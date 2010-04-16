@@ -15,10 +15,13 @@
 */
 package org.jmodelica.ide;
 
+import java.io.File;
+
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.swt.graphics.RGB;
 import org.jmodelica.generated.scanners.Modelica22PartitionScanner;
+import org.jmodelica.util.OptionRegistry;
 
 public class IDEConstants {
 
@@ -78,10 +81,8 @@ public class IDEConstants {
 	}
 
 	public static final String PACKAGE_FILE = "package.mo";
+	    
+	public static final String PACKAGES_IN_WORKSPACE_OPTION = "PACKAGEPATHS";
 	
-	
-	public static final String PATH_SEP = 
-	    System.getProperty("os.name").indexOf("win") >= 0 
-	        ? ";"
-	        : ":";
+	public static final String PATH_SEP = File.pathSeparator;
 }

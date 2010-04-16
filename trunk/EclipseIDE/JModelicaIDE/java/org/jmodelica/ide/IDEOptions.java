@@ -3,7 +3,6 @@ package org.jmodelica.ide;
 import java.io.File;
 
 import org.eclipse.core.resources.IProject;
-import org.jmodelica.ide.helpers.Library;
 import org.jmodelica.util.OptionRegistry;
 
 /**
@@ -15,44 +14,24 @@ import org.jmodelica.util.OptionRegistry;
 public class IDEOptions extends OptionRegistry {
 
 public IDEOptions(IProject project) {
+    setStringOption("MODELICAPATH", "");
+    setStringOption(IDEConstants.PACKAGES_IN_WORKSPACE_OPTION, "");
     
-    setStringOption(
-        "MODELICAPATH", 
-        "");
-
-    setStringOption(
-        "PACKAGEPATHS", 
-        "");
+	if (project == null)
+		return;
     
     try {
-        copyAllOptions(
-            new OptionRegistry(
-                project
-                .getPersistentProperty(
-                    IDEConstants.PROPTERTY_OPTIONS_PATH)
-                + File.separatorChar
-                + "options.xml"));
-
-    } catch (NullPointerException e ) {
-        System.out.println("Null project. Not copying options.");
-
+        String dir = project.getPersistentProperty(IDEConstants.PROPTERTY_OPTIONS_PATH);
+		String path = dir + File.separator + "options.xml";
+		copyAllOptions(new OptionRegistry(path));
+		
+	    String modelicaPath = project.getPersistentProperty(IDEConstants.PROPERTY_LIBRARIES_ID);
+		setStringOption("MODELICAPATH", modelicaPath);
     } catch (Exception e) {
+    	// TODO: Do something constructive. An error message or something.
         e.printStackTrace();
     }
     
-    try {
-        setStringOption(
-            "MODELICAPATH", 
-            Library.makeModelicaPath(
-                project.getPersistentProperty(
-                    IDEConstants.PROPERTY_LIBRARIES_ID)));
-       
-    } catch (NullPointerException e ) {
-        System.out.println("Null project. Not setting MODELICAPATH.");
-    
-    } catch (Exception e ) {
-        e.printStackTrace();
-    }
 
 }
 

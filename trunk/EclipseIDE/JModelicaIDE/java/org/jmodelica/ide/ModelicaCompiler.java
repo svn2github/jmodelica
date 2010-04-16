@@ -14,7 +14,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.jmodelica.ide;
- 
+
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
@@ -24,6 +24,7 @@ import mock.MockProject;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -36,154 +37,121 @@ import org.jastadd.plugin.compiler.ast.IASTNode;
 import org.jmodelica.ide.helpers.DocumentReader;
 import org.jmodelica.ide.helpers.Maybe;
 import org.jmodelica.modelica.compiler.ASTNode;
+import org.jmodelica.modelica.compiler.LibNode;
 import org.jmodelica.modelica.compiler.SourceRoot;
 import org.jmodelica.modelica.compiler.StoredDefinition;
- 
+
 public class ModelicaCompiler extends AbstractCompiler {
 
-public static final String ERROR_MARKER_ID = IDEConstants.ERROR_MARKER_ID;
+	public static final String ERROR_MARKER_ID = IDEConstants.ERROR_MARKER_ID;
 
-@Override
-public IASTNode compileToProjectAST(
-    IProject project,
-    IProgressMonitor monitor) 
-{
-    return 
-        recursiveCompile(
-            new CompilationRoot(project), 
-            project, 
-            monitor)
-        .root();
-}
- 
-private CompilationRoot recursiveCompile(
-    CompilationRoot compilationRoot, 
-    IContainer parent,
-    IProgressMonitor monitor) 
-{
-    try {
-        
-        IResource[] resources = parent.members();
-        
-        for (IResource resource : resources) {
-            
-            if (monitor.isCanceled())
-                break;
-            
-            switch (resource.getType()) {
-            case IResource.FOLDER:
-                
-                compilationRoot.addPackageDirectory(resource);
+	@Override
+	public IASTNode compileToProjectAST(IProject project, IProgressMonitor monitor) {
+		return recursiveCompile(new CompilationRoot(project), project, monitor).root();
+	}
 
-                break;
-            case IResource.FILE:
-                
-                IFile file = 
-                    (IFile)resource;
-                
-                if (IDEConstants.FILE_EXT.equals(file.getFileExtension()))
-                     compilationRoot.parseFile(file);
+	private CompilationRoot recursiveCompile(CompilationRoot compilationRoot, IContainer parent,
+			IProgressMonitor monitor) {
+		try {
 
-                break;
-            }
-            
-            monitor.worked(1);
-        }
-        
-    } catch (CoreException e) {
-        e.printStackTrace();
-    }
-    
-    return compilationRoot;
-}
+			IResource[] resources = parent.members();
 
-protected IFile defaultToMock(IFile file) {
-    return
-        new Maybe<IFile>(file)
-        .defaultTo(
-            new MockFile(null, ""));
-}
+			for (IResource resource : resources) {
 
-@Override
-public IASTNode compileToAST(
-    IDocument document,
-    DirtyRegion dirtyRegion,
-    IRegion region,
-    IFile file) 
-{
-    file = defaultToMock(file); 
-    CompilationRoot compilationRoot = new CompilationRoot(file.getProject());
-    compilationRoot.parseFile(new DocumentReader(document), file);
-    return compilationRoot.getStoredDefinition();
-}
+				if (monitor.isCanceled())
+					break;
 
-public Maybe<ASTNode<?>> recompile(IDocument doc, IFile file) {
-    file = 
-        defaultToMock(file);
-    return 
-        new Maybe<ASTNode<?>>(
-            (ASTNode<?>) compileToAST(doc, null, null, file));
-}
+				switch (resource.getType()) {
+				case IResource.FOLDER:
+					File dir = new File(resource.getRawLocation().toOSString());
+					if (dir.isDirectory() && LibNode.packageMoPresentIn(dir.listFiles())) 
+						compilationRoot.addPackageDirectory(dir);
+					else
+						recursiveCompile(compilationRoot, (IFolder) resource, monitor);
+					break;
+					
+				case IResource.FILE:
+					IFile file = (IFile) resource;
+					if (IDEConstants.FILE_EXT.equals(file.getFileExtension()))
+						compilationRoot.parseFile(file);
+					break;
+				}
 
-public StoredDefinition recompile(String doc, IFile file) {
-    file = 
-        defaultToMock(file);
-    CompilationRoot lasr =
-        new CompilationRoot(file.getProject());
+				monitor.worked(1);
+			}
 
-    lasr.parseDoc(doc, file);
-    
-    return 
-        lasr.getStoredDefinition();
-}
+		} catch (CoreException e) {
+			e.printStackTrace();
+		}
 
-@Override
-protected IASTNode compileToAST(IFile file) {
-    return 
-        compileFile(
-            defaultToMock(file));
-}
+		return compilationRoot;
+	}
 
-public StoredDefinition compileFile(IFile file) {
-    file = defaultToMock(file);
-    CompilationRoot compilationRoot = 
-        new CompilationRoot(file.getProject());
-    
-    compilationRoot.parseFile(file);
-    
-    return compilationRoot.getStoredDefinition();
-}
+	protected IFile defaultToMock(IFile file) {
+		return new Maybe<IFile>(file).defaultTo(new MockFile(null, ""));
+	}
 
+	@Override
+	public IASTNode compileToAST(IDocument document, DirtyRegion dirtyRegion, IRegion region,
+			IFile file) {
+		file = defaultToMock(file);
+		CompilationRoot compilationRoot = new CompilationRoot(file.getProject());
+		compilationRoot.parseFile(new DocumentReader(document), file);
+		return compilationRoot.getStoredDefinition();
+	}
 
-public SourceRoot compileDirectory(File dir) {
+	public Maybe<ASTNode<?>> recompile(IDocument doc, IFile file) {
+		file = defaultToMock(file);
+		return new Maybe<ASTNode<?>>((ASTNode<?>) compileToAST(doc, null, null, file));
+	}
 
-    CompilationRoot cRoot = new CompilationRoot(MockProject.PROJECT);
-    
-    for (File f : dir.listFiles()) {
+	public StoredDefinition recompile(String doc, IFile file) {
+		file = defaultToMock(file);
+		CompilationRoot lasr = new CompilationRoot(file.getProject());
 
-        if (f.isDirectory())
-            compileDirectory(f);
-        else 
-            cRoot.parseFile(
-                new MockFile(f.getAbsolutePath()));
-    }
-    
-    return cRoot.root();
-}
+		lasr.parseDoc(doc, file);
 
-public StoredDefinition compileString(String content) {
-    return 
-        new CompilationRoot(new MockProject())
-            .parseDoc(content, new MockFile())
-            .getStoredDefinition();
-}
-@Override
-protected Collection<String> acceptedFileExtensions() {
-    return Arrays.asList(IDEConstants.ALL_FILE_EXTENSIONS);
-}
+		return lasr.getStoredDefinition();
+	}
 
-@Override
-protected String acceptedNatureID() {
-    return IDEConstants.NATURE_ID;
-}
+	@Override
+	protected IASTNode compileToAST(IFile file) {
+		return compileFile(defaultToMock(file));
+	}
+
+	public StoredDefinition compileFile(IFile file) {
+		file = defaultToMock(file);
+		CompilationRoot compilationRoot = new CompilationRoot(file.getProject());
+
+		compilationRoot.parseFile(file);
+
+		return compilationRoot.getStoredDefinition();
+	}
+
+	public SourceRoot compileDirectory(File dir) {
+		CompilationRoot cRoot = new CompilationRoot(MockProject.PROJECT);
+		for (File f : dir.listFiles()) {
+			if (f.isDirectory())
+				compileDirectory(f);
+			else
+				cRoot.parseFile(new MockFile(f.getAbsolutePath()));
+		}
+
+		return cRoot.root();
+	}
+
+	public StoredDefinition compileString(String content) {
+		return new CompilationRoot(new MockProject()).parseDoc(content, new MockFile())
+				.getStoredDefinition();
+	}
+
+	@Override
+	protected Collection<String> acceptedFileExtensions() {
+		return Arrays.asList(IDEConstants.ALL_FILE_EXTENSIONS);
+	}
+
+	@Override
+	protected String acceptedNatureID() {
+		return IDEConstants.NATURE_ID;
+	}
 }

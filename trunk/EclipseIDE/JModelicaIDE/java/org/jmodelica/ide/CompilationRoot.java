@@ -43,19 +43,15 @@ public class CompilationRoot {
 
 	/**
 	 * Create an empty CompilationRoot
-	 * 
-	 * @param report
-	 *            ErrorReport implementation for parser to use. Defaults to
-	 *            {@link ModelicaParser.AbortingReport} if Nothing is passed.
 	 */
 	public CompilationRoot(IProject project) {
-		this.list    = new List<StoredDefinition>();
-		this.root    = new SourceRoot(new Program(list));
+		this.list = new List<StoredDefinition>();
+		this.root = new SourceRoot(new Program(list));
 		this.handler = new InstanceErrorHandler();
 
 		PARSER.setReport(errorReport);
 		root.setErrorHandler(handler);
-		
+
 		root.options = new IDEOptions(project);
 		root.getProgram().getInstProgramRoot().options = root.options;
 
@@ -70,8 +66,8 @@ public class CompilationRoot {
 	 */
 	public StoredDefinition getStoredDefinition() {
 
-	    assert list.getNumChild() > 0; 
-		
+		assert list.getNumChild() > 0;
+
 		return list.getNumChild() > 0 ? list.getChild(0) : null;
 	}
 
@@ -93,9 +89,11 @@ public class CompilationRoot {
 	/**
 	 * Compile and add AST from string.
 	 * 
-	 * @param doc   string to compile
-	 * @param file  eclipse file handle. Used as a key to identify the resulting
-	 *              StoredDefinition.
+	 * @param doc
+	 *            string to compile
+	 * @param file
+	 *            eclipse file handle. Used as a key to identify the resulting
+	 *            StoredDefinition.
 	 * @return this
 	 */
 	public CompilationRoot parseDoc(String doc, IFile file) {
@@ -127,17 +125,16 @@ public class CompilationRoot {
 
 		try {
 			SourceRoot localRoot = (SourceRoot) PARSER.parse(SCANNER);
-			for (StoredDefinition def : localRoot.getProgram().getUnstructuredEntitys()) { 
+			for (StoredDefinition def : localRoot.getProgram().getUnstructuredEntitys()) 
 				list.add(annotatedDefinition(def, file));
-			}
 		} catch (Parser.Exception e) {
 			addBadDef(file);
 			e.printStackTrace();
 		} catch (ParserException e) {
-		    e.printStackTrace();
+			e.printStackTrace();
 			addBadDef(file);
 		} catch (IOException e) {
-		    e.printStackTrace();
+			e.printStackTrace();
 			addBadDef(file);
 		} finally {
 			errorReport.cleanUp();
@@ -149,32 +146,15 @@ public class CompilationRoot {
 			}
 		}
 	}
-	
-	public void addPackageDirectory(IResource dir) {
-	    
-        try {
-            File file =
-                new File(dir.getRawLocation().toOSString());
-            
-            if (file.isDirectory() && 
-                LibNode.packageMoPresentIn(file.listFiles())) 
-            {
-                String path =
-                    root.options.getStringOption("PACKAGEPATHS");
-                
-                path += 
-                    file.getAbsolutePath();
-            
-                root.options.setStringOption(
-                        "PACKAGEPATHS",
-                        path);
-            }
-            
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        
-	   
+
+	public void addPackageDirectory(File dir) {
+		try {
+			String path = root.options.getStringOption(IDEConstants.PACKAGES_IN_WORKSPACE_OPTION);
+			path += (path.equals("") ? "" : File.pathSeparator) + dir.getAbsolutePath();
+			root.options.setStringOption(IDEConstants.PACKAGES_IN_WORKSPACE_OPTION, path);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	private void addBadDef(IFile file) {

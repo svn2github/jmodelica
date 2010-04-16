@@ -17,6 +17,7 @@ package org.jmodelica.ide.helpers;
 
 import java.io.File;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
@@ -66,11 +67,10 @@ public class Util {
 	}
 	
 	public static String implode(String delim, Iterable<?> objs) {
-	    List<String> list = 
-	        new LinkedList<String>();
+		ArrayList<String> list = new ArrayList<String>();
 	    for (Object o : objs) 
 	        list.add(o.toString());
-	    return implode(delim, list.toArray(new String[] {}));
+	    return implode(delim, list.toArray(new String[0]));
 	}
 	
 	public static String[] explode(String delim, String str) {

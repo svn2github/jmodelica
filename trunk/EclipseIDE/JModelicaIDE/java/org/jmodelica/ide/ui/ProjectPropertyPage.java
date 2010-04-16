@@ -12,7 +12,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package org.jmodelica.ide.ui;
 
 import java.io.File;
@@ -43,18 +43,16 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PropertyPage;
-import org.jmodelica.generated.scanners.PackageExaminer;
 import org.jmodelica.ide.IDEConstants;
-import org.jmodelica.ide.helpers.Library;
 import org.jmodelica.ide.helpers.Maybe;
-import org.jmodelica.ide.helpers.Library.Version;
+import org.jmodelica.ide.helpers.Util;
 
 public class ProjectPropertyPage extends PropertyPage {
 
-	private List<Library> libraries;
+	private List<String> library_paths;
 	private String defaultMSL;
 	private String optionsPath;
-	
+
 	private Combo defMSLCombo;
 	private Button delLibraryButton;
 	private Button addLibraryButton;
@@ -62,141 +60,92 @@ public class ProjectPropertyPage extends PropertyPage {
 	private org.eclipse.swt.widgets.Text text;
 	private Table libraryTable;
 	private Group optionsGroup;
-	
+
 	private DirectoryDialog dirDlg;
 	private final DirectoryDialog optionsDlg;
 	private MessageBox error;
-	private PackageExaminer	examiner;
-	
+
 	private boolean changed;
 
 	public ProjectPropertyPage() {
-	    
-		Shell shell = 
-		    PlatformUI
-		    .getWorkbench()
-		    .getDisplay()
-		    .getActiveShell();
-		
-		dirDlg = 
-		    new DirectoryDialog(shell);
-		dirDlg.setMessage(
-	        "Select directory containing library");
-		dirDlg.setText(
-	        "Select library");
-		
-		optionsDlg = 
-		    new DirectoryDialog(shell);
-		optionsDlg.setMessage(
-	        "Select directory containing options.xml");
-		optionsDlg.setText(
-	        "Select directory");
-		
-		error = 
-		    new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-		examiner = 
-		    new PackageExaminer();
-		changed = 
-		    false;
-		
-		optionsPath = 
-		    "";
+
+		Shell shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
+
+		dirDlg = new DirectoryDialog(shell);
+		dirDlg.setMessage("Select directory to load libraries from");
+		dirDlg.setText("Select directory");
+
+		optionsDlg = new DirectoryDialog(shell);
+		optionsDlg.setMessage("Select directory containing options.xml");
+		optionsDlg.setText("Select directory");
+
+		error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
+		changed = false;
+
+		optionsPath = "";
 	}
-	
+
 	@Override
 	protected Control createContents(Composite parent) {
-		return 
-		    createLibraryGroup(parent);
+		return createLibraryGroup(parent);
 	}
 
 	private Composite createLibraryGroup(Composite parent) {
 		loadProperties();
-		
-		Group lib = new Group(parent, SWT.NONE); {
-		    lib.setText("Libraries");
-		    GridLayout layout = new GridLayout();
-		    layout.numColumns = 1;
-		    lib.setLayout(layout);
-		    createLibrariesComposite(lib);
-		};
-		
-		optionsGroup = new Group(parent, SWT.None); 
-		{
-		    optionsGroup.setText("Options.xml");
-		    GridLayout layout = new GridLayout();
-            layout.numColumns = 1;
-            optionsGroup.setLayout(layout);
-            createOptionsSelection(optionsGroup);
-            optionsGroup.pack();
-		}
-		
+
+		Group lib = new Group(parent, SWT.NONE);
+		lib.setText("Library paths");
+		lib.setLayout(new GridLayout(1, false));
+		createLibrariesComposite(lib);
+
+		optionsGroup = new Group(parent, SWT.None);
+		optionsGroup.setText("Options.xml path");
+		optionsGroup.setLayout(new GridLayout(1, false));
+		createOptionsSelection(optionsGroup);
+		optionsGroup.pack();
+
 		return lib;
 	}
 
-	private Composite newContainer(
-        Composite parent, 
-        int layoutNbrCols) 
-	{
-	    
-	    Composite container = 
-	        new Composite(parent, SWT.None);
-	    container.setLayoutData(
-	        new GridData(SWT.FILL, SWT.FILL, true, true));
-	    container.setLayout(
-	        marginlessGridLayout(
-	            layoutNbrCols));
-	    
-	    return container;
+	private Composite newContainer(Composite parent, int layoutNbrCols) {
+		Composite container = new Composite(parent, SWT.None);
+		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		container.setLayout(marginlessGridLayout(layoutNbrCols));
+
+		return container;
 	}
-	
+
 	private Composite createOptionsSelection(Composite parent) {
-	    
-	    Composite container =
-	        newContainer(parent, 3);
-	    
-	    text =
-	        new org.eclipse.swt.widgets.Text(container, SWT.NONE);
-	    text.setText(
-            optionsPath);
-	    
-	    optionsBrowse 
-	        = createButton(container, "Browse");
-	    optionsBrowse.addSelectionListener(
-            new OptionsListener());
-	    
-	    return container;
-    }
+		Composite container = newContainer(parent, 3);
+
+		text = new org.eclipse.swt.widgets.Text(container, SWT.NONE);
+		text.setText(optionsPath);
+
+		optionsBrowse = createButton(container, "Browse");
+		optionsBrowse.addSelectionListener(new OptionsListener());
+
+		return container;
+	}
 
 	private void createLibrariesComposite(Composite parent) {
-		Composite container = 
-		    newContainer(parent, 2);
+		Composite container = newContainer(parent, 2);
 		createLibraryTable(container);
 		createLibraryButtonsComposite(container);
 		container.pack();
 	}
 
 	private void createLibraryButtonsComposite(Composite parent) {
-		Composite container = 
-		    new Composite(parent, SWT.NONE);
-		container.setLayoutData(
-		    new GridData(
-		        SWT.BEGINNING, 
-		        SWT.BEGINNING, 
-		        false, 
-		        false));
+		Composite container = new Composite(parent, SWT.NONE);
+		container.setLayoutData(new GridData(SWT.BEGINNING, SWT.BEGINNING, false, false));
 		container.setLayout(marginlessGridLayout(1));
-		
-		addLibraryButton = 
-		    createButton(container, "Add");
-		addLibraryButton.addSelectionListener(
-		    new AddListener());
-		
-		delLibraryButton = 
-		    createButton(container, "Remove");
-		delLibraryButton.addSelectionListener(
-		    new DeleteListener());
+
+		addLibraryButton = createButton(container, "Add");
+		addLibraryButton.addSelectionListener(new AddListener());
+
+		delLibraryButton = createButton(container, "Remove");
+		delLibraryButton.addSelectionListener(new DeleteListener());
 		delLibraryButton.setEnabled(false);
-		
+
 		container.pack();
 	}
 
@@ -205,35 +154,21 @@ public class ProjectPropertyPage extends PropertyPage {
 		libraryTable.setLinesVisible(true);
 		libraryTable.setHeaderVisible(true);
 		GridData data = new GridData(SWT.FILL, SWT.FILL, true, true);
-		data.heightHint = 200;
+		data.heightHint = 100;
 		libraryTable.setLayoutData(data);
 
-		for (String columnName : new String[] {"Location"} ) {
-		    
-		    new TableColumn(libraryTable, SWT.NONE)
-		        .setText(columnName);
-		}
-			
+		for (String columnName : new String[] { "Path" })
+			new TableColumn(libraryTable, SWT.NONE).setText(columnName);
+
 		fillLibraryTable();
 		libraryTable.addSelectionListener(new TableSelectionListener());
 		return libraryTable;
 	}
 
 	private Button createButton(Composite parent, String title) {
-	    
-		Button button =
-		    new Button(parent, SWT.PUSH);
-		
-		button.setText(
-		    title);
-		
-		button.setLayoutData(
-	        new GridData(
-	            SWT.FILL, 
-	            SWT.BEGINNING, 
-	            false, 
-	            false));
-		
+		Button button = new Button(parent, SWT.PUSH);
+		button.setText(title);
+		button.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, false, false));
 		return button;
 	}
 
@@ -246,20 +181,18 @@ public class ProjectPropertyPage extends PropertyPage {
 	}
 
 	private void fillLibraryTable() {
+		if (getProject() == null)
+			return;
 
-	    if (getProject() == null)
-	        return;
-	    
-		for (Library lib : libraries) 
+		for (String lib : library_paths)
 			addLibrary(lib);
 
 		for (TableColumn tc : libraryTable.getColumns())
 			tc.pack();
-		
 	}
 
-	private void addLibrary(Library library) {
-	    new TableItem(libraryTable, SWT.NONE).setText(0, library.path);
+	private void addLibrary(String library) {
+		new TableItem(libraryTable, SWT.NONE).setText(0, library);
 	}
 
 	private IProject getProject() {
@@ -271,7 +204,7 @@ public class ProjectPropertyPage extends PropertyPage {
 		saveProperties();
 		return true;
 	}
-	
+
 	@Override
 	public boolean performCancel() {
 		changed = false;
@@ -279,125 +212,66 @@ public class ProjectPropertyPage extends PropertyPage {
 	}
 
 	private void loadProperties() {
-		
-	    IProject proj = getProject();
+		IProject proj = getProject();
 		String libStr = null;
 
 		try {
-		    
-			libStr = 
-			    proj.getPersistentProperty(
-		            IDEConstants.PROPERTY_LIBRARIES_ID);
-
-			defaultMSL = 
-			    proj.getPersistentProperty(
-		            IDEConstants.PROPERTY_DEFAULT_MSL_ID);
-			
-			optionsPath =
-			    new Maybe<String>(
-			            proj.getPersistentProperty(
-		                    IDEConstants.PROPTERTY_OPTIONS_PATH))
-                .defaultTo("");
-			
+			libStr = proj.getPersistentProperty(IDEConstants.PROPERTY_LIBRARIES_ID);
+			defaultMSL = proj.getPersistentProperty(IDEConstants.PROPERTY_DEFAULT_MSL_ID);
+			String optionsPathStr = proj.getPersistentProperty(IDEConstants.PROPTERTY_OPTIONS_PATH);
+			optionsPath = new Maybe<String>(optionsPathStr).defaultTo("");
 		} catch (CoreException e) {
-		    e.printStackTrace();
+			e.printStackTrace();
 		}
-		
-		libraries = Library.fromString(libStr);
-		
+
+		library_paths = new ArrayList();
+		library_paths.addAll(Arrays.asList(libStr.split(IDEConstants.PATH_SEP)));
 	}
-	
+
 	private void saveProperties() {
-	    
 		IProject proj = getProject();
-		
-		try {
-		
-		    String libStr = 
-		        Library.toString(libraries);
-		    
-		    proj.setPersistentProperty(
-		        IDEConstants.PROPERTY_LIBRARIES_ID, 
-		        libStr);
-			
-			proj.setPersistentProperty(
-		        IDEConstants.PROPERTY_DEFAULT_MSL_ID, 
-		        defaultMSL);
-			
-			proj.setPersistentProperty(
-		        IDEConstants.PROPTERTY_OPTIONS_PATH, 
-		        text.getText());
-			
-			if (changed) 
-				proj.build(IncrementalProjectBuilder.FULL_BUILD, null);
-			
-		} catch (CoreException e) {
-		    e.printStackTrace();
-		}
-		
-		changed = false;
-	}
 
-	public void updateDefautMSL() {
-		ArrayList<Version> versions = new ArrayList<Version>(libraries.size());
-		for (int i = 0; i < libraries.size(); i++) {
-			Library lib = libraries.get(i);
-			if (lib.name.equals("Modelica")) 
-				versions.add(lib.version);
+		try {
+			String libStr = Util.implode(IDEConstants.PATH_SEP, library_paths);
+			proj.setPersistentProperty(IDEConstants.PROPERTY_LIBRARIES_ID, libStr);
+			proj.setPersistentProperty(IDEConstants.PROPERTY_DEFAULT_MSL_ID, defaultMSL);
+			proj.setPersistentProperty(IDEConstants.PROPTERTY_OPTIONS_PATH, text.getText());
+
+			if (changed)
+				proj.build(IncrementalProjectBuilder.FULL_BUILD, null);
+
+		} catch (CoreException e) {
+			e.printStackTrace();
 		}
-		Collections.sort(versions, Collections.reverseOrder());
-		defMSLCombo.removeAll();
-		for (Version v : versions) {
-			String str = v.toString();
-			defMSLCombo.add(str);
-			if (str.equals(defaultMSL)) {
-				defMSLCombo.select(defMSLCombo.getItemCount() - 1);
-			}
-		}
-		if (defMSLCombo.getSelectionIndex() == -1) {
-			if (defMSLCombo.getItemCount() > 0) {
-				defMSLCombo.select(0);
-				defaultMSL = defMSLCombo.getItem(0);
-			} else {
-				defaultMSL = null;
-			}
-		}
+
+		changed = false;
 	}
 
 	public class OptionsListener implements SelectionListener {
 
-        public void widgetDefaultSelected(SelectionEvent e) {        
-        }
+		public void widgetDefaultSelected(SelectionEvent e) {
+		}
 
-        public void widgetSelected(SelectionEvent e) {
+		public void widgetSelected(SelectionEvent e) {
+			String path = optionsDlg.open();
+			if (path == null)
+				return;
 
-            String path = 
-                optionsDlg.open();
-            
-            if (path == null)
-                return;
-            
-            if (path.endsWith("options.xml"))
-                path = path.substring(0, path.length() - "options.xml".length());
-            
-            if (
-                !Arrays.asList(
-                    new Maybe<String[]>(
-                        new File(path).list())
-                    .defaultTo(new String[] {}))
-                .contains("options.xml")) 
-            {
-                error.setMessage("No options.xml found in folder");
-                error.open();
-            }
-            
-            text.setText(path);
-            
-            optionsGroup.pack();
-        }
-	
+			if (path.endsWith("options.xml"))
+				path = path.substring(0, path.length() - "options.xml".length());
+
+			String[] files = new File(path).list();
+			if (files != null && Arrays.asList(files).contains("options.xml")) {
+				error.setMessage("No options.xml found in folder");
+				error.open();
+			}
+
+			text.setText(path);
+			optionsGroup.pack();
+		}
+
 	}
-	
+
 	public class AddListener implements SelectionListener {
 
 		public void widgetDefaultSelected(SelectionEvent e) {
@@ -406,29 +280,13 @@ public class ProjectPropertyPage extends PropertyPage {
 		public void widgetSelected(SelectionEvent e) {
 			String path = dirDlg.open();
 			if (path != null) {
-				try {
-					Library lib = examiner.examine(path);
-					if (!lib.isOK()) {
-						error.setMessage(
-					        "Could not find package " +
-					        "information in package.mo file.");
-						error.open();
-					} else if (libraries.contains(lib)) {
-						error.setMessage(
-					        "Library already added.");
-						error.open();
-					} else {
-						libraries.add(lib);
-						addLibrary(lib);
-						if (lib.name.equals("Modelica"))
-							updateDefautMSL();
-						changed = true;
-					}
-				} catch (FileNotFoundException ex) {
-					error.setMessage(
-				        "No package.mo file found.\n" +
-						"Directory does not seem to contain a library.");
+				if (library_paths.contains(path)) {
+					error.setMessage("Library path already added.");
 					error.open();
+				} else {
+					library_paths.add(path);
+					addLibrary(path);
+					changed = true;
 				}
 			}
 		}
@@ -443,11 +301,8 @@ public class ProjectPropertyPage extends PropertyPage {
 		public void widgetSelected(SelectionEvent e) {
 			libraryTable.getSelectionIndex();
 			int i = libraryTable.getSelectionIndex();
-			boolean isMSL = libraries.get(i).name.equals("Modelica");
 			libraryTable.remove(i);
-			libraries.remove(i);
-			if (isMSL)
-				updateDefautMSL();
+			library_paths.remove(i);
 			changed = true;
 		}
 

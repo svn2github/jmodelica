@@ -199,65 +199,33 @@ aspect Library {
 	}
 	
 	syn lazy List Program.getLibNodeList() {
-
         List libnodes = new List();
         
-        String modelicaPath = 
-            root().options.getStringOption("MODELICAPATH");
-        String packagePath = null;
-		try {
-			packagePath = root().options.getStringOption("PACKAGEPATHS");
-		} catch (OptionRegistry.UnknownOptionException e1) {
-		}
-        
+        String modelicaPath = root().options.getStringOption("MODELICAPATH");
         log.info("MODELICAPATH=" + modelicaPath);
-        
-        String paths = modelicaPath;
-            
-        String pathSeparator = 
-            OptionRegistry.getPathSeparator();
-        
-        if (packagePath != null && packagePath.length() > 0)
-            paths += 
-                pathSeparator + packagePath;
-                
+           
         // For each directory detect all libraries
-        for (String pathElement : paths.split(pathSeparator)) {
-   
+        for (String pathElement : modelicaPath.split(File.pathSeparator)) {
             try {
-                
                 File baseDir = new File(pathElement);
-                
                 if (baseDir.listFiles() == null) 
                     continue;
                 
                 // Get all Unstructured entities:
-                File[] filesUnStructured = baseDir.listFiles(
-                        new UnStructuredEntriesFilenameFilter());
+                File[] filesUnStructured = baseDir.listFiles(new UnStructuredEntriesFilenameFilter());
                 
                 for (File file : filesUnStructured){
-                    String name = 
-                        file.getName().substring(0,file.getName().length()-3); 
-                    libnodes.add(
-                        new LibNode(file.toString(),
-                        name,
-                        false));            
+                    String name = file.getName().substring(0,file.getName().length()-3); 
+                    libnodes.add(new LibNode(file.toString(), name, false));            
                 }
                 
                 for (File dir : baseDir.listFiles()) {
-                    
                     if (!dir.isDirectory())
                         continue;
                     
-                    File baseDir_tmp =
-                        new File(dir.getAbsolutePath());         
-                
-                    if (LibNode.packageMoPresentIn(baseDir_tmp.listFiles())) {
-                        libnodes.add(
-                            new LibNode(dir.toString(),
-                            dir.getName(),
-                            true));
-                    }
+                    File baseDir_tmp = new File(dir.getAbsolutePath());         
+                    if (LibNode.packageMoPresentIn(baseDir_tmp.listFiles()))
+                        libnodes.add(new LibNode(dir.toString(), dir.getName(), true));
                 }
                 
             } catch (Exception e) {
@@ -267,6 +235,17 @@ aspect Library {
                 e.printStackTrace();
             }       
         }
+        
+        // Add extra libraries specified in PACKAGEPATHS
+		try {
+			String packagePath = root().options.getStringOption("PACKAGEPATHS");
+			for (String pathElement : packagePath.split(File.pathSeparator)) {
+				File dir = new File(pathElement);
+                libnodes.add(new LibNode(dir.toString(), dir.getName(), true));
+			}
+		} catch (OptionRegistry.UnknownOptionException e1) {
+		}
+       
          
         return libnodes;
 
