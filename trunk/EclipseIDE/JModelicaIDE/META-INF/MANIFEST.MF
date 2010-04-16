@@ -5,7 +5,7 @@ Bundle-SymbolicName: org.jmodelica.ide;singleton:=true
 Bundle-Version: 0.3.4.r999
 Bundle-Activator: org.jmodelica.ide.Activator
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: lib/beaver-rt.jar,
  .
 Require-Bundle: org.eclipse.jface.text,
