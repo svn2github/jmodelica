@@ -55,7 +55,7 @@ directory for building the platform
  > mkdir build
  > cd build
  > ../configure --with-ipopt=/path/to/ipopt-install-dir \
-     --with-sundials=/path/to/ipopt-install-dir
+     --with-sundials=/path/to/sundials-install-dir
 
 The argument --with-ipopt is optional. Notice, however, that if it is
 not given, only parts of the software will be built and the
