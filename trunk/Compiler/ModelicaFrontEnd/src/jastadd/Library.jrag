@@ -201,18 +201,26 @@ aspect Library {
 	syn lazy List Program.getLibNodeList() {
 
         List libnodes = new List();
-        String modelicaPath = root().options.getStringOption("MODELICAPATH");
-
+        
+        String modelicaPath = 
+            root().options.getStringOption("MODELICAPATH");
+        String packagePath  = 
+            root().options.getStringOption("PACKAGEPATHS");
+        
         log.info("MODELICAPATH=" + modelicaPath);
         
-        // Find the correct separator of path elements: ':' or ';'
-          String pathSeparator = 
-                System.getProperty("os.name").toLowerCase().indexOf("win") >= 0 
-                    ? ";"
-                    : ":";
+        String paths = modelicaPath;
+            
+        String pathSeparator = 
+            OptionRegistry.getPathSeparator();
+        
+        if (packagePath != null && packagePath.length() > 0)
+            paths += 
+                pathSeparator + packagePath;
                 
         // For each directory detect all libraries
-        for (String pathElement : modelicaPath.split(pathSeparator)) {
+        for (String pathElement : paths.split(pathSeparator)) {
+   
             try {
                 
                 File baseDir = new File(pathElement);
@@ -223,8 +231,10 @@ aspect Library {
                 // Get all Unstructured entities:
                 File[] filesUnStructured = baseDir.listFiles(
                         new UnStructuredEntriesFilenameFilter());
+                
                 for (File file : filesUnStructured){
-                    String name = file.getName().substring(0,file.getName().length()-3); 
+                    String name = 
+                        file.getName().substring(0,file.getName().length()-3); 
                     libnodes.add(
                         new LibNode(file.toString(),
                         name,
@@ -236,15 +246,17 @@ aspect Library {
                     if (!dir.isDirectory())
                         continue;
                     
-                    File baseDir_tmp = new File(dir.getAbsolutePath());         
+                    File baseDir_tmp =
+                        new File(dir.getAbsolutePath());         
                 
                     if (LibNode.packageMoPresentIn(baseDir_tmp.listFiles())) {
                         libnodes.add(
                             new LibNode(dir.toString(),
                             dir.getName(),
                             true));
-                    } 
+                    }
                 }
+                
             } catch (Exception e) {
                 // TODO: Replace with a good log.debug or just pass the exception on, 
                 // perhaps wrapped in a RuntimeException
@@ -252,7 +264,7 @@ aspect Library {
                 e.printStackTrace();
             }       
         }
-                  
+         
         return libnodes;
 
 	}
