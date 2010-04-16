@@ -204,8 +204,11 @@ aspect Library {
         
         String modelicaPath = 
             root().options.getStringOption("MODELICAPATH");
-        String packagePath  = 
-            root().options.getStringOption("PACKAGEPATHS");
+        String packagePath = null;
+		try {
+			packagePath = root().options.getStringOption("PACKAGEPATHS");
+		} catch (OptionRegistry.UnknownOptionException e1) {
+		}
         
         log.info("MODELICAPATH=" + modelicaPath);
         
