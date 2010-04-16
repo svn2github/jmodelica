@@ -55,7 +55,7 @@ def setup():
     # parameter est model
     oc.compile_model(parest_cpath, parest_fpath)
     # vdp min time model
-    oc.compile_model(vdpmin_cpath, vdpmin_fpath, 'ipopt')
+    oc.compile_model(vdpmin_cpath, vdpmin_fpath)#, 'ipopt')
     
         
 @testattr(stddist = True)

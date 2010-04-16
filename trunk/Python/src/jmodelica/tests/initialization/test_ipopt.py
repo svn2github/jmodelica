@@ -38,43 +38,40 @@ path_to_tests = os.path.join(jm_home, "Python", "jmodelica", "tests")
 
 oc = OptimicaCompiler()
 
-model = os.path.join('files','CSTR.mo')
-fpath = os.path.join(jm_home, path_to_examples, model)
-cpath = "CSTR.CSTR_Init"
-fname = cpath.replace('.','_')
-oc.compile_model(cpath, fpath, 'ipopt')
-
-model_daeinit = os.path.join("files", "DAEInitTest.mo")
-fpath_daeinit = os.path.join(path_to_tests, model_daeinit)
-cpath_daeinit = "DAEInitTest"
-fname_daeinit = cpath_daeinit.replace('.','_',1)
-        
-oc.set_boolean_option('state_start_values_fixed',True)
-oc.compile_model(cpath_daeinit, fpath_daeinit, target='ipopt')
-
 class TestNLPInitWrappers:
     """ Tests for NLPInitialization wrapper methods.
     
     """
-    
+    @classmethod
+    def setUpClass(cls):
+        """Sets up the class."""
+        model = os.path.join('files','CSTR.mo')
+        fpath = os.path.join(jm_home, path_to_examples, model)
+        cpath = "CSTR.CSTR_Init"
+        fname = cpath.replace('.','_')
+        oc.set_boolean_option('state_start_values_fixed',False)
+        oc.compile_model(cpath, fpath, 'ipopt')
+        
     def setUp(self):
-        """Test setUp. Load the test model."""        
+        """Test setUp. Load the test model.""" 
+        cpath = "CSTR.CSTR_Init"
+        fname = cpath.replace('.','_')       
         cstr = jmi.Model(fname)    
         self.init_nlp = NLPInitialization(cstr)     
      
-    @testattr(stddist = True)   
+    @testattr(ipopt = True)   
     def test_init_opt_get_dimensions(self):
         """ Test NLPInitialization.init_opt_get_dimensions"""
         (nx,n_h,dh_n_nz) = self.init_nlp.init_opt_get_dimensions()
 
-#    @testattr(stddist = True)
+#    @testattr(ipopt = True)
 #    def test_init_opt_get_x(self):
 #       """ Test NLPInitialization.init_opt_get_x"""
 #       (nx,n_h,dh_n_nz) = self.init_nlp.init_opt_get_dimensions()
 #       x=self.init_nlp.init_opt_get_x()
 #       nose.tools.assert_equal(len(x),nx)
     
-    @testattr(stddist = True)  
+    @testattr(ipopt = True)  
     def test_init_opt_getset_initial(self):
         """ Test NLPInitialization.init_opt_get_initial"""
         (nx,n_h,dh_n_nz)=self.init_nlp.init_opt_get_dimensions()
@@ -82,7 +79,7 @@ class TestNLPInitWrappers:
         self.init_nlp.init_opt_get_initial(x_init)
         self.init_nlp.init_opt_set_initial(x_init)
     
-    @testattr(stddist = True)           
+    @testattr(ipopt = True)           
     def test_init_opt_getset_bounds(self):
         """ Test NLPInitialization.init_opt_get_bounds and init_opt_set_bounds"""
         (nx,n_h,dh_n_nz)=self.init_nlp.init_opt_get_dimensions()
@@ -91,34 +88,34 @@ class TestNLPInitWrappers:
         self.init_nlp.init_opt_get_bounds(x_lb,x_ub)
         self.init_nlp.init_opt_set_bounds(x_lb,x_ub)       
         
-    @testattr(stddist = True)    
+    @testattr(ipopt = True)    
     def test_init_opt_f(self):
         """ Test NLPInitialization.init_opt_f"""
         f=N.zeros(1)
         self.init_nlp.init_opt_f(f)
     
-    @testattr(stddist = True)   
+    @testattr(ipopt = True)   
     def test_init_opt_df(self):
         """ Test NLPInitialization.init_opt_df"""
         (nx,n_h,dh_n_nz)=self.init_nlp.init_opt_get_dimensions()
         df=N.zeros(nx)
         self.init_nlp.init_opt_df(df)
 
-    @testattr(stddist = True)   
+    @testattr(ipopt = True)   
     def test_init_opt_h(self):
         """ Test NLPInitialization.opt_sim_h"""
         (nx,n_h,dh_n_nz)=self.init_nlp.init_opt_get_dimensions()
         res=N.zeros(n_h)
         self.init_nlp.init_opt_h(res)
     
-    @testattr(stddist = True)   
+    @testattr(ipopt = True)   
     def test_init_opt_dh(self):
         """ Test NLPInitialization.opt_sim_dh"""
         (nx,n_h,dh_n_nz)=self.init_nlp.init_opt_get_dimensions()
         jac=N.zeros(dh_n_nz)
         self.init_nlp.init_opt_dh(jac)
     
-    @testattr(stddist = True)    
+    @testattr(ipopt = True)    
     def test_opt_init_opt_dh_nz_indices(self):
         """ Test NLPInitialization.opt_sim_dh_nz_indices"""
         (nx,n_h,dh_n_nz)=self.init_nlp.init_opt_get_dimensions()
@@ -132,10 +129,22 @@ class TestNLPInit:
     of initialization problems.
     
     """
+    @classmethod
+    def setUpClass(cls):
+        """Sets up the test class."""
+        model_daeinit = os.path.join("files", "DAEInitTest.mo")
+        fpath_daeinit = os.path.join(path_to_tests, model_daeinit)
+        cpath_daeinit = "DAEInitTest"
+        fname_daeinit = cpath_daeinit.replace('.','_',1)
+        
+        oc.set_boolean_option('state_start_values_fixed',True)
+        oc.compile_model(cpath_daeinit, fpath_daeinit, target='ipopt')
     
     def setUp(self):
         """Test setUp. Load the test model."""                    
         # Load the dynamic library and XML data
+        cpath_daeinit = "DAEInitTest"
+        fname_daeinit = cpath_daeinit.replace('.','_',1)
         self.dae_init_test = jmi.Model(fname_daeinit)
 
         # This is to check that values set in the model prior to
@@ -145,7 +154,7 @@ class TestNLPInit:
     
         self.init_nlp = NLPInitialization(self.dae_init_test)
 
-    @testattr(stddist = True)    
+    @testattr(ipopt = True)    
     def test_init_opt_get_dimensions(self):
         """ Test NLPInitialization.init_opt_get_dimensions"""
     
@@ -159,7 +168,7 @@ class TestNLPInit:
                N.abs(res_dh_n_nz-dh_n_nz)==0, \
                "test_jmi.py: test_init_opt: init_opt_get_dimensions returns wrong problem dimensions." 
 
-    @testattr(stddist = True)    
+    @testattr(ipopt = True)    
     def test_init_opt_get_set_x_init(self):
 
         n_x, n_h, dh_n_nz = self.init_nlp.init_opt_get_dimensions()
@@ -180,7 +189,7 @@ class TestNLPInit:
         assert N.sum(N.abs(res_x_init-x_init))<1e-3, \
                "test_jmi.py: test_init_opt: init_opt_get_x_init returns wrong values after setting the initial values with init_opt_get_x_init." 
 
-    @testattr(stddist = True)    
+    @testattr(ipopt = True)    
     def test_init_opt_get_set_bounds(self):
 
         n_x, n_h, dh_n_nz = self.init_nlp.init_opt_get_dimensions()
@@ -208,7 +217,7 @@ class TestNLPInit:
         assert N.sum(N.abs(res_x_lb-x_lb))<1e-3, \
                "test_jmi.py: test_init_opt: init_opt_get_bounds returns wrong upper bounds after calling init_opt_set_bounds." 
 
-    @testattr(stddist = True)    
+    @testattr(ipopt = True)    
     def test_init_opt_f(self):
 
         n_x, n_h, dh_n_nz = self.init_nlp.init_opt_get_dimensions()
@@ -221,7 +230,7 @@ class TestNLPInit:
         assert N.sum(N.abs(res_f-f))<1e-3, \
                "test_jmi.py: test_init_opt: init_opt_f returns wrong value" 
 
-    @testattr(stddist = True)    
+    @testattr(ipopt = True)    
     def test_init_opt_df(self):
 
         n_x, n_h, dh_n_nz = self.init_nlp.init_opt_get_dimensions()
@@ -234,7 +243,7 @@ class TestNLPInit:
         assert N.sum(N.abs(res_df-df))<1e-3, \
                "test_jmi.py: test_init_opt: init_opt_df returns wrong value" 
 
-    @testattr(stddist = True)    
+    @testattr(ipopt = True)    
     def test_init_opt_h(self):
 
         n_x, n_h, dh_n_nz = self.init_nlp.init_opt_get_dimensions()
@@ -247,7 +256,7 @@ class TestNLPInit:
         assert N.sum(N.abs(res_h-h))<1e-3, \
                "test_jmi.py: test_init_opt: init_opt_h returns wrong value" 
 
-    @testattr(stddist = True)    
+    @testattr(ipopt = True)    
     def test_init_opt_dh(self):
         n_x, n_h, dh_n_nz = self.init_nlp.init_opt_get_dimensions()
 
@@ -261,7 +270,7 @@ class TestNLPInit:
         assert N.sum(N.abs(res_dh-dh))<1e-3, \
                "test_jmi.py: test_init_opt: init_opt_dh returns wrong value" 
 
-    @testattr(stddist = True)    
+    @testattr(ipopt = True)    
     def test_init_opt_dh_nz_indices(self):
 
         n_x, n_h, dh_n_nz = self.init_nlp.init_opt_get_dimensions()
@@ -277,7 +286,7 @@ class TestNLPInit:
         assert N.sum(N.abs(res_dh_icol-dh_icol))<1e-3, \
                "test_jmi.py: test_init_opt: init_opt_dh_nz_indices returns wrong values for the column indices" 
 
-    @testattr(stddist = True)    
+    @testattr(ipopt = True)    
     def test_init_opt_solve(self):
 
         n_x, n_h, dh_n_nz = self.init_nlp.init_opt_get_dimensions()

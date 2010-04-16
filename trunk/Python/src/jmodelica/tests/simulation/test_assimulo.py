@@ -16,6 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 """Tests for the jmodelica.simulation.assimulo module."""
+import warnings
 import nose
 import os
 import numpy as N
@@ -27,7 +28,7 @@ from jmodelica.tests import testattr
 try:
     from jmodelica.simulation.assimulo import JMIODE, JMIDAE, JMIModel_Exception
 except NameError:
-    print 'Could not load Assimulo module.'
+    warnings.warn('Could not load Assimulo module. Check jmodelica.check_packages()')
 
 jm_home = os.environ.get('JMODELICA_HOME')
 path_to_examples = os.path.join(jm_home, 'Python', 'jmodelica', 'examples')
@@ -65,7 +66,7 @@ class Test_JMI_ODE:
         # Creates the solvers
         self.ODE = JMIODE(self.m_ODE)
     
-    @testattr(stddist = True) 
+    @testattr(assimulo = True) 
     def test_init(self):
         """
         Tests jmodelica.simulation.assimulo.JMIODE.__init__
@@ -100,7 +101,7 @@ class Test_JMI_ODE:
         
         nose.tools.assert_raises(JMIModel_Exception, JMIODE, m_DISC)
     
-    @testattr(stddist = True) 
+    @testattr(assimulo = True) 
     def test_f(self):
         """
         Tests jmodelica.simulation.assimulo.JMIODE.f
@@ -114,7 +115,7 @@ class Test_JMI_ODE:
         assert temp_rhs[1] == 1.0
         nose.tools.assert_almost_equal(temp_rhs[2], 14.77811, 5)
     
-    @testattr(stddist = True) 
+    @testattr(assimulo = True) 
     def test_j(self):
         """
         Tests jmodelica.simulation.assimulo.JMIODE.j
@@ -134,7 +135,7 @@ class Test_JMI_ODE:
         nose.tools.assert_almost_equal(temp_j[2,1], 14.7781122, 5)
         assert temp_j[2,2] == 0.0
     
-    @testattr(stddist = True) 
+    @testattr(assimulo = True) 
     def test_reset(self):
         """
         Tests jmodelica.simulation.assimulo.JMIODE.reset
@@ -149,7 +150,7 @@ class Test_JMI_ODE:
         assert self.ODE._model.real_x[1] != 2.0
         assert self.ODE._model.real_x[2] != 2.0
     
-    @testattr(stddist = True) 
+    @testattr(assimulo = True) 
     def test_g(self):
         """
         Tests jmodelica.simulation.assimulo.JMIODE.g
@@ -195,7 +196,7 @@ class Test_JMI_DAE:
         self.DAE = JMIDAE(self.m_DAE)
         self.DISC = JMIDAE(self.m_DISC)
     
-    @testattr(stddist = True) 
+    @testattr(assimulo = True) 
     def test_eps(self):
         """
         Tests jmodelica.simulation.assimulo.JMIDAE.get/set_eps
@@ -210,7 +211,7 @@ class Test_JMI_DAE:
         self.DAE.eps = 10.0
         assert self.DAE.eps == 10.0
     
-    @testattr(stddist = True) 
+    @testattr(assimulo = True) 
     def test_max_eIteration(self):
         """
         Tests jmodelica.simulation.assimulo.JMIDAE.get/set_max_eIteration
@@ -225,7 +226,7 @@ class Test_JMI_DAE:
         self.DAE.max_eIter = 10
         assert self.DAE.max_eIter == 10
     
-    @testattr(stddist = True) 
+    @testattr(assimulo = True) 
     def test_check_eIter(self):
         """
         Tests jmodelica.simulation.assimulo.JMIDAE.check_eIter
@@ -252,7 +253,7 @@ class Test_JMI_DAE:
         assert eIter[1] == 0
         assert eIter[2] == 0
     
-    @testattr(stddist = True) 
+    @testattr(assimulo = True) 
     def test_event_switch(self):
         """
         Tests jmodelica.simulation.assimulo.JMIDAE.event_switch
@@ -269,7 +270,7 @@ class Test_JMI_DAE:
         assert solver.switches[1] == False
         assert solver.switches[2] == False
     
-    @testattr(stddist = True) 
+    @testattr(assimulo = True) 
     def test_f(self):
         """
         Tests jmodelica.simulation.assimulo.JMIDAE.f
@@ -285,7 +286,7 @@ class Test_JMI_DAE:
         assert temp_f[3] == -2.0
         nose.tools.assert_almost_equal(temp_f[1], -1.158529, 5)
     
-    @testattr(stddist = True) 
+    @testattr(assimulo = True) 
     def test_g(self):
         """
         Tests jmodelica.simulation.assimulo.JMIDAE.g
@@ -295,7 +296,7 @@ class Test_JMI_DAE:
         nose.tools.assert_almost_equal(temp_g[0], -0.429203, 5)
         nose.tools.assert_almost_equal(temp_g[1], 1.141592, 5)
     
-    @testattr(stddist = True) 
+    @testattr(assimulo = True) 
     def test_g_adjust(self):
         """
         Tests jmodelica.simulation.assimulo.JMIDAE.g
@@ -312,7 +313,7 @@ class Test_JMI_DAE:
         nose.tools.assert_almost_equal(temp_g_adjust[0], -2.429203, 5)
         nose.tools.assert_almost_equal(temp_g_adjust[1], 3.141592, 5)
         
-    @testattr(stddist = True) 
+    @testattr(assimulo = True) 
     def test_init(self):
         """
         Tests jmodelica.simulation.assimulo.JMIDAE.__init__
@@ -335,7 +336,7 @@ class Test_JMI_DAE:
         assert self.DISC._g_nbr == 2
         assert self.DISC.event_fcn == self.DISC.g_adjust
     
-    @testattr(stddist = True) 
+    @testattr(assimulo = True) 
     def test_reset(self):
         """
         Tests jmodelica.simulation.assimulo.JMIDAE.reset
@@ -356,7 +357,7 @@ class Test_JMI_DAE:
        
         assert self.DAE.y0[0] == 0.1
 
-    @testattr(stddist = True) 
+    @testattr(assimulo = True) 
     def test_j(self):
         """
         Tests jmodelica.simulation.assimulo.JMIDAE.j
@@ -373,7 +374,7 @@ class Test_JMI_DAE:
         assert temp_j[1,1] == -0.1
         nose.tools.assert_almost_equal(temp_j[1,0], 0.5403023, 5)
     
-    @testattr(stddist = True) 
+    @testattr(assimulo = True) 
     def test_handle_event(self):
         """
         Tests jmodelica.simulation.assimulo.JMIDAE.handle_event
@@ -395,7 +396,7 @@ class Test_JMI_DAE:
         
         self.DISC.handle_event(solver, [1,1])
 
-    @testattr(stddist = True) 
+    @testattr(assimulo = True) 
     def test_init_mode(self):
         """
         Tests jmodelica.simulation.assimulo.init_mode
@@ -409,7 +410,7 @@ class Test_JMI_DAE:
         assert self.DISC._model.sw[0] == 1
         assert self.DISC._model.sw[1] == 1
     
-    @testattr(stddist = True) 
+    @testattr(assimulo = True) 
     def test_initiate(self):
         """
         Tests jmodelica.simulation.assimulo.initiate

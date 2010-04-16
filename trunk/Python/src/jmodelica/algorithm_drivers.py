@@ -17,7 +17,8 @@ try:
     from Assimulo.Implicit_ODE import *
     from Assimulo.Explicit_ODE import *
 except:
-    pass
+    warnings.warn('Could not load Assimulo module. Check jmodelica.check_packages()')
+    IDA = None
 
 int = N.int32
 N.int = N.int32
