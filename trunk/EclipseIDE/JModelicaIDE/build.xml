@@ -14,6 +14,7 @@
 
 	<property name="java_dir" value="java" />
 	<property name="tests_dir" value="tests" />
+	<property name="ant_task_dir" value="ant" />
 	<property name="bin_dir" value="bin" />
 	<property name="output_dir" value="site" />
 
@@ -65,90 +66,87 @@
 			<pathelement location="${ant-contrib_dir}/target/ant-contrib.jar" />
 		</classpath>
 	</taskdef>
+		
 
-	<!-- define ant4eclipse tasks -->
-	<taskdef uri="antlib:org.ant4eclipse" resource="org/ant4eclipse/antlib.xml" />
-
-	<a4e:targetPlatform id="platform">
-		<location dir="${eclipse_path}" />
-	</a4e:targetPlatform>
-
-	<!-- modified macro from a4e-pde-macros.xml -->
 	<macrodef name="jm_buildPlugin" description="creates jar for a single plug-in project">
 		<attribute name="projectName" />
 
 		<sequential>
-			<a4e:executePluginProject workspaceDirectory=".." projectName="@{projectName}" prefix="jm">
-				<a4e:forProject>
-					<!-- TODO: automatically append svn revision to plugin version -->
-					
-					<!-- read build.properties -->
-					<property file="../@{projectName}/build.properties" prefix="@{projectName}" />
+			<!-- read build.properties -->
+			<property file="../@{projectName}/build.properties" prefix="@{projectName}" />
 
-					<!-- copy binary includes -->
-					<copy todir="${bin_dir}/bundles/@{projectName}">
-						<fileset dir="../@{projectName}" includes="${@{projectName}.bin.includes}">
-							<filename name="." negate="true" />
-						</fileset>
-					</copy>
+			<!-- copy binary includes -->
+			<copy todir="${bin_dir}/bundles/@{projectName}">
+				<fileset dir="../@{projectName}" includes="${@{projectName}.bin.includes}">
+					<filename name="." negate="true" />
+				</fileset>
+			</copy>
 
-					<!-- 'patch' the manifest with the resolved bundle version -->
-					<manifest file="${bin_dir}/bundles/@{projectName}/META-INF/MANIFEST.MF" mode="update">
-						<attribute name="Bundle-Version" value="${jm.bundle.resolved.version}" />
-					</manifest>
+			<!-- extract version and id -->
+			<!-- TODO: automatically append svn revision to plugin version and patch manifest (do it in task) -->
+			<taskdef name="pluginVersion" classname="org.jmodelica.ant.ExtractPluginVersion" classpath="${bin_dir}/classes" />
+			<pluginVersion plugin="@{projectName}" 
+				path="${bin_dir}/bundles/@{projectName}/META-INF/MANIFEST.MF" 
+				datadir="${bin_dir}" />
+			<property file="${bin_dir}/plugin.properties" prefix="jm" />
 
-					<!-- build jar -->
-					<jar destfile="${bin_dir}/plugins/${jm.bundle.symbolicname}_${jm.bundle.resolved.version}.jar" basedir="${bin_dir}/bundles/@{projectName}" manifest="${bin_dir}/bundles/@{projectName}/META-INF/MANIFEST.MF" />
-				</a4e:forProject>
-			</a4e:executePluginProject>
+			<!-- build jar -->
+			<jar destfile="${bin_dir}/plugins/${jm.@{projectName}.jar}" 
+				basedir="${bin_dir}/bundles/@{projectName}" 
+				manifest="${bin_dir}/bundles/@{projectName}/META-INF/MANIFEST.MF" />
 		</sequential>
 	</macrodef>
 
-	<!-- modified macro from a4e-pde-macros.xml -->
 	<macrodef name="jm_buildFeature" description="creates jar for a single feature project">
 		<attribute name="projectName" />
 
 		<sequential>
-			<a4e:executeFeature workspaceDirectory=".." projectName="@{projectName}" targetPlatformId="platform" prefix="jm">
-				<a4e:forRootFeature>
-					<!-- copy binary includes  -->
-					<copy todir="${bin_dir}/bundles/@{projectName}" overwrite="true">
-						<a4e:pdeProjectFileSet workspaceDirectory=".." projectname="@{projectName}" />
-					</copy>
+			<!-- read build.properties -->
+			<property file="../@{projectName}/build.properties" prefix="@{projectName}" />
 
-					<!-- patch the feature.xml -->
-					<!-- TODO: automatically update feature version -->
-					<!-- TODO: automatically set download and installation sizes? -->
-					<a4e:patchFeatureManifest featureXmlFile="${bin_dir}/bundles/@{projectName}/feature.xml" pluginVersions="${jm.feature.plugins.resolved.versions}" />
+			<!-- copy binary includes -->
+			<copy todir="${bin_dir}/bundles/@{projectName}">
+				<fileset dir="../@{projectName}" includes="${@{projectName}.bin.includes}">
+					<filename name="." negate="true" />
+				</fileset>
+			</copy>
 
-					<!-- build jar -->
-					<jar destfile="${bin_dir}/features/${jm.feature.id}_${jm.feature.resolved.version}.jar" basedir="${bin_dir}/bundles/@{projectName}" />
-				</a4e:forRootFeature>
-			</a4e:executeFeature>
+			<!-- patch the feature.xml -->
+			<taskdef name="patchFeature" classname="org.jmodelica.ant.PatchFeature" classpath="${bin_dir}/classes" />
+			<patchFeature feature="@{projectName}" 
+				path="${bin_dir}/bundles/@{projectName}/feature.xml" 
+				datadir="${bin_dir}" />
+			<property file="${bin_dir}/feature.properties" prefix="jm" />
+			<!-- TODO: automatically set download and installation sizes? -->
+
+			<!-- build jar -->
+			<jar destfile="${bin_dir}/features/${jm.@{projectName}.jar}" 
+				basedir="${bin_dir}/bundles/@{projectName}" />
 		</sequential>
 	</macrodef>
 
 	<macrodef name="jm_buildSite" description="builds the update site">
-		<attribute name="dir"/>
-		<attribute name="name"/>
-		
+		<attribute name="dir" />
+		<attribute name="name" />
+
 		<sequential>
 			<!-- update site.xml -->
-			<!-- TODO: automatically update site.xml with versions of features -->
-			
+			<taskdef name="patchSite" classname="org.jmodelica.ant.PatchSite" classpath="${bin_dir}/classes" />
+			<patchSite path="@{dir}/site.xml" datadir="${bin_dir}" />
+
 			<!-- build site -->
 			<pathconvert property="launcher">
 				<path id="launcher.path">
 					<fileset dir="${eclipse_path}/plugins">
-						<include name="org.eclipse.equinox.launcher_*.jar"/>
+						<include name="org.eclipse.equinox.launcher_*.jar" />
 					</fileset>
 				</path>
 			</pathconvert>
 			<java jar="${launcher}" fork="true" timeout="10800000" taskname="p2" failonerror="false" maxmemory="256m">
 				<classpath>
 					<fileset dir="${eclipse_path}/plugins">
-						<include name="org.eclipse.equinox.launcher_*.jar"/>
-						<include name="org.eclipse.equinox.p2.metadata.generator_*.jar"/>
+						<include name="org.eclipse.equinox.launcher_*.jar" />
+						<include name="org.eclipse.equinox.p2.metadata.generator_*.jar" />
 					</fileset>
 					<pathelement location="${eclipse_path}/plugins" />
 				</classpath>
@@ -288,6 +286,7 @@
 	<!-- remove compiled files -->
 	<target name="clean">
 		<delete dir="${bin_dir}" />
+		<delete dir="${output_dir}" />
 	</target>
 
 	<!-- compile files -->
@@ -296,6 +295,7 @@
 		<javac compiler="javac1.5" debug="true" destdir="${bin_dir}/classes">
 			<classpath refid="plugin_classpath" />
 			<src path="${java_dir}" />
+			<src path="${ant_task_dir}" />
 			<src path="${tests_dir}" />
 			<src path="${core_java_dir}" />
 			<src path="${folding_java_dir}" />
@@ -304,32 +304,36 @@
 	</target>
 
 	<!-- build plugins, features and site -->
-	<target name="site" depends="clean,compile">
+	<target name="site" depends="compile">
 		<!-- collect class files for org.jastadd.plugin -->
 		<copy todir="${bin_dir}/bundles/org.jastadd.plugin">
 			<fileset dir="${bin_dir}/classes">
 				<include name="org/jastadd/**/*" />
 			</fileset>
 		</copy>
-		
+
 		<!-- collect class files for org.jmodelica.folding -->
 		<copy todir="${bin_dir}/bundles/org.jmodelica.folding">
 			<fileset dir="${bin_dir}/classes">
 				<include name="org/jmodelica/folding/**/*" />
 			</fileset>
 		</copy>
-		
+
 		<!-- collect class files for JModelicaIDE -->
 		<copy todir="${bin_dir}/bundles/JModelicaIDE">
 			<fileset dir="${bin_dir}/classes">
 				<include name="org/jmodelica/**/*" />
 				<exclude name="org/jmodelica/folding/**/*" />
-				<include name="mock/**/*" /> <!-- remove once #774 is done -->
-				<include name="testcases/**/*" /> <!-- remove once #774 is done -->
+				<exclude name="org/jmodelica/ant/**/*" />
+				<include name="mock/**/*" />
+				<!-- remove once #774 is done -->
+				<include name="testcases/**/*" />
+				<!-- remove once #774 is done -->
 			</fileset>
 		</copy>
-		
+
 		<!-- build jars for plugins -->
+		<delete file="${bin_dir}/plugin.versions" quiet="true" />
 		<emptyDir dir="${bin_dir}/plugins" />
 		<jm_buildPlugin projectName="JModelicaIDE" />
 		<jm_buildPlugin projectName="org.jmodelica.folding" />
