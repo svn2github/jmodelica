@@ -20,6 +20,7 @@ import warnings
 import nose
 import os
 import numpy as N
+import jmodelica
 import jmodelica.jmi as jmi
 from jmodelica.compiler import ModelicaCompiler
 from jmodelica.compiler import OptimicaCompiler
@@ -27,6 +28,9 @@ from jmodelica.tests import testattr
 
 try:
     from jmodelica.simulation.assimulo import JMIODE, JMIDAE, JMIModel_Exception
+    from jmodelica.simulation.assimulo import write_data
+    from jmodelica.simulation.assimulo import TrajectoryLinearInterpolation
+    from Assimulo.Explicit_ODE import CVode
 except NameError:
     warnings.warn('Could not load Assimulo module. Check jmodelica.check_packages()')
 
@@ -65,6 +69,36 @@ class Test_JMI_ODE:
         
         # Creates the solvers
         self.ODE = JMIODE(self.m_ODE)
+    
+    @testattr(assimulo = True)
+    def test_input(self):
+        """
+        Tests the input.
+        """
+        t = N.linspace(1,10.,100)
+        u = (0.75)*N.ones(N.size(t,0))
+        u_traj = TrajectoryLinearInterpolation(t,u.reshape(100,1))
+        
+        self.ODE.input = u_traj
+        
+        vdp_sim = CVode(self.ODE)
+
+        vdp_sim(10,100)
+    
+        write_data(vdp_sim)
+    
+        # Load the file we just wrote to file
+        res = jmodelica.io.ResultDymolaTextual('VDP_pack_VDP_Opt_result.txt')
+    
+        x1=res.get_variable_data('x1')
+        x2=res.get_variable_data('x2')
+        u =res.get_variable_data('u')
+        
+        assert u.x[-1] == 0.75
+        nose.tools.assert_almost_equal(x1.x[-1], -0.54108518, 5)
+        nose.tools.assert_almost_equal(x2.x[-1], -0.81364915, 5)
+
+        
     
     @testattr(assimulo = True) 
     def test_init(self):

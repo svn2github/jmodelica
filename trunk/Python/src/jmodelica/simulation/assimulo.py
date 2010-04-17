@@ -93,11 +93,12 @@ class JMIODE(Explicit_Problem):
         model. See http://www.jmodelica.org/page/10
     """
     
-    def __init__(self, model):
+    def __init__(self, model, input=None):
         """
         Sets the initial values.
         """
         self._model = model
+        self.input = input
         
         self.y0 = self._model.real_x
         
@@ -119,6 +120,10 @@ class JMIODE(Explicit_Problem):
         self._model.t = t
         self._model.real_x = y
         
+        #Sets the inputs, if any
+        if self.input!=None:
+            self._model.real_u = self.input.eval(t)[0,:]
+        
         #Evaluating the rhs
         self._model.eval_ode_f()
         rhs = self._model.real_dx
@@ -132,6 +137,10 @@ class JMIODE(Explicit_Problem):
         #Moving data to the model
         self._model.t = t
         self._model.real_x = y
+        
+        #Sets the inputs, if any
+        if self.input!=None:
+            self._model.real_u = self.input.eval(t)[0,:]
         
         #Evaluating the jacobian
         #-Setting options
@@ -161,6 +170,20 @@ class JMIODE(Explicit_Problem):
         #TODO
         raise JMIModel_Exception('Not implemented.')
    
+    def _set_input(self, input):
+        """
+        Sets the input.
+        """
+        self.__input = input
+        
+    def _get_input(self):
+        """
+        Returns the input.
+        """
+        return self.__input
+        
+    inputdocstring='The input.'
+    input = property(_get_input, _set_input, doc=inputdocstring)
     
     def reset(self):
         """
