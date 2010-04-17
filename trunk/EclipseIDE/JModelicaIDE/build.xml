@@ -304,7 +304,7 @@
 	</target>
 
 	<!-- build plugins, features and site -->
-	<target name="build" depends="compile">
+	<target name="build" depends="clean,compile">
 		<!-- collect class files for org.jastadd.plugin -->
 		<copy todir="${bin_dir}/bundles/org.jastadd.plugin">
 			<fileset dir="${bin_dir}/classes">
@@ -351,9 +351,6 @@
 			<fileset file="${site_dir}/site.xml" />
 		</copy>
 		<jm_buildSite dir="${output_dir}" name="JModelica" />
-
-		<!-- delete temp dir -->
-		<delete dir="${bin_dir}"/>
 	</target>
 
 	<!-- run ant tests -->
