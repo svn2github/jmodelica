@@ -1,4 +1,4 @@
-// Just a, b, c
+// Just r
 // line above is expected output
 
 // normal completion on component

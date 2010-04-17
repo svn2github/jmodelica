@@ -16,7 +16,7 @@ import org.jmodelica.modelica.compiler.InstClassDecl;
 import org.jmodelica.modelica.compiler.SourceRoot;
 import org.jmodelica.modelica.compiler.StoredDefinition;
 
-public class CompletionTest {
+public class CompletionNoTest {
 
 public StoredDefinition make(String[] otherFiles, String file) {
 
@@ -68,7 +68,7 @@ public static void main(String[] args) {
         "end test;";
     
     StoredDefinition def = 
-        new CompletionTest().make(otherFiles, file);
+        new CompletionNoTest().make(otherFiles, file);
     SourceRoot root = 
         (SourceRoot) def.root();
     InstClassDecl enc =

@@ -16,15 +16,15 @@ import org.jmodelica.modelica.compiler.SourceRoot;
 import org.jmodelica.modelica.parser.ModelicaParser;
 import org.jmodelica.modelica.parser.ModelicaScanner;
 
-public class ModelicaTestCase {
+public class BaseModelicaTestCase {
     
-    static final String FAIL = "<<FAILURE: in test %d>>";
+    static final String FAIL = "in test file: %s";
 
     public OffsetDocument document;
     public SourceRoot root;
     public ClassDecl enclosingClass;
     
-    public ModelicaTestCase(String filename) {
+    public BaseModelicaTestCase(String filename) {
         try {
             File file = new File(filename);
             
@@ -96,7 +96,7 @@ public class ModelicaTestCase {
     
     public Maybe<String> expected() {
         Set<String> set = expectedSet();
-        return Maybe.guard(new DocUtil(document).getLine(0), !set.isEmpty());
+        return set.isEmpty() ? Maybe.<String>Nothing() : Maybe.Just(set.iterator().next());
     }
 
     /**

@@ -1,5 +1,6 @@
 package mock;
 
+import java.io.File;
 import java.net.URI;
 import java.util.Map;
 
@@ -23,6 +24,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.content.IContentTypeMatcher;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.jmodelica.ide.IDEConstants;
 
 @SuppressWarnings({ "deprecation", "unchecked" })
 public class MockProject implements IProject {
@@ -298,7 +300,12 @@ public void build(int kind, IProgressMonitor monitor) throws CoreException {
     }
 
     public String getPersistentProperty(QualifiedName key) throws CoreException {
-        return "/home/philip/runtime-EclipseApplication";
+    	if (key.equals(IDEConstants.PROPTERTY_OPTIONS_PATH))
+    		return System.getenv("JMODELICA_HOME") + File.separator + "Options";
+    	else if (key.equals(IDEConstants.PROPERTY_LIBRARIES_ID)) 
+    		return System.getenv("JMODELICA_SRC") + File.separator + "ThirdParty" + File.separator + "MSL";
+    	else 
+    		return null;
     }
 
     public IProject getProject() {

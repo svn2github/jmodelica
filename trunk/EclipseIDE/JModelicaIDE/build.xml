@@ -8,6 +8,7 @@
 	<property name="beaver_dir" value="${jmodelica_root}/ThirdParty/Beaver/beaver-0.9.6.1/lib" />
 	<property name="jflex_dir" value="${jmodelica_root}/ThirdParty/JFlex/jflex-1.4.3/lib" />
 	<property name="jastadd_dir" value="${jmodelica_root}/ThirdParty/JastAdd" />
+	<property name="junit_dir" value="${jmodelica_root}/ThirdParty/Junit" />
 	<property name="ant-contrib_dir" value="${jmodelica_root}/ThirdParty/Ant-Contrib/ant-contrib-1.0b3" />
 	<property name="ant4eclipse_dir" value="${jmodelica_root}/ThirdParty/Ant4Eclipse" />
 
@@ -353,5 +354,34 @@
 
 		<!-- delete temp dir -->
 		<delete dir="${bin_dir}"/>
+	</target>
+
+	<!-- run ant tests -->
+	<target name="test" depends="compile">
+		<!-- any class containing "NoTest" in the name is excluded -->
+		<!-- any class whose name starts with "Base" is excluded -->
+		<emptyDir dir="doc/junit-reports" />
+		<junit printsummary="yes" fork="true" maxmemory="512M">
+			<classpath>
+				<fileset dir="${junit_dir}">
+					<include name="junit-4.5.jar" />
+				</fileset>
+				<pathelement path="${bin_dir}/classes" />
+				<path refid="plugin_classpath" />
+			</classpath>
+			<formatter type="xml" />
+
+			<batchtest fork="yes" todir="doc/junit-reports">
+				<fileset dir="${tests_dir}/">
+					<include name="testcases/*.java" />
+					<exclude name="testcases/Base*.java" />
+					<exclude name="testcases/*NoTest*.java" />
+				</fileset>
+			</batchtest>
+		</junit>
+		<junitreport todir="doc/junit-reports">
+			<fileset dir="doc/junit-reports" includes="TEST-*.xml" />
+			<report todir="doc/junit-reports" />
+		</junitreport>
 	</target>
 </project>
