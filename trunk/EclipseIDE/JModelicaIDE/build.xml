@@ -213,7 +213,7 @@
 	<!-- generate the scanners -->
 	<target name="scanner">
 		<mkdir dir="${parser_output}" />
-		<foreach target="jflex" param="flex_file" inheritall="true" parallel="true">
+		<for param="flexfile">
 			<path id="scanners">
 				<fileset dir="${scanner_dir}">
 					<include name="*.flex" />
@@ -222,11 +222,10 @@
 					<include name="*all.flex" />
 				</fileset>
 			</path>
-		</foreach>
-	</target>
-
-	<target name="jflex">
-		<jflex file="${flex_file}" destdir="${java_dir}" nobak="yes" />
+			<sequential>
+				<jflex file="@{flexfile}" destdir="${java_dir}" nobak="yes" />
+			</sequential>
+		</for>
 	</target>
 
 	<target name="parser">
@@ -304,7 +303,7 @@
 	</target>
 
 	<!-- build plugins, features and site -->
-	<target name="site" depends="compile">
+	<target name="site" depends="clean,compile">
 		<!-- collect class files for org.jastadd.plugin -->
 		<copy todir="${bin_dir}/bundles/org.jastadd.plugin">
 			<fileset dir="${bin_dir}/classes">
@@ -325,10 +324,8 @@
 				<include name="org/jmodelica/**/*" />
 				<exclude name="org/jmodelica/folding/**/*" />
 				<exclude name="org/jmodelica/ant/**/*" />
-				<include name="mock/**/*" />
-				<!-- remove once #774 is done -->
-				<include name="testcases/**/*" />
-				<!-- remove once #774 is done -->
+				<include name="mock/**/*" /> <!-- remove once #774 is done -->
+				<include name="testcases/**/*" /> <!-- remove once #774 is done -->
 			</fileset>
 		</copy>
 
