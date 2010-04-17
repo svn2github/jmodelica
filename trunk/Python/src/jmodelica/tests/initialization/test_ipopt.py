@@ -315,6 +315,9 @@ class TestNLPInit:
     @testattr(stddist = True)    
     def test_init_opt_write_result(self):
 
+        cpath_daeinit = "DAEInitTest"
+        fname_daeinit = cpath_daeinit.replace('.','_',1)
+
         # Test optimization of initialization system
         self.init_nlp_ipopt = InitializationOptimizer(self.init_nlp)
     
@@ -323,6 +326,7 @@ class TestNLPInit:
         self.init_nlp_ipopt.init_opt_ipopt_solve()
 
         self.init_nlp.export_result_dymola()
+        
         res = io.ResultDymolaTextual(fname_daeinit + "_result.txt")
 
         res_Z = N.array([5.,

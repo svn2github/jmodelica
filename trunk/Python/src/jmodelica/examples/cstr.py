@@ -137,9 +137,8 @@ def run_demo(with_plots=True):
     init_sim_model.set_value('T_ref',T_0_B)
     init_sim_model.set_value('Tc_ref',u[0])
 
-    (init_sim_model,res) = simulate(init_sim_model,compiler='optimica',
-                                    alg_args={'start_time':0.,'final_time':150.,
-                                              'input_trajectory':u_traj})
+    (init_sim_model,res) = simulate(init_sim_model,alg_args={'start_time':0.,'final_time':150.,
+                                                             'input_trajectory':u_traj})
     
     # Extract variable profiles
     c_init_sim=res.get_variable_data('cstr.c')
