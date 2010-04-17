@@ -68,7 +68,7 @@ function python_tests() {
         cd ${TEST_DIR}
         for TEST in ${TESTS}; do
 	  echo ${TEST} | sed -e 's!^.*jmodelica.tests.!Running !'
-          nosetests -a stddist -v ${TEST}
+          nosetests -a stddist -a assimulo -a ipopt -v ${TEST}
         done
       fi
       ;;
@@ -76,7 +76,7 @@ function python_tests() {
       if build_jmodelica 2> /dev/null > /dev/null; then
         cd ${TEST_DIR}
         for TEST in ${TESTS}; do
-          nosetests -a stddist -v ${TEST} 2>&1 \
+          nosetests -a stddist -a assimulo -a ipopt -v ${TEST} 2>&1 \
 	    | sed -n -e 's!^OK$!PASSED!ip' -e 's!^FAILED !TEST FAILED!p'
         done | filter_python_separate
       else
@@ -89,7 +89,7 @@ function python_tests() {
         cd ${TEST_DIR}
         for TEST in ${TESTS}; do
           echo ${TEST} | sed -e 's!^.*jmodelica.tests.!Running !'
-          nosetests -a stddist -v ${TEST} 2>&1 \
+          nosetests -a stddist -a assimulo -a ipopt -v ${TEST} 2>&1 \
 	    | egrep -v '^Exception .* ignored$' \
 	    | grep -B1 -A500 -e${PATTERN} \
 	    | sed -e 's!^OK$!PASSED!' -e 's!^FAILED !TEST FAILED!'
