@@ -70,14 +70,15 @@
 
 	<macrodef name="jm_buildPlugin" description="creates jar for a single plug-in project">
 		<attribute name="projectName" />
+		<attribute name="path" default="../@{projectName}" />
 
 		<sequential>
 			<!-- read build.properties -->
-			<property file="../@{projectName}/build.properties" prefix="@{projectName}" />
+			<property file="@{path}/build.properties" prefix="@{projectName}" />
 
 			<!-- copy binary includes -->
 			<copy todir="${bin_dir}/bundles/@{projectName}">
-				<fileset dir="../@{projectName}" includes="${@{projectName}.bin.includes}">
+				<fileset dir="@{path}" includes="${@{projectName}.bin.includes}">
 					<filename name="." negate="true" />
 				</fileset>
 			</copy>
@@ -334,7 +335,7 @@
 		<emptyDir dir="${bin_dir}/plugins" />
 		<jm_buildPlugin projectName="JModelicaIDE" />
 		<jm_buildPlugin projectName="org.jmodelica.folding" />
-		<jm_buildPlugin projectName="org.jastadd.plugin" />
+		<jm_buildPlugin projectName="org.jastadd.plugin" path="${core_dir}" />
 
 		<!-- build jars for features -->
 		<emptyDir dir="${bin_dir}/features" />
