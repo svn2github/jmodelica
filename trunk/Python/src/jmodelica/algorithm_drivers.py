@@ -247,8 +247,8 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
             raise InvalidAlgorithmArgumentException(e)
         
         self.nlp = ipopt.NLPCollocationLagrangePolynomials(model,self.n_e, self.hs, self.n_cp)
-        if self.res:
-            self.nlp.set_initial_from_dymola(self.res, self.hs, 0, 0) 
+        if self.init_traj:
+            self.nlp.set_initial_from_dymola(self.init_traj, self.hs, 0, 0) 
             
         self.nlp_ipopt = ipopt.CollocationOptimizer(self.nlp)
             
@@ -257,7 +257,7 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
                       n_e=50, 
                       n_cp=3, 
                       hs=N.ones(50)*1./50, 
-                      res = None,
+                      init_traj = None,
                       result_mesh='default', 
                       result_file_name='', 
                       result_format='txt',
@@ -273,9 +273,10 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
                 Default: 3
             n_cp -- 
                 Number of collocation points.
-            res --
+            init_traj --
                 A reference to an object of type ResultDymolaTextual or
-                ResultDymolaBinary.
+                ResultDymolaBinary containing variable trajectories used
+                to initialize the optimization problem.
                 Default: None (i.e. not used, set this argument to activate initialization)
             result_mesh --
                 Determines which function will be used to get the solution 
@@ -298,7 +299,7 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
         self.n_e=n_e
         self.n_cp=n_cp
         self.hs=hs
-        self.res=res
+        self.init_traj=init_traj
         self.result_mesh=result_mesh
         if not n_interpolation_points:
             self.result_args = dict(file_name=result_file_name, format=result_format)

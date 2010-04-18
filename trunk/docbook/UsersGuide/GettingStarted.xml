@@ -529,20 +529,14 @@ model = Model('CSTR_CSTR_Opt')
         shell or, preferably, into your Python script file.</para>
 
         <programlisting language="python">import os.path
+from jmodelica import initialize
+from jmodelica import simulate
+from jmodelica import optimize
 
-import jmodelica
 import jmodelica.jmi as jmi
-from jmodelica.initialization.ipopt import NLPInitialization
-from jmodelica.initialization.ipopt import InitializationOptimizer
-from jmodelica.simulation.sundials import TrajectoryLinearInterpolation
-from jmodelica.simulation.sundials import SundialsDAESimulator
-from jmodelica.optimization import ipopt
 from jmodelica.compiler import OptimicaCompiler
 
 import numpy as N
-import scipy as S
-import scipy.optimize as opt
-import ctypes as ct
 import matplotlib.pyplot as plt
 </programlisting>
 
@@ -554,11 +548,8 @@ import matplotlib.pyplot as plt
         <programlisting language="python"># Create a Modelica compiler instance
 oc = OptimicaCompiler()
     
-# Compile the stationary initialization model into a DLL
-oc.compile_model("CSTR.mo", "CSTR.CSTR_Init", target='ipopt')
-
-# Load a model instance into Python
-init_model = jmi.Model("CSTR_CSTR_Init")
+# Compile the stationary initialization model into a DLL and load it
+init_model = oc.compile_model("CSTR.mo", "CSTR.CSTR_Init", target='ipopt')
 </programlisting>
 
         <para>At this point, you may open the file CSTR.mo, containing the
@@ -574,32 +565,21 @@ init_model = jmi.Model("CSTR_CSTR_Init")
       <section>
         <title>Solve the DAE initialization problem</title>
 
-        <para>Next, we create an object from the class DAEInitializationOpt,
-        which represent an optimization problem for finding an initial
-        solution of the DAE system. Also, we create an object for solving this
-        problem using Ipopt.</para>
-
-        <programlisting language="python"># Create DAE initialization object.
-init_nlp = NLPInitialization(init_model)
-    
-# Create an Ipopt solver object for the DAE initialization system
-init_nlp_ipopt = InitializationOptimizer(init_nlp)
-</programlisting>
-
         <para>In the next step, we would like to specify the first operating
         point, A, by means of a constant input cooling temperature, and then
-        solve the initialization problem.</para>
+        solve the initialization problem assuming that all derivatives are
+        zero.</para>
 
         <programlisting language="python"># Set inputs for Stationary point A
 Tc_0_A = 250
 init_model.set_value('Tc',Tc_0_A)
     
 # Solve the DAE initialization system with Ipopt
-init_nlp_ipopt.init_opt_ipopt_solve()
+(init_model, init_result) = initialize(init_model)
     
 # Store stationary point A
-c_0_A = init_model.get_value('c')
-T_0_A = init_model.get_value('T')
+c_0_A = init_result.get_variable_data('c').x[0]
+T_0_A = init_result.get_variable_data('T').x[0]
 
 # Print some data for stationary point A 
 print(' *** Stationary point A ***') 
@@ -609,23 +589,27 @@ print('state T = %f' % T_0_A)
 </programlisting>
 
         <para>Notice how the function set_value is used to set the value of
-        the control input. Once the solution has been computed in the call to
-        init_opt_ipopt_solve, the result is available in the model, recall
-        that the model was passed by reference to the algorithm object, and
-        can be retrieved by calling the function get_value. Look carefully at
-        the printouts in the Python shell to see a printout of the stationary
-        values. The procedure is now repeated for operating point B:</para>
+        the control input. The initialization algorithm is invoked by calling
+        the function 'initialize', which returns the initialization result in
+        the object 'init_result'. The 'initialize' function relies on the
+        algorithm Ipopt for computing the solution of the initialization
+        problem. The values of the states corresponding to grade A can then be
+        extracted from the result object. Look carefully at the printouts in
+        the Python shell to see a printout of the stationary values. Display
+        the help text for the 'initialize' function and take a moment to look
+        through it. The procedure is now repeated for operating point
+        B:</para>
 
         <programlisting language="python"># Set inputs for Stationary point B
 Tc_0_B = 280
 init_model.set_value('Tc',Tc_0_B)
         
 # Solve the DAE initialization system with Ipopt
-init_nlp_ipopt.init_opt_ipopt_solve()
+(init_model, init_result) = initialize(init_model)
     
 # Store stationary point B
-c_0_B = init_model.get_value('c')
-T_0_B = init_model.get_value('T')
+c_0_B = init_result.get_variable_data('c').x[0]
+T_0_B = init_result.get_variable_data('T').x[0]
 
 # Print some data for stationary point B 
 print(' *** Stationary point B ***') 
@@ -634,8 +618,8 @@ print('state c = %f' % c_0_B)
 print('state T = %f' % T_0_B)
 </programlisting>
 
-        <para>We have now used Ipopt to compute two stationary points for the
-        system based on constant control inputs.</para>
+        <para>We have now computed two stationary points for the system based
+        on constant control inputs.</para>
       </section>
 
       <section>
@@ -847,14 +831,14 @@ print('state T = %f' % T_0_B)
         convenient to set up a dedicated model for computation of initial
         trajectories. In the model CSTR.CSTR_Init_Optimization in the CSTR.mo
         file, a step input is filtered through a first order filter in order
-        to generate a smooth input for the CSTR system. the filtering is done
+        to generate a smooth input for the CSTR system. The filtering is done
         in order not to excite unstable modes of the system, and in particular
         to avoid sudden ignition. Notice also that the variable names in the
         initialization model must match those in the optimal control model.
         Therefore, also the cost function is included in the initialization
         model.</para>
 
-        <para>Start by creating a Trajectory object that can be passed to the
+        <para>Start by creating an input trajectory to be passed to the
         simulator:</para>
 
         <programlisting language="python"># Create the time vector
@@ -863,20 +847,15 @@ t = N.linspace(1,150.,100)
 # target input value is here increased in order to get a
 # better initial guess.
 u = (Tc_0_B+35)*N.ones(N.size(t,0))
-u = N.array([u])
-u = N.transpose(u)
-# Create a Trajectory object that can be passed to the simulator
-u_traj = TrajectoryLinearInterpolation(t,u)
+# Create a matrix where the first column is time and the second column represents
+# the input trajectory.
+u_traj = N.transpose(N.vstack((t,u)))
 </programlisting>
 
         <para>Next, compile the model and set model parameters:</para>
 
-        <programlisting language="python"># Comile the Modelica model first to C code and
-# then to a dynamic library
-oc.compile_model("CSTR.mo","CSTR.CSTR_Init_Optimization",target='ipopt')
-
-# Load the dynamic library and XML data
-init_sim_model=jmi.Model("CSTR_CSTR_Init_Optimization")
+        <programlisting language="python"># Compile the optimization initialization model and load the DLL
+init_sim_model = oc.compile_model("CSTR.mo","CSTR.CSTR_Init_Optimization",target='ipopt')
 
 # Set model parameters
 init_sim_model.set_value('cstr.c_init',c_0_A)
@@ -887,40 +866,24 @@ init_sim_model.set_value('T_ref',T_0_B)
 init_sim_model.set_value('Tc_ref',u_traj.eval(0.)[0])
 </programlisting>
 
-        <para>Having set up the simulation model, we need to compute
-        consistent initial conditions. This is done using the same algorithm
-        as was used above when computing stationary points:</para>
+        <para>Having initialized the model parameters, we can simulate the
+        model using the 'simulate' function.</para>
 
-        <programlisting language="python"># Create DAE initialization object.
-init_nlp = NLPInitialization(init_sim_model)
-    
-# Create an Ipopt solver object for the DAE initialization system
-init_nlp_ipopt = InitializationOptimizer(init_nlp)
-        
-# Solve the DAE initialization system with Ipopt
-init_nlp_ipopt.init_opt_ipopt_solve()
+        <programlisting language="python">(init_sim_model,res) = simulate(init_sim_model,alg_args={'start_time':0.,'final_time':150.,
+                                                         'input_trajectory':u_traj})
 </programlisting>
 
-        <para>Finally, we create a simulator object and simulate the system
-        using the DAE solver SUNDIALS:</para>
+        <para>The function 'simulation' first computes consistent initial
+        conditions and then simulates the model in the interval 0 to 150
+        seconds with the input trajectory specified by 'u_traj'. Notice that
+        the arguments to the simulation function is specified in a Python
+        dictionary. Take a moment to read the interactive help for the
+        'simulate' function.</para>
 
-        <programlisting language="python"> # Create a simulator
- simulator = SundialsDAESimulator(init_sim_model, verbosity=3, start_time=0.0, \
-                                     final_time=150, time_step=0.01,input=u_traj)
- # Run simulation
- simulator.run()
-    
- # Write data to file 
- simulator.write_data()
-</programlisting>
+        <para>The simulation result is returned in the output argument 'res',
+        from which you may now retrieve trajectories for plotting:</para>
 
-        <para>In the last command, the simulation result was written to file.
-        We may now load the file and plot the simulated trajectories:</para>
-
-        <programlisting language="python"># Load the file we just wrote to file
-res = jmodelica.io.ResultDymolaTextual('CSTR_CSTR_Init_Optimization_result.txt')
-
-# Extract variable profiles
+        <programlisting language="python"># Extract variable profiles
 c_init_sim=res.get_variable_data('cstr.c')
 T_init_sim=res.get_variable_data('cstr.T')
 Tc_init_sim=res.get_variable_data('cstr.Tc')
@@ -949,17 +912,14 @@ plt.show()
 
         <para>Look at the plots and make sure you understand the effect of the
         filter. Think about alternative, better ways to chose the input
-        profile. Also, try to increase the value of 35 added to the target
-        input value: how much can you increase this value without experiencing
-        sudden ignition of the reactor?</para>
+        profile. Also, try to increase the value 35 that was added to the
+        target input: how much can you increase this value without
+        experiencing sudden ignition of the reactor?</para>
 
         <para>Once the initial guess is generated, we compile the model
         containing the optimal control problem:</para>
 
-        <programlisting language="python">oc.compile_model("CSTR.mo", "CSTR.CSTR_Opt", target='ipopt')
-
-cstr = jmi.Model("CSTR_CSTR_Opt")
-</programlisting>
+        <programlisting language="python">cstr = oc.compile_model("CSTR.mo", "CSTR.CSTR_Opt", target='ipopt')</programlisting>
 
         <para>We will now initialize the parameters of the model so that their
         values correspond to the optimization objective of transferring the
@@ -976,43 +936,18 @@ cstr.set_value('cstr.c_init',c_0_A)
 cstr.set_value('cstr.T_init',T_0_A)
 </programlisting>
 
-        <para>Now we create objects representing the optimization problem
-        itself and the problem connected to the Ipopt solver. Also, the
-        initial guess computed above is used to initialize the optimization
-        problem:</para>
-
-        <programlisting language="python"># Initialize the mesh
-n_e = 150 # Number of elements 
-hs = N.ones(n_e)*1./n_e # Equidistant points
-n_cp = 3; # Number of collocation points in each element
-    
-# Create an NLP object
-nlp = ipopt.NLPCollocationLagrangePolynomials(cstr,n_e,hs,n_cp)
-
-# Use the simulated trajectories to initialize the model
-nlp.set_initial_from_dymola(res, hs, 0, 0)
-    
-# Create an Ipopt NLP object
-nlp_ipopt = ipopt.CollocationOptimizer(nlp)
-</programlisting>
-
-        <para>In order to create an instance of the optimization problem, we
-        need to specify the mesh on which the optimization is done. The
-        simultaneous optimization algorithm is based on a collocation metod
-        that corresponds to a fixed step implicit Runge-Kutta scheme, where
-        the mesh defines the length of each step. Also, the number of
-        collocation points in each element, or step, needs to be provided.
-        This number corresponds to the order of the Runge-Kutta scheme. The
+        <para>In order to solve the optimization problem, we need to specify
+        the mesh on which the optimization is performed. The simultaneous
+        optimization algorithm is based on a collocation method that
+        corresponds to a fixed step implicit Runge-Kutta scheme, where the
+        mesh defines the length of each step. Also, the number of collocation
+        points in each element, or step, needs to be provided. This number
+        corresponds to the stage order of the Runge-Kutta scheme. The
         selection of mesh is analogous to the choice of step length in a
         one-step algorithm for solving differential equations. Accordingly,
         the mesh needs to be fine-grained enough to ensure sufficiently
-        accurate approximation of the differential constraint. Selection of
-        mesh and the number of collocation points is somewhat arbitrary, but
-        it is important to understand the trade-off involved: fewer element
-        may be traded for a higher order method. It is also worth noticing
-        that the collocation scheme implemented in the algorithm used here is
-        implicit, which grants for stable and robust numerical properties. For
-        an overview of simultaneous optimization algorithms, see [2].</para>
+        accurate approximation of the differential constraint. For an overview
+        of simultaneous optimization algorithms, see [2].</para>
 
         <para>Collocation-based optimization algorithms often require a good
         initial guess in order to achieve fast convergence. Also, if the
@@ -1021,51 +956,33 @@ nlp_ipopt = ipopt.CollocationOptimizer(nlp)
         see the CSTR.mo file for an example for this. Notice that
         initialization in the case of collocation-based optimization methods
         means initialization of all the control and state profiles as a
-        function of time. In some cases, as in the CSTR example treated in
-        this tutorial, it is sufficient to use constant profiles. For this
-        purpose, the 'initialGuess' attribute works well. In more difficult
-        cases, however, it may be necessary to initialize the profiles using
-        simulation data, where an initial guess for the input(s) has been used
-        to generate the profiles for the dependent variables. This approach
-        for initializing the optimization problem is also supported, but is
-        not covered in this tutorial.</para>
+        function of time. In some cases, it is sufficient to use constant
+        profiles. For this purpose, the 'initialGuess' attribute works well.
+        In more difficult cases, however, it may be necessary to initialize
+        the profiles using simulation data, where an initial guess for the
+        input(s) has been used to generate the profiles for the dependent
+        variables. This approach for initializing the optimization problem is
+        used in this tutorial.</para>
 
         <para>We are now ready to solve the actual optimization problem. This
-        is done by invoking the method opt_sim_ipopt_solve on the nlp_ipopt
-        object:</para>
+        is done by invoking the method optimize:</para>
 
-        <programlisting language="python"># Solve the optimization problem
-nlp_ipopt.opt_sim_ipopt_solve()
+        <programlisting language="python"># Initialize the mesh
+n_e = 100 # Number of elements 
+hs = N.ones(n_e)*1./n_e # Equidistant points
+n_cp = 3; # Number of collocation points in each element
+
+(cstr,res) = optimize(cstr,alg_args={'n_e':n_e,'hs':hs,'n_cp':n_cp,'init_traj':res})
 </programlisting>
 
         <para>You should see the output of Ipopt in the Python shell as the
         algorithm iterates to find the optimal solution. Ipopt should
         terminate with a message like 'Optimal solution found' or 'Solved to
-        an acceptable level' in order for an optimum to be found.</para>
-      </section>
-
-      <section>
-        <title>Saving and plotting the result</title>
-
-        <para>Before proceeding, let us save the optimization result to
-        file:</para>
-
-        <programlisting># Write to file
-nlp.export_result_dymola()
-</programlisting>
-
-        <para>This command will renders the file 'CSTR_CSTR_Opt_resutl.txt' to
-        be written to disk. The result file uses the Dymola textual result
-        file format, and accordingly, the result may be loaded into Dymola.
-        The file may also be loaded into the Python shell, as will be
-        demonstrated next.</para>
-
-        <para>In order to conveniently access the variable trajectories of the
-        result, we load the file into Python:</para>
-
-        <programlisting language="python"># Load the file we just wrote to file
-res = jmodelica.io.ResultDymolaTextual('CSTR_CSTR_Opt_result.txt')
-</programlisting>
+        an acceptable level' in order for an optimum to be found. Again, the
+        arguments to the algorithm (number of elements, number of collocation
+        points, element length vector and initial guess object) are given in a
+        Python dictionary. The optimization result is returned in the output
+        argument 'res'.</para>
 
         <para>We can now retrieve the trajectories of the variables that we
         intend to plot:</para>
@@ -1114,7 +1031,7 @@ plt.show()
 
           <mediaobject>
             <imageobject>
-              <imagedata fileref="images/cstr.svg" scalefit="1" width="70%"></imagedata>
+              <imagedata fileref="images/cstr.svg" scalefit="1" width="60%"></imagedata>
             </imageobject>
           </mediaobject>
         </figure>
@@ -1132,11 +1049,6 @@ plt.show()
             <para>Why is the input cooling temperature high in the beginning
             of the interval?</para>
           </listitem>
-
-          <listitem>
-            <para>Why is there a spike in the control profile at about
-            38s?</para>
-          </listitem>
         </orderedlist>
       </section>
 
@@ -1147,57 +1059,40 @@ plt.show()
         implies that the differential equation is approximated by a discrete
         time counterpart. The accuracy of the solution is dependent on the
         method of collocation and the number of elements. In order to assess
-        the accuracy of the optimization result, we may simulate the system
-        using a DAE solver using the optimal control profile as input. With
-        this approach, the state profiles are computed with high accuracy and
-        the result may then be compared with the profiles resulting from
-        optimization. The procedure for setting up and executing this
-        simulation is similar to above:</para>
+        the accuracy of the discretization, we may simulate the system using a
+        DAE solver using the optimal control profile as input. With this
+        approach, the state profiles are computed with high accuracy and the
+        result may then be compared with the profiles resulting from
+        optimization. Notice that this procedure does not verify the
+        optimality of the resulting optimal control profiles, but only the
+        accuracy of the discretization of the dynamics.</para>
+
+        <para>The procedure for setting up and executing this simulation is
+        similar to above:</para>
 
         <programlisting language="python"># Simulate to verify the optimal solution
 # Set up input trajectory
 t = Tc_res.t 
 u = Tc_res.x
-u = N.array([u])
-u = N.transpose(u)
-u_traj = TrajectoryLinearInterpolation(t,u)
+u_traj = N.transpose(N.vstack((t,u)))
     
 # Comile the Modelica model first to C code and
 # then to a dynamic library
-oc.compile_model("CSTR.mo","CSTR.CSTR",target='ipopt')
-
-# Load the dynamic library and XML data
-sim_model=jmi.Model("CSTR_CSTR")
+sim_model = oc.compile_model("CSTR.CSTR",curr_dir+"/files/CSTR.mo",target='ipopt')
 
 sim_model.set_value('c_init',c_0_A)
 sim_model.set_value('T_init',T_0_A)
-sim_model.set_value('Tc',u_traj.eval(0.)[0])
+sim_model.set_value('Tc',u[0])
 
-# Create DAE initialization object.
-init_nlp = NLPInitialization(sim_model)
-    
-# Create an Ipopt solver object for the DAE initialization system
-init_nlp_ipopt = InitializationOptimizer(init_nlp)
-        
-# Solve the DAE initialization system with Ipopt
-init_nlp_ipopt.init_opt_ipopt_solve()
-
-simulator = SundialsDAESimulator(sim_model, verbosity=3, start_time=0.0, \
-                                 final_time=150, time_step=0.01,input=u_traj)
-# Run simulation
-simulator.run()
-
-# Store simulation data to file    
-simulator.write_data() 
+(sim_model,res) = simulate(sim_model,compiler='optimica',
+                           alg_args={'start_time':0.,'final_time':150.,
+                                     'input_trajectory':u_traj})
 </programlisting>
 
         <para>Finally, we load the simulated data and plot it to compare with
         the optimized trajectories:</para>
 
-        <programlisting language="python"># Load the file we just wrote to file
-res = jmodelica.io.ResultDymolaTextual('CSTR_CSTR_result.txt')
-
-# Extract variable profiles
+        <programlisting language="python"># Extract variable profiles
 c_sim=res.get_variable_data('c')
 T_sim=res.get_variable_data('T')
 Tc_sim=res.get_variable_data('Tc')
@@ -1237,8 +1132,8 @@ plt.show()
 
           <mediaobject>
             <imageobject>
-              <imagedata fileref="images/cstr_opt_cmp.png" scalefit="1"
-                         width="70%"></imagedata>
+              <imagedata fileref="images/cstr_opt_cmp.svg" scalefit="1"
+                         width="60%"></imagedata>
             </imageobject>
           </mediaobject>
         </figure>

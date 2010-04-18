@@ -74,6 +74,7 @@ def run_demo(with_plots=True):
 """
 
     curr_dir = os.path.dirname(os.path.abspath(__file__));
+
     # Create a Modelica compiler instance
     oc = OptimicaCompiler()
     oc.set_boolean_option("enable_variable_scaling",True)
@@ -123,10 +124,11 @@ def run_demo(with_plots=True):
     # target input value is here increased in order to get a
     # better initial guess.
     u = (Tc_0_B+35)*N.ones(N.size(t,0))
+    # Create a matrix where the first column is time and the second column represents
+    # the input trajectory.
     u_traj = N.transpose(N.vstack((t,u)))
 
-    # Comile the Modelica model first to C code and
-    # then to a dynamic library
+    # Compile the optimization initialization model and load the DLL
     init_sim_model = oc.compile_model("CSTR.CSTR_Init_Optimization",curr_dir+"/files/CSTR.mo",target='ipopt')
 
     # Set model parameters
@@ -171,8 +173,6 @@ def run_demo(with_plots=True):
     # Solve optimal control problem    
     cstr = oc.compile_model("CSTR.CSTR_Opt", curr_dir+"/files/CSTR.mo", target='ipopt')
 
-    #cstr = jmi.Model("CSTR_CSTR_Opt")
-
     cstr.set_value('Tc_ref',Tc_0_B)
     cstr.set_value('c_ref',c_0_B)
     cstr.set_value('T_ref',T_0_B)
@@ -184,7 +184,7 @@ def run_demo(with_plots=True):
     hs = N.ones(n_e)*1./n_e # Equidistant points
     n_cp = 3; # Number of collocation points in each element
 
-    (cstr,res) = optimize(cstr,alg_args={'n_e':n_e,'hs':hs,'n_cp':n_cp,'res':res})
+    (cstr,res) = optimize(cstr,alg_args={'n_e':n_e,'hs':hs,'n_cp':n_cp,'init_traj':res})
 
     # Extract variable profiles
     c_res=res.get_variable_data('cstr.c')

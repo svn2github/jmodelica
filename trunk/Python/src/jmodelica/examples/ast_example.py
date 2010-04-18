@@ -183,7 +183,8 @@ def run_demo(with_plots=True):
     print("Number of differentiated variables: %d" % filter_flat_model.numDifferentiatedRealVariables())
     print("Number of algebraic variables:      %d" % filter_flat_model.numAlgebraicRealVariables())
     print("Number of equations:                %d" % filter_flat_model.numEquations())
-    print("Number of initial:                  %d" % filter_flat_model.numInitialEquations())
+    print("Number of initial equation:         %d" % filter_flat_model.numInitialEquations())
+
 
 
 

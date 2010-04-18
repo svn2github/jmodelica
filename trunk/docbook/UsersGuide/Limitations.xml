@@ -11,7 +11,7 @@
   <title>Limitations</title>
 
   <para>This page lists the current limitations of the JModelica.org platform,
-  as of version 1.0b2. The development of the platform can be followed at the
+  as of version 1.2.0. The development of the platform can be followed at the
   Trac site, where future releases and associated features are planned. In
   order to get an idea of the current Modelica compliance of the compiler
   front-end, you may look at the associated test suite. All models with a test
@@ -20,36 +20,66 @@
   <itemizedlist>
     <listitem>
       <para>The Modelica 3.1 compliance of the front-end is limited; the
-      following features are currently not supported: </para>
+      following features are currently not supported:</para>
 
       <itemizedlist>
         <listitem>
-          <para>Vectors and arrays </para>
+          <para>If expressions are supported, but not:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>When clauses</para>
+            </listitem>
+
+            <listitem>
+              <para>If equations</para>
+            </listitem>
+          </itemizedlist>
         </listitem>
 
         <listitem>
-          <para>User defined/external functions </para>
+          <para>Integer and boolean variables (integer and boolean parameters
+          and constants are supported)</para>
         </listitem>
 
         <listitem>
-          <para>Algorithms </para>
+          <para>Strings</para>
         </listitem>
 
         <listitem>
-          <para>Hybrid constructs (if, when etc.) </para>
+          <para>Enumerations</para>
         </listitem>
 
         <listitem>
-          <para>Generics (redeclare constructs) is only partially supported
-          </para>
+          <para>Generics (redeclare constructs) is only partially
+          supported</para>
         </listitem>
 
         <listitem>
-          <para>Overloaded operators (chapter 14) </para>
+          <para>Limitations apply to the use of functions with arguments with
+          unknown array sizes </para>
         </listitem>
 
         <listitem>
-          <para>Stream connectors (chapter 15) </para>
+          <para>External functions</para>
+        </listitem>
+
+        <listitem>
+          <para>The following built-in functions are not supported: sign(v),
+          Integer(e), String(...), div(x,y), mod(x,y), rem(x,y), ceil(x),
+          floor(x), integer(x), delay(...), cardinality(), semiLinear(...),
+          Subtask.decouple(v), initial(), terminal(), smooth(p, expr),
+          sample(start, interval), pre(y), edge(b), reinit(x, expr),
+          scalar(A), vector(A), matrix(A), diagonal(v), product(...),
+          outerProduct(v1, v2), symmetric(A), skew(x). </para>
+        </listitem>
+
+        <listitem>
+          <para>Overloaded operators (chapter 14)</para>
+        </listitem>
+
+        <listitem>
+          <para>Stream connectors (chapter 15)</para>
         </listitem>
 
         <listitem>
@@ -61,18 +91,22 @@
 
     <listitem>
       <para>In the Optimica front-end the following constructs are not
-      supported: </para>
+      supported:</para>
 
       <itemizedlist>
         <listitem>
           <para>Annotations for transcription information</para>
+        </listitem>
+
+        <listitem>
+          <para>Minimum time problems</para>
         </listitem>
       </itemizedlist>
     </listitem>
 
     <listitem>
       <para>The JModelica.org Model Interface (JMI) has the following
-      limiations: </para>
+      Limitations:</para>
 
       <itemizedlist>
         <listitem>
@@ -89,17 +123,6 @@
           specification</para>
         </listitem>
       </itemizedlist>
-    </listitem>
-
-    <listitem>
-      <para>The simulation capabilities are very limited. Only ODE systems can
-      be simulated, limitations above apply.</para>
-    </listitem>
-
-    <listitem>
-      <para>The Python interface to the compiler and to the JMI interface is
-      under development and is likely to change. Feedback is
-      appreciated.</para>
     </listitem>
   </itemizedlist>
 </chapter>
