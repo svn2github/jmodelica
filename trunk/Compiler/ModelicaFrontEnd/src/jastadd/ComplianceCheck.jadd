@@ -34,11 +34,21 @@ aspect ComplianceCheck {
 			warning("Using while statements is currently not supported when compiling with CppAD, and can give erroneous results");
 	}
 	
-	public void InstRecord.complianceCheck() {
-		if (type().isArray())
-			warning("Using arrays of records is currently not supported when compiling with CppAD, and can give erroneous results");
+	public void InstAccess.complianceCheck() {
+		if (myInstComponentDecl().isRecord() && hasFArraySubscripts() && inFunction() && 
+				!getFArraySubscripts().variability().lessOrEqual(fConstant())) {
+			warning("Using arrays of records with indices of higher than parameter variability is currently not supported when compiling with CppAD");
+		}
 	}
 	
+	public void InstExternal.complianceCheck() {
+		if (!hasFExternalLanguage() || !getFExternalLanguage().supportedLanguage())
+			compliance("External functions are not supported");
+	}
+	
+	syn boolean FExternalLanguage.supportedLanguage() = false;
+	eq FBuiltinExternalLanguage.supportedLanguage()   = true;
+	eq FUnknownExternalLanguage.supportedLanguage()   = true;  // Avoid duplicate errors
 
 	public void FUnsupportedEquation.collectErrors() {
 		compliance("Unsupported equation type");
