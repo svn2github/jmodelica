@@ -147,6 +147,10 @@ http://www.jmodelica.org/assimulo
 
 4. FMI compliance
 
+The Functional Mockup Interface (FMI) standard is partially supported. FMI
+compliant model meta data XML document can be exported, support for the FMI
+C model execution interface is not yet supported.
+
 5. XML model export
 
 Models are now exported in XML format. The XML documents contain information 
