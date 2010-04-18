@@ -160,15 +160,18 @@ aspect FlatVariability {
 		}
 	}
 
-	// TODO: Take care of IDENT in range-expr without the 'in rang-expr'
-	syn FTypePrefixVariability FForIndex.variability() {
-		if (hasFExp()) {
-			return getFExp().variability();
-		} else {
-			return null;
-		}
-	}
+	syn FTypePrefixVariability FForIndex.variability() = hasFExp() ? getFExp().variability() : fParameter();
 
+	syn FTypePrefixVariability FSubscript.variability() = fParameter();
+	eq FExpSubscript.variability() = getFExp().variability();
+	
+	syn FTypePrefixVariability FArraySubscripts.variability() {
+		FTypePrefixVariability total = fConstant();
+		for (FSubscript arg : getFSubscripts()) 
+			total = total.combine(arg.variability());
+		return total;
+	}
+	
 	eq FLinspace.variability() = getStartExp().variability().combine(getStopExp().variability());
 	
 	eq FSubscriptedExp.variability()  = combineFExpListVariability(getArray().iterable());
