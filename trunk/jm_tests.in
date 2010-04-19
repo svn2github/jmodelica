@@ -28,6 +28,13 @@ BUILD=@abs_builddir@
 if [[ "${JAVA_HOME}" == "" ]]; then
   JAVA_HOME=@_JAVA_HOME_@
 fi
+WITH_IPOPT=@WITH_IPOPT@
+if [[ "@SUNDIALS_HOME@" == "" ]]; then
+  WITH_SUNDIALS=false
+else
+  WITH_SUNDIALS=true
+fi
+ECLIPSE_HOME=@ECLIPSE_HOME@
 
 # Variables that are relative to others
 CPPAD_HOME=${JMODELICA_HOME}/ThirdParty/CppAD/
@@ -61,6 +68,13 @@ function python_tests() {
   TEST_DIR=$(mktemp -dqt)
   TESTS="$(find ${JMODELICA_HOME}/Python/jmodelica/tests -name \*.py | grep test_)"
   PATTERN=----------------------------------------------------------------------
+  TAGS="-a stddist"
+  if [[ "${WITH_IPOPT}" == "true" ]]; then
+    TAGS="${TAGS} -a ipopt"
+    if [[ "${WITH_SUNDIALS}" == "true" ]]; then
+      TAGS="${TAGS} -a assimulo"
+    fi
+  fi
   print_name Python
   case ${OUTPUT} in
     v)
@@ -68,7 +82,7 @@ function python_tests() {
         cd ${TEST_DIR}
         for TEST in ${TESTS}; do
 	  echo ${TEST} | sed -e 's!^.*jmodelica.tests.!Running !'
-          nosetests -a stddist -a assimulo -a ipopt -v ${TEST}
+          nosetests ${TAGS} -v ${TEST}
         done
       fi
       ;;
@@ -76,7 +90,7 @@ function python_tests() {
       if build_jmodelica 2> /dev/null > /dev/null; then
         cd ${TEST_DIR}
         for TEST in ${TESTS}; do
-          nosetests -a stddist -a assimulo -a ipopt -v ${TEST} 2>&1 \
+          nosetests ${TAGS} -v ${TEST} 2>&1 \
 	    | sed -n -e 's!^OK$!PASSED!ip' -e 's!^FAILED !TEST FAILED!p'
         done | filter_python_separate
       else
@@ -89,7 +103,7 @@ function python_tests() {
         cd ${TEST_DIR}
         for TEST in ${TESTS}; do
           echo ${TEST} | sed -e 's!^.*jmodelica.tests.!Running !'
-          nosetests -a stddist -a assimulo -a ipopt -v ${TEST} 2>&1 \
+          nosetests ${TAGS} -v ${TEST} 2>&1 \
 	    | egrep -v '^Exception .* ignored$' \
 	    | grep -B1 -A500 -e${PATTERN} \
 	    | sed -e 's!^OK$!PASSED!' -e 's!^FAILED !TEST FAILED!'
