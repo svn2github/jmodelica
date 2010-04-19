@@ -304,6 +304,11 @@ public class CGenerator extends GenericGenerator {
 	
 	
 	/**
+	 * \brief Returns the string denoting the beginning of the copyright blurb.
+	 */
+	protected String startOfBlurb() { return "/*"; }
+	
+	/**
 	 * Constructor.
 	 * 
 	 * @param expPrinter Printer object used to generate code for expressions.
