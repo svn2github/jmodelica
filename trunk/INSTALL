@@ -109,7 +109,7 @@ need to be installed. The JModelica.org has been tested on Python 2.5
 and Python 2.6. For Windows users, the python(x,y) distribution
 (www.pythonxy.com), containing NumPy, SciPy and Matplotlib, is
 recommended. Notice that the JModelica.org-SDK and JModelica.org
-installers for Windows will install JPype, lxml and Nose
+installers for Windows will install JPype, lxml, Cython and Nose
 automatically. Linux and Mac OS X users need to install these packages
 manually.
 
