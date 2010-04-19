@@ -74,21 +74,51 @@ model ArrayOfRecords_Warn
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.WarningTestCase(
          name="ArrayOfRecords_Warn",
-         description="Warning for using array of records",
+         description="",
          errorMessage="
 1 errors found:
 Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-At line 79, column 4:
-  Using arrays of records is currently not supported when compiling with CppAD, and can give erroneous results
+At line 79, column 3:
+  Using arrays of records with indices of higher than parameter variability is currently not supported when compiling with CppAD
 ")})));
+
+ function f
+  input Real i;
+  output R[2] a;
+ algorithm
+  a := {R(1,2), R(3,4)};
+  a[integer(i)].a := 0;
+ end f;
 
  record R
   Real a;
   Real b;
  end R;
  
- R x[2];
+ R x[2] = f(1);
 end ArrayOfRecords_Warn;
+
+
+model ExternalFunction_ComplErr
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ComplianceErrorTestCase(
+         name="ExternalFunction_ComplErr",
+         description="",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 105, column 3:
+  External functions are not supported
+")})));
+
+ function f
+  output Real x;
+  external "C";
+ end f;
+ 
+ Real x = f();
+end ExternalFunction_ComplErr;
+
 
 
 end ComplianceTests;

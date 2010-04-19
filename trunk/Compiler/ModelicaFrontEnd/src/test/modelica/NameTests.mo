@@ -149,7 +149,6 @@ Semantic error at line 100, column 4:
 
 model NameTest5_Err
   
-  
    annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.ErrorTestCase(name="NameTest5_Err",
                                                description="Basic test of name lookup",
