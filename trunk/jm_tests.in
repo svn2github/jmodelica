@@ -162,13 +162,15 @@ function ant_test() {
 }
 
 function build_jmodelica() {
-  if [[ -d ${BUILD} ]]; then
-    cd ${BUILD}
-    ${CLEAN_BUILD}
-    make && make install
-  else
-    echo Cannot build, build dir does not exist!
-    exit 1
+  if [[ "${NO_BUILD_JMODELICA}" != "1" ]]; then
+    if [[ -d ${BUILD} ]]; then
+      cd ${BUILD}
+      ${CLEAN_BUILD}
+      make && make install
+    else
+      echo Cannot build, build dir does not exist!
+      exit 1
+    fi
   fi
 }
 
@@ -184,6 +186,7 @@ function switch_test_flags() {
   done
 }
 
+# === Main ===
 OUTPUT=n
 i=0
 for a in ${tests}; do
@@ -211,6 +214,9 @@ for a in ${DEFAULT_ARGS} $*; do
           CLEAN_BUILD="make clean"
         fi
         ;;
+      i)
+        NO_BUILD_JMODELICA=1
+        ;;
       h)
         echo "usage: tests [-ajmopvnqcCh]"
         echo "The -ajmop options each control a set of tests, and select all"
@@ -226,7 +232,8 @@ for a in ${DEFAULT_ARGS} $*; do
         echo "  -n  Normal output, only show results and compilation errors"
         echo "  -q  Quiet output, only show brief resuls and compilation errors"
         echo "  -c  Do a clean before junit tests"
-        echo "  -C  Do a clean before each test"
+        echo "  -C  Do a clean before each test suite"
+        echo "  -i  Do not re-build before python tests"
         echo "  -h  Print this help and exit"
 	exit
         ;;
@@ -245,6 +252,11 @@ for a in ${tests}; do
 done
 if [[ "${ANY_ON}" == 0 ]]; then
   switch_test_flags ${DEFAULT_TESTS}
+fi
+
+# If on Windows, inform user about bug in ticket #766
+if [[ "$(uname | sed -n -e 's!^MINGW!1!p')" != "" ]]; then
+  echo Note: If modelica or optimica tests seem to hang, press enter a couple of times.
 fi
 
 for a in ${tests}; do
