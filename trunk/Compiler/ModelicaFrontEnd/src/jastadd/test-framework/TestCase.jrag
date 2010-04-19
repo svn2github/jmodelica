@@ -19,8 +19,13 @@ import java.util.Iterator;
 aspect TestCases {
 
 /**
+ * \brief base class for test cases.
+ * 
+ * Note that for each attribute (e.g. "attributeName") in the test case 
+ * annotation, there must be a corresponding method (e.g. "setAttributeName()") 
+ * in that subclass of TestCase.
+ * 
  * @author jakesson
- *
  */
 abstract public class TestCase {
 

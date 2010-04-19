@@ -81,6 +81,10 @@ public abstract class CodeGenTestCase extends TestCase {
 		this.genCodeFileName = "";
 		this.resultOnFile = false;
 	}
+	
+	public void setGeneratedCode(String genCode) {
+		setGenCode(genCode);
+	}
 
 	public String getGenCodeFileName() {
 		return genCodeFileName;

@@ -17,28 +17,20 @@
 package XMLCodeGenTests
 
 
-  // TODO: Remove this test once a real test is added
-  model DummyTest
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="DummyTest",
-         description="",
-         flatModel="
-fclass XMLCodeGenTests.DummyTest
-end XMLCodeGenTests.DummyTest;
-")})));
 
-  end DummyTest;
+model RemoveCopyright
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.XMLCodeGenTestCase(
+         name="RemoveCopyright",
+         description="Test that licence tag is filtered out",
+         template="<!-- test copyright blurb --> test",
+         generatedCode="test"
+)})));
+end RemoveCopyright;
+
+
 
   model XMLCodeGenTest1
-    	  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.XMLCodeGenTestCase(name="XMLCodeGenTest1",
-        description="Test of XML code generation",
-        template = 
-        "",
-        generatedCode="")})));
-  
-  
   	parameter Real rp1=1;
   	parameter Real rp2=rp1;
     parameter Real rp3(start=1);
