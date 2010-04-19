@@ -183,7 +183,7 @@ model = Model('CSTR_CSTR_Opt')
     functionality on a model of an electric circuit. The model is depicted in
     Figure (RLC.png) and consists of resistances, inductors and a capacitor.
     The circuit is connected to a voltage source which generates a square-wave
-    with an amplitude of 1.0 and a frequency of 1 Hz. This model is written in
+    with an amplitude of 1.0 and a frequency of 0.6 Hz. This model is written in
     Modelica code and saved in the file RLC_Circuit.mo and is depicted in
     below.</para>
 
@@ -213,7 +213,7 @@ import pylab as P</programlisting>
     then passed down in the following way,</para>
 
     <programlisting>(jmi_mod, res) = simulate(model='RLC_Circuit', file_name='RLC_Circuit.mo',
-                          alg_args={'start_time':0.0,'final_time':30.0,'num_communication_points':0})
+                          alg_args={'start_time':0.0,'final_time':20.0,'num_communication_points':0})
 </programlisting>
 
     <para>The return arguments from 'simulate' are the compiled model and the
