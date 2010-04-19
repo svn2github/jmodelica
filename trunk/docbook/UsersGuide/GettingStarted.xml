@@ -179,7 +179,84 @@ model = Model('CSTR_CSTR_Opt')
   <section>
     <title>Simulation of models</title>
 
-    <para></para>
+    <para>This example focus on how to use the high-level simulation
+    functionality on a model of an electric circuit. The model is depicted in
+    Figure (RLC.png) and consists of resistances, inductors and a capacitor.
+    The circuit is connected to a voltage source which generates a square-wave
+    with an amplitude of 1.0 and a frequency of 1 Hz. This model is written in
+    Modelica code and saved in the file RLC_Circuit.mo and is depicted in
+    below.</para>
+
+    <figure>
+      <title>Electric Circuit</title>
+
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="Images/RLC.png" scale="100"></imagedata>
+        </imageobject>
+      </mediaobject>
+    </figure>
+
+    <para>To use the functionality provided by the JModelica.org platform they
+    first have to be imported into the Python script. So we start by importing
+    the following:</para>
+
+    <programlisting language="Python">from jmodelica import simulate
+import pylab as P</programlisting>
+
+    <para>The method 'simulate' is the high-level simulation method and the
+    'pylab' package is used here for plotting.</para>
+
+    <para>Next, we need to provide the 'simulate' method with information
+    about which model we would like to simulate and where it is stored. We
+    also need information about the simulation interval. The information is
+    then passed down in the following way,</para>
+
+    <programlisting>(jmi_mod, res) = simulate(model='RLC_Circuit', file_name='RLC_Circuit.mo',
+                          alg_args={'start_time':0.0,'final_time':30.0,'num_communication_points':0})
+</programlisting>
+
+    <para>The return arguments from 'simulate' are the compiled model and the
+    simulation results. Here 'alg_args' are the arguments for the algorithm
+    stored in a dictionary. The 'num_communication_points' represents the
+    number of communication points stored by the algorithm. The default is 500
+    points and when set to zero (0), the internal steps calculated by the
+    algorithm are stored. If the problem requires that the default options in
+    the specific solver needs to be changed, they should be passed down in a
+    dictionary called 'solver_args'. Typically these options can be the
+    tolerances. Using the default simulation package, Assimulo, information
+    regarding which algorithms are supported and the solver arguments can be
+    found here, http://www.jmodelica.org/assimulo . The default solver is IDA.
+    </para>
+
+    <para>After a successful simulation the statistics are printed in the
+    prompt and the results are stored in the variable 'res'. To view the
+    result, we have to retrieve information about the variables we are
+    interested of. This is easily done in the following way, </para>
+
+    <programlisting>square_y = res.get_variable_data('y')
+resistor_v = res.get_variable_data('resistor.v')
+inductor1_i = res.get_variable_data('inductor1.i')
+</programlisting>
+
+    <para>And then plotted with the help from pylab,</para>
+
+    <programlisting>P.plot(square_y.t, square_y.x, resistor_v.t, resistor_v.x, inductor1_i.t, inductor1_i.x)    
+P.legend(('square.y','resistor.v','inductor1.i'))
+P.show()
+</programlisting>
+
+    <para>The simulation result is shown in the figure below:</para>
+
+    <figure>
+      <title>Simulation result</title>
+
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="Images/Result_RLC.svg" width="60%"></imagedata>
+        </imageobject>
+      </mediaobject>
+    </figure>
   </section>
 
   <section>
