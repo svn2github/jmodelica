@@ -902,7 +902,6 @@ bindist: bindistdir
 
 test: install
 	$(prefix)/jm_tests 
-	rm -rf test_tmp
 
 # clean-local: clean-jmi-examples clean-frontends
 
