@@ -31,7 +31,7 @@ try:
     from jmodelica.simulation.assimulo import write_data
     from jmodelica.simulation.assimulo import TrajectoryLinearInterpolation
     from Assimulo.Explicit_ODE import CVode
-except NameError:
+except NameError, ImportError:
     warnings.warn('Could not load Assimulo module. Check jmodelica.check_packages()')
 
 jm_home = os.environ.get('JMODELICA_HOME')
