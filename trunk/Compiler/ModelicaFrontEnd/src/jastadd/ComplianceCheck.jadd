@@ -66,6 +66,11 @@ aspect ComplianceCheck {
 		compliance("The " + getName() + "() function-like operator is not supported");
 	}
 	
+	public void FDotAddExp.complianceCheck() {
+		if (type().isString())
+			compliance("String concatenation is not supported");
+	}
+	
 	public void InstPrimitive.complianceCheck() {
 		super.complianceCheck();
 		if (isString())

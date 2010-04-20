@@ -97,9 +97,16 @@ aspect FlatTypeAnalysis {
 	
 	eq FUnaryExp.type()   = getFExp().type();
 	eq FArtmBinExp.type() = getLeft().type().looseNumericPromotion(getRight().type());
-	eq FAddExp.type()     = getLeft().type().numericPromotion(getRight().type());
 	eq FSubExp.type()     = getLeft().type().numericPromotion(getRight().type());
 	eq FNegExp.type()     = getFExp().type().isNumeric() ? getFExp().type() : fUnknownType();
+	
+	eq FDotAddExp.type() {
+		FType t = rawType();
+		return t.hasAdd() ? t : fUnknownType();
+	}
+	
+	syn FType FDotAddExp.rawType() = getLeft().type().looseTypePromotion(getRight().type());
+	eq FAddExp.rawType()           = getLeft().type().typePromotion(getRight().type());
 	
 	eq FNoEventExp.type() = getFExp().type();
 	
@@ -446,6 +453,15 @@ aspect TypePromotion {
 	 * An integer type combined with a real type results in a real type.
 	 */
 	syn FType FType.typePromotion(FType type) = typePromotion(type, false);
+
+	/**
+	 * \brief Combine two types to the broadest common denominator.
+	 * 
+	 * If scalar types are not compatible or if both are array and sizes 
+	 * doesn't match, the unknown type is returned.
+	 * An integer type combined with a real type results in a real type.
+	 */
+	syn FType FType.looseTypePromotion(FType type) = looseTypePromotion(type, false);
 	
 	/**
 	 * \brief Combine two types to the broadest common numeric denominator.
@@ -485,6 +501,24 @@ aspect TypePromotion {
 		if (!equivalentTo(type, allowUnknown))
 			return fUnknownType();
 		return isNumeric() ? numericPromotion(type, allowUnknown) : this;
+	}
+
+	/**
+	 * \brief Combine two types to the broadest common denominator.
+	 * 
+	 * If scalar types are not compatible or if both are array and sizes 
+	 * doesn't match, the unknown type is returned.
+	 * An integer type combined with a real type results in a real type.
+	 * If <code>allowUnknown</code> is <code>true</code>, then unknown 
+	 * lengths are considered equal to any length.
+	 */
+	syn FType FType.looseTypePromotion(FType type, boolean allowUnknown) {
+		if (isScalar() || type.isScalar() || dimensionCompatible(type, allowUnknown)) {
+			FType scalar = scalarType().typePromotion(type.scalarType());
+			return scalar.sizedType(isScalar() ? type.size() : size());
+		} else {
+			return fUnknownType();
+		}
 	}
 	
 	/**
