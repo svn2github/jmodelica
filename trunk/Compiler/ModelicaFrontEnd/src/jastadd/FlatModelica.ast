@@ -1058,3 +1058,8 @@ FMaxExp : FMinMaxExp;
  * \brief Sum built-in function.
  */
 FSumExp : FBuiltInFunctionCall ::= FExp;
+
+/**
+ * \brief Dummy node for unsupported built-in functions
+ */
+FUnsupportedBuiltIn : FBuiltInFunctionCall ::= <Name>;

@@ -58,6 +58,14 @@ aspect ComplianceCheck {
 		compliance("Unsupported expression type");
 	}
 	
+	public void FWhenStmt.complianceCheck() {
+		compliance("When statements are not supported");
+	}
+	
+	public void FUnsupportedBuiltIn.complianceCheck() {
+		compliance("The " + getName() + "() function-like operator is not supported");
+	}
+	
 	public void InstPrimitive.complianceCheck() {
 		super.complianceCheck();
 		if (isString())

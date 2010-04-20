@@ -910,6 +910,8 @@ aspect FlatExpressions {
 
 	public FIntegerExp FIntegerExp.flatten(FQName prefix) { return new FIntegerExp(getFExp().flatten(prefix)); }
 	
+	public FUnsupportedBuiltIn FUnsupportedBuiltIn.flatten(FQName prefix) { return null; }
+	
 	// These used to delegate to standard implementation for FExp.flatten(FQName).
 	public FScalar    FScalar.flatten(FQName prefix)    { return null; }
 	
