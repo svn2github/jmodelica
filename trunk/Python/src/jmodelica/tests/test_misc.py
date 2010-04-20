@@ -99,7 +99,7 @@ def test_initialize():
     assert N.abs(ddx.x[-1] - 0) < 1e-3, \
         "Wrong value of variable der(dx) using jmodelica.initialize."
 
-@testattr(stddist = True)
+@testattr(ipopt = True)
 def test_optimize():
     """ Test the jmodelica.optimize function using all default parameters. """
     mofile_pend = os.path.join('files','Pendulum_pack.mo')
@@ -181,7 +181,7 @@ def test_simulate_set_alg_arg():
     assert N.abs(resistor_v.x[-1] - 0.159255008028) < 1e-3, \
         "Wrong value in simulation result using jmodelica.simulate with rlc."
         
-@testattr(stddist = True)
+@testattr(assimulo = True)
 def test_simulate_set_probl_arg():
     """ Test that it is possible to set properties in assimulo and that an 
         exception is raised if the argument is invalid. """
@@ -192,7 +192,7 @@ def test_simulate_set_probl_arg():
                              model_rlc,
                              solver_args={'maxeter':10})   
         
-@testattr(stddist = True)
+@testattr(assimulo = True)
 def test_simulate_invalid_solver_arg():
     """ Test that the jmodelica.simulate function raises an exception for an 
         invalid solver argument.
