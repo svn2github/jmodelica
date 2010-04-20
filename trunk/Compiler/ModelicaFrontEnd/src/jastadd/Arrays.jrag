@@ -1536,6 +1536,16 @@ aspect ArrayHelpers {
 		}
 		
 		/**
+		 * \brief Check is the length in any dimension equals 0.
+		 */
+		public boolean isEmpty() {
+			for (int i = 0; i < size.length; i++)
+				if (size[i] == 0)
+					return true;
+			return false;
+		}
+		
+		/**
 		 * \brief Check if the lengths in the given dimension has a value (fix length or integer).
 		 */
 		protected boolean hasValue(int dim) {

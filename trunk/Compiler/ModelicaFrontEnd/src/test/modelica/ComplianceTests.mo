@@ -264,7 +264,7 @@ model UnsupportedBuiltins3_ComplErr
          name="UnsupportedBuiltins3_ComplErr",
          description="Compliance error for unsupported builtins",
          errorMessage="
-9 errors found:
+8 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 263, column 3:
   The semiLinear() function-like operator is not supported
@@ -302,6 +302,58 @@ Compliance error at line 271, column 3:
   reinit();
 end UnsupportedBuiltins3_ComplErr;
 
+
+model StringConcat_ComplErr
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ComplianceErrorTestCase(
+         name="StringConcat_ComplErr",
+         description="Compliance error for string concatenation",
+         errorMessage="
+6 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 308, column 9:
+  String variables are not supported
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 308, column 13:
+  String concatenation is not supported
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 309, column 12:
+  String variables are not supported
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 309, column 16:
+  String concatenation is not supported
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 310, column 12:
+  String variables are not supported
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 310, column 16:
+  String concatenation is not supported
+")})));
+
+ Real a = 1 + 2;
+ String b = "1" + "2";
+ String[2] c = { "1", "2" } .+ "3";
+ String[2] d = { "1", "2" } + { "3", "4" };
+end StringConcat_ComplErr;
+
+
+model EmptyArray_ComplErr
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ComplianceErrorTestCase(
+         name="EmptyArray_ComplErr",
+         description="Compliance error for empty arrays",
+         errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 341, column 7:
+  Array variables with dimensions of length 0 are not supported
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 341, column 16:
+  Empty arrays are not supported
+")})));
+
+ Real x[0,2] = ones(0, 2);
+end EmptyArray_ComplErr;
 
 
 end ComplianceTests;

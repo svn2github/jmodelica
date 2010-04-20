@@ -25,16 +25,19 @@ aspect ComplianceCheck {
 	public void ASTNode.complianceCheck() {}
 	
 	public void FIfWhenClause.complianceCheck() {
+		super.complianceCheck();
 		if (!getTest().variability().lessOrEqual(fParameter()))
 			warning("Using if statements is currently not supported when compiling with CppAD, and can give erroneous results");
 	}
 	
 	public void FWhileStmt.complianceCheck() {
+		super.complianceCheck();
 		if (!getTest().variability().lessOrEqual(fParameter()))
 			warning("Using while statements is currently not supported when compiling with CppAD, and can give erroneous results");
 	}
 	
 	public void InstAccess.complianceCheck() {
+		super.complianceCheck();
 		if (myInstComponentDecl().isRecord() && hasFArraySubscripts() && inFunction() && 
 				!getFArraySubscripts().variability().lessOrEqual(fParameter())) {
 			warning("Using arrays of records with indices of higher than parameter variability is currently not supported when compiling with CppAD");
@@ -42,6 +45,7 @@ aspect ComplianceCheck {
 	}
 	
 	public void InstExternal.complianceCheck() {
+		super.complianceCheck();
 		if (!hasFExternalLanguage() || !getFExternalLanguage().supportedLanguage())
 			compliance("External functions are not supported");
 	}
@@ -59,14 +63,17 @@ aspect ComplianceCheck {
 	}
 	
 	public void FWhenStmt.complianceCheck() {
+		super.complianceCheck();
 		compliance("When statements are not supported");
 	}
 	
 	public void FUnsupportedBuiltIn.complianceCheck() {
+		super.complianceCheck();
 		compliance("The " + getName() + "() function-like operator is not supported");
 	}
 	
 	public void FDotAddExp.complianceCheck() {
+		super.complianceCheck();
 		if (type().isString())
 			compliance("String concatenation is not supported");
 	}
@@ -78,13 +85,25 @@ aspect ComplianceCheck {
 		if (isInteger() && !variability().lessOrEqual(fParameter()))
 			compliance("Integer variables are not supported, only constants and parameters");
 		if (isBoolean() && !variability().lessOrEqual(fParameter()))
-			compliance("Boolean variables are not supported, only constants and parameters");		
+			compliance("Boolean variables are not supported, only constants and parameters");
+		if (size().isEmpty())
+			compliance("Array variables with dimensions of length 0 are not supported");
 	}
 
 	public void InstComponentDecl.complianceCheck() {
+		super.complianceCheck();
 		if (hasConditionalAttribute())
 			compliance("Conditional components are not supported");
 	}
 	
+	public void FExp.complianceCheck() {
+		super.complianceCheck();
+		if (size().isEmpty()) {
+			for (FExp ch : childFExps())
+				if (ch.size().isEmpty())
+					return;
+			compliance("Empty arrays are not supported");
+		}
+	}
 	
 }
