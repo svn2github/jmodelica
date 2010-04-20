@@ -22,6 +22,7 @@ jmodelica.optimize and jmodelica.simulate
 import warnings
 import numpy as N
 
+import jmodelica
 from jmodelica.optimization import ipopt
 from jmodelica.initialization.ipopt import NLPInitialization
 from jmodelica.initialization.ipopt import InitializationOptimizer
@@ -33,9 +34,11 @@ try:
     from Assimulo import Explicit_ODE
     from Assimulo.Implicit_ODE import *
     from Assimulo.Explicit_ODE import *
+    assimulo_present = True
 except:
     warnings.warn('Could not load Assimulo module. Check jmodelica.check_packages()')
     IDA = None
+    assimulo_present = False
 
 int = N.int32
 N.int = N.int32
@@ -79,7 +82,7 @@ class IpoptInitializationAlg(AlgorithmBase):
             self._set_alg_args(**alg_args)
         except TypeError, e:
             raise InvalidAlgorithmArgumentException(e)
-        
+
         self.nlp = NLPInitialization(model,self.stat)            
         self.nlp_ipopt = InitializationOptimizer(self.nlp)
             
@@ -158,7 +161,10 @@ class AssimuloAlg(AlgorithmBase):
             self._set_alg_args(**alg_args)
         except TypeError, e:
             raise InvalidAlgorithmArgumentException(e)
-
+        
+        if not assimulo_present:
+            raise Exception('Could not find Assimulo package. Check jmodelica.check_packages()')
+        
         if issubclass(self.solver, Implicit_ODE):
             if (N.size(self.input_trajectory)==0):
                 self.probl = JMIDAE(model)

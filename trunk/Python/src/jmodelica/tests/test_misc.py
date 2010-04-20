@@ -202,7 +202,7 @@ def test_simulate_invalid_solver_arg():
                              model_rlc,
                              solver_args={'mxiter':10})
 
-@testattr(stddist = True)
+@testattr(assimulo = True)
 def test_simulate_invalid_algorithm_arg():
     """ Test that the jmodelica.optimize function raises exception for an 
         invalid algorithm argument.
