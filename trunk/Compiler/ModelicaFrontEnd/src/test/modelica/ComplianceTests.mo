@@ -269,9 +269,6 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 263, column 3:
   The semiLinear() function-like operator is not supported
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Semantic error at line 264, column 3:
-  The function Subtask.decouple() is undeclared
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Semantic error at line 265, column 3:
   The function initial() is undeclared
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
@@ -296,7 +293,6 @@ Compliance error at line 271, column 3:
 
  equation
   semiLinear();
-  Subtask.decouple();
   initial();
   terminal();
   smooth();
