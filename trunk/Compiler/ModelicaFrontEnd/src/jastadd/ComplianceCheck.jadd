@@ -106,4 +106,9 @@ aspect ComplianceCheck {
 		}
 	}
 	
+	public void InstNamedModification.complianceCheck() {
+		if (getName().hasFArraySubscripts())
+			compliance("Modifiers of specific array elements are not supported");
+	}
+	
 }
