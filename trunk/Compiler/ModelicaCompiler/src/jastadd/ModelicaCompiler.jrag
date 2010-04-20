@@ -97,10 +97,10 @@ import org.xml.sax.SAXException;
  * level.
  * 
  */
-public class ModelicaCompiler {	
-	protected static final ModelicaLogger log = ModelicaLoggers.getConsoleLogger("JModelica.ModelicaCompiler");
-	{
-		System.out.println("ModelicaCompiler.static");
+public class ModelicaCompiler {
+	protected static final String CONSOLE_LOG_NAME = ModelicaCompiler.class.getName() + ".console";
+	protected static final ModelicaLogger log = ModelicaLoggers.getConsoleLogger(CONSOLE_LOG_NAME);
+	static {
 		ASTNode.log = log;
 	}
 	
@@ -110,7 +110,7 @@ public class ModelicaCompiler {
 	public static final String ERROR = "e";
 	public static final String INHERITED = "inh";
 	protected static final HashMap<String, Level> levels = new HashMap<String, Level>();
-	{
+	static {
 		levels.put(DEBUG,   Level.FINE);
 		levels.put(INFO,    Level.INFO);
 		levels.put(WARNING, Level.WARNING);
@@ -810,11 +810,9 @@ public class ModelicaCompiler {
 			if (ml == null) {
 				Logger l = Logger.getLogger(name);
 				l.setUseParentHandlers(false);
-				if (l.getHandlers().length == 0) {  // Workaround for buggy java-in-python library
-					ConsoleHandler ch = new ConsoleHandler();
-					ch.setFormatter(new ConsoleFormatter());
-					l.addHandler(ch);
-				}
+				ConsoleHandler ch = new ConsoleHandler();
+				ch.setFormatter(new ConsoleFormatter());
+				l.addHandler(ch);
 				l.setLevel(Level.WARNING);
 				ml = new LoggerInModelicaLogger(l);
 				logs.put(name, ml);
