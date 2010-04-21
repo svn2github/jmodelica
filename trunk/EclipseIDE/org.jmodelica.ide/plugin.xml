@@ -120,25 +120,21 @@
             priority="highest">
          <triggerPoints>
             <or>
-               <and>
-                  <adapt
-                        type="org.eclipse.core.resources.IFile">
-                  </adapt>
+               <adapt
+                     type="org.eclipse.core.resources.IProject">
+                  <test
+                        property="org.eclipse.core.resources.projectNature"
+                        value="org.jmodelica.ide.nature">
+                  </test>
+               </adapt>
+               <adapt
+                     type="org.eclipse.core.resources.IFile">
                   <test
                         forcePluginActivation="true"
                         property="org.eclipse.debug.ui.matchesPattern"
                         value="*.mo">
                   </test>
-               </and>
-               <and>
-                  <adapt
-                        type="org.eclipse.core.resources.IProject">
-                  </adapt>
-                  <test
-                        property="org.eclipse.core.resources.projectNature"
-                        value="org.jmodelica.ide.nature">
-                  </test>
-               </and>
+               </adapt>
             </or>
          </triggerPoints>
          <possibleChildren>
@@ -179,6 +175,18 @@
          <actionProvider
                class="org.jmodelica.ide.outline.ExplorerActionProvider">
          </actionProvider>
+         <commonWizard
+               menuGroupId="org.jmodelica.ide.wizard"
+               type="new"
+               wizardId="org.jmodelica.ide.wizard.file">
+            <enablement></enablement>
+         </commonWizard>
+         <commonWizard
+               menuGroupId="org.jmodelica.ide.wizard"
+               type="new"
+               wizardId="org.jmodelica.ide.wizard.project">
+            <enablement></enablement>
+         </commonWizard>
       </navigatorContent>
    </extension>
    <extension

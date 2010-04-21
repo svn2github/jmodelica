@@ -39,9 +39,10 @@ import org.eclipse.ui.part.ISetSelectionTarget;
 
 public class NewFileWizard extends Wizard implements INewWizard {
 
-	private static final String window_title = "New Modelica File";
-	private static final String title = "New Modelica File";
-	private static final String description = "Creates a new Modelica File";
+	private static final String WINDOW_TITLE = "New Modelica File";
+	private static final String TITLE = "New Modelica File";
+	private static final String DESCRIPTION = "Creates a new Modelica File";
+	private static final String FILE_EXTENSION = "mo";
 
 	private IWorkbench workbench;
 	private IStructuredSelection selection;
@@ -49,7 +50,7 @@ public class NewFileWizard extends Wizard implements INewWizard {
 
 	@Override
 	public boolean performFinish() {
-
+		
 		IFile file = mainPage.createNewFile();
 		if (file == null) {
 			return false;
@@ -89,9 +90,10 @@ public class NewFileWizard extends Wizard implements INewWizard {
 	@Override
 	public void addPages() {
 		super.addPages();
-		mainPage = new WizardNewFileCreationPage(window_title, getSelection());//$NON-NLS-1$
-		mainPage.setTitle(title);
-		mainPage.setDescription(description);
+		mainPage = new WizardNewFileCreationPage(WINDOW_TITLE, getSelection());//$NON-NLS-1$
+		mainPage.setTitle(TITLE);
+		mainPage.setDescription(DESCRIPTION);
+		mainPage.setFileExtension(FILE_EXTENSION);
 		addPage(mainPage);
 	}
 
