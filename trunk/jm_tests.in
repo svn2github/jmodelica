@@ -24,28 +24,31 @@ PYTHON_HOME=/opt/python/python2.5/
 JMODELICA_HOME=@prefix@
 JMODELICA_SRC=@abs_top_srcdir@
 IPOPT_HOME=@IPOPT_HOME@
+SUNDIALS_HOME=@SUNDIALS_HOME@
+ECLIPSE_HOME=@ECLIPSE_HOME@
 BUILD=@abs_builddir@
 if [[ "${JAVA_HOME}" == "" ]]; then
   JAVA_HOME=@_JAVA_HOME_@
 fi
-WITH_IPOPT=@WITH_IPOPT@
-if [[ "@SUNDIALS_HOME@" == "" ]]; then
-  WITH_SUNDIALS=false
-else
-  WITH_SUNDIALS=true
-fi
-ECLIPSE_HOME=@ECLIPSE_HOME@
 
 # Variables that are relative to others
 CPPAD_HOME=${JMODELICA_HOME}/ThirdParty/CppAD/
-PYTHONPATH=${PYTHON_HOME}:${JMODELICA_HOME}/Python/ 
-if [[ "${LD_LIBRARY_PATH}" == "" ]]; then
-  LD_LIBRARY_PATH=/lib:${IPOPT_HOME}/lib 
-else
-  LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${IPOPT_HOME}/lib
-fi
+PYTHONPATH=${PYTHON_HOME}:${JMODELICA_HOME}/Python/
 
 # ====== End variables to set ======
+
+# Update library path
+if [[ "${IPOPT_HOME}" != "" ]]; then
+  LIB_PATH=${IPOPT_HOME}/lib
+  if [[ "${SUNDIALS_HOME}" != "" ]]; then
+    LIB_PATH=${LIB_PATH}:${SUNDIALS_HOME}/lib
+  fi
+  if [[ "${LD_LIBRARY_PATH}" == "" ]]; then
+    LD_LIBRARY_PATH=/lib:${LIB_PATH}
+  else
+    LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${LIB_PATH}
+  fi
+fi
 
 # Test sets
 tests="modelica optimica python"
@@ -69,9 +72,9 @@ function python_tests() {
   TESTS="$(find ${JMODELICA_HOME}/Python/jmodelica/tests -name \*.py | grep test_)"
   PATTERN=----------------------------------------------------------------------
   TAGS="-a stddist"
-  if [[ "${WITH_IPOPT}" == "true" ]]; then
+  if [[ "${IPOPT_HOME}" != "" ]]; then
     TAGS="${TAGS} -a ipopt"
-    if [[ "${WITH_SUNDIALS}" == "true" ]]; then
+    if [[ "${SUNDIALS_HOME}" != "" ]]; then
       TAGS="${TAGS} -a assimulo"
     fi
   fi
