@@ -163,4 +163,34 @@ XML schema.
 
 7. Python integration
 
+ * The order the non-named arguments for the ModelicaCompiler and OptimicaCompiler 
+   function 'compile_model' has changed. In previous versions the arguments came 
+   in the order (model_file_name, model_class_name, target = "model") and is now 
+   (model_class_name, model_file_name, target = "model").
+ * The functions setparameter and getparameter in jmi.Model have been removed. 
+   Instead the functions set_value and get_value (also in jmi.Model) should be 
+   used.
+ * Default start directory $install\work has been removed. A new directory 'tests'
+   will be created in $install for the files created when running nose tests so 
+   that these will not litter the JModelica Python packages.
+   Windows users: If Python is started via the JModelica start-menu, the 
+   default start directory is now %DOCUMENTS%\JModelica.org (usually 
+   My Computer\Shared Documents).
+ * Some caching has been implemented in the xmlparser module to improve 
+   execution time for working with jmi.Model objects, which should be 
+   noticable for large models.
+   
+
 7.1 New high-level functions for optimization and simulation
+
+New high-level functions for problem initialization, optimization and 
+simulation have been added which collect the compilation of a model, 
+creation of a model object, setup and running of an 
+initialization/optimization/simulation and returning of a result in 
+one function call. For each function there is an algorithm implemented 
+which will be used by default but there is also the 
+possibility to add own algorithms. All examples in the example 
+package have been updated to use the high-level functions.
+
+
+  
