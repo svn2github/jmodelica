@@ -40,6 +40,11 @@ except:
     IDA = None
     assimulo_present = False
 
+try:
+    ipopt_present = jmodelica.environ['IPOPT_HOME']
+except:
+    ipopt_present = False
+
 int = N.int32
 N.int = N.int32
 
@@ -82,6 +87,9 @@ class IpoptInitializationAlg(AlgorithmBase):
             self._set_alg_args(**alg_args)
         except TypeError, e:
             raise InvalidAlgorithmArgumentException(e)
+            
+        if not ipopt_present:
+            raise Exception('Could not find IPOPT. Check jmodelica.check_packages()')
 
         self.nlp = NLPInitialization(model,self.stat)            
         self.nlp_ipopt = InitializationOptimizer(self.nlp)
@@ -268,6 +276,9 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
             self._set_alg_args(**alg_args)
         except TypeError, e:
             raise InvalidAlgorithmArgumentException(e)
+        
+        if not ipopt_present:
+            raise Exception('Could not find IPOPT. Check jmodelica.check_packages()')
         
         self.nlp = ipopt.NLPCollocationLagrangePolynomials(model,self.n_e, self.hs, self.n_cp)
         if self.init_traj:
