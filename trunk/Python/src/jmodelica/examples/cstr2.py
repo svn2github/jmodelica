@@ -23,18 +23,12 @@ import jmodelica
 import jmodelica.jmi as jmi
 from jmodelica.compiler import OptimicaCompiler
 from jmodelica.compiler import ModelicaCompiler
-from jmodelica.initialization.ipopt import NLPInitialization
-from jmodelica.initialization.ipopt import InitializationOptimizer
-from jmodelica.optimization import ipopt
+from jmodelica import initialize
+from jmodelica import optimize
 
 # Import numerical libraries
 import numpy as N
-import ctypes as ct
 import matplotlib.pyplot as plt
-import scipy.integrate as integr
-import scipy as S
-import scipy.optimize as opt
-import numpy.ctypeslib as Nct
 
 def run_demo(with_plots=True):
     """This example is based on a system composed of two
@@ -66,16 +60,11 @@ def run_demo(with_plots=True):
     mc = ModelicaCompiler()
     
     # Compile the stationary initialization model into a DLL
-    mc.compile_model("CSTRLib.Components.Two_CSTRs_stat_init", curr_dir+"/files/CSTRLib.mo", target='ipopt')
+    mc.compile_model("CSTRLib.Components.Two_CSTRs_stat_init", 
+					curr_dir+"/files/CSTRLib.mo", target='ipopt')
 
     # Load a model instance into Python
     init_model = jmi.Model("CSTRLib_Components_Two_CSTRs_stat_init")
-    
-    # Create DAE initialization object.
-    init_nlp = NLPInitialization(init_model)
-    
-    # Create an Ipopt solver object for the DAE initialization system
-    init_nlp_ipopt = InitializationOptimizer(init_nlp)
     
     # Set inputs for Stationary point A
     u1_0_A = 1
@@ -83,11 +72,8 @@ def run_demo(with_plots=True):
     init_model.set_value('u1',u1_0_A)
     init_model.set_value('u2',u2_0_A)
     
-    # init_nlp_ipopt.init_opt_ipopt_set_string_option("derivative_test","first-order")
-    #init_nlp_ipopt.init_opt_ipopt_set_int_option("max_iter",5)
-
     # Solve the DAE initialization system with Ipopt
-    init_nlp_ipopt.init_opt_ipopt_solve()
+    (init_model, init_result) = initialize(init_model)        
     
     # Store stationary point A
     CA1_0_A = init_model.get_value('CA1')
@@ -107,12 +93,9 @@ def run_demo(with_plots=True):
     init_model.set_value('u1',u1_0_B)
     init_model.set_value('u2',u2_0_B)
     
-    # init_nlp_ipopt.init_opt_ipopt_set_string_option("derivative_test","first-order")
-    #init_nlp_ipopt.init_opt_ipopt_set_int_option("max_iter",5)  
-
     # Solve the DAE initialization system with Ipopt
-    init_nlp_ipopt.init_opt_ipopt_solve()
-
+    (init_model, init_result) = initialize(init_model)
+   
     # Stationary point B
     CA1_0_B = init_model.get_value('CA1')
     CA2_0_B = init_model.get_value('CA2')
@@ -130,7 +113,7 @@ def run_demo(with_plots=True):
     # Create an OptimicaCompiler instance
     oc = OptimicaCompiler()
 
-    # Compil the Model
+    # Compile the Model
     oc.compile_model("CSTR2_Opt", 
                      (curr_dir+"/files/CSTRLib.mo", curr_dir+"/files/CSTR2_Opt.mo"),
                      target='ipopt')
@@ -157,27 +140,10 @@ def run_demo(with_plots=True):
     hs = N.ones(n_e)*1./n_e # Equidistant points
     n_cp = 3; # Number of collocation points in each element
     
-    # Create an NLP object representing the discretized problem
-    nlp = ipopt.NLPCollocationLagrangePolynomials(model,n_e,hs,n_cp)
-    
-    # Create an Ipopt NLP object
-    nlp_ipopt = ipopt.CollocationOptimizer(nlp)
-    
-    #nlp_ipopt.opt_sim_ipopt_set_string_option("derivative_test","first-order")
-
-    # The convergence is slow, for some reason, increasing tolerance.
-    nlp_ipopt.opt_sim_ipopt_set_num_option("tol",0.0001)
-
-    #Solve the optimization problem
-    nlp_ipopt.opt_sim_ipopt_solve()
-
-    # Write to file. The resulting file (CSTR2_Opt_result.txt) can be
-    # loaded into Dymola.
-    nlp.export_result_dymola()
-
-    # Load the file we just wrote
-    res = jmodelica.io.ResultDymolaTextual('CSTR2_Opt_result.txt')
-    
+    (model, res) = optimize(model, 
+							alg_args={'n_e':30, 'hs':hs, 'n_cp':n_cp},
+							solver_args={"derivative_test":"first-order", "tol":0.0001})
+        
     # Extract variable profiles
     CA1_res=res.get_variable_data('two_CSTRs_Series.CA1')
     CA2_res=res.get_variable_data('two_CSTRs_Series.CA2')

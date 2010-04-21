@@ -22,15 +22,12 @@ import os.path
 import jmodelica
 import jmodelica.jmi as jmi
 from jmodelica.compiler import OptimicaCompiler
-from jmodelica.optimization import ipopt
-from jmodelica.initialization.ipopt import *
+from jmodelica import optimize
 
 # Import numerical libraries
 import numpy as N
-import ctypes as ct
 import matplotlib.pyplot as plt
-
-import scipy.integrate as int
+import scipy.integrate as integr
 
 def run_demo(with_plots=True):
     """Optimal control of the quadruple tank process."""
@@ -68,7 +65,7 @@ def run_demo(with_plots=True):
     #qt.getPI()[22] = u_A[1]
     
     t_sim = N.linspace(0.,2000.,500)
-    y_sim = int.odeint(res,x_0,t_sim)
+    y_sim = integr.odeint(res,x_0,t_sim)
 
     x_A = y_sim[-1,:]
 
@@ -84,7 +81,7 @@ def run_demo(with_plots=True):
     qt.set_real_u(u_B)
     
     t_sim = N.linspace(0.,2000.,500)
-    y_sim = int.odeint(res,x_0,t_sim)
+    y_sim = integr.odeint(res,x_0,t_sim)
     
     x_B = y_sim[-1,:]
 
@@ -110,30 +107,7 @@ def run_demo(with_plots=True):
     qt.set_value("u2_r",u_B[1])
 
     # Solve optimal control problem
-    
-    # Initialize the mesh
-    n_e = 50 # Number of elements 
-    hs = N.ones(n_e)*1./n_e # Equidistant points
-    n_cp = 3; # Number of collocation points in each element
-    
-    # Create an NLP object
-    nlp = ipopt.NLPCollocationLagrangePolynomials(qt,n_e,hs,n_cp)
-    
-    # Create an Ipopt NLP object
-    nlp_ipopt = ipopt.CollocationOptimizer(nlp)
-    
-    #nlp_ipopt.opt_sim_ipopt_set_string_option("derivative_test","first-order")
-    nlp_ipopt.opt_sim_ipopt_set_int_option("max_iter",500)
-    
-    # Solve the optimization problem
-    nlp_ipopt.opt_sim_ipopt_solve()
-    
-    # Write to file. The resulting file can also be
-    # loaded into Dymola.
-    nlp.export_result_dymola()
-    
-    # Load the file we just wrote to file
-    res = jmodelica.io.ResultDymolaTextual('QuadTank_pack_QuadTank_Opt_result.txt')
+    (qt, res) = optimize(qt, solver_args={'max_iter':500})
 
     # Extract variable profiles
     x1=res.get_variable_data('x1')

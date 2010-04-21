@@ -30,10 +30,11 @@ from jmodelica.initialization.ipopt import InitializationOptimizer
 try:
     from jmodelica.simulation.assimulo import JMIDAE, JMIODE, write_data
     from jmodelica.simulation.assimulo import TrajectoryLinearInterpolation
-    from Assimulo import Implicit_ODE
-    from Assimulo import Explicit_ODE
     from Assimulo.Implicit_ODE import *
     from Assimulo.Explicit_ODE import *
+    from Assimulo import Implicit_ODE as impl_ode
+    from Assimulo import Explicit_ODE as expl_ode
+
     assimulo_present = True
 except:
     warnings.warn('Could not load Assimulo module. Check jmodelica.check_packages()')
@@ -191,7 +192,7 @@ class AssimuloAlg(AlgorithmBase):
                       start_time=0.0,
                       final_time=1.0,
                       num_communication_points=500,
-                      solver=IDA,
+                      solver='IDA',
                       input_trajectory = N.array([])):
         """ Set arguments for Assimulo algorithm.
         
@@ -206,8 +207,8 @@ class AssimuloAlg(AlgorithmBase):
                 Number of points where the solution is returned.
                 Default: 500 (if = 0 then integrator will return at it's internal steps)
             solver --
-                Set which solver to use with class name. This determines whether a DAE or 
-                ODE problem will be created.
+                Set which solver to use with class name as string. This determines 
+                whether a DAE or ODE problem will be created.
                 Default: IDA
             input_trajectory --
                 Trajectory data for model inputs. The argument should be a matrix
@@ -219,7 +220,21 @@ class AssimuloAlg(AlgorithmBase):
         self.start_time = start_time
         self.final_time = final_time
         self.num_communication_points = num_communication_points
-        self.solver = solver
+        
+        if hasattr(impl_ode, solver):
+            self.solver = getattr(impl_ode, solver)
+        elif hasattr(expl_ode, solver):
+            self.solver = getattr(expl_ode, solver)
+        else:
+            raise InvalidAlgorithmArgumentException("The solver: "+solver+ " is unknown.")
+        #try:
+            #self.solver = getattr(impl_ode, solver)
+        #except AttributeError:
+            #try:
+                #self.solver = getattr(expl_ode, solver)
+            #except AttributeError:
+                #raise Exception("The solver: "+solver+ " is unknown.")
+				
         self.input_trajectory = input_trajectory
         
     def set_solver_options(self, 
@@ -276,11 +291,14 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
             self._set_alg_args(**alg_args)
         except TypeError, e:
             raise InvalidAlgorithmArgumentException(e)
-        
+            
         if not ipopt_present:
             raise Exception('Could not find IPOPT. Check jmodelica.check_packages()')
         
-        self.nlp = ipopt.NLPCollocationLagrangePolynomials(model,self.n_e, self.hs, self.n_cp)
+        if not self.blocking_factors:
+            self.nlp = ipopt.NLPCollocationLagrangePolynomials(model,self.n_e, self.hs, self.n_cp)
+        else:
+            self.nlp = ipopt.NLPCollocationLagrangePolynomials(model,self.n_e, self.hs, self.n_cp, blocking_factors=self.blocking_factors)
         if self.init_traj:
             self.nlp.set_initial_from_dymola(self.init_traj, self.hs, 0, 0) 
             
@@ -291,6 +309,7 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
                       n_e=50, 
                       n_cp=3, 
                       hs=N.ones(50)*1./50, 
+                      blocking_factors=None,
                       init_traj = None,
                       result_mesh='default', 
                       result_file_name='', 
@@ -307,6 +326,9 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
                 Default: 3
             n_cp -- 
                 Number of collocation points.
+            blocking_factors --
+                Blocking factor vector.
+                Default: None (not used)
             init_traj --
                 A reference to an object of type ResultDymolaTextual or
                 ResultDymolaBinary containing variable trajectories used
@@ -333,6 +355,7 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
         self.n_e=n_e
         self.n_cp=n_cp
         self.hs=hs
+        self.blocking_factors=blocking_factors
         self.init_traj=init_traj
         self.result_mesh=result_mesh
         if not n_interpolation_points:
@@ -383,8 +406,8 @@ class InvalidAlgorithmArgumentException(Exception):
     def __init__(self, arg):
         self.msg='Invalid algorithm argument: '+str(arg)
         
-    def __str__():
-        return self.msg
+    def __str__(self):
+        return repr(self.msg)
 
 class InvalidSolverArgumentException(Exception):
     """ Exception raised when a solver argument is encountered that does not exists."""
@@ -392,6 +415,6 @@ class InvalidSolverArgumentException(Exception):
     def __init__(self, arg):
         self.msg='Invalid solver argument: '+str(arg)
         
-    def __str__():
-        return self.msg
+    def __str__(self):
+        return repr(self.msg)
     

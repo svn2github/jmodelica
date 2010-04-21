@@ -43,7 +43,7 @@ def run_demo(with_plots=True):
     oc = OptimicaCompiler()
     oc.set_boolean_option('state_start_values_fixed',True)
     
-    # Comile the Modelica model first to C code and
+    # Compile the Modelica model first to C code and
     # then to a dynamic library
     oc.compile_model(model_name,mofile,target='ipopt')
 

@@ -197,10 +197,10 @@ def initialize(model,
             Dict with compiler options listed. 
             Default: empty dict
         algorithm --
-            The simulation algorithm to use is specified by passing class name in 
+            The initialize algorithm to use is specified by passing class name in 
             this argument. The algorithm class can be any class which implements the 
             abstract class algorithm_drivers.AlgorithmBase.
-            Default: AssimuloAlg
+            Default: IpoptInitializationAlg
         alg_args --
             All arguments for the chosen algorithm should be listed in this dict.
             Default: empty dict

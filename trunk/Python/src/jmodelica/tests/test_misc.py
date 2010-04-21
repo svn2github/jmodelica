@@ -224,7 +224,7 @@ def test_simulate_w_ode():
                                      compiler='optimica',
                                      compiler_options={'state_start_values_fixed':True},
                                      compiler_target='model',
-                                     alg_args={'solver':CVode, 'final_time':20, 'num_communication_points':0},
+                                     alg_args={'solver':'CVode', 'final_time':20, 'num_communication_points':0},
                                      solver_args={'discr':'BDF', 'iter':'Newton'})
     x1=res.get_variable_data('x1')
     x2=res.get_variable_data('x2')

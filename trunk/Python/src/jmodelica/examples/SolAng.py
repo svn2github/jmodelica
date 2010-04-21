@@ -18,21 +18,8 @@
 import os
 import numpy as N
 import pylab as p
-import matplotlib
 
-import jmodelica
-import jmodelica.jmi as jmi
-from time import time
-from jmodelica.tests import get_example_path
-from jmodelica.compiler import ModelicaCompiler
-from jmodelica.initialization.ipopt import NLPInitialization
-from jmodelica.initialization.ipopt import InitializationOptimizer
-
-try:
-    from jmodelica.simulation.assimulo import JMIDAE, write_data
-    from Assimulo.Implicit_ODE import IDA
-except:
-    raise ImportError('Could not find Assimulo package.')
+from jmodelica import simulate
 
 def run_demo(with_plots=True):
     """
@@ -45,32 +32,10 @@ def run_demo(with_plots=True):
     m_name = 'SolAngles'
     mofile = curr_dir+'/files/SolAngles.mo'
     
+    (model, res) = simulate(m_name, mofile, compiler_target='ipopt',
+							alg_args={'final_time':86400.0, 'num_communication_points':86400},
+							solver_args={'make_consistency':'IDA_YA_YDP_INIT'})
     
-    mc = ModelicaCompiler()
-    
-    # Compile the Modelica model first to C code and
-    # then to a dynamic library
-    mc.compile_model(m_name,mofile,target='ipopt')
-
-    # Load the dynamic library and XML data
-    model=jmi.Model(m_name)
-    
-    #Simulation with the new package, Assimulo
-    SolAng_mod = JMIDAE(model)
-    SolAng_sim = IDA(SolAng_mod)
-    SolAng_sim.reset() #Resets to the initial values from the model
-    SolAng_sim.make_consistency('IDA_YA_YDP_INIT') #Calculates initial values
-    
-    #Time the run method for assimulo
-    time_begin = time()
-    SolAng_sim(86400.0, 86400) #Simulate the same time and with the same number of output points
-    #rtol and atol is by default 1.0e-6 the same as with pySundials
-    assimulo = time()-time_begin #Elapsed time
-    
-    write_data(SolAng_sim)
-    
-    # Load the data we just wrote to file
-    res = jmodelica.io.ResultDymolaTextual('SolAngles_result.txt')
     theta = res.get_variable_data('theta')
     azim = res.get_variable_data('azim')
     N_day = res.get_variable_data('N_day')
@@ -85,10 +50,6 @@ def run_demo(with_plots=True):
         p.title('Angle of Incidence on Surface')
         p.grid()
         p.show()
-    
-    #Print the statistics for the timing
-    print '\nElapsed time:'
-    print 'Assimulo: %e' %assimulo
 
 if __name__=="__main__":
     run_demo()

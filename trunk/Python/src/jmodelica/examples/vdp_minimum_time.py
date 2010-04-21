@@ -19,14 +19,10 @@
 import os.path
 
 # Import the JModelica.org Python packages
-import jmodelica
-import jmodelica.jmi as jmi
-from jmodelica.compiler import OptimicaCompiler
-from jmodelica.optimization import ipopt
+from jmodelica import optimize
 
 # Import numerical libraries
 import numpy as N
-import ctypes as ct
 import matplotlib.pyplot as plt
 
 def run_demo(with_plots=True):
@@ -34,41 +30,13 @@ def run_demo(with_plots=True):
     dynamic optimization problem based on a
     Van der Pol oscillator system."""
 
-    oc = OptimicaCompiler()
-    oc.set_boolean_option('state_start_values_fixed',True)
-
     curr_dir = os.path.dirname(os.path.abspath(__file__));
-    
-    # Compile the Optimica model first to C code and
-    # then to a dynamic library
-    oc.compile_model("VDP_pack.VDP_Opt_Min_Time",
-                     curr_dir+"/files/VDP.mo",
-                     target='ipopt')
-
-    # Load the dynamic library and XML data
-    vdp=jmi.Model("VDP_pack_VDP_Opt_Min_Time")
-
-    # Initialize the mesh
-    n_e = 50 # Number of elements 
-    hs = N.ones(n_e)*1./n_e # Equidistant points
-    n_cp = 3; # Number of collocation points in each element
-
-    # Create an NLP object
-    nlp = ipopt.NLPCollocationLagrangePolynomials(vdp,n_e,hs,n_cp)
-
-    # Create an Ipopt NLP object
-    nlp_ipopt = ipopt.CollocationOptimizer(nlp)
-
-    # Solve the optimization problem
-    nlp_ipopt.opt_sim_ipopt_solve()
-    
-    # Write to file. The resulting file can also be
-    # loaded into Dymola.
-    nlp.export_result_dymola()
-    
-    # Load the file we just wrote to file
-    res = jmodelica.io.ResultDymolaTextual('VDP_pack_VDP_Opt_Min_Time_result.txt')
-
+    model_name = 'VDP_pack.VDP_Opt_Min_Time'
+    mo_file = curr_dir+'/files/VDP.mo'
+	
+    (model, res) = optimize(model_name, mo_file, compiler_target='ipopt',
+							compiler_options={'state_start_values_fixed':True})
+							
     # Extract variable profiles
     x1=res.get_variable_data('x1')
     x2=res.get_variable_data('x2')

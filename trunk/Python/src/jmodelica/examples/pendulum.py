@@ -20,53 +20,24 @@ import os.path
 
 # Import the JModelica.org Python packages
 import jmodelica
-import jmodelica.jmi as jmi
-from jmodelica.compiler import OptimicaCompiler
-from jmodelica.optimization import ipopt
+from jmodelica import optimize
 
 # Import numerical libraries
 import numpy as N
-import ctypes as ct
 import matplotlib.pyplot as plt
 
 def run_demo(with_plots=True):
     """Demonstrate how to solve a dynamic optimization
     problem based on an inverted pendulum system."""
-
-    oc = OptimicaCompiler()
-    oc.set_boolean_option('state_start_values_fixed',True)
-
+    
+    
     curr_dir = os.path.dirname(os.path.abspath(__file__));
+    model_name = "Pendulum_pack.Pendulum_Opt"
     
-    # Comile the Optimica model first to C code and
-    # then to a dynamic library
-    oc.compile_model("Pendulum_pack.Pendulum_Opt",
-                 curr_dir+"/files/Pendulum_pack.mo",
-                 target='ipopt')
-
-    # Load the dynamic library and XML data
-    pend=jmi.Model("Pendulum_pack_Pendulum_Opt")
-
-    # Initialize the mesh
-    n_e = 50 # Number of elements 
-    hs = N.ones(n_e)*1./n_e # Equidistant points
-    n_cp = 3; # Number of collocation points in each element
-
-    # Create an NLP object
-    nlp = ipopt.NLPCollocationLagrangePolynomials(pend,n_e,hs,n_cp)
-
-    # Create an Ipopt NLP object
-    nlp_ipopt = ipopt.CollocationOptimizer(nlp)
-
-    # Solve the optimization problem
-    nlp_ipopt.opt_sim_ipopt_solve()
-
-    # Write to file. The resulting file can also be
-    # loaded into Dymola.
-    nlp.export_result_dymola()
-    
-    # Load the file we just wrote to file
-    res = jmodelica.io.ResultDymolaTextual('Pendulum_pack_Pendulum_Opt_result.txt')
+    # optimize
+    (model, res) = optimize(model_name, curr_dir+"/files/Pendulum_pack.mo",
+							compiler_target='ipopt',
+							compiler_options={'state_start_values_fixed':True})
 
     # Extract variable profiles
     theta=res.get_variable_data('pend.theta')
