@@ -5,6 +5,6 @@
 	<classpathentry kind="src" path="java"/>
 	<classpathentry kind="src" path="tests"/>
 	<classpathentry kind="src" path="ant"/>
-	<classpathentry exported="true" kind="lib" path="/ThirdParty/Beaver/beaver-0.9.6.1/lib/beaver-rt.jar" sourcepath="/ThirdParty/Beaver/beaver-0.9.6.1/lib/beaver-rt-src.jar"/>
+	<classpathentry exported="true" kind="lib" path="/JModelica/ThirdParty/Beaver/beaver-0.9.6.1/lib/beaver-rt.jar" sourcepath="/JModelica/ThirdParty/Beaver/beaver-0.9.6.1/lib/beaver-rt-src.jar"/>
 	<classpathentry kind="output" path="bin-eclipse"/>
 </classpath>
