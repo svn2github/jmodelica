@@ -183,8 +183,8 @@ model = Model('CSTR_CSTR_Opt')
     functionality on a model of an electric circuit. The model is depicted in
     Figure (RLC.png) and consists of resistances, inductors and a capacitor.
     The circuit is connected to a voltage source which generates a square-wave
-    with an amplitude of 1.0 and a frequency of 0.6 Hz. This model is written in
-    Modelica code and saved in the file RLC_Circuit.mo and is depicted in
+    with an amplitude of 1.0 and a frequency of 0.6 Hz. This model is written
+    in Modelica code and saved in the file RLC_Circuit.mo and is depicted in
     below.</para>
 
     <figure>
@@ -192,7 +192,7 @@ model = Model('CSTR_CSTR_Opt')
 
       <mediaobject>
         <imageobject>
-          <imagedata fileref="Images/RLC.png" scale="100"></imagedata>
+          <imagedata fileref="Images/RLC.png" scalefit="1" width="60%"></imagedata>
         </imageobject>
       </mediaobject>
     </figure>
@@ -226,13 +226,13 @@ import pylab as P</programlisting>
     dictionary called 'solver_args'. Typically these options can be the
     tolerances. Using the default simulation package, Assimulo, information
     regarding which algorithms are supported and the solver arguments can be
-    found here, http://www.jmodelica.org/assimulo . The default solver is IDA.
-    </para>
+    found here, http://www.jmodelica.org/assimulo . The default solver is
+    IDA.</para>
 
     <para>After a successful simulation the statistics are printed in the
     prompt and the results are stored in the variable 'res'. To view the
     result, we have to retrieve information about the variables we are
-    interested of. This is easily done in the following way, </para>
+    interested of. This is easily done in the following way,</para>
 
     <programlisting>square_y = res.get_variable_data('y')
 resistor_v = res.get_variable_data('resistor.v')
@@ -253,7 +253,7 @@ P.show()
 
       <mediaobject>
         <imageobject>
-          <imagedata fileref="Images/Result_RLC.svg" width="60%"></imagedata>
+          <imagedata fileref="Images/Result_RLC.svg" scalefit="1" width="60%"></imagedata>
         </imageobject>
       </mediaobject>
     </figure>
