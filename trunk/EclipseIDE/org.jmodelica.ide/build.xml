@@ -72,8 +72,10 @@
 
 	<path id="plugin_classpath">
 		<pathelement location="${lib_dir}/beaver-rt.jar" />
+		<pathelement location="${junit_dir}/junit-4.5.jar" />
 		<fileset dir="${eclipse_path}/plugins">
 			<include name="**/*.jar" />
+			<exclude name="**/org.apache.ant*.jar"/>
 		</fileset>
 	</path>
 
