@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>JModelicaIDE</name>
+	<name>org.jmodelica.ide</name>
 	<comment></comment>
 	<projects>
 		<project>org.jastadd.plugin</project>

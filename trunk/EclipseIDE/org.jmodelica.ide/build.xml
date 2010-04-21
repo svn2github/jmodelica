@@ -319,8 +319,8 @@
 			</fileset>
 		</copy>
 
-		<!-- collect class files for JModelicaIDE -->
-		<copy todir="${bin_dir}/bundles/JModelicaIDE">
+		<!-- collect class files for org.jmodelica.ide -->
+		<copy todir="${bin_dir}/bundles/org.jmodelica.ide">
 			<fileset dir="${bin_dir}/classes">
 				<include name="org/jmodelica/**/*" />
 				<exclude name="org/jmodelica/folding/**/*" />
@@ -333,7 +333,7 @@
 		<!-- build jars for plugins -->
 		<delete file="${bin_dir}/plugin.versions" quiet="true" />
 		<emptyDir dir="${bin_dir}/plugins" />
-		<jm_buildPlugin projectName="JModelicaIDE" />
+		<jm_buildPlugin projectName="org.jmodelica.ide" />
 		<jm_buildPlugin projectName="org.jmodelica.folding" />
 		<jm_buildPlugin projectName="org.jastadd.plugin" path="${core_dir}" />
 
