@@ -227,13 +227,6 @@ class AssimuloAlg(AlgorithmBase):
             self.solver = getattr(expl_ode, solver)
         else:
             raise InvalidAlgorithmArgumentException("The solver: "+solver+ " is unknown.")
-        #try:
-            #self.solver = getattr(impl_ode, solver)
-        #except AttributeError:
-            #try:
-                #self.solver = getattr(expl_ode, solver)
-            #except AttributeError:
-                #raise Exception("The solver: "+solver+ " is unknown.")
 				
         self.input_trajectory = input_trajectory
         
