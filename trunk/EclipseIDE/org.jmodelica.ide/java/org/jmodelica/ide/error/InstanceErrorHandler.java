@@ -42,7 +42,6 @@ public class InstanceErrorHandler implements IErrorHandler {
 		}
 	}
 
-	@Override
 	public void compliance(String s, ASTNode n) {
 		error(s, n);  // TODO: Perhaps these should be handled differently? issued for unimplemented features
 	}

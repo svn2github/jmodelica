@@ -12,7 +12,6 @@ public class MockEditor implements EditorWithFile {
         this.path = path;
     }
     
-    @Override
     public EditorFile editorFile() {
         return new EditorFile(new FileEditorInput(new MockFile(new MockProject(), path)));
     }

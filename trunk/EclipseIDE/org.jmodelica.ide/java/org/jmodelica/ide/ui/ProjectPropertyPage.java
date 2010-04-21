@@ -261,7 +261,7 @@ public class ProjectPropertyPage extends PropertyPage {
 				path = path.substring(0, path.length() - "options.xml".length());
 
 			String[] files = new File(path).list();
-			if (files != null && Arrays.asList(files).contains("options.xml")) {
+			if (files == null || !Arrays.asList(files).contains("options.xml")) {
 				error.setMessage("No options.xml found in folder");
 				error.open();
 			}
