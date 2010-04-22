@@ -17,7 +17,7 @@
 
 # Import library for path manipulations
 import os.path
-
+import warnings
 import jmodelica
 import jmodelica.jmi as jmi
 from jmodelica.compiler import OptimicaCompiler
@@ -29,7 +29,7 @@ try:
     from jmodelica.simulation.assimulo import JMIDAE, write_data
     from Assimulo.Implicit_ODE import IDA
 except:
-    raise ImportError('Could not find Assimulo package.')
+    warnings.warn('Could not find Assimulo package. Check jmodelica.check_packages()')
 
 import numpy as N
 import scipy as S

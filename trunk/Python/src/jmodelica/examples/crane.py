@@ -19,7 +19,7 @@ import os
 import numpy as N
 import pylab as p
 import matplotlib
-
+import warnings
 import jmodelica
 import jmodelica.jmi as jmi
 from jmodelica.tests import get_example_path
@@ -31,7 +31,7 @@ try:
     from jmodelica.simulation.assimulo import JMIDAE, write_data
     from Assimulo.Implicit_ODE import IDA
 except:
-    raise ImportError('Could not find Assimulo package.')
+    warnings.warn('Could not find Assimulo package. Check jmodelica.check_packages()')
 
 def run_demo(with_plots=True):
     """
