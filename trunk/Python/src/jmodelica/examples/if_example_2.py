@@ -53,21 +53,6 @@ def run_demo(with_plots=True):
     #Simulate
     (model, res) = simulate(model,
 							alg_args={'final_time':5.0})
-
-    
-	#************
-    #if_mod = JMIDAE(model)
-    #if_sim = IDA(if_mod)
-    #if_sim(5.0)
-    
-    ##Write Data
-    #write_data(if_sim)
-
-    #res = jmodelica.io.ResultDymolaTextual('IfExpExamples_IfExpExample2_result.txt')
-	#****************
-	
-
-
     # Get results
     x = res.get_variable_data('x')
     u = res.get_variable_data('u')

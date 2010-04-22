@@ -36,7 +36,6 @@ def run_demo(with_plots=True):
     
     # optimize
     (model, res) = optimize(model_name, curr_dir+"/files/Pendulum_pack.mo",
-							compiler_target='ipopt',
 							compiler_options={'state_start_values_fixed':True})
 
     # Extract variable profiles

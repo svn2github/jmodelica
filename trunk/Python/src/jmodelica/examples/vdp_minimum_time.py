@@ -34,7 +34,7 @@ def run_demo(with_plots=True):
     model_name = 'VDP_pack.VDP_Opt_Min_Time'
     mo_file = curr_dir+'/files/VDP.mo'
 	
-    (model, res) = optimize(model_name, mo_file, compiler_target='ipopt',
+    (model, res) = optimize(model_name, mo_file,
 							compiler_options={'state_start_values_fixed':True})
 							
     # Extract variable profiles

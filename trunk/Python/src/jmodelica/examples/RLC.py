@@ -33,8 +33,7 @@ def run_demo(with_plots=True):
     model_name = 'RLC_Circuit'
     mofile = curr_dir+'/files/RLC_Circuit.mo'
     
-    (model, res) = simulate(model_name, mofile, compiler_target='ipopt',
-							alg_args={'final_time':30})
+    (model, res) = simulate(model_name, mofile, alg_args={'final_time':30})
     
     sine_y = res.get_variable_data('sine.y')
     resistor_v = res.get_variable_data('resistor.v')

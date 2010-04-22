@@ -38,7 +38,7 @@ def run_demo(with_plots=True):
     model_name = 'RLC_Circuit'
     mofile = curr_dir+'/files/RLC_Circuit.mo'
     
-    (model, res) = initialize(model_name, mofile, compiler_target='ipopt')
+    (model, res) = initialize(model_name, mofile)
 
     (E_dae,A_dae,B_dae,F_dae,g_dae,state_names,input_names,algebraic_names, \
      dx0,x0,u0,w0,t0) = linearize_dae(model)

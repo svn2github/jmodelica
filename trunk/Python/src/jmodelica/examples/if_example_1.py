@@ -35,7 +35,7 @@ def run_demo(with_plots=True):
     model_name = 'IfExpExamples.IfExpExample1'
     mofile = curr_dir+'/files/IfExpExamples.mo'
     
-    (model, res) = simulate(model_name, mofile, compiler_target='ipopt',
+    (model, res) = simulate(model_name, mofile,
 							alg_args={'final_time':5, 'num_communication_points':500})
         
     x = res.get_variable_data('x')
