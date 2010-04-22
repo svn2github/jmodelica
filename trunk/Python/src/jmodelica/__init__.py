@@ -64,6 +64,11 @@ import numpy as N
 int = N.int32
 N.int = N.int32
 
+try:
+    ipopt_present = jmodelica.environ['IPOPT_HOME']
+except:
+    ipopt_present = False
+
 def optimize(model, 
              file_name='', 
              compiler_target='ipopt', 
@@ -305,7 +310,11 @@ def _exec_algorithm(model,
 
     if not isinstance(model, jmodelica.jmi.Model):
         # model class and mo-file must be set
-         model = _compile(model, file_name, compiler=compiler, 
+        
+        if not ipopt_present and compiler_target=='ipopt':
+            raise Exception('Could not find IPOPT. Check jmodelica.check_packages()')
+        
+        model = _compile(model, file_name, compiler=compiler, 
                           compiler_options=compiler_options, 
                           compiler_target=compiler_target)
          

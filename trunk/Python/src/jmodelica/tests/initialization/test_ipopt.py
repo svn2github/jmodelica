@@ -312,7 +312,7 @@ class TestNLPInit:
         assert max(N.abs(res_Z-self.dae_init_test.get_z()))<1e-3, \
                "test_jmi.py: test_init_opt: Wrong solution to initialization system." 
         
-    @testattr(stddist = True)    
+    @testattr(ipopt = True)    
     def test_init_opt_write_result(self):
 
         cpath_daeinit = "DAEInitTest"

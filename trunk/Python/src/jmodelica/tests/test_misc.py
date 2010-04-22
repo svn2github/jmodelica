@@ -35,6 +35,11 @@ try:
 except ImportError:
     warnings.warn('Could not load Assimulo module. Check jmodelica.check_packages()')
 
+try:
+    ipopt_present = jmodelica.environ['IPOPT_HOME']
+except:
+    ipopt_present = False
+
 int = N.int32
 N.int = N.int32
 
@@ -59,11 +64,12 @@ mc.set_boolean_option('state_start_values_fixed',True)
 oc = OptimicaCompiler()
 oc.set_boolean_option('state_start_values_fixed',True)
 
-mc.compile_model(cpath_rlc, fpath_rlc, target='ipopt')
-oc.compile_model(cpath_vdp, fpath_vdp, target='ipopt')
+if ipopt_present:
+    mc.compile_model(cpath_rlc, fpath_rlc, target='ipopt')
+    oc.compile_model(cpath_vdp, fpath_vdp, target='ipopt')
 
-model_rlc = jmi.Model(dll_rlc)
-model_vdp = jmi.Model(dll_vdp)
+    model_rlc = jmi.Model(dll_rlc)
+    model_vdp = jmi.Model(dll_vdp)
 
 @testattr(ipopt = True)
 def test_initialize():
