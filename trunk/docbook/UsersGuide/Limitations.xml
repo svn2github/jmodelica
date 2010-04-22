@@ -19,8 +19,8 @@
 
   <itemizedlist>
     <listitem>
-      <para>The Modelica 3.1 compliance of the front-end is limited; the
-      following features are currently not supported:</para>
+      <para>The Modelica compliance of the front-end is limited; the following
+      features are currently not supported:</para>
 
       <itemizedlist>
         <listitem>
@@ -35,6 +35,10 @@
               <para>If equations</para>
             </listitem>
           </itemizedlist>
+        </listitem>
+
+        <listitem>
+          <para>Parsing of Modelica 3.0</para>
         </listitem>
 
         <listitem>
@@ -57,7 +61,7 @@
 
         <listitem>
           <para>Limitations apply to the use of functions with arguments with
-          unknown array sizes </para>
+          unknown array sizes</para>
         </listitem>
 
         <listitem>
@@ -71,7 +75,7 @@
           Subtask.decouple(v), initial(), terminal(), smooth(p, expr),
           sample(start, interval), pre(y), edge(b), reinit(x, expr),
           scalar(A), vector(A), matrix(A), diagonal(v), product(...),
-          outerProduct(v1, v2), symmetric(A), skew(x). </para>
+          outerProduct(v1, v2), symmetric(A), skew(x).</para>
         </listitem>
 
         <listitem>

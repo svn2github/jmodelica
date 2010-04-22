@@ -24,7 +24,7 @@
     academia into industrial use. JModelica.org is a result of research at the
     Department of Automatic Control, Lund University,
     <citation>Jak2007</citation>and is now maintained and developed by Modelon
-    AB.</para>
+    AB in collaboration with academia.</para>
   </section>
 
   <section>
@@ -88,7 +88,7 @@
         <mediaobject>
           <imageobject>
             <imagedata fileref="images/arch_0.preview.png" scalefit="1"
-                       width="90%"></imagedata>
+                       width="60%"></imagedata>
           </imageobject>
         </mediaobject>
       </figure>The JModelica.org platform consists of a number of different
@@ -192,8 +192,7 @@
       </listitem>
     </itemizedlist>
 
-    <para>An overview of the JModelica.org platform is given in the paper
-    JModelica—an Open Source Platform for Optimization of Modelica
-    Models</para>
+    <para>An overview of the JModelica.org platform is given
+    <citation>Jak2010</citation></para>
   </section>
 </chapter>
