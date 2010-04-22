@@ -1268,71 +1268,27 @@ plt.show()
   <section>
     <title>Working with file I/O</title>
 
-    <para>In this tutorial you will learn how to load and save
-    simulation/optimization results and how this can be used to initialize an
-    optimization problem.</para>
+    <para>In this tutorial you will learn how to load simulation/optimization
+    results.</para>
 
     <section>
       <title>I/O functionality</title>
 
-      <para>The module io provides useful functions for exporting and loading
-      simulation or optimization results from Dymola. The result files can be
-      in Dymola textural or Dymola binary format. The variable data is saved
-      together with the variable names which makes it possible to load the
-      result files and match result data with a specific variable.</para>
-    </section>
-
-    <section>
-      <title>Exporting result data</title>
-
-      <para>In the following example, the model file CSTR.mo is assumed to
-      have been compiled, loaded in a Model object and initialized. (See the
-      tutorial on optimization for a complete review of solving the CSTR
-      optimization problem.)</para>
-
-      <para>Initialize mesh and create an NLP object using the
-      SimultaneousOptLagPols class. This class inherits the interface
-      SimultaneousOpt which conveniently wrapps the IO export function.</para>
-
-      <programlisting language="python"># Initialize mesh
-n_e = 50                          # Number of elements
-hs = N.ones(n_e)*1./n_e           # Equidistant points
-n_cp = 3;                         # Number of collocation points in each element
-
-# Create an NLP object
-nlp = ipopt.NLPCollocationLagrangePolynomials(cstr,n_e,hs,n_cp)
-</programlisting>
-
-      <para>Create an Ipopt NLP object and solve the optimization
-      problem.</para>
-
-      <programlisting language="pythobn"># Create an Ipopt NLP object
-nlp_ipopt = ipopt.CollocationOptimizer(nlp)
-
-# Solve the optimization problem
-nlp_ipopt.opt_sim_ipopt_solve()
-</programlisting>
-
-      <para>After an optimization problem has been run it is a trivial
-      operation to save the result to file.</para>
-
-      <programlisting language="python"># Write to file
-nlp.export_result_dymola()
-</programlisting>
-
-      <para>The export_result_dymola method takes an argument format which is
-      'txt' by default meaning that the result will be in textural format. To
-      export in binary Matlab format, set this argument to 'mat'. The exported
-      file will follow the name convention &lt;DLL lib
-      name&gt;_result.txt|mat.</para>
+      <para>The module jmodelica.io provides useful functions for exporting
+      and loading simulation or optimization results from Dymola. The result
+      files can be in Dymola textural or Dymola binary format. The variable
+      data is saved together with the variable names which makes it possible
+      to load the result files and match result data with a specific
+      variable.</para>
     </section>
 
     <section>
       <title>Loading result data</title>
 
-      <para>To load the result data saved using the export functionality the
-      jmi.io module can be used. The result object can then be used to
-      retrieve data for a specific variable.</para>
+      <para>To load a result data file saved using the export functionality
+      jmodelica.io.export_result_dymola the class ResultDymolaTextual in the
+      same module, jmodelica.io, can be used. The result object can then be
+      used to retrieve data for a specific variable.</para>
 
       <programlisting language="python"># Load the CSTR results
 res = jmodelica.io.ResultDymolaTextual('CSTR_CSTR_Opt_result.txt')
@@ -1362,7 +1318,7 @@ res.get_variable_data('T_ref').x
 
       <itemizedlist>
         <listitem>
-          <para>&lt;model class name&gt;_variables.xml</para>
+          <para>&lt;model class name&gt;.xml</para>
         </listitem>
 
         <listitem>
@@ -1370,25 +1326,25 @@ res.get_variable_data('T_ref').x
         </listitem>
       </itemizedlist>
 
-      <para>The parameter meta data is saved in &lt;model class
-      name&gt;_variables.xml and the parameter values in &lt;model class
-      name&gt;_values.xml. A reference id is used to map a parameter value in
-      the values file to a parameter specification.</para>
+      <para>The parameter meta data is saved in &lt;model class name&gt;.xml
+      and the parameter values in &lt;model class name&gt;_values.xml. The
+      name of the parameter is used to map a parameter value in the values
+      file to a parameter specification.</para>
     </section>
 
     <section>
-      <title>Get and set parameter</title>
+      <title>Get and set value</title>
 
-      <para>The model parameters can be acessed with via the jmi.Model
-      interface. It is possible to look at the whole vector or for one
-      specific parameter. Accessing one specific parameter requires that the
-      parameter name is known.</para>
+      <para>The model parameters can be accessed with via the jmi.Model
+      interface. It is possible to look at the whole vector of, for example,
+      all real parameters in the model or one specific parameter. Accessing
+      one specific parameter requires that the parameter name is known.</para>
 
       <para>The following code example assumes the CSTR model has been
       compiled and the DLL file loaded in jmi.Model.</para>
 
-      <programlisting language="python"># Get independent parameter vector
-cstr.get_pi()
+      <programlisting language="python"># Get independent real parameter vector
+cstr.get_real_pi()
 &gt;&gt; array([ 1.66666667e-03, 1.00000000e+03, 1.66666667e-03,
            3.50000000e+02, 2.19000000e-01, 1.20000000e+09,
            8.75000000e+03, 9.15600000e+02, 1.00000000e+03,
@@ -1398,11 +1354,14 @@ cstr.get_pi()
            1.00000000e+00, 1.00000000e+00])
 
 # Get independent parameter c_ref
-cstr.getparameter('c_ref')
+cstr.get_value('c_ref')
 &gt;&gt; 500.0
 
 # Set independent parameter
-cstr.setparameter('c_ref', 450)
+cstr.set_value('c_ref', 450)
+# c_ref has now changed
+cstr.get_value('c_ref')
+&gt;&gt; 450.0
 </programlisting>
     </section>
 
@@ -1432,8 +1391,8 @@ cstr.load_parameters_from_XML('new_values.xml')</programlisting>
       <section>
         <title>Writing to XML values file</title>
 
-        <para>Setting a parameter value with Model.setparameter only changes
-        the value in the vector loaded when jmi.Model was created, which means
+        <para>Setting a parameter value with Model.set_value only changes the
+        value in the vector loaded when jmi.Model was created, which means
         that they will not be saved. To save all changes made to parameters in
         a model, the values have to be written to the XML values file.</para>
 
@@ -1444,7 +1403,7 @@ cstr.write_parameters_to_XML()
         <para>If this method is called without arguments the values will be
         written to the XML file which was created when the model was compiled
         (following the name conventions mentioned above). It is also possible
-        to save the changes in a new XML file. This is quite convienient since
+        to save the changes in a new XML file. This is quite convenient since
         different parameter value settings can easily be saved and loaded in
         the model.</para>
 
