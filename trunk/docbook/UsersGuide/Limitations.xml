@@ -38,7 +38,8 @@
         </listitem>
 
         <listitem>
-          <para>Parsing of Modelica 3.0</para>
+          <para>Parsing of full Modelica 3.2 (Modelica 3.0 is
+          supported)</para>
         </listitem>
 
         <listitem>
