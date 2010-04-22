@@ -19,15 +19,12 @@
 import os.path
 
 # Import the JModelica.org Python packages
-import jmodelica
-import jmodelica.jmi as jmi
+from jmodelica import jmi
 from jmodelica.compiler import OptimicaCompiler
-from jmodelica.optimization import ipopt
-from jmodelica.initialization.ipopt import *
+from jmodelica import initialize
 
 # Import numerical libraries
 import numpy as N
-import ctypes as ct
 import matplotlib.pyplot as plt
 
 import scipy.integrate as int
@@ -54,14 +51,7 @@ def run_demo(with_plots=True):
     a1_nom = qt_static.get_value("a1")
     a2_nom = qt_static.get_value("a2")
 
-    # Create NLP
-    nlp = NLPInitialization(qt_static,stat=1)
-
-    # Create optimizer
-    ipopt_nlp = InitializationOptimizer(nlp)
-
-    # Solve problem
-    ipopt_nlp.init_opt_ipopt_solve();
+    (qt_static, res) = initialize(qt_static, alg_args={'stat':1})
 
     print "Optimal parameter values:"
     print "a1: %2.2e (nominal: %2.2e)" % (qt_static.get_value("a1"),a1_nom)

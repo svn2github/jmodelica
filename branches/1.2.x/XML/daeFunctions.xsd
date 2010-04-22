@@ -9,7 +9,16 @@
 		</xs:annotation>
 		<xs:sequence>
 			<xs:element name="Name" type="exp:QualifiedName"/>
-			<xs:element name="Size" type="exp:Exp" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="Record" type="exp:QualifiedName" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Qualified Name of the record type (in case the variable is a Record)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="Size" type="exp:Exp" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Array size index expressions</xs:documentation>
+				</xs:annotation>
+			</xs:element>
 			<xs:element name="BindingExpression" type="exp:Exp" minOccurs="0"/>
 		</xs:sequence>
 		<xs:attribute name="type" use="required">
@@ -19,9 +28,31 @@
 					<xs:enumeration value="Integer"/>
 					<xs:enumeration value="Boolean"/>
 					<xs:enumeration value="String"/>
+					<xs:enumeration value="Record"/>
 				</xs:restriction>
 			</xs:simpleType>
 		</xs:attribute>
+		<xs:attribute name="variability" default="continuous">
+			<xs:annotation>
+				<xs:documentation>To be filled if the variable is a constant or a parameter</xs:documentation>
+			</xs:annotation>
+			<xs:simpleType>
+				<xs:restriction base="xs:normalizedString">
+					<xs:enumeration value="parameter"/>
+					<xs:enumeration value="constant"/>
+					<xs:enumeration value="continuous"/>
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
+	</xs:complexType>
+	<xs:complexType name="RecordVariable">
+		<xs:annotation>
+			<xs:documentation>Declaration of a record variable</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="Name" type="exp:QualifiedName"/>
+			<xs:element name="Field" type="fun:FunctionVariable" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
 	</xs:complexType>
 	<xs:complexType name="DerivativeInputVariable">
 		<xs:annotation>
@@ -61,6 +92,7 @@
 					</xs:annotation>
 					<xs:complexType>
 						<xs:sequence>
+							<xs:element name="Name" type="exp:QualifiedName"/>
 							<xs:element name="OutputVariable" type="fun:FunctionVariable" nillable="true">
 								<xs:annotation>
 									<xs:documentation>Output of the inverse function. The variable must be an input of the source function</xs:documentation>
@@ -74,7 +106,6 @@
 							<xs:element name="ProtectedVariable" type="fun:FunctionVariable" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
 							<xs:element name="Algorithm" type="fun:Algorithm" minOccurs="0"/>
 						</xs:sequence>
-						<xs:attribute name="name" type="xs:normalizedString" use="required"/>
 					</xs:complexType>
 				</xs:element>
 				<xs:element name="DerivativeFunction" minOccurs="0" maxOccurs="unbounded">
@@ -83,6 +114,7 @@
 					</xs:annotation>
 					<xs:complexType>
 						<xs:sequence>
+							<xs:element name="Name" type="exp:QualifiedName"/>
 							<xs:element name="OutputVariable" type="fun:FunctionVariable" nillable="true" maxOccurs="unbounded"/>
 							<xs:element name="InputVariable" type="fun:DerivativeInputVariable" nillable="true" maxOccurs="unbounded">
 								<xs:annotation>
@@ -92,30 +124,9 @@
 							<xs:element name="ProtectedVariable" type="fun:FunctionVariable" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
 							<xs:element name="Algorithm" type="fun:Algorithm" minOccurs="0"/>
 						</xs:sequence>
-						<xs:attribute name="name" type="xs:normalizedString" use="required"/>
 					</xs:complexType>
 				</xs:element>
 			</xs:sequence>
-		</xs:complexType>
-	</xs:element>
-	<xs:element name="ExternalFunction">
-		<xs:annotation>
-			<xs:documentation>Function definition calling external algorithm procedural code. Element includes the path</xs:documentation>
-		</xs:annotation>
-		<xs:complexType>
-			<xs:complexContent>
-				<xs:extension base="exp:QualifiedName">
-					<xs:attribute name="language" default="C">
-						<xs:simpleType>
-							<xs:restriction base="xs:normalizedString">
-								<xs:enumeration value="C"/>
-								<xs:enumeration value="Modelica"/>
-								<xs:enumeration value="Fortran77"/>
-							</xs:restriction>
-						</xs:simpleType>
-					</xs:attribute>
-				</xs:extension>
-			</xs:complexContent>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="FunctionsList">
@@ -123,10 +134,19 @@
 			<xs:documentation>List of user-defined functions</xs:documentation>
 		</xs:annotation>
 		<xs:complexType>
-			<xs:choice minOccurs="0" maxOccurs="unbounded">
+			<xs:sequence minOccurs="0" maxOccurs="unbounded">
 				<xs:element ref="fun:Function"/>
-				<xs:element ref="fun:ExternalFunction"/>
-			</xs:choice>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="RecordsList">
+		<xs:annotation>
+			<xs:documentation>List of record declarations</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence minOccurs="0" maxOccurs="unbounded">
+				<xs:element name="Record" type="fun:RecordVariable"/>
+			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
 </xs:schema>

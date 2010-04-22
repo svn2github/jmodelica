@@ -36,7 +36,7 @@ file. Make sure to run
  > make install
 
 Notice that a compiled version of Ipopt is included in the
-JModelica.org-SDK installer.
+JModelica.org-SDK installer for Windows.
 
 3. Get Sundials 
 
@@ -44,7 +44,8 @@ Download Sundials from
 https://computation.llnl.gov/casc/sundials/main.html. Unzip the
 tar-ball and put in a directory that does not hold any spaces nor ~
 character in its path. Build the package according to its
-INSTALL_NOTES file.
+INSTALL_NOTES file. Sundials is also included in the JModelica.org-SDK
+for Windows.
 
 4. Configure
 
@@ -55,14 +56,14 @@ directory for building the platform
  > mkdir build
  > cd build
  > ../configure --with-ipopt=/path/to/ipopt-install-dir \
-     --with-sundials=/path/to/ipopt-install-dir
+     --with-sundials=/path/to/sundials-install-dir
 
-The argument --with-ipopt is optional. Notice, however, that if it is
-not given, only parts of the software will be built and the
-functionality of the platform will be limited. The same applies to
---with-sundials. You may want to give additional arguments to
-configure. Type configure --help for information. By default, the
-installation directory (--prefix) is set to /usr/local/jmodelica.
+The arguments --with-ipopt and --with-sundials are optional. Notice,
+however, that if they are not given, only parts of the software will
+be built and the functionality of the platform will be limited. You
+may want to give additional arguments to configure. Type configure
+--help for information. By default, the installation directory
+(--prefix) is set to /usr/local/jmodelica.
 
 5. Build and install
 
@@ -106,10 +107,8 @@ In order to run the JModelica.org compilers from Python, the packages
    the test suits.)
 
 need to be installed. The JModelica.org has been tested on Python 2.5
-and Python 2.6. For Windows users, the python(x,y) distribution
-(www.pythonxy.com), containing NumPy, SciPy and Matplotlib, is
-recommended. Notice that the JModelica.org-SDK and JModelica.org
-installers for Windows will install JPype, lxml and Nose
+and Python 2.6. Notice that the JModelica.org-SDK and JModelica.org
+installers for Windows will install JPype, lxml, Cython and Nose
 automatically. Linux and Mac OS X users need to install these packages
 manually.
 
@@ -130,18 +129,20 @@ JModelica.org supports the following environment variables:
    separated by semicolons and on Linux/Mac OS X they are separated
    by colons.
 
-On Windows is only necessary to set the variable JMODELICA_HOME as a
-global environment variable, since the other variables are set in the
-Python script startup.py, which is executed when the jmodelica package
-is imported into Python. 
+On Windows it is only necessary to set the variable JMODELICA_HOME as
+a global environment variable, since the other variables are set in
+the Python script startup.py, which is executed when the jmodelica
+package is imported into Python. The menu shortcuts provided by the
+SDK and the binary installers for Windows will set this environment
+variable automatically when Python/Ipython is started.
 
 For Linux and Mac OS X users we recommend using the scripts:
 
-$JMODELICA_HOME/Python/jm_ipython.sh
+$JMODELICA_HOME/bin/jm_ipython.sh
 
 or
 
-$JMODELICA_HOME/Python/jm_python.sh
+$JMODELICA_HOME/bin/jm_python.sh
 
 to start IPython (recommended) or Python. In these scripts, the
 default values of the environment variables are set to match your
@@ -181,9 +182,5 @@ This will list all required packages, if they are installed and
 package version (if available). Compare your status output to the 
 list of required packages which can be found in this file under: 
 'Running JModelica.org from Python' or on the homepage www.jmodelica.org.
-
-
-=======
-Issues:
 
 

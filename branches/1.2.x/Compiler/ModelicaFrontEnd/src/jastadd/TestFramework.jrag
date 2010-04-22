@@ -58,7 +58,6 @@ aspect TestFramework {
 
 
 	public boolean ASTNode.collectTestCases(TestSuite ts, String className) {
-		log.debug("ASTNode.collectTestCases");
 		for (int i=0;i<getNumChild();i++)
 			if (getChild(i).collectTestCases(ts,className))
 				return true;
@@ -66,9 +65,7 @@ aspect TestFramework {
 	}
 
 	public boolean FullClassDecl.collectTestCases(TestSuite ts, String className) {
-		log.debug("FullClassDecl.collectTestCases: "+ qualifiedName() + " looking for " + className);
 		if (qualifiedName().equals(className)) {
-		    log.debug("FullClassDecl.collectTestCases: found "+className);
 			collectTestCases(ts);
 			return true;
 		}
@@ -95,7 +92,6 @@ aspect TestFramework {
 	}
 
 	public void ElementModification.collectTestCasesEM(String name, TestSuite ts) {
-		log.debug("+ElementModification.collectTestCasesEM: "+ getName().qualifiedName() + " looking for: "+name);
 		if (name.equals(getName().qualifiedName())) {
 			if (name.equals("JModelica"))  
 				getModification().collectTestCasesEM("unitTesting",ts);
@@ -105,137 +101,65 @@ aspect TestFramework {
 	}
 
 	public void FunctionCall.collectTestCasesFC(String name, TestSuite ts) {
-		//log.debug("+FunctionCall.collectTestCasesFC: " + name);
-		if (name.equals(getName().qualifiedName())) {
-			if (name.equals("JModelica.UnitTesting"))
-				getFunctionArguments().collectTestCasesNA("testCase",ts);
-			else if (name.equals("JModelica.UnitTesting.FlatteningTestCase")) {
-				FlatteningTestCase ftc = new FlatteningTestCase();
-				for (int i=0;i<getFunctionArguments().getNumNamedArgument();i++) {
-					NamedArgument na = getFunctionArguments().getNamedArgument(i);
-					if (na.getName().name().equals("name"))
-						ftc.setName(((StringLitExp)na.getExp()).getSTRING());
-					else if (na.getName().name().equals("description"))
-						ftc.setDescription(((StringLitExp)na.getExp()).getSTRING());	
-					else if (na.getName().name().equals("flatModel"))
-						ftc.setFlatModel((((StringLitExp)na.getExp()).getSTRING()).replace("\\\"","\""));		
-						//ftc.setFlatModel((((StringLitExp)na.getExp()).getSTRING()));		
-				}
-				log.debug(">>>>>>>>");
-				log.debug(ftc.getFlatModel());
-				ftc.setSourceFileName(root().fileName());
-				ftc.setClassName(enclosingClassDecl().qualifiedName());
-				ts.add(ftc);
-			}else if (name.equals("JModelica.UnitTesting.FClassMethodTestCase")) {
-				FClassMethodTestCase ftc = new FClassMethodTestCase();
-				for (int i=0;i<getFunctionArguments().getNumNamedArgument();i++) {
-					NamedArgument na = getFunctionArguments().getNamedArgument(i);
-					if (na.getName().name().equals("name"))
-						ftc.setName(((StringLitExp)na.getExp()).getSTRING());
-					else if (na.getName().name().equals("description"))
-						ftc.setDescription(((StringLitExp)na.getExp()).getSTRING());	
-					else if (na.getName().name().equals("methodName"))
-						ftc.setMethodName(((StringLitExp)na.getExp()).getSTRING());	
-					else if (na.getName().name().equals("methodResult"))
-						ftc.setOutput((((StringLitExp)na.getExp()).getSTRING()).replace("\\\"","\""));		
-						//ftc.setFlatModel((((StringLitExp)na.getExp()).getSTRING()));		
-				}
-				log.debug(">>>>>>>>");
-				ftc.setSourceFileName(root().fileName());
-				ftc.setClassName(enclosingClassDecl().qualifiedName());
-				ts.add(ftc);
-			}else if (name.equals("JModelica.UnitTesting.TransformCanonicalTestCase")) {
-					TransformCanonicalTestCase tctc = new TransformCanonicalTestCase();
-					for (int i=0;i<getFunctionArguments().getNumNamedArgument();i++) {
-						NamedArgument na = getFunctionArguments().getNamedArgument(i);
-						if (na.getName().name().equals("name"))
-							tctc.setName(((StringLitExp)na.getExp()).getSTRING());
-						else if (na.getName().name().equals("description"))
-							tctc.setDescription(((StringLitExp)na.getExp()).getSTRING());	
-						else if (na.getName().name().equals("flatModel"))
-							tctc.setFlatModel((((StringLitExp)na.getExp()).getSTRING()).replace("\\\"","\""));		
-							//ftc.setFlatModel((((StringLitExp)na.getExp()).getSTRING()));		
+		if (name.equals(getName().qualifiedName()) && name.equals("JModelica.UnitTesting")) {
+			getFunctionArguments().collectTestCasesNA("testCase", ts);
+		} else if (getName().qualifiedName().startsWith(name) && name.equals("JModelica.UnitTesting.")) {
+			// Find the name of the test case to create
+			String className = getName().qualifiedName().substring(name.length());
+			String fullName = TestCase.class.getName().replace("TestCase", className);
+			String attrName = null;
+			try {
+				// Get a class object for the test case class
+				Class cl = Class.forName(fullName);
+				
+				// Check if it is a test case
+				if (TestCase.class.isAssignableFrom(cl)) {
+					// Create an object of the new test case class
+					TestCase tc = (TestCase) cl.newInstance();
+					
+					// Add all attributes
+					for (NamedArgument na : getFunctionArguments().getNamedArguments()) {
+						attrName = na.getName().name();
+						// TODO: Use type() and ceval() instead.
+						if (na.getExp() instanceof StringLitExp) {
+							String val = ((StringLitExp) na.getExp()).getSTRING().replace("\\\"","\"");
+							
+							// Get the method for setting this attribute
+							String methodName = "set" + Character.toUpperCase(attrName.charAt(0)) + attrName.substring(1);
+							Method m = cl.getMethod(methodName, String.class);
+							
+							// Call the method
+							m.invoke(tc, val);
+						} else {
+							log.debug("Creating test case '" + className + "' - attribute '" + 
+									attrName + "' is assigned an unsupported expression type");
+						}
 					}
-					tctc.setSourceFileName(root().fileName());
-					tctc.setClassName(enclosingClassDecl().qualifiedName());
-					ts.add(tctc);
-			} else if (name.equals("JModelica.UnitTesting.GenericCodeGenTestCase")) {
-				GenericCodeGenTestCase cgtc = new GenericCodeGenTestCase();
-				for (int i=0;i<getFunctionArguments().getNumNamedArgument();i++) {
-					NamedArgument na = getFunctionArguments().getNamedArgument(i);
-					if (na.getName().name().equals("name"))
-						cgtc.setName(((StringLitExp)na.getExp()).getSTRING());
-					else if (na.getName().name().equals("description"))
-						cgtc.setDescription(((StringLitExp)na.getExp()).getSTRING());	
-					else if (na.getName().name().equals("generatedCode"))
-						cgtc.setGenCode((((StringLitExp)na.getExp()).getSTRING()).replace("\\\"","\""));		
-					else if (na.getName().name().equals("template"))
-						cgtc.setTemplate((((StringLitExp)na.getExp()).getSTRING()).replace("\\\"","\""));			
+					
+					// Set generic information of the test case and add to list
+					tc.setSourceFileName(root().fileName());
+					tc.setClassName(enclosingClassDecl().qualifiedName());
+					ts.add(tc);
+					log.debug("Created test case '" + className + "' for class '" + tc.getClassName() + "'");
 				}
-				log.debug(">>>>>>>>");
-				cgtc.setSourceFileName(root().fileName());
-				cgtc.setClassName(enclosingClassDecl().qualifiedName());
-				ts.add(cgtc);
-			} else if (name.equals("JModelica.UnitTesting.ErrorTestCase")) {
-				ErrorTestCase etc = new ErrorTestCase();
-				for (int i=0;i<getFunctionArguments().getNumNamedArgument();i++) {
-					NamedArgument na = getFunctionArguments().getNamedArgument(i);
-					if (na.getName().name().equals("name"))
-						etc.setName(((StringLitExp)na.getExp()).getSTRING());
-					else if (na.getName().name().equals("description"))
-						etc.setDescription(((StringLitExp)na.getExp()).getSTRING());	
-					else if (na.getName().name().equals("errorMessage"))
-						etc.setErrorMessage(((StringLitExp)na.getExp()).getSTRING().replace("\\\"","\""));		
-				} 
-				etc.setSourceFileName(root().fileName());
-				etc.setClassName(enclosingClassDecl().qualifiedName());
-				ts.add(etc);
-			}else if (name.equals("JModelica.UnitTesting.ComplianceErrorTestCase")) {
-				ComplianceErrorTestCase etc = new ComplianceErrorTestCase();
-				for (int i=0;i<getFunctionArguments().getNumNamedArgument();i++) {
-					NamedArgument na = getFunctionArguments().getNamedArgument(i);
-					if (na.getName().name().equals("name"))
-						etc.setName(((StringLitExp)na.getExp()).getSTRING());
-					else if (na.getName().name().equals("description"))
-						etc.setDescription(((StringLitExp)na.getExp()).getSTRING());	
-					else if (na.getName().name().equals("errorMessage"))
-						etc.setErrorMessage(((StringLitExp)na.getExp()).getSTRING().replace("\\\"","\""));		
-				}
-				etc.setSourceFileName(root().fileName());
-				etc.setClassName(enclosingClassDecl().qualifiedName());
-				ts.add(etc);
-			} else if (name.equals("JModelica.UnitTesting.WarningTestCase")) {
-				WarningTestCase etc = new WarningTestCase();
-				for (int i=0;i<getFunctionArguments().getNumNamedArgument();i++) {
-					NamedArgument na = getFunctionArguments().getNamedArgument(i);
-					if (na.getName().name().equals("name"))
-						etc.setName(((StringLitExp)na.getExp()).getSTRING());
-					else if (na.getName().name().equals("description"))
-						etc.setDescription(((StringLitExp)na.getExp()).getSTRING());	
-					else if (na.getName().name().equals("errorMessage"))
-						etc.setErrorMessage(((StringLitExp)na.getExp()).getSTRING().replace("\\\"","\""));		
-				}
-				etc.setSourceFileName(root().fileName());
-				etc.setClassName(enclosingClassDecl().qualifiedName());
-				ts.add(etc);
+			} catch (ClassNotFoundException e) {
+				// TODO: Maybe we should throw exceptions instead of log?
+				// No such class was found - log that
+				log.debug("Creating test case '" + className + "' - class not found");
+			} catch (NoSuchMethodException e) {
+				// No such method was found - log that
+				log.debug("Creating test case '" + className + "' - attribute '" + attrName + "' not found");
+			} catch (Exception e) {
+				// The test case class did not behave as expected - log that
+				log.debug("Creating test case '" + className + "' - malformed test case class");
 			}
 		}
 	}
 
 	public void NamedArgument.collectTestCasesNA(String name, TestSuite ts) {
-		log.debug("+NamedArgument.collectTestCasesNA: "+name);
-		if (name.equals(getName().qualifiedName())) {
-			if (name.equals("testCase")) {
-				getExp().collectTestCasesFC("JModelica.UnitTesting.FlatteningTestCase",ts);
-				getExp().collectTestCasesFC("JModelica.UnitTesting.TransformCanonicalTestCase",ts);
-				getExp().collectTestCasesFC("JModelica.UnitTesting.ErrorTestCase",ts);
-				getExp().collectTestCasesFC("JModelica.UnitTesting.WarningTestCase",ts);
-				getExp().collectTestCasesFC("JModelica.UnitTesting.ComplianceErrorTestCase",ts);
-				getExp().collectTestCasesFC("JModelica.UnitTesting.GenericCodeGenTestCase",ts);
-				getExp().collectTestCasesFC("JModelica.UnitTesting.FClassMethodTestCase",ts);
-			}
+		if (name.equals(getName().qualifiedName()) && name.equals("testCase")) {
+			getExp().collectTestCasesFC("JModelica.UnitTesting.", ts);
 		}
-	
 	}
 
 }

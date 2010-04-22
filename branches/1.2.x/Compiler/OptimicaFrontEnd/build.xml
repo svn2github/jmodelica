@@ -202,28 +202,10 @@
 		<!--<delete dir="bin"/>-->
 	</target>
 
-	<!-- Generates tests from a single .mo file -->
-	<target name="gen-test-file">
-		<trycatch>
-			<try>
-				<java classname="org.jmodelica.optimica.compiler.JunitGenerator" 
-						classpath=".:bin/optimica.jar:${beaver_dir}/lib/beaver.jar:bin/util.jar:../ModelicaCompiler/bin/ModelicaCompiler.jar" 
-						fork="true" failonerror="true" dir="." maxmemory="512M">
-					<arg value="${gen-test_path}" />
-					<arg value="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated" />
-				</java>
-			</try>
-			<catch>
-				<echo file="gen-test-file-fail">${gen-test_path}</echo>
-			</catch>
-		</trycatch>
-	</target>
-
 	<!-- TARGET gen-test -->
 	<target name="gen-test" depends="build">
-		<delete file="gen-test-file-fail" />
 		<mkdir dir="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated" />
-		<foreach target="gen-test-file" param="gen-test_path" inheritall="true" parallel="true">
+		<for param="gen-test.path">
 			<path>
 				<fileset dir="${modelica_front_end_path}/src/test/modelica">
 					<include name="*.mo" />
@@ -232,14 +214,15 @@
 					<include name="*.mo" />
 				</fileset>
 			</path>
-		</foreach>
-		<if>
-			<available file="gen-test-file-fail" />
-			<then>
-				<delete file="gen-test-file-fail" />
-				<fail>Generating tests failed.</fail>
-			</then>
-		</if>
+			<sequential>
+				<java classname="org.jmodelica.optimica.compiler.JunitGenerator" 
+						classpath=".:bin/optimica.jar:${beaver_dir}/lib/beaver.jar:bin/util.jar:../ModelicaCompiler/bin/ModelicaCompiler.jar" 
+						fork="true" failonerror="true" dir="." maxmemory="512M">
+					<arg value="@{gen-test.path}" />
+					<arg value="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated" />
+				</java>
+			</sequential>
+		</for>
 		<javac compiler="javac1.5" debug="true" destdir="bin" classpath="${junit_dir}/junit-4.5.jar">
 			<src path="${test_junit-gen_dir}/" />
 			<include name="org/jmodelica/test/junitgenerated/*.java" />

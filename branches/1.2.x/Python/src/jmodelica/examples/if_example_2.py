@@ -18,17 +18,11 @@
 import os
 import numpy as N
 import pylab as p
-import matplotlib
 
 import jmodelica
-import jmodelica.jmi as jmi
-from jmodelica.tests import get_example_path
+from jmodelica import jmi
 from jmodelica.compiler import ModelicaCompiler
-try:
-    from jmodelica.simulation.assimulo import JMIDAE, write_data
-    from Assimulo.Implicit_ODE import IDA
-except:
-    raise ImportError('Could not find Assimulo package.')
+from jmodelica import simulate
 
 def run_demo(with_plots=True):
     """
@@ -46,7 +40,7 @@ def run_demo(with_plots=True):
     
     mc = ModelicaCompiler()
     
-    # Comile the Modelica model first to C code and
+    # Compile the Modelica model first to C code and
     # then to a dynamic library
     mc.compile_model(model_name,mofile,target='ipopt')
 
@@ -57,15 +51,8 @@ def run_demo(with_plots=True):
     model.set_sw(N.array([1,1]))
     
     #Simulate
-    if_mod = JMIDAE(model)
-    if_sim = IDA(if_mod)
-    if_sim(5.0)
-    
-    #Write Data
-    write_data(if_sim)
-
-    res = jmodelica.io.ResultDymolaTextual('IfExpExamples_IfExpExample2_result.txt')
-
+    (model, res) = simulate(model,
+							alg_args={'final_time':5.0})
     # Get results
     x = res.get_variable_data('x')
     u = res.get_variable_data('u')

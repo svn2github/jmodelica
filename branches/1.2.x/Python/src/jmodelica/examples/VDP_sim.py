@@ -19,14 +19,7 @@ import os
 import numpy as N
 import pylab as p
 
-import jmodelica
-import jmodelica.jmi as jmi
-from jmodelica.compiler import OptimicaCompiler
-try:
-    from Assimulo.Explicit_ODE import CVode
-    from jmodelica.simulation.assimulo import JMIODE, write_data
-except:
-    pass
+from jmodelica import simulate
 
 def run_demo(with_plots=True):
     """
@@ -37,31 +30,13 @@ def run_demo(with_plots=True):
 
     model_name = 'VDP_pack.VDP_Opt'
     mofile = curr_dir+'/files/VDP.mo'
-    package = 'VDP_pack_VDP_Opt'
     
-    
-    oc = OptimicaCompiler()
-    oc.set_boolean_option('state_start_values_fixed',True)
-    
-    # Comile the Modelica model first to C code and
-    # then to a dynamic library
-    oc.compile_model(model_name,mofile)
+    (model, res) = simulate(model_name, mofile, 
+                            compiler='optimica',
+                            compiler_options={'state_start_values_fixed':True},
+                            alg_args={'final_time':20,'num_communication_points':0,'solver':'CVode'},
+                            solver_args={'discr':'BDF','iter':'Newton'})
 
-    # Load the dynamic library and XML data
-    model=jmi.Model(package)
-    
-    VDP_mod = JMIODE(model)
-    
-    VDP_sim = CVode(VDP_mod)
-    VDP_sim.discr = 'BDF' #discretication method, default Adams
-    VDP_sim.iter = 'Newton' #iteration method, default FixedPoint
-    VDP_sim(20) #Runs the simulation
-    
-    write_data(VDP_sim)
-    
-    # Load the file we just wrote to file
-    res = jmodelica.io.ResultDymolaTextual('VDP_pack_VDP_Opt_result.txt')
-    
     x1=res.get_variable_data('x1')
     x2=res.get_variable_data('x2')
     
@@ -69,7 +44,7 @@ def run_demo(with_plots=True):
            "Wrong value in simulation result in VDP_assimulo.py" 
     assert N.abs(x2.x[-1] - 1.57833994) < 1e-5, \
            "Wrong value in simulation result in VDP_assimulo.py"
-    assert VDP_sim.stats['Number of F-Eval During Jac-Eval         '] == 0
+    #assert VDP_sim.stats['Number of F-Eval During Jac-Eval         '] == 0
     
     if with_plots:
         fig = p.figure()

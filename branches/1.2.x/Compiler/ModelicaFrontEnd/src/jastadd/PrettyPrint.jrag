@@ -1397,6 +1397,8 @@ aspect FlattPrettyPrint {
 	eq FSumExp.builtInName()      = "sum";
 	eq FLinspace.builtInName()    = "linspace";
 	
+	eq FUnsupportedBuiltIn.builtInName() = getName();
+	
 	
 	public void FForClauseE.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		str.print(indent+"for ");

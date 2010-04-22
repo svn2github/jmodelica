@@ -74,7 +74,7 @@ aspect ContentCheck {
 //	}
 	
 	public void FUnknownExternalLanguage.contentCheck() {
-		error("The external language specitication \"" + getLanguage() + "\" is not supported");
+		error("The external language specification \"" + getLanguage() + "\" is not supported");
 	}
 	
 	inh boolean FIterExp.iterExpUseOK();

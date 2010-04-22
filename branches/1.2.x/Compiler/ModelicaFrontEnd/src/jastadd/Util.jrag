@@ -567,8 +567,10 @@ aspect Names {
         getLastInstAccess().getFArraySubscripts();
     
     syn FArraySubscripts InstAccess.getFArraySubscripts() = null;
+    eq InstDot.getFArraySubscripts() = getRight().getFArraySubscripts();
 
     syn boolean InstAccess.hasFArraySubscripts() = false;
+    eq InstDot.hasFArraySubscripts() = getRight().hasFArraySubscripts();
     
     /**
      * \brief Set the array subscripts of the last name part.
@@ -1044,6 +1046,7 @@ aspect FlatFunctionUtils {
      inh boolean FQName.inFunction();
      inh boolean InstAssignable.inFunction();
      inh boolean InstExternal.inFunction();
+     inh boolean InstAccess.inFunction();
      inh boolean FExp.inFunction();
      inh boolean FIdUse.inFunction();
      inh boolean FStatement.inFunction();

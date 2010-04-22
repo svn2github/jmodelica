@@ -264,6 +264,17 @@ aspect InstFunctionBinding {
 				map.put("size",      new VarArgsBuiltInCreator(new FSizeExp(), 1, 2));
 				map.put("min",       new VarArgsBuiltInCreator(new FMinExp(),  1, 2));
 				map.put("max",       new VarArgsBuiltInCreator(new FMaxExp(),  1, 2));
+				
+				String[] unsupported = new String[] { 
+						// Ticket 678: Support for array related functions
+						"scalar", "vector", "matrix", "diagonal", "product", "outerProduct", "symmetric", "skew", 
+						// Ticket 664: Support all function-like operators
+						"sign", "Integer", "String", "div", "mod", "rem", "ceil", "floor", "delay", "cardinality", 
+						"semiLinear", "initial", "terminal", "smooth", "sample", "pre", "edge", "reinit"
+					};
+				for (String name : unsupported)
+					if (!map.containsKey(name))
+						map.put(name, new UnsupportedBuiltInCreator(name));
 			}
 			
 			private static class BuiltInCreator {
@@ -338,7 +349,24 @@ aspect InstFunctionBinding {
 				}
 				
 			}
-
+			
+			private static class UnsupportedBuiltInCreator extends InfArgsBuiltInCreator {
+				
+				private static final FUnsupportedBuiltIn tmpl = new FUnsupportedBuiltIn();
+				
+				private String name;
+				
+				public UnsupportedBuiltInCreator(String name) {
+					super(tmpl, 0);
+					this.name = name;
+				}
+				
+				protected void setArguments(FBuiltInFunctionCall res, InstFunctionArgument[] args) {
+					((FUnsupportedBuiltIn) res).setName(name);
+				}
+				
+			}
+			
 		}
 		
 	}

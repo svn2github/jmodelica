@@ -2824,4 +2824,16 @@ end CRecordDecl16;
 
 
 
+model RemoveCopyright
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="RemoveCopyright",
+         description="Test that licence tag is filtered out",
+         template="/* test copyright blurb */ test",
+         generatedCode="test"
+)})));
+end RemoveCopyright;
+
+
+
 end CCodeGenTests;

@@ -5,7 +5,7 @@ This base.py file holds base classes for simulation and optimization tests.
 
 import os
 import numpy
-
+import warnings
 import jmodelica.jmi as jmi
 import jmodelica.initialization.ipopt as ipopt_init
 from jmodelica.optimization import ipopt
@@ -17,7 +17,7 @@ try:
     from jmodelica.simulation.assimulo import JMIDAE, write_data
     from Assimulo.Implicit_ODE import IDA
 except:
-    raise ImportError('Could not find Assimulo package.')
+    warnings.warn('Could not load Assimulo module. Check jmodelica.check_packages()')
 
 _jm_home = os.environ.get('JMODELICA_HOME')
 _tests_path = os.path.join(_jm_home, "Python", "jmodelica", "tests")
@@ -61,7 +61,6 @@ class _BaseSimOptTest:
         self.abs_tol = abs_tol
         self.model_name = _model_name
         self.model = jmi.Model(self.model_name)
-        self.mod_assimulo = JMIDAE(self.model)
 
 
     def run(self):
@@ -244,7 +243,7 @@ class SimulationTest(_BaseSimOptTest):
         Any other named args are passed to sundials.
         """
         _BaseSimOptTest.setup_base(self, rel_tol, abs_tol)
-        
+        self.mod_assimulo = JMIDAE(self.model)
         self.final_time = final_time
         self.ncp = int((final_time-start_time)/time_step)
 

@@ -86,6 +86,19 @@
 		<xs:attribute name="type" type="xs:normalizedString"/>
 		<xs:attribute name="size" type="xs:unsignedInt"/>
 	</xs:complexType>
+	<xs:complexType name="RecordConstructor">
+		<xs:annotation>
+			<xs:documentation>Constructor function of a record</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="Name" type="exp:QualifiedName"/>
+			<xs:element name="Argument" type="exp:Exp" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Each argument must correspond (in order and type) to a field of the record definition</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
 	<xs:complexType name="QualifiedName">
 		<xs:annotation>
 			<xs:documentation>Qualified name</xs:documentation>
@@ -319,7 +332,7 @@
 	</xs:element>
 	<xs:element name="Array" type="exp:Array">
 		<xs:annotation>
-			<xs:documentation>Array definition</xs:documentation>
+			<xs:documentation>Constructor function of an array</xs:documentation>
 		</xs:annotation>
 	</xs:element>
 	<xs:element name="Range">
@@ -331,6 +344,11 @@
 				<xs:any namespace="##targetNamespace"/>
 			</xs:sequence>
 		</xs:complexType>
+	</xs:element>
+	<xs:element name="RecordConstructor" type="exp:RecordConstructor">
+		<xs:annotation>
+			<xs:documentation>Constructor function of a record</xs:documentation>
+		</xs:annotation>
 	</xs:element>
 	<xs:element name="UndefinedDimension" fixed="">
 		<xs:annotation>

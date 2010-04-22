@@ -109,6 +109,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 				<xs:element ref="equ:InitialEquations" minOccurs="0"/>
 				<xs:element ref="opt:Optimization" minOccurs="0"/>
 				<xs:element ref="fun:FunctionsList" minOccurs="0"/>
+				<xs:element ref="fun:RecordsList" minOccurs="0"/>
 			</xs:sequence>
 			<xs:attribute name="fmiVersion" type="xs:normalizedString" use="required" fixed="1.0"/>
 			<xs:attribute name="modelName" type="xs:string" use="required">

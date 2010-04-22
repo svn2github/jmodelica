@@ -989,4 +989,27 @@ end TypeTests.ArrayTypeTest5;
 end ArrayTypeTest5;
 
 
+
+model UnknownTypeAccess1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="UnknownTypeAccess1",
+         description="Using component of model type as expression",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 999, column 8:
+  Type error in expression
+")})));
+
+ model C
+  Real x=1;
+ end C;
+ C c;
+equation
+ c.x = c;
+end UnknownTypeAccess1;
+
+
+
 end TypeTests;

@@ -21,7 +21,7 @@ import os
 import numpy as N
 import nose
 import nose.tools
-
+import warnings
 import jmodelica
 from jmodelica.compiler import ModelicaCompiler
 from jmodelica.compiler import OptimicaCompiler
@@ -29,7 +29,16 @@ from jmodelica import jmi
 from jmodelica.tests import testattr
 from jmodelica.algorithm_drivers import InvalidAlgorithmArgumentException
 from jmodelica.algorithm_drivers import InvalidSolverArgumentException
-from Assimulo.Explicit_ODE import *
+
+try:
+    from Assimulo.Explicit_ODE import *
+except ImportError:
+    warnings.warn('Could not load Assimulo module. Check jmodelica.check_packages()')
+
+try:
+    ipopt_present = jmodelica.environ['IPOPT_HOME']
+except:
+    ipopt_present = False
 
 int = N.int32
 N.int = N.int32
@@ -55,13 +64,14 @@ mc.set_boolean_option('state_start_values_fixed',True)
 oc = OptimicaCompiler()
 oc.set_boolean_option('state_start_values_fixed',True)
 
-mc.compile_model(cpath_rlc, fpath_rlc, target='ipopt')
-oc.compile_model(cpath_vdp, fpath_vdp, target='ipopt')
+if ipopt_present:
+    mc.compile_model(cpath_rlc, fpath_rlc, target='ipopt')
+    oc.compile_model(cpath_vdp, fpath_vdp, target='ipopt')
 
-model_rlc = jmi.Model(dll_rlc)
-model_vdp = jmi.Model(dll_vdp)
+    model_rlc = jmi.Model(dll_rlc)
+    model_vdp = jmi.Model(dll_vdp)
 
-@testattr(stddist = True)
+@testattr(ipopt = True)
 def test_initialize():
     """ Test the jmodelica.initialize function using all default parameters. """
     mofile_pend = os.path.join('files','Pendulum_pack.mo')
@@ -95,7 +105,7 @@ def test_initialize():
     assert N.abs(ddx.x[-1] - 0) < 1e-3, \
         "Wrong value of variable der(dx) using jmodelica.initialize."
 
-@testattr(stddist = True)
+@testattr(ipopt = True)
 def test_optimize():
     """ Test the jmodelica.optimize function using all default parameters. """
     mofile_pend = os.path.join('files','Pendulum_pack.mo')
@@ -110,7 +120,7 @@ def test_optimize():
         "Wrong value of cost function using jmodelica.optimize with vdp."
    
 
-@testattr(stddist = True)
+@testattr(ipopt = True)
 def test_optimize_set_n_cp():
     """ Test the jmodelica.optimize function and setting n_cp in alg_args.
     """
@@ -122,7 +132,7 @@ def test_optimize_set_n_cp():
             "Wrong value of cost function using jmodelica.optimize with vdp. \
             cost.x[-1] was: "+str(cost.x[-1])
             
-@testattr(stddist = True)
+@testattr(ipopt = True)
 def test_optimize_set_args():
     """Test the jmodelica.optimize function and setting some algorithm and solver args.
     """
@@ -141,7 +151,7 @@ def test_optimize_set_args():
             "Wrong value of cost function using jmodelica.optimize with vdp."
 
 
-@testattr(stddist = True)
+@testattr(ipopt = True)
 def test_optimize_invalid_algorithm_arg():
     """ Test that the jmodelica.optimize function raises exception for an 
         invalid algorithm argument.
@@ -155,7 +165,7 @@ def test_optimize_invalid_algorithm_arg():
                              model_vdp,
                              alg_args={'ne':10})
 
-@testattr(stddist = True)
+@testattr(assimulo = True)
 def test_simulate():
     """ Test the jmodelica.simulate function using all default parameters."""
     mofile_rlc = os.path.join('files','RLC_Circuit.mo')
@@ -168,7 +178,7 @@ def test_simulate():
     assert N.abs(resistor_v.x[-1] - 0.138037041741) < 1e-3, \
         "Wrong value in simulation result using jmodelica.simulate with rlc."
         
-@testattr(stddist = True)
+@testattr(assimulo = True)
 def test_simulate_set_alg_arg():
     """ Test the jmodelica.simulate function and setting an algorithm argument."""    
     (model,res) = jmodelica.simulate(model_rlc, alg_args={'final_time':30.0})
@@ -177,7 +187,7 @@ def test_simulate_set_alg_arg():
     assert N.abs(resistor_v.x[-1] - 0.159255008028) < 1e-3, \
         "Wrong value in simulation result using jmodelica.simulate with rlc."
         
-@testattr(stddist = True)
+@testattr(assimulo = True)
 def test_simulate_set_probl_arg():
     """ Test that it is possible to set properties in assimulo and that an 
         exception is raised if the argument is invalid. """
@@ -188,7 +198,7 @@ def test_simulate_set_probl_arg():
                              model_rlc,
                              solver_args={'maxeter':10})   
         
-@testattr(stddist = True)
+@testattr(assimulo = True)
 def test_simulate_invalid_solver_arg():
     """ Test that the jmodelica.simulate function raises an exception for an 
         invalid solver argument.
@@ -198,7 +208,7 @@ def test_simulate_invalid_solver_arg():
                              model_rlc,
                              solver_args={'mxiter':10})
 
-@testattr(stddist = True)
+@testattr(assimulo = True)
 def test_simulate_invalid_algorithm_arg():
     """ Test that the jmodelica.optimize function raises exception for an 
         invalid algorithm argument.
@@ -208,7 +218,7 @@ def test_simulate_invalid_algorithm_arg():
                              model_rlc,
                              alg_args={'starttime':10})
       
-@testattr(stddist=True)
+@testattr(assimulo=True)
 def test_simulate_w_ode():
     """ Test jmodelica.simulate with ODE problem and setting solver args."""
     mofile_vdp = os.path.join('files', 'VDP.mo')
@@ -220,7 +230,7 @@ def test_simulate_w_ode():
                                      compiler='optimica',
                                      compiler_options={'state_start_values_fixed':True},
                                      compiler_target='model',
-                                     alg_args={'solver':CVode, 'final_time':20, 'num_communication_points':0},
+                                     alg_args={'solver':'CVode', 'final_time':20, 'num_communication_points':0},
                                      solver_args={'discr':'BDF', 'iter':'Newton'})
     x1=res.get_variable_data('x1')
     x2=res.get_variable_data('x2')

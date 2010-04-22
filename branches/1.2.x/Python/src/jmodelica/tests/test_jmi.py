@@ -17,15 +17,7 @@ from jmodelica.compiler import OptimicaCompiler
 from jmodelica.compiler import ModelicaCompiler
 import jmodelica.xmlparser as xp
 import jmodelica.io
-from jmodelica.initialization.ipopt import NLPInitialization
-from jmodelica.initialization.ipopt import InitializationOptimizer
-from jmodelica.optimization import ipopt
 
-try:
-    from jmodelica.simulation.assimulo import JMIODE
-    from Assimulo.Explicit_ODE import CVode
-except:
-    raise ImportError('Could not find Assimulo package.')
 
 int = N.int32
 N.int = N.int32
@@ -44,7 +36,7 @@ fpath_vdp = os.path.join(path_to_examples, model_vdp)
 cpath_vdp = "VDP_pack.VDP_Opt"
 fname_vdp = cpath_vdp.replace('.','_',1)
 oc.set_boolean_option('state_start_values_fixed',True)
-oc.compile_model(cpath_vdp, fpath_vdp, target='ipopt')
+oc.compile_model(cpath_vdp, fpath_vdp)#, target='ipopt')
 
 # constants used in TestJMIModel
 eval_alg = jmi.JMI_DER_CPPAD
@@ -57,7 +49,7 @@ fpath_rlc = os.path.join(path_to_examples, model_rlc)
 cpath_rlc = "RLC_Circuit"
 fname_rlc = cpath_rlc.replace('.','_',1)      
 mc.set_boolean_option('eliminate_alias_variables', True)
-mc.compile_model(cpath_rlc, fpath_rlc, target='ipopt')
+mc.compile_model(cpath_rlc, fpath_rlc)#, target='ipopt')
 
 class TestModel_VDP:
     """Test the high level model class, jmi.Model.
@@ -1139,7 +1131,7 @@ class TestJMIModel_VDP:
                "test_jmi.py: test_Model_dae_get_sizes: Wrong number of DAE equations." 
     
         res_n_eq_F0 = 6
-        res_n_eq_F1 = 7
+        res_n_eq_F1 = 4
         res_n_eq_Fp = 0
         res_n_eq_R0 = 0
         n_eq_F0,n_eq_F1,n_eq_Fp,n_eq_R0 = self.vdp.jmimodel.init_get_sizes()
@@ -1191,36 +1183,3 @@ class TestJMIModel_VDP:
         assert n_eq_F0==res_n_eq_F0 and n_eq_F1==res_n_eq_F1 and n_eq_Fp==res_n_eq_Fp and n_eq_R0==res_n_eq_R0, \
                "test_jmi.py: test_Model_dae_get_sizes: Wrong number of DAE initialization equations."
                
-class TestModelSimulation:
-    """Test the JMIModel instance of the Van der Pol oscillator."""
-    
-    def __init__(self):
-        """Test setUp. Load the test model."""
-        self.vdp = jmi.Model(fname_vdp)
-        
-    def test_opt_jac_non_zeros(self):
-        """Testing the number of non-zero elements in VDP after simulation.
-        
-        Note:
-        This test is model specific and not generic as most other
-        tests in this class.
-        """
-        simulator_mod = JMIODE(self.m)
-        simulator = CVode(simulator_mod)
-        simulator.simulate(10)
-
-        T, ys = [simulator.t, simulator.y]
-        
-        assert self.vdp.jmimodel._n_z > 0, "Length of z should be greater than zero."
-        print 'n_z.value:', self.vdp.jmimodel._n_z.value
-        n_cols, n_nz = self.vdp.jmimodel.opt_dJ_dim(jmi.JMI_DER_CPPAD,
-                                                    jmi.JMI_DER_SPARSE,
-                                                    jmi.JMI_DER_X_P,
-                                                    n.ones(self.vdp.jmimodel._n_z.value,
-                                                           dtype=int))
-        
-        print 'n_nz:', n_nz
-        
-        assert n_cols > 0, "The resulting should at least of one column."
-        assert n_nz > 0, "The resulting jacobian should at least have" \
-                         " one element (structurally) non-zero."

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- edited with XMLSpy v2009 (http://www.altova.com) by Magnus Gäfvert (Modelon AB) -->
+<!-- edited with XMLSpy v2010 (http://www.altova.com) by Magnus Gäfvert (Modelon AB) -->
 <xs:schema xmlns:opt="https://svn.jmodelica.org/trunk/XML/daeOptimization.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:exp="https://svn.jmodelica.org/trunk/XML/daeExpressions.xsd" targetNamespace="https://svn.jmodelica.org/trunk/XML/daeOptimization.xsd" elementFormDefault="qualified" attributeFormDefault="unqualified">
 	<xs:import namespace="https://svn.jmodelica.org/trunk/XML/daeExpressions.xsd" schemaLocation="optExpressions.xsd"/>
 	<xs:complexType name="Constraint">
@@ -26,7 +26,7 @@
 		</xs:annotation>
 		<xs:complexType>
 			<xs:sequence>
-				<xs:element name="ObjectiveFunction" type="exp:OptExp" minOccurs="0"/>
+				<xs:element name="ObjectiveFunction" type="exp:OptExp"/>
 				<xs:element name="IntervalStartTime" type="opt:TimeVariable"/>
 				<xs:element name="IntervalFinalTime" type="opt:TimeVariable"/>
 				<xs:element name="TimePoints">
@@ -37,7 +37,7 @@
 						</xs:sequence>
 					</xs:complexType>
 				</xs:element>
-				<xs:element name="Constraints" minOccurs="0">
+				<xs:element name="Constraints">
 					<xs:complexType>
 						<xs:choice minOccurs="0" maxOccurs="unbounded">
 							<xs:element name="ConstraintEq" type="opt:Constraint"/>

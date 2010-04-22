@@ -23,6 +23,7 @@ import jmodelica
 import jmodelica.jmi as jmi
 from jmodelica.compiler import OptimicaCompiler
 from jmodelica.optimization import ipopt
+from jmodelica import optimize
 
 # Import numerical libraries
 import numpy as N
@@ -108,31 +109,10 @@ def run_demo(with_plots=True):
         plt.grid()
         plt.ylabel('x2')
         plt.show()
-        
-    # Initialize the mesh
-    n_e = 50 # Number of elements 
-    hs = N.ones(n_e)*1./n_e # Equidistant points
-    n_cp = 3; # Number of collocation points in each element
     
-    # Create an NLP object
-    nlp = ipopt.NLPCollocationLagrangePolynomials(model,n_e,hs,n_cp)
+    # optimize
+    (model, res) = optimize(model, solver_args={"max_iter":500})
     
-    # Create an Ipopt NLP object
-    nlp_ipopt = ipopt.CollocationOptimizer(nlp)
-    
-    #nlp_ipopt.opt_sim_ipopt_set_string_option("derivative_test","first-order")
-    nlp_ipopt.opt_sim_ipopt_set_int_option("max_iter",500)
-    
-    # Solve the optimization problem
-    nlp_ipopt.opt_sim_ipopt_solve()
-
-    # Write to file. The resulting file can also be
-    # loaded into Dymola.
-    nlp.export_result_dymola()
-    
-    # Load the file we just wrote to file
-    res = jmodelica.io.ResultDymolaTextual('ParEst_ParEst_result.txt')
-
     # Extract variable profiles
     x1 = res.get_variable_data('sys.x1')
     u = res.get_variable_data('u')

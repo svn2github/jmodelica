@@ -1789,8 +1789,8 @@ equation
  algorithm
   z.x[1] := ix;
   z.x[2] := iy;
-  w.x[1] := z.x;
-  w.x[2] := z.x;
+  w.x[1] := z.x[1];
+  w.x[2] := z.x[2];
   o := ( w.x[1] ) * ( w.x[2] );
   return;
  end RecordTests.RecordFunc5.f;

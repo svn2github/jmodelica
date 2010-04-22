@@ -568,6 +568,8 @@ aspect Scalarization {
 		for (FRecordComponentType comp : getComponents()) {
 			FQName fqn = left.copyAndAppend(comp.getName());
 			FExp exp = right.scalarRecordFExp(indexMap, new FQName(comp.getName()));
+			exp = right.dynamicFExp(exp);
+			exp.clearScalarized();
 			comp.getFType().scalarizeRecordArrayAssignment(vars, stmts, indexMap, fqn, exp);
 		}
 	}

@@ -4568,7 +4568,7 @@ model ExternalFunc7
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
 Semantic error at line 4508, column 2:
-  The external language specitication \"C++\" is not supported
+  The external language specification \"C++\" is not supported
 ")})));
 
  function f

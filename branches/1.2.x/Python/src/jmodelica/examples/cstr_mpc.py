@@ -17,7 +17,7 @@
 
 # Import library for path manipulations
 import os.path
-
+import warnings
 import jmodelica
 import jmodelica.jmi as jmi
 from jmodelica.compiler import OptimicaCompiler
@@ -29,7 +29,7 @@ try:
     from jmodelica.simulation.assimulo import JMIDAE, write_data
     from Assimulo.Implicit_ODE import IDA
 except:
-    raise ImportError('Could not find Assimulo package.')
+    warnings.warn('Could not find Assimulo package. Check jmodelica.check_packages()')
 
 import numpy as N
 import scipy as S
@@ -41,6 +41,11 @@ def run_demo(with_plots=True):
     """ Model predicitve control of the Hicks-Ray CSTR reactor.
         This example demonstrates how to use the blocking factor
         feature of the collocation algorithm.
+
+        This example also shows how to use classes for initialization,
+        simulation and optimization directly rather than calling then
+        through the high-level classes 'initialialize', 'simulate' and
+        'optimize'.
     """
 
     curr_dir = os.path.dirname(os.path.abspath(__file__));

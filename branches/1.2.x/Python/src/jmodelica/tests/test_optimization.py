@@ -10,7 +10,7 @@ class TestOptimization(OptimizationTest):
                 '../../examples/files/VDP.mo', 'VDP_pack.VDP_Opt', 
                 options = { 'state_start_values_fixed': True })
 
-    @testattr(stddist = True)
+    @testattr(ipopt = True)
     def setUp(self):
         n_e = 50
         hs = N.ones(n_e)*1./n_e
@@ -18,7 +18,7 @@ class TestOptimization(OptimizationTest):
         self.setup_base(nlp_args = (n_e, hs, n_cp), options = { 'max_iter': 500 })
         self.run()
 
-    @testattr(stddist = True)
+    @testattr(ipopt = True)
     def test_cost_end(self):
         self.assert_end_value('cost', 2.3469089e+01)
 
@@ -30,7 +30,7 @@ class TestIfExp(OptimizationTest):
         OptimizationTest.setup_class_base(
                 'IfExpTest.mo', 'IfExpTest')
 
-    @testattr(stddist = True)
+    @testattr(ipopt = True)
     def setUp(self):
         n_e = 50
         hs = N.ones(n_e)*1./n_e
@@ -38,7 +38,7 @@ class TestIfExp(OptimizationTest):
         self.setup_base(nlp_args = (n_e, hs, n_cp), options = { 'max_iter': 500 })
         self.run()
 
-    @testattr(stddist = True)
+    @testattr(ipopt = True)
     def test_cost_end(self):
         self.assert_end_value('cost', 1.0590865e+00)
 
@@ -49,7 +49,7 @@ class TestFreeInitialConditions(OptimizationTest):
         OptimizationTest.setup_class_base(
             'FreeInitialConditions.mo', 'FreeInitialConditions')
 
-    @testattr(stddist = True)
+    @testattr(ipopt = True)
     def setUp(self):
         n_e = 50
         hs = N.ones(n_e)*1./n_e
@@ -57,7 +57,7 @@ class TestFreeInitialConditions(OptimizationTest):
         self.setup_base(nlp_args = (n_e, hs, n_cp), options = { 'max_iter': 500 })
         self.run()
 
-    @testattr(stddist = True)
+    @testattr(ipopt = True)
     def test_cost_end(self):
         self.assert_end_value('cost', 1.9179767e+01)
 
@@ -68,7 +68,7 @@ class TestBlockingFactors(OptimizationTest):
         OptimizationTest.setup_class_base(
             'BlockingTest.mo', 'BlockingTest')
 
-    @testattr(stddist = True)
+    @testattr(ipopt = True)
     def setUp(self):
         n_e = 50
         hs = N.ones(n_e)*1./n_e
@@ -78,11 +78,11 @@ class TestBlockingFactors(OptimizationTest):
         self.run()
         self.load_expected_data('BlockingTest_result.txt')
 
-    @testattr(stddist = True)
+    @testattr(ipopt = True)
     def test_cost_end(self):
         self.assert_end_value('cost', 8.1819533e-01)
 
-    @testattr(stddist = True)
+    @testattr(ipopt = True)
     def test_trajectories(self):
         self.assert_all_trajectories(['x[1]', 'x[2]', 'w1', 'w2', 'w3', 'w4'])
 
@@ -93,7 +93,7 @@ class TestElementInterpolationResult(OptimizationTest):
         OptimizationTest.setup_class_base(
             'DI_opt.mo', 'DI_opt')
 
-    @testattr(stddist = True)
+    @testattr(ipopt = True)
     def setUp(self):
         n_e = 8
         hs = N.ones(n_e)*1./n_e
@@ -103,7 +103,7 @@ class TestElementInterpolationResult(OptimizationTest):
         self.run()
         self.load_expected_data('DI_opt_element_interpolation_result.txt')
 
-    @testattr(stddist = True)
+    @testattr(ipopt = True)
     def test_trajectories(self):
         self.assert_all_trajectories(['x', 'v', 'w1', 'w2', 'u', 'cost'])
 
@@ -114,7 +114,7 @@ class TestMeshInterpolationResult(OptimizationTest):
         OptimizationTest.setup_class_base(
             'DI_opt.mo', 'DI_opt')
 
-    @testattr(stddist = True)
+    @testattr(ipopt = True)
     def setUp(self):
         n_e = 8
         hs = N.ones(n_e)*1./n_e
@@ -124,7 +124,7 @@ class TestMeshInterpolationResult(OptimizationTest):
         self.run()
         self.load_expected_data('DI_opt_mesh_interpolation_result.txt')
 
-    @testattr(stddist = True)
+    @testattr(ipopt = True)
     def test_trajectories(self):
         self.assert_all_trajectories(['x', 'v', 'w1', 'w2', 'u', 'cost'])
 
@@ -135,7 +135,7 @@ class TestIntegersNBooleanParameters(OptimizationTest):
         OptimizationTest.setup_class_base(
             'ArrayIntBoolPars_Opt.mo', 'ArrayIntBoolPars_Opt')
 
-    @testattr(stddist = True)
+    @testattr(ipopt = True)
     def setUp(self):
         n_e = 50
         hs = N.ones(n_e)*1./n_e
@@ -144,7 +144,7 @@ class TestIntegersNBooleanParameters(OptimizationTest):
         self.run()
         self.load_expected_data('ArrayIntBoolPars_Opt_result.txt')
 
-    @testattr(stddist = True)
+    @testattr(ipopt = True)
     def test_trajectories(self):
         self.assert_all_trajectories(['B', 'N', 'x[1]'])
 
@@ -156,7 +156,7 @@ class TestNominal(OptimizationTest):
             'NominalTest.mo', 'NominalTests.NominalOptTest2',
             options={"enable_variable_scaling":True})
 
-    @testattr(stddist = True)
+    @testattr(ipopt = True)
     def setUp(self):
         n_e = 50
         hs = N.ones(n_e)*1./n_e
@@ -165,11 +165,11 @@ class TestNominal(OptimizationTest):
         self.run()
         self.load_expected_data('NominalTests_NominalOptTest2_result.txt')
 
-    @testattr(stddist = True)
+    @testattr(ipopt = True)
     def test_trajectories(self):
         self.assert_all_trajectories(['x', 'der(x)', 'u'])
 
-    @testattr(stddist = True)
+    @testattr(ipopt = True)
     def test_initialization_from_data(self):       
         n_e = 50
         hs = N.ones(n_e)*1./n_e
@@ -186,7 +186,7 @@ class TestFunction1(OptimizationTest):
         OptimizationTest.setup_class_base(
             'FunctionAR_opt.mo', 'FunctionAR.UnknownArray1')
 
-    @testattr(stddist = True)
+    @testattr(ipopt = True)
     def setUp(self):
         n_e = 50
         hs = N.ones(n_e)*1./n_e
@@ -195,7 +195,7 @@ class TestFunction1(OptimizationTest):
         self.run()
         self.load_expected_data('UnknownArray.txt')
 
-    @testattr(stddist = True)
+    @testattr(ipopt = True)
     def test_trajectories(self):
         vars = ['x[%d]' % i for i in range(1, 4)]
         self.assert_all_trajectories(vars, same_span=True)
@@ -208,7 +208,7 @@ class TestFunction1(OptimizationTest):
         OptimizationTest.setup_class_base(
             'FunctionAR_opt.mo', 'FunctionAR.FuncRecord1')
 
-    @testattr(stddist = True)
+    @testattr(ipopt = True)
     def setUp(self):
         n_e = 50
         hs = N.ones(n_e)*1./n_e
@@ -217,7 +217,7 @@ class TestFunction1(OptimizationTest):
         self.run()
         self.load_expected_data('FuncRecord.txt')
 
-    @testattr(stddist = True)
+    @testattr(ipopt = True)
     def test_trajectories(self):
         self.assert_all_trajectories(['x', 'r.a'], same_span=True)
    

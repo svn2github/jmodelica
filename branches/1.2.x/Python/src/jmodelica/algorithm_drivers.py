@@ -1,10 +1,29 @@
-""" Module for optimization and simulation algorithms to be used together with 
-jmodelica.optimize and jmodelica.simulate
+#!/usr/bin/env python 
+# -*- coding: utf-8 -*-
+""" Module for optimization, simulation and initialization algorithms to be 
+used together with jmodelica.optimize, jmodelica.simulate and jmodelica.initialize 
+respectively.
 """
+
+# Copyright (C) 2010 Modelon AB
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+
 #from abc import ABCMeta, abstractmethod
 import warnings
 import numpy as N
 
+import jmodelica
 from jmodelica.optimization import ipopt
 from jmodelica.initialization.ipopt import NLPInitialization
 from jmodelica.initialization.ipopt import InitializationOptimizer
@@ -12,19 +31,29 @@ from jmodelica.initialization.ipopt import InitializationOptimizer
 try:
     from jmodelica.simulation.assimulo import JMIDAE, JMIODE, write_data
     from jmodelica.simulation.assimulo import TrajectoryLinearInterpolation
-    from Assimulo import Implicit_ODE
-    from Assimulo import Explicit_ODE
     from Assimulo.Implicit_ODE import *
     from Assimulo.Explicit_ODE import *
+    from Assimulo import Implicit_ODE as impl_ode
+    from Assimulo import Explicit_ODE as expl_ode
+
+    assimulo_present = True
 except:
-    pass
+    warnings.warn('Could not load Assimulo module. Check jmodelica.check_packages()')
+    assimulo_present = False
+
+try:
+    ipopt_present = jmodelica.environ['IPOPT_HOME']
+except:
+    ipopt_present = False
 
 int = N.int32
 N.int = N.int32
 
 class AlgorithmBase:
     """ Abstract class which all algorithms that are to be used with 
-    jmodelica.optimize or jmodelica.simulate must implement."""
+        jmodelica.optimize, jmodelica.simulate or jmodelica.initialize must 
+        implement.
+    """
 #    __metaclass__=ABCMeta
     
 #    @abstractmethod
@@ -61,7 +90,10 @@ class IpoptInitializationAlg(AlgorithmBase):
             self._set_alg_args(**alg_args)
         except TypeError, e:
             raise InvalidAlgorithmArgumentException(e)
-        
+            
+        if not ipopt_present:
+            raise Exception('Could not find IPOPT. Check jmodelica.check_packages()')
+
         self.nlp = NLPInitialization(model,self.stat)            
         self.nlp_ipopt = InitializationOptimizer(self.nlp)
             
@@ -81,7 +113,6 @@ class IpoptInitializationAlg(AlgorithmBase):
             result_format --
                 Format of result file.
                 Default: 'txt'
-
         """
         self.stat=stat
         self.result_args = dict(file_name=result_file_name, format=result_format)
@@ -92,7 +123,7 @@ class IpoptInitializationAlg(AlgorithmBase):
         
         Parameters:
             solver_args --
-                dict with int, real or string options for the solver ipopt
+                Dict with int, real or string options for the solver ipopt.
         """
         for k, v in solver_args.iteritems():
             if isinstance(v, int):
@@ -135,12 +166,17 @@ class AssimuloAlg(AlgorithmBase):
         """
         self.model = model
         
+        if not assimulo_present:
+            raise Exception('Could not find Assimulo package. Check jmodelica.check_packages()')
+        
         #try to set algorithm arguments
         try:
             self._set_alg_args(**alg_args)
         except TypeError, e:
             raise InvalidAlgorithmArgumentException(e)
-
+        
+        
+        
         if issubclass(self.solver, Implicit_ODE):
             if (N.size(self.input_trajectory)==0):
                 self.probl = JMIDAE(model)
@@ -159,7 +195,7 @@ class AssimuloAlg(AlgorithmBase):
                       start_time=0.0,
                       final_time=1.0,
                       num_communication_points=500,
-                      solver=IDA,
+                      solver='IDA',
                       input_trajectory = N.array([])):
         """ Set arguments for Assimulo algorithm.
         
@@ -169,25 +205,32 @@ class AssimuloAlg(AlgorithmBase):
                 Default: 0.0
             final_time --
                 Simulation stop time.
-                Default: 0.0
+                Default: 1.0
             num_communication_points -- 
-                Number of points where the solution is returned.
-                Default: 500 (if = 0 then integrator will return at it's internal steps)
+                Number of points where the solution is returned. If set to 0 the 
+                integrator will return at it's internal steps.
+                Default: 500               
             solver --
-                Set which solver to use with class name. This determines whether a DAE or 
-                ODE problem will be created.
-                Default: IDA
+                Set which solver to use with class name as string. This determines 
+                whether a DAE or ODE problem will be created.
+                Default: 'IDA'
             input_trajectory --
                 Trajectory data for model inputs. The argument should be a matrix
                 where the first column represents time and the following columns
                 represents input trajectory data. 
-                Default: An empty matrix, i.e., no input trajectories.
-                
+                Default: An empty matrix, i.e., no input trajectories.               
         """
         self.start_time = start_time
         self.final_time = final_time
         self.num_communication_points = num_communication_points
-        self.solver = solver
+        
+        if hasattr(impl_ode, solver):
+            self.solver = getattr(impl_ode, solver)
+        elif hasattr(expl_ode, solver):
+            self.solver = getattr(expl_ode, solver)
+        else:
+            raise InvalidAlgorithmArgumentException("The solver: "+solver+ " is unknown.")
+				
         self.input_trajectory = input_trajectory
         
     def set_solver_options(self, 
@@ -196,7 +239,7 @@ class AssimuloAlg(AlgorithmBase):
         
         Parameters:
             solver_args --
-                dict with list of solver arguments. Arguments must be a property of 
+                Dict with list of solver arguments. Arguments must be a property of 
                 the solver. An InvalidSolverArgumentException is raised if an 
                 argument can not be found for the chosen solver.
          """
@@ -234,8 +277,8 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
             model -- 
                 jmodelica.jmi.Model model object
             alg_args -- 
-                dict with algorithm arguments. See _set_alg_args function call for 
-                names and default values.
+                Dict with algorithm arguments. See the _set_alg_args function 
+                call for names and default values.
             
         """
         self.model = model
@@ -244,10 +287,16 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
             self._set_alg_args(**alg_args)
         except TypeError, e:
             raise InvalidAlgorithmArgumentException(e)
+            
+        if not ipopt_present:
+            raise Exception('Could not find IPOPT. Check jmodelica.check_packages()')
         
-        self.nlp = ipopt.NLPCollocationLagrangePolynomials(model,self.n_e, self.hs, self.n_cp)
-        if self.res:
-            self.nlp.set_initial_from_dymola(self.res, self.hs, 0, 0) 
+        if not self.blocking_factors:
+            self.nlp = ipopt.NLPCollocationLagrangePolynomials(model,self.n_e, self.hs, self.n_cp)
+        else:
+            self.nlp = ipopt.NLPCollocationLagrangePolynomials(model,self.n_e, self.hs, self.n_cp, blocking_factors=self.blocking_factors)
+        if self.init_traj:
+            self.nlp.set_initial_from_dymola(self.init_traj, self.hs, 0, 0) 
             
         self.nlp_ipopt = ipopt.CollocationOptimizer(self.nlp)
             
@@ -256,12 +305,13 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
                       n_e=50, 
                       n_cp=3, 
                       hs=N.ones(50)*1./50, 
-                      res = None,
+                      blocking_factors=None,
+                      init_traj = None,
                       result_mesh='default', 
                       result_file_name='', 
                       result_format='txt',
                       n_interpolation_points=None):
-        """ Set arguments for CollocationLagrangePolynomials algorithm.
+        """ Set arguments for the CollocationLagrangePolynomials algorithm.
         
         Parameters:
             n_e -- 
@@ -269,13 +319,19 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
                 Default:50
             hs -- 
                 Vector containing the normalized element lengths.
-                Default: 3
+                Default: Equidistant points using default n_e.
             n_cp -- 
                 Number of collocation points.
-            res --
+                Default: 3
+            blocking_factors --
+                Blocking factor vector.
+                Default: None (not used)
+            init_traj --
                 A reference to an object of type ResultDymolaTextual or
-                ResultDymolaBinary.
-                Default: None (i.e. not used, set this argument to activate initialization)
+                ResultDymolaBinary containing variable trajectories used
+                to initialize the optimization problem.
+                Default: None (i.e. not used, set this argument to activate 
+                initialization)
             result_mesh --
                 Determines which function will be used to get the solution 
                 trajectories. Possible values are, 'element_interpolation', 
@@ -297,7 +353,8 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
         self.n_e=n_e
         self.n_cp=n_cp
         self.hs=hs
-        self.res=res
+        self.blocking_factors=blocking_factors
+        self.init_traj=init_traj
         self.result_mesh=result_mesh
         if not n_interpolation_points:
             self.result_args = dict(file_name=result_file_name, format=result_format)
@@ -310,7 +367,7 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
         
         Parameters:
             solver_args --
-                dict with int, real or string options for the solver ipopt
+                Dict with int, real or string options for the solver ipopt.
         """
         for k, v in solver_args.iteritems():
             if isinstance(v, int):
@@ -342,20 +399,24 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
         return resultfile
         
 class InvalidAlgorithmArgumentException(Exception):
-    """ Exception raised when an algorithm argument is encountered that does not exists."""
+    """ Exception raised when an algorithm argument is encountered that does 
+        not exist.
+    """
     
     def __init__(self, arg):
         self.msg='Invalid algorithm argument: '+str(arg)
         
-    def __str__():
-        return self.msg
+    def __str__(self):
+        return repr(self.msg)
 
 class InvalidSolverArgumentException(Exception):
-    """ Exception raised when a solver argument is encountered that does not exists."""
+    """ Exception raised when a solver argument is encountered that does 
+        not exist.
+    """
     
     def __init__(self, arg):
         self.msg='Invalid solver argument: '+str(arg)
         
-    def __str__():
-        return self.msg
+    def __str__(self):
+        return repr(self.msg)
     

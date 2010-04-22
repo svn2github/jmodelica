@@ -114,6 +114,16 @@ public class XMLValueGenerator extends GenericGenerator{
 			}
 		}
 	}
+	
+	/**
+	 * \brief Returns the string denoting the beginning of the copyright blurb.
+	 */
+	protected String startOfBlurb() { return "<!--"; }
+	
+	/**
+	 * \brief Returns the string denoting the end of the copyright blurb.
+	 */
+	protected String endOfBlurb() { return "-->"; }
 
 	/**
 	 * Constructor.

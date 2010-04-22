@@ -18,15 +18,9 @@
 import os
 import numpy as N
 import pylab as p
-import matplotlib
 
-import jmodelica
-import jmodelica.jmi as jmi
-from jmodelica.tests import get_example_path
-from jmodelica.compiler import ModelicaCompiler
-from jmodelica.initialization.ipopt import NLPInitialization
-from jmodelica.initialization.ipopt import InitializationOptimizer
 from jmodelica import simulate
+from jmodelica import initialize
 from jmodelica.linearization import *
 
 int = N.int32
@@ -44,24 +38,7 @@ def run_demo(with_plots=True):
     model_name = 'RLC_Circuit'
     mofile = curr_dir+'/files/RLC_Circuit.mo'
     
-    
-    mc = ModelicaCompiler()
-    
-    # Comile the Modelica model first to C code and
-    # then to a dynamic library
-    mc.compile_model(model_name,mofile,target='ipopt')
-
-    # Load the dynamic library and XML data
-    model=jmi.Model(model_name)
-
-    # Create DAE initialization object.
-    init_nlp = NLPInitialization(model)
-    
-    # Create an Ipopt solver object for the DAE initialization system
-    init_nlp_ipopt = InitializationOptimizer(init_nlp)
-        
-    # Solve the DAE initialization system with Ipopt
-    init_nlp_ipopt.init_opt_ipopt_solve()
+    (model, res) = initialize(model_name, mofile)
 
     (E_dae,A_dae,B_dae,F_dae,g_dae,state_names,input_names,algebraic_names, \
      dx0,x0,u0,w0,t0) = linearize_dae(model)

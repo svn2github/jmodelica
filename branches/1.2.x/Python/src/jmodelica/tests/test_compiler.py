@@ -111,12 +111,12 @@ def test_optimica_compile_wtarget_alg():
     """ Test that it is possible to compile (optimicacompiler.py) with target algorithms. """
     oc.compile_model(cpath_oc, fpath_oc, target='algorithms')
 
-@testattr(stddist = True)
+@testattr(ipopt = True)
 def test_compile_wtarget_ipopt():
     """ Test that it is possible to compile (compiler.py) with target ipopt. """
     mc.compile_model(cpath_mc, fpath_mc, target='ipopt')    
 
-@testattr(stddist = True)
+@testattr(ipopt = True)
 def test_optimica_compile_wtarget_ipopt():
     """ Test that it is possible to compile (optimicacompiler.py) with target ipopt. """
     oc.compile_model(cpath_oc, fpath_oc, target='ipopt')
@@ -323,7 +323,7 @@ def test_get_option_description():
     mc.set_string_option(option, value, description)
     nose.tools.assert_equal(mc.get_option_description(option),description)
 
-@testattr(stddist = True)
+@testattr(ipopt = True)
 def TO_ADDtest_MODELICAPATH():
     """ Test that the MODELICAPATH is loaded correctly.
 

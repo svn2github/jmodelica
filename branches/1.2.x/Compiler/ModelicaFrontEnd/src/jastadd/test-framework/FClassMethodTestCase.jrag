@@ -84,6 +84,7 @@ public class FClassMethodTestCase extends TestCase {
 	public String getOutput() {
 		return output;
 	}
+	
 	/**
 	 * @param output the output to set
 	 */
@@ -91,6 +92,13 @@ public class FClassMethodTestCase extends TestCase {
 		this.output = output;
 		this.outputFileName = "";
 		this.resultOnFile = false;
+	}
+	
+	/**
+	 * @param output the output to set
+	 */
+	public void setMethodResult(String output) {
+		setOutput(output);
 	}
 	
 	/**

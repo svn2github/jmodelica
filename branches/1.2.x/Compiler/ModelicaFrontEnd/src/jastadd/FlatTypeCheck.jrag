@@ -117,10 +117,15 @@ aspect FlatTypeCheck {
   }
 
   
-  // FIdUseExp and FInstAccessExp ska inte kollas, det görs i InstAccess
-  public void FIdUseExp.typeCheck() {}
-  public void FInstAccessExp.typeCheck() {}
-  
+  public void FIdUseExp.typeCheck() {
+	  if (!getFIdUse().isUnknown() && type().isUnknown())
+		  typeError();
+  }
+  public void FInstAccessExp.typeCheck() {
+	  if (!getInstAccess().isUnknown() && type().isUnknown())
+		  typeError();
+  }
+
   /**
    * \brief Check if the FExp of this FIterExp must be scalar.
    */

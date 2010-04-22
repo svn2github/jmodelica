@@ -245,6 +245,7 @@ aspect Arrays {
 			return getFArraySubscripts().accessNdims();
 		return myFV().ndims();
 	}
+	eq FIdUseInstAccess.ndims() = getInstAccess().ndims();
 	eq FIdUseExp.ndims() = getFIdUse().ndims();
 		
 	/**
@@ -403,6 +404,7 @@ aspect Arrays {
 	inh lazy Size FSubscript.mySize();
 	inh lazy Size FArraySubscripts.mySize();
 	eq FIdUse.getChild().mySize()                     = myFV().size();
+	eq FIdUseInstAccess.getChild().mySize()           = getInstAccess().size();
 	eq InstArrayAccess.getFArraySubscripts().mySize() = myInstComponentDecl().size();
 	eq FSubscriptedExp.getFArraySubscripts().mySize() = getFExp().size();
 	eq FExpSubscript.getFExp().mySize()               = mySize();
@@ -480,11 +482,15 @@ aspect Arrays {
 	syn lazy int FSizeExp.dimension() = getDim().ceval().intValue() - 1;
 	
 	eq FAbstractCat.size() {
-		int dim = dimension();
-		MutableSize ms = getFExp(0).size().promote(ndims()).mutableClone();
-		for (int i = 1; i < getNumFExp(); i++)
-			ms.add(dim, getFExp(i).size().promote(ndims()), dim);
-		return ms;
+		try {
+			int dim = dimension();
+			MutableSize ms = getFExp(0).size().promote(ndims()).mutableClone();
+			for (int i = 1; i < getNumFExp(); i++)
+				ms.add(dim, getFExp(i).size().promote(ndims()), dim);
+			return ms;
+		} catch (UnsupportedOperationException e) {
+			return Size.SCALAR;
+		}
 	}
 	
 	eq FSumExp.size() = getFExp().isIterExp() ? iterExp().size() : Size.SCALAR;
@@ -578,6 +584,7 @@ aspect Arrays {
 		return getFQName().hasFArraySubscripts()? 
 			getFArraySubscripts().accessSize(): myFV().size();
 	}
+	eq FIdUseInstAccess.size() = getInstAccess().size();
 		
 	eq FIdUseExp.size() = getFIdUse().size();
 	
@@ -1258,7 +1265,8 @@ aspect Arrays {
 	syn lazy Indices FIdUse.indices() {
 		return getFQName().hasFArraySubscripts()? 
 				getFArraySubscripts().indices(): myFV().indices();
-	}	
+	}
+	eq FIdUseInstAccess.indices() = getInstAccess().indices();
 
 	/**
 	 * \brief Get the set of all array indices of an instance array access. 
@@ -1533,6 +1541,16 @@ aspect ArrayHelpers {
 				if (!hasValue(i))
 					return false;
 			return true;
+		}
+		
+		/**
+		 * \brief Check is the length in any dimension equals 0.
+		 */
+		public boolean isEmpty() {
+			for (int i = 0; i < size.length; i++)
+				if (size[i] == 0)
+					return true;
+			return false;
 		}
 		
 		/**

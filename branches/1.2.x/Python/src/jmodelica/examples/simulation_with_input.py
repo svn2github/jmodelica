@@ -18,21 +18,11 @@
 import os
 import numpy as N
 import pylab as p
-import matplotlib
 
-import jmodelica
-import jmodelica.jmi as jmi
-from jmodelica.tests import get_example_path
+from jmodelica import jmi
 from jmodelica.compiler import ModelicaCompiler
-from jmodelica.initialization.ipopt import NLPInitialization
-from jmodelica.initialization.ipopt import InitializationOptimizer
+from jmodelica import simulate
 
-try:
-    from jmodelica.simulation.assimulo import JMIDAE, write_data
-    from jmodelica.simulation.assimulo import TrajectoryLinearInterpolation
-    from Assimulo.Implicit_ODE import IDA
-except:
-    raise ImportError('Could not find Assimulo package.')
 
 def run_demo(with_plots=True):
     """
@@ -46,32 +36,22 @@ def run_demo(with_plots=True):
     # Generate input
     t = N.linspace(0.,10.,100) 
     u = N.cos(t)
-    u = N.array([u])
-    u = N.transpose(u)
-    u_traj = TrajectoryLinearInterpolation(t,u)
+    u_traj = N.transpose(N.vstack((t,u)))
     
     mc = ModelicaCompiler()
     
-    # Comile the Modelica model first to C code and
+    # Compile the Modelica model first to C code and
     # then to a dynamic library
     mc.compile_model(model_name,mofile,target='ipopt')
 
     # Load the dynamic library and XML data
     model=jmi.Model(model_name)
 
-    model.set_value('u',u_traj.eval(0.)[0])
+    model.set_value('u',u[0])
     
-    mod = JMIDAE(model, input=u_traj) #Create an assimulo DAE model
-    sim = IDA(mod) #Create an IDA solver
-    
-    sim.initiate() #Calculate initial conditions
-    sim.simulate(30,3000) #Simulate 30 seconds with 3000 communication points
-    
-    
-    write_data(sim) #Writes data
-
-    # Load the file we just wrote to file
-    res = jmodelica.io.ResultDymolaTextual('SecondOrder_result.txt')
+    (model, res) = simulate(model, alg_args={'final_time':30, 
+							'num_communication_points':3000, 'input_trajectory':u_traj})
+        
     x1_sim = res.get_variable_data('x1')
     x2_sim = res.get_variable_data('x2')
     u_sim = res.get_variable_data('u')
@@ -97,7 +77,7 @@ def run_demo(with_plots=True):
         p.subplot(2,1,1)
         p.plot(x1_sim.t, x1_sim.x, x2_sim.t, x2_sim.x)
         p.subplot(2,1,2)
-        p.plot(u_sim.t, u_sim.x,'x-',t, u[:,0],'x-')
+        p.plot(u_sim.t, u_sim.x,'x-',t, u[:],'x-')
 
         p.show()
 

@@ -13,21 +13,6 @@
   <section>
     <title>Tutorial on Abstract Syntax Trees (ASTs)</title>
 
-    <para></para>
-
-    <section>
-      <title>Python packages</title>
-
-      <para>The optimization examples in JModelica.org uses the Python
-      scientific library SciPy, which is dependent on NumPy and the
-      mathematical plotting library matplotlib for plotting. These packages
-      will thus also be used in the example below. Most Python functions have
-      built in documentation, which can be accessed from the Python shell by
-      invoking the help function, for example 'help(numpy.size)'. Use this
-      feature frequently to learn more about the packages used in this
-      tutorial, including the jmodelica package.</para>
-    </section>
-
     <section>
       <title>About Abstract Syntax Trees</title>
 
@@ -392,7 +377,8 @@ dump_inst_ast(filter_instance,"")</programlisting>
       look at the printouts for a resistor in the model:</para>
 
       <programlisting language="python">    InstComposite: Modelica.Electrical.Analog.Basic.Resistor R1 {R=1}
-      InstPrimitive: SI.Resistance R {=1, start=1, final quantity="Resistance", final unit="Ohm"}
+      InstPrimitive: SI.Resistance R {=1, start=1, final quantity="Resistance", \
+                                      final unit="Ohm"}
       InstExtends: Interfaces.OnePort {R=1}
         InstPrimitive: SI.Voltage v {final quantity="ElectricPotential", final unit="V"}
         InstPrimitive: SI.Current i {final quantity="ElectricCurrent", final unit="A"}
@@ -419,21 +405,27 @@ dump_inst_ast(filter_instance,"")</programlisting>
       signal source to a step. The instance node for the step voltage source
       'V' is given below:</para>
 
-      <programlisting language="python">    InstComposite: Modelica.Electrical.Analog.Sources.StepVoltage V {V=0, startTime=1, offset=0}
-      InstPrimitive: SI.Voltage V {=0, start=1, final quantity="ElectricPotential", final unit="V"}
+      <programlisting language="python">    InstComposite: Modelica.Electrical.Analog.Sources.StepVoltage V {V=0, startTime=1, \
+                                                                     offset=0}
+      InstPrimitive: SI.Voltage V {=0, start=1, final quantity="ElectricPotential", \
+                                   final unit="V"}
       InstExtends: Interfaces.VoltageSource {V=0, startTime=1, offset=0, 
            redeclare Modelica.Blocks.Sources.Step signalSource(height=V)}
-        InstPrimitive: SI.Voltage offset {=0, =0, final quantity="ElectricPotential", final unit="V"}
+        InstPrimitive: SI.Voltage offset {=0, =0, final quantity="ElectricPotential", \
+                                          final unit="V"}
         InstPrimitive: SI.Time startTime {=1, =0, final quantity="Time", final unit="s"}
-        InstReplacingComposite: Modelica.Blocks.Sources.Step signalSource {height=V, final offset=offset, 
-             final startTime=startTime}
+        InstReplacingComposite: Modelica.Blocks.Sources.Step signalSource {height=V, \
+                                          final offset=offset, final startTime=startTime}
           InstPrimitive: Real height {=V, =1}
-          InstExtends: Interfaces.SignalSource {height=V, final offset=offset, final startTime=startTime}
+          InstExtends: Interfaces.SignalSource {height=V, final offset=offset, \
+                                                final startTime=startTime}
             InstPrimitive: Real offset {=offset, =0}
-            InstPrimitive: SIunits.Time startTime {=startTime, =0, final quantity="Time", final unit="s"}
+            InstPrimitive: SIunits.Time startTime {=startTime, =0, final quantity="Time", \
+                                                   final unit="s"}
             InstExtends: SO {height=V, final offset=offset, final startTime=startTime}
               InstPrimitive: RealOutput y {}
-              InstExtends: BlockIcon {height=V, final offset=offset, final startTime=startTime}</programlisting>
+              InstExtends: BlockIcon {height=V, final offset=offset, 
+                                      final startTime=startTime}</programlisting>
 
       <para>Here we see how the modification "redeclare
       Modelica.Blocks.Sources.Step signalSource(height=V)" affects the
@@ -463,17 +455,25 @@ except:
     # Flatten the model instance filter_instance
     filter_flat_model = mc.flatten_model(filter_instance)</programlisting>
 
-      <para>First, let us have a look at the flattened model:</para>
+      <para>During flattening, the instance tree is traversed and all
+      primitive declarations and equations are collected. In addition, such as
+      scalarization and elimination of alias variables are performed.</para>
+
+      <para>Let us have a look at the flattened model:</para>
 
       <programlisting language="python">print(filter_flat_model.prettyPrint(""))</programlisting>
 
       <para>We may also retrieve some model statistics:</para>
 
       <programlisting language="python">print("*** Model statistics for CauerLowPassAnalog *** ")
-print("Number of differentiated variables: %d" % filter_flat_model.numDifferentiatedRealVariables())
-print("Number of algebraic variables:      %d" % filter_flat_model.numAlgebraicRealVariables())
-print("Number of equations:                %d" % filter_flat_model.numEquations())
-print("Number of initial:                  %d" % filter_flat_model.numInitialEquations())</programlisting>
+print("Number of differentiated variables: %d" \
+       % filter_flat_model.numDifferentiatedRealVariables())
+print("Number of algebraic variables:      %d" \
+       % filter_flat_model.numAlgebraicRealVariables())
+print("Number of equations:                %d" \
+       % filter_flat_model.numEquations())
+print("Number of initial equations:        %d" \
+       % filter_flat_model.numInitialEquations())</programlisting>
 
       <para>How many variables and equations is the model composed of? Does
       the model seem to be well posed?</para>

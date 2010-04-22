@@ -18,11 +18,11 @@
 
 __all__ = ['jmi', 'xmlparser', 'compiler','optimization',
            'examples', 'tests','io','initialization','simulation',
-           'linearization']
+           'linearization', 'algorithm_drivers']
 
 __version__=''
 
-import os, os.path
+import os
 import warnings
 
 try:
@@ -34,14 +34,16 @@ except KeyError, IOError:
                            'set or points to a non-existing location.')
     
 # set version
+f= None
 try:
-    _fpath=os.path.join(os.environ['JMODELICA_HOME'],'version.txt')
+    _fpath=os.path.join(os.environ['JMODELICA_HOME'],'version.txt')    
     f = open(_fpath)
     __version__=f.readline()
 except IOError:
     warnings.warn('Version file not found. Environment may be corrupt.')
 finally:
-    f.close()    
+    if f is not None:
+        f.close()   
 
 try:
     _f = os.path.join(os.environ['JMODELICA_HOME'],'startup.py')
@@ -62,6 +64,11 @@ import numpy as N
 int = N.int32
 N.int = N.int32
 
+try:
+    ipopt_present = jmodelica.environ['IPOPT_HOME']
+except:
+    ipopt_present = False
+
 def optimize(model, 
              file_name='', 
              compiler_target='ipopt', 
@@ -71,33 +78,56 @@ def optimize(model,
              solver_args={}):
     """ Compact function for model optimization.
     
-    Pass a jmi.Model object or path to mo-file and model class if model 
-    should be (re)compiled. There are default values for all other settings. 
-    These can be changed in function call.
+    The intention with this function is to wrap model compilation, creation of 
+    a model object and optimization in one function call. The optimization 
+    method depends on which algorithm is used, this can be set with the 
+    function argument 'algorithm'. Arguments for the algorithm and solver are 
+    passed as dicts. Which arguments that are valid depends on which algorithm 
+    is used, see the algorithm implementation in algorithm_drivers.py for details.
+    
+    The default algorithm for this function is CollocationLagrangePolynomialsAlg. 
+    
+    The simplest way of using the function is to pass the model name and path 
+    to the model file (a jmi.Model is enough if model is already compiled) and 
+    use the default values for all other arguments.
     
     Parameters:
         model -- 
-            Model object or model class name (if class name then mo-file must be provided)
+            Model object or model name (supply model name if model should be 
+            (re)compiled, then mo-file must also be provided)
         file_name --
-            Name of mo-file. 
-            Default: empty string
+            Name of model file (mo-file). 
+            Default: empty string (no compilation)
         compiler_target --
             Target argument to compiler. 
             Default: 'ipopt'
         compiler_options --
-            Dict with compiler options listed. 
+            Dict with options for the compiler (see options.xml for possible 
+            values). 
             Default: empty dict
         algorithm --
-            The optimization algorithm to use is specified by passing class name in 
-            this argument. The algorithm class can be any class which implements the 
-            abstract class algorithm_drivers.AlgorithmBase.
+            The algorithm which will be used for the simulation is 
+            specified by passing the algorithm class in this argument. The 
+            algorithm class can be any class which implements the abstract 
+            class AlgorithmBase (found in algorithm_drivers.py). In this way 
+            it is possible to write own algorithms and use them with this 
+            function.
             Default: CollocationLagrangePolynomialsAlg
         alg_args --
             All arguments for the chosen algorithm should be listed in this dict.
+            Valid arguments depend on the algorithm chosen, see algorithm 
+            implementation in algorithm_drivers.py for details.      
             Default: empty dict
         solver_args --
             All arguments for the chosen solver should be listed in this dict.
+            Valid arguments depend on the chosen algorithm and possibly which 
+            solver has been selected for the algorithm. See algorithm 
+            implementation in algorithm_drivers.py for details.
             Default: empty dict
+    Returns:
+        model -- The jmi.Model object
+        res -- The loaded result file.
+    
     
     """
     compiler='optimica'
@@ -120,37 +150,56 @@ def simulate(model,
              solver_args={}):
     """ Compact function for model simulation.
     
-    Pass a jmi.Model object or path to mo-file and model class if model 
-    should be (re)compiled. There are default values for all other settings. 
-    These can be changed in function call.
+    The intention with this function is to wrap model compilation, creation of 
+    a model object and simulation in one function call. The simulation 
+    method depends on which algorithm is used, this can be set with the 
+    function argument 'algorithm'. Arguments for the algorithm and solver are 
+    passed as dicts. Which arguments that are valid depends on which algorithm 
+    is used, see the algorithm implementation in algorithm_drivers.py for details.
+    
+    The default algorithm for this function is AssimuloAlg. 
+    
+    The simplest way of using the function is to pass the model name and path 
+    to the model file (a jmi.Model is enough if model is already compiled) and 
+    use the default values for all other arguments.
     
     Parameters:
         model -- 
-            Model object or model class name (if class name then mo-file must be provided)
+            Model object or model name (supply model name if model should be 
+            (re)compiled, then mo-file must also be provided)
         file_name --
-            Name of mo-file. 
-            Default: empty string
+            Name of model file (mo-file). 
+            Default: empty string (no compilation)
         compiler --
-            Set compiler that model should be compiled with, either 'modelica' or 'optimica'.
+            Set compiler that model should be compiled with, 'modelica' or 
+            'optimica'.
             Default: 'modelica'
         compiler_target --
             Target argument to compiler. 
             Default: 'ipopt'
         compiler_options --
-            Dict with compiler options listed. 
+            Dict with options for the compiler (see options.xml for possible 
+            values). 
             Default: empty dict
         algorithm --
-            The simulation algorithm to use is specified by passing class name in 
-            this argument. The algorithm class can be any class which implements the 
-            abstract class algorithm_drivers.AlgorithmBase.
+            The algorithm which will be used for the simulation is 
+            specified by passing the algorithm class in this argument. The 
+            algorithm class can be any class which implements the abstract 
+            class AlgorithmBase (found in algorithm_drivers.py). In this way 
+            it is possible to write own algorithms and use them with this 
+            function.
             Default: AssimuloAlg
         alg_args --
             All arguments for the chosen algorithm should be listed in this dict.
+            Valid arguments depend on the algorithm chosen, see algorithm 
+            implementation in algorithm_drivers.py for details.      
             Default: empty dict
         solver_args --
             All arguments for the chosen solver should be listed in this dict.
+            Valid arguments depend on the chosen algorithm and possibly which 
+            solver has been selected for the algorithm. See algorithm 
+            implementation in algorithm_drivers.py for details.
             Default: empty dict
-            
     Returns:
         model -- The jmi.Model object
         res -- The loaded result file.
@@ -175,35 +224,55 @@ def initialize(model,
                solver_args={}):
     """ Compact function for model initialization.
     
-    Pass a jmi.Model object or path to mo-file and model class if model 
-    should be (re)compiled. There are default values for all other settings. 
-    These can be changed in function call.
+    The intention with this function is to wrap model compilation, creation of 
+    a model object and initialization in one function call. The initialization 
+    method depends on which algorithm is used, this can be set with the 
+    function argument 'algorithm'. Arguments for the algorithm and solver are 
+    passed as dicts. Which arguments that are valid depends on which algorithm 
+    is used, see the algorithm implementation in algorithm_drivers.py for details.
+    
+    The default algorithm for this function is IpoptInitializationAlg. 
+    
+    The simplest way of using the function is to pass the model name and path 
+    to the model file (a jmi.Model is enough if model is already compiled) and 
+    use the default values for all other arguments.
     
     Parameters:
         model -- 
-            Model object or model class name (if class name then mo-file must be provided)
+            Model object or model name (supply model name if model should be 
+            (re)compiled, then mo-file must also be provided)
         file_name --
-            Name of mo-file. 
-            Default: empty string
+            Name of model file (mo-file). 
+            Default: empty string (no compilation)
         compiler --
-            Set compiler that model should be compiled with, either 'modelica' or 'optimica'.
+            Set compiler that model should be compiled with, 'modelica' or 
+            'optimica'.
             Default: 'modelica'
         compiler_target --
             Target argument to compiler. 
             Default: 'ipopt'
         compiler_options --
-            Dict with compiler options listed. 
+            Dict with options for the compiler (see options.xml for possible 
+            values). 
             Default: empty dict
         algorithm --
-            The simulation algorithm to use is specified by passing class name in 
-            this argument. The algorithm class can be any class which implements the 
-            abstract class algorithm_drivers.AlgorithmBase.
-            Default: AssimuloAlg
+            The algorithm which will be used for the initialization is 
+            specified by passing the algorithm class in this argument. The 
+            algorithm class can be any class which implements the abstract 
+            class AlgorithmBase (found in algorithm_drivers.py). In this way 
+            it is possible to write own algorithms and use them with this 
+            function.
+            Default: IpoptInitializationAlg
         alg_args --
             All arguments for the chosen algorithm should be listed in this dict.
+            Valid arguments depend on the algorithm chosen, see algorithm 
+            implementation in algorithm_drivers.py for details.      
             Default: empty dict
         solver_args --
             All arguments for the chosen solver should be listed in this dict.
+            Valid arguments depend on the chosen algorithm and possibly which 
+            solver has been selected for the algorithm. See algorithm 
+            implementation in algorithm_drivers.py for details.
             Default: empty dict
             
     Returns:
@@ -229,7 +298,8 @@ def _exec_algorithm(model,
              algorithm, 
              alg_args, 
              solver_args):
-    """ Helper function which performs all steps of an algorithm run.
+    """ Helper function which performs all steps of an algorithm run which are 
+    common to all algortihms.
     
     Throws exception if algorithm is not a subclass of algorithm_drivers.AlgorithmBase.
     """
@@ -240,7 +310,11 @@ def _exec_algorithm(model,
 
     if not isinstance(model, jmodelica.jmi.Model):
         # model class and mo-file must be set
-         model = _compile(model, file_name, compiler=compiler, 
+        
+        if not ipopt_present and compiler_target=='ipopt':
+            raise Exception('Could not find IPOPT. Check jmodelica.check_packages()')
+        
+        model = _compile(model, file_name, compiler=compiler, 
                           compiler_options=compiler_options, 
                           compiler_target=compiler_target)
          
@@ -318,21 +392,29 @@ def check_packages():
     # Test dependencies
     sys.stdout.write("\n\n")
     sys.stdout.write("Dependencies: \n\n".rjust(0))
-    modstr="Module"
+    modstr="Package"
     verstr="Version"
     sys.stdout.write("%s %s" % (modstr.ljust(le), verstr.ljust(le)))
     sys.stdout.write("\n")
     sys.stdout.write("%s %s" % (("-"*len(modstr)).ljust(le), ("-"*len(verstr)).ljust(le)))
     sys.stdout.write("\n")
     
-    modules=["numpy", "scipy", "matplotlib", "jpype", "lxml", "nose", "pysundials"]
+    modules=["numpy", "scipy", "matplotlib", "jpype", "lxml", "nose", "assimulo"]
+    assimulo_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'simulation')
+    
     if platform == "win32":
         modules.append("pyreadline")
-        
+    
+    error_modules=[]
+    warning_modules=[]
+    fp = None
     for module in modules:
         try:
-            vers="--"            
-            fp, path, desc = imp.find_module(module)
+            vers="--"
+            if module=='assimulo':
+                fp, path, desc = imp.find_module(module, [assimulo_path])
+            else:    
+                fp, path, desc = imp.find_module(module)
             mod = imp.load_module(module, fp, path, desc)
             try:
                 if module == "pyreadline":
@@ -346,10 +428,12 @@ def check_packages():
                 pass
             sys.stdout.write("%s %s %s" %(module.ljust(le,'.'), vers.ljust(le), "Ok".ljust(le)))
         except ImportError, e:
-            if module != "nose":
-                sys.stdout.write("%s %s %s " % (module.ljust(le,'.'), vers.ljust(le), "Error (Module required but not found)".ljust(le)))
+            if module == "nose" or module == "assimulo":
+                sys.stdout.write("%s %s %s" % (module.ljust(le,'.'), vers.ljust(le), "Package missing - Warning issued, see details below".ljust(le)))
+                warning_modules.append(module)
             else:
-                sys.stdout.write("%s %s %s" % (module.ljust(le,'.'), vers.ljust(le), "Warning (Module required to run tests)".ljust(le)))
+                sys.stdout.write("%s %s %s " % (module.ljust(le,'.'), vers.ljust(le), "Package missing - Error issued, see details below.".ljust(le)))
+                error_modules.append(module)
             pass
         finally:
             if fp:
@@ -357,3 +441,44 @@ def check_packages():
         sys.stdout.write("\n")
         sys.stdout.flush()
         time.sleep(0.25)
+
+        
+    # Write errors and warnings
+    # are there any errors?
+    if len(error_modules) > 0:
+        sys.stdout.write("\n")
+        errtitle = "Errors"
+        sys.stdout.write("\n")
+        sys.stdout.write(errtitle+" \n")
+        sys.stdout.write("-"*len(errtitle))
+        sys.stdout.write("\n\n")
+        sys.stdout.write("The packages: \n\n")
+        
+        for er in error_modules:
+            sys.stdout.write("   - "+str(er))
+            sys.stdout.write("\n")
+        sys.stdout.write("\n")
+        sys.stdout.write("could not be found. It is not possible to run the jmodelica package without them.\n")
+    
+    if len(warning_modules) > 0:
+        sys.stdout.write("\n")
+        wartitle = "Warnings"
+        sys.stdout.write("\n")
+        sys.stdout.write(wartitle+" \n")
+        sys.stdout.write("-"*len(wartitle))
+        sys.stdout.write("\n\n")
+        
+        for w in warning_modules:
+            if w == 'assimulo':
+                sys.stdout.write("** The package jmodelica.simulation.assimulo could not be found. \n  \
+ This package is needed to be able to use: \n\n   \
+- jmodelica.simulate with default argument \"algorithm\" = AssimuloAlg \n   \
+- The jmodelica.simulation package \n   \
+- Some of the examples in the jmodelica.examples package")
+            elif w == 'nose':
+                sys.stdout.write("** The package nose could not be found. \n   \
+This package is needed in the jmodelica.tests package. You will not be able to run any tests.")
+		
+            sys.stdout.write("\n\n")
+
+

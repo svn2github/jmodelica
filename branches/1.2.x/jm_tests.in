@@ -24,6 +24,8 @@ PYTHON_HOME=/opt/python/python2.5/
 JMODELICA_HOME=@prefix@
 JMODELICA_SRC=@abs_top_srcdir@
 IPOPT_HOME=@IPOPT_HOME@
+SUNDIALS_HOME=@SUNDIALS_HOME@
+ECLIPSE_HOME=@ECLIPSE_HOME@
 BUILD=@abs_builddir@
 if [[ "${JAVA_HOME}" == "" ]]; then
   JAVA_HOME=@_JAVA_HOME_@
@@ -31,14 +33,22 @@ fi
 
 # Variables that are relative to others
 CPPAD_HOME=${JMODELICA_HOME}/ThirdParty/CppAD/
-PYTHONPATH=${PYTHON_HOME}:${JMODELICA_HOME}/Python/ 
-if [[ "${LD_LIBRARY_PATH}" == "" ]]; then
-  LD_LIBRARY_PATH=/lib:${IPOPT_HOME}/lib 
-else
-  LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${IPOPT_HOME}/lib
-fi
+PYTHONPATH=${PYTHON_HOME}:${JMODELICA_HOME}/Python/
 
 # ====== End variables to set ======
+
+# Update library path
+if [[ "${IPOPT_HOME}" != "" ]]; then
+  LIB_PATH=${IPOPT_HOME}/lib
+  if [[ "${SUNDIALS_HOME}" != "" ]]; then
+    LIB_PATH=${LIB_PATH}:${SUNDIALS_HOME}/lib
+  fi
+  if [[ "${LD_LIBRARY_PATH}" == "" ]]; then
+    LD_LIBRARY_PATH=/lib:${LIB_PATH}
+  else
+    LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${LIB_PATH}
+  fi
+fi
 
 # Test sets
 tests="modelica optimica python"
@@ -61,6 +71,13 @@ function python_tests() {
   TEST_DIR=$(mktemp -dqt)
   TESTS="$(find ${JMODELICA_HOME}/Python/jmodelica/tests -name \*.py | grep test_)"
   PATTERN=----------------------------------------------------------------------
+  TAGS="-a stddist"
+  if [[ "${IPOPT_HOME}" != "" ]]; then
+    TAGS="${TAGS} -a ipopt"
+    if [[ "${SUNDIALS_HOME}" != "" ]]; then
+      TAGS="${TAGS} -a assimulo"
+    fi
+  fi
   print_name Python
   case ${OUTPUT} in
     v)
@@ -68,7 +85,7 @@ function python_tests() {
         cd ${TEST_DIR}
         for TEST in ${TESTS}; do
 	  echo ${TEST} | sed -e 's!^.*jmodelica.tests.!Running !'
-          nosetests -a stddist -v ${TEST}
+          nosetests ${TAGS} -v ${TEST}
         done
       fi
       ;;
@@ -76,7 +93,7 @@ function python_tests() {
       if build_jmodelica 2> /dev/null > /dev/null; then
         cd ${TEST_DIR}
         for TEST in ${TESTS}; do
-          nosetests -a stddist -v ${TEST} 2>&1 \
+          nosetests ${TAGS} -v ${TEST} 2>&1 \
 	    | sed -n -e 's!^OK$!PASSED!ip' -e 's!^FAILED !TEST FAILED!p'
         done | filter_python_separate
       else
@@ -89,7 +106,7 @@ function python_tests() {
         cd ${TEST_DIR}
         for TEST in ${TESTS}; do
           echo ${TEST} | sed -e 's!^.*jmodelica.tests.!Running !'
-          nosetests -a stddist -v ${TEST} 2>&1 \
+          nosetests ${TAGS} -v ${TEST} 2>&1 \
 	    | egrep -v '^Exception .* ignored$' \
 	    | grep -B1 -A500 -e${PATTERN} \
 	    | sed -e 's!^OK$!PASSED!' -e 's!^FAILED !TEST FAILED!'
@@ -162,13 +179,15 @@ function ant_test() {
 }
 
 function build_jmodelica() {
-  if [[ -d ${BUILD} ]]; then
-    cd ${BUILD}
-    ${CLEAN_BUILD}
-    make && make install
-  else
-    echo Cannot build, build dir does not exist!
-    exit 1
+  if [[ "${NO_BUILD_JMODELICA}" != "1" ]]; then
+    if [[ -d ${BUILD} ]]; then
+      cd ${BUILD}
+      ${CLEAN_BUILD}
+      make && make install
+    else
+      echo Cannot build, build dir does not exist!
+      exit 1
+    fi
   fi
 }
 
@@ -184,6 +203,7 @@ function switch_test_flags() {
   done
 }
 
+# === Main ===
 OUTPUT=n
 i=0
 for a in ${tests}; do
@@ -211,6 +231,9 @@ for a in ${DEFAULT_ARGS} $*; do
           CLEAN_BUILD="make clean"
         fi
         ;;
+      i)
+        NO_BUILD_JMODELICA=1
+        ;;
       h)
         echo "usage: tests [-ajmopvnqcCh]"
         echo "The -ajmop options each control a set of tests, and select all"
@@ -226,7 +249,8 @@ for a in ${DEFAULT_ARGS} $*; do
         echo "  -n  Normal output, only show results and compilation errors"
         echo "  -q  Quiet output, only show brief resuls and compilation errors"
         echo "  -c  Do a clean before junit tests"
-        echo "  -C  Do a clean before each test"
+        echo "  -C  Do a clean before each test suite"
+        echo "  -i  Do not re-build before python tests"
         echo "  -h  Print this help and exit"
 	exit
         ;;
@@ -245,6 +269,11 @@ for a in ${tests}; do
 done
 if [[ "${ANY_ON}" == 0 ]]; then
   switch_test_flags ${DEFAULT_TESTS}
+fi
+
+# If on Windows, inform user about bug in ticket #766
+if [[ "$(uname | sed -n -e 's!^MINGW!1!p')" != "" ]]; then
+  echo Note: If modelica or optimica tests seem to hang, press enter a couple of times.
 fi
 
 for a in ${tests}; do
