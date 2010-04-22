@@ -39,7 +39,6 @@ try:
     assimulo_present = True
 except:
     warnings.warn('Could not load Assimulo module. Check jmodelica.check_packages()')
-    IDA = None
     assimulo_present = False
 
 try:
@@ -167,14 +166,16 @@ class AssimuloAlg(AlgorithmBase):
         """
         self.model = model
         
+        if not assimulo_present:
+            raise Exception('Could not find Assimulo package. Check jmodelica.check_packages()')
+        
         #try to set algorithm arguments
         try:
             self._set_alg_args(**alg_args)
         except TypeError, e:
             raise InvalidAlgorithmArgumentException(e)
         
-        if not assimulo_present:
-            raise Exception('Could not find Assimulo package. Check jmodelica.check_packages()')
+        
         
         if issubclass(self.solver, Implicit_ODE):
             if (N.size(self.input_trajectory)==0):
