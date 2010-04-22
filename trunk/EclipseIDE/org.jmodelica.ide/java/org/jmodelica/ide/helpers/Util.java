@@ -218,7 +218,6 @@ public class Util {
     }
     
     /**
-     * 
      * Create a right-recursive dot access from a list of identifiers,
      * or a simple access if parts.length == 1.
      *  
@@ -240,6 +239,11 @@ public class Util {
         
     }
     
+    /**
+     * \brief Get the value of a property from the project properties.
+     * 
+     * If property isn't set or project is <code>null</code>, get preference value instead. 
+     */
     public static String getProperty(IProject proj, QualifiedName key) {
     	String val = null;
     	try {

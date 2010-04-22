@@ -37,14 +37,15 @@
 		<available file="../../Compiler/ModelicaFrontEnd/src" type="dir" property="" />
 	</condition>
 
-	<property name="lib_dir" value="lib" />
 	<property name="beaver_dir" value="${jmodelica_root}/ThirdParty/Beaver/beaver-0.9.6.1/lib" />
 	<property name="jflex_dir" value="${jmodelica_root}/ThirdParty/JFlex/jflex-1.4.3/lib" />
 	<property name="jastadd_dir" value="${jmodelica_root}/ThirdParty/JastAdd" />
 	<property name="junit_dir" value="${jmodelica_root}/ThirdParty/Junit" />
 	<property name="ant-contrib_dir" value="${jmodelica_root}/ThirdParty/Ant-Contrib/ant-contrib-1.0b3" />
-	<property name="ant4eclipse_dir" value="${jmodelica_root}/ThirdParty/Ant4Eclipse" />
+	<property name="options_dir" value="${jmodelica_root}/Options" />
 
+	<property name="lib_dir" value="lib" />
+	<property name="resource_dir" value="resources" />
 	<property name="java_dir" value="java" />
 	<property name="tests_dir" value="tests" />
 	<property name="ant_task_dir" value="ant" />
@@ -241,6 +242,11 @@
 		<copy todir="${lib_dir}">
 			<fileset dir="${beaver_dir}">
 				<include name="beaver-rt*" />
+			</fileset>
+		</copy>
+		<copy todir="${resource_dir}">
+			<fileset dir="${options_dir}">
+				<include name="options.xml" />
 			</fileset>
 		</copy>
 	</target>

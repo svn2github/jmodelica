@@ -35,7 +35,7 @@
    <extension
          point="org.eclipse.ui.ide.projectNatureImages">
       <image
-            icon="icons/outline/modelica_project.png"
+            icon="resources/icons/outline/modelica_project.png"
             id="org.jmodelica.ide.nature.image"
             natureId="org.jmodelica.ide.nature">
       </image>
@@ -59,7 +59,7 @@
       <wizard
             category="org.jmodelica.ide.category"
             class="org.jmodelica.ide.ui.NewFileWizard"
-            icon="icons/outline/modelica_file.png"
+            icon="resources/icons/outline/modelica_file.png"
             id="org.jmodelica.ide.wizard.file"
             name="Modelica File"
             project="false">
@@ -73,7 +73,7 @@
       <wizard
             category="org.jmodelica.ide.category"
             class="org.jmodelica.ide.ui.NewProjectWizard"
-            icon="icons/modelica_project_new.png"
+            icon="resources/icons/modelica_project_new.png"
             id="org.jmodelica.ide.wizard.project"
             name="Modelica Project"
             project="true">
@@ -92,7 +92,7 @@
             contributorClass="org.jmodelica.ide.editor.EditorContributor"
             default="true"
             extensions="mo"
-            icon="icons/outline/modelica_file.png"
+            icon="resources/icons/outline/modelica_file.png"
             id="org.jmodelica.ide.editor"
             name="Modelica Editor">
          <contentTypeBinding
@@ -113,7 +113,7 @@
       <navigatorContent
             activeByDefault="true"
             contentProvider="org.jmodelica.ide.outline.ExplorerContentProvider"
-            icon="icons/modelica_perspective.png"
+            icon="resources/icons/modelica_perspective.png"
             id="org.jmodelica.ide.navigator.content"
             labelProvider="org.jmodelica.ide.outline.ExplorerLabelProvider"
             name="Modelica Elements"
@@ -228,7 +228,7 @@
       <view
             category="org.jmodelica.ide.view.category"
             class="org.jmodelica.ide.outline.InstanceOutlineView"
-            icon="icons/modelica_perspective.png"
+            icon="resources/icons/modelica_perspective.png"
             id="org.jmodelica.ide.view.outline.instance"
             name="Instance Outline">
          <description>
@@ -238,7 +238,7 @@
       <view
             category="org.jmodelica.ide.view.category"
             class="org.jmodelica.ide.outline.SourceOutlineView"
-            icon="icons/modelica_perspective.png"
+            icon="resources/icons/modelica_perspective.png"
             id="org.jmodelica.ide.view.outline.source"
             name="Source Outline">
          <description>
@@ -250,7 +250,7 @@
          point="org.eclipse.ui.perspectives">
       <perspective
             class="org.jmodelica.ide.ui.ModelicaPerspective"
-            icon="icons/modelica_perspective.png"
+            icon="resources/icons/modelica_perspective.png"
             id="org.jmodelica.ide.perspective"
             name="Modelica">
       </perspective>

@@ -23,16 +23,24 @@ public class ModelicaPreferencePage extends PreferencePage  implements IWorkbenc
 	protected Control createContents(Composite parent) {
 		settings = new ModelicaSettingsControl();
 		settings.setLibraryPaths(load(LIBRARIES_ID));
-		settings.setOptionsPath(load(OPTIONS_ID));
+		setOptionsPath(load(OPTIONS_ID));
 		return settings.createControl(parent);
+	}
+
+	private void setOptionsPath(String options) {
+		String stateLoc = Activator.getDefault().getStateLocation().toOSString();
+		settings.setOptionsPath(options.equals(stateLoc) ? "" : options);
 	}
 
 	private String load(QualifiedName key) {
 		return getPreferenceStore().getString(key.getLocalName());
 	}
 
-	private void save(QualifiedName key, String value) {
-		getPreferenceStore().setValue(key.getLocalName(), value);
+	private void save(QualifiedName key, String value, boolean emptyOk) {
+		if (emptyOk || !value.isEmpty())
+			getPreferenceStore().setValue(key.getLocalName(), value);
+		else
+			defaults(key);
 	}
 
 	private String defaults(QualifiedName key) {
@@ -49,14 +57,14 @@ public class ModelicaPreferencePage extends PreferencePage  implements IWorkbenc
 	@Override
 	protected void performDefaults() {
 		settings.setLibraryPaths(defaults(LIBRARIES_ID));
-		settings.setOptionsPath(defaults(OPTIONS_ID));
+		setOptionsPath(defaults(OPTIONS_ID));
 		super.performDefaults();
 	}
 
 	@Override
 	public boolean performOk() {
-		save(LIBRARIES_ID, settings.getLibraryPaths());
-		save(OPTIONS_ID, settings.getOptionsPath());
+		save(LIBRARIES_ID, settings.getLibraryPaths(), true);
+		save(OPTIONS_ID, settings.getOptionsPath(), false);
 		// TODO Trigger rebuild of all Modelica projects
 		return super.performOk();
 	}

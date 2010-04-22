@@ -77,7 +77,14 @@ public class ProjectPropertyPage extends PropertyPage {
 			proj.build(IncrementalProjectBuilder.FULL_BUILD, null);
 		} catch (CoreException e) {
 		}
-		return true;
+		return super.performOk();
+	}
+
+	@Override
+	protected void performDefaults() {
+		settings.setLibraryPaths(Util.getProperty(null, LIBRARIES_ID));
+		settings.setOptionsPath(Util.getProperty(null, OPTIONS_ID));
+		super.performDefaults();
 	}
 
 }

@@ -28,7 +28,7 @@ import org.jmodelica.ide.Activator;
 
 public class ImageLoader {
 	
-	public final static IPath ICONS_PATH = new Path("icons");
+	public final static IPath ICONS_PATH = new Path("resources/icons");
 
 	
 	// Add a key and a image descriptor for each image
