@@ -101,7 +101,14 @@
 			<pathelement location="${ant-contrib_dir}/target/ant-contrib.jar" />
 		</classpath>
 	</taskdef>
-		
+	
+	<macrodef name="jm_getRevision" description="gets the svn revision of the project">
+		<attribute name="path" default="${bin_dir}" />
+		<sequential>
+			<exec>
+			</exec>
+		</sequential>
+	</macrodef>
 
 	<macrodef name="jm_buildPlugin" description="creates jar for a single plug-in project">
 		<attribute name="projectName" />
@@ -119,11 +126,10 @@
 			</copy>
 
 			<!-- extract version and id -->
-			<!-- TODO: automatically append svn revision to plugin version and patch manifest (do it in task) -->
 			<taskdef name="pluginVersion" classname="org.jmodelica.ant.ExtractPluginVersion" classpath="${bin_dir}/classes" />
 			<pluginVersion plugin="@{projectName}" 
 				path="${bin_dir}/bundles/@{projectName}/META-INF/MANIFEST.MF" 
-				datadir="${bin_dir}" />
+				datadir="${bin_dir}" revision="${svn.revision}"/>
 			<property file="${bin_dir}/plugin.properties" prefix="jm" />
 
 			<!-- build jar -->
@@ -369,6 +375,11 @@
 				<include name="testcases/**/*" /> <!-- remove once #774 is done -->
 			</fileset>
 		</copy>
+		
+		<!-- get svn revision number -->
+		<exec executable="svnversion" outputproperty="svn.revision">
+			<arg value="${jmodelica_root}"/>
+		</exec>
 
 		<!-- build jars for plugins -->
 		<delete file="${bin_dir}/plugin.versions" quiet="true" />
