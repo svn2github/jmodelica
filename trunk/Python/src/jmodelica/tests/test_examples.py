@@ -65,10 +65,10 @@ def test_cstr2():
     """ Test the cstr2 example. """   
     cstr2.run_demo(False)
 
-@testattr(stddist = True)
+@testattr(slow = True)
 def test_distillation():
     """ Test the distillation example. """  
-    #distillation.run_demo(False)
+    distillation.run_demo(False)
     
 @testattr(assimulo = True)
 def test_if_example_1():
