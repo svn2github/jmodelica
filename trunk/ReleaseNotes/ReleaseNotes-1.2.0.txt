@@ -1,7 +1,15 @@
-This document contains the release notes for the upcoming release
-1.2.0.
+This document contains the release notes for JModelica.org 1.2.0.
 
-NOTICE: This document is in preparation
+Highlights:
+
+ * Vectors and user defined functions are supported by the Modelica
+   and Optimica compilers 
+ 
+ * New Python functions for easy initialization, simulation and
+   optimization
+ 
+ * A new Python simulation package, Assimulo, has been integrated to
+   provide increased flexibility and performance
 
 1. Compilers
 
@@ -9,14 +17,15 @@ NOTICE: This document is in preparation
 
 1.1.1 Arrays
 
-Arrays are now almost fully supported. This includes all arithmetic operations and  
-use of arrays in all places allowed in the language specification. The only exception 
-is slice operations, that are only supported for the last component in an access.
+Arrays are now almost fully supported. This includes all arithmetic
+operations and use of arrays in all places allowed in the language
+specification. The only exception is slice operations, that are only
+supported for the last component in an access.
 
 1.1.2 Function-like operators
 
-Most function-like operators are now supported. The following list contains 
-the function-like operators that are *not* supported:
+Most function-like operators are now supported. The following list
+contains the function-like operators that are *not* supported:
 
  * sign(v) 
  * Integer(e) 
@@ -49,23 +58,24 @@ the function-like operators that are *not* supported:
 
 1.1.3 Functions and algorithms
 
-Both algorithms and pure Modelica functions are supported, with a few exceptions: 
+Both algorithms and pure Modelica functions are supported, with a few
+exceptions:
 
- * Use of control structures (if, for, etc.) with test or loop expressions with 
-   variability that is higher than parameter is not supported when compiling for 
-   CppAD.
- * Indexes to arrays of records with variability that is higher than parameter is 
-   not supported when compiling for CppAD.
- * Support for inputs to functions with one or more dimensions declared with ":" 
-   is only partial.
+ * Use of control structures (if, for, etc.) with test or loop
+   expressions with variability that is higher than parameter is not
+   supported when compiling for CppAD.
+ * Indexes to arrays of records with variability that is higher than
+   parameter is not supported when compiling for CppAD.
+ * Support for inputs to functions with one or more dimensions
+   declared with ":" is only partial.
    
 External functions are not supported.
 
 1.1.4 Miscellaneous
 
  * Record constructors are now supported.
- * Limited support for constructs generating events, if expressions, 
-   is provided.
+ * Limited support for constructs generating events .If expressions 
+   is supported.
  * The noEvent operator is supported.
  * Integer and boolean parameters
  * The error checking has been expanded to cover more errors.
@@ -74,8 +84,8 @@ External functions are not supported.
 
 1.2. Optimica Compiler
 
-All support mentioned for the Modelica compiler applies to the Optimica compiler 
-as well.
+All support mentioned for the Modelica compiler applies to the
+Optimica compiler as well.
 
 2. JModelica.org Model Interface (JMI)
 
@@ -139,58 +149,73 @@ obtain the dense output.
 3. New simulation package: Assimulo
 
 The simulation based on pySundials have been removed and replaced by
-the Assimulo package which is also using the Sundials solvers. The main
-difference between the two is that Assimulo is using Cython to connect
-to Sundials. This has substantially improved the simulation speed. For
-more info regarding Assimulo and its features, see:
-http://www.jmodelica.org/assimulo
+the Assimulo package which is also using the Sundials solvers. The
+main difference between the two is that Assimulo is using Cython to
+connect to Sundials. This has substantially improved the simulation
+speed. For more info regarding Assimulo and its features, see:
+http://www.jmodelica.org/assimulo.
 
 4. FMI compliance
 
-The Functional Mockup Interface (FMI) standard is partially supported. FMI
-compliant model meta data XML document can be exported, support for the FMI
-C model execution interface is not yet supported.
+The Functional Mockup Interface (FMI) standard is partially
+supported. FMI compliant model meta data XML document can be exported,
+support for the FMI C model execution interface is not yet supported.
 
 5. XML model export
 
-Models are now exported in XML format. The XML documents contain information 
-on the set of variables, the equations, the user defined functions and for 
-the Optimica´s optimization problems definition of the flattened model. 
-Documents can be validated by a schema designed as an extension of the FMI 
-XML schema.
+Models are now exported in XML format. The XML documents contain
+information on the set of variables, the equations, the user defined
+functions and for the Optimica´s optimization problems definition of
+the flattened model. Documents can be validated by a schema designed
+as an extension of the FMI XML schema.
 
-6. Symbolic framework
+6. Python integration
 
-7. Python integration
+ * The order of the non-named arguments for the ModelicaCompiler and
+   OptimicaCompiler function 'compile_model' has changed. In previous
+   versions the arguments came in the order (model_file_name,
+   model_class_name, target = "model") and is now (model_class_name,
+   model_file_name, target = "model").
 
- * The order the non-named arguments for the ModelicaCompiler and OptimicaCompiler 
-   function 'compile_model' has changed. In previous versions the arguments came 
-   in the order (model_file_name, model_class_name, target = "model") and is now 
-   (model_class_name, model_file_name, target = "model").
- * The functions setparameter and getparameter in jmi.Model have been removed. 
-   Instead the functions set_value and get_value (also in jmi.Model) should be 
-   used.
- * Default start directory $install\work has been removed. A new directory 'tests'
-   will be created in $install for the files created when running nose tests so 
-   that these will not litter the JModelica Python packages.
-   Windows users: If Python is started via the JModelica start-menu, the 
-   default start directory is now %DOCUMENTS%\JModelica.org (usually 
-   My Computer\Shared Documents).
- * Some caching has been implemented in the xmlparser module to improve 
-   execution time for working with jmi.Model objects, which should be 
-   noticable for large models.
+ * The functions 'setparameter' and 'getparameter' in jmi.Model have
+   been removed. Instead the functions set_value and get_value (also
+   in jmi.Model) should be used.
+
+ * Default start directory $install\work has been removed. A new
+   directory 'tests' will be created in $install for the files created
+   when running nose tests so that these will not litter the JModelica
+   Python packages.  Windows users: If Python is started via the
+   JModelica start-menu, the default start directory is now
+   %DOCUMENTS%\JModelica.org (usually My Computer\Shared Documents).
+
+ * Caching has been implemented in the xmlparser module to
+   improve execution time for working with jmi.Model objects, which
+   should be noticeable for large models.
    
 
-7.1 New high-level functions for optimization and simulation
+6.1 New high-level functions for optimization and simulation
 
-New high-level functions for problem initialization, optimization and 
-simulation have been added which collect the compilation of a model, 
-creation of a model object, setup and running of an 
-initialization/optimization/simulation and returning of a result in 
-one function call. For each function there is an algorithm implemented 
-which will be used by default but there is also the 
-possibility to add own algorithms. All examples in the example 
-package have been updated to use the high-level functions.
+New high-level functions for problem initialization, optimization and
+simulation have been added which wrap the compilation of a model,
+creation of a model object, setup and running of an
+initialization/optimization/simulation and returning of a result in
+one function call. For each function there is an algorithm implemented
+which will be used by default but there is also the possibility to add
+custom algorithms. All examples in the example package have been
+updated to use the high-level functions.
+
+7. Contributors to JModelica.org 1.2.0
+
+Christian Andersson
+Tove Bergdahl
+Magnus Gäfvert
+Jesper Mattsson
+Philip Nilsson
+Roberto Parrotto
+Philip Reuterswärd
+Johan Åkesson
+
+
 
 
   
