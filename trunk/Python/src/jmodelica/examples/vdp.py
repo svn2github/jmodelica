@@ -40,7 +40,7 @@ def run_demo(with_plots=True):
 
     cost=res.get_variable_data('cost')
     
-    assert N.abs(cost.x[-1] - 3.1761958e+00) < 1e-3, \
+    assert N.abs(cost.x[-1] - 2.3469089e+01) < 1e-3, \
             "Wrong value of cost function in vdp.py"  
 
     if with_plots:

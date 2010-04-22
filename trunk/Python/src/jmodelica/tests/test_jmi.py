@@ -1131,7 +1131,7 @@ class TestJMIModel_VDP:
                "test_jmi.py: test_Model_dae_get_sizes: Wrong number of DAE equations." 
     
         res_n_eq_F0 = 6
-        res_n_eq_F1 = 7
+        res_n_eq_F1 = 4
         res_n_eq_Fp = 0
         res_n_eq_R0 = 0
         n_eq_F0,n_eq_F1,n_eq_Fp,n_eq_R0 = self.vdp.jmimodel.init_get_sizes()
