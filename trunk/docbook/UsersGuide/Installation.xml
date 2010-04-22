@@ -13,8 +13,8 @@
 
     <para>JModelica.org can be installed on Linux, Mac OS X, and Windows (XP,
     Vista, 7) with 32-bit or 64-bit architectures. Most development work is
-    carried out on 32-bit Mac OS X and Windows XP, so these platforms tend to
-    be best tested.</para>
+    carried out on 32-bit Mac OS X , Linux and Windows XP, so these platforms
+    tend to be best tested.</para>
   </section>
 
   <section>
@@ -43,7 +43,7 @@
 
       <para>The JModelica.org Windows installer contains a binary distribution
       of JModelica.org built using the JModelica.org-SDK, bundled with
-      required third-party software components. The JModelica windows
+      required third-party software components. The JModelica.org Windows
       installer sets up a pre-configured complete environment with convenient
       start menu shortcuts.</para>
 
@@ -143,7 +143,7 @@
             <procedure>
               <step>
                 <para>Download and install <link
-                xlink:href="http://www.python.org/download/releases/2.6.4/">Python
+                xlink:href="http://www.python.org/download/">Python
                 2.6</link>.</para>
               </step>
 
@@ -182,21 +182,18 @@
             </procedure>
           </task>
 
-          <para><link xlink:href="http://www.pythonxy.com/">Python(x,y)</link>
-          is a scientific-oriented Python distribution that includes all
-          necessary dependencies (an a lot more!).</para>
-
           <task>
             <title>Python(x,y) installation of Python prerequisites for
-            Windows binary installer</title>
-
+            Windows binary installer</title>       
             <procedure>
+      			<para><link xlink:href="http://www.pythonxy.com/">Python(x,y)</link>
+				  is a scientific-oriented Python distribution that includes all
+				  necessary dependencies (and a lot more!).</para> 
               <step>
                 <para>Download a <link
                 xlink:href="http://www.pythonxy.com/download.php">Python(x,y)</link>
                 installer for Python 2.6.</para>
               </step>
-
               <step>
                 <para>Run the installer and select a full installation (or
                 select the required packages manually for a smaller
@@ -204,8 +201,6 @@
               </step>
             </procedure>
           </task>
-
-          <para></para>
         </section>
       </section>
 
