@@ -36,13 +36,14 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.dialogs.WizardNewFileCreationPage;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.ISetSelectionTarget;
+import org.jmodelica.ide.IDEConstants;
 
 public class NewFileWizard extends Wizard implements INewWizard {
 
 	private static final String WINDOW_TITLE = "New Modelica File";
 	private static final String TITLE = "New Modelica File";
 	private static final String DESCRIPTION = "Creates a new Modelica File";
-	private static final String FILE_EXTENSION = "mo";
+	private static final String FILE_EXTENSION = IDEConstants.FILE_EXT;
 
 	private IWorkbench workbench;
 	private IStructuredSelection selection;

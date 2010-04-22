@@ -207,7 +207,7 @@
       <page
             class="org.jmodelica.ide.ui.ProjectPropertyPage"
             id="org.jmodelica.ide.property.modelica"
-            name="Modelica">
+            name="JModelica">
          <enabledWhen>
             <instanceof
                   value="org.eclipse.core.resources.IProject">
@@ -317,5 +317,13 @@
             keyConfigurationId="org.eclipse.ui.defaultAcceleratorConfiguration"
             keySequence="F3">
       </keyBinding>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="org.jmodelica.ide.ui.ModelicaPreferencePage"
+            id="org.jmodelica.ide.preference.modelica"
+            name="JModelica">
+      </page>
    </extension>
 </plugin>

@@ -15,6 +15,9 @@
 */
 package org.jmodelica.ide;
 
+import java.io.File;
+
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -61,5 +64,22 @@ public class Activator extends AbstractUIPlugin {
 	public static Activator getDefault() {
 		return plugin;
 	}
-
+	
+	/** 
+	 * Initializes a preference store with default preference values 
+	 * for this plug-in.
+	 */
+	protected void initializeDefaultPreferences(IPreferenceStore store) {
+		String jmodelicaHome = System.getenv("JMODELICA_HOME");
+		String modelicaPath = System.getenv("MODELICAPATH");
+		
+		if (modelicaPath == null && jmodelicaHome != null) { 
+			modelicaPath = "/ThirdParty/MSL";
+			modelicaPath = jmodelicaHome + modelicaPath.replace('/', File.separatorChar);
+		}
+		String optionsPath = jmodelicaHome != null ? jmodelicaHome + File.separator + "Options" : null;
+		
+		store.setDefault(IDEConstants.PROPERTY_LIBRARIES_ID.getLocalName(), modelicaPath);
+		store.setDefault(IDEConstants.PROPERTY_OPTIONS_PATH_ID.getLocalName(), optionsPath);
+	}
 }

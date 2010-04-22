@@ -3,6 +3,7 @@ package org.jmodelica.ide;
 import java.io.File;
 
 import org.eclipse.core.resources.IProject;
+import org.jmodelica.ide.helpers.Util;
 import org.jmodelica.util.OptionRegistry;
 
 /**
@@ -21,11 +22,11 @@ public IDEOptions(IProject project) {
 		return;
     
     try {
-        String dir = project.getPersistentProperty(IDEConstants.PROPTERTY_OPTIONS_PATH);
+        String dir = Util.getProperty(project, IDEConstants.PROPERTY_OPTIONS_PATH_ID);
 		String path = dir + File.separator + "options.xml";
 		copyAllOptions(new OptionRegistry(path));
 		
-	    String modelicaPath = project.getPersistentProperty(IDEConstants.PROPERTY_LIBRARIES_ID);
+	    String modelicaPath = Util.getProperty(project, IDEConstants.PROPERTY_LIBRARIES_ID);
 		setStringOption("MODELICAPATH", modelicaPath);
     } catch (Exception e) {
     	// TODO: Do something constructive. An error message or something.

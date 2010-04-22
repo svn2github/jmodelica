@@ -60,7 +60,7 @@ public class IDEConstants {
 	public static final RGB BRACE_MATCHING_COLOR = new RGB(128, 128, 128);
 	
 	public static final QualifiedName PROPERTY_LIBRARIES_ID = new QualifiedName(PLUGIN_ID, "libraries");
-	public static final QualifiedName PROPTERTY_OPTIONS_PATH = new QualifiedName(PLUGIN_ID, "options_path");
+	public static final QualifiedName PROPERTY_OPTIONS_PATH_ID = new QualifiedName(PLUGIN_ID, "options_path");
 
 	public static final String WIZARD_ID = PLUGIN_ID + ".wizard";
 	public static final String WIZARD_FILE_ID = WIZARD_ID + ".file";

@@ -28,9 +28,11 @@ import java.util.regex.Pattern;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IEditorPart;
@@ -38,6 +40,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.ide.IDE;
 import org.jastadd.plugin.compiler.ast.IError;
+import org.jmodelica.ide.Activator;
 import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.editor.Editor;
 import org.jmodelica.modelica.compiler.ASTNode;
@@ -235,6 +238,17 @@ public class Util {
             ? res  
             : new Dot("", res, createDotAccess(parts, i + 1));
         
+    }
+    
+    public static String getProperty(IProject proj, QualifiedName key) {
+    	String val = null;
+    	try {
+			val = proj.getPersistentProperty(key);
+		} catch (Exception e) {
+		}
+		if (val == null)
+			val = Activator.getDefault().getPreferenceStore().getString(key.getLocalName());
+		return val.isEmpty() ? null : val;
     }
 
 }
