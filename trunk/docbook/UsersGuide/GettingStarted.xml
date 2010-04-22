@@ -10,6 +10,27 @@
          xmlns:db="http://docbook.org/ns/docbook">
   <title>Getting started</title>
 
+  <para>The examples in JModelica.org uses the Python scientific library
+  SciPy, which is dependent on NumPy and the mathematical plotting library
+  matplotlib for plotting. These packages will thus also be used in the
+  example below. Most Python functions have built in documentation, which can
+  be accessed from the Python shell by invoking the help function, for example
+  'help(numpy.size)'. Use this feature frequently to learn more about the
+  packages used in this tutorial, including the jmodelica package. It is
+  possible do the tutorials without any Python knowledge (although it helps to
+  know the basics). In most cases it is convenient to store the Python
+  commands in a script file and run the script from the file by invoking the
+  Python command run:</para>
+
+  <programlisting>&gt;&gt;&gt; run my_script.py</programlisting>
+
+  <para>or</para>
+
+  <programlisting>&gt;&gt;&gt; run -i my_script.py</programlisting>
+
+  <para>where the latter will render all variables to be accessible in the
+  Python interpreter after termination of the script.</para>
+
   <section>
     <title>Compilation of models</title>
 
@@ -259,21 +280,95 @@ P.show()
   <section>
     <title>Solving optimal control problems</title>
 
-    <para>A Continuously Stirred Tank Reactor (CSTR) model will be used to
-    demonstrate how to solve an optimal control problem using the
-    JModelica.org platform.</para>
-
     <section>
-      <title>Python packages</title>
+      <title>The van der Pol Oscillator</title>
 
-      <para>The optimization examples in JModelica.org uses the Python
-      scientific library SciPy, which is dependent on NumPy and the
-      mathematical plotting library matplotlib for plotting. These packages
-      will thus also be used in the example below. Most Python functions have
-      built in documentation, which can be accessed from the Python shell by
-      invoking the help function, for example 'help(numpy.size)'. Use this
-      feature frequently to learn more about the packages used in this
-      tutorial, including the jmodelica package.</para>
+      <para>We consider the following Optimica model:</para>
+
+      <programlisting>optimization VDP_Opt (objective = cost(finalTime),
+                      startTime = 0,
+                      finalTime = 20)
+
+  // The states
+  Real x1(start=0,fixed=true);
+  Real x2(start=1,fixed=true);
+
+  // The control signal
+  input Real u;
+
+  Real cost(start=0,fixed=true);
+
+equation
+  der(x1) = (1 - x2^2) * x1 - x2 + u;
+  der(x2) = x1;
+  der(cost) = x1^2 + x2^2 + u^2;
+constraint 
+   u&lt;=0.75;
+end VDP_Opt;
+</programlisting>
+
+      <para>Create a new file named VDP_Opt.mo and save it in you working
+      directory. Next, create a Python script file and a write (or copy paste)
+      the following commands:</para>
+
+      <programlisting language="python"># Import the optimize function
+from jmodelica import optimize
+
+# Import the plotting library
+import matplotlib.pyplot as plt</programlisting>
+
+      <para>Next, we call the 'optimize' function which encapsulates
+      operations for compiling, loading, executing the optimization algorithm,
+      and loading the result from file:</para>
+
+      <programlisting language="python">(model, res) = optimize("VDP_Opt", VDP_Opt.mo")</programlisting>
+
+      <para>In this case, we use the default settings for the optimization
+      algorithm and provide only the name of the Optimica class (the first
+      argument) and the name of the file (VDP.mo). The return argument 'model'
+      is a reference to a jmodelica.Model object representing the compiled
+      model. The 'res' return argument represents the optimization result and
+      can be used to access the optimal trajectories:</para>
+
+      <programlisting language="python"> x1=res.get_variable_data('x1')
+ x2=res.get_variable_data('x2')
+ u=res.get_variable_data('u')</programlisting>
+
+      <para>The return arguments are objects of the Python class
+      jmodelica.io.Trajectory, which has two fields: 't' which represents the
+      time vector and 'x' which represents the trajectory vector. t and x are
+      both numpy arrays of the same length. Using the matplotlib package, we
+      can visualize the optimization result:</para>
+
+      <programlisting language="python">plt.figure(1)
+plt.clf()
+plt.subplot(311)
+plt.plot(x1.t,x1.x)
+plt.grid()
+plt.ylabel('x1')
+        
+plt.subplot(312)
+plt.plot(x2.t,x2.x)
+plt.grid()
+plt.ylabel('x2')
+        
+plt.subplot(313)
+plt.plot(u.t,u.x)
+plt.grid()
+plt.ylabel('u')plt.xlabel('time')
+plt.show()</programlisting>
+
+      <para>You should now see the optimization result as shown below.</para>
+
+      <figure>
+        <title>Van der Pol optimization result.</title>
+
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="images/vdp.svg" scalefit="1" width="60%"></imagedata>
+          </imageobject>
+        </mediaobject>
+      </figure>
     </section>
 
     <section>
