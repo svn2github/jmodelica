@@ -90,7 +90,7 @@ def test_simulation_with_input():
     """ Test the simulation_with_input example. """    
     simulation_with_input.run_demo(False)
 
-@testattr(ipopt = True)
+@testattr(assimulo = True)
 def test_rlc_linearization():
     """ Test that linearization of the RLC circuit works. """    
     RLC_linearization.run_demo(False)
