@@ -41,6 +41,11 @@ def run_demo(with_plots=True):
     """ Model predicitve control of the Hicks-Ray CSTR reactor.
         This example demonstrates how to use the blocking factor
         feature of the collocation algorithm.
+
+        This example also shows how to use classes for initialization,
+        simulation and optimization directly rather than calling then
+        through the high-level classes 'initialialize', 'simulate' and
+        'optimize'.
     """
 
     curr_dir = os.path.dirname(os.path.abspath(__file__));

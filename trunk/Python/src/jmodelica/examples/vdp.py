@@ -26,17 +26,12 @@ import numpy as N
 import matplotlib.pyplot as plt
 
 def run_demo(with_plots=True):
-    """Demonstrate how to solve a minimum time
-    dynamic optimization problem based on a
-    Van der Pol oscillator system."""
+    """Demonstrate how to solve a dynamic optimization problem based
+    on a Van der Pol oscillator system."""
 
     curr_dir = os.path.dirname(os.path.abspath(__file__));
-    model_name = "VDP_pack.VDP_Opt"
-    mo_file = curr_dir+"/files/VDP.mo"
 
-    (model, res) = optimize(model_name, mo_file,
-                            compiler_options={'state_start_values_fixed':True},
-                            solver_args={'max_iter':500})
+    (model, res) = optimize("VDP_pack.VDP_Opt", curr_dir+"/files/VDP.mo")
 
     # Extract variable profiles
     x1=res.get_variable_data('x1')
@@ -45,7 +40,7 @@ def run_demo(with_plots=True):
 
     cost=res.get_variable_data('cost')
     
-    assert N.abs(cost.x[-1] - 2.3469089e+01) < 1e-3, \
+    assert N.abs(cost.x[-1] - 3.1761958e+00) < 1e-3, \
             "Wrong value of cost function in vdp.py"  
 
     if with_plots:
