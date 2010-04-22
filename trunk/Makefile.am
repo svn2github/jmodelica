@@ -78,10 +78,11 @@ if WITH_SUNDIALS
 	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python; \
 	fi
 endif 
-	[ -e $(DESTDIR)$(prefix)/Python/jm_python.sh ] && echo "File exists, don't copy jm_python.sh" || cp Python/jm_python.sh $(DESTDIR)$(prefix)/Python/jm_python.sh
-	[ -e $(DESTDIR)$(prefix)/Python/jm_ipython.sh  ] && echo "File exists, don't jm_ipython.sh" || cp Python/jm_ipython.sh $(DESTDIR)$(prefix)/Python/jm_ipython.sh
+	mkdir -p $(DESTDIR)$(prefix)/bin
+	[ -e $(DESTDIR)$(prefix)/bin/jm_python.sh ] && echo "File exists, don't copy jm_python.sh" || cp Python/jm_python.sh $(DESTDIR)$(prefix)/bin/jm_python.sh
+	[ -e $(DESTDIR)$(prefix)/bin/jm_ipython.sh  ] && echo "File exists, don't jm_ipython.sh" || cp Python/jm_ipython.sh $(DESTDIR)$(prefix)/bin/jm_ipython.sh
 	cp $(abs_top_srcdir)/Python/src/startup.py $(DESTDIR)$(prefix)/
-	chmod ugo+x $(DESTDIR)$(prefix)/Python/jm_*.sh
+	chmod ugo+x $(DESTDIR)$(prefix)/bin/jm_*.sh
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Beaver
 	cp $(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/LICENSE $(DESTDIR)$(prefix)/ThirdParty/Beaver/

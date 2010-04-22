@@ -138,11 +138,11 @@ variable automatically when Python/Ipython is started.
 
 For Linux and Mac OS X users we recommend using the scripts:
 
-$JMODELICA_HOME/Python/jm_ipython.sh
+$JMODELICA_HOME/bin/jm_ipython.sh
 
 or
 
-$JMODELICA_HOME/Python/jm_python.sh
+$JMODELICA_HOME/bin/jm_python.sh
 
 to start IPython (recommended) or Python. In these scripts, the
 default values of the environment variables are set to match your
