@@ -1,7 +1,8 @@
 #!/usr/bin/env python 
 # -*- coding: utf-8 -*-
-""" Module for optimization and simulation algorithms to be used together with 
-jmodelica.optimize and jmodelica.simulate
+""" Module for optimization, simulation and initialization algorithms to be 
+used together with jmodelica.optimize, jmodelica.simulate and jmodelica.initialize 
+respectively.
 """
 
 # Copyright (C) 2010 Modelon AB
@@ -51,7 +52,9 @@ N.int = N.int32
 
 class AlgorithmBase:
     """ Abstract class which all algorithms that are to be used with 
-    jmodelica.optimize or jmodelica.simulate must implement."""
+        jmodelica.optimize, jmodelica.simulate or jmodelica.initialize must 
+        implement.
+    """
 #    __metaclass__=ABCMeta
     
 #    @abstractmethod
@@ -111,7 +114,6 @@ class IpoptInitializationAlg(AlgorithmBase):
             result_format --
                 Format of result file.
                 Default: 'txt'
-
         """
         self.stat=stat
         self.result_args = dict(file_name=result_file_name, format=result_format)
@@ -122,7 +124,7 @@ class IpoptInitializationAlg(AlgorithmBase):
         
         Parameters:
             solver_args --
-                dict with int, real or string options for the solver ipopt
+                Dict with int, real or string options for the solver ipopt.
         """
         for k, v in solver_args.iteritems():
             if isinstance(v, int):
@@ -202,20 +204,20 @@ class AssimuloAlg(AlgorithmBase):
                 Default: 0.0
             final_time --
                 Simulation stop time.
-                Default: 0.0
+                Default: 1.0
             num_communication_points -- 
-                Number of points where the solution is returned.
-                Default: 500 (if = 0 then integrator will return at it's internal steps)
+                Number of points where the solution is returned. If set to 0 the 
+                integrator will return at it's internal steps.
+                Default: 500               
             solver --
                 Set which solver to use with class name as string. This determines 
                 whether a DAE or ODE problem will be created.
-                Default: IDA
+                Default: 'IDA'
             input_trajectory --
                 Trajectory data for model inputs. The argument should be a matrix
                 where the first column represents time and the following columns
                 represents input trajectory data. 
-                Default: An empty matrix, i.e., no input trajectories.
-                
+                Default: An empty matrix, i.e., no input trajectories.               
         """
         self.start_time = start_time
         self.final_time = final_time
@@ -236,7 +238,7 @@ class AssimuloAlg(AlgorithmBase):
         
         Parameters:
             solver_args --
-                dict with list of solver arguments. Arguments must be a property of 
+                Dict with list of solver arguments. Arguments must be a property of 
                 the solver. An InvalidSolverArgumentException is raised if an 
                 argument can not be found for the chosen solver.
          """
@@ -274,8 +276,8 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
             model -- 
                 jmodelica.jmi.Model model object
             alg_args -- 
-                dict with algorithm arguments. See _set_alg_args function call for 
-                names and default values.
+                Dict with algorithm arguments. See the _set_alg_args function 
+                call for names and default values.
             
         """
         self.model = model
@@ -308,7 +310,7 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
                       result_file_name='', 
                       result_format='txt',
                       n_interpolation_points=None):
-        """ Set arguments for CollocationLagrangePolynomials algorithm.
+        """ Set arguments for the CollocationLagrangePolynomials algorithm.
         
         Parameters:
             n_e -- 
@@ -316,9 +318,10 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
                 Default:50
             hs -- 
                 Vector containing the normalized element lengths.
-                Default: 3
+                Default: Equidistant points using default n_e.
             n_cp -- 
                 Number of collocation points.
+                Default: 3
             blocking_factors --
                 Blocking factor vector.
                 Default: None (not used)
@@ -326,7 +329,8 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
                 A reference to an object of type ResultDymolaTextual or
                 ResultDymolaBinary containing variable trajectories used
                 to initialize the optimization problem.
-                Default: None (i.e. not used, set this argument to activate initialization)
+                Default: None (i.e. not used, set this argument to activate 
+                initialization)
             result_mesh --
                 Determines which function will be used to get the solution 
                 trajectories. Possible values are, 'element_interpolation', 
@@ -362,7 +366,7 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
         
         Parameters:
             solver_args --
-                dict with int, real or string options for the solver ipopt
+                Dict with int, real or string options for the solver ipopt.
         """
         for k, v in solver_args.iteritems():
             if isinstance(v, int):
@@ -394,7 +398,9 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
         return resultfile
         
 class InvalidAlgorithmArgumentException(Exception):
-    """ Exception raised when an algorithm argument is encountered that does not exists."""
+    """ Exception raised when an algorithm argument is encountered that does 
+        not exist.
+    """
     
     def __init__(self, arg):
         self.msg='Invalid algorithm argument: '+str(arg)
@@ -403,7 +409,9 @@ class InvalidAlgorithmArgumentException(Exception):
         return repr(self.msg)
 
 class InvalidSolverArgumentException(Exception):
-    """ Exception raised when a solver argument is encountered that does not exists."""
+    """ Exception raised when a solver argument is encountered that does 
+        not exist.
+    """
     
     def __init__(self, arg):
         self.msg='Invalid solver argument: '+str(arg)

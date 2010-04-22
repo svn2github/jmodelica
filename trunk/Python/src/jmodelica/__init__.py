@@ -73,33 +73,56 @@ def optimize(model,
              solver_args={}):
     """ Compact function for model optimization.
     
-    Pass a jmi.Model object or path to mo-file and model class if model 
-    should be (re)compiled. There are default values for all other settings. 
-    These can be changed in function call.
+    The intention with this function is to wrap model compilation, creation of 
+    a model object and optimization in one function call. The optimization 
+    method depends on which algorithm is used, this can be set with the 
+    function argument 'algorithm'. Arguments for the algorithm and solver are 
+    passed as dicts. Which arguments that are valid depends on which algorithm 
+    is used, see the algorithm implementation in algorithm_drivers.py for details.
+    
+    The default algorithm for this function is CollocationLagrangePolynomialsAlg. 
+    
+    The simplest way of using the function is to pass the model name and path 
+    to the model file (a jmi.Model is enough if model is already compiled) and 
+    use the default values for all other arguments.
     
     Parameters:
         model -- 
-            Model object or model class name (if class name then mo-file must be provided)
+            Model object or model name (supply model name if model should be 
+            (re)compiled, then mo-file must also be provided)
         file_name --
-            Name of mo-file. 
-            Default: empty string
+            Name of model file (mo-file). 
+            Default: empty string (no compilation)
         compiler_target --
             Target argument to compiler. 
             Default: 'ipopt'
         compiler_options --
-            Dict with compiler options listed. 
+            Dict with options for the compiler (see options.xml for possible 
+            values). 
             Default: empty dict
         algorithm --
-            The optimization algorithm to use is specified by passing class name in 
-            this argument. The algorithm class can be any class which implements the 
-            abstract class algorithm_drivers.AlgorithmBase.
+            The algorithm which will be used for the simulation is 
+            specified by passing the algorithm class in this argument. The 
+            algorithm class can be any class which implements the abstract 
+            class AlgorithmBase (found in algorithm_drivers.py). In this way 
+            it is possible to write own algorithms and use them with this 
+            function.
             Default: CollocationLagrangePolynomialsAlg
         alg_args --
             All arguments for the chosen algorithm should be listed in this dict.
+            Valid arguments depend on the algorithm chosen, see algorithm 
+            implementation in algorithm_drivers.py for details.      
             Default: empty dict
         solver_args --
             All arguments for the chosen solver should be listed in this dict.
+            Valid arguments depend on the chosen algorithm and possibly which 
+            solver has been selected for the algorithm. See algorithm 
+            implementation in algorithm_drivers.py for details.
             Default: empty dict
+    Returns:
+        model -- The jmi.Model object
+        res -- The loaded result file.
+    
     
     """
     compiler='optimica'
@@ -122,37 +145,56 @@ def simulate(model,
              solver_args={}):
     """ Compact function for model simulation.
     
-    Pass a jmi.Model object or path to mo-file and model class if model 
-    should be (re)compiled. There are default values for all other settings. 
-    These can be changed in function call.
+    The intention with this function is to wrap model compilation, creation of 
+    a model object and simulation in one function call. The simulation 
+    method depends on which algorithm is used, this can be set with the 
+    function argument 'algorithm'. Arguments for the algorithm and solver are 
+    passed as dicts. Which arguments that are valid depends on which algorithm 
+    is used, see the algorithm implementation in algorithm_drivers.py for details.
+    
+    The default algorithm for this function is AssimuloAlg. 
+    
+    The simplest way of using the function is to pass the model name and path 
+    to the model file (a jmi.Model is enough if model is already compiled) and 
+    use the default values for all other arguments.
     
     Parameters:
         model -- 
-            Model object or model class name (if class name then mo-file must be provided)
+            Model object or model name (supply model name if model should be 
+            (re)compiled, then mo-file must also be provided)
         file_name --
-            Name of mo-file. 
-            Default: empty string
+            Name of model file (mo-file). 
+            Default: empty string (no compilation)
         compiler --
-            Set compiler that model should be compiled with, either 'modelica' or 'optimica'.
+            Set compiler that model should be compiled with, 'modelica' or 
+            'optimica'.
             Default: 'modelica'
         compiler_target --
             Target argument to compiler. 
             Default: 'ipopt'
         compiler_options --
-            Dict with compiler options listed. 
+            Dict with options for the compiler (see options.xml for possible 
+            values). 
             Default: empty dict
         algorithm --
-            The simulation algorithm to use is specified by passing class name in 
-            this argument. The algorithm class can be any class which implements the 
-            abstract class algorithm_drivers.AlgorithmBase.
+            The algorithm which will be used for the simulation is 
+            specified by passing the algorithm class in this argument. The 
+            algorithm class can be any class which implements the abstract 
+            class AlgorithmBase (found in algorithm_drivers.py). In this way 
+            it is possible to write own algorithms and use them with this 
+            function.
             Default: AssimuloAlg
         alg_args --
             All arguments for the chosen algorithm should be listed in this dict.
+            Valid arguments depend on the algorithm chosen, see algorithm 
+            implementation in algorithm_drivers.py for details.      
             Default: empty dict
         solver_args --
             All arguments for the chosen solver should be listed in this dict.
+            Valid arguments depend on the chosen algorithm and possibly which 
+            solver has been selected for the algorithm. See algorithm 
+            implementation in algorithm_drivers.py for details.
             Default: empty dict
-            
     Returns:
         model -- The jmi.Model object
         res -- The loaded result file.
@@ -177,35 +219,55 @@ def initialize(model,
                solver_args={}):
     """ Compact function for model initialization.
     
-    Pass a jmi.Model object or path to mo-file and model class if model 
-    should be (re)compiled. There are default values for all other settings. 
-    These can be changed in function call.
+    The intention with this function is to wrap model compilation, creation of 
+    a model object and initialization in one function call. The initialization 
+    method depends on which algorithm is used, this can be set with the 
+    function argument 'algorithm'. Arguments for the algorithm and solver are 
+    passed as dicts. Which arguments that are valid depends on which algorithm 
+    is used, see the algorithm implementation in algorithm_drivers.py for details.
+    
+    The default algorithm for this function is IpoptInitializationAlg. 
+    
+    The simplest way of using the function is to pass the model name and path 
+    to the model file (a jmi.Model is enough if model is already compiled) and 
+    use the default values for all other arguments.
     
     Parameters:
         model -- 
-            Model object or model class name (if class name then mo-file must be provided)
+            Model object or model name (supply model name if model should be 
+            (re)compiled, then mo-file must also be provided)
         file_name --
-            Name of mo-file. 
-            Default: empty string
+            Name of model file (mo-file). 
+            Default: empty string (no compilation)
         compiler --
-            Set compiler that model should be compiled with, either 'modelica' or 'optimica'.
+            Set compiler that model should be compiled with, 'modelica' or 
+            'optimica'.
             Default: 'modelica'
         compiler_target --
             Target argument to compiler. 
             Default: 'ipopt'
         compiler_options --
-            Dict with compiler options listed. 
+            Dict with options for the compiler (see options.xml for possible 
+            values). 
             Default: empty dict
         algorithm --
-            The initialize algorithm to use is specified by passing class name in 
-            this argument. The algorithm class can be any class which implements the 
-            abstract class algorithm_drivers.AlgorithmBase.
+            The algorithm which will be used for the initialization is 
+            specified by passing the algorithm class in this argument. The 
+            algorithm class can be any class which implements the abstract 
+            class AlgorithmBase (found in algorithm_drivers.py). In this way 
+            it is possible to write own algorithms and use them with this 
+            function.
             Default: IpoptInitializationAlg
         alg_args --
             All arguments for the chosen algorithm should be listed in this dict.
+            Valid arguments depend on the algorithm chosen, see algorithm 
+            implementation in algorithm_drivers.py for details.      
             Default: empty dict
         solver_args --
             All arguments for the chosen solver should be listed in this dict.
+            Valid arguments depend on the chosen algorithm and possibly which 
+            solver has been selected for the algorithm. See algorithm 
+            implementation in algorithm_drivers.py for details.
             Default: empty dict
             
     Returns:
@@ -231,7 +293,8 @@ def _exec_algorithm(model,
              algorithm, 
              alg_args, 
              solver_args):
-    """ Helper function which performs all steps of an algorithm run.
+    """ Helper function which performs all steps of an algorithm run which are 
+    common to all algortihms.
     
     Throws exception if algorithm is not a subclass of algorithm_drivers.AlgorithmBase.
     """
