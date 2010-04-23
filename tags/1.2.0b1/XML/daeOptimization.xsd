@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSpy v2010 (http://www.altova.com) by Magnus Gäfvert (Modelon AB) -->
+<xs:schema xmlns:opt="https://svn.jmodelica.org/trunk/XML/daeOptimization.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:exp="https://svn.jmodelica.org/trunk/XML/daeExpressions.xsd" targetNamespace="https://svn.jmodelica.org/trunk/XML/daeOptimization.xsd" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:import namespace="https://svn.jmodelica.org/trunk/XML/daeExpressions.xsd" schemaLocation="optExpressions.xsd"/>
+	<xs:complexType name="Constraint">
+		<xs:annotation>
+			<xs:documentation>Constraint complex type definition</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="exp:BinaryOperation"/>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="TimeVariable">
+		<xs:annotation>
+			<xs:documentation>Time variable type definition</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="Value" type="xs:float" minOccurs="0"/>
+			<xs:element name="Free" type="xs:boolean" minOccurs="0"/>
+			<xs:element name="InitialGuess" type="xs:float" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="Optimization">
+		<xs:annotation>
+			<xs:documentation>Optimization problem representation</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="ObjectiveFunction" type="exp:OptExp"/>
+				<xs:element name="IntervalStartTime" type="opt:TimeVariable"/>
+				<xs:element name="IntervalFinalTime" type="opt:TimeVariable"/>
+				<xs:element name="TimePoints">
+					<xs:complexType>
+						<xs:sequence minOccurs="0" maxOccurs="unbounded">
+							<xs:element name="Index" type="xs:integer"/>
+							<xs:element name="Value" type="xs:double"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="Constraints">
+					<xs:complexType>
+						<xs:choice minOccurs="0" maxOccurs="unbounded">
+							<xs:element name="ConstraintEq" type="opt:Constraint"/>
+							<xs:element name="ConstraintGeq" type="opt:Constraint"/>
+							<xs:element name="ConstraintLeq" type="opt:Constraint"/>
+						</xs:choice>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

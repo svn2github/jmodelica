@@ -1,0 +1,112 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+import org.jmodelica.util.*;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.Collection;
+
+/**
+ * @author jakesson
+ *
+ */
+public class ErrorTestCase extends TestCase {
+
+	String errorMessage="";
+	
+	public ErrorTestCase() {}
+	
+	public ErrorTestCase(String errorMessage) {
+		this.errorMessage = errorMessage;
+	}
+	
+	/**
+	 * \brief Perform tests on a set of semantic problems.
+	 */
+	protected Result testProblems(Collection<Problem> problems) {
+		filterProblems(problems);
+		
+		if (problems.size() == 0)
+			return Result.CONTINUE;
+		
+		StringBuilder str = new StringBuilder("Errors found!\n");
+		for (Problem p : problems) {
+			str.append(p);
+			str.append('\n');
+		}
+		String test = filterErrorMessages(str.toString());
+		String correct = filterErrorMessages(getErrorMessage());
+		return test.equals(correct) ? Result.PASS : Result.FAIL;
+	}
+
+	/**
+	 * \brief Perform tests on the set of semantic problems found after transform canonical step.
+	 */
+	protected Result testTransformedProblems(Collection<Problem> problems) {
+		return stop(testProblems(problems));
+	}
+	
+	public String filterErrorMessages(String str) {
+		StringBuilder filteredStr = new StringBuilder();
+		BufferedReader origStr = new BufferedReader(new StringReader(str));
+		String line;
+		
+		try {
+			line = origStr.readLine();
+		} catch (IOException e) {
+			e.printStackTrace();
+			return filteredStr.toString();
+		}
+		while (line!=null) {
+			try {
+			
+				line = origStr.readLine();
+				
+			if (line!=null && line.contains("Semantic error at line")) {
+	
+					line = origStr.readLine();
+				filteredStr.append(line+"\n");
+			
+			}
+			
+			} catch (IOException e) {
+				e.printStackTrace();
+				return filteredStr.toString();
+			}	
+
+			
+		}
+		
+	return filteredStr.toString();
+	}
+	
+	/**
+	 * @return the errorMessage
+	 */
+	public String getErrorMessage() {
+		return errorMessage;
+	}
+
+	/**
+	 * @param errorMessage the errorMessage to set
+	 */
+	public void setErrorMessage(String errorMessage) {
+		this.errorMessage = errorMessage;
+	}
+
+}

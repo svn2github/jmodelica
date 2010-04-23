@@ -1,0 +1,235 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+import java.util.HashMap;
+
+aspect FlatNameBinding {
+	
+	inh AbstractFVariable FIdUse.lookupFV(FQName fqn);
+	inh AbstractFVariable FIdUse.lookupDerFV(FQName fqn);
+	inh AbstractFVariable FExp.lookupFV(FQName fqn);
+	inh AbstractFVariable FFunctionVariable.lookupFV(FQName fqn);
+	syn lazy AbstractFVariable FIdUse.myFV() = lookupFV(getFQName());
+	
+	syn lazy AbstractFVariable FIdUseExp.myFV() = getFIdUse().myFV();
+	eq FDerExp.myFV() = getFIdUse().lookupDerFV(getFIdUse().getFQName());
+
+	eq Root.getChild().lookupFV(FQName fqn)    = null;
+	eq Root.getChild().lookupDerFV(FQName fqn) = null;
+
+	eq FClass.getChild(int index).lookupFV(FQName fqn) {
+		AbstractFVariable variable = lookupFVFromMap(fullyQualifiedVariablesMap(), fqn, false);
+		return (variable == null) ? unknownFVariable() : variable;
+	}
+
+	eq FClass.getChild(int index).lookupDerFV(FQName fqn) {
+		AbstractFVariable variable = lookupFVFromMap(fullyQualifiedVariablesMap(), fqn, true);
+		return (variable == null) ? unknownFVariable() : variable;
+	}
+
+	eq FFunctionDecl.getChild(int index).lookupFV(FQName fqn) {
+		AbstractFVariable variable = lookupFVFromMap(fullyQualifiedVariablesMap(), fqn, false);
+		return (variable == null) ? unknownFVariable() : variable;
+	}
+	
+	public static AbstractFVariable ASTNode.lookupFVFromMap(
+			HashMap<String, ? extends AbstractFVariable> map, FQName fqn, boolean der) {
+		// TODO: der() on members of records
+		AbstractFVariable variable = map.get(der ? fqn.derName() : fqn.name());
+		if (variable == null) {
+			int i = fqn.getNumFQNamePart();
+			do {
+				i--;
+				String part = fqn.prefixName(i);
+				AbstractFVariable tmp = map.get(part);
+				if (tmp != null) 
+					variable = tmp.lookupFVInRecord(fqn, i);
+			} while (variable == null && i > 1);
+		}
+		return variable;
+	}
+	
+	public AbstractFVariable AbstractFVariable.lookupFVInRecord(FQName fqn, int part) {
+		AbstractFVariable res = null;
+		if (myFRecordDecl() != null)
+			for (FVariable fv : myFRecordDecl().getFVariables())
+				if (fv.name().equals(fqn.getFQNamePart(part).getName()))
+					res = fv;
+		if (part < fqn.getNumFQNamePart() - 1 && res != null)
+			res = res.lookupFVInRecord(fqn, part + 1);
+		return res;
+	}
+	
+	inh AbstractFVariable FForClauseE.lookupFV(FQName fqn);
+	eq FForClauseE.getChild().lookupFV(FQName fqn) {
+		String name = fqn.name();
+		for (FForIndex fi : getFForIndexs()) {
+			if (fi.getFVariable().name().equals(name)) {
+				return fi.getFVariable();
+			}
+		}
+		return lookupFV(fqn);
+	}
+	
+	inh AbstractFVariable FForStmt.lookupFV(FQName fqn);
+	eq FForStmt.getChild().lookupFV(FQName fqn) {
+		String name = fqn.name();
+		FVariable index = getIndex().getFVariable();
+		if (index.name().equals(name)) 
+			return index;
+		return lookupFV(fqn);
+	}
+	
+	inh AbstractFVariable FIterExp.lookupFV(FQName fqn);
+	eq FIterExp.getChild().lookupFV(FQName fqn) {
+		String name = fqn.name();
+		for (CommonForIndex fi : getForIndexs()) {
+			if (fi instanceof FForIndex) {
+				FForIndex ffi = (FForIndex) fi;
+				if (ffi.getFVariable().name().equals(name)) 
+					return ffi.getFVariable();
+			}
+		}
+		return lookupFV(fqn);
+	}
+	
+	/*
+	inh AbstractFVariable FDerExp.lookupFDV(String name);
+	eq Root.getChild().lookupFDV(String name) = null;
+	eq FClass.getChild(int index).lookupFDV(String name) {
+		FVariable variable = (FDerivativeVariable) 
+		   fullyQualifiedVariablesMap().get(name);
+		if (variable == null) {
+			return unknownFVariable();
+		} else {
+			return variable;
+		}		
+	}
+	syn lazy FDerivativeVariable FDerExp.myFDV() = 
+		(FDerivativeVariable)lookupFDV(getFIdUseExp().derName());	
+	*/
+	
+	syn lazy HashMap<String,FVariable> FClass.fullyQualifiedVariablesMap() {
+		//log.debug("FClass.fullyQualifiedVariablesMap()");
+		HashMap<String,FVariable> map = new HashMap<String,FVariable>();
+		for (FVariable v : getFVariables()) 
+			map.put(v.name(), v);
+		for (FVariable v : getAliasVariables()) 
+			map.put(v.name(), v);
+		return map;
+	}
+	
+	syn lazy HashMap<String, FFunctionVariable> FFunctionDecl.fullyQualifiedVariablesMap() {
+		HashMap<String, FFunctionVariable> map = new HashMap<String, FFunctionVariable>();
+		for (FFunctionVariable v : getFFunctionVariables()) 
+			map.put(v.name(), v);
+		return map;
+	}
+	
+	syn boolean FIdUse.isForIndex()            = myFV().isForIndex();
+	syn boolean FIdUseInstAccess.isForIndex()  = getInstAccess().isForIndex();
+	syn boolean FInstAccessExp.isForIndex()    = getInstAccess().isForIndex();
+	syn boolean InstAccess.isForIndex()        = myInstComponentDecl().isForIndex();
+	syn boolean AbstractFVariable.isForIndex() = false;
+	inh boolean FVariable.isForIndex();
+	inh boolean InstComponentDecl.isForIndex();
+	eq FForIndex.getFVariable().isForIndex()        = true;
+	eq InstForIndex.getInstPrimitive().isForIndex() = true;
+	eq InstNode.getChild().isForIndex()             = false;
+	eq FClass.getChild().isForIndex()               = false;
+	
+}
+
+aspect FlatFunctionBinding {
+	
+	syn FFunctionDecl FFunctionCall.myFFunctionDecl() = lookupFFunc(getName().name());
+	inh FFunctionDecl FFunctionCall.lookupFFunc(String name);
+	eq Root.getChild().lookupFFunc(String name) = null;
+	eq FClass.getChild().lookupFFunc(String name) = lookupFFunc(name);
+	syn FFunctionDecl FClass.lookupFFunc(String name) {
+		for (FFunctionDecl f : getFFunctionDecls())
+			if (f.name().equals(name))
+				return f;
+		return null;
+	}
+	
+}
+
+aspect FlatRecordBinding {
+	
+	/**
+	 * \brief Get the outermost record variable of this access.
+	 * 
+	 * Access is assumed to be refering to a member of a record and be in a function.
+	 */
+	syn AbstractFVariable FIdUse.myRecordFV() = lookupFV(getFQName().copyPrefix());
+	
+	syn lazy FRecordDecl AbstractFVariable.myFRecordDecl() = null;
+	eq FRecordVariable.myFRecordDecl()   = lookupFRec(getRecord().name());
+	eq FFunctionVariable.myFRecordDecl() = type().myFRecordDecl();
+	
+	syn lazy FRecordDecl FIdUse.myFRecordDecl() = lookupFRec(name());
+	
+	syn lazy FRecordDecl FType.myFRecordDecl() = null;
+	eq FRecordType.myFRecordDecl() = lookupFRec(getName());
+	
+	inh FRecordDecl FRecordVariable.lookupFRec(String name);
+	inh FRecordDecl FRecordType.lookupFRec(String name);
+	inh FRecordDecl FIdUse.lookupFRec(String name);
+	eq Root.getChild().lookupFRec(String name) = null;
+	eq FClass.getChild().lookupFRec(String name) = lookupFRec(name);
+	syn FRecordDecl FClass.lookupFRec(String name) {
+		for (FRecordDecl r : getFRecordDecls())
+			if (r.name().equals(name))
+				return r;
+		return null;
+	}
+	
+	syn AbstractFVariable FRecordDecl.findComponent(FQName name) {
+		UnknownFVariable unknown = unknownFVariable();
+		FRecordDecl rec = this;
+		AbstractFVariable res = unknown;
+		for (FQNamePart p : name.getFQNameParts()) {
+			if (rec == null)
+				return unknown;
+			res = unknown;
+			for (FVariable v : rec.getFVariables()) {
+				if (v.getFQName().getFQNamePart(0).getName().equals(p.getName())) {
+					res = v;
+					rec = v.myFRecordDecl();
+					break;
+				}
+			}
+			if (res == unknown)
+				return unknown;
+		}
+		return res;
+	}
+	
+}
+
+aspect UnknownFVariables {
+
+	syn UnknownFVariable FClass.getUnknownFVariable() = new UnknownFVariable();
+
+	syn lazy UnknownFVariable ASTNode.unknownFVariable() = 
+	  root().unknownFVariable();
+	eq FlatRoot.unknownFVariable() = getFClass().getUnknownFVariable();
+
+	syn boolean AbstractFVariable.isUnknown() = false;
+	eq UnknownFVariable.isUnknown() = true;
+	   
+}

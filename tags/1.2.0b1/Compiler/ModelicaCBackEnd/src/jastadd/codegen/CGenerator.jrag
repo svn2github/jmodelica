@@ -1,0 +1,324 @@
+
+/*
+Copyright (C) 2009 Modelon AB
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+/** \file CGenerator.java
+*  \brief CGenerator class.
+*/
+
+import java.io.*;
+
+public class CGenerator extends GenericGenerator {
+
+	class DAETag_C_scalingMethod extends DAETag {
+		
+		public DAETag_C_scalingMethod(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("C_DAE_scaling_method","C: scaling_method",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			if (fclass.root().options.getBooleanOption("enable_variable_scaling")) {
+				genPrinter.print("JMI_SCALING_VARIABLES");
+			} else {
+				genPrinter.print("JMI_SCALING_NONE");
+			}
+		}
+	
+	}
+	
+	class DAETag_C_equationResiduals extends DAETag {
+		
+		public DAETag_C_equationResiduals(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("C_DAE_equation_residuals","C: equation residuals",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			int i=0;
+			for (FAbstractEquation e : fclass.equations()) {
+				e.genResidual_C(i,"    ",genPrinter);				
+				i += e.numScalarEquations();
+			}
+		}
+	
+	}
+
+	class DAETag_C_eventIndicatorResiduals extends DAETag {
+		
+		public DAETag_C_eventIndicatorResiduals(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("C_DAE_event_indicator_residuals","C: event indicator residuals in equations",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			int i=0;
+			for (FRelExp e : fclass.relExpInEquations()) {
+				e.genResidual_C(i,"    ",genPrinter);				
+				i++;
+			}
+		}
+	
+	}
+
+	class DAETag_C_initialEquationResiduals extends DAETag {
+		
+		public DAETag_C_initialEquationResiduals(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("C_DAE_initial_equation_residuals","C: initial equation residuals",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			int i=0;
+			for (FAbstractEquation e : fclass.equations()) {
+				e.genResidual_C(i,"    ",genPrinter);				
+				i += e.numScalarEquations();
+			}
+			for (FAbstractEquation e : fclass.initialEquations()) {
+				e.genResidual_C(i,"    ",genPrinter);				
+				i += e.numScalarEquations();
+			}
+		}	
+	}
+
+	class DAETag_C_initialEventIndicatorResiduals extends DAETag {
+		
+		public DAETag_C_initialEventIndicatorResiduals(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("C_DAE_initial_event_indicator_residuals","C: event indicator residuals in initial equations",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			int i=0;
+			for (FRelExp e : fclass.relExpInEquations()) {
+				e.genResidual_C(i,"    ",genPrinter);				
+				i++;
+			}
+			for (FRelExp e : fclass.relExpInInitialEquations()) {
+				e.genResidual_C(i,"    ",genPrinter);				
+				i++;
+			}
+		}
+	}
+	
+	class DAETag_C_initialGuessEquationResiduals extends DAETag {
+		
+		public DAETag_C_initialGuessEquationResiduals(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("C_DAE_initial_guess_equation_residuals","C: initial guess equation residuals",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			int i=0;
+			for (FRealVariable fv : fclass.realVariables()) {
+				if (!(fv.fixedAttribute() )) {
+					fv.genStartAttributeResidual_C(i,"   ",genPrinter);
+					i++;
+				}
+			}
+		}
+	
+	}
+
+	class DAETag_C_initialDependentParameterResiduals extends DAETag {
+		
+		public DAETag_C_initialDependentParameterResiduals(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("C_DAE_initial_dependent_parameter_residuals","C: dependent parameter residuals",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			int i=0;
+			for (FRealVariable fv : fclass.dependentRealParameters()) {
+				genPrinter.print("   " + "(*res)[" + i + "] = ");
+				fv.getBindingExp().prettyPrint_C(genPrinter,"");
+				genPrinter.print(" - ");
+				genPrinter.print(fv.name_C());
+				genPrinter.print(";\n");
+
+				i++;
+			}
+		}
+	
+	}
+	
+	class DAETag_C_variableAliases extends DAETag {
+		
+		public DAETag_C_variableAliases(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("C_variable_aliases","C: macros for C variable aliases",
+			  myGenerator,fclass);
+		}
+		
+		private void generateVar(PrintStream genPrinter, FVariable fv, String offset, int index) {
+			genPrinter.print("#define ");
+			genPrinter.print(fv.name_C());
+			genPrinter.print(" ((*(jmi->z))[jmi->offs_");
+//			genPrinter.print(fv.type().name().toLowerCase());
+//			genPrinter.print("_");
+			genPrinter.print(offset);
+			genPrinter.print("+");
+			genPrinter.print(index);
+			genPrinter.print("])\n");
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			for (FVariable fv : fclass.independentRealConstants())
+				generateVar(genPrinter, fv, "real_ci", fv.independentRealConstantIndex());
+			
+			for (FVariable fv : fclass.dependentRealConstants()) 
+				generateVar(genPrinter, fv, "real_cd", fv.dependentRealConstantIndex());
+			
+			for (FVariable fv : fclass.independentRealParameters()) 
+				generateVar(genPrinter, fv, "real_pi", fv.independentRealParameterIndex());
+			
+			for (FVariable fv : fclass.dependentRealParameters()) 
+				generateVar(genPrinter, fv, "real_pd", fv.dependentRealParameterIndex());
+
+			for (FVariable fv : fclass.independentIntegerConstants())
+				generateVar(genPrinter, fv, "integer_ci", fv.independentIntegerConstantIndex());
+			
+			for (FVariable fv : fclass.dependentIntegerConstants()) 
+				generateVar(genPrinter, fv, "integer_cd", fv.dependentIntegerConstantIndex());
+			
+			for (FVariable fv : fclass.independentIntegerParameters()) 
+				generateVar(genPrinter, fv, "integer_pi", fv.independentIntegerParameterIndex());
+			
+			for (FVariable fv : fclass.dependentIntegerParameters()) 
+				generateVar(genPrinter, fv, "integer_pd", fv.dependentIntegerParameterIndex());
+
+			for (FVariable fv : fclass.independentBooleanConstants())
+				generateVar(genPrinter, fv, "boolean_ci", fv.independentBooleanConstantIndex());
+			
+			for (FVariable fv : fclass.dependentBooleanConstants()) 
+				generateVar(genPrinter, fv, "boolean_cd", fv.dependentBooleanConstantIndex());
+			
+			for (FVariable fv : fclass.independentBooleanParameters()) 
+				generateVar(genPrinter, fv, "boolean_pi", fv.independentBooleanParameterIndex());
+			
+			for (FVariable fv : fclass.dependentBooleanParameters()) 
+				generateVar(genPrinter, fv, "boolean_pd", fv.dependentBooleanParameterIndex());
+
+			for (FVariable fv : fclass.derivativeVariables()) 
+				generateVar(genPrinter, fv, "real_dx", fv.derivativeVariableIndex());
+			
+			for (FVariable fv : fclass.differentiatedRealVariables()) 
+				generateVar(genPrinter, fv, "real_x", fv.differentiatedRealVariableIndex());
+			
+			for (FVariable fv : fclass.realInputs()) 
+				generateVar(genPrinter, fv, "real_u", fv.realInputIndex());
+			
+			for (FVariable fv : fclass.algebraicRealVariables()) 
+				generateVar(genPrinter, fv, "real_w", fv.algebraicRealVariableIndex());
+			
+			genPrinter.print("#define time ((*(jmi->z))[jmi->offs_t])\n"); 
+
+			for (FVariable fv : fclass.discreteRealVariables()) 
+				generateVar(genPrinter, fv, "real_d", fv.discreteRealVariableIndex());
+						
+			for (FVariable fv : fclass.discreteIntegerVariables()) 
+				generateVar(genPrinter, fv, "integer_d", fv.discreteIntegerVariableIndex());
+						
+			for (FVariable fv : fclass.integerInputs()) 
+				generateVar(genPrinter, fv, "boolean_u", fv.booleanInputIndex());
+						
+			for (FVariable fv : fclass.discreteBooleanVariables()) 
+				generateVar(genPrinter, fv, "boolean_d", fv.discreteBooleanVariableIndex());
+						
+			for (FVariable fv : fclass.booleanInputs()) 
+				generateVar(genPrinter, fv, "boolean_u", fv.booleanInputIndex());
+
+			for (FVariable fv : fclass.integerInputs()) 
+				generateVar(genPrinter, fv, "boolean_u", fv.booleanInputIndex());
+			
+		}
+	}
+	
+	/**
+	 * Generates headers for Modelica functions.
+	 */
+	class DAETag_C_function_headers extends DAETag {
+		
+		public DAETag_C_function_headers(AbstractGenerator myGenerator, FClass fclass) {
+			super("C_function_headers","C: C function headers representing Modelica functions",
+			  myGenerator,fclass);
+		}
+
+		public void generate(PrintStream genPrinter) {
+			for (FFunctionDecl func : fclass.getFFunctionDecls())
+				func.genHeader_C(genPrinter, "");
+		}
+	}
+	
+	/**
+	 * Generates definitions for Modelica functions.
+	 */
+	class DAETag_C_functions extends DAETag {
+		
+		public DAETag_C_functions(AbstractGenerator myGenerator, FClass fclass) {
+			super("C_functions","C: C functions representing Modelica functions",
+			  myGenerator,fclass);
+		}
+
+		public void generate(PrintStream genPrinter) {
+			for (FFunctionDecl func : fclass.getFFunctionDecls())
+				func.prettyPrint_C(genPrinter, "");
+		}
+	}
+	
+	/**
+	 * Generates structs for Modelica records.
+	 */
+	class DAETag_C_records extends DAETag {
+		
+		public DAETag_C_records(AbstractGenerator myGenerator, FClass fclass) {
+			super("C_records","C: C structs representing Modelica records",
+			  myGenerator,fclass);
+		}
+
+		public void generate(PrintStream genPrinter) {
+			for (FRecordDecl rec : fclass.getFRecordDecls())
+				rec.prettyPrint_C(genPrinter, "");
+		}
+	}
+	
+	
+	/**
+	 * \brief Returns the string denoting the beginning of the copyright blurb.
+	 */
+	protected String startOfBlurb() { return "/*"; }
+	
+	/**
+	 * Constructor.
+	 * 
+	 * @param expPrinter Printer object used to generate code for expressions.
+	 * @param escapeCharacter Escape characters used to decode tags.
+	 * @param fclass An FClass object used as a basis for the code generation.
+	 */
+	public CGenerator(Printer expPrinter, char escapeCharacter,
+			FClass fclass) {
+		super(expPrinter, escapeCharacter, fclass);
+	}
+
+}
+

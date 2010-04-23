@@ -1,0 +1,216 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.ArrayList ;
+
+aspect Connections {
+
+	/* Machinery to manage connection sets */
+
+	public ConnectionSetManager FClass.connectionSetManager = new ConnectionSetManager();
+	
+	public ConnectionSetManager FClass.getConnectionSetManager() {
+		return connectionSetManager;
+	}
+
+	public void FClass.genConnectionEquations() {
+	
+		log.debug("<<<FClass.genConnectionEquations()");
+		ArrayList<ConnectionSet> l = connectionSetManager.getConnectionSetList();
+		log.debug("<<<FClass.genConnectionEquations(): "+ l.size() + " sets in manager");
+		//getConnectionSetManager().printConnectionSets();
+		
+		for (ConnectionSet set : l) {
+			// TODO: use sorted data structure instead? would speed up use of ConnectionSetManager as well
+			ConnectionSetEntry csee[] = set.toArray(new ConnectionSetEntry[set.size()]);
+			java.util.Arrays.sort(csee);
+			
+			//log.debug("*** Array size: " + csee.length);
+			
+			if (csee[0].isFlow()) {
+				// Treat first element separately
+				FExp e = csee[0].getFQName().createFIdUseExp();
+				if (csee[0].isOutside()) 
+					e = new FNegExp(e);
+			
+				for (int j = 1; j < csee.length; j++) {
+					FExp e2 = csee[j].getFQName().createFIdUseExp();
+					e = csee[j].isOutside() ? new FSubExp(e, e2) : new FAddExp(e, e2);
+				}
+				getFEquationBlock(0).addFAbstractEquation(new FEquation(e, new FRealLitExp("0.0")));	
+			} else {
+				// Treat first element separately
+				FExp e1 = csee[0].getFQName().createFIdUseExp();
+				for (int j = 1; j < csee.length; j++) {
+					FExp e2 = csee[j].getFQName().createFIdUseExp();
+					getFEquationBlock(0).addFAbstractEquation(new FEquation(e1, e2));
+					e1 = e2;
+				}
+			}
+
+		}
+	}
+		
+	public class ConnectionSet extends LinkedHashSet<ConnectionSetEntry> {}
+
+	static public class ConnectionSetManager {
+	
+		private ArrayList<ConnectionSet> list = new ArrayList<ConnectionSet>();
+		
+		public ArrayList<ConnectionSet> getConnectionSetList() {
+			return list;
+		}
+			
+		public void addInsideFlowVar(InstComponentDecl var1, FQName namePrefix1) {
+			ConnectionSetEntry cse1 = new ConnectionSetEntry(var1, false, namePrefix1);
+			
+			if (getConnectionSet(cse1) == null) {
+				ConnectionSet h = new ConnectionSet();
+				h.add(cse1);
+				list.add(h);
+			}
+
+		}
+		
+		public void addVars(InstComponentDecl var1, boolean outside1, FQName namePrefix1,
+		                    InstComponentDecl var2, boolean outside2, FQName namePrefix2) {
+
+//			log.debug("ConnectionSetManager.addVars");
+		
+//		    log.debug(namePrefix1.name()+" . "+var1.name() + " outside: " + outside1);
+//		    log.debug(namePrefix2.name()+" . "+var2.name() + " outside: " + outside2);
+		
+			ConnectionSetEntry cse1 = new ConnectionSetEntry(var1,outside1,namePrefix1);
+			ConnectionSetEntry cse2 = new ConnectionSetEntry(var2,outside2,namePrefix2);	
+
+			ConnectionSet h1 = getConnectionSet(cse1);
+			ConnectionSet h2 = getConnectionSet(cse2);
+			
+			if (h1!=null && h2==null)
+				h1.add(cse2);
+			else if (h2!=null && h1==null)
+				h2.add(cse1);
+			else if (h1!=null && h2!=null) {
+				if (h1!=h2) {
+					h1.addAll(h2);
+					list.remove(h2);
+				}
+			} else {
+				ConnectionSet h = new ConnectionSet();
+				h.add(cse1);
+				h.add(cse2);
+				list.add(h);
+			}
+		}
+	
+		public ConnectionSet getConnectionSet(ConnectionSetEntry cse) {
+			for (ConnectionSet set : list)
+				if (set.contains(cse))
+					return set;
+			return null;
+		}
+	
+		public String printConnectionSets() {
+		
+			StringBuffer str = new StringBuffer();
+			
+			str.append("Connection sets: " + list.size() + " sets\n");
+			
+			// Print connection sets 
+			for(ConnectionSet set : list) {
+				str.append("Connection set (");
+				if (set.iterator().next().isFlow())
+					str.append("flow");
+				else
+					str.append("non flow");
+				str.append("): {");
+				String set_str = set.toString();
+				str.append(set_str.substring(1, set_str.length() - 1));
+				str.append("}\n");
+			}
+
+			return str.toString();
+		}
+	}
+
+	
+	static public class ConnectionSetEntry implements Comparable<ConnectionSetEntry> {
+	
+		private InstComponentDecl cd;
+		private boolean outside;
+		private FQName fqName;
+		//private boolean flow;
+		
+		public ConnectionSetEntry(InstComponentDecl cd, boolean outside, FQName fqName) {
+			//log.debug("Created ConnectionSetEntry: " + cd.getName().getID());
+			this.cd = cd;
+			this.outside = outside;
+			this.fqName = (FQName)fqName.fullCopy();
+			//this.fqName.add(new FQNamePart(cd,cd.size()));
+		}
+	
+		public boolean isOutside() {
+			return outside;
+		}
+	
+		public InstComponentDecl getVar() {
+			return cd;
+		}
+	
+		public boolean isFlow() {
+			return cd.getComponentDecl().hasTypePrefixFlow();
+		}
+	
+		
+		public String name() {
+		   return fqName.name();
+		}
+		
+		public String toString() {
+			return fqName.name() + (outside ? "(o)" : "(i)");
+		}
+		
+		public FQName getFQName() {
+			return fqName;
+		}
+		
+		public int hashCode() {
+			// TODO: Wouldn't toString().hashCode() be better?
+			
+			//log.debug("ConnectionSetEntry.hashCode");
+			String tr = "true";
+			String fa = "false";
+			return name().intern().hashCode() + (outside? tr.intern().hashCode() : fa.intern().hashCode());
+		}
+		
+		
+		public boolean equals(Object o) {
+			if (o instanceof ConnectionSetEntry) {
+				ConnectionSetEntry cse = (ConnectionSetEntry) o;
+				return name().equals(cse.name()) && outside == cse.isOutside();
+			}
+			return false;
+		}
+	
+		public int compareTo(ConnectionSetEntry cse) {
+			return name().compareTo(cse.name());
+		}
+	
+	}
+
+}
