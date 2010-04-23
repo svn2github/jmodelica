@@ -32,7 +32,29 @@ import java.util.Collection;
 
 import org.jmodelica.modelica.compiler.*;
 
-abstract public class TestAnnotationizer {
+/**
+ * \brief Generates a test case annotation for a test model.
+ * 
+ * Most of the logic of this class is delegated to TestAnnotationizerHelper, a 
+ * class that is generated from TestAnnotationizer.jrag. This class handles 
+ * parsing the arguments and choosing between Modelica and Optimica versions 
+ * of TestAnnotationizerHelper.
+ * 
+ * Usage: java TestAnnotationizer java TestAnnotationizer <.mo file path> [options...] [description]
+ *   Options:
+ *     -w           write result to file instead of stdout
+ *     -m/-o        create annotation for Modelica/Optimica (default is infer from file path)
+ *     -t=<type>    set type of test, e.g. ErrorTestCase
+ *     -c=<class>   set name of class to generate annotation for, if name 
+ *                  does not contain a dot, base name of .mo file is prepended
+ *     -d=<data>    set extra data to send to the specific generator
+ *     -h           print this help
+ *   User will be prompted for type and/or class if not set with options. 
+ *   Options can *not* share a single "-", e.g. "-mw" will not work.
+ *   Description is the text that will be entered in the "description" field of 
+ *   the test annotation.
+ */
+public class TestAnnotationizer {
 
 	public static void main(String[] args) throws Exception {
 		if (args.length == 0)

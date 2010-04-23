@@ -29,8 +29,36 @@ import java.util.Collection;
 
 aspect TestAnnotationizer {
 
+/**
+ * \brief Generates a test case annotation for a test model.
+ * 
+ * Helper class for TestAnnotationizer. This class contains a nmuber of inner 
+ * classes that also inherit from it. Each of these inner classes handles the 
+ * test case type with the same name as the inner class. An instance of the 
+ * inner class associated with the desired test case is created using reflection, 
+ * and the task of creating the annotation is then delegeted to that instance.
+ * 
+ * The behaviour when creating the annotations mirrors the behaviour of the test 
+ * case classes.
+ * 
+ * All subclasses should be inner classes, and implement a constructor with the 
+ * same arguments as the constructor of this class. Such inner classes can also be 
+ * added in other JastAdd source files.
+ */
 abstract public class TestAnnotationizerHelper {
 
+	// TODO: Use more code directly from the test case classes.
+	
+	/**
+	 * \brief This is the main method for creating the annotation.
+	 * 
+	 * @param filePath     the path to the Modelica file containing the test model
+	 * @param testType     the type of test case (case sensitive)
+	 * @param modelName    the name of the test model
+	 * @param description  the text to put in the "description" field of the test annotation
+	 * @param data         any extra data to send to the delegate object
+	 * @param write        if <code>true</code>, write the annotation directly in the Modelica file
+	 */
 	public static void doAnnotation(String filePath, String testType, String modelName, 
 			String description, String data, boolean write) throws Exception {
 		try {
@@ -60,6 +88,13 @@ abstract public class TestAnnotationizerHelper {
 		System.exit(1);
 	}
 
+	/**
+	 * \brief Prints a help message and exits.
+	 * 
+	 * Iterates over all available test case types and prints a usage message for each.
+	 * 
+	 * @param errorLevel  the exit status to pass to System.exit()
+	 */
 	public static void usageError(int errorLevel) throws Exception {
 		System.out.println("Usage: java TestAnnotationizer <.mo file path> [options...] [<description>]");
 		System.out.println("  Options:");
@@ -78,6 +113,15 @@ abstract public class TestAnnotationizerHelper {
 		System.exit(errorLevel);
 	}
 	
+	/**
+	 * \brief Prints a usage message for this test case type.
+	 * 
+	 * Prints the class name and, if given in <code>extra</code>, a description of 
+	 * what extra data passed to the test case type is used for.
+	 * 
+	 * Subclasses should override and call this implementation if they use the 
+	 * <code>data</code> argument of their constructor.
+	 */
 	public static void usage(String cl, String extra) {
 		System.out.print("    " + cl);
 		if (extra != null && !extra.equals(""))
@@ -92,6 +136,18 @@ abstract public class TestAnnotationizerHelper {
 	protected String description;
 	protected SourceRoot root;
 	
+	/**
+	 * \brief Standard constructor for test case creators.
+	 * 
+	 * Parses the Modelica file containing the test model and saves the source root.
+	 * 
+	 * All subclasses should have a constructor with the same arguments that calls this constructor.
+	 * 
+	 * @param filePath     the path to the Modelica file containing the test model
+	 * @param className    the name of the test model
+	 * @param description  the text to put in the "description" field of the test annotation
+	 * @param data         any extra data to send to the delegate object
+	 */
 	public TestAnnotationizerHelper(String filePath, String className, String description, String data) throws Exception {
 		this.filePath = filePath;
 		this.className = className;
@@ -120,12 +176,18 @@ abstract public class TestAnnotationizerHelper {
 			sd.setFileName(filePath);
 	}
 
+	/**
+	 * \brief Prints the resulting test annotation to stdout.
+	 */
 	public void printAnnotation() throws Exception {
 		System.out.println("Annotation:\n=====================");
 		outputAnnotation(System.out);
 		System.out.println("\n=====================");		
 	}
 
+	/**
+	 * \brief Writes the resulting test annotation directly in the Modelica file.
+	 */
 	public void writeAnnotation() throws Exception {
 		File old = new File(filePath);
 		BufferedReader in = new BufferedReader(new FileReader(old));
@@ -153,6 +215,9 @@ abstract public class TestAnnotationizerHelper {
 		System.out.println("File " + old.getName() + " updated.");
 	}
 
+	/**
+	 * \brief Generates the test annotation and ouputs it on the given stream.
+	 */
 	public void outputAnnotation(PrintStream out) throws Exception {
 		out.println(" annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={");
 		out.println("     JModelica.UnitTesting." + getClass().getSimpleName() + "(");
@@ -162,14 +227,23 @@ abstract public class TestAnnotationizerHelper {
 		out.println(")})));\n");
 	}
 	
+	/**
+	 * \brief Gets the line number of the the start of the test model.
+	 */
 	protected int getLine() throws Exception {
 		return root.getProgram().getInstProgramRoot().simpleLookupInstClassDecl(className).beginLine();
 	}
 	
+	/**
+	 * \brief Escapes unallowed characters in the fields of the test annotation.
+	 */
 	protected String prepare(String str) {
 		return str.replaceAll("\\\\", "\\\\").replaceAll("\"", "\\\\\"");	
 	}
 
+	/**
+	 * \brief Performs the instantiation, flattening and transform canonical steps of the compilation.
+	 */
 	protected FClass compile() throws Exception {
 		InstClassDecl icl = instantiate();		
 	    FClass fc = flatten(icl);
@@ -177,6 +251,19 @@ abstract public class TestAnnotationizerHelper {
 	    return fc;
 	}
 
+	/**
+	 * \brief Performs the instantiation step of the compilation.
+	 */
+	protected InstClassDecl instantiate() throws Exception {
+		InstProgramRoot ipr = root.getProgram().getInstProgramRoot();
+		ipr.options = new OptionRegistry(root.options);
+		handleCompilerProblems(ipr.checkErrorsInInstClass(className));
+		return ipr.simpleLookupInstClassDecl(className);
+	}
+
+	/**
+	 * \brief Performs the flattening step of the compilation.
+	 */
 	protected FClass flatten(InstClassDecl icl) {
 		FlatRoot flatRoot = new FlatRoot();
 	    flatRoot.setFileName(filePath);
@@ -187,18 +274,20 @@ abstract public class TestAnnotationizerHelper {
 		return fc;
 	}
 
-	protected InstClassDecl instantiate() throws Exception {
-		InstProgramRoot ipr = root.getProgram().getInstProgramRoot();
-		ipr.options = new OptionRegistry(root.options);
-		handleCompilerProblems(ipr.checkErrorsInInstClass(className));
-		return ipr.simpleLookupInstClassDecl(className);
-	}
-
+	/**
+	 * \brief Performs the transform canonical step of the compilation.
+	 */
 	protected void transformCanonical(FClass fc) throws Exception {
 		fc.transformCanonical();
 		handleCompilerProblems(fc.errorCheck());
 	}
 	
+	/**
+	 * \brief Filters away the Problems that is ignored by test cases and throws an 
+	 *        exception if any remain.
+	 * 
+	 * Called by instantiate() and transformCanonical() after error checking.
+	 */
 	protected void handleCompilerProblems(Collection<Problem> problems) throws CompilerException {
 		CompilerException ce = new CompilerException();
 		for (Problem p : problems) 
@@ -208,17 +297,37 @@ abstract public class TestAnnotationizerHelper {
 			throw ce;
 	}
 	
+	/**
+	 * \brief Decides what Problems to keep when filtering.
+	 * 
+	 * This implementation filters out warnings and compliance errors.
+	 */
 	protected boolean keepProblem(Problem p) {
 		return p.isTestError();
 	}
 
+	/**
+	 * \brief Generate and print the part of the annotation that is specific to 
+	 *        the test case type.
+	 */
 	abstract protected void printSpecific(PrintStream out, String indent) throws Exception;
 
+	/**
+	 * \brief Base class for code generation tests.
+	 * 
+	 * Extra data is used as the code template.
+	 */
 	public static abstract class CodeGenTestCase extends TestAnnotationizerHelper {
 
 		protected String template;
 		protected String code;
 
+		/**
+		 * \brief Constructor for base code generation test.
+		 * 
+		 * Compiles the model and generates code using the code template passed in 
+		 * <code>data</code> and a code generator created by subclass.
+		 */
 		public CodeGenTestCase(String filePath, String className, String description, String data) throws Exception {
 			super(filePath, className, description, data);
 			template = prepare(data.replaceAll("\\\\n", "\n"));
@@ -229,8 +338,15 @@ abstract public class TestAnnotationizerHelper {
 			code = prepare(os.toString());
 		}
 		
+		/**
+		 * \brief Create the code generator to use.
+		 */
 		public abstract AbstractGenerator createGenerator(FClass fc);
 
+		/**
+		 * \brief Generate and print the part of the annotation that is specific to 
+	     *        this test case type.
+		 */
 		@Override
 		protected void printSpecific(PrintStream out, String indent) throws Exception {
 			out.print(indent + "template=\"");
@@ -244,16 +360,32 @@ abstract public class TestAnnotationizerHelper {
 		
 	}
 
+	/**
+	 * \brief A generic code generation test.
+	 */
 	public static class GenericCodeGenTestCase extends CodeGenTestCase {
 
+		/**
+		 * \brief Constructor for generic code generation test.
+		 * 
+		 * Delegates to super class.
+		 */
 		public GenericCodeGenTestCase(String filePath, String className, String description, String data) throws Exception {
 			super(filePath, className, description, data);
 		}
 		
+		/**
+		 * \brief Prints a usage message for this test case type.
+		 */
 		public static void usage(String cl, String extra) {
 			TestAnnotationizerHelper.usage(cl, "generic code template");
 		}
 
+		/**
+		 * \brief Create the code generator to use.
+		 * 
+		 * Creates a GenericGenerator.
+		 */
 		@Override
 		public AbstractGenerator createGenerator(FClass fc) {
 			return new GenericGenerator(new PrettyPrinter(), '$', fc);
@@ -261,15 +393,27 @@ abstract public class TestAnnotationizerHelper {
 		
 	}
 
+	/**
+	 * \brief A flattening test.
+	 */
 	public static class FlatteningTestCase extends TestAnnotationizerHelper {
 		
 		protected FClass fc;
 
+		/**
+		 * \brief Constructor for flattening test.
+		 * 
+		 * Performs the flattening and instantiation steps of compilation.
+		 */
 		public FlatteningTestCase(String filePath, String className, String description, String data) throws Exception {
 			super(filePath, className, description, data);
 			fc = flatten(instantiate());
 		}
 
+		/**
+		 * \brief Generate and print the part of the annotation that is specific to 
+	     *        this test case type.
+		 */
 		@Override
 		protected void printSpecific(PrintStream out, String indent) throws Exception {
 			out.println(indent + "flatModel=\"");
@@ -279,8 +423,17 @@ abstract public class TestAnnotationizerHelper {
 		
 	}
 
+	/**
+	 * \brief A transform canonical test.
+	 */
 	public static class TransformCanonicalTestCase extends FlatteningTestCase {
 
+		/**
+		 * \brief Constructor for transform canonical test.
+		 * 
+		 * Performs the transform canonical step of compilation.
+		 * (Superclass performs the flattening and instantiation steps.)
+		 */
 		public TransformCanonicalTestCase(String filePath, String className, String description, String data) throws Exception {
 			super(filePath, className, description, data);
 			transformCanonical(fc);
@@ -288,10 +441,20 @@ abstract public class TestAnnotationizerHelper {
 		
 	}
 
+	/**
+	 * \brief An error test case.
+	 */
 	public static class ErrorTestCase extends TestAnnotationizerHelper {
 
 		private String message;
 
+		/**
+		 * \brief Constructor for error test case.
+		 * 
+		 * Compiles the model and catches any compiler exceptions thrown. If an 
+		 * exception is caught, an error message is composed, to be included in 
+		 * the annotation.
+		 */
 		public ErrorTestCase(String filePath, String className, String description, String data) throws Exception {
 			super(filePath, className, description, data);
 			try {
@@ -306,10 +469,17 @@ abstract public class TestAnnotationizerHelper {
 			}
 		}
 		
+		/**
+		 * \brief Returns an error message for when no errors were detected in test model.
+		 */
 		protected String noExceptionMessage() {
 			return "No errors reported in "+getClass().getSimpleName()+".";
 		}
 
+		/**
+		 * \brief Generate and print the part of the annotation that is specific to 
+	     *        this test case type.
+		 */
 		@Override
 		protected void printSpecific(PrintStream out, String indent) throws Exception {
 			out.print(indent + "errorMessage=\"\n" + message + "\"");
@@ -317,28 +487,57 @@ abstract public class TestAnnotationizerHelper {
 
 	}
 	
+	/**
+	 * \brief A warning test.
+	 */
 	public static class WarningTestCase extends ErrorTestCase {
 
+		/**
+		 * \brief Constructor for warning test.
+		 * 
+		 * Delegates to super class.
+		 */
 		public WarningTestCase(String filePath, String className, String description, String data) throws Exception {
 			super(filePath, className, description, data);
 		}
 		
+		/**
+		 * \brief Returns an error message for when no errors were detected in test model.
+		 */
 		protected String noExceptionMessage() {
 			return "No warnings or errors reported in WarningTestCase.";
 		}
 		
+		/**
+		 * \brief Decides what Problems to keep when filtering.
+		 * 
+		 * This implementation keeps all problems.
+		 */
 		protected boolean keepProblem(Problem p) {
 			return true;
 		}
 
 	}
 	
+	/**
+	 * \brief A compliance error test.
+	 */
 	public static class ComplianceErrorTestCase extends ErrorTestCase {
 
+		/**
+		 * \brief Constructor for compliance error test.
+		 * 
+		 * Delegates to super class.
+		 */
 		public ComplianceErrorTestCase(String filePath, String className, String description, String data) throws Exception {
 			super(filePath, className, description, data);
 		}
 		
+		/**
+		 * \brief Decides what Problems to keep when filtering.
+		 * 
+		 * This implementation filters out compliance errors.
+		 */
 		protected boolean keepProblem(Problem p) {
 			return p.severity() == Problem.Severity.ERROR;
 		}

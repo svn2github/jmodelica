@@ -18,16 +18,32 @@ aspect CTestAnnotationizer {
 
 abstract public class TestAnnotationizerHelper {
 
+	/**
+	 * \brief A C code generation test.
+	 */
 	public static class CCodeGenTestCase extends CodeGenTestCase {
 
+		/**
+		 * \brief Constructor for C code generation test.
+		 * 
+		 * Delegates to super class.
+		 */
 		public CCodeGenTestCase(String filePath, String className, String description, String data) throws Exception {
 			super(filePath, className, description, data);
 		}
 		
+		/**
+		 * \brief Prints a usage message for this test case type.
+		 */
 		public static void usage(String cl, String extra) {
 			TestAnnotationizerHelper.usage(cl, "C code template");
 		}
 
+		/**
+		 * \brief Create the code generator to use.
+		 * 
+		 * Creates a CGenerator.
+		 */
 		@Override
 		public AbstractGenerator createGenerator(FClass fc) {
 			return new CGenerator(new PrettyPrinter(), '$', fc);
