@@ -95,6 +95,12 @@ aspect Connections {
 //		    log.debug(namePrefix1.name()+" . "+var1.name() + " outside: " + outside1);
 //		    log.debug(namePrefix2.name()+" . "+var2.name() + " outside: " + outside2);
 		
+			// Don't add parameters or constants to connection set
+			if (var1.variability().lessOrEqual(var1.fParameter()) || 
+					var2.variability().lessOrEqual(var1.fParameter())) {
+					return;
+			}
+			
 			ConnectionSetEntry cse1 = new ConnectionSetEntry(var1,outside1,namePrefix1);
 			ConnectionSetEntry cse2 = new ConnectionSetEntry(var2,outside2,namePrefix2);	
 

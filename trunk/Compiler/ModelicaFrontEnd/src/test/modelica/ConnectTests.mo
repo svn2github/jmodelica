@@ -205,6 +205,35 @@ end ConnectTests.ConnectTest4;
       
    end ConnectTest4;
 
+model ConnectTest5
+  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FlatteningTestCase(name="ConnectTest5",
+        description="Test of generation of connection equations.",
+                                               flatModel=
+"fclass ConnectTests.ConnectTest5
+ parameter Integer c1.n = 2 /* 2 */;
+ Real c1.x[2];
+ parameter Integer c2.n = 2 /* 2 */;
+ Real c2.x[2];
+equation
+ c1.x = {1,2};
+ c1.x = c2.x;
+end ConnectTests.ConnectTest5;
+")})));
+
+  connector C
+    parameter Integer n = 2;
+    Real x[n];
+  end C;
+  C c1;
+  C c2;
+
+equation
+  connect(c1,c2);
+  c1.x = {1,2};
+
+end ConnectTest5;
+
 
 model Electrical
   
