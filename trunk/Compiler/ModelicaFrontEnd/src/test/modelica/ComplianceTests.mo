@@ -303,6 +303,27 @@ Compliance error at line 271, column 3:
 end UnsupportedBuiltins3_ComplErr;
 
 
+model UnsupportedBuiltins4_ComplErr
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ComplianceErrorTestCase(
+         name="UnsupportedBuiltins4_ComplErr",
+         description="Compliance error for unsupported builtins",
+         errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 263, column 3:
+  The assert() function-like operator is not supported
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 266, column 3:
+  The terminate() function-like operator is not supported
+")})));
+
+ equation
+  assert();
+  terminate();
+end UnsupportedBuiltins4_ComplErr;
+
+
 model StringConcat_ComplErr
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.ComplianceErrorTestCase(

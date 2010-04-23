@@ -270,7 +270,8 @@ aspect InstFunctionBinding {
 						"scalar", "vector", "matrix", "diagonal", "product", "outerProduct", "symmetric", "skew", 
 						// Ticket 664: Support all function-like operators
 						"sign", "Integer", "String", "div", "mod", "rem", "ceil", "floor", "delay", "cardinality", 
-						"semiLinear", "initial", "terminal", "smooth", "sample", "pre", "edge", "reinit"
+						"semiLinear", "initial", "terminal", "smooth", "sample", "pre", "edge", "reinit", 
+						"assert", "terminate"
 					};
 				for (String name : unsupported)
 					if (!map.containsKey(name))
