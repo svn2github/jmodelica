@@ -90,7 +90,7 @@ InstExtendsShortClass : InstExtends ::=;
 //InstReplacingExtendsShortClass : InstReplacingExtendsShortClass ::= <InstExtendsShortClass:InstExtendsShortClass>
 
 // Accesses in the instance tree
-abstract InstAccess ::= <ID>;
+abstract InstAccess ::= <ID> /ExpandedSubscripts:FArraySubscripts/;
 InstDot : InstAccess ::= Left:InstAccess Right:InstAccess;
 
 InstArrayAccess : InstAccess ::= [FArraySubscripts];

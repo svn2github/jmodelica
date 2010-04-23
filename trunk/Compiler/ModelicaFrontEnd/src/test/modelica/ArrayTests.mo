@@ -6158,15 +6158,21 @@ end ArrayTests.ArrayNeg1;
 end ArrayNeg1;
 
 
+// TODO: When tests can set options, do this without alias removal
 model ArrayNeg2
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
+     JModelica.UnitTesting.TransformCanonicalTestCase(
          name="ArrayNeg2",
-         description="Scalarization of negation: array of Integer (component)",
+         description="",
          flatModel="
 fclass ArrayTests.ArrayNeg2
- Integer x[3] =  - ( y );
- Integer y[3] = {1,0, - ( 1 )};
+ Integer x[1];
+ Integer x[2];
+ Integer x[3];
+equation
+  - ( x[1] ) = 1;
+  - ( x[2] ) = 0;
+  - ( x[3] ) =  - ( 1 );
 end ArrayTests.ArrayNeg2;
 ")})));
 
@@ -6560,7 +6566,7 @@ model LongArrayForm3
 fclass ArrayTests.LongArrayForm3
  Real x1[3] = array(1,2,3);
  Real x2[3] = {4,5,6};
- Real x3[3,3] = array(x1,x2,{7,8,9});
+ Real x3[3,3] = array(x1[1:3],x2[1:3],{7,8,9});
 end ArrayTests.LongArrayForm3;
 ")})));
 
@@ -7338,6 +7344,125 @@ end ArrayTests.ForEquation1;
  
  A y;
 end ForEquation1;
+
+
+
+model SliceTest1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="SliceTest1",
+         description="Slice operations: basic test",
+         flatModel="
+fclass ArrayTests.SliceTest1
+ Real x[1].a[2] = {1,2};
+ Real x[2].a[2] = {3,4};
+ Real y[2,2] = x[1:2].a[1:2] .+ 1;
+end ArrayTests.SliceTest1;
+")})));
+
+ model A
+  Real a[2];
+ end A;
+ 
+ A x[2](a={{1,2},{3,4}});
+ Real y[2,2] = x.a .+ 1;
+end SliceTest1;
+
+
+model SliceTest2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="SliceTest2",
+         description="Slice operations: basic test",
+         flatModel="
+fclass ArrayTests.SliceTest2
+ Real x[1].a[1];
+ Real x[1].a[2];
+ Real x[2].a[1];
+ Real x[2].a[2];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+equation
+ x[1].a[1] = 1;
+ x[1].a[2] = 2;
+ x[2].a[1] = 3;
+ x[2].a[2] = 4;
+ y[1,1] = x[1].a[1] .+ 1;
+ y[1,2] = x[1].a[2] .+ 1;
+ y[2,1] = x[2].a[1] .+ 1;
+ y[2,2] = x[2].a[2] .+ 1;
+end ArrayTests.SliceTest2;
+")})));
+
+ model A
+  Real a[2];
+ end A;
+ 
+ A x[2](a={{1,2},{3,4}});
+ Real y[2,2] = x.a .+ 1;
+end SliceTest2;
+
+
+model SliceTest3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="SliceTest3",
+         description="Slice operations: test with vector indices",
+         flatModel="
+fclass ArrayTests.SliceTest3
+ Real x[1].a[1];
+ Real x[1].a[2];
+ Real x[1].a[3];
+ Real x[1].a[4];
+ Real x[2].a[1];
+ Real x[2].a[2];
+ Real x[2].a[3];
+ Real x[2].a[4];
+ Real x[3].a[1];
+ Real x[3].a[2];
+ Real x[3].a[3];
+ Real x[3].a[4];
+ Real x[4].a[1];
+ Real x[4].a[2];
+ Real x[4].a[3];
+ Real x[4].a[4];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+equation
+ x[1].a[1] = 1;
+ x[1].a[2] = 2;
+ x[1].a[3] = 3;
+ x[1].a[4] = 4;
+ x[2].a[1] = 1;
+ x[2].a[2] = 2;
+ x[2].a[3] = 3;
+ x[2].a[4] = 4;
+ x[3].a[1] = 1;
+ x[3].a[2] = 2;
+ x[3].a[3] = 3;
+ x[3].a[4] = 4;
+ x[4].a[1] = 1;
+ x[4].a[2] = 2;
+ x[4].a[3] = 3;
+ x[4].a[4] = 4;
+ y[1,1] = x[2].a[2] .+ 1;
+ y[1,2] = x[2].a[4] .+ 1;
+ y[2,1] = x[3].a[2] .+ 1;
+ y[2,2] = x[3].a[4] .+ 1;
+end ArrayTests.SliceTest3;
+")})));
+
+ model A
+  Real a[4];
+ end A;
+ 
+ A x[4](a={{1,2,3,4},{1,2,3,4},{1,2,3,4},{1,2,3,4}});
+ Real y[2,2] = x[2:3].a[{2,4}] .+ 1;
+end SliceTest3;
 
 
 

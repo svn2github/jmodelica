@@ -41,7 +41,6 @@ public class TokenTester {
 			while (!done && testSuccess) {
 				String t1 = fms1.nextToken();
 				String t2 = fms2.nextToken();
-//				System.out.println("t1: " + t1 + " t2: " + t2);
 
 				boolean match;
 				if (t1 == null || t2 == null) {
@@ -51,10 +50,8 @@ public class TokenTester {
 					match = t1.equals(t2);
 				}
 
-				if (!match) {
-					System.out.println("Token error - test failed");
+				if (!match) 
 					testSuccess = false;
-				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -63,74 +60,5 @@ public class TokenTester {
 
 		return testSuccess;
 	}
-/*
-	public static void main(String args[]) {
-	
-		if(args.length != 3) {
-			System.out.println("TokenTester expects a .mo file name, a class name and a .mof file name as command line arguments");
-			System.exit(1);
-		}
 
-		String moFile = args[0];
-		String cName = args[1];
-		String mofFile = args[2];
-
-		
-		ModelicaParser parser = new ModelicaParser();
-		FlatModelicaParser fparser = new FlatModelicaParser();
-		SourceRoot sr = null;
-		FlatRoot fr = null;
-		InstProgramRoot ipr = null;
-		
-		try {
-			String cl = args[1];
-			Reader reader = new FileReader(moFile);
-			ModelicaScanner scanner = new ModelicaScanner(new BufferedReader(reader));
-			//System.out.println("Parsing "+moFile+"...");
-			sr = (SourceRoot)parser.parse(scanner);
-		    ipr = sr.getProgram().getInstProgramRoot();
-		} catch (Error e) {
-			System.out.println("In file: '"+moFile + "':");
-			System.err.println(e.getMessage());
-			System.exit(1);
-		} catch (Exception e) {e.printStackTrace();}
-		
-		FClass fc1 = new FClass();
-		InstNode ir;
-		try {
-			ir = ipr.findFlattenInst(cName,fc1);
-		} catch (ModelicaClassNotFoundException e) {
-			System.exit(0);
-		}
-		sr.setFileName(moFile);
-		
-		StringBuilder fm1_str = new StringBuilder();
-		//fc1.prettyPrint(fm1_str, "");
-
-		try {
-			Reader reader = new FileReader(mofFile);
-			FlatModelicaScanner scanner = new FlatModelicaScanner(new BufferedReader(reader));
-			//System.out.println("Parsing "+mofFile+"...");
-			fr = (FlatRoot)fparser.parse(scanner);
-		} catch (Error e) {
-			System.out.println("In file: '"+mofFile + "':");
-			System.err.println(e.getMessage());
-			System.exit(1);
-		} catch (Exception e) {e.printStackTrace();}
-		
-		StringBuilder fm2_str = new StringBuilder();
-		fr.setFileName(mofFile);
-		//fr.prettyPrint(fm2_str, "");
-		
-		TokenTester tt = new TokenTester();
-		boolean testSuccess = tt.test(fm1_str.toString(),fm2_str.toString());
-
-		if (testSuccess)
-			System.out.println("Test succeeded!");
-		else
-			System.out.println("Test failed!");
-
-	}
-
-*/
 }

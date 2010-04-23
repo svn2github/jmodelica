@@ -3733,7 +3733,7 @@ fclass FunctionTests.UnknownArray5
  Real x[3];
  Real y[3];
 equation
- (x, y) = FunctionTests.UnknownArray5.f({1,2,3});
+ (x[1:3], y[1:3]) = FunctionTests.UnknownArray5.f({1,2,3});
 
  function FunctionTests.UnknownArray5.f
   input Real[:] a;

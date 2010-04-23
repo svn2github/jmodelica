@@ -46,7 +46,8 @@ aspect InstLookupComponents {
 	eq InstRoot.getChild().lookupInstComponent(String name) = emptyHashSet();
 	
 	eq InstDot.getRight().lookupInstComponent(String name) = getLeft().qualifiedLookupInstComponent(name);
-	eq InstArrayAccess.getFArraySubscripts().lookupInstComponent(String name) = getTopAccess().lookupInstComponent(name);
+	eq InstArrayAccess.getFArraySubscripts().lookupInstComponent(String name) = getTopInstAccess().lookupInstComponent(name);
+	eq InstAccess.getExpandedSubscripts().lookupInstComponent(String name) = getTopInstAccess().lookupInstComponent(name);
 		
 	syn lazy HashSet InstAccess.qualifiedLookupInstComponent(String name) = emptyHashSet();
 	eq InstComponentAccess.qualifiedLookupInstComponent(String name) = myInstComponentDecl().memberInstComponent(name);	

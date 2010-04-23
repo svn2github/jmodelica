@@ -96,6 +96,24 @@ aspect Constructors {
 	public FIdUse.FIdUse(String name) {
 		this(new FQName(name));
 	}
+    
+	/**
+	 * \brief Constructs an FQName by splitting the given name into name parts.
+	 * 
+	 * Does <em>not</em> parse array subscripts.
+	 */
+    public FQName.FQName(String name) {
+        this(new List());
+        for (String part : name.split("\\."))
+            addFQNamePart(new FQNamePart(part, new Opt()));
+    }
+    
+	/**
+	 * \brief Constructs an FQName that is a copy of another FQName.
+	 */
+    public FQName.FQName(FQName fqname) {
+        this((List)fqname.getFQNamePartList().fullCopy());
+    }
 	
 	/**
 	 * \brief Constructs a flat FIdUseExp that refers to the variable with the given name.

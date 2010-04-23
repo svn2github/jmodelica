@@ -447,10 +447,10 @@ aspect Names {
   eq InstBuiltInClassDecl.primitiveName() = name();
   
   eq InstFullClassDecl.primitiveName() {
-    if (extendsPrimitive())
-        return getInstExtends(0).getClassName().myInstClassDecl().finalClass().primitiveName();
-    else 
-        return name();
+      if (extendsPrimitive())
+          return getInstExtends(0).getClassName().myInstClassDecl().finalClass().primitiveName();
+      else 
+          return name();
   }
   
   syn String InstForIndex.name() = getInstPrimitive().name();
@@ -543,22 +543,20 @@ aspect Names {
     /**
      * \brief Get the top node in an access (possibly qualified).
      */
-    syn Access Access.getTopAccess() {
-        // This can be done with inherited attributes, but is much simpler with getParent()
-        if (getParent() instanceof Dot)
-            return ((Dot) getParent()).getTopAccess();
-        return this;
-    }
+    syn Access Access.getTopAccess() = retrieveTopAccess(this);
+    
+    inh Access Access.retrieveTopAccess(Access pre);
+    eq ASTNode.getChild().retrieveTopAccess(Access pre) = pre;
+    eq Dot.getChild().retrieveTopAccess(Access pre)     = retrieveTopAccess(this);
     
     /**
      * \brief Get the top node in an access (possibly qualified).
      */
-    syn InstAccess InstAccess.getTopAccess() {
-        // This can be done with inherited attributes, but is much simpler with getParent()
-        if (getParent() instanceof InstDot)
-            return ((InstDot) getParent()).getTopAccess();
-        return this;
-    }
+    syn InstAccess InstAccess.getTopInstAccess() = retrieveTopInstAccess(this);
+    
+    inh InstAccess InstAccess.retrieveTopInstAccess(InstAccess pre);
+    eq ASTNode.getChild().retrieveTopInstAccess(InstAccess pre) = pre;
+    eq InstDot.getChild().retrieveTopInstAccess(InstAccess pre) = retrieveTopInstAccess(this);
     
     /**
      * \brief Get the array subscripts of the last name part.
@@ -604,16 +602,6 @@ aspect FlatNames {
             return "unknown";
         }
     }
-    
-    public FQName.FQName(String name) {
-        this(new List());
-        for (String part : name.split("\\."))
-            addFQNamePart(new FQNamePart(part, new Opt()));
-    }
-
-    public FQName.FQName(FQName fqname) {
-        this((List)fqname.getFQNamePartList().fullCopy());
-    }
 
     public FQName FQName.append(String name) {
         addFQNamePart(new FQNamePart(name, new Opt()));
@@ -647,8 +635,7 @@ aspect FlatNames {
         getFIdUse().hasFArraySubscripts();
     syn FArraySubscripts FIdUseExp.getFArraySubscripts() = 
         getFIdUse().getFArraySubscripts();
-    
-    
+
     /**
      * \brief Get the array subscripts of the last name part.
      */
@@ -667,7 +654,7 @@ aspect FlatNames {
         FQName prefix = retrieveFQName();
         FQName myName = prefix!=null? new FQName(prefix):
                                       new FQName();
-        return myName;  
+        return myName;
     }
     
     syn lazy FQName InstNode.getFQName() = getFQNamePrefix();
@@ -702,7 +689,7 @@ aspect FlatNames {
             myName.lastFQNamePart().setFArraySubscripts(fas);
         }
         return myName;
-    }   
+    }
 
     eq InstClassDecl.getFQName() = new FQName();
     inh lazy FQName InstNode.retrieveFQName();
@@ -768,7 +755,7 @@ aspect FlatNames {
         for (int i=0;i<getNumFQNamePart();i++) {
             if (i==getNumFQNamePart()-1) {
                 str.append("der(");
-            }           
+            }
             str.append(getFQNamePart(i).getName());
             //if (i<getNumFQNamePart()-1 || isScalarized()) {
                 if (getFQNamePart(i).hasFArraySubscripts()) {
@@ -1317,7 +1304,7 @@ aspect ShortClassUtil {
         if (getExtendsClauseShortClass().hasTypePrefixInputOutput())
             if (getExtendsClauseShortClass().getTypePrefixInputOutput() instanceof Output)
                 return true;
-        return false;   
+        return false;
     }
 
     syn boolean InstClassDecl.isInput() = false;
@@ -1395,7 +1382,7 @@ aspect ParserHelpers {
          * Getter for problem.
          */
          public Problem getProblem() {
-            return p;
+             return p;
          }
         
     }

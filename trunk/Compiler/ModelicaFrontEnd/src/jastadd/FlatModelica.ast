@@ -736,7 +736,7 @@ FIdDecl ::= FQName;
 /**
  * \brief A qualified identifier.
  */
-FIdUse ::= FQName; 
+FIdUse ::= FQName /ExpandedSubscripts:FArraySubscripts/;
 
 /**
  * \brief A qualifed identifier in an expression.

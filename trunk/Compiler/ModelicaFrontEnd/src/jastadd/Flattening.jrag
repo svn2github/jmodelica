@@ -232,7 +232,7 @@ aspect Flattening {
 
 	public FFunctionVariable InstAssignable.createFFunctionVariable(Opt eo, FQName fqn) {
 		// TODO: if we need separate variable class for records, overide this
-		FType type =(FType) type().fullCopy();
+		FType type = (FType) type().fullCopy();
 		type.flattenSize(new FQName());
 		if (isArray())
 			return new FFunctionArray(new Opt(), type, eo, fqn);
@@ -482,14 +482,23 @@ aspect Flattening {
 		return use;
 	}
 	syn InstAccess InstAccess.splitArrayAccess(int index) = this;
-	eq InstDot.splitArrayAccess(int index) = 
-		new InstDot(getID(), (InstAccess) getLeft().fullCopy(), getRight().splitArrayAccess(index));
+	eq InstDot.splitArrayAccess(int index) {
+		InstAccess left, right;
+		if (getLeft().isArray()) {
+			left = getLeft().splitArrayAccess(index);
+			right = (InstAccess) getRight().fullCopy();
+		} else {
+			left = (InstAccess) getLeft().fullCopy();
+			right = getRight().splitArrayAccess(index);
+		}
+		return new InstDot(getID(), left, right);
+	}
 	eq InstArrayAccess.splitArrayAccess(int index) {
 		InstArrayAccess access = (InstArrayAccess) fullCopy();
 		if (hasFArraySubscripts()) {
 			access.getFArraySubscripts().specifyNext(index);
 		} else {
-			FArraySubscripts fas = FArraySubscripts.createFColonSubscripts(ndims());
+			FArraySubscripts fas = FArraySubscripts.createFColonSubscripts(localNdims());
 			access.setFArraySubscripts(fas);
 			fas.specifyNext(index);
 		}
@@ -825,12 +834,20 @@ aspect FlatExpressions {
 	
 	public FQName InstAccess.flatten(FQName prefix) { 
 		FQName myName = isForIndex() ? new FQName() : new FQName(prefix);
-		InstAccess fa = getFirstInstAccess();
-		do {
-			Opt as = fa.isInstArrayAccess() ? new Opt(fa.fArraySubscripts().flatten(prefix)) : new Opt();
-			myName.addFQNamePart(new FQNamePart(fa.name(), as));
-			fa = fa.getNextInstAccess();
-		} while (fa != null);
+		ArrayList<FArraySubscripts> fasl = allFArraySubscripts();
+		InstAccess cur = getFirstInstAccess();
+		int last = fasl.size() - 1;
+		boolean func = inFunction();
+		for (int i = 0; i <= last; i++, cur = cur.getNextInstAccess()) {
+			FArraySubscripts fas = fasl.get(i);
+			/* TODO: This is a temproary fix to make the slices code play nice 
+			 *        with functions - it will probably need to be replaced with 
+			 *        a more permanent fix later. See #741. */
+			boolean empty = (fas.getNumFSubscript() == 0) || 
+					        (func && i == last && !cur.hasFArraySubscripts()); 
+			Opt as = empty ? new Opt() : new Opt(fas.flatten(prefix));
+			myName.addFQNamePart(new FQNamePart(cur.name(), as));
+		}
 		return myName;
 	}
 

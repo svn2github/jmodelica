@@ -138,6 +138,12 @@ aspect Arrays {
 		}
 		return nd;
 	}
+	
+	/**
+	 * \brief Get array dimensions of a single part of an access.
+	 */
+	syn lazy int InstAccess.localNdims() = 
+		hasFArraySubscripts() ? getFArraySubscripts().accessNdims() : myInstComponentDecl().ndims();
 
 	
 	/**
@@ -239,11 +245,11 @@ aspect Arrays {
 		// be 0 and using myFV() might cause a NullPointerException.
 		// This is because if scalarization is in progress, 
 		// then this node will be hanging without a proper AST.
-		if (getFQName().isScalarized())
-			return 0;
-		if (getFQName().hasFArraySubscripts())
-			return getFArraySubscripts().accessNdims();
-		return myFV().ndims();
+		int n = 0;
+		if (!getFQName().isScalarized())
+			for (FArraySubscripts fas : allFArraySubscripts())
+				n += fas.accessNdims();
+		return n;
 	}
 	eq FIdUseInstAccess.ndims() = getInstAccess().ndims();
 	eq FIdUseExp.ndims() = getFIdUse().ndims();
@@ -256,12 +262,97 @@ aspect Arrays {
 	 * 
 	 * @return Array dimension.
 	 */	
-	syn int InstAccess.ndims() = 0;
-	eq InstArrayAccess.ndims() {
-		//.out.println("InstArrayAccess.ndims()");
-		return hasFArraySubscripts()? 
-			getFArraySubscripts().accessNdims(): 
-				myInstComponentDecl().ndims();
+	syn int InstAccess.ndims() {
+		int n = 0;
+		for (FArraySubscripts fas : allFArraySubscripts())
+			n += fas.accessNdims();
+		return n;
+	}
+	
+	/**
+	 * \brief Get the expanded FArraySubscripts of each part of this access.
+	 */
+	syn lazy ArrayList<FArraySubscripts> InstAccess.allFArraySubscripts() {
+		ArrayList<FArraySubscripts> res = new ArrayList<FArraySubscripts>(1);
+		res.add(getExpandedSubscripts());
+		return res;
+	}
+	eq InstDot.allFArraySubscripts() {
+		ArrayList<FArraySubscripts> left = getLeft().allFArraySubscripts();
+		ArrayList<FArraySubscripts> right = getRight().allFArraySubscripts();
+		ArrayList<FArraySubscripts> res = new ArrayList<FArraySubscripts>(left.size() + right.size());
+		res.addAll(left);
+		res.addAll(right);
+		return res;
+	}
+	
+	/**
+	 * \brief Get the expanded FArraySubscripts of each part of this access.
+	 */
+	syn lazy ArrayList<FArraySubscripts> FIdUse.allFArraySubscripts() {
+		ArrayList<FArraySubscripts> res = new ArrayList<FArraySubscripts>(getFQName().getNumFQNamePart());
+		for (FQNamePart part : getFQName().getFQNameParts())
+			res.add(part.hasFArraySubscripts() ? part.getFArraySubscripts() : new FArraySubscripts());
+		if (!hasFArraySubscripts() && myFV().isArray()) 
+			res.set(res.size() - 1, getExpandedSubscripts());
+		return res;
+	}
+	
+	/**
+	 * \brief Get the expanded array subscripts of this access.
+	 * 
+	 * An access without subscripts returns subscripts that span the entire component.
+	 * Any colon subscripts are expanded into constant vector expressions.
+	 */
+	syn FArraySubscripts InstAccess.getExpandedSubscripts() = new FArraySubscripts();
+	eq InstArrayAccess.getExpandedSubscripts() {
+		return hasFArraySubscripts() ? 
+				getFArraySubscripts().expandedSubscripts() :
+				myInstComponentDecl().expandedSubscripts();
+	}
+	
+	/**
+	 * \brief Get the expanded array subscripts of this access.
+	 * 
+	 * @return  an FArraySubscripts that spans the entire FV this access points to.
+	 */
+	syn FArraySubscripts FIdUse.getExpandedSubscripts() {
+		FArraySubscripts res = new FArraySubscripts();
+		for (int i = 0; i < myFV().ndims(); i++)
+			res.addFSubscript(myFV().size().createExpandedFSubscript(i));
+		return res;
+	}
+	
+	/**
+	 * \brief Create a copy of this FArraySubscripts with all colon indices expanded.
+	 */
+	public FArraySubscripts FArraySubscripts.expandedSubscripts() {
+		FArraySubscripts res = new FArraySubscripts();
+		for (FSubscript s : getFSubscripts())
+			res.addFSubscript(s.expandedSubscript());
+		return res;
+	}
+	
+	/**
+	 * \brief Create a copy of this FSubscript, expanding it to a vector if it is a colon.
+	 */
+	public FSubscript FSubscript.expandedSubscript() {
+		return (FSubscript) fullCopy();
+	}
+	public FSubscript FColonSubscript.expandedSubscript() {
+		return size().createExpandedFSubscript(0);
+	}
+	
+	/**
+	 * \brief Create an FArraySubscripts that spans all array cells of this component.
+	 * 
+	 * If this is a scalar component, an empty FArraySubscripts is returned.
+	 */
+	public FArraySubscripts InstComponentDecl.expandedSubscripts() {
+		FArraySubscripts res = new FArraySubscripts();
+		for (int i = 0; i < ndims(); i++)
+			res.addFSubscript(size().createExpandedFSubscript(i));
+		return res;
 	}
 	
 	/**
@@ -273,8 +364,6 @@ aspect Arrays {
 	 * @return Array dimension.
 	 */	
 	syn int InstAssignable.ndims() = hasFArraySubscripts() ? getFArraySubscripts().ndims() : 0;
-	
-	eq InstDot.ndims() = getRight().ndims() + getLeft().ndims();
 	
 	/**
 	 * \brief Get array dimensions.
@@ -406,6 +495,7 @@ aspect Arrays {
 	eq FIdUse.getChild().mySize()                     = myFV().size();
 	eq FIdUseInstAccess.getChild().mySize()           = getInstAccess().size();
 	eq InstArrayAccess.getFArraySubscripts().mySize() = myInstComponentDecl().size();
+	eq InstAccess.getExpandedSubscripts().mySize()    = myInstComponentDecl().size();
 	eq FSubscriptedExp.getFArraySubscripts().mySize() = getFExp().size();
 	eq FExpSubscript.getFExp().mySize()               = mySize();
 	eq FlatRoot.getChild().mySize()                   = Size.SCALAR;
@@ -453,14 +543,21 @@ aspect Arrays {
 		boolean hasStep = getNumFExp() > 2;
  		FExp start = (FExp) getFExp(0).fullCopy();
  		FExp stop = (FExp) getFExp(hasStep ? 2 : 1).fullCopy();
- 		FExp step = hasStep ? (FExp) getFExp(1).fullCopy() : null;
-		FExp exp = new FSubExp(stop, start);
-		if (hasStep)
-			exp = new FDivExp(exp, step);
-		exp = new FAddExp(new FIntegerExp(exp), new FIntegerLitExp(1));
-		s.append(dynamicFExp(new FMaxExp(exp, new Opt(new FIntegerLitExp(0)))));
+ 		if (!hasStep && start.isIntegerLiteral(1) && stop.type().isInteger()) {
+ 			s.append(stop);
+ 		} else {
+ 	 		FExp step = hasStep ? (FExp) getFExp(1).fullCopy() : null;
+ 			FExp exp = new FSubExp(stop, start);
+ 			if (hasStep)
+ 				exp = new FDivExp(exp, step);
+ 			exp = new FAddExp(new FIntegerExp(exp), new FIntegerLitExp(1));
+ 			s.append(dynamicFExp(new FMaxExp(exp, new Opt(new FIntegerLitExp(0)))));
+		}
 		return s;
 	}
+ 	
+ 	syn boolean FExp.isIntegerLiteral(int v)  = false;
+ 	eq FIntegerLitExp.isIntegerLiteral(int v) = getUNSIGNED_INTEGER().equals(Integer.toString(v));
  	
  	eq FLinspace.size() {
 		MutableSize s = new MutableSize(ndims());
@@ -581,8 +678,15 @@ aspect Arrays {
 	 * \brief Get the array sizes. 
 	 */
 	syn lazy Size FIdUse.size() {
-		return getFQName().hasFArraySubscripts()? 
-			getFArraySubscripts().accessSize(): myFV().size();
+		if (ndims() == 0)
+			return Size.SCALAR;
+		
+		MutableSize s = new MutableSize(ndims());
+		for (FArraySubscripts fas : allFArraySubscripts())
+			for (FSubscript fs : fas.getFSubscripts()) 
+				if (fs.ndims() == 1)
+					s.append(fs.size());
+		return s;
 	}
 	eq FIdUseInstAccess.size() = getInstAccess().size();
 		
@@ -1169,12 +1273,28 @@ aspect Arrays {
 	 * @param scalarize  <code>true</code> if the FQName should be marked as scalarized 
 	 */
 	public void FQName.specify(Index i, boolean scalarize) {
-		setLastFArraySubscripts(i.newFArraySubscripts());
+		int last = getNumFQNamePart() - 1;
+		for (int j = 0, dim = 0; dim < i.ndims(); j++) {
+			FQNamePart part = getFQNamePart(j);
+			int n = (j == last) ? (i.ndims() - dim) : part.numFSubscripts();
+			if (n > 0) {
+				FArraySubscripts fas = new FArraySubscripts();
+				for (int k = 0; k < n; k++, dim++)
+					fas.addFSubscript(new FExpSubscript(i.get(dim)));
+				part.setFArraySubscripts(fas);
+			}
+		}
 		scalarized = scalarize;
 	}
 	
 	/**
-	 * \brief Sets the last FArraySubscripts to the same as the Index.
+	 * \brief Gets the number of FSubscripts in the FArraySubscripts of this FQNamePart, if any.
+	 */
+	syn int FQNamePart.numFSubscripts() = 
+		hasFArraySubscripts() ? getFArraySubscripts().getNumFSubscript() : 0;
+	
+	/**
+	 * \brief Sets the FArraySubscripts of each part to match the Index.
 	 * 
 	 * @param i          the Index specifying what array subscripts to use
 	 * @param scalarize  <code>true</code> if the InstAccess should be marked as scalarized 
@@ -1182,6 +1302,42 @@ aspect Arrays {
 	public void InstAccess.specify(Index i, boolean scalarize) {
 		setLastFArraySubscripts(i.newFArraySubscripts());
 		scalarized = scalarize;
+	}
+
+	public void InstDot.specify(Index i, boolean scalarize) {
+		getFirstInstAccess().specifyEach(i, allFArraySubscripts(), 0, 0);
+		scalarized = scalarize;
+	}
+
+	/**
+	 * \brief Sets the FArraySubscripts of each part to match the Index.
+	 * 
+	 * @param i     the Index specifying what array subscripts to use
+	 * @param fasl  the list of expanded FArraySubscripts for the outermost InstDot
+	 * @param fi    the index in <code>fasl</code> that corresponds to this part
+	 * @param dim   the next dimension in <code>i</code> to use
+	 */
+	protected void InstAccess.specifyEach(Index i, ArrayList<FArraySubscripts> fasl, int fi, int dim) {
+		getNextInstAccess().specifyEach(i, fasl, fi + 1, dim);
+	}
+
+	/**
+	 * \brief Sets the FArraySubscripts of each part to match the Index.
+	 * 
+	 * @param i     the Index specifying what array subscripts to use
+	 * @param fasl  the list of expanded FArraySubscripts for the outermost InstDot
+	 * @param fi    the index in <code>fasl</code> that corresponds to this part
+	 * @param dim   the next dimension in <code>i</code> to use
+	 */
+	protected void InstArrayAccess.specifyEach(Index i, ArrayList<FArraySubscripts> fasl, int fi, int dim) {
+		int n = fasl.get(fi).getNumFSubscript();
+		if (n > 0) {
+			setFArraySubscripts(new FArraySubscripts());
+			for (int j = 0; j < n; j++, dim++)
+				getFArraySubscripts().addFSubscript(new FExpSubscript(i.get(dim)));
+		}
+		if (fi + 1 < fasl.size())
+			getNextInstAccess().specifyEach(i, fasl, fi + 1, dim);
 	}
 
 	eq FRangeExp.getArray() {
@@ -1227,7 +1383,7 @@ aspect Arrays {
 	 * 
 	 * @return An Indices object containing all indices in each array dimension.
 	 */
-	syn lazy Indices FArraySubscripts.indices() = Indices.create(this);
+	syn lazy Indices FArraySubscripts.indices() = Indices.createFromFas(this);
 	
 	/**
 	 * \brief Get the set of all array indices of an array access. 
@@ -1262,11 +1418,8 @@ aspect Arrays {
 	 * 
 	 * @return An Indices object containing all indices in each array dimension.
 	 */
-	syn lazy Indices FIdUse.indices() {
-		return getFQName().hasFArraySubscripts()? 
-				getFArraySubscripts().indices(): myFV().indices();
-	}
-	eq FIdUseInstAccess.indices() = getInstAccess().indices();
+	syn lazy Indices FIdUse.indices() = Indices.createFromFas(allFArraySubscripts());
+	syn Indices FIdUseInstAccess.indices() = getInstAccess().indices();
 
 	/**
 	 * \brief Get the set of all array indices of an instance array access. 
@@ -1280,10 +1433,7 @@ aspect Arrays {
 	 * 
 	 * @return An Indices object containing all indices in each array dimension.
 	 */
-	syn lazy Indices InstAccess.indices() = myInstComponentDecl().indices();
-	eq InstDot.indices()                  = getLastInstAccess().indices();
-	eq InstArrayAccess.indices()          = 
-		hasFArraySubscripts() ? getFArraySubscripts().indices() : myInstComponentDecl().indices();
+	syn lazy Indices InstAccess.indices() = Indices.createFromFas(allFArraySubscripts());
 		
 	/**
 	 * \brief Get the set of all array indices of an subscripted array expression. 
@@ -1743,9 +1893,25 @@ aspect ArrayHelpers {
 		}
 		
 		/**
+		 * \brief Create an FSubscript that spans the length of dimension <code>d</code>.
+		 * 
+		 * If nothing is known of the length of the dimension, an FColonSubscripts is created.
+		 */
+		public FSubscript createExpandedFSubscript(int d) {
+			if (hasValue(d)) {
+				List<FExp> lim = new List<FExp>();
+				lim.add(new FIntegerLitExp(1));
+				lim.add(createFExp(d));
+				return new FExpSubscript(new FRangeExp(lim));
+			} else {
+				return new FColonSubscript();
+			}
+		}
+		
+		/**
 		 * \brief Create an FExp that describes the length of dimension <code>d</code>.
 		 * 
-		 * the resulting expression is not expanded like createSizeFExp().
+		 * The resulting expression is not expanded like createSizeFExp().
 		 */
 		public FExp createFExp(int d) {
 			return new FIntegerLitExp(size[d]);
@@ -2525,8 +2691,15 @@ aspect ArrayHelpers {
 		/**
 		 * \brief Create an Indices object based on FArraySubcripts.
 		 */
-		public static Indices create(FArraySubscripts fas) {
-			return NonConsecutiveIndices.create(fas);
+		public static Indices createFromFas(FArraySubscripts fas) {
+			return NonConsecutiveIndices.createFromFas(fas);
+		}
+		
+		/**
+		 * \brief Create an Indices object based on a list of FArraySubcripts.
+		 */
+		public static Indices createFromFas(ArrayList<FArraySubscripts> fasl) {
+			return NonConsecutiveIndices.createFromFas(fasl);
 		}
 		
 		/**
@@ -2714,25 +2887,57 @@ aspect ArrayHelpers {
 		// The indices are stored as a list of integer arrays.
 		protected ArrayList<int[]> indices; 
 		protected Index trans;
-		protected boolean trim;
+		protected boolean[] trim;
 		
 		/**
 		 * \brief Create a NonConsecutiveIndices object based on FArraySubcripts.
 		 *        Use Indices.create(FArraySubscripts fas).
 		 */
-		public static NonConsecutiveIndices create(FArraySubscripts fas) {
-			ArrayList<int[]> ind = new ArrayList<int[]>();
-			for (FSubscript fs : fas.getFSubscripts()) 
+		public static NonConsecutiveIndices createFromFas(FArraySubscripts fas) {
+			int n = fas.getNumFSubscript();
+			ArrayList<int[]> ind = new ArrayList<int[]>(n);
+			boolean[] trim = new boolean[n];
+			
+			int i = 0;
+			for (FSubscript fs : fas.getFSubscripts()) { 
 				ind.add(fs.myIndices());
-			return new NonConsecutiveIndices(ind, true);
+				trim[i++] = fs.ndims() == 0;
+			}
+			return new NonConsecutiveIndices(ind, trim);
+		}
+		
+		/**
+		 * \brief Create a NonConsecutiveIndices object based on a list of FArraySubcripts.
+		 *        Use Indices.create(ArrayList<FArraySubscripts> fasl).
+		 */
+		public static NonConsecutiveIndices createFromFas(ArrayList<FArraySubscripts> fasl) {
+			int n = 0;
+			for (FArraySubscripts fas : fasl)
+				n += fas.getNumFSubscript();
+			ArrayList<int[]> ind = new ArrayList<int[]>(n);
+			boolean[] trim = new boolean[n];
+			
+			int i = 0;
+			for (FArraySubscripts fas : fasl) {
+				for (FSubscript fs : fas.getFSubscripts()) {
+					ind.add(fs.myIndices());
+					trim[i++] = fs.ndims() == 0;
+				} 
+			}
+			return new NonConsecutiveIndices(ind, trim);
 		}
 		
 		/**
 		 * \brief Create a NonConsecutiveIndices object based on a list of int arrays
 		 *        Use Indices.create(ArrayList<int[]> ind).
+		 * 
+		 * @param trim  remove dimensions that only span one index.
 		 */
 		public static NonConsecutiveIndices create(ArrayList<int[]> ind, boolean trim) {
-			return new NonConsecutiveIndices(ind, trim);
+			boolean[] trims = new boolean[ind.size()];
+			for (int i = 0; i < trims.length; i++)
+				trims[i] = trim && ind.get(i).length == 1;
+			return new NonConsecutiveIndices(ind, trims);
 		}
 		
 		/**
@@ -2743,7 +2948,7 @@ aspect ArrayHelpers {
 			int[] ii = i.index();
 			int[] ti = trans.index();
 			for (int ji = 0, jt = 0; ji < ndims; ji++, jt++) {
-				while (indices.get(jt).length == 1 && trim) 
+				while (trim[jt]) 
 					jt++;
 				ti[jt] = indices.get(jt)[ii[ji] - 1];
 			}
@@ -2754,8 +2959,10 @@ aspect ArrayHelpers {
 		/**
 		 * \brief Internal constructor to create a NonConsecutiveIndices object based on a 
 		 *        list of int arrays containing the used indexes on the underlying array.
+		 * 
+		 * @param trim  the dimensions to remove.
 		 */
-		protected NonConsecutiveIndices(ArrayList<int[]> ind, boolean trim) {
+		protected NonConsecutiveIndices(ArrayList<int[]> ind, boolean[] trim) {
 			super(getSize(ind, trim));
 			this.trim = trim;
 			indices = ind;
@@ -2768,15 +2975,15 @@ aspect ArrayHelpers {
 		 * \brief Calculate size for this indices from a list of int arrays containing the 
 		 *        used indexes on the underlying array
 		 */
-		protected static Size getSize(ArrayList<int[]> ind, boolean trim) {
+		protected static Size getSize(ArrayList<int[]> ind, boolean[] trim) {
 			int n = 0;
-			for (int[] i : ind)
-				if (i.length > 1 || !trim)
+			for (boolean tr : trim)
+				if (!tr)
 					n++;
 			MutableSize size = new MutableSize(n);
-			for (int[] i : ind)
-				if (i.length > 1 || !trim)
-					size.append(i.length);
+			for (int i = 0; i < trim.length; i++)
+				if (!trim[i])
+					size.append(ind.get(i).length);
 			return size;
 		}
 		

@@ -333,6 +333,12 @@ aspect FlatTypeCheck {
 	  return "named argument " + getName().prettyPrint("");
   }
   
+  public void InstAccess.typeCheck() {
+	  if (getTopInstAccess() == this && !type().isUnknown()) {
+		  // TODO: if this is a slice, check that all branches are of equal size
+	  }
+  }
+  
   /**
    * \brief Check if the type defined for this argument in the built-in function list 
    *        is valid.
