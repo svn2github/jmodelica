@@ -65,59 +65,6 @@ aspect TransformCanonical {
 		genInitialEquations();
 		sortDependentParameters();
 
-		if (root().options.getBooleanOption("index_reduction")) {
-            log.debug("Index reduction");    
-
-            org.jmodelica.graphs.EquationSystem eqSys = 
-                        new org.jmodelica.graphs.EquationSystem("Index reduction graph");
-
-
-            int k = 1;
-            for (FAbstractEquation e : equations()) {
-                String eqName = "(" + k + ")";
-
-                log.debug("Equation: " + eqName);
-
-                org.jmodelica.graphs.Equation eqn = eqSys.addEquation(eqName);
-
-                for (FVariable y : e.algebraicVariables()) {
-                    log.debug("  Algebraic: " + y.name());
-
-                    org.jmodelica.graphs.Variable v = eqSys.addVariable(y.name());    
-                    eqn.addVariable(v);
-                }
-
-                for (FVariable x : e.differentiatedVariables()) {
-                    log.debug("  State: " + x.name());
-
-                    org.jmodelica.graphs.Variable v = eqSys.addVariable(x.name());    
-                    eqn.addVariable(v);
-                }
-
-                for (FDerivativeVariable dx : e.derivativeVariables()) {
-                    FVariable x = dx.myDifferentiatedVariable();
-                    log.debug("  Diffed state: " + x.name());
-
-                    org.jmodelica.graphs.Variable v = eqSys.addVariable(x.name(), 1);    
-                    eqn.addVariable(v);
-                }
-
-                ++k;
-            }
-            log.debug("--------------------");
-
-            eqSys.dumpGraph();
-
-            log.debug("--------------------");
-            eqSys.cheapAssignment();
-            int index = eqSys.pantelides();
-
-            log.debug("Index = " + index);
-            eqSys.dumpGraph();
-        } else {
-            //log.debug("NO index reduction");    
-        }  
-
         root().flushAllRecursive();
 		
 	}
