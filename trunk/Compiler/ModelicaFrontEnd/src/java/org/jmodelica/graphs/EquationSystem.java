@@ -1,3 +1,5 @@
+/* Written by Philip Reuterswärd 2007 and 2010. */
+/* TODO: Insert GPL license / Modelon copyright (?). */
 package org.jmodelica.graphs;
 
 import java.util.LinkedList;
@@ -8,6 +10,63 @@ import java.util.LinkedHashSet;
 import java.util.Stack;
 import java.util.Collection;
 
+/* 
+ * References:
+ *
+ * Pantelides, The Consistent Initialization of Differential-Algebraic Systems,
+ * SIAM J. Sci. Stat. Comput., 1988
+ *
+ * Tarjan, Depth-First Search and Linear Graph Algorithms, SIAM J. Comput., 1972
+ *
+ * ----
+ * Rmk: A lot of these methods should not be 'public', but ~'package private'.
+ * Rmk: Introduce interfaces for the different graph-algos.
+ * Rmk: The cheap assignment should use the Hopcroft-Karp algorithm instead?
+ * Rmk: Full dummy derivative selection possibilities requires 
+ *      algorithms for calculating all possible matchings. 
+ * Rmk: The (structural) index calculation is off. 
+ *      Maybe there's a reason that some 
+ *      commercial tools don't output this information.
+ */
+
+/*
+ * Usage:
+ *
+ * 1. Create a graph:
+ *
+ *      EquationSystem eqSys = new EquationSystem("equation system name");
+ *      Equation eq;
+ *      Variable var;
+ *
+ *      eq = eqSys.addEquation("(1)");
+ *      var = eqSys.addVariable("x2");
+ *      eq.addVariable(var);
+ *      var = eqSys.addVariable("x1", 1);
+ *      eq.addVariable(var);
+ *      ... 
+ *
+ * 2. Run pantelides
+ *
+ *      int index = eqSys.pantelides();
+ *
+ *    This might call for differentition of subsets of equations.
+ *    To check for this:
+ *
+ *       eqSys.hasDifferentiatedEquations();
+ *
+ *    NB: the index calculation is off for some examples. Maybe it should be removed.
+ *
+ * 3. Run BLT
+ *
+ *      LinkedList<Stack<Equation>> comp = eqSys.blt();
+ *
+ *    This returns a sorted list of strong components (equations). 
+ *     
+ *      Variable v = Equation.getMatch();
+ *
+ *    return the variable matched to an equation.
+ */
+
 public class EquationSystem {
     private LinkedList<Equation> equations;
     private HashMap<String, Variable> variables;
@@ -15,12 +74,33 @@ public class EquationSystem {
     private String name;
 
     private int maxId = Integer.MIN_VALUE;
+    private int varIdCounter;
+
+    /*
+     * Exceptions used to report errors 
+     */
+    public class PantelidesMaxDepthException extends Exception {  
+        PantelidesMaxDepthException(String s) {
+            super(s);
+        }
+    }
+
+    public class PantelidesEmptyEquationException extends Exception {  
+        PantelidesEmptyEquationException(String s) {
+            super(s);
+        }
+    }
 
     public EquationSystem(String name) {
         equations = new LinkedList<Equation>();
         variables = new LinkedHashMap<String, Variable>();
         activeVariables = new LinkedHashMap<String, Variable>();
         this.name = name;
+        varIdCounter = 1; // this will number {1,2,3,...}
+    }
+
+    public int getNumVariables() {
+        return varIdCounter - 1;
     }
 
     public String getName() {
@@ -64,6 +144,7 @@ public class EquationSystem {
         }
     }
 
+    /*
     public void cheapAssignment() {
         for (Equation eq : equations) {
             eq.resetVariableIterator();
@@ -80,12 +161,18 @@ public class EquationSystem {
             }
         }
     }
+    */
 
     private Variable differentiateVariable(Variable var) {
         Variable dvar = var.differentiate();
         if (dvar == null) {
-            // TODO:
-            dvar = new Variable(var.getName(), var.getTimesDiffed()+1);
+            /* Do I need to know if I have equations of the type
+             *       x' = vx;
+             *       vx' = ...; ?
+             * I don't think so.
+             */
+            dvar = new Variable(var.getName(), var.getTimesDiffed()+1, 
+                                varIdCounter++);
             var.setDifferential(dvar);
             dvar.setIntegral(var);
 
@@ -118,7 +205,6 @@ public class EquationSystem {
             // x + y = 0   d/dt -> x' + y' = 0
             deq.addVariable(var);
 
-            // TODO:
             Variable dvar = differentiateVariable(var);
             deq.addVariable(dvar);
         }
@@ -126,7 +212,9 @@ public class EquationSystem {
         return deq;
     }
 
-    public void blt() {
+	// returns the sorted strong components
+	// someone should probably change the return format
+    public LinkedList<Stack<Equation>> blt() {
         Stack<Equation> activeEqns = new Stack<Equation>();
         
         for (Equation eq : equations) {
@@ -139,12 +227,14 @@ public class EquationSystem {
 
         }
 
+		/*
         System.out.println("Active equations for BLT:");
         System.out.print("  ");
         for (Equation eq : activeEqns) {
             System.out.print(eq + " ");
         }
         System.out.println();
+		*/
 
         int j = 0;
         Stack<Equation> stack = new Stack<Equation>();
@@ -190,44 +280,51 @@ public class EquationSystem {
                         }
                     } else {
                         //System.out.println("top: " + eq + 
-                         //" - exhausted variables (estack = " + eStack.size() + ")");
+                        //    " - exhausted variables (estack = " + eStack.size() + ")");
 
                         if (eq.getTarjanLink() == eq.getTarjanNbr()) {
+                            // 'eq' is the root of a strong component
                             if (!eStack.empty()) {
                                 //System.out.println("estack: ");
                                 for (Equation e : eStack) {
                                     //System.out.println("  " + e + " : (" + 
-                                                       //e.getTarjanNbr() + ", " + 
-                                                       //e.getTarjanLink() + ")");
+                                    //                   e.getTarjanNbr() + ", " + 
+                                     //                  e.getTarjanLink() + ")");
                                 }
                                 
                                 // new strong component
                                 //System.out.println("Strong component:");
                                 Equation eq2 = eStack.peek();
 
-                                //System.out.println("this: " + eq + " (" + 
-                                                   //eq.getTarjanNbr() + ", " + 
-                                                   //eq.getTarjanLink() + ")");
-                                //System.out.println("that: " + eq2 + " (" + 
-                                                   //eq2.getTarjanNbr() + ", " + 
-                                                   //eq2.getTarjanLink() + ")");
+								/*
+                                System.out.println("this: " + eq + " (" + 
+                                                   eq.getTarjanNbr() + ", " + 
+                                                   eq.getTarjanLink() + ")");
+                                System.out.println("that: " + eq2 + " (" + 
+                                                   eq2.getTarjanNbr() + ", " + 
+                                                   eq2.getTarjanLink() + ")");
                                
-                                //System.out.print(" ");
+                                System.out.print(" ");
+								*/
                                 Stack<Equation> comp = new Stack<Equation>();
                                 while (eq2.getTarjanNbr() >= eq.getTarjanNbr()) {
                                     eq2 = eStack.pop();
 
                                     comp.push(eq2);
-                                    //System.out.println("In COMPONENT: (" + eq2 + 
-                                    //               ", " + eq2.getMatch() + ")");
+									/*
+                                    System.out.println("In COMPONENT: (" + eq2 + 
+                                                     ", " + eq2.getMatch() + ")");
+													 */
 
                                     if (eStack.empty()) {
                                         break;
                                     } else {
                                         eq2 = eStack.peek();
-                                        //System.out.println("that: " + eq2 + " (" + 
-                                                   //eq2.getTarjanNbr() + ", " + 
-                                                   //eq2.getTarjanLink() + ")");
+										/*
+                                        System.out.println("that: " + eq2 + " (" + 
+                                                   eq2.getTarjanNbr() + ", " + 
+                                                   eq2.getTarjanLink() + ")");
+										*/
                                     }
                                 }
 
@@ -248,6 +345,9 @@ public class EquationSystem {
             }
         }
 
+		return components;
+
+		/*
         System.out.println("Strong components (" + components.size() + "):");
         int k = 1;
         for (Stack<Equation> s : components) {
@@ -274,15 +374,62 @@ public class EquationSystem {
             }
             System.out.println("---");
         }
+		*/
     }
 
-    public int pantelides() {
-        int index; // DAE index
+	// Pantelides algorithm
+	//
+    // call 'cheapAssignment' prior to this
+    // 
+    // Returns index. 
+    // NB: Still experimental!! This may be wrong!!
+    public int pantelides() throws PantelidesMaxDepthException, 
+                                   PantelidesEmptyEquationException {
+        int defaultMaxDepth = 5;
 
-        // it is recommended to run 'cheapAssignment' first
+		return pantelides(defaultMaxDepth);
+	}
+
+	//
+	// maxDepth - the algorithm might fail, this is the max number 
+	//            of consecutive equation differentiations
+    public int pantelides(int maxDepth) throws PantelidesMaxDepthException, 
+                                        PantelidesEmptyEquationException {
+        int index; // DAE index
         
         Stack<Equation> unassigned = new Stack<Equation>();
+        /* TODO: collect differentiated equations
+         *       in a special place
+         *
+         */
         //Stack<Equation> differentiate = new Stack<Equation>();
+
+        // cheapAss
+        for (Equation eq : equations) {
+            if (eq.getNumVariables() == 0) {
+                throw new PantelidesEmptyEquationException(
+                                          "Encountered empty equation");
+            }
+
+            eq.resetVariableIterator();
+            Variable var = eq.getNextActiveVariable();
+
+            while (var != null) {
+                if (!var.isMatched()) {
+                    var.setMatch(eq);
+                    eq.setMatch(var);
+                    break;
+                }
+
+                var = eq.getNextActiveVariable();
+            } 
+
+            // could no match equation
+            /* TODO:
+            eq.resetVariableIterator();
+            unassigned.push(eq);
+            */
+        }
 
         for (Equation eq : equations) {
             eq.resetVariableIterator();
@@ -291,6 +438,8 @@ public class EquationSystem {
             }
         }
 
+        // Debug stuff:
+        /*
         if (unassigned.empty()) {
             System.out.println("No unassigned equations");
         } else {
@@ -302,6 +451,7 @@ public class EquationSystem {
             }
             System.out.println();
         }
+        */
 
         index = 0;
         Collection<Equation> differentiate = new LinkedList<Equation>();
@@ -313,16 +463,19 @@ public class EquationSystem {
                 index = eq.getTimesDiffed();
             }
             
-            if (index > 4) {
-                System.out.println("pantelides reached max depth = " + index);
-                return -1;
+            if (index > maxDepth) {
+                //System.out.println("pantelides reached max depth.");
+
+                throw new PantelidesMaxDepthException("Reached max depth = " + index);
             }
 
             //System.out.println("pantelides pop unassigned: " + eq);
 
             if (!augmentPath(eq, differentiate)) {
+				/*
                 System.out.println("subset needs differentiation (level = " + eq.getTimesDiffed() + "):");
                 System.out.print("  equation: " + eq);
+				*/
 
                 // remove previous matching
                 if (eq.getMatch() != null) {
@@ -343,7 +496,7 @@ public class EquationSystem {
                 //      (but it still would not be optimal..)
                 HashSet<Equation> set = new HashSet<Equation>(differentiate);
                 for (Equation eqn : set) {
-                    System.out.print(" " + eqn);
+                    //System.out.print(" " + eqn);
                     deq = differentiateEquation(eqn);
 
                     unassigned.push(deq);
@@ -357,8 +510,10 @@ public class EquationSystem {
                         eqn.setMatch(null);
                     }
                 }
-                System.out.println();
 
+                //System.out.println();
+
+				/*
                 // do some heavy printous
                 System.out.println("graph after subset diff:");
                 set = new HashSet<Equation>(equations);
@@ -371,6 +526,7 @@ public class EquationSystem {
                 for (Equation e : unassigned) {
                     dumpEquation(e);
                 }
+				*/
             }
         }
 
@@ -382,14 +538,24 @@ public class EquationSystem {
         //
         // index has counted the number of times of differentiation
         // for the most diffed equation
+        //
+        // TODO:
+        //
+        // This test isn't good enough.
         for (Variable var : activeVariables.values()) {
             if (var.getTimesDiffed() == 0) {
-                return index+1;
+                ++index;
+                break;
             }
         }
 
         // all matched variables appear differentiated
         return index;
+    }
+
+    public boolean hasDifferentiatedEquations() {
+        // differentiated equations are inserted last
+        return (equations.getLast().getTimesDiffed() > 0);
     }
 
     private boolean augmentPath(Equation equation, Collection<Equation> differentiate) {
@@ -484,7 +650,7 @@ public class EquationSystem {
             var = variables.get(key);
             //System.out.println("contains OK: " + var);
         } else {
-            var = new Variable(name, timesDiffed);
+            var = new Variable(name, timesDiffed, ++varIdCounter);
             variables.put(key, var);
 
             // make sure we keep the highest derivative collection
@@ -552,5 +718,38 @@ public class EquationSystem {
             var = eq.getNextVariable();
         }
         System.out.println();
+    }
+
+    public void dumpMatrixMarket(String file) {
+        // dump as sparse integer matrix
+        String header = "%%MatrixMarket matrix coordinate integer general";
+        System.out.println(header);
+
+        int m = equations.size();
+        int n = variables.size();
+
+        // count non-zeros
+        int nnz = 0;
+        for (Equation eq : equations) {
+            nnz += eq.getNumVariables(); 
+        }
+
+        // print matrix size
+        System.out.println("  " + m + "  " + n + "  " + nnz);
+        
+        for (Equation eq : equations) {
+            eq.resetVariableIterator();
+
+            Variable var = eq.getNextVariable();
+
+            // Rmk: Right now this dumps all variables, not just active.
+            int i = eq.getId();
+            while (var != null) {
+                int j = var.getId();
+                System.out.println("    " + i + "  " + j + "  " + j);
+
+                var = eq.getNextVariable();
+            }
+        }
     }
 }

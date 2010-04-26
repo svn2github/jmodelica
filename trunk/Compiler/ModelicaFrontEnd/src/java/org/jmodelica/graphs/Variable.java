@@ -1,3 +1,5 @@
+/* Written by Philip Reuterswärd 2007 and 2010. */
+/* TODO: Insert GPL license / Modelon copyright (?). */
 package org.jmodelica.graphs;
 
 public class Variable {
@@ -8,11 +10,19 @@ public class Variable {
     private Variable differential;
     private boolean active;
 
-    public Variable(String name, int timesDiffed) {
+    private int id;
+
+    public Variable(String name, int timesDiffed, int id) {
         this.name = name;
         this.timesDiffed = timesDiffed;
+        this.id = id;
+
         match = null;
         active = false;
+    }
+
+    public int getId() {
+        return id;
     }
 
     public boolean isActive() {

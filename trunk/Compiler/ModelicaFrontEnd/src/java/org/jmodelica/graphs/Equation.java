@@ -1,3 +1,5 @@
+/* Written by Philip Reuterswärd 2007 and 2010. */
+/* TODO: Insert GPL license / Modelon copyright (?). */
 package org.jmodelica.graphs;
 
 import java.util.HashSet;
@@ -141,5 +143,9 @@ public class Equation {
 
     public boolean addVariable(Variable var) {
         return variables.add(var);
+    }
+
+    public int getNumVariables() {
+        return variables.size();
     }
 }
