@@ -94,9 +94,9 @@ def optimize(model,
     Parameters:
         model -- 
             Model object or model name (supply model name if model should be 
-            (re)compiled, then mo-file must also be provided)
+            (re)compiled, then mo-file(s) must also be provided)
         file_name --
-            Name of model file (mo-file). 
+            Path to model file or list of paths to model files. 
             Default: empty string (no compilation)
         compiler_target --
             Target argument to compiler. 
@@ -168,7 +168,7 @@ def simulate(model,
             Model object or model name (supply model name if model should be 
             (re)compiled, then mo-file must also be provided)
         file_name --
-            Name of model file (mo-file). 
+            Path to model file or list of paths to model files.
             Default: empty string (no compilation)
         compiler --
             Set compiler that model should be compiled with, 'modelica' or 
@@ -242,7 +242,7 @@ def initialize(model,
             Model object or model name (supply model name if model should be 
             (re)compiled, then mo-file must also be provided)
         file_name --
-            Name of model file (mo-file). 
+            Path to model file or list of paths to model files. 
             Default: empty string (no compilation)
         compiler --
             Set compiler that model should be compiled with, 'modelica' or 
@@ -335,7 +335,9 @@ def _compile(model_name, file_name, compiler='modelica', compiler_target = "ipop
     
     Returns jmi.Model object.
     """
-    if isinstance(model_name, str) and file_name.strip():
+    if isinstance(file_name, str):
+        file_name = [file_name]
+    if isinstance(model_name, str) and len(file_name)>0:
         comp=None
         if compiler.lower() == 'modelica':
             comp = ModelicaCompiler()
@@ -361,8 +363,8 @@ def _compile(model_name, file_name, compiler='modelica', compiler_target = "ipop
         model = jmi.Model(compiled_name)
 
     else:
-        raise Exception("Provide a model name and a mo-file in \
-            order for model to be (re)compiled.")
+        raise Exception("Provide a model name and one or more \
+            mo-file(s) in order for model to be (re)compiled.")
     return model
 
 def check_packages():
