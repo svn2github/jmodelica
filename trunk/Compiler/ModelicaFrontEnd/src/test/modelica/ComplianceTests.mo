@@ -194,14 +194,14 @@ Compliance error at line 172, column 3:
 ")})));
 
  equation
-  scalar();
-  vector();
-  matrix();
-  diagonal();
-  product();
-  outerProduct();
-  symmetric();
-  skew();
+  scalar(1);
+  vector(1);
+  matrix(1);
+  diagonal(1 + "2");
+  product(1);
+  outerProduct(1);
+  symmetric(1);
+  skew(1);
 end UnsupportedBuiltins1_ComplErr;
 
 
@@ -245,15 +245,15 @@ Compliance error at line 219, column 3:
 ")})));
 
  equation
-  sign();
+  sign(1);
   Integer();
   String();
-  div();
+  div(1);
   mod();
-  rem();
+  rem(1);
   ceil();
   floor();
-  delay();
+  delay(1);
   cardinality();
 end UnsupportedBuiltins2_ComplErr;
 
@@ -293,13 +293,13 @@ Compliance error at line 271, column 3:
 
  equation
   semiLinear();
-  initial();
+  initial(1);
   terminal();
-  smooth();
+  smooth(1);
   sample();
-  pre();
+  pre(1);
   edge();
-  reinit();
+  reinit(1);
 end UnsupportedBuiltins3_ComplErr;
 
 
@@ -319,7 +319,7 @@ Compliance error at line 266, column 3:
 ")})));
 
  equation
-  assert();
+  assert(1);
   terminate();
 end UnsupportedBuiltins4_ComplErr;
 

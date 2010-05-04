@@ -100,9 +100,6 @@ import org.xml.sax.SAXException;
 public class ModelicaCompiler {
 	protected static final String CONSOLE_LOG_NAME = ModelicaCompiler.class.getName() + ".console";
 	protected static final ModelicaLogger log = ModelicaLoggers.getConsoleLogger(CONSOLE_LOG_NAME);
-	static {
-		ASTNode.log = log;
-	}
 	
 	public static final String DEBUG = "d";
 	public static final String INFO = "i";
@@ -110,11 +107,15 @@ public class ModelicaCompiler {
 	public static final String ERROR = "e";
 	public static final String INHERITED = "inh";
 	protected static final HashMap<String, Level> levels = new HashMap<String, Level>();
-	static {
-		levels.put(DEBUG,   Level.FINE);
-		levels.put(INFO,    Level.INFO);
-		levels.put(WARNING, Level.WARNING);
-		levels.put(ERROR,   Level.SEVERE);
+	// This should be two static blocks, but jastadd ignores those, so this is a workaround
+	private static void staticBlocks() {
+		ASTNode.log = log;
+		if (levels.isEmpty()) {
+			levels.put(DEBUG,   Level.FINE);
+			levels.put(INFO,    Level.INFO);
+			levels.put(WARNING, Level.WARNING);
+			levels.put(ERROR,   Level.SEVERE);
+		}
 	}
 	public static final String DEFAULT_LEVEL = ERROR;
 	
@@ -125,6 +126,7 @@ public class ModelicaCompiler {
 	
 	
 	public ModelicaCompiler(OptionRegistry options, String xmlTpl, String xmlValuesTpl, String cTemplatefile) {
+		staticBlocks();
 		this.options = options;
 		this.xmlTpl = xmlTpl;
 		this.xmlValuesTpl = xmlValuesTpl;
@@ -651,6 +653,8 @@ public class ModelicaCompiler {
 	 * \brief Convenience constructor intended to be called from main method.
 	 */
 	protected ModelicaCompiler(String compilerName, String[] args, Hashtable<String, String> programarguments) {
+		staticBlocks();
+		
 		String filesep = System.getProperty("file.separator");
 		if (args.length < 1) {
 			log.error(compilerName + " expects the command line arguments: \n" +

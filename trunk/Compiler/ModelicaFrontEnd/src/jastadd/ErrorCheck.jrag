@@ -779,6 +779,11 @@ aspect InstanceErrorCheck {
 	    }
     	super.collectErrors();
 	}
+	
+	public void FUnsupportedBuiltIn.collectErrors() {
+		// Don't check arguments
+		allChecks();
+	}
  
 	protected boolean InstNamedArgument.errorChecked = false;
 	public void InstNamedArgument.collectErrors() {
