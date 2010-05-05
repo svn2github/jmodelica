@@ -64,7 +64,7 @@
 			</BooleanAttributes>
 		</Option>
 		<Option type="boolean">
-			<BooleanAttributes key="equation_sorting" value="true">
+			<BooleanAttributes key="equation_sorting" value="false">
 				<Description>
 					If this option is true (default is false), equations are sorted using the BLT algorithm.
 				</Description>

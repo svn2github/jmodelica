@@ -65,10 +65,87 @@ aspect TransformCanonical {
 		genInitialEquations();
 		sortDependentParameters();
 
+		if (root().options.getBooleanOption("index_reduction")) {
+			indexReduction();
+		}
+
+		if (root().options.getBooleanOption("equation_sorting")) {
+			indexReduction();
+			blt();
+		}
+		
         root().flushAllRecursive();
 		
 	}
 		
+	
+	private org.jmodelica.graphs.EquationSystem FClass.eqSys = null;
+	
+	public void FClass.indexReduction() {
+		
+		eqSys = new org.jmodelica.graphs.EquationSystem(name());
+		org.jmodelica.graphs.Equation eqn;
+		org.jmodelica.graphs.Variable v = null;
+		
+		int k = 1;
+		for (FAbstractEquation e : equations()) {
+			eqn = eqSys.addEquation("eq_"+k);
+			k++;
+			
+			for (FVariable y : e.algebraicVariables()) { 
+				log.debug("  Algebraic: " + y.name()); 
+					 	 
+				v = eqSys.addVariable(y.name());     
+				eqn.addVariable(v); 
+			} 
+					 
+			for (FVariable x : e.differentiatedVariables()) { 
+				log.debug("  State: " + x.name()); 
+					 	 
+				v = eqSys.addVariable(x.name());     
+				eqn.addVariable(v); 
+			} 
+				 	 
+			for (FDerivativeVariable dx : e.derivativeVariables()) { 
+				FVariable x = dx.myDifferentiatedVariable(); 
+				log.debug("  Diffed state: " + x.name()); 
+ 
+				v = eqSys.addVariable(x.name(), 1);     
+				eqn.addVariable(v); 
+			} 
+			
+		}
+		
+		try {
+			int index = eqSys.pantelides();
+		} catch (org.jmodelica.graphs.EquationSystem.PantelidesMaxDepthException e) {
+            System.out.println("Pantelides reached max depth");
+        } catch (org.jmodelica.graphs.EquationSystem.PantelidesEmptyEquationException e) {
+            System.out.println("Pantelides encountered empty equation");
+        }
+        
+        eqSys.dumpGraph();
+			
+	}
+
+	public void FClass.blt() {
+		
+		LinkedList<Stack<org.jmodelica.graphs.Equation>> blt_result = eqSys.blt();
+
+		StringBuffer str = new StringBuffer();
+		str.append("BLT:\n");
+		LinkedList<Stack<org.jmodelica.graphs.Equation>> blt = eqSys.blt();
+		int i = 0;
+		for (Stack<org.jmodelica.graphs.Equation> s : blt_result) {
+			str.append("Block "+i+":\n");
+			for (org.jmodelica.graphs.Equation e : s) {
+				str.append(e + " (" + e.getMatch()+")\n");
+			}
+			i++;
+		}
+		System.out.println(str.toString());
+	}
+	
 	/**
 	 * \brief Convert variable binding equations into regular equations.
 	 */
