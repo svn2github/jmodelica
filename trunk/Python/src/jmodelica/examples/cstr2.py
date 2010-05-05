@@ -112,7 +112,7 @@ def run_demo(with_plots=True):
 
     # Create an OptimicaCompiler instance
     oc = OptimicaCompiler()
-
+    oc.set_log_level('INFO')
     # Compile the Model
     oc.compile_model("CSTR2_Opt", 
                      (curr_dir+"/files/CSTRLib.mo", curr_dir+"/files/CSTR2_Opt.mo"),
@@ -124,10 +124,10 @@ def run_demo(with_plots=True):
     # Initialize the model with parameters
 
     # Initialize the model to stationary point A
-    model.set_value('two_CSTRs_Series.CA1_0',CA1_0_A)
-    model.set_value('two_CSTRs_Series.CA2_0',CA2_0_A)
-    model.set_value('two_CSTRs_Series.T1_0',T1_0_A)
-    model.set_value('two_CSTRs_Series.T2_0',T2_0_A)
+    model.set_value('cstr.two_CSTRs_Series.CA1_0',CA1_0_A)
+    model.set_value('cstr.two_CSTRs_Series.CA2_0',CA2_0_A)
+    model.set_value('cstr.two_CSTRs_Series.T1_0',T1_0_A)
+    model.set_value('cstr.two_CSTRs_Series.T2_0',T2_0_A)
     
     # Set the target values to stationary point B
     model.set_value('u1_ref',u1_0_B)
@@ -136,21 +136,22 @@ def run_demo(with_plots=True):
     model.set_value('CA2_ref',CA2_0_B)
     
     # Initialize the optimization mesh
-    n_e = 30 # Number of elements 
+    n_e = 50 # Number of elements 
     hs = N.ones(n_e)*1./n_e # Equidistant points
     n_cp = 3; # Number of collocation points in each element
     
-    (model, res) = optimize(model, 
-							alg_args={'n_e':30, 'hs':hs, 'n_cp':n_cp},
-							solver_args={"derivative_test":"first-order", "tol":0.0001})
+    (model, res) = optimize(model, compiler_options={'enable_variable_scaling':True,'index_reduction':True},
+                            alg_args={'n_e':n_e, 'hs':hs, 'n_cp':n_cp,'blocking_factors':2*N.ones(n_e/2,dtype=N.int)},
+                            solver_args={'tol':1e-4})
         
     # Extract variable profiles
-    CA1_res=res.get_variable_data('two_CSTRs_Series.CA1')
-    CA2_res=res.get_variable_data('two_CSTRs_Series.CA2')
-    T1_res=res.get_variable_data('two_CSTRs_Series.T1')
-    T2_res=res.get_variable_data('two_CSTRs_Series.T2')
-    u1_res=res.get_variable_data('two_CSTRs_Series.u1')
-    u2_res=res.get_variable_data('two_CSTRs_Series.u2')
+    CA1_res=res.get_variable_data('cstr.two_CSTRs_Series.CA1')
+    CA2_res=res.get_variable_data('cstr.two_CSTRs_Series.CA2')
+    T1_res=res.get_variable_data('cstr.two_CSTRs_Series.T1')
+    T2_res=res.get_variable_data('cstr.two_CSTRs_Series.T2')
+    u1_res=res.get_variable_data('cstr.two_CSTRs_Series.u1')
+    u2_res=res.get_variable_data('cstr.two_CSTRs_Series.u2')
+    der_u2_res=res.get_variable_data('der_u2')
     
     CA1_ref_res=res.get_variable_data('CA1_ref')
     CA2_ref_res=res.get_variable_data('CA2_ref')
@@ -160,8 +161,8 @@ def run_demo(with_plots=True):
     
     cost=res.get_variable_data('cost')
     
-    assert N.abs(cost.x[-1]/1.e1 - 1.9282732) < 1e-3, \
-            "Wrong value of cost function in cstr2.py"
+    assert N.abs(cost.x[-1] - 1.4745648e+01) < 1e-3, \
+           "Wrong value of cost function in cstr2.py"
     
     # Plot the results
     if with_plots:
@@ -199,14 +200,13 @@ def run_demo(with_plots=True):
         plt.clf()
         plt.hold(True)
         plt.subplot(211)
-        plt.plot(u1_res.t,u1_res.x)
-        plt.ylabel('Input 1')
-        plt.plot(u1_ref_res.t,u1_ref_res.x,'--')
-        plt.grid()
-        plt.subplot(212)
         plt.plot(u2_res.t,u2_res.x)
         plt.ylabel('Input 2')
         plt.plot(u2_ref_res.t,u2_ref_res.x,'--')
+        plt.grid()
+        plt.subplot(212)
+        plt.plot(der_u2_res.t,der_u2_res.x)
+        plt.ylabel('Derivative of input 2')
         plt.xlabel('t [s]')
         plt.grid()
         plt.show()

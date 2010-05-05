@@ -23,9 +23,9 @@ package CSTRLib
    parameter Real dH=4.78e4 "Heat of Reaction (J/mol)";
 
    // Algebraic variables
-   Real q1(start=100) "Volumetric Flow Rate Leaving Reactor 1 (L/min)";
-   Real q2(start=100) "Volumetric Flow Rate Leaving Reactor 2 (L/min)";
-   Real Qc(start=-50) "Energy Flow from Reactor #1 - Cooling (J/min)";
+   Real q1(start=100,nominal=100) "Volumetric Flow Rate Leaving Reactor 1 (L/min)";
+   Real q2(start=100,nominal=100) "Volumetric Flow Rate Leaving Reactor 2 (L/min)";
+   Real Qc(start=-50,nominal=50) "Energy Flow from Reactor #1 - Cooling (J/min)";
 
   // Initial values for the states
    parameter Real V1_0=200;
@@ -37,12 +37,12 @@ package CSTRLib
 
    //Guess Values for steady-state solution to be
    //used as initial conditions
-   Real V1(start=V1_0) "Volume in Reactor 1 (L)";
-   Real CA1(start=CA1_0) "Concentration of Reactor 1 (mol/L)";
-   SI.Temperature T1(start=T1_0) "Temperature in Reactor 1 (K)";
-   Real V2(start=V2_0) "Volume in Reactor 2 (L)";
-   Real CA2(start=CA2_0) "Concentration of Reactor 2 (mol/L)";
-   SI.Temperature T2(start=T2_0) "Temperature in Reactor 2 (K)";
+   Real V1(start=V1_0,nominal=V1_0) "Volume in Reactor 1 (L)";
+   Real CA1(start=CA1_0,nominal=CA1_0) "Concentration of Reactor 1 (mol/L)";
+   SI.Temperature T1(start=T1_0,nominal=T1_0) "Temperature in Reactor 1 (K)";
+   Real V2(start=V2_0,nominal=V2_0) "Volume in Reactor 2 (L)";
+   Real CA2(start=CA2_0,nominal=CA2_0) "Concentration of Reactor 2 (mol/L)";
+   SI.Temperature T2(start=T2_0,nominal=T2_0) "Temperature in Reactor 2 (K)";
 
    // Model inputs
    Modelica.Blocks.Interfaces.RealInput u1(start=1) annotation (Placement(
