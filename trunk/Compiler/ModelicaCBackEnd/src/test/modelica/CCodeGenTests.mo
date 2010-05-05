@@ -1184,9 +1184,9 @@ jmi_ad_var_t func_CCodeGenTests_CArrayInput1_f_exp(jmi_array_t* inp_a) {
 
 
     JMI_ARRAY_STATIC(tmp_1, 3, 3)
-    jmi_array_ref_1(tmp_1, 1) = 1.0;
-    jmi_array_ref_1(tmp_1, 2) = 2.0;
-    jmi_array_ref_1(tmp_1, 3) = 3.0;
+    jmi_array_ref_1(tmp_1, 1) = 1;
+    jmi_array_ref_1(tmp_1, 2) = 2;
+    jmi_array_ref_1(tmp_1, 3) = 3;
     (*res)[0] = func_CCodeGenTests_CArrayInput1_f_exp(tmp_1) - (_x_0);
 ")})));
 
@@ -1231,9 +1231,9 @@ jmi_ad_var_t func_CCodeGenTests_CArrayInput2_f_exp(jmi_array_t* inp_a) {
 
 
     JMI_ARRAY_STATIC(tmp_1, 3, 3)
-    jmi_array_ref_1(tmp_1, 1) = 1.0 + 3;
-    jmi_array_ref_1(tmp_1, 2) = 2.0 + 5;
-    jmi_array_ref_1(tmp_1, 3) = 3.0 + 7;
+    jmi_array_ref_1(tmp_1, 1) = 1 + 3;
+    jmi_array_ref_1(tmp_1, 2) = 2 + 5;
+    jmi_array_ref_1(tmp_1, 3) = 3 + 7;
     (*res)[0] = 2 + ( 5 ) * ( func_CCodeGenTests_CArrayInput2_f_exp(tmp_1) ) - (_x_0);
 ")})));
 
@@ -1278,17 +1278,17 @@ jmi_ad_var_t func_CCodeGenTests_CArrayInput3_f_exp(jmi_array_t* inp_a) {
 
 
     JMI_ARRAY_STATIC(tmp_1, 3, 3)
-    jmi_array_ref_1(tmp_1, 1) = 1.0;
-    jmi_array_ref_1(tmp_1, 2) = 2.0;
-    jmi_array_ref_1(tmp_1, 3) = 3.0;
+    jmi_array_ref_1(tmp_1, 1) = 1;
+    jmi_array_ref_1(tmp_1, 2) = 2;
+    jmi_array_ref_1(tmp_1, 3) = 3;
     JMI_ARRAY_STATIC(tmp_2, 3, 3)
-    jmi_array_ref_1(tmp_2, 1) = 4.0;
-    jmi_array_ref_1(tmp_2, 2) = 5.0;
-    jmi_array_ref_1(tmp_2, 3) = 6.0;
+    jmi_array_ref_1(tmp_2, 1) = 4;
+    jmi_array_ref_1(tmp_2, 2) = 5;
+    jmi_array_ref_1(tmp_2, 3) = 6;
     JMI_ARRAY_STATIC(tmp_3, 3, 3)
-    jmi_array_ref_1(tmp_3, 1) = 7.0;
-    jmi_array_ref_1(tmp_3, 2) = 8.0;
-    jmi_array_ref_1(tmp_3, 3) = 9.0;
+    jmi_array_ref_1(tmp_3, 1) = 7;
+    jmi_array_ref_1(tmp_3, 2) = 8;
+    jmi_array_ref_1(tmp_3, 3) = 9;
     JMI_ARRAY_STATIC(tmp_4, 3, 3)
     jmi_array_ref_1(tmp_4, 1) = func_CCodeGenTests_CArrayInput3_f_exp(tmp_1);
     jmi_array_ref_1(tmp_4, 2) = func_CCodeGenTests_CArrayInput3_f_exp(tmp_2);
@@ -1326,9 +1326,9 @@ void func_CCodeGenTests_CArrayInput4_f1_def(jmi_ad_var_t* out_o) {
     jmi_ad_var_t out_v;
     out_v = 1.0;
     JMI_ARRAY_STATIC(tmp_1, 3, 3)
-    jmi_array_ref_1(tmp_1, 1) = 1.0;
-    jmi_array_ref_1(tmp_1, 2) = 2.0;
-    jmi_array_ref_1(tmp_1, 3) = 3.0;
+    jmi_array_ref_1(tmp_1, 1) = 1;
+    jmi_array_ref_1(tmp_1, 2) = 2;
+    jmi_array_ref_1(tmp_1, 3) = 3;
     out_v = func_CCodeGenTests_CArrayInput4_f2_exp(tmp_1);
     if (out_o != NULL) *out_o = out_v;
     JMI_DYNAMIC_FREE()
@@ -1395,9 +1395,9 @@ void func_CCodeGenTests_CArrayInput5_f1_def(jmi_ad_var_t* out_o) {
     jmi_ad_var_t t_v;
     out_v = 1.0;
     JMI_ARRAY_STATIC(tmp_1, 3, 3)
-    jmi_array_ref_1(tmp_1, 1) = 1.0;
-    jmi_array_ref_1(tmp_1, 2) = 2.0;
-    jmi_array_ref_1(tmp_1, 3) = 3.0;
+    jmi_array_ref_1(tmp_1, 1) = 1;
+    jmi_array_ref_1(tmp_1, 2) = 2;
+    jmi_array_ref_1(tmp_1, 3) = 3;
     func_CCodeGenTests_CArrayInput5_f2_def(tmp_1, &out_v, &t_v);
     if (out_o != NULL) *out_o = out_v;
     JMI_DYNAMIC_FREE()
@@ -1468,25 +1468,25 @@ void func_CCodeGenTests_CArrayInput6_f1_def(jmi_ad_var_t* out_o) {
     jmi_ad_var_t out_v;
     out_v = 1.0;
     JMI_ARRAY_STATIC(tmp_1, 2, 2)
-    jmi_array_ref_1(tmp_1, 1) = 1.0;
-    jmi_array_ref_1(tmp_1, 2) = 2.0;
+    jmi_array_ref_1(tmp_1, 1) = 1;
+    jmi_array_ref_1(tmp_1, 2) = 2;
     JMI_ARRAY_STATIC(tmp_2, 2, 2)
-    jmi_array_ref_1(tmp_2, 1) = 3.0;
-    jmi_array_ref_1(tmp_2, 2) = 4.0;
+    jmi_array_ref_1(tmp_2, 1) = 3;
+    jmi_array_ref_1(tmp_2, 2) = 4;
     if (COND_EXP_LT(func_CCodeGenTests_CArrayInput6_f2_exp(tmp_1),4,JMI_TRUE,JMI_FALSE)) {
         JMI_ARRAY_STATIC(tmp_3, 2, 2)
-        jmi_array_ref_1(tmp_3, 1) = 5.0;
-        jmi_array_ref_1(tmp_3, 2) = 6.0;
+        jmi_array_ref_1(tmp_3, 1) = 5;
+        jmi_array_ref_1(tmp_3, 2) = 6;
         out_v = func_CCodeGenTests_CArrayInput6_f2_exp(tmp_3);
     } else if (COND_EXP_GT(func_CCodeGenTests_CArrayInput6_f2_exp(tmp_2),5,JMI_TRUE,JMI_FALSE)) {
         JMI_ARRAY_STATIC(tmp_4, 2, 2)
-        jmi_array_ref_1(tmp_4, 1) = 7.0;
-        jmi_array_ref_1(tmp_4, 2) = 8.0;
+        jmi_array_ref_1(tmp_4, 1) = 7;
+        jmi_array_ref_1(tmp_4, 2) = 8;
         out_v = func_CCodeGenTests_CArrayInput6_f2_exp(tmp_4);
     } else {
         JMI_ARRAY_STATIC(tmp_5, 2, 2)
-        jmi_array_ref_1(tmp_5, 1) = 9.0;
-        jmi_array_ref_1(tmp_5, 2) = 10.0;
+        jmi_array_ref_1(tmp_5, 1) = 9;
+        jmi_array_ref_1(tmp_5, 2) = 10;
         out_v = func_CCodeGenTests_CArrayInput6_f2_exp(tmp_5);
     }
     if (out_o != NULL) *out_o = out_v;
@@ -1559,14 +1559,14 @@ void func_CCodeGenTests_CArrayInput7_f1_def(jmi_ad_var_t* out_o) {
     jmi_ad_var_t out_v;
     out_v = 1.0;
     JMI_ARRAY_STATIC(tmp_1, 3, 3)
-    jmi_array_ref_1(tmp_1, 1) = 1.0;
-    jmi_array_ref_1(tmp_1, 2) = 2.0;
-    jmi_array_ref_1(tmp_1, 3) = 3.0;
+    jmi_array_ref_1(tmp_1, 1) = 1;
+    jmi_array_ref_1(tmp_1, 2) = 2;
+    jmi_array_ref_1(tmp_1, 3) = 3;
     while (COND_EXP_LT(func_CCodeGenTests_CArrayInput7_f2_exp(tmp_1),2,JMI_TRUE,JMI_FALSE)) {
         JMI_ARRAY_STATIC(tmp_2, 3, 3)
-        jmi_array_ref_1(tmp_2, 1) = 4.0;
-        jmi_array_ref_1(tmp_2, 2) = 5.0;
-        jmi_array_ref_1(tmp_2, 3) = 6.0;
+        jmi_array_ref_1(tmp_2, 1) = 4;
+        jmi_array_ref_1(tmp_2, 2) = 5;
+        jmi_array_ref_1(tmp_2, 3) = 6;
         out_v = func_CCodeGenTests_CArrayInput7_f2_exp(tmp_2);
 }
     if (out_o != NULL) *out_o = out_v;
@@ -1635,20 +1635,20 @@ void func_CCodeGenTests_CArrayInput8_f1_def(jmi_ad_var_t* out_o) {
     jmi_ad_var_t out_v;
     out_v = 1.0;
     JMI_ARRAY_STATIC(tmp_1, 3, 3)
-    jmi_array_ref_1(tmp_1, 1) = 1.0;
-    jmi_array_ref_1(tmp_1, 2) = 2.0;
-    jmi_array_ref_1(tmp_1, 3) = 3.0;
+    jmi_array_ref_1(tmp_1, 1) = 1;
+    jmi_array_ref_1(tmp_1, 2) = 2;
+    jmi_array_ref_1(tmp_1, 3) = 3;
     JMI_ARRAY_STATIC(tmp_2, 3, 3)
-    jmi_array_ref_1(tmp_2, 1) = 4.0;
-    jmi_array_ref_1(tmp_2, 2) = 5.0;
-    jmi_array_ref_1(tmp_2, 3) = 6.0;
+    jmi_array_ref_1(tmp_2, 1) = 4;
+    jmi_array_ref_1(tmp_2, 2) = 5;
+    jmi_array_ref_1(tmp_2, 3) = 6;
     jmi_ad_var_t i_ia[] = { func_CCodeGenTests_CArrayInput8_f2_exp(tmp_1), func_CCodeGenTests_CArrayInput8_f2_exp(tmp_2) };
     for (int i_ii = 0; i_ii < 2; i_ii++) {
         jmi_ad_var_t i_i = i_ia[i_ii];
         JMI_ARRAY_STATIC(tmp_3, 3, 3)
-        jmi_array_ref_1(tmp_3, 1) = 7.0;
-        jmi_array_ref_1(tmp_3, 2) = 8.0;
-        jmi_array_ref_1(tmp_3, 3) = 9.0;
+        jmi_array_ref_1(tmp_3, 1) = 7;
+        jmi_array_ref_1(tmp_3, 2) = 8;
+        jmi_array_ref_1(tmp_3, 3) = 9;
         out_v = func_CCodeGenTests_CArrayInput8_f2_exp(tmp_3);
     }
     if (out_o != NULL) *out_o = out_v;

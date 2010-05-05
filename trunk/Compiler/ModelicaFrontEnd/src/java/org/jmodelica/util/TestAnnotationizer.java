@@ -141,7 +141,7 @@ public class TestAnnotationizer {
 	}
 
 	private static String getPackageName(String filePath) {
-		String[] parts = filePath.split(File.separator);
+		String[] parts = filePath.split("\\\\|/");
 		return parts[parts.length - 1].split("\\.")[0];
 	}
 }

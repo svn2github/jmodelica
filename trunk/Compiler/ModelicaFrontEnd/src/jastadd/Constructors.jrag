@@ -130,6 +130,13 @@ aspect Constructors {
 	}
 	
 	/**
+	 * \brief Constructs an InstDot with an empty ID.
+	 */
+	public InstDot.InstDot(InstAccess left, InstAccess right) {
+		this("", left, right);
+	}
+	
+	/**
 	 * \brief Constructs an FForIndex with a temporary index variable and a 
 	 *        range expression starting at 1 as the in expression.
 	 * 

@@ -917,7 +917,7 @@ aspect InstanceTreeConstruction {
 	}
 
 	public InstAccess Dot.newInstAccess() {
-		InstAccess ia = new InstDot("",getLeft().newInstAccess(),getRight().newInstAccess());
+		InstAccess ia = new InstDot(getLeft().newInstAccess(), getRight().newInstAccess());
 		ia.setLocation(this);
 		return ia;
 	}	

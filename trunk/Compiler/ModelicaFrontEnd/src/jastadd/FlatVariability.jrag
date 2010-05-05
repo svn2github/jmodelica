@@ -90,6 +90,9 @@ aspect FlatVariability {
 	syn boolean FExp.isDiscreteExp() = variability().discreteVariability();
 	syn boolean FExp.isContinuousExp() = variability().continuousVariability();
 	
+	syn boolean FSubscript.isConstant() = true;
+	eq FExpSubscript.isConstant() = getFExp().isConstantExp();
+	
 	syn lazy FTypePrefixVariability FExp.variability() = combineFExpListVariability(childFExps());
 	
 	// TODO this must be fixed.

@@ -17,9 +17,6 @@
 
 package ForbiddenOperationsTests
 
-model Test
-      Modelica.Thermal.HeatTransfer.Examples.ControlledTemperature CT;
-end Test;
 
 model ComplexExpInDer1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={

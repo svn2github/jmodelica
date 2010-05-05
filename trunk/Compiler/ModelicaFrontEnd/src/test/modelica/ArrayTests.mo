@@ -7466,5 +7466,108 @@ end SliceTest3;
 
 
 
+model MixedIndices1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="MixedIndices1",
+         description="Mixing for index subscripts with colon subscripts",
+         flatModel="
+fclass ArrayTests.MixedIndices1
+ Real y[1,1,1];
+ Real y[1,1,2];
+ Real y[1,2,1];
+ Real y[1,2,2];
+ Real y[2,1,1];
+ Real y[2,1,2];
+ Real y[2,2,1];
+ Real y[2,2,2];
+ Real z[1,1,1];
+ Real z[1,1,2];
+ Real z[1,2,1];
+ Real z[1,2,2];
+ Real z[2,1,1];
+ Real z[2,1,2];
+ Real z[2,2,1];
+ Real z[2,2,2];
+equation
+ der(y[1,1,1]) = z[1,1,1];
+ der(y[1,1,2]) = z[1,1,2];
+ der(y[1,2,1]) = z[1,2,1];
+ der(y[1,2,2]) = z[1,2,2];
+ der(y[2,1,1]) = z[2,1,1];
+ der(y[2,1,2]) = z[2,1,2];
+ der(y[2,2,1]) = z[2,2,1];
+ der(y[2,2,2]) = z[2,2,2];
+ z[1,1,1] = 1;
+ z[1,1,2] = 0;
+ z[1,2,1] = 0;
+ z[1,2,2] = 1;
+ z[2,1,1] = 1;
+ z[2,1,2] = 0;
+ z[2,2,1] = 0;
+ z[2,2,2] = 1;
+end ArrayTests.MixedIndices1;
+")})));
+
+ model M
+   Real x[2,2] = identity(2);
+ end M;
+ 
+ M m[2];
+ Real y[2,2,2];
+ Real z[2,2,2];
+equation
+ for i in 1:2 loop
+  der(y[i,:,:]) = m[i].x;
+  z[i,:,:] = m[i].x;
+ end for;
+end MixedIndices1;
+
+
+model MixedIndices2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="MixedIndices2",
+         description="Mixing expression subscripts containing for indices with colon subscripts",
+         flatModel="
+fclass ArrayTests.MixedIndices2
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+ Real y[3,1];
+ Real y[3,2];
+ Real y[4,1];
+ Real y[4,2];
+ Real z[1,1];
+ Real z[1,2];
+ Real z[2,1];
+ Real z[2,2];
+equation
+ y[1,1] = ( z[1,1] ) * ( 2 );
+ y[1,2] = ( z[1,2] ) * ( 2 );
+ y[2,1] = ( z[2,1] ) * ( 2 );
+ y[2,2] = ( z[2,2] ) * ( 2 );
+ y[3,1] = ( z[1,1] ) * ( 2 );
+ y[3,2] = ( z[1,2] ) * ( 2 );
+ y[4,1] = ( z[2,1] ) * ( 2 );
+ y[4,2] = ( z[2,2] ) * ( 2 );
+ z[1,1] = 1;
+ z[1,2] = 0;
+ z[2,1] = 0;
+ z[2,2] = 1;
+end ArrayTests.MixedIndices2;
+")})));
+
+ Real y[4,2];
+ Real z[2,2] = identity(2);
+equation
+ for i in 0:2:2 loop
+   y[(1:2).+i,:] = z[:,:] * 2;
+ end for;
+end MixedIndices2;
+
+
+
   annotation (uses(Modelica(version="3.0.1")));
 end ArrayTests;

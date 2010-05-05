@@ -245,13 +245,11 @@ aspect Scalarization {
 			scalarizeUnknownArrayAssignment(vars, stmts, indexMap, getBindingExp());
 		} else {
 			createArrayTemporaries(stmts, vars, indexMap, true);
-			FIdUse id = new FIdUse(new FQName(name()));
 			Array arr = getBindingExp().getArray();
 			for (Index i : arr.indices()) {
 				FExp exp = arr.get(i).scalarize(indexMap);
-				FIdUse nid = (FIdUse) id.fullCopy();
-				nid.getFQName().specify(i, false);
-				stmts.add(new FAssignStmt(nid, exp));
+				FIdUse id = new FIdUse(getFQName().specify(i, false));
+				stmts.add(new FAssignStmt(id, exp));
 			}
 		}
 	}
@@ -1251,7 +1249,7 @@ aspect Scalarization {
     }
 	
     public InstDot InstDot.scalarize(HashMap<String,FExp> indexMap) {
-    	return new InstDot("", getLeft().scalarize(indexMap), getRight().scalarize(indexMap));
+    	return new InstDot(getLeft().scalarize(indexMap), getRight().scalarize(indexMap));
     }
 	
     public InstArrayAccess InstArrayAccess.scalarize(HashMap<String,FExp> indexMap) {

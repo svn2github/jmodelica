@@ -184,9 +184,9 @@ aspect OptimicaArrays {
 			return super.getArray();
 		Array array = new Array(indices());
 		for (Index i : array.indices()) {
-			InstTimedVariable tv = fullCopy();
-			tv.getName().specify(i, true);
-			array.set(i, tv);
+			InstAccess name = getName().specify(i);
+			FExp arg = (FExp) getArg().fullCopy();
+			array.set(i, new InstTimedVariable(name, arg));
 		}
 		return array;
 	}
@@ -195,10 +195,11 @@ aspect OptimicaArrays {
 		if (!isArray()) 
 			return super.getArray();
 		Array array = new Array(indices());
-		Indices ind = array.indices();
-		for (Index i : ind) 
-			array.set(i, new FTimedVariable(getName().specify(ind.translate(i), true), 
-					(FExp) getArg().fullCopy()));
+		for (Index i : array.indices()) {
+			FIdUse name = getName().specify(i, true);
+			FExp arg = (FExp) getArg().fullCopy();
+			array.set(i, new FTimedVariable(name, arg));
+		}
 		return array;
 	}
 	
