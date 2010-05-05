@@ -216,7 +216,7 @@ model ConnectTest5
  parameter Integer c2.n = 2 /* 2 */;
  Real c2.x[2];
 equation
- c1.x = {1,2};
+ c1.x[1:2] = {1,2};
  c1.x = c2.x;
 end ConnectTests.ConnectTest5;
 ")})));
