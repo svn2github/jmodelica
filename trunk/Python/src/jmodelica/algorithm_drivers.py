@@ -291,7 +291,7 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
         if not ipopt_present:
             raise Exception('Could not find IPOPT. Check jmodelica.check_packages()')
         
-        if not self.blocking_factors:
+        if self.blocking_factors == None:
             self.nlp = ipopt.NLPCollocationLagrangePolynomials(model,self.n_e, self.hs, self.n_cp)
         else:
             self.nlp = ipopt.NLPCollocationLagrangePolynomials(model,self.n_e, self.hs, self.n_cp, blocking_factors=self.blocking_factors)
