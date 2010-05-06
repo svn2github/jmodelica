@@ -46,6 +46,7 @@ try:
 except:
     ipopt_present = False
 
+default_int = int
 int = N.int32
 N.int = N.int32
 
@@ -126,7 +127,7 @@ class IpoptInitializationAlg(AlgorithmBase):
                 Dict with int, real or string options for the solver ipopt.
         """
         for k, v in solver_args.iteritems():
-            if isinstance(v, int):
+            if isinstance(v, default_int):
                 self.nlp_ipopt.opt_sim_ipopt_set_int_option(k, v)
             elif isinstance(v, float):
                 self.nlp_ipopt.opt_sim_ipopt_set_num_option(k, v)
@@ -370,7 +371,7 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
                 Dict with int, real or string options for the solver ipopt.
         """
         for k, v in solver_args.iteritems():
-            if isinstance(v, int):
+            if isinstance(v, default_int):
                 self.nlp_ipopt.opt_sim_ipopt_set_int_option(k, v)
             elif isinstance(v, float):
                 self.nlp_ipopt.opt_sim_ipopt_set_num_option(k, v)
