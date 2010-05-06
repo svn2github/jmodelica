@@ -57,11 +57,10 @@ int jmi_init_opt_ipopt_solve(jmi_init_opt_ipopt_t *jmi_init_opt_ipopt) {
 
 	tnlp = new jmi_init_opt_TNLP(jmi_init_opt_ipopt->jmi_init_opt);
 
-
 	Ipopt::ApplicationReturnStatus status;
 	status = jmi_init_opt_ipopt->ipopt_app->OptimizeTNLP(tnlp);
 
-	return 0;
+	return status;
 
 }
 

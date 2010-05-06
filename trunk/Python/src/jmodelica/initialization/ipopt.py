@@ -75,7 +75,7 @@ class InitializationOptimizer(object):
                
     def init_opt_ipopt_solve(self):
         """ Solve the NLP problem."""
-        if self._nlp_init._jmi_model._dll.jmi_init_opt_ipopt_solve(self._ipopt_init) is not 0:
+        if self._nlp_init._jmi_model._dll.jmi_init_opt_ipopt_solve(self._ipopt_init) > 1:
             raise jmi.JMIException("Solving IPOPT failed.")
     
     def init_opt_ipopt_set_string_option(self, key, val):

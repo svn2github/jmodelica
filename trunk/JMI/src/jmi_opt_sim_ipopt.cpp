@@ -57,11 +57,10 @@ int jmi_opt_sim_ipopt_solve(jmi_opt_sim_ipopt_t *jmi_opt_sim_ipopt) {
 
 	tnlp = new jmi_TNLP(jmi_opt_sim_ipopt->jmi_opt_sim);
 
-
 	Ipopt::ApplicationReturnStatus status;
 	status = jmi_opt_sim_ipopt->ipopt_app->OptimizeTNLP(tnlp);
 
-	return 0;
+	return status;
 
 }
 
@@ -82,8 +81,6 @@ int jmi_opt_sim_ipopt_set_num_option(jmi_opt_sim_ipopt_t *jmi_opt_sim_ipopt, cha
 	jmi_opt_sim_ipopt->ipopt_app->Options()->SetNumericValue(tag, val);
 	return 0;
 }
-
-
 
 /*
 int jmi_opt_sim_ipopt_get_starting_point(jmi_opt_sim_ipopt_t *jmi_opt_sim_ipopt, Index n, int init_x, Number* x,

@@ -96,6 +96,8 @@ public:
     Index n_;
     Index n_h_;
     Index dh_n_nz_;
+    int return_status_;
+
 };
 
 

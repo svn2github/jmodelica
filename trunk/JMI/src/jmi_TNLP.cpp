@@ -17,7 +17,8 @@ jmi_TNLP::jmi_TNLP(jmi_opt_sim_t* problem)
   n_h_(0),
   n_g_(0),
   dh_n_nz_(0),
-  dg_n_nz_(0)
+  dg_n_nz_(0),
+  return_status_(-1)
 {
   ASSERT_EXCEPTION(problem_ != NULL, INVALID_TNLP,
 		   "Null problem definition passed into jmi_TNLP");
@@ -220,6 +221,9 @@ void jmi_TNLP::finalize_solution(SolverReturn status,
 				     const IpoptData* ip_data,
 				     IpoptCalculatedQuantities* ip_cq)
 {
+    return_status_ = status;
+//	printf("jmi_init_opt_TNLP.finalize_solution(.)\n");
+//		printf("Return status: %d\n",status);
 }
 
 
@@ -285,4 +289,8 @@ bool jmi_TNLP::get_list_of_nonlinear_variables(Index num_nonlin_vars,
 */
 //	return true;
 
+}
+
+int jmi_TNLP::get_return_status() {
+	return return_status_;
 }

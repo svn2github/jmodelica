@@ -79,7 +79,7 @@ class CollocationOptimizer(object):
                
     def opt_sim_ipopt_solve(self):
         """ Solve the NLP problem."""
-        if self._nlp_collocation._model.jmimodel._dll.jmi_opt_sim_ipopt_solve(self._ipopt_opt) is not 0:
+        if self._nlp_collocation._model.jmimodel._dll.jmi_opt_sim_ipopt_solve(self._ipopt_opt) > 1:
             raise jmi.JMIException("Solving IPOPT failed.")
     
     def opt_sim_ipopt_set_string_option(self, key, val):

@@ -96,6 +96,13 @@ int jmi_opt_sim_ipopt_set_int_option(jmi_opt_sim_ipopt_t *jmi_opt_sim_ipopt, cha
  */
 int jmi_opt_sim_ipopt_set_num_option(jmi_opt_sim_ipopt_t *jmi_opt_sim_ipopt, char* key, double val);
 
+/**
+ * \brief Get the return status from Ipopt
+ *
+ *  @return Ipopt return status
+ */
+int jmi_opt_sim_ipopt_get_return_status(jmi_opt_sim_ipopt_t *jmi_opt_sim_ipopt);
+
 /* @} */
 
 #ifdef __cplusplus

@@ -15,7 +15,8 @@ jmi_init_opt_TNLP::jmi_init_opt_TNLP(jmi_init_opt_t* problem)
   problem_(problem),
   n_(0),
   n_h_(0),
-  dh_n_nz_(0)
+  dh_n_nz_(0),
+  return_status_(-1)
 {
   ASSERT_EXCEPTION(problem_ != NULL, INVALID_TNLP,
 		   "Null problem definition passed into jmi_init_opt_TNLP");
@@ -178,6 +179,9 @@ void jmi_init_opt_TNLP::finalize_solution(SolverReturn status,
 				     const IpoptData* ip_data,
 				     IpoptCalculatedQuantities* ip_cq)
 {
+	return_status_ = status;
+//	printf("jmi_init_opt_TNLP.finalize_solution(.)\n");
+//	printf("Return status: %d\n",status);
 }
 
 /*

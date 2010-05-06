@@ -71,6 +71,8 @@ public:
     virtual bool get_list_of_nonlinear_variables(Index num_nonlin_vars,
         Index* pos_nonlin_vars);
 
+    int get_return_status();
+
   private:
     /**@name Default Compiler Generated Methods
      * (Hidden to avoid implicit creation/calling).
@@ -97,6 +99,7 @@ public:
     Index n_g_;
     Index dh_n_nz_;
     Index dg_n_nz_;
+    int return_status_;
 };
 
 
