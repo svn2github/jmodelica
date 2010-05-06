@@ -18,7 +18,6 @@ from jmodelica.compiler import ModelicaCompiler
 import jmodelica.xmlparser as xp
 import jmodelica.io
 
-
 int = N.int32
 N.int = N.int32
 
@@ -574,7 +573,6 @@ class TestModel_RLC:
     def test_set_constant(self):
         """ Test that set_value of constant should raise error."""
         nose.tools.assert_raises(Exception, self.rlc.set_value, 'sine.pi',1.0)
-               
 
 class TestJMIModel_VDP:
     """ Test the JMI Model Interface wrappers.
@@ -1148,7 +1146,6 @@ class TestJMIModel_VDP:
         assert n_eq_Ceq==res_n_eq_Ceq and n_eq_Cineq==res_n_eq_Cineq and n_eq_Heq==res_n_eq_Heq and n_eq_Hineq==res_n_eq_Hineq,  \
                "test_jmi.py: test_Model_dae_get_sizes: Wrong number of constraints." 
     
-    
     @testattr(stddist = True)
     def test_state_start_values_fixed(self):
         """ Test of the compiler option state_start_values_fixed
@@ -1183,3 +1180,31 @@ class TestJMIModel_VDP:
         assert n_eq_F0==res_n_eq_F0 and n_eq_F1==res_n_eq_F1 and n_eq_Fp==res_n_eq_Fp and n_eq_R0==res_n_eq_R0, \
                "test_jmi.py: test_Model_dae_get_sizes: Wrong number of DAE initialization equations."
                
+class TestModelGeneric:
+    """ Test methods in the jmodelica.jmi.Model class    
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        model = os.path.join("files", "DependentParameterTest.mo")
+        fpath = os.path.join(path_to_tests, model)
+        cpath = "DependentParameterTest"
+        fname = cpath.replace('.','_',1)
+        
+        mc = ModelicaCompiler()
+        
+        mc.compile_model(cpath, fpath)
+        
+        # Load the dynamic library and XML data
+        cls.m = jmi.Model(fname)
+
+
+    @testattr(stddist = True)
+    def test_setget_independent_parameter(self):
+       """ Test recomputation of dependent parameters when setting
+           independent parameters."""
+
+       self.m.set_value("p1",5)
+       
+       nose.tools.assert_equal(self.m.get_value("p2"),15)
+       nose.tools.assert_equal(self.m.get_value("p3"),20)

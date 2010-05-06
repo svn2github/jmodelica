@@ -1662,12 +1662,15 @@ class Model(object):
             values.append(self.get_value(name))
         return values
         
-    def set_value(self, name, value):
+    def set_value(self, name, value, recompute_dependent_parameters=True):
         """ Set get value of a parameter or variable.
         
         Parameters:
             name -- name of variable or parameter.
             value -- parameter or variable value.
+            recompute_dependent_parameters -- if an independent parameter
+            is set, the dependet parameters are recomputed
+            if this argument is true (default).
 
         Raises Error if name not present in model or if variable can 
         not be set."""
@@ -1689,6 +1692,12 @@ class Model(object):
                     self.get_z()[z_i] = (value)/sc[z_i]
                 else:
                     self.get_z()[z_i] = (value)
+
+            if recompute_dependent_parameters and \
+                   z_i>=self._offs_real_pi and \
+                   z_i<self._offs_real_pd:
+                self._set_dependent_parameters()
+                
         else:
             raise Exception("Parameter or variable "+name+" could not be found in model.")
     
