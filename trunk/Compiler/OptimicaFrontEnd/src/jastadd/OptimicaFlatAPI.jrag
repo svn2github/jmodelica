@@ -1,3 +1,21 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+import java.util.LinkedHashSet;
+
 aspect OptimicaFlatAPI {
 	
 	/**
@@ -946,4 +964,51 @@ aspect OptimicaFlatAPIDiagnostics {
 		return str.toString();
 	}
 	
+}
+
+aspect OptimicaFreeParameters {
+	
+    syn int FClass.numFreeParameters() = freeParameters().size();
+	coll ArrayList<FVariable> FClass.freeParameters() 
+	  [new ArrayList<FVariable>()] with add root FlatRoot;
+	FVariable contributes
+ 		this when freeAttribute() && shouldContribute()
+	to FClass.freeParameters() for myFClass();
+	
+	syn int FClass.numFreeRealParameters() = freeRealParameters().size();
+	syn lazy ArrayList<FRealVariable> FClass.freeRealParameters() {
+      ArrayList<FRealVariable> set = new ArrayList<FRealVariable>();
+      set.addAll(reals());
+      set.retainAll(freeParameters());
+      return set;
+     }
+	syn int FVariable.freeRealParameterIndex() =
+		myFClass().freeRealParameters().indexOf(this);
+
+	syn int FClass.numFreeIntegerParameters() = freeIntegerParameters().size();
+	syn lazy ArrayList<FIntegerVariable> FClass.freeIntegerParameters() {
+      ArrayList<FIntegerVariable> set = new ArrayList<FIntegerVariable>();
+      set.addAll(integers());
+      set.retainAll(freeParameters());
+      return set;
+     }
+	syn int FVariable.freeIntegerParameterIndex() =
+		myFClass().freeIntegerParameters().indexOf(this);
+
+	syn int FClass.numFreeBooleanParameters() = freeBooleanParameters().size();
+	syn lazy ArrayList<FBooleanVariable> FClass.freeBooleanParameters() {
+      ArrayList<FBooleanVariable> set = new ArrayList<FBooleanVariable>();
+      set.addAll(booleans());
+      set.retainAll(freeParameters());
+      return set;
+     }
+	syn int FVariable.freeBooleanParameterIndex() =
+		myFClass().freeBooleanParameters().indexOf(this);	
+	
+	syn lazy ArrayList<FRealVariables> freeDependentRealParameters() {
+		LinkedHashSet<FRealVariables> s = new LinkedHashSet<FRealVariables>();
+		for (FRealVariables v : freeRealParameters()) {
+			s.addAll(v.dependentParameterUses());
+		}
+	}
 }
