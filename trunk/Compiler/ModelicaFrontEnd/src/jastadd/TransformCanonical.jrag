@@ -15,6 +15,7 @@
 */
 
 import java.util.ArrayList;
+import java.util.Stack;
 
 /* This causes conflicts
 import org.jmodelica.graphs.EquationSystem;

@@ -1054,34 +1054,45 @@ aspect FlatExpressions {
 	}
 
 	public void FConnectClause.flatten(FQName prefix, FClass fc) {
-				
-		InstFullClassDecl c1 = (InstFullClassDecl)(getConnector1().getInstAccess().myInstComponentDecl().myInstClass().finalClass());
-		InstFullClassDecl c2 = (InstFullClassDecl)(getConnector2().getInstAccess().myInstComponentDecl().myInstClass().finalClass());
+		InstAccess ia1 = getConnector1().getInstAccess();
+		InstAccess ia2 = getConnector2().getInstAccess();
+		
+		InstComponentDecl comp1 = ia1.myInstComponentDecl();
+		InstComponentDecl comp2 = ia1.myInstComponentDecl();
+		
+		InstFullClassDecl c1 = (InstFullClassDecl) comp1.myInstClass().finalClass();
+		InstFullClassDecl c2 = (InstFullClassDecl) comp2.myInstClass().finalClass();
+		
+		FQName name1 = ia1.flatten(prefix);
+		FQName name2 = ia2.flatten(prefix);
 				
 		// Is it two "primitives" that are connected?
 		if (c1.extendsPrimitive() || c1.isPrimitive()) {
-/*
-			fc.getConnectionSetManager().addVars(getConnector1().getInstAccess().myInstComponentDecl(),false,((FQName)prefix.fullCopy()).append(getConnector1().getInstAccess().flatten(prefix)),
-		                                         getConnector2().getInstAccess().myInstComponentDecl(),false,((FQName)prefix.fullCopy()).append(getConnector2().getInstAccess().flatten(prefix)));
-*/
-			fc.getConnectionSetManager().addVars(getConnector1().getInstAccess().myInstComponentDecl(),false,getConnector1().getInstAccess().flatten(prefix),
-                    getConnector2().getInstAccess().myInstComponentDecl(),false,getConnector2().getInstAccess().flatten(prefix));
-
+			fc.getConnectionSetManager().addVars(comp1, false, name1, comp2, false, name2);
 			return;
 		}
 
-		boolean outside1 = enclosingInstClassDecl().memberInstComponent(getConnector1().getInstAccess().name()).size()>0;
-		boolean outside2 = enclosingInstClassDecl().memberInstComponent(getConnector2().getInstAccess().name()).size()>0;
+		boolean outside1 = enclosingInstClassDecl().memberInstComponent(ia1.name()).size() > 0;
+		boolean outside2 = enclosingInstClassDecl().memberInstComponent(ia2.name()).size() > 0;
 		
 		InstComponentDecl var1, var2;
-		
 		for (InstComponentDecl icd : c1.containedInstComponents()) {
 			var1 = icd;
 			var2 = (InstComponentDecl) c2.memberInstComponent(var1.name()).iterator().next();
-			FQName fqn1 = getConnector1().getInstAccess().flatten(prefix).append(var1.name());
-			FQName fqn2 = getConnector2().getInstAccess().flatten(prefix).append(var2.name());
+			FQName fqn1 = var1.flattenedAccess(name1);
+			FQName fqn2 = var2.flattenedAccess(name2);
 			fc.getConnectionSetManager().addVars(var1, outside1, fqn1, var2, outside2, fqn2);
 		}
+	}
+	
+	/**
+	 * \brief Creates a flattened access to this component.
+	 */
+	public FQName InstComponentDecl.flattenedAccess(FQName prefix) {
+		FQName fqn = prefix.copyAndAppend(name());
+		if (expandedSubscripts().getNumFSubscript() > 0)
+			fqn.setLastFArraySubscripts(expandedSubscripts());
+		return fqn;
 	}
 
 }

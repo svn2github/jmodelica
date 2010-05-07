@@ -217,7 +217,7 @@ model ConnectTest5
  Real c2.x[2];
 equation
  c1.x[1:2] = {1,2};
- c1.x = c2.x;
+ c1.x[1:2] = c2.x[1:2];
 end ConnectTests.ConnectTest5;
 ")})));
 
