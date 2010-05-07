@@ -121,4 +121,4 @@ InstComponentModification : InstElementModification;
 abstract InstElementRedeclare : InstNamedModification;
 InstClassRedeclare : InstElementRedeclare ::= /InstClassDecl/;
 InstComponentRedeclare : InstElementRedeclare ::= /InstComponentDecl/ /DynamicClassName:InstAccess*/;
-	
+

@@ -190,8 +190,79 @@ Semantic error at line 179, column 41:
 
   end ClassAttrTest6;
 
+  optimization FreeDependentParametersTest1(objective=p1^2,startTime=0,finalTime=1) 
 
-    
+      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FClassMethodTestCase(name="FreeDependentParametersTest1",
+      methodName="freeParametersDiagnostics",
+        description="Test that free dependent parameters are computed correctly.", methodResult=
+        "  
+Free independent parameters:
+p1
+p4
+Free dependent parameters:
+p2
+p5
+p3
+  ")})));
+
+     parameter Real p1(free=true) = 1;
+     parameter Real p2 = p1;
+     parameter Real p3 = p2;
+     parameter Real p4(free=true) = 1;
+     parameter Real p5 = p4;
+  end FreeDependentParametersTest1;
+
+  optimization FreeDependentParametersTest2(objective=p1^2,startTime=0,finalTime=1) 
+
+  	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FClassMethodTestCase(name="FreeDependentParametersTest2",
+      methodName="freeParametersDiagnostics",
+        description="Test that free dependent parameters are computed correctly.", methodResult=
+        "  
+Free independent parameters:
+p1
+p4
+Free dependent parameters:
+p2
+p5
+p3
+  ")})));
+
+     parameter Real p1(free=true) = 1;
+     parameter Real p2 = p1;
+     parameter Real p3 = p2;
+     parameter Real p4(free=true) = 1;
+     parameter Real p5 = p4;
+     Real x1 = 1;
+     Real x2 = p1;
+     Real x3 = p2;
+  end FreeDependentParametersTest2;
+
+  optimization FreeDependentParametersTest3(objective=p1^2,startTime=0,finalTime=1) 
+
+  	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FClassMethodTestCase(name="FreeDependentParametersTest3",
+      methodName="freeParametersDiagnostics",
+        description="Test that free dependent parameters are computed correctly.", methodResult=
+        "  
+Free independent parameters:
+p1
+Free dependent parameters:
+p2
+p3
+  ")})));
+
+     parameter Real p1(free=true) = 1;
+     parameter Real p2 = p1;
+     parameter Real p3 = p2;
+     parameter Real p4 = 1;
+     parameter Real p5(free=true) = p4;
+     Real x1 = 1;
+     Real x2 = p1;
+     Real x3 = p2;
+  end FreeDependentParametersTest3;
+
   optimization InstantValueTest1 
      (objective=x(finalTime)^2,startTime=0,finalTime(free=true,initialGuess=3))
     Real x(start=0);

@@ -22,7 +22,7 @@ aspect OptimicaFlatVariability {
 	}
 	
 	syn boolean FTypePrefixVariability.optParameterVariability() = false;
-	eq FTimed.optParameterVariability() = true;	
+	eq FOptParameter.optParameterVariability() = true;	
 	syn boolean FExp.isOptParameterExp() = variability().optParameterVariability();
 		
 	public static final FOptParameter FOptParameter.singleton = new FOptParameter();	
@@ -56,6 +56,12 @@ aspect OptimicaFlatVariability {
    		} else {
    			return fContinuous();
    		}
+	}
+	
+	refine FlatVariability eq FExp.isParameterExp() {
+		//System.out.println(variability().getClass());
+		return variability().parameterVariability() || 
+		variability().optParameterVariability(); 
 	}
 	
    	eq FTimed.toString() = "timed";

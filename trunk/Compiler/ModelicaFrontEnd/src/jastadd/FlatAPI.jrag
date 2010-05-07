@@ -773,6 +773,10 @@ aspect FlatAPI {
 	
 	*/
 	
+	inh FVariable FExp.containingFV();
+	eq FVariable.getBindingExp().containingFV() = this;
+	eq Root.getChild().containingFV() = null;
+	
 	inh boolean FExp.inFEquation();
 	eq FAbstractEquation.getChild().inFEquation()=true;
 	eq Root.getChild().inFEquation()=false;
@@ -781,7 +785,7 @@ aspect FlatAPI {
 	eq FAbstractEquation.getChild().myFEquation()=this;
 	eq Root.getChild().myFEquation()=null;
 	
-	inh FClass FVariable.myFClass();
+	inh FClass AbstractFVariable.myFClass();
 	inh FClass FExp.myFClass();
 	inh FClass FIdUse.myFClass();
 	inh FClass FQName.myFClass();
@@ -817,7 +821,7 @@ aspect FlatAPI {
 	FIdUseExp contributes
 		(FVariable)myFV() when !myFV().isUnknown()
 	to FVariable.referencedFVariablesInBindingExp() for inBindingExp();
-	
+		
 }
 
 aspect FlatCausality {
@@ -962,12 +966,53 @@ aspect FVariableUses {
 	/**
 	 * \brief Collection attribute returning all variable uses in expressions.
 	 */
-	coll HashSet<FIdUseExp> AbstractFVariable.uses() [new HashSet<FIdUseExp>()] 
+	coll HashSet<FIdUseExp> AbstractFVariable.uses() [new LinkedHashSet<FIdUseExp>()] 
 		with add root FlatRoot;
 	
 	FIdUseExp contributes this when !(getParent() instanceof FDerExp) to 
 		AbstractFVariable.uses() for myFV();
 
+	/**
+	 * \brief Collection attribute returning all dependent parameters which
+	 * depends on the parameter.
+	 */
+	coll HashSet<FVariable> AbstractFVariable.dependentParameters() 
+	  [new LinkedHashSet<FVariable>()] 
+		with add root FlatRoot;
+	
+	FIdUseExp contributes containingFV() when !(getParent() instanceof FDerExp) &&
+	    !myFV().isUnknown() &&
+		((FVariable)myFV()).isParameter() && containingFV()!=null && containingFV().isParameter() to 
+		AbstractFVariable.dependentParameters() for myFV();
+	
+	syn lazy ArrayList<FRealVariable> AbstractFVariable.dependentRealParameters() {
+      ArrayList<FRealVariable> set = new ArrayList<FRealVariable>();
+      set.addAll(myFClass().reals());
+      set.retainAll(dependentParameters());
+      return set;
+     }
+
+	syn lazy ArrayList<FIntegerVariable> AbstractFVariable.dependentIntegerParameters() {
+	      ArrayList<FIntegerVariable> set = new ArrayList<FIntegerVariable>();
+	      set.addAll(myFClass().integers());
+	      set.retainAll(dependentParameters());
+	      return set;
+	     }
+
+	syn lazy ArrayList<FBooleanVariable> AbstractFVariable.dependentBooleanParameters() {
+	      ArrayList<FBooleanVariable> set = new ArrayList<FBooleanVariable>();
+	      set.addAll(myFClass().booleans());
+	      set.retainAll(dependentParameters());
+	      return set;
+	     }
+
+	syn lazy ArrayList<FStringVariable> AbstractFVariable.dependentStringParameters() {
+	      ArrayList<FStringVariable> set = new ArrayList<FStringVariable>();
+	      set.addAll(myFClass().strings());
+	      set.retainAll(dependentParameters());
+	      return set;
+	     }
+	
 	/**
 	 * \brief Collection attribute returning all algebraic variables (FVariables)
 	 * referenced in an equation.
@@ -1066,19 +1111,24 @@ aspect LinearFVariables {
 	eq FAbstractEquation.getChild().isLinear() = true;
 	
 	eq FMulExp.getLeft().isLinear() =
-		(getRight().isConstantExp() || getRight().isParameterExp())?
+		(getRight().isConstantExp() || getRight().isLinearParameterExp())?
 				isLinear() : false;
 	eq FMulExp.getRight().isLinear() =
-		(getLeft().isConstantExp() || getLeft().isParameterExp())?
+		(getLeft().isConstantExp() || getLeft().isLinearParameterExp())?
 				isLinear() : false;
 	eq FDivExp.getLeft().isLinear() =
-		(getRight().isConstantExp() || getRight().isParameterExp())?
+		(getRight().isConstantExp() || getRight().isLinearParameterExp())?
 				isLinear() : false;			
 	eq FDivExp.getRight().isLinear() = false;		
     eq FPowExp.getChild().isLinear() = false;
     eq FFunctionCall.getChild().isLinear() = false;
     eq FMathematicalFunctionCall.getChild().isLinear() = false;
 				
+	// This definition is to avoid errors when isParameterExp is redefined
+	// to include free parameters in the Optimica extension.
+	syn boolean FExp.isLinearParameterExp() = 
+		variability().parameterVariability();
+    
 }
 
 aspect FlatDiagnostics {

@@ -822,7 +822,7 @@ aspect OptimicaLinearVariables {
 	refine FlatAPI eq FVariable.isLinear() {
 		if ((isParameter() || isConstant()) && !isOptParameter()) {
 			return true;
-		}
+		} 
 		for (FIdUseExp e : uses()) {
 			if (!e.isLinear()) {
 				return false;
@@ -941,6 +941,9 @@ aspect OptimicaFlatAPIDiagnostics {
 
 		str.append("\n");
 		str.append(timedVariablesLinearityDiagnostics());
+
+		str.append("\n");
+		str.append(freeParametersDiagnostics());		
 		
 		return str.toString();
 	}	
@@ -964,51 +967,90 @@ aspect OptimicaFlatAPIDiagnostics {
 		return str.toString();
 	}
 	
+	public String FOptClass.freeParametersDiagnostics() {
+		StringBuilder str = new StringBuilder();
+		str.append("Free independent parameters:\n");
+		for (FVariable v : freeIndependentParameters()) {
+			str.append(v.name()+"\n");
+		}
+		str.append("Free dependent parameters:\n");
+			for (FVariable v : freeDependentParameters()) {
+				str.append(v.name()+"\n");
+			}
+		return str.toString();
+	}
 }
 
 aspect OptimicaFreeParameters {
 	
-    syn int FClass.numFreeParameters() = freeParameters().size();
-	coll ArrayList<FVariable> FClass.freeParameters() 
+    syn int FOptClass.numFreeIndependentParameters() = 
+    	freeIndependentParameters().size();
+	coll ArrayList<FVariable> FOptClass.freeIndependentParameters() 
 	  [new ArrayList<FVariable>()] with add root FlatRoot;
 	FVariable contributes
- 		this when freeAttribute() && shouldContribute()
-	to FClass.freeParameters() for myFClass();
+ 		this when freeAttribute() && isIndependentParameter() && shouldContribute()
+	to FOptClass.freeIndependentParameters() for myFOptClass();
 	
-	syn int FClass.numFreeRealParameters() = freeRealParameters().size();
-	syn lazy ArrayList<FRealVariable> FClass.freeRealParameters() {
+	syn int FOptClass.numFreeIndependentRealParameters() = 
+		freeIndependentRealParameters().size();
+	syn lazy ArrayList<FRealVariable> FOptClass.freeIndependentRealParameters() {
       ArrayList<FRealVariable> set = new ArrayList<FRealVariable>();
       set.addAll(reals());
-      set.retainAll(freeParameters());
+      set.retainAll(freeIndependentParameters());
       return set;
      }
-	syn int FVariable.freeRealParameterIndex() =
-		myFClass().freeRealParameters().indexOf(this);
 
-	syn int FClass.numFreeIntegerParameters() = freeIntegerParameters().size();
-	syn lazy ArrayList<FIntegerVariable> FClass.freeIntegerParameters() {
+	syn int FOptClass.numFreeIndependentIntegerParameters() = freeIndependentIntegerParameters().size();
+	syn lazy ArrayList<FIntegerVariable> FOptClass.freeIndependentIntegerParameters() {
       ArrayList<FIntegerVariable> set = new ArrayList<FIntegerVariable>();
       set.addAll(integers());
-      set.retainAll(freeParameters());
+      set.retainAll(freeIndependentParameters());
       return set;
      }
-	syn int FVariable.freeIntegerParameterIndex() =
-		myFClass().freeIntegerParameters().indexOf(this);
 
-	syn int FClass.numFreeBooleanParameters() = freeBooleanParameters().size();
-	syn lazy ArrayList<FBooleanVariable> FClass.freeBooleanParameters() {
+	syn int FOptClass.numFreeIndependentBooleanParameters() = freeIndependentBooleanParameters().size();
+	syn lazy ArrayList<FBooleanVariable> FOptClass.freeIndependentBooleanParameters() {
       ArrayList<FBooleanVariable> set = new ArrayList<FBooleanVariable>();
       set.addAll(booleans());
-      set.retainAll(freeParameters());
+      set.retainAll(freeIndependentParameters());
       return set;
      }
-	syn int FVariable.freeBooleanParameterIndex() =
-		myFClass().freeBooleanParameters().indexOf(this);	
 	
-	syn lazy ArrayList<FRealVariables> freeDependentRealParameters() {
-		LinkedHashSet<FRealVariables> s = new LinkedHashSet<FRealVariables>();
-		for (FRealVariables v : freeRealParameters()) {
-			s.addAll(v.dependentParameterUses());
+	/**
+	 * \brief Get a list of all dependent parameters that depends on
+	 * free parameters.
+	 */
+	syn lazy LinkedHashSet<FVariable> FOptClass.freeDependentParameters() {
+		LinkedHashSet<FVariable> s = new LinkedHashSet<FVariable>();
+		// Retrieve the dependent parameters that depends directly on
+		// free independent parameters.
+		for (FVariable v : freeIndependentParameters()) {
+			s.addAll(v.dependentParameters());
 		}
+		//
+		// Fixed point iteration over the dependent parameters.
+		//
+		int n_dp = s.size();
+		LinkedHashSet<FVariable> s_tmp = new LinkedHashSet<FVariable>();
+		for (FVariable v : s) {
+			s_tmp.addAll(v.dependentParameters());
+		}
+		s.addAll(s_tmp);
+		while (n_dp!=s.size()) {
+			n_dp = s.size();
+			for (FVariable v : s) {
+				s_tmp.addAll(v.dependentParameters());
+			}
+			s.addAll(s_tmp);
+		}
+		return s;
 	}
+	
+	syn lazy LinkedHashSet<FRealVariable> FOptClass.freeDependentRealParameters() {
+		LinkedHashSet<FRealVariable> s = new LinkedHashSet<FRealVariable>();
+		s.addAll(reals());
+		s.retainAll(freeDependentParameters());
+		return s;
+	}
+	
 }
