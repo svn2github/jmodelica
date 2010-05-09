@@ -327,8 +327,10 @@ int jmi_init_init(jmi_t* jmi, jmi_residual_func_t F0, int n_eq_F0,
 	return 0;
 }
 
-int jmi_opt_init(jmi_t* jmi, jmi_residual_func_t J,
-		jmi_jacobian_func_t dJ,
+int jmi_opt_init(jmi_t* jmi, jmi_residual_func_t Ffdp,int n_eq_Fdp,
+		 jmi_jacobian_func_t dFfdp,
+		 int dFfdp_n_nz, int* dFfdp_row, int* dFfdp_col,
+		 jmi_residual_func_t J, jmi_jacobian_func_t dJ,
 		int dJ_n_nz, int* dJ_row, int* dJ_col,
 		jmi_residual_func_t Ceq, int n_eq_Ceq,
 		jmi_jacobian_func_t dCeq,
@@ -346,6 +348,10 @@ int jmi_opt_init(jmi_t* jmi, jmi_residual_func_t J,
 	// Create opt_init_t struct
 	jmi_opt_t* opt = (jmi_opt_t*)calloc(1,sizeof(jmi_opt_t));
 	jmi->opt = opt;
+
+	jmi_func_t* jf_Ffdp;
+	jmi_func_new(&jf_Ffdp,Ffdp,n_eq_Fdp,dFfdp,dFfdp_n_nz,dFfdp_row, dFfdp_col);
+	jmi->opt->Ffdp = jf_Ffdp;
 
 	jmi_func_t* jf_J;
 	jmi_func_new(&jf_J,J,1,dJ,dJ_n_nz,dJ_row, dJ_col);
@@ -488,10 +494,11 @@ int jmi_init_get_sizes(jmi_t* jmi, int* n_eq_F0, int* n_eq_F1, int* n_eq_Fp,
 	return 0;
 }
 
-int jmi_opt_get_sizes(jmi_t* jmi, int* n_eq_Ceq, int* n_eq_Cineq, int* n_eq_Heq, int* n_eq_Hineq) {
+int jmi_opt_get_sizes(jmi_t* jmi, int* n_eq_Ffdp, int* n_eq_Ceq, int* n_eq_Cineq, int* n_eq_Heq, int* n_eq_Hineq) {
 	if (jmi->opt == NULL) {
 		return -1;
 	}
+	*n_eq_Ffdp = jmi->opt->Ffdp->n_eq_F;
 	*n_eq_Ceq = jmi->opt->Ceq->n_eq_F;
 	*n_eq_Cineq = jmi->opt->Cineq->n_eq_F;
 	*n_eq_Heq = jmi->opt->Heq->n_eq_F;

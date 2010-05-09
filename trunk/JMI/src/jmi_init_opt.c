@@ -125,6 +125,9 @@ int jmi_init_opt_new(jmi_init_opt_t **jmi_init_opt_new, jmi_t *jmi,
 			}
 		}
 
+		// Set number of equality constraints
+		jmi_init_opt->n_h = jmi->init->F0->n_eq_F + jmi->opt->Ffdp->n_eq_F;
+
 	} else {
 
 		// Copy information about free parameters
@@ -140,12 +143,21 @@ int jmi_init_opt_new(jmi_init_opt_t **jmi_init_opt_new, jmi_t *jmi,
 			merged_p_free_lb[i] = p_free_lb[i];
 			merged_p_free_ub[i] = p_free_ub[i];
 		}
+
+		// Set number of equality constraints
+		jmi_init_opt->n_h = jmi->init->F0->n_eq_F;
+
 	}
+/*
+	printf("** %d\n",jmi_init_opt->n_p_free);
+	for (i=0;i<jmi_init_opt->n_p_free;i++) {
+		printf("*** %d\n",jmi_init_opt->p_free_indices[i]);
+	}
+*/
 
 	// Set size of optimization vector
 	jmi_init_opt->n_x = jmi_init_opt->n_p_free + jmi->n_real_dx +
 		jmi->n_real_x +jmi->n_real_w;
-
 
 	// Create mask for evaluation of Jacobians
 	jmi_init_opt->der_mask_v = (int*)calloc(jmi->n_z,sizeof(int));
@@ -153,7 +165,7 @@ int jmi_init_opt_new(jmi_init_opt_t **jmi_init_opt_new, jmi_t *jmi,
 		jmi_init_opt->der_mask_v[i] = 1;
 	}
 
-	for (i=jmi->offs_real_pi;i<jmi->offs_real_pi + jmi->n_real_pi;i++) {
+	for (i=jmi->offs_real_pi;i<jmi->offs_real_pi + jmi->n_real_pi + jmi->n_real_pd;i++) {
 		jmi_init_opt->der_mask_v[i] = 0;
 	}
 
@@ -210,7 +222,7 @@ int jmi_init_opt_new(jmi_init_opt_t **jmi_init_opt_new, jmi_t *jmi,
 	int dF1_dv_n_cols;
 	int dF1_dv_n_nz;
 	retval = jmi_init_dF1_dim(jmi, jmi_init_opt->der_eval_alg, JMI_DER_SPARSE,
-				JMI_DER_PI | JMI_DER_DX | JMI_DER_X | JMI_DER_W,
+				JMI_DER_PI | JMI_DER_PD | JMI_DER_DX | JMI_DER_X | JMI_DER_W,
 				jmi_init_opt->der_mask_v, &dF1_dv_n_cols, &dF1_dv_n_nz);
 	if (retval<0) {
 		return retval;
@@ -224,22 +236,19 @@ int jmi_init_opt_new(jmi_init_opt_t **jmi_init_opt_new, jmi_t *jmi,
 	jmi_init_opt->dF1_dv = (jmi_real_t*)calloc(jmi_init_opt->dF1_dv_n_nz,sizeof(jmi_real_t));
 
 	retval = jmi_init_dF1_nz_indices(jmi,jmi_init_opt->der_eval_alg,
-			JMI_DER_PI | JMI_DER_DX | JMI_DER_X | JMI_DER_W,
+			JMI_DER_PI | JMI_DER_PD | JMI_DER_DX | JMI_DER_X | JMI_DER_W,
 			jmi_init_opt->der_mask_v, jmi_init_opt->dF1_dv_irow,
 			jmi_init_opt->dF1_dv_icol);
 	if (retval<0) {
 		return retval;
 	}
 
-	// Set number of equality constraints
-	jmi_init_opt->n_h = jmi->init->F0->n_eq_F;
-
 	// Compute the number of non-zero entries in the equality constraint
 	// Jacobian
 	int dF0_dv_n_cols;
 	int dF0_dv_n_nz;
 	retval = jmi_init_dF0_dim(jmi, jmi_init_opt->der_eval_alg, JMI_DER_SPARSE,
-				JMI_DER_PI | JMI_DER_DX | JMI_DER_X | JMI_DER_W,
+				JMI_DER_PI | JMI_DER_PD | JMI_DER_DX | JMI_DER_X | JMI_DER_W,
 				jmi_init_opt->der_mask_v, &dF0_dv_n_cols, &dF0_dv_n_nz);
 	if (retval<0) {
 		return retval;
@@ -248,6 +257,19 @@ int jmi_init_opt_new(jmi_init_opt_t **jmi_init_opt_new, jmi_t *jmi,
 	//printf("*** %d, %d\n",dF0_dv_n_nz,dF0_dv_n_cols);
 
 	jmi_init_opt->dh_n_nz = dF0_dv_n_nz;
+	jmi_init_opt->dF0_n_nz = dF0_dv_n_nz;
+
+	if (stat==1 && jmi->opt!=NULL && jmi->opt->Ffdp->n_eq_F>0) {
+		int dFfdp_dv_n_cols;
+		int dFfdp_dv_n_nz;
+		retval = jmi_opt_dFfdp_dim(jmi, jmi_init_opt->der_eval_alg, JMI_DER_SPARSE,
+					JMI_DER_PI | JMI_DER_PD | JMI_DER_DX | JMI_DER_X | JMI_DER_W,
+					jmi_init_opt->der_mask_v, &dFfdp_dv_n_cols, &dFfdp_dv_n_nz);
+		if (retval<0) {
+			return retval;
+		}
+		jmi_init_opt->dh_n_nz += dFfdp_dv_n_nz;
+	}
 
 	// Allocate memory
 	jmi_init_opt->dh_icol = (int*)calloc(jmi_init_opt->dh_n_nz,sizeof(int));
@@ -255,14 +277,38 @@ int jmi_init_opt_new(jmi_init_opt_t **jmi_init_opt_new, jmi_t *jmi,
 
 	// Compute the non-zero indices in equality constraint Jacobian
 	retval = jmi_init_dF0_nz_indices(jmi,jmi_init_opt->der_eval_alg,
-			JMI_DER_PI | JMI_DER_DX | JMI_DER_X | JMI_DER_W,
+			JMI_DER_PI | JMI_DER_PD | JMI_DER_DX | JMI_DER_X | JMI_DER_W,
 			jmi_init_opt->der_mask_v, jmi_init_opt->dh_irow,
 			jmi_init_opt->dh_icol);
 	if (retval<0) {
 		return retval;
 	}
 
-	//print_problem_stats(jmi_init_opt);
+	/*
+	for (i=0;i<jmi_init_opt->dh_n_nz;i++) {
+		printf(">> %d %d %d\n",i,jmi_init_opt->dh_irow[i],jmi_init_opt->dh_icol[i]);
+	}
+*/
+
+	if (stat==1 && jmi->opt!=NULL && jmi->opt->Ffdp->n_eq_F>0) {
+		retval = jmi_opt_dFfdp_nz_indices(jmi,jmi_init_opt->der_eval_alg,
+					JMI_DER_PI | JMI_DER_PD | JMI_DER_DX | JMI_DER_X | JMI_DER_W,
+					jmi_init_opt->der_mask_v, jmi_init_opt->dh_irow + dF0_dv_n_nz,
+					jmi_init_opt->dh_icol + dF0_dv_n_nz);
+		if (retval<0) {
+			return retval;
+		}
+		for (i=jmi_init_opt->dF0_n_nz;i<jmi_init_opt->dh_n_nz;i++) {
+			jmi_init_opt->dh_irow[i] += jmi_init_opt->jmi->init->F0->n_eq_F;
+		}
+
+	}
+/*
+	for (i=0;i<jmi_init_opt->dh_n_nz;i++) {
+		printf(">>> %d %d %d\n",i,jmi_init_opt->dh_irow[i],jmi_init_opt->dh_icol[i]);
+	}
+*/
+//	print_problem_stats(jmi_init_opt);
 
 	free(merged_p_free_init);
 	free(merged_p_free_lb);
@@ -413,13 +459,13 @@ int jmi_init_opt_df(jmi_init_opt_t *jmi_init_opt, jmi_real_t *df) {
 
 	if (jmi_init_opt->stat==1) {
 		retval = jmi_opt_dJ(jmi_init_opt->jmi, jmi_init_opt->der_eval_alg, JMI_DER_DENSE_COL_MAJOR,
-					JMI_DER_PI | JMI_DER_DX | JMI_DER_X | JMI_DER_W, jmi_init_opt->der_mask_v,df);
+					JMI_DER_PI | JMI_DER_PD | JMI_DER_DX | JMI_DER_X | JMI_DER_W, jmi_init_opt->der_mask_v,df);
 
 	} else {
 
 		// Evaluate jacobian
 		retval = jmi_init_dF1(jmi, jmi_init_opt->der_eval_alg,
-			JMI_DER_SPARSE, JMI_DER_PI | JMI_DER_DX | JMI_DER_X | JMI_DER_W,
+			JMI_DER_SPARSE, JMI_DER_PI | JMI_DER_PD | JMI_DER_DX | JMI_DER_X | JMI_DER_W,
 			jmi_init_opt->der_mask_v, jmi_init_opt->dF1_dv);
 		if (retval<0) {
 			return retval;
@@ -476,6 +522,11 @@ int jmi_init_opt_h(jmi_init_opt_t *jmi_init_opt, jmi_real_t *res) {
     }
 */
 	int retval = jmi_init_F0(jmi_init_opt->jmi, res);
+
+	if (jmi_init_opt->stat==1 && jmi_init_opt->jmi->opt->Ffdp->n_eq_F>0) {
+		retval = jmi_opt_Ffdp(jmi_init_opt->jmi, res+jmi_init_opt->jmi->init->F0->n_eq_F);
+	}
+
 /*
 	printf("F0\n");
     for (i=0;i<jmi_init_opt->jmi->init->F1->n_eq_F;i++) {
@@ -500,8 +551,15 @@ int jmi_init_opt_dh(jmi_init_opt_t *jmi_init_opt, jmi_real_t *jac) {
 
 	// Evaluate jacobian
 	int retval = jmi_init_dF0 (jmi, jmi_init_opt->der_eval_alg,
-			JMI_DER_SPARSE, JMI_DER_PI | JMI_DER_DX | JMI_DER_X | JMI_DER_W,
+			JMI_DER_SPARSE, JMI_DER_PI | JMI_DER_PD | JMI_DER_DX | JMI_DER_X | JMI_DER_W,
 			jmi_init_opt->der_mask_v, jac);
+
+	if (jmi_init_opt->stat==1 && jmi_init_opt->jmi->opt->Ffdp->n_eq_F>0) {
+		jmi_opt_dFfdp (jmi, jmi_init_opt->der_eval_alg,
+					JMI_DER_SPARSE, JMI_DER_PI | JMI_DER_PD | JMI_DER_DX | JMI_DER_X | JMI_DER_W,
+					jmi_init_opt->der_mask_v, jac + jmi_init_opt->dF0_n_nz);
+	}
+
 	return retval;
 
 }

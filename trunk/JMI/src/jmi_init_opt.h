@@ -132,6 +132,7 @@ struct jmi_init_opt_t{
 	int dh_n_nz;
 	int *dh_irow;
 	int *dh_icol;
+	int dF0_n_nz;
 	int n_nonlinear_variables;
 	int *non_linear_variables_indices; // Stored Fortran style (first index = 1)
 	jmi_real_t *res_F1;                 // work vector

@@ -158,7 +158,7 @@ aspect OptimicaFlatAPI {
 		}
 		return null;
 	}
-
+		
 	/**
 	 * \brief Check if the startTime attribute is set.
 	 * 
@@ -983,6 +983,17 @@ aspect OptimicaFlatAPIDiagnostics {
 
 aspect OptimicaFreeParameters {
 	
+	syn boolean FVariable.isFreeParameter() = 
+		myFOptClass().freeParameters().contains(this);
+	
+	syn int FOptClass.numFreeParameters() = freeParameters().size();
+	syn lazy ArrayList<FVariable> FOptClass.freeParameters() {
+		ArrayList<FVariable> l = new ArrayList<FVariable>();
+		l.addAll(freeIndependentParameters());
+		l.addAll(freeDependentParameters());
+		return l;
+	}
+	
     syn int FOptClass.numFreeIndependentParameters() = 
     	freeIndependentParameters().size();
 	coll ArrayList<FVariable> FOptClass.freeIndependentParameters() 
@@ -1020,6 +1031,7 @@ aspect OptimicaFreeParameters {
 	 * \brief Get a list of all dependent parameters that depends on
 	 * free parameters.
 	 */
+	syn int FOptClass.numFreeDependentParameters() = freeDependentParameters().size();
 	syn lazy LinkedHashSet<FVariable> FOptClass.freeDependentParameters() {
 		LinkedHashSet<FVariable> s = new LinkedHashSet<FVariable>();
 		// Retrieve the dependent parameters that depends directly on
@@ -1046,6 +1058,7 @@ aspect OptimicaFreeParameters {
 		return s;
 	}
 	
+	syn int FOptClass.numFreeDependentRealParameters() = freeDependentRealParameters().size();
 	syn lazy LinkedHashSet<FRealVariable> FOptClass.freeDependentRealParameters() {
 		LinkedHashSet<FRealVariable> s = new LinkedHashSet<FRealVariable>();
 		s.addAll(reals());

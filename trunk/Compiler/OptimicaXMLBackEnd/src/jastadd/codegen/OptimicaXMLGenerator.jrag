@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *  \brief XMLGenerator class.
 */
 
-
 import java.io.PrintStream;
 
 /**
@@ -57,7 +56,7 @@ public class OptimicaXMLGenerator extends XMLGenerator {
 		super.addRealAttributes(genPrinter, realvariable);
 		Boolean generateFMI = realvariable.root().options.getBooleanOption("generate_fmi_xml");
 		if(!generateFMI) {
-			genPrinter.print("free=\""+realvariable.freeAttribute()+"\" ");
+			genPrinter.print("free=\""+realvariable.isFreeParameter()+"\" ");
 			double ig_val = 0;
 			// If initialGuess attribute is not specified, use start attribute
 			if (realvariable.initialGuessAttributeSet()) {
@@ -74,7 +73,7 @@ public class OptimicaXMLGenerator extends XMLGenerator {
 		super.addIntegerAttributes(genPrinter, integervariable);
 		Boolean generateFMI = integervariable.root().options.getBooleanOption("generate_fmi_xml");
 		if(!generateFMI) {
-			genPrinter.print("free=\""+integervariable.freeAttribute()+"\" ");
+			genPrinter.print("free=\""+integervariable.isFreeParameter()+"\" ");
 			int ig_val = 0;
 			// If initialGuess attribute is not specified, use start attribute
 			if (integervariable.initialGuessAttributeSet()) {
@@ -91,7 +90,7 @@ public class OptimicaXMLGenerator extends XMLGenerator {
 		super.addBooleanAttributes(genPrinter, booleanvariable);
 		Boolean generateFMI = booleanvariable.root().options.getBooleanOption("generate_fmi_xml");
 		if(!generateFMI) {
-			genPrinter.print("free=\""+booleanvariable.freeAttribute()+"\" ");
+			genPrinter.print("free=\""+booleanvariable.isFreeParameter()+"\" ");
 			boolean ig_val = false;
 			// If initialGuess attribute is not specified, use start attribute
 			if (booleanvariable.initialGuessAttributeSet()) {

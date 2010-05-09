@@ -179,6 +179,7 @@ int jmi_delete(jmi_t* jmi){
 		free(jmi->init);
 	}
 	if(jmi->opt != NULL) {
+		jmi_func_delete(jmi->opt->Ffdp);
 		jmi_func_delete(jmi->opt->J);
 		jmi_func_delete(jmi->opt->Ceq);
 		jmi_func_delete(jmi->opt->Cineq);
@@ -616,6 +617,75 @@ int jmi_init_R0(jmi_t* jmi, jmi_real_t* res) {
 
 	return 0;
 }
+
+int jmi_opt_Ffdp(jmi_t* jmi, jmi_real_t* res) {
+
+	int i;
+	for (i=0;i<jmi->n_z;i++) {
+		(*(jmi->z))[i] = (*(jmi->z_val))[i];
+	}
+
+	return jmi_func_F(jmi,jmi->opt->Ffdp,res);
+
+}
+
+int jmi_opt_dFfdp(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int* mask, jmi_real_t* jac) {
+	if (eval_alg & JMI_DER_SYMBOLIC) {
+
+		return jmi_func_dF(jmi, jmi->opt->Ffdp, sparsity,
+				independent_vars, mask, jac) ;
+
+
+	} else if (eval_alg & JMI_DER_CPPAD) {
+		return -1;
+	} else {
+		return -1;
+	}
+}
+
+int jmi_opt_dFfdp_n_nz(jmi_t* jmi, int eval_alg, int* n_nz) {
+
+	if (eval_alg & JMI_DER_SYMBOLIC) {
+
+		return jmi_func_dF_n_nz(jmi, jmi->opt->Ffdp, n_nz);
+
+	} else if (eval_alg & JMI_DER_CPPAD) {
+		return -1;
+	} else {
+		return -1;
+	}
+}
+
+int jmi_opt_dFfdp_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
+        int *mask, int* row, int* col) {
+
+	if (eval_alg & JMI_DER_SYMBOLIC) {
+
+		return jmi_func_dF_nz_indices(jmi, jmi->opt->Ffdp, independent_vars, mask, row, col);
+
+	} else if (eval_alg & JMI_DER_CPPAD) {
+		return -1;
+	} else {
+		return -1;
+	}
+
+}
+
+int jmi_opt_dFfdp_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
+		int *dF_n_cols, int *dF_n_nz) {
+
+	if (eval_alg & JMI_DER_SYMBOLIC) {
+
+		return jmi_func_dF_dim(jmi, jmi->opt->Ffdp, sparsity, independent_vars, mask,
+				dF_n_cols, dF_n_nz);
+
+	} else if (eval_alg & JMI_DER_CPPAD) {
+		return -1;
+	} else {
+		return -1;
+	}
+}
+
 
 int jmi_opt_J(jmi_t* jmi, jmi_real_t* res) {
 

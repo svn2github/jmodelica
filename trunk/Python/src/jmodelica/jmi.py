@@ -1601,7 +1601,8 @@ class Model(object):
     def _set_p_opt_indices(self):
         """ Set the optimization parameter indices (if Optimica). """
         xmldoc = self._get_XMLDoc()
-        refs = xmldoc.get_p_opt_variable_refs()       
+        refs = xmldoc.get_p_opt_variable_refs()
+        
         if len(refs) > 0:
             n_p_opt = 0
             p_opt_indices = []
@@ -1923,7 +1924,7 @@ class JMIModel(object):
         # save dll file name so that it can be deleted when python
         # exits if not before
         _temp_dlls.append({'handle':self._dll._handle,'name':self._tempfname})
-
+        
         self._jmi = ct.c_voidp()
         assert self._dll.jmi_new(byref(self._jmi)) == 0, \
                "jmi_new returned non-zero"
@@ -2450,6 +2451,7 @@ class JMIModel(object):
                                                 ct.POINTER(ct.c_int),
                                                 ct.POINTER(ct.c_int),
                                                 ct.POINTER(ct.c_int),
+                                                ct.POINTER(ct.c_int),
                                                 ct.POINTER(ct.c_int)]    
         self._dll.jmi_opt_J.argtypes = [ct.c_void_p,
                                         Nct.ndpointer(dtype=c_jmi_real_t,
@@ -2493,16 +2495,60 @@ class JMIModel(object):
                                                            flags='C'),
                                              ct.POINTER(ct.c_int),
                                              ct.POINTER(ct.c_int)]
-        
+
+        n_eq_Ffdp = ct.c_int()
         n_eq_Ceq = ct.c_int()
         n_eq_Cineq = ct.c_int()
         n_eq_Heq = ct.c_int()
         n_eq_Hineq = ct.c_int()
-        assert self._dll.jmi_dae_get_sizes(self._jmi, byref(n_eq_Ceq), byref(n_eq_Cineq),
+        assert self._dll.jmi_opt_get_sizes(self._jmi, byref(n_eq_Ffdp), byref(n_eq_Ceq),
+                                           byref(n_eq_Cineq),
                                            byref(n_eq_Heq), byref(n_eq_Hineq)) \
                is 0, \
                "getting optimization function sizes failed"
-        
+
+        self._dll.jmi_opt_Ffdp.argtypes = [ct.c_void_p,
+                                          Nct.ndpointer(dtype=c_jmi_real_t,
+                                                        ndim=1,
+                                                        shape=n_eq_Ffdp.value,
+                                                        flags='C')]    
+        self._dll.jmi_opt_dFfdp.argtypes = [ct.c_void_p,
+                                           ct.c_int,
+                                           ct.c_int,
+                                           ct.c_int,
+                                           Nct.ndpointer(dtype=ct.c_int,
+                                                         ndim=1,
+                                                         shape=n_z.value,
+                                                         flags='C'),
+                                           Nct.ndpointer(dtype=c_jmi_real_t,
+                                                         ndim=1,
+                                                         flags='C')]  
+        self._dll.jmi_opt_dFfdp_n_nz.argtypes = [ct.c_void_p,
+                                                ct.c_int,
+                                                ct.POINTER(ct.c_int)]   
+        self._dll.jmi_opt_dFfdp_nz_indices.argtypes = [ct.c_void_p,
+                                                      ct.c_int,
+                                                      ct.c_int,
+                                                      Nct.ndpointer(dtype=ct.c_int,
+                                                                    ndim=1,
+                                                                    shape=n_z.value,
+                                                                    flags='C'),
+                                                      Nct.ndpointer(dtype=ct.c_int,
+                                                                    ndim=1,
+                                                                    flags='C'),
+                                                      Nct.ndpointer(dtype=ct.c_int,
+                                                                    ndim=1,
+                                                                    flags='C')]
+        self._dll.jmi_opt_dFfdp_dim.argtypes = [ct.c_void_p,
+                                               ct.c_int,
+                                               ct.c_int,
+                                               ct.c_int,
+                                               Nct.ndpointer(dtype=ct.c_int,
+                                                             ndim=1,
+                                                             shape=n_z.value,
+                                                             flags='C'),
+                                               ct.POINTER(ct.c_int),
+                                               ct.POINTER(ct.c_int)]    
          
         self._dll.jmi_opt_Ceq.argtypes = [ct.c_void_p,
                                           Nct.ndpointer(dtype=c_jmi_real_t,
@@ -3690,18 +3736,148 @@ class JMIModel(object):
         """Get the sizes of the optimization functions.
         
         Returns:
-            Tuple with number of equations in the Ceq, Cineq, Heq and Hineq 
+            Tuple with number of equations in the Ffdp, Ceq, Cineq, Heq and Hineq 
             residual respectively. 
         
         """
+        n_eq_Ffdp = ct.c_int()
         n_eq_Ceq = ct.c_int()
         n_eq_Cineq = ct.c_int()
         n_eq_Heq = ct.c_int()
         n_eq_Hineq = ct.c_int()
-        if self._dll.jmi_opt_get_sizes(self._jmi, byref(n_eq_Ceq), byref(n_eq_Cineq), byref(n_eq_Heq), byref(n_eq_Hineq)) is not 0:
+        if self._dll.jmi_opt_get_sizes(self._jmi, byref(n_eq_Ffdp), byref(n_eq_Ceq), byref(n_eq_Cineq), byref(n_eq_Heq), byref(n_eq_Hineq)) is not 0:
             raise JMIException("Getting the sizes of the optimization functions failed.")
-        return n_eq_Ceq.value, n_eq_Cineq.value, n_eq_Heq.value, n_eq_Hineq.value
+        return n_eq_Ffdp.value, n_eq_Ceq.value, n_eq_Cineq.value, n_eq_Heq.value, n_eq_Hineq.value
+
+    def opt_Ffdp(self, res):
+        """Evaluate the residual of the free dependent parameter residuals Ffdp.
         
+        Parameters:
+            res -- The residual.
+        
+        """
+        if self._dll.jmi_opt_Ffdp(self._jmi, res) is not 0:
+            raise JMIException("Evaluation of the residual of the free dependent parameter residual Ffdp failed.")
+        
+    def opt_dFfdp(self, eval_alg, sparsity, independent_vars, mask, jac):
+        """Evaluate the Jacobian of the free dependent parameter residual Ffdp.
+        
+        Parameters:
+            eval_alg -- 
+                JMI_DER_SYMBOLIC to evaluate a symbolic Jacobian or 
+                JMI_DER_CPPAD to evaluate the Jacobian by means of CppAD.
+            sparsity --
+               Output format of the Jacobian. Use JMI_DER_SPARSE, 
+               JMI_DER_DENSE_COL_MAJOR, or JMI_DER_DENS_ROW_MAJOR
+            independent_vars -- 
+                Indicates which columns of the full Jacobian should be evaluated 
+                (for example JMI_DER_DX or JMI_DER_X).
+                
+                Can either be a list of columns or a bitmask of the columns
+                or:ed (|) together. Using a list is more prefered as it is more
+                Pythonesque.
+            mask --
+                Vector containing ones for the Jacobian columns that should be 
+                included in the Jacobian and zeros for those which should not.
+            jac --
+                The Jacobian. (Return)
+        
+        """
+        try:
+            independent_vars = reduce(lambda x,y: x | y, independent_vars)
+        except TypeError:
+            pass
+        
+        if self._dll.jmi_opt_dFfdp(self._jmi, eval_alg, sparsity, independent_vars, mask, jac) is not 0:
+            raise JMIException("Evaluation of the Jacobian of the equality path constraint Ffdp failed.")
+        
+    def opt_dFfdp_n_nz(self, eval_alg):
+        """Get the number of non-zeros in the full Jacobian of the free
+        dependent parameter residual  Ffdp.
+        
+        Parameters:
+            eval_alg --
+                For which Jacobian the number of non-zero elements should be 
+                returned: Symbolic (JMI_DER_SYMBOLIC) or CppAD (JMI_DER_CPPAD).
+                
+        Returns:
+            The number of non-zero entries in the full Jacobian.
+        
+        """
+        n_nz = ct.c_int()
+        if self._dll.jmi_opt_dFfdp_n_nz(self._jmi, eval_alg, byref(n_nz)) is not 0:
+            raise JMIException("Getting the number of non-zeros failed.")
+        return int(n_nz.value)
+        
+    def opt_dFfdp_nz_indices(self, eval_alg, independent_vars, mask, row, col):
+        """Get the row and column indices of the non-zero elements in the Jacobian 
+        of the free dependent parameter residual Ffdp.
+        
+        Parameters:
+            eval_alg -- 
+                JMI_DER_SYMBOLIC to evaluate a symbolic Jacobian or 
+                JMI_DER_CPPAD to evaluate the Jacobian by means of CppAD.
+            independent_vars -- 
+                Indicates which columns of the full Jacobian should be evaluated 
+                (for example JMI_DER_DX or JMI_DER_X).
+                
+                Can either be a list of columns or a bitmask of the columns
+                or:ed (|) together. Using a list is more prefered as it is more
+                Pythonesque.
+            mask --
+                Vector containing ones for the Jacobian columns that should be 
+                included in the Jacobian and zeros for those which should not.
+            row --
+                Row indices of the non-zeros in the Jacobian. (Return)
+            col --
+                Column indices of the non-zeros in the Jacobian. (Return)
+
+        """
+        try:
+            independent_vars = reduce(lambda x,y: x | y, independent_vars)
+        except TypeError:
+            pass        
+        if self._dll.jmi_opt_dFfdp_nz_indices(self._jmi, eval_alg, independent_vars, mask, row, col) is not 0:
+            raise JMIException("Getting the row and column indices failed.")
+        
+    def opt_dFfdp_dim(self, eval_alg, sparsity, independent_vars, mask):
+        """Compute the number of columns and non-zero elements in the Jacobian of 
+        the free dependent parameter residual  Ffdp.
+        
+        Parameters:
+            eval_alg -- 
+                JMI_DER_SYMBOLIC to evaluate a symbolic Jacobian or 
+                JMI_DER_CPPAD to evaluate the Jacobian by means of CppAD.
+            sparsity --
+               Output format of the Jacobian. Use JMI_DER_SPARSE, 
+               JMI_DER_DENSE_COL_MAJOR, or JMI_DER_DENS_ROW_MAJOR
+            independent_vars -- 
+                Indicates which columns of the full Jacobian should be evaluated 
+                (for example JMI_DER_DX or JMI_DER_X).
+                
+                Can either be a list of columns or a bitmask of the columns
+                or:ed (|) together. Using a list is more prefered as it is more
+                Pythonesque.
+            mask --
+                Vector containing ones for the Jacobian columns that should be 
+                included in the Jacobian and zeros for those which should not.
+        
+        Returns:
+            Tuple with number of columns and non-zeros resp. of the resulting 
+            Jacobian.
+
+        """
+        try:
+            independent_vars = reduce(lambda x,y: x | y, independent_vars)
+        except TypeError:
+            pass
+        
+        dFfdp_n_cols = ct.c_int()
+        dFfdp_n_nz = ct.c_int()
+        if self._dll.jmi_opt_dFfdp_dim(self._jmi, eval_alg, sparsity, independent_vars, mask, byref(dFfdp_n_cols), byref(dFfdp_n_nz)) is not 0:
+            raise JMIException("Computing the number of columns and non-zero elements failed.")
+        return int(dFfdp_n_cols.value), int(dFfdp_n_nz.value)
+
     def opt_J(self):
         """Evaluate the cost function J."""
         J = N.zeros(1, dtype=c_jmi_real_t)

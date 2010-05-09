@@ -1,6 +1,11 @@
+from jmodelica.initialization.ipopt import *
+from jmodelica.compiler import OptimicaCompiler
+import jmodelica.jmi as jmi
+from jmodelica.io import ResultDymolaTextual
 from jmodelica.tests.base_simul import *
 from jmodelica.tests import testattr
 import numpy as N
+import os.path
 
 class TestOptimization(OptimizationTest):
 
@@ -221,3 +226,25 @@ class TestFunction1(OptimizationTest):
     def test_trajectories(self):
         self.assert_all_trajectories(['x', 'r.a'], same_span=True)
    
+class TestStaticOptimizationDependentParameters:
+
+    @classmethod
+    def setUpClass(cls):
+        curr_dir = os.path.dirname(os.path.abspath(__file__));
+        oc = OptimicaCompiler() 
+        oc.compile_model("StaticOptimizationTest.StaticOptimizationTest2",
+                         curr_dir+"/files/StaticOptimizationTest.mo",target="ipopt")
+        cls.model = jmi.Model("StaticOptimizationTest_StaticOptimizationTest2")
+        cls.nlp = NLPInitialization(cls.model,stat=1)
+        cls.ipopt_nlp = InitializationOptimizer(cls.nlp)
+
+    @testattr(ipopt = True)
+    def setUp(self):
+        self.ipopt_nlp.init_opt_ipopt_solve();
+        self.nlp.export_result_dymola()
+        self.res = ResultDymolaTextual("StaticOptimizationTest_StaticOptimizationTest2_result.txt")
+
+    @testattr(ipopt = True)
+    def test_parameter_value(self):
+        k = self.res.get_variable_data("k")
+        assert k.x[-1] == 1.1, "Wrong value of optimized parameter."

@@ -470,14 +470,14 @@ class XMLDoc(XMLBaseDoc):
             return self.function_cache.get(self, 'get_p_opt_names', include_alias)
 
         if include_alias:
-            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"independentParameter\"]\
+            keys = self._xpatheval("//ScalarVariable/@name[../@variability=\"parameter\"]\
                 [../*/@free=\"true\"]")
-            vals = self._xpatheval("//ScalarVariable/@valueReference[../VariableCategory=\"independentParameter\"]\
+            vals = self._xpatheval("//ScalarVariable/@valueReference[../@variability=\"parameter\"]\
                 [../*/@free=\"true\"]")
         else:
-            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"independentParameter\"]\
+            keys = self._xpatheval("//ScalarVariable/@name[../@variability=\"parameter\"]\
                 [../*/@free=\"true\"][../@alias=\"noAlias\"]")
-            vals = self._xpatheval("//ScalarVariable/@valueReference[../VariableCategory=\"independentParameter\"]\
+            vals = self._xpatheval("//ScalarVariable/@valueReference[../@variability=\"parameter\"]\
                 [../*/@free=\"true\"][../@alias=\"noAlias\"]")
 
         if len(keys)!=len(vals):
@@ -595,13 +595,13 @@ class XMLDoc(XMLBaseDoc):
 
         if include_alias:
             keys = self._xpatheval("//ScalarVariable/@name\
-                [../VariableCategory=\"independentParameter\"][../*/@free=\"true\"][../*/@start]")
+                [../@variability=\"parameter\"][../*/@free=\"true\"][../*/@start]")
             vals = self._xpatheval("//ScalarVariable/*/@start\
-                [../../VariableCategory=\"independentParameter\"][../../*/@free=\"true\"]")
+                [../../@variability=\"parameter\"][../../*/@free=\"true\"]")
         else:
-            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"independentParameter\"]\
+            keys = self._xpatheval("//ScalarVariable/@name[../@variability=\"parameter\"]\
                 [../*/@free=\"true\"][../@alias=\"noAlias\"][../*/@start]")
-            vals = self._xpatheval("//ScalarVariable/*/@start[../../VariableCategory=\"independentParameter\"]\
+            vals = self._xpatheval("//ScalarVariable/*/@start[../../@variability=\"parameter\"]\
                 [../../*/@free=\"true\"][../../@alias=\"noAlias\"]")
 
         if len(keys)!=len(vals):
@@ -729,7 +729,7 @@ class XMLDoc(XMLBaseDoc):
         if not ignore_cache:
             return self.function_cache.get(self, 'get_p_opt_variable_refs', None)
 
-        refs = self._xpatheval("//ScalarVariable/@valueReference[../VariableCategory=\"independentParameter\"]\
+        refs = self._xpatheval("//ScalarVariable/@valueReference[../@variability=\"parameter\"]\
             [../*/@free=\"true\"]")
         valrefs=[]
         for ref in refs:
@@ -860,13 +860,13 @@ class XMLDoc(XMLBaseDoc):
 
         if include_alias:
             keys = self._xpatheval("//ScalarVariable/@name\
-                [../VariableCategory=\"independentParameter\"][../*/@free=\"true\"][../*/@initialGuess]")
+                [../@variability=\"parameter\"][../*/@free=\"true\"][../*/@initialGuess]")
             vals = self._xpatheval("//ScalarVariable/*/@initialGuess\
-                [../../VariableCategory=\"independentParameter\"][../../*/@free=\"true\"]")
+                [../../@variability=\"parameter\"][../../*/@free=\"true\"]")
         else:
-            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"independentParameter\"]\
+            keys = self._xpatheval("//ScalarVariable/@name[../@variability=\"parameter\"]\
                 [../*/@free=\"true\"][../@alias=\"noAlias\"][../*/@initialGuess]")
-            vals = self._xpatheval("//ScalarVariable/*/@initialGuess[../../VariableCategory=\"independentParameter\"]\
+            vals = self._xpatheval("//ScalarVariable/*/@initialGuess[../../@variability=\"parameter\"]\
                 [../../*/@free=\"true\"][../../@alias=\"noAlias\"]")
 
         if len(keys)!=len(vals):
@@ -997,14 +997,14 @@ class XMLDoc(XMLBaseDoc):
             return self.function_cache.get(self, 'get_p_opt_lb_values', include_alias)
 
         if include_alias:
-            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"independentParameter\"] \
+            keys = self._xpatheval("//ScalarVariable/@name[../@variability=\"parameter\"] \
                                    [../*/@free=\"true\"] [../*/@min]")
-            vals = self._xpatheval("//ScalarVariable/*/@min[../../VariableCategory=\"independentParameter\"] \
+            vals = self._xpatheval("//ScalarVariable/*/@min[../../@variability=\"parameter\"] \
                                    [../../*/@free=\"true\"]")
         else:
-            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"independentParameter\"] \
+            keys = self._xpatheval("//ScalarVariable/@name[../@variability=\"parameter\"] \
                                    [../*/@free=\"true\"] [../*/@min][../@alias=\"noAlias\"]")
-            vals = self._xpatheval("//ScalarVariable/*/@min[../../VariableCategory=\"independentParameter\"] \
+            vals = self._xpatheval("//ScalarVariable/*/@min[../../@variability=\"parameter\"] \
                                    [../../*/@free=\"true\"][../../@alias=\"noAlias\"]")
 
         if len(keys)!=len(vals):
@@ -1134,14 +1134,14 @@ class XMLDoc(XMLBaseDoc):
             return self.function_cache.get(self, 'get_p_opt_ub_values', include_alias)
 
         if include_alias:
-            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"independentParameter\"] \
+            keys = self._xpatheval("//ScalarVariable/@name[../@variability=\"parameter\"] \
                                    [../*/@free=\"true\"] [../*/@max]")
-            vals = self._xpatheval("//ScalarVariable/*/@max[../../VariableCategory=\"independentParameter\"] \
+            vals = self._xpatheval("//ScalarVariable/*/@max[../../@variability=\"parameter\"] \
                                    [../../*/@free=\"true\"]")
         else:
-            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"independentParameter\"] \
+            keys = self._xpatheval("//ScalarVariable/@name[../@variability=\"parameter\"] \
                                    [../*/@free=\"true\"][../*/@max][../@alias=\"noAlias\"]")
-            vals = self._xpatheval("//ScalarVariable/*/@max[../../VariableCategory=\"independentParameter\"] \
+            vals = self._xpatheval("//ScalarVariable/*/@max[../../@variability=\"parameter\"] \
                                    [../../*/@free=\"true\"][../../@alias=\"noAlias\"]")        
  
         if len(keys)!=len(vals):
@@ -1292,13 +1292,13 @@ class XMLDoc(XMLBaseDoc):
 
         if include_alias:
             keys = self._xpatheval("//ScalarVariable/@name\
-                [../VariableCategory=\"independentParameter\"][../*/@free=\"true\"][../isLinear]")
+                [../@variability=\"parameter\"][../*/@free=\"true\"][../isLinear]")
             vals = self._xpatheval("//ScalarVariable/isLinear/text()\
-                [../../VariableCategory=\"independentParameter\"][../../*/@free=\"true\"]")
+                [../../@variability=\"parameter\"][../../*/@free=\"true\"]")
         else:
-            keys = self._xpatheval("//ScalarVariable/@name[../VariableCategory=\"independentParameter\"]\
+            keys = self._xpatheval("//ScalarVariable/@name[../@variability=\"parameter\"]\
                 [../*/@free=\"true\"][../isLinear][../@alias=\"noAlias\"]")
-            vals = self._xpatheval("//ScalarVariable/isLinear/text()[../../VariableCategory=\"independentParameter\"]\
+            vals = self._xpatheval("//ScalarVariable/isLinear/text()[../../@variability=\"parameter\"]\
                 [../../*/@free=\"true\"][../../@alias=\"noAlias\"]")                
                
         if len(keys)!=len(vals):

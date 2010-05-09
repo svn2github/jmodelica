@@ -28,6 +28,19 @@ import java.io.*;
  *
  */
 public class OptimicaCGenerator extends CGenerator {
+
+	class OptTag_C_numFreeDependentParameters extends OptTag {
+		
+		public OptTag_C_numFreeDependentParameters(AbstractGenerator myGenerator, 
+		  FOptClass foptclass) {
+			super("n_free_dependent_real_parameters","Number of free dependent parameters",
+			  myGenerator,foptclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(foptclass.numFreeDependentRealParameters());
+		}	
+	}
 	
 	class OptTag_C_numPathEqConstraints extends OptTag {
 		
@@ -132,6 +145,27 @@ public class OptimicaCGenerator extends CGenerator {
 		}
 	}
 
+	class OptTag_C_FreeDependentParameterResiduals extends OptTag {
+		
+		public OptTag_C_FreeDependentParameterResiduals(AbstractGenerator myGenerator, 
+		  FOptClass foptclass) {
+			super("C_Opt_dependent_free_parameter_residuals","C: dependent parameter residuals",
+			  myGenerator,foptclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			int i=0;
+			for (FRealVariable fv : foptclass.freeDependentRealParameters()) {
+				genPrinter.print("   " + "(*res)[" + i + "] = ");
+				fv.getBindingExp().prettyPrint_C(genPrinter,"");
+				genPrinter.print(" - ");
+				genPrinter.print(fv.name_C());
+				genPrinter.print(";\n");
+				i++;
+			}			
+		}
+	}
+	
 	class OptTag_C_CostFunction extends OptTag {
 		
 		public OptTag_C_CostFunction(AbstractGenerator myGenerator, 
