@@ -703,6 +703,90 @@ equation
 end ArrayTest32;
 
 
+model ArrayTest33
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ArrayTest33",
+         description="Equations in array components",
+         flatModel="
+fclass ArrayTests.ArrayTest33
+ Real c[1].x;
+ Real c[2].x;
+ Real c[3].x;
+equation
+ c[1].x = 1;
+ c[2].x = 1;
+ c[3].x = 1;
+end ArrayTests.ArrayTest33;
+")})));
+
+  model C
+	Real x;
+  equation
+    x = 1;
+  end C;
+  
+  C c[3];
+end ArrayTest33;
+
+
+model ArrayTest34
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ArrayTest34",
+         description="Equations in array components",
+         flatModel="
+fclass ArrayTests.ArrayTest34
+ Real a[1].b[1].x;
+ Real a[1].b[1].c[1].x;
+ Real a[1].b[1].c[2].x;
+ Real a[1].b[2].x;
+ Real a[1].b[2].c[1].x;
+ Real a[1].b[2].c[2].x;
+ Real a[2].b[1].x;
+ Real a[2].b[1].c[1].x;
+ Real a[2].b[1].c[2].x;
+ Real a[2].b[2].x;
+ Real a[2].b[2].c[1].x;
+ Real a[2].b[2].c[2].x;
+equation
+ a[1].b[1].x = a[1].b[1].c[1].x;
+ a[1].b[1].c[1].x = 1;
+ a[1].b[1].c[2].x = 1;
+ a[1].b[2].x = a[1].b[2].c[1].x;
+ a[1].b[2].c[1].x = 1;
+ a[1].b[2].c[2].x = 1;
+ a[2].b[1].x = a[2].b[1].c[1].x;
+ a[2].b[1].c[1].x = 1;
+ a[2].b[1].c[2].x = 1;
+ a[2].b[2].x = a[2].b[2].c[1].x;
+ a[2].b[2].c[1].x = 1;
+ a[2].b[2].c[2].x = 1;
+end ArrayTests.ArrayTest34;
+")})));
+
+  model A
+    B b[2];
+  end A;
+  
+  model B
+    Real x;
+    C c[2];
+  equation
+    x = c[1].x;
+  end B;
+  
+  model C
+	Real x;
+  equation
+    x = 1;
+  end C;
+  
+  A a[2];
+end ArrayTest34;
+
+
+
 
 model UnknownSize1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={

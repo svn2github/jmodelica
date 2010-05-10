@@ -1007,7 +1007,7 @@ aspect InstaceConstrainingClauses {
 		return getValueModification().getExp().instantiate();
 	}
 	
-	syn lazy List InstNode.getFAbstractEquationList()  { 
+	public List InstNode.buildFAbstractEquationList() { 
 	    List l = new List();
 	    for (AbstractEquation e : equations()) {
 	    	l.add(e.instantiate());
@@ -1017,6 +1017,19 @@ aspect InstaceConstrainingClauses {
 	    }
 	    return l;
 	}
+	
+	syn lazy List InstNode.getFAbstractEquationList() = 
+		buildFAbstractEquationList();
+	eq InstComposite.getFAbstractEquationList() = 
+		isArrayDecl() ? new List() : buildFAbstractEquationList();
+	eq InstArrayComponentDecl.getFAbstractEquationList() = 
+		retrieveFAbstractEquationList();
+	
+	inh List InstArrayComponentDecl.retrieveFAbstractEquationList();
+	eq InstNode.getInstComponentDecl().retrieveFAbstractEquationList() = 
+		buildFAbstractEquationList();
+	eq InstForIndex.getInstPrimitive().retrieveFAbstractEquationList() = 
+		new List();
 
 }
 
