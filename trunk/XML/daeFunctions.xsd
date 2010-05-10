@@ -60,7 +60,6 @@
 		</xs:annotation>
 		<xs:complexContent>
 			<xs:extension base="fun:FunctionVariable">
-				<xs:attribute name="default" type="xs:anySimpleType"/>
 				<xs:attribute name="derived" type="xs:boolean" default="false">
 					<xs:annotation>
 						<xs:documentation>true if the function is differentiated with respect of the variable. If derived=true, then type must be Real</xs:documentation>
