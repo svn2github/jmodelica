@@ -70,7 +70,6 @@
 						<xs:documentation>The derivative function is only valid if variables with zeroDerivative=true are independent of the variables the function is differentiated with respect to (i.e. the derivative of the input variable is "zero")</xs:documentation>
 					</xs:annotation>
 				</xs:attribute>
-				<xs:attribute name="order" type="xs:unsignedInt"/>
 			</xs:extension>
 		</xs:complexContent>
 	</xs:complexType>
@@ -123,6 +122,7 @@
 							<xs:element name="ProtectedVariable" type="fun:FunctionVariable" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
 							<xs:element name="Algorithm" type="fun:Algorithm" minOccurs="0"/>
 						</xs:sequence>
+						<xs:attribute name="order"/>
 					</xs:complexType>
 				</xs:element>
 			</xs:sequence>
