@@ -83,8 +83,6 @@
 		<xs:sequence>
 			<xs:any namespace="##targetNamespace" minOccurs="0" maxOccurs="unbounded"/>
 		</xs:sequence>
-		<xs:attribute name="type" type="xs:normalizedString"/>
-		<xs:attribute name="size" type="xs:unsignedInt"/>
 	</xs:complexType>
 	<xs:complexType name="RecordConstructor">
 		<xs:annotation>
