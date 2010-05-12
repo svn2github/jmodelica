@@ -77,7 +77,6 @@ int jmi_init_opt_new(jmi_init_opt_t **jmi_init_opt_new, jmi_t *jmi,
 	// Copy the stat field
 	jmi_init_opt->stat = stat;
 
-
 	// If the static argument is 1, then merge free optimization parameters (as
 	// specified in Optimica) and free parameters in the initialization problem
 	// (as specified by the fixed=false attribute). These kind of parameters
@@ -148,12 +147,13 @@ int jmi_init_opt_new(jmi_init_opt_t **jmi_init_opt_new, jmi_t *jmi,
 		jmi_init_opt->n_h = jmi->init->F0->n_eq_F;
 
 	}
-/*
+
+	/*
 	printf("** %d\n",jmi_init_opt->n_p_free);
 	for (i=0;i<jmi_init_opt->n_p_free;i++) {
 		printf("*** %d\n",jmi_init_opt->p_free_indices[i]);
 	}
-*/
+	 */
 
 	// Set size of optimization vector
 	jmi_init_opt->n_x = jmi_init_opt->n_p_free + jmi->n_real_dx +
@@ -165,13 +165,19 @@ int jmi_init_opt_new(jmi_init_opt_t **jmi_init_opt_new, jmi_t *jmi,
 		jmi_init_opt->der_mask_v[i] = 1;
 	}
 
-	for (i=jmi->offs_real_pi;i<jmi->offs_real_pi + jmi->n_real_pi + jmi->n_real_pd;i++) {
+	for (i=jmi->offs_real_pi;i<jmi->offs_real_dx;i++) {
 		jmi_init_opt->der_mask_v[i] = 0;
 	}
 
 	for (i=0;i<jmi_init_opt->n_p_free;i++) {
 		jmi_init_opt->der_mask_v[jmi->offs_real_pi + jmi_init_opt->p_free_indices[i]] = 1;
 	}
+
+	/*
+	for (i=0;i<jmi->n_z;i++) {
+		printf("mask[%d]=%d\n",i,jmi_init_opt->der_mask_v[i]);
+	}
+*/
 
 	// Initialize vectors
 	jmi_init_opt->x = (jmi_real_t*)calloc(jmi_init_opt->n_x,sizeof(jmi_real_t));
