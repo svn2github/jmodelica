@@ -7653,5 +7653,38 @@ end MixedIndices2;
 
 
 
+model ForInitial1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ForInitial1",
+         description="For equation in initial equation block",
+         flatModel="
+fclass ArrayTests.ForInitial1
+ parameter Integer N = 3 /* 3 */;
+ Real x[1];
+ Real x[2];
+ Real x[3];
+initial equation 
+ der(x[1]) = 0;
+ der(x[2]) = 0;
+ der(x[3]) = 0;
+equation
+ der(x[1]) =  - ( x[1] );
+ der(x[2]) =  - ( x[2] );
+ der(x[3]) =  - ( x[3] );
+end ArrayTests.ForInitial1;
+")})));
+
+  parameter Integer N = 3;
+  Real x[N];
+initial equation
+  for i in 1:N loop
+    der(x[i]) = 0;
+  end for;
+equation
+  der(x) = -x;
+end ForInitial1;
+
+
   annotation (uses(Modelica(version="3.0.1")));
 end ArrayTests;

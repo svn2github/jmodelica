@@ -660,7 +660,9 @@ aspect InstNodeInterface {
 aspect FlatExpressions {
 
 	public void FAbstractEquation.flatten(FQName prefix, FClass fc) {
-		getType().addEquationTo(fc, flatten(prefix));
+		FAbstractEquation eqn = flattenEqn(prefix, fc);
+		if (eqn != null)
+			getType().addEquationTo(fc, eqn);
 	}
 	
 	public FEquationType FEquationType.flatten(FQName prefix) {
@@ -677,16 +679,58 @@ aspect FlatExpressions {
 		fc.addFInitialEquation(f);
 	}
 
-	public FAbstractEquation FAbstractEquation.flatten(FQName prefix) {
-		/* Default implementation should never be called - will result in NullPointerException. */
-		return null; 
+	public FAbstractEquation FAbstractEquation.flattenEqn(FQName prefix, FClass fc) {
+		throw new UnsupportedOperationException(); 
 	}
 
-	public FEquation FEquation.flatten(FQName prefix) {
+	public FEquation FEquation.flattenEqn(FQName prefix, FClass fc) {
 		return new FEquation(getType().flatten(prefix), getLeft().flatten(prefix), getRight().flatten(prefix));
 	}
+
+	public FForClauseE InstForClauseE.flattenEqn(FQName prefix, FClass fc) {
+		List forIndex = new List();
+		List eqns = new List();
+		for (InstForIndex ifi : getInstForIndexs()) 
+			forIndex.add(ifi.flatten(prefix));
+		for (FAbstractEquation ae : getFAbstractEquations())
+			eqns.add(ae.flattenEqn(prefix, fc));
+		return new FForClauseE(forIndex, eqns);
+	}
+
+	public FAbstractEquation FConnectClause.flattenEqn(FQName prefix, FClass fc) {
+		InstAccess ia1 = getConnector1().getInstAccess();
+		InstAccess ia2 = getConnector2().getInstAccess();
+		
+		InstComponentDecl comp1 = ia1.myInstComponentDecl();
+		InstComponentDecl comp2 = ia1.myInstComponentDecl();
+		
+		InstFullClassDecl c1 = (InstFullClassDecl) comp1.myInstClass().finalClass();
+		InstFullClassDecl c2 = (InstFullClassDecl) comp2.myInstClass().finalClass();
+		
+		FQName name1 = ia1.flatten(prefix);
+		FQName name2 = ia2.flatten(prefix);
+				
+		// Is it two "primitives" that are connected?
+		if (c1.extendsPrimitive() || c1.isPrimitive()) {
+			fc.getConnectionSetManager().addVars(comp1, false, name1, comp2, false, name2);
+			return null;
+		}
+
+		boolean outside1 = enclosingInstClassDecl().memberInstComponent(ia1.name()).size() > 0;
+		boolean outside2 = enclosingInstClassDecl().memberInstComponent(ia2.name()).size() > 0;
+		
+		InstComponentDecl var1, var2;
+		for (InstComponentDecl icd : c1.containedInstComponents()) {
+			var1 = icd;
+			var2 = (InstComponentDecl) c2.memberInstComponent(var1.name()).iterator().next();
+			FQName fqn1 = var1.flattenedAccess(name1);
+			FQName fqn2 = var2.flattenedAccess(name2);
+			fc.getConnectionSetManager().addVars(var1, outside1, fqn1, var2, outside2, fqn2);
+		}
+		return null;
+	}
 	
-	public FFunctionCallEquation FFunctionCallEquation.flatten(FQName prefix) {
+	public FFunctionCallEquation FFunctionCallEquation.flattenEqn(FQName prefix, FClass fc) {
 		List<FFunctionCallLeft> lefts = new List<FFunctionCallLeft>();
 		for (FFunctionCallLeft l : getLefts()) 
 			lefts.add(l.flatten(prefix));
@@ -1030,60 +1074,6 @@ aspect FlatExpressions {
 	public FForIndex FForIndex.flatten(FQName prefix) {
 		return (FForIndex) fullCopy();
 	}
-
-	//ForClauseE : AbstractEquation ::= ForIndex* ForEqns:AbstractEquation*;
-    //ForIndex ::= ForIndexDecl [Exp];
-	public void InstForClauseE.flatten(FQName prefix, FClass fc) {
-		List forIndex = new List();
-		List eqns = new List();
-		for (InstForIndex ifi : getInstForIndexs()) {
-			forIndex.add(ifi.flatten(prefix));
-		}
-		FClass fcc = new FClass();
-		fcc.setFQName(new FQName("tmp")); 
-		fcc.addFEquationBlock(new FEquationBlock(new List()));
-		//fcc.dumpTree("");
-		for (FAbstractEquation ae : getFAbstractEquations()) {
-			ae.flatten(prefix,fcc);
-		}
-		for (FAbstractEquation ae :fcc.getFEquationBlock(0).getFAbstractEquations()) {
-			eqns.add(ae);
-		}	
-		fc.getFEquationBlock(0).addFAbstractEquation(new FForClauseE(forIndex,eqns));
-		
-	}
-
-	public void FConnectClause.flatten(FQName prefix, FClass fc) {
-		InstAccess ia1 = getConnector1().getInstAccess();
-		InstAccess ia2 = getConnector2().getInstAccess();
-		
-		InstComponentDecl comp1 = ia1.myInstComponentDecl();
-		InstComponentDecl comp2 = ia1.myInstComponentDecl();
-		
-		InstFullClassDecl c1 = (InstFullClassDecl) comp1.myInstClass().finalClass();
-		InstFullClassDecl c2 = (InstFullClassDecl) comp2.myInstClass().finalClass();
-		
-		FQName name1 = ia1.flatten(prefix);
-		FQName name2 = ia2.flatten(prefix);
-				
-		// Is it two "primitives" that are connected?
-		if (c1.extendsPrimitive() || c1.isPrimitive()) {
-			fc.getConnectionSetManager().addVars(comp1, false, name1, comp2, false, name2);
-			return;
-		}
-
-		boolean outside1 = enclosingInstClassDecl().memberInstComponent(ia1.name()).size() > 0;
-		boolean outside2 = enclosingInstClassDecl().memberInstComponent(ia2.name()).size() > 0;
-		
-		InstComponentDecl var1, var2;
-		for (InstComponentDecl icd : c1.containedInstComponents()) {
-			var1 = icd;
-			var2 = (InstComponentDecl) c2.memberInstComponent(var1.name()).iterator().next();
-			FQName fqn1 = var1.flattenedAccess(name1);
-			FQName fqn2 = var2.flattenedAccess(name2);
-			fc.getConnectionSetManager().addVars(var1, outside1, fqn1, var2, outside2, fqn2);
-		}
-	}
 	
 	/**
 	 * \brief Creates a flattened access to this component.
@@ -1099,13 +1089,17 @@ aspect FlatExpressions {
 
 aspect InstantiatedExpressions {
 
+	public FEquationType AbstractEquation.equationType() {
+		return isInitial() ? new FInitialEquation() : new FNormalEquation();
+	}
+
 	public FAbstractEquation AbstractEquation.instantiate() {
-		return copyLocationTo(new FUnsupportedEquation(new FNormalEquation()));
+		return copyLocationTo(new FUnsupportedEquation(equationType()));
 	}
 
 	public FAbstractEquation Equation.instantiate() {
-		FEquationType t = isInitial() ? new FInitialEquation() : new FNormalEquation();
-		return copyLocationTo(new FEquation(t, getLeft().instantiate(),getRight().instantiate()));
+		return copyLocationTo(new FEquation(equationType(), 
+				getLeft().instantiate(), getRight().instantiate()));
 	}
 
 	public FAbstractEquation ConnectClause.instantiate() {
@@ -1114,19 +1108,18 @@ aspect InstantiatedExpressions {
 		   o = new Opt(new FStringComment(getComment().getStringComment().getComment()));
 	    else
 	    	o = new Opt();
-		FConnectClause c = new FConnectClause(o,new FIdUseInstAccess(
-				new FQName(),getConnector1().newInstAccess()),
-				new FIdUseInstAccess(new FQName(),getConnector2().newInstAccess()));
+		FConnectClause c = new FConnectClause(equationType(), o, 
+				new FIdUseInstAccess(new FQName(), getConnector1().newInstAccess()),
+				new FIdUseInstAccess(new FQName(), getConnector2().newInstAccess()));
 		c.setLocation(this);
 		return c;
 	}
 	
 	public FFunctionCallEquation FunctionCallEquation.instantiate() {
-		FEquationType t = isInitial() ? new FInitialEquation() : new FNormalEquation();
 		List<FFunctionCallLeft> l = new List<FFunctionCallLeft>();
 		for (FunctionCallLeft a : getLefts()) 
 			l.add(a.instantiate());
-		return copyLocationTo(new FFunctionCallEquation(t, l, getCall().instantiate()));
+		return copyLocationTo(new FFunctionCallEquation(equationType(), l, getCall().instantiate()));
 	}
 	
 	public 	FFunctionCallLeft FunctionCallLeft.instantiate() {
@@ -1501,7 +1494,7 @@ aspect InstantiatedExpressions {
 		for (AbstractEquation ae : getAbstractEquations()) {
 			eqns.add(ae.instantiate());
 		}
-		return new InstForClauseE(forIndex,eqns);
+		return new InstForClauseE(equationType(), forIndex, eqns);
 	}
 
 }
