@@ -116,7 +116,7 @@ aspect Flattening {
    		FAlgorithmBlock fab;
    		if (getNumFAbstractEquation() > 0) {
 	   		fab = (FAlgorithmBlock) getFAbstractEquation(0);
-	   		fab = fab.flatten(new FQName());
+	   		fab = fab.flattenEqn(new FQName(), fc);
    		} else {
    			fab = new FAlgorithmBlock(new List());
    		}
@@ -680,7 +680,7 @@ aspect FlatExpressions {
 	}
 
 	public FAbstractEquation FAbstractEquation.flattenEqn(FQName prefix, FClass fc) {
-		throw new UnsupportedOperationException(); 
+		return (FAbstractEquation) fullCopy();
 	}
 
 	public FEquation FEquation.flattenEqn(FQName prefix, FClass fc) {
@@ -741,7 +741,7 @@ aspect FlatExpressions {
 		return new FFunctionCallLeft(hasFExp() ? new Opt(getFExp().flatten(prefix)) : new Opt());
 	}
 
-	public FAlgorithmBlock FAlgorithmBlock.flatten(FQName prefix) {
+	public FAlgorithmBlock FAlgorithmBlock.flattenEqn(FQName prefix, FClass fc) {
 		List l = FStatement.flattenFStatementList(prefix, getFStatements());
 		return new FAlgorithmBlock(l);
 	}
@@ -1093,6 +1093,10 @@ aspect InstantiatedExpressions {
 		return isInitial() ? new FInitialEquation() : new FNormalEquation();
 	}
 
+	public FEquationType Algorithm.equationType() {
+		return hasInitial() ? new FInitialEquation() : new FNormalEquation();
+	}
+
 	public FAbstractEquation AbstractEquation.instantiate() {
 		return copyLocationTo(new FUnsupportedEquation(equationType()));
 	}
@@ -1131,7 +1135,7 @@ aspect InstantiatedExpressions {
 	
 	public FAlgorithmBlock Algorithm.instantiate() {
 		List l = Statement.instantiateStatementList(getStatements());
-		return copyLocationTo(new FAlgorithmBlock(l));
+		return copyLocationTo(new FAlgorithmBlock(equationType(), l));
 	}
 	
 	public InstExternal ExternalClause.instantiate() {
