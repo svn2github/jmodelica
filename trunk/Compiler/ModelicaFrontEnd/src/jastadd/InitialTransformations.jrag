@@ -48,53 +48,12 @@
     
     eq ClassRedeclare.getBaseClassDecl().visibility() = new PublicVisibilityType();
     eq ComponentRedeclare.getComponentDecl().visibility() = new PublicVisibilityType();
-  
+    
     /**
      * Rewrite the PN_FullClassDecl to a FullClassDecl including visibility info.
      */
     rewrite PN_FullClassDecl {
         to FullClassDecl { 
-             //log.debug("****  rewrite PN_FullClassDecl: "+getClass().getName()+": "+ name());
-            
-            Composition c = getComposition();
-    
-            List eqn = new List();
-            List alg = new List();
-            List sup = new List();
-            List imp = new List();
-            List classd = new List();
-            List compd = new List();
-            List annotation = new List();
-    
-            for (int i=0; i<c.getNumClause();i++) {
-    
-                Clause cl = c.getClause(i);
-        
-                if (cl instanceof ComponentDecl) {
-                    compd.add((ComponentDecl)cl);
-                } else if (cl instanceof EquationClause) {
-                    EquationClause ec = (EquationClause)cl;
-                    for (int j=0;j<ec.getNumAbstractEquation();j++) {
-                        eqn.add(ec.getAbstractEquation(j));
-                    }
-                } else if (cl instanceof Algorithm) {
-                    alg.add((Algorithm) cl);
-                } else if (cl instanceof ExtendsClause) {
-                    sup.add((ExtendsClause) cl);
-                } else if (cl instanceof ClassDecl) {
-                    classd.add((ClassDecl) cl);
-                } else if (cl instanceof ImportClause) {
-                    imp.add((ImportClause) cl);
-                } else if (cl instanceof ElementAnnotation) {
-                    annotation.add(((ElementAnnotation)cl).getAnnotation());
-                }
-
-            }
-    
-            Opt ext_clause = c.hasExternalClause()?
-                             new Opt(c.getExternalClause()):
-                             new Opt();
-            
             FullClassDecl fc = new FullClassDecl(visibility(),
                                           getEncapsulatedOpt(),
                                           getPartialOpt(),
@@ -108,18 +67,93 @@
                                           getConstrainingClauseOpt(),
                                           getConstrainingClauseCommentOpt(),
                                           getStringCommentOpt(),
-                                          eqn,
-                                          alg,
-                                          sup,
-                                          imp,
-                                          classd,
-                                          compd,
-                                          annotation,
-                                          ext_clause,
+                                          new List(),
+                                          new List(),
+                                          new List(),
+                                          new List(),
+                                          new List(),
+                                          new List(),
+                                          new List(),
+                                          new Opt(),
                                           getEndName());
+            
+            getComposition().extractElementsTo(fc);
+            
             fc.setLocation(getRestriction(), this);
             return fc;
         }
+    }
+    
+    /**
+     * Rewrite the PN_ExtendClassDecl to a ExtendClassDecl including visibility info.
+     */
+    rewrite PN_ExtendClassDecl {
+        to ExtendClassDecl { 
+            ExtendClassDecl ec = new ExtendClassDecl(visibility(),
+                                          getEncapsulatedOpt(),
+                                          getPartialOpt(),
+                                          getRestriction(),
+                                          getName(),
+                                          getRedeclareOpt(),
+                                          getFinalOpt(),
+                                          getInnerOpt(),
+                                          getOuterOpt(),
+                                          getReplaceableOpt(),
+                                          getConstrainingClauseOpt(),
+                                          getConstrainingClauseCommentOpt(),
+                                          getStringCommentOpt(),
+                                          new List(),
+                                          new List(),
+                                          new List(),
+                                          new List(),
+                                          new List(),
+                                          new List(),
+                                          new List(),
+                                          new Opt(),
+                                          getEndName());
+            
+            ClassAccess ca = new ClassAccess(getName().getID());
+            InlineExtendsClause iec = new InlineExtendsClause(
+            		new PublicVisibilityType(), ca, getClassModificationOpt(), new Opt());
+            ec.addSuper(iec);
+            getComposition().extractElementsTo(ec);
+            if (!hasRedeclare())
+            	ec.setRedeclare(new Redeclare());
+
+            ca.setLocation(getName());
+            // TODO: iec should probably include "extends" token as well, but that needs parser change
+            iec.setLocation(getName());
+            ec.setLocation(getRestriction(), this);
+            return ec;
+        }
+    }
+    
+    /**
+     * \brief Extract elements from Composition and add to a FullClassDecl.
+     */
+    public void Composition.extractElementsTo(FullClassDecl fcd) {
+        for (Clause cl : getClauses()) {
+            if (cl instanceof ComponentDecl) {
+                fcd.addComponentDecl((ComponentDecl) cl);
+            } else if (cl instanceof EquationClause) {
+                EquationClause ec = (EquationClause) cl;
+                for (AbstractEquation equ : ec.getAbstractEquations()) 
+                    fcd.addEquation(equ);
+            } else if (cl instanceof Algorithm) {
+            	fcd.addAlgorithm((Algorithm) cl);
+            } else if (cl instanceof ExtendsClause) {
+            	fcd.addSuper((ExtendsClause) cl);
+            } else if (cl instanceof ClassDecl) {
+            	fcd.addClassDecl((ClassDecl) cl);
+            } else if (cl instanceof ImportClause) {
+            	fcd.addImport((ImportClause) cl);
+            } else if (cl instanceof ElementAnnotation) {
+            	fcd.addAnnotation(((ElementAnnotation) cl).getAnnotation());
+            }
+        }
+        
+        if (hasExternalClause())
+        	fcd.setExternalClause(getExternalClause());
     }
     
     /**

@@ -357,6 +357,7 @@ aspect FileNames {
     eq StoredDefinition.getChild().retrieveFileName() = getFileName().equals("")? retrieveFileName(): getFileName();
     eq FullClassDecl.getChild().retrieveFileName() =  retrieveFileName();
     eq InstNode.getInstClassDecl(int i).retrieveFileName() = getInstClassDecl(i).getClassDecl().fileName(); 
+    eq InstNode.getRedeclaredInstClassDecl(int i).retrieveFileName() = getRedeclaredInstClassDecl(i).getClassDecl().fileName(); 
     eq InstFullClassDecl.getChild().retrieveFileName() = getClassDecl().fileName();
     eq InstComponentDecl.getChild().retrieveFileName() = getComponentDecl().fileName();
     eq InstExtends.getChild().retrieveFileName() = getExtendsClause().fileName();
@@ -479,9 +480,6 @@ aspect Names {
   eq FullClassDecl.getExternalClause().enclosingClassDecl() = this;     
 
   eq ShortClassDecl.getExtendsClauseShortClass().enclosingClassDecl() = this;
-  
-  eq ExtendClassDecl.getClassModification().enclosingClassDecl() = this;
-  eq ExtendClassDecl.getComposition().enclosingClassDecl() = this;
   
   
     /**

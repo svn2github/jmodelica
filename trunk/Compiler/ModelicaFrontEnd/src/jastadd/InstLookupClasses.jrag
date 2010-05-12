@@ -30,10 +30,11 @@ aspect InstLookupClasses {
 	inh HashSet InstNode.lookupInstClass(String name);
     inh HashSet InstModification.lookupInstClass(String name);
 		
-	eq InstNode.getInstClassDecl(int i).lookupInstClass(String name) = genericLookupInstClass(name); 
-	eq InstNode.getInstComponentDecl(int i).lookupInstClass(String name) = genericLookupInstClass(name); 
-	eq InstNode.getFAbstractEquation(int i).lookupInstClass(String name) = genericLookupInstClass(name); 
-	eq InstNode.getInstExtends(int i).lookupInstClass(String name) = superLookupInstClass(name);
+	eq InstNode.getInstClassDecl().lookupInstClass(String name)           = genericLookupInstClass(name); 
+	eq InstNode.getRedeclaredInstClassDecl().lookupInstClass(String name) = genericLookupInstClass(name); 
+	eq InstNode.getInstComponentDecl().lookupInstClass(String name)       = genericLookupInstClass(name); 
+	eq InstNode.getFAbstractEquation().lookupInstClass(String name)       = genericLookupInstClass(name); 
+	eq InstNode.getInstExtends().lookupInstClass(String name)             = superLookupInstClass(name);
 
     eq InstNode.getDynamicClassName().lookupInstClass(String name) = genericLookupInstClass(name);
 
@@ -48,6 +49,8 @@ aspect InstLookupClasses {
 	eq InstExtends.getInstComponentDecl().lookupInstClass(String name) = genericLookupInstClassInExtends(name);	
 	eq InstExtends.getInstExtends().lookupInstClass(String name) = superLookupInstClassInExtends(name);	
     eq InstExtends.getDynamicClassName().lookupInstClass(String name) = genericLookupInstClassInExtends(name);
+    
+    eq InstInlineExtends.getClassName().lookupInstClass(String name) = surroundingSuperLookupInstClass(name);
 
 	// The lexical scope of modifiers in short classes is the "outer" scope, although
 	// the short class declaration is modeled as containing an extends clause
@@ -68,14 +71,28 @@ aspect InstLookupClasses {
 
 	syn HashSet InstClassDecl.lookupInstClassInInstClassRedeclare(String name) = emptyHashSet();
 	eq InstReplacingShortClassDecl.lookupInstClassInInstClassRedeclare(String name) = getInstClassRedeclare().lookupInstClass(name);
+	eq InstReplacingFullClassDecl.lookupInstClassInInstClassRedeclare(String name) = getInstClassRedeclare().lookupInstClass(name);
 
 	syn boolean InstClassDecl.isRedeclared() = false;
 	eq InstReplacingShortClassDecl.isRedeclared() = true;
+	eq InstReplacingFullClassDecl.isRedeclared() = true;
 
 	eq SourceRoot.getChild().lookupInstClass(String name) = emptyHashSet();
 	
 	// This equation is necessary since InstAccesses may be present in FExps.
 	eq FlatRoot.getChild().lookupInstClass(String name) = emptyHashSet();
+	
+	/**
+	 * \brief Does class lookup in the superclass of the class surrounding the class containing the InstInlineExtends.
+	 * 
+	 * Used to look up the class being extended in a "redeclare class extends" declaration.
+	 */
+	inh HashSet InstInlineExtends.surroundingSuperLookupInstClass(String name);
+	// TODO: This probably needs adjustment, e.g. a new base case
+	eq SourceRoot.getChild().surroundingSuperLookupInstClass(String name) = emptyHashSet();
+	eq FlatRoot.getChild().surroundingSuperLookupInstClass(String name) = emptyHashSet();
+	eq InstExtends.getChild().surroundingSuperLookupInstClass(String name) = 
+		myInstClass().superLookupInstClass(name);
 	
 	syn lazy HashSet InstProgramRoot.lookupElementInstClass(String name) {
 		HashSet set = new HashSet(4);

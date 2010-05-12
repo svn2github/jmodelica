@@ -2985,5 +2985,158 @@ end RedeclareTests.RedeclareTest28;
 end RedeclareTest28;
 
 
+
+model RedeclareElement1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="RedeclareElement1",
+         description="Redeclare class as element, short replacing declaration, basic test",
+         flatModel="
+fclass RedeclareTests.RedeclareElement1
+ Real c.b.y;
+ Real c.b.z;
+equation
+ c.b.y = 1;
+ c.b.z = 2;
+end RedeclareTests.RedeclareElement1;
+")})));
+
+  model A
+    replaceable model B
+      Real y;
+    end B;
+    
+    B b;
+  end A;
+  
+  model C
+    extends A;
+    redeclare model B = D;
+    model D 
+      Real y;
+      Real z;
+    end D;
+  end C;
+  
+  C c;
+equation
+  c.b.y = 1;
+  c.b.z = 2;
+end RedeclareElement1;
+
+
+model RedeclareElement2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="RedeclareElement2",
+         description="Redeclare class as element, long replacing declaration, basic test",
+         flatModel="
+fclass RedeclareTests.RedeclareElement2
+ Real c.b.y;
+ Real c.b.z;
+equation
+ c.b.y = 1;
+ c.b.z = 2;
+end RedeclareTests.RedeclareElement2;
+")})));
+
+  model A
+    replaceable model B
+      Real y;
+    end B;
+    
+    B b;
+  end A;
+  
+  model C
+    extends A;
+    redeclare model B
+      Real y;
+      Real z;
+    end B;
+  end C;
+  
+  C c;
+equation
+  c.b.y = 1;
+  c.b.z = 2;
+end RedeclareElement2;
+
+
+model RedeclareElement3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="RedeclareElement3",
+         description="Redeclare class as element, long extending declaration, basic test",
+         flatModel="
+fclass RedeclareTests.RedeclareElement3
+ Real c.b.z;
+ Real c.b.y;
+equation
+ c.b.y = 1;
+ c.b.z = 2;
+end RedeclareTests.RedeclareElement3;
+")})));
+
+  model A
+    replaceable model B
+      Real y;
+    end B;
+    
+    B b;
+  end A;
+  
+  model C
+    extends A;
+    redeclare model extends B
+      Real z;
+    end B;
+  end C;
+  
+  C c;
+equation
+  c.b.y = 1;
+  c.b.z = 2;
+end RedeclareElement3;
+
+
+model RedeclareElement4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="RedeclareElement4",
+         description="Redeclare class as element, long extending declaration, basic test",
+         flatModel="
+fclass RedeclareTests.RedeclareElement4
+ Real c.b.z;
+ Real c.b.y;
+equation
+ c.b.y = 1;
+ c.b.z = 2;
+end RedeclareTests.RedeclareElement4;
+")})));
+
+  model A
+    replaceable model B
+      Real y;
+    end B;
+    
+    B b;
+  end A;
+  
+  model C
+    extends A;
+    model extends B
+      Real z;
+    end B;
+  end C;
+  
+  C c;
+equation
+  c.b.y = 1;
+  c.b.z = 2;
+end RedeclareElement4;
+
+
+
 end RedeclareTests;
 

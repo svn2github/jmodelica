@@ -255,17 +255,17 @@ BaseClassDecl base_class_decl
     END_ID.end {:
         String end_s = end.substring(3,end.length());
 	    end_s = removeWhitespace(end_s);
-        return new ExtendClassDecl(
+        return new PN_ExtendClassDecl(
             new UnknownVisibilityType(),
             encapsulated,
             partial,
             restriction,
             start,
             new Opt(), new Opt(), new Opt(), new Opt(), new Opt(), new Opt(), new Opt(),
-            class_modification,
             string_comment,
             composition,
-            end_s); 
+            end_s, 
+            class_modification); 
   :}  
   | error {: 
       return new BadClassDecl(); 

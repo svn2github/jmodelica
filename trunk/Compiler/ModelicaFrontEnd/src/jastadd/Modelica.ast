@@ -134,7 +134,9 @@ ExtendsClauseShortClass : ExtendsClause ::= [TypePrefixFlow]
                                 [ArraySubscripts] 
                                 Comment; 
                             
-ExtendClassDecl : BaseClassDecl ::= [ClassModification] [StringComment] Composition  <EndName:String>;
+PN_ExtendClassDecl : PN_FullClassDecl ::= [ClassModification];
+                                
+ExtendClassDecl : FullClassDecl;
                                    
 PrimitiveClassDecl : FullClassDecl::=;
 RealClassDecl : PrimitiveClassDecl::=;
@@ -196,6 +198,7 @@ abstract Element : Clause;
 ElementAnnotation : Element ::= Annotation;
 PN_ExtendsClause : Element ::= Super:Access [ClassModification] [Annotation];
 ExtendsClause : Element ::= VisibilityType Super:Access [ClassModification] [Annotation];
+InlineExtendsClause : ExtendsClause;
 abstract ImportClause : Element ::= PackageName:Access Comment;
 ImportClauseQualified : ImportClause;
 //ImportClauseSingleDefinition : ImportClause;

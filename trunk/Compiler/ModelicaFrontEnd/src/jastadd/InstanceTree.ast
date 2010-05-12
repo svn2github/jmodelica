@@ -18,6 +18,7 @@ abstract InstNode ::= /InstComponentDecl*/
                       /InstClassDecl*/ 
                       /InstExtends*/ 
                       /InstImport*/ 
+                      /RedeclaredInstClassDecl:InstClassDecl*/
                       /FAbstractEquation*/ 
                       /FQName/ 
                       /DynamicClassName:InstAccess*/ 
@@ -43,8 +44,8 @@ InstPrimitiveClassDecl : InstFullClassDecl;
 InstBuiltInClassDecl : InstClassDecl ::=;
 UnknownInstClassDecl : InstFullClassDecl;
 
-InstReplacingFullClassDecl : InstFullClassDecl ::= <OriginalClassDecl:ClassDecl> /OriginalInstClass:InstClassDecl/ <InstClassRedeclare:InstClassRedeclare>;
-InstReplacingShortClassDecl : InstShortClassDecl ::= <OriginalClassDecl:ClassDecl> /OriginalInstClass:InstClassDecl/ <InstClassRedeclare:InstClassRedeclare>;
+InstReplacingFullClassDecl : InstFullClassDecl ::= <OriginalClassDecl:ClassDecl> /OriginalInstClass:InstClassDecl/ <InstClassRedeclare:InstRececlareClassNode>;
+InstReplacingShortClassDecl : InstShortClassDecl ::= <OriginalClassDecl:ClassDecl> /OriginalInstClass:InstClassDecl/ <InstClassRedeclare:InstRececlareClassNode>;
 InstReplacingPrimitiveClassDecl : InstReplacingFullClassDecl ::=;
 
 abstract InstRestriction;
@@ -87,6 +88,7 @@ InstReplacingPrimitive : InstPrimitive ::= <OriginalDecl:ComponentDecl> /Origina
 
 InstExtends : InstNode ::= ClassName:InstAccess <ExtendsClause:ExtendsClause> [InstClassModification];
 InstExtendsShortClass : InstExtends ::=;
+InstInlineExtends : InstExtends;
 //InstReplacingExtendsShortClass : InstReplacingExtendsShortClass ::= <InstExtendsShortClass:InstExtendsShortClass>
 
 // Accesses in the instance tree
