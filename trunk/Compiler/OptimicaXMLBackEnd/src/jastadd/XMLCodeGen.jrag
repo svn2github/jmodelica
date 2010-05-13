@@ -28,10 +28,9 @@ aspect XMLCodeGen_Optimica {
 		
 		str.println(indent + "<" + namespace + ":" + tag + ">");
 		
-		//Identifier
-		str.print(indent+"\t<" + namespace + ":" + tagId + ">");		
+		//Identifier	
 		iduse.prettyPrint_XML(str,p.indent(indent));
-		str.println("</" + namespace + ":" + tagId + ">");
+		
 		//Expression argument
 		str.print(indent+"\t<" + namespace + ":" + tagExp + ">");		
 		str.print(arg.ceval().realValue());
