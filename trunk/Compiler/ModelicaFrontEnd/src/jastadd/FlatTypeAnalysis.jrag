@@ -792,4 +792,17 @@ aspect InstClassRestriction {
 	eq InstFunction.isCallable() = true;
 	eq InstMRecord.isCallable()  = true;
 	
+	/**
+	 * \brief Is this class a package?
+	 */
+	syn boolean InstClassDecl.isPackage() = false;
+	eq InstBaseClassDecl.isPackage()      = getInstRestriction().isPackage();
+	eq UnknownInstClassDecl.isPackage()   = false;
+	
+	/**
+	 * \brief Is this restriction "package"?
+	 */
+	syn boolean InstRestriction.isPackage() = false;
+	eq InstMPackage.isPackage() = true;
+	
 }

@@ -59,7 +59,7 @@ InstMPackage : InstRestriction;
 InstFunction : InstRestriction;
 InstMRecord : InstRestriction;
 
-InstExternal ::= [FExternalLanguage] [InstExternalCall];
+InstExternal ::= <ExternalClause:ExternalClause> [FExternalLanguage] [InstExternalCall];
 InstExternalCall ::= [ReturnVar:InstAccess] <Name> Arg:FExp*;
 
 abstract InstImport ::= PackageName:InstAccess <ImportClause:ImportClause>;

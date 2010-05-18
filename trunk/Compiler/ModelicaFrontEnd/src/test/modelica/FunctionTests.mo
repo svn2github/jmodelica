@@ -4582,4 +4582,285 @@ end ExternalFunc7;
 
 
 
+model ExternalFuncLibs1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FClassMethodTestCase(
+         name="ExternalFuncLibs1",
+         description="External function annotations, Library",
+         methodName="externalLibraries",
+         methodResult="[foo, m, bar]"
+ )})));
+
+ function f1
+  input Real x;
+  output Real y;
+ external annotation(Library="foo");
+ end f1;
+ 
+ function f2
+  input Real x;
+  output Real y;
+ external annotation(Library="bar");
+ end f2;
+ 
+ function f3
+  input Real x;
+  output Real y;
+ external annotation(Library={"bar", "m"});
+ end f3;
+ 
+ function f4
+  input Real x;
+  output Real y;
+ external;
+ end f4;
+ 
+ Real x1 = f1(1);
+ Real x2 = f2(2);
+ Real x3 = f3(3);
+ Real x4 = f4(4);
+end ExternalFuncLibs1;
+
+
+model ExternalFuncLibs2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FClassMethodTestCase(
+         name="ExternalFuncLibs2",
+         description="External function annotations, Include",
+         methodName="externalIncludes",
+         methodResult="[#include \"bar.h\", #include \"foo.h\"]"
+ )})));
+
+ function f1
+  input Real x;
+  output Real y;
+ external annotation(Include="#include \"foo.h\"");
+ end f1;
+ 
+ function f2
+  input Real x;
+  output Real y;
+ external annotation(Include="#include \"foo.h\"");
+ end f2;
+ 
+ function f3
+  input Real x;
+  output Real y;
+ external annotation(Include="#include \"bar.h\"");
+ end f3;
+ 
+ function f4
+  input Real x;
+  output Real y;
+ external;
+ end f4;
+ 
+ Real x1 = f1(1);
+ Real x2 = f2(2);
+ Real x3 = f3(3);
+ Real x4 = f4(4);
+end ExternalFuncLibs2;
+
+
+model ExternalFuncLibs3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FilteredFClassMethodTestCase(
+         name="ExternalFuncLibs3",
+         description="External function annotations, LibraryDirectory",
+         methodName="externalLibraryDirectories",
+         methodResult="[/c:/bar/lib, /c:/foo/lib]"
+ )})));
+
+ function f1
+  input Real x;
+  output Real y;
+ external annotation(LibraryDirectory="file:///c:/foo/lib");
+ end f1;
+ 
+ function f2
+  input Real x;
+  output Real y;
+ external;
+ end f2;
+ 
+ function f3
+  input Real x;
+  output Real y;
+ external annotation(Library="bar", 
+                     LibraryDirectory="file:///c:/bar/lib");
+ end f3;
+ 
+ Real x1 = f1(1);
+ Real x2 = f2(2);
+ Real x3 = f3(3);
+end ExternalFuncLibs3;
+
+
+model ExternalFuncLibs4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FilteredFClassMethodTestCase(
+         name="ExternalFuncLibs4",
+         description="External function annotations, LibraryDirectory",
+         methodName="externalLibraryDirectories",
+         methodResult="[%dir%/Resources/Library]"
+ )})));
+ function f1
+  input Real x;
+  output Real y;
+ external annotation(Library="foo");
+ end f1;
+ 
+ function f2
+  input Real x;
+  output Real y;
+ external annotation(Library="bar");
+ end f2;
+ 
+ function f3
+  input Real x;
+  output Real y;
+ external;
+ end f3;
+ 
+ Real x1 = f1(1);
+ Real x2 = f2(2);
+ Real x3 = f3(3);
+end ExternalFuncLibs4;
+
+
+model ExternalFuncLibs5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FilteredFClassMethodTestCase(
+         name="ExternalFuncLibs5",
+         description="External function annotations, IncludeDirectory",
+         methodName="externalIncludeDirectories",
+         methodResult="[/c:/foo/inc, /c:/bar/inc]"
+ )})));
+
+ function f1
+  input Real x;
+  output Real y;
+ external annotation(IncludeDirectory="file:///c:/foo/inc");
+ end f1;
+ 
+ function f2
+  input Real x;
+  output Real y;
+ external annotation(Include="#include \"bar.h\"", 
+                     IncludeDirectory="file:///c:/bar/inc");
+ end f2;
+ 
+ function f3
+  input Real x;
+  output Real y;
+ external;
+ end f3;
+ 
+ Real x1 = f1(1);
+ Real x2 = f2(2);
+ Real x3 = f3(3);
+end ExternalFuncLibs5;
+
+
+model ExternalFuncLibs6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FilteredFClassMethodTestCase(
+         name="ExternalFuncLibs6",
+         description="External function annotations, IncludeDirectory",
+         methodName="externalIncludeDirectories",
+         methodResult="[%dir%/Resources/Include]"
+ )})));
+
+ function f1
+  input Real x;
+  output Real y;
+ external annotation(Include="#include \"foo.h\"");
+ end f1;
+ 
+ function f2
+  input Real x;
+  output Real y;
+ external annotation(Include="#include \"bar.h\"");
+ end f2;
+ 
+ function f3
+  input Real x;
+  output Real y;
+ external;
+ end f3;
+ 
+ Real x1 = f1(1);
+ Real x2 = f2(2);
+ Real x3 = f3(3);
+end ExternalFuncLibs6;
+
+
+model ExternalFuncLibs7
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FClassMethodTestCase(
+         name="ExternalFuncLibs7",
+         description="External function annotations, compiler args",
+         methodName="externalCompilerArgs",
+         methodResult=" -lfoo -lbar -L/c:/bar/lib -L/c:/std/lib -L/c:/foo/lib -I/c:/foo/inc -I/c:/std/inc -I/c:/bar/inc"
+ )})));
+
+ function f1
+  input Real x;
+  output Real y;
+ external annotation(LibraryDirectory="file:///c:/std/lib", 
+                     IncludeDirectory="file:///c:/std/inc");
+ end f1;
+ 
+ function f2
+  input Real x;
+  output Real y;
+ external annotation(Library="foo",
+                     LibraryDirectory="file:///c:/foo/lib",  
+                     Include="#include \"foo.h\"", 
+                     IncludeDirectory="file:///c:/foo/inc");
+ end f2;
+ 
+ function f3
+  input Real x;
+  output Real y;
+ external annotation(Include="#include \"bar.h\"", 
+                     IncludeDirectory="file:///c:/bar/inc", 
+                     Library="bar", 
+                     LibraryDirectory="file:///c:/bar/lib");
+ end f3;
+ 
+ function f4
+  input Real x;
+  output Real y;
+ external;
+ end f4;
+ 
+ Real x1 = f1(1);
+ Real x2 = f2(2);
+ Real x3 = f3(3);
+ Real x4 = f4(4);
+end ExternalFuncLibs7;
+
+
+model ExternalFuncLibs8
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FilteredFClassMethodTestCase(
+         name="ExternalFuncLibs8",
+         description="External function annotations, compiler args",
+         methodName="externalCompilerArgs",
+         methodResult=" -lfoo -L%dir%/Resources/Library -I%dir%/Resources/Include"
+ )})));
+ 
+ function f
+  input Real x;
+  output Real y;
+ external annotation(Library="foo", 
+                     Include="#include \"foo.h\"");
+ end f;
+ 
+ Real x = f(1);
+end ExternalFuncLibs8;
+
+
+
 end FunctionTests;

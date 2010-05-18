@@ -166,6 +166,7 @@ aspect Flattening {
 		stmt.setFExternalLanguage(hasFExternalLanguage() ? 
 				(FExternalLanguage) getFExternalLanguage().fullCopy() : 
 				new FCExternalLanguage());
+		stmt.extractLibrary(this);
 		if (hasInstExternalCall()) {
 			InstExternalCall call = getInstExternalCall();
 			if (call.hasReturnVar())
@@ -1142,7 +1143,7 @@ aspect InstantiatedExpressions {
 		// TODO: Interpret annotations and add information to InstExternal
 		Opt lang = hasExternalLanguage() ? new Opt(getExternalLanguage().instantiate()) : new Opt();
 		Opt call = hasExternalFunctionCall() ? new Opt(getExternalFunctionCall().instantiate()) : new Opt();
-		return copyLocationTo(new InstExternal(lang, call));
+		return copyLocationTo(new InstExternal(this, lang, call));
 	}
 	
 	public static final String FCExternalLanguage.LANGUAGE_STRING         = "C";

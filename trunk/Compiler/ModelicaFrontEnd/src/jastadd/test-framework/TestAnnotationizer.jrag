@@ -26,6 +26,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.regex.Pattern;
 
 aspect TestAnnotationizer {
 
@@ -540,6 +541,52 @@ abstract public class TestAnnotationizerHelper {
 		 */
 		protected boolean keepProblem(Problem p) {
 			return p.severity() == Problem.Severity.ERROR;
+		}
+
+	}
+
+	/**
+	 * \brief An FClass method test case.
+	 */
+	public static class FClassMethodTestCase extends TestAnnotationizerHelper {
+
+		private String methodName;
+		private String methodResult;
+		protected FClass fc;
+		
+		/**
+		 * \brief Constructor for FClass method test case.
+		 * 
+		 * Compiles the model.
+		 */
+		public FClassMethodTestCase(String filePath, String className, String description, String data) throws Exception {
+			super(filePath, className, description, data);
+			fc = compile();
+			methodName = data;
+	    	Method method = fc.getClass().getMethod(methodName);
+			methodResult = method.invoke(fc).toString();
+		}
+		
+		/**
+		 * \brief Generate and print the part of the annotation that is specific to 
+	     *        this test case type.
+		 */
+		@Override
+		protected void printSpecific(PrintStream out, String indent) throws Exception {
+			int nl = Math.max(methodResult.lastIndexOf('\n'), methodResult.lastIndexOf('\r'));
+			if (nl >= 0) 
+				methodResult = "\n" + methodResult + (nl < methodResult.length() - 1 ? "\n" : "");
+			out.print(indent + "methodName=\"" + methodName + "\",\n");
+			out.print(indent + "methodResult=\"" + methodResult + "\"");
+			if (nl < 0) 
+				out.print("\n ");
+		}
+		
+		/**
+		 * \brief Prints a usage message for this test case type.
+		 */
+		public static void usage(String cl, String extra) {
+			TestAnnotationizerHelper.usage(cl, "method name");
 		}
 
 	}

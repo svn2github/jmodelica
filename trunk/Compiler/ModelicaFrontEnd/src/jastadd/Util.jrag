@@ -16,10 +16,13 @@
 
 
 import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.logging.Level;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 aspect RootAccess {
     
@@ -350,6 +353,8 @@ aspect FileNames {
     
     eq Root.fileName() = getFileName();
     
+    syn String ASTNode.dirName() = fileName().replaceFirst("[\\\\/][^\\\\/]*$", "");
+    
     inh lazy String ASTNode.retrieveFileName();
     eq SourceRoot.getProgram().retrieveFileName() = getFileName();
     eq FlatRoot.getFClass().retrieveFileName() = getFileName();
@@ -460,6 +465,19 @@ aspect Names {
   syn String InstAccess.enclosingName() = "";
   eq InstDot.enclosingName() = name().substring(0, name().lastIndexOf('.'));
   
+  
+  inh String InstExternal.packageName();
+  inh String InstBaseClassDecl.packageName();
+  eq InstBaseClassDecl.getChild().packageName() = isPackage() ? qualifiedName() : packageName();
+  eq InstRoot.getChild().packageName() = null;
+  eq FlatRoot.getChild().packageName() = null;
+  
+  inh String InstExternal.packagePath(String name);
+  eq InstNode.getChild().packagePath(String name) {
+	  HashSet res = lookupInstClass(name);
+	  return res.isEmpty() ? null : ((InstClassDecl) res.iterator().next()).dirName();
+  }
+
   
   inh InstClassDecl ASTNode.enclosingInstClassDecl();
   eq SourceRoot.getProgram().enclosingInstClassDecl() = null;
@@ -1422,4 +1440,44 @@ aspect NodeSearch {
         
     }
     
+}
+
+aspect Strings {
+	
+	/**
+	 * \brief Get the value of this string literal with all escape sequences 
+	 *        replaced with their actual meaning.
+	 */
+	syn String StringLitExp.unEscape() {
+		StringBuffer buf = new StringBuffer();
+		Matcher m = ESCAPE_PATTERN.matcher(getSTRING());
+		HashMap<String,String> repl = escapeReplacements();
+		while (m.find())
+			m.appendReplacement(buf, repl.get(m.group(1)));
+		m.appendTail(buf);
+		return buf.toString();
+	}
+	
+	protected static Pattern ASTNode.ESCAPE_PATTERN = Pattern.compile("\\\\(.)");
+	
+	protected static HashMap<String,String> ASTNode.escapeReplacements() {
+		if (ESCAPE_REPLACEMENTS == null) {
+			ESCAPE_REPLACEMENTS = new HashMap<String,String>();
+			ESCAPE_REPLACEMENTS.put("'", "'");
+			ESCAPE_REPLACEMENTS.put("\"", "\"");
+			ESCAPE_REPLACEMENTS.put("?", "?");
+			ESCAPE_REPLACEMENTS.put("\\", Matcher.quoteReplacement("\\"));
+			ESCAPE_REPLACEMENTS.put("a", "\007");
+			ESCAPE_REPLACEMENTS.put("b", "\b");
+			ESCAPE_REPLACEMENTS.put("f", "\f");
+			ESCAPE_REPLACEMENTS.put("n", "\n");
+			ESCAPE_REPLACEMENTS.put("r", "\r");
+			ESCAPE_REPLACEMENTS.put("v", "\013");
+			ESCAPE_REPLACEMENTS.put("t", "\t");
+		}
+		return ESCAPE_REPLACEMENTS;
+	}
+
+	private static HashMap<String,String> ASTNode.ESCAPE_REPLACEMENTS = null;
+
 }

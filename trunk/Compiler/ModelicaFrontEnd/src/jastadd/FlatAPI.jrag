@@ -15,7 +15,11 @@
 */
 
 import java.util.LinkedHashSet;
+import java.util.HashSet;
 import java.util.ArrayList;
+import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 aspect FlatAPI {
 	
@@ -790,6 +794,7 @@ aspect FlatAPI {
 	inh FClass FIdUse.myFClass();
 	inh FClass FQName.myFClass();
 	inh FClass FAlgorithmBlock.myFClass();
+	inh lazy FClass FExternalStmt.myFClass();
 	eq FClass.getChild().myFClass() = this;
 	eq Root.getChild().myFClass() = null; 
 
@@ -1500,6 +1505,106 @@ aspect FlatAlgorithmAPI {
 			generatedFunctionNumber++;
 		} while (lookupFFunc(name) != null || fullyQualifiedVariablesMap().get(part) != null);
 		return name;
+	}
+	
+}
+
+aspect FlatExternalFunctionAPI {
+	
+	/**
+	 * \brief Gives the arguments to pass to gcc required by external functions.
+	 */
+	syn String FClass.externalCompilerArgs() {
+		StringBuilder buf = new StringBuilder();
+		for (String lib : externalLibraries()) {
+			buf.append(" -l");
+			buf.append(lib);
+		}
+		for (String dir : externalLibraryDirectories()) {
+			buf.append(" -L");
+			buf.append(dir);
+		}
+		for (String dir : externalIncludeDirectories()) {
+			buf.append(" -I");
+			buf.append(dir);
+		}
+		return buf.toString();
+	}
+	
+	coll HashSet<String> FClass.externalLibraries() 
+	  [new HashSet<String>()] with addAll root FClass;
+	FExternalStmt contributes library() when library() != null 
+	  to FClass.externalLibraries() for myFClass();
+	
+	coll HashSet<String> FClass.externalIncludes() 
+	  [new HashSet<String>()] with add root FClass;
+	FExternalStmt contributes include() when include() != null 
+	  to FClass.externalIncludes() for myFClass();
+	
+	coll HashSet<String> FClass.externalLibraryDirectories() 
+	  [new HashSet<String>()] with add root FClass;
+	FExternalStmt contributes libraryDirectory() when libraryDirectory() != null 
+	  to FClass.externalLibraryDirectories() for myFClass();
+	
+	coll HashSet<String> FClass.externalIncludeDirectories() 
+	  [new HashSet<String>()] with add root FClass;
+	FExternalStmt contributes includeDirectory() when includeDirectory() != null 
+	  to FClass.externalIncludeDirectories() for myFClass();
+	
+	syn ArrayList<String> FExternalStmt.library() = library;
+	syn String FExternalStmt.include()            = include;
+	syn String FExternalStmt.libraryDirectory()   = libraryDir;
+	syn String FExternalStmt.includeDirectory()   = includeDir;
+
+	private ArrayList<String> FExternalStmt.library;
+	private String FExternalStmt.include;
+	private String FExternalStmt.libraryDir;
+	private String FExternalStmt.includeDir;
+	
+	public void FExternalStmt.extractLibrary(InstExternal n) {
+		library = n.annotation("Library").asStringList();
+		include = n.annotation("Include").string();
+		libraryDir = n.annotation("LibraryDirectory").string();
+		includeDir = n.annotation("IncludeDirectory").string();
+		
+		if (libraryDir == null || includeDir == null) {
+			String packageName = n.packageName();
+			if (packageName != null) {
+				String defDir = "modelica://" + packageName + "/Resources";
+				libraryDir = (libraryDir == null && library != null) ? 
+						defDir + "/Library" : libraryDir;
+				includeDir = (includeDir == null && include != null) ? 
+						defDir + "/Include" : includeDir;
+			}
+		}
+		
+		if (includeDir != null) 
+			includeDir = n.uri2path(includeDir);
+		if (libraryDir != null) {
+			libraryDir = n.uri2path(libraryDir);
+			// TODO: If platform-specific subdir exists, use it instead. Always use linux?
+		}
+	}
+	
+	/**
+	 * \brief Converts an URI to a file-system path.
+	 * 
+	 * Only modelica:// and file:// URIs are supported.
+	 * 
+	 * @param str  the string to interpret as an URI
+	 */
+	public String InstExternal.uri2path(String str) {
+		try {
+			URI uri = new URI(str);
+			if (uri.getScheme().equals("file")) {
+				return uri.getPath();
+			} else if (uri.getScheme().equals("modelica")) {
+				String pack = packagePath(uri.getHost());
+				return pack != null ? pack + uri.getPath() : null;
+			}
+		} catch (URISyntaxException e) {
+		}
+		return null;
 	}
 	
 }
