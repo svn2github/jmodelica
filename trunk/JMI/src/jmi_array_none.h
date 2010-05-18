@@ -84,12 +84,12 @@ struct _jmi_dynamic_list {
 
 // Macro for declaring dynamic list variable - should be called at beginning of function
 #define JMI_DYNAMIC_INIT() \
-	jmi_dynamic_list* jmi_dynamic_first = calloc(1, sizeof(jmi_dynamic_list));\
+	jmi_dynamic_list* jmi_dynamic_first = (jmi_dynamic_list*)calloc(1, sizeof(jmi_dynamic_list));\
 	jmi_dynamic_list* jmi_dynamic_last = jmi_dynamic_first;
 
 // Macro for adding a pointer to dynamic list - only for use in other macros
 #define JMI_DYNAMIC_ADD_POINTER(pointer) \
-	jmi_dynamic_last->next = calloc(1, sizeof(jmi_dynamic_list));\
+	jmi_dynamic_last->next = (jmi_dynamic_list*)calloc(1, sizeof(jmi_dynamic_list));\
 	jmi_dynamic_last = jmi_dynamic_last->next;\
 	jmi_dynamic_last->data = pointer;
 
