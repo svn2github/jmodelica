@@ -262,12 +262,6 @@ aspect Environments {
 		return l;
 	}
 
-	eq InstExtendsShortClass.localInstModifications() {
-		// notice that modifications on short classes are merged in InstShortClassDecl nodes
-		ArrayList<InstModification> l = new ArrayList<InstModification>();
-		return l;
-	}
- 
  	syn lazy ArrayList<InstModification> InstClassDecl.classInstModifications() = getMergedEnvironment().clone();
 
  

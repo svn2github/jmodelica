@@ -3137,6 +3137,180 @@ equation
 end RedeclareElement4;
 
 
+model RedeclareElement5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="RedeclareElement5",
+         description="Redeclare class as element, short replacing declaration, with equation and modifications",
+         flatModel="
+fclass RedeclareTests.RedeclareElement5
+ Real c.b.y(start = 2);
+ Real c.b.z(start = 1);
+ Real c.b.x(start = 5);
+equation
+ c.b.y = 1;
+ c.b.x = 3;
+ c.b.z = 2;
+end RedeclareTests.RedeclareElement5;
+")})));
+
+  model A
+    replaceable model B
+      Real y(start=3);
+    end B;
+    
+    B b;
+  end A;
+  
+  model C
+    extends A;
+    redeclare model B = D(z(start=1)=2);
+    model D 
+      Real y(start=2);
+      Real z(start=4);
+      Real x(start=5);
+    equation
+      x = 3;
+    end D;
+  end C;
+  
+  C c;
+equation
+  c.b.y = 1;
+end RedeclareElement5;
+
+
+model RedeclareElement6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="RedeclareElement6",
+         description="Redeclare class as element, long replacing declaration, with equation",
+         flatModel="
+fclass RedeclareTests.RedeclareElement6
+ Real c.b.y;
+ Real c.b.z;
+ Real c.b.x;
+equation
+ c.b.y = 1;
+ c.b.z = 2;
+ c.b.x = 3;
+end RedeclareTests.RedeclareElement6;
+")})));
+
+  model A
+	replaceable model B
+	  Real y;
+	end B;
+	
+	B b;
+  end A;
+  
+  model C
+	extends A;
+	redeclare model B
+	  Real y;
+	  Real z;
+	  Real x;
+	equation
+	  x = 3;
+	end B;
+  end C;
+  
+  C c;
+equation
+  c.b.y = 1;
+  c.b.z = 2;
+end RedeclareElement6;
+
+
+model RedeclareElement7
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="RedeclareElement7",
+         description="Redeclare class as element, long extending declaration, with equation and modifications",
+         flatModel="
+fclass RedeclareTests.RedeclareElement7
+ Real c.b.z;
+ Real c.b.y(start = 10);
+ Real c.b.x(start = 20);
+ Real c.b.w;
+equation
+ c.b.z = 1;
+ c.b.w = 4;
+ c.b.y = 2;
+ c.b.x = 3;
+end RedeclareTests.RedeclareElement7;
+")})));
+
+  model A
+	replaceable model B
+	  Real y = 2;
+	  Real x(start=20);
+      Real w;
+    equation
+      w = 4;
+	end B;
+	
+	B b;
+  end A;
+  
+  model C
+	extends A;
+	redeclare model extends B(y(start=10), x=3)
+	  Real z;
+	equation
+	  z = 1;
+	end B;
+  end C;
+  
+  C c;
+end RedeclareElement7;
+
+
+model RedeclareElement8
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="RedeclareElement8",
+         description="Redeclare class as element, long extending declaration, with equation and modifications",
+         flatModel="
+fclass RedeclareTests.RedeclareElement8
+ Real c.b.z;
+ Real c.b.y(start = 10);
+ Real c.b.x(start = 20);
+ Real c.b.w;
+equation
+ c.b.z = 1;
+ c.b.w = 4;
+ c.b.y = 2;
+ c.b.x = 3;
+end RedeclareTests.RedeclareElement8;
+")})));
+
+  model A
+	replaceable model B
+		Real y = 2;
+		Real x(start=20);
+		Real w;
+	equation
+		w = 4;
+	end B;
+	
+	B b;
+  end A;
+  
+  model C
+	extends A;
+	model extends B(y(start=10), x=3)
+	  Real z;
+	equation
+	  z = 1;
+	end B;
+  end C;
+  
+  C c;
+end RedeclareElement8;
+
+
 
 end RedeclareTests;
 
