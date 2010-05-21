@@ -353,7 +353,8 @@ aspect FileNames {
     
     eq Root.fileName() = getFileName();
     
-    syn String ASTNode.dirName() = fileName().replaceFirst("[\\\\/][^\\\\/]*$", "");
+    syn String ASTNode.dirName() = 
+    	fileName().replaceFirst("^[^\\\\/]*$", ".").replaceFirst("[\\\\/][^\\\\/]*$", "");
     
     inh lazy String ASTNode.retrieveFileName();
     eq SourceRoot.getProgram().retrieveFileName() = getFileName();
