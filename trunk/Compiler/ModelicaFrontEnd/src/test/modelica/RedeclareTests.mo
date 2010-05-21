@@ -3311,6 +3311,40 @@ end RedeclareTests.RedeclareElement8;
 end RedeclareElement8;
 
 
+model RedeclareElement9
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="RedeclareElement9",
+         description="",
+         flatModel="
+fclass RedeclareTests.RedeclareElement9
+ constant Integer c.n = 3;
+ Real c.b.y = 2;
+ Real c.b.x[3] = {i ^ 2 for i in 1:3};
+end RedeclareTests.RedeclareElement9;
+")})));
+
+	model A
+		constant Integer n = 2;
+		B b;
+		
+		replaceable model B
+			Real x[n] = {i^2 for i in 1:n};
+		end B;
+	end A;
+	
+	model C
+		extends A(n=3);
+		
+		redeclare model extends B
+			Real y = 2;
+		end B;
+	end C;
+	
+	C c;
+end RedeclareElement9;
+
+
 
 end RedeclareTests;
 

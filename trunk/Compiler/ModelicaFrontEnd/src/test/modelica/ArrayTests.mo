@@ -1250,9 +1250,12 @@ model FillExp7
          name="FillExp7",
          description="Fill operator: no arguments at all",
          errorMessage="
-1 errors found:
+2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 1029, column 14:
+Semantic error at line 1259, column 7:
+  Array size mismatch in declaration of x, size of declaration is [2] and size of binding expression is []
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1259, column 14:
   Calling function fill(): missing argument for required input s
 ")})));
 
@@ -1457,12 +1460,15 @@ model MinExp10
          name="MinExp10",
          description="Reduction-expression with min(): non-vector index expressions",
          errorMessage="
-2 errors found:
+3 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 1183, column 25:
+Semantic error at line 1472, column 11:
+  Type error in expression
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1472, column 25:
   The expression of for index i must be a vector expression: {{1,2},{3,4}} has 2 dimension(s)
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 1183, column 45:
+Semantic error at line 1472, column 45:
   The expression of for index j must be a vector expression: 2 has 0 dimension(s)
 ")})));
 
@@ -1672,12 +1678,15 @@ model MaxExp10
          name="MaxExp10",
          description="Reduction-expression with max(): non-vector index expressions",
          errorMessage="
-2 errors found:
+3 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 1424, column 25:
+Semantic error at line 1690, column 11:
+  Type error in expression
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1690, column 25:
   The expression of for index i must be a vector expression: {{1,2},{3,4}} has 2 dimension(s)
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 1424, column 45:
+Semantic error at line 1690, column 45:
   The expression of for index j must be a vector expression: 2 has 0 dimension(s)
 ")})));
 
@@ -1873,11 +1882,15 @@ model ArrayIterTest3
          name="ArrayIterTest3",
          description="Array constructor with iterators: without in",
          errorMessage="
-2 errors found:
-Semantic error at line 1529, column 28:
+3 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1893, column 16:
+  Type error in expression
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1893, column 28:
   For index without in expression isn't supported
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 1529, column 31:
+Semantic error at line 1893, column 31:
   For index without in expression isn't supported
 ")})));
 
@@ -1950,6 +1963,26 @@ end ArrayTests.ArrayIterTest5;
 
  Real x[1,1,1] = { {1} for i in {1}, j in {1} };
 end ArrayIterTest5;
+					   
+					   
+model ArrayIterTest6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArrayIterTest6",
+         description="Iterated expression with bad size",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1960, column 16:
+  Function f has no outputs, but is used in expression
+")})));
+
+	function f
+	algorithm
+	end f;
+	
+	Real x[3] = { f() for i in 1:3 };
+end ArrayIterTest6;
 
 
 
@@ -7684,6 +7717,35 @@ initial equation
 equation
   der(x) = -x;
 end ForInitial1;
+
+
+
+model CircularFunctionArg1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+	 JModelica.UnitTesting.ErrorTestCase(
+		 name="CircularFunctionArg1",
+		 description="Circular dependency when calculating size of function output",
+		 errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1528, column 14:
+  Could not evaluate array size of output b
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 1529, column 14:
+  Could not evaluate array size of output b
+")})));
+
+	function f 
+		input Real[:] a;
+		output Real[:] b = a;
+	algorithm
+	end f;
+	
+	Real[:] a = f(b);
+	Real[:] b = f(a);
+end CircularFunctionArg1;
+
+
 
 
   annotation (uses(Modelica(version="3.0.1")));

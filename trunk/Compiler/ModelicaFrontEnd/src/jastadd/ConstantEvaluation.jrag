@@ -1038,7 +1038,19 @@ aspect CircularExpressions {
 			if (i.hasFExp() && i.getFExp().isCircular()) 
 				return true;
 		return false;
-	}	
+	}
+	
+	eq InstFunctionCall.isCircular() {
+		for (InstFunctionArgument a : getArgs())
+			if (a.isCircular())
+				return true;
+		return false;
+	}
+	
+	syn boolean InstFunctionArgument.isCircular() = false;
+	eq InstPositionalArgument.isCircular() = getFExp().isCircular();
+	eq InstNamedArgument.isCircular()      = getFExp().isCircular();
+	eq InstDefaultArgument.isCircular()    = getFExp().isCircular();
 	
 
 	syn lazy boolean AbstractFVariable.isCircular() circular [true] = false;

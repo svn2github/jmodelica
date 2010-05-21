@@ -227,9 +227,11 @@ aspect PredefinedTypes {
 +"function ones end ones;\n"
 +"function fill\n"
 +"  input Real s;\n"      // Type not used
++"  output Real o;\n"     // Type not used
 +"end fill;\n"
 +"function cat\n"
 +"  input Real k;\n"      // Type not used
++"  output Real o;\n"     // Type not used
 +"end cat;\n"
 +"function linspace\n" 
 +"  input Real x1;\n"
@@ -249,6 +251,7 @@ aspect PredefinedTypes {
 +"end max;\n"
 +"function sum\n"
 +"  input Real A;\n"      // Type not used
++"  output Real o;\n"     // Type not used
 +"end sum;\n"
 +"function product end product;\n"
 +"function symmetric end symmetric;\n"

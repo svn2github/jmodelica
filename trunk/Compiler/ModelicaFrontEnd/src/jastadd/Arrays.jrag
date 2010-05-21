@@ -188,8 +188,11 @@ aspect Arrays {
 	}
 	eq FCatExp.ndims()         = getFExp(0).ndims();
 	eq FSumExp.ndims()         = getFExp().isIterExp() ? iterExp().ndims() : 0;
-	eq FIterExp.ndims()        = getFExp().ndims() + getNumForIndex();
 	eq FSubscriptedExp.ndims() = getFArraySubscripts().accessNdims();
+	eq FIterExp.ndims() {
+		int exp = getFExp().ndims();
+		return (exp >= 0) ? exp + getNumForIndex() : -1;
+	}
 	
 	eq FTranspose.ndims() = getFExp().ndims();
 	eq FCross.ndims() = 1;
@@ -593,6 +596,8 @@ aspect Arrays {
 	eq FSumExp.size() = getFExp().isIterExp() ? iterExp().size() : Size.SCALAR;
 	
 	eq FIterExp.size() {
+		if (ndims() <= 0)
+			return Size.SCALAR;
 		MutableSize s = new MutableSize(ndims());
 		for (CommonForIndex fi : getForIndexList())
 			if (fi.hasFExp() && fi.getFExp().ndims() == 1)

@@ -137,6 +137,7 @@ aspect FlatTypeCheck {
   // TODO: Add product() when it is implemented
   
   public void FIterExp.typeCheck() {
+	  super.typeCheck();
 	  if (iterExpMustBeScalar() && !getFExp().type().isUnknown() && getFExp().ndims() != 0)
 		  error("The expression of a reduction-expression must be scalar, except for sum(): " +
 				  getFExp() + " has " + getFExp().ndims() + " dimension(s)");
@@ -270,7 +271,9 @@ aspect FlatTypeCheck {
   eq FMatrixRow.dimensionIsOk() = true;
  
   public void InstFunctionCall.typeCheck() {
-	  if (!isFunctionCallClause() && size().isUnknown())
+	  if (!isFunctionCallClause() && !getName().myInstClassDecl().isRecord() && !hasOutputs())
+		  error("Function " + getName().name() + " has no outputs, but is used in expression");
+	  else if (!isFunctionCallClause() && size().isUnknown())
 		  error("Could not evaluate array size of output " + expOutput().name());
 	  if (myOutputs().size() < myLefts().size())
 		  error("Too many components assigned from function call: " + getName().name() + 

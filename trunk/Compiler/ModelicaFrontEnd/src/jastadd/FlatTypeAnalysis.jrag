@@ -318,7 +318,7 @@ aspect FlatTypeAnalysis {
 	}
 	
 	eq FIterExp.type() {
-		if (size().numElements() == 0)
+		if (ndims() < 0 || size().numElements() == 0)
 			return fUnknownType();
 		return getFExp().type().arrayType(size());
 	}

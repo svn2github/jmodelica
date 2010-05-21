@@ -767,21 +767,23 @@ public class ModelicaCompiler {
 	 * \brief Log error message for exception and exit.
 	 */
 	protected void handleException(Exception e, String msg) {
+		if (e.getMessage() != null)
+			msg += ": " + e.getMessage();
 		log.error(msg);
-		handleException(e);
-	}
-	
-	/**
-	 * \brief Log error message for exception and exit.
-	 */
-	protected void handleException(Exception e) {
-		log.error(e.getMessage());
+		
 		StringWriter str = new StringWriter();
 		PrintWriter print = new PrintWriter(str);
 		print.print(e);
 		e.printStackTrace(print);
 		log.debug(str.toString());
 		System.exit(1);
+	}
+	
+	/**
+	 * \brief Log error message for exception and exit.
+	 */
+	protected void handleException(Exception e) {
+		handleException(e, "Unknown program error");
 	}
 
 	/**
@@ -815,6 +817,8 @@ public class ModelicaCompiler {
 				Logger l = Logger.getLogger(name);
 				l.setUseParentHandlers(false);
 				ConsoleHandler ch = new ConsoleHandler();
+				// Dont limit log level for handler, we do that in logger
+				ch.setLevel(Level.FINEST);
 				ch.setFormatter(new ConsoleFormatter());
 				l.addHandler(ch);
 				l.setLevel(Level.WARNING);
