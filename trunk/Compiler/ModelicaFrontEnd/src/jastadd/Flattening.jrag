@@ -860,17 +860,22 @@ aspect FlatExpressions {
 	public FExp FInstAccessExp.flatten(FQName prefix) {
 		// If the FInstAccess referes to a constant, then inline expression
 		// Checks in the instance tree ensures that constants always
-		// have binding expressions
+		// have binding expressions, however, array subscripts may need to be 
+		// flattened during error checks, when using qualifiedName()
 		if (getInstAccess().myInstComponentDecl() instanceof InstPrimitive) {
 			InstPrimitive ip = (InstPrimitive) getInstAccess().myInstComponentDecl();
 			if (ip.isConstant()) {
-				if (isArray()) {
-					return getArray().buildLiteral(ip.isReal());
-				} else {
-					CValue cval = ceval();
-					if (ip.isReal())
-						cval = cval.convertReal();
-					return cval.buildLiteral();
+				try {
+					if (isArray()) {
+						return getArray().buildLiteral(ip.isReal());
+					} else {
+						CValue cval = ceval();
+						if (ip.isReal())
+							cval = cval.convertReal();
+						return cval.buildLiteral();
+					}
+				} catch (UnsupportedOperationException e) {
+					// In this case, simply don't inline value
 				}
 			}
 		} 

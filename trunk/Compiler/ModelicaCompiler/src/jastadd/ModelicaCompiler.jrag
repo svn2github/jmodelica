@@ -749,16 +749,13 @@ public class ModelicaCompiler {
 				str.append(p.toString()+"\n");
 			log.error(str.toString());
 			System.exit(1);
-		} catch (Error e) {
-			// TODO: This prints the error message once for each file - perhaps it would be better to ignore file names here?
-			for (int i=0; i<name.length; i++) {
-				log.error("In file: '" + name[i] + "': "+e.getMessage());
-			}			
-			System.exit(1);
 		} catch (FileNotFoundException e) {
 			log.error("Could not find file: " + e.getMessage());
 			System.exit(1);
-		} catch (Exception e) {
+		} catch (OutOfMemoryError e) {
+			log.error("Out of memory. Please set the memory limit of the JVM higher.");
+			System.exit(1);
+		} catch (Throwable e) {
 			handleException(e);
 		}
 	}
@@ -766,14 +763,13 @@ public class ModelicaCompiler {
 	/**
 	 * \brief Log error message for exception and exit.
 	 */
-	protected void handleException(Exception e, String msg) {
+	protected void handleException(Throwable e, String msg) {
 		if (e.getMessage() != null)
 			msg += ": " + e.getMessage();
 		log.error(msg);
 		
 		StringWriter str = new StringWriter();
 		PrintWriter print = new PrintWriter(str);
-		print.print(e);
 		e.printStackTrace(print);
 		log.debug(str.toString());
 		System.exit(1);
@@ -782,7 +778,7 @@ public class ModelicaCompiler {
 	/**
 	 * \brief Log error message for exception and exit.
 	 */
-	protected void handleException(Exception e) {
+	protected void handleException(Throwable e) {
 		handleException(e, "Unknown program error");
 	}
 

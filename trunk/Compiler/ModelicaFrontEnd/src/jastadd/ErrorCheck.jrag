@@ -424,12 +424,8 @@ aspect InstanceErrorCheck {
 		  n.collectErrors();
 	  for(InstNode n : getInstExtendss()) 
 		  n.collectErrors();
-	  for(FAbstractEquation e : getFAbstractEquations()) {
-		  log.debug(" mmmm ");
-		      log.debug(prettyPrint("   ####>> "));
-		  e.prettyPrint(">>> ");
+	  for(FAbstractEquation e : getFAbstractEquations()) 
 		  e.collectErrors();
-	  }
 	}
   }
 

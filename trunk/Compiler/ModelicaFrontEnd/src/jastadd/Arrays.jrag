@@ -1531,7 +1531,7 @@ aspect Arrays {
 	syn int[] FExp.myIndices() {
 		if (ndims() == 0) {
 			return new int[] { ceval().intValue() };
-		} else if (ndims() == 1) {
+		} else if (ndims() == 1 && !size().isUnknown()) {
 			int[] indices = new int[size().get(0)];
 			int j = 0;
 			for (FExp exp : getArray().getFExps()) 
@@ -2766,7 +2766,7 @@ aspect ArrayHelpers {
 				return false;
 			int[] index = i.index();
 			for (int j = 0; j < ndims; j++)
-				if (index[j] > size.get(j))
+				if (index[j] < 1 || index[j] > size.get(j))
 					return false;
 			return true;
 		}
@@ -3007,7 +3007,8 @@ aspect ArrayHelpers {
 			indices = ind;
 			trans = new Index(ind.size());
 			for (int i = 0; i < ind.size(); i++)
-				trans.index()[i] = indices.get(i)[0];
+				if (indices.get(i).length > 0)
+					trans.index()[i] = indices.get(i)[0];
 		}
 		
 		/**

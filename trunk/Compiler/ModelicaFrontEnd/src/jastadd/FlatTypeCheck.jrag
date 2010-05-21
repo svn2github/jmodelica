@@ -158,13 +158,17 @@ aspect FlatTypeCheck {
 		  if (!getFExp().variability().lessOrEqual(fParameter())) {
 			  error("Array index in equation must be constant, parameter or loop index: " + getFExp());
 		  } else { // TODO: Perform bounds check in functions if index has parameter variability or lower?
-			  int max = mySize().get(0);
-			  for (FExp e : getExpanded().iterable()) {
-				  int i = e.ceval().intValue();
-				  if (i < 1 || i > max) {
-					  error("Array index out of bounds: " + i + ", index expression: "+ getFExp());
-					  return;
+			  try {
+				  int max = mySize().get(0);
+				  for (FExp e : getExpanded().iterable()) {
+					  int i = e.ceval().intValue();
+					  if (i < 1 || i > max) {
+						  error("Array index out of bounds: " + i + ", index expression: " + getFExp());
+						  return;
+					  }
 				  }
+			  } catch (UnsupportedOperationException e) {
+				  error("Could not evaluate array index expression: " + getFExp());
 			  }
 		  }
 	  }

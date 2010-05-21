@@ -793,6 +793,33 @@ class ConstantLookup15
 end ConstantLookup15;
 
 
+model ConstantLookup16
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ConstantLookup16",
+         description="Using constant with bad value as array index",
+         errorMessage="
+4 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
+Semantic error at line 797, column 16:
+  Could not evaluate binding expression for constant 'a': 'b[c]'
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
+Semantic error at line 797, column 22:
+  Could not evaluate array index expression: c
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
+Semantic error at line 799, column 19:
+  Could not evaluate binding expression for constant 'c': 'd'
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
+Semantic error at line 799, column 23:
+  Cannot find class or component declaration for d
+")})));
+
+	constant Real a = b[c];
+	constant Real[3] b = {1, 2, 3};
+	constant Integer c = d;
+end ConstantLookup16;
+
+
 
 class ExtendsTest1
      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
