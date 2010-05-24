@@ -358,25 +358,6 @@ Compliance error at line 310, column 16:
 end StringConcat_ComplErr;
 
 
-model EmptyArray_ComplErr
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ComplianceErrorTestCase(
-         name="EmptyArray_ComplErr",
-         description="Compliance error for empty arrays",
-         errorMessage="
-2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 341, column 7:
-  Array variables with dimensions of length 0 are not supported
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 341, column 16:
-  Empty arrays are not supported
-")})));
-
- Real x[0,2] = ones(0, 2);
-end EmptyArray_ComplErr;
-
-
 model ArrayCellMod_ComplErr
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.ComplianceErrorTestCase(

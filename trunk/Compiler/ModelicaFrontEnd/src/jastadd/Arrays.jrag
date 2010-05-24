@@ -1004,20 +1004,22 @@ aspect Arrays {
 			return super.getArray();
 		
 		if (!isArray())
-			return new ScalarAsArray(composeScalarCellExp(Index.NULL));
+			return new ScalarAsArray(composeMulScalarCellExp(Index.NULL));
 		
 		Array res = new Array(indices());
 		for (Index i : res.indices()) 
-			res.set(i, composeScalarCellExp(i));
+			res.set(i, composeMulScalarCellExp(i));
 		return res;
 	}
 	
-	protected FExp FMulExp.composeScalarCellExp(Index i) {
+	protected FExp FMulExp.composeMulScalarCellExp(Index i) {
 		return vectorMultiplication(getLeft().getArray().leftMulIterator(i), 
-		                            getRight().getArray().rightMulIterator(i));
+		                            getRight().getArray().rightMulIterator(i), type());
 	}
 	
-	protected static FExp FExp.vectorMultiplication(Iterator<FExp> left, Iterator<FExp> right) {
+	protected static FExp FExp.vectorMultiplication(Iterator<FExp> left, Iterator<FExp> right, FType type) {
+		if (!left.hasNext())
+			return type.zeroLiteral();
 		FExp cur = new FMulExp((FExp) left.next().fullCopy(), (FExp) right.next().fullCopy());
 		while (left.hasNext()) 
 			cur = new FAddExp(cur, new FMulExp((FExp) left.next().fullCopy(), (FExp) right.next().fullCopy()));
@@ -1034,12 +1036,13 @@ aspect Arrays {
 		
 		Array base = getLeft().getArray();
 		Array res = base;
+		FType type = type();
 		for (; e > 1; e--) {
 			Array cur = new Array(indices());
 			for (Index i : cur.indices()) {
 				Iterator<FExp> left = res.leftMulIterator(i);
 				Iterator<FExp> right = base.rightMulIterator(i);
-				cur.set(i, vectorMultiplication(left, right));
+				cur.set(i, vectorMultiplication(left, right, type));
 			}
 			res = cur;
 		}

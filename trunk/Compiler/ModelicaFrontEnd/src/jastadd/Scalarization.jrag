@@ -1277,7 +1277,7 @@ aspect Scalarization {
 	
 	public FExp FMulExp.scalarizeExp(HashMap<String,FExp> indexMap) {
 		if (getLeft().isArray() && !isArray()) 
-			return dynamicFExp(composeScalarCellExp(Index.NULL)).scalarize(indexMap);
+			return dynamicFExp(composeMulScalarCellExp(Index.NULL)).scalarize(indexMap);
 		else
 			return super.scalarizeExp(indexMap);
 	}

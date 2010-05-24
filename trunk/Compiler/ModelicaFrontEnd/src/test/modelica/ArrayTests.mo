@@ -7747,6 +7747,128 @@ end CircularFunctionArg1;
 
 
 
+model EmptyArray1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="EmptyArray1",
+         description="Empty arrays, basic test",
+         flatModel="
+fclass ArrayTests.EmptyArray1
+end ArrayTests.EmptyArray1;
+")})));
+
+	Real x[3,0] = zeros(3,0);
+end EmptyArray1;
+
+
+model EmptyArray2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="EmptyArray2",
+         description="Empty arrays, addition",
+         flatModel="
+fclass ArrayTests.EmptyArray2
+end ArrayTests.EmptyArray2;
+")})));
+
+	Real x[3,0] = zeros(3,0);
+	Real y[3,0] = zeros(3,0);
+	Real z[3,0] = x + y;
+end EmptyArray2;
+
+
+model EmptyArray3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="EmptyArray3",
+         description="Empty arrays, concatenation",
+         flatModel="
+fclass ArrayTests.EmptyArray3
+ Real xx[1,1];
+ Real xx[1,2];
+ Real xx[2,1];
+ Real xx[2,2];
+equation
+ xx[1,1] = 1;
+ xx[1,2] = 2;
+ xx[2,1] = 3;
+ xx[2,2] = 4;
+end ArrayTests.EmptyArray3;
+")})));
+
+	Real x[2,2] = {{1,2},{3,4}};
+	Real y[2,0] = ones(2,0);
+	Real z[0,2] = ones(0,2);
+	Real w[0,0] = ones(0,0);
+	Real xx[2,2] = [x, y; z, w];
+end EmptyArray3;
+
+
+model EmptyArray4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="EmptyArray4",
+         description="Empty arrays, multiplication",
+         flatModel="
+fclass ArrayTests.EmptyArray4
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+equation
+ y[1,1] = 0;
+ y[1,2] = 0;
+ y[2,1] = 0;
+ y[2,2] = 0;
+end ArrayTests.EmptyArray4;
+")})));
+
+	Real x[2,0] = {{1,2},{3,4}} * ones(2,0);
+	Real y[2,2] = ones(2,0) * ones(0,2);
+	Real z[0,0] = ones(0,2) * ones(2,0);
+end EmptyArray4;
+
+
+model EmptyArray5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="EmptyArray5",
+         description="Empty arrays, simple equation system",
+         flatModel="
+fclass ArrayTests.EmptyArray5
+ parameter Integer n = 0 /* 0 */;
+ parameter Integer p = 2 /* 2 */;
+ parameter Integer q = 2 /* 2 */;
+ input Real u[1];
+ input Real u[2];
+ Real y[1];
+ Real y[2];
+ parameter Real D[1,1] = ( 1 ) * ( 1 ) /* 1.0 */;
+ parameter Real D[1,2] = ( 1 ) * ( 2 ) /* 2.0 */;
+ parameter Real D[2,1] = ( 2 ) * ( 1 ) /* 2.0 */;
+ parameter Real D[2,2] = ( 2 ) * ( 2 ) /* 4.0 */;
+equation
+ y[1] = 0.0 + ( D[1,1] ) * ( u[1] ) + ( D[1,2] ) * ( u[2] );
+ y[2] = 0.0 + ( D[2,1] ) * ( u[1] ) + ( D[2,2] ) * ( u[2] );
+end ArrayTests.EmptyArray5;
+")})));
+
+	parameter Integer n = 0;
+	parameter Integer p = 2;
+	parameter Integer q = 2;
+	input Real u[p];
+	Real x[n];
+	Real y[q];
+	parameter Real A[n,n] = ones(n,n);
+	parameter Real B[n,p] = ones(n,p);
+	parameter Real C[q,n] = ones(q,n);
+	parameter Real D[q,p] = { i*j for i in 1:q, j in 1:p };
+equation
+	der(x) = A*x + B*u;
+	    y  = C*x + D*u;
+end EmptyArray5;
+
+
 
   annotation (uses(Modelica(version="3.0.1")));
 end ArrayTests;
