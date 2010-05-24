@@ -81,6 +81,9 @@ def write_data(simulator):
         data = N.c_[data, u]
         
         io.export_result_dymola(model,data)
+        
+
+
 
 class JMIODE(Explicit_Problem):
     """
@@ -144,7 +147,7 @@ class JMIODE(Explicit_Problem):
         
         #Evaluating the jacobian
         #-Setting options
-        z_l = N.array([1]*len(self._model.z)) #Used to give independent_vars full control
+        z_l = N.array([1]*len(self._model.z),dtype=N.int32) #Used to give independent_vars full control
         independent_vars = [jmi.JMI_DER_X] #Derivation with respect to X
         sparsity = jmi.JMI_DER_DENSE_ROW_MAJOR
         evaluation_options = jmi.JMI_DER_CPPAD #Determine to use CPPAD
@@ -291,7 +294,7 @@ class JMIDAE(Implicit_Problem):
         
         #Evaluating the jacobian
         #-Setting options
-        z_l = N.array([1]*len(self._model.z)) #Used to give independent_vars full control
+        z_l = N.array([1]*len(self._model.z),dtype=N.int32) #Used to give independent_vars full control
         independent_vars = [jmi.JMI_DER_DX, jmi.JMI_DER_X, jmi.JMI_DER_W] #Derivation with respect to these variables
         sparsity = jmi.JMI_DER_DENSE_ROW_MAJOR
         evaluation_options = jmi.JMI_DER_CPPAD#jmi.JMI_DER_SYMBOLIC

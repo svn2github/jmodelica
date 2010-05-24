@@ -1197,7 +1197,7 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
         self._hs=hs
         self.n_p_opt=model.jmimodel.opt_get_n_p_opt()
 
-        self._blocking_factors = blocking_factors
+        self._blocking_factors = N.int32(blocking_factors)
         
         NLPCollocation._initialize(self, model)
         self._set_nlpLagrangePols_typedefs()
@@ -1262,7 +1262,7 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
                                      _linearity_information_provided,                
                                      _p_opt_lin, _dx_lin, _x_lin, _u_lin, _w_lin,
                                      _dx_tp_lin, _x_tp_lin, _u_tp_lin, _w_tp_lin,                
-                                     n_cp,jmi.JMI_DER_CPPAD,N.size(blocking_factors),blocking_factors) is 0, \
+                                     n_cp,jmi.JMI_DER_CPPAD,N.size(self._blocking_factors),self._blocking_factors) is 0, \
                                      " jmi_opt_lp_new returned non-zero."
         except AttributeError,e:
              raise jmi.JMIException("Can not create NLPCollocationLagrangePolynomials object. Try recompiling model with target='algorithms'")
