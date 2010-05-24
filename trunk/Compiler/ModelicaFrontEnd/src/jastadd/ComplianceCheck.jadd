@@ -86,8 +86,6 @@ aspect ComplianceCheck {
 			compliance("Integer variables are not supported, only constants and parameters");
 		if (isBoolean() && !variability().lessOrEqual(fParameter()))
 			compliance("Boolean variables are not supported, only constants and parameters");
-		if (size().isEmpty())
-			compliance("Array variables with dimensions of length 0 are not supported");
 	}
 
 	public void InstComponentDecl.complianceCheck() {
