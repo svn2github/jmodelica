@@ -820,6 +820,21 @@ Semantic error at line 799, column 23:
 end ConstantLookup16;
 
 
+// TODO: Compiling this model causes an exception
+model ConstantLookup17
+	partial model A
+		parameter Integer n = 2;
+		Real x[n] = fill(1, n);
+	end A;
+	
+	model B
+		parameter Integer n = 3;
+	end B;
+	
+	A a(n = B.n);
+end ConstantLookup17;
+
+
 
 class ExtendsTest1
      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
