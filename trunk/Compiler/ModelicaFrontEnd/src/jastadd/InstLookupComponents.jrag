@@ -116,7 +116,8 @@ aspect InstLookupComponents {
 					set.add(ic);
 			}
 
-			for (InstExtends ie : constrainingInstExtends()) {
+			// TODO: handle constraining type
+			for (InstExtends ie : instExtends()) {
 				set.addAll(ie.memberInstComponent(name));
 			}
 		

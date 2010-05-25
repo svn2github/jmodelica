@@ -839,7 +839,7 @@ model ConstantLookup18
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
          name="ConstantLookup18",
-         description="",
+         description="Member of constant record, using record constructor, through inheritance and short class decl",
          flatModel="
 fclass NameTests.ConstantLookup18
  parameter Integer b.n = 3 /* 3 */;
@@ -853,7 +853,7 @@ equation
 end NameTests.ConstantLookup18;
 ")})));
 
-   partial model A
+   model A
        parameter Integer n;
        Real x[n] = fill(1, n);
    end A;
@@ -879,6 +879,43 @@ end NameTests.ConstantLookup18;
 end ConstantLookup18;
 
 
+model ConstantLookup19
+    package A
+        constant Integer n;
+        model AA
+            Real x[n] = fill(1, n);
+        end AA;
+    end A;
+    
+    package B
+        extends A(n = C.f.n);
+        replaceable package C = D;
+    end B;
+    
+    package D
+        extends E;
+    end D;
+    
+    package E
+        constant F f;
+    end E;
+    
+    record F
+        Integer n;
+    end F;
+    
+    package G
+        extends B(redeclare package C = H);
+    end G;
+    
+    package H
+        extends E(f(n=3));
+    end H;
+    
+    G.AA y;
+end ConstantLookup19;
+
+
 model ConstantLookup20
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
@@ -902,6 +939,34 @@ end NameTests.ConstantLookup20;
    
    Real y = A.b.x;
 end ConstantLookup20;
+
+
+model ConstantLookup21
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ConstantLookup21",
+         description="Lookup of package constant through short class decl with constrainedby",
+         flatModel="
+fclass NameTests.ConstantLookup21
+ Real a.x[2] = ones(2);
+end NameTests.ConstantLookup21;
+")})));
+
+    model A
+        replaceable package B = C constrainedby D;
+        Real x[B.n] = ones(B.n);
+    end A;
+    
+    package C
+        constant Integer n = 2;
+    end C;
+    
+    package D
+        constant Integer n;
+    end D;
+    
+    A a;
+end ConstantLookup21;
 
 
 
