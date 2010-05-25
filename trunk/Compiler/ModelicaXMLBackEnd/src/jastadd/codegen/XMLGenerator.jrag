@@ -25,6 +25,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.Stack;
@@ -233,9 +234,31 @@ public class XMLGenerator extends GenericGenerator {
 		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
 		 */
 		public void generate(PrintStream genPrinter) {
-//				genPrinter.print("<VendorAnnotations>");
-//				genPrinter.print("\n\t\t TODO (optional element)");
-//				genPrinter.print("\n\t </VendorAnnotations>");
+			genPrinter.print("<VendorAnnotations>");
+			genPrinter.print("\n\t\t <Tool name=\"JModelica\">");
+			HashSet<String> extLibraries = fclass.externalLibraries();
+			HashSet<String> extIncludes = fclass.externalIncludes();
+			HashSet<String> extLibDirs = fclass.externalLibraryDirectories();
+			HashSet<String> extInclDirs = fclass.externalIncludeDirectories();
+			
+			for(String lib : extLibraries) {
+				genPrinter.print("\n\t\t\t <Annotation name=\"Library\" value=\""+
+						lib+"\"/>");
+			}
+			for(String inc : extIncludes) {
+				genPrinter.print("\n\t\t\t <Annotation name=\"Include\" value=\""+
+						replaceIllegalChars(inc)+"\"/>");
+			}
+			for(String libdir : extLibDirs) {
+				genPrinter.print("\n\t\t\t <Annotation name=\"LibraryDirectory\" value=\""+
+						libdir+"\"/>");
+			}
+			for(String incdir : extInclDirs) {
+				genPrinter.print("\n\t\t\t <Annotation name=\"IncludeDirectory\" value=\""+
+						incdir+"\"/>");
+			}
+			genPrinter.print("\n\t\t </Tool>");
+			genPrinter.print("\n\t </VendorAnnotations>");
 		}
 	}	
 
@@ -683,9 +706,10 @@ public class XMLGenerator extends GenericGenerator {
 			FClass fclass) {
 		super(expPrinter,escapeCharacter, fclass);
 		
-		illegalCharsSub=new HashMap<String,String>();
-		illegalCharsSub.put("<","&lt;");
+		illegalCharsSub=new LinkedHashMap<String,String>();
 		illegalCharsSub.put("&","&amp");
+		illegalCharsSub.put("<","&lt;");
+		illegalCharsSub.put("\"", "&quot;");
 	}
 }
 

@@ -339,7 +339,7 @@ class XMLDoc(XMLBaseDoc):
             vals = self._xpatheval("//ScalarVariable/@valueReference")
         else:
             keys = self._xpatheval("//ScalarVariable/@name[../@alias=\"noAlias\"]")
-            vals = self._xpatheval("//ScalarVariable/@valueReference[../@alias=\"noAlias\"]")        
+            vals = self._xpatheval("//ScalarVariable/@valueReference[../@alias=\"noAlias\"]")      
    
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
@@ -1546,7 +1546,31 @@ class XMLDoc(XMLBaseDoc):
         for tp in vals:
             timepoints.append(float(tp))
         return timepoints
-     
+        
+    def get_external_libraries(self, ignore_cache=False):
+        """ Extract all external library entries. """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_external_libraries', None)
+        return self._xpatheval("//VendorAnnotations/*/Annotation/@value [../@name=\"Library\"]")
+        
+    def get_external_includes(self, ignore_cache=False):
+        """Extract all external file includes."""
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_external_includes', None)
+        return self_xpatheval("//VendorAnnotations/*/Annotation/@value [../@name=\"Include\"]")
+        
+    def get_external_lib_dirs(self, ignore_cache=False):
+        """ Extract all external library directories. """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_external_lib_dirs', None)
+        return self._xpatheval("//VendorAnnotations/*/Annotation/@value [../@name=\"LibraryDirectory\"]")
+        
+    def get_external_incl_dirs(self, ignore_cache=False):
+        """ Extract all external include directories. """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_external_incl_dirs', None)
+        return self._xpatheval("//VendorAnnotations/*/Annotation/@value [../@name=\"IncludeDirectory\"]")
+        
             
 class XMLValuesDoc(XMLBaseDoc):
     
