@@ -361,6 +361,20 @@ aspect Environments {
 	eq Program.getInstProgramRoot().myEnvironment() = new Environment();
 	eq Program.getInstProgramRoot().myEnvironment(String name) = new Environment();
 	
+	syn lazy List<InstRecordConstructorModification> InstValueModification.getInstRecordConstructorModificationList() {
+		List<InstRecordConstructorModification> res = new List<InstRecordConstructorModification>();
+
+		if (getFExp() instanceof FRecordConstructor) {
+			FRecordConstructor call = (FRecordConstructor) getFExp();
+			InstClassDecl icd = ((FIdUseInstAccess) call.getRecord()).getInstAccess().myInstClassDecl();
+			ArrayList<InstComponentDecl> inputs = icd.myModifiableComponents();
+			for (int i = 0; i < inputs.size(); i++) 
+				res.add(new InstRecordConstructorModification(getModification(), inputs.get(i), call.getArg(i)));
+		}
+
+		return res;
+	}
+	
 	syn lazy InstModification InstModification.matchInstModification(String name) = null;
 	eq InstCompleteModification.matchInstModification(String name) {
 		for (InstModification im : getInstClassModification().getInstArguments())
@@ -372,6 +386,13 @@ aspect Environments {
 	eq InstComponentModification.matchInstModification(String name) {
 		if (name.equals(getName().getID()))
 			return hasInstModification()? getInstModification() : null;
+		return null;
+	}
+	
+	eq InstValueModification.matchInstModification(String name) {
+		for (InstRecordConstructorModification im : getInstRecordConstructorModifications())
+			if (im.getInput().name().equals(name))
+				return im;
 		return null;
 	}
 	
@@ -1048,6 +1069,8 @@ aspect InstaceConstrainingClauses {
 	syn lazy FExp InstValueModification.getFExp() { 
 		return getValueModification().getExp().instantiate();
 	}
+	
+	eq InstRecordConstructorModification.getFExp() = (FExp) getArg().fullCopy();
 	
 	public List InstNode.buildFAbstractEquationList() { 
 	    List l = new List();

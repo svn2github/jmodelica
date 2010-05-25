@@ -112,7 +112,9 @@ InstForStmt : FStatement ::= InstForIndex* ForStmt:FStatement*;
 // error checking.	
 abstract InstModification ::= <Modification:Modification>;
 InstCompleteModification : InstModification ::= InstClassModification [InstValueModification];
-InstValueModification : InstModification ::= /FExp/;
+InstValueModification : InstModification ::= /FExp/ /InstRecordConstructorModification*/;
+// Virtual modification for argument of record constructor value modification.
+InstRecordConstructorModification : InstValueModification ::= <Input:InstComponentDecl> <Arg:FExp>;
 
 InstClassModification : InstModification ::= InstArgument*;
 abstract InstArgument : InstModification ::= <Each:boolean> <Final:boolean>;

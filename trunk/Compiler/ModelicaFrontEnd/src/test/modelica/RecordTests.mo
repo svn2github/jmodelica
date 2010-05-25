@@ -760,9 +760,12 @@ model RecordConstructor4
          name="RecordConstructor4",
          description="Record constructors: wrong type of arg",
          errorMessage="
-1 errors found:
+2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
-Semantic error at line 764, column 18:
+Semantic error at line 772, column 10:
+  The binding expression of the variable c does not match the declared type of the variable
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
+Semantic error at line 775, column 18:
   Record constructor for A: types of positional argument 3 and input c are not compatible
 ")})));
 

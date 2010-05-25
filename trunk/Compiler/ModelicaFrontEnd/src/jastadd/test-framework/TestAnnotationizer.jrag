@@ -64,7 +64,7 @@ abstract public class TestAnnotationizerHelper {
 			String description, String data, boolean write) throws Exception {
 		try {
 			for (Class cl : TestAnnotationizerHelper.class.getClasses()) {
-				if (cl.getSimpleName().equals(testType) && !Modifier.isAbstract(cl.getModifiers())) {
+				if (cl.getSimpleName().startsWith(testType) && !Modifier.isAbstract(cl.getModifiers())) {
 					Constructor constructor = cl.getConstructor(String.class, String.class, String.class, String.class);
 					TestAnnotationizerHelper ta = (TestAnnotationizerHelper) constructor.newInstance(filePath, modelName, description, data);
 					if (write)
@@ -101,7 +101,7 @@ abstract public class TestAnnotationizerHelper {
 		System.out.println("  Options:");
 		System.out.println("    -w           write result to file instead of stdout");
 		System.out.println("    -m/-o        create annotation for Modelica/Optimica (default is infer from file path)");
-		System.out.println("    -t=<type>    set type of test, e.g. ErrorTestCase");
+		System.out.println("    -t=<type>    set type of test, a unique prefix is enough, e.g. Err for ErrorTestCase");
 		System.out.println("    -c=<class>   set name of class to generate annotation for, if name ");
 		System.out.println("                 does not contain a dot, base name of .mo file is prepended");
 		System.out.println("    -d=<data>    set extra data to send to the specific generator");

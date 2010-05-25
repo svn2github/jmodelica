@@ -820,19 +820,88 @@ Semantic error at line 799, column 23:
 end ConstantLookup16;
 
 
-// TODO: Compiling this model causes an exception
+// TODO: Compiling this model causes an exception, it should cause an error message
 model ConstantLookup17
-	partial model A
+	model A
 		parameter Integer n = 2;
 		Real x[n] = fill(1, n);
 	end A;
 	
 	model B
-		parameter Integer n = 3;
+		constant Integer n = 3;
 	end B;
 	
 	A a(n = B.n);
 end ConstantLookup17;
+
+
+model ConstantLookup18
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ConstantLookup18",
+         description="",
+         flatModel="
+fclass NameTests.ConstantLookup18
+ parameter Integer b.n = 3 /* 3 */;
+ Real b.x[1];
+ Real b.x[2];
+ Real b.x[3];
+equation
+ b.x[1] = 1;
+ b.x[2] = 1;
+ b.x[3] = 1;
+end NameTests.ConstantLookup18;
+")})));
+
+   partial model A
+       parameter Integer n;
+       Real x[n] = fill(1, n);
+   end A;
+   
+   model B
+       extends A(n = C.f.n);
+       replaceable package C = D;
+   end B;
+   
+   package D
+       extends E;
+   end D;
+   
+   package E
+       constant F f = F(3);
+   end E;
+   
+   record F
+       Integer n;
+   end F;
+   
+   B b;
+end ConstantLookup18;
+
+
+model ConstantLookup20
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ConstantLookup20",
+         description="Member of constant record, using record constructor",
+         flatModel="
+fclass NameTests.ConstantLookup20
+ Real y;
+equation
+ y = 3.0;
+end NameTests.ConstantLookup20;
+")})));
+
+   package A
+	   constant B b = B(3);
+   end A;
+   
+   record B
+	   Real x;
+   end B;
+   
+   Real y = A.b.x;
+end ConstantLookup20;
 
 
 

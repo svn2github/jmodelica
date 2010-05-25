@@ -40,6 +40,7 @@ aspect InstLookupComponents {
 	eq InstAssignable.getChild().lookupInstComponent(String name) = myInstClass().memberInstComponent(name); 
 	eq InstAssignable.getInstModification().lookupInstComponent(String name) = lookupInstComponent(name);
 	eq InstAssignable.getFArraySubscripts().lookupInstComponent(String name) = lookupInstComponent(name);
+	// TODO: should binding expressions be looked up from the modification instead?
 	eq InstAssignable.getBindingFExp().lookupInstComponent(String name) = lookupInstComponent(name);
 	eq InstAssignable.getDynamicFExp().lookupInstComponent(String name) = lookupInstComponent(name);
 	

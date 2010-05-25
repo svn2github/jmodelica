@@ -42,6 +42,8 @@ aspect InstLookupClasses {
 	eq InstComponentDecl.getInstComponentDecl().lookupInstClass(String name) = genericLookupInstClassInComponent(name);	
 	eq InstComponentDecl.getInstExtends().lookupInstClass(String name) = superLookupInstClassInComponent(name);
     eq InstComponentDecl.getDynamicClassName().lookupInstClass(String name) = genericLookupInstClassInComponent(name);
+    
+    eq InstAssignable.getBindingFExp().lookupInstClass(String name) = myInstValueMod().lookupInstClass(name);
 	
     eq InstArrayComponentDecl.getChild().lookupInstClass(String name) = lookupInstClass(name);
     
