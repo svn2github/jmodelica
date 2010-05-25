@@ -25,6 +25,7 @@ import numpy as N
 import pylab as P
 import jmodelica.io as io
 import jmodelica.jmi as jmi
+import jmodelica.fmi as fmi
 from jmodelica.initialization.ipopt import NLPInitialization
 from jmodelica.initialization.ipopt import InitializationOptimizer
 
@@ -83,6 +84,89 @@ def write_data(simulator):
         io.export_result_dymola(model,data)
         
 
+class FMIODE(Explicit_Problem):
+    """
+    An Assimulo Explicit Model extended to FMI interface.
+    """
+    def __init__(self, model):
+        """
+        Initialize the problem.
+        """
+        self._model = model
+        self._timeEvent = False
+        
+        self.y0 = self._model.real_x
+        self.Problem_Name = self._model._description
+        
+        [f_nbr, g_nbr] = self._model.get_ode_sizes()
+        
+        if g_nbr > 0:
+            self.event_fcn = self.g #Activates the event function
+            if self._model.event_info.upcomingTimeEvent == self._model._fmiTrue:
+                self._timeEvent = True
+                self._timeSwitch = True
+                self._nextTimeEvent = self._model.event_info.nextEventTime
+        
+    def f(self, t, y, sw=None):
+        """
+        The rhs (right-hand-side) for an ODE problem.
+        """
+        #Moving data to the model
+        self._model.t = t
+        self._model.real_x = y
+        
+        #Evaluating the rhs
+        rhs = self._model.real_dx
+
+        return rhs
+        
+    def g(self, t, y, sw):
+        """
+        The event indicator function for a ODE problem.
+        """
+        #Moving data to the model
+        self._model.t = t
+        self._model.real_x = y
+        
+        #Evaluating the event indicators
+        eventInd = self._model.event_ind
+        
+        #Appending time event
+        if self._timeEvent:
+            if self._timeSwitch:
+                eventInd = N.append(eventInd,N.array([t-self._nextTimeEvent]))
+            else:
+                eventInd = N.append(eventInd,N.array([self._nextTimeEvent-t]))
+        
+        return eventInd
+        
+    def handle_event(self, solver, event_info):
+        """
+        This method is called when Assimulo finds an event.
+        """
+        self._model.event_info.iterationConverged = self._model._fmiFalse
+        
+        while self._model.event_info.iterationConverged == self._model._fmiFalse:
+            self._model.update_event()
+            
+            #Retrieve solutions (if needed)
+            if self._model.event_info.iterationConverged == self._model._fmiFalse:
+                pass
+        
+        #Check if the event affected the state values and if so sets them
+        if self._model.event_info.stateValuesChanged == self._model._fmiTrue:
+            solver.y[-1] = self._model.real_x
+        
+        if self._model.event_info.stateValueReferencesChanged == self._model._fmiTrue:
+            #Get new nominal values.
+            solver.atol = 0.01*self.rtol*self._model.real_x_nominal
+            print 'New Nominal'
+            
+        if self._model.event_info.upcomingTimeEvent == self._model._fmiTrue:
+            if self._model.event_info.nextEventTime != self._nextTimeEvent:
+                self._timeSwitch = not self._timeSwitch
+                self._nextTimeEvent = self._model.event_info.nextEventTime
+            print self._nextTimeEvent
 
 
 class JMIODE(Explicit_Problem):
