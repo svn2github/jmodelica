@@ -22,6 +22,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import java.io.*;
 
 public class CGenerator extends GenericGenerator {
+	
+	class DAETag_C_externalFuncIncludes extends DAETag {
+		
+		public DAETag_C_externalFuncIncludes(AbstractGenerator myGenerator,
+				FClass fclass) {
+			super("external_func_includes","C: external function includes",
+					myGenerator,fclass);
+		}
+		
+		public void generate(PrintStream genPrinter) {
+			for(String incl : fclass.externalIncludes()) {
+				genPrinter.print(incl);
+			}
+		}
+	}
 
 	class DAETag_C_scalingMethod extends DAETag {
 		

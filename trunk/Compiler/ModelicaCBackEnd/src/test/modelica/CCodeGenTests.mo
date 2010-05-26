@@ -2834,6 +2834,18 @@ model RemoveCopyright
 )})));
 end RemoveCopyright;
 
-
+model ExtStmtInclude1
+	annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+		JModelica.UnitTesting.CCodeGenTestCase(
+			name="ExtStmtInclude1",
+			description="Test that include statement is inserted properly.",
+			template="$external_func_includes$",
+			generatedCode="#include \"extFunc1.h\"")})));
+	function extFunc1
+		 external "C" annotation(Include="#include \"extFunc1.h\"");
+	end extFunc1;
+	algorithm
+		extFunc1();end ExtStmtInclude1;
+ 
 
 end CCodeGenTests;

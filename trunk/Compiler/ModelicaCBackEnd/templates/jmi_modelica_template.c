@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <jmi.h>
+$external_func_includes$
 
 static const int N_real_ci = $n_real_ci$;
 static const int N_real_cd = $n_real_cd$;
