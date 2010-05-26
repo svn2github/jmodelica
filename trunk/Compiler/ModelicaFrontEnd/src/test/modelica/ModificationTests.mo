@@ -839,10 +839,10 @@ model ArrayModifications12
          description="Modifications to arrays: arrays of composites: 3 levels deep, component modifier on outer",
          flatModel="
 fclass ModificationTests.ArrayModifications12
- Real xa[1].yb[1].zc[3] = ya[1,1,:];
- Real xa[1].yb[2].zc[3] = ya[1,2,:];
- Real xa[2].yb[1].zc[3] = ya[2,1,:];
- Real xa[2].yb[2].zc[3] = ya[2,2,:];
+ Real xa[1].yb[1].zc[3] = ya[1,1,1:3];
+ Real xa[1].yb[2].zc[3] = ya[1,2,1:3];
+ Real xa[2].yb[1].zc[3] = ya[2,1,1:3];
+ Real xa[2].yb[2].zc[3] = ya[2,2,1:3];
  Real ya[2,2,3] = {{{1,2,3},{4,5,6}},{{7,8,9},{10,11,12}}};
 end ModificationTests.ArrayModifications12;
 ")})));

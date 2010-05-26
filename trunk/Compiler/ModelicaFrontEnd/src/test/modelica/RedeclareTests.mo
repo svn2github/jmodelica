@@ -2985,6 +2985,34 @@ end RedeclareTests.RedeclareTest28;
 end RedeclareTest28;
 
 
+model RedeclareTest29
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="RedeclareTest29",
+         description="Modifying parameter that is used as size of array",
+         flatModel="
+fclass RedeclareTests.RedeclareTest29
+ Real y[2] = {1.0,2.0};
+end RedeclareTests.RedeclareTest29;
+")})));
+
+    record A
+        parameter Integer n;
+        Real x[n];
+    end A;
+    
+    package B
+        constant A a;
+    end B;
+    
+    package C
+        extends B(a(n=2, x={1,2}));
+    end C;
+    
+    Real y[2] = C.a.x;
+end RedeclareTest29;
+
+
 
 model RedeclareElement1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={

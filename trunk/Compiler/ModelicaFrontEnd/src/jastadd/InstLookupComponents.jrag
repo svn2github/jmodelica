@@ -21,27 +21,25 @@ aspect InstLookupComponents {
 
 	inh lazy HashSet InstAccess.lookupInstComponent(String name);	
 	inh lazy HashSet InstNode.lookupInstComponent(String name);	
-	inh lazy HashSet InstComponentModification.lookupInstComponent(String name);	
+	inh lazy HashSet InstModification.lookupInstComponent(String name);	
 	eq InstBaseClassDecl.getChild().lookupInstComponent(String name) = genericLookupInstComponent(name); 	
 	eq InstNode.getChild().lookupInstComponent(String name) = genericLookupInstComponent(name); 
 	
 	eq InstComponentDecl.getInstModification().lookupInstComponent(String name) = lookupInstComponent(name);
+	eq InstComponentDecl.getInstConstraining().lookupInstComponent(String name) = lookupInstComponent(name);
 	eq InstReplacingComposite.getOriginalInstComponent().lookupInstComponent(String name) = lookupInstComponent(name);
 	eq InstReplacingPrimitive.getOriginalInstComponent().lookupInstComponent(String name) = lookupInstComponent(name);
 	eq InstExtends.getInstClassModification().lookupInstComponent(String name) = lookupInstComponent(name);
-	
-	eq InstValueModification.getFExp().lookupInstComponent(String name) = myInstNode().lookupInstComponent(name);
 	
 	eq InstShortClassDecl.getChild().lookupInstComponent(String name) = lookupInstComponent(name);
 
 	eq InstComponentDecl.getFArraySubscripts().lookupInstComponent(String name) = lookupInstComponent(name);
 	
-	// TODO: Make sure all of there applies to records as well as primitives
-	eq InstAssignable.getChild().lookupInstComponent(String name) = myInstClass().memberInstComponent(name); 
+	// TODO: Make sure all of these applies to records as well as primitives
+	eq InstAssignable.getChild().lookupInstComponent(String name) = memberInstComponent(name); 
+	eq InstAssignable.getBindingFExp().lookupInstComponent(String name) = myInstValueMod().lookupInstComponent(name);
 	eq InstAssignable.getInstModification().lookupInstComponent(String name) = lookupInstComponent(name);
 	eq InstAssignable.getFArraySubscripts().lookupInstComponent(String name) = lookupInstComponent(name);
-	// TODO: should binding expressions be looked up from the modification instead?
-	eq InstAssignable.getBindingFExp().lookupInstComponent(String name) = lookupInstComponent(name);
 	eq InstAssignable.getDynamicFExp().lookupInstComponent(String name) = lookupInstComponent(name);
 	
 	eq InstRoot.getChild().lookupInstComponent(String name) = emptyHashSet();
@@ -93,10 +91,24 @@ aspect InstLookupComponents {
 		set.addAll(memberInstComponent(name));
 		for (InstImport ii : instImports()) 
 			set.addAll(ii.lookupInstConstantInImport(name));		
-		if (set.isEmpty())
-			set.addAll(lookupInstConstant(name));
+		if (set.isEmpty()) 
+			set.addAll(genericLookupInstConstant(name));
 		return set.isEmpty() ? emptyHashSet() : set;
 	 }
+	
+	syn HashSet InstNode.genericLookupInstConstant(String name) {
+		HashSet set = new HashSet(4);
+		set.addAll(lookupInstConstant(name));
+		for (InstExtends ie : instExtends())
+			set.addAll(ie.lookupInstConstant(name));
+		return set;
+	}
+	
+	eq InstComponentDecl.genericLookupInstConstant(String name) {
+		HashSet set = super.genericLookupInstConstant(name);
+		set.addAll(myInstClass().lookupInstConstant(name));
+		return set;
+	}
 	
 	syn lazy HashSet InstNode.memberInstComponent(String name)  {
 
@@ -197,8 +209,6 @@ aspect LookupInstComponentsInModifications {
      */
 	inh HashSet InstElementModification.lookupInstComponentInInstElement(String name);
 	inh HashSet InstNamedModification.lookupInstComponentInInstElement(String name);
-	
-	eq InstElementModification.getName().lookupInstComponent(String name) = lookupInstComponentInInstElement(name);
 	
 	eq InstNamedModification.getName().lookupInstComponent(String name) = lookupInstComponentInInstElement(name);
 	

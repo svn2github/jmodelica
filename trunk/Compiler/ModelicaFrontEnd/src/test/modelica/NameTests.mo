@@ -880,6 +880,16 @@ end ConstantLookup18;
 
 
 model ConstantLookup19
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ConstantLookup19",
+         description="Using package constant set through redeclare and several levels of inheritance",
+         flatModel="
+fclass NameTests.ConstantLookup19
+ Real y.x[3] = fill(1, 3);
+end NameTests.ConstantLookup19;
+")})));
+
     package A
         constant Integer n;
         model AA
