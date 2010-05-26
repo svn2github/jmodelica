@@ -2840,12 +2840,30 @@ model ExtStmtInclude1
 			name="ExtStmtInclude1",
 			description="Test that include statement is inserted properly.",
 			template="$external_func_includes$",
-			generatedCode="#include \"extFunc1.h\"")})));
+			generatedCode="#include \"extFunc.h\"")})));
+	function extFunc
+		 external "C" annotation(Include="#include \"extFunc.h\"");
+	end extFunc;
+	algorithm
+		extFunc();end ExtStmtInclude1;
+
+model ExtStmtInclude2
+	annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+		JModelica.UnitTesting.CCodeGenTestCase(
+			name="ExtStmtInclude2",
+			description="Test that include statements are inserted properly.",
+			template="$external_func_includes$",
+			generatedCode="
+#include \"extFunc2.h\"
+#include \"extFunc1.h\"")})));
 	function extFunc1
 		 external "C" annotation(Include="#include \"extFunc1.h\"");
 	end extFunc1;
+	function extFunc2
+		external "C" annotation(Include="#include \"extFunc2.h\"");
+	end extFunc2;
 	algorithm
-		extFunc1();end ExtStmtInclude1;
- 
-
+		extFunc1();
+		extFunc2();
+end ExtStmtInclude2;
 end CCodeGenTests;

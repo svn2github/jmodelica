@@ -33,7 +33,7 @@ public class CGenerator extends GenericGenerator {
 		
 		public void generate(PrintStream genPrinter) {
 			for(String incl : fclass.externalIncludes()) {
-				genPrinter.print(incl);
+				genPrinter.print(incl+"\n");
 			}
 		}
 	}
