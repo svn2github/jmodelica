@@ -4664,7 +4664,7 @@ end ExternalFuncLibs2;
 
 model ExternalFuncLibs3
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FilteredFClassMethodTestCase(
+     JModelica.UnitTesting.FClassMethodTestCase(
          name="ExternalFuncLibs3",
          description="External function annotations, LibraryDirectory",
          methodName="externalLibraryDirectories",
@@ -4698,10 +4698,11 @@ end ExternalFuncLibs3;
 
 model ExternalFuncLibs4
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FilteredFClassMethodTestCase(
+     JModelica.UnitTesting.FClassMethodTestCase(
          name="ExternalFuncLibs4",
          description="External function annotations, LibraryDirectory",
          methodName="externalLibraryDirectories",
+		 filter=true, 
          methodResult="[%dir%/Resources/Library]"
  )})));
  function f1
@@ -4730,10 +4731,11 @@ end ExternalFuncLibs4;
 
 model ExternalFuncLibs5
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FilteredFClassMethodTestCase(
+     JModelica.UnitTesting.FClassMethodTestCase(
          name="ExternalFuncLibs5",
          description="External function annotations, IncludeDirectory",
          methodName="externalIncludeDirectories",
+	     filter=true, 
          methodResult="[/c:/foo/inc, /c:/bar/inc]"
  )})));
 
@@ -4764,10 +4766,11 @@ end ExternalFuncLibs5;
 
 model ExternalFuncLibs6
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FilteredFClassMethodTestCase(
+     JModelica.UnitTesting.FClassMethodTestCase(
          name="ExternalFuncLibs6",
          description="External function annotations, IncludeDirectory",
          methodName="externalIncludeDirectories",
+		 filter=true, 
          methodResult="[%dir%/Resources/Include]"
  )})));
 
@@ -4844,10 +4847,11 @@ end ExternalFuncLibs7;
 
 model ExternalFuncLibs8
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FilteredFClassMethodTestCase(
+     JModelica.UnitTesting.FClassMethodTestCase(
          name="ExternalFuncLibs8",
          description="External function annotations, compiler args",
          methodName="externalCompilerArgs",
+	     filter=true, 
          methodResult=" -lfoo -L%dir%/Resources/Library -I%dir%/Resources/Include"
  )})));
  

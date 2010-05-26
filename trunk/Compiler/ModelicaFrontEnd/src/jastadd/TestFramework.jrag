@@ -120,15 +120,16 @@ aspect TestFramework {
 					// Add all attributes
 					for (NamedArgument na : getFunctionArguments().getNamedArguments()) {
 						attrName = na.getName().name();
+						String methodName = "set" + Character.toUpperCase(attrName.charAt(0)) + attrName.substring(1);
+						
 						// TODO: Use type() and ceval() instead.
 						if (na.getExp() instanceof StringLitExp) {
 							String val = ((StringLitExp) na.getExp()).getSTRING().replace("\\\"","\"");
-							
-							// Get the method for setting this attribute
-							String methodName = "set" + Character.toUpperCase(attrName.charAt(0)) + attrName.substring(1);
 							Method m = cl.getMethod(methodName, String.class);
-							
-							// Call the method
+							m.invoke(tc, val);
+						} else if (na.getExp() instanceof BooleanLitExp) {
+							boolean val = na.getExp() instanceof BooleanLitExpTrue;
+							Method m = cl.getMethod(methodName, Boolean.TYPE);
 							m.invoke(tc, val);
 						} else {
 							log.debug("Creating test case '" + className + "' - attribute '" + 
@@ -148,7 +149,8 @@ aspect TestFramework {
 				log.debug("Creating test case '" + className + "' - class not found");
 			} catch (NoSuchMethodException e) {
 				// No such method was found - log that
-				log.debug("Creating test case '" + className + "' - attribute '" + attrName + "' not found");
+				log.debug("Creating test case '" + className + "' - attribute '" + attrName + 
+						"' not found or used with wrong type of expression");
 			} catch (Exception e) {
 				// The test case class did not behave as expected - log that
 				log.debug("Creating test case '" + className + "' - malformed test case class");

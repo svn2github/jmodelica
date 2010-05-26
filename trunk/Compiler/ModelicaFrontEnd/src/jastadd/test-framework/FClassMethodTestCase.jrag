@@ -61,28 +61,14 @@ public class FClassMethodTestCase extends TestCase {
 	    try {
 	    	Method method = fc.getClass().getMethod(getMethodName());
 	    		    	
-	    	String test = massageTest(method.invoke(fc).toString());
-	    	String correct = massageCorrect(getOutput());
+	    	String test = removeWhitespace(method.invoke(fc).toString());
+	    	String correct = removeWhitespace(filter(getOutput()));
 
 	    	if (test.equals(correct))
 	    		return Result.PASS;
 	    } catch (Exception e) {
 	    }
     	return Result.FAIL;
-	}
-	
-	/**
-	 * \brief Massage test result string before comparison.
-	 */
-	protected String massageTest(String str) {
-		return removeWhitespace(str);
-	}
-	
-	/**
-	 * \brief Massage correct string before comparison.
-	 */
-	protected String massageCorrect(String str) {
-		return removeWhitespace(str);
 	}
 	
 	/**

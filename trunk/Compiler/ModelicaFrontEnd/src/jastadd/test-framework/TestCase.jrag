@@ -33,6 +33,7 @@ abstract public class TestCase {
 	private String description;
 	private String sourceFileName;
 	private String className;
+	private boolean filter = false;
 
 	public TestCase() {}
 	
@@ -113,6 +114,25 @@ abstract public class TestCase {
 	 */
 	public void setClassName(String className) {
 		this.className = className;
+	}
+	
+	/**
+	 * \brief Activate or deactivate filtering (see {@link #filter(String)}).
+	 */
+	public void setFilter(boolean val) {
+		filter = val;
+	}
+	
+	/**
+	 * \brief Perform filtering on string, if activated.
+	 */
+	protected String filter(String str) {
+		if (filter) {
+			// TODO: Add more filters
+			String dir = getSourceFileName().replaceFirst("[\\\\/][^\\\\/]*$", "");
+			str = str.replace("%dir%", dir);
+		}
+		return str;
 	}
 	
 	/**

@@ -68,7 +68,7 @@ public abstract class CodeGenTestCase extends TestCase {
 	    generator.generate(new BufferedReader(new StringReader(getTemplate())),
 	    		           new PrintStream(os));
 	    String test = removeWhitespace(os.toString());
-	    String correct = removeWhitespace(getGenCode());
+	    String correct = removeWhitespace(filter(getGenCode()));
 	    return test.equals(correct) ? Result.PASS : Result.FAIL;
 	}
 	
