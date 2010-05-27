@@ -152,18 +152,18 @@ public class XMLGenerator extends GenericGenerator {
 				Iterator<String> it = units.iterator();
 				while(it.hasNext()) {
 					String unit = it.next();
-					genPrinter.print("\n\t\t <BaseUnit unit=\""+unit+"\">");
+					genPrinter.print("\n\t\t<BaseUnit unit=\""+unit+"\">");
 					HashSet<String> defs = map.get(unit);
 					Iterator<String> defsit = defs.iterator();
 					while(defsit.hasNext()) {
-						genPrinter.print("\n\t\t\t <DisplayUnitDefinition ");
+						genPrinter.print("\n\t\t\t<DisplayUnitDefinition ");
 						genPrinter.print("displayUnit=\""+ defsit.next()+"\" ");
 						genPrinter.print("gain=\"1\" ");
 						genPrinter.print("offset=\"0\"/>");
 					}
-					genPrinter.print("\n\t\t </BaseUnit>");
+					genPrinter.print("\n\t\t</BaseUnit>");
 				}				
-				genPrinter.print("\n\t </UnitDefinitions>");
+				genPrinter.print("\n\t</UnitDefinitions>");
 			}
 		}
 	}
@@ -235,30 +235,30 @@ public class XMLGenerator extends GenericGenerator {
 		 */
 		public void generate(PrintStream genPrinter) {
 			genPrinter.print("<VendorAnnotations>");
-			genPrinter.print("\n\t\t <Tool name=\"JModelica\">");
+			genPrinter.print("\n\t\t<Tool name=\"JModelica\">");
 			HashSet<String> extLibraries = fclass.externalLibraries();
 			HashSet<String> extIncludes = fclass.externalIncludes();
 			HashSet<String> extLibDirs = fclass.externalLibraryDirectories();
 			HashSet<String> extInclDirs = fclass.externalIncludeDirectories();
 			
 			for(String lib : extLibraries) {
-				genPrinter.print("\n\t\t\t <Annotation name=\"Library\" value=\""+
+				genPrinter.print("\n\t\t\t<Annotation name=\"Library\" value=\""+
 						lib+"\"/>");
 			}
 			for(String inc : extIncludes) {
-				genPrinter.print("\n\t\t\t <Annotation name=\"Include\" value=\""+
+				genPrinter.print("\n\t\t\t<Annotation name=\"Include\" value=\""+
 						replaceIllegalChars(inc)+"\"/>");
 			}
 			for(String libdir : extLibDirs) {
-				genPrinter.print("\n\t\t\t <Annotation name=\"LibraryDirectory\" value=\""+
+				genPrinter.print("\n\t\t\t<Annotation name=\"LibraryDirectory\" value=\""+
 						libdir+"\"/>");
 			}
 			for(String incdir : extInclDirs) {
-				genPrinter.print("\n\t\t\t <Annotation name=\"IncludeDirectory\" value=\""+
+				genPrinter.print("\n\t\t\t<Annotation name=\"IncludeDirectory\" value=\""+
 						incdir+"\"/>");
 			}
-			genPrinter.print("\n\t\t </Tool>");
-			genPrinter.print("\n\t </VendorAnnotations>");
+			genPrinter.print("\n\t\t</Tool>");
+			genPrinter.print("\n\t</VendorAnnotations>");
 		}
 	}	
 
@@ -285,7 +285,7 @@ public class XMLGenerator extends GenericGenerator {
 		 */
 		public void generate(PrintStream genPrinter) {			
 			for(FVariable variable:fclass.allVariables()) {		
-				genPrinter.print("\n\t\t <ScalarVariable ");
+				genPrinter.print("\n\t\t<ScalarVariable ");
 				genPrinter.print("name=\""+variable.name()+"\" ");
 				genPrinter.print("valueReference=\""+variable.valueReference()+"\" ");
 				if(variable.hasFStringComment()) {
@@ -326,28 +326,28 @@ public class XMLGenerator extends GenericGenerator {
                 genPrinter.print(">");
 
 				if(variable.isReal()) {
-					genPrinter.print("\n\t\t\t <Real ");
+					genPrinter.print("\n\t\t\t<Real ");
 					addRealAttributes(genPrinter, (FRealVariable)variable);
 					genPrinter.print("/>");					
 				} else if(variable.isInteger()) {
-					genPrinter.print("\n\t\t\t <Integer ");
+					genPrinter.print("\n\t\t\t<Integer ");
 					addIntegerAttributes(genPrinter, (FIntegerVariable)variable);
 					genPrinter.print("/>");
 				} else if(variable.isBoolean()) {
-					genPrinter.print("\n\t\t\t <Boolean ");
+					genPrinter.print("\n\t\t\t<Boolean ");
 					addBooleanAttributes(genPrinter, (FBooleanVariable)variable);
 					genPrinter.print("/>");
 				} else if(variable.isString()) {
-					genPrinter.print("\n\t\t\t <String ");
+					genPrinter.print("\n\t\t\t<String ");
 					addStringAttributes(genPrinter, (FStringVariable)variable);
 					genPrinter.print("/>");
 					
 					Boolean generateEqu = fclass.root().options.getBooleanOption("generate_xml_equations");
 					if(generateEqu){
 						//qualified name
-						genPrinter.print("\n\t\t\t <QualifiedName>");
+						genPrinter.print("\n\t\t\t<QualifiedName>");
 						variable.getFQName().prettyPrint_XML(genPrinter,"\t\t\t");
-						genPrinter.print("\n\t\t\t </QualifiedName>");
+						genPrinter.print("\n\t\t\t</QualifiedName>");
 					}
 					
 				} else if(false) {
@@ -367,7 +367,7 @@ public class XMLGenerator extends GenericGenerator {
 					addLinearInfo(genPrinter, variable);
 				
 					//variable category
-					genPrinter.print("\n\t\t\t <VariableCategory>");
+					genPrinter.print("\n\t\t\t<VariableCategory>");
 					if(variable.isDerivativeVariable()) {
 						genPrinter.print("derivative");
 					} else if(variable.isDifferentiatedVariable()) {
@@ -387,7 +387,7 @@ public class XMLGenerator extends GenericGenerator {
 					genPrinter.print("</VariableCategory>");
 				}
 				
-				genPrinter.print("\n\t\t </ScalarVariable>");
+				genPrinter.print("\n\t\t</ScalarVariable>");
 			}
 		}
 	}
@@ -409,7 +409,7 @@ public class XMLGenerator extends GenericGenerator {
 	 */
 	protected void addLinearInfo(PrintStream genPrinter, FVariable variable){
 		//isLinear
-		genPrinter.print("\n\t\t\t <isLinear>"+variable.isLinear()+"</isLinear>");
+		genPrinter.print("\n\t\t\t<isLinear>"+variable.isLinear()+"</isLinear>");
 	}
 
 	/*

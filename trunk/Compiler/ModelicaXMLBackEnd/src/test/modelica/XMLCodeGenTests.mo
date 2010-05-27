@@ -28,6 +28,59 @@ model RemoveCopyright
 )})));
 end RemoveCopyright;
 
+model XMLExtFuncAnnotations1
+	annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+		JModelica.UnitTesting.XMLCodeGenTestCase(
+			name="XMLExtFuncAnnotations1",
+			description="Test that external function annotations are generated correctly with file://.",
+			template="$XML_vendorAnnotations$",
+			generatedCode="
+<VendorAnnotations>
+		<Tool name=\"JModelica\">
+			<Annotation name=\"Library\" value=\"external1\"/>
+			<Annotation name=\"Include\" value=\"#include &quot;external1.h&quot;\"/>
+			<Annotation name=\"LibraryDirectory\" value=\"/Library\"/>
+			<Annotation name= \"IncludeDirectory\" value=\"/Include\"/>
+		</Tool>
+	</VendorAnnotations>
+"
+   )})));
+	function extFunc
+		external "C" annotation(Library="external1", Include="#include \"external1.h\"",
+								LibraryDirectory="file:///Library", IncludeDirectory="file:///Include");
+	end extFunc;
+	
+algorithm
+	extFunc();
+	
+end XMLExtFuncAnnotations1;
+
+model XMLExtFuncAnnotations2
+	annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+		JModelica.UnitTesting.XMLCodeGenTestCase(
+			name="XMLExtFuncAnnotations2",
+			description="Test that external function annotations are generated correctly without explicit Include or Library directories.",
+			template="$XML_vendorAnnotations$",
+			filter=true,
+			generatedCode="
+<VendorAnnotations>
+		<Tool name=\"JModelica\">
+			<Annotation name=\"Library\" value=\"external1\"/>
+			<Annotation name=\"Include\" value=\"#include &quot;external1.h&quot;\"/>
+			<Annotation name=\"LibraryDirectory\" value=\"%dir%/Resources/Library\"/>
+			<Annotation name= \"IncludeDirectory\" value=\"%dir%/Resources/Include\"/>
+		</Tool>
+	</VendorAnnotations>
+"
+   )})));
+	function extFunc
+		external "C" annotation(Library="external1", Include="#include \"external1.h\"");
+	end extFunc;
+	
+algorithm
+	extFunc();
+	
+end XMLExtFuncAnnotations2;
 
 
   model XMLCodeGenTest1
