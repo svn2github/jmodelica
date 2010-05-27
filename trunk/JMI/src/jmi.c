@@ -165,7 +165,8 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 }
 
 int jmi_ad_init(jmi_t* jmi) {
-	return -1;
+  //return -1;
+  return 0;
 }
 
 int jmi_delete(jmi_t* jmi){
