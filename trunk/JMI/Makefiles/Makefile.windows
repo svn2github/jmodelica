@@ -65,6 +65,12 @@ CPPAD_HOME =
 # IPOPT home
 IPOPT_HOME = 
 
+# Additional libraries
+EXT_LIBS =
+
+# Additional include directories
+EXT_INC_DIRS =
+
 # Build with algorithms (requires IPOPT)
 BUILD_WITH_ALGORITHMS = false
 
@@ -76,33 +82,47 @@ OBJS = $(FILE_NAME).o
 # C++ Compiler command
 CXX = g++
 
+# C Compiler command
+CC = gcc
+
 # ar command
 AR = ar
 
 # Command to remove temporary files
 RM = del
 
+# Compile with or without CppAD
+JMI_AD=JMI_AD_CPPAD
+
 # C++ Compiler options
-CXXFLAGS = -g -O2 -DJMI_AD=JMI_AD_CPPAD
+CXXFLAGS = -g -O2 -DJMI_AD=${JMI_AD}
+
+# C Compiler options
+CFLAGS = -g -O2 -std=c99 -DJMI_AD=$(JMI_AD)
 
 SHARED_LDFLAGS = -shared 
 
 # Directories with header files
-JMIINCDIR = ${JMODELICA_HOME}/include
-CPPADINCDIR = $(CPPAD_HOME)
+JMI_INC_DIR = ${JMODELICA_HOME}/include
+CPPAD_INC_DIR = $(CPPAD_HOME)
 
 # Directory with jmi_cppad.a
-JMILIBDIR = ${JMODELICA_HOME}/lib
+JMI_LIB_DIR = ${JMODELICA_HOME}/lib
 
 # Libraries necessary to link with jmi
-LIBS = -L$(JMILIBDIR) -ljmi_cppad 
-LIBS_IPOPT = -L$(JMILIBDIR) -ljmi_cppad -ljmi_algorithm_cppad -ljmi_solver_cppad -L$(IPOPT_HOME)/lib -lipopt -lm -lgfortran -lpthread -lmingw32 -lmoldname -lmingwex -lmsvcrt -luser32 -lkernel32 -ladvapi32 -lshell32 -lstdc++ 
+LIBS_CPPAD = -L$(JMI_LIB_DIR) -ljmi_cppad
+LIBS_NOCPPAD = -L${JMI_LIB_DIR} -ljmi 
+LIBS_IPOPT = -L$(JMI_LIB_DIR) -ljmi_cppad -ljmi_algorithm_cppad -ljmi_solver_cppad -L$(IPOPT_HOME)/lib -lipopt -lm -lgfortran -lpthread -lmingw32 -lmoldname -lmingwex -lmsvcrt -luser32 -lkernel32 -ladvapi32 -lshell32 -lstdc++ 
 
 # Include paths for compilation
-INCL = -I$(JMIINCDIR) -I$(CPPADINCDIR)
+INCL_CPPAD = -I$(JMI_INC_DIR) -I$(CPPAD_INC_DIR)
+INCL_NOCPPAD = -I$(JMI_INC_DIR) $(EXT_INC_DIRS)
 
 model: $(OBJS)
-	$(CXX) $(SHARED_LDFLAGS) $(CXXLINKFLAGS) $(CXXFLAGS) -o $(SHARED) $(OBJS) $(LIBS)
+	$(CXX) $(SHARED_LDFLAGS) $(CXXLINKFLAGS) $(CXXFLAGS) -o $(SHARED) $(OBJS) $(LIBS_CPPAD)
+
+model_noad: $(OBJS)
+	$(CC) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) $(LIBS_NOCPPAD) $(EXT_LIBS)
 
 algorithms: $(OBJS)
 # This is to ensure that the contents of libjmi_algorithm_cppad and
@@ -111,7 +131,7 @@ ifeq "$(wildcard .jmi_objs )" ""
 	mkdir .jmi_objs
 endif
 	cd .jmi_objs && ar -x $(JMODELICA_HOME)/lib/libjmi_algorithm_cppad.a   
-	$(CXX) $(SHARED_LDFLAGS) $(CXXLINKFLAGS) $(CXXFLAGS) -o $(SHARED) $(OBJS) ./.jmi_objs/*.o $(LIBS)
+	$(CXX) $(SHARED_LDFLAGS) $(CXXLINKFLAGS) $(CXXFLAGS) -o $(SHARED) $(OBJS) ./.jmi_objs/*.o $(LIBS_CPPAD)
 	$(RM) .jmi_objs\*.o
 	rmdir .jmi_objs
 
@@ -148,10 +168,18 @@ all: $(SHARED)
 
 # Compile
 .cpp.o:
-	$(CXX) $(CXXFLAGS) $(INCL) -c -o $@ $<
+ifeq ($(JMI_AD),JMI_AD_CPPAD)
+	$(CXX) $(CXXFLAGS) $(INCL_CPPAD) -c -o $@ $<
+else
+	$(CXX) $(CXXFLAGS) $(INCL_NOCPPAD) -c -o $@ $<
+endif
 
 .c.o:
-	$(CXX) $(CXXFLAGS) $(INCL) -c -o $@ $<
+ifeq ($(JMI_AD),JMI_AD_CPPAD)
+	$(CXX) $(CXXFLAGS) $(INCL_CPPAD) -c -o $@ $<
+else
+	$(CC) $(CFLAGS) $(INCL_NOCPPAD) -c -o $@ $<
+endif
 
 clean:
 	del $(SHARED) $(OBJS)
