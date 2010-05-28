@@ -99,25 +99,25 @@ At line 79, column 3:
 end ArrayOfRecords_Warn;
 
 
-model ExternalFunction_ComplErr
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ComplianceErrorTestCase(
-         name="ExternalFunction_ComplErr",
-         description="Compliance error for external functions",
-         errorMessage="
-1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 105, column 3:
-  External functions are not supported
-")})));
+//model ExternalFunction_ComplErr
+// annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+//     JModelica.UnitTesting.ComplianceErrorTestCase(
+//         name="ExternalFunction_ComplErr",
+//         description="Compliance error for external functions",
+//         errorMessage="
+//1 errors found:
+//Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+//Compliance error at line 105, column 3:
+//  External functions are not supported
+//")})));
 
- function f
-  output Real x;
-  external "C";
- end f;
+// function f
+//  output Real x;
+//  external "C";
+// end f;
  
- Real x = f();
-end ExternalFunction_ComplErr;
+// Real x = f();
+//end ExternalFunction_ComplErr;
 
 
 model WhenStmt_ComplErr

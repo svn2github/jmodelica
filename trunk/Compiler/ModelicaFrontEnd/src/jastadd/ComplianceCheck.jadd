@@ -44,12 +44,12 @@ aspect ComplianceCheck {
 		}
 	}
 	
-	public void InstExternal.complianceCheck() {
+/*	public void InstExternal.complianceCheck() {
 		super.complianceCheck();
 		if (!hasFExternalLanguage() || !getFExternalLanguage().supportedLanguage())
 			compliance("External functions are not supported");
 	}
-	
+*/	
 	syn boolean FExternalLanguage.supportedLanguage() = false;
 	eq FBuiltinExternalLanguage.supportedLanguage()   = true;
 	eq FUnknownExternalLanguage.supportedLanguage()   = true;  // Avoid duplicate errors

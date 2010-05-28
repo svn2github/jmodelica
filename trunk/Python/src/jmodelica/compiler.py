@@ -31,6 +31,7 @@ import jpype
 import string
 import jmodelica as jm
 import jmodelica.jmi as jmi
+from jmodelica import xmlparser
 
 #start JVM
 # note that startJVM() fails after shutdownJVM(), hence, only one start
@@ -291,7 +292,18 @@ class ModelicaCompiler():
             self._compiler.compileModel(model_file_name,
                                         model_class_name)
             c_file = model_class_name.replace('.','_')
-            self.compile_dll(c_file, target)
+            
+            # get external libs and include dirs from XML doc
+            xml_file=c_file+'.xml'
+            xmldoc = xmlparser.XMLDoc(xml_file)
+            ext_libs = xmldoc.get_external_libraries()
+            ext_lib_dirs = xmldoc.get_external_lib_dirs()
+            ext_incl_dirs = xmldoc.get_external_incl_dirs()
+            
+            if len(ext_libs) > 0:
+                self.compile_dll(c_file, target, ext_libs=ext_libs, ext_lib_dirs=ext_lib_dirs, ext_incl_dirs=ext_incl_dirs)
+            else:
+                self.compile_dll(c_file, target)
 
         except jpype.JavaException, ex:
             self._handle_exception(ex)
@@ -431,7 +443,8 @@ class ModelicaCompiler():
         except jpype.JavaException, ex:
             self._handle_exception(ex)
 
-    def compile_dll(self, c_file_name, target="model"):
+    def compile_dll(self, c_file_name, target="model", ext_libs=[], 
+        ext_lib_dirs=[], ext_incl_dirs=[]):
 
         """ 
         Compile a c code representation of a model.
@@ -441,7 +454,7 @@ class ModelicaCompiler():
         this module is run. Needs a c-file which is generated with
         generate_code.
 
-        Parameters:
+        Parameters:c
             c_file_name --
                 Name of c-file for which the .dll should be compiled without 
                 file extention.
@@ -455,6 +468,23 @@ class ModelicaCompiler():
         jmodelica_h =' JMODELICA_HOME=' + self.jm_home
         cppad_h = ' CPPAD_HOME=' + jm.environ['CPPAD_HOME']
         ipopt_h = ' IPOPT_HOME=' + jm.environ['IPOPT_HOME']
+        
+        if target=='model_noad':
+            jmiad = ' JMI_AD=JMI_AD_NONE'
+        else:
+            jmiad = ' JMI_AD=JMI_AD_CPPAD'
+        
+        extlibs = ' EXT_LIBS=\"'
+        for libdir in ext_lib_dirs:
+            extlibs = extlibs+" -L"+libdir
+        for lib in ext_libs:
+            extlibs = extlibs+" -l"+lib
+        extlibs = extlibs+"\""
+        
+        extincdir = ' EXT_INC_DIRS=\"'
+        for incdir in ext_incl_dirs:
+            extincdir = extincdir+" -I"+incdir
+        extincdir = extincdir+"\""
 
         if sys.platform == 'win32':
             make = os.path.join(jm.environ['MINGW_HOME'],'bin','mingw32-make') + ' -f '
@@ -470,7 +500,10 @@ class ModelicaCompiler():
                   file_name + \
                   jmodelica_h + \
                   cppad_h + \
-                  ipopt_h
+                  ipopt_h + \
+                  jmiad + \
+                  extlibs + \
+                  extincdir
         else:
             cmd = 'make -f' + \
                   make_file + \
@@ -479,7 +512,10 @@ class ModelicaCompiler():
                   file_name + \
                   jmodelica_h + \
                   cppad_h + \
-                  ipopt_h
+                  ipopt_h + \
+                  jmiad + \
+                  extlibs + \
+                  extincdir
 
         #run make -> <model_class_name>.dll
         retcode = subprocess.call(cmd, shell=True)

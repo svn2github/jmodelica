@@ -1530,6 +1530,28 @@ aspect FlatExternalFunctionAPI {
 		}
 		return buf.toString();
 	}
+
+	syn String FClass.externalLibArgs() {
+		StringBuilder buf = new StringBuilder();
+		for (String lib : externalLibraries()) {
+			buf.append(" -l");
+			buf.append(lib);
+		}
+		for (String dir : externalLibraryDirectories()) {
+			buf.append(" -L");
+			buf.append(dir);
+		}
+		return buf.toString();
+	}
+
+	syn String FClass.externalIncludeArgs() {
+		StringBuilder buf = new StringBuilder();
+		for (String dir : externalIncludeDirectories()) {
+			buf.append(" -I");
+			buf.append(dir);
+		}
+		return buf.toString();
+	}
 	
 	coll HashSet<String> FClass.externalLibraries() 
 	  [new HashSet<String>()] with addAll root FClass;

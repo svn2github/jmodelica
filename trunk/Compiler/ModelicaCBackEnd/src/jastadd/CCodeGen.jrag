@@ -804,6 +804,17 @@ aspect CCodeGen {
 		str.print("JMI_FALSE");
 	}
 	
+	public void FExternalStmt.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		if(hasReturnVar()) {
+			String ret = getReturnVar().name_C();
+			str.print(indent);
+			str.print(ret+" = ");
+		}
+		str.print(getName()+"(");
+		getArgs().prettyPrintWithSep(p, str, indent, o, ", ");
+		str.print(");\n");
+	}
+	
 	public void ASTNode.genTempVars_C(Printer p, PrintStream str, String indent, Object o) {
 		for (ASTNode node : this)
 			node.genTempVars_C(p, str, indent, o);
@@ -1062,8 +1073,6 @@ aspect CCodeGen {
 			str.print(";\n");
 		}
 	}
-
-	
 	
 }
 
