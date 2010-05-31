@@ -16,6 +16,7 @@ import jmodelica.xmlparser as xp
 jm_home = os.environ.get('JMODELICA_HOME')
 path_to_examples = os.path.join('Python','jmodelica','examples')
 path_to_schemas = os.path.join(jm_home,'XML')
+path_to_tests = os.path.join('Python', 'jmodelica','tests')
 
 # cstr model
 cstr_model = os.path.join('files','CSTR.mo')
@@ -34,6 +35,12 @@ vdpmin_model = os.path.join('files','VDP.mo')
 vdpmin_fpath = os.path.join(jm_home,path_to_examples,vdpmin_model)
 vdpmin_cpath = "VDP_pack.VDP_Opt_Min_Time"
 vdpmin_fname = vdpmin_cpath.replace('.','_',1)
+
+# static opt model
+staticopt_model = os.path.join('files', 'StaticOptimizationTest.mo')
+staticopt_fpath = os.path.join(jm_home, path_to_tests, staticopt_model)
+staticopt_cpath = 'StaticOptimizationTest.StaticOptimizationTest2'
+staticopt_fname = staticopt_cpath.replace('.','_',1)
 
 #compilers
 mc = ModelicaCompiler()
@@ -56,6 +63,8 @@ def setup():
     oc.compile_model(parest_cpath, parest_fpath)
     # vdp min time model
     oc.compile_model(vdpmin_cpath, vdpmin_fpath)#, 'ipopt')
+    # static opt model
+    oc.compile_model(staticopt_cpath, staticopt_fpath, 'ipopt')
     
         
 @testattr(stddist = True)
@@ -88,6 +97,7 @@ def test_xmldoc_methods():
     cstr_xmldoc = xp.XMLDoc(cstr_fname+'.xml')
     parest_xmldoc = xp.XMLDoc(parest_fname+'.xml')
     vdpmin_xmldoc = xp.XMLDoc(vdpmin_fname+'.xml')
+    staticopt_xmldoc = xp.XMLDoc(staticopt_fname+'.xml')
     
     t_get_valueref.description = 'test XMLDoc.get_valueref'
     t_get_aliases.description = 'test XMLDoc.get_aliases'
@@ -135,7 +145,7 @@ def test_xmldoc_methods():
     t_get_finaltime.description = ' test XMLDoc.get_finaltime'
     t_get_finaltime_free.description = ' test XMLDoc.get_finaltime_free'
     t_get_timepoints.description = ' test XMLDoc.get_timepoints'
-
+    t_is_static.description = ' test XMLDoc.is_static'
     
     yield t_get_valueref, cstr_xmldoc
     yield t_get_aliases, cstr_xmldoc
@@ -183,6 +193,7 @@ def test_xmldoc_methods():
     yield t_get_finaltime, cstr_xmldoc
     yield t_get_finaltime_free, cstr_xmldoc
     yield t_get_timepoints, cstr_xmldoc 
+    yield t_is_static, staticopt_xmldoc
     
 @testattr(stddist = True)
 def test_xmlvaluesdoc_methods():
@@ -937,6 +948,11 @@ def t_get_timepoints(xmldoc):
         assert tp.__class__ is float, \
             "timepoint is not float."
     nose.tools.assert_equal(timepoints[0], 150.0)
+    
+@testattr(stddist = True)
+def t_is_static(xmldoc):
+    isstatic = xmldoc.is_static()
+    nose.tools.assert_equal(isstatic,True)
     
 # @testattr(stddist = True)
 # def test_fmi_schema():

@@ -139,8 +139,8 @@ public class OptimicaXMLGenerator extends XMLGenerator {
 			String indent="\t\t";
 			FOptClass optClass = (FOptClass) fclass;
 			
-			genPrinter.println("<opt:Optimization>");
-			
+			genPrinter.println("<opt:Optimization static=\""+optClass.staticAttribute()+"\" >");
+
 			if(generateEqu){
 				//Objective function
 				genPrinter.println(indent+"<opt:ObjectiveFunction>");

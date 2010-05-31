@@ -1571,6 +1571,15 @@ class XMLDoc(XMLBaseDoc):
             return self.function_cache.get(self, 'get_external_incl_dirs', None)
         return self._xpatheval("//VendorAnnotations/*/Annotation/@value [../@name=\"IncludeDirectory\"]")
         
+    def is_static(self, ignore_cache=False):
+        """ Return True if Optimica static attribute is set and equal to true, otherwise False."""
+        if not ignore_cache:
+            return self.function_cache.get(self, 'is_static', None)
+        static = self._xpatheval("opt:Optimization/@static")
+        if len(static) > 0:
+            return static[0]=='true'
+        return False
+        
             
 class XMLValuesDoc(XMLBaseDoc):
     
