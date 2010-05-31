@@ -1,6 +1,6 @@
-package ExtFunctionsTest
+package ExtFunctions
 
-model ExtFunctionTest1
+model addTwo
  Real a(start=1) = 1;
  Real b(start=2) = 2;
  Real c(start=3);
@@ -8,7 +8,7 @@ model ExtFunctionTest1
  algorithm
   c := add(a,b);
 
-end ExtFunctionTest1;
+end addTwo;
 
 function add
  input Real a;
@@ -20,4 +20,4 @@ function add
 end add;
 
 
-end ExtFunctionsTest;
+end ExtFunctions;

@@ -10,8 +10,8 @@ from Assimulo import Implicit_ODE as impl_ode
 def run_demo(with_plots=True):
     
     curr_dir = os.path.dirname(os.path.abspath(__file__));
-    model_name = 'ExtFunctionsTest.ExtFunctionTest1'
-    mofile = curr_dir+'/files/ExtFunctionsTests.mo'
+    model_name = 'ExtFunctions.addTwo'
+    mofile = curr_dir+'/files/ExtFunctions.mo'
 
     mc = ModelicaCompiler()
     model=mc.compile_model(model_name,mofile,target='model_noad')
