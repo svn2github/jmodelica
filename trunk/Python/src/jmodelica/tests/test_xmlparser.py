@@ -42,6 +42,17 @@ staticopt_fpath = os.path.join(jm_home, path_to_tests, staticopt_model)
 staticopt_cpath = 'StaticOptimizationTest.StaticOptimizationTest2'
 staticopt_fname = staticopt_cpath.replace('.','_',1)
 
+# ext functions models
+extfunc1_model = os.path.join('files', 'ExtFunctionTests.mo')
+extfunc1_fpath = os.path.join(jm_home, path_to_tests, extfunc1_model)
+extfunc1_cpath = 'ExtFunctionTests.ExtFunctionTest1'
+extfunc1_fname = extfunc1_cpath.replace('.','_',1)
+
+extfunc2_model = os.path.join('files', 'ExtFunctionTests.mo')
+extfunc2_fpath = os.path.join(jm_home, path_to_tests, extfunc2_model)
+extfunc2_cpath = 'ExtFunctionTests.ExtFunctionTest2'
+extfunc2_fname = extfunc2_cpath.replace('.','_',1)
+
 #compilers
 mc = ModelicaCompiler()
 oc = OptimicaCompiler()
@@ -66,6 +77,16 @@ def setup():
     # static opt model
     oc.compile_model(staticopt_cpath, staticopt_fpath, 'ipopt')
     
+    # ext functions model 1 - can not compile dll at the moment
+    src_root = mc.parse_model(extfunc1_fpath)
+    inst_cls_decl = mc.instantiate_model(src_root, extfunc1_cpath)
+    fcls = mc.flatten_model(inst_cls_decl)
+    mc.generate_code(fcls)
+    # ext functions model 2 - can not compile dll at the moment
+    src_root = mc.parse_model(extfunc2_fpath)
+    inst_cls_decl = mc.instantiate_model(src_root, extfunc2_cpath)
+    fcls = mc.flatten_model(inst_cls_decl)
+    mc.generate_code(fcls)
         
 @testattr(stddist = True)
 def test_create_XMLDoc():
@@ -98,6 +119,8 @@ def test_xmldoc_methods():
     parest_xmldoc = xp.XMLDoc(parest_fname+'.xml')
     vdpmin_xmldoc = xp.XMLDoc(vdpmin_fname+'.xml')
     staticopt_xmldoc = xp.XMLDoc(staticopt_fname+'.xml')
+    extfunc1_xmldoc = xp.XMLDoc(extfunc1_fname+'.xml')
+    extfunc2_xmldoc = xp.XMLDoc(extfunc2_fname+'.xml')
     
     t_get_valueref.description = 'test XMLDoc.get_valueref'
     t_get_aliases.description = 'test XMLDoc.get_aliases'
@@ -146,7 +169,15 @@ def test_xmldoc_methods():
     t_get_finaltime_free.description = ' test XMLDoc.get_finaltime_free'
     t_get_timepoints.description = ' test XMLDoc.get_timepoints'
     t_is_static.description = ' test XMLDoc.is_static'
-    
+    t_get_external_libraries_1.description = ' test XMLDoc.get_external libraries'
+    t_get_external_libraries_2.description = ' test XMLDoc.get_external libraries'
+    t_get_external_includes_1.description = ' test XMLDoc.get_external_includes'
+    t_get_external_includes_2.description = ' test XMLDoc.get_external_includes'
+    t_get_external_librarydirs_1.description = ' test XMLDoc.get_external_lib_dirs'
+    t_get_external_librarydirs_2.description = ' test XMLDoc.get_external_lib_dirs'
+    t_get_external_includedirs_1.description = ' test XMLDoc.get_external_incl_dirs'
+    t_get_external_includedirs_2.description = ' test XMLDoc.get_external_incl_dirs'
+
     yield t_get_valueref, cstr_xmldoc
     yield t_get_aliases, cstr_xmldoc
     yield t_get_variable_description, cstr_xmldoc
@@ -194,6 +225,16 @@ def test_xmldoc_methods():
     yield t_get_finaltime_free, cstr_xmldoc
     yield t_get_timepoints, cstr_xmldoc 
     yield t_is_static, staticopt_xmldoc
+    yield t_get_external_libraries_1, extfunc1_xmldoc
+    yield t_get_external_libraries_2, extfunc2_xmldoc
+    yield t_get_external_includes_1, extfunc1_xmldoc
+    yield t_get_external_includes_2, extfunc2_xmldoc
+    yield t_get_external_librarydirs_1, extfunc1_xmldoc
+    yield t_get_external_librarydirs_2, extfunc2_xmldoc
+    yield t_get_external_includedirs_1, extfunc1_xmldoc
+    yield t_get_external_includedirs_2, extfunc2_xmldoc
+
+
     
 @testattr(stddist = True)
 def test_xmlvaluesdoc_methods():
@@ -953,7 +994,56 @@ def t_get_timepoints(xmldoc):
 def t_is_static(xmldoc):
     isstatic = xmldoc.is_static()
     nose.tools.assert_equal(isstatic,True)
+
+@testattr(stddist = True)
+def t_get_external_libraries_1(xmldoc):
+    extlib = xmldoc.get_external_libraries()
+    nose.tools.assert_equal(extlib[0],'addNumbers1')
     
+@testattr(stddist = True)
+def t_get_external_libraries_2(xmldoc):
+    extlib = xmldoc.get_external_libraries()
+    extlib.sort()
+    nose.tools.assert_equal(extlib[0],'addNumbers1')
+    nose.tools.assert_equal(extlib[1],'addNumbers2')
+    
+@testattr(stddist=True)
+def t_get_external_includes_1(xmldoc):
+    extincl = xmldoc.get_external_includes()
+    nose.tools.assert_equal(extincl[0],'#include \"addNumbers1.h\"')
+    
+@testattr(stddist = True)
+def t_get_external_includes_2(xmldoc):
+    extincl = xmldoc.get_external_includes()
+    extincl.sort()
+    nose.tools.assert_equal(extincl[0],'#include \"addNumbers1.h\"')
+    nose.tools.assert_equal(extincl[1],'#include \"addNumbers2.h\"')
+    
+@testattr(stddist = True)
+def t_get_external_librarydirs_1(xmldoc):
+    extlib = xmldoc.get_external_lib_dirs()
+    nose.tools.assert_equal(extlib[0],'/Library')
+    
+@testattr(stddist = True)
+def t_get_external_librarydirs_2(xmldoc):
+    extlib = xmldoc.get_external_lib_dirs()
+    extlib.sort()
+    nose.tools.assert_equal(extlib[0],'/Library')
+    nose.tools.assert_equal(extlib[1],'/Libs/lib1')
+    
+@testattr(stddist=True)
+def t_get_external_includedirs_1(xmldoc):
+    extincl = xmldoc.get_external_incl_dirs()
+    nose.tools.assert_equal(extincl[0],'/Include')
+    
+@testattr(stddist = True)
+def t_get_external_includedirs_2(xmldoc):
+    extincl = xmldoc.get_external_incl_dirs()
+    extincl.sort()
+    nose.tools.assert_equal(extincl[0],'/Incl/incl1')
+    nose.tools.assert_equal(extincl[1],'/Include')
+
+
 # @testattr(stddist = True)
 # def test_fmi_schema():
 #     """ Test that generated XML file validates with the fmi schema. """

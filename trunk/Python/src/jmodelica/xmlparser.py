@@ -1548,25 +1548,25 @@ class XMLDoc(XMLBaseDoc):
         return timepoints
         
     def get_external_libraries(self, ignore_cache=False):
-        """ Extract all external library entries. """
+        """ Extract all external library entries and return as list. """
         if not ignore_cache:
             return self.function_cache.get(self, 'get_external_libraries', None)
         return self._xpatheval("//VendorAnnotations/*/Annotation/@value [../@name=\"Library\"]")
         
     def get_external_includes(self, ignore_cache=False):
-        """Extract all external file includes."""
+        """Extract all external file includes and return as list."""
         if not ignore_cache:
             return self.function_cache.get(self, 'get_external_includes', None)
-        return self_xpatheval("//VendorAnnotations/*/Annotation/@value [../@name=\"Include\"]")
+        return self._xpatheval("//VendorAnnotations/*/Annotation/@value [../@name=\"Include\"]")
         
     def get_external_lib_dirs(self, ignore_cache=False):
-        """ Extract all external library directories. """
+        """ Extract all external library directories and return as list. """
         if not ignore_cache:
             return self.function_cache.get(self, 'get_external_lib_dirs', None)
         return self._xpatheval("//VendorAnnotations/*/Annotation/@value [../@name=\"LibraryDirectory\"]")
         
     def get_external_incl_dirs(self, ignore_cache=False):
-        """ Extract all external include directories. """
+        """ Extract all external include directories and return as list. """
         if not ignore_cache:
             return self.function_cache.get(self, 'get_external_incl_dirs', None)
         return self._xpatheval("//VendorAnnotations/*/Annotation/@value [../@name=\"IncludeDirectory\"]")
