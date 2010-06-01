@@ -1670,6 +1670,11 @@ int jmi_opt_dHineq_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_v
 	}
 }
 
+int jmi_with_cppad_derivatives()
+{
+	return JMI_AD_WITH_CPPAD;
+}
+
 
 // Array interface
 #include "jmi_array_cppad.h"

@@ -404,6 +404,9 @@ class Model(object):
         self.jmimodel.initAD()
         self._set_dependent_parameters()
 
+    def has_cppad_derivatives(self):
+        """ Check if there is support for CppAD derivatives."""
+        return bool(self.jmimodel.with_cppad_derivatives())
 
     def reset(self):
         """Reset the internal states of the DLL.
@@ -2727,6 +2730,12 @@ class JMIModel(object):
         """
         if self._dll.jmi_ad_init(self._jmi) is not 0:
             raise JMIException("Could not initialize AD.")
+            
+    def with_cppad_derivatives(self):
+        """ Check if there is support for CppAD derivatives or not.
+            Return 1 for CppAD support, 0 if no CppAD support.
+        """
+        return self._dll.jmi_with_cppad_derivatives()
                
     def __del__(self):
         """DLL load cleanup function.

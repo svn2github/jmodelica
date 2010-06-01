@@ -59,7 +59,12 @@ class TestModel_VDP:
     """
     def __init__(self):        
         self.vdp = jmi.Model(fname_vdp)
-            
+        
+    @testattr(stddist = True)
+    def test_has_cppad_derivatives(self):
+        """ Test jmi.Model.has_cppad_derivatives function."""
+        nose.tools.assert_equal(self.vdp.has_cppad_derivatives(), True)
+    
     @testattr(stddist = True)                                          
     def test_model_size(self):
         """Test jmi.Model length of x"""

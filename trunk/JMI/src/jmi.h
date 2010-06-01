@@ -1879,6 +1879,16 @@ void jmi_print_summary(jmi_t *jmi);
  */
 void jmi_lin_interpolate(jmi_real_t x, jmi_real_t *z , int n ,int m,
 		jmi_real_t *y);
+		
+/**
+ * \brief Check if there is support for CppAD derivatives or not.
+ * 
+ * If the return value is 1 then there is support for CppAD derivatives, 
+ * if return value is 0 there is no CppAD support.
+ * 
+ * @return 1 for CppAD support, 0 if no CppAD support.
+ */ 
+int jmi_with_cppad_derivatives();
 
 /* @} */
 
