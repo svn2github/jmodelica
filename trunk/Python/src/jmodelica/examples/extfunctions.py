@@ -1,11 +1,8 @@
-from jmodelica.compiler import ModelicaCompiler
 import jmodelica
 import pylab as p
 import numpy as N
 import os
-from jmodelica.simulation.assimulo import JMIDAE, write_data
-from Assimulo.Implicit_ODE import IDA
-from Assimulo import Implicit_ODE as impl_ode
+
 
 def run_demo(with_plots=True):
     
@@ -13,16 +10,8 @@ def run_demo(with_plots=True):
     model_name = 'ExtFunctions.addTwo'
     mofile = curr_dir+'/files/ExtFunctions.mo'
 
-    mc = ModelicaCompiler()
-    model=mc.compile_model(model_name,mofile,target='model_noad')
-
     #simulate
-    probl = JMIDAE(model)
-    simulator = impl_ode.IDA(probl)
-    simulator.simulate(10.0)
-    write_data(simulator)
-    result_file_name=model.get_name()+'_result.txt'
-    res = jmodelica.io.ResultDymolaTextual(result_file_name)
+    (model, res) = jmodelica.simulate(model_name, mofile, compiler_target='model_noad')
 
     sim_a = res.get_variable_data('a')
     sim_b = res.get_variable_data('b')

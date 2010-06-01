@@ -257,7 +257,9 @@ class AssimuloAlg(AlgorithmBase):
                 
     def solve(self):
         """ Runs the simulation. """
-        self.simulator.initiate()
+        # Only run initiate if model has been compiled with CppAD
+        if self.model.has_cppad_derivatives():
+            self.simulator.initiate()
         self.simulator.simulate(self.final_time, self.num_communication_points)
     
     def write_result(self):
