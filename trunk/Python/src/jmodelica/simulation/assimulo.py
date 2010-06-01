@@ -197,7 +197,8 @@ class JMIODE(Explicit_Problem):
         if g_nbr > 0:
             raise JMIModel_Exception('There is no support for discontinuities when using an ODE solver.')
         
-        self.jac = self.j #Activates the jacobian
+        if self._model.has_cppad_derivatives():
+            self.jac = self.j #Activates the jacobian
     
     def f(self, t, y, sw=None):
         """
@@ -309,7 +310,8 @@ class JMIDAE(Implicit_Problem):
         self.eps = 1e-9 #Epsilon for adjusting the event indicator.
         self.log_events = False #Are we to log the events?
         
-        self.jac = self.j #Activates the jacobian
+        if self._model.has_cppad_derivatives():
+            self.jac = self.j #Activates the jacobian
         
         #Sets internal options
         self._initiate_problem = False #Used for initiation
