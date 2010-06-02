@@ -110,6 +110,15 @@ aspect InstLookupComponents {
 		return set;
 	}
 	
+	/**
+	 * \brief Check if any constraining class/component has the given component.
+	 */
+	syn boolean InstNode.constrainMemberInstComponent(String name) {
+		if (!hasInstConstraining() || inInstConstraining())
+			return true;
+		return getInstConstraining().getInstNode().memberInstComponent(name).size() > 0;
+	}
+	
 	syn lazy HashSet InstNode.memberInstComponent(String name)  {
 
 		if (isArray()) {
@@ -123,17 +132,16 @@ aspect InstLookupComponents {
 		} else {	
 			HashSet set = new HashSet(4);
 		 	
-			for (InstComponentDecl ic : constrainingInstComponentDecls()) {
+			for (InstComponentDecl ic : instComponentDecls()) 
 				if (ic.matchInstComponentDecl(name))
 					set.add(ic);
-			}
 
-			// TODO: handle constraining type
-			for (InstExtends ie : instExtends()) {
+			for (InstExtends ie : instExtends()) 
 				set.addAll(ie.memberInstComponent(name));
-			}
 		
-			return (set.size() > 0) ? set : emptyHashSet();
+			if (set.size() > 0 && constrainMemberInstComponent(name)) 
+				return set;
+			return emptyHashSet();
 		}
 	}
 	
@@ -149,11 +157,13 @@ aspect InstLookupComponents {
 	
 	syn lazy HashSet InstNode.memberInstConstant(String name) {
 		HashSet set = new HashSet(4);
-		for (InstComponentDecl ic : constrainingInstComponentDecls()) {
+		for (InstComponentDecl ic : instComponentDecls()) 
 			if (ic.getComponentDecl().isConstant() && ic.matchInstComponentDecl(name))
 				set.add(ic);
-		}
-		return set.isEmpty() ? emptyHashSet() : set;
+
+		if (set.size() > 0 && constrainMemberInstComponent(name)) 
+			return set;
+		return emptyHashSet();
 	}
 
 	syn HashSet InstImport.lookupInstConstantInImport(String name) {

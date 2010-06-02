@@ -979,6 +979,124 @@ end NameTests.ConstantLookup21;
 end ConstantLookup21;
 
 
+model ConstantLookup22
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ConstantLookup22",
+         description="Class lookup through redeclares with constrainedby, complex example",
+         flatModel="
+fclass NameTests.ConstantLookup22
+ Real f.d.a[2] = f.e[1:2];
+ Real f.e[2] = ones(2);
+end NameTests.ConstantLookup22;
+")})));
+
+    partial package A
+        replaceable partial model M = B;
+	end A;
+	
+	partial model B
+		replaceable package N = E;
+		input Real[N.b] a;
+	end B;
+	
+	model C
+		extends B(redeclare replaceable package N = F constrainedby G);
+	end C;
+		
+	package D
+		extends F;
+		extends A(redeclare model M = C(redeclare package N = F));
+	end D;
+	  
+	partial package E
+		constant Integer b(min=1);
+	end E;
+		  
+	package F
+		extends G(redeclare package O = H);
+	end F;
+		  
+	package G
+		extends E(b=O.c.g);
+		replaceable package O = J;
+	end G;
+		  
+	package H 
+		extends I(c(g=2));
+	end H;
+			  
+	package I
+		extends J;
+	end I;
+			  
+	package J
+		constant K c;
+	end J;
+		  
+	record K
+		parameter Integer g;
+	end K;
+	
+	model L
+		replaceable package P = D constrainedby M;
+		P.M d(a=e);
+		Real[P.b] e = ones(P.b);
+	end L;
+	
+	package M
+		extends A;
+		extends E;
+	end M;
+	
+	L f;
+end ConstantLookup22;
+
+
+model ConstantLookup23
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ConstantLookup23",
+         description="Trying to use member that does not exist in constraining class (but does in actual)",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
+Semantic error at line 1062, column 13:
+  Cannot find class or component declaration for x
+")})));
+
+	package A
+	end A;
+	
+	package B
+		constant Real x = 1.0;
+	end B;
+	
+	replaceable package C = B constrainedby A;
+	
+	Real y = C.x;
+end ConstantLookup23;
+
+
+// TODO: C.d is here evaluated to either 0.0 or 1.0, depending on the order of the extends clauses
+model ConstantLookup24
+    package A
+        constant Real d = 1.0;
+    end A;
+    
+    package B
+        constant Real d;
+    end B;
+    
+    package C
+        extends A;
+        extends B;
+    end C;
+    
+    Real x = C.d;
+end ConstantLookup24;
+
+
 
 class ExtendsTest1
      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={

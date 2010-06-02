@@ -410,74 +410,67 @@ aspect InstLookupClasses {
 			return getClassName().myInstClassDecl().superLookupInstClass(name);
 	}
 
+	/**
+	 * \brief Check if any constraining class/component has the given class.
+	 */
+	syn boolean InstNode.constrainMemberInstClass(String name) {
+		if (!hasInstConstraining() || inInstConstraining())
+			return true;
+		return getInstConstraining().getInstNode().memberInstClass(name).size() > 0;
+	}
+	
 	syn HashSet InstNode.memberInstClass(String name) circular [emptyHashSet()] = emptyHashSet();
 	
 	eq InstFullClassDecl.memberInstClass(String name) {
 		HashSet set = new HashSet();
 		
-		for (InstClassDecl icd : constrainingInstClassDecls()) {
-			if (icd.matchInstClassDecl(name)) {
+		for (InstClassDecl icd : instClassDecls()) 
+			if (icd.matchInstClassDecl(name)) 
 				set.add(icd);
-			}
-		}
 		
-		for (InstExtends ie : constrainingInstExtends()) {
+		for (InstExtends ie : instExtends()) 
 			set.addAll(ie.memberInstClass(name));
-		}
 		
-		
-		if (set.size()>0)
+		if (set.size() > 0 && constrainMemberInstClass(name)) 
 			return set;
-		else
-			return emptyHashSet();
+		return emptyHashSet();
 	}
 	
-	eq InstShortClassDecl.memberInstClass(String name) {
-				
-		if (hasInstConstraining())
-			return getInstConstraining().getInstNode().memberInstClass(name);
-		else {
-			return getInstExtends(0).memberInstClass(name);			
-		 }	
-	
+	eq InstShortClassDecl.memberInstClass(String name){
+		HashSet set = getInstExtends(0).memberInstClass(name);		
+		if (set.size() > 0 && constrainMemberInstClass(name)) 
+			return set;
+		return emptyHashSet();
 	}
 	
 	eq InstExtends.memberInstClass(String name) {
 		HashSet set = new HashSet();
 		
-		for (InstClassDecl icd : constrainingInstClassDecls()) {
-			if (icd.matchInstClassDecl(name)) {
+		for (InstClassDecl icd : instClassDecls()) 
+			if (icd.matchInstClassDecl(name)) 
 				set.add(icd);
-			}
-		}
 		
-		for (InstExtends ie : constrainingInstExtends()) {
+		for (InstExtends ie : instExtends()) 
 			set.addAll(ie.memberInstClass(name));
-		}
 		
-		if (set.size()>0)
+		if (set.size() > 0 && constrainMemberInstClass(name)) 
 			return set;
-		else
-			return emptyHashSet();
+		return emptyHashSet();
 	}
 	
 	eq InstComponentDecl.memberInstClass(String name) {
 		HashSet set = new HashSet();
 		
-		for (InstClassDecl icd : constrainingInstClassDecls()) {
-			if (icd.matchInstClassDecl(name)) {
+		for (InstClassDecl icd : instClassDecls()) 
+			if (icd.matchInstClassDecl(name)) 
 				set.add(icd);
-			}
-		}
 		
-		for (InstExtends ie : constrainingInstExtends()) {
+		for (InstExtends ie : instExtends()) 
 			set.addAll(ie.memberInstClass(name));
-		}
 		
-		if (set.size()>0)
+		if (set.size() > 0 && constrainMemberInstClass(name)) 
 			return set;
-		else
-			return emptyHashSet();
+		return emptyHashSet();
 	}
 	
 	syn boolean InstClassDecl.matchInstClassDecl(String name) = false;

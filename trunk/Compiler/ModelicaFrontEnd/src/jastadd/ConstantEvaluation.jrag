@@ -669,9 +669,10 @@ aspect ConstantEvaluation {
 	syn CValue InstPrimitive.ceval(Index i) {
     	CValue val = new CValueUnknown();
 	    if ((isConstant() || isParameter()) && indices().isValid(i)) {
-	    	if (myBindingInstExp() != null) {
-	    		if (!myBindingInstExp().type().isUnknown())
-	    			val = myBindingInstExp().getArray().get(i).ceval();
+	    	FExp bexp = myBindingInstExp();
+	    	if (bexp != null) {
+	    		if (!bexp.type().isUnknown())
+	    			val = bexp.isArray() ? bexp.getArray().get(i).ceval() : bexp.ceval();
 	    	} else {
 	    		val = startAttributeCValue();
 	    	}

@@ -342,7 +342,7 @@ aspect FlatTypeAnalysis {
 		if (myInstComponentDecl().isAssignable()) {
 			InstAssignable ip = (InstAssignable) myInstComponentDecl();
 			FType t = ip.type().scalarType();
-			return isArray() ? t.arrayType(size()) : t.scalarType();
+			return isArray() ? t.arrayType(size()) : t;
 		} else {
 			return fUnknownType();
 		}
