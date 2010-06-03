@@ -809,9 +809,21 @@ aspect CCodeGen {
 			String ret = getReturnVar().name_C();
 			str.print(indent);
 			str.print(ret+" = ");
-		}
+		} else {
+			str.print(indent);
+		}		
 		str.print(getName()+"(");
-		getArgs().prettyPrintWithSep(p, str, indent, o, ", ");
+		String prefix = "";
+		for (FExp arg : getArgs()) {
+			str.print(prefix);
+			if (arg instanceof FIdUseExp && ((FIdUseExp)arg).myFV() instanceof FFunctionVariable) {
+				if(((FFunctionVariable)((FIdUseExp)arg).myFV()).isOutput()){
+					str.print("&");
+				}
+			}
+			p.toString(arg, str, indent, o);
+			prefix = ", ";
+		}
 		str.print(");\n");
 	}
 	

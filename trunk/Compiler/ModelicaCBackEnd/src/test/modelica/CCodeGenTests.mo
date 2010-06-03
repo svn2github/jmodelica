@@ -2865,5 +2865,384 @@ model ExtStmtInclude2
 	algorithm
 		extFunc1();
 		extFunc2();
-end ExtStmtInclude2;
+end ExtStmtInclude2;
+model SimpleExternal1
+	annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+		JModelica.UnitTesting.CCodeGenTestCase(
+			name="SimpleExternal1",
+			description="Simple external function call, one input, one output.",
+			template="
+$C_function_headers$
+$C_functions$
+",
+			generatedCode="
+   
+void func_CCodeGenTests_SimpleExternal1_f_def(jmi_ad_var_t a_v, jmi_ad_var_t* b_o);
+jmi_ad_var_t func_CCodeGenTests_SimpleExternal1_f_exp(jmi_ad_var_t a_v);
+void func_CCodeGenTests_SimpleExternal1_algorithm_1_def(jmi_ad_var_t a_in_v, jmi_ad_var_t* b_out_o);
+jmi_ad_var_t func_CCodeGenTests_SimpleExternal1_algorithm_1_exp(jmi_ad_var_t a_in_v);
+
+void func_CCodeGenTests_SimpleExternal1_f_def(jmi_ad_var_t a_v, jmi_ad_var_t* b_o) {
+   JMI_DYNAMIC_INIT()
+   jmi_ad_var_t b_v;
+   b_v = f(a_v);
+   if (b_o != NULL) *b_o = b_v;
+   JMI_DYNAMIC_FREE()
+   return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_SimpleExternal1_f_exp(jmi_ad_var_t a_v) {
+   jmi_ad_var_t b_v;
+   func_CCodeGenTests_SimpleExternal1_f_def(a_v, &b_v);
+   return b_v;
+}
+
+void func_CCodeGenTests_SimpleExternal1_algorithm_1_def(jmi_ad_var_t a_in_v, jmi_ad_var_t* b_out_o) {
+   JMI_DYNAMIC_INIT()
+   jmi_ad_var_t b_out_v;
+   b_out_v = func_CCodeGenTests_SimpleExternal1_f_exp(a_in_v);
+   if (b_out_o != NULL) *b_out_o = b_out_v;
+   JMI_DYNAMIC_FREE()
+   return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_SimpleExternal1_algorithm_1_exp(jmi_ad_var_t a_in_v) {
+   jmi_ad_var_t b_out_v;
+   func_CCodeGenTests_SimpleExternal1_algorithm_1_def(a_in_v, &b_out_v);
+   return b_out_v;
+}")})));
+
+	Real a_in=1;
+	Real b_out;
+	function f
+		input Real a;
+		output Real b;
+		external;
+	end f;
+	algorithm
+		b_out := f(a_in);
+end SimpleExternal1;
+
+model SimpleExternal2
+	annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+		JModelica.UnitTesting.CCodeGenTestCase(
+			name="SimpleExternal2",
+			description="Simple external function call, two inputs, one output.",
+			template="
+   $C_function_headers$
+   $C_functions$
+",
+			generatedCode="
+   
+void func_CCodeGenTests_SimpleExternal2_f_def(jmi_ad_var_t a_v, jmi_ad_var_t b_v, jmi_ad_var_t* c_o);
+jmi_ad_var_t func_CCodeGenTests_SimpleExternal2_f_exp(jmi_ad_var_t a_v, jmi_ad_var_t b_v);
+void func_CCodeGenTests_SimpleExternal2_algorithm_1_def(jmi_ad_var_t a_in_v, jmi_ad_var_t b_in_v, jmi_ad_var_t* c_out_o);
+jmi_ad_var_t func_CCodeGenTests_SimpleExternal2_algorithm_1_exp(jmi_ad_var_t a_in_v, jmi_ad_var_t b_in_v);
+
+void func_CCodeGenTests_SimpleExternal2_f_def(jmi_ad_var_t a_v, jmi_ad_var_t b_v, jmi_ad_var_t* c_o) {
+   JMI_DYNAMIC_INIT()
+   jmi_ad_var_t c_v;
+   c_v = f(a_v, b_v);
+   if (c_o != NULL) *c_o = c_v;
+   JMI_DYNAMIC_FREE()
+   return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_SimpleExternal2_f_exp(jmi_ad_var_t a_v, jmi_ad_var_t b_v) {
+   jmi_ad_var_t c_v;
+   func_CCodeGenTests_SimpleExternal2_f_def(a_v, b_v, &c_v);
+   return c_v;
+}
+
+void func_CCodeGenTests_SimpleExternal2_algorithm_1_def(jmi_ad_var_t a_in_v, jmi_ad_var_t b_in_v, jmi_ad_var_t* c_out_o) {
+   JMI_DYNAMIC_INIT()
+   jmi_ad_var_t c_out_v;
+   c_out_v = func_CCodeGenTests_SimpleExternal2_f_exp(a_in_v, b_in_v);
+   if (c_out_o != NULL) *c_out_o = c_out_v;
+   JMI_DYNAMIC_FREE()
+   return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_SimpleExternal2_algorithm_1_exp(jmi_ad_var_t a_in_v, jmi_ad_var_t b_in_v) {
+   jmi_ad_var_t c_out_v;
+   func_CCodeGenTests_SimpleExternal2_algorithm_1_def(a_in_v, b_in_v, &c_out_v);
+   return c_out_v;
+}")})));
+	Real a_in=1;
+	Real b_in=2;
+	Real c_out;
+	function f
+		input Real a;
+		input Real b;
+		output Real c;
+		external "C";
+	end f;
+	algorithm
+		c_out := f(a_in, b_in);
+end SimpleExternal2;
+
+model SimpleExternal3
+	annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+		JModelica.UnitTesting.CCodeGenTestCase(
+			name="SimpleExternal3",
+			description="Simple explicit external function call.",
+			template="
+$C_function_headers$
+$C_functions$
+",
+			generatedCode="
+   
+void func_CCodeGenTests_SimpleExternal3_f_def(jmi_ad_var_t a_v, jmi_ad_var_t* b_o);
+jmi_ad_var_t func_CCodeGenTests_SimpleExternal3_f_exp(jmi_ad_var_t a_v);
+void func_CCodeGenTests_SimpleExternal3_algorithm_1_def(jmi_ad_var_t a_in_v, jmi_ad_var_t* b_out_o);
+jmi_ad_var_t func_CCodeGenTests_SimpleExternal3_algorithm_1_exp(jmi_ad_var_t a_in_v);
+
+void func_CCodeGenTests_SimpleExternal3_f_def(jmi_ad_var_t a_v, jmi_ad_var_t* b_o) {
+   JMI_DYNAMIC_INIT()
+   jmi_ad_var_t b_v;
+   b_v = my_f(a_v);
+   if (b_o != NULL) *b_o = b_v;
+   JMI_DYNAMIC_FREE()
+   return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_SimpleExternal3_f_exp(jmi_ad_var_t a_v) {
+   jmi_ad_var_t b_v;
+   func_CCodeGenTests_SimpleExternal3_f_def(a_v, &b_v);
+   return b_v;
+}
+
+void func_CCodeGenTests_SimpleExternal3_algorithm_1_def(jmi_ad_var_t a_in_v, jmi_ad_var_t* b_out_o) {
+   JMI_DYNAMIC_INIT()
+   jmi_ad_var_t b_out_v;
+   b_out_v = func_CCodeGenTests_SimpleExternal3_f_exp(a_in_v);
+   if (b_out_o != NULL) *b_out_o = b_out_v;
+   JMI_DYNAMIC_FREE()
+   return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_SimpleExternal3_algorithm_1_exp(jmi_ad_var_t a_in_v) {
+   jmi_ad_var_t b_out_v;
+   func_CCodeGenTests_SimpleExternal3_algorithm_1_def(a_in_v, &b_out_v);
+   return b_out_v;
+}")})));
+	Real a_in=1;
+	Real b_out;
+	function f
+		input Real a;
+		output Real b;
+		external b = my_f(a);
+	end f;
+	algorithm
+		b_out := f(a_in);
+end SimpleExternal3;
+
+model SimpleExternal4
+	annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+		JModelica.UnitTesting.CCodeGenTestCase(
+			name="SimpleExternal4",
+			description="Simple explicit external function call, return in output variable.",
+			template="
+   
+$C_function_headers$
+$C_functions$
+",
+			generatedCode="
+   
+void func_CCodeGenTests_SimpleExternal4_f_def(jmi_ad_var_t a_v, jmi_ad_var_t* b_o);
+jmi_ad_var_t func_CCodeGenTests_SimpleExternal4_f_exp(jmi_ad_var_t a_v);
+void func_CCodeGenTests_SimpleExternal4_algorithm_1_def(jmi_ad_var_t a_in_v, jmi_ad_var_t* b_out_o);
+jmi_ad_var_t func_CCodeGenTests_SimpleExternal4_algorithm_1_exp(jmi_ad_var_t a_in_v);
+
+void func_CCodeGenTests_SimpleExternal4_f_def(jmi_ad_var_t a_v, jmi_ad_var_t* b_o) {
+   JMI_DYNAMIC_INIT()
+   jmi_ad_var_t b_v;
+   my_f(a_v, &b_v);
+   if (b_o != NULL) *b_o = b_v;
+   JMI_DYNAMIC_FREE()
+   return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_SimpleExternal4_f_exp(jmi_ad_var_t a_v) {
+   jmi_ad_var_t b_v;
+   func_CCodeGenTests_SimpleExternal4_f_def(a_v, &b_v);
+   return b_v;
+}
+
+void func_CCodeGenTests_SimpleExternal4_algorithm_1_def(jmi_ad_var_t a_in_v, jmi_ad_var_t* b_out_o) {
+   JMI_DYNAMIC_INIT()
+   jmi_ad_var_t b_out_v;
+   b_out_v = func_CCodeGenTests_SimpleExternal4_f_exp(a_in_v);
+   if (b_out_o != NULL) *b_out_o = b_out_v;
+   JMI_DYNAMIC_FREE()
+   return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_SimpleExternal4_algorithm_1_exp(jmi_ad_var_t a_in_v) {
+   jmi_ad_var_t b_out_v;
+   func_CCodeGenTests_SimpleExternal4_algorithm_1_def(a_in_v, &b_out_v);
+   return b_out_v;
+}")})));
+
+	Real a_in=1;
+	Real b_out;
+	function f
+		input Real a;
+		output Real b;
+		external my_f(a, b);
+	end f;
+	algorithm
+		b_out := f(a_in);	
+end SimpleExternal4;
+
+model SimpleExternal5
+	annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+		JModelica.UnitTesting.CCodeGenTestCase(
+			name="SimpleExternal5",
+			description="External function call without outputs.",
+			template="
+   
+$C_function_headers$
+$C_functions$
+",
+			generatedCode="
+   
+void func_CCodeGenTests_SimpleExternal5_f_def(jmi_ad_var_t a_v);
+void func_CCodeGenTests_SimpleExternal5_algorithm_1_def(jmi_ad_var_t a_in_v);
+
+void func_CCodeGenTests_SimpleExternal5_f_def(jmi_ad_var_t a_v) {
+   JMI_DYNAMIC_INIT()
+   f(a_v);
+   JMI_DYNAMIC_FREE()
+   return;
+}
+
+void func_CCodeGenTests_SimpleExternal5_algorithm_1_def(jmi_ad_var_t a_in_v) {
+   JMI_DYNAMIC_INIT()
+   func_CCodeGenTests_SimpleExternal5_f_def(a_in_v);
+   JMI_DYNAMIC_FREE()
+   return;
+}")})));
+	Real a_in=1;
+	function f
+		input Real a;
+		external;
+	end f;
+	algorithm
+		f(a_in);
+end SimpleExternal5;
+
+model SimpleExternal6
+	annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+		JModelica.UnitTesting.CCodeGenTestCase(
+			name="SimpleExternal6",
+			description="Explicit external function call without outputs.",
+			template="
+   
+$C_function_headers$
+$C_functions$
+",
+			generatedCode="
+   
+void func_CCodeGenTests_SimpleExternal6_f_def(jmi_ad_var_t a_v);
+void func_CCodeGenTests_SimpleExternal6_algorithm_1_def(jmi_ad_var_t a_in_v);
+
+void func_CCodeGenTests_SimpleExternal6_f_def(jmi_ad_var_t a_v) {
+   JMI_DYNAMIC_INIT()
+   my_f(a_v);
+   JMI_DYNAMIC_FREE()
+   return;
+}
+
+void func_CCodeGenTests_SimpleExternal6_algorithm_1_def(jmi_ad_var_t a_in_v) {
+   JMI_DYNAMIC_INIT()
+   func_CCodeGenTests_SimpleExternal6_f_def(a_in_v);
+   JMI_DYNAMIC_FREE()
+   return;
+}")})));
+	Real a_in=1;
+	function f
+		input Real a;
+		external my_f(a);
+	end f;
+	algorithm
+		f(a_in);
+end SimpleExternal6;
+
+model SimpleExternal7
+	annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+		JModelica.UnitTesting.CCodeGenTestCase(
+			name="SimpleExternal7",
+			description="Explicit external function call with arbitraty placement of output parameter.",
+			template="
+   
+$C_function_headers$
+$C_functions$
+",
+			generatedCode="
+
+void func_CCodeGenTests_SimpleExternal7_f_def(jmi_ad_var_t a_v, jmi_ad_var_t b_v, jmi_ad_var_t* c_o);
+jmi_ad_var_t func_CCodeGenTests_SimpleExternal7_f_exp(jmi_ad_var_t a_v, jmi_ad_var_t b_v);
+void func_CCodeGenTests_SimpleExternal7_algorithm_1_def(jmi_ad_var_t a_in_v, jmi_ad_var_t b_in_v, jmi_ad_var_t* c_out_o);
+jmi_ad_var_t func_CCodeGenTests_SimpleExternal7_algorithm_1_exp(jmi_ad_var_t a_in_v, jmi_ad_var_t b_in_v);
+
+void func_CCodeGenTests_SimpleExternal7_f_def(jmi_ad_var_t a_v, jmi_ad_var_t b_v, jmi_ad_var_t* c_o) {
+   JMI_DYNAMIC_INIT()
+   jmi_ad_var_t c_v;
+   my_f(a_v, &c_v, b_v);
+   if (c_o != NULL) *c_o = c_v;
+   JMI_DYNAMIC_FREE()
+   return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_SimpleExternal7_f_exp(jmi_ad_var_t a_v, jmi_ad_var_t b_v) {
+   jmi_ad_var_t c_v;
+   func_CCodeGenTests_SimpleExternal7_f_def(a_v, b_v, &c_v);
+   return c_v;
+}
+
+void func_CCodeGenTests_SimpleExternal7_algorithm_1_def(jmi_ad_var_t a_in_v, jmi_ad_var_t b_in_v, jmi_ad_var_t* c_out_o) {
+   JMI_DYNAMIC_INIT()
+   jmi_ad_var_t c_out_v;
+   c_out_v = func_CCodeGenTests_SimpleExternal7_f_exp(a_in_v, b_in_v);
+   if (c_out_o != NULL) *c_out_o = c_out_v;
+   JMI_DYNAMIC_FREE()
+   return;
+}
+   
+jmi_ad_var_t func_CCodeGenTests_SimpleExternal7_algorithm_1_exp(jmi_ad_var_t a_in_v, jmi_ad_var_t b_in_v) {
+   jmi_ad_var_t c_out_v;
+   func_CCodeGenTests_SimpleExternal7_algorithm_1_def(a_in_v, b_in_v, &c_out_v);
+   return c_out_v;
+}")})));
+	Real a_in = 1;
+	Real b_in = 2;
+	Real c_out;
+	function f
+		input Real a;
+		input Real b;
+		output Real c;
+		external my_f(a,c,b);
+	end f;
+algorithm
+	c_out := f(a_in, b_in);
+end SimpleExternal7;
+
+//model SimpleExternal8
+//Real a_in = 1;
+//	Real b_in = 2;
+//	Real c_out;
+//	Real d_out;
+//	function f
+//		input Real a;
+//		input Real b;
+//		output Real c;
+//		output Real d;
+//		external d = my_f(a,c,b);
+//	end f;
+//algorithm
+//	(c_out, d_out) := f(a_in, b_in);//	
+//end SimpleExternal8;
+
+
 end CCodeGenTests;
