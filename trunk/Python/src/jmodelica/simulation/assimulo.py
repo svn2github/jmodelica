@@ -96,16 +96,26 @@ class FMIODE(Explicit_Problem):
         self._timeEvent = False
         
         self.y0 = self._model.real_x
-        self.Problem_Name = self._model._description
+        self.problem_name = self._model._description
         
         [f_nbr, g_nbr] = self._model.get_ode_sizes()
         
-        if g_nbr > 0:
-            self.event_fcn = self.g #Activates the event function
-            if self._model.event_info.upcomingTimeEvent == self._model._fmiTrue:
-                self._timeEvent = True
-                self._timeSwitch = True
-                self._nextTimeEvent = self._model.event_info.nextEventTime
+        self._f_nbr = f_nbr
+        self._g_nbr = g_nbr
+        
+        self.event_fcn = self.g
+        self._timeSwitch = True
+        self._nextTimeEvent = self._model._XMLStopTime #Default StopTime (results in no event)
+        if self._model.event_info.upcomingTimeEvent == self._model._fmiTrue:
+            self._nextTimeEvent = self._model.event_info.nextEventTime
+        
+        #self._nextTimeEvent = self._model.event_info.nextEventTime
+        #if g_nbr > 0:
+        #    
+        #    if self._model.event_info.upcomingTimeEvent == self._model._fmiTrue:
+        #        self._timeEvent = True
+        #        self._timeSwitch = True
+        #        self._nextTimeEvent = self._model.event_info.nextEventTime
         
     def f(self, t, y, sw=None):
         """
@@ -132,11 +142,10 @@ class FMIODE(Explicit_Problem):
         eventInd = self._model.event_ind
         
         #Appending time event
-        if self._timeEvent:
-            if self._timeSwitch:
-                eventInd = N.append(eventInd,N.array([t-self._nextTimeEvent]))
-            else:
-                eventInd = N.append(eventInd,N.array([self._nextTimeEvent-t]))
+        if self._timeSwitch:
+            eventInd = N.append(eventInd,N.array([t-self._nextTimeEvent]))
+        else:
+            eventInd = N.append(eventInd,N.array([self._nextTimeEvent-t]))
         
         return eventInd
         
@@ -167,7 +176,28 @@ class FMIODE(Explicit_Problem):
                 self._timeSwitch = not self._timeSwitch
                 self._nextTimeEvent = self._model.event_info.nextEventTime
             print self._nextTimeEvent
-
+        #else: #If not upcoming time event, set next time event to final time.
+        #    self._model.event_info.nextEventTime = 
+    
+        
+        
+    #def completed_step(self, solver, t, y):
+    #    """
+    #    Method which is called at each successful step.
+    #    """
+    #    #Moving data to the model
+    #    self._model.t = t
+    #    self._model.real_x = y
+    #    
+    #    self._model.save_time_point()
+    #    
+    #    if self._model.fmiCompletedIntegratorStep():
+    #        self.handle_event(solver,[0]) #Event have been detect, call event iteration.
+    #        return -1 #Break iteration loop and reinitiate.
+    #    else:
+    #        return 0
+        
+        
 
 class JMIODE(Explicit_Problem):
     """

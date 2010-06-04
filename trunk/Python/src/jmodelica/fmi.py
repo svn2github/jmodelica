@@ -142,6 +142,11 @@ class FMIModel(object):
         
         #Default values
         self.__t = None
+        
+        self._res_t = N.array([])
+        self._res_r = N.array([])
+        self._res_i = N.array([])
+        self._res_b = []
     
     def _load_c(self):
         """
@@ -172,6 +177,11 @@ class FMIModel(object):
         self._XMLStopTime = N.array(self._xmldoc._xpatheval('//DefaultExperiment/@stopTime'),dtype=N.double)
         self._XMLTolerance = N.array(self._xmldoc._xpatheval('//DefaultExperiment/@tolerance'),dtype=N.double)
         
+        if self._XMLStartTime.size > 0:
+            self._XMLStartTime = self._XMLStartTime[0]
+        if self._XMLStopTime.size > 0:
+            self._XMLStopTime = self._XMLStopTime[0]
+        
         self._XMLStartRealValues = N.array(self._xmldoc._xpatheval('//ScalarVariable/Real/@start'),dtype=N.double)
         self._XMLStartRealKeys = N.array(self._xmldoc._xpatheval('//ScalarVariable/@valueReference[../Real/@start]'),dtype=N.uint)
         self._XMLStartIntegerValues = N.array(self._xmldoc._xpatheval('//ScalarVariable/Integer/@start'),dtype=N.int)
@@ -186,6 +196,20 @@ class FMIModel(object):
                 self._XMLStartBooleanValues[i] = '1'
             else:
                 self._XMLStartBooleanValues[i] = '0'
+                
+        cont_name = self._xmldoc._xpatheval("//ScalarVariable/@name[../Real][not(../@variability='constant')][not(../@variability='parameter')][not(../@variability='discrete')][not(../@alias)]")
+        cont_valueref = self._xmldoc._xpatheval("//ScalarVariable/@valueReference[../Real][not(../@variability='constant')][not(../@variability='parameter')][not(../@variability='discrete')][not(../@alias)]")
+        
+        disc_name_r = self._xmldoc._xpatheval("//ScalarVariable/@name[../@variability='discrete'][not(../@alias)][../Real]")
+        disc_valueref_r = self._xmldoc._xpatheval("//ScalarVariable/@valueReference[../@variability='discrete'][not(../@alias)][../Real]")
+        disc_name_i = self._xmldoc._xpatheval("//ScalarVariable/@name[../@variability='discrete'][not(../@alias)][../Integer]")
+        disc_valueref_i = N.array(self._xmldoc._xpatheval("//ScalarVariable/@valueReference[../@variability='discrete'][not(../@alias)][../Integer]"),dtype=N.uint)
+        disc_name_b = self._xmldoc._xpatheval("//ScalarVariable/@name[../@variability='discrete'][not(../@alias)][../Boolean]")
+        disc_valueref_b = N.array(self._xmldoc._xpatheval("//ScalarVariable/@valueReference[../@variability='discrete'][not(../@alias)][../Boolean]"),dtype=N.uint)
+
+        self._save_cont_valueref = [N.array(cont_valueref+disc_valueref_r,dtype=N.uint), disc_valueref_i, disc_valueref_b]
+        self._save_cont_name = [cont_name+disc_name_r, disc_name_i, disc_name_b]
+        self._save_nbr_points = 0
         
     def _set_fmimodel_typedefs(self):
         """ 
@@ -425,6 +449,15 @@ class FMIModel(object):
         if status != 0:
             raise FMIException('Failed to update the events.')
     
+    def save_time_point(self):
+        """
+        Saves data for the specific time point.
+        """
+        self._res_t = N.append(self._res_t,self.t)
+        self._res_r = N.append(self._res_r,self.get_fmiReal(self._save_cont_valueref[0]))
+        self._res_i = N.append(self._res_i,self.get_fmiInteger(self._save_cont_valueref[1]))
+        self._res_b = self._res_b + self.get_fmiBoolean(self._save_cont_valueref[2])
+    
     def get_event_info(self):
         """
         Returns the event info.
@@ -483,6 +516,24 @@ class FMIModel(object):
             
         return values
         
+    def set_fmiReal(self, valueref, values):
+        """
+        Sets the values of parameters identified by valueref with the 'values'.
+        """
+        valueref = N.array(valueref, dtype=N.uint)
+        nref = valueref.size
+        values = N.array(values)
+        
+        if valueref.size != values.size:
+            raise FMIException('The length of valueref and values are inconsistent.')
+        
+        status = self._fmiSetReal(self._model,valueref, nref, values)
+        
+        if status != 0:
+            raise FMIException('Failed to set the Real values.')
+        
+        
+        
     def get_fmiInteger(self, valueref):
         """
         Returns the fmiInteger values from the value reference
@@ -498,6 +549,23 @@ class FMIModel(object):
             
         return values
         
+    def set_fmiInteger(self, valueref, values):
+        """
+        Sets the values of parameters identified by valueref with the 'values'.
+        """
+        valueref = N.array(valueref, dtype=N.uint)
+        nref = valueref.size
+        values = N.array(values)
+        
+        if valueref.size != values.size:
+            raise FMIException('The length of valueref and values are inconsistent.')
+        
+        status = self._fmiSetInteger(self._model,valueref, nref, values)
+        
+        if status != 0:
+            raise FMIException('Failed to set the Integer values.')
+        
+        
     def get_fmiBoolean(self, valueref):
         """
         Returns the fmiBoolean values from the value reference
@@ -510,8 +578,34 @@ class FMIModel(object):
         
         if status != 0:
             raise FMIException('Failed to get the Boolean values.')
-            
-        return values
+        
+        bol = []
+        for i in values:
+            if i == self._fmiTrue:
+                bol.append(True)
+            else:
+                bol.append(False)
+        
+        if nref==1:
+            bol = bol[0]
+        
+        return bol
+        
+    def set_fmiBoolean(self, valueref, values):
+        """
+        Sets the values of parameters identified by valueref with the 'values'.
+        """
+        valueref = N.array(valueref, dtype=N.uint)
+        nref = valueref.size
+        values = N.array(values)
+        
+        if valueref.size != values.size:
+            raise FMIException('The length of valueref and values are inconsistent.')
+        
+        status = self._fmiSetBoolean(self._model,valueref, nref, values)
+        
+        if status != 0:
+            raise FMIException('Failed to set the Boolean values.')
         
     def get_fmiString(self, valueref):
         """
@@ -527,6 +621,22 @@ class FMIModel(object):
             raise FMIException('Failed to get the String values.')
             
         return values
+    
+    def set_fmiString(self, valueref, values):
+        """
+        Sets the values of parameters identified by valueref with the 'values'.
+        """
+        valueref = N.array(valueref, dtype=N.uint)
+        nref = valueref.size
+        values = N.array(values)
+        
+        if valueref.size != values.size:
+            raise FMIException('The length of valueref and values are inconsistent.')
+        
+        status = self._fmiSetString(self._model,valueref, nref, values)
+        
+        if status != 0:
+            raise FMIException('Failed to set the String values.')
         
     def get_fmiNominal(self, valueref):
         """
@@ -538,32 +648,43 @@ class FMIModel(object):
             return 1.0
         else:
             return float(values[0])
+    
+    def fmiCompletedIntegratorStep(self):
+        """
+        Call the internal FMI function: fmiCompletedIntegratorStep.
+        """
+        callEventUpdate = self._fmiBoolean('0')
+        status = self._fmiCompletedIntegratorStep(self._model, C.byref(callEventUpdate))
         
+        if status != 0:
+            raise FMIException('Failed to call FMI Completed Step.')
+            
+        if callEventUpdate.value == self._fmiTrue:
+            return True
+        else:
+            return False
+    
     def initialize(self):
         """
         Initialize the model.
         """
+        #Set the start attributes
         if len(self._XMLStartRealValues) > 0:
-            status = self._fmiSetReal(self._model, self._XMLStartRealKeys, len(self._XMLStartRealKeys), self._XMLStartRealValues)
-            if status != 0:
-                raise FMIException('Failed to set Real values.')
+            self.set_fmiReal(self._XMLStartRealKeys, self._XMLStartRealValues)
+
         if len(self._XMLStartIntegerValues) > 0:
-            status = self._fmiSetInteger(self._model, self._XMLStartIntegerKeys, len(self._XMLStartIntegerKeys), self._XMLStartIntegerValues)
-            if status != 0:
-                raise FMIException('Failed to set Integer values.')
+            self.set_fmiInteger(self._XMLStartIntegerKeys, self._XMLStartIntegerValues)
+
         if len(self._XMLStartBooleanValues) > 0:
-            status = self._fmiSetBoolean(self._model, self._XMLStartBooleanKeys, len(self._XMLStartBooleanKeys), self._XMLStartBooleanValues)
-            if status != 0:
-                raise FMIException('Failed to set Boolean values.')
+            self.set_fmiBoolean(self._XMLStartBooleanKeys, self._XMLStartBooleanValues)
+
         if len(self._XMLStartStringValues) > 0:
-            status = self._fmiSetString(self._model, self._XMLStartStringKeys, len(self._XMLStartStringKeys), self._XMLStartStringValues)
-            if status != 0:
-                raise FMIException('Failed to set String values.')
-        
+            self.set_fmiString(self._XMLStartStringKeys, self._XMLStartStringValues)
+
         #Trying to set the initial time from the xml file, else 0.0
         if self.t == None:
             try:
-                self.t = self._XMLStartTime[0]
+                self.t = self._XMLStartTime
             except IndexError:
                 self.t = 0.0
         
@@ -581,6 +702,7 @@ class FMIModel(object):
         
         if status > 0:
             raise FMIException('Failed to Initialize the model.')
+    
     
     def instantiate(self, name='Model', logging='0'):
         """
@@ -619,7 +741,7 @@ class FMIModel(object):
         """ Get data type of variable. """
         return self._xmldoc.get_data_type(variablename)
         
-    def get_valueref(self, variablename):
+    def get_valueref(self, variablename=None, type=None):
         """
         Extract the ValueReference given a variable name.
         
@@ -629,25 +751,50 @@ class FMIModel(object):
         Returns:
             The ValueReference for the variable passed as argument.
         """
-        return self._xmldoc.get_valueref(variablename)
+        if variablename:
+            return self._xmldoc.get_valueref(variablename)
+        else:
+            return N.array(self._xmldoc._xpatheval("//ScalarVariable/@valueReference[../@variability='"+type+"']"),dtype=N.int)
     
-    def get_variable_names(self, include_alias=True):
+    def get_variable_type_names(self, type):
+        """
+        Extract the names of the variables in a model depending on the type.
+        """
+        keys = []
+        vals = []
+        for i in type:
+            keys=keys+self._xmldoc._xpatheval("//ScalarVariable/@name[not(../Enumeration)][../@variability='"+i+"']")
+            vals=vals+self._xmldoc._xpatheval("//ScalarVariable/@valueReference[not(../Enumeration)][../@variability='"+i+"']")
+
+        if len(keys)!=len(vals):
+            raise Exception("Number of vals does not equal number of keys. \
+                Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))           
+        
+        d={}
+        for index, key in enumerate(keys):
+            d[str(key)]=int(vals[index])
+        return d
+        
+    
+    def get_variable_names(self, include_alias=True, ignore_enumerate=True):
         """
         Extract the names of the variables in a model.
 
         Returns:
             Dict with variable name as key and value reference as value.
         """
-        if include_alias:
-            keys = self._xpatheval("//ScalarVariable/@name")
-            vals = self._xpatheval("//ScalarVariable/@valueReference")
-        else:
-            keys = self._xpatheval("//ScalarVariable/@name[not(../@alias)]")
-            vals = self._xpatheval("//ScalarVariable/@valueReference[not(../@alias)]")        
+        if include_alias and ignore_enumerate:
+            keys = self._xmldoc._xpatheval("//ScalarVariable/@name[not(../Enumeration)]")
+            vals = self._xmldoc._xpatheval("//ScalarVariable/@valueReference[not(../Enumeration)]")
+        elif not include_alias and ignore_enumerate:
+            keys = self._xmldoc._xpatheval("//ScalarVariable/@name[not(../@alias)][not(../Enumeration)]")
+            vals = self._xmldoc._xpatheval("//ScalarVariable/@valueReference[not(../@alias)][not(../Enumeration)]")        
+
    
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))           
+        
         d={}
         for index, key in enumerate(keys):
             d[str(key)]=int(vals[index])
@@ -669,14 +816,14 @@ class FMIModel(object):
         # get value reference of aliased variable
         val_ref = self.get_valueref(aliased_variable)
         if val_ref!=None:
-            aliases = self._xpatheval("//ScalarVariable/@name[../@alias]\
+            aliases = self._xmldoc._xpatheval("//ScalarVariable/@name[../@alias]\
                 [../@valueReference=\""+str(val_ref)+"\"]")
             aliasnames=[]
             isnegated=[]
             for index, alias in enumerate(aliases):
                 if str(aliased_variable)!=str(alias):
                     aliasnames.append(str(alias))
-                    aliasvalue = self._xpatheval("//ScalarVariable/@alias[../@name=\""+str(alias)+"\"]")
+                    aliasvalue = self._xmldoc._xpatheval("//ScalarVariable/@alias[../@name=\""+str(alias)+"\"]")
                     isnegated.append(str(aliasvalue[0])=="negatedAlias")
             return aliasnames, isnegated
         else:
@@ -827,13 +974,32 @@ def export_result_dymola(model, data, file_name='', format='txt'):
         f.write('int dataInfo(%d,%d)\n' % (num_vars + 1, 4))
         f.write('0 1 0 -1 # time\n')
         
-        cont_states = model.get_continuous_value_reference()
-        n_parameters = num_vars-cont_states
+        
+        #Get Parameters and Constants
+        params_without_alias = model.get_variable_type_names(['constant','parameter'])
+        params_names_ref = {}
+        params_names_sign = {}
+        # sort in value reference order
+        params_sorted_names = sorted(params_without_alias.items(),key=itemgetter(1))
+        params_names=[]
+        params_names_without_alias = []
+        for n in params_sorted_names:
+            # add variable name to list
+            params_names.append(n[0])
+            params_names_without_alias.append(n[0])
+            # add alias variables
+            alias_names, alias_sign = model.get_aliases(n[0])
+            for i, an in enumerate(alias_names):
+                params_names_ref[an] = n[1]
+                params_names_sign[an] = alias_sign[i]
+                params_names.append(an)
+
+        n_parameters = len(params_names_without_alias)
         cnt_1 = 2
         cnt_2 = 2
         for name in all_names_without_alias:
             ref = model.get_valueref(name)
-            if ref not in cont_states: # Put parameters in data set
+            if name in params_names_without_alias: # Put parameters in data set
                 f.write('1 %d 0 -1 # ' % cnt_1 + name+'\n')                
                 # find out if variable has aliases
                 aliases = [item[0] for item in alias_names_ref.items() if item[1] == ref]
@@ -863,28 +1029,28 @@ def export_result_dymola(model, data, file_name='', format='txt'):
         f.write("%12.12f" % data[0,0])
         for name in all_names_without_alias:
             ref = model.get_valueref(name)
-            if ref not in cont_states: # Put parameters in data set
+            if name in params_names_without_alias: # Put parameters in data set
                 datatype = model.get_data_type(name)
                 if datatype == 'Real':
                     f.write(" %12.12f" % (model.get_fmiReal([ref])*model.get_fmiNominal(str(ref))))
                 if datatype == 'Integer':
                     f.write(" %12.12f" % (model.get_fmiInteger([ref])))
                 if datatype == 'Boolean':
-                    f.write(" %12.12f" % (model.get_fmiBoolean([ref])))
+                    f.write(" %12.12f" % (float(model.get_fmiBoolean([ref]))))
         f.write('\n')
         f.write("%12.12f" % data[-1,0])
         for name in all_names_without_alias:
             ref = model.get_valueref(name)
-            if ref not in cont_states: # Put parameters in data set
+            if name in params_names_without_alias: # Put parameters in data set
                 datatype = model.get_data_type(name)
                 if datatype == 'Real':
                     f.write(" %12.12f" % (model.get_fmiReal([ref])*model.get_fmiNominal(str(ref))))
                 if datatype == 'Integer':
                     f.write(" %12.12f" % (model.get_fmiInteger([ref])))
                 if datatype == 'Boolean':
-                    f.write(" %12.12f" % (model.get_fmiBoolean([ref])))
+                    f.write(" %12.12f" % (float(model.get_fmiBoolean([ref]))))
         f.write('\n\n')
-        
+        """
         # Write data set 2
         n_vars = len(data[0,:])
         n_points = len(data[:,0])
@@ -902,7 +1068,7 @@ def export_result_dymola(model, data, file_name='', format='txt'):
             f.write(str+'\n')
 
         f.write('\n')
-
+        """
         f.close()
 
     else:
