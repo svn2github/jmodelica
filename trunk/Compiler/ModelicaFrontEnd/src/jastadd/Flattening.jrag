@@ -112,6 +112,9 @@ aspect Flattening {
 
    		for (InstComponentDecl icd : getInstComponentDecls())
 			icd.flattenInFunction(ffd, fc);
+   		for (InstExtends ie : getInstExtendss())
+   	   		for (InstComponentDecl icd : ie.myInstClass().getInstComponentDecls())
+   				icd.flattenInFunction(ffd, fc);
 		
    		FAlgorithmBlock fab;
    		if (getNumFAbstractEquation() > 0) {

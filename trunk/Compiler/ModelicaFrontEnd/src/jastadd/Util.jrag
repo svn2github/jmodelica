@@ -930,6 +930,8 @@ aspect FlatFunctionUtils {
          for (InstComponentDecl icd : getInstComponentDecls())
              if (icd.isInput())
                  l.add(icd);
+         for (InstExtends ie : getInstExtendss())
+        	 l.addAll(ie.myInstClass().myInputs());
          return l;
      }
      
@@ -941,6 +943,8 @@ aspect FlatFunctionUtils {
          for (InstComponentDecl icd : getInstComponentDecls())
              if (icd.isOutput())
                  l.add(icd);
+         for (InstExtends ie : getInstExtendss())
+        	 l.addAll(ie.myInstClass().myOutputs());
          return l;
      }
      
@@ -953,6 +957,8 @@ aspect FlatFunctionUtils {
          // TODO: Are there other reasons a component might not be modifiable?
          for (InstComponentDecl icd : getInstComponentDecls())
              l.add(icd);
+         for (InstExtends ie : getInstExtendss())
+        	 l.addAll(ie.myInstClass().myModifiableComponents());
          return l;
      }
      

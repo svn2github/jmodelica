@@ -4867,4 +4867,39 @@ end ExternalFuncLibs8;
 
 
 
+model ExtendFunc1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ExtendFunc1",
+         description="Flattening of function extending other function",
+         flatModel="
+fclass FunctionTests.ExtendFunc1
+ Real x = FunctionTests.ExtendFunc1.f2(1.0);
+
+ function FunctionTests.ExtendFunc1.f2
+  input Real a;
+  output Real b;
+ algorithm
+  b := a;
+  return;
+ end FunctionTests.ExtendFunc1.f2;
+end FunctionTests.ExtendFunc1;
+")})));
+
+    function f1
+        input Real a;
+        output Real b;
+    end f1;
+    
+    function f2
+        extends f1;
+    algorithm
+        b := a;
+    end f2;
+    
+    Real x = f2(1.0);
+end ExtendFunc1;
+
+
+
 end FunctionTests;
