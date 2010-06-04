@@ -51,7 +51,7 @@ def run_demo(with_plots=True):
     a1_nom = qt_static.get_value("a1")
     a2_nom = qt_static.get_value("a2")
 
-    (qt_static, res) = initialize(qt_static, alg_args={'stat':1})
+    init_res = initialize(qt_static, alg_args={'stat':1})
 
     print "Optimal parameter values:"
     print "a1: %2.2e (nominal: %2.2e)" % (qt_static.get_value("a1"),a1_nom)

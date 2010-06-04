@@ -324,12 +324,9 @@ def _exec_algorithm(model,
     alg.set_solver_options(solver_args)
     # solve optimization problem/simulate
     alg.solve()
-    # write result to file and get file name in return
-    result_file_name = alg.write_result()
-    # load result file
-    res = jmodelica.io.ResultDymolaTextual(result_file_name)
-    return (model,res)
-
+    # get and return result
+    return alg.get_result()
+    
 def _compile(model_name, file_name, compiler='modelica', compiler_target = "ipopt", compiler_options={}):
     """ Helper function which performs compilation of chosen model.
     

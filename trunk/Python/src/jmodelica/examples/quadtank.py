@@ -107,9 +107,10 @@ def run_demo(with_plots=True):
     qt.set_value("u2_r",u_B[1])
 
     # Solve optimal control problem
-    (qt, res) = optimize(qt, solver_args={'max_iter':500})
+    opt_res = optimize(qt, solver_args={'max_iter':500})
 
     # Extract variable profiles
+    res = opt_res.result_data
     x1=res.get_variable_data('x1')
     x2=res.get_variable_data('x2')
     x3=res.get_variable_data('x3')

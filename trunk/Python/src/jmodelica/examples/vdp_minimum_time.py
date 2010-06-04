@@ -33,11 +33,12 @@ def run_demo(with_plots=True):
     curr_dir = os.path.dirname(os.path.abspath(__file__));
     model_name = 'VDP_pack.VDP_Opt_Min_Time'
     mo_file = curr_dir+'/files/VDP.mo'
-	
-    (model, res) = optimize(model_name, mo_file,
-							compiler_options={'state_start_values_fixed':True})
+
+    opt_res = optimize(model_name, mo_file,
+                        compiler_options={'state_start_values_fixed':True})
 							
     # Extract variable profiles
+    res = opt_res.result_data
     x1=res.get_variable_data('x1')
     x2=res.get_variable_data('x2')
     u=res.get_variable_data('u')

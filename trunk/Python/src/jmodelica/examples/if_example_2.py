@@ -51,9 +51,10 @@ def run_demo(with_plots=True):
     model.set_sw(N.array([1,1]))
     
     #Simulate
-    (model, res) = simulate(model,
-							alg_args={'final_time':5.0})
+    sim_res = simulate(model,
+                       alg_args={'final_time':5.0})
     # Get results
+    res = sim_res.result_data
     x = res.get_variable_data('x')
     u = res.get_variable_data('u')
     

@@ -87,11 +87,11 @@ def run_demo(with_plots=True):
     init_model.set_value('Tc',Tc_0_A)
         
     # Solve the DAE initialization system with Ipopt
-    (init_model, init_result) = initialize(init_model)
+    init_result = initialize(init_model)
     
     # Store stationary point A
-    c_0_A = init_result.get_variable_data('c').x[0]
-    T_0_A = init_result.get_variable_data('T').x[0]
+    c_0_A = init_result.result_data.get_variable_data('c').x[0]
+    T_0_A = init_result.result_data.get_variable_data('T').x[0]
     
     # Print some data for stationary point A
     print(' *** Stationary point A ***')
@@ -104,11 +104,12 @@ def run_demo(with_plots=True):
     init_model.set_value('Tc',Tc_0_B)
         
     # Solve the DAE initialization system with Ipopt
-    (init_model, init_result) = initialize(init_model)
+    init_result = initialize(init_model)
     
     # Store stationary point B
-    c_0_B = init_result.get_variable_data('c').x[0]
-    T_0_B = init_result.get_variable_data('T').x[0]
+    res = init_result.result_data
+    c_0_B = res.get_variable_data('c').x[0]
+    T_0_B = res.get_variable_data('T').x[0]
 
     # Print some data for stationary point B
     print(' *** Stationary point B ***')
@@ -139,10 +140,11 @@ def run_demo(with_plots=True):
     init_sim_model.set_value('T_ref',T_0_B)
     init_sim_model.set_value('Tc_ref',u[0])
 
-    (init_sim_model,res) = simulate(init_sim_model,alg_args={'start_time':0.,'final_time':150.,
-                                                             'input_trajectory':u_traj})
+    sim_res = simulate(init_sim_model,alg_args={'start_time':0.,'final_time':150.,
+                                                'input_trajectory':u_traj})
     
     # Extract variable profiles
+    res = sim_res.result_data
     c_init_sim=res.get_variable_data('cstr.c')
     T_init_sim=res.get_variable_data('cstr.T')
     Tc_init_sim=res.get_variable_data('cstr.Tc')
@@ -184,9 +186,10 @@ def run_demo(with_plots=True):
     hs = N.ones(n_e)*1./n_e # Equidistant points
     n_cp = 3; # Number of collocation points in each element
 
-    (cstr,res) = optimize(cstr,alg_args={'n_e':n_e,'hs':hs,'n_cp':n_cp,'init_traj':res})
+    opt_res = optimize(cstr,alg_args={'n_e':n_e,'hs':hs,'n_cp':n_cp,'init_traj':res})
 
     # Extract variable profiles
+    res = opt_res.result_data
     c_res=res.get_variable_data('cstr.c')
     T_res=res.get_variable_data('cstr.T')
     Tc_res=res.get_variable_data('cstr.Tc')
@@ -239,11 +242,12 @@ def run_demo(with_plots=True):
     sim_model.set_value('T_init',T_0_A)
     sim_model.set_value('Tc',u[0])
 
-    (sim_model,res) = simulate(sim_model,compiler='optimica',
-                               alg_args={'start_time':0.,'final_time':150.,
-                                         'input_trajectory':u_traj})
+    sim_res = simulate(sim_model,compiler='optimica',
+                       alg_args={'start_time':0.,'final_time':150.,
+                       'input_trajectory':u_traj})
     
     # Extract variable profiles
+    res = sim_res.result_data
     c_sim=res.get_variable_data('c')
     T_sim=res.get_variable_data('T')
     Tc_sim=res.get_variable_data('Tc')

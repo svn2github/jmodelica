@@ -111,9 +111,10 @@ def run_demo(with_plots=True):
         plt.show()
     
     # optimize
-    (model, res) = optimize(model, solver_args={"max_iter":500})
+    opt_res = optimize(model, solver_args={"max_iter":500})
     
     # Extract variable profiles
+    res = opt_res.result_data
     x1 = res.get_variable_data('sys.x1')
     u = res.get_variable_data('u')
     w = res.get_variable_data('sys.w')

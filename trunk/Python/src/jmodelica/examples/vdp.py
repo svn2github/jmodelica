@@ -31,9 +31,10 @@ def run_demo(with_plots=True):
 
     curr_dir = os.path.dirname(os.path.abspath(__file__));
 
-    (model, res) = optimize("VDP_pack.VDP_Opt", curr_dir+"/files/VDP.mo")
+    opt_res = optimize("VDP_pack.VDP_Opt", curr_dir+"/files/VDP.mo")
 
     # Extract variable profiles
+    res = opt_res.result_data
     x1=res.get_variable_data('x1')
     x2=res.get_variable_data('x2')
     u=res.get_variable_data('u')

@@ -38,20 +38,22 @@ def run_demo(with_plots=True):
     model_name = 'RLC_Circuit'
     mofile = curr_dir+'/files/RLC_Circuit.mo'
     
-    (model, res) = initialize(model_name, mofile)
+    init_res = initialize(model_name, mofile)
 
     (E_dae,A_dae,B_dae,F_dae,g_dae,state_names,input_names,algebraic_names, \
-     dx0,x0,u0,w0,t0) = linearize_dae(model)
+     dx0,x0,u0,w0,t0) = linearize_dae(init_res.model)
     
     (A_ode,B_ode,g_ode,H_ode,M_ode,q_ode) = linear_dae_to_ode(E_dae,A_dae,B_dae,F_dae,g_dae)
 
-    (m1,res1) = simulate("RLC_Circuit",mofile)
-    (m2,res2) = simulate("RLC_Circuit_Linearized",mofile)
+    sim_res1 = simulate("RLC_Circuit",mofile)
+    sim_res2 = simulate("RLC_Circuit_Linearized",mofile)
     
+    res1 = sim_res1.result_data
     c_v_1 = res1.get_variable_data('capacitor.v')
     i_p_i_1 = res1.get_variable_data('inductor.p.i')
     i_p1_i_1 = res1.get_variable_data('inductor1.p.i')
     
+    res2 = sim_res2.result_data
     c_v_2 = res2.get_variable_data('x[1]')
     i_p_i_2 = res2.get_variable_data('x[2]')
     i_p1_i_2 = res2.get_variable_data('x[3]')

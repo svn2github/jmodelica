@@ -73,7 +73,7 @@ def run_demo(with_plots=True):
     init_model.set_value('u2',u2_0_A)
     
     # Solve the DAE initialization system with Ipopt
-    (init_model, init_result) = initialize(init_model)        
+    init_result = initialize(init_model)        
     
     # Store stationary point A
     CA1_0_A = init_model.get_value('CA1')
@@ -94,7 +94,7 @@ def run_demo(with_plots=True):
     init_model.set_value('u2',u2_0_B)
     
     # Solve the DAE initialization system with Ipopt
-    (init_model, init_result) = initialize(init_model)
+    init_result = initialize(init_model)
    
     # Stationary point B
     CA1_0_B = init_model.get_value('CA1')
@@ -140,11 +140,12 @@ def run_demo(with_plots=True):
     hs = N.ones(n_e)*1./n_e # Equidistant points
     n_cp = 3; # Number of collocation points in each element
     
-    (model, res) = optimize(model, compiler_options={'enable_variable_scaling':True,'index_reduction':True},
-                            alg_args={'n_e':n_e, 'hs':hs, 'n_cp':n_cp,'blocking_factors':2*N.ones(n_e/2,dtype=N.int)},
-                            solver_args={'tol':1e-4})
+    opt_res = optimize(model, compiler_options={'enable_variable_scaling':True,'index_reduction':True},
+                       alg_args={'n_e':n_e, 'hs':hs, 'n_cp':n_cp,'blocking_factors':2*N.ones(n_e/2,dtype=N.int)},
+                       solver_args={'tol':1e-4})
         
     # Extract variable profiles
+    res = opt_res.result_data
     CA1_res=res.get_variable_data('cstr.two_CSTRs_Series.CA1')
     CA2_res=res.get_variable_data('cstr.two_CSTRs_Series.CA2')
     T1_res=res.get_variable_data('cstr.two_CSTRs_Series.T1')

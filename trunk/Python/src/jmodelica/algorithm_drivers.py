@@ -66,8 +66,58 @@ class AlgorithmBase:
 #    @abstractmethod
     def solve(self): pass
     
-#    @abstractmethod
-    def write_result(self): pass
+#   @abstractmethod
+    def get_result(self): pass
+    
+class ResultBase:
+    def __init__(self, model=None, result_file_name=None, solver=None, result_data=None):
+        self.model = model
+        self.result_file_name = result_file_name
+        self.solver = solver
+        self.result_data = result_data
+    
+    def get_model(self):
+        if self.model != None:
+            return self.model
+        raise Exception("model has not been set")
+        
+    def set_model(self, model):
+        self.model = model
+        
+    model = property(fget=get_model, fset=set_model, doc="The jmi.Model instance.")
+        
+    def get_result_file_name(self):
+        if self.result_file_name != None:
+            return self.result_file_name
+        raise Exception("result file name has not been set")
+    
+    def set_result_name_file(self, file_name):
+        self.result_file_name = result_file_name
+        
+    result_file_name = property(fget=get_result_file_name, fset=set_result_name_file, doc="The result file name.")
+        
+    def get_solver(self):
+        if self.solver != None:
+            return self.solver
+        raise Exception("solver has not been set")
+
+    def set_solver(self, solver):
+        self.solver = solver
+        
+    solver = property(fget=get_solver, fset=set_solver, doc="The solver used in the algorithm.")
+        
+    def get_result_data(self):
+        if self.result_data != None:
+            return self.result_data
+        raise Exception("result data has not been set")
+        
+    def set_result_data(self):
+        self.result_data = result_data
+        
+    result_data = property(fget=get_result_data, fset=set_result_data, doc="The result data object.")
+    
+    
+class IpoptInitResult(ResultBase): pass
 
 class IpoptInitializationAlg(AlgorithmBase):
     """ Initialization of a model using Ipopt. """
@@ -137,17 +187,23 @@ class IpoptInitializationAlg(AlgorithmBase):
     def solve(self):
         """ Solve the initialization problem using ipopt solver. """
         self.nlp_ipopt.init_opt_ipopt_solve()
-    
-    def write_result(self):
-        """ Write result to file. Returns name of result file."""
-
-        self.nlp.export_result_dymola(**self.result_args)
         
-        # return name of result file
+    def get_result(self):
+        """ Write result to file, load result data and return IpoptInitResult."""
+        
+        self.nlp.export_result_dymola(**self.result_args)
+        # result file name
         resultfile = self.result_args['file_name']
         if not resultfile:
             resultfile=self.model.get_name()+'_result.txt'
-        return resultfile
+        # load result file
+        res = jmodelica.io.ResultDymolaTextual(resultfile)
+        
+        # create and return result object
+        return IpoptInitResult(self.model, resultfile, self.nlp_ipopt, res)
+            
+
+class AssimuloSimResult(ResultBase): pass
 
 class AssimuloAlg(AlgorithmBase):
     """ Simulation algorithm using the Assimulo package. """
@@ -231,7 +287,7 @@ class AssimuloAlg(AlgorithmBase):
             self.solver = getattr(expl_ode, solver)
         else:
             raise InvalidAlgorithmArgumentException("The solver: "+solver+ " is unknown.")
-				
+            
         self.input_trajectory = input_trajectory
         
     def set_solver_options(self, 
@@ -261,13 +317,22 @@ class AssimuloAlg(AlgorithmBase):
         if self.model.has_cppad_derivatives():
             self.simulator.initiate()
         self.simulator.simulate(self.final_time, self.num_communication_points)
-    
-    def write_result(self):
-        """ Writes result to file and returns the file name."""
+ 
+    def get_result(self):
+        """ Write result to file, load result data and return AssimuloSimResult."""
+        
         write_data(self.simulator)
-        return self.model.get_name()+'_result.txt'
+        # result file name
+        resultfile = self.model.get_name()+'_result.txt'
+        # load result file
+        res = jmodelica.io.ResultDymolaTextual(resultfile)
+        
+        # create and return result object
+        return AssimuloSimResult(self.model, resultfile, self.solver, res)
+    
 
-  
+class CollocationLagrangePolynomialsResult(ResultBase): pass
+
 class CollocationLagrangePolynomialsAlg(AlgorithmBase):
     """ Optimization algorithm using CollocationLagrangePolynomials method. """
     
@@ -383,9 +448,9 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
     def solve(self):
         """ Solve the optimization problem using ipopt solver. """
         self.nlp_ipopt.opt_sim_ipopt_solve()
-    
-    def write_result(self):
-        """ Write result to file. Returns name of result file."""
+        
+    def get_result(self):
+        """ Write result to file, load result data and return CollocationLagrangePolynomialsResult."""
         if self.result_mesh=='element_interpolation':
             self.nlp.export_result_dymola_element_interpolation(**self.result_args)
         elif self.result_mesh=='mesh_interpolation':
@@ -393,14 +458,19 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
         elif self.result_mesh=='default':
             self.nlp.export_result_dymola(**self.result_args)
         else:
-            raise InvalidAlgorithmArgumentException(self.result_mesh)
-        
-        # return name of result file
+             raise InvalidAlgorithmArgumentException(self.result_mesh)
+            
+        # result file name
         resultfile = self.result_args['file_name']
         if not resultfile:
             resultfile=self.model.get_name()+'_result.txt'
-        return resultfile
         
+        # load result file
+        res = jmodelica.io.ResultDymolaTextual(resultfile)
+        
+        # create and return result object
+        return CollocationLagrangePolynomialsResult(self.model, resultfile, self.nlp_ipopt, res)
+    
 class InvalidAlgorithmArgumentException(Exception):
     """ Exception raised when an algorithm argument is encountered that does 
         not exist.

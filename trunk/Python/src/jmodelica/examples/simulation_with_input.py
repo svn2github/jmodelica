@@ -49,9 +49,10 @@ def run_demo(with_plots=True):
 
     model.set_value('u',u[0])
     
-    (model, res) = simulate(model, alg_args={'final_time':30, 
-							'num_communication_points':3000, 'input_trajectory':u_traj})
-        
+    sim_res = simulate(model, alg_args={'final_time':30, 
+                       'num_communication_points':3000, 'input_trajectory':u_traj})
+    
+    res = sim_res.result_data
     x1_sim = res.get_variable_data('x1')
     x2_sim = res.get_variable_data('x2')
     u_sim = res.get_variable_data('u')

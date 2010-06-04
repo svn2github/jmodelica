@@ -31,12 +31,13 @@ def run_demo(with_plots=True):
     model_name = 'VDP_pack.VDP_Opt'
     mofile = curr_dir+'/files/VDP.mo'
     
-    (model, res) = simulate(model_name, mofile, 
-                            compiler='optimica',
-                            compiler_options={'state_start_values_fixed':True},
-                            alg_args={'final_time':20,'num_communication_points':0,'solver':'CVode'},
-                            solver_args={'discr':'BDF','iter':'Newton'})
+    sim_res = simulate(model_name, mofile, 
+                       compiler='optimica',
+                       compiler_options={'state_start_values_fixed':True},
+                       alg_args={'final_time':20,'num_communication_points':0,'solver':'CVode'},
+                       solver_args={'discr':'BDF','iter':'Newton'})
 
+    res = sim_res.result_data
     x1=res.get_variable_data('x1')
     x2=res.get_variable_data('x2')
     

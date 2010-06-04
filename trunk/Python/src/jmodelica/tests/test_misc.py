@@ -78,7 +78,8 @@ def test_initialize():
     fpath_pend = os.path.join(jm_home,path_to_examples,mofile_pend)
     cpath_pend = "Pendulum_pack.Pendulum"
     
-    (model,res) = jmodelica.initialize(cpath_pend, fpath_pend,compiler='optimica')
+    init_res = jmodelica.initialize(cpath_pend, fpath_pend,compiler='optimica')
+    res = init_res.result_data
     theta=res.get_variable_data('theta')
     dtheta=res.get_variable_data('dtheta')
     x=res.get_variable_data('x')
@@ -112,9 +113,9 @@ def test_optimize():
     fpath_pend = os.path.join(jm_home,path_to_examples,mofile_pend)
     cpath_pend = "Pendulum_pack.Pendulum_Opt"
     
-    (model,res) = jmodelica.optimize(cpath_pend, fpath_pend, 
-                                     compiler_options={'state_start_values_fixed':True})
-    cost=res.get_variable_data('cost')
+    opt_res = jmodelica.optimize(cpath_pend, fpath_pend, 
+                                 compiler_options={'state_start_values_fixed':True})
+    cost=opt_res.result_data.get_variable_data('cost')
     
     assert N.abs(cost.x[-1] - 1.2921683e-01) < 1e-3, \
         "Wrong value of cost function using jmodelica.optimize with vdp."
@@ -124,9 +125,9 @@ def test_optimize():
 def test_optimize_set_n_cp():
     """ Test the jmodelica.optimize function and setting n_cp in alg_args.
     """
-    (model,res) = jmodelica.optimize(model_vdp, 
-                                     alg_args={'n_cp':10})
-    cost=res.get_variable_data('cost')
+    opt_res = jmodelica.optimize(model_vdp, 
+                                 alg_args={'n_cp':10})
+    cost=opt_res.result_data.get_variable_data('cost')
     
     assert N.abs(cost.x[-1] - 2.34602647e+01 ) < 1e-3, \
             "Wrong value of cost function using jmodelica.optimize with vdp. \
@@ -141,11 +142,11 @@ def test_optimize_set_args():
     cpath_vdp = "VDP_pack.VDP_Opt"
     
     res_file_name = 'test_optimize_set_result_mesh.txt'
-    (model,res) = jmodelica.optimize(model_vdp, 
-                                     alg_args={'result_mesh':'element_interpolation', 
-                                               'result_file_name':res_file_name},
-                                     solver_args={'max_iter':100})
-    cost=res.get_variable_data('cost')
+    opt_res = jmodelica.optimize(model_vdp, 
+                                 alg_args={'result_mesh':'element_interpolation', 
+                                           'result_file_name':res_file_name},
+                                 solver_args={'max_iter':100})
+    cost=opt_res.result_data.get_variable_data('cost')
     
     assert N.abs(cost.x[-1] - 2.3469089e+01) < 1e-3, \
             "Wrong value of cost function using jmodelica.optimize with vdp."
@@ -172,8 +173,8 @@ def test_simulate():
     fpath_rlc = os.path.join(jm_home, path_to_examples, mofile_rlc)
     cpath_rlc = "RLC_Circuit"
     
-    (model,res) = jmodelica.simulate(cpath_rlc, fpath_rlc)
-    resistor_v = res.get_variable_data('resistor.v')
+    sim_res = jmodelica.simulate(cpath_rlc, fpath_rlc)
+    resistor_v = sim_res.result_data.get_variable_data('resistor.v')
     
     assert N.abs(resistor_v.x[-1] - 0.138037041741) < 1e-3, \
         "Wrong value in simulation result using jmodelica.simulate with rlc."
@@ -181,8 +182,8 @@ def test_simulate():
 @testattr(assimulo = True)
 def test_simulate_set_alg_arg():
     """ Test the jmodelica.simulate function and setting an algorithm argument."""    
-    (model,res) = jmodelica.simulate(model_rlc, alg_args={'final_time':30.0})
-    resistor_v = res.get_variable_data('resistor.v')
+    sim_res = jmodelica.simulate(model_rlc, alg_args={'final_time':30.0})
+    resistor_v = sim_res.result_data.get_variable_data('resistor.v')
     
     assert N.abs(resistor_v.x[-1] - 0.159255008028) < 1e-3, \
         "Wrong value in simulation result using jmodelica.simulate with rlc."
@@ -191,7 +192,7 @@ def test_simulate_set_alg_arg():
 def test_simulate_set_probl_arg():
     """ Test that it is possible to set properties in assimulo and that an 
         exception is raised if the argument is invalid. """
-    (model,res) = jmodelica.simulate(model_rlc, solver_args={'max_eIter':100, 'maxh':0.1})
+    sim_res = jmodelica.simulate(model_rlc, solver_args={'max_eIter':100, 'maxh':0.1})
     
     nose.tools.assert_raises(jmodelica.algorithm_drivers.InvalidSolverArgumentException,
                              jmodelica.simulate,
@@ -225,15 +226,15 @@ def test_simulate_w_ode():
     fpath_vdp = os.path.join(jm_home, path_to_examples, mofile_vdp)
     cpath_vdp = "VDP_pack.VDP_Opt"
 
-    (model,res) = jmodelica.simulate(cpath_vdp, 
-                                     fpath_vdp,
-                                     compiler='optimica',
-                                     compiler_options={'state_start_values_fixed':True},
-                                     compiler_target='model',
-                                     alg_args={'solver':'CVode', 'final_time':20, 'num_communication_points':0},
-                                     solver_args={'discr':'BDF', 'iter':'Newton'})
-    x1=res.get_variable_data('x1')
-    x2=res.get_variable_data('x2')
+    sim_res = jmodelica.simulate(cpath_vdp, 
+                                 fpath_vdp,
+                                 compiler='optimica',
+                                 compiler_options={'state_start_values_fixed':True},
+                                 compiler_target='model',
+                                 alg_args={'solver':'CVode', 'final_time':20, 'num_communication_points':0},
+                                 solver_args={'discr':'BDF', 'iter':'Newton'})
+    x1=sim_res.result_data.get_variable_data('x1')
+    x2=sim_res.result_data.get_variable_data('x2')
     
     assert N.abs(x1.x[-1] + 0.736680243) < 1e-5, \
            "Wrong value in simulation result in VDP_assimulo.py" 

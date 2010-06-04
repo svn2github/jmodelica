@@ -35,9 +35,10 @@ def run_demo(with_plots=True):
     model_name = 'IfExpExamples.IfExpExample1'
     mofile = curr_dir+'/files/IfExpExamples.mo'
     
-    (model, res) = simulate(model_name, mofile,
-							alg_args={'final_time':5, 'num_communication_points':500})
-        
+    sim_res = simulate(model_name, mofile,
+                       alg_args={'final_time':5, 'num_communication_points':500})
+                        
+    res = sim_res.result_data
     x = res.get_variable_data('x')
     u = res.get_variable_data('u')
     

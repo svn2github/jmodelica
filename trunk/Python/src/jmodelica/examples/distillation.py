@@ -60,7 +60,7 @@ def run_demo(with_plots=True):
     u1_0_A = 3.0
     init_model.set_value('u1',u1_0_A)
     
-    (init_model, init_result) = initialize(init_model)
+    init_result = initialize(init_model)
     	
     # Store stationary point A
     y_A = N.zeros(32)
@@ -75,7 +75,7 @@ def run_demo(with_plots=True):
     # Set inputs for stationary point B
     u1_0_B = 3.0 - 1
     init_model.set_value('u1',u1_0_B)
-    (init_model, init_result) = initialize(init_model)
+    init_result = initialize(init_model)
 
     # Store stationary point B
     y_B = N.zeros(32)
@@ -114,9 +114,10 @@ def run_demo(with_plots=True):
     model.set_value('y1_ref',y_B[0])
     
     # Solve the optimization problem
-    (model, res) = optimize(model)
+    opt_res = optimize(model)
 
     # Extract variable profiles
+    res = opt_res.result_data
     u1_res = res.get_variable_data('u1')
     u1_ref_res = res.get_variable_data('u1_ref')
     y1_ref_res = res.get_variable_data('y1_ref')
