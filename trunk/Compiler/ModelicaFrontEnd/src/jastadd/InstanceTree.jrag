@@ -806,6 +806,13 @@ aspect InstanceTreeConstruction {
 	public InstComponentDecl InstBuiltInClassDecl.newInstComponentDecl(ComponentDecl cd, Access className) {
 		return new InstBuiltIn(className.newInstAccess(),new Opt(),cd,new Opt(),new Opt(),new Opt());
 	}
+	
+	public InstComponentDecl InstClassDecl.newInstConstrainingComponentDecl(ComponentDecl cd, Access className) {
+		// TODO: Does this really use the correct modifiers, etc?
+		InstComponentDecl icd = newInstComponentDecl(cd, className);
+		icd.setInstConstrainingOpt(new Opt());
+		return icd;
+	}
 
 	public abstract InstComponentDecl InstClassDecl.newInstReplacingComponent(ComponentDecl replacingDecl,
 	                                                                 ComponentDecl originalDecl, InstComponentRedeclare icr);
@@ -1058,9 +1065,8 @@ aspect InstaceConstrainingClauses {
     eq InstConstrainingClass.getConstrainingClause() = getBaseClassDecl().getConstrainingClause();
 
 	syn lazy InstNode InstConstraining.getInstNode();
-	eq InstConstrainingComponent.getInstNode() {
-  		return getClassName().myInstClassDecl().newInstComponentDecl(getComponentDecl(),getConstrainingClause().getAccess());
-	}
+	eq InstConstrainingComponent.getInstNode() =
+  		getClassName().myInstClassDecl().newInstConstrainingComponentDecl(getComponentDecl(), getConstrainingClause().getAccess());
 
 	eq InstConstrainingClass.getInstNode() {
 		ClassDecl classToExpand = getClassName().myInstClassDecl().getClassDecl();
@@ -1221,12 +1227,6 @@ aspect InstanceAST_API {
 		return l;
 	}
 
-	
-	inh boolean InstNode.inInstConstraining();
-	inh boolean Opt.inInstConstraining();
-	eq InstConstraining.getChild().inInstConstraining() = true;
-	eq Opt.getChild().inInstConstraining()              = inInstConstraining();
-	eq ASTNode.getChild().inInstConstraining()          = false;
 	
 	// TODO: this seems to be a trick? equations are added in InstComponentDecl and
 	// InstBaseClassDecl since they have nodes of type InstConstraining

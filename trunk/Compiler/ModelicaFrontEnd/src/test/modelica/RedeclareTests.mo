@@ -903,18 +903,20 @@ Semantic error at line 884, column 34:
 end RedeclareTest_Constr_17_Err;
 
 model RedeclareTest_Constr_18_Err "Constraining clause example."
- 
-      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ErrorTestCase(name="RedeclareTest_Constr_18_Err",
-        description="Check that the declaration is a subtype of the constraining clause",
-                                               errorMessage=
-"1 error(s) found...
-In file 'src/test/modelica/RedeclareTests.mo':
-Semantic error at line 918, column 32:
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="RedeclareTest_Constr_18_Err",
+         description="Check that the declaration is a subtype of the constraining clause",
+         errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RedeclareTests.mo':
+Semantic error at line 940, column 20:
+  In the declaration 'replaceable D d constrainedby D (redeclare replaceable B c)', the declared class is not a subtype of the constraining class
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RedeclareTests.mo':
+Semantic error at line 940, column 38:
   'redeclare replaceable B c' is not a subtype of 'replaceable C c constrainedby C '
-"
-  )})));
-  
+")})));
+
   model A
     Real x=1;
   end A;
