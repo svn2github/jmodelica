@@ -759,7 +759,7 @@ class NLPCollocation(object):
         w_index = 0;
         for name in dx_names:
             try:
-                #print(dx_names.get(ref))
+                #print(name)
                 #print(col_index)
                 traj = res.get_variable_data(name)
                 if self._model.get_scaling_method() & jmi.JMI_SCALING_VARIABLES > 0:
@@ -771,10 +771,10 @@ class NLPCollocation(object):
             except:
                 dx_index = dx_index + 1
                 col_index = col_index + 1
-                print "Warning: Could not find trajectory for variable " + name
+                print "Warning: Could not find trajectory for derivative variable " + name
         for name in x_names:
             try:
-                #print(x_names.get(ref))
+                #print(name)
                 #print(col_index)
                 traj = res.get_variable_data(name)
                 if self._model.get_scaling_method() & jmi.JMI_SCALING_VARIABLES > 0:
@@ -786,11 +786,11 @@ class NLPCollocation(object):
             except:
                 x_index = x_index + 1
                 col_index = col_index + 1
-                print "Warning: Could not find trajectory for variable " + name
+                print "Warning: Could not find trajectory for state variable " + name
 
         for name in u_names:
             try:
-                #print(u_names.get(ref))
+                #print(name)
                 #print(col_index)
                 traj = res.get_variable_data(name)
                 if self._model.get_scaling_method() & jmi.JMI_SCALING_VARIABLES > 0:
@@ -802,21 +802,21 @@ class NLPCollocation(object):
             except:
                 u_index = u_index + 1
                 col_index = col_index + 1
-                print "Warning: Could not find trajectory for variable " + name
+                print "Warning: Could not find trajectory for input variable " + name
 
         for name in w_names:
             try:
-                #print(w_names.get(ref))
+                #print(name)
                 #print(col_index)
                 traj = res.get_variable_data(name)
                 if N.size(traj.x)==2:
                     if self._model.get_scaling_method() & jmi.JMI_SCALING_VARIABLES > 0:
-                        var_data[:,col_index] = N.ones(n_points)*traj.x[0]/sc_u[w_index]
+                        var_data[:,col_index] = N.ones(n_points)*traj.x[0]/sc_w[w_index]
                     else:
                         var_data[:,col_index] = N.ones(n_points)*traj.x[0]
                 else:
                     if self._model.get_scaling_method() & jmi.JMI_SCALING_VARIABLES > 0:
-                        var_data[:,col_index] = traj.x/sc_u[w_index]
+                        var_data[:,col_index] = traj.x/sc_w[w_index]
                     else:
                         var_data[:,col_index] = traj.x
                 w_index = w_index + 1
@@ -824,7 +824,7 @@ class NLPCollocation(object):
             except:
                 w_index = w_index + 1
                 col_index = col_index + 1
-                print "Warning: Could not find trajectory for variable " + name
+                print "Warning: Could not find trajectory for algebraic variable " + name
 
         #print(var_data)
         #print(N.reshape(var_data,(n_cols*n_points,1),order='F')[:,0])
