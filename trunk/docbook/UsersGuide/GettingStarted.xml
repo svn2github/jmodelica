@@ -1032,7 +1032,7 @@ init_sim_model.set_value('cstr.T_init',T_0_A)
 init_sim_model.set_value('Tc_0',Tc_0_A)
 init_sim_model.set_value('c_ref',c_0_B)
 init_sim_model.set_value('T_ref',T_0_B)
-init_sim_model.set_value('Tc_ref',u_traj.eval(0.)[0])
+init_sim_model.set_value('Tc_ref',u[0])
 </programlisting>
 
         <para>Having initialized the model parameters, we can simulate the
