@@ -178,11 +178,11 @@ class IpoptInitializationAlg(AlgorithmBase):
         """
         for k, v in solver_args.iteritems():
             if isinstance(v, default_int):
-                self.nlp_ipopt.opt_sim_ipopt_set_int_option(k, v)
+                self.nlp_ipopt.init_opt_ipopt_set_int_option(k, v)
             elif isinstance(v, float):
-                self.nlp_ipopt.opt_sim_ipopt_set_num_option(k, v)
+                self.nlp_ipopt.init_opt_ipopt_set_num_option(k, v)
             elif isinstance(v, str):
-                self.nlp_ipopt.opt_sim_ipopt_set_string_option(k, v)
+                self.nlp_ipopt.init_opt_ipopt_set_string_option(k, v)
                         
     def solve(self):
         """ Solve the initialization problem using ipopt solver. """
