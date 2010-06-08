@@ -132,8 +132,8 @@ aspect TestFramework {
 							Method m = cl.getMethod(methodName, Boolean.TYPE);
 							m.invoke(tc, val);
 						} else {
-							log.debug("Creating test case '" + className + "' - attribute '" + 
-									attrName + "' is assigned an unsupported expression type");
+							log.error("Creating test case '" + className + "' - attribute '" + 
+									attrName + "' is assigned from an unsupported expression type");
 						}
 					}
 					
@@ -146,14 +146,14 @@ aspect TestFramework {
 			} catch (ClassNotFoundException e) {
 				// TODO: Maybe we should throw exceptions instead of log?
 				// No such class was found - log that
-				log.debug("Creating test case '" + className + "' - class not found");
+				log.error("Creating test case '" + className + "' - class not found");
 			} catch (NoSuchMethodException e) {
 				// No such method was found - log that
-				log.debug("Creating test case '" + className + "' - attribute '" + attrName + 
+				log.error("Creating test case '" + className + "' - attribute '" + attrName + 
 						"' not found or used with wrong type of expression");
 			} catch (Exception e) {
 				// The test case class did not behave as expected - log that
-				log.debug("Creating test case '" + className + "' - malformed test case class");
+				log.error("Creating test case '" + className + "' - malformed test case class");
 			}
 		}
 	}

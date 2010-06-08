@@ -1946,6 +1946,32 @@ model TypeModifications4
 end TypeModifications4;
 
 
- 
+
+model ConstMod1
+	record A
+		Real x;
+	end A;
+	
+	package B
+		constant A y;
+	end B;
+	
+	package C
+		extends B(y = A(1));
+	end C;
+	
+	package D
+		replaceable package E = A;
+	end D;
+	
+	package F
+		extends D;
+		redeclare replaceable package E = C constrainedby A;
+	end F;
+	
+	Real z = F.E.y.x;
+end ConstMod1;
+
+
 
 end ModificationTests;

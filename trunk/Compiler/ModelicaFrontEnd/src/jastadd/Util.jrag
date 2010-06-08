@@ -925,40 +925,40 @@ aspect FlatFunctionUtils {
      /**
       * \brief Returns a list of all InstComponentDecls declared as "input".
       */
-     syn lazy ArrayList<InstComponentDecl> InstClassDecl.myInputs() {
+     syn lazy ArrayList<InstComponentDecl> InstNode.myInputs() {
          ArrayList<InstComponentDecl> l = new ArrayList<InstComponentDecl>();
          for (InstComponentDecl icd : getInstComponentDecls())
              if (icd.isInput())
                  l.add(icd);
          for (InstExtends ie : getInstExtendss())
-        	 l.addAll(ie.myInstClass().myInputs());
+        	 l.addAll(ie.myInputs());
          return l;
      }
      
      /**
       * \brief Returns a list of all InstComponentDecls declared as "output".
       */
-     syn lazy ArrayList<InstComponentDecl> InstClassDecl.myOutputs() {
+     syn lazy ArrayList<InstComponentDecl> InstNode.myOutputs() {
          ArrayList<InstComponentDecl> l = new ArrayList<InstComponentDecl>();
          for (InstComponentDecl icd : getInstComponentDecls())
              if (icd.isOutput())
                  l.add(icd);
          for (InstExtends ie : getInstExtendss())
-        	 l.addAll(ie.myInstClass().myOutputs());
+        	 l.addAll(ie.myOutputs());
          return l;
      }
      
      /**
       * \brief Returns a list of all contained InstComponentDecls that may be altered by a modification.
       */
-     syn lazy ArrayList<InstComponentDecl> InstClassDecl.myModifiableComponents() {
+     syn lazy ArrayList<InstComponentDecl> InstNode.myModifiableComponents() {
          ArrayList<InstComponentDecl> l = new ArrayList<InstComponentDecl>();
          // TODO: Only add components that are not final or constant
          // TODO: Are there other reasons a component might not be modifiable?
          for (InstComponentDecl icd : getInstComponentDecls())
              l.add(icd);
          for (InstExtends ie : getInstExtendss())
-        	 l.addAll(ie.myInstClass().myModifiableComponents());
+        	 l.addAll(ie.myModifiableComponents());
          return l;
      }
      

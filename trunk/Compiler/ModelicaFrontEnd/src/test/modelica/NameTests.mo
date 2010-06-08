@@ -551,6 +551,32 @@ equation
 end NameTest17;
 
 
+model NameTest18
+	model A
+		replaceable package B = D;
+		parameter Real y2 = 2;
+		B.C b(y = y2);
+	end A;
+	
+	package D
+		extends F(redeclare model C = G);
+	end D;
+	
+	package F
+		replaceable model C = G;
+	end F;
+	
+	model G
+		parameter Real y = 1 / x;
+		parameter Real x = 1 / y;
+		Real z = y + x;
+	end G;
+	
+	A a(y2 = 2, redeclare package B = D);
+end NameTest18;
+
+
+
 /* Used for tests ConstantLookup1-3. */
 constant Real constant_1 = 1.0;
 

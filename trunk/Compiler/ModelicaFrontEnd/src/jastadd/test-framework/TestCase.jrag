@@ -33,7 +33,9 @@ abstract public class TestCase {
 	private String description;
 	private String sourceFileName;
 	private String className;
+	
 	private boolean filter = false;
+	private boolean checkWarnings = false;
 
 	public TestCase() {}
 	
@@ -121,6 +123,13 @@ abstract public class TestCase {
 	 */
 	public void setFilter(boolean val) {
 		filter = val;
+	}
+	
+	/**
+	 * \brief Activate or deactivate incusion of warnings in error check (see {@link #filterProblems(Collection<Problem>)}).
+	 */
+	public void setCheckWarnings(boolean val) {
+		checkWarnings = val;
 	}
 	
 	/**
@@ -288,7 +297,7 @@ abstract public class TestCase {
 	 */
 	protected void filterProblems(Collection<Problem> problems) {
 		for (Iterator<Problem> it = problems.iterator(); it.hasNext(); )
-			if (!it.next().isTestError())
+			if (!it.next().isTestError(checkWarnings))
 				it.remove();
 	}
 	

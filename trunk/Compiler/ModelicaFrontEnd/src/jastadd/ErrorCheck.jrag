@@ -70,8 +70,8 @@ import java.util.ArrayList;
         this.beginColumn = beginColumn;
     }
     
-    public boolean isTestError() {
-    	return severity == Severity.ERROR && kind != Kind.COMPLIANCE;
+    public boolean isTestError(boolean checkWarnings) {
+    	return (checkWarnings || severity == Severity.ERROR) && kind != Kind.COMPLIANCE;
     }
   
     public boolean equals(Object o) {

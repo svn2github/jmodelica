@@ -3376,5 +3376,45 @@ end RedeclareElement9;
 
 
 
+model RedeclareFunction1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="RedeclareFunction1",
+         description="Lookup with modifications in extending function",
+         flatModel="
+fclass RedeclareTests.RedeclareFunction1
+ Real x[2] = RedeclareTests.RedeclareFunction1.B({1,2});
+
+ function RedeclareTests.RedeclareFunction1.B
+  input Real[2] i;
+  output Real[2] o;
+ algorithm
+  o := i;
+  return;
+ end RedeclareTests.RedeclareFunction1.B;
+end RedeclareTests.RedeclareFunction1;
+")})));
+
+	package A
+		constant Integer n = 1;
+		replaceable partial function B
+			input Real i[n];
+			output Real o[n];
+		end B;
+	end A;
+	
+	package C
+		extends A(n = 2);
+		
+		redeclare function extends B
+		algorithm
+			o := i;
+		end B;
+	end C;
+	
+	Real x[2] = C.B({1, 2});
+end RedeclareFunction1;
+
+
 end RedeclareTests;
 
