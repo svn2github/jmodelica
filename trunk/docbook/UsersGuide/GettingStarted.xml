@@ -661,10 +661,12 @@ plt.show()</programlisting>
 
       <para>Start the tutorial by creating a working directory and copy the
       file $JMODELICA_HOME/Python/jmodelica/examples/files/CSTR.mo to your
-      working directory. An on-line version of CSTR.mo is also available
-      (depending on which browser you use, you may have to accept the site
-      certificate by clicking through a few steps). If you choose to create
-      Python script file, save it to the working directory.</para>
+      working directory. An on-line version of <link
+      xlink:href="https://svn.jmodelica.org/trunk/Python/src/jmodelica/examples/files/CSTR.mo">CSTR.mo</link>
+      is also available (depending on which browser you use, you may have to
+      accept the site certificate by clicking through a few steps). If you
+      choose to create Python script file, save it to the working
+      directory.</para>
 
       <section>
         <title>Start the Python shell</title>
