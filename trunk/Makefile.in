@@ -266,6 +266,7 @@ AUTOMAKE_OPTIONS = foreign
 
 # EXTRA_DIST =
 SUBDIRS = JMI/src
+assimulo_install_dir = $(abs_builddir)/Assimulo_install
 bindistdir = JModelica.org-$(VERSION)-bin
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
@@ -692,7 +693,7 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-recursive
 
-clean-am: clean-generic clean-libtool mostlyclean-am
+clean-am: clean-generic clean-libtool clean-local mostlyclean-am
 
 distclean: distclean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
@@ -765,20 +766,20 @@ uninstall-am:
 
 .PHONY: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) CTAGS GTAGS \
 	all all-am all-local am--refresh check check-am clean \
-	clean-generic clean-libtool ctags ctags-recursive dist \
-	dist-all dist-bzip2 dist-gzip dist-lzma dist-shar dist-tarZ \
-	dist-xz dist-zip distcheck distclean distclean-generic \
-	distclean-hdr distclean-libtool distclean-tags distcleancheck \
-	distdir distuninstallcheck dvi dvi-am html html-am info \
-	info-am install install-am install-data install-data-am \
-	install-dvi install-dvi-am install-exec install-exec-am \
-	install-exec-local install-html install-html-am install-info \
-	install-info-am install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs installdirs-am maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-generic \
-	mostlyclean-libtool pdf pdf-am ps ps-am tags tags-recursive \
-	uninstall uninstall-am
+	clean-generic clean-libtool clean-local ctags ctags-recursive \
+	dist dist-all dist-bzip2 dist-gzip dist-lzma dist-shar \
+	dist-tarZ dist-xz dist-zip distcheck distclean \
+	distclean-generic distclean-hdr distclean-libtool \
+	distclean-tags distcleancheck distdir distuninstallcheck dvi \
+	dvi-am html html-am info info-am install install-am \
+	install-data install-data-am install-dvi install-dvi-am \
+	install-exec install-exec-am install-exec-local install-html \
+	install-html-am install-info install-info-am install-man \
+	install-pdf install-pdf-am install-ps install-ps-am \
+	install-strip installcheck installcheck-am installdirs \
+	installdirs-am maintainer-clean maintainer-clean-generic \
+	mostlyclean mostlyclean-generic mostlyclean-libtool pdf pdf-am \
+	ps ps-am tags tags-recursive uninstall uninstall-am
 
 
 all-local:
@@ -787,7 +788,7 @@ all-local:
 @HAVE_ANT_TRUE@	cd $(abs_top_srcdir)/Compiler/OptimicaCompiler; \
 @HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT)
 @WITH_SUNDIALS_TRUE@	cd $(abs_top_srcdir)/Assimulo; \
-@WITH_SUNDIALS_TRUE@	python setup_source.py install --sundials-home=$(SUNDIALS_HOME) --prefix=Assimulo_install
+@WITH_SUNDIALS_TRUE@	python setup_source.py install --sundials-home=$(SUNDIALS_HOME) --prefix=$(assimulo_install_dir)
 
 install-exec-local:
 @HAVE_ANT_TRUE@	cp $(abs_top_srcdir)/Compiler/ModelicaCompiler/bin/ModelicaCompiler.jar $(DESTDIR)$(prefix)/lib/
@@ -817,17 +818,17 @@ install-exec-local:
 	mkdir -p $(DESTDIR)$(prefix)/Python
 	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy LICENSE file" || cp $(abs_top_srcdir)/Python/LICENSE $(DESTDIR)$(prefix)/Python
 	cd $(abs_top_srcdir)/Python/src/; find jmodelica -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python
-@WITH_SUNDIALS_TRUE@	if [ -e $(abs_top_srcdir)/Assimulo/Assimulo_install/lib/python2.5/site-packages/ ]; \
+@WITH_SUNDIALS_TRUE@	if [ -e $(assimulo_install_dir)/lib/python2.5/site-packages/ ]; \
 @WITH_SUNDIALS_TRUE@	then \
-@WITH_SUNDIALS_TRUE@	cd $(abs_top_srcdir)/Assimulo/Assimulo_install/lib/python2.5/site-packages/; \
+@WITH_SUNDIALS_TRUE@	cd $(assimulo_install_dir)/lib/python2.5/site-packages/; \
 @WITH_SUNDIALS_TRUE@	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python; \
 @WITH_SUNDIALS_TRUE@	fi
-@WITH_SUNDIALS_TRUE@	if [ -e $(abs_top_srcdir)/Assimulo/Assimulo_install/lib/python2.6/site-packages/ ];\
+@WITH_SUNDIALS_TRUE@	if [ -e $(assimulo_install_dir)/lib/python2.6/site-packages/ ];\
 @WITH_SUNDIALS_TRUE@	then \
-@WITH_SUNDIALS_TRUE@	cd $(abs_top_srcdir)/Assimulo/Assimulo_install/lib/python2.6/site-packages/; \
+@WITH_SUNDIALS_TRUE@	cd $(assimulo_install_dir)/lib/python2.6/site-packages/; \
 @WITH_SUNDIALS_TRUE@	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python; \
 @WITH_SUNDIALS_TRUE@	else \
-@WITH_SUNDIALS_TRUE@	cd $(abs_top_srcdir)/Assimulo/Assimulo_install/Lib/site-packages/; \
+@WITH_SUNDIALS_TRUE@	cd $(assimulo_install_dir)/Lib/site-packages/; \
 @WITH_SUNDIALS_TRUE@	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python; \
 @WITH_SUNDIALS_TRUE@	fi
 	mkdir -p $(DESTDIR)$(prefix)/bin
@@ -904,7 +905,7 @@ bindist: bindistdir
 test: install
 	$(prefix)/jm_tests -i
 
-# clean-local: clean-jmi-examples clean-frontends
+clean-local: clean-frontends clean-assimulo
 
 # jmi-examples: install
 # 	cd JMI/examples/Vdp; $(MAKE) all
@@ -919,6 +920,11 @@ test: install
 # 	cd JMI/examples/FurutaPendulum; $(MAKE) clean
 # 	cd JMI/examples/CSTR; $(MAKE) clean
 # 	cd JMI/examples/CSTR2; $(MAKE) clean
+
+clean-assimulo:
+@WITH_SUNDIALS_TRUE@	cd $(abs_top_srcdir)/Assimulo; \
+@WITH_SUNDIALS_TRUE@	python setup_source.py clean --all --sundials-home=$(SUNDIALS_HOME) 
+@WITH_SUNDIALS_TRUE@	rm -rf $(assimulo_install_dir)
 
 clean-frontends:
 #	cd $(abs_top_srcdir)/Compiler/ModelicaFrontEnd; \

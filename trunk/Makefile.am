@@ -19,6 +19,8 @@ AUTOMAKE_OPTIONS = foreign
 
 SUBDIRS = JMI/src
 
+assimulo_install_dir=$(abs_builddir)/Assimulo_install
+
 bindistdir=JModelica.org-$(VERSION)-bin
 
 all-local:
@@ -30,7 +32,7 @@ if HAVE_ANT
 endif
 if WITH_SUNDIALS
 	cd $(abs_top_srcdir)/Assimulo; \
-	python setup_source.py install --sundials-home=$(SUNDIALS_HOME) --prefix=Assimulo_install
+	python setup_source.py install --sundials-home=$(SUNDIALS_HOME) --prefix=$(assimulo_install_dir)
 endif
 
 install-exec-local:
@@ -64,17 +66,17 @@ endif
 	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy LICENSE file" || cp $(abs_top_srcdir)/Python/LICENSE $(DESTDIR)$(prefix)/Python
 	cd $(abs_top_srcdir)/Python/src/; find jmodelica -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python
 if WITH_SUNDIALS
-	if [ -e $(abs_top_srcdir)/Assimulo/Assimulo_install/lib/python2.5/site-packages/ ]; \
+	if [ -e $(assimulo_install_dir)/lib/python2.5/site-packages/ ]; \
 	then \
-	cd $(abs_top_srcdir)/Assimulo/Assimulo_install/lib/python2.5/site-packages/; \
+	cd $(assimulo_install_dir)/lib/python2.5/site-packages/; \
 	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python; \
 	fi
-	if [ -e $(abs_top_srcdir)/Assimulo/Assimulo_install/lib/python2.6/site-packages/ ];\
+	if [ -e $(assimulo_install_dir)/lib/python2.6/site-packages/ ];\
 	then \
-	cd $(abs_top_srcdir)/Assimulo/Assimulo_install/lib/python2.6/site-packages/; \
+	cd $(assimulo_install_dir)/lib/python2.6/site-packages/; \
 	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python; \
 	else \
-	cd $(abs_top_srcdir)/Assimulo/Assimulo_install/Lib/site-packages/; \
+	cd $(assimulo_install_dir)/Lib/site-packages/; \
 	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python; \
 	fi
 endif 
@@ -158,7 +160,7 @@ bindist: bindistdir
 test: install
 	$(prefix)/jm_tests -i
 
-# clean-local: clean-jmi-examples clean-frontends
+clean-local: clean-frontends clean-assimulo
 
 # jmi-examples: install
 # 	cd JMI/examples/Vdp; $(MAKE) all
@@ -173,6 +175,13 @@ test: install
 # 	cd JMI/examples/FurutaPendulum; $(MAKE) clean
 # 	cd JMI/examples/CSTR; $(MAKE) clean
 # 	cd JMI/examples/CSTR2; $(MAKE) clean
+
+clean-assimulo:
+if WITH_SUNDIALS
+	cd $(abs_top_srcdir)/Assimulo; \
+	python setup_source.py clean --all --sundials-home=$(SUNDIALS_HOME) 
+	rm -rf $(assimulo_install_dir)
+endif
 
 clean-frontends:
 if HAVE_ANT
