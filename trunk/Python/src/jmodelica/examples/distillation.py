@@ -30,7 +30,7 @@ from jmodelica import optimize
 import numpy as N
 import matplotlib.pyplot as plt
 
-def run_demo(with_plots=True):
+def run_demo(with_plots=True,with_blocking_factors = False):
     """ Load change of a distillation column. The distillation column model
     is documented in the paper:
 
@@ -112,9 +112,20 @@ def run_demo(with_plots=True):
     # Set the target values to stationary point B
     model.set_value('u1_ref',u1_0_B)
     model.set_value('y1_ref',y_B[0])
-    
+
+    n_e = 100 # Number of elements 
+    hs = N.ones(n_e)*1./n_e # Equidistant points
+    n_cp = 3; # Number of collocation points in each element
+
     # Solve the optimization problem
-    opt_res = optimize(model)
+    if with_blocking_factors:
+        # Blocking factors for control parametrization
+        blocking_factors=4*N.ones(n_e/4,dtype=N.int)
+        
+        opt_res = optimize(model, alg_args={'n_e':n_e, 'n_cp':n_cp,
+                                            'hs':hs,'blocking_factors': blocking_factors})
+    else:
+        opt_res = optimize(model, alg_args={'n_e':n_e, 'n_cp':n_cp, 'hs':hs})
 
     # Extract variable profiles
     res = opt_res.result_data
@@ -133,8 +144,12 @@ def run_demo(with_plots=True):
         
     cost=res.get_variable_data('cost')
     
-    assert N.abs(cost.x[-1]/1.e1 - 2.8527469) < 1e-3, \
-            "Wrong value of cost function in distillation.py"
+    if with_blocking_factors:
+        assert N.abs(cost.x[-1]/1.e1 - 2.8549683) < 1e-3, \
+               "Wrong value of cost function in distillation.py"
+    else:
+        assert N.abs(cost.x[-1]/1.e1 - 2.8527469) < 1e-3, \
+               "Wrong value of cost function in distillation.py"
 
 
     # Plot the results
