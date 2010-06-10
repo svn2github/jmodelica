@@ -827,7 +827,9 @@ install-exec-local:
 @WITH_SUNDIALS_TRUE@	then \
 @WITH_SUNDIALS_TRUE@	cd $(assimulo_install_dir)/lib/python2.6/site-packages/; \
 @WITH_SUNDIALS_TRUE@	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python; \
-@WITH_SUNDIALS_TRUE@	else \
+@WITH_SUNDIALS_TRUE@	fi
+@WITH_SUNDIALS_TRUE@	if [ -e $(assimulo_install_dir)/Lib/site-packages/ ];\
+@WITH_SUNDIALS_TRUE@	then \
 @WITH_SUNDIALS_TRUE@	cd $(assimulo_install_dir)/Lib/site-packages/; \
 @WITH_SUNDIALS_TRUE@	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python; \
 @WITH_SUNDIALS_TRUE@	fi
