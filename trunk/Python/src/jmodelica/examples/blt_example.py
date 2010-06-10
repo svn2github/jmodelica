@@ -15,8 +15,27 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-"""The JModelica Model example package."""
-__all__ = ['vdp','VDP_sim','pendulum','vdp_minimum_time','parameter_estimation_1',
-           'cstr','quadtank','quadtank_static_opt','ast_example','RLC','cstr2',
-           'distillation','cstr_mpc','simulation_with_input','if_example_1',
-           'if_example_2','crane','RLC_linearization','index_reduction_example','blt_example']
+# Import library for path manipulations
+import os.path
+from jmodelica import initialize
+from jmodelica import simulate
+from jmodelica import optimize
+
+import jmodelica.jmi as jmi
+from jmodelica.compiler import OptimicaCompiler
+
+import numpy as N
+import matplotlib.pyplot as plt
+
+def run_demo(with_plots=True):
+    """ Example demonstrating how to use BLT.
+    """
+
+    curr_dir = os.path.dirname(os.path.abspath(__file__));
+
+    # Create a Modelica compiler instance
+    oc = OptimicaCompiler()
+    oc.set_boolean_option("equation_sorting",True)
+
+    # Compile model
+    pend = oc.compile_model("BLT_Example", curr_dir+"/files/BLT_Example.mo", target='ipopt')

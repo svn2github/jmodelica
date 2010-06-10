@@ -33,4 +33,20 @@ package Pendulum_pack
                 (x_ref - pend.x)^2 + pend.dx^2+0.01*u^2;
   end Pendulum_Opt;
 
+  model PlanarPendulum
+    parameter Real L = 1 "Pendulum length";
+    parameter Real g =9.81 "Acceleration due to gravity";
+    Real x "Cartesian x coordinate";
+    Real y "Cartesian x coordinate";
+    Real vx "Velocity in x coordinate";
+    Real vy "Velocity in y coordinate";
+    Real lambda "Lagrange multiplier";
+  equation
+    der(x) = vx;
+    der(y) = vy;
+    der(vx) = lambda*x;
+    der(vy) = lambda*y - g;
+    x^2 + y^2 = L;
+  end PlanarPendulum;
+
 end Pendulum_pack;
