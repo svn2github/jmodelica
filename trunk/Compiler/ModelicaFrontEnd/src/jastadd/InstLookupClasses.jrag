@@ -70,6 +70,8 @@ aspect InstLookupClasses {
   
 	eq InstReplacingComposite.getClassName().lookupInstClass(String name) = getInstComponentRedeclare().lookupInstClass(name);
 	eq InstReplacingPrimitive.getClassName().lookupInstClass(String name) = getInstComponentRedeclare().lookupInstClass(name);
+	
+	eq InstConstrainingClass.getInstNode().lookupInstClass(String name) = getClassName().myInstClassDecl().lookupInstClass(name);
 
 	syn HashSet InstClassDecl.lookupInstClassInInstClassRedeclare(String name) = emptyHashSet();
 	eq InstReplacingShortClassDecl.lookupInstClassInInstClassRedeclare(String name) = getInstClassRedeclare().lookupInstClass(name);

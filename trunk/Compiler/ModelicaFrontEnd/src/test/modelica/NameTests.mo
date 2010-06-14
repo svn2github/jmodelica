@@ -552,27 +552,39 @@ end NameTest17;
 
 
 model NameTest18
-	model A
-		replaceable package B = D;
-		parameter Real y2 = 2;
-		B.C b(y = y2);
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="NameTest18",
+         description="Constraining class extending local class",
+         flatModel="
+fclass NameTests.NameTest18
+ Real y.x;
+end NameTests.NameTest18;
+")})));
+
+	package A
+		package C
+			model M
+				Real x;
+			end M;
+		end C;
+		
+		package D
+			extends C;
+		end D;
 	end A;
 	
-	package D
-		extends F(redeclare model C = G);
-	end D;
+	package B
+		model M
+			Real x;
+		end M;
+	end B;
 	
-	package F
-		replaceable model C = G;
-	end F;
+	package E
+		replaceable package F = B constrainedby A.D;
+	end E;
 	
-	model G
-		parameter Real y = 1 / x;
-		parameter Real x = 1 / y;
-		Real z = y + x;
-	end G;
-	
-	A a(y2 = 2, redeclare package B = D);
+	E.F.M y;
 end NameTest18;
 
 

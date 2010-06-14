@@ -442,15 +442,14 @@ aspect InstanceErrorCheck {
     }
     
     /**
-     * \brief Check if this node is the direct child of an InstComponentDecl.
+     * \brief Check if this node is in an InstComponentDecl.
      */
     inh boolean InstExtends.inInstComponent();
-    inh boolean List.inInstComponent();
-    inh boolean Opt.inInstComponent();
-    eq ASTNode.getChild().inInstComponent()           = false;
+    inh boolean InstClassRedeclare.inInstComponent();
     eq InstComponentDecl.getChild().inInstComponent() = true;
-    eq List.getChild().inInstComponent()              = inInstComponent();
-    eq Opt.getChild().inInstComponent()               = inInstComponent();
+    eq InstClassDecl.getChild().inInstComponent()     = false;
+    eq InstRoot.getChild().inInstComponent()          = false;
+    eq FlatRoot.getChild().inInstComponent()          = false;
 
   	public void InstBaseClassDecl.collectErrors() {
   	    log.debug(prettyPrint("   ### ") + " errorChecked="+errorChecked);
@@ -467,6 +466,8 @@ aspect InstanceErrorCheck {
 */        	
         for (InstImport ii : getInstImports())
         	ii.collectErrors();		
+		if (hasInstConstraining())
+			getInstConstraining().collectErrors();
 //        for (FAbstractEquation e : getFAbstractEquations())
 //        	e.collectErrors();
 //    	getEquationList().collectErrors();
@@ -665,7 +666,8 @@ aspect InstanceErrorCheck {
 
 	public void InstClassRedeclare.collectErrors() {
 		super.collectErrors();
-		getInstClassDecl().collectErrors();	
+		if (!inInstComponent())
+			getInstClassDecl().collectErrors();	
 	}
 
 	public void InstValueModification.collectErrors() {
