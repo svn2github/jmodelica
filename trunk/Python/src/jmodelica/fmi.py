@@ -1008,7 +1008,7 @@ def export_result_dymola(model, data, file_name='', format='txt'):
         cnt_1 = 2
         cnt_2 = 2
         for name in all_names_without_alias:
-            ref = model.get_valueref(name)
+            ref = N.uint(model.get_valueref(name))
             if name in params_names_without_alias: # Put parameters in data set
                 f.write('1 %d 0 -1 # ' % cnt_1 + name+'\n')                
                 # find out if variable has aliases
@@ -1038,18 +1038,22 @@ def export_result_dymola(model, data, file_name='', format='txt'):
         # Write data set 1
         f.write('float data_1(%d,%d)\n' % (2, n_parameters + 1))
         f.write("%12.12f" % data[0,0])
+        str_text = ''
         for name in all_names_without_alias:
             ref = model.get_valueref(name)
             if name in params_names_without_alias: # Put parameters in data set
                 datatype = model.get_data_type(name)
                 if datatype == 'Real':
-                    f.write(" %12.12f" % (model.get_fmiReal([ref])*model.get_fmiNominal(str(ref))))
+                    str_text = str_text + (" %12.12f" % (model.get_fmiReal([ref])*model.get_fmiNominal(str(ref))))
                 if datatype == 'Integer':
-                    f.write(" %12.12f" % (model.get_fmiInteger([ref])))
+                    str_text = str_text + (" %12.12f" % (model.get_fmiInteger([ref])))
                 if datatype == 'Boolean':
-                    f.write(" %12.12f" % (float(model.get_fmiBoolean([ref]))))
+                    str_text = str_text + (" %12.12f" % (float(model.get_fmiBoolean([ref]))))
+        f.write(str_text)
         f.write('\n')
         f.write("%12.12f" % data[-1,0])
+        f.write(str_text)
+        """
         for name in all_names_without_alias:
             ref = model.get_valueref(name)
             if name in params_names_without_alias: # Put parameters in data set
@@ -1060,6 +1064,7 @@ def export_result_dymola(model, data, file_name='', format='txt'):
                     f.write(" %12.12f" % (model.get_fmiInteger([ref])))
                 if datatype == 'Boolean':
                     f.write(" %12.12f" % (float(model.get_fmiBoolean([ref]))))
+        """
         f.write('\n\n')
         
         n_vars = len(data[0,:])
