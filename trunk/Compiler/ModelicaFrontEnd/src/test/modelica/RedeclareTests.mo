@@ -3345,7 +3345,7 @@ model RedeclareElement9
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.FlatteningTestCase(
          name="RedeclareElement9",
-         description="",
+         description="Redeclare class as element, using modified constant",
          flatModel="
 fclass RedeclareTests.RedeclareElement9
  constant Integer c.n = 3;
@@ -3373,15 +3373,141 @@ end RedeclareTests.RedeclareElement9;
 	
 	C c;
 end RedeclareElement9;
+	
+	
+model RedeclareSameLevel10
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+	 JModelica.UnitTesting.FlatteningTestCase(
+		 name="RedeclareSameLevel10",
+		 description="Two interdependent classes redeclared as elements",
+		 flatModel="
+fclass RedeclareTests.RedeclareSameLevel10
+ Real d.y;
+ Real d.c.x;
+equation
+ d.c.x = 1;
+ d.y = 2;
+end RedeclareTests.RedeclareSameLevel10;
+")})));
+
+	package A
+		replaceable partial model C
+		end C;
+		
+		replaceable model D
+			C c;
+		end D;
+	end A;
+	
+	package B
+		extends A;
+		
+		redeclare model C
+			Real x;
+		end C;
+
+		redeclare model extends D
+			Real y;
+		end D;
+	end B;
+	
+	B.D d;
+equation
+	d.c.x = 1;
+	d.y = 2;
+end RedeclareSameLevel10;
 
 
-
-model RedeclareFunction1
+model RedeclareSameLevel11
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.FlatteningTestCase(
-         name="RedeclareFunction1",
-         description="Lookup with modifications in extending function",
+         name="RedeclareSameLevel11",
+         description="Class used in base class redeclared as element",
          flatModel="
+fclass RedeclareTests.RedeclareSameLevel11
+ Real d.c.y;
+ Real d.c.x;
+equation
+ d.c.x = 1;
+ d.c.y = 2;
+end RedeclareTests.RedeclareSameLevel11;
+")})));
+
+	package A
+		replaceable model C
+			Real x;
+		end C;
+		
+		model D
+			C c;
+		end D;
+	end A;
+	
+	package B
+		extends A;
+		
+		redeclare model extends C
+			Real y;
+		end C;
+	end B;
+	
+	B.D d;
+equation
+	d.c.x = 1;
+	d.c.y = 2;
+end RedeclareSameLevel11;
+
+
+model RedeclareSameLevel12
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="RedeclareSameLevel12",
+         description="Two interdependent classes redeclared as elements, with inner equations",
+         flatModel="
+fclass RedeclareTests.RedeclareSameLevel12
+ Real d.y;
+ Real d.c.x;
+equation
+ d.c.x = 1;
+ d.y = 2;
+end RedeclareTests.RedeclareSameLevel12;
+")})));
+
+	package A
+		replaceable partial model C
+		end C;
+		
+		replaceable model D
+			C c;
+		end D;
+	end A;
+	
+	package B
+		extends A;
+		
+		redeclare model C
+			Real x;
+		end C;
+
+		redeclare model extends D
+			Real y;
+		equation
+			c.x = 1;
+			y = 2;
+		end D;
+	end B;
+	
+	B.D d;
+end RedeclareSameLevel12;
+
+	
+	
+model RedeclareFunction1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+	 JModelica.UnitTesting.FlatteningTestCase(
+		 name="RedeclareFunction1",
+		 description="Lookup with modifications in extending function",
+		 flatModel="
 fclass RedeclareTests.RedeclareFunction1
  Real x[2] = RedeclareTests.RedeclareFunction1.B({1,2});
 
@@ -3416,5 +3542,57 @@ end RedeclareTests.RedeclareFunction1;
 end RedeclareFunction1;
 
 
-end RedeclareTests;
+model RedeclareFunction2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="RedeclareFunction2",
+         description="Lookup in extending function with redeclared record",
+         flatModel="
+fclass RedeclareTests.RedeclareFunction2
+ RedeclareTests.RedeclareFunction2.D x = RedeclareTests.RedeclareFunction2.B({1,2});
 
+ function RedeclareTests.RedeclareFunction2.B
+  input Real[2] i;
+  output RedeclareTests.RedeclareFunction2.D o;
+ algorithm
+  o.a := i;
+  return;
+ end RedeclareTests.RedeclareFunction2.B;
+
+ record RedeclareTests.RedeclareFunction2.D
+  Real a[2];
+ end RedeclareTests.RedeclareFunction2.D;
+end RedeclareTests.RedeclareFunction2;
+")})));
+
+	package A
+		constant Integer n = 1;
+		
+		replaceable partial function B
+			input Real i[n];
+			output D o;
+		end B;
+		
+		replaceable partial record D
+		end D;
+	end A;
+	
+	package C
+		extends A(n = 2);
+		
+		redeclare function extends B
+		algorithm
+			o.a := i;
+		end B;
+
+		redeclare record D
+			Real a[n];
+		end D;
+	end C;
+	
+	C.D x = C.B({1, 2});
+end RedeclareFunction2;
+
+
+
+end RedeclareTests;

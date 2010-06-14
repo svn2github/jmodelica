@@ -420,14 +420,37 @@ aspect InstanceErrorCheck {
 	  allChecks();
 	  for(InstNode n : getInstComponentDecls()) 
 		  n.collectErrors();
-	  for(InstNode n : getInstClassDecls()) 
-		  n.collectErrors();
+	  collectErrorsInClassDecls();
 	  for(InstNode n : getInstExtendss()) 
 		  n.collectErrors();
 	  for(FAbstractEquation e : getFAbstractEquations()) 
 		  e.collectErrors();
 	}
   }
+  
+    public void InstNode.collectErrorsInClassDecls() {
+    	for (InstNode n : getInstClassDecls()) 
+    		n.collectErrors();
+    }
+    
+    public void InstComponentDecl.collectErrorsInClassDecls() {
+    }
+    
+    public void InstExtends.collectErrorsInClassDecls() {
+    	if (!inInstComponent())
+    		super.collectErrorsInClassDecls();
+    }
+    
+    /**
+     * \brief Check if this node is the direct child of an InstComponentDecl.
+     */
+    inh boolean InstExtends.inInstComponent();
+    inh boolean List.inInstComponent();
+    inh boolean Opt.inInstComponent();
+    eq ASTNode.getChild().inInstComponent()           = false;
+    eq InstComponentDecl.getChild().inInstComponent() = true;
+    eq List.getChild().inInstComponent()              = inInstComponent();
+    eq Opt.getChild().inInstComponent()               = inInstComponent();
 
   	public void InstBaseClassDecl.collectErrors() {
   	    log.debug(prettyPrint("   ### ") + " errorChecked="+errorChecked);
@@ -574,22 +597,20 @@ aspect InstanceErrorCheck {
 	public void InstExtendsShortClass.collectErrors() {
         log.debug(prettyPrint("   ### ") + " errorChecked="+errorChecked);
     if (!errorChecked) {
-      log.debug(prettyPrint("   ### "));
       errorChecked = true;
 	  allChecks();
       // Normally the class modifications in an InstExtendsShortClass
       // does not need to be checked, since they are checked in InstShortClassDecl.
       // This is not the case if the short class decl references
       // an primitive variable, however, and in this case the
-      // class modification needs to bee checked for errors.
+      // class modification needs to be checked for errors.
  	  if (extendsPrimitive() && hasInstClassModification())
 		 getInstClassModification().collectErrors();
       
 	  getClassName().collectErrors();
 	  for(InstNode n : getInstComponentDecls()) 
 		  n.collectErrors();
-	  for(InstNode n : getInstClassDecls()) 
-		  n.collectErrors();
+	  collectErrorsInClassDecls();
 	  for(InstNode n : getInstExtendss()) 
 		  n.collectErrors();
 	  

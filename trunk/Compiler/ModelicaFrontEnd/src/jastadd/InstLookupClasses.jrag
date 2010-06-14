@@ -85,16 +85,43 @@ aspect InstLookupClasses {
 	eq FlatRoot.getChild().lookupInstClass(String name) = emptyHashSet();
 	
 	/**
-	 * \brief Does class lookup in the superclass of the class surrounding the class containing the InstInlineExtends.
+	 * \brief Does class lookup in the superclass(es) of the class surrounding the class containing an InstInlineExtends.
 	 * 
 	 * Used to look up the class being extended in a "redeclare class extends" declaration.
 	 */
-	inh HashSet InstInlineExtends.surroundingSuperLookupInstClass(String name);
-	// TODO: This probably needs adjustment, e.g. a new base case
+	inh HashSet InstNode.surroundingSuperLookupInstClass(String name);
 	eq SourceRoot.getChild().surroundingSuperLookupInstClass(String name) = emptyHashSet();
-	eq FlatRoot.getChild().surroundingSuperLookupInstClass(String name) = emptyHashSet();
-	eq InstExtends.getChild().surroundingSuperLookupInstClass(String name) = 
-		myInstClass().superLookupInstClass(name);
+	eq FlatRoot.getChild().surroundingSuperLookupInstClass(String name)   = emptyHashSet();
+	eq InstClassDecl.getInstExtends().surroundingSuperLookupInstClass(String name) = 
+		doSurroundingSuperLookupInstClass(name);
+	eq InstClassDecl.getChild().surroundingSuperLookupInstClass(String name) = 
+		lookupInstClassInSuperClass(name);
+	eq InstComponentDecl.getChild().surroundingSuperLookupInstClass(String name) = 
+		myInstClass().doSurroundingSuperLookupInstClass(name);
+	
+	/**
+	 * \brief Does lookup in all superclasses.
+	 */
+	syn lazy HashSet InstNode.lookupInstClassInSuperClass(String name) {
+		HashSet set = new HashSet(4);
+		for (InstExtends ie : getInstExtendss()) 
+			set.addAll(ie.memberInstClass(name));
+		return set.isEmpty() ? emptyHashSet() : set;
+	}
+	
+	/**
+	 * \brief Redirection method for surroundingSuperLookupInstClass().
+	 * 
+	 * Used to allow artificial calls to one of the cases.
+	 */
+	syn HashSet InstClassDecl.doSurroundingSuperLookupInstClass(String name) =
+		surroundingSuperLookupInstClass(name);
+	
+	eq InstReplacingFullClassDecl.doSurroundingSuperLookupInstClass(String name) {
+		HashSet set = new HashSet(1);
+		set.add(getOriginalInstClass());
+		return set;
+	}
 	
 	syn lazy HashSet InstProgramRoot.lookupElementInstClass(String name) {
 		HashSet set = new HashSet(4);
