@@ -453,10 +453,11 @@ class FMIModel(object):
         """
         Saves data for the specific time point.
         """
-        self._res_t = N.append(self._res_t,self.t)
-        self._res_r = N.append(self._res_r,self.get_fmiReal(self._save_cont_valueref[0]))
-        self._res_i = N.append(self._res_i,self.get_fmiInteger(self._save_cont_valueref[1]))
-        self._res_b = self._res_b + self.get_fmiBoolean(self._save_cont_valueref[2])
+        sol_real = self.get_fmiReal(self._save_cont_valueref[0])
+        sol_int  = self.get_fmiInteger(self._save_cont_valueref[1])
+        sol_bool = self.get_fmiBoolean(self._save_cont_valueref[2])
+        
+        return sol_real, sol_int, sol_bool
     
     def get_event_info(self):
         """
@@ -763,8 +764,8 @@ class FMIModel(object):
         keys = []
         vals = []
         for i in type:
-            keys=keys+self._xmldoc._xpatheval("//ScalarVariable/@name[not(../Enumeration)][../@variability='"+i+"']")
-            vals=vals+self._xmldoc._xpatheval("//ScalarVariable/@valueReference[not(../Enumeration)][../@variability='"+i+"']")
+            keys=keys+self._xmldoc._xpatheval("//ScalarVariable/@name[not(../@alias)][not(../Enumeration)][not(../String)][../@variability='"+i+"']")
+            vals=vals+self._xmldoc._xpatheval("//ScalarVariable/@valueReference[not(../@alias)][not(../Enumeration)][not(../String)][../@variability='"+i+"']")
 
         if len(keys)!=len(vals):
             raise Exception("Number of vals does not equal number of keys. \
@@ -776,19 +777,22 @@ class FMIModel(object):
         return d
         
     
-    def get_variable_names(self, include_alias=True, ignore_enumerate=True):
+    def get_variable_names(self, include_alias=True, ignore_cache=False):
         """
         Extract the names of the variables in a model.
 
         Returns:
             Dict with variable name as key and value reference as value.
         """
-        if include_alias and ignore_enumerate:
-            keys = self._xmldoc._xpatheval("//ScalarVariable/@name[not(../Enumeration)]")
-            vals = self._xmldoc._xpatheval("//ScalarVariable/@valueReference[not(../Enumeration)]")
-        elif not include_alias and ignore_enumerate:
-            keys = self._xmldoc._xpatheval("//ScalarVariable/@name[not(../@alias)][not(../Enumeration)]")
-            vals = self._xmldoc._xpatheval("//ScalarVariable/@valueReference[not(../@alias)][not(../Enumeration)]")        
+        if not ignore_cache:
+            return self._xmldoc.function_cache.get(self,'get_variable_names',include_alias)
+        
+        if include_alias:
+            keys = self._xmldoc._xpatheval("//ScalarVariable/@name[not(../Enumeration)][not(../String)]")
+            vals = self._xmldoc._xpatheval("//ScalarVariable/@valueReference[not(../Enumeration)][not(../String)]")
+        else:
+            keys = self._xmldoc._xpatheval("//ScalarVariable/@name[not(../@alias)][not(../Enumeration)][not(../String)]")
+            vals = self._xmldoc._xpatheval("//ScalarVariable/@valueReference[not(../@alias)][not(../Enumeration)][not(../String)]")        
 
    
         if len(keys)!=len(vals):
@@ -843,13 +847,14 @@ class FMIModel(object):
         print 'Before'
         self._fmiTerminate(self._model)
         
-        if sys.platform == 'win32':
-            try:
-                self._fmiFreeModelInstance(self._model)
-            except WindowsError:
-                print 'Failed to free model instance.'
-        else:
-            self._fmiFreeModelInstance(self._model)
+        #--ERROR
+        #if sys.platform == 'win32':
+        #    try:
+        #        self._fmiFreeModelInstance(self._model)
+        #    except WindowsError:
+        #        print 'Failed to free model instance.'
+        #else:
+        #    self._fmiFreeModelInstance(self._model)
             
         #Remove the temporary xml
         os.remove(self._tempdir+os.sep+self._tempxml)
@@ -995,6 +1000,11 @@ def export_result_dymola(model, data, file_name='', format='txt'):
                 params_names.append(an)
 
         n_parameters = len(params_names_without_alias)
+        
+        list_of_continuous_states = N.append(model._save_cont_valueref[0],model._save_cont_valueref[1])
+        list_of_continuous_states = N.append(list_of_continuous_states, model._save_cont_valueref[2]).tolist()
+        valueref_of_continuous_states = []
+        
         cnt_1 = 2
         cnt_2 = 2
         for name in all_names_without_alias:
@@ -1011,6 +1021,7 @@ def export_result_dymola(model, data, file_name='', format='txt'):
                         f.write('1 %d 0 -1 # ' % cnt_1 + alias +'\n')               
                 cnt_1 = cnt_1 + 1
             else:
+                valueref_of_continuous_states.append(list_of_continuous_states.index(ref))
                 f.write('2 %d 0 -1 # ' % cnt_2 + name +'\n')
                 # find out if variable has aliases
                 aliases = [item[0] for item in alias_names_ref.items() if item[1] == ref]
@@ -1050,25 +1061,17 @@ def export_result_dymola(model, data, file_name='', format='txt'):
                 if datatype == 'Boolean':
                     f.write(" %12.12f" % (float(model.get_fmiBoolean([ref]))))
         f.write('\n\n')
-        """
-        # Write data set 2
+        
         n_vars = len(data[0,:])
         n_points = len(data[:,0])
         f.write('float data_2(%d,%d)\n' % (n_points, n_vars))
+       
         for i in range(n_points):
-            str = ''
-            for ref in range(n_vars):
-                if ref==0: # Don't scale time
-                    str = str + (" %12.12f" % data[i,ref])
-                else:
-                    if scaling_method & jmodelica.jmi.JMI_SCALING_VARIABLES > 0:
-                        str = str + (" %12.12f" % (data[i,ref]*sc[ref-1+n_parameters]))
-                    else:
-                        str = str + (" %12.12f" % data[i,ref])
-            f.write(str+'\n')
-
+            str_text = (" %12.12f" % data[i,0])
+            for j in range(n_vars-1):
+                str_text = str_text + (" %12.12f" % (data[i,1+valueref_of_continuous_states[j]]))#*model.get_fmiNominal(str(list_of_continuous_states[valueref_of_continuous_states[j]]))))
+            f.write(str_text+'\n')
         f.write('\n')
-        """
         f.close()
 
     else:

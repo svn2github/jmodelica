@@ -68,7 +68,7 @@ def write_data(simulator):
         data = N.c_[data, y[:,len(model.real_x):len(model.real_x)+len(model.real_w)]]
 
         io.export_result_dymola(model,data)
-    else:
+    elif isinstance(simulator._problem, JMIODE):
         model = simulator._problem._model
         
         t = N.array(simulator.t)
@@ -82,6 +82,20 @@ def write_data(simulator):
         data = N.c_[data, u]
         
         io.export_result_dymola(model,data)
+    else:
+        model = simulator._problem._model
+        
+        t = N.array(simulator.t)
+        r = simulator._problem._sol_real.reshape(-1,len(model._save_cont_valueref[0]))
+        data = N.c_[t,r]
+        if simulator._problem._sol_int.size > 0:
+            i = simulator._problem._sol_int.reshape(-1,len(model._save_cont_valueref[1]))
+            data = N.c_[data,i]
+        if len(simulator._problem._sol_bool) > 0:
+            b = N.array(simulator._problem._sol_bool).reshape(-1,len(model._save_cont_valueref[2]))
+            data = N.c_[data,b]
+        
+        fmi.export_result_dymola(model, data)
         
 
 class FMIODE(Explicit_Problem):
@@ -103,19 +117,22 @@ class FMIODE(Explicit_Problem):
         self._f_nbr = f_nbr
         self._g_nbr = g_nbr
         
-        self.event_fcn = self.g
-        self._timeSwitch = True
-        self._nextTimeEvent = self._model._XMLStopTime #Default StopTime (results in no event)
-        if self._model.event_info.upcomingTimeEvent == self._model._fmiTrue:
-            self._nextTimeEvent = self._model.event_info.nextEventTime
+        if g_nbr > 0:
+            self.event_fcn = self.g
+        self.time_event_fcn = self.t
         
-        #self._nextTimeEvent = self._model.event_info.nextEventTime
-        #if g_nbr > 0:
-        #    
-        #    if self._model.event_info.upcomingTimeEvent == self._model._fmiTrue:
-        #        self._timeEvent = True
-        #        self._timeSwitch = True
-        #        self._nextTimeEvent = self._model.event_info.nextEventTime
+        #Internal values
+        self._sol_time = N.array([])
+        self._sol_real = N.array([])
+        self._sol_int  = N.array([])
+        self._sol_bool = []
+        
+        #Stores the first time point
+        [r,i,b] = self._model.save_time_point()
+        
+        self._sol_real = N.append(self._sol_real,r)
+        self._sol_int = N.append(self._sol_int,i)
+        self._sol_bool = self._sol_bool + b
         
     def f(self, t, y, sw=None):
         """
@@ -141,13 +158,30 @@ class FMIODE(Explicit_Problem):
         #Evaluating the event indicators
         eventInd = self._model.event_ind
         
-        #Appending time event
-        if self._timeSwitch:
-            eventInd = N.append(eventInd,N.array([t-self._nextTimeEvent]))
-        else:
-            eventInd = N.append(eventInd,N.array([self._nextTimeEvent-t]))
-        
         return eventInd
+        
+    def t(self, t, y, sw):
+        """
+        Time event function.
+        """
+        if self._model.event_info.upcomingTimeEvent == self._model._fmiTrue:
+            return self._model.event_info.nextEventTime
+        else:
+            return None
+        
+    def post_process(self, solver):
+        """
+        Post processing (stores the time points).
+        """
+        #Moving data to the model
+        self._model.t = solver.t[-1]
+        self._model.real_x = solver.y[-1]
+        
+        [r,i,b] = self._model.save_time_point()
+        
+        self._sol_real = N.append(self._sol_real,r)
+        self._sol_int = N.append(self._sol_int,i)
+        self._sol_bool = self._sol_bool + b
         
     def handle_event(self, solver, event_info):
         """
@@ -169,13 +203,11 @@ class FMIODE(Explicit_Problem):
         if self._model.event_info.stateValueReferencesChanged == self._model._fmiTrue:
             #Get new nominal values.
             solver.atol = 0.01*self.rtol*self._model.real_x_nominal
-            print 'New Nominal'
             
-        if self._model.event_info.upcomingTimeEvent == self._model._fmiTrue:
-            if self._model.event_info.nextEventTime != self._nextTimeEvent:
-                self._timeSwitch = not self._timeSwitch
-                self._nextTimeEvent = self._model.event_info.nextEventTime
-            print self._nextTimeEvent
+        #if self._model.event_info.upcomingTimeEvent == self._model._fmiTrue:
+        #    if self._model.event_info.nextEventTime != self._nextTimeEvent:
+        #        self._timeSwitch = not self._timeSwitch
+        #        self._nextTimeEvent = self._model.event_info.nextEventTime
         #else: #If not upcoming time event, set next time event to final time.
         #    self._model.event_info.nextEventTime = 
     
