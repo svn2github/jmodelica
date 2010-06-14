@@ -385,4 +385,30 @@ end ArrayCellMod_ComplErr;
 
 
 
+model ConstantFromFunc
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ComplianceErrorTestCase(
+         name="ConstantFromFunc",
+         description="Compliance error for expressions that doesn't support ceval() as binding expressions for constants'",
+         errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 395, column 16:
+  Constant evaluation not supported for expression(s) directly or indirectly used by the binding expression for constant 'a': 'f(1)'
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 396, column 16:
+  Constant evaluation not supported for expression(s) directly or indirectly used by the binding expression for constant 'b': 'a'
+")})));
+
+	function f
+		input Real i;
+		output Real o = i;
+	algorithm
+	end f;
+	
+	constant Real a = f(1);
+	constant Real b = a;
+end ConstantFromFunc;
+
+
 end ComplianceTests;

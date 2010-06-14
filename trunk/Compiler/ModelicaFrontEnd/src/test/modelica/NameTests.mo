@@ -588,6 +588,33 @@ end NameTests.NameTest18;
 end NameTest18;
 
 
+model NameTest19
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="NameTest19",
+         description="Lookup of classes from array subscripts of dotted access",
+         flatModel="
+fclass NameTests.NameTest19
+ Real y.x[1];
+equation
+ y.x[1] = 1;
+end NameTests.NameTest19;
+")})));
+
+    package A
+        constant Integer b = 1;
+    end A;
+    
+    model B
+        Real x[1];
+    end B;
+    
+    B y;
+equation
+    y.x[A.b] = 1;
+end NameTest19;
+
+
 
 /* Used for tests ConstantLookup1-3. */
 constant Real constant_1 = 1.0;

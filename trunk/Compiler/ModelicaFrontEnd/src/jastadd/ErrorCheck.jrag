@@ -513,27 +513,30 @@ aspect InstanceErrorCheck {
 		}
 	}
 	
-	public void FExp.checkConstantScalarExpression(ASTNode node, String varKind, String varName) {
-
+	public void FExp.checkConstantScalarExpression(InstPrimitive node, String varKind, String varName) {
+		String exp = "'" + prettyPrint("") + "'";
 		try {
 			if (isCircular()) {
-				node.error("Could not evaluate binding expression for " + varKind + " '"+
-						varName + "' due to circularity: '" + 
-						prettyPrint("") + "'");
+				node.error("Could not evaluate binding expression for " + varKind + " '" +
+						varName + "' due to circularity: " + exp);
 				} else if (ceval().isUnknown()) {
-					node.error("Could not evaluate binding expression for " + varKind + " '" +
-							varName+ "': '" + 
-							prettyPrint("") + "'");
+					if (ceval().isUnsupported()) {
+						if (node.isConstant()) // TODO: Produce error for non-structural parameters as well
+							node.compliance("Constant evaluation not supported for expression(s) directly or indirectly " + 
+									"used by the binding expression for " + varKind + " '" + varName + "': " + exp);
+					} else {
+						node.error("Could not evaluate binding expression for " + 
+								varKind + " '" + varName + "': " + exp);
+					}
 				}	
 			
 			} catch (UnsupportedOperationException e) {
-				node.error("Could not evaluate binding expression for "+ varKind + " '"+
-						varName + "': '" + 
-						prettyPrint("") + "'");
+				node.error("Could not evaluate binding expression for " + 
+						varKind + " '" + varName + "': " + exp);
 			}
 	}
 	
-	public void FExp.checkConstantExpression(ASTNode node, String varKind, String varName) {
+	public void FExp.checkConstantExpression(InstPrimitive node, String varKind, String varName) {
 		if (ndims() == 0) {
 //			log.debug("FExp.checkConstantExpression ndims=0, "+getClass().getName());
 			checkConstantScalarExpression(node,varKind,varName);
@@ -570,7 +573,7 @@ aspect InstanceErrorCheck {
 					InstComponentModification icm = (InstComponentModification)im;
 					if (icm.hasInstModification() && icm.getInstModification().hasInstValueMod()) {
 						FExp val_mod = icm.getInstModification().instValueMod();
-						val_mod.checkConstantExpression(this,"attribute",icm.getName().name());
+						val_mod.checkConstantExpression(this, "attribute", icm.getName().name());
 					}
 				}
 			}

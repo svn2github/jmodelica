@@ -18,14 +18,9 @@ import java.util.HashSet;
 
 aspect InstLookupClasses {
 
-	syn lazy HashSet InstAccess.lookupInstClass() circular [emptyHashSet()]{
-	 	return lookupInstClass(name());
-	}
+	syn lazy HashSet InstAccess.lookupInstClass() circular [emptyHashSet()] = lookupInstClass(name());
+	eq InstDot.lookupInstClass() = getRight().lookupInstClass();
 
-	eq InstDot.lookupInstClass() {
-	   return getRight().lookupInstClass();
-    }
-    
 	inh HashSet InstAccess.lookupInstClass(String name) circular [emptyHashSet()];
 	inh HashSet InstNode.lookupInstClass(String name);
     inh HashSet InstModification.lookupInstClass(String name);
@@ -266,9 +261,9 @@ aspect InstLookupClasses {
 			return emptyHashSet();
 	}
 	
-	eq InstDot.getRight().lookupInstClass(String name) {
-		return getLeft().qualifiedLookupInstClass(name);
-	}
+	eq InstDot.getRight().lookupInstClass(String name)                    = getLeft().qualifiedLookupInstClass(name);
+	eq InstArrayAccess.getFArraySubscripts().lookupInstClass(String name) = getTopInstAccess().lookupInstClass(name);
+	eq InstAccess.getExpandedSubscripts().lookupInstClass(String name)    = getTopInstAccess().lookupInstClass(name);
 	
 	syn HashSet InstAccess.qualifiedLookupInstClass(String name) circular [emptyHashSet()] = emptyHashSet();	
 	eq InstClassAccess.qualifiedLookupInstClass(String name) = myInstClassDecl().memberInstClass(name);
