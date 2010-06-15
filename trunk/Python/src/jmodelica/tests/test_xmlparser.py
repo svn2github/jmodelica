@@ -59,6 +59,7 @@ oc = OptimicaCompiler()
 
 #type defs
 int = n.int32
+uint = n.uint32
 
 def setup():
     """ 
@@ -251,7 +252,7 @@ def test_xmlvaluesdoc_methods():
 @testattr(stddist = True)
 def t_get_valueref(xmldoc):
     ref = xmldoc.get_valueref('u')
-    assert ref.__class__ is int, \
+    assert ref.__class__ is uint, \
         "XMLVariablesDoc.get_valueref did not return int."
         
 @testattr(stddist = True)
@@ -279,8 +280,8 @@ def t_get_variable_names(xmldoc):
     for key, value in d.iteritems():
         assert key.__class__ is str, \
             "Variable name is not string"
-        assert value.__class__ is int, \
-            "Value reference is not int"
+        assert value.__class__ is uint, \
+            "Value reference is not uint"
     nose.tools.assert_equal(d.get('u'),26)     
     
 @testattr(stddist = True)
@@ -289,8 +290,8 @@ def t_get_derivative_names(xmldoc):
     for key, value in d.iteritems():
         assert key.__class__ is str, \
             "Variable name is not string"
-        assert value.__class__ is int, \
-            "Value reference is not int"
+        assert value.__class__ is uint, \
+            "Value reference is not uint"
     nose.tools.assert_equal(d.get('der(cost)'),20)
 
 @testattr(stddist = True)
@@ -299,8 +300,8 @@ def t_get_differentiated_variable_names(xmldoc):
     for key, value in d.iteritems():
         assert key.__class__ is str, \
             "Variable name is not string"
-        assert value.__class__ is int, \
-            "Value reference is not int"
+        assert value.__class__ is uint, \
+            "Value reference is not uint"
     nose.tools.assert_equal(d.get('cstr.c'),24)
 
 @testattr(stddist = True)    
@@ -309,8 +310,8 @@ def t_get_input_names(xmldoc):
     for key, value in d.iteritems():
         assert key.__class__ is str, \
             "Variable name is not string"
-        assert value.__class__ is int, \
-            "Value reference is not int"
+        assert value.__class__ is uint, \
+            "Value reference is not uint"
     nose.tools.assert_equal(d.get('u'),26)
 
 @testattr(stddist = True)    
@@ -319,8 +320,8 @@ def t_get_algebraic_variable_names(xmldoc):
     for key, value in d.iteritems():
         assert key.__class__ is str, \
             "Variable name is not string"
-        assert value.__class__ is int, \
-            "Value reference is not int"
+        assert value.__class__ is uint, \
+            "Value reference is not uint"
     # no example in testfile
 
 @testattr(stddist = True)    
@@ -329,8 +330,8 @@ def t_get_p_opt_names(xmldoc):
     for key, value in d.iteritems():
         assert key.__class__ is str, \
             "Variable name is not string"
-        assert value.__class__ is int, \
-            "Value reference is not int"
+        assert value.__class__ is uint, \
+            "Value reference is not uint"
     nose.tools.assert_equal(d.get('sys.w'),0)
 
 @testattr(stddist = True)    

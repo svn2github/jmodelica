@@ -844,7 +844,6 @@ class FMIModel(object):
         import os
         import sys
         #Deallocate the models allocation
-        print 'Before'
         self._fmiTerminate(self._model)
         
         #--ERROR
@@ -992,12 +991,14 @@ def export_result_dymola(model, data, file_name='', format='txt'):
             # add variable name to list
             params_names.append(n[0])
             params_names_without_alias.append(n[0])
+            """
             # add alias variables
             alias_names, alias_sign = model.get_aliases(n[0])
             for i, an in enumerate(alias_names):
                 params_names_ref[an] = n[1]
                 params_names_sign[an] = alias_sign[i]
                 params_names.append(an)
+            """
 
         n_parameters = len(params_names_without_alias)
         
@@ -1044,7 +1045,7 @@ def export_result_dymola(model, data, file_name='', format='txt'):
             if name in params_names_without_alias: # Put parameters in data set
                 datatype = model.get_data_type(name)
                 if datatype == 'Real':
-                    str_text = str_text + (" %12.12f" % (model.get_fmiReal([ref])*model.get_fmiNominal(str(ref))))
+                    str_text = str_text + (" %12.12f" % (model.get_fmiReal([ref])))
                 if datatype == 'Integer':
                     str_text = str_text + (" %12.12f" % (model.get_fmiInteger([ref])))
                 if datatype == 'Boolean':

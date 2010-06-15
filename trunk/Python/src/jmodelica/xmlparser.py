@@ -23,6 +23,7 @@ import numpy as N
 
 int = N.int32
 N.int = N.int32
+uint = N.uint32
 
 def _parse_XML(filename, schemaname=''):
     
@@ -346,7 +347,7 @@ class XMLDoc(XMLBaseDoc):
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))           
         d={}
         for index, key in enumerate(keys):
-            d[str(key)]=int(vals[index])
+            d[str(key)]=uint(vals[index])
         return d
 
 
@@ -372,7 +373,7 @@ class XMLDoc(XMLBaseDoc):
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))           
         d={}
         for index, key in enumerate(keys):
-            d[str(key)]=int(vals[index])
+            d[str(key)]=uint(vals[index])
         return d
         
     def get_differentiated_variable_names(self, include_alias=True, ignore_cache=False):
@@ -397,7 +398,7 @@ class XMLDoc(XMLBaseDoc):
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))            
         d = {}
         for index, key in enumerate(keys):
-            d[str(key)] = int(vals[index])
+            d[str(key)] = uint(vals[index])
         return d
 
     def get_input_names(self, include_alias=True, ignore_cache=False):
@@ -426,7 +427,7 @@ class XMLDoc(XMLBaseDoc):
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
         d = {}
         for index, key in enumerate(keys):
-            d[str(key)] = int(vals[index])
+            d[str(key)] = uint(vals[index])
         return d
 
     def get_algebraic_variable_names(self, include_alias=True, ignore_cache=False):
@@ -455,7 +456,7 @@ class XMLDoc(XMLBaseDoc):
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))       
         d = {}
         for index, key in enumerate(keys):
-            d[str(key)] = int(vals[index])
+            d[str(key)] = uint(vals[index])
         return d
 
     def get_p_opt_names(self, include_alias=True, ignore_cache=False):
@@ -485,7 +486,7 @@ class XMLDoc(XMLBaseDoc):
                 Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))
         d = {}
         for index, key in enumerate(keys):
-            d[str(key)] = int(vals[index])
+            d[str(key)] = uint(vals[index])
         return d
 
     def get_variable_descriptions(self, include_alias=True, ignore_cache=False):
