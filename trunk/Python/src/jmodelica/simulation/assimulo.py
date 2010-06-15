@@ -86,16 +86,18 @@ def write_data(simulator):
         model = simulator._problem._model
         
         t = N.array(simulator.t)
-        r = simulator._problem._sol_real.reshape(-1,len(model._save_cont_valueref[0]))
+        #r = simulator._problem._sol_real.reshape(-1,len(model._save_cont_valueref[0]))
+        r = N.array(simulator._problem._sol_real)
         data = N.c_[t,r]
-        if simulator._problem._sol_int.size > 0:
-            i = simulator._problem._sol_int.reshape(-1,len(model._save_cont_valueref[1]))
+        if len(simulator._problem._sol_int) > 0:
+            #i = simulator._problem._sol_int.reshape(-1,len(model._save_cont_valueref[1]))
+            i = N.array(simulator._problem._sol_int)
             data = N.c_[data,i]
         if len(simulator._problem._sol_bool) > 0:
             b = N.array(simulator._problem._sol_bool).reshape(-1,len(model._save_cont_valueref[2]))
             data = N.c_[data,b]
         
-        fmi.export_result_dymola(model, data)
+        export_result_dymola(model, data)
         
 
 class FMIODE(Explicit_Problem):
@@ -130,9 +132,9 @@ class FMIODE(Explicit_Problem):
         #Stores the first time point
         [r,i,b] = self._model.save_time_point()
         
-        self._sol_real = N.append(self._sol_real,r)
-        self._sol_int = N.append(self._sol_int,i)
-        self._sol_bool = self._sol_bool + b
+        self._sol_real += [r]
+        self._sol_int  += [i]
+        self._sol_bool += b
         
     def f(self, t, y, sw=None):
         """
@@ -178,10 +180,10 @@ class FMIODE(Explicit_Problem):
         self._model.real_x = solver.y[-1]
         
         [r,i,b] = self._model.save_time_point()
-        
-        self._sol_real = N.append(self._sol_real,r)
-        self._sol_int = N.append(self._sol_int,i)
-        self._sol_bool = self._sol_bool + b
+
+        self._sol_real += [r]
+        self._sol_int  += [i]
+        self._sol_bool += b
         
     def handle_event(self, solver, event_info):
         """
