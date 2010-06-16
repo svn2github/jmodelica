@@ -146,18 +146,6 @@ algorithm
  return;
 end Func22;
 
-model Test
- Real a1 = Func01();
- Real a2 = Func11();
- Real a3 = Func21();
- Real a4 = Func02();
- Real a5 = Func12();
- Real a6 = Func22();
-equation
- Func10();
- Func00();
-end Test;
-
 
 /* ====================== Functions ====================== */
 
@@ -273,6 +261,155 @@ end FunctionTests.FunctionFlatten4;
 
  Real x = TestFunctionWithConst(2);
 end FunctionFlatten4;
+
+
+model FunctionFlatten5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="FunctionFlatten5",
+         description="Flattening functions: function called in extended class",
+         flatModel="
+fclass FunctionTests.FunctionFlatten5
+ Real y.x;
+equation
+ y.x = FunctionTests.TestFunction1(1);
+
+ function FunctionTests.TestFunction1
+  input Real i1 := 0;
+  output Real o1 := i1;
+ algorithm
+  return;
+ end FunctionTests.TestFunction1;
+end FunctionTests.FunctionFlatten5;
+")})));
+
+	model A
+		Real x;
+	equation
+		x = TestFunction1(1);
+	end A;
+	
+	model B
+		extends A;
+	end B;
+	
+	B y;
+end FunctionFlatten5;
+
+
+model FunctionFlatten6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="FunctionFlatten6",
+         description="Flattening functions: function called in class modification",
+         flatModel="
+fclass FunctionTests.FunctionFlatten6
+ Real y.x = FunctionTests.TestFunction1(1);
+
+ function FunctionTests.TestFunction1
+  input Real i1 := 0;
+  output Real o1 := i1;
+ algorithm
+  return;
+ end FunctionTests.TestFunction1;
+end FunctionTests.FunctionFlatten6;
+")})));
+
+	model A
+		Real x;
+	end A;
+	
+	model B = A(x = TestFunction1(1));
+	
+	B y;
+end FunctionFlatten6;
+
+
+model FunctionFlatten7
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="FunctionFlatten7",
+         description="Calling different inherited versions of same function",
+         flatModel="
+fclass FunctionTests.FunctionFlatten7
+ Real x = FunctionTests.FunctionFlatten7.A.f();
+ Real y = FunctionTests.FunctionFlatten7.B.f();
+ Real z = FunctionTests.FunctionFlatten7.C.f();
+
+ function FunctionTests.FunctionFlatten7.A.f
+  output Real a := 1.0;
+ algorithm
+  return;
+ end FunctionTests.FunctionFlatten7.A.f;
+
+ function FunctionTests.FunctionFlatten7.B.f
+  output Real a := 2.0;
+ algorithm
+  return;
+ end FunctionTests.FunctionFlatten7.B.f;
+
+ function FunctionTests.FunctionFlatten7.C.f
+  output Real a := 3.0;
+ algorithm
+  return;
+ end FunctionTests.FunctionFlatten7.C.f;
+end FunctionTests.FunctionFlatten7;
+")})));
+
+	package A
+		constant Real c = 1;
+		function f
+			output Real a = c;
+		algorithm
+		end f;
+	end A;
+	
+	package B
+		extends A(c = 2);
+	end B;
+	
+	package C
+		extends A(c = 3);
+	end C;
+	
+	Real x = A.f();
+	Real y = B.f();
+	Real z = C.f();
+end FunctionFlatten7;
+
+
+model FunctionFlatten8
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="FunctionFlatten8",
+         description="Calling function from parallel class",
+         flatModel="
+fclass FunctionTests.FunctionFlatten8
+ Real y.x;
+equation
+ y.x = FunctionTests.FunctionFlatten8.f();
+
+ function FunctionTests.FunctionFlatten8.f
+  output Real x := 1;
+ algorithm
+  return;
+ end FunctionTests.FunctionFlatten8.f;
+end FunctionTests.FunctionFlatten8;
+")})));
+
+	function f
+		output Real x = 1;
+	algorithm
+	end f;
+	
+	model A
+		Real x;
+	equation
+		x = f();
+	end A;
+	
+	A y;
+end FunctionFlatten8;
 
 
 

@@ -3509,15 +3509,15 @@ model RedeclareFunction1
 		 description="Lookup with modifications in extending function",
 		 flatModel="
 fclass RedeclareTests.RedeclareFunction1
- Real x[2] = RedeclareTests.RedeclareFunction1.B({1,2});
+ Real x[2] = RedeclareTests.RedeclareFunction1.C.B({1,2});
 
- function RedeclareTests.RedeclareFunction1.B
+ function RedeclareTests.RedeclareFunction1.C.B
   input Real[2] i;
   output Real[2] o;
  algorithm
   o := i;
   return;
- end RedeclareTests.RedeclareFunction1.B;
+ end RedeclareTests.RedeclareFunction1.C.B;
 end RedeclareTests.RedeclareFunction1;
 ")})));
 
@@ -3549,19 +3549,19 @@ model RedeclareFunction2
          description="Lookup in extending function with redeclared record",
          flatModel="
 fclass RedeclareTests.RedeclareFunction2
- RedeclareTests.RedeclareFunction2.D x = RedeclareTests.RedeclareFunction2.B({1,2});
+ RedeclareTests.RedeclareFunction2.C.D x = RedeclareTests.RedeclareFunction2.C.B({1,2});
 
- function RedeclareTests.RedeclareFunction2.B
+ function RedeclareTests.RedeclareFunction2.C.B
   input Real[2] i;
-  output RedeclareTests.RedeclareFunction2.D o;
+  output RedeclareTests.RedeclareFunction2.C.D o;
  algorithm
   o.a := i;
   return;
- end RedeclareTests.RedeclareFunction2.B;
+ end RedeclareTests.RedeclareFunction2.C.B;
 
- record RedeclareTests.RedeclareFunction2.D
+ record RedeclareTests.RedeclareFunction2.C.D
   Real a[2];
- end RedeclareTests.RedeclareFunction2.D;
+ end RedeclareTests.RedeclareFunction2.C.D;
 end RedeclareTests.RedeclareFunction2;
 ")})));
 

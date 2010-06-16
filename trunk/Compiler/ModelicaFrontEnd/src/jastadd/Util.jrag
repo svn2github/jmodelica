@@ -421,11 +421,9 @@ aspect Names {
   
   
   syn String ClassDecl.qualifiedName();
-  eq BaseClassDecl.qualifiedName() = classNamePrefix().equals("")? 
-                                                  name(): classNamePrefix() + "." + name();
+  eq BaseClassDecl.qualifiedName() = combineName(classNamePrefix(), name());
   inh String BaseClassDecl.classNamePrefix();
-  eq FullClassDecl.getClassDecl().classNamePrefix() = classNamePrefix().equals("")?
-                                                      name(): classNamePrefix() + "." + name();
+  eq FullClassDecl.getClassDecl().classNamePrefix() = combineName(classNamePrefix(), name());
   eq BuiltInClassDecl.qualifiedName() = getName().getID();
   
   // For proxy
@@ -435,13 +433,28 @@ aspect Names {
   
   eq SourceRoot.getProgram().classNamePrefix() = computeClassNamePrefix();
   eq Root.getChild().classNamePrefix() = "";
+  
+  /**
+   * \brief Compose a dotted name of two components.
+   * 
+   * Each component can be a dotted name, a single name or empty.
+   */
+  public static String ASTNode.combineName(String first, String second) {
+	  if (first.equals(""))
+		  return second;
+	  if (second.equals(""))
+		  return first;
+	  return first + "." + second;
+  }
     
   syn String InstClassDecl.qualifiedName();
-  eq InstBaseClassDecl.qualifiedName() = instClassNamePrefix().equals("")? 
-                                                  name(): instClassNamePrefix() + "." + name();
-  inh String InstBaseClassDecl.instClassNamePrefix();
-  eq InstFullClassDecl.getInstClassDecl().instClassNamePrefix() = instClassNamePrefix().equals("")?
-                                                      name(): instClassNamePrefix() + "." + name();
+  eq InstBaseClassDecl.qualifiedName() = combineName(instClassNamePrefix(), name());
+  
+  inh lazy String InstBaseClassDecl.instClassNamePrefix();
+  eq InstFullClassDecl.getInstClassDecl().instClassNamePrefix() = 
+	  combineName(instClassNamePrefix(), name());
+  eq InstFullClassDecl.getInstExtends().instClassNamePrefix()   = 
+	  combineName(instClassNamePrefix(), name());
 
   eq InstBuiltInClassDecl.qualifiedName() = name();
   

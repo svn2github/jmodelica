@@ -2,3 +2,14 @@ This document contains the release notes for JModelica.org 1.3.0.
 
 Highlights:
 
+1. Compilers
+
+1.1. Modelica Compiler
+
+1.1.1 Arrays
+
+Slice operations are now supported, except in some situations in function. 
+
+1.1.2 Redeclare
+
+Redeclares as class elements are now supported.

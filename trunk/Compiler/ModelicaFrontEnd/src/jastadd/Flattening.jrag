@@ -54,18 +54,21 @@ aspect Flattening {
 			//return null;
 		}
     }
-    
-    public void InstClassDecl.flattenCalledFunctions(FClass fc) {
-		getInstComponentDeclList().flattenCalledFunctions(fc);
-		getFAbstractEquationList().flattenCalledFunctions(fc);
-    }
-	
 
-	// Find functions that needs to be flattened
+    /**
+     * \brief Find functions that needs to be flattened.
+     */
 	public void ASTNode.flattenCalledFunctions(FClass fc) {
 		for (int i = 0; i < getNumChild(); i++) 
 			getChild(i).flattenCalledFunctions(fc);
 	}
+    
+    public void InstNode.flattenCalledFunctions(FClass fc) {
+		getInstComponentDeclList().flattenCalledFunctions(fc);
+		getFAbstractEquationList().flattenCalledFunctions(fc);
+		getInstExtendsList().flattenCalledFunctions(fc);
+		super.flattenCalledFunctions(fc);
+    }
 
 	public void InstValueModification.flattenCalledFunctions(FClass fc) {
 		getFExp().flattenCalledFunctions(fc);
