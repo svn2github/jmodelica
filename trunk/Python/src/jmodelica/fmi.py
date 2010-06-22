@@ -171,14 +171,17 @@ class FMIModel(object):
         self._nContinuousStates = int(self._xmldoc._xpatheval('//fmiModelDescription/@numberOfContinuousStates')[0])
         self._nEventIndicators = int(self._xmldoc._xpatheval('//fmiModelDescription/@numberOfEventIndicators')[0])
         self._GUID = self._xmldoc._xpatheval('//fmiModelDescription/@guid')[0]
-        self._description = self._xmldoc._xpatheval('//fmiModelDescription/@description')[0]
+        try:
+            self._description = self._xmldoc._xpatheval('//fmiModelDescription/@description')[0]
+        except IndexError:
+            self._description = ''
         
         self._XMLStartTime = N.array(self._xmldoc._xpatheval('//DefaultExperiment/@startTime'),dtype=N.double)
         self._XMLStopTime = N.array(self._xmldoc._xpatheval('//DefaultExperiment/@stopTime'),dtype=N.double)
         self._XMLTolerance = N.array(self._xmldoc._xpatheval('//DefaultExperiment/@tolerance'),dtype=N.double)
         
-        if self._XMLStartTime.size > 0:
-            self._XMLStartTime = self._XMLStartTime[0]
+        #if self._XMLStartTime.size > 0:
+        #    self._XMLStartTime = self._XMLStartTime[0]
         if self._XMLStopTime.size > 0:
             self._XMLStopTime = self._XMLStopTime[0]
         
@@ -685,14 +688,14 @@ class FMIModel(object):
         #Trying to set the initial time from the xml file, else 0.0
         if self.t == None:
             try:
-                self.t = self._XMLStartTime
+                self.t = self._XMLStartTime[0]
             except IndexError:
                 self.t = 0.0
         
         
         if len(self._XMLTolerance) == 0:
             tolcontrolled = self._fmiBoolean('0')
-            tol = self._fmiReal('0.0')
+            tol = self._fmiReal(0.0)
         else:
             tolcontrolled = self._fmiBoolean('1')
             tol = self._XMLTolerance[0]
@@ -713,7 +716,13 @@ class FMIModel(object):
         guid = self._fmiString(self._GUID)
         logging = self._fmiBoolean(logging)
         
-        functions = self._fmiCallbackFunctions(self._fmiCallbackLogger(self.fmiCallbackLogger),self._fmiCallbackAllocateMemory(self.fmiCallbackAllocateMemory), self._fmiCallbackFreeMemory(self.fmiCallbackFreeMemory))
+        functions = self._fmiCallbackFunctions#(self._fmiCallbackLogger(self.fmiCallbackLogger),self._fmiCallbackAllocateMemory(self.fmiCallbackAllocateMemory), self._fmiCallbackFreeMemory(self.fmiCallbackFreeMemory))
+        
+        
+        functions.logger = self.fmiCallbackLogger
+        functions.allocateMemory = self.fmiCallbackAllocateMemory
+        functions.freeMemory = self.fmiCallbackFreeMemory
+        
         
         self._model = self._fmiInstantiateModel(instance,guid,functions,logging)
         
