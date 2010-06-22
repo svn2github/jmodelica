@@ -28,8 +28,8 @@ abstract public class TestAnnotationizerHelper {
 		 * 
 		 * Delegates to super class.
 		 */
-		public CCodeGenTestCase(String filePath, String className, String description, String data) throws Exception {
-			super(filePath, className, description, data);
+		public CCodeGenTestCase(String filePath, String className, String description, String opts, String data) throws Exception {
+			super(filePath, className, description, opts, data);
 		}
 		
 		/**

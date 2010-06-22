@@ -6275,21 +6275,27 @@ end ArrayTests.ArrayNeg1;
 end ArrayNeg1;
 
 
-// TODO: When tests can set options, do this without alias removal
 model ArrayNeg2
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
          name="ArrayNeg2",
-         description="",
+         description="Scalarization of negation: array of Integer (variable)",
+		 eliminate_alias_variables=false,
          flatModel="
 fclass ArrayTests.ArrayNeg2
  Integer x[1];
  Integer x[2];
  Integer x[3];
+ Integer y[1];
+ Integer y[2];
+ Integer y[3];
 equation
-  - ( x[1] ) = 1;
-  - ( x[2] ) = 0;
-  - ( x[3] ) =  - ( 1 );
+ x[1] =  - ( y[1] );
+ x[2] =  - ( y[2] );
+ x[3] =  - ( y[3] );
+ y[1] = 1;
+ y[2] = 0;
+ y[3] =  - ( 1 );
 end ArrayTests.ArrayNeg2;
 ")})));
 

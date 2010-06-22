@@ -1503,7 +1503,7 @@ aspect FlatAlgorithmAPI {
 			part = "algorithm_" + generatedFunctionNumber;
 			name = name() + "." + part;
 			generatedFunctionNumber++;
-		} while (lookupFFunc(name) != null || fullyQualifiedVariablesMap().get(part) != null);
+		} while (lookupFunc(name) != null || fullyQualifiedVariablesMap().get(part) != null);
 		return name;
 	}
 	

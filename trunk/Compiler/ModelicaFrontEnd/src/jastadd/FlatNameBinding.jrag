@@ -155,11 +155,13 @@ aspect FlatNameBinding {
 
 aspect FlatFunctionBinding {
 	
-	syn FFunctionDecl FFunctionCall.myFFunctionDecl() = lookupFFunc(getName().name());
-	inh FFunctionDecl FFunctionCall.lookupFFunc(String name);
-	eq Root.getChild().lookupFFunc(String name) = null;
-	eq FClass.getChild().lookupFFunc(String name) = lookupFFunc(name);
-	syn FFunctionDecl FClass.lookupFFunc(String name) {
+	syn FFunctionDecl FFunctionCall.myFFunctionDecl() = lookupFFunctionDecl(getName().name());
+	
+	inh FFunctionDecl FFunctionCall.lookupFFunctionDecl(String name);
+	eq Root.getChild().lookupFFunctionDecl(String name)   = null;
+	eq FClass.getChild().lookupFFunctionDecl(String name) = lookupFunc(name);
+	
+	syn FFunctionDecl FClass.lookupFunc(String name) {
 		for (FFunctionDecl f : getFFunctionDecls())
 			if (f.name().equals(name))
 				return f;

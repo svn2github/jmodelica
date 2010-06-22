@@ -67,6 +67,7 @@ public class TestAnnotationizer {
 		String data = null;
 		boolean write = false;
 		boolean optimica = filePath.contains("Optimica");
+		String opts = null;
 		
 		for (int i = 1; i < args.length; i++) {
 			String arg = (args[i].length() > 3) ? args[i].substring(3) : "";
@@ -76,6 +77,8 @@ public class TestAnnotationizer {
 				modelName = composeModelName(modelName, arg);
 			else if (args[i].startsWith("-d=")) 
 				data = arg;
+			else if (args[i].startsWith("-p=")) 
+				opts = arg;
 			else if (args[i].equals("-w")) 
 				write = true;
 			else if (args[i].equals("-h")) 
@@ -103,15 +106,15 @@ public class TestAnnotationizer {
 			testType = in.readLine().trim();			
 		}
 		
-		doAnnotation(optimica, filePath, testType, modelName, description, data, write);
+		doAnnotation(optimica, filePath, testType, modelName, description, opts, data, write);
 	}
 
 	private static void doAnnotation(boolean optimica, String filePath,
-			String testType, String modelName, String description, String data,
-			boolean write) throws Exception {
+			String testType, String modelName, String description, String opts, 
+			String data, boolean write) throws Exception {
 		Method m = getHelperClass(optimica ? OPTIMICA : MODELICA).getMethod("doAnnotation", 
-				String.class, String.class, String.class, String.class, String.class, boolean.class);
-		m.invoke(null, filePath, testType, modelName, description, data, write);
+				String.class, String.class, String.class, String.class, String.class, String.class, boolean.class);
+		m.invoke(null, filePath, testType, modelName, description, opts, data, write);
 	}
 
 	private static void usageError(int level) throws Exception {

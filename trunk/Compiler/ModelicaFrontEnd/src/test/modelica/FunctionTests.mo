@@ -3335,18 +3335,22 @@ end FunctionTests.ArrayOutputScalarization8;
 end ArrayOutputScalarization8;
 
 
-// TODO: Redo test to run without alias elimination once there is support for that in test framework.
 model ArrayOutputScalarization9
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
          name="ArrayOutputScalarization9",
          description="Scalarization of array function outputs: equation without expression",
+         eliminate_alias_variables=false,
          flatModel="
 fclass FunctionTests.ArrayOutputScalarization9
  Real x[1];
  Real x[2];
+ Real temp_1[1];
+ Real temp_1[2];
 equation
- ({x[1],x[2]}) = FunctionTests.ArrayOutputScalarization9.f();
+ ({temp_1[1],temp_1[2]}) = FunctionTests.ArrayOutputScalarization9.f();
+ x[1] = temp_1[1];
+ x[2] = temp_1[2];
 
  function FunctionTests.ArrayOutputScalarization9.f
   output Real[2] x;

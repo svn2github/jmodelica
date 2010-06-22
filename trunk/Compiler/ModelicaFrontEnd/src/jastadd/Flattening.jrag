@@ -95,45 +95,42 @@ aspect Flattening {
 	
 	// TODO: Shouldn't this be InstBaseClassDecl instead?
 	public void InstFullClassDecl.flattenFunction(FClass fc) {
-		getInstRestriction().flattenFunction(fc);
+		getInstRestriction().flattenFunction(fc, this);
 	}
 	
-	public void InstRestriction.flattenFunction(FClass fc) {}
+	public void InstRestriction.flattenFunction(FClass fc, InstFullClassDecl icd) {}
 	
-	private FClass InstFunction.flatFunctionAddedTo = null;
-	
-	public void InstFunction.flattenFunction(FClass fc) {
-		if (flatFunctionAddedTo != fc) {
-			flatFunctionAddedTo = fc;
-			((InstFullClassDecl) getParent()).flattenThisFunction(fc);
-		}
+	public void InstFunction.flattenFunction(FClass fc, InstFullClassDecl icd) {
+		icd.flattenThisFunction(fc);
 	}
 	
 	public void InstFullClassDecl.flattenThisFunction(FClass fc) {
-   		FFunctionDecl ffd = new FFunctionDecl();
-   		ffd.setFQName(new FQName(qualifiedName()));
-
-   		for (InstComponentDecl icd : getInstComponentDecls())
-			icd.flattenInFunction(ffd, fc);
-   		for (InstExtends ie : getInstExtendss())
-   	   		for (InstComponentDecl icd : ie.getInstComponentDecls())
-   				icd.flattenInFunction(ffd, fc);
-		
-   		FAlgorithmBlock fab;
-   		if (getNumFAbstractEquation() > 0) {
-	   		fab = (FAlgorithmBlock) getFAbstractEquation(0);
-	   		fab = fab.flattenEqn(new FQName(), fc);
-   		} else {
-   			fab = new FAlgorithmBlock(new List());
-   		}
-		ffd.setFAlgorithmBlock(fab);
-		if (hasInstExternal())
-			fab.addFStatement(getInstExternal().flatten(this, new FQName()));
-		fab.ensureReturn();
-
-		fc.addFFunctionDecl(ffd);
-		
-		flattenCalledFunctions(fc);
+		if (fc.lookupFunc(qualifiedName()) == null) {		
+	   		FFunctionDecl ffd = new FFunctionDecl();
+	   		ffd.setFQName(new FQName(qualifiedName()));
+	
+	   		for (InstComponentDecl icd : getInstComponentDecls())
+				icd.flattenInFunction(ffd, fc);
+	   		for (InstExtends ie : getInstExtendss())
+	   	   		for (InstComponentDecl icd : ie.getInstComponentDecls())
+	   				icd.flattenInFunction(ffd, fc);
+			
+	   		FAlgorithmBlock fab;
+	   		if (getNumFAbstractEquation() > 0) {
+		   		fab = (FAlgorithmBlock) getFAbstractEquation(0);
+		   		fab = fab.flattenEqn(new FQName(), fc);
+	   		} else {
+	   			fab = new FAlgorithmBlock(new List());
+	   		}
+			ffd.setFAlgorithmBlock(fab);
+			if (hasInstExternal())
+				fab.addFStatement(getInstExternal().flatten(this, new FQName()));
+			fab.ensureReturn();
+	
+			fc.addFFunctionDecl(ffd);
+			
+			flattenCalledFunctions(fc);
+		}
 	}
 	
 	// Flatten record if not already done

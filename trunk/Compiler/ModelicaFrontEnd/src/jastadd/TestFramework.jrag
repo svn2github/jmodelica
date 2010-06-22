@@ -120,17 +120,27 @@ aspect TestFramework {
 					// Add all attributes
 					for (NamedArgument na : getFunctionArguments().getNamedArguments()) {
 						attrName = na.getName().name();
-						String methodName = "set" + Character.toUpperCase(attrName.charAt(0)) + attrName.substring(1);
+						boolean isOpt = attrName.indexOf('_') >= 0;
+						String methodName = isOpt ? null : 
+							"set" + Character.toUpperCase(attrName.charAt(0)) + attrName.substring(1);
 						
 						// TODO: Use type() and ceval() instead.
 						if (na.getExp() instanceof StringLitExp) {
-							String val = ((StringLitExp) na.getExp()).getSTRING().replace("\\\"","\"");
-							Method m = cl.getMethod(methodName, String.class);
-							m.invoke(tc, val);
+							String val = ((StringLitExp) na.getExp()).getSTRING().replace("\\\"", "\"");
+							if (isOpt) {
+								tc.setStringOption(attrName, val);
+							} else {
+								Method m = cl.getMethod(methodName, String.class);
+								m.invoke(tc, val);
+							}
 						} else if (na.getExp() instanceof BooleanLitExp) {
 							boolean val = na.getExp() instanceof BooleanLitExpTrue;
-							Method m = cl.getMethod(methodName, Boolean.TYPE);
-							m.invoke(tc, val);
+							if (isOpt) {
+								tc.setBooleanOption(attrName, val);
+							} else {
+								Method m = cl.getMethod(methodName, Boolean.TYPE);
+								m.invoke(tc, val);
+							}
 						} else {
 							log.error("Creating test case '" + className + "' - attribute '" + 
 									attrName + "' is assigned from an unsupported expression type");

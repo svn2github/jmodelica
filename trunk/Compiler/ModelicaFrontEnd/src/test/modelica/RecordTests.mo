@@ -824,19 +824,23 @@ end RecordConstructor6;
 
 
 
-// TODO: When it is possible to set compiler options in tests, use eliminate_alias_variables=false for these
 model RecordScalarize1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
          name="RecordScalarize1",
          description="Scalarization of records: modification",
+         eliminate_alias_variables=false,
          flatModel="
 fclass RecordTests.RecordScalarize1
+ Real x.a;
+ Real x.b;
  Real y.a;
  Real y.b;
 equation
- y.a = 1;
- y.b = 2;
+ y.a = x.a;
+ y.b = x.b;
+ x.a = 1;
+ x.b = 2;
 
  record RecordTests.RecordScalarize1.A
   Real a;
@@ -862,13 +866,18 @@ model RecordScalarize2
      JModelica.UnitTesting.TransformCanonicalTestCase(
          name="RecordScalarize2",
          description="Scalarization of records: basic test",
+         eliminate_alias_variables=false,
          flatModel="
 fclass RecordTests.RecordScalarize2
+ Real x.a;
+ Real x.b;
  Real y.a;
  Real y.b;
 equation
- y.a = 1;
- y.b = 2;
+ y.a = x.a;
+ y.b = x.b;
+ x.a = 1;
+ x.b = 2;
 
  record RecordTests.RecordScalarize2.A
   Real a;
@@ -896,13 +905,18 @@ model RecordScalarize3
      JModelica.UnitTesting.TransformCanonicalTestCase(
          name="RecordScalarize3",
          description="Scalarization of records: record constructor",
+         eliminate_alias_variables=false,
          flatModel="
 fclass RecordTests.RecordScalarize3
+ Real x.a;
+ Real x.b;
  Real y.a;
  Real y.b;
 equation
- y.a = 1;
- y.b = 2;
+ y.a = x.a;
+ y.b = x.b;
+ x.a = 1;
+ x.b = 2;
 
  record RecordTests.RecordScalarize3.A
   Real a;
@@ -928,6 +942,7 @@ model RecordScalarize4
      JModelica.UnitTesting.TransformCanonicalTestCase(
          name="RecordScalarize4",
          description="Scalarization of records: two different records, record constructors",
+         eliminate_alias_variables=false,
          flatModel="
 fclass RecordTests.RecordScalarize4
  Real x.a;
@@ -972,15 +987,20 @@ model RecordScalarize5
      JModelica.UnitTesting.TransformCanonicalTestCase(
          name="RecordScalarize5",
          description="Scalarization of records: nestled records",
+         eliminate_alias_variables=false,
          flatModel="
 fclass RecordTests.RecordScalarize5
  Real x.a;
  Real x.b.c;
  Real x.b.d;
+ Real y.c;
+ Real y.d;
 equation
  x.a = 1;
- x.b.c = 2;
- x.b.d = 3;
+ x.b.c = y.c;
+ x.b.d = y.d;
+ y.c = 2;
+ y.d = 3;
 
  record RecordTests.RecordScalarize5.B
   Real c;
@@ -993,6 +1013,7 @@ equation
  end RecordTests.RecordScalarize5.A;
 end RecordTests.RecordScalarize5;
 ")})));
+
 
  record A
   Real a;
@@ -1014,13 +1035,18 @@ model RecordScalarize6
      JModelica.UnitTesting.TransformCanonicalTestCase(
          name="RecordScalarize6",
          description="Scalarization of records: equivalent records",
+         eliminate_alias_variables=false,
          flatModel="
 fclass RecordTests.RecordScalarize6
+ Real x.a;
+ Real x.b;
  Real y.b;
  Real y.a;
 equation
- y.a = 1;
- y.b = 2;
+ y.a = x.a;
+ y.b = x.b;
+ x.a = 1;
+ x.b = 2;
 
  record RecordTests.RecordScalarize6.A
   Real a;
@@ -1056,15 +1082,22 @@ model RecordScalarize7
      JModelica.UnitTesting.TransformCanonicalTestCase(
          name="RecordScalarize7",
          description="Scalarization of records: equivalent nestled records",
+         eliminate_alias_variables=false,
          flatModel="
 fclass RecordTests.RecordScalarize7
+ Real x.c;
+ Real x.x.b;
+ Real x.x.a;
  Real y.x.a;
  Real y.x.b;
  Real y.c;
 equation
- y.c = 1;
- y.x.a = 2;
- y.x.b = 3;
+ y.c = x.c;
+ y.x.a = x.x.a;
+ y.x.b = x.x.b;
+ x.c = 1;
+ x.x.a = 2;
+ x.x.b = 3;
 
  record RecordTests.RecordScalarize7.A
   Real b;
@@ -1186,12 +1219,19 @@ model RecordScalarize10
      JModelica.UnitTesting.TransformCanonicalTestCase(
          name="RecordScalarize10",
          description="Scalarization of records: record containing array, using record constructor",
+         eliminate_alias_variables=false,
          flatModel="
 fclass RecordTests.RecordScalarize10
  Real x.a[1];
  Real x.a[2];
  Real x.b;
+ Real y.a[1];
+ Real y.a[2];
+ Real y.b;
 equation
+ x.a[1] = y.a[1];
+ x.a[2] = y.a[2];
+ x.b = y.b;
  x.a[1] = 1;
  x.a[2] = 2;
  x.b = 3;
@@ -1265,13 +1305,22 @@ model RecordScalarize13
      JModelica.UnitTesting.TransformCanonicalTestCase(
          name="RecordScalarize13",
          description="Scalarization of records: arrays of records, binding exp + record equation",
+         eliminate_alias_variables=false,
          flatModel="
 fclass RecordTests.RecordScalarize13
  Real x[1].a;
  Real x[1].b;
  Real x[2].a;
  Real x[2].b;
+ Real y[1].a;
+ Real y[1].b;
+ Real y[2].a;
+ Real y[2].b;
 equation
+ x[1].a = y[1].a;
+ x[1].b = y[1].b;
+ x[2].a = y[2].a;
+ x[2].b = y[2].b;
  x[1].a = 1;
  x[1].b = 2;
  x[2].a = 3;
@@ -1301,6 +1350,7 @@ model RecordScalarize14
      JModelica.UnitTesting.TransformCanonicalTestCase(
          name="RecordScalarize14",
          description="Scalarization of records: nestled records and arrays",
+         eliminate_alias_variables=false,
          flatModel="
 fclass RecordTests.RecordScalarize14
  Real x[1].b[1].a[1];
@@ -1311,7 +1361,23 @@ fclass RecordTests.RecordScalarize14
  Real x[2].b[1].a[2];
  Real x[2].b[2].a[1];
  Real x[2].b[2].a[2];
+ Real y[1].b[1].a[1];
+ Real y[1].b[1].a[2];
+ Real y[1].b[2].a[1];
+ Real y[1].b[2].a[2];
+ Real y[2].b[1].a[1];
+ Real y[2].b[1].a[2];
+ Real y[2].b[2].a[1];
+ Real y[2].b[2].a[2];
 equation
+ x[1].b[1].a[1] = y[1].b[1].a[1];
+ x[1].b[1].a[2] = y[1].b[1].a[2];
+ x[1].b[2].a[1] = y[1].b[2].a[1];
+ x[1].b[2].a[2] = y[1].b[2].a[2];
+ x[2].b[1].a[1] = y[2].b[1].a[1];
+ x[2].b[1].a[2] = y[2].b[1].a[2];
+ x[2].b[2].a[1] = y[2].b[2].a[1];
+ x[2].b[2].a[2] = y[2].b[2].a[2];
  x[1].b[1].a[1] = 1;
  x[1].b[1].a[2] = 2;
  x[1].b[2].a[1] = 3;
@@ -1351,9 +1417,11 @@ model RecordScalarize15
      JModelica.UnitTesting.TransformCanonicalTestCase(
          name="RecordScalarize15",
          description="Scalarization of records: access of nestled primitive",
+         eliminate_alias_variables=false,
          flatModel="
 fclass RecordTests.RecordScalarize15
  Real x[1].b[1].a[1];
+ Real x[1].b[1].a[2];
  Real x[1].b[2].a[1];
  Real x[1].b[2].a[2];
  Real x[2].b[1].a[1];
@@ -1363,13 +1431,14 @@ fclass RecordTests.RecordScalarize15
  Real y;
 equation
  x[1].b[1].a[1] = 1;
- y = 2;
+ x[1].b[1].a[2] = 2;
  x[1].b[2].a[1] = 3;
  x[1].b[2].a[2] = 4;
  x[2].b[1].a[1] = 5;
  x[2].b[1].a[2] = 6;
  x[2].b[2].a[1] = 7;
  x[2].b[2].a[2] = 8;
+ y = x[1].b[1].a[2];
 
  record RecordTests.RecordScalarize15.B
   Real a[2];

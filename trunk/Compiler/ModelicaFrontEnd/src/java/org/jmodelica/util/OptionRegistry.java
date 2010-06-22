@@ -1,7 +1,10 @@
 package org.jmodelica.util;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -14,20 +17,68 @@ import org.xml.sax.SAXException;
 
 /**
  * OptionRegistry contains all options for the compiler. Options
- * can be created and retreived based on type: String, Integer etc.
+ * can be created and retrieved based on type: String, Integer etc.
  * OptionRegistry also provides methods for handling paths
  * to Modelica libraries.
  */
 public class OptionRegistry {
+	
+		private enum DefOpt {
+			MSL_VER    ("default_msl_version", ""),
+			START_FIX  ("state_start_values_fixed", 
+					"This option enables the user to specify if initial equations should be " + 
+					"generated automatically for differentiated variables even though the fixed " +
+					"attribute is equal to fixed. Setting this option to true is, however, often " +
+					"practical in optimization problems."),
+			ELIM_ALIAS ("eliminate_alias_variables", 
+					"If this option is set to true (default), then alias variables are " +
+                    "eliminated from the model."),
+			HALT_WARN  ("halt_on_warning", 
+					"If this option is set to false (default) one or more compiler " +
+                    "warnings will not stop compilation of the model."),
+			XML_EQU    ("generate_xml_equations", 
+					"If this option is true, then model equations are generated in XML format. " + 
+					"Default is false."),
+			INDEX_RED  ("index_reduction", 
+					"If this option is true (default is false), index reduction is performed."),
+			EQU_SORT   ("equation_sorting", 
+					"If this option is true (default is false), equations are sorted using the BLT algorithm."),
+			XML_FMI    ("generate_fmi_xml", 
+					"If this option is true the model description part of the XML variables file " + 
+					"will be FMI compliant. Default is false. To generate an XML which will " + 
+					"validate with FMI schema the option generate_xml_equations must also be false."),
+			VAR_SCALE  ("enable_variable_scaling", 
+					"If this option is true (default is false), then the \"nominal\" attribute will " + 
+					"be used to scale variables in the model.");
+			
+			public String key;
+			public String desc;
+			
+			private DefOpt(String k, String d) {
+				key = k;
+				desc = d;
+			}
+		}
 
 		private HashMap<String,Option> optionsMap;
 		
 		public OptionRegistry() {
 			optionsMap = new HashMap<String,Option>();
+			
+			// Fill registry with default options
+			defaultStringOption(DefOpt.MSL_VER,     "3.0.1");
+			defaultBooleanOption(DefOpt.START_FIX,  false);
+			defaultBooleanOption(DefOpt.ELIM_ALIAS, true);
+			defaultBooleanOption(DefOpt.HALT_WARN,  false);
+			defaultBooleanOption(DefOpt.XML_EQU,    false);
+			defaultBooleanOption(DefOpt.INDEX_RED,  false);
+			defaultBooleanOption(DefOpt.EQU_SORT,   false);
+			defaultBooleanOption(DefOpt.XML_FMI,    false);
+			defaultBooleanOption(DefOpt.VAR_SCALE,  false);
 		}
 
 		public OptionRegistry(OptionRegistry registry) {
-			optionsMap = new HashMap<String,Option>();
+			this();
 			copyAllOptions(registry);
 		}
 		
@@ -108,12 +159,42 @@ public class OptionRegistry {
 			org.w3c.dom.Document doc = builder.parse(new File(xmlfile));
 			return doc;
 		}
-
+		
+		/**
+		 * \brief Export all options as XML.
+		 * 
+		 * @param out  the stream to write to
+		 */
+		public void exportXML(PrintStream out) {
+			out.print("<OptionsRegistry>\n\t<Options>\n");
+			for (Option o : optionsMap.values())
+				o.exportXML(out);
+			out.print("\t</Options>\n</OptionsRegistry>\n");
+		}
+		
+		/**
+		 * \brief Export all options as an XML file.
+		 * 
+		 * @param name  the name of the file to write to
+		 * @throws FileNotFoundException  if the file cannot be opened
+		 */
+		public void exportXML(String name) throws FileNotFoundException {
+			FileOutputStream out = new FileOutputStream(name);
+			exportXML(new PrintStream(out));
+			try {
+				out.close();
+			} catch (IOException e) {
+			}
+		}
 		
 		protected void createIntegerOption(String key, String description,
 				int defaultValue) {
 			optionsMap.put(key,new IntegerOption(key, description,
 					defaultValue));			
+		}
+		
+		protected void defaultIntegerOption(DefOpt o, int defaultValue) {
+			createIntegerOption(o.key, o.desc, defaultValue);		
 		}
 		
 		public void setIntegerOption(String key, int value, String description) {
@@ -150,6 +231,10 @@ public class OptionRegistry {
 					defaultValue));			
 		}
 		
+		protected void defaultStringOption(DefOpt o, String defaultValue) {
+			createStringOption(o.key, o.desc, defaultValue);		
+		}
+		
 		public void setStringOption(String key, String value, String description) {
 			Option o = optionsMap.get(key);
 			if (o == null) {
@@ -184,6 +269,10 @@ public class OptionRegistry {
 					defaultValue));			
 		}
 		
+		protected void defaultRealOption(DefOpt o, double defaultValue) {
+			createRealOption(o.key, o.desc, defaultValue);		
+		}
+		
 		public void setRealOption(String key, double value, String description) {
 			Option o = optionsMap.get(key);
 			if (o == null) {
@@ -216,6 +305,10 @@ public class OptionRegistry {
 				boolean defaultValue) {
 			optionsMap.put(key,new BooleanOption(key, description,
 					defaultValue));			
+		}
+		
+		protected void defaultBooleanOption(DefOpt o, boolean defaultValue) {
+			createBooleanOption(o.key, o.desc, defaultValue);		
 		}
 		
 		public void setBooleanOption(String key, boolean value, String description) {
@@ -255,7 +348,7 @@ public class OptionRegistry {
 		}
 		
 		public Set<Map.Entry<String, Option>> getAllOptions() {
-			return this.optionsMap.entrySet();
+			return optionsMap.entrySet();
 		}
 		
 		public void copyAllOptions(OptionRegistry registry) throws UnknownOptionException{
@@ -283,8 +376,37 @@ public class OptionRegistry {
 				}
 			}			
 		}
+
+		/**
+		 * \brief Make the first letter in a string capital.
+		 */
+		public static Object capitalize(String str) {
+			return str.substring(0, 1).toUpperCase() + str.substring(1);
+		}
+
+		public static String wrap(String str, String prefix, int width) {
+			StringBuilder buf = new StringBuilder();
+			int start = 0;
+			int end = start + width;
+			int len = str.length();
+			while (end < len) {
+				while (end > start && !Character.isWhitespace(str.charAt(end)))
+					end--;
+				if (end <= start)
+					end = start + width;
+				buf.append(prefix);
+				buf.append(str.substring(start, end));
+				buf.append('\n');
+				start = end + 1;
+				end = start + width;
+			}
+			buf.append(prefix);
+			buf.append(str.substring(start));
+			buf.append('\n');
+			return buf.toString();
+		}
 	
-	class Option {
+	abstract static class Option {
 		protected String key;
 		protected String description;
 			
@@ -293,6 +415,27 @@ public class OptionRegistry {
 			this.description = description;
 		}
 	
+		public void exportXML(PrintStream out) {
+			String type = getType();
+			String tag = capitalize(type) + "Attributes";
+			String attrs = String.format("\t\t\t<%s key=\"%s\" value=\"%s\"", tag, key, getValueString());
+			out.print(String.format("\t\t<Option type=\"%s\">\n", type));
+			out.print(attrs);
+			if (description == null || description.isEmpty()) {
+				out.print("/>\n");
+			} else {
+				out.print(">\n\t\t\t\t<Description>\n");
+				out.print(wrap(description, "\t\t\t\t\t", 80));
+				out.print("\t\t\t\t</Description>\n\t\t\t</");
+				out.print(tag);
+				out.print(">\n");
+			}
+			out.print("\t\t</Option>\n");
+		}
+		
+		public abstract String getType();
+		public abstract String getValueString();
+
 		public String getKey() {
 			return key;
 		}
@@ -307,7 +450,7 @@ public class OptionRegistry {
 		
 	}
 	
-	class IntegerOption extends Option {
+	static class IntegerOption extends Option {
 		protected int value;
 		
 		public IntegerOption(String key, String description, int value) {
@@ -322,9 +465,19 @@ public class OptionRegistry {
 		public int getValue() {
 			return value;
 		}
+
+		@Override
+		public String getType() {
+			return "integer";
+		}
+
+		@Override
+		public String getValueString() {
+			return Integer.toString(value);
+		}
 	}
 
-	class StringOption extends Option {
+	static class StringOption extends Option {
 		protected String value;
 		
 		public StringOption(String key, String description, String value) {
@@ -339,9 +492,19 @@ public class OptionRegistry {
 		public String getValue() {
 			return value;
 		}
+
+		@Override
+		public String getType() {
+			return "string";
+		}
+
+		@Override
+		public String getValueString() {
+			return value;
+		}
 	}
 
-	class RealOption extends Option {
+	static class RealOption extends Option {
 		protected double value;
 		
 		public RealOption(String key, String description, double value) {
@@ -356,9 +519,19 @@ public class OptionRegistry {
 		public double getValue() {
 			return value;
 		}
+
+		@Override
+		public String getType() {
+			return "real";
+		}
+
+		@Override
+		public String getValueString() {
+			return Double.toString(value);
+		}
 	}
 
-	class BooleanOption extends Option {
+	static class BooleanOption extends Option {
 		protected boolean value;
 		
 		public BooleanOption(String key, String description, boolean value) {
@@ -373,9 +546,19 @@ public class OptionRegistry {
 		public boolean getValue() {
 			return value;
 		}
+
+		@Override
+		public String getType() {
+			return "boolean";
+		}
+
+		@Override
+		public String getValueString() {
+			return Boolean.toString(value);
+		}
 	}
 	
-	public class UnknownOptionException extends RuntimeException { 
+	public static class UnknownOptionException extends RuntimeException { 
 		
 		/**
 		 * 

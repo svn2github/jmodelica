@@ -61,12 +61,12 @@ abstract public class TestAnnotationizerHelper {
 	 * @param write        if <code>true</code>, write the annotation directly in the Modelica file
 	 */
 	public static void doAnnotation(String filePath, String testType, String modelName, 
-			String description, String data, boolean write) throws Exception {
+			String description, String opts, String data, boolean write) throws Exception {
 		try {
 			for (Class cl : TestAnnotationizerHelper.class.getClasses()) {
 				if (cl.getSimpleName().startsWith(testType) && !Modifier.isAbstract(cl.getModifiers())) {
-					Constructor constructor = cl.getConstructor(String.class, String.class, String.class, String.class);
-					TestAnnotationizerHelper ta = (TestAnnotationizerHelper) constructor.newInstance(filePath, modelName, description, data);
+					Constructor constructor = cl.getConstructor(String.class, String.class, String.class, String.class, String.class);
+					TestAnnotationizerHelper ta = (TestAnnotationizerHelper) constructor.newInstance(filePath, modelName, description, opts, data);
 					if (write)
 						ta.writeAnnotation();
 					else
@@ -105,6 +105,8 @@ abstract public class TestAnnotationizerHelper {
 		System.out.println("    -c=<class>   set name of class to generate annotation for, if name ");
 		System.out.println("                 does not contain a dot, base name of .mo file is prepended");
 		System.out.println("    -d=<data>    set extra data to send to the specific generator");
+		System.out.println("    -p=<opts>    comma-separated list of compiler options to override defaults for, ");
+		System.out.println("                 example: -p=eliminate_alias_variables=false,default_msl_version=\"2.2\"");
 		System.out.println("    -h           print this help");
 		System.out.println("  User will be prompted for type and/or class if not set with options.");
 		System.out.println("  Available test types:");
@@ -136,6 +138,7 @@ abstract public class TestAnnotationizerHelper {
 	protected String testName;
 	protected String description;
 	protected SourceRoot root;
+	protected String[] opts;
 	
 	/**
 	 * \brief Standard constructor for test case creators.
@@ -147,26 +150,24 @@ abstract public class TestAnnotationizerHelper {
 	 * @param filePath     the path to the Modelica file containing the test model
 	 * @param className    the name of the test model
 	 * @param description  the text to put in the "description" field of the test annotation
+	 * @param opts         comma-separated list of compiler options to override defaults for
 	 * @param data         any extra data to send to the delegate object
 	 */
-	public TestAnnotationizerHelper(String filePath, String className, String description, String data) throws Exception {
+	public TestAnnotationizerHelper(String filePath, String className, String description, String opts, String data) throws Exception {
 		this.filePath = filePath;
 		this.className = className;
 		this.description = prepare(description);
+		this.opts = (opts == null) ? new String[0] : opts.split(",");
 		testName = className.substring(className.lastIndexOf('.') + 1);
 		
 		String filesep = File.separator;
-		String optionsfile = System.getenv("JMODELICA_HOME")+filesep+"Options"+filesep+"options.xml";
-//		OptionRegistry or = new OptionRegistry(optionsfile);
 		String modelicapath = System.getenv("JMODELICA_HOME")+filesep+"ThirdParty"+filesep+"MSL";
-//		or.setStringOption("MODELICAPATH", modelicapath);
 		
 		ParserHandler ph = new ParserHandler();
 		try {
 			root = ph.parseFile(filePath);
-			root.options = new OptionRegistry(optionsfile);
+			root.options = createOptionRegistry();
 			root.options.setStringOption("MODELICAPATH", modelicapath);
-//			root.options.copyAllOptions(or);
 		} catch (ParserException e) {
 			e.getProblem().setFileName(filePath);
 			CompilerException ce = new CompilerException();
@@ -175,6 +176,56 @@ abstract public class TestAnnotationizerHelper {
 		}
 		for (StoredDefinition sd : root.getProgram().getUnstructuredEntitys()) 
 			sd.setFileName(filePath);
+	}
+	
+	/**
+	 * \brief Creates the options registry to use.
+	 */
+	protected OptionRegistry createOptionRegistry() throws Exception {
+		OptionRegistry or = new OptionRegistry();
+		for (String opt : opts) {
+			String parts[] = opt.split("=");
+			if (parts.length != 2)
+				throw new ModelicaException("Bad compiler option string: " + opt);
+			String key = parts[0];
+			String val = parts[1];
+			if (val.startsWith("\"") && val.endsWith("\"")) {
+				or.setStringOption(key, val.substring(1, val.length() - 1));
+			} else if (val.equals("true") || val.equals("false")) {
+				or.setBooleanOption(key, val.equals("true"));
+			} else if (isInteger(val)) {
+				or.setIntegerOption(key, Integer.parseInt(val));
+			} else if (isReal(val)) {
+				or.setRealOption(key, Double.parseDouble(val));
+			} else {
+				throw new ModelicaException("Bad compiler option value: " + opt);
+			}
+		}
+		return or;
+	}
+	
+	/**
+	 * \brief Check if a string can be parsed as an int.
+	 */
+	protected static boolean isInteger(String str) {
+		try {
+			Integer.parseInt(str);
+			return true;
+		} catch (NumberFormatException e) {
+			return false;
+		}
+	}
+	
+	/**
+	 * \brief Check if a string can be parsed as a double.
+	 */
+	protected static boolean isReal(String str) {
+		try {
+			Double.parseDouble(str);
+			return true;
+		} catch (NumberFormatException e) {
+			return false;
+		}
 	}
 
 	/**
@@ -224,6 +275,8 @@ abstract public class TestAnnotationizerHelper {
 		out.println("     JModelica.UnitTesting." + getClass().getSimpleName() + "(");
 		out.println("         name=\"" + testName + "\",");
 		out.println("         description=\"" + description + "\",");
+		for (String opt : opts) 
+			out.println("         " + opt + ",");
 		printSpecific(out, "         ");
 		out.println(")})));\n");
 	}
@@ -329,8 +382,8 @@ abstract public class TestAnnotationizerHelper {
 		 * Compiles the model and generates code using the code template passed in 
 		 * <code>data</code> and a code generator created by subclass.
 		 */
-		public CodeGenTestCase(String filePath, String className, String description, String data) throws Exception {
-			super(filePath, className, description, data);
+		public CodeGenTestCase(String filePath, String className, String description, String opts, String data) throws Exception {
+			super(filePath, className, description, opts, data);
 			template = prepare(data.replaceAll("\\\\n", "\n"));
 			FClass fc = compile();
 			AbstractGenerator generator = createGenerator(fc);
@@ -371,8 +424,8 @@ abstract public class TestAnnotationizerHelper {
 		 * 
 		 * Delegates to super class.
 		 */
-		public GenericCodeGenTestCase(String filePath, String className, String description, String data) throws Exception {
-			super(filePath, className, description, data);
+		public GenericCodeGenTestCase(String filePath, String className, String description, String opts, String data) throws Exception {
+			super(filePath, className, description, opts, data);
 		}
 		
 		/**
@@ -406,8 +459,8 @@ abstract public class TestAnnotationizerHelper {
 		 * 
 		 * Performs the flattening and instantiation steps of compilation.
 		 */
-		public FlatteningTestCase(String filePath, String className, String description, String data) throws Exception {
-			super(filePath, className, description, data);
+		public FlatteningTestCase(String filePath, String className, String description, String opts, String data) throws Exception {
+			super(filePath, className, description, opts, data);
 			fc = flatten(instantiate());
 		}
 
@@ -435,8 +488,8 @@ abstract public class TestAnnotationizerHelper {
 		 * Performs the transform canonical step of compilation.
 		 * (Superclass performs the flattening and instantiation steps.)
 		 */
-		public TransformCanonicalTestCase(String filePath, String className, String description, String data) throws Exception {
-			super(filePath, className, description, data);
+		public TransformCanonicalTestCase(String filePath, String className, String description, String opts, String data) throws Exception {
+			super(filePath, className, description, opts, data);
 			transformCanonical(fc);
 		}
 		
@@ -456,8 +509,8 @@ abstract public class TestAnnotationizerHelper {
 		 * exception is caught, an error message is composed, to be included in 
 		 * the annotation.
 		 */
-		public ErrorTestCase(String filePath, String className, String description, String data) throws Exception {
-			super(filePath, className, description, data);
+		public ErrorTestCase(String filePath, String className, String description, String opts, String data) throws Exception {
+			super(filePath, className, description, opts, data);
 			try {
 				compile();
 				throw new ModelicaException(noExceptionMessage());
@@ -498,8 +551,8 @@ abstract public class TestAnnotationizerHelper {
 		 * 
 		 * Delegates to super class.
 		 */
-		public WarningTestCase(String filePath, String className, String description, String data) throws Exception {
-			super(filePath, className, description, data);
+		public WarningTestCase(String filePath, String className, String description, String opts, String data) throws Exception {
+			super(filePath, className, description, opts, data);
 		}
 		
 		/**
@@ -530,8 +583,8 @@ abstract public class TestAnnotationizerHelper {
 		 * 
 		 * Delegates to super class.
 		 */
-		public ComplianceErrorTestCase(String filePath, String className, String description, String data) throws Exception {
-			super(filePath, className, description, data);
+		public ComplianceErrorTestCase(String filePath, String className, String description, String opts, String data) throws Exception {
+			super(filePath, className, description, opts, data);
 		}
 		
 		/**
@@ -559,8 +612,8 @@ abstract public class TestAnnotationizerHelper {
 		 * 
 		 * Compiles the model.
 		 */
-		public FClassMethodTestCase(String filePath, String className, String description, String data) throws Exception {
-			super(filePath, className, description, data);
+		public FClassMethodTestCase(String filePath, String className, String description, String opts, String data) throws Exception {
+			super(filePath, className, description, opts, data);
 			fc = compile();
 			methodName = data;
 	    	Method method = fc.getClass().getMethod(methodName);

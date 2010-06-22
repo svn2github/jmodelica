@@ -36,8 +36,12 @@ abstract public class TestCase {
 	
 	private boolean filter = false;
 	private boolean checkWarnings = false;
+	
+	private OptionRegistry options;
 
-	public TestCase() {}
+	public TestCase() {
+		options = createOptionsRegistry();
+	}
 	
 	/**
 	 * @param name
@@ -49,11 +53,52 @@ abstract public class TestCase {
 			        String description, 
 			        String sourceFileName,
 			        String className) {
-		super();
+		this();
 		this.name = name;
 		this.description = description;
 		this.sourceFileName = sourceFileName;
 		this.className = className;
+	}
+	
+	/**
+	 * \brief Create the OptionsRegistry to be used during compilation.
+	 * 
+	 * Options may be further changed by test annotation.
+	 */
+	protected OptionRegistry createOptionsRegistry() {
+		OptionRegistry or = new OptionRegistry();
+		String modelica_path = System.getenv("JMODELICA_HOME") + File.separator + 
+				"ThirdParty" + File.separator + "MSL";
+		or.setStringOption("MODELICAPATH", modelica_path);
+		return or;
+	}
+	
+	/**
+	 * \brief Set a string option to be used during compilation.
+	 */
+	public void setStringOption(String key, String value) {
+		options.setStringOption(key, value);
+	}
+	
+	/**
+	 * \brief Set a boolean option to be used during compilation.
+	 */
+	public void setBooleanOption(String key, boolean value) {
+		options.setBooleanOption(key, value);
+	}
+	
+	/**
+	 * \brief Set an integer option to be used during compilation.
+	 */
+	public void setIntegerOption(String key, int value) {
+		options.setIntegerOption(key, value);
+	}
+	
+	/**
+	 * \brief Set a real option to be used during compilation.
+	 */
+	public void setRealOption(String key, double value) {
+		options.setRealOption(key, value);
 	}
 		
 	public void dumpJunit(StringBuilder str, int index) {
@@ -181,18 +226,7 @@ abstract public class TestCase {
 			return false;
 		}
 		
-		String filesep = System.getProperty("file.separator");
-		String optionsfile = System.getenv("JMODELICA_HOME")+filesep+"Options"+filesep+"options.xml";
-		OptionRegistry or;
-		try {
-			or = new OptionRegistry(optionsfile);
-		} catch (Exception e) {
-			throw new CouldNotLoadOptionsException(e);
-		}
-		String modelica_path = System.getenv("JMODELICA_HOME")+filesep+"ThirdParty/MSL";
-		or.setStringOption("MODELICAPATH",modelica_path);
-		sr.options = or;
-		
+		sr.options = options;
 		sr.setFileName(getSourceFileName());
 		
 		
@@ -215,11 +249,10 @@ abstract public class TestCase {
 	    flatRoot.setFileName(getSourceFileName());
 	    FClass fc = createFClass(ipr.simpleLookupInstClassDecl(getClassName()));
 	    flatRoot.setFClass(fc);
-	    flatRoot.options = new OptionRegistry(or);
+	    flatRoot.options = new OptionRegistry(options);
 	    
-	    InstNode ir;
 	    try {
-	    	ir = ipr.findFlattenInst(getClassName(), fc);
+	    	ipr.findFlattenInst(getClassName(), fc);
 	    } catch (ModelicaClassNotFoundException e) {
 	    	return false;
 	    }

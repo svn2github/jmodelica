@@ -1135,7 +1135,10 @@ aspect FlatFunctionUtils {
       * Only valid after scalarization.
       */
      syn int FExp.numScalarVars() = 1;
-     eq FArray.numScalarVars()    = getNumFExp() * getFExp(0).numScalarVars();
+     eq FArray.numScalarVars() {
+    	 int n = getNumFExp();
+    	 return (n == 0) ? 0 : n * getFExp(0).numScalarVars();
+     }
      eq FRecordConstructor.numScalarVars() {
          int n = 0;
          for (FExp e : getArgs())
