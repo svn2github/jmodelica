@@ -421,7 +421,8 @@ public class OptionRegistry {
 			String attrs = String.format("\t\t\t<%s key=\"%s\" value=\"%s\"", tag, key, getValueString());
 			out.print(String.format("\t\t<Option type=\"%s\">\n", type));
 			out.print(attrs);
-			if (description == null || description.isEmpty()) {
+//			if (description == null || description.isEmpty()) {
+			if (description == null || description.equals("")) {
 				out.print("/>\n");
 			} else {
 				out.print(">\n\t\t\t\t<Description>\n");
@@ -551,7 +552,7 @@ public class OptionRegistry {
 		public String getType() {
 			return "boolean";
 		}
-
+		
 		@Override
 		public String getValueString() {
 			return Boolean.toString(value);

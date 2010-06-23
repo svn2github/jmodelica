@@ -47,6 +47,7 @@ if not jpype.isJVMStarted():
     print "JVM started."
 
 OptionRegistry = org.jmodelica.util.OptionRegistry
+
 UnknownOptionException = jpype.JClass('org.jmodelica.util.OptionRegistry$UnknownOptionException')
 
 class ModelicaCompiler():
