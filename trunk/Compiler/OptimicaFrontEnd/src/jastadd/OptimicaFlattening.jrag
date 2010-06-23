@@ -29,11 +29,10 @@ aspect OptimicaFlattening {
     }
     
     public void InstOptClassDecl.flattenCalledFunctions(FClass fc) {
-		getInstComponentDecls().flattenCalledFunctions(fc);
-		getFAbstractEquations().flattenCalledFunctions(fc);
 		getFConstraints().flattenCalledFunctions(fc);
 		if (hasInstClassModification()) 
 			getInstClassModification().flattenCalledFunctions(fc);
+		super.flattenCalledFunctions(fc);
     }
         
     refine Flattening void InstClassDecl.flattenInstClassDecl(FClass fc) {

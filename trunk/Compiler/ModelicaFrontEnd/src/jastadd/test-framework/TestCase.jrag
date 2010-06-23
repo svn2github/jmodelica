@@ -23,7 +23,9 @@ aspect TestCases {
  * 
  * Note that for each attribute (e.g. "attributeName") in the test case 
  * annotation, there must be a corresponding method (e.g. "setAttributeName()") 
- * in that subclass of TestCase.
+ * in that subclass of TestCase. Any attribute in the test case annotation with 
+ * a name containing an underscore ("_"), is instead interpreted as a compiler
+ * option, and is set with setXXXOption().
  * 
  * @author jakesson
  */
@@ -200,15 +202,6 @@ abstract public class TestCase {
     	str_res = str_res.replaceAll("\\n", "");
     	str_res = str_res.replaceAll(" ", "");
 		return str_res;
-	}
-	
-	/**
-	 * \brief Thrown when the options file could not be openend.
-	 */
-	public static class CouldNotLoadOptionsException extends RuntimeException {
-		public CouldNotLoadOptionsException(Throwable t) {
-			super(t);
-		}
 	}
 	
 	/**

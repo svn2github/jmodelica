@@ -736,4 +736,48 @@ constraint
 end DoubleTankOptimization;
 
 
+
+function TestFunction1
+	input Real i;
+	output Real o;
+algorithm
+	o := i;
+end TestFunction1;
+
+
+model OptFunctionFlatten1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="OptFunctionFlatten1",
+         description="Flattening functions: function called in extended class, optimica compiler",
+         flatModel="
+fclass OptimicaTests.OptFunctionFlatten1
+ Real y.x;
+equation
+ y.x = OptimicaTests.TestFunction1(1);
+
+ function OptimicaTests.TestFunction1
+  input Real i;
+  output Real o;
+ algorithm
+  o := i;
+  return;
+ end OptimicaTests.TestFunction1;
+end OptimicaTests.OptFunctionFlatten1;
+")})));
+
+	model A
+		Real x;
+	equation
+		x = TestFunction1(1);
+	end A;
+	
+	model B
+		extends A;
+	end B;
+	
+	B y;
+end OptFunctionFlatten1;
+
+
 end OptimicaTests;

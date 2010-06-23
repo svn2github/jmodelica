@@ -615,6 +615,48 @@ equation
 end NameTest19;
 
 
+model NameTest20
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="NameTest20",
+         description="Extending class with call to function in surrounding class",
+         flatModel="
+fclass NameTests.NameTest20
+ Real y.x;
+equation
+ y.x = NameTests.NameTest20.A.f();
+
+ function NameTests.NameTest20.A.f
+  output Real z;
+ algorithm
+  z := 1;
+  return;
+ end NameTests.NameTest20.A.f;
+end NameTests.NameTest20;
+")})));
+
+	package A
+		function f
+			output Real z;
+		algorithm
+			z := 1;
+		end f;
+		
+		model B
+			Real x;
+		equation
+			x = f();
+		end B;
+	end A;
+	
+	model C
+		extends A.B;
+	end C;
+	
+	C y;
+end NameTest20;
+
+
 
 /* Used for tests ConstantLookup1-3. */
 constant Real constant_1 = 1.0;
