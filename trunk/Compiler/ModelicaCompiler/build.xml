@@ -93,7 +93,7 @@
 
 	<target name="compile-ast" depends="gen,gen-parser">
 		<mkdir dir="bin" />
-		<javac classpath="${beaver_dir}/lib/beaver.jar" compiler="javac1.5" debug="true" destdir="bin">
+		<javac classpath="${beaver_dir}/lib/beaver.jar" compiler="javac1.6" debug="true" destdir="bin">
 			<src path="${base_output}" />
 			<src path="${modelica_front_end_path}/src/java" />
 			<include name="**/*.java" />
@@ -247,7 +247,7 @@
 				</java>
 			</sequential>
 		</for>
-		<javac compiler="javac1.5" debug="true" destdir="bin" classpath="${junit_dir}/junit-4.5.jar">
+		<javac compiler="javac1.6" debug="true" destdir="bin" classpath="${junit_dir}/junit-4.5.jar">
 			<src path="${test_junit-gen_dir}/" />
 			<include name="org/jmodelica/test/junitgenerated/*.java" />
 			<exclude name="**/*.aj" />
