@@ -25,6 +25,9 @@
  -->
 
 <project name="JModelica" default="build" basedir=".">
+	
+	<property name="java_version" value="1.6"/>
+	<property name="java_compiler" value="javac${java_version}"/>
 
 	<!-- "package" is the directory where generated files will be stored -->
 	<property name="ast_package" value="org.jmodelica.modelica.compiler" />
@@ -84,7 +87,8 @@
 
 	<target name="compile-ast" depends="gen,gen-parser">
 		<mkdir dir="bin" />
-		<javac classpath="${beaver_dir}/lib/beaver.jar" compiler="javac1.6" debug="true" destdir="bin">
+		<javac classpath="${beaver_dir}/lib/beaver.jar" compiler="${java_compiler}" source="${java_version}" 
+				target="${java_version}" debug="true" destdir="bin">
 			<src path="${base_output}" />
 			<src path="src/java" />
 			<include name="**/*.java" />
@@ -190,7 +194,8 @@
 				</java>
 			</sequential>
 		</for>
-		<javac compiler="javac1.6" debug="true" destdir="bin" classpath="${junit_dir}/junit-4.5.jar">
+		<javac compiler="${java_compiler}" source="${java_version}" target="${java_version}" debug="true" 
+				destdir="bin" classpath="${junit_dir}/junit-4.5.jar">
 			<src path="${test_junit-gen_dir}/" />
 			<include name="org/jmodelica/test/junitgenerated/*.java" />
 			<exclude name="**/*.aj" />

@@ -24,6 +24,9 @@
  -->
 
 <project name="ModelicaCompiler" default="build" basedir=".">
+	
+	<property name="java_version" value="1.6"/>
+	<property name="java_compiler" value="javac${java_version}"/>
 
 	<property name="modelica_front_end_path" value="../ModelicaFrontEnd" />
 	<property name="modelica_xml_back_end_path" value="../ModelicaXMLBackEnd" />
@@ -70,8 +73,6 @@
 
 	<!-- TARGET build -->
 	<target name="build" depends="compile-ast">
-		<!-- compile all java files in srcdir and recursively in subdirectories -->
-		<!-- you can use the jikes compiler by changing javac1.4 to jikes -->
 		<mkdir dir="${jar_output_dir}" />
 		<jar destfile="${jar_output_dir}/ModelicaCompiler.jar">
 			<fileset dir="bin">
@@ -93,7 +94,8 @@
 
 	<target name="compile-ast" depends="gen,gen-parser">
 		<mkdir dir="bin" />
-		<javac classpath="${beaver_dir}/lib/beaver.jar" compiler="javac1.6" debug="true" destdir="bin">
+		<javac classpath="${beaver_dir}/lib/beaver.jar" compiler="${java_compiler}" source="${java_version}" 
+				target="${java_version}" debug="true" destdir="bin">
 			<src path="${base_output}" />
 			<src path="${modelica_front_end_path}/src/java" />
 			<include name="**/*.java" />
@@ -247,7 +249,8 @@
 				</java>
 			</sequential>
 		</for>
-		<javac compiler="javac1.6" debug="true" destdir="bin" classpath="${junit_dir}/junit-4.5.jar">
+		<javac compiler="${java_compiler}" source="${java_version}" target="${java_version}" debug="true" 
+				destdir="bin" classpath="${junit_dir}/junit-4.5.jar">
 			<src path="${test_junit-gen_dir}/" />
 			<include name="org/jmodelica/test/junitgenerated/*.java" />
 			<exclude name="**/*.aj" />
