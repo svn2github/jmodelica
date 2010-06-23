@@ -4440,6 +4440,44 @@ end FunctionTests.UnknownArray20;
 end UnknownArray20;
 
 
+model UnknownArray21
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="UnknownArray21",
+         description="Scalarizing multiplication between two inputs of unknown size",
+         flatModel="
+fclass FunctionTests.UnknownArray21
+ Real x;
+equation
+ x = FunctionTests.UnknownArray21.f({1,2}, {3,4});
+
+ function FunctionTests.UnknownArray21.f
+  input Real[:] a;
+  input Real[:] b;
+  Real temp_1;
+  output Real c;
+ algorithm
+  temp_1 := 0.0;
+  for i1 in 1:size(b, 1) loop
+   temp_1 := temp_1 + ( a[i1] ) * ( b[i1] );
+  end for;
+  c := temp_1;
+  return;
+ end FunctionTests.UnknownArray21.f;
+end FunctionTests.UnknownArray21;
+")})));
+
+	function f
+		input Real a[:];
+		input Real b[:];
+		output Real c = a * b;
+	algorithm
+	end f;
+	
+	Real x = f({1,2}, {3,4});
+end UnknownArray21;
+
+
 
 model IncompleteFunc1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={

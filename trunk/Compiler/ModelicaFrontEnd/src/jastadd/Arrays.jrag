@@ -1967,13 +1967,27 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Ceate a dummy expression that has the size described by this Size.
+		 * \brief Create a dummy expression that has the size described by this Size.
 		 */
 		public FExp createDummyFExp(Map<ASTNode, FExp> varMap) {
 			FZeros z = new FZeros();
 			for (int i = 0; i < size.length; i++)
 				z.addFExp(createSizeFExp(i, varMap));
 			return z;
+		}
+		
+		/**
+		 * \brief Create a zero expression of this size.
+		 */
+		public FExp createZeroFExp() {
+			if (size.length == 0) {
+				return new FIntegerLitExp(0);
+			} else {
+				FZeros res = new FZeros();
+				for (int i = 0; i < size.length; i++)
+					res.addFExp(createFExp(i));
+				return res;
+			}
 		}
 		
 	}

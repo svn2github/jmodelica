@@ -29,10 +29,10 @@ model ConnectTests
  Real c2.cb.x;
  Real c2.cb.y;
 equation
-  - ( c2.ca.x ) - ( c2.cb.x ) = 0.0;
+  - ( c2.ca.x ) - ( c2.cb.x ) = 0;
  c2.ca.y = c2.cb.y;
- c2.ca.x = 0.0;
- c2.cb.x = 0.0;
+ c2.ca.x = 0;
+ c2.cb.x = 0;
 end ConnectTests.ConnectTest1;
 ")})));
 
@@ -174,11 +174,11 @@ fclass ConnectTests.ConnectTest4
  Real c2.ca2.y;
 equation
  c2.ca2.x = 3;
-  - ( c2.ca.x ) - ( c2.cb.x ) = 0.0;
+  - ( c2.ca.x ) - ( c2.cb.x ) = 0;
  c2.ca.y = c2.cb.y;
- c2.ca.x = 0.0;
- c2.cb.x = 0.0;
- c2.ca2.x = 0.0;
+ c2.ca.x = 0;
+ c2.cb.x = 0;
+ c2.ca2.x = 0;
 end ConnectTests.ConnectTest4;
 ")})));
 
@@ -233,6 +233,47 @@ equation
   c1.x = {1,2};
 
 end ConnectTest5;
+
+
+model ConnectTest6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ConnectTest6",
+         description="Connecting array flow variables",
+         flatModel="
+fclass ConnectTests.ConnectTest6
+ Real b1.a1.y[2];
+ Real b1.a1.x[2];
+ Real b1.a2.y[2];
+ Real b1.a2.x[2];
+ Real b2.a1.y[2];
+ Real b2.a1.x[2];
+ Real b2.a2.y[2];
+ Real b2.a2.x[2];
+equation
+ b1.a1.y[1:2] = b2.a2.y[1:2];
+ b1.a1.x[1:2] + b2.a2.x[1:2] = zeros(2);
+ b1.a2.x = zeros(2);
+ b2.a1.x = zeros(2);
+end ConnectTests.ConnectTest6;
+")})));
+
+	connector A
+		Real y[2];
+		flow Real x[2];
+	end A;
+	
+	model B
+		A a1;
+		A a2;
+	end B;
+	
+	B b1;
+	B b2;
+equation
+	connect(b1.a1, b2.a2);
+end ConnectTest6;
+
 
 
 model Electrical
@@ -357,11 +398,11 @@ equation
  c.i = c.p.i;
  c.p.v = cv.p.v;
  cv.p.v = r.p.v;
- c.p.i + cv.p.i + r.p.i = 0.0;
+ c.p.i + cv.p.i + r.p.i = 0;
  c.n.v = cv.n.v;
  cv.n.v = g.p.v;
  g.p.v = r.n.v;
- c.n.i + cv.n.i + g.p.i + r.n.i = 0.0;
+ c.n.i + cv.n.i + g.p.i + r.n.i = 0;
 end ConnectTests.CircuitTest1;
 ")})));
   
@@ -439,17 +480,17 @@ equation
  f.v = f.p.v - ( f.n.v );
  cv.p.v = f.p.v;
  f.p.v = r.p.v;
- cv.p.i + f.p.i + r.p.i = 0.0;
+ cv.p.i + f.p.i + r.p.i = 0;
  cv.n.v = f.n.v;
  f.n.v = g.p.v;
  g.p.v = r.n.v;
- cv.n.i + f.n.i + g.p.i + r.n.i = 0.0;
+ cv.n.i + f.n.i + g.p.i + r.n.i = 0;
  f.c.p.v = f.p.v;
  f.p.v = f.r.p.v;
- f.c.p.i - ( f.p.i ) + f.r.p.i = 0.0;
+ f.c.p.i - ( f.p.i ) + f.r.p.i = 0;
  f.c.n.v = f.n.v;
  f.n.v = f.r.n.v;
- f.c.n.i - ( f.n.i ) + f.r.n.i = 0.0;
+ f.c.n.i - ( f.n.i ) + f.r.n.i = 0;
 end ConnectTests.CircuitTest2;
 ")})));
   
@@ -771,24 +812,24 @@ equation
  C1.p.v = C2.p.v;
  C2.p.v = L1.p.v;
  L1.p.v = R1.n.v;
- C1.p.i + C2.p.i + L1.p.i + R1.n.i = 0.0;
+ C1.p.i + C2.p.i + L1.p.i + R1.n.i = 0;
  C1.n.v = C3.n.v;
  C3.n.v = C5.n.v;
  C5.n.v = G.p.v;
  G.p.v = R2.n.v;
  R2.n.v = V.n.v;
- C1.n.i + C3.n.i + C5.n.i + G.p.i + R2.n.i + V.n.i = 0.0;
+ C1.n.i + C3.n.i + C5.n.i + G.p.i + R2.n.i + V.n.i = 0;
  C2.n.v = C3.p.v;
  C3.p.v = C4.p.v;
  C4.p.v = L1.n.v;
  L1.n.v = L2.p.v;
- C2.n.i + C3.p.i + C4.p.i + L1.n.i + L2.p.i = 0.0;
+ C2.n.i + C3.p.i + C4.p.i + L1.n.i + L2.p.i = 0;
  C4.n.v = C5.p.v;
  C5.p.v = L2.n.v;
  L2.n.v = R2.p.v;
- C4.n.i + C5.p.i + L2.n.i + R2.p.i = 0.0;
+ C4.n.i + C5.p.i + L2.n.i + R2.p.i = 0;
  R1.p.v = V.p.v;
- R1.p.i + V.p.i = 0.0;
+ R1.p.i + V.p.i = 0;
 end ConnectTests.CauerLowPassAnalog;
 ")})));
 

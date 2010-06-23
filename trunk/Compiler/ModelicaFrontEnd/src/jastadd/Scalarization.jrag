@@ -476,7 +476,10 @@ aspect Scalarization {
 			exp.addArrayUsesToIndexMap(myIndexMap, indexNames);
 			
 			// Create loop
-			FForStmt fs = new FForStmt(new FForIndex(i, getRight().size().createFExp(0)), new List());
+			Size rSize = getRight().size();
+			FExp sizeExp = rSize.hasValue(0) ? rSize.createFExp(0) : 
+				new FSizeExp((FExp) getRight().fullCopy(), 0);
+			FForStmt fs = new FForStmt(new FForIndex(i, sizeExp), new List());
 			clauses.add(fs);
 			List<FStatement> fsl = fs.getForStmts();
 			

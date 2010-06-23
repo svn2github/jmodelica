@@ -166,7 +166,14 @@ aspect Constructors {
 	 * \brief Constructs an FSizeExp giving the size in the given dimension for the given variable.
 	 */
 	public FSizeExp.FSizeExp(FQName var, int dim) {
-		this(new FIdUseExp(var), new Opt(new FIntegerLitExp(dim + 1)));
+		this(new FIdUseExp(var), dim);
+	}
+	
+	/**
+	 * \brief Constructs an FSizeExp giving the size in the given dimension for the given expression.
+	 */
+	public FSizeExp.FSizeExp(FExp exp, int dim) {
+		this(exp, new Opt(new FIntegerLitExp(dim + 1)));
 	}
 	
 	/**

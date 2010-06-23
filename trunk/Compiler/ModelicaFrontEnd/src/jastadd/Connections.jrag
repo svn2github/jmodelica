@@ -52,7 +52,8 @@ aspect Connections {
 					FExp e2 = csee[j].getFQName().createFIdUseExp();
 					e = csee[j].isOutside() ? new FSubExp(e, e2) : new FAddExp(e, e2);
 				}
-				getFEquationBlock(0).addFAbstractEquation(new FEquation(e, new FRealLitExp("0.0")));	
+				FExp zero = csee[0].getVar().size().createZeroFExp();
+				getFEquationBlock(0).addFAbstractEquation(new FEquation(e, zero));	
 			} else {
 				// Treat first element separately
 				FExp e1 = csee[0].getFQName().createFIdUseExp();

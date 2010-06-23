@@ -105,7 +105,7 @@ aspect Flattening {
 	}
 	
 	public void InstFullClassDecl.flattenThisFunction(FClass fc) {
-		if (fc.lookupFunc(qualifiedName()) == null) {		
+		if (fc.lookupFunc(qualifiedName()) == null) {	
 	   		FFunctionDecl ffd = new FFunctionDecl();
 	   		ffd.setFQName(new FQName(qualifiedName()));
 	
@@ -153,15 +153,17 @@ aspect Flattening {
 	}
 	
 	public void InstFullClassDecl.flattenThisRecord(FClass fc) {
-		FRecordDecl frd = new FRecordDecl();
-   		frd.setFQName(new FQName(qualifiedName()));
-   		
-   		for (InstComponentDecl icd : getInstComponentDecls())
-			icd.flattenInRecord(frd, fc);
-		
-		fc.addFRecordDecl(frd);
-		
-		flattenCalledFunctions(fc);
+		if (fc.lookupFRec(qualifiedName()) == null) {
+			FRecordDecl frd = new FRecordDecl();
+	   		frd.setFQName(new FQName(qualifiedName()));
+	   		
+	   		for (InstComponentDecl icd : getInstComponentDecls())
+				icd.flattenInRecord(frd, fc);
+			
+			fc.addFRecordDecl(frd);
+			
+			flattenCalledFunctions(fc);
+		}
 	}
 	
 	public FExternalStmt InstExternal.flatten(InstClassDecl func, FQName prefix) {
@@ -297,7 +299,8 @@ aspect Flattening {
 	
 	public void InstPrimitive.flatten(FClass fc) {
 		fc.addFVariable(createFVariable());
-		if (isFlow()) {
+		if (isFlow()) 
+			// TODO: Add expanded array subscripts
 			fc.getConnectionSetManager().addInsideFlowVar(this,getFQNamePrefix().append(name()));
 		}
 	}
@@ -706,7 +709,7 @@ aspect FlatExpressions {
 		InstAccess ia2 = getConnector2().getInstAccess();
 		
 		InstComponentDecl comp1 = ia1.myInstComponentDecl();
-		InstComponentDecl comp2 = ia1.myInstComponentDecl();
+		InstComponentDecl comp2 = ia2.myInstComponentDecl();
 		
 		InstFullClassDecl c1 = (InstFullClassDecl) comp1.myInstClass().finalClass();
 		InstFullClassDecl c2 = (InstFullClassDecl) comp2.myInstClass().finalClass();
@@ -720,13 +723,14 @@ aspect FlatExpressions {
 			return null;
 		}
 
-		boolean outside1 = enclosingInstClassDecl().memberInstComponent(ia1.name()).size() > 0;
-		boolean outside2 = enclosingInstClassDecl().memberInstComponent(ia2.name()).size() > 0;
+		InstClassDecl eicd = enclosingInstClassDecl();
+		boolean outside1 = eicd.memberInstComponent(ia1.name()).size() > 0;
+		boolean outside2 = eicd.memberInstComponent(ia2.name()).size() > 0;
 		
 		InstComponentDecl var1, var2;
-		for (InstComponentDecl icd : c1.containedInstComponents()) {
+		for (InstComponentDecl icd : comp1.containedInstComponents()) {
 			var1 = icd;
-			var2 = (InstComponentDecl) c2.memberInstComponent(var1.name()).iterator().next();
+			var2 = (InstComponentDecl) comp2.memberInstComponent(var1.name()).iterator().next();
 			FQName fqn1 = var1.flattenedAccess(name1);
 			FQName fqn2 = var2.flattenedAccess(name2);
 			fc.getConnectionSetManager().addVars(var1, outside1, fqn1, var2, outside2, fqn2);

@@ -29,6 +29,19 @@ aspect FlatTypeAnalysis {
 	eq FFunctionVariable.type()   = getType();
 	eq UnknownFVariable.type()    = fUnknownType();
 	
+	// Re-evaluate record types for function variables
+	private boolean FFunctionVariable.typeRewritten = false;
+	rewrite FFunctionVariable { 
+		when (!typeRewritten) to FFunctionVariable {
+			if (getType().isRecord()) {
+				FRecordType type = (FRecordType) getType();
+				setType((FType) type.myFRecordDecl().type().sizedType(type.size()).unboundCopy());
+			}
+			typeRewritten = true;
+			return this;
+		}
+	}
+
 	syn FType FRecordVariable.getType() = myFRecordDecl().type().sizedType(size());
 	
 	syn FType InstComponentModification.type() {
@@ -57,12 +70,9 @@ aspect FlatTypeAnalysis {
 	
 	// TODO: Reduce code duplication here
 	syn lazy FRecordType FRecordDecl.type() {
-		TreeSet<FRecordComponentType> comps = new TreeSet<FRecordComponentType>();
-		for (FVariable fv : getFVariables()) 
-			comps.add(new FRecordComponentType(fv.name(), (FType) fv.type().fullCopy()));
 		FRecordType type = new FRecordType(Size.SCALAR, name(), new List());
-		for (FRecordComponentType comp : comps)
-			type.addComponent(comp);
+		for (FVariable fv : getFVariables()) 
+			type.addComponent(new FRecordComponentType(fv.name(), (FType) fv.type().fullCopy()));
 		return type;
 	}
 	

@@ -908,26 +908,26 @@ model RecordScalarize3
          eliminate_alias_variables=false,
          flatModel="
 fclass RecordTests.RecordScalarize3
- Real x.a;
  Real x.b;
- Real y.a;
+ Real x.a;
  Real y.b;
+ Real y.a;
 equation
- y.a = x.a;
  y.b = x.b;
- x.a = 1;
- x.b = 2;
+ y.a = x.a;
+ x.b = 1;
+ x.a = 2;
 
  record RecordTests.RecordScalarize3.A
-  Real a;
   Real b;
+  Real a;
  end RecordTests.RecordScalarize3.A;
 end RecordTests.RecordScalarize3;
 ")})));
 
  record A
-  Real a;
   Real b;
+  Real a;
  end A;
  
  A x = A(1, 2);
@@ -1043,8 +1043,8 @@ fclass RecordTests.RecordScalarize6
  Real y.b;
  Real y.a;
 equation
- y.a = x.a;
  y.b = x.b;
+ y.a = x.a;
  x.a = 1;
  x.b = 2;
 
@@ -1092,12 +1092,12 @@ fclass RecordTests.RecordScalarize7
  Real y.x.b;
  Real y.c;
 equation
- y.c = x.c;
  y.x.a = x.x.a;
  y.x.b = x.x.b;
+ y.c = x.c;
  x.c = 1;
- x.x.a = 2;
- x.x.b = 3;
+ x.x.b = 2;
+ x.x.a = 3;
 
  record RecordTests.RecordScalarize7.A
   Real b;
@@ -1141,7 +1141,7 @@ end RecordTests.RecordScalarize7;
   Real c;
  end D;
  
- C x = C(1, B(2, 3));
+ C x = D(B(3, 2), 1);
  D y;
 equation
  y = x;
@@ -2107,31 +2107,36 @@ model RecordOutput1
      JModelica.UnitTesting.TransformCanonicalTestCase(
          name="RecordOutput1",
          description="Scalarization of records in functions: record output: basic test",
+         eliminate_alias_variables=false,
          flatModel="
 fclass RecordTests.RecordOutput1
- Real x.x;
- Real x.y;
+ Real z.y;
+ Real z.x;
+ Real temp_1.y;
+ Real temp_1.x;
 equation
- (RecordTests.RecordOutput1.A(x.x, x.y)) = RecordTests.RecordOutput1.f();
+ (RecordTests.RecordOutput1.A(temp_1.y, temp_1.x)) = RecordTests.RecordOutput1.f();
+ z.y = temp_1.y;
+ z.x = temp_1.x;
 
  function RecordTests.RecordOutput1.f
   output RecordTests.RecordOutput1.A o;
  algorithm
-  o.x := 1;
-  o.y := 2;
+  o.y := 1;
+  o.x := 2;
   return;
  end RecordTests.RecordOutput1.f;
 
  record RecordTests.RecordOutput1.A
-  Real x;
   Real y;
+  Real x;
  end RecordTests.RecordOutput1.A;
 end RecordTests.RecordOutput1;
 ")})));
 
  record A
-  Real x;
   Real y;
+  Real x;
  end A;
  
  function f
@@ -2139,7 +2144,7 @@ end RecordTests.RecordOutput1;
  algorithm
  end f;
  
- A x = f();
+ A z = f();
 end RecordOutput1;
 
 

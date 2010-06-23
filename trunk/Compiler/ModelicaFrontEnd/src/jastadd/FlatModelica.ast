@@ -204,6 +204,9 @@ abstract FType ::= <Size:Size>;
 
 /**
  * \brief A record type.
+ * 
+ * In the instance tree, the components are sored alphabetically, 
+ * but in the flat tree they are in the order declared. 
  */
 FRecordType : FType ::= <Name> Component:FRecordComponentType*;
 
