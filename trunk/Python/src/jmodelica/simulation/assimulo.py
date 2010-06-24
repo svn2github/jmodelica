@@ -85,12 +85,10 @@ def write_data(simulator):
     else:
         model = simulator._problem._model
         
-        t = N.array(simulator.t)
-        #r = simulator._problem._sol_real.reshape(-1,len(model._save_cont_valueref[0]))
+        t = N.array(simulator._problem._sol_time)
         r = N.array(simulator._problem._sol_real)
         data = N.c_[t,r]
         if len(simulator._problem._sol_int) > 0:
-            #i = simulator._problem._sol_int.reshape(-1,len(model._save_cont_valueref[1]))
             i = N.array(simulator._problem._sol_int)
             data = N.c_[data,i]
         if len(simulator._problem._sol_bool) > 0:
@@ -132,6 +130,7 @@ class FMIODE(Explicit_Problem):
         #Stores the first time point
         [r,i,b] = self._model.save_time_point()
         
+        self._sol_time += [self._model.t]
         self._sol_real += [r]
         self._sol_int  += [i]
         self._sol_bool += b
@@ -171,24 +170,22 @@ class FMIODE(Explicit_Problem):
         else:
             return None
         
-    def post_process(self, solver):
+    def post_process(self, solver, t, y):
         """
         Post processing (stores the time points).
         """
         #Moving data to the model
-        self._model.t = solver.t[-1]
-        self._model.real_x = solver.y[-1]
+        self._model.t = t
+        self._model.real_x = y
         
-        #For delays and dynamic state selection
-        if self._model.fmiCompletedIntegratorStep():
-            self.handle_event(solver,[0]) #Event have been detect, call event iteration.
-            solver.Integrator.cvinit(solver.t[-1],solver.problem_spec,solver.y[-1],solver.maxord,solver.maxsteps,solver.initstep)
-        
+        #Retrieves the time-point
         [r,i,b] = self._model.save_time_point()
         
+        #Save the time-point
         self._sol_real += [r]
         self._sol_int  += [i]
         self._sol_bool += b
+        self._sol_time += [t]
         
     def handle_event(self, solver, event_info):
         """
@@ -207,37 +204,20 @@ class FMIODE(Explicit_Problem):
         if self._model.event_info.stateValuesChanged == self._model._fmiTrue:
             solver.y[-1] = self._model.real_x
         
+        #Get new nominal values.
         if self._model.event_info.stateValueReferencesChanged == self._model._fmiTrue:
-            #Get new nominal values.
             solver.atol = 0.01*self.rtol*self._model.real_x_nominal
-            
-        #if self._model.event_info.upcomingTimeEvent == self._model._fmiTrue:
-        #    if self._model.event_info.nextEventTime != self._nextTimeEvent:
-        #        self._timeSwitch = not self._timeSwitch
-        #        self._nextTimeEvent = self._model.event_info.nextEventTime
-        #else: #If not upcoming time event, set next time event to final time.
-        #    self._model.event_info.nextEventTime = 
-    
         
         
-    #def completed_step(self, solver):
-    #    """
-    #    Method which is called at each successful step. This method is responsible for calling the event function
-    #    at a discontinuity arised because of delays and dynamic state selection. This method is also resposible
-    #    for reinitiate the solver.
-    #    """
-    #    #Moving data to the model
-    #    #self._model.t = t
-    #    #self._model.real_x = y
-    #    
-    #    #self._model.save_time_point()
-    #    
-    #    if self._model.fmiCompletedIntegratorStep():
-    #        self.handle_event(solver,[0]) #Event have been detect, call event iteration.
-    #        solver.Integrator.cvinit(self._model.t,solver.problem_spec,self._model.real_x,solver.maxord,solver.maxsteps,solver.initstep)
-    #        return -1 #Break iteration loop
-    #    else:
-    #        return 0
+    def completed_step(self, solver):
+        """
+        Method which is called at each successful step.
+        """
+        if self._model.fmiCompletedIntegratorStep():
+            self.handle_event(solver,[0]) #Event have been detect, call event iteration.
+            return 1 #Tell to reinitiate the solver.
+        else:
+            return 0
         
         
 
