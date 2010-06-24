@@ -846,7 +846,7 @@ aspect Scalarization {
 		FQNamePart first = suffix.getFQNamePart(0);
 		FExp arg = getArg(getRecord().myFRecordDecl().indexOf(first.getName()));
 		if (first.hasFArraySubscripts())
-			arg = arg.getArray().get(first.getFArraySubscripts().index());
+			arg = arg.getArray().get(first.getFArraySubscripts().asIndex());
 		return arg.scalarRecordFExp(indexMap, suffix.copySuffix());
 	}
 	
@@ -1296,6 +1296,11 @@ aspect Scalarization {
 	
 	public FExp FNdimsExp.scalarizeExp(HashMap<String,FExp> indexMap) {
 		return ceval().buildLiteral();
+	}
+	
+	public FExp FSubscriptedExp.scalarizeExp(HashMap<String,FExp> indexMap) {
+		Index i = getFArraySubscripts().scalarize(indexMap).asIndex();
+		return (FExp) getFExp().getArray().get(i).fullCopy();
 	}
 	
 	public FExp FMinMaxExp.scalarizeExp(HashMap<String,FExp> indexMap) {

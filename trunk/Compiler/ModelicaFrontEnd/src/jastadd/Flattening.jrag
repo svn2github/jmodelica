@@ -299,7 +299,7 @@ aspect Flattening {
 	
 	public void InstPrimitive.flatten(FClass fc) {
 		fc.addFVariable(createFVariable());
-		if (isFlow()) 
+		if (isFlow()) {
 			// TODO: Add expanded array subscripts
 			fc.getConnectionSetManager().addInsideFlowVar(this,getFQNamePrefix().append(name()));
 		}
@@ -869,17 +869,25 @@ aspect FlatExpressions {
 		// Checks in the instance tree ensures that constants always
 		// have binding expressions, however, array subscripts may need to be 
 		// flattened during error checks, when using qualifiedName()
-		if (getInstAccess().myInstComponentDecl() instanceof InstPrimitive) {
-			InstPrimitive ip = (InstPrimitive) getInstAccess().myInstComponentDecl();
+		InstAccess ia = getInstAccess();
+		if (ia.myInstComponentDecl() instanceof InstPrimitive) {
+			InstPrimitive ip = (InstPrimitive) ia.myInstComponentDecl();
 			if (ip.isConstant()) {
 				try {
 					if (isArray()) {
 						return getArray().buildLiteral(ip.isReal());
 					} else {
-						CValue cval = ceval();
-						if (ip.isReal())
-							cval = cval.convertReal();
-						return cval.buildLiteral();
+						// Check if we have non-constant array subscripts
+						if (ia.nonConstArraySubscripts()) {
+							FExp exp = ip.getBindingFExp().getArray().buildLiteral(ip.isReal());
+							FArraySubscripts fas = ia.getFArraySubscripts().flatten(prefix);
+							return new FSubscriptedExp(exp, fas);
+						} else {
+							CValue cval = ceval();
+							if (ip.isReal())
+								cval = cval.convertReal();
+							return cval.buildLiteral();
+						}
 					}
 				} catch (UnsupportedOperationException e) {
 					// In this case, simply don't inline value
@@ -887,6 +895,14 @@ aspect FlatExpressions {
 			}
 		} 
 		return new FIdUseExp(getInstAccess().flatten(prefix));
+	}
+	
+	syn boolean InstAccess.nonConstArraySubscripts() {
+		if (hasFArraySubscripts()) 
+			for (FSubscript fs : getFArraySubscripts().getFSubscripts())
+				if (!fs.variability().constantVariability())
+					return true;
+		return false;
 	}
 	
 	public FQName InstAccess.flatten(FQName prefix) { 

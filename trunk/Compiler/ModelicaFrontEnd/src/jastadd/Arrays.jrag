@@ -1570,16 +1570,6 @@ aspect Arrays {
 	}
 	
 	/**
-	 * \brief Create an Index that describes the same array index as this.
-	 */
-	public Index FArraySubscripts.index() {
-		int[] i = new int[getNumFSubscript()];
-		for (int j = 0; j < i.length; j++)
-			i[j] = getFSubscript(j).ceval().intValue();
-		return new Index(i);
-	}
-	
-	/**
 	 * \brief Try to infer type of an expression from its surrounding Array.
 	 * 
 	 * An FExp that is the direct child of an Array always has the same type as the Array, except scalar.
