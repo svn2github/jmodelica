@@ -997,7 +997,7 @@ class NLPCollocation(object):
         
     def opt_sim_g(self, res):
         """ 
-        Get the residual of the inequality constraints h.
+        Get the residual of the inequality constraints g.
         
         Parameters:
             res -- Residual of the inequality constraints. (Return)
