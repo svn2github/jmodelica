@@ -115,6 +115,9 @@ class FMIModel(object):
         if sys.platform == 'win32':
             suffix = '.dll'
             platform = 'win32'
+        elif sys.platform == 'linux2':
+            suffix = '.so'
+            platform = 'linux32'
         else:
             raise FMIException('Unsupported platform.')
             
@@ -150,7 +153,10 @@ class FMIModel(object):
     
     def _load_c(self):
         """
-        Loads the c library.
+        Loads the C-library and the C-functions 'free' and 'calloc' to
+        
+            model._free
+            model._calloc
         """
         c_lib = C.CDLL(find_library('c'))
         
@@ -186,20 +192,38 @@ class FMIModel(object):
             self._XMLStopTime = self._XMLStopTime[0]
         
         self._XMLStartRealValues = N.array(self._xmldoc._xpatheval('//ScalarVariable/Real/@start'),dtype=N.double)
-        self._XMLStartRealKeys = N.array(self._xmldoc._xpatheval('//ScalarVariable/@valueReference[../Real/@start]'),dtype=N.uint)
-        self._XMLStartIntegerValues = N.array(self._xmldoc._xpatheval('//ScalarVariable/Integer/@start'),dtype=N.int)
-        self._XMLStartIntegerKeys = N.array(self._xmldoc._xpatheval('//ScalarVariable/@valueReference[../Integer/@start]'),dtype=N.uint)
+        self._XMLStartRealKeys =   N.array(self._xmldoc._xpatheval('//ScalarVariable/@valueReference[../Real/@start]'),dtype=N.uint32)
+        self._XMLStartRealNames =  N.array(self._xmldoc._xpatheval('//ScalarVariable/@name[../Real/@start]'))
+        self._XMLStartIntegerValues = N.array(self._xmldoc._xpatheval('//ScalarVariable/Integer/@start'),dtype=N.int32)
+        self._XMLStartIntegerKeys   = N.array(self._xmldoc._xpatheval('//ScalarVariable/@valueReference[../Integer/@start]'),dtype=N.uint32)
+        self._XMLStartIntegerNames  = N.array(self._xmldoc._xpatheval('//ScalarVariable/@name[../Integer/@start]'))
         self._XMLStartBooleanValues = N.array(self._xmldoc._xpatheval('//ScalarVariable/Boolean/@start'))
-        self._XMLStartBooleanKeys = N.array(self._xmldoc._xpatheval('//ScalarVariable/@valueReference[../Boolean/@start]'),dtype=N.uint)
+        self._XMLStartBooleanKeys   = N.array(self._xmldoc._xpatheval('//ScalarVariable/@valueReference[../Boolean/@start]'),dtype=N.uint32)
+        self._XMLStartBooleanNames  = N.array(self._xmldoc._xpatheval('//ScalarVariable/@name[../Boolean/@start]'))
         self._XMLStartStringValues = N.array(self._xmldoc._xpatheval('//ScalarVariable/String/@start'))
-        self._XMLStartStringKeys = N.array(self._xmldoc._xpatheval('//ScalarVariable/@valueReference[../String/@start]'),dtype=N.uint)
+        self._XMLStartStringKeys   = N.array(self._xmldoc._xpatheval('//ScalarVariable/@valueReference[../String/@start]'),dtype=N.uint32)
+        self._XMLStartStringNames  = N.array(self._xmldoc._xpatheval('//ScalarVariable/@name[../String/@start]'))
+        
         
         for i in xrange(len(self._XMLStartBooleanValues)):
             if self._XMLStartBooleanValues[i] == 'true':
-                self._XMLStartBooleanValues[i] = '1'
+                if self.is_negated(self._XMLStartBooleanNames[i]):
+                    self._XMLStartBooleanValues[i] = '0'
+                else:
+                    self._XMLStartBooleanValues[i] = '1'
             else:
-                self._XMLStartBooleanValues[i] = '0'
+                if self.is_negated(self._XMLStartBooleanNames[i]):
+                    self._XMLStartBooleanValues[i] = '1'
+                else:
+                    self._XMLStartBooleanValues[i] = '0'
                 
+        for i in xrange(len(self._XMLStartRealValues)):
+            self._XMLStartRealValues[i] = -1*self._XMLStartRealValues[i] if self.is_negated(self._XMLStartRealNames[i]) else self._XMLStartRealValues[i]
+        
+        for i in xrange(len(self._XMLStartIntegerValues)):
+            self._XMLStartIntegerValues[i] = -1*self._XMLStartIntegerValues[i] if self.is_negated(self._XMLStartIntegerNames[i]) else self._XMLStartIntegerValues[i]
+        
+        
         cont_name = self._xmldoc._xpatheval("//ScalarVariable/@name[../Real][not(../@variability='constant')][not(../@variability='parameter')][not(../@variability='discrete')][not(../@alias)]")
         cont_valueref = self._xmldoc._xpatheval("//ScalarVariable/@valueReference[../Real][not(../@variability='constant')][not(../@variability='parameter')][not(../@variability='discrete')][not(../@alias)]")
         
@@ -215,8 +239,8 @@ class FMIModel(object):
         self._save_nbr_points = 0
         
     def _set_fmimodel_typedefs(self):
-        """ 
-        Type c-functions from FMI used by FMIModel.
+        """
+        Connects the FMU to Python by retrieving the C-function by use of ctypes. 
         """
         self._validplatforms = self._dll.__getattr__(self._modelname+'_fmiGetModelTypesPlatform')
         self._validplatforms.restype = C.c_char_p
@@ -233,10 +257,10 @@ class FMIModel(object):
         self._fmiStatus = C.c_int
         
         self._fmiComponent = C.c_void_p
-        self._fmiValueReference = C.c_uint
+        self._fmiValueReference = C.c_uint32
         
         self._fmiReal = C.c_double
-        self._fmiInteger = C.c_int
+        self._fmiInteger = C.c_int32
         self._fmiBoolean = C.c_char
         self._fmiString = C.c_char_p
         
@@ -368,7 +392,8 @@ class FMIModel(object):
     
     def get_cont_state(self):
         """
-        Returns the continuous state.
+        The property for setting and getting the continuous states at the
+        current time-point.
         """
         values = N.array([0.0]*self._nContinuousStates, dtype=N.double)
         status = self._fmiGetContinuousStates(self._model, values, self._nContinuousStates)
@@ -380,7 +405,8 @@ class FMIModel(object):
         
     def set_cont_state(self, values):
         """
-        Sets the continuous state.
+        The property for setting and getting the continuous states at the
+        current time-point.
         """
         status = self._fmiSetContinuousStates(self._model, values, self._nContinuousStates)
         
@@ -391,7 +417,19 @@ class FMIModel(object):
     
     def get_nominal(self):
         """
-        Returns the nominal values.
+        Returns the nominal values of the continuous states.
+        
+            Parameters::
+            
+                None
+                
+            Return::
+            
+                real_x_nominal    - The nominal values as an array.
+                
+            Example::
+            
+                nominal = model.real_x_nominal
         """
         values = N.array([0.0]*self._nContinuousStates,dtype=N.double)
         status = self._fmiGetNominalContinuousStates(self._model, values, self._nContinuousStates)
@@ -405,7 +443,19 @@ class FMIModel(object):
     
     def get_dx(self):
         """
-        Returns the derivative.
+        Returns the derivative of the continuous states.
+        
+            Parameters::
+            
+                None
+                
+            Return::
+            
+                real_dx     - The derivative as an array.
+                
+            Example::
+            
+                dx = model.real_dx
         """
         values = N.array([0.0]*self._nContinuousStates,dtype=N.double)
         status = self._fmiGetDerivatives(self._model, values, self._nContinuousStates)
@@ -419,7 +469,19 @@ class FMIModel(object):
         
     def get_event_indicators(self):
         """
-        Returns the event indicators.
+        Returns the event indicators at the current time-point.
+        
+            Parameters::
+            
+                None
+                
+            Return::
+            
+                event_ind   - The event indicators as an array.
+                
+            Example::
+            
+                evInd = model.event_ind
         """
         values = N.array([0.0]*self._nEventIndicators,dtype=N.double)
         status = self._fmiGetEventIndicators(self._model, values, self._nEventIndicators)
@@ -433,7 +495,24 @@ class FMIModel(object):
     
     def get_tolerances(self):
         """
-        Returns the tolerances.
+        Returns the relative and absolute tolerances. If the relative tolerance
+        is defined in the XML-file it is used, otherwise a default of 1.e-4 is 
+        used. The absolute tolerance is calculated and returned according to
+        the FMI specification, atol = 0.01*rtol*(nominal values of the continuous states)
+        
+            Parameters::
+            
+                None
+                
+            Return::
+            
+                rtol    - The relative tolerance.
+                
+                atol    - The absolute tolerance.
+                
+            Example::
+            
+                [rtol, atol] = model.get_tolerances()
         """
         if len(self._XMLTolerance) == 0:
             rtol = 1.e-4 #Default tolerance 10^-4
@@ -445,7 +524,21 @@ class FMIModel(object):
     
     def update_event(self, intermediateResult='1'):
         """
-        Updates the event information.
+        Updates the event information at the current time-point. If intermediateResult is
+        set to '1' the update_event will stop at each event iteration which would require
+        to loop until event_info.iterationConverged == fmiTrue.
+        
+            Parameters::
+            
+                intermediateResult  - Default '1'.
+                
+            Return::
+            
+                None
+                
+            Example::
+            
+                model.update_event()
         """
         status = self._fmiEventUpdate(self._model, intermediateResult, C.byref(self._eventInfo))
         
@@ -454,7 +547,25 @@ class FMIModel(object):
     
     def save_time_point(self):
         """
-        Saves data for the specific time point.
+        Retrieves the data at the current time-point of the variables defined
+        to be continuous and the variables defined to be discrete. The information
+        about the variables are retrieved from the XML-file.
+        
+            Parameters::
+            
+                None
+                
+            Return::
+            
+                sol_real    - The Real-valued variables.
+                
+                sol_int     - The Integer-valued variables.
+                
+                sol_bool    - The Boolean-valued variables.
+                
+            Example::
+            
+                [r,i,b] = model.save_time_point()
         """
         sol_real = self.get_fmiReal(self._save_cont_valueref[0])
         sol_int  = self.get_fmiInteger(self._save_cont_valueref[1])
@@ -464,7 +575,29 @@ class FMIModel(object):
     
     def get_event_info(self):
         """
-        Returns the event info.
+        Returns the event information from the FMU. The event information
+        is a struct which contains,
+        
+            iterationConverged          - Event iteration converged (if fmiTrue).
+            stateValueReferencesChanged - ValueReferences of states x changed (if fmiTrue).
+            stateValuesChanged          - Values of states x have changed (if fmiTrue).
+            terminateSimulation         - Error, terminate simulation (if fmiTrue).
+            upcomingTimeEvent           - if fmiTrue, nextEventTime is the next time event.
+            nextEventTime               - The next time event.
+        
+            Parameters::
+            
+                None
+                
+            Return::
+            
+                eventInfo   - The eventInfo struct.
+                
+            Example::
+            
+                event_info    = model.event_info
+                nextEventTime = model.event_info.nextEventTime
+        
         """
         return self._eventInfo
     
@@ -472,9 +605,21 @@ class FMIModel(object):
     
     def get_continuous_value_reference(self):
         """
-        Returns the continuous states value reference.
+        Returns the continuous states valuereference.
+        
+            Parameters::
+            
+                None
+                
+            Return::
+            
+                val     - The references to the continuous states.
+                
+            Example::
+            
+            val = model.get_continuous_value_reference()
         """
-        values = N.array([0]*self._nContinuousStates,dtype=N.uint)
+        values = N.array([0]*self._nContinuousStates,dtype=N.uint32)
         status = self._fmiGetStateValueReferences(self._model, values, self._nContinuousStates)
         
         if status != 0:
@@ -484,7 +629,20 @@ class FMIModel(object):
     
     def get_version(self):
         """
-        Returns the FMI version of the Model.
+        Returns the FMI version of the Model which is was generated according.
+            
+            Parameters::
+            
+                None
+                
+            Return::
+            
+                version   - The version.
+                
+            Example::
+            
+                model.version
+        
         """
         return self._version()
         
@@ -492,7 +650,20 @@ class FMIModel(object):
     
     def get_validplatforms(self):
         """
-        Returns the set of valid compatible platforms for the Model.
+        Returns the set of valid compatible platforms for the Model, extracted
+        from the XML.
+        
+            Parameters::
+            
+                None
+                
+            Return::
+            
+                validPlatform   - The valid platforms.
+                
+            Example::
+            
+                model.valid_platforms
         """
         return self._validplatforms()
         
@@ -502,14 +673,40 @@ class FMIModel(object):
         """
         Returns the number of continuous states and the number of
         event indicators.
+        
+            Parameters::
+            
+                None
+                
+            Return::
+            
+                nbr_cont    - The number of continuous states.
+                
+                nbr_ind     - The number of event indicators.
+                
+            Example::
+            
+                [nCont, nEvent] = model.get_ode_sizes()
         """
         return self._nContinuousStates, self._nEventIndicators
     
     def get_fmiReal(self, valueref):
         """
-        Returns the fmiReal values from the value reference
+        Returns the real-values from the valuereference(s).
+        
+            Parameters::
+            
+                valueref    - A list of valuereferences.
+                
+            Return::
+            
+                values      - The values retrieved from the FMU.
+                
+            Example::
+            
+                val = model.get_fmiReal([232])
         """
-        valueref = N.array(valueref, dtype=N.uint)
+        valueref = N.array(valueref, dtype=N.uint32)
         nref = len(valueref)
         values = N.array([0.0]*nref)
         
@@ -522,27 +719,53 @@ class FMIModel(object):
         
     def set_fmiReal(self, valueref, values):
         """
-        Sets the values of parameters identified by valueref with the 'values'.
+        Sets the real-values in the FMU as defined by the valuereference(s).
+        
+            Parameters::
+                
+                valueref    - A list of valuereferences.
+                
+                values      - Values to be set.
+                
+            Return::
+                
+                None
+        
+            Example::
+            
+                model.set_fmiReal([234,235],[2.34,10.4])
+        
         """
-        valueref = N.array(valueref, dtype=N.uint)
+        valueref = N.array(valueref, dtype=N.uint32)
         nref = valueref.size
         values = N.array(values)
-        
+
         if valueref.size != values.size:
             raise FMIException('The length of valueref and values are inconsistent.')
-        
+
         status = self._fmiSetReal(self._model,valueref, nref, values)
-        
+
         if status != 0:
             raise FMIException('Failed to set the Real values.')
         
         
-        
     def get_fmiInteger(self, valueref):
         """
-        Returns the fmiInteger values from the value reference
+        Returns the integer-values from the valuereference(s).
+        
+            Parameters::
+            
+                valueref    - A list of valuereferences.
+                
+            Return::
+            
+                values      - The values retrieved from the FMU.
+                
+            Example::
+            
+                val = model.get_fmiInteger([232])
         """
-        valueref = N.array(valueref, dtype=N.uint)
+        valueref = N.array(valueref, dtype=N.uint32)
         nref = len(valueref)
         values = N.array([0]*nref)
         
@@ -555,9 +778,24 @@ class FMIModel(object):
         
     def set_fmiInteger(self, valueref, values):
         """
-        Sets the values of parameters identified by valueref with the 'values'.
+        Sets the integer-values in the FMU as defined by the valuereference(s).
+        
+            Parameters::
+                
+                valueref    - A list of valuereferences.
+                
+                values      - Values to be set.
+                
+            Return::
+                
+                None
+        
+            Example::
+            
+                model.set_fmiInteger([234,235],[12,-3])
+        
         """
-        valueref = N.array(valueref, dtype=N.uint)
+        valueref = N.array(valueref, dtype=N.uint32)
         nref = valueref.size
         values = N.array(values)
         
@@ -572,9 +810,21 @@ class FMIModel(object):
         
     def get_fmiBoolean(self, valueref):
         """
-        Returns the fmiBoolean values from the value reference
+        Returns the boolean-values from the valuereference(s).
+        
+            Parameters::
+            
+                valueref    - A list of valuereferences.
+                
+            Return::
+            
+                values      - The values retrieved from the FMU.
+                
+            Example::
+            
+                val = model.get_fmiBoolean([232])
         """
-        valueref = N.array(valueref, dtype=N.uint)
+        valueref = N.array(valueref, dtype=N.uint32)
         nref = len(valueref)
         values = N.array(['0']*nref)
         
@@ -597,9 +847,24 @@ class FMIModel(object):
         
     def set_fmiBoolean(self, valueref, values):
         """
-        Sets the values of parameters identified by valueref with the 'values'.
+        Sets the boolean-values in the FMU as defined by the valuereference(s).
+        
+            Parameters::
+                
+                valueref    - A list of valuereferences.
+                
+                values      - Values to be set.
+                
+            Return::
+                
+                None
+        
+            Example::
+            
+                model.set_fmiBoolean([234,235],[True,False])
+        
         """
-        valueref = N.array(valueref, dtype=N.uint)
+        valueref = N.array(valueref, dtype=N.uint32)
         nref = valueref.size
         values = N.array(values)
         
@@ -613,9 +878,21 @@ class FMIModel(object):
         
     def get_fmiString(self, valueref):
         """
-        Returns the fmiString values from the value reference
+        Returns the string-values from the valuereference(s).
+        
+            Parameters::
+            
+                valueref    - A list of valuereferences.
+                
+            Return::
+            
+                values      - The values retrieved from the FMU.
+                
+            Example::
+            
+                val = model.get_fmiString([232])
         """
-        valueref = N.array(valueref, dtype=N.uint)
+        valueref = N.array(valueref, dtype=N.uint32)
         nref = len(valueref)
         values = N.array(['str']*nref)
         
@@ -628,9 +905,24 @@ class FMIModel(object):
     
     def set_fmiString(self, valueref, values):
         """
-        Sets the values of parameters identified by valueref with the 'values'.
+        Sets the string-values in the FMU as defined by the valuereference(s).
+        
+            Parameters::
+                
+                valueref    - A list of valuereferences.
+                
+                values      - Values to be set.
+                
+            Return::
+                
+                None
+        
+            Example::
+            
+                model.set_fmiString([234,235],['text','text'])
+        
         """
-        valueref = N.array(valueref, dtype=N.uint)
+        valueref = N.array(valueref, dtype=N.uint32)
         nref = valueref.size
         values = N.array(values)
         
@@ -657,7 +949,7 @@ class FMIModel(object):
         """
         Call the internal FMI function: fmiCompletedIntegratorStep.
         """
-        callEventUpdate = self._fmiBoolean('0')
+        callEventUpdate = self._fmiBoolean(self._fmiFalse)
         status = self._fmiCompletedIntegratorStep(self._model, C.byref(callEventUpdate))
         
         if status != 0:
@@ -672,6 +964,7 @@ class FMIModel(object):
         """
         Initialize the model.
         """
+        
         #Set the start attributes
         if len(self._XMLStartRealValues) > 0:
             self.set_fmiReal(self._XMLStartRealKeys, self._XMLStartRealValues)
@@ -714,15 +1007,17 @@ class FMIModel(object):
         """
         instance = self._fmiString(name)
         guid = self._fmiString(self._GUID)
-        logging = self._fmiBoolean(logging)
+        if logging == '0':
+            logging = self._fmiBoolean(self._fmiFalse)
+        else:
+            logging = self._fmiBoolean(self._fmiTrue)
         
-        functions = self._fmiCallbackFunctions#(self._fmiCallbackLogger(self.fmiCallbackLogger),self._fmiCallbackAllocateMemory(self.fmiCallbackAllocateMemory), self._fmiCallbackFreeMemory(self.fmiCallbackFreeMemory))
+        functions = self._fmiCallbackFunctions()#(self._fmiCallbackLogger(self.fmiCallbackLogger),self._fmiCallbackAllocateMemory(self.fmiCallbackAllocateMemory), self._fmiCallbackFreeMemory(self.fmiCallbackFreeMemory))
         
         
-        functions.logger = self.fmiCallbackLogger
-        functions.allocateMemory = self.fmiCallbackAllocateMemory
-        functions.freeMemory = self.fmiCallbackFreeMemory
-        
+        functions.logger = self._fmiCallbackLogger(self.fmiCallbackLogger)
+        functions.allocateMemory = self._fmiCallbackAllocateMemory(self.fmiCallbackAllocateMemory)
+        functions.freeMemory = self._fmiCallbackFreeMemory(self.fmiCallbackFreeMemory)
         
         self._model = self._fmiInstantiateModel(instance,guid,functions,logging)
         
@@ -730,6 +1025,7 @@ class FMIModel(object):
         print 'Logger'
         pass
     def fmiCallbackAllocateMemory(self, nobj, size):
+        print 'Allocate'
         return self._calloc(nobj,size)
 
     def fmiCallbackFreeMemory(self, obj):
@@ -813,7 +1109,7 @@ class FMIModel(object):
             d[str(key)]=int(vals[index])
         return d
     
-    def get_aliases(self, aliased_variable):
+    def get_aliases(self, aliased_variable, ignore_cache=False):
         """ Return list of all alias variables belonging to the aliased 
             variable along with a list of booleans indicating whether the 
             alias variable should be negated or not.
@@ -826,6 +1122,9 @@ class FMIModel(object):
                 alias is negated.
 
         """
+        if not ignore_cache:
+            return self._xmldoc.function_cache.get(self, 'get_aliases', aliased_variable)
+            
         # get value reference of aliased variable
         val_ref = self.get_valueref(aliased_variable)
         if val_ref!=None:
@@ -842,6 +1141,18 @@ class FMIModel(object):
         else:
             raise Exception("The variable: "+str(aliased_variable)+" can not be found in model.")
     
+    def is_negated(self, variable):
+        """
+        Return if the variable is alias negated or not.
+        """
+        neg = self._xmldoc._xpatheval("//ScalarVariable/@name[../@alias='negatedAlias'][../@name='"+variable+"']")
+
+        if len(neg)==1:
+            return True
+        else:
+            return False
+            
+    
     def get_name(self):
         """ Return the name of the model. """
         return self._modelname
@@ -856,14 +1167,15 @@ class FMIModel(object):
         self._fmiTerminate(self._model)
         
         #--ERROR
-        #if sys.platform == 'win32':
-        #    try:
-        #        self._fmiFreeModelInstance(self._model)
-        #    except WindowsError:
-        #        print 'Failed to free model instance.'
-        #else:
-        #    self._fmiFreeModelInstance(self._model)
-            
+        if sys.platform == 'win32':
+            pass
+            #try:
+            #    self._fmiFreeModelInstance(self._model)
+            #except WindowsError:
+            #    print 'Failed to free model instance.'
+        else:
+            self._fmiFreeModelInstance(self._model)
+           
         #Remove the temporary xml
         os.remove(self._tempdir+os.sep+self._tempxml)
         #Remove the temporary binary

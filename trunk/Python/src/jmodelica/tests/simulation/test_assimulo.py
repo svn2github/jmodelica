@@ -460,3 +460,66 @@ class Test_JMI_DAE:
 
         assert solver.switches[0] == True
         assert solver.switches[1] == True
+
+class Test_FMI_ODE:
+    """
+    This class tests jmodelica.simulation.assimulo.FMIODE
+    """
+    
+    @classmethod
+    def setUpClass(cls):
+        """
+        Compile the test model.
+        """
+        pass
+
+        
+    def setUp(self):
+        """
+        Load the test model.
+        """
+        pass
+        
+    @testattr(fmi = True)
+    def test_init(self):
+        """
+        This tests the functionality of the method init. 
+        """
+        raise NotImplemetedError
+        
+    @testattr(fmi = True)
+    def test_f(self):
+        """
+        This tests the functionality of the rhs.
+        """
+        raise NotImplemetedError
+    
+    @testattr(fmi = True)
+    def test_g(self):
+        """
+        This tests the functionality of the event indicators.
+        """
+        raise NotImplemetedError
+        
+    @testattr(fmi = True)
+    def test_t(self):
+        """
+        This tests the functionality of the time events.
+        """
+        raise NotImplemetedError
+        
+    @testattr(fmi = True)
+    def test_post_process(self):
+        """
+        This tests the functionality of the post process method.
+        """
+        raise NotImplemetedError
+        
+    @testattr(fmi = True)
+    def test_handle_event(self):
+        """
+        This tests the functionality of the method handle_event.
+        """
+        raise NotImplemetedError
+    
+    

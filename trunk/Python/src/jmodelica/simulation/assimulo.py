@@ -97,7 +97,7 @@ def write_data(simulator):
             b = N.array(simulator._problem._sol_bool).reshape(-1,len(model._save_cont_valueref[2]))
             data = N.c_[data,b]
         
-        export_result_dymola(model, data)
+        fmi.export_result_dymola(model, data)
         
 
 class FMIODE(Explicit_Problem):
@@ -110,10 +110,10 @@ class FMIODE(Explicit_Problem):
         """
         self._model = model
         self._timeEvent = False
-        
+
         self.y0 = self._model.real_x
-        self.problem_name = self._model._description
-        
+        self.problem_name = self._model.get_name()
+
         [f_nbr, g_nbr] = self._model.get_ode_sizes()
         
         self._f_nbr = f_nbr
@@ -124,9 +124,9 @@ class FMIODE(Explicit_Problem):
         self.time_event_fcn = self.t
         
         #Internal values
-        self._sol_time = N.array([])
-        self._sol_real = N.array([])
-        self._sol_int  = N.array([])
+        self._sol_time = []
+        self._sol_real = []
+        self._sol_int  = []
         self._sol_bool = []
         
         #Stores the first time point
@@ -143,7 +143,7 @@ class FMIODE(Explicit_Problem):
         #Moving data to the model
         self._model.t = t
         self._model.real_x = y
-        
+
         #Evaluating the rhs
         rhs = self._model.real_dx
 
@@ -159,7 +159,7 @@ class FMIODE(Explicit_Problem):
         
         #Evaluating the event indicators
         eventInd = self._model.event_ind
-        
+
         return eventInd
         
     def t(self, t, y, sw):
@@ -179,8 +179,13 @@ class FMIODE(Explicit_Problem):
         self._model.t = solver.t[-1]
         self._model.real_x = solver.y[-1]
         
+        #For delays and dynamic state selection
+        if self._model.fmiCompletedIntegratorStep():
+            self.handle_event(solver,[0]) #Event have been detect, call event iteration.
+            solver.Integrator.cvinit(solver.t[-1],solver.problem_spec,solver.y[-1],solver.maxord,solver.maxsteps,solver.initstep)
+        
         [r,i,b] = self._model.save_time_point()
-
+        
         self._sol_real += [r]
         self._sol_int  += [i]
         self._sol_bool += b
@@ -215,19 +220,22 @@ class FMIODE(Explicit_Problem):
     
         
         
-    #def completed_step(self, solver, t, y):
+    #def completed_step(self, solver):
     #    """
-    #    Method which is called at each successful step.
+    #    Method which is called at each successful step. This method is responsible for calling the event function
+    #    at a discontinuity arised because of delays and dynamic state selection. This method is also resposible
+    #    for reinitiate the solver.
     #    """
     #    #Moving data to the model
-    #    self._model.t = t
-    #    self._model.real_x = y
+    #    #self._model.t = t
+    #    #self._model.real_x = y
     #    
-    #    self._model.save_time_point()
+    #    #self._model.save_time_point()
     #    
     #    if self._model.fmiCompletedIntegratorStep():
     #        self.handle_event(solver,[0]) #Event have been detect, call event iteration.
-    #        return -1 #Break iteration loop and reinitiate.
+    #        solver.Integrator.cvinit(self._model.t,solver.problem_spec,self._model.real_x,solver.maxord,solver.maxsteps,solver.initstep)
+    #        return -1 #Break iteration loop
     #    else:
     #        return 0
         
