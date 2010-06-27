@@ -1,7 +1,11 @@
 from jmodelica.initialization.ipopt import *
 from jmodelica.compiler import OptimicaCompiler
 import jmodelica.jmi as jmi
+import jmodelica.io
 from jmodelica.io import ResultDymolaTextual
+from jmodelica.optimization.ipopt import NLPCollocationLagrangePolynomials
+from jmodelica.optimization.ipopt import CollocationOptimizer
+import matplotlib.pyplot as plt
 from jmodelica.tests.base_simul import *
 from jmodelica.tests import testattr
 import numpy as N
@@ -248,3 +252,216 @@ class TestStaticOptimizationDependentParameters:
     def test_parameter_value(self):
         k = self.res.get_variable_data("k")
         assert k.x[-1] == 1.1, "Wrong value of optimized parameter."
+
+class TestOptInitBlockingFactors:
+    @classmethod
+    def setUpClass(cls):
+        cls.curr_dir = os.path.dirname(os.path.abspath(__file__));
+        oc = OptimicaCompiler()
+        cls.model = oc.compile_model("BlockingInitPack.M_init",
+                                     cls.curr_dir+"/files/BlockingError.mo", target='ipopt')
+
+        cls.opt_model = oc.compile_model("BlockingInitPack.M_Opt",
+                                         cls.curr_dir+"/files/BlockingError.mo", target='ipopt')
+
+    @testattr(ipopt = True)
+    def setUp(self):
+
+        self.res_init = jmodelica.io.ResultDymolaTextual(self.curr_dir+"/files/BlockingInitPack_M_init_result.txt")
+
+        self.n_e = 5 # Number of elements 
+        self.hs = N.ones(self.n_e)*1./self.n_e # Equidistant points
+        self.n_cp = 3; # Number of collocation points in each element
+
+        # Blocking factors for control parametrization
+        blocking_factors=N.ones(self.n_e,dtype=N.int)
+
+        self.nlp = NLPCollocationLagrangePolynomials(self.opt_model,self.n_e,self.hs,self.n_cp,blocking_factors)
+
+        self.nlp.set_initial_from_dymola(self.res_init, self.hs, 0., 10.)
+
+        self.nlp.export_result_dymola("qwe.txt")
+
+        self.res_init2 = jmodelica.io.ResultDymolaTextual('qwe.txt')
+
+
+    @testattr(ipopt = True)
+    def test_initialization(self):
+
+
+        m_x1_1 = self.res_init.get_variable_data("m.x[1]")
+        m_x1_2 = self.res_init2.get_variable_data("m.x[1]")
+        
+        m_x2_1 = self.res_init.get_variable_data("m.x[2]")
+        m_x2_2 = self.res_init2.get_variable_data("m.x[2]")
+        
+        m_y_1 = self.res_init.get_variable_data("m.y")
+        m_y_2 = self.res_init2.get_variable_data("m.y")
+        
+        m_u_1 = self.res_init.get_variable_data("m.u")
+        m_u_2 = self.res_init2.get_variable_data("m.u")
+        
+        (n_x, n_g, n_h, dg_n_nz, dh_n_nz) = self.nlp.opt_sim_get_dimensions()
+        
+        x_init = N.zeros(n_x)
+        self.nlp.opt_sim_get_initial(x_init)
+
+        offs_x_el_junc = 8 + 7*self.n_e*self.n_cp + self.n_e
+
+        x_el_junc = N.zeros((self.n_e,3))
+        
+        for i in range(self.n_e):
+            x_el_junc[i,:] = x_init[offs_x_el_junc + i*3:offs_x_el_junc + (i+1)*3]
+
+        t_f = 10.
+
+        t_x_el_junc = N.linspace(0,t_f,self.n_e+1)
+        t_x_el_junc = t_x_el_junc[1:]
+
+        offs_dx_p = 8 + 7*self.n_e*self.n_cp + self.n_e + 3*self.n_e
+        offs_x_p = offs_dx_p + 3
+        offs_u_p = offs_x_p + 3
+        offs_w_p = offs_u_p + 1
+
+        n_tp = 10
+        
+        dx_p = N.zeros((n_tp,3))
+        x_p = N.zeros((n_tp,3))
+        u_p = N.zeros((n_tp,1))
+        w_p = N.zeros((n_tp,1))
+        
+        for i in range(n_tp):
+            dx_p[i,:] = x_init[offs_dx_p + i*8:offs_dx_p + i*8 + 3]
+            x_p[i,:] = x_init[offs_x_p + i*8:offs_x_p + i*8 + 3]
+            u_p[i,:] = x_init[offs_u_p + i*8:offs_u_p + i*8 + 1]
+            w_p[i,:] = x_init[offs_w_p + i*8:offs_w_p + i*8 + 1]
+
+        t_tp = N.linspace(1,10,10)
+
+        h=N.zeros(n_h)
+        self.nlp.opt_sim_h(h)
+        print N.max(N.abs(h))
+
+#         plt.figure(3)
+#         plt.clf()
+#         plt.plot(m_x1_1.t,m_x1_1.x)
+#         plt.plot(m_x1_2.t,m_x1_2.x)
+#         plt.plot(t_x_el_junc,x_el_junc[:,1],'x')
+#         plt.plot(t_tp,x_p[:,1],'o')
+#         plt.title("x[1]")
+#         plt.grid()
+#         plt.show()
+        
+#         plt.figure(4)
+#         plt.clf()
+#         plt.plot(m_x2_1.t,m_x2_1.x)
+#         plt.plot(m_x2_2.t,m_x2_2.x)
+#         plt.plot(t_x_el_junc,x_el_junc[:,2],'x')
+#         plt.plot(t_tp,x_p[:,2],'o')
+#         plt.title("x[2]")
+#         plt.grid()
+#         plt.show()
+
+#         plt.figure(5)
+#         plt.clf()
+#         plt.plot(m_y_1.t,m_y_1.x)
+#         plt.plot(m_y_2.t,m_y_2.x)
+#         plt.plot(t_tp,w_p[:,0],'o')
+#         plt.title("y")
+#         plt.grid()
+#         plt.show()
+        
+#         plt.figure(6)
+#         plt.clf()
+#         plt.plot(m_u_1.t,m_u_1.x)
+#         plt.plot(m_u_2.t,m_u_2.x)
+#         plt.plot(t_tp,u_p[:,0],'o')
+#         plt.title("u")
+#         plt.grid()
+#         plt.show()
+
+
+        m_x1_2_res = N.array([ 1.        ,  0.96503702,  0.80699964,  0.81708186,  0.82968423,
+                               0.73425843,  0.4641878 ,  0.30274918, -0.22539661, -0.45405707,
+                               -0.47988416, -0.25883339,  0.07728009,  0.22367095,  0.49688434,
+                               0.42028466])
+        
+        m_x2_2_res = N.array([ 1.        ,  0.77648496,  0.75474237,  0.86572509,  0.85523243,
+                               0.47651669, -0.02410645, -0.24417425, -0.68431665, -0.61607295,
+                               -0.48363351,  0.15624317,  0.56793272,  0.66948745,  0.56283272,
+                               0.14759305])
+        
+        m_u_2_res = N.array([ 0.        ,  0.30515581,  0.30515581,  0.30515581,  0.73893649,
+                              0.73893649,  0.73893649, -0.920168  , -0.920168  , -0.920168  ,
+                              0.0269131 ,  0.0269131 ,  0.0269131 ,  0.89776804,  0.89776804,
+                              0.89776804])
+        
+        m_y_2_res = N.array([ 2.        ,  1.74152198,  1.56174201,  1.68280695,  1.68491666,
+                              1.21077512,  0.44008136,  0.05857493, -0.90971326, -1.07013001,
+                              -0.96351767, -0.10259022,  0.64521281,  0.8931584 ,  1.05971706,
+                              0.56787771])
+        
+        x_el_junc_res = N.array([[  3.91403795,   0.81708186,   0.86572509],
+                                 [  6.38519639,   0.4641878 ,  -0.02410645],
+                                 [  8.53595865,  -0.45405707,  -0.61607295],
+                                 [  9.99351048,   0.07728009,   0.56793272],
+                                 [ 11.69233416,   0.42028466,   0.14759305]])
+        
+        dx_p_res = N.array([[ 1.89614716, -0.13108396,  0.13906756],
+                            [ 2.24392408,  0.04864298,  0.04357222],
+                            [ 1.05980345, -0.15348176, -0.49911689],
+                            [ 0.78887658, -0.48829925, -0.73269738],
+                            [ 1.29975129, -0.52999439, -0.34773495],
+                            [ 0.66373748, -0.16201457,  0.33665916],
+                [ 0.56780963,  0.31891731,  0.70407499],
+                            [ 1.30735387,  0.49065263,  0.42142531],
+                            [ 0.81705525,  0.20439241, -0.24969127],
+                            [ 0.49438075, -0.27269124, -0.69161393]])
+        
+        x_p_res = N.array([[  1.71039492,   0.83348678,   0.70240363],
+                           [  3.91403795,   0.81708186,   0.86572509],
+                           [  5.61520049,   0.79371837,   0.64023676],
+                           [  6.38519639,   0.4641878 ,  -0.02410645],
+                           [  7.48469697,  -0.08119087,  -0.61118532],
+                           [  8.53595865,  -0.45405707,  -0.61607295],
+                           [  9.01802285,  -0.36600637,  -0.04708865],
+                           [  9.99351048,   0.07728009,   0.56793272],
+                           [ 11.15957068,   0.45741668,   0.66180933],
+                           [ 11.69233416,   0.42028466,   0.14759305]])
+        
+        u_p_res = N.array([[ 0.84147098],
+                           [ 0.90929742],
+                           [ 0.14112001],
+                           [-0.75680257],
+                           [-0.95892497],
+                           [-0.27941585],
+                           [ 0.6569871 ],
+                           [ 0.98935824],
+                           [ 0.41211848],
+                           [-0.54402111]])
+        
+        w_p_res = N.array([[ 1.53589041],
+                           [ 1.68280695],
+                           [ 1.43395513],
+                           [ 0.44008136],
+                           [-0.69237618],
+                           [-1.07013001],
+                           [-0.41309502],
+                           [ 0.64521281],
+                           [ 1.11922602],
+                           [ 0.56787771]])
+        
+        assert N.sum(N.abs(m_x1_2.x-m_x1_2_res))<1e-3, "Error in initialization of x[1]"
+        assert N.sum(N.abs(m_x2_2.x-m_x2_2_res))<1e-3, "Error in initialization of x[2]"
+        assert N.sum(N.abs(m_u_2.x-m_u_2_res))<1e-3, "Error in initialization of u"
+        assert N.sum(N.abs(m_y_2.x-m_y_2_res))<1e-3, "Error in initialization of y"
+        
+        assert N.sum(N.abs(x_el_junc-x_el_junc_res))<1e-3, "Error in initialization of x_el_junc"
+        
+        assert N.sum(N.abs(dx_p-dx_p_res))<1e-3, "Error in initialization of dx_p"
+        assert N.sum(N.abs(x_p-x_p_res))<1e-3, "Error in initialization of x_p"
+        assert N.sum(N.abs(u_p-u_p_res))<1e-3, "Error in initialization of u_p"
+        assert N.sum(N.abs(w_p-w_p_res))<1e-3, "Error in initialization of w_p"
+        
+        optimizer = CollocationOptimizer(self.nlp)
+        optimizer.opt_sim_ipopt_solve()

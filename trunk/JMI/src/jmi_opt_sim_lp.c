@@ -1722,6 +1722,7 @@ static int lp_set_initial_from_trajectory(
 
 	int i;
 	int j;
+	int k;
 
 	int n_real_ci, n_real_cd, n_real_pi, n_real_pd, n_integer_ci, n_integer_cd, n_integer_pi, n_integer_pd,
 		n_boolean_ci, n_boolean_cd, n_boolean_pi, n_boolean_pd,
@@ -1776,34 +1777,66 @@ static int lp_set_initial_from_trajectory(
 					jmi->opt->n_p_opt);
 
     // Loop over the collocation points, interpolate in input tables.
+
 	for (i=0;i<jmi_opt_sim->n_e;i++) {
 		for (j=0;j<nlp->n_cp;j++) {
-			jmi_lin_interpolate(time_vec[i*nlp->n_cp + j],
-							trajectory_data_init,traj_n_points,n_vars+1,
-							jmi_opt_sim->x_init + jmi->opt->n_p_opt +
-							n_vars*(1 + i*nlp->n_cp + j));
+			if (jmi_opt_sim->n_blocking_factors==0) {
+				jmi_lin_interpolate(time_vec[i*nlp->n_cp + j],
+										trajectory_data_init,traj_n_points,n_vars+1,
+										jmi_opt_sim->x_init + jmi->opt->n_p_opt +
+										n_vars*(1 + i*nlp->n_cp + j));
+			} else {
+				jmi_lin_interpolate(time_vec[i*nlp->n_cp + j],
+										trajectory_data_init,traj_n_points,n_vars+1,
+										vals);
+				// dx
+				for (k=0;k<jmi->n_real_dx;k++) {
+					int offs_dx = offs_dx_coll(jmi_opt_sim,i,j+1,k);
+					//printf("dx: %d, %d, %d: %d\n",i,j,k,offs_dx);
+					jmi_opt_sim->x_init[offs_dx] = vals[k];
+				}
+				// x
+				for (k=0;k<jmi->n_real_x;k++) {
+					int offs_x = offs_x_coll(jmi_opt_sim,i,j+1,k);
+					//printf("x: %d, %d, %d: %d\n",i,j,k,offs_x);
+					jmi_opt_sim->x_init[offs_x] = vals[jmi->n_real_dx + k];
+				}
+				// u
+				if (j==0) {
+					for (k=0;k<jmi->n_real_u;k++) {
+						int offs_u = offs_u_coll(jmi_opt_sim,i,j+1,k);
+						//printf("x: %d, %d, %d: %d\n",i,j,k,offs_u);
+						jmi_opt_sim->x_init[offs_u] = vals[jmi->n_real_dx + jmi->n_real_x + k];
+					}
+				}
+				// w
+				for (k=0;k<jmi->n_real_w;k++) {
+					int offs_w = offs_w_coll(jmi_opt_sim,i,j+1,k);
+					//printf("x: %d, %d, %d: %d\n",i,j,k,offs_w);
+					jmi_opt_sim->x_init[offs_w] = vals[jmi->n_real_dx + jmi->n_real_x + jmi->n_real_u + k];
+				}
+			}
 		}
+
 	}
 
     // Loop over element junction states
 	for (i=0;i<jmi_opt_sim->n_e;i++) {
-		jmi_lin_interpolate(time_vec[(i+1)*nlp->n_cp],
+		//printf("-- %f\n",time_vec[(i+1)*nlp->n_cp-1]);
+		jmi_lin_interpolate(time_vec[(i+1)*nlp->n_cp-1],
 						trajectory_data_init,traj_n_points,n_vars+1,vals);
 		for (j=0;j<n_x;j++) {
-			jmi_opt_sim->x_init[jmi->opt->n_p_opt +
-								n_vars*(1 + jmi_opt_sim->n_e*nlp->n_cp) +
-										n_real_dx*i + j] = vals[n_real_dx + j];
+			jmi_opt_sim->x_init[nlp->offs_x_el_junc +
+										jmi->n_real_x*i + j] = vals[jmi->n_real_dx + j];
 		}
 	}
 
     // Loop over time points
 	for (i=0;i<jmi->n_tp;i++) {
-		jmi_lin_interpolate(tp[i],
+		int o_dx_p = offs_dx_p(jmi_opt_sim,i,0);
+		jmi_lin_interpolate(tp[i]*(jmi->opt->final_time-jmi->opt->start_time),
 						trajectory_data_init,traj_n_points,n_vars+1,
-						jmi_opt_sim->x_init +  jmi->opt->n_p_opt +
-						n_vars*(1 + jmi_opt_sim->n_e*nlp->n_cp) +
-								n_real_dx*jmi_opt_sim->n_e + i*n_vars);
-
+						jmi_opt_sim->x_init +  o_dx_p);
 	}
 
 	for (i=0;i<jmi_opt_sim->n_x;i++) {
