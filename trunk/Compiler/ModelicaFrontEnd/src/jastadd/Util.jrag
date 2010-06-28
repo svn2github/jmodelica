@@ -1217,16 +1217,20 @@ aspect Visibility {
 }
 
 aspect ComponentDeclMethods {
+	
     /**
-     * Check if a ComponentDecl is declared flow.
+     * \brief Check if a ComponentDecl is declared flow.
      */
-    syn boolean ComponentDecl.isFlow() {
-    
-        if (hasTypePrefixFlow())
-            return true;
-    
-        return false;
-    }
+	syn boolean ComponentDecl.isFlow()  = hasTypePrefixFlow() && getTypePrefixFlow().isFlow();
+	syn boolean TypePrefixFlow.isFlow() = false;
+	eq Flow.isFlow()                    = true;
+	
+    /**
+     * \brief Check if a ComponentDecl is declared stream.
+     */
+	syn boolean ComponentDecl.isStream()  = hasTypePrefixFlow() && getTypePrefixFlow().isStream();
+	syn boolean TypePrefixFlow.isStream() = false;
+	eq Stream.isStream()                  = true;
 
     /**
      * Check if a ComponentDecl is declared parameter.

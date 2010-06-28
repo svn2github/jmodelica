@@ -837,4 +837,51 @@ extends Modelica.Electrical.Analog.Examples.CauerLowPassAnalog(R1(R=1),R2(R=1),V
 
 end CauerLowPassAnalog; 
 
+
+
+// TODO: These equations are wrong. Change test when stream equations are generated properly!
+model StreamTest1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="StreamTest1",
+         description="Stream variables: basic test",
+         flatModel="
+fclass ConnectTests.StreamTest1
+ Real g.e.a;
+ Real g.e.b;
+ Real g.e.c;
+ Real g.e.d;
+ Real g.f.a;
+ Real g.f.b;
+ Real g.f.c;
+ Real g.f.d;
+equation
+ g.e.a = g.f.a;
+  - ( g.e.b ) - ( g.f.b ) = 0;
+ g.e.c = g.f.c;
+ g.e.d = g.f.d;
+ g.e.b = 0;
+ g.f.b = 0;
+end ConnectTests.StreamTest1;
+")})));
+
+	connector A
+		Real a;
+		flow Real b;
+		stream Real c;
+		stream Real d;
+	end A;
+	
+	model B
+		A e;
+		A f;
+	equation
+		connect(e,f);
+	end B;
+	
+	B g;
+end StreamTest1;
+
+
+
 end ConnectTests;

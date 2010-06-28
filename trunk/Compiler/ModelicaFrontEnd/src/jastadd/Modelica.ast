@@ -244,7 +244,8 @@ PN_ComponentDecl ::= Name:IdDecl
 
 abstract TypePrefix;
 abstract TypePrefixFlow : TypePrefix;
-Flow : TypePrefixFlow::=;
+Flow : TypePrefixFlow;
+Stream : TypePrefixFlow;
 abstract TypePrefixVariability : TypePrefix;
 Continuous : TypePrefixVariability::=;
 Discrete : TypePrefixVariability::=;

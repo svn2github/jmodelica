@@ -178,9 +178,13 @@ aspect Connections {
 		public InstComponentDecl getVar() {
 			return cd;
 		}
-	
+		
 		public boolean isFlow() {
-			return cd.getComponentDecl().hasTypePrefixFlow();
+			return cd.getComponentDecl().isFlow();
+		}
+		
+		public boolean isStream() {
+			return cd.getComponentDecl().isStream();
 		}
 	
 		

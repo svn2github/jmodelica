@@ -544,7 +544,8 @@ ConditionalAttribute conditional_attribute =
   ;  
   
 TypePrefix type_prefix_flow = 
-  FLOW                          {: return new Flow(); :}
+    FLOW     {: return new Flow(); :}
+  | STREAM   {: return new Stream(); :}
   ;
   
 EquationClause equation_clause =
