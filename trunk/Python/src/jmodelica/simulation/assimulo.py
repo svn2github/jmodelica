@@ -107,7 +107,6 @@ class FMIODE(Explicit_Problem):
         Initialize the problem.
         """
         self._model = model
-        self._timeEvent = False
 
         self.y0 = self._model.real_x
         self.problem_name = self._model.get_name()
@@ -165,7 +164,7 @@ class FMIODE(Explicit_Problem):
         """
         Time event function.
         """
-        if self._model.event_info.upcomingTimeEvent == self._model._fmiTrue:
+        if self._model.event_info.upcomingTimeEvent == True:
             return self._model.event_info.nextEventTime
         else:
             return None
@@ -208,7 +207,7 @@ class FMIODE(Explicit_Problem):
         
         #Get new nominal values.
         if eInfo.stateValueReferencesChanged:
-            solver.atol = 0.01*self.rtol*self._model.real_x_nominal
+            solver.atol = 0.01*solver.rtol*self._model.real_x_nominal
         
         
     def completed_step(self, solver):

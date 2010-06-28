@@ -22,12 +22,13 @@ import os
 import numpy as N
 import jmodelica
 import jmodelica.jmi as jmi
+import jmodelica.fmi as fmi
 from jmodelica.compiler import ModelicaCompiler
 from jmodelica.compiler import OptimicaCompiler
 from jmodelica.tests import testattr
 
 try:
-    from jmodelica.simulation.assimulo import JMIODE, JMIDAE, JMIModel_Exception
+    from jmodelica.simulation.assimulo import JMIODE, JMIDAE, FMIODE, JMIModel_Exception
     from jmodelica.simulation.assimulo import write_data
     from jmodelica.simulation.assimulo import TrajectoryLinearInterpolation
     from Assimulo.Explicit_ODE import CVode
@@ -42,6 +43,8 @@ mc = ModelicaCompiler()
 oc = OptimicaCompiler()
 oc.set_boolean_option('state_start_values_fixed',True)
 
+curr_dir = os.path.dirname(os.path.abspath(__file__));
+path_to_fmus = os.path.join(curr_dir[:-len('simulation')], 'files', 'FMUs')
 
 class Test_JMI_ODE:
     """
@@ -472,54 +475,128 @@ class Test_FMI_ODE:
         Compile the test model.
         """
         pass
-
         
     def setUp(self):
         """
         Load the test model.
         """
-        pass
+        self._bounce  = fmi.FMIModel('bouncingBall.fmu',path_to_fmus)
+        self._dq = fmi.FMIModel('dq.fmu',path_to_fmus)
+        self._bounce.initialize()
+        self._dq.initialize()
+        self._bounceSim = FMIODE(self._bounce)
+        self._dqSim     = FMIODE(self._dq)
         
     @testattr(fmi = True)
     def test_init(self):
         """
         This tests the functionality of the method init. 
         """
-        raise NotImplemetedError
+        assert self._bounceSim._f_nbr == 2
+        assert self._bounceSim._g_nbr == 1
+        assert self._bounceSim.event_fcn == self._bounceSim.g
+        assert self._bounceSim.y0[0] == 1.0
+        assert self._bounceSim.y0[1] == 0.0
+        assert self._dqSim._f_nbr == 1
+        assert self._dqSim._g_nbr == 0
+        try:
+            self._dqSim.event_fcn
+            raise FMIException('')
+        except AttributeError:
+            pass
+        
+        sol = self._bounceSim._sol_real
+        
+        nose.tools.assert_almost_equal(sol[0][0],1.000000000)
+        nose.tools.assert_almost_equal(sol[0][1],0.000000000)
+        nose.tools.assert_almost_equal(sol[0][2],0.000000000)
+        nose.tools.assert_almost_equal(sol[0][3],-9.81000000)
         
     @testattr(fmi = True)
     def test_f(self):
         """
         This tests the functionality of the rhs.
         """
-        raise NotImplemetedError
+        t = 1.0
+        y = N.array([1.0,1.0])
+        
+        rhs = self._bounceSim.f(t,y)
+        
+        nose.tools.assert_almost_equal(rhs[0],1.00000000)
+        nose.tools.assert_almost_equal(rhs[1],-9.8100000)
+
     
     @testattr(fmi = True)
     def test_g(self):
         """
         This tests the functionality of the event indicators.
         """
-        raise NotImplemetedError
+        t = 1.0
+        y = N.array([1.0,1.0])
+        
+        event = self._bounceSim.g(t,y,None)
+        
+        nose.tools.assert_almost_equal(event[0],1.00000000)
+        
+        y = N.array([0.5,1.0])
+        event = self._bounceSim.g(t,y,None)
+        
+        nose.tools.assert_almost_equal(event[0],0.50000000)
+
         
     @testattr(fmi = True)
     def test_t(self):
         """
         This tests the functionality of the time events.
         """
-        raise NotImplemetedError
+        t = 1.0
+        y = N.array([1.0,1.0])
+        
+        time = self._bounceSim.t(t,y,None)
+        
+        assert time == None
+        #Further testing of the time event function is needed.
         
     @testattr(fmi = True)
     def test_post_process(self):
         """
         This tests the functionality of the post process method.
         """
-        raise NotImplemetedError
+        t = 1.0
+        y = N.array([1.0,1.0])
+        
+        assert len(self._bounceSim._sol_real) == 1
+        
+        self._bounceSim.post_process(None,t,y)
+        
+        assert len(self._bounceSim._sol_real) == 2
+        
         
     @testattr(fmi = True)
     def test_handle_event(self):
         """
         This tests the functionality of the method handle_event.
         """
-        raise NotImplemetedError
+        y = N.array([1.,1.])
+        self._bounceSim._model.real_x = y
+        solver = lambda x:1
+        solver.rtol = 1.e-4
+        solver.y = [y]
+
+        self._bounceSim.handle_event(solver, None)
+
+        nose.tools.assert_almost_equal(solver.y[0][0],1.00000000)
+        nose.tools.assert_almost_equal(solver.y[0][1],-0.70000000)
+        
+        #Further testing of the handle_event function is needed.
     
-    
+    @testattr(fmi = True)
+    def test_completed_step(self):
+        """
+        This tests the functionality of the method completed_step.
+        """
+        assert self._bounceSim.completed_step(None) == 0
+        #Further testing of the completed step function is needed.
+        
+        
+        
