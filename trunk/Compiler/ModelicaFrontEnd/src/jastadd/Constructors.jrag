@@ -96,6 +96,15 @@ aspect Constructors {
 	public FIdUse.FIdUse(String name) {
 		this(new FQName(name));
 	}
+	
+	/**
+	 * \brief Constructs an FIdUse that refers to a cell of the variable with the given name.
+	 *
+	 * @param fas  the array subscripts to set for the last name part
+	 */
+	public FIdUse.FIdUse(String name, FArraySubscripts fas) {
+		this(new FQName(name, fas));
+	}
     
 	/**
 	 * \brief Constructs an FQName by splitting the given name into name parts.
@@ -107,6 +116,18 @@ aspect Constructors {
         for (String part : name.split("\\."))
             addFQNamePart(new FQNamePart(part, new Opt()));
     }
+	
+	/**
+	 * \brief Constructs an FQName by splitting the given name into name parts and adding array subscripts.
+	 * 
+	 * Does <em>not</em> parse array subscripts.
+	 *
+	 * @param fas  the array subscripts to set for the last name part
+	 */
+	public FQName.FQName(String name, FArraySubscripts fas) {
+		this(name);
+		setLastFArraySubscripts(fas);
+	}
     
 	/**
 	 * \brief Constructs an FQName that is a copy of another FQName.
@@ -127,6 +148,15 @@ aspect Constructors {
 	 */
 	public FIdUseExp.FIdUseExp(FQName name) {
 		this(new FIdUse(name));
+	}
+	
+	/**
+	 * \brief Constructs an FIdUseExp that refers to a cell of the variable with the given name.
+	 *
+	 * @param fas  the array subscripts to set for the last name part
+	 */
+	public FIdUseExp.FIdUseExp(String name, FArraySubscripts fas) {
+		this(new FIdUse(name, fas));
 	}
 	
 	/**

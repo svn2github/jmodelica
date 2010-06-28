@@ -878,7 +878,7 @@ aspect FlatExpressions {
 						return getArray().buildLiteral(ip.isReal());
 					} else {
 						// Check if we have non-constant array subscripts
-						if (ia.nonConstArraySubscripts()) {
+						if (ia.hasUnknownIndices()) {
 							FExp exp = ip.getBindingFExp().getArray().buildLiteral(ip.isReal());
 							FArraySubscripts fas = ia.getFArraySubscripts().flatten(prefix);
 							return new FSubscriptedExp(exp, fas);
@@ -891,19 +891,32 @@ aspect FlatExpressions {
 					}
 				} catch (UnsupportedOperationException e) {
 					// In this case, simply don't inline value
+					// TODO: Really? isn't this an error?
 				}
 			}
 		} 
 		return new FIdUseExp(getInstAccess().flatten(prefix));
 	}
 	
-	syn boolean InstAccess.nonConstArraySubscripts() {
-		if (hasFArraySubscripts()) 
-			for (FSubscript fs : getFArraySubscripts().getFSubscripts())
-				if (!fs.variability().constantVariability())
-					return true;
+	syn boolean InstAccess.hasUnknownIndices() = 
+		hasFArraySubscripts() && getFArraySubscripts().hasUnknownIndices(); 
+	
+	syn lazy boolean FArraySubscripts.hasUnknownIndices() {
+		for (FSubscript fs : getFSubscripts())
+			if (fs.isUnknownIndex())
+				return true;
 		return false;
 	}
+	
+	syn boolean FSubscript.isUnknownIndex() {
+		try {
+			return ceval().intValue() == 0;
+		} catch (UnsupportedOperationException e) {
+			return true;
+		}
+	}
+	// TODO: this doesn't seem to cover arrays of unknown size
+	eq FColonSubscript.isUnknownIndex() = false;
 	
 	public FQName InstAccess.flatten(FQName prefix) { 
 		FQName myName = isForIndex() ? new FQName() : new FQName(prefix);

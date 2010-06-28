@@ -6261,6 +6261,60 @@ equation
 end ArrayConst2;
 
 
+model ArrayConst3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayConst3",
+         description="Array constants used with discrete index",
+         flatModel="
+fclass ArrayTests.ArrayConst3
+ Real x;
+equation
+ x = ArrayTests.ArrayConst3.f(1);
+
+ function ArrayTests.ArrayConst3.f
+  input Real i;
+  output Real o;
+  Real[2] temp_1;
+ algorithm
+  temp_1[1] := 1.0;
+  temp_1[2] := 2.0;
+  o := temp_1[integer(i)];
+  return;
+ end ArrayTests.ArrayConst3.f;
+end ArrayTests.ArrayConst3;
+")})));
+
+	function f
+		input Real i;
+		output Real o;
+	algorithm
+		o := testConst[integer(i)];
+	end f;
+	
+	Real x = f(1);
+end ArrayConst3;
+
+
+model ArrayConst4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayConst4",
+         description="Array constants used with parameter index",
+         flatModel="
+fclass ArrayTests.ArrayConst4
+ parameter Integer i = 1 /* 1 */;
+ Real x;
+equation
+ x = 1.0;
+end ArrayTests.ArrayConst4;
+")})));
+
+	parameter Integer i = 1;
+	Real x = testConst[i];
+end ArrayConst4;
+
+
 
   annotation (uses(Modelica(version="3.0.1")));
 end ArrayTests;

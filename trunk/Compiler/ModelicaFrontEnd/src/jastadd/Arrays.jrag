@@ -1533,7 +1533,11 @@ aspect Arrays {
 	
 	syn int[] FExp.myIndices() {
 		if (ndims() == 0) {
-			return new int[] { ceval().intValue() };
+			try {
+				return new int[] { ceval().intValue() };
+			} catch (UnsupportedOperationException e) {
+				return new int[] { 0 };
+			}
 		} else if (ndims() == 1 && !size().isUnknown()) {
 			int[] indices = new int[size().get(0)];
 			int j = 0;

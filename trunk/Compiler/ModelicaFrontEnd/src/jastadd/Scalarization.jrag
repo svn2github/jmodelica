@@ -432,7 +432,9 @@ aspect Scalarization {
 	 *        The translations should add array subscripts that are uses of the given names.
 	 * 
 	 * Any expression node that needs it's own for loop(s) should override this method, 
-	 * save <code>names</code> and create it's for loop in createArrayTemporaries().
+	 * save <code>names</code> and create it's for loop in createArrayTemporaries(). 
+	 * In this case, don't continue traversal here, do that in createArrayTemporaries()
+	 * instead (when we have updated names).
 	 */
 	public void ASTNode.addArrayUsesToIndexMap(HashMap<String,FExp> indexMap, ForNames names) {
 		for (ASTNode n : this)
@@ -461,7 +463,7 @@ aspect Scalarization {
 			useTempVar = true;
 			
 			// Create temp
-			FType type = (FType) type().scalarType().fullCopy();
+			FType type = (FType) type().scalarType().unboundCopy();
 			if (addVar) 
 				vars.add(new FFunctionVariable(type, tempVarName()));
 			clauses.add(new FAssignStmt(new FIdUse(tempVarName()), type.zeroLiteral()));
@@ -958,6 +960,25 @@ aspect Scalarization {
 		}
 	}
 	
+	public void FSubscriptedExp.createArrayTemporaries(List clauses, 
+			List vars, HashMap<String,FExp> indexMap, boolean addVar) {
+		super.createArrayTemporaries(clauses, vars, indexMap, addVar);
+		if (getFArraySubscripts().hasUnknownIndices() && inFunction()) {
+			String name = tempVarName();
+			if (addVar) {
+				FType type = (FType) getFExp().type().fullCopy();
+				vars.add(new FFunctionVariable(type, name));
+			}
+			
+			Array arr = getFExp().getArray();
+			for (Index i : arr.indices()) {
+				FExp exp = arr.get(i).scalarize(indexMap);
+				FIdUse use = new FIdUse(name, i.newFArraySubscripts());
+				clauses.add(new FAssignStmt(use, exp));
+			}
+		}
+	}
+	
 	/**
 	 * \brief Creates temporary varables for a record with the given name.
 	 * 
@@ -1299,8 +1320,13 @@ aspect Scalarization {
 	}
 	
 	public FExp FSubscriptedExp.scalarizeExp(HashMap<String,FExp> indexMap) {
-		Index i = getFArraySubscripts().scalarize(indexMap).asIndex();
-		return (FExp) getFExp().getArray().get(i).fullCopy();
+		FArraySubscripts fas = getFArraySubscripts().scalarize(indexMap);
+		if (getFArraySubscripts().hasUnknownIndices() && inFunction()) {
+			return new FIdUseExp(tempVarName(), fas);
+		} else {
+			Index i = fas.asIndex();
+			return getFExp().getArray().get(i).scalarize(indexMap);
+		}
 	}
 	
 	public FExp FMinMaxExp.scalarizeExp(HashMap<String,FExp> indexMap) {
