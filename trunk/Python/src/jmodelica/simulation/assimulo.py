@@ -134,6 +134,7 @@ class FMIODE(Explicit_Problem):
         self._sol_int  += [i]
         self._sol_bool += b
         
+        
     def f(self, t, y, sw=None):
         """
         The rhs (right-hand-side) for an ODE problem.
