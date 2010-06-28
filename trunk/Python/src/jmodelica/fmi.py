@@ -115,11 +115,13 @@ class FMIModel(object):
         if sys.platform == 'win32':
             suffix = '.dll'
             platform = 'win32'
-        elif sys.platform == 'linux2':
+        elif sys.platform == 'darwin':
             suffix = '.so'
             platform = 'linux32'
         else:
-            raise FMIException('Unsupported platform.')
+            suffix = '.so'
+            platform = 'linux32'
+
             
         #Create temp binary
         self._tempnames = unzip_FMU(archive=fmu, path=path, platform=platform)
@@ -145,11 +147,6 @@ class FMIModel(object):
         
         #Default values
         self.__t = None
-        
-        self._res_t = N.array([])
-        self._res_r = N.array([])
-        self._res_i = N.array([])
-        self._res_b = []
     
     def _load_c(self):
         """
@@ -186,8 +183,6 @@ class FMIModel(object):
         self._XMLStopTime = N.array(self._xmldoc._xpatheval('//DefaultExperiment/@stopTime'),dtype=N.double)
         self._XMLTolerance = N.array(self._xmldoc._xpatheval('//DefaultExperiment/@tolerance'),dtype=N.double)
         
-        #if self._XMLStartTime.size > 0:
-        #    self._XMLStartTime = self._XMLStartTime[0]
         if self._XMLStopTime.size > 0:
             self._XMLStopTime = self._XMLStopTime[0]
         
@@ -290,7 +285,11 @@ class FMIModel(object):
                         ('upcomingTimeEvent',self._fmiBoolean),
                         ('nextEventTime', self._fmiReal)]
                         
+        class pyEventInfo():
+            pass
+                        
         self._fmiEventInfo = fmiEventInfo
+        self._pyEventInfo = pyEventInfo()
         
         #Methods
         self._fmiInstantiateModel = self._dll.__getattr__(self._modelname+'_fmiInstantiateModel')
@@ -384,6 +383,9 @@ class FMIModel(object):
         """
         Sets the time.
         """
+        t = N.array(t)
+        if t.size > 1:
+            raise FMIException('Failed to set the time. The size of "t" is greater than one.')
         self.__t = t
         temp = self._fmiReal(t)
         self._fmiSetTime(self._model,temp)
@@ -408,6 +410,11 @@ class FMIModel(object):
         The property for setting and getting the continuous states at the
         current time-point.
         """
+        values = N.array(values)
+        if values.size != self._nContinuousStates:
+            raise FMIException('Failed to set the new continuous states. The number of values are not consistent' \
+                                ' with the number of continuous states.')
+        
         status = self._fmiSetContinuousStates(self._model, values, self._nContinuousStates)
         
         if status >= 3:
@@ -578,11 +585,11 @@ class FMIModel(object):
         Returns the event information from the FMU. The event information
         is a struct which contains,
         
-            iterationConverged          - Event iteration converged (if fmiTrue).
-            stateValueReferencesChanged - ValueReferences of states x changed (if fmiTrue).
-            stateValuesChanged          - Values of states x have changed (if fmiTrue).
-            terminateSimulation         - Error, terminate simulation (if fmiTrue).
-            upcomingTimeEvent           - if fmiTrue, nextEventTime is the next time event.
+            iterationConverged          - Event iteration converged (if True).
+            stateValueReferencesChanged - ValueReferences of states x changed (if True).
+            stateValuesChanged          - Values of states x have changed (if True).
+            terminateSimulation         - Error, terminate simulation (if True).
+            upcomingTimeEvent           - if True, nextEventTime is the next time event.
             nextEventTime               - The next time event.
         
             Parameters::
@@ -599,7 +606,15 @@ class FMIModel(object):
                 nextEventTime = model.event_info.nextEventTime
         
         """
-        return self._eventInfo
+        
+        self._pyEventInfo.iterationConverged          = self._eventInfo.iterationConverged == self._fmiTrue
+        self._pyEventInfo.stateValueReferencesChanged = self._eventInfo.stateValueReferencesChanged == self._fmiTrue
+        self._pyEventInfo.stateValuesChanged          = self._eventInfo.stateValuesChanged == self._fmiTrue
+        self._pyEventInfo.terminateSimulation         = self._eventInfo.terminateSimulation == self._fmiTrue
+        self._pyEventInfo.upcomingTimeEvent           = self._eventInfo.upcomingTimeEvent == self._fmiTrue
+        self._pyEventInfo.nextEventTime               = self._eventInfo.nextEventTime
+        
+        return self._pyEventInfo
     
     event_info = property(get_event_info)
     
@@ -1025,7 +1040,6 @@ class FMIModel(object):
         print 'Logger'
         pass
     def fmiCallbackAllocateMemory(self, nobj, size):
-        print 'Allocate'
         return self._calloc(nobj,size)
 
     def fmiCallbackFreeMemory(self, obj):

@@ -191,21 +191,23 @@ class FMIODE(Explicit_Problem):
         """
         This method is called when Assimulo finds an event.
         """
-        self._model.event_info.iterationConverged = self._model._fmiFalse
-        
-        while self._model.event_info.iterationConverged == self._model._fmiFalse:
+        eInfo = self._model.event_info
+        eInfo.iterationConverged = False
+
+        while eInfo.iterationConverged == False:
             self._model.update_event()
-            
+            eInfo = self._model.event_info
+
             #Retrieve solutions (if needed)
-            if self._model.event_info.iterationConverged == self._model._fmiFalse:
+            if eInfo.iterationConverged == False:
                 pass
         
         #Check if the event affected the state values and if so sets them
-        if self._model.event_info.stateValuesChanged == self._model._fmiTrue:
+        if eInfo.stateValuesChanged:
             solver.y[-1] = self._model.real_x
         
         #Get new nominal values.
-        if self._model.event_info.stateValueReferencesChanged == self._model._fmiTrue:
+        if eInfo.stateValueReferencesChanged:
             solver.atol = 0.01*self.rtol*self._model.real_x_nominal
         
         
