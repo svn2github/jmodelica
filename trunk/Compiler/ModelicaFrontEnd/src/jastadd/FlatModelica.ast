@@ -898,14 +898,19 @@ InstDefaultArgument : InstFunctionArgument ::= FExp;
 abstract FBuiltInFunctionCall : FAbstractFunctionCall ::= /OriginalArg:InstFunctionArgument*/;
 
 /**
+ * \brief Base class for calls to built-in unary functions.
+ */
+abstract FUnaryBuiltIn : FBuiltInFunctionCall ::= FExp;
+
+/**
  * \brief noEvent built-in function.
  */
-FNoEventExp : FBuiltInFunctionCall ::= FExp;
+FNoEventExp : FUnaryBuiltIn;
 
 /**
  * \brief Abs built-in function.
  */
-FAbsExp : FBuiltInFunctionCall ::= FExp;
+FAbsExp : FUnaryBuiltIn;
 
 /**
  * \brief Base class for calls to built-in mathematical functions.
@@ -915,32 +920,32 @@ abstract FMathematicalFunctionCall : FBuiltInFunctionCall ::= FExp;
 /**
  * \brief Sin built-in function.
  */
-FSinExp : FMathematicalFunctionCall ::= ;
+FSinExp : FMathematicalFunctionCall;
 
 /**
  * \brief Cos built-in function.
  */
-FCosExp : FMathematicalFunctionCall ::= ;
+FCosExp : FMathematicalFunctionCall;
 
 /**
  * \brief Tan built-in function.
  */
-FTanExp : FMathematicalFunctionCall ::= ;
+FTanExp : FMathematicalFunctionCall;
 
 /**
  * \brief Asin built-in function.
  */
-FAsinExp : FMathematicalFunctionCall ::= ;
+FAsinExp : FMathematicalFunctionCall;
 
 /**
  * \brief ACos built-in function.
  */
-FAcosExp : FMathematicalFunctionCall ::= ;
+FAcosExp : FMathematicalFunctionCall;
 
 /**
  * \brief ATan built-in function.
  */
-FAtanExp : FMathematicalFunctionCall ::= ;
+FAtanExp : FMathematicalFunctionCall;
 
 /**
  * \brief Atan2 built-in function.
@@ -950,42 +955,42 @@ FAtan2Exp : FMathematicalFunctionCall ::= Y:FExp;
 /**
  * \brief Sinh built-in function.
  */
-FSinhExp : FMathematicalFunctionCall ::= ;
+FSinhExp : FMathematicalFunctionCall;
 
 /**
  * \brief Cosh built-in function.
  */
-FCoshExp : FMathematicalFunctionCall ::= ;
+FCoshExp : FMathematicalFunctionCall;
 
 /**
  * \brief Tanh built-in function.
  */
-FTanhExp : FMathematicalFunctionCall ::= ;
+FTanhExp : FMathematicalFunctionCall;
 
 /**
  * \brief Exp built-in function.
  */
-FExpExp : FMathematicalFunctionCall ::= ;
+FExpExp : FMathematicalFunctionCall;
 
 /**
  * \brief Log built-in function.
  */
-FLogExp : FMathematicalFunctionCall ::= ;
+FLogExp : FMathematicalFunctionCall;
 
 /**
  * \brief Log10 built-in function.
  */
-FLog10Exp : FMathematicalFunctionCall ::= ;
+FLog10Exp : FMathematicalFunctionCall;
 
 /**
  * \brief Sqrt built-in function.
  */
-FSqrtExp : FMathematicalFunctionCall ::= ;
+FSqrtExp : FMathematicalFunctionCall;
 
 /**
  * \brief Ndims built-in function.
  */
-FNdimsExp : FBuiltInFunctionCall ::= FExp;
+FNdimsExp : FUnaryBuiltIn;
 
 /**
  * \brief Size built-in function.
@@ -995,17 +1000,17 @@ FSizeExp : FBuiltInFunctionCall ::= FExp [Dim:FExp];
 /**
  * \brief integer() built-in function.
  */
-FIntegerExp : FBuiltInFunctionCall ::= FExp;
+FIntegerExp : FUnaryBuiltIn;
 
 /**
  * \brief Scalar built-in function.
  */
-FScalar : FBuiltInFunctionCall ::= FExp;
+FScalar : FUnaryBuiltIn;
 
 /**
  * \brief Transpose built-in function.
  */
-FTranspose : FBuiltInFunctionCall ::= FExp;
+FTranspose : FUnaryBuiltIn;
 
 /**
  * \brief Cross built-in function.
@@ -1015,7 +1020,7 @@ FCross : FBuiltInFunctionCall ::= X:FExp Y:FExp;
 /**
  * \brief Identity built-in function.
  */
-FIdentity : FBuiltInFunctionCall ::= FExp;
+FIdentity : FUnaryBuiltIn;
 
 /**
  * \brief Identity built-in function.
@@ -1060,7 +1065,22 @@ FMaxExp : FMinMaxExp;
 /**
  * \brief Sum built-in function.
  */
-FSumExp : FBuiltInFunctionCall ::= FExp;
+FSumExp : FUnaryBuiltIn;
+
+/**
+ * \brief Common base class for FInStream & FActualStream
+ */
+abstract FStreamBuiltIn : FUnaryBuiltIn;
+
+/**
+ * \brief InStream built-in function.
+ */
+FInStream : FStreamBuiltIn;
+
+/**
+ * \brief ActualStream built-in function.
+ */
+FActualStream : FStreamBuiltIn;
 
 /**
  * \brief Dummy node for unsupported built-in functions

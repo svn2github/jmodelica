@@ -143,6 +143,21 @@ aspect FlatTypeCheck {
 				  getFExp() + " has " + getFExp().ndims() + " dimension(s)");
   }
   
+  public void FStreamBuiltIn.typeCheck() {
+	  if (!getFExp().isAccessToStream()) 
+		  error("Argument of " + builtInName() + "() must be a stream variable");
+  }
+  
+  syn boolean FExp.isAccessToStream()  = false;
+  eq FIdUseExp.isAccessToStream()      = getFIdUse().isAccessToStream();
+  eq FInstAccessExp.isAccessToStream() = getInstAccess().isAccessToStream();
+  
+  syn boolean FIdUse.isAccessToStream()  = false;
+  eq FIdUseInstAccess.isAccessToStream() = getInstAccess().isAccessToStream();
+  
+  syn boolean InstAccess.isAccessToStream() = myInstComponentDecl().getComponentDecl().isStream();
+  
+  
   public void InstForIndex.typeCheck() {
 	  if (hasFExp() && !getFExp().type().isUnknown() && getFExp().ndims() != 1)
 		  error("The expression of for index " + name() + " must be a vector expression: " + 
@@ -358,6 +373,7 @@ aspect FlatTypeCheck {
   eq FNdimsExp.getOriginalArg(int i).argumentDefinedTypeValid()  = false;
   eq FSizeExp.getOriginalArg(int i).argumentDefinedTypeValid()   = i != 0;
   eq FInfArgsFunctionCall.getChild().argumentDefinedTypeValid()  = false;
+  eq FStreamBuiltIn.getChild().argumentDefinedTypeValid()        = false;
 
   /**
    * \brief Check if the type supplied is valid for this argument.

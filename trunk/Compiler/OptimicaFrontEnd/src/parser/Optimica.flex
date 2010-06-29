@@ -130,129 +130,126 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
 %%
 
 <YYINITIAL> {
-  "within"           { return newSymbol(Terminals.WITHIN); }  
-  "class"           { return newSymbol(Terminals.CLASS); }  
-  "model"           { return newSymbol(Terminals.MODEL); }
-  "block"           { return newSymbol(Terminals.BLOCK); }
-  "expandable"       { return newSymbol(Terminals.EXPANDABLE); }
-  "connector"       { return newSymbol(Terminals.CONNECTOR); }
-  "type"            { return newSymbol(Terminals.TYPE); }
-  "package"         { return newSymbol(Terminals.PACKAGE); }
-    "function"        { return newSymbol(Terminals.FUNCTION); }
-    "record"        { return newSymbol(Terminals.RECORD); }
+  "within"        { return newSymbol(Terminals.WITHIN); }  
+  "class"         { return newSymbol(Terminals.CLASS); }  
+  "model"         { return newSymbol(Terminals.MODEL); }
+  "block"         { return newSymbol(Terminals.BLOCK); }
+  "expandable"    { return newSymbol(Terminals.EXPANDABLE); }
+  "connector"     { return newSymbol(Terminals.CONNECTOR); }
+  "type"          { return newSymbol(Terminals.TYPE); }
+  "package"       { return newSymbol(Terminals.PACKAGE); }
+  "function"      { return newSymbol(Terminals.FUNCTION); }
+  "record"        { return newSymbol(Terminals.RECORD); }
   
-  "end"             { return newSymbol(Terminals.END); }
-  "external"             { return newSymbol(Terminals.EXTERNAL); }
+  "end"           { return newSymbol(Terminals.END); }
+  "external"      { return newSymbol(Terminals.EXTERNAL); }
   
   
-  "public"         { return newSymbol(Terminals.PUBLIC); }
-  "protected"      { return newSymbol(Terminals.PROTECTED); }
+  "public"        { return newSymbol(Terminals.PUBLIC); }
+  "protected"     { return newSymbol(Terminals.PROTECTED); }
   
-  "extends"         { return newSymbol(Terminals.EXTENDS); }
-  "constrainedby"         { return newSymbol(Terminals.CONSTRAINEDBY); }
+  "extends"       { return newSymbol(Terminals.EXTENDS); }
+  "constrainedby" { return newSymbol(Terminals.CONSTRAINEDBY); }
 
-  "flow"            { return newSymbol(Terminals.FLOW); }
-   "discrete"       { return newSymbol(Terminals.DISCRETE); }
-  "parameter"       { return newSymbol(Terminals.PARAMETER); }
-  "constant"        { return newSymbol(Terminals.CONSTANT); }
-  "input"           { return newSymbol(Terminals.INPUT); }
-  "output"          { return newSymbol(Terminals.OUTPUT); }
+  "flow"          { return newSymbol(Terminals.FLOW); }
+  "stream"        { return newSymbol(Terminals.STREAM); }
+
+  "discrete"      { return newSymbol(Terminals.DISCRETE); }
+  "parameter"     { return newSymbol(Terminals.PARAMETER); }
+  "constant"      { return newSymbol(Terminals.CONSTANT); }
+  "input"         { return newSymbol(Terminals.INPUT); }
+  "output"        { return newSymbol(Terminals.OUTPUT); }
   
-  "initial"         { return newSymbol(Terminals.INITIAL); }
-  "equation"        { return newSymbol(Terminals.EQUATION); }
+  "initial"       { return newSymbol(Terminals.INITIAL); }
+  "equation"      { return newSymbol(Terminals.EQUATION); }
+  "algorithm"     { return newSymbol(Terminals.ALGORITHM); }
+
   "initial" {WhiteSpace} "equation"    { addLineBreaks(yytext()); 
   										 return newSymbol(Terminals.INITIAL_EQUATION); }  
-  "algorithm"        { return newSymbol(Terminals.ALGORITHM); }
-     "initial" {WhiteSpace} "algorithm"   { addLineBreaks(yytext()); 
+  "initial" {WhiteSpace} "algorithm"   { addLineBreaks(yytext()); 
   										 return newSymbol(Terminals.INITIAL_ALGORITHM); }
-  "end" {WhiteSpace} "for"   { addLineBreaks(yytext()); 
-    return newSymbol(Terminals.END_FOR); }
 
-  "end" {WhiteSpace} "while"   { addLineBreaks(yytext()); 
-    return newSymbol(Terminals.END_WHILE); }
-
-  "end" {WhiteSpace} "if"   { addLineBreaks(yytext()); 
-    return newSymbol(Terminals.END_IF); }
-
+  "end" {WhiteSpace} "for"    { addLineBreaks(yytext()); 
+                                return newSymbol(Terminals.END_FOR); }
+  "end" {WhiteSpace} "while"  { addLineBreaks(yytext()); 
+                                return newSymbol(Terminals.END_WHILE); }
+  "end" {WhiteSpace} "if"     { addLineBreaks(yytext()); 
+                                return newSymbol(Terminals.END_IF); }
   "end" {WhiteSpace} "when"   { addLineBreaks(yytext()); 
-    return newSymbol(Terminals.END_WHEN); }
- 
-    "end" {WhiteSpace} {ID} { String s = yytext();
-  			  return newSymbol(Terminals.END_ID, s); }  										 
+                                return newSymbol(Terminals.END_WHEN); }
+  "end" {WhiteSpace} {ID}     { String s = yytext();
+  			                    return newSymbol(Terminals.END_ID, s); }  										 
   										 
-     "each"        { return newSymbol(Terminals.EACH); }
-    "final"        { return newSymbol(Terminals.FINAL); }   
-    "replaceable"        { return newSymbol(Terminals.REPLACEABLE); }
-    "redeclare"        { return newSymbol(Terminals.REDECLARE); }
-    "annotation"        { return newSymbol(Terminals.ANNOTATION); }
-    "import"        { return newSymbol(Terminals.IMPORT); }
-    "encapsulated"        { return newSymbol(Terminals.ENCAPSULATED); }
-    "partial"        { return newSymbol(Terminals.PARTIAL); }
-    "inner"        { return newSymbol(Terminals.INNER); }
-    "outer"        { return newSymbol(Terminals.OUTER); }
-    
-    "and"        { return newSymbol(Terminals.AND); }
-     "or"        { return newSymbol(Terminals.OR); }
-     "not"        { return newSymbol(Terminals.NOT); }
-     "true"        { return newSymbol(Terminals.TRUE); }
-     "false"        { return newSymbol(Terminals.FALSE); }
-     
-     "if"        { return newSymbol(Terminals.IF); }
-     "then"        { return newSymbol(Terminals.THEN); }
-     "else"        { return newSymbol(Terminals.ELSE); }
-     "elseif"        { return newSymbol(Terminals.ELSEIF); }
-     
-     "for"      { return newSymbol(Terminals.FOR); }
-     "loop"      { return newSymbol(Terminals.LOOP); }
-     "in"      { return newSymbol(Terminals.IN); }
-     
-     "while"      { return newSymbol(Terminals.WHILE); }
-
-	 "when"      { return newSymbol(Terminals.WHEN); }
-	 "elsewhen"      { return newSymbol(Terminals.ELSEWHEN); }
-	 
-	 "break"      { return newSymbol(Terminals.BREAK); }
-	 "return"      { return newSymbol(Terminals.RETURN); }
- 
- "connect"         { return newSymbol(Terminals.CONNECT); }
- "time"         { return newSymbol(Terminals.TIME); }
- "der"              { return newSymbol(Terminals.DER); }
-   "constraint"         { return newSymbol(Terminals.CONSTRAINT); }
-  "optimization"         { return newSymbol(Terminals.OPTIMIZATION); }
- 
+  "each"          { return newSymbol(Terminals.EACH); }
+  "final"         { return newSymbol(Terminals.FINAL); }   
+  "replaceable"   { return newSymbol(Terminals.REPLACEABLE); }
+  "redeclare"     { return newSymbol(Terminals.REDECLARE); }
+  "annotation"    { return newSymbol(Terminals.ANNOTATION); }
+  "import"        { return newSymbol(Terminals.IMPORT); }
+  "encapsulated"  { return newSymbol(Terminals.ENCAPSULATED); }
+  "partial"       { return newSymbol(Terminals.PARTIAL); }
+  "inner"         { return newSymbol(Terminals.INNER); }
+  "outer"         { return newSymbol(Terminals.OUTER); }
   
+  "and"           { return newSymbol(Terminals.AND); }
+  "or"            { return newSymbol(Terminals.OR); }
+  "not"           { return newSymbol(Terminals.NOT); }
+  "true"          { return newSymbol(Terminals.TRUE); }
+  "false"         { return newSymbol(Terminals.FALSE); }
   
-  "("               { return newSymbol(Terminals.LPAREN); }
-  ")"               { return newSymbol(Terminals.RPAREN); }
-  "{"               { return newSymbol(Terminals.LBRACE); }
-  "}"               { return newSymbol(Terminals.RBRACE); }
-  "["               { return newSymbol(Terminals.LBRACK); }	
-  "]"               { return newSymbol(Terminals.RBRACK); }	
-  ";"               { return newSymbol(Terminals.SEMICOLON); }
-  ":"               { return newSymbol(Terminals.COLON); }
-  "."               { return newSymbol(Terminals.DOT); }
-  ","               { return newSymbol(Terminals.COMMA); }
-  ".+"              { return newSymbol(Terminals.DOTPLUS); }  
-  ".-"              { return newSymbol(Terminals.DOTMINUS); }
-  ".*"              { return newSymbol(Terminals.DOTMULT); }
-  "./"              { return newSymbol(Terminals.DOTDIV); }
-  ".^"              { return newSymbol(Terminals.DOTPOW); }
+  "if"            { return newSymbol(Terminals.IF); }
+  "then"          { return newSymbol(Terminals.THEN); }
+  "else"          { return newSymbol(Terminals.ELSE); }
+  "elseif"        { return newSymbol(Terminals.ELSEIF); }
+  
+  "for"           { return newSymbol(Terminals.FOR); }
+  "loop"          { return newSymbol(Terminals.LOOP); }
+  "in"            { return newSymbol(Terminals.IN); }
+  
+  "while"         { return newSymbol(Terminals.WHILE); }
 
+  "when"          { return newSymbol(Terminals.WHEN); }
+  "elsewhen"      { return newSymbol(Terminals.ELSEWHEN); }
 
-  "+"               { return newSymbol(Terminals.PLUS); }  
-  "-"               { return newSymbol(Terminals.MINUS); }
-  "*"               { return newSymbol(Terminals.MULT); }
-  "/"               { return newSymbol(Terminals.DIV); }
-  "="               { return newSymbol(Terminals.EQUALS); }
-  ":="              { return newSymbol(Terminals.ASSIGN); }
-  "^"               { return newSymbol(Terminals.POW); }
+  "break"         { return newSymbol(Terminals.BREAK); }
+  "return"        { return newSymbol(Terminals.RETURN); }
+ 
+  "connect"       { return newSymbol(Terminals.CONNECT); }
+  "time"          { return newSymbol(Terminals.TIME); }
+  "der"           { return newSymbol(Terminals.DER); }
+  "constraint"    { return newSymbol(Terminals.CONSTRAINT); }
+  "optimization"  { return newSymbol(Terminals.OPTIMIZATION); }
+  
+  "("             { return newSymbol(Terminals.LPAREN); }
+  ")"             { return newSymbol(Terminals.RPAREN); }
+  "{"             { return newSymbol(Terminals.LBRACE); }
+  "}"             { return newSymbol(Terminals.RBRACE); }
+  "["             { return newSymbol(Terminals.LBRACK); }	
+  "]"             { return newSymbol(Terminals.RBRACK); }	
+  ";"             { return newSymbol(Terminals.SEMICOLON); }
+  ":"             { return newSymbol(Terminals.COLON); }
+  "."             { return newSymbol(Terminals.DOT); }
+  ","             { return newSymbol(Terminals.COMMA); }
+  ".+"            { return newSymbol(Terminals.DOTPLUS); }  
+  ".-"            { return newSymbol(Terminals.DOTMINUS); }
+  ".*"            { return newSymbol(Terminals.DOTMULT); }
+  "./"            { return newSymbol(Terminals.DOTDIV); }
+  ".^"            { return newSymbol(Terminals.DOTPOW); }
 
-  "<"               { return newSymbol(Terminals.LT); }  
-  "<="              { return newSymbol(Terminals.LEQ); }
-  ">"               { return newSymbol(Terminals.GT); }
-  ">="              { return newSymbol(Terminals.GEQ); }
-  "=="              { return newSymbol(Terminals.EQ); }
-  "<>"              { return newSymbol(Terminals.NEQ); }
+  "+"             { return newSymbol(Terminals.PLUS); }  
+  "-"             { return newSymbol(Terminals.MINUS); }
+  "*"             { return newSymbol(Terminals.MULT); }
+  "/"             { return newSymbol(Terminals.DIV); }
+  "="             { return newSymbol(Terminals.EQUALS); }
+  ":="            { return newSymbol(Terminals.ASSIGN); }
+  "^"             { return newSymbol(Terminals.POW); }
+
+  "<"             { return newSymbol(Terminals.LT); }  
+  "<="            { return newSymbol(Terminals.LEQ); }
+  ">"             { return newSymbol(Terminals.GT); }
+  ">="            { return newSymbol(Terminals.GEQ); }
+  "=="            { return newSymbol(Terminals.EQ); }
+  "<>"            { return newSymbol(Terminals.NEQ); }
   
   {STRING}  {  String s = yytext();
                addLineBreaks(s);
@@ -265,9 +262,9 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   {UNSIGNED_INTEGER}  { return newSymbol(Terminals.UNSIGNED_INTEGER, yytext()); }
   {UNSIGNED_NUMBER}   { return newSymbol(Terminals.UNSIGNED_NUMBER, yytext()); }
   
-   {Comment}         { addLineBreaks(yytext()); }
-  {NonBreakingWhiteSpace} 		{ }
-  {LineTerminator} 		{ lineBreakMap.put(yyline+1, yychar + yylength()); }
+  {Comment}                { addLineBreaks(yytext()); }
+  {NonBreakingWhiteSpace}  { }
+  {LineTerminator} 		   { lineBreakMap.put(yyline+1, yychar + yylength()); }
 
 }
 

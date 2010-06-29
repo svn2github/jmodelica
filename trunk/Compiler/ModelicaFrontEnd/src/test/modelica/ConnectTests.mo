@@ -842,10 +842,10 @@ end CauerLowPassAnalog;
 // TODO: These equations are wrong. Change test when stream equations are generated properly!
 model StreamTest1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
-         name="StreamTest1",
-         description="Stream variables: basic test",
-         flatModel="
+	 JModelica.UnitTesting.FlatteningTestCase(
+		 name="StreamTest1",
+		 description="Stream variables: basic test",
+		 flatModel="
 fclass ConnectTests.StreamTest1
  Real g.e.a;
  Real g.e.b;
@@ -881,6 +881,123 @@ end ConnectTests.StreamTest1;
 	
 	B g;
 end StreamTest1;
+
+
+// TODO: These equations are wrong. Change test when stream equations are generated properly!
+model StreamTest2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="StreamTest2",
+         description="Basic test of inStream() and actualStream()",
+         flatModel="
+fclass ConnectTests.StreamTest2
+ Real d.b;
+ Real d.c;
+ Real x;
+ Real y;
+equation
+ x = inStream(d.c);
+ y = actualStream(d.c);
+ d.b = 0;
+end ConnectTests.StreamTest2;
+")})));
+
+	connector A
+		flow Real b;
+		stream Real c;
+	end A;
+	
+	A d;
+	Real x;
+	Real y;
+equation
+	x = inStream(d.c);
+	y = actualStream(d.c);
+end StreamTest2;
+
+
+model StreamTest3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="StreamTest3",
+         description="Using inStream() and actualStream() on normal var in connector",
+         errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
+Semantic error at line 930, column 6:
+  Argument of inStream() must be a stream variable
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
+Semantic error at line 931, column 6:
+  Argument of actualStream() must be a stream variable
+")})));
+
+	connector A
+		Real a;
+		flow Real b;
+		stream Real c;
+	end A;
+	
+	A d;
+	Real x;
+	Real y;
+equation
+	x = inStream(d.a);
+	y = actualStream(d.a);
+end StreamTest3;
+
+
+model StreamTest4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="StreamTest4",
+         description="Using inStream() and actualStream() on flow var",
+         errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
+Semantic error at line 960, column 6:
+  Argument of inStream() must be a stream variable
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
+Semantic error at line 961, column 6:
+  Argument of actualStream() must be a stream variable
+")})));
+
+	connector A
+		Real a;
+		flow Real b;
+		stream Real c;
+	end A;
+	
+	A d;
+	Real x;
+	Real y;
+equation
+	x = inStream(d.b);
+	y = actualStream(d.b);
+end StreamTest4;
+
+
+model StreamTest5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="StreamTest5",
+         description="Using inStream() and actualStream() on normal var not in connector",
+         errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
+Semantic error at line 984, column 6:
+  Argument of inStream() must be a stream variable
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
+Semantic error at line 985, column 6:
+  Argument of actualStream() must be a stream variable
+")})));
+
+	Real a;
+	Real x;
+	Real y;
+equation
+	x = inStream(a);
+	y = actualStream(a);
+end StreamTest5;
 
 
 

@@ -1004,30 +1004,19 @@ aspect FlatExpressions {
 	public abstract FAbstractFunctionCall FAbstractFunctionCall.flatten(FQName prefix);
 	public abstract FBuiltInFunctionCall  FBuiltInFunctionCall.flatten(FQName prefix);
 	
+	public FBuiltInFunctionCall FUnaryBuiltIn.flatten(FQName prefix)             { return createNode(getFExp().flatten(prefix)); }
 	public FBuiltInFunctionCall FMathematicalFunctionCall.flatten(FQName prefix) { return createNode(getFExp().flatten(prefix)); }
 	public FAtan2Exp            FAtan2Exp.flatten(FQName prefix)                 { return new FAtan2Exp(getFExp().flatten(prefix), getY().flatten(prefix)); }
-	
-	public FAbsExp FAbsExp.flatten(FQName prefix) { return new FAbsExp(getFExp().flatten(prefix)); }
-	
-	public FNoEventExp FNoEventExp.flatten(FQName prefix) { return new FNoEventExp(getFExp().flatten(prefix)); }
-
-	public FIntegerExp FIntegerExp.flatten(FQName prefix) { return new FIntegerExp(getFExp().flatten(prefix)); }
 	
 	public FUnsupportedBuiltIn FUnsupportedBuiltIn.flatten(FQName prefix) { return null; }
 	
 	// These used to delegate to standard implementation for FExp.flatten(FQName).
 	public FScalar    FScalar.flatten(FQName prefix)    { return null; }
 	
-	public FIdentity  FIdentity.flatten(FQName prefix)  { return new FIdentity(getFExp().flatten(prefix)); }
-	public FTranspose FTranspose.flatten(FQName prefix) { return new FTranspose(getFExp().flatten(prefix)); }
 	public FCross     FCross.flatten(FQName prefix)     { return new FCross(getX().flatten(prefix), getY().flatten(prefix)); }
 	
 	public FMinMaxExp FMinMaxExp.flatten(FQName prefix) { 
 		return createNode(getX().flatten(prefix), hasY() ? getY().flatten(prefix) : null); 
-	}
-	
-	public FNdimsExp  FNdimsExp.flatten(FQName prefix) {
-		return new FNdimsExp(getFExp().flatten(prefix)); 
 	}
 	
 	public FSizeExp   FSizeExp.flatten(FQName prefix) {

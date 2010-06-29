@@ -347,6 +347,7 @@ aspect InheritedFactoryMethods {
 	public abstract FUnaryExp                 FUnaryExp.createEmptyNode();
 	public abstract FBooleanLitExp            FBooleanLitExp.createEmptyNode();   // No children, but can be useful
 	public abstract FBuiltInFunctionCall      FBuiltInFunctionCall.createEmptyNode();  // Used in BuiltInTranslator 
+	public abstract FUnaryBuiltIn             FUnaryBuiltIn.createEmptyNode();
 	public abstract FMathematicalFunctionCall FMathematicalFunctionCall.createEmptyNode();
 	public abstract FInfArgsFunctionCall      FInfArgsFunctionCall.createEmptyNode();
 	public abstract FMinMaxExp      		  FMinMaxExp.createEmptyNode();
@@ -434,20 +435,22 @@ aspect InheritedFactoryMethods {
 	public FSqrtExp  FSqrtExp.createEmptyNode()  { return new FSqrtExp();  }
 	
 	// Built-in function calls and function call-like operators
-	public FNdimsExp   FNdimsExp.createEmptyNode()   { return new FNdimsExp();   }
-	public FSizeExp    FSizeExp.createEmptyNode()    { return new FSizeExp();    }
-	public FIntegerExp FIntegerExp.createEmptyNode() { return new FIntegerExp(); }
-	public FScalar     FScalar.createEmptyNode()     { return new FScalar();     }
-	public FTranspose  FTranspose.createEmptyNode()  { return new FTranspose();  }
-	public FCross      FCross.createEmptyNode()      { return new FCross();      }
-	public FIdentity   FIdentity.createEmptyNode()   { return new FIdentity();   }
-	public FOnes       FOnes.createEmptyNode()       { return new FOnes();       }
-	public FZeros      FZeros.createEmptyNode()      { return new FZeros();      }
-	public FFillExp    FFillExp.createEmptyNode()    { return new FFillExp();    }
-	public FMinExp     FMinExp.createEmptyNode()     { return new FMinExp();     }
-	public FMaxExp     FMaxExp.createEmptyNode()     { return new FMaxExp();     }
-	public FSumExp     FSumExp.createEmptyNode()     { return new FSumExp();     }
-	public FAbsExp     FAbsExp.createEmptyNode()     { return new FAbsExp();     }
+	public FNdimsExp     FNdimsExp.createEmptyNode()     { return new FNdimsExp();     }
+	public FSizeExp      FSizeExp.createEmptyNode()      { return new FSizeExp();      }
+	public FIntegerExp   FIntegerExp.createEmptyNode()   { return new FIntegerExp();   }
+	public FScalar       FScalar.createEmptyNode()       { return new FScalar();       }
+	public FTranspose    FTranspose.createEmptyNode()    { return new FTranspose();    }
+	public FCross        FCross.createEmptyNode()        { return new FCross();        }
+	public FIdentity     FIdentity.createEmptyNode()     { return new FIdentity();     }
+	public FOnes         FOnes.createEmptyNode()         { return new FOnes();         }
+	public FZeros        FZeros.createEmptyNode()        { return new FZeros();        }
+	public FFillExp      FFillExp.createEmptyNode()      { return new FFillExp();      }
+	public FMinExp       FMinExp.createEmptyNode()       { return new FMinExp();       }
+	public FMaxExp       FMaxExp.createEmptyNode()       { return new FMaxExp();       }
+	public FSumExp       FSumExp.createEmptyNode()       { return new FSumExp();       }
+	public FAbsExp       FAbsExp.createEmptyNode()       { return new FAbsExp();       }
+	public FInStream     FInStream.createEmptyNode()     { return new FInStream();     }
+	public FActualStream FActualStream.createEmptyNode() { return new FActualStream(); }
 	
 	/**
 	 * \brief Create new node of same class as this, with the specified 
@@ -486,6 +489,16 @@ aspect InheritedFactoryMethods {
 	 */
 	public FMathematicalFunctionCall FMathematicalFunctionCall.createNode(FExp exp) {
 		FMathematicalFunctionCall node = createEmptyNode();
+		node.setFExp(exp);
+		return node;
+	}
+	
+	/**
+	 * \brief Create new node of same class as this, with the specified 
+	 *        children.
+	 */
+	public FUnaryBuiltIn FUnaryBuiltIn.createNode(FExp exp) {
+		FUnaryBuiltIn node = createEmptyNode();
 		node.setFExp(exp);
 		return node;
 	}

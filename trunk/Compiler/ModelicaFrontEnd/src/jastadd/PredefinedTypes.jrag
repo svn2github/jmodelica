@@ -256,6 +256,14 @@ aspect PredefinedTypes {
 +"function product end product;\n"
 +"function symmetric end symmetric;\n"
 +"function skew end skew;\n"
++"function inStream\n"
++"  input Real v;\n"      // Type not used
++"  output Real o;\n"     // Type not used
++"end inStream;\n"
++"function actualStream\n"
++"  input Real n;\n"      // Type not used
++"  output Real o;\n"     // Type not used
++"end actualStream;\n"
 +"function sin \"sine\"\n"
 +"  input Modelica.SIunits.Angle u;\n"
 +"  output Real y;\n"
