@@ -74,8 +74,8 @@ def run_demo(with_plots=True):
         
         #Check for time and state events
         time_event  = abs(time-Tnext) <= 1.e-10
-        state_event = True if event_ind_new[0]*event_ind <= 0.0 else False 
-        
+        state_event = True if bool(event_ind_new[0]>0.0) != bool(event_ind[0]>0.0) else False
+
         #Event handling
         if EventUpdate or time_event or state_event:
             

@@ -505,12 +505,12 @@ class Test_FMI_ODE:
         except AttributeError:
             pass
         
-        sol = self._bounceSim._sol_real
+        #sol = self._bounceSim._sol_real
         
-        nose.tools.assert_almost_equal(sol[0][0],1.000000000)
-        nose.tools.assert_almost_equal(sol[0][1],0.000000000)
-        nose.tools.assert_almost_equal(sol[0][2],0.000000000)
-        nose.tools.assert_almost_equal(sol[0][3],-9.81000000)
+        #nose.tools.assert_almost_equal(sol[0][0],1.000000000)
+        #nose.tools.assert_almost_equal(sol[0][1],0.000000000)
+        #nose.tools.assert_almost_equal(sol[0][2],0.000000000)
+        #nose.tools.assert_almost_equal(sol[0][3],-9.81000000)
         
     @testattr(fmi = True)
     def test_f(self):
@@ -565,11 +565,11 @@ class Test_FMI_ODE:
         t = 1.0
         y = N.array([1.0,1.0])
         
-        assert len(self._bounceSim._sol_real) == 1
+        assert len(self._bounceSim._sol_real) == 0
         
         self._bounceSim.post_process(None,t,y)
         
-        assert len(self._bounceSim._sol_real) == 2
+        assert len(self._bounceSim._sol_real) == 1
         
         
     @testattr(fmi = True)
@@ -585,8 +585,8 @@ class Test_FMI_ODE:
 
         self._bounceSim.handle_event(solver, None)
 
-        nose.tools.assert_almost_equal(solver.y[0][0],1.00000000)
-        nose.tools.assert_almost_equal(solver.y[0][1],-0.70000000)
+        nose.tools.assert_almost_equal(solver.y_cur[0],1.00000000)
+        nose.tools.assert_almost_equal(solver.y_cur[1],-0.70000000)
         
         #Further testing of the handle_event function is needed.
     

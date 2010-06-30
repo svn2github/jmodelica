@@ -127,12 +127,12 @@ class FMIODE(Explicit_Problem):
         self._sol_bool = []
         
         #Stores the first time point
-        [r,i,b] = self._model.save_time_point()
+        #[r,i,b] = self._model.save_time_point()
         
-        self._sol_time += [self._model.t]
-        self._sol_real += [r]
-        self._sol_int  += [i]
-        self._sol_bool += b
+        #self._sol_time += [self._model.t]
+        #self._sol_real += [r]
+        #self._sol_int  += [i]
+        #self._sol_bool += b
         
         
     def f(self, t, y, sw=None):
@@ -204,7 +204,7 @@ class FMIODE(Explicit_Problem):
         
         #Check if the event affected the state values and if so sets them
         if eInfo.stateValuesChanged:
-            solver.y[-1] = self._model.real_x
+            solver.y_cur = self._model.real_x
         
         #Get new nominal values.
         if eInfo.stateValueReferencesChanged:
