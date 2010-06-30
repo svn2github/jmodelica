@@ -203,7 +203,7 @@ aspect ConstantEvaluation {
 	     * @return Value converted to string.
 	     */
         public String stringValue() { 
-        	return new Integer(value).toString(); 
+        	return Integer.toString(value); 
         }
         
         /**
@@ -272,7 +272,7 @@ aspect ConstantEvaluation {
 	     * @return Value converted to string.
 	     */
         public String stringValue() { 
-        	return new Double(value).toString(); 
+        	return Double.toString(value); 
         }
         
         /**
@@ -343,7 +343,7 @@ aspect ConstantEvaluation {
 	     * @return Value converted to string.
 	     */
         public String stringValue() { 
-        	return new Boolean(value).toString(); 
+        	return Boolean.toString(value); 
         }
         
         /**
@@ -687,8 +687,8 @@ aspect ConstantEvaluation {
 	syn CValue InstPrimitive.ceval(Index i) {
     	CValue val = new CValueUnknown();
 	    if ((isConstant() || isParameter()) && indices().isValid(i)) {
-	    	FExp bexp = myBindingInstExp();
-	    	if (bexp != null) {
+	    	if (hasBindingFExp()) {
+		    	FExp bexp = getBindingFExp();
 	    		if (!bexp.type().isUnknown())
 	    			val = bexp.isArray() ? bexp.getArray().get(i).ceval() : bexp.ceval();
 	    	} else {

@@ -236,8 +236,20 @@ end ArrayTests.ArrayTest7;
     x[3] = 3;
   end ArrayTest7;
 
-// TODO: This model isn't flattened properly
   model ArrayTest8
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ArrayTest8",
+         description="Test flattening of variables with sizes given in modifications",
+         flatModel="
+fclass ArrayTests.ArrayTest8
+ parameter Integer m[1].n = 1 /* 1 */;
+ Real m[1].x[1] = ones(m[1].n);
+ parameter Integer m[2].n = 2 /* 2 */;
+ Real m[2].x[2] = ones(m[2].n);
+end ArrayTests.ArrayTest8;
+")})));
+
     model M
       parameter Integer n = 3;
       Real x[n] = ones(n);

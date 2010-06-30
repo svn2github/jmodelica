@@ -20,7 +20,7 @@ model ConnectTests
   class ConnectTest1
 
   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="ConnectTest2",
+      JModelica.UnitTesting.FlatteningTestCase(name="ConnectTest1",
         description="Test of generation of connection equations.",
                                                flatModel=
 "fclass ConnectTests.ConnectTest1

@@ -680,44 +680,24 @@ aspect FlatNames {
         lastFQNamePart().setFArraySubscriptsOpt(o);
     }
     
-    syn lazy FQName InstNode.getFQNamePrefix() {
-        FQName prefix = retrieveFQName();
-        FQName myName = prefix!=null? new FQName(prefix):
-                                      new FQName();
-        return myName;
-    }
+    syn lazy FQName InstNode.getFQNamePrefix() = new FQName(retrieveFQName());
     
     syn lazy FQName InstNode.getFQName() = getFQNamePrefix();
     
     eq InstComponentDecl.getFQName() {
-        
-        FQName prefix = retrieveFQName();
-        FQName myName = prefix!=null? new FQName(prefix):
-                                      new FQName();
-    
+        FQName myName = new FQName(retrieveFQName());
         Opt array_subscr = new Opt();
-        if (isPrimitive() && isArrayDecl() ) {
-            array_subscr.setChild((FArraySubscripts)getFArraySubscripts().flatten(myName),0);
-        }
-        
-        myName.addFQNamePart(new FQNamePart(name(),array_subscr));
+        if (isAssignable() && isArrayDecl()) 
+            array_subscr.setChild(size().flattenFArraySubscripts(myName), 0);
+        myName.addFQNamePart(new FQNamePart(name(), array_subscr));
         return myName;
     }
     
     eq InstArrayComponentDecl.getFQName() {
-        FQName prefix = retrieveFQName();
-
-        FQName myName = prefix!=null? new FQName(prefix):
-                                      new FQName();
-        
-        FArraySubscripts fas = new FArraySubscripts(
-                new List().add(new FExpSubscript(new FIntegerLitExp(getIndex()+""))));
-
-        if (myName.hasFArraySubscripts()) {
-            myName.getFArraySubscripts().addFSubscript(fas.getFSubscript(0));
-        } else {
-            myName.lastFQNamePart().setFArraySubscripts(fas);
-        }
+        FQName myName = new FQName(retrieveFQName());
+        if (!myName.hasFArraySubscripts())
+        	myName.setLastFArraySubscripts(new FArraySubscripts());
+        myName.getFArraySubscripts().addFSubscript(new FExpSubscript(getIndex()));
         return myName;
     }
 
@@ -728,11 +708,11 @@ aspect FlatNames {
     eq InstReplacingComposite.getOriginalInstComponent().retrieveFQName() = retrieveFQName();
     eq InstReplacingPrimitive.getOriginalInstComponent().retrieveFQName() = retrieveFQName();
     eq InstReplacingShortClassDecl.getChild().retrieveFQName() = retrieveFQName();
-    eq InstClassDecl.getChild().retrieveFQName() = null; //getFQName();
-    eq InstForIndex.getChild().retrieveFQName() = null;
+    eq InstClassDecl.getChild().retrieveFQName() = new FQName(); //getFQName();
+    eq InstForIndex.getChild().retrieveFQName() = new FQName();
     
-    eq InstRoot.getChild().retrieveFQName() = null;
-    eq SourceRoot.getProgram().retrieveFQName() = null;
+    eq InstRoot.getChild().retrieveFQName() = new FQName();
+    eq SourceRoot.getProgram().retrieveFQName() = new FQName();
 
     syn String FQName.prefixName(int n) {
         StringBuilder str = new StringBuilder();

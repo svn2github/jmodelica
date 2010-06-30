@@ -1695,17 +1695,17 @@ aspect ArrayHelpers {
 		/**
 		 * \brief Create a new flattened FArraySubscripts object describing this size.
 		 */
-		public FArraySubscripts flattenFArraySubscripts() {
+		public FArraySubscripts flattenFArraySubscripts(FQName prefix) {
 			FArraySubscripts fas = new FArraySubscripts();
 			for (int i = 0; i < size.length; i++)
-				fas.addFSubscript(flattenFSubscript(i));
+				fas.addFSubscript(flattenFSubscript(i, prefix));
 			return fas;
 		}
 		
 		/**
 		 * \brief Create a new flattened FSubscript for dimension <code>i</code>.
 		 */
-		protected FSubscript flattenFSubscript(int i) {
+		protected FSubscript flattenFSubscript(int i, FQName prefix) {
 			return size[i] == UNKNOWN ? new FColonSubscript() : new FExpSubscript(size[i]);
 		}
 		
@@ -2229,9 +2229,9 @@ aspect ArrayHelpers {
 		/**
 		 * \brief Create a new flattened FSubscript for dimension <code>i</code>.
 		 */
-		protected FSubscript flattenFSubscript(int i) {
-			return exps[i] == null ? super.flattenFSubscript(i) : 
-				new FExpSubscript(exps[i].flatten(new FQName()));
+		protected FSubscript flattenFSubscript(int i, FQName prefix) {
+			return exps[i] == null ? super.flattenFSubscript(i, prefix) : 
+				new FExpSubscript(exps[i].flatten(prefix));
 		}
 		
 		/**

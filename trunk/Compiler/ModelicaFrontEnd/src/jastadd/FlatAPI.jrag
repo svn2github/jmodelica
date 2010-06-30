@@ -876,10 +876,11 @@ aspect Attributes {
 	eq FAttribute.matches(String str) = getName().name().equals(str);
 	
 	syn lazy FAttribute FVariable.findAttribute(String name) = findMatching(getFAttributes(), name);
-	syn boolean FVariable.attributeSet(FAttribute a) = (a != null) ? a.getAttributeSet() : false;
-	syn FExp    FVariable.attributeExp(FAttribute a) = (a != null && a.hasValue()) ? a.getValue() : null;
-	syn boolean FVariable.attributeSet(String name)  = attributeSet(findAttribute(name));
-	syn FExp    FVariable.attributeExp(String name)  = attributeExp(findAttribute(name));
+	syn boolean FVariable.attributeSet(FAttribute a)   = (a != null) ? a.getAttributeSet() : false;
+	syn FExp    FVariable.attributeExp(FAttribute a)   = (a != null && a.hasValue()) ? a.getValue() : null;
+	syn boolean FVariable.attributeSet(String name)    = attributeSet(findAttribute(name));
+	syn FExp    FVariable.attributeExp(String name)    = attributeExp(findAttribute(name));
+	syn String  FVariable.attributeString(String name) = attributeCValueString(name).stringValue();
 	
 	syn CValue FVariable.attributeCValueString(String name) {
 		FAttribute a = findAttribute(name);
@@ -933,8 +934,11 @@ aspect Attributes {
 	syn int     FIntegerVariable.maxAttribute()       = maxAttributeCValue().intValue();
 
 	// start attribute
-	syn boolean FVariable.startAttributeSet()           = attributeSet("start");
-	syn FExp    FVariable.startAttributeExp()           = attributeExp("start");
+	syn boolean FVariable.useBindingExpAsStart()  = 
+		(isDependentParameter() && !startAttributeSet()) || isIndependentConstant();
+	
+	syn boolean FVariable.startAttributeSet()     = attributeSet("start");
+	syn FExp    FVariable.startAttributeExp()     = attributeExp("start");
 	
 	syn CValue FVariable.startAttributeCValue()   = new CValueUnknown();
 	eq FRealVariable.startAttributeCValue()       = attributeCValueReal("start", 0.0);
@@ -963,6 +967,10 @@ aspect Attributes {
 	syn FExp    FRealVariable.nominalAttributeExp()    = attributeExp("nominal");
 	syn CValue  FRealVariable.nominalAttributeCValue() = attributeCValueReal("nominal", 1.0);
 	syn double  FRealVariable.nominalAttribute()       = nominalAttributeCValue().realValue();
+
+	syn boolean FDerivativeVariable.nominalAttributeSet()    = myDifferentiatedVariable().nominalAttributeSet();
+	syn FExp    FDerivativeVariable.nominalAttributeExp()    = myDifferentiatedVariable().nominalAttributeExp();
+	syn CValue  FDerivativeVariable.nominalAttributeCValue() = myDifferentiatedVariable().nominalAttributeCValue();
 				
 }
 

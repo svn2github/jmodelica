@@ -267,7 +267,7 @@ aspect Constructors {
 	 */
 	public FFunctionArray.FFunctionArray(FType type, String name) {
 		this(new Opt(), type, new Opt(), new FQName(name));
-		getFQName().setLastFArraySubscripts(type.size().flattenFArraySubscripts());
+		getFQName().setLastFArraySubscripts(type.size().flattenFArraySubscripts(new FQName()));
 	}
 	
 	/**
