@@ -192,6 +192,10 @@ class FMIODE(Explicit_Problem):
         """
         This method is called when Assimulo finds an event.
         """
+        #Moving data to the model
+        self._model.t = solver.t_cur
+        self._model.real_x = solver.y_cur
+        
         eInfo = self._model.event_info
         eInfo.iterationConverged = False
 
