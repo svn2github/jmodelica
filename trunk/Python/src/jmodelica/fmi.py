@@ -644,7 +644,7 @@ class FMIModel(object):
     
     def get_version(self):
         """
-        Returns the FMI version of the Model which is was generated according.
+        Returns the FMI version of the Model which it was generated according.
             
             Parameters::
             

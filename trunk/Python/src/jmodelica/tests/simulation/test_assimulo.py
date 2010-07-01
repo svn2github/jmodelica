@@ -581,6 +581,8 @@ class Test_FMI_ODE:
         self._bounceSim._model.real_x = y
         solver = lambda x:1
         solver.rtol = 1.e-4
+        solver.t_cur = 1.0
+        solver.y_cur = y
         solver.y = [y]
 
         self._bounceSim.handle_event(solver, None)
@@ -595,7 +597,11 @@ class Test_FMI_ODE:
         """
         This tests the functionality of the method completed_step.
         """
-        assert self._bounceSim.completed_step(None) == 0
+        y = N.array([1.,1.])
+        solver = lambda x:1
+        solver.t_cur = 1.0
+        solver.y_cur = y
+        assert self._bounceSim.completed_step(solver) == 0
         #Further testing of the completed step function is needed.
         
         

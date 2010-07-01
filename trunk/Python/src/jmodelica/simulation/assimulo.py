@@ -178,6 +178,8 @@ class FMIODE(Explicit_Problem):
         #Moving data to the model
         self._model.t = t
         self._model.real_x = y
+        #Evaluating the rhs (Have to evaluate the values in the model)
+        rhs = self._model.real_dx
         
         #Retrieves the time-point
         [r,i,b] = self._model.save_time_point()
@@ -195,6 +197,8 @@ class FMIODE(Explicit_Problem):
         #Moving data to the model
         self._model.t = solver.t_cur
         self._model.real_x = solver.y_cur
+        #Evaluating the rhs (Have to evaluate the values in the model)
+        rhs = self._model.real_dx
         
         eInfo = self._model.event_info
         eInfo.iterationConverged = False
@@ -220,6 +224,12 @@ class FMIODE(Explicit_Problem):
         """
         Method which is called at each successful step.
         """
+        #Moving data to the model
+        self._model.t = solver.t_cur
+        self._model.real_x = solver.y_cur
+        #Evaluating the rhs (Have to evaluate the values in the model)
+        rhs = self._model.real_dx
+        
         if self._model.step_event():
             self._logg_step_event += [solver.t_cur]
             self.handle_event(solver,[0]) #Event have been detect, call event iteration.
