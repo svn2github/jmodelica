@@ -125,6 +125,7 @@ class FMIODE(Explicit_Problem):
         self._sol_real = []
         self._sol_int  = []
         self._sol_bool = []
+        self._logg_step_event = []
         
         #Stores the first time point
         #[r,i,b] = self._model.save_time_point()
@@ -216,10 +217,20 @@ class FMIODE(Explicit_Problem):
         Method which is called at each successful step.
         """
         if self._model.fmiCompletedIntegratorStep():
+            self._logg_step_event += [solver.t_cur]
             self.handle_event(solver,[0]) #Event have been detect, call event iteration.
             return 1 #Tell to reinitiate the solver.
         else:
             return 0
+            
+    def print_step_info(self):
+        """
+        Prints the information about step events.
+        """
+        print '\nStep-event information:\n'
+        for i in range(len(self._logg_step_event)):
+            print 'Event at time: %e\n'%self._logg_step_event[i]
+        print '\nNumber of events: ',len(self._logg_step_event)
         
         
 
