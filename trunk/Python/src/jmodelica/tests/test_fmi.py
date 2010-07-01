@@ -103,7 +103,7 @@ class Test_FMI:
         pass
         
     @testattr(fmi = True)
-    def test_fmiBoolean(self):
+    def test_boolean(self):
         """
         This tests the functionality of setting/getting fmiBoolean.
         """
@@ -111,17 +111,17 @@ class Test_FMI:
         pass 
 
     @testattr(fmi = True)
-    def test_fmiReal(self):
+    def test_real(self):
         """
         This tests the functionality of setting/getting fmiReal.
         """
-        const = self._bounce.get_fmiReal([3,4])
+        const = self._bounce.get_real([3,4])
         
         nose.tools.assert_almost_equal(const[0],-9.81000000)
         nose.tools.assert_almost_equal(const[1],0.70000000)
     
     @testattr(fmi = True)
-    def test_fmiInteger(self):
+    def test_integer(self):
         """
         This tests the functionality of setting/getting fmiInteger.
         """
@@ -129,7 +129,7 @@ class Test_FMI:
         pass 
         
     @testattr(fmi = True)    
-    def test_fmiString(self):
+    def test_string(self):
         """
         This tests the functionality of setting/getting fmiString.
         """

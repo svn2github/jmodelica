@@ -36,11 +36,11 @@ def run_demo(with_plots=True):
     event_ind = bouncing_fmu.event_ind
     
     #For retrieving the solutions use,
-    #bouncing_fmu.get_fmiReal,get_fmiInteger,get_fmiBoolean,get_fmiString (valueref)
+    #bouncing_fmu.get_real,get_integer,get_boolean,get_string (valueref)
     
     #Values for the solution
     t_sol = [Tstart]
-    h_sol = [bouncing_fmu.get_fmiReal([0])]
+    h_sol = [bouncing_fmu.get_real([0])]
     
     #Main integration loop.
     time = Tstart
@@ -60,7 +60,7 @@ def run_demo(with_plots=True):
         bouncing_fmu.t = time
         
         #Set the inputs at the current time (if any)
-        #bouncing_fmu.set_fmiReal,set_fmiInteger,set_fmiBoolean,set_fmiString (valueref, values)
+        #bouncing_fmu.set_real,set_integer,set_boolean,set_string (valueref, values)
         
         #Set the states at t = time (Perform the step)
         x = x + h*dx
@@ -69,15 +69,15 @@ def run_demo(with_plots=True):
         #Get the event indicators at t = time
         event_ind_new = bouncing_fmu.event_ind
         
-        #Inform the model about an accepted step
-        EventUpdate = bouncing_fmu.fmiCompletedIntegratorStep()
+        #Inform the model about an accepted step and check for step events
+        step_event = bouncing_fmu.step_event()
         
         #Check for time and state events
         time_event  = abs(time-Tnext) <= 1.e-10
         state_event = True if bool(event_ind_new[0]>0.0) != bool(event_ind[0]>0.0) else False
 
         #Event handling
-        if EventUpdate or time_event or state_event:
+        if step_event or time_event or state_event:
             
             eInfo = bouncing_fmu.event_info
             eInfo.iterationConverged = False
@@ -89,7 +89,7 @@ def run_demo(with_plots=True):
 
                 #Retrieve solutions (if needed)
                 if eInfo.iterationConverged == False:
-                    #bouncing_fmu.get_fmiReal,get_fmiInteger,get_fmiBoolean,get_fmiString (valueref)
+                    #bouncing_fmu.get_real,get_integer,get_boolean,get_string (valueref)
                     pass
             
             #Check if the event affected the state values and if so sets them
@@ -110,10 +110,10 @@ def run_demo(with_plots=True):
         event_ind = event_ind_new
         
         #Retrieve solutions at t=time for outputs
-        #bouncing_fmu.get_fmiReal,get_fmiInteger,get_fmiBoolean,get_fmiString (valueref)
+        #bouncing_fmu.get_real,get_integer,get_boolean,get_string (valueref)
         
         t_sol += [time]
-        h_sol += [bouncing_fmu.get_fmiReal([0])]
+        h_sol += [bouncing_fmu.get_real([0])]
     
     
     #Plot the solution

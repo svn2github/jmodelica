@@ -216,7 +216,7 @@ class FMIODE(Explicit_Problem):
         """
         Method which is called at each successful step.
         """
-        if self._model.fmiCompletedIntegratorStep():
+        if self._model.step_event():
             self._logg_step_event += [solver.t_cur]
             self.handle_event(solver,[0]) #Event have been detect, call event iteration.
             return 1 #Tell to reinitiate the solver.
@@ -229,7 +229,7 @@ class FMIODE(Explicit_Problem):
         """
         print '\nStep-event information:\n'
         for i in range(len(self._logg_step_event)):
-            print 'Event at time: %e\n'%self._logg_step_event[i]
+            print 'Event at time: %e'%self._logg_step_event[i]
         print '\nNumber of events: ',len(self._logg_step_event)
         
         

@@ -574,9 +574,9 @@ class FMIModel(object):
             
                 [r,i,b] = model.save_time_point()
         """
-        sol_real = self.get_fmiReal(self._save_cont_valueref[0])
-        sol_int  = self.get_fmiInteger(self._save_cont_valueref[1])
-        sol_bool = self.get_fmiBoolean(self._save_cont_valueref[2])
+        sol_real = self.get_real(self._save_cont_valueref[0])
+        sol_int  = self.get_integer(self._save_cont_valueref[1])
+        sol_bool = self.get_boolean(self._save_cont_valueref[2])
         
         return sol_real, sol_int, sol_bool
     
@@ -705,7 +705,7 @@ class FMIModel(object):
         """
         return self._nContinuousStates, self._nEventIndicators
     
-    def get_fmiReal(self, valueref):
+    def get_real(self, valueref):
         """
         Returns the real-values from the valuereference(s).
         
@@ -719,7 +719,7 @@ class FMIModel(object):
                 
             Example::
             
-                val = model.get_fmiReal([232])
+                val = model.get_real([232])
         """
         valueref = N.array(valueref, dtype=N.uint32)
         nref = len(valueref)
@@ -732,7 +732,7 @@ class FMIModel(object):
             
         return values
         
-    def set_fmiReal(self, valueref, values):
+    def set_real(self, valueref, values):
         """
         Sets the real-values in the FMU as defined by the valuereference(s).
         
@@ -748,7 +748,7 @@ class FMIModel(object):
         
             Example::
             
-                model.set_fmiReal([234,235],[2.34,10.4])
+                model.set_real([234,235],[2.34,10.4])
         
         """
         valueref = N.array(valueref, dtype=N.uint32)
@@ -764,7 +764,7 @@ class FMIModel(object):
             raise FMIException('Failed to set the Real values.')
         
         
-    def get_fmiInteger(self, valueref):
+    def get_integer(self, valueref):
         """
         Returns the integer-values from the valuereference(s).
         
@@ -778,7 +778,7 @@ class FMIModel(object):
                 
             Example::
             
-                val = model.get_fmiInteger([232])
+                val = model.get_integer([232])
         """
         valueref = N.array(valueref, dtype=N.uint32)
         nref = len(valueref)
@@ -791,7 +791,7 @@ class FMIModel(object):
             
         return values
         
-    def set_fmiInteger(self, valueref, values):
+    def set_integer(self, valueref, values):
         """
         Sets the integer-values in the FMU as defined by the valuereference(s).
         
@@ -807,7 +807,7 @@ class FMIModel(object):
         
             Example::
             
-                model.set_fmiInteger([234,235],[12,-3])
+                model.set_integer([234,235],[12,-3])
         
         """
         valueref = N.array(valueref, dtype=N.uint32)
@@ -823,7 +823,7 @@ class FMIModel(object):
             raise FMIException('Failed to set the Integer values.')
         
         
-    def get_fmiBoolean(self, valueref):
+    def get_boolean(self, valueref):
         """
         Returns the boolean-values from the valuereference(s).
         
@@ -837,7 +837,7 @@ class FMIModel(object):
                 
             Example::
             
-                val = model.get_fmiBoolean([232])
+                val = model.get_boolean([232])
         """
         valueref = N.array(valueref, dtype=N.uint32)
         nref = len(valueref)
@@ -860,7 +860,7 @@ class FMIModel(object):
         
         return bol
         
-    def set_fmiBoolean(self, valueref, values):
+    def set_boolean(self, valueref, values):
         """
         Sets the boolean-values in the FMU as defined by the valuereference(s).
         
@@ -876,7 +876,7 @@ class FMIModel(object):
         
             Example::
             
-                model.set_fmiBoolean([234,235],[True,False])
+                model.set_boolean([234,235],[True,False])
         
         """
         valueref = N.array(valueref, dtype=N.uint32)
@@ -891,7 +891,7 @@ class FMIModel(object):
         if status != 0:
             raise FMIException('Failed to set the Boolean values.')
         
-    def get_fmiString(self, valueref):
+    def get_string(self, valueref):
         """
         Returns the string-values from the valuereference(s).
         
@@ -905,7 +905,7 @@ class FMIModel(object):
                 
             Example::
             
-                val = model.get_fmiString([232])
+                val = model.get_string([232])
         """
         valueref = N.array(valueref, dtype=N.uint32)
         nref = len(valueref)
@@ -918,7 +918,7 @@ class FMIModel(object):
             
         return values
     
-    def set_fmiString(self, valueref, values):
+    def set_string(self, valueref, values):
         """
         Sets the string-values in the FMU as defined by the valuereference(s).
         
@@ -934,7 +934,7 @@ class FMIModel(object):
         
             Example::
             
-                model.set_fmiString([234,235],['text','text'])
+                model.set_string([234,235],['text','text'])
         
         """
         valueref = N.array(valueref, dtype=N.uint32)
@@ -949,7 +949,7 @@ class FMIModel(object):
         if status != 0:
             raise FMIException('Failed to set the String values.')
         
-    def get_fmiNominal(self, valueref):
+    def get_nominal(self, valueref):
         """
         Returns the nominal value from valueref.
         """
@@ -960,7 +960,7 @@ class FMIModel(object):
         else:
             return float(values[0])
     
-    def fmiCompletedIntegratorStep(self):
+    def step_event(self):
         """
         Call the internal FMI function: fmiCompletedIntegratorStep.
         """
@@ -982,16 +982,16 @@ class FMIModel(object):
         
         #Set the start attributes
         if len(self._XMLStartRealValues) > 0:
-            self.set_fmiReal(self._XMLStartRealKeys, self._XMLStartRealValues)
+            self.set_real(self._XMLStartRealKeys, self._XMLStartRealValues)
 
         if len(self._XMLStartIntegerValues) > 0:
-            self.set_fmiInteger(self._XMLStartIntegerKeys, self._XMLStartIntegerValues)
+            self.set_integer(self._XMLStartIntegerKeys, self._XMLStartIntegerValues)
 
         if len(self._XMLStartBooleanValues) > 0:
-            self.set_fmiBoolean(self._XMLStartBooleanKeys, self._XMLStartBooleanValues)
+            self.set_boolean(self._XMLStartBooleanKeys, self._XMLStartBooleanValues)
 
         if len(self._XMLStartStringValues) > 0:
-            self.set_fmiString(self._XMLStartStringKeys, self._XMLStartStringValues)
+            self.set_string(self._XMLStartStringKeys, self._XMLStartStringValues)
 
         #Trying to set the initial time from the xml file, else 0.0
         if self.t == None:
@@ -1380,11 +1380,11 @@ def export_result_dymola(model, data, file_name='', format='txt'):
             if name in params_names_without_alias: # Put parameters in data set
                 datatype = model.get_data_type(name)
                 if datatype == 'Real':
-                    str_text = str_text + (" %12.12f" % (model.get_fmiReal([ref])))
+                    str_text = str_text + (" %12.12f" % (model.get_real([ref])))
                 if datatype == 'Integer':
-                    str_text = str_text + (" %12.12f" % (model.get_fmiInteger([ref])))
+                    str_text = str_text + (" %12.12f" % (model.get_integer([ref])))
                 if datatype == 'Boolean':
-                    str_text = str_text + (" %12.12f" % (float(model.get_fmiBoolean([ref]))))
+                    str_text = str_text + (" %12.12f" % (float(model.get_boolean([ref]))))
         f.write(str_text)
         f.write('\n')
         f.write("%12.12f" % data[-1,0])
