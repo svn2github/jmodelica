@@ -210,7 +210,7 @@ model = Model('CSTR_CSTR_Opt')
 
       <mediaobject>
         <imageobject>
-          <imagedata fileref="Images/RLC.png" scalefit="1" width="60%"></imagedata>
+          <imagedata fileref="images/RLC.png" scalefit="1" width="60%"></imagedata>
         </imageobject>
       </mediaobject>
     </figure>
@@ -271,7 +271,7 @@ P.show()
 
       <mediaobject>
         <imageobject>
-          <imagedata fileref="Images/Result_RLC.svg" scalefit="1" width="60%"></imagedata>
+          <imagedata fileref="images/Result_RLC.svg" scalefit="1" width="60%"></imagedata>
         </imageobject>
       </mediaobject>
     </figure>

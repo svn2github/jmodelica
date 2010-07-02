@@ -1,0 +1,489 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter version="5.0" xmlns="http://docbook.org/ns/docbook"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:xs="http://www.w3.org/2001/XMLSchema"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+  <title>FMI Interface</title>
+
+  <para>FMI (Functional Mock-up Interface) is a standard for exchanging models
+  between different modelling and simulation environments. FMI defines a
+  C-interface and a set of C-functions for which the communication between the
+  model and the simulation environment is to be handled. Models are currently
+  described as ODEs with time-, state and step-events with the intention to
+  extend the standard to also cover DAEs. A model is distributed in a zip-file
+  with the extension '.fmu' and consists of several files. The important ones
+  are mainly the '.xml'-file, which contains the definition of all variables
+  and then the C-functions which can either be provided in source and/or
+  binary form. For more information regarding the FMI standard, please visit
+  http://www.functional-mockup-interface.org/.</para>
+
+  <section>
+    <title>Overview of JModelica.org FMI package</title>
+
+    <para>Our FMI-interface is written in Python and is intended to be a close
+    copy of the defined C-interface for an FMU. The interface is located in
+    "jmodelica.fmi" and consist of the class FMIModel together with methods
+    for unzipping the FMU and for writing the result. Connected to this
+    interface is a wrapper for JModelica.org's simulation package to enable an
+    easy simulation of the FMUs. The simulation wrapper is located in
+    "jmodelica.simulation.assimulo", FMIODE.</para>
+
+    <para>Below is a list of the defined FMI C-interface and its counterpart
+    in our Python package. There is also one-to-one map to the C-functions. These functions are also located in FMIModel and is named with a leading underscore together with the same name as specified in the standard.</para>
+
+    <informaltable border="0">
+      <tr>
+      <th>FMI C-Interface</th>
+      <th>FMI Python Interface</th>
+      </tr>
+      <tr>
+      <td>const char* fmiGetModelTypesPlatform()</td>
+      <td>string FMIModel.get_validplatforms()</td>
+      </tr>
+      <tr>
+      <td>const char* fmiGetVersion()</td>
+      <td>string FMIModel.get_version()</td>
+      </tr>
+      <tr>
+      <td>fmiComponent fmiInstantiateModel(...)</td>
+      <td>FMIModel.__init__</td>
+      </tr>
+      <tr>
+      <td>struct fmiCallbackFunctions</td>
+      <td>...</td>
+      </tr>
+      <tr>
+      <td>void fmiFreeModelInstance(fmiComponent c)</td>
+      <td>FMIModel.__del__</td>
+      </tr>
+      <tr>
+      <td>fmiStatus fmiSetDebugLogging(...)</td>
+      <td>...</td>
+      </tr>
+      <tr>
+      <td>fmiStatus fmiSetTime(...)</td>
+      <td>FMIModel.t (property)</td>
+      </tr>
+      <tr>
+      <td>fmiStatus fmi(Get/Set)ContinuousStates(...)</td>
+      <td>FMIModel.real_x (property)</td>
+      </tr>
+      <tr>
+      <td>fmiStatus fmiCompletedIntegratorStep(...)</td>
+      <td>boolean FMIModel.step_event()</td>
+      </tr>
+      <tr>
+      <td>fmiStatus fmiSetReal/Integer/Boolean/String(...)</td>
+      <td>none FMIModel.set_real/integer/boolean/string(valueref,values)</td>
+      </tr>
+      <tr>
+      <td>fmiStatus fmiInitialize(...)</td>
+      <td>none FMIModel.initialize() (also sets the start attributes)</td>
+      </tr>
+      <tr>
+      <td>struct fmiEventInfo</td>
+      <td>FMIModel.event_info (get property)</td>
+      </tr>
+      <tr>
+      <td>fmiStatus fmiGetDerivatives(...)</td>
+      <td>numpy.array FMIModel.real_dx (get property)</td>
+      </tr>
+      <tr>
+      <td>fmiStatus fmiGetEventIndicators(...)</td>
+      <td>numpy.array FMIModel.event_ind (get property)</td>
+      </tr>
+      <tr>
+      <td>fmiStatus fmiGetReal/Integer/Boolean/String(...)</td>
+      <td>numpy.array FMIModel.get_real/integer/boolean/string(valueref)</td>
+      </tr>
+      <tr>
+      <td>fmiStatus fmiEventUpdate(...)</td>
+      <td>none FMIModel.update_event()</td>
+      </tr>
+      <tr>
+      <td>fmiStatus fmiGetNominalContinuousStates(...)</td>
+      <td>FMIModel.real_x_nominal (get property)</td>
+      </tr>
+      <tr>
+      <td>fmiStatus fmiGetStateValueReferences(...)</td>
+      <td>numpy.array FMIModel.get_continuous_value_reference(self):</td>
+      </tr>
+      <tr>
+      <td>fmiStatus fmiTerminate(...)</td>
+      <td>FMIModel.__del__</td>
+      </tr>
+    </informaltable>
+    
+    <para>
+    It is also recommended to have a look at the interactive help from IPython by using for instance,
+    </para>
+    
+    <programlisting language="Python">
+    FMIModel.get_real?
+    </programlisting>
+  
+  </section>
+  <section>
+  <title>Examples</title>
+  
+  <para>
+  In the next two sections it will be shown how to use the JModelica.org platform both for simulation of a FMU using the raw Python interface and also to simulate a FMU using JModelica.org's simulation package.
+  </para>
+  
+   <para>The Python commands in these examples may be copied and pasted
+      directly into a Python shell, in some cases with minor modifications.
+      Alternatively, they may be copied into a text file, which also is the recommended way.</para>
+  
+  <section>
+    <title>Example using the raw interface</title>
+
+    <para>This example shows how to use the raw (JModelica.org) FMI interface
+    for simulation of an FMU. The FMU that is to be simulated is the bouncing
+    ball example from Qtronics FMU SDK. This example is written similar to the
+    example in the documentation of the 'Functional Mock-up Interface for
+    Model Exchange' version 1.0 (http://www.functional-mockup-interface.org/).
+    The example is to be simulated using explicit Euler.</para>
+
+    <para>The bouncing ball consists of two equations, </para>
+
+    <para>
+    der(h) = v
+    </para>
+    <para> 
+    der(v) = -g 
+    </para>
+    
+    <para>
+    and one event function, h &lt; 0 where we
+    turn, 
+    </para>
+    
+    <para>
+    v = -e*v. 
+    </para>
+    
+    <para>
+    Here 'h' is the height, g the gravity and v the velocity.
+    The starting values are, h=1, v=0, e=0.7 and g = 9.81.
+    </para>
+
+    <section>
+      <title>Implementation</title>
+
+      <para>We first start by importing the necessary modules,</para>
+
+      <programlisting language="Python">
+        import numpy as N 
+        import pylab as P #Used for plotting
+        from jmodelica.fmi import FMIModel #The FMI Interface
+        </programlisting>
+
+      <para>Next, we have to load the FMU and initialize the model,</para>
+
+      <programlisting language="Python">
+        #Load the FMU by specifying the fmu and the directory
+        bouncing_fmu = FMIModel('bouncingBall.fmu', '/path/to/FMU/')
+
+        Tstart = 0.5 #The start time.
+        Tend   = 3.0 #The final simulation time.
+        
+        bouncing_fmu.t = Tstart #Set the start time before the initialization.
+        
+        bouncing_fmu.initialize() #Initialize the model. Also sets all the start attributes
+                                  #defined in the XML file.
+        </programlisting>
+
+      <para>The first line loads the FMU and connects the C-functions of the
+      model to Python together with loading the information from the
+      '.xml'-file. Then we define the start-time which is default to the
+      start-time in the '.xml'-file and if there is no start-time in the
+      '.xml' it defaults to zero. The model is also initialized, which is
+      needed before we start our simulation.</para>
+
+      <programlisting language="Python">
+        #Get Continuous States
+        x = bouncing_fmu.real_x
+        #Get the Nominal Values
+        x_nominal = bouncing_fmu.real_x_nominal
+        #Get the Event Indicators
+        event_ind = bouncing_fmu.event_ind
+        
+        #Values for the solution
+        t_sol = [Tstart]
+        h_sol = [bouncing_fmu.get_real([0])]
+        </programlisting>
+        
+    <para>
+    Here we have retrieved the continuous states together with the nominal values and the event indicators. In our case the nominal values are all equal to one. This information is available in the '.xml'-file. We also create lists which is used for storing the result. What's left before we can start the integration loop is to define the step-size.
+    </para>
+        
+      <programlisting language="Python">
+        time = Tstart
+        Tnext = Tend #Used for time events
+        dt = 0.01 #Step-size
+      </programlisting>
+    
+    <para>
+    We are now ready to create our main integration loop.
+    </para>
+    
+      <programlisting language="Python">
+        #Main integration loop.
+        while time &lt; Tend and not bouncing_fmu.event_info.terminateSimulation:
+            #Compute the derivative
+            dx = bouncing_fmu.real_dx
+            
+            #Advance
+            time = time + h
+            
+            #Set the time
+            bouncing_fmu.t = time
+            
+            #Set the inputs at the current time (if any)
+            #bouncing_fmu.set_real,set_integer,set_boolean,set_string (valueref, values)
+            
+            #Set the states at t = time (Perform the step)
+            x = x + h*dx
+            bouncing_fmu.real_x = x
+    </programlisting>
+    
+    <para>
+    This is the integration loop for advancing the solution one step using the explicit Euler method. We loop until we have reached the final time or if the FMU reported that the simulation is to be terminated (event_info.terminateSimulation). In the start of the loop the derivatives of the continuous states are retrieved and then the simulation time is just incremented by the step-size and set to the model. It could also be the case that the model is depended on inputs which can be set using the set_(real/...) methods. 
+    </para>
+    <para>
+    Note that only variables defined in the '.xml'-file to be inputs can be set using the set_(real/...) methods.
+    </para>
+    
+    <para>
+    The step is performed by calculating the new states (x+h*dx) and setting the values into the model.
+    </para>
+    
+    <programlisting language="Python">
+            #Get the event indicators at t = time
+            event_ind_new = bouncing_fmu.event_ind
+            
+            #Inform the model about an accepted step and check for step event.
+            step_event = bouncing_fmu.step_event()
+            
+            #Check for time and state events
+            time_event  = abs(time-Tnext) &lt;= 1.e-10
+            state_event = True if bool(event_ind_new[0]&gt;0.0) != bool(event_ind[0]&gt;0.0) else False
+    </programlisting>
+    
+    <para>
+    We also have to monitor and check for events during the simulation. Events can be of either type, time-, state- or step events. The time events are check by continuously monitor the current time and the time where the next time event (Tnext) occurs towards a small epsilon. State events are basically checked against sign changes of the event functions. Step events are monitored in the FMU, in the method fmiCompletedIntegratorStep and return True if any event handling is necessary. If an event have occurred, it needs to handled and an example is shown below,
+    </para>
+    
+    <programlisting language="Python">
+            #Event handling
+            if step_event or time_event or state_event:
+                
+                eInfo = bouncing_fmu.event_info
+                eInfo.iterationConverged = False
+                
+                #Event iteration
+                while eInfo.iterationConverged == False:
+                    bouncing_fmu.update_event()
+                    eInfo = bouncing_fmu.event_info
+
+                    #Retrieve solutions (if needed)
+                    if eInfo.iterationConverged == False:
+                        #bouncing_fmu.get_real,get_integer,get_boolean,get_string (valueref)
+                        pass
+                
+                #Check if the event affected the state values and if so sets them
+                if eInfo.stateValuesChanged:
+                    x = bouncing_fmu.real_x
+            
+                #Get new nominal values.
+                if eInfo.stateValueReferencesChanged:
+                    #atol = 0.01*rtol*bouncing_fmu.real_x_nominal
+                    pass
+                    
+                #Check for new time event
+                if eInfo.upcomingTimeEvent:
+                    Tnext = min(eInfo.nextEventTime, Tend)
+                else:
+                    Tnext = Tend
+    </programlisting>
+    
+    <para>
+    So if an event occurred, we enter the iteration loop where we loop until the solution of the new states have converged. During this iteration we can also retrieve the intermediate values with the normal 'get' methods. At this point 'eInfo' contains information about the changes made in the iteration. If the state values have changed, they are retrieved and if the state references have changed for example in the case with dynamic state selection, new absolute tolerances are calculated with the new nominal values. Finally the model is checked for a new time event.
+    </para>
+    
+    <programlisting language="Python">
+            event_ind = event_ind_new
+            
+            #Retrieve solutions at t=time for outputs
+            #bouncing_fmu.get_real,get_integer,get_boolean,get_string (valueref)
+            
+            t_sol += [time]
+            h_sol += [bouncing_fmu.get_real([0])]
+    </programlisting>
+    
+    <para>
+    In the end of the loop, the solution is stored and the old event indicators are stored for use in the next loop.
+    </para>
+
+      <para>Finally we can plot the solution,</para>
+
+      <programlisting language="Python">
+        #Plot the solution
+        P.plot(t_sol,h_sol)
+        P.title(bouncing_fmu.get_name())
+        P.xlabel('Height (m)')
+        P.ylabel('Time (s)')
+        P.show()
+        </programlisting>
+
+      <para>and the figure below shows the results.</para>
+
+      <figure>
+        <title>Simulation result</title>
+
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="images/bouncing.svg" scalefit="1" width="60%"></imagedata>
+          </imageobject>
+        </mediaobject>
+      </figure>
+    </section>
+  </section>
+
+  <section>
+     
+
+    <title>Example using a compiled FMU</title>
+    <para>
+     This example will show how to use the JModelica.org's FMI-interface together with its simulation package. The FMU to be simulated is the full Robot from the Modelica standard library examples. It consists of brakes, motors, gears and path planning. The model consists of 36 continuous states together with 98 event functions and also a few thousand constants/parameters. The FMU was generated using Dymola. 
+</para>
+    <figure>
+      <title>Full Robot</title>
+
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="images/fullRobot.png" scalefit="1" width="60%" />
+        </imageobject>
+      </mediaobject>
+    </figure>
+
+    <section>
+      <title>Implementation</title>
+
+      <para>We first start by importing the necessary modules,</para>
+
+      <programlisting language="Python">
+    import pylab as P  
+    from jmodelica.fmi import FMIModel
+    from jmodelica.simulation.assimulo import FMIODE, write_data
+    from jmodelica.io import ResultDymolaTextual
+    from Assimulo.Explicit_ODE import CVode
+    </programlisting>
+
+      <para>Then we load and initialize the FMU.</para>
+
+      <programlisting language="Python">
+    model = FMIModel('fullRobot.fmu')
+    model.initialize()
+    </programlisting>
+
+      <para>We can also retrieve the tolerances specified in the '.xml'-file,
+      shown below. If the tolerances are not specified in the '.xml'-file it
+      defaults to 1.0e-4. The absolute tolerances are defined to be, according
+      to the FMI specification, 0.01*rtol*x_nominal.</para>
+
+      <programlisting language="Python">
+    rtol, atol = model.get_tolerances()
+
+    modRobot = FMIODE(model)
+    simRobot = CVode(modRobot)
+    </programlisting>
+
+      <para>Here we also created our problem from the model, FMIODE and then
+      also created the solver from the problem, CVode. Then we set the
+      attributes to the solver.</para>
+
+      <programlisting language="Python">
+    simRobot.rtol  = rtol #Set the relative tolerance
+    simRobot.atol  = atol #Set the absolute tolerances
+    simRobot.iter  = 'Newton' #Set the iteration to Newton, default functional iteration
+    simRobot.discr = 'BDF' #Set the method to BDF, default Adams
+    </programlisting>
+
+      <para>Here we set the relative and absolute tolerances retrieved from the models default experiment. We also changed from the default solver, Adams to BDF and the iteration to Newton.For more information about the solver attributes
+      see, http://www.jmodelica.org/assimulo. Now we are ready to simulate the
+      problem, we want to simulate from time=0.0 to 1.8 with 1000
+      communication points so we give just that information to the simulate
+      method (default starting time is 0.0).</para>
+
+      <programlisting language="Python">
+    simRobot.simulate(1.8,1000)
+    </programlisting>
+
+      <para>The simulation statistics will be printed in the prompt. To store the result data on file, simply use the method write_result in the jmodelica.simulation.assimulo package.</para>
+
+      <programlisting language="Python">
+    write_result(simRobot)
+    </programlisting>
+
+    <para>
+    The result can then be loaded using the method ResultDymolaTextual from the I/O module.
+    </para>
+
+      <programlisting language="Python">
+    res = ResultDymolaTextual('fullRobot_result.txt')
+    </programlisting>
+    
+    <para>
+    To retrieve data about a variable from the result object (res), just use the method get_variable_data,
+    </para>
+    
+    <programlisting language="Python">
+    dq1 = res.get_variable_data('der(mechanics.q[1])')
+    dq6 = res.get_variable_data('der(mechanics.q[6])')
+    </programlisting>
+    
+    <para>
+    Now we have loaded and retrieved the variables of interest. So lets plot them.
+    </para>
+    
+    <programlisting language="Python">
+    P.plot(dq1.t,dq1.x,dq6.t,dq6.x)
+    P.legend(['der(mechanics.q[1])','der(mechanics.q[6])'])
+    P.xlabel('Time (s)')
+    P.ylabel('Joint Velocity (rad/s)')
+    P.title('Full Robot')
+    P.show()
+    </programlisting>
+    
+    <para>
+    Below is the resulting figure.
+    </para>
+    
+    <figure>
+      <title>Full Robot Results</title>
+
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="images/robot_result.svg" scalefit="1" width="60%" />
+        </imageobject>
+      </mediaobject>
+    </figure>
+    
+    </section>
+
+     
+  </section>
+  </section>
+  <section>
+    <title>Limitations</title>
+
+    <para>Cannot compile FMUs distributed in source code.</para>
+  </section>
+  
+</chapter>

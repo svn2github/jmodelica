@@ -35,6 +35,8 @@
   <xi:include href="Installation.xml" xpointer="element(/1)" />
 
   <xi:include href="GettingStarted.xml" xpointer="element(/1)" />
+  
+  <xi:include href="FMI.xml" xpointer="element(/1)" />
 
   <xi:include href="AdvancedTopics.xml" xpointer="element(/1)" />
 
