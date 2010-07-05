@@ -59,6 +59,11 @@ fpath_rlc = os.path.join(jm_home, path_to_examples, mofile_rlc)
 cpath_rlc = "RLC_Circuit"
 dll_rlc = cpath_rlc.replace('.','_',1)
 
+mofile_minit = os.path.join('files','must_initialize.mo')
+fpath_minit = os.path.join(jm_home, path_to_examples, mofile_minit)
+cpath_minit = "must_initialize"
+
+
 mc = ModelicaCompiler()
 mc.set_boolean_option('state_start_values_fixed',True)
 oc = OptimicaCompiler()
@@ -282,6 +287,15 @@ def test_exception_raised():
     cpath = "Pendulum_pack.Pendulum"   
     nose.tools.assert_raises(Exception, jmodelica.simulate, cpath)
     nose.tools.assert_raises(Exception, jmodelica.optimize, cpath)
+    
+@testattr(assimulo=True)
+def test_simulate_initialize_arg():
+    """ Test jmodelica.simulate alg_arg 'initialize'."""
+    nose.tools.assert_raises(Exception,
+                             jmodelica.simulate,
+                             cpath_minit,
+                             fpath_minit,
+                             alg_args={'initialize':False})
     
 
    

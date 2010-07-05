@@ -253,7 +253,8 @@ class AssimuloAlg(AlgorithmBase):
                       final_time=1.0,
                       num_communication_points=500,
                       solver='IDA',
-                      input_trajectory = N.array([])):
+                      input_trajectory = N.array([]),
+                      initialize=True):
         """ Set arguments for Assimulo algorithm.
         
         Parameters:
@@ -275,7 +276,9 @@ class AssimuloAlg(AlgorithmBase):
                 Trajectory data for model inputs. The argument should be a matrix
                 where the first column represents time and the following columns
                 represents input trajectory data. 
-                Default: An empty matrix, i.e., no input trajectories.               
+                Default: An empty matrix, i.e., no input trajectories.
+            initialize --
+                Do initialization if True, skip initialization if False.
         """
         self.start_time = start_time
         self.final_time = final_time
@@ -289,6 +292,7 @@ class AssimuloAlg(AlgorithmBase):
             raise InvalidAlgorithmArgumentException("The solver: "+solver+ " is unknown.")
             
         self.input_trajectory = input_trajectory
+        self.initialize = initialize
         
     def set_solver_options(self, 
                            solver_args={}):
@@ -314,7 +318,8 @@ class AssimuloAlg(AlgorithmBase):
     def solve(self):
         """ Runs the simulation. """
         # Only run initiate if model has been compiled with CppAD
-        if self.model.has_cppad_derivatives():
+        # and if alg arg 'initialize' is True.
+        if self.model.has_cppad_derivatives() and self.initialize:
             self.simulator.initiate()
         self.simulator.simulate(self.final_time, self.num_communication_points)
  
