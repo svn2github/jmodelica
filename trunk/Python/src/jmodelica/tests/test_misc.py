@@ -46,7 +46,7 @@ N.int = N.int32
 
 jm_home = jmodelica.environ['JMODELICA_HOME']
 path_to_examples = os.path.join('Python', 'jmodelica', 'examples')
-
+path_to_tests = os.path.join('Python','jmodelica','tests')
 
 #create Model objects
 mofile_vdp = os.path.join('files', 'VDP.mo')
@@ -60,7 +60,7 @@ cpath_rlc = "RLC_Circuit"
 dll_rlc = cpath_rlc.replace('.','_',1)
 
 mofile_minit = os.path.join('files','must_initialize.mo')
-fpath_minit = os.path.join(jm_home, path_to_examples, mofile_minit)
+fpath_minit = os.path.join(jm_home, path_to_tests, mofile_minit)
 cpath_minit = "must_initialize"
 
 
@@ -290,7 +290,15 @@ def test_exception_raised():
     
 @testattr(assimulo=True)
 def test_simulate_initialize_arg():
-    """ Test jmodelica.simulate alg_arg 'initialize'."""
+    """ Test jmodelica.simulate alg_arg 'initialize'. """
+    # This test is built on that simulation without initialization fails.
+    # Since simulation without initialization fails far down in Sundials
+    # no "proper" exception is thrown which means that I can only test that
+    # the general Exception is returned which means that the test is pretty
+    # unspecific (the test will pass for every type of error thrown). Therfore,
+    # I first test that running the simulation with default settings succeeds, so
+    # at least one knows that the error has with initialization to do.
+    nose.tools.ok_(jmodelica.simulate(cpath_minit, fpath_minit))
     nose.tools.assert_raises(Exception,
                              jmodelica.simulate,
                              cpath_minit,
