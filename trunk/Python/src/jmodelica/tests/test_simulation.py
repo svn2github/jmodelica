@@ -60,3 +60,43 @@ class TestFunction2(SimulationTest):
     def test_trajectories(self):
         self.assert_all_trajectories(['x', 'r.a'], same_span=True)
 
+
+class TestStreams1(SimulationTest):
+
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            'StreamExample.mo', 'StreamExample.Examples.Systems.HeatedGas_SimpleWrap',options={'enable_variable_scaling':True})
+
+    @testattr(assimulo = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=10, time_step = 0.1,)
+        self.run()
+        self.load_expected_data('StreamExample_Examples_Systems_HeatedGas_SimpleWrap_result.txt')
+
+    @testattr(assimulo = True)
+    def test_trajectories(self):
+        self.assert_all_trajectories(['linearResistanceWrap.port_a.m_flow',
+                                      'linearResistanceWrap.linearResistance.port_a.p',
+                                      'linearResistanceWrap.linearResistance.port_a.h_outflow',
+                                      ], same_span=True, rel_tol=1e-2, abs_tol=1e-2)
+
+
+class TestStreams2(SimulationTest):
+
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            'StreamExample.mo', 'StreamExample.Examples.Systems.HeatedGas',options={'enable_variable_scaling':True})
+
+    @testattr(assimulo = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=10, time_step = 0.1,)
+        self.run()
+        self.load_expected_data('StreamExample_Examples_Systems_HeatedGas_result.txt')
+
+    @testattr(assimulo = True)
+    def test_trajectories(self):
+        self.assert_all_trajectories(['linearResistance.port_a.m_flow',
+                                      'multiPortVolume.flowPort[1].h_outflow'
+                                      ], same_span=True, rel_tol=1e-2, abs_tol=1e-2)

@@ -57,6 +57,11 @@ aspect TransformCanonical {
 		genBindingEquations();
 		genAlgorithmFunctions();
 		scalarize();
+		
+		// This must be done after scalarization
+		enableStreamsRewrite();
+		root().flushAllRecursive();
+		
 		if (root().options.getBooleanOption("eliminate_alias_variables")) {
 			genAlias();
 			eliminateAliasVariables();
@@ -512,13 +517,14 @@ aspect TransformCanonical {
 		for (FAbstractEquation equation : 
 			getFEquationBlock(0).getFAbstractEquations()) {
 			// Iterate over all equations
-
 			// If the equation is an alias equation, then register
 			// the alias variables in the alias manager.
+//			System.out.println(equation.prettyPrint(" -- "));
 			if (equation.isAliasEquation()) {
 				AliasPair aliasPair = equation.aliasVariables();
 				aliasManager.addAliasVariables(aliasPair.fv1,
 						aliasPair.fv2, aliasPair.negated);
+//				System.out.println(aliasManager.printAliasSets());
 			}			
 		}	
 		//flush();

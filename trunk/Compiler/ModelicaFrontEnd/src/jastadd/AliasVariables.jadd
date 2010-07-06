@@ -61,17 +61,15 @@ aspect AliasVariables {
 	
 	eq FVariable.isNegated(){
 		AliasVariable av = myFClass().getAliasManager().getAliasVariable(this);
+		LinkedHashSet<AliasVariable> aliasSet =
+			myFClass().getAliasManager().getAliasSet(av);
 		if (av==null) {
 			return false;
 		} else {
-			return av.isNegated();
+			//return av.isNegated();
+			return !((av.isNegated() & myFClass().getAliasManager().getIterationVariable(aliasSet).isNegated()) |
+			(!av.isNegated() & !myFClass().getAliasManager().getIterationVariable(aliasSet).isNegated()));
 		}
-/*		if (aliasVariable()==null) {
-			return false;
-		} else {
-			return aliasVariable().isNegated();
-		}
-*/
 	}
 		
 	/**

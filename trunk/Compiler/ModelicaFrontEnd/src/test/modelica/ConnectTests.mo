@@ -253,7 +253,11 @@ fclass ConnectTests.ConnectTest6
 equation
  b1.a1.y[1:2] = b2.a2.y[1:2];
  b1.a1.x[1:2] + b2.a2.x[1:2] = zeros(2);
+ b1.a1.y[1:2] = b1.a2.y[1:2];
+  - ( b1.a1.x[1:2] ) - ( b1.a2.x[1:2] ) = zeros(2);
  b1.a2.x = zeros(2);
+ b2.a1.y[1:2] = b2.a2.y[1:2];
+  - ( b2.a1.x[1:2] ) - ( b2.a2.x[1:2] ) = zeros(2);
  b2.a1.x = zeros(2);
 end ConnectTests.ConnectTest6;
 ")})));
@@ -266,6 +270,8 @@ end ConnectTests.ConnectTest6;
 	model B
 		A a1;
 		A a2;
+          equation
+            connect(a1,a2);
 	end B;
 	
 	B b1;
@@ -838,8 +844,6 @@ extends Modelica.Electrical.Analog.Examples.CauerLowPassAnalog(R1(R=1),R2(R=1),V
 end CauerLowPassAnalog; 
 
 
-
-// TODO: These equations are wrong. Change test when stream equations are generated properly!
 model StreamTest1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
 	 JModelica.UnitTesting.FlatteningTestCase(
@@ -858,8 +862,6 @@ fclass ConnectTests.StreamTest1
 equation
  g.e.a = g.f.a;
   - ( g.e.b ) - ( g.f.b ) = 0;
- g.e.c = g.f.c;
- g.e.d = g.f.d;
  g.e.b = 0;
  g.f.b = 0;
 end ConnectTests.StreamTest1;
@@ -883,7 +885,6 @@ end ConnectTests.StreamTest1;
 end StreamTest1;
 
 
-// TODO: These equations are wrong. Change test when stream equations are generated properly!
 model StreamTest2
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.FlatteningTestCase(
@@ -891,28 +892,46 @@ model StreamTest2
          description="Basic test of inStream() and actualStream()",
          flatModel="
 fclass ConnectTests.StreamTest2
- Real d.b;
- Real d.c;
- Real x;
- Real y;
+ Real g.e.a;
+ Real g.e.b;
+ Real g.e.c;
+ Real g.e.d;
+ Real g.f.a;
+ Real g.f.b;
+ Real g.f.c;
+ Real g.f.d;
+ Real g.x;
+ Real g.y;
 equation
- x = inStream(d.c);
- y = actualStream(d.c);
- d.b = 0;
+ g.x = inStream(g.e.c);
+ g.y = actualStream(g.e.c);
+ g.e.a = g.f.a;
+  - ( g.e.b ) - ( g.f.b ) = 0;
+ g.e.b = 0;
+ g.f.b = 0;
 end ConnectTests.StreamTest2;
 ")})));
 
 	connector A
+		Real a;
 		flow Real b;
 		stream Real c;
+		stream Real d;
 	end A;
 	
-	A d;
-	Real x;
-	Real y;
-equation
-	x = inStream(d.c);
-	y = actualStream(d.c);
+	model B
+		A e;
+		A f;
+		Real x;
+		Real y;
+
+	equation
+         	x = inStream(e.c);
+	        y = actualStream(e.c);
+		connect(e,f);
+	end B;
+	
+	B g;
 end StreamTest2;
 
 

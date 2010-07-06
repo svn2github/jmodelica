@@ -113,13 +113,13 @@ int jmi_init_opt_get_initial(jmi_init_opt_t *jmi_init_opt, jmi_real_t *x_init);
  int jmi_init_opt_set_initial(jmi_init_opt_t *jmi_init_opt,
 		jmi_real_t *x_init);
 
- /**
+/**
   * \brief Set the initial point of the NLP based on values in the JMI model.
   *
   * @param jmi_init_opt A jmi_init_opt_t struct.
   * @return Error code.
   */
-int jmi_init_opt_set_initial_from_model(jmi_init_opt_t *jmi_init_opt);
+//int jmi_init_opt_set_initial_from_model(jmi_init_opt_t *jmi_init_opt);
 
 /**
  * \brief The main struct in the jmi_init_opt interface is jmi_init_opt_t.

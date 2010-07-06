@@ -1357,6 +1357,10 @@ aspect Scalarization {
 		}
 	}
 	
+	public FExp FStreamBuiltIn.scalarizeExp(HashMap<String,FExp> indexMap) {
+		return createNode(getFExp().scalarize(indexMap));
+	}
+	
 	public FExp FBinExp.scalarizeExp(HashMap<String,FExp> indexMap) { return createNode(getLeft().scalarize(indexMap), getRight().scalarize(indexMap)); }
 	public FExp FUnaryExp.scalarizeExp(HashMap<String,FExp> indexMap) { return createNode(getFExp().scalarize(indexMap)); }
 	public FExp FMathematicalFunctionCall.scalarizeExp(HashMap<String,FExp> indexMap) { return createNode(getFExp().scalarize(indexMap)); }

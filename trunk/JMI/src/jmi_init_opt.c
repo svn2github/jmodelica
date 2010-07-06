@@ -409,6 +409,12 @@ int jmi_init_opt_set_initial(jmi_init_opt_t *jmi_init_opt,
 	return 0;
 }
 
+/*
+int jmi_init_opt_set_initial_from_model(jmi_init_opt_t *jmi_init_opt) {
+
+}
+*/
+
 int jmi_init_opt_f(jmi_init_opt_t *jmi_init_opt, jmi_real_t *f) {
 	if (jmi_init_opt->jmi->init == NULL) {
 		return -1;

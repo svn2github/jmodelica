@@ -863,6 +863,22 @@ aspect FlatNames {
         FQName res = new FQName();
         if (getNumFQNamePart() > 0)
             res.addFQNamePart(getFQNamePart(0).fullCopy());
+        // This is to get printouts including array subscripts, since they
+        // are always expanded up to the second last name.
+        //res.scalarized = true;
+        return res;
+    }
+
+    /**
+     * \brief Create a copy of the name excluding the last name.
+     */
+    public FQName FQName.copyFullPrefix() {
+        FQName res = new FQName();
+        for (int i = 0; i < getNumFQNamePart()-1; i++)
+            res.addFQNamePart(getFQNamePart(i).fullCopy());
+        // This is to get printouts including array subscripts, since they
+        // are always expanded up to the second last name.
+        res.scalarized = true;
         return res;
     }
     
