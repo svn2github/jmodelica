@@ -31,8 +31,7 @@ aspect Arrays {
 	 * null.
 	 */
 	syn lazy ArraySubscripts ComponentDecl.arraySubscripts() =
-		hasVarArraySubscripts()? getVarArraySubscripts():
-			null;
+		hasVarArraySubscripts() ? getVarArraySubscripts() : null;
 
 	/**
 	 * \brief Check if an expression is inside array subscripts.
@@ -1175,7 +1174,6 @@ aspect Arrays {
 		if (!isArray() || fc == null)
 			return super.getArray();
 		
-		boolean inFunc = inFunction();
 		Array arr = new Array(indices());
 		for (Index i : arr.indices()) {
 			FQName n = new FQName(tempVarName());

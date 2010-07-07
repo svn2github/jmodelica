@@ -524,6 +524,19 @@ aspect ConstantEvaluation {
   eq FDotDivExp.cevalCalc() = type().div(getLeft().ceval(), getRight().ceval());
   eq FDotPowExp.cevalCalc() = type().pow(getLeft().ceval(), getRight().ceval());
   
+  eq FMulExp.cevalCalc() {
+	  if (isElementWise() || isArray())
+		  super.cevalCalc();
+	  
+	  FType t = type();
+	  CValue sum = new CValueInteger(0);
+	  Array l = getLeft().getArray();
+	  Array r = getRight().getArray();
+	  for (Index i : l.indices())
+		  sum = t.add(sum, t.mul(l.get(i).ceval(), r.get(i).ceval()));
+	  return sum;
+  }
+  
   eq FNegExp.cevalCalc() = type().neg(getFExp().ceval());
   
   eq FAndExp.cevalCalc() = type().and(getLeft().ceval(), getRight().ceval());

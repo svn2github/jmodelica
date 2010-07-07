@@ -110,10 +110,10 @@ aspect Flattening {
 	   		ffd.setFQName(new FQName(qualifiedName()));
 	
 	   		for (InstComponentDecl icd : getInstComponentDecls())
-				icd.flattenInFunction(ffd, fc);
+				icd.flattenInFunction(ffd, fc, false);
 	   		for (InstExtends ie : getInstExtendss())
 	   	   		for (InstComponentDecl icd : ie.getInstComponentDecls())
-	   				icd.flattenInFunction(ffd, fc);
+	   				icd.flattenInFunction(ffd, fc, false);
 			
 	   		FAlgorithmBlock fab;
 	   		if (getNumFAbstractEquation() > 0) {
@@ -126,6 +126,9 @@ aspect Flattening {
 			if (hasInstExternal())
 				fab.addFStatement(getInstExternal().flatten(this, new FQName()));
 			fab.ensureReturn();
+			
+			for (InstPrimitive cons : localFunctionConstantList())
+				cons.flattenInFunction(ffd, fc, true);
 	
 			fc.addFFunctionDecl(ffd);
 			
@@ -218,10 +221,11 @@ aspect Flattening {
 			addFStatement(new FReturnStmt());
 	}
 	
-	public void InstComponentDecl.flattenInFunction(FFunctionDecl ffd, FClass fc) {}
+	public void InstComponentDecl.flattenInFunction(FFunctionDecl ffd, FClass fc, boolean useConstant) {}
 	
-	public void InstAssignable.flattenInFunction(FFunctionDecl ffd, FClass fc) {
-		if (!getComponentDecl().isConstant()) {
+	public void InstAssignable.flattenInFunction(FFunctionDecl ffd, FClass fc, boolean useConstant) {
+		boolean isConstant = getComponentDecl().isConstant();
+		if (useConstant || !isConstant) {
 			FExp e = flattenBindingFExp();
 			Opt eo = (e == null) ? new Opt() : new Opt(e);
 			FQName fqn = new FQName(getFQName());
@@ -231,6 +235,7 @@ aspect Flattening {
 				ffv.setFTypePrefixInputOutput(new FInput());
 			if (isOutput())
 				ffv.setFTypePrefixInputOutput(new FOutput());
+			// TODO: Mark var as constant if isConstant is true?
 			ffd.addFFunctionVariable(ffv);
 			myInstClassDecl().flattenRecord(fc);
 		}
@@ -876,14 +881,25 @@ aspect FlatExpressions {
 			if (ip.isConstant()) {
 				try {
 					if (isArray()) {
+						// TODO: this probably needs to be extended to handle same cases as scalar access
 						return getArray().buildLiteral(ip.isReal());
 					} else {
 						// Check if we have non-constant array subscripts
 						if (ia.hasUnknownIndices()) {
-							FExp exp = ip.getBindingFExp().getArray().buildLiteral(ip.isReal());
-							FArraySubscripts fas = ia.getFArraySubscripts().flatten(prefix);
-							return new FSubscriptedExp(exp, fas);
+							if (inFunction()) {
+								// Add the constant array to the function and keep the access
+								functionConstantList().add(ip);
+								FQName fqn = new FQName(ip.getFQName());
+								fqn.setLastFArraySubscripts(ia.getFArraySubscripts().flatten(prefix));
+								return new FIdUseExp(fqn);
+							} else {
+								// Inline entire array wrapped in an FSubscriptedExp, and resolve index later
+								FExp exp = ip.getBindingFExp().getArray().buildLiteral(ip.isReal());
+								FArraySubscripts fas = ia.getFArraySubscripts().flatten(prefix);
+								return new FSubscriptedExp(exp, fas);
+							}
 						} else {
+							// Inline value
 							CValue cval = ceval();
 							if (ip.isReal())
 								cval = cval.convertReal();
@@ -898,6 +914,20 @@ aspect FlatExpressions {
 		} 
 		return new FIdUseExp(getInstAccess().flatten(prefix));
 	}
+	
+	/**
+	 * \brief Get the list of constants that need to be added to the surrounding function.
+	 */
+	inh ArrayList<InstPrimitive> FInstAccessExp.functionConstantList();
+	eq InstClassDecl.getChild().functionConstantList() = localFunctionConstantList();
+	eq Root.getChild().functionConstantList() = null;
+	
+	/**
+	 * \brief The list of constants that need to be added to this function.
+	 * 
+	 * The list will be populated when expressions in the function are flattened.
+	 */
+	syn lazy ArrayList<InstPrimitive> InstClassDecl.localFunctionConstantList() = new ArrayList<InstPrimitive>();
 	
 	syn boolean InstAccess.hasUnknownIndices() = 
 		hasFArraySubscripts() && getFArraySubscripts().hasUnknownIndices(); 

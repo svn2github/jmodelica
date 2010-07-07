@@ -800,13 +800,14 @@ aspect FlatAPI {
 
 	syn lazy boolean FVariable.isIndependentConstant() = isConstant();
 	syn lazy boolean FVariable.isDependentConstant() = false;
-	syn lazy boolean FVariable.isIndependentParameter();
-	eq FVariable.isIndependentParameter() = isParameter() &&
- 		  (hasBindingExp()? getBindingExp().isConstantExp(): 
- 		  (startAttributeSet()? startAttributeExp().isConstantExp(): true));
-	syn lazy boolean FVariable.isDependentParameter() = isParameter() &&
- 		  (hasBindingExp()? getBindingExp().isParameterExp(): 
- 		  (startAttributeSet()? startAttributeExp().isParameterExp(): false));
+	
+	syn lazy boolean FVariable.isIndependentParameter() = 
+		isParameter() && (hasParamValueExp() ? paramValueExp().isConstantExp() : true);
+	syn lazy boolean FVariable.isDependentParameter() = 
+		isParameter() && !isIndependentParameter();
+	syn boolean FVariable.hasParamValueExp() = hasBindingExp() || startAttributeSet();
+	syn FExp FVariable.paramValueExp() = hasBindingExp() ? getBindingExp() : startAttributeExp();
+	
 	syn boolean FVariable.isVariable() = !isParameter() && !isConstant();
 	syn lazy boolean FVariable.isDifferentiatedVariable() = 
 	  myFClass().differentiatedRealVariables().contains(this);

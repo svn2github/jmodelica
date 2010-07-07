@@ -6277,7 +6277,7 @@ model ArrayConst3
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
          name="ArrayConst3",
-         description="Array constants used with discrete index",
+         description="Array constants used with index of discrete variability",
          flatModel="
 fclass ArrayTests.ArrayConst3
  Real x;
@@ -6287,11 +6287,11 @@ equation
  function ArrayTests.ArrayConst3.f
   input Real i;
   output Real o;
-  Real[2] temp_1;
+  Real[2] testConst;
  algorithm
-  temp_1[1] := 1.0;
-  temp_1[2] := 2.0;
-  o := temp_1[integer(i)];
+  testConst[1] := 1;
+  testConst[2] := 2;
+  o := testConst[integer(i)];
   return;
  end ArrayTests.ArrayConst3.f;
 end ArrayTests.ArrayConst3;

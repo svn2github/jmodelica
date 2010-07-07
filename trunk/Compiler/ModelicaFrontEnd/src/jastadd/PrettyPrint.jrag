@@ -769,7 +769,8 @@ aspect FlattPrettyPrint {
 	    	str.print("\"");
 	    }
 
-	    if (isIndependentParameter() && hasBindingExp()) {
+	    if (isIndependentParameter() && hasBindingExp() && !isArray()) {
+	    	// TODO: print comment for arrays as well
 	    	str.print(" /* ");
 	    	try {
 		    	if (isReal()) {

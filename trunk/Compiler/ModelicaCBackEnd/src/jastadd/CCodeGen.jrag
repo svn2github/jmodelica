@@ -68,6 +68,8 @@ aspect CCodeGen {
 		if (getRight().variability().lessOrEqual(fParameter()) && getRight().type().isInteger()) {
 			str.print("(");
 			int exponent = getRight().ceval().intValue();
+			if (exponent == 0)
+				str.print("1");
 			for (int i=0;i<exponent;i++) {
 				str.print("(");
 				p.toString(getLeft(),str,indent,o); 
@@ -534,14 +536,14 @@ aspect CCodeGen {
 	}
 	
 	public void FFunctionCallStmt.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
-		genTempVars_C(printer_C, str, indent, null);
+		genTempVars_C(p, str, indent, o);
 		str.print(indent);
 		p.toString(getCall(), str, "", o);
 		str.print(";\n");
 	}
 
 	public void FAssignStmt.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
-		genTempVars_C(printer_C, str, indent, null);
+		genTempVars_C(p, str, indent, o);
 		str.print(indent);
 		p.toString(getLeft(), str, indent, o);
 		str.print(" = ");
@@ -558,7 +560,7 @@ aspect CCodeGen {
 	
 	public void FIfWhenStmt.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
 		for (FIfWhenClause clause : getFIfWhenClauses())
-			clause.getTest().genTempVars_C(printer_C, str, indent, null);
+			clause.getTest().genTempVars_C(p, str, indent, o);
 		str.print(indent);
 		getFIfWhenClauses().prettyPrintWithSep(p, str, indent, o, indent + "} else ");
 		prettyPrintElse_C(p, str, indent, o);
@@ -584,7 +586,7 @@ aspect CCodeGen {
 	}
 	
 	public void FWhileStmt.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
-		getTest().genTempVars_C(printer_C, str, indent, null);
+		getTest().genTempVars_C(p, str, indent, o);
 		str.print(indent);
 		str.print("while (");
 		p.toString(getTest(), str, "", o);
@@ -594,7 +596,7 @@ aspect CCodeGen {
 	}
 	
 	public void FForStmt.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
-		getIndex().genTempVars_C(printer_C, str, indent, null);
+		getIndex().genTempVars_C(p, str, indent, o);
 		getIndex().printForArrayDecl_C(p, str, indent, o);
 		str.print(indent);
 		str.print("for (");
@@ -732,6 +734,12 @@ aspect CCodeGen {
 
 	public void FNoEventExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
 		p.toString(getFExp(),str,indent,o);
+	}
+	
+	public void FIntegerExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		str.print("jmi_real_to_integer(");
+		p.toString(getFExp(), str, indent, o);
+		str.print(")");
 	}
 	
 	syn String FBoolBinExp.macro_C();

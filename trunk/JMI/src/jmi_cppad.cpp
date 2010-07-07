@@ -33,7 +33,7 @@
  *    code.
  *
  * Current limitations:
-  *   - Memory is copied at several locations form double* vectors to vector<AD>
+ *   - Memory is copied at several locations form double* vectors to vector<AD>
  *     objects. This may be a bit inefficient - but how can it be avoided?
  *   - Work-vectors. New objects are created at each function call. It may make
  *     sense to allocate work vectors and save them between calls.

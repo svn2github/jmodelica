@@ -131,7 +131,8 @@ aspect Scalarization {
 	 * 
 	 * @param vars    the list of FVariables to add the variables to
 	 * @param prefix  add this as a prefix to the name
-	 * @param last    an FVariable containing the attributes, variability, etc inherited from surrounding record
+	 * @param last    an FVariable containing the attributes, variability, 
+	 *                etc inherited from the surrounding record
 	 */
 	public void FVariable.scalarRecordFVariables(List<FVariable> vars, FQName prefix, FVariable last) {
 		FQName name = prefix.fullCopy().append(getFQName());
@@ -1357,23 +1358,14 @@ aspect Scalarization {
 		}
 	}
 	
-	public FExp FStreamBuiltIn.scalarizeExp(HashMap<String,FExp> indexMap) {
-		return createNode(getFExp().scalarize(indexMap));
-	}
-	
 	public FExp FBinExp.scalarizeExp(HashMap<String,FExp> indexMap) { return createNode(getLeft().scalarize(indexMap), getRight().scalarize(indexMap)); }
 	public FExp FUnaryExp.scalarizeExp(HashMap<String,FExp> indexMap) { return createNode(getFExp().scalarize(indexMap)); }
 	public FExp FMathematicalFunctionCall.scalarizeExp(HashMap<String,FExp> indexMap) { return createNode(getFExp().scalarize(indexMap)); }
 	public FExp FAtan2Exp.scalarizeExp(HashMap<String,FExp> indexMap) { return new FAtan2Exp(getFExp().scalarize(indexMap), getY().scalarize(indexMap)); }
+	public FExp FUnaryBuiltIn.scalarizeExp(HashMap<String,FExp> indexMap) { return createNode(getFExp().scalarize(indexMap)); }
 
-	public FExp FAbsExp.scalarizeExp(HashMap<String,FExp> indexMap) { return new FAbsExp(getFExp().scalarize(indexMap)); }
-	
 	public FExp FLitExp.scalarizeExp(HashMap<String,FExp> indexMap) { return (FLitExp) fullCopy(); }
 	public FExp FDerExp.scalarizeExp(HashMap<String,FExp> indexMap) { return new FDerExp(getFIdUse().scalarize(indexMap)); }
-
-	public FExp FNoEventExp.scalarizeExp(HashMap<String,FExp> indexMap) { return new FNoEventExp(getFExp().scalarize(indexMap)); }
-
-	public FExp FIntegerExp.scalarizeExp(HashMap<String,FExp> indexMap) { return new FIntegerExp(getFExp().scalarize(indexMap)); }
 	
 	public FExp FFunctionCall.scalarizeExp(HashMap<String,FExp> indexMap) {
 		if (isComposite() && functionCallIsExp())

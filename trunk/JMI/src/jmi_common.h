@@ -180,6 +180,9 @@ typedef jmi_ad_tape_t *jmi_ad_tape_p;                  ///< If JMI_AD_NONE: a po
 
 #define LOG_EXP_OR(op1,op2) ((op1)+(op2)>JMI_FALSE) ///< Macro for logical expression or <br>
 
+// Assumes that both Real and Integer are represented with double
+#define jmi_real_to_integer(v) floor(v)  ///< Converts a Real to Integer.
+
 #define JMI_AD_WITH_CPPAD 0
 
 #include "jmi_array_none.h"
@@ -202,6 +205,9 @@ typedef jmi_ad_tape_t *jmi_ad_tape_p;
 #define COND_EXP_GT(op1,op2,th,el) (CppAD::CondExpGt(op1,op2,th,el))
 
 #define LOG_EXP_OR(op1,op2)  (COND_EXP_GT((op1)+(op2),JMI_FALSE,JMI_TRUE,JMI_FALSE))
+
+// TODO: Support integer() properly for CppAD
+#define jmi_real_to_integer(v) (v)  ///< Converts a Real to Integer.
 
 #define JMI_AD_WITH_CPPAD 1
 
