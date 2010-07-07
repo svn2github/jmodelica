@@ -15,6 +15,7 @@
 */
 
 import java.util.Iterator;
+import java.util.Collection;
 
 aspect TestCases {
 
@@ -105,7 +106,7 @@ abstract public class TestCase {
 		
 	public void dumpJunit(StringBuilder str, int index) {
 		str.append("  @Test public void " + getName() + "() {\n");
-		str.append("    assertTrue(ts.get("+index+").getDescription(), ts.get("+index+").testMe());\n");
+		str.append("    ts.get("+index+").testMe(asserter);\n");
 	    str.append("  }\n\n");
 	}
 	
@@ -197,6 +198,8 @@ abstract public class TestCase {
 	 * @return
 	 */
 	public String removeWhitespace(String str) {
+	    /* TODO: Removing all whitespace can conceal errors. 
+	     * Perhaps all sequences of whitespace should be replaces with a single space instead? */ 
 		String str_res = str;
     	str_res = str_res.replaceAll("\\r", "");
     	str_res = str_res.replaceAll("\\n", "");
@@ -205,115 +208,134 @@ abstract public class TestCase {
 	}
 	
 	/**
-	 * \brief Describes the result of a test performed by a method called by testMe().
+	 * \brief Interface for proxy class used to remove dependency on junit from TestCase.
 	 */
-	protected enum Result { PASS, FAIL, CONTINUE }
+	public static interface Assert {
+		public void fail(String msg);
+	}
 	
-	public boolean testMe() {
+	private Assert asserter;
+	
+	/**
+	 * \brief Signal that the test failed.
+	 * 
+	 * @param msg  a message describing what went wrong
+	 */
+	protected void fail(String msg) {
+		asserter.fail(getDescription() + "\n" + getClass().getSimpleName() + ": " + msg);
+	}
+	
+	/**
+	 * \brief Signal that the test failed.
+	 * 
+	 * @param e  the exception that caused the failure
+	 */
+	protected void fail(Exception e) {
+		if (e instanceof ModelicaException) 
+			fail(e.getMessage());
+
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		e.printStackTrace(new PrintStream(out));
+		fail("Exception caught in test case: " + out.toString());
+	}
+	
+	public void testMe(Assert a) {
+		try {
+			asserter = a;
+			performTest();
+		} catch (Exception e) {
+			fail(e);
+		}
+	}
+	
+	public void performTest() throws Exception {
 		// Parse
 		ParserHandler ph = new ParserHandler();
 		SourceRoot sr = null;
-		try {
-			sr = ph.parseFile(getSourceFileName());
-		} catch (Exception e) {
-			return false;
-		}
-		
+		sr = ph.parseFile(getSourceFileName());
 		sr.options = options;
 		sr.setFileName(getSourceFileName());
 		
 		
 		// Instantiate and check for errors
 	    InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
-	    Collection<Problem> problems;
-	    try {
-	    	problems = ipr.checkErrorsInInstClass(getClassName());
-	    } catch (ModelicaClassNotFoundException e) {
-	    	return false;
-	    }
-	    
-		Result res = testSemanticProblems(problems);
-		if (res != Result.CONTINUE)
-			return res == Result.PASS;
+	    Collection<Problem> problems = ipr.checkErrorsInInstClass(getClassName());
+		if (testSemanticProblems(problems)) return;
 		
 		
 		// Flatten class and test it
 	    FlatRoot flatRoot = new FlatRoot();
 	    flatRoot.setFileName(getSourceFileName());
 	    FClass fc = createFClass(ipr.simpleLookupInstClassDecl(getClassName()));
+	    
 	    flatRoot.setFClass(fc);
 	    flatRoot.options = new OptionRegistry(options);
-	    
-	    try {
-	    	ipr.findFlattenInst(getClassName(), fc);
-	    } catch (ModelicaClassNotFoundException e) {
-	    	return false;
-	    }
-	    
-	    res = testFlattened(fc);
-		if (res != Result.CONTINUE)
-			return res == Result.PASS;
+    	ipr.findFlattenInst(getClassName(), fc);
+		if (testFlattened(fc)) return;
 		
 		
 		// Transform canonical and check for errors again
 	    fc.transformCanonical();
 		problems = fc.errorCheck();
-		
-		res = testTransformedProblems(problems);
-		if (res != Result.CONTINUE)
-			return res == Result.PASS;
+		if (testTransformedProblems(problems)) return;
 		
 		
 		// Test transformed class
-	    res = testTransformed(fc);
-		if (res != Result.CONTINUE)
-			return res == Result.PASS;
-		
-		
-		// No test has returned FAIL
-		return true;
+	    testTransformed(fc);
 	}
 
 	/**
 	 * \brief Perform tests on the set of semantic problems found in the instance tree.
 	 * 
-	 * Default implementation returns FAIL if any errors other than COMPLIANCE were found, CONTINUE otherwise.
+	 * Default implementation fails if any errors other than COMPLIANCE were found, and returns false otherwise.
+	 * 
+	 * @return  <code>true</code> if test case shoule stop after this method
 	 */
-	protected Result testSemanticProblems(Collection<Problem> problems) {
+	protected boolean testSemanticProblems(Collection<Problem> problems) {
 		return testProblems(problems);
 	}
 	
 	/**
 	 * \brief Perform tests on flattened class.
+	 * 
+	 * @return  <code>true</code> if test case shoule stop after this method
 	 */
-	protected Result testFlattened(FClass fc) {
-		return Result.CONTINUE;
+	protected boolean testFlattened(FClass fc) {
+		return false;
 	}
 
 	/**
 	 * \brief Perform tests on flat class after transform canonical step.
+	 * 
+	 * @return  <code>true</code> if test case shoule stop after this method
 	 */
-	protected Result testTransformed(FClass fc) {
-		return Result.CONTINUE;
+	protected boolean testTransformed(FClass fc) {
+		return false;
 	}
 
 	/**
 	 * \brief Perform tests on the set of semantic problems found after transform canonical step.
 	 * 
-	 * Default implementation returns FAIL if any errors other than COMPLIANCE were found, CONTINUE otherwise.
+	 * Default implementation fails if any errors other than COMPLIANCE were found, and returns false otherwise.
+	 * 
+	 * @return  <code>true</code> if test case shoule stop after this method
 	 */
-	protected Result testTransformedProblems(Collection<Problem> problems) {
+	protected boolean testTransformedProblems(Collection<Problem> problems) {
 		return testProblems(problems);
 	}
 	
 	/**
 	 * \brief Perform tests on a set of semantic problems.
 	 * 
-	 * Default implementation returns FAIL if any errors other than COMPLIANCE were found, CONTINUE otherwise.
+	 * Default implementation fails if any errors other than COMPLIANCE were found, and returns false otherwise.
+	 * 
+	 * @return  <code>true</code> if test case shoule stop after this method
 	 */
-	protected Result testProblems(Collection<Problem> problems) {
+	protected boolean testProblems(Collection<Problem> problems) {
 		filterProblems(problems);
-		return (problems.size() > 0) ? Result.FAIL : Result.CONTINUE;
+		if (problems.size() > 0)
+			fail(new CompilerException(problems));
+		return false;
 	}
 	
 	/**
@@ -328,25 +350,29 @@ abstract public class TestCase {
 	}
 	
 	/**
-	 * \brief Compare a flat class to a pretty-printed correct model and return PASS or FAIL.
+	 * \brief Compare a flat class to a pretty-printed correct model and fail if different.
 	 */
-	protected Result testPrettyPrint(FClass fc, String correct) {
+	protected void testPrettyPrint(FClass fc, String correct) {
 		TokenTester tt = new TokenTester();
 		String test = fc.prettyPrint("");
-		return tt.test(test, correct) ? Result.PASS : Result.FAIL;
+		if (!tt.test(test, correct)) 
+			fail("Flat class does not match expected." + compareMsg(test, correct));
 	}
 	
 	/**
-	 * \brief Transforms any CONTINUE result into FAIL.
-	 * 
-	 * @see Result
+	 * \brief Generate the part of an error message that shows expected and actual result.
 	 */
-	protected Result stop(Result res) {
-		return (res == Result.CONTINUE) ? Result.FAIL : res;
+	protected String compareMsg(String actual, String expected) {
+		if (!expected.startsWith("\n"))
+			expected = "\n" + expected;
+		return "\n--- Expected: ---" + expected + "\n--- Actual: ---\n" + actual;
 	}
 
 }
 	
+	/**
+	 * \brief Create a new instance of the proper FClass (sub)class.
+	 */
 	public static FClass TestCase.createFClass(InstClassDecl icd) {
 		return new FClass();
 	}

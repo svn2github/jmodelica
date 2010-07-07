@@ -61,15 +61,19 @@ public abstract class CodeGenTestCase extends TestCase {
 
 	/**
 	 * \brief Perform tests on flat class after transform canonical step.
+	 * 
+	 * @return  <code>true</code> if test case shoule stop after this method
 	 */
-	protected Result testTransformed(FClass fc) {
+	protected boolean testTransformed(FClass fc) {
    	  	ByteArrayOutputStream os = new ByteArrayOutputStream();
   	    AbstractGenerator generator = createGenerator(fc);
 	    generator.generate(new BufferedReader(new StringReader(getTemplate())),
 	    		           new PrintStream(os));
 	    String test = removeWhitespace(os.toString());
 	    String correct = removeWhitespace(filter(getGenCode()));
-	    return test.equals(correct) ? Result.PASS : Result.FAIL;
+	    if (!removeWhitespace(test).equals(removeWhitespace(correct)))
+	    	fail("Generated code does not match expected." + compareMsg(test, correct));
+	    return true;
 	}
 	
 	public String getGenCode() {

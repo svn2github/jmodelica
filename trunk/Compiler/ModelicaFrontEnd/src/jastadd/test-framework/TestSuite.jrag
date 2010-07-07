@@ -55,17 +55,19 @@ public class TestSuite {
 		StringBuilder str = new StringBuilder();
 		str.append("package org.jmodelica.test.junitgenerated;\n\n");
 		str.append("import org.junit.*;\n");
-		str.append("import static org.junit.Assert.*;\n");
 		
 		SourceRoot sr = new SourceRoot();
-		if (sr.language().equals("Modelica")) {
-			str.append("import org.jmodelica.modelica.compiler.*;\n");
-		} else if (sr.language().equals("Optimica")) {
-			str.append("import org.jmodelica.optimica.compiler.*;\n");	
-		}
-		str.append("\n");
+		str.append("import org.jmodelica." + sr.language().toLowerCase() + ".compiler.*;\n\n");
+
 		str.append("public class " + name + " {\n\n");
 		str.append("  static TestSuite ts;\n\n");
+		
+		str.append("  private static class Assert implements TestCase.Assert {\n");
+		str.append("    public void fail(String msg) {\n");
+		str.append("      org.junit.Assert.fail(msg);\n");
+		str.append("    }\n");
+		str.append("  }\n");
+		str.append("  static Assert asserter = new Assert();\n\n");
 		
 		str.append("  @BeforeClass public static void setUp() {\n");
 		str.append("    ts = new TestSuite(\"" + testFile.replaceAll("\\\\", "\\\\\\\\") // Replaces \ with \\

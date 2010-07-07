@@ -58,9 +58,12 @@ public class FlatteningTestCase extends TestCase {
 	
 	/**
 	 * \brief Test that the flattened model matches the correct one.
+	 * 
+	 * @return  <code>true</code> if test case shoule stop after this method
 	 */
-	protected Result testFlattened(FClass fc) {
-		return testPrettyPrint(fc, getFlatModel());
+	protected boolean testFlattened(FClass fc) {
+		testPrettyPrint(fc, getFlatModel());
+		return true;
 	}
 	
 	/**

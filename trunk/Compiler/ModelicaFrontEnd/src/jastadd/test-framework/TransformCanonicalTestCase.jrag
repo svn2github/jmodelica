@@ -56,8 +56,9 @@ public class TransformCanonicalTestCase extends TestCase {
 	/**
 	 * \brief Perform tests on flat class after transform canonical step.
 	 */
-	protected Result testTransformed(FClass fc) {
-		return testPrettyPrint(fc, getFlatModel());
+	protected boolean testTransformed(FClass fc) {
+		testPrettyPrint(fc, getFlatModel());
+		return true;
 	}
 	
 	/**

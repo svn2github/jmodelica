@@ -37,62 +37,54 @@ public class ErrorTestCase extends TestCase {
 	
 	/**
 	 * \brief Perform tests on a set of semantic problems.
+	 * 
+	 * @return  <code>true</code> if test case shoule stop after this method
 	 */
-	protected Result testProblems(Collection<Problem> problems) {
+	protected boolean testProblems(Collection<Problem> problems) {
 		filterProblems(problems);
 		
 		if (problems.size() == 0)
-			return Result.CONTINUE;
+			return false;
 		
-		StringBuilder str = new StringBuilder("Errors found!\n");
-		for (Problem p : problems) {
-			str.append(p);
-			str.append('\n');
-		}
-		String test = filterErrorMessages(str.toString());
-		String correct = filterErrorMessages(getErrorMessage());
-		return test.equals(correct) ? Result.PASS : Result.FAIL;
+		String test = new CompilerException(problems).getMessage();
+		String correct = getErrorMessage();
+		String f_test = filterErrorMessages(test);
+		String f_correct = filterErrorMessages(correct);
+		
+		if (!f_test.equals(f_correct))
+			fail("Wrong errors reported." + compareMsg(test, correct));
+			
+		return true;
 	}
 
 	/**
 	 * \brief Perform tests on the set of semantic problems found after transform canonical step.
+	 * 
+	 * @return  <code>true</code> if test case shoule stop after this method
 	 */
-	protected Result testTransformedProblems(Collection<Problem> problems) {
-		return stop(testProblems(problems));
+	protected boolean testTransformedProblems(Collection<Problem> problems) {
+		if (!testProblems(problems))
+			fail("No errors reported.");
+		return true;
 	}
 	
 	public String filterErrorMessages(String str) {
 		StringBuilder filteredStr = new StringBuilder();
 		BufferedReader origStr = new BufferedReader(new StringReader(str));
-		String line;
 		
 		try {
-			line = origStr.readLine();
-		} catch (IOException e) {
-			e.printStackTrace();
-			return filteredStr.toString();
-		}
-		while (line!=null) {
-			try {
-			
+			String line = origStr.readLine();
+			while (line != null) {
 				line = origStr.readLine();
-				
-			if (line!=null && line.contains("Semantic error at line")) {
-	
+				if (line != null && line.contains("Semantic error at line")) {
 					line = origStr.readLine();
-				filteredStr.append(line+"\n");
-			
+					filteredStr.append(line + "\n");
+				}
 			}
-			
-			} catch (IOException e) {
-				e.printStackTrace();
-				return filteredStr.toString();
-			}	
-
-			
+		} catch (IOException e) {
 		}
 		
-	return filteredStr.toString();
+		return filteredStr.toString();
 	}
 	
 	/**

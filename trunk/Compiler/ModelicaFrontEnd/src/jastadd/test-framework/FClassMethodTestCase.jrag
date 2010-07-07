@@ -56,19 +56,21 @@ public class FClassMethodTestCase extends TestCase {
 
 	/**
 	 * \brief Perform tests on flat class after transform canonical step.
+	 * 
+	 * @return  <code>true</code> if test case shoule stop after this method
 	 */
-	protected Result testTransformed(FClass fc) {
+	protected boolean testTransformed(FClass fc) {
 	    try {
 	    	Method method = fc.getClass().getMethod(getMethodName());
 	    		    	
-	    	String test = removeWhitespace(method.invoke(fc).toString());
-	    	String correct = removeWhitespace(filter(getOutput()));
+	    	String test = method.invoke(fc).toString();
+	    	String correct = filter(getOutput());
 
-	    	if (test.equals(correct))
-	    		return Result.PASS;
+	    	if (!removeWhitespace(test).equals(removeWhitespace(correct)))
+	    		fail("Method result does not match expected." + compareMsg(test, correct));
 	    } catch (Exception e) {
 	    }
-    	return Result.FAIL;
+    	return true;
 	}
 	
 	/**

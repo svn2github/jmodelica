@@ -108,13 +108,20 @@ import java.util.ArrayList;
    * Exception containing a list of compiler errors/warnings. 
    */
   public class CompilerException extends ModelicaException {
-	  private ArrayList<Problem> problems;
+	  private Collection<Problem> problems;
 	  
 	  /**
 	   * Default constructor.
 	   */
 	  public CompilerException() {
 		  problems = new ArrayList<Problem>();
+	  }
+	  
+	  /**
+	   * Construct from a list of problems.
+	   */
+	  public CompilerException(Collection<Problem> problems) {
+		  this.problems = problems;
 	  }
 	  
 	  /**
@@ -127,7 +134,7 @@ import java.util.ArrayList;
 	  /**
 	   * Get the list of problems.
 	   */
-	  public ArrayList<Problem> getProblems() {
+	  public Collection<Problem> getProblems() {
 		  return problems;
 	  }
 
@@ -136,9 +143,12 @@ import java.util.ArrayList;
 	   */
 	  public String getMessage() {
 		  StringBuilder str = new StringBuilder();
-		  str.append(problems.size() + " problems found:\n");
-		  for (Problem problem : problems)
-			  str.append(problem+"\n");
+		  str.append(problems.size());
+		  str.append(" problems found:\n");
+		  for (Problem p : problems) {
+			  str.append(p);
+			  str.append('\n');
+		  }
 		  return str.toString();
 	  }
   }
