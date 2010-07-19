@@ -25,6 +25,177 @@ import scipy.io
 from operator import itemgetter
 
 import jmodelica.jmi
+from jmodelica import xmldoc
+
+def export_result_dymola2(model, data, file_name='', format='txt'):
+    """
+    Export an optimization or simulation result to file in Dymolas
+    result file format. The parameter values are read from the z
+    vector of the model object and the time series are read from
+    the data argument.
+
+    Parameters:
+        model --
+            A Model object.
+        data --
+            A two dimensional array of variable trajectory data. The
+            first column represents the time vector. The following
+            colums contain, in order, the derivatives, the states,
+            the inputs and the algebraic variables. The ordering is
+            according to increasing value references.
+        file_name --
+            If no file name is given, the name of the model (as defined
+            by JMIModel.get_name()) concatenated with the string
+            '_result' is used. A file suffix equal to the format
+            argument is then appended to the file name.
+        format --
+            A text string equal either to 'txt' for textual format or
+            'mat' for binary Matlab format.
+
+    Limitations:
+        Currently only textual format is supported.
+
+    """
+
+    if (format=='txt'):
+
+        if file_name=='':
+            file_name=model.get_name() + '_result.txt'
+
+        # Open file
+        f = open(file_name,'w')
+
+        # Write header
+        f.write('#1\n')
+        f.write('char Aclass(3,11)\n')
+        f.write('Atrajectory\n')
+        f.write('1.1\n')
+        f.write('\n')
+        
+        xmlfile = model.get_name()+'.xml'
+        md = xmldoc.ModelDescription(xmlfile)
+        
+        # sort in value reference order (must match order in data)
+        names = sorted(md.get_variable_names2())
+        aliases = sorted(md.get_variable_aliases2())
+        descriptions = sorted(md.get_variable_descriptions2())
+        variabilities = sorted(md.get_variable_variabilities2())
+        
+        num_vars = len(names)
+        
+        # Find the maximum name and description length
+        max_name_length = len('Time')
+        max_desc_length = len('Time in [s]')
+        
+        for i in range(len(names)):
+            name = names[i][1]
+            desc = descriptions[i][1]
+            
+            if (len(name)>max_name_length):
+                max_name_length = len(name)
+                
+            if (len(desc)>max_desc_length):
+                max_desc_length = len(desc)
+
+        f.write('char name(%d,%d)\n' % (num_vars + 1, max_name_length))
+        f.write('time\n')
+    
+        # write names
+        for name in names:
+            f.write(name[1] +'\n')
+
+        f.write('\n')
+
+        f.write('char description(%d,%d)\n' % (num_vars + 1, max_desc_length))
+        f.write('Time in [s]\n')
+
+        # write descriptions
+        for desc in descriptions:
+            f.write(desc[1]+'\n')
+            
+
+        f.write('\n')
+
+        # Write data meta information
+        offs = model.get_offsets()
+        n_parameters = offs[12] # offs[12] = offs_dx
+        f.write('int dataInfo(%d,%d)\n' % (num_vars + 1, 4))
+        f.write('0 1 0 -1 # time\n')
+
+        cnt_1 = 1
+        cnt_2 = 1
+        
+        for i, name in enumerate(names):
+            (ref, type) = jmodelica.jmi._translate_value_ref(name[0])
+            
+            if int(ref) < n_parameters: # Put parameters in data set
+                if aliases[i][1] == 0: # no alias
+                    cnt_1 = cnt_1 + 1
+                    f.write('1 %d 0 -1 # ' % cnt_1 + name[1]+'\n')
+                elif aliases[i][1] == 1: # alias
+                    f.write('1 %d 0 -1 # ' % cnt_1 + name[1]+'\n')
+                else: # negated alias
+                    f.write('1 -%d 0 -1 # ' % cnt_1 + name[1] +'\n')
+                
+                
+            else:
+                if aliases[i][1] == 0: # noalias
+                    cnt_2 = cnt_2 + 1   
+                    f.write('2 %d 0 -1 # ' % cnt_2 + name[1] +'\n')
+                elif aliases[i][1] == 1: # alias
+                    f.write('2 %d 0 -1 # ' % cnt_2 + name[1] +'\n')
+                else: #neg alias
+                    f.write('2 -%d 0 -1 # ' % cnt_2 + name[1] +'\n')
+            
+                
+        f.write('\n')
+
+        sc = model.jmimodel.get_variable_scaling_factors()
+        z = model.get_z()
+
+        scaling_method = model.get_scaling_method()
+
+        # Write data
+        # Write data set 1
+        f.write('float data_1(%d,%d)\n' % (2, n_parameters + 1))
+        f.write("%12.12f" % data[0,0])
+        for ref in range(n_parameters):
+            if scaling_method & jmodelica.jmi.JMI_SCALING_VARIABLES > 0:
+                f.write(" %12.12f" % (z[ref]*sc[ref]))
+            else:
+                f.write(" %12.12f" % (z[ref]))
+        f.write('\n')
+        f.write("%12.12f" % data[-1,0])
+        for ref in range(n_parameters):
+            if scaling_method & jmodelica.jmi.JMI_SCALING_VARIABLES > 0:
+                f.write(" %12.12f" % (z[ref]*sc[ref]))
+            else:
+                f.write(" %12.12f" % (z[ref]))
+        f.write('\n\n')
+
+        # Write data set 2
+        n_vars = len(data[0,:])
+        n_points = len(data[:,0])
+        f.write('float data_2(%d,%d)\n' % (n_points, n_vars))
+        for i in range(n_points):
+            str = ''
+            for ref in range(n_vars):
+                if ref==0: # Don't scale time
+                    str = str + (" %12.12f" % data[i,ref])
+                else:
+                    if scaling_method & jmodelica.jmi.JMI_SCALING_VARIABLES > 0:
+                        str = str + (" %12.12f" % (data[i,ref]*sc[ref-1+n_parameters]))
+                    else:
+                        str = str + (" %12.12f" % data[i,ref])
+            f.write(str+'\n')
+
+        f.write('\n')
+
+        f.close()
+
+    else:
+        raise Error('Export on binary Dymola result files not yet supported.')
+
 
 def export_result_dymola(model, data, file_name='', format='txt'):
     """
