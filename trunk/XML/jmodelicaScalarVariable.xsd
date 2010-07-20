@@ -179,7 +179,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 						<xs:enumeration value="state"/>
 						<xs:enumeration value="dependentConstant"/>
 						<xs:enumeration value="independentConstant"/>
-						<xs:enumeration value="dependentParamenter"/>
+						<xs:enumeration value="dependentParameter"/>
 						<xs:enumeration value="independentParameter"/>
 						<xs:enumeration value="algebraic"/>
 					</xs:restriction>
