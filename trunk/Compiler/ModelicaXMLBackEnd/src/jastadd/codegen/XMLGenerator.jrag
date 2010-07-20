@@ -376,7 +376,7 @@ public class XMLGenerator extends GenericGenerator {
 					} else if(variable.isIndependentConstant()) {
 						genPrinter.print("independentConstant");
 					} else if(variable.isDependentParameter()) {
-						genPrinter.print("dependentParamenter");
+						genPrinter.print("dependentParameter");
 					} else if(variable.isIndependentParameter()) {
 						genPrinter.print("independentParameter");
 					} else {
