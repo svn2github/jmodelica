@@ -28,7 +28,7 @@
 
 jmi_ad_var_t jmi_divide(jmi_ad_var_t num, jmi_ad_var_t den,const char msg[]) {
   if (den==0) {
-    printf(msg);
+    printf("%s", msg);
     printf("\n");
     return (num==0)? 0: ( (num>0)? 1.e20: -1.e20 );
   } else {

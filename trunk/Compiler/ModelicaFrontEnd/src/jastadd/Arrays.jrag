@@ -76,10 +76,23 @@ aspect Arrays {
 	/**
 	 * \brief Return an Index with these array subscripts.
 	 * 
+	 * This version is cached, to avoid repeating constant evaluation.
+	 * 
 	 * @throws UnsupportedOperationException  if the subscripts can't be evaluated to 
 	 *                                         constant Integer values.
 	 */
-	syn lazy Index FArraySubscripts.asIndex() {
+	syn lazy Index FArraySubscripts.asIndex() = createIndex();
+	
+	/**
+	 * \brief Return an Index with these array subscripts.
+	 * 
+	 * This version is not cached, to allow indices to be re-evaluated at each use 
+	 * during function evaluation.
+	 * 
+	 * @throws UnsupportedOperationException  if the subscripts can't be evaluated to 
+	 *                                         constant Integer values.
+	 */
+	public Index FArraySubscripts.createIndex() {
 		int[] i = new int[getNumFSubscript()];
 		int j = 0;
 		for (FSubscript s : getFSubscripts()) 
@@ -441,7 +454,7 @@ aspect Arrays {
 	/**
 	 * \brief Get the array sizes. 
 	 */
-	syn lazy Size FArraySubscripts.size() {
+	syn lazy Size FArraySubscripts.declarationSize() {
 		if (ndims() == 0)
 			return Size.SCALAR;
 		MutableSize s = new MutableSize(ndims());
@@ -461,8 +474,23 @@ aspect Arrays {
 	}
 	
 	public void FColonSubscript.addDeclarationSize(MutableSize s) {
-		s.append(Size.UNKNOWN);
+		s.append(new FUnknownSizeExp(surroundingVariableDecl(), myDim()));
 	}
+	
+	/**
+	 * \brief The variable declaration that this subscript is a part of the size of, if any.
+	 */
+	inh CommonVariableDecl FColonSubscript.surroundingVariableDecl();
+	eq FVariable.getFQName().surroundingVariableDecl()                   = this;
+	eq InstComponentDecl.getFArraySubscripts().surroundingVariableDecl() = this;
+	eq FExp.getChild().surroundingVariableDecl()                         = null;
+	eq Root.getChild().surroundingVariableDecl()                         = null;
+	
+	/**
+	 * \brief The dimension this subscript is used for.
+	 */
+	inh int FSubscript.myDim();
+	eq FArraySubscripts.getFSubscript(int i).myDim() = i;
 
 	/**
 	 * \brief Get the array sizes when the array subscripts are used in an
@@ -491,9 +519,9 @@ aspect Arrays {
 	/**
 	 * \brief Get the size this subscript(s) would have if all subscripts were colons.
 	 */
-	inh lazy Size FEndExp.mySize();
-	inh lazy Size FSubscript.mySize();
-	inh lazy Size FArraySubscripts.mySize();
+	inh Size FEndExp.mySize();
+	inh Size FSubscript.mySize();
+	inh Size FArraySubscripts.mySize();
 	eq FIdUse.getChild().mySize()                     = myFV().size();
 	eq FIdUseInstAccess.getChild().mySize()           = getInstAccess().size();
 	eq InstArrayAccess.getFArraySubscripts().mySize() = myInstComponentDecl().size();
@@ -573,12 +601,12 @@ aspect Arrays {
 		return getFExp(0).size().expand(getNumFExp());
 	}
 	
-	syn lazy int FAbstractCat.dimension();
+	syn int FAbstractCat.dimension();
 	eq FCatExp.dimension()    = getDim().ceval().intValue() - 1;
 	eq FMatrix.dimension()    = 0;
 	eq FMatrixRow.dimension() = 1;
 	
-	syn lazy int FSizeExp.dimension() = getDim().ceval().intValue() - 1;
+	syn int FSizeExp.dimension() = getDim().ceval().intValue() - 1;
 	
 	eq FAbstractCat.size() {
 		try {
@@ -651,7 +679,7 @@ aspect Arrays {
 	
 	syn Size FAbstractFunctionCall.sizeOfOutput(int i) = (i == 0) ? size() : Size.SCALAR;
 	
-	syn lazy Size InstFunctionCall.sizeOfOutput(int i) {
+	syn Size InstFunctionCall.sizeOfOutput(int i) {
 		Size s = myOutputs().get(i).size();
 		if (!s.isUnknown())
 			return s;
@@ -679,7 +707,7 @@ aspect Arrays {
 	eq FElseIfExp.size() = getThenExp().size();
 	
 	/**
-	 * \brief Get the array sizes. 
+	 * \brief Get the array sizes.
 	 */
 	syn lazy Size FIdUse.size() {
 		if (ndims() == 0)
@@ -707,7 +735,7 @@ aspect Arrays {
 	/**
 	 * \brief Get the array sizes. 
 	 */
-	syn lazy Size InstAssignable.size() {
+	eq InstAssignable.size() {
 		Size s = declaredSize();
 		if (hasBindingFExp() && s.isUnknown() && (!isInput() || !inFunction()))
 			s = s.createKnown(getBindingFExp());
@@ -717,8 +745,8 @@ aspect Arrays {
 	/**
 	 * \brief Get the array sizes as declared. May be unknown. 
 	 */
-	syn Size InstAssignable.declaredSize() = 
-		hasFArraySubscripts() ? getFArraySubscripts().size() : Size.SCALAR;
+	syn Size InstComponentDecl.declaredSize() = 
+		hasFArraySubscripts() ? getFArraySubscripts().declarationSize() : Size.SCALAR;
 	
 	/**
 	 * \brief Get the array sizes. 
@@ -728,10 +756,7 @@ aspect Arrays {
 	/**
 	 * \brief Get the array sizes. 
 	 */
-	syn lazy Size InstNode.size() = Size.SCALAR;
-	
-	eq InstComponentDecl.size() = hasFArraySubscripts()? 
-			getFArraySubscripts().size(): Size.SCALAR;
+	syn lazy Size InstComponentDecl.size() = declaredSize();
 
 	/**
 	 * \brief Get the array sizes. 
@@ -746,7 +771,7 @@ aspect Arrays {
 	syn lazy Size FQName.size() {
 		FQNamePart last = getFQNamePart(getNumFQNamePart()-1);
 		if (last.hasFArraySubscripts()) {
-			return last.getFArraySubscripts().size(); 
+			return last.getFArraySubscripts().declarationSize(); 
 		} else {
 			return Size.SCALAR;
 		}
@@ -1530,21 +1555,22 @@ aspect Arrays {
 	eq FExpSubscript.myIndices() = getFExp().myIndices();
 	
 	syn int[] FExp.myIndices() {
-		if (ndims() == 0) {
-			try {
-				return new int[] { ceval().intValue() };
-			} catch (UnsupportedOperationException e) {
-				return new int[] { 0 };
+		try {
+			int n = 0;
+			if (ndims() == 0)
+				n = 1;
+			else if (ndims() == 1)
+				n = size().get(0);
+			if (n > 0) {
+				int[] indices = new int[n];
+				int j = 0;
+				for (CValue val : ceval())
+					indices[j++] = val.intValue();
+				return indices;
 			}
-		} else if (ndims() == 1 && !size().isUnknown()) {
-			int[] indices = new int[size().get(0)];
-			int j = 0;
-			for (FExp exp : getArray().getFExps()) 
-				indices[j++] = exp.ceval().intValue();
-			return indices;
-		} else {
-			return new int[0];
+		} catch (UnsupportedOperationException e) {
 		}
+		return new int[0];
 	}
 	
 	/**
@@ -1604,6 +1630,7 @@ aspect Arrays {
 	inh FType Array.type();
 	eq FExp.getArray().type()             = type();
 	eq FExpSubscript.getExpanded().type() = type();
+
 }
 
 aspect ArrayHelpers {
@@ -1682,11 +1709,13 @@ aspect ArrayHelpers {
 		
 		/**
 		 * \brief Returns the number of elements spanned by this Size.
+		 * 
+		 * Only valid if all dimensions are known or currently evaluable.
 		 */
 		public int numElements() {
 			int res = 1;
 			for (int i = 0; i < size.length && res > 0; i++)
-				res *= size[i];
+				res *= get(i);
 			return res < 0 ? 0 : res;
 		}
 		
@@ -1820,6 +1849,16 @@ aspect ArrayHelpers {
 		}
 		
 		/**
+		 * \brief Calculate hash code.
+		 */
+		public int hashCode() {
+			int res = 0;
+			for (int i = 0; i < size.length; i++)
+				res = (res << 8) ^ size[i];
+			return res;
+		}
+		
+		/**
 		 * \brief Check if another size is equivalent to this one.
 		 * 
 		 * @param allowUnknown  if <code>true</code>, consider unknown lengths equal to any length, 
@@ -1854,9 +1893,10 @@ aspect ArrayHelpers {
 		 * @param itsDim        the dimension in the other Size to compare
 		 */
 		public boolean equivalentDim(Size s, boolean allowUnknown, int myDim, int itsDim) {
-			boolean unknown = size[myDim] == UNKNOWN || s.size[itsDim] == UNKNOWN;
-			boolean differ = size[myDim] != s.size[itsDim];
-			return !differ || (unknown && allowUnknown);
+			boolean same = size[myDim] == s.size[itsDim];
+			if (same || !allowUnknown)
+				return same;
+			return size[myDim] == UNKNOWN || s.size[itsDim] == UNKNOWN;
 		}
 		
 		private static final String SEP = ", ";
@@ -2091,7 +2131,7 @@ aspect ArrayHelpers {
 				exps[d] = null;
 			} else if (size[d] != UNKNOWN) {
 				size[d] += s;
-			} else if (exps[d] != null) {
+			} else if (okExp(exps[d])) {
 				exps[d] = new FAddExp((FExp) exps[d].unboundCopy(), new FIntegerLitExp(s));
 			}
 		}
@@ -2114,17 +2154,39 @@ aspect ArrayHelpers {
 		 */
 		public void add(int d1, Size s, int d2) {
 			FExp e = (s instanceof MutableSize) ? ((MutableSize) s).exps[d2] : null;
-			if (e != null) 
+			if (okExp(e)) 
 				add(d1, e);
 			else
 				add(d1, s.size[d2]);
 		}
 		
 		/**
+		 * \brief Get length in the <code>i</code>th dimension.
+		 */
+		public int get(int i) {
+			if (i < 0 || i >= size.length)
+				return UNKNOWN;
+			if (exps[i] == null) // We want to evaluate FUnknownSizeExps as well
+				return size[i];
+			try {
+				return exps[i].ceval().intValue();
+			} catch (UnsupportedOperationException e) {
+				return UNKNOWN;
+			}
+		}
+		
+		/**
 		 * \brief Check if the lengths in the given dimension has a value (fix length or integer).
 		 */
 		protected boolean hasValue(int dim) {
-			return size[dim] != UNKNOWN || exps[dim] != null;
+			return size[dim] != UNKNOWN || okExp(exps[dim]);
+		}
+		
+		/**
+		 * \brief Check if an expression is valid.
+		 */
+		protected static boolean okExp(FExp e) {
+			return e != null && e.isValidExp();
 		}
 		
 		/**
@@ -2133,7 +2195,7 @@ aspect ArrayHelpers {
 		 */
 		protected void copyFrom(int d1, FExp exp, int d2) {
 			set(d1, exp.size(), d2);
-			if (size[d1] == UNKNOWN && exps[d1] == null) {
+			if (!hasValue(d1)) {
 				FExp copyExp = (FExp) exp.fullCopy();
 				Opt dimExp = new Opt(new FIntegerLitExp(d2 + 1));
 				FSizeExp sizeExp  = new FSizeExp(copyExp, dimExp);
@@ -2178,9 +2240,9 @@ aspect ArrayHelpers {
 		 * @param varMap  a map of variables to replace and expressions to replace them with
 		 */
 		public FExp createSizeFExp(int d, Map<ASTNode, FExp> varMap) {
-			return (exps[d] == null) ? 
-					super.createSizeFExp(d, varMap) : 
-					exps[d].createSizeFExp(varMap);
+			return (okExp(exps[d])) ? 
+					exps[d].createSizeFExp(varMap) : 
+					super.createSizeFExp(d, varMap);
 		}
 		
 		/**
@@ -2189,9 +2251,9 @@ aspect ArrayHelpers {
 		 * the resulting expression is not expanded like createSizeFExp().
 		 */
 		public FExp createFExp(int d) {
-			return (exps[d] == null) ? 
-					super.createFExp(d) : 
-					(FExp) exps[d].unboundCopy();
+			return (okExp(exps[d])) ? 
+					(FExp) exps[d].unboundCopy() : 
+					super.createFExp(d);
 		}
 		
 		/**
@@ -2201,6 +2263,7 @@ aspect ArrayHelpers {
 			int known = 1;
 			FExp res = null;
 			for (int i = 0; i < size.length; i++) {
+				// TODO: this will fail if hasValue(i) == false
 				if (size[i] == UNKNOWN) {
 					FExp e = (FExp) exps[i].unboundCopy();
 					res = (res == null) ? e : new FMulExp(res, e);
@@ -2228,6 +2291,7 @@ aspect ArrayHelpers {
 		 * \brief Create a new flattened FSubscript for dimension <code>i</code>.
 		 */
 		protected FSubscript flattenFSubscript(int i, FQName prefix) {
+			// TODO: use okExp() instead of "== null"?
 			return exps[i] == null ? super.flattenFSubscript(i, prefix) : 
 				new FExpSubscript(exps[i].flatten(prefix));
 		}
@@ -2236,6 +2300,7 @@ aspect ArrayHelpers {
 		 * \brief Returns a string representation of a single length.
 		 */
 		protected String toString(int i) {
+			// TODO: use okExp() instead of "== null"?
 			return exps[i] == null ? super.toString(i) : exps[i].prettyPrint("");
 		}
 		
@@ -2600,6 +2665,26 @@ aspect ArrayHelpers {
 		}
 		
 		/**
+		 * \brief Compare two Index for equality.
+		 */
+		public boolean equals(Object i) {
+			return (i instanceof Index) && Arrays.equals(index, ((Index) i).index);
+		}
+		
+		/**
+		 * \brief Calculate hash code.
+		 * 
+		 * Creates perfect hash when ndims() <= 3 and all indices are <= 1023.
+		 */
+		public int hashCode() {
+			int shift = index.length <= 3 ? 10 : 5;
+			int res = 0;
+			for (int i = 0; i < index.length; i++)
+				res = (res << shift) ^ index[i];
+			return res;
+		}
+		
+		/**
 		 * \brief Creates a new Index that describes the last <code>ndims() - level</code>
 		 *        dimensions of this Index.
 		 * 
@@ -2829,9 +2914,10 @@ aspect ArrayHelpers {
 			if (ndims < 4) {
 				int h = 0;
 				for (int i = 0; i < ndims; i++) {
-					if (size.get(i) > 1023) 
+					int s = size.get(i);
+					if (s > 1023) 
 						return;
-					h = (h << 10) & size.get(i);
+					h = (h << 10) | s;
 				}
 				hash = h;
 			}

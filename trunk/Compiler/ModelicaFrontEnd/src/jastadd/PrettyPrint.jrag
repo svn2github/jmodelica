@@ -694,20 +694,22 @@ aspect PrettyPrint {
 aspect FlattPrettyPrint {
 	
 	public void FClass.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
-		str.print(indent+"fclass "+ name() +"\n");
-		for (int i=0;i<getNumFVariable();i++) {
-	  		if (!getFVariable(i).isDerivativeVariable()) {
-	  			p.toString(getFVariable(i),str,indent+" ",o);
-	  		str.print(";\n");  
+		String nextInd = p.indent(indent);
+		str.print(indent + "fclass " + name() + "\n");
+		for (FVariable fv : getFVariables()) {
+	  		if (!fv.isDerivativeVariable()) {
+	  			p.toString(fv, str, nextInd, o);
+	  			str.print(";\n");  
 	  		}
 		}
 
 		if (getNumFInitialEquation()>0)
 			str.print(indent + "initial equation \n");
-	    for (int j=0;j<getNumFInitialEquation();j++) {
-	  		p.toString(getFInitialEquation(j),str, indent+" ",o);
-			str.print(";\n");
-		}
+		getFInitialEquations().prettyPrintWithFix(p, str, nextInd, o, "", ";\n");
+
+		if (getNumFParameterEquation()>0)
+			str.print(indent + "initial equation /* dependent parameters */\n");
+		getFParameterEquations().prettyPrintWithFix(p, str, nextInd, o, "", ";\n");
 	
 	    boolean wroteEquation = false;
 	    for (FEquationBlock b : getFEquationBlocks()) {
@@ -721,14 +723,14 @@ aspect FlattPrettyPrint {
 	    				str.print("equation\n");
 	    				wroteEquation = true;
 	    			}
-	    			p.toString(e, str, p.indent(indent), o);
+	    			p.toString(e, str, nextInd, o);
 		    		str.print(";\n");
 	    		}
 	    	}
 	    }
 	    
-    	p.toString(getFFunctionDecls(), str, p.indent(indent), o);
-    	p.toString(getFRecordDecls(), str, p.indent(indent), o);
+    	p.toString(getFFunctionDecls(), str, nextInd, o);
+    	p.toString(getFRecordDecls(), str, nextInd, o);
 		
   		str.print(indent);
   		str.print("end ");
@@ -769,8 +771,7 @@ aspect FlattPrettyPrint {
 	    	str.print("\"");
 	    }
 
-	    if (isIndependentParameter() && hasBindingExp() && !isArray()) {
-	    	// TODO: print comment for arrays as well
+	    if (isIndependentParameter() && hasBindingExp()) {
 	    	str.print(" /* ");
 	    	try {
 		    	if (isReal()) {
@@ -1056,7 +1057,11 @@ aspect FlattPrettyPrint {
 	eq FFortran77ExternalLanguage.getLanguage() = LANGUAGE_STRING;
 	eq FBuiltinExternalLanguage.getLanguage()   = LANGUAGE_STRING;
 	
-	public void FDotAddExp.prettyPrint(Printer p,PrintStream str, String indent, Object o) {
+	public void FUnknownSizeExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		str.print(":");
+	}
+	
+	public void FDotAddExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		p.toString(getLeft(),str,indent,o);
 		if(!(getRight() instanceof FNegExp)) 
 			str.print(p.op(this));
@@ -1074,7 +1079,7 @@ aspect FlattPrettyPrint {
 //			p.toString(getRight(),str,indent,o);
 	}
 		
-	public void FDotMulExp.prettyPrint(Printer p,PrintStream str, String indent, Object o) {
+	public void FDotMulExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		str.print("( ");
 		p.toString(getLeft(),str,indent,o);
 		str.print(" )");

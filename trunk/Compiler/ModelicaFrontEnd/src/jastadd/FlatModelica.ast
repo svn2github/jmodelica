@@ -31,6 +31,7 @@ FClass ::= FQName
            FVariable* 
            AliasVariable:FVariable* 
            FInitialEquation:FAbstractEquation*
+           FParameterEquation:FAbstractEquation*
            FEquationBlock*
            FFunctionDecl*
            FRecordDecl*
@@ -320,7 +321,7 @@ abstract FSubscript;
 /**
  * \brief The colon subscript used to denote that the array size is inferred.
  */
-FColonSubscript : FSubscript::=;
+FColonSubscript : FSubscript ::= /SizeExp:FExp/;
 
 /**
  * \brief Expression subscript.
@@ -812,10 +813,15 @@ FMatrixRow : FAbstractCat;
 
 /**
  * \brief Generated expression that applies array subscripts to any expression.
- *
- * Generated when slices are flattened.
  */
 FSubscriptedExp : FExp ::= FExp FArraySubscripts;
+
+/**
+ * \brief Internal expression that describes an unknown size (for a single dimension).
+ * 
+ * Only used in Size objects.
+ */
+FUnknownSizeExp : FExp ::= <Variable:CommonVariableDecl> <Dim:int>;
 
 /**
  * \brief Range expression.

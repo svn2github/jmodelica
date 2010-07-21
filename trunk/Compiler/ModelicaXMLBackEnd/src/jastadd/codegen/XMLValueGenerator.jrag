@@ -63,54 +63,20 @@ public class XMLValueGenerator extends GenericGenerator{
 		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
 		 */
 		public void generate(PrintStream genPrinter) {
-			ArrayList<FBooleanVariable> booleans = fclass.independentBooleanParameters();
-			for(FBooleanVariable variable: booleans) {
-				genPrinter.print("\n\t <BooleanParameter ");
-				genPrinter.print("name=\""+variable.name()+"\" ");
-				if(variable.hasBindingExp()) {
-					genPrinter.print("value=\""+variable.getBindingExp().ceval().booleanValue()+"\"");
-				}else{
-					genPrinter.print("value=\""+variable.startAttribute()+"\"");
-				}
-				genPrinter.print("/>");
-			}
-			
-			ArrayList<FIntegerVariable> integers = fclass.independentIntegerParameters();
-			for(FIntegerVariable variable: integers) {
-				genPrinter.print("\n\t <IntegerParameter ");
-				genPrinter.print("name=\""+variable.name()+"\" ");
-				if(variable.hasBindingExp()) {
-					genPrinter.print("value=\""+variable.getBindingExp().ceval().intValue()+"\"");
-				}else{
-					genPrinter.print("value=\""+variable.startAttribute()+"\"");
-				}
-				genPrinter.print("/>");
-
-			}
-						
-			ArrayList<FRealVariable> reals = fclass.independentRealParameters();
-			for(FRealVariable variable: reals) {
-				genPrinter.print("\n\t <RealParameter ");
-				genPrinter.print("name=\""+variable.name()+"\" ");
-				if(variable.hasBindingExp()) {
-					genPrinter.print("value=\""+variable.getBindingExp().ceval().realValue()+"\"");
-				}else{
-					genPrinter.print("value=\""+variable.startAttribute()+"\"");
-				}
-				genPrinter.print("/>");
-			}
-			
-			ArrayList<FStringVariable> strings = fclass.independentStringParameters();			
-			for(FStringVariable variable: strings) {
-				genPrinter.print("\n\t <StringParameter ");
-				genPrinter.print("name=\""+variable.name()+"\" ");
-				if(variable.hasBindingExp()) {
-					genPrinter.print("value=\""+variable.getBindingExp().ceval().stringValue()+"\"");
-				}else{
-					genPrinter.print("value=\""+variable.startAttribute()+"\"");
-				}
-				genPrinter.print("/>");
-
+			// TODO: Does the order matter here? Is it important to exclude strings?
+			//       If not, we could iterate over independentParameters() instead.
+			printParameterList(fclass.independentBooleanParameters(), genPrinter);
+			printParameterList(fclass.independentIntegerParameters(), genPrinter);
+			printParameterList(fclass.independentRealParameters(), genPrinter);
+//			printParameterList(fclass.independentStringParameters(), genPrinter);
+		}
+		
+		protected void printParameterList(Iterable<? extends FVariable> list, PrintStream genPrinter) {
+			for (FVariable fv : list) {
+				genPrinter.print("\t <" + fv.type() + "Parameter ");
+				genPrinter.print("name=\"" + fv.name() + "\" ");
+				genPrinter.print("value=\"" + fv.ceval() + "\"");
+				genPrinter.print("/>\n");
 			}
 		}
 	}

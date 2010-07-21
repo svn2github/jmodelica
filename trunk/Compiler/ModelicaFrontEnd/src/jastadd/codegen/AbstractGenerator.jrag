@@ -145,7 +145,7 @@ public abstract class AbstractGenerator {
 	 * 
 	 * Must not contain the tag escape character.
 	 * 
-	 * Subclasses should override.
+	 * Subclasses should override if their templates may contain copyright blurb.
 	 */
 	protected String startOfBlurb() { return null; }
 	
@@ -206,8 +206,12 @@ public abstract class AbstractGenerator {
 				case TAG:
 					if (c == escapeCharacter) {
 					    mode = Mode.NORMAL;
-						tag = tagMap.get(tag_name.toString());
-						tag.generate(genPrinter);
+					    String name = tag_name.toString();
+						tag = tagMap.get(name);
+						if (tag != null)
+							tag.generate(genPrinter);
+						else // TODO: introduce specific exception type
+							throw new RuntimeException("Unknown tag: " + name);
 					} else {
 						tag_name.append((char) c);
 					}
@@ -265,9 +269,7 @@ public abstract class AbstractGenerator {
 				else
 					read = true;
 			}
-		} catch (NullPointerException e) {
-			throw new RuntimeException("Unknown tag: "+ tag_name.toString());
-		} catch (IOException e) {
+		} catch (IOException e) { // TODO: introduce specific exception type
 			throw new RuntimeException("IOException during code generation");
 		}
 	}	

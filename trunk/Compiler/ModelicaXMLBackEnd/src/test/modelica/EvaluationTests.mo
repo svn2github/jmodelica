@@ -1,0 +1,221 @@
+/*
+	Copyright (C) 2009 Modelon AB
+
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, version 3 of the License.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+package EvaluationTests
+	
+	
+	
+	model VectorMul
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.XMLCodeGenTestCase(
+         name="VectorMul",
+         description="",
+         template="$XML_variables$",
+         generatedCode="
+
+		<ScalarVariable name=\"n\" valueReference=\"268435463\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Integer start=\"0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>independentParameter</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"x[1]\" valueReference=\"0\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"1.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>dependentParameter</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"x[2]\" valueReference=\"1\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"2.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>dependentParameter</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"x[3]\" valueReference=\"2\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"3.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>dependentParameter</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"y[1]\" valueReference=\"3\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"3.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>dependentParameter</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"y[2]\" valueReference=\"4\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"2.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>dependentParameter</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"y[3]\" valueReference=\"5\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"1.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>dependentParameter</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"z\" valueReference=\"6\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"10.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>dependentParameter</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"q\" valueReference=\"6\" variability=\"continuous\" causality=\"internal\" alias=\"alias\" >
+			<Real relativeQuantity=\"false\" start=\"0.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>algebraic</VariableCategory>
+		</ScalarVariable>")})));
+
+		parameter Integer n = 3;
+		parameter Real x[n] = 1:n;
+		parameter Real y[n] = n:-1:1;
+		parameter Real z = x * y;
+		Real q = z;
+	end VectorMul;
+	
+	
+	model FunctionEval1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.XMLValueGenTestCase(
+         name="FunctionEval1",
+         description="",
+         template="$XML_parameters$",
+         generatedCode="
+	 <RealParameter name=\"x\" value=\"3.0\"/>
+")})));
+
+		function f
+			input Real i;
+			output Real o = i + 2.0;
+			algorithm
+		end f;
+		
+		parameter Real x = f(1.0);
+	end FunctionEval1;
+	
+	
+	model FunctionEval2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.XMLValueGenTestCase(
+         name="FunctionEval2",
+         description="",
+         template="$XML_parameters$",
+         generatedCode="
+	 <RealParameter name=\"x[1]\" value=\"1.0\"/>
+	 <RealParameter name=\"x[2]\" value=\"1.0\"/>
+	 <RealParameter name=\"x[3]\" value=\"2.0\"/>
+	 <RealParameter name=\"x[4]\" value=\"3.0\"/>
+	 <RealParameter name=\"x[5]\" value=\"5.0\"/>
+	 <RealParameter name=\"x[6]\" value=\"8.0\"/>
+")})));
+
+		function fib
+			input Real n;
+			output Real a;
+		protected
+			Real b;
+			Real c;
+			Real i;
+		algorithm
+			a := 1;
+			b := 1;
+			if n < 3 then
+				return;
+			end if;
+			i := 2;
+			while i < n loop
+				c := b;
+				b := a;
+				a := b + c;
+				i := i + 1;
+			end while;
+		end fib;
+	
+		parameter Real x[6] = { fib(1), fib(2), fib(3), fib(4), fib(5), fib(6) };
+	end FunctionEval2;
+	
+	
+	model FunctionEval3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.XMLValueGenTestCase(
+         name="FunctionEval3",
+         description="",
+         template="$XML_parameters$",
+         generatedCode="
+	 <RealParameter name=\"x\" value=\"48.0\"/>
+")})));
+
+		function f
+			input Real[3] i;
+			output Real o = 1;
+		protected
+			Real[size(i,1)] x;
+		algorithm
+			x := i + (1:size(i,1));
+			for j in 1:size(i,1) loop
+				o := o * x[j];
+			end for;
+		end f;
+		
+		parameter Real x = f({1,2,3});
+	end FunctionEval3;
+	
+	
+	model FunctionEval4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.XMLValueGenTestCase(
+         name="FunctionEval4",
+         description="",
+         template="$XML_parameters$",
+         generatedCode="
+	 <RealParameter name=\"x\" value=\"48.0\"/>
+")})));
+
+		function f
+			input Real[:] i;
+			output Real o = 1;
+		protected
+			Real[size(i,1)] x;
+		algorithm
+			x := i + (1:size(i,1));
+			for j in 1:size(i,1) loop
+				o := o * x[j];
+			end for;
+		end f;
+		
+		parameter Real x = f({1,2,3});
+	end FunctionEval4;
+	
+	
+	model FunctionEval5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.XMLValueGenTestCase(
+         name="FunctionEval5",
+         description="",
+         template="$XML_parameters$",
+         generatedCode="
+	 <RealParameter name=\"x\" value=\"6.0\"/>
+")})));
+
+		function f
+			input Real[3] i;
+			output Real o;
+		algorithm
+			o := 0;
+			for x in i loop
+				o := o + x;
+			end for;
+		end f;
+		
+		parameter Real x = f({1,2,3});
+	end FunctionEval5;
+	
+	
+	
+end EvaluationTests;

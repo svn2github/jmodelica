@@ -14,8 +14,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Queue;
+import java.util.Set;
 import java.util.Stack;
+import java.util.HashSet;
 
 /* This causes conflicts
 import org.jmodelica.graphs.EquationSystem;
@@ -157,19 +162,23 @@ aspect TransformCanonical {
 	 */
 	public void FClass.genBindingEquations() {
 		for (FVariable fv : getFVariables()) {
-			if (!fv.isParameter() && !fv.isConstant()) {
+			if (!fv.isIndependentParameter() && !fv.isConstant()) {
+				boolean depPar = fv.isDependentParameter();
 				FQName var_name = fv.getFQName().fullCopy();
+				// Do not copy array indices
 				var_name.setLastFArraySubscripts(null);
 				if (fv.hasBindingExp()) {
 					FExp bexp = fv.getBindingExp();
 					fv.setBindingExpOpt(new Opt());
-					// Do not copy array indices
 					FEquation feq = new FEquation(new FIdUseExp(var_name), bexp);
-					addFEquation(feq);
+					if (depPar)
+						addFParameterEquation(feq);
+					else
+						addFEquation(feq);
 				} else if (fv.isRecord()) {
 					FRecordDecl rec = fv.myFRecordDecl();
 					for (FAttribute a : fv.getFAttributes()) 
-						a.genBindingEquations(this, rec, var_name);
+						a.genBindingEquations(this, rec, var_name, depPar);
 				}
 			}
 		}
@@ -180,18 +189,21 @@ aspect TransformCanonical {
 	/**
 	 * \brief Generate equations from an attribute of a record variable.
 	 */
-	public void FAttribute.genBindingEquations(FClass fc, FRecordDecl rec, FQName prefix) {
+	public void FAttribute.genBindingEquations(FClass fc, FRecordDecl rec, FQName prefix, boolean depPar) {
 		AbstractFVariable comp = rec.findComponent(getName().getFQName());
 		if (hasValue() && !comp.isUnknown()) {
 			// TODO: handle 'each'
 			FQName fqn = prefix.copyAndAppend(getName().getFQName());
 			FEquation feq = new FEquation(new FIdUseExp(fqn), getValue());
-			fc.addFEquation(feq);
+			if (depPar)
+				fc.addFParameterEquation(feq);
+			else
+				fc.addFEquation(feq);
 			setValueOpt(new Opt());
 			if (comp.isRecord()) {
 				FRecordDecl next = comp.myFRecordDecl();
 				for (FAttribute a : getFAttributes())
-					a.genBindingEquations(fc, next, fqn);
+					a.genBindingEquations(fc, next, fqn, depPar);
 			}
 		}
 	}
@@ -639,93 +651,103 @@ aspect ParameterSorting {
 	public boolean FClass.cyclicParameters = false;
 	
 	/**
-	 * \brief Sort dependent parameters.
+	 * \brief Index of equation during equation sorting.
+	 */
+	public int FAbstractEquation.sortingIndex = -1;
+	
+	public class FAbstractEquation {
+		public static class SortingIndexComparator implements Comparator<FAbstractEquation> {
+			public int compare(FAbstractEquation o1, FAbstractEquation o2) {
+				return o1.sortingIndex - o2.sortingIndex;
+			}
+		}
+	}
+	
+	/**
+	 * \brief Creates a TreeSet that can hold FAbstractEquations, sorted by their sortingIndex.
+	 */
+	public static TreeSet<FAbstractEquation> FAbstractEquation.sortingSet() {
+		return new TreeSet<FAbstractEquation>(new SortingIndexComparator());
+	}
+	
+	/**
+	 * \brief Sort dependent parameter equations.
 	 * 
 	 * This is a simple implementation of Kahn's topological sorting algorithm.
 	 * This implementation will most likely be replaced by other graph 
 	 * algorithms later on.
 	 */
 	public void FClass.sortDependentParameters() {
+		// Get the list of parameter equations
+		ArrayList<FAbstractEquation> eqns = getFParameterEquations().toArrayList();
+		int n_eqns = eqns.size();
+		for (int i = 0; i < n_eqns; i++)
+			eqns.get(i).sortingIndex = i;
 		
-		// Retrieve the dependent parameter that will be sorted
-		ArrayList<FVariable> dps = dependentParameters();
-		
-		// Create data structures for the adjacency graph.
-		ArrayList<ArrayList<FVariable>> toNodes = new ArrayList<ArrayList<FVariable>>();	
-		ArrayList<ArrayList<FVariable>> fromNodes = new ArrayList<ArrayList<FVariable>>();	
-		
-		// Initialize data structures.
-		for(int i=0;i<numDependentParameters();i++) {
-			toNodes.add(new ArrayList<FVariable>());
-			fromNodes.add(new ArrayList<FVariable>());
+		// Set up data structures for the adjacency graph.
+		ArrayList<HashSet<FAbstractEquation>> toNodes = new ArrayList<HashSet<FAbstractEquation>>(n_eqns);
+		ArrayList<HashSet<FAbstractEquation>> fromNodes = new ArrayList<HashSet<FAbstractEquation>>(n_eqns);
+		for (int i = 0; i < n_eqns; i++) {
+			toNodes.add(new HashSet<FAbstractEquation>());
+			fromNodes.add(new HashSet<FAbstractEquation>());
 		}
 		
-		// For each flat variable
-		for (FVariable fv : dps) {
-			// Retreive all variables referenced in binding expression
-			ArrayList<FVariable> deps = fv.referencedFVariablesInBindingExp();
+		// For each equation
+		for (FAbstractEquation eqn : eqns) {
+			// Retreive all variables referenced in right hand side
+			Set<AbstractFVariable> deps = eqn.referencedFVariablesInRHS();
 			// Build the actual adjacency graph.
-			for (FVariable fv_add : deps) {
-				if (!(dps.indexOf(fv_add)<0) && !toNodes.get(dps.indexOf(fv_add)).contains(fv)) {
-					toNodes.get(dps.indexOf(fv_add)).add(fv);		
-					fromNodes.get(dps.indexOf(fv)).add(fv_add);
+			for (AbstractFVariable fv : deps) {
+				FAbstractEquation depEqn = fv.parameterEquation();
+				if (depEqn != null && depEqn.sortingIndex >= 0) {
+					toNodes.get(depEqn.sortingIndex).add(eqn);		
+					fromNodes.get(eqn.sortingIndex).add(depEqn);
 				}
 			}
 		}	
 				
 		// Sort using algorithm described at
 		// http://en.wikipedia.org/wiki/Topological_sorting
-		ArrayList<FVariable> L = new ArrayList<FVariable>();
-		ArrayList<FVariable> S = new ArrayList<FVariable>();
+		List<FAbstractEquation> L = new List<FAbstractEquation>();
+		Queue<FAbstractEquation> S = new ArrayDeque<FAbstractEquation>(n_eqns);
 		
 		// Add all nodes without incoming edges to S
-		int i = 0;
-		for (ArrayList<FVariable> l : fromNodes) {
-			if (l.isEmpty()) {
-				S.add(dps.get(i));
-			}
-			i++;
-		}
+		for (int i = 0; i < n_eqns; i++) 
+			if (fromNodes.get(i).isEmpty()) 
+				S.add(eqns.get(i));
+		
 		// Repeat while S is not empty
-		while (!S.isEmpty()) {
+		while (S.size() > 0) {
 			// Remove a node n from S
-			FVariable n = S.remove(0);
+			FAbstractEquation n = S.remove();
 			// Insert n into L
 			L.add(n);
-			// For each node m with an edge e from n to m
-			for (FVariable m : toNodes.get(dps.indexOf(n))) {
+			// For each node m with an edge e from n to m (in original order)
+			Set<FAbstractEquation> nodes = FAbstractEquation.sortingSet();
+			nodes.addAll(toNodes.get(n.sortingIndex));
+			for (FAbstractEquation m : nodes) {
 				// Remove edge e from fromNodes
-				fromNodes.get(dps.indexOf(m)).remove(n);
+				fromNodes.get(m.sortingIndex).remove(n);
 				// If m has no incoming edges add m to S
-				if (fromNodes.get(dps.indexOf(m)).isEmpty()) {
+				if (fromNodes.get(m.sortingIndex).isEmpty()) 
 					S.add(m);
-				}
 			}
 			// Remove e from toNodes
-			toNodes.get(dps.indexOf(n)).clear();
+			toNodes.get(n.sortingIndex).clear();
 		}
 		
 		// Not possible to find an ordering without cycles?
-		if (L.size()!=dps.size()) {
+		if (L.getNumChild() != eqns.size()) {
 			cyclicParameters = true;
 			return;
 		}
 		
-		// Remove all dependent parameters from (in reversed order)
-		for (i=getNumFVariable()-1;i>=0;i--) {
-			if (dps.contains(getFVariable(i))) {
-				getFVariableList().removeChild(i);
-			}
-		}
-
-		// Add all dependent parameters in sorted order.
-		for (FVariable fv : L) {
-			addFVariable(fv);
-		}
+		// Replace old parameter equation list
+		setFParameterEquationList(L);
 
 		// Flush AST since the structure has changed.
-		//flush();
-		root().flushAllRecursive();
+		flush();
+		//root().flushAllRecursive();
 	}	
 		
 }

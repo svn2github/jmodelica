@@ -17,6 +17,7 @@
 
 import java.util.HashSet;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -945,6 +946,19 @@ aspect FlatFunctionUtils {
      }
      
      /**
+      * \brief Returns a list of all InstComponentDecls not declared as "input".
+      */
+     syn lazy ArrayList<InstComponentDecl> InstNode.myNonInputs() {
+         ArrayList<InstComponentDecl> l = new ArrayList<InstComponentDecl>();
+         for (InstComponentDecl icd : getInstComponentDecls())
+             if (!icd.isInput())
+                 l.add(icd);
+         for (InstExtends ie : getInstExtendss())
+        	 l.addAll(ie.myNonInputs());
+         return l;
+     }
+     
+     /**
       * \brief Returns a list of all InstComponentDecls declared as "output".
       */
      syn lazy ArrayList<InstComponentDecl> InstNode.myOutputs() {
@@ -1392,6 +1406,17 @@ aspect FlatExpressions {
     eq SourceRoot.getChild().inIfCondition() = false;
     eq FlatRoot.getChild().inIfCondition() = false;
     
+    /**
+     * \brief Is this expression of a type that is valid for most uses?
+     * 
+     * Only dummy expressions and similar return false.
+     */
+    syn boolean FExp.isValidExp()       = true;
+    eq FNoExp.isValidExp()              = false;
+    eq FUnsupportedExp.isValidExp()     = false;
+    eq FUnsupportedBuiltIn.isValidExp() = false;
+    eq FUnknownSizeExp.isValidExp()     = false;
+    
 }
 
 aspect LineOffsets {
@@ -1503,4 +1528,65 @@ aspect Strings {
 
 	private static HashMap<String,String> ASTNode.ESCAPE_REPLACEMENTS = null;
 
+}
+
+aspect GeneralHelpers {
+	
+	/**
+	 * \brief Generic iterator over constant array.
+	 */
+	public class ConstArrayIterator<T> implements Iterator<T> {
+		
+		protected T[] elems;
+		protected int i;
+		
+		public ConstArrayIterator(T[] arr) {
+			elems = arr;
+			i = 0;
+		}
+		
+		public boolean hasNext() {
+			return i < elems.length;
+		}
+		
+		public T next() {
+			return elems[i++];
+		}
+		
+		public void remove() {
+			throw new UnsupportedOperationException();
+		}
+		
+	}
+	
+	/**
+	 * \brief Generic iterator over a single value.
+	 */
+	public class SingleIterator<T> implements Iterator<T> {
+		
+		protected T elem;
+		protected boolean ok;
+		
+		public SingleIterator(T e) {
+			elem = e;
+			ok = true;
+		}
+		
+		public boolean hasNext() {
+			return ok;
+		}
+		
+		public T next() {
+			if (!ok)
+				throw new UnsupportedOperationException();
+			ok = false;
+			return elem;
+		}
+		
+		public void remove() {
+			throw new UnsupportedOperationException();
+		}
+		
+	}
+	
 }

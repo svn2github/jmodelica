@@ -529,8 +529,10 @@ aspect InstanceErrorCheck {
 			if (isCircular()) {
 				node.error("Could not evaluate binding expression for " + varKind + " '" +
 						varName + "' due to circularity: " + exp);
-				} else if (ceval().isUnknown()) {
-					if (ceval().isUnsupported()) {
+			} else {
+				CValue val = ceval();
+				if (val.isUnknown()) {
+					if (val.isUnsupported()) {
 						if (node.isConstant()) // TODO: Produce error for non-structural parameters as well
 							node.compliance("Constant evaluation not supported for expression(s) directly or indirectly " + 
 									"used by the binding expression for " + varKind + " '" + varName + "': " + exp);
@@ -539,11 +541,11 @@ aspect InstanceErrorCheck {
 								varKind + " '" + varName + "': " + exp);
 					}
 				}	
-			
-			} catch (UnsupportedOperationException e) {
-				node.error("Could not evaluate binding expression for " + 
-						varKind + " '" + varName + "': " + exp);
 			}
+		} catch (UnsupportedOperationException e) {
+			node.error("Could not evaluate binding expression for " + 
+					varKind + " '" + varName + "': " + exp);
+		}
 	}
 	
 	public void FExp.checkConstantExpression(InstPrimitive node, String varKind, String varName) {

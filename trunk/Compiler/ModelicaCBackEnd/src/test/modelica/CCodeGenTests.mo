@@ -88,8 +88,8 @@ $C_DAE_initial_guess_equation_residuals$
          description="Test of code generation",
          template="$C_DAE_initial_dependent_parameter_residuals$",
          generatedCode="
-   (*res)[0] = ( _p1_0 ) * ( _p1_0 ) - _p2_1;
-   (*res)[1] = _p2_1 - _p3_2;
+    (*res)[0] = ( _p1_2 ) * ( _p1_2 ) - (_p2_1);
+    (*res)[1] = _p2_1 - (_p3_0);
 ")})));
 
 	    parameter Real p3 = p2;
@@ -367,7 +367,6 @@ end CLogExp3;
 
 
 model CCodeGenDiscreteVariables1
-
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.CCodeGenTestCase(
          name="CCodeGenDiscreteVariables1",
@@ -380,30 +379,28 @@ $C_DAE_equation_residuals$
 #define _c1_0 ((*(jmi->z))[jmi->offs_real_ci+0])
 #define _c2_1 ((*(jmi->z))[jmi->offs_real_ci+1])
 #define _p1_2 ((*(jmi->z))[jmi->offs_real_pi+0])
-#define _p2_15 ((*(jmi->z))[jmi->offs_real_pd+0])
-#define _ci1_6 ((*(jmi->z))[jmi->offs_integer_ci+0])
-#define _ci2_7 ((*(jmi->z))[jmi->offs_integer_ci+1])
-#define _pi1_8 ((*(jmi->z))[jmi->offs_integer_pi+0])
-#define _pi2_16 ((*(jmi->z))[jmi->offs_integer_pd+0])
-#define _cb1_10 ((*(jmi->z))[jmi->offs_boolean_ci+0])
-#define _cb2_11 ((*(jmi->z))[jmi->offs_boolean_ci+1])
-#define _pb1_12 ((*(jmi->z))[jmi->offs_boolean_pi+0])
-#define _pb2_17 ((*(jmi->z))[jmi->offs_boolean_pd+0])
-#define _der_x_14 ((*(jmi->z))[jmi->offs_real_dx+0])
-#define _x_4 ((*(jmi->z))[jmi->offs_real_x+0])
-#define _w_5 ((*(jmi->z))[jmi->offs_real_w+0])
+#define _p2_3 ((*(jmi->z))[jmi->offs_real_pd+0])
+#define _ci1_7 ((*(jmi->z))[jmi->offs_integer_ci+0])
+#define _ci2_8 ((*(jmi->z))[jmi->offs_integer_ci+1])
+#define _pi1_9 ((*(jmi->z))[jmi->offs_integer_pi+0])
+#define _pi2_10 ((*(jmi->z))[jmi->offs_integer_pd+0])
+#define _cb1_12 ((*(jmi->z))[jmi->offs_boolean_ci+0])
+#define _cb2_13 ((*(jmi->z))[jmi->offs_boolean_ci+1])
+#define _pb1_14 ((*(jmi->z))[jmi->offs_boolean_pi+0])
+#define _pb2_15 ((*(jmi->z))[jmi->offs_boolean_pd+0])
+#define _der_x_17 ((*(jmi->z))[jmi->offs_real_dx+0])
+#define _x_5 ((*(jmi->z))[jmi->offs_real_x+0])
+#define _w_6 ((*(jmi->z))[jmi->offs_real_w+0])
 #define time ((*(jmi->z))[jmi->offs_t])
-#define _rd2_3 ((*(jmi->z))[jmi->offs_real_d+0])
-#define _rid2_9 ((*(jmi->z))[jmi->offs_integer_d+0])
-#define _rbd2_13 ((*(jmi->z))[jmi->offs_boolean_d+0])
+#define _rd2_4 ((*(jmi->z))[jmi->offs_real_d+0])
+#define _rid2_11 ((*(jmi->z))[jmi->offs_integer_d+0])
+#define _rbd2_16 ((*(jmi->z))[jmi->offs_boolean_d+0])
 
-    (*res)[0] =  - ( _x_4 ) - (_der_x_14);
-    (*res)[1] = 4 - (_rd2_3);
-    (*res)[2] = 4 - (_w_5);
-    (*res)[3] = 4 - (_rid2_9);
-    (*res)[4] = JMI_FALSE - (_rbd2_13);
-
-
+    (*res)[0] =  - ( _x_5 ) - (_der_x_17);
+    (*res)[1] = 4 - (_rd2_4);
+    (*res)[2] = 4 - (_w_6);
+    (*res)[3] = 4 - (_rid2_11);
+    (*res)[4] = JMI_FALSE - (_rbd2_16);
 ")})));
 
   constant Real c1 = 1;
@@ -2845,7 +2842,8 @@ model ExtStmtInclude1
 		 external "C" annotation(Include="#include \"extFunc.h\"");
 	end extFunc;
 	algorithm
-		extFunc();end ExtStmtInclude1;
+		extFunc();
+end ExtStmtInclude1;
 
 model ExtStmtInclude2
 	annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
@@ -3166,7 +3164,8 @@ void func_CCodeGenTests_SimpleExternal6_algorithm_1_def(jmi_ad_var_t a_in_v) {
 		external my_f(a);
 	end f;
 	algorithm
-		f(a_in);
+		f(a_in);
+
 end SimpleExternal6;
 
 model SimpleExternal7
@@ -3241,7 +3240,8 @@ end SimpleExternal7;
 //		external d = my_f(a,c,b);
 //	end f;
 //algorithm
-//	(c_out, d_out) := f(a_in, b_in);//	
+//	(c_out, d_out) := f(a_in, b_in);
+//	
 //end SimpleExternal8;
 
 

@@ -176,8 +176,10 @@ aspect FlatVariability {
 		return total;
 	}
 	
-	eq FIdUseExp.variability() {
-		AbstractFVariable variable = this.myFV();
+	eq FIdUseExp.variability() = getFIdUse().variability();
+	
+	syn FTypePrefixVariability FIdUse.variability() {
+		AbstractFVariable variable = myFV();
 		if (variable instanceof FVariable) {
 			FVariable fVariable = (FVariable) variable;
 			return(fVariable.variability());
@@ -185,6 +187,7 @@ aspect FlatVariability {
 			return (fContinuous());
 		}
 	}
+	eq FIdUseInstAccess.variability() = getInstAccess().myInstComponentDecl().variability();
 
 	syn FTypePrefixVariability FForIndex.variability() = hasFExp() ? getFExp().variability() : fParameter();
 

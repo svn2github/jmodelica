@@ -115,13 +115,11 @@ aspect Flattening {
 	   	   		for (InstComponentDecl icd : ie.getInstComponentDecls())
 	   				icd.flattenInFunction(ffd, fc, false);
 			
-	   		FAlgorithmBlock fab;
-	   		if (getNumFAbstractEquation() > 0) {
-		   		fab = (FAlgorithmBlock) getFAbstractEquation(0);
-		   		fab = fab.flattenEqn(new FQName(), fc);
-	   		} else {
+	   		FAlgorithmBlock fab = findFunctionAlgorithm();
+	   		if (fab == null)
 	   			fab = new FAlgorithmBlock(new List());
-	   		}
+	   		else
+	   			fab = fab.flattenEqn(new FQName(), fc);
 			ffd.setFAlgorithmBlock(fab);
 			if (hasInstExternal())
 				fab.addFStatement(getInstExternal().flatten(this, new FQName()));
@@ -134,6 +132,21 @@ aspect Flattening {
 			
 			flattenCalledFunctions(fc);
 		}
+	}
+	
+	syn FAlgorithmBlock InstNode.findFunctionAlgorithm() {
+		if (getNumFAbstractEquation() > 0) {
+			FAbstractEquation equ = getFAbstractEquation(0);
+			if (equ instanceof FAlgorithmBlock)
+				return (FAlgorithmBlock) equ;
+		} else {
+			for (InstExtends ie : getInstExtendss()) {
+				FAlgorithmBlock tmp = ie.findFunctionAlgorithm();
+				if (tmp != null) 
+					return tmp;
+			}
+		}
+		return null;
 	}
 	
 	// Flatten record if not already done
@@ -242,36 +255,75 @@ aspect Flattening {
 	}
 
 	public FFunctionVariable InstAssignable.createFFunctionVariable(Opt eo, FQName fqn) {
-		// TODO: if we need separate variable class for records, overide this
+		// TODO: if we need separate variable class for records, override this
 		FType type = (FType) type().fullCopy();
-		type.flattenSize(new FQName());
+		FFunctionVariable ffv;
 		if (isArray())
-			return new FFunctionArray(new Opt(), type, eo, fqn);
+			ffv = new FFunctionArray(new Opt(), type, eo, fqn);
 		else
-			return new FFunctionVariable(new Opt(), type, eo, fqn);
+			ffv = new FFunctionVariable(new Opt(), type, eo, fqn);
+		type.flattenSize(new FQName(), ffv);
+		return ffv;
 	}
 	
-	public void FType.flattenSize(FQName prefix) {
-		setSize(getSize().flatten(prefix));
+	public void FType.flattenSize(FQName prefix, AbstractFVariable fv) {
+		setSize(getSize().flatten(prefix, fv));
 	}
 	
-	public void FRecordType.flattenSize(FQName prefix) {
-		super.flattenSize(prefix);
+	public void FRecordType.flattenSize(FQName prefix, AbstractFVariable fv) {
+		super.flattenSize(prefix, fv);
 		for (FRecordComponentType comp : getComponents())
-			comp.getFType().flattenSize(prefix);
+			comp.getFType().flattenSize(prefix, null);
 	}
 	
-	public Size Size.flatten(FQName prefix) {
+	public Size Size.flatten(FQName prefix, AbstractFVariable fv) {
 		return this;
 	}
 	
-	public MutableSize MutableSize.flatten(FQName prefix) {
+	public MutableSize MutableSize.flatten(FQName prefix, AbstractFVariable fv) {
 		MutableSize res = new MutableSize(size.length);
 		System.arraycopy(size, 0, res.size, 0, size.length);
-		for (int i = 0; i < exps.length; i++)
-			if (exps[i] != null)
+		for (int i = 0; i < exps.length; i++) {
+			if (exps[i] != null) {
 				res.exps[i] = exps[i].flatten(prefix);
+				res.exps[i].updateFUnknownSizeExps(fv);
+			}
+		}
 		return res;
+	}
+	
+	/**
+	 * \brief Change the variable of any FUnknownSizeExp in size to the given variable.
+	 */
+	public void FType.updateFUnknownSizeExps(CommonVariableDecl var) {
+		if (getSize() != Size.SCALAR) {
+			Size s = getSize().clone();
+			s.updateFUnknownSizeExps(var);
+			setSize(s);
+		}
+	}
+
+	/**
+	 * \brief Change the variable of any FUnknownSizeExp dimension to the given variable.
+	 */
+	public void Size.updateFUnknownSizeExps(CommonVariableDecl var) {}
+	
+	public void MutableSize.updateFUnknownSizeExps(CommonVariableDecl var) {
+		for (int i = 0; i < exps.length; i++) {
+			if (exps[i] != null) {
+				exps[i] = (FExp) exps[i].fullCopy();
+				exps[i].updateFUnknownSizeExps(var);
+			}
+		}
+	}
+	
+	/**
+	 * \brief Change the variable of any FUnknownSizeExp to the given variable.
+	 */
+	public void FExp.updateFUnknownSizeExps(CommonVariableDecl var) {}
+	
+	public void FUnknownSizeExp.updateFUnknownSizeExps(CommonVariableDecl var) {
+		setVariable(var);
 	}
 
 	// Generic method for flattening	
@@ -1042,17 +1094,21 @@ aspect FlatExpressions {
 	public FUnsupportedBuiltIn FUnsupportedBuiltIn.flatten(FQName prefix) { return null; }
 	
 	// These used to delegate to standard implementation for FExp.flatten(FQName).
-	public FScalar    FScalar.flatten(FQName prefix)    { return null; }
+	public FScalar FScalar.flatten(FQName prefix) { return null; }
 	
-	public FCross     FCross.flatten(FQName prefix)     { return new FCross(getX().flatten(prefix), getY().flatten(prefix)); }
+	public FCross  FCross.flatten(FQName prefix)  { return new FCross(getX().flatten(prefix), getY().flatten(prefix)); }
 	
 	public FMinMaxExp FMinMaxExp.flatten(FQName prefix) { 
 		return createNode(getX().flatten(prefix), hasY() ? getY().flatten(prefix) : null); 
 	}
 	
-	public FSizeExp   FSizeExp.flatten(FQName prefix) {
+	public FSizeExp FSizeExp.flatten(FQName prefix) {
 		Opt<FExp> dim = hasDim() ? new Opt<FExp>(getDim().flatten(prefix)) : new Opt<FExp>();
 		return new FSizeExp(getFExp().flatten(prefix), dim); 
+	}
+	
+	public FUnknownSizeExp FUnknownSizeExp.flatten(FQName prefix) {
+		return new FUnknownSizeExp(null, getDim());
 	}
 	
 	public FDerExp InstDerExp.flatten(FQName prefix) {

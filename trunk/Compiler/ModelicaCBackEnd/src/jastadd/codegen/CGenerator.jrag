@@ -23,6 +23,8 @@ import java.io.*;
 
 public class CGenerator extends GenericGenerator {
 	
+	protected static final String INDENT = "    ";
+	
 	class DAETag_C_externalFuncIncludes extends DAETag {
 		
 		public DAETag_C_externalFuncIncludes(AbstractGenerator myGenerator,
@@ -67,7 +69,7 @@ public class CGenerator extends GenericGenerator {
 		public void generate(PrintStream genPrinter) {
 			int i=0;
 			for (FAbstractEquation e : fclass.equations()) {
-				e.genResidual_C(i,"    ",genPrinter);				
+				e.genResidual_C(i,INDENT,genPrinter);				
 				i += e.numScalarEquations();
 			}
 		}
@@ -85,7 +87,7 @@ public class CGenerator extends GenericGenerator {
 		public void generate(PrintStream genPrinter) {
 			int i=0;
 			for (FRelExp e : fclass.relExpInEquations()) {
-				e.genResidual_C(i,"    ",genPrinter);				
+				e.genResidual_C(i,INDENT,genPrinter);				
 				i++;
 			}
 		}
@@ -103,11 +105,11 @@ public class CGenerator extends GenericGenerator {
 		public void generate(PrintStream genPrinter) {
 			int i=0;
 			for (FAbstractEquation e : fclass.equations()) {
-				e.genResidual_C(i,"    ",genPrinter);				
+				e.genResidual_C(i,INDENT,genPrinter);				
 				i += e.numScalarEquations();
 			}
 			for (FAbstractEquation e : fclass.initialEquations()) {
-				e.genResidual_C(i,"    ",genPrinter);				
+				e.genResidual_C(i,INDENT,genPrinter);				
 				i += e.numScalarEquations();
 			}
 		}	
@@ -124,11 +126,11 @@ public class CGenerator extends GenericGenerator {
 		public void generate(PrintStream genPrinter) {
 			int i=0;
 			for (FRelExp e : fclass.relExpInEquations()) {
-				e.genResidual_C(i,"    ",genPrinter);				
+				e.genResidual_C(i,INDENT,genPrinter);				
 				i++;
 			}
 			for (FRelExp e : fclass.relExpInInitialEquations()) {
-				e.genResidual_C(i,"    ",genPrinter);				
+				e.genResidual_C(i,INDENT,genPrinter);				
 				i++;
 			}
 		}
@@ -164,14 +166,9 @@ public class CGenerator extends GenericGenerator {
 	
 		public void generate(PrintStream genPrinter) {
 			int i=0;
-			for (FRealVariable fv : fclass.dependentRealParameters()) {
-				genPrinter.print("   " + "(*res)[" + i + "] = ");
-				fv.getBindingExp().prettyPrint_C(genPrinter,"");
-				genPrinter.print(" - ");
-				genPrinter.print(fv.name_C());
-				genPrinter.print(";\n");
-
-				i++;
+			for (FAbstractEquation e : fclass.getFParameterEquations()) {
+				e.genResidual_C(i, INDENT, genPrinter);				
+				i += e.numScalarEquations();
 			}
 		}
 	

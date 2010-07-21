@@ -29,6 +29,8 @@ import java.io.*;
  */
 public class OptimicaCGenerator extends CGenerator {
 
+	protected static final String INDENT = "    ";
+	
 	class OptTag_C_numFreeDependentParameters extends OptTag {
 		
 		public OptTag_C_numFreeDependentParameters(AbstractGenerator myGenerator, 
@@ -155,13 +157,9 @@ public class OptimicaCGenerator extends CGenerator {
 	
 		public void generate(PrintStream genPrinter) {
 			int i=0;
-			for (FRealVariable fv : foptclass.freeDependentRealParameters()) {
-				genPrinter.print("   " + "(*res)[" + i + "] = ");
-				fv.getBindingExp().prettyPrint_C(genPrinter,"");
-				genPrinter.print(" - ");
-				genPrinter.print(fv.name_C());
-				genPrinter.print(";\n");
-				i++;
+			for (FAbstractEquation e : foptclass.freeDependentParameterEquations()) {
+				e.genResidual_C(i, INDENT, genPrinter);				
+				i += e.numScalarEquations();
 			}			
 		}
 	}
@@ -176,7 +174,7 @@ public class OptimicaCGenerator extends CGenerator {
 	
 		public void generate(PrintStream genPrinter) {
 			if (foptclass.objectiveExp()!=null) {
-				genPrinter.print("   (*res)[0] = ");
+				genPrinter.print(INDENT + "(*res)[0] = ");
 				foptclass.objectiveExp().prettyPrint_C(genPrinter,"");
 				genPrinter.print(";\n");
 			}
@@ -194,7 +192,7 @@ public class OptimicaCGenerator extends CGenerator {
 		public void generate(PrintStream genPrinter) {
 			int i=0;
 			for (FConstraintEq c : foptclass.pathEqConstraints()) {
-				c.genResidual_C(i,"    ",genPrinter);				
+				c.genResidual_C(i, INDENT, genPrinter);				
 				i++;
 			}
 		}	
@@ -211,11 +209,11 @@ public class OptimicaCGenerator extends CGenerator {
 		public void generate(PrintStream genPrinter) {
 			int i=0;
 			for (FConstraintLeq c : foptclass.pathLeqConstraints()) {
-				c.genResidual_C(i,"    ",genPrinter);				
+				c.genResidual_C(i, INDENT, genPrinter);				
 				i++;
 			}
 			for (FConstraintGeq c : foptclass.pathGeqConstraints()) {
-				c.genResidual_C(i,"    ",genPrinter);				
+				c.genResidual_C(i, INDENT, genPrinter);				
 				i++;
 			}
 		}	
@@ -232,7 +230,7 @@ public class OptimicaCGenerator extends CGenerator {
 		public void generate(PrintStream genPrinter) {
 			int i=0;
 			for (FConstraintEq c : foptclass.pointEqConstraints()) {
-				c.genResidual_C(i,"    ",genPrinter);				
+				c.genResidual_C(i, INDENT, genPrinter);				
 				i++;
 			}
 		}	
@@ -249,11 +247,11 @@ public class OptimicaCGenerator extends CGenerator {
 		public void generate(PrintStream genPrinter) {
 			int i=0;
 			for (FConstraintLeq c : foptclass.pointLeqConstraints()) {
-				c.genResidual_C(i,"    ",genPrinter);				
+				c.genResidual_C(i, INDENT, genPrinter);				
 				i++;
 			}
 			for (FConstraintGeq c : foptclass.pointGeqConstraints()) {
-				c.genResidual_C(i,"    ",genPrinter);				
+				c.genResidual_C(i, INDENT, genPrinter);				
 				i++;
 			}
 		}	

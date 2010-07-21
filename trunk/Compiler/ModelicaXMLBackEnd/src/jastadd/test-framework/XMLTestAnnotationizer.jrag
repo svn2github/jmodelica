@@ -51,6 +51,32 @@ abstract public class TestAnnotationizerHelper {
 		
 	}
 
+	/**
+	 * \brief An XML value generation test.
+	 */
+	public static class XMLValueGenTestCase extends XMLCodeGenTestCase {
+
+		/**
+		 * \brief Constructor for XML code generation test.
+		 * 
+		 * Delegates to super class.
+		 */
+		public XMLValueGenTestCase(String filePath, String className, String description, String opts, String data) throws Exception {
+			super(filePath, className, description, opts, data);
+		}
+
+		/**
+		 * \brief Create the code generator to use.
+		 * 
+		 * Creates an XMLGenerator.
+		 */
+		@Override
+		public AbstractGenerator createGenerator(FClass fc) {
+			return new XMLValueGenerator(new PrettyPrinter(), '$', fc);
+		}
+		
+	}
+
 }
 
 }

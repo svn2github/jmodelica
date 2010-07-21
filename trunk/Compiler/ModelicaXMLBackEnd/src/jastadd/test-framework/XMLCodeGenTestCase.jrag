@@ -36,3 +36,26 @@ public class XMLCodeGenTestCase extends CodeGenTestCase {
 	}
 	
 }
+
+
+public class XMLValueGenTestCase extends CodeGenTestCase {
+    
+	public XMLValueGenTestCase() {}
+    
+	public XMLValueGenTestCase(String name, 
+			                  String description,
+			                  String sourceFileName, 
+			                  String className, 
+			                  String result,
+			                  boolean resultOnFile,
+			                  String template,
+			                  boolean templateOnFile) {
+		super(name, description, sourceFileName, className,result,
+				resultOnFile,template,templateOnFile);
+	}
+
+	public AbstractGenerator createGenerator(FClass fc) {
+		return new XMLValueGenerator(new PrettyPrinter(), '$',fc);		
+	}
+	
+}

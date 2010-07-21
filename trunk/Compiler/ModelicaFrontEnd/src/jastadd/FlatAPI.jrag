@@ -16,6 +16,7 @@
 
 import java.util.LinkedHashSet;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.ArrayList;
 import java.io.File;
 import java.net.URI;
@@ -777,9 +778,11 @@ aspect FlatAPI {
 	
 	*/
 	
-	inh FVariable FExp.containingFV();
-	eq FVariable.getBindingExp().containingFV() = this;
-	eq Root.getChild().containingFV() = null;
+	inh Set<FVariable> FExp.boundParameters();
+	eq FVariable.getBindingExp().boundParameters()       = Collections.singleton(this);
+	eq Root.getChild().boundParameters()                 = Collections.emptySet();
+	eq FEquation.getRight().boundParameters()            = getLeft().referencedParametersInFExp();
+	eq FFunctionCallEquation.getCall().boundParameters() = referencedParametersInLefts();
 	
 	inh boolean FExp.inFEquation();
 	eq FAbstractEquation.getChild().inFEquation()=true;
@@ -801,10 +804,12 @@ aspect FlatAPI {
 	syn lazy boolean FVariable.isIndependentConstant() = isConstant();
 	syn lazy boolean FVariable.isDependentConstant() = false;
 	
-	syn lazy boolean FVariable.isIndependentParameter() = 
-		isParameter() && (hasParamValueExp() ? paramValueExp().isConstantExp() : true);
 	syn lazy boolean FVariable.isDependentParameter() = 
 		isParameter() && !isIndependentParameter();
+	syn lazy boolean FVariable.isIndependentParameter() = 
+		isParameter() && !hasParameterEquation() && 
+		(hasParamValueExp() ? paramValueExp().isConstantExp() : true);
+	
 	syn boolean FVariable.hasParamValueExp() = hasBindingExp() || startAttributeSet();
 	syn FExp FVariable.paramValueExp() = hasBindingExp() ? getBindingExp() : startAttributeExp();
 	
@@ -822,12 +827,60 @@ aspect FlatAPI {
 	eq FVariable.getBindingExp().inBindingExp() = this;
 	eq Root.getChild().inBindingExp() = null; 
 	
+	// TODO: check for uses and change to return set and use findReferencedFVariablesInTree()
 	coll ArrayList<FVariable> FVariable.referencedFVariablesInBindingExp() 
 	  [new ArrayList<FVariable>()] with add root FlatRoot;
 	FIdUseExp contributes
 		(FVariable)myFV() when !myFV().isUnknown()
 	to FVariable.referencedFVariablesInBindingExp() for inBindingExp();
-		
+	
+	public static Set<FVariable> ASTNode.parametersInSet(Set<? extends AbstractFVariable> set) {
+		Set<FVariable> res = new HashSet<FVariable>();
+		for (AbstractFVariable fv : set)
+			if (fv instanceof FVariable && ((FVariable) fv).isParameter())
+				res.add((FVariable) fv);
+		return res;
+	}
+	
+	public Set<FVariable> FFunctionCallEquation.referencedParametersInLefts() {
+		Set<AbstractFVariable> res = new HashSet<AbstractFVariable>();
+		getLefts().findReferencedFVariablesInTree(res);
+		return parametersInSet(res);
+	}
+	
+	public Set<FVariable> FExp.referencedParametersInFExp() {
+		return parametersInSet(referencedFVariablesInFExp());
+	}
+	
+	public Set<AbstractFVariable> FExp.referencedFVariablesInFExp() {
+		Set<AbstractFVariable> res = new HashSet<AbstractFVariable>();
+		findReferencedFVariablesInTree(res);
+		return res;
+	}
+	
+	public void ASTNode.findReferencedFVariablesInTree(Set<AbstractFVariable> set) {
+		for (ASTNode n : this)
+			n.findReferencedFVariablesInTree(set);
+	}
+	
+	public void FIdUseExp.findReferencedFVariablesInTree(Set<AbstractFVariable> set) {
+		if (!myFV().isUnknown())
+			set.add(myFV());
+		super.findReferencedFVariablesInTree(set);
+	}
+	
+	public Set<AbstractFVariable> FAbstractEquation.referencedFVariablesInRHS() {
+		return Collections.emptySet();
+	}
+	
+	public Set<AbstractFVariable> FEquation.referencedFVariablesInRHS() {
+		return getRight().referencedFVariablesInFExp();
+	}
+	
+	public Set<AbstractFVariable> FFunctionCallEquation.referencedFVariablesInRHS() {
+		return getCall().referencedFVariablesInFExp();
+	}
+	
 }
 
 aspect FlatCausality {
@@ -935,13 +988,14 @@ aspect Attributes {
 	syn int     FIntegerVariable.maxAttribute()       = maxAttributeCValue().intValue();
 
 	// start attribute
+	// TODO: What about independent parameters?
 	syn boolean FVariable.useBindingExpAsStart()  = 
 		(isDependentParameter() && !startAttributeSet()) || isIndependentConstant();
 	
 	syn boolean FVariable.startAttributeSet()     = attributeSet("start");
 	syn FExp    FVariable.startAttributeExp()     = attributeExp("start");
 	
-	syn CValue FVariable.startAttributeCValue()   = new CValueUnknown();
+	syn CValue FVariable.startAttributeCValue()   = CValue.UNKNOWN;
 	eq FRealVariable.startAttributeCValue()       = attributeCValueReal("start", 0.0);
 	eq FDerivativeVariable.startAttributeCValue() = new CValueReal(0.0);
 	eq FIntegerVariable.startAttributeCValue()    = attributeCValueInteger("start", 0);
@@ -992,12 +1046,12 @@ aspect FVariableUses {
 	 */
 	coll HashSet<FVariable> AbstractFVariable.dependentParameters() 
 	  [new LinkedHashSet<FVariable>()] 
-		with add root FlatRoot;
+		with addAll root FlatRoot;
 	
-	FIdUseExp contributes containingFV() when !(getParent() instanceof FDerExp) &&
-	    !myFV().isUnknown() &&
-		((FVariable)myFV()).isParameter() && containingFV()!=null && containingFV().isParameter() to 
-		AbstractFVariable.dependentParameters() for myFV();
+	FIdUseExp contributes boundParameters() 
+		when !(getParent() instanceof FDerExp) && !myFV().isUnknown() && 
+		     ((FVariable) myFV()).isParameter()
+		to AbstractFVariable.dependentParameters() for myFV();
 	
 	syn lazy ArrayList<FRealVariable> AbstractFVariable.dependentRealParameters() {
       ArrayList<FRealVariable> set = new ArrayList<FRealVariable>();

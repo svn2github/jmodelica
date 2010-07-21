@@ -71,7 +71,7 @@ function python_tests() {
   TEST_DIR=$(mktemp -dqt)
   TESTS="$(find ${JMODELICA_HOME}/Python/jmodelica/tests -name \*.py | grep test_)"
   PATTERN=----------------------------------------------------------------------
-  TAGS="-a stddist"
+  TAGS="-a stddist -a fmi"
   if [[ "${IPOPT_HOME}" != "" ]]; then
     TAGS="${TAGS} -a ipopt"
     if [[ "${SUNDIALS_HOME}" != "" ]]; then
@@ -247,7 +247,7 @@ for a in ${DEFAULT_ARGS} $*; do
         echo "  -p  Select/deselect python tests"
         echo "  -v  Verbose output, show everything"
         echo "  -n  Normal output, only show results and compilation errors"
-        echo "  -q  Quiet output, only show brief resuls and compilation errors"
+        echo "  -q  Quiet output, only show brief results"
         echo "  -c  Do a clean before junit tests"
         echo "  -C  Do a clean before each test suite"
         echo "  -i  Do not re-build before python tests"

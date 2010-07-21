@@ -30,13 +30,14 @@ aspect FlatNameBinding {
 	eq Root.getChild().lookupFV(FQName fqn)    = null;
 	eq Root.getChild().lookupDerFV(FQName fqn) = null;
 
-	eq FClass.getChild(int index).lookupFV(FQName fqn) {
-		AbstractFVariable variable = lookupFVFromMap(fullyQualifiedVariablesMap(), fqn, false);
-		return (variable == null) ? unknownFVariable() : variable;
-	}
-
-	eq FClass.getChild(int index).lookupDerFV(FQName fqn) {
-		AbstractFVariable variable = lookupFVFromMap(fullyQualifiedVariablesMap(), fqn, true);
+	eq FClass.getChild(int index).lookupFV(FQName fqn)    = lookupFV(fqn, false);
+	eq FClass.getChild(int index).lookupDerFV(FQName fqn) = lookupFV(fqn, true);
+	
+	public AbstractFVariable FClass.lookupFV(FQName fqn, boolean der) {
+		boolean scalar = fqn.scalarized;
+		fqn.scalarized = scalarized;
+		AbstractFVariable variable = lookupFVFromMap(fullyQualifiedVariablesMap(), fqn, der);
+		fqn.scalarized = scalar;
 		return (variable == null) ? unknownFVariable() : variable;
 	}
 
@@ -150,6 +151,58 @@ aspect FlatNameBinding {
 	eq InstForIndex.getInstPrimitive().isForIndex() = true;
 	eq InstNode.getChild().isForIndex()             = false;
 	eq FClass.getChild().isForIndex()               = false;
+	
+}
+
+aspect ParameterEquations {
+
+	syn boolean AbstractFVariable.hasBindingExp() = false;
+	
+	syn boolean AbstractFVariable.hasParameterEquation() = 
+		!hasBindingExp() && parameterEquation() != null;
+	
+	inh lazy FAbstractEquation AbstractFVariable.parameterEquation();
+	eq FClass.getFVariable(int i).parameterEquation()     = 
+		parameterEquationsMap().get(getFVariable(i));
+	eq FClass.getAliasVariable(int i).parameterEquation() = 
+		parameterEquationsMap().get(getAliasVariable(i));
+	eq FForIndex.getChild().parameterEquation()           = null;
+	eq FFunctionDecl.getChild().parameterEquation()       = null;
+	
+	syn lazy HashMap<AbstractFVariable,FAbstractEquation> FClass.parameterEquationsMap() {
+		HashMap<AbstractFVariable,FAbstractEquation> map = new HashMap<AbstractFVariable,FAbstractEquation>();
+		for (FAbstractEquation equ : getFParameterEquations())
+			equ.addToParameterEquationsMap(map);
+		return map;
+	}
+	
+	public void FAbstractEquation.addToParameterEquationsMap(
+			HashMap<AbstractFVariable,FAbstractEquation> map) {}
+	
+	public void FEquation.addToParameterEquationsMap(
+			HashMap<AbstractFVariable,FAbstractEquation> map) {
+		getLeft().addToParameterEquationsMap(map, this);
+	}
+	
+	public void FFunctionCallEquation.addToParameterEquationsMap(
+			HashMap<AbstractFVariable,FAbstractEquation> map) {
+		for (FFunctionCallLeft left : getLefts())
+			if (left.hasFExp())
+				left.getFExp().addToParameterEquationsMap(map, this);
+	}
+	
+	public void FExp.addToParameterEquationsMap(
+			HashMap<AbstractFVariable,FAbstractEquation> map, FAbstractEquation equ) {
+		for (FExp e : childFExps())
+			e.addToParameterEquationsMap(map, equ);
+	}
+	
+	public void FIdUseExp.addToParameterEquationsMap(
+			HashMap<AbstractFVariable,FAbstractEquation> map, FAbstractEquation equ) {
+		AbstractFVariable fv = getFIdUse().myFV();
+		if (!fv.isUnknown())
+			map.put(fv, equ);
+	}
 	
 }
 

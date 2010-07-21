@@ -193,6 +193,7 @@ aspect FlatTypeAnalysis {
 			return fIntegerArrayType(size());
 		}
 	}
+	eq FUnknownSizeExp.type() = fIntegerScalarType();
 	
 	eq FMinMaxExp.type() = 
 		hasY() ? 
@@ -349,7 +350,7 @@ aspect FlatTypeAnalysis {
 	eq FIdUseExp.type() = getFIdUse().type();
 	eq FInstAccessExp.type() = getInstAccess().type();
 	
-	syn lazy FType FIdUse.type() = myFV().type();
+	syn lazy FType FIdUse.type() = myFV().type().sizedType(size());
 	eq FIdUseInstAccess.type() = getInstAccess().type();
 
 	syn lazy FType InstAccess.type() {

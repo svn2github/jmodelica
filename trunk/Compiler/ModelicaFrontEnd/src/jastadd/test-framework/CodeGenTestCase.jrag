@@ -69,8 +69,8 @@ public abstract class CodeGenTestCase extends TestCase {
   	    AbstractGenerator generator = createGenerator(fc);
 	    generator.generate(new BufferedReader(new StringReader(getTemplate())),
 	    		           new PrintStream(os));
-	    String test = removeWhitespace(os.toString());
-	    String correct = removeWhitespace(filter(getGenCode()));
+	    String test = os.toString();
+	    String correct = filter(getGenCode());
 	    if (!removeWhitespace(test).equals(removeWhitespace(correct)))
 	    	fail("Generated code does not match expected." + compareMsg(test, correct));
 	    return true;

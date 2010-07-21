@@ -388,11 +388,12 @@ aspect InheritedFactoryMethods {
 	public FStringLitExp       FStringLitExp.createEmptyNode()       { return new FStringLitExp();       }
 	
 	// Misc expressions
-	public FIfExp      FIfExp.createEmptyNode()      { return new FIfExp();      }
-	public FElseIfExp  FElseIfExp.createEmptyNode()  { return new FElseIfExp();  }
-	public FNoExp      FNoExp.createEmptyNode()      { return new FNoExp();      }
-	public FTimeExp    FTimeExp.createEmptyNode()    { return new FTimeExp();    }
-	public FNoEventExp FNoEventExp.createEmptyNode() { return new FNoEventExp(); }
+	public FIfExp          FIfExp.createEmptyNode()          { return new FIfExp();          }
+	public FElseIfExp      FElseIfExp.createEmptyNode()      { return new FElseIfExp();      }
+	public FTimeExp        FTimeExp.createEmptyNode()        { return new FTimeExp();        }
+	public FNoEventExp     FNoEventExp.createEmptyNode()     { return new FNoEventExp();     }
+	public FNoExp          FNoExp.createEmptyNode()          { return new FNoExp();          }
+	public FUnknownSizeExp FUnknownSizeExp.createEmptyNode() { return new FUnknownSizeExp(); }
 	
 	// Identifier expressions
 	public FIdUseExp      FIdUseExp.createEmptyNode()      { return new FIdUseExp();      }

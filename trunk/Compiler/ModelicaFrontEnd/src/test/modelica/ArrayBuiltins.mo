@@ -1585,6 +1585,7 @@ model ArrayEnd3
 	 JModelica.UnitTesting.TransformCanonicalTestCase(
 		 name="ArrayEnd3",
 		 description="End operator: nestled array subscripts",
+		 eliminate_alias_variables=false,
 		 flatModel="
 fclass ArrayBuiltins.ArrayEnd3
  constant Integer x1[1] = 1;
@@ -1592,16 +1593,20 @@ fclass ArrayBuiltins.ArrayEnd3
  constant Integer x1[3] = 3;
  constant Integer x1[4] = 4;
  Real x2[1];
+ Real x2[2];
+ Real x2[3];
  Real x2[4];
  Real x2[5];
  Real y[1];
  Real y[2];
 equation
  x2[1] = 5;
- y[2] = 6;
- y[1] = 7;
+ x2[2] = 6;
+ x2[3] = 7;
  x2[4] = 8;
  x2[5] = 9;
+ y[1] = x2[3];
+ y[2] = x2[2];
 end ArrayBuiltins.ArrayEnd3;
 ")})));
 

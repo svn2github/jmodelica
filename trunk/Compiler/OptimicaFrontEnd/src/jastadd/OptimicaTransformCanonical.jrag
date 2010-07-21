@@ -27,31 +27,23 @@ aspect OptimicaTransformCanonical {
 		List<FVariable> vars = new List<FVariable>();
 		List<FVariable> alias_vars = new List<FVariable>();
 		// Scalarize all non-alias variables
-		for (FVariable fv : getFVariables()) {
+		for (FVariable fv : getFVariables()) 
 			fv.scalarize(vars);
-		}
-		// Scalarize alias variables
-		for (FVariable fv : getAliasVariables()) {
+		// Scalarize all alias variables
+		for (FVariable fv : getAliasVariables()) 
 			fv.scalarize(alias_vars);
-		}
 		
 		// Scalarize equations
-		List<FAbstractEquation> eqns = new List<FAbstractEquation>();
-		for (FAbstractEquation ae : getFEquationBlock(0).getFAbstractEquations()) {
-			ae.scalarize(eqns, vars, new HashMap<String,FExp>());
-		}
-		getFEquationBlock(0).setFAbstractEquationList(eqns);
-		List<FAbstractEquation> ieqns = new List<FAbstractEquation>();
-		for (FAbstractEquation ae : getFInitialEquations()) {
-			ae.scalarize(ieqns, vars, new HashMap<String,FExp>());
-		}
-		setFInitialEquationList(ieqns);		
+		FEquationBlock eb = getFEquationBlock(0);
+		List<FAbstractEquation> eqns = scalarizeEquationList(eb.getFAbstractEquations(), vars);
+		eb.setFAbstractEquationList(eqns);
+		setFInitialEquationList(scalarizeEquationList(getFInitialEquations(), vars));
+		setFParameterEquationList(scalarizeEquationList(getFParameterEquations(), vars));
 		
 		// Scalarize constraints
 		List<FConstraint> constr = new List<FConstraint>();
-		for (FConstraint c : getFConstraints()) {
-			c.scalarize(constr, eqns, vars, new HashMap<String,FExp>());
-		}
+		for (FConstraint c : getFConstraints()) 
+			c.scalarize(constr, eqns, vars, Collections.<String,FExp>emptyMap());
 		setFConstraintList(constr);
 
 		// Scalarize class attributes
@@ -64,15 +56,17 @@ aspect OptimicaTransformCanonical {
 		setAliasVariableList(alias_vars);
 		
 		// Replace subscript expressions with literals
-		eqns.makeSubscriptsLiteral();
-		ieqns.makeSubscriptsLiteral();
-		constr.makeSubscriptsLiteral();
+		eb.getFAbstractEquations().makeSubscriptsLiteral();
+		getFInitialEquations().makeSubscriptsLiteral();
+		getFParameterEquations().makeSubscriptsLiteral();
 		
 		// Scalarize functions
 		List<FFunctionDecl> funcs = new List<FFunctionDecl>();
 		for (FFunctionDecl f : getFFunctionDecls()) 
 			funcs.add(f.scalarize());
 		setFFunctionDeclList(funcs);
+		
+		scalarized = true;
 
 		flush();		
 	}
@@ -81,10 +75,10 @@ aspect OptimicaTransformCanonical {
 	 * \brief Scalarize constraint and put all scalarized equations in list eqns.
 	 */
 	public void FConstraint.scalarize(List<FConstraint> constr, List<FAbstractEquation> eqns, 
-			List<FVariable> vars, HashMap<String,FExp> indexMap) {}
+			List<FVariable> vars, Map<String,FExp> indexMap) {}
 	
 	public void FRelationConstraint.scalarize(List<FConstraint> constr, List<FAbstractEquation> eqns, 
-			List<FVariable> vars, HashMap<String,FExp> indexMap) {
+			List<FVariable> vars, Map<String,FExp> indexMap) {
 		createArrayTemporaries(eqns, vars, indexMap, true);
 		//log.debug("FEquation.scalarize() " + ndims());
 		if (ndims()==0) {
@@ -108,9 +102,9 @@ aspect OptimicaTransformCanonical {
 	}
 	
 	public void FForClauseC.scalarize(List<FConstraint> constr, List<FAbstractEquation> eqns,
-			List<FVariable> vars, HashMap<String,FExp> indexMap) {
+			List<FVariable> vars, Map<String,FExp> indexMap) {
 		createArrayTemporaries(eqns, vars, indexMap, true);
-		HashMap<String,FExp> myIndexMap = new HashMap<String,FExp>();
+		Map<String,FExp> myIndexMap = new HashMap<String,FExp>();
 		myIndexMap.putAll(indexMap);
 		Indices indices = indices();
 		for (Index i : indices) {
@@ -125,11 +119,11 @@ aspect OptimicaTransformCanonical {
 		}
 	}
 	
-	public FExp FTimedVariable.scalarize(HashMap<String,FExp> indexMap) { 
+	public FExp FTimedVariable.scalarize(Map<String,FExp> indexMap) { 
 		return new FTimedVariable(getName().scalarize(indexMap),getArg().scalarize(indexMap)); 
 	}
 	
-	public FExp FStartTimeExp.scalarize(HashMap<String,FExp> indexMap) { return new FStartTimeExp(); } 
-	public FExp FFinalTimeExp.scalarize(HashMap<String,FExp> indexMap) { return new FFinalTimeExp(); } 
+	public FExp FStartTimeExp.scalarize(Map<String,FExp> indexMap) { return new FStartTimeExp(); } 
+	public FExp FFinalTimeExp.scalarize(Map<String,FExp> indexMap) { return new FFinalTimeExp(); } 
 	
 }
