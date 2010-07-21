@@ -951,7 +951,7 @@ aspect Scalarization {
 			FExp temp = null;
 			if (type().isRecord()) {
 				if (addVar)
-					type().createRecordTemporaries(vars, equation, tempVarName());
+					type().createRecordTemporaries(vars, equation, tempVarName(), inParameterEquation());
 				if (equation)
 					temp = type().createRecordConstructor(new FQName(tempVarName()));
 				else
@@ -959,7 +959,7 @@ aspect Scalarization {
 			} else if (isArray()) {
 				if (equation) {
 					if (addVar)
-						type().createTempFVariables(vars, new FQName(tempVarName()));
+						type().createTempFVariables(vars, new FQName(tempVarName()), inParameterEquation());
 					temp = getArray().buildScalarized(indexMap, this);
 				} else {
 					if (addVar)
@@ -1003,11 +1003,11 @@ aspect Scalarization {
 	 * @param equation  if <code>true</code>, generate FVariables, otherwise a FFunctionVariable
 	 * @param name      the name of the record variable
 	 */
-	public void FType.createRecordTemporaries(List vars, boolean equation, String name) {}	
+	public void FType.createRecordTemporaries(List vars, boolean equation, String name, boolean param) {}	
 	
-	public void FRecordType.createRecordTemporaries(List vars, boolean equation, String name) {
+	public void FRecordType.createRecordTemporaries(List vars, boolean equation, String name, boolean param) {
 		if (equation) {
-			createTempFVariables(vars, new FQName(name));
+			createTempFVariables(vars, new FQName(name), param);
 		} else {
 			FFunctionVariable var = isArray() ? new FFunctionArray() : new FFunctionVariable();
 			var.setType(fullCopy());
@@ -1063,15 +1063,15 @@ aspect Scalarization {
 	 * @param vars  list of variable to add the new variable to
 	 * @param name  the name of the new variable
 	 */
-	public void FType.createTempFVariables(List vars, FQName name) {
+	public void FType.createTempFVariables(List vars, FQName name, boolean param) {
 		if (isArray()) {
 			FQName fqn = name.fullCopy();
 			for (Index i : indices()) {
 				fqn.setLastFArraySubscripts(i.newFArraySubscripts());
-				createTempCellFVariables(vars, fqn);
+				createTempCellFVariables(vars, fqn, param);
 			}
 		} else {
-			createTempCellFVariables(vars, name);
+			createTempCellFVariables(vars, name, param);
 		}
 	}
 	
@@ -1081,10 +1081,10 @@ aspect Scalarization {
 	 * @param vars  list of variable to add the new variable to
 	 * @param name  the name of the new variable
 	 */
-	public void FType.createTempCellFVariables(List vars, FQName name) {
+	public void FType.createTempCellFVariables(List vars, FQName name, boolean param) {
 		FQName fqn = name.fullCopy();
 		fqn.scalarized = true;
-		vars.add(createFVariable(new FTemporaryVisibilityType(), fqn));
+		vars.add(createFVariable(new FTemporaryVisibilityType(), fqn, param));
 	}
 	
 	
@@ -1095,27 +1095,27 @@ aspect Scalarization {
 	 * 
 	 * Default implementation returns <code>null</code>.
 	 */
-	public FVariable FType.createFVariable(FVisibilityType fvt, FQName name) {
+	public FVariable FType.createFVariable(FVisibilityType fvt, FQName name, boolean param) {
 		return null;
 	}
 		
-	public FVariable FRealType.createFVariable(FVisibilityType fvt, FQName name) {
-		return new FRealVariable(fvt, new FContinuous(), 
+	public FVariable FRealType.createFVariable(FVisibilityType fvt, FQName name, boolean param) {
+		return new FRealVariable(fvt, param ? new FParameter() : new FContinuous(), 
 				new Opt(), new List(), new Opt(), new Opt(), name);
 	}	
 	
-	public FVariable FIntegerType.createFVariable(FVisibilityType fvt, FQName name) {
-		return new FIntegerVariable(fvt, new FDiscrete(), 
+	public FVariable FIntegerType.createFVariable(FVisibilityType fvt, FQName name, boolean param) {
+		return new FIntegerVariable(fvt, param ? new FParameter() : new FDiscrete(), 
 				new Opt(), new List(), new Opt(), new Opt(), name);
 	}	
 	
-	public FVariable FBooleanType.createFVariable(FVisibilityType fvt, FQName name) {
-		return new FBooleanVariable(fvt, new FDiscrete(), 
+	public FVariable FBooleanType.createFVariable(FVisibilityType fvt, FQName name, boolean param) {
+		return new FBooleanVariable(fvt, param ? new FParameter() : new FDiscrete(), 
 				new Opt(), new List(), new Opt(), new Opt(), name);
 	}	
 	
-	public FVariable FStringType.createFVariable(FVisibilityType fvt, FQName name) {
-		return new FStringVariable(fvt, new FDiscrete(), 
+	public FVariable FStringType.createFVariable(FVisibilityType fvt, FQName name, boolean param) {
+		return new FStringVariable(fvt, param ? new FParameter() : new FDiscrete(), 
 				new Opt(), new List(), new Opt(), new Opt(), name);
 	}	
 	
@@ -1125,10 +1125,10 @@ aspect Scalarization {
 	 * @param vars  list of variable to add the new variables to
 	 * @param name  the name of the record variable
 	 */
-	public void FRecordType.createTempCellFVariables(List vars, FQName name) {
+	public void FRecordType.createTempCellFVariables(List vars, FQName name, boolean param) {
 		for (FRecordComponentType comp : getComponents()) {
 			FQName next = name.copyAndAppend(comp.getName());
-			comp.getFType().createTempFVariables(vars, next);
+			comp.getFType().createTempFVariables(vars, next, param);
 		}
 	}
 	

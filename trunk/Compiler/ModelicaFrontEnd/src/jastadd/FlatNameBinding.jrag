@@ -204,6 +204,15 @@ aspect ParameterEquations {
 			map.put(fv, equ);
 	}
 	
+	/**
+	 * \brief Is this expression in a parameter equation?
+	 */
+	inh boolean FExp.inParameterEquation();
+	eq FClass.getFParameterEquation().inParameterEquation() = true;
+	eq FClass.getChild().inParameterEquation()              = false;
+	eq FFunctionDecl.getChild().inParameterEquation()       = false;
+	eq Root.getChild().inParameterEquation()                = false;
+	
 }
 
 aspect FlatFunctionBinding {

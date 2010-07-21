@@ -523,7 +523,7 @@ aspect InstanceErrorCheck {
 		}
 	}
 	
-	public void FExp.checkConstantScalarExpression(InstPrimitive node, String varKind, String varName) {
+	public void FExp.checkConstantExpression(InstPrimitive node, String varKind, String varName) {
 		String exp = "'" + prettyPrint("") + "'";
 		try {
 			if (isCircular()) {
@@ -545,17 +545,6 @@ aspect InstanceErrorCheck {
 		} catch (UnsupportedOperationException e) {
 			node.error("Could not evaluate binding expression for " + 
 					varKind + " '" + varName + "': " + exp);
-		}
-	}
-	
-	public void FExp.checkConstantExpression(InstPrimitive node, String varKind, String varName) {
-		if (ndims() == 0) {
-//			log.debug("FExp.checkConstantExpression ndims=0, "+getClass().getName());
-			checkConstantScalarExpression(node,varKind,varName);
-		} else {
-//			log.debug("FExp.checkConstantExpression ndims="+ndims() + " "+getClass().getName());
-			for (Index i : getArray().indices())  
-				getArray().get(i).checkConstantScalarExpression(node, varKind, varName);
 		}
 	}
 	
