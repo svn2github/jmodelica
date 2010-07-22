@@ -947,6 +947,12 @@ aspect FlattPrettyPrint {
 		p.toString(getRight(), str, indent, o);
 	}
 	
+	public void InstAssignStmt.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		p.toString(getLeft(), str, indent, o);
+		str.print(" := ");
+		p.toString(getRight(), str, indent, o);
+	}
+	
 	public void FFunctionCallStmt.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		if (getNumLeft() > 0) {
 			str.print("(");
@@ -999,6 +1005,15 @@ aspect FlattPrettyPrint {
 	public void FForStmt.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		str.print("for ");
 		p.toString(getIndex(), str, indent, o);
+		str.print(" loop\n");
+		getForStmts().prettyPrintWithIndent(p, str, p.indent(indent), o, ";");
+		str.print(indent);
+		str.print("end for");
+	}
+	
+	public void InstForStmt.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		str.print("for ");
+		getInstForIndexList().prettyPrintWithSep(p, str, indent, o, ", ");
 		str.print(" loop\n");
 		getForStmts().prettyPrintWithIndent(p, str, p.indent(indent), o, ";");
 		str.print(indent);
@@ -1273,6 +1288,10 @@ aspect FlattPrettyPrint {
 			str.print(name());
 		else 
 			p.toString(getFQName(), str, indent, o);
+	}
+	
+	public void FIdUseInstAccess.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		p.toString(getInstAccess(), str, indent, o);
 	}
 
 	public void FIdUseExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {

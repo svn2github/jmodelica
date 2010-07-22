@@ -266,21 +266,21 @@ aspect Flattening {
 		return ffv;
 	}
 	
-	public void FType.flattenSize(FQName prefix, AbstractFVariable fv) {
+	public void FType.flattenSize(FQName prefix, FFunctionVariable fv) {
 		setSize(getSize().flatten(prefix, fv));
 	}
 	
-	public void FRecordType.flattenSize(FQName prefix, AbstractFVariable fv) {
+	public void FRecordType.flattenSize(FQName prefix, FFunctionVariable fv) {
 		super.flattenSize(prefix, fv);
 		for (FRecordComponentType comp : getComponents())
 			comp.getFType().flattenSize(prefix, null);
 	}
 	
-	public Size Size.flatten(FQName prefix, AbstractFVariable fv) {
+	public Size Size.flatten(FQName prefix, FFunctionVariable fv) {
 		return this;
 	}
 	
-	public MutableSize MutableSize.flatten(FQName prefix, AbstractFVariable fv) {
+	public MutableSize MutableSize.flatten(FQName prefix, FFunctionVariable fv) {
 		MutableSize res = new MutableSize(size.length);
 		System.arraycopy(size, 0, res.size, 0, size.length);
 		for (int i = 0; i < exps.length; i++) {
@@ -295,7 +295,7 @@ aspect Flattening {
 	/**
 	 * \brief Change the variable of any FUnknownSizeExp in size to the given variable.
 	 */
-	public void FType.updateFUnknownSizeExps(CommonVariableDecl var) {
+	public void FType.updateFUnknownSizeExps(AbstractFVariable var) {
 		if (getSize() != Size.SCALAR) {
 			Size s = getSize().clone();
 			s.updateFUnknownSizeExps(var);
@@ -306,9 +306,9 @@ aspect Flattening {
 	/**
 	 * \brief Change the variable of any FUnknownSizeExp dimension to the given variable.
 	 */
-	public void Size.updateFUnknownSizeExps(CommonVariableDecl var) {}
+	public void Size.updateFUnknownSizeExps(AbstractFVariable var) {}
 	
-	public void MutableSize.updateFUnknownSizeExps(CommonVariableDecl var) {
+	public void MutableSize.updateFUnknownSizeExps(AbstractFVariable var) {
 		for (int i = 0; i < exps.length; i++) {
 			if (exps[i] != null) {
 				exps[i] = (FExp) exps[i].fullCopy();
@@ -320,10 +320,15 @@ aspect Flattening {
 	/**
 	 * \brief Change the variable of any FUnknownSizeExp to the given variable.
 	 */
-	public void FExp.updateFUnknownSizeExps(CommonVariableDecl var) {}
+	public void FExp.updateFUnknownSizeExps(AbstractFVariable var) {
+		// TODO: need better way of including exp in tree
+		parent = var;
+	}
 	
-	public void FUnknownSizeExp.updateFUnknownSizeExps(CommonVariableDecl var) {
+	public void FUnknownSizeExp.updateFUnknownSizeExps(AbstractFVariable var) {
 		setVariable(var);
+		// TODO: need better way of including exp in tree
+		parent = var;
 	}
 
 	// Generic method for flattening	

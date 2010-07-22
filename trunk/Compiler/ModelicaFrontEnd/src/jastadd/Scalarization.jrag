@@ -1271,35 +1271,6 @@ aspect Scalarization {
 	eq List.getChild().wantsRecordCon()             = wantsRecordCon();
 	eq Opt.getChild().wantsRecordCon()              = wantsRecordCon();
 	eq FFunctionCall.getArg().wantsRecordCon()      = !inFunction();
-    
-    /* These are needed because scalarize() is reused in Array.createExpanded(), that 
-     * might be called on an instance tree.
-     */
-    public FExp FInstAccessExp.scalarizeExp(Map<String,FExp> indexMap) {
-    	if (indexMap.containsKey(name())) 
-    		return (FExp) indexMap.get(name()).fullCopy();
-    	return new FInstAccessExp(getInstAccess().scalarize(indexMap));
-    }
-	
-    public FIdUseInstAccess FIdUseInstAccess.scalarize(Map<String,FExp> indexMap) {
-    	return new FIdUseInstAccess(new FQName(), getInstAccess().scalarize(indexMap));
-    }
-	
-    public InstAccess InstAccess.scalarize(Map<String,FExp> indexMap) {
-    	return (InstAccess) fullCopy();
-    }
-	
-    public InstDot InstDot.scalarize(Map<String,FExp> indexMap) {
-    	return new InstDot(getLeft().scalarize(indexMap), getRight().scalarize(indexMap));
-    }
-	
-    public InstArrayAccess InstArrayAccess.scalarize(Map<String,FExp> indexMap) {
-    	InstArrayAccess res = (InstArrayAccess) fullCopy();
-    	if (hasFArraySubscripts())
-    		res.setFArraySubscripts(getFArraySubscripts().scalarize(indexMap));
-    	return res;
-    }
-    // End of instance classes that need scalarize()
  
     public FExp FIfExp.scalarizeExp(Map<String,FExp> indexMap) {
 		List etl = new List();

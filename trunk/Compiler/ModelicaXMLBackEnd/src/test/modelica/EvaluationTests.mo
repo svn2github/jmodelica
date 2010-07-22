@@ -319,6 +319,27 @@ model FunctionEval7
 		o := i;
 	end f;
 end FunctionEval7;
+
+
+model FunctionEval8
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.XMLValueGenTestCase(
+         name="FunctionEval8",
+         description="Constant evaluation and variability of iter exp containing function call",
+         template="$XML_parameters$",
+         generatedCode="
+	 <RealParameter name=\"x[1]\" value=\"2.0\"/>
+	 <RealParameter name=\"x[2]\" value=\"4.0\"/>
+")})));
+
+	function f
+		input Real i;
+		output Real o = 2 * i;
+	algorithm
+	end f;
+	
+	parameter Real x[2] = { f(i) for i in 1:2 };
+end FunctionEval8;
 	
 	
 	

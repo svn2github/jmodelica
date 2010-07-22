@@ -616,7 +616,7 @@ aspect ConstantEvaluation {
 		public String toString() {
 			// TODO: Should this be stringValue() instead?
 			if (values.length == 0)
-				return "";
+				return "(zero-size array)";
 			StringBuilder buf = new StringBuilder();
 			toStringRec(buf, indices.iterator(), 0);
 			return buf.toString();
@@ -1182,6 +1182,34 @@ aspect ConstantEvaluation {
 	  return res;
   }
   
+  /**
+   * \brief Make sure all size() attributes are calculated before function evaluation.
+   */
+  public void ASTNode.calcSizes() {
+	  for (ASTNode n : this)
+		  n.calcSizes();
+  }
+  
+  public void InstAssignable.calcSizes() {
+	  super.calcSizes();
+	  if (hasBindingFExp())
+		  myBindingInstExp().calcSizes();
+	  size();
+  }
+  
+  public void FExp.calcSizes() {
+	  super.calcSizes();
+	  size();
+  }
+  
+  private boolean FAlgorithmBlock.calcSizesDone = false;
+  public void FAlgorithmBlock.calcSizes() {
+	  if (!calcSizesDone) {
+		  calcSizesDone = true;
+		  super.calcSizes();
+	  }
+  }
+  
   // TODO: reduce code duplication
   
   /**
@@ -1191,14 +1219,17 @@ aspect ConstantEvaluation {
    *                Should be filled with the values of the inputs.
    */
   public void FFunctionDecl.evaluate(Map<CommonVariableDecl, CValue> values) {
+ 	  FAlgorithmBlock fab = getFAlgorithmBlock();
 	  Map<CommonVariableDecl, CValue> oldVal = currentEvaluationValues;
 	  currentEvaluationValues = values;
+	  fab.calcSizes();
 	  
 	  for (FFunctionVariable var : myInputs())
 		  var.readEvaluationValue(values);
 	  for (FFunctionVariable var : myNonInputs())
 		  var.readEvaluationValue(values);
-	  getFAlgorithmBlock().getFStatements().evaluateList(values);
+	  
+	  fab.getFStatements().evaluateList(values);
 	  
 	  if (oldVal != null)
 		  for (CommonVariableDecl var : oldVal.keySet())
@@ -1220,24 +1251,21 @@ aspect ConstantEvaluation {
   public void InstFullClassDecl.evaluate(Map<CommonVariableDecl, CValue> values) {
 	  // We assume this class is a function
 	  
-	  if (hasInstExternal()) {
+ 	  FAlgorithmBlock fab = findFunctionAlgorithm();
+   	  if (fab == null || hasInstExternal()) {
 		  values.clear();
 		  return;
-	  }
+   	  }
 	  
 	  Map<CommonVariableDecl, CValue> oldVal = currentEvaluationValues;
 	  currentEvaluationValues = values;
+	  fab.calcSizes();
 	  
 	  for (InstComponentDecl var : myInputs())
 		  var.readEvaluationValue(values);
 	  for (InstComponentDecl var : myNonInputs())
 		  var.readEvaluationValue(values);
 	  
- 	  FAlgorithmBlock fab = findFunctionAlgorithm();
-   	  if (fab == null) {
-		  values.clear();
-		  return;
-   	  }
 	  fab.getFStatements().evaluateList(values);
 	  
 	  if (oldVal != null)

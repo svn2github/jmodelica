@@ -168,6 +168,14 @@ aspect FlatVariability {
 	eq FTimeExp.variability()  = fContinuous();
 
 	eq FSizeExp.variability() = hasDim() ? getDim().variability() : fParameter();
+	
+	eq FIterExp.variability() {
+		FTypePrefixVariability total = getArray().iteratorFExp().next().variability();
+		for (CommonForIndex ind : getForIndexList())
+			if (ind.hasFExp())
+				total = total.combine(ind.getFExp().variability());
+		return total;
+	}
 
 	eq InstFunctionCall.variability() {
 		FTypePrefixVariability total = fConstant();

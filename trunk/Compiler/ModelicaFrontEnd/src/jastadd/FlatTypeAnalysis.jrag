@@ -134,7 +134,7 @@ aspect FlatTypeAnalysis {
 			return super.type();
 		Size left = getLeft().size();
 		Size right = getRight().size();
-		if (!left.equivalentDim(right, false, left.ndims() - 1, 0))
+		if (!left.equivalentDim(right, inFunction(), left.ndims() - 1, 0))
 			return fUnknownType();
 		if (left.ndims() > 2 || right.ndims() > 2)
 			return fUnknownType();

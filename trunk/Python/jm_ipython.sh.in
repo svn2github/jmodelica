@@ -1,7 +1,7 @@
 #!/bin/sh
 
-if [[ "${JAVA_HOME}" == "" ]]; then
-  JAVA_HOME=@_JAVA_HOME_@
+if test "${JAVA_HOME}" == ""; then
+  export JAVA_HOME=@_JAVA_HOME_@
 fi
 JMODELICA_HOME=@prefix@ \
 IPOPT_HOME=@IPOPT_HOME@ \

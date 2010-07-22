@@ -571,11 +571,13 @@ aspect Arrays {
  	eq FRangeExp.size() {
  		MutableSize s = new MutableSize(1);
 		boolean hasStep = getNumFExp() > 2;
- 		FExp start = (FExp) getFExp(0).fullCopy();
- 		FExp stop = (FExp) getFExp(hasStep ? 2 : 1).fullCopy();
+ 		FExp start = getFExp(0);
+ 		FExp stop = getFExp(hasStep ? 2 : 1);
  		if (!hasStep && start.isIntegerLiteral(1) && stop.type().isInteger()) {
  			s.append(stop);
  		} else {
+ 			start = (FExp) start.fullCopy();
+ 			stop = (FExp) stop.fullCopy();
  	 		FExp step = hasStep ? (FExp) getFExp(1).fullCopy() : null;
  			FExp exp = new FSubExp(stop, start);
  			if (hasStep)
@@ -899,7 +901,7 @@ aspect Arrays {
 			return (Array) fullCopy();
 		Indices newIndices = Indices.create(forIndices);
 		Array arr = new Array(Indices.create(expandedSize(newIndices.size())));
-		HashMap<String,FExp> indexMap = new HashMap<String,FExp>();
+		Map<String,FExp> indexMap = new HashMap<String,FExp>();
 		for (Index i : newIndices) {
 			int j = 0;
 			int[] ii = newIndices.translate(i).index();
@@ -916,12 +918,50 @@ aspect Arrays {
 		return size().expand(size);
 	}
 	
-	protected void Array.fillSubset(Array arr, Index i, HashMap<String,FExp> indexMap) {
-		for (Index i2 : indices())
-			arr.set(i.expand(i2), get(i2).scalarize(indexMap));
+	protected void Array.fillSubset(Array arr, Index i, Map<String,FExp> indexMap) {
+		for (Index i2 : indices()) {
+			FExp e = (FExp) get(i2).fullCopy();
+			arr.set(i.expand(i2), (FExp) replaceIndices(e, indexMap));
+		}
 	}
-	protected void ScalarAsArray.fillSubset(Array arr, Index i, HashMap<String,FExp> indexMap) {
-		arr.set(i, get(i).scalarize(indexMap));
+	protected void ScalarAsArray.fillSubset(Array arr, Index i, Map<String,FExp> indexMap) {
+		FExp e = (FExp) get(Index.NULL).fullCopy();
+		arr.set(i, (FExp) replaceIndices(e, indexMap));
+	}
+	
+	/**
+	 * \brief Replaces all uses of indices in <code>indexMap</code> with the respective expressions.
+	 * 
+	 * May alter the tree below <code>org</code>.
+	 */
+	protected static ASTNode Array.replaceIndices(ASTNode org, Map<String,FExp> indexMap) {
+		ASTNode res = org.replaceFromIndexMap(indexMap);
+		if (org == res) {
+			int n = org.getNumChild();
+			for (int i = 0; i < n; i++) {
+				ASTNode sub = org.getChild(i);
+				ASTNode repl = replaceIndices(sub, indexMap);
+				if (repl != sub)
+					org.setChild(repl, i);
+			}
+		}
+		return res;
+	}
+	
+	/**
+	 * \brief If this node is a use of an index in <code>indexMap</code>, return the 
+	 *        respective expression, otherwise return <code>this</code>.
+	 */
+	public ASTNode ASTNode.replaceFromIndexMap(Map<String,FExp> indexMap) {
+		return this;
+	}
+	public ASTNode FInstAccessExp.replaceFromIndexMap(Map<String,FExp> indexMap) {
+		FExp res = indexMap.get(name());
+		return (res == null) ? this : res;
+	}
+	public ASTNode FIdUseExp.replaceFromIndexMap(Map<String,FExp> indexMap) {
+		FExp res = indexMap.get(name());
+		return (res == null) ? this : res;
 	}
 	
 	/**
@@ -2102,13 +2142,15 @@ aspect ArrayHelpers {
 		 * \brief Sets length <code>d</code> to the value of <code>e</code>.
 		 */
 		public void set(int d, FExp e) {
-			try {
-				size[d] = e.ceval().intValue();
-				exps[d] = null;
-			} catch (UnsupportedOperationException uoe) {
-				size[d] = UNKNOWN;
-				exps[d] = e;
+			int s = UNKNOWN;
+			if (e.isValidExp()) {
+				try {
+					s = e.ceval().intValue();
+				} catch (UnsupportedOperationException uoe) {
+				}
 			}
+			size[d] = s;
+			exps[d] = (s == UNKNOWN) ? e : null;
 		}
 		
 		/**
