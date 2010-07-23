@@ -101,14 +101,17 @@ def linearize_dae(model):
     
     g = -N.transpose(N.matrix(g))
 
-    state_names = model.get_differentiated_variable_names(include_alias=False)
-    state_names = sorted([(v,k) for k,v in state_names.items()])
+    state_names = model.get_x_variable_names(include_alias=False)
+    #state_names = sorted([(v,k) for k,v in state_names.items()])
+    state_names = sorted(state_names)
     state_names = [state_names[i][1] for i in range(len(state_names))]
-    algebraic_names = model.get_algebraic_variable_names(include_alias=False)
-    algebraic_names = sorted([(v,k) for k,v in algebraic_names.items()])
+    algebraic_names = model.get_w_variable_names(include_alias=False)
+    #algebraic_names = sorted([(v,k) for k,v in algebraic_names.items()])
+    algebraic_names = sorted(algebraic_names)
     algebraic_names = [algebraic_names[i][1] for i in range(len(algebraic_names))]
-    input_names = model.get_input_names(include_alias=False)
-    input_names = sorted([(v,k) for k,v in input_names.items()])
+    input_names = model.get_u_variable_names(include_alias=False)
+    input_names = sorted(input_names)
+    #input_names = sorted([(v,k) for k,v in input_names.items()])
     input_names = [input_names[i][1] for i in range(len(input_names))]
 
     dx0 = N.zeros(n_x)

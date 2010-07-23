@@ -598,58 +598,59 @@ class NLPCollocation(object):
                 if the final time is fixed.
         """
         # Obtain the names
-        dx_names_and_refs = self._model.get_derivative_names(include_alias=False)
+        names = self._model.get_dx_variable_names(include_alias=False)
         #dx_names = dx_names_and_refs.keys()
         # sort in value reference order
-        sorted_names = sorted(dx_names_and_refs.items(),key=itemgetter(1))
+        
+        #sorted_names = sorted(dx_names_and_refs.items(),key=itemgetter(1))
         dx_names=[]
-        for t in sorted_names:
-            dx_names.append(t[0])
+        for name in sorted(names):
+            dx_names.append(name[1])
         
 
         #dx_name_value_refs = dx_names.keys()
         #dx_name_value_refs.sort(key=int)
 
-        x_names_and_refs = self._model.get_differentiated_variable_names(include_alias=False)
+        names = self._model.get_x_variable_names(include_alias=False)
         #x_names = x_names_and_refs.keys()
         # sort in value reference order
-        sorted_names = sorted(x_names_and_refs.items(),key=itemgetter(1))
+        #sorted_names = sorted(x_names_and_refs.items(),key=itemgetter(1))
         x_names=[]
-        for t in sorted_names:
-            x_names.append(t[0])
+        for name in sorted(names):
+            x_names.append(name[1])
 
         #x_name_value_refs = x_names.keys()
         #x_name_value_refs.sort(key=int)
 
-        u_names_and_refs = self._model.get_input_names(include_alias=False)
+        names = self._model.get_u_variable_names(include_alias=False)
         #u_names = u_names_and_refs.keys()
         # sort in value reference order
-        sorted_names = sorted(u_names_and_refs.items(),key=itemgetter(1))
+        #sorted_names = sorted(u_names_and_refs.items(),key=itemgetter(1))
         u_names=[]
-        for t in sorted_names:
-            u_names.append(t[0])
+        for name in sorted(names):
+            u_names.append(name[1])
 
         #u_name_value_refs = u_names.keys()
         #u_name_value_refs.sort(key=int)
 
-        w_names_and_refs = self._model.get_algebraic_variable_names(include_alias=False)
+        names = self._model.get_w_variable_names(include_alias=False)
         #w_names = w_names_and_refs.keys()
         # sort in value reference order
-        sorted_names = sorted(w_names_and_refs.items(),key=itemgetter(1))
+        #sorted_names = sorted(w_names_and_refs.items(),key=itemgetter(1))
         w_names=[]
-        for t in sorted_names:
-            w_names.append(t[0])
+        for name in sorted(names):
+            w_names.append(name[1])
 
         #w_name_value_refs = w_names.keys()
         #w_name_value_refs.sort(key=int)
 
-        p_opt_names_and_refs = self._model.get_p_opt_names(include_alias=False)
+        names = self._model.get_p_opt_variable_names(include_alias=False)
         #p_opt_names = p_opt_names_and_refs.keys()
         # sort in value reference order
-        sorted_names = sorted(p_opt_names_and_refs.items(),key=itemgetter(1))
+        #sorted_names = sorted(p_opt_names_and_refs.items(),key=itemgetter(1))
         p_opt_names=[]
-        for t in sorted_names:
-            p_opt_names.append(t[0])
+        for name in sorted(names):
+            p_opt_names.append(name[1])
 
         #p_opt_name_value_refs = p_opt_names.keys()
         #p_opt_name_value_refs.sort(key=int)
@@ -730,7 +731,7 @@ class NLPCollocation(object):
 
             for name in p_opt_names:
                 try:
-                    ref = self._model.get_valueref(name)
+                    ref = self._model.get_value_reference(name)
                     (z_i, ptype) = jmi._translate_value_ref(ref)
                     i_pi = z_i - self._model._offs_real_pi.value
                     i_pi_opt = p_opt_indices.index(i_pi)

@@ -10,1148 +10,1036 @@ import numpy as n
 from jmodelica.tests import testattr
 from jmodelica.compiler import OptimicaCompiler
 from jmodelica.compiler import ModelicaCompiler
-import jmodelica.xmlparser as xp
+from jmodelica import xmlparser
 
 
 jm_home = os.environ.get('JMODELICA_HOME')
-path_to_examples = os.path.join('Python','jmodelica','examples')
-path_to_schemas = os.path.join(jm_home,'XML')
-path_to_tests = os.path.join('Python', 'jmodelica','tests')
+path_to_tests = os.path.join(jm_home, 'Python', 'jmodelica','tests')
 
-# cstr model
-cstr_model = os.path.join('files','CSTR.mo')
-cstr_fpath = os.path.join(jm_home,path_to_examples,cstr_model)
-cstr_cpath = "CSTR.CSTR_Opt"
-cstr_fname = cstr_cpath.replace('.','_',1)
-
-# parameter estimation model
-parest_model = os.path.join('files','ParameterEstimation_1.mo')
-parest_fpath = os.path.join(jm_home,path_to_examples,parest_model)
-parest_cpath = "ParEst.ParEst"
-parest_fname = parest_cpath.replace('.','_',1)
-
-# vdp min time model
-vdpmin_model = os.path.join('files','VDP.mo')
-vdpmin_fpath = os.path.join(jm_home,path_to_examples,vdpmin_model)
-vdpmin_cpath = "VDP_pack.VDP_Opt_Min_Time"
-vdpmin_fname = vdpmin_cpath.replace('.','_',1)
-
-# static opt model
-staticopt_model = os.path.join('files', 'StaticOptimizationTest.mo')
-staticopt_fpath = os.path.join(jm_home, path_to_tests, staticopt_model)
-staticopt_cpath = 'StaticOptimizationTest.StaticOptimizationTest2'
-staticopt_fname = staticopt_cpath.replace('.','_',1)
-
-# ext functions models
-extfunc1_model = os.path.join('files', 'ExtFunctionTests.mo')
-extfunc1_fpath = os.path.join(jm_home, path_to_tests, extfunc1_model)
-extfunc1_cpath = 'ExtFunctionTests.ExtFunctionTest1'
-extfunc1_fname = extfunc1_cpath.replace('.','_',1)
-
-extfunc2_model = os.path.join('files', 'ExtFunctionTests.mo')
-extfunc2_fpath = os.path.join(jm_home, path_to_tests, extfunc2_model)
-extfunc2_cpath = 'ExtFunctionTests.ExtFunctionTest2'
-extfunc2_fname = extfunc2_cpath.replace('.','_',1)
-
-#compilers
-mc = ModelicaCompiler()
-oc = OptimicaCompiler()
+# modified cstr xml
+modcstr = os.path.join(path_to_tests, 'files','CSTR_CSTR_Opt_modified.xml')
+md = xmlparser.ModelDescription(modcstr)
 
 #type defs
 int = n.int32
 uint = n.uint32
 
-def setup():
-    """ 
-    Setup test module. Compile test models (only needs to be done once) and 
-    set log level. 
+@testattr(stddist = True)
+def test_get_fmi_version():
     """
-    OptimicaCompiler.set_log_level(OptimicaCompiler.LOG_ERROR)
-    oc.set_boolean_option('state_start_values_fixed',True)
-    oc.set_boolean_option('eliminate_alias_variables',True)
-    # cstr model
-    oc.compile_model(cstr_cpath, cstr_fpath)
-    # parameter est model
-    oc.compile_model(parest_cpath, parest_fpath)
-    # vdp min time model
-    oc.compile_model(vdpmin_cpath, vdpmin_fpath)#, 'ipopt')
-    # static opt model
-    oc.compile_model(staticopt_cpath, staticopt_fpath, 'ipopt')
+    Test xmlparser.ModelDescription.get_fmi_version method.
     
-    # ext functions model 1 - can not compile dll at the moment
-    src_root = mc.parse_model(extfunc1_fpath)
-    inst_cls_decl = mc.instantiate_model(src_root, extfunc1_cpath)
-    fcls = mc.flatten_model(inst_cls_decl)
-    mc.generate_code(fcls)
-    # ext functions model 2 - can not compile dll at the moment
-    src_root = mc.parse_model(extfunc2_fpath)
-    inst_cls_decl = mc.instantiate_model(src_root, extfunc2_cpath)
-    fcls = mc.flatten_model(inst_cls_decl)
-    mc.generate_code(fcls)
+    """
+    nose.tools.assert_equal(md.get_fmi_version(), '1.0')
+
+@testattr(stddist = True)
+def test_get_model_name():
+    """
+    Test xmlparser.ModelDescription.get_model_name method.
+    
+    """
+    nose.tools.assert_equal(md.get_model_name(), 'CSTR.CSTR_Opt')
+    
+@testattr(stddist = True)
+def test_get_model_identifier():
+    """
+    Test xmlparser.ModelDescription.get_model_identifier method.
+    
+    """
+    nose.tools.assert_equal(md.get_model_identifier(), 'CSTR_CSTR_Opt')
+
+@testattr(stddist = True)
+def test_get_guid():
+    """
+    Test xmlparser.ModelDescription.get_guid method.
+    
+    """
+    nose.tools.assert_equal(md.get_guid(), '123abc')
+
+@testattr(stddist = True)
+def test_get_description():
+    """
+    Test xmlparser.ModelDescription.get_description method.
+    
+    """
+    nose.tools.assert_equal(md.get_description(), 'Modified CSTR')
+
+@testattr(stddist = True)
+def test_get_author():
+    """
+    Test xmlparser.ModelDescription.get_author method.
+    
+    """
+    nose.tools.assert_equal(md.get_author(), 'tester')
+    
+@testattr(stddist = True)
+def test_get_version():
+    """
+    Test xmlparser.ModelDescription.get_version method.
+    
+    """
+    nose.tools.assert_equal(md.get_version(), 1.0)
+    
+@testattr(stddist = True)
+def test_get_generation_tool():
+    """
+    Test xmlparser.ModelDescription.get_generation_tool method.
+    
+    """
+    nose.tools.assert_equal(md.get_generation_tool(), 'JModelica')
         
 @testattr(stddist = True)
-def test_create_XMLDoc():
-    """ 
-    Test that it is possible to parse the XML file and create a 
-    XMLDoc object. 
+def test_get_generation_date_and_time():
     """
-    filename = cstr_fname+'.xml'
-    assert xp.XMLDoc(filename) is not None, \
-           "Could not create XMLDoc from XML file: "+filename
+    Test xmlparser.ModelDescription.get_generation_date_and_time method.
+    
+    """
+    nose.tools.assert_equal(md.get_generation_date_and_time(), '2010-05-17T14:08:53')
 
 @testattr(stddist = True)
-def test_create_XMLValuesDoc():
-    """ 
-    Test that it is possible to parse the XML file and create a 
-    XMLValuesDoc object. 
+def test_get_variable_naming_convention():
     """
+    Test xmlparser.ModelDescription.get_variable_naming_convention method.
     
-    filename = cstr_fname+'_values.xml'
-    assert xp.XMLValuesDoc(filename) is not None, \
-           "Could not create XMLValuesDoc from XML file: "+filename
+    """
+    nose.tools.assert_equal(md.get_variable_naming_convention(), 'flat')
 
 @testattr(stddist = True)
-def test_xmldoc_methods():
-    """ 
-    Test that all XMLDoc methods are callable and returns the 
-    correct data type. 
+def test_get_number_of_continuous_states():
     """
-    cstr_xmldoc = xp.XMLDoc(cstr_fname+'.xml')
-    parest_xmldoc = xp.XMLDoc(parest_fname+'.xml')
-    vdpmin_xmldoc = xp.XMLDoc(vdpmin_fname+'.xml')
-    staticopt_xmldoc = xp.XMLDoc(staticopt_fname+'.xml')
-    extfunc1_xmldoc = xp.XMLDoc(extfunc1_fname+'.xml')
-    extfunc2_xmldoc = xp.XMLDoc(extfunc2_fname+'.xml')
+    Test xmlparser.ModelDescription.get_number_of_continuous_states method.
     
-    t_get_valueref.description = 'test XMLDoc.get_valueref'
-    t_get_aliases.description = 'test XMLDoc.get_aliases'
-    t_get_variable_description.description = 'test XMLDoc.get_variable_description'
-    t_get_data_type.description = 'test XMLDoc.get_data_type'
-    t_get_variable_names.description = 'test XMLDoc.get_variable_names'
-    t_get_derivative_names.description = 'test XMLDoc.get_derivative_names'
-    t_get_differentiated_variable_names.description = 'test XMLDoc.get_differentiated_variable_names'
-    t_get_input_names.description = 'test XMLDoc.get_input_names'
-    t_get_algebraic_variable_names.description = 'test XMLDoc.get_algebraic_variable_names'
-    t_get_p_opt_names.description = 'test XMLDoc.get_p_opt_names'
-    t_get_variable_descriptions.description = 'test XMLDoc.get_variable_descriptions'
-    t_get_start_attributes.description = 'test XMLDoc.get_start_attributes'
-    t_get_dx_start_attributes.description = 'test XMLDoc.get_dx_start_attributes' 
-    t_get_x_start_attributes.description = 'test XMLDoc.get_x_start_attributes'
-    t_get_u_start_attributes.description = 'test XMLDoc.get_u_start_attributes'
-    t_get_w_start_attributes.description = 'test XMLDoc.get_w_start_attributes'
-    t_get_p_opt_variable_refs.description = 'test XMLDoc.get_p_opt_variable_refs'
-    t_get_w_initial_guess_values.description = 'test XMLDoc.get_w_initial_guess_values'
-    t_get_u_initial_guess_values.description = ' test XMLDoc.get_u_initial_guess_values'
-    t_get_dx_initial_guess_values.description = ' test XMLDoc.get_dx_initial_guess_values'
-    t_get_x_initial_guess_values.description = ' test XMLDoc.get_x_initial_guess_values'
-    t_get_p_opt_initial_guess_values.description = ' test XMLDoc.get_p_opt_initial_guess_values'
-    t_get_w_lb_values.description = ' test XMLDoc.get_w_lb_values'
-    t_get_u_lb_values.description = ' test XMLDoc.get_u_lb_values'
-    t_get_dx_lb_values.description = ' test XMLDoc.get_dx_lb_values'
-    t_get_x_lb_values.description = ' test XMLDoc.get_x_lb_values'
-    t_get_p_opt_lb_values.description = ' test XMLDoc.get_p_opt_lb_values'
-    t_get_w_ub_values.description = ' test XMLDoc.get_w_ub_values'
-    t_get_u_ub_values.description = ' test XMLDoc.get_u_ub_values'
-    t_get_dx_ub_values.description = ' test XMLDoc.get_dx_ub_values'
-    t_get_x_ub_values.description = ' test XMLDoc.get_x_ub_values'
-    t_get_p_opt_ub_values.description = ' test XMLDoc.get_p_opt_ub_values'   
-    t_get_w_lin_values.description = ' test XMLDoc.get_w_lin_values'
-    t_get_u_lin_values.description = ' test XMLDoc.get_u_lin_values'
-    t_get_dx_lin_values.description = ' test XMLDoc.get_dx_lin_values'
-    t_get_x_lin_values.description = ' test XMLDoc.get_x_lin_values'
-    t_get_p_opt_lin_values.description = ' test XMLDoc.get_p_opt_lin_values'   
-    t_get_w_lin_tp_values.description = ' test XMLDoc.get_w_lin_tp_values'
-    t_get_u_lin_tp_values.description = ' test XMLDoc.get_u_lin_tp_values'
-    t_get_dx_lin_tp_values.description = ' test XMLDoc.get_dx_lin_tp_values'
-    t_get_x_lin_tp_values.description = ' test XMLDoc.get_x_lin_tp_values'    
-    t_get_starttime.description = ' test XMLDoc.get_starttime'
-    t_get_starttime_free.description = ' test XMLDoc.get_starttime_free'
-    t_get_finaltime.description = ' test XMLDoc.get_finaltime'
-    t_get_finaltime_free.description = ' test XMLDoc.get_finaltime_free'
-    t_get_timepoints.description = ' test XMLDoc.get_timepoints'
-    t_is_static.description = ' test XMLDoc.is_static'
-    t_get_external_libraries_1.description = ' test XMLDoc.get_external libraries'
-    t_get_external_libraries_2.description = ' test XMLDoc.get_external libraries'
-    t_get_external_includes_1.description = ' test XMLDoc.get_external_includes'
-    t_get_external_includes_2.description = ' test XMLDoc.get_external_includes'
-    t_get_external_librarydirs_1.description = ' test XMLDoc.get_external_lib_dirs'
-    t_get_external_librarydirs_2.description = ' test XMLDoc.get_external_lib_dirs'
-    t_get_external_includedirs_1.description = ' test XMLDoc.get_external_incl_dirs'
-    t_get_external_includedirs_2.description = ' test XMLDoc.get_external_incl_dirs'
-
-    yield t_get_valueref, cstr_xmldoc
-    yield t_get_aliases, cstr_xmldoc
-    yield t_get_variable_description, cstr_xmldoc
-    yield t_get_data_type, cstr_xmldoc
-    yield t_get_variable_names, cstr_xmldoc
-    yield t_get_derivative_names, cstr_xmldoc
-    yield t_get_differentiated_variable_names, cstr_xmldoc
-    yield t_get_input_names, cstr_xmldoc
-    yield t_get_algebraic_variable_names, cstr_xmldoc
-    yield t_get_p_opt_names, parest_xmldoc
-    yield t_get_variable_descriptions, cstr_xmldoc
-    yield t_get_start_attributes, cstr_xmldoc
-    yield t_get_dx_start_attributes, cstr_xmldoc
-    yield t_get_x_start_attributes, cstr_xmldoc
-    yield t_get_u_start_attributes, cstr_xmldoc
-    yield t_get_w_start_attributes, parest_xmldoc
-    yield t_get_p_opt_variable_refs, parest_xmldoc
-    yield t_get_w_initial_guess_values, parest_xmldoc
-    yield t_get_u_initial_guess_values, cstr_xmldoc
-    yield t_get_dx_initial_guess_values, cstr_xmldoc
-    yield t_get_x_initial_guess_values, cstr_xmldoc
-    yield t_get_p_opt_initial_guess_values, parest_xmldoc
-    yield t_get_w_lb_values, cstr_xmldoc # no example in testfiles
-    yield t_get_u_lb_values, vdpmin_xmldoc
-    yield t_get_dx_lb_values, cstr_xmldoc # no example in testfiles
-    yield t_get_x_lb_values, cstr_xmldoc # no example in testfiles
-    yield t_get_p_opt_lb_values, vdpmin_xmldoc
-    yield t_get_w_ub_values, cstr_xmldoc # no example in testfiles
-    yield t_get_u_ub_values, vdpmin_xmldoc
-    yield t_get_dx_ub_values, cstr_xmldoc # no example in testfiles
-    yield t_get_x_ub_values, cstr_xmldoc # no example in testfiles
-    yield t_get_p_opt_ub_values, cstr_xmldoc # no example in testfiles
-    yield t_get_w_lin_values, parest_xmldoc
-    yield t_get_u_lin_values, cstr_xmldoc
-    yield t_get_dx_lin_values, cstr_xmldoc
-    yield t_get_x_lin_values, cstr_xmldoc
-    yield t_get_p_opt_lin_values, parest_xmldoc
-    yield t_get_w_lin_tp_values, parest_xmldoc
-    yield t_get_u_lin_tp_values, cstr_xmldoc
-    yield t_get_dx_lin_tp_values, cstr_xmldoc
-    yield t_get_x_lin_tp_values, cstr_xmldoc    
-    yield t_get_starttime, cstr_xmldoc
-    yield t_get_starttime_free, cstr_xmldoc
-    yield t_get_finaltime, cstr_xmldoc
-    yield t_get_finaltime_free, cstr_xmldoc
-    yield t_get_timepoints, cstr_xmldoc 
-    yield t_is_static, staticopt_xmldoc
-    yield t_get_external_libraries_1, extfunc1_xmldoc
-    yield t_get_external_libraries_2, extfunc2_xmldoc
-    yield t_get_external_includes_1, extfunc1_xmldoc
-    yield t_get_external_includes_2, extfunc2_xmldoc
-    yield t_get_external_librarydirs_1, extfunc1_xmldoc
-    yield t_get_external_librarydirs_2, extfunc2_xmldoc
-    yield t_get_external_includedirs_1, extfunc1_xmldoc
-    yield t_get_external_includedirs_2, extfunc2_xmldoc
-
-
+    """
+    nose.tools.assert_equal(md.get_number_of_continuous_states(), 3)
     
 @testattr(stddist = True)
-def test_xmlvaluesdoc_methods():
-    """ 
-    Test that all the XMLValuesDoc methods are callable and returns 
-    the correct data type.
+def test_get_number_of_event_indicators():
     """
-    xmldoc = xp.XMLValuesDoc(cstr_fname+'_values.xml')
+    Test xmlparser.ModelDescription.get_number_of_event_indicators method.
     
-    t_get_iparam_values.description = 'test XMLValuesDoc.get_iparam_values'
-    
-    yield t_get_iparam_values, xmldoc
+    """
+    nose.tools.assert_equal(md.get_number_of_event_indicators(), 0)    
+
+@testattr(stddist = True)
+def test_get_value_reference():
+    """
+    Test xmlparser.ModelDescription.get_value_reference method.
+    """
+    variablename = 'cstr.T0'
+    vref = 3
+    nose.tools.assert_equal(md.get_value_reference(variablename), vref)
     
 @testattr(stddist = True)
-def t_get_valueref(xmldoc):
-    ref = xmldoc.get_valueref('u')
-    assert ref.__class__ is uint, \
-        "XMLVariablesDoc.get_valueref did not return int."
+def test_is_alias():
+    """
+    Test xmlparser.ModelDescription.is_alias method.
+    """
+    variablename = 'cstr.T0'
+    isalias = False
+    nose.tools.assert_equal(md.is_alias(variablename), isalias)
+    
+    variablename = 'cstr.r'
+    isalias = True
+    nose.tools.assert_equal(md.is_alias(variablename), isalias)
+    
+    variablename = 'cstr.EdivR'
+    nose.tools.assert_equal(md.is_alias(variablename), isalias)
+    
+@testattr(stddist = True)
+def test_is_negated_alias():
+    """
+    Test xmlparser.ModelDescription.is_negated_alias method.
+    """
+    
+    variablename = 'cstr.r'
+    isnegalias = True
+    nose.tools.assert_equal(md.is_negated_alias(variablename), 
+        isnegalias)
+    
+    variablename = 'cstr.EdivR'
+    isnegalias = False
+    nose.tools.assert_equal(md.is_negated_alias(variablename), 
+        isnegalias)
         
 @testattr(stddist = True)
-def t_get_aliases(xmldoc):
-    aliases, isnegated = xmldoc.get_aliases('u')
-    nose.tools.assert_equal(aliases[0],'cstr.Tc')
-    nose.tools.assert_equal(isnegated[0], False)
+def test_is_constant():
+    """
+    Test xmlparser.ModelDescription.is_constant method.
+    """
     
-@testattr(stddist = True)
-def t_get_variable_description(xmldoc):
-    desc = xmldoc.get_variable_description('cstr.F0')
-    nose.tools.assert_equal(desc, 'Inflow')
+    variablename = 'cstr.F'
+    isconst = True
+    nose.tools.assert_equal(md.is_constant(variablename), 
+        isconst)
+    
+    variablename = 'cstr.T0'
+    isconst = False
+    nose.tools.assert_equal(md.is_constant(variablename), 
+        isconst)
         
 @testattr(stddist = True)
-def t_get_data_type(xmldoc):
-    type = xmldoc.get_data_type('u')
-    assert type.__class__ is str, \
-        "XMLVariablesDoc.get_data_type did not return string."
-    nose.tools.assert_equal(type,'Real'),  \
-        "XMLVariablesDoc.get_data_type for variable u did not return Real."
+def test_get_aliases():
+    """
+    Test xmlparser.get_aliases_for_variable method.
+    """
+    
+    variablename = 'cstr.F0'
+    aliases = ['cstr.c0', 'cstr.r']
+    isneg = [False, True]
+    
+    nose.tools.assert_equal(md.get_aliases_for_variable(variablename), 
+        (aliases, isneg))
+    
+@testattr(stddist = True)
+def test_get_variable_names():
+    """
+    Test xmlparser.ModelDescription.get_variable_names method.
+    
+    """
+    vrefs = (26, 0, 0, 2, 3, 0, 5, 5, 7, 8)
+    vnames = ("u", "cstr.F0", "cstr.c0", "cstr.F", "cstr.T0", "cstr.r", 
+        "cstr.k0", "cstr.EdivR", "cstr.U", "cstr.rho")
+        
+    vrefs_noalias = (26, 0, 2, 3, 5, 7, 8)
+    vnames_noalias = ("u", "cstr.F0", "cstr.F", "cstr.T0", "cstr.k0", 
+        "cstr.U", "cstr.rho")
+    
+    # with alias
+    nose.tools.assert_equal(md.get_variable_names(), zip(vrefs, vnames))
+    
+    # without alias
+    nose.tools.assert_equal(md.get_variable_names(include_alias=False), 
+        zip(vrefs_noalias, vnames_noalias))
+        
+@testattr(stddist = True)
+def test_get_variable_aliases():
+    """
+    Test xmlparser.ModelDescription.get_variable_aliases method.
+    
+    """
+    vrefs = (26, 0, 0, 2, 3, 0, 5, 5, 7, 8)
+    valiases = (xmlparser.NO_ALIAS, xmlparser.NO_ALIAS, xmlparser.ALIAS, 
+        xmlparser.NO_ALIAS, xmlparser.NO_ALIAS, xmlparser.NEGATED_ALIAS, 
+        xmlparser.NO_ALIAS, xmlparser.ALIAS, xmlparser.NO_ALIAS, 
+        xmlparser.NO_ALIAS)
+        
+    nose.tools.assert_equal(md.get_variable_aliases(), zip(vrefs, valiases))
+    
+@testattr(stddist = True)
+def test_get_variable_descriptions():
+    """
+    Test xmlparser.ModelDescription.get_variable_descriptions method.
+    
+    """
+    vrefs = (26, 0, 0, 2, 3, 0, 5, 5, 7, 8)
+    vdesc = ("", "Inflow", "Concentration of inflow", "Outflow", "", "", 
+        "", "", "", "")
+        
+    vrefs_noalias = (26, 0, 2, 3, 5, 7, 8)
+    vdesc_noalias = ("", "Inflow", "Outflow", "", "", "", "")
+    
+    # with alias
+    nose.tools.assert_equal(md.get_variable_descriptions(), zip(vrefs, vdesc))
+    
+    # without alias
+    nose.tools.assert_equal(md.get_variable_descriptions(include_alias=False), 
+        zip(vrefs_noalias, vdesc_noalias))
+    
+@testattr(stddist = True)
+def test_get_variable_variabilities():
+    """
+    Test xmlparser.ModelDescription.get_variable_variabilities method.
+    
+    """
+    vrefs = (26, 0, 0, 2, 3, 0, 5, 5, 7, 8)
+    vvars = (xmlparser.CONTINUOUS, xmlparser.PARAMETER, 
+        xmlparser.CONTINUOUS, xmlparser.CONSTANT, xmlparser.PARAMETER, 
+        xmlparser.PARAMETER, xmlparser.DISCRETE, xmlparser.CONTINUOUS, 
+        xmlparser.PARAMETER, xmlparser.CONTINUOUS)
+        
+    vrefs_noalias = (26, 0, 2, 3, 5, 7, 8)
+    vvars_noalias = (xmlparser.CONTINUOUS, xmlparser.PARAMETER, 
+        xmlparser.CONSTANT, xmlparser.PARAMETER, xmlparser.DISCRETE, 
+        xmlparser.PARAMETER, xmlparser.CONTINUOUS)
+    
+    # with alias
+    nose.tools.assert_equal(md.get_variable_variabilities(), zip(vrefs, vvars))
+    
+    # without alias
+    nose.tools.assert_equal(md.get_variable_variabilities(include_alias=False), 
+        zip(vrefs_noalias, vvars_noalias))
+
+    
+@testattr(stddist = True)
+def test_get_variable_nominal_attributes():
+    """
+    Test xmlparser.ModelDescription.get_variable_nominal_attributes method.
+    
+    """
+    vrefs = (26, 0, 0, 2, 3, 0, 5, 5, 7, 8)
+    vnom = (3.14, 3.14, None, None, None, 10.0, None, None, None, 5)
+        
+    vrefs_noalias = (26, 0, 2, 3, 5, 7, 8)
+    vnom_noalias = (3.14, 3.14, None, None, None, None, 5)
+    
+    # with alias
+    nose.tools.assert_equal(md.get_variable_nominal_attributes(), zip(vrefs, vnom))
+    
+    # without alias
+    nose.tools.assert_equal(md.get_variable_nominal_attributes(include_alias=False), 
+        zip(vrefs_noalias, vnom_noalias))
 
 @testattr(stddist = True)
-def t_get_variable_names(xmldoc):
-    d = xmldoc.get_variable_names()
-    for key, value in d.iteritems():
-        assert key.__class__ is str, \
-            "Variable name is not string"
-        assert value.__class__ is uint, \
-            "Value reference is not uint"
-    nose.tools.assert_equal(d.get('u'),26)     
+def test_get_variable_start_attributes():
+    """
+    Test xmlparser.ModelDescription.get_variable_start_attributes method.
     
-@testattr(stddist = True)
-def t_get_derivative_names(xmldoc):
-    d = xmldoc.get_derivative_names()
-    for key, value in d.iteritems():
-        assert key.__class__ is str, \
-            "Variable name is not string"
-        assert value.__class__ is uint, \
-            "Value reference is not uint"
-    nose.tools.assert_equal(d.get('der(cost)'),20)
+    """
+    vrefs = (26, 0, 0, 2, 3, 0, 5, 5, 7, 8)
+    vstart = (350.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 10.0, 0.0)
+        
+    vrefs_noalias = (26, 0, 2, 3, 5, 7, 8)
+    vstart_noalias = (350.0, 0.0, 0.0, 0.0, 0.0, 10.0, 0.0)
+    
+    # with alias
+    nose.tools.assert_equal(md.get_variable_start_attributes(), zip(vrefs, vstart))
+    
+    # without alias
+    nose.tools.assert_equal(md.get_variable_start_attributes(include_alias=False), 
+        zip(vrefs_noalias, vstart_noalias))
 
 @testattr(stddist = True)
-def t_get_differentiated_variable_names(xmldoc):
-    d = xmldoc.get_differentiated_variable_names()
-    for key, value in d.iteritems():
-        assert key.__class__ is str, \
-            "Variable name is not string"
-        assert value.__class__ is uint, \
-            "Value reference is not uint"
-    nose.tools.assert_equal(d.get('cstr.c'),24)
-
-@testattr(stddist = True)    
-def t_get_input_names(xmldoc):
-    d = xmldoc.get_input_names()
-    for key, value in d.iteritems():
-        assert key.__class__ is str, \
-            "Variable name is not string"
-        assert value.__class__ is uint, \
-            "Value reference is not uint"
-    nose.tools.assert_equal(d.get('u'),26)
-
-@testattr(stddist = True)    
-def t_get_algebraic_variable_names(xmldoc):
-    d = xmldoc.get_algebraic_variable_names()
-    for key, value in d.iteritems():
-        assert key.__class__ is str, \
-            "Variable name is not string"
-        assert value.__class__ is uint, \
-            "Value reference is not uint"
-    # no example in testfile
-
-@testattr(stddist = True)    
-def t_get_p_opt_names(xmldoc):
-    d = xmldoc.get_p_opt_names()
-    for key, value in d.iteritems():
-        assert key.__class__ is str, \
-            "Variable name is not string"
-        assert value.__class__ is uint, \
-            "Value reference is not uint"
-    nose.tools.assert_equal(d.get('sys.w'),0)
-
-@testattr(stddist = True)    
-def t_get_variable_descriptions(xmldoc):
-    d = xmldoc.get_variable_descriptions()
-    for key, value in d.iteritems():
-        assert key.__class__ is str, \
-            "Variable name is not string"
-        assert value.__class__ is str, \
-            "Description is not string"
-    nose.tools.assert_equal(d.get('cstr.F0'),'Inflow')
+def test_get_p_opt_variable_names():
+    """
+    Test xmlparser.ModelDescription.get_p_opt_variable_names method.
+    
+    """
+    vrefs = (0, 7)
+    vnames = ('cstr.F0', 'cstr.U')
+        
+    vrefs_noalias = (0, 7)
+    vnames_noalias = ('cstr.F0', 'cstr.U')
+    
+    # with alias
+    nose.tools.assert_equal(md.get_p_opt_variable_names(), zip(vrefs, vnames))
+    
+    # without alias
+    nose.tools.assert_equal(md.get_p_opt_variable_names(include_alias=False), 
+        zip(vrefs_noalias, vnames_noalias))
 
 @testattr(stddist = True)
-def t_get_start_attributes(xmldoc):
-    d = xmldoc.get_start_attributes()
-    for key, value in d.iteritems():
-        assert key.__class__ is str, \
-            "Variable name is not string"
-        type = xmldoc.get_data_type(key)
-        if type == 'Real':
-            assert value.__class__ is float, \
-                "Start attribute of Real is not float."
-        elif type == 'Integer':
-            assert value.__class__ is int, \
-                "Start attribute of Integer is not int."
-        elif type == 'Boolean':
-            assert value.__class__ is bool, \
-                "Start attribute of Boolean is not bool."
-        elif type == 'String':
-            assert value.__class__ is str, \
-                "Start attribute of String is not str."
-        else:
-            pass
-            # enumeration not supported
-    nose.tools.assert_equal(d.get('cstr.F0'),0.0)
-            
-@testattr(stddist = True)
-def t_get_dx_start_attributes(xmldoc):
-    d = xmldoc.get_dx_start_attributes()
-    for key, value in d.iteritems():
-        assert key.__class__ is str, \
-            "Variable name is not string"
-        type = xmldoc.get_data_type(key)
-        if type == 'Real':
-            assert value.__class__ is float, \
-                "Start attribute of Real is not float."
-        elif type == 'Integer':
-            assert value.__class__ is int, \
-                "Start attribute of Integer is not int."
-        elif type == 'Boolean':
-            assert value.__class__ is bool, \
-                "Start attribute of Boolean is not bool."
-        elif type == 'String':
-            assert value.__class__ is str, \
-                "Start attribute of String is not str."
-        else:
-            pass
-            # enumeration not supported
-    nose.tools.assert_equal(d.get('cstr.der(T)'),0.0)
-            
-@testattr(stddist = True)
-def t_get_x_start_attributes(xmldoc):
-    d = xmldoc.get_x_start_attributes()
-    for key, value in d.iteritems():
-        assert key.__class__ is str, \
-            "Variable name is not string"
-        type = xmldoc.get_data_type(key)
-        if type == 'Real':
-            assert value.__class__ is float, \
-                "Start attribute of Real is not float."
-        elif type == 'Integer':
-            assert value.__class__ is int, \
-                "Start attribute of Integer is not int."
-        elif type == 'Boolean':
-            assert value.__class__ is bool, \
-                "Start attribute of Boolean is not bool."
-        elif type == 'String':
-            assert value.__class__ is str, \
-                "Start attribute of String is not str."
-        else:
-            pass
-            # enumeration not supported
-    nose.tools.assert_equal(d.get('cstr.c'),1000.0)          
+def test_get_dx_variable_names():
+    """
+    Test xmlparser.ModelDescription.get_dx_variable_names method.
+    
+    """
+    vrefs = (8,)
+    vnames = ('cstr.rho',)
+        
+    vrefs_noalias = (8,)
+    vnames_noalias = ('cstr.rho',)
+    
+    # with alias
+    nose.tools.assert_equal(md.get_dx_variable_names(), zip(vrefs, vnames))
+    
+    # without alias
+    nose.tools.assert_equal(md.get_dx_variable_names(include_alias=False), 
+        zip(vrefs_noalias, vnames_noalias))
 
 @testattr(stddist = True)
-def t_get_u_start_attributes(xmldoc):
-    d = xmldoc.get_u_start_attributes()
-    for key, value in d.iteritems():
-        assert key.__class__ is str, \
-            "Variable name is not string"
-        type = xmldoc.get_data_type(key)
-        if type == 'Real':
-            assert value.__class__ is float, \
-                "Start attribute of Real is not float."
-        elif type == 'Integer':
-            assert value.__class__ is int, \
-                "Start attribute of Integer is not int."
-        elif type == 'Boolean':
-            assert value.__class__ is bool, \
-                "Start attribute of Boolean is not bool."
-        elif type == 'String':
-            assert value.__class__ is str, \
-                "Start attribute of String is not str."
-        else:
-            pass
-            # enumeration not supported
-    nose.tools.assert_equal(d.get('u'),350.0)
-            
+def test_get_x_variable_names():
+    """
+    Test xmlparser.ModelDescription.get_x_variable_names method.
+    
+    """
+    vrefs = (5,)
+    vnames = ('cstr.k0',)
+        
+    vrefs_noalias = (5,)
+    vnames_noalias = ('cstr.k0',)
+    
+    # with alias
+    nose.tools.assert_equal(md.get_x_variable_names(), zip(vrefs, vnames))
+    
+    # without alias
+    nose.tools.assert_equal(md.get_x_variable_names(include_alias=False), 
+        zip(vrefs_noalias, vnames_noalias))
+        
 @testattr(stddist = True)
-def t_get_w_start_attributes(xmldoc):
-    d = xmldoc.get_w_start_attributes()
-    for key, value in d.iteritems():
-        assert key.__class__ is str, \
-            "Variable name is not string"
-        type = xmldoc.get_data_type(key)
-        if type == 'Real':
-            assert value.__class__ is float, \
-                "Start attribute of Real is not float."
-        elif type == 'Integer':
-            assert value.__class__ is int, \
-                "Start attribute of Integer is not int."
-        elif type == 'Boolean':
-            assert value.__class__ is bool, \
-                "Start attribute of Boolean is not bool."
-        elif type == 'String':
-            assert value.__class__ is str, \
-                "Start attribute of String is not str."
-        else:
-            pass
-            # enumeration not supported
-    nose.tools.assert_equal(d.get('u'),0.0)         
+def test_get_u_variable_names():
+    """
+    Test xmlparser.ModelDescription.get_u_variable_names method.
+    
+    """
+    vrefs = (26,)
+    vnames = ('u',)
+        
+    vrefs_noalias = (26,)
+    vnames_noalias = ('u',)
+    
+    # with alias
+    nose.tools.assert_equal(md.get_u_variable_names(), zip(vrefs, vnames))
+    
+    # without alias
+    nose.tools.assert_equal(md.get_u_variable_names(include_alias=False), 
+        zip(vrefs_noalias, vnames_noalias))
 
 @testattr(stddist = True)
-def t_get_p_opt_variable_refs(xmldoc):
-    refs = xmldoc.get_p_opt_variable_refs()   
-    for ref in refs:
-        assert ref.__class__ is int, \
-           "Value reference is not int."
-    nose.tools.assert_equal(refs[0],0)
-
-@testattr(stddist = True)
-def t_get_w_initial_guess_values(xmldoc):
-    d = xmldoc.get_w_initial_guess_values()
-    for key, value in d.iteritems():
-        assert key.__class__ is str, \
-            "Variable name is not string"
-        type = xmldoc.get_data_type(key)
-        if type == 'Real':
-            assert value.__class__ is float, \
-                "value of Real variable is not float."
-        elif type == 'Integer':
-            assert value.__class__ is int, \
-                "value of Integer variable is not int."
-        elif type == 'Boolean':
-            assert value.__class__ is bool, \
-                "value of Boolean variable is not bool."
-        elif type == 'String':
-            assert value.__class__ is str, \
-                "value of String variable is not str."
-        else:
-            pass
-            # enumeration not supported
-    nose.tools.assert_equal(d.get('u'), 0.0)
-
-@testattr(stddist = True)
-def t_get_u_initial_guess_values(xmldoc):
-    d = xmldoc.get_u_initial_guess_values()
-    for key, value in d.iteritems():
-        assert key.__class__ is str, \
-            "Variable name is not string"
-        type = xmldoc.get_data_type(key)
-        if type == 'Real':
-            assert value.__class__ is float, \
-                "value of Real is not float."
-        elif type == 'Integer':
-            assert value.__class__ is int, \
-                "value of Integer is not int."
-        elif type == 'Boolean':
-            assert value.__class__ is bool, \
-                "Initial guess value of Boolean is not bool."
-        elif type == 'String':
-            assert value.__class__ is str, \
-                "Initial guess value of String is not str."
-        else:
-            pass
-            # enumeration not supported
-    nose.tools.assert_equal(d.get('u'),350.0)
-
-@testattr(stddist = True)
-def t_get_dx_initial_guess_values(xmldoc):
-    d = xmldoc.get_dx_initial_guess_values()
-    for key, value in d.iteritems():
-        assert key.__class__ is str, \
-            "Variable name is not string"
-        type = xmldoc.get_data_type(key)
-        if type == 'Real':
-            assert value.__class__ is float, \
-                "value of Real is not float."
-        elif type == 'Integer':
-            assert value.__class__ is int, \
-                "value of Integer is not int."
-        elif type == 'Boolean':
-            assert value.__class__ is bool, \
-                "Initial guess value of Boolean is not bool."
-        elif type == 'String':
-            assert value.__class__ is str, \
-                "Initial guess value of String is not str."
-        else:
-            pass
-            # enumeration not supported
-    nose.tools.assert_equal(d.get('der(cost)'),0.0)
-
-@testattr(stddist = True)
-def t_get_x_initial_guess_values(xmldoc):
-    d = xmldoc.get_x_initial_guess_values()
-    for key, value in d.iteritems():
-        assert key.__class__ is str, \
-            "Variable name is not string"
-        type = xmldoc.get_data_type(key)
-        if type == 'Real':
-            assert value.__class__ is float, \
-                "value of Real is not float."
-        elif type == 'Integer':
-            assert value.__class__ is int, \
-                "value of Integer is not int."
-        elif type == 'Boolean':
-            assert value.__class__ is bool, \
-                "Initial guess value of Boolean is not bool."
-        elif type == 'String':
-            assert value.__class__ is str, \
-                "Initial guess value of String is not str."
-        else:
-            pass
-            # enumeration not supported
-    nose.tools.assert_equal(d.get('cstr.c'),300.0)
-
-@testattr(stddist = True)
-def t_get_p_opt_initial_guess_values(xmldoc):
-    d = xmldoc.get_p_opt_initial_guess_values()
-    for key, value in d.iteritems():
-        assert key.__class__ is str, \
-            "Variable name is not string"
-        type = xmldoc.get_data_type(key)
-        if type == 'Real':
-            assert value.__class__ is float, \
-                "value of Real is not float."
-        elif type == 'Integer':
-            assert value.__class__ is int, \
-                "value of Integer is not int."
-        elif type == 'Boolean':
-            assert value.__class__ is bool, \
-                "Initial guess value of Boolean is not bool."
-        elif type == 'String':
-            assert value.__class__ is str, \
-                "Initial guess value of String is not str."
-        else:
-            pass
-            # enumeration not supported
-    nose.tools.assert_equal(d.get('sys.w'),2.0)
-
-@testattr(stddist = True)
-def t_get_w_lb_values(xmldoc):
-    d = xmldoc.get_w_lb_values()
-    for key, value in d.iteritems():
-        assert key.__class__ is str, \
-            "Variable name is not string"
-        type = xmldoc.get_data_type(key)
-        if type == 'Real':
-            assert value.__class__ is float, \
-                "value of Real is not float."
-        elif type == 'Integer':
-            assert value.__class__ is int, \
-                "value of Integer is not int."
-        elif type == 'Boolean':
-            assert value.__class__ is bool, \
-                "Initial guess value of Boolean is not bool."
-        elif type == 'String':
-            assert value.__class__ is str, \
-                "Initial guess value of String is not str."
-        else:
-            pass
-            # enumeration not supported
-    # no example in testfiles
-
-@testattr(stddist = True)
-def t_get_u_lb_values(xmldoc):
-    d = xmldoc.get_u_lb_values()
-    for key, value in d.iteritems():
-        assert key.__class__ is str, \
-            "Variable name is not string"
-        type = xmldoc.get_data_type(key)
-        if type == 'Real':
-            assert value.__class__ is float, \
-                "value of Real is not float."
-        elif type == 'Integer':
-            assert value.__class__ is int, \
-                "value of Integer is not int."
-        elif type == 'Boolean':
-            assert value.__class__ is bool, \
-                "Initial guess value of Boolean is not bool."
-        elif type == 'String':
-            assert value.__class__ is str, \
-                "Initial guess value of String is not str."
-        else:
-            pass
-            # enumeration not supported
-    nose.tools.assert_equal(d.get('u'),-1.0)
-
-@testattr(stddist = True)
-def t_get_dx_lb_values(xmldoc):
-    d = xmldoc.get_dx_lb_values()
-    for key, value in d.iteritems():
-        assert key.__class__ is str, \
-            "Variable name is not string"
-        type = xmldoc.get_data_type(key)
-        if type == 'Real':
-            assert value.__class__ is float, \
-                "value of Real is not float."
-        elif type == 'Integer':
-            assert value.__class__ is int, \
-                "value of Integer is not int."
-        elif type == 'Boolean':
-            assert value.__class__ is bool, \
-                "Initial guess value of Boolean is not bool."
-        elif type == 'String':
-            assert value.__class__ is str, \
-                "Initial guess value of String is not str."
-        else:
-            pass
-            # enumeration not supported
-    # no example in testfile
-
-@testattr(stddist = True)
-def t_get_x_lb_values(xmldoc):
-    d = xmldoc.get_x_lb_values()
-    for key, value in d.iteritems():
-        assert key.__class__ is str, \
-            "Variable name is not string"
-        type = xmldoc.get_data_type(key)
-        if type == 'Real':
-            assert value.__class__ is float, \
-                "value of Real is not float."
-        elif type == 'Integer':
-            assert value.__class__ is int, \
-                "value of Integer is not int."
-        elif type == 'Boolean':
-            assert value.__class__ is bool, \
-                "Initial guess value of Boolean is not bool."
-        elif type == 'String':
-            assert value.__class__ is str, \
-                "Initial guess value of String is not str."
-        else:
-            pass
-            # enumeration not supported
-    # no example in testfile
-
-@testattr(stddist = True)
-def t_get_p_opt_lb_values(xmldoc):
-    d = xmldoc.get_p_opt_lb_values()
-    for key, value in d.iteritems():
-        assert key.__class__ is str, \
-            "Variable name is not string"
-        type = xmldoc.get_data_type(key)
-        if type == 'Real':
-            assert value.__class__ is float, \
-                "value of Real is not float."
-        elif type == 'Integer':
-            assert value.__class__ is int, \
-                "value of Integer is not int."
-        elif type == 'Boolean':
-            assert value.__class__ is bool, \
-                "Initial guess value of Boolean is not bool."
-        elif type == 'String':
-            assert value.__class__ is str, \
-                "Initial guess value of String is not str."
-        else:
-            pass
-            # enumeration not supported
-    nose.tools.assert_equal(d.get('tf'),0.2)
-
-@testattr(stddist = True)
-def t_get_w_ub_values(xmldoc):
-    d = xmldoc.get_w_ub_values()
-    for key, value in d.iteritems():
-        assert key.__class__ is str, \
-            "Variable name is not string"
-        type = xmldoc.get_data_type(key)
-        if type == 'Real':
-            assert value.__class__ is float, \
-                "value of Real is not float."
-        elif type == 'Integer':
-            assert value.__class__ is int, \
-                "value of Integer is not int."
-        elif type == 'Boolean':
-            assert value.__class__ is bool, \
-                "Initial guess value of Boolean is not bool."
-        elif type == 'String':
-            assert value.__class__ is str, \
-                "Initial guess value of String is not str."
-        else:
-            pass
-            # enumeration not supported
-    # no example in testfile
-
-@testattr(stddist = True)
-def t_get_u_ub_values(xmldoc):
-    d = xmldoc.get_u_ub_values()
-    for key, value in d.iteritems():
-        assert key.__class__ is str, \
-            "Variable name is not string"
-        type = xmldoc.get_data_type(key)
-        if type == 'Real':
-            assert value.__class__ is float, \
-                "value of Real is not float."
-        elif type == 'Integer':
-            assert value.__class__ is int, \
-                "value of Integer is not int."
-        elif type == 'Boolean':
-            assert value.__class__ is bool, \
-                "Initial guess value of Boolean is not bool."
-        elif type == 'String':
-            assert value.__class__ is str, \
-                "Initial guess value of String is not str."
-        else:
-            pass
-            # enumeration not supported
-    nose.tools.assert_equal(d.get('u'),1.0)
-
-@testattr(stddist = True)
-def t_get_dx_ub_values(xmldoc):
-    d = xmldoc.get_dx_ub_values()
-    for key, value in d.iteritems():
-        assert key.__class__ is str, \
-            "Variable name is not string"
-        type = xmldoc.get_data_type(key)
-        if type == 'Real':
-            assert value.__class__ is float, \
-                "value of Real is not float."
-        elif type == 'Integer':
-            assert value.__class__ is int, \
-                "value of Integer is not int."
-        elif type == 'Boolean':
-            assert value.__class__ is bool, \
-                "Initial guess value of Boolean is not bool."
-        elif type == 'String':
-            assert value.__class__ is str, \
-                "Initial guess value of String is not str."
-        else:
-            pass
-            # enumeration not supported
-    # no example in testfile
-
-@testattr(stddist = True)
-def t_get_x_ub_values(xmldoc):
-    d = xmldoc.get_x_ub_values()
-    for key, value in d.iteritems():
-        assert key.__class__ is str, \
-            "Variable name is not string"
-        type = xmldoc.get_data_type(key)
-        if type == 'Real':
-            assert value.__class__ is float, \
-                "value of Real is not float."
-        elif type == 'Integer':
-            assert value.__class__ is int, \
-                "value of Integer is not int."
-        elif type == 'Boolean':
-            assert value.__class__ is bool, \
-                "Initial guess value of Boolean is not bool."
-        elif type == 'String':
-            assert value.__class__ is str, \
-                "Initial guess value of String is not str."
-        else:
-            pass
-            # enumeration not supported
-    # no example in testfile
-
-@testattr(stddist = True)
-def t_get_p_opt_ub_values(xmldoc):
-    d = xmldoc.get_p_opt_ub_values()
-    for key, value in d.iteritems():
-        assert key.__class__ is str, \
-            "Variable name is not string"
-        type = xmldoc.get_data_type(key)
-        if type == 'Real':
-            assert value.__class__ is float, \
-                "value of Real is not float."
-        elif type == 'Integer':
-            assert value.__class__ is int, \
-                "value of Integer is not int."
-        elif type == 'Boolean':
-            assert value.__class__ is bool, \
-                "Initial guess value of Boolean is not bool."
-        elif type == 'String':
-            assert value.__class__ is str, \
-                "Initial guess value of String is not str."
-        else:
-            pass
-            # enumeration not supported
-    # no example in testfile
-
-@testattr(stddist = True)
-def t_get_w_lin_values(xmldoc):
-    d = xmldoc.get_w_lin_values()
-    for key, value in d.iteritems():
-        assert key.__class__ is str, \
-            "Variable name is not string"
-        assert value.__class__ is bool, \
-                "Is linear value is not bool."
-    nose.tools.assert_equal(d.get('u'),False)
-
-@testattr(stddist = True)
-def t_get_u_lin_values(xmldoc):
-    d = xmldoc.get_u_lin_values()
-    for key, value in d.iteritems():
-        assert key.__class__ is str, \
-            "Variable name is not string"
-        assert value.__class__ is bool, \
-                "Is linear value is not bool."
-    nose.tools.assert_equal(d.get('u'),False)
-
-@testattr(stddist = True)
-def t_get_dx_lin_values(xmldoc):
-    d = xmldoc.get_dx_lin_values()
-    for key, value in d.iteritems():
-        assert key.__class__ is str, \
-            "Variable name is not string"
-        assert value.__class__ is bool, \
-                "Is linear value is not bool."
-    nose.tools.assert_equal(d.get('der(cost)'),True)
-
-@testattr(stddist = True)
-def t_get_x_lin_values(xmldoc):
-    d = xmldoc.get_x_lin_values()
-    for key, value in d.iteritems():
-        assert key.__class__ is str, \
-            "Variable name is not string"
-        assert value.__class__ is bool, \
-                "Is linear value is not bool."
-    nose.tools.assert_equal(d.get('cstr.T'),False)
-
-@testattr(stddist = True)
-def t_get_p_opt_lin_values(xmldoc):
-    d = xmldoc.get_p_opt_lin_values()
-    for key, value in d.iteritems():
-        assert key.__class__ is str, \
-            "Variable name is not string"
-        assert value.__class__ is bool, \
-                "Is linear value is not bool."
-    nose.tools.assert_equal(d.get('sys.z'),False)
-
-@testattr(stddist = True)
-def t_get_w_lin_tp_values(xmldoc):
-    d = xmldoc.get_w_lin_tp_values()
-    for key, value in d.iteritems():
-        assert key.__class__ is str, \
-            "Variable name is not string"
-        for val in value:
-            assert val.__class__ is bool, \
-                "Time point value is not bool."
-    tps = d.get('u')
-    nose.tools.assert_equal(len(tps),11)
-    nose.tools.assert_equal(tps[0],True)
-
-@testattr(stddist = True)
-def t_get_u_lin_tp_values(xmldoc):
-    d = xmldoc.get_u_lin_tp_values()
-    for key, value in d.iteritems():
-        assert key.__class__ is str, \
-            "Variable name is not string"
-        for val in value:
-            assert val.__class__ is bool, \
-                "Time point value is not bool."
-    tps = d.get('u')
-    nose.tools.assert_equal(tps[0],True)
-
-@testattr(stddist = True)
-def t_get_dx_lin_tp_values(xmldoc):
-    d = xmldoc.get_dx_lin_tp_values()
-    for key, value in d.iteritems():
-        assert key.__class__ is str, \
-            "Variable name is not string"
-        for val in value:
-            assert val.__class__ is bool, \
-                "Time point value is not bool."
-    tps = d.get('der(cost)')
-    nose.tools.assert_equal(tps[0],True)
-
-@testattr(stddist = True)
-def t_get_x_lin_tp_values(xmldoc):
-    d = xmldoc.get_x_lin_tp_values()
-    for key, value in d.iteritems():
-        assert key.__class__ is str, \
-            "Variable name is not string"
-        for val in value:
-            assert val.__class__ is bool, \
-                "Time point value is not bool."
-    tps = d.get('cstr.c')
-    nose.tools.assert_equal(tps[0],True)    
-                
-@testattr(stddist = True)
-def t_get_iparam_values(xmldoc):
-    d = xmldoc.get_iparam_values()
-    for key, value in d.iteritems():
-        assert key.__class__ is str, \
-            "Value reference is not int"
-        type = xmldoc.get_parameter_type(key)
-        if type == 'RealParameter':
-            assert value.__class__ is float, \
-                "value of Real is not float."
-        elif type == 'IntegerParameter':
-            assert value.__class__ is int, \
-                "value of Integer is not int."
-        elif type == 'BooleanParameter':
-            assert value.__class__ is bool, \
-                "Initial guess value of Boolean is not bool."
-        elif type == 'StringParameter':
-            assert value.__class__ is str, \
-                "Initial guess value of String is not str."
-        else:
-            pass
-            # enumeration not supported
-    nose.tools.assert_equal(d.get('cstr.T0'), 350.0)
-
-@testattr(stddist = True)
-def t_get_starttime(xmldoc):
-    time = xmldoc.get_starttime()
-    assert time.__class__ is float, \
-        "XMLDoc.get_starttime did not return float."
-    nose.tools.assert_equal(time,0.0)
+def test_get_w_variable_names():
+    """
+    Test xmlparser.ModelDescription.get_w_variable_names method.
     
-@testattr(stddist = True)
-def t_get_starttime_free(xmldoc):
-    b = xmldoc.get_starttime_free()
-    assert b.__class__ is bool, \
-            "XMLDoc.get_starttime_free did not return boolean."
-    nose.tools.assert_equal(b, False)
+    """
+    vrefs = (2,)
+    vnames = ('cstr.F',)
+        
+    vrefs_noalias = (2,)
+    vnames_noalias = ('cstr.F',)
     
-@testattr(stddist = True)
-def t_get_finaltime(xmldoc):
-    time = xmldoc.get_finaltime()
-    assert time.__class__ is float, \
-        "XMLDoc.get_finaltime did not return float."
-    nose.tools.assert_equal(time,150.0)
+    # with alias
+    nose.tools.assert_equal(md.get_w_variable_names(), zip(vrefs, vnames))
     
-@testattr(stddist = True)
-def t_get_finaltime_free(xmldoc):
-    b = xmldoc.get_finaltime_free()
-    assert b.__class__ is bool, \
-            "XMLDoc.get_finaltime_free did not return boolean."
-    nose.tools.assert_equal(b, False)
-    
-@testattr(stddist = True)
-def t_get_timepoints(xmldoc):
-    timepoints = xmldoc.get_timepoints()
-    for tp in timepoints:
-        assert tp.__class__ is float, \
-            "timepoint is not float."
-    nose.tools.assert_equal(timepoints[0], 150.0)
-    
-@testattr(stddist = True)
-def t_is_static(xmldoc):
-    isstatic = xmldoc.is_static()
-    nose.tools.assert_equal(isstatic,True)
-
-@testattr(stddist = True)
-def t_get_external_libraries_1(xmldoc):
-    extlib = xmldoc.get_external_libraries()
-    nose.tools.assert_equal(extlib[0],'addNumbers1')
-    
-@testattr(stddist = True)
-def t_get_external_libraries_2(xmldoc):
-    extlib = xmldoc.get_external_libraries()
-    extlib.sort()
-    nose.tools.assert_equal(extlib[0],'addNumbers1')
-    nose.tools.assert_equal(extlib[1],'addNumbers2')
-    
-@testattr(stddist=True)
-def t_get_external_includes_1(xmldoc):
-    extincl = xmldoc.get_external_includes()
-    nose.tools.assert_equal(extincl[0],'#include \"addNumbers1.h\"')
-    
-@testattr(stddist = True)
-def t_get_external_includes_2(xmldoc):
-    extincl = xmldoc.get_external_includes()
-    extincl.sort()
-    nose.tools.assert_equal(extincl[0],'#include \"addNumbers1.h\"')
-    nose.tools.assert_equal(extincl[1],'#include \"addNumbers2.h\"')
-    
-@testattr(stddist = True)
-def t_get_external_librarydirs_1(xmldoc):
-    extlib = xmldoc.get_external_lib_dirs()
-    nose.tools.assert_equal(extlib[0],'/Library')
-    
-@testattr(stddist = True)
-def t_get_external_librarydirs_2(xmldoc):
-    extlib = xmldoc.get_external_lib_dirs()
-    extlib.sort()
-    nose.tools.assert_equal(extlib[0],'/Library')
-    nose.tools.assert_equal(extlib[1],'/Libs/lib1')
-    
-@testattr(stddist=True)
-def t_get_external_includedirs_1(xmldoc):
-    extincl = xmldoc.get_external_incl_dirs()
-    nose.tools.assert_equal(extincl[0],'/Include')
-    
-@testattr(stddist = True)
-def t_get_external_includedirs_2(xmldoc):
-    extincl = xmldoc.get_external_incl_dirs()
-    extincl.sort()
-    nose.tools.assert_equal(extincl[0],'/Incl/incl1')
-    nose.tools.assert_equal(extincl[1],'/Include')
+    # without alias
+    nose.tools.assert_equal(md.get_w_variable_names(include_alias=False), 
+        zip(vrefs_noalias, vnames_noalias))
 
 
-# @testattr(stddist = True)
-# def test_fmi_schema():
-#     """ Test that generated XML file validates with the fmi schema. """
-#     mc.set_boolean_option('generate_fmi_xml', True)
-#     mc.set_boolean_option('generate_xml_equations', False)
+@testattr(stddist = True)
+def test_get_p_opt_start():
+    """
+    Test xmlparser.ModelDescription.get_p_opt_start method.
     
-#     model_mc = os.path.join('files', 'Pendulum_pack_no_opt.mo')
-#     fpath_mc = os.path.join(jm_home,path_to_examples,model_mc)
-#     cpath_mc = "Pendulum_pack.Pendulum"
+    """
+    vrefs = (0, 7)
+    vstart = (0.0, 10.0)
+        
+    vrefs_noalias = (0, 7)
+    vstart_noalias = (0.0, 10.0)
     
-#     mc.compile_model(fpath_mc, cpath_mc)
-#     fname = cpath_mc.replace('.','_',1)
-#     filename = fname+'.xml'
+    # with alias
+    nose.tools.assert_equal(md.get_p_opt_start(), zip(vrefs, vstart))
     
-#     schema = 'fmiModelDescription.xsd'
-#     path_to_schema = os.path.join(path_to_schemas,schema)
+    # without alias
+    nose.tools.assert_equal(md.get_p_opt_start(include_alias=False), 
+        zip(vrefs_noalias, vstart_noalias))
+
+@testattr(stddist = True)
+def test_get_dx_start():
+    """
+    Test xmlparser.ModelDescription.get_dx_start method.
     
-#     xmldoc = xp.XMLDoc(filename,schemaname=path_to_schema)
+    """
+    vrefs = (8,)
+    vstart = (0.0,)
+        
+    vrefs_noalias = (8,)
+    vstart_noalias = (0.0,)
     
+    # with alias
+    nose.tools.assert_equal(md.get_dx_start(), zip(vrefs, vstart))
     
-## Commented out tests due to #729
+    # without alias
+    nose.tools.assert_equal(md.get_dx_start(include_alias=False), 
+        zip(vrefs_noalias, vstart_noalias))
+
+@testattr(stddist = True)
+def test_get_x_start():
+    """
+    Test xmlparser.ModelDescription.get_x_start method.
     
-#@testattr(stddist = True)
-#def test_extended_fmi_schema():
-#    """ Test that generated XML file validates with the extended fmi schema. """
-#    mc.set_boolean_option('generate_fmi_xml', True)
-#    mc.set_boolean_option('generate_xml_equations', True)
-#    
-#    model_mc = os.path.join('files', 'Pendulum_pack_no_opt.mo')
-#    fpath_mc = os.path.join(jm_home,path_to_examples,model_mc)
-#    cpath_mc = "Pendulum_pack.Pendulum"
-#    
-#    mc.compile_model(fpath_mc, cpath_mc)
-#    fname = cpath_mc.replace('.','_',1)
-#    filename = fname+'.xml'
-#    
-#    schema = 'fmiExtendedModelDescription.xsd'
-#    path_to_schema = os.path.join(path_to_schemas,schema)
-#    
-#    xmldoc = xp.XMLDoc(filename,schemaname=path_to_schema)
+    """
+    vrefs = (5,)
+    vstart = (0.0,)
+        
+    vrefs_noalias = (5,)
+    vstart_noalias = (0.0,)
     
-#@testattr(stddist = True)
-#def test_jmodelica_schema():
-#    """ Test that generated XML file validates with the jmodelica schema. """
-#    mc.set_boolean_option('generate_fmi_xml', False)
-#    mc.set_boolean_option('generate_xml_equations', True)
-#    
-#    model_mc = os.path.join('files', 'Pendulum_pack_no_opt.mo')
-#    fpath_mc = os.path.join(jm_home,path_to_examples,model_mc)
-#    cpath_mc = "Pendulum_pack.Pendulum"
-#    
-#    mc.compile_model(fpath_mc, cpath_mc)
-#    fname = cpath_mc.replace('.','_',1)
-#    filename = fname+'.xml'
-#    
-#    schema = 'jmodelicaModelDescription.xsd'
-#    path_to_schema = os.path.join(path_to_schemas,schema)
-#    
-#    xmldoc = xp.XMLDoc(filename,schemaname=path_to_schema)
-#    
-#@testattr(stddist = True)
-#def test_jmodelica_schema_2():
-#    """ Test that generated XML file validates with the jmodelica schema. """
-#    mc.set_boolean_option('generate_fmi_xml', False)
-#    mc.set_boolean_option('generate_xml_equations', False)
-#    
-#    model_mc = os.path.join('files', 'Pendulum_pack_no_opt.mo')
-#    fpath_mc = os.path.join(jm_home,path_to_examples,model_mc)
-#    cpath_mc = "Pendulum_pack.Pendulum"
-#    
-#    mc.compile_model(fpath_mc, cpath_mc)
-#    fname = cpath_mc.replace('.','_',1)
-#    filename = fname+'.xml'
-#    
-#    schema = 'jmodelicaModelDescription.xsd'
-#    path_to_schema = os.path.join(path_to_schemas,schema)
-#    
-#    xmldoc = xp.XMLDoc(filename,schemaname=path_to_schema)
+    # with alias
+    nose.tools.assert_equal(md.get_x_start(), zip(vrefs, vstart))
     
-#@testattr(stddist = True)
-#def test_extended_fmi_schema_opt():
-#    """ Test that generated XML file validates with the extended fmi schema. """
-#    oc.set_boolean_option('generate_fmi_xml', True)
-#    oc.set_boolean_option('generate_xml_equations', True)
-#    oc.compile_model(parest_fpath, parest_cpath)
-#    fname = parest_cpath.replace('.','_',1)
-#    filename = fname+'.xml'
-#    
-#    schema = 'fmiExtendedModelDescription.xsd'
-#    path_to_schema = os.path.join(path_to_schemas,schema)
-#    
-#    xmldoc = xp.XMLDoc(filename,schemaname=path_to_schema)
+    # without alias
+    nose.tools.assert_equal(md.get_x_start(include_alias=False), 
+        zip(vrefs_noalias, vstart_noalias))
+        
+@testattr(stddist = True)
+def test_get_u_start():
+    """
+    Test xmlparser.ModelDescription.get_u_start method.
     
+    """
+    vrefs = (26,)
+    vstart = (350.0,)
+        
+    vrefs_noalias = (26,)
+    vstart_noalias = (350.0,)
     
+    # with alias
+    nose.tools.assert_equal(md.get_u_start(), zip(vrefs, vstart))
     
+    # without alias
+    nose.tools.assert_equal(md.get_u_start(include_alias=False), 
+        zip(vrefs_noalias, vstart_noalias))
+
+@testattr(stddist = True)
+def test_get_w_start():
+    """
+    Test xmlparser.ModelDescription.get_w_start method.
     
+    """
+    vrefs = (2,)
+    vstart = (0.0,)
+        
+    vrefs_noalias = (2,)
+    vstart_noalias = (0.0,)
     
+    # with alias
+    nose.tools.assert_equal(md.get_w_start(), zip(vrefs, vstart))
     
+    # without alias
+    nose.tools.assert_equal(md.get_w_start(include_alias=False), 
+        zip(vrefs_noalias, vstart_noalias))
+
+@testattr(stddist = True)
+def test_get_p_opt_initial_guess():
+    """
+    Test xmlparser.ModelDescription.get_p_opt_initial_guess method.
     
+    """
+    vrefs = (0, 7)
+    vinit = (0.0, 5.0)
+        
+    vrefs_noalias = (0, 7)
+    vinit_noalias = (0.0, 5.0)
     
+    # with alias
+    nose.tools.assert_equal(md.get_p_opt_initial_guess(), zip(vrefs, vinit))
     
+    # without alias
+    nose.tools.assert_equal(md.get_p_opt_initial_guess(include_alias=False), 
+        zip(vrefs_noalias, vinit_noalias))
     
+@testattr(stddist = True)
+def test_get_dx_initial_guess():
+    """
+    Test xmlparser.ModelDescription.get_dx_initial_guess method.
     
+    """
+    vrefs = (8,)
+    vinit = (0.0,)
+        
+    vrefs_noalias = (8,)
+    vinit_noalias = (0.0,)
     
+    # with alias
+    nose.tools.assert_equal(md.get_dx_initial_guess(), zip(vrefs, vinit))
     
+    # without alias
+    nose.tools.assert_equal(md.get_dx_initial_guess(include_alias=False), 
+        zip(vrefs_noalias, vinit_noalias))
+
+@testattr(stddist = True)
+def test_get_x_initial_guess():
+    """
+    Test xmlparser.ModelDescription.get_x_initial_guess method.
     
+    """
+    vrefs = (5,)
+    vinit = (0.0,)
+        
+    vrefs_noalias = (5,)
+    vinit_noalias = (0.0,)
     
+    # with alias
+    nose.tools.assert_equal(md.get_x_initial_guess(), zip(vrefs, vinit))
     
+    # without alias
+    nose.tools.assert_equal(md.get_x_initial_guess(include_alias=False), 
+        zip(vrefs_noalias, vinit_noalias))
+
+@testattr(stddist = True)
+def test_get_u_initial_guess():
+    """
+    Test xmlparser.ModelDescription.get_u_initial_guess method.
     
+    """
+    vrefs = (26,)
+    vinit = (350.0,)
+        
+    vrefs_noalias = (26,)
+    vinit_noalias = (350.0,)
     
+    # with alias
+    nose.tools.assert_equal(md.get_u_initial_guess(), zip(vrefs, vinit))
+    
+    # without alias
+    nose.tools.assert_equal(md.get_u_initial_guess(include_alias=False), 
+        zip(vrefs_noalias, vinit_noalias))
+
+@testattr(stddist = True)
+def test_get_w_initial_guess():
+    """
+    Test xmlparser.ModelDescription.get_w_initial_guess method.
+    
+    """
+    vrefs = (2,)
+    vinit = (None,)
+        
+    vrefs_noalias = (2,)
+    vinit_noalias = (None,)
+    
+    # with alias
+    nose.tools.assert_equal(md.get_w_initial_guess(), zip(vrefs, vinit))
+    
+    # without alias
+    nose.tools.assert_equal(md.get_w_initial_guess(include_alias=False), 
+        zip(vrefs_noalias, vinit_noalias))
+
+@testattr(stddist = True)
+def test_get_p_opt_min():
+    """
+    Test xmlparser.ModelDescription.get_p_opt_min method.
+    
+    """
+    vrefs = (0, 7)
+    vmin = (None, 0.0)
+        
+    vrefs_noalias = (0, 7)
+    vmin_noalias = (None, 0.0)
+    
+    # with alias
+    nose.tools.assert_equal(md.get_p_opt_min(), zip(vrefs, vmin))
+    
+    # without alias
+    nose.tools.assert_equal(md.get_p_opt_min(include_alias=False), 
+        zip(vrefs_noalias, vmin_noalias))
+
+@testattr(stddist = True)
+def test_get_dx_min():
+    """
+    Test xmlparser.ModelDescription.get_dx_min method.
+    
+    """
+    vrefs = (8,)
+    vmin = (None,)
+        
+    vrefs_noalias = (8,)
+    vmin_noalias = (None,)
+    
+    # with alias
+    nose.tools.assert_equal(md.get_dx_min(), zip(vrefs, vmin))
+    
+    # without alias
+    nose.tools.assert_equal(md.get_dx_min(include_alias=False), 
+        zip(vrefs_noalias, vmin_noalias))
+
+@testattr(stddist = True)
+def test_get_x_min():
+    """
+    Test xmlparser.ModelDescription.get_x_min method.
+    
+    """
+    vrefs = (5,)
+    vmin = (1.5,)
+        
+    vrefs_noalias = (5,)
+    vmin_noalias = (1.5,)
+    
+    # with alias
+    nose.tools.assert_equal(md.get_x_min(), zip(vrefs, vmin))
+    
+    # without alias
+    nose.tools.assert_equal(md.get_x_min(include_alias=False), 
+        zip(vrefs_noalias, vmin_noalias))
+
+@testattr(stddist = True)
+def test_get_u_max():
+    """
+    Test xmlparser.ModelDescription.get_u_max method.
+    
+    """
+    vrefs = (26,)
+    vmin = (None,)
+        
+    vrefs_noalias = (26,)
+    vmin_noalias = (None,)
+    
+    # with alias
+    nose.tools.assert_equal(md.get_u_max(), zip(vrefs, vmin))
+    
+    # without alias
+    nose.tools.assert_equal(md.get_u_max(include_alias=False), 
+        zip(vrefs_noalias, vmin_noalias))
+
+@testattr(stddist = True)
+def test_get_w_max():
+    """
+    Test xmlparser.ModelDescription.get_w_max method.
+    
+    """
+    vrefs = (2,)
+    vmin = (-5.0,)
+        
+    vrefs_noalias = (2,)
+    vmin_noalias = (-5.0,)
+    
+    # with alias
+    nose.tools.assert_equal(md.get_w_max(), zip(vrefs, vmin))
+    
+    # without alias
+    nose.tools.assert_equal(md.get_w_max(include_alias=False), 
+        zip(vrefs_noalias, vmin_noalias))
+
+@testattr(stddist = True)
+def test_get_p_opt_max():
+    """
+    Test xmlparser.ModelDescription.get_p_opt_max method.
+    
+    """
+    vrefs = (0, 7)
+    vmax = (100.0, 1000.0)
+        
+    vrefs_noalias = (0, 7)
+    vmax_noalias = (100.0, 1000.0)
+    
+    # with alias
+    nose.tools.assert_equal(md.get_p_opt_max(), zip(vrefs, vmax))
+    
+    # without alias
+    nose.tools.assert_equal(md.get_p_opt_max(include_alias=False), 
+        zip(vrefs_noalias, vmax_noalias))
+
+@testattr(stddist = True)
+def test_get_dx_max():
+    """
+    Test xmlparser.ModelDescription.get_dx_max method.
+    
+    """
+    vrefs = (8,)
+    vmax = (500.0,)
+        
+    vrefs_noalias = (8,)
+    vmax_noalias = (500.0,)
+    
+    # with alias
+    nose.tools.assert_equal(md.get_dx_max(), zip(vrefs, vmax))
+    
+    # without alias
+    nose.tools.assert_equal(md.get_dx_max(include_alias=False), 
+        zip(vrefs_noalias, vmax_noalias))
+
+@testattr(stddist = True)
+def test_get_x_max():
+    """
+    Test xmlparser.ModelDescription.get_x_max method.
+    
+    """
+    vrefs = (5,)
+    vmax = (10.0,)
+        
+    vrefs_noalias = (5,)
+    vmax_noalias = (10.0,)
+    
+    # with alias
+    nose.tools.assert_equal(md.get_x_max(), zip(vrefs, vmax))
+    
+    # without alias
+    nose.tools.assert_equal(md.get_x_max(include_alias=False), 
+        zip(vrefs_noalias, vmax_noalias))
+
+@testattr(stddist = True)
+def test_get_u_max():
+    """
+    Test xmlparser.ModelDescription.get_u_max method.
+    
+    """
+    vrefs = (26,)
+    vmax = (None,)
+        
+    vrefs_noalias = (26,)
+    vmax_noalias = (None,)
+    
+    # with alias
+    nose.tools.assert_equal(md.get_u_max(), zip(vrefs, vmax))
+    
+    # without alias
+    nose.tools.assert_equal(md.get_u_max(include_alias=False), 
+        zip(vrefs_noalias, vmax_noalias))
+
+@testattr(stddist = True)
+def test_get_w_max():
+    """
+    Test xmlparser.ModelDescription.get_w_max method.
+    
+    """
+    vrefs = (2,)
+    vmax = (0.0,)
+        
+    vrefs_noalias = (2,)
+    vmax_noalias = (0.0,)
+    
+    # with alias
+    nose.tools.assert_equal(md.get_w_max(), zip(vrefs, vmax))
+    
+    # without alias
+    nose.tools.assert_equal(md.get_w_max(include_alias=False), 
+        zip(vrefs_noalias, vmax_noalias))
+
+@testattr(stddist = True)
+def test_get_p_opt_islinear():
+    """
+    Test xmlparser.ModelDescription.get_p_opt_islinear method.
+    
+    """
+    vrefs = (0, 7)
+    vlin = (True, True)
+        
+    vrefs_noalias = (0, 7)
+    vlin_noalias = (True, True)
+    
+    # with alias
+    nose.tools.assert_equal(md.get_p_opt_islinear(), zip(vrefs, vlin))
+    
+    # without alias
+    nose.tools.assert_equal(md.get_p_opt_islinear(include_alias=False), 
+        zip(vrefs_noalias, vlin_noalias))
+
+@testattr(stddist = True)
+def test_get_dx_islinear():
+    """
+    Test xmlparser.ModelDescription.get_dx_islinear method.
+    
+    """
+    vrefs = (8,)
+    vlin = (True,)
+        
+    vrefs_noalias = (8,)
+    vlin_noalias = (True,)
+    
+    # with alias
+    nose.tools.assert_equal(md.get_dx_islinear(), zip(vrefs, vlin))
+    
+    # without alias
+    nose.tools.assert_equal(md.get_dx_islinear(include_alias=False), 
+        zip(vrefs_noalias, vlin_noalias))
+
+@testattr(stddist = True)
+def test_get_x_islinear():
+    """
+    Test xmlparser.ModelDescription.get_x_islinear method.
+    
+    """
+    vrefs = (5,)
+    vlin = (False,)
+        
+    vrefs_noalias = (5,)
+    vlin_noalias = (False,)
+    
+    # with alias
+    nose.tools.assert_equal(md.get_x_islinear(), zip(vrefs, vlin))
+    
+    # without alias
+    nose.tools.assert_equal(md.get_x_islinear(include_alias=False), 
+        zip(vrefs_noalias, vlin_noalias))
+
+@testattr(stddist = True)
+def test_get_u_islinear():
+    """
+    Test xmlparser.ModelDescription.get_u_islinear method.
+    
+    """
+    vrefs = (26,)
+    vlin = (False,)
+        
+    vrefs_noalias = (26,)
+    vlin_noalias = (False,)
+    
+    # with alias
+    nose.tools.assert_equal(md.get_u_islinear(), zip(vrefs, vlin))
+    
+    # without alias
+    nose.tools.assert_equal(md.get_u_islinear(include_alias=False), 
+        zip(vrefs_noalias, vlin_noalias))
+
+@testattr(stddist = True)
+def test_get_w_islinear():
+    """
+    Test xmlparser.ModelDescription.get_w_islinear method.
+    
+    """
+    vrefs = (2,)
+    vlin = (None,)
+        
+    vrefs_noalias = (2,)
+    vlin_noalias = (None,)
+    
+    # with alias
+    nose.tools.assert_equal(md.get_w_islinear(), zip(vrefs, vlin))
+    
+    # without alias
+    nose.tools.assert_equal(md.get_w_islinear(include_alias=False), 
+        zip(vrefs_noalias, vlin_noalias))
+
+@testattr(stddist = True)
+def test_get_dx_linear_timed_variables():
+    """
+    Test xmlparser.ModelDescription.get_dx_linear_timed_variables method.
+    
+    """
+    lin_tps = [(8,[True])]
+        
+    lin_tps_noalias = [(8,[True])]
+    
+    # with alias
+    nose.tools.assert_equal(md.get_dx_linear_timed_variables(), lin_tps)
+    
+    # without alias
+    nose.tools.assert_equal(md.get_dx_linear_timed_variables(
+        include_alias=False), lin_tps_noalias)
+
+@testattr(stddist = True)
+def test_get_x_linear_timed_variables():
+    """
+    Test xmlparser.ModelDescription.get_x_linear_timed_variables method.
+    
+    """
+    lin_tps = [(5,[True, False])]
+        
+    lin_tps_noalias = [(5,[True, False])]
+    
+    # with alias
+    nose.tools.assert_equal(md.get_x_linear_timed_variables(), lin_tps)
+    
+    # without alias
+    nose.tools.assert_equal(md.get_x_linear_timed_variables(
+        include_alias=False), lin_tps_noalias)
+
+@testattr(stddist = True)
+def test_get_u_linear_timed_variables():
+    """
+    Test xmlparser.ModelDescription.get_u_linear_timed_variables method.
+    
+    """
+    lin_tps = [(26,[True])]
+        
+    lin_tps_noalias = [(26,[True])]
+    
+    # with alias
+    nose.tools.assert_equal(md.get_u_linear_timed_variables(), lin_tps)
+    
+    # without alias
+    nose.tools.assert_equal(md.get_u_linear_timed_variables(
+        include_alias=False), lin_tps_noalias)
+
+@testattr(stddist = True)
+def test_get_w_linear_timed_variables():
+    """
+    Test xmlparser.ModelDescription.get_w_linear_timed_variables method.
+    
+    """
+    lin_tps = [(2,[])]
+        
+    lin_tps_noalias = [(2,[])]
+    
+    # with alias
+    nose.tools.assert_equal(md.get_w_linear_timed_variables(), lin_tps)
+    
+    # without alias
+    nose.tools.assert_equal(md.get_w_linear_timed_variables(
+        include_alias=False), lin_tps_noalias)
+        
+@testattr(stddist = True)
+def test_get_p_opt_value_reference():
+    """
+    Test xmlparser.ModelDescription.get_p_opt_value_reference method.
+    
+    """
+    
+    vrefs = [0,7]
+    nose.tools.assert_equal(md.get_p_opt_value_reference(), vrefs)
+    
+        
+@testattr(stddist = True)
+def test_get_external_libraries():
+    """
+    Test xmlparser.ModelDescription.get_external_libraries method.
+    """
+    
+    extlib = ['addNumbers1']
+    nose.tools.assert_equal(md.get_external_libraries(), extlib)
+
+@testattr(stddist = True)
+def test_get_external_includes():
+    """
+    Test xmlparser.ModelDescription.get_external_includes method.
+    """
+    
+    extincl = ['#include \"addNumbers1.h\"']
+    nose.tools.assert_equal(md.get_external_includes(), extincl)
+    
+@testattr(stddist = True)
+def test_get_external_lib_dirs():
+    """
+    Test xmlparser.ModelDescription.get_external_lib_dirs method.
+    """
+    
+    extlibdirs = ['/Library']
+    nose.tools.assert_equal(md.get_external_lib_dirs(), extlibdirs)
+    
+@testattr(stddist = True)
+def test_get_external_incl_dirs():
+    """
+    Test xmlparser.ModelDescription.get_external_incl_dirs method.
+    """
+    
+    extincldirs = ['/Include']
+    nose.tools.assert_equal(md.get_external_incl_dirs(), extincldirs)
+
+@testattr(stddist = True)
+def test_get_opt_starttime():
+    """
+    Test xmlparser.ModelDescription.get_opt_starttime method.
+    
+    """
+    starttime = 0.0
+    
+    nose.tools.assert_equal(md.get_opt_starttime(), starttime)
+    
+@testattr(stddist = True)
+def test_get_opt_finaltime():
+    """
+    Test xmlparser.ModelDescription.get_opt_finaltime method.
+    
+    """
+    finaltime = 150.0
+    
+    nose.tools.assert_equal(md.get_opt_finaltime(), finaltime)
+    
+@testattr(stddist = True)
+def test_get_opt_starttime_free():
+    """
+    Test xmlparser.ModelDescription.get_opt_starttime_free method.
+    
+    """
+    starttime_free = False
+    
+    nose.tools.assert_equal(md.get_opt_starttime_free(), starttime_free)
+    
+@testattr(stddist = True)
+def test_get_opt_finaltime_free():
+    """
+    Test xmlparser.ModelDescription.get_opt_finaltime_free method.
+    
+    """
+    finaltime_free = False
+    
+    nose.tools.assert_equal(md.get_opt_finaltime_free(), finaltime_free)
+    
+@testattr(stddist = True)
+def test_get_opt_timepoints():
+    """
+    Test xmlparser.ModelDescription.get_opt_timepoints method.
+    
+    """
+    timepoints = [150.0, 150.0, 150.0]
+    
+    nose.tools.assert_equal(md.get_opt_timepoints(), timepoints)

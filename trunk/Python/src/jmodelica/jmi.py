@@ -445,7 +445,8 @@ class Model(object):
         # set start attributes
         xml_file=libname+'.xml' 
         # assumes libname is name of model and xmlfile is located in the same dir as the dll
-        self._set_XMLDoc(xmlparser.XMLDoc(os.path.join(path,xml_file)))
+        self._set_XMLDoc(xmlparser.ModelDescription(os.path.join(path,xml_file)))
+        
         self._set_scaling_factors()
         self._set_start_attributes()
 
@@ -462,8 +463,7 @@ class Model(object):
         
     def _is_optimica(self):
         """ Find out if model is compiled with OptimicaCompiler. """
-        xmldoc = self._get_XMLDoc()
-        return xmldoc.get_starttime()!=None        
+        return self._get_XMLDoc().get_opt_starttime()!=None        
 
     def _set_scaling_factors(self):
         """Load metadata saved in XML files.
@@ -473,22 +473,31 @@ class Model(object):
         
         """
         xmldoc = self._get_XMLDoc()
-        nominal_attr = xmldoc.get_nominal_attributes(include_alias=False)
+        nominal_attr = xmldoc.get_variable_nominal_attributes(
+            include_alias=False)
         
         #Real variables vector
         sc = self.get_variable_scaling_factors()
         
-        keys = nominal_attr.keys()
-        keys.sort(key=str)
-
-        for key in keys:
-            value_ref = xmldoc.get_valueref(key)
-            value = nominal_attr.get(key)
+        for attr in nominal_attr:
+            (i, ptype) = _translate_value_ref(attr[0])
             
-            (i, ptype) = _translate_value_ref(value_ref)
-            if(ptype == 0):
+            value = attr[1]
+            if(ptype == 0 and value != None):
                 # Only set scaling factors for Reals
                 sc[i] = value
+        
+        #keys = nominal_attr.keys()
+        #keys.sort(key=str)
+
+        #for key in keys:
+            #value_ref = xmldoc.get_valueref(key)
+            #value = nominal_attr.get(key)
+            
+            #(i, ptype) = _translate_value_ref(value_ref)
+            #if(ptype == 0):
+                ## Only set scaling factors for Reals
+                #sc[i] = value
               
     def _set_dependent_parameters(self):
         """
@@ -522,7 +531,7 @@ class Model(object):
         sc = self.jmimodel.get_variable_scaling_factors()
 
         # p_opt: free variables
-        values = xmldoc.get_p_opt_start_attributes(include_alias=False)
+        startattributes = xmldoc.get_p_opt_start(include_alias=False)
         n_p_opt = self.jmimodel.opt_get_n_p_opt()
         if n_p_opt > 0:
             p_opt_indices = N.zeros(n_p_opt, dtype=int)
@@ -530,60 +539,123 @@ class Model(object):
             self.jmimodel.opt_get_p_opt_indices(p_opt_indices)
             p_opt_indices = p_opt_indices.tolist()
             
-            for name in values.keys():
-                value_ref = xmldoc.get_valueref(name)
-                (z_i, ptype) = _translate_value_ref(value_ref)
-                i_pi = z_i - self._offs_real_pi.value
-                i_pi_opt = p_opt_indices.index(i_pi)
-                if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
-                    p_opt_start[i_pi_opt] = values.get(name)/sc[z_i]
-                else:
-                    p_opt_start[i_pi_opt] = values.get(name)
-        
+            for attr in startattributes():
+                #value_ref = xmldoc.get_valueref(name)
+                if attr[1] != None:
+                    (z_i, ptype) = _translate_value_ref(attr[0])
+                    i_pi = z_i - self._offs_real_pi.value
+                    i_pi_opt = p_opt_indices.index(i_pi)
+                    if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                        p_opt_start[i_pi_opt] = attr[1]/sc[z_i]
+                    else:
+                        #p_opt_start[i_pi_opt] = values.get(name)
+                        p_opt_start[i_pi_opt] = attr[1]
+
+            #for name in values.keys():
+                #value_ref = xmldoc.get_valueref(name)
+                #(z_i, ptype) = _translate_value_ref(value_ref)
+                #i_pi = z_i - self._offs_real_pi.value
+                #i_pi_opt = p_opt_indices.index(i_pi)
+                #if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                    #p_opt_start[i_pi_opt] = values.get(name)/sc[z_i]
+                #else:
+                    #p_opt_start[i_pi_opt] = values.get(name)
+
         # dx: derivative
-        values = xmldoc.get_dx_start_attributes(include_alias=False)
-        for name in values.keys():
-            value_ref = xmldoc.get_valueref(name)
-            (z_i, ptype) = _translate_value_ref(value_ref)
-            i_dx = z_i - self._offs_real_dx.value
-            if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
-                dx_start[i_dx] = values.get(name)/sc[z_i]
-            else:
-                dx_start[i_dx] = values.get(name)
+        startattributes = xmldoc.get_dx_start(include_alias=False)
+        for attr in startattributes:
+            if attr[1] != None:
+                #value_ref = xmldoc.get_valueref(name)
+                (z_i, ptype) = _translate_value_ref(attr[0])
+                i_dx = z_i - self._offs_real_dx.value
+                if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                    dx_start[i_dx] = attr[1]/sc[z_i]
+                else:
+                    dx_start[i_dx] = attr[1]
+        
+        ## dx: derivative
+        #values = xmldoc.get_dx_start_attributes(include_alias=False)
+        #for name in values.keys():
+            #value_ref = xmldoc.get_valueref(name)
+            #(z_i, ptype) = _translate_value_ref(value_ref)
+            #i_dx = z_i - self._offs_real_dx.value
+            #if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                #dx_start[i_dx] = values.get(name)/sc[z_i]
+            #else:
+                #dx_start[i_dx] = values.get(name)
         
         # x: differentiate
-        values = xmldoc.get_x_start_attributes(include_alias=False)
-        for name in values.keys():
-            value_ref = xmldoc.get_valueref(name)
-            (z_i, ptype) = _translate_value_ref(value_ref)
-            i_x = z_i - self._offs_real_x.value
-            if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
-                x_start[i_x] = values.get(name)/sc[z_i]
-            else:
-                x_start[i_x] = values.get(name)
+        startattributes = xmldoc.get_x_start(include_alias=False)
+        for attr in startattributes:
+            if attr[1] != None:
+                #value_ref = xmldoc.get_valueref(name)
+                (z_i, ptype) = _translate_value_ref(attr[0])
+                i_x = z_i - self._offs_real_x.value
+                if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                    x_start[i_x] = attr[1]/sc[z_i]
+                else:
+                    x_start[i_x] = attr[1]
+
+        ## x: differentiate
+        #values = xmldoc.get_x_start_attributes(include_alias=False)
+        #for name in values.keys():
+            #value_ref = xmldoc.get_valueref(name)
+            #(z_i, ptype) = _translate_value_ref(value_ref)
+            #i_x = z_i - self._offs_real_x.value
+            #if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                #x_start[i_x] = values.get(name)/sc[z_i]
+            #else:
+                #x_start[i_x] = values.get(name)
             
         # u: input
-        values = xmldoc.get_u_start_attributes(include_alias=False)
-        for name in values.keys():
-            value_ref = xmldoc.get_valueref(name)
-            (z_i, ptype) = _translate_value_ref(value_ref)
-            if ptype==0: # Only Reals supported here
-                i_u = z_i - self._offs_real_u.value
-                if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
-                    u_start[i_u] = values.get(name)/sc[z_i]
-                else:
-                    u_start[i_u] = values.get(name)
+        startattributes = xmldoc.get_u_start(include_alias=False)
+        for attr in startattributes:
+            if attr[1] != None:
+                #value_ref = xmldoc.get_valueref(name)
+                (z_i, ptype) = _translate_value_ref(attr[0])
+                if ptype==0: # Only Reals supported here
+                    i_u = z_i - self._offs_real_u.value
+                    if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                        u_start[i_u] = attr[1]/sc[z_i]
+                    else:
+                        u_start[i_u] = attr[1]
+
+        ## u: input
+        #values = xmldoc.get_u_start_attributes(include_alias=False)
+        #for name in values.keys():
+            #value_ref = xmldoc.get_valueref(name)
+            #(z_i, ptype) = _translate_value_ref(value_ref)
+            #if ptype==0: # Only Reals supported here
+                #i_u = z_i - self._offs_real_u.value
+                #if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                    #u_start[i_u] = values.get(name)/sc[z_i]
+                #else:
+                    #u_start[i_u] = values.get(name)
+
         
         # w: algebraic
-        values = xmldoc.get_w_start_attributes(include_alias=False)
-        for name in values.keys():
-            value_ref = xmldoc.get_valueref(name)
-            (z_i, ptype) = _translate_value_ref(value_ref)
-            i_w = z_i - self._offs_real_w.value
-            if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
-                w_start[i_w] = values.get(name)/sc[z_i]
-            else:
-                w_start[i_w] = values.get(name)
+        startattributes = xmldoc.get_w_start(include_alias=False)
+        for attr in startattributes:
+            if attr[1]:
+                #value_ref = xmldoc.get_valueref(name)
+                (z_i, ptype) = _translate_value_ref(attr[0])
+                i_w = z_i - self._offs_real_w.value
+                if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                    w_start[i_w] = attr[1]/sc[z_i]
+                else:
+                    w_start[i_w] = attr[1]
+
+        ## w: algebraic
+        #values = xmldoc.get_w_start_attributes(include_alias=False)
+        #for name in values.keys():
+            #value_ref = xmldoc.get_valueref(name)
+            #(z_i, ptype) = _translate_value_ref(value_ref)
+            #i_w = z_i - self._offs_real_w.value
+            #if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                #w_start[i_w] = values.get(name)/sc[z_i]
+            #else:
+                #w_start[i_w] = values.get(name)
+
                 
     def _set_initial_values(self, p_opt_init, dx_init, x_init, u_init, w_init):
         
@@ -604,7 +676,7 @@ class Model(object):
         sc = self.jmimodel.get_variable_scaling_factors()
 
         # p_opt: free variables
-        values = xmldoc.get_p_opt_initial_guess_values(include_alias=False)
+        initialguesses = xmldoc.get_p_opt_initial_guess(include_alias=False)
         n_p_opt = self.jmimodel.opt_get_n_p_opt()
         if n_p_opt > 0:
             p_opt_indices = N.zeros(n_p_opt, dtype=int)
@@ -612,60 +684,131 @@ class Model(object):
             self.jmimodel.opt_get_p_opt_indices(p_opt_indices)
             p_opt_indices = p_opt_indices.tolist()
             
-            for name in values.keys():
-                value_ref = xmldoc.get_valueref(name)
-                (z_i, ptype) = _translate_value_ref(value_ref)
-                i_pi = z_i - self._offs_real_pi.value
-                i_pi_opt = p_opt_indices.index(i_pi)
-                if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
-                    p_opt_init[i_pi_opt] = values.get(name)/sc[z_i]
-                else:
-                    p_opt_init[i_pi_opt] = values.get(name)
+            for guess in initialguesses:
+                if guess[1] != None:
+                    #value_ref = xmldoc.get_valueref(name)
+                    (z_i, ptype) = _translate_value_ref(guess[0])
+                    i_pi = z_i - self._offs_real_pi.value
+                    i_pi_opt = p_opt_indices.index(i_pi)
+                    if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                        p_opt_init[i_pi_opt] = guess[1]/sc[z_i]
+                    else:
+                        p_opt_init[i_pi_opt] = guess[1]
+
+        ## p_opt: free variables
+        #values = xmldoc.get_p_opt_initial_guess_values(include_alias=False)
+        #n_p_opt = self.jmimodel.opt_get_n_p_opt()
+        #if n_p_opt > 0:
+            #p_opt_indices = N.zeros(n_p_opt, dtype=int)
         
+            #self.jmimodel.opt_get_p_opt_indices(p_opt_indices)
+            #p_opt_indices = p_opt_indices.tolist()
+            
+            #for name in values.keys():
+                #value_ref = xmldoc.get_valueref(name)
+                #(z_i, ptype) = _translate_value_ref(value_ref)
+                #i_pi = z_i - self._offs_real_pi.value
+                #i_pi_opt = p_opt_indices.index(i_pi)
+                #if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                    #p_opt_init[i_pi_opt] = values.get(name)/sc[z_i]
+                #else:
+                    #p_opt_init[i_pi_opt] = values.get(name)
+
         # dx: derivative
-        values = xmldoc.get_dx_initial_guess_values(include_alias=False)
-        for name in values.keys():
-            value_ref = xmldoc.get_valueref(name)
-            (z_i, ptype) = _translate_value_ref(value_ref)
-            i_dx = z_i - self._offs_real_dx.value
-            if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
-                dx_init[i_dx] = values.get(name)/sc[z_i]
-            else:
-                dx_init[i_dx] = values.get(name)
+        initialguesses = xmldoc.get_dx_initial_guess(include_alias=False)
+        for guess in initialguesses:
+            if guess[1] != None:
+                #value_ref = xmldoc.get_valueref(name)
+                (z_i, ptype) = _translate_value_ref(guess[0])
+                i_dx = z_i - self._offs_real_dx.value
+                if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                    dx_init[i_dx] = guess[1]/sc[z_i]
+                else:
+                    dx_init[i_dx] = guess[1]
+        
+        ## dx: derivative
+        #values = xmldoc.get_dx_initial_guess_values(include_alias=False)
+        #for name in values.keys():
+            #value_ref = xmldoc.get_valueref(name)
+            #(z_i, ptype) = _translate_value_ref(value_ref)
+            #i_dx = z_i - self._offs_real_dx.value
+            #if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                #dx_init[i_dx] = values.get(name)/sc[z_i]
+            #else:
+                #dx_init[i_dx] = values.get(name)
         
         # x: differentiate
-        values = xmldoc.get_x_initial_guess_values(include_alias=False)
-        for name in values.keys():
-            value_ref = xmldoc.get_valueref(name)
-            (z_i, ptype) = _translate_value_ref(value_ref)
-            i_x = z_i - self._offs_real_x.value
-            if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
-                x_init[i_x] = values.get(name)/sc[z_i]
-            else:
-                x_init[i_x] = values.get(name)
+        initialguesses = xmldoc.get_x_initial_guess(include_alias=False)
+        for guess in initialguesses:
+            if guess[1] != None:
+                #value_ref = xmldoc.get_valueref(name)
+                (z_i, ptype) = _translate_value_ref(guess[0])
+                i_x = z_i - self._offs_real_x.value
+                if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                    x_init[i_x] = guess[1]/sc[z_i]
+                else:
+                    x_init[i_x] = guess[1]
+
+        ## x: differentiate
+        #values = xmldoc.get_x_initial_guess_values(include_alias=False)
+        #for name in values.keys():
+            #value_ref = xmldoc.get_valueref(name)
+            #(z_i, ptype) = _translate_value_ref(value_ref)
+            #i_x = z_i - self._offs_real_x.value
+            #if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                #x_init[i_x] = values.get(name)/sc[z_i]
+            #else:
+                #x_init[i_x] = values.get(name)
+
             
         # u: input
-        values = xmldoc.get_u_initial_guess_values(include_alias=False)
-        for name in values.keys():
-            value_ref = xmldoc.get_valueref(name)
-            (z_i, ptype) = _translate_value_ref(value_ref)
-            if ptype==0: # Only Reals supported here
-                i_u = z_i - self._offs_real_u.value
-                if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
-                    u_init[i_u] = values.get(name)/sc[z_i]
-                else:
-                    u_init[i_u] = values.get(name)
+        initialguesses = xmldoc.get_u_initial_guess(include_alias=False)
+        for guess in initialguesses:
+            if guess[1] != None:
+                #value_ref = xmldoc.get_valueref(name)
+                (z_i, ptype) = _translate_value_ref(guess[0])
+                if ptype==0: # Only Reals supported here
+                    i_u = z_i - self._offs_real_u.value
+                    if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                        u_init[i_u] = guess[1]/sc[z_i]
+                    else:
+                        u_init[i_u] = guess[1]
+
+        ## u: input
+        #values = xmldoc.get_u_initial_guess_values(include_alias=False)
+        #for name in values.keys():
+            #value_ref = xmldoc.get_valueref(name)
+            #(z_i, ptype) = _translate_value_ref(value_ref)
+            #if ptype==0: # Only Reals supported here
+                #i_u = z_i - self._offs_real_u.value
+                #if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                    #u_init[i_u] = values.get(name)/sc[z_i]
+                #else:
+                    #u_init[i_u] = values.get(name)
+
         
         # w: algebraic
-        values = xmldoc.get_w_initial_guess_values(include_alias=False)
-        for name in values.keys():
-            value_ref = xmldoc.get_valueref(name)
-            (z_i, ptype) = _translate_value_ref(value_ref)
-            i_w = z_i - self._offs_real_w.value
-            if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
-                w_init[i_w] = values.get(name)/sc[z_i]
-            else:
-                w_init[i_w] = values.get(name)
+        initialguesses = xmldoc.get_w_initial_guess(include_alias=False)
+        for guess in initialguesses:
+            if guess[1] != None:
+                #value_ref = xmldoc.get_valueref(name)
+                (z_i, ptype) = _translate_value_ref(guess[0])
+                i_w = z_i - self._offs_real_w.value
+                if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                    w_init[i_w] = guess[1]/sc[z_i]
+                else:
+                    w_init[i_w] = guess[1]
+
+        ## w: algebraic
+        #values = xmldoc.get_w_initial_guess_values(include_alias=False)
+        #for name in values.keys():
+            #value_ref = xmldoc.get_valueref(name)
+            #(z_i, ptype) = _translate_value_ref(value_ref)
+            #i_w = z_i - self._offs_real_w.value
+            #if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                #w_init[i_w] = values.get(name)/sc[z_i]
+            #else:
+                #w_init[i_w] = values.get(name)
 
     def _set_lb_values(self, p_opt_lb, dx_lb, x_lb, u_lb, w_lb):
         
@@ -686,7 +829,7 @@ class Model(object):
         sc = self.jmimodel.get_variable_scaling_factors()
 
         # p_opt: free variables
-        values = xmldoc.get_p_opt_lb_values(include_alias=False)
+        lowerbounds = xmldoc.get_p_opt_min(include_alias=False)
         n_p_opt = self.jmimodel.opt_get_n_p_opt()
         if n_p_opt > 0:
             p_opt_indices = N.zeros(n_p_opt, dtype=int)
@@ -694,60 +837,134 @@ class Model(object):
             self.jmimodel.opt_get_p_opt_indices(p_opt_indices)
             p_opt_indices = p_opt_indices.tolist()
             
-            for name in values.keys():
-                value_ref = xmldoc.get_valueref(name)
-                (z_i, ptype) = _translate_value_ref(value_ref)
-                i_pi = z_i - self._offs_real_pi.value
-                i_pi_opt = p_opt_indices.index(i_pi)
-                if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
-                    p_opt_lb[i_pi_opt] = values.get(name)/sc[z_i]
-                else:
-                    p_opt_lb[i_pi_opt] = values.get(name)
+            for lb in lowerbounds:
+                if lb[1] != None:
+                    #value_ref = xmldoc.get_valueref(name)
+                    (z_i, ptype) = _translate_value_ref(lb[0])
+                    i_pi = z_i - self._offs_real_pi.value
+                    i_pi_opt = p_opt_indices.index(i_pi)
+                    if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                        p_opt_lb[i_pi_opt] = lb[1]/sc[z_i]
+                    else:
+                        p_opt_lb[i_pi_opt] = lb[1]
+
+
+        ## p_opt: free variables
+        #values = xmldoc.get_p_opt_lb_values(include_alias=False)
+        #n_p_opt = self.jmimodel.opt_get_n_p_opt()
+        #if n_p_opt > 0:
+            #p_opt_indices = N.zeros(n_p_opt, dtype=int)
+        
+            #self.jmimodel.opt_get_p_opt_indices(p_opt_indices)
+            #p_opt_indices = p_opt_indices.tolist()
+            
+            #for name in values.keys():
+                #value_ref = xmldoc.get_valueref(name)
+                #(z_i, ptype) = _translate_value_ref(value_ref)
+                #i_pi = z_i - self._offs_real_pi.value
+                #i_pi_opt = p_opt_indices.index(i_pi)
+                #if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                    #p_opt_lb[i_pi_opt] = values.get(name)/sc[z_i]
+                #else:
+                    #p_opt_lb[i_pi_opt] = values.get(name)
 
         # dx: derivative
-        values = xmldoc.get_dx_lb_values(include_alias=False)
-        for name in values.keys():
-            value_ref = xmldoc.get_valueref(name)
-            (z_i, ptype) = _translate_value_ref(value_ref)
-            i_dx = z_i - self._offs_real_dx.value
-            if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
-                dx_lb[i_dx] = values.get(name)/sc[z_i]
-            else:
-                dx_lb[i_dx] = values.get(name)
-        
-        # x: differentiate
-        values = xmldoc.get_x_lb_values(include_alias=False)
-        for name in values.keys():
-            value_ref = xmldoc.get_valueref(name)
-            (z_i, ptype) = _translate_value_ref(value_ref)
-            i_x = z_i - self._offs_real_x.value
-            if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
-                x_lb[i_x] = values.get(name)/sc[z_i]
-            else:
-                x_lb[i_x] = values.get(name)
-            
-        # u: input
-        values = xmldoc.get_u_lb_values(include_alias=False)
-        for name in values.keys():
-            value_ref = xmldoc.get_valueref(name)
-            (z_i, ptype) = _translate_value_ref(value_ref)
-            if ptype==0: # Only reals supported here
-                i_u = z_i - self._offs_real_u.value
+        lowerbounds = xmldoc.get_dx_min(include_alias=False)
+        for lb in lowerbounds:
+            if lb[1] != None:
+                #value_ref = xmldoc.get_valueref(name)
+                (z_i, ptype) = _translate_value_ref(lb[0])
+                i_dx = z_i - self._offs_real_dx.value
                 if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
-                    u_lb[i_u] = values.get(name)/sc[z_i]
+                    dx_lb[i_dx] = lb[1]/sc[z_i]
                 else:
-                    u_lb[i_u] = values.get(name)
+                    dx_lb[i_dx] = lb[1]
+
+
+        ## dx: derivative
+        #values = xmldoc.get_dx_lb_values(include_alias=False)
+        #for name in values.keys():
+            #value_ref = xmldoc.get_valueref(name)
+            #(z_i, ptype) = _translate_value_ref(value_ref)
+            #i_dx = z_i - self._offs_real_dx.value
+            #if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                #dx_lb[i_dx] = values.get(name)/sc[z_i]
+            #else:
+                #dx_lb[i_dx] = values.get(name)
+
+        # x: differentiate
+        lowerbounds = xmldoc.get_x_min(include_alias=False)
+        for lb in lowerbounds:
+            if lb[1] != None:
+                #value_ref = xmldoc.get_valueref(name)
+                (z_i, ptype) = _translate_value_ref(lb[0])
+                i_x = z_i - self._offs_real_x.value
+                if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                    x_lb[i_x] = lb[1]/sc[z_i]
+                else:
+                    x_lb[i_x] = lb[1]
+
         
+        ## x: differentiate
+        #values = xmldoc.get_x_lb_values(include_alias=False)
+        #for name in values.keys():
+            #value_ref = xmldoc.get_valueref(name)
+            #(z_i, ptype) = _translate_value_ref(value_ref)
+            #i_x = z_i - self._offs_real_x.value
+            #if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                #x_lb[i_x] = values.get(name)/sc[z_i]
+            #else:
+                #x_lb[i_x] = values.get(name)
+
+        # u: input
+        lowerbounds = xmldoc.get_u_min(include_alias=False)
+        for lb in lowerbounds:
+            if lb[1] != None:
+                #value_ref = xmldoc.get_valueref(name)
+                (z_i, ptype) = _translate_value_ref(lb[0])
+                if ptype==0: # Only reals supported here
+                    i_u = z_i - self._offs_real_u.value
+                    if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                        u_lb[i_u] = lb[1]/sc[z_i]
+                    else:
+                        u_lb[i_u] = lb[1]
+
+            
+        ## u: input
+        #values = xmldoc.get_u_lb_values(include_alias=False)
+        #for name in values.keys():
+            #value_ref = xmldoc.get_valueref(name)
+            #(z_i, ptype) = _translate_value_ref(value_ref)
+            #if ptype==0: # Only reals supported here
+                #i_u = z_i - self._offs_real_u.value
+                #if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                    #u_lb[i_u] = values.get(name)/sc[z_i]
+                #else:
+                    #u_lb[i_u] = values.get(name)
+
         # w: algebraic
-        values = xmldoc.get_w_lb_values(include_alias=False)
-        for name in values.keys():
-            value_ref = xmldoc.get_valueref(name)
-            (z_i, ptype) = _translate_value_ref(value_ref)
-            i_w = z_i - self._offs_real_w.value
-            if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
-                w_lb[i_w] = values.get(name)/sc[z_i]
-            else:
-                w_lb[i_w] = values.get(name)
+        lowerbounds = xmldoc.get_w_min(include_alias=False)
+        for lb in lowerbounds:
+            if lb[1] != None:
+                #value_ref = xmldoc.get_valueref(name)
+                (z_i, ptype) = _translate_value_ref(lb[0])
+                i_w = z_i - self._offs_real_w.value
+                if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                    w_lb[i_w] = lb[1]/sc[z_i]
+                else:
+                    w_lb[i_w] = lb[1]
+
+        
+        ## w: algebraic
+        #values = xmldoc.get_w_lb_values(include_alias=False)
+        #for name in values.keys():
+            #value_ref = xmldoc.get_valueref(name)
+            #(z_i, ptype) = _translate_value_ref(value_ref)
+            #i_w = z_i - self._offs_real_w.value
+            #if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                #w_lb[i_w] = values.get(name)/sc[z_i]
+            #else:
+                #w_lb[i_w] = values.get(name)
 
     def _set_ub_values(self, p_opt_ub, dx_ub, x_ub, u_ub, w_ub):
         
@@ -767,7 +984,7 @@ class Model(object):
         sc = self.jmimodel.get_variable_scaling_factors()
 
         # p_opt: free variables
-        values = xmldoc.get_p_opt_ub_values(include_alias=False)
+        upperbounds = xmldoc.get_p_opt_max(include_alias=False)
         n_p_opt = self.jmimodel.opt_get_n_p_opt()
         if n_p_opt > 0:
             p_opt_indices = N.zeros(n_p_opt, dtype=int)
@@ -775,60 +992,129 @@ class Model(object):
             self.jmimodel.opt_get_p_opt_indices(p_opt_indices)
             p_opt_indices = p_opt_indices.tolist()
             
-            for name in values.keys():
-                value_ref = xmldoc.get_valueref(name)
-                (z_i, ptype) = _translate_value_ref(value_ref)
-                i_pi = z_i - self._offs_real_pi.value
-                i_pi_opt = p_opt_indices.index(i_pi)
-                if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
-                    p_opt_ub[i_pi_opt] = values.get(name)/sc[z_i]
-                else:
-                    p_opt_ub[i_pi_opt] = values.get(name)
+            for ub in upperbounds:
+                if ub[1] != None:
+                    #value_ref = xmldoc.get_valueref(name)
+                    (z_i, ptype) = _translate_value_ref(ub[0])
+                    i_pi = z_i - self._offs_real_pi.value
+                    i_pi_opt = p_opt_indices.index(i_pi)
+                    if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                        p_opt_ub[i_pi_opt] = ub[1]/sc[z_i]
+                    else:
+                        p_opt_ub[i_pi_opt] = ub[1]
+
+        ## p_opt: free variables
+        #values = xmldoc.get_p_opt_ub_values(include_alias=False)
+        #n_p_opt = self.jmimodel.opt_get_n_p_opt()
+        #if n_p_opt > 0:
+            #p_opt_indices = N.zeros(n_p_opt, dtype=int)
+        
+            #self.jmimodel.opt_get_p_opt_indices(p_opt_indices)
+            #p_opt_indices = p_opt_indices.tolist()
+            
+            #for name in values.keys():
+                #value_ref = xmldoc.get_valueref(name)
+                #(z_i, ptype) = _translate_value_ref(value_ref)
+                #i_pi = z_i - self._offs_real_pi.value
+                #i_pi_opt = p_opt_indices.index(i_pi)
+                #if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                    #p_opt_ub[i_pi_opt] = values.get(name)/sc[z_i]
+                #else:
+                    #p_opt_ub[i_pi_opt] = values.get(name)
 
         # dx: derivative
-        values = xmldoc.get_dx_ub_values(include_alias=False)
-        for name in values.keys():
-            value_ref = xmldoc.get_valueref(name)
-            (z_i, ptype) = _translate_value_ref(value_ref)
-            i_dx = z_i - self._offs_real_dx.value
-            if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
-                dx_ub[i_dx] = values.get(name)/sc[z_i]
-            else:
-                dx_ub[i_dx] = values.get(name)
-        
+        upperbounds = xmldoc.get_dx_max(include_alias=False)
+        for ub in upperbounds:
+            if ub[1] != None:
+                #value_ref = xmldoc.get_valueref(name)
+                (z_i, ptype) = _translate_value_ref(ub[0])
+                i_dx = z_i - self._offs_real_dx.value
+                if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                    dx_ub[i_dx] = ub[1]/sc[z_i]
+                else:
+                    dx_ub[i_dx] = ub[1]
+
+        ## dx: derivative
+        #values = xmldoc.get_dx_ub_values(include_alias=False)
+        #for name in values.keys():
+            #value_ref = xmldoc.get_valueref(name)
+            #(z_i, ptype) = _translate_value_ref(value_ref)
+            #i_dx = z_i - self._offs_real_dx.value
+            #if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                #dx_ub[i_dx] = values.get(name)/sc[z_i]
+            #else:
+                #dx_ub[i_dx] = values.get(name)
+
         # x: differentiate
-        values = xmldoc.get_x_ub_values(include_alias=False)
-        for name in values.keys():
-            value_ref = xmldoc.get_valueref(name)
-            (z_i, ptype) = _translate_value_ref(value_ref)
-            i_x = z_i - self._offs_real_x.value
-            if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
-                x_ub[i_x] = values.get(name)/sc[z_i]
-            else:
-                x_ub[i_x] = values.get(name)
+        upperbounds = xmldoc.get_x_max(include_alias=False)
+        for ub in upperbounds:
+            if ub[1] != None:
+                #value_ref = xmldoc.get_valueref(name)
+                (z_i, ptype) = _translate_value_ref(ub[0])
+                i_x = z_i - self._offs_real_x.value
+                if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                    x_ub[i_x] = ub[1]/sc[z_i]
+                else:
+                    x_ub[i_x] = ub[1]
+
+        ## x: differentiate
+        #values = xmldoc.get_x_ub_values(include_alias=False)
+        #for name in values.keys():
+            #value_ref = xmldoc.get_valueref(name)
+            #(z_i, ptype) = _translate_value_ref(value_ref)
+            #i_x = z_i - self._offs_real_x.value
+            #if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                #x_ub[i_x] = values.get(name)/sc[z_i]
+            #else:
+                #x_ub[i_x] = values.get(name)
             
         # u: input
-        values = xmldoc.get_u_ub_values(include_alias=False)
-        for name in values.keys():
-            value_ref = xmldoc.get_valueref(name)
-            (z_i, ptype) = _translate_value_ref(value_ref)
-            if ptype==0: # Only Reals supported here
-                i_u = z_i - self._offs_real_u.value
-                if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
-                    u_ub[i_u] = values.get(name)/sc[z_i]
-                else:
-                    u_ub[i_u] = values.get(name)
-        
+        upperbounds = xmldoc.get_u_max(include_alias=False)
+        for ub in upperbounds:
+            if ub[1] != None:
+                #value_ref = xmldoc.get_valueref(name)
+                (z_i, ptype) = _translate_value_ref(ub[0])
+                if ptype==0: # Only Reals supported here
+                    i_u = z_i - self._offs_real_u.value
+                    if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                        u_ub[i_u] = ub[1]/sc[z_i]
+                    else:
+                        u_ub[i_u] = ub[1]
+            
+        ## u: input
+        #values = xmldoc.get_u_ub_values(include_alias=False)
+        #for name in values.keys():
+            #value_ref = xmldoc.get_valueref(name)
+            #(z_i, ptype) = _translate_value_ref(value_ref)
+            #if ptype==0: # Only Reals supported here
+                #i_u = z_i - self._offs_real_u.value
+                #if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                    #u_ub[i_u] = values.get(name)/sc[z_i]
+                #else:
+                    #u_ub[i_u] = values.get(name)
+                    
         # w: algebraic
-        values = xmldoc.get_w_ub_values(include_alias=False)
-        for name in values.keys():
-            value_ref = xmldoc.get_valueref(name)
-            (z_i, ptype) = _translate_value_ref(value_ref)
-            i_w = z_i - self._offs_real_w.value
-            if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
-                w_ub[i_w] = values.get(name)/sc[z_i]
-            else:
-                w_ub[i_w] = values.get(name)
+        upperbounds = xmldoc.get_w_max(include_alias=False)
+        for ub in upperbounds:
+            if ub[1] != None:
+                #value_ref = xmldoc.get_valueref(name)
+                (z_i, ptype) = _translate_value_ref(ub[0])
+                i_w = z_i - self._offs_real_w.value
+                if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                    w_ub[i_w] = ub[1]/sc[z_i]
+                else:
+                    w_ub[i_w] = ub[1]
+        
+        ## w: algebraic
+        #values = xmldoc.get_w_ub_values(include_alias=False)
+        #for name in values.keys():
+            #value_ref = xmldoc.get_valueref(name)
+            #(z_i, ptype) = _translate_value_ref(value_ref)
+            #i_w = z_i - self._offs_real_w.value
+            #if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0:
+                #w_ub[i_w] = values.get(name)/sc[z_i]
+            #else:
+                #w_ub[i_w] = values.get(name)
 
     def _set_lin_values(self, p_opt_lin, dx_lin, x_lin, u_lin, w_lin, dx_tp_lin, x_tp_lin, u_tp_lin, w_tp_lin):
         
@@ -860,9 +1146,9 @@ class Model(object):
         
         
         xmldoc = self._get_XMLDoc()
-
+        
         # p_opt: free variables
-        values = xmldoc.get_p_opt_lin_values(include_alias=False)
+        islinears = xmldoc.get_p_opt_islinear(include_alias=False)
         n_p_opt = self.jmimodel.opt_get_n_p_opt()
         if n_p_opt > 0:
             p_opt_indices = N.zeros(n_p_opt, dtype=int)
@@ -870,105 +1156,168 @@ class Model(object):
             self.jmimodel.opt_get_p_opt_indices(p_opt_indices)
             p_opt_indices = p_opt_indices.tolist()
 
-            for name in values.keys():
-                value_ref = xmldoc.get_valueref(name)
-                (z_i, ptype) = _translate_value_ref(value_ref)
-                i_pi = z_i - self._offs_real_pi.value
-                i_pi_opt = p_opt_indices.index(i_pi)
-                p_opt_lin[i_pi_opt] = int(values.get(name))
+            for lin in islinears:
+                if lin[1] != None:
+                    #value_ref = xmldoc.get_valueref(name)
+                    (z_i, ptype) = _translate_value_ref(lin[0])
+                    i_pi = z_i - self._offs_real_pi.value
+                    i_pi_opt = p_opt_indices.index(i_pi)
+                    p_opt_lin[i_pi_opt] = int(lin[1])
+
+        ## p_opt: free variables
+        #values = xmldoc.get_p_opt_lin_values(include_alias=False)
+        #n_p_opt = self.jmimodel.opt_get_n_p_opt()
+        #if n_p_opt > 0:
+            #p_opt_indices = N.zeros(n_p_opt, dtype=int)
+        
+            #self.jmimodel.opt_get_p_opt_indices(p_opt_indices)
+            #p_opt_indices = p_opt_indices.tolist()
+
+            #for name in values.keys():
+                #value_ref = xmldoc.get_valueref(name)
+                #(z_i, ptype) = _translate_value_ref(value_ref)
+                #i_pi = z_i - self._offs_real_pi.value
+                #i_pi_opt = p_opt_indices.index(i_pi)
+                #p_opt_lin[i_pi_opt] = int(values.get(name))
 
         # dx: derivative
-        values = xmldoc.get_dx_lin_values(include_alias=False)
-        for name in values.keys():
-            value_ref = xmldoc.get_valueref(name)
-            (z_i, ptype) = _translate_value_ref(value_ref)
-            i_dx = z_i - self._offs_real_dx.value
-            dx_lin[i_dx] = int(values.get(name))
+        islinears = xmldoc.get_dx_islinear(include_alias=False)
+        for lin in islinears:
+            if lin[1] != None:
+                #value_ref = xmldoc.get_valueref(name)
+                (z_i, ptype) = _translate_value_ref(lin[0])
+                i_dx = z_i - self._offs_real_dx.value
+                dx_lin[i_dx] = int(lin[1])
+
+        ## dx: derivative
+        #values = xmldoc.get_dx_lin_values(include_alias=False)
+        #for name in values.keys():
+            #value_ref = xmldoc.get_valueref(name)
+            #(z_i, ptype) = _translate_value_ref(value_ref)
+            #i_dx = z_i - self._offs_real_dx.value
+            #dx_lin[i_dx] = int(values.get(name))
         
         # x: differentiate
-        values = xmldoc.get_x_lin_values(include_alias=False)
-        for name in values.keys():
-            value_ref = xmldoc.get_valueref(name)
-            (z_i, ptype) = _translate_value_ref(value_ref)
-            i_x = z_i - self._offs_real_x.value
-            x_lin[i_x] = int(values.get(name))
+        islinears = xmldoc.get_x_islinear(include_alias=False)
+        for lin in islinears:
+            if lin[1] != None:
+                #value_ref = xmldoc.get_valueref(name)
+                (z_i, ptype) = _translate_value_ref(lin[0])
+                i_x = z_i - self._offs_real_x.value
+                x_lin[i_x] = int(lin[1])
+        
+        ## x: differentiate
+        #values = xmldoc.get_x_lin_values(include_alias=False)
+        #for name in values.keys():
+            #value_ref = xmldoc.get_valueref(name)
+            #(z_i, ptype) = _translate_value_ref(value_ref)
+            #i_x = z_i - self._offs_real_x.value
+            #x_lin[i_x] = int(values.get(name))
             
         # u: input
-        values = xmldoc.get_u_lin_values(include_alias=False)
-        for name in values.keys():
-            value_ref = xmldoc.get_valueref(name)
-            (z_i, ptype) = _translate_value_ref(value_ref)
-            if ptype==0: # Only Reals supported here
-                i_u = z_i - self._offs_real_u.value
-                u_lin[i_u] = int(values.get(name))
+        islinears = xmldoc.get_u_islinear(include_alias=False)
+        for lin in islinears:
+            if lin[1] != None:
+                #value_ref = xmldoc.get_valueref(name)
+                (z_i, ptype) = _translate_value_ref(lin[0])
+                if ptype==0: # Only Reals supported here
+                    i_u = z_i - self._offs_real_u.value
+                    u_lin[i_u] = int(lin[1])
+            
+        ## u: input
+        #values = xmldoc.get_u_lin_values(include_alias=False)
+        #for name in values.keys():
+            #value_ref = xmldoc.get_valueref(name)
+            #(z_i, ptype) = _translate_value_ref(value_ref)
+            #if ptype==0: # Only Reals supported here
+                #i_u = z_i - self._offs_real_u.value
+                #u_lin[i_u] = int(values.get(name))
                 
         # w: algebraic
-        values = xmldoc.get_w_lin_values(include_alias=False)
-        for name in values.keys():
-            value_ref = xmldoc.get_valueref(name)
-            (z_i, ptype) = _translate_value_ref(value_ref)
-            if ptype==0: # Only Reals supported here
-                i_w = z_i - self._offs_real_w.value
-                w_lin[i_w] = int(values.get(name))
+        islinears = xmldoc.get_w_islinear(include_alias=False)
+        for lin in islinears:
+            if lin[1] != None:
+                #value_ref = xmldoc.get_valueref(name)
+                (z_i, ptype) = _translate_value_ref(lin[0])
+                if ptype==0: # Only Reals supported here
+                    i_w = z_i - self._offs_real_w.value
+                    w_lin[i_w] = int(lin[1])
+                
+        ## w: algebraic
+        #values = xmldoc.get_w_lin_values(include_alias=False)
+        #for name in values.keys():
+            #value_ref = xmldoc.get_valueref(name)
+            #(z_i, ptype) = _translate_value_ref(value_ref)
+            #if ptype==0: # Only Reals supported here
+                #i_w = z_i - self._offs_real_w.value
+                #w_lin[i_w] = int(values.get(name))
 
         # number of timepoints
         no_of_tp = self._n_tp.value
 
         # timepoints dx: derivative
-        values = xmldoc.get_dx_lin_tp_values(include_alias=False)
+        time_variables = xmldoc.get_dx_linear_timed_variables(
+            include_alias=False)
         
-        names = values.keys()
-        names.sort(key=str)
+        #names = values.keys()
+        #names.sort(key=str)
         
-        for no_tp in range(no_of_tp):
-            for name in names:
-                value_ref = xmldoc.get_valueref(name)
-                (z_i, ptype) = _translate_value_ref(value_ref)
-                i_dx = z_i - self._offs_real_dx.value
-                dx_tp_lin[i_dx+no_tp*len(names)] = int(values.get(name)[no_tp])
+        for tp in range(no_of_tp):
+            for tv in time_variables:
+                if tv[1] != []:
+                    #value_ref = xmldoc.get_valueref(name)
+                    (z_i, ptype) = _translate_value_ref(tv[0])
+                    i_dx = z_i - self._offs_real_dx.value
+                    dx_tp_lin[i_dx+tp*len(time_variables)] = int(tv[1][tp])
         
         # timepoints x: differentiate
-        values = xmldoc.get_x_lin_tp_values(include_alias=False)
+        time_variables = xmldoc.get_x_linear_timed_variables(
+            include_alias=False)
         
-        names = values.keys()
-        names.sort(key=str)       
+        #names = values.keys()
+        #names.sort(key=str)       
         
-        for no_tp in range(no_of_tp):
-            for name in names:
-                value_ref = xmldoc.get_valueref(name)
-                (z_i, ptype) = _translate_value_ref(value_ref)
-                i_x = z_i - self._offs_real_x.value                
-                x_tp_lin[i_x+no_tp*len(names)] = int(values.get(name)[no_tp])
+        for tp in range(no_of_tp):
+            for tv in time_variables:
+                if tv[1] != []:
+                    #value_ref = xmldoc.get_valueref(name)
+                    (z_i, ptype) = _translate_value_ref(tv[0])
+                    i_x = z_i - self._offs_real_x.value                
+                    x_tp_lin[i_x+tp*len(time_variables)] = int(tv[1][tp])
             
         # timepoints u: input
-        values = xmldoc.get_u_lin_tp_values(include_alias=False)
+        time_variables = xmldoc.get_u_linear_timed_variables(
+            include_alias=False)
         
-        names = values.keys()
-        names.sort(key=str)
+        #names = values.keys()
+        #names.sort(key=str)
         
-        for no_tp in range(no_of_tp):
-            for name in names:
-                value_ref = xmldoc.get_valueref(name)
-                (z_i, ptype) = _translate_value_ref(value_ref)
-                if ptype==0: # Only reals supported here
-                    i_u = z_i - self._offs_real_u.value                
-                    u_tp_lin[i_u+no_tp*len(names)] = int(values.get(name)[no_tp])
+        for tp in range(no_of_tp):
+            for tv in time_variables:
+                if tv[1] != []:
+                    #value_ref = xmldoc.get_valueref(name)
+                    (z_i, ptype) = _translate_value_ref(tv[0])
+                    if ptype==0: # Only reals supported here
+                        i_u = z_i - self._offs_real_u.value                
+                        u_tp_lin[i_u+tp*len(time_variables)] = int(tv[1][tp])
         
         # timepoints w: algebraic
-        values = xmldoc.get_w_lin_tp_values(include_alias=False)
+        time_variables = xmldoc.get_w_linear_timed_variables(
+            include_alias=False)
         
-        names = values.keys()
-        names.sort(key=str)
+        #names = values.keys()
+        #names.sort(key=str)
 
-        for no_tp in range(no_of_tp):
-            for name in names:
-                value_ref = xmldoc.get_valueref(name)
-                (z_i, ptype) = _translate_value_ref(value_ref)
-                i_w = z_i - self._offs_real_w.value
-                w_tp_lin[i_w+no_tp*len(names)] = int(values.get(name)[no_tp])                
+        for tp in range(no_of_tp):
+            for tv in time_variables:
+                if tv[1] != []:
+                    #value_ref = xmldoc.get_valueref(name)
+                    (z_i, ptype) = _translate_value_ref(tv[0])
+                    i_w = z_i - self._offs_real_w.value
+                    w_tp_lin[i_w+tp*len(time_variables)] = int(tv[1][tp])                
     
-    def get_valueref(self, variablename):
-        return self._get_XMLDoc().get_valueref(variablename)
+    def get_value_reference(self, variablename):
+        return self._get_XMLDoc().get_value_reference(variablename)
         
 
     def get_variable_names(self, include_alias=True):
@@ -988,54 +1337,60 @@ class Model(object):
         """
         return self._get_XMLDoc().is_negated_alias(variablename)
 
-    def get_variable_description(self, variablename):
-        """ Return the description of a variable. """
-        return self._get_XMLDoc().get_variable_description(variablename)
+    #def get_variable_description(self, variablename):
+        #""" Return the description of a variable. """
+        #xmldoc = self._get_XMLDoc2()
+        #return xmldoc.get_variable_description(variablename)
 
-    def get_derivative_names(self, include_alias=True):
+    def get_dx_variable_names(self, include_alias=True):
         """
-        Extract the names of the derivatives in a model.
-
-        Returns:
-            Dict with ValueReference as key and name as value.
-        """
-        return self._get_XMLDoc().get_derivative_names(include_alias)
-
-    def get_differentiated_variable_names(self, include_alias=True):
-        """
-        Extract the names of the differentiated_variables in a model.
+        Get the names of the derivatives in the model.
 
         Returns:
-            Dict with ValueReference as key and name as value.
+            List of tuples containing value reference and name 
+            respectively.
         """
-        return self._get_XMLDoc().get_differentiated_variable_names(include_alias)
+        return self._get_XMLDoc().get_dx_variable_names(include_alias)
 
-    def get_input_names(self, include_alias=True):
+    def get_x_variable_names(self, include_alias=True):
         """
-        Extract the names of the inputs in a model.
-
-        Returns:
-            Dict with ValueReference as key and name as value.
-        """
-        return self._get_XMLDoc().get_input_names(include_alias)
-
-    def get_algebraic_variable_names(self, include_alias=True):
-        """
-        Extract the names of the algebraic variables in a model.
+        Get the names of the differentiated_variables in the model.
 
         Returns:
-            Dict with ValueReference as key and name as value.
+            List of tuples containing value reference and name 
+            respectively.
         """
-        return self._get_XMLDoc().get_algebraic_variable_names(include_alias)
+        return self._get_XMLDoc().get_x_variable_names(include_alias)
 
-    def get_p_opt_names(self, include_alias=True):
+    def get_u_variable_names(self, include_alias=True):
         """
-        Extract the names of the optimized parameters.
+        Get the names of the inputs in the model.
 
         Returns:
-            Dict with ValueReference as key and name as value.
+            List of tuples containing value reference and name 
+            respectively.
         """
-        return self._get_XMLDoc().get_p_opt_names(include_alias)
+        return self._get_XMLDoc().get_u_variable_names(include_alias)
+
+    def get_w_variable_names(self, include_alias=True):
+        """
+        Get the names of the algebraic variables in the model.
+
+        Returns:
+            List of tuples containing value reference and name 
+            respectively.
+        """
+        return self._get_XMLDoc().get_w_variable_names(include_alias)
+
+    def get_p_opt_variable_names(self, include_alias=True):
+        """
+        Get the names of the optimized parameters in the model.
+
+        Returns:
+            List of tuples containing value reference and name 
+            respectively.
+        """
+        return self._get_XMLDoc().get_p_opt_variable_names(include_alias)
 
 
     def get_variable_descriptions(self, include_alias=True):
@@ -1509,38 +1864,62 @@ class Model(object):
         """
         
         xmldoc = self._get_XMLDoc()
-        start_attr = xmldoc.get_start_attributes(include_alias=False)
+        #start_attr = xmldoc.get_start_attributes(include_alias=False)
+        start_attr = xmldoc.get_variable_start_attributes(include_alias=False)
         
         #Real variables vector
         z = self.get_z()
         sc = self.get_variable_scaling_factors()
         
-        keys = start_attr.keys()
-        keys.sort(key=str)
-
-        for key in keys:
-            value_ref = xmldoc.get_valueref(key)
-            value = start_attr.get(key)
+        for attr in start_attr:
+            (i, ptype) = _translate_value_ref(attr[0])
+            value = attr[1]
             
-            (i, ptype) = _translate_value_ref(value_ref)
-            if(ptype == 0):
-                # Primitive type is Real
-                if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0: 
-                    z[i] = value/sc[i]
+            if value != None: # if no start attr is set then value is None
+                if ptype == 0:
+                    # Primitive type is Real
+                    if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0: 
+                        z[i] = value/sc[i]
+                    else:
+                        z[i] = value
+                elif(ptype == 1):
+                    # Primitive type is Integer
+                    pass
+                elif(ptype == 2):
+                    # Primitive type is Boolean
+                    pass
+                elif(ptype == 3):
+                    # Primitive type is String
+                    pass
                 else:
-                    z[i] = value
+                    "Unknown type"
+        
+        #keys = start_attr.keys()
+        #keys.sort(key=str)
+
+        #for key in keys:
+            #value_ref = xmldoc.get_valueref(key)
+            #value = start_attr.get(key)
+            
+            #(i, ptype) = _translate_value_ref(value_ref)
+            #if(ptype == 0):
+                ## Primitive type is Real
+                #if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0: 
+                    #z[i] = value/sc[i]
+                #else:
+                    #z[i] = value
                     
-            elif(ptype == 1):
-                # Primitive type is Integer
-                pass
-            elif(ptype == 2):
-                # Primitive type is Boolean
-                pass
-            elif(ptype == 3):
-                # Primitive type is String
-                pass
-            else:
-                "Unknown type"
+            #elif(ptype == 1):
+                ## Primitive type is Integer
+                #pass
+            #elif(ptype == 2):
+                ## Primitive type is Boolean
+                #pass
+            #elif(ptype == 3):
+                ## Primitive type is String
+                #pass
+            #else:
+                #"Unknown type"
     
     def _set_iparam_values(self, xml_values_doc=None):
         """ Set values for the independent parameters. """
@@ -1548,15 +1927,15 @@ class Model(object):
             xml_values_doc = self._get_XMLValuesDoc()
         values = xml_values_doc.get_iparam_values() #{variablename:value}
         xmldoc = self._get_XMLDoc()
-        variables = xmldoc.get_variable_names(include_alias=False) # {variablename:value reference}
+        #variables = xmldoc.get_variable_names(include_alias=False) # {variablename:value reference}
        
         z = self.get_z()       
         sc = self.get_variable_scaling_factors()
 
         for name in values.keys():
             value = values.get(name)
-            value_ref = variables.get(name)
-            (i, ptype) = _translate_value_ref(value_ref)
+            #value_ref = variables.get(name)
+            (i, ptype) = _translate_value_ref(xmldoc.get_value_reference(name))
 
             if(ptype == 0):
                 # Primitive type is Real
@@ -1579,10 +1958,11 @@ class Model(object):
     def _set_opt_interval(self):
         """ Set the optimization intervals (if Optimica). """
         xmldoc = self._get_XMLDoc()
-        starttime = xmldoc.get_starttime()
-        starttimefree = xmldoc.get_starttime_free()
-        finaltime = xmldoc.get_finaltime()
-        finaltimefree = xmldoc.get_finaltime_free()
+        
+        starttime = xmldoc.get_opt_starttime()
+        starttimefree = xmldoc.get_opt_starttime_free()
+        finaltime = xmldoc.get_opt_finaltime()
+        finaltimefree = xmldoc.get_opt_finaltime_free()
         if starttime!=None and finaltime!=None:
             self.jmimodel.opt_set_optimization_interval(starttime, int(starttimefree),
                                                         finaltime, int(finaltimefree))
@@ -1593,10 +1973,10 @@ class Model(object):
     def _set_timepoints(self):       
         """ Set the optimization timepoints (if Optimica). """
         xmldoc = self._get_XMLDoc()
-        start =  xmldoc.get_starttime()
-        final = xmldoc.get_finaltime()
+        start =  xmldoc.get_opt_starttime()
+        final = xmldoc.get_opt_finaltime()
         points = []
-        for point in xmldoc.get_timepoints():
+        for point in xmldoc.get_opt_timepoints():
             norm_point = (point - start) / (final-start)
             points.append(norm_point)         
         self.jmimodel.set_tp(N.array(points))   
@@ -1604,7 +1984,7 @@ class Model(object):
     def _set_p_opt_indices(self):
         """ Set the optimization parameter indices (if Optimica). """
         xmldoc = self._get_XMLDoc()
-        refs = xmldoc.get_p_opt_variable_refs()
+        refs = xmldoc.get_p_opt_value_reference()
         
         if len(refs) > 0:
             n_p_opt = 0
@@ -1630,7 +2010,7 @@ class Model(object):
         Raises Error if name not present in model."""
         
         xmldoc = self._get_XMLDoc()
-        valref = xmldoc.get_valueref(name.strip())
+        valref = xmldoc.get_value_reference(name.strip())
         sc = self.get_variable_scaling_factors()
         value = None
         if valref != None:
@@ -1680,7 +2060,7 @@ class Model(object):
         not be set."""
         
         xmldoc = self._get_XMLDoc()
-        valref = xmldoc.get_valueref(name)
+        valref = xmldoc.get_value_reference(name)
         sc = self.get_variable_scaling_factors()
         if valref != None:
             if xmldoc.is_constant(name):
@@ -1774,9 +2154,9 @@ class Model(object):
         for p in parameters:
             #get value reference            
             name = p.get('name')
-            valueref = xmldoc.get_valueref(name)
             #get index in z-vector
-            index, type = _translate_value_ref(valueref) 
+            index, type = _translate_value_ref(
+                xmldoc.get_value_reference(name)) 
             
             # set value in xml values doc for name = name 
             # to value from z-vector
@@ -1794,15 +2174,17 @@ class Model(object):
         else:
             xml_values_doc._doc.write(xml_values_doc._doc.docinfo.URL)
             
-    def get_aliases(self, variable):
+    def get_aliases_for_variable(self, variable):
         """ Return list of all alias variables belonging to the aliased 
             variable along with a list of booleans indicating whether the 
             alias variable should be negated or not.
             
-            Raises exception if argument is not an aliased or alias variable.
+            Returns empty lists if variable has no alias variables.
+            
+            Returns None if variable cannot be found in model.
 
         """
-        return self._get_XMLDoc().get_aliases(variable)
+        return self._get_XMLDoc().get_aliases_for_variable(variable)
             
     def opt_interval_starttime_free(self):
         """Evaluate if optimization start time is free.

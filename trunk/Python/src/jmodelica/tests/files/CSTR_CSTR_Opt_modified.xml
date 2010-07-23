@@ -24,7 +24,7 @@ fmiVersion="1.0" modelName="CSTR.CSTR_Opt" modelIdentifier="CSTR_CSTR_Opt" guid=
 	</VendorAnnotations>		
 	<ModelVariables>
 		 <ScalarVariable name="u" valueReference="26" variability="continuous" causality="input" alias="noAlias">
-			 <Real relativeQuantity="false" start="350.0" free="false" initialGuess="350.0" />
+			 <Real relativeQuantity="false" start="350.0" free="false" initialGuess="350.0" nominal="3.14" />
 			<DirectDependency>
 				<Name>String</Name>
 				<Name>String</Name>
@@ -36,7 +36,7 @@ fmiVersion="1.0" modelName="CSTR.CSTR_Opt" modelIdentifier="CSTR_CSTR_Opt" guid=
 			 <VariableCategory>algebraic</VariableCategory>
 		 </ScalarVariable>
 		 <ScalarVariable name="cstr.F0" valueReference="0" description="Inflow" variability="parameter" causality="internal" alias="noAlias">
-			 <Real quantity="VolumeFlowRate" unit="m3/s" relativeQuantity="false" start="0.0" free="false" initialGuess="0.0" />
+			 <Real quantity="VolumeFlowRate" unit="m3/s" relativeQuantity="false" start="0.0" free="true" initialGuess="0.0" nominal="3.14" max="100"/>
 			 <isLinear>true</isLinear>
 			 <isLinearTimedVariables>
 				 <TimePoint index="0" isLinear="true"/>
@@ -52,12 +52,8 @@ fmiVersion="1.0" modelName="CSTR.CSTR_Opt" modelIdentifier="CSTR_CSTR_Opt" guid=
 			 <VariableCategory>independentParameter</VariableCategory>
 		 </ScalarVariable>
 		 <ScalarVariable name="cstr.F" valueReference="2" description="Outflow" variability="constant" causality="internal" alias="noAlias">
-			 <Real quantity="VolumeFlowRate" unit="m3/s" relativeQuantity="false" start="0.0" free="false" initialGuess="0.0" />
-			 <isLinear>true</isLinear>
-			 <isLinearTimedVariables>
-				 <TimePoint index="0" isLinear="true"/>
-			 </isLinearTimedVariables>
-			 <VariableCategory>independentParameter</VariableCategory>
+			 <Real quantity="VolumeFlowRate" unit="m3/s" relativeQuantity="false" start="0.0" free="false" min="-5.0" max="0.0"/>
+			 <VariableCategory>algebraic</VariableCategory>
 		 </ScalarVariable>
 		 <ScalarVariable name="cstr.T0" valueReference="3" variability="parameter" causality="internal" alias="noAlias">
 			 <Real quantity="ThermodynamicTemperature" unit="K" displayUnit="degC" relativeQuantity="false" min="0.0" start="0.0" free="false" initialGuess="0.0" />
@@ -68,7 +64,7 @@ fmiVersion="1.0" modelName="CSTR.CSTR_Opt" modelIdentifier="CSTR_CSTR_Opt" guid=
 			 <VariableCategory>independentParameter</VariableCategory>
 		 </ScalarVariable>
 		 <ScalarVariable name="cstr.r" valueReference="0" variability="parameter" causality="output" alias="negatedAlias">
-			 <Real quantity="Length" unit="m" relativeQuantity="false" start="0.0" free="false" initialGuess="0.0" />
+			 <Real quantity="Length" unit="m" relativeQuantity="false" start="0.0" free="false" initialGuess="0.0" nominal="10"/>
 			 <isLinear>true</isLinear>
 			 <isLinearTimedVariables>
 				 <TimePoint index="0" isLinear="true"/>
@@ -76,15 +72,16 @@ fmiVersion="1.0" modelName="CSTR.CSTR_Opt" modelIdentifier="CSTR_CSTR_Opt" guid=
 			 <VariableCategory>independentParameter</VariableCategory>
 		 </ScalarVariable>
 		 <ScalarVariable name="cstr.k0" valueReference="5" variability="discrete" alias="noAlias">
-			 <Real relativeQuantity="false" start="0.0" free="false" initialGuess="0.0" />
-			 <isLinear>true</isLinear>
+			 <Real relativeQuantity="false" start="0.0" free="false" initialGuess="0.0"  min="1.5" max="10"/>
+			 <isLinear>false</isLinear>
 			 <isLinearTimedVariables>
 				 <TimePoint index="0" isLinear="true"/>
+				 <TimePoint index="0" isLinear="false"/>
 			 </isLinearTimedVariables>
-			 <VariableCategory>independentParameter</VariableCategory>
+			 <VariableCategory>state</VariableCategory>
 		 </ScalarVariable>
 		 <ScalarVariable name="cstr.EdivR" valueReference="5" variability="continuous" causality="internal" alias="alias">
-			 <Real relativeQuantity="false" start="0.0" free="false" initialGuess="0.0" />
+			 <Real relativeQuantity="false" start="0.0" free="false" initialGuess="0.0"/>
 			 <isLinear>true</isLinear>
 			 <isLinearTimedVariables>
 				 <TimePoint index="0" isLinear="true"/>
@@ -92,7 +89,7 @@ fmiVersion="1.0" modelName="CSTR.CSTR_Opt" modelIdentifier="CSTR_CSTR_Opt" guid=
 			 <VariableCategory>independentParameter</VariableCategory>
 		 </ScalarVariable>
 		 <ScalarVariable name="cstr.U" valueReference="7" variability="parameter" causality="none" alias="noAlias">
-			 <Real relativeQuantity="false" start="0.0" free="false" initialGuess="0.0" />
+			 <Real relativeQuantity="false" start="10.0" free="true" initialGuess="5.0" min="0.0" max="1000"/>
 			 <isLinear>true</isLinear>
 			 <isLinearTimedVariables>
 				 <TimePoint index="0" isLinear="true"/>
@@ -100,12 +97,12 @@ fmiVersion="1.0" modelName="CSTR.CSTR_Opt" modelIdentifier="CSTR_CSTR_Opt" guid=
 			 <VariableCategory>independentParameter</VariableCategory>
 		 </ScalarVariable>
 		 <ScalarVariable name="cstr.rho" valueReference="8" causality="internal" alias="noAlias">
-			 <Real relativeQuantity="false" start="0.0" free="false" initialGuess="0.0" />
+			 <Real relativeQuantity="false" start="0.0" free="false" initialGuess="0.0" nominal="5" max="500"/>
 			 <isLinear>true</isLinear>
 			 <isLinearTimedVariables>
 				 <TimePoint index="0" isLinear="true"/>
 			 </isLinearTimedVariables>
-			 <VariableCategory>independentParameter</VariableCategory>
+			 <VariableCategory>derivative</VariableCategory>
 		 </ScalarVariable>
 	</ModelVariables>
 	

@@ -296,7 +296,7 @@ class ModelicaCompiler():
             
             # get external libs and include dirs from XML doc
             xml_file=c_file+'.xml'
-            xmldoc = xmlparser.XMLDoc(xml_file)
+            xmldoc = xmlparser.ModelDescription(xml_file)
             ext_libs = xmldoc.get_external_libraries()
             ext_lib_dirs = xmldoc.get_external_lib_dirs()
             ext_incl_dirs = xmldoc.get_external_incl_dirs()

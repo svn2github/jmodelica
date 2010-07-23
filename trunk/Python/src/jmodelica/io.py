@@ -25,9 +25,9 @@ import scipy.io
 from operator import itemgetter
 
 import jmodelica.jmi
-from jmodelica import xmldoc
+from jmodelica import xmlparser
 
-def export_result_dymola2(model, data, file_name='', format='txt'):
+def export_result_dymola(model, data, file_name='', format='txt'):
     """
     Export an optimization or simulation result to file in Dymolas
     result file format. The parameter values are read from the z
@@ -73,13 +73,13 @@ def export_result_dymola2(model, data, file_name='', format='txt'):
         f.write('\n')
         
         xmlfile = model.get_name()+'.xml'
-        md = xmldoc.ModelDescription(xmlfile)
+        md = xmlparser.ModelDescription(xmlfile)
         
         # sort in value reference order (must match order in data)
-        names = sorted(md.get_variable_names2())
-        aliases = sorted(md.get_variable_aliases2())
-        descriptions = sorted(md.get_variable_descriptions2())
-        variabilities = sorted(md.get_variable_variabilities2())
+        names = sorted(md.get_variable_names(), key=itemgetter(0))
+        aliases = sorted(md.get_variable_aliases(), key=itemgetter(0))
+        descriptions = sorted(md.get_variable_descriptions(), key=itemgetter(0))
+        variabilities = sorted(md.get_variable_variabilities(), key=itemgetter(0))
         
         num_vars = len(names)
         
@@ -197,7 +197,7 @@ def export_result_dymola2(model, data, file_name='', format='txt'):
         raise Error('Export on binary Dymola result files not yet supported.')
 
 
-def export_result_dymola(model, data, file_name='', format='txt'):
+def export_result_dymola2(model, data, file_name='', format='txt'):
     """
     Export an optimization or simulation result to file in Dymolas
     result file format. The parameter values are read from the z

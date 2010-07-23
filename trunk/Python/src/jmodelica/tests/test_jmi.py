@@ -83,36 +83,36 @@ class TestModel_VDP:
     @testattr(stddist = True)    
     def test_get_variable_names(self):
         names = self.vdp.get_variable_names()
-        ntools.assert_equal(names.get('p1'),0)
+        ntools.assert_equal(names[0][1],'p1')
         
     @testattr(stddist = True)
-    def test_get_derivative_names(self):
-        names = self.vdp.get_derivative_names()
-        ntools.assert_equal(names.get('der(x2)'),4)
+    def test_get_dx_variable_names(self):
+        names = [(3,'der(x1)'),(4,'der(x2)'),(5,'der(cost)')]
+        ntools.assert_equal(self.vdp.get_dx_variable_names(),names)
     
     @testattr(stddist = True)
-    def test_get_differentiated_variable_names(self):
-        names = self.vdp.get_differentiated_variable_names()
-        ntools.assert_equal(names.get('cost'),8)
+    def test_get_x_variable_names(self):
+        names = [(6,'x1'),(7,'x2'),(8,'cost')]
+        ntools.assert_equal(self.vdp.get_x_variable_names(),names)
     
     @testattr(stddist = True)
-    def test_get_input_names(self):
-        names = self.vdp.get_input_names()
-        ntools.assert_equal(names.get('u'),9)
+    def test_get_u_variable_names(self):
+        names = [(9,'u')]
+        ntools.assert_equal(self.vdp.get_u_variable_names(),names)
     
     @testattr(stddist = True)
-    def test_get_algebraic_variable_names(self):
+    def test_get_w_variable_names(self):
         # TODO improve test 
         # there are no algebraic variables in the vdp model
-        names = self.vdp.get_algebraic_variable_names()
-        ntools.assert_equal(len(names),0)
+        names = []
+        ntools.assert_equal(self.vdp.get_w_variable_names(),names)
     
     @testattr(stddist = True)
-    def test_get_p_opt_names(self):
+    def test_get_p_opt_variable_names(self):
         # TODO improve test 
         # there are no popt variables in the model
-        names = self.vdp.get_p_opt_names()
-        ntools.assert_equal(len(names),0)
+        names = []
+        ntools.assert_equal(self.vdp.get_p_opt_variable_names(),names)
      
     @testattr(stddist = True)   
     def test_get_sizes(self):
@@ -541,14 +541,15 @@ class TestModel_RLC:
         # Load the dynamic library and XML data
         self.rlc = jmi.Model(fname_rlc)
 
-    @testattr(stddist = True)
-    def test_get_variable_description(self):
-        ntools.assert_equal(self.rlc.get_variable_description("resistor.R"),"Resistance")
+    # removed method
+    #@testattr(stddist = True)
+    #def test_get_variable_description(self):
+        #ntools.assert_equal(self.rlc.get_variable_description("resistor.R"),"Resistance")
         
     @testattr(stddist = True)
     def test_get_variable_descriptions(self):
         descriptions = self.rlc.get_variable_descriptions()
-        ntools.assert_equal(descriptions.get('capacitor.C'),"Capacitance")
+        ntools.assert_equal(descriptions[0][1],"Potential at the pin")
 
     @testattr(stddist = True)
     def test_is_negated_alias(self):
@@ -556,7 +557,7 @@ class TestModel_RLC:
     
     @testattr(stddist = True)
     def test_get_aliases(self):
-        (aliases,is_neg_alias) = self.rlc.get_aliases("capacitor.p.i")
+        (aliases,is_neg_alias) = self.rlc.get_aliases_for_variable("capacitor.p.i")
         ntools.assert_equal(aliases[0],"capacitor.i")
         ntools.assert_equal(aliases[1], "capacitor.n.i")
         ntools.assert_equal(is_neg_alias[0],False)
