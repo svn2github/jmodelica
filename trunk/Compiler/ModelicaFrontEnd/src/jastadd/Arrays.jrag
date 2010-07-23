@@ -78,8 +78,8 @@ aspect Arrays {
 	 * 
 	 * This version is cached, to avoid repeating constant evaluation.
 	 * 
-	 * @throws UnsupportedOperationException  if the subscripts can't be evaluated to 
-	 *                                         constant Integer values.
+	 * @throws ConstantEvaluationException  if the subscripts can't be evaluated to 
+	 *                                      constant Integer values.
 	 */
 	syn lazy Index FArraySubscripts.asIndex() = createIndex();
 	
@@ -89,8 +89,8 @@ aspect Arrays {
 	 * This version is not cached, to allow indices to be re-evaluated at each use 
 	 * during function evaluation.
 	 * 
-	 * @throws UnsupportedOperationException  if the subscripts can't be evaluated to 
-	 *                                         constant Integer values.
+	 * @throws ConstantEvaluationException  if the subscripts can't be evaluated to 
+	 *                                      constant Integer values.
 	 */
 	public Index FArraySubscripts.createIndex() {
 		int[] i = new int[getNumFSubscript()];
@@ -617,7 +617,7 @@ aspect Arrays {
 			for (int i = 1; i < getNumFExp(); i++)
 				ms.add(dim, getFExp(i).size().promote(ndims()), dim);
 			return ms;
-		} catch (UnsupportedOperationException e) {
+		} catch (ConstantEvaluationException e) {
 			return Size.SCALAR;
 		}
 	}
@@ -695,7 +695,7 @@ aspect Arrays {
 			for (int j = 0; j < s.ndims(); j++) 
 				ms.append(dynamicFExp(s.createSizeFExp(j, (HashMap) varMap.clone())));
 			return ms;
-		} catch (UnsupportedOperationException e) {
+		} catch (ConstantEvaluationException e) {
 			return s;
 		}
 	}
@@ -809,7 +809,7 @@ aspect Arrays {
 	
 	public FExp InstAccess.createSizeFExp(Map<ASTNode, FExp> varMap) {
 		if (varMap.containsKey(this))
-			throw new UnsupportedOperationException();
+			throw new ConstantEvaluationException();
 		varMap.put(this, null);
 		InstComponentDecl var = myInstComponentDecl();
 		FExp exp = varMap.get(var);
@@ -818,7 +818,7 @@ aspect Arrays {
 	
 	public FExp FIdUse.createSizeFExp(Map<ASTNode, FExp> varMap) {
 		if (varMap.containsKey(this))
-			throw new UnsupportedOperationException();
+			throw new ConstantEvaluationException();
 		varMap.put(this, null);
 		AbstractFVariable var = myFV();
 		FExp exp = varMap.get(var);
@@ -1608,7 +1608,7 @@ aspect Arrays {
 					indices[j++] = val.intValue();
 				return indices;
 			}
-		} catch (UnsupportedOperationException e) {
+		} catch (ConstantEvaluationException e) {
 		}
 		return new int[0];
 	}
@@ -2146,7 +2146,7 @@ aspect ArrayHelpers {
 			if (e.isValidExp()) {
 				try {
 					s = e.ceval().intValue();
-				} catch (UnsupportedOperationException uoe) {
+				} catch (ConstantEvaluationException uoe) {
 				}
 			}
 			size[d] = s;
@@ -2184,7 +2184,7 @@ aspect ArrayHelpers {
 		public void add(int d, FExp e) {
 			try {
 				add(d, e.ceval().intValue());
-			} catch (UnsupportedOperationException uoe) {
+			} catch (ConstantEvaluationException uoe) {
 				exps[d] = new FAddExp(createFExp(d), e);
 				size[d] = UNKNOWN;
 			}
@@ -2212,7 +2212,7 @@ aspect ArrayHelpers {
 				return size[i];
 			try {
 				return exps[i].ceval().intValue();
-			} catch (UnsupportedOperationException e) {
+			} catch (ConstantEvaluationException e) {
 				return UNKNOWN;
 			}
 		}

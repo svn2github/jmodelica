@@ -963,7 +963,7 @@ aspect FlatExpressions {
 							return cval.buildLiteral();
 						}
 					}
-				} catch (UnsupportedOperationException e) {
+				} catch (ConstantEvaluationException e) {
 					// In this case, simply don't inline value
 					// TODO: Really? isn't this an error?
 				}
@@ -999,7 +999,7 @@ aspect FlatExpressions {
 	syn boolean FSubscript.isUnknownIndex() {
 		try {
 			return ceval().intValue() == 0;
-		} catch (UnsupportedOperationException e) {
+		} catch (ConstantEvaluationException e) {
 			return true;
 		}
 	}

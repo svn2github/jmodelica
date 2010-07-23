@@ -774,16 +774,8 @@ aspect FlattPrettyPrint {
 	    if (isIndependentParameter() && hasBindingExp()) {
 	    	str.print(" /* ");
 	    	try {
-		    	if (isReal()) {
-					str.print(getBindingExp().ceval().realValue());
-				} else if (isInteger()) {
-					str.print(getBindingExp().ceval().intValue());
-				} else if (isBoolean()) {
-					str.print(getBindingExp().ceval().booleanValue());
-				} else if (isString()) {
-					str.print(getBindingExp().ceval().stringValue());
-				}
-			} catch (UnsupportedOperationException e){
+				str.print(getBindingExp().ceval());
+			} catch (ConstantEvaluationException e){
 				str.print("evalutation error");
 			}
 	    	str.print(" */");

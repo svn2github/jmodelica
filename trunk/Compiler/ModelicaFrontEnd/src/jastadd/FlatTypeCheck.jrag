@@ -182,7 +182,7 @@ aspect FlatTypeCheck {
 						  return;
 					  }
 				  }
-			  } catch (UnsupportedOperationException e) {
+			  } catch (ConstantEvaluationException e) {
 				  error("Could not evaluate array index expression: " + getFExp());
 			  }
 		  }

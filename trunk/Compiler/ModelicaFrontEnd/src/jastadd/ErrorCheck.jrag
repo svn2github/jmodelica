@@ -542,7 +542,7 @@ aspect InstanceErrorCheck {
 					}
 				}	
 			}
-		} catch (UnsupportedOperationException e) {
+		} catch (ConstantEvaluationException e) {
 			node.error("Could not evaluate binding expression for " + 
 					varKind + " '" + varName + "': " + exp);
 		}
