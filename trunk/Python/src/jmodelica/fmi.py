@@ -77,7 +77,6 @@ def unzip_FMU(archive, platform='win32', path='.'):
     found_files = [] #Found files
     
     for file in archive.filelist: #Looping over the archive to find correct binary
-        
         if dir[0] in file.filename and platform in file.filename and file.filename.endswith(suffix): #Binary directory found
             found_files.append(file)
     
@@ -116,8 +115,8 @@ class FMIModel(object):
             suffix = '.dll'
             platform = 'win32'
         elif sys.platform == 'darwin':
-            suffix = '.so'
-            platform = 'linux32'
+            suffix = '.dylib'
+            platform = 'darwin'
         else:
             suffix = '.so'
             platform = 'linux32'

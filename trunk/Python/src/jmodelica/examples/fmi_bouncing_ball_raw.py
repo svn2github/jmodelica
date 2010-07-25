@@ -117,11 +117,12 @@ def run_demo(with_plots=True):
     
     
     #Plot the solution
-    P.plot(t_sol,h_sol)
-    P.title(bouncing_fmu.get_name())
-    P.xlabel('Height (m)')
-    P.ylabel('Time (s)')
-    P.show()
+    if with_plots:
+        P.plot(t_sol,h_sol)
+        P.title(bouncing_fmu.get_name())
+        P.xlabel('Height (m)')
+        P.ylabel('Time (s)')
+        P.show()
 
 if __name__ == "__main__":
     run_demo()

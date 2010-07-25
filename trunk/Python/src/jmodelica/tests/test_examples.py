@@ -94,3 +94,8 @@ def test_simulation_with_input():
 def test_rlc_linearization():
     """ Test that linearization of the RLC circuit works. """    
     RLC_linearization.run_demo(False)
+
+@testattr(fmi = True)
+def test_fmi_bouncing_ball_raw():
+    """ Test that linearization of the RLC circuit works. """    
+    fmi_bouncing_ball_raw.run_demo(False)
