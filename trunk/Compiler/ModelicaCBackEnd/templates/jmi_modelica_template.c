@@ -67,6 +67,8 @@ static const int N_eq_Fp = $n_real_pd$;
 static const int N_eq_R0 = $n_event_indicators$ + $n_initial_event_indicators$;
 static const int N_sw_init = $n_switches$ + $n_initial_switches$;
 
+static const int N_eq_J = 0;
+static const int N_eq_L = 0;
 static const int N_eq_opt_Ffdp = 0;
 static const int N_eq_Ceq = 0;
 static const int N_eq_Cineq = 0;
@@ -156,6 +158,10 @@ static int model_opt_J(jmi_t* jmi, jmi_ad_var_vec_p res) {
 	return -1;
 }
 
+static int model_opt_L(jmi_t* jmi, jmi_ad_var_vec_p res) {
+	return -1;
+}
+
 static int model_opt_Ceq(jmi_t* jmi, jmi_ad_var_vec_p res) {
 	return -1;
 }
@@ -198,7 +204,8 @@ int jmi_new(jmi_t** jmi) {
 
 	// Initialize the Opt interface
 	jmi_opt_init(*jmi, *model_opt_Ffdp, N_eq_opt_Ffdp, NULL, 0, NULL, NULL,
-		     *model_opt_J, NULL, 0, NULL, NULL,
+		     *model_opt_J, N_eq_L, NULL, 0, NULL, NULL,
+		     *model_opt_L, N_eq_L, NULL, 0, NULL, NULL,
 		     *model_opt_Ceq, N_eq_Ceq, NULL, 0, NULL, NULL,
 		     *model_opt_Cineq, N_eq_Cineq, NULL, 0, NULL, NULL,
 		     *model_opt_Heq, N_eq_Heq, NULL, 0, NULL, NULL,

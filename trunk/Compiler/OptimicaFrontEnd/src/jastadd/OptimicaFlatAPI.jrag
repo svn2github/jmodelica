@@ -159,7 +159,21 @@ aspect OptimicaFlatAPI {
 		}
 		return null;
 	}
-		
+
+	/**
+	 * \brief Get the integrand cost function expression.
+	 * 
+	 * @return Cost function expression.
+	 */
+	syn lazy FExp FOptClass.objectiveIntegrandExp() {
+		for (FAttribute a : getFAttributes()) {
+			if (a.getName().name().equals("objectiveIntegrand")) {
+				return a.hasValue()? a.getValue(): null;
+			}
+		}
+		return null;
+	}
+	
 	/**
 	 * \brief Check if the startTime attribute is set.
 	 * 
@@ -875,6 +889,12 @@ aspect OptimicaFlatAPIDiagnostics {
 		str.append("Cost function:   ");
 		if (objectiveExp()!=null) {
 			str.append(objectiveExp()!=null? objectiveExp().prettyPrint("") + "\n": "");
+		} else {
+			str.append(" not give\n");
+		}
+		str.append("Cost function integrand:   ");
+		if (objectiveIntegrandExp()!=null) {
+			str.append(objectiveIntegrandExp()!=null? objectiveIntegrandExp().prettyPrint("") + "\n": "");
 		} else {
 			str.append(" not give\n");
 		}

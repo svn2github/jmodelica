@@ -97,5 +97,10 @@ def test_rlc_linearization():
 
 @testattr(fmi = True)
 def test_fmi_bouncing_ball_raw():
-    """ Test that linearization of the RLC circuit works. """    
+    """ Test that the FMI bouncing ball example works """    
     fmi_bouncing_ball_raw.run_demo(False)
+
+@testattr(ipopt = True)
+def test_lagrange_cost():
+    """ Test the Lagrange cost example """    
+    lagrange_cost.run_demo(False)

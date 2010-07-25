@@ -605,13 +605,22 @@ int jmi_init_init(jmi_t* jmi, jmi_residual_func_t F0, int n_eq_F0,
  *        of \f$F_{fdp}\f$.
  * @param dFfdp_col Column indices of the non-zeros in the symbolic Jacobain
  *        of \f$F_{fdp}\f$.
- * @param J A function pointer to the cost function \f$J\f$.
+ * @param J A function pointer to the generalized terminal penalty function \f$J\f$.
+ * @param n_eq_J Number of generalized terminal penalty functions.
  * @param dJ Function pointer to the symbolic Jacobian of \f$J\f$.
  * @param dJ_n_nz Number of non-zeros in the symbolic jacobian of \f$J\f$.
  * @param dJ_row Row indices of the non-zeros in the symbolic Jacobain
  *        of \f$J\f$.
  * @param dJ_col Column indices of the non-zeros in the symbolic Jacobain
  *        of \f$J\f$.
+ * @param L A function pointer to the Lagrange integrand \f$L\f$.
+ * @param n_eq_L Number of Lagrange integrands.
+ * @param dL Function pointer to the symbolic Jacobian of \f$L\f$.
+ * @param dL_n_nz Number of non-zeros in the symbolic jacobian of \f$L\f$.
+ * @param dL_row Row indices of the non-zeros in the symbolic Jacobain
+ *        of \f$L\f$.
+ * @param dL_col Column indices of the non-zeros in the symbolic Jacobain
+ *        of \f$L\f$.
  * @param Ceq A function pointer to the equality path constraint residual
  * function \f$C_{eq}\f$.
  * @param n_eq_Ceq Number of equations in the equality path constraint residual
@@ -661,8 +670,10 @@ int jmi_init_init(jmi_t* jmi, jmi_residual_func_t F0, int n_eq_F0,
 int jmi_opt_init(jmi_t* jmi, jmi_residual_func_t Ffdp,int n_eq_Fdp,
 		 jmi_jacobian_func_t dFfdp,
 		 int dfdp_n_nz, int* dfdp_row, int* dfdp_col,
-		 jmi_residual_func_t J, jmi_jacobian_func_t dJ,
+		 jmi_residual_func_t J, int n_eq_J, jmi_jacobian_func_t dJ,
 		 int dJ_n_nz, int* dJ_row, int* dJ_col,
+		 jmi_residual_func_t L, int n_eq_L, jmi_jacobian_func_t dL,
+		 int dL_n_nz, int* dL_row, int* dL_col,
 		 jmi_residual_func_t Ceq, int n_eq_Ceq,
 		 jmi_jacobian_func_t dCeq,
 		 int dCeq_n_nz, int* dCeq_row, int* dCeq_col,
@@ -819,8 +830,9 @@ struct jmi_init_t{
  * problem.
  */
 struct  jmi_opt_t{
-	jmi_func_t* Ffdp;                        ///< Function pointer to the free dependent parameters residual function.
+	jmi_func_t* Ffdp;                     ///< Function pointer to the free dependent parameters residual function.
 	jmi_func_t* J;                        ///< Function pointer to the cost function.
+	jmi_func_t* L;                        ///< Function pointer to the Lagrange integrand.
 	jmi_func_t* Ceq;                      ///< Function pointer to the equality path constraint residual function.
 	jmi_func_t* Cineq;                    ///< Function pointer to the inequality path constraint residual function.
 	jmi_func_t* Heq;                      ///< Function pointer to the equality point constraint residual function.

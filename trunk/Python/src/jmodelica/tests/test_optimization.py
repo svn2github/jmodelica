@@ -465,3 +465,82 @@ class TestOptInitBlockingFactors:
         
         optimizer = CollocationOptimizer(self.nlp)
         optimizer.opt_sim_ipopt_solve()
+
+class TestLagrangeCost1(OptimizationTest):
+
+    @classmethod
+    def setUpClass(cls):
+        OptimizationTest.setup_class_base('LagrangeCost.mo','LagrangeCost.OptTest1')
+
+    @testattr(ipopt = True)
+    def setUp(self):
+        n_e = 50
+        hs = N.ones(n_e)*1./n_e
+        n_cp = 3
+        self.setup_base(nlp_args = (n_e, hs, n_cp), options = { 'max_iter': 500 })
+        self.run()
+        self.load_expected_data('LagrangeCost_OptTest1_result.txt')
+
+    @testattr(ipopt = True)
+    def test_trajectories(self):
+        self.assert_all_trajectories(['sys.x[1]', 'sys.x[2]', 'u', 'sys.y'])
+
+class TestLagrangeCost2(OptimizationTest):
+
+    @classmethod
+    def setUpClass(cls):
+        OptimizationTest.setup_class_base('LagrangeCost.mo','LagrangeCost.OptTest1')
+
+    @testattr(ipopt = True)
+    def setUp(self):
+        n_e = 50
+        hs = N.ones(n_e)*1./n_e
+        n_cp = 3
+        b_f = 3*N.ones(10)
+        self.setup_base(nlp_args = (n_e, hs, n_cp,b_f), options = { 'max_iter': 500 })
+        self.run()
+        self.load_expected_data('LagrangeCost_OptTest1_bf_result.txt')
+
+    @testattr(ipopt = True)
+    def test_trajectories(self):
+        self.assert_all_trajectories(['sys.x[1]', 'sys.x[2]', 'u', 'sys.y'])
+
+class TestLagrangeCost3(OptimizationTest):
+
+    @classmethod
+    def setUpClass(cls):
+        OptimizationTest.setup_class_base('LagrangeCost.mo','LagrangeCost.OptTest4')
+
+    @testattr(ipopt = True)
+    def setUp(self):
+        n_e = 50
+        hs = N.ones(n_e)*1./n_e
+        n_cp = 3
+        self.setup_base(nlp_args = (n_e, hs, n_cp), options = { 'max_iter': 500 })
+        self.run()
+        self.load_expected_data('LagrangeCost_OptTest4_result.txt')
+
+    @testattr(ipopt = True)
+    def test_trajectories(self):
+        self.assert_all_trajectories(['sys.x[1]', 'sys.x[2]', 'u', 'sys.y'])
+
+class TestLagrangeCost4(OptimizationTest):
+
+    @classmethod
+    def setUpClass(cls):
+        OptimizationTest.setup_class_base('LagrangeCost.mo','LagrangeCost.OptTest4')
+
+    @testattr(ipopt = True)
+    def setUp(self):
+        n_e = 50
+        hs = N.ones(n_e)*1./n_e
+        n_cp = 3
+        b_f = 3*N.ones(10)
+        self.setup_base(nlp_args = (n_e, hs, n_cp,b_f), options = { 'max_iter': 500 })
+        self.run()
+        self.load_expected_data('LagrangeCost_OptTest4_bf_result.txt')
+
+    @testattr(ipopt = True)
+    def test_trajectories(self):
+        self.assert_all_trajectories(['sys.x[1]', 'sys.x[2]', 'u', 'sys.y'])
+

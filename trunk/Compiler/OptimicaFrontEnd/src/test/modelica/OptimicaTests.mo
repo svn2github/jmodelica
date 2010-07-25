@@ -31,8 +31,6 @@ model OptimicaTests
     y<=5;
   end ConstraintTest1;
 
-
-
   optimization ClassAttrTest1 (objective=x(finalTime)^2,startTime=3,finalTime=4)
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.FlatteningTestCase(
@@ -189,6 +187,56 @@ Semantic error at line 179, column 41:
 ")})));
 
   end ClassAttrTest6;
+
+  optimization ClassAttrTest7 (objectiveIntegrand=x(finalTime),startTime=3,finalTime=4)
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ClassAttrTest7",
+         description="Variability of objective class attribute: continuous",
+         errorMessage="
+1 errors found:
+Error: in file '/Users/jakesson/projects/JModelica/Compiler/OptimicaFrontEnd/src/test/modelica/OptimicaTests.mo':
+Semantic error at line 193, column 31:
+  The class attribute 'objectiveIntegrand' must not have timed variability.
+")})));
+
+    Real x;
+    Real y;
+  equation 
+    x=2;
+    y=4;
+  constraint
+    x<=3;
+    y>=3;
+  end ClassAttrTest7;
+
+  optimization ClassAttrTest8 (objectiveIntegrand=x^2,startTime=3,finalTime=4)
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ClassAttrTest8",
+         description="Variability of objective class attribute: timed",
+         flatModel="
+optimization OptimicaTests.ClassAttrTest8(objectiveIntegrand = x ^ 2,startTime = 3,finalTime = 4)
+ Real x;
+ Real y;
+equation 
+ x = 2;
+ y = 4;
+constraint 
+ x <= 3;
+ y >= 3;
+end OptimicaTests.ClassAttrTest8;
+")})));
+
+    Real x;
+    Real y;
+  equation 
+    x=2;
+    y=4;
+  constraint
+    x<=3;
+    y>=3;
+  end ClassAttrTest8;
 
   optimization FreeDependentParametersTest1(objective=p1^2,startTime=0,finalTime=1) 
 

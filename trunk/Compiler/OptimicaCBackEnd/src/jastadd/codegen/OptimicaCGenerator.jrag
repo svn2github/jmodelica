@@ -43,6 +43,32 @@ public class OptimicaCGenerator extends CGenerator {
 			genPrinter.print(foptclass.numFreeDependentRealParameters());
 		}	
 	}
+
+	class OptTag_C_numPointwisePenalty extends OptTag {
+		
+		public OptTag_C_numPointwisePenalty(AbstractGenerator myGenerator, 
+		  FOptClass foptclass) {
+			super("n_j","Number of pointwise penalty functions",
+			  myGenerator,foptclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(foptclass.objectiveExp()!=null? "1": "0");
+		}	
+	}
+
+	class OptTag_C_numLagrangeIntegrand extends OptTag {
+		
+		public OptTag_C_numLagrangeIntegrand(AbstractGenerator myGenerator, 
+		  FOptClass foptclass) {
+			super("n_l","Number of Lagrange integrands",
+			  myGenerator,foptclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(foptclass.objectiveIntegrandExp()!=null? "1": "0");
+		}	
+	}
 	
 	class OptTag_C_numPathEqConstraints extends OptTag {
 		
@@ -180,6 +206,24 @@ public class OptimicaCGenerator extends CGenerator {
 			}
 		}
 	}
+
+	class OptTag_C_LagrangeIntegrandFunction extends OptTag {
+		
+		public OptTag_C_LagrangeIntegrandFunction(AbstractGenerator myGenerator, 
+		  FOptClass foptclass) {
+			super("C_Opt_lagrange_integrand","C: Lagrange integrand function",
+			  myGenerator,foptclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			if (foptclass.objectiveIntegrandExp()!=null) {
+				genPrinter.print("   (*res)[0] = ");
+				foptclass.objectiveIntegrandExp().prettyPrint_C(genPrinter,"");
+				genPrinter.print(";\n");
+			}
+		}
+	}
+
 	
 	class OptTag_C_PathEqualityConstraints extends OptTag {
 	

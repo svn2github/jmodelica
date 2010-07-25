@@ -2837,6 +2837,8 @@ class JMIModel(object):
                                                 ct.POINTER(ct.c_int),
                                                 ct.POINTER(ct.c_int),
                                                 ct.POINTER(ct.c_int),
+                                                ct.POINTER(ct.c_int),
+                                                ct.POINTER(ct.c_int),
                                                 ct.POINTER(ct.c_int)]    
         self._dll.jmi_opt_J.argtypes = [ct.c_void_p,
                                         Nct.ndpointer(dtype=c_jmi_real_t,
@@ -2881,12 +2883,14 @@ class JMIModel(object):
                                              ct.POINTER(ct.c_int),
                                              ct.POINTER(ct.c_int)]
 
+        n_eq_J = ct.c_int()
+        n_eq_L = ct.c_int()
         n_eq_Ffdp = ct.c_int()
         n_eq_Ceq = ct.c_int()
         n_eq_Cineq = ct.c_int()
         n_eq_Heq = ct.c_int()
         n_eq_Hineq = ct.c_int()
-        assert self._dll.jmi_opt_get_sizes(self._jmi, byref(n_eq_Ffdp), byref(n_eq_Ceq),
+        assert self._dll.jmi_opt_get_sizes(self._jmi, byref(n_eq_J), byref(n_eq_L), byref(n_eq_Ffdp), byref(n_eq_Ceq),
                                            byref(n_eq_Cineq),
                                            byref(n_eq_Heq), byref(n_eq_Hineq)) \
                is 0, \
@@ -4127,18 +4131,20 @@ class JMIModel(object):
         """Get the sizes of the optimization functions.
         
         Returns:
-            Tuple with number of equations in the Ffdp, Ceq, Cineq, Heq and Hineq 
+            Tuple with number of equations in the J, L, Ffdp, Ceq, Cineq, Heq and Hineq 
             residual respectively. 
         
         """
+        n_eq_J = ct.c_int()
+        n_eq_L = ct.c_int()
         n_eq_Ffdp = ct.c_int()
         n_eq_Ceq = ct.c_int()
         n_eq_Cineq = ct.c_int()
         n_eq_Heq = ct.c_int()
         n_eq_Hineq = ct.c_int()
-        if self._dll.jmi_opt_get_sizes(self._jmi, byref(n_eq_Ffdp), byref(n_eq_Ceq), byref(n_eq_Cineq), byref(n_eq_Heq), byref(n_eq_Hineq)) is not 0:
+        if self._dll.jmi_opt_get_sizes(self._jmi, byref(n_eq_J), byref(n_eq_L), byref(n_eq_Ffdp), byref(n_eq_Ceq), byref(n_eq_Cineq), byref(n_eq_Heq), byref(n_eq_Hineq)) is not 0:
             raise JMIException("Getting the sizes of the optimization functions failed.")
-        return n_eq_Ffdp.value, n_eq_Ceq.value, n_eq_Cineq.value, n_eq_Heq.value, n_eq_Hineq.value
+        return n_eq_J.value, n_eq_L.value, n_eq_Ffdp.value, n_eq_Ceq.value, n_eq_Cineq.value, n_eq_Heq.value, n_eq_Hineq.value
 
     def opt_Ffdp(self, res):
         """Evaluate the residual of the free dependent parameter residuals Ffdp.

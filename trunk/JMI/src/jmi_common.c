@@ -330,8 +330,10 @@ int jmi_init_init(jmi_t* jmi, jmi_residual_func_t F0, int n_eq_F0,
 int jmi_opt_init(jmi_t* jmi, jmi_residual_func_t Ffdp,int n_eq_Fdp,
 		 jmi_jacobian_func_t dFfdp,
 		 int dFfdp_n_nz, int* dFfdp_row, int* dFfdp_col,
-		 jmi_residual_func_t J, jmi_jacobian_func_t dJ,
-		int dJ_n_nz, int* dJ_row, int* dJ_col,
+		 jmi_residual_func_t J, int n_eq_J, jmi_jacobian_func_t dJ,
+		 int dJ_n_nz, int* dJ_row, int* dJ_col,
+		 jmi_residual_func_t L, int n_eq_L, jmi_jacobian_func_t dL,
+		 int dL_n_nz, int* dL_row, int* dL_col,
 		jmi_residual_func_t Ceq, int n_eq_Ceq,
 		jmi_jacobian_func_t dCeq,
 		int dCeq_n_nz, int* dCeq_row, int* dCeq_col,
@@ -354,8 +356,12 @@ int jmi_opt_init(jmi_t* jmi, jmi_residual_func_t Ffdp,int n_eq_Fdp,
 	jmi->opt->Ffdp = jf_Ffdp;
 
 	jmi_func_t* jf_J;
-	jmi_func_new(&jf_J,J,1,dJ,dJ_n_nz,dJ_row, dJ_col);
+	jmi_func_new(&jf_J,J,n_eq_J,dJ,dJ_n_nz,dJ_row, dJ_col);
 	jmi->opt->J = jf_J;
+
+	jmi_func_t* jf_L;
+	jmi_func_new(&jf_L,L,n_eq_L,dL,dL_n_nz,dL_row, dL_col);
+	jmi->opt->L = jf_L;
 
 	jmi_func_t* jf_Ceq;
 	jmi_func_new(&jf_Ceq,Ceq,n_eq_Ceq,dCeq,dCeq_n_nz,dCeq_row, dCeq_col);
@@ -472,8 +478,6 @@ int jmi_variable_type_spec(jmi_t *jmi, int independent_vars,
   return -1;
 }
 
-
-
 int jmi_dae_get_sizes(jmi_t* jmi, int* n_eq_F, int* n_eq_R) {
 	if (jmi->dae == NULL) {
 		return -1;
@@ -482,6 +486,7 @@ int jmi_dae_get_sizes(jmi_t* jmi, int* n_eq_F, int* n_eq_R) {
 	*n_eq_R = jmi->dae->R->n_eq_F;
 	return 0;
 }
+
 int jmi_init_get_sizes(jmi_t* jmi, int* n_eq_F0, int* n_eq_F1, int* n_eq_Fp,
 		int* n_eq_R0) {
 	if (jmi->init == NULL) {
@@ -494,10 +499,13 @@ int jmi_init_get_sizes(jmi_t* jmi, int* n_eq_F0, int* n_eq_F1, int* n_eq_Fp,
 	return 0;
 }
 
-int jmi_opt_get_sizes(jmi_t* jmi, int* n_eq_Ffdp, int* n_eq_Ceq, int* n_eq_Cineq, int* n_eq_Heq, int* n_eq_Hineq) {
+int jmi_opt_get_sizes(jmi_t* jmi, int* n_eq_J, int* n_eq_L, int* n_eq_Ffdp,
+		int* n_eq_Ceq, int* n_eq_Cineq, int* n_eq_Heq, int* n_eq_Hineq) {
 	if (jmi->opt == NULL) {
 		return -1;
 	}
+	*n_eq_J = jmi->opt->J->n_eq_F;
+	*n_eq_L = jmi->opt->L->n_eq_F;
 	*n_eq_Ffdp = jmi->opt->Ffdp->n_eq_F;
 	*n_eq_Ceq = jmi->opt->Ceq->n_eq_F;
 	*n_eq_Cineq = jmi->opt->Cineq->n_eq_F;

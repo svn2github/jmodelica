@@ -1089,7 +1089,7 @@ class TestJMIModel_VDP:
     @testattr(stddist = True)
     def test_opt_get_sizes(self):
         """ Test opt_get_sizes method. """
-        n_eq_ffdp, n_eq_ceq, n_eq_cineq, n_eq_heq, n_eq_hineq = self.vdp.jmimodel.opt_get_sizes()
+        n_eq_j, n_eq_l, n_eq_ffdp, n_eq_ceq, n_eq_cineq, n_eq_heq, n_eq_hineq = self.vdp.jmimodel.opt_get_sizes()
     
     @testattr(stddist = True)
     def test_opt_J(self):
@@ -1142,15 +1142,17 @@ class TestJMIModel_VDP:
         assert n_eq_F0==res_n_eq_F0 and n_eq_F1==res_n_eq_F1 and n_eq_Fp==res_n_eq_Fp and n_eq_R0==res_n_eq_R0, \
                "test_jmi.py: test_Model_dae_get_sizes: Wrong number of DAE initialization equations." 
 
+        res_n_eq_J = 1
+        res_n_eq_L = 0
         res_n_eq_Ffdp = 0
         res_n_eq_Ceq = 0
         res_n_eq_Cineq = 1
         res_n_eq_Heq = 0
         res_n_eq_Hineq = 0
         
-        n_eq_Ffdp,n_eq_Ceq,n_eq_Cineq,n_eq_Heq,n_eq_Hineq = self.vdp.jmimodel.opt_get_sizes()
+        n_eq_J, n_eq_L, n_eq_Ffdp,n_eq_Ceq,n_eq_Cineq,n_eq_Heq,n_eq_Hineq = self.vdp.jmimodel.opt_get_sizes()
     
-        assert n_eq_Ffdp==res_n_eq_Ffdp and n_eq_Ceq==res_n_eq_Ceq and n_eq_Cineq==res_n_eq_Cineq and n_eq_Heq==res_n_eq_Heq and n_eq_Hineq==res_n_eq_Hineq,  \
+        assert n_eq_J==res_n_eq_J and n_eq_L==res_n_eq_L and n_eq_Ffdp==res_n_eq_Ffdp and n_eq_Ceq==res_n_eq_Ceq and n_eq_Cineq==res_n_eq_Cineq and n_eq_Heq==res_n_eq_Heq and n_eq_Hineq==res_n_eq_Hineq,  \
                "test_jmi.py: test_Model_dae_get_sizes: Wrong number of constraints." 
     
     @testattr(stddist = True)

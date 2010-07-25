@@ -97,7 +97,7 @@
  * limited extent C++ where needed (e.g. in solver interfaces and in most likely in the
  * AD framework).
  *
- * It should also be possible to build shared libraries, in order to.
+ * It should also be possible to build shared libraries, in order to
  * build applications that contains several models.
  *
  *
@@ -212,7 +212,7 @@
  *   \f$C_{eq}(p,v,q)\f$, \f$C_{ineq}(p,v,q)\f$, \f$H_{eq}(p,q)\f$, \f$H_{ineq}(p,q)\f$.
  *   Based on these functions, an optimization problem is then formulated as
  *
- *      \f$\min_{p^{opt},u}J(p,q)\f$<br>
+ *      \f$\min_{p^{opt},u} \int_{t_0}^{t_f} L(p,v) dt + J(p,q)\f$<br>
  *      subject to <br>
  *      \f$F_{fdp}(p) = 0\f$<br>
  *      \f$C_{eq}(p,v,q) = 0\f$<br>
@@ -220,10 +220,18 @@
  *      \f$H_{eq}(p,q) = 0\f$<br>
  *      \f$H_{ineq}(p,q) \leq 0\f$<br>
  *
- *   where \f$J\f$ is the cost function to be minimized, \f$F_{fdp} are the free
+ *   where \f$L\f$ is the Lagrange integrand and \f$J\f$ is the point wise
+ *   penalty penalty function in the cost to be minimized, \f$F_{fdp} are the free
  *   dependent parameter residuals, \f$ \f$C_{eq}\f$ are path equality constraints,
  *   \f$C_{ineq}\f$ are path inequality constraints, \f$H_{eq}\f$ are (time) point equality constraints,
- *   and \f$H_{ineq}\f$ are (time) point inequality constraints. The rationale for introducing
+ *   and \f$H_{ineq}\f$ are (time) point inequality constraints. Notice that \f$J\f$
+ *   (corresponding to the Optimica class attribute 'objective') is a function of the parameters
+ *   \f$p\f$ and the instant variables \f$q\f$, and
+ *   is commonly used to express terminal costs or sums of deviations between
+ *   measurement data and model trajectories in parameter estimation problems.
+ *   \f$L\f$ (corresponding to the Optimica class attribute 'objectiveIntegrand')
+ *   on the other hand is used to encode Lagrange type integral cost functions.
+ *   The rationale for introducing
  *   \f$H_{eq}\f$ and \f$H_{ineq}\f$ is to enable expression of e.g. terminal constraints. In addition, the
  *   DAE and the DAE initialization relations are constraints in the optimization problem.
  *   The \f$n_{p^{opt}}\f$ optimization parameters \f$p^{opt}\f$ are a subset
@@ -1385,6 +1393,8 @@ int jmi_opt_get_p_opt_indices(jmi_t *jmi, int *p_opt_indices);
  * \brief Get the sizes of the the optimization functions.
  *
  * @param jmi A jmi_t struct.
+ * @param n_eq_J (Output) The number of point wise penalty functions.
+ * @param n_eq_L (Output) The number of Lagrange integrands.
  * @param n_eq_Ffdp (Output) The number of equations in the \f$F_{fdp}\f$ residual.
  * @param n_eq_Ceq (Output) The number of equations in the \f$C_{eq}\f$ residual.
  * @param n_eq_Cineq (Output) The number of equations in the \f$C_{ineq}\f$ residual.
@@ -1393,7 +1403,8 @@ int jmi_opt_get_p_opt_indices(jmi_t *jmi, int *p_opt_indices);
  * @return Error code.
  *
  */
-int jmi_opt_get_sizes(jmi_t* jmi, int* n_eq_Ffdp, int* n_eq_Ceq, int* n_eq_Cineq, int* n_eq_Heq, int* n_eq_Hineq);
+int jmi_opt_get_sizes(jmi_t* jmi, int* n_eq_J, int* n_eq_L, int* n_eq_Ffdp,
+		int* n_eq_Ceq, int* n_eq_Cineq, int* n_eq_Heq, int* n_eq_Hineq);
 
 /**
  * \brief Evaluate the \f$F_{fdp}\f$ residual function.
@@ -1467,20 +1478,20 @@ int jmi_opt_dFfdp_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_va
 		int *dF_n_cols, int *dF_n_nz);
 
 /**
- * \brief Evaluate the cost function \f$J\f$.
+ * \brief Evaluate the penalty function \f$J\f$.
  *
  * The user sets the input variables by writing to
  * the vectors obtained from the functions ::jmi_get_dx, ::jmi_get_x etc.
  *
  * @param jmi A jmi_t struct.
- * @param J The value of the cost function.
+ * @param J The value of the penalty function.
  * @return Error code.
  *
  */
 int jmi_opt_J(jmi_t* jmi, jmi_real_t* J);
 
 /**
- * \brief Evaluate the gradient of the cost function \f$J\f$.
+ * \brief Evaluate the gradient of the penalty function \f$J\f$.
  *
  * The user sets the input variables by writing to
  * the vectors obtained from the functions ::jmi_get_dx, ::jmi_get_x etc.
@@ -1497,7 +1508,7 @@ int jmi_opt_J(jmi_t* jmi, jmi_real_t* J);
 int jmi_opt_dJ(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int* mask, jmi_real_t* jac);
 
 /**
- * \brief Returns the number of non-zeros in the gradient of the cost function \f$J\f$.
+ * \brief Returns the number of non-zeros in the gradient of the penalty function \f$J\f$.
  *
  * @param jmi A jmi_t struct.
  * @param eval_alg See ::jmi_dae_dF_n_nz.
@@ -1508,7 +1519,7 @@ int jmi_opt_dJ_n_nz(jmi_t* jmi, int eval_alg, int* n_nz);
 
 /**
  * \brief Returns the row and column indices of the non-zero elements in the gradient
- * of the cost function \f$J\f$.
+ * of the penalty function \f$J\f$.
  *
  * Notice that Fortran style indexing is used: the first row (and column) has index 1.
  *
@@ -1526,7 +1537,7 @@ int jmi_opt_dJ_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
 
 /**
  * \brief This helper function computes the number of columns and the number of non-zero
- * elements in the gradient of the cost function \f$J\f$ given a sparsity configuration.
+ * elements in the gradient of the penalty function \f$J\f$ given a sparsity configuration.
  *
  * @param jmi A jmi_t struct.
  * @param eval_alg See ::jmi_dae_dF.
@@ -1539,6 +1550,82 @@ int jmi_opt_dJ_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
  */
 int jmi_opt_dJ_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
 		int *dJ_n_cols, int *dJ_n_nz);
+
+/**
+ * \brief Evaluate the Lagrange integrand cost \f$L\f$.
+ *
+ * The user sets the input variables by writing to
+ * the vectors obtained from the functions ::jmi_get_dx, ::jmi_get_x etc.
+ *
+ * @param jmi A jmi_t struct.
+ * @param L The value of the Lagrange integrand.
+ * @return Error code.
+ *
+ */
+int jmi_opt_L(jmi_t* jmi, jmi_real_t* L);
+
+/**
+ * \brief Evaluate the gradient of the Lagrange integrand \f$L\f$.
+ *
+ * The user sets the input variables by writing to
+ * the vectors obtained from the functions ::jmi_get_dx, ::jmi_get_x etc.
+ *
+ * @param jmi A jmi_t struct.
+ * @param eval_alg See ::jmi_dae_dF.
+ * @param sparsity See ::jmi_dae_dF.
+ * @param independent_vars See ::jmi_dae_dF.
+ * @param mask See ::jmi_dae_dF.
+ * @param jac (Output) The gradient.
+ * @return Error code.
+ *
+ */
+int jmi_opt_dL(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int* mask, jmi_real_t* jac);
+
+/**
+ * \brief Returns the number of non-zeros in the gradient of the Lagrange
+ * integrand \f$L\f$.
+ *
+ * @param jmi A jmi_t struct.
+ * @param eval_alg See ::jmi_dae_dF_n_nz.
+ * @param n_nz (Output) The number of non-zero entries in the full gradient.
+ * @return Error code.
+ */
+int jmi_opt_dL_n_nz(jmi_t* jmi, int eval_alg, int* n_nz);
+
+/**
+ * \brief Returns the row and column indices of the non-zero elements in the gradient
+ * of the Lagrange integrand \f$L\f$.
+ *
+ * Notice that Fortran style indexing is used: the first row (and column) has index 1.
+ *
+ * @param jmi A jmi_t struct.
+ * @param eval_alg See ::jmi_dae_dF.
+ * @param independent_vars See ::jmi_dae_dF.
+ * @param mask See ::jmi_dae_dF.
+ * @param row (Output) The row indices of the non-zeros in the gradient.
+ * @param col (Output) The column indices of the non-zeros in the gradient.
+ * @return Error code.
+ *
+ */
+int jmi_opt_dL_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
+        int *mask, int* row, int* col);
+
+/**
+ * \brief This helper function computes the number of columns and the number of non-zero
+ * elements in the gradient of the Lagrange integrand \f$L\f$ given a sparsity
+ * configuration.
+ *
+ * @param jmi A jmi_t struct.
+ * @param eval_alg See ::jmi_dae_dF.
+ * @param sparsity See ::jmi_dae_dF.
+ * @param independent_vars See ::jmi_dae_dF.
+ * @param mask See ::jmi_dae_dF.
+ * @param dL_n_cols (Output) The number of columns of the resulting Jacobian.
+ * @param dL_n_nz (Output) The number of non-zeros of the resulting Jacobian.
+ *
+ */
+int jmi_opt_dL_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
+		int *dL_n_cols, int *dL_n_nz);
 
 /**
  * \brief Evaluate the residual of the equality path constraints \f$C_{eq}\f$.
@@ -1879,15 +1966,15 @@ void jmi_print_summary(jmi_t *jmi);
  */
 void jmi_lin_interpolate(jmi_real_t x, jmi_real_t *z , int n ,int m,
 		jmi_real_t *y);
-		
+
 /**
  * \brief Check if there is support for CppAD derivatives or not.
- * 
- * If the return value is 1 then there is support for CppAD derivatives, 
+ *
+ * If the return value is 1 then there is support for CppAD derivatives,
  * if return value is 0 there is no CppAD support.
- * 
+ *
  * @return 1 for CppAD support, 0 if no CppAD support.
- */ 
+ */
 int jmi_with_cppad_derivatives();
 
 /* @} */

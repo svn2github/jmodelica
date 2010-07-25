@@ -24,6 +24,7 @@ aspect ClassAttributes {
 	    // Build a string with a Modelica class corresponding to Real
 		String builtInDef = "model ClassAttributes\n";
 		builtInDef += "Real objective = 1;\n"; 
+		builtInDef += "Real objectiveIntegrand = 1;\n"; 
 		builtInDef += "parameter Real startTime=0;\n";
 		builtInDef += "parameter Real finalTime=0;\n";
 		builtInDef += "parameter Boolean static=false;\n";

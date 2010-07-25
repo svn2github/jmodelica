@@ -61,6 +61,11 @@ aspect OptimicaErrorCheck {
      				error("The class attribute 'objective' must have parameter or timed variability.");
  		}
  
+     	if (!iocd.isStatic() && getName().name().equals("objectiveIntegrand") && 
+     			(getInstModification().instValueMod().variability().equals(fTimed()))) {
+     				error("The class attribute 'objectiveIntegrand' must not have timed variability.");
+ 		}
+
   	}
 
   	public void FOptClass.checkFClassDimensions() {
