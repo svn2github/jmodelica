@@ -14,7 +14,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import java.util.ArrayDeque;
+//import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Queue;
@@ -709,7 +709,8 @@ aspect ParameterSorting {
 		// Sort using algorithm described at
 		// http://en.wikipedia.org/wiki/Topological_sorting
 		List<FAbstractEquation> L = new List<FAbstractEquation>();
-		Queue<FAbstractEquation> S = new ArrayDeque<FAbstractEquation>(n_eqns);
+//		Queue<FAbstractEquation> S = new ArrayDeque<FAbstractEquation>(n_eqns);
+		ArrayList<FAbstractEquation> S = new ArrayList<FAbstractEquation>(n_eqns);
 		
 		// Add all nodes without incoming edges to S
 		for (int i = 0; i < n_eqns; i++) 
@@ -719,7 +720,8 @@ aspect ParameterSorting {
 		// Repeat while S is not empty
 		while (S.size() > 0) {
 			// Remove a node n from S
-			FAbstractEquation n = S.remove();
+			//FAbstractEquation n = S.remove();
+			FAbstractEquation n = S.remove(0);	
 			// Insert n into L
 			L.add(n);
 			// For each node m with an edge e from n to m (in original order)
