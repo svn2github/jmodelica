@@ -32,6 +32,7 @@ N.int = N.int32
 
 jm_home = jmodelica.environ['JMODELICA_HOME']
 path_to_examples = os.path.join('Python','jmodelica','examples')
+path_to_tests = os.path.join('Python','jmodelica','tests')
 oc = OptimicaCompiler()
 oc.set_boolean_option('state_start_values_fixed',True)
 
@@ -343,3 +344,40 @@ class TestNLP_CSTR():
     ##     plt.ylabel('x2')
     ##     plt.show()
 
+class TestCollocationEventException:
+    """ Check that an exception is thrown when a collocation optimization
+    object is created from a model containing event indicators.
+    """
+    
+    @classmethod
+    def setUpClass(cls):
+        """
+        Compile the test model.
+        """
+        # compile cstr
+        model_cstr = os.path.join('files','IfExpTest.mo')
+        fpath_cstr = os.path.join(jm_home, path_to_tests, model_cstr)
+        cpath_cstr = "IfExpTestEvents"
+        fname_cstr = cpath_cstr.replace('.','_')
+        oc.compile_model(cpath_cstr, fpath_cstr, 'ipopt')
+    
+    def setUp(self):
+        """Test setUp. Load the test model."""
+        cpath_model = "IfExpTestEvents"
+        fname_model = cpath_model.replace('.','_')
+        self.model = jmi.Model(fname_model)
+
+    @testattr(ipopt = True)
+    def test_exception_thrown(self):
+        # Initialize the mesh
+        n_e = 150 # Number of elements 
+        hs = N.ones(n_e)*1./n_e # Equidistant points
+        n_cp = 3; # Number of collocation points in each element        
+        
+        # Create an NLP object
+        try:
+            self.nlp = ipopt.NLPCollocationLagrangePolynomials(self.model,n_e,hs,n_cp)
+        except Exception as e:
+            assert str(e) == "The collocation optimization algorithm does not support models with events. Please consider using the noEvent() operator or rewriting the model.", "Wrong message in thrown exception."
+        else:
+            assert False, "No exception thrown when creating a collocation optimization object based on a model containing events."
