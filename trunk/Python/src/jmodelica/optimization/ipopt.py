@@ -24,6 +24,8 @@ import numpy.ctypeslib as Nct
 from jmodelica import jmi 
 from jmodelica import io
 
+from jmodelica.io import VariableNotFoundError
+
 int = N.int32
 N.int = N.int32
 
@@ -740,7 +742,7 @@ class NLPCollocation(object):
                         p_opt_data[i_pi_opt] = traj.x[0]/sc[z_i]
                     else:
                         p_opt_data[i_pi_opt] = traj.x[0]
-                except:
+                except VariableNotFoundError:
                     print "Warning: Could not find value for parameter " + name
                     
         #print(N.size(var_data))
@@ -784,7 +786,7 @@ class NLPCollocation(object):
                     var_data[:,col_index] = traj.x
                 x_index = x_index + 1
                 col_index = col_index + 1
-            except:
+            except VariableNotFoundError:
                 x_index = x_index + 1
                 col_index = col_index + 1
                 print "Warning: Could not find trajectory for state variable " + name
@@ -800,7 +802,7 @@ class NLPCollocation(object):
                     var_data[:,col_index] = traj.x
                 u_index = u_index + 1
                 col_index = col_index + 1
-            except:
+            except VariableNotFoundError:
                 u_index = u_index + 1
                 col_index = col_index + 1
                 print "Warning: Could not find trajectory for input variable " + name
@@ -822,7 +824,7 @@ class NLPCollocation(object):
                         var_data[:,col_index] = traj.x
                 w_index = w_index + 1
                 col_index = col_index + 1
-            except:
+            except VariableNotFoundError:
                 w_index = w_index + 1
                 col_index = col_index + 1
                 print "Warning: Could not find trajectory for algebraic variable " + name
