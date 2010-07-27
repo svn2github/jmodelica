@@ -1211,7 +1211,8 @@ class FMIModel(object):
             #except WindowsError:
             #    print 'Failed to free model instance.'
         else:
-            self._fmiFreeModelInstance(self._model)
+            pass
+            #self._fmiFreeModelInstance(self._model)
            
         #Remove the temporary xml
         os.remove(self._tempdir+os.sep+self._tempxml)
