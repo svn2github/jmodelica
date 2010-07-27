@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
-"""Module containing XML parser and validator providing an XML object which 
-can be used to extract information from the parsed XML file using XPath 
-queries.
+"""Module containing XML parser and validator providing an XML data 
+structure based on the XML schemas fmiModelDescription.xsd, 
+fmiExtendedModelDescription.xsd and jmodelicaModelDescription.xsd which 
+can be used to extract information from an XML file - provided the XML 
+file will validate with the above schemas.
 """
 #    Copyright (C) 2009 Modelon AB
 #
@@ -24,6 +26,8 @@ import numpy as N
 int = N.int32
 N.int = N.int32
 uint = N.uint32
+
+# ==== Enumerations used in the module ==== #
 
 # Alias data
 NO_ALIAS = 0
@@ -60,8 +64,12 @@ ENUMERATION = 4
 
 #=======================================================================
 
+# ==== Internal helper functions ====#
 
 def _translate_xmlbool(xmlbool):
+    """ Helper function which translates strings 'true' and 'false' 
+        to bool types.
+    """
     if xmlbool == 'false':
         return False
     elif xmlbool == 'true':
@@ -71,6 +79,9 @@ def _translate_xmlbool(xmlbool):
             ' does not have a valid value.')
             
 def _translate_variability(variability):
+    """ Helper function which translates strings from the attribute 
+        variability to corresponding enumeration value.
+    """
     if variability == "continuous":
         return CONTINUOUS
     elif variability == "constant":
@@ -83,6 +94,9 @@ def _translate_variability(variability):
         raise XMLException("Variability: "+str(variability)+" is unknown.")
 
 def _translate_alias(alias):
+    """ Helper function which translates strings from the attribute 
+        alias to corresponding enumeration value.
+    """
     if alias == "noAlias":
         return NO_ALIAS
     elif alias == "alias":
@@ -93,6 +107,9 @@ def _translate_alias(alias):
         raise XMLException("Alias: "+ str(alias) + " is unknown.")
             
 def _translate_variable_category(category):
+    """ Helper function which translates strings from the attribute 
+        variable category to corresponding enumeration value.
+    """
     if category == "algebraic":
         return ALGEBRAIC
     elif category == "state":
@@ -108,9 +125,13 @@ def _translate_variable_category(category):
     elif category == "derivative":
         return DERIVATIVE
     else:
-        raise XMLException("Variable category: "+str(category)+" is unknown.")
+        raise XMLException("Variable category: "+
+            str(category)+" is unknown.")
     
 def _translate_causality(causality):
+    """ Helper function which translates strings from the attribute 
+        causality to corresponding enumeration value.
+    """
     if causality == "internal":
         return INTERNAL
     elif causality == "input":
@@ -121,6 +142,24 @@ def _translate_causality(causality):
         return NONE
     else:
         raise XMLException("Causality: "+str(causality)+" is unknown.")
+        
+def _translate_fundamental_type(type):
+    """ Helper function which translates strings from the scalar variable 
+        fundamental type to corresponding enumeration value.
+    """
+    if isinstance(type, Real):
+        return REAL
+    elif isinstance(type, Integer):
+        return INTEGER
+    elif isinstance(type, String):
+        return STRING
+    elif isinstance(type, Boolean):
+        return BOOLEAN
+    elif isinstance(type, Enumeration):
+        return ENUMERATION
+    else:
+        raise XMLException("Unknown type for variable: "+ 
+            str(type))
 
 def _parse_XML(filename, schemaname=''):
 
@@ -165,7 +204,7 @@ def _parse_XML(filename, schemaname=''):
                 %(schemaname, detail))         
         
         schema = etree.XMLSchema(schemadoc)
-    
+
         result = schema.validate(xmldoc)
     
         if not result:
@@ -179,14 +218,11 @@ class ModelDescription:
 
     def __init__(self, filename, schemaname=''):
         """ 
-        Create an XML document object representation and an XPath 
-        evaluator.
+        Create an XML document object representation.
         
-        Parse an XML document and create an XML document object 
+        Parse an XML document and create a full XML document object 
         representation. Validate against XML schema before parsing if 
-        the parameter schemaname is set. Instantiates an XPath evaluator 
-        object for the parsed XML which can be used to evaluate XPath 
-        expressions on the XML.
+        the parameter schemaname is set.
          
         """
         # set up cache, parse XML file and obtain the root
@@ -206,11 +242,15 @@ class ModelDescription:
         # create tuple
         self._vrefs = tuple(self._vrefs)
         self._vrefs_noAlias = tuple(self._vrefs_noAlias)
+        
+        # update alias variables default attributes
+        # they should inherit the aliased variables values
+        self._update_alias_defaults()
 
     def _parse_element_tree(self, root):
         """ Parse the XML element tree and build up internal data 
-            structure. """
-        
+            structure. 
+        """
         # model (root) attributes
         self._fill_attributes(root)
             
@@ -251,6 +291,9 @@ class ModelDescription:
         self._attributes.update(root.attrib) 
             
     def _fill_unit_definitions(self, root):
+        """ Create the unit definitions data structure and fill with data 
+            from the XML file.
+        """
         self._unit_definitions = []
         
         e_unitdefs = root.find('UnitDefinitions')
@@ -261,6 +304,9 @@ class ModelDescription:
                 self._unit_definitions.append(BaseUnit(e_baseunit))
                 
     def _fill_type_definitions(self, root):
+        """ Create the type definitions data structure and fill with data 
+            from the XML file.
+        """
         self._type_definitions = []
         
         e_typedefs = root.find('TypeDefinitions')
@@ -271,6 +317,9 @@ class ModelDescription:
                 self._type_definitions.append(Type(e_type))
                 
     def _fill_default_experiment(self, root):
+        """ Create the default experiment data structure and fill with 
+            data from the XML file.
+        """
         self._default_experiment = None
         
         e_defaultexperiment = root.find('DefaultExperiment')
@@ -279,6 +328,9 @@ class ModelDescription:
                 e_defaultexperiment)
     
     def _fill_vendor_annotations(self, root):
+        """ Create the vendor annotations data structure and fill with 
+            data from the XML file.
+        """
         self._vendor_annotations = []
         
         e_vendorannotations = root.find('VendorAnnotations')
@@ -289,6 +341,9 @@ class ModelDescription:
                 self._vendor_annotations.append(Tool(e_tool))
                 
     def _fill_model_variables(self, root):
+        """ Create the model variables data structure (list with all 
+            scalar variables) and fill with data from the XML file.
+        """
         self._model_variables = []
         self._model_variables_dict = {}
         
@@ -309,6 +364,9 @@ class ModelDescription:
                     self._vrefs_noAlias.append(sv.get_value_reference())
                 
     def _fill_optimization(self, root):
+        """ Create the optimization data structure (if any) and fill 
+            with data from the XML file.
+        """
         self._optimization = None
         
         try:
@@ -322,64 +380,176 @@ class ModelDescription:
         if e_optimization != None:
             self._optimization = Optimization(e_optimization)
             
+    def _update_alias_defaults(self):
+        """ Update all alias variable attributes variability and 
+            causality. They should get their value from the aliased 
+            variable.
+        """
+        # create dict with no aliases and vref as key
+        names_noalias = self.get_variable_names(include_alias=False)
+        noalias_dict = dict(zip(self._vrefs_noAlias,names_noalias))
+        
+        for sv in self.get_model_variables():
+            if sv.get_alias() != NO_ALIAS:
+                # alias variable found
+                
+                # get aliased variable
+                aliased_name = noalias_dict[sv.get_value_reference()][1]
+                aliased_sv = self._model_variables_dict[aliased_name]
+                
+                # update attributes of alias variable
+                sv._attributes['variability'] = aliased_sv._attributes['variability']
+                sv._attributes['causality'] = aliased_sv._attributes['causality']
+            
     def get_fmi_version(self):
+        """ Get model attribute fmi version.
+        
+        Returns:
+            fmi version attribute as string.
+        """
         return self._attributes['fmiVersion']
         
     def get_model_name(self):
+        """ Get model attribute name.
+        
+        Returns:
+            model name as string.
+        """
         return self._attributes['modelName']
         
     def get_model_identifier(self):
+        """ Get model attribute model identifier.
+        
+        Returns:
+            model identifier as string.
+        """
         return self._attributes['modelIdentifier']
         
     def get_guid(self):
+        """ Get model attribute GUID.
+        
+        Returns:
+            GUID as string.
+        """
         return self._attributes['guid']
         
     def get_description(self):
+        """ Get model attribute description.
+        
+        Returns:
+            description as string (empty string if not specified in XML).
+        """
         return self._attributes['description']
     
     def get_author(self):
+        """ Get model attribute author.
+        
+        Returns:
+            author as string (empty string if not specified in XML).
+        """
         return self._attributes['author']
         
     def get_version(self):
+        """ Get model attribute version (of FMU). 
+        
+        Returns:
+            version as float if set, otherwise None.
+        """
         if self._attributes['version'] == '':
             return None
         return float(self._attributes['version'])
         
     def get_generation_tool(self):
+        """ Get model attribute generation tool.
+        
+        Returns:
+            generation tool as string (empty string if not specified in XML).
+        """
         return self._attributes['generationTool']
         
     def get_generation_date_and_time(self):
+        """ Get model attribute date and time.
+        
+        Returns:
+            date and time as string (empty string if not specified in XML).
+        """
         return self._attributes['generationDateAndTime']
         
     def get_variable_naming_convention(self):
+        """ Get model attribute variable naming convention.
+        
+        Returns:
+            variable naming convention as string.
+        """
         return self._attributes['variableNamingConvention']
         
     def get_number_of_continuous_states(self):
+        """ Get model attribute number of continuous states.
+        
+        Returns:
+            number of continuous states as unsigned int.
+         """
         if self._attributes['numberOfContinuousStates'] == '':
             return None
-        return int(self._attributes['numberOfContinuousStates'])
+        return uint(self._attributes['numberOfContinuousStates'])
         
     def get_number_of_event_indicators(self):
+        """ Get model attribute number of event indicators.
+        
+        Returns:
+            number of event indicators as unsigned int.
+         """
         if self._attributes['numberOfEventIndicators'] == '':
             return None
-        return int(self._attributes['numberOfEventIndicators'])
+        return uint(self._attributes['numberOfEventIndicators'])
         
     def get_unit_definitions(self):
+        """ Get all unit definitions set in model.
+        
+        Returns:
+            List of unit definitions (type: BaseUnit)
+        """
         return self._unit_definitions
         
     def get_type_definitions(self):
+        """ Get all type definitions set in model.
+        
+        Returns:
+            List of type definitions (type: Type)
+        """
         return self._type_definitions
         
     def get_default_experiment(self):
+        """ Get default experiment data set in model.
+        
+        Returns:
+            Object of type DefaultExperiment or None if not set.
+        """
         return self._default_experiment
         
     def get_vendor_annotations(self):
+        """ Get all vendor annotations set in model.
+        
+        Returns:
+            List of vendor annotations (type: Tool)
+        """
         return self._vendor_annotations
         
     def get_model_variables(self):
+        """ Get all variables in model. 
+        
+        Returns:
+            List of all variables (type: ScalarVariable)
+        """
         return self._model_variables
         
     def get_optimization(self):
+        """ Get optimization data set in model.
+        
+        Returns:
+            Object of type Optimization if model is Optimica, otherwise 
+            None.
+        """
         return self._optimization
         
     # ========== Here begins the more complex functions ================
@@ -468,23 +638,11 @@ class ModelDescription:
                 
         sv = self._model_variables_dict.get(variablename)
         if sv != None:
-            type = sv.get_fundamental_type()
-            if isinstance(type, Real):
-                return REAL
-            elif isinstance(type, Integer):
-                return INTEGER
-            elif isinstance(type, String):
-                return STRING
-            elif isinstance(type, Boolean):
-                return BOOLEAN
-            elif isinstance(type, Enumeration):
-                return ENUMERATION
-            else:
-                raise XMLException("Unknown type for variable: "+ 
-                    str(variablename))
+            return _translate_fundamental_type(sv.get_fundamental_type())
         else:
             raise XMLException("Variable: "+str(variablename)+" was not \
                 found in model.")
+
 
     def get_aliases_for_variable(self, variablename, ignore_cache=False):
         """ Return list of all alias variables belonging to the aliased 
@@ -720,7 +878,8 @@ class ModelDescription:
 
         
     def _get_all_variables(self, type, include_alias):
-        
+        """ Helper function which returns all variables of type: 'type'.
+        """
         typevars = []
         scalarvariables = self.get_model_variables()
         
@@ -2167,8 +2326,12 @@ class ModelDescription:
 # ============== Here begins the XML element classes ===================
     
 class BaseUnit:
-    
+    """ Class defining data structure based on the XML element BaseUnit.
+    """
     def __init__(self, element):
+        """ Constructor which takes an XML element object describing the 
+            BaseUnit element and creates a BaseUnit object copy.
+        """
         # attributes
         self._attributes = {'unit':''}
         
@@ -2183,14 +2346,30 @@ class BaseUnit:
             self._display_unit_definitions.append(DisplayUnitDefinition(e_unitdef))
             
     def get_unit(self):
+        """ Get the BaseUnit attribute unit.
+        
+        Returns:
+            unit as string.
+        """
         return self._attributes['unit']
             
     def get_display_units(self):
+        """ Get all display units in the BaseUnit element.
+        
+        Returns:
+            List of all display units (type: DisplayUnitDefinition)
+         """
         return self._display_unit_definitions
         
 class DisplayUnitDefinition:
-    
+    """ Class defining data structure based on the XML element 
+        DisplayUnitDefinition.
+    """
     def __init__(self, element):
+        """ Constructor which takes an XML element object describing the 
+            DisplayUnitDefinition element and creates a 
+            DisplayUnitDefinition object copy.
+        """
         # attributes
         self._attributes = {'displayUnit':'',
                             'gain':'1.0',
@@ -2200,17 +2379,36 @@ class DisplayUnitDefinition:
         self._attributes.update(element.attrib)
 
     def get_display_unit(self):
+        """ Get the value of the display unit attribute. 
+        
+        Returns:
+            display unit as string.
+        """
         return self._attributes['displayUnit']
         
     def get_gain(self):
+        """ Get the value of the gain attribute.
+        
+        Returns:
+            gain as float (default: 1).
+        """
         return float(self._attributes['gain'])
         
     def get_offset(self):
+        """ Get the value of the offset attribute.
+        
+        Returns:
+            offset as float (default: 0).
+        """
         return float(self._attributes['offset'])
         
 class Type:
-    
+    """ Class defining data structure based on the XML element Type.
+    """
     def __init__(self, element):
+        """ Constructor which takes an XML element object describing the 
+            Type element and creates a Type object copy.
+        """
         # attributes
         self._attributes = {'name':'',
                             'description':''}
@@ -2233,17 +2431,39 @@ class Type:
             raise XMLException("fundamental type (TypeDefinitions)"+str(e_ftype.tag)+" is unknown")
 
     def get_name(self):
+        """ Get the value of the name attribute. 
+        
+        Returns:
+            name as string.
+        """
         return self._attributes['name']
         
     def get_description(self):
+        """ Get the value of the description attribute. 
+        
+        Returns:
+            description as string (empty string if not set).
+        """
         return self._attributes['description']
         
     def get_fundamental_type(self):
+        """ Get the type of the type defined. (Real, Integer, Boolean, 
+            String or Enumeration Type)
+        
+        Returns:
+                Object of type RealType, IntegerType, BooleanType, 
+                StringType or EnumerationType.
+        """
         return self._fundamentaltype
         
 class RealType:
-    
+    """ Class defining data structure based on the XML element RealType.
+    """
     def __init__(self, element):
+        """ Constructor which takes an XML element object describing the 
+            RealType element and creates a RealType object copy.
+        """
+        # attributes
         self._attributes = {'quantity':'',
                             'unit':'',
                             'displayUnit':'',
@@ -2256,59 +2476,130 @@ class RealType:
         self._attributes.update(element.attrib)
 
     def get_quantity(self):
+        """ Get the value of the quantity attribute.
+        
+        Returns:
+            quantity as string (empty string if not set).
+        """
         return self._attributes['quantity']
     
     def get_unit(self):
+        """ Get the value of the unit attribute.
+        
+        Returns:
+            unit as string (empty string if not set).
+        """
         return self._attributes['unit']
         
     def get_display_unit(self):
+        """ Get the value of the display unit attribute.
+        
+        Returns:
+            display unit as string (empty string if not set).
+        """
         return self._attributes['displayUnit']
         
     def get_relative_quantity(self):
+        """ Get the value of the relative quantity attribute.
+        
+        Returns:
+            relative quantity as bool (default: false).
+        """
         return _translate_xmlbool(self._attributes['relativeQuantity'])
     
     def get_min(self):
+        """ Get the value of the min attribute.
+        
+        Returns:
+            min as float (None if not set).
+        """
         if self._attributes['min'] == '':
             return None
         return float(self._attributes['min'])
         
     def get_max(self):
+        """ Get the value of the max attribute.
+        
+        Returns:
+            max as float (None if not set).
+        """
         if self._attributes['max'] == '':
             return None
         return float(self._attributes['max'])
         
     def get_nominal(self):
+        """ Get the value of the nominal attribute.
+        
+        Returns:
+            nominal as float (None if not set).
+        """
         if self._attributes['nominal'] == '':
             return None
         return float(self._attributes['nominal'])
         
 class IntegerType:
-    
+    """ Class defining data structure based on the XML element 
+        IntegerType.
+    """
     def __init__(self, element):
+        """ Constructor which takes an XML element object describing the 
+            IntegerType element and creates a IntegerType object copy.
+        """
         self._attributes = {'quantity':'',
                             'min':'',
                             'max':''}
     
     def get_quantity(self):
+        """ Get the value of the quantity attribute.
+        
+        Returns:
+            quantity as string (empty string if not set).
+        """
         return self._attributes['quantity']
         
     def get_min(self):
+        """ Get the value of the min attribute.
+        
+        Returns:
+            min as int (None if not set).
+        """
         if self._attributes['min'] == '':
             return None
         return int(self._attributes['min'])
         
     def get_max(self):
+        """ Get the value of the max attribute.
+        
+        Returns:
+            max as int (None if not set).
+        """
         if self._attributes['max'] == '':
             return None
         return int(self._attributes['max'])
 
-class BooleanType: pass
+class BooleanType:
+    """ Class defining data structure based on the XML element 
+        BooleanType. Is empty since XML element contains no attributes 
+        or other elements.
+    """
+    pass
 
-class StringType: pass
-
-class EnumerationType:
+class StringType:
+    """ Class defining data structure based on the XML element 
+        StringType. Is empty since XML element contains no attributes 
+        or other elements.
+    """
+    pass
     
+class EnumerationType:
+    """ Class defining data structure based on the XML element 
+        EnumerationType.
+    """
     def __init__(self, element):
+        """ Constructor which takes an XML element object describing the 
+            EnumerationType element and creates a EnumerationType object 
+            copy.
+        """
         self._attributes = {'quantity':'',
                             'min':'',
                             'max':''}
@@ -2323,24 +2614,49 @@ class EnumerationType:
             self._items.append(Item(e_item))
                             
     def get_quantity(self):
+        """ Get the value of the quantity attribute.
+        
+        Returns:
+            quantity as string (empty string if not set).
+        """
         return self._attributes['quantity']
         
     def get_min(self):
+        """ Get the value of the min attribute.
+        
+        Returns:
+            min as int (None if not set).
+        """
         if self._attributes['min'] == '':
             return None
         return int(self._attributes['min'])
         
     def get_max(self):
+        """ Get the value of the max attribute.
+        
+        Returns:
+            max as int (None if not set).
+        """
         if self._attributes['max'] == '':
             return None
         return int(self._attributes['max'])
         
     def get_items(self):
+        """ Get items defined in the enumeration.
+        
+        Returns:
+            List of all items (type: Item)
+        """
         return self._items
 
 class Item:
-    
+    """ Class defining data structure based on the XML element 
+        Item.
+    """
     def __init__(self, element):
+        """ Constructor which takes an XML element object describing the 
+            Item element and creates a Item object copy.
+        """
         self._attributes = {'name':'',
                             'description':''}
                             
@@ -2348,14 +2664,30 @@ class Item:
         self._attributes.update(element.attrib)
         
     def get_name(self):
+        """ Get the value of the name attribute.
+        
+        Returns:
+            name as string.
+        """
         return self._attributes['name']
         
     def get_description(self):
+        """ Get the value of the description attribute.
+        
+        Returns:
+            description as string.
+        """
         return self._attributes['description']
 
 class DefaultExperiment:
-    
+    """ Class defining data structure based on the XML element 
+        DefaultExperiment.
+    """
     def __init__(self, element):
+        """ Constructor which takes an XML element object describing the 
+            DefaultExperiment element and creates a DefaultExperiment 
+            object copy.
+        """
         self._attributes = {'startTime':'',
                             'stopTime':'',
                             'tolerance':''}
@@ -2364,23 +2696,43 @@ class DefaultExperiment:
         self._attributes.update(element.attrib)
     
     def get_start_time(self):
+        """ Get the value of the start time attribute.
+        
+        Returns:
+            start time as float (None if not set).
+        """
         if self._attributes['startTime'] == '':
             return None
         return float(self._attributes['startTime'])
         
     def get_stop_time(self):
+        """ Get the value of the stop time attribute.
+        
+        Returns:
+            stop time as float (None if not set).
+        """
         if self._attributes['stopTime'] == '':
             return None
         return float(self._attributes['stopTime'])
         
     def get_tolerance(self):
+        """ Get the value of the tolerance attribute.
+        
+        Returns:
+            tolerance as float (None if not set).
+        """
         if self._attributes['tolerance'] == '':
             return None
         return float(self._attributes['tolerance'])
         
 class Tool:
-
+    """ Class defining data structure based on the XML element 
+        Tool.
+    """
     def __init__(self, element):
+        """ Constructor which takes an XML element object describing the 
+            Tool element and creates a Tool object copy.
+        """
         self._attributes = {'name':''}
         
         # update attribute dict with attributes from XML file
@@ -2393,14 +2745,29 @@ class Tool:
             self._annotations.append(Annotation(e_annotation))
         
     def get_name(self):
+        """ Get the value of the name attribute.
+        
+        Returns:
+            name as string.
+        """
         return self._attributes['name']
 
     def get_annotations(self):
+        """ Get all annotations set for the tool.
+        
+        Returns:
+            List of all annotations (type: Annotation)
+        """
         return self._annotations
         
 class Annotation:
-    
+    """ Class defining data structure based on the XML element 
+        Annotation.
+    """
     def __init__(self, element):
+        """ Constructor which takes an XML element object describing the 
+            Annotation element and creates a Annotation object copy.
+        """
         self._attributes = {'name':'',
                             'value':''}
         
@@ -2408,14 +2775,30 @@ class Annotation:
         self._attributes.update(element.attrib)
 
     def get_name(self):
+        """ Get the value of the name attribute.
+        
+        Returns:
+            name as string.
+        """
         return self._attributes['name']
         
     def get_value(self):
+        """ Get the value of the value attribute.
+        
+        Returns:
+            value as string.
+        """
         return self._attributes['value']
         
 class ScalarVariable:
-    
+    """ Class defining data structure based on the XML element 
+        ScalarVariable.
+    """
     def __init__(self, element):
+        """ Constructor which takes an XML element object describing the 
+            ScalarVariable element and creates a ScalarVariable object 
+            copy.
+        """
         self._attributes = {'name':'',
                             'valueReference':'',
                             'description':'',
@@ -2471,43 +2854,111 @@ class ScalarVariable:
             self._variable_category = e_variablecategory.text
 
     def get_name(self):
+        """ Get the value of the name attribute.
+        
+        Returns:
+            name as string.
+        """
         return self._attributes['name']
         
     def get_value_reference(self):
+        """ Get the value of the value reference attribute.
+        
+        Returns:
+            value reference as unsigned int.
+        """
         if self._attributes['valueReference'] == '':
             return None
-        return int(self._attributes['valueReference'])
+        return uint(self._attributes['valueReference'])
         
     def get_description(self):
+        """ Get the value of the description attribute.
+        
+        Returns:
+            description as string (empty string if not set).
+        """
         return self._attributes['description']
         
     def get_variability(self):
+        """ Get the value of the variability attribute.
+        
+        Returns:
+            variability as enumeration: CONTINUOUS, CONSTANT, PARAMETER 
+            or DISCRETE (default: CONTINUOUS).
+        """
         return _translate_variability(self._attributes['variability'])
         
     def get_causality(self):
+        """ Get the value of the causality attribute.
+        
+        Returns:
+            causality as enumeration: INTERNAL, INPUT ,OUTPUT or NONE. 
+            (default: INTERNAL).
+        """
         return _translate_causality(self._attributes['causality'])
         
     def get_alias(self):
+        """ Get the value of the alias attribute.
+        
+        Returns:
+            alias as enumeration: NO_ALIAS, ALIAS or NEGATED_ALIAS. 
+            (default: NO_ALIAS).
+        """
         return _translate_alias(self._attributes['alias'])
         
     def get_fundamental_type(self):
+        """ Get the type of the type defined. (Real, Integer, Boolean, 
+            String or Enumeration Type)
+        
+        Returns:
+                Object of type Real, Integer, Boolean, String or 
+                Enumeration.
+        """
         return self._fundamental_type
         
     def get_direct_dependency(self):
+        """ Get the direct dependencies set for the variable.
+        
+        Returns:
+            Object of type DirectDependency (None if not set).
+        """
         return self._direct_dependency
         
     def get_is_linear(self):
+        """ Get the value of the is linear element.
+        
+        Returns:
+            is linear as bool (None if not set).
+        """
         return self._is_linear
         
     def get_is_linear_timed_variables(self):
+        """ Get all is linear timed variables set for the variable.
+        
+        Returns:
+            List of all linear timed variables (type: TimePoint)
+        """
         return self._is_linear_timed_variables
     
     def get_variable_category(self):
+        """ Get the value of the variable category element.
+        
+        Returns:
+            variable category as enumeration: ALGEBRAIC, STATE, 
+            DEPENDENT_CONSTANT, INDEPENDENT_CONSTANT, 
+            DEPENDENT_PARAMETER, INDEPENDENT_PARAMETER or DERIVATIVE  
+            (default: ALGEBRAIC).
+        """
         return _translate_variable_category(self._variable_category)
         
 class Real:
-    
+    """ Class defining data structure based on the XML element 
+        Real.
+    """
     def __init__(self, element):
+        """ Constructor which takes an XML element object describing the 
+            Real element and creates a Real object copy.
+        """
         self._attributes = {'declaredType':'',
                             'quantity':'',
                             'unit':'',
@@ -2525,65 +2976,130 @@ class Real:
         self._attributes.update(element.attrib)
 
     def get_declared_type(self):
+        """ Get the value of the declared type attribute.
+        
+        Returns:
+            declared type as string (empty string if not set).
+        """
         return self._attributes['declaredType']
         
     def get_quantity(self):
+        """ Get the value of the quantity attribute.
+        
+        Returns:
+            quantity as string (empty string if not set).
+        """
         return self._attributes['quantity']
         
     def get_unit(self):
+        """ Get the value of the unit attribute.
+        
+        Returns:
+            unit as string (empty string if not set).
+        """
         return self._attributes['unit']
         
     def get_display_unit(self):
+        """ Get the value of the display unit attribute.
+        
+        Returns:
+            display unit as string (empty string if not set).
+        """
         return self._attributes['displayUnit']
         
     def get_relative_quantity(self):
+        """ Get the value of the relative quantity attribute.
+        
+        Returns:
+            relative quantity as bool (default: false).
+        """
         return _translate_xmlbool(self._attributes['relativeQuantity'])
         
     def get_min(self):
+        """ Get the value of the min attribute.
+        
+        Returns:
+            min as float (None if not set).
+        """
         min = self._attributes['min']
         if min == '':
             return None
         return float(min)
         
     def get_max(self):
+        """ Get the value of the max attribute.
+        
+        Returns:
+            max as float (None if not set).
+        """
         max = self._attributes['max']
         if max == '':
             return None
         return float(max)
 
     def get_nominal(self):
+        """ Get the value of the nominal attribute.
+        
+        Returns:
+            nominal as float (None if not set).
+        """
         nominal = self._attributes['nominal']
         if nominal == '':
             return None
         return float(nominal)
 
     def get_start(self):
+        """ Get the value of the start attribute.
+        
+        Returns:
+            start as float (None if not set).
+        """
         start = self._attributes['start']
         if start == '':
             return None
         return float(start)
 
     def get_fixed(self):
+        """ Get the value of the fixed attribute.
+        
+        Returns:
+            fixed as bool (None if not set).
+        """
         fixed = self._attributes['fixed']
         if fixed == '':
             return None
         return _translate_xmlbool(fixed)
         
     def get_free(self):
+        """ Get the value of the free attribute.
+        
+        Returns:
+            free as bool (None if not set).
+        """
         free = self._attributes['free']
         if free == '':
             return None
         return _translate_xmlbool(free)
 
     def get_initial_guess(self):
+        """ Get the value of the attribute.
+        
+        Returns:
+            initial guess as float (None if not set).
+        """
         initialguess = self._attributes['initialGuess']
         if initialguess == '':
             return None
         return float(initialguess)
         
 class Integer:
-    
+    """ Class defining data structure based on the XML element 
+        Integer.
+    """
     def __init__(self, element):
+        """ Constructor which takes an XML element object describing the 
+            Integer element and creates a Integer object copy.
+        """
         self._attributes = {'declaredType':'',
                             'quantity':'',
                             'min':'',
@@ -2597,50 +3113,95 @@ class Integer:
         self._attributes.update(element.attrib)
 
     def get_declared_type(self):
+        """ Get the value of the declared type attribute.
+        
+        Returns:
+            declared type as string (empty string if not set).
+        """
         return self._attributes['declaredType']
         
     def get_quantity(self):
+        """ Get the value of the quantity attribute.
+        
+        Returns:
+            quantity as string (empty string if not set).
+        """
         return self._attributes['quantity']
                 
     def get_min(self):
+        """ Get the value of the min attribute.
+        
+        Returns:
+            min as int (None if not set).
+        """
         min = self._attributes['min']
         if min == '':
             return None
         return int(min)
         
     def get_max(self):
+        """ Get the value of the max attribute.
+        
+        Returns:
+            max as int (None if not set).
+        """
         max = self._attributes['max']
         if max == '':
             return None
         return int(max)
 
     def get_start(self):
+        """ Get the value of the start attribute.
+        
+        Returns:
+            start as int (None if not set).
+        """
         start = self._attributes['start']
         if start == '':
             return None
         return int(start)
 
     def get_fixed(self):
+        """ Get the value of the fixed attribute.
+        
+        Returns:
+            fixed as bool (None if not set).
+        """
         fixed = self._attributes['fixed']
         if fixed == '':
             return None
         return _translate_xmlbool(fixed)
         
     def get_free(self):
+        """ Get the value of the free attribute.
+        
+        Returns:
+            free as bool (None if not set).
+        """
         free = self._attributes['free']
         if free == '':
             return None
         return _translate_xmlbool(free)
 
     def get_initial_guess(self):
+        """ Get the value of the attribute.
+        
+        Returns:
+            initial guess as int (None if not set).
+        """
         initialguess = self._attributes['initialGuess']
         if initialguess == '':
             return None
         return int(initialguess)
         
 class Boolean:
-    
+    """ Class defining data structure based on the XML element 
+        Boolean.
+    """
     def __init__(self, element):
+        """ Constructor which takes an XML element object describing the 
+            Boolean element and creates a Boolean object copy.
+        """
         self._attributes = {'declaredType':'',
                             'start':'',
                             'fixed':'',
@@ -2651,35 +3212,65 @@ class Boolean:
         self._attributes.update(element.attrib)
 
     def get_declared_type(self):
+        """ Get the value of the declared type attribute.
+        
+        Returns:
+            declared type as string (empty string if not set).
+        """
         return self._attributes['declaredType']
         
     def get_start(self):
+        """ Get the value of the start attribute.
+        
+        Returns:
+            start as bool (None if not set).
+        """
         start = self._attributes['start']
         if start == '':
             return None
         return _translate_xmlbool(start)
 
     def get_fixed(self):
+        """ Get the value of the fixed attribute.
+        
+        Returns:
+            fixed as bool (None if not set).
+        """
         fixed = self._attributes['fixed']
         if fixed == '':
             return None
         return _translate_xmlbool(fixed)
         
     def get_free(self):
+        """ Get the value of the free attribute.
+        
+        Returns:
+            free as bool (None if not set).
+        """
         free = self._attributes['free']
         if free == '':
             return None
         return _translate_xmlbool(free)
 
     def get_initial_guess(self):
+        """ Get the value of the attribute.
+        
+        Returns:
+            initial guess as bool (None if not set).
+        """
         initialguess = self._attributes['initialGuess']
         if initialguess == '':
             return None
         return _translate_xmlbool(initialguess)
 
 class String:
-    
+    """ Class defining data structure based on the XML element 
+        String.
+    """
     def __init__(self, element):
+        """ Constructor which takes an XML element object describing the 
+            String element and creates a String object copy.
+        """
         self._attributes = {'declaredType':'',
                             'start':'',
                             'fixed':''}
@@ -2688,12 +3279,27 @@ class String:
         self._attributes.update(element.attrib)
 
     def get_declared_type(self):
+        """ Get the value of the declared type attribute.
+        
+        Returns:
+            declared type as string (empty string if not set).
+        """
         return self._attributes['declaredType']
         
     def get_start(self):
+        """ Get the value of the start attribute.
+        
+        Returns:
+            start as string (None if not set).
+        """
         return self._attributes['start']
 
     def get_fixed(self):
+        """ Get the value of the fixed attribute.
+        
+        Returns:
+            fixed as bool (None if not set).
+        """
         fixed = self._attributes['fixed']
         if fixed == '':
             return None
@@ -2701,8 +3307,13 @@ class String:
 
 
 class Enumeration:
-    
+    """ Class defining data structure based on the XML element 
+        Enumeration.
+    """
     def __init__(self, element):
+        """ Constructor which takes an XML element object describing the 
+            Enumeration element and creates a Enumeration object copy.
+        """
         self._attributes = {'declaredType':'',
                             'quantity':'',
                             'min':'',
@@ -2714,49 +3325,96 @@ class Enumeration:
         self._attributes.update(element.attrib)
 
     def get_declared_type(self):
+        """ Get the value of the declared type attribute.
+        
+        Returns:
+            declared type as string.
+        """
         return self._attributes['declaredType']
         
     def get_quantity(self):
+        """ Get the value of the quantity attribute.
+        
+        Returns:
+            quantity as string (empty string if not set).
+        """
         return self._attributes['quantity']
 
     def get_min(self):
+        """ Get the value of the min attribute.
+        
+        Returns:
+            min as int (None if not set).
+        """
         min = self._attributes['min']
         if min == '':
             return None
         return int(min)
         
     def get_max(self):
+        """ Get the value of the max attribute.
+        
+        Returns:
+            max as int (None if not set).
+        """
         max = self._attributes['max']
         if max == '':
             return None
         return int(max)
 
     def get_start(self):
+        """ Get the value of the start attribute.
+        
+        Returns:
+            start as int (None if not set).
+        """
         start = self._attributes['start']
         if start == '':
             return None
         return int(start)
 
     def get_fixed(self):
+        """ Get the value of the fixed attribute.
+        
+        Returns:
+            fixed as bool (None if not set).
+        """
         fixed = self._attributes['fixed']
         if fixed == '':
             return None
         return _translate_xmlbool(fixed)
 
 class DirectDependency:
-    
+    """ Class defining data structure based on the XML element 
+        DirectDependency.
+    """
     def __init__(self, element):
+        """ Constructor which takes an XML element object describing the 
+            DirectDependency element and creates a DirectDependency 
+            object copy.
+        """
         self._names = []
         e_names = element.getchildren()
         for e_name in e_names:
             self._names.append(e_name.text)
             
     def get_names(self):
+        """ Get the names of the input variables needed to compute this 
+            output.
+        
+        Returns:
+                List of variable names as string.
+        """
         return self._names
 
 class TimePoint:
-    
+    """ Class defining data structure based on the XML element 
+        TimePoint.
+    """
     def __init__(self, element):
+        """ Constructor which takes an XML element object describing the 
+            TimePoint element and creates a TimePoint object copy.
+        """
         self._attributes = {'index':'',
                             'isLinear':''}
                             
@@ -2764,22 +3422,29 @@ class TimePoint:
         self._attributes.update(element.attrib)
 
     def get_index(self):
-        index = self._attributes['index']
-        if index == '':
-            return None
-        else:
-            return int(index)
+        """ Get the value of the index attribute.
+        
+        Returns:
+            index as int.
+        """
+        return int(self._attributes['index'])
             
     def get_is_linear(self):
-        is_linear = self._attributes['isLinear']
-        if is_linear == '':
-            return None
-        else:
-            return _translate_xmlbool(is_linear)
+        """ Get the value of the is linear attribute.
+        
+        Returns:
+            is linear as bool.
+        """
+        return _translate_xmlbool(self._attributes['isLinear'])
             
 class Optimization:
-    
+    """ Class defining data structure based on the XML element 
+        Optimization.
+    """
     def __init__(self, element):
+        """ Constructor which takes an XML element object describing the 
+            Optimization element and creates an Optimization object copy.
+        """
         self._attributes = {'static':''}
 
         # update attribute dict with attributes from XML file
@@ -2813,22 +3478,51 @@ class Optimization:
                 self._time_points.append(Opt_TimePoint(e_index, e_values[i]))
                 
     def get_static(self):
+        """ Get the value of the static attribute.
+        
+        Returns:
+            static as bool (None if not set).
+        """
         if self._attributes['static'] == '':
             return None
         return _translate_xmlbool(self._attributes['static'])
             
     def get_interval_start_time(self):
+        """ Get the interval start time set for this model.
+        
+        Returns:
+            Object of type Opt_IntervalTime containing start time data 
+            (None if not set).
+        """
         return self._interval_start_time
         
     def get_interval_final_time(self):
+        """ Get the interval final time set for this model.
+        
+        Returns:
+            Object of type Opt_IntervalTime containing final time data 
+            (None if not set).
+        """
         return self._interval_final_time
         
     def get_time_points(self):
+        """ Get the optimization time points set for this model.
+        
+        Returns:
+            List of all time points (type: Opt_TimePoint).
+        """
         return self._time_points
         
 class Opt_IntervalTime:
-    
+    """ Class defining data structure based on the XML element 
+        OptIntervalFinalTime and OptIntervalStartTime.
+    """
     def __init__(self, element):
+        """ Constructor which takes an XML element object describing the 
+            ns:opt IntervalStartTime and IntervalFinalTime elements and 
+            creates an Opt_IntervalTime object with start or final time 
+            data.
+        """
         opt=element.nsmap['opt']
         ns="{"+opt+"}"
         
@@ -2855,24 +3549,55 @@ class Opt_IntervalTime:
             
     
     def get_value(self):
+        """ Get the value of the value element.
+        
+        Returns:
+            value as float (None if not set).
+        """
         return self._value
 
     def get_free(self):
+        """ Get the free of the value element.
+        
+        Returns:
+            free as bool (None if not set).
+        """
         return self._free
         
     def get_initial_guess(self):
+        """ Get the value of the initial guess element.
+        
+        Returns:
+            initial guess as float (None if not set).
+        """
         return self._initial_guess
     
 class Opt_TimePoint:
-    
+    """ Class defining data structure based on the XML element 
+        TimePoint.
+    """
     def __init__(self, e_index, e_value):
+        """ Constructor which takes an XML element object describing the 
+            ns:opt TimePoint element and creates an Opt_TimePoint object 
+            with time point data.
+        """
         self._index = e_index.text
         self._value = e_value.text
         
     def get_index(self):
+        """ Get the value of the index element.
+        
+        Returns:
+            index as int.
+        """
         return int(self._index)
         
     def get_value(self):
+        """ Get the value of the value element.
+        
+        Returns:
+            value as float.
+        """
         return float(self._value)
 
 
@@ -2958,62 +3683,7 @@ class XMLFunctionCache:
         # result was not found - add to cache
         return self.add(obj, function, key)
         
-
-#class XMLDoc(XMLBaseDoc):
-    #""" Class representing a parsed XML file containing model variable meta data. """
-
-    #def get_data_type(self, variablename):
-        #""" Get data type of variable. """
-        #types = self.get_data_types()
-        #return types.get(variablename)
         
-    #def get_data_types(self, ignore_cache=False):
-        #if not ignore_cache:
-            #return self.function_cache.get(self, 'get_data_types')
-
-        #nodes=self._xpatheval("//ScalarVariable")
-        #keys = self._xpatheval("//ScalarVariable/@name")
-        
-        #vals = []
-        #for node in nodes:
-            #children=node.getchildren()
-            #vals.append(children[0].tag)
-        #d={}
-        #for index, key in enumerate(keys):
-            #d[str(key)]=str(vals[index])
-        #return d
-
-
-
-                
-    #def _cast_values(self, keys, vals):
-        #d={}
-        #for index, key in enumerate(keys):
-            #type_ = self.get_data_type(key)
-            #if type_ == 'Real':
-                #d[str(key)]= float(vals[index])
-            #elif type_ == 'Integer':
-                #d[str(key)]= int(vals[index])
-            #elif type_ == 'Boolean':
-                #d[str(key)]= (vals[index]=="true")
-            #elif type_ == 'String':
-                #d[str(key)]= str(vals[index])
-            #else:
-                #pass
-                ## enumeration not supported yet      
-        #return d
-
-        
-    #def is_static(self, ignore_cache=False):
-        #""" Return True if Optimica static attribute is set and equal to true, otherwise False."""
-        #if not ignore_cache:
-            #return self.function_cache.get(self, 'is_static', None)
-        #static = self._xpatheval("opt:Optimization/@static")
-        #if len(static) > 0:
-            #return static[0]=='true'
-        #return False
-        
- 
 class XMLBaseDoc:
     
     """ Base class representing a parsed XML file."""

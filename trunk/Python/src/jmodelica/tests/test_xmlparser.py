@@ -253,8 +253,8 @@ def test_get_variable_variabilities():
     """
     vrefs = (26, 0, 0, 2, 3, 0, 5, 5, 7, 8)
     vvars = (xmlparser.CONTINUOUS, xmlparser.PARAMETER, 
-        xmlparser.CONTINUOUS, xmlparser.CONSTANT, xmlparser.PARAMETER, 
-        xmlparser.PARAMETER, xmlparser.DISCRETE, xmlparser.CONTINUOUS, 
+        xmlparser.PARAMETER, xmlparser.CONSTANT, xmlparser.PARAMETER, 
+        xmlparser.PARAMETER, xmlparser.DISCRETE, xmlparser.DISCRETE, 
         xmlparser.PARAMETER, xmlparser.CONTINUOUS)
         
     vrefs_noalias = (26, 0, 2, 3, 5, 7, 8)

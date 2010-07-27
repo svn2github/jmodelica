@@ -18,7 +18,7 @@
 
 import sys
 import jmodelica.jmi
-import jmodelica.xmlparser
+from jmodelica import xmlparser
 import os
 import tempfile
 import ctypes as C
@@ -168,42 +168,23 @@ class FMIModel(object):
         """
         Loads the XML information.
         """
-        #self._xmldoc = jmodelica.xmlparser.XMLDoc(self._tempdir+os.sep+self._tempxml)
-        self._md = jmodelica.xmlparser.ModelDescription(self._tempdir+os.sep+self._tempxml)
-        
-        #self._nContinuousStates = int(self._xmldoc._xpatheval('//fmiModelDescription/@numberOfContinuousStates')[0])
+        self._md = xmlparser.ModelDescription(self._tempdir+os.sep+self._tempxml) 
         self._nContinuousStates = self._md.get_number_of_continuous_states()
-        
-        #self._nEventIndicators = int(self._xmldoc._xpatheval('//fmiModelDescription/@numberOfEventIndicators')[0])
         self._nEventIndicators = self._md.get_number_of_event_indicators()
-        
-        #self._GUID = self._xmldoc._xpatheval('//fmiModelDescription/@guid')[0]
         self._GUID = self._md.get_guid()
-        
-        #try:
-            #self._description = self._xmldoc._xpatheval('//fmiModelDescription/@description')[0]
-        #except IndexError:
-            #self._description = ''
-            
         self._description = self._md.get_description()
         
         def_experiment = self._md.get_default_experiment()
         if def_experiment != None:
-            #self._XMLStartTime = N.array(self._xmldoc._xpatheval('//DefaultExperiment/@startTime'),dtype=N.double)
-            self._XMLStartTime = N.array(self._md.get_default_experiment().get_start_time(),dtype=N.double)
+            self._XMLStartTime = self._md.get_default_experiment().get_start_time()
+            self._XMLStopTime = self._md.get_default_experiment().get_stop_time()
+            self._XMLTolerance = self._md.get_default_experiment().get_tolerance()
+            self._tolControlled = True
             
-            #self._XMLStopTime = N.array(self._xmldoc._xpatheval('//DefaultExperiment/@stopTime'),dtype=N.double)
-            self._XMLStopTime = N.array(self._md.get_default_experiment().get_stop_time(),dtype=N.double)
-            
-            #self._XMLTolerance = N.array(self._xmldoc._xpatheval('//DefaultExperiment/@tolerance'),dtype=N.double)
-            self._XMLTolerance = N.array(self._md.get_default_experiment().get_tolerance(),dtype=N.double)
         else:
-            self._XMLStartTime = N.array([],dtype=N.double)
-            self._XMLStopTime = N.array([],dtype=N.double)
-            self._XMLTolerance = N.array([],dtype=N.double)
-            
-        if self._XMLStopTime.size > 0:
-            self._XMLStopTime = self._XMLStopTime[0]
+            self._XMLStartTime = 0.0
+            self._XMLTolerance = 1.e-4
+            self._tolControlled = False
         
         reals = self._md.get_all_real_variables()
         real_start_values = []
@@ -215,10 +196,7 @@ class FMIModel(object):
                 real_start_values.append(real.get_fundamental_type().get_start())
                 real_keys.append(real.get_value_reference())
                 real_names.append(real.get_name())
-            
-        #self._XMLStartRealValues = N.array(self._xmldoc._xpatheval('//ScalarVariable/Real/@start'),dtype=N.double)
-        #self._XMLStartRealKeys =   N.array(self._xmldoc._xpatheval('//ScalarVariable/@valueReference[../Real/@start]'),dtype=N.uint32)
-        #self._XMLStartRealNames =  N.array(self._xmldoc._xpatheval('//ScalarVariable/@name[../Real/@start]'))
+
         self._XMLStartRealValues = N.array(real_start_values,dtype=N.double)
         self._XMLStartRealKeys =   N.array(real_keys,dtype=N.uint32)
         self._XMLStartRealNames =  N.array(real_names)
@@ -233,10 +211,7 @@ class FMIModel(object):
                 int_start_values.append(int.get_fundamental_type().get_start())
                 int_keys.append(int.get_value_reference())
                 int_names.append(int.get_name())
-        
-        #self._XMLStartIntegerValues = N.array(self._xmldoc._xpatheval('//ScalarVariable/Integer/@start'),dtype=N.int32)
-        #self._XMLStartIntegerKeys   = N.array(self._xmldoc._xpatheval('//ScalarVariable/@valueReference[../Integer/@start]'),dtype=N.uint32)
-        #self._XMLStartIntegerNames  = N.array(self._xmldoc._xpatheval('//ScalarVariable/@name[../Integer/@start]'))
+
         self._XMLStartIntegerValues = N.array(int_start_values,dtype=N.int32)
         self._XMLStartIntegerKeys   = N.array(int_keys,dtype=N.uint32)
         self._XMLStartIntegerNames  = N.array(int_names)
@@ -252,9 +227,6 @@ class FMIModel(object):
                 bool_keys.append(bool.get_value_reference())
                 bool_names.append(bool.get_name())
 
-        #self._XMLStartBooleanValues = N.array(self._xmldoc._xpatheval('//ScalarVariable/Boolean/@start'))
-        #self._XMLStartBooleanKeys   = N.array(self._xmldoc._xpatheval('//ScalarVariable/@valueReference[../Boolean/@start]'),dtype=N.uint32)
-        #self._XMLStartBooleanNames  = N.array(self._xmldoc._xpatheval('//ScalarVariable/@name[../Boolean/@start]'))
         self._XMLStartBooleanValues = N.array(bool_start_values)
         self._XMLStartBooleanKeys   = N.array(bool_keys,dtype=N.uint32)
         self._XMLStartBooleanNames  = N.array(bool_names)
@@ -265,29 +237,14 @@ class FMIModel(object):
         str_names = []
         for str in strs:
             start = str.get_fundamental_type().get_start()
-            if start != None:
+            if start != '':
                 str_start_values.append(str.get_fundamental_type().get_start())
                 str_keys.append(str.get_value_reference())
                 str_names.append(str.get_name())
-            
-        #self._XMLStartStringValues = N.array(self._xmldoc._xpatheval('//ScalarVariable/String/@start'))
-        #self._XMLStartStringKeys   = N.array(self._xmldoc._xpatheval('//ScalarVariable/@valueReference[../String/@start]'),dtype=N.uint32)
-        #self._XMLStartStringNames  = N.array(self._xmldoc._xpatheval('//ScalarVariable/@name[../String/@start]'))
+
         self._XMLStartStringValues = N.array(str_start_values)
         self._XMLStartStringKeys   = N.array(str_keys,dtype=N.uint32)
         self._XMLStartStringNames  = N.array(str_names)
-        
-        #for i in xrange(len(self._XMLStartBooleanValues)):
-            #if self._XMLStartBooleanValues[i] == 'true':
-                #if self.is_negated(self._XMLStartBooleanNames[i]):
-                    #self._XMLStartBooleanValues[i] = '0'
-                #else:
-                    #self._XMLStartBooleanValues[i] = '1'
-            #else:
-                #if self.is_negated(self._XMLStartBooleanNames[i]):
-                    #self._XMLStartBooleanValues[i] = '1'
-                #else:
-                    #self._XMLStartBooleanValues[i] = '0'
 
         for i in xrange(len(self._XMLStartBooleanValues)):
             if self._XMLStartBooleanValues[i] == True:
@@ -314,43 +271,31 @@ class FMIModel(object):
         disc_valueref_r = []
  
         for real in reals:
-            if real.get_variability() == jmodelica.xmlparser.CONTINUOUS and \
-                real.get_alias() == jmodelica.xmlparser.NO_ALIAS:
+            if real.get_variability() == xmlparser.CONTINUOUS and \
+                real.get_alias() == xmlparser.NO_ALIAS:
                     cont_name.append(real.get_name())
                     cont_valueref.append(real.get_value_reference())
                 
-            elif real.get_variability() == jmodelica.xmlparser.DISCRETE and \
-                real.get_alias() == jmodelica.xmlparser.NO_ALIAS:
+            elif real.get_variability() == xmlparser.DISCRETE and \
+                real.get_alias() == xmlparser.NO_ALIAS:
                     disc_name_r.append(real.get_name())
                     disc_valueref_r.append(real.get_value_reference())
         
         disc_name_i = []
         disc_valueref_i = []
         for int in ints:
-            if int.get_variability() == jmodelica.xmlparser.DISCRETE and \
-                int.get_alias() == jmodelica.xmlparser.NO_ALIAS:
+            if int.get_variability() == xmlparser.DISCRETE and \
+                int.get_alias() == xmlparser.NO_ALIAS:
                     disc_name_i.append(int.get_name())
                     disc_valueref_i.append(int.get_value_reference())
                     
         disc_name_b = []
         disc_valueref_b =[]
         for bool in bools:
-            if bool.get_variability() == jmodelica.xmlparser.DISCRETE and \
-                bool.get_alias() == jmodelica.xmlparser.NO_ALIAS:
+            if bool.get_variability() == xmlparser.DISCRETE and \
+                bool.get_alias() == xmlparser.NO_ALIAS:
                     disc_name_b.append(bool.get_name())
-                    disc_valueref_b(bool.get_value_reference())
-        
-        #cont_name = self._xmldoc._xpatheval("//ScalarVariable/@name[../Real][not(../@variability='constant')][not(../@variability='parameter')][not(../@variability='discrete')][not(../@alias)]")
-        #cont_valueref = self._xmldoc._xpatheval("//ScalarVariable/@valueReference[../Real][not(../@variability='constant')][not(../@variability='parameter')][not(../@variability='discrete')][not(../@alias)]")
-        
-        #disc_name_r = self._xmldoc._xpatheval("//ScalarVariable/@name[../@variability='discrete'][not(../@alias)][../Real]")
-        #disc_valueref_r = self._xmldoc._xpatheval("//ScalarVariable/@valueReference[../@variability='discrete'][not(../@alias)][../Real]")
-        
-        #disc_name_i = self._xmldoc._xpatheval("//ScalarVariable/@name[../@variability='discrete'][not(../@alias)][../Integer]")
-        #disc_valueref_i = N.array(self._xmldoc._xpatheval("//ScalarVariable/@valueReference[../@variability='discrete'][not(../@alias)][../Integer]"),dtype=N.uint)
-        
-        #disc_name_b = self._xmldoc._xpatheval("//ScalarVariable/@name[../@variability='discrete'][not(../@alias)][../Boolean]")
-        #disc_valueref_b = N.array(self._xmldoc._xpatheval("//ScalarVariable/@valueReference[../@variability='discrete'][not(../@alias)][../Boolean]"),dtype=N.uint)
+                    disc_valueref_b.append(bool.get_value_reference())
 
         self._save_cont_valueref = [N.array(cont_valueref+disc_valueref_r,dtype=N.uint), disc_valueref_i, disc_valueref_b]
         self._save_cont_name = [cont_name+disc_name_r, disc_name_i, disc_name_b]
@@ -644,10 +589,7 @@ class FMIModel(object):
             
                 [rtol, atol] = model.get_tolerances()
         """
-        if len(self._XMLTolerance) == 0:
-            rtol = 1.e-4 #Default tolerance 10^-4
-        else:
-            rtol = self._XMLTolerance[0]
+        rtol = self._XMLTolerance
         atol = 0.01*rtol*self.real_x_nominal
         
         return [rtol, atol]
@@ -1118,18 +1060,15 @@ class FMIModel(object):
 
         #Trying to set the initial time from the xml file, else 0.0
         if self.t == None:
-            try:
-                self.t = self._XMLStartTime[0]
-            except IndexError:
-                self.t = 0.0
+            self.t = self._XMLStartTime
         
         
-        if len(self._XMLTolerance) == 0:
+        if self._tolControlled:
             tolcontrolled = self._fmiBoolean('0')
             tol = self._fmiReal(0.0)
         else:
             tolcontrolled = self._fmiBoolean('1')
-            tol = self._XMLTolerance[0]
+            tol = self._XMLTolerance
         
         self._eventInfo = self._fmiEventInfo('0','0','0','0','0',self._fmiReal(0.0))
         
@@ -1178,12 +1117,10 @@ class FMIModel(object):
         Returns:
             Dict with ValueReference as key and description as value.
         """
-        #return self._xmldoc.get_variable_descriptions(include_alias)
         return self._md.get_variable_descriptions(include_alias)
         
     def get_data_type(self, variablename):
         """ Get data type of variable. """
-        #return self._xmldoc.get_data_type(variablename)
         return self._md.get_data_type(variablename)
         
     def get_valueref(self, variablename=None, type=None):
@@ -1196,11 +1133,9 @@ class FMIModel(object):
         Returns:
             The ValueReference for the variable passed as argument.
         """
-        if variablename:
-            #return self._xmldoc.get_valueref(variablename)
+        if variablename != None:
             return self._md.get_value_reference(variablename)
         else:
-            #return N.array(self._xmldoc._xpatheval("//ScalarVariable/@valueReference[../@variability='"+type+"']"),dtype=N.int)
             valrefs = []
             allvariables = self._md.get_model_variables()
             for variable in allvariables:
@@ -1216,98 +1151,28 @@ class FMIModel(object):
         Returns:
             Dict with variable name as key and value reference as value.
         """
-        #if not ignore_cache:
-            #return self._xmldoc.function_cache.get(self,'get_variable_names',include_alias)
         
-        variables = self._md.get_model_variables()
-        names = []
-        valuerefs = []
-        
-        if include_alias:
-            for var in variables:
-                vtype = var.get_variability()
-                if vtype!=jmodelica.xmlparser.ENUMERATION and \
-                    vtype!=jmodelica.xmlparser.STRING and \
-                    vtype!=type:
+        if type != None:
+            variables = self._md.get_model_variables()
+            names = []
+            valuerefs = []
+            if include_alias:
+                for var in variables:
+                    if var.get_variability()==type:
                         names.append(var.get_name())
                         valuerefs.append(var.get_value_reference())
-            return zip(tuple(vrefs), tuple(names))
-            
-        for var in variables:
-            vtype = var.get_variability()
-            if  var.get_alias() == jmodelica.xmlparser.NO_ALIAS and \
-                vtype!=jmodelica.xmlparser.ENUMERATION and \
-                vtype!=jmodelica.xmlparser.STRING and \
-                vtype!=type:
-                    names.append(var.get_name())
-                    valuerefs.append(var.get_value_reference()) 
-        return zip(tuple(vrefs), tuple(names))    
-        
-        #if include_alias:
-            #keys = self._xmldoc._xpatheval("//ScalarVariable/@name[not(../Enumeration)][not(../String)]")
-            #vals = self._xmldoc._xpatheval("//ScalarVariable/@valueReference[not(../Enumeration)][not(../String)]")
-        #else:
-            #keys = self._xmldoc._xpatheval("//ScalarVariable/@name[not(../@alias)][not(../Enumeration)][not(../String)]")
-            #vals = self._xmldoc._xpatheval("//ScalarVariable/@valueReference[not(../@alias)][not(../Enumeration)][not(../String)]")        
-
-   
-        #if len(keys)!=len(vals):
-            #raise Exception("Number of vals does not equal number of keys. \
-                #Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))           
-        
-        #d={}
-        #for index, key in enumerate(keys):
-            #d[str(key)]=int(vals[index])
-        #return d
+                return zip(tuple(vrefs), tuple(names))
+            else:
+                for var in variables: 
+                    if var.get_variability()==type and \
+                        var.get_alias() == xmlparser.NO_ALIAS:
+                            names.append(var.get_name())
+                            valuerefs.append(var.get_value_reference())
+                return zip(tuple(vrefs), tuple(names))
+        else:
+            return self._md.get_variable_names(include_alias)
     
-    #def get_variable_type_names(self, type):
-        #"""
-        #Extract the names of the variables in a model depending on the type.
-        #"""
-        #keys = []
-        #vals = []
-        #for i in type:
-            #keys=keys+self._xmldoc._xpatheval("//ScalarVariable/@name[not(../@alias)][not(../Enumeration)][not(../String)][../@variability='"+i+"']")
-            #vals=vals+self._xmldoc._xpatheval("//ScalarVariable/@valueReference[not(../@alias)][not(../Enumeration)][not(../String)][../@variability='"+i+"']")
-
-        #if len(keys)!=len(vals):
-            #raise Exception("Number of vals does not equal number of keys. \
-                #Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))           
-        
-        #d={}
-        #for index, key in enumerate(keys):
-            #d[str(key)]=int(vals[index])
-        #return d
-        
-    
-    #def get_variable_names(self, include_alias=True, ignore_cache=False):
-        #"""
-        #Extract the names of the variables in a model.
-
-        #Returns:
-            #Dict with variable name as key and value reference as value.
-        #"""
-        #if not ignore_cache:
-            #return self._xmldoc.function_cache.get(self,'get_variable_names',include_alias)
-        
-        #if include_alias:
-            #keys = self._xmldoc._xpatheval("//ScalarVariable/@name[not(../Enumeration)][not(../String)]")
-            #vals = self._xmldoc._xpatheval("//ScalarVariable/@valueReference[not(../Enumeration)][not(../String)]")
-        #else:
-            #keys = self._xmldoc._xpatheval("//ScalarVariable/@name[not(../@alias)][not(../Enumeration)][not(../String)]")
-            #vals = self._xmldoc._xpatheval("//ScalarVariable/@valueReference[not(../@alias)][not(../Enumeration)][not(../String)]")        
-
-   
-        #if len(keys)!=len(vals):
-            #raise Exception("Number of vals does not equal number of keys. \
-                #Number of vals are: "+str(len(vals))+" and number of keys are: "+str(len(keys)))           
-        
-        #d={}
-        #for index, key in enumerate(keys):
-            #d[str(key)]=int(vals[index])
-        #return d
-    
-    def get_aliases(self, aliased_variable, ignore_cache=False):
+    def get_alias_for_variable(self, aliased_variable, ignore_cache=False):
         """ Return list of all alias variables belonging to the aliased 
             variable along with a list of booleans indicating whether the 
             alias variable should be negated or not.
@@ -1321,36 +1186,9 @@ class FMIModel(object):
 
         """
         return self._md.get_aliases_for_variable(aliased_variable)
-        #if not ignore_cache:
-            #return self._xmldoc.function_cache.get(self, 'get_aliases', aliased_variable)
-            
-        ## get value reference of aliased variable
-        #val_ref = self.get_valueref(aliased_variable)
-        #if val_ref!=None:
-            #aliases = self._xmldoc._xpatheval("//ScalarVariable/@name[../@alias]\
-                #[../@valueReference=\""+str(val_ref)+"\"]")
-            #aliasnames=[]
-            #isnegated=[]
-            #for index, alias in enumerate(aliases):
-                #if str(aliased_variable)!=str(alias):
-                    #aliasnames.append(str(alias))
-                    #aliasvalue = self._xmldoc._xpatheval("//ScalarVariable/@alias[../@name=\""+str(alias)+"\"]")
-                    #isnegated.append(str(aliasvalue[0])=="negatedAlias")
-            #return aliasnames, isnegated
-        #else:
-            #raise Exception("The variable: "+str(aliased_variable)+" can not be found in model.")
     
-    #def is_negated(self, variable):
-        #"""
-        #Return if the variable is alias negated or not.
-        #"""
-        #neg = self._xmldoc._xpatheval("//ScalarVariable/@name[../@alias='negatedAlias'][../@name='"+variable+"']")
-
-        #if len(neg)==1:
-            #return True
-        #else:
-            #return False
-            
+    def get_variable_aliases(self):
+        return self._md.get_variable_aliases()
     
     def get_name(self):
         """ Return the name of the model. """
@@ -1385,6 +1223,220 @@ class FMIModel(object):
 
 
 def export_result_dymola(model, data, file_name='', format='txt'):
+    """
+    Export an optimization or simulation result to file in Dymolas
+    result file format. The parameter values are read from the z
+    vector of the model object and the time series are read from
+    the data argument.
+
+    Parameters:
+        model --
+            A Model object.
+        data --
+            A two dimensional array of variable trajectory data. The
+            first column represents the time vector. The following
+            colums contain, in order, the derivatives, the states,
+            the inputs and the algebraic variables. The ordering is
+            according to increasing value references.
+        file_name --
+            If no file name is given, the name of the model (as defined
+            by JMIModel.get_name()) concatenated with the string
+            '_result' is used. A file suffix equal to the format
+            argument is then appended to the file name.
+        format --
+            A text string equal either to 'txt' for textual format or
+            'mat' for binary Matlab format.
+
+    Limitations:
+        Currently only textual format is supported.
+
+    """
+
+    if (format=='txt'):
+        if file_name=='':
+            file_name=model.get_name() + '_result.txt'
+
+        # Open file
+        f = open(file_name,'w')
+
+        # Write header
+        f.write('#1\n')
+        f.write('char Aclass(3,11)\n')
+        f.write('Atrajectory\n')
+        f.write('1.1\n')
+        f.write('\n')
+        
+        # all lists that we need for later
+        vrefs_alias = []
+        vrefs_noalias = []
+        vrefs = []
+        names_alias = []
+        names_noalias = []
+        names = []
+        aliases_alias = []
+        aliases = []
+        descriptions_alias = []
+        descriptions = []
+        variabilities_alias = []
+        variabilities_noalias = []
+        variabilities = []
+        types_alias = []
+        types_noalias = []
+        types = []
+        
+        for var in model._md.get_model_variables():
+            ftype = var.get_fundamental_type()
+            if not isinstance(ftype,xmlparser.String) and \
+                not isinstance(ftype,xmlparser.Enumeration):
+                    if var.get_alias() == xmlparser.NO_ALIAS:
+                        vrefs_noalias.append(var.get_value_reference())
+                        names_noalias.append(var.get_name())
+                        aliases.append(var.get_alias())
+                        descriptions.append(var.get_description())
+                        variabilities_noalias.append(var.get_variability())
+                        types_noalias.append(xmlparser._translate_fundamental_type(ftype))
+                    else:
+                        vrefs_alias.append(var.get_value_reference())
+                        names_alias.append(var.get_name())
+                        aliases_alias.append(var.get_alias())
+                        descriptions_alias.append(var.get_description())
+                        variabilities_alias.append(var.get_variability())
+                        types_alias.append(xmlparser._translate_fundamental_type(ftype))
+                        
+        # need to save these no alias lists for later
+        vrefs = vrefs_noalias[:]
+        names = names_noalias[:]
+        types = types_noalias[:]
+        variabilities = variabilities_noalias[:]
+        
+        # merge lists
+        vrefs.extend(vrefs_alias)
+        names.extend(names_alias)
+        aliases.extend(aliases_alias)
+        descriptions.extend(descriptions_alias)
+        variabilities.extend(variabilities_alias)
+        types.extend(types_alias)
+        
+        # zip to list of tuples and sort - non alias variables are now
+        # guaranteed to be first in list
+        names_noalias = sorted(zip(tuple(vrefs_noalias),tuple(names_noalias)), key=itemgetter(0))
+        variabilities_noalias = sorted(zip(tuple(vrefs_noalias),tuple(variabilities_noalias)), key=itemgetter(0))
+        names = sorted(zip(tuple(vrefs),tuple(names)), key=itemgetter(0))
+        aliases = sorted(zip(tuple(vrefs),tuple(aliases)), key=itemgetter(0))
+        descriptions = sorted(zip(tuple(vrefs),tuple(descriptions)), key=itemgetter(0))
+        variabilities = sorted(zip(tuple(vrefs),tuple(variabilities)), key=itemgetter(0))
+        types = sorted(zip(tuple(vrefs),tuple(types)), key=itemgetter(0))
+        
+        num_vars = len(names)
+
+        # Find the maximum name and description length
+        max_name_length = len('Time')
+        max_desc_length = len('Time in [s]')
+        
+        for i in range(len(names)):
+            name = names[i][1]
+            desc = descriptions[i][1]
+            
+            if (len(name)>max_name_length):
+                max_name_length = len(name)
+                
+            if (len(desc)>max_desc_length):
+                max_desc_length = len(desc)
+
+        f.write('char name(%d,%d)\n' % (num_vars+1, max_name_length))
+        f.write('time\n')
+
+        for name in names:
+            f.write(name[1] +'\n')
+
+        f.write('\n')
+
+        # Write descriptions       
+        f.write('char description(%d,%d)\n' % (num_vars + 1, max_desc_length))
+        f.write('Time in [s]\n')
+
+        # Loop over all variables, not only those with a description
+        for desc in descriptions:
+            f.write(desc[1] +'\n')
+                
+        f.write('\n')
+
+        # Write data meta information
+        
+        f.write('int dataInfo(%d,%d)\n' % (num_vars + 1, 4))
+        f.write('0 1 0 -1 # time\n')
+        
+        list_of_continuous_states = N.append(model._save_cont_valueref[0],model._save_cont_valueref[1])
+        list_of_continuous_states = N.append(list_of_continuous_states, model._save_cont_valueref[2]).tolist()
+        valueref_of_continuous_states = []
+        
+        cnt_1 = 1
+        cnt_2 = 1
+        n_parameters = 0
+        for i, name in enumerate(names):
+            if variabilities[i][1] == xmlparser.PARAMETER or \
+                variabilities[i][1] == xmlparser.CONSTANT:
+                if aliases[i][1] == 0: # no alias
+                    cnt_1 += 1
+                    n_parameters += 1
+                    f.write('1 %d 0 -1 # ' % cnt_1 + name[1]+'\n')
+                elif aliases[i][1] == 1: # alias
+                    f.write('1 %d 0 -1 # ' % cnt_1 + name[1]+'\n')
+                else: # negated alias
+                    f.write('1 -%d 0 -1 # ' % cnt_1 + name[1] +'\n')
+            else:
+                if aliases[i][1] == 0: # noalias
+                    valueref_of_continuous_states.append(list_of_continuous_states.index(name[0]))
+                    cnt_2 += 1   
+                    f.write('2 %d 0 -1 # ' % cnt_2 + name[1] +'\n')
+                elif aliases[i][1] == 1: # alias
+                    f.write('2 %d 0 -1 # ' % cnt_2 + name[1] +'\n')
+                else: #neg alias
+                    f.write('2 -%d 0 -1 # ' % cnt_2 + name[1] +'\n')
+        f.write('\n')
+
+        # Write data
+        # Write data set 1
+        f.write('float data_1(%d,%d)\n' % (2, n_parameters + 1))
+        f.write("%12.12f" % data[0,0])
+        str_text = ''
+        
+        # write constants and parameters
+        for i, name in enumerate(names_noalias):
+            if variabilities_noalias[i][1] == xmlparser.CONSTANT or \
+                variabilities_noalias[i][1] == xmlparser.PARAMETER:
+                    if types_noalias[i] == xmlparser.REAL:
+                        str_text = str_text + (" %12.12f" % (model.get_real([name[0]])))
+                    elif types_noalias[i] == xmlparser.INTEGER:
+                        str_text = str_text + (" %12.12f" % (model.get_integer([name[0]])))
+                    elif types_noalias[i] == xmlparser.BOOLEAN:
+                        str_text = str_text + (" %12.12f" % (float(model.get_boolean([name[0]]))))
+                        
+                    
+        f.write(str_text)
+        f.write('\n')
+        f.write("%12.12f" % data[-1,0])
+        f.write(str_text)
+
+        f.write('\n\n')
+        
+        n_vars = len(data[0,:])
+        n_points = len(data[:,0])
+        # write data set 2
+        f.write('float data_2(%d,%d)\n' % (n_points, n_vars))
+        # write contiuous and discretes
+        for i in range(n_points):
+            str_text = (" %12.12f" % data[i,0])
+            for j in range(n_vars-1):
+                str_text = str_text + (" %12.12f" % (data[i,1+valueref_of_continuous_states[j]]))
+            f.write(str_text+'\n')
+        f.write('\n')
+        f.close()
+
+    else:
+        raise Error('Export on binary Dymola result files not yet supported.')
+
+def export_result_dymola_deprecated(model, data, file_name='', format='txt'):
     """
     Export an optimization or simulation result to file in Dymolas
     result file format. The parameter values are read from the z

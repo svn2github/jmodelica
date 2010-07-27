@@ -113,7 +113,6 @@ def export_result_dymola(model, data, file_name='', format='txt'):
         for desc in descriptions:
             f.write(desc[1]+'\n')
             
-
         f.write('\n')
 
         # Write data meta information
@@ -159,18 +158,18 @@ def export_result_dymola(model, data, file_name='', format='txt'):
         # Write data set 1
         f.write('float data_1(%d,%d)\n' % (2, n_parameters + 1))
         f.write("%12.12f" % data[0,0])
+        str_text = ''
         for ref in range(n_parameters):
             if scaling_method & jmodelica.jmi.JMI_SCALING_VARIABLES > 0:
-                f.write(" %12.12f" % (z[ref]*sc[ref]))
+                str_text += " %12.12f" % (z[ref]*sc[ref])
             else:
-                f.write(" %12.12f" % (z[ref]))
+                str_text += " %12.12f" % (z[ref])
+                
+        f.write(str_text)
         f.write('\n')
         f.write("%12.12f" % data[-1,0])
-        for ref in range(n_parameters):
-            if scaling_method & jmodelica.jmi.JMI_SCALING_VARIABLES > 0:
-                f.write(" %12.12f" % (z[ref]*sc[ref]))
-            else:
-                f.write(" %12.12f" % (z[ref]))
+        f.write(str_text)
+
         f.write('\n\n')
 
         # Write data set 2
@@ -197,7 +196,7 @@ def export_result_dymola(model, data, file_name='', format='txt'):
         raise Error('Export on binary Dymola result files not yet supported.')
 
 
-def export_result_dymola2(model, data, file_name='', format='txt'):
+def export_result_dymola_deprecated(model, data, file_name='', format='txt'):
     """
     Export an optimization or simulation result to file in Dymolas
     result file format. The parameter values are read from the z
