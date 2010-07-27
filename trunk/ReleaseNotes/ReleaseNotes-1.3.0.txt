@@ -20,6 +20,15 @@ Redeclares as class elements are now supported.
 All support mentioned for the Modelica compiler applies to the
 Optimica compiler as well.
 
+1.2.1 Support for the objectiveIntegrand class attribute. In order to
+encode Lagrange cost functions of the type
+
+\int_{t_0}^{t_f}L(.)dt,
+
+the Optimica class attribute objectiveIntegrand is supported by the
+Optimica compiler. The expression L may be utilized by optimization
+algorithms providning dedicated support for Lagrange cost functions.
+
 2. JModelica.org Model Interface (JMI)
 
 2.1 General
@@ -39,6 +48,11 @@ optimization problem, with the additional equality constraint
 p2 = p1
 
 included in the problem. 
+
+2.2.2 Support for Lagrange cost functions. The new Optimica class
+attribute objectiveIntegrand, see above, is supported by the
+collocation optimization algorihtm. The integral cost is approximated
+by a Radau quadrature formula.
 
 3. Assimulo
 
