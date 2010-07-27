@@ -307,7 +307,6 @@ int jmi_init_opt_new(jmi_init_opt_t **jmi_init_opt_new, jmi_t *jmi,
 		for (i=jmi_init_opt->dF0_n_nz;i<jmi_init_opt->dh_n_nz;i++) {
 			jmi_init_opt->dh_irow[i] += jmi_init_opt->jmi->init->F0->n_eq_F;
 		}
-
 	}
 /*
 	for (i=0;i<jmi_init_opt->dh_n_nz;i++) {

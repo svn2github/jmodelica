@@ -38,10 +38,11 @@
  *
  * Consider the optimization problem
  *
- *      \f$\displaystyle\min_{p_{opt},u}J(p,q)\f$<br>
+ *      \f$\displaystyle\min_{p_{opt},u} \int_{t_0}^{t_f} L(p,v) dt + J(p,q)\f$<br>
  *      subject to <br>
  *      \f$ F(p,v) = 0\f$, \f$[t_0,t_f]\f$ <br>
  *      \f$  F_0(p,v) = 0 \f$<br>
+ *      \f$F_{fdp}(p) = 0\f$<br>
  *      \f$C_{eq}(p,v,q) = 0\f$, \f$[t_0,t_f]\f$ <br>
  *      \f$C_{ineq}(p,v,q) \leq 0,\f$ \f$[t_0,t_f]\f$<br>
  *      \f$H_{eq}(p,q) = 0\f$<br>
@@ -160,7 +161,11 @@
  *
  * \subsection jmi_opt_sim_lp_constr Equality constraints representing the DAE
  *
- * A the initial point the relation
+ * The free dependent parameter constraint is given by
+ *
+ *   \f$ F_{fdp}(p) = 0\f$<br>
+ *
+ * and consists of \f$n_{fdp}\f$ equations. At the initial point the relation
  *
  * \f$F_0(p,v_{0,0})=0\f$ ,  \f$v_{0,0} = [\dot x_{0,0}^T, x_{0,0}^T, u_{0,0}^T,
  *   w_{0,0}^T, t_{0}]^T\f$ <br>
@@ -223,17 +228,17 @@
  *
  * The number of equality constraints is
  *
- * \f$2n_x+n_w+(n_x+n_w)n_en_c + n_xn_e + n_u + n_xn_en_c +
+ * \f$n_{fdp} + 2n_x+n_w+(n_x+n_w)n_en_c + n_xn_e + n_u + n_xn_en_c +
  *   (2n_x+n_u+n_w)n_{tp}\f$
  *
  * and the number of free variables when considering the total number of
  * variables and the number of equality constraints deriving from the DAE
  * constraint is then
  *
- * \f$n_{p^{opt}} + n_un_en_c + 2\f$
+ * \f$n_{p^{opt}} - n_{fdp} + n_un_en_c + 2\f$
  *
- * which corresponds the number of free optimization parameters, the input
- * profile and, optionally, the free initial and terminal points.
+ * which corresponds the number of free independent optimization parameters,
+ * the input profile and, optionally, the free initial and terminal points.
  *
  * \subsection jmi_opt_sim_nlp The NLP problem
  *
@@ -252,11 +257,16 @@
  * where \f$x\in R^{n_{\bar x}}\f$, \f$g\in n_g\f$ and \f$h \in n_h\f$ and
  *
  * \f$
- * f(\bar x) = J(\bar x)
+ * f(\bar x) = \displaystyle\sum_{i=0}^{n_{e}-1}\displaystyle\sum_{j=1}^{n_{cp}}\alpha_jL(p^{opt},v_{i,j}) + J(\bar x)
  * \f$
+ *
+ * where the Lagrange cost function has been approximated by a Radau quadrature
+ * and \f$\alpha_j\f$ are the quadrature weights. The equality constraint
+ * is given by:
  *
  * \f$
  * h(\bar x) = \left[ \begin{array}{l}
+ *                      F_{fdp}(p) \\
  *                      F_0(p,v_{0,0}) \\
  *                      F(p,v_{0,1}) \\
  *                      \vdots\\
@@ -372,6 +382,7 @@
  *
  * \f$
  * h_1(\bar x) = \left[ \begin{array}{l}
+ *                      F_{fdp}(p) \\
  *                      F_0(p,v_{0,0}) \\
  *                      F(p,v_{0,1}) \\
  *                      \vdots\\
@@ -440,6 +451,12 @@
  *   \displaystyle \frac{\partial h_1}{\partial \bar x_1}=
  *     \left[
  *         \begin{array}{c cccc}
+ *           \displaystyle{\frac{\partial F_{fdp}}{\partial p^{opt}}} &0
+ *           &
+ *           &
+ *           ...
+ *           &
+ *           0 \\
  *           \displaystyle{\frac{\partial F_0}{\partial p^{opt}}} &
  *           \displaystyle{\frac{\partial F_0}{\partial \dot x_{0,0}}} &
  *           \displaystyle{\frac{\partial F_0}{\partial x_{0,0}}} &
@@ -507,6 +524,7 @@
  *   \displaystyle \frac{\partial h_1}{\partial \bar x_2}=
  *     \left[
  *         \begin{array}{c cc ccccccccccc ccc cccc}
+ *         0 & &&&&&& ... &&&&&& 0 &0&&\\
  *         0 & &&&&&& ... &&&&&& 0 &0&&\\
  *           \displaystyle{\frac{\partial F}{\partial \dot x_{0,1}}} &
  *           \displaystyle{\frac{\partial F}{\partial x_{0,1}}} &
@@ -606,6 +624,7 @@
  *   \displaystyle \frac{\partial h_1}{\partial \bar x_3}=
  *     \left[
  *         \begin{array}{ccc cc}
+ *         0&&...&&0\\
  *           0&&& \displaystyle{\frac{\partial F_0}{\partial t_0}}\\
  *           &\ddots&&\displaystyle{\frac{\partial F}{\partial t_0}} &
  *           \displaystyle{\frac{\partial F}{\partial t_f}}\\
@@ -963,7 +982,7 @@
  * constraints. Denoting the (normalized) blocking factor vector \f$\gamma\f$,
  * the number of equality constraints becomes
  *
- * \f$2n_x+n_w+(n_x+n_w)n_en_c + n_xn_e + n_u + n_xn_en_c +
+ * \f$n_{fdp} + 2n_x+n_w+(n_x+n_w)n_en_c + n_xn_e + n_u + n_xn_en_c +
  *   (2n_x+n_u+n_w)n_{tp} + n_u\sum_i(\gamma_i-1)\f$
  *
  * \section jmi_opt_sim_lp_create Creation of a jmi_opt_sim_t struct
@@ -998,6 +1017,7 @@ typedef struct {
     jmi_real_t *Lp_dot_vals;        // Values of the derivative of the Lagrange polynomials at the points in cp
     jmi_real_t *Lpp_dot_vals;       // Values of the derivative of the Lagrange polynomials at the points in cpp
     int der_eval_alg;                   // Evaluation algorithm used for computation of derivatives
+    int dFfdp_dp_n_nz;
     int dF0_n_nz;
     int dF_dp_n_nz;
     int dF_ddx_dx_du_dw_n_nz;

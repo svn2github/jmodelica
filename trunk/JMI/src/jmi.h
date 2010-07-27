@@ -212,7 +212,7 @@
  *   \f$C_{eq}(p,v,q)\f$, \f$C_{ineq}(p,v,q)\f$, \f$H_{eq}(p,q)\f$, \f$H_{ineq}(p,q)\f$.
  *   Based on these functions, an optimization problem is then formulated as
  *
- *      \f$\min_{p^{opt},u} \int_{t_0}^{t_f} L(p,v) dt + J(p,q)\f$<br>
+ *      \f$\displaystyle\min_{p^{opt},u} \int_{t_0}^{t_f} L(p,v) dt + J(p,q)\f$<br>
  *      subject to <br>
  *      \f$F_{fdp}(p) = 0\f$<br>
  *      \f$C_{eq}(p,v,q) = 0\f$<br>
@@ -221,8 +221,8 @@
  *      \f$H_{ineq}(p,q) \leq 0\f$<br>
  *
  *   where \f$L\f$ is the Lagrange integrand and \f$J\f$ is the point wise
- *   penalty penalty function in the cost to be minimized, \f$F_{fdp} are the free
- *   dependent parameter residuals, \f$ \f$C_{eq}\f$ are path equality constraints,
+ *   penalty penalty function in the cost to be minimized, \f$F_{fdp}\f$ are the free
+ *   dependent parameter residuals, \f$C_{eq}\f$ are path equality constraints,
  *   \f$C_{ineq}\f$ are path inequality constraints, \f$H_{eq}\f$ are (time) point equality constraints,
  *   and \f$H_{ineq}\f$ are (time) point inequality constraints. Notice that \f$J\f$
  *   (corresponding to the Optimica class attribute 'objective') is a function of the parameters

@@ -2,6 +2,7 @@ This document contains the release notes for JModelica.org 1.3.0.
 
 Highlights:
 
+
 1. Compilers
 
 1.1. Modelica Compiler
@@ -13,3 +14,52 @@ Slice operations are now supported, except in some situations in function.
 1.1.2 Redeclare
 
 Redeclares as class elements are now supported.
+
+1.2. Optimica Compiler
+
+All support mentioned for the Modelica compiler applies to the
+Optimica compiler as well.
+
+2. JModelica.org Model Interface (JMI)
+
+2.1 General
+
+2.2 Optimization algorithm
+
+2.2.1 Support for free dependent parameters in the collocation
+optimization algorith. In models containing parameter declarations
+such as
+
+parameter Real p1(free=true);
+parameter Real p2 = p1;
+
+the parameter p2 needs to be considered as being free in the
+optimization problem, with the additional equality constraint
+
+p2 = p1
+
+included in the problem. 
+
+3. Assimulo
+
+4. FMI compliance
+
+
+5. XML model export
+
+6. Python integration
+
+
+7. Contributors to JModelica.org 1.2.0
+
+Christian Andersson
+Tove Bergdahl
+Magnus Gäfvert
+Jesper Mattsson
+Johan Åkesson
+
+Previous contributors:
+
+Philip Nilsson
+Roberto Parrotto
+Philip Reuterswärd

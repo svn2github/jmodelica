@@ -335,6 +335,48 @@ p3
      Real x3 = p2;
   end FreeDependentParametersTest4;
 
+  optimization FreeDependentParametersTest5(objective=p1^2 + p2^2,startTime=0,finalTime=1) 
+
+  	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FClassMethodTestCase(name="FreeDependentParametersTest5",
+      methodName="variableDiagnostics",
+        description="Test linearity of free dependent parameters.", methodResult=
+        "  
+Independent constants: 
+
+Dependent constants: 
+
+Independent parameters: 
+ p1: number of uses: 2, isLinear: false evaluated binding exp: 1.0
+ p4: number of uses: 1, isLinear: true evaluated binding exp: 1.0
+
+Dependent parameters: 
+ p2: number of uses: 3, isLinear: false
+ p3: number of uses: 1, isLinear: true
+ p5: number of uses: 1, isLinear: true
+
+Differentiated variables: 
+
+Derivative variables: 
+
+Discrete variables: 
+
+Algebraic real variables: 
+ x1: number of uses: 1, isLinear: true, alias: no
+
+Input variables: 
+  ")})));
+
+     parameter Real p1(free=true) = 1;
+     parameter Real p2 = p1;
+     parameter Real p3 = p2;
+     parameter Real p4 = 1;
+     parameter Real p5(free=true) = p4;
+     Real x1 = 1;
+     Real x2 = p1;
+     Real x3 = p2;
+  end FreeDependentParametersTest5;
+
   optimization InstantValueTest1 
      (objective=x(finalTime)^2,startTime=0,finalTime(free=true,initialGuess=3))
     Real x(start=0);

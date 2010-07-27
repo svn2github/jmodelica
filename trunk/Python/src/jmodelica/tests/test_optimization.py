@@ -544,3 +544,26 @@ class TestLagrangeCost4(OptimizationTest):
     def test_trajectories(self):
         self.assert_all_trajectories(['sys.x[1]', 'sys.x[2]', 'u', 'sys.y'])
 
+class TestDependentParametersInCollocation(OptimizationTest):
+
+    @classmethod
+    def setUpClass(cls):
+        OptimizationTest.setup_class_base('DependentParameterTest2.mo','DependentParameterTest2')
+
+    @testattr(ipopt = True)
+    def setUp(self):
+        n_e = 30
+        hs = N.ones(n_e)*1./n_e
+        n_cp = 3
+        b_f = N.ones(n_e)
+        self.setup_base(nlp_args = (n_e, hs, n_cp,b_f), options = { 'max_iter': 500 })
+        self.run()
+        self.load_expected_data('DependentParameterTest2_result.txt')
+
+    @testattr(ipopt = True)
+    def test_trajectories(self):
+        self.assert_all_trajectories(['x', 'u', 'p1', 'p2', 'p4'])
+
+
+
+
