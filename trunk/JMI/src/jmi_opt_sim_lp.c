@@ -1854,8 +1854,6 @@ static int lp_set_initial_from_trajectory(
 		int traj_n_points, jmi_real_t *hs_init, jmi_real_t start_time_init,
 		jmi_real_t final_time_init) {
 
-	printf("lp_set_initial_from_trajectory\n");
-	
 	jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
 	jmi_t *jmi = jmi_opt_sim->jmi;
 
@@ -1915,7 +1913,6 @@ static int lp_set_initial_from_trajectory(
 					trajectory_data_init,traj_n_points,n_vars+1,jmi_opt_sim->x_init+
 					jmi->opt->n_p_opt);
 
-	printf("--- %d\n",jmi_opt_sim->n_blocking_factors);
     // Loop over the collocation points, interpolate in input tables.
 
 	for (i=0;i<jmi_opt_sim->n_e;i++) {

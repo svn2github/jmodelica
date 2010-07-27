@@ -105,7 +105,6 @@ int jmi_opt_sim_set_initial(jmi_opt_sim_t *jmi_opt_sim,
 	int i;
 	for (i=0;i<jmi_opt_sim->n_x;i++) {
 		jmi_opt_sim->x_init[i] = x_init[i];
-		jmi_opt_sim->x[i] = x_init[i];
 	}
 	return 0;
 }
