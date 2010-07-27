@@ -1608,9 +1608,9 @@ Optional Packages:
   --with-gnu-ld           assume the C compiler uses GNU ld [default=no]
   --with-ipopt            IPOPT installation directory [default=check]
   --with-sundials         SUNDIALS installation directory [default=check]
-  --with-eclipse          Eclipse installation directory [default=check]
-  --with-mingw            MinGW installation directory. [default=check]
-  --with-cppad            CppAD installation directory [default=check]
+  --with-eclipse          Eclipse installation directory [default=no]
+  --with-mingw            MinGW installation directory. [default=no]
+  --with-cppad            CppAD installation directory [default=no]
 
 Some influential environment variables:
   CXX         C++ compiler command

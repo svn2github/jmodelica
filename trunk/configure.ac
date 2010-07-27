@@ -135,7 +135,7 @@ SUNDIALS_HOME=$sundials
 
 AC_ARG_WITH([eclipse],
    [AS_HELP_STRING([--with-eclipse],
-     [Eclipse installation directory @<:@default=check@:>@])],
+     [Eclipse installation directory @<:@default=no@:>@])],
    [eclipse=$withval],
    [with_eclipse=no])
 
@@ -153,7 +153,7 @@ ECLIPSE_HOME=$eclipse
 # Checks for mingw.
 AC_ARG_WITH([mingw],
    [AS_HELP_STRING([--with-mingw],
-     [MinGW installation directory. @<:@default=check@:>@])],
+     [MinGW installation directory. @<:@default=no@:>@])],
    [mingw=$withval],
    [with_mingw=no])
 
@@ -193,7 +193,7 @@ esac
 # Detect CppAD
 AC_ARG_WITH([cppad],
    [AS_HELP_STRING([--with-cppad],
-     [CppAD installation directory @<:@default=check@:>@])],
+     [CppAD installation directory @<:@default=no@:>@])],
    [cppad=$withval],
    [with_cppad=no])
 
