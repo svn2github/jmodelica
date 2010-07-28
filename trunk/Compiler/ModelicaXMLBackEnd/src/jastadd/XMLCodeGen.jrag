@@ -620,6 +620,7 @@ aspect XMLTagBinding{
         eq FAtan2Exp.xmlTag() = "Atan2";       
         eq FTimeExp.xmlTag() = "Time";
         eq FRangeExp.xmlTag() = "Range";
+        eq FNoEventExp.xmlTag() = "NoEvent";
         //other expressions
         eq FArray.xmlTag() = "Array";   
         eq FFunctionCall.xmlTag() = "FunctionCall";
