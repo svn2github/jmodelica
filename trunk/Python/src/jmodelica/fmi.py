@@ -41,9 +41,9 @@ def unzip_FMU(archive, platform='win32', path='.'):
     """
     Unzip the FMU.
     """
-    
+
     try:
-        archive = ZipFile(path+os.sep+archive)
+        archive = ZipFile(os.path.join(path,archive))
     except IOError:
         raise FMIException('Could not locate the FMU.')
     

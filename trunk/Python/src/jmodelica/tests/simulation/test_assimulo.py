@@ -25,7 +25,9 @@ import jmodelica.jmi as jmi
 import jmodelica.fmi as fmi
 from jmodelica.compiler import ModelicaCompiler
 from jmodelica.compiler import OptimicaCompiler
+from jmodelica.io import ResultDymolaTextual
 from jmodelica.tests import testattr
+from jmodelica import simulate
 
 try:
     from jmodelica.simulation.assimulo import JMIODE, JMIDAE, FMIODE, JMIModel_Exception
@@ -604,5 +606,15 @@ class Test_FMI_ODE:
         assert self._bounceSim.completed_step(solver) == 0
         #Further testing of the completed step function is needed.
         
-        
-        
+    @testattr(fmi = True)
+    def test_basic_simulation(self):
+        """
+        This tests the basic simulation and writing.
+        """
+        res_obj = simulate(os.path.join(path_to_fmus,'bouncingBall.fmu'), alg_args={'final_time':3.})
+        res = res_obj.result_data
+        height = res.get_variable_data('h')
+
+        nose.tools.assert_almost_equal(height.x[0],1.000000,5)
+        nose.tools.assert_almost_equal(height.x[-1],-0.9804523,5)
+        nose.tools.assert_almost_equal(height.t[-1],3.000000,5)

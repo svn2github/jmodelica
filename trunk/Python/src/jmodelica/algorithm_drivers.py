@@ -24,12 +24,13 @@ import warnings
 import numpy as N
 
 import jmodelica
+from jmodelica.fmi import FMIModel
 from jmodelica.optimization import ipopt
 from jmodelica.initialization.ipopt import NLPInitialization
 from jmodelica.initialization.ipopt import InitializationOptimizer
 
 try:
-    from jmodelica.simulation.assimulo import JMIDAE, JMIODE, write_data
+    from jmodelica.simulation.assimulo import JMIDAE, JMIODE, FMIODE, write_data
     from jmodelica.simulation.assimulo import TrajectoryLinearInterpolation
     from Assimulo.Implicit_ODE import *
     from Assimulo.Explicit_ODE import *
@@ -204,6 +205,118 @@ class IpoptInitializationAlg(AlgorithmBase):
             
 
 class AssimuloSimResult(ResultBase): pass
+
+class AssimuloFMIAlg(AlgorithmBase):
+    """Simulation algortihm for FMUs using the Assimulo package."""
+    
+    def __init__(self,
+                 model,
+                 alg_args={}):
+        self.model = FMIModel(model) #Create an FMIModel
+        self.model.initialize()      #Set the start attributes
+        
+        if not assimulo_present:
+            raise Exception('Could not find Assimulo package. Check jmodelica.check_packages()')
+        
+        #try to set algorithm arguments
+        try:
+            self._set_alg_args(**alg_args)
+        except TypeError, e:
+            raise InvalidAlgorithmArgumentException(e)
+        
+        self.probl = FMIODE(self.model)
+        
+        self.simulator = self.solver(self.probl, t0=self.start_time)
+    
+    def _set_alg_args(self,
+                      start_time=0.0,
+                      final_time=1.0,
+                      num_communication_points=500,
+                      solver='CVode',
+                      ):
+        """ Set arguments for Assimulo algorithm.
+        
+        Parameters:
+            start_time -- 
+                Simulation start time.
+                Default: 0.0
+            final_time --
+                Simulation stop time.
+                Default: 1.0
+            num_communication_points -- 
+                Number of points where the solution is returned. If set to 0 the 
+                integrator will return at it's internal steps.
+                Default: 500               
+            solver --
+                Set which solver to use with class name as string.
+                Default: 'CVode'
+        """
+        self.start_time = start_time
+        self.final_time = final_time
+        self.num_communication_points = num_communication_points
+        
+        if hasattr(expl_ode, solver):
+            self.solver = getattr(expl_ode, solver)
+        else:
+            raise InvalidAlgorithmArgumentException("The solver: "+solver+ " is unknown.")
+    
+    def set_solver_options(self, 
+                           solver_args={}):
+        """ Set options for the solver.
+        
+        Parameters:
+            solver_args --
+                Dict with list of solver arguments. Arguments must be a property of 
+                the solver. An InvalidSolverArgumentException is raised if an 
+                argument can not be found for the chosen solver.
+         """
+        rtol, atol = self.model.get_tolerances()
+        
+        #If the tolerances are not set specifically, they are set according to the 'DefaultExperiment'
+        #from the XML file.
+        try:
+            solver_args['atol']
+        except KeyError:
+            solver_args['atol'] = atol
+        try:
+            solver_args['rtol']
+        except KeyError:
+            solver_args['rtol'] = rtol
+        
+        #Sets the default CVode solver to BDF using Newton iteration (if not set)
+        try:
+            solver_args['discr']
+        except KeyError:
+            solver_args['discr'] = 'BDF'
+        try:
+            solver_args['iter']
+        except KeyError:
+            solver_args['iter'] = 'Newton'
+        
+        #loop solver_args and set properties of solver
+        for k, v in solver_args.iteritems():
+            try:
+                getattr(self.simulator,k)
+            except AttributeError:
+                try:
+                    getattr(self.probl,k)
+                except AttributeError:
+                    raise InvalidSolverArgumentException(v)
+            setattr(self.simulator, k, v)
+                
+    def solve(self):
+        """ Runs the simulation. """
+        self.simulator.simulate(self.final_time, self.num_communication_points)
+ 
+    def get_result(self):
+        """ Write result to file, load result data and return AssimuloSimResult."""
+        write_data(self.simulator)
+        # result file name
+        resultfile = self.model.get_name()+'_result.txt'
+        # load result file
+        res = jmodelica.io.ResultDymolaTextual(resultfile)
+        # create and return result object
+        return AssimuloSimResult(self.model, resultfile, self.solver, res)
 
 class AssimuloAlg(AlgorithmBase):
     """ Simulation algorithm using the Assimulo package. """

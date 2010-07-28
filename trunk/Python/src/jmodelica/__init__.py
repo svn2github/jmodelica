@@ -308,7 +308,7 @@ def _exec_algorithm(model,
         raise Exception(str(algorithm)+
                         " must be a subclass of jmodelica.algorithm_drivers.AlgorithmBase")
 
-    if not isinstance(model, jmodelica.jmi.Model):
+    if isinstance(model, str) and file_name !='':
         # model class and mo-file must be set
         
         if not ipopt_present and compiler_target=='ipopt':
@@ -317,7 +317,10 @@ def _exec_algorithm(model,
         model = _compile(model, file_name, compiler=compiler, 
                           compiler_options=compiler_options, 
                           compiler_target=compiler_target)
-         
+    
+    if isinstance(model,str) and model.lower().endswith('.fmu') and issubclass(algorithm, AssimuloAlg):
+        algorithm = AssimuloFMIAlg
+    
     # initialize algorithm
     alg = algorithm(model, alg_args)
     # set arguments to solver, if any
