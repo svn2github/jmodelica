@@ -61,10 +61,13 @@ by a Radau quadrature formula.
 
 5. XML model export
 
+5.1 Support for the built-in function noEvent.
+
+
 6. Python integration
 
 
-7. Contributors to JModelica.org 1.2.0
+7. Contributors to JModelica.org 1.3.0
 
 Christian Andersson
 Tove Bergdahl
