@@ -24,6 +24,7 @@ import tempfile
 import ctypes as C
 import numpy as N
 from ctypes.util import find_library
+import platform as PL
 import numpy.ctypeslib as Nct
 from zipfile import ZipFile
 from lxml import etree
@@ -37,7 +38,7 @@ class FMIException(Exception):
 
 
     
-def unzip_FMU(archive, platform='win32', path='.'):
+def unzip_FMU(archive, path='.'):
     """
     Unzip the FMU.
     """
@@ -49,12 +50,27 @@ def unzip_FMU(archive, platform='win32', path='.'):
     
     dir = ['binaries','sources']
     
-    if platform == 'win32' or platform == 'win64':
+    if sys.platform == 'win32':
+        platform = 'win'
         suffix = '.dll'
-    elif platform == 'linux32' or platform == 'linux64':
-        suffix = '.so'
-    else: 
+    elif sys.platform == 'darwin':
+        platform = 'darwin'
         suffix = '.dylib'
+    else:
+        platform = 'linux'
+        suffix = '.so'
+    
+    if PL.architecture()[0].startswith('32'):
+        platform += '32'
+    else:
+        platform += '64'
+    
+    #if platform == 'win32' or platform == 'win64':
+    #    suffix = '.dll'
+    #elif platform == 'linux32' or platform == 'linux64':
+    #    suffix = '.so'
+    #else: 
+    #    suffix = '.dylib'
     
     #Extracting the XML
     for file in archive.filelist:
@@ -113,17 +129,14 @@ class FMIModel(object):
         
         if sys.platform == 'win32':
             suffix = '.dll'
-            platform = 'win32'
         elif sys.platform == 'darwin':
             suffix = '.dylib'
-            platform = 'darwin'
         else:
             suffix = '.so'
-            platform = 'linux32'
 
             
         #Create temp binary
-        self._tempnames = unzip_FMU(archive=fmu, path=path, platform=platform)
+        self._tempnames = unzip_FMU(archive=fmu, path=path)
         self._tempdll = self._tempnames[0]
         self._tempxml = self._tempnames[1]
         self._modelname = self._tempnames[2]

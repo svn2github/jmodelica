@@ -33,23 +33,21 @@ def test_unzip():
     """
     This tests the functionality of the method unzip_FMU.
     """
-    #Detect Platform
-    if S.platform == 'win32':
-        platform = 'win32'
-    else:
-        platform = 'linux32'
+    platform = sys.platform
     
     #FMU
     fmu = 'bouncingBall.fmu'
     
     #Unzip FMU
-    tempnames = unzip_FMU(archive=fmu, path=path_to_fmus, platform=platform)
+    tempnames = unzip_FMU(archive=fmu, path=path_to_fmus)
     tempdll = tempnames[0]
     tempxml = tempnames[1]
     modelname = tempnames[2]
     
     if platform == 'win32':
         assert tempdll.endswith('.dll')
+    elif platform == 'darwin':
+        assert tempdll.endswith('.dylib')
     else:
         assert tempdll.endswith('.so')
     assert tempxml.endswith('.xml')
@@ -61,13 +59,15 @@ def test_unzip():
     fmu = 'dq.fmu'
     
     #Unzip FMU
-    tempnames = unzip_FMU(archive=fmu, path=path_to_fmus, platform=platform)
+    tempnames = unzip_FMU(archive=fmu, path=path_to_fmus)
     tempdll = tempnames[0]
     tempxml = tempnames[1]
     modelname = tempnames[2]
     
     if platform == 'win32':
         assert tempdll.endswith('.dll')
+    elif platform == 'darwin':
+        assert tempdll.endswith('.dylib')
     else:
         assert tempdll.endswith('.so')
     assert tempxml.endswith('.xml')
