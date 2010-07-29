@@ -1,4 +1,4 @@
-from jmodelica.tests.base_simul import *
+from jmodelica.tests.general.base_simul import *
 from jmodelica.tests import testattr
 from jmodelica.compiler import OptimicaCompiler
 import numpy as N

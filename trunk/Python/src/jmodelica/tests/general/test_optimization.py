@@ -6,7 +6,7 @@ from jmodelica.io import ResultDymolaTextual
 from jmodelica.optimization.ipopt import NLPCollocationLagrangePolynomials
 from jmodelica.optimization.ipopt import CollocationOptimizer
 import matplotlib.pyplot as plt
-from jmodelica.tests.base_simul import *
+from jmodelica.tests.general.base_simul import *
 from jmodelica.tests import testattr
 import numpy as N
 import os.path
@@ -237,7 +237,7 @@ class TestStaticOptimizationDependentParameters:
         curr_dir = os.path.dirname(os.path.abspath(__file__));
         oc = OptimicaCompiler() 
         oc.compile_model("StaticOptimizationTest.StaticOptimizationTest2",
-                         curr_dir+"/files/StaticOptimizationTest.mo",target="ipopt")
+                         curr_dir+"/../files/StaticOptimizationTest.mo",target="ipopt")
         cls.model = jmi.Model("StaticOptimizationTest_StaticOptimizationTest2")
         cls.nlp = NLPInitialization(cls.model,stat=1)
         cls.ipopt_nlp = InitializationOptimizer(cls.nlp)
@@ -259,15 +259,15 @@ class TestOptInitBlockingFactors:
         cls.curr_dir = os.path.dirname(os.path.abspath(__file__));
         oc = OptimicaCompiler()
         cls.model = oc.compile_model("BlockingInitPack.M_init",
-                                     cls.curr_dir+"/files/BlockingError.mo", target='ipopt')
+                                     cls.curr_dir+"/../files/BlockingError.mo", target='ipopt')
 
         cls.opt_model = oc.compile_model("BlockingInitPack.M_Opt",
-                                         cls.curr_dir+"/files/BlockingError.mo", target='ipopt')
+                                         cls.curr_dir+"/../files/BlockingError.mo", target='ipopt')
 
     @testattr(ipopt = True)
     def setUp(self):
 
-        self.res_init = jmodelica.io.ResultDymolaTextual(self.curr_dir+"/files/BlockingInitPack_M_init_result.txt")
+        self.res_init = jmodelica.io.ResultDymolaTextual(self.curr_dir+"/../files/BlockingInitPack_M_init_result.txt")
 
         self.n_e = 5 # Number of elements 
         self.hs = N.ones(self.n_e)*1./self.n_e # Equidistant points

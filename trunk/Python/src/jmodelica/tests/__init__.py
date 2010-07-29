@@ -8,9 +8,7 @@ import sys
 import os, os.path
 import jmodelica.jmi as pyjmi
 
-
-__all__ = ['optimization','initialization','simulation','linearization_tests']
-
+__all__ = ['optimization','initialization','simulation','general','test_compiler','test_examples','test_fmi','test_init','test_io','test_jmi','test_jmiwrappers','test_linearization','test_xmlparser']
 
 #create working directory for tests
 if sys.platform == 'win32':
