@@ -568,7 +568,7 @@ class Test_FMI_ODE:
         y = N.array([1.0,1.0])
         
         assert len(self._bounceSim._sol_real) == 0
-        
+        self._bounceSim.write_cont = False
         self._bounceSim.post_process(None,t,y)
         
         assert len(self._bounceSim._sol_real) == 1

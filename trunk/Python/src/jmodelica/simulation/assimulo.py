@@ -94,8 +94,11 @@ def write_data(simulator):
         if len(simulator._problem._sol_bool) > 0:
             b = N.array(simulator._problem._sol_bool).reshape(-1,len(model._save_cont_valueref[2]))
             data = N.c_[data,b]
-        
-        fmi.export_result_dymola(model, data)
+
+        export = fmi.ExportDymola(model)
+        map(export.write_point,(row for row in data))
+        export.write_finalize()
+        #fmi.export_result_dymola(model, data)
         
 
 class FMIODE(Explicit_Problem):
@@ -119,6 +122,10 @@ class FMIODE(Explicit_Problem):
         if g_nbr > 0:
             self.event_fcn = self.g
         self.time_event_fcn = self.t
+        
+        #Default values
+        self.write_cont = True #Continuous writing
+        self.export = fmi.ExportDymola(model)
         
         #Internal values
         self._sol_time = []
@@ -170,7 +177,23 @@ class FMIODE(Explicit_Problem):
             return self._model.event_info.nextEventTime
         else:
             return None
+    
+    def _set_write_cont(self, cont):
+        """
+        Defines if the values should be written to the file continuously
+        during the simulation.
+        """
+        self.__write_cont = cont
         
+    def _get_write_cont(self):
+        """
+        Defines if the values should be written to the file continuously
+        during the simulation.
+        """
+        return self.__write_cont
+
+    write_cont = property(_get_write_cont, _set_write_cont)
+    
     def post_process(self, solver, t, y):
         """
         Post processing (stores the time points).
@@ -181,14 +204,17 @@ class FMIODE(Explicit_Problem):
         #Evaluating the rhs (Have to evaluate the values in the model)
         rhs = self._model.real_dx
         
-        #Retrieves the time-point
-        [r,i,b] = self._model.save_time_point()
-        
-        #Save the time-point
-        self._sol_real += [r]
-        self._sol_int  += [i]
-        self._sol_bool += b
-        self._sol_time += [t]
+        if self.write_cont:
+            self.export.write_point()
+        else:
+            #Retrieves the time-point
+            [r,i,b] = self._model.save_time_point()
+
+            #Save the time-point
+            self._sol_real += [r]
+            self._sol_int  += [i]
+            self._sol_bool += b
+            self._sol_time += [t]
         
     def handle_event(self, solver, event_info):
         """
@@ -245,7 +271,10 @@ class FMIODE(Explicit_Problem):
         for i in range(len(self._logg_step_event)):
             print 'Event at time: %e'%self._logg_step_event[i]
         print '\nNumber of events: ',len(self._logg_step_event)
-        
+    
+    def finalize(self, solver):
+        if self.write_cont:
+            self.export.write_finalize()
         
 
 class JMIODE(Explicit_Problem):

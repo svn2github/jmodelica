@@ -292,7 +292,7 @@ class AssimuloFMIAlg(AlgorithmBase):
             solver_args['iter']
         except KeyError:
             solver_args['iter'] = 'Newton'
-        
+
         #loop solver_args and set properties of solver
         for k, v in solver_args.iteritems():
             try:
@@ -302,6 +302,8 @@ class AssimuloFMIAlg(AlgorithmBase):
                     getattr(self.probl,k)
                 except AttributeError:
                     raise InvalidSolverArgumentException(v)
+                setattr(self.probl, k, v)
+                continue
             setattr(self.simulator, k, v)
                 
     def solve(self):
@@ -310,7 +312,8 @@ class AssimuloFMIAlg(AlgorithmBase):
  
     def get_result(self):
         """ Write result to file, load result data and return AssimuloSimResult."""
-        write_data(self.simulator)
+        if not self.probl.write_cont:
+            write_data(self.simulator)
         # result file name
         resultfile = self.model.get_name()+'_result.txt'
         # load result file
@@ -426,6 +429,8 @@ class AssimuloAlg(AlgorithmBase):
                     getattr(self.probl,k)
                 except AttributeError:
                     raise InvalidSolverArgumentException(v)
+                setattr(self.probl, k, v)
+                continue
             setattr(self.simulator, k, v)
                 
     def solve(self):
