@@ -1890,6 +1890,7 @@ class ExportDymola(ExportResult):
         if not self._file_open:
             self.write_header()
         f = self._file
+        data_order = self._data_order
 
         #If data is none, store the current point from the model
         if data==None:
@@ -1900,7 +1901,7 @@ class ExportDymola(ExportResult):
         #Write the point
         str_text = (" %12.12f" % data[0])
         for j in xrange(self._nvariables-1):
-            str_text = str_text + (" %12.12f" % (data[1+self._data_order[j]]))
+            str_text = str_text + (" %12.12f" % (data[1+data_order[j]]))
         f.write(str_text+'\n')
         
         #Update number of points
