@@ -1814,6 +1814,7 @@ class ExportDymola(ExportResult):
         
         list_of_continuous_states = N.append(self.model._save_cont_valueref[0],self.model._save_cont_valueref[1])
         list_of_continuous_states = N.append(list_of_continuous_states, self.model._save_cont_valueref[2]).tolist()
+        list_of_continuous_states = dict(zip(list_of_continuous_states,xrange(len(list_of_continuous_states))))
         valueref_of_continuous_states = []
         
         cnt_1 = 1
@@ -1832,7 +1833,7 @@ class ExportDymola(ExportResult):
                     f.write('1 -%d 0 -1 # ' % cnt_1 + name[1] +'\n')
             else:
                 if aliases[i][1] == 0: # noalias
-                    valueref_of_continuous_states.append(list_of_continuous_states.index(name[0]))
+                    valueref_of_continuous_states.append(list_of_continuous_states[name[0]])
                     cnt_2 += 1   
                     f.write('2 %d 0 -1 # ' % cnt_2 + name[1] +'\n')
                 elif aliases[i][1] == 1: # alias
@@ -1869,11 +1870,13 @@ class ExportDymola(ExportResult):
         
         self._nvariables = len(valueref_of_continuous_states)+1
         
+        
         f.write('float data_2(')
-        
         self._point_npoints = f.tell()
+        f.write(' '*(14+4+14))
+        f.write('\n')
         
-        f.write('%s,%d)\n' % (' '*14, self._nvariables))
+        #f.write('%s,%d)\n' % (' '*14, self._nvariables))
         
         self._file = f
         self._data_order = valueref_of_continuous_states
@@ -1915,10 +1918,12 @@ class ExportDymola(ExportResult):
             f = self._file
             
             f.seek(self._point_last_t)
+            
             f.write('%12.12f'%self.model.t)
             
             f.seek(self._point_npoints)
-            f.write('%d'%self._npoints)
+            f.write('%d,%d)' % (self._npoints, self._nvariables))
+            #f.write('%d'%self._npoints)
             f.seek(-1,2)
             #Close the file
             f.write('\n')
