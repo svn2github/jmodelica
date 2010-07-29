@@ -95,7 +95,7 @@ def write_data(simulator):
             b = N.array(simulator._problem._sol_bool).reshape(-1,len(model._save_cont_valueref[2]))
             data = N.c_[data,b]
 
-        export = fmi.ExportDymola(model)
+        export = io.ResultWriterDymola(model)
         map(export.write_point,(row for row in data))
         export.write_finalize()
         #fmi.export_result_dymola(model, data)
@@ -125,7 +125,7 @@ class FMIODE(Explicit_Problem):
         
         #Default values
         self.write_cont = True #Continuous writing
-        self.export = fmi.ExportDymola(model)
+        self.export = io.ResultWriterDymola(model)
         
         #Internal values
         self._sol_time = []

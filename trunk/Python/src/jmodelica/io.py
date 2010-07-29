@@ -18,7 +18,7 @@ Module for writing optimization and simulation results to file.
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-import numpy
+import numpy as N
 import array
 import scipy.io
 
@@ -475,7 +475,7 @@ class ResultDymolaTextual:
         for i in range(0,nLines):
             info = fid.readline().split()
             dataInfo.append(map(int,info[0:nCols]))
-        self.dataInfo = numpy.array(dataInfo)
+        self.dataInfo = N.array(dataInfo)
 
         # Find out how many data matrices there are
         nData = 0
@@ -503,7 +503,7 @@ class ResultDymolaTextual:
                     info.extend(l.split())
                 data.append(map(float,info[0:nCols]))
                 del(info)
-            self.data.append(numpy.array(data))
+            self.data.append(N.array(data))
 
     def get_variable_index(self,name): 
         """
@@ -614,6 +614,297 @@ class ResultDymolaBinary:
         if dataMat<1:
             dataMat = 1
         return Trajectory(self.raw['data_%d'%dataMat][0,:],factor*self.raw['data_%d'%dataMat][dataInd,:])
+
+
+
+class ResultWriter():
+    
+    def write_header():
+        pass
+    def write_point():
+        pass
+    def write_finalize():
+        pass
+        
+class ResultWriterDymola (ResultWriter):
+    """
+    Export an optimization or simulation result to file in Dymolas
+    result file format.
+    """
+    def __init__(self,model):
+        """
+        Export an optimization or simulation result to file in Dymolas
+        result file format. The parameter values are read from the z
+        vector of the model object and the time series are read from
+        the data argument.
+
+        Parameters:
+            model --
+                A Model object.
+            data --
+                A two dimensional array of variable trajectory data. The
+                first column represents the time vector. The following
+                colums contain, in order, the derivatives, the states,
+                the inputs and the algebraic variables. The ordering is
+                according to increasing value references.
+            file_name --
+                If no file name is given, the name of the model (as defined
+                by JMIModel.get_name()) concatenated with the string
+                '_result' is used. A file suffix equal to the format
+                argument is then appended to the file name.
+            format --
+                A text string equal either to 'txt' for textual format or
+                'mat' for binary Matlab format.
+
+        Limitations:
+            Currently only textual format is supported.
+
+        """
+        self.model = model
+        
+        #Internal values
+        self._file_open = False
+        self._npoints = 0
+        
+    
+    def write_header(self, file_name=''):
+        """
+        Opens the file and writes the header.
+        """
+        if file_name=='':
+            file_name=self.model.get_name() + '_result.txt'
+
+        # Open file
+        f = open(file_name,'w')
+        self._file_open = True
+        
+        # Write header
+        f.write('#1\n')
+        f.write('char Aclass(3,11)\n')
+        f.write('Atrajectory\n')
+        f.write('1.1\n')
+        f.write('\n')
+        
+        # all lists that we need for later
+        vrefs_alias = []
+        vrefs_noalias = []
+        vrefs = []
+        names_alias = []
+        names_noalias = []
+        names = []
+        aliases_alias = []
+        aliases = []
+        descriptions_alias = []
+        descriptions = []
+        variabilities_alias = []
+        variabilities_noalias = []
+        variabilities = []
+        types_alias = []
+        types_noalias = []
+        types = []
+        
+        for var in self.model._md.get_model_variables():
+            ftype = var.get_fundamental_type()
+            if not isinstance(ftype,xmlparser.String) and \
+                not isinstance(ftype,xmlparser.Enumeration):
+                    if var.get_alias() == xmlparser.NO_ALIAS:
+                        vrefs_noalias.append(var.get_value_reference())
+                        names_noalias.append(var.get_name())
+                        aliases.append(var.get_alias())
+                        descriptions.append(var.get_description())
+                        variabilities_noalias.append(var.get_variability())
+                        types_noalias.append(xmlparser._translate_fundamental_type(ftype))
+                    else:
+                        vrefs_alias.append(var.get_value_reference())
+                        names_alias.append(var.get_name())
+                        aliases_alias.append(var.get_alias())
+                        descriptions_alias.append(var.get_description())
+                        variabilities_alias.append(var.get_variability())
+                        types_alias.append(xmlparser._translate_fundamental_type(ftype))
+                        
+        # need to save these no alias lists for later
+        vrefs = vrefs_noalias[:]
+        names = names_noalias[:]
+        types = types_noalias[:]
+        variabilities = variabilities_noalias[:]
+        
+        # merge lists
+        vrefs.extend(vrefs_alias)
+        names.extend(names_alias)
+        aliases.extend(aliases_alias)
+        descriptions.extend(descriptions_alias)
+        variabilities.extend(variabilities_alias)
+        types.extend(types_alias)
+        
+        # zip to list of tuples and sort - non alias variables are now
+        # guaranteed to be first in list
+        names_noalias = sorted(zip(tuple(vrefs_noalias),tuple(names_noalias)), key=itemgetter(0))
+        variabilities_noalias = sorted(zip(tuple(vrefs_noalias),tuple(variabilities_noalias)), key=itemgetter(0))
+        names = sorted(zip(tuple(vrefs),tuple(names)), key=itemgetter(0))
+        aliases = sorted(zip(tuple(vrefs),tuple(aliases)), key=itemgetter(0))
+        descriptions = sorted(zip(tuple(vrefs),tuple(descriptions)), key=itemgetter(0))
+        variabilities = sorted(zip(tuple(vrefs),tuple(variabilities)), key=itemgetter(0))
+        types = sorted(zip(tuple(vrefs),tuple(types)), key=itemgetter(0))
+        
+        num_vars = len(names)
+
+        # Find the maximum name and description length
+        max_name_length = len('Time')
+        max_desc_length = len('Time in [s]')
+        
+        for i in range(len(names)):
+            name = names[i][1]
+            desc = descriptions[i][1]
+            
+            if (len(name)>max_name_length):
+                max_name_length = len(name)
+                
+            if (len(desc)>max_desc_length):
+                max_desc_length = len(desc)
+
+        f.write('char name(%d,%d)\n' % (num_vars+1, max_name_length))
+        f.write('time\n')
+
+        for name in names:
+            f.write(name[1] +'\n')
+
+        f.write('\n')
+
+        # Write descriptions       
+        f.write('char description(%d,%d)\n' % (num_vars + 1, max_desc_length))
+        f.write('Time in [s]\n')
+
+        # Loop over all variables, not only those with a description
+        for desc in descriptions:
+            f.write(desc[1] +'\n')
+                
+        f.write('\n')
+
+        # Write data meta information
+        
+        f.write('int dataInfo(%d,%d)\n' % (num_vars + 1, 4))
+        f.write('0 1 0 -1 # time\n')
+        
+        list_of_continuous_states = N.append(self.model._save_cont_valueref[0],self.model._save_cont_valueref[1])
+        list_of_continuous_states = N.append(list_of_continuous_states, self.model._save_cont_valueref[2]).tolist()
+        list_of_continuous_states = dict(zip(list_of_continuous_states,xrange(len(list_of_continuous_states))))
+        valueref_of_continuous_states = []
+        
+        cnt_1 = 1
+        cnt_2 = 1
+        n_parameters = 0
+        for i, name in enumerate(names):
+            if variabilities[i][1] == xmlparser.PARAMETER or \
+                variabilities[i][1] == xmlparser.CONSTANT:
+                if aliases[i][1] == 0: # no alias
+                    cnt_1 += 1
+                    n_parameters += 1
+                    f.write('1 %d 0 -1 # ' % cnt_1 + name[1]+'\n')
+                elif aliases[i][1] == 1: # alias
+                    f.write('1 %d 0 -1 # ' % cnt_1 + name[1]+'\n')
+                else: # negated alias
+                    f.write('1 -%d 0 -1 # ' % cnt_1 + name[1] +'\n')
+            else:
+                if aliases[i][1] == 0: # noalias
+                    valueref_of_continuous_states.append(list_of_continuous_states[name[0]])
+                    cnt_2 += 1   
+                    f.write('2 %d 0 -1 # ' % cnt_2 + name[1] +'\n')
+                elif aliases[i][1] == 1: # alias
+                    f.write('2 %d 0 -1 # ' % cnt_2 + name[1] +'\n')
+                else: #neg alias
+                    f.write('2 -%d 0 -1 # ' % cnt_2 + name[1] +'\n')
+        f.write('\n')
+
+        # Write data
+        # Write data set 1
+        f.write('float data_1(%d,%d)\n' % (2, n_parameters + 1))
+        f.write("%12.12f" % self.model.t)
+        str_text = ''
+        
+        # write constants and parameters
+        for i, name in enumerate(names_noalias):
+            if variabilities_noalias[i][1] == xmlparser.CONSTANT or \
+                variabilities_noalias[i][1] == xmlparser.PARAMETER:
+                    if types_noalias[i] == xmlparser.REAL:
+                        str_text = str_text + (" %12.12f" % (self.model.get_real([name[0]])))
+                    elif types_noalias[i] == xmlparser.INTEGER:
+                        str_text = str_text + (" %12.12f" % (self.model.get_integer([name[0]])))
+                    elif types_noalias[i] == xmlparser.BOOLEAN:
+                        str_text = str_text + (" %12.12f" % (float(self.model.get_boolean([name[0]]))))
+                        
+                    
+        f.write(str_text)
+        f.write('\n')
+        self._point_last_t = f.tell()
+        f.write("%s" % ' '*28)
+        f.write(str_text)
+
+        f.write('\n\n')
+        
+        self._nvariables = len(valueref_of_continuous_states)+1
+        
+        
+        f.write('float data_2(')
+        self._point_npoints = f.tell()
+        f.write(' '*(14+4+14))
+        f.write('\n')
+        
+        #f.write('%s,%d)\n' % (' '*14, self._nvariables))
+        
+        self._file = f
+        self._data_order = valueref_of_continuous_states
+        
+    def write_point(self, data=None):
+        """
+        Writes the current statues of the model to file. If the header
+        have not been written previously it is written.
+        """
+        #Open the file and write header if not open
+        if not self._file_open:
+            self.write_header()
+        f = self._file
+        data_order = self._data_order
+
+        #If data is none, store the current point from the model
+        if data==None:
+            #Retrieves the time-point
+            [r,i,b] = self.model.save_time_point()
+            data = N.append(N.append(N.append(self.model.t,r),i),b)
+
+        #Write the point
+        str_text = (" %12.12f" % data[0])
+        for j in xrange(self._nvariables-1):
+            str_text = str_text + (" %12.12f" % (data[1+data_order[j]]))
+        f.write(str_text+'\n')
+        
+        #Update number of points
+        self._npoints+=1
+
+    def write_finalize(self):
+        """
+        Finalize the writing by filling in the blanks in the created file.
+        The blanks consists of the number of points and the final time (in data set 1).
+        Also close the file.
+        """
+        #If open, finalize and close
+        if self._file_open:
+            
+            f = self._file
+            
+            f.seek(self._point_last_t)
+            
+            f.write('%12.12f'%self.model.t)
+            
+            f.seek(self._point_npoints)
+            f.write('%d,%d)' % (self._npoints, self._nvariables))
+            #f.write('%d'%self._npoints)
+            f.seek(-1,2)
+            #Close the file
+            f.write('\n')
+            f.close()
+            self._file_open = False
+    
+
 
 
 class JIOError(Exception):
