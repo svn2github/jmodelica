@@ -14,7 +14,7 @@ from jmodelica.compiler import OptimicaCompiler
 import jmodelica.xmlparser as xp
 import jmodelica.io
 from jmodelica.optimization import ipopt
-
+from jmodelica.fmi import *
 from jmodelica import simulate
 
 jm_home = os.environ.get('JMODELICA_HOME')
@@ -25,6 +25,8 @@ fpath = os.path.join(jm_home,path_to_examples,model)
 cpath = "VDP_pack.VDP_Opt_Min_Time"
 fname = cpath.replace('.','_',1)
 
+curr_dir = os.path.dirname(os.path.abspath(__file__));
+path_to_fmus = os.path.join(curr_dir, 'files', 'FMUs')
 
 class TestIO:
     """Tests IO"""
@@ -84,3 +86,36 @@ class TestIO:
         model_file = os.path.join(jm_home, "Python", "jmodelica", "tests", "files", "ParameterAlias.mo")
 
         simulate("ParameterAlias",model_file)
+
+class test_ResultWriterDymola:
+    """Tests the class ResultWriterDymola."""
+    
+    def setUp(self):
+        """
+        Sets up the test case.
+        """
+        self._bounce  = FMIModel('bouncingBall.fmu',path_to_fmus)
+        self._dq = FMIModel('dq.fmu',path_to_fmus)
+        self._bounce.initialize()
+        self._dq.initialize()
+        
+    @testattr(fmi = True)
+    def test_work_flow(self):
+        """Tests the work flow of write_header, write_point, write_finalize."""
+        
+        
+        bouncingBall = jmodelica.io.ResultWriterDymola(self._bounce)
+        
+        bouncingBall.write_header()
+        bouncingBall.write_point()
+        bouncingBall.write_finalize()
+        
+        res = jmodelica.io.ResultDymolaTextual('bouncingBall_result.txt')
+        
+        h = res.get_variable_data('h')
+        derh = res.get_variable_data('der(h)')
+        g = res.get_variable_data('g')
+        
+        nose.tools.assert_almost_equal(h.x, 1.000000, 5)
+        nose.tools.assert_almost_equal(derh.x, 0.000000, 5)
+        nose.tools.assert_almost_equal(g.x, 9.810000, 5)

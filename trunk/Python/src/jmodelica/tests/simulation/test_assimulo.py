@@ -611,7 +611,17 @@ class Test_FMI_ODE:
         """
         This tests the basic simulation and writing.
         """
+        #Writing continuous
         res_obj = simulate(os.path.join(path_to_fmus,'bouncingBall.fmu'), alg_args={'final_time':3.})
+        res = res_obj.result_data
+        height = res.get_variable_data('h')
+
+        nose.tools.assert_almost_equal(height.x[0],1.000000,5)
+        nose.tools.assert_almost_equal(height.x[-1],-0.9804523,5)
+        nose.tools.assert_almost_equal(height.t[-1],3.000000,5)
+        
+        #Writing after
+        res_obj = simulate(os.path.join(path_to_fmus,'bouncingBall.fmu'), alg_args={'final_time':3.}, solver_args={'write_cont':False})
         res = res_obj.result_data
         height = res.get_variable_data('h')
 

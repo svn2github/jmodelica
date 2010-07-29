@@ -96,6 +96,7 @@ def write_data(simulator):
             data = N.c_[data,b]
 
         export = io.ResultWriterDymola(model)
+        export.write_header()
         map(export.write_point,(row for row in data))
         export.write_finalize()
         #fmi.export_result_dymola(model, data)
@@ -133,6 +134,7 @@ class FMIODE(Explicit_Problem):
         self._sol_int  = []
         self._sol_bool = []
         self._logg_step_event = []
+        self._write_header = True
         
         #Stores the first time point
         #[r,i,b] = self._model.save_time_point()
@@ -205,6 +207,9 @@ class FMIODE(Explicit_Problem):
         rhs = self._model.real_dx
         
         if self.write_cont:
+            if self._write_header:
+                self._write_header = False
+                self.export.write_header()
             self.export.write_point()
         else:
             #Retrieves the time-point

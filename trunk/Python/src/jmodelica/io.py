@@ -615,15 +615,17 @@ class ResultDymolaBinary:
             dataMat = 1
         return Trajectory(self.raw['data_%d'%dataMat][0,:],factor*self.raw['data_%d'%dataMat][dataInd,:])
 
-
-
 class ResultWriter():
-    
+    """Base class for writing results to file."""
     def write_header():
+        """The header is intended to be used for writing general information
+        about the model. This is intended to be called once."""
         pass
     def write_point():
+        """This method does the writing of the actual result."""
         pass
     def write_finalize():
+        """The finalize method can be used to for instance close the file."""
         pass
         
 class ResultWriterDymola (ResultWriter):
@@ -631,36 +633,26 @@ class ResultWriterDymola (ResultWriter):
     Export an optimization or simulation result to file in Dymolas
     result file format.
     """
-    def __init__(self,model):
+    def __init__(self, model, format='txt'):
         """
         Export an optimization or simulation result to file in Dymolas
-        result file format. The parameter values are read from the z
-        vector of the model object and the time series are read from
-        the data argument.
+        result file format.
 
-        Parameters:
+        Parameters::
+        
             model --
-                A Model object.
-            data --
-                A two dimensional array of variable trajectory data. The
-                first column represents the time vector. The following
-                colums contain, in order, the derivatives, the states,
-                the inputs and the algebraic variables. The ordering is
-                according to increasing value references.
-            file_name --
-                If no file name is given, the name of the model (as defined
-                by JMIModel.get_name()) concatenated with the string
-                '_result' is used. A file suffix equal to the format
-                argument is then appended to the file name.
+                A FMIModel object.
             format --
                 A text string equal either to 'txt' for textual format or
                 'mat' for binary Matlab format.
 
         Limitations:
             Currently only textual format is supported.
-
         """
         self.model = model
+        
+        if format!='txt':
+            raise JIOError('The format is currently not supported.')
         
         #Internal values
         self._file_open = False
@@ -669,7 +661,17 @@ class ResultWriterDymola (ResultWriter):
     
     def write_header(self, file_name=''):
         """
-        Opens the file and writes the header.
+        Opens the file and writes the header. This includes the information
+        about the variables and a table determining the link between variables
+        and data.
+        
+        Parameters::
+        
+            file_name --
+                If no file name is given, the name of the model (as defined
+                by FMIModel.get_name()) concatenated with the string
+                '_result' is used. A file suffix equal to the format
+                argument is then appended to the file name.
         """
         if file_name=='':
             file_name=self.model.get_name() + '_result.txt'
@@ -856,12 +858,17 @@ class ResultWriterDymola (ResultWriter):
         
     def write_point(self, data=None):
         """
-        Writes the current statues of the model to file. If the header
-        have not been written previously it is written.
+        Writes the current status of the model to file. If the header
+        have not been written previously it is written. If data is specified
+        it is written instead of the current status.
+        
+        Parameters::
+            
+                data --
+                    A one dimensional array of variable trajectory data.
+                    data should consists of information about the status
+                    in the order specified by FMIModel.save_time_point()
         """
-        #Open the file and write header if not open
-        if not self._file_open:
-            self.write_header()
         f = self._file
         data_order = self._data_order
 
@@ -884,7 +891,7 @@ class ResultWriterDymola (ResultWriter):
         """
         Finalize the writing by filling in the blanks in the created file.
         The blanks consists of the number of points and the final time (in data set 1).
-        Also close the file.
+        Also closes the file.
         """
         #If open, finalize and close
         if self._file_open:
