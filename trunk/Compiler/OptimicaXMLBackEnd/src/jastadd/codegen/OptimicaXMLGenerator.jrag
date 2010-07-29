@@ -146,6 +146,11 @@ public class OptimicaXMLGenerator extends XMLGenerator {
 				genPrinter.println(indent+"<opt:ObjectiveFunction>");
 				objectiveFunction_XML(genPrinter,optClass,indent+"\t");
 				genPrinter.println(indent+"</opt:ObjectiveFunction>");
+				
+				//Integrand objective function
+				genPrinter.println(indent+"<opt:IntegrandObjectiveFunction>");
+				integrandObjectiveFunction_XML(genPrinter, optClass, indent+"\t");
+				genPrinter.println(indent+"</opt:IntegrandObjectiveFunction>");
 			}			
 			//Interval start time
 			genPrinter.println(indent+"<opt:IntervalStartTime>");	
@@ -182,6 +187,17 @@ public class OptimicaXMLGenerator extends XMLGenerator {
 		}else{
 			FStringLitExp strLit = new FStringLitExp();
 			genPrinter.println(indent+"<exp:" + strLit.xmlTag() + ">No objective function</exp:"+strLit.xmlTag()+">");
+		}	
+	}
+
+	//XML code generation for the integrand objective function
+	private void integrandObjectiveFunction_XML(PrintStream genPrinter, FOptClass optClass, String indent){
+		if(optClass.objectiveIntegrandExp()!=null){
+			FExp integrandObjFunct = (FExp)optClass.objectiveIntegrandExp();
+			integrandObjFunct.prettyPrint_XML(genPrinter,indent);
+		}else{
+			FStringLitExp strLit = new FStringLitExp();
+			genPrinter.println(indent+"<exp:" + strLit.xmlTag() + ">No integrand objective function</exp:"+strLit.xmlTag()+">");
 		}	
 	}
 	
