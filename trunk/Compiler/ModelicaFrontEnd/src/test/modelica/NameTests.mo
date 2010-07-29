@@ -1927,4 +1927,274 @@ end NameTests.IndexLookup2;
   Real x = y.z[i];
 end IndexLookup2;
 
+model ConditionalComponentTest1_Err
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="ConditionalComponentTest1_Err",
+        description="Test of type checking of conditional components.",
+                                               errorMessage=
+"
+Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
+Semantic error at line 1939, column 18:
+  The guard expression of a conditional component should be a boolean expression
+")})));
+
+  parameter Real x = 1 if 1;
+end ConditionalComponentTest1_Err;
+
+model ConditionalComponentTest2_Err
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="ConditionalComponentTest2_Err",
+        description="Test of type checking of conditional components.",
+                                               errorMessage=
+"
+Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
+Semantic error at line 1954, column 18:
+  The guard expression of a conditional component should be a scalar expression
+")})));
+
+  parameter Boolean b[2] = {true,true};
+  parameter Real x = 1 if b;
+end ConditionalComponentTest2_Err;
+
+model ConditionalComponentTest3_Err
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="ConditionalComponentTest3_Err",
+        description="Test of type checking of conditional components.",
+                                               errorMessage=
+"
+Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
+Semantic error at line 1967, column 18:
+  The guard expression of a conditional component should be a boolean expression
+Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
+Semantic error at line 1967, column 18:
+  The guard expression of a conditional component should be a scalar expression
+")})));
+
+  parameter Integer b[2] = {1,1};
+  parameter Real x = 1 if b;
+end ConditionalComponentTest3_Err;
+
+
+model ConditionalComponentTest4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ConditionalComponentTest4",
+         description="Test flattening of conditional components.",
+         flatModel="
+fclass NameTests.ConditionalComponentTest4
+ parameter Boolean b = true /* true */;
+ parameter Real x = 1 /* 1 */;
+end NameTests.ConditionalComponentTest4;
+")})));
+
+  parameter Boolean b = true;
+  parameter Real x = 1 if b;
+end ConditionalComponentTest4;
+
+
+model ConditionalComponentTest5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ConditionalComponentTest5",
+         description="Test flattening of conditional components.",
+         flatModel="
+fclass NameTests.ConditionalComponentTest5
+ parameter Real x = 1 /* 1 */;
+end NameTests.ConditionalComponentTest5;
+")})));
+
+  package P
+    constant Boolean b = true;
+  end P;
+  parameter Real x = 1 if P.b;
+end ConditionalComponentTest5;
+
+model ConditionalComponentTest6_Err
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="ConditionalComponentTest6_Err",
+        description="Test of type checking of conditional components.",
+                                               errorMessage=
+"
+Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
+Semantic error at line 2021, column 12:
+  The component x is conditional: Access of conditional components is only valid in connect statements
+")})));
+  parameter Boolean b = false;
+  parameter Real x = 1 if b;
+  Real y = x;  
+end ConditionalComponentTest6_Err;
+
+model ConditionalComponentTest7_Err
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="ConditionalComponentTest7_Err",
+        description="Test of type checking of conditional components.",
+                                               errorMessage=
+"
+Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
+Semantic error at line 2036, column 12:
+  The component m is conditional: Access of conditional components is only valid in connect statements
+")})));
+  model M
+    Real x = 2;
+  end M;
+  parameter Boolean b = false;
+  M m if b;
+  Real y = m.x;  
+end ConditionalComponentTest7_Err;
+
+model ConditionalComponentTest8
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ConditionalComponentTest8",
+         description="Test flattening of conditional components.",
+         flatModel="
+fclass NameTests.ConditionalComponentTest8
+ parameter Boolean b = false /* false */;
+end NameTests.ConditionalComponentTest8;
+")})));
+
+  parameter Boolean b = false;
+  parameter Real x = 1 if b;
+end ConditionalComponentTest8;
+
+model ConditionalComponentTest9
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ConditionalComponentTest9",
+         description="Test flattening of conditional components.",
+         flatModel="
+fclass NameTests.ConditionalComponentTest9
+ parameter Boolean b = false /* false */;
+end NameTests.ConditionalComponentTest9;
+")})));
+
+  model N
+   Real z;
+   equation
+   z^2 = 4;
+  end N;
+
+  model M
+    Real x;
+    N n;
+    extends N;
+    equation
+    x = 3;
+  end M;
+
+  parameter Boolean b = false;
+  M m if b;
+
+end ConditionalComponentTest9;
+
+model ConditionalComponentTest10
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ConditionalComponentTest10",
+         description="Test flattening of conditional components.",
+         flatModel="
+fclass NameTests.ConditionalComponentTest10
+ parameter Boolean b = true /* true */;
+ parameter Boolean m.b = b;
+ Real m.u1;
+ Real m.y;
+ Real source1.y = source1.p;
+ parameter Real source1.p = 1 /* 1 */;
+ Real sink.u;
+equation
+ m.u1 = m.y;
+ m.y = sink.u;
+ sink.u = source1.y;
+end NameTests.ConditionalComponentTest10;
+")})));
+
+  connector RealInput = input Real;
+  connector RealOutput = output Real;
+
+  model Source
+    RealOutput y = p;
+    parameter Real p = 1;
+  end Source;
+
+  model Sink 
+    RealInput u;
+  end Sink;
+
+  model M
+    parameter Boolean b = true;
+    RealInput u1 if b;
+    RealInput u2 if not b;
+    RealOutput y;
+  equation
+    connect(u1,y);
+    connect(u2,y);
+  end M;
+
+  parameter Boolean b = true;
+  M m(b=b);
+  Source source1 if b;
+  Source source2 if not b;
+  Sink sink;
+  equation
+  connect(source1.y,m.u1);
+  connect(source2.y,m.u2);
+  connect(m.y,sink.u);
+
+end ConditionalComponentTest10;
+
+model ConditionalComponentTest11
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ConditionalComponentTest11",
+         description="Test flattening of conditional components.",
+         flatModel="
+fclass NameTests.ConditionalComponentTest11
+ parameter Boolean b = false /* false */;
+ parameter Boolean m.b = b;
+ Real m.u2;
+ Real m.y;
+ Real source2.y = source2.p;
+ parameter Real source2.p = 1 /* 1 */;
+ Real sink.u;
+equation
+ m.u2 = m.y;
+ m.y = sink.u;
+ sink.u = source2.y;
+end NameTests.ConditionalComponentTest11;
+")})));
+
+  connector RealInput = input Real;
+  connector RealOutput = output Real;
+
+  model Source
+    RealOutput y = p;
+    parameter Real p = 1;
+  end Source;
+
+  model Sink 
+    RealInput u;
+  end Sink;
+
+  model M
+    parameter Boolean b = true;
+    RealInput u1 if b;
+    RealInput u2 if not b;
+    RealOutput y;
+  equation
+    connect(u1,y);
+    connect(u2,y);
+  end M;
+
+  parameter Boolean b = false;
+  M m(b=b);
+  Source source1 if b;
+  Source source2 if not b;
+  Sink sink;
+  equation
+  connect(source1.y,m.u1);
+  connect(source2.y,m.u2);
+  connect(m.y,sink.u);
+
+end ConditionalComponentTest11;
+
 end NameTests;

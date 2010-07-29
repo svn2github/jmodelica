@@ -27,6 +27,7 @@ aspect InstLookupComponents {
 	
 	eq InstComponentDecl.getInstModification().lookupInstComponent(String name) = lookupInstComponent(name);
 	eq InstComponentDecl.getInstConstraining().lookupInstComponent(String name) = lookupInstComponent(name);
+	eq InstComponentDecl.getConditionalAttribute().lookupInstComponent(String name) = lookupInstComponent(name);
 	eq InstReplacingComposite.getOriginalInstComponent().lookupInstComponent(String name) = lookupInstComponent(name);
 	eq InstReplacingPrimitive.getOriginalInstComponent().lookupInstComponent(String name) = lookupInstComponent(name);
 	eq InstExtends.getInstClassModification().lookupInstComponent(String name) = lookupInstComponent(name);
@@ -39,6 +40,7 @@ aspect InstLookupComponents {
 	eq InstAssignable.getChild().lookupInstComponent(String name) = memberInstComponent(name); 
 	eq InstAssignable.getBindingFExp().lookupInstComponent(String name) = myInstValueMod().lookupInstComponent(name);
 	eq InstAssignable.getInstModification().lookupInstComponent(String name) = lookupInstComponent(name);
+	eq InstAssignable.getConditionalAttribute().lookupInstComponent(String name) = lookupInstComponent(name);
 	eq InstAssignable.getFArraySubscripts().lookupInstComponent(String name) = lookupInstComponent(name);
 	eq InstAssignable.getDynamicFExp().lookupInstComponent(String name) = lookupInstComponent(name);
 	

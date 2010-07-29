@@ -15,6 +15,10 @@ Slice operations are now supported, except in some situations in function.
 
 Redeclares as class elements are now supported.
 
+1.1.3 Conditional components
+
+Conditional components are now supported.
+
 1.2. Optimica Compiler
 
 All support mentioned for the Modelica compiler applies to the
@@ -72,11 +76,13 @@ by a Radau quadrature formula.
 Christian Andersson
 Tove Bergdahl
 Magnus Gäfvert
+Roberto Parrotto
 Jesper Mattsson
 Johan Åkesson
 
 Previous contributors:
 
 Philip Nilsson
-Roberto Parrotto
+Jens Rantil
 Philip Reuterswärd
+

@@ -52,24 +52,6 @@ Compliance error at line 103, column 10:
 
 end BooleanVariable_ComplErr;
 
-model ConditionalComponents_ComplErr
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ComplianceErrorTestCase(name="ConditionalComponents_ComplErr",
-        description="Compliance error for conditional components",
-                                               errorMessage=
-"
-Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 124, column 7:
-  Conditional components are not supported
-
-")})));
-
- Real x=1;
- Real y=1 if false;
-
-end ConditionalComponents_ComplErr;
-
-
 model ArrayOfRecords_Warn
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.WarningTestCase(

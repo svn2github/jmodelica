@@ -1337,6 +1337,23 @@ aspect ComponentDeclMethods {
         return false;
     }
     
+    /**
+     * Check if a component is disabled by a conditional clause
+     */
+    syn boolean InstComponentDecl.isDisabled() {
+    	if (!hasConditionalAttribute() || 
+    			(hasConditionalAttribute() && getConditionalAttribute().ceval().booleanValue())) {
+    		return false;
+    	} else {
+    		return true;
+    	}
+    }
+    
+    syn boolean FIdUseInstAccess.isDisabled() = getInstAccess().isDisabled();
+    syn boolean InstAccess.isDisabled() = false;
+    eq InstComponentAccess.isDisabled() = myInstComponentDecl().isDisabled();
+    eq InstDot.isDisabled() = getRight().isDisabled() || getLeft().isDisabled();
+    
 }
 
 aspect ShortClassUtil {
@@ -1398,7 +1415,15 @@ aspect FlatExpressions {
     eq FAbstractEquation.getChild().inNoEventExp() = false;
     eq SourceRoot.getChild().inNoEventExp() = false;
     eq FlatRoot.getChild().inNoEventExp() = false;
-    
+
+    inh boolean InstAccess.inConnectClause();
+    inh boolean FExp.inConnectClause();
+    eq FConnectClause.getChild().inConnectClause() = true;
+    eq FAlgorithmBlock.getChild().inConnectClause() = false;
+    eq FAbstractEquation.getChild().inConnectClause() = false;
+    eq SourceRoot.getChild().inConnectClause() = false;
+    eq FlatRoot.getChild().inConnectClause() = false;
+
     inh boolean FExp.inIfCondition();
     eq FIfExp.getChild().inIfCondition() = true;
     eq FElseIfExp.getChild().inIfCondition() = true;

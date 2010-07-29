@@ -45,6 +45,17 @@ aspect FlatTypeCheck {
     			}
     		}
 	    }
+    	if (hasConditionalAttribute()) {
+    		if (!getConditionalAttribute().type().isScalar()) {
+    			error ("The guard expression of a conditional component should be a scalar expression");
+    		}
+    		if (!getConditionalAttribute().type().isBoolean()) {
+    			error ("The guard expression of a conditional component should be a boolean expression");
+    		}
+    		if (!getConditionalAttribute().variability().lessOrEqual(fParameter())) {
+    			error ("The guard expression of a conditional component should have parameter or constant variability");
+    		}
+    	}
 	  
     	typeCheckAttributes();
     }

@@ -26,14 +26,15 @@ aspect InstanceNameCheck {
      	error("Cannot find class or component declaration for "+qualifiedName());
   	}
 	
-	
 	public void InstComponentAccess.nameCheck() {
     	//log.debug("InstComponentAccess.nameCheck(): " + name() + " " + myInstComponentDecl().name());
 		if (myInstComponentDecl().isUnknown()) 
        		error("The component "+qualifiedName()+" is undeclared");
+		if (!inConnectClause() && myInstComponentDecl().hasConditionalAttribute()) {
+			error("The component "+qualifiedName()+" is conditional: Access of conditional components is only valid in connect statements");
+		}
     }
   
-    
     public void InstClassAccess.nameCheck() {
     	//log.debug("InstClassAccess.nameCheck(): " + name() + " " + myInstClassDecl().name());
 		if (myInstClassDecl().isUnknown()) {

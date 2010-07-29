@@ -87,12 +87,6 @@ aspect ComplianceCheck {
 		if (isBoolean() && !variability().lessOrEqual(fParameter()))
 			compliance("Boolean variables are not supported, only constants and parameters");
 	}
-
-	public void InstComponentDecl.complianceCheck() {
-		super.complianceCheck();
-		if (hasConditionalAttribute())
-			compliance("Conditional components are not supported");
-	}
 	
 	public void InstNamedModification.complianceCheck() {
 		if (getName().hasFArraySubscripts())
