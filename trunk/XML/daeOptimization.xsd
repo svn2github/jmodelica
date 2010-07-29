@@ -59,6 +59,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 		<xs:complexType>
 			<xs:sequence>
 				<xs:element name="ObjectiveFunction" type="exp:OptExp"/>
+				<xs:element name="IntegrandObjectiveFunction" type="exp:OptExp"/>
 				<xs:element name="IntervalStartTime" type="opt:TimeVariable"/>
 				<xs:element name="IntervalFinalTime" type="opt:TimeVariable"/>
 				<xs:element name="TimePoints">
