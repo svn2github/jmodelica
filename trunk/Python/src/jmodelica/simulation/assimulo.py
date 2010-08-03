@@ -196,7 +196,7 @@ class FMIODE(Explicit_Problem):
 
     write_cont = property(_get_write_cont, _set_write_cont)
     
-    def post_process(self, solver, t, y):
+    def handle_result(self, solver, t, y):
         """
         Post processing (stores the time points).
         """
@@ -571,9 +571,9 @@ class JMIDAE(Implicit_Problem):
                 
             self.event_switch(solver, event_info) #Turns the switches
 
-            b_mode = self.g(solver.t[-1], solver.y[-1], solver.yd[-1], solver.switches)
+            b_mode = self.g(solver.t_cur, solver.y_cur, solver.yd_cur, solver.switches)
             self.init_mode(solver) #Pass in the solver to the problem specified init_mode
-            a_mode = self.g(solver.t[-1], solver.y[-1], solver.yd[-1], solver.switches)
+            a_mode = self.g(solver.t_cur, solver.y_cur, solver.yd_cur, solver.switches)
 
             #Log information
             if self.log_events:
@@ -636,8 +636,8 @@ class JMIDAE(Implicit_Problem):
                 self._log_information[i-1][3].append(True)
             
             #Sets the calculated values
-            solver.y[-1] = N.append(self._model.real_x,self._model.real_w)
-            solver.yd[-1] = N.append(self._model.real_dx,[0]*len(self._model.real_w)) 
+            solver.y_cur = N.append(self._model.real_x,self._model.real_w)
+            solver.yd_cur = N.append(self._model.real_dx,[0]*len(self._model.real_w)) 
         else:
             self._model.sw = [int(x) for x in solver.switches]
             

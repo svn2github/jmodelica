@@ -424,6 +424,9 @@ class Test_JMI_DAE:
         solver.t = [[1.0]]
         solver.y = [[1.,1.]]
         solver.yd = [[1.,1.]]
+        solver.t_cur = N.array(1.0)
+        solver.y_cur = N.array([1.,1.])
+        solver.yd_cur = N.array([1.,1.])
         solver.switches = [False,True]
         self.DISC.event_switch = lambda x,y:1
         self.DISC.init_mode = lambda x:1
@@ -560,16 +563,16 @@ class Test_FMI_ODE:
         #Further testing of the time event function is needed.
         
     @testattr(fmi = True)
-    def test_post_process(self):
+    def test_handle_result(self):
         """
-        This tests the functionality of the post process method.
+        This tests the functionality of the handle result method.
         """
         t = 1.0
         y = N.array([1.0,1.0])
         
         assert len(self._bounceSim._sol_real) == 0
         self._bounceSim.write_cont = False
-        self._bounceSim.post_process(None,t,y)
+        self._bounceSim.handle_result(None,t,y)
         
         assert len(self._bounceSim._sol_real) == 1
         
