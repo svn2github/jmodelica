@@ -829,6 +829,14 @@ class Trajectory:
         self._x0 = abscissa[0]
         self._xf = abscissa[-1]
 
+        if not N.all(N.diff(self.abscissa)>=0):
+            raise Exception("The abscissa must be increasing.")
+
+        small = 1e-8
+        double_point_indices = N.nonzero(N.abs(N.diff(self.abscissa))<=small)
+        for i in double_point_indices:
+            self.abscissa[i+1] = self.abscissa[i+1] + small
+
     def eval(self,x):
         """
         Evaluate the trajectory at a specifed abscissa.
