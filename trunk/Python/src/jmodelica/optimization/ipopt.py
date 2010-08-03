@@ -94,7 +94,7 @@ class CollocationOptimizer(object):
             
         """
         if self._nlp_collocation._model.jmimodel._dll.jmi_opt_sim_ipopt_set_string_option(self._ipopt_opt, key, val) is not 0:
-            raise jmi.JMIException("Setting string option failed.")
+            raise jmi.JMIException("The Ipopt string option " + key + " is unknown")
         
     def opt_sim_ipopt_set_int_option(self, key, val):
         """
@@ -106,7 +106,7 @@ class CollocationOptimizer(object):
             
         """        
         if self._nlp_collocation._model.jmimodel._dll.jmi_opt_sim_ipopt_set_int_option(self._ipopt_opt, key, val) is not 0:
-            raise jmi.JMIException("Setting int option failed.")
+            raise jmi.JMIException("The Ipopt integer option " + key + " is unknown")
 
     def opt_sim_ipopt_set_num_option(self, key, val):
         """
@@ -118,7 +118,7 @@ class CollocationOptimizer(object):
             
         """
         if self._nlp_collocation._model.jmimodel._dll.jmi_opt_sim_ipopt_set_num_option(self._ipopt_opt, key, val) is not 0:
-            raise jmi.JMIException("Setting num option failed.")
+            raise jmi.JMIException("The Ipopt real option " + key + " is unknown")
 
 class NLPCollocation(object):
     """

@@ -66,20 +66,31 @@ int jmi_opt_sim_ipopt_solve(jmi_opt_sim_ipopt_t *jmi_opt_sim_ipopt) {
 
 int jmi_opt_sim_ipopt_set_string_option(jmi_opt_sim_ipopt_t *jmi_opt_sim_ipopt, char* key, char* val) {
 	std::string tag(key);
-	jmi_opt_sim_ipopt->ipopt_app->Options()->SetStringValue(tag, val);
-	return 0;
+	if (jmi_opt_sim_ipopt->ipopt_app->Options()->SetStringValue(tag, val)) {
+		return 0;
+	} else {
+		return -1;
+	}
 }
 
 int jmi_opt_sim_ipopt_set_int_option(jmi_opt_sim_ipopt_t *jmi_opt_sim_ipopt, char* key, int val) {
 	std::string tag(key);
-	jmi_opt_sim_ipopt->ipopt_app->Options()->SetIntegerValue(tag, val);
-	return 0;
+	if (jmi_opt_sim_ipopt->ipopt_app->Options()->SetIntegerValue(tag, val)) {
+		return 0;
+	} else {
+		return -1;
+	}
+
 }
 
 int jmi_opt_sim_ipopt_set_num_option(jmi_opt_sim_ipopt_t *jmi_opt_sim_ipopt, char* key, double val) {
 	std::string tag(key);
-	jmi_opt_sim_ipopt->ipopt_app->Options()->SetNumericValue(tag, val);
-	return 0;
+	if (jmi_opt_sim_ipopt->ipopt_app->Options()->SetNumericValue(tag, val)) {
+		return 0;
+	} else {
+		return -1;
+	}
+
 }
 
 /*

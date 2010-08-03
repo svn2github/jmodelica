@@ -214,6 +214,21 @@ class TestNLP_CSTR():
         self.nlp_ipopt = ipopt.CollocationOptimizer(self.nlp)
 
     @testattr(ipopt = True)
+    def test_invalid_string_option(self):
+        """Test that exceptions are thrown when invalid IPOPT options are set."""
+        nose.tools.assert_raises(Exception, self.nlp_ipopt.opt_sim_ipopt_set_string_option, 'invalid_option','val')
+
+    @testattr(ipopt = True)
+    def test_invalid_int_option(self):
+        """Test that exceptions are thrown when invalid IPOPT options are set."""
+        nose.tools.assert_raises(Exception, self.nlp_ipopt.opt_sim_ipopt_set_int_option, 'invalid_option',1)
+
+    @testattr(ipopt = True)
+    def test_invalid_num_option(self):
+        """Test that exceptions are thrown when invalid IPOPT options are set."""
+        nose.tools.assert_raises(Exception, self.nlp_ipopt.opt_sim_ipopt_set_num_option, 'invalid_option',1.0)
+
+    @testattr(ipopt = True)
     def test_jmi_opt_sim_set_initial_from_trajectory(self):
         """ Test of 'jmi_opt_sim_set_initial_from_trajectory'.
     

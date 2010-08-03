@@ -153,6 +153,8 @@ class TestNLPInit:
         self.dae_init_test.set_value('y1',0.3)
     
         self.init_nlp = NLPInitialization(self.dae_init_test)
+        self.init_nlp_ipopt = InitializationOptimizer(self.init_nlp)
+
 
     @testattr(ipopt = True)    
     def test_init_opt_get_dimensions(self):
@@ -291,8 +293,6 @@ class TestNLPInit:
 
         n_x, n_h, dh_n_nz = self.init_nlp.init_opt_get_dimensions()
 
-        # Test optimization of initialization system
-        self.init_nlp_ipopt = InitializationOptimizer(self.init_nlp)
     
         # self.init_nlp_ipopt.init_opt_ipopt_set_string_option("derivative_test","first-order")
         
@@ -317,9 +317,6 @@ class TestNLPInit:
 
         cpath_daeinit = "DAEInitTest"
         fname_daeinit = cpath_daeinit.replace('.','_',1)
-
-        # Test optimization of initialization system
-        self.init_nlp_ipopt = InitializationOptimizer(self.init_nlp)
     
         # self.init_nlp_ipopt.init_opt_ipopt_set_string_option("derivative_test","first-order")
         
@@ -359,3 +356,18 @@ class TestNLPInit:
         assert N.abs(res_Z[8] - res.get_variable_data("y3").x[0])<1e-3, \
                "test_jmi.py: test_init_opt_write_result: Wrong solution to initialization system for variable y3."
         
+    @testattr(ipopt = True)
+    def test_invalid_string_option(self):
+        """Test that exceptions are thrown when invalid IPOPT options are set."""
+        nose.tools.assert_raises(Exception, self.init_nlp_ipopt.init_opt_ipopt_set_string_option, 'invalid_option','val')
+
+    @testattr(ipopt = True)
+    def test_invalid_int_option(self):
+        """Test that exceptions are thrown when invalid IPOPT options are set."""
+        nose.tools.assert_raises(Exception, self.init_nlp_ipopt.init_opt_ipopt_set_int_option, 'invalid_option',1)
+
+    @testattr(ipopt = True)
+    def test_invalid_num_option(self):
+        """Test that exceptions are thrown when invalid IPOPT options are set."""
+        nose.tools.assert_raises(Exception, self.init_nlp_ipopt.init_opt_ipopt_set_num_option, 'invalid_option',1.0)
+

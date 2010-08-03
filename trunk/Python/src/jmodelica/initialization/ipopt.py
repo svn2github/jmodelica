@@ -88,7 +88,7 @@ class InitializationOptimizer(object):
             
         """
         if self._nlp_init._jmi_model._dll.jmi_init_opt_ipopt_set_string_option(self._ipopt_init, key, val) is not 0:
-            raise jmi.JMIException("Setting string option failed.")
+            raise jmi.JMIException("The Ipopt string option " + key + " is unknown")
         
     def init_opt_ipopt_set_int_option(self, key, val):
         """
@@ -100,7 +100,7 @@ class InitializationOptimizer(object):
             
         """        
         if self._nlp_init._jmi_model._dll.jmi_init_opt_ipopt_set_int_option(self._ipopt_init, key, val) is not 0:
-            raise jmi.JMIException("Setting int option failed.")
+            raise jmi.JMIException("The Ipopt integer option " + key + " is unknown")
 
     def init_opt_ipopt_set_num_option(self, key, val):
         """
@@ -112,7 +112,7 @@ class InitializationOptimizer(object):
             
         """
         if self._nlp_init._jmi_model._dll.jmi_init_opt_ipopt_set_num_option(self._ipopt_init, key, val) is not 0:
-            raise jmi.JMIException("Setting num option failed.")
+            raise jmi.JMIException("The Ipopt real option " + key + " is unknown")
 
 class NLPInitialization(object):
     """

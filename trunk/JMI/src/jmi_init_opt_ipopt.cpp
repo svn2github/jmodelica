@@ -66,23 +66,30 @@ int jmi_init_opt_ipopt_solve(jmi_init_opt_ipopt_t *jmi_init_opt_ipopt) {
 
 int jmi_init_opt_ipopt_set_string_option(jmi_init_opt_ipopt_t *jmi_init_opt_ipopt, char* key, char* val) {
 	std::string tag(key);
-	jmi_init_opt_ipopt->ipopt_app->Options()->SetStringValue(tag, val);
-	return 0;
+	if (jmi_init_opt_ipopt->ipopt_app->Options()->SetStringValue(tag, val))  {
+		return 0;
+	} else {
+		return -1;
+	}
 }
 
 int jmi_init_opt_ipopt_set_int_option(jmi_init_opt_ipopt_t *jmi_init_opt_ipopt, char* key, int val) {
 	std::string tag(key);
-	jmi_init_opt_ipopt->ipopt_app->Options()->SetIntegerValue(tag, val);
-	return 0;
+	if (jmi_init_opt_ipopt->ipopt_app->Options()->SetIntegerValue(tag, val)) {
+		return 0;
+	} else {
+		return -1;
+	}
 }
 
 int jmi_init_opt_ipopt_set_num_option(jmi_init_opt_ipopt_t *jmi_init_opt_ipopt, char* key, double val) {
 	std::string tag(key);
-	jmi_init_opt_ipopt->ipopt_app->Options()->SetNumericValue(tag, val);
-	return 0;
+	if (jmi_init_opt_ipopt->ipopt_app->Options()->SetNumericValue(tag, val)) {
+		return 0;
+	} else {
+		return -1;
+	}
 }
-
-
 
 /*
 int jmi_init_opt_ipopt_get_starting_point(jmi_init_opt_ipopt_t *jmi_init_opt_ipopt, Index n, int init_x, Number* x,
