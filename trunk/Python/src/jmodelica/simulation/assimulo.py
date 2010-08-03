@@ -121,8 +121,8 @@ class FMIODE(Explicit_Problem):
         self._g_nbr = g_nbr
         
         if g_nbr > 0:
-            self.event_fcn = self.g
-        self.time_event_fcn = self.t
+            self.state_events = self.g
+        self.time_events = self.t
         
         #Default values
         self.write_cont = True #Continuous writing
@@ -419,7 +419,7 @@ class JMIDAE(Implicit_Problem):
         
         if g_nbr > 0:
             self.switches0 = [bool(x) for x in self._model.sw] #Change the models values of the switches from ints to booleans
-            self.event_fcn = self.g_adjust #Activates the event function
+            self.state_events = self.g_adjust #Activates the event function
             
         #Sets default values
         self.max_eIter = 50 #Maximum number of event iterations allowed.
@@ -661,7 +661,7 @@ class JMIDAE(Implicit_Problem):
         Helper function for handle_event to determine if we have event
         iteration.
         
-            Input: Values of the event indicator functions (event_fcn)
+            Input: Values of the event indicator functions (state_events)
             before and after we have changed mode of operations.
         """
         

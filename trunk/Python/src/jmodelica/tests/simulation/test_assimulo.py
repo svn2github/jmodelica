@@ -373,7 +373,7 @@ class Test_JMI_DAE:
             
         #Test discontiniuous system
         assert self.DISC._g_nbr == 2
-        assert self.DISC.event_fcn == self.DISC.g_adjust
+        assert self.DISC.state_events == self.DISC.g_adjust
     
     @testattr(assimulo = True) 
     def test_reset(self):
@@ -499,13 +499,13 @@ class Test_FMI_ODE:
         """
         assert self._bounceSim._f_nbr == 2
         assert self._bounceSim._g_nbr == 1
-        assert self._bounceSim.event_fcn == self._bounceSim.g
+        assert self._bounceSim.state_events == self._bounceSim.g
         assert self._bounceSim.y0[0] == 1.0
         assert self._bounceSim.y0[1] == 0.0
         assert self._dqSim._f_nbr == 1
         assert self._dqSim._g_nbr == 0
         try:
-            self._dqSim.event_fcn
+            self._dqSim.state_events
             raise FMIException('')
         except AttributeError:
             pass
