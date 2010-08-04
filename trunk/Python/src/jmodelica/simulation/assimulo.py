@@ -555,6 +555,8 @@ class JMIDAE(Implicit_Problem):
         """
         This method is called when assimulo finds an event.
         """
+        event_info = event_info[0] #Only look at the state event information
+        
         nbr_iteration = 0
         
         if self.log_events:
@@ -761,7 +763,7 @@ class JMIDAE(Implicit_Problem):
                 else:
                     solver.switches[i] = False
         
-            self.handle_event(solver, [0])
+            self.handle_event(solver, [[0],False])
         else:
             self.init_mode(solver)
         
