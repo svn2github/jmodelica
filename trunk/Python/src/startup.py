@@ -95,6 +95,11 @@ except IOError:
 
 # check paths
 for _e in _defaults:
-    if _e[2] and not os.path.exists(environ[_e[0]]):
-        warnings.warn('%s=%s path does not exist. Environment may be corrupt.' % (_e[0],environ[_e[0]]))
+    if sys.platform == 'win32':
+        paths = environ[_e[0]].split(';') #On windows the paths are separeted with semicolons, so split.
+    else:
+        paths = environ[_e[0]].split(':') #On other platforms they are separeted with colons, so split.
+    for p in paths:
+        if _e[2] and not os.path.exists(p):
+            warnings.warn('%s=%s path does not exist. Environment may be corrupt.' % (_e[0],p))
         
