@@ -820,7 +820,7 @@ class ResultWriterDymola (ResultWriter):
         # Write data
         # Write data set 1
         f.write('float data_1(%d,%d)\n' % (2, n_parameters + 1))
-        f.write("%12.12f" % self.model.t)
+        f.write("%12.12f" % self.model.time)
         str_text = ''
         
         # write constants and parameters
@@ -876,7 +876,7 @@ class ResultWriterDymola (ResultWriter):
         if data==None:
             #Retrieves the time-point
             [r,i,b] = self.model.save_time_point()
-            data = N.append(N.append(N.append(self.model.t,r),i),b)
+            data = N.append(N.append(N.append(self.model.time,r),i),b)
 
         #Write the point
         str_text = (" %12.12f" % data[0])
@@ -900,7 +900,7 @@ class ResultWriterDymola (ResultWriter):
             
             f.seek(self._point_last_t)
             
-            f.write('%12.12f'%self.model.t)
+            f.write('%12.12f'%self.model.time)
             
             f.seek(self._point_npoints)
             f.write('%d,%d)' % (self._npoints, self._nvariables))

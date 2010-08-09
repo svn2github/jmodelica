@@ -155,7 +155,7 @@ class FMIModel(object):
         self._load_xml()
         
         #Instantiate
-        self.instantiate()
+        self.instantiate_model()
         
         #Default values
         self.__t = None
@@ -460,15 +460,39 @@ class FMIModel(object):
         self._fmiGetStateValueReferences.restype = self._fmiStatus
         self._fmiGetStateValueReferences.argtypes = [self._fmiComponent, Nct.ndpointer(), C.c_size_t]
        
-    def get_t(self):
+    def _get_time(self):
         """
-        Returns the time.
+        Sets/Gets the current time of the simulation.
+        
+            Parameters::
+            
+                time
+                        - Sets the time.
+                        
+            Returns::
+            
+                time
+                        - The current time.
+        
+        Calls the low-level FMI function: fmiSetTime.
         """
         return self.__t
     
-    def set_t(self, t):
+    def _set_time(self, t):
         """
-        Sets the time.
+        Sets/Gets the current time of the simulation.
+        
+            Parameters::
+            
+                time
+                        - Sets the time.
+                        
+            Returns::
+            
+                time
+                        - The current time.
+        
+        Calls the low-level FMI function: fmiSetTime.
         """
         t = N.array(t)
         if t.size > 1:
@@ -477,12 +501,22 @@ class FMIModel(object):
         temp = self._fmiReal(t)
         self._fmiSetTime(self._model,temp)
         
-    t = property(get_t,set_t)
+    time = property(_get_time,_set_time)
     
-    def get_cont_state(self):
+    def _get_continuous_states(self):
         """
-        The property for setting and getting the continuous states at the
-        current time-point.
+        Gets/Sets the continuous state vector.
+        
+            Parameters::
+            
+                values
+                        - The new values of the continuous states.
+            
+            Returns::
+            
+                The current values of the continuous states.
+                
+        Calls the low-level FMI function: fmiSetContinuousStates/fmiGetContinuousStates
         """
         values = N.array([0.0]*self._nContinuousStates, dtype=N.double)
         status = self._fmiGetContinuousStates(self._model, values, self._nContinuousStates)
@@ -492,10 +526,20 @@ class FMIModel(object):
         
         return values
         
-    def set_cont_state(self, values):
+    def _set_continuous_states(self, values):
         """
-        The property for setting and getting the continuous states at the
-        current time-point.
+        Gets/Sets the continuous state vector.
+        
+            Parameters::
+            
+                values
+                        - The new values of the continuous states.
+            
+            Returns::
+            
+                The current values of the continuous states.
+                
+        Calls the low-level FMI function: fmiSetContinuousStates/fmiGetContinuousStates
         """
         values = N.array(values)
         if values.size != self._nContinuousStates:
@@ -507,9 +551,9 @@ class FMIModel(object):
         if status >= 3:
             raise FMIException('Failed to set the new continuous states.')
     
-    real_x = property(get_cont_state, set_cont_state)
+    continuous_states = property(_get_continuous_states, _set_continuous_states)
     
-    def get_nominal(self):
+    def _get_nominal_continuous_states(self):
         """
         Returns the nominal values of the continuous states.
         
@@ -519,11 +563,13 @@ class FMIModel(object):
                 
             Return::
             
-                real_x_nominal    - The nominal values as an array.
+                nomial    - The nominal values as an array.
                 
             Example::
             
-                nominal = model.real_x_nominal
+                nominal = model.nominal_continuous_states
+                
+        Calls the low-level FMI function: fmiGetNominalContinuousStates
         """
         values = N.array([0.0]*self._nContinuousStates,dtype=N.double)
         status = self._fmiGetNominalContinuousStates(self._model, values, self._nContinuousStates)
@@ -533,9 +579,9 @@ class FMIModel(object):
             
         return values
     
-    real_x_nominal = property(get_nominal)
+    nominal_continuous_states = property(_get_nominal_continuous_states)
     
-    def get_dx(self):
+    def get_derivatives(self):
         """
         Returns the derivative of the continuous states.
         
@@ -545,11 +591,13 @@ class FMIModel(object):
                 
             Return::
             
-                real_dx     - The derivative as an array.
+                dx    - The derivative as an array.
                 
             Example::
             
-                dx = model.real_dx
+                dx = model.get_derivatives()
+                
+        Calls the low-level FMI function: fmiGetDerivatives
         """
         values = N.array([0.0]*self._nContinuousStates,dtype=N.double)
         status = self._fmiGetDerivatives(self._model, values, self._nContinuousStates)
@@ -558,8 +606,6 @@ class FMIModel(object):
             raise FMIException('Failed to get the derivative values.')
             
         return values
-        
-    real_dx = property(get_dx)
         
     def get_event_indicators(self):
         """
@@ -571,11 +617,13 @@ class FMIModel(object):
                 
             Return::
             
-                event_ind   - The event indicators as an array.
+                evInd   - The event indicators as an array.
                 
             Example::
             
-                evInd = model.event_ind
+                evInd = model.get_event_indicators()
+                
+        Calls the low-level FMI function: fmiGetEventIndicators
         """
         values = N.array([0.0]*self._nEventIndicators,dtype=N.double)
         status = self._fmiGetEventIndicators(self._model, values, self._nEventIndicators)
@@ -584,8 +632,7 @@ class FMIModel(object):
             raise FMIException('Failed to get the event indicators.')
             
         return values
-        
-    event_ind = property(get_event_indicators)
+
     
     def get_tolerances(self):
         """
@@ -609,11 +656,11 @@ class FMIModel(object):
                 [rtol, atol] = model.get_tolerances()
         """
         rtol = self._XMLTolerance
-        atol = 0.01*rtol*self.real_x_nominal
+        atol = 0.01*rtol*self.nominal_continuous_states
         
         return [rtol, atol]
     
-    def update_event(self, intermediateResult='1'):
+    def event_update(self, intermediateResult='0'):
         """
         Updates the event information at the current time-point. If intermediateResult is
         set to '1' the update_event will stop at each event iteration which would require
@@ -621,7 +668,7 @@ class FMIModel(object):
         
             Parameters::
             
-                intermediateResult  - Default '1'.
+                intermediateResult  - Default '0'.
                 
             Return::
             
@@ -629,7 +676,9 @@ class FMIModel(object):
                 
             Example::
             
-                model.update_event()
+                model.event_update()
+        
+        Calls the low-level FMI function: fmiEventUpdate
         """
         status = self._fmiEventUpdate(self._model, intermediateResult, C.byref(self._eventInfo))
         
@@ -700,11 +749,9 @@ class FMIModel(object):
         
         return self._pyEventInfo
     
-    event_info = property(get_event_info)
-    
-    def get_continuous_value_reference(self):
+    def get_state_value_references(self):
         """
-        Returns the continuous states valuereference.
+        Returns the continuous states valuereferences.
         
             Parameters::
             
@@ -717,6 +764,8 @@ class FMIModel(object):
             Example::
             
             val = model.get_continuous_value_reference()
+            
+        Calls the low-level FMI function: fmiGetStateValueReferences
         """
         values = N.array([0]*self._nContinuousStates,dtype=N.uint32)
         status = self._fmiGetStateValueReferences(self._model, values, self._nContinuousStates)
@@ -726,7 +775,7 @@ class FMIModel(object):
             
         return values
     
-    def get_version(self):
+    def _get_version(self):
         """
         Returns the FMI version of the Model which it was generated according.
             
@@ -745,9 +794,9 @@ class FMIModel(object):
         """
         return self._version()
         
-    version = property(fget=get_version)
+    version = property(fget=_get_version)
     
-    def get_validplatforms(self):
+    def _get_model_types_platform(self):
         """
         Returns the set of valid compatible platforms for the Model, extracted
         from the XML.
@@ -758,15 +807,15 @@ class FMIModel(object):
                 
             Return::
             
-                validPlatform   - The valid platforms.
+                model_types_platform   - The valid platforms.
                 
             Example::
             
-                model.valid_platforms
+                model.model_types_platform
         """
         return self._validplatforms()
         
-    valid_platforms = property(fget=get_validplatforms)
+    model_types_platform = property(fget=_get_model_types_platform)
     
     def get_ode_sizes(self):
         """
@@ -804,6 +853,8 @@ class FMIModel(object):
             Example::
             
                 val = model.get_real([232])
+                
+        Calls the low-level FMI function: fmiGetReal/fmiSetReal
         """
         valueref = N.array(valueref, dtype=N.uint32)
         nref = len(valueref)
@@ -834,6 +885,7 @@ class FMIModel(object):
             
                 model.set_real([234,235],[2.34,10.4])
         
+        Calls the low-level FMI function: fmiGetReal/fmiSetReal
         """
         valueref = N.array(valueref, dtype=N.uint32)
         nref = valueref.size
@@ -863,6 +915,8 @@ class FMIModel(object):
             Example::
             
                 val = model.get_integer([232])
+                
+        Calls the low-level FMI function: fmiGetInteger/fmiSetInteger
         """
         valueref = N.array(valueref, dtype=N.uint32)
         nref = len(valueref)
@@ -893,6 +947,7 @@ class FMIModel(object):
             
                 model.set_integer([234,235],[12,-3])
         
+        Calls the low-level FMI function: fmiGetInteger/fmiSetInteger
         """
         valueref = N.array(valueref, dtype=N.uint32)
         nref = valueref.size
@@ -922,6 +977,8 @@ class FMIModel(object):
             Example::
             
                 val = model.get_boolean([232])
+                
+        Calls the low-level FMI function: fmiGetBoolean/fmiSetBoolean
         """
         valueref = N.array(valueref, dtype=N.uint32)
         nref = len(valueref)
@@ -962,6 +1019,7 @@ class FMIModel(object):
             
                 model.set_boolean([234,235],[True,False])
         
+        Calls the low-level FMI function: fmiGetBoolean/fmiSetBoolean
         """
         valueref = N.array(valueref, dtype=N.uint32)
         nref = valueref.size
@@ -990,6 +1048,8 @@ class FMIModel(object):
             Example::
             
                 val = model.get_string([232])
+                
+        Calls the low-level FMI function: fmiGetString/fmiSetString
         """
         valueref = N.array(valueref, dtype=N.uint32)
         nref = len(valueref)
@@ -1022,6 +1082,7 @@ class FMIModel(object):
             
                 model.set_string([234,235],['text','text'])
         
+        Calls the low-level FMI function: fmiGetString/fmiSetString
         """
         valueref = N.array(valueref, dtype=N.uint32)
         nref = valueref.size
@@ -1050,9 +1111,18 @@ class FMIModel(object):
         else:
             return float(values[0])
     
-    def step_event(self):
+    def completed_integrator_step(self):
         """
-        Call the internal FMI function: fmiCompletedIntegratorStep.
+        This method must be called by the environment after every completed step of the 
+        integrator. If the return is True, then the environment must call event_update()
+        otherwise, no action is needed.
+        
+            Returns::
+            
+                True  -> Call event_update().
+                False -> Do nothing.
+                
+        Calls the low-level FMI function: fmiCompletedIntegratorStep.
         """
         callEventUpdate = self._fmiBoolean(self._fmiFalse)
         status = self._fmiCompletedIntegratorStep(self._model, C.byref(callEventUpdate))
@@ -1067,7 +1137,15 @@ class FMIModel(object):
     
     def initialize(self):
         """
-        Initialize the model.
+        Initializes the model and computes initial values for all variables, including
+        setting the start values of variables defined with a the start attribute in the
+        XML-file. 
+        
+            Returns::
+            
+                None
+                
+        Calls the low-level FMI function: fmiInitialize.
         """
         
         #Set the start attributes
@@ -1084,8 +1162,8 @@ class FMIModel(object):
             self.set_string(self._XMLStartStringKeys, self._XMLStartStringValues)
 
         #Trying to set the initial time from the xml file, else 0.0
-        if self.t == None:
-            self.t = self._XMLStartTime
+        if self.time == None:
+            self.time = self._XMLStartTime
         
         
         if self._tolControlled:
@@ -1103,9 +1181,25 @@ class FMIModel(object):
             raise FMIException('Failed to Initialize the model.')
     
     
-    def instantiate(self, name='Model', logging='0'):
+    def instantiate_model(self, name='Model', logging='0'):
         """
         Instantiate the model.
+        
+            Parameters::
+            
+                name    
+                        - The name of the instance.
+                        - Default 'Model'
+                        
+                logging
+                        - Defines if the logging should be turned on or off.
+                        - Default '0', no logging.
+                        
+            Returns::
+            
+                None
+                
+        Calls the low-level FMI function: fmiInstantiateModel.
         """
         instance = self._fmiString(name)
         guid = self._fmiString(self._GUID)
@@ -1127,9 +1221,15 @@ class FMIModel(object):
         print 'Logger'
         pass
     def fmiCallbackAllocateMemory(self, nobj, size):
+        """
+        Callback function for the FMU which allocates memory needed by the model.
+        """
         return self._calloc(nobj,size)
 
     def fmiCallbackFreeMemory(self, obj):
+        """
+        Callback function for the FMU which deallocates memory allocated by fmiCallbackAllocateMemory
+        """
         print 'Free'
         self._free(obj)
     

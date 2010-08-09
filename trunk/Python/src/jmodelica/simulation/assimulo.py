@@ -120,7 +120,7 @@ class FMIODE(Explicit_Problem):
         self.input = input
         self.input_names = []
 
-        self.y0 = self._model.real_x
+        self.y0 = self._model.continuous_states
         self.problem_name = self._model.get_name()
 
         [f_nbr, g_nbr] = self._model.get_ode_sizes()
@@ -158,15 +158,15 @@ class FMIODE(Explicit_Problem):
         The rhs (right-hand-side) for an ODE problem.
         """
         #Moving data to the model
-        self._model.t = t
-        self._model.real_x = y
+        self._model.time = t
+        self._model.continuous_states = y
         
         #Sets the inputs, if any
         if self.input!=None:
             self._model.set_real(self.input_names,self.input.eval(t)[0,:])
         
         #Evaluating the rhs
-        rhs = self._model.real_dx
+        rhs = self._model.get_derivatives()
 
         return rhs
         
@@ -175,15 +175,15 @@ class FMIODE(Explicit_Problem):
         The event indicator function for a ODE problem.
         """
         #Moving data to the model
-        self._model.t = t
-        self._model.real_x = y
+        self._model.time = t
+        self._model.continuous_states = y
         
         #Sets the inputs, if any
         if self.input!=None:
             self._model.set_real(self.input_names,self.input.eval(t)[0,:])
         
         #Evaluating the event indicators
-        eventInd = self._model.event_ind
+        eventInd = self._model.get_event_indicators()
 
         return eventInd
         
@@ -191,8 +191,10 @@ class FMIODE(Explicit_Problem):
         """
         Time event function.
         """
-        if self._model.event_info.upcomingTimeEvent == True:
-            return self._model.event_info.nextEventTime
+        eInfo = self._model.get_event_info()
+        
+        if eInfo.upcomingTimeEvent == True:
+            return eInfo.nextEventTime
         else:
             return None
     
@@ -217,16 +219,17 @@ class FMIODE(Explicit_Problem):
         Post processing (stores the time points).
         """
         #Moving data to the model
-        if t != self._model.t:
-            self._model.t = t
-            self._model.real_x = y
+        if t != self._model.time:
+            #Moving data to the model
+            self._model.time = t
+            self._model.continuous_states = y
             
             #Sets the inputs, if any
-        if self.input!=None:
-            self._model.set_real(self.input_names,self.input.eval(t)[0,:])
+            if self.input!=None:
+                self._model.set_real(self.input_names,self.input.eval(t)[0,:])
             
             #Evaluating the rhs (Have to evaluate the values in the model)
-            rhs = self._model.real_dx
+            rhs = self._model.get_derivatives()
         
         if self.write_cont:
             if self._write_header:
@@ -247,24 +250,24 @@ class FMIODE(Explicit_Problem):
         """
         This method is called when Assimulo finds an event.
         """
-        if self._model.t != solver.t_cur:
+        if self._model.time != solver.t_cur:
             #Moving data to the model
-            self._model.t = solver.t_cur
-            self._model.real_x = solver.y_cur
+            self._model.time = solver.t_cur
+            self._model.continuous_states = solver.y_cur
             
             #Sets the inputs, if any
             if self.input!=None:
                 self._model.set_real(self.input_names,self.input.eval(solver.t_cur)[0,:])
             
             #Evaluating the rhs (Have to evaluate the values in the model)
-            rhs = self._model.real_dx
+            rhs = self._model.get_derivatives()
         
-        eInfo = self._model.event_info
+        eInfo = self._model.get_event_info()
         eInfo.iterationConverged = False
 
         while eInfo.iterationConverged == False:
-            self._model.update_event()
-            eInfo = self._model.event_info
+            self._model.event_update('0')
+            eInfo = self._model.get_event_info()
 
             #Retrieve solutions (if needed)
             if eInfo.iterationConverged == False:
@@ -272,11 +275,11 @@ class FMIODE(Explicit_Problem):
         
         #Check if the event affected the state values and if so sets them
         if eInfo.stateValuesChanged:
-            solver.y_cur = self._model.real_x
+            solver.y_cur = self._model.continuous_states
         
         #Get new nominal values.
         if eInfo.stateValueReferencesChanged:
-            solver.atol = 0.01*solver.rtol*self._model.real_x_nominal
+            solver.atol = 0.01*solver.rtol*self._model.nominal_continuous_states
         
         
     def completed_step(self, solver):
@@ -284,18 +287,18 @@ class FMIODE(Explicit_Problem):
         Method which is called at each successful step.
         """
         #Moving data to the model
-        if solver.t_cur != self._model.t:
-            self._model.t = solver.t_cur
-            self._model.real_x = solver.y_cur
+        if solver.t_cur != self._model.time:
+            self._model.time = solver.t_cur
+            self._model.continuous_states = solver.y_cur
             
             #Sets the inputs, if any
             if self.input!=None:
                 self._model.set_real(self.input_names,self.input.eval(solver.t_cur)[0,:])
             
             #Evaluating the rhs (Have to evaluate the values in the model)
-            rhs = self._model.real_dx
+            rhs = self._model.get_derivatives()
         
-        if self._model.step_event():
+        if self._model.completed_integrator_step():
             self._logg_step_event += [solver.t_cur]
             self.handle_event(solver,[0]) #Event have been detect, call event iteration.
             return 1 #Tell to reinitiate the solver.

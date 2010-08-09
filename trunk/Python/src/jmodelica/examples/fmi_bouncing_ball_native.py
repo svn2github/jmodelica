@@ -23,17 +23,17 @@ def run_demo(with_plots=True):
     Tstart = 0.5 #The start time.
     Tend   = 3.0 #The final simulation time.
     
-    bouncing_fmu.t = Tstart #Set the start time before the initialization.
+    bouncing_fmu.time = Tstart #Set the start time before the initialization.
     
     bouncing_fmu.initialize() #Initialize the model. Also sets all the start attributes
                               #defined in the XML file.
                               
     #Get Continuous States
-    x = bouncing_fmu.real_x
+    x = bouncing_fmu.continuous_states
     #Get the Nominal Values
-    x_nominal = bouncing_fmu.real_x_nominal
+    x_nominal = bouncing_fmu.nominal_continuous_states
     #Get the Event Indicators
-    event_ind = bouncing_fmu.event_ind
+    event_ind = bouncing_fmu.get_event_indicators()
     
     #For retrieving the solutions use,
     #bouncing_fmu.get_real,get_integer,get_boolean,get_string (valueref)
@@ -49,30 +49,30 @@ def run_demo(with_plots=True):
     Tnext = Tend #Used for time events
     dt = 0.01 #Step-size
     
-    while time < Tend and not bouncing_fmu.event_info.terminateSimulation:
+    while time < Tend and not bouncing_fmu.get_event_info().terminateSimulation:
         
         #Compute the derivative
-        dx = bouncing_fmu.real_dx
+        dx = bouncing_fmu.get_derivatives()
         
         #Advance
         h = min(dt, Tnext-time)
         time = time + h
         
         #Set the time
-        bouncing_fmu.t = time
+        bouncing_fmu.time = time
         
         #Set the inputs at the current time (if any)
         #bouncing_fmu.set_real,set_integer,set_boolean,set_string (valueref, values)
         
         #Set the states at t = time (Perform the step)
         x = x + h*dx
-        bouncing_fmu.real_x = x
+        bouncing_fmu.continuous_states = x
         
         #Get the event indicators at t = time
-        event_ind_new = bouncing_fmu.event_ind
+        event_ind_new = bouncing_fmu.get_event_indicators()
         
         #Inform the model about an accepted step and check for step events
-        step_event = bouncing_fmu.step_event()
+        step_event = bouncing_fmu.completed_integrator_step()
         
         #Check for time and state events
         time_event  = abs(time-Tnext) <= 1.e-10
@@ -81,13 +81,13 @@ def run_demo(with_plots=True):
         #Event handling
         if step_event or time_event or state_event:
             
-            eInfo = bouncing_fmu.event_info
+            eInfo = bouncing_fmu.get_event_info()
             eInfo.iterationConverged = False
             
             #Event iteration
             while eInfo.iterationConverged == False:
-                bouncing_fmu.update_event()
-                eInfo = bouncing_fmu.event_info
+                bouncing_fmu.event_update()
+                eInfo = bouncing_fmu.get_event_info()
 
                 #Retrieve solutions (if needed)
                 if eInfo.iterationConverged == False:
@@ -96,7 +96,7 @@ def run_demo(with_plots=True):
             
             #Check if the event affected the state values and if so sets them
             if eInfo.stateValuesChanged:
-                x = bouncing_fmu.real_x
+                x = bouncing_fmu.continuous_states
         
             #Get new nominal values.
             if eInfo.stateValueReferencesChanged:

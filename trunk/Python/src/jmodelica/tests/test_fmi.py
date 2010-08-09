@@ -139,67 +139,67 @@ class Test_FMI:
     @testattr(fmi = True)
     def test_t(self):
         """
-        This tests the functionality of setting/getting t.
+        This tests the functionality of setting/getting time.
         """
         
-        assert self._bounce.t == 0.0
-        assert self._dq.t == 0.0
+        assert self._bounce.time == 0.0
+        assert self._dq.time == 0.0
         
-        self._bounce.t = 1.0
+        self._bounce.time = 1.0
         
-        assert self._bounce.t == 1.0
+        assert self._bounce.time == 1.0
         
-        nose.tools.assert_raises(FMIException, self._bounce.set_t, N.array([1.0,1.0]))
+        nose.tools.assert_raises(FMIException, self._bounce._set_time, N.array([1.0,1.0]))
         
         
     @testattr(fmi = True)
     def test_real_x(self):
         """
-        This tests the property of real_x.
+        This tests the property of the continuous_states.
         """
-        nose.tools.assert_raises(FMIException, self._bounce.set_cont_state,N.array([1.]))
-        nose.tools.assert_raises(FMIException, self._dq.set_cont_state,N.array([1.0,1.0]))
+        nose.tools.assert_raises(FMIException, self._bounce._set_continuous_states,N.array([1.]))
+        nose.tools.assert_raises(FMIException, self._dq._set_continuous_states,N.array([1.0,1.0]))
         
         temp = N.array([2.0,1.0])
-        self._bounce.real_x = temp
+        self._bounce.continuous_states = temp
         
-        nose.tools.assert_almost_equal(self._bounce.real_x[0],temp[0])
-        nose.tools.assert_almost_equal(self._bounce.real_x[1],temp[1])
+        nose.tools.assert_almost_equal(self._bounce.continuous_states[0],temp[0])
+        nose.tools.assert_almost_equal(self._bounce.continuous_states[1],temp[1])
 
         
     @testattr(fmi = True)
     def test_real_dx(self):
         """
-        This tests the (get)-property of real_dx.
+        This tests the method get_derivative.
         """
         #Bounce
-        real_dx = self._bounce.real_dx
+        real_dx = self._bounce.get_derivatives()
         nose.tools.assert_almost_equal(real_dx[0], 0.00000000)
         nose.tools.assert_almost_equal(real_dx[1], -9.810000000)
 
-        self._bounce.real_x = N.array([2.,5.])
-        real_dx = self._bounce.real_dx
+        self._bounce.continuous_states = N.array([2.,5.])
+        real_dx = self._bounce.get_derivatives()
         nose.tools.assert_almost_equal(real_dx[0], 5.000000000)
         nose.tools.assert_almost_equal(real_dx[1], -9.810000000)
         
         #DQ
-        real_dx = self._dq.real_dx
+        real_dx = self._dq.get_derivatives()
         nose.tools.assert_almost_equal(real_dx[0], -1.0000000)
-        self._dq.real_x = N.array([5.])
-        real_dx = self._dq.real_dx
+        self._dq.continuous_states = N.array([5.])
+        real_dx = self._dq.get_derivatives()
         nose.tools.assert_almost_equal(real_dx[0], -5.0000000)
 
     @testattr(fmi = True)
     def test_real_x_nominal(self):
         """
-        This tests the (get)-property of real_x_nominal.
+        This tests the (get)-property of nominal_continuous_states.
         """
-        nominal = self._bounce.real_x_nominal
+        nominal = self._bounce.nominal_continuous_states
         
         assert nominal[0] == 1.0
         assert nominal[1] == 1.0
         
-        nominal = self._dq.real_x_nominal
+        nominal = self._dq.nominal_continuous_states
         
         assert nominal[0] == 1.0
     
@@ -208,16 +208,16 @@ class Test_FMI:
         """
         This tests the (get)-property of version.
         """
-        assert self._bounce.get_version() == '1.0'
-        assert self._dq.get_version() == '1.0'
+        assert self._bounce._get_version() == '1.0'
+        assert self._dq._get_version() == '1.0'
         
     @testattr(fmi = True)
     def test_valid_platforms(self):
         """
-        This tests the (get)-property of valid platforms.
+        This tests the (get)-property of model_types_platform
         """
-        assert self._bounce.get_validplatforms() == 'standard32'
-        assert self._dq.get_validplatforms() == 'standard32'
+        assert self._bounce.model_types_platform == 'standard32'
+        assert self._dq.model_types_platform == 'standard32'
         
     @testattr(fmi = True)
     def test_get_tolerances(self):
@@ -238,35 +238,35 @@ class Test_FMI:
     @testattr(fmi = True)
     def test_event_indicators(self):
         """
-        This tests the (get)-property of event_ind.
+        This tests the method get_event_indicators.
         """
-        assert len(self._bounce.event_ind) == 1
-        assert len(self._dq.event_ind) == 0
+        assert len(self._bounce.get_event_indicators()) == 1
+        assert len(self._dq.get_event_indicators()) == 0
         
-        event_ind = self._bounce.event_ind
+        event_ind = self._bounce.get_event_indicators()
         nose.tools.assert_almost_equal(event_ind[0],1.0000000000)
-        self._bounce.real_x = N.array([5.]*2)
-        event_ind = self._bounce.event_ind
+        self._bounce.continuous_states = N.array([5.]*2)
+        event_ind = self._bounce.get_event_indicators()
         nose.tools.assert_almost_equal(event_ind[0],5.0000000000)
     
     @testattr(fmi = True)
     def test_update_event(self):
         """
-        This tests the functionality of the method update_event.
+        This tests the functionality of the method event_update.
         """
-        self._bounce.real_x = N.array([1.0,1.0])
+        self._bounce.continuous_states = N.array([1.0,1.0])
         
-        self._bounce.update_event()
+        self._bounce.event_update()
         
-        nose.tools.assert_almost_equal(self._bounce.real_x[0],1.0000000000)
-        nose.tools.assert_almost_equal(self._bounce.real_x[1],-0.7000000000)
+        nose.tools.assert_almost_equal(self._bounce.continuous_states[0],1.0000000000)
+        nose.tools.assert_almost_equal(self._bounce.continuous_states[1],-0.7000000000)
         
-        self._bounce.update_event()
+        self._bounce.event_update()
         
-        nose.tools.assert_almost_equal(self._bounce.real_x[0],1.0000000000)
-        nose.tools.assert_almost_equal(self._bounce.real_x[1],0.49000000000)
+        nose.tools.assert_almost_equal(self._bounce.continuous_states[0],1.0000000000)
+        nose.tools.assert_almost_equal(self._bounce.continuous_states[1],0.49000000000)
         
-        eInfo = self._bounce.event_info
+        eInfo = self._bounce.get_event_info()
         
         assert eInfo.nextEventTime == 0.0
         assert eInfo.upcomingTimeEvent == False
@@ -276,14 +276,14 @@ class Test_FMI:
     @testattr(fmi = True)
     def test_get_continuous_value_references(self):
         """
-        This tests the functionality of the method get_continuous_value_references.
+        This tests the functionality of the method get_state_value_references.
         """
-        ref = self._bounce.get_continuous_value_reference()
+        ref = self._bounce.get_state_value_references()
         
         assert ref[0] == 0
         assert ref[1] == 2
         
-        ref = self._dq.get_continuous_value_reference()
+        ref = self._dq.get_state_value_references()
         
         assert ref[0] == 0
         
