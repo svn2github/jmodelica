@@ -343,6 +343,7 @@ class FMIModel(object):
         self._fmiInteger = C.c_int32
         self._fmiBoolean = C.c_char
         self._fmiString = C.c_char_p
+        self._PfmiString = C.POINTER(self._fmiString)
         
         #Defines
         self._fmiTrue = '\x01'
@@ -427,7 +428,8 @@ class FMIModel(object):
         self._fmiGetBoolean.argtypes = [self._fmiComponent, Nct.ndpointer(),C.c_size_t, Nct.ndpointer()]
         self._fmiGetString = self._dll.__getattr__(self._modelname+'_fmiGetString')
         self._fmiGetString.restype = self._fmiStatus
-        self._fmiGetString.argtypes = [self._fmiComponent, Nct.ndpointer(),C.c_size_t, Nct.ndpointer()]
+        #self._fmiGetString.argtypes = [self._fmiComponent, Nct.ndpointer(),C.c_size_t, Nct.ndpointer()]
+        self._fmiGetString.argtypes = [self._fmiComponent, Nct.ndpointer(),C.c_size_t, self._PfmiString]
         
         self._fmiSetReal = self._dll.__getattr__(self._modelname+'_fmiSetReal')
         self._fmiSetReal.restype = self._fmiStatus
@@ -440,7 +442,7 @@ class FMIModel(object):
         self._fmiSetBoolean.argtypes = [self._fmiComponent, Nct.ndpointer(),C.c_size_t,Nct.ndpointer()]
         self._fmiSetString = self._dll.__getattr__(self._modelname+'_fmiSetString')
         self._fmiSetString.restype = self._fmiStatus
-        self._fmiSetString.argtypes = [self._fmiComponent, Nct.ndpointer(),C.c_size_t,Nct.ndpointer()]
+        self._fmiSetString.argtypes = [self._fmiComponent, Nct.ndpointer(),C.c_size_t,self._PfmiString]
         
         self._fmiGetDerivatives = self._dll.__getattr__(self._modelname+'_fmiGetDerivatives')
         self._fmiGetDerivatives.restype = self._fmiStatus
@@ -991,14 +993,16 @@ class FMIModel(object):
         """
         valueref = N.array(valueref, dtype=N.uint32)
         nref = len(valueref)
-        values = N.array(['str']*nref)
+        values = N.ndarray([])
         
-        status = self._fmiGetString(self._model, valueref, nref, values)
+        temp = (self._fmiString*nref)()
         
+        status = self._fmiGetString(self._model, valueref, nref, temp)
+
         if status != 0:
-            raise FMIException('Failed to get the String values.')
-            
-        return values
+            raise FMIException('Failed to set the String values.')
+        
+        return N.array(temp)[:]
     
     def set_string(self, valueref, values):
         """
@@ -1023,10 +1027,14 @@ class FMIModel(object):
         nref = valueref.size
         values = N.array(values)
         
+        temp = (self._fmiString*nref)()
+        for i in range(nref):
+            temp[i] = values[i]
+        
         if valueref.size != values.size:
             raise FMIException('The length of valueref and values are inconsistent.')
-        
-        status = self._fmiSetString(self._model,valueref, nref, values)
+
+        status = self._fmiSetString(self._model, valueref, nref, temp)
         
         if status != 0:
             raise FMIException('Failed to set the String values.')
@@ -1081,11 +1089,11 @@ class FMIModel(object):
         
         
         if self._tolControlled:
-            tolcontrolled = self._fmiBoolean('0')
-            tol = self._fmiReal(0.0)
-        else:
             tolcontrolled = self._fmiBoolean('1')
             tol = self._XMLTolerance
+        else:
+            tolcontrolled = self._fmiBoolean('0')
+            tol = self._fmiReal(0.0)
         
         self._eventInfo = self._fmiEventInfo('0','0','0','0','0',self._fmiReal(0.0))
         

@@ -42,6 +42,12 @@ class JMIModel_Exception(Exception):
     A JMIModel Exception.
     """
     pass
+    
+class FMIModel_Exception(Exception):
+    """
+    A FMIModel Exception.
+    """
+    pass
 
 def write_data(simulator):
     """
@@ -106,11 +112,13 @@ class FMIODE(Explicit_Problem):
     """
     An Assimulo Explicit Model extended to FMI interface.
     """
-    def __init__(self, model):
+    def __init__(self, model, input=None):
         """
         Initialize the problem.
         """
         self._model = model
+        self.input = input
+        self.input_names = []
 
         self.y0 = self._model.real_x
         self.problem_name = self._model.get_name()
@@ -152,7 +160,11 @@ class FMIODE(Explicit_Problem):
         #Moving data to the model
         self._model.t = t
         self._model.real_x = y
-
+        
+        #Sets the inputs, if any
+        if self.input!=None:
+            self._model.set_real(self.input_names,self.input.eval(t)[0,:])
+        
         #Evaluating the rhs
         rhs = self._model.real_dx
 
@@ -165,6 +177,10 @@ class FMIODE(Explicit_Problem):
         #Moving data to the model
         self._model.t = t
         self._model.real_x = y
+        
+        #Sets the inputs, if any
+        if self.input!=None:
+            self._model.set_real(self.input_names,self.input.eval(t)[0,:])
         
         #Evaluating the event indicators
         eventInd = self._model.event_ind
@@ -204,6 +220,11 @@ class FMIODE(Explicit_Problem):
         if t != self._model.t:
             self._model.t = t
             self._model.real_x = y
+            
+            #Sets the inputs, if any
+        if self.input!=None:
+            self._model.set_real(self.input_names,self.input.eval(t)[0,:])
+            
             #Evaluating the rhs (Have to evaluate the values in the model)
             rhs = self._model.real_dx
         
@@ -230,6 +251,11 @@ class FMIODE(Explicit_Problem):
             #Moving data to the model
             self._model.t = solver.t_cur
             self._model.real_x = solver.y_cur
+            
+            #Sets the inputs, if any
+            if self.input!=None:
+                self._model.set_real(self.input_names,self.input.eval(solver.t_cur)[0,:])
+            
             #Evaluating the rhs (Have to evaluate the values in the model)
             rhs = self._model.real_dx
         
@@ -261,6 +287,11 @@ class FMIODE(Explicit_Problem):
         if solver.t_cur != self._model.t:
             self._model.t = solver.t_cur
             self._model.real_x = solver.y_cur
+            
+            #Sets the inputs, if any
+            if self.input!=None:
+                self._model.set_real(self.input_names,self.input.eval(solver.t_cur)[0,:])
+            
             #Evaluating the rhs (Have to evaluate the values in the model)
             rhs = self._model.real_dx
         
@@ -283,6 +314,67 @@ class FMIODE(Explicit_Problem):
     def finalize(self, solver):
         if self.write_cont:
             self.export.write_finalize()
+        
+    
+    def _set_input(self, input):
+        """
+        Sets the input. The input must be a subclass of the class Trajectory.
+        The property input_names must also be specified if the input is set
+        as the names map the input to the correct variable.
+        """
+        self.__input = input
+        
+    def _get_input(self):
+        """
+        Sets the input. The input must be a subclass of the class Trajectory.
+        The property input_names must also be specified if the input is set
+        as the names map the input to the correct variable.
+        """
+        return self.__input
+
+    input = property(_get_input, _set_input)
+    
+    def _set_input_variables(self, names):
+        """
+        Defines the input variables.
+        
+            Parameters::
+            
+                names  -
+                        Should be a list of names with the causality 'input'.
+                        These names are then mapped to the input values specified
+                        with the 'input' option.
+                        
+            Returns::
+            
+                none
+        """
+        if not isinstance(names,list):
+            raise FMIModel_Exception('Names must be a LIST of names.')
+        
+        self.__names = []
+        
+        for n in names:
+            self.__names += [self._model.get_valueref(n)]
+            
+    def _get_input_variables(self):
+        """
+        Defines the input variables.
+        
+            Parameters::
+            
+                names  -
+                        Should be a list of names with the causality 'input'.
+                        These names are then mapped to the input values specified
+                        with the 'input' option.
+                        
+            Return::
+            
+                none
+        """
+        return self.__names
+
+    input_names = property(fget=_get_input_variables,fset=_set_input_variables)
         
 
 class JMIODE(Explicit_Problem):

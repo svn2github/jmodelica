@@ -224,7 +224,11 @@ class AssimuloFMIAlg(AlgorithmBase):
         except TypeError, e:
             raise InvalidAlgorithmArgumentException(e)
         
-        self.probl = FMIODE(self.model)
+        if (N.size(self.input_trajectory)==0):
+            self.probl = FMIODE(self.model)
+        else:
+            self.probl = FMIODE(self.model,TrajectoryLinearInterpolation(self.input_trajectory[:,0], \
+                                                                        self.input_trajectory[:,1:]))
         
         self.simulator = self.solver(self.probl, t0=self.start_time)
     
@@ -233,6 +237,7 @@ class AssimuloFMIAlg(AlgorithmBase):
                       final_time=1.0,
                       num_communication_points=500,
                       solver='CVode',
+                      input_trajectory = N.array([])
                       ):
         """ Set arguments for Assimulo algorithm.
         
@@ -250,6 +255,13 @@ class AssimuloFMIAlg(AlgorithmBase):
             solver --
                 Set which solver to use with class name as string.
                 Default: 'CVode'
+            input_trajectory --
+                Trajectory data for model inputs. The argument should be a matrix
+                where the first column represents time and the following columns
+                represents input trajectory data. If the input_trajectory is set
+                the property input_names in solver_args must be set and reflect
+                the variables for which the input is going to be adjusted.
+                Default: An empty matrix, i.e., no input trajectories.
         """
         self.start_time = start_time
         self.final_time = final_time
@@ -259,6 +271,8 @@ class AssimuloFMIAlg(AlgorithmBase):
             self.solver = getattr(expl_ode, solver)
         else:
             raise InvalidAlgorithmArgumentException("The solver: "+solver+ " is unknown.")
+            
+        self.input_trajectory = input_trajectory
     
     def set_solver_options(self, 
                            solver_args={}):
