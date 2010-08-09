@@ -39,8 +39,10 @@ def run_demo(with_plots=True):
     #bouncing_fmu.get_real,get_integer,get_boolean,get_string (valueref)
     
     #Values for the solution
+    vref  = [bouncing_fmu.get_valueref('h')] + [bouncing_fmu.get_valueref('v')] #Retrieve the valureferences for the
+                                                                                #values 'h' and 'v'
     t_sol = [Tstart]
-    h_sol = [bouncing_fmu.get_real([0])]
+    sol = [bouncing_fmu.get_real(vref)]
     
     #Main integration loop.
     time = Tstart
@@ -113,16 +115,24 @@ def run_demo(with_plots=True):
         #bouncing_fmu.get_real,get_integer,get_boolean,get_string (valueref)
         
         t_sol += [time]
-        h_sol += [bouncing_fmu.get_real([0])]
+        sol += [bouncing_fmu.get_real(vref)]
     
     
     #Plot the solution
     if with_plots:
-        P.plot(t_sol,h_sol)
+        #Plot the height
+        P.figure(1)
+        P.plot(t_sol,N.array(sol)[:,0])
         P.title(bouncing_fmu.get_name())
-        P.xlabel('Height (m)')
-        P.ylabel('Time (s)')
+        P.ylabel('Height (m)')
+        P.xlabel('Time (s)')
+        #Plot the velocity
+        P.figure(2)
+        P.plot(t_sol,N.array(sol)[:,1])
+        P.title(bouncing_fmu.get_name())
+        P.ylabel('Velocity (m/s)')
+        P.xlabel('Time (s)')
         P.show()
-
+        
 if __name__ == "__main__":
     run_demo()
