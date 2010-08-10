@@ -63,8 +63,9 @@ abstract public class TestAnnotationizerHelper {
 	public static void doAnnotation(String filePath, String testType, String modelName, 
 			String description, String opts, String data, boolean write) throws Exception {
 		try {
+			String ttl = testType.toLowerCase();
 			for (Class cl : TestAnnotationizerHelper.class.getClasses()) {
-				if (cl.getSimpleName().startsWith(testType) && !Modifier.isAbstract(cl.getModifiers())) {
+				if (cl.getSimpleName().toLowerCase().startsWith(ttl) && !Modifier.isAbstract(cl.getModifiers())) {
 					Constructor constructor = cl.getConstructor(String.class, String.class, String.class, String.class, String.class);
 					TestAnnotationizerHelper ta = (TestAnnotationizerHelper) constructor.newInstance(filePath, modelName, description, opts, data);
 					if (write)

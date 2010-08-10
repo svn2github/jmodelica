@@ -708,7 +708,7 @@ aspect FlattPrettyPrint {
 		getFInitialEquations().prettyPrintWithFix(p, str, nextInd, o, "", ";\n");
 
 		if (getNumFParameterEquation()>0)
-			str.print(indent + "initial equation /* dependent parameters */\n");
+			str.print(indent + "parameter equation\n");
 		getFParameterEquations().prettyPrintWithFix(p, str, nextInd, o, "", ";\n");
 	
 	    boolean wroteEquation = false;
@@ -1287,10 +1287,7 @@ aspect FlattPrettyPrint {
 	}
 
 	public void FIdUseExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
-		str.print(getFIdUse().name());
-		if (getFIdUse().hasFArraySubscripts()) {
-			p.toString(getFIdUse().getFArraySubscripts(),str,indent,o);
-		}
+		p.toString(getFIdUse(), str, indent, o);
 	}
 
 	public void FInstAccessExp.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
@@ -1299,6 +1296,8 @@ aspect FlattPrettyPrint {
 	
 	public void InstAccess.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		str.print(name());
+		if (hasFArraySubscripts())
+			p.toString(getFArraySubscripts(), str, indent, o);
 	}
 	
 	public void InstArrayAccess.prettyPrint(Printer p, PrintStream str, String indent, Object o) {

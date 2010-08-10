@@ -6206,7 +6206,7 @@ fclass ArrayTests.EmptyArray5
  parameter Real D[1,2];
  parameter Real D[2,1];
  parameter Real D[2,2];
-initial equation /* dependent parameters */
+parameter equation
  D[1,1] = ( 1 ) * ( 1 );
  D[1,2] = ( 1 ) * ( 2 );
  D[2,1] = ( 2 ) * ( 1 );

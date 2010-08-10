@@ -154,7 +154,7 @@ aspect Arrays {
 	/**
 	 * \brief Get array dimensions of a single part of an access.
 	 */
-	syn lazy int InstAccess.localNdims() = 
+	syn int InstAccess.localNdims() = 
 		hasFArraySubscripts() ? getFArraySubscripts().accessNdims() : myInstComponentDecl().ndims();
 
 	
@@ -691,7 +691,7 @@ aspect Arrays {
 			varMap.put(myInputs().get(j), getArg(j).getFExp());
 		
 		try {
-			MutableSize ms = new MutableSize(ndims());
+			MutableSize ms = new MutableSize(s.ndims());
 			for (int j = 0; j < s.ndims(); j++) 
 				ms.append(dynamicFExp(s.createSizeFExp(j, (HashMap) varMap.clone())));
 			return ms;
@@ -1516,14 +1516,14 @@ aspect Arrays {
 	 * 
 	 * @return An Indices object containing all indices in each array dimension.
 	 */
-	syn Indices FIdUseExp.indices() = getFIdUse().indices();
+	eq FIdUseExp.indices() = getFIdUse().indices();
 
 	/**
 	 * \brief Get the set of all array indices of an array access. 
 	 * 
 	 * @return An Indices object containing all indices in each array dimension.
 	 */
-	syn lazy Indices FIdUse.indices() = Indices.createFromFas(allFArraySubscripts());
+	syn Indices FIdUse.indices() = Indices.createFromFas(allFArraySubscripts());
 	syn Indices FIdUseInstAccess.indices() = getInstAccess().indices();
 
 	/**
@@ -1531,14 +1531,14 @@ aspect Arrays {
 	 * 
 	 * @return An Indices object containing all indices in each array dimension.
 	 */
-	syn Indices FInstAccessExp.indices() = getInstAccess().indices();
+	eq FInstAccessExp.indices() = getInstAccess().indices();
 
 	/**
 	 * \brief Get the set of all array indices of an instance array access. 
 	 * 
 	 * @return An Indices object containing all indices in each array dimension.
 	 */
-	syn lazy Indices InstAccess.indices() = Indices.createFromFas(allFArraySubscripts());
+	syn Indices InstAccess.indices() = Indices.createFromFas(allFArraySubscripts());
 		
 	/**
 	 * \brief Get the set of all array indices of an subscripted array expression. 
@@ -1586,6 +1586,8 @@ aspect Arrays {
 	
 	eq FColonSubscript.myIndices() {
 		int n = size().get(0);
+		if (n < 0)
+			return new int[0];
 		int[] ind = new int[n];
 		for (int i = 0; i < n; i++)
 			ind[i] = i + 1;

@@ -16,6 +16,6 @@
 
 AUnitTesting : Annotation ::= ATestCase*;
 
-abstract ATestCase;
+abstract ATestCase : BaseNode;
 AFlatteningTestCase : ATestCase ::= Name:StringLitExp Description:StringLitExp FlatModel:StringLitExp;
 AErrorTestCase : ATestCase ::= Name:StringLitExp Description:StringLitExp ErrorMessage:StringLitExp;

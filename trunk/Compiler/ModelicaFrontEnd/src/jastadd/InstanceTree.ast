@@ -14,17 +14,17 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-abstract InstNode ::= /InstComponentDecl*/ 
-                      /InstClassDecl*/ 
-                      /InstExtends*/ 
-                      /InstImport*/ 
-                      /RedeclaredInstClassDecl:InstClassDecl*/
-                      /FAbstractEquation*/ 
-                      /FQName/ 
-                      /DynamicClassName:InstAccess*/ 
-                      /DynamicComponentName:InstAccess*/ 
-                      /DynamicFExp:FExp*/;
-abstract InstRoot : InstNode ::= ;
+abstract InstNode : BaseNode ::= /InstComponentDecl*/ 
+                                 /InstClassDecl*/ 
+                                 /InstExtends*/ 
+                                 /InstImport*/ 
+                                 /RedeclaredInstClassDecl:InstClassDecl*/
+                                 /FAbstractEquation*/ 
+                                 /FQName/ 
+                                 /DynamicClassName:InstAccess*/ 
+                                 /DynamicComponentName:InstAccess*/ 
+                                 /DynamicFExp:FExp*/;
+abstract InstRoot : InstNode;
 InstClassRoot : InstRoot ::= <ClassDecl:ClassDecl>;
 //InstFullClassDeclRoot :InstRoot ::= InstFullClassDecl;
 InstProgramRoot : InstRoot ::= <Program:Program>
@@ -37,92 +37,103 @@ InstProgramRoot : InstRoot ::= <Program:Program>
 
 abstract InstClassDecl: InstNode ::= <ClassDecl:ClassDecl>;
 abstract InstBaseClassDecl : InstClassDecl ::= [InstConstraining] InstRestriction;
-InstFullClassDecl : InstBaseClassDecl ::= [InstExternal];
-InstExtendClassDecl : InstFullClassDecl ::= ;
-InstShortClassDecl : InstBaseClassDecl ::= [FArraySubscripts];
+InstFullClassDecl      : InstBaseClassDecl ::= [InstExternal];
+InstExtendClassDecl    : InstFullClassDecl ::= ;
+InstShortClassDecl     : InstBaseClassDecl ::= [FArraySubscripts];
 InstPrimitiveClassDecl : InstFullClassDecl;
-InstBuiltInClassDecl : InstClassDecl ::=;
-UnknownInstClassDecl : InstFullClassDecl;
+InstBuiltInClassDecl   : InstClassDecl;
+UnknownInstClassDecl   : InstFullClassDecl;
 
-InstReplacingFullClassDecl : InstFullClassDecl ::= <OriginalClassDecl:ClassDecl> /OriginalInstClass:InstClassDecl/ <InstClassRedeclare:InstRececlareClassNode>;
-InstReplacingShortClassDecl : InstShortClassDecl ::= <OriginalClassDecl:ClassDecl> /OriginalInstClass:InstClassDecl/ <InstClassRedeclare:InstRececlareClassNode>;
-InstReplacingPrimitiveClassDecl : InstReplacingFullClassDecl ::=;
+InstReplacingFullClassDecl      : InstFullClassDecl  ::= 
+	                                 <OriginalClassDecl:ClassDecl> 
+                                     /OriginalInstClass:InstClassDecl/ 
+                                     <InstClassRedeclare:InstRececlareClassNode>;
+InstReplacingShortClassDecl     : InstShortClassDecl ::= 
+	                                 <OriginalClassDecl:ClassDecl> 
+                                     /OriginalInstClass:InstClassDecl/ 
+                                     <InstClassRedeclare:InstRececlareClassNode>;
+InstReplacingPrimitiveClassDecl : InstReplacingFullClassDecl;
 
-abstract InstRestriction;
-InstModel : InstRestriction;
-InstBlock : InstRestriction;
-InstMClass : InstRestriction;
+abstract InstRestriction : BaseNode;
+InstModel     : InstRestriction;
+InstBlock     : InstRestriction;
+InstMClass    : InstRestriction;
 InstConnector : InstRestriction;
 InstExpandableConnector : InstConnector;
-InstMType : InstRestriction;
-InstMPackage : InstRestriction;
-InstFunction : InstRestriction;
-InstMRecord : InstRestriction;
+InstMType     : InstRestriction;
+InstMPackage  : InstRestriction;
+InstFunction  : InstRestriction;
+InstMRecord   : InstRestriction;
 
-InstExternal ::= <ExternalClause:ExternalClause> [FExternalLanguage] [InstExternalCall];
-InstExternalCall ::= [ReturnVar:InstAccess] <Name> Arg:FExp*;
+InstExternal     : BaseNode ::= <ExternalClause:ExternalClause> [FExternalLanguage] [InstExternalCall];
+InstExternalCall : BaseNode ::= [ReturnVar:InstAccess] <Name> Arg:FExp*;
 
-abstract InstImport ::= PackageName:InstAccess <ImportClause:ImportClause>;
-InstImportQualified : InstImport;
+abstract InstImport : BaseNode ::= PackageName:InstAccess <ImportClause:ImportClause>;
+InstImportQualified   : InstImport;
 InstImportUnqualified : InstImport;
-InstImportRename : InstImport;
+InstImportRename      : InstImport;
 
-abstract InstConstraining ::=  ClassName:InstAccess [InstClassModification] /InstNode/;
-InstConstrainingClass : InstConstraining ::= <BaseClassDecl:BaseClassDecl>;
+abstract InstConstraining : BaseNode         ::=  ClassName:InstAccess [InstClassModification] /InstNode/;
+InstConstrainingClass     : InstConstraining ::= <BaseClassDecl:BaseClassDecl>;
 InstConstrainingComponent : InstConstraining ::= <ComponentDecl:ComponentDecl> /DynamicClassName:InstAccess*/;
 
 // The class to expand may differ from the declared class of the component due to 
 // redeclaration of classes.
-abstract InstComponentDecl : InstNode ::= ClassName:InstAccess [LocalFArraySubscripts:FArraySubscripts] <ComponentDecl:ComponentDecl> [InstModification] [InstConstraining] /FArraySubscripts/ [ConditionalAttribute:FExp];
-InstComposite : InstComponentDecl;
-abstract InstAssignable : InstComponentDecl ::= /BindingFExp:FExp/;
-InstPrimitive : InstAssignable;
-InstRecord : InstAssignable;
-InstBuiltIn : InstPrimitive;
+abstract InstComponentDecl : InstNode ::= ClassName:InstAccess 
+                                          [LocalFArraySubscripts:FArraySubscripts] 
+                                          <ComponentDecl:ComponentDecl> 
+                                          [InstModification] 
+                                          [InstConstraining] 
+                                          /FArraySubscripts/ 
+                                          [ConditionalAttribute:FExp];
+InstComposite            : InstComponentDecl;
+abstract InstAssignable  : InstComponentDecl ::= /BindingFExp:FExp/;
+InstPrimitive            : InstAssignable;
+InstRecord               : InstAssignable;
+InstBuiltIn              : InstPrimitive;
 UnknownInstComponentDecl : InstComponentDecl;
-
-InstArrayComponentDecl : InstComponentDecl ::= <Index:int>;
-
-InstReplacingComposite : InstComposite ::= <OriginalDecl:ComponentDecl> /OriginalInstComponent:InstComponentDecl/ <InstComponentRedeclare:InstComponentRedeclare>;
-InstReplacingPrimitive : InstPrimitive ::= <OriginalDecl:ComponentDecl> /OriginalInstComponent:InstComponentDecl/ <InstComponentRedeclare:InstComponentRedeclare>;
+InstArrayComponentDecl   : InstComponentDecl ::= <Index:int>;
+                         
+InstReplacingComposite   : InstComposite ::= <OriginalDecl:ComponentDecl> 
+                                             /OriginalInstComponent:InstComponentDecl/ 
+                                             <InstComponentRedeclare:InstComponentRedeclare>;
+InstReplacingPrimitive   : InstPrimitive ::= <OriginalDecl:ComponentDecl>
+                                             /OriginalInstComponent:InstComponentDecl/ 
+                                             <InstComponentRedeclare:InstComponentRedeclare>;
 
 InstExtends : InstNode ::= ClassName:InstAccess <ExtendsClause:ExtendsClause> [InstClassModification];
-InstExtendsShortClass : InstExtends ::=;
-InstInlineExtends : InstExtends;
+InstExtendsShortClass : InstExtends;
+InstInlineExtends     : InstExtends;
 //InstReplacingExtendsShortClass : InstReplacingExtendsShortClass ::= <InstExtendsShortClass:InstExtendsShortClass>
 
 // Accesses in the instance tree
-abstract InstAccess ::= <ID> /ExpandedSubscripts:FArraySubscripts/;
+abstract InstAccess : BaseNode ::= <ID> /ExpandedSubscripts:FArraySubscripts/;
 InstDot : InstAccess ::= Left:InstAccess Right:InstAccess;
 
-InstArrayAccess : InstAccess ::= [FArraySubscripts];
-
-InstParseAccess : InstArrayAccess;
-InstClassAccess : InstAccess;
+InstArrayAccess     : InstAccess ::= [FArraySubscripts];
+InstParseAccess     : InstArrayAccess;
+InstClassAccess     : InstAccess;
 InstAmbiguousAccess : InstArrayAccess;
-
 InstComponentAccess : InstArrayAccess;
 
 InstForIndex : CommonForIndex ::= InstPrimitive /DynamicClassName:InstAccess*/;
 
 InstForClauseE : FAbstractEquation ::= InstForIndex* FAbstractEquation*;
-InstForStmt : FStatement ::= InstForIndex* ForStmt:FStatement*;
+InstForStmt    : FStatement        ::= InstForIndex* ForStmt:FStatement*;
 
 // These nodes are used to create instance copies of modification trees intended for
 // error checking.	
-abstract InstModification ::= <Modification:Modification>;
+abstract InstModification : BaseNode ::= <Modification:Modification>;
 InstCompleteModification : InstModification ::= InstClassModification [InstValueModification];
-InstValueModification : InstModification ::= /FExp/ /InstRecordConstructorModification*/;
+InstValueModification    : InstModification ::= /FExp/ /InstRecordConstructorModification*/;
+InstClassModification    : InstModification ::= InstArgument*;
 // Virtual modification for argument of record constructor value modification.
 InstRecordConstructorModification : InstValueModification ::= <Input:InstComponentDecl> <Arg:FExp>;
 
-InstClassModification : InstModification ::= InstArgument*;
-abstract InstArgument : InstModification ::= <Each:boolean> <Final:boolean>;
-
-abstract InstNamedModification : InstArgument ::= Name:InstAccess;
+abstract InstArgument            : InstModification      ::= <Each:boolean> <Final:boolean>;
+abstract InstNamedModification   : InstArgument          ::= Name:InstAccess;
 abstract InstElementModification : InstNamedModification ::= [InstModification];
+abstract InstElementRedeclare    : InstNamedModification;
 InstComponentModification : InstElementModification; 
-abstract InstElementRedeclare : InstNamedModification;
-InstClassRedeclare : InstElementRedeclare ::= /InstClassDecl/;
-InstComponentRedeclare : InstElementRedeclare ::= /InstComponentDecl/ /DynamicClassName:InstAccess*/;
-
+InstClassRedeclare        : InstElementRedeclare ::= /InstClassDecl/;
+InstComponentRedeclare    : InstElementRedeclare ::= /InstComponentDecl/ /DynamicClassName:InstAccess*/;

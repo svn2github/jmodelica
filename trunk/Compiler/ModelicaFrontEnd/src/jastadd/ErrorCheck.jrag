@@ -362,7 +362,7 @@ aspect ErrorCheck {
     return problems;
   }
 
- 
+/*
     syn lazy FullClassDecl ASTNode.retrieveFullClassDecl(String className) {
       for(int i = 0; i < getNumChild(); i++) {
 		  FullClassDecl fcd = getChild(i).retrieveFullClassDecl(className);
@@ -378,7 +378,7 @@ aspect ErrorCheck {
 		} else
 			return getClassDeclList().retrieveFullClassDecl(className);
 	}
-
+*/
    
 }
 
@@ -395,8 +395,6 @@ aspect InstanceErrorCheck {
     }   
   	
   	eq InstFullClassDecl.retrieveInstFullClassDecl(String className) {
-  	    log.debug(" ### InstFullClassDecl.retrieveInstFullClassDecl: " + 
-  	      qualifiedName() + " looking for " + className);
 	   	if (className.equals(qualifiedName())) {
 	   		return this;
 		} else
@@ -424,7 +422,6 @@ aspect InstanceErrorCheck {
 
 
   public void InstNode.collectErrors() {
-    log.debug(prettyPrint("   #### ") + " errorChecked="+errorChecked);
     if (!errorChecked) {
       errorChecked = true;
 	  allChecks();
@@ -443,8 +440,7 @@ aspect InstanceErrorCheck {
     		n.collectErrors();
     }
     
-    public void InstComponentDecl.collectErrorsInClassDecls() {
-    }
+    public void InstComponentDecl.collectErrorsInClassDecls() {}
     
     public void InstExtends.collectErrorsInClassDecls() {
     	if (!inInstComponent())
@@ -462,7 +458,6 @@ aspect InstanceErrorCheck {
     eq FlatRoot.getChild().inInstComponent()          = false;
 
   	public void InstBaseClassDecl.collectErrors() {
-  	    log.debug(prettyPrint("   ### ") + " errorChecked="+errorChecked);
     	if (!errorChecked) {
 //    	errorChecked = true;
         super.collectErrors();
@@ -504,7 +499,6 @@ aspect InstanceErrorCheck {
   	
 	boolean InstImport.errorChecked = false;
     public void InstImport.collectErrors() {
-    	log.debug(prettyPrint("   ### ") + " errorChecked="+errorChecked);
     	if (!errorChecked) {
     		errorChecked = true;
 			getPackageName().collectErrors();
@@ -512,7 +506,6 @@ aspect InstanceErrorCheck {
 	}
 	
 	public void InstComponentDecl.collectErrors() {
-    //log.debug(prettyPrint("   ### ") + " errorChecked="+errorChecked);
     if (!errorChecked) {
 		super.collectErrors();
 		getClassName().collectErrors();
@@ -589,7 +582,6 @@ aspect InstanceErrorCheck {
 	}
 	
 	public void InstExtends.collectErrors() {
-    log.debug(prettyPrint("   ### ") + " errorChecked="+errorChecked);
     if (!errorChecked) {
 		super.collectErrors();
 		getClassName().collectErrors();
@@ -600,7 +592,6 @@ aspect InstanceErrorCheck {
 	}	
 	
 	public void InstExtendsShortClass.collectErrors() {
-        log.debug(prettyPrint("   ### ") + " errorChecked="+errorChecked);
     if (!errorChecked) {
       errorChecked = true;
 	  allChecks();
@@ -625,7 +616,6 @@ aspect InstanceErrorCheck {
 	//public void InstPrimitiveClassDecl.collectErrors() {}
 
 	public void InstShortClassDecl.collectErrors() {
-        log.debug(prettyPrint("   ### ") + " errorChecked="+errorChecked);
 	    if (!errorChecked) {
 		  super.collectErrors();
 		  // The localInstModifications should only be checked if
@@ -644,7 +634,6 @@ aspect InstanceErrorCheck {
     public void InstReplacingShortClassDecl.collectInstModificationErrors() { }
 
 	public void InstReplacingShortClassDecl.collectErrors() {
-	    log.debug(prettyPrint("   ### ") + " errorChecked="+errorChecked);    
 	    if (!errorChecked) {
 		  super.collectErrors();
 		  getOriginalInstClass().collectErrors();
@@ -653,7 +642,6 @@ aspect InstanceErrorCheck {
 	}
 
 	public void InstReplacingFullClassDecl.collectErrors() {
-	    log.debug(prettyPrint("   ### ") + " errorChecked="+errorChecked);
 	    if (!errorChecked) {
 		  super.collectErrors();
 		  getOriginalInstClass().collectErrors();
@@ -680,7 +668,6 @@ aspect InstanceErrorCheck {
 
 	boolean InstAccess.errorChecked = false;
 	public void InstDot.collectErrors() {
-	    //log.debug(prettyPrint("   ### ") + " errorChecked="+errorChecked);
 	    if (!errorChecked) {	
 			errorChecked = true;
 			getLeft().collectErrors();
@@ -690,7 +677,6 @@ aspect InstanceErrorCheck {
 	}
 
 	public void InstClassAccess.collectErrors() {
-        //log.debug(prettyPrint("   ### ") + " errorChecked="+errorChecked);
 	    if (!errorChecked) {
 		    //super.collectErrors();
 		    nameCheck();

@@ -340,7 +340,117 @@ model FunctionEval8
 	
 	parameter Real x[2] = { f(i) for i in 1:2 };
 end FunctionEval8;
-	
+
+
+model FunctionEval9
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.XMLValueGenTestCase(
+         name="FunctionEval9",
+         description="Constant evaluation of functions: while loops (flat tree, independent param)",
+         template="$XML_parameters$",
+         generatedCode="
+	 <RealParameter name=\"x\" value=\"120.0\"/>
+")})));
+
+	function f
+		input Real i;
+		output Real o;
+	protected
+		Real x;
+	algorithm
+		x := 2;
+		o := 1;
+		while x <= i loop
+			o := o * x;
+			x := x + 1;
+		end while;
+	end f;
+
+	parameter Real x = f(5);
+end FunctionEval9;
+
+
+model FunctionEval10
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="FunctionEval10",
+         description="Constant evaluation of functions: while loops (instance tree)",
+         flatModel="
+fclass EvaluationTests.FunctionEval10
+ constant Real x = EvaluationTests.FunctionEval10.f(5);
+ Real y = 120.0;
+
+ function EvaluationTests.FunctionEval10.f
+  input Real i;
+  output Real o;
+  Real x;
+ algorithm
+  x := 2;
+  o := 1;
+  while x <= i loop
+   o := ( o ) * ( x );
+   x := x + 1;
+  end while;
+  return;
+ end EvaluationTests.FunctionEval10.f;
+end EvaluationTests.FunctionEval10;
+")})));
+
+	function f
+		input Real i;
+		output Real o;
+	protected
+		Real x;
+	algorithm
+		x := 2;
+		o := 1;
+		while x <= i loop
+			o := o * x;
+			x := x + 1;
+		end while;
+	end f;
+
+	constant Real x = f(5);
+	Real y = x;
+end FunctionEval10;
+
+
+model FunctionEval11
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.XMLCodeGenTestCase(
+         name="FunctionEval11",
+         description="Constant evaluation of functions: while loops (flat tree, dependent param)",
+         template="$XML_variables$",
+         generatedCode="
+
+		<ScalarVariable name=\"x\" valueReference=\"1\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"120.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>dependentParameter</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"y\" valueReference=\"0\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"0.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>independentParameter</VariableCategory>
+		</ScalarVariable>")})));
+
+	function f
+		input Real i;
+		output Real o;
+	protected
+		Real x;
+	algorithm
+		x := 2;
+		o := 1;
+		while x <= i loop
+			o := o * x;
+			x := x + 1;
+		end while;
+	end f;
+
+	parameter Real x = f(y);
+	parameter Real y = 5;
+end FunctionEval11;
 	
 	
 end EvaluationTests;

@@ -46,7 +46,7 @@ import org.jmodelica.util.OptionRegistry;
 import org.jmodelica.util.OptionRegistry.UnknownOptionException;
 import org.xml.sax.SAXException;
 
-//import beaver.Parser.Exception;
+aspect ModelicaCompilerMain {
 
 /**
  * 
@@ -260,6 +260,100 @@ public class ModelicaCompiler {
 	public void setCTemplate(String template) {
 		this.cTemplatefile = template;
 	}
+
+	protected final static int NUM_USED_MEMORY_SLOTS = 6;
+	protected long[] usedMem = new long[NUM_USED_MEMORY_SLOTS];
+	protected int numUsedMemFilled;
+	protected long timeCompilationStarted;
+
+	/**
+	 * \brief Initilize vars gathering debug information about compilation.
+	 * 
+	 * Should be called before compilation process begins.
+	 */
+	protected void resetCompilationInfo() {
+		timeCompilationStarted = System.currentTimeMillis();
+		numUsedMemFilled = 0;
+	}
+	
+	/**
+	 * \brief Log debug information about compilation.
+	 * 
+	 * Should be called after compilation process ends.
+	 */
+	protected void logCompilationInfo() {
+		long time = System.currentTimeMillis() - timeCompilationStarted;
+		double time2 = Math.round(time / 10.0) / 100.0;
+		log.debug("Compilation took " + time2 + " s");
+		
+		noteUsedMemory();  // Needed if an exception occurred
+		if (numUsedMemFilled > 1) {
+			log.debug("Changes in memory use:");
+			log.debug(" parseModel():       " + ASTNode.formatMem((int) (usedMem[1] - usedMem[0])));
+		}
+		if (numUsedMemFilled > 3)
+			log.debug(" instantiateModel(): " + ASTNode.formatMem((int) (usedMem[3] - usedMem[2])));
+		if (numUsedMemFilled > 5)
+			log.debug(" flattenModel():     " + ASTNode.formatMem((int) (usedMem[5] - usedMem[4])));
+	}
+	
+	/**
+	 * \brief Saves away the current amount of memory used.
+	 */
+	protected void noteUsedMemory() {
+		if (numUsedMemFilled < NUM_USED_MEMORY_SLOTS)
+			usedMem[numUsedMemFilled++] = RUNTIME.totalMemory() - RUNTIME.freeMemory();
+	}
+	private static final Runtime RUNTIME = Runtime.getRuntime();
+
+	/**
+	 * \brief Save a dump of the memory use of an AST.
+	 * 
+	 * The dump will be saved in a file named <code>"size_" + type + ".txt"</code>.
+	 * 
+	 * @param root  the root of the AST to dump memory use for
+	 * @param type  a one-word description of the tree to dump
+	 */
+	protected void dumpMemoryUseFile(ASTNode root, String type) throws FileNotFoundException {
+		dumpMemoryUseFile(root, type, type);
+	}
+
+	/**
+	 * \brief Save a dump of the memory use of an AST.
+	 * 
+	 * The dump will be saved in a file named <code>"size_" + name + ".txt"</code>.
+	 * 
+	 * @param root  the root of the AST to dump memory use for
+	 * @param type  a short description of the tree to dump
+	 * @param name  the variable part of the file name
+	 */
+	protected void dumpMemoryUseFile(ASTNode root, String type, String name) 
+			throws FileNotFoundException {
+		String file = "size_" + name + ".txt";
+		log.debug("Dumping " + type + " tree to '" + file + "'...");
+		long time = System.currentTimeMillis();
+		root.dumpMemoryUse(file, true, 25, 2 * 1024);
+		time = Math.round((System.currentTimeMillis() - time) / 1000.0);
+		log.debug(" Dumped tree in " + time + "s");
+	}
+
+	/**
+	 * \brief Save a dump of the number of AST nodes created of each type.
+	 * 
+	 * ASTNode must be changed to inherit ProfilingNode for node type counting to work.
+	 * 
+	 * @param file  the name of the file to save dump to
+	 */
+	protected void dumpNodeCountFile(String file) throws FileNotFoundException {
+		if (ProfilingNode.class.isAssignableFrom(ASTNode.class)) {
+			log.debug("Dumping counts of created nodes to '" + file + "'...");
+			PrintStream out = new PrintStream(file);
+			ProfilingNode.printInfo(out, ProfilingNode.SORT_COUNT_DESC);
+			out.close();
+		} else {
+			log.debug("ASTNode must inherit ProfilingNode for node type counting to work.");
+		}
+	}
 			
 	/**
 	 * Compiles a Modelica model. A model file name and class must be provided.
@@ -289,20 +383,31 @@ public class ModelicaCompiler {
 	 */
 	public void compileModel(String name[], String cl)
 	  throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, beaver.Parser.Exception {
-		log.info("======= Compiling model =======");		
-		// build source tree
-		SourceRoot sr = parseModel(name);
+		log.info("======= Compiling model =======");
+		resetCompilationInfo();
 		
-		// compute instance tree
-		InstClassDecl icl = instantiateModel(sr, cl);
-		
-		// flattening
-		FClass fc = flattenModel(icl);
+		SourceRoot sr = null;
+		try {
+			// build source tree
+			sr = parseModel(name);
+//			dumpMemoryUseFile(sr, "source");  // TODO: add comman-line arg for this
+			
+			// compute instance tree
+			InstClassDecl icl = instantiateModel(sr, cl);
+//			dumpMemoryUseFile(icl, "instance");
+			
+			// flattening
+			FClass fc = flattenModel(icl);
+//			dumpMemoryUseFile(fc, "flat");
 
-		// Generate code?
-		if (this.xmlTpl != null && this.xmlValuesTpl !=null && this.cTemplatefile != null) {
-			generateCode(fc);
-		}		
+			// Generate code?
+			if (this.xmlTpl != null && this.xmlValuesTpl !=null && this.cTemplatefile != null) 
+				generateCode(fc);
+		} finally {
+			logCompilationInfo();
+//			dumpNodeCountFile("node_count.txt");
+//			dumpMemoryUseFile(sr, "final source", "source2");
+		}
 		log.info("====== Model compiled successfully =======");
 	}
 
@@ -367,35 +472,38 @@ public class ModelicaCompiler {
      * where the content of all files is contained. Each file is parsed using
      * the parseModel method.
 	 * 
-	 * @param name
+	 * @param names
 	 *            An array of file names.
 	 *            
 	 * @return The root of the source tree.
 	 * 
 	 * @throws beaver.Parser.Exception
-	 *             If there was an Beaver parsing exception.
+	 *             If there was a Beaver parsing exception.
 	 * @throws CompilerException
 	 *             If errors have been found during the parsing.
 	 * @throws FileNotFoundException
-	 *             If the model file can not be found.
+	 *             If the model file could not be found.
 	 * @throws IOException
 	 *             If there was an error reading the model file. (Beaver exception.)
 	 */
-	public SourceRoot parseModel(String name[]) 
+	public SourceRoot parseModel(String names[]) 
 	  throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException{
+		noteUsedMemory();
+		
 		SourceRoot sr = null;
-		for (int i=0;i<name.length;i++) {
-			SourceRoot sr_tmp = parseModel(name[i]);
+		for (String name : names) {
+			SourceRoot sr_tmp = parseModel(name);
 			//copy options from local optionregistry to sourceroot optionregistry
 			sr_tmp.options.copyAllOptions(this.options);
-			if (i==0) {
+			if (sr == null) 
 				sr = sr_tmp;
-			} else {
-				for(StoredDefinition sd : sr_tmp.getProgram().getUnstructuredEntitys()) {
+			else 
+				for(StoredDefinition sd : sr_tmp.getProgram().getUnstructuredEntitys()) 
 					sr.getProgram().addUnstructuredEntity(sd);
-				}
-			}
 		}
+		
+		noteUsedMemory();
+		
 		return sr;
 	}
 	
@@ -418,6 +526,8 @@ public class ModelicaCompiler {
 	 */
 	public InstClassDecl instantiateModel(SourceRoot sr, String cl) 
 		throws ModelicaClassNotFoundException, CompilerException{
+		noteUsedMemory();
+		
 		InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
 		ipr.options = new OptionRegistry(sr.options);
 		
@@ -426,6 +536,8 @@ public class ModelicaCompiler {
 		if (problems.size()>0) {
 			handleCompilerProblems(problems);
 		}
+		
+		noteUsedMemory();
 		
 		return ipr.simpleLookupInstClassDecl(cl);		
 	}
@@ -485,6 +597,8 @@ public class ModelicaCompiler {
 	 */
 	public FClass flattenModel(InstClassDecl icl) 
 			throws CompilerException, ModelicaClassNotFoundException, IOException {
+		noteUsedMemory();
+		
 		FlatRoot flatRoot = new FlatRoot();
 		flatRoot.setFileName(icl.qualifiedName()+".mof");
 		FClass fc = createFClass();
@@ -522,7 +636,9 @@ public class ModelicaCompiler {
 		Collection<Problem> problems = fc.errorCheck();
 		if (problems.size() > 0) 
 			handleCompilerProblems(problems);
-		
+
+		noteUsedMemory();
+
 		return fc;
 	}
 	
@@ -890,4 +1006,6 @@ public class ModelicaCompiler {
 			
 		}
 	}
+}
+
 }

@@ -950,7 +950,7 @@ aspect ConstantEvaluation {
   
   // TODO: if caching, use cevalFunction() instead
   eq FFunctionCall.cevalCalc()    = evaluate()[0];
-  eq InstFunctionCall.cevalCalc() = evaluate()[0];
+  eq InstFunctionCall.cevalCalc() = hasOutputs() ? evaluate()[0] : CValue.UNKNOWN;
 
   eq FSinExp.cevalCalc()   = new CValueReal(Math.sin(getFExp().ceval().realValue()));
   eq FCosExp.cevalCalc()   = new CValueReal(Math.cos(getFExp().ceval().realValue()));
@@ -1184,11 +1184,6 @@ aspect ConstantEvaluation {
   
   public class AbstractFVariable implements CommonVariableDecl {}
   public class InstComponentDecl implements CommonVariableDecl {}
-  
-  public interface CommonFunctionDecl {
-	  public void evaluate(Map<CommonVariableDecl, CValue> values);
-	  public void flushArrays();
-  }
   
   syn ArrayList<? extends CommonVariableDecl> FAbstractFunctionCall.myFuncInputs() = null;
   eq FFunctionCall.myFuncInputs()    = myInputs();

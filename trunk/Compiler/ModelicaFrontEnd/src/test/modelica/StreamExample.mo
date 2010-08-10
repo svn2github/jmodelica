@@ -269,7 +269,7 @@ fclass StreamExample.Examples.Systems.HeatedGas
 initial equation 
  multiPortVolume.p = multiPortVolume.p_start;
  multiPortVolume.T = multiPortVolume.T_start;
-initial equation /* dependent parameters */
+parameter equation
  flowSource.cp = cp;
  multiPortVolume.cp = cp;
  multiPortVolume.R = R_gas;
@@ -463,7 +463,7 @@ fclass StreamExample.Examples.Systems.HeatedGas_SimpleWrap
  Real linearResistanceWrap.linearResistance.port_b.p(nominal = 100000,start = 100000,final quantity = \"Pressure\",final unit = \"Pa\",displayUnit = \"bar\");
  Real linearResistanceWrap.linearResistance.port_b.h_outflow(nominal = 400000,start = 400000,final quantity = \"SpecificEnergy\",final unit = \"J/kg\");
  Real linearResistanceWrap.linearResistance.u(start = 1);
-initial equation /* dependent parameters */
+parameter equation
  flowSource.cp = cp;
  reservoir.cp = cp;
  reservoir.h0 = ( reservoir.cp ) * ( reservoir.T0 );

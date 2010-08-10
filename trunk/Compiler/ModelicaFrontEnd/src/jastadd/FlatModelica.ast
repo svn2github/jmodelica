@@ -27,37 +27,37 @@ FlatRoot : Root ::= FClass;
  * a list of variables and variables, a list of functions and a list of equations, 
  * of which some are initial equations.
  */ 
-FClass ::= FQName 
-           FVariable* 
-           AliasVariable:FVariable* 
-           FInitialEquation:FAbstractEquation*
-           FParameterEquation:FAbstractEquation*
-           FEquationBlock*
-           FFunctionDecl*
-           FRecordDecl*
-           /UnknownFVariable/; 
+FClass : BaseNode ::= FQName 
+                      FVariable* 
+                      AliasVariable:FVariable* 
+                      FInitialEquation:FAbstractEquation*
+                      FParameterEquation:FAbstractEquation*
+                      FEquationBlock*
+                      FFunctionDecl*
+                      FRecordDecl*
+                      /UnknownFVariable/; 
 
 /**
  * \brief A flattened user-defined function.
  *
  * Results from a class with the restriction "function" and an algorithm block.
  */
-FFunctionDecl ::= FQName FFunctionVariable* FAlgorithmBlock;
+FFunctionDecl : BaseNode ::= FQName FFunctionVariable* FAlgorithmBlock;
 
 /**
  * \brief A flattenend record declaration.
  */
-FRecordDecl ::= FQName FVariable*;
+FRecordDecl : BaseNode ::= FQName FVariable*;
 
 /**
  * \brief A list of equations corresponding to a BLT block.
  */
-FEquationBlock ::= FAbstractEquation*;
+FEquationBlock : BaseNode ::= FAbstractEquation*;
 
 /**
  * \brief Abstract base class for flat variables.
  */
-abstract AbstractFVariable;
+abstract AbstractFVariable : BaseNode;
 
 /**
  * \brief A flat variable in a function.
@@ -98,7 +98,7 @@ abstract FVariable : AbstractFVariable ::= FVisibilityType
 /**
  * \brief Base class for variable type prefixes.
  */
-abstract FTypePrefix;
+abstract FTypePrefix : BaseNode;
 
 /**
  * \brief Base class for variability type prefixes.
@@ -111,22 +111,22 @@ abstract FTypePrefixVariability : FTypePrefix;
  * Continuous is not a valid prefix but is used to identify  expressions that 
  * are not declared as parameters, constants, or discrete.
  */
-FContinuous : FTypePrefixVariability::=;
+FContinuous : FTypePrefixVariability;
 
 /**
  * \brief Discrete variability.
  */
-FDiscrete : FTypePrefixVariability::=;
+FDiscrete : FTypePrefixVariability;
 
 /**
  * \brief Parameter variability.
  */
-FParameter : FTypePrefixVariability::=;
+FParameter : FTypePrefixVariability;
 
 /**
  * \brief Constant variability.
  */
-FConstant : FTypePrefixVariability::=;
+FConstant : FTypePrefixVariability;
 
 /**
  * \brief Base class for causality type prefixes.
@@ -136,12 +136,12 @@ abstract FTypePrefixInputOutput : FTypePrefix;
 /**
  * \brief Input causality.
  */ 
-FInput : FTypePrefixInputOutput::=;
+FInput : FTypePrefixInputOutput;
 
 /**
  * \brief Output causality.
  */
-FOutput : FTypePrefixInputOutput::=;
+FOutput : FTypePrefixInputOutput;
 
 /**
  * \brief FVariable of type Real.
@@ -179,29 +179,29 @@ FDerivativeVariable : FRealVariable;
 /**
  * \brief Node representing the visibility of an FVariable object.
  */
-abstract FVisibilityType::=;
+abstract FVisibilityType : BaseNode;
 
 /**
  * \brief Public visibility.
  */
-FPublicVisibilityType : FVisibilityType ::=;
+FPublicVisibilityType : FVisibilityType;
 
 /**
  * \brief Protected visibility.
  */
-FProtectedVisibilityType : FVisibilityType ::=;
+FProtectedVisibilityType : FVisibilityType;
 
 /**
  * \brief Visibility for temporary variable. 
  *
  * Used to mark temporary variables added to handle function calls returning array.
  */
-FTemporaryVisibilityType : FPublicVisibilityType ::=;
+FTemporaryVisibilityType : FPublicVisibilityType;
 
 /**
  * \brief Base class for all type nodes.
  */
-abstract FType ::= <Size:Size>;
+abstract FType : BaseNode ::= <Size:Size>;
 
 /**
  * \brief A record type.
@@ -214,7 +214,7 @@ FRecordType : FType ::= <Name> Component:FRecordComponentType*;
 /**
  * \brief The type discription of a record component.
  */
-FRecordComponentType ::= <Name> FType;
+FRecordComponentType : BaseNode ::= <Name> FType;
 
 /**
  * \brief Base class for primitive type nodes.
@@ -267,14 +267,14 @@ FUnknownType : FPrimitiveType;
  * needs to be printed in a number of different way (dot notation, underscore
  * notation etc).
  */
-FQName ::= FQNamePart*;
+FQName : BaseNode ::= FQNamePart*;
 
 /**
  * \brief A name and, optionally, its associated array subscripts.
  * 
  * To be used in FQName:s.
  */
-FQNamePart ::= <Name:String> [FArraySubscripts];
+FQNamePart : BaseNode ::= <Name:String> [FArraySubscripts];
 
 /**
  * \brief Representation of an attribute for a built-in types.
@@ -285,38 +285,38 @@ FQNamePart ::= <Name:String> [FArraySubscripts];
  * type, its value, whether it is set explicitly by the user and the prefixes
  * each and final. 
  */
-FAttribute ::= Type:FIdUse
-               Name:FIdDecl 			   
-               [Value:FExp]
-               <AttributeSet:boolean>
-               [FEach]
-               [FFinal]
-               FAttribute*;
+FAttribute : BaseNode ::= Type:FIdUse
+                          Name:FIdDecl 			   
+                          [Value:FExp]
+                          <AttributeSet:boolean>
+                          [FEach]
+                          [FFinal]
+                          FAttribute*;
 
 /**
  * \brief Node representing the each prefix for attributes.
  */
-FEach ::=;
+FEach : BaseNode;
 
 /**
  * \brief Node representing the final prefix for attributes.
  */
-FFinal ::=;
+FFinal : BaseNode;
 
 /**
  * \brief A string comment node.
  */
-FStringComment ::= <Comment:String>;
+FStringComment : BaseNode ::= <Comment:String>;
 
 /**
  * \brief Array subscripts used in FQNames.
  */
-FArraySubscripts ::= FSubscript*;
+FArraySubscripts : BaseNode ::= FSubscript*;
 
 /**
  * \brief Base class for array subscripts.
  */ 
-abstract FSubscript;
+abstract FSubscript : BaseNode;
 
 /**
  * \brief The colon subscript used to denote that the array size is inferred.
@@ -331,7 +331,7 @@ FExpSubscript : FSubscript ::= FExp /Expanded:Array/;
 /**
  * \brief Classifies a flattened equation as initial or normal.
  */
-abstract FEquationType;
+abstract FEquationType : BaseNode;
 
 /**
  * \brief Classifies a flattened equation as normal.
@@ -346,7 +346,7 @@ FInitialEquation : FEquationType;
 /**
  * \brief Base class for flattened equations.
  */
-abstract FAbstractEquation ::= Type:FEquationType;
+abstract FAbstractEquation : BaseNode ::= Type:FEquationType;
 
 /**
  * \brief Unsupported equation.
@@ -372,7 +372,7 @@ FFunctionCallEquation : FAbstractEquation ::= Left:FFunctionCallLeft* Call:FAbst
  * Needed because it is allowed to leave places in the variable list empty.
  * Example: (x, , z) = func(a, b);
  */
-FFunctionCallLeft ::= [FExp];
+FFunctionCallLeft : BaseNode ::= [FExp];
 
 /**
  * \brief A flattened connect statement.
@@ -399,7 +399,7 @@ FAlgorithmBlock : FAbstractEquation ::= FStatement*;
 /**
  * \brief Base class for statements in flattened algorithms.
  */
-abstract FStatement;
+abstract FStatement : BaseNode;
 
 /**
  * \brief An assignment statement in the instance tree.
@@ -450,7 +450,7 @@ FWhenStmt : FIfWhenStmt;
  * \brief Base class for flattened [else]if and [else]when clauses in if/when statements.
 
  */
-abstract FIfWhenClause ::= Test:FExp FStatement*;
+abstract FIfWhenClause : BaseNode ::= Test:FExp FStatement*;
 
 /**
  * \brief Flattened [else]if clause in if statement.
@@ -480,7 +480,7 @@ FExternalStmt : FStatement ::= FExternalLanguage [ReturnVar:FIdUse] <Name> Arg:F
 /**
  * \brief A language specification for an external function.
  */
-abstract FExternalLanguage;
+abstract FExternalLanguage : BaseNode;
 
 /**
  * \brief Language specification for "C".
@@ -506,7 +506,7 @@ FUnknownExternalLanguage : FExternalLanguage ::= <Language>;
 /**
  * \brief Describes the set of scalarized FExp nodes corresponding to an array expression.
  */
-Array ::= FExp*;
+Array : BaseNode ::= FExp*;
 
 /**
  * \brief Dummy array for representing a scalar expression in algorithms handling Arrays. 
@@ -527,7 +527,7 @@ ScalarAsArray : Array;
 /**
  * \brief Abstract base class for all flattened expressions.
  */
-abstract FExp ::= /Array/ /DynamicFExp:FExp*/;
+abstract FExp : BaseNode ::= /Array/ /DynamicFExp:FExp*/;
 
 /**
  * \brief Unsupported expression.
@@ -654,7 +654,7 @@ FNeqExp : FEqRelExp;
 /**
  * \brief Not expression.
  */
-FNotExp : FUnaryExp ::=;
+FNotExp : FUnaryExp;
 
 /**
  * \brief Base class for binary boolean operators.
@@ -715,7 +715,7 @@ FIterExp : FExp ::= FExp ForIndex:CommonForIndex*;
 /**
  * \brief Common subclass for for indices in instance and flat trees.
  */
-abstract CommonForIndex ::= [FExp];
+abstract CommonForIndex : BaseNode ::= [FExp];
 
 /**
  * \brief For indices expression.
@@ -735,12 +735,12 @@ FElseIfExp : FExp ::= IfExp:FExp ThenExp:FExp;
 /**
  * \brief Declaration of a qualified name. 
  */
-FIdDecl ::= FQName;
+FIdDecl : BaseNode ::= FQName;
 
 /**
  * \brief A qualified identifier.
  */
-FIdUse ::= FQName /ExpandedSubscripts:FArraySubscripts/;
+FIdUse : BaseNode ::= FQName /ExpandedSubscripts:FArraySubscripts/;
 
 /**
  * \brief A qualifed identifier in an expression.
@@ -831,7 +831,7 @@ FRangeExp : FExp ::= FExp*;
 /**
  * \brief Dummy node.
  */
-FNoExp : FExp::=;
+FNoExp : FExp;
 
 /**
  * \brief Built-in variable time.
@@ -863,7 +863,7 @@ InstFunctionCall : FAbstractFunctionCall ::= Name:InstAccess Arg:InstFunctionArg
 /**
  * \brief Base class for function call arguments in the instance tree.
  */
-abstract InstFunctionArgument;
+abstract InstFunctionArgument : BaseNode;
 
 /**
  * \brief Positional function call argument in the instance tree.

@@ -289,8 +289,7 @@ aspect UnknownFVariables {
 
 	syn UnknownFVariable FClass.getUnknownFVariable() = new UnknownFVariable();
 
-	syn lazy UnknownFVariable ASTNode.unknownFVariable() = 
-	  root().unknownFVariable();
+	syn UnknownFVariable ASTNode.unknownFVariable() = root().unknownFVariable();
 	eq FlatRoot.unknownFVariable() = getFClass().getUnknownFVariable();
 
 	syn boolean AbstractFVariable.isUnknown() = false;

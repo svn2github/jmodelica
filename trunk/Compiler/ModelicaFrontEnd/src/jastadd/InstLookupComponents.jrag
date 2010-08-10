@@ -19,7 +19,7 @@ import java.util.HashSet;
 
 aspect InstLookupComponents {
 
-	inh lazy HashSet InstAccess.lookupInstComponent(String name);	
+	inh HashSet InstAccess.lookupInstComponent(String name);	
 	inh lazy HashSet InstNode.lookupInstComponent(String name);	
 	inh lazy HashSet InstModification.lookupInstComponent(String name);	
 	eq InstBaseClassDecl.getChild().lookupInstComponent(String name) = genericLookupInstComponent(name); 	
@@ -50,7 +50,7 @@ aspect InstLookupComponents {
 	eq InstArrayAccess.getFArraySubscripts().lookupInstComponent(String name) = getTopInstAccess().lookupInstComponent(name);
 	eq InstAccess.getExpandedSubscripts().lookupInstComponent(String name) = getTopInstAccess().lookupInstComponent(name);
 		
-	syn lazy HashSet InstAccess.qualifiedLookupInstComponent(String name) = emptyHashSet();
+	syn HashSet InstAccess.qualifiedLookupInstComponent(String name) = emptyHashSet();
 	eq InstComponentAccess.qualifiedLookupInstComponent(String name) = myInstComponentDecl().memberInstComponent(name);	
 	eq InstClassAccess.qualifiedLookupInstComponent(String name) = myInstClassDecl().memberInstComponent(name);
 
@@ -124,6 +124,9 @@ aspect InstLookupComponents {
 	syn lazy HashSet InstNode.memberInstComponent(String name)  {
 
 		if (isArray()) {
+			if (getNumInstComponentDecl() == 0)
+				return emptyHashSet();
+			
 			int ndims = ndims();
 			InstNode n = getInstComponentDecl(0);
 			for (int i=0;i<ndims-1;i++) {

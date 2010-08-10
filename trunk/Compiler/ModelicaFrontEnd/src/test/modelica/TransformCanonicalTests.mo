@@ -46,7 +46,7 @@ fclass TransformCanonicalTests.TransformCanonicalTest2
  parameter Real p3;
  parameter Real p2;
  parameter Real p1 = 4 /* 4.0 */;
-initial equation /* dependent parameters */
+parameter equation
  p6 = p5;
  p2 = ( p1 ) * ( p1 );
  p3 = p2 + p1;
@@ -129,7 +129,7 @@ fclass TransformCanonicalTests.TransformCanonicalTest5
  parameter Real p7 = 1 /* 1.0 */;
  parameter Real p5 = 1 /* 1.0 */;
  parameter Real p3 = 1 /* 1.0 */;
-initial equation /* dependent parameters */
+parameter equation
  p11 = ( p7 ) * ( p5 );
  p8 = ( p7 ) * ( p3 );
  p10 = ( p11 ) * ( p3 );

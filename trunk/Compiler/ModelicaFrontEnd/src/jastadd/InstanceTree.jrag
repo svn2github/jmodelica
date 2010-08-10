@@ -698,9 +698,9 @@ aspect InstanceTreeConstruction {
 		return l;
 	}
 	
-	eq InstPrimitive.getInstComponentDeclList() = emptyList();
-	eq InstPrimitive.getInstClassDeclList() = emptyList();
-//	eq InstPrimitive.getInstExtendsList() = emptyList();
+	eq InstPrimitive.getInstComponentDeclList() = new List();
+	eq InstPrimitive.getInstClassDeclList() = new List();
+//	eq InstPrimitive.getInstExtendsList() = new List();
 
     public InstNode InstNode.createInstComponentDecl(ComponentDecl cd) {
     	// Check if the component is redeclared. 

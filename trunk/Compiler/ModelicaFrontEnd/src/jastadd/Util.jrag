@@ -30,23 +30,20 @@ aspect RootAccess {
     
     syn String SourceRoot.language() = "Modelica";
     
-    inh lazy Root ASTNode.retrieveRoot();
+    inh Root ASTNode.retrieveRoot();
     eq SourceRoot.getChild().retrieveRoot() = this;
     eq FlatRoot.getChild().retrieveRoot()   = this;
-    syn lazy Root ASTNode.root() = retrieveRoot();
+    syn Root ASTNode.root() = retrieveRoot();
+    syn lazy Root BaseNode.root() = retrieveRoot();
     eq Root.root() = this;
     
-    syn lazy List ASTNode.emptyList() = root().emptyList();
-    eq Root.emptyList() = getEmptyList();
-    syn lazy List Root.getEmptyList() = new List();
+    // TODO: When uses of HashSet has been generalised to Set, replace with Collections.emptySet()
+    public static final HashSet ASTNode.EMPTY_HASH_SET = new HashSet(2);
+    syn HashSet ASTNode.emptyHashSet() = EMPTY_HASH_SET;
     
-    syn lazy HashSet ASTNode.emptyHashSet() = root().emptyHashSet();
-    eq Root.emptyHashSet() = getEmptyHashSet();
-    syn lazy HashSet Root.getEmptyHashSet() = new HashSet(4);
-    
-    syn lazy ArrayList ASTNode.emptyArrayList() = root().emptyArrayList();
-    eq Root.emptyArrayList() = getEmptyArrayList();
-    syn lazy ArrayList Root.getEmptyArrayList() = new ArrayList();
+    // TODO: When uses of ArrayList has been generalised to List, replace with Collections.emptyList()
+    public static final ArrayList ASTNode.EMPTY_ARRAY_LIST = new ArrayList(0);
+    syn ArrayList ASTNode.emptyArrayList() = EMPTY_ARRAY_LIST;
     
     public boolean ASTNode.hasRoot() { return (getParent() == null) ? false : getParent().hasRoot(); }
     public boolean Root.hasRoot()    { return true; }
@@ -350,15 +347,15 @@ aspect NodeMethods {
 
 aspect FileNames {
 
-    syn lazy String ASTNode.fileName() = retrieveFileName();
-    eq StoredDefinition.fileName() = getFileName().equals("")? retrieveFileName(): getFileName();
-    
-    eq Root.fileName() = getFileName();
+    syn String ASTNode.fileName()       = retrieveFileName();
+    syn lazy String BaseNode.fileName() = retrieveFileName();
+    eq StoredDefinition.fileName()      = getFileName().equals("") ? retrieveFileName() : getFileName();
+    eq Root.fileName()                  = getFileName();
     
     syn String ASTNode.dirName() = 
     	fileName().replaceFirst("^[^\\\\/]*$", ".").replaceFirst("[\\\\/][^\\\\/]*$", "");
     
-    inh lazy String ASTNode.retrieveFileName();
+    inh String ASTNode.retrieveFileName();
     eq SourceRoot.getProgram().retrieveFileName() = getFileName();
     eq FlatRoot.getFClass().retrieveFileName() = getFileName();
     
@@ -401,11 +398,11 @@ aspect Names {
   
   syn String InstNamedModification.name() = getName().name();
   
-  syn lazy String Access.qualifiedName() = getID();
-  eq Dot.qualifiedName() = getLeft().qualifiedName() + "." + getRight().qualifiedName();
+  syn String Access.qualifiedName() = getID();
+  syn lazy String Dot.qualifiedName() = getLeft().qualifiedName() + "." + getRight().qualifiedName();
   
-  syn lazy String InstAccess.qualifiedName() = getID();
-  eq InstDot.qualifiedName() = getLeft().qualifiedName() + "." + getRight().qualifiedName();
+  syn String InstAccess.qualifiedName() = getID();
+  syn lazy String InstDot.qualifiedName() = getLeft().qualifiedName() + "." + getRight().qualifiedName();
   
   syn String ClassDecl.name();
   eq BaseClassDecl.name() = getName().getID();
@@ -1614,5 +1611,36 @@ aspect GeneralHelpers {
 		}
 		
 	}
+
+	/**
+	 * \brief Round a number to 2 decimals if it is < 10, 1 decimal otherwise.
+	 */
+	public static double ASTNode.roundFriendly(double val) {
+		double round = val < 10.0 ? 100.0 : 10.0;
+		return Math.round(val * round) / round;
+	}
+	
+	/**
+	 * \brief Creates a human-readable memory size string (e.g. 2.34 kB).
+	 * 
+	 * @param mem  size to format, in bytes. May be negative.
+	 */
+	public static String ASTNode.formatMem(int mem) {
+		int i = 0;
+		double scaledMem = Math.abs(mem);
+		for (; i < 4 && scaledMem >= 1000.0; i++)
+			scaledMem /= 1024.0;
+		StringBuilder buf = new StringBuilder();
+		if (mem < 0)
+			buf.append('-');
+		if (i == 0)
+			buf.append(mem);
+		else
+			buf.append(roundFriendly(scaledMem));
+		buf.append(memUnits[i]);
+		return buf.toString();
+	}
+	
+	private static final String[] ASTNode.memUnits = { " B", " kB", " MB", " GB", " TB" };
 	
 }

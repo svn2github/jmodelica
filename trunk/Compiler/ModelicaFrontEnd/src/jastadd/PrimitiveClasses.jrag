@@ -65,16 +65,16 @@ aspect UnknownDeclarations {
 										new Comment());
 	}		                            
 	
-	syn lazy UnknownClassDecl ASTNode.unknownClassDecl() = root().unknownClassDecl();
+	syn UnknownClassDecl ASTNode.unknownClassDecl() = root().unknownClassDecl();
 	eq SourceRoot.unknownClassDecl() = getProgram().getUnknownClassDecl();
 
-	syn lazy UnknownComponentDecl ASTNode.unknownComponentDecl() = root().unknownComponentDecl();
+	syn UnknownComponentDecl ASTNode.unknownComponentDecl() = root().unknownComponentDecl();
 	eq SourceRoot.unknownComponentDecl() = getProgram().getUnknownComponentDecl();
 
-	syn lazy boolean ClassDecl.isUnknown() = false;
+	syn boolean ClassDecl.isUnknown() = false;
 	eq UnknownClassDecl.isUnknown() = true;
 
-	syn lazy boolean ComponentDecl.isUnknown() = false;
+	syn boolean ComponentDecl.isUnknown() = false;
 	eq UnknownComponentDecl.isUnknown() = true;
 	
 	syn boolean ClassDecl.isPrimitive() = false;
@@ -91,10 +91,10 @@ aspect UnknownDeclarations {
 	syn lazy UnknownInstComponentDecl InstProgramRoot.getUnknownInstComponentDecl() = 
 	    new UnknownInstComponentDecl(new InstParseAccess("Unknown",new Opt()),new Opt(),getProgram().getUnknownComponentDecl(), new Opt(),new Opt(),new Opt());
 		
-	syn lazy UnknownInstClassDecl ASTNode.unknownInstClassDecl() = root().unknownInstClassDecl();
+	syn UnknownInstClassDecl ASTNode.unknownInstClassDecl() = root().unknownInstClassDecl();
 	eq SourceRoot.unknownInstClassDecl() = getUnknownInstClassDecl();
 
-	syn lazy UnknownInstComponentDecl ASTNode.unknownInstComponentDecl() = root().unknownInstComponentDecl();
+	syn UnknownInstComponentDecl ASTNode.unknownInstComponentDecl() = root().unknownInstComponentDecl();
 	eq SourceRoot.unknownInstComponentDecl() = getUnknownInstComponentDecl();
 
 	syn lazy boolean InstClassDecl.isUnknown() = false;

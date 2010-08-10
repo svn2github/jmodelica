@@ -24,39 +24,53 @@ import org.xml.sax.SAXException;
 public class OptionRegistry {
 	
 		private enum DefOpt {
-			MSL_VER    ("default_msl_version", ""),
-			START_FIX  ("state_start_values_fixed", 
+			MSL_VER    ("default_msl_version",       "3.0.1", ""),
+			START_FIX  ("state_start_values_fixed",  false, 
 					"This option enables the user to specify if initial equations should be " + 
 					"generated automatically for differentiated variables even though the fixed " +
 					"attribute is equal to fixed. Setting this option to true is, however, often " +
 					"practical in optimization problems."),
-			ELIM_ALIAS ("eliminate_alias_variables", 
+			ELIM_ALIAS ("eliminate_alias_variables", true, 
 					"If this option is set to true (default), then alias variables are " +
                     "eliminated from the model."),
-			HALT_WARN  ("halt_on_warning", 
+			HALT_WARN  ("halt_on_warning",           false, 
 					"If this option is set to false (default) one or more compiler " +
                     "warnings will not stop compilation of the model."),
-			XML_EQU    ("generate_xml_equations", 
+			XML_EQU    ("generate_xml_equations",    false, 
 					"If this option is true, then model equations are generated in XML format. " + 
 					"Default is false."),
-			INDEX_RED  ("index_reduction", 
+			INDEX_RED  ("index_reduction",           false, 
 					"If this option is true (default is false), index reduction is performed."),
-			EQU_SORT   ("equation_sorting", 
+			EQU_SORT   ("equation_sorting",          false, 
 					"If this option is true (default is false), equations are sorted using the BLT algorithm."),
-			XML_FMI    ("generate_fmi_xml", 
+			XML_FMI    ("generate_fmi_xml",          false, 
 					"If this option is true the model description part of the XML variables file " + 
 					"will be FMI compliant. Default is false. To generate an XML which will " + 
 					"validate with FMI schema the option generate_xml_equations must also be false."),
-			VAR_SCALE  ("enable_variable_scaling", 
+			VAR_SCALE  ("enable_variable_scaling",   false, 
 					"If this option is true (default is false), then the \"nominal\" attribute will " + 
 					"be used to scale variables in the model.");
 			
 			public String key;
 			public String desc;
+			public Object val;
 			
-			private DefOpt(String k, String d) {
+			private DefOpt(String k, Object v, String d) {
 				key = k;
 				desc = d;
+				val = v;
+			}
+			
+			private DefOpt(String k, boolean v, String d) {
+				this(k, new Boolean(v), d);
+			}
+			
+			private DefOpt(String k, double v, String d) {
+				this(k, new Double(v), d);
+			}
+			
+			private DefOpt(String k, int v, String d) {
+				this(k, new Integer(v), d);
 			}
 		}
 
@@ -64,17 +78,8 @@ public class OptionRegistry {
 		
 		public OptionRegistry() {
 			optionsMap = new HashMap<String,Option>();
-			
-			// Fill registry with default options
-			defaultStringOption(DefOpt.MSL_VER,     "3.0.1");
-			defaultBooleanOption(DefOpt.START_FIX,  false);
-			defaultBooleanOption(DefOpt.ELIM_ALIAS, true);
-			defaultBooleanOption(DefOpt.HALT_WARN,  false);
-			defaultBooleanOption(DefOpt.XML_EQU,    false);
-			defaultBooleanOption(DefOpt.INDEX_RED,  false);
-			defaultBooleanOption(DefOpt.EQU_SORT,   false);
-			defaultBooleanOption(DefOpt.XML_FMI,    false);
-			defaultBooleanOption(DefOpt.VAR_SCALE,  false);
+			for (DefOpt o : DefOpt.values())
+				defaultOption(o);
 		}
 
 		public OptionRegistry(OptionRegistry registry) {
@@ -187,14 +192,21 @@ public class OptionRegistry {
 			}
 		}
 		
+		protected void defaultOption(DefOpt o) {
+			if (o.val instanceof Integer)
+				createIntegerOption(o.key, o.desc, ((Integer) o.val).intValue());
+			else if (o.val instanceof String)
+				createStringOption(o.key, o.desc, (String) o.val);
+			else if (o.val instanceof Double)
+				createRealOption(o.key, o.desc, ((Double) o.val).doubleValue());
+			else if (o.val instanceof Boolean)
+				createBooleanOption(o.key, o.desc, ((Boolean) o.val).booleanValue());
+		}
+		
 		protected void createIntegerOption(String key, String description,
 				int defaultValue) {
 			optionsMap.put(key,new IntegerOption(key, description,
 					defaultValue));			
-		}
-		
-		protected void defaultIntegerOption(DefOpt o, int defaultValue) {
-			createIntegerOption(o.key, o.desc, defaultValue);		
 		}
 		
 		public void setIntegerOption(String key, int value, String description) {
@@ -231,10 +243,6 @@ public class OptionRegistry {
 					defaultValue));			
 		}
 		
-		protected void defaultStringOption(DefOpt o, String defaultValue) {
-			createStringOption(o.key, o.desc, defaultValue);		
-		}
-		
 		public void setStringOption(String key, String value, String description) {
 			Option o = optionsMap.get(key);
 			if (o == null) {
@@ -269,10 +277,6 @@ public class OptionRegistry {
 					defaultValue));			
 		}
 		
-		protected void defaultRealOption(DefOpt o, double defaultValue) {
-			createRealOption(o.key, o.desc, defaultValue);		
-		}
-		
 		public void setRealOption(String key, double value, String description) {
 			Option o = optionsMap.get(key);
 			if (o == null) {
@@ -305,10 +309,6 @@ public class OptionRegistry {
 				boolean defaultValue) {
 			optionsMap.put(key,new BooleanOption(key, description,
 					defaultValue));			
-		}
-		
-		protected void defaultBooleanOption(DefOpt o, boolean defaultValue) {
-			createBooleanOption(o.key, o.desc, defaultValue);		
 		}
 		
 		public void setBooleanOption(String key, boolean value, String description) {
