@@ -631,3 +631,14 @@ class Test_FMI_ODE:
         nose.tools.assert_almost_equal(height.x[0],1.000000,5)
         nose.tools.assert_almost_equal(height.x[-1],-0.9804523,5)
         nose.tools.assert_almost_equal(height.t[-1],3.000000,5)
+        
+        #Test with predefined FMIModel
+        model = fmi.FMIModel(os.path.join(path_to_fmus,'bouncingBall.fmu'))
+        model.initialize()
+        res_obj = simulate(model, alg_args={'final_time':3.})
+        res = res_obj.result_data
+        height = res.get_variable_data('h')
+
+        nose.tools.assert_almost_equal(height.x[0],1.000000,5)
+        nose.tools.assert_almost_equal(height.x[-1],-0.9804523,5)
+        nose.tools.assert_almost_equal(height.t[-1],3.000000,5)

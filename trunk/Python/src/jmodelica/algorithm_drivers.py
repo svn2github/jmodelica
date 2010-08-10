@@ -212,8 +212,11 @@ class AssimuloFMIAlg(AlgorithmBase):
     def __init__(self,
                  model,
                  alg_args={}):
-        self.model = FMIModel(model) #Create an FMIModel
-        self.model.initialize()      #Set the start attributes
+        if isinstance(model,FMIModel):
+            self.model = model
+        else:
+            self.model = FMIModel(model) #Create an FMIModel
+            self.model.initialize()      #Set the start attributes
         
         if not assimulo_present:
             raise Exception('Could not find Assimulo package. Check jmodelica.check_packages()')

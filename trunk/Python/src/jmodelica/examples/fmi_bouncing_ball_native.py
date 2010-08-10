@@ -50,7 +50,6 @@ def run_demo(with_plots=True):
     dt = 0.01 #Step-size
     
     while time < Tend and not bouncing_fmu.get_event_info().terminateSimulation:
-        
         #Compute the derivative
         dx = bouncing_fmu.get_derivatives()
         
@@ -76,7 +75,7 @@ def run_demo(with_plots=True):
         
         #Check for time and state events
         time_event  = abs(time-Tnext) <= 1.e-10
-        state_event = True if bool(event_ind_new[0]>0.0) != bool(event_ind[0]>0.0) else False
+        state_event = True if True in ((event_ind_new>0.0) != (event_ind>0.0)) else False
 
         #Event handling
         if step_event or time_event or state_event:
@@ -86,7 +85,7 @@ def run_demo(with_plots=True):
             
             #Event iteration
             while eInfo.iterationConverged == False:
-                bouncing_fmu.event_update()
+                bouncing_fmu.event_update('0') #Stops after each event iteration
                 eInfo = bouncing_fmu.get_event_info()
 
                 #Retrieve solutions (if needed)
@@ -100,8 +99,7 @@ def run_demo(with_plots=True):
         
             #Get new nominal values.
             if eInfo.stateValueReferencesChanged:
-                #atol = 0.01*rtol*bouncing_fmu.real_x_nominal
-                pass
+                atol = 0.01*rtol*bouncing_fmu.nominal_continuous_states
                 
             #Check for new time event
             if eInfo.upcomingTimeEvent:

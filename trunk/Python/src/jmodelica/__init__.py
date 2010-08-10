@@ -55,6 +55,7 @@ except IOError:
 
 import jmodelica
 import jmodelica.jmi as jmi
+import jmodelica.fmi as fmi
 from jmodelica.compiler import ModelicaCompiler
 from jmodelica.compiler import OptimicaCompiler
 from jmodelica.algorithm_drivers import *
@@ -320,7 +321,9 @@ def _exec_algorithm(model,
     
     if isinstance(model,str) and model.lower().endswith('.fmu') and issubclass(algorithm, AssimuloAlg):
         algorithm = AssimuloFMIAlg
-    
+    if isinstance(model,fmi.FMIModel) and issubclass(algorithm, AssimuloAlg):
+        algorithm = AssimuloFMIAlg
+
     # initialize algorithm
     alg = algorithm(model, alg_args)
     # set arguments to solver, if any
