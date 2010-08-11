@@ -642,3 +642,34 @@ class Test_FMI_ODE:
         nose.tools.assert_almost_equal(height.x[0],1.000000,5)
         nose.tools.assert_almost_equal(height.x[-1],-0.9804523,5)
         nose.tools.assert_almost_equal(height.t[-1],3.000000,5)
+
+
+    @testattr(fmi = True)
+    def test_default_simulation(self):
+        """
+        This test the default values of the simulation using simulate.
+        """
+        #Writing continuous
+        res_obj = simulate(os.path.join(path_to_fmus,'bouncingBall.fmu'), alg_args={'final_time':3.})
+        res = res_obj.result_data
+        height = res.get_variable_data('h')
+        
+        nose.tools.assert_almost_equal(res_obj.solver.rtol, 0.000100, 5)
+        assert res_obj.solver.iter == 'Newton'
+        
+        nose.tools.assert_almost_equal(height.x[0],1.000000,5)
+        nose.tools.assert_almost_equal(height.x[-1],-0.9804523,5)
+        nose.tools.assert_almost_equal(height.t[-1],3.000000,5)
+        
+        #Writing continuous
+        res_obj = simulate(os.path.join(path_to_fmus,'bouncingBall.fmu'), alg_args={'final_time':3.},
+                                            solver_args={'rtol':1e-6, 'iter':'FixedPoint'})
+        res = res_obj.result_data
+        height = res.get_variable_data('h')
+    
+        nose.tools.assert_almost_equal(res_obj.solver.rtol, 0.00000100, 7)
+        assert res_obj.solver.iter == 'FixedPoint'
+        
+        nose.tools.assert_almost_equal(height.x[0],1.000000,5)
+        nose.tools.assert_almost_equal(height.x[-1],-0.98018113,5)
+        nose.tools.assert_almost_equal(height.t[-1],3.000000,5)

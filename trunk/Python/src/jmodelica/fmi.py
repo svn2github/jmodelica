@@ -996,8 +996,8 @@ class FMIModel(object):
             else:
                 bol.append(False)
         
-        if nref==1:
-            bol = bol[0]
+        #if nref==1:
+        #    bol = bol[0]
         
         return bol
         

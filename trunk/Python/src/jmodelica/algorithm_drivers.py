@@ -336,7 +336,7 @@ class AssimuloFMIAlg(AlgorithmBase):
         # load result file
         res = jmodelica.io.ResultDymolaTextual(resultfile)
         # create and return result object
-        return AssimuloSimResult(self.model, resultfile, self.solver, res)
+        return AssimuloSimResult(self.model, resultfile, self.simulator, res)
 
 class AssimuloAlg(AlgorithmBase):
     """ Simulation algorithm using the Assimulo package. """
@@ -468,7 +468,7 @@ class AssimuloAlg(AlgorithmBase):
         res = jmodelica.io.ResultDymolaTextual(resultfile)
         
         # create and return result object
-        return AssimuloSimResult(self.model, resultfile, self.solver, res)
+        return AssimuloSimResult(self.model, resultfile, self.simulator, res)
     
 
 class CollocationLagrangePolynomialsResult(ResultBase): pass
