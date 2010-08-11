@@ -109,9 +109,9 @@ aspect CCodeGen {
 	}
 	
 	public void FIdUseExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
-		if (isArray() && keepAsArray())
+		if (isArray() && keepAsArray()) {
 			str.print(getFIdUse().toString_C(p, o));
-		else
+		} else {
 			if (myFV().isReal() && root().options.getBooleanOption("enable_variable_scaling")) {
 				str.print("(");
 				p.toString(getFIdUse(), str, indent, o);
@@ -121,6 +121,7 @@ aspect CCodeGen {
 			} else {
 				p.toString(getFIdUse(), str, indent, o);
 			}
+		}
 	}
 	
 	inh boolean FIdUse.isAssignUse();

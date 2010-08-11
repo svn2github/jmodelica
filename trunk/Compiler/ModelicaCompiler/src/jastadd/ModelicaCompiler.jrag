@@ -119,9 +119,9 @@ public class ModelicaCompiler {
 	}
 	public static final String DEFAULT_LEVEL = ERROR;
 	
-	private String xmlTpl=null;
-	private String xmlValuesTpl=null;
-	private String cTemplatefile=null;
+	protected String xmlTpl=null;
+	protected String xmlValuesTpl=null;
+	protected String cTemplatefile=null;
 	private OptionRegistry options = null;
 	
 	
@@ -574,9 +574,13 @@ public class ModelicaCompiler {
 	/**
 	 * \brief Create a new FClass object.
 	 * 
+	 * @param icd A reference to a instance class - in compiler extensions
+	 * it may be useful to be able to extract the kind of class is being
+	 * instantiated: model, block etc.
+	 * 
 	 * Override for subclasses needing a subclass of FClass.
 	 */
-	protected FClass createFClass() {
+	protected FClass createFClass(InstClassDecl icd) {
 		return new FClass();
 	}
 	
@@ -601,7 +605,7 @@ public class ModelicaCompiler {
 		
 		FlatRoot flatRoot = new FlatRoot();
 		flatRoot.setFileName(icl.qualifiedName()+".mof");
-		FClass fc = createFClass();
+		FClass fc = createFClass(icl);
 		flatRoot.setFClass(fc);
 		flatRoot.options = new OptionRegistry(icl.root().options);
 		
@@ -670,6 +674,39 @@ public class ModelicaCompiler {
 	}
 
 	/**
+	 * \brief get the XML template. 
+	 * 
+	 * @param fc A reference to an FClass object. This is convenient in
+	 * extensions of ModelicaCompiler that need to distinguish between
+	 * different kinds of flattened classes.
+	 */
+	protected String getXmlTpl(FClass fc) {
+		return this.xmlTpl;
+	}
+
+	/**
+	 * \brief get the XML values template. 
+	 * 
+	 * @param fc A reference to an FClass object. This is convenient in
+	 * extensions of ModelicaCompiler that need to distinguish between
+	 * different kinds of flattened classes.
+	 */
+	protected String getXmlValuesTpl(FClass fc) {
+		return this.xmlValuesTpl;
+	}
+
+	/**
+	 * \brief get the C template. 
+	 * 
+	 * @param fc A reference to an FClass object. This is convenient in
+	 * extensions of ModelicaCompiler that need to distinguish between
+	 * different kinds of flattened classes.
+	 */
+	protected String getCTemplatefile(FClass fc) {
+		return this.cTemplatefile;
+	}
+	
+	/**
 	 * 
 	 * Generates XML and c code for a flattened model represented as an instance
 	 * of FClass using template files. The XML variables, XML values and c files
@@ -687,15 +724,15 @@ public class ModelicaCompiler {
 		
 		XMLGenerator xmlgenerator = createXMLGenerator(fc);
 		String output = fc.nameUnderscore() + ".xml";
-		xmlgenerator.generate(this.xmlTpl, output);
+		xmlgenerator.generate(getXmlTpl(fc), output);
 
 		XMLValueGenerator valuegenerator = createXMLValueGenerator(fc);
 		output = fc.nameUnderscore() + "_values.xml";
-		valuegenerator.generate(this.xmlValuesTpl, output);
+		valuegenerator.generate(getXmlValuesTpl(fc), output);
 		
 		CGenerator cgenerator = createCGenerator(fc);
 		output = fc.nameUnderscore() + ".c";
-		cgenerator.generate(this.cTemplatefile, output);
+		cgenerator.generate(getCTemplatefile(fc), output);
 
 		log.debug("... code generated.");
 	}

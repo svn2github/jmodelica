@@ -46,7 +46,7 @@ aspect OptimicaCCodeGen {
 		getLeft().prettyPrint_C(str,"");
 		str.print(");\n");
 	}
-
+	
 }
 
 

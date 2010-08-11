@@ -584,7 +584,7 @@ class OptimicaCompiler(ModelicaCompiler):
     OptimicaCompiler = org.jmodelica.optimica.compiler.OptimicaCompiler
 
     jm_home = jm.environ['JMODELICA_HOME']
-    c_tpl_path = os.path.join(jm_home, 'CodeGenTemplates', 'jmi_optimica_template.c')
+    optimica_c_tpl_path = os.path.join(jm_home, 'CodeGenTemplates', 'jmi_optimica_template.c')
 
     def __init__(self):
         try:
@@ -599,12 +599,16 @@ class OptimicaCompiler(ModelicaCompiler):
             self._compiler = self.OptimicaCompiler(options, 
                                                    self.fmi_ext_tpl,
                                                    self.model_values_tpl,
-                                                   self.c_tpl_path)
+                                                   self.c_tpl_path,
+                                                   self.fmi_ext_tpl,
+                                                   self.optimica_c_tpl_path)
         else:
             self._compiler = self.OptimicaCompiler(options, 
                                                    self.jmodelica_tpl,
                                                    self.model_values_tpl,
-                                                   self.c_tpl_path)
+                                                   self.c_tpl_path,
+                                                   self.jmodelica_tpl,
+                                                   self.optimica_c_tpl_path)
     @classmethod
     def set_log_level(self,level):
         """ Set the level of log prints. """

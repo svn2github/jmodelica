@@ -87,17 +87,17 @@ class TestModel_VDP:
         
     @testattr(stddist = True)
     def test_get_dx_variable_names(self):
-        names = [(3,'der(x1)'),(4,'der(x2)'),(5,'der(cost)')]
+        names = [(5,'der(x1)'),(6,'der(x2)'),(7,'der(cost)')]
         ntools.assert_equal(self.vdp.get_dx_variable_names(),names)
     
     @testattr(stddist = True)
     def test_get_x_variable_names(self):
-        names = [(6,'x1'),(7,'x2'),(8,'cost')]
+        names = [(8,'x1'),(9,'x2'),(10,'cost')]
         ntools.assert_equal(self.vdp.get_x_variable_names(),names)
     
     @testattr(stddist = True)
     def test_get_u_variable_names(self):
-        names = [(9,'u')]
+        names = [(11,'u')]
         ntools.assert_equal(self.vdp.get_u_variable_names(),names)
     
     @testattr(stddist = True)
@@ -116,12 +116,12 @@ class TestModel_VDP:
      
     @testattr(stddist = True)   
     def test_get_sizes(self):
-        sizes = [0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 18]
+        sizes = [0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 20]
         ntools.assert_equal(self.vdp.get_sizes(),sizes)
     
     @testattr(stddist = True)    
     def test_get_offsets(self):
-        offsets = [0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 6, 9, 10, 10, 11, 14, 17, 18, 18, 18, 18, 18, 18, 18, 18]
+        offsets = [0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 8, 11, 12, 12, 13, 16, 19, 20, 20, 20, 20, 20, 20, 20, 20]
         ntools.assert_equal(self.vdp.get_offsets(),offsets)
     
     @testattr(stddist = True)
@@ -371,8 +371,8 @@ class TestModel_VDP:
     @testattr(stddist = True)    
     def test_parameters(self):
         """Test methods jmi.Model.[set|get]_real_pi(...)."""
-        new_params = [1.54, 19.54, 78.12]
-        reset = [0] * 3
+        new_params = [1.54, 19.54, 78.12, 0, 3]
+        reset = [0] * 5
         self.vdp.real_pi = reset
         params = self.vdp.real_pi
         N.testing.assert_array_almost_equal(reset, params)

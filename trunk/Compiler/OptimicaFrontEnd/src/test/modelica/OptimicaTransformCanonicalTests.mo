@@ -16,7 +16,8 @@ Dependent constants:
 Independent parameters: 
  p1: number of uses: 3, isLinear: true evaluated binding exp: 1.0
  p2: number of uses: 1, isLinear: false
-
+ startTime: number of uses: 0, isLinear: true evaluated binding exp: 0.0
+ finalTime: number of uses: 1, isLinear: true evaluated binding exp: 1.0
 Dependent parameters: 
 
 Differentiated variables: 
@@ -135,6 +136,20 @@ y:
   3.0, isLinear: true
   4.0, isLinear: true
   5.0, isLinear: true
+startTime:
+  0.0, isLinear: true
+  1.0, isLinear: true
+  2.0, isLinear: true
+  3.0, isLinear: true
+  4.0, isLinear: true
+  5.0, isLinear: true
+finalTime:
+  0.0, isLinear: true
+  1.0, isLinear: true
+  2.0, isLinear: true
+  3.0, isLinear: true
+  4.0, isLinear: true
+  5.0, isLinear: true
   ")})));
 
 	parameter Real t0 = 0;
@@ -174,6 +189,8 @@ y:
  parameter Real B[2] = 2;
  parameter Real C[1] = 1;
  parameter Real C[2] = 1;
+ parameter Real startTime = 0 /* 0 */;
+ parameter Real finalTime = 2 /* 2 */;
  Real der(x[1]);
  Real der(x[2]);
  Real der(cost);
@@ -238,6 +255,8 @@ optimization OptimicaTransformCanonicalTests.ArrayTest2(objective = cost(finalTi
  parameter Real B[2] = 2 ;
  parameter Real C[1] = 1 ;
  parameter Real C[2] = 1 ;
+ parameter Real startTime = 0 /* 0 */;
+ parameter Real finalTime = 2 /* 2 */;
  Real der(x[1]);
  Real der(x[2]);
  Real der(cost);
@@ -301,6 +320,8 @@ optimization TimedArrayTest1 (objective=y(finalTime),startTime=0,finalTime=2)
 optimization OptimicaTransformCanonicalTests.TimedArrayTest1(objective = y(finalTime),startTime = 0,finalTime = 2)
  Real x[2];
  Real y;
+ parameter Real startTime = 0 /* 0 */;
+ parameter Real finalTime = 2 /* 2 */;
 equation 
  y = 1;
  x[2] = 2;
@@ -326,6 +347,8 @@ optimization OptimicaTransformCanonicalTests.TimedArrayTest2(objective = y(final
  Real x[1];
  Real x[2];
  Real y;
+ parameter Real startTime = 0 /* 0 */;
+ parameter Real finalTime = 2 /* 2 */;
 equation 
  x[1] = 1;
  x[2] = 2;
@@ -391,6 +414,8 @@ optimization OptimicaTransformCanonicalTests.ForConstraint1(objective = y[1](fin
  Real x[2];
  Real y[1];
  Real y[2];
+ parameter Real startTime = 0 /* 0 */;
+ parameter Real finalTime = 2 /* 2 */;
 equation 
  x[1] = 1;
  x[2] = 2;
@@ -412,6 +437,130 @@ constraint
  end for;
 end ForConstraint1;
 
+optimization MinTimeTest1 (objective=finalTime,finalTime(free=true,start=1,initialGuess=3)=4)
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="MinTimeTest1",
+         description="Test normalization of minimum time problems",
+         flatModel="
+optimization OptimicaTransformCanonicalTests.MinTimeTest1(objective = finalTime,finalTime = 1.0)
+ Real x(start = 1,fixed = true);
+ Real dx(start = 0,fixed = true);
+ input Real u;
+ parameter Real startTime = 0.0 /* 0.0 */;
+ parameter Real finalTime(free = true,start = 1,initialGuess = 3);
+ Real der(x);
+ Real der(dx);
+initial equation 
+ x = 1;
+ dx = 0;
+equation 
+ ( der(x) ) / ( finalTime - ( startTime ) ) = dx;
+ ( der(dx) ) / ( finalTime - ( startTime ) ) = u;
+constraint 
+ u <= 1;
+ u >=  - ( 1 );
+ x(finalTime) = 0;
+ dx(finalTime) = 0;
+end OptimicaTransformCanonicalTests.MinTimeTest1;
+")})));
+
+  Real x(start=1,fixed=true);
+  Real dx(start=0,fixed=true);
+  input Real u;
+equation
+  der(x) = dx;
+  der(dx) = u;
+constraint
+  u<=1; u>=-1;
+  x(finalTime) = 0;
+  dx(finalTime) = 0;
+end MinTimeTest1;
+
+optimization MinTimeTest2 (objective=-startTime,
+                          startTime(free=true,initialGuess=-1)=2)
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="MinTimeTest2",
+         description="Test normalization of minimum time problems",
+         flatModel="
+optimization OptimicaTransformCanonicalTests.MinTimeTest2(objective =  - ( startTime ),startTime = 0.0)
+ Real x(start = 1,fixed = true);
+ Real dx(start = 0,fixed = true);
+ input Real u;
+ parameter Real startTime(free = true,initialGuess =  - ( 1 ),start =  - ( 1 ));
+ parameter Real finalTime = 1.0 /* 1.0 */;
+ Real der(x);
+ Real der(dx);
+initial equation 
+ x = 1;
+ dx = 0;
+equation 
+ ( der(x) ) / ( finalTime - ( startTime ) ) = dx;
+ ( der(dx) ) / ( finalTime - ( startTime ) ) = u;
+constraint 
+ u <= 1;
+ u >=  - ( 1 );
+ x(finalTime) = 0;
+ dx(finalTime) = 0;
+end OptimicaTransformCanonicalTests.MinTimeTest2;
+")})));
+
+
+  Real x(start=1,fixed=true);
+  Real dx(start=0,fixed=true);
+  input Real u;
+equation
+  der(x) = dx;
+  der(dx) = u;
+constraint
+  u<=1; u>=-1;
+  x(finalTime) = 0;
+  dx(finalTime) = 0;
+end MinTimeTest2;
+
+optimization MinTimeTest3 (objective=finalTime,
+                          startTime(free=true,initialGuess=-1), finalTime(free=true,initialGuess = 2))
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="MinTimeTest3",
+         description="Test normalization of minimum time problems",
+         flatModel="
+optimization OptimicaTransformCanonicalTests.MinTimeTest3(objective = finalTime,startTime = 0.0,finalTime = 1.0)
+ Real x(start = 1,fixed = true);
+ Real dx(start = 0,fixed = true);
+ input Real u;
+ parameter Real startTime(free = true,initialGuess =  - ( 1 ),start =  - ( 1 ));
+ parameter Real finalTime(free = true,initialGuess = 2,start = 2);
+ Real der(x);
+ Real der(dx);
+initial equation 
+ x = 1;
+ dx = 0;
+equation 
+ ( der(x) ) / ( finalTime - ( startTime ) ) = dx;
+ ( der(dx) ) / ( finalTime - ( startTime ) ) = u;
+constraint 
+ startTime =  - ( 1 );
+ u <= 1;
+ u >=  - ( 1 );
+ x(finalTime) = 0;
+ dx(finalTime) = 0;
+end OptimicaTransformCanonicalTests.MinTimeTest3;
+")})));
+
+  Real x(start=1,fixed=true);
+  Real dx(start=0,fixed=true);
+  input Real u;
+equation
+  der(x) = dx;
+  der(dx) = u;
+constraint
+  startTime=-1;
+  u<=1; u>=-1;
+  x(finalTime) = 0;
+  dx(finalTime) = 0;
+end MinTimeTest3;
 
 end OptimicaTransformCanonicalTests;
 

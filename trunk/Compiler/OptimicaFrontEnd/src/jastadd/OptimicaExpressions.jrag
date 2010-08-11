@@ -28,19 +28,19 @@ aspect OptimicaExpressions {
 		 	return iv;
 		 }
 	}
-	
+	/*
 	rewrite FIdUseExp {
-		when (name().equals("startTime")) to FStartTimeExp {
+		when (name().equals("startTime") && !rewritten) to FStartTimeExp {
 			return new FStartTimeExp();
 		}
 	}
 
 	rewrite FIdUseExp {
-		when (name().equals("finalTime")) to FFinalTimeExp {
+		when (name().equals("finalTime") && !rewritten) to FFinalTimeExp {
 			return new FFinalTimeExp();
 		}
 	}
-	
+	*/
 	refine InstNameClassification eq InstFunctionCall.getName().kind() = Kind.AMBIGUOUS_ACCESS;
 	
 	eq FStartTimeExp.cevalCalc() {

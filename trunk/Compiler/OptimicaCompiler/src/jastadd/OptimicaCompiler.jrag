@@ -73,9 +73,15 @@ import org.jmodelica.util.OptionRegistry;
  */
 public class OptimicaCompiler extends ModelicaCompiler{
 	
+	private String optimicaXmlTpl=null;
+	private String optimicaCTemplatefile=null;
+	
 	public OptimicaCompiler(OptionRegistry options, String xmlTpl, 
-			String xmlValuesTpl, String cTemplatefile) {
+			String xmlValuesTpl, String cTemplatefile, String optimicaXmlTpl,
+			String optimicaCTemplatefile) {
 		super(options, xmlTpl, xmlValuesTpl, cTemplatefile);
+		this.optimicaXmlTpl = optimicaXmlTpl;
+		this.optimicaCTemplatefile = optimicaCTemplatefile;
 	}	
 		
 	/**
@@ -115,7 +121,7 @@ public class OptimicaCompiler extends ModelicaCompiler{
 		InstClassDecl icd = instantiateModel(sr, cl);
 			
 		// flattening
-		FOptClass fc = flattenModel(icd);
+		FClass fc = flattenModel(icd);
 
 		// Generate code?
 		if (getXMLTpl() != null && getXMLValuesTpl() != null && getCTemplate() != null) 
@@ -127,9 +133,17 @@ public class OptimicaCompiler extends ModelicaCompiler{
 	
 	/**
 	 * \brief Create a new FOptClass object.
+	 * @param icd A reference to a instance class - in compiler extensions
+	 * it may be useful to be able to extract the kind of class is being
+	 * instantiated: model, block etc.
+
 	 */
-	protected FOptClass createFClass() {
-		return new FOptClass();
+	protected FClass createFClass(InstClassDecl icd) {
+		if (icd.isOptimizationClass()) {
+			return new FOptClass();
+		} else {
+			return new FClass();
+		}
 	}
 
 	/**
@@ -138,7 +152,7 @@ public class OptimicaCompiler extends ModelicaCompiler{
 	 * @param icd
 	 *            A reference to the model instance.
 	 * 
-	 * @return FOptClass object representing the flattened Optimica model.
+	 * @return FOptClass or FClass object representing the flattened model.
 	 * 
 	 * @throws CompilerException
 	 *             If errors have been found during the flattening.
@@ -147,23 +161,61 @@ public class OptimicaCompiler extends ModelicaCompiler{
 	 * @throws ModelicaClassNotFoundException
 	 *             If the Modelica class to flatten is not found.
 	 */
-	public FOptClass flattenModel(InstClassDecl icd) 
+	public FClass flattenModel(InstClassDecl icd) 
 			throws CompilerException, ModelicaClassNotFoundException, IOException {
-		return (FOptClass) super.flattenModel(icd);
+		return super.flattenModel(icd);
 	}
 	
 	/**
 	 * \brief Create a new OptimicaXMLGenerator object.
 	 */
-	protected OptimicaXMLGenerator createXMLGenerator(FClass fc) {
-		return new OptimicaXMLGenerator(new PrettyPrinter(), '$', (FOptClass) fc);
+	protected XMLGenerator createXMLGenerator(FClass fc) {
+		if (fc instanceof FOptClass) {
+			return new OptimicaXMLGenerator(new PrettyPrinter(), '$', (FOptClass) fc);
+		} else {
+			return new XMLGenerator(new PrettyPrinter(), '$', fc);
+		}
 	}
 	
 	/**
 	 * \brief Create a new OptimicaCGenerator object.
 	 */
-	protected OptimicaCGenerator createCGenerator(FClass fc) {
-		return new OptimicaCGenerator(new PrettyPrinter(), '$', (FOptClass) fc);
+	protected CGenerator createCGenerator(FClass fc) {
+		if (fc instanceof FOptClass) {
+			return new OptimicaCGenerator(new PrettyPrinter(), '$', (FOptClass) fc);
+		} else {
+			return new CGenerator(new PrettyPrinter(), '$', fc);
+		}
+	}
+
+	/**
+	 * \brief get the XML template. 
+	 * 
+	 * @param fc A reference to an FClass object. This is convenient in
+	 * extensions of ModelicaCompiler that need to distinguish between
+	 * different kinds of flattened classes.
+	 */
+	protected String getXmlTpl(FClass fc) {
+		if (fc instanceof FOptClass) {
+			return this.optimicaXmlTpl;
+		} else {
+			return this.xmlTpl;
+		}
+	}
+
+	/**
+	 * \brief get the C template. 
+	 * 
+	 * @param fc A reference to an FClass object. This is convenient in
+	 * extensions of ModelicaCompiler that need to distinguish between
+	 * different kinds of flattened classes.
+	 */
+	protected String getCTemplatefile(FClass fc) {
+		if (fc instanceof FOptClass) {
+			return this.optimicaCTemplatefile;
+		} else {
+			return this.cTemplatefile;
+		}
 	}
 
 	protected OptimicaCompiler(String[] args, Hashtable<String, String> programarguments) {

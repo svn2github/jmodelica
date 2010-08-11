@@ -815,6 +815,12 @@ aspect OptimicaFlatAPI {
 	
 	eq FOptClass.getFEquationBlock().inEquationSection() = true;
 	
+	syn boolean Restriction.isOptimizationClass() = false;
+	eq OptimizationClass.isOptimizationClass() = true;
+	syn boolean ClassDecl.isOptimizationClass() = false;
+	eq BaseClassDecl.isOptimizationClass() = getRestriction().isOptimizationClass();
+	syn boolean InstClassDecl.isOptimizationClass() = getClassDecl().isOptimizationClass();
+	
 }
 
 aspect OptimicaFVariableUses {

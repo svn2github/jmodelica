@@ -26,7 +26,7 @@ aspect ClassAttributes {
 		builtInDef += "Real objective = 1;\n"; 
 		builtInDef += "Real objectiveIntegrand = 1;\n"; 
 		builtInDef += "parameter Real startTime=0;\n";
-		builtInDef += "parameter Real finalTime=0;\n";
+		builtInDef += "parameter Real finalTime=1;\n";
 		builtInDef += "parameter Boolean static=false;\n";
     	builtInDef += "end ClassAttributes;\n";
    
@@ -65,6 +65,14 @@ aspect ClassAttributes {
 		return l;
 	}
 
+ 	eq InstOptClassDecl.localInstModifications() {
+		ArrayList<InstModification> l = new ArrayList<InstModification>();
+		// Add modifications from the class modification list
+		if (hasInstClassModification())
+			l.add(getInstClassModification());			
+		return l;
+	}
+	
 	eq InstOptClassDecl.getInstClassModification().lookupInstComponentInInstElement(String name) {
 		
 		HashSet set = new HashSet();
@@ -88,9 +96,13 @@ aspect ClassAttributes {
 		memberInstComponent(name);
 	
 	eq InstOptClassDecl.memberInstComponent(String name) {
-		//log.debug("InstOptClassDecl.memberInstComponent: " + name);
+		log.debug("InstOptClassDecl.memberInstComponent: " + name);
 		HashSet set = new HashSet(4);
 		set.addAll(super.memberInstComponent(name));
+		if (set.size()>0) {
+			log.debug("Found component amongst the declared ones!");
+			return set;
+		}
 		for (int i=0;i<getNumInstClassAttribute();i++) {
 			if (getInstClassAttribute(i).matchInstComponentDecl(name))
 				set.add(getInstClassAttribute(i));

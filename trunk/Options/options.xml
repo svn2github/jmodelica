@@ -85,5 +85,13 @@
 				</Description>
 			</BooleanAttributes>
 		</Option>
+	        <Option type="boolean">
+			<BooleanAttributes key="normalize_minimum_time_problems" value="true">
+				<Description>
+                                     When this option is set to true (default is true) then minimum time optimal control problems encoded in Optimica are converted to fixed interval problems by scaling of the derivative variables. 
+				</Description>
+			</BooleanAttributes>
+		</Option>
 	</Options>	
+
 </OptionRegistry>

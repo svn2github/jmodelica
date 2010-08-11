@@ -1609,8 +1609,25 @@ aspect GeneralHelpers {
 		public void remove() {
 			throw new UnsupportedOperationException();
 		}
-		
 	}
+
+	syn boolean Restriction.isModel() = false;
+	eq Model.isModel() = true;
+	syn boolean ClassDecl.isModel() = false;
+	eq BaseClassDecl.isModel() = getRestriction().isModel();
+	syn boolean InstClassDecl.isModel() = getClassDecl().isModel();
+
+	syn boolean Restriction.isBlock() = false;
+	eq Block.isBlock() = true;
+	syn boolean ClassDecl.isBlock() = false;
+	eq BaseClassDecl.isBlock() = getRestriction().isBlock();
+	syn boolean InstClassDecl.isBlock() = getClassDecl().isBlock();
+
+	syn boolean Restriction.isClass() = false;
+	eq MClass.isClass() = true;
+	syn boolean ClassDecl.isClass() = false;
+	eq BaseClassDecl.isClass() = getRestriction().isClass();
+	syn boolean InstClassDecl.isClass() = getClassDecl().isClass();
 
 	/**
 	 * \brief Round a number to 2 decimals if it is < 10, 1 decimal otherwise.
@@ -1619,7 +1636,7 @@ aspect GeneralHelpers {
 		double round = val < 10.0 ? 100.0 : 10.0;
 		return Math.round(val * round) / round;
 	}
-	
+
 	/**
 	 * \brief Creates a human-readable memory size string (e.g. 2.34 kB).
 	 * 

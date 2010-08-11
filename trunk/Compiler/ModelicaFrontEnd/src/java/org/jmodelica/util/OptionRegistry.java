@@ -49,7 +49,11 @@ public class OptionRegistry {
 					"validate with FMI schema the option generate_xml_equations must also be false."),
 			VAR_SCALE  ("enable_variable_scaling",   false, 
 					"If this option is true (default is false), then the \"nominal\" attribute will " + 
-					"be used to scale variables in the model.");
+					"be used to scale variables in the model."),
+			MIN_T_TRANS  ("normalize_minimum_time_problems", true, 
+							" When this option is set to true (default is true) then minimum time " +
+							"optimal control problems encoded in Optimica are converted to fixed " + 
+							"interval problems by scaling of the derivative variables.");
 			
 			public String key;
 			public String desc;
@@ -80,6 +84,7 @@ public class OptionRegistry {
 			optionsMap = new HashMap<String,Option>();
 			for (DefOpt o : DefOpt.values())
 				defaultOption(o);
+//			defaultBooleanOption(DefOpt.MIN_T_TRANS,  true);
 		}
 
 		public OptionRegistry(OptionRegistry registry) {

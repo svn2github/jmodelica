@@ -24,6 +24,7 @@ import nose.tools
 import jmodelica
 from jmodelica.tests import testattr
 from jmodelica.compiler import OptimicaCompiler
+from jmodelica.compiler import ModelicaCompiler
 from jmodelica import jmi
 from jmodelica.initialization.ipopt import NLPInitialization
 from jmodelica.initialization.ipopt import InitializationOptimizer
@@ -37,6 +38,7 @@ path_to_examples = os.path.join('Python','jmodelica','examples')
 path_to_tests = os.path.join(jm_home, "Python", "jmodelica", "tests")
 
 oc = OptimicaCompiler()
+mc = ModelicaCompiler()
 
 class TestNLPInitWrappers:
     """ Tests for NLPInitialization wrapper methods.
@@ -137,8 +139,8 @@ class TestNLPInit:
         cpath_daeinit = "DAEInitTest"
         fname_daeinit = cpath_daeinit.replace('.','_',1)
         
-        oc.set_boolean_option('state_start_values_fixed',True)
-        oc.compile_model(cpath_daeinit, fpath_daeinit, target='ipopt')
+        mc.set_boolean_option('state_start_values_fixed',True)
+        mc.compile_model(cpath_daeinit, fpath_daeinit, target='ipopt')
     
     def setUp(self):
         """Test setUp. Load the test model."""                    

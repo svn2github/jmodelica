@@ -376,7 +376,12 @@ class NLPCollocation(object):
         
         # Get the result
         self.opt_sim_get_result(p_opt,t_,dx_,x_,u_,w_)
-        
+
+        # If a normalized minimum time problem has been solved,
+        # then, the time vector should be rescaled
+        #n=[names[1] for names in self._model.get_p_opt_variable_names()]
+        #non_fixed_interval = ('finalTime' in n) or ('startTime' in n)
+
         data = N.zeros((n_points,1+n_real_dx+n_real_x+n_real_u+n_real_w))
         data[:,0] = t_
         for i in range(n_real_dx):
@@ -504,7 +509,6 @@ class NLPCollocation(object):
 
         return p_opt, data
 
-    
     def export_result_dymola(self, file_name='', format='txt'):
         """
         Export the optimization result in Dymola format. The function
