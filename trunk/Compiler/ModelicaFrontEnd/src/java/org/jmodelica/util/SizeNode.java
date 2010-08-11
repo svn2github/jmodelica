@@ -86,42 +86,34 @@ public class SizeNode implements TreeNode {
 		child.parent = this;
 	}
 
-	@Override
 	public TreeNode getChildAt(int childIndex) {
 		return children.get(childIndex);
 	}
 
-	@Override
 	public int getChildCount() {
 		return children != null ? children.size() : 0;
 	}
 
-	@Override
 	public TreeNode getParent() {
 		return parent;
 	}
 
-	@Override
 	public int getIndex(TreeNode node) {
 		return children != null ? children.indexOf(node) : -1;
 	}
 
-	@Override
 	public boolean getAllowsChildren() {
 		return true;
 	}
 
-	@Override
 	public boolean isLeaf() {
 		return getChildCount() == 0;
 	}
 
-	@Override
 	public Enumeration children() {
 		return Collections.enumeration(children);
 	}
 	
-	@Override
 	public String toString() {
 		return size + " - " + node;
 	}

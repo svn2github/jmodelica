@@ -10,7 +10,6 @@ import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.filechooser.FileFilter;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class SizeTree extends JFrame {
 	public SizeTree(String file) throws IOException {
@@ -27,7 +26,6 @@ public class SizeTree extends JFrame {
 
 	public static void main(String[] args) throws IOException {
 		JFileChooser chooser = new JFileChooser(args.length > 0 ? args[0] : ".");
-		chooser.addChoosableFileFilter(new FileNameExtensionFilter("Text files", "txt"));
 		chooser.setFileFilter(new ProfileSizeFileFilter());
 		int returnVal = chooser.showOpenDialog(null);
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
