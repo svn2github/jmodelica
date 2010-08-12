@@ -82,7 +82,7 @@ aspect ComplianceCheck {
 		super.complianceCheck();
 		if (isString())
 			compliance("String variables are not supported");
-		if (isInteger() && !variability().lessOrEqual(fParameter()))
+		if (isInteger() && !variability().lessOrEqual(fParameter()) && !inFunction())
 			compliance("Integer variables are not supported, only constants and parameters");
 		if (isBoolean() && !variability().lessOrEqual(fParameter()))
 			compliance("Boolean variables are not supported, only constants and parameters");

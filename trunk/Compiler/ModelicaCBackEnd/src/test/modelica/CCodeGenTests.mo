@@ -3245,4 +3245,44 @@ end SimpleExternal7;
 //end SimpleExternal8;
 
 
+
+model IntegerInFunc1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="IntegerInFunc1",
+         description="Using Integer variable in function",
+         template="$C_functions$",
+         generatedCode="
+void func_CCodeGenTests_IntegerInFunc1_f_def(jmi_ad_var_t i_v, jmi_array_t* a_a, jmi_ad_var_t* x_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t x_v;
+    x_v = jmi_array_val_1(a_a, i_v);
+    if (x_o != NULL) *x_o = x_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_IntegerInFunc1_f_exp(jmi_ad_var_t i_v, jmi_array_t* a_a) {
+    jmi_ad_var_t x_v;
+    func_CCodeGenTests_IntegerInFunc1_f_def(i_v, a_a, &x_v);
+    return x_v;
+}
+
+")})));
+
+	function f
+		input Integer i;
+		input Real a[3];
+		output Real x;
+	algorithm
+		x := a[i];
+	end f;
+	
+	Real x[3] = {2.3, 4.2, 1.5};
+	Real y = f(1, x);
+	Real z = f(2, x);
+end IntegerInFunc1;
+
+
+
 end CCodeGenTests;
