@@ -29,7 +29,7 @@ import numpy.ctypeslib as Nct
 from zipfile import ZipFile
 from lxml import etree
 from operator import itemgetter
-
+import warnings
 
 
 class FMIException(Exception):
@@ -1197,17 +1197,20 @@ class FMIModel(object):
         
         
         if tolControlled:
-            tolcontrolledC = self._fmiBoolean('1')
+            tolcontrolledC = self._fmiBoolean(self._fmiTrue)
             tol = self._XMLTolerance
         else:
-            tolcontrolledC = self._fmiBoolean('0')
+            tolcontrolledC = self._fmiBoolean(self._fmiFalse)
             tol = self._fmiReal(0.0)
         
         self._eventInfo = self._fmiEventInfo('0','0','0','0','0',self._fmiReal(0.0))
         
         status = self._fmiInitialize(self._model, tolcontrolledC, tol, C.byref(self._eventInfo))
         
-        if status > 0:
+        if status == 1:
+            warnings.warn('Initialize returned with a warning. Check the log for information.')
+        
+        if status > 1:
             raise FMIException('Failed to Initialize the model.')
     
     
