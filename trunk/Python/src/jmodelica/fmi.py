@@ -1099,7 +1099,30 @@ class FMIModel(object):
         
         if status != 0:
             raise FMIException('Failed to set the String values.')
+    
+    def set_debug_logging(self,flag):
+        """
+        Specifies if the debugging should be turned on or off.
         
+            Parameters::
+            
+                flag     - Boolean value
+                
+            Return::
+            
+                None
+                
+        Calss the low-level FMI function: fmiSetDebuggLogging
+        """
+        if flag:
+            status = self._fmiSetDebugLogging(self._model, self._fmiTrue)
+        else:
+            status = self._fmiSetDebugLogging(self._model, self._fmiFalse)
+            
+        if status != 0:
+            raise FMIException('Failed to set the debugging option.')
+        
+    
     def get_nominal(self, valueref):
         """
         Returns the nominal value from valueref.
