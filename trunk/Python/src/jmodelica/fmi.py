@@ -1159,12 +1159,18 @@ class FMIModel(object):
         else:
             return False
     
-    def initialize(self):
+    def initialize(self, tolControlled=True):
         """
         Initializes the model and computes initial values for all variables, including
         setting the start values of variables defined with a the start attribute in the
         XML-file. 
-        
+            
+            Parameters::
+            
+                tolControllled - If the model are going to be called by numerical solver using
+                                 step-size control.
+                               - Boolean flag.
+            
             Returns::
             
                 None
@@ -1190,16 +1196,16 @@ class FMIModel(object):
             self.time = self._XMLStartTime
         
         
-        if self._tolControlled:
-            tolcontrolled = self._fmiBoolean(self._fmiTrue)
+        if tolControlled:
+            tolcontrolledC = self._fmiBoolean(self._fmiTrue)
             tol = self._XMLTolerance
         else:
-            tolcontrolled = self._fmiBoolean(self._fmiFalse)
+            tolcontrolledC = self._fmiBoolean(self._fmiFalse)
             tol = self._fmiReal(0.0)
         
         self._eventInfo = self._fmiEventInfo('0','0','0','0','0',self._fmiReal(0.0))
         
-        status = self._fmiInitialize(self._model, tolcontrolled, tol, C.byref(self._eventInfo))
+        status = self._fmiInitialize(self._model, tolcontrolledC, tol, C.byref(self._eventInfo))
         
         if status > 0:
             raise FMIException('Failed to Initialize the model.')
