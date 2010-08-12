@@ -1197,10 +1197,10 @@ class FMIModel(object):
         
         
         if tolControlled:
-            tolcontrolledC = self._fmiBoolean(self._fmiTrue)
+            tolcontrolledC = self._fmiBoolean('1')
             tol = self._XMLTolerance
         else:
-            tolcontrolledC = self._fmiBoolean(self._fmiFalse)
+            tolcontrolledC = self._fmiBoolean('0')
             tol = self._fmiReal(0.0)
         
         self._eventInfo = self._fmiEventInfo('0','0','0','0','0',self._fmiReal(0.0))
