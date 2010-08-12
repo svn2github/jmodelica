@@ -832,7 +832,7 @@ class ResultWriterDymola (ResultWriter):
                     elif types_noalias[i] == xmlparser.INTEGER:
                         str_text = str_text + (" %12.12f" % (self.model.get_integer([name[0]])))
                     elif types_noalias[i] == xmlparser.BOOLEAN:
-                        str_text = str_text + (" %12.12f" % (float(self.model.get_boolean([name[0]]))))
+                        str_text = str_text + (" %12.12f" % (float(self.model.get_boolean([name[0]])[0])))
                         
                     
         f.write(str_text)

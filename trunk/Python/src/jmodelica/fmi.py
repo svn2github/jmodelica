@@ -163,6 +163,7 @@ class FMIModel(object):
         #Internal values
         self._file_open = False
         self._npoints = 0
+        self._log = []
     
     def _load_c(self):
         """
@@ -1190,10 +1191,10 @@ class FMIModel(object):
         
         
         if self._tolControlled:
-            tolcontrolled = self._fmiBoolean('1')
+            tolcontrolled = self._fmiBoolean(self._fmiTrue)
             tol = self._XMLTolerance
         else:
-            tolcontrolled = self._fmiBoolean('0')
+            tolcontrolled = self._fmiBoolean(self._fmiFalse)
             tol = self._fmiReal(0.0)
         
         self._eventInfo = self._fmiEventInfo('0','0','0','0','0',self._fmiReal(0.0))
@@ -1204,7 +1205,7 @@ class FMIModel(object):
             raise FMIException('Failed to Initialize the model.')
     
     
-    def instantiate_model(self, name='Model', logging='0'):
+    def instantiate_model(self, name='Model', logging=False):
         """
         Instantiate the model.
         
@@ -1216,7 +1217,7 @@ class FMIModel(object):
                         
                 logging
                         - Defines if the logging should be turned on or off.
-                        - Default '0', no logging.
+                        - Default False, no logging.
                         
             Returns::
             
@@ -1226,10 +1227,10 @@ class FMIModel(object):
         """
         instance = self._fmiString(name)
         guid = self._fmiString(self._GUID)
-        if logging == '0':
-            logging = self._fmiBoolean(self._fmiFalse)
-        else:
+        if logging:
             logging = self._fmiBoolean(self._fmiTrue)
+        else:
+            logging = self._fmiBoolean(self._fmiFalse)
         
         functions = self._fmiCallbackFunctions()#(self._fmiCallbackLogger(self.fmiCallbackLogger),self._fmiCallbackAllocateMemory(self.fmiCallbackAllocateMemory), self._fmiCallbackFreeMemory(self.fmiCallbackFreeMemory))
         
@@ -1237,12 +1238,15 @@ class FMIModel(object):
         functions.logger = self._fmiCallbackLogger(self.fmiCallbackLogger)
         functions.allocateMemory = self._fmiCallbackAllocateMemory(self.fmiCallbackAllocateMemory)
         functions.freeMemory = self._fmiCallbackFreeMemory(self.fmiCallbackFreeMemory)
+        self._functions = functions
+        self._model = self._fmiInstantiateModel(instance,guid,self._functions,logging)
         
-        self._model = self._fmiInstantiateModel(instance,guid,functions,logging)
-        
-    def fmiCallbackLogger(self,*args):
-        print 'Logger'
-        pass
+    def fmiCallbackLogger(self,c, instanceName, status, category, *message):
+        """
+        Logg the information from the FMU.
+        """
+        self._log += [[instanceName, status, category, message]]
+
     def fmiCallbackAllocateMemory(self, nobj, size):
         """
         Callback function for the FMU which allocates memory needed by the model.
@@ -1253,8 +1257,18 @@ class FMIModel(object):
         """
         Callback function for the FMU which deallocates memory allocated by fmiCallbackAllocateMemory
         """
-        print 'Free'
         self._free(obj)
+    
+    def get_log(self):
+        """
+        Returns the log information as a list. Empty if logging is set to False.
+        
+            Returns::
+            
+                log     - A list.
+        """
+        
+        return self._log
     
     #XML PART
     def get_variable_descriptions(self, include_alias=True):
@@ -1353,14 +1367,12 @@ class FMIModel(object):
         
         #--ERROR
         if sys.platform == 'win32':
-            pass
-            #try:
-            #    self._fmiFreeModelInstance(self._model)
-            #except WindowsError:
-            #    print 'Failed to free model instance.'
+            try:
+                self._fmiFreeModelInstance(self._model)
+            except WindowsError:
+                print 'Failed to free model instance.'
         else:
-            pass
-            #self._fmiFreeModelInstance(self._model)
+            self._fmiFreeModelInstance(self._model)
            
         #Remove the temporary xml
         os.remove(self._tempdir+os.sep+self._tempxml)
