@@ -288,7 +288,7 @@ class AssimuloFMIAlg(AlgorithmBase):
                 argument can not be found for the chosen solver.
          """
         rtol, atol = self.model.get_tolerances()
-        
+        solver_args = solver_args.copy()
         #If the tolerances are not set specifically, they are set according to the 'DefaultExperiment'
         #from the XML file.
         try:
