@@ -122,6 +122,7 @@ aspect OptimicaPrettyPrint {
 
 aspect FlatOptimicaPrettyPrint {
 	public void FOptClass.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		String nextInd = p.indent(indent);
 		str.print(indent+"optimization "+ name());
 		getFAttributeList().prettyPrintFAttributeList(str,p,o);
 		str.print("\n");
@@ -148,6 +149,11 @@ aspect FlatOptimicaPrettyPrint {
 				str.print(";\n");
 			}
 		}
+	  	
+		if (getNumFParameterEquation()>0)
+			str.print(indent + "parameter equation\n");
+		getFParameterEquations().prettyPrintWithFix(p, str, nextInd, o, "", ";\n");
+	  	
 		str.print(indent + "constraint \n");
 	  	for (int j=0;j<getNumFConstraint();j++) {
 			//log.debug("FClass.prettyPrint(): Equation nr: " + j);
