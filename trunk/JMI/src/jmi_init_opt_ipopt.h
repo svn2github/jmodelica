@@ -96,6 +96,20 @@ int jmi_init_opt_ipopt_set_int_option(jmi_init_opt_ipopt_t *jmi_init_opt_ipopt, 
  */
 int jmi_init_opt_ipopt_set_num_option(jmi_init_opt_ipopt_t *jmi_init_opt_ipopt, char* key, double val);
 
+/**
+ * \brief Get statistics from the last optimization run.
+ *
+ * @param jmi_init_opt_ipopt A jmi_init_opt_ipopt_t struct.
+ * @param return_status Return status from IPOPT (Output)
+ * @param nbr_iter Number of iterations (Output)
+ * @param objective Final value of objective function (Output)
+ * @param total_exec_time Execution time (Output)
+ * @return Error code.
+ */
+int jmi_init_opt_ipopt_get_statistics(jmi_init_opt_ipopt_t* jmi_init_opt_ipopt,
+		int* return_status, int* nbr_iter, jmi_real_t* objective,
+		jmi_real_t* total_exec_time);
+
 /* @} */
 
 #ifdef __cplusplus

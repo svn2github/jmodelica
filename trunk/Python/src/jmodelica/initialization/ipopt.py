@@ -70,6 +70,12 @@ class InitializationOptimizer(object):
             self._nlp_init._jmi_model._dll.jmi_init_opt_ipopt_set_num_option.argtypes = [ct.c_void_p,
                                                                                          ct.c_char_p,
                                                                                          c_jmi_real_t]
+            self._nlp_init._jmi_model._dll.jmi_init_opt_ipopt_get_statistics.argtypes = [ct.c_void_p,
+                                                                                         ct.POINTER(ct.c_int),
+                                                                                         ct.POINTER(ct.c_int),
+                                                                                         ct.POINTER(c_jmi_real_t),
+                                                                                         ct.POINTER(c_jmi_real_t)]
+
         except AttributeError, e:
             pass        
                
@@ -113,6 +119,28 @@ class InitializationOptimizer(object):
         """
         if self._nlp_init._jmi_model._dll.jmi_init_opt_ipopt_set_num_option(self._ipopt_init, key, val) is not 0:
             raise jmi.JMIException("The Ipopt real option " + key + " is unknown")
+
+    def init_opt_ipopt_get_statistics(self):
+        """
+        Get statistics from the last optimization run.
+
+        Returns:
+            return_status -- Return status from IPOPT
+            nbr_iter -- Number of iterations 
+            objective -- Final value of objective function
+            total_exec_time -- Execution time
+        """
+        return_code = ct.c_int()
+        iters = ct.c_int()
+        objective = c_jmi_real_t()
+        exec_time = c_jmi_real_t()
+        if self._nlp_init._jmi_model._dll.jmi_init_opt_ipopt_get_statistics(self._ipopt_init,
+                                                                            byref(return_code),
+                                                                            byref(iters),
+                                                                            byref(objective),
+                                                                            byref(exec_time)) is not 0:
+            raise jmi.JMIException("Error when retrieve statistics - optimization problem may not be solved.")
+        return (return_code.value,iters.value,objective.value,exec_time.value)
 
 class NLPInitialization(object):
     """
@@ -375,6 +403,8 @@ class NLPInitialization(object):
                                                                                       ndim=1,
                                                                                       shape=dh_n_nz.value,
                                                                                       flags='C')]
+            self._jmi_model._dll.jmi_init_opt_set_initial_from_model.argtypes = [ct.c_void_p]
+            
             #dll.jmi_opt_sim_write_file_matlab.argtypes = [ct.c_void_p,
             #                                              ct.c_char_p]
             #dll.jmi_opt_sim_get_result.argtypes = [ct.c_void_p,
@@ -396,10 +426,7 @@ class NLPInitialization(object):
             #                                       Nct.ndpointer(dtype=c_jmi_real_t,
             #                                                     ndim=1,
             #                                                     flags='C')]
-            # This is not correct, the n_real_x referes to the wrong x vector
-            # In this case, n_real_x refers to the size of the optimization vector
-            # in the initialization problem not to the number of states.
-            # _returns_ndarray(dll.jmi_init_opt_get_x, c_jmi_real_t, n_real_x.value, order='C')
+            jmi._returns_ndarray(self._jmi_model._dll.jmi_init_opt_get_x, c_jmi_real_t, n_real_x.value, order='C')
         except AttributeError, e:
             pass                 
         
@@ -529,6 +556,13 @@ class NLPInitialization(object):
         """
         if self._jmi_model._dll.jmi_init_opt_dh_nz_indices(self._jmi_init_opt, irow, icol) is not 0:
             raise jmi.JMIException("Getting the indices of the non-zeros in the equality constraint Jacobian failed.")
+
+    def init_opt_set_initial_from_model(self):
+        """ 
+        Set the initial point of the NLP based on values in the JMI model.                
+        """
+        if self._jmi_model._dll.jmi_init_opt_set_initial_from_model(self._jmi_init_opt) is not 0:
+            raise jmi.JMIException("Could not set initial point from model.")
 
     def export_result_dymola(self, file_name='', format='txt'):
         """

@@ -119,7 +119,7 @@ int jmi_init_opt_get_initial(jmi_init_opt_t *jmi_init_opt, jmi_real_t *x_init);
   * @param jmi_init_opt A jmi_init_opt_t struct.
   * @return Error code.
   */
-//int jmi_init_opt_set_initial_from_model(jmi_init_opt_t *jmi_init_opt);
+ int jmi_init_opt_set_initial_from_model(jmi_init_opt_t *jmi_init_opt);
 
 /**
  * \brief The main struct in the jmi_init_opt interface is jmi_init_opt_t.

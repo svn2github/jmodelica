@@ -253,6 +253,12 @@ class TestStaticOptimizationDependentParameters:
         k = self.res.get_variable_data("k")
         assert k.x[-1] == 1.1, "Wrong value of optimized parameter."
 
+    @testattr(ipopt = True)
+    def test_initialization_from_model(self):
+        self.model.set_value("k",-1)
+        self.nlp.init_opt_set_initial_from_model()
+        assert self.nlp.init_opt_get_x()[0] == -1, "Wrong value of parameter."
+
 class TestOptInitBlockingFactors:
     @classmethod
     def setUpClass(cls):

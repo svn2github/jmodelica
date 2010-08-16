@@ -70,9 +70,18 @@ bool jmi_init_opt_TNLP::get_starting_point(Index n, bool init_x, Number* x,
 				      Number* lambda)
 {
   DBG_ASSERT(init_x == true && init_z == false && init_lambda == false);
-  if (jmi_init_opt_get_initial(problem_, x) < 0) {
-	  return false;
+
+  int i;
+  // Copy values from model
+  if (jmi_init_opt_set_initial_from_model(problem_) < 0) {
+ 	  return false;
+   }
+
+  // Get initial point
+  for (i=0;i<problem_->n_x;i++) {
+	  x[i] = problem_->x[i];
   }
+
   return true;
 }
 

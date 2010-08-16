@@ -19,6 +19,7 @@
 
 #include "jmi_init_opt_ipopt.h"
 #include "IpIpoptApplication.hpp"
+#include "IpSolveStatistics.hpp"
 #include "jmi_init_opt_TNLP.hpp"
 
 //using namespace Ipopt;
@@ -26,6 +27,9 @@
 struct jmi_init_opt_ipopt_t{
 	jmi_init_opt_t *jmi_init_opt;
 	Ipopt::SmartPtr<Ipopt::IpoptApplication> ipopt_app;
+	Ipopt::SmartPtr<Ipopt::TNLP> tnlp;
+	int solved;
+	int return_status;
 };
 
 int jmi_init_opt_ipopt_new(jmi_init_opt_ipopt_t **jmi_init_opt_ipopt, jmi_init_opt_t *jmi_init_opt) {
@@ -37,6 +41,9 @@ int jmi_init_opt_ipopt_new(jmi_init_opt_ipopt_t **jmi_init_opt_ipopt, jmi_init_o
 
 	nlp->ipopt_app = new Ipopt::IpoptApplication();
 	nlp->ipopt_app->Options()->SetStringValue("hessian_approximation", "limited-memory");
+	nlp->tnlp = new jmi_init_opt_TNLP(jmi_init_opt);
+	nlp->solved = 0;
+	nlp->return_status = -1;
 
 	return 0;
 }
@@ -53,12 +60,10 @@ int jmi_init_opt_ipopt_solve(jmi_init_opt_ipopt_t *jmi_init_opt_ipopt) {
 		return false;
 	}
 
-    SmartPtr<TNLP> tnlp;
-
-	tnlp = new jmi_init_opt_TNLP(jmi_init_opt_ipopt->jmi_init_opt);
-
 	Ipopt::ApplicationReturnStatus status;
-	status = jmi_init_opt_ipopt->ipopt_app->OptimizeTNLP(tnlp);
+	status = jmi_init_opt_ipopt->ipopt_app->OptimizeTNLP(jmi_init_opt_ipopt->tnlp);
+	jmi_init_opt_ipopt->solved = 1;
+	jmi_init_opt_ipopt->return_status = status;
 
 	return status;
 
@@ -90,6 +95,21 @@ int jmi_init_opt_ipopt_set_num_option(jmi_init_opt_ipopt_t *jmi_init_opt_ipopt, 
 		return -1;
 	}
 }
+
+int jmi_init_opt_ipopt_get_statistics(jmi_init_opt_ipopt_t* jmi_init_opt_ipopt,
+		int* return_status, int* nbr_iter, jmi_real_t* objective,
+		jmi_real_t* total_exec_time) {
+	if (jmi_init_opt_ipopt->solved==1) {
+		*return_status = jmi_init_opt_ipopt->return_status;
+		*nbr_iter = jmi_init_opt_ipopt->ipopt_app->Statistics()->IterationCount();
+		*objective = jmi_init_opt_ipopt->ipopt_app->Statistics()->FinalObjective();
+		*total_exec_time = jmi_init_opt_ipopt->ipopt_app->Statistics()->TotalCPUTime();
+		return 0;
+	} else {
+		return -1;
+	}
+}
+
 
 /*
 int jmi_init_opt_ipopt_get_starting_point(jmi_init_opt_ipopt_t *jmi_init_opt_ipopt, Index n, int init_x, Number* x,

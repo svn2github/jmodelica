@@ -392,6 +392,7 @@ int jmi_init_opt_get_initial(jmi_init_opt_t *jmi_init_opt, jmi_real_t *x_init) {
 	int i;
 	for (i=0;i<jmi_init_opt->n_x;i++) {
 		x_init[i] = jmi_init_opt->x_init[i];
+		//x_init[i] = jmi_init_opt->x[i];
 	}
 	return 0;
 }
@@ -408,11 +409,38 @@ int jmi_init_opt_set_initial(jmi_init_opt_t *jmi_init_opt,
 	return 0;
 }
 
-/*
+
 int jmi_init_opt_set_initial_from_model(jmi_init_opt_t *jmi_init_opt) {
 
+	int i;
+	jmi_real_t* pi = jmi_get_real_pi(jmi_init_opt->jmi);
+	jmi_real_t* dx = jmi_get_real_dx(jmi_init_opt->jmi);
+	jmi_real_t* x = jmi_get_real_x(jmi_init_opt->jmi);
+	jmi_real_t* w = jmi_get_real_w(jmi_init_opt->jmi);
+
+	// Copy values for free parameters
+	for (i=0;i<jmi_init_opt->n_p_free;i++) {
+		jmi_init_opt->x[i] = pi[jmi_init_opt->p_free_indices[i]];
+	}
+
+	// Copy values for derivatives
+	for (i=0;i<jmi_init_opt->jmi->n_real_dx;i++) {
+		jmi_init_opt->x[i + jmi_init_opt->n_p_free] = dx[i];
+	}
+
+	// Copy values for differentiated variables
+	for (i=0;i<jmi_init_opt->jmi->n_real_x;i++) {
+		jmi_init_opt->x[i + jmi_init_opt->n_p_free + jmi_init_opt->jmi->n_real_dx] = x[i];
+	}
+
+	// Copy values for the algebraics
+	for (i=0;i<jmi_init_opt->jmi->n_real_w;i++) {
+		jmi_init_opt->x[i + jmi_init_opt->n_p_free + jmi_init_opt->jmi->n_real_dx + jmi_init_opt->jmi->n_real_x] = w[i];
+	}
+
+	return 0;
+
 }
-*/
 
 int jmi_init_opt_f(jmi_init_opt_t *jmi_init_opt, jmi_real_t *f) {
 	if (jmi_init_opt->jmi->init == NULL) {
