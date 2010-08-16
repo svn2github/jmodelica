@@ -295,7 +295,7 @@ def test_simulate_initialize_arg():
     # Since simulation without initialization fails far down in Sundials
     # no "proper" exception is thrown which means that I can only test that
     # the general Exception is returned which means that the test is pretty
-    # unspecific (the test will pass for every type of error thrown). Therfore,
+    # unspecific (the test will pass for every type of error thrown). Therefore,
     # I first test that running the simulation with default settings succeeds, so
     # at least one knows that the error has with initialization to do.
     nose.tools.ok_(jmodelica.simulate(cpath_minit, fpath_minit))
@@ -304,9 +304,14 @@ def test_simulate_initialize_arg():
                              cpath_minit,
                              fpath_minit,
                              alg_args={'initialize':False})
-    
 
-   
+@testattr(stddist = True)
+def test_dependent_parameters():
+    """ Test evaluation of dependent parameters. """
+    mc = ModelicaCompiler()
+    path = os.path.join(jm_home, path_to_tests, 'files', 'DepPar.mo')
+    model = mc.compile_model('DepPar.DepPar1', path)
     
-
-  
+    assert (model.get_value('p1') == 1.0), 'Wrong value of independent parameter p1'
+    assert (model.get_value('p2') == 2.0), 'Wrong value of dependent parameter p2'
+    assert (model.get_value('p3') == 6.0), 'Wrong value of dependent parameter p3'

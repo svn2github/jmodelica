@@ -217,7 +217,6 @@ model FunctionEval5
 end FunctionEval5;
 
 
-
 model FunctionEval6
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.XMLCodeGenTestCase(
@@ -225,7 +224,6 @@ model FunctionEval6
          description="Constant evaluation of functions: array output",
          template="$XML_variables$",
          generatedCode="
-
 		<ScalarVariable name=\"x[1]\" valueReference=\"0\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
 			<Real relativeQuantity=\"false\" start=\"0.0\" />
 			<isLinear>true</isLinear>
@@ -236,26 +234,27 @@ model FunctionEval6
 			<isLinear>true</isLinear>
 			<VariableCategory>independentParameter</VariableCategory>
 		</ScalarVariable>
-		<ScalarVariable name=\"y[1]\" valueReference=\"2\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+		<ScalarVariable name=\"temp_1[1]\" valueReference=\"2\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
 			<Real relativeQuantity=\"false\" start=\"1.0\" />
 			<isLinear>true</isLinear>
 			<VariableCategory>dependentParameter</VariableCategory>
 		</ScalarVariable>
-		<ScalarVariable name=\"y[2]\" valueReference=\"3\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+		<ScalarVariable name=\"temp_1[2]\" valueReference=\"3\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
 			<Real relativeQuantity=\"false\" start=\"2.0\" />
 			<isLinear>true</isLinear>
 			<VariableCategory>dependentParameter</VariableCategory>
 		</ScalarVariable>
-		<ScalarVariable name=\"temp_1[1]\" valueReference=\"4\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+		<ScalarVariable name=\"y[1]\" valueReference=\"4\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
 			<Real relativeQuantity=\"false\" start=\"1.0\" />
 			<isLinear>true</isLinear>
 			<VariableCategory>dependentParameter</VariableCategory>
 		</ScalarVariable>
-		<ScalarVariable name=\"temp_1[2]\" valueReference=\"5\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+		<ScalarVariable name=\"y[2]\" valueReference=\"5\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
 			<Real relativeQuantity=\"false\" start=\"2.0\" />
 			<isLinear>true</isLinear>
 			<VariableCategory>dependentParameter</VariableCategory>
-		</ScalarVariable>")})));
+		</ScalarVariable>
+")})));
 
 	parameter Real x[2] = {1, 2};
 	parameter Real y[2] = f(x);
@@ -269,7 +268,6 @@ model FunctionEval6
 end FunctionEval6;
 
 
-
 model FunctionEval7
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.XMLCodeGenTestCase(
@@ -277,7 +275,6 @@ model FunctionEval7
          description="Constant evaluation of functions: array output, unknown size",
          template="$XML_variables$",
          generatedCode="
-
 		<ScalarVariable name=\"x[1]\" valueReference=\"0\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
 			<Real relativeQuantity=\"false\" start=\"0.0\" />
 			<isLinear>true</isLinear>
@@ -288,26 +285,27 @@ model FunctionEval7
 			<isLinear>true</isLinear>
 			<VariableCategory>independentParameter</VariableCategory>
 		</ScalarVariable>
-		<ScalarVariable name=\"y[1]\" valueReference=\"2\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+		<ScalarVariable name=\"temp_1[1]\" valueReference=\"2\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
 			<Real relativeQuantity=\"false\" start=\"1.0\" />
 			<isLinear>true</isLinear>
 			<VariableCategory>dependentParameter</VariableCategory>
 		</ScalarVariable>
-		<ScalarVariable name=\"y[2]\" valueReference=\"3\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+		<ScalarVariable name=\"temp_1[2]\" valueReference=\"3\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
 			<Real relativeQuantity=\"false\" start=\"2.0\" />
 			<isLinear>true</isLinear>
 			<VariableCategory>dependentParameter</VariableCategory>
 		</ScalarVariable>
-		<ScalarVariable name=\"temp_1[1]\" valueReference=\"4\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+		<ScalarVariable name=\"y[1]\" valueReference=\"4\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
 			<Real relativeQuantity=\"false\" start=\"1.0\" />
 			<isLinear>true</isLinear>
 			<VariableCategory>dependentParameter</VariableCategory>
 		</ScalarVariable>
-		<ScalarVariable name=\"temp_1[2]\" valueReference=\"5\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+		<ScalarVariable name=\"y[2]\" valueReference=\"5\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
 			<Real relativeQuantity=\"false\" start=\"2.0\" />
 			<isLinear>true</isLinear>
 			<VariableCategory>dependentParameter</VariableCategory>
-		</ScalarVariable>")})));
+		</ScalarVariable>
+")})));
 
 	parameter Real x[2] = {1, 2};
 	parameter Real y[2] = f(x);

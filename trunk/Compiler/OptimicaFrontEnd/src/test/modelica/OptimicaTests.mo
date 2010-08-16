@@ -339,9 +339,9 @@ p3
 
   	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.FClassMethodTestCase(name="FreeDependentParametersTest5",
-      methodName="variableDiagnostics",
-        description="Test linearity of free dependent parameters.", methodResult=
-        "  
+        methodName="variableDiagnostics",
+        description="Test linearity of free dependent parameters.", 
+		methodResult="  
 Independent constants: 
 
 Dependent constants: 
@@ -354,8 +354,8 @@ Independent parameters:
 
 Dependent parameters: 
  p2: number of uses: 3, isLinear: false
- p3: number of uses: 1, isLinear: true
  p5: number of uses: 1, isLinear: true
+ p3: number of uses: 1, isLinear: true
 
 Differentiated variables: 
 

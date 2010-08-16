@@ -88,8 +88,8 @@ $C_DAE_initial_guess_equation_residuals$
          description="Test of code generation",
          template="$C_DAE_initial_dependent_parameter_residuals$",
          generatedCode="
-    (*res)[0] = ( _p1_2 ) * ( _p1_2 ) - (_p2_1);
-    (*res)[1] = _p2_1 - (_p3_0);
+    (*res)[0] = ( _p1_2 ) * ( _p1_2 ) - (_p2_0);
+    (*res)[1] = _p2_0 - (_p3_1);
 ")})));
 
 	    parameter Real p3 = p2;

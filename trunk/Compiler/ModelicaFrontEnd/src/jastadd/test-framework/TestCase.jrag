@@ -193,17 +193,13 @@ abstract public class TestCase {
 	}
 	
 	/**
-	 * \brief Remove all whitespaces.
-	 * @param str
-	 * @return
+	 * \brief Replace all sequences of whitespace with a single space each.
 	 */
 	public String removeWhitespace(String str) {
 	    /* TODO: Removing all whitespace can conceal errors. 
-	     * Perhaps all sequences of whitespace should be replaces with a single space instead? */ 
+	     * Perhaps all sequences of whitespace should be replaced with a single space instead? */ 
 		String str_res = str;
-    	str_res = str_res.replaceAll("\\r", "");
-    	str_res = str_res.replaceAll("\\n", "");
-    	str_res = str_res.replaceAll(" ", "");
+    	str_res = str_res.replaceAll("\\s+", "");
 		return str_res;
 	}
 	
@@ -363,9 +359,8 @@ abstract public class TestCase {
 	 * \brief Generate the part of an error message that shows expected and actual result.
 	 */
 	protected String compareMsg(String actual, String expected) {
-		if (!expected.startsWith("\n"))
-			expected = "\n" + expected;
-		return "\n--- Expected: ---" + expected + "\n--- Actual: ---\n" + actual;
+		expected =  expected.trim();
+		return "\n--- Expected: ---\n" + expected + "\n\n--- Actual: ---\n" + actual;
 	}
 
 }
