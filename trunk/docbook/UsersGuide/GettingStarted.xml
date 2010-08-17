@@ -230,38 +230,95 @@ import pylab as P</programlisting>
     also need information about the simulation interval. The information is
     then passed down in the following way,</para>
 
-    <programlisting>(jmi_mod, res) = simulate(model='RLC_Circuit_Square', file_name='RLC_Circuit.mo',
+    <programlisting>res_object = simulate(model='RLC_Circuit_Square', file_name='RLC_Circuit.mo',
                           alg_args={'start_time':0.0,'final_time':20.0,'num_communication_points':0})
 </programlisting>
 
-    <para>The return arguments from 'simulate' are the compiled model and the
-    simulation results. Here 'alg_args' are the arguments for the algorithm
-    stored in a dictionary. The 'num_communication_points' represents the
-    number of communication points stored by the algorithm. The default is 500
-    points and when set to zero (0), the internal steps calculated by the
-    algorithm are stored. If the problem requires that the default options in
-    the specific solver needs to be changed, they should be passed down in a
-    dictionary called 'solver_args'. Typically these options can be the
-    tolerances. Using the default simulation package, Assimulo, information
-    regarding which algorithms are supported and the solver arguments can be
-    found here, http://www.jmodelica.org/assimulo . The default solver is
-    IDA.</para>
+    <para>The return argument from 'simulate' is a result object where the
+    simulation result can be retrieved using the method
+    <literal>get_result_data</literal>. Here 'alg_args' are the arguments for
+    the algorithm stored in a dictionary. The 'num_communication_points'
+    represents the number of communication points stored by the algorithm. The
+    default is 500 points and when set to zero (0), the internal steps
+    calculated by the algorithm are stored. If the problem requires that the
+    default options in the specific solver needs to be changed, they should be
+    passed down in a dictionary called 'solver_args'. Typically these options
+    can be the tolerances. Using the default simulation package, Assimulo,
+    information regarding which algorithms are supported and the solver
+    arguments can be found here, http://www.jmodelica.org/assimulo . The
+    default solver is IDA and for a selection of the solver arguments to IDA, see the table below.</para>
+
+    <table>
+      <title>Selection of solver arguments for IDA</title>
+
+      <tgroup cols="2">
+        <thead>
+          <row>
+            <entry align="center">Argument</entry>
+
+            <entry align="center">Option</entry>
+          </row>
+        </thead>
+
+        <tbody>
+          <row>
+            <entry>suppress_alg (Suppress the algebraic variables on the error
+            test)</entry>
+
+            <entry>Boolean flag</entry>
+          </row>
+
+          <row>
+            <entry>initstep (The initial step-size)</entry>
+
+            <entry>Positive float</entry>
+          </row>
+
+          <row>
+            <entry>maxorder (The maximum order used)</entry>
+
+            <entry>Integer of max 5</entry>
+          </row>
+
+          <row>
+            <entry>maxh (Maximum step-size)</entry>
+
+            <entry>Positive float</entry>
+          </row>
+
+          <row>
+            <entry>atol (Absolute Tolerance)</entry>
+
+            <entry>Array of floats or Float</entry>
+          </row>
+
+          <row>
+            <entry>rtol (Relative Tolerance)</entry>
+
+            <entry>Float</entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </table>
 
     <para>After a successful simulation the statistics are printed in the
     prompt and the results are stored in the variable 'res'. To view the
     result, we have to retrieve information about the variables we are
     interested of. This is easily done in the following way,</para>
 
-    <programlisting>square_y = res.get_variable_data('y')
-resistor_v = res.get_variable_data('resistor.v')
-inductor1_i = res.get_variable_data('inductor1.i')
-</programlisting>
+    <programlisting>
+    res = res_object.get_result_data()
+    square_y = res.get_variable_data('y')
+    resistor_v = res.get_variable_data('resistor.v')
+    inductor1_i = res.get_variable_data('inductor1.i')
+    </programlisting>
 
     <para>And then plotted with the help from pylab,</para>
 
-    <programlisting>P.plot(square_y.t, square_y.x, resistor_v.t, resistor_v.x, inductor1_i.t, inductor1_i.x)    
-P.legend(('square.y','resistor.v','inductor1.i'))
-P.show()
+    <programlisting>
+    P.plot(square_y.t, square_y.x, resistor_v.t, resistor_v.x, inductor1_i.t, inductor1_i.x)    
+    P.legend(('square.y','resistor.v','inductor1.i'))
+    P.show()
 </programlisting>
 
     <para>The simulation result is shown in the figure below:</para>
