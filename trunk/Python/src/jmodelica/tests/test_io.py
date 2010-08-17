@@ -1,3 +1,20 @@
+#!/usr/bin/env python 
+# -*- coding: utf-8 -*-
+
+# Copyright (C) 2010 Modelon AB
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+
 """ Test module for testing the io module
 """
 
@@ -18,32 +35,41 @@ from jmodelica.optimization import ipopt
 from jmodelica.fmi import *
 from jmodelica import simulate
 
-fpath = os.path.join(get_files_path(), 'Modelica', 'VDP.mo')
-cpath = "VDP_pack.VDP_Opt_Min_Time"
-fname = cpath.replace('.','_',1)
+oc = OptimicaCompiler()
 
-#curr_dir = os.path.dirname(os.path.abspath(__file__));
 path_to_fmus = os.path.join(get_files_path(), 'FMUs')
 
 class TestIO:
     """Tests IO"""
-
-    def setup(self):
-        """ 
-        Setup test module. Compile test model (only needs to be done once) and 
-        set log level. 
+    @classmethod
+    def setUpClass(cls):
         """
-        oc = OptimicaCompiler()
+        Sets up the test class.
+        """
         oc.set_boolean_option('state_start_values_fixed',True)
-        OptimicaCompiler.set_log_level(OptimicaCompiler.LOG_ERROR)
-        oc.compile_model(cpath, fpath, target='ipopt')
-        oc.compile_model(cpath, fpath, target='ipopt')
+        oc.set_log_level(OptimicaCompiler.LOG_ERROR)
+        
+        fpath = os.path.join(get_files_path(), 'Modelica', 'VDP.mo')
+        cpath = "VDP_pack.VDP_Opt_Min_Time"
+        fname = cpath.replace('.','_',1)
 
+        oc.compile_model(cpath, fpath, target='ipopt')
+    
+    def setUp(self):
+        """ 
+        Setup test cases.
+        """
+        # Load the dynamic library and XML data
+        self.fname = "VDP_pack_VDP_Opt_Min_Time"
+        self.vdp = jmi.Model(self.fname)
+        
+        
     @testattr(ipopt = True)
     def test_dymola_export_import(self):
-
-        # Load the dynamic library and XML data
-        vdp = jmi.Model(fname)
+        """
+        Test for export and import the result file on Dymola textual format.
+        """
+        vdp = self.vdp
 
         # Initialize the mesh
         n_e = 50 # Number of elements 
@@ -66,7 +92,7 @@ class TestIO:
         nlp.export_result_dymola()
 
         # Load the file we just wrote
-        res = jmodelica.io.ResultDymolaTextual(fname+'_result.txt')
+        res = jmodelica.io.ResultDymolaTextual(self.fname+'_result.txt')
 
         # Check that one of the trajectories match.
         assert max(N.abs(traj[:,3]-res.get_variable_data('x1').x))<1e-12, \
