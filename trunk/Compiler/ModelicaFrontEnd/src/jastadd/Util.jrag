@@ -239,7 +239,7 @@ aspect NodeMethods {
      * \brief Creates a new ArrayList containing all the elements in this list, in the same order.
      */
     public ArrayList<T> List.toArrayList() {
-        ArrayList<T> l = new ArrayList<T>();
+        ArrayList<T> l = new ArrayList<T>(getNumChild());
         for (T e : this)
             l.add(e);
         return l;

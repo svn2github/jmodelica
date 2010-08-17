@@ -541,7 +541,7 @@ aspect TransformCanonical {
 			}			
 		}	
 		//flush();
-		root().flushAllRecursive();
+		root().flushAllRecursive(); // TODO: is this really needed? the tree isn't changed
 	}
 
 	/**
@@ -551,45 +551,39 @@ aspect TransformCanonical {
 	public boolean FClass.aliasVariablesEliminated = false;
 	
 	/**
-	 * \brief Eliminate alias variabels from the flat model.
+	 * \brief Eliminate alias variables from the flat model.
 	 * 
 	 * The non-alias variables are kept in the list FClass.FVariableList but the
 	 * alias variables are moved to FClass.AliasVariablesList.
 	 */
 	public void FClass.eliminateAliasVariables() {
-		List<FVariable> nonAliasVars = new List<FVariable>();
-		List<FVariable> aliasVars = new List<FVariable>();
-		List<FAbstractEquation> eqns = new List<FAbstractEquation>();
+		ArrayList<FVariable> nonAliasVars = new ArrayList<FVariable>();
+		ArrayList<FVariable> aliasVars    = new ArrayList<FVariable>();
+		ArrayList<FAbstractEquation> eqns = new ArrayList<FAbstractEquation>();
 		
 		//log.debug("FClass.eliminateAliasVariables(): l1 " + nonAliasVars + " l2 " + aliasVars);
 		
 		// Go through all variables and insert in correct list
 		for (FVariable fv : getFVariables()) {
-			if (fv.isAlias()) {
+			if (fv.isAlias()) 
 				aliasVars.add(fv);
-			} else {
+			else 
 				nonAliasVars.add(fv);
-			}
 		}
 		
 		// Remove alias equations.
-		for (FAbstractEquation equation : 
-			getFEquationBlock(0).getFAbstractEquations()) {
-			// Iterate over all equations
-			if (!equation.isAliasEquation()) {
+		for (FAbstractEquation equation : getFEquationBlock(0).getFAbstractEquations()) 
+			if (!equation.isAliasEquation()) 
 				eqns.add(equation);
-			}			
-		}	
 
-		setFVariableList(nonAliasVars);
-		setAliasVariableList(aliasVars);
-		getFEquationBlock(0).setFAbstractEquationList(eqns);
+		setFVariableList(new List(nonAliasVars));
+		setAliasVariableList(new List(aliasVars));
+		getFEquationBlock(0).setFAbstractEquationList(new List(eqns));
 		
 		aliasVariablesEliminated = true;
 		enableAliasRewrite();
 		
-		//root().flushAllRecursive();
-		flush();   // TODO: Is this still needed despite enableAliasRewrite()?
+		flush();
 	}
 	
 	public void ASTNode.enableAliasRewrite() {

@@ -562,6 +562,75 @@ constraint
   dx(finalTime) = 0;
 end MinTimeTest3;
 
+
+  model DAETest1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="DAETest1",
+         description="Fixed set from parameter with parameter equation",
+         flatModel="
+fclass OptimicaTransformCanonicalTests.DAETest1
+ parameter Integer N = 5 \"Number of linear ODEs/DAEs\" /* 5 */;
+ parameter Integer N_states = 3 \"Number of states: < N\" /* 3 */;
+ Real x[1](start = 3,fixed = dynamic[1]) \"States/algebraics\";
+ Real x[2](start = 3,fixed = dynamic[2]) \"States/algebraics\";
+ Real x[3](start = 3,fixed = dynamic[3]) \"States/algebraics\";
+ Real x[4](start = 3,fixed = dynamic[4]) \"States/algebraics\";
+ Real x[5](start = 3,fixed = dynamic[5]) \"States/algebraics\";
+ input Real u \"Control input\";
+ parameter Real a[1] \"Time constants\";
+ parameter Real a[2] \"Time constants\";
+ parameter Real a[3] \"Time constants\";
+ parameter Real a[4] \"Time constants\";
+ parameter Real a[5] \"Time constants\";
+ parameter Boolean dynamic[1] \"Switches for turning ODEs into DAEs\";
+ parameter Boolean dynamic[2] \"Switches for turning ODEs into DAEs\";
+ parameter Boolean dynamic[3] \"Switches for turning ODEs into DAEs\";
+ parameter Boolean dynamic[4] \"Switches for turning ODEs into DAEs\";
+ parameter Boolean dynamic[5] \"Switches for turning ODEs into DAEs\";
+initial equation 
+ x[1] = 3;
+ x[2] = 3;
+ x[3] = 3;
+parameter equation
+ a[1] = 3.0;
+ a[2] = 2.5;
+ a[3] = 2.0;
+ a[4] = 1.5;
+ a[5] = 1.0;
+ dynamic[1] = (if 1 <= N_states then true else false);
+ dynamic[2] = (if 2 <= N_states then true else false);
+ dynamic[3] = (if 3 <= N_states then true else false);
+ dynamic[4] = (if 4 <= N_states then true else false);
+ dynamic[5] = (if 5 <= N_states then true else false);
+equation
+ der(x[1]) = (  - ( a[1] ) ) * ( x[1] ) + ( a[1] ) * ( x[2] );
+ der(x[2]) = (  - ( a[2] ) ) * ( x[2] ) + ( a[2] ) * ( x[3] );
+ der(x[3]) = (  - ( a[3] ) ) * ( x[3] ) + ( a[3] ) * ( x[4] );
+ 0 = (  - ( a[4] ) ) * ( x[4] ) + ( a[4] ) * ( x[5] );
+ 0 = (  - ( a[5] ) ) * ( x[5] ) + ( a[5] ) * ( u );
+end OptimicaTransformCanonicalTests.DAETest1;
+")})));
+
+	parameter Integer N = 5 "Number of linear ODEs/DAEs";
+	parameter Integer N_states = 3 "Number of states: < N";
+	Real x[N](each start=3,fixed=dynamic) "States/algebraics";
+	input Real u "Control input";
+	output Real y = x[1] "Output";
+	parameter Real a[N] = (0.5*(N+1):-0.5:1) "Time constants";
+	parameter Boolean dynamic[N] = array((if i<=N_states then true else false) for i in 1:N) "Switches for turning ODEs into DAEs";    
+  equation
+	// ODE equations
+	for i in 1:N_states loop
+		der(x[i]) = -a[i]*x[i] + a[i]*x[i+1];
+	end for;
+	// DAE equations
+	for i in N_states+1:N-1 loop
+		0 = -a[i]*x[i] + a[i]*x[i+1];
+	end for;
+	// The last equation is assumed to be algebraic
+	0 = -a[N]*x[N] + a[N]*u;
+  end DAETest1;
+
+
 end OptimicaTransformCanonicalTests;
-
-

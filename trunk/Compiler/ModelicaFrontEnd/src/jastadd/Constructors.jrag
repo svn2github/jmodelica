@@ -15,6 +15,7 @@
 */
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 aspect Constructors {
 
@@ -26,6 +27,17 @@ aspect Constructors {
 		this(a,new Opt<FArraySubscripts>(),cd,inst_mod_opt,inst_constr_opt);
 	}
 	*/
+	
+	/**
+	 * \brief Construct a List containing the same nodes as the given Collection.
+	 */
+	public List.List(Collection<T> nodes) {
+		if (!nodes.isEmpty())
+			setChild(null, nodes.size() - 1); // Ensure we won't need to increase size later
+		int i = 0;
+		for (T n : nodes)
+			setChild(n, i++);
+	}
 	
 	/**
 	 * \brief Constructs an equation that is not initial.
