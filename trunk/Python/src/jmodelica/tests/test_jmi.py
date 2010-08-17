@@ -95,26 +95,31 @@ class TestModel_VDP:
 
     @testattr(stddist = True)    
     def test_get_variable_names(self):
+        """ Test jmi.Model.get_variable_names method."""
         names = self.vdp.get_variable_names()
         ntools.assert_equal(names[0][1],'p1')
         
     @testattr(stddist = True)
     def test_get_dx_variable_names(self):
+        """ Test jmi.Model.get_dx_variable_names method."""
         names = [(5,'der(x1)'),(6,'der(x2)'),(7,'der(cost)')]
         ntools.assert_equal(self.vdp.get_dx_variable_names(),names)
     
     @testattr(stddist = True)
     def test_get_x_variable_names(self):
+        """ Test jmi.Model.get_x_variable_names method."""
         names = [(8,'x1'),(9,'x2'),(10,'cost')]
         ntools.assert_equal(self.vdp.get_x_variable_names(),names)
     
     @testattr(stddist = True)
     def test_get_u_variable_names(self):
+        """ Test jmi.Model.get_u_variable_names method."""
         names = [(11,'u')]
         ntools.assert_equal(self.vdp.get_u_variable_names(),names)
     
     @testattr(stddist = True)
     def test_get_w_variable_names(self):
+        """ Test jmi.Model.get_w_variable_names method."""
         # TODO improve test 
         # there are no algebraic variables in the vdp model
         names = []
@@ -122,6 +127,7 @@ class TestModel_VDP:
     
     @testattr(stddist = True)
     def test_get_p_opt_variable_names(self):
+        """ Test jmi.Model.get_p_opt_variable_names method."""
         # TODO improve test 
         # there are no popt variables in the model
         names = []
@@ -129,16 +135,19 @@ class TestModel_VDP:
      
     @testattr(stddist = True)   
     def test_get_sizes(self):
+        """ Test jmi.Model.get_sizes method."""
         sizes = [0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 20]
         ntools.assert_equal(self.vdp.get_sizes(),sizes)
     
     @testattr(stddist = True)    
     def test_get_offsets(self):
+        """ Test jmi.Model.get_offsets method."""
         offsets = [0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 8, 11, 12, 12, 13, 16, 19, 20, 20, 20, 20, 20, 20, 20, 20]
         ntools.assert_equal(self.vdp.get_offsets(),offsets)
     
     @testattr(stddist = True)
     def test_get_n_tp(self):
+        """ Test jmi.Model.get_n_tp method."""
         ntools.assert_equal(self.vdp.get_n_tp(),1)
         
     @testattr(stddist = True)    
@@ -432,7 +441,6 @@ class TestModel_VDP:
         
     def test_optimization_cost_jacobian(self):
         """Test evaluation of optimization cost function jacobian.
-        
         Note:
         This test is model specific for the VDP oscillator.
         """
@@ -469,6 +477,7 @@ class TestModel_VDP:
             
     @testattr(stddist = True)
     def test_writeload_parameters_from_XML(self):
+        """ Test writing and loading parameters parameters from XML."""
         original_values = self.vdp.get_real_pi()
         new_values = N.ones(len(original_values))
         self.vdp.set_real_pi(new_values)
@@ -490,6 +499,9 @@ class TestModel_VDP:
 
     @testattr(stddist = True)
     def test_writeload_params_new_file(self):
+        """ Test writing and loading parameters parameters from XML 
+            with new file. 
+        """
         original_values = self.vdp.get_real_pi()
         new_values = N.ones(len(original_values))
         self.vdp.set_real_pi(new_values)
@@ -515,30 +527,37 @@ class TestModel_VDP:
             
     @testattr(stddist = True)        
     def test_get_name(self):
+        """Test jmi.Model.get_name method."""
         ntools.assert_equal(self.vdp.get_name(),"VDP_pack_VDP_Opt")
     
     @testattr(stddist = True)    
     def test_opt_interval_starttime_free(self):
+        """Test jmi.Model.get_name method."""
         ntools.assert_equal(self.vdp.opt_interval_starttime_free(),False)
     
     @testattr(stddist = True)    
     def test_opt_interval_starttime_fixed(self):
+        """Test jmi.Model.opt_interval_starttime_fixed method."""
         ntools.assert_equal(self.vdp.opt_interval_starttime_fixed(),True)
     
     @testattr(stddist = True)        
     def test_opt_interval_finaltime_free(self):
+        """Test jmi.Model.opt_interval_finaltime_free method."""
         ntools.assert_equal(self.vdp.opt_interval_finaltime_free(),False)
     
     @testattr(stddist = True)    
     def test_opt_interval_finaltime_fixed(self):
+        """Test jmi.Model.opt_interval_finaltime_fixed method."""
         ntools.assert_equal(self.vdp.opt_interval_finaltime_fixed(),True)
     
     @testattr(stddist = True)   
     def test_opt_interval_get_start_time(self):
+        """Test jmi.Model.opt_interval_get_start_time method."""
         ntools.assert_equal(self.vdp.opt_interval_get_start_time(),0.0)
     
     @testattr(stddist = True)   
     def test_opt_interval_get_final_time(self):
+        """Test jmi.Model.opt_interval_get_final_time method."""
         ntools.assert_equal(self.vdp.opt_interval_get_final_time(),20.0)
         
 class TestModel_RLC:
@@ -573,15 +592,18 @@ class TestModel_RLC:
         
     @testattr(stddist = True)
     def test_get_variable_descriptions(self):
+        """Test jmi.Model.get_variable_descriptions method."""
         descriptions = self.rlc.get_variable_descriptions()
         ntools.assert_equal(descriptions[0][1],"Potential at the pin")
 
     @testattr(stddist = True)
     def test_is_negated_alias(self):
+        """Test jmi.Model.is_negated_alias method."""
         ntools.assert_equal(self.rlc.is_negated_alias("resistor.n.i"),True)
     
     @testattr(stddist = True)
     def test_get_aliases(self):
+        """Test jmi.Model.get_aliases_for_variable method."""
         (aliases,is_neg_alias) = self.rlc.get_aliases_for_variable("capacitor.p.i")
         ntools.assert_equal(aliases[0],"capacitor.i")
         ntools.assert_equal(aliases[1], "capacitor.n.i")

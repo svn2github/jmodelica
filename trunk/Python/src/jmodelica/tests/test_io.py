@@ -104,6 +104,9 @@ class TestIO:
 
     @testattr(assimulo = True)
     def test_parameter_alias(self):
+        """ Test simulate and write to file when model has parameter alias.
+            (Test so that write to file does not crash.)
+        """
         model_file = os.path.join(get_files_path(), 'Modelica', 'ParameterAlias.mo')
         simulate("ParameterAlias",model_file)
 
