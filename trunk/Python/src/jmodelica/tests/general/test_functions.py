@@ -18,7 +18,10 @@
 from jmodelica.tests.general.base_simul import *
 from jmodelica.tests import testattr
 
-class TestFunctionTest1(SimulationTest):
+class TestFunction1(SimulationTest):
+    """
+    Basic test of Modelica functions.
+    """
 
     @classmethod
     def setUpClass(cls):
@@ -32,13 +35,16 @@ class TestFunctionTest1(SimulationTest):
 
     @testattr(assimulo = True)
     def test_trajectories(self):
+        """
+        Test that results match the expected ones.
+        """
         self.assert_all_trajectories(['pi', 'tau', 'gpi', 'gtau'])
 
-    @testattr(assimulo = True)
-    def test_ends(self):
-        self.assert_all_end_values(['pi', 'tau', 'gpi', 'gtau'])
 
-class TestFunctionTest2(SimulationTest):
+class TestFunction2(SimulationTest):
+    """
+    Test of Modelica functions with arrays.
+    """
 
     @classmethod
     def setUpClass(cls):
@@ -52,8 +58,29 @@ class TestFunctionTest2(SimulationTest):
 
     @testattr(assimulo = True)
     def test_trajectories(self):
+        """
+        Test that results match the expected ones.
+        """
         self.assert_all_trajectories(['pi', 'tau', 'gpi', 'gtau'])
 
+
+class TestIntegerArg1(SimulationTest):
+    """
+    Test of Modelica functions with Integer variables.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base('FunctionTests.mo', 'FunctionTests.IntegerArg1')
+
     @testattr(assimulo = True)
-    def test_ends(self):
-        self.assert_all_end_values(['pi', 'tau', 'gpi', 'gtau'])
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=0.1, time_step=0.01)
+        self.run()
+
+    @testattr(assimulo = True)
+    def test_result(self):
+        """
+        Test that results match the expected ones.
+        """
+        self.assert_end_value('x', 4.0)
