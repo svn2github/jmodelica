@@ -26,24 +26,10 @@ N.int = N.int32
 mc = ModelicaCompiler()
 oc = OptimicaCompiler()
 
-# compile VDP
-fpath_vdp = os.path.join(get_files_path(), 'Modelica', "VDP.mo")
-cpath_vdp = "VDP_pack.VDP_Opt"
-fname_vdp = cpath_vdp.replace('.','_',1)
-oc.set_boolean_option('state_start_values_fixed',True)
-oc.compile_model(cpath_vdp, fpath_vdp)#, target='ipopt')
-
 # constants used in TestJMIModel
 eval_alg = jmi.JMI_DER_CPPAD
 sparsity = jmi.JMI_DER_SPARSE
 indep_vars = jmi.JMI_DER_ALL
-
-# compile RLC_Circuit with alias variables elimination
-fpath_rlc = os.path.join(get_files_path(), 'Modelica', "RLC_Circuit.mo")
-cpath_rlc = "RLC_Circuit"
-fname_rlc = cpath_rlc.replace('.','_',1)      
-mc.set_boolean_option('eliminate_alias_variables', True)
-mc.compile_model(cpath_rlc, fpath_rlc)#, target='ipopt')
 
 class TestModel_VDP:
     """Test the high level model class, jmi.Model.
@@ -52,8 +38,23 @@ class TestModel_VDP:
     
     Also note that this class also is tested in simulation tests.
     """
-    def __init__(self):        
-        self.vdp = jmi.Model(fname_vdp)
+    @classmethod
+    def setUpClass(cls):
+        """
+        Sets up the test class.
+        """
+        # compile VDP
+        fpath_vdp = os.path.join(get_files_path(), 'Modelica', "VDP.mo")
+        cpath_vdp = "VDP_pack.VDP_Opt"
+        fname_vdp = cpath_vdp.replace('.','_',1)
+        oc.set_boolean_option('state_start_values_fixed',True)
+        oc.compile_model(cpath_vdp, fpath_vdp)#, target='ipopt')
+    
+    def setUp(self):
+        """
+        Sets up the test case.
+        """
+        self.vdp = jmi.Model("VDP_pack_VDP_Opt")
         
     @testattr(stddist = True)
     def test_has_cppad_derivatives(self):
@@ -530,11 +531,23 @@ class TestModel_RLC:
     The tests are based on the RLC_Circuit example file.
 
     """
+    @classmethod
+    def setUpClass(cls):
+        """
+        Sets up the test class.
+        """
+        # compile RLC_Circuit with alias variables elimination
+        fpath_rlc = os.path.join(get_files_path(), 'Modelica', "RLC_Circuit.mo")
+        cpath_rlc = "RLC_Circuit"
+        fname_rlc = cpath_rlc.replace('.','_',1)      
+        mc.set_boolean_option('eliminate_alias_variables', True)
+        mc.compile_model(cpath_rlc, fpath_rlc)#, target='ipopt')
     
-    def __init__(self):
-        """Load the test model."""
-        # Load the dynamic library and XML data
-        self.rlc = jmi.Model(fname_rlc)
+    def setUp(self):
+        """
+        Sets up the test case.
+        """
+        self.rlc = jmi.Model("RLC_Circuit")
 
     # removed method
     #@testattr(stddist = True)
@@ -584,9 +597,23 @@ class TestJMIModel_VDP:
     correct type.
     
     """
-    def __init__(self):
-        # Load the dynamic library and XML data
-        self.vdp = jmi.Model(fname_vdp)                
+    @classmethod
+    def setUpClass(cls):
+        """
+        Sets up the test class.
+        """
+        # compile VDP
+        fpath_vdp = os.path.join(get_files_path(), 'Modelica', "VDP.mo")
+        cpath_vdp = "VDP_pack.VDP_Opt"
+        fname_vdp = cpath_vdp.replace('.','_',1)
+        oc.set_boolean_option('state_start_values_fixed',True)
+        oc.compile_model(cpath_vdp, fpath_vdp)#, target='ipopt')
+    
+    def setUp(self):
+        """
+        Sets up the test case.
+        """
+        self.vdp = jmi.Model("VDP_pack_VDP_Opt")               
 
     @testattr(stddist = True)
     def test_initAD(self):
@@ -1191,10 +1218,11 @@ class TestModelGeneric:
         fname = cpath.replace('.','_',1)
         
         mc.compile_model(cpath, fpath)
-        
         # Load the dynamic library and XML data
-        cls.m = jmi.Model(fname)
-
+    
+    def setUp(self):
+        """Set up the test case."""
+        self.m = jmi.Model("DependentParameterTest")
 
     @testattr(stddist = True)
     def test_setget_independent_parameter(self):
