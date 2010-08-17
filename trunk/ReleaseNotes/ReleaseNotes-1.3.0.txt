@@ -31,7 +31,7 @@ encode Lagrange cost functions of the type
 
 the Optimica class attribute objectiveIntegrand is supported by the
 Optimica compiler. The expression L may be utilized by optimization
-algorithms providning dedicated support for Lagrange cost functions.
+algorithms providing dedicated support for Lagrange cost functions.
 
 2. JModelica.org Model Interface (JMI)
 
@@ -40,7 +40,7 @@ algorithms providning dedicated support for Lagrange cost functions.
 2.2 Optimization algorithm
 
 2.2.1 Support for free dependent parameters in the collocation
-optimization algorith. In models containing parameter declarations
+optimization algorithm. In models containing parameter declarations
 such as
 
 parameter Real p1(free=true);
@@ -55,13 +55,22 @@ included in the problem.
 
 2.2.2 Support for Lagrange cost functions. The new Optimica class
 attribute objectiveIntegrand, see above, is supported by the
-collocation optimization algorihtm. The integral cost is approximated
+collocation optimization algorithm. The integral cost is approximated
 by a Radau quadrature formula.
 
 3. Assimulo
 
+Support for simulation of an FMU (see below) using Assimulo. Simulation
+of an FMU can either be done by using the high-level method *simulate* or
+creating a model from the FMIModel class together with a problem class,
+FMIODE which is then passed to CVode.
+
 4. FMI compliance
 
+Improved support for the Functional Mockup Interface (FMI) standard.
+Support for importing an FMI model, FMU (Functional Mockup Unit). The 
+import consist of loading the FMU into Python and connecting the models
+C execution interface to Python. Note, strings are not currently supported.
 
 5. XML model export
 
