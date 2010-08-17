@@ -93,4 +93,20 @@ aspect ComplianceCheck {
 			compliance("Modifiers of specific array elements are not supported");
 	}
 	
+	public void FClass.checkDuplicateVariables() {
+		HashSet<String> h = new HashSet<String>();
+		for (FVariable fv : getFVariables()) {
+			if (h.contains(fv.name())) {
+				compliance("The variable " + fv.name() + " is declared multiple times. "+
+						"Possibly, the model is still legal, but the JModelica.org compiler "+
+						"does currently not merge indentical components.");
+			} else {
+				h.add(fv.name());
+			}
+			
+		}
+		
+	}
+
+	
 }

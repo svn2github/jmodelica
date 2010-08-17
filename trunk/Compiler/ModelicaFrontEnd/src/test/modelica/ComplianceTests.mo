@@ -365,5 +365,22 @@ Compliance error at line 364, column 14:
  A a(b[1] = 1, b[1](start=2));
 end ArrayCellMod_ComplErr;
 
+model DuplicateVariables_ComplErr
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ComplianceErrorTestCase(
+         name="DuplicateVariables_ComplErr",
+         description="Compliance error test checking for duplicate variables",
+         errorMessage="
+1 Errors found:
+Compliance error at line 0, column 0:
+  The variable x is declared multiple times. Possibly, the model is still legal, but the JModelica.org compiler does currently not merge indentical components.
+
+")})));
+  Real x = 1;
+  Real x = 1;
+
+end DuplicateVariables_ComplErr;
+
+
 
 end ComplianceTests;

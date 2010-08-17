@@ -826,10 +826,12 @@ aspect TransformCanonicalErrorCheck {
 		for (String str : aliasErrors) {
 			error(str);
 		}
+		checkDuplicateVariables();
 		checkFClassDimensions();
 	}
-	
 }
+
+
 
 
 aspect FlushFClass {
