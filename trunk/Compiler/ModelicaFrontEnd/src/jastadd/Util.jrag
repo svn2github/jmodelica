@@ -548,7 +548,8 @@ aspect Names {
     eq InstDot.getFirstInstAccess() = getLeft().getFirstInstAccess();
    
     inh InstAccess InstAccess.getNextInstAccess();
-    eq InstDot.getLeft().getNextInstAccess() = getRight().getFirstInstAccess();
+    eq InstDot.getLeft().getNextInstAccess()  = getRight().getFirstInstAccess();
+    eq InstDot.getRight().getNextInstAccess() = getNextInstAccess();
     eq ASTNode.getChild().getNextInstAccess() = null;
 
     
@@ -713,22 +714,29 @@ aspect FlatNames {
     eq InstRoot.getChild().retrieveFQName() = new FQName();
     eq SourceRoot.getProgram().retrieveFQName() = new FQName();
 
+    /**
+     * \brief Get a string representation of a prefix of this name.
+     * 
+     * @param n  the number of parts to include. If <code>n <= 0</code>, then 
+     *           all but the last <code>-n</code> parts are included.
+     */
     syn String FQName.prefixName(int n) {
+    	int tot = getNumFQNamePart();
+    	if (n <= 0)
+    		n = tot + n;
         StringBuilder str = new StringBuilder();
         for (int i = 0; i < n; i++) {
             FQNamePart part = getFQNamePart(i);
             str.append(part.getName());
-            if (i < n-1 || isScalarized()) {
-                if (part.hasFArraySubscripts()) 
-                    str.append(part.getFArraySubscripts());
-                if (i < n-1) 
-                    str.append(".");
-            }
+            if ((i < n-1 || isScalarized()) && part.hasFArraySubscripts()) 
+            	str.append(part.getFArraySubscripts());
+            if (i < n-1) 
+                str.append(".");
         }
         return str.toString();
     }
 
-    syn lazy String FQName.name() = prefixName(getNumFQNamePart());
+    syn lazy String FQName.name() = prefixName(0);
     
     syn String FQNamePart.name() = getName();
 
@@ -862,9 +870,7 @@ aspect FlatNames {
         FQName res = new FQName();
         if (getNumFQNamePart() > 0)
             res.addFQNamePart(getFQNamePart(0).fullCopy());
-        // This is to get printouts including array subscripts, since they
-        // are always expanded up to the second last name.
-        //res.scalarized = true;
+        res.scalarized = scalarized;
         return res;
     }
 
@@ -875,9 +881,17 @@ aspect FlatNames {
         FQName res = new FQName();
         for (int i = 0; i < getNumFQNamePart()-1; i++)
             res.addFQNamePart(getFQNamePart(i).fullCopy());
-        // This is to get printouts including array subscripts, since they
-        // are always expanded up to the second last name.
-        res.scalarized = true;
+        res.scalarized = scalarized;
+        return res;
+    }
+    
+    /**
+     * \brief Create a copy of this name without array subscripts.
+     */
+    public FQName FQName.copyWithoutSubscripts() {
+        FQName res = new FQName();
+        for (FQNamePart part : getFQNameParts())
+        	res.addFQNamePart(new FQNamePart(part.getName(), new Opt()));
         return res;
     }
     

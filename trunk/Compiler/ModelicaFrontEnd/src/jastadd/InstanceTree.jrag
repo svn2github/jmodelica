@@ -1233,10 +1233,15 @@ aspect InstanceAST_API {
 	syn boolean InstNode.hasInstConstraining() = false;
 	syn InstConstraining InstNode.getInstConstraining() = null;
 
-	syn boolean InstNode.extendsPrimitive() = false;
-	eq InstShortClassDecl.extendsPrimitive() = getNumInstExtends()==1 && getInstExtends(0).extendsPrimitive();
-	eq InstExtends.extendsPrimitive() = getClassName().myInstClassDecl().isPrimitive() || getClassName().myInstClassDecl().extendsPrimitive();
-	eq InstFullClassDecl.extendsPrimitive() = getNumInstExtends()==1 && getInstExtends(0).extendsPrimitive();
+	syn boolean InstNode.extendsPrimitive()  = false;
+	eq InstShortClassDecl.extendsPrimitive() = 
+		getNumInstExtends()==1 && getInstExtends(0).extendsPrimitive();
+	eq InstFullClassDecl.extendsPrimitive()  = 
+		getNumInstExtends()==1 && getInstExtends(0).extendsPrimitive();
+	eq InstExtends.extendsPrimitive() {
+		InstClassDecl icd = getClassName().myInstClassDecl();
+		return icd.isPrimitive() ||	icd.extendsPrimitive();
+	}
 	
 	syn InstClassDecl InstClassDecl.getBaseInstClass() = 
 		(getNumInstExtends() > 0) ? getInstExtends(0).getBaseInstClass() : this;
@@ -1246,6 +1251,20 @@ aspect InstanceAST_API {
 	inh boolean InstNode.enclosedBy(InstNode node);
 	eq InstNode.getChild().enclosedBy(InstNode node) = (node == this) || enclosedBy(node);
 	eq InstRoot.getChild().enclosedBy(InstNode node) = (node == this);
+	
+	/**
+	 * \brief Find the component that this access should be evaluated in.
+	 */
+	inh InstComponentDecl InstAccess.containingInstComponent();
+	inh InstComponentDecl InstNode.containingInstComponent();
+	eq InstComponentDecl.getLocalFArraySubscripts().containingInstComponent() = 
+		containingInstComponent();
+	eq InstComponentDecl.getFArraySubscripts().containingInstComponent()      = 
+		containingInstComponent();
+	eq InstComponentDecl.getChild().containingInstComponent() = this;
+	eq InstClassDecl.getChild().containingInstComponent()     = null;
+	eq InstRoot.getChild().containingInstComponent()          = null;
+	eq FlatRoot.getChild().containingInstComponent()          = null;
 	
 }
 

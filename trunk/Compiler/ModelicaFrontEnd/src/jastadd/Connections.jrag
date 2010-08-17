@@ -210,14 +210,9 @@ aspect Connections {
 		 */
 		public ArrayList<ConnectionSetEntry> getFlowVariables(String prefix) {
 			ArrayList<ConnectionSetEntry> cses = new ArrayList<ConnectionSetEntry>();
-			for (ConnectionSetEntry cse : this) {
-				if (cse.isFlow()) {
-					FQName my_prefix = cse.getFQName().copyFullPrefix();
-					if (my_prefix.name().equals(prefix)) {
-						cses.add(cse);
-					}
-				}
-			}
+			for (ConnectionSetEntry cse : this) 
+				if (cse.isFlow() && cse.prefix().equals(prefix)) 
+					cses.add(cse);
 			return cses;
 		}
 		
@@ -342,15 +337,18 @@ aspect Connections {
 		private InstComponentDecl cd;
 		private boolean outside;
 		private FQName fqName;
+		private String prefix;
 		//private boolean flow;
 		
 		public ConnectionSetEntry(InstComponentDecl cd, boolean outside, FQName fqName) {
 			//log.debug("Created ConnectionSetEntry: " + cd.getName().getID());
 			this.cd = cd;
 			this.outside = outside;
-			this.fqName = (FQName)fqName.fullCopy();
-			//this.fqName.scalarized = true;
-			//this.fqName.add(new FQNamePart(cd,cd.size()));
+			this.fqName = fqName;
+			boolean scalar = fqName.scalarized;
+			fqName.scalarized = true;
+			prefix = fqName.prefixName(-1);
+			fqName.scalarized = scalar;
 		}
 	
 		public boolean isOutside() {
@@ -377,12 +375,16 @@ aspect Connections {
 		   return fqName.name();
 		}
 		
+		public String prefix() {
+			return prefix;
+		}
+		
 		public boolean equals(String name, boolean outside) {
 			return name.equals(this.name()) & (outside==this.outside);
 		}
 		
 		public String toString() {
-			return fqName.name() + (outside ? "(o)" : "(i)");
+			return fqName.name() + (outside ? " (o)" : " (i)");
 		}
 		
 		public FQName getFQName() {

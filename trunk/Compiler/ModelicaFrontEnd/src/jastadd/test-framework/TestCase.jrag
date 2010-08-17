@@ -239,12 +239,19 @@ abstract public class TestCase {
 		try {
 			asserter = a;
 			performTest();
-		} catch (Exception e) {
+		} catch (ParserException e) {
+			fail(e);
+		} catch (ModelicaClassNotFoundException e) {
+			fail(e);
+		} catch (beaver.Parser.Exception e) {
+			fail(e);
+		} catch (IOException e) {
 			fail(e);
 		}
 	}
 	
-	public void performTest() throws Exception {
+	public void performTest() throws ParserException, beaver.Parser.Exception, 
+				IOException, ModelicaClassNotFoundException {
 		// Parse
 		ParserHandler ph = new ParserHandler();
 		SourceRoot sr = null;

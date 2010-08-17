@@ -808,7 +808,23 @@ aspect FlatAPI {
 		isParameter() && !isIndependentParameter();
 	syn lazy boolean FVariable.isIndependentParameter() = 
 		isParameter() && !hasParameterEquation() && 
-		(hasParamValueExp() ? paramValueExp().isConstantExp() : true);
+		(!hasParamValueExp() || paramValueExp().isIndependentParameterExp());
+
+	syn boolean FExp.isIndependentParameterExp() = isConstantExp() && !hasCompositeFunc();
+	
+    /**
+     * \brief Check if tree contains a function call returning an array or a record.
+     */
+	syn boolean ASTNode.hasCompositeFunc() {
+		for (ASTNode n : this)
+			if (n.hasCompositeFunc())
+				return true;
+		return false;
+	}
+	eq InstFunctionCall.hasCompositeFunc() = 
+		type().isArray() || type().isRecord() || super.hasCompositeFunc();
+	eq FFunctionCall.hasCompositeFunc()    = 
+		type().isArray() || type().isRecord() || super.hasCompositeFunc();
 	
 	syn boolean FVariable.hasParamValueExp() = hasBindingExp() || startAttributeSet();
 	syn FExp FVariable.paramValueExp() = hasBindingExp() ? getBindingExp() : startAttributeExp();
@@ -913,6 +929,12 @@ aspect FlatTypes {
 	eq FRecordDecl.getChild().inRecord() = true;
 	eq FClass.getChild().inRecord()      = false;
 	eq FForIndex.getChild().inRecord()   = false;
+	
+	inh boolean InstComponentDecl.inRecord();
+	eq InstNode.getInstComponentDecl().inRecord()               = false;
+	eq InstForIndex.getInstPrimitive().inRecord()               = false;
+	eq InstRecord.getInstComponentDecl().inRecord()             = true;
+	eq InstArrayComponentDecl.getInstComponentDecl().inRecord() = inRecord();
 	
 	syn int FRecordDecl.indexOf(String name) {
 		for (int i = 0; i < getNumFVariable(); i++)

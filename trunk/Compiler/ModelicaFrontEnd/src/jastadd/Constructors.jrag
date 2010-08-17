@@ -220,6 +220,13 @@ aspect Constructors {
 		this(new List().add(start).add(step).add(stop));
 	}
 	
+	/**
+	 * \brief Constructs an FRecordConstructor for a record with the given name and no arguments.
+	 */
+	public FRecordConstructor.FRecordConstructor(String name) {
+		this(new FIdUse(name), new List());
+	}
+	
 	public ComponentDecl.ComponentDecl(boolean isParameter,
 	                                   String type,
 	                                   String name,

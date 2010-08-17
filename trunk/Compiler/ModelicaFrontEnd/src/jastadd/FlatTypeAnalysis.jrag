@@ -659,14 +659,15 @@ aspect FTypeEquivalent {
 
 aspect BuiltInFlatTypes {
  	
- 	syn boolean InstPrimitive.isReal() = 
- 		myInstClass().finalClass().primitiveName().equals("Real");
- 	syn boolean InstPrimitive.isInteger() = 
- 		myInstClass().finalClass().primitiveName().equals("Integer");
- 	syn boolean InstPrimitive.isBoolean() = 
- 		myInstClass().finalClass().primitiveName().equals("Boolean");
- 	syn boolean InstPrimitive.isString() = 
- 		myInstClass().finalClass().primitiveName().equals("String");
+ 	syn boolean InstAssignable.isReal()    = false;
+ 	syn boolean InstAssignable.isInteger() = false;
+ 	syn boolean InstAssignable.isBoolean() = false;
+ 	syn boolean InstAssignable.isString()  = false;
+ 	
+ 	eq InstPrimitive.isReal()    = myInstClass().finalClass().primitiveName().equals("Real");
+ 	eq InstPrimitive.isInteger() = myInstClass().finalClass().primitiveName().equals("Integer");
+ 	eq InstPrimitive.isBoolean() = myInstClass().finalClass().primitiveName().equals("Boolean");
+ 	eq InstPrimitive.isString()  = myInstClass().finalClass().primitiveName().equals("String");
 
  	syn boolean InstBuiltIn.isReal() = 
  		myInstClass().finalClass().primitiveName().equals("RealType");

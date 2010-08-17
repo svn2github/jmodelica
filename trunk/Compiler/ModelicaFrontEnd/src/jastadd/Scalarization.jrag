@@ -1209,11 +1209,7 @@ aspect Scalarization {
 	eq FFunctionCall.canKeepAsArray() = true;
 	
 	inh boolean FExp.canAcceptArray();
-	inh boolean List.canAcceptArray();
-	inh boolean Opt.canAcceptArray();
-	eq ASTNode.getChild().canAcceptArray()          = false;
-	eq List.getChild().canAcceptArray()             = canAcceptArray();
-	eq Opt.getChild().canAcceptArray()              = canAcceptArray();
+	eq BaseNode.getChild().canAcceptArray()         = false;
 	eq FFunctionCallLeft.getFExp().canAcceptArray() = inFunction();
 	eq FFunctionCall.getArg().canAcceptArray()      = inFunction();
 	eq FSizeExp.getFExp().canAcceptArray()          = inFunction();
@@ -1265,11 +1261,7 @@ aspect Scalarization {
     }
     
 	inh boolean FExp.wantsRecordCon();
-	inh boolean List.wantsRecordCon();
-	inh boolean Opt.wantsRecordCon();
-	eq ASTNode.getChild().wantsRecordCon()          = false;
-	eq List.getChild().wantsRecordCon()             = wantsRecordCon();
-	eq Opt.getChild().wantsRecordCon()              = wantsRecordCon();
+	eq BaseNode.getChild().wantsRecordCon()         = false;
 	eq FFunctionCall.getArg().wantsRecordCon()      = !inFunction();
  
     public FExp FIfExp.scalarizeExp(Map<String,FExp> indexMap) {

@@ -1833,14 +1833,18 @@ aspect ArrayHelpers {
 		
 		/**
 		 * \brief Create a copy of this with <code>dim</code> dimensions, if necessary 
-		 *        adding dimensions of length 1 to the right side.
+		 *        adding dimensions of length 1 to the right side, or removing dimensions 
+		 *        from the left side.
 		 */
 		public Size promote(int dim) {
-			if (dim <= size.length) 
+			if (dim == size.length) 
 				return this;
+			if (dim == 0)
+				return SCALAR;
 			Size ns = new Size(new int[dim]);
-			System.arraycopy(size, 0, ns.size, 0, size.length);
-			Arrays.fill(ns.size, size.length, dim, 1);
+			int old = dim < size.length ? dim : size.length;
+			System.arraycopy(size, size.length - old, ns.size, 0, old);
+			Arrays.fill(ns.size, old, dim, 1);
 			return ns;
 		}
 		
@@ -2367,15 +2371,19 @@ aspect ArrayHelpers {
 		
 		/**
 		 * \brief Create a copy of this with <code>dim</code> dimensions, if necessary 
-		 *        adding dimensions of length 1 to the right side.
+		 *        adding dimensions of length 1 to the right side, or removing dimensions 
+		 *        from the left side.
 		 */
-		public MutableSize promote(int dim) {
-			if (dim <= size.length) 
+		public Size promote(int dim) {
+			if (dim == size.length) 
 				return this;
+			if (dim == 0)
+				return SCALAR;
 			MutableSize ns = new MutableSize(dim);
-			System.arraycopy(size, 0, ns.size, 0, size.length);
-			System.arraycopy(exps, 0, ns.exps, 0, exps.length);
-			Arrays.fill(ns.size, size.length, dim, 1);
+			int old = dim < size.length ? dim : size.length;
+			System.arraycopy(size, size.length - old, ns.size, 0, old);
+			System.arraycopy(exps, exps.length - old, ns.exps, 0, old);
+			Arrays.fill(ns.size, old, dim, 1);
 			return ns;
 		}
 		

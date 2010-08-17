@@ -526,7 +526,7 @@ aspect InstanceErrorCheck {
 				CValue val = ceval();
 				if (val.isUnknown()) {
 					if (val.isUnsupported()) {
-						if (node.isConstant()) // TODO: Produce error for non-structural parameters as well
+						if (node.isConstant()) // TODO: Produce error for structural parameters as well
 							node.compliance("Constant evaluation not supported for expression(s) directly or indirectly " + 
 									"used by the binding expression for " + varKind + " '" + varName + "': " + exp);
 					} else {

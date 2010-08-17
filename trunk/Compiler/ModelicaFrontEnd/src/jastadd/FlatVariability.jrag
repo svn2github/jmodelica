@@ -102,10 +102,10 @@ aspect FlatVariability {
     eq InstComponentDecl.getInstComponentDecl().overrideVariability(TypePrefixVariability var) =
     	var.combineDown(findVariability());
     
-	syn boolean InstPrimitive.isConstant()   = findVariability().constantVariability();
-	syn boolean InstPrimitive.isParameter()  = findVariability().parameterVariability();
-	syn boolean InstPrimitive.isDiscrete()   = findVariability().discreteVariability();
-	syn boolean InstPrimitive.isContinuous() = findVariability().continuousVariability();
+	syn boolean InstAssignable.isConstant()   = findVariability().constantVariability();
+	syn boolean InstAssignable.isParameter()  = findVariability().parameterVariability();
+	syn boolean InstAssignable.isDiscrete()   = findVariability().discreteVariability();
+	syn boolean InstAssignable.isContinuous() = findVariability().continuousVariability();
 		
 		
 	syn boolean FExp.isConstantExp() = variability().constantVariability();

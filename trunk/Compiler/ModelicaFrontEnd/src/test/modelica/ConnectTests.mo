@@ -281,6 +281,35 @@ equation
 end ConnectTest6;
 
 
+// TODO: this throws exception during flattening
+model ConnectTest7
+    connector A
+        Real x;
+        flow Real y;
+    end A;
+    
+    A a1[3];
+    A a2[3];
+equation
+    connect(a1, a2);
+end ConnectTest7;
+
+
+// TODO: this throws exception during flattening
+model ConnectTest8
+    connector A
+        Real x;
+        flow Real y;
+    end A;
+    
+    A a[4];
+equation
+    for i in 1:3 loop
+        connect(a[i], a[i+1]);
+    end for;
+end ConnectTest8;
+
+
 
 model Electrical
   

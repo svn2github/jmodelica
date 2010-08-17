@@ -68,7 +68,7 @@ aspect ConstantEvaluation {
 		public String getMessage() {
 			return (val == null) ? 
 				"Unspecified constant evaluation failure" :
-				"Cannot " + super.getMessage() + " on " + val.errorDesc();
+				"Cannot " + super.getMessage() + val.errorDesc();
 		}
 	}
   
@@ -109,7 +109,7 @@ aspect ConstantEvaluation {
 	     * @return Value converted to int.
 	     */
 	    public int intValue() { 
-	    	throw new ConstantEvaluationException(this, "get int value"); 
+	    	throw new ConstantEvaluationException(this, "get int value of "); 
 	    }
 	    
 	    /**
@@ -118,7 +118,7 @@ aspect ConstantEvaluation {
 	     * @return Value converted to double.
 	     */
 	    public double realValue() { 
-	    	throw new ConstantEvaluationException(this, "get real value"); 
+	    	throw new ConstantEvaluationException(this, "get real value of "); 
 	    }
 	    
 	    /**
@@ -127,7 +127,7 @@ aspect ConstantEvaluation {
 	     * @return Value converted to boolean.
 	     */
 	    public boolean booleanValue() { 
-	    	throw new ConstantEvaluationException(this, "get boolean value"); 
+	    	throw new ConstantEvaluationException(this, "get boolean value of "); 
 	    }
 	    
 	    /**
@@ -136,7 +136,7 @@ aspect ConstantEvaluation {
 	     * @return Value converted to string.	     
 	     */
 	    public String stringValue() { 
-	    	throw new ConstantEvaluationException(this, "get string value"); 
+	    	throw new ConstantEvaluationException(this, "get string value of "); 
 	    }
 	    
 	    /**
@@ -146,7 +146,7 @@ aspect ConstantEvaluation {
 	     *  @return Literal expression AST node.
 	     */
 	    public FExp buildLiteral() { 
-	    	throw new ConstantEvaluationException(this, "create literal expression"); 
+	    	throw new ConstantEvaluationException(this, "create literal expression from "); 
 	    }
 	    
 	    /**
@@ -221,40 +221,39 @@ aspect ConstantEvaluation {
         }
         
         /**
-         * \brief Set the value of a specific cell of an array constant value.
+         * \brief Convenience method for accessing an array CValue as CValueArray.
          * 
          * Only valid for arrays.
          */
-        public void setCell(Index i, CValue val) {
-        	throw new ConstantEvaluationException(this, "set value of array cell");
-        }
-        
+        public CValueArray array() {
+        	throw new ConstantEvaluationException(this, "use this as array: ");
+        }      
+ 	   
         /**
-         * \brief Get the value of a specific cell of an array constant value.
-         * 
-         * Only valid for arrays.
+         * \brief Check if this is a record.
          */
-        public CValue getCell(Index i) {
-        	throw new ConstantEvaluationException(this, "get value of array cell");
+        public boolean isRecord() {
+        	return false;
+        }
+       
+        /**
+         * \brief Convenience method for accessing a record CValue as CValueRecord.
+         * 
+         * Only valid for records.
+         */
+        public CValueRecord record() {
+        	throw new ConstantEvaluationException(this, "use this as record: ");
         }
         
         /**
          * \brief Reduce an array of constant boolean values to a single boolean.
          * 
-         * Used for the test expression of while statements.
+         * Used for the test expression of while statements. For scalar constant values, 
+         * just returns the boolean value.
          */
         public boolean reduceBoolean() {
         	return booleanValue();
         }
-		
-		/**
-		 * \brief Returns the Indices associated with this constant value.
-         * 
-         * Only valid for arrays.
-		 */
-		public Indices indices() {
-        	throw new ConstantEvaluationException(this, "get Indices");
-		}
 		
 		/**
 		 * \brief Returns the array size of this constant value.
@@ -564,21 +563,28 @@ aspect ConstantEvaluation {
      * \brief Constant value for array.
      * 
      * Note that this class is mutable, care must be taken not to modify 
-     * arrays that have already been returned. The only place that should 
-     * be done is during function evaluation, where CValues are used to 
-     * represent mutable variable values.
+     * arrays that have already been returned. The only place where that 
+     * should be done is during function evaluation, where CValues are used 
+     * to represent mutable variable values.
      */
     public class CValueArray extends CValue {
     	
     	/* TODO: If/when caching is introduced for ceval(), add lazy evaluation by 
     	 *       keeping a reference to the producing FExp and adding a method to FExp 
     	 *       that fills in a specific cell. This method can then be overridden as 
-    	 *       constan eval support for arrays is added to specific expression types.
+    	 *       constant eval support for arrays is added to specific expression types.
     	 */ 
     	
 		protected Indices  indices;
 		protected CValue[] values;
+		private int add = 0;
     	
+		/**
+		 * \brief Create a CValueArray of size <code>s</code>.
+		 * 
+		 * The array is initially filled with unknown values. 
+		 * Individual values must be set with setCell().
+		 */
     	public CValueArray(Size s) {
     		indices = Indices.create(s);
 			values = new CValue[indices.numElements()];
@@ -591,10 +597,29 @@ aspect ConstantEvaluation {
     	}
         
         /**
+         * \brief Convenience method for accessing an array CValue as CValueArray.
+         * 
+         * Only valid for arrays.
+         */
+        public CValueArray array() {
+        	return this;
+        }      
+        
+        /**
          * \brief Set the value of a specific cell of an array constant value.
          */
         public void setCell(Index i, CValue val) {
         	values[i.internal(indices)] = val;
+        }
+        
+        /**
+         * \brief Set the value of the next free cell of an array constant value.
+         * 
+         * "Free" here means the cell after the last one set by addCell(), or the 
+         * first cell if this is the first call.
+         */
+        public void addCell(CValue val) {
+        	values[add++] = val;
         }
         
         /**
@@ -677,11 +702,11 @@ aspect ConstantEvaluation {
 			if (values.length == 0)
 				return "(zero-size array)";
 			StringBuilder buf = new StringBuilder();
-			toStringRec(buf, indices.iterator(), 0);
+			toStringRec(buf, iterator(), 0);
 			return buf.toString();
 		}
 		
-		private void toStringRec(StringBuilder buf, Iterator<Index> it, int dim) {
+		private void toStringRec(StringBuilder buf, Iterator<CValue> it, int dim) {
 			if (dim < indices.ndims()) {
 				int n = indices.size().get(dim);
 				buf.append("{ ");
@@ -693,13 +718,159 @@ aspect ConstantEvaluation {
 				}
 				buf.append(" }");
 			} else {
-				buf.append(getCell(it.next()));
+				buf.append(it.next());
 			}
 		}
+	    
+	    /**
+	     * \brief Create a literal AST node from constant.
+	     *  
+	     *  @return FArray AST node containing literal expression nodes.
+	     */
+	    public FExp buildLiteral() { 
+	    	return buildLiteralRec(iterator(), 0);
+	    }
+	    
+	    private FExp buildLiteralRec(Iterator<CValue> it, int dim) {
+			if (dim < indices.ndims()) {
+				FArray arr = new FArray();
+				int n = indices.size().get(dim);
+				dim++;
+				for (int i = 0; i < n; i++) 
+					arr.addFExp(buildLiteralRec(it, dim));
+				return arr;
+			} else {
+				return it.next().buildLiteral();
+			}
+	    }
 		
+	    /**
+	     * \brief An iterator that iterates over all cells in the array.
+	     * 
+	     * Traverses the array in the same order as indices().iterator().
+	     */
 		public Iterator<CValue> iterator() {
 			return new ConstArrayIterator<CValue>(values);
 		}
+    	
+    }
+    
+    /**
+     * \brief Constant value for record.
+     * 
+     * Note that this class is mutable, care must be taken not to modify 
+     * records that have already been returned. The only place where that 
+     * should be done is during function evaluation, where CValues are used 
+     * to represent mutable variable values.
+     */
+    public class CValueRecord extends CValue {
+    	
+    	protected String name;
+    	protected String[] members;
+    	protected CValue[] values;
+    	
+    	/**
+    	 * \brief Create a new record constant value for the described record.
+    	 * 
+    	 * @param type  the FRecordType describing the record
+    	 */
+    	public CValueRecord(FRecordType type) {
+    		name = type.getName();
+    		int n = type.getNumComponent();
+    		members = new String[n];
+    		values = new CValue[n];
+    		int i = 0;
+    		for (FRecordComponentType mtype : type.getComponents())
+    			members[i++] = mtype.getName();
+    	}
+  	   
+        /**
+         * \brief Check if this is a record.
+         */
+        public boolean isRecord() {
+        	return true;
+        }
+        
+        /**
+         * \brief Convenience method for accessing a record CValue as CValueRecord.
+         * 
+         * Only valid for records.
+         */
+        public CValueRecord record() {
+        	return this;
+        }
+        
+        /**
+         * \brief Get the internal index for a given member.
+         */
+        protected int index(String name) {
+        	int i = 0;
+        	for (; i < members.length && !members[i].equals(name); i++);
+        	if (i >= members.length)
+        		throw new ConstantEvaluationException(this, "find record member '" + name + "'");
+        	return i;
+        }
+        
+        /**
+         * \brief Set the value of a specific member of a record constant value.
+         */
+        public void setMember(String name, CValue val) {
+        	values[index(name)] = val;
+        }
+        
+        /**
+         * \brief Set the value of a specific member of a record constant value.
+         * 
+         * @param i  the zero-based index of the member, according to the order 
+         *           in the record declaration
+         */
+        public void setMember(int i, CValue val) {
+        	values[i] = val;
+        }
+        
+        /**
+         * \brief Get the value of a specific member of a record constant value.
+         */
+        public CValue getMember(String name) {
+        	CValue res = values[index(name)];
+        	return res == null ? UNKNOWN : res;
+        }
+        
+        /**
+         * \brief Get the value of a specific member of a record constant value.
+         * 
+         * @param i  the zero-based index of the member, according to the order 
+         *           in the record declaration
+         */
+        public CValue getMember(int i) {
+        	CValue res = values[i];
+        	return res == null ? UNKNOWN : res;
+        }
+        
+        public String toString() {
+        	StringBuilder buf = new StringBuilder(name);
+        	buf.append('(');
+        	String sep = "";
+        	for (CValue val : values) {
+        		buf.append(sep);
+        		buf.append(val == null ? UNKNOWN : val);
+        		sep = ", ";
+        	}
+        	buf.append(')');
+        	return buf.toString();
+        }
+	    
+	    /**
+	     * \brief Create a literal AST node from constant.
+	     *  
+	     *  @return FRecordConstructor AST node containing literal expression nodes.
+	     */
+	    public FExp buildLiteral() { 
+	    	FRecordConstructor res = new FRecordConstructor(name);
+	    	for (CValue val : values)
+	    		res.addArg(val.buildLiteral());
+	    	return res;
+	    }
     	
     }
 
@@ -710,18 +881,16 @@ aspect ConstantEvaluation {
      * Creates a (possibly nested) FArray containing FLitExp nodes.
      * 
      * @param toReal  if <code>true</code>, convert all values to real.
-     * 
-     * @throws UnsupportedOperationException  if the expressions aren't constant.
      */
     public FExp Array.buildLiteral(boolean toReal) {
     	return buildFArray(iteratorFExp(), new LiteralBuilder(toReal), 1);
     }
     
-    public static class Array {
+    public class Array {
 	    /**
 	     * Helper object for {@link #buildLiteral(boolean)}.
 	     */
-	    protected class LiteralBuilder implements ElementBuilder {
+	    protected static class LiteralBuilder implements ElementBuilder {
 	    	private boolean toReal;
 	    	
 	    	public LiteralBuilder(boolean toReal) {
@@ -826,8 +995,8 @@ aspect ConstantEvaluation {
 	  
 	  FType t = type();
 	  CValue sum = new CValueInteger(0);
-	  CValue l = getLeft().ceval();
-	  CValue r = getRight().ceval();
+	  CValueArray l = getLeft().ceval().array();
+	  CValueArray r = getRight().ceval().array();
 	  for (Index i : l.indices())
 		  sum = t.add(sum, t.mul(l.getCell(i), r.getCell(i)));
 	  return sum;
@@ -855,6 +1024,14 @@ aspect ConstantEvaluation {
 		  if (eie.getIfExp().ceval().booleanValue())
 			  return eie.getThenExp().ceval();
 	  return getElseExp().ceval();
+  }
+  
+  eq FRecordConstructor.cevalCalc() {
+	  CValueRecord res = new CValueRecord((FRecordType) type());
+	  int i = 0;
+	  for (FExp arg : getArgs())
+		  res.setMember(i++, arg.ceval());
+	  return res;
   }
   
   // TODO: expand to handle boolean end enum index
@@ -919,16 +1096,79 @@ aspect ConstantEvaluation {
   eq FStringLitExp.cevalCalc() = new CValueString(getString());
   
   syn CValue FIdUse.ceval() {
-	  if (myFV() != null && !myFV().isUnknown()) {
-		  CValue res = myFV().ceval();
-		  if (hasFArraySubscripts() && !getFQName().isScalarized())
-			  res = res.getCell(getFArraySubscripts().createIndex());
+	  boolean func = inFunction();
+	  FQName name = getFQName();
+	  if (func)
+		  name = name.resolveSubscripts();
+	  AbstractFVariable var = func ? lookupFV(name) : myFV();
+	  if (var != null && !var.isUnknown()) {
+		  CValue res = var.inRecord() ? cevalRecordMember(name) : var.ceval();
+		  if (hasFArraySubscripts() && !name.isScalarized())
+			  res = res.array().getCell(getFArraySubscripts().createIndex());
 		  return res;
 	  } else {
 		  return CValue.UNKNOWN;
 	  }
   }
   eq FIdUseInstAccess.ceval() = getInstAccess().ceval();
+  
+  /**
+   * \brief Create a copy with all array subscripts replaced by literals.
+   */
+  public FQName FQName.resolveSubscripts() {
+	  FQName res = new FQName();
+	  for (FQNamePart part : getFQNameParts())
+		  res.addFQNamePart(part.resolveSubscripts());
+	  return res;
+  }
+  
+  /**
+   * \brief Create a copy with all array subscripts replaced by literals.
+   */
+  public FQNamePart FQNamePart.resolveSubscripts() {
+	  Opt fas = hasFArraySubscripts() ? 
+			  new Opt(getFArraySubscripts().resolveSubscripts()) : new Opt();
+	  return new FQNamePart(getName(), fas);
+  }
+  
+  /**
+   * \brief Create a copy with all array subscripts replaced by literals.
+   */
+  public FArraySubscripts FArraySubscripts.resolveSubscripts() {
+	  FArraySubscripts res = new FArraySubscripts();
+	  for (FSubscript fs : getFSubscripts())
+		  res.addFSubscript(fs.resolveSubscripts());
+	  return res;
+  }
+  
+  /**
+   * \brief Create a copy with all array subscripts replaced by literals.
+   */
+  public FSubscript FSubscript.resolveSubscripts() {
+	  return this;
+  }
+  
+  /**
+   * \brief Create a copy with all array subscripts replaced by literals.
+   */
+  public FExpSubscript FExpSubscript.resolveSubscripts() {
+	  return new FExpSubscript(ceval().buildLiteral());
+  }
+  
+  /**
+   * \brief Perform constant evaluation of an access to a record member.
+   */
+  syn CValue FIdUse.cevalRecordMember(FQName name) {
+	  if (name.getNumFQNamePart() <= 1)
+		  return CValue.UNKNOWN;
+	  String last = name.lastFQNamePart().getName();
+	  FQName prefix = name.copyFullPrefix();
+	  AbstractFVariable var = lookupFV(prefix.copyWithoutSubscripts());
+	  CValue res = var.inRecord() ? cevalRecordMember(prefix) : var.ceval();
+	  if (prefix.hasFArraySubscripts())
+		  res = res.array().getCell(prefix.getFArraySubscripts().createIndex());
+	  return res.record().getMember(last);
+  }
  
   eq FIdUseExp.cevalCalc()      = getFIdUse().ceval();
   eq FInstAccessExp.cevalCalc() = getInstAccess().ceval();
@@ -936,17 +1176,33 @@ aspect ConstantEvaluation {
   syn CValue InstAccess.ceval() = CValue.UNKNOWN;
   eq InstDot.ceval()            = getRight().ceval();
   eq InstComponentAccess.ceval() {
-	  if (myInstComponentDecl().isPrimitive()) {
-		  InstPrimitive prim = (InstPrimitive) myInstComponentDecl();
+	  if (myInstComponentDecl().isAssignable()) {
+		  InstAssignable var = (InstAssignable) myInstComponentDecl();
+		  
 		  Index i = Index.NULL;
 		  if (hasFArraySubscripts()) {
 			  FArraySubscripts fas = getFArraySubscripts();
 			  i = duringFunctionEval() ? fas.createIndex() : fas.asIndex();
 		  }
-		  return prim.ceval(i);
+		  
+		  if (!var.inRecord() || containingInstComponent() == var.containingInstComponent()) 
+			  return var.ceval(i);
+		  
+		  CValue res = cevalRecordMember(getID());
+		  if (i != Index.NULL)
+			  res = res.array().getCell(i);
+		  return res;
 	  }
 	  return CValue.UNKNOWN;
   }
+  
+  /**
+   * \brief Perform constant evaluation of an access to a record member.
+   */
+  inh CValue InstAccess.cevalRecordMember(String id);
+  eq BaseNode.getChild().cevalRecordMember(String id) = CValue.UNKNOWN;
+  eq InstDot.getLeft().cevalRecordMember(String id)   = cevalRecordMember(id);
+  eq InstDot.getRight().cevalRecordMember(String id)  = getLeft().ceval().record().getMember(id);
   
   // TODO: if caching, use cevalFunction() instead
   eq FFunctionCall.cevalCalc()    = evaluate()[0];
@@ -977,81 +1233,97 @@ aspect ConstantEvaluation {
 		(evaluationValue == null) ? CValue.UNKNOWN : evaluationValue;
 
 	/**
-	 * \brief Evaluation of a primitive instance node located in the instance
+	 * \brief Evaluation of a assignable instance node located in the instance
 	 * AST.
 	 * 
 	 * In some situations, expressions are evaluated in the instance AST. 
 	 * Such expressions are then instantiated, but not yet flattened. As a
-	 * consequence, identifiers in expressions refers to InstPrimitive nodes,
+	 * consequence, identifiers in expressions refers to InstAssignable nodes,
 	 * and accordingly, it it necessary to compute the constant value 
-	 * corresponding to an InstPrimitive node. If the primitive is a
-	 * constant or a parameters, and if it has a binding expressions, then
+	 * corresponding to an InstAssignable node. If the assignable is a
+	 * constant or a parameter, and if it has a binding expression, then
 	 * a corresponding CValue object is returned, otherwise, CValueUnknown
 	 * is returned.
 	 * 
 	 * @return The constant value.
 	 */
-	eq InstPrimitive.ceval() = ceval(Index.NULL);
+	eq InstAssignable.ceval() = ceval(Index.NULL);
 	
 
 	/**
-	 * \brief Evaluation of a primitive instance node located in the instance
-	 * AST. Evaluates a specific cell if this primitive is an array.
+	 * \brief Evaluation of a assignable instance node located in the instance
+	 * AST. Evaluates a specific cell if this assignable is an array.
 	 * 
-	 * If primitive is not an array, <code>i</code> should be Index.NULL.
+	 * If assignable is not an array, <code>i</code> should be Index.NULL.
 	 *  
 	 * In some situations, expressions are evaluated in the instance AST. 
 	 * Such expressions are then instantiated, but not yet flattened. As a
-	 * consequence, identifiers in expressions refers to InstPrimitive nodes,
+	 * consequence, identifiers in expressions refers to InstAssignable nodes,
 	 * and accordingly, it it necessary to compute the constant value 
-	 * corresponding to an InstPrimitive node. If the primitive is a
-	 * constant or a parameters, and if it has a binding expressions, then
+	 * corresponding to an InstAssignable node. If the assignable is a
+	 * constant or a parametes, and if it has a binding expression, then
 	 * a corresponding CValue object is returned, otherwise, CValueUnknown
 	 * is returned.
 	 * 
 	 * @return The constant value.
 	 */
-	syn CValue InstPrimitive.ceval(Index i) {
+	syn CValue InstAssignable.ceval(Index i) {
     	CValue val = CValue.UNKNOWN;
 		if (evaluationValue != null) {
 			val = evaluationValue;
-			if (i != Index.NULL)
-				val = val.getCell(i);
 		} else if ((isConstant() || isParameter())) {
 	    	if (hasBindingFExp()) {
 		    	FExp bexp = getBindingFExp();
 	    		if (!bexp.type().isUnknown())
 	    			val = bexp.ceval(i);
-	    		if (i != Index.NULL)
-	    			val = val.getCell(i);
 	    	} else {
 	    		val = startAttributeCValue();
 	    	}
-	    	// Reals can have a binding exp that is Integer - convert
-			if (isReal() && !val.isUnknown())
-				val = val.convertReal();
 		}
+		if (i != Index.NULL && val != CValue.UNKNOWN)
+			val = val.array().getCell(i);
 		return val;
 	}
 	
 	/**
 	 * \brief Find and evaluate the "start" attribute. If it is not found, use default value.
 	 */
-	syn lazy CValue InstPrimitive.startAttributeCValue() {
+	syn lazy CValue InstAssignable.startAttributeCValue() = CValue.UNKNOWN;
+	
+	eq InstPrimitive.startAttributeCValue() {
 		for (InstModification im : totalMergedEnvironment()) {
 			FExp exp = im.findStartAttribute();
 			if (exp != null)
 				return exp.ceval();
 		}
+		
+		// Default value
+		CValue res = CValue.UNKNOWN;
 		if (isReal())
-			return new CValueReal(0.0);
-		if (isInteger())
-			return new CValueInteger(0);
-		if (isBoolean())
-			return new CValueBoolean(false);
-		if (isString())
-			return new CValueString("");
-		return CValue.UNKNOWN;
+			res = new CValueReal(0.0);
+		else if (isInteger())
+			res = new CValueInteger(0);
+		else if (isBoolean())
+			res = new CValueBoolean(false);
+		else if (isString())
+			res = new CValueString("");
+		if (isArray()) {
+			CValueArray array = new CValueArray(size());
+			for (Index i : indices())
+				array.setCell(i, res);
+			res = array;
+		}
+		return res;
+	}
+	
+	eq InstRecord.startAttributeCValue() {
+		// TODO: perhaps this breakup should be done in ceval()?
+		// Assume an InstRecord can't be an array
+		CValueRecord res = new CValueRecord((FRecordType) type());
+		int i = 0;
+		for (InstComponentDecl var : getInstComponentDecls())
+			res.setMember(i++, var.ceval());
+		return res;
 	}
 	
 	/**
@@ -1103,7 +1375,10 @@ aspect ConstantEvaluation {
   
   inh CValue FVariable.cevalForIndex();
   eq FForStmt.getIndex().cevalForIndex()        = currentEvaluationIndex;
-  eq FForClauseE.getFForIndex().cevalForIndex() = new CValueInteger(0);
+  /* TODO: This returns a zero because for indices may be evaluated during scalarization.
+   *       Perhaps it would be better to set the current value in the for index as with 
+   *       currentEvaluationIndex? */ 
+  eq FForClauseE.getFForIndex().cevalForIndex() = new CValueInteger(0); 
   eq FIterExp.getForIndex().cevalForIndex()     = new CValueInteger(0);
   eq FClass.getChild().cevalForIndex()          = CValue.UNKNOWN;
   
@@ -1138,16 +1413,24 @@ aspect ConstantEvaluation {
   syn CValue FExp.extractCValue(CValue val, FVariable fv) = null;
   eq FIdUseExp.extractCValue(CValue val, FVariable fv)    = getFIdUse().myFV() == fv ? val : null;
   eq FArray.extractCValue(CValue val, FVariable fv) {
-	  if (!val.isArray())
-		  return CValue.UNKNOWN;
+	  CValueArray arr = val.array();
 	  for (Index i : indices()) {
-		  CValue res = getArray().get(i).extractCValue(val.getCell(i), fv);
+		  CValue res = getArray().get(i).extractCValue(arr.getCell(i), fv);
 		  if (res != null)
 			  return res;
 	  }
 	  return null;
   }
-  //TODO: Add FRecordConstructor
+  eq FRecordConstructor.extractCValue(CValue val, FVariable fv) {
+	  CValueRecord rec = val.record();
+	  int n = getNumArg();
+	  for (int i = 0; i < n; i++) {
+		  CValue res = getArg(i).extractCValue(rec.getMember(i), fv);
+		  if (res != null)
+			  return res;
+	  }
+	  return null;
+  }
   
   /**
    * \brief Check if this node is in a function that is being evaluated.
@@ -1503,37 +1786,172 @@ aspect ConstantEvaluation {
   public abstract int FStatement.evaluate(Map<CommonVariableDecl, CValue> values);
   
   public int FAssignStmt.evaluate(Map<CommonVariableDecl, CValue> values) {
-	  // TODO: handle records
-	  // TODO: handle non-scalarized case?
-	  FFunctionVariable var = (FFunctionVariable) getLeft().myFV();
-	  CValue val = getRight().ceval();
-	  if (getLeft().getFQName().hasFArraySubscripts()) {
-		  Index i = getLeft().getFQName().getFArraySubscripts().createIndex();
-		  CValue old = var.evaluationValue();
-		  if (old.isUnknown())
-			  var.setEvaluationValue(new CValueArray(var.size()), values);
-		  var.evaluationValue().setCell(i, val);
-	  } else {
-		  var.setEvaluationValue(val, values);
-	  }
+	  getLeft().assignToInFuncEval(values, getRight().ceval());
 	  return EVAL_CONT;
   }
 
   public int InstAssignStmt.evaluate(Map<CommonVariableDecl, CValue> values) {
-	  // TODO: handle records
-	  // TODO: handle slices - instead of getting one index, iterate over all - problem with size()
-	  InstAssignable var = (InstAssignable) getLeft().getInstAccess().myInstComponentDecl();
-	  CValue val = getRight().ceval();
-	  if (getLeft().getInstAccess().hasFArraySubscripts()) {
-		  Index i = getLeft().getInstAccess().getFArraySubscripts().createIndex();
-		  CValue old = var.evaluationValue();
-		  if (old.isUnknown())
-			  var.setEvaluationValue(new CValueArray(var.size()), values);
-		  var.evaluationValue().setCell(i, val);
-	  } else {
-		  var.setEvaluationValue(val, values);
-	  }
+	  getLeft().getInstAccess().assignToInFuncEval(values, getRight().ceval());
 	  return EVAL_CONT;
+  }
+
+  /**
+   * \brief Evaluate an assignment with this as the left side during function evaluation.
+   * 
+   * @param values  constant values for the variables. 
+   */
+  public void FIdUse.assignToInFuncEval(Map<CommonVariableDecl, CValue> values, CValue right) {
+	  FQName name = getFQName();
+	  boolean single = name.getNumFQNamePart() == 1;
+	  FQName first = single ? name : name.copyPrefix();
+	  FFunctionVariable var = (FFunctionVariable) (single ? myFV() : lookupFV(first));
+	  FQNamePart firstPart = name.getFQNamePart(0);
+	  CValue val = var.type().assignToPartInFuncEval(firstPart, var.evaluationValue(), right);
+	  var.setEvaluationValue(val, values);
+  }
+
+  /**
+   * \brief Evaluate an assignment with this as the left side during function evaluation.
+   * 
+   * @param values  constant values for the variables. 
+   */
+  public void InstAccess.assignToInFuncEval(Map<CommonVariableDecl, CValue> values, CValue right) {
+	  InstAccess firstPart = getFirstInstAccess();
+	  InstAssignable var = (InstAssignable) firstPart.myInstComponentDecl();
+	  CValue val = var.type().assignToPartInFuncEval(firstPart, var.evaluationValue(), right);
+	  var.setEvaluationValue(val, values);
+  }
+  
+  /**
+   * \brief Common interface for parts of qualified names.
+   */
+  public interface CommonNamePart {
+	  public String name();
+	  public Indices indices();
+	  public boolean hasFArraySubscripts();
+	  public FArraySubscripts getFArraySubscripts();
+	  public boolean isArray();
+	  public CommonNamePart nextNamePart();
+  }
+  public class InstAccess implements CommonNamePart {}
+  public class FQNamePart implements CommonNamePart {}
+  
+  public Indices FQNamePart.indices() {
+	  return Indices.createFromFas(getFArraySubscripts());
+  }
+  
+  /**
+   * \brief Check if this name part accesses an array.
+   * 
+   * Note that the check is based only on the array subscripts, and a name part 
+   * without array subscripts is assumed to be scalar. Thus this method should 
+   * only be used for name parts with array subscripts.
+   */
+  syn boolean FQNamePart.isArray() {
+	  if (hasFArraySubscripts()) 
+		  for (FSubscript fs : getFArraySubscripts().getFSubscripts())
+			  if (fs.ndims() > 0)
+				  return true;
+	  return false;
+  }
+  
+  /**
+   * \brief Get the next part in the name this is a part of, or null if this is the last part. 
+   */
+  syn CommonNamePart InstAccess.nextNamePart() = getNextInstAccess();
+  inh CommonNamePart FQNamePart.nextNamePart();
+  eq FQName.getFQNamePart(int i).nextNamePart() = 
+	  getNumFQNamePart() > i + 1 ? getFQNamePart(i + 1) : null;
+	  
+  /**
+   * \brief Handle one part of the left access of an assignment during function evaluation.
+   */
+  public CValue FType.assignToPartInFuncEval(CommonNamePart name, CValue left, CValue right) {
+	  return assignToLastInFuncEval(name, left, right);
+  }
+  
+  public CValue FRecordType.assignToPartInFuncEval(
+		  CommonNamePart name, CValue left, CValue right) {
+	  CommonNamePart next = name.nextNamePart();
+	  if (next == null) 
+		  return assignToLastInFuncEval(name, left, right);
+
+	  FType nextType = componentType(next.name());
+	  if (isArray()) {
+		  if (left.isUnknown()) 
+			  left = new CValueArray(size());
+		  CValueArray arr = left.array();
+		  if (name.isArray()) {
+			  Indices ind = name.indices();
+			  int rdims = right.size().ndims();
+			  Size ns = right.size().promote(rdims - ind.ndims());
+			  Indices nind = Indices.create(ns);
+			  CValueArray ra = right.array();
+			  for (Index i : ind) {
+				  if (ns != Size.SCALAR) {
+					  CValueArray ra2 = new CValueArray(ns);
+					  for (Index j : nind) 
+						  ra2.setCell(j, ra.getCell(i.expand(j)));
+					  right = ra2;
+				  } else {
+					  right = ra.getCell(i);
+				  }
+				  Index j = ind.translate(i);
+				  arr.setCell(j, assignToRecPartInFuncEval(next, nextType, arr.getCell(j), right));
+			  }
+		  } else {
+			  Index i = name.getFArraySubscripts().createIndex();
+			  arr.setCell(i, assignToRecPartInFuncEval(next, nextType, arr.getCell(i), right));
+		  }
+	  } else {
+		  left = assignToRecPartInFuncEval(next, nextType, left, right);
+	  }
+	  return left;
+  }
+  
+  /**
+   * \brief Handle one part of the left access of an assignment during function evaluation.
+   */
+  public CValue FRecordType.assignToRecPartInFuncEval(
+		  CommonNamePart next, FType nextType, CValue left, CValue right) {
+	  if (left.isUnknown())
+		  left = new CValueRecord(this);
+	  CValue val = left.record().getMember(next.name());
+	  val = nextType.assignToPartInFuncEval(next, val, right);
+	  left.record().setMember(next.name(), val);
+	  return left;
+  }
+  
+  /**
+   * \brief Get the type of a specific component.
+   */
+  public FType FRecordType.componentType(String name) {
+	  for (FRecordComponentType comp : getComponents())
+		  if (comp.getName().equals(name))
+			  return comp.getFType();
+	  return null;
+  }
+  
+  /**
+   * \brief Handle the last part of the left access of an assignment during function evaluation.
+   */
+  public CValue FType.assignToLastInFuncEval(CommonNamePart name, CValue left, CValue right) {
+	  if (left.isUnknown() || !isArray()) {
+		  if (isArray() && name.hasFArraySubscripts())
+			  left = new CValueArray(size());
+		  else
+			  return right;
+	  }
+	  if (name.isArray()) {
+	  	  CValueArray al = left.array();
+		  CValueArray ar = right.array();
+		  Indices ind = name.indices();
+		  for (Index i : ind)
+			  al.setCell(ind.translate(i), ar.getCell(i));
+	  } else {
+		  left.array().setCell(name.getFArraySubscripts().createIndex(), right);
+	  }
+	  return left;
   }
 
   public int FExternalStmt.evaluate(Map<CommonVariableDecl, CValue> values) {
@@ -1584,7 +2002,7 @@ aspect ConstantEvaluation {
   public int FForStmt.evaluate(Map<CommonVariableDecl, CValue> values) {
 	  CValue oldVal = currentEvaluationIndex;
 	  
-	  CValue ivals = getIndex().getFExp().ceval();
+	  CValueArray ivals = getIndex().getFExp().ceval().array();
 	  for (Index i : ivals.indices()) {
 		  currentEvaluationIndex = ivals.getCell(i);
 		  int res = getForStmts().evaluateList(values);
@@ -1613,7 +2031,7 @@ aspect ConstantEvaluation {
 	  InstComponentDecl var = getInstPrimitive();
 	  CValue oldVal = var.evaluationValue();
 	  boolean last = i == indices.getNumChild() - 1;
-	  CValue ivals = getFExp().ceval();
+	  CValueArray ivals = getFExp().ceval().array();
 	  for (Index j : ivals.indices()) {
 		  var.setEvaluationValue(ivals.getCell(j), values);
 		  int res = last ? stmts.evaluateList(values) : 
@@ -1921,7 +2339,7 @@ aspect CircularExpressions {
 	syn boolean FIdUse.isCircular()  = myFV().isCircular();
 	eq FIdUseInstAccess.isCircular() = getInstAccess().myInstComponentDecl().isCircular();
 
-	syn lazy boolean FForIndex.isCircular() circular [true] = hasFExp()? getFExp().isCircular(): false;
+	syn lazy boolean FForIndex.isCircular() circular [true] = hasFExp() && getFExp().isCircular();
 
 	eq FIterExp.isCircular() {
 		if (getFExp().isCircular()) 
