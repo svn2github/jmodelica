@@ -8,6 +8,7 @@ import numpy as N
 import nose
 
 from jmodelica.tests import testattr
+from jmodelica.tests import get_files_path
 
 import jmodelica.jmi as jmi
 from jmodelica.compiler import OptimicaCompiler
@@ -17,16 +18,12 @@ from jmodelica.optimization import ipopt
 from jmodelica.fmi import *
 from jmodelica import simulate
 
-jm_home = os.environ.get('JMODELICA_HOME')
-path_to_examples = os.path.join("Python","jmodelica","examples")
-
-model = os.path.join("files", "VDP.mo")
-fpath = os.path.join(jm_home,path_to_examples,model)
+fpath = os.path.join(get_files_path(), 'Modelica', 'VDP.mo')
 cpath = "VDP_pack.VDP_Opt_Min_Time"
 fname = cpath.replace('.','_',1)
 
-curr_dir = os.path.dirname(os.path.abspath(__file__));
-path_to_fmus = os.path.join(curr_dir, 'files', 'FMUs')
+#curr_dir = os.path.dirname(os.path.abspath(__file__));
+path_to_fmus = os.path.join(get_files_path(), 'FMUs')
 
 class TestIO:
     """Tests IO"""
@@ -41,8 +38,6 @@ class TestIO:
         OptimicaCompiler.set_log_level(OptimicaCompiler.LOG_ERROR)
         oc.compile_model(cpath, fpath, target='ipopt')
         oc.compile_model(cpath, fpath, target='ipopt')
-
-
 
     @testattr(ipopt = True)
     def test_dymola_export_import(self):
@@ -83,8 +78,7 @@ class TestIO:
 
     @testattr(assimulo = True)
     def test_parameter_alias(self):
-        model_file = os.path.join(jm_home, "Python", "jmodelica", "tests", "files", "ParameterAlias.mo")
-
+        model_file = os.path.join(get_files_path(), 'Modelica', 'ParameterAlias.mo')
         simulate("ParameterAlias",model_file)
 
 class test_ResultWriterDymola:

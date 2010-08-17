@@ -8,6 +8,7 @@ import numpy as N
 import nose
 
 from jmodelica.tests import testattr
+from jmodelica.tests import get_files_path
 
 import jmodelica.jmi as jmi
 from jmodelica.compiler import OptimicaCompiler
@@ -18,11 +19,8 @@ from jmodelica.linearization import *
 from jmodelica.initialization.ipopt import NLPInitialization
 from jmodelica.initialization.ipopt import InitializationOptimizer
 
-jm_home = os.environ.get('JMODELICA_HOME')
-path_to_examples = os.path.join("Python","jmodelica","examples")
 
-model = os.path.join("files", "CSTR.mo")
-fpath = os.path.join(jm_home,path_to_examples,model)
+fpath = os.path.join(get_files_path(), 'Modelica', 'CSTR.mo')
 cpath = "CSTR.CSTR_Opt"
 fname = cpath.replace('.','_',1)
 

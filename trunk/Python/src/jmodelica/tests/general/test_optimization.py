@@ -8,6 +8,7 @@ from jmodelica.optimization.ipopt import CollocationOptimizer
 import matplotlib.pyplot as plt
 from jmodelica.tests.general.base_simul import *
 from jmodelica.tests import testattr
+from jmodelica.tests import get_files_path
 import numpy as N
 import os.path
 
@@ -15,8 +16,8 @@ class TestOptimization(OptimizationTest):
 
     @classmethod
     def setUpClass(cls):
-        OptimizationTest.setup_class_base(
-                '../../examples/files/VDP.mo', 'VDP_pack.VDP_Opt', 
+        mofile = os.path.join(get_files_path(), 'Modelica', 'VDP.mo')
+        OptimizationTest.setup_class_base(mofile, 'VDP_pack.VDP_Opt', 
                 options = { 'state_start_values_fixed': True })
 
     @testattr(ipopt = True)
@@ -236,8 +237,9 @@ class TestStaticOptimizationDependentParameters:
     def setUpClass(cls):
         curr_dir = os.path.dirname(os.path.abspath(__file__));
         oc = OptimicaCompiler() 
+        mofile = os.path.join(get_files_path(), 'Modelica', 'StaticOptimizationTest.mo')
         oc.compile_model("StaticOptimizationTest.StaticOptimizationTest2",
-                         curr_dir+"/../files/StaticOptimizationTest.mo",target="ipopt")
+                         mofile,target="ipopt")
         cls.model = jmi.Model("StaticOptimizationTest_StaticOptimizationTest2")
         cls.nlp = NLPInitialization(cls.model,stat=1)
         cls.ipopt_nlp = InitializationOptimizer(cls.nlp)
@@ -264,16 +266,17 @@ class TestOptInitBlockingFactors:
     def setUpClass(cls):
         cls.curr_dir = os.path.dirname(os.path.abspath(__file__));
         oc = OptimicaCompiler()
+        mofile = os.path.join(get_files_path(), 'Modelica', 'BlockingError.mo')
         cls.model = oc.compile_model("BlockingInitPack.M_init",
-                                     cls.curr_dir+"/../files/BlockingError.mo", target='ipopt')
+                                     mofile, target='ipopt')
 
         cls.opt_model = oc.compile_model("BlockingInitPack.M_Opt",
-                                         cls.curr_dir+"/../files/BlockingError.mo", target='ipopt')
+                                         mofile, target='ipopt')
 
     @testattr(ipopt = True)
     def setUp(self):
-
-        self.res_init = jmodelica.io.ResultDymolaTextual(self.curr_dir+"/../files/BlockingInitPack_M_init_result.txt")
+        resfile = os.path.join(get_files_path(), 'Results', 'BlockingInitPack_M_init_result.txt')
+        self.res_init = jmodelica.io.ResultDymolaTextual(resfile)
 
         self.n_e = 5 # Number of elements 
         self.hs = N.ones(self.n_e)*1./self.n_e # Equidistant points

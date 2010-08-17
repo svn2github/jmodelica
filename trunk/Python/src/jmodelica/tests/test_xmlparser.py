@@ -8,16 +8,14 @@ import nose.tools
 import numpy as n
 
 from jmodelica.tests import testattr
+from jmodelica.tests import get_files_path
 from jmodelica.compiler import OptimicaCompiler
 from jmodelica.compiler import ModelicaCompiler
 from jmodelica import xmlparser
 
 
-jm_home = os.environ.get('JMODELICA_HOME')
-path_to_tests = os.path.join(jm_home, 'Python', 'jmodelica','tests')
-
 # modified cstr xml
-modcstr = os.path.join(path_to_tests, 'files','CSTR_CSTR_Opt_modified.xml')
+modcstr = os.path.join(get_files_path(), 'XML','CSTR_CSTR_Opt_modified.xml')
 md = xmlparser.ModelDescription(modcstr)
 
 #type defs

@@ -27,6 +27,7 @@ from jmodelica.compiler import ModelicaCompiler
 from jmodelica.compiler import OptimicaCompiler
 from jmodelica import jmi
 from jmodelica.tests import testattr
+from jmodelica.tests import get_files_path
 from jmodelica.algorithm_drivers import InvalidAlgorithmArgumentException
 from jmodelica.algorithm_drivers import InvalidSolverArgumentException
 
@@ -43,27 +44,21 @@ except:
 int = N.int32
 N.int = N.int32
 
-
-jm_home = jmodelica.environ['JMODELICA_HOME']
-path_to_examples = os.path.join('Python', 'jmodelica', 'examples')
-path_to_tests = os.path.join('Python','jmodelica','tests')
-
-#create Model objects
-mofile_vdp = os.path.join('files', 'VDP.mo')
-fpath_vdp = os.path.join(jm_home, path_to_examples, mofile_vdp)
+# VDP model
+fpath_vdp = os.path.join(get_files_path(),'Modelica','VDP.mo')
 cpath_vdp = "VDP_pack.VDP_Opt"
 dll_vdp = cpath_vdp.replace('.','_',1)
 
-mofile_rlc = os.path.join('files','RLC_Circuit.mo')
-fpath_rlc = os.path.join(jm_home, path_to_examples, mofile_rlc)
+# RLC model
+fpath_rlc = os.path.join(get_files_path(),'Modelica','RLC_Circuit.mo')
 cpath_rlc = "RLC_Circuit"
 dll_rlc = cpath_rlc.replace('.','_',1)
 
-mofile_minit = os.path.join('files','must_initialize.mo')
-fpath_minit = os.path.join(jm_home, path_to_tests, mofile_minit)
+# Model which must be initialized
+fpath_minit = os.path.join(get_files_path(), 'Modelica', 'must_initialize.mo')
 cpath_minit = "must_initialize"
 
-
+# Create compilers
 mc = ModelicaCompiler()
 mc.set_boolean_option('state_start_values_fixed',True)
 oc = OptimicaCompiler()
@@ -79,8 +74,8 @@ if ipopt_present:
 @testattr(ipopt = True)
 def test_initialize():
     """ Test the jmodelica.initialize function using all default parameters. """
-    mofile_pend = os.path.join('files','Pendulum_pack.mo')
-    fpath_pend = os.path.join(jm_home,path_to_examples,mofile_pend)
+    #mofile_pend = os.path.join('files','Pendulum_pack.mo')
+    fpath_pend = os.path.join(get_files_path(), 'Modelica', 'Pendulum_pack.mo')
     cpath_pend = "Pendulum_pack.Pendulum"
     
     init_res = jmodelica.initialize(cpath_pend, fpath_pend,compiler='optimica')
@@ -114,8 +109,8 @@ def test_initialize():
 @testattr(ipopt = True)
 def test_initialize_with_solverargs():
     """ Test the jmodelica.initialize function using all default parameters. """
-    mofile_pend = os.path.join('files','Pendulum_pack.mo')
-    fpath_pend = os.path.join(jm_home,path_to_examples,mofile_pend)
+    #mofile_pend = os.path.join('files','Pendulum_pack.mo')
+    fpath_pend = os.path.join(get_files_path(), 'Modelica', 'Pendulum_pack.mo')
     cpath_pend = "Pendulum_pack.Pendulum"
     
     init_res = jmodelica.initialize(cpath_pend, fpath_pend,compiler='optimica', solver_args={'max_iter':1000})
@@ -149,8 +144,8 @@ def test_initialize_with_solverargs():
 @testattr(ipopt = True)
 def test_optimize():
     """ Test the jmodelica.optimize function using all default parameters. """
-    mofile_pend = os.path.join('files','Pendulum_pack.mo')
-    fpath_pend = os.path.join(jm_home,path_to_examples,mofile_pend)
+    #mofile_pend = os.path.join('files','Pendulum_pack.mo')
+    fpath_pend = os.path.join(get_files_path(), 'Modelica', 'Pendulum_pack.mo')
     cpath_pend = "Pendulum_pack.Pendulum_Opt"
     
     opt_res = jmodelica.optimize(cpath_pend, fpath_pend, 
@@ -177,10 +172,6 @@ def test_optimize_set_n_cp():
 def test_optimize_set_args():
     """Test the jmodelica.optimize function and setting some algorithm and solver args.
     """
-    mofile_vdp = os.path.join('files', 'VDP.mo')
-    fpath_vdp = os.path.join(jm_home, path_to_examples, mofile_vdp)
-    cpath_vdp = "VDP_pack.VDP_Opt"
-    
     res_file_name = 'test_optimize_set_result_mesh.txt'
     opt_res = jmodelica.optimize(model_vdp, 
                                  alg_args={'result_mesh':'element_interpolation', 
@@ -197,10 +188,6 @@ def test_optimize_invalid_algorithm_arg():
     """ Test that the jmodelica.optimize function raises exception for an 
         invalid algorithm argument.
     """
-    mofile_vdp = os.path.join('files', 'VDP.mo')
-    fpath_vdp = os.path.join(jm_home, path_to_examples, mofile_vdp)
-    cpath_vdp = "VDP_pack.VDP_Opt"
-    
     nose.tools.assert_raises(jmodelica.algorithm_drivers.InvalidAlgorithmArgumentException,
                              jmodelica.optimize,
                              model_vdp,
@@ -209,10 +196,6 @@ def test_optimize_invalid_algorithm_arg():
 @testattr(assimulo = True)
 def test_simulate():
     """ Test the jmodelica.simulate function using all default parameters."""
-    mofile_rlc = os.path.join('files','RLC_Circuit.mo')
-    fpath_rlc = os.path.join(jm_home, path_to_examples, mofile_rlc)
-    cpath_rlc = "RLC_Circuit"
-    
     sim_res = jmodelica.simulate(cpath_rlc, fpath_rlc)
     resistor_v = sim_res.result_data.get_variable_data('resistor.v')
     
@@ -233,7 +216,6 @@ def test_simulate_set_probl_arg():
     """ Test that it is possible to set properties in assimulo and that an 
         exception is raised if the argument is invalid. """
     sim_res = jmodelica.simulate(model_rlc, solver_args={'max_eIter':100, 'maxh':0.1})
-    
     nose.tools.assert_raises(jmodelica.algorithm_drivers.InvalidSolverArgumentException,
                              jmodelica.simulate,
                              model_rlc,
@@ -262,10 +244,6 @@ def test_simulate_invalid_algorithm_arg():
 @testattr(assimulo=True)
 def test_simulate_w_ode():
     """ Test jmodelica.simulate with ODE problem and setting solver args."""
-    mofile_vdp = os.path.join('files', 'VDP.mo')
-    fpath_vdp = os.path.join(jm_home, path_to_examples, mofile_vdp)
-    cpath_vdp = "VDP_pack.VDP_Opt"
-
     sim_res = jmodelica.simulate(cpath_vdp, 
                                  fpath_vdp,
                                  compiler='optimica',
@@ -308,8 +286,7 @@ def test_simulate_initialize_arg():
 @testattr(stddist = True)
 def test_dependent_parameters():
     """ Test evaluation of dependent parameters. """
-    mc = ModelicaCompiler()
-    path = os.path.join(jm_home, path_to_tests, 'files', 'DepPar.mo')
+    path = os.path.join(get_files_path(), 'Modelica', 'DepPar.mo')
     model = mc.compile_model('DepPar.DepPar1', path)
     
     assert (model.get_value('p1') == 1.0), 'Wrong value of independent parameter p1'

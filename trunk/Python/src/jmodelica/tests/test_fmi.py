@@ -23,10 +23,10 @@ import os as O
 import numpy as N
 import sys as S
 from jmodelica.tests import testattr
+from jmodelica.tests import get_files_path
 from jmodelica.fmi import *
 
-curr_dir = O.path.dirname(O.path.abspath(__file__));
-path_to_fmus = O.path.join(curr_dir, 'files', 'FMUs')
+path_to_fmus = O.path.join(get_files_path(), 'FMUs')
 
 @testattr(fmi = True)
 def test_unzip():

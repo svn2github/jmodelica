@@ -23,6 +23,7 @@ import nose.tools
 
 import jmodelica
 from jmodelica.tests import testattr
+from jmodelica.tests import get_files_path
 from jmodelica.compiler import OptimicaCompiler
 from jmodelica.compiler import ModelicaCompiler
 from jmodelica import jmi
@@ -32,10 +33,6 @@ from jmodelica import io
 
 int = N.int32
 N.int = N.int32
-
-jm_home = jmodelica.environ['JMODELICA_HOME']
-path_to_examples = os.path.join('Python','jmodelica','examples')
-path_to_tests = os.path.join(jm_home, "Python", "jmodelica", "tests")
 
 oc = OptimicaCompiler()
 mc = ModelicaCompiler()
@@ -47,8 +44,7 @@ class TestNLPInitWrappers:
     @classmethod
     def setUpClass(cls):
         """Sets up the class."""
-        model = os.path.join('files','CSTR.mo')
-        fpath = os.path.join(jm_home, path_to_examples, model)
+        fpath = os.path.join(get_files_path(), 'Modelica', 'CSTR.mo')
         cpath = "CSTR.CSTR_Init"
         fname = cpath.replace('.','_')
         oc.set_boolean_option('state_start_values_fixed',False)
@@ -134,8 +130,7 @@ class TestNLPInit:
     @classmethod
     def setUpClass(cls):
         """Sets up the test class."""
-        model_daeinit = os.path.join("files", "DAEInitTest.mo")
-        fpath_daeinit = os.path.join(path_to_tests, model_daeinit)
+        fpath_daeinit = os.path.join(get_files_path(), 'Modelica', 'DAEInitTest.mo')
         cpath_daeinit = "DAEInitTest"
         fname_daeinit = cpath_daeinit.replace('.','_',1)
         

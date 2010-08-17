@@ -23,6 +23,7 @@ import nose.tools
 
 import jmodelica
 from jmodelica.tests import testattr
+from jmodelica.tests import get_files_path
 from jmodelica.compiler import OptimicaCompiler
 from jmodelica import jmi
 from jmodelica.optimization import ipopt
@@ -30,9 +31,6 @@ from jmodelica.optimization import ipopt
 int = N.int32
 N.int = N.int32
 
-jm_home = jmodelica.environ['JMODELICA_HOME']
-path_to_examples = os.path.join('Python','jmodelica','examples')
-path_to_tests = os.path.join('Python','jmodelica','tests')
 oc = OptimicaCompiler()
 oc.set_boolean_option('state_start_values_fixed',True)
 
@@ -46,8 +44,7 @@ class TestNLP_VDP:
         Compile the test model.
         """
         # compile cstr
-        model_cstr = os.path.join('files','CSTR.mo')
-        fpath_cstr = os.path.join(jm_home, path_to_examples, model_cstr)
+        fpath_cstr = os.path.join(get_files_path(), 'Modelica', 'CSTR.mo')
         cpath_cstr = "CSTR.CSTR_Opt"
         fname_cstr = cpath_cstr.replace('.','_')
         oc.compile_model(cpath_cstr, fpath_cstr, 'ipopt')
@@ -191,8 +188,7 @@ class TestNLP_CSTR():
         Compile the test model.
         """
         # compile vdp
-        model_vdp = os.path.join("files","VDP.mo")
-        fpath_vdp = os.path.join(jm_home, path_to_examples, model_vdp)
+        fpath_vdp = os.path.join(get_files_path(), 'Modelica', 'VDP.mo')
         cpath_vdp = "VDP_pack.VDP_Opt_Min_Time"
         fname_vdp = cpath_vdp.replace('.','_',1)
         oc.compile_model(cpath_vdp, fpath_vdp, target='ipopt')
@@ -370,8 +366,7 @@ class TestCollocationEventException:
         Compile the test model.
         """
         # compile cstr
-        model_cstr = os.path.join('files','IfExpTest.mo')
-        fpath_cstr = os.path.join(jm_home, path_to_tests, model_cstr)
+        fpath_cstr = os.path.join(get_files_path(), 'Modelica', 'IfExpTest.mo')
         cpath_cstr = "IfExpTestEvents"
         fname_cstr = cpath_cstr.replace('.','_')
         oc.compile_model(cpath_cstr, fpath_cstr, 'ipopt')

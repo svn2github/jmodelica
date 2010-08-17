@@ -9,20 +9,18 @@ import nose
 import nose.tools
 
 from jmodelica.tests import testattr
+from jmodelica.tests import get_files_path
 
 from jmodelica.compiler import ModelicaCompiler
 from jmodelica.compiler import OptimicaCompiler
 import jmodelica as jm
 
 jm_home = jm.environ['JMODELICA_HOME']
-path_to_examples = os.path.join('Python', 'jmodelica', 'examples')
 
-model_mc = os.path.join('files', 'Pendulum_pack_no_opt.mo')
-fpath_mc = os.path.join(jm_home,path_to_examples,model_mc)
+fpath_mc = os.path.join(get_files_path(), 'Modelica', 'Pendulum_pack_no_opt.mo')
 cpath_mc = "Pendulum_pack.Pendulum"
 
-model_oc = os.path.join('files','Pendulum_pack.mo')
-fpath_oc = os.path.join(jm_home,path_to_examples,model_oc)
+fpath_oc = os.path.join(get_files_path(), 'Modelica', 'Pendulum_pack.mo')
 cpath_oc = "Pendulum_pack.Pendulum_Opt"
 
 mc = ModelicaCompiler()
@@ -140,8 +138,7 @@ def test_optimica_stepbystep():
 @testattr(stddist = True)
 def test_compiler_error():
     """ Test that a CompilerError is raised if compilation errors are found in the model."""
-    corruptmodel = os.path.join('files','CorruptCodeGenTests.mo')
-    path = os.path.join(jm_home,path_to_examples,corruptmodel)
+    path = os.path.join(get_files_path(), 'Modelica','CorruptCodeGenTests.mo')
     cl = 'CorruptCodeGenTests.CorruptTest1'
     nose.tools.assert_raises(jm.compiler.CompilerError, mc.compile_model, cl, path)
     nose.tools.assert_raises(jm.compiler.CompilerError, oc.compile_model, cl, path) 
@@ -156,8 +153,7 @@ def test_class_not_found_error():
 @testattr(stddist = True)
 def test_IO_error():
     """ Test that an IOError is raised if the model file is not found. """          
-    errormodel = os.path.join('files','NonExistingModel.mo')
-    errorpath = os.path.join(jm_home,path_to_examples,errormodel)
+    errorpath = os.path.join(get_files_path(), 'Modelica','NonExistingModel.mo')
     nose.tools.assert_raises(IOError, mc.compile_model, cpath_mc, errorpath)
     nose.tools.assert_raises(IOError, oc.compile_model, cpath_oc, errorpath)
 
@@ -215,15 +211,15 @@ def test_setget_cTemplate():
 @testattr(stddist = True)
 def test_parse_multiple():
     """ Test that it is possible to parse two model files. """
-    lib = os.path.join(jm_home,path_to_examples,'files','CSTRLib.mo')
-    opt = os.path.join(jm_home,path_to_examples, 'files','CSTR2_Opt.mo')
+    lib = os.path.join(get_files_path(), 'Modelica','CSTRLib.mo')
+    opt = os.path.join(get_files_path(), 'Modelica','CSTR2_Opt.mo')
     oc.parse_model([lib, opt])
 
 @testattr(stddist = True)
 def test_compile_multiple():
     """ Test that it is possible to compile two model files. """
-    lib = os.path.join(jm_home,path_to_examples,'files','CSTRLib.mo')
-    opt = os.path.join(jm_home,path_to_examples, 'files','CSTR2_Opt.mo')
+    lib = os.path.join(get_files_path(), 'Modelica','CSTRLib.mo')
+    opt = os.path.join(get_files_path(), 'Modelica','CSTR2_Opt.mo')
     oc.compile_model('CSTR2_Opt', [lib,opt])
 
 @testattr(stddist = True)

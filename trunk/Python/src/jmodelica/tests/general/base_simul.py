@@ -26,6 +26,7 @@ from jmodelica.optimization import ipopt
 from jmodelica.compiler import ModelicaCompiler
 from jmodelica.compiler import OptimicaCompiler
 from jmodelica.io import ResultDymolaTextual
+from jmodelica.tests import get_files_path
 
 try:
     from jmodelica.simulation.assimulo import JMIDAE, write_data
@@ -33,8 +34,8 @@ try:
 except:
     warnings.warn('Could not load Assimulo module. Check jmodelica.check_packages()')
 
-_jm_home = os.environ.get('JMODELICA_HOME')
-_tests_path = os.path.join(_jm_home, "Python", "jmodelica", "tests")
+#_jm_home = os.environ.get('JMODELICA_HOME')
+#_tests_path = os.path.join(_jm_home, "Python", "jmodelica", "tests")
 _model_name = ''
 
 class _BaseSimOptTest:
@@ -55,9 +56,9 @@ class _BaseSimOptTest:
           options     - a dict of options to set in the compiler, defaults to no options
           compiler    - the compiler to use
         """
-        global _model_name, _tests_path
+        global _model_name
         _model_name = class_name.replace('.','_')
-        path = os.path.join(_tests_path, 'files', mo_file)
+        path = os.path.join(get_files_path(), 'Modelica', mo_file)
         _set_compiler_options(compiler, options)
         compiler.compile_model(class_name, path, target='ipopt')
 
@@ -91,7 +92,7 @@ class _BaseSimOptTest:
         Load the expected data to use for assert_all_paths() and assert_all_end_values().
           name -  the file name of the results file, relative to files dir
         """
-        path = os.path.join(_tests_path, 'files', name)
+        path = os.path.join(get_files_path(), 'Results', name)
         self.expected = ResultDymolaTextual(path)
 
 

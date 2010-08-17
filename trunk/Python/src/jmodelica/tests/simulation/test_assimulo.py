@@ -27,6 +27,7 @@ from jmodelica.compiler import ModelicaCompiler
 from jmodelica.compiler import OptimicaCompiler
 from jmodelica.io import ResultDymolaTextual
 from jmodelica.tests import testattr
+from jmodelica.tests import get_files_path
 from jmodelica import simulate
 
 try:
@@ -37,16 +38,11 @@ try:
 except NameError, ImportError:
     warnings.warn('Could not load Assimulo module. Check jmodelica.check_packages()')
 
-jm_home = os.environ.get('JMODELICA_HOME')
-path_to_examples = os.path.join(jm_home, 'Python', 'jmodelica', 'examples')
-sep = os.path.sep
 
 mc = ModelicaCompiler()
 oc = OptimicaCompiler()
 oc.set_boolean_option('state_start_values_fixed',True)
-
-curr_dir = os.path.dirname(os.path.abspath(__file__));
-path_to_fmus = os.path.join(curr_dir[:-len('simulation')], 'files', 'FMUs')
+path_to_fmus = os.path.join(get_files_path(), 'FMUs')
 
 class Test_JMI_ODE:
     """
@@ -58,8 +54,7 @@ class Test_JMI_ODE:
         """
         Compile the test model.
         """
-        modelf_ODE = 'files' + sep + 'VDP.mo'
-        fpath_ODE = os.path.join(path_to_examples, modelf_ODE)
+        fpath_ODE = os.path.join(get_files_path(), 'Modelica', 'VDP.mo')
         cpath_ODE = 'VDP_pack.VDP_Opt'
         fname_ODE = cpath_ODE.replace('.','_',1)
         
@@ -116,8 +111,7 @@ class Test_JMI_ODE:
             assert self.m_ODE.real_x[i] == self.ODE.y0[i]
             
         #Test for algebraic variables
-        modelf_DAE = 'files' + sep + 'RLC_Circuit.mo'
-        fpath_DAE = os.path.join(path_to_examples, modelf_DAE)
+        fpath_DAE = os.path.join(get_files_path(), 'Modelica', 'RLC_Circuit.mo')
         cpath_DAE = 'RLC_Circuit'
         fname_DAE = cpath_DAE.replace('.','_',1)
         mc.compile_model(cpath_DAE, fpath_DAE)
@@ -129,8 +123,7 @@ class Test_JMI_ODE:
         
 
         #Test for discontinious model
-        modelf_DISC = 'files' + sep + 'IfExpExamples.mo'
-        fpath_DISC = os.path.join(path_to_examples, modelf_DISC)
+        fpath_DISC = os.path.join(get_files_path(), 'Modelica', 'IfExpExamples.mo')
         cpath_DISC = 'IfExpExamples.IfExpExample2'
         fname_DISC = cpath_DISC.replace('.','_',1)
         mc.compile_model(cpath_DISC, fpath_DISC)
@@ -208,15 +201,13 @@ class Test_JMI_DAE:
         Compile the test model.
         """
         #DAE test model
-        modelf_DAE = 'files' + sep + 'Pendulum_pack_no_opt.mo'
-        fpath_DAE = os.path.join(path_to_examples, modelf_DAE)
+        fpath_DAE = os.path.join(get_files_path(), 'Modelica', 'Pendulum_pack_no_opt.mo')
         cpath_DAE = 'Pendulum_pack.Pendulum'
         fname_DAE = cpath_DAE.replace('.','_',1)
 
         mc.compile_model(cpath_DAE, fpath_DAE)
         
-        modelf_DISC = 'files' + sep + 'IfExpExamples.mo'
-        fpath_DISC = os.path.join(path_to_examples, modelf_DISC)
+        fpath_DISC = os.path.join(get_files_path(), 'Modelica', 'IfExpExamples.mo')
         cpath_DISC = 'IfExpExamples.IfExpExample2'
         fname_DISC = cpath_DISC.replace('.','_',1)
 

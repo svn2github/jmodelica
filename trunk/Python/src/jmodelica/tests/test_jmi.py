@@ -11,6 +11,7 @@ import nose.tools as ntools
 
 #from jmodelica.tests import load_example_standard_model
 from jmodelica.tests import testattr
+from jmodelica.tests import get_files_path
 
 import jmodelica.jmi as jmi
 from jmodelica.compiler import OptimicaCompiler
@@ -21,17 +22,12 @@ import jmodelica.io
 int = N.int32
 N.int = N.int32
 
-# set paths
-jm_home = os.environ.get('JMODELICA_HOME')
-path_to_examples = os.path.join(jm_home, "Python", "jmodelica", "examples")
-path_to_tests = os.path.join(jm_home, "Python", "jmodelica", "tests")
 # get a compiler
 mc = ModelicaCompiler()
 oc = OptimicaCompiler()
 
 # compile VDP
-model_vdp = os.path.join("files", "VDP.mo")
-fpath_vdp = os.path.join(path_to_examples, model_vdp)
+fpath_vdp = os.path.join(get_files_path(), 'Modelica', "VDP.mo")
 cpath_vdp = "VDP_pack.VDP_Opt"
 fname_vdp = cpath_vdp.replace('.','_',1)
 oc.set_boolean_option('state_start_values_fixed',True)
@@ -43,8 +39,7 @@ sparsity = jmi.JMI_DER_SPARSE
 indep_vars = jmi.JMI_DER_ALL
 
 # compile RLC_Circuit with alias variables elimination
-model_rlc = os.path.join("files", "RLC_Circuit.mo")
-fpath_rlc = os.path.join(path_to_examples, model_rlc)
+fpath_rlc = os.path.join(get_files_path(), 'Modelica', "RLC_Circuit.mo")
 cpath_rlc = "RLC_Circuit"
 fname_rlc = cpath_rlc.replace('.','_',1)      
 mc.set_boolean_option('eliminate_alias_variables', True)
@@ -1162,15 +1157,11 @@ class TestJMIModel_VDP:
         """ Test of the dae_get_sizes in Model
         """
         
-        model = os.path.join("files", "VDP_pack.mo")
-        fpath = os.path.join(path_to_tests, model)
+        fpath = os.path.join(get_files_path(), 'Modelica', "VDP_pack.mo")
         cpath = "VDP_pack.VDP"
         fname = cpath.replace('.','_',1)
-    
-        mc = ModelicaCompiler()
-        
+
         mc.set_boolean_option('state_start_values_fixed',False)
-    
         mc.compile_model(cpath, fpath)
     
         # Load the dynamic library and XML data
@@ -1190,17 +1181,14 @@ class TestJMIModel_VDP:
                "test_jmi.py: test_Model_dae_get_sizes: Wrong number of DAE initialization equations."
                
 class TestModelGeneric:
-    """ Test methods in the jmodelica.jmi.Model class    
+    """ Test methods in the jmodelica.jmi.Model class
     """
 
     @classmethod
     def setUpClass(cls):
-        model = os.path.join("files", "DependentParameterTest.mo")
-        fpath = os.path.join(path_to_tests, model)
+        fpath = os.path.join(get_files_path(), 'Modelica', 'DependentParameterTest.mo')
         cpath = "DependentParameterTest"
         fname = cpath.replace('.','_',1)
-        
-        mc = ModelicaCompiler()
         
         mc.compile_model(cpath, fpath)
         
