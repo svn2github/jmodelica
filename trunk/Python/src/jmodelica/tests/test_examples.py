@@ -104,3 +104,8 @@ def test_fmi_bouncing_ball_raw():
 def test_lagrange_cost():
     """ Test the Lagrange cost example """    
     lagrange_cost.run_demo(False)
+
+@testattr(fmi = True)
+def test_fmi_bouncing_ball():
+    """ Test that the FMI bouncing ball using the high-level simulate works. """
+    fmi_bouncing_ball.run_demo(False)
