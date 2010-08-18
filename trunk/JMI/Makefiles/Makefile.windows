@@ -65,11 +65,17 @@ CPPAD_HOME =
 # IPOPT home
 IPOPT_HOME = 
 
+# Additional library directories
+EXT_LIB_DIRS =
+EXTERNAL_DIRS = $(EXT_LIB_DIRS:%=-L%)
+
 # Additional libraries
-EXT_LIBS =
+EXT_LIBS = 
+EXTERNAL_LIBS = $(EXT_LIBS:%=-l%)
 
 # Additional include directories
 EXT_INC_DIRS =
+EXTERNAL_INCLUDES = $(EXT_INC_DIRS:%=-I%)
 
 # Build with algorithms (requires IPOPT)
 BUILD_WITH_ALGORITHMS = false
@@ -116,13 +122,21 @@ LIBS_IPOPT = -L$(JMI_LIB_DIR) -ljmi_cppad -ljmi_algorithm_cppad -ljmi_solver_cpp
 
 # Include paths for compilation
 INCL_CPPAD = -I$(JMI_INC_DIR) -I$(CPPAD_INC_DIR)
-INCL_NOCPPAD = -I$(JMI_INC_DIR) $(EXT_INC_DIRS)
+INCL_NOCPPAD = -I$(JMI_INC_DIR) $(EXTERNAL_INCLUDES)
 
+# set variable to correct makefile (for recursive call in model_noad)
+MAKEFILE = $(lastword $(MAKEFILE_LIST))
+
+ifeq ($(JMI_AD),JMI_AD_CPPAD)
 model: $(OBJS)
 	$(CXX) $(SHARED_LDFLAGS) $(CXXLINKFLAGS) $(CXXFLAGS) -o $(SHARED) $(OBJS) $(LIBS_CPPAD)
+else
+model: $(OBJS)
+	$(CC) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) $(LIBS_NOCPPAD) $(EXTERNAL_LIBS) $(EXTERNAL_DIRS)
+endif
 
-model_noad: $(OBJS)
-	$(CC) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) $(LIBS_NOCPPAD) $(EXT_LIBS)
+model_noad: 
+	$(MAKE) -f $(MAKEFILE) JMI_AD=JMI_AD_NONE model
 
 algorithms: $(OBJS)
 # This is to ensure that the contents of libjmi_algorithm_cppad and

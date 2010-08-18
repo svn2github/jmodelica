@@ -470,22 +470,20 @@ class ModelicaCompiler():
         cppad_h = ' CPPAD_HOME=' + jm.environ['CPPAD_HOME']
         ipopt_h = ' IPOPT_HOME=' + jm.environ['IPOPT_HOME']
         
-        if target=='model_noad':
-            jmiad = ' JMI_AD=JMI_AD_NONE'
-        else:
-            jmiad = ' JMI_AD=JMI_AD_CPPAD'
+        extlibdirs = ' EXT_LIB_DIRS=\"'
+        s = ' '
+        libdirs = s.join(ext_lib_dirs)
+        extlibdirs = extlibdirs+libdirs+"\""
         
         extlibs = ' EXT_LIBS=\"'
-        for libdir in ext_lib_dirs:
-            extlibs = extlibs+" -L"+libdir
-        for lib in ext_libs:
-            extlibs = extlibs+" -l"+lib
-        extlibs = extlibs+"\""
-        
+        s = ' '
+        libs = s.join(ext_libs)
+        extlibs = extlibs+libs+"\""
+
         extincdir = ' EXT_INC_DIRS=\"'
-        for incdir in ext_incl_dirs:
-            extincdir = extincdir+" -I"+incdir
-        extincdir = extincdir+"\""
+        s = ' '
+        incdir = s.join(ext_incl_dirs)
+        extincdir = extincdir+incdir+"\""
 
         if sys.platform == 'win32':
             make = os.path.join(jm.environ['MINGW_HOME'],'bin','mingw32-make') + ' -f '
@@ -502,7 +500,7 @@ class ModelicaCompiler():
                   jmodelica_h + \
                   cppad_h + \
                   ipopt_h + \
-                  jmiad + \
+                  extlibdirs + \
                   extlibs + \
                   extincdir
         else:
@@ -514,7 +512,6 @@ class ModelicaCompiler():
                   jmodelica_h + \
                   cppad_h + \
                   ipopt_h + \
-                  jmiad + \
                   extlibs + \
                   extincdir
 
