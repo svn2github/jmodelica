@@ -188,16 +188,12 @@
     <para>If logging is set to <literal>True</literal> the log can be
     retrieved with the method,</para>
 
-    <programlisting language="Python">
-    FMIModel.get_log()
-    </programlisting>
+    <programlisting language="Python">FMIModel.get_log()</programlisting>
 
     <para>Documentation of the functions can also be accessed interactively
     from IPython by using for instance,</para>
 
-    <programlisting language="Python">
-    FMIModel.get_real?
-    </programlisting>
+    <programlisting language="Python">FMIModel.get_real?</programlisting>
 
     <para>There is also a one-to-one map to the C-functions, meaning that
     there is an option to use the low-level C-functions as they are specified
@@ -232,11 +228,11 @@
       (http://www.functional-mockup-interface.org/). The bouncing ball model
       is to be simulated using the explicit Euler method with event
       detection.</para>
-        
-        <para>The example can also be found in the Python examples catalog in the JModelica.org platform.</para>
-        
-      <para>The bouncing ball consists of two
-      equations,</para>
+
+      <para>The example can also be found in the Python examples catalog in
+      the JModelica.org platform.</para>
+
+      <para>The bouncing ball consists of two equations,</para>
 
       <para><inlinemediaobject>
           <imageobject>
@@ -246,7 +242,7 @@
 
       <para>and one event function (also commonly called root
       function),</para>
-    
+
       <para><inlinemediaobject>
           <imageobject>
             <imagedata fileref="images/event_eq.png"></imagedata>
@@ -271,16 +267,13 @@
 
         <para>Start by importing the necessary modules,</para>
 
-        <programlisting language="Python">
-        import numpy as N 
+        <programlisting language="Python">        import numpy as N 
         import pylab as P #Used for plotting
-        from jmodelica.fmi import FMIModel #The FMI Interface
-        </programlisting>
+        from jmodelica.fmi import FMIModel #The FMI Interface      </programlisting>
 
         <para>Next, the FMU is to be loaded and initialized,</para>
 
-        <programlisting language="Python">
-        #Load the FMU by specifying the fmu together with the path.
+        <programlisting language="Python">        #Load the FMU by specifying the fmu together with the path.
         bouncing_fmu = FMIModel('/path/to/FMU/bouncingBall.fmu')
 
         Tstart = 0.5 #The start time.
@@ -290,9 +283,7 @@
                                    #(Defaults to 0.0)
         
         bouncing_fmu.initialize() #Initialize the model. Also sets all the start 
-                                  #attributes defined in the XML file.
-                                  
-      </programlisting>
+                                  #attributes defined in the XML file.     </programlisting>
 
         <para>The first line loads the FMU and connects the C-functions of the
         model to Python together with loading the information from the
@@ -310,8 +301,7 @@
         <para>Then information about the first step is retrieved and stored
         for later use.</para>
 
-        <programlisting language="Python">
-        #Get Continuous States
+        <programlisting language="Python">        #Get Continuous States
         x = bouncing_fmu.continuous_states
         #Get the Nominal Values
         x_nominal = bouncing_fmu.nominal_continuous_states
@@ -322,8 +312,7 @@
         vref  = [bouncing_fmu.get_valueref('h')] + \
                 [bouncing_fmu.get_valueref('v')] #Retrieve the valureferences for the
                                                  #values 'h' and 'v't_sol = [Tstart]
-        sol = [bouncing_fmu.get_real(vref)]
-        </programlisting>
+        sol = [bouncing_fmu.get_real(vref)]        </programlisting>
 
         <para>Here the continuous states together with the nominal values and
         the event indicators are stored to be used in the integration loop. In
@@ -332,17 +321,14 @@
         storing the result. The final step before the integration is started
         is to define the step-size.</para>
 
-        <programlisting language="Python">
-        time = Tstart
+        <programlisting language="Python">        time = Tstart
         Tnext = Tend #Used for time events
-        dt = 0.01 #Step-size
-      </programlisting>
+        dt = 0.01 #Step-size      </programlisting>
 
         <para>We are now ready to create our main integration loop where the
         solution is advanced using the explicit Euler method.</para>
 
-        <programlisting language="Python">
-        #Main integration loop.
+        <programlisting language="Python">        #Main integration loop.
         while time &lt; Tend and not bouncing_fmu.get_event_info().terminateSimulation:
             #Compute the derivative of the previous step f(x(n), t(n))
             dx = bouncing_fmu.get_derivatives()
@@ -359,8 +345,7 @@
             
             #Set the states at t = time (Perform the step using x(n+1)=x(n)+hf(x(n), t(n))
             x = x + h*dx 
-            bouncing_fmu.continuous_states = x
-    </programlisting>
+            bouncing_fmu.continuous_states = x    </programlisting>
 
         <para>This is the integration loop for advancing the solution one
         step. The loop continues until the final time have been reached or if
@@ -381,8 +366,7 @@
         simulation, we have to check the indicators which is done
         below.</para>
 
-        <programlisting language="Python">
-            #Get the event indicators at t = time
+        <programlisting language="Python">            #Get the event indicators at t = time
             event_ind_new = bouncing_fmu.get_event_indicators()
             
             #Inform the model about an accepted step and check for step events
@@ -391,8 +375,7 @@
             #Check for time and state events
             time_event  = abs(time-Tnext) &lt;= 1.e-10
             state_event = True if True in ((event_ind_new&gt;0.0) != (event_ind&gt;0.0))\
-                          else False
-    </programlisting>
+                          else False   </programlisting>
 
         <para>Events can be, time, state or step events. The time events are
         checked by continuously monitor the current time and the next time
@@ -402,8 +385,7 @@
         event handling is necessary. If an event have occurred, it needs to be
         handled, see below.</para>
 
-        <programlisting language="Python">
-            #Event handling
+        <programlisting language="Python">            #Event handling
             if step_event or time_event or state_event:
                 
                 eInfo = bouncing_fmu.get_event_info()
@@ -431,8 +413,7 @@
                 if eInfo.upcomingTimeEvent:
                     Tnext = min(eInfo.nextEventTime, Tend)
                 else:
-                    Tnext = Tend
-    </programlisting>
+                    Tnext = Tend  </programlisting>
 
         <para>If an event occurred, we enter the iteration loop where we loop
         until the solution of the new states have converged. During this
@@ -446,15 +427,13 @@
         new absolute tolerances are calculated with the new nominal values.
         Finally the model is checked for a new time event.</para>
 
-        <programlisting language="Python">
-            event_ind = event_ind_new
+        <programlisting language="Python">            event_ind = event_ind_new
         
             #Retrieve solutions at t=time for outputs
             #bouncing_fmu.get_real,get_integer,get_boolean,get_string (valueref)
             
             t_sol += [time]
-            sol += [bouncing_fmu.get_real(vref)]
-    </programlisting>
+            sol += [bouncing_fmu.get_real(vref)]   </programlisting>
 
         <para>In the end of the loop, the solution is stored and the old event
         indicators are stored for use in the next loop.</para>
@@ -462,8 +441,7 @@
         <para>After the loop have finished, by reaching the final time, we
         plot the simulation results</para>
 
-        <programlisting language="Python">
-        #Plot the height
+        <programlisting language="Python">        #Plot the height
         P.figure(1)
         P.plot(t_sol,N.array(sol)[:,0])
         P.title(bouncing_fmu.get_name())
@@ -475,8 +453,7 @@
         P.title(bouncing_fmu.get_name())
         P.ylabel('Velocity (m/s)')
         P.xlabel('Time (s)')
-        P.show()
-        </programlisting>
+        P.show()     </programlisting>
 
         <para>and the figure below shows the results.</para>
 
@@ -488,7 +465,9 @@
               <imagedata fileref="images/bouncing_h.svg" scalefit="1"
                          width="50%"></imagedata>
             </imageobject>
-        </mediaobject><mediaobject>
+          </mediaobject>
+
+          <mediaobject>
             <imageobject>
               <imagedata fileref="images/bouncing_v.svg" scalefit="1"
                          width="50%"></imagedata>
@@ -526,10 +505,8 @@
 
         <para>We start by importing the necessary method and module,</para>
 
-        <programlisting language="Python">
-    from jmodelica import simulate
-    import pylab as P
-    </programlisting>
+        <programlisting language="Python">    from jmodelica import simulate
+    import pylab as P </programlisting>
 
         <para>The <literal>simulate</literal> method is a high-level method
         for simulation where the input are the model of interest together with
@@ -601,10 +578,8 @@
         <para>In the code below, the simulation options are passed on to
         <literal>simulate</literal></para>
 
-        <programlisting language="Python">
-    simRobot = simulate('Robot.fmu', alg_args={'final_time':1.8, 
-                       'num_communication_points':1000})
-    </programlisting>
+        <programlisting language="Python">    simRobot = simulate('Robot.fmu', alg_args={'final_time':1.8, 
+                       'num_communication_points':1000}) </programlisting>
 
         <para>This preforms the simulation and the statistics will be printed
         in the prompt.</para>
@@ -613,30 +588,24 @@
         object <literal>simRobot</literal> by calling the method
         <literal>get_result_data()</literal>.</para>
 
-        <programlisting language="Python">
-    res = sim_res.get_result_data()
-    </programlisting>
+        <programlisting language="Python">    res = sim_res.get_result_data() </programlisting>
 
         <para>To retrieve data about a variable from the result data (res),
         use the method <literal>get_variable_data</literal> together with the
         name of the variable.</para>
 
-        <programlisting language="Python">
-    dq1 = res.get_variable_data('der(mechanics.q[1])')
-    dq6 = res.get_variable_data('der(mechanics.q[6])')
-    </programlisting>
+        <programlisting language="Python">    dq1 = res.get_variable_data('der(mechanics.q[1])')
+    dq6 = res.get_variable_data('der(mechanics.q[6])')  </programlisting>
 
         <para>Now we have loaded and retrieved the variables of interest. So
         lets plot them.</para>
 
-        <programlisting language="Python">
-    P.plot(dq1.t,dq1.x,dq6.t,dq6.x)
+        <programlisting language="Python">    P.plot(dq1.t,dq1.x,dq6.t,dq6.x)
     P.legend(['der(mechanics.q[1])','der(mechanics.q[6])'])
     P.xlabel('Time (s)')
     P.ylabel('Joint Velocity (rad/s)')
     P.title('Full Robot')
-    P.show()
-    </programlisting>
+    P.show()</programlisting>
 
         <para>Below is the resulting figure together with a comparison from
         the simulation result generated by Dymola.</para>
@@ -650,11 +619,12 @@
                          width="60%"></imagedata>
             </imageobject>
           </mediaobject>
-
         </figure>
+
         <figure>
-        <title>Comparison with Dymola</title>
-        <mediaobject>
+          <title>Comparison with Dymola</title>
+
+          <mediaobject>
             <imageobject>
               <imagedata fileref="images/DymolaFullRobotComparison.svg"
                          scalefit="1" width="60%"></imagedata>
@@ -665,13 +635,4 @@
     </section>
   </section>
 
-  <section>
-    <title>Limitations</title>
-
-    <para>Cannot compile FMUs distributed in source code.</para>
-
-    <para>Unloading of the binary does not work.</para>
-
-    <para>Get/Set string does not work.</para>
-  </section>
 </chapter>

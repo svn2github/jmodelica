@@ -246,7 +246,8 @@ import pylab as P</programlisting>
     can be the tolerances. Using the default simulation package, Assimulo,
     information regarding which algorithms are supported and the solver
     arguments can be found here, http://www.jmodelica.org/assimulo . The
-    default solver is IDA and for a selection of the solver arguments to IDA, see the table below.</para>
+    default solver is IDA and for a selection of the solver arguments to IDA,
+    see the table below.</para>
 
     <table>
       <title>Selection of solver arguments for IDA</title>
@@ -308,7 +309,7 @@ import pylab as P</programlisting>
 
     <programlisting>
     res = res_object.get_result_data()
-    square_y = res.get_variable_data('y')
+    square_y = res.get_variable_data('square.y')
     resistor_v = res.get_variable_data('resistor.v')
     inductor1_i = res.get_variable_data('inductor1.i')
     </programlisting>
