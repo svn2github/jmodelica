@@ -26,6 +26,7 @@ settings will be used.
 
 import os
 import sys
+import platform
 import subprocess
 import jpype
 import string
@@ -470,16 +471,25 @@ class ModelicaCompiler():
         cppad_h = ' CPPAD_HOME=' + jm.environ['CPPAD_HOME']
         ipopt_h = ' IPOPT_HOME=' + jm.environ['IPOPT_HOME']
         
-        extlibdirs = ' EXT_LIB_DIRS=\"'
-        s = ' '
-        libdirs = s.join(ext_lib_dirs)
-        extlibdirs = extlibdirs+libdirs+"\""
         
+        # external library directories
+        platform_dir = _get_platform()
+            
+        extlibdirs = ' EXT_LIB_DIRS=\"'
+        for libdir in ext_lib_dirs:
+            if os.path.exists(os.path.join(libdir, platform_dir)):
+                extlibdirs = extlibdirs + os.path.join(libdir, platform_dir)
+            else:
+                extlibdirs = extlibdirs + libdir
+        extlibdirs = extlibdirs+"\""
+        
+        # external libraries
         extlibs = ' EXT_LIBS=\"'
         s = ' '
         libs = s.join(ext_libs)
         extlibs = extlibs+libs+"\""
 
+        # external include directories
         extincdir = ' EXT_INC_DIRS=\"'
         s = ' '
         incdir = s.join(ext_incl_dirs)
@@ -512,6 +522,7 @@ class ModelicaCompiler():
                   jmodelica_h + \
                   cppad_h + \
                   ipopt_h + \
+                  extlibdirs + \
                   extlibs + \
                   extincdir
 
@@ -699,3 +710,35 @@ class UnknownOptionError(JError):
     
     """
     pass
+    
+def _get_platform():
+    """ Helper function. Returns string describing the platform 
+        on which jmodelica is run. The different possible return values 
+        are:
+            win32
+            win64
+            darwin32
+            darwin64
+            linux32
+            linux64
+    """
+    _platform = ''
+    if sys.platform == 'win32':
+        # windows
+        _platform = 'win'
+    elif sys.platform == 'darwin':
+        # mac
+        _platform = 'darwin'
+    else:
+        # assume linux
+        _platform = 'linux'
+    
+    (bits, linkage) =  platform.architecture()
+    if bits == '32bit':
+        _platform = _platform +'32'
+    else:
+        _platform = _platform + '64'
+    
+    return _platform
+    
+    
