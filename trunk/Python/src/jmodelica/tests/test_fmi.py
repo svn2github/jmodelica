@@ -309,4 +309,18 @@ class Test_FMI:
         """
         assert self._bounce.get_name() == 'bouncingBall'
         assert self._dq.get_name() == 'dq'
-
+    
+    @testattr(fmi = True)
+    def test_debug_logging(self):
+        """
+        This test the attribute debugging.
+        """
+        self._bounce.set_debug_logging(True)
+        assert len(self._bounce.get_log()) == 0
+        self._bounce.set_real([0], [1.0])
+        assert len(self._bounce.get_log()) > 0 #Stored information in log
+        
+    
+        
+        
+        
