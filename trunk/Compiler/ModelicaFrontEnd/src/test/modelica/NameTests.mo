@@ -507,7 +507,7 @@ class NameTest15
                                                flatModel=
 "
 fclass NameTests.NameTest15
- protected Real x = 1;
+ Real x = 1;
 end NameTests.NameTest15;
 ")})));
 

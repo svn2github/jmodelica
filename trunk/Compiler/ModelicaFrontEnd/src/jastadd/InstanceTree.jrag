@@ -542,7 +542,7 @@ aspect InstanceTreeConstruction {
 	
 	
 	/**
-	 * \brief Dynamically places an FExp in the tree under this InstFunctionCall.
+	 * \brief Dynamically places an FExp in the tree under this FExp.
 	 * 
 	 * @returns  the final version of the dynamically placed node.
 	 */

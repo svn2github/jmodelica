@@ -739,11 +739,7 @@ aspect FlattPrettyPrint {
 	}
 
 	public void FVariable.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
-		
 			str.print(indent);
-			if (isProtected()) {
-				str.print("protected ");
-			}
 			
 			str.print(getFTypePrefixVariability().toString());
 						
@@ -780,8 +776,7 @@ aspect FlattPrettyPrint {
 			}
 	    	str.print(" */");
 	    }
-	    
-		}
+	}
 
 	
 	public void FDerivativeVariable.prettyPrint(Printer p, PrintStream str, String indent, Object o) {

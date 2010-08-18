@@ -1176,6 +1176,7 @@ aspect ConstantEvaluation {
   syn CValue InstAccess.ceval() = CValue.UNKNOWN;
   eq InstDot.ceval()            = getRight().ceval();
   eq InstComponentAccess.ceval() {
+	  CValue res = CValue.UNKNOWN;
 	  if (myInstComponentDecl().isAssignable()) {
 		  InstAssignable var = (InstAssignable) myInstComponentDecl();
 		  
@@ -1185,15 +1186,27 @@ aspect ConstantEvaluation {
 			  i = duringFunctionEval() ? fas.createIndex() : fas.asIndex();
 		  }
 		  
-		  if (!var.inRecord() || containingInstComponent() == var.containingInstComponent()) 
-			  return var.ceval(i);
-		  
-		  CValue res = cevalRecordMember(getID());
-		  if (i != Index.NULL)
-			  res = res.array().getCell(i);
-		  return res;
+		  if (shouldCevalThroughParent(var)) {
+			  res = cevalRecordMember(getID());
+			  if (i != Index.NULL)
+				  res = res.array().getCell(i);
+			  return res;
+		  } else {
+			  res = var.ceval(i);
+		  }
 	  }
-	  return CValue.UNKNOWN;
+	  return res;
+  }
+  
+  /**
+   * \brief Check if constant evaluation should go through surrounding record.
+   */
+  protected boolean InstComponentAccess.shouldCevalThroughParent(InstAssignable var) {
+	  if (!var.inRecord() || !var.inFunction() || 
+			  containingInstComponent() == var.containingInstComponent())
+		  return false;
+	  InstAccess first = getTopInstAccess().getFirstInstAccess();
+	  return !first.myInstComponentDecl().evaluationValue().isUnknown();
   }
   
   /**
