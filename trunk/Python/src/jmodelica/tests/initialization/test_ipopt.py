@@ -311,6 +311,18 @@ class TestNLPInit:
     
         assert max(N.abs(res_Z-self.dae_init_test.get_z()))<1e-3, \
                "test_jmi.py: test_init_opt: Wrong solution to initialization system." 
+
+    @testattr(ipopt = True)
+    def test_statistics(self):
+        """ Test of 'jmi_init_opt_get_statistics'.
+        """
+        # Solve the optimization problem
+        self.init_nlp_ipopt.init_opt_ipopt_solve()
+        (return_status,iters,cost,time) = self.init_nlp_ipopt.init_opt_ipopt_get_statistics()
+
+        assert return_status==0, "Return status from Ipopt should be 0"
+        assert abs(cost-2.4134174e+06)<1, "Wrong value of cost function"
+
         
     @testattr(ipopt = True)    
     def test_init_opt_write_result(self):

@@ -19,6 +19,7 @@
 
 #include "jmi_opt_sim_ipopt.h"
 #include "IpIpoptApplication.hpp"
+#include "IpSolveStatistics.hpp"
 #include "jmi_TNLP.hpp"
 
 //using namespace Ipopt;
@@ -26,6 +27,9 @@
 struct jmi_opt_sim_ipopt_t{
 	jmi_opt_sim_t *jmi_opt_sim;
 	Ipopt::SmartPtr<Ipopt::IpoptApplication> ipopt_app;
+	Ipopt::SmartPtr<Ipopt::TNLP> tnlp;
+	int solved;
+	int return_status;
 };
 
 int jmi_opt_sim_ipopt_new(jmi_opt_sim_ipopt_t **jmi_opt_sim_ipopt, jmi_opt_sim_t *jmi_opt_sim) {
@@ -37,6 +41,9 @@ int jmi_opt_sim_ipopt_new(jmi_opt_sim_ipopt_t **jmi_opt_sim_ipopt, jmi_opt_sim_t
 
 	nlp->ipopt_app = new Ipopt::IpoptApplication();
 	nlp->ipopt_app->Options()->SetStringValue("hessian_approximation", "limited-memory");
+	nlp->tnlp = new jmi_TNLP(jmi_opt_sim);
+	nlp->solved = 0;
+	nlp->return_status = -1;
 
 	return 0;
 }
@@ -53,13 +60,10 @@ int jmi_opt_sim_ipopt_solve(jmi_opt_sim_ipopt_t *jmi_opt_sim_ipopt) {
 		return false;
 	}
 
-    SmartPtr<TNLP> tnlp;
-
-	tnlp = new jmi_TNLP(jmi_opt_sim_ipopt->jmi_opt_sim);
-
 	Ipopt::ApplicationReturnStatus status;
-	status = jmi_opt_sim_ipopt->ipopt_app->OptimizeTNLP(tnlp);
-
+	status = jmi_opt_sim_ipopt->ipopt_app->OptimizeTNLP(jmi_opt_sim_ipopt->tnlp);
+	jmi_opt_sim_ipopt->solved = 1;
+	jmi_opt_sim_ipopt->return_status = status;
 	return status;
 
 }
@@ -91,6 +95,20 @@ int jmi_opt_sim_ipopt_set_num_option(jmi_opt_sim_ipopt_t *jmi_opt_sim_ipopt, cha
 		return -1;
 	}
 
+}
+
+int jmi_opt_sim_ipopt_get_statistics(jmi_opt_sim_ipopt_t* jmi_opt_sim_ipopt,
+		int* return_status, int* nbr_iter, jmi_real_t* objective,
+		jmi_real_t* total_exec_time) {
+	if (jmi_opt_sim_ipopt->solved==1) {
+		*return_status = jmi_opt_sim_ipopt->return_status;
+		*nbr_iter = jmi_opt_sim_ipopt->ipopt_app->Statistics()->IterationCount();
+		*objective = jmi_opt_sim_ipopt->ipopt_app->Statistics()->FinalObjective();
+		*total_exec_time = jmi_opt_sim_ipopt->ipopt_app->Statistics()->TotalCPUTime();
+		return 0;
+	} else {
+		return -1;
+	}
 }
 
 /*

@@ -76,6 +76,11 @@ class CollocationOptimizer(object):
             self._nlp_collocation._model.jmimodel._dll.jmi_opt_sim_ipopt_set_num_option.argtypes = [ct.c_void_p,
                                                                                                     ct.c_char_p,
                                                                                                     c_jmi_real_t]
+            self._nlp_collocation._model.jmimodel._dll.jmi_opt_sim_ipopt_get_statistics.argtypes = [ct.c_void_p,
+                                                                                         ct.POINTER(ct.c_int),
+                                                                                         ct.POINTER(ct.c_int),
+                                                                                         ct.POINTER(c_jmi_real_t),
+                                                                                         ct.POINTER(c_jmi_real_t)]
         except AttributeError, e:
             pass       
                
@@ -119,6 +124,29 @@ class CollocationOptimizer(object):
         """
         if self._nlp_collocation._model.jmimodel._dll.jmi_opt_sim_ipopt_set_num_option(self._ipopt_opt, key, val) is not 0:
             raise jmi.JMIException("The Ipopt real option " + key + " is unknown")
+
+    def opt_sim_ipopt_get_statistics(self):
+        """
+        Get statistics from the last optimization run.
+
+        Returns:
+            return_status -- Return status from IPOPT
+            nbr_iter -- Number of iterations 
+            objective -- Final value of objective function
+            total_exec_time -- Execution time
+        """
+        return_code = ct.c_int()
+        iters = ct.c_int()
+        objective = c_jmi_real_t()
+        exec_time = c_jmi_real_t()
+        if self._nlp_collocation._model.jmimodel._dll.jmi_opt_sim_ipopt_get_statistics(self._ipopt_opt,
+                                                                           byref(return_code),
+                                                                           byref(iters),
+                                                                           byref(objective),
+                                                                            byref(exec_time)) is not 0:
+            raise jmi.JMIException("Error when retrieve statistics - optimization problem may not be solved.")
+        return (return_code.value,iters.value,objective.value,exec_time.value)
+
 
 class NLPCollocation(object):
     """
