@@ -462,7 +462,8 @@ class Test_JMI_DAE:
 
 class Test_FMI_ODE:
     """
-    This class tests jmodelica.simulation.assimulo.FMIODE
+    This class tests jmodelica.simulation.assimulo.FMIODE and together
+    with Assimulo. Requires that Assimulo is installed.
     """
     
     @classmethod
@@ -483,7 +484,7 @@ class Test_FMI_ODE:
         self._bounceSim = FMIODE(self._bounce)
         self._dqSim     = FMIODE(self._dq)
         
-    @testattr(fmi = True)
+    @testattr(assimulo = True)
     def test_init(self):
         """
         This tests the functionality of the method init. 
@@ -508,7 +509,7 @@ class Test_FMI_ODE:
         #nose.tools.assert_almost_equal(sol[0][2],0.000000000)
         #nose.tools.assert_almost_equal(sol[0][3],-9.81000000)
         
-    @testattr(fmi = True)
+    @testattr(assimulo = True)
     def test_f(self):
         """
         This tests the functionality of the rhs.
@@ -522,7 +523,7 @@ class Test_FMI_ODE:
         nose.tools.assert_almost_equal(rhs[1],-9.8100000)
 
     
-    @testattr(fmi = True)
+    @testattr(assimulo = True)
     def test_g(self):
         """
         This tests the functionality of the event indicators.
@@ -540,7 +541,7 @@ class Test_FMI_ODE:
         nose.tools.assert_almost_equal(event[0],0.50000000)
 
         
-    @testattr(fmi = True)
+    @testattr(assimulo = True)
     def test_t(self):
         """
         This tests the functionality of the time events.
@@ -553,7 +554,7 @@ class Test_FMI_ODE:
         assert time == None
         #Further testing of the time event function is needed.
         
-    @testattr(fmi = True)
+    @testattr(assimulo = True)
     def test_handle_result(self):
         """
         This tests the functionality of the handle result method.
@@ -568,7 +569,7 @@ class Test_FMI_ODE:
         assert len(self._bounceSim._sol_real) == 1
         
         
-    @testattr(fmi = True)
+    @testattr(assimulo = True)
     def test_handle_event(self):
         """
         This tests the functionality of the method handle_event.
@@ -588,7 +589,7 @@ class Test_FMI_ODE:
         
         #Further testing of the handle_event function is needed.
     
-    @testattr(fmi = True)
+    @testattr(assimulo = True)
     def test_completed_step(self):
         """
         This tests the functionality of the method completed_step.
@@ -600,7 +601,7 @@ class Test_FMI_ODE:
         assert self._bounceSim.completed_step(solver) == 0
         #Further testing of the completed step function is needed.
         
-    @testattr(fmi = True)
+    @testattr(assimulo = True)
     def test_basic_simulation(self):
         """
         This tests the basic simulation and writing.
@@ -635,7 +636,7 @@ class Test_FMI_ODE:
         nose.tools.assert_almost_equal(height.t[-1],3.000000,5)
 
 
-    @testattr(fmi = True)
+    @testattr(assimulo = True)
     def test_default_simulation(self):
         """
         This test the default values of the simulation using simulate.
