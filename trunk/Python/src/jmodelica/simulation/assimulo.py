@@ -901,6 +901,93 @@ class JMIDAE(Implicit_Problem):
         print 'After: ', self._log_information[ind][6][iter][1]
         
 
+class JMIDAESens(Implicit_Problem):
+    """
+    An Assimulo Implicit Model extended to JMI interface with support 
+    for sensitivities.
+    """
+    def __init__(self, model):
+        """
+        Sets the initial values.
+        """
+        self._model = model
+        
+        self.y0 = N.append(self._model.real_x,self._model.real_w)
+        self.yd0 = N.append(self._model.real_dx,[0]*len(self._model.real_w))
+        self.algvar = [1.0]*len(self._model.real_x) + [0.0]*len(self._model.real_w) #Sets the algebraic components of the model
+        
+        [f_nbr, g_nbr] = self._model.jmimodel.dae_get_sizes() #Used for determine if there are discontinuities
+        
+        #Internal values
+        self._parameter_names = [name[1] for name in self._model.get_p_opt_variable_names()]
+        self._sens_matrix = [] #Sensitivity matrix
+        self._f_nbr = f_nbr #Number of equations
+        self._g_nbr = g_nbr #Number of event indicatiors
+        self._x_nbr = len(self._model.real_x) #Number of differentiated
+        self._w_nbr = len(self._model.real_w) #Number of algebraic
+        self._dx_nbr = len(self._model.real_dx) #Number of derivatives
+        
+        #Set the start values to the parameters.
+        self.p0 = N.array([])
+        for n in self._parameter_names:
+            self.p0 = N.append(self.p0, self._model.get_value(n))
+            self._sens_matrix += [[]] 
+        
+        self._p_nbr = len(self.p0) #Number of parameters
+        
+    def f(self, t, y, yd, p):
+        """
+        The residual function for an DAE problem.
+        """
+        #Moving data to the model
+        self._model.t = t
+        self._model.real_x = y[0:self._x_nbr]
+        self._model.real_w = y[self._x_nbr:self._f_nbr]
+        self._model.real_dx = yd[0:self._dx_nbr]
+        
+        #Set the free parameters
+        for ind, val in enumerate(p):
+            self._model.set_value(self._parameter_names[ind],val)
+        
+        #Evaluating the residual function
+        residual = N.array([.0]*self._f_nbr)
+        self._model.jmimodel.dae_F(residual)
+        
+        return residual
+        
+    def handle_result(self, solver, t ,y, yd):
+        """
+        Post processing (stores the time points and the sensitivity result).
+        """
+        solver.t += [t]
+        solver.y += [y]
+        
+        #Store the sensitivity matrix
+        for i in range(self._p_nbr):
+            self._sens_matrix[i] += [solver.interpolate_sensitivity(t, 0, i)]
+        
+    def get_sens_result(self):
+        """
+        Returns the sensitivity results together with the names.
+        
+            Returns::
+            
+                parameter_names, sensitivity_matrix = JMIDAESens.get_sens_result()
+                
+                    parameters_names   - The names of the parameters for which sensitivities
+                                         have been calculated.
+                                       
+                    sensitivity_matrix - A matrix containing the sensitivities for all the
+                                         parameters.
+                                         
+                                         sensitivity_matrix[0], gives the result for the first
+                                                                parameter in the parameters_names
+                                                                list.
+        """
+        for i in range(self._p_nbr):
+            self._sens_matrix[i] = N.array(self._sens_matrix[i]).reshape(-1,self._f_nbr)
+            
+        return self._parameter_names, self._sens_matrix
 
 class Trajectory:
     """
