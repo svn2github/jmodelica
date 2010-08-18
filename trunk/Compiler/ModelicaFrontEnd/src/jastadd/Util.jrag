@@ -1423,10 +1423,10 @@ aspect FlatExpressions {
     inh boolean FExp.inNoEventExp();
     eq FNoEventExp.getChild().inNoEventExp() = true;
     eq FAlgorithmBlock.getChild().inNoEventExp() = true;
-    eq FAbstractEquation.getChild().inNoEventExp() = false;
     eq SourceRoot.getChild().inNoEventExp() = false;
     eq FlatRoot.getChild().inNoEventExp() = false;
-
+    eq FClass.getFParameterEquation().inNoEventExp() = true;
+    
     inh boolean InstAccess.inConnectClause();
     inh boolean FExp.inConnectClause();
     eq FConnectClause.getChild().inConnectClause() = true;

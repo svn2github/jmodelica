@@ -3283,6 +3283,20 @@ jmi_ad_var_t func_CCodeGenTests_IntegerInFunc1_f_exp(jmi_ad_var_t i_v, jmi_array
 	Real z = f(2, x);
 end IntegerInFunc1;
 
+model IfExpInParExp
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="IfExpInParExp",
+         description="Test that relational expressions in parameter expressions are treated correctly",
+         template="$C_DAE_initial_dependent_parameter_residuals$",
+         generatedCode="
+    (*res)[0] = (COND_EXP_EQ(COND_EXP_LE(AD_WRAP_LITERAL(1), _N_0, JMI_TRUE, JMI_FALSE),JMI_TRUE,AD_WRAP_LITERAL(1.),AD_WRAP_LITERAL(2.))) - (_r_1_1);
+    (*res)[1] = (COND_EXP_EQ(COND_EXP_LE(AD_WRAP_LITERAL(2), _N_0, JMI_TRUE, JMI_FALSE),JMI_TRUE,AD_WRAP_LITERAL(1.),AD_WRAP_LITERAL(2.))) - (_r_2_2);
+    (*res)[2] = (COND_EXP_EQ(COND_EXP_LE(AD_WRAP_LITERAL(3), _N_0, JMI_TRUE, JMI_FALSE),JMI_TRUE,AD_WRAP_LITERAL(1.),AD_WRAP_LITERAL(2.))) - (_r_3_3);
+")})));
 
+  parameter Integer N = 2;
+  parameter Real r[3] = array((if i<=N then 1. else 2.) for i in 1:3); 
+end IfExpInParExp;
 
 end CCodeGenTests;
