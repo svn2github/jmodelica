@@ -178,22 +178,19 @@ def run_demo(with_plots=True):
         # Get the first Tc sample
         Tc_ctrl = Tc_res.x[0]
         
-        # Solve initialization problem for simulation model
+        # Set the value to the model
         sim_model.set_value('Tc',Tc_ctrl)
-        
-        cstr_sim.re_init(t_mpc[i],cstr_sim.y[-1],cstr_sim.yd[-1]) #Re initiates the problem
-        
       
-        cstr_sim.initiate() #Calculate initial conditions
+        cstr_sim.initiate() #Calculate initial conditions (from the model)
         cstr_sim.simulate(t_mpc[i+1]) #Simulate
         
         t_T_sim = cstr_sim.t
         
         # Set terminal values of the states
-        cstr.set_value('cstr.c_init',cstr_sim.y[-1][0])
-        cstr.set_value('cstr.T_init',cstr_sim.y[-1][1])
-        sim_model.set_value('c_init',cstr_sim.y[-1][0])
-        sim_model.set_value('T_init',cstr_sim.y[-1][1])
+        cstr.set_value('cstr.c_init',cstr_sim.y_cur[0])
+        cstr.set_value('cstr.T_init',cstr_sim.y_cur[1])
+        sim_model.set_value('c_init',cstr_sim.y_cur[0])
+        sim_model.set_value('T_init',cstr_sim.y_cur[1])
         plt.figure(4)
         plt.subplot(3,1,1)
         plt.plot(t_T_sim,N.array(cstr_sim.y)[:,0],'b')
