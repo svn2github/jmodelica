@@ -34,15 +34,14 @@ def run_demo(with_plots=True):
     model_name = 'VDP_pack.VDP_Opt_Min_Time'
     mo_file = curr_dir+'/files/VDP.mo'
 
-    opt_res = optimize(model_name, mo_file,
-                        compiler_options={'state_start_values_fixed':True})
+    opt_res = optimize(model_name, mo_file)
 							
     # Extract variable profiles
     res = opt_res.result_data
     x1=res.get_variable_data('x1')
     x2=res.get_variable_data('x2')
     u=res.get_variable_data('u')
-    tf=res.get_variable_data('tf')
+    tf=res.get_variable_data('finalTime')
 
     assert N.abs(tf.x[-1] - 2.2811587) < 1e-3, \
             "Wrong value of cost function in cstr_minimum_time.py"

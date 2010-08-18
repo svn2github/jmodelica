@@ -33,6 +33,16 @@ the Optimica class attribute objectiveIntegrand is supported by the
 Optimica compiler. The expression L may be utilized by optimization
 algorithms providing dedicated support for Lagrange cost functions.
 
+1.2.2 Support for minimum time problems. Optimization problems with
+free initial and terminal times can now be solved by setting the free
+attribute of the class attributes startTime and finalTime to true. The
+Optimica compiler automatically translates the problem into a fixed
+horizon problems with free parameters for the start en terminal times,
+which in turn are used to rescale the time of the problem. 
+
+Using this method, no changes are required to the optimization
+algorithm, since a fixed horizon problem is solved.
+
 2. JModelica.org Model Interface (JMI)
 
 2.1 General

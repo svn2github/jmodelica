@@ -377,11 +377,6 @@ class NLPCollocation(object):
         # Get the result
         self.opt_sim_get_result(p_opt,t_,dx_,x_,u_,w_)
 
-        # If a normalized minimum time problem has been solved,
-        # then, the time vector should be rescaled
-        #n=[names[1] for names in self._model.get_p_opt_variable_names()]
-        #non_fixed_interval = ('finalTime' in n) or ('startTime' in n)
-
         data = N.zeros((n_points,1+n_real_dx+n_real_x+n_real_u+n_real_w))
         data[:,0] = t_
         for i in range(n_real_dx):
@@ -392,6 +387,19 @@ class NLPCollocation(object):
             data[:,n_real_dx+n_real_x+i+1] = u_[i*n_points:(i+1)*n_points]
         for i in range(n_real_w):
             data[:,n_real_dx+n_real_x+n_real_u+i+1] = w_[i*n_points:(i+1)*n_points]
+
+        # If a normalized minimum time problem has been solved,
+        # then, the time vector should be rescaled
+        n=[names[1] for names in self._model.get_p_opt_variable_names()]
+        non_fixed_interval = ('finalTime' in n) or ('startTime' in n)            
+
+        if non_fixed_interval:
+            # A minimum time problem has been solved,
+            # interval is normalized to [0,1]
+            t0 = self._model.get_value('startTime')
+            tf = self._model.get_value('finalTime')
+            for i in range(N.size(data,0)):
+                data[i,0] = t0 + data[i,0]*(tf-t0)
 
         return p_opt, data
 
@@ -452,6 +460,19 @@ class NLPCollocation(object):
         for i in range(n_real_w):
             data[:,n_real_dx+n_real_x+n_real_u+i+1] = w_[i*n_points:(i+1)*n_points]
 
+        # If a normalized minimum time problem has been solved,
+        # then, the time vector should be rescaled
+        n=[names[1] for names in self._model.get_p_opt_variable_names()]
+        non_fixed_interval = ('finalTime' in n) or ('startTime' in n)            
+
+        if non_fixed_interval:
+            # A minimum time problem has been solved,
+            # interval is normalized to [0,1]
+            t0 = self._model.get_value('startTime')
+            tf = self._model.get_value('finalTime')
+            for i in range(N.size(data,0)):
+                data[i,0] = t0 + data[i,0]*(tf-t0)
+
         return p_opt, data
 
     def get_result_mesh_interpolation(self,mesh):
@@ -506,6 +527,19 @@ class NLPCollocation(object):
             data[:,n_real_dx+n_real_x+i+1] = u_[i*n_points:(i+1)*n_points]
         for i in range(n_real_w):
             data[:,n_real_dx+n_real_x+n_real_u+i+1] = w_[i*n_points:(i+1)*n_points]
+
+        # If a normalized minimum time problem has been solved,
+        # then, the time vector should be rescaled
+        n=[names[1] for names in self._model.get_p_opt_variable_names()]
+        non_fixed_interval = ('finalTime' in n) or ('startTime' in n)            
+
+        if non_fixed_interval:
+            # A minimum time problem has been solved,
+            # interval is normalized to [0,1]
+            t0 = self._model.get_value('startTime')
+            tf = self._model.get_value('finalTime')
+            for i in range(N.size(data,0)):
+                data[i,0] = t0 + data[i,0]*(tf-t0)
 
         return p_opt, data
 

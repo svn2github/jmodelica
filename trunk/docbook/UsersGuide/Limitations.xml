@@ -102,10 +102,6 @@
         <listitem>
           <para>Annotations for transcription information</para>
         </listitem>
-
-        <listitem>
-          <para>Minimum time problems</para>
-        </listitem>
       </itemizedlist>
     </listitem>
 
@@ -129,16 +125,20 @@
         </listitem>
       </itemizedlist>
     </listitem>
+
     <listitem>
       <para>The JModelica.org FMI Model Interface (FMI) has the following
       Limitations:</para>
 
       <itemizedlist>
         <listitem>
-          <para>The FMI interface only supports FMUs distributed with binaries, not only source code.</para>
+          <para>The FMI interface only supports FMUs distributed with
+          binaries, not only source code.</para>
         </listitem>
+
         <listitem>
-          <para>Options for setting and getting string variables does not work.</para>
+          <para>Options for setting and getting string variables does not
+          work.</para>
         </listitem>
       </itemizedlist>
     </listitem>

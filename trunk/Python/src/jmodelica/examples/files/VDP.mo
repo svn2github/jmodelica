@@ -25,28 +25,19 @@ package VDP_pack
      u<=0.75;
   end VDP_Opt;
 
-  optimization VDP_Opt_Min_Time (objective = tf,
+  optimization VDP_Opt_Min_Time (objective = finalTime,
                          startTime = 0,
-                         finalTime = 1) 
-
-    // The time is scaled so that the new
-    // time variable, call it \tau,
-    // is related to the original time,
-    // call it t as \tau=tf*t where tf
-    // is a parameter to be minimized 
-    // subject to the dynamics
-    // \dot x = tf*f(x,u)
-    parameter Real tf(free=true,min=0.2)=1 "Final time";
+                         finalTime(free=true,min=0.2,initialGuess=1)) 
 
     // The states
-    Real x1(start=0);
-    Real x2(start=1);
+    Real x1(start=0,fixed=true);
+    Real x2(start=1,fixed=true);
     
     // The control signal with bounds
     input Real u(min=-1,max=1);
   equation
-    der(x1) = 1*tf*((1 - x2^2) * x1 - x2 + u);
-    der(x2) = 1*tf*(x1);
+    der(x1) = ((1 - x2^2) * x1 - x2 + u);
+    der(x2) = x1;
   constraint
     // terminal constraints
     x1(finalTime)=0;

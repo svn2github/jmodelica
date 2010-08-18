@@ -62,7 +62,6 @@
  * The JModelica.org JMI interface in under development. The function signatures
  * are likely to change in the future - all feedback is very welcome. The following
  * limitations apply:
- *   - Minimum time problems are not supported.
  *   - Optimization of element lengths in the JMI simultaneous optimization
  *   interface is not supportd.
  *   - Symbolic Jacobians are not provided by the compiler. This is actually

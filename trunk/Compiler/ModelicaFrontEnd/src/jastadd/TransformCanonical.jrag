@@ -825,9 +825,6 @@ aspect TransformCanonicalErrorCheck {
 	}
 }
 
-
-
-
 aspect FlushFClass {
 	/**
 	 * \brief Flush all caches, including collection attributes.

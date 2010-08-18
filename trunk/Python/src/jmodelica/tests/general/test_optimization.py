@@ -590,6 +590,111 @@ class TestDependentParametersInCollocation(OptimizationTest):
     def test_trajectories(self):
         self.assert_all_trajectories(['x', 'u', 'p1', 'p2', 'p4'])
 
+class TestMinTimeProblem1(OptimizationTest):
+
+    @classmethod
+    def setUpClass(cls):
+        OptimizationTest.setup_class_base(
+            'MinTimeProblems.mo', 'MinTimeProblems.MinTimeProblem1')
+
+    @testattr(ipopt = True)
+    def setUp(self):
+        n_e = 50
+        hs = N.ones(n_e)*1./n_e
+        n_cp = 3
+        b_f = []
+        self.setup_base(nlp_args = (n_e, hs, n_cp, b_f))
+        self.run()
+        self.load_expected_data('MinTimeProblems_MinTimeProblem1_result.txt')
+
+    @testattr(ipopt = True)
+    def test_trajectories(self):
+        self.assert_all_trajectories(['x', 'dx', 'u'])
+
+class TestMinTimeProblem2(OptimizationTest):
+
+    @classmethod
+    def setUpClass(cls):
+        OptimizationTest.setup_class_base(
+            'MinTimeProblems.mo', 'MinTimeProblems.MinTimeProblem2')
+
+    @testattr(ipopt = True)
+    def setUp(self):
+        n_e = 50
+        hs = N.ones(n_e)*1./n_e
+        n_cp = 3
+        b_f = []
+        self.setup_base(nlp_args = (n_e, hs, n_cp, b_f))
+        self.run()
+        self.load_expected_data('MinTimeProblems_MinTimeProblem2_result.txt')
+
+    @testattr(ipopt = True)
+    def test_trajectories(self):
+        self.assert_all_trajectories(['x', 'dx', 'u'])
+
+class TestMinTimeProblem3(OptimizationTest):
+
+    @classmethod
+    def setUpClass(cls):
+        OptimizationTest.setup_class_base(
+            'MinTimeProblems.mo', 'MinTimeProblems.MinTimeProblem3')
+
+    @testattr(ipopt = True)
+    def setUp(self):
+        n_e = 50
+        hs = N.ones(n_e)*1./n_e
+        n_cp = 3
+        b_f = []
+        self.setup_base(nlp_args = (n_e, hs, n_cp, b_f))
+        self.run()
+        self.load_expected_data('MinTimeProblems_MinTimeProblem3_result.txt')
+
+    @testattr(ipopt = True)
+    def test_trajectories(self):
+        self.assert_all_trajectories(['x', 'dx', 'u'])
+
+class TestMinTimeProblem4(OptimizationTest):
+
+    @classmethod
+    def setUpClass(cls):
+        OptimizationTest.setup_class_base(
+            'MinTimeProblems.mo', 'MinTimeProblems.MinTimeProblem4')
+
+    @testattr(ipopt = True)
+    def setUp(self):
+        n_e = 50
+        hs = N.ones(n_e)*1./n_e
+        n_cp = 3
+        b_f = []
+        self.setup_base(nlp_args = (n_e, hs, n_cp, b_f))
+        self.run()
+        self.load_expected_data('MinTimeProblems_MinTimeProblem4_result.txt')
+
+    @testattr(ipopt = True)
+    def test_trajectories(self):
+        self.assert_all_trajectories(['sys.x1', 'sys.x2', 'u'])
+
+
+class TestMinTimeProblem5(OptimizationTest):
+
+    @classmethod
+    def setUpClass(cls):
+        OptimizationTest.setup_class_base(
+            'MinTimeProblems.mo', 'MinTimeProblems.MinTimeProblem5')
+
+    @testattr(ipopt = True)
+    def setUp(self):
+        n_e = 50
+        hs = N.ones(n_e)*1./n_e
+        n_cp = 3
+        b_f = []
+        self.setup_base(nlp_args = (n_e, hs, n_cp, b_f))
+        self.run()
+        self.load_expected_data('MinTimeProblems_MinTimeProblem5_result.txt')
+
+    @testattr(ipopt = True)
+    def test_trajectories(self):
+        self.assert_all_trajectories(['sys.x1', 'sys.x2', 'u'])
 
 
 
