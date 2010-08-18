@@ -11,8 +11,9 @@ def run_demo(with_plots=True):
     mofile = curr_dir+'/files/ExtFunctions.mo'
 
     #simulate
-    (model, res) = jmodelica.simulate(model_name, mofile, compiler_target='model_noad')
-
+    simres = jmodelica.simulate(model_name, mofile, compiler_target='model_noad')
+    
+    res = simres.result_data
     sim_a = res.get_variable_data('a')
     sim_b = res.get_variable_data('b')
     sim_c = res.get_variable_data('c')
