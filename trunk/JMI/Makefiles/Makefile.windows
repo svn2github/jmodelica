@@ -132,7 +132,7 @@ model: $(OBJS)
 	$(CXX) $(SHARED_LDFLAGS) $(CXXLINKFLAGS) $(CXXFLAGS) -o $(SHARED) $(OBJS) $(LIBS_CPPAD)
 else
 model: $(OBJS)
-	$(CC) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) $(LIBS_NOCPPAD) $(EXTERNAL_LIBS) $(EXTERNAL_DIRS)
+	$(CC) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) $(LIBS_NOCPPAD) $(EXTERNAL_DIRS) $(EXTERNAL_LIBS)
 endif
 
 model_noad: 
@@ -196,6 +196,4 @@ else
 endif
 
 clean:
-	del $(SHARED) $(OBJS)
-
-
+	$(RM) $(SHARED) $(OBJS)
