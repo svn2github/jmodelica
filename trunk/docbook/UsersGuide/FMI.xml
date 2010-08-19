@@ -61,7 +61,7 @@
     <table>
       <title>Conversion table.</title>
 
-      <tgroup cols="2">
+      <tgroup align="left" cols="2">
         <thead>
           <row>
             <entry align="center">FMI C-Interface</entry>
@@ -236,7 +236,7 @@
 
       <para><inlinemediaobject>
           <imageobject>
-            <imagedata fileref="images/bounc_eq.png"></imagedata>
+            <imagedata fileref="images/bounc_eq.png" scale="100"></imagedata>
           </imageobject>
         </inlinemediaobject></para>
 
@@ -524,7 +524,7 @@
         <table>
           <title>Selection of solver arguments for CVode</title>
 
-          <tgroup cols="2">
+          <tgroup align="left" cols="2">
             <thead>
               <row>
                 <entry align="center">Argument</entry>
@@ -634,5 +634,4 @@
       </section>
     </section>
   </section>
-
 </chapter>
