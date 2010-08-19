@@ -35,7 +35,7 @@ from jmodelica.algorithm_drivers import InvalidAlgorithmArgumentException
 from jmodelica.algorithm_drivers import InvalidSolverArgumentException
 
 try:
-    from Assimulo.Explicit_ODE import *
+    from assimulo.explicit_ode import *
 except ImportError:
     warnings.warn('Could not load Assimulo module. Check jmodelica.check_packages()')
 

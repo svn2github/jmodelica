@@ -30,9 +30,9 @@ from jmodelica.initialization.ipopt import NLPInitialization
 from jmodelica.initialization.ipopt import InitializationOptimizer
 
 try:
-    from Assimulo.Problem import Implicit_Problem
-    from Assimulo.Problem import Explicit_Problem
-    from Assimulo.Sundials import Sundials_Exception
+    from assimulo.problem import Implicit_Problem
+    from assimulo.problem import Explicit_Problem
+    from assimulo.sundials import Sundials_Exception
 except ImportError:
     warnings.warn('Could not find Assimulo package. Check jmodelica.check_packages()')
 

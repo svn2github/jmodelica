@@ -30,12 +30,12 @@ from jmodelica.initialization.ipopt import NLPInitialization
 from jmodelica.initialization.ipopt import InitializationOptimizer
 
 try:
-    from jmodelica.simulation.assimulo import JMIDAE, JMIODE, FMIODE, write_data
-    from jmodelica.simulation.assimulo import TrajectoryLinearInterpolation
-    from Assimulo.Implicit_ODE import *
-    from Assimulo.Explicit_ODE import *
-    from Assimulo import Implicit_ODE as impl_ode
-    from Assimulo import Explicit_ODE as expl_ode
+    from jmodelica.simulation.assimulo_problem import JMIDAE, JMIODE, FMIODE, write_data
+    from jmodelica.simulation.assimulo_problem import TrajectoryLinearInterpolation
+    from assimulo.implicit_ode import *
+    from assimulo.explicit_ode import *
+    from assimulo import implicit_ode as impl_ode
+    from assimulo import explicit_ode as expl_ode
 
     assimulo_present = True
 except:

@@ -4,7 +4,7 @@
 
 This currently only includes an interface to SUNDIALS.
 """
-__all__ = ['sundials','assimulo']
+__all__ = ['assimulo_problem']
 
 import jmodelica.io as io
 import numpy as np

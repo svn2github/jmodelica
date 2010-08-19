@@ -32,8 +32,8 @@ from jmodelica.io import ResultDymolaTextual
 from jmodelica.tests import get_files_path
 
 try:
-    from jmodelica.simulation.assimulo import JMIDAE, write_data
-    from Assimulo.Implicit_ODE import IDA
+    from jmodelica.simulation.assimulo_problem import JMIDAE, write_data
+    from assimulo.implicit_ode import IDA
 except:
     warnings.warn('Could not load Assimulo module. Check jmodelica.check_packages()')
 

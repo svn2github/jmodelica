@@ -16,4 +16,4 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 """Tests for the simulation package."""
-__all__ = ['test_assimulo']
+__all__ = ['test_assimulo_problem']

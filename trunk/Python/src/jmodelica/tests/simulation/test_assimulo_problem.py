@@ -31,10 +31,10 @@ from jmodelica.tests import get_files_path
 from jmodelica import simulate
 
 try:
-    from jmodelica.simulation.assimulo import JMIODE, JMIDAE, FMIODE, JMIModel_Exception
-    from jmodelica.simulation.assimulo import write_data
-    from jmodelica.simulation.assimulo import TrajectoryLinearInterpolation
-    from Assimulo.Explicit_ODE import CVode
+    from jmodelica.simulation.assimulo_problem import JMIODE, JMIDAE, FMIODE, JMIModel_Exception
+    from jmodelica.simulation.assimulo_problem import write_data
+    from jmodelica.simulation.assimulo_problem import TrajectoryLinearInterpolation
+    from assimulo.explicit_ode import CVode
 except NameError, ImportError:
     warnings.warn('Could not load Assimulo module. Check jmodelica.check_packages()')
 
