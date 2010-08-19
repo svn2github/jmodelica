@@ -32,9 +32,8 @@ available in this namespace (unlikely).
 
 import os, os.path
 import sys
-import warnings
+import logging
 import jpype
-#import matplotlib
 
 _jm_home = os.environ['JMODELICA_HOME']
 #exception here if jm_home not found
@@ -102,9 +101,12 @@ for _e in _defaults:
             paths = environ[_e[0]].split(':') #On other platforms they are separeted with colons, so split.
         for p in paths:
             if _e[2] and not os.path.exists(p):
-                warnings.warn('%s=%s path does not exist. Environment may be corrupt.' % (_e[0],p))
+                logging.warning('%s=%s path does not exist. Environment may be corrupt.' % (_e[0],p))
     else:
         if _e[2] and not os.path.exists(environ[_e[0]]):
-                warnings.warn('%s=%s path does not exist. Environment may be corrupt.' % (_e[0],environ[_e[0]]))
+            if _e[0] == 'IPOPT_HOME':
+                logging.warning('%s=%s path does not exist. An IPOPT installation could not be found, some modules and examples will therefore not work properly.\0' % (_e[0],environ[_e[0]]))
+            else:
+                logging.warning('%s=%s path does not exist. Environment may be corrupt.' % (_e[0],environ[_e[0]]))
         
 
