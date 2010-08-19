@@ -231,7 +231,7 @@ aspect Environments {
         l.addAll(getInstExtends(0).getClassName().myInstClassDecl().classInstModifications());
    		return l;
 	}	 
-		 	
+ 	
 	eq InstReplacingShortClassDecl.localInstModifications() {
 		ArrayList<InstModification> l = new ArrayList<InstModification>();
 		// If there is a constraining clase, return its modifications
@@ -246,6 +246,22 @@ aspect Environments {
 				l.add(getOriginalInstClass().getInstClassModification());     
         }	
         l.addAll(getInstExtends(0).getClassName().myInstClassDecl().classInstModifications());
+		return l;
+	}
+ 	
+	eq InstReplacingFullClassDecl.localInstModifications() {
+		ArrayList<InstModification> l = new ArrayList<InstModification>();
+		// If there is a constraining clase, return its modifications
+		if (getOriginalInstClass().hasInstConstraining()) {
+		  if (getOriginalInstClass().getInstConstraining().hasInstClassModification()) {
+			l.add(getOriginalInstClass().getInstConstraining().getInstClassModification());
+          }
+        } else {
+            // If no constraining clause, use the original declaration 
+            // and return its modifiers
+     		if (getOriginalInstClass().hasInstClassModification())
+				l.add(getOriginalInstClass().getInstClassModification());     
+        }	
 		return l;
 	}
 	 	
@@ -332,7 +348,7 @@ aspect Environments {
 		boolean componentRedeclareFound = false;
 		InstComponentRedeclare icr = retrieveReplacingComponent(name);
 		boolean classRedeclareFound = false;
-		InstRececlareClassNode iclrn = retrieveReplacingClass(name);
+		InstRedeclareClassNode iclrn = retrieveReplacingClass(name);
 		for (InstModification im : getMergedEnvironment()) {
 			// If a first component redeclare modification is found, add modifiers
 			if (!componentRedeclareFound && im == icr) {
@@ -445,7 +461,7 @@ aspect Environments {
 
 	// TODO: make sure components are created using the right class now
 	// TODO: repeat this for components?
-	syn InstRececlareClassNode InstNode.retrieveReplacingClass(String name) {
+	syn InstRedeclareClassNode InstNode.retrieveReplacingClass(String name) {
 		for (InstModification im : getMergedEnvironment()) {
 			InstClassRedeclare icr = im.matchInstClassRedeclare(name);
 			if (icr != null) 
@@ -455,7 +471,7 @@ aspect Environments {
 	}
 	
 	eq InstExtends.retrieveReplacingClass(String name) {
-		InstRececlareClassNode res = super.retrieveReplacingClass(name);
+		InstRedeclareClassNode res = super.retrieveReplacingClass(name);
 		return (res == null) ? lookupReplacingClass(name) : res;
 	}
 	
@@ -720,7 +736,7 @@ aspect InstanceTreeConstruction {
     	// Check if the class is redeclared. 
     	// -> Yes: Create an InstReplacingClass component
     	// -> No: Create an InstClassDecl
-		InstRececlareClassNode icr = retrieveReplacingClass(bcd.name());
+		InstRedeclareClassNode icr = retrieveReplacingClass(bcd.name());
     	if (icr!=null) {
     	    ClassDecl replacingClass = icr.redeclaringClassDecl();
     		return bcd.newInstReplacingClass(replacingClass, icr);
@@ -729,12 +745,12 @@ aspect InstanceTreeConstruction {
    		}
 	}    
     
-    public interface InstRececlareClassNode {
+    public interface InstRedeclareClassNode {
     	public HashSet lookupInstClass(String name);
     	public ClassDecl redeclaringClassDecl();
     }
-    public class InstClassDecl implements InstRececlareClassNode {}
-    public class InstClassRedeclare implements InstRececlareClassNode {}
+    public class InstClassDecl implements InstRedeclareClassNode {}
+    public class InstClassRedeclare implements InstRedeclareClassNode {}
     
     syn ClassDecl InstClassDecl.redeclaringClassDecl()      = getClassDecl();
     syn ClassDecl InstClassRedeclare.redeclaringClassDecl() = getClassRedeclare().getBaseClassDecl();
@@ -896,35 +912,41 @@ aspect InstanceTreeConstruction {
     	return new InstBuiltInClassDecl(this);
     }
 
-    public InstClassDecl ClassDecl.newInstReplacingClass(ClassDecl replacingClass, InstRececlareClassNode icr) {
-    	return null;
+    public InstClassDecl ClassDecl.newInstReplacingClass(ClassDecl replacingClass, InstRedeclareClassNode icr) {
+    	return replacingClass.createInstReplacingClass(this, icr);
     }    
-
-    public InstReplacingFullClassDecl FullClassDecl.newInstReplacingClass(ClassDecl replacingClass, InstRececlareClassNode icr) {
+    
+    public InstClassDecl PrimitiveClassDecl.newInstReplacingClass(ClassDecl replacingClass, InstRedeclareClassNode icr) {
+    	InstRestriction ir = newInstRestriction();
+    	Opt<InstExternal> exto = newInstExternalOpt();  // TODO: shouldn't ir & exto come from replacing class
+        return new InstReplacingPrimitiveClassDecl(replacingClass, new Opt(), ir, exto, this, icr);
+    }
+    
+    public InstClassDecl ClassDecl.createInstReplacingClass(ClassDecl replacedClass, InstRedeclareClassNode icr) {
+    	return null;
+    }
+    
+    public InstClassDecl FullClassDecl.createInstReplacingClass(ClassDecl replacedClass, InstRedeclareClassNode icr) {
     	InstRestriction ir = newInstRestriction();
     	Opt<InstExternal> exto = newInstExternalOpt();
-    	InstReplacingFullClassDecl fcd = new InstReplacingFullClassDecl(replacingClass, new Opt(), ir, exto, this, icr);
-	    fcd.setInstConstrainingOpt(newInstConstrainingClassOpt()); //TODO: Should be constr clause of original or redeclared? 
+    	InstReplacingFullClassDecl fcd = new InstReplacingFullClassDecl(this, new Opt(), ir, exto, replacedClass, icr);
+	    fcd.setInstConstrainingOpt(newInstConstrainingClassOpt()); 
+	    //TODO: Should be constr clause of original or redeclared? 
 	    // - Should be from redeclared if it has one.
     	fcd.setLocation(this);
     	return fcd;
     }
-    public InstReplacingShortClassDecl ShortClassDecl.newInstReplacingClass(ClassDecl replacingClass, InstRececlareClassNode icr) {
+    
+    public InstClassDecl ShortClassDecl.createInstReplacingClass(ClassDecl replacedClass, InstRedeclareClassNode icr) {
 		Opt fas_opt = new Opt();
-		if (getExtendsClauseShortClass().hasArraySubscripts()) {
-			fas_opt.setChild(getExtendsClauseShortClass().getArraySubscripts().instantiate(),0);
-		}
+		if (getExtendsClauseShortClass().hasArraySubscripts()) 
+			fas_opt.setChild(getExtendsClauseShortClass().getArraySubscripts().instantiate(), 0);
     	InstRestriction ir = newInstRestriction();
-      	InstReplacingShortClassDecl scd =  new InstReplacingShortClassDecl(replacingClass, new Opt(), ir, fas_opt, this, icr);
+      	InstReplacingShortClassDecl scd =  new InstReplacingShortClassDecl(this, new Opt(), ir, fas_opt, replacedClass, icr);
 	    scd.setInstConstrainingOpt(newInstConstrainingClassOpt());    	
     	scd.setLocation(this);
-   	return scd;
-    }
-    public InstReplacingFullClassDecl PrimitiveClassDecl.newInstReplacingClass(ClassDecl replacingClass, InstRececlareClassNode icr) {
-    	InstRestriction ir = newInstRestriction();
-    	Opt<InstExternal> exto = newInstExternalOpt();
-        return new InstReplacingPrimitiveClassDecl(replacingClass, new Opt(), ir, exto, this, icr);
-    }
+    	return scd;
+     }
     
     // Create InstRestriction
     public InstRestriction BaseClassDecl.newInstRestriction() {

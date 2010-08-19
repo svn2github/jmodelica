@@ -1815,10 +1815,22 @@ aspect ConstantEvaluation {
    */
   public void FIdUse.assignToInFuncEval(Map<CommonVariableDecl, CValue> values, CValue right) {
 	  FQName name = getFQName();
-	  boolean single = name.getNumFQNamePart() == 1;
-	  FQName first = single ? name : name.copyPrefix();
-	  FFunctionVariable var = (FFunctionVariable) (single ? myFV() : lookupFV(first));
-	  FQNamePart firstPart = name.getFQNamePart(0);
+	  AbstractFVariable tmp_var;
+	  int i = 0;
+	  int n = name.getNumFQNamePart();
+	  if (n == 1) {
+		  tmp_var = (FFunctionVariable) myFV();
+	  } else {
+		  // Depends on lookupFV() not being lazy
+		  FQName tmp_name = new FQName();
+		  --i;
+		  do {
+			  tmp_name.addFQNamePart(name.getFQNamePart(++i).fullCopy());
+			  tmp_var = lookupFV(tmp_name);
+		  } while (tmp_var.isUnknown() && i < n);
+	  }
+	  FFunctionVariable var = (FFunctionVariable) tmp_var;
+	  FQNamePart firstPart = name.getFQNamePart(i);
 	  CValue val = var.type().assignToPartInFuncEval(firstPart, var.evaluationValue(), right);
 	  var.setEvaluationValue(val, values);
   }

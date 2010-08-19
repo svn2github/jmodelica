@@ -3373,8 +3373,73 @@ end RedeclareTests.RedeclareElement9;
 	
 	C c;
 end RedeclareElement9;
+
+
+model RedeclareElement10
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="RedeclareElement10",
+         description="",
+         flatModel="
+fclass RedeclareTests.RedeclareElement10
+ parameter Real c.y = c.x;
+ parameter Real c.x = 1 /* 1 */;
+end RedeclareTests.RedeclareElement10;
+")})));
+
+    package A
+        replaceable model C = D;
+    end A;
+    
+    package B
+        extends A;
+        
+        redeclare model extends C
+            parameter Real y = x;
+        end C;
+    end B;
+    
+    model D
+        parameter Real x = 1;
+    end D;
+    
+    B.C c;
+end RedeclareElement10;
+
+
+model RedeclareElement11
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="RedeclareElement11",
+         description="",
+         flatModel="
+fclass RedeclareTests.RedeclareElement11
+ parameter Real b.c.y = b.c.x;
+ parameter Real b.c.x = 1 /* 1 */;
+end RedeclareTests.RedeclareElement11;
+")})));
+
+	package A
+		replaceable model C = D;
+		C c;
+	end A;
 	
+	package B
+		extends A;
+		
+		redeclare model extends C
+			parameter Real y = x;
+		end C;
+	end B;
 	
+	model D
+		parameter Real x = 1;
+	end D;
+	
+	B b;
+end RedeclareElement11;
+
+
 model RedeclareSameLevel10
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
 	 JModelica.UnitTesting.FlatteningTestCase(

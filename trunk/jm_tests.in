@@ -67,9 +67,12 @@ function optimica_tests() {
   junit_test Optimica
 }
 
+function find_python_tests() {
+  TESTS="$(find ${JMODELICA_HOME}/Python/jmodelica/tests -name \*.py | grep test_)"
+}
+
 function python_tests() {
   TEST_DIR=$(mktemp -dqt)
-  TESTS="$(find ${JMODELICA_HOME}/Python/jmodelica/tests -name \*.py | grep test_)"
   PATTERN=----------------------------------------------------------------------
   TAGS="-a stddist -a fmi"
   if [[ "${IPOPT_HOME}" != "" ]]; then
@@ -82,15 +85,17 @@ function python_tests() {
   case ${OUTPUT} in
     v)
       if build_jmodelica; then
+        find_python_tests()
         cd ${TEST_DIR}
         for TEST in ${TESTS}; do
-	  echo ${TEST} | sed -e 's!^.*jmodelica.tests.!Running !'
+          echo ${TEST} | sed -e 's!^.*jmodelica.tests.!Running !'
           nosetests ${TAGS} -v ${TEST}
         done
       fi
       ;;
     q)
       if build_jmodelica 2> /dev/null > /dev/null; then
+        find_python_tests()
         cd ${TEST_DIR}
         for TEST in ${TESTS}; do
           nosetests ${TAGS} -v ${TEST} 2>&1 \
@@ -103,6 +108,7 @@ function python_tests() {
     n)
       echo Building...
       if build_jmodelica > /dev/null; then
+        find_python_tests()
         cd ${TEST_DIR}
         for TEST in ${TESTS}; do
           echo ${TEST} | sed -e 's!^.*jmodelica.tests.!Running !'

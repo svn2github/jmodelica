@@ -47,11 +47,11 @@ UnknownInstClassDecl   : InstFullClassDecl;
 InstReplacingFullClassDecl      : InstFullClassDecl  ::= 
 	                                 <OriginalClassDecl:ClassDecl> 
                                      /OriginalInstClass:InstClassDecl/ 
-                                     <InstClassRedeclare:InstRececlareClassNode>;
+                                     <InstClassRedeclare:InstRedeclareClassNode>;
 InstReplacingShortClassDecl     : InstShortClassDecl ::= 
 	                                 <OriginalClassDecl:ClassDecl> 
                                      /OriginalInstClass:InstClassDecl/ 
-                                     <InstClassRedeclare:InstRececlareClassNode>;
+                                     <InstClassRedeclare:InstRedeclareClassNode>;
 InstReplacingPrimitiveClassDecl : InstReplacingFullClassDecl;
 
 abstract InstRestriction : BaseNode;

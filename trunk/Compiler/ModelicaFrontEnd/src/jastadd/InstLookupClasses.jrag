@@ -48,7 +48,8 @@ aspect InstLookupClasses {
     eq InstExtends.getDynamicClassName().lookupInstClass(String name)  = genericLookupInstClassInExtends(name);
 	eq InstExtends.getFAbstractEquation().lookupInstClass(String name) = genericLookupInstClassInExtends(name); 
    
-    eq InstInlineExtends.getClassName().lookupInstClass(String name) = surroundingSuperLookupInstClass(name);
+    eq InstInlineExtends.getClassName().lookupInstClass(String name) = 
+    	getClassName().name().equals(name) ? surroundingSuperLookupInstClass(name) : lookupInstClass(name);
 
 	// The lexical scope of modifiers in short classes is the "outer" scope, although
 	// the short class declaration is modeled as containing an extends clause
@@ -96,6 +97,11 @@ aspect InstLookupClasses {
 		lookupInstClassInSuperClass(name);
 	eq InstComponentDecl.getChild().surroundingSuperLookupInstClass(String name) = 
 		myInstClass().doSurroundingSuperLookupInstClass(name);
+	eq InstReplacingShortClassDecl.getInstExtends().surroundingSuperLookupInstClass(String name) {
+		HashSet set = new HashSet(4);
+		set.add(getOriginalInstClass());
+		return set;
+	}
 	
 	/**
 	 * \brief Does lookup in all superclasses.
