@@ -192,6 +192,7 @@ PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
 PACKAGE_NAME = @PACKAGE_NAME@
 PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
+PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 RANLIB = @RANLIB@
@@ -821,17 +822,17 @@ install-exec-local:
 @WITH_SUNDIALS_TRUE@	if [ -e $(assimulo_install_dir)/lib/python2.5/site-packages/ ]; \
 @WITH_SUNDIALS_TRUE@	then \
 @WITH_SUNDIALS_TRUE@	cd $(assimulo_install_dir)/lib/python2.5/site-packages/; \
-@WITH_SUNDIALS_TRUE@	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python; \
+@WITH_SUNDIALS_TRUE@	find assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python; \
 @WITH_SUNDIALS_TRUE@	fi
 @WITH_SUNDIALS_TRUE@	if [ -e $(assimulo_install_dir)/lib/python2.6/site-packages/ ];\
 @WITH_SUNDIALS_TRUE@	then \
 @WITH_SUNDIALS_TRUE@	cd $(assimulo_install_dir)/lib/python2.6/site-packages/; \
-@WITH_SUNDIALS_TRUE@	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python; \
+@WITH_SUNDIALS_TRUE@	find assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python; \
 @WITH_SUNDIALS_TRUE@	fi
 @WITH_SUNDIALS_TRUE@	if [ -e $(assimulo_install_dir)/Lib/site-packages/ ];\
 @WITH_SUNDIALS_TRUE@	then \
 @WITH_SUNDIALS_TRUE@	cd $(assimulo_install_dir)/Lib/site-packages/; \
-@WITH_SUNDIALS_TRUE@	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python; \
+@WITH_SUNDIALS_TRUE@	find assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python; \
 @WITH_SUNDIALS_TRUE@	fi
 	mkdir -p $(DESTDIR)$(prefix)/bin
 	[ -e $(DESTDIR)$(prefix)/bin/jm_python.sh ] && echo "File exists, don't copy jm_python.sh" || cp Python/jm_python.sh $(DESTDIR)$(prefix)/bin/jm_python.sh

@@ -69,17 +69,17 @@ if WITH_SUNDIALS
 	if [ -e $(assimulo_install_dir)/lib/python2.5/site-packages/ ]; \
 	then \
 	cd $(assimulo_install_dir)/lib/python2.5/site-packages/; \
-	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python; \
+	find assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python; \
 	fi
 	if [ -e $(assimulo_install_dir)/lib/python2.6/site-packages/ ];\
 	then \
 	cd $(assimulo_install_dir)/lib/python2.6/site-packages/; \
-	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python; \
+	find assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python; \
 	fi
 	if [ -e $(assimulo_install_dir)/Lib/site-packages/ ];\
 	then \
 	cd $(assimulo_install_dir)/Lib/site-packages/; \
-	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python; \
+	find assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python; \
 	fi
 endif 
 	mkdir -p $(DESTDIR)$(prefix)/bin
