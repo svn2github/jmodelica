@@ -19,6 +19,20 @@ Redeclares as class elements are now supported.
 
 Conditional components are now supported.
 
+1.1.4 External functions
+
+ - Basic support for external functions written in c. 
+ 
+ - Annotations for libraries, includes, library directories and include 
+ directories supported.
+ 
+ - Platform directories supported.
+
+ - Can not be used together with CppAD. 
+
+ - Arrays as arguments are not yet supported. Functions in Modelica_utilies 
+are also not supported.
+
 1.2. Optimica Compiler
 
 All support mentioned for the Modelica compiler applies to the
@@ -84,11 +98,35 @@ C execution interface to Python. Note, strings are not currently supported.
 
 5. XML model export
 
-5.1 Support for the built-in function noEvent.
+5.1 noEvent function
 
+Support for the built-in function noEvent.
+
+5.2 static attribute
+
+Support for the Optimica attribute static. 
 
 6. Python integration
 
+6.1 High-level functions
+
+6.1.1 Model files
+
+Passing more than one model file to high-level functions supported.
+
+6.1.2 New result object
+
+A result object is used as return argument for all algorithms. The 
+result object for each algorithm extends the base class ResultBase and 
+will therefore (at least) contain: the model object, the result file name, 
+the solver used and the result data object.
+
+6.2 File I/O:
+
+6.2.1 Write to file
+
+Rewriting xmlparser.py has improved performance when writing 
+simulation result data to file considerably.
 
 7. Contributors to JModelica.org 1.3.0
 
