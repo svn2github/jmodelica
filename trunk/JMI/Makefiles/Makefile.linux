@@ -30,6 +30,9 @@
 #                         IPOPT interface is built.
 #   IPOPT_HOME            (mandatory if BUILD_WITH_ALGORITHMS=true) An IPOPT build
 #                         directory.
+#   EXT_LIB_DIRS          List of external library directories.
+#   EXT_LIBS              List of external libraries.
+#   EXT_INC_DIRS          List of external include directories.
 #
 # The following targets are supported:
 #    model        Build a shared object file containing the generated code
@@ -38,7 +41,9 @@
 #                 in the target 'basic' and in addition JMI algorithms.
 #    ipopt        Build a shared object file including the content resulting 
 #                 in the target 'algorithms' and in addition the Ipopt algorithm
-#                 interface.     
+#                 interface.
+#    model_noad   Build a shared object file containing the generated code,
+#                 external libraries and the low level JMI interface (not CppAD).
 #        
 # Example:
 #  make -f Makefile.linux ipopt \
