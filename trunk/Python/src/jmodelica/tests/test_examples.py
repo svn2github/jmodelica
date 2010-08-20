@@ -109,3 +109,8 @@ def test_lagrange_cost():
 def test_fmi_bouncing_ball():
     """ Test that the FMI bouncing ball using the high-level simulate works. """
     fmi_bouncing_ball.run_demo(False)
+
+@testattr(assimulo = True)
+def test_extfunctions_ball():
+    """ Test of simulation with external functions. """
+    extfunctions.run_demo(False)
