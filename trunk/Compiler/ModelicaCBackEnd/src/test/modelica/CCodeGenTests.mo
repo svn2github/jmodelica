@@ -3180,24 +3180,103 @@ jmi_ad_var_t func_CCodeGenTests_SimpleExternal8_f_exp(jmi_ad_var_t a_v, jmi_ad_v
 		(c_out, d_out) = f(a_in, b_in);
 end SimpleExternal8;
 
-//model SimpleExternal8
-//Real a_in = 1;
-//	Real b_in = 2;
-//	Real c_out;
-//	Real d_out;
-//	function f
-//		input Real a;
-//		input Real b;
-//		output Real c;
-//		output Real d;
-//		external d = my_f(a,c,b);
-//	end f;
-//algorithm
-//	(c_out, d_out) := f(a_in, b_in);
-//	
-//end SimpleExternal8;
+model SimpleExternal9
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="SimpleExternal9",
+         description="",
+         template="
+$C_function_headers$
+$C_functions$
+",
+         generatedCode="
+void func_CCodeGenTests_SimpleExternal9_f_def(jmi_ad_var_t a_v, jmi_ad_var_t b_v, jmi_ad_var_t* c_o, jmi_ad_var_t* d_o);
+jmi_ad_var_t func_CCodeGenTests_SimpleExternal9_f_exp(jmi_ad_var_t a_v, jmi_ad_var_t b_v);
 
+void func_CCodeGenTests_SimpleExternal9_f_def(jmi_ad_var_t a_v, jmi_ad_var_t b_v, jmi_ad_var_t* c_o, jmi_ad_var_t* d_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t c_v;
+    jmi_ad_var_t d_v;
+    d_v = my_f(a_v, b_v, &c_v);
+    if (c_o != NULL) *c_o = c_v;
+    if (d_o != NULL) *d_o = d_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
 
+jmi_ad_var_t func_CCodeGenTests_SimpleExternal9_f_exp(jmi_ad_var_t a_v, jmi_ad_var_t b_v) {
+    jmi_ad_var_t c_v;
+    func_CCodeGenTests_SimpleExternal9_f_def(a_v, b_v, &c_v, NULL);
+    return c_v;
+}
+
+")})));
+
+	Real a_in = 1;
+	Real b_in = 2;
+	Real c_out;
+	Real d_out;
+	function f
+		input Real a;
+		input Real b;
+		output Real c;
+		output Real d;
+		external d = my_f(a,b,c);
+	end f;
+	equation
+		(c_out, d_out) = f(a_in, b_in);	
+end SimpleExternal9;
+
+model SimpleExternal10
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="SimpleExternal10",
+         description="",
+         template="
+$C_function_headers$
+$C_functions$
+",
+         generatedCode="
+void func_CCodeGenTests_SimpleExternal10_f_def(jmi_ad_var_t a_v, jmi_ad_var_t b_v, jmi_ad_var_t* c_o, jmi_ad_var_t* d_o, jmi_ad_var_t* e_o);
+jmi_ad_var_t func_CCodeGenTests_SimpleExternal10_f_exp(jmi_ad_var_t a_v, jmi_ad_var_t b_v);
+
+void func_CCodeGenTests_SimpleExternal10_f_def(jmi_ad_var_t a_v, jmi_ad_var_t b_v, jmi_ad_var_t* c_o, jmi_ad_var_t* d_o, jmi_ad_var_t* e_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t c_v;
+    jmi_ad_var_t d_v;
+    jmi_ad_var_t e_v;
+    d_v = my_f(a_v, &c_v, b_v, &e_v);
+    if (c_o != NULL) *c_o = c_v;
+    if (d_o != NULL) *d_o = d_v;
+    if (e_o != NULL) *e_o = e_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_SimpleExternal10_f_exp(jmi_ad_var_t a_v, jmi_ad_var_t b_v) {
+    jmi_ad_var_t c_v;
+    func_CCodeGenTests_SimpleExternal10_f_def(a_v, b_v, &c_v, NULL, NULL);
+    return c_v;
+}
+
+")})));
+
+	Real a_in = 1;
+	Real b_in = 2;
+	Real c_out;
+	Real d_out;
+	Real e_out;
+	function f
+		input Real a;
+		input Real b;
+		output Real c;
+		output Real d;
+		output Real e;
+		external d = my_f(a,c,b,e);
+	end f;
+	equation
+		(c_out, d_out, e_out) = f(a_in, b_in);
+end SimpleExternal10;
 
 model IntegerInFunc1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
