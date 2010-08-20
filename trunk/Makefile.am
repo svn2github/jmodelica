@@ -34,6 +34,18 @@ if WITH_SUNDIALS
 	cd $(abs_top_srcdir)/Assimulo; \
 	python setup_source.py install --sundials-home=$(SUNDIALS_HOME) --prefix=$(assimulo_install_dir)
 endif
+	mkdir -p $(abs_builddir)/build_tmp
+	$(CC) -c -fPIC $(abs_top_srcdir)/Python/util/FMILogger.c -o $(abs_builddir)/build_tmp/FMILogger.o
+	case $(build) in \
+	*-cygwin*) \
+	$(CC) -shared -Wl -soname,libFMILogger.so.1 -o $(abs_builddir)/build_tmp/FMILogger.so $(abs_builddir)/build_tmp/FMILogger.o ;; \
+  	*-mingw*) \
+	$(CC) -shared -Wl -soname,libFMILogger.so.1 -o $(abs_builddir)/build_tmp/FMILogger.so $(abs_builddir)/build_tmp/FMILogger.o ;; \
+  	*-apple*) \
+	$(CC) -dynamiclib -Wl -o $(abs_builddir)/build_tmp/FMILogger.dylib $(abs_builddir)/build_tmp/FMILogger.o ;; \
+  	*) \
+	$(CC) -shared -Wl -soname,libFMILogger.so.1 -o $(abs_builddir)/build_tmp/FMILogger.so $(abs_builddir)/build_tmp/FMILogger.o ;; \
+	esac
 
 install-exec-local:
 if HAVE_ANT
@@ -114,6 +126,18 @@ endif
 	cp  $(abs_top_srcdir)/version.txt $(DESTDIR)$(prefix)
 	cp jm_tests $(DESTDIR)$(prefix)/jm_tests
 	chmod ugo+x $(DESTDIR)$(prefix)/jm_tests
+	mkdir -p $(DESTDIR)$(prefix)/Python/util
+	case $(build) in \
+	*-cygwin*) \
+	cp  $(abs_builddir)/build_tmp/FMILogger.so $(DESTDIR)$(prefix)/Python/util/ ;; \
+  	*-mingw*) \
+	cp  $(abs_builddir)/build_tmp/FMILogger.so $(DESTDIR)$(prefix)/Python/util/ ;; \
+  	*-apple*) \
+	cp  $(abs_builddir)/build_tmp/FMILogger.dylib $(DESTDIR)$(prefix)/Python/util/ ;; \
+  	*) \
+	cp  $(abs_builddir)/build_tmp/FMILogger.so $(DESTDIR)$(prefix)/Python/util/ ;; \
+	esac
+
 
 bindistdir: install
 	rm -rf $(bindistdir)
