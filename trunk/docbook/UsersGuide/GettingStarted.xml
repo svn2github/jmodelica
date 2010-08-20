@@ -379,18 +379,19 @@ import matplotlib.pyplot as plt</programlisting>
       operations for compiling, loading, executing the optimization algorithm,
       and loading the result from file:</para>
 
-      <programlisting language="python">(model, res) = optimize("VDP_Opt", VDP_Opt.mo")</programlisting>
+      <programlisting language="python">res_object = optimize("VDP_Opt", "VDP_Opt.mo")</programlisting>
 
       <para>In this case, we use the default settings for the optimization
       algorithm and provide only the name of the Optimica class (the first
-      argument) and the name of the file (VDP.mo). The return argument 'model'
-      is a reference to a jmodelica.Model object representing the compiled
-      model. The 'res' return argument represents the optimization result and
-      can be used to access the optimal trajectories:</para>
+      argument) and the name of the file (VDP.mo). The return object is a
+      result object which contains a reference to a jmodelica.Model object
+      representing the compiled model and also the optimization result. To
+      access the optimization result and the optimal trajectories:</para>
 
-      <programlisting language="python"> x1=res.get_variable_data('x1')
- x2=res.get_variable_data('x2')
- u=res.get_variable_data('u')</programlisting>
+      <programlisting language="python">res = res_object.get_result_data() #Get the result data
+x1=res.get_variable_data('x1')
+x2=res.get_variable_data('x2')
+u=res.get_variable_data('u')</programlisting>
 
       <para>The return arguments are objects of the Python class
       jmodelica.io.Trajectory, which has two fields: 't' which represents the
@@ -804,7 +805,8 @@ Tc_0_A = 250
 init_model.set_value('Tc',Tc_0_A)
     
 # Solve the DAE initialization system with Ipopt
-(init_model, init_result) = initialize(init_model)
+init_result_object = initialize(init_model)
+init_result = init_result_object.get_result_data()
     
 # Store stationary point A
 c_0_A = init_result.get_variable_data('c').x[0]
@@ -819,22 +821,23 @@ print('state T = %f' % T_0_A)
 
         <para>Notice how the function set_value is used to set the value of
         the control input. The initialization algorithm is invoked by calling
-        the function 'initialize', which returns the initialization result in
-        the object 'init_result'. The 'initialize' function relies on the
-        algorithm Ipopt for computing the solution of the initialization
-        problem. The values of the states corresponding to grade A can then be
-        extracted from the result object. Look carefully at the printouts in
-        the Python shell to see a printout of the stationary values. Display
-        the help text for the 'initialize' function and take a moment to look
-        through it. The procedure is now repeated for operating point
-        B:</para>
+        the function 'initialize', which returns a result object where the
+        initialization result is accessed with 'get_result_data' and stored in
+        'init_result'. The 'initialize' function relies on the algorithm Ipopt
+        for computing the solution of the initialization problem. The values
+        of the states corresponding to grade A can then be extracted from the
+        result object. Look carefully at the printouts in the Python shell to
+        see a printout of the stationary values. Display the help text for the
+        'initialize' function and take a moment to look through it. The
+        procedure is now repeated for operating point B:</para>
 
         <programlisting language="python"># Set inputs for Stationary point B
 Tc_0_B = 280
 init_model.set_value('Tc',Tc_0_B)
         
 # Solve the DAE initialization system with Ipopt
-(init_model, init_result) = initialize(init_model)
+init_result_object = initialize(init_model)
+init_result = init_result_object.get_result_data()
     
 # Store stationary point B
 c_0_B = init_result.get_variable_data('c').x[0]
@@ -1098,8 +1101,9 @@ init_sim_model.set_value('Tc_ref',u[0])
         <para>Having initialized the model parameters, we can simulate the
         model using the 'simulate' function.</para>
 
-        <programlisting language="python">(init_sim_model,res) = simulate(init_sim_model,alg_args={'start_time':0.,'final_time':150.,
+        <programlisting language="python">sim_result_object = simulate(init_sim_model,alg_args={'start_time':0.,'final_time':150.,
                                                          'input_trajectory':u_traj})
+res = sim_result_object.get_result_data()
 </programlisting>
 
         <para>The function 'simulation' first computes consistent initial
@@ -1109,8 +1113,9 @@ init_sim_model.set_value('Tc_ref',u[0])
         dictionary. Take a moment to read the interactive help for the
         'simulate' function.</para>
 
-        <para>The simulation result is returned in the output argument 'res',
-        from which you may now retrieve trajectories for plotting:</para>
+        <para>The simulation result object is returned and to retrieve the
+        simulation data use the method 'get_result_data', from which you may
+        now retrieve trajectories for plotting:</para>
 
         <programlisting language="python"># Extract variable profiles
 c_init_sim=res.get_variable_data('cstr.c')
@@ -1201,7 +1206,8 @@ n_e = 100 # Number of elements
 hs = N.ones(n_e)*1./n_e # Equidistant points
 n_cp = 3; # Number of collocation points in each element
 
-(cstr,res) = optimize(cstr,alg_args={'n_e':n_e,'hs':hs,'n_cp':n_cp,'init_traj':res})
+opt_result_object = optimize(cstr,alg_args={'n_e':n_e,'hs':hs,'n_cp':n_cp,'init_traj':res})
+res = opt_result_object.get_result_data()
 </programlisting>
 
         <para>You should see the output of Ipopt in the Python shell as the
@@ -1210,8 +1216,8 @@ n_cp = 3; # Number of collocation points in each element
         an acceptable level' in order for an optimum to be found. Again, the
         arguments to the algorithm (number of elements, number of collocation
         points, element length vector and initial guess object) are given in a
-        Python dictionary. The optimization result is returned in the output
-        argument 'res'.</para>
+        Python dictionary. The optimization result object is returned and the
+        optimization data are stored in 'res'.</para>
 
         <para>We can now retrieve the trajectories of the variables that we
         intend to plot:</para>
@@ -1313,9 +1319,10 @@ sim_model.set_value('c_init',c_0_A)
 sim_model.set_value('T_init',T_0_A)
 sim_model.set_value('Tc',u[0])
 
-(sim_model,res) = simulate(sim_model,compiler='optimica',
+sim_result_object = simulate(sim_model,compiler='optimica',
                            alg_args={'start_time':0.,'final_time':150.,
                                      'input_trajectory':u_traj})
+res = sim_result_object.get_result_data()
 </programlisting>
 
         <para>Finally, we load the simulated data and plot it to compare with
