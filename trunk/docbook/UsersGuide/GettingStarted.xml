@@ -1442,20 +1442,21 @@ plt.show()
     <section>
       <title>I/O functionality</title>
 
-      <para>The module jmodelica.io provides useful functions for exporting
-      and loading simulation or optimization results from Dymola. The result
-      files can be in Dymola textural or Dymola binary format. The variable
-      data is saved together with the variable names which makes it possible
-      to load the result files and match result data with a specific
-      variable.</para>
+      <para>The module <literal>jmodelica.io</literal> provides useful
+      functions for exporting and loading simulation or optimization results
+      from Dymola. The result files can be in Dymola textural or Dymola binary
+      format. The variable data is saved together with the variable names
+      which makes it possible to load the result files and match result data
+      with a specific variable.</para>
     </section>
 
     <section>
       <title>Loading result data</title>
 
       <para>To load a result data file saved using the export functionality
-      jmodelica.io.export_result_dymola the class ResultDymolaTextual in the
-      same module, jmodelica.io, can be used. The result object can then be
+      <literal>jmodelica.io.export_result_dymola</literal> the class
+      <literal>ResultDymolaTextual</literal> in the same module,
+      <literal>jmodelica.io</literal>, is used. The result object can then be
       used to retrieve data for a specific variable.</para>
 
       <programlisting language="python"># Load the CSTR results
@@ -1463,7 +1464,7 @@ res = jmodelica.io.ResultDymolaTextual('CSTR_CSTR_Opt_result.txt')
 
 # Get variable data for T_ref
 res.get_variable_data('T_ref').x
-&gt;&gt; array([ 320., 320.])
+&gt;&gt; array([ 280.099198,  280.099198])
 </programlisting>
 
       <para>There is a similar function for retrieving results from a file in
@@ -1503,32 +1504,34 @@ res.get_variable_data('T_ref').x
     <section>
       <title>Get and set value</title>
 
-      <para>The model parameters can be accessed with via the jmi.Model
-      interface. It is possible to look at the whole vector of, for example,
-      all real parameters in the model or one specific parameter. Accessing
-      one specific parameter requires that the parameter name is known.</para>
+      <para>The model parameters can be accessed with via the
+      <literal>jmi.Model</literal> interface. It is possible to look at the
+      whole vector of, for example, all real parameters in the model or one
+      specific parameter. Accessing one specific parameter requires that the
+      parameter name is known.</para>
 
       <para>The following code example assumes the CSTR model has been
-      compiled and the DLL file loaded in jmi.Model.</para>
+      compiled and the DLL file loaded in <literal>jmi.Model</literal>.</para>
 
       <programlisting language="python"># Get independent real parameter vector
-cstr.get_real_pi()
-&gt;&gt; array([ 1.66666667e-03, 1.00000000e+03, 1.66666667e-03,
-           3.50000000e+02, 2.19000000e-01, 1.20000000e+09,
-           8.75000000e+03, 9.15600000e+02, 1.00000000e+03,
-           2.39000000e+02, -5.00000000e+04, 1.00000000e+02,
-           1.00000000e+03, 3.50000000e+02, 5.00000000e+02,
-           3.20000000e+02, 3.00000000e+02, 1.00000000e+00,
-           1.00000000e+00, 1.00000000e+00])
+cstr_model.get_real_pi()
+&gt;&gt; array([  1.66666667e-03,   1.00000000e+03,   1.66666667e-03,
+            3.50000000e+02,   2.19000000e-01,   1.20000000e+09,
+            8.75000000e+03,   9.15600000e+02,   1.00000000e+03,
+            2.39000000e+02,  -5.00000000e+04,   1.00000000e+02,
+            1.00000000e+03,   3.50000000e+02,   5.00000000e+02,
+            3.20000000e+02,   3.00000000e+02,   1.00000000e+00,
+            1.00000000e+00,   1.00000000e+00,   0.00000000e+00,
+            1.50000000e+02])
 
 # Get independent parameter c_ref
-cstr.get_value('c_ref')
+cstr_model.get_value('c_ref')
 &gt;&gt; 500.0
 
 # Set independent parameter
-cstr.set_value('c_ref', 450)
+cstr_model.set_value('c_ref', 450)
 # c_ref has now changed
-cstr.get_value('c_ref')
+cstr_model.get_value('c_ref')
 &gt;&gt; 450.0
 </programlisting>
     </section>
@@ -1540,12 +1543,20 @@ cstr.get_value('c_ref')
         <title>Loading XML values file</title>
 
         <para>It is possible to load the values from an XML file as is done
-        automatically when the jmi.Model object was first created. If, for
-        example, there were many local changes to parameters it could be
-        desirable to reset everything as it was from the beginning.</para>
+        automatically when the <literal>jmi.Model</literal> object was first
+        created. If, for example, there were many local changes to parameters
+        it could be desirable to reset everything as it was from the
+        beginning.</para>
 
-        <programlisting language="python"># Load values XML file
-cstr.load_parameters_from_XML()
+        <programlisting language="python"># Set parameter
+cstr_model.set_value('c_ref', 450)
+cstr_model.get_value('c_ref')
+&gt;&gt; 450.0
+# Load values XML file
+cstr_model.load_parameters_from_XML()
+# Parameter has now been reset
+cstr_model.get_value('c_ref')
+&gt;&gt; 500.0
 </programlisting>
 
         <para>Default behaviour is to load the same file as was created during
@@ -1553,30 +1564,37 @@ cstr.load_parameters_from_XML()
         method.</para>
 
         <programlisting language="python"># Load other XML file
-cstr.load_parameters_from_XML('new_values.xml')</programlisting>
+cstr_model.load_parameters_from_XML('new_values.xml')</programlisting>
       </section>
 
       <section>
         <title>Writing to XML values file</title>
 
-        <para>Setting a parameter value with Model.set_value only changes the
-        value in the vector loaded when jmi.Model was created, which means
-        that they will not be saved. To save all changes made to parameters in
-        a model, the values have to be written to the XML values file.</para>
+        <para>Setting a parameter value with
+        <literal>Model.set_value</literal> only changes the value in the
+        vector loaded when <literal>jmi.Model</literal> was created, which
+        means that they will not be saved. To save all changes made to
+        parameters in a model, the values have to be written to the XML values
+        file.</para>
 
-        <programlisting language="python"># Save parameters to values XML
-cstr.write_parameters_to_XML()
+        <programlisting language="python"># Set parameter
+cstr_model.set_value('c_ref', 450)
+# Save parameters to values XML
+cstr_model.write_parameters_to_XML()
+# Changed parameter has now been saved in XML file
+cstr_model.get_value('c_ref')
+&gt;&gt; 450.0
 </programlisting>
 
-        <para>If this method is called without arguments the values will be
-        written to the XML file which was created when the model was compiled
-        (following the name conventions mentioned above). It is also possible
-        to save the changes in a new XML file. This is quite convenient since
-        different parameter value settings can easily be saved and loaded in
-        the model.</para>
+        <para>If <literal>write_parameters_to_XML()</literal> is called
+        without arguments the values will be written to the XML file which was
+        created when the model was compiled (following the name conventions
+        mentioned above). It is also possible to save the changes in a new XML
+        file. This is quite convenient since different parameter value
+        settings can easily be saved and loaded in the model.</para>
 
         <programlisting language="python"># Save to specific XML file
-cstr.write_parameters_to_XML('test_values.xml')</programlisting>
+cstr_model.write_parameters_to_XML('test_values.xml')</programlisting>
       </section>
     </section>
   </section>
