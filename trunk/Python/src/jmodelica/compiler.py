@@ -257,8 +257,8 @@ class ModelicaCompiler():
         written to the folder in which the compilation is performed. All 
         files will get the default name <model_class_name>.<ext>. Set target 
         to specify the contents of the object file used to build the .dll. 
-        Default is"model". Other two options are "algorithms" and "ipopt". 
-        See makefile in install folder for details.
+        Default is"model". Other three options are "model_noad", 
+        "algorithms" and "ipopt". See makefile in install folder for details.
 
         Parameters:
             model_class_name -- 
