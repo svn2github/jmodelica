@@ -118,7 +118,7 @@ private:
 	delete jmi_dynamic_first;
 
 // Record array access macros
-#define jmi_array_rec_1(arr, i1) (&((*((arr)->var))[i1]))
+#define jmi_array_rec_1(arr, i1) (&((*((arr)->var))[_JMI_ARR_I_1(arr, i1)]))
 #define jmi_array_rec_2(arr, i1, i2) (&((*((arr)->var))[_JMI_ARR_I_2(arr, i1, i2)]))
 #define jmi_array_rec_3(arr, i1, i2, i3) (&((*((arr)->var))[_JMI_ARR_I_3(arr, i1, i2, i3)]))
 #define jmi_array_rec_4(arr, i1, i2, i3, i4) (&((*((arr)->var))[_JMI_ARR_I_4(arr, i1, i2, i3, i4)]))

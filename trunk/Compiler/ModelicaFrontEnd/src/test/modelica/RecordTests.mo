@@ -2661,4 +2661,34 @@ end RecordInput7;
 
 
 
+model RecordParBexp1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="RecordParBexp1",
+         description="Parameter with array-of-records type and literal binding expression",
+		 checkWarnings=true,
+         flatModel="
+fclass RecordTests.RecordParBexp1
+ parameter Real r[1].x = 3 /* 3 */;
+ parameter Real r[1].y = 3 /* 3 */;
+ parameter Real r[2].x = 4 /* 4 */;
+ parameter Real r[2].y = 6 /* 6 */;
+
+ record RecordTests.RecordParBexp1.R
+  Real x = 1;
+  Real y = 1;
+ end RecordTests.RecordParBexp1.R;
+end RecordTests.RecordParBexp1;
+")})));
+
+	record R
+		Real x = 1;
+		Real y = 1;
+	end R;
+	
+	parameter R[2] r = {R(3,3),R(4,6)};
+end RecordParBexp1;
+
+
+
 end RecordTests;

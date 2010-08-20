@@ -623,12 +623,14 @@ aspect Flattening {
 	}
 
 	/**
-	 * \brief Check if this InstValueModificationis part of a modification 
+	 * \brief Check if this InstValueModification is part of a modification 
 	 *        that is declared "each".
 	 */
 	inh boolean InstValueModification.hasEach();
-	eq InstArgument.getChild().hasEach() = getEach();
-	eq InstNode.getChild().hasEach()     = false;
+	eq InstArgument.getChild().hasEach()          = getEach();
+	eq InstNode.getChild().hasEach()              = false;
+	eq InstArrayModification.getChild().hasEach() = true;
+	syn boolean InstArrayModification.hasEach()   = true;
 	
 	/**
 	 * \ingroup aspect_Flattening

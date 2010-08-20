@@ -9,7 +9,12 @@ Highlights:
 
 1.1.1 Arrays
 
-Slice operations are now supported, except in some situations in function. 
+Slice operations are now supported.
+ 
+Array support is now nearly complete. The exceptions are:
+ * Functions with array inputs with sizes declared as ':' - only basic support.
+ * A few array-related function-like operators are not supported.
+ * Connect clauses does not handle arrays of connectors properly.
 
 1.1.2 Redeclare
 
@@ -19,19 +24,29 @@ Redeclares as class elements are now supported.
 
 Conditional components are now supported.
 
-1.1.4 External functions
+1.1.4 Constants and parameters
 
- - Basic support for external functions written in c. 
- 
- - Annotations for libraries, includes, library directories and include 
- directories supported.
- 
- - Platform directories supported.
+Function calls can now be used as binding expressions for parameters 
+and constants. The handling of Integer, Boolean and record type parameters 
+is also improved.
 
- - Can not be used together with CppAD. 
+1.1.5 External functions
 
- - Arrays as arguments are not yet supported. Functions in Modelica_utilies 
-are also not supported.
+ * Basic support for external functions written in c. 
+ * Annotations for libraries, includes, library directories and include 
+   directories supported.
+ * Platform directories supported.
+ * Can not be used together with CppAD. 
+ * Arrays as arguments are not yet supported. Functions in Modelica_utilies 
+   are also not supported.
+
+1.1.6 Miscellaneous
+
+The error checking has been improved, eliminating many erroneous error 
+messages for correct Modelica code.
+
+The memory and time usage for the compiler has been greatly reduced for 
+medium and large models, especially for complex class structures.
 
 1.2. Optimica Compiler
 
@@ -132,14 +147,14 @@ simulation result data to file considerably.
 
 Christian Andersson
 Tove Bergdahl
-Magnus Gäfvert
+Magnus Gï¿½fvert
 Roberto Parrotto
 Jesper Mattsson
-Johan Åkesson
+Johan ï¿½kesson
 
 Previous contributors:
 
 Philip Nilsson
 Jens Rantil
-Philip Reuterswärd
+Philip Reuterswï¿½rd
 

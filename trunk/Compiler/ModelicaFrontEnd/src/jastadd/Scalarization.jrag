@@ -106,10 +106,11 @@ aspect Scalarization {
 		// they should be scalarized but can't contain any FForIndex 
 		// (except in reduction-expressions)
 		Map<String,FExp> constIndexMap = null;
-		if (isParameter() || isConstant())
+		if (hasBindingExp())
 			constIndexMap = Collections.emptyMap();
 		if (isRecord()) {
-			scalarRecordFVariables(vars, new FQName(), null);
+			FExp bexp = hasBindingExp() ? getBindingExp() : null;
+			scalarRecordFVariables(vars, new FQName(), null, bexp);
 		} else if (isArray()) {
 			for (Index i : indices()) {
 				// Copy original declaration
@@ -117,7 +118,7 @@ aspect Scalarization {
 				// Set new array subscripts corresponding to index
 				fv_tmp.getFQName().setLastFArraySubscripts(i.newFArraySubscripts());
 				// Constants and parameters still have binding expressions
-				if (constIndexMap != null && hasBindingExp())
+				if (hasBindingExp())
 					fv_tmp.setBindingExp(getBindingExp().getArray().get(i).scalarize(constIndexMap));
 				// Iterate over all attributes and scalarize.
 				for (FAttribute a : fv_tmp.getFAttributes()) 
@@ -144,16 +145,21 @@ aspect Scalarization {
 	 * @param prefix  add this as a prefix to the name
 	 * @param last    an FVariable containing the attributes, variability, 
 	 *                etc inherited from the surrounding record
+	 * @param bexp    binding expression inherited from surrounding record
 	 */
-	public void FVariable.scalarRecordFVariables(List<FVariable> vars, FQName prefix, FVariable last) {
+	public void FVariable.scalarRecordFVariables(
+			List<FVariable> vars, FQName prefix, FVariable last, FExp bexp) {
 		FQName name = prefix.fullCopy().append(getFQName());
 		if (isArray()) {
+			FExp nbexp = null;
 			for (Index i : indices()) {
+				if (bexp != null)
+					nbexp = bexp.getArray().get(i);
 				name.setLastFArraySubscripts(i.newFArraySubscripts());
-				scalarRecordCellFVariables(vars, name, last);
+				scalarRecordCellFVariables(vars, name, last, nbexp);
 			}
 		} else {
-			scalarRecordCellFVariables(vars, name, last);
+			scalarRecordCellFVariables(vars, name, last, bexp);
 		}
 	}
 	
@@ -163,20 +169,32 @@ aspect Scalarization {
 	 * @param vars  the list of FVariables to add the variables to
 	 * @param name  the name of the new variable
 	 * @param last  an FVariable containing the attributes, variability, etc inherited from surrounding record
+	 * @param bexp  binding expression inherited from surrounding record or array
 	 */
-	public void FVariable.scalarRecordCellFVariables(List<FVariable> vars, FQName name, FVariable last) {
+	public void FVariable.scalarRecordCellFVariables(
+			List<FVariable> vars, FQName name, FVariable last, FExp bexp) {
 		FVariable fv = (FVariable) fullCopy();
+		if (bexp != null)
+			fv.setBindingExp(bexp.scalarizeExp(Collections.<String,FExp>emptyMap()));
+		else
+			fv.setBindingExpOpt(new Opt());
 		fv.inheritFrom(last);
 		fv.setFQName(name.fullCopy());
 		fv.getFQName().scalarized = true;
 		vars.add(fv);
 	}
 	
-	public void FRecordVariable.scalarRecordCellFVariables(List<FVariable> vars, FQName name, FVariable last) {
+	public void FRecordVariable.scalarRecordCellFVariables(
+			List<FVariable> vars, FQName name, FVariable last, FExp bexp) {
 		FVariable tmp = (FVariable) fullCopy();
 		tmp.inheritFrom(last);
-		for (FVariable comp : myFRecordDecl().getFVariables())
-			comp.scalarRecordFVariables(vars, name, tmp);
+		FExp nbexp = null;
+		Map<String, FExp> emptyIndexMap = Collections.emptyMap();
+		for (FVariable comp : myFRecordDecl().getFVariables()) {
+			if (bexp != null)
+				nbexp = bexp.scalarRecordFExp(emptyIndexMap, comp.getFQName());
+			comp.scalarRecordFVariables(vars, name, tmp, nbexp);
+		}
 	}
 	
 	/**
@@ -185,10 +203,14 @@ aspect Scalarization {
 	public void FVariable.inheritFrom(FVariable other) {
 		if (other == null)
 			return;
+
+		// Prefixes
 		setFVisibilityType(other.getFVisibilityType());
 		setFTypePrefixVariability(getFTypePrefixVariability().combineDown(other.getFTypePrefixVariability()));
 		if (other.hasFTypePrefixInputOutput())
 			setFTypePrefixInputOutput(other.getFTypePrefixInputOutput());
+
+		// Attributes
 		String myName = getFQName().getFQNamePart(0).getName();
 		for (FAttribute a : other.getFAttributes()) {
 			// TODO: support attributes on single cell in array (#599)

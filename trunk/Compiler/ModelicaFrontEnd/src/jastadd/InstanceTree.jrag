@@ -300,17 +300,30 @@ aspect Environments {
 			env.mergeInnerModification(im);
 		return env;
 	}
+	
+	eq InstArrayComponentDecl.getMergedEnvironment() {
+		Environment env = super.getMergedEnvironment();
+		for (int i = 0; i < env.size(); i++) {
+			if (env.get(i) instanceof InstValueModification) {
+				InstValueModification ivm = (InstValueModification) env.get(i);
+				FExp exp = ivm.getFExp();
+				if (exp.isArray()) {
+					exp = exp.splitArrayExp(getIndex());
+					InstArrayModification aim = new InstArrayModification(ivm.getModification(), exp);
+					env.set(i, ivm.dynamicInstMod(aim));
+				}
+			}
+		}
+		return env;
+	}
 
 
-	
-	
-	
 	/**
 	 * myEnvironment represents the environment of the InstNode itself. It is defined
 	 * as an inherited attribute and is computed from the outer environment located at
 	 * ancestor InstNodes.
 	 */	
-	inh  lazy Environment InstNode.myEnvironment();
+	inh lazy Environment InstNode.myEnvironment();
 	inh lazy Environment InstNode.myEnvironment(String name); // TODO: Make sure this is lazy - removed for debugging
 	
 	/**
@@ -364,8 +377,6 @@ aspect Environments {
     				env.mergeInnerModification(iclr.getInstClassDecl().getInstClassModification());
 				classRedeclareFound = true;
 			}
-
-			
 			
 			if (im.matchInstModification(name) != null) {
 				env.mergeInnerModification(im.matchInstModification(name));
@@ -385,8 +396,11 @@ aspect Environments {
 			FRecordConstructor call = (FRecordConstructor) getFExp();
 			InstClassDecl icd = ((FIdUseInstAccess) call.getRecord()).getInstAccess().myInstClassDecl();
 			ArrayList<InstComponentDecl> inputs = icd.myModifiableComponents();
-			for (int i = 0; i < inputs.size(); i++) 
-				res.add(new InstRecordConstructorModification(getModification(), inputs.get(i), call.getArg(i)));
+			Modification mod = getModification();
+			for (int i = 0; i < inputs.size(); i++) {
+				InstModification im = new InstRecordConstructorModification(mod, inputs.get(i), call.getArg(i));
+				res.add((InstRecordConstructorModification) dynamicInstMod(im));
+			}
 		}
 
 		return res;
@@ -523,6 +537,7 @@ aspect InstanceTreeConstruction {
 	syn lazy List InstConstrainingComponent.getDynamicClassNameList() = new List();
 	syn lazy List InstForIndex.getDynamicClassNameList() = new List();
 	syn lazy List FExp.getDynamicFExpList() = new List();
+	syn lazy List InstValueModification.getDynamicInstModList() = new List();
 	
 	/**
 	 * \brief Dynamically places a class name in the tree under this InstNode.
@@ -567,6 +582,17 @@ aspect InstanceTreeConstruction {
 			return exp;
 		getDynamicFExpList().add(exp);
 		return getDynamicFExp(getNumDynamicFExp() - 1);
+	}
+	
+	
+	/**
+	 * \brief Dynamically places an InstModification in the tree under this InstValueModification.
+	 * 
+	 * @returns  the final version of the dynamically placed node.
+	 */
+	public InstModification InstValueModification.dynamicInstMod(InstModification im) {
+		getDynamicInstModList().add(im);
+		return getDynamicInstMod(getNumDynamicInstMod() - 1);
 	}
 	
 	
@@ -1100,6 +1126,7 @@ aspect InstaceConstrainingClauses {
 	}
 	
 	eq InstRecordConstructorModification.getFExp() = (FExp) getArg().fullCopy();
+	eq InstArrayModification.getFExp()             = (FExp) getCell().unboundCopy();
 	
 	public List InstNode.buildFAbstractEquationList() { 
 	    List l = new List();
