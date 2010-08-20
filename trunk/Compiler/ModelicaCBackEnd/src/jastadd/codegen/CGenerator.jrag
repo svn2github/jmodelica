@@ -173,7 +173,27 @@ public class CGenerator extends GenericGenerator {
 		}
 	
 	}
+
+	class DAETag_C_initialDependentParameterAssignments extends DAETag {
+		
+		public DAETag_C_initialDependentParameterAssignments(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("C_DAE_initial_dependent_parameter_assignments","C: dependent parameter assignments",
+			  myGenerator,fclass);
+		}
 	
+		public void generate(PrintStream genPrinter) {
+			for (FAbstractEquation e : fclass.getFParameterEquations()) {
+				e.genAssignment_C(INDENT, genPrinter);		
+/*				e.getLeft().prettyPrint_C(genPrinter,"");
+				genPrinter.print(" = ");
+				e.getRight().prettyPrint_C(genPrinter,"");
+				genPrinter.print(";\n");*/
+			}
+		}
+	
+	}
+
 	class DAETag_C_variableAliases extends DAETag {
 		
 		public DAETag_C_variableAliases(AbstractGenerator myGenerator, 

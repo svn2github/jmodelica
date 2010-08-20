@@ -960,7 +960,31 @@ aspect CCodeGen {
 		for (FFunctionCallLeft l : getLefts())
 			l.genWriteBack_C(str, indent);
 	}
+
+	public void FAbstractEquation.genAssignment_C(String indent, PrintStream str) {}
 	
+	public void FEquation.genAssignment_C(String indent, PrintStream str) {
+		genTempVars_C(printer_C, str, indent, null);
+		str.print(indent);
+		getLeft().prettyPrint_C(str,"");
+		str.print(" = ");
+		getRight().prettyPrint_C(str,"");
+		str.print(";\n");
+	}
+
+	public void FFunctionCallEquation.genAssignment_C(String indent, PrintStream str) {
+		genTempVars_C(printer_C, str, indent, null);
+		int i = 0;
+		for (FFunctionCallLeft l : getLefts()) {
+			l.setBaseIndex(i);
+			l.genTempVar_C(indent, str);
+		}
+		getCall().prettyPrint_C(str, indent);
+		str.print(";\n");
+		for (FFunctionCallLeft l : getLefts())
+			l.genWriteBackAssignment_C(str, indent);
+	}
+
 	private int FFunctionCallLeft.equationIndex = -1;
 	public void FFunctionCallLeft.setBaseIndex(int i) {
 		equationIndex = i + myIndex();
@@ -1039,6 +1063,45 @@ aspect CCodeGen {
 		str.print(" - (");
 		prettyPrint_C(str, "");
 		str.print(");\n");
+	}
+	
+	public void FFunctionCallLeft.genWriteBackAssignment_C(PrintStream str, String indent) {
+		if (hasFExp()) 
+			getFExp().type().genWriteBackAssignment_C(str, indent, name_C(), getFExp());
+	}
+	
+	public void FType.genWriteBackAssignment_C(PrintStream str, String indent, String name, FExp exp) {
+		if (isArray()) {
+			String type = isRecord() ? C_ARRAY_RECORD : C_ARRAY_VALUE;
+			String pre = String.format("jmi_array_%s_%d(%s, ", type, ndims(), name);
+			Array arr = exp.getArray();
+			for (Index i : arr.indices()) {
+				String cellName = pre + i.toUnclosedString() + ")";
+				genCellWriteBackAssignment_C(str, indent, cellName, arr.get(i));
+			}
+		} else {
+			genCellWriteBackAssignment_C(str, indent, name, exp);
+		}
+	}
+	
+	public void FType.genCellWriteBackAssignment_C(PrintStream str, String indent, String name, FExp exp) {
+		exp.genWriteBackAssignment_C(str, indent, name);
+	}
+	
+	public void FRecordType.genCellWriteBackAssignment_C(PrintStream str, String indent, String name, FExp exp) {
+		for (FRecordComponentType comp : getComponents()) {
+			String compName = name + "->" + comp.getName();
+			FExp compExp = exp.extractRecordComponentExp(comp.getName());
+			comp.getFType().genWriteBackAssignment_C(str, indent, compName, compExp);
+		}
+	}
+
+	public void FExp.genWriteBackAssignment_C(PrintStream str, String indent, String name) {
+		str.print(indent);
+		prettyPrint_C(str, "");
+		str.print(" = ");
+		str.print(name);
+		str.print(";\n");
 	}
 	
 	public void FExp.genArgument_C(Printer p, PrintStream str, String indent, Object o) {

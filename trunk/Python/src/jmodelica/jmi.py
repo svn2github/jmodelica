@@ -454,7 +454,7 @@ class Model(object):
         xml_values_file = libname+'_values.xml'
         self._set_XMLValuesDoc(xmlparser.XMLValuesDoc(os.path.join(path,xml_values_file)))
         self._set_iparam_values()
-        
+
         # set optimizataion interval, time points and optimization indices
         if self._is_optimica():
             self._set_opt_interval()
@@ -503,14 +503,15 @@ class Model(object):
         """
         Sets the dependent parameters of the model.
         """
-        pd_tmp = N.zeros(self._n_real_pd.value)
-        pd = N.zeros(self._n_real_pd.value)
-        for i in range(self._n_real_pd.value):
-            self.set_real_pd(pd)
-            self.jmimodel.init_Fp(pd_tmp)
-            pd[i] = pd_tmp[i]
-            pd_tmp[:] = pd
-        self.set_real_pd(pd)
+        self.jmimodel.init_eval_parameters()
+#        pd_tmp = N.zeros(self._n_real_pd.value)
+#        pd = N.zeros(self._n_real_pd.value)
+#        for i in range(self._n_real_pd.value):
+#            self.set_real_pd(pd)
+#            self.jmimodel.init_Fp(pd_tmp)
+#            pd[i] = pd_tmp[i]
+#            pd_tmp[:] = pd
+#        self.set_real_pd(pd)
 
     def _set_start_values(self, p_opt_start, dx_start, x_start, u_start, w_start):
         
@@ -1953,7 +1954,7 @@ class Model(object):
                 # Primitive type is String
                 pass
             else:
-                "Unknown type"
+                JMIException("Unknown type")
             
     def _set_opt_interval(self):
         """ Set the optimization intervals (if Optimica). """
@@ -2805,6 +2806,9 @@ class JMIModel(object):
                                                              flags='C'),
                                                ct.POINTER(ct.c_int),
                                                ct.POINTER(ct.c_int)]   
+
+        self._dll.jmi_init_eval_parameters.argtypes = [ct.c_void_p]
+
         self._dll.jmi_init_R0.argtypes = [ct.c_void_p,
                                           Nct.ndpointer(dtype=c_jmi_real_t,
                                                         ndim=1,
@@ -3932,18 +3936,19 @@ class JMIModel(object):
  
     def init_Fp(self, res):
         """Evaluates the Fp residual function of the initialization system.
-        
+      
         Parameters:
             res -- The residual of Fp.
-            
+          
         """
+        raise JMIException("The init_Fp function is no longer supported.")
         if self._dll.jmi_init_Fp(self._jmi, res) is not 0:
             raise JMIException("Evaluating the Fp residual function failed.")
-        
+      
     def init_dFp(self, eval_alg, sparsity, independent_vars, mask, jac):
         """Evaluates the Jacobian of the DAE initialization residual function
         F1.
-        
+      
         Parameters:
             eval_alg -- 
                 JMI_DER_SYMBOLIC to evaluate a symbolic Jacobian or 
@@ -3954,7 +3959,7 @@ class JMIModel(object):
             independent_vars -- 
                 Indicates which columns of the full Jacobian should be evaluated 
                 (for example JMI_DER_DX or JMI_DER_X).
-                
+              
                 Can either be a list of columns or a bitmask of the columns
                 or:ed (|) together. Using a list is more prefered as it is more
                 Pythonesque.
@@ -3963,38 +3968,40 @@ class JMIModel(object):
                 included in the Jacobian and zeros for those which should not.
             jac --
                 The Jacobian. (Return)
-                
+              
         """
+        raise JMIException("The init_Fp function is no longer supported.")
         try:
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
         except TypeError:
             pass
-        
+      
         if self._dll.jmi_init_dFp(self._jmi, eval_alg, sparsity, independent_vars, mask, jac) is not 0:
             raise JMIException("Evaluating the Jacobian failed.")
-    
+  
     def init_dFp_n_nz(self, eval_alg):
         """Get the number of non-zeros in the full Jacobian of the DAE 
         initialization residual function Fp.
-        
+      
         Parameters:
             eval_alg --
                 For which Jacobian the number of non-zero elements should be 
                 returned: Symbolic (JMI_DER_SYMBOLIC) or CppAD (JMI_DER_CPPAD).
-                
+              
         Returns:
             The number of non-zero Jacobian entries in the full Jacobian.
-            
+          
         """
+        raise JMIException("The init_Fp function is no longer supported.")
         n_nz = ct.c_int()
         if self._dll.jmi_init_dFp_n_nz(self._jmi, eval_alg, byref(n_nz)) is not 0:
             raise JMIException("Getting the number of non-zeros failed.")
         return int(n_nz.value)
-    
+  
     def init_dFp_nz_indices(self, eval_alg, independent_vars, mask, row, col):
         """Get the row and column indices of the non-zero elements in the Jacobian 
         of the DAE initialization residual function Fp.
-        
+      
         Parameters:
             eval_alg -- 
                 JMI_DER_SYMBOLIC to evaluate a symbolic Jacobian or 
@@ -4002,7 +4009,7 @@ class JMIModel(object):
             independent_vars -- 
                 Indicates which columns of the full Jacobian should be evaluated 
                 (for example JMI_DER_DX or JMI_DER_X).
-                
+              
                 Can either be a list of columns or a bitmask of the columns
                 or:ed (|) together. Using a list is more prefered as it is more
                 Pythonesque.
@@ -4013,19 +4020,20 @@ class JMIModel(object):
                 Row indices of the non-zeros in the Jacobian. (Return)
             col --
                 Column indices of the non-zeros in the Jacobian. (Return)
-                
+              
         """
+        raise JMIException("The init_Fp function is no longer supported.")
         try:
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
         except TypeError:
             pass        
         if self._dll.jmi_init_dFp_nz_indices(self._jmi, eval_alg, independent_vars, mask, row, cols) is not 0:
             raise JMIException("Getting the row and column indices failed.")
-    
+  
     def init_dFp_dim(self, eval_alg, sparsity, independent_vars, mask):
         """Get the number of columns and non-zero elements in the Jacobian of
         the DAE initialization residual function Fp.
-        
+      
         Parameters:
             eval_alg -- 
                 JMI_DER_SYMBOLIC to evaluate a symbolic Jacobian or 
@@ -4036,7 +4044,7 @@ class JMIModel(object):
             independent_vars -- 
                 Indicates which columns of the full Jacobian should be evaluated 
                 (for example JMI_DER_DX or JMI_DER_X).
-                
+              
                 Can either be a list of columns or a bitmask of the columns
                 or:ed (|) together. Using a list is more prefered as it is more
                 Pythonesque.
@@ -4046,8 +4054,9 @@ class JMIModel(object):
         Returns:
             Tuple with number of columns and non-zeros resp. of the resulting 
             Jacobian.
-            
+          
         """
+        raise JMIException("The init_Fp function is no longer supported.")
         try:
             independent_vars = reduce(lambda x,y: x | y, independent_vars)
         except TypeError:
@@ -4057,6 +4066,12 @@ class JMIModel(object):
         if self._dll.jmi_init_dFp_dim(self._jmi, eval_alg, sparsity, independent_vars, mask, byref(dF_n_cols), byref(dF_n_nz)) is not 0:
             raise JMIException("Getting the number of columns and non-zero elements failed.")        
         return int(dFp_n_cols.value), int(dFp_n_nz.value)
+
+    def init_eval_parameters(self):
+        """Computes the dependent parameters.            
+        """
+        if self._dll.jmi_init_eval_parameters(self._jmi) is not 0:
+            raise JMIException("Evaluation of parameters failed")
 
     def init_R0(self, res):
         """Evaluates the DAE initialization event indicators.

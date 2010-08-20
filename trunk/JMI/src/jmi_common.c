@@ -300,6 +300,7 @@ int jmi_init_init(jmi_t* jmi, jmi_residual_func_t F0, int n_eq_F0,
 		jmi_residual_func_t Fp, int n_eq_Fp,
 		jmi_jacobian_func_t dFp,
 		int dFp_n_nz, int* dFp_row, int* dFp_col,
+		jmi_generic_func_t eval_parameters,
 		jmi_residual_func_t R0, int n_eq_R0,
 		jmi_jacobian_func_t dR0,
 		int dR0_n_nz, int* dR0_row, int* dR0_col) {
@@ -319,6 +320,8 @@ int jmi_init_init(jmi_t* jmi, jmi_residual_func_t F0, int n_eq_F0,
 	jmi_func_t* jf_Fp;
 	jmi_func_new(&jf_Fp,Fp,n_eq_Fp,dFp,dFp_n_nz,dFp_row, dFp_col);
 	jmi->init->Fp = jf_Fp;
+
+	jmi->init->eval_parameters = eval_parameters;
 
 	jmi_func_t* jf_R0;
 	jmi_func_new(&jf_R0,R0,n_eq_R0,dFp,dR0_n_nz,dR0_row, dR0_col);

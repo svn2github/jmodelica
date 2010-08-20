@@ -1291,6 +1291,14 @@ int jmi_init_dFp_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_var
 		int *dF_n_cols, int *dF_n_nz);
 
 /**
+ * \brief Evaluate the dependent parameters.
+ *
+ * @param jmi A jmi_t struct.
+ * @return Error code.
+ */
+int jmi_init_eval_parameters(jmi_t* jmi);
+
+/**
  * \brief Evaluate DAE event indicator residuals for the initialization system.
  *
  * The user sets the input variables by writing to

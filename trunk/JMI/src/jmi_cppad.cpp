@@ -1283,6 +1283,26 @@ int jmi_init_dFp_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_var
 	}
 }
 
+int jmi_init_eval_parameters(jmi_t* jmi) {
+	int i, return_status;
+
+	for (i=0;i<jmi->n_z;i++) {
+		(*(jmi->z))[i] = (*(jmi->z_val))[i];
+	}
+
+	return_status = jmi->init->eval_parameters(jmi);
+
+	// Write back evaluation result
+	if (return_status==0) {
+		for (i=0;i<jmi->n_z;i++) {
+			(*(jmi->z_val))[i] = CppAD::Value(((*(jmi->z))[i]));
+		}
+		return 0;
+	}
+	return return_status;
+
+}
+
 int jmi_init_R0(jmi_t* jmi, jmi_real_t* res) {
     return jmi_func_F(jmi,jmi->init->R0, res);
 }

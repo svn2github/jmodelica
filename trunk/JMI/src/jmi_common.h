@@ -259,6 +259,8 @@ jmi_ad_var_t jmi_max(jmi_ad_var_t x, jmi_ad_var_t y);
 
 /* @{ */
 
+typedef int (*jmi_generic_func_t)(jmi_t* jmi);
+
 /**
  * \brief Function signature for evaluation of a residual function in
  * the generated code.
@@ -586,6 +588,7 @@ int jmi_init_init(jmi_t* jmi, jmi_residual_func_t F0, int n_eq_F0,
 		  jmi_residual_func_t Fp, int n_eq_Fp,
 		  jmi_jacobian_func_t dFp,
 		  int dFp_n_nz, int* dFp_row, int* dFp_col,
+		  jmi_generic_func_t eval_parameters,
 		  jmi_residual_func_t R0, int n_eq_R0,
 		  jmi_jacobian_func_t dR0,
 		  int dR0_n_nz, int* dR0_row, int* dR0_col);
@@ -822,6 +825,7 @@ struct jmi_init_t{
 	jmi_func_t* F1;                      ///< A jmi_func_t struct representing \f$F_1\f$.
 	jmi_func_t* Fp;                      ///< A jmi_func_t struct representing \f$F_p\f$.
 	jmi_func_t* R0;                      ///< A jmi_func_t struct representing \f$R_0\f$.
+    jmi_generic_func_t eval_parameters; ///<A function pointer to a function for evaluating parameters.
 };
 
 /**

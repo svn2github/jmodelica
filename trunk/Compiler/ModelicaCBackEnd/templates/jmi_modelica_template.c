@@ -63,7 +63,7 @@ static const int N_eq_R = $n_event_indicators$;
 
 static const int N_eq_F0 = $n_equations$ + $n_initial_equations$;
 static const int N_eq_F1 = $n_initial_guess_equations$;
-static const int N_eq_Fp = $n_real_pd$ + $n_integer_pd$;
+static const int N_eq_Fp = 0;
 static const int N_eq_R0 = $n_event_indicators$ + $n_initial_event_indicators$;
 static const int N_sw_init = $n_switches$ + $n_initial_switches$;
 
@@ -141,8 +141,13 @@ $C_DAE_initial_guess_equation_residuals$
 }
 
 static int model_init_Fp(jmi_t* jmi, jmi_ad_var_vec_p res) {
-$C_DAE_initial_dependent_parameter_residuals$
-	return 0;
+  // C_DAE_initial_dependent_parameter_residuals
+	return -1;
+}
+
+static int model_init_eval_parameters(jmi_t* jmi) {
+$C_DAE_initial_dependent_parameter_assignments$
+        return 0;
 }
 
 static int model_init_R0(jmi_t* jmi, jmi_ad_var_vec_p res) {
@@ -199,6 +204,7 @@ int jmi_new(jmi_t** jmi) {
 		      0, NULL, NULL,
 		      *model_init_Fp, N_eq_Fp, NULL,
 		      0, NULL, NULL,
+		      *model_init_eval_parameters,
 		      *model_init_R0, N_eq_R0, NULL,
 		      0, NULL, NULL);
 
