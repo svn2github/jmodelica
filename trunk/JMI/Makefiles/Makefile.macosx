@@ -60,6 +60,21 @@ CPPAD_HOME =
 # IPOPT home
 IPOPT_HOME = 
 
+# Additional library directories
+EXT_LIB_DIRS =
+EXTERNAL_DIRS = $(EXT_LIB_DIRS:%=-L%)
+
+# Additional libraries
+EXT_LIBS = 
+EXTERNAL_LIBS = $(EXT_LIBS:%=-l%)
+
+# Additional include directories
+EXT_INC_DIRS =
+EXTERNAL_INCLUDES = $(EXT_INC_DIRS:%=-I%)
+
+# Build with algorithms (requires IPOPT)
+BUILD_WITH_ALGORITHMS = false
+
 SHARED = $(FILE_NAME).dylib
 
 # Object files to be included in the shared library
@@ -68,28 +83,50 @@ OBJS = $(FILE_NAME).o
 # C++ Compiler command
 CXX = g++
 
+# C Compiler command
+CC = gcc
+
+# Compile with or without CppAD
+JMI_AD=JMI_AD_CPPAD
+
 # C++ Compiler options
-CXXFLAGS = -g -O2 -DJMI_AD=JMI_AD_CPPAD
+CXXFLAGS = -g -O2 -DJMI_AD=${JMI_AD}
+
+# C Compiler options
+CFLAGS = -g -O2 -std=c99 -DJMI_AD=$(JMI_AD) -fPIC
 
 SHARED_LDFLAGS = -dynamiclib
 
 # Directories with header files
-JMIINCDIR = ${JMODELICA_HOME}/include
-CPPADINCDIR = $(CPPAD_HOME)
+JMI_INC_DIR = ${JMODELICA_HOME}/include
+CPPAD_INC_DIR = $(CPPAD_HOME)
 
 # Directory with jmi_cppad.a
-JMILIBDIR = ${JMODELICA_HOME}/lib
+JMI_LIB_DIR = ${JMODELICA_HOME}/lib
 
 # Libraries necessary to link with jmi
-LIBS = -L$(JMILIBDIR) -ljmi_cppad 
-LIBS_IPOPT = -L$(JMILIBDIR) -ljmi_cppad -ljmi_algorithm_cppad -ljmi_solver_cppad \
+LIBS_CPPAD = -L$(JMI_LIB_DIR) -ljmi_cppad
+LIBS_NOCPPAD = -L${JMI_LIB_DIR} -ljmi 
+LIBS_IPOPT = -L$(JMI_LIB_DIR) -ljmi_cppad -ljmi_algorithm_cppad -ljmi_solver_cppad \
 -L$(IPOPT_HOME)/lib -lipopt -llapack -lblas -lm -lgfortran
 
 # Include paths for compilation
-INCL = -I$(JMIINCDIR) -I$(CPPADINCDIR)
+INCL_CPPAD = -I$(JMI_INC_DIR) -I$(CPPAD_INC_DIR)
+INCL_NOCPPAD = -I$(JMI_INC_DIR) $(EXTERNAL_INCLUDES)
 
+# set variable to correct makefile (for recursive call in model_noad)
+MAKEFILE = $(lastword $(MAKEFILE_LIST))
+
+ifeq ($(JMI_AD),JMI_AD_CPPAD)
 model: $(OBJS)
-	$(CXX) $(SHARED_LDFLAGS) $(CXXLINKFLAGS) $(CXXFLAGS) -o $(SHARED) $(OBJS) $(LIBS)
+	$(CXX) $(SHARED_LDFLAGS) $(CXXLINKFLAGS) $(CXXFLAGS) -o $(SHARED) $(OBJS) $(LIBS_CPPAD)
+else
+model: $(OBJS)
+	$(CC) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) $(LIBS_NOCPPAD) $(EXTERNAL_DIRS) $(EXTERNAL_LIBS)
+endif
+
+model_noad: 
+	$(MAKE) -f $(MAKEFILE) JMI_AD=JMI_AD_NONE model
 
 algorithms: $(OBJS)
 # This is to ensure that the contents of libjmi_algorithm_cppad and
@@ -97,10 +134,9 @@ algorithms: $(OBJS)
 ifeq "$(wildcard .jmi_objs )" ""
 	mkdir .jmi_objs
 endif
-	cd .jmi_objs; \
-	ar -x $(JMODELICA_HOME)/lib/libjmi_algorithm_cppad.a; 
-	$(CXX) $(SHARED_LDFLAGS) $(CXXLINKFLAGS) $(CXXFLAGS) -o $(SHARED) $(OBJS) ./.jmi_objs/*.o $(LIBS)
-	rm .jmi_objs/*
+	cd .jmi_objs && $(AR) -x $(JMODELICA_HOME)/lib/libjmi_algorithm_cppad.a   
+	$(CXX) $(SHARED_LDFLAGS) $(CXXLINKFLAGS) $(CXXFLAGS) -o $(SHARED) $(OBJS) ./.jmi_objs/*.o $(LIBS_CPPAD)
+	$(RM) .jmi_objs/*
 	rmdir .jmi_objs
 
 ipopt: $(OBJS)
@@ -109,23 +145,25 @@ ipopt: $(OBJS)
 ifeq "$(wildcard .jmi_objs )" ""
 	mkdir .jmi_objs
 endif
-	cd .jmi_objs; \
-	ar -x $(JMODELICA_HOME)/lib/libjmi_algorithm_cppad.a; \
-	ar -x $(JMODELICA_HOME)/lib/libjmi_solver_cppad.a  
+	cd .jmi_objs && $(AR) -x $(JMODELICA_HOME)/lib/libjmi_algorithm_cppad.a  && $(AR) -x $(JMODELICA_HOME)/lib/libjmi_solver_cppad.a  
 	$(CXX) $(SHARED_LDFLAGS) $(CXXLINKFLAGS) $(CXXFLAGS) -o $(SHARED) $(OBJS) ./.jmi_objs/*.o $(LIBS_IPOPT)
-	rm .jmi_objs/*
+	$(RM) .jmi_objs/*
 	rmdir .jmi_objs
-
-
-.SUFFIXES: .cpp .c .o .obj
 
 # Compile
 .cpp.o:
-	$(CXX) $(CXXFLAGS) $(INCL) -c -o $@ $<
+ifeq ($(JMI_AD),JMI_AD_CPPAD)
+	$(CXX) $(CXXFLAGS) $(INCL_CPPAD) -c -o $@ $<
+else
+	$(CXX) $(CXXFLAGS) $(INCL_NOCPPAD) -c -o $@ $<
+endif
 
 .c.o:
-	$(CXX) $(CXXFLAGS) $(INCL) -c -o $@ $<
+ifeq ($(JMI_AD),JMI_AD_CPPAD)
+	$(CXX) $(CXXFLAGS) $(INCL_CPPAD) -c -o $@ $<
+else
+	$(CC) $(CFLAGS) $(INCL_NOCPPAD) -c -o $@ $<
+endif
 
 clean:
-	rm $(SHARED) $(OBJS)
-
+	$(RM) $(SHARED) $(OBJS)
