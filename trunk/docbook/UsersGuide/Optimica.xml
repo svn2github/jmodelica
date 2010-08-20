@@ -10,8 +10,73 @@
          xmlns:db="http://docbook.org/ns/docbook">
   <title>Optimica</title>
 
-  <para></para>
+  <para>In this chapter, the Optimica extension will be presented and
+  informally defined. The Optimica extension in described in detail in
+  <citation>Jak2008a</citation>, where additional motivations for introducing
+  Optimica can be found.The presentation will be made using the following
+  dynamic optimization problem, based on a double integrator system, as an
+  example:</para>
 
-  <para>The Optimica extension in described in detail in
-  <citation>Jak2008a</citation>.</para>
+  <para>In summary, the Optimica extension consists of the following elements:
+  </para>
+
+  <itemizedlist>
+    <listitem>
+      <para> A new specialized class: <literal>optimization</literal></para>
+    </listitem>
+
+    <listitem>
+      <para> New attributes for the built-in type Real:
+      <literal>free</literal> and <literal>initialGuess</literal></para>
+    </listitem>
+
+    <listitem>
+      <para> A new function for accessing the value of a variable at a
+      specified time instant</para>
+    </listitem>
+
+    <listitem>
+      <para>Class attributes for the specialized class
+      <literal>optimization</literal>: objective},
+      <literal>startTime</literal>, <literal>finalTime</literal> and
+      <literal>static</literal></para>
+    </listitem>
+
+    <listitem>
+      <para>A new section: <literal>constraint</literal></para>
+    </listitem>
+
+    <listitem>
+      <para>Inequality constraints</para>
+    </listitem>
+  </itemizedlist>
+
+  <section>
+    <title>A new Specialized Class</title>
+
+    <para>A new specialized class, called <literal>optimization</literal>, in
+    which the proposed Optimica-specific constructs are valid is supported by
+    Optimica. This approach is consistent with the Modelica language, since
+    there are already several other specialized classes, e.g.,
+    <literal>record</literal>, <literal>function</literal> and
+    <literal>model</literal>. By introducing a new specialized class, it also
+    becomes straightforward to check the validity of a program, since the
+    Optimica-specific constructs are only valid inside an
+    <literal>optimization</literal> class. The <literal>optimization</literal>
+    class corresponds to an optimization problem, static or dynamic, as
+    specified above. Apart from the Optimica-specific constructs, an
+    <literal>optimization</literal> class can also contain component and
+    variable declarations, local classes, and equations. </para>
+
+    <para>It is not possible to declare components from \texttt{optimization}
+    classes in the current version of Optimica. Rather, the underlying
+    assumption is that an <literal>optimization</literal> class defines an
+    optimization problem, that is solved off-line. An interesting extension
+    would, however, be to allow for <literal>optimization</literal> classes to
+    be instantiated. With this extension, it would be possible to solve
+    optimization problems, on-line, during simulation. A particularly
+    interesting application of this feature is model predictive control, which
+    is a control strategy that involves on-line solution of optimization
+    problems during execution. </para>
+  </section>
 </chapter>
