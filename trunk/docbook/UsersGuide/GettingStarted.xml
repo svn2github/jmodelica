@@ -12,15 +12,15 @@
 
   <para>The examples in JModelica.org uses the Python scientific library
   SciPy, which is dependent on NumPy and the mathematical plotting library
-  matplotlib for plotting. These packages will thus also be used in the
-  example below. Most Python functions have built in documentation, which can
-  be accessed from the Python shell by invoking the help function, for example
-  'help(numpy.size)'. Use this feature frequently to learn more about the
-  packages used in this tutorial, including the jmodelica package. It is
-  possible do the tutorials without any Python knowledge (although it helps to
-  know the basics). In most cases it is convenient to store the Python
-  commands in a script file and run the script from the file by invoking the
-  Python command run:</para>
+  matplotlib for plotting. These packages will thus also be used in some
+  examples in this chapter. Most Python functions have built-in documentation,
+  which can be accessed from the Python shell by invoking the help function,
+  for example <literal>help(numpy.size)</literal>. Use this feature frequently
+  to learn more about the packages used in this tutorial, including the
+  jmodelica package. It is possible do the tutorials without any Python
+  knowledge (although it helps to know the basics). In most cases it is
+  convenient to store the Python commands in a script file and run the script
+  from the file by invoking the Python command run:</para>
 
   <programlisting>&gt;&gt;&gt; run my_script.py</programlisting>
 
@@ -91,16 +91,22 @@ oc.set_string_option('default_msl_version','3.0.1')
         <section>
           <title>Compiling</title>
 
-          <para>A model can now be compiled with the compiler instance using
-          the method <literal>compile_model</literal> which takes a model name
-          and a model file name as arguments.</para>
+          <para>Compile a model, using the previously created compiler
+          instance, with the method <literal>compile_model</literal> which
+          takes a model name and a model file name as arguments. Once
+          compilation has completed successfully a DLL file along with a few
+          other files will have been created on the file system. The DLL file
+          can then be loaded using the class jmi.Model. The result model
+          object is used to interact with the JMI Model interface.
+          <literal>compile_model</literal> does the DLL loading for you and
+          will return with the jmi.Model model object as return
+          argument.</para>
 
-          <programlisting language="python"># Compile the model
-oc.compile_model('CSTR.CSTR_Opt', 'CSTR.mo')</programlisting>
+          <programlisting language="python"># Compile the model and get a jmi.Model as return argument
+cstr_model = oc.compile_model('CSTR.CSTR_Opt', 'CSTR.mo')</programlisting>
 
-          <para>On a successful compilation a C file, some XML files and a
-          shared object file (DLL) will have been generated. If the
-          compilation has failed an exception will be raised.</para>
+          <para>If the compilation has failed an exception will be
+          raised.</para>
         </section>
       </section>
 
@@ -109,12 +115,14 @@ oc.compile_model('CSTR.CSTR_Opt', 'CSTR.mo')</programlisting>
 
         <para>The <literal>compile_model</literal> method takes an optional
         argument target which is '<literal>mode</literal>l' by default. There
-        are two other options for this argument, 'algorithms' and 'ipopt'. It
-        is necessary to compile with target '<literal>ipopt</literal>' to use
-        the Ipopt algorithm interface for optimization.</para>
+        are three other options for this argument,
+        '<literal>model_noad</literal>', '<literal>algorithm</literal>' and
+        '<literal>ipopt</literal>'. It is necessary to compile with target
+        '<literal>ipopt</literal>' to use the Ipopt algorithm interface for
+        optimization.</para>
 
-        <programlisting language="python"># Compile the model with support for Ipopt
-oc.compile_model('CSTR.CSTR_Opt', 'CSTR.mo', target='ipopt')
+        <programlisting language="python"># Compile the model with support for Ipopt and get a jmi.Model as return argument
+cstr_model = oc.compile_model('CSTR.CSTR_Opt', 'CSTR.mo', target='ipopt')
 </programlisting>
       </section>
 
@@ -157,7 +165,7 @@ flat_rep = oc.flatten_model(model_instance)
 oc.generate_code(flat_rep)
 </programlisting>
 
-          <para>There several files are generated in this step.</para>
+          <para>Several files are generated in this step.</para>
         </section>
 
         <section>
@@ -172,25 +180,23 @@ oc.generate_code(flat_rep)
 oc.compile_dll('CSTR_CSTR_Opt', target='ipopt')
 </programlisting>
         </section>
-      </section>
-    </section>
 
-    <section>
-      <title>Loading the Shared Object file (DLL)</title>
+        <section>
+          <title>Loading the Shared Object file (DLL)</title>
 
-      <para>Once compilation has completed successfully a DLL file along with
-      a few other files will have been created on the file system. The DLL
-      file can then be loaded in Python using the class Model from which the
-      JMI Model interface can be reached.</para>
+          <para>The DLL file is loaded using the class Model from which the
+          JMI Model interface can be reached.</para>
 
-      <programlisting># Import Model
+          <programlisting># Import Model
 from jmodelica.jmi import Model
 # Load dll file and create Model object
 model = Model('CSTR_CSTR_Opt')
 </programlisting>
 
-      <para>The model object can now be used to manipulate parameters and for
-      optimization and simulation.</para>
+          <para>The model object can now be used to manipulate parameters and
+          for optimization and simulation.</para>
+        </section>
+      </section>
     </section>
   </section>
 
