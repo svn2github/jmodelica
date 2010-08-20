@@ -27,7 +27,7 @@ from jmodelica.initialization.ipopt import NLPInitialization
 from jmodelica.initialization.ipopt import InitializationOptimizer
 
 try:
-    from jmodelica.simulation.assimulo_problem import JMIDAE, write_data
+    from jmodelica.simulation.assimulo_interface import JMIDAE, write_data
     from assimulo.implicit_ode import IDA
 except:
     warnings.warn('Could not find Assimulo package. Check jmodelica.check_packages()')

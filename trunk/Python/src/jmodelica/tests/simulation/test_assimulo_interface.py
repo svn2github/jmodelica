@@ -31,9 +31,9 @@ from jmodelica.tests import get_files_path
 from jmodelica import simulate
 
 try:
-    from jmodelica.simulation.assimulo_problem import JMIODE, JMIDAE, FMIODE, JMIModel_Exception
-    from jmodelica.simulation.assimulo_problem import write_data
-    from jmodelica.simulation.assimulo_problem import TrajectoryLinearInterpolation
+    from jmodelica.simulation.assimulo_interface import JMIODE, JMIDAE, FMIODE, JMIModel_Exception
+    from jmodelica.simulation.assimulo_interface import write_data
+    from jmodelica.simulation.assimulo_interface import TrajectoryLinearInterpolation
     from assimulo.explicit_ode import CVode
 except NameError, ImportError:
     warnings.warn('Could not load Assimulo module. Check jmodelica.check_packages()')

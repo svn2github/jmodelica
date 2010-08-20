@@ -26,7 +26,7 @@ from jmodelica import jmi
 from jmodelica.compiler import OptimicaCompiler
 
 try:
-    from jmodelica.simulation.assimulo_problem import JMIDAESens
+    from jmodelica.simulation.assimulo_interface import JMIDAESens
     from assimulo.implicit_ode import IDA
 except:
     warnings.warn('Could not find Assimulo package. Check jmodelica.check_packages()')
