@@ -113,11 +113,4 @@ model DepRec1
 
 end DepRec1;
 
-model DepRec2
-
-  R[2] r = {R(3,3),R(4,6)};
-  R[2] r2 = f_r(r);
-
-end DepRec2;
-
 end DepParTests;

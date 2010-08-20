@@ -1375,3 +1375,14 @@ class TestDependentParameterEvaluation8(TZValues):
         cpath = "DepParTests.DepPar8"
         z = [ 2.,  1.,  3.,  0.,  1.,  1.,  0.,  0.,  0.,  1.,  1.,  1.,  0.]
         super(TestDependentParameterEvaluation8,self).__init__(fpath,cpath,z)
+
+class TestDependentParameterEvaluation9(TZValues):
+    """Test evaluation of dependent parameters.
+    """
+
+    def __init__(self):
+        fpath = os.path.join(get_files_path(), 'Modelica', "DepParTests.mo")
+        cpath = "DepParTests.DepRec1"
+        z = [ 3.,  3.,  4.,  6.,  3.,  3.,  4.,  6.,  3.,  3.,  4.,  6.,  0.]
+        super(TestDependentParameterEvaluation9,self).__init__(fpath,cpath,z)
+
