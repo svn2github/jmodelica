@@ -1,5 +1,22 @@
 package DepParTests
 
+model DepPar1
+   //[ 2.,  2.,  1.,  1.,  2.,  2.,  2.,  1.,  1.,  1.,  2.,  2.,  1.,
+   //     0.,  1.,  0.,  0.]
+   parameter Integer i = 1;
+   parameter Integer i2 = 2*i;
+   parameter Real a[N] = ones(N)*i2;
+   parameter Real b[N] = a;
+   parameter Integer N1 = 1;
+   parameter Integer N2 = 1;
+   parameter Integer N = N1+N2;
+   parameter Real r[3] = array((if i<=N then 1. else 2.) for i in 1:3);
+   parameter Boolean b1 = true;
+   parameter Boolean b2 = false;
+   parameter Boolean b3 = b1 or b2;
+   parameter Boolean b4 = b1 and b2;
+end DepPar1;
+
 function f1
   input Real x;
   output Real y;
@@ -76,23 +93,6 @@ model DepPar8
 equation
   der(x) = -x;
 end DepPar8;
-
-model DepPar9
-   //[ 2.,  2.,  1.,  1.,  2.,  2.,  2.,  1.,  1.,  1.,  2.,  2.,  1.,
-   //     0.,  1.,  0.,  0.]
-   parameter Integer i = 1;
-   parameter Integer i2 = 2*i;
-   parameter Real a[N] = ones(N)*i2;
-   parameter Real b[N] = a;
-   parameter Integer N1 = 1;
-   parameter Integer N2 = 1;
-   parameter Integer N = N1+N2;
-   parameter Real r[3] = array((if i<=N then 1. else 2.) for i in 1:3);
-   parameter Boolean b1 = true;
-   parameter Boolean b2 = false;
-   parameter Boolean b3 = b1 or b2;
-   parameter Boolean b4 = b1 and b2;
-end DepPar9;
 
   record R
     Real x;
