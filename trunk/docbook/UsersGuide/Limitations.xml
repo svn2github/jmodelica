@@ -140,6 +140,9 @@
           <para>Options for setting and getting string variables does not
           work.</para>
         </listitem>
+        <listitem>
+          <para>The debug logging does not work properly.</para>
+        </listitem>
       </itemizedlist>
     </listitem>
   </itemizedlist>
