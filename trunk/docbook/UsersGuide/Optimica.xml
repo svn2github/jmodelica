@@ -343,6 +343,7 @@ end DoubleIntegrator; </programlisting>
 
     <programlisting>optimization DIMinTime
   DoubleIntegrator di;
+  input Real u = di.u;
 end DIMinTime; </programlisting>
 
     <para>This class contains only one component representing the dynamic
@@ -389,6 +390,7 @@ end DIMinTime; </programlisting>
     <programlisting>optimization DIMinTime
   DoubleIntegrator di(u(free=true,
                         initialGuess=0.0));
+  input Real u = di.u;
 end DIMinTime; </programlisting>
   </section>
 
@@ -405,5 +407,125 @@ end DIMinTime; </programlisting>
     Modelica, it is not possible to access the value of a variable at a
     particular time instant in a natural way, and a new construct therefore
     has to be introduced.</para>
+
+    <para>All variables in Modelica are functions of time. The variability of
+    variables may be different-some are continuously changing, whereas others
+    can change value only at discrete time instants, and yet others are
+    constant. Nevertheless, the value of a Modelica variable is defined for
+    all time instants within the simulation, or optimization, interval. The
+    time argument of variables are not written explicitly in Modelica,
+    however. One option for enabling access to variable values at specified
+    time instants is therefore to associate an implicitly defined function
+    with a variable declaration. This function can then be invoked by the
+    standard Modelica syntax for function calls, <literal>y(t_i)</literal>.
+    The name of the function is identical to the name of the variable, and it
+    has one argument; the time instant at which the variable is evaluated.
+    This syntax is also very natural since it corresponds precisely to the
+    mathematical notation of a function. Notice that the proposed syntax
+    <literal>y(t_i)</literal> makes the interpretation of such an expression
+    context dependent. In order for this construct to be valid in standard
+    Modelica, <literal>y</literal> must refer to a function declaration. With
+    the proposed extension, <literal>y</literal> may refer either to a
+    function declaration or a variable declaration. A compiler therefore needs
+    to classify an expression <literal>y(t_i)</literal> based on the context,
+    i.e., what function and variable declarations are visible. This feature of
+    Optimica is used in the constraint section of the double integrator
+    example, and is described below. </para>
+  </section>
+
+  <section>
+    <title>Class attributes</title>
+
+    <para>In the optimization formulation above, there are elements that occur
+    only once, i.e., the cost function and the optimization interval. These
+    elements are intrinsic properties of the respective optimization
+    formulations, and should be specified, once, by the user. In this respect
+    the cost function and optimization interval differ from, for example,
+    constraints, since the user may specify zero, one or more of the latter.
+    </para>
+
+    <para>In order to encode these elements, class attributes are introduced.
+    A class attribute is an intrinsic element of a specialized class, and may
+    be modified in a class declaration without the need to explicitly extend
+    from a built-in class. In the Optimica extension, four class attributes
+    are introduced for the specialized class <literal>optimization</literal>.
+    These are <literal>objective</literal>, which defines the cost function,
+    <literal>startTime</literal>, which defines the start of the optimization
+    interval, <literal>finalTime</literal>, which defines the end of the
+    optimization interval, and <literal>static</literal>, which indicates
+    whether the class defines a static or dynamic optimization problem. The
+    proposed syntax for class attributes is shown in the following
+    <literal>optimization</literal> class:</para>
+
+    <programlisting>optimization DIMinTime (
+        objective=finalTime,
+        startTime=0,
+        finalTime(free=true,initialGuess=1))
+ DoubleIntegrator di(u(free=true,
+                       initialGuess=0.0));
+ input Real u = di.u;
+end DIMinTime;</programlisting>
+
+    <para>The default value of the class attribute <literal>static</literal>
+    is <literal>false</literal>, and accordingly, it does not have to be set
+    in this case. In essence, the keyword <literal>extends</literal> and the
+    reference to the built-in class have been eliminated, and the modification
+    construct is instead given directly after the name of the class itself.
+    The class attributes may be accessed and modified in the same way as if
+    they were inherited. </para>
+  </section>
+
+  <section>
+    <title>Constraints</title>
+
+    <para>Constraints are similar to equations, and in fact, a path equality
+    constraint is equivalent to a Modelica equation. But in addition,
+    inequality constraints, as well as point equality and inequality
+    constraints should be supported. It is therefore natural to have a
+    separation between equations and constraints. In Modelica, initial
+    equations, equations, and algorithms are specified in separate sections,
+    within a class body. A reasonable alternative for specifying constraints
+    is therefore to introduce a new kind of section,
+    <literal>constraint</literal>. Constraint sections are only allowed inside
+    an <literal>optimization</literal> class, and may contain equality,
+    inequality as well as point constraints. In the double integrator example,
+    there are several constraints. Apart from the constraints specifying
+    bounds on the control input <emphasis>u</emphasis> and the velocity
+    <emphasis>v</emphasis>, there are also terminal constraints. The latter
+    are conveniently expressed using the mechanism for accessing the value of
+    a variable at a particular time instant;
+    <literal>di.x(finalTime)=1</literal> and
+    <literal>di.v(finalTime)=0</literal>. In addition, bounds may have to be
+    specified for the <literal>finalTime</literal> class attribute. The
+    resulting optimization formulation may now be written:</para>
+
+    <programlisting>optimization DIMinTime (
+    objective=finalTime,
+    startTime=0,
+    finalTime(free=true,initialGuess=1))
+ DoubleIntegrator di(u(free=true,
+                       initialGuess=0.0));
+ input Real u = di.u; 
+constraint
+ finalTime&gt;=0.5;
+ finalTime&lt;=10;
+ di.x(finalTime)=1;
+ di.v(finalTime)=0;
+ di.v&lt;=0.5;
+ di.u&gt;=-1; di.u&lt;=1;
+end DIMinTime;</programlisting>
+
+    <para>The Optimica specification can be translated into executable format
+    and solved by a numerical solver, yielding the result:</para>
+
+    <figure>
+      <title>Optimization result</title>
+
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="images/di_min_time.svg" scalefit="1" width="60%"></imagedata>
+        </imageobject>
+      </mediaobject>
+    </figure>
   </section>
 </chapter>
