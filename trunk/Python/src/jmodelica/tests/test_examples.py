@@ -111,6 +111,12 @@ def test_fmi_bouncing_ball():
     fmi_bouncing_ball.run_demo(False)
 
 @testattr(assimulo = True)
-def test_extfunctions_ball():
+def test_extfunctions():
     """ Test of simulation with external functions. """
     extfunctions.run_demo(False)
+
+@testattr(ipopt = True)
+def test_qt_par_est():
+    """ Run parameter estimation example """
+    qt_par_est.run_demo(False)
+
