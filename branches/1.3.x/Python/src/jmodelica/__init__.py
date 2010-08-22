@@ -20,7 +20,7 @@ __all__ = ['jmi', 'xmlparser', 'compiler','optimization',
            'examples', 'tests','io','initialization','simulation',
            'linearization', 'algorithm_drivers']
 
-__version__=''
+__version__='1.3b1'
 
 import os
 import warnings
