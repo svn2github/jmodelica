@@ -1,0 +1,744 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter version="5.0" xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+  <title>Release notes</title>
+
+  <section>
+    <title>Release notes for JModelica.org version 1.2</title>
+
+    <section>
+      <title>Highlights</title>
+
+      <itemizedlist>
+        <listitem>
+          <para> Vectors and user defined functions are supported by the
+          Modelica and Optimica compilers</para>
+        </listitem>
+
+        <listitem>
+          <para>New Python functions for easy initialization, simulation and
+          optimization</para>
+        </listitem>
+
+        <listitem>
+          <para> A new Python simulation package, Assimulo, has been
+          integrated to provide increased flexibility and performance</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Compilers</title>
+
+      <section>
+        <title>The Modelica compiler</title>
+
+        <section>
+          <title>Arrays</title>
+
+          <para>Arrays are now almost fully supported. This includes all
+          arithmetic operations and use of arrays in all places allowed in the
+          language specification. The only exception is slice operations, that
+          are only supported for the last component in an access.</para>
+        </section>
+
+        <section>
+          <title>Function-like operators</title>
+
+          <para>Most function-like operators are now supported. The following
+          list contains the function-like operators that are *not*
+          supported:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>sign(v)</para>
+            </listitem>
+
+            <listitem>
+              <para>Integer(e)</para>
+            </listitem>
+
+            <listitem>
+              <para>String(...)</para>
+            </listitem>
+
+            <listitem>
+              <para>div(x,y)</para>
+            </listitem>
+
+            <listitem>
+              <para>mod(x,y)</para>
+            </listitem>
+
+            <listitem>
+              <para>rem(x,y)</para>
+            </listitem>
+
+            <listitem>
+              <para>ceil(x)</para>
+            </listitem>
+
+            <listitem>
+              <para>floor(x)</para>
+            </listitem>
+
+            <listitem>
+              <para>integer(x)</para>
+            </listitem>
+
+            <listitem>
+              <para>delay(...)</para>
+            </listitem>
+
+            <listitem>
+              <para>cardinality()</para>
+            </listitem>
+
+            <listitem>
+              <para>semiLinear()</para>
+            </listitem>
+
+            <listitem>
+              <para>Subtask.decouple(v)</para>
+            </listitem>
+
+            <listitem>
+              <para>initial()</para>
+            </listitem>
+
+            <listitem>
+              <para>terminal()</para>
+            </listitem>
+
+            <listitem>
+              <para>smooth(p, expr)</para>
+            </listitem>
+
+            <listitem>
+              <para>sample(start, interval)</para>
+            </listitem>
+
+            <listitem>
+              <para>pre(y)</para>
+            </listitem>
+
+            <listitem>
+              <para>edge(b)</para>
+            </listitem>
+
+            <listitem>
+              <para>reinit(x, expr)</para>
+            </listitem>
+
+            <listitem>
+              <para>scalar(A)</para>
+            </listitem>
+
+            <listitem>
+              <para>vector(A)</para>
+            </listitem>
+
+            <listitem>
+              <para>matrix(A)</para>
+            </listitem>
+
+            <listitem>
+              <para>diagonal(v)</para>
+            </listitem>
+
+            <listitem>
+              <para>product(...)</para>
+            </listitem>
+
+            <listitem>
+              <para>outerProduct(v1, v2)</para>
+            </listitem>
+
+            <listitem>
+              <para>symmetric(A)</para>
+            </listitem>
+
+            <listitem>
+              <para>skew(x)</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+
+        <section>
+          <title>Functions and algorithms</title>
+
+          <para>Both algorithms and pure Modelica functions are supported,
+          with a few exceptions:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>Use of control structures (if, for, etc.) with test or
+              loop expressions with variability that is higher than parameter
+              is not supported when compiling for CppAD.</para>
+            </listitem>
+
+            <listitem>
+              <para>Indexes to arrays of records with variability that is
+              higher than parameter is not supported when compiling for
+              CppAD.</para>
+            </listitem>
+
+            <listitem>
+              <para>Support for inputs to functions with one or more
+              dimensions declared with ":" is only partial.</para>
+            </listitem>
+          </itemizedlist>
+
+          <para>External functions are not supported.</para>
+        </section>
+
+        <section>
+          <title>Miscellaneous</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>Record constructors are now supported.</para>
+            </listitem>
+
+            <listitem>
+              <para> Limited support for constructs generating events. If
+              expressions are supported.</para>
+            </listitem>
+
+            <listitem>
+              <para>The noEvent operator is supported.</para>
+            </listitem>
+
+            <listitem>
+              <para>The error checking has been expanded to cover more
+              errors.</para>
+            </listitem>
+
+            <listitem>
+              <para>Modelica compliance errors are reported for legal but
+              unsupported language constructs.</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+      </section>
+
+      <section>
+        <title>The Optimica Compiler</title>
+
+        <para>All support mentioned for the Modelica compiler applies to the
+        Optimica compiler as well.</para>
+      </section>
+    </section>
+
+    <section>
+      <title>The JModelica.org Model Interface (JMI)</title>
+
+      <section>
+        <title>General</title>
+
+        <section>
+          <title>Automatic scaling based on the <literal>nominal</literal>
+          attribute</title>
+
+          <para>The Modelica attribute <literal>nominal</literal> can be used
+          to scale variables. This is particularly important when solving
+          optimization problems where poorly scaled systems may result in lack
+          of convergence. Automatic scaling is turned off by default since it
+          introduces a slight computational overhead: setting the compiler
+          option <literal>enable_variable_scaling</literal> to
+          <literal>true</literal> enables this feature.</para>
+        </section>
+
+        <section>
+          <title>Support for event indicator functions</title>
+
+          <para>Support for event indicator functions and switching functions
+          are now provided. These features are used by the new simulation
+          package Assimulo to simulate systems with events. Notice that
+          limitations in the compiler front-end applies, see above. </para>
+        </section>
+
+        <section>
+          <title>Integer and boolean parameters</title>
+
+          <para>Support for event indicator functions and switching functions
+          are now provided. These features are used by the new simulation
+          package Assimulo to simulate systems with events. Notice that
+          limitations in the compiler front-end applies, see above. </para>
+        </section>
+
+        <section>
+          <title>Linearization</title>
+
+          <para>A function for linearization of DAE models is provided. The
+          linearized models are computed using automatic differentiation which
+          gives results at machine precision. Also, for index-1 systems,
+          linearized DAEs can be converted into linear ODE form suitable for
+          e.g., control design.</para>
+        </section>
+      </section>
+    </section>
+
+    <section>
+      <title>The collocation optimization algorithm</title>
+
+      <section>
+        <title>Piecewise constant control signals</title>
+
+        <para>In control applications, in particular model predictive control,
+        it is common to assume piecewise constant control variables, sometimes
+        referred to as blocking factors. Blocking factors are now supported by
+        the collocation-based optimization algorithm, see
+        <literal>jmodelica.examples.cstr_mp</literal>c for an example.</para>
+      </section>
+
+      <section>
+        <title>Free initial conditions allowed</title>
+
+        <para>The restriction that all state initial conditions should be
+        fixed has been relaxed in the optimization algorithm. This enables
+        more flexible formulation of optimization problems.</para>
+      </section>
+
+      <section>
+        <title>Dens output of optimization result</title>
+
+        <para>Functions for retrieving the optimization result from the
+        collocation-based algorithm in a dense format are now provided. Two
+        options are available: either a user defined mesh is provided or the
+        result is given for a user defined number of points inside each finite
+        element. Interpolation of the collocation polynomials are used to
+        obtain the dense output.</para>
+      </section>
+    </section>
+
+    <section>
+      <title>New simulation package: Assimulo</title>
+
+      <para>The simulation based on pySundials have been removed and replaced
+      by the Assimulo package which is also using the Sundials solvers. The
+      main difference between the two is that Assimulo is using Cython to
+      connect to Sundials. This has substantially improved the simulation
+      speed. For more info regarding Assimulo and its features, see: <link
+      xlink:href="http://www.jmodelica.org/assimulo">http://www.jmodelica.org/assimulo</link>.
+      </para>
+    </section>
+
+    <section>
+      <title>FMI compliance</title>
+
+      <para>The Functional Mockup Interface (FMI) standard is partially
+      supported. FMI compliant model meta data XML document can be exported,
+      support for the FMI C model execution interface is not yet supported.
+      </para>
+    </section>
+
+    <section>
+      <title>XML model export</title>
+
+      <para>Models are now exported in XML format. The XML documents contain
+      information on the set of variables, the equations, the user defined
+      functions and for the Optimica´s optimization problems definition of the
+      flattened model. Documents can be validated by a schema designed as an
+      extension of the FMI XML schema. </para>
+    </section>
+
+    <section>
+      <title>Python integration</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>The order of the non-named arguments for the ModelicaCompiler
+          and OptimicaCompiler function <literal>compile_model</literal> has
+          changed. In previous versions the arguments came in the order
+          <literal>(model_file_name, model_class_name, target =
+          "model")</literal> and is now <literal>(model_class_name,
+          model_file_name, target = "model")</literal>.</para>
+        </listitem>
+
+        <listitem>
+          <para>The functions <literal>setparameter</literal> and
+          <literal>getparameter</literal> in <literal>jmi.Model</literal> have
+          been removed. Instead the functions <literal>set_value</literal> and
+          get_value (also in <literal>jmi.Model</literal>) should be
+          used.</para>
+        </listitem>
+
+        <listitem>
+          <para>Caching has been implemented in the xmlparser module to
+          improve execution time for working with jmi.Model objects, which
+          should be noticeable for large models.</para>
+        </listitem>
+      </itemizedlist>
+
+      <section>
+        <title>New high-level functions for optimization and
+        simulation</title>
+
+        <para>New high-level functions for problem initialization,
+        optimization and simulation have been added which wrap the compilation
+        of a model, creation of a model object, setup and running of an
+        initialization/optimization/simulation and returning of a result in
+        one function call. For each function there is an algorithm implemented
+        which will be used by default but there is also the possibility to add
+        custom algorithms. All examples in the example package have been
+        updated to use the high-level functions. </para>
+      </section>
+    </section>
+
+    <section>
+      <title>Contributors</title>
+
+      <para>Christian Andersson</para>
+
+      <para>Tove Bergdahl</para>
+
+      <para>Magnus Gäfvert</para>
+
+      <para>Jesper Mattsson</para>
+
+      <para>Philip Nilsson</para>
+
+      <para>Roberto Parrotto</para>
+
+      <para>Philip Reuterswärd</para>
+
+      <para>Johan Åkesson</para>
+
+      <section>
+        <title>Previous contributors</title>
+
+        <para>Jens Rantil</para>
+      </section>
+    </section>
+  </section>
+
+  <section>
+    <title>Release notes for JModelica.org version 1.3</title>
+
+    <section>
+      <title>Highlights</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>Functional Mockup Interface (FMI) simulation support</para>
+        </listitem>
+
+        <listitem>
+          <para>Support for minimum time problems</para>
+        </listitem>
+
+        <listitem>
+          <para>Improved support for redeclare/replaceable in the compiler
+          frontend</para>
+        </listitem>
+
+        <listitem>
+          <para>Limited support for external functions</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Compilers</title>
+
+      <section>
+        <title>The Modelica compiler</title>
+
+        <section>
+          <title>Arrays</title>
+
+          <para>Slice operations are now supported.</para>
+
+          <para>Array support is now nearly complete. The exceptions
+          are:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>Functions with array inputs with sizes declared as ':' -
+              only basic support.</para>
+            </listitem>
+
+            <listitem>
+              <para>A few array-related function-like operators are not
+              supported.</para>
+            </listitem>
+
+            <listitem>
+              <para>Connect clauses does not handle arrays of connectors
+              properly.</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+
+        <section>
+          <title>Redecare</title>
+
+          <para>Redeclares as class elements are now supported.</para>
+        </section>
+
+        <section>
+          <title>Conditional components</title>
+
+          <para>Conditional components are now supported.</para>
+        </section>
+
+        <section>
+          <title>Constants and parameters</title>
+
+          <para>Function calls can now be used as binding expressions for
+          parameters and constants. The handling of Integer, Boolean and
+          record type parameters is also improved. </para>
+        </section>
+
+        <section>
+          <title>External functions</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>Basic support for external functions written in C. </para>
+            </listitem>
+
+            <listitem>
+              <para>Annotations for libraries, includes, library directories
+              and include directories supported.</para>
+            </listitem>
+
+            <listitem>
+              <para>Platform directories supported.</para>
+            </listitem>
+
+            <listitem>
+              <para>Can not be used together with CppAD.</para>
+            </listitem>
+
+            <listitem>
+              <para>Arrays as arguments are not yet supported. Functions in
+              Modelica_utilies are also not supported.</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+
+        <section>
+          <title>Miscellaneous</title>
+
+          <para>The error checking has been improved, eliminating many
+          erroneous error messages for correct Modelica code. </para>
+
+          <para>The memory and time usage for the compiler has been greatly
+          reduced for medium and large models, especially for complex class
+          structures.</para>
+        </section>
+      </section>
+
+      <section>
+        <title>The Optimica compiler</title>
+
+        <para>All support mentioned for the Modelica compiler applies to the
+        Optimica compiler as well. </para>
+
+        <section>
+          <title> New class attribute objectiveIntegrand</title>
+
+          <para>Support for the objectiveIntegrand class attribute. In order
+          to encode Lagrange cost functions of the type</para>
+
+          <informalequation>
+            <m:math display="block">
+              <m:mrow>
+                <m:munderover>
+                  <m:mo>∫</m:mo>
+
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mi>0</m:mi>
+                  </m:msub>
+
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mi>f</m:mi>
+                  </m:msub>
+                </m:munderover>
+
+                <m:mrow>
+                  <m:mrow>
+                    <m:mi>L</m:mi>
+
+                    <m:mo>⁡</m:mo>
+
+                    <m:mfenced>
+                      <m:mi>.</m:mi>
+                    </m:mfenced>
+                  </m:mrow>
+
+                  <m:mspace depth="0.5ex" height="0.5ex" width="1ex" />
+
+                  <m:mtext>dt</m:mtext>
+                </m:mrow>
+              </m:mrow>
+            </m:math>
+          </informalequation>
+
+          <para>the Optimica class attribute
+          <literal>objectiveIntegrand</literal> is supported by the Optimica
+          compiler. The expression <emphasis>L</emphasis> may be utilized by
+          optimization algorithms providing dedicated support for Lagrange
+          cost functions.</para>
+        </section>
+
+        <section>
+          <title>Support for minimum time problems</title>
+
+          <para>Optimization problems with free initial and terminal times can
+          now be solved by setting the free attribute of the class attributes
+          startTime and finalTime to true. The Optimica compiler automatically
+          translates the problem into a fixed horizon problems with free
+          parameters for the start en terminal times, which in turn are used
+          to rescale the time of the problem.</para>
+
+          <para>Using this method, no changes are required to the optimization
+          algorithm, since a fixed horizon problem is solved. </para>
+        </section>
+      </section>
+    </section>
+
+    <section>
+      <title>JModelica.org Model Interface (JMI)</title>
+
+      <section>
+        <title>The collocation optimization algorithm</title>
+
+        <section>
+          <title>Dependent parameters</title>
+
+          <para>Support for free dependent parameters in the collocation
+          optimization algorithm is now implemented. In models containing
+          parameter declarations such as: </para>
+
+          <programlisting>parameter Real p1(free=true);
+parameter Real p2 = p1;</programlisting>
+
+          <para>where the parameter p2 needs to be considered as being free in
+          the optimization problem, with the additional equality
+          constraint:</para>
+
+          <programlisting>p1 = p2</programlisting>
+
+          <para>included in the problem. </para>
+        </section>
+
+        <section>
+          <title>Support for Lagrange cost functions</title>
+
+          <para>The new Optimica class attribute objectiveIntegrand, see
+          above, is supported by the collocation optimization algorithm. The
+          integral cost is approximated by a Radau quadrature formula. </para>
+        </section>
+      </section>
+    </section>
+
+    <section>
+      <title>Assimulo</title>
+
+      <para>Support for simulation of an FMU (see below) using Assimulo.
+      Simulation of an FMU can either be done by using the high-level method
+      *simulate* or creating a model from the FMIModel class together with a
+      problem class, FMIODE which is then passed to CVode. </para>
+    </section>
+
+    <section>
+      <title>FMI compliance</title>
+
+      <para>Improved support for the Functional Mockup Interface (FMI)
+      standard. Support for importing an FMI model, FMU (Functional Mockup
+      Unit). The import consist of loading the FMU into Python and connecting
+      the models C execution interface to Python. Note, strings are not
+      currently supported.</para>
+
+      <para>Imported FMUs can be simulated using the Assimulo package. </para>
+    </section>
+
+    <section>
+      <title>XML model export</title>
+
+      <section>
+        <title><literal>noEvent</literal> operator</title>
+
+        <para>Support for the built-in operator <literal>noEvent</literal> has
+        been implemented.</para>
+      </section>
+
+      <section>
+        <title><literal>static</literal> attribute</title>
+
+        <para>Support for the Optimica attribute static has been implemented.
+        </para>
+      </section>
+    </section>
+
+    <section>
+      <title>Python integration</title>
+
+      <section>
+        <title>High-level functions </title>
+
+        <section>
+          <title>Model files</title>
+
+          <para>Passing more than one model file to high-level functions
+          supported. </para>
+        </section>
+
+        <section>
+          <title>New result object</title>
+
+          <para>A result object is used as return argument for all algorithms.
+          The result object for each algorithm extends the base class
+          <literal>ResultBase</literal> and will therefore (at least) contain:
+          the model object, the result file name, the solver used and the
+          result data object. </para>
+        </section>
+      </section>
+
+      <section>
+        <title>File I/O</title>
+
+        <para>Rewriting xmlparser.py has improved performance when writing
+        simulation result data to file considerably. </para>
+      </section>
+    </section>
+
+    <section>
+      <title>Contributors</title>
+
+      <para>Christian Andersson</para>
+
+      <para>Tove Bergdahl</para>
+
+      <para>Magnus Gäfvert</para>
+
+      <para>Jesper Mattsson</para>
+
+      <para>Roberto Parrotto</para>
+
+      <para>Johan Åkesson</para>
+
+      <para>Philip Reuterswärd</para>
+
+      <section>
+        <title>Previous contributors</title>
+
+        <para>Philip Nilsson</para>
+
+        <para>Jens Rantil</para>
+      </section>
+    </section>
+  </section>
+</chapter>

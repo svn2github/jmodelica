@@ -1,7 +1,10 @@
 This document contains the release notes for JModelica.org 1.3.0.
 
 Highlights:
-
+  - Functional Mockup Interface (FMI) simulation support
+  - Support for minimum time problems
+  - Improved support for redecare/replaceable in the compiler frontend
+  - Limited support for external functions
 
 1. Compilers
 
@@ -32,7 +35,7 @@ is also improved.
 
 1.1.5 External functions
 
- * Basic support for external functions written in c. 
+ * Basic support for external functions written in C. 
  * Annotations for libraries, includes, library directories and include 
    directories supported.
  * Platform directories supported.
@@ -42,7 +45,7 @@ is also improved.
 
 1.1.6 Miscellaneous
 
-The error checking has been improved, eliminating many erroneous error 
+The error checking has been improved, eliminating many erroneous error
 messages for correct Modelica code.
 
 The memory and time usage for the compiler has been greatly reduced for 
@@ -53,7 +56,9 @@ medium and large models, especially for complex class structures.
 All support mentioned for the Modelica compiler applies to the
 Optimica compiler as well.
 
-1.2.1 Support for the objectiveIntegrand class attribute. In order to
+1.2.1 New class attribute objectiveIntegrand
+
+Support for the objectiveIntegrand class attribute. In order to
 encode Lagrange cost functions of the type
 
 \int_{t_0}^{t_f}L(.)dt,
@@ -62,40 +67,43 @@ the Optimica class attribute objectiveIntegrand is supported by the
 Optimica compiler. The expression L may be utilized by optimization
 algorithms providing dedicated support for Lagrange cost functions.
 
-1.2.2 Support for minimum time problems. Optimization problems with
-free initial and terminal times can now be solved by setting the free
-attribute of the class attributes startTime and finalTime to true. The
-Optimica compiler automatically translates the problem into a fixed
-horizon problems with free parameters for the start en terminal times,
-which in turn are used to rescale the time of the problem. 
+1.2.2 Support for minimum time problems. 
+
+Optimization problems with free initial and terminal times can now be
+solved by setting the free attribute of the class attributes startTime
+and finalTime to true. The Optimica compiler automatically translates
+the problem into a fixed horizon problems with free parameters for the
+start en terminal times, which in turn are used to rescale the time of
+the problem.
 
 Using this method, no changes are required to the optimization
 algorithm, since a fixed horizon problem is solved.
 
 2. JModelica.org Model Interface (JMI)
 
-2.1 General
+2.2 The collocation optimization algorithm
 
-2.2 Optimization algorithm
+2.2.1 Dependent parameters
 
-2.2.1 Support for free dependent parameters in the collocation
-optimization algorithm. In models containing parameter declarations
+Support for free dependent parameters in the collocation
+optimization algorithm is now implemented. In models containing parameter declarations
 such as
 
 parameter Real p1(free=true);
 parameter Real p2 = p1;
 
-the parameter p2 needs to be considered as being free in the
+where the parameter p2 needs to be considered as being free in the
 optimization problem, with the additional equality constraint
 
 p2 = p1
 
 included in the problem. 
 
-2.2.2 Support for Lagrange cost functions. The new Optimica class
-attribute objectiveIntegrand, see above, is supported by the
-collocation optimization algorithm. The integral cost is approximated
-by a Radau quadrature formula.
+2.2.2 Support for Lagrange cost functions. 
+
+The new Optimica class attribute objectiveIntegrand, see above, is
+supported by the collocation optimization algorithm. The integral cost
+is approximated by a Radau quadrature formula.
 
 3. Assimulo
 
@@ -111,15 +119,17 @@ Support for importing an FMI model, FMU (Functional Mockup Unit). The
 import consist of loading the FMU into Python and connecting the models
 C execution interface to Python. Note, strings are not currently supported.
 
+Imported FMUs can be simulated using the Assimulo package.
+
 5. XML model export
 
-5.1 noEvent function
+5.1 noEvent operator
 
-Support for the built-in function noEvent.
+Support for the built-in operator noEvent has been implemented.
 
 5.2 static attribute
 
-Support for the Optimica attribute static. 
+Support for the Optimica attribute static has been implemented. 
 
 6. Python integration
 
@@ -136,9 +146,7 @@ result object for each algorithm extends the base class ResultBase and
 will therefore (at least) contain: the model object, the result file name, 
 the solver used and the result data object.
 
-6.2 File I/O:
-
-6.2.1 Write to file
+6.2 File I/O
 
 Rewriting xmlparser.py has improved performance when writing 
 simulation result data to file considerably.

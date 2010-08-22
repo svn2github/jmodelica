@@ -44,6 +44,8 @@
 
   <xi:include href="Limitations.xml" xpointer="element(/1)" />
 
+  <xi:include href="ReleaseNotes.xml" xpointer="element(/1)" />
+
   <bibliography>
     <title>Bibliography</title>
 

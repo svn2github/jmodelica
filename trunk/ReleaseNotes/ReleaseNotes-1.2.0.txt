@@ -75,7 +75,7 @@ External functions are not supported.
 
  * Record constructors are now supported.
  * Limited support for constructs generating events .If expressions 
-   is supported.
+   are supported.
  * The noEvent operator is supported.
  * Integer and boolean parameters
  * The error checking has been expanded to cover more errors.
@@ -105,7 +105,7 @@ computational overhead: setting the compiler option
 Support for event indicator functions and switching functions are now
 provided. These features are used by the new simulation package
 Assimulo to simulate systems with events. Notice that limitations in
-the compiler front-end applies, see above
+the compiler front-end applies, see above.
 
 2.1.3 Integer and boolean parameters 
 
@@ -215,6 +215,9 @@ Roberto Parrotto
 Philip Reuterswärd
 Johan Åkesson
 
+Previous contributors:
+
+Jens Rantil
 
 
 
