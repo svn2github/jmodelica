@@ -28,7 +28,7 @@ def run_demo(with_plots=True):
 
     curr_dir = os.path.dirname(os.path.abspath(__file__));
 
-    model_name = 'VDP_pack.VDP_Opt'
+    model_name = 'VDP_pack.VDP'
     mofile = curr_dir+'/files/VDP.mo'
     
     sim_res = simulate(model_name, mofile, 
@@ -41,9 +41,9 @@ def run_demo(with_plots=True):
     x1=res.get_variable_data('x1')
     x2=res.get_variable_data('x2')
     
-    assert N.abs(x1.x[-1] + 0.736680243) < 1e-5, \
+    assert N.abs(x1.x[-1] + 0.736680243) < 1e-3, \
            "Wrong value in simulation result in VDP_assimulo.py" 
-    assert N.abs(x2.x[-1] - 1.57833994) < 1e-5, \
+    assert N.abs(x2.x[-1] - 1.57833994) < 1e-3, \
            "Wrong value in simulation result in VDP_assimulo.py"
     #assert VDP_sim.stats['Number of F-Eval During Jac-Eval         '] == 0
     

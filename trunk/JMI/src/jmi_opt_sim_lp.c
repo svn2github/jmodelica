@@ -2016,6 +2016,30 @@ int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 
 	(*jmi_opt_sim)->jmi = jmi;
 
+	// Compute elements and taus of time points
+	(*jmi_opt_sim)->tp_e = (int*)calloc(jmi->n_tp,sizeof(int));
+	(*jmi_opt_sim)->tp_tau = (jmi_real_t*)calloc(jmi->n_tp,sizeof(jmi_real_t));
+
+	for (i=0;i<jmi->n_tp;i++) {
+		jmi_real_t ti = 0;
+		for (j=0;j<n_e;j++) {
+			ti += hs[j];
+			//printf("%f %f %f\n", ti, hs[j], jmi->tp[i]);
+			if (jmi->tp[i]<=ti) {
+				(*jmi_opt_sim)->tp_e[i] = j;
+				(*jmi_opt_sim)->tp_tau[i] = (jmi->tp[i] - (ti - hs[j]))/
+				(hs[j]);
+				break;
+			}
+			(*jmi_opt_sim)->tp_e[i] = n_e-1;
+			(*jmi_opt_sim)->tp_tau[i] = 1.0;
+		}
+	}
+/*
+	for (i=0;i<jmi->n_tp;i++) {
+		printf("%d, %d, %f\n",i,(*jmi_opt_sim)->tp_e[i],(*jmi_opt_sim)->tp_tau[i]);
+	}
+*/
 	// Set blocking factors
 	// Normalize blocking factors vector so that sum(blocking_factors(i)) = n_e
 
@@ -2082,26 +2106,6 @@ int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 		opt->offs_tf = opt->offs_h + 1;
 	} else {
 		opt->offs_tf = opt->offs_h;
-	}
-
-	// Compute elements and taus of time points
-	(*jmi_opt_sim)->tp_e = (int*)calloc(jmi->n_tp,sizeof(int));
-	(*jmi_opt_sim)->tp_tau = (jmi_real_t*)calloc(jmi->n_tp,sizeof(jmi_real_t));
-
-	for (i=0;i<jmi->n_tp;i++) {
-		jmi_real_t ti = 0;
-		for (j=0;j<n_e;j++) {
-			ti += hs[j];
-			//printf("%f %f %f\n", ti, hs[j], jmi->tp[i]);
-			if (jmi->tp[i]<=ti) {
-				(*jmi_opt_sim)->tp_e[i] = j;
-				(*jmi_opt_sim)->tp_tau[i] = (jmi->tp[i] - (ti - hs[j]))/
-				(hs[j]);
-				break;
-			}
-			(*jmi_opt_sim)->tp_e[i] = n_e-1;
-			(*jmi_opt_sim)->tp_tau[i] = 1.0;
-		}
 	}
 
 	opt->der_eval_alg = der_eval_alg;

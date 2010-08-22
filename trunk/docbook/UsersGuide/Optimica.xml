@@ -78,6 +78,7 @@
               </m:mrow>
             </m:mrow>
           </m:mtd>
+
           <m:mtd>
             <m:mrow>
               <m:mtext>,</m:mtext>
@@ -101,12 +102,10 @@
               </m:mrow>
             </m:mrow>
           </m:mtd>
-
-
         </m:mlabeledtr>
 
         <m:mlabeledtr>
-  <m:mtd>
+          <m:mtd>
             <m:mrow>
               <m:mover>
                 <m:mrow>
@@ -135,6 +134,7 @@
               </m:mrow>
             </m:mrow>
           </m:mtd>
+
           <m:mtd>
             <m:mrow>
               <m:mtext>,</m:mtext>
@@ -158,8 +158,6 @@
               </m:mrow>
             </m:mrow>
           </m:mtd>
-
-        
         </m:mlabeledtr>
       </m:mtable>
     </m:math>
@@ -349,7 +347,7 @@ end DIMinTime; </programlisting>
 
     <para>This class contains only one component representing the dynamic
     system model, but will be extended in the following to incorporate also
-    the other elements of the optimization problem. </para>
+    the other elements of the optimization problem.</para>
   </section>
 
   <section>
@@ -365,7 +363,7 @@ end DIMinTime; </programlisting>
     that they are indeed optimization variables. For these reasons, a new
     attribute for the built-in type Real, <literal>free</literal>, of boolean
     type is introduced. By default, this attribute is set to
-    <literal>false</literal>. </para>
+    <literal>false</literal>.</para>
 
     <para>Secondly, an attribute, <literal>initialGuess</literal>, is
     introduced to enable the user to provide an initial guess for variables
@@ -385,8 +383,8 @@ end DIMinTime; </programlisting>
     the Optimica compiler. In the double integrator example, the control
     variable <emphasis>u</emphasis> is a free optimization variable, and
     accordingly, the <literal>free</literal> attribute is set to
-    \texttt{true}. Also, the <literal>initialGuess</literal> attribute is set
-    to 0.0. </para>
+    <literal>true</literal>. Also, the <literal>initialGuess</literal>
+    attribute is set to 0.0.</para>
 
     <programlisting>optimization DIMinTime
   DoubleIntegrator di(u(free=true,
@@ -406,6 +404,6 @@ end DIMinTime; </programlisting>
     in the model, evaluated at the time instant t<subscript>i</subscript>. In
     Modelica, it is not possible to access the value of a variable at a
     particular time instant in a natural way, and a new construct therefore
-    has to be introduced. </para>
+    has to be introduced.</para>
   </section>
 </chapter>

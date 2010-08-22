@@ -16,7 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 """The JModelica Model example package."""
-__all__ = ['vdp','VDP_sim','pendulum','vdp_minimum_time','parameter_estimation_1',
+__all__ = ['vdp','vdp_sim','vdp_pp','pendulum','vdp_minimum_time','parameter_estimation_1',
            'cstr','quadtank','quadtank_static_opt','ast_example','RLC','cstr2',
            'distillation','cstr_mpc','simulation_with_input','if_example_1',
            'if_example_2','crane','RLC_linearization','index_reduction_example','blt_example',
