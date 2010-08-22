@@ -1,0 +1,439 @@
+<project name="jmodelica_ide" default="gen" xmlns:a4e="antlib:org.ant4eclipse">
+	
+	<!-- ============ Project names =========== -->
+	<!-- These are really the names of the directories of to the different projects, 
+	     but that is usually the same as the project names. They must either all be 
+	     in the same directory and the build.xml from the org.jmodelica.ide project 
+	     must be used (for editing the plugins in Eclipse), or the build.xml in 
+	     EclipseIDE/org.jmodelica.ide under the root of a complete checkout of 
+	     https://svn.jmodelica.org/trunk must be used (for building from the command 
+	     line). In both cases, the current working directory of ant must be the one 
+	     containing the build.xml file used. To be able to use the test, site or compile 
+	     targets, ant must be given -Declipse_path=<path-to-eclipse-installation> as 
+	     an argument. -->
+	<!-- Project name for the project checked out from 
+	     https://svn.jmodelica.org/trunk -->
+	<property name="trunk.project" value="JModelica" />
+	<!-- Project name for the project checked out from 
+	     https://svn.jmodelica.org/trunk/EclipseIDE/org.jmodelica.ide -->
+	<property name="ide.project" value="org.jmodelica.ide" />
+	<!-- Project name for the project checked out from 
+	     https://svn.jmodelica.org/trunk/EclipseIDE/org.jmodelica.folding -->
+	<property name="folding.project" value="org.jmodelica.folding" />
+	<!-- Project name for the project checked out from 
+	     https://svn.jastadd.org/projects/trunk/JastAddExtensions/org.jastadd.plugin -->
+	<property name="jastadd.project" value="org.jastadd.plugin" />
+	<!-- Project name for the project checked out from 
+	     https://svn.jmodelica.org/trunk/EclipseIDE/org.jmodelica.ide.feature -->
+	<property name="ide.feature.project" value="org.jmodelica.ide.feature" />
+	<!-- Project name for the project checked out from 
+	     https://svn.jmodelica.org/trunk/EclipseIDE/org.jmodelica.folding.feature -->
+	<property name="folding.feature.project" value="org.jmodelica.folding.feature" />
+	<!-- Project name for the project checked out from 
+	     https://svn.jmodelica.org/trunk/EclipseIDE/org.jastadd.plugin.feature -->
+	<property name="jastadd.feature.project" value="org.jastadd.plugin.feature" />
+
+	<condition property="jmodelica_root" value="../.." else="../${trunk.project}">
+		<available file="../../Compiler/ModelicaFrontEnd/src" type="dir" property="" />
+	</condition>
+
+	<property name="beaver_dir" value="${jmodelica_root}/ThirdParty/Beaver/beaver-0.9.6.1/lib" />
+	<property name="jflex_dir" value="${jmodelica_root}/ThirdParty/JFlex/jflex-1.4.3/lib" />
+	<property name="jastadd_dir" value="${jmodelica_root}/ThirdParty/JastAdd" />
+	<property name="junit_dir" value="${jmodelica_root}/ThirdParty/Junit" />
+	<property name="ant-contrib_dir" value="${jmodelica_root}/ThirdParty/Ant-Contrib/ant-contrib-1.0b3" />
+	<property name="options_dir" value="${jmodelica_root}/Options" />
+
+	<property name="lib_dir" value="lib" />
+	<property name="resource_dir" value="resources" />
+	<property name="java_dir" value="java" />
+	<property name="tests_dir" value="tests" />
+	<property name="ant_task_dir" value="ant" />
+	<property name="bin_dir" value="bin" />
+	<property name="output_dir" value="site" />
+
+	<property name="jmodelica_dir" value="${jmodelica_root}/Compiler/ModelicaFrontEnd/src" />
+	<condition property="core_dir" value="../${jastadd.project}" else="${jastadd_dir}/org.jastadd.plugin">
+		<available file="../${jastadd.project}" type="dir" property="" />
+	</condition>
+	<property name="site_dir" value="../site" />
+
+	<property name="core_java_dir" value="${core_dir}/src" />
+	<property name="folding_java_dir" value="../${folding.project}/src" />
+
+
+	<property name="package" value="org.jmodelica" />
+	<property name="ast_package" value="${package}.modelica.compiler" />
+	<property name="package_dir" value="${java_dir}/org/jmodelica" />
+	<!--	
+	<property name="jmodelica_test_framework" value="${jmodelica_dir}/test/test-framework"/>
+	<property name="jmodelica_java" value="${jmodelica_dir}/java"/>
+	-->
+	<property name="scanner_dir" value="flex" />
+
+	<path id="plugin_classpath">
+		<pathelement location="${lib_dir}/beaver-rt.jar" />
+		<pathelement location="${junit_dir}/junit-4.5.jar" />
+		<fileset dir="${eclipse_path}/plugins">
+			<include name="**/*.jar" />
+			<exclude name="**/org.apache.ant*.jar"/>
+		</fileset>
+	</path>
+
+	<property name="parser_output" value="${package_dir}/modelica/parser" />
+	<!--<property name="parser_output" value="${package_dir}/modelica/parser"/>-->
+	<property name="parser_dir" value="${jmodelica_dir}/parser" />
+
+	<property name="ide_aspects" value="aspects" />
+	<property name="ide_core_aspects" value="${core_dir}/src" />
+	<property name="compiler_aspects" value="${jmodelica_dir}/jastadd" />
+
+	<!-- "jflex" is an ant task class for the scanner generator in JFlex.jar -->
+	<!-- "beaver" is an ant task class for the parser generator in beaver.jar -->
+	<!-- "jastadd" is an ant task class in jastadd2.jar -->
+	<taskdef name="jflex" classname="JFlex.anttask.JFlexTask" classpath="${jflex_dir}/JFlex.jar" />
+	<taskdef name="beaver" classname="beaver.comp.run.AntTask" classpath="${beaver_dir}/beaver.jar" />
+	<taskdef name="jastadd" classname="jastadd.JastAddTask" classpath="${jastadd_dir}/jastadd2.jar" />
+
+	<!-- for ant-contrib (foreach, etc) -->
+	<taskdef resource="net/sf/antcontrib/antlib.xml">
+		<classpath>
+			<pathelement location="${ant-contrib_dir}/target/ant-contrib.jar" />
+		</classpath>
+	</taskdef>
+	
+	<macrodef name="jm_getRevision" description="gets the svn revision of the project">
+		<attribute name="path" default="${bin_dir}" />
+		<sequential>
+			<exec>
+			</exec>
+		</sequential>
+	</macrodef>
+
+	<macrodef name="jm_buildPlugin" description="creates jar for a single plug-in project">
+		<attribute name="projectName" />
+		<attribute name="path" default="../@{projectName}" />
+		<attribute name="revPath" default="@{path}" />
+
+		<sequential>
+			<!-- read build.properties -->
+			<property file="@{path}/build.properties" prefix="@{projectName}" />
+
+			<!-- copy binary includes -->
+			<copy todir="${bin_dir}/bundles/@{projectName}">
+				<fileset dir="@{path}" includes="${@{projectName}.bin.includes}">
+					<filename name="." negate="true" />
+				</fileset>
+			</copy>
+			
+			<!-- get svn revision number -->
+			<exec executable="svnversion" outputproperty="jm.@{projectName}.revision">
+				<arg value="-c"/>
+				<arg value="@{revPath}"/>
+			</exec>
+
+			<!-- extract version and id -->
+			<taskdef name="pluginVersion" classname="org.jmodelica.ant.ExtractPluginVersion" classpath="${bin_dir}/classes" />
+			<pluginVersion plugin="@{projectName}" 
+				path="${bin_dir}/bundles/@{projectName}/META-INF/MANIFEST.MF" 
+				datadir="${bin_dir}" revision="${jm.@{projectName}.revision}"/>
+			<property file="${bin_dir}/plugin.properties" prefix="jm" />
+
+			<!-- build jar -->
+			<jar destfile="${bin_dir}/plugins/${jm.@{projectName}.jar}" 
+				basedir="${bin_dir}/bundles/@{projectName}" 
+				manifest="${bin_dir}/bundles/@{projectName}/META-INF/MANIFEST.MF" />
+		</sequential>
+	</macrodef>
+
+	<macrodef name="jm_buildFeature" description="creates jar for a single feature project">
+		<attribute name="projectName" />
+
+		<sequential>
+			<!-- read build.properties -->
+			<property file="../@{projectName}/build.properties" prefix="@{projectName}" />
+
+			<!-- copy binary includes -->
+			<copy todir="${bin_dir}/bundles/@{projectName}">
+				<fileset dir="../@{projectName}" includes="${@{projectName}.bin.includes}">
+					<filename name="." negate="true" />
+				</fileset>
+			</copy>
+
+			<!-- patch the feature.xml -->
+			<taskdef name="patchFeature" classname="org.jmodelica.ant.PatchFeature" classpath="${bin_dir}/classes" />
+			<patchFeature feature="@{projectName}" 
+				path="${bin_dir}/bundles/@{projectName}/feature.xml" 
+				datadir="${bin_dir}" />
+			<property file="${bin_dir}/feature.properties" prefix="jm" />
+			<!-- TODO: automatically set download and installation sizes? -->
+
+			<!-- build jar -->
+			<jar destfile="${bin_dir}/features/${jm.@{projectName}.jar}" 
+				basedir="${bin_dir}/bundles/@{projectName}" />
+		</sequential>
+	</macrodef>
+
+	<macrodef name="jm_buildSite" description="builds the update site">
+		<attribute name="dir" />
+		<attribute name="name" />
+
+		<sequential>
+			<!-- update site.xml -->
+			<taskdef name="patchSite" classname="org.jmodelica.ant.PatchSite" classpath="${bin_dir}/classes" />
+			<patchSite path="@{dir}/site.xml" datadir="${bin_dir}" />
+
+			<!-- build site -->
+			<pathconvert property="launcher">
+				<path id="launcher.path">
+					<fileset dir="${eclipse_path}/plugins">
+						<include name="org.eclipse.equinox.launcher_*.jar" />
+					</fileset>
+				</path>
+			</pathconvert>
+			<java jar="${launcher}" fork="true" timeout="10800000" taskname="p2" failonerror="false" maxmemory="256m">
+				<classpath>
+					<fileset dir="${eclipse_path}/plugins">
+						<include name="org.eclipse.equinox.launcher_*.jar" />
+						<include name="org.eclipse.equinox.p2.metadata.generator_*.jar" />
+					</fileset>
+					<pathelement location="${eclipse_path}/plugins" />
+				</classpath>
+				<arg line=" org.eclipse.equinox.launcher.Main" />
+				<arg line=" -application org.eclipse.equinox.p2.metadata.generator.EclipseGenerator" />
+				<arg line=" -updateSite @{dir}/ -site file:@{dir}/site.xml" />
+				<arg line=" -metadataRepositoryName &quot;@{name} plugins&quot;" />
+				<arg line=" -artifactRepositoryName &quot;@{name} artifacts&quot;" />
+				<arg line=" -inplace -noDefaultIUs -compress" />
+			</java>
+		</sequential>
+	</macrodef>
+
+	<macrodef name="emptyDir" description="creates or empties directory">
+		<attribute name="dir" />
+		<sequential>
+			<delete dir="@{dir}" quiet="true" />
+			<mkdir dir="@{dir}" />
+		</sequential>
+	</macrodef>
+
+	<!-- meta-target for generating scanners -->
+	<target name="genscanner" depends="copy,scanner" />
+
+	<!-- meta-target for generating all java files -->
+	<target name="gen" depends="copy,scanner,parser,ast" />
+
+	<!-- generate compiler ast files -->
+	<!-- create AST node types and weave aspect modules -->
+	<target name="ast">
+		<jastadd package="${ast_package}" license="${ide_aspects}/licence.blurb" beaver="true" rewrite="true" outdir="${java_dir}" NoCacheCycle="false" ComponentCheck="true" visitcheck="false" LazyMaps="true" Deterministic="true" NoStatic="false" Debug="false">
+			<fileset dir="${compiler_aspects}">
+				<include name="**/*.ast" />
+				<include name="**/*.jrag" />
+				<include name="**/*.jadd" />
+			</fileset>
+			<fileset dir="${ide_aspects}">
+				<include name="**/*.ast" />
+				<include name="**/*.jrag" />
+				<include name="**/*.jadd" />
+			</fileset>
+			<fileset dir="${ide_core_aspects}">
+				<include name="**/*.ast" />
+				<include name="**/*.jrag" />
+				<include name="**/*.jadd" />
+			</fileset>
+		</jastadd>
+	</target>
+
+	<!-- Copy required files from JModelica -->
+	<target name="copy">
+		<copy todir="${java_dir}">
+			<fileset dir="${jmodelica_dir}/java">
+				<include name="**/*" />
+			</fileset>
+		</copy>
+		<copy todir="${lib_dir}">
+			<fileset dir="${beaver_dir}">
+				<include name="beaver-rt*" />
+			</fileset>
+		</copy>
+		<copy todir="${resource_dir}">
+			<fileset dir="${options_dir}">
+				<include name="options.xml" />
+			</fileset>
+		</copy>
+	</target>
+
+	<!-- generate the scanners -->
+	<target name="scanner">
+		<mkdir dir="${parser_output}" />
+		<for param="flexfile">
+			<path id="scanners">
+				<fileset dir="${scanner_dir}">
+					<include name="*.flex" />
+				</fileset>
+				<fileset dir="${parser_dir}">
+					<include name="*all.flex" />
+				</fileset>
+			</path>
+			<sequential>
+				<jflex file="@{flexfile}" destdir="${java_dir}" nobak="yes" />
+			</sequential>
+		</for>
+	</target>
+
+	<target name="parser">
+		<mkdir dir="${parser_output}" />
+
+		<!-- concat and generate the scanners -->
+		<concat destfile="${parser_output}/Modelica_all.flex" force="no">
+			<filelist dir="${parser_dir}" files="Modelica_header.flex" />
+			<filelist dir="${parser_dir}" files="Modelica.flex" />
+		</concat>
+		<jflex file="${parser_output}/Modelica_all.flex" outdir="${parser_output}" nobak="yes" />
+
+
+		<!-- Modelica parser -->
+		<!-- generate the parser phase 1, translating .lalr to .beaver -->
+		<concat destfile="${parser_output}/Modelica_all.parser" force="no">
+			<filelist dir="${parser_dir}" files="Modelica_header.parser" />
+			<filelist dir="${parser_dir}" files="Modelica.parser" />
+		</concat>
+
+		<java classpath="${jastadd_dir}/JastAddParser.jar:${beaver_dir}/lib/beaver-rt.jar" classname="Main">
+			<arg line="${parser_output}/Modelica_all.parser ${parser_output}/ModelicaParser_raw.beaver" />
+		</java>
+		<concat destfile="${parser_output}/ModelicaParser.beaver" force="no">
+			<filelist dir="." files="${parser_dir}/beaver.input" />
+			<filelist dir="${parser_output}" files="ModelicaParser_raw.beaver" />
+		</concat>
+		<!-- generate the parser phase 2, translating .beaver to .java -->
+		<beaver file="${parser_output}/ModelicaParser.beaver" terminalNames="yes" compress="no" useSwitch="yes" />
+
+		<!-- generate flat Modelica scanner -->
+		<concat destfile="${parser_output}/FlatModelica_all.flex" force="no">
+			<filelist dir="." files="${parser_dir}/FlatModelica_header.flex" />
+			<filelist dir="${parser_dir}" files="FlatModelica.flex" />
+		</concat>
+		<jflex file="${parser_output}/FlatModelica_all.flex" outdir="${parser_output}" nobak="yes" />
+
+		<!-- clean up intermediate files -->
+		<delete>
+			<fileset dir="${parser_output}">
+				<include name="*.parser" />
+				<include name="*.beaver" />
+			</fileset>
+		</delete>
+	</target>
+
+	<!-- remove generated and copied java files -->
+	<target name="cleanGen" depends="clean">
+		<delete dir="${package_dir}/generated" />
+		<delete dir="${package_dir}/modelica" />
+		<delete dir="${package_dir}/util" />
+		<delete dir="${package_dir}/graph" />
+		<delete file="${lib_dir}/beaver-rt.jar" />
+		<delete file="${lib_dir}/beaver-rt-src.jar" />
+	</target>
+
+	<!-- remove compiled files -->
+	<target name="clean">
+		<delete dir="${bin_dir}" />
+		<delete dir="${output_dir}" />
+	</target>
+
+	<!-- compile files -->
+	<target name="compile" depends="gen">
+		<mkdir dir="${bin_dir}/classes" />
+		<javac compiler="javac1.5" debug="true" destdir="${bin_dir}/classes">
+			<classpath refid="plugin_classpath" />
+			<src path="${java_dir}" />
+			<src path="${ant_task_dir}" />
+			<src path="${tests_dir}" />
+			<src path="${core_java_dir}" />
+			<src path="${folding_java_dir}" />
+			<include name="**/*.java" />
+		</javac>
+	</target>
+
+	<!-- build plugins, features and site -->
+	<target name="site" depends="clean,compile">
+		<!-- collect class files for org.jastadd.plugin -->
+		<copy todir="${bin_dir}/bundles/${jastadd.project}">
+			<fileset dir="${bin_dir}/classes">
+				<include name="org/jastadd/**/*" />
+			</fileset>
+		</copy>
+
+		<!-- collect class files for org.jmodelica.folding -->
+		<copy todir="${bin_dir}/bundles/${folding.project}">
+			<fileset dir="${bin_dir}/classes">
+				<include name="org/jmodelica/folding/**/*" />
+			</fileset>
+		</copy>
+
+		<!-- collect class files for org.jmodelica.ide -->
+		<copy todir="${bin_dir}/bundles/${ide.project}">
+			<fileset dir="${bin_dir}/classes">
+				<include name="org/jmodelica/**/*" />
+				<exclude name="org/jmodelica/folding/**/*" />
+				<exclude name="org/jmodelica/ant/**/*" />
+				<include name="mock/**/*" /> <!-- remove once #774 is done -->
+				<include name="testcases/**/*" /> <!-- remove once #774 is done -->
+			</fileset>
+		</copy>
+
+		<!-- build jars for plugins -->
+		<delete file="${bin_dir}/plugin.versions" quiet="true" />
+		<emptyDir dir="${bin_dir}/plugins" />
+		<jm_buildPlugin projectName="${ide.project}" revpath="${jmodelica_root}" />
+		<jm_buildPlugin projectName="${folding.project}" />
+		<jm_buildPlugin projectName="${jastadd.project}" path="${core_dir}" />
+
+		<!-- build jars for features -->
+		<emptyDir dir="${bin_dir}/features" />
+		<jm_buildFeature projectName="${ide.feature.project}" />
+		<jm_buildFeature projectName="${folding.feature.project}" />
+		<jm_buildFeature projectName="${jastadd.feature.project}" />
+
+		<!-- build update site -->
+		<emptyDir dir="${output_dir}" />
+		<copy todir="${output_dir}">
+			<fileset dir="${bin_dir}">
+				<include name="plugins/**/*"/>
+				<include name="features/**/*"/>
+			</fileset>
+			<fileset file="${site_dir}/site.xml" />
+		</copy>
+		<jm_buildSite dir="${output_dir}" name="JModelica" />
+	</target>
+
+	<!-- run ant tests -->
+	<target name="test" depends="compile">
+		<!-- any class containing "NoTest" in the name is excluded -->
+		<!-- any class whose name starts with "Base" is excluded -->
+		<emptyDir dir="doc/junit-reports" />
+		<junit printsummary="yes" fork="true" maxmemory="512M">
+			<classpath>
+				<fileset dir="${junit_dir}">
+					<include name="junit-4.5.jar" />
+				</fileset>
+				<pathelement path="${bin_dir}/classes" />
+				<path refid="plugin_classpath" />
+			</classpath>
+			<formatter type="xml" />
+
+			<batchtest fork="yes" todir="doc/junit-reports">
+				<fileset dir="${tests_dir}/">
+					<include name="testcases/*.java" />
+					<exclude name="testcases/Base*.java" />
+					<exclude name="testcases/*NoTest*.java" />
+				</fileset>
+			</batchtest>
+		</junit>
+		<junitreport todir="doc/junit-reports">
+			<fileset dir="doc/junit-reports" includes="TEST-*.xml" />
+			<report todir="doc/junit-reports" />
+		</junitreport>
+	</target>
+</project>
