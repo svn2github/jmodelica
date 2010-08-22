@@ -1,0 +1,45 @@
+RUNNING TESTS 
+=================== 
+The Python tests requires the Nose Python testing framework that can
+be downloaded from:
+
+  http://somethingaboutorange.com/mrl/projects/nose/
+  
+(should also be included in most Linux distros as "python-nose")
+
+Run the tests in the tests package with
+
+	nosetests -a stddist
+	
+standing in the 'tests' directory in the jmodelica package. Notice
+that the environment variable JMODELICA_HOME needs to be set. Nose
+then finds all available tests that are related to the standard
+JModelica.org bundle and runs them. For details on how to run specific
+tests, and more, have a look at the Nose website and 'man nosetests'.
+
+If you don't add the '-a stddist' flag packages that are not part of
+the official requirements for JModelica.org might be loaded for
+tests. This might result in import errors if your system does not
+contain those packages.
+
+RUNNING TESTS - FAQ
+===================
+If the test fails and outputs something similar to
+
+  JMIException: libipopt.so.0: cannot open shared object file: No such
+  file or directory
+  
+you are missing the Ipopt shared library in your library path. This
+can be solved in two ways:
+
+ 1) By installing Ipopt on your system (so that library ends up in
+    /usr/local/lib or similar). See Ipopt documentation for this.
+    
+ 2) By setting an environment variable in your shell by invoking
+ 
+      export LD_LIBRARY_PATH=LD_LIBRARY_PATH:/path/to/ipopt_build/lib
+      
+    Unless you put this in your shell's resource file (for example
+    ~/.bashrc) you will need to run this command every time you open up
+    a new shell.
+    

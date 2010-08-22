@@ -1,0 +1,113 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+
+import java.util.Collection;
+import org.jmodelica.util.*;
+
+/**
+ * @author jakesson
+ *
+ */
+public class FlatteningTestCase extends TestCase {
+	private String flatModel = "";
+    private String flatModelFileName = "";
+    private boolean resultOnFile = false;
+    
+    // TODO: Use or remove resultOnFile
+	
+	public FlatteningTestCase() {}
+    
+	/**
+	 * @param name
+	 * @param description
+	 * @param sourceFileName
+	 * @param className
+	 * @param flatModel
+	 * @param flatModelFileName
+	 * @param resultOnFile
+	 */
+	public FlatteningTestCase(String name, 
+			                  String description,
+			                  String sourceFileName, 
+			                  String className, 
+			                  String result,
+			                  boolean resultOnFile) {
+		super(name, description, sourceFileName, className);
+		this.resultOnFile = resultOnFile;		
+		if (!resultOnFile) {
+			this.flatModel = result;
+		} else {
+			this.flatModelFileName = result;
+		}
+		
+	}
+	
+	/**
+	 * \brief Test that the flattened model matches the correct one.
+	 * 
+	 * @return  <code>true</code> if test case shoule stop after this method
+	 */
+	protected boolean testFlattened(FClass fc) {
+		testPrettyPrint(fc, getFlatModel());
+		return true;
+	}
+	
+	/**
+	 * @return the flatModel
+	 */
+	public String getFlatModel() {
+		return flatModel;
+	}
+	/**
+	 * @param flatModel the flatModel to set
+	 */
+	public void setFlatModel(String flatModel) {
+		this.flatModel = flatModel;
+		this.flatModelFileName = "";
+		this.resultOnFile = false;
+	}
+	/**
+	 * @return the flatModelFileName
+	 */
+	public String getFlatModelFileName() {
+		return flatModelFileName;
+	}
+	/**
+	 * @param flatModelFileName the flatModelFileName to set
+	 */
+	public void setFlatModelFileName(String flatModelFileName) {
+		this.flatModelFileName = flatModelFileName;
+		this.flatModel = "";
+		this.resultOnFile = true;
+	}
+	/**
+	 * @return the resultOnFile
+	 */
+	public boolean isResultOnFile() {
+		return resultOnFile;
+	}
+	
+	/**
+	 * @param resultOnFile the resultOnFile to set
+	 */
+	public void setResultOnFile(boolean resultOnFile) {
+		this.resultOnFile = resultOnFile;
+	}
+    
+	
+	
+}

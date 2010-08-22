@@ -1,0 +1,1717 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+import java.util.LinkedHashSet;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.ArrayList;
+import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
+
+aspect FlatAPI {
+	
+	/**
+	 * The value reference value is represented by a 32 bit unsigned integer 
+	 * variable. The lowest 28 bits is used to represent the index of a 
+	 * variable of the corresponding Real, Integer, Boolean and String vector. 
+	 * Bits 29-31 represents the primitive type, where:
+	 * 0: Real
+	 * 1: Integer
+	 * 2: Boolean
+	 * 3: String
+	 * Bit 32 is left unused.
+	 *
+	 */
+	inh lazy int AbstractFVariable.valueReference();
+	eq FClass.getFVariable(int i).valueReference() {
+		int index = 0;
+		index = 0x00000000; 
+		FVariable fv = getFVariable(i);
+		if (independentRealConstants().indexOf(fv) >= 0) {
+			return index + independentRealConstants().indexOf(fv);
+		} 
+		index += numIndependentRealConstants();
+		if (dependentRealConstants().indexOf(fv) >= 0) {
+			return index + dependentRealConstants().indexOf(fv);
+		} 
+		index += numDependentRealConstants();
+		if (independentRealParameters().indexOf(fv) >= 0) {
+			return index + independentRealParameters().indexOf(fv);
+		} 
+		index += numIndependentRealParameters();
+		if (dependentRealParameters().indexOf(fv) >= 0) {
+			return index + dependentRealParameters().indexOf(fv);
+		} 
+		index += numDependentRealParameters();
+		
+		index += 0x10000000; 
+		if (independentIntegerConstants().indexOf(fv) >= 0) {
+			return index + independentIntegerConstants().indexOf(fv);
+		} 
+		index += numIndependentIntegerConstants();
+		if (dependentIntegerConstants().indexOf(fv) >= 0) {
+			return index + dependentIntegerConstants().indexOf(fv);
+		} 
+		index += numDependentIntegerConstants();
+		if (independentIntegerParameters().indexOf(fv) >= 0) {
+			return index + independentIntegerParameters().indexOf(fv);
+		} 
+		index += numIndependentIntegerParameters();
+		if (dependentIntegerParameters().indexOf(fv) >= 0) {
+			return index + dependentIntegerParameters().indexOf(fv);
+		} 
+		index += numDependentIntegerParameters();
+		index -= 0x10000000; 
+		
+		index += 0x20000000; 
+		if (independentBooleanConstants().indexOf(fv) >= 0) {
+			return index + independentBooleanConstants().indexOf(fv);
+		} 
+		index += numIndependentBooleanConstants();
+		if (dependentBooleanConstants().indexOf(fv) >= 0) {
+			return index + dependentBooleanConstants().indexOf(fv);
+		} 
+		index += numDependentBooleanConstants();
+		if (independentBooleanParameters().indexOf(fv) >= 0) {
+			return index + independentBooleanParameters().indexOf(fv);
+		} 
+		index += numIndependentBooleanParameters();
+		if (dependentBooleanParameters().indexOf(fv) >= 0) {
+			return index + dependentBooleanParameters().indexOf(fv);
+		} 
+		index += numDependentBooleanParameters();
+		index -= 0x20000000; 
+		
+		if (derivativeVariables().indexOf(fv) >= 0) {
+			return index + derivativeVariables().indexOf(fv);
+		} 		
+		index += numDerivativeVariables(); 
+		if (differentiatedRealVariables().indexOf(fv) >= 0) {
+			return index + differentiatedRealVariables().indexOf(fv);
+		} 
+		index += numDifferentiatedRealVariables();
+		if (realInputs().indexOf(fv) >= 0) {
+			return index + realInputs().indexOf(fv);
+		} 
+		index += numRealInputs();
+		if (algebraicRealVariables().indexOf(fv) >= 0) {
+			return index + algebraicRealVariables().indexOf(fv);
+		} 
+		index += numAlgebraicRealVariables();
+		if (discreteRealVariables().indexOf(fv) >= 0) {
+			return index + discreteRealVariables().indexOf(fv);
+		} 
+		index += numDiscreteRealVariables(); 
+
+		index += 0x10000000; 
+		if (discreteIntegerVariables().indexOf(fv) >= 0) {
+			return index + discreteIntegerVariables().indexOf(fv);
+		} 
+		index += numDiscreteIntegerVariables();
+		if (integerInputs().indexOf(fv) >= 0) {
+			return index + integerInputs().indexOf(fv);
+		} 
+		index += numIntegerInputs();
+		index -= 0x10000000; 
+		
+		index += 0x20000000; 
+		if (discreteBooleanVariables().indexOf(fv) >= 0) {
+			return index + discreteBooleanVariables().indexOf(fv);
+		} 
+		index += numDiscreteBooleanVariables();
+		if (booleanInputs().indexOf(fv) >= 0) {
+			return index + booleanInputs().indexOf(fv);
+		} 
+		index += numBooleanInputs();
+		index -= 0x20000000;
+		
+		index = 0x30000000; 
+		if (independentStringConstants().indexOf(fv) >= 0) {
+			return index + independentStringConstants().indexOf(fv);
+		} 
+		index += numIndependentStringConstants();
+		if (dependentStringConstants().indexOf(fv) >= 0) {
+			return index + dependentStringConstants().indexOf(fv);
+		} 
+		index += numDependentStringConstants();
+		if (independentStringParameters().indexOf(fv) >= 0) {
+			return index + independentStringParameters().indexOf(fv);
+		} 
+		index += numIndependentStringParameters();
+		if (dependentStringParameters().indexOf(fv) >= 0) {
+			return index + dependentStringParameters().indexOf(fv);
+		} 
+		index += numDependentStringParameters();
+		if (stringInputs().indexOf(fv) >= 0) {
+			return index + stringInputs().indexOf(fv);
+		} 
+		index += numStringInputs();
+		if (discreteStringVariables().indexOf(fv) >= 0) {
+			return index + discreteStringVariables().indexOf(fv);
+		} 
+
+		return index;
+	}
+
+	eq FClass.getAliasVariable(int i).valueReference() {
+		return getAliasVariable(i).aliasValueReference();
+	}
+	
+	eq FClass.getFEquationBlock().valueReference() = -1;
+	eq Root.getChild().valueReference() = -1;
+	
+	syn int FVariable.aliasValueReference() = alias()!=null? 
+		alias().valueReference(): -1;
+		
+	syn boolean FVariable.shouldContribute() = !isAlias() && !inRecord() && !isForIndex();
+
+    syn int FClass.numReals() = reals().size();
+	coll ArrayList<FRealVariable> FClass.reals() 
+	  [new ArrayList<FRealVariable>()] with add root FlatRoot;
+	FRealVariable contributes this when shouldContribute() to FClass.reals() for myFClass();
+//	FDerivativeVariable contributes this to FClass.reals() for myFClass();
+
+    syn int FClass.numIntegers() = integers().size();
+	coll ArrayList<FIntegerVariable> FClass.integers() 
+	  [new ArrayList<FIntegerVariable>()] with add root FlatRoot;
+	FIntegerVariable contributes this when shouldContribute() to FClass.integers() for myFClass();
+
+    syn int FClass.numBooleans() = booleans().size();
+	coll ArrayList<FBooleanVariable> FClass.booleans() 
+	  [new ArrayList<FBooleanVariable>()] with add root FlatRoot;
+	FBooleanVariable contributes this when shouldContribute() to FClass.booleans() for myFClass();
+
+    syn int FClass.numStrings() = strings().size();
+	coll ArrayList<FStringVariable> FClass.strings() 
+	  [new ArrayList<FStringVariable>()] with add root FlatRoot;
+	FStringVariable contributes this when shouldContribute() to FClass.strings() for myFClass();
+
+    syn int FClass.numIndependentConstants() = independentConstants().size();
+	coll ArrayList<FVariable> FClass.independentConstants() 
+	  [new ArrayList<FVariable>()] with add root FlatRoot;
+	FVariable contributes this 
+	  when isIndependentConstant() && shouldContribute() 
+	  to FClass.independentConstants() for myFClass();
+
+	syn int FClass.numIndependentRealConstants() = independentRealConstants().size();
+	syn lazy ArrayList<FRealVariable> FClass.independentRealConstants() {
+      ArrayList<FRealVariable> set = new ArrayList<FRealVariable>();
+      set.addAll(reals());
+      set.retainAll(independentConstants());
+      return set;
+     }
+	syn int FVariable.independentRealConstantIndex() =
+		myFClass().independentRealConstants().indexOf(this);
+	
+	syn int FClass.numIndependentIntegerConstants() = independentIntegerConstants().size();
+	syn lazy ArrayList<FIntegerVariable> FClass.independentIntegerConstants() {
+      ArrayList<FIntegerVariable> set = new ArrayList<FIntegerVariable>();
+      set.addAll(integers());
+      set.retainAll(independentConstants());
+      return set;
+     }
+	syn int FVariable.independentIntegerConstantIndex() =
+		myFClass().independentIntegerConstants().indexOf(this);
+
+	
+	syn int FClass.numIndependentBooleanConstants() = independentBooleanConstants().size();
+	syn lazy ArrayList<FBooleanVariable> FClass.independentBooleanConstants() {
+      ArrayList<FBooleanVariable> set = new ArrayList<FBooleanVariable>();
+      set.addAll(booleans());
+      set.retainAll(independentConstants());
+      return set;
+     }
+	syn int FVariable.independentBooleanConstantIndex() =
+		myFClass().independentBooleanConstants().indexOf(this);
+	
+	syn int FClass.numIndependentStringConstants() = independentStringConstants().size();
+	syn lazy ArrayList<FStringVariable> FClass.independentStringConstants() {
+      ArrayList<FStringVariable> set = new ArrayList<FStringVariable>();
+      set.addAll(strings());
+      set.retainAll(independentConstants());
+      return set;
+     }
+	syn int FVariable.independentStringConstantIndex() =
+		myFClass().independentStringConstants().indexOf(this);
+
+	// TODO: Is there such a thing as a dependent constant??
+    syn int FClass.numDependentConstants() = dependentConstants().size();
+	coll ArrayList<FVariable> FClass.dependentConstants() 
+	  [new ArrayList<FVariable>()] with add root FlatRoot;
+	FVariable contributes
+ 		this when false
+	to FClass.dependentConstants() for myFClass();
+	
+	syn int FClass.numDependentRealConstants() = dependentRealConstants().size();
+	syn lazy ArrayList<FRealVariable> FClass.dependentRealConstants() {
+      ArrayList<FRealVariable> set = new ArrayList<FRealVariable>();
+      set.addAll(reals());
+      set.retainAll(dependentConstants());
+      return set;
+     }
+	syn int FVariable.dependentRealConstantIndex() =
+		myFClass().dependentRealConstants().indexOf(this);
+	
+	syn int FClass.numDependentIntegerConstants() = dependentIntegerConstants().size();
+	syn lazy ArrayList<FIntegerVariable> FClass.dependentIntegerConstants() {
+      ArrayList<FIntegerVariable> set = new ArrayList<FIntegerVariable>();
+      set.addAll(integers());
+      set.retainAll(dependentConstants());
+      return set;
+     }
+	syn int FVariable.dependentIntegerConstantIndex() =
+		myFClass().dependentIntegerConstants().indexOf(this);
+	
+	syn int FClass.numDependentBooleanConstants() = dependentBooleanConstants().size();
+	syn lazy ArrayList<FBooleanVariable> FClass.dependentBooleanConstants() {
+      ArrayList<FBooleanVariable> set = new ArrayList<FBooleanVariable>();
+      set.addAll(booleans());
+      set.retainAll(dependentConstants());
+      return set;
+     }
+	syn int FVariable.dependentBooleanConstantIndex() =
+		myFClass().dependentBooleanConstants().indexOf(this);
+	
+	syn int FClass.numDependentStringConstants() = dependentStringConstants().size();
+	syn lazy ArrayList<FStringVariable> FClass.dependentStringConstants() {
+      ArrayList<FStringVariable> set = new ArrayList<FStringVariable>();
+      set.addAll(strings());
+      set.retainAll(dependentConstants());
+      return set;
+     }
+	syn int FVariable.dependentStringConstantIndex() =
+		myFClass().dependentStringConstants().indexOf(this);
+
+    syn int FClass.numIndependentParameters() = independentParameters().size();
+	coll ArrayList<FVariable> FClass.independentParameters() 
+	  [new ArrayList<FVariable>()] with add root FlatRoot;
+	FVariable contributes
+ 		this when isIndependentParameter() && shouldContribute()
+	to FClass.independentParameters() for myFClass();
+	
+	syn int FClass.numIndependentRealParameters() = independentRealParameters().size();
+	syn lazy ArrayList<FRealVariable> FClass.independentRealParameters() {
+      ArrayList<FRealVariable> set = new ArrayList<FRealVariable>();
+      set.addAll(reals());
+      set.retainAll(independentParameters());
+      return set;
+     }
+	syn int FVariable.independentRealParameterIndex() =
+		myFClass().independentRealParameters().indexOf(this);
+
+	syn int FClass.numIndependentIntegerParameters() = independentIntegerParameters().size();
+	syn lazy ArrayList<FIntegerVariable> FClass.independentIntegerParameters() {
+      ArrayList<FIntegerVariable> set = new ArrayList<FIntegerVariable>();
+      set.addAll(integers());
+      set.retainAll(independentParameters());
+      return set;
+     }
+	syn int FVariable.independentIntegerParameterIndex() =
+		myFClass().independentIntegerParameters().indexOf(this);
+	
+	syn int FClass.numIndependentBooleanParameters() = independentBooleanParameters().size();
+	syn lazy ArrayList<FBooleanVariable> FClass.independentBooleanParameters() {
+      ArrayList<FBooleanVariable> set = new ArrayList<FBooleanVariable>();
+      set.addAll(booleans());
+      set.retainAll(independentParameters());
+      return set;
+     }
+	syn int FVariable.independentBooleanParameterIndex() =
+		myFClass().independentBooleanParameters().indexOf(this);
+
+	syn int FClass.numIndependentStringParameters() = independentStringParameters().size();
+	syn lazy ArrayList<FStringVariable> FClass.independentStringParameters() {
+      ArrayList<FStringVariable> set = new ArrayList<FStringVariable>();
+      set.addAll(strings());
+      set.retainAll(independentParameters());
+      return set;
+     }
+	syn int FVariable.independentStringParameterIndex() =
+		myFClass().independentStringParameters().indexOf(this);
+
+    syn int FClass.numDependentParameters() = dependentParameters().size();
+	coll ArrayList<FVariable> FClass.dependentParameters() 
+	  [new ArrayList<FVariable>()] with add root FlatRoot;
+	FVariable contributes
+ 		this when isDependentParameter() && shouldContribute()
+	to FClass.dependentParameters() for myFClass();
+
+	syn int FClass.numDependentRealParameters() = dependentRealParameters().size();
+	syn lazy ArrayList<FRealVariable> FClass.dependentRealParameters() {
+      ArrayList<FRealVariable> set = new ArrayList<FRealVariable>();
+      set.addAll(reals());
+      set.retainAll(dependentParameters());
+      return set;
+     }
+	syn int FVariable.dependentRealParameterIndex() =
+		myFClass().dependentRealParameters().indexOf(this);
+
+	syn int FClass.numDependentIntegerParameters() = dependentIntegerParameters().size();
+	syn lazy ArrayList<FIntegerVariable> FClass.dependentIntegerParameters() {
+      ArrayList<FIntegerVariable> set = new ArrayList<FIntegerVariable>();
+      set.addAll(integers());
+      set.retainAll(dependentParameters());
+      return set;
+     }
+	syn int FVariable.dependentIntegerParameterIndex() =
+		myFClass().dependentIntegerParameters().indexOf(this);
+	
+	syn int FClass.numDependentBooleanParameters() = dependentBooleanParameters().size();
+	syn lazy ArrayList<FBooleanVariable> FClass.dependentBooleanParameters() {
+      ArrayList<FBooleanVariable> set = new ArrayList<FBooleanVariable>();
+      set.addAll(booleans());
+      set.retainAll(dependentParameters());
+      return set;
+     }
+	syn int FVariable.dependentBooleanParameterIndex() =
+		myFClass().dependentBooleanParameters().indexOf(this);
+	
+	syn int FClass.numDependentStringParameters() = dependentStringParameters().size();
+	syn lazy ArrayList<FStringVariable> FClass.dependentStringParameters() {
+      ArrayList<FStringVariable> set = new ArrayList<FStringVariable>();
+      set.addAll(strings());
+      set.retainAll(dependentParameters());
+      return set;
+     }
+	syn int FVariable.dependentStringParameterIndex() =
+		myFClass().dependentStringParameters().indexOf(this);
+
+	syn int FClass.numDiscreteRealVariables() = discreteRealVariables().size();
+	syn lazy ArrayList<FRealVariable> FClass.discreteRealVariables() {
+      ArrayList<FRealVariable> set = new ArrayList<FRealVariable>();
+      set.addAll(reals());
+      set.retainAll(discreteVariables());
+      return set;
+     }
+	syn int FVariable.discreteRealVariableIndex() =
+		myFClass().discreteRealVariables().indexOf(this);
+
+	syn int FClass.numDiscreteIntegerVariables() = discreteIntegerVariables().size();
+	syn lazy ArrayList<FIntegerVariable> FClass.discreteIntegerVariables() {
+      ArrayList<FIntegerVariable> set = new ArrayList<FIntegerVariable>();
+      set.addAll(integers());
+      set.retainAll(discreteVariables());
+      return set;
+     }
+	syn int FVariable.discreteIntegerVariableIndex() =
+		myFClass().discreteIntegerVariables().indexOf(this);
+
+	syn int FClass.numDiscreteBooleanVariables() = discreteBooleanVariables().size();
+	syn lazy ArrayList<FBooleanVariable> FClass.discreteBooleanVariables() {
+      ArrayList<FBooleanVariable> set = new ArrayList<FBooleanVariable>();
+      set.addAll(booleans());
+      set.retainAll(discreteVariables());
+      return set;
+     }
+	syn int FVariable.discreteBooleanVariableIndex() =
+		myFClass().discreteBooleanVariables().indexOf(this);
+
+	syn int FClass.numDiscreteStringVariables() = discreteStringVariables().size();
+	syn lazy ArrayList<FStringVariable> FClass.discreteStringVariables() {
+      ArrayList<FStringVariable> set = new ArrayList<FStringVariable>();
+      set.addAll(strings());
+      set.retainAll(discreteVariables());
+      return set;
+     }
+	syn int FVariable.discreteStringVariableIndex() =
+		myFClass().discreteStringVariables().indexOf(this);
+	
+	
+    syn int FClass.numDifferentiatedRealVariables() = differentiatedRealVariables().size();
+  	syn lazy ArrayList<FVariable> FClass.differentiatedRealVariables() {
+  		ArrayList<FVariable> l = new ArrayList<FVariable>();
+  		for (FVariable fv : differentiatedRealVariablesSet()) {
+  			l.add(fv);
+  		}
+  		return l;
+  	}
+  	// The LinkedHashSet is used here to avoid duplicates.
+	coll LinkedHashSet<FVariable> FClass.differentiatedRealVariablesSet() 
+	  [new LinkedHashSet<FVariable>()] with add root FlatRoot;
+	FDerExp contributes
+ 		(FVariable)getFIdUse().myFV() when !getFIdUse().myFV().isUnknown()
+	to FClass.differentiatedRealVariablesSet() for myFClass();
+	syn int FVariable.differentiatedRealVariableIndex() =
+		myFClass().differentiatedRealVariables().indexOf(this);
+
+    syn int FClass.numDerivativeVariables() = derivativeVariables().size();
+	coll ArrayList<FDerivativeVariable> FClass.derivativeVariables() 
+	  [new ArrayList<FDerivativeVariable>()] with add root FlatRoot;
+	FDerivativeVariable contributes
+		this when shouldContribute()
+	to FClass.derivativeVariables() for myFClass();
+	syn int FVariable.derivativeVariableIndex() =
+		myFClass().derivativeVariables().indexOf(this);
+	
+    syn int FClass.numVariables() = variables().size();
+	coll ArrayList<FVariable> FClass.variables() 
+	  [new ArrayList<FVariable>()] with add root FlatRoot;
+	FVariable contributes
+ 		this when !isParameter() && !isConstant() && shouldContribute()
+	to FClass.variables() for myFClass();
+
+    syn int FClass.numDiscreteVariables() = discreteVariables().size();
+	coll ArrayList<FVariable> FClass.discreteVariables() 
+	  [new ArrayList<FVariable>()] with add root FlatRoot;
+	FRealVariable contributes
+		this when isDiscrete() && !isInput() && shouldContribute()
+	to FClass.discreteVariables() for myFClass();	
+	FIntegerVariable contributes
+		this when !isParameter() && !isInput() && !isConstant() && shouldContribute()
+	to FClass.discreteVariables() for myFClass();	
+	FBooleanVariable contributes
+		this when !isParameter() && !isInput() && !isConstant() && shouldContribute()
+	to FClass.discreteVariables() for myFClass();	
+	FStringVariable contributes
+		this when !isParameter() && !isInput() && !isConstant() && shouldContribute()
+	to FClass.discreteVariables() for myFClass();	
+	
+    syn int FClass.numAliasVariables() = aliasVariables().size();
+	coll ArrayList<FVariable> FClass.aliasVariables() 
+	  [new ArrayList<FVariable>()] with add root FlatRoot;
+	FVariable contributes
+ 		this when  !isParameter() && !isConstant() && isAlias()
+	to FClass.aliasVariables() for myFClass();
+
+    syn int FClass.numAllVariables() = allVariables().size();
+	syn lazy ArrayList<FVariable> FClass.allVariables() {
+	      ArrayList<FVariable> set = new ArrayList<FVariable>();
+	      for (FVariable fv : getFVariables()) {
+                  set.add(fv);
+              }
+	      for (FVariable fv : getAliasVariables()) {
+                  set.add(fv);
+              }
+	      return set;
+	}
+	
+	syn int FClass.numRealVariables() = realVariables().size();
+	syn lazy ArrayList<FRealVariable> FClass.realVariables() {
+      ArrayList<FRealVariable> set = new ArrayList<FRealVariable>();
+      set.addAll(reals());
+      set.retainAll(variables());
+      return set;
+     }
+
+	syn int FClass.numIntegerVariables() = integerVariables().size();
+	syn lazy ArrayList<FIntegerVariable> FClass.integerVariables() {
+      ArrayList<FIntegerVariable> set = new ArrayList<FIntegerVariable>();
+      set.addAll(integers());
+      set.retainAll(variables());
+      return set;
+     }
+
+	syn int FClass.numBooleanVariables() = booleanVariables().size();
+	syn lazy ArrayList<FBooleanVariable> FClass.booleanVariables() {
+      ArrayList<FBooleanVariable> set = new ArrayList<FBooleanVariable>();
+      set.addAll(booleans());
+      set.retainAll(variables());
+      return set;
+     }
+
+	syn int FClass.numStringVariables() = stringVariables().size();
+	syn lazy ArrayList<FStringVariable> FClass.stringVariables() {
+      ArrayList<FStringVariable> set = new ArrayList<FStringVariable>();
+      set.addAll(strings());
+      set.retainAll(variables());
+      return set;
+     }
+	
+    syn int FClass.numAlgebraicRealVariables() = algebraicRealVariables().size();
+	syn lazy ArrayList<FVariable> FClass.algebraicRealVariables() { 
+	  ArrayList<FVariable> set = new ArrayList<FVariable>();
+  	  set.addAll(reals());
+  	  set.retainAll(variables());
+  	  set.removeAll(differentiatedRealVariables());
+  	  set.removeAll(derivativeVariables());
+  	  set.removeAll(discreteVariables());
+  	  set.removeAll(inputs());
+      return set;
+	}
+	syn int FVariable.algebraicRealVariableIndex() =
+		myFClass().algebraicRealVariables().indexOf(this);
+
+	/*
+    syn int FClass.numAlgebraicRealVariables() = algebraicRealVariables().size();
+	syn lazy ArrayList<FVariable> FClass.algebraicRealVariables() { 
+	  ArrayList<FVariable> set = new ArrayList<FVariable>();
+	  set.addAll(algebraicVariables());
+	  set.retainAll(reals());
+	  set.removeAll(discreteVariables());
+      return set;
+	}
+	*/
+	
+	/*
+    syn int FClass.numAlgebraicIntegerVariables() = algebraicIntegerVariables().size();
+	syn lazy ArrayList<FVariable> FClass.algebraicIntegerVariables() { 
+	  ArrayList<FVariable> set = new ArrayList<FVariable>();
+	    set.addAll(algebraicVariables());
+	    set.retainAll(integers());
+      return set;
+	}
+	syn int FVariable.algebraicIntegerVariableIndex() =
+		myFClass().algebraicIntegerVariables().indexOf(this);
+	
+    syn int FClass.numAlgebraicBooleanVariables() = algebraicBooleanVariables().size();
+	syn lazy ArrayList<FVariable> FClass.algebraicBooleanVariables() { 
+	  ArrayList<FVariable> set = new ArrayList<FVariable>();
+	    set.addAll(algebraicVariables());
+	    set.retainAll(booleans());
+      return set;
+	}
+	syn int FVariable.algebraicBooleanVariableIndex() =
+		myFClass().algebraicBooleanVariables().indexOf(this);
+
+    syn int FClass.numAlgebraicStringVariables() = algebraicStringVariables().size();
+	syn lazy ArrayList<FVariable> FClass.algebraicStringVariables() { 
+	  ArrayList<FVariable> set = new ArrayList<FVariable>();
+	    set.addAll(algebraicVariables());
+	    set.retainAll(strings());
+      return set;
+	}
+	syn int FVariable.algebraicStringVariableIndex() =
+		myFClass().algebraicStringVariables().indexOf(this);
+*/
+	
+    syn int FClass.numVariablesWithBindingExp() = variablesWithBindingExp().size();
+	coll ArrayList<FVariable> FClass.variablesWithBindingExp() 
+	  [new ArrayList<FVariable>()] with add root FlatRoot;
+	FVariable contributes
+ 		this when !isParameter() && !isConstant() &&
+ 		  hasBindingExp() && shouldContribute()
+	to FClass.variablesWithBindingExp() for myFClass();
+
+	syn int FClass.numRealVariablesWithBindingExp() = realVariablesWithBindingExp().size();
+	syn lazy ArrayList<FVariable> FClass.realVariablesWithBindingExp() {
+      ArrayList<FVariable> set = new ArrayList<FVariable>();
+      set.addAll(variablesWithBindingExp());
+      set.retainAll(reals());
+      return set;
+     }
+
+	syn int FClass.numIntegerVariablesWithBindingExp() = integerVariablesWithBindingExp().size();
+	syn lazy ArrayList<FVariable> FClass.integerVariablesWithBindingExp() {
+      ArrayList<FVariable> set = new ArrayList<FVariable>();
+      set.addAll(variablesWithBindingExp());
+      set.retainAll(integers());
+      return set;
+     }
+
+	syn int FClass.numBooleanVariablesWithBindingExp() = booleanVariablesWithBindingExp().size();
+	syn lazy ArrayList<FVariable> FClass.booleanVariablesWithBindingExp() {
+      ArrayList<FVariable> set = new ArrayList<FVariable>();
+      set.addAll(variablesWithBindingExp());
+      set.retainAll(booleans());
+      return set;
+     }
+
+	syn int FClass.numStringVariablesWithBindingExp() = stringVariablesWithBindingExp().size();
+	syn lazy ArrayList<FVariable> FClass.stringVariablesWithBindingExp() {
+      ArrayList<FVariable> set = new ArrayList<FVariable>();
+      set.addAll(variablesWithBindingExp());
+      set.retainAll(strings());
+      return set;
+     }
+     
+    syn int FClass.numInputs() = inputs().size();
+	coll ArrayList<FVariable> FClass.inputs() 
+	  [new ArrayList<FVariable>()] with add root FlatRoot;
+	FVariable contributes
+ 		this when isInput() && shouldContribute()
+	to FClass.inputs() for myFClass();
+
+	syn int FClass.numRealInputs() = realInputs().size();
+	syn lazy ArrayList<FVariable> FClass.realInputs() {
+      ArrayList<FVariable> set = new ArrayList<FVariable>();
+      set.addAll(inputs());
+      set.retainAll(reals());
+      return set;
+     }
+	syn int FVariable.realInputIndex() =
+		myFClass().realInputs().indexOf(this);
+	
+	syn int FClass.numIntegerInputs() = integerInputs().size();
+	syn lazy ArrayList<FVariable> FClass.integerInputs() {
+      ArrayList<FVariable> set = new ArrayList<FVariable>();
+      set.addAll(inputs());
+      set.retainAll(integers());
+      return set;
+     }
+	syn int FVariable.integerInputIndex() =
+		myFClass().integerInputs().indexOf(this);
+
+	syn int FClass.numBooleanInputs() = booleanInputs().size();
+	syn lazy ArrayList<FVariable> FClass.booleanInputs() {
+      ArrayList<FVariable> set = new ArrayList<FVariable>();
+      set.addAll(inputs());
+      set.retainAll(booleans());
+      return set;
+     }
+	syn int FVariable.booleanInputIndex() =
+		myFClass().booleanInputs().indexOf(this);
+
+	syn int FClass.numStringInputs() = stringInputs().size();
+	syn lazy ArrayList<FVariable> FClass.stringInputs() {
+      ArrayList<FVariable> set = new ArrayList<FVariable>();
+      set.addAll(inputs());
+      set.retainAll(strings());
+      return set;
+     }
+	syn int FVariable.stringInputIndex() =
+		myFClass().stringInputs().indexOf(this);
+
+    syn lazy int FClass.numScalarEquations() {
+    	int res = 0;
+    	for (FAbstractEquation e : equations())
+    		res += e.numScalarEquations();
+    	return res;
+    }
+    syn int FClass.numEquations() = equations().size();
+	syn lazy ArrayList<FAbstractEquation> FClass.equations() {
+		ArrayList<FAbstractEquation> l = new ArrayList<FAbstractEquation>();
+		for (FEquationBlock b : getFEquationBlocks()) {
+			for (FAbstractEquation e : b.getFAbstractEquations()) {
+				l.add(e);
+			}
+		}
+		return l;
+	}
+	
+	syn int FAbstractEquation.numScalarEquations() = 1;
+	eq FFunctionCallEquation.numScalarEquations() {
+		 int res = 0;
+		 for (FFunctionCallLeft l : getLefts())
+			 res += l.numScalarVars();
+		 return res;
+	}
+	
+	syn int FClass.numEventIndicators() = numRelExpInEquations();
+	
+    syn int FClass.numRelExpInEquations() = relExpInEquations().size();
+	coll ArrayList<FRelExp> FClass.relExpInEquations() 
+	  [new ArrayList<FRelExp>()] with add root FlatRoot;
+	FRelExp contributes
+    // Only include relational in the equation section which are 
+    // not inside a noEvent operator
+ 		this when inEquationSection() && !inNoEventExp()
+	to FClass.relExpInEquations() for myFClass();	
+		
+	public int FRelExp.relExpInEquationsIndex() {
+		return myFClass().relExpInEquations().indexOf(this);
+	}
+	
+	syn int FClass.numInitialEquations() = initialEquations().size(); 
+    syn lazy int FClass.numInitialScalarEquations() {
+    	int res = 0;
+    	for (FAbstractEquation e : initialEquations())
+    		res += e.numScalarEquations();
+    	return res;
+    }
+	syn lazy ArrayList<FAbstractEquation> FClass.initialEquations() {
+		ArrayList<FAbstractEquation> l = new ArrayList<FAbstractEquation>();
+		for (FAbstractEquation e : getFInitialEquations()) {
+			l.add(e);
+		}
+		return l;
+	}
+
+	syn int FClass.numInitialGuessEquations() {
+		int n_eq = 0;
+		for (FRealVariable fv : realVariables()) {
+			if (!(fv.fixedAttribute())) {
+				n_eq++;
+			}
+		}
+		return n_eq;
+	}
+
+	syn int FClass.numInitialEventIndicators() = numRelExpInInitialEquations();
+    syn int FClass.numRelExpInInitialEquations() = 
+    	relExpInInitialEquations().size();
+	coll ArrayList<FRelExp> FClass.relExpInInitialEquations() 
+	    [new ArrayList<FRelExp>()] with add root FlatRoot;
+	FRelExp contributes
+	    // Only include relational in the initial equation section which are 
+	    // not inside a noEvent operator
+ 		this when inInitialEquationSection() && !inNoEventExp()
+	    to FClass.relExpInInitialEquations() for myFClass();	
+
+	public int FBoolBinExp.relExpInInitialEquationsIndex() {
+		return myFClass().relExpInInitialEquations().indexOf(this);
+	}
+ 
+/*	
+
+	coll ArrayList<FVariable> FClass.structuralParameters() [new ArrayList<FVariable>()] with add root FlatRoot;
+	FIdUseExp contributes
+		(FVariable)myFV() when inArraySubscripts()
+	to FClass.structuralParameters() for myFClass();
+
+	coll ArrayList<FEquation> FVariable.variableIncidence() [new ArrayList<FEquation>()] with add root FlatRoot;
+    FIdUseExp contributes
+		myFEquation() when inFEquation()
+	to FVariable.variableIncidence() for (FVariable)myFV();
+	
+	syn lazy ArrayList<ArrayList> FClass.variableIncidence() {
+		ArrayList<ArrayList> l = new ArrayList<ArrayList>();
+		for (FVariable fv : variables()) {
+           l.add(fv.variableIncidence());
+       } 
+		return l;
+	
+	}
+	
+	*/
+	
+	inh Set<FVariable> FExp.boundParameters();
+	eq FVariable.getBindingExp().boundParameters()       = Collections.singleton(this);
+	eq Root.getChild().boundParameters()                 = Collections.emptySet();
+	eq FEquation.getRight().boundParameters()            = getLeft().referencedParametersInFExp();
+	eq FFunctionCallEquation.getCall().boundParameters() = referencedParametersInLefts();
+	
+	inh boolean FExp.inFEquation();
+	eq FAbstractEquation.getChild().inFEquation()=true;
+	eq Root.getChild().inFEquation()=false;
+	
+	inh FAbstractEquation FExp.myFEquation();
+	eq FAbstractEquation.getChild().myFEquation()=this;
+	eq Root.getChild().myFEquation()=null;
+	
+	inh FClass AbstractFVariable.myFClass();
+	inh FClass FExp.myFClass();
+	inh FClass FIdUse.myFClass();
+	inh FClass FQName.myFClass();
+	inh FClass FAlgorithmBlock.myFClass();
+	inh lazy FClass FExternalStmt.myFClass();
+	eq FClass.getChild().myFClass() = this;
+	eq Root.getChild().myFClass() = null; 
+
+	syn lazy boolean FVariable.isIndependentConstant() = isConstant();
+	syn lazy boolean FVariable.isDependentConstant() = false;
+	
+	syn lazy boolean FVariable.isDependentParameter() = 
+		isParameter() && !isIndependentParameter();
+	syn lazy boolean FVariable.isIndependentParameter() = 
+		isParameter() && !hasParameterEquation() && 
+		(!hasParamValueExp() || paramValueExp().isIndependentParameterExp());
+
+	syn boolean FExp.isIndependentParameterExp() = isConstantExp() && !hasCompositeFunc();
+	
+    /**
+     * \brief Check if tree contains a function call returning an array or a record.
+     */
+	syn boolean ASTNode.hasCompositeFunc() {
+		for (ASTNode n : this)
+			if (n.hasCompositeFunc())
+				return true;
+		return false;
+	}
+	eq InstFunctionCall.hasCompositeFunc() = 
+		type().isArray() || type().isRecord() || super.hasCompositeFunc();
+	eq FFunctionCall.hasCompositeFunc()    = 
+		type().isArray() || type().isRecord() || super.hasCompositeFunc();
+	
+	syn boolean FVariable.hasParamValueExp() = hasBindingExp() || startAttributeSet();
+	syn FExp FVariable.paramValueExp() = hasBindingExp() ? getBindingExp() : startAttributeExp();
+	
+	syn boolean FVariable.isVariable() = !isParameter() && !isConstant();
+	syn lazy boolean FVariable.isDifferentiatedVariable() = 
+	  myFClass().differentiatedRealVariables().contains(this);
+	syn lazy boolean FVariable.isDerivativeVariable() = false;
+	eq FDerivativeVariable.isDerivativeVariable() = true;
+	syn lazy boolean FVariable.isAlgebraicVariable() = 
+		  myFClass().algebraicRealVariables().contains(this);
+	syn lazy boolean FVariable.isDiscreteVariable() = 
+		  myFClass().discreteVariables().contains(this);
+
+	inh FVariable FExp.inBindingExp();
+	eq FVariable.getBindingExp().inBindingExp() = this;
+	eq Root.getChild().inBindingExp() = null; 
+	
+	// TODO: check for uses and change to return set and use findReferencedFVariablesInTree()
+	coll ArrayList<FVariable> FVariable.referencedFVariablesInBindingExp() 
+	  [new ArrayList<FVariable>()] with add root FlatRoot;
+	FIdUseExp contributes
+		(FVariable)myFV() when !myFV().isUnknown()
+	to FVariable.referencedFVariablesInBindingExp() for inBindingExp();
+	
+	public static Set<FVariable> ASTNode.parametersInSet(Set<? extends AbstractFVariable> set) {
+		Set<FVariable> res = new HashSet<FVariable>();
+		for (AbstractFVariable fv : set)
+			if (fv instanceof FVariable && ((FVariable) fv).isParameter())
+				res.add((FVariable) fv);
+		return res;
+	}
+	
+	public Set<FVariable> FFunctionCallEquation.referencedParametersInLefts() {
+		Set<AbstractFVariable> res = new HashSet<AbstractFVariable>();
+		getLefts().findReferencedFVariablesInTree(res);
+		return parametersInSet(res);
+	}
+	
+	public Set<FVariable> FExp.referencedParametersInFExp() {
+		return parametersInSet(referencedFVariablesInFExp());
+	}
+	
+	public Set<AbstractFVariable> FExp.referencedFVariablesInFExp() {
+		Set<AbstractFVariable> res = new HashSet<AbstractFVariable>();
+		findReferencedFVariablesInTree(res);
+		return res;
+	}
+	
+	public void ASTNode.findReferencedFVariablesInTree(Set<AbstractFVariable> set) {
+		for (ASTNode n : this)
+			n.findReferencedFVariablesInTree(set);
+	}
+	
+	public void FIdUseExp.findReferencedFVariablesInTree(Set<AbstractFVariable> set) {
+		if (!myFV().isUnknown())
+			set.add(myFV());
+		super.findReferencedFVariablesInTree(set);
+	}
+	
+	public Set<AbstractFVariable> FAbstractEquation.referencedFVariablesInRHS() {
+		return Collections.emptySet();
+	}
+	
+	public Set<AbstractFVariable> FEquation.referencedFVariablesInRHS() {
+		return getRight().referencedFVariablesInFExp();
+	}
+	
+	public Set<AbstractFVariable> FFunctionCallEquation.referencedFVariablesInRHS() {
+		return getCall().referencedFVariablesInFExp();
+	}
+	
+}
+
+aspect FlatCausality {
+
+	syn boolean FTypePrefixInputOutput.inputCausality() = false;
+	eq FInput.inputCausality() = true;	
+	syn boolean FTypePrefixInputOutput.outputCausality() = false;
+	eq FOutput.outputCausality() = true;	
+	
+    syn boolean FVariable.isInput() = 
+      hasFTypePrefixInputOutput()? getFTypePrefixInputOutput().inputCausality(): false;    
+    syn boolean FVariable.isOutput() = 
+      hasFTypePrefixInputOutput()? getFTypePrefixInputOutput().outputCausality(): false;
+
+}
+
+aspect FlatTypes {
+
+	syn boolean AbstractFVariable.isReal()    = type().isReal();
+	syn boolean AbstractFVariable.isInteger() = type().isInteger();
+	syn boolean AbstractFVariable.isBoolean() = type().isBoolean();
+	syn boolean AbstractFVariable.isString()  = type().isString();
+	syn boolean AbstractFVariable.isRecord()  = type().isRecord();
+	
+	syn boolean FExp.isComposite()              = isArray() || type().isRecord();
+	syn boolean FType.isComposite()             = isArray() || isRecord();
+	syn boolean AbstractFVariable.isComposite() = isArray() || isRecord();
+	
+	inh boolean AbstractFVariable.inRecord();
+	eq FRecordDecl.getChild().inRecord() = true;
+	eq FClass.getChild().inRecord()      = false;
+	eq FForIndex.getChild().inRecord()   = false;
+	
+	inh boolean InstComponentDecl.inRecord();
+	eq InstNode.getInstComponentDecl().inRecord()               = false;
+	eq InstForIndex.getInstPrimitive().inRecord()               = false;
+	eq InstRecord.getInstComponentDecl().inRecord()             = true;
+	eq InstArrayComponentDecl.getInstComponentDecl().inRecord() = inRecord();
+	
+	syn int FRecordDecl.indexOf(String name) {
+		for (int i = 0; i < getNumFVariable(); i++)
+			if (getFVariable(i).name().equals(name))
+				return i;
+		return -1;
+	}
+}
+
+/**
+ * \brief Evaluation of attriubtes for primitive types.
+ */
+aspect Attributes {
+	
+	eq FAttribute.matches(String str) = getName().name().equals(str);
+	
+	syn lazy FAttribute FVariable.findAttribute(String name) = findMatching(getFAttributes(), name);
+	syn boolean FVariable.attributeSet(FAttribute a)   = (a != null) ? a.getAttributeSet() : false;
+	syn FExp    FVariable.attributeExp(FAttribute a)   = (a != null && a.hasValue()) ? a.getValue() : null;
+	syn boolean FVariable.attributeSet(String name)    = attributeSet(findAttribute(name));
+	syn FExp    FVariable.attributeExp(String name)    = attributeExp(findAttribute(name));
+	syn String  FVariable.attributeString(String name) = attributeCValueString(name).stringValue();
+	
+	syn CValue FVariable.attributeCValueString(String name) {
+		FAttribute a = findAttribute(name);
+		return attributeSet(a) ? attributeExp(a).ceval() : new CValueString("");
+	}
+	syn CValue FVariable.attributeCValueBoolean(String name, boolean def) {
+		FAttribute a = findAttribute(name);
+		return attributeSet(a) ? attributeExp(a).ceval() : new CValueBoolean(def);
+	}
+	syn CValue FVariable.attributeCValueReal(String name, double def) {
+		FAttribute a = findAttribute(name);
+		return attributeSet(a) ? attributeExp(a).ceval() : new CValueReal(def);
+	}
+	syn CValue FVariable.attributeCValueInteger(String name, int def) {
+		FAttribute a = findAttribute(name);
+		return attributeSet(a) ? attributeExp(a).ceval() : new CValueInteger(def);
+	}
+
+	// Quantity attribute
+	syn boolean FVariable.quantityAttributeSet()    = attributeSet("quantity");
+	syn FExp    FVariable.quantityAttributeExp()    = attributeExp("quantity");
+	syn CValue  FVariable.quantityAttributeCValue() = attributeCValueString("quantity");
+	syn String  FVariable.quantityAttribute()       = quantityAttributeCValue().stringValue();
+
+	// Unit attribute
+	syn boolean FVariable.unitAttributeSet()    = attributeSet("unit");
+	syn FExp    FVariable.unitAttributeExp()    = attributeExp("unit");
+	syn CValue  FVariable.unitAttributeCValue() = attributeCValueString("unit");
+	syn String  FVariable.unitAttribute()       = unitAttributeCValue().stringValue();
+
+	// Display Unit attribute
+	syn boolean FVariable.displayUnitAttributeSet()    = attributeSet("displayUnit");
+	syn FExp    FVariable.displayUnitAttributeExp()    = attributeExp("displayUnit");
+	syn CValue  FVariable.displayUnitAttributeCValue() = attributeCValueString("displayUnit");
+	syn String  FVariable.displayUnitAttribute()       = displayUnitAttributeCValue().stringValue();
+
+	// min attribute
+	syn boolean FVariable.minAttributeSet()           = attributeSet("min");
+	syn FExp    FVariable.minAttributeExp()           = attributeExp("min");
+	syn CValue  FRealVariable.minAttributeCValue()    = attributeCValueReal("min", -1e20);
+	syn CValue  FIntegerVariable.minAttributeCValue() = attributeCValueInteger("min", (int) -1e10);
+	syn double  FRealVariable.minAttribute()          = minAttributeCValue().realValue();
+	syn int     FIntegerVariable.minAttribute()       = minAttributeCValue().intValue();
+
+	// max attribute
+	syn boolean FVariable.maxAttributeSet()           = attributeSet("max");
+	syn FExp    FVariable.maxAttributeExp()           = attributeExp("max");
+	syn CValue  FRealVariable.maxAttributeCValue()    = attributeCValueReal("max", 1e20);
+	syn CValue  FIntegerVariable.maxAttributeCValue() = attributeCValueInteger("max", (int) 1e10);
+	syn double  FRealVariable.maxAttribute()          = maxAttributeCValue().realValue();
+	syn int     FIntegerVariable.maxAttribute()       = maxAttributeCValue().intValue();
+
+	// start attribute
+	// TODO: What about independent parameters?
+	syn boolean FVariable.useBindingExpAsStart()  = 
+		(isDependentParameter() && !startAttributeSet()) || isIndependentConstant();
+	
+	syn boolean FVariable.startAttributeSet()     = attributeSet("start");
+	syn FExp    FVariable.startAttributeExp()     = attributeExp("start");
+	
+	syn CValue FVariable.startAttributeCValue()   = CValue.UNKNOWN;
+	eq FRealVariable.startAttributeCValue()       = attributeCValueReal("start", 0.0);
+	eq FDerivativeVariable.startAttributeCValue() = new CValueReal(0.0);
+	eq FIntegerVariable.startAttributeCValue()    = attributeCValueInteger("start", 0);
+	eq FBooleanVariable.startAttributeCValue()    = attributeCValueBoolean("start", false);
+	eq FStringVariable.startAttributeCValue()     = attributeCValueString("start");
+
+	syn double  FRealVariable.startAttribute()    = startAttributeCValue().realValue();
+	syn int     FIntegerVariable.startAttribute() = startAttributeCValue().intValue();
+	syn boolean FBooleanVariable.startAttribute() = startAttributeCValue().booleanValue();
+	syn String  FStringVariable.startAttribute()  = startAttributeCValue().stringValue();
+
+	// fixed attribute
+	syn boolean FVariable.fixedAttributeSet()           = attributeSet("fixed");
+	syn FExp    FVariable.fixedAttributeExp()           = attributeExp("fixed");
+	syn CValue  FRealVariable.fixedAttributeCValue()    = attributeCValueBoolean("fixed", isParameter() || isConstant());
+	syn CValue  FIntegerVariable.fixedAttributeCValue() = attributeCValueBoolean("fixed", isParameter() || isConstant());
+	syn CValue  FBooleanVariable.fixedAttributeCValue() = attributeCValueBoolean("fixed", isParameter() || isConstant());
+	syn boolean FRealVariable.fixedAttribute()          = fixedAttributeCValue().booleanValue();
+	syn boolean FIntegerVariable.fixedAttribute()       = fixedAttributeCValue().booleanValue();	
+	syn boolean FBooleanVariable.fixedAttribute()       = fixedAttributeCValue().booleanValue();	
+		
+	// Nominal attribute
+	syn boolean FRealVariable.nominalAttributeSet()    = attributeSet("nominal");
+	syn FExp    FRealVariable.nominalAttributeExp()    = attributeExp("nominal");
+	syn CValue  FRealVariable.nominalAttributeCValue() = attributeCValueReal("nominal", 1.0);
+	syn double  FRealVariable.nominalAttribute()       = nominalAttributeCValue().realValue();
+
+	syn boolean FDerivativeVariable.nominalAttributeSet()    = myDifferentiatedVariable().nominalAttributeSet();
+	syn FExp    FDerivativeVariable.nominalAttributeExp()    = myDifferentiatedVariable().nominalAttributeExp();
+	syn CValue  FDerivativeVariable.nominalAttributeCValue() = myDifferentiatedVariable().nominalAttributeCValue();
+				
+}
+
+aspect FVariableUses {
+	
+	/**
+	 * \brief Collection attribute returning all variable uses in expressions.
+	 */
+	coll HashSet<FIdUseExp> AbstractFVariable.uses() [new LinkedHashSet<FIdUseExp>()] 
+		with add root FlatRoot;
+	
+	FIdUseExp contributes this when !(getParent() instanceof FDerExp) to 
+		AbstractFVariable.uses() for myFV();
+
+	/**
+	 * \brief Collection attribute returning all dependent parameters which
+	 * depends on the parameter.
+	 */
+	coll HashSet<FVariable> AbstractFVariable.dependentParameters() 
+	  [new LinkedHashSet<FVariable>()] 
+		with addAll root FlatRoot;
+	
+	FIdUseExp contributes boundParameters() 
+		when !(getParent() instanceof FDerExp) && !myFV().isUnknown() && 
+		     ((FVariable) myFV()).isParameter()
+		to AbstractFVariable.dependentParameters() for myFV();
+	
+	syn lazy ArrayList<FRealVariable> AbstractFVariable.dependentRealParameters() {
+      ArrayList<FRealVariable> set = new ArrayList<FRealVariable>();
+      set.addAll(myFClass().reals());
+      set.retainAll(dependentParameters());
+      return set;
+     }
+
+	syn lazy ArrayList<FIntegerVariable> AbstractFVariable.dependentIntegerParameters() {
+	      ArrayList<FIntegerVariable> set = new ArrayList<FIntegerVariable>();
+	      set.addAll(myFClass().integers());
+	      set.retainAll(dependentParameters());
+	      return set;
+	     }
+
+	syn lazy ArrayList<FBooleanVariable> AbstractFVariable.dependentBooleanParameters() {
+	      ArrayList<FBooleanVariable> set = new ArrayList<FBooleanVariable>();
+	      set.addAll(myFClass().booleans());
+	      set.retainAll(dependentParameters());
+	      return set;
+	     }
+
+	syn lazy ArrayList<FStringVariable> AbstractFVariable.dependentStringParameters() {
+	      ArrayList<FStringVariable> set = new ArrayList<FStringVariable>();
+	      set.addAll(myFClass().strings());
+	      set.retainAll(dependentParameters());
+	      return set;
+	     }
+	
+	/**
+	 * \brief Collection attribute returning all algebraic variables (FVariables)
+	 * referenced in an equation.
+	 */
+	coll LinkedHashSet<FVariable> FAbstractEquation.algebraicVariables() 
+		[new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
+
+	FIdUseExp contributes (FVariable)myFV() when !myFV().isUnknown() && 
+		!(getParent() instanceof FDerExp) && ((FVariable)myFV()).isAlgebraicVariable() to 
+		FAbstractEquation.algebraicVariables() for myFEquation();
+
+	/**
+	 * \brief Collection attribute returning all derivative variables (FDerivativeVariables)
+	 * referenced in an equation.
+	 */
+	coll LinkedHashSet<FDerivativeVariable> FAbstractEquation.derivativeVariables() 
+		[new LinkedHashSet<FDerivativeVariable>()] with add root FAbstractEquation;
+
+	FDerExp contributes (FDerivativeVariable)myFV() when !myFV().isUnknown() && 
+		((FDerivativeVariable)myFV()).isDerivativeVariable() to 
+		FAbstractEquation.derivativeVariables() for myFEquation();
+
+	/**
+	 * \brief Collection attribute returning all differentiated variables (FVariables)
+	 * referenced in an equation.
+	 */
+	coll LinkedHashSet<FVariable> FAbstractEquation.differentiatedVariables() 
+		[new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
+
+	FIdUseExp contributes (FVariable)myFV() when !myFV().isUnknown() && 
+	    !(getParent() instanceof FDerExp) && ((FVariable)myFV()).isDifferentiatedVariable() to 
+		FAbstractEquation.differentiatedVariables() for myFEquation();
+
+	/**
+	 * \brief Collection attribute returning all discrete variables (FVariables)
+	 * referenced in an equation.
+	 */
+	coll LinkedHashSet<FVariable> FAbstractEquation.discreteVariables() 
+		[new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
+
+	FIdUseExp contributes (FVariable)myFV() when !myFV().isUnknown() && 
+	    !(getParent() instanceof FDerExp) && ((FVariable)myFV()).isDiscreteVariable() to 
+		FAbstractEquation.discreteVariables() for myFEquation();
+	
+	/**
+	 * \brief Get the differenetiated variabel (FVariable) corresponding to 
+	 * a derivative variable (FDerivativeVariable)
+	 */
+	syn FRealVariable FDerivativeVariable.myDifferentiatedVariable() =
+		(FRealVariable)myFClass().fullyQualifiedVariablesMap().get(getFQName().name());
+
+	/**
+	 * \brief Get the derivative variabel (FDerivativeVariable) corresponding to 
+	 * a differentiated variable (FVariable)
+	 */
+	syn FDerivativeVariable FVariable.myDerivativeVariable() =
+		(FDerivativeVariable)myFClass().fullyQualifiedVariablesMap().get("der("+name()+")");
+	
+}
+
+aspect LinearFVariables {
+	
+	/**
+	 * \brief Check linearity of variable.
+	 * 
+	 * The attribute isLinear returns true if all uses of the variable appears
+	 * linearly in equations and in initial equations. Parameters and constants
+	 * are assumed to be literals in the linearity computation. Accordingly,
+	 * multiplication of a variable with a parameter or constant does not render
+	 * the variable nonlinear. Also, parameters and constants are considered
+	 * to be linear themselves.
+	 */
+	syn lazy boolean FVariable.isLinear() {
+		if (isParameter() || isConstant()) {
+			return true;
+		}
+		for (FIdUseExp e : uses()) {
+			if (!e.isLinear()) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	/**
+	 * \brief Check if a subexpression appears linearly.
+	 * 
+	 * Note that this method does not check if the expression itself is linear
+	 * but wheather it apperas linearly in a composite expression. For example
+	 * the sub expression 'sin(x)' appears linearly in '1+sin(x)'.
+	 */
+	inh boolean FExp.isLinear();
+	eq FlatRoot.getChild().isLinear() = true;
+	eq SourceRoot.getChild().isLinear() = true;
+	
+	eq FAbstractEquation.getChild().isLinear() = true;
+	
+	eq FMulExp.getLeft().isLinear() =
+		(getRight().isConstantExp() || getRight().isLinearParameterExp())?
+				isLinear() : false;
+	eq FMulExp.getRight().isLinear() =
+		(getLeft().isConstantExp() || getLeft().isLinearParameterExp())?
+				isLinear() : false;
+	eq FDivExp.getLeft().isLinear() =
+		(getRight().isConstantExp() || getRight().isLinearParameterExp())?
+				isLinear() : false;			
+	eq FDivExp.getRight().isLinear() = false;		
+    eq FPowExp.getChild().isLinear() = false;
+    eq FFunctionCall.getChild().isLinear() = false;
+    eq FMathematicalFunctionCall.getChild().isLinear() = false;
+				
+	// This definition is to avoid errors when isParameterExp is redefined
+	// to include free parameters in the Optimica extension.
+	syn boolean FExp.isLinearParameterExp() = 
+		variability().parameterVariability();
+    
+}
+
+aspect FlatDiagnostics {
+
+	syn String FClass.diagnostics() {
+		StringBuilder str = new StringBuilder();
+		str.append("Diagnostics for flattened class " + name() + "\n");
+
+		str.append("Number of independent constants:              " + 
+		  numIndependentConstants() + "\n");
+		str.append("  Number of Real independent constants:       " + 
+		  numIndependentRealConstants() + "\n");
+		str.append("  Number of Integer independent constants:    " + 
+		  numIndependentIntegerConstants() + "\n");
+		str.append("  Number of Boolean independent constants:    " + 
+		  numIndependentBooleanConstants() + "\n");
+		str.append("  Number of String independent constants:     " + 
+		  numIndependentStringConstants() + "\n");
+
+		str.append("Number of dependent constants:                " + 
+		  numDependentConstants() + "\n");
+		str.append("  Number of Real dependent constants:         " + 
+		  numDependentRealConstants() + "\n");
+		str.append("  Number of Integer dependent constants:      " + 
+		  numDependentIntegerConstants() + "\n");
+		str.append("  Number of Boolean dependent constants:      " + 
+		  numDependentBooleanConstants() + "\n");
+		str.append("  Number of String dependent constants:       " + 
+		  numDependentStringConstants() + "\n");
+
+		str.append("Number of independent parameters:             " + 
+		  numIndependentParameters() + "\n");
+		str.append("  Number of Real independent parameters:      " + 
+		  numIndependentRealParameters() + "\n");
+		str.append("  Number of Integer independent parameters:   " + 
+		  numIndependentIntegerParameters() + "\n");
+		str.append("  Number of Boolean independent parameters:   " + 
+		  numIndependentBooleanParameters() + "\n");
+		str.append("  Number of String independent parameters:    " + 
+		  numIndependentStringParameters() + "\n");
+		  		  
+		str.append("Number of dependent parameters:               " + 
+		  numDependentParameters() + "\n");
+		str.append("  Number of Real dependent parameters:        " + 
+		  numDependentRealParameters() + "\n");
+		str.append("  Number of Integer dependent parameters:     " + 
+		  numDependentIntegerParameters() + "\n");
+		str.append("  Number of Boolean dependent parameters:     " + 
+		  numDependentBooleanParameters() + "\n");
+		str.append("  Number of String dependent parameters:      " + 
+		  numDependentStringParameters() + "\n");
+		
+		str.append("Number of variables :                         " + 
+				numVariables() + "\n");
+		str.append("  Number of Real variables:                   " + 
+				numRealVariables() + "\n");
+		str.append("  Number of Integer variables:                " + 
+				numIntegerVariables() + "\n");
+		str.append("  Number of Boolean variables:                " + 
+				numBooleanVariables() + "\n");
+		str.append("  Number of String variables:                 " + 
+				numStringVariables() + "\n");
+
+		str.append("Number of Real differentiated variables:      " + 
+				  numDifferentiatedRealVariables() + "\n"); 
+		str.append("Number of Real derivative variables:          " + 
+				  numDerivativeVariables() + "\n"); 
+		str.append("Number of Real algebraic variables:           " + 
+				  numAlgebraicRealVariables() + "\n");
+
+		str.append("Number of inputs:                             " + 
+		  numInputs() + "\n");
+		str.append("  Number of Real inputs:                      " + 
+		  numRealInputs() + "\n");
+		str.append("  Number of Integer inputs:                   " + 
+		  numIntegerInputs() + "\n");
+		str.append("  Number of Boolean inputs:                   " + 
+		  numBooleanInputs() + "\n");
+		str.append("  Number of String inputs:                    " + 
+		  numStringInputs() + "\n");
+				
+		str.append("Number of discrete variables :                " + 
+				numDiscreteVariables() + "\n");
+		str.append("  Number of Real discrete variables:          " + 
+				numDiscreteRealVariables() + "\n");
+		str.append("  Number of Integer discrete variables:       " + 
+				numDiscreteIntegerVariables() + "\n");
+		str.append("  Number of Boolean discrete variables:       " + 
+				numDiscreteBooleanVariables() + "\n");
+		str.append("  Number of String discrete variables:        " + 
+				numDiscreteStringVariables() + "\n");
+		
+		str.append("Number of equations:                          " + 
+		  numEquations() + "\n");
+		
+		str.append("Number of variables with binding expression:  " + 
+		  numVariablesWithBindingExp() + "\n");
+		str.append("  Number of Real variables with binding exp:  " + 
+		  numRealVariablesWithBindingExp() + "\n");
+		str.append("  Number of Integer variables binding exp:    " + 
+		  numIntegerVariablesWithBindingExp() + "\n");
+		str.append("  Number of Boolean variables binding exp:    " + 
+		  numBooleanVariablesWithBindingExp() + "\n");
+		str.append("  Number of String variables binding exp:     " + 
+		  numStringVariablesWithBindingExp() + "\n");
+			
+		str.append("Total number of equations:                    " + 
+				  (numEquations()+numVariablesWithBindingExp()) + "\n");
+	
+		str.append("Number of initial equations:                  " + 
+		  numInitialEquations() + "\n");
+
+		str.append("Number of relational exps in equations:       " + 
+				  (numRelExpInEquations()) + "\n");
+
+		str.append("Number of relational exps in init equations:  " + 
+				  (numRelExpInInitialEquations()) + "\n");
+		
+		str.append("\n");
+		
+		str.append(variableDiagnostics());
+		
+		str.append("\n");  
+
+		str.append(aliasDiagnostics());
+		
+		str.append("\n");  
+		
+		str.append(incidence());
+
+//		str.append("\n");
+		
+//		str.append(dersAndDiffs());
+		
+		str.append("\n");  
+		
+		str.append(getConnectionSetManager().printConnectionSets());
+		
+		return str.toString();
+	}
+
+	public String FClass.aliasDiagnostics() {
+		StringBuilder str = new StringBuilder();
+		str.append("Alias sets:\n");
+		if (getAliasManager()!=null) {
+			str.append(getAliasManager().printAliasSets());
+			int n_elim = 0;
+			for (LinkedHashSet<AliasVariable> aliasSet : 
+				getAliasManager().getAliasSets()) {
+				n_elim += aliasSet.size() - 1;
+			}
+			str.append(n_elim + " variables can be eliminated\n");
+				
+		} else {
+			str.append("  Alias sets not computed.\n");
+		}
+		return str.toString();	
+		
+	}
+
+	public String FClass.variableDiagnostics() {
+		
+		StringBuilder str = new StringBuilder();
+		
+		str.append("Independent constants: \n");
+		for (FVariable fv : independentConstants()) {
+			str.append(" " + fv.name());
+			str.append(": number of uses: " + fv.uses().size() + ", isLinear: " 
+					+ fv.isLinear());
+				str.append("\n");
+		}
+		str.append("\n");
+		
+		str.append("Dependent constants: \n");
+		for (FVariable fv : dependentConstants()) {
+			str.append(" " + fv.name());
+			str.append(": number of uses: " + fv.uses().size() + ", isLinear: " 
+					+ fv.isLinear());
+				str.append("\n");
+		}
+		str.append("\n");
+		
+		str.append("Independent parameters: \n");
+		for (FVariable fv : independentParameters()) {
+			str.append(" " + fv.name());
+			str.append(": number of uses: " + fv.uses().size() + ", isLinear: " 
+					+ fv.isLinear());
+			if (fv.hasBindingExp()) {
+				str.append(" evaluated binding exp: ");
+				if (fv.isReal()) {
+					str.append(fv.getBindingExp().ceval().realValue());
+				} else if (fv.isInteger()) {
+					str.append(fv.getBindingExp().ceval().intValue());
+				} else if (fv.isBoolean()) {
+					str.append(fv.getBindingExp().ceval().booleanValue());
+				} else if (fv.isString()) {
+					str.append(fv.getBindingExp().ceval().stringValue());
+				}
+			}
+			str.append("\n");
+		}
+		str.append("\n");
+		
+		str.append("Dependent parameters: \n");
+		for (FVariable fv : dependentParameters()) {
+			str.append(" " + fv.name());
+			str.append(": number of uses: " + fv.uses().size() + ", isLinear: " 
+					+ fv.isLinear());
+				str.append("\n");
+		}
+
+		str.append("\n");  
+		str.append("Differentiated variables: \n");
+		for (FVariable fv : differentiatedRealVariables()) {
+			str.append(" " + fv.name());
+			str.append(": number of uses: " + fv.uses().size() + ", isLinear: " 
+					+ fv.isLinear());
+			str.append("\n");
+		}
+
+		str.append("\n");  
+		str.append("Derivative variables: \n");
+		for (FVariable fv : derivativeVariables()) {
+			str.append(" " + fv.name());
+			str.append(": number of uses: " + fv.uses().size() + ", isLinear: " 
+					+ fv.isLinear());
+				str.append("\n");
+		}
+		str.append("\n");  
+
+		str.append("Discrete variables: \n");
+		for (FVariable fv : discreteVariables()) {
+			str.append(" " + fv.name());
+			str.append(": number of uses: " + fv.uses().size() + ", isLinear: " 
+					+ fv.isLinear());
+			str.append(", alias: ");
+			if (!fv.isAlias()) {
+				str.append("no");
+			} else {
+				if (fv.isNegated()) {
+					str.append("-");
+				}
+				str.append(fv.alias().valueReference());
+			}
+			str.append("\n");
+		}
+		str.append("\n");
+		
+		str.append("Algebraic real variables: \n");
+		for (FVariable fv : algebraicRealVariables()) {
+			str.append(" " + fv.name());
+			str.append(": number of uses: " + fv.uses().size() + ", isLinear: " 
+					+ fv.isLinear());
+			str.append(", alias: ");
+			if (!fv.isAlias()) {
+				str.append("no");
+			} else {
+				if (fv.isNegated()) {
+					str.append("-");
+				}
+				str.append(fv.alias().valueReference());
+			}
+			str.append("\n");
+		}
+		str.append("\n");
+		
+		str.append("Input variables: \n");
+		for (FVariable fv : inputs()) {
+			str.append(" " + fv.name());
+			str.append(": number of uses: " + fv.uses().size() + ", isLinear: " 
+					+ fv.isLinear());
+				str.append("\n");
+		}
+
+		return str.toString();
+		
+	}
+
+	public String FClass.incidence() {
+		StringBuilder str = new StringBuilder();
+		
+		LinkedHashSet<FVariable> h;
+		LinkedHashSet<FDerivativeVariable> dh;
+		
+		str.append("Incidence:\n");
+		
+		int i = 0;
+		for (FAbstractEquation fe : equations()) {
+			str.append(" eq " + i + ": ");
+			dh = fe.derivativeVariables();
+			for (FVariable fv : dh) {
+				str.append(fv.name() + " ");
+			}
+			h = fe.algebraicVariables();
+			h.addAll(fe.discreteVariables());
+			for (FVariable fv : h) {
+				str.append(fv.name() + " ");
+			}
+			str.append("\n");
+			i++;
+		}
+		
+		return str.toString();
+		
+	}
+	
+	public String FClass.dersAndDiffs() {
+		StringBuilder str = new StringBuilder();
+		str.append("Derivatives and differentiated variables:\n");
+		for (FDerivativeVariable fdv : derivativeVariables()) {
+			if (fdv.myDifferentiatedVariable()!=null) {
+				str.append(" " + fdv.name() + ", " + fdv.myDifferentiatedVariable().name() + "\n");
+			}
+		}	
+		str.append("Differentiated variables and derivatives:\n");
+		for (FVariable fv : differentiatedRealVariables()) {
+			if (fv.myDerivativeVariable()!=null) {
+				str.append(" " + fv.name() + ", " + fv.myDerivativeVariable().name() + "\n");
+			}
+		}
+		return str.toString();
+		
+	}
+	
+}
+
+aspect FlatAlgorithmAPI {
+	
+	syn boolean FIdUse.inFAlgorithm() = myFAlgorithm() != null;
+	
+	inh lazy FAlgorithmBlock FStatement.myFAlgorithm();
+	inh lazy FAlgorithmBlock FIdUse.myFAlgorithm();
+	eq FAlgorithmBlock.getChild().myFAlgorithm() = this;
+	eq Root.getChild().myFAlgorithm() = null;
+	
+	coll ArrayList<FAlgorithmBlock> FClass.myAlgorithms()
+	    [new ArrayList<FAlgorithmBlock>()] with add root FClass;
+	FAlgorithmBlock contributes this when !inFunction()
+	    to FClass.myAlgorithms() for myFClass();
+	
+	coll ArrayList<FIdUse> FAlgorithmBlock.assignedFIdUses() 
+	    [new ArrayList<FIdUse>()] with add root FAlgorithmBlock;
+	FAssignStmt contributes getLeft() to FAlgorithmBlock.assignedFIdUses() for myFAlgorithm();
+	
+	coll ArrayList<FIdUse> FAlgorithmBlock.usedFIdUses() 
+	    [new ArrayList<FIdUse>()] with add root FAlgorithmBlock;
+	FIdUse contributes this when !useIsAssignment() // TODO: need to check for *ForIndex?
+	    to FAlgorithmBlock.usedFIdUses() for myFAlgorithm();
+	
+	inh boolean FIdUse.useIsAssignment();
+	eq FAssignStmt.getLeft().useIsAssignment() = true;
+	eq FExp.getChild().useIsAssignment() = false;
+	eq FStatement.getChild().useIsAssignment() = false;
+	eq FAlgorithmBlock.getChild().useIsAssignment() = false;
+	eq Root.getChild().useIsAssignment() = false;
+	
+	private String FAlgorithmBlock.functionName = null;
+	public String FAlgorithmBlock.generateFunctionName() {
+		if (functionName == null)
+			functionName = myFClass().generateFunctionName();
+		return functionName;
+	}
+	private int FClass.generatedFunctionNumber = 1;
+	public String FClass.generateFunctionName() {
+		String name, part;
+		do {
+			part = "algorithm_" + generatedFunctionNumber;
+			name = name() + "." + part;
+			generatedFunctionNumber++;
+		} while (lookupFunc(name) != null || fullyQualifiedVariablesMap().get(part) != null);
+		return name;
+	}
+	
+}
+
+aspect FlatExternalFunctionAPI {
+	
+	/**
+	 * \brief Gives the arguments to pass to gcc required by external functions.
+	 */
+	syn String FClass.externalCompilerArgs() {
+		StringBuilder buf = new StringBuilder();
+		for (String lib : externalLibraries()) {
+			buf.append(" -l");
+			buf.append(lib);
+		}
+		for (String dir : externalLibraryDirectories()) {
+			buf.append(" -L");
+			buf.append(dir);
+		}
+		for (String dir : externalIncludeDirectories()) {
+			buf.append(" -I");
+			buf.append(dir);
+		}
+		return buf.toString();
+	}
+
+	syn String FClass.externalLibArgs() {
+		StringBuilder buf = new StringBuilder();
+		for (String lib : externalLibraries()) {
+			buf.append(" -l");
+			buf.append(lib);
+		}
+		for (String dir : externalLibraryDirectories()) {
+			buf.append(" -L");
+			buf.append(dir);
+		}
+		return buf.toString();
+	}
+
+	syn String FClass.externalIncludeArgs() {
+		StringBuilder buf = new StringBuilder();
+		for (String dir : externalIncludeDirectories()) {
+			buf.append(" -I");
+			buf.append(dir);
+		}
+		return buf.toString();
+	}
+	
+	coll HashSet<String> FClass.externalLibraries() 
+	  [new HashSet<String>()] with addAll root FClass;
+	FExternalStmt contributes library() when library() != null 
+	  to FClass.externalLibraries() for myFClass();
+	
+	coll HashSet<String> FClass.externalIncludes() 
+	  [new HashSet<String>()] with add root FClass;
+	FExternalStmt contributes include() when include() != null 
+	  to FClass.externalIncludes() for myFClass();
+	
+	coll HashSet<String> FClass.externalLibraryDirectories() 
+	  [new HashSet<String>()] with add root FClass;
+	FExternalStmt contributes libraryDirectory() when libraryDirectory() != null 
+	  to FClass.externalLibraryDirectories() for myFClass();
+	
+	coll HashSet<String> FClass.externalIncludeDirectories() 
+	  [new HashSet<String>()] with add root FClass;
+	FExternalStmt contributes includeDirectory() when includeDirectory() != null 
+	  to FClass.externalIncludeDirectories() for myFClass();
+	
+	syn ArrayList<String> FExternalStmt.library() = library;
+	syn String FExternalStmt.include()            = include;
+	syn String FExternalStmt.libraryDirectory()   = libraryDir;
+	syn String FExternalStmt.includeDirectory()   = includeDir;
+
+	private ArrayList<String> FExternalStmt.library;
+	private String FExternalStmt.include;
+	private String FExternalStmt.libraryDir;
+	private String FExternalStmt.includeDir;
+	
+	public void FExternalStmt.extractLibrary(InstExternal n) {
+		library = n.annotation("Library").asStringList();
+		include = n.annotation("Include").string();
+		libraryDir = n.annotation("LibraryDirectory").string();
+		includeDir = n.annotation("IncludeDirectory").string();
+		
+		if (libraryDir == null || includeDir == null) {
+			String packageName = n.packageName();
+			if (packageName != null) {
+				String defDir = "modelica://" + packageName + "/Resources";
+				libraryDir = (libraryDir == null && library != null) ? 
+						defDir + "/Library" : libraryDir;
+				includeDir = (includeDir == null && include != null) ? 
+						defDir + "/Include" : includeDir;
+			}
+		}
+		
+		if (includeDir != null) 
+			includeDir = n.uri2path(includeDir);
+		if (libraryDir != null) {
+			libraryDir = n.uri2path(libraryDir);
+			// TODO: If platform-specific subdir exists, use it instead. Always use linux?
+		}
+	}
+	
+	/**
+	 * \brief Converts an URI to a file-system path.
+	 * 
+	 * Only modelica:// and file:// URIs are supported.
+	 * 
+	 * @param str  the string to interpret as an URI
+	 */
+	public String InstExternal.uri2path(String str) {
+		try {
+			URI uri = new URI(str);
+			if (uri.getScheme().equals("file")) {
+				return uri.getPath();
+			} else if (uri.getScheme().equals("modelica")) {
+				String pack = packagePath(uri.getHost());
+				return pack != null ? pack + uri.getPath() : null;
+			}
+		} catch (URISyntaxException e) {
+		}
+		return null;
+	}
+	
+}
