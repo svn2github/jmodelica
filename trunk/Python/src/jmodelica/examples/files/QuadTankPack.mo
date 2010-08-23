@@ -50,8 +50,8 @@ model PRBS2
     input Real u1 = qt.u1;
     input Real u2 = qt.u2;
 initial equation
-  der(qt.x1) = 0;
-  der(qt.x2) = 0;
+  qt.x1 = 0.0627;
+  qt.x2 = 0.06044;
   qt.x3 = 0.024;
   qt.x4 = 0.023;
   end Sim_QuadTank;
@@ -147,8 +147,8 @@ initial equation
 
 end QuadTank_Static;
 
-optimization QuadTank_ParEst (objective=sum((y1_meas[i] - qt.x1(t_meas[i]))^2 + 
-                                            (y2_meas[i] - qt.x2(t_meas[i]))^2 for i in 1:N_meas),
+optimization QuadTank_ParEst (objective=sum((x1_meas[i] - qt.x1(t_meas[i]))^2 + 
+                                            (x2_meas[i] - qt.x2(t_meas[i]))^2 for i in 1:N_meas),
                                              startTime=0,finalTime=60)
     
     // Initial tank levels
@@ -161,24 +161,32 @@ optimization QuadTank_ParEst (objective=sum((y1_meas[i] - qt.x1(t_meas[i]))^2 +
     	             x2(fixed=true),x2_0=x2_0,
                      x3(fixed=true),x3_0=x3_0,
                      x4(fixed=true),x4_0=x4_0,
-                     a1(free=true,initialGuess = 0.03e-4,nominal=0.03e-4,min=0,max=0.1e-4),
-                     a2(free=true,initialGuess = 0.03e-4,nominal=0.03e-4,min=0,max=0.1e-4));
+                     a1(free=true,initialGuess = 0.03e-4,min=0,max=0.1e-4),
+                     a2(free=true,initialGuess = 0.03e-4,min=0,max=0.1e-4));
 
+    // Number of measurement points
     parameter Integer N_meas = 61;
-    parameter Real t_meas[N_meas] = 0:60.0/(N_meas-1):60; 
-    parameter Real y1_meas[N_meas] = ones(N_meas); 	
-    parameter Real y2_meas[N_meas] = ones(N_meas); 
+    // Vector of measurement times
+    parameter Real t_meas[N_meas] = 0:60.0/(N_meas-1):60;
+    // Measurement values for x1 
+    // Notice that dummy values are entered here:
+    // the real measurement values will be set from Python
+    parameter Real x1_meas[N_meas] = ones(N_meas);
+    // Measurement values for x2 	
+    parameter Real x2_meas[N_meas] = ones(N_meas);
+    // Input trajectory for u1 
     PRBS1 prbs1;
+    // Input trajectory for u2
     PRBS2 prbs2;	
 equation
     connect(prbs1.y,qt.u1);
     connect(prbs2.y,qt.u2);
 end QuadTank_ParEst;
 
-optimization QuadTank_ParEst2 (objective=sum((y1_meas[i] - qt.x1(t_meas[i]))^2 + 
-                                            (y2_meas[i] - qt.x2(t_meas[i]))^2 +
-                                             (y3_meas[i] - qt.x3(t_meas[i]))^2 +
-                                             (y4_meas[i] - qt.x4(t_meas[i]))^2 for i in 1:N_meas),
+optimization QuadTank_ParEst2 (objective=sum((x1_meas[i] - qt.x1(t_meas[i]))^2 + 
+                                            (x2_meas[i] - qt.x2(t_meas[i]))^2 +
+                                             (x3_meas[i] - qt.x3(t_meas[i]))^2 +
+                                             (x4_meas[i] - qt.x4(t_meas[i]))^2 for i in 1:N_meas),
                                              startTime=0,finalTime=60)
     
     // Initial tank levels
@@ -198,10 +206,10 @@ optimization QuadTank_ParEst2 (objective=sum((y1_meas[i] - qt.x1(t_meas[i]))^2 +
 
     parameter Integer N_meas = 61;
     parameter Real t_meas[N_meas] = 0:60.0/(N_meas-1):60; 
-    parameter Real y1_meas[N_meas] = ones(N_meas); 	
-    parameter Real y2_meas[N_meas] = ones(N_meas); 
-    parameter Real y3_meas[N_meas] = ones(N_meas); 	
-    parameter Real y4_meas[N_meas] = ones(N_meas); 
+    parameter Real x1_meas[N_meas] = ones(N_meas); 	
+    parameter Real x2_meas[N_meas] = ones(N_meas); 
+    parameter Real x3_meas[N_meas] = ones(N_meas); 	
+    parameter Real x4_meas[N_meas] = ones(N_meas); 
     PRBS1 prbs1;
     PRBS2 prbs2;	
 equation
