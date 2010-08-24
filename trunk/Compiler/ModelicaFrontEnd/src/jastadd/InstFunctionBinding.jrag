@@ -273,11 +273,19 @@ aspect InstFunctionBinding {
 						// Ticket 664: Support all function-like operators
 						"sign", "Integer", "String", "div", "mod", "rem", "ceil", "floor", "delay", "cardinality", 
 						"semiLinear", "initial", "terminal", "smooth", "sample", "pre", "edge", "reinit", 
-						"assert", "terminate"
+						"terminate"
 					};
 				for (String name : unsupported)
 					if (!map.containsKey(name))
 						map.put(name, new UnsupportedBuiltInCreator(name));
+				
+				String[] ignored = new String[] { 
+						// Ticket 664: Support all function-like operators
+						"assert"
+					};
+				for (String name : ignored)
+					if (!map.containsKey(name))
+						map.put(name, new IgnoredBuiltInCreator(name));
 			}
 			
 			private static class BuiltInCreator {
@@ -360,12 +368,26 @@ aspect InstFunctionBinding {
 				private String name;
 				
 				public UnsupportedBuiltInCreator(String name) {
-					super(tmpl, 0);
+					this(name, tmpl);
+				}
+				
+				protected UnsupportedBuiltInCreator(String name, FUnsupportedBuiltIn tmpl2) {
+					super(tmpl2, 0);
 					this.name = name;
 				}
 				
 				protected void setArguments(FBuiltInFunctionCall res, InstFunctionArgument[] args) {
 					((FUnsupportedBuiltIn) res).setName(name);
+				}
+				
+			}
+			
+			private static class IgnoredBuiltInCreator extends UnsupportedBuiltInCreator {
+				
+				private static final FIgnoredBuiltIn tmpl = new FIgnoredBuiltIn();
+				
+				public IgnoredBuiltInCreator(String name) {
+					super(name, tmpl);
 				}
 				
 			}

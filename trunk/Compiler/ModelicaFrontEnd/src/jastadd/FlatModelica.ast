@@ -251,11 +251,16 @@ FBooleanType : FPrimitiveType;
 FStringType : FPrimitiveType;
 
 /**
- * \brief Class representing an unknown primitive type.
+ * \brief Class representing the type of an expression that has no value, e.g. assertions.
+ */
+FNoType : FType;
+
+/**
+ * \brief Class representing an unknown type.
  *
  * Used to represent type errors. 
  */
-FUnknownType : FPrimitiveType;
+FUnknownType : FType;
 
 /**
  * \brief A qualified name supporting array subscripts.
@@ -1089,6 +1094,11 @@ FInStream : FStreamBuiltIn;
 FActualStream : FStreamBuiltIn;
 
 /**
- * \brief Dummy node for unsupported built-in functions
+ * \brief Dummy node for unsupported built-in functions.
  */
 FUnsupportedBuiltIn : FBuiltInFunctionCall ::= <Name>;
+
+/**
+ * \brief Dummy node for built-in functions that are ignored with a warning.
+ */
+FIgnoredBuiltIn : FUnsupportedBuiltIn;

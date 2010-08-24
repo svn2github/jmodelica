@@ -68,8 +68,12 @@ aspect ComplianceCheck {
 	}
 	
 	public void FUnsupportedBuiltIn.complianceCheck() {
-		super.complianceCheck();
 		compliance("The " + getName() + "() function-like operator is not supported");
+	}
+	
+	public void FIgnoredBuiltIn.complianceCheck() {
+		warning("The " + getName() + 
+				"() function-like operator is not supported, and is currently ignored");
 	}
 	
 	public void FDotAddExp.complianceCheck() {

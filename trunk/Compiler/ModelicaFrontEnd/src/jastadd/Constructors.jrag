@@ -374,6 +374,7 @@ aspect InheritedFactoryMethods {
 	// Unsupported expressions
 	public FUnsupportedExp     FUnsupportedExp.createEmptyNode()     { return new FUnsupportedExp();     }
 	public FUnsupportedBuiltIn FUnsupportedBuiltIn.createEmptyNode() { return new FUnsupportedBuiltIn(); }
+	public FIgnoredBuiltIn     FIgnoredBuiltIn.createEmptyNode()     { return new FIgnoredBuiltIn(); }
 	
 	// Arithmetic oprerators
 	public FAddExp    FAddExp.createEmptyNode()    { return new FAddExp();    }

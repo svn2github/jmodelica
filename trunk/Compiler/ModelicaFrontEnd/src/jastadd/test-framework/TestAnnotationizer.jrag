@@ -58,6 +58,7 @@ abstract public class TestAnnotationizerHelper {
 	 * @param modelName    the name of the test model
 	 * @param description  the text to put in the "description" field of the test annotation
 	 * @param data         any extra data to send to the delegate object
+	 * @param opts         comma-separated list of compiler options to override defaults for
 	 * @param write        if <code>true</code>, write the annotation directly in the Modelica file
 	 */
 	public static void doAnnotation(String filePath, String testType, String modelName, 

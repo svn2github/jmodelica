@@ -282,10 +282,14 @@ aspect FlatTypeCheck {
   public void FBuiltInFunctionCall.typeCheck() {
 	  if (checkTypeAsExpression())
 		  super.typeCheck();
-	  if (myLefts().size() > 1)
+	  int n = builtInHasOutput() ? 1 : 0;
+	  if (myLefts().size() > n)
 		  error("Too many components assigned from function call: " + builtInName() + 
-				  "() has 1 output(s)");
+				  "() has " + n + " output(s)");
   }
+  
+  syn boolean FBuiltInFunctionCall.builtInHasOutput() = true;
+  eq FIgnoredBuiltIn.builtInHasOutput() = false;
   
   syn boolean FBuiltInFunctionCall.checkTypeAsExpression() = false;
   eq FSizeExp.checkTypeAsExpression()     = true;
