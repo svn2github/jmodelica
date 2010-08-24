@@ -2074,13 +2074,19 @@ plt.show()  </programlisting>
     and the control input profiles:</para>
 
     <figure>
-      <title>Measured state and control profiles</title>
+      <title>Measured state profiles</title>
 
       <mediaobject>
         <imageobject>
           <imagedata fileref="images/qt_x.svg" scalefit="1" width="60%"></imagedata>
         </imageobject>
+      </mediaobject>
+    </figure>
 
+    <figure>
+      <title>Input profiles used in estimation experiment</title>
+
+      <mediaobject>
         <imageobject>
           <imagedata fileref="images/qt_u.svg" scalefit="1" width="60%"></imagedata>
         </imageobject>
@@ -2115,7 +2121,7 @@ u = N.transpose(N.vstack((t_meas,u1,u2)))</programlisting>
     <programlisting># Simulate model response with nominal parameters
 res_sim = simulate('QuadTankPack.Sim_QuadTank',
                    'QuadTankPack.mo',
-                   compiler='opimica',
+                   compiler='optimica',
                    alg_args={'input_trajectory':u,
                              'start_time':0.,
                              'final_time':60})</programlisting>
@@ -2178,8 +2184,8 @@ plt.show()</programlisting>
     problem contained in the class
     <literal>QuadTankPack.QuadTank_ParEst</literal>:</para>
 
-    <programlisting>optimization QuadTank_ParEst (objective=sum((x1_meas[i] - qt.x1(t_meas[i]))^2 + 
-                                            (x2_meas[i] - qt.x2(t_meas[i]))^2 for i in 1:N_meas),
+    <programlisting>optimization QuadTank_ParEst (objective=sum((y1_meas[i] - qt.x1(t_meas[i]))^2 + 
+                                            (y2_meas[i] - qt.x2(t_meas[i]))^2 for i in 1:N_meas),
                                              startTime=0,finalTime=60)
     
     // Initial tank levels
@@ -2202,9 +2208,9 @@ plt.show()</programlisting>
   // Measurement values for x1 
   // Notice that dummy values are entered here:
   // the real measurement values will be set from Python
-  parameter Real x1_meas[N_meas] = ones(N_meas);
+  parameter Real y1_meas[N_meas] = ones(N_meas);
   // Measurement values for x2 	
-  parameter Real x2_meas[N_meas] = ones(N_meas);
+  parameter Real y2_meas[N_meas] = ones(N_meas);
   // Input trajectory for u1 
   PRBS1 prbs1;
   // Input trajectory for u2
@@ -2242,12 +2248,12 @@ N_meas = N.size(u1,0)
 # Set measurement data into model
 for i in range(0,N_meas):
     qt_par_est.set_value("t_meas["+`i+1`+"]",t_meas[i])
-    qt_par_est.set_value("x1_meas["+`i+1`+"]",y1_meas[i])
-    qt_par_est.set_value("x2_meas["+`i+1`+"]",y2_meas[i])</programlisting>
+    qt_par_est.set_value("y1_meas["+`i+1`+"]",y1_meas[i])
+    qt_par_est.set_value("y2_meas["+`i+1`+"]",y2_meas[i])</programlisting>
 
     <para>We are now ready to solve the optimization problem:</para>
 
-    <programlisting># Numer of element in collocation algorithm
+    <programlisting># Number of element in collocation algorithm
 n_e = 100
 # Normalized element lengths
 hs = N.ones(n_e)/n_e
@@ -2341,10 +2347,10 @@ N_meas = N.size(u1,0)
 # Set measurement data into model
 for i in range(0,N_meas):
     qt_par_est2.set_value("t_meas["+`i+1`+"]",t_meas[i])
-    qt_par_est2.set_value("x1_meas["+`i+1`+"]",y1_meas[i])
-    qt_par_est2.set_value("x2_meas["+`i+1`+"]",y2_meas[i])
-    qt_par_est2.set_value("x3_meas["+`i+1`+"]",y3_meas[i])
-    qt_par_est2.set_value("x4_meas["+`i+1`+"]",y4_meas[i])
+    qt_par_est2.set_value("y1_meas["+`i+1`+"]",y1_meas[i])
+    qt_par_est2.set_value("y2_meas["+`i+1`+"]",y2_meas[i])
+    qt_par_est2.set_value("y3_meas["+`i+1`+"]",y3_meas[i])
+    qt_par_est2.set_value("y4_meas["+`i+1`+"]",y4_meas[i])
 
 # Solve parameter estimation problem
 res_opt2 = optimize(qt_par_est2,alg_args={"n_e":n_e,"n_cp":3, \
@@ -2412,7 +2418,7 @@ plt.show()</programlisting>
     </figure>
 
     <para>The red curves represent the case where a1, a2, a3 and a4 has been
-    estimated. </para>
+    estimated.</para>
 
     <para>Take a moment to think about the results. Are there other parameters
     that could have been selected for estimation?</para>

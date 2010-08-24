@@ -137,8 +137,8 @@ def run_demo(with_plots=True):
     # Set measurement data into model
     for i in range(0,N_meas):
         qt_par_est.set_value("t_meas["+`i+1`+"]",t_meas[i])
-        qt_par_est.set_value("x1_meas["+`i+1`+"]",y1_meas[i])
-        qt_par_est.set_value("x2_meas["+`i+1`+"]",y2_meas[i])
+        qt_par_est.set_value("y1_meas["+`i+1`+"]",y1_meas[i])
+        qt_par_est.set_value("y2_meas["+`i+1`+"]",y2_meas[i])
 
     # Numer of element in collocation algorithm
     n_e = 100
@@ -195,10 +195,10 @@ def run_demo(with_plots=True):
     # Set measurement data into model
     for i in range(0,N_meas):
         qt_par_est2.set_value("t_meas["+`i+1`+"]",t_meas[i])
-        qt_par_est2.set_value("x1_meas["+`i+1`+"]",y1_meas[i])
-        qt_par_est2.set_value("x2_meas["+`i+1`+"]",y2_meas[i])
-        qt_par_est2.set_value("x3_meas["+`i+1`+"]",y3_meas[i])
-        qt_par_est2.set_value("x4_meas["+`i+1`+"]",y4_meas[i])
+        qt_par_est2.set_value("y1_meas["+`i+1`+"]",y1_meas[i])
+        qt_par_est2.set_value("y2_meas["+`i+1`+"]",y2_meas[i])
+        qt_par_est2.set_value("y3_meas["+`i+1`+"]",y3_meas[i])
+        qt_par_est2.set_value("y4_meas["+`i+1`+"]",y4_meas[i])
 
     # Solve parameter estimation problem
     res_opt2 = optimize(qt_par_est2,alg_args={"n_e":n_e,"n_cp":3, \
