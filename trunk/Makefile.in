@@ -192,6 +192,7 @@ PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
 PACKAGE_NAME = @PACKAGE_NAME@
 PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
+PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 RANLIB = @RANLIB@
@@ -789,6 +790,7 @@ all-local:
 @HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT)
 @WITH_SUNDIALS_TRUE@	cd $(abs_top_srcdir)/Assimulo; \
 @WITH_SUNDIALS_TRUE@	python setup_source.py install --sundials-home=$(SUNDIALS_HOME) --prefix=$(assimulo_install_dir)
+	$(abs_top_srcdir)/get_version.sh $(abs_top_srcdir) > $(abs_builddir)/version.txt
 	mkdir -p $(abs_builddir)/build_tmp
 	$(CC) -c -fPIC $(abs_top_srcdir)/Python/util/FMILogger.c -o $(abs_builddir)/build_tmp/FMILogger.o
 	case $(build) in \
@@ -874,7 +876,7 @@ install-exec-local:
 	mkdir -p $(DESTDIR)$(prefix)/XML
 	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy XML schemas"  || cp  $(abs_top_srcdir)/XML/*.xsd $(DESTDIR)$(prefix)/XML
 	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy XML LICENSE"  || cp  $(abs_top_srcdir)/XML/LICENSE $(DESTDIR)$(prefix)/XML
-	cp  $(abs_top_srcdir)/version.txt $(DESTDIR)$(prefix)
+	cp  $(abs_builddir)/version.txt $(DESTDIR)$(prefix)
 	cp jm_tests $(DESTDIR)$(prefix)/jm_tests
 	chmod ugo+x $(DESTDIR)$(prefix)/jm_tests
 	mkdir -p $(DESTDIR)$(prefix)/Python/util

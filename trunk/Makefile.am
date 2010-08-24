@@ -34,6 +34,7 @@ if WITH_SUNDIALS
 	cd $(abs_top_srcdir)/Assimulo; \
 	python setup_source.py install --sundials-home=$(SUNDIALS_HOME) --prefix=$(assimulo_install_dir)
 endif
+	$(abs_top_srcdir)/get_version.sh $(abs_top_srcdir) > $(abs_builddir)/version.txt
 	mkdir -p $(abs_builddir)/build_tmp
 	$(CC) -c -fPIC $(abs_top_srcdir)/Python/util/FMILogger.c -o $(abs_builddir)/build_tmp/FMILogger.o
 	case $(build) in \
@@ -123,7 +124,7 @@ endif
 	mkdir -p $(DESTDIR)$(prefix)/XML
 	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy XML schemas"  || cp  $(abs_top_srcdir)/XML/*.xsd $(DESTDIR)$(prefix)/XML
 	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy XML LICENSE"  || cp  $(abs_top_srcdir)/XML/LICENSE $(DESTDIR)$(prefix)/XML
-	cp  $(abs_top_srcdir)/version.txt $(DESTDIR)$(prefix)
+	cp  $(abs_builddir)/version.txt $(DESTDIR)$(prefix)
 	cp jm_tests $(DESTDIR)$(prefix)/jm_tests
 	chmod ugo+x $(DESTDIR)$(prefix)/jm_tests
 	mkdir -p $(DESTDIR)$(prefix)/Python/util
