@@ -38,7 +38,7 @@ f= None
 try:
     _fpath=os.path.join(os.environ['JMODELICA_HOME'],'version.txt')    
     f = open(_fpath)
-    __version__=f.readline()
+    __version__=f.readline().strip()
 except IOError:
     warnings.warn('Version file not found. Environment may be corrupt.')
 finally:
@@ -390,9 +390,17 @@ def check_packages():
     #check python version
     pyversion = sys.version.partition(" ")[0]
     sys.stdout.write("%s %s" % ("Python version:".ljust(le,'.'),pyversion.ljust(le)))
+    sys.stdout.write("\n\n")
+    sys.stdout.flush()
+    time.sleep(0.25)
+    
+    #check jmodelica version
+    jmversion = jmodelica.__version__
+    sys.stdout.write("%s %s" % ("JModelica version:".ljust(le,'.'),jmversion.ljust(le)))
     sys.stdout.write("\n")
     sys.stdout.flush()
-    time.sleep(0.25)    
+    time.sleep(0.25)
+    
     import imp
     # Test dependencies
     sys.stdout.write("\n\n")
@@ -404,41 +412,41 @@ def check_packages():
     sys.stdout.write("%s %s" % (("-"*len(modstr)).ljust(le), ("-"*len(verstr)).ljust(le)))
     sys.stdout.write("\n")
     
-    modules=["numpy", "scipy", "matplotlib", "jpype", "lxml", "nose", "assimulo"]
-    assimulo_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'simulation')
+    packages=["numpy", "scipy", "matplotlib", "jpype", "lxml", "nose", "assimulo"]
+    assimulo_path=os.path.join(jmodelica.environ['JMODELICA_HOME'],'Python','assimulo')
     
     if platform == "win32":
-        modules.append("pyreadline")
+        packages.append("pyreadline")
     
-    error_modules=[]
-    warning_modules=[]
+    error_packages=[]
+    warning_packages=[]
     fp = None
-    for module in modules:
+    for package in packages:
         try:
             vers="--"
-            if module=='assimulo':
-                fp, path, desc = imp.find_module(module, [assimulo_path])
+            if package=='assimulo':
+                fp, path, desc = imp.find_module('problem', [assimulo_path])
             else:    
-                fp, path, desc = imp.find_module(module)
-            mod = imp.load_module(module, fp, path, desc)
+                fp, path, desc = imp.find_module(package)
+            mod = imp.load_module(package, fp, path, desc)
             try:
-                if module == "pyreadline":
+                if package == "pyreadline":
                     vers = mod.release.version
-                elif module == "lxml":
+                elif package == "lxml":
                     from lxml import etree
                     vers = etree.__version__
                 else:
                     vers = mod.__version__
             except AttributeError, e:
                 pass
-            sys.stdout.write("%s %s %s" %(module.ljust(le,'.'), vers.ljust(le), "Ok".ljust(le)))
+            sys.stdout.write("%s %s %s" %(package.ljust(le,'.'), vers.ljust(le), "Ok".ljust(le)))
         except ImportError, e:
-            if module == "nose" or module == "assimulo":
-                sys.stdout.write("%s %s %s" % (module.ljust(le,'.'), vers.ljust(le), "Package missing - Warning issued, see details below".ljust(le)))
-                warning_modules.append(module)
+            if package == "nose" or package == "assimulo":
+                sys.stdout.write("%s %s %s" % (package.ljust(le,'.'), vers.ljust(le), "Package missing - Warning issued, see details below".ljust(le)))
+                warning_packages.append(package)
             else:
-                sys.stdout.write("%s %s %s " % (module.ljust(le,'.'), vers.ljust(le), "Package missing - Error issued, see details below.".ljust(le)))
-                error_modules.append(module)
+                sys.stdout.write("%s %s %s " % (package.ljust(le,'.'), vers.ljust(le), "Package missing - Error issued, see details below.".ljust(le)))
+                error_packages.append(package)
             pass
         finally:
             if fp:
@@ -450,7 +458,7 @@ def check_packages():
         
     # Write errors and warnings
     # are there any errors?
-    if len(error_modules) > 0:
+    if len(error_packages) > 0:
         sys.stdout.write("\n")
         errtitle = "Errors"
         sys.stdout.write("\n")
@@ -459,13 +467,13 @@ def check_packages():
         sys.stdout.write("\n\n")
         sys.stdout.write("The packages: \n\n")
         
-        for er in error_modules:
+        for er in error_packages:
             sys.stdout.write("   - "+str(er))
             sys.stdout.write("\n")
         sys.stdout.write("\n")
         sys.stdout.write("could not be found. It is not possible to run the jmodelica package without them.\n")
     
-    if len(warning_modules) > 0:
+    if len(warning_packages) > 0:
         sys.stdout.write("\n")
         wartitle = "Warnings"
         sys.stdout.write("\n")
@@ -473,9 +481,9 @@ def check_packages():
         sys.stdout.write("-"*len(wartitle))
         sys.stdout.write("\n\n")
         
-        for w in warning_modules:
+        for w in warning_packages:
             if w == 'assimulo':
-                sys.stdout.write("** The package jmodelica.simulation.assimulo could not be found. \n  \
+                sys.stdout.write("** The package assimulo could not be found. \n  \
  This package is needed to be able to use: \n\n   \
 - jmodelica.simulate with default argument \"algorithm\" = AssimuloAlg \n   \
 - The jmodelica.simulation package \n   \
