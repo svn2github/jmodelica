@@ -916,7 +916,6 @@ aspect FlatNames {
     eq FStringType.name()  = "String";
     eq FRecordType.name()  = getName();
     eq FUnknownType.name() = "(unknown type)";
-    eq FNoType.name()      = "(no type)";
     
     syn boolean FAbstractFunctionCall.isIgnored() = false;
     eq FIgnoredBuiltIn.isIgnored() = true;

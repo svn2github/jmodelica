@@ -318,7 +318,7 @@ Semantic error at line 313, column 12:
   Too many components assigned from function call: assert() has 0 output(s)
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Semantic error at line 314, column 3:
-  The right and left expression types of equation are not compatible
+  Function assert() has no outputs, but is used in expression
 ")})));
 
   Real a;

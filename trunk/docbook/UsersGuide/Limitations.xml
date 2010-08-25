@@ -62,36 +62,86 @@
         </listitem>
 
         <listitem>
-          <para>Limitations apply to the use of functions with arguments with
-          unknown array sizes</para>
-        </listitem>
-
-        <listitem>
           <para>Partial support for external functions, only external C
           functions with scalar inputs and outputs are supported.</para>
         </listitem>
 
         <listitem>
-          <para>The following built-in functions are not supported: sign(v),
-          Integer(e), String(...), div(x,y), mod(x,y), rem(x,y), ceil(x),
-          floor(x), integer(x), delay(...), cardinality(), semiLinear(...),
-          Subtask.decouple(v), initial(), terminal(), smooth(p, expr),
-          sample(start, interval), pre(y), edge(b), reinit(x, expr),
-          scalar(A), vector(A), matrix(A), diagonal(v), product(...),
-          outerProduct(v1, v2), symmetric(A), skew(x).</para>
+          <para>The following built-in functions are not
+          supported:<informaltable border="1" frame="void" width="75%">
+              <tr>
+                <td>sign(v)</td>
+                <td>cardinality()</td>
+                <td>reinit(x, expr)</td>
+              </tr>
+
+              <tr>
+                <td>Integer(e)</td>
+                <td>semiLinear(...)</td>
+                <td>scalar(A)</td>
+              </tr>
+
+              <tr>
+                <td>String(...)</td>
+                <td>Subtask.decouple(v)</td>
+                <td>vector(A)</td>
+              </tr>
+
+              <tr>
+                <td>div(x,y)</td>
+                <td>initial()</td>
+                <td>matrix(A)</td>
+              </tr>
+
+              <tr>
+                <td>mod(x,y)</td>
+                <td>terminal()</td>
+                <td>diagonal(v)</td>
+              </tr>
+
+              <tr>
+                <td>rem(x,y)</td>
+                <td>smooth(p, expr)</td>
+                <td>product(...)</td>
+              </tr>
+
+              <tr>
+                <td>ceil(x)</td>
+                <td>sample(start, interval)</td>
+                <td>outerProduct(v1, v2)</td>
+              </tr>
+
+              <tr>
+                <td>floor(x)</td>
+                <td>pre(y)</td>
+                <td>symmetric(A)</td>
+              </tr>
+
+              <tr>
+                <td>integer(x)</td>
+                <td>edge(b)</td>
+                <td>skew(x)</td>
+              </tr>
+
+              <tr>
+                <td>delay(...)</td>
+              </tr>
+            </informaltable></para>
         </listitem>
 
         <listitem>
-          <para>Overloaded operators (chapter 14)</para>
+          <para>Overloaded operators (Modelica Language Specification, chapter
+          14)</para>
         </listitem>
 
         <listitem>
-          <para>Stream connectors (chapter 15)</para>
+          <para>Stream connectors (Modelica Language Specification, chapter
+          15)</para>
         </listitem>
 
         <listitem>
-          <para>Mapping of models to execution environments (chapter
-          16)</para>
+          <para>Mapping of models to execution environments (Modelica Language
+          Specification, chapter 16)</para>
         </listitem>
       </itemizedlist>
     </listitem>

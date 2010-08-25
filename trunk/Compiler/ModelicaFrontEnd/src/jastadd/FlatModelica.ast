@@ -251,11 +251,6 @@ FBooleanType : FPrimitiveType;
 FStringType : FPrimitiveType;
 
 /**
- * \brief Class representing the type of an expression that has no value, e.g. assertions.
- */
-FNoType : FType;
-
-/**
  * \brief Class representing an unknown type.
  *
  * Used to represent type errors. 

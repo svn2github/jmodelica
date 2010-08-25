@@ -372,7 +372,7 @@ aspect FlatTypeAnalysis {
 		}
 	}
 	
-	eq FIgnoredBuiltIn.type() = fNoType();
+	eq FIgnoredBuiltIn.type() = fUnknownType();
 	
 	inh FType FFunctionCallLeft.type();
 	eq FFunctionCallEquation.getLeft(int i).type() = getCall().typeOfOutput(i);
@@ -384,10 +384,9 @@ aspect FlatTypeAnalysis {
 	syn lazy FType InstFunctionCall.typeOfOutput(int i) = myOutputs().get(i).type().sizedType(sizeOfOutput(i));
 	syn lazy FType FFunctionCall.typeOfOutput(int i)    = myOutputs().get(i).type().sizedType(sizeOfOutput(i));
 
-	eq FFunctionCall.type()    = hasOutputs() ? typeOfOutput(0) : fNoType();
-	eq InstFunctionCall.type() = hasOutputs() ? typeOfOutput(0) : fNoType();
+	eq FFunctionCall.type()    = hasOutputs() ? typeOfOutput(0) : fUnknownType();
+	eq InstFunctionCall.type() = hasOutputs() ? typeOfOutput(0) : fUnknownType();
 	eq FMathematicalFunctionCall.type() = fRealScalarType();		
-	
 	
 	// TODO: expand to handle boolean end enum index
 	syn lazy FType FSubscript.type();
@@ -611,7 +610,6 @@ aspect FTypeCompatibility {
 		type.isString() && dimensionCompatible(type, allowUnknown);
 	eq FRecordType.typeCompatible(FType type, boolean allowUnknown) = 
 		typeMatches(type, true, allowUnknown);
-	eq FNoType.typeCompatible(FType type, boolean allowUnknown) = false;
 	
 	syn boolean FType.typeMatches(FType type, boolean compatible, boolean allowUnknown) =
 		compatible ? typeCompatible(type, allowUnknown) : equivalentTo(type, allowUnknown);
@@ -656,7 +654,6 @@ aspect FTypeEquivalent {
 		type.isString() && dimensionCompatible(type, allowUnknown);
 	eq FRecordType.equivalentTo(FType type, boolean allowUnknown) = 
 		typeMatches(type, false, allowUnknown);
-	eq FNoType.equivalentTo(FType type, boolean allowUnknown) = false;
  
 }
 
@@ -687,7 +684,6 @@ aspect BuiltInFlatTypes {
 	public static final FBooleanType FBooleanType.SCALAR = new FBooleanType(Size.SCALAR);
 	public static final FStringType  FStringType.SCALAR  = new FStringType(Size.SCALAR);
 	public static final FUnknownType FUnknownType.SCALAR = new FUnknownType(Size.SCALAR);
-	public static final FNoType      FNoType.SCALAR      = new FNoType(Size.SCALAR);
 
 	syn boolean FType.isReal()    = false;
 	eq FRealType.isReal()         = true;
@@ -737,7 +733,6 @@ aspect BuiltInFlatTypes {
  	eq FUnknownType.isUnknown() = true;
  	
 	syn FType ASTNode.fUnknownType() = FUnknownType.SCALAR;
-	syn FType ASTNode.fNoType()      = FNoType.SCALAR;
 	
 	syn FPrimitiveType ASTNode.fRealScalarType()    = FRealType.SCALAR;
 	syn FPrimitiveType ASTNode.fIntegerScalarType() = FIntegerType.SCALAR;
@@ -760,7 +755,6 @@ aspect BuiltInFlatTypes {
  	
  	syn FType FType.arrayType(Size size);
  	eq FUnknownType.arrayType(Size size)  = this;
- 	eq FNoType.arrayType(Size size)       = this;
 	eq FRealType.arrayType(Size size)     = fRealArrayType(size);
  	eq FIntegerType.arrayType(Size size)  = fIntegerArrayType(size);
  	eq FStringType.arrayType(Size size)   = fStringArrayType(size);
