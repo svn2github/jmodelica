@@ -28,6 +28,7 @@ from jmodelica.fmi import FMIModel
 from jmodelica.optimization import ipopt
 from jmodelica.initialization.ipopt import NLPInitialization
 from jmodelica.initialization.ipopt import InitializationOptimizer
+from jmodelica.initialization.jfsolver import JFSolver
 
 try:
     from jmodelica.simulation.assimulo_interface import JMIDAE, JMIODE, FMIODE, write_data
@@ -633,3 +634,66 @@ class InvalidSolverArgumentException(Exception):
     def __str__(self):
         return repr(self.msg)
     
+class JFSInitResult(ResultBase): pass
+    
+class JFSInitAlg(AlgorithmBase):
+    """ Initialization using a solver of non-linear eq-systems"""
+
+    def __init__(self, model, alg_args={}):
+        """ Create algorithm objects.
+        
+        Parameters:
+            model -- 
+                jmi.Model object representation of the model
+            alg_args -- 
+                All arguments for the algorithm. See _set_alg_args
+                function call for names and default values.        
+        """
+        
+        self.model = model
+        self.solver = JFSolver(model)
+        #try to set algorithm arguments
+        try:
+            self._set_alg_args(**alg_args)
+        except TypeError, e:
+            raise InvalidAlgorithmArgumentException(e)
+        
+    def _set_alg_args(self,
+                      use_jac=True,
+                      result_file_name='', 
+                      result_format='txt'):
+        """ Set arguments for initialization algorithm.
+        
+        Parameters:
+            use_jac -- 
+                Boolean set to True if the jacobian is to be 
+                supplied by the JMIinterface
+                Default: True
+            result_file_name --
+                Name of result file.
+                Default: empty string (default generated file name will be used)
+            result_format --
+                Format of result file.
+                Default: 'txt'
+        """
+        self.solver.set_jac_usage(use_jac)
+        self.result_args = dict(file_name=result_file_name, format=result_format)
+          
+    def set_solver_options(self, solver_args): pass
+
+    def solve(self):
+        self.solver.initialize()
+
+    def get_result(self):
+        """ Write result to file, load result data and return NLSInitResult."""
+        
+        self.solver.export_result_dymola(**self.result_args)
+        # result file name
+        resultfile = self.result_args['file_name']
+        if not resultfile:
+            resultfile=self.model.get_name()+'_result.txt'
+        # load result file
+        res = jmodelica.io.ResultDymolaTextual(resultfile)
+        
+        # create and return result object
+        return JFSInitResult(self.model, resultfile, self.solver, res)
