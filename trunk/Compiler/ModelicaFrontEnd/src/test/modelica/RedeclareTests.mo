@@ -3379,7 +3379,7 @@ model RedeclareElement10
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.FlatteningTestCase(
          name="RedeclareElement10",
-         description="",
+         description="Redeclaring a short class decl with redeclare class extends",
          flatModel="
 fclass RedeclareTests.RedeclareElement10
  parameter Real c.y = c.x;
@@ -3411,7 +3411,7 @@ model RedeclareElement11
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.FlatteningTestCase(
          name="RedeclareElement11",
-         description="",
+         description="Redeclaring a short class decl with redeclare class extends",
          flatModel="
 fclass RedeclareTests.RedeclareElement11
  parameter Real b.c.y = b.c.x;
@@ -3440,21 +3440,87 @@ end RedeclareTests.RedeclareElement11;
 end RedeclareElement11;
 
 
-model RedeclareSameLevel10
+model RedeclareElement12
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
 	 JModelica.UnitTesting.FlatteningTestCase(
-		 name="RedeclareSameLevel10",
-		 description="Two interdependent classes redeclared as elements",
+		 name="RedeclareElement12",
+		 description="Class modification containing reference to element of the extends it is attached to",
 		 flatModel="
-fclass RedeclareTests.RedeclareSameLevel10
- Real d.y;
- Real d.c.x;
-equation
- d.c.x = 1;
- d.y = 2;
-end RedeclareTests.RedeclareSameLevel10;
+fclass RedeclareTests.RedeclareElement12
+ constant Real a = 3.0;
+ parameter Real b = 3.0 /* 3.0 */;
+end RedeclareTests.RedeclareElement12;
 ")})));
 
+	package A
+		replaceable package C
+			constant Real a = 1;
+		end C;
+		
+		replaceable package E
+			constant Real a = 2;
+		end E;
+	end A;
+	
+	package B
+		extends A (redeclare package C = D, redeclare package E = F(a = C.a));
+	end B;
+	
+	package D
+		extends A.C(a = 3);
+	end D;
+	
+	package F
+		extends A.E(a = 4);
+	end F;
+	
+	package G
+		extends B;
+	end G;
+	
+	constant Real a = G.E.a;
+	parameter Real b = a;
+end RedeclareElement12;
+
+
+model RedeclareElement13
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="RedeclareElement13",
+         description="Class modification containing reference to element of the extends it is attached to",
+         flatModel="
+fclass RedeclareTests.RedeclareElement13
+ constant Real a = 1.0;
+ parameter Real c = 1.0 /* 1.0 */;
+end RedeclareTests.RedeclareElement13;
+")})));
+
+	package A
+		constant Real b = 1;
+		
+		replaceable package E
+			constant Real a = 2;
+		end E;
+	end A;
+	
+	package B
+		extends A (redeclare package E = F(a = b));
+	end B;
+	
+	package F
+		extends A.E(a = 3);
+	end F;
+	
+	package G
+		extends B;
+	end G;
+	
+	constant Real a = G.E.a;
+	parameter Real c = a;
+end RedeclareElement13;
+
+
+model RedeclareSameLevel10
 	package A
 		replaceable partial model C
 		end C;
