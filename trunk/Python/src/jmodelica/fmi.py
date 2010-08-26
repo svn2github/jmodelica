@@ -145,11 +145,11 @@ class FMIModel(object):
         #Retrieve and load the binary
         self._dll = jmodelica.jmi.load_DLL(self._tempdll[:-len(suffix)],self._tempdir)
         
-        #Set FMIModel Typedefs
-        self._set_fmimodel_typedefs()
-        
         #Load calloc and free
         self._load_c()
+        
+        #Set FMIModel Typedefs
+        self._set_fmimodel_typedefs()
         
         #Load XML file
         self._load_xml()
@@ -171,6 +171,10 @@ class FMIModel(object):
         
             model._free
             model._calloc
+        
+        Also loads the helper function for the logger into,
+        
+            model._fmiHelperLogger
         """
         c_lib = C.CDLL(find_library('c'))
         
@@ -181,6 +185,21 @@ class FMIModel(object):
         self._free = c_lib.free
         self._free.restype = None
         self._free.argtypes = [C.c_void_p]
+        
+        #Get the path to the helper C function, logger
+        p = os.path.join(jmodelica.environ['JMODELICA_HOME'],'Python','util')
+        
+        #Load the helper function
+        if sys.platform == 'win32':
+            suffix = '.dll'
+        elif sys.platform == 'darwin':
+            suffix = '.dylib'
+        else:
+            suffix = '.so'
+        cFMILogger = C.CDLL(p+os.sep+'FMILogger'+suffix)        
+        
+        self._fmiHelperLogger = cFMILogger.pythonCallbacks
+        
         
     def _load_xml(self):
         """
@@ -363,6 +382,12 @@ class FMIModel(object):
                         ('freeMemory', self._fmiCallbackFreeMemory)]
         
         self._fmiCallbackFunctions = fmiCallbackFunctions
+        
+        #Sets the types for the helper function
+        #--
+        self._fmiHelperLogger.restype  = C.POINTER(self._fmiCallbackFunctions)
+        self._fmiHelperLogger.argtypes = [self._fmiCallbackFunctions] 
+        #--
         
         class fmiEventInfo(C.Structure):
             _fields_ = [('iterationConverged', self._fmiBoolean),
@@ -1229,7 +1254,7 @@ class FMIModel(object):
                         - Default False, no logging.
                         
             Returns::
-            
+
                 None
                 
         Calls the low-level FMI function: fmiInstantiateModel.
@@ -1247,10 +1272,15 @@ class FMIModel(object):
         functions.logger = self._fmiCallbackLogger(self.fmiCallbackLogger)
         functions.allocateMemory = self._fmiCallbackAllocateMemory(self.fmiCallbackAllocateMemory)
         functions.freeMemory = self._fmiCallbackFreeMemory(self.fmiCallbackFreeMemory)
-        self._functions = functions
-        self._model = self._fmiInstantiateModel(instance,guid,self._functions,logging)
         
-    def fmiCallbackLogger(self,c, instanceName, status, category, *message):
+        self._functions = functions
+        self._modFunctions = self._fmiCallbackFunctions()
+        self._modFunctions = self._fmiHelperLogger(self._functions)
+        self._modFunctions = self._modFunctions.contents
+        
+        self._model = self._fmiInstantiateModel(instance,guid,self._modFunctions,logging)
+        
+    def fmiCallbackLogger(self,c, instanceName, status, category, message):
         """
         Logg the information from the FMU.
         """
@@ -1270,14 +1300,17 @@ class FMIModel(object):
     
     def get_log(self):
         """
-        Returns the log information as a list. Empty if logging is set to False.
+        Returns the log information as a list. To turn on the logging use the method, 
+        set_debug_logging(True). The log is stored as a list of lists. For example
+        log[0] are the first log message to the log and consists of, in the following
+        order, the instance name, the status, the category and the message.
         
             Returns::
             
-                log     - A list.
+                log     - A list of lists.
+                
         """
-        
-        return self._log
+        return self._log 
     
     #XML PART
     def get_variable_descriptions(self, include_alias=True):

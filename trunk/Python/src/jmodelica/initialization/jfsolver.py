@@ -10,7 +10,6 @@ import jmodelica.jmi as jmi
 from jmodelica.jmi import JMIException
 from jmodelica import io
 
-print "Importing JFSolver"
 
 class JFSolver(object):
     """ Class handling the initialization of a DAE using a solver of nl-eqs 

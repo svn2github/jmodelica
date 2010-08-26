@@ -69,6 +69,7 @@ typedef struct c_fmiCallbackFunctions {
 } c_fmiCallbackFunctions;
 
 static py_logger_type python_logger_callback;
+c_fmiCallbackFunctions c_struct;
 
 #define BUF_SIZE 1000 //Defines the buffer size
 
@@ -83,14 +84,14 @@ void fmuLoggerCallback(fmiComponent c, fmiString instanceName, fmiStatus status,
 }
 
 
-c_fmiCallbackFunctions pythonCallbacks(py_fmiCallbackFunctions py_struct) {
+c_fmiCallbackFunctions* pythonCallbacks(py_fmiCallbackFunctions py_struct) {
     //Transforms the python struct to the C struct
     python_logger_callback = py_struct.logger;
-    c_fmiCallbackFunctions c_struct;
     c_struct.logger = fmuLoggerCallback;
     c_struct.allocateMemory = py_struct.allocateMemory;
     c_struct.freeMemory = py_struct.freeMemory;
-    return c_struct;
+    
+    return &c_struct;
 }
 
 
