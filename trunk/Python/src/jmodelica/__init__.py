@@ -92,7 +92,8 @@ def optimize(model,
     to the model file (a jmi.Model is enough if model is already compiled) and 
     use the default values for all other arguments.
     
-    Parameters:
+    Parameters::
+    
         model -- 
             Model object or model name (supply model name if model should be 
             (re)compiled, then mo-file(s) must also be provided)
@@ -125,7 +126,9 @@ def optimize(model,
             solver has been selected for the algorithm. See algorithm 
             implementation in algorithm_drivers.py for details.
             Default: empty dict
-    Returns:
+    
+    Returns::
+    
         model -- The jmi.Model object
         res -- The loaded result file.
     
@@ -164,7 +167,8 @@ def simulate(model,
     to the model file (a jmi.Model is enough if model is already compiled) and 
     use the default values for all other arguments.
     
-    Parameters:
+    Parameters::
+    
         model -- 
             Model object or model name (supply model name if model should be 
             (re)compiled, then mo-file must also be provided)
@@ -201,7 +205,9 @@ def simulate(model,
             solver has been selected for the algorithm. See algorithm 
             implementation in algorithm_drivers.py for details.
             Default: empty dict
-    Returns:
+    
+    Returns::
+    
         model -- The jmi.Model object
         res -- The loaded result file.
     
@@ -238,7 +244,8 @@ def initialize(model,
     to the model file (a jmi.Model is enough if model is already compiled) and 
     use the default values for all other arguments.
     
-    Parameters:
+    Parameters::
+    
         model -- 
             Model object or model name (supply model name if model should be 
             (re)compiled, then mo-file must also be provided)
@@ -276,7 +283,8 @@ def initialize(model,
             implementation in algorithm_drivers.py for details.
             Default: empty dict
             
-    Returns:
+    Returns::
+    
         model -- The jmi.Model object
         res -- The loaded result file.
     

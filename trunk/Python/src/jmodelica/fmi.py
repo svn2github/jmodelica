@@ -742,7 +742,7 @@ class FMIModel(object):
     def get_event_info(self):
         """
         Returns the event information from the FMU. The event information
-        is a struct which contains,
+        is a struct which contains, ::
         
             iterationConverged          - Event iteration converged (if True).
             stateValueReferencesChanged - ValueReferences of states x changed (if True).
@@ -751,18 +751,18 @@ class FMIModel(object):
             upcomingTimeEvent           - if True, nextEventTime is the next time event.
             nextEventTime               - The next time event.
         
-            Parameters::
-            
-                None
+        Parameters::
+        
+            None
                 
-            Return::
+        Return::
             
-                eventInfo   - The eventInfo struct.
+            eventInfo   - The eventInfo struct.
                 
-            Example::
+        Example::
             
-                event_info    = model.event_info
-                nextEventTime = model.event_info.nextEventTime
+            event_info    = model.event_info
+            nextEventTime = model.event_info.nextEventTime
         
         """
         
@@ -789,7 +789,7 @@ class FMIModel(object):
                 
             Example::
             
-            val = model.get_continuous_value_reference()
+                val = model.get_continuous_value_reference()
             
         Calls the low-level FMI function: fmiGetStateValueReferences
         """
@@ -1330,10 +1330,12 @@ class FMIModel(object):
         """
         Extract the ValueReference given a variable name.
         
-        Parameters:
+        Parameters::
+        
             variablename -- the name of the variable
             
-        Returns:
+        Returns::
+        
             The ValueReference for the variable passed as argument.
         """
         if variablename != None:
@@ -1351,8 +1353,10 @@ class FMIModel(object):
         """
         Extract the names of the variables in a model.
 
-        Returns:
+        Returns::
+        
             Dict with variable name as key and value reference as value.
+        
         """
         
         if type != None:
@@ -1382,7 +1386,8 @@ class FMIModel(object):
             
             Raises exception if argument is not in model.
 
-            Returns:
+            Returns::
+            
                 A list consisting of the alias variable names and another
                 list consisting of booleans indicating if the corresponding
                 alias is negated.

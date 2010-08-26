@@ -171,7 +171,8 @@ def _parse_XML(filename, schemaname=''):
     also validated against the XML Schema file provided before 
     parsing. 
 
-    Parameters:
+    Parameters::
+    
         filename -- 
             Name of XML file to parse including absolute or relative 
             path.
@@ -179,13 +180,15 @@ def _parse_XML(filename, schemaname=''):
             Name of XML Schema file including absolute or relative 
             path.
     
-    Exceptions:   
+    Exceptions::
+       
         XMLException -- 
             If the XML file can not be read or is not well-formed. 
             If a schema is present and if the schema file can not be 
             read, is not well-formed or if the validation fails. 
     
-    Returns:    
+    Returns::
+       
         Reference to the ElementTree object containing the parsed XML.
     
     """
@@ -428,7 +431,8 @@ class ModelDescription:
     def get_guid(self):
         """ Get model attribute GUID.
         
-        Returns:
+        Returns::
+        
             GUID as string.
         """
         return self._attributes['guid']
@@ -436,7 +440,8 @@ class ModelDescription:
     def get_description(self):
         """ Get model attribute description.
         
-        Returns:
+        Returns::
+        
             description as string (empty string if not specified in XML).
         """
         return self._attributes['description']
@@ -444,7 +449,8 @@ class ModelDescription:
     def get_author(self):
         """ Get model attribute author.
         
-        Returns:
+        Returns::
+        
             author as string (empty string if not specified in XML).
         """
         return self._attributes['author']
@@ -452,7 +458,8 @@ class ModelDescription:
     def get_version(self):
         """ Get model attribute version (of FMU). 
         
-        Returns:
+        Returns::
+        
             version as float if set, otherwise None.
         """
         if self._attributes['version'] == '':
@@ -462,7 +469,8 @@ class ModelDescription:
     def get_generation_tool(self):
         """ Get model attribute generation tool.
         
-        Returns:
+        Returns::
+        
             generation tool as string (empty string if not specified in XML).
         """
         return self._attributes['generationTool']
@@ -470,7 +478,8 @@ class ModelDescription:
     def get_generation_date_and_time(self):
         """ Get model attribute date and time.
         
-        Returns:
+        Returns::
+        
             date and time as string (empty string if not specified in XML).
         """
         return self._attributes['generationDateAndTime']
@@ -478,7 +487,8 @@ class ModelDescription:
     def get_variable_naming_convention(self):
         """ Get model attribute variable naming convention.
         
-        Returns:
+        Returns::
+        
             variable naming convention as string.
         """
         return self._attributes['variableNamingConvention']
@@ -486,7 +496,8 @@ class ModelDescription:
     def get_number_of_continuous_states(self):
         """ Get model attribute number of continuous states.
         
-        Returns:
+        Returns::
+        
             number of continuous states as unsigned int.
          """
         if self._attributes['numberOfContinuousStates'] == '':
@@ -496,7 +507,8 @@ class ModelDescription:
     def get_number_of_event_indicators(self):
         """ Get model attribute number of event indicators.
         
-        Returns:
+        Returns::
+        
             number of event indicators as unsigned int.
          """
         if self._attributes['numberOfEventIndicators'] == '':
@@ -506,7 +518,8 @@ class ModelDescription:
     def get_unit_definitions(self):
         """ Get all unit definitions set in model.
         
-        Returns:
+        Returns::
+        
             List of unit definitions (type: BaseUnit)
         """
         return self._unit_definitions
@@ -514,7 +527,8 @@ class ModelDescription:
     def get_type_definitions(self):
         """ Get all type definitions set in model.
         
-        Returns:
+        Returns::
+        
             List of type definitions (type: Type)
         """
         return self._type_definitions
@@ -522,7 +536,8 @@ class ModelDescription:
     def get_default_experiment(self):
         """ Get default experiment data set in model.
         
-        Returns:
+        Returns::
+        
             Object of type DefaultExperiment or None if not set.
         """
         return self._default_experiment
@@ -530,7 +545,8 @@ class ModelDescription:
     def get_vendor_annotations(self):
         """ Get all vendor annotations set in model.
         
-        Returns:
+        Returns::
+        
             List of vendor annotations (type: Tool)
         """
         return self._vendor_annotations
@@ -538,7 +554,8 @@ class ModelDescription:
     def get_model_variables(self):
         """ Get all variables in model. 
         
-        Returns:
+        Returns::
+        
             List of all variables (type: ScalarVariable)
         """
         return self._model_variables
@@ -546,7 +563,8 @@ class ModelDescription:
     def get_optimization(self):
         """ Get optimization data set in model.
         
-        Returns:
+        Returns::
+        
             Object of type Optimization if model is Optimica, otherwise 
             None.
         """
@@ -558,10 +576,12 @@ class ModelDescription:
         """
         Get the value reference given a variable name.
         
-        Parameters:
+        Parameters::
+        
             variablename -- the name of the variable
             
-        Returns:
+        Returns::
+        
             The value reference for the variable passed as argument. 
         
         Raises exception if variable was not found.
@@ -675,7 +695,8 @@ class ModelDescription:
         """
         Extract the names of the variables in a model.
 
-        Returns:
+        Returns::
+        
             List of tuples containing value references and names 
             respectively.
         """
@@ -700,7 +721,8 @@ class ModelDescription:
     def get_variable_aliases(self, ignore_cache=False):
         """ Extract the alias data for each variable in the model.
         
-        Returns:
+        Returns::
+        
             List of tuples containing value references and alias data 
             respectively.
         """
@@ -718,7 +740,8 @@ class ModelDescription:
         """
         Extract the descriptions of the variables in a model.
 
-        Returns:
+        Returns::
+        
             List of tuples containing value reference and description 
             respectively.
         """
@@ -743,7 +766,8 @@ class ModelDescription:
         ignore_cache=False):
         """ Get the variability of the variables in the model.
         
-        Returns:
+        Returns::
+        
             List of tuples containing value reference and variability 
             respectively.
         """
@@ -768,7 +792,8 @@ class ModelDescription:
             ignore_cache=False):
         """ Get the nominal attribute of the variables in the model.
         
-        Returns:
+        Returns::
+        
             List of tuples containing value reference and value of 
             nominal attribute respectively.
         """
@@ -801,7 +826,8 @@ class ModelDescription:
         ignore_cache=False):
         """ Get the start attributes of the variables in the model.
         
-        Returns:
+        Returns::
+        
             List of tuples containing value reference and value of 
             start attribute respectively.
         """
@@ -828,7 +854,8 @@ class ModelDescription:
         ignore_cache=False):
         """ Get all real variables in the model.
         
-        Returns:
+        Returns::
+        
             List of all ScalarVariables of type Real.
         """
         if not ignore_cache:
@@ -841,7 +868,8 @@ class ModelDescription:
         ignore_cache=False):
         """ Get all string variables in the model.
         
-        Returns:
+        Returns::
+        
             List of all ScalarVariables of type String.
         """
         if not ignore_cache:
@@ -854,7 +882,8 @@ class ModelDescription:
         ignore_cache=False):
         """ Get all integer variables in the model.
         
-        Returns:
+        Returns::
+        
             List of all ScalarVariables of type Integer.
         """
         if not ignore_cache:
@@ -867,7 +896,8 @@ class ModelDescription:
         ignore_cache=False):
         """ Get all boolean variables in the model.
         
-        Returns:
+        Returns::
+        
             List of all ScalarVariables of type Boolean.
         """
         if not ignore_cache:
@@ -878,7 +908,8 @@ class ModelDescription:
 
         
     def _get_all_variables(self, type, include_alias):
-        """ Helper function which returns all variables of type: 'type'.
+        """ 
+        Helper function which returns all variables of type: 'type'.
         """
         typevars = []
         scalarvariables = self.get_model_variables()
@@ -900,7 +931,8 @@ class ModelDescription:
         """ 
         Get the names of all optimized independent parameters.
         
-        Returns:
+        Returns::
+        
             List of tuples containing value reference and name 
             respectively.
             
@@ -934,7 +966,8 @@ class ModelDescription:
         """ 
         Get the names of all derivatives.
         
-        Returns:
+        Returns::
+        
             List of tuples containing value reference and name 
             respectively.
             
@@ -966,7 +999,8 @@ class ModelDescription:
         """ 
         Get the names of all states.
         
-        Returns:
+        Returns::
+        
             List of tuples containing value reference and name 
             respectively.
             
@@ -998,7 +1032,8 @@ class ModelDescription:
         """ 
         Get the names of all inputs.
         
-        Returns:
+        Returns::
+        
             List of tuples containing value reference and name 
             respectively.
             
@@ -1032,7 +1067,8 @@ class ModelDescription:
         """ 
         Get the names of all algebraic variables.
         
-        Returns:
+        Returns::
+        
             List of tuples containing value reference and name 
             respectively.
             
@@ -1066,7 +1102,8 @@ class ModelDescription:
         """ Get the start attributes of the independent paramenters 
             (variability:parameter, free: true) in the model.
         
-        Returns:
+        Returns::
+        
             List of tuples containing value reference and value of 
             start attribute respectively.
         """
@@ -1099,7 +1136,8 @@ class ModelDescription:
         """ Get the start attributes of the derivatives 
             (variable_category:derivative) in the model.
         
-        Returns:
+        Returns::
+        
             List of tuples containing value reference and value of 
             start attribute respectively.
         """
@@ -1130,7 +1168,8 @@ class ModelDescription:
         """ Get the start attributes of the states 
             (variable_category:state) in the model.
         
-        Returns:
+        Returns::
+        
             List of tuples containing value reference and value of 
             start attribute respectively.
         """
@@ -1161,7 +1200,8 @@ class ModelDescription:
         """ Get the start attributes of the inputs 
             (variable_category:algebraic, causality: input) in the model.
         
-        Returns:
+        Returns::
+        
             List of tuples containing value reference and value of 
             start attribute respectively.
         """
@@ -1194,7 +1234,8 @@ class ModelDescription:
         """ Get the start attributes of the algebraic variables 
             (variable_category:algebraic, causality: not input) in the model.
         
-        Returns:
+        Returns::
+        
             List of tuples containing value reference and value of 
             start attribute respectively.
         """
@@ -1228,7 +1269,8 @@ class ModelDescription:
         Get value reference and initial guess attribute for all optimized 
         independent parameters (variability:parameter, free: true).
         
-        Returns:
+        Returns::
+        
             List of tuples containing value reference and value of 
             initial guess attribute respectively.
         
@@ -1268,7 +1310,8 @@ class ModelDescription:
         """ Get the initial guess attribute of the derivatives 
             (variable_category:derivative) in the model.
         
-        Returns:
+        Returns::
+        
             List of tuples containing value reference and value of 
             initial guess attribute respectively.
         """
@@ -1307,7 +1350,8 @@ class ModelDescription:
         """ Get the initial guess attributes of the states 
             (variable_category:state) in the model.
         
-        Returns:
+        Returns::
+        
             List of tuples containing value reference and value of 
             initial guess attribute respectively.
         """
@@ -1346,7 +1390,8 @@ class ModelDescription:
         """ Get the initial guess attributes of the inputs 
             (variable_category:algebraic, causality: input) in the model.
         
-        Returns:
+        Returns::
+        
             List of tuples containing value reference and value of 
             initial guess attribute respectively.
         """
@@ -1387,7 +1432,8 @@ class ModelDescription:
         """ Get the initial guess attributes of the algebraic variables 
             (variable_category:algebraic, causality: not input) in the model.
         
-        Returns:
+        Returns::
+        
             List of tuples containing value reference and value of 
             initial guess attribute respectively.
         """
@@ -1429,7 +1475,8 @@ class ModelDescription:
         Get value reference and min attribute for all optimized 
         independent parameters (variability:parameter, free: true).
         
-        Returns:
+        Returns::
+        
             List of tuples containing value reference and value of 
             min attribute respectively.
         
@@ -1469,7 +1516,8 @@ class ModelDescription:
         """ Get the min attribute of the derivatives 
             (variable_category:derivative) in the model.
         
-        Returns:
+        Returns::
+        
             List of tuples containing value reference and value of 
             min attribute respectively.
         """
@@ -1508,7 +1556,8 @@ class ModelDescription:
         """ Get the min attributes of the states 
             (variable_category:state) in the model.
         
-        Returns:
+        Returns::
+        
             List of tuples containing value reference and value of 
             min attribute respectively.
         """
@@ -1547,7 +1596,8 @@ class ModelDescription:
         """ Get the min attributes of the inputs 
             (variable_category:algebraic, causality: input) in the model.
         
-        Returns:
+        Returns::
+        
             List of tuples containing value reference and value of 
             min attribute respectively.
         """
@@ -1588,7 +1638,8 @@ class ModelDescription:
         """ Get the min attributes of the algebraic variables 
             (variable_category:algebraic, causality: not input) in the model.
         
-        Returns:
+        Returns::
+        
             List of tuples containing value reference and value of 
             min attribute respectively.
         """
@@ -1630,7 +1681,8 @@ class ModelDescription:
         Get value reference and max attribute for all optimized 
         independent parameters (variability:parameter, free: true).
         
-        Returns:
+        Returns::
+        
             List of tuples containing value reference and value of 
             max attribute respectively.
         
@@ -1670,7 +1722,8 @@ class ModelDescription:
         """ Get the max attribute of the derivatives 
             (variable_category:derivative) in the model.
         
-        Returns:
+        Returns::
+        
             List of tuples containing value reference and value of 
             max attribute respectively.
         """
@@ -1709,7 +1762,8 @@ class ModelDescription:
         """ Get the max attributes of the states 
             (variable_category:state) in the model.
         
-        Returns:
+        Returns::
+        
             List of tuples containing value reference and value of 
             max attribute respectively.
         """
@@ -1748,7 +1802,8 @@ class ModelDescription:
         """ Get the max attributes of the inputs 
             (variable_category:algebraic, causality: input) in the model.
         
-        Returns:
+        Returns::
+        
             List of tuples containing value reference and value of 
             max attribute respectively.
         """
@@ -1789,7 +1844,8 @@ class ModelDescription:
         """ Get the max attributes of the algebraic variables 
             (variable_category:algebraic, causality: not input) in the model.
         
-        Returns:
+        Returns::
+        
             List of tuples containing value reference and value of 
             max attribute respectively.
         """
@@ -1831,7 +1887,8 @@ class ModelDescription:
         appears linearly in all equations and constraints for all optimized 
         independent parameters.
         
-        Returns:
+        Returns::
+        
             List of tuples containing value reference and value of 
             is linear element respectively.
 
@@ -1865,7 +1922,8 @@ class ModelDescription:
         appears linearly in all equations and constraints for all 
         derivatives (variable_category:derivative) in the model.
         
-        Returns:
+        Returns::
+        
             List of tuples containing value reference and value of 
             is linear element respectively.
         """
@@ -1898,7 +1956,8 @@ class ModelDescription:
         appears linearly in all equations and constraints for all states 
         (variable_category:state) in the model.
         
-        Returns:
+        Returns::
+        
             List of tuples containing value reference and value of 
             is linear element respectively.
         """
@@ -1931,7 +1990,8 @@ class ModelDescription:
         appears linearly in all equations and constraints for all inputs 
         (variable_category:algebraic, causality: input) in the model.
         
-        Returns:
+        Returns::
+        
             List of tuples containing value reference and value of 
             is linear element respectively.
         """
@@ -1967,7 +2027,8 @@ class ModelDescription:
         algebraic variables (variable_category:algebraic, 
         causality: not input) in the model.
         
-        Returns:
+        Returns::
+        
             List of tuples containing value reference and value of 
             is linear element respectively.
         """
@@ -2001,7 +2062,8 @@ class ModelDescription:
         Get value reference and linear timed variables for all derivatives 
         (variable_category:derivative) in the model.
 
-        Returns:
+        Returns::
+        
             List of tuples with value reference and list of linear time 
             variables respectively. 
         
@@ -2043,7 +2105,8 @@ class ModelDescription:
         Get value reference and linear timed variables for all states 
         (variable_category:state) in the model.
 
-        Returns:
+        Returns::
+        
             List of tuples with value reference and list of linear time 
             variables respectively. 
         
@@ -2085,7 +2148,8 @@ class ModelDescription:
         Get value reference and linear timed variables for all inputs 
         (variable_category:algebraic, causality: input) in the model.
 
-        Returns:
+        Returns::
+        
             List of tuples with value reference and list of linear time 
             variables respectively. 
         
@@ -2130,7 +2194,8 @@ class ModelDescription:
         variables (variable_category:algebraic, causality: not input) in 
         the model.
 
-        Returns:
+        Returns::
+        
             List of tuples with value reference and list of linear time 
             variables respectively. 
         
@@ -2172,7 +2237,8 @@ class ModelDescription:
         """ 
         Get value reference for all optimized independent parameters.
         
-        Returns:
+        Returns::
+        
             List of value reference for all optimized independent 
             parameters.
             
@@ -2348,7 +2414,8 @@ class BaseUnit:
     def get_unit(self):
         """ Get the BaseUnit attribute unit.
         
-        Returns:
+        Returns::
+        
             unit as string.
         """
         return self._attributes['unit']
@@ -2356,7 +2423,8 @@ class BaseUnit:
     def get_display_units(self):
         """ Get all display units in the BaseUnit element.
         
-        Returns:
+        Returns::
+        
             List of all display units (type: DisplayUnitDefinition)
          """
         return self._display_unit_definitions
@@ -2381,7 +2449,8 @@ class DisplayUnitDefinition:
     def get_display_unit(self):
         """ Get the value of the display unit attribute. 
         
-        Returns:
+        Returns::
+        
             display unit as string.
         """
         return self._attributes['displayUnit']
@@ -2389,7 +2458,8 @@ class DisplayUnitDefinition:
     def get_gain(self):
         """ Get the value of the gain attribute.
         
-        Returns:
+        Returns::
+        
             gain as float (default: 1).
         """
         return float(self._attributes['gain'])
@@ -2397,7 +2467,8 @@ class DisplayUnitDefinition:
     def get_offset(self):
         """ Get the value of the offset attribute.
         
-        Returns:
+        Returns::
+        
             offset as float (default: 0).
         """
         return float(self._attributes['offset'])
@@ -2433,7 +2504,8 @@ class Type:
     def get_name(self):
         """ Get the value of the name attribute. 
         
-        Returns:
+        Returns::
+        
             name as string.
         """
         return self._attributes['name']
@@ -2441,7 +2513,8 @@ class Type:
     def get_description(self):
         """ Get the value of the description attribute. 
         
-        Returns:
+        Returns::
+        
             description as string (empty string if not set).
         """
         return self._attributes['description']
@@ -2450,7 +2523,8 @@ class Type:
         """ Get the type of the type defined. (Real, Integer, Boolean, 
             String or Enumeration Type)
         
-        Returns:
+        Returns::
+        
                 Object of type RealType, IntegerType, BooleanType, 
                 StringType or EnumerationType.
         """
@@ -2478,7 +2552,8 @@ class RealType:
     def get_quantity(self):
         """ Get the value of the quantity attribute.
         
-        Returns:
+        Returns::
+        
             quantity as string (empty string if not set).
         """
         return self._attributes['quantity']
@@ -2486,7 +2561,8 @@ class RealType:
     def get_unit(self):
         """ Get the value of the unit attribute.
         
-        Returns:
+        Returns::
+        
             unit as string (empty string if not set).
         """
         return self._attributes['unit']
@@ -2494,7 +2570,8 @@ class RealType:
     def get_display_unit(self):
         """ Get the value of the display unit attribute.
         
-        Returns:
+        Returns::
+        
             display unit as string (empty string if not set).
         """
         return self._attributes['displayUnit']
@@ -2502,7 +2579,8 @@ class RealType:
     def get_relative_quantity(self):
         """ Get the value of the relative quantity attribute.
         
-        Returns:
+        Returns::
+        
             relative quantity as bool (default: false).
         """
         return _translate_xmlbool(self._attributes['relativeQuantity'])
@@ -2510,7 +2588,8 @@ class RealType:
     def get_min(self):
         """ Get the value of the min attribute.
         
-        Returns:
+        Returns::
+        
             min as float (None if not set).
         """
         if self._attributes['min'] == '':
@@ -2520,7 +2599,8 @@ class RealType:
     def get_max(self):
         """ Get the value of the max attribute.
         
-        Returns:
+        Returns::
+        
             max as float (None if not set).
         """
         if self._attributes['max'] == '':
@@ -2530,7 +2610,8 @@ class RealType:
     def get_nominal(self):
         """ Get the value of the nominal attribute.
         
-        Returns:
+        Returns::
+        
             nominal as float (None if not set).
         """
         if self._attributes['nominal'] == '':
@@ -2552,7 +2633,8 @@ class IntegerType:
     def get_quantity(self):
         """ Get the value of the quantity attribute.
         
-        Returns:
+        Returns::
+        
             quantity as string (empty string if not set).
         """
         return self._attributes['quantity']
@@ -2560,7 +2642,8 @@ class IntegerType:
     def get_min(self):
         """ Get the value of the min attribute.
         
-        Returns:
+        Returns::
+        
             min as int (None if not set).
         """
         if self._attributes['min'] == '':
@@ -2570,7 +2653,8 @@ class IntegerType:
     def get_max(self):
         """ Get the value of the max attribute.
         
-        Returns:
+        Returns::
+        
             max as int (None if not set).
         """
         if self._attributes['max'] == '':
@@ -2616,7 +2700,8 @@ class EnumerationType:
     def get_quantity(self):
         """ Get the value of the quantity attribute.
         
-        Returns:
+        Returns::
+        
             quantity as string (empty string if not set).
         """
         return self._attributes['quantity']
@@ -2624,7 +2709,8 @@ class EnumerationType:
     def get_min(self):
         """ Get the value of the min attribute.
         
-        Returns:
+        Returns::
+        
             min as int (None if not set).
         """
         if self._attributes['min'] == '':
@@ -2634,7 +2720,8 @@ class EnumerationType:
     def get_max(self):
         """ Get the value of the max attribute.
         
-        Returns:
+        Returns::
+        
             max as int (None if not set).
         """
         if self._attributes['max'] == '':
@@ -2644,7 +2731,8 @@ class EnumerationType:
     def get_items(self):
         """ Get items defined in the enumeration.
         
-        Returns:
+        Returns::
+        
             List of all items (type: Item)
         """
         return self._items
@@ -2666,7 +2754,8 @@ class Item:
     def get_name(self):
         """ Get the value of the name attribute.
         
-        Returns:
+        Returns::
+        
             name as string.
         """
         return self._attributes['name']
@@ -2674,7 +2763,8 @@ class Item:
     def get_description(self):
         """ Get the value of the description attribute.
         
-        Returns:
+        Returns::
+        
             description as string.
         """
         return self._attributes['description']
@@ -2698,7 +2788,8 @@ class DefaultExperiment:
     def get_start_time(self):
         """ Get the value of the start time attribute.
         
-        Returns:
+        Returns::
+        
             start time as float (None if not set).
         """
         if self._attributes['startTime'] == '':
@@ -2708,7 +2799,8 @@ class DefaultExperiment:
     def get_stop_time(self):
         """ Get the value of the stop time attribute.
         
-        Returns:
+        Returns::
+        
             stop time as float (None if not set).
         """
         if self._attributes['stopTime'] == '':
@@ -2718,7 +2810,8 @@ class DefaultExperiment:
     def get_tolerance(self):
         """ Get the value of the tolerance attribute.
         
-        Returns:
+        Returns::
+        
             tolerance as float (None if not set).
         """
         if self._attributes['tolerance'] == '':
@@ -2747,7 +2840,8 @@ class Tool:
     def get_name(self):
         """ Get the value of the name attribute.
         
-        Returns:
+        Returns::
+        
             name as string.
         """
         return self._attributes['name']
@@ -2755,7 +2849,8 @@ class Tool:
     def get_annotations(self):
         """ Get all annotations set for the tool.
         
-        Returns:
+        Returns::
+        
             List of all annotations (type: Annotation)
         """
         return self._annotations
@@ -2777,7 +2872,8 @@ class Annotation:
     def get_name(self):
         """ Get the value of the name attribute.
         
-        Returns:
+        Returns::
+        
             name as string.
         """
         return self._attributes['name']
@@ -2785,7 +2881,8 @@ class Annotation:
     def get_value(self):
         """ Get the value of the value attribute.
         
-        Returns:
+        Returns::
+        
             value as string.
         """
         return self._attributes['value']
@@ -2856,7 +2953,8 @@ class ScalarVariable:
     def get_name(self):
         """ Get the value of the name attribute.
         
-        Returns:
+        Returns::
+        
             name as string.
         """
         return self._attributes['name']
@@ -2864,7 +2962,8 @@ class ScalarVariable:
     def get_value_reference(self):
         """ Get the value of the value reference attribute.
         
-        Returns:
+        Returns::
+        
             value reference as unsigned int.
         """
         if self._attributes['valueReference'] == '':
@@ -2874,7 +2973,8 @@ class ScalarVariable:
     def get_description(self):
         """ Get the value of the description attribute.
         
-        Returns:
+        Returns::
+        
             description as string (empty string if not set).
         """
         return self._attributes['description']
@@ -2882,7 +2982,8 @@ class ScalarVariable:
     def get_variability(self):
         """ Get the value of the variability attribute.
         
-        Returns:
+        Returns::
+        
             variability as enumeration: CONTINUOUS, CONSTANT, PARAMETER 
             or DISCRETE (default: CONTINUOUS).
         """
@@ -2891,7 +2992,8 @@ class ScalarVariable:
     def get_causality(self):
         """ Get the value of the causality attribute.
         
-        Returns:
+        Returns::
+        
             causality as enumeration: INTERNAL, INPUT ,OUTPUT or NONE. 
             (default: INTERNAL).
         """
@@ -2900,7 +3002,8 @@ class ScalarVariable:
     def get_alias(self):
         """ Get the value of the alias attribute.
         
-        Returns:
+        Returns::
+        
             alias as enumeration: NO_ALIAS, ALIAS or NEGATED_ALIAS. 
             (default: NO_ALIAS).
         """
@@ -2910,7 +3013,8 @@ class ScalarVariable:
         """ Get the type of the type defined. (Real, Integer, Boolean, 
             String or Enumeration Type)
         
-        Returns:
+        Returns::
+        
                 Object of type Real, Integer, Boolean, String or 
                 Enumeration.
         """
@@ -2919,7 +3023,8 @@ class ScalarVariable:
     def get_direct_dependency(self):
         """ Get the direct dependencies set for the variable.
         
-        Returns:
+        Returns::
+        
             Object of type DirectDependency (None if not set).
         """
         return self._direct_dependency
@@ -2927,7 +3032,8 @@ class ScalarVariable:
     def get_is_linear(self):
         """ Get the value of the is linear element.
         
-        Returns:
+        Returns::
+        
             is linear as bool (None if not set).
         """
         return self._is_linear
@@ -2935,7 +3041,8 @@ class ScalarVariable:
     def get_is_linear_timed_variables(self):
         """ Get all is linear timed variables set for the variable.
         
-        Returns:
+        Returns::
+        
             List of all linear timed variables (type: TimePoint)
         """
         return self._is_linear_timed_variables
@@ -2943,7 +3050,8 @@ class ScalarVariable:
     def get_variable_category(self):
         """ Get the value of the variable category element.
         
-        Returns:
+        Returns::
+        
             variable category as enumeration: ALGEBRAIC, STATE, 
             DEPENDENT_CONSTANT, INDEPENDENT_CONSTANT, 
             DEPENDENT_PARAMETER, INDEPENDENT_PARAMETER or DERIVATIVE  
@@ -2978,7 +3086,8 @@ class Real:
     def get_declared_type(self):
         """ Get the value of the declared type attribute.
         
-        Returns:
+        Returns::
+        
             declared type as string (empty string if not set).
         """
         return self._attributes['declaredType']
@@ -2986,7 +3095,8 @@ class Real:
     def get_quantity(self):
         """ Get the value of the quantity attribute.
         
-        Returns:
+        Returns::
+        
             quantity as string (empty string if not set).
         """
         return self._attributes['quantity']
@@ -2994,7 +3104,8 @@ class Real:
     def get_unit(self):
         """ Get the value of the unit attribute.
         
-        Returns:
+        Returns::
+        
             unit as string (empty string if not set).
         """
         return self._attributes['unit']
@@ -3002,7 +3113,8 @@ class Real:
     def get_display_unit(self):
         """ Get the value of the display unit attribute.
         
-        Returns:
+        Returns::
+        
             display unit as string (empty string if not set).
         """
         return self._attributes['displayUnit']
@@ -3010,7 +3122,8 @@ class Real:
     def get_relative_quantity(self):
         """ Get the value of the relative quantity attribute.
         
-        Returns:
+        Returns::
+        
             relative quantity as bool (default: false).
         """
         return _translate_xmlbool(self._attributes['relativeQuantity'])
@@ -3018,7 +3131,8 @@ class Real:
     def get_min(self):
         """ Get the value of the min attribute.
         
-        Returns:
+        Returns::
+        
             min as float (None if not set).
         """
         min = self._attributes['min']
@@ -3029,7 +3143,8 @@ class Real:
     def get_max(self):
         """ Get the value of the max attribute.
         
-        Returns:
+        Returns::
+        
             max as float (None if not set).
         """
         max = self._attributes['max']
@@ -3040,7 +3155,8 @@ class Real:
     def get_nominal(self):
         """ Get the value of the nominal attribute.
         
-        Returns:
+        Returns::
+        
             nominal as float (None if not set).
         """
         nominal = self._attributes['nominal']
@@ -3051,7 +3167,8 @@ class Real:
     def get_start(self):
         """ Get the value of the start attribute.
         
-        Returns:
+        Returns::
+        
             start as float (None if not set).
         """
         start = self._attributes['start']
@@ -3062,7 +3179,8 @@ class Real:
     def get_fixed(self):
         """ Get the value of the fixed attribute.
         
-        Returns:
+        Returns::
+        
             fixed as bool (None if not set).
         """
         fixed = self._attributes['fixed']
@@ -3073,7 +3191,8 @@ class Real:
     def get_free(self):
         """ Get the value of the free attribute.
         
-        Returns:
+        Returns::
+        
             free as bool (None if not set).
         """
         free = self._attributes['free']
@@ -3084,7 +3203,8 @@ class Real:
     def get_initial_guess(self):
         """ Get the value of the attribute.
         
-        Returns:
+        Returns::
+        
             initial guess as float (None if not set).
         """
         initialguess = self._attributes['initialGuess']
@@ -3115,7 +3235,8 @@ class Integer:
     def get_declared_type(self):
         """ Get the value of the declared type attribute.
         
-        Returns:
+        Returns::
+        
             declared type as string (empty string if not set).
         """
         return self._attributes['declaredType']
@@ -3123,7 +3244,8 @@ class Integer:
     def get_quantity(self):
         """ Get the value of the quantity attribute.
         
-        Returns:
+        Returns::
+        
             quantity as string (empty string if not set).
         """
         return self._attributes['quantity']
@@ -3131,7 +3253,8 @@ class Integer:
     def get_min(self):
         """ Get the value of the min attribute.
         
-        Returns:
+        Returns::
+        
             min as int (None if not set).
         """
         min = self._attributes['min']
@@ -3142,7 +3265,8 @@ class Integer:
     def get_max(self):
         """ Get the value of the max attribute.
         
-        Returns:
+        Returns::
+        
             max as int (None if not set).
         """
         max = self._attributes['max']
@@ -3153,7 +3277,8 @@ class Integer:
     def get_start(self):
         """ Get the value of the start attribute.
         
-        Returns:
+        Returns::
+        
             start as int (None if not set).
         """
         start = self._attributes['start']
@@ -3164,7 +3289,8 @@ class Integer:
     def get_fixed(self):
         """ Get the value of the fixed attribute.
         
-        Returns:
+        Returns::
+        
             fixed as bool (None if not set).
         """
         fixed = self._attributes['fixed']
@@ -3175,7 +3301,8 @@ class Integer:
     def get_free(self):
         """ Get the value of the free attribute.
         
-        Returns:
+        Returns::
+        
             free as bool (None if not set).
         """
         free = self._attributes['free']
@@ -3186,7 +3313,8 @@ class Integer:
     def get_initial_guess(self):
         """ Get the value of the attribute.
         
-        Returns:
+        Returns::
+        
             initial guess as int (None if not set).
         """
         initialguess = self._attributes['initialGuess']
@@ -3214,7 +3342,8 @@ class Boolean:
     def get_declared_type(self):
         """ Get the value of the declared type attribute.
         
-        Returns:
+        Returns::
+        
             declared type as string (empty string if not set).
         """
         return self._attributes['declaredType']
@@ -3222,7 +3351,8 @@ class Boolean:
     def get_start(self):
         """ Get the value of the start attribute.
         
-        Returns:
+        Returns::
+        
             start as bool (None if not set).
         """
         start = self._attributes['start']
@@ -3233,7 +3363,8 @@ class Boolean:
     def get_fixed(self):
         """ Get the value of the fixed attribute.
         
-        Returns:
+        Returns::
+        
             fixed as bool (None if not set).
         """
         fixed = self._attributes['fixed']
@@ -3244,7 +3375,8 @@ class Boolean:
     def get_free(self):
         """ Get the value of the free attribute.
         
-        Returns:
+        Returns::
+        
             free as bool (None if not set).
         """
         free = self._attributes['free']
@@ -3255,7 +3387,8 @@ class Boolean:
     def get_initial_guess(self):
         """ Get the value of the attribute.
         
-        Returns:
+        Returns::
+        
             initial guess as bool (None if not set).
         """
         initialguess = self._attributes['initialGuess']
@@ -3281,7 +3414,8 @@ class String:
     def get_declared_type(self):
         """ Get the value of the declared type attribute.
         
-        Returns:
+        Returns::
+        
             declared type as string (empty string if not set).
         """
         return self._attributes['declaredType']
@@ -3289,7 +3423,8 @@ class String:
     def get_start(self):
         """ Get the value of the start attribute.
         
-        Returns:
+        Returns::
+        
             start as string (None if not set).
         """
         return self._attributes['start']
@@ -3297,7 +3432,8 @@ class String:
     def get_fixed(self):
         """ Get the value of the fixed attribute.
         
-        Returns:
+        Returns::
+        
             fixed as bool (None if not set).
         """
         fixed = self._attributes['fixed']
@@ -3327,7 +3463,8 @@ class Enumeration:
     def get_declared_type(self):
         """ Get the value of the declared type attribute.
         
-        Returns:
+        Returns::
+        
             declared type as string.
         """
         return self._attributes['declaredType']
@@ -3335,7 +3472,8 @@ class Enumeration:
     def get_quantity(self):
         """ Get the value of the quantity attribute.
         
-        Returns:
+        Returns::
+        
             quantity as string (empty string if not set).
         """
         return self._attributes['quantity']
@@ -3343,7 +3481,8 @@ class Enumeration:
     def get_min(self):
         """ Get the value of the min attribute.
         
-        Returns:
+        Returns::
+        
             min as int (None if not set).
         """
         min = self._attributes['min']
@@ -3354,7 +3493,7 @@ class Enumeration:
     def get_max(self):
         """ Get the value of the max attribute.
         
-        Returns:
+        Returns::
             max as int (None if not set).
         """
         max = self._attributes['max']
@@ -3365,7 +3504,8 @@ class Enumeration:
     def get_start(self):
         """ Get the value of the start attribute.
         
-        Returns:
+        Returns::
+        
             start as int (None if not set).
         """
         start = self._attributes['start']
@@ -3376,7 +3516,8 @@ class Enumeration:
     def get_fixed(self):
         """ Get the value of the fixed attribute.
         
-        Returns:
+        Returns::
+        
             fixed as bool (None if not set).
         """
         fixed = self._attributes['fixed']
@@ -3402,7 +3543,8 @@ class DirectDependency:
         """ Get the names of the input variables needed to compute this 
             output.
         
-        Returns:
+        Returns::
+        
                 List of variable names as string.
         """
         return self._names
@@ -3424,7 +3566,8 @@ class TimePoint:
     def get_index(self):
         """ Get the value of the index attribute.
         
-        Returns:
+        Returns::
+        
             index as int.
         """
         return int(self._attributes['index'])
@@ -3432,7 +3575,8 @@ class TimePoint:
     def get_is_linear(self):
         """ Get the value of the is linear attribute.
         
-        Returns:
+        Returns::
+        
             is linear as bool.
         """
         return _translate_xmlbool(self._attributes['isLinear'])
@@ -3480,7 +3624,8 @@ class Optimization:
     def get_static(self):
         """ Get the value of the static attribute.
         
-        Returns:
+        Returns::
+        
             static as bool (None if not set).
         """
         if self._attributes['static'] == '':
@@ -3490,7 +3635,8 @@ class Optimization:
     def get_interval_start_time(self):
         """ Get the interval start time set for this model.
         
-        Returns:
+        Returns::
+        
             Object of type Opt_IntervalTime containing start time data 
             (None if not set).
         """
@@ -3499,7 +3645,8 @@ class Optimization:
     def get_interval_final_time(self):
         """ Get the interval final time set for this model.
         
-        Returns:
+        Returns::
+        
             Object of type Opt_IntervalTime containing final time data 
             (None if not set).
         """
@@ -3508,7 +3655,8 @@ class Optimization:
     def get_time_points(self):
         """ Get the optimization time points set for this model.
         
-        Returns:
+        Returns::
+        
             List of all time points (type: Opt_TimePoint).
         """
         return self._time_points
@@ -3551,7 +3699,8 @@ class Opt_IntervalTime:
     def get_value(self):
         """ Get the value of the value element.
         
-        Returns:
+        Returns::
+        
             value as float (None if not set).
         """
         return self._value
@@ -3559,7 +3708,8 @@ class Opt_IntervalTime:
     def get_free(self):
         """ Get the free of the value element.
         
-        Returns:
+        Returns::
+        
             free as bool (None if not set).
         """
         return self._free
@@ -3567,7 +3717,8 @@ class Opt_IntervalTime:
     def get_initial_guess(self):
         """ Get the value of the initial guess element.
         
-        Returns:
+        Returns::
+        
             initial guess as float (None if not set).
         """
         return self._initial_guess
@@ -3587,7 +3738,8 @@ class Opt_TimePoint:
     def get_index(self):
         """ Get the value of the index element.
         
-        Returns:
+        Returns::
+        
             index as int.
         """
         return int(self._index)
@@ -3595,7 +3747,8 @@ class Opt_TimePoint:
     def get_value(self):
         """ Get the value of the value element.
         
-        Returns:
+        Returns::
+        
             value as float.
         """
         return float(self._value)
@@ -3717,7 +3870,8 @@ class XMLValuesDoc(XMLBaseDoc):
         Extract name and value for all independent parameters in the 
         XML document.
         
-        Returns:   
+        Returns::
+           
             Dict with variable name as key and parameter as value.
             
         """

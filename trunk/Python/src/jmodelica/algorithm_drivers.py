@@ -129,7 +129,8 @@ class IpoptInitializationAlg(AlgorithmBase):
                  alg_args={}):
         """ Create algorithm objects.
         
-        Parameters:
+        Parameters::
+        
             model -- 
                 jmi.Model object representation of the model
             alg_args -- 
@@ -156,7 +157,8 @@ class IpoptInitializationAlg(AlgorithmBase):
                       result_format='txt'):
         """ Set arguments for initialization algorithm.
         
-        Parameters:
+        Parameters::
+        
             stat -- 
                 Solve a static optimization problem if True.
                 Default: False
@@ -174,7 +176,8 @@ class IpoptInitializationAlg(AlgorithmBase):
                            solver_args):
         """ Set options for the solver.
         
-        Parameters:
+        Parameters::
+        
             solver_args --
                 Dict with int, real or string options for the solver ipopt.
         """
@@ -245,7 +248,8 @@ class AssimuloFMIAlg(AlgorithmBase):
                       ):
         """ Set arguments for Assimulo algorithm.
         
-        Parameters:
+        Parameters::
+        
             start_time -- 
                 Simulation start time.
                 Default: 0.0
@@ -282,7 +286,8 @@ class AssimuloFMIAlg(AlgorithmBase):
                            solver_args={}):
         """ Set options for the solver.
         
-        Parameters:
+        Parameters::
+        
             solver_args --
                 Dict with list of solver arguments. Arguments must be a property of 
                 the solver. An InvalidSolverArgumentException is raised if an 
@@ -347,7 +352,8 @@ class AssimuloAlg(AlgorithmBase):
                  alg_args={}):
         """ Create a simulation algorithm using Assimulo.
         
-        Parameters:
+        Parameters::
+        
             model -- 
                 jmi.Model object representation of the model
             alg_args -- 
@@ -391,7 +397,8 @@ class AssimuloAlg(AlgorithmBase):
                       initialize=True):
         """ Set arguments for Assimulo algorithm.
         
-        Parameters:
+        Parameters::
+        
             start_time -- 
                 Simulation start time.
                 Default: 0.0
@@ -432,7 +439,8 @@ class AssimuloAlg(AlgorithmBase):
                            solver_args={}):
         """ Set options for the solver.
         
-        Parameters:
+        Parameters::
+        
             solver_args --
                 Dict with list of solver arguments. Arguments must be a property of 
                 the solver. An InvalidSolverArgumentException is raised if an 
@@ -482,7 +490,8 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
                  alg_args={}):
         """ Create a CollocationLagrangePolynomials algorithm.
         
-        Parameters:      
+        Parameters::
+              
             model -- 
                 jmodelica.jmi.Model model object
             alg_args -- 
@@ -522,7 +531,8 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
                       n_interpolation_points=None):
         """ Set arguments for the CollocationLagrangePolynomials algorithm.
         
-        Parameters:
+        Parameters::
+        
             n_e -- 
                 Number of finite elements.
                 Default:50
@@ -574,7 +584,8 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
                            solver_args):
         """ Set options for the solver.
         
-        Parameters:
+        Parameters::
+        
             solver_args --
                 Dict with int, real or string options for the solver ipopt.
         """
@@ -664,7 +675,8 @@ class JFSInitAlg(AlgorithmBase):
                       result_format='txt'):
         """ Set arguments for initialization algorithm.
         
-        Parameters:
+        Parameters::
+        
             use_jac -- 
                 Boolean set to True if the jacobian is to be 
                 supplied by the JMIinterface
