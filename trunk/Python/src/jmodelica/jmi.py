@@ -186,7 +186,8 @@ class _PointerToNDArrayConverter:
     def __init__(self, shape, dtype, ndim=1, order=None):
         """Set meta data about the array the returned pointer is pointing to.
         
-        Parameters:
+        Parameters::
+        
             shape -- a tuple containing the shape of the array
             dtype -- the data type that the function result points to.
             ndim  -- the optional number of dimensions that the result returns.
@@ -260,7 +261,8 @@ def load_DLL(libname, path):
     However, the first one is recommended as it is the most platform
     independent syntax.
     
-    Parameters:
+    Parameters::
+    
         libname -- name of the library without prefix.
         path -- the relative or absolute path to the library.
     
@@ -281,11 +283,12 @@ def _translate_value_ref(valueref):
     variable and index in vector using the protocol: bit 0-28 is index, 29-31 
     is primitive type.
         
-    Parameters:
+    Parameters::
+    
         valueref -- 
             The value reference to translate.
             
-    Returns:
+    Returns::
         
         Primitive type and index in the corresponding vector as integers.
     
@@ -518,7 +521,8 @@ class Model(object):
         """ 
         Set start values from the XML meta data file. 
         
-        Parameters:
+        Parameters::
+        
             p_opt_start -- The optimized parameters start value vector.
             dx_start -- The derivatives start value vector.
             x_start -- The states start value vector.
@@ -663,7 +667,8 @@ class Model(object):
         """ 
         Set initial guess values from the XML meta data file. 
         
-        Parameters:
+        Parameters::
+        
             p_opt_init -- The optimized parameters initial guess vector.
             dx_init -- The derivatives initial guess vector.
             x_init -- The states initial guess vector.
@@ -816,7 +821,8 @@ class Model(object):
         """ 
         Set lower bounds from the XML meta data file. 
         
-        Parameters:
+        Parameters::
+        
             p_opt_lb -- The optimized parameters lower bounds vector.
             dx_lb -- The derivatives lower bounds vector.
             x_lb -- The states lower bounds vector.
@@ -972,7 +978,8 @@ class Model(object):
         """ 
         Set upper bounds from the XML meta data file. 
         
-        Parameters:
+        Parameters::
+        
             p_opt_ub -- The optimized parameters upper bounds vector.
             dx_ub -- The derivatives upper bounds vector.
             x_ub -- The states upper bounds vector.
@@ -1132,7 +1139,8 @@ class Model(object):
         variables, followed by the second time point and so on for all time 
         points.
                 
-        Parameters:
+        Parameters::
+        
             p_opt_lin -- The optimized parameters linear information vector.
             dx_lin -- The derivatives linear information vector.
             x_lin -- The states linear information vector.
@@ -1325,7 +1333,8 @@ class Model(object):
         """
         Extract the names of the variables in a model.
 
-        Returns:
+        Returns::
+        
             Dict with ValueReference as key and name as value.
         """
         return self._get_XMLDoc().get_variable_names(include_alias)
@@ -1347,7 +1356,8 @@ class Model(object):
         """
         Get the names of the derivatives in the model.
 
-        Returns:
+        Returns::
+        
             List of tuples containing value reference and name 
             respectively.
         """
@@ -1357,7 +1367,8 @@ class Model(object):
         """
         Get the names of the differentiated_variables in the model.
 
-        Returns:
+        Returns::
+        
             List of tuples containing value reference and name 
             respectively.
         """
@@ -1367,7 +1378,8 @@ class Model(object):
         """
         Get the names of the inputs in the model.
 
-        Returns:
+        Returns::
+        
             List of tuples containing value reference and name 
             respectively.
         """
@@ -1377,7 +1389,8 @@ class Model(object):
         """
         Get the names of the algebraic variables in the model.
 
-        Returns:
+        Returns::
+        
             List of tuples containing value reference and name 
             respectively.
         """
@@ -1388,6 +1401,7 @@ class Model(object):
         Get the names of the optimized parameters in the model.
 
         Returns:
+        
             List of tuples containing value reference and name 
             respectively.
         """
@@ -1398,7 +1412,8 @@ class Model(object):
         """
         Extract the descriptions of the variables in a model.
 
-        Returns:
+        Returns::
+        
             Dict with ValueReference as key and description as value.
         """
         return self._get_XMLDoc().get_variable_descriptions(include_alias)
@@ -2005,7 +2020,8 @@ class Model(object):
     def get_value(self, name):
         """ Get value of a variable or parameter.
 
-        Parameters:
+        Parameters::
+        
             name -- name of variable or parameter.
 
         Raises Error if name not present in model."""
@@ -2033,10 +2049,12 @@ class Model(object):
     def get_values(self, names):
         """ Get values for a list of variables or parameters.
         
-        Parameters:
+        Parameters::
+        
             names -- List of names of variables or parameters
             
-        Returns:
+        Returns::
+        
             List of values corresponding to the variables/parameters 
             passed as argument.
             
@@ -2050,7 +2068,8 @@ class Model(object):
     def set_value(self, name, value, recompute_dependent_parameters=True):
         """ Set get value of a parameter or variable.
         
-        Parameters:
+        Parameters::
+        
             name -- name of variable or parameter.
             value -- parameter or variable value.
             recompute_dependent_parameters -- if an independent parameter
@@ -2089,7 +2108,8 @@ class Model(object):
     def set_values(self, names, values):
         """ Set values for several parameters or variables. 
         
-        Parameters:
+        Parameters::
+        
             names -- List of names of parameters or variables
             values -- List of new values for parameters or variables in names.
             
@@ -2111,7 +2131,8 @@ class Model(object):
         path (if no path is set file is assumed to be in the 
         current directory).
                 
-        Parameters:
+        Parameters::
+        
             filename -- filename of XML file that should be loaded (optional)
             path -- directory where XML file is located (optional)
             
@@ -2137,7 +2158,8 @@ class Model(object):
         parameters filename and path (if no path is set file is assumed 
         to be in the current directory). 
         
-        Parameters:
+        Parameters::
+        
             filename -- filename of XML file that should be loaded (optional)
             path -- directory where XML file is located (optional)
         """       
@@ -2180,9 +2202,10 @@ class Model(object):
             variable along with a list of booleans indicating whether the 
             alias variable should be negated or not.
             
-            Returns empty lists if variable has no alias variables.
-            
-            Returns None if variable cannot be found in model.
+            Returns::
+                
+                Empty lists if variable has no alias variables. None if 
+                variable cannot be found in model.
 
         """
         return self._get_XMLDoc().get_aliases_for_variable(variable)
@@ -2259,11 +2282,13 @@ class Model(object):
     def opt_eval_jac_J(self, independent_variables, mask=None):
         """Evaluate the jacobian of the cost function.
         
-        Parameters:
-        independent_variables -- the variables witch the jacobian will be based
-                                 on.
-        mask                  -- (optional) if only some independent variables should be
-                                 (re)evaluated.
+        Parameters::
+        
+            independent_variables -- 
+                The variables witch the jacobian will be based on.
+            mask -- 
+                (optional) If only some independent variables should be
+                (re)evaluated.
                                  
         Please refer to the JMI documentation for more info.
         """
@@ -3404,7 +3429,8 @@ class JMIModel(object):
     def ode_df(self, eval_alg, sparsity, independent_vars, mask, jac):
         """Evaluates the Jacobian of the right hand side of the ODE.
         
-        Parameters:
+        Parameters::
+        
             eval_alg -- 
                 JMI_DER_SYMBOLIC to evaluate a symbolic Jacobian or 
                 JMI_DER_CPPAD to evaluate the Jacobian by means of CppAD.
@@ -3436,12 +3462,14 @@ class JMIModel(object):
         """Get the number of non-zeros in the Jacobian of the right hand side
         of the ODE.
         
-        Parameters:
+        Parameters::
+        
             eval_alg --
                 For which Jacobian the number of non-zero elements should be 
                 returned: Symbolic (JMI_DER_SYMBOLIC) or CppAD (JMI_DER_CPPAD).
                 
-        Returns:
+        Returns::
+        
             The number of non-zero Jacobian entries.
             
         """
@@ -3454,7 +3482,8 @@ class JMIModel(object):
         """Get the row and column indices of the non-zero elements in the 
         Jacobian of the right hand side of the ODE.
         
-        Parameters:
+        Parameters::
+        
             eval_alg -- 
                 JMI_DER_SYMBOLIC to evaluate a symbolic Jacobian or 
                 JMI_DER_CPPAD to evaluate the Jacobian by means of CppAD.
@@ -3485,7 +3514,8 @@ class JMIModel(object):
         """Return the number of columns and non-zero elements in the Jacobian
         of the right hand side of the ODE.
         
-        Parameters:
+        Parameters::
+        
             eval_alg -- 
                 JMI_DER_SYMBOLIC to evaluate a symbolic Jacobian or 
                 JMI_DER_CPPAD to evaluate the Jacobian by means of CppAD.
@@ -3503,7 +3533,8 @@ class JMIModel(object):
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
        
-        Returns:
+        Returns::
+        
             Tuple with number of columns and non-zeros resp. of the resulting 
             Jacobian.
             
@@ -3529,7 +3560,8 @@ class JMIModel(object):
     def dae_F(self, res):
         """Evaluates the DAE residual.
         
-        Parameters:
+        Parameters::
+        
             res -- DAE residual vector. (Return)
             
         """
@@ -3539,7 +3571,8 @@ class JMIModel(object):
     def dae_dF(self, eval_alg, sparsity, independent_vars, mask, jac):
         """Evaluate the Jacobian of the DAE residual function.
         
-        Parameters:
+        Parameters::
+        
             eval_alg -- 
                 JMI_DER_SYMBOLIC to evaluate a symbolic Jacobian or 
                 JMI_DER_CPPAD to evaluate the Jacobian by means of CppAD.
@@ -3570,12 +3603,14 @@ class JMIModel(object):
     def dae_dF_n_nz(self, eval_alg):
         """Get the number of non-zeros in the full DAE residual Jacobian.
 
-        Parameters:
+        Parameters::
+        
             eval_alg --
                 For which Jacobian the number of non-zero elements should be 
                 returned: Symbolic (JMI_DER_SYMBOLIC) or CppAD (JMI_DER_CPPAD).
                 
-        Returns:
+        Returns::
+        
             The number of non-zero Jacobian entries.
             
         """
@@ -3588,7 +3623,8 @@ class JMIModel(object):
         """Returns the row and column indices of the non-zero elements in the
         DAE residual Jacobian.
         
-        Parameters:
+        Parameters::
+        
             eval_alg -- 
                 JMI_DER_SYMBOLIC to evaluate a symbolic Jacobian or 
                 JMI_DER_CPPAD to evaluate the Jacobian by means of CppAD.
@@ -3621,7 +3657,8 @@ class JMIModel(object):
         """Get the number of columns and non-zero elements in the Jacobian of 
         the DAE residual.
         
-        Parameters:
+        Parameters::
+        
             eval_alg -- 
                 JMI_DER_SYMBOLIC to evaluate a symbolic Jacobian or 
                 JMI_DER_CPPAD to evaluate the Jacobian by means of CppAD.
@@ -3639,7 +3676,8 @@ class JMIModel(object):
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
         
-        Returns:
+        Returns::
+        
             Tuple with number of columns and non-zeros resp. of the resulting 
             Jacobian.
             
@@ -3657,7 +3695,8 @@ class JMIModel(object):
     def dae_R(self, res):
         """Evaluates the DAE event indicators.
         
-        Parameters:
+        Parameters::
+        
             res -- DAE residual vector. (Return)
             
         """
@@ -3667,7 +3706,8 @@ class JMIModel(object):
     def init_get_sizes(self):
         """Gets the number of equations in the DAE initialization functions.
         
-        Returns:
+        Returns::
+        
             The number of equations in F0, F1 and Fp resp.
             
         """
@@ -3682,7 +3722,8 @@ class JMIModel(object):
     def init_F0(self, res):
         """Evaluates the F0 residual function of the initialization system.
         
-        Parameters:
+        Parameters::
+        
             res -- The residual of F0.
             
         """
@@ -3693,7 +3734,8 @@ class JMIModel(object):
         """Evaluates the Jacobian of the DAE initialization residual function
         F0.
         
-        Parameters:
+        Parameters::
+        
             eval_alg -- 
                 JMI_DER_SYMBOLIC to evaluate a symbolic Jacobian or 
                 JMI_DER_CPPAD to evaluate the Jacobian by means of CppAD.
@@ -3726,12 +3768,14 @@ class JMIModel(object):
         """Get the number of non-zeros in the full Jacobian of the DAE 
         initialization residual function F0.
         
-        Parameters:
+        Parameters::
+        
             eval_alg --
                 For which Jacobian the number of non-zero elements should be 
                 returned: Symbolic (JMI_DER_SYMBOLIC) or CppAD (JMI_DER_CPPAD).
                 
-        Returns:
+        Returns::
+        
             The number of non-zero Jacobian entries in the full Jacobian.
             
         """
@@ -3744,7 +3788,8 @@ class JMIModel(object):
         """Get the row and column indices of the non-zero elements in the
         Jacobian of the DAE initialization residual function F0.
         
-        Parameters:
+        Parameters::
+        
             eval_alg -- 
                 JMI_DER_SYMBOLIC to evaluate a symbolic Jacobian or 
                 JMI_DER_CPPAD to evaluate the Jacobian by means of CppAD.
@@ -3775,7 +3820,8 @@ class JMIModel(object):
         """Get the number of columns and non-zero elements in the Jacobian of
         the DAE initialization residual function F0.
         
-        Parameters:
+        Parameters::
+        
             eval_alg -- 
                 JMI_DER_SYMBOLIC to evaluate a symbolic Jacobian or 
                 JMI_DER_CPPAD to evaluate the Jacobian by means of CppAD.
@@ -3789,7 +3835,8 @@ class JMIModel(object):
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
 
-        Returns:
+        Returns::
+        
             Tuple with number of columns and non-zeros resp. of the resulting 
             Jacobian.
             
@@ -3807,7 +3854,8 @@ class JMIModel(object):
     def init_F1(self, res):
         """Evaluates the F1 residual function of the initialization system.
         
-        Parameters:
+        Parameters::
+        
             res -- The residual of F1.
             
         """
@@ -3818,7 +3866,8 @@ class JMIModel(object):
         """Evaluates the Jacobian of the DAE initialization residual function
         F1.
         
-        Parameters:
+        Parameters::
+        
             eval_alg -- 
                 JMI_DER_SYMBOLIC to evaluate a symbolic Jacobian or 
                 JMI_DER_CPPAD to evaluate the Jacobian by means of CppAD.
@@ -3851,12 +3900,14 @@ class JMIModel(object):
         """Get the number of non-zeros in the full Jacobian of the DAE 
         initialization residual function F1.
         
-        Parameters:
+        Parameters::
+        
             eval_alg --
                 For which Jacobian the number of non-zero elements should be 
                 returned: Symbolic (JMI_DER_SYMBOLIC) or CppAD (JMI_DER_CPPAD).
                 
-        Returns:
+        Returns::
+        
             The number of non-zero Jacobian entries in the full Jacobian.
             
         """
@@ -3869,7 +3920,8 @@ class JMIModel(object):
         """Get the row and column indices of the non-zero elements in the
         Jacobian of the DAE initialization residual function F1.
         
-        Parameters:
+        Parameters::
+        
             eval_alg -- 
                 JMI_DER_SYMBOLIC to evaluate a symbolic Jacobian or 
                 JMI_DER_CPPAD to evaluate the Jacobian by means of CppAD.
@@ -3901,7 +3953,8 @@ class JMIModel(object):
         """Get the number of columns and non-zero elements in the Jacobian of
         the DAE initialization residual function F1.
         
-        Parameters:
+        Parameters::
+        
             eval_alg -- 
                 JMI_DER_SYMBOLIC to evaluate a symbolic Jacobian or 
                 JMI_DER_CPPAD to evaluate the Jacobian by means of CppAD.
@@ -3919,7 +3972,8 @@ class JMIModel(object):
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
 
-        Returns:
+        Returns::
+        
             Tuple with number of columns and non-zeros resp. of the resulting 
             Jacobian.
             
@@ -3937,7 +3991,8 @@ class JMIModel(object):
     def init_Fp(self, res):
         """Evaluates the Fp residual function of the initialization system.
       
-        Parameters:
+        Parameters::
+        
             res -- The residual of Fp.
           
         """
@@ -3949,7 +4004,8 @@ class JMIModel(object):
         """Evaluates the Jacobian of the DAE initialization residual function
         F1.
       
-        Parameters:
+        Parameters::
+        
             eval_alg -- 
                 JMI_DER_SYMBOLIC to evaluate a symbolic Jacobian or 
                 JMI_DER_CPPAD to evaluate the Jacobian by means of CppAD.
@@ -3983,12 +4039,14 @@ class JMIModel(object):
         """Get the number of non-zeros in the full Jacobian of the DAE 
         initialization residual function Fp.
       
-        Parameters:
+        Parameters::
+        
             eval_alg --
                 For which Jacobian the number of non-zero elements should be 
                 returned: Symbolic (JMI_DER_SYMBOLIC) or CppAD (JMI_DER_CPPAD).
               
-        Returns:
+        Returns::
+        
             The number of non-zero Jacobian entries in the full Jacobian.
           
         """
@@ -4002,7 +4060,8 @@ class JMIModel(object):
         """Get the row and column indices of the non-zero elements in the Jacobian 
         of the DAE initialization residual function Fp.
       
-        Parameters:
+        Parameters::
+        
             eval_alg -- 
                 JMI_DER_SYMBOLIC to evaluate a symbolic Jacobian or 
                 JMI_DER_CPPAD to evaluate the Jacobian by means of CppAD.
@@ -4034,7 +4093,8 @@ class JMIModel(object):
         """Get the number of columns and non-zero elements in the Jacobian of
         the DAE initialization residual function Fp.
       
-        Parameters:
+        Parameters::
+        
             eval_alg -- 
                 JMI_DER_SYMBOLIC to evaluate a symbolic Jacobian or 
                 JMI_DER_CPPAD to evaluate the Jacobian by means of CppAD.
@@ -4051,7 +4111,9 @@ class JMIModel(object):
             mask --
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
-        Returns:
+                
+        Returns::
+        
             Tuple with number of columns and non-zeros resp. of the resulting 
             Jacobian.
           
@@ -4076,7 +4138,8 @@ class JMIModel(object):
     def init_R0(self, res):
         """Evaluates the DAE initialization event indicators.
         
-        Parameters:
+        Parameters::
+        
             res -- DAE residual vector. (Return)
             
         """
@@ -4086,7 +4149,8 @@ class JMIModel(object):
     def opt_set_optimization_interval(self, start_time, start_time_free, final_time, final_time_free):
         """Set the optimization interval.
         
-        Parameters:
+        Parameters::
+        
             start_time -- Start time of optimization interval.
             start_time_free -- 0 if start time should be fixed or 1 if free.
             final_time -- Final time of optimization interval.
@@ -4099,7 +4163,8 @@ class JMIModel(object):
     def opt_get_optimization_interval(self):
         """Gets the optimization interval.
         
-        Returns:
+        Returns::
+        
             Tuple with: start time of optimization interval, 0 if start time is 
             fixed and 1 if free, final time of optimization interval, 0 if final 
             time is fixed and 1 if free respectively. 
@@ -4117,7 +4182,8 @@ class JMIModel(object):
         """ 
         Specify optimization parameters for the model.
         
-        Parameters:
+        Parameters::
+        
             n_p_opt -- Number of parameters to be optimized.
             p_opt_indices -- Indices of parameters to be optimized in pi vector.
              
@@ -4135,7 +4201,8 @@ class JMIModel(object):
     def opt_get_p_opt_indices(self, p_opt_indices):
         """Get the optimization parameter indices.
         
-        Parameters:    
+        Parameters::
+        
             p_opt_indices -- Indices of parameters to be optimized. (Return)
         
         """
@@ -4145,7 +4212,8 @@ class JMIModel(object):
     def opt_get_sizes(self):
         """Get the sizes of the optimization functions.
         
-        Returns:
+        Returns::
+        
             Tuple with number of equations in the J, L, Ffdp, Ceq, Cineq, Heq and Hineq 
             residual respectively. 
         
@@ -4164,7 +4232,8 @@ class JMIModel(object):
     def opt_Ffdp(self, res):
         """Evaluate the residual of the free dependent parameter residuals Ffdp.
         
-        Parameters:
+        Parameters::
+        
             res -- The residual.
         
         """
@@ -4174,7 +4243,8 @@ class JMIModel(object):
     def opt_dFfdp(self, eval_alg, sparsity, independent_vars, mask, jac):
         """Evaluate the Jacobian of the free dependent parameter residual Ffdp.
         
-        Parameters:
+        Parameters::
+        
             eval_alg -- 
                 JMI_DER_SYMBOLIC to evaluate a symbolic Jacobian or 
                 JMI_DER_CPPAD to evaluate the Jacobian by means of CppAD.
@@ -4207,12 +4277,14 @@ class JMIModel(object):
         """Get the number of non-zeros in the full Jacobian of the free
         dependent parameter residual  Ffdp.
         
-        Parameters:
+        Parameters::
+        
             eval_alg --
                 For which Jacobian the number of non-zero elements should be 
                 returned: Symbolic (JMI_DER_SYMBOLIC) or CppAD (JMI_DER_CPPAD).
                 
-        Returns:
+        Returns::
+        
             The number of non-zero entries in the full Jacobian.
         
         """
@@ -4225,7 +4297,8 @@ class JMIModel(object):
         """Get the row and column indices of the non-zero elements in the Jacobian 
         of the free dependent parameter residual Ffdp.
         
-        Parameters:
+        Parameters::
+        
             eval_alg -- 
                 JMI_DER_SYMBOLIC to evaluate a symbolic Jacobian or 
                 JMI_DER_CPPAD to evaluate the Jacobian by means of CppAD.
@@ -4256,7 +4329,8 @@ class JMIModel(object):
         """Compute the number of columns and non-zero elements in the Jacobian of 
         the free dependent parameter residual  Ffdp.
         
-        Parameters:
+        Parameters::
+        
             eval_alg -- 
                 JMI_DER_SYMBOLIC to evaluate a symbolic Jacobian or 
                 JMI_DER_CPPAD to evaluate the Jacobian by means of CppAD.
@@ -4274,7 +4348,8 @@ class JMIModel(object):
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
         
-        Returns:
+        Returns::
+        
             Tuple with number of columns and non-zeros resp. of the resulting 
             Jacobian.
 
@@ -4300,7 +4375,8 @@ class JMIModel(object):
     def opt_dJ(self, eval_alg, sparsity, independent_vars, mask, jac):
         """Evaluate the gradient of the cost function.
         
-        Parameters:
+        Parameters::
+        
             eval_alg -- 
                 JMI_DER_SYMBOLIC to evaluate a symbolic Jacobian or 
                 JMI_DER_CPPAD to evaluate the Jacobian by means of CppAD.
@@ -4332,12 +4408,13 @@ class JMIModel(object):
     def opt_dJ_n_nz(self, eval_alg):
         """Get the number of non-zeros in the gradient of the cost function J.
         
-        Parameters:
+        Parameters::
+        
             eval_alg --
                 For which Jacobian the number of non-zero elements should be 
                 returned: Symbolic (JMI_DER_SYMBOLIC) or CppAD (JMI_DER_CPPAD).
                 
-        Returns:
+        Returns::
             The number of non-zero entries in the full gradient.
         
         """
@@ -4350,7 +4427,8 @@ class JMIModel(object):
         """Get the row and column indices of the non-zero elements in the gradient 
         of the cost function J.
         
-        Parameters:
+        Parameters::
+        
             eval_alg -- 
                 JMI_DER_SYMBOLIC to evaluate a symbolic Jacobian or 
                 JMI_DER_CPPAD to evaluate the Jacobian by means of CppAD.
@@ -4381,7 +4459,8 @@ class JMIModel(object):
         """Compute the number of columns and non-zero elements in the gradient
         of the cost function.
         
-        Parameters:
+        Parameters::
+        
             eval_alg -- 
                 JMI_DER_SYMBOLIC to evaluate a symbolic Jacobian or 
                 JMI_DER_CPPAD to evaluate the Jacobian by means of CppAD.
@@ -4399,7 +4478,8 @@ class JMIModel(object):
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
         
-        Returns:
+        Returns::
+        
             Tuple with number of columns and non-zeros resp. of the resulting 
             Jacobian.
 
@@ -4419,7 +4499,8 @@ class JMIModel(object):
     def opt_Ceq(self, res):
         """Evaluate the residual of the equality path constraint Ceq.
         
-        Parameters:
+        Parameters::
+        
             res -- The residual.
         
         """
@@ -4429,7 +4510,8 @@ class JMIModel(object):
     def opt_dCeq(self, eval_alg, sparsity, independent_vars, mask, jac):
         """Evaluate the Jacobian of the equality path constraint Ceq.
         
-        Parameters:
+        Parameters::
+        
             eval_alg -- 
                 JMI_DER_SYMBOLIC to evaluate a symbolic Jacobian or 
                 JMI_DER_CPPAD to evaluate the Jacobian by means of CppAD.
@@ -4462,12 +4544,14 @@ class JMIModel(object):
         """Get the number of non-zeros in the full Jacobian of the equality path 
         constraint Ceq.
         
-        Parameters:
+        Parameters::
+        
             eval_alg --
                 For which Jacobian the number of non-zero elements should be 
                 returned: Symbolic (JMI_DER_SYMBOLIC) or CppAD (JMI_DER_CPPAD).
                 
-        Returns:
+        Returns::
+        
             The number of non-zero entries in the full Jacobian.
         
         """
@@ -4480,7 +4564,8 @@ class JMIModel(object):
         """Get the row and column indices of the non-zero elements in the Jacobian 
         of the equality path constraint residual Ceq.
         
-        Parameters:
+        Parameters::
+        
             eval_alg -- 
                 JMI_DER_SYMBOLIC to evaluate a symbolic Jacobian or 
                 JMI_DER_CPPAD to evaluate the Jacobian by means of CppAD.
@@ -4511,7 +4596,8 @@ class JMIModel(object):
         """Compute the number of columns and non-zero elements in the Jacobian of 
         the equality path constraint residual function Ceq.
         
-        Parameters:
+        Parameters::
+        
             eval_alg -- 
                 JMI_DER_SYMBOLIC to evaluate a symbolic Jacobian or 
                 JMI_DER_CPPAD to evaluate the Jacobian by means of CppAD.
@@ -4529,7 +4615,8 @@ class JMIModel(object):
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
         
-        Returns:
+        Returns::
+        
             Tuple with number of columns and non-zeros resp. of the resulting 
             Jacobian.
 
@@ -4548,7 +4635,8 @@ class JMIModel(object):
     def opt_Cineq(self, res):
         """Evaluate the residual of the inequality path constraint Cineq.
         
-        Parameters:
+        Parameters::
+        
             res -- The residual.        
         
         """
@@ -4558,7 +4646,8 @@ class JMIModel(object):
     def opt_dCineq(self, eval_alg, sparsity, independent_vars, mask, jac):
         """Evaluate the Jacobian of the inequality path constraint Cineq.
         
-        Parameters:
+        Parameters::
+        
             eval_alg -- 
                 JMI_DER_SYMBOLIC to evaluate a symbolic Jacobian or 
                 JMI_DER_CPPAD to evaluate the Jacobian by means of CppAD.
@@ -4592,12 +4681,14 @@ class JMIModel(object):
         """Get the number of non-zeros in the full Jacobian of the inequality path 
         constraint Cineq.
         
-        Parameters:
+        Parameters::
+        
             eval_alg --
                 For which Jacobian the number of non-zero elements should be 
                 returned: Symbolic (JMI_DER_SYMBOLIC) or CppAD (JMI_DER_CPPAD).
                 
-        Returns:
+        Returns::
+        
             The number of non-zero entries in the full Jacobian.
                     
         """
@@ -4610,7 +4701,8 @@ class JMIModel(object):
         """Get the row and column indices of the non-zero elements in the Jacobian 
         of the inequality path constraint residual Cineq.
         
-        Parameters:
+        Parameters::
+        
             eval_alg -- 
                 JMI_DER_SYMBOLIC to evaluate a symbolic Jacobian or 
                 JMI_DER_CPPAD to evaluate the Jacobian by means of CppAD.
@@ -4637,7 +4729,8 @@ class JMIModel(object):
         """Compute the number of columns and non-zero elements in the Jacobian of 
         the inequality path constraint residual function Cineq.
         
-        Parameters:
+        Parameters::
+        
             eval_alg -- 
                 JMI_DER_SYMBOLIC to evaluate a symbolic Jacobian or 
                 JMI_DER_CPPAD to evaluate the Jacobian by means of CppAD.
@@ -4655,7 +4748,8 @@ class JMIModel(object):
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
         
-        Returns:
+        Returns::
+        
             Tuple with number of columns and non-zeros resp. of the resulting 
             Jacobian.
 
@@ -4673,7 +4767,8 @@ class JMIModel(object):
     def opt_Heq(self, res):
         """Evaluate the residual of the equality point constraint Heq.
         
-        Parameters:
+        Parameters::
+        
             res -- The residual.        
         
         """
@@ -4683,7 +4778,8 @@ class JMIModel(object):
     def opt_dHeq(self, eval_alg, sparsity, independent_vars, mask, jac):
         """Evaluate the Jacobian of the equality point constraint Heq.
         
-        Parameters:
+        Parameters::
+        
             eval_alg -- 
                 JMI_DER_SYMBOLIC to evaluate a symbolic Jacobian or 
                 JMI_DER_CPPAD to evaluate the Jacobian by means of CppAD.
@@ -4716,12 +4812,14 @@ class JMIModel(object):
         Get the number of non-zeros in the full Jacobian of the equality point 
         constraint Heq.
         
-        Parameters:
+        Parameters::
+        
             eval_alg --
                 For which Jacobian the number of non-zero elements should be 
                 returned: Symbolic (JMI_DER_SYMBOLIC) or CppAD (JMI_DER_CPPAD).
                 
-        Returns:
+        Returns::
+        
             The number of non-zero entries in the full Jacobian.
                     
         """
@@ -4735,7 +4833,8 @@ class JMIModel(object):
         Get the row and column indices of the non-zero elements in the Jacobian 
         of the equality point constraint residual Heq.
         
-        Parameters:
+        Parameters::
+        
             eval_alg -- 
                 JMI_DER_SYMBOLIC to evaluate a symbolic Jacobian or 
                 JMI_DER_CPPAD to evaluate the Jacobian by means of CppAD.
@@ -4767,7 +4866,8 @@ class JMIModel(object):
         Compute the number of columns and non-zero elements in the Jacobian of 
         the equality point constraint residual function Heq.
         
-        Parameters:
+        Parameters::
+        
             eval_alg -- 
                 JMI_DER_SYMBOLIC to evaluate a symbolic Jacobian or 
                 JMI_DER_CPPAD to evaluate the Jacobian by means of CppAD.
@@ -4785,7 +4885,8 @@ class JMIModel(object):
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
         
-        Returns:
+        Returns::
+        
             Tuple with number of columns and non-zeros resp. of the resulting 
             Jacobian.
 
@@ -4804,7 +4905,8 @@ class JMIModel(object):
         """ 
         Evaluate the residual of the inequality point constraint Hineq.
         
-        Parameters:
+        Parameters::
+        
             res -- The residual.        
         
         """
@@ -4815,7 +4917,8 @@ class JMIModel(object):
         """ 
         Evaluate the Jacobian of the inequality point constraint Hineq.
         
-        Parameters:
+        Parameters::
+        
             eval_alg -- 
                 JMI_DER_SYMBOLIC to evaluate a symbolic Jacobian or 
                 JMI_DER_CPPAD to evaluate the Jacobian by means of CppAD.
@@ -4848,12 +4951,14 @@ class JMIModel(object):
         Get the number of non-zeros in the full Jacobian of the inequality point 
         constraint Hineq.
         
-        Parameters:
+        Parameters::
+        
             eval_alg --
                 For which Jacobian the number of non-zero elements should be 
                 returned: Symbolic (JMI_DER_SYMBOLIC) or CppAD (JMI_DER_CPPAD).
                 
-        Returns:
+        Returns::
+        
             The number of non-zero entries in the full Jacobian.
                     
         """
@@ -4867,7 +4972,8 @@ class JMIModel(object):
         Get the row and column indices of the non-zero elements in the Jacobian 
         of the inequality point constraint residual Hineq.
         
-        Parameters:
+        Parameters::
+        
             eval_alg -- 
                 JMI_DER_SYMBOLIC to evaluate a symbolic Jacobian or 
                 JMI_DER_CPPAD to evaluate the Jacobian by means of CppAD.
@@ -4900,7 +5006,8 @@ class JMIModel(object):
         Compute the number of columns and non-zero elements in the Jacobian of 
         the inequality point constraint residual function Hineq.
         
-        Parameters:
+        Parameters::
+        
             eval_alg -- 
                 JMI_DER_SYMBOLIC to evaluate a symbolic Jacobian or 
                 JMI_DER_CPPAD to evaluate the Jacobian by means of CppAD.
@@ -4918,7 +5025,8 @@ class JMIModel(object):
                 Vector containing ones for the Jacobian columns that should be 
                 included in the Jacobian and zeros for those which should not.
         
-        Returns:
+        Returns::
+        
             Tuple with number of columns and non-zeros resp. of the resulting 
             Jacobian.
 
@@ -4933,4 +5041,3 @@ class JMIModel(object):
         if self._dll.jmi_opt_dHineq_dim(self._jmi, eval_alg, sparsity, independent_vars, mask, byref(dHineq_n_cols), byref(dHineq_n_nz)) is not 0:
             raise JMIException("Computing the number of columns and non-zero elements failed.")
         return int(dHineq_n_cols.value), int(dHineq_n_nz.value)
-    
