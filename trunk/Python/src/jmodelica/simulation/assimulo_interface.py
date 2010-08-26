@@ -694,7 +694,7 @@ class JMIDAE(Implicit_Problem):
     def event_switch(self, solver, event_info):
         """
         This is where we turn the switches. If we have an event, this is
-        where it will be taken care of.
+        where it will be taken care of. ::
         
             event_info is a vector consisting of -1, 0, +1, and is as long
             as the number of event functions. A -1 symbolises that an event
@@ -758,7 +758,9 @@ class JMIDAE(Implicit_Problem):
         Helper function for handle_event to determine if we have event
         iteration.
         
-            Input: Values of the event indicator functions (state_events)
+        Parameters::
+        
+            Values of the event indicator functions (state_events)
             before and after we have changed mode of operations.
         """
         
@@ -998,7 +1000,8 @@ class Trajectory:
         """
         Default constructor for creating a tracjectory object.
 
-        Parameters:
+        Parameters::
+        
             abscissa -- One dimensional numpy array containing
                         the n abscissa (independent) values
             ordinate -- Two dimensional n x m numpy matrix containing
@@ -1025,11 +1028,13 @@ class Trajectory:
         """
         Evaluate the trajectory at a specifed abscissa.
 
-        Parameters:
+        Parameters::
+        
             x -- One dimensional numpy array, or scalar number,
                  containing n abscissa value(s).
 
-        Returns:
+        Returns::
+        
             Two dimensional n x m matrix containing the
             ordinate values corresponding to the argument x.
         """
@@ -1063,11 +1068,13 @@ class TrajectoryLinearInterpolation(Trajectory):
         """
         Evaluate the trajectory at a specifed abscissa.
 
-        Parameters:
+        Parameters::
+        
             x -- One dimensional numpy array, or scalar number,
                  containing n abscissa value(s).
 
-        Returns:
+        Returns::
+        
             Two dimensional n x m matrix containing the
             ordinate values corresponding to the argument x.
         """        

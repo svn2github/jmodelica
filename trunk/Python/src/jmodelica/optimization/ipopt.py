@@ -1,18 +1,20 @@
+#!/usr/bin/env python 
 # -*- coding: utf-8 -*-
+
+# Copyright (C) 2010 Modelon AB
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
 """ The IPOPT solver module. """
-#    Copyright (C) 2009 Modelon AB
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, version 3 of the License.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
-#
-#    You should have received a copy of the GNU General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from operator import itemgetter
 
@@ -42,7 +44,8 @@ class CollocationOptimizer(object):
         NLPCollocationLagrangePolynomials object. The underlying model must 
         have been compiled with support for ipopt.
         
-        Parameters:
+        Parameters::
+        
             nlp_collocation -- NLPCollocation object.
         
         """
@@ -93,7 +96,8 @@ class CollocationOptimizer(object):
         """
         Set Ipopt string option.
         
-        Parameters:
+        Parameters::
+        
             key -- Name of option.
             val -- Value of option.
             
@@ -105,7 +109,8 @@ class CollocationOptimizer(object):
         """
         Set Ipopt integer option.
         
-        Parameters:
+        Parameters::
+        
             key -- Name of option.
             val -- Value of option.
             
@@ -117,7 +122,8 @@ class CollocationOptimizer(object):
         """
         Set Ipopt double option.
         
-        Parameters:
+        Parameters::
+        
             key -- Name of option.
             val -- Value of option.
             
@@ -129,7 +135,8 @@ class CollocationOptimizer(object):
         """
         Get statistics from the last optimization run.
 
-        Returns:
+        Returns::
+        
             return_status -- Return status from IPOPT
             nbr_iter -- Number of iterations 
             objective -- Final value of objective function
@@ -374,15 +381,16 @@ class NLPCollocation(object):
         Get the optimization result. The result is given for the
         collocation points used in the algorithm.
         
-        Returns:
-        p_opt --
-            A vector containing the values of the optimized parameters.
-        data --
-            A two dimensional array of variable trajectory data. The
-            first column represents the time vector. The following
-            colums contain, in order, the derivatives, the states,
-            the inputs and the algebraic variables. The ordering is
-            according to increasing value references.
+        Returns::
+        
+            p_opt --
+                A vector containing the values of the optimized parameters.
+            data --
+                A two dimensional array of variable trajectory data. The
+                first column represents the time vector. The following
+                colums contain, in order, the derivatives, the states,
+                the inputs and the algebraic variables. The ordering is
+                according to increasing value references.
         """
         
         n_points = self.opt_sim_get_result_variable_vector_length()
@@ -441,20 +449,22 @@ class NLPCollocation(object):
         interpolation polynomials are used to compute the value of the
         variable trajectories at each point.
 
-        Parameters:
+        Parameters::
+        
             n_interpolation_points --
                 Number of points in each finite element at which the
                 solution trajectories are evaluated.
         
-        Returns:
-        p_opt --
-            A vector containing the values of the optimized parameters.
-        data --
-            A two dimensional array of variable trajectory data. The
-            first column represents the time vector. The following
-            colums contain, in order, the derivatives, the states,
-            the inputs and the algebraic variables. The ordering is
-            according to increasing value references.
+        Returns::
+        
+            p_opt --
+                A vector containing the values of the optimized parameters.
+            data --
+                A two dimensional array of variable trajectory data. The
+                first column represents the time vector. The following
+                colums contain, in order, the derivatives, the states,
+                the inputs and the algebraic variables. The ordering is
+                according to increasing value references.
         """
 
         n_points = self.opt_sim_get_n_e()*n_interpolation_points
@@ -510,19 +520,21 @@ class NLPCollocation(object):
         polynomials are used to compute the value of the variable
         trajectories at eachpoint.
 
-        Parameters:
+        Parameters::
+        
             mesh --
                 Vector of time points.
         
-        Returns:
-        p_opt --
-            A vector containing the values of the optimized parameters.
-        data --
-            A two dimensional array of variable trajectory data. The
-            first column represents the time vector. The following
-            colums contain, in order, the derivatives, the states,
-            the inputs and the algebraic variables. The ordering is
-            according to increasing value references.
+        Returns::
+        
+            p_opt --
+                A vector containing the values of the optimized parameters.
+            data --
+                A two dimensional array of variable trajectory data. The
+                first column represents the time vector. The following
+                colums contain, in order, the derivatives, the states,
+                the inputs and the algebraic variables. The ordering is
+                according to increasing value references.
         """
 
         n_points = len(mesh)
@@ -577,14 +589,16 @@ class NLPCollocation(object):
         get_result is used to retrieve the solution trajectories.
         The result is given at the collocation points.
 
-        Parameters:
+        Parameters::
+        
             file_name --
                 Name of the result file.
             format --
                 A string equal either to 'txt' for output to Dymola textual
                 format or 'mat' for output to Dymola binary Matlab format.
 
-        Limitations:
+        Limitations::
+        
             Only format='txt' is currently supported.
         """
 
@@ -600,7 +614,8 @@ class NLPCollocation(object):
         export_result_dymola_element_interpolation is used to retrieve the
         solution trajectories. 
         
-        Parameters:
+        Parameters::
+        
             n_interpolation_points --
                 The number of points in each finite element at which the result
                 is returned.
@@ -610,7 +625,8 @@ class NLPCollocation(object):
                 A string equal either to 'txt' for output to Dymola textual
                 format or 'mat' for output to Dymola binary Matlab format.
 
-        Limitations:
+        Limitations::
+        
             Only format='txt' is currently supported.
         """
 
@@ -626,7 +642,8 @@ class NLPCollocation(object):
         export_result_dymola_element_interpolation is used to retrieve the
         solution trajectories. 
 
-        Parameters:
+        Parameters::
+        
             mesh --
                 A vector of time points at wich the result is given. 
             file_name --
@@ -635,7 +652,8 @@ class NLPCollocation(object):
                 A string equal either to 'txt' for output to Dymola textual
                 format or 'mat' for output to Dymola binary Matlab format.
 
-        Limitations:
+        Limitations::
+        
             Only format='txt' is currently supported.
         """
 
@@ -651,7 +669,8 @@ class NLPCollocation(object):
         Initialize the optimization vector from an object of either ResultDymolaTextual
         or ResultDymolaBinary.
 
-        Parameters:
+        Parameters::
+        
             res --
                 A reference to an object of type ResultDymolaTextual or
                 ResultDymolaBinary.
@@ -906,7 +925,8 @@ class NLPCollocation(object):
         Get the number of variables and the number of constraints in the 
         problem.
         
-        Returns:
+        Returns::
+        
             Tuple with the number of variables in the NLP problem, inequality 
             constraints, equality constraints, non-zeros in the Jacobian of 
             the inequality constraints and non-zeros in the Jacobian of the 
@@ -927,7 +947,8 @@ class NLPCollocation(object):
         """ 
         Get the number of finite elements.
         
-        Returns
+        Returns::
+        
             The number of inite elements         
         """
         n_e = ct.c_int()
@@ -939,7 +960,8 @@ class NLPCollocation(object):
         """ 
         Get data that specifies the optimization interval.
         
-        Parameters:
+        Parameters::
+        
             start_time -- Optimization interval start time. (Return)
             start_time_free -- 0 if start time should be fixed or 1 if free. (Return)
             final_time -- Optimization final time. (Return)
@@ -957,7 +979,8 @@ class NLPCollocation(object):
         """ 
         Get the initial point of the NLP.
         
-        Parameters:
+        Parameters::
+        
             x_init -- The initial guess vector. (Return)
         
         """
@@ -967,7 +990,8 @@ class NLPCollocation(object):
     def opt_sim_set_initial(self, x_init):
         """ Set the initial point of the NLP.
 
-        Parameters:
+        Parameters::
+        
             x_init --- The initial guess vector.
         """
         if self._model.jmimodel._dll.jmi_opt_sim_set_initial(self._jmi_opt_sim, x_init) is not 0:
@@ -982,27 +1006,28 @@ class NLPCollocation(object):
         Also, initial guesses for the optimization interval and element lengths
         are provided.
 
-        Parameters:
-        p_opt_init --
-            A vector of size n_p_opt containing initial values for the
-            optimized parameters.
-        trajectory_data_init --
-            A matrix stored in column major format. The
-            first column contains the time vector. The following column
-            contains, in order, the derivative, state, input, and algebraic
-            variable profiles.
-        traj_n_points --
-            Number of time points in trajectory_data_init.
-        hs_init --
-            A vector of length n_e containing initial guesses of the
-            normalized lengths of the finite elements. This argument is neglected
-            if the problem does not have free element lengths.
-        start_time_init --
-            Initial guess of interval start time. This argument is neglected if
-            the start time is fixed.
-        final_time_init --
-            Initial guess of interval final time. This argument is neglected if
-            the final time is fixed.
+        Parameters::
+        
+            p_opt_init --
+                A vector of size n_p_opt containing initial values for the
+                optimized parameters.
+            trajectory_data_init --
+                A matrix stored in column major format. The
+                first column contains the time vector. The following column
+                contains, in order, the derivative, state, input, and algebraic
+                variable profiles.
+            traj_n_points --
+                Number of time points in trajectory_data_init.
+            hs_init --
+                A vector of length n_e containing initial guesses of the
+                normalized lengths of the finite elements. This argument is neglected
+                if the problem does not have free element lengths.
+            start_time_init --
+                Initial guess of interval start time. This argument is neglected if
+                the start time is fixed.
+            final_time_init --
+                Initial guess of interval final time. This argument is neglected if
+                the final time is fixed.
         """
         # check sum (n_real_x, n_real_dx, n_real_u, n_real_w +1 (time)) mult with traj_n_points = size trajectory_data_init
         sum = self._model._n_real_x.value + self._model._n_real_dx.value + self._model._n_real_u.value + self._model._n_real_w.value + 1
@@ -1021,7 +1046,8 @@ class NLPCollocation(object):
         """ 
         Get the upper and lower bounds of the optimization variables.
         
-        Parameters:
+        Parameters::
+        
             x_lb -- The lower bounds vector. (Return)
             x_ub -- The upper bounds vector. (Return)
         
@@ -1033,7 +1059,8 @@ class NLPCollocation(object):
         """ 
         Set the upper and lower bounds of the optimization variables.
         
-        Parameters:
+        Parameters::
+        
             x_lb -- The lower bounds vector. (Return)
             x_ub -- The upper bounds vector. (Return)
         
@@ -1045,7 +1072,8 @@ class NLPCollocation(object):
         """ 
         Get the cost function value at a given point in search space.
         
-        Parameters:
+        Parameters::
+        
             f -- Value of the cost function. (Return)
         
         """
@@ -1057,7 +1085,8 @@ class NLPCollocation(object):
         Get the gradient of the cost function value at a given point in search 
         space.
         
-        Parameters:
+        Parameters::
+        
             df -- Value of the gradient of the cost function. (Return)
             
         """
@@ -1068,7 +1097,8 @@ class NLPCollocation(object):
         """ 
         Get the residual of the inequality constraints g.
         
-        Parameters:
+        Parameters::
+        
             res -- Residual of the inequality constraints. (Return)
             
         """
@@ -1079,7 +1109,8 @@ class NLPCollocation(object):
         """ 
         Get the Jacobian of the residual of the inequality constraints.
         
-        Parameters:
+        Parameters::
+        
             jac -- The Jacobian of the residual of the inequality constraints. (Return)
         
         """
@@ -1090,7 +1121,8 @@ class NLPCollocation(object):
         """ 
         Get the indices of the non-zeros in the inequality constraint Jacobian.
         
-        Parameters:
+        Parameters::
+        
             irow -- 
                 Row indices of the non-zero entries in the Jacobian of the 
                 residual of the inequality constraints. (Return)
@@ -1106,7 +1138,8 @@ class NLPCollocation(object):
         """ 
         Get the residual of the equality constraints h.
         
-        Parameters:
+        Parameters::
+        
             res -- The residual of the equality constraints. (Return)
         
         """
@@ -1117,7 +1150,8 @@ class NLPCollocation(object):
         """ 
         Get the Jacobian of the residual of the equality constraints.
         
-        Parameters:
+        Parameters::
+        
             jac -- The Jacobian of the residual of the equality constraints. (Return)
         
         """
@@ -1128,7 +1162,8 @@ class NLPCollocation(object):
         """ 
         Get the indices of the non-zeros in the equality constraint Jacobian.
         
-        Parameters:
+        Parameters::
+        
             irow -- 
                 Row indices of the non-zero entries in the Jacobian of the 
                 residual of the equality constraints. (Return)
@@ -1144,7 +1179,8 @@ class NLPCollocation(object):
         """ 
         Write the optimization result to file in Matlab format.
         
-        Parameters:
+        Parameters::
+        
             file_name -- Name of file to write to.
         
         """
@@ -1162,7 +1198,8 @@ class NLPCollocation(object):
         """ 
         Get the results, stored in column major format.
         
-        Parameters:
+        Parameters::
+        
             p_opt -- Vector containing optimal parameter values. (Return)
             t -- The time vector. (Return)
             dx -- The derivatives. (Return)
@@ -1178,7 +1215,8 @@ class NLPCollocation(object):
         """ 
         Get the results, stored in column major format.
         
-        Parameters:
+        Parameters::
+        
             n_interpolation_points -- Number of time points in each element.
             p_opt -- Vector containing optimal parameter values. (Return)
             t -- The time vector. (Return)
@@ -1197,7 +1235,8 @@ class NLPCollocation(object):
         """ 
         Get the results, stored in column major format.
         
-        Parameters:
+        Parameters::
+        
             mesh -- Mesh of time points.
             p_opt -- Vector containing optimal parameter values. (Return)
             t -- The time vector. (Return)
@@ -1250,7 +1289,8 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
         [2,2]. If the number of elements is 10, then the normalized
         vector is [2,1,7].
         
-        Parameters:
+        Parameters::
+        
             model -- The Model object.
             n_e -- Number of finite elements.
             hs -- Vector containing the normalized element lengths.
@@ -1516,7 +1556,8 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
     def opt_sim_lp_eval_pol(self, tau, n, pol, k):
         """ Evaluate Lagrange polynomial. 
         
-        Parameters:
+        Parameters::
+        
             tau -- Value of independent variable in polynomial evaluation.
             n -- Order of polynomials.
             pol -- Vector containing the polynomial coefficients. 
@@ -1532,7 +1573,8 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
         """
         Get the Lagrange polynomials of a specified order.
         
-        Parameters:
+        Parameters::
+        
             n_cp -- 
                 Number of collocation points.
             cp -- 
