@@ -8,7 +8,7 @@
 # ====== Variables to set ======
 
 # Memory allocation for the ant process
-ANT_OPTS="-Xmx512m"
+ANT_OPTS="-Xmx1g"
 
 # Default tests - run if no tests are chosen
 # Possible values: modelica, optimica, python or combination (e.g. "modelica optimica")
