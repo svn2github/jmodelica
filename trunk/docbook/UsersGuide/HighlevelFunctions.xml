@@ -1,0 +1,393 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter version="5.0" xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+  <title>High-level functions: initialize, simulate and optimize</title>
+
+  <para>The purpose of the high-level functions is to provide a flexible user
+  interface to initializing, simulating and optimizing a model. In its
+  simplest form, the functions can be used with all arguments set to default
+  values requiring very few user inputs. For more complex usage there are a
+  number of options that can be set which enables more user control over the
+  course of events.</para>
+
+  <section>
+    <title>Overview</title>
+
+    <para>This section will give a brief overview to the high-level functions,
+    which algorithms are available at the moment, how to change settings and
+    how the return argument is composed. The section ends with a short
+    simulation example, but the general principle of the example also applies
+    for the initialize and optimize functions.</para>
+
+    <section>
+      <title>Importing the high-level functions</title>
+
+      <para>The initialize, simulate and optimize functions are all located in
+      <literal>jmodelica.__init__ </literal>which means that they are accessed
+      by importing <literal>jmodelica</literal> <programlisting
+      language="python"># import the simulate function from jmodelica
+from jmodelica import simulate
+
+# import the optimize function by importing jmodelica
+import jmodelica
+# optimize is now available
+jmodelica.optimize
+</programlisting></para>
+    </section>
+
+    <section>
+      <title>Algorithms</title>
+
+      <para>The algorithms that are used in the high-level functions are
+      implemented as classes in the module
+      <literal>jmodelica.algorithm_drivers</literal>. They all subclass the
+      base algorithm class
+      <literal>jmodelica.algorithm_drivers.AlgorithmBase</literal> which
+      contains methods that all algorithm classes must implement. The
+      currently available algorithms are displayed in table t.</para>
+
+      <para><table colsep="1" pgwide="0">
+          <title>Algorithms accessible from high-level functions</title>
+
+          <tgroup cols="4">
+            <colspec align="left" colname="col–alg" colwidth="4*" />
+
+            <colspec align="left" colname="col–use" colwidth="2*" />
+
+            <colspec align="left" colname="col–def" colwidth="1*" />
+
+            <colspec align="left" colname="col–ret" colwidth="4*" />
+
+            <thead>
+              <row>
+                <entry align="center">Algorithm</entry>
+
+                <entry align="center">Use in</entry>
+
+                <entry align="center">Default</entry>
+
+                <entry align="center">Returns</entry>
+              </row>
+            </thead>
+
+            <tbody>
+              <row rowsep="1">
+                <entry>AssimuloAlg</entry>
+
+                <entry>simulate</entry>
+
+                <entry>yes</entry>
+
+                <entry>AssimuloSimResult</entry>
+              </row>
+
+              <row rowsep="1">
+                <entry>AssimuloFMIAlg</entry>
+
+                <entry>simulate</entry>
+
+                <entry>no</entry>
+
+                <entry>AssimuloSimResult</entry>
+              </row>
+
+              <row rowsep="1">
+                <entry>CollocationLagrangePolynomialsAlg</entry>
+
+                <entry>optimize</entry>
+
+                <entry>yes</entry>
+
+                <entry>CollocationLagrangePolynomialsResult</entry>
+              </row>
+
+              <row rowsep="1">
+                <entry>IpoptInitializationAlg</entry>
+
+                <entry>initialize</entry>
+
+                <entry>yes</entry>
+
+                <entry>IpoptInitResult</entry>
+              </row>
+
+              <row rowsep="0">
+                <entry>JFSInitAlg</entry>
+
+                <entry>initialize</entry>
+
+                <entry>no</entry>
+
+                <entry>JFSInitResult</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </table></para>
+    </section>
+
+    <section>
+      <title>Result object</title>
+
+      <para>Every algorithm returns its own result object and all result
+      objects have a common base class
+      <literal>jmodelica.algorithm_drivers.ResultBase</literal>. This means
+      that no matter which algorithm is used in the high-level function, the
+      function will always return an object which can be manipulated with the
+      methods and properties of the <literal>ResultBase</literal>
+      class.</para>
+
+      <table>
+        <title>The jmodelica.algorithm_drivers.ResultBase class</title>
+
+        <tgroup cols="3">
+          <colspec align="left" colname="col–meth" colwidth="1*" />
+
+          <colspec align="left" colname="col–prop" colwidth="1*" />
+
+          <colspec align="left" colname="col–desc" colwidth="2*" />
+
+          <thead>
+            <row>
+              <entry align="center">Method</entry>
+
+              <entry align="center">Property</entry>
+
+              <entry align="center">Description</entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry><literal>get_model()</literal></entry>
+
+              <entry><literal>model</literal></entry>
+
+              <entry>The jmodelica.jmi.Model object that was used in the
+              algorithm.</entry>
+            </row>
+
+            <row>
+              <entry><literal>get_result_file_name()</literal></entry>
+
+              <entry><literal>result_file_name</literal></entry>
+
+              <entry>The name of the result file created on the file
+              system.</entry>
+            </row>
+
+            <row>
+              <entry><literal>get_solver()</literal></entry>
+
+              <entry><literal>solver</literal></entry>
+
+              <entry>The solver used in the algorithm.</entry>
+            </row>
+
+            <row>
+              <entry><literal>get_result_data()</literal></entry>
+
+              <entry><literal>result_data</literal></entry>
+
+              <entry>The result data object containing the whole
+              initialization, simulation or optimization result
+              matrix.</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+    </section>
+
+    <section>
+      <title>Default arguments</title>
+
+      <section>
+        <title> Function arguments</title>
+
+        <para>The only required input to any of the high-level functions is
+        the model object, the rest of the arguments all have default values.
+        The default values are listed in the docstring of the function. Using
+        the interactive help in the Python shell or looking at the <link
+        xlink:href="www.jmodelica.org">api documentation</link> will display
+        the docstring for a certain function. It is then possible to see what
+        arguments are available and their default values.</para>
+
+        <programlisting># docstring for simulate
+Docstring:
+    Compact function for model simulation.
+
+The intention with this function is to wrap model compilation, creation of
+a model object and simulation in one function call. The simulation
+method depends on which algorithm is used, this can be set with the
+function argument 'algorithm'. Arguments for the algorithm and solver are
+passed as dicts. Which arguments that are valid depends on which algorithm
+is used, see the algorithm implementation in algorithm_drivers.py for details.
+
+The default algorithm for this function is AssimuloAlg.
+
+The simplest way of using the function is to pass the model name and path
+to the model file (a jmi.Model is enough if model is already compiled) and
+use the default values for all other arguments.
+
+Parameters::
+
+    model --
+        Model object or model name (supply model name if model should be
+        (re)compiled, then mo-file must also be provided)
+    file_name --
+        Path to model file or list of paths to model files.
+        Default: empty string (no compilation)
+    compiler --
+        Set compiler that model should be compiled with, 'modelica' or
+        'optimica'.
+        Default: 'modelica'
+    compiler_target --
+        Target argument to compiler.
+        Default: 'ipopt'
+    compiler_options --
+        Dict with options for the compiler (see options.xml for possible
+        values).
+        Default: empty dict
+    algorithm --
+        The algorithm which will be used for the simulation is
+        specified by passing the algorithm class in this argument. The
+        algorithm class can be any class which implements the abstract
+        class AlgorithmBase (found in algorithm_drivers.py). In this way
+        it is possible to write own algorithms and use them with this
+        function.
+        Default: AssimuloAlg
+    alg_args --
+        All arguments for the chosen algorithm should be listed in this dict.
+        Valid arguments depend on the algorithm chosen, see algorithm
+        implementation in algorithm_drivers.py for details.
+        Default: empty dict
+    solver_args --
+        All arguments for the chosen solver should be listed in this dict.
+        Valid arguments depend on the chosen algorithm and possibly which
+        solver has been selected for the algorithm. See algorithm
+        implementation in algorithm_drivers.py for details.
+        Default: empty dict
+
+Returns::
+
+    Result object, subclass of algorithm_drivers.ResultBase.</programlisting>
+      </section>
+
+      <section>
+        <title>Algorithm arguments</title>
+
+        <para><literal>alg_args</literal> and <literal>solver_args</literal>
+        in the high-level functions are different depending on which algorithm
+        is used. To see what values are valid for a specific algorithm, check
+        the docstring for the algorithm.</para>
+
+        <programlisting># algorithm arguments for AssimuloAlg
+Docstring:
+    Set arguments for Assimulo algorithm.
+
+Parameters:
+    start_time --
+        Simulation start time.
+        Default: 0.0
+    final_time --
+        Simulation stop time.
+        Default: 1.0
+    num_communication_points --
+        Number of points where the solution is returned. If set to 0 the
+        integrator will return at it's internal steps.
+        Default: 500
+    solver --
+        Set which solver to use with class name as string. This determines
+        whether a DAE or ODE problem will be created.
+        Default: 'IDA'
+    input_trajectory --
+        Trajectory data for model inputs. The argument should be a matrix
+        where the first column represents time and the following columns
+        represents input trajectory data.
+        Default: An empty matrix, i.e., no input trajectories.
+    initialize --
+        Do initialization if True, skip initialization if False.
+</programlisting>
+      </section>
+    </section>
+
+    <section>
+      <title>Short simulation example</title>
+
+      <para>Here a short example using the simulate high-level function will
+      be demonstrated. The RLC circuit model will be used in the example, this
+      model and a Python script which runs the example can be found in the
+      JModelica examples package.</para>
+
+      <para>Start by creating the model object:</para>
+
+      <programlisting># The model name and mo-file
+model_name = 'RLC_Circuit'
+mo_file = 'RLC_Circuit.mo'
+
+# Create jmi.Model object
+from jmodelica import jmi
+rlc_model = jmi.Model(model_name, mo_file)
+</programlisting>
+
+      <para>Then import the simulate function and simulate using all default
+      arguments, this means that the AssimuloAlg algorithm will be used. Save
+      the result object in a variable.</para>
+
+      <programlisting># Import simulate
+from jmodelica import simulate
+
+# Simulate with default arguments and save the result object in a variable 
+sim_res = simulate(model_name, mofile)
+</programlisting>
+
+      <para>The result data can then be extracted from the result object and
+      plotted.</para>
+
+      <programlisting># Get the result data and plot some signals
+res = sim_res.result_data
+sine_y = res.get_variable_data('sine.y')
+resistor_v = res.get_variable_data('resistor.v')
+inductor1_i = res.get_variable_data('inductor1.i')
+</programlisting>
+
+      <figure>
+        <title>Result data from a simulation of s of the RLC Circuit</title>
+
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center"
+                       fileref="images/RLC_resultplot_short.png"
+                       valign="middle" width="40%"></imagedata>
+          </imageobject>
+        </mediaobject>
+      </figure>
+
+      <para>The default simulation time for the AssimuloAlg algorithm is 1s.
+      This can be changed by altering the algorithm argument
+      'final_time'</para>
+
+      <programlisting># Simulate again, this time with 'final_time' set to 30s
+sim_res = simulate(model_name, mofile), alg_args={'final_time':30})
+</programlisting>
+
+      <para>Plotting with the same commands gives the result can be seen in
+      the figure below.</para>
+
+      <figure>
+        <title>Result data from a simulation of 30s of the RLC Circuit</title>
+
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center" fileref="images/RLC_resultplot.png"
+                       format="png" valign="middle" width="40%"></imagedata>
+          </imageobject>
+        </mediaobject>
+      </figure>
+    </section>
+  </section>
+</chapter>
