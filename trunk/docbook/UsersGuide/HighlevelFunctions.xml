@@ -45,11 +45,11 @@ jmodelica.optimize
 
       <para>The algorithms that are used in the high-level functions are
       implemented as classes in the module
-      <literal>jmodelica.algorithm_drivers</literal>. They all subclass the
-      base algorithm class
+      <literal>jmodelica.algorithm_drivers</literal>. They are all subclasses
+      of the base algorithm class
       <literal>jmodelica.algorithm_drivers.AlgorithmBase</literal> which
       contains methods that all algorithm classes must implement. The
-      currently available algorithms are displayed in table t.</para>
+      currently available algorithms are displayed in table below.</para>
 
       <para><table colsep="1" pgwide="0">
           <title>Algorithms accessible from high-level functions</title>
@@ -206,7 +206,7 @@ jmodelica.optimize
       <title>Default arguments</title>
 
       <section>
-        <title> Function arguments</title>
+        <title>Function arguments</title>
 
         <para>The only required input to any of the high-level functions is
         the model object, the rest of the arguments all have default values.
@@ -318,10 +318,10 @@ Parameters:
     <section>
       <title>Short simulation example</title>
 
-      <para>Here a short example using the simulate high-level function will
-      be demonstrated. The RLC circuit model will be used in the example, this
-      model and a Python script which runs the example can be found in the
-      JModelica examples package.</para>
+      <para>Here is a short example which will demonstrate how to use the
+      high-level function simulate. The RLC circuit model will be used in the
+      example, this model and a Python script which runs the example can be
+      found in the JModelica examples package.</para>
 
       <para>Start by creating the model object:</para>
 
@@ -375,8 +375,8 @@ inductor1_i = res.get_variable_data('inductor1.i')
 sim_res = simulate(model_name, mofile), alg_args={'final_time':30})
 </programlisting>
 
-      <para>Plotting with the same commands gives the result can be seen in
-      the figure below.</para>
+      <para>Plotting with the same commands gives the result which can be seen
+      in the figure below.</para>
 
       <figure>
         <title>Result data from a simulation of 30s of the RLC Circuit</title>
