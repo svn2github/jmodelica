@@ -444,7 +444,7 @@ aspect InstBindingType {
 	eq InstRoot.getChild().expandBindingType(FType type, InstNode node)      = type;
 	eq FlatRoot.getChild().expandBindingType(FType type, InstNode node)      = type;
 	eq InstArrayComponentDecl.getChild().expandBindingType(FType type, InstNode node) = 
-		expandBindingType(type.enclosingArrayType(childFSubscript(0).numIndices()), node);
+		expandBindingType(type.enclosingArrayType(myDimensionLength()), node);
 	eq InstComposite.getChild().expandBindingType(FType type, InstNode node) = 
 		(node == this) ? type : expandBindingType(type, node);
 	eq InstRecord.getChild().expandBindingType(FType type, InstNode node) = 

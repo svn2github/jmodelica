@@ -607,6 +607,59 @@ aspect Names {
         Opt o = (fas == null) ? new Opt() : new Opt(fas);
         ((InstArrayAccess) getLastInstAccess()).setFArraySubscriptsOpt(o);
     }
+    
+}
+
+aspect Slices {
+	
+    /**
+     * \brief Check if this is a slice operation.
+     */
+    syn boolean InstAccess.isSlice() = hasFArraySubscripts() && isArray();
+    eq InstDot.isSlice() = getLeft().isArray() || getRight().isSlice();
+    
+    /**
+     * \brief Check if this is a slice operation.
+     */
+    syn boolean FQName.isSlice() {
+    	int n = getNumFQNamePart() - 1;
+    	for (int i = 0; i < n; i++) {
+    		FQNamePart part = getFQNamePart(i);
+    		if (part.hasFArraySubscripts())
+    			for (FSubscript fs : part.getFArraySubscripts().getFSubscripts())
+    				if (fs.ndims() > 0)
+    					return true;
+    	}
+    	boolean array = false;
+    	boolean exp = false;
+		FQNamePart part = getFQNamePart(n);
+		if (part.hasFArraySubscripts()) {
+			for (FSubscript fs : part.getFArraySubscripts().getFSubscripts()) {
+				if (fs instanceof FExpSubscript) 
+					exp = true;
+				if (fs.ndims() > 0)
+					array = true;
+			}
+		}
+		return array && exp;
+    }
+	
+    /**
+     * \brief Check if this is a slice operation.
+     */
+    syn boolean FIdUse.isSlice()  = getFQName().isSlice();
+    eq FIdUseInstAccess.isSlice() = getInstAccess().isSlice();
+	
+    /**
+     * \brief Check if this is a slice operation.
+     */
+    syn boolean FInstAccessExp.isSlice() = getInstAccess().isSlice();
+	
+    /**
+     * \brief Check if this is a slice operation.
+     */
+    syn boolean FIdUseExp.isSlice() = isArray() && getFIdUse().isSlice();
+    
 }
 
 aspect FlatNames {

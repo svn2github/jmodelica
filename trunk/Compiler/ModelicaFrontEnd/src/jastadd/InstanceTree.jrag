@@ -649,7 +649,8 @@ aspect InstanceTreeConstruction {
 			// of InstaArrayComponentDecls. The remaining are used when
 			// InstArrayComponentDecls are created further down in the tree.
 			//for (int i : getFArraySubscripts().getFSubscript(0).arrayIndices()) 
-			for (int i : getFArraySubscripts().getFSubscript(0).arrayIndices()) 
+			int n = size().get(0);
+			for (int i = 1; i <= n; i++)
 				l.add(new InstArrayComponentDecl(new InstClassAccess("ArrayDecl"), new Opt(), 
 						getComponentDecl(), new Opt(), new Opt(), new Opt(), i));
 			return l;
@@ -660,23 +661,18 @@ aspect InstanceTreeConstruction {
 
 	eq InstArrayComponentDecl.getInstComponentDeclList() {
 		// Get the FSubscript corresponding to this InstArrayComponentDecl
-		FSubscript fs = childFSubscript(1);
-		if (fs != null) {
+		int n = childDimensionLength();
+		List l = new List();
+		if (n > 0) {
 			// Loop over indices and create new InstArrayComponentDecls
-			List l = new List();
-			for (int i : fs.arrayIndices()) 
+			for (int i = 1; i <= n; i++)
 				l.add(new InstArrayComponentDecl(new InstClassAccess("ArrayDecl"), new Opt(), 
 						instComponentDecl(). getComponentDecl(), new Opt(), new Opt(), new Opt(), i));
-			return l;
 		} else {
-			List l = new List();
-			ArrayList<ComponentDecl> comps = components();
-
-			for (ComponentDecl cd : comps) {
+			for (ComponentDecl cd : components()) 
 				l.add(createInstComponentDecl(cd));
-			}			
-			return l;
 		}
+			return l;
 	}
 	
 	syn lazy List InstNode.getInstClassDeclList() {
@@ -728,10 +724,8 @@ aspect InstanceTreeConstruction {
 	}
 
 	eq InstArrayComponentDecl.getInstExtendsList() {
-		// Get the FSubscript corresponding to this InstArrayComponentDecl
-		FSubscript fs = childFSubscript(1);
 		List l = new List();
-		if (fs == null) {
+		if (childDimensionLength() == Size.UNKNOWN) {
 			// Loop over indices and create new 
 			for (ExtendsClause e : superClasses()) {
 				l.add(createInstExtends(e));
@@ -1410,14 +1404,27 @@ aspect SourceAST_API {
 
 aspect InstArrays {
 	
-	inh FSubscript InstArrayComponentDecl.childFSubscript(int i);
-	eq InstArrayComponentDecl.getInstComponentDecl().childFSubscript(int i) = 
-		childFSubscript(i+1);
-	eq InstComponentDecl.getInstComponentDecl().childFSubscript(int i) =
-		(hasFArraySubscripts() && getFArraySubscripts().getNumFSubscript()>i)?
-				getFArraySubscripts().getFSubscript(i) : null;
-	eq InstRoot.getChild().childFSubscript(int i) = null;
-	eq FlatRoot.getChild().childFSubscript(int i) = null;
+	/**
+	 * \brief Find the length of the dimension corresponding to this InstArrayComponentDecl. 
+	 */
+	inh int InstArrayComponentDecl.myDimensionLength();
+	eq InstNode.getChild().myDimensionLength() = getNumInstComponentDecl();
+	
+	/**
+	 * \brief Find the length of the dimension corresponding to the level under 
+	 *        this InstArrayComponentDecl. 
+	 */
+	syn int InstArrayComponentDecl.childDimensionLength() = dimensionLength(1);
+	
+	/**
+	 * \brief Find the length of the dimension corresponding to the InstArrayComponentDecl(s)
+	 *        <code>i</code> levels under this one. 
+	 */
+	inh int InstArrayComponentDecl.dimensionLength(int i);
+	eq InstArrayComponentDecl.getInstComponentDecl().dimensionLength(int i) = dimensionLength(i + 1);
+	eq InstComponentDecl.getInstComponentDecl().dimensionLength(int i)      = size().get(i);
+	eq InstRoot.getChild().dimensionLength(int i)                           = Size.UNKNOWN;
+	eq FlatRoot.getChild().dimensionLength(int i)                           = Size.UNKNOWN;
 
 	inh InstComponentDecl InstArrayComponentDecl.instComponentDecl();
 	eq InstComponentDecl.getChild().instComponentDecl() = this;
@@ -1454,19 +1461,14 @@ aspect InstArrays {
 	/**
 	 * This is the definition of an NTA that collects both the local
 	 * array subscripts given a component declaration and array subscripts
-	 * given on the declaration's class (in the case o short
+	 * given on the declaration's class (in the case of short
 	 * class declarations).
 	 */
 	syn lazy FArraySubscripts InstComponentDecl.getFArraySubscripts() {
 		FArraySubscripts fas = new FArraySubscripts();
-		for (FSubscript fs : myFSubscripts()) {
+		for (FSubscript fs : myFSubscripts()) 
 			fas.addFSubscript((FSubscript)fs.fullCopy());
-		}
-		if (fas.getNumChild()>0) {
-			return fas;
-		} else {
-			return null;
-		}
+		return (fas.getNumChild() > 0) ? fas : null;
 	}
 	
 	syn boolean InstComponentDecl.hasFArraySubscripts() = getFArraySubscripts()!=null;
