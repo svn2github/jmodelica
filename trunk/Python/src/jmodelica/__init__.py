@@ -129,8 +129,7 @@ def optimize(model,
     
     Returns::
     
-        model -- The jmi.Model object
-        res -- The loaded result file.
+        Result object, subclass of algorithm_drivers.ResultBase.
     
     
     """
@@ -208,8 +207,7 @@ def simulate(model,
     
     Returns::
     
-        model -- The jmi.Model object
-        res -- The loaded result file.
+        Result object, subclass of algorithm_drivers.ResultBase.
     
     """
     return _exec_algorithm(model, 
@@ -285,8 +283,7 @@ def initialize(model,
             
     Returns::
     
-        model -- The jmi.Model object
-        res -- The loaded result file.
+        Result object, subclass of algorithm_drivers.ResultBase.
     
     """
     return _exec_algorithm(model, 
