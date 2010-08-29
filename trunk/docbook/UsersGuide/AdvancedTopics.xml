@@ -461,7 +461,7 @@ except:
 
       <para>Let us have a look at the flattened model:</para>
 
-      <programlisting language="python">print(filter_flat_model.prettyPrint(""))</programlisting>
+      <programlisting language="python">print(filter_flat_model)</programlisting>
 
       <para>We may also retrieve some model statistics:</para>
 

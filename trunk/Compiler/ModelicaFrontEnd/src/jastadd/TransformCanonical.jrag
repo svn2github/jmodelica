@@ -822,6 +822,7 @@ aspect TransformCanonicalErrorCheck {
 		}
 		checkDuplicateVariables();
 		checkFClassDimensions();
+		checkUnsupportedStreamConnections();
 	}
 }
 

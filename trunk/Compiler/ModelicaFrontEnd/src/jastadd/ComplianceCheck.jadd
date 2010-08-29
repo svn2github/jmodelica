@@ -106,11 +106,16 @@ aspect ComplianceCheck {
 						"does currently not merge indentical components.");
 			} else {
 				h.add(fv.name());
-			}
-			
+			}	
 		}
-		
 	}
-
+	
+	public void FClass.checkUnsupportedStreamConnections() {
+		for (ConnectionSet cse : getConnectionSetManager().getConnectionSetList()) {
+			if (cse.numStreamVariables()>2) {
+				compliance("Stream connections with more than three connectors are not supported: " + cse);
+			}
+		}
+	}
 	
 }

@@ -71,55 +71,73 @@
           supported:<informaltable border="1" frame="void" width="75%">
               <tr>
                 <td>sign(v)</td>
+
                 <td>cardinality()</td>
+
                 <td>reinit(x, expr)</td>
               </tr>
 
               <tr>
                 <td>Integer(e)</td>
+
                 <td>semiLinear(...)</td>
+
                 <td>scalar(A)</td>
               </tr>
 
               <tr>
                 <td>String(...)</td>
+
                 <td>Subtask.decouple(v)</td>
+
                 <td>vector(A)</td>
               </tr>
 
               <tr>
                 <td>div(x,y)</td>
+
                 <td>initial()</td>
+
                 <td>matrix(A)</td>
               </tr>
 
               <tr>
                 <td>mod(x,y)</td>
+
                 <td>terminal()</td>
+
                 <td>diagonal(v)</td>
               </tr>
 
               <tr>
                 <td>rem(x,y)</td>
+
                 <td>smooth(p, expr)</td>
+
                 <td>product(...)</td>
               </tr>
 
               <tr>
                 <td>ceil(x)</td>
+
                 <td>sample(start, interval)</td>
+
                 <td>outerProduct(v1, v2)</td>
               </tr>
 
               <tr>
                 <td>floor(x)</td>
+
                 <td>pre(y)</td>
+
                 <td>symmetric(A)</td>
               </tr>
 
               <tr>
                 <td>integer(x)</td>
+
                 <td>edge(b)</td>
+
                 <td>skew(x)</td>
               </tr>
 
@@ -135,8 +153,8 @@
         </listitem>
 
         <listitem>
-          <para>Stream connectors (Modelica Language Specification, chapter
-          15)</para>
+          <para>Stream connections with more than two connectors are not
+          supported.</para>
         </listitem>
 
         <listitem>
@@ -190,11 +208,7 @@
 
         <listitem>
           <para>Options for setting and getting string variables does not
-          work.</para>
-        </listitem>
-
-        <listitem>
-          <para>The debug logging does not work properly.</para>
+          work</para>
         </listitem>
       </itemizedlist>
     </listitem>

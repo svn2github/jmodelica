@@ -18,9 +18,30 @@
   for example <literal>help(numpy.size)</literal>. Use this feature frequently
   to learn more about the packages used in this tutorial, including the
   jmodelica package. It is possible do the tutorials without any Python
-  knowledge (although it helps to know the basics). In most cases it is
-  convenient to store the Python commands in a script file and run the script
-  from the file by invoking the Python command run:</para>
+  knowledge (although it helps to know the basics). </para>
+
+        <para>The tutorials in this chapter are preferably run in a Python shell using the Pylab mode. If
+        you are running Windows, select the menu option 'pylab' provided with the
+        JModelica.org installation. If you are running Linux or Mac OS X, open
+        a terminal and enter the command:</para>
+
+        <programlisting language="python">&gt; $JMODELICA_HOME/Python/jm_ipython.sh -pylab
+</programlisting>
+
+        <para>As your first action, go to the working directory you have
+        created:</para>
+
+        <programlisting language="python">In [1]: cd '/path/to/working/directory'
+</programlisting>
+
+        <para>In order to run the Python script, use the 'run' command:</para>
+
+        <programlisting language="python">in [2]: run cstr.py
+</programlisting>
+
+  <para>In most cases it is convenient to store the Python commands in a
+  script file and run the script from the file by invoking the Python command
+  run:</para>
 
   <programlisting>&gt;&gt;&gt; run my_script.py</programlisting>
 
@@ -832,28 +853,6 @@ plt.show()</programlisting>
       choose to create Python script file, save it to the working
       directory.</para>
 
-      <section>
-        <title>Start the Python shell</title>
-
-        <para>Next, open a Python shell, preferably using the Pylab mode. If
-        you are running Windows, select the menu option provided with the
-        JModelica.org installation. If you are running Linux or Mac OS X, open
-        a terminal and enter the command:</para>
-
-        <programlisting language="python">&gt; /path/to/jmodelica_installation/Python/jm_ipython.sh -pylab
-</programlisting>
-
-        <para>As your first action, go to the working directory you have
-        created:</para>
-
-        <programlisting language="python">In [1]: cd '/path/to/working/directory'
-</programlisting>
-
-        <para>In order to run the Python script, use the 'run' command:</para>
-
-        <programlisting language="python">in [2]: run cstr.py
-</programlisting>
-      </section>
 
       <section>
         <title>Compile and instantiate a model object</title>
