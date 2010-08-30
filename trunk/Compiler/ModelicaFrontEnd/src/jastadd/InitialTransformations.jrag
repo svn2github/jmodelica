@@ -79,7 +79,7 @@
             
             getComposition().extractElementsTo(fc);
             
-            fc.setLocation(getRestriction(), this);
+            fc.setLocationNoTree(getRestriction(), this);
             return fc;
         }
     }
@@ -120,10 +120,10 @@
             if (!hasRedeclare())
             	ec.setRedeclare(new Redeclare());
 
-            ca.setLocation(getName());
+            ca.setLocationNoTree(getName());
             // TODO: iec should probably include "extends" token as well, but that needs parser change
-            iec.setLocation(getName());
-            ec.setLocation(getRestriction(), this);
+            iec.setLocationNoTree(getName());
+            ec.setLocationNoTree(getRestriction(), this);
             return ec;
         }
     }
@@ -166,7 +166,7 @@
                                      getClassModificationOpt(),
                                      getAnnotationOpt());
         
-            e.setLocation(this);
+            e.setLocationNoTree(this);
             return e;
         }
     }
@@ -197,7 +197,7 @@
                                                     l,
                                                     getConstrainingClauseOpt(),
                                                     getComment());
-            c.setLocation(this);
+            c.setLocationNoTree(this);
             //log.debug("PN_ComponentClause->ComponentClause.getStart() = "+c.getStart());
             return c;
         }
@@ -206,7 +206,7 @@
      rewrite PN_ComponentRedeclare {
         to ComponentRedeclare {
            ComponentRedeclare c = new ComponentRedeclare(getEachOpt(),getFinalOpt(), getName(), (ComponentDecl)getBaseComponentDecl());
-           c.setLocation(this);
+           c.setLocationNoTree(this);
            return c;
         }
     }   
@@ -262,7 +262,7 @@
                                                                 new List().add(getName(i)),
                                                                 (Opt)getConstrainingClauseOpt().fullCopy(),
                                                                 (Comment)getComment().fullCopy());
-                        c.setLocation(this);
+                        c.setLocationNoTree(this);
                         //log.debug("ComponentClause->ComponentClause.getStart() = "+c.getStart());
                         l.add(c);
                     }
@@ -305,7 +305,7 @@
                                                     getName(0).getComment(),
                                                     getConstrainingClauseOpt(),
                                                     getComment());
-                c.setLocation(getName(0), this);
+                c.setLocationNoTree(getName(0), this);
                 //log.debug("ComponentClause->ComponentDecl.getStart() = "+c.getStart());
                 return c;
             }
@@ -348,11 +348,11 @@
                                                     getStringCommentOpt()))),
                                                    new Opt())),
                                            new Opt());
-            e.getModification().setLocation(this);
-            ((CompleteModification)e.getModification()).getClassModification().setLocation(this);
+            e.getModification().setLocationNoTree(this);
+            ((CompleteModification)e.getModification()).getClassModification().setLocationNoTree(this);
             ClassModification cm = ((CompleteModification)e.getModification()).getClassModification();
-            ((ComponentModification)cm.getArgument(0)).getName().setLocation(this);
-            e.setLocation(this);
+            ((ComponentModification)cm.getArgument(0)).getName().setLocationNoTree(this);
+            e.setLocationNoTree(this);
             return e;
         }
     
@@ -370,7 +370,7 @@
                                       getTypePrefixInputOutputOpt(),
                                       getArraySubscriptsOpt(),
                                       getComment());
-            ecsc.setLocation(this);
+            ecsc.setLocationNoTree(this);
             ShortClassDecl scd = new ShortClassDecl((VisibilityType)ecsc.getVisibilityType().fullCopy(), 
                                       getEncapsulatedOpt(), 
                                       getPartialOpt(), 
@@ -385,7 +385,7 @@
                                       getConstrainingClauseCommentOpt(),
                                       ecsc); 
                                       
-           scd.setLocation(this);
+           scd.setLocationNoTree(this);
            return scd;
         }
     }
