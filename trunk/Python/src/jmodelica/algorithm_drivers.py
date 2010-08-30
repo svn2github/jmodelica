@@ -420,6 +420,7 @@ class AssimuloAlg(AlgorithmBase):
                 Default: An empty matrix, i.e., no input trajectories.
             initialize --
                 Do initialization if True, skip initialization if False.
+                Default: True
         """
         self.start_time = start_time
         self.final_time = final_time
@@ -536,12 +537,12 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
             n_e -- 
                 Number of finite elements.
                 Default:50
-            hs -- 
-                Vector containing the normalized element lengths.
-                Default: Equidistant points using default n_e.
             n_cp -- 
                 Number of collocation points.
                 Default: 3
+            hs -- 
+                Vector containing the normalized element lengths.
+                Default: Equidistant points using default n_e.
             blocking_factors --
                 Blocking factor vector.
                 Default: None (not used)
