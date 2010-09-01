@@ -440,6 +440,11 @@
         <listitem>
           <para>Limited support for external functions</para>
         </listitem>
+
+        <listitem>
+          <para>Support for stream connections (with up to two connectors in a
+          connection)</para>
+        </listitem>
       </itemizedlist>
     </section>
 
@@ -528,7 +533,7 @@
 
           <para>Stream connectors, including the operators inStream and
           actualStream and connections with up to two stream connectors are
-          supported. </para>
+          supported.</para>
         </section>
 
         <section>

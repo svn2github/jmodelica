@@ -5,6 +5,7 @@ Highlights:
   - Support for minimum time problems
   - Improved support for redecare/replaceable in the compiler frontend
   - Limited support for external functions
+  - Support for stream connections (with up to two connectors in a connection)
 
 1. Compilers
 
