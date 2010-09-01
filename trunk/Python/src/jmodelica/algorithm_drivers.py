@@ -72,51 +72,127 @@ class AlgorithmBase:
     def get_result(self): pass
     
 class ResultBase:
+    """ Base class for an algorithm result. All algorithms used in any 
+        of the high-level functions must return an object which extends 
+        this class.
+    """
+    
     def __init__(self, model=None, result_file_name=None, solver=None, result_data=None):
+        """ Create a result object containing the model used in the algorithm,
+        the name of the result file, the solver used in the algorithm and 
+        the result data object.
+                       
+        Parameters::
+        
+            model -- 
+                The jmi.Model object for the model used in the algorithm.
+            result_file_name --
+                Name of the file containing the algorithm result created
+                on the file system.
+            solver --
+                The solver object used in the algorithm.
+            result_data --
+                The result data object created when running the 
+                algorithm. Holds the whole result data matrix.
+        """
         self.model = model
         self.result_file_name = result_file_name
         self.solver = solver
         self.result_data = result_data
     
     def get_model(self):
+        """ Get the jmi.Model object representing the model that was 
+        used in the algorithm.
+        
+        Returns::
+        
+            The jmi.Model object that was used in the algorithm.
+        """
         if self.model != None:
             return self.model
         raise Exception("model has not been set")
         
     def set_model(self, model):
+        """ Set the jmi.Model that was used in the algorithm.
+        
+        Parameters::
+        
+            model --
+                The jmi.Model object that was used in the algorithm.
+        """
         self.model = model
         
-    model = property(fget=get_model, fset=set_model, doc="The jmi.Model instance.")
+    model = property(fget=get_model, fset=set_model)
         
     def get_result_file_name(self):
+        """ Get the name of the result file created on the file system.
+        
+        Returns::
+        
+            The name of the result file.
+        """
         if self.result_file_name != None:
             return self.result_file_name
         raise Exception("result file name has not been set")
     
     def set_result_name_file(self, file_name):
+        """ Set the name of the result file created in the algorithm.
+        
+        Parameters::
+            file_name --
+                The name of the result file.
+            
+        """
         self.result_file_name = result_file_name
         
-    result_file_name = property(fget=get_result_file_name, fset=set_result_name_file, doc="The result file name.")
+    result_file_name = property(fget=get_result_file_name, fset=set_result_name_file)
         
     def get_solver(self):
+        """ Get the solver object repesenting the solver that was used 
+        in the algorithm.
+        
+        Returns::
+        
+            The solver object that was used in the algorithm.
+        """
         if self.solver != None:
             return self.solver
         raise Exception("solver has not been set")
 
     def set_solver(self, solver):
+        """ Set the solver that was used in the algorithm.
+        
+        Parameters::
+        
+            solver --
+                The solver that was used in the algorithm.
+        """
         self.solver = solver
         
-    solver = property(fget=get_solver, fset=set_solver, doc="The solver used in the algorithm.")
+    solver = property(fget=get_solver, fset=set_solver)
         
     def get_result_data(self):
+        """ Get the result data matrix created in the algorithm.
+        
+        Returns::
+        
+            The result data matrix.
+        """
         if self.result_data != None:
             return self.result_data
         raise Exception("result data has not been set")
         
-    def set_result_data(self):
+    def set_result_data(self, result_data):
+        """ Set the result data matrix that was created in the algorithm.
+        
+        Parameters::
+        
+            result_data --
+                The result data matrix.
+        """
         self.result_data = result_data
         
-    result_data = property(fget=get_result_data, fset=set_result_data, doc="The result data object.")
+    result_data = property(fget=get_result_data, fset=set_result_data)
     
     
 class IpoptInitResult(ResultBase): pass
@@ -654,7 +730,8 @@ class JFSInitAlg(AlgorithmBase):
     def __init__(self, model, alg_args={}):
         """ Create algorithm objects.
         
-        Parameters:
+        Parameters::
+        
             model -- 
                 jmi.Model object representation of the model
             alg_args -- 
