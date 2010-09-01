@@ -18,25 +18,25 @@
   for example <literal>help(numpy.size)</literal>. Use this feature frequently
   to learn more about the packages used in this tutorial, including the
   jmodelica package. It is possible do the tutorials without any Python
-  knowledge (although it helps to know the basics). </para>
+  knowledge (although it helps to know the basics).</para>
 
-        <para>The tutorials in this chapter are preferably run in a Python shell using the Pylab mode. If
-        you are running Windows, select the menu option 'pylab' provided with the
-        JModelica.org installation. If you are running Linux or Mac OS X, open
-        a terminal and enter the command:</para>
+  <para>The tutorials in this chapter are preferably run in a Python shell
+  using the Pylab mode. If you are running Windows, select the menu option
+  'pylab' provided with the JModelica.org installation. If you are running
+  Linux or Mac OS X, open a terminal and enter the command:</para>
 
-        <programlisting language="python">&gt; $JMODELICA_HOME/Python/jm_ipython.sh -pylab
+  <programlisting language="python">&gt; $JMODELICA_HOME/Python/jm_ipython.sh -pylab
 </programlisting>
 
-        <para>As your first action, go to the working directory you have
-        created:</para>
+  <para>As your first action, go to the working directory you have
+  created:</para>
 
-        <programlisting language="python">In [1]: cd '/path/to/working/directory'
+  <programlisting language="python">In [1]: cd '/path/to/working/directory'
 </programlisting>
 
-        <para>In order to run the Python script, use the 'run' command:</para>
+  <para>In order to run the Python script, use the 'run' command:</para>
 
-        <programlisting language="python">in [2]: run cstr.py
+  <programlisting language="python">in [2]: run cstr.py
 </programlisting>
 
   <para>In most cases it is convenient to store the Python commands in a
@@ -540,7 +540,8 @@ plt.ylabel('x2')
 plt.subplot(313)
 plt.plot(u.t,u.x)
 plt.grid()
-plt.ylabel('u')plt.xlabel('time')
+plt.ylabel('u')
+plt.xlabel('time')
 plt.show()</programlisting>
 
       <para>You should now see the optimization result as shown below.</para>
@@ -852,7 +853,6 @@ plt.show()</programlisting>
       accept the site certificate by clicking through a few steps). If you
       choose to create Python script file, save it to the working
       directory.</para>
-
 
       <section>
         <title>Compile and instantiate a model object</title>
