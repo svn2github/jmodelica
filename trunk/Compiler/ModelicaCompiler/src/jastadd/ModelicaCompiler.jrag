@@ -920,11 +920,7 @@ public class ModelicaCompiler {
 		if (e.getMessage() != null)
 			msg += ": " + e.getMessage();
 		log.error(msg);
-		
-		StringWriter str = new StringWriter();
-		PrintWriter print = new PrintWriter(str);
-		e.printStackTrace(print);
-		log.debug(str.toString());
+		log.stackTrace(e);
 		System.exit(1);
 	}
 	

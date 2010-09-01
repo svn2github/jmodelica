@@ -41,7 +41,14 @@ public class JunitGenerator {
 	}
 	
 	public JunitGenerator(String fileName, String className) {
-		this.ts = new TestSuite(fileName,className);
+		this.ts = new TestSuite(fileName, className, new Assert());
+	}
+	
+	private static class Assert implements TestCase.Assert {
+	    public void fail(String msg) {
+	    	System.out.println(msg);
+	    	System.exit(1);
+	    }
 	}
 	
 	public static void main(String args[]) {

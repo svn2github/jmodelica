@@ -1231,6 +1231,96 @@ end NameTests.ConstantLookup25;
 end ConstantLookup25;
 
 
+package ExtraForConstantLookup26
+	partial package A
+		extends B(d = size(b, 1), c = b[:].a);
+		
+		record C
+			Real a;
+		end C;
+		
+		constant C[:] b;
+	end A;
+	
+	package B 
+		constant Integer d;
+		constant Real[d] c;
+	end B;
+	
+	package D
+		extends A;
+	end D;
+	
+	package E
+		constant F.G[:] e = { F.f, F.g };
+		extends D(b = e);
+	end E;
+	
+	package F
+		record G
+			Real a;
+		end G;
+		
+		constant G f(a = 1);
+		constant G g(a = 2);
+	end F;
+end ExtraForConstantLookup26;
+
+model ConstantLookup26
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ConstantLookup26",
+         description="Constant lookup in complex data structure",
+         flatModel="
+fclass NameTests.ConstantLookup26
+ constant Real x[2] = {1.0,2.0};
+ Real y[2] = {1.0,2.0};
+end NameTests.ConstantLookup26;
+")})));
+
+    constant Real x[2] = ExtraForConstantLookup26.E.c;
+	Real y[2] = x;
+end ConstantLookup26;
+
+
+model ConstantLookup27
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ConstantLookup27",
+         description="Access to record as modification",
+         flatModel="
+fclass NameTests.ConstantLookup27
+ constant NameTests.ConstantLookup27.A c = NameTests.ConstantLookup27.A(1, 2);
+ constant Real e[2] = {1.0,2.0};
+ Real f[2] = {1.0,2.0};
+
+ record NameTests.ConstantLookup27.A
+  Real a;
+  Real b;
+ end NameTests.ConstantLookup27.A;
+end NameTests.ConstantLookup27;
+")})));
+
+	record A
+		Real a;
+		Real b;
+	end A;
+	
+	constant A c = A(1, 2);
+	
+	package B
+		constant A d = A(3, 4);
+	end B;
+	
+	package C
+		extends B(d = c);
+	end C;
+	
+	constant Real e[2] = { C.d.a, C.d.b };
+	Real f[2] = e;
+end ConstantLookup27;
+
+
 
 class ExtendsTest1
      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={

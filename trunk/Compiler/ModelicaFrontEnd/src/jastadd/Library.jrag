@@ -118,9 +118,12 @@ aspect Library {
 				log.error(e.getProblem().toString());
 				return createErrorStoredDefinition();		        
 			} catch (Exception e) {
-				log.error("Error when parsing file: '" + dirName + "/package.mo':\n" + 
-						"   " + e.getClass().getName() + "\n" + 
-						"   " + e.getMessage());
+				String msg = "Error when parsing file: '" + dirName + "/package.mo':\n" + 
+						"   " + e.getClass().getName() + "\n";
+				if (e.getMessage() != null)
+					msg = msg + "   " + e.getMessage();
+				log.error(msg);
+				log.stackTrace(e);
 				return createErrorStoredDefinition();		        
 			} 		
 			
@@ -139,9 +142,12 @@ aspect Library {
 				log.error(e.getProblem().toString()+"\n");
 				return createErrorStoredDefinition();		        
 			} catch (Exception e) {
-				log.error("Error when parsing file: '" + getFileName() + "':\n" + 
-						"   " + e.getClass().getName() + "\n" + 
-						"   " + e.getMessage());
+				String msg = "Error when parsing file: '" + getFileName() + "':\n" + 
+				"   " + e.getClass().getName() + "\n";
+				if (e.getMessage() != null)
+					msg = msg + "   " + e.getMessage();
+				log.error(msg);
+				log.stackTrace(e);
 				return createErrorStoredDefinition();		        
 			} 
 		}

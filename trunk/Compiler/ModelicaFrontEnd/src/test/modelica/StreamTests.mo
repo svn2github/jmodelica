@@ -133,12 +133,12 @@ model StreamComplErr
  // This is actually a compliance error but is kept here in order to avoid copying dependent classes.
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.ComplianceErrorTestCase(name="StreamComplErr",
-        description="Compliance error for String variables",
-                                               errorMessage=
+        description="Compliance error for stream connections with more than two connectors",
+        errorMessage=
 "
 Error: in file 'StreamTests.StreamComplErr.mof':
 Compliance error at line 0, column 0:
-  Stream connections with more than three connectors are not supported: Connection set (stream): {res1.port_b.h_outflow (i), res2.port_a.h_outflow (i), res3.port_a.h_outflow (i)}
+  Stream connections with more than two connectors are not supported: Connection set (stream): {res1.port_b.h_outflow (i), res2.port_a.h_outflow (i), res3.port_a.h_outflow (i)}
 ")})));
 
 Reservoir r1;

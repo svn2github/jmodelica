@@ -127,11 +127,11 @@ InstForStmt    : FStatement        ::= InstForIndex* ForStmt:FStatement*;
 abstract InstModification : BaseNode ::= <Modification:Modification>;
 InstCompleteModification : InstModification ::= InstClassModification [InstValueModification];
 InstValueModification    : InstModification ::= /FExp/ 
-                                                /InstRecordConstructorModification*/ 
+                                                /InstRecordModification*/ 
                                                 /DynamicInstMod:InstModification*/;
 InstClassModification    : InstModification ::= InstArgument*;
-//Virtual modification for argument of record constructor value modification.
-InstRecordConstructorModification : InstValueModification ::= <Input:InstComponentDecl> <Arg:FExp>;
+//Virtual modification for member of record type modification.
+InstRecordModification : InstValueModification ::= <Name:String> <Value:FExp>;
 //Virtual modification for cell of array constant value modification.
 InstArrayModification : InstValueModification ::= <Cell:FExp>;
 

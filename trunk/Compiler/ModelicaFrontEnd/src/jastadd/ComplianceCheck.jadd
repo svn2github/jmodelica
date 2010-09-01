@@ -112,8 +112,8 @@ aspect ComplianceCheck {
 	
 	public void FClass.checkUnsupportedStreamConnections() {
 		for (ConnectionSet cse : getConnectionSetManager().getConnectionSetList()) {
-			if (cse.numStreamVariables()>2) {
-				compliance("Stream connections with more than three connectors are not supported: " + cse);
+			if (cse.numStreamVariables() > 2) {
+				compliance("Stream connections with more than two connectors are not supported: " + cse);
 			}
 		}
 	}

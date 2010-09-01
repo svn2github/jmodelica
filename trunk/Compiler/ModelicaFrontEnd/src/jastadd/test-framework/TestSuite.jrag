@@ -30,7 +30,7 @@ public class TestSuite {
 		l = new ArrayList<TestCase>();
 	}
 
-	public TestSuite(String fileName, String className) {
+	public TestSuite(String fileName, String className, TestCase.Assert asserter) {
 		name = className;
 		l = new ArrayList<TestCase>();
 		ParserHandler ph = new ParserHandler();
@@ -38,8 +38,7 @@ public class TestSuite {
 		try {
 			sr = ph.parseFile(fileName);
 		} catch (Exception e) {
-			System.out.println("Error when parsing file: " + fileName);
-			System.exit(1);
+			asserter.fail("Error when parsing file: " + fileName);
 		}
 		
 		OptionRegistry or = new OptionRegistry();
@@ -69,19 +68,20 @@ public class TestSuite {
 		str.append("  }\n");
 		str.append("  static Assert asserter = new Assert();\n\n");
 		
+		String escaped = testFile.replaceAll("\\\\", "\\\\\\\\");  // Replaces \ with \\
 		str.append("  @BeforeClass public static void setUp() {\n");
-		str.append("    ts = new TestSuite(\"" + testFile.replaceAll("\\\\", "\\\\\\\\") // Replaces \ with \\
-				   + "\",\"" + getName() + "\");\n");
+		str.append("    ts = new TestSuite(\"" + escaped + "\", \"" + getName() + "\", asserter);\n");
 		str.append("  }\n\n");
-		for (int i=0;i<l.size();i++) {
-			get(i).dumpJunit(str,i);
-		}
+		
+		for (int i=0; i < l.size(); i++) 
+			get(i).dumpJunit(str, i);
+
 		str.append("  @AfterClass public static void tearDown() {\n");
 		str.append("    ts = null;\n");
 		str.append("  }\n\n");
 		str.append("}\n\n");
 		
-		File file = new File(dir+"/"+getName()+".java");
+		File file = new File(dir, getName() + ".java");
 		try {
 			FileWriter writer = new FileWriter(file);
 			writer.append(str.toString());

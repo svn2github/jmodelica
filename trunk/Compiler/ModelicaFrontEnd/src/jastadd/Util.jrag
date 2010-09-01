@@ -152,6 +152,16 @@ aspect Logging {
         public void info(String message)    { log(Level.INFO,    message); }
         public void warning(String message) { log(Level.WARNING, message); }
         public void error(String message)   { log(Level.SEVERE,  message); }
+        
+        /**
+         * Log stack trace of exception on debug log level.
+         */
+        public void stackTrace(Throwable e) {
+    		StringWriter str = new StringWriter();
+    		PrintWriter print = new PrintWriter(str);
+    		e.printStackTrace(print);
+    		debug(str.toString());
+        }
     }
 
     public static ModelicaLogger ASTNode.log = new ModelicaLogger();
@@ -631,6 +641,33 @@ aspect Names {
     public void InstAccess.setLastFArraySubscripts(FArraySubscripts fas) {
         Opt o = (fas == null) ? new Opt() : new Opt(fas);
         ((InstArrayAccess) getLastInstAccess()).setFArraySubscriptsOpt(o);
+    }
+    
+    /**
+     * \brief Copy this access, append a name part to the copy and return the copy.
+     */
+    public InstDot InstAccess.copyAndAppend(String id) {
+    	InstAccess left = (InstAccess) fullCopy();
+    	InstAccess right = createPartToAppend(id);
+        return new InstDot(left, right);
+    }
+    
+    public InstDot InstDot.copyAndAppend(String id) {
+    	InstDot res = (InstDot) copy();
+    	res.setLeft((InstAccess) getLeft().fullCopy());
+    	res.setRight(getRight().copyAndAppend(id));
+    	return res;
+    }
+    
+    /**
+     * \brief Create an InstAccess suitable for appending to this access.
+     */
+    public InstAccess InstAccess.createPartToAppend(String id) {
+    	return new InstParseAccess(id, new Opt());
+    }
+    
+    public InstAccess InstComponentAccess.createPartToAppend(String id) {
+    	return new InstComponentAccess(id, new Opt());
     }
     
 }
