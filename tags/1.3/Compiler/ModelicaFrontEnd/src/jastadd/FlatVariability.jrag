@@ -1,0 +1,266 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+aspect FlatVariability {
+	
+	syn boolean FTypePrefixVariability.constantVariability() = false;
+	eq FConstant.constantVariability() = true;	
+	syn boolean FTypePrefixVariability.parameterVariability() = false;
+	eq FParameter.parameterVariability() = true;	
+	syn boolean FTypePrefixVariability.discreteVariability() = false;
+	eq FDiscrete.discreteVariability() = true;	
+	syn boolean FTypePrefixVariability.continuousVariability() = false;
+	eq FContinuous.continuousVariability() = true;	
+
+	syn boolean TypePrefixVariability.constantVariability() = false;
+	eq Constant.constantVariability() = true;	
+	syn boolean TypePrefixVariability.parameterVariability() = false;
+	eq Parameter.parameterVariability() = true;	
+	syn boolean TypePrefixVariability.discreteVariability() = false;
+	eq Discrete.discreteVariability() = true;	
+	syn boolean TypePrefixVariability.continuousVariability() = false;
+	eq Continuous.continuousVariability() = true;
+	
+	
+	/**
+	 * \brief Test if variablilty is at most the same as <code>other</code>.
+	 * 
+	 * Uses ordering of variabilities imposed by {@link #variabilityLevel()}.
+	 */
+	syn boolean FTypePrefixVariability.lessOrEqual(FTypePrefixVariability other) = 
+		variabilityLevel() <= other.variabilityLevel();
+	
+	/**
+	 * \brief An ordering of the variability types.
+	 * 
+	 * To be used by methods for comparing variabilities. 
+	 * Should <em>never</em> be compared to literals, only to the return value from other 
+	 * FTypePrefixVariability objects. This simplifies adding new variabilities.
+	 *  
+	 * Also used to determine the behaviour of {@link #combine(FTypePrefixVariability)}.
+	 */
+	abstract protected int FTypePrefixVariability.variabilityLevel();
+	protected int FConstant.variabilityLevel()   { return VARIABILITY_LEVEL; }
+	protected int FParameter.variabilityLevel()  { return VARIABILITY_LEVEL; }
+	protected int FDiscrete.variabilityLevel()   { return VARIABILITY_LEVEL; }
+	protected int FContinuous.variabilityLevel() { return VARIABILITY_LEVEL; }
+	protected static final int FConstant.VARIABILITY_LEVEL   = 0;
+	protected static final int FParameter.VARIABILITY_LEVEL  = 10;
+	protected static final int FDiscrete.VARIABILITY_LEVEL   = 20;
+	protected static final int FContinuous.VARIABILITY_LEVEL = 30;
+	
+	/**
+	 * \brief An ordering of the variability types.
+	 * 
+	 * To be used by methods for comparing variabilities. 
+	 * Should <em>never</em> be compared to literals, only to the return value from other 
+	 * FTypePrefixVariability objects. This simplifies adding new variabilities.
+	 *  
+	 * Also used to determine the behaviour of {@link #combine(FTypePrefixVariability)}.
+	 */
+	abstract protected int TypePrefixVariability.variabilityLevel();
+	protected int Constant.variabilityLevel()   { return VARIABILITY_LEVEL; }
+	protected int Parameter.variabilityLevel()  { return VARIABILITY_LEVEL; }
+	protected int Discrete.variabilityLevel()   { return VARIABILITY_LEVEL; }
+	protected int Continuous.variabilityLevel() { return VARIABILITY_LEVEL; }
+	protected static final int Constant.VARIABILITY_LEVEL   = 0;
+	protected static final int Parameter.VARIABILITY_LEVEL  = 10;
+	protected static final int Discrete.VARIABILITY_LEVEL   = 20;
+	protected static final int Continuous.VARIABILITY_LEVEL = 30;
+	
+	syn boolean FVariable.isConstant() = getFTypePrefixVariability().constantVariability();
+    syn boolean FVariable.isParameter() = getFTypePrefixVariability().parameterVariability();
+    syn boolean FVariable.isDiscrete() = getFTypePrefixVariability().discreteVariability();
+    syn boolean FVariable.isContinuous() = getFTypePrefixVariability().continuousVariability();
+    
+    protected static final Continuous InstComponentDecl.CONTINUOUS_VARIABILITY = new Continuous();
+    
+    syn TypePrefixVariability InstComponentDecl.findVariability() {
+    	ComponentDecl cd = getComponentDecl();
+    	TypePrefixVariability var = cd.hasTypePrefixVariability() ? 
+    			cd.getTypePrefixVariability() : CONTINUOUS_VARIABILITY;
+    	return overrideVariability(var);
+    }
+    
+    inh TypePrefixVariability InstComponentDecl.overrideVariability(TypePrefixVariability var);
+    eq InstNode.getChild().overrideVariability(TypePrefixVariability var)      = var;
+    eq InstPrimitive.getChild().overrideVariability(TypePrefixVariability var) = var;
+    // TODO: or should InstPrimitive use InstComponentDecl version?
+    eq InstComponentDecl.getInstComponentDecl().overrideVariability(TypePrefixVariability var) =
+    	var.combineDown(findVariability());
+    
+	syn boolean InstAssignable.isConstant()   = findVariability().constantVariability();
+	syn boolean InstAssignable.isParameter()  = findVariability().parameterVariability();
+	syn boolean InstAssignable.isDiscrete()   = findVariability().discreteVariability();
+	syn boolean InstAssignable.isContinuous() = findVariability().continuousVariability();
+		
+		
+	syn boolean FExp.isConstantExp() = variability().constantVariability();
+	syn boolean FExp.isParameterExp() = variability().parameterVariability();
+	syn boolean FExp.isDiscreteExp() = variability().discreteVariability();
+	syn boolean FExp.isContinuousExp() = variability().continuousVariability();
+	
+	syn boolean FSubscript.isConstant() = true;
+	eq FExpSubscript.isConstant() = getFExp().isConstantExp();
+	
+	syn lazy FTypePrefixVariability FExp.variability() = combineFExpListVariability(childFExps());
+	
+	// TODO this must be fixed.
+	eq FInstAccessExp.variability() = getInstAccess().myInstComponentDecl().variability();
+	eq FUnsupportedExp.variability() = null;
+	
+	syn lazy FTypePrefixVariability FVariable.variability() {
+   		if (!isContinuous()) {
+   			return getFTypePrefixVariability();
+   		} else if (isInteger() || isBoolean() || isString()) {
+   			/* TODO: Can this really occur?
+   			 * This seems to cover the exact same cases as the first if.
+   			 */
+   			return(fDiscrete());
+   		} else {
+   			return fContinuous();
+   		}
+	}
+	
+	public static FTypePrefixVariability FExp.combineFExpListVariability(Iterable<? extends FExp> exps) {
+		Iterator<? extends FExp> it = exps.iterator();
+		FTypePrefixVariability total = it.hasNext() ? it.next().variability() : fConstant();
+		while (it.hasNext()) 
+			total = total.combine(it.next().variability());
+		return total;
+	}
+	
+	syn lazy FTypePrefixVariability InstComponentDecl.variability() = fConstant();
+	eq InstPrimitive.variability() {
+		if (isContinuous())
+			return fContinuous();
+		if (isDiscrete())
+			return fDiscrete();
+		if (isParameter())
+			return fParameter();
+		return fConstant();
+	}
+	eq InstRecord.variability() {
+		InstComponentDecl rec = isArray() ? getInstComponentDecl(0) : this;
+		FTypePrefixVariability total = fConstant();
+		for (InstComponentDecl icd : rec.getInstComponentDecls()) 
+			total = total.combine(icd.variability());
+		return total;
+	}
+	
+	eq FLitExp.variability()   = fConstant();
+	eq FNoExp.variability()    = fConstant();
+	eq FNdimsExp.variability() = fConstant();
+	eq FEndExp.variability()   = fParameter();
+	eq FTimeExp.variability()  = fContinuous();
+
+	eq FSizeExp.variability() = hasDim() ? getDim().variability() : fParameter();
+	
+	eq FIterExp.variability() {
+		FTypePrefixVariability total = getArray().iteratorFExp().next().variability();
+		for (CommonForIndex ind : getForIndexList())
+			if (ind.hasFExp())
+				total = total.combine(ind.getFExp().variability());
+		return total;
+	}
+
+	eq InstFunctionCall.variability() {
+		FTypePrefixVariability total = fConstant();
+		for (InstFunctionArgument arg : getArgs()) 
+			total = total.combine(arg.getFExp().variability());
+		return total;
+	}
+	
+	eq FIdUseExp.variability() = getFIdUse().variability();
+	
+	syn FTypePrefixVariability FIdUse.variability() {
+		AbstractFVariable variable = myFV();
+		if (variable instanceof FVariable) {
+			FVariable fVariable = (FVariable) variable;
+			return(fVariable.variability());
+		} else {
+			return (fContinuous());
+		}
+	}
+	eq FIdUseInstAccess.variability() = getInstAccess().myInstComponentDecl().variability();
+
+	syn FTypePrefixVariability FForIndex.variability() = hasFExp() ? getFExp().variability() : fParameter();
+
+	syn FTypePrefixVariability FSubscript.variability() = fParameter();
+	eq FExpSubscript.variability() = getFExp().variability();
+	
+	syn FTypePrefixVariability FArraySubscripts.variability() {
+		FTypePrefixVariability total = fConstant();
+		for (FSubscript arg : getFSubscripts()) 
+			total = total.combine(arg.variability());
+		return total;
+	}
+	
+	eq FLinspace.variability() = getStartExp().variability().combine(getStopExp().variability());
+	
+	eq FSubscriptedExp.variability()  = combineFExpListVariability(getArray().iterable());
+	
+	eq FIdentity.variability()   = fConstant();
+	eq FOnes.variability()       = fConstant();
+	eq FZeros.variability()      = fConstant();
+	eq FFillExp.variability()    = getFillExp().variability();
+	
+	syn int FTypePrefixVariability.combineLevel() = variabilityLevel() * 10;
+	
+   	public FTypePrefixVariability FTypePrefixVariability.combine(FTypePrefixVariability other) {
+   		return (other.combineLevel() > combineLevel()) ? other : this;
+	}	
+	
+   	public FTypePrefixVariability FTypePrefixVariability.combineDown(FTypePrefixVariability other) {
+   		return (other.combineLevel() < combineLevel()) ? other : this;
+	}	
+	
+	syn int TypePrefixVariability.combineLevel() = variabilityLevel() * 10;
+	
+   	public TypePrefixVariability TypePrefixVariability.combine(TypePrefixVariability other) {
+   		return (other.combineLevel() > combineLevel()) ? other : this;
+	}	
+	
+   	public TypePrefixVariability TypePrefixVariability.combineDown(TypePrefixVariability other) {
+   		return (other.combineLevel() < combineLevel()) ? other : this;
+	}	
+	
+}
+
+aspect VariabilitySingletons {
+	
+	public static final FContinuous FContinuous.singleton = new FContinuous();	
+	public static final FDiscrete FDiscrete.singleton = new FDiscrete();	
+	public static final FParameter FParameter.singleton = new FParameter();
+	public static final FConstant FConstant.singleton = new FConstant();	
+	
+	public static FContinuous ASTNode.fContinuous() {
+		return FContinuous.singleton;
+	}
+
+	public static FDiscrete ASTNode.fDiscrete() {
+		return FDiscrete.singleton;
+	}	
+
+	public static FParameter ASTNode.fParameter() {
+		return FParameter.singleton;
+	}
+	
+	public static FConstant ASTNode.fConstant() {
+		return FConstant.singleton;
+	}
+}
+
