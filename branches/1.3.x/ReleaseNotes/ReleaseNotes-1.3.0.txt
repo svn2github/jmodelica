@@ -43,7 +43,12 @@ is also improved.
  * Arrays as arguments are not yet supported. Functions in Modelica_utilies 
    are also not supported.
 
-1.1.6 Miscellaneous
+1.1.6 Stream connectors
+
+Stream connectors, including the operators inStream and actualStream
+and connections with up to two stream connectors are supported.
+
+1.1.7 Miscellaneous
 
 The error checking has been improved, eliminating many erroneous error
 messages for correct Modelica code.

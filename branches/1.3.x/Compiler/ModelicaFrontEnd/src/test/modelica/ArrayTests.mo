@@ -1314,7 +1314,7 @@ model ArrayIterTest6
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 1960, column 16:
-  Function f has no outputs, but is used in expression
+  Function f() has no outputs, but is used in expression
 ")})));
 
 	function f

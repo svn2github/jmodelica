@@ -46,8 +46,7 @@ def run_demo(with_plots=True):
     y4_meas = data['y4_d'][6000::100,0]/100
     u1 = data['u1_d'][6000::100,0]
     u2 = data['u2_d'][6000::100,0]
-    
-    
+        
     # Plot measurements and inputs
     if with_plots:
         plt.figure(1)
@@ -68,7 +67,7 @@ def run_demo(with_plots=True):
         plt.subplot(2,2,4)
         plt.plot(t_meas,y2_meas)
         plt.title('x2')
-        plt.xlabel('x2')
+        plt.xlabel('t[s]')
         plt.grid()
         plt.show()
 
@@ -158,8 +157,8 @@ def run_demo(with_plots=True):
     a2_opt = res_opt.result_data.get_variable_data("qt.a2")
 
     # Print optimal parameter values
-    print('a1: ' + str(a1_opt.x[-1]))
-    print('a2: ' + str(a2_opt.x[-1]))
+    print('a1: ' + str(a1_opt.x[-1]*1e4) + 'cm^2')
+    print('a2: ' + str(a2_opt.x[-1]*1e4) + 'cm^2')
 
     assert N.abs(a1_opt.x[-1]*1.e6 - 2.658636) < 1e-3, \
            "Wrong value of parameter a1"  
@@ -190,7 +189,6 @@ def run_demo(with_plots=True):
     # Compile second parameter estimation model
     qt_par_est2 = oc.compile_model("QuadTankPack.QuadTank_ParEst2",
                                    curr_dir+"/files/QuadTankPack.mo",target='ipopt')
-
     # Number of measurement points
     N_meas = N.size(u1,0)
 
@@ -213,10 +211,10 @@ def run_demo(with_plots=True):
     a4_opt2 = res_opt2.result_data.get_variable_data("qt.a4")
 
     # Print optimal parameter values 
-    print('a1:' + str(a1_opt2.x[-1]))
-    print('a2:' + str(a2_opt2.x[-1]))
-    print('a3:' + str(a3_opt2.x[-1]))
-    print('a4:' + str(a4_opt2.x[-1]))
+    print('a1:' + str(a1_opt2.x[-1]*1e4) + 'cm^2')
+    print('a2:' + str(a2_opt2.x[-1]*1e4) + 'cm^2')
+    print('a3:' + str(a3_opt2.x[-1]*1e4) + 'cm^2')
+    print('a4:' + str(a4_opt2.x[-1]*1e4) + 'cm^2')
 
     assert N.abs(a1_opt2.x[-1]*1.e6 - 2.659686) < 1e-3, \
            "Wrong value of parameter a1"  

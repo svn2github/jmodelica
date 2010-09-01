@@ -1,18 +1,20 @@
+#!/usr/bin/env python 
 # -*- coding: utf-8 -*-
+
+# Copyright (C) 2010 Modelon AB
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
 """ The IPOPT solver module. """
-#    Copyright (C) 2009 Modelon AB
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, version 3 of the License.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
-#
-#    You should have received a copy of the GNU General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import ctypes as ct
 from ctypes import byref
@@ -36,7 +38,8 @@ class InitializationOptimizer(object):
         Class for solving a DAE initialization problem my means
         of optimization using IPOPT.
         
-        Parameters:
+        Parameters::
+        
             nlp_init -- NLPInitialization object.
         
         """
@@ -88,7 +91,8 @@ class InitializationOptimizer(object):
         """
         Set Ipopt string option.
         
-        Parameters:
+        Parameters::
+        
             key -- Name of option.
             val -- Value of option.
             
@@ -100,7 +104,8 @@ class InitializationOptimizer(object):
         """
         Set Ipopt integer option.
         
-        Parameters:
+        Parameters::
+        
             key -- Name of option.
             val -- Value of option.
             
@@ -112,7 +117,8 @@ class InitializationOptimizer(object):
         """
         Set Ipopt double option.
         
-        Parameters:
+        Parameters::
+        
             key -- Name of option.
             val -- Value of option.
             
@@ -124,7 +130,8 @@ class InitializationOptimizer(object):
         """
         Get statistics from the last optimization run.
 
-        Returns:
+        Returns::
+        
             return_status -- Return status from IPOPT
             nbr_iter -- Number of iterations 
             objective -- Final value of objective function
@@ -156,7 +163,8 @@ class NLPInitialization(object):
         algebraic variables. These values are taken from the XML files created 
         at compilation.
         
-        Parameters:
+        Parameters::
+        
             model -- The Model object.
         
         """
@@ -435,7 +443,8 @@ class NLPInitialization(object):
         Get the number of variables and the number of constraints in the 
         problem.
         
-        Returns:
+        Returns::
+        
             Tuple with the number of variables in the NLP problem, equality constraints,
             and non-zeros in the Jacobian of the equality constraints respectively. 
             
@@ -456,7 +465,8 @@ class NLPInitialization(object):
         """ 
         Get the initial point of the NLP.
         
-        Parameters:
+        Parameters::
+        
             x_init -- The initial guess vector. (Return)
         
         """
@@ -466,7 +476,8 @@ class NLPInitialization(object):
     def init_opt_set_initial(self, x_init):
         """ Set the initial point of the NLP.
 
-        Parameters:
+        Parameters::
+        
             x_init --- The initial guess vector.
         """
         if self._jmi_model._dll.jmi_init_opt_set_initial(self._jmi_init_opt, x_init) is not 0:
@@ -476,7 +487,8 @@ class NLPInitialization(object):
         """ 
         Get the upper and lower bounds of the optimization variables.
         
-        Parameters:
+        Parameters::
+        
             x_lb -- The lower bounds vector. (Return)
             x_ub -- The upper bounds vector. (Return)
         
@@ -488,7 +500,8 @@ class NLPInitialization(object):
         """ 
         Set the upper and lower bounds of the optimization variables.
         
-        Parameters:
+        Parameters::
+        
             x_lb -- The lower bounds vector. (Return)
             x_ub -- The upper bounds vector. (Return)
         
@@ -500,7 +513,8 @@ class NLPInitialization(object):
         """ 
         Get the cost function value at a given point in search space.
         
-        Parameters:
+        Parameters::
+        
             f -- Value of the cost function. (Return)
         
         """
@@ -512,7 +526,8 @@ class NLPInitialization(object):
         Get the gradient of the cost function value at a given point in search 
         space.
         
-        Parameters:
+        Parameters::
+        
             df -- Value of the gradient of the cost function. (Return)
             
         """
@@ -523,7 +538,8 @@ class NLPInitialization(object):
         """ 
         Get the residual of the equality constraints h.
         
-        Parameters:
+        Parameters::
+        
             res -- The residual of the equality constraints. (Return)
         
         """
@@ -534,7 +550,8 @@ class NLPInitialization(object):
         """ 
         Get the Jacobian of the residual of the equality constraints.
         
-        Parameters:
+        Parameters::
+        
             jac -- The Jacobian of the residual of the equality constraints. (Return)
         
         """
@@ -545,7 +562,8 @@ class NLPInitialization(object):
         """ 
         Get the indices of the non-zeros in the equality constraint Jacobian.
         
-        Parameters:
+        Parameters::
+        
             irow -- 
                 Row indices of the non-zero entries in the Jacobian of the 
                 residual of the equality constraints. (Return)
@@ -568,14 +586,16 @@ class NLPInitialization(object):
         """
         Export the initialization result in Dymola format. 
 
-        Parameters:
+        Parameters::
+        
             file_name --
                 Name of the result file.
             format --
                 A string equal either to 'txt' for output to Dymola textual
                 format or 'mat' for output to Dymola binary Matlab format.
 
-        Limitations:
+        Limitations::
+        
             Only format='txt' is currently supported.
         """
 

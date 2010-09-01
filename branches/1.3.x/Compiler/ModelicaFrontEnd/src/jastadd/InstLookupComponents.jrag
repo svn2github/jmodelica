@@ -51,8 +51,32 @@ aspect InstLookupComponents {
 	eq InstAccess.getExpandedSubscripts().lookupInstComponent(String name) = getTopInstAccess().lookupInstComponent(name);
 		
 	syn HashSet InstAccess.qualifiedLookupInstComponent(String name) = emptyHashSet();
-	eq InstComponentAccess.qualifiedLookupInstComponent(String name) = myInstComponentDecl().memberInstComponent(name);	
 	eq InstClassAccess.qualifiedLookupInstComponent(String name) = myInstClassDecl().memberInstComponent(name);
+	eq InstComponentAccess.qualifiedLookupInstComponent(String name) {
+		InstComponentDecl icd = myInstComponentDecl();
+		if (hasFArraySubscripts() && !isArray()) {
+			// If we can, try to get the correct InstArrayComponentDecl to do lookup from
+			try {
+				boolean ok = true;
+				Index i = getFArraySubscripts().asIndex();
+				InstComponentDecl icd2 = icd;
+				for (int dim = 0; ok && dim < i.ndims(); dim++) {
+					int j = i.get(dim) - 1;
+					if (j < 0 || j >= icd.getNumInstComponentDecl()) {
+						ok = false;
+					} else {
+						icd2 = icd2.getInstComponentDecl(j);
+						if (!(icd2 instanceof InstArrayComponentDecl))
+							ok = false;
+					}
+				}
+				if (ok)
+					icd = icd2;
+			} catch (ConstantEvaluationException e) {
+			} 
+		}
+		return icd.memberInstComponent(name);	
+	}
 
 	eq SourceRoot.getChild().lookupInstComponent(String name) = emptyHashSet();
 	// This equation is necessary since InstAccesses may be present in FExps.	

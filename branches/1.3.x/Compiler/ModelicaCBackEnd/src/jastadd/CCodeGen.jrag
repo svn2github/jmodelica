@@ -537,10 +537,12 @@ aspect CCodeGen {
 	}
 	
 	public void FFunctionCallStmt.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
-		genTempVars_C(p, str, indent, o);
-		str.print(indent);
-		p.toString(getCall(), str, "", o);
-		str.print(";\n");
+		if (!getCall().isIgnored()) {
+			genTempVars_C(p, str, indent, o);
+			str.print(indent);
+			p.toString(getCall(), str, "", o);
+			str.print(";\n");
+		}
 	}
 
 	public void FAssignStmt.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
@@ -950,15 +952,17 @@ aspect CCodeGen {
 	}
 	
 	public void FFunctionCallEquation.genResidual_C(int i, String indent, PrintStream str) {
-		genTempVars_C(printer_C, str, indent, null);
-		for (FFunctionCallLeft l : getLefts()) {
-			l.setBaseIndex(i);
-			l.genTempVar_C(indent, str);
+		if (!getCall().isIgnored()) {
+			genTempVars_C(printer_C, str, indent, null);
+			for (FFunctionCallLeft l : getLefts()) {
+				l.setBaseIndex(i);
+				l.genTempVar_C(indent, str);
+			}
+			getCall().prettyPrint_C(str, indent);
+			str.print(";\n");
+			for (FFunctionCallLeft l : getLefts())
+				l.genWriteBack_C(str, indent);
 		}
-		getCall().prettyPrint_C(str, indent);
-		str.print(";\n");
-		for (FFunctionCallLeft l : getLefts())
-			l.genWriteBack_C(str, indent);
 	}
 
 	public void FAbstractEquation.genAssignment_C(String indent, PrintStream str) {}
@@ -973,16 +977,18 @@ aspect CCodeGen {
 	}
 
 	public void FFunctionCallEquation.genAssignment_C(String indent, PrintStream str) {
-		genTempVars_C(printer_C, str, indent, null);
-		int i = 0;
-		for (FFunctionCallLeft l : getLefts()) {
-			l.setBaseIndex(i);
-			l.genTempVar_C(indent, str);
+		if (!getCall().isIgnored()) {
+			genTempVars_C(printer_C, str, indent, null);
+			int i = 0;
+			for (FFunctionCallLeft l : getLefts()) {
+				l.setBaseIndex(i);
+				l.genTempVar_C(indent, str);
+			}
+			getCall().prettyPrint_C(str, indent);
+			str.print(";\n");
+			for (FFunctionCallLeft l : getLefts())
+				l.genWriteBackAssignment_C(str, indent);
 		}
-		getCall().prettyPrint_C(str, indent);
-		str.print(";\n");
-		for (FFunctionCallLeft l : getLefts())
-			l.genWriteBackAssignment_C(str, indent);
 	}
 
 	private int FFunctionCallLeft.equationIndex = -1;

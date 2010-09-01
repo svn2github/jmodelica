@@ -48,6 +48,8 @@ import org.jmodelica.modelica.compiler.*;
  *     -c=<class>   set name of class to generate annotation for, if name 
  *                  does not contain a dot, base name of .mo file is prepended
  *     -d=<data>    set extra data to send to the specific generator
+ *     -p=<opts>    comma-separated list of compiler options to override defaults for,
+ *                  example: -p=eliminate_alias_variables=false,default_msl_version="2.2"
  *     -h           print this help
  *   User will be prompted for type and/or class if not set with options. 
  *   Options can *not* share a single "-", e.g. "-mw" will not work.

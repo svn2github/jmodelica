@@ -239,29 +239,31 @@ aspect XMLCodeGen {
 	}
 		
 	public void FFunctionCallEquation.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
-		FFunctionCall call = (FFunctionCall)this.getCall();
-		String tag = this.xmlTag();
-		String namespace = "equ";
+		if (!getCall().isIgnored()) {
+			FFunctionCall call = (FFunctionCall)this.getCall();
+			String tag = this.xmlTag();
+			String namespace = "equ";
 
-		str.println(indent + "<" + namespace + ":" + tag  + ">");
-		
-		//output arguments
-		for (FFunctionCallLeft f : this.getLeftList()){
-			str.println(indent + "\t<" + namespace + ":OutputArgument>");
-			
-			if(!f.hasFExp()){
-				str.println(indent + "\t<" + namespace + ":EmptyOutputArgument/>");
-			}else{
-				f.getFExp().prettyPrint_XML(str,p.indent(indent+"\t"));
-			}
-			
-			str.println(indent + "\t</" + namespace + ":OutputArgument>");
-		}
-		
-		//function call
-		call.prettyPrint_XML(str,p.indent(indent+"\t"));
+			str.println(indent + "<" + namespace + ":" + tag  + ">");
+
+			//output arguments
+			for (FFunctionCallLeft f : this.getLeftList()){
+				str.println(indent + "\t<" + namespace + ":OutputArgument>");
 				
-		str.println(indent + "</" + namespace + ":" + tag  + ">");	
+				if(!f.hasFExp()){
+					str.println(indent + "\t<" + namespace + ":EmptyOutputArgument/>");
+				}else{
+					f.getFExp().prettyPrint_XML(str,p.indent(indent+"\t"));
+				}
+
+				str.println(indent + "\t</" + namespace + ":OutputArgument>");
+			}
+
+			//function call
+			call.prettyPrint_XML(str,p.indent(indent+"\t"));
+		
+			str.println(indent + "</" + namespace + ":" + tag  + ">");
+		}
 	}
 	
 	//-------------------- Functions ---------------------------
@@ -480,29 +482,31 @@ aspect XMLCodeGen {
         str.println(indent + "</" + namespace + ":" + tag + ">"); 
     }
     
-	public void FFunctionCallStmt.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o){
-		FFunctionCall call = (FFunctionCall)this.getCall();
-		String tag = this.xmlTag();
-		String namespace = "fun";
-		
-		str.println(indent + "<" + namespace + ":" + tag  + ">");
-		
-		for (FFunctionCallLeft f : this.getLeftList()){
+	public void FFunctionCallStmt.prettyPrint_XML(Printer p, PrintStream str, String indent, Object o) {
+		if (!getCall().isIgnored()) {
+			FFunctionCall call = (FFunctionCall)this.getCall();
+			String tag = this.xmlTag();
+			String namespace = "fun";
 			
-			str.println(indent + "\t<" + namespace + ":OutputArgument>");
+			str.println(indent + "<" + namespace + ":" + tag  + ">");
 			
-			if(!f.hasFExp()){
-				str.println(indent + "\t\t<" + namespace + ":EmptyOutputArgument/>");
-			}else{
-				f.getFExp().prettyPrint_XML(str,p.indent(indent+"\t"));
+			for (FFunctionCallLeft f : this.getLeftList()){
+				
+				str.println(indent + "\t<" + namespace + ":OutputArgument>");
+				
+				if(!f.hasFExp()){
+					str.println(indent + "\t\t<" + namespace + ":EmptyOutputArgument/>");
+				}else{
+					f.getFExp().prettyPrint_XML(str,p.indent(indent+"\t"));
+				}
+				
+				str.println(indent + "\t</" + namespace + ":OutputArgument>");
 			}
 			
-			str.println(indent + "\t</" + namespace + ":OutputArgument>");
-		}
+			call.prettyPrint_XML(str,p.indent(indent+"\t"));
 		
-		call.prettyPrint_XML(str,p.indent(indent+"\t"));
-	
-		str.println(indent + "</" + namespace + ":" + tag  + ">");	
+			str.println(indent + "</" + namespace + ":" + tag  + ">");
+		}
 	}
 	
 	//-------------------- Qualified Names ---------------------------

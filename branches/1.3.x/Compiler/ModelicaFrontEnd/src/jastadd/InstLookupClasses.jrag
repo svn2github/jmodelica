@@ -42,11 +42,17 @@ aspect InstLookupClasses {
 	
     eq InstArrayComponentDecl.getChild().lookupInstClass(String name) = lookupInstClass(name);
     
-	eq InstExtends.getInstClassDecl().lookupInstClass(String name)     = genericLookupInstClassInExtends(name);	
-	eq InstExtends.getInstComponentDecl().lookupInstClass(String name) = genericLookupInstClassInExtends(name);	
-	eq InstExtends.getInstExtends().lookupInstClass(String name)       = superLookupInstClassInExtends(name);	
-    eq InstExtends.getDynamicClassName().lookupInstClass(String name)  = genericLookupInstClassInExtends(name);
-	eq InstExtends.getFAbstractEquation().lookupInstClass(String name) = genericLookupInstClassInExtends(name); 
+	eq InstExtends.getInstClassDecl().lookupInstClass(String name)         = genericLookupInstClassInExtends(name);	
+	eq InstExtends.getInstComponentDecl().lookupInstClass(String name)     = genericLookupInstClassInExtends(name);	
+	eq InstExtends.getInstExtends().lookupInstClass(String name)           = superLookupInstClassInExtends(name);	
+    eq InstExtends.getDynamicClassName().lookupInstClass(String name)      = genericLookupInstClassInExtends(name);
+	eq InstExtends.getFAbstractEquation().lookupInstClass(String name)     = genericLookupInstClassInExtends(name); 
+	eq InstExtends.getInstClassModification().lookupInstClass(String name) = lookupInstClassFromMod(name);
+	
+	inh HashSet InstExtends.lookupInstClassFromMod(String name);
+	eq InstNode.getInstExtends().lookupInstClassFromMod(String name)          = genericLookupInstClass(name);
+	eq InstComponentDecl.getInstExtends().lookupInstClassFromMod(String name) = genericLookupInstClassInComponent(name);
+	eq InstExtends.getInstExtends().lookupInstClassFromMod(String name)       = genericLookupInstClassInExtends(name);
    
     eq InstInlineExtends.getClassName().lookupInstClass(String name) = 
     	getClassName().name().equals(name) ? surroundingSuperLookupInstClass(name) : lookupInstClass(name);
@@ -98,7 +104,7 @@ aspect InstLookupClasses {
 	eq InstComponentDecl.getChild().surroundingSuperLookupInstClass(String name) = 
 		myInstClass().doSurroundingSuperLookupInstClass(name);
 	eq InstReplacingShortClassDecl.getInstExtends().surroundingSuperLookupInstClass(String name) {
-		HashSet set = new HashSet(4);
+		HashSet set = new HashSet(4);  // TODO: only valid for original purpose of attribute, needs rewite otherwise
 		set.add(getOriginalInstClass());
 		return set;
 	}

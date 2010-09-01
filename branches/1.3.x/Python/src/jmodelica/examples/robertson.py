@@ -33,7 +33,9 @@ except:
 
 
 def run_demo(with_plots=True):
-    
+    """
+    Demonstrates how to use JModelica.org for calculating sensitivities.
+    """
     
     curr_dir = O.path.join(O.path.dirname(O.path.abspath(__file__)),'files')
     

@@ -25,6 +25,9 @@ curr_dir = O.path.dirname(O.path.abspath(__file__));
 path_to_fmus = O.path.join(curr_dir, 'files', 'FMUs')
 
 def run_demo(with_plots=True):
+    """
+    Demonstrates how to use JModelica.org for simulation of FMUs.
+    """
 
 
     model = O.path.join(path_to_fmus,'bouncingBall.fmu')

@@ -120,7 +120,9 @@ aspect Connections {
 			//System.out.println(cs);
 			if (cs!=null) {
 				ConnectionSetEntry cses[] = cs.toArray(new ConnectionSetEntry[cs.size()]);
-				if (cses.length==2) {
+				if (cses.length==1 && cses[0].isInside()) { // N=1 M=0
+					return cses[0].getFQName().createFIdUseExp();
+				} else if (cses.length==2) {
 					if ((cses[0].isInside()&&cses[1].isOutside()) || // N=1 M=1
 							(cses[1].isInside()&&cses[0].isOutside())) {
 						if (cses[0].isInside()) { // Rewrite recursively to the inStream(c.streamVar<outside>)
@@ -143,7 +145,8 @@ aspect Connections {
 					
 				}
 			}
-			return null;
+			this.rewriteStreams = false;
+			return this;
 		}
 	}
 
@@ -214,6 +217,16 @@ aspect Connections {
 				if (cse.isFlow() && cse.prefix().equals(prefix)) 
 					cses.add(cse);
 			return cses;
+		}
+		
+		public int numStreamVariables() {
+			int n_stream_vars = 0;
+			for (ConnectionSetEntry e : this) {
+				if (e.isStream()) {
+					n_stream_vars++;
+				}
+			}
+			return n_stream_vars;
 		}
 		
 		public String toString() {

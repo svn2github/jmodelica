@@ -1204,6 +1204,33 @@ model ConstantLookup24
 end ConstantLookup24;
 
 
+model ConstantLookup25
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ConstantLookup25",
+         description="Slice over array of components, declared with : size",
+         flatModel="
+fclass NameTests.ConstantLookup25
+ constant NameTests.ConstantLookup25.A x[2] = {NameTests.ConstantLookup25.A(1),NameTests.ConstantLookup25.A(2)};
+ constant Real y[2] = {1.0,2.0};
+ Real z[2] = {1.0,2.0};
+
+ record NameTests.ConstantLookup25.A
+  Real a;
+ end NameTests.ConstantLookup25.A;
+end NameTests.ConstantLookup25;
+")})));
+
+	record A
+		Real a;
+	end A;
+	
+	constant A x[:] = { A(1), A(2) };
+    constant Real y[2] = x.a;
+	Real z[2] = y;
+end ConstantLookup25;
+
+
 
 class ExtendsTest1
      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={

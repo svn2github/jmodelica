@@ -151,7 +151,7 @@ aspect Logging {
         public void debug(String message)   { log(Level.FINE,    message); }
         public void info(String message)    { log(Level.INFO,    message); }
         public void warning(String message) { log(Level.WARNING, message); }
-        public void error(String message)   { log(Level.SEVERE,   message); }
+        public void error(String message)   { log(Level.SEVERE,  message); }
     }
 
     public static ModelicaLogger ASTNode.log = new ModelicaLogger();
@@ -159,61 +159,92 @@ aspect Logging {
 }
 
 aspect NodeMethods {
-
-  public void ASTNode.setStart(int start) {
-    this.start = start;
-  } 
-
-  public void ASTNode.setEnd(int end) {
-    this.end = end;
-  }
-  
-  public class ASTNode{
-      /**
-       * \brief Copies the <code>start</code> and <code>end</code> members to 
-       *        another node.
-       *        
-       * @param n  the node to copy the location to.
-       * @return  the node given as <code>n</code>.
-       */
-      public <N extends ASTNode> N copyLocationTo(N n) {
-          n.start = this.start;
-          n.end = this.end;
-          return n;
-      }
-  }
-  
-  /**
-   * \brief Sets the <code>start</code> and <code>end</code> members of the node.
-   */
-  public void ASTNode.setLocation(int start, int end) {
-    this.start = start;
-    this.end = end;
-  }
-  
-  /**
-   * \brief Sets the <code>start</code> and <code>end</code> members of the node
-   * to values copied from two other nodes.
-   * 
-   * @param start  the node to copy the <code>start</code> member from.
-   * @param end    the node to copy the <code>end</code> member from.
-   */
-  public void ASTNode.setLocation(ASTNode start, ASTNode end) {
-    this.start = start.start;
-    this.end = end.end;
-  }
-  
-  /**
-   * \brief Sets the <code>start</code> and <code>end</code> members of the node
-   * to values copied another node.
-   */
-  public void ASTNode.setLocation(ASTNode node) {
-    start = node.start;
-    end = node.end;
-  }
- 
-  public int ASTNode.beginLine() { return getLine(getStart()); }
-  public int ASTNode.beginColumn() { return getColumn(getStart()); }
+	  
+    public class ASTNode{
+        /**
+         * \brief Copies the member variables defining the location within 
+         *        the source to another node.
+         *        
+         * @param n  the node to copy the location to
+         * @return   the node given as <code>n</code>, for convenience
+         */
+        public <N extends ASTNode> N copyLocationTo(N n) {
+      	    n.setLocation(this, this);
+            return n;
+        }
+    }
+    
+    /**
+     * \brief Sets the member variables defining the location of the node within 
+     *        the source to values copied another node.
+     */
+    public void ASTNode.setLocation(ASTNode node) {
+  	    setLocation(node, node);
+    }
+    
+    /**
+     * \brief Sets the member variables defining the location of the node within 
+     *        the source to values copied from two other nodes.
+     * 
+     * @param start  the node to copy the <code>start</code> member from.
+     * @param end    the node to copy the <code>end</code> member from.
+     */
+    public void ASTNode.setLocation(ASTNode start, ASTNode end) {
+        this.start = start.start;
+        this.end = end.end;
+    }
+    
+    /**
+     * \brief Sets the member variables defining the location of the node within 
+     *        the source to values copied from two other nodes.
+     * 
+     * @param start  the node to copy the <code>start</code> and <code>fName</code> 
+     *               members from.
+     * @param end    the node to copy the <code>end</code> member from.
+     */
+    public void BaseNode.setLocation(ASTNode start, ASTNode end) {
+        super.setLocation(start, end);
+        fName = start.fileName();
+    }
+    
+    /**
+     * \brief Sets the member variables defining the location of the node within 
+     *        the source to values copied another node, that might not be in a 
+     *        proper AST.
+     */
+    public void ASTNode.setLocationNoTree(ASTNode node) {
+  	    setLocationNoTree(node, node);
+    }
+    
+    /**
+     * \brief Sets the member variables defining the location of the node within 
+     *        the source to values copied from two other nodes, that might not be 
+     *        in a proper AST.
+     * 
+     * @param start  the node to copy the <code>start</code> member from.
+     * @param end    the node to copy the <code>end</code> member from.
+     */
+    public void ASTNode.setLocationNoTree(ASTNode start, ASTNode end) {
+        setLocation(start, end);
+    }
+    
+    /**
+     * \brief Sets the member variables defining the location of the node within 
+     *        the source to values copied from two other nodes, that might not be 
+     *        in a proper AST.
+     * 
+     * @param start  the node to copy the <code>start</code> and <code>fName</code> 
+     *               members from.
+     * @param end    the node to copy the <code>end</code> member from.
+     */
+    public void BaseNode.setLocationNoTree(ASTNode start, ASTNode end) {
+        super.setLocation(start, end);
+        if (start instanceof BaseNode)
+        	fName = ((BaseNode) start).fName;
+    }
+    
+    public int ASTNode.beginLine() { return getLine(getStart()); }
+    public int ASTNode.beginColumn() { return getColumn(getStart()); }
 
     public String ASTNode.getNodeName() {
         return dump();
@@ -253,8 +284,9 @@ aspect NodeMethods {
      * Comparisons are done with ==, not with equals().
      */
     public boolean List.replaceChild(T oldNode, T newNode) {
-        for (int i = 0; i < getNumChild(); i++) {
-            if (getChild(i) == oldNode) {
+    	int n = getNumChildNoTransform();
+        for (int i = 0; i < n; i++) {
+            if (getChildNoTransform(i) == oldNode) {
                 setChild(newNode, i);
                 return true;
             }
@@ -346,36 +378,29 @@ aspect NodeMethods {
 }
 
 aspect FileNames {
+    
+    protected String BaseNode.fName = null;
 
-    syn String ASTNode.fileName()       = retrieveFileName();
-    syn lazy String BaseNode.fileName() = retrieveFileName();
-    eq StoredDefinition.fileName()      = getFileName().equals("") ? retrieveFileName() : getFileName();
-    eq Root.fileName()                  = getFileName();
+    public String ASTNode.fileName() { 
+    	return retrieveFileName(); 
+    }
+    public String BaseNode.fileName() {
+    	if (fName == null)
+    	    fName = retrieveFileName();
+    	return fName;
+    }
+    public String Root.fileName() { 
+    	return fName; 
+    }
     
     syn String ASTNode.dirName() = 
     	fileName().replaceFirst("^[^\\\\/]*$", ".").replaceFirst("[\\\\/][^\\\\/]*$", "");
     
     inh String ASTNode.retrieveFileName();
-    eq SourceRoot.getProgram().retrieveFileName() = getFileName();
-    eq FlatRoot.getFClass().retrieveFileName() = getFileName();
+    eq BaseNode.getChild().retrieveFileName() = fileName();
     
-    eq StoredDefinition.getChild().retrieveFileName() = getFileName().equals("")? retrieveFileName(): getFileName();
-    eq FullClassDecl.getChild().retrieveFileName() =  retrieveFileName();
-    eq InstNode.getInstClassDecl(int i).retrieveFileName() = getInstClassDecl(i).getClassDecl().fileName(); 
-    eq InstNode.getRedeclaredInstClassDecl(int i).retrieveFileName() = getRedeclaredInstClassDecl(i).getClassDecl().fileName(); 
-    eq InstFullClassDecl.getChild().retrieveFileName() = getClassDecl().fileName();
-    eq InstComponentDecl.getChild().retrieveFileName() = getComponentDecl().fileName();
-    eq InstExtends.getChild().retrieveFileName() = getExtendsClause().fileName();
-    eq InstImport.getChild().retrieveFileName() = getImportClause().fileName();
-    eq InstModification.getChild().retrieveFileName() = getModification().fileName();
-    
-    private String Root.fName = "";
-    public void Root.setFileName(String fName) { this.fName = fName; }
-    public String Root.getFileName() {return fName; }
-
-    private String StoredDefinition.fName = "";
+    public void Root.setFileName(String fName)             { this.fName = fName; }
     public void StoredDefinition.setFileName(String fName) { this.fName = fName; }
-    public String StoredDefinition.getFileName() {return fName; }
 }
     
 aspect Names {
@@ -607,6 +632,59 @@ aspect Names {
         Opt o = (fas == null) ? new Opt() : new Opt(fas);
         ((InstArrayAccess) getLastInstAccess()).setFArraySubscriptsOpt(o);
     }
+    
+}
+
+aspect Slices {
+	
+    /**
+     * \brief Check if this is a slice operation.
+     */
+    syn boolean InstAccess.isSlice() = hasFArraySubscripts() && isArray();
+    eq InstDot.isSlice() = getLeft().isArray() || getRight().isSlice();
+    
+    /**
+     * \brief Check if this is a slice operation.
+     */
+    syn boolean FQName.isSlice() {
+    	int n = getNumFQNamePart() - 1;
+    	for (int i = 0; i < n; i++) {
+    		FQNamePart part = getFQNamePart(i);
+    		if (part.hasFArraySubscripts())
+    			for (FSubscript fs : part.getFArraySubscripts().getFSubscripts())
+    				if (fs.ndims() > 0)
+    					return true;
+    	}
+    	boolean array = false;
+    	boolean exp = false;
+		FQNamePart part = getFQNamePart(n);
+		if (part.hasFArraySubscripts()) {
+			for (FSubscript fs : part.getFArraySubscripts().getFSubscripts()) {
+				if (fs instanceof FExpSubscript) 
+					exp = true;
+				if (fs.ndims() > 0)
+					array = true;
+			}
+		}
+		return array && exp;
+    }
+	
+    /**
+     * \brief Check if this is a slice operation.
+     */
+    syn boolean FIdUse.isSlice()  = getFQName().isSlice();
+    eq FIdUseInstAccess.isSlice() = getInstAccess().isSlice();
+	
+    /**
+     * \brief Check if this is a slice operation.
+     */
+    syn boolean FInstAccessExp.isSlice() = getInstAccess().isSlice();
+	
+    /**
+     * \brief Check if this is a slice operation.
+     */
+    syn boolean FIdUseExp.isSlice() = isArray() && getFIdUse().isSlice();
+    
 }
 
 aspect FlatNames {
@@ -916,6 +994,9 @@ aspect FlatNames {
     eq FStringType.name()  = "String";
     eq FRecordType.name()  = getName();
     eq FUnknownType.name() = "(unknown type)";
+    
+    syn boolean FAbstractFunctionCall.isIgnored() = false;
+    eq FIgnoredBuiltIn.isIgnored() = true;
     
     /**
      * \brief Add an equation to the first equation block.

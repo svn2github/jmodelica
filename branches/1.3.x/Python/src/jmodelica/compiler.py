@@ -260,7 +260,8 @@ class ModelicaCompiler():
         Default is"model". Other three options are "model_noad", 
         "algorithms" and "ipopt". See makefile in install folder for details.
 
-        Parameters:
+        Parameters::
+        
             model_class_name -- 
                 Name of model class in the model file to compile.
             model_file_name -- 
@@ -269,10 +270,12 @@ class ModelicaCompiler():
             target -- 
                 The build target.
 
-        Returns:
+        Returns::
+        
             A jmi.Model object.
 
-        Exceptions:
+        Exceptions::
+        
             CompilerError -- 
                 Raised if one or more error is found during compilation.
             ModelicaClassNotFoundError -- 
@@ -319,16 +322,19 @@ class ModelicaCompiler():
         Parse a model and return a reference to the source tree
         representation.
 
-        Parameters:    
+        Parameters::
+            
             model_file_name -- 
                 Path to file or list of paths to files in which the model is 
                 contained.
 
-        Return:
+        Return::
+        
             Reference to the root of the source tree representation of the 
             parsed model.
 
-        Exceptions:
+        Exceptions::
+        
             CompilerError --
                 If one or more error is found during compilation.
             IOError --
@@ -358,16 +364,19 @@ class ModelicaCompiler():
         tree belonging to the model which must first be created with 
         parse_model.
 
-        Parameters:   
+        Parameters::
+          
             source_root -- 
                 Reference to the root of the source tree representation.
             model_class_name -- 
                 Name of model class in the model file to compile.
 
-        Returns:
+        Returns::
+        
             Reference to the instance AST node representing the model instance. 
 
-        Exceptions:
+        Exceptions::
+        
             CompilerError -- 
                 If one or more error is found during compilation.
             ModelicaClassNotFoundError -- 
@@ -391,14 +400,17 @@ class ModelicaCompiler():
         belonging to the model which must first be created with 
         instantiate_model.
 
-        Parameters:  
+        Parameters::
+          
             inst_class_decl -- 
                 Reference to a model instance. 
 
-        Returns:
+        Returns::
+        
             Object (FClass) representing the flattened model. 
 
-        Exceptions:
+        Exceptions::
+        
             CompilerError --
                 If one or more error is found during compilation.
             ModelicaClassNotFoundError --
@@ -427,11 +439,13 @@ class ModelicaCompiler():
         in the JModelica installation folder. Default output folder is the 
         current folder from which this module is run.
 
-        Parameters:
+        Parameters::
+        
             fclass -- 
                 Reference to the flattened model object representation.  
 
-        Exceptions:
+        Exceptions::
+        
             IOError -- 
                 If the model file is not found, can not be read or any other 
                 IO related error.
@@ -456,7 +470,8 @@ class ModelicaCompiler():
         this module is run. Needs a c-file which is generated with
         generate_code.
 
-        Parameters:c
+        Parameters::
+        
             c_file_name --
                 Name of c-file for which the .dll should be compiled without 
                 file extention.
@@ -714,7 +729,8 @@ class UnknownOptionError(JError):
 def _get_platform():
     """ Helper function. Returns string describing the platform 
         on which jmodelica is run. The different possible return values 
-        are:
+        are::
+        
             win32
             win64
             darwin32

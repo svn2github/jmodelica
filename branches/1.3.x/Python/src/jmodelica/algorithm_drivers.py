@@ -28,6 +28,7 @@ from jmodelica.fmi import FMIModel
 from jmodelica.optimization import ipopt
 from jmodelica.initialization.ipopt import NLPInitialization
 from jmodelica.initialization.ipopt import InitializationOptimizer
+from jmodelica.initialization.jfsolver import JFSolver
 
 try:
     from jmodelica.simulation.assimulo_interface import JMIDAE, JMIODE, FMIODE, write_data
@@ -128,7 +129,8 @@ class IpoptInitializationAlg(AlgorithmBase):
                  alg_args={}):
         """ Create algorithm objects.
         
-        Parameters:
+        Parameters::
+        
             model -- 
                 jmi.Model object representation of the model
             alg_args -- 
@@ -155,7 +157,8 @@ class IpoptInitializationAlg(AlgorithmBase):
                       result_format='txt'):
         """ Set arguments for initialization algorithm.
         
-        Parameters:
+        Parameters::
+        
             stat -- 
                 Solve a static optimization problem if True.
                 Default: False
@@ -173,7 +176,8 @@ class IpoptInitializationAlg(AlgorithmBase):
                            solver_args):
         """ Set options for the solver.
         
-        Parameters:
+        Parameters::
+        
             solver_args --
                 Dict with int, real or string options for the solver ipopt.
         """
@@ -244,7 +248,8 @@ class AssimuloFMIAlg(AlgorithmBase):
                       ):
         """ Set arguments for Assimulo algorithm.
         
-        Parameters:
+        Parameters::
+        
             start_time -- 
                 Simulation start time.
                 Default: 0.0
@@ -281,7 +286,8 @@ class AssimuloFMIAlg(AlgorithmBase):
                            solver_args={}):
         """ Set options for the solver.
         
-        Parameters:
+        Parameters::
+        
             solver_args --
                 Dict with list of solver arguments. Arguments must be a property of 
                 the solver. An InvalidSolverArgumentException is raised if an 
@@ -346,7 +352,8 @@ class AssimuloAlg(AlgorithmBase):
                  alg_args={}):
         """ Create a simulation algorithm using Assimulo.
         
-        Parameters:
+        Parameters::
+        
             model -- 
                 jmi.Model object representation of the model
             alg_args -- 
@@ -390,7 +397,8 @@ class AssimuloAlg(AlgorithmBase):
                       initialize=True):
         """ Set arguments for Assimulo algorithm.
         
-        Parameters:
+        Parameters::
+        
             start_time -- 
                 Simulation start time.
                 Default: 0.0
@@ -412,6 +420,7 @@ class AssimuloAlg(AlgorithmBase):
                 Default: An empty matrix, i.e., no input trajectories.
             initialize --
                 Do initialization if True, skip initialization if False.
+                Default: True
         """
         self.start_time = start_time
         self.final_time = final_time
@@ -431,7 +440,8 @@ class AssimuloAlg(AlgorithmBase):
                            solver_args={}):
         """ Set options for the solver.
         
-        Parameters:
+        Parameters::
+        
             solver_args --
                 Dict with list of solver arguments. Arguments must be a property of 
                 the solver. An InvalidSolverArgumentException is raised if an 
@@ -481,7 +491,8 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
                  alg_args={}):
         """ Create a CollocationLagrangePolynomials algorithm.
         
-        Parameters:      
+        Parameters::
+              
             model -- 
                 jmodelica.jmi.Model model object
             alg_args -- 
@@ -521,16 +532,17 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
                       n_interpolation_points=None):
         """ Set arguments for the CollocationLagrangePolynomials algorithm.
         
-        Parameters:
+        Parameters::
+        
             n_e -- 
                 Number of finite elements.
                 Default:50
-            hs -- 
-                Vector containing the normalized element lengths.
-                Default: Equidistant points using default n_e.
             n_cp -- 
                 Number of collocation points.
                 Default: 3
+            hs -- 
+                Vector containing the normalized element lengths.
+                Default: Equidistant points using default n_e.
             blocking_factors --
                 Blocking factor vector.
                 Default: None (not used)
@@ -573,7 +585,8 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
                            solver_args):
         """ Set options for the solver.
         
-        Parameters:
+        Parameters::
+        
             solver_args --
                 Dict with int, real or string options for the solver ipopt.
         """
@@ -633,3 +646,67 @@ class InvalidSolverArgumentException(Exception):
     def __str__(self):
         return repr(self.msg)
     
+class JFSInitResult(ResultBase): pass
+    
+class JFSInitAlg(AlgorithmBase):
+    """ Initialization using a solver of non-linear eq-systems"""
+
+    def __init__(self, model, alg_args={}):
+        """ Create algorithm objects.
+        
+        Parameters:
+            model -- 
+                jmi.Model object representation of the model
+            alg_args -- 
+                All arguments for the algorithm. See _set_alg_args
+                function call for names and default values.        
+        """
+        
+        self.model = model
+        self.solver = JFSolver(model)
+        #try to set algorithm arguments
+        try:
+            self._set_alg_args(**alg_args)
+        except TypeError, e:
+            raise InvalidAlgorithmArgumentException(e)
+        
+    def _set_alg_args(self,
+                      use_jac=True,
+                      result_file_name='', 
+                      result_format='txt'):
+        """ Set arguments for initialization algorithm.
+        
+        Parameters::
+        
+            use_jac -- 
+                Boolean set to True if the jacobian is to be 
+                supplied by the JMIinterface
+                Default: True
+            result_file_name --
+                Name of result file.
+                Default: empty string (default generated file name will be used)
+            result_format --
+                Format of result file.
+                Default: 'txt'
+        """
+        self.solver.set_jac_usage(use_jac)
+        self.result_args = dict(file_name=result_file_name, format=result_format)
+          
+    def set_solver_options(self, solver_args): pass
+
+    def solve(self):
+        self.solver.initialize()
+
+    def get_result(self):
+        """ Write result to file, load result data and return NLSInitResult."""
+        
+        self.solver.export_result_dymola(**self.result_args)
+        # result file name
+        resultfile = self.result_args['file_name']
+        if not resultfile:
+            resultfile=self.model.get_name()+'_result.txt'
+        # load result file
+        res = jmodelica.io.ResultDymolaTextual(resultfile)
+        
+        # create and return result object
+        return JFSInitResult(self.model, resultfile, self.solver, res)

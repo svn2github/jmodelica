@@ -951,31 +951,26 @@ aspect FlatExpressions {
 			InstAssignable var = (InstAssignable) ia.myInstComponentDecl();
 			if (var.isConstant()) {
 				try {
-					if (isArray()) {
-						// TODO: this probably needs to be extended to handle same cases as scalar access
-						return getArray().buildLiteral(var.isReal());
-					} else {
-						// Check if we have non-constant array subscripts
-						if (ia.hasUnknownIndices()) {
-							if (inFunction()) {
-								// Add the constant array to the function and keep the access
-								functionConstantList().add(var);
-								FQName fqn = new FQName(var.getFQName());
-								fqn.setLastFArraySubscripts(ia.getFArraySubscripts().flatten(prefix));
-								return new FIdUseExp(fqn);
-							} else {
-								// Inline entire array wrapped in an FSubscriptedExp, and resolve index later
-								FExp exp = var.getBindingFExp().getArray().buildLiteral(var.isReal());
-								FArraySubscripts fas = ia.getFArraySubscripts().flatten(prefix);
-								return new FSubscriptedExp(exp, fas);
-							}
+					// Check if we have non-constant array subscripts
+					if (ia.hasUnknownIndices()) {
+						if (inFunction()) {
+							// Add the constant array to the function and keep the access
+							functionConstantList().add(var);
+							FQName fqn = new FQName(var.getFQName());
+							fqn.setLastFArraySubscripts(ia.getFArraySubscripts().flatten(prefix));
+							return new FIdUseExp(fqn);
 						} else {
-							// Inline value
-							CValue cval = ceval();
-							if (var.isReal())
-								cval = cval.convertReal();
-							return cval.buildLiteral();
+							// Inline entire array wrapped in an FSubscriptedExp, and resolve index later
+							FExp exp = var.getBindingFExp().getArray().buildLiteral(var.isReal());
+							FArraySubscripts fas = ia.getFArraySubscripts().flatten(prefix);
+							return new FSubscriptedExp(exp, fas);
 						}
+					} else {
+						// Inline value
+						CValue cval = ceval();
+						if (var.isReal())
+							cval = cval.convertReal();
+						return cval.buildLiteral();
 					}
 				} catch (ConstantEvaluationException e) {
 					// In this case, simply don't inline value

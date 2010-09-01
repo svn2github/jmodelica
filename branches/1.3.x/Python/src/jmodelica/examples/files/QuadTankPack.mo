@@ -50,8 +50,8 @@ model PRBS2
     input Real u1 = qt.u1;
     input Real u2 = qt.u2;
 initial equation
-  der(qt.x1) = 0;
-  der(qt.x2) = 0;
+  qt.x1 = 0.0627;
+  qt.x2 = 0.06044;
   qt.x3 = 0.024;
   qt.x4 = 0.023;
   end Sim_QuadTank;
@@ -161,14 +161,22 @@ optimization QuadTank_ParEst (objective=sum((y1_meas[i] - qt.x1(t_meas[i]))^2 +
     	             x2(fixed=true),x2_0=x2_0,
                      x3(fixed=true),x3_0=x3_0,
                      x4(fixed=true),x4_0=x4_0,
-                     a1(free=true,initialGuess = 0.03e-4,nominal=0.03e-4,min=0,max=0.1e-4),
-                     a2(free=true,initialGuess = 0.03e-4,nominal=0.03e-4,min=0,max=0.1e-4));
+                     a1(free=true,initialGuess = 0.03e-4,min=0,max=0.1e-4),
+                     a2(free=true,initialGuess = 0.03e-4,min=0,max=0.1e-4));
 
+    // Number of measurement points
     parameter Integer N_meas = 61;
-    parameter Real t_meas[N_meas] = 0:60.0/(N_meas-1):60; 
-    parameter Real y1_meas[N_meas] = ones(N_meas); 	
-    parameter Real y2_meas[N_meas] = ones(N_meas); 
+    // Vector of measurement times
+    parameter Real t_meas[N_meas] = 0:60.0/(N_meas-1):60;
+    // Measurement values for x1 
+    // Notice that dummy values are entered here:
+    // the real measurement values will be set from Python
+    parameter Real y1_meas[N_meas] = ones(N_meas);
+    // Measurement values for x2 	
+    parameter Real y2_meas[N_meas] = ones(N_meas);
+    // Input trajectory for u1 
     PRBS1 prbs1;
+    // Input trajectory for u2
     PRBS2 prbs2;	
 equation
     connect(prbs1.y,qt.u1);

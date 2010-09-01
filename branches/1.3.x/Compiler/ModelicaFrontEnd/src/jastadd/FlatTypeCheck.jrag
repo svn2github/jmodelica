@@ -282,10 +282,16 @@ aspect FlatTypeCheck {
   public void FBuiltInFunctionCall.typeCheck() {
 	  if (checkTypeAsExpression())
 		  super.typeCheck();
-	  if (myLefts().size() > 1)
+	  int n = builtInHasOutput() ? 1 : 0;
+	  if (myLefts().size() > n)
 		  error("Too many components assigned from function call: " + builtInName() + 
-				  "() has 1 output(s)");
+				  "() has " + n + " output(s)");
+	  else if (!isFunctionCallClause() && n == 0)
+		  error("Function " + builtInName() + "() has no outputs, but is used in expression");
   }
+  
+  syn boolean FBuiltInFunctionCall.builtInHasOutput() = true;
+  eq FIgnoredBuiltIn.builtInHasOutput() = false;
   
   syn boolean FBuiltInFunctionCall.checkTypeAsExpression() = false;
   eq FSizeExp.checkTypeAsExpression()     = true;
@@ -302,7 +308,7 @@ aspect FlatTypeCheck {
  
   public void InstFunctionCall.typeCheck() {
 	  if (!isFunctionCallClause() && !getName().myInstClassDecl().isRecord() && !hasOutputs())
-		  error("Function " + getName().name() + " has no outputs, but is used in expression");
+		  error("Function " + getName().name() + "() has no outputs, but is used in expression");
 	  else if (!isFunctionCallClause() && size().isUnknown())
 		  error("Could not evaluate array size of output " + expOutput().name());
 	  if (myOutputs().size() < myLefts().size())

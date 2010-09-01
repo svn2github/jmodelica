@@ -16,7 +16,7 @@
 
       <itemizedlist>
         <listitem>
-          <para> Vectors and user defined functions are supported by the
+          <para>Vectors and user defined functions are supported by the
           Modelica and Optimica compilers</para>
         </listitem>
 
@@ -26,8 +26,8 @@
         </listitem>
 
         <listitem>
-          <para> A new Python simulation package, Assimulo, has been
-          integrated to provide increased flexibility and performance</para>
+          <para>A new Python simulation package, Assimulo, has been integrated
+          to provide increased flexibility and performance</para>
         </listitem>
       </itemizedlist>
     </section>
@@ -206,7 +206,7 @@
             </listitem>
 
             <listitem>
-              <para> Limited support for constructs generating events. If
+              <para>Limited support for constructs generating events. If
               expressions are supported.</para>
             </listitem>
 
@@ -260,7 +260,7 @@
           <para>Support for event indicator functions and switching functions
           are now provided. These features are used by the new simulation
           package Assimulo to simulate systems with events. Notice that
-          limitations in the compiler front-end applies, see above. </para>
+          limitations in the compiler front-end applies, see above.</para>
         </section>
 
         <section>
@@ -269,7 +269,7 @@
           <para>Support for event indicator functions and switching functions
           are now provided. These features are used by the new simulation
           package Assimulo to simulate systems with events. Notice that
-          limitations in the compiler front-end applies, see above. </para>
+          limitations in the compiler front-end applies, see above.</para>
         </section>
 
         <section>
@@ -325,8 +325,7 @@
       main difference between the two is that Assimulo is using Cython to
       connect to Sundials. This has substantially improved the simulation
       speed. For more info regarding Assimulo and its features, see: <link
-      xlink:href="http://www.jmodelica.org/assimulo">http://www.jmodelica.org/assimulo</link>.
-      </para>
+      xlink:href="http://www.jmodelica.org/assimulo">http://www.jmodelica.org/assimulo</link>.</para>
     </section>
 
     <section>
@@ -334,8 +333,8 @@
 
       <para>The Functional Mockup Interface (FMI) standard is partially
       supported. FMI compliant model meta data XML document can be exported,
-      support for the FMI C model execution interface is not yet supported.
-      </para>
+      support for the FMI C model execution interface is not yet
+      supported.</para>
     </section>
 
     <section>
@@ -345,7 +344,7 @@
       information on the set of variables, the equations, the user defined
       functions and for the Optimica´s optimization problems definition of the
       flattened model. Documents can be validated by a schema designed as an
-      extension of the FMI XML schema. </para>
+      extension of the FMI XML schema.</para>
     </section>
 
     <section>
@@ -387,7 +386,7 @@
         one function call. For each function there is an algorithm implemented
         which will be used by default but there is also the possibility to add
         custom algorithms. All examples in the example package have been
-        updated to use the high-level functions. </para>
+        updated to use the high-level functions.</para>
       </section>
     </section>
 
@@ -493,7 +492,7 @@
 
           <para>Function calls can now be used as binding expressions for
           parameters and constants. The handling of Integer, Boolean and
-          record type parameters is also improved. </para>
+          record type parameters is also improved.</para>
         </section>
 
         <section>
@@ -501,7 +500,7 @@
 
           <itemizedlist>
             <listitem>
-              <para>Basic support for external functions written in C. </para>
+              <para>Basic support for external functions written in C.</para>
             </listitem>
 
             <listitem>
@@ -525,10 +524,18 @@
         </section>
 
         <section>
+          <title>Stream connectors</title>
+
+          <para>Stream connectors, including the operators inStream and
+          actualStream and connections with up to two stream connectors are
+          supported. </para>
+        </section>
+
+        <section>
           <title>Miscellaneous</title>
 
           <para>The error checking has been improved, eliminating many
-          erroneous error messages for correct Modelica code. </para>
+          erroneous error messages for correct Modelica code.</para>
 
           <para>The memory and time usage for the compiler has been greatly
           reduced for medium and large models, especially for complex class
@@ -540,10 +547,10 @@
         <title>The Optimica compiler</title>
 
         <para>All support mentioned for the Modelica compiler applies to the
-        Optimica compiler as well. </para>
+        Optimica compiler as well.</para>
 
         <section>
-          <title> New class attribute objectiveIntegrand</title>
+          <title>New class attribute objectiveIntegrand</title>
 
           <para>Support for the objectiveIntegrand class attribute. In order
           to encode Lagrange cost functions of the type</para>
@@ -604,7 +611,7 @@
           to rescale the time of the problem.</para>
 
           <para>Using this method, no changes are required to the optimization
-          algorithm, since a fixed horizon problem is solved. </para>
+          algorithm, since a fixed horizon problem is solved.</para>
         </section>
       </section>
     </section>
@@ -620,7 +627,7 @@
 
           <para>Support for free dependent parameters in the collocation
           optimization algorithm is now implemented. In models containing
-          parameter declarations such as: </para>
+          parameter declarations such as:</para>
 
           <programlisting>parameter Real p1(free=true);
 parameter Real p2 = p1;</programlisting>
@@ -631,7 +638,7 @@ parameter Real p2 = p1;</programlisting>
 
           <programlisting>p1 = p2</programlisting>
 
-          <para>included in the problem. </para>
+          <para>included in the problem.</para>
         </section>
 
         <section>
@@ -639,7 +646,7 @@ parameter Real p2 = p1;</programlisting>
 
           <para>The new Optimica class attribute objectiveIntegrand, see
           above, is supported by the collocation optimization algorithm. The
-          integral cost is approximated by a Radau quadrature formula. </para>
+          integral cost is approximated by a Radau quadrature formula.</para>
         </section>
       </section>
     </section>
@@ -650,7 +657,7 @@ parameter Real p2 = p1;</programlisting>
       <para>Support for simulation of an FMU (see below) using Assimulo.
       Simulation of an FMU can either be done by using the high-level method
       *simulate* or creating a model from the FMIModel class together with a
-      problem class, FMIODE which is then passed to CVode. </para>
+      problem class, FMIODE which is then passed to CVode.</para>
     </section>
 
     <section>
@@ -662,7 +669,7 @@ parameter Real p2 = p1;</programlisting>
       the models C execution interface to Python. Note, strings are not
       currently supported.</para>
 
-      <para>Imported FMUs can be simulated using the Assimulo package. </para>
+      <para>Imported FMUs can be simulated using the Assimulo package.</para>
     </section>
 
     <section>
@@ -678,8 +685,8 @@ parameter Real p2 = p1;</programlisting>
       <section>
         <title><literal>static</literal> attribute</title>
 
-        <para>Support for the Optimica attribute static has been implemented.
-        </para>
+        <para>Support for the Optimica attribute static has been
+        implemented.</para>
       </section>
     </section>
 
@@ -687,13 +694,13 @@ parameter Real p2 = p1;</programlisting>
       <title>Python integration</title>
 
       <section>
-        <title>High-level functions </title>
+        <title>High-level functions</title>
 
         <section>
           <title>Model files</title>
 
           <para>Passing more than one model file to high-level functions
-          supported. </para>
+          supported.</para>
         </section>
 
         <section>
@@ -703,7 +710,7 @@ parameter Real p2 = p1;</programlisting>
           The result object for each algorithm extends the base class
           <literal>ResultBase</literal> and will therefore (at least) contain:
           the model object, the result file name, the solver used and the
-          result data object. </para>
+          result data object.</para>
         </section>
       </section>
 
@@ -711,7 +718,7 @@ parameter Real p2 = p1;</programlisting>
         <title>File I/O</title>
 
         <para>Rewriting xmlparser.py has improved performance when writing
-        simulation result data to file considerably. </para>
+        simulation result data to file considerably.</para>
       </section>
     </section>
 

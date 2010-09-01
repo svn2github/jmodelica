@@ -26,6 +26,7 @@ from jmodelica import simulate
 
 def run_demo(with_plots=True):
     """
+    Demonstrates how to simulate with inputs.
     """
 
     curr_dir = os.path.dirname(os.path.abspath(__file__));

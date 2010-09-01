@@ -24,7 +24,8 @@ def linearize_dae(model):
     machine precision. (That is, no numerical finite differences
     are used in the linearization.)
 
-    Returns:
+    Returns::
+    
         E -- n_eq_F x n_dx matrix corresponding to dF/ddx.
         A -- n_eq_F x n_x matrix corresponding to -dF/dx.
         B -- n_eq_F x n_u matrix corresponding to -dF/du.
@@ -43,7 +44,8 @@ def linearize_dae(model):
               linearization is done.
         t0 -- time for which the linearization is done.  
 
-    Limitations:
+    Limitations::
+    
         Currently only dense matrix format supported. Sparse format
         to be added.
 
@@ -144,7 +146,8 @@ def linear_dae_to_ode(E_dae,A_dae,B_dae,F_dae,g_dae):
       dx = A*x + B*u + g
        w = H*x + M*u + q
 
-    Returns:
+    Returns::
+    
         A -- n_x x n_x matrix of constant coefficients.
         B -- n_x x n_u matrix of constant coefficients.
         g -- n_x x 1 matrix of constant coefficients.
@@ -152,7 +155,8 @@ def linear_dae_to_ode(E_dae,A_dae,B_dae,F_dae,g_dae):
         M -- n_w x n_u matrix of constant coefficients.
         q -- n_w x 1 matrix of constant coefficients
         
-    Limitations:
+    Limitations::
+    
         Outputs in the Modelica model are currently not
         taken into account - all algebraic variables
         are provided as outputs. 
@@ -197,7 +201,8 @@ def linearize_ode(model):
     Notice that the conversion into ODE form works only if the
     linear DAE has index 1.
 
-    Returns:
+    Returns::
+    
         A -- n_x x n_x matrix of constant coefficients.
         B -- n_x x n_u matrix of constant coefficients.
         g -- n_x x 1 matrix of constant coefficients.
@@ -217,7 +222,8 @@ def linearize_ode(model):
               linearization is done.
         t0 -- time for which the linearization is done.  
 
-    Limitations:
+    Limitations::
+    
         Outputs in the Modelica model are currently not
         taken into account - all algebraic variables
         are provided as outputs.         

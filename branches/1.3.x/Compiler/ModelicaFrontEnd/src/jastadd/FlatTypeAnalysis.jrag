@@ -372,11 +372,12 @@ aspect FlatTypeAnalysis {
 		}
 	}
 	
+	eq FIgnoredBuiltIn.type() = fUnknownType();
+	
 	inh FType FFunctionCallLeft.type();
 	eq FFunctionCallEquation.getLeft(int i).type() = getCall().typeOfOutput(i);
 	eq FFunctionCallStmt.getLeft(int i).type()     = getCall().typeOfOutput(i);
 	
-	// TODO: Can't anything be inferred here?
 	syn lazy FType InstComponentDecl.type() = fUnknownType();
 	
 	syn FType FAbstractFunctionCall.typeOfOutput(int i) = (i == 0) ? type() : fUnknownType();
@@ -386,7 +387,6 @@ aspect FlatTypeAnalysis {
 	eq FFunctionCall.type()    = hasOutputs() ? typeOfOutput(0) : fUnknownType();
 	eq InstFunctionCall.type() = hasOutputs() ? typeOfOutput(0) : fUnknownType();
 	eq FMathematicalFunctionCall.type() = fRealScalarType();		
-	
 	
 	// TODO: expand to handle boolean end enum index
 	syn lazy FType FSubscript.type();
@@ -444,7 +444,7 @@ aspect InstBindingType {
 	eq InstRoot.getChild().expandBindingType(FType type, InstNode node)      = type;
 	eq FlatRoot.getChild().expandBindingType(FType type, InstNode node)      = type;
 	eq InstArrayComponentDecl.getChild().expandBindingType(FType type, InstNode node) = 
-		expandBindingType(type.enclosingArrayType(childFSubscript(0).numIndices()), node);
+		expandBindingType(type.enclosingArrayType(myDimensionLength()), node);
 	eq InstComposite.getChild().expandBindingType(FType type, InstNode node) = 
 		(node == this) ? type : expandBindingType(type, node);
 	eq InstRecord.getChild().expandBindingType(FType type, InstNode node) = 
@@ -732,11 +732,12 @@ aspect BuiltInFlatTypes {
 	syn boolean FType.isUnknown() = false;
  	eq FUnknownType.isUnknown() = true;
  	
+	syn FType ASTNode.fUnknownType() = FUnknownType.SCALAR;
+	
 	syn FPrimitiveType ASTNode.fRealScalarType()    = FRealType.SCALAR;
 	syn FPrimitiveType ASTNode.fIntegerScalarType() = FIntegerType.SCALAR;
 	syn FPrimitiveType ASTNode.fBooleanScalarType() = FBooleanType.SCALAR;
 	syn FPrimitiveType ASTNode.fStringScalarType()  = FStringType.SCALAR;
-	syn FPrimitiveType ASTNode.fUnknownType()       = FUnknownType.SCALAR;
  	
 	syn FPrimitiveType ASTNode.fRealArrayType(Size size)    = new FRealType(size);
 	syn FPrimitiveType ASTNode.fIntegerArrayType(Size size) = new FIntegerType(size);

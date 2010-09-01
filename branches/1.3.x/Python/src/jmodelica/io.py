@@ -34,7 +34,8 @@ def export_result_dymola(model, data, file_name='', format='txt'):
     vector of the model object and the time series are read from
     the data argument.
 
-    Parameters:
+    Parameters::
+    
         model --
             A Model object.
         data --
@@ -52,7 +53,8 @@ def export_result_dymola(model, data, file_name='', format='txt'):
             A text string equal either to 'txt' for textual format or
             'mat' for binary Matlab format.
 
-    Limitations:
+    Limitations::
+    
         Currently only textual format is supported.
 
     """
@@ -203,7 +205,8 @@ def export_result_dymola_deprecated(model, data, file_name='', format='txt'):
     vector of the model object and the time series are read from
     the data argument.
 
-    Parameters:
+    Parameters::
+    
         model --
             A Model object.
         data --
@@ -221,7 +224,8 @@ def export_result_dymola_deprecated(model, data, file_name='', format='txt'):
             A text string equal either to 'txt' for textual format or
             'mat' for binary Matlab format.
 
-    Limitations:
+    Limitations::
+    
         Currently only textual format is supported.
 
     """
@@ -395,7 +399,8 @@ class Trajectory:
         """
         Constructor for the Trajectory class.
 
-        Parameters:
+        Parameters::
+        
             t --
                 Abscissa of the trajectory.
             x --
@@ -414,7 +419,8 @@ class ResultDymolaTextual:
         """
         Load a result file written on Dymola textual format.
 
-        Parameters:
+        Parameters::
+        
             fname --
                 Name of file.
         """
@@ -559,7 +565,8 @@ class ResultDymolaBinary:
         """
         Load a result file written on Dymola binary format.
 
-        Parameters:
+        Parameters::
+        
             fname --
                 Name of file.
         """
@@ -573,11 +580,13 @@ class ResultDymolaBinary:
         """
         Retrieve the index in the name vector of a given variable.
         
-        Parameters:
+        Parameters::
+        
             name --
                 Name of variable.
 
-        Returns:
+        Returns::
+        
             In integer index.
         """
         try:
@@ -591,11 +600,13 @@ class ResultDymolaBinary:
         """
         Retrieve the data sequence for a variable with a given name.
         
-        Parameters:
+        Parameters::
+        
             name --
                 Name of the variable.
 
-        Returns:
+        Returns::
+        
             A Trajectory object containing the time vector and the data vector
             of the variable.
         """
@@ -646,7 +657,8 @@ class ResultWriterDymola (ResultWriter):
                 A text string equal either to 'txt' for textual format or
                 'mat' for binary Matlab format.
 
-        Limitations:
+        Limitations::
+        
             Currently only textual format is supported.
         """
         self.model = model

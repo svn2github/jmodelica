@@ -246,7 +246,7 @@ model UnsupportedBuiltins3_ComplErr
          name="UnsupportedBuiltins3_ComplErr",
          description="Compliance error for unsupported builtins",
          errorMessage="
-8 errors found:
+9 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 263, column 3:
   The semiLinear() function-like operator is not supported
@@ -271,6 +271,9 @@ Compliance error at line 270, column 3:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 271, column 3:
   The reinit() function-like operator is not supported
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 266, column 3:
+  The terminate() function-like operator is not supported
 ")})));
 
  equation
@@ -282,28 +285,48 @@ Compliance error at line 271, column 3:
   pre(1);
   edge();
   reinit(1);
+  terminate();
 end UnsupportedBuiltins3_ComplErr;
 
 
-model UnsupportedBuiltins4_ComplErr
+model UnsupportedBuiltins4_Warn
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ComplianceErrorTestCase(
-         name="UnsupportedBuiltins4_ComplErr",
-         description="Compliance error for unsupported builtins",
+     JModelica.UnitTesting.WarningTestCase(
+         name="UnsupportedBuiltins4_Warn",
+         description="Warnings for ignored builtins",
+         errorMessage="
+1 errors found:
+Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+At line 294, column 2:
+  The assert() function-like operator is not supported, and is currently ignored
+")})));
+
+equation
+ assert(1);
+end UnsupportedBuiltins4_Warn;
+
+
+model UnsupportedBuiltins5_Err
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="UnsupportedBuiltins5_Err",
+         description="Ignored builtins can't have outputs'",
          errorMessage="
 2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 263, column 3:
-  The assert() function-like operator is not supported
+Semantic error at line 313, column 12:
+  Too many components assigned from function call: assert() has 0 output(s)
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 266, column 3:
-  The terminate() function-like operator is not supported
+Semantic error at line 314, column 3:
+  Function assert() has no outputs, but is used in expression
 ")})));
 
+  Real a;
+  Real b;
  equation
-  assert(1);
-  terminate();
-end UnsupportedBuiltins4_ComplErr;
+  (a, b) = assert(1);
+  a = assert(1);
+end UnsupportedBuiltins5_Err;
 
 
 model StringConcat_ComplErr

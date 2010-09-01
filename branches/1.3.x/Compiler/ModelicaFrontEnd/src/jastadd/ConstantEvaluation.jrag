@@ -973,8 +973,8 @@ aspect ConstantEvaluation {
   // Bypass for nodes with inherent support for constant evaluation of arrays.
   eq FFunctionCall.cevalArray(Index i)    = cevalCalc();
   eq InstFunctionCall.cevalArray(Index i) = cevalCalc();
-  eq FInstAccessExp.cevalArray(Index i)   = cevalCalc();
-  eq FIdUseExp.cevalArray(Index i)        = cevalCalc();
+  eq FInstAccessExp.cevalArray(Index i)   = isSlice() ? super.cevalArray(i) : cevalCalc();
+  eq FIdUseExp.cevalArray(Index i)        = isSlice() ? super.cevalArray(i) : cevalCalc();
   
   /**
    * \brief Delegate attribute for ceval().

@@ -13,7 +13,7 @@
 
     <subtitle>Version <productnumber>1.3.0</productnumber></subtitle>
 
-    <pubdate>2010-08-21</pubdate>
+    <pubdate>2010-08-29</pubdate>
 
     <copyright>
       <year>2010</year>
@@ -37,6 +37,8 @@
   <xi:include href="GettingStarted.xml" xpointer="element(/1)" />
 
   <xi:include href="FMI.xml" xpointer="element(/1)" />
+
+  <xi:include href="HighlevelFunctions.xml" xpointer="element(/1)" />
 
   <xi:include href="AdvancedTopics.xml" xpointer="element(/1)" />
 

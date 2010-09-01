@@ -55,25 +55,15 @@ aspect InstNameClassification {
 	
 	rewrite InstParseAccess {
 		to InstAccess {
-			if (kind().isComponentAccess()) {
-				//log.debug("rewrite InstParseAccess " + name() + " component");
-				    InstComponentAccess a = new InstComponentAccess(getID(),getFArraySubscriptsOpt());
-					a.setStart(getStart());
-					a.setEnd(getEnd());
-					return a;
-			} else if (kind().isClassAccess()) {
-				//log.debug("rewrite InstParseAccess " + name() + " class");
-					InstClassAccess a =  new InstClassAccess(getID());
-					a.setStart(getStart());
-					a.setEnd(getEnd());
-					return a;
-			} else {
-				//log.debug("rewrite InstParseAccess " + name() + " ambiguous");
-					InstAmbiguousAccess a = new InstAmbiguousAccess(getID(),getFArraySubscriptsOpt());
-					a.setStart(getStart());
-					a.setEnd(getEnd());
-					return a;
-			}
+			InstAccess a;
+			if (kind().isComponentAccess()) 
+			    a = new InstComponentAccess(getID(), getFArraySubscriptsOpt());
+			else if (kind().isClassAccess()) 
+				a = new InstClassAccess(getID());
+			else 
+				a = new InstAmbiguousAccess(getID(), getFArraySubscriptsOpt());
+			a.setLocation(this);
+			return a;
   		}
 	}
 
@@ -131,16 +121,13 @@ aspect InstResolveAmbiguousNames {
 	    	//log.debug("rewrite InstAmbiguousAccess begin " + name());
 	  		if (!lookupInstComponent(name()).isEmpty()) {
 		    	//log.debug("rewrite InstAmbiguousAccess " + name() + " component");
-     		    InstComponentAccess c = new InstComponentAccess(name(),getFArraySubscriptsOpt());
-  	 			c.setStart(getStart());
-  	 			c.setEnd(getEnd());
+     		    InstComponentAccess c = new InstComponentAccess(name(), getFArraySubscriptsOpt());
+  	 			c.setLocation(this);
   	 			return c;
-  		} else 
-            if(!lookupInstClass(name()).isEmpty()) {		
+  		    } else if (!lookupInstClass(name()).isEmpty()) {		
     	    	//log.debug("rewrite InstAmbiguousAccess " + name() + " class");
             	InstClassAccess t = new InstClassAccess(name()); 
-    			t.setStart(getStart());
-    			t.setEnd(getEnd());
+    			t.setLocation(this);
   	 			return t;
   			}
   			rewritten = true;

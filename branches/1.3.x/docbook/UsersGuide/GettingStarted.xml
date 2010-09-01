@@ -18,9 +18,30 @@
   for example <literal>help(numpy.size)</literal>. Use this feature frequently
   to learn more about the packages used in this tutorial, including the
   jmodelica package. It is possible do the tutorials without any Python
-  knowledge (although it helps to know the basics). In most cases it is
-  convenient to store the Python commands in a script file and run the script
-  from the file by invoking the Python command run:</para>
+  knowledge (although it helps to know the basics). </para>
+
+        <para>The tutorials in this chapter are preferably run in a Python shell using the Pylab mode. If
+        you are running Windows, select the menu option 'pylab' provided with the
+        JModelica.org installation. If you are running Linux or Mac OS X, open
+        a terminal and enter the command:</para>
+
+        <programlisting language="python">&gt; $JMODELICA_HOME/Python/jm_ipython.sh -pylab
+</programlisting>
+
+        <para>As your first action, go to the working directory you have
+        created:</para>
+
+        <programlisting language="python">In [1]: cd '/path/to/working/directory'
+</programlisting>
+
+        <para>In order to run the Python script, use the 'run' command:</para>
+
+        <programlisting language="python">in [2]: run cstr.py
+</programlisting>
+
+  <para>In most cases it is convenient to store the Python commands in a
+  script file and run the script from the file by invoking the Python command
+  run:</para>
 
   <programlisting>&gt;&gt;&gt; run my_script.py</programlisting>
 
@@ -346,7 +367,7 @@ P.show()</programlisting>
       different parameter values. Sweeping parameters is a useful technique
       for analysing model sensitivity with respect to uncertainty in physical
       parameters or initial conditions. Consider the following model of the
-      Van der Pol oscillator: </para>
+      Van der Pol oscillator:</para>
 
       <programlisting>  model VDP
     // State start values
@@ -832,28 +853,6 @@ plt.show()</programlisting>
       choose to create Python script file, save it to the working
       directory.</para>
 
-      <section>
-        <title>Start the Python shell</title>
-
-        <para>Next, open a Python shell, preferably using the Pylab mode. If
-        you are running Windows, select the menu option provided with the
-        JModelica.org installation. If you are running Linux or Mac OS X, open
-        a terminal and enter the command:</para>
-
-        <programlisting language="python">&gt; /path/to/jmodelica_installation/Python/jm_ipython.sh -pylab
-</programlisting>
-
-        <para>As your first action, go to the working directory you have
-        created:</para>
-
-        <programlisting language="python">In [1]: cd '/path/to/working/directory'
-</programlisting>
-
-        <para>In order to run the Python script, use the 'run' command:</para>
-
-        <programlisting language="python">in [2]: run cstr.py
-</programlisting>
-      </section>
 
       <section>
         <title>Compile and instantiate a model object</title>
@@ -1530,6 +1529,898 @@ plt.show()
         role="bold">57</emphasis>, pp. 575-593.</para>
       </section>
     </section>
+  </section>
+
+  <section>
+    <title>Solving parameter estimation problems</title>
+
+    <para>In this tutorial it will be demonstrated how to solve parameter
+    estimation problems. We consider a quadruple tank system depicted in
+    Figure below.</para>
+
+    <figure>
+      <title>A schematic figure of the quadruple tank process.</title>
+
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="images/qt_schematic.png" scalefit="1"
+                     width="60%"></imagedata>
+        </imageobject>
+      </mediaobject>
+    </figure>
+
+    <para>The dynamics of the system is given by the differential
+    equations:</para>
+
+    <informalequation>
+      <m:math display="block" overflow="scroll">
+        <m:mtable>
+          <m:mtr>
+            <m:mtd columnalign="right">
+              <m:msub>
+                <m:mover>
+                  <m:mi>x</m:mi>
+
+                  <m:mo>.</m:mo>
+                </m:mover>
+
+                <m:mn>1</m:mn>
+              </m:msub>
+            </m:mtd>
+
+            <m:mtd columnalign="left">
+              <m:mo>=</m:mo>
+
+              <m:mo>-</m:mo>
+
+              <m:mfrac>
+                <m:msub>
+                  <m:mi>a</m:mi>
+
+                  <m:mn>1</m:mn>
+                </m:msub>
+
+                <m:msub>
+                  <m:mi>A</m:mi>
+
+                  <m:mn>2</m:mn>
+                </m:msub>
+              </m:mfrac>
+
+              <m:msqrt>
+                <m:mrow>
+                  <m:mn>2</m:mn>
+
+                  <m:mi>g</m:mi>
+                </m:mrow>
+
+                <m:msub>
+                  <m:mi>x</m:mi>
+
+                  <m:mn>1</m:mn>
+                </m:msub>
+              </m:msqrt>
+
+              <m:mo>+</m:mo>
+
+              <m:mfrac>
+                <m:msub>
+                  <m:mi>a</m:mi>
+
+                  <m:mn>3</m:mn>
+                </m:msub>
+
+                <m:msub>
+                  <m:mi>A</m:mi>
+
+                  <m:mn>1</m:mn>
+                </m:msub>
+              </m:mfrac>
+
+              <m:msqrt>
+                <m:mrow>
+                  <m:mn>2</m:mn>
+
+                  <m:mi>g</m:mi>
+                </m:mrow>
+
+                <m:msub>
+                  <m:mi>x</m:mi>
+
+                  <m:mn>3</m:mn>
+                </m:msub>
+              </m:msqrt>
+
+              <m:mo>+</m:mo>
+
+              <m:mfrac>
+                <m:mrow>
+                  <m:msub>
+                    <m:mi>γ</m:mi>
+
+                    <m:mn>1</m:mn>
+                  </m:msub>
+
+                  <m:msub>
+                    <m:mi>k</m:mi>
+
+                    <m:mn>1</m:mn>
+                  </m:msub>
+                </m:mrow>
+
+                <m:msub>
+                  <m:mi>A</m:mi>
+
+                  <m:mn>1</m:mn>
+                </m:msub>
+              </m:mfrac>
+
+              <m:msub>
+                <m:mi>u</m:mi>
+
+                <m:mn>1</m:mn>
+              </m:msub>
+            </m:mtd>
+          </m:mtr>
+
+          <m:mtr>
+            <m:mtd columnalign="right">
+              <m:msub>
+                <m:mover>
+                  <m:mi>x</m:mi>
+
+                  <m:mo>.</m:mo>
+                </m:mover>
+
+                <m:mn>2</m:mn>
+              </m:msub>
+            </m:mtd>
+
+            <m:mtd columnalign="left">
+              <m:mo>=</m:mo>
+
+              <m:mo>-</m:mo>
+
+              <m:mfrac>
+                <m:msub>
+                  <m:mi>a</m:mi>
+
+                  <m:mn>2</m:mn>
+                </m:msub>
+
+                <m:msub>
+                  <m:mi>A</m:mi>
+
+                  <m:mn>2</m:mn>
+                </m:msub>
+              </m:mfrac>
+
+              <m:msqrt>
+                <m:mrow>
+                  <m:mn>2</m:mn>
+
+                  <m:mi>g</m:mi>
+                </m:mrow>
+
+                <m:msub>
+                  <m:mi>x</m:mi>
+
+                  <m:mn>2</m:mn>
+                </m:msub>
+              </m:msqrt>
+
+              <m:mo>+</m:mo>
+
+              <m:mfrac>
+                <m:msub>
+                  <m:mi>a</m:mi>
+
+                  <m:mn>4</m:mn>
+                </m:msub>
+
+                <m:msub>
+                  <m:mi>A</m:mi>
+
+                  <m:mn>2</m:mn>
+                </m:msub>
+              </m:mfrac>
+
+              <m:msqrt>
+                <m:mrow>
+                  <m:mn>2</m:mn>
+
+                  <m:mi>g</m:mi>
+                </m:mrow>
+
+                <m:msub>
+                  <m:mi>x</m:mi>
+
+                  <m:mn>4</m:mn>
+                </m:msub>
+              </m:msqrt>
+
+              <m:mo>+</m:mo>
+
+              <m:mfrac>
+                <m:mrow>
+                  <m:msub>
+                    <m:mi>γ</m:mi>
+
+                    <m:mn>2</m:mn>
+                  </m:msub>
+
+                  <m:msub>
+                    <m:mi>k</m:mi>
+
+                    <m:mn>2</m:mn>
+                  </m:msub>
+                </m:mrow>
+
+                <m:msub>
+                  <m:mi>A</m:mi>
+
+                  <m:mn>2</m:mn>
+                </m:msub>
+              </m:mfrac>
+
+              <m:msub>
+                <m:mi>u</m:mi>
+
+                <m:mn>2</m:mn>
+              </m:msub>
+            </m:mtd>
+          </m:mtr>
+
+          <m:mtr>
+            <m:mtd columnalign="right">
+              <m:msub>
+                <m:mover>
+                  <m:mi>x</m:mi>
+
+                  <m:mo>.</m:mo>
+                </m:mover>
+
+                <m:mn>3</m:mn>
+              </m:msub>
+            </m:mtd>
+
+            <m:mtd columnalign="left">
+              <m:mo>=</m:mo>
+
+              <m:mo>-</m:mo>
+
+              <m:mfrac>
+                <m:msub>
+                  <m:mi>a</m:mi>
+
+                  <m:mn>3</m:mn>
+                </m:msub>
+
+                <m:msub>
+                  <m:mi>A</m:mi>
+
+                  <m:mn>3</m:mn>
+                </m:msub>
+              </m:mfrac>
+
+              <m:msqrt>
+                <m:mrow>
+                  <m:mn>2</m:mn>
+
+                  <m:mi>g</m:mi>
+                </m:mrow>
+
+                <m:msub>
+                  <m:mi>x</m:mi>
+
+                  <m:mn>3</m:mn>
+                </m:msub>
+              </m:msqrt>
+
+              <m:mo>+</m:mo>
+
+              <m:mfrac>
+                <m:mrow>
+                  <m:mfenced separators="">
+                    <m:mn>1</m:mn>
+
+                    <m:mo>-</m:mo>
+
+                    <m:msub>
+                      <m:mi>γ</m:mi>
+
+                      <m:mn>2</m:mn>
+                    </m:msub>
+                  </m:mfenced>
+
+                  <m:msub>
+                    <m:mi>k</m:mi>
+
+                    <m:mn>2</m:mn>
+                  </m:msub>
+                </m:mrow>
+
+                <m:msub>
+                  <m:mi>A</m:mi>
+
+                  <m:mn>3</m:mn>
+                </m:msub>
+              </m:mfrac>
+
+              <m:msub>
+                <m:mi>u</m:mi>
+
+                <m:mn>2</m:mn>
+              </m:msub>
+            </m:mtd>
+          </m:mtr>
+
+          <m:mtr>
+            <m:mtd columnalign="right">
+              <m:msub>
+                <m:mover>
+                  <m:mi>x</m:mi>
+
+                  <m:mo>.</m:mo>
+                </m:mover>
+
+                <m:mn>4</m:mn>
+              </m:msub>
+            </m:mtd>
+
+            <m:mtd columnalign="left">
+              <m:mo>=</m:mo>
+
+              <m:mo>-</m:mo>
+
+              <m:mfrac>
+                <m:msub>
+                  <m:mi>a</m:mi>
+
+                  <m:mn>4</m:mn>
+                </m:msub>
+
+                <m:msub>
+                  <m:mi>A</m:mi>
+
+                  <m:mn>4</m:mn>
+                </m:msub>
+              </m:mfrac>
+
+              <m:msqrt>
+                <m:mrow>
+                  <m:mn>2</m:mn>
+
+                  <m:mi>g</m:mi>
+                </m:mrow>
+
+                <m:msub>
+                  <m:mi>x</m:mi>
+
+                  <m:mn>4</m:mn>
+                </m:msub>
+              </m:msqrt>
+
+              <m:mo>+</m:mo>
+
+              <m:mfrac>
+                <m:mrow>
+                  <m:mfenced separators="">
+                    <m:mn>1</m:mn>
+
+                    <m:mo>-</m:mo>
+
+                    <m:msub>
+                      <m:mi>γ</m:mi>
+
+                      <m:mn>1</m:mn>
+                    </m:msub>
+                  </m:mfenced>
+
+                  <m:msub>
+                    <m:mi>k</m:mi>
+
+                    <m:mn>1</m:mn>
+                  </m:msub>
+                </m:mrow>
+
+                <m:msub>
+                  <m:mi>A</m:mi>
+
+                  <m:mn>4</m:mn>
+                </m:msub>
+              </m:mfrac>
+
+              <m:msub>
+                <m:mi>u</m:mi>
+
+                <m:mn>1</m:mn>
+              </m:msub>
+            </m:mtd>
+          </m:mtr>
+        </m:mtable>
+
+        <m:mspace linebreak="newline" />
+      </m:math>
+    </informalequation>
+
+    <para>Where the parameter values are given in the table below:</para>
+
+    <table border="1">
+      <caption>Quadruple tank parameter values</caption>
+
+      <tr>
+        <td>Name</td>
+
+        <td>Value</td>
+
+        <td>Unit</td>
+      </tr>
+
+      <tr>
+        <td>A<subscript>i</subscript></td>
+
+        <td>4.9</td>
+
+        <td>cm<superscript>2</superscript></td>
+      </tr>
+
+      <tr>
+        <td>a<subscript>i</subscript></td>
+
+        <td>0.03</td>
+
+        <td>cm<superscript>2</superscript></td>
+      </tr>
+
+      <tr>
+        <td>k<subscript>i</subscript></td>
+
+        <td>0.56</td>
+
+        <td>cm<superscript>2</superscript>V<superscript>-1</superscript>s<superscript>-1</superscript></td>
+      </tr>
+
+      <tr>
+        <td>γ<subscript>i</subscript></td>
+
+        <td>0.3</td>
+
+        <td>Vcm<superscript>-1</superscript></td>
+      </tr>
+    </table>
+
+    <para>The states of the model are the tank water levels x1, x2, x3, and
+    x4. The control inputs, u1 and u2, are the flows generated by the two
+    pumps.</para>
+
+    <para>The Modelica model for the system is located in <link
+    xlink:href="https://svn.jmodelica.org/tags/1.3b1/Python/src/jmodelica/examples/files/QuadTankPack.mo">QuadTankPack.mo</link>.
+    Download the file to your working directory and open it in a text editor.
+    Locate the class <literal>QuadTankPack.QuadTank</literal> and make sure
+    you understand the model. In particular, notice that all model variables
+    and parameters are expressed in SI units.</para>
+
+    <para>Measurement data, available in <link
+    xlink:href="https://svn.jmodelica.org/tags/1.3b1/Python/src/jmodelica/examples/files/qt_par_est_data.mat">qt_par_est_data.mat</link>,
+    has been logged in an identification experiment. Download also this file
+    to your working directory.</para>
+
+    <para>Open a text file and name it qt_par_est.py. Then enter the
+    imports:</para>
+
+    <programlisting>from scipy.io.matlab.mio import loadmat
+import matplotlib.pyplot as plt
+import numpy as N
+from jmodelica import simulate
+from jmodelica import optimize
+from jmodelica.compiler import OptimicaCompiler</programlisting>
+
+    <para>into the file. Next, we enter code to open the data file, extract
+    the measurement time series and plot the measurements:</para>
+
+    <programlisting># Load measurement data from file
+data = loadmat('qt_par_est_data.mat',appendmat=False)
+
+# Extract data series
+t_meas = data['t'][6000::100,0]-60
+y1_meas = data['y1_f'][6000::100,0]/100
+y2_meas = data['y2_f'][6000::100,0]/100
+y3_meas = data['y3_d'][6000::100,0]/100
+y4_meas = data['y4_d'][6000::100,0]/100
+u1 = data['u1_d'][6000::100,0]
+u2 = data['u2_d'][6000::100,0]    
+
+# Plot measurements and inputs
+plt.figure(1)
+plt.clf()
+plt.subplot(2,2,1)
+plt.plot(t_meas,y3_meas)
+plt.title('x3')
+plt.grid()
+plt.subplot(2,2,2)
+plt.plot(t_meas,y4_meas)
+plt.title('x4')
+plt.grid()
+plt.subplot(2,2,3)
+plt.plot(t_meas,y1_meas)
+plt.title('x1')
+plt.xlabel('t[s]')
+plt.grid()
+plt.subplot(2,2,4)
+plt.plot(t_meas,y2_meas)
+plt.title('x2')
+plt.xlabel('t[s]')
+plt.grid()
+plt.show()
+
+plt.figure(2)
+plt.clf()
+plt.subplot(2,1,1)
+plt.plot(t_meas,u1)
+plt.hold(True)
+plt.title('u1')
+plt.grid()
+plt.subplot(2,1,2)
+plt.plot(t_meas,u2)
+plt.title('u2')
+plt.xlabel('t[s]')
+plt.hold(True)
+plt.grid()
+plt.show()  </programlisting>
+
+    <para>You should now see two plots showing the measurement state profiles
+    and the control input profiles:</para>
+
+    <figure>
+      <title>Measured state profiles</title>
+
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="images/qt_x.svg" scalefit="1" width="60%"></imagedata>
+        </imageobject>
+      </mediaobject>
+    </figure>
+
+    <figure>
+      <title>Input profiles used in estimation experiment</title>
+
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="images/qt_u.svg" scalefit="1" width="60%"></imagedata>
+        </imageobject>
+      </mediaobject>
+    </figure>
+
+    <para>In order to evaluate the accuracy of nominal model parameter values,
+    start by simulating the model, assuming that the start values of the
+    states are given by the state measurement at the start of the experiment.
+    This assumption can be expressed in the model:</para>
+
+    <programlisting>model Sim_QuadTank
+  QuadTank qt;
+  input Real u1 = qt.u1;
+  input Real u2 = qt.u2;
+initial equation
+  qt.x1 = 0.0627;
+  qt.x2 = 0.06044;
+  qt.x3 = 0.024;
+  qt.x4 = 0.023;
+end Sim_QuadTank;</programlisting>
+
+    <para>Notice that initial equations have been added to the model. Before
+    the model is simulated, a matrix containing the input trajectories is
+    created:</para>
+
+    <programlisting># Build input trajectory matrix for use in simulation
+u = N.transpose(N.vstack((t_meas,u1,u2)))</programlisting>
+
+    <para>Now, the model can be simulated:</para>
+
+    <programlisting># Simulate model response with nominal parameters
+res_sim = simulate('QuadTankPack.Sim_QuadTank',
+                   'QuadTankPack.mo',
+                   compiler='optimica',
+                   alg_args={'input_trajectory':u,
+                             'start_time':0.,
+                             'final_time':60})</programlisting>
+
+    <para>The simulation result can now be extracted:</para>
+
+    <programlisting># Load simulation result
+x1_sim = res_sim.result_data.get_variable_data('qt.x1')
+x2_sim = res_sim.result_data.get_variable_data('qt.x2')
+x3_sim = res_sim.result_data.get_variable_data('qt.x3')
+x4_sim = res_sim.result_data.get_variable_data('qt.x4')
+u1_sim = res_sim.result_data.get_variable_data('u1')
+u2_sim = res_sim.result_data.get_variable_data('u2')</programlisting>
+
+    <para>and then plotted:</para>
+
+    <programlisting># Plot simulation result
+plt.figure(1)
+plt.subplot(2,2,1)
+plt.plot(x1_sim.t,x3_sim.x)
+plt.subplot(2,2,2)
+plt.plot(x2_sim.t,x4_sim.x)
+plt.subplot(2,2,3)
+plt.plot(x3_sim.t,x1_sim.x)
+plt.subplot(2,2,4)
+plt.plot(x4_sim.t,x2_sim.x)
+plt.show()
+
+plt.figure(2)
+plt.subplot(2,1,1)
+plt.plot(u1_sim.t,u1_sim.x,'r')
+plt.subplot(2,1,2)
+plt.plot(u2_sim.t,u2_sim.x,'r')
+plt.show()</programlisting>
+
+    <para>The plot below shows the result of the simulation.</para>
+
+    <figure>
+      <title>Simulation result for the nominal model</title>
+
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="images/qt_sim.svg" scalefit="1" width="60%"></imagedata>
+        </imageobject>
+      </mediaobject>
+    </figure>
+
+    <para>Here, the simulated profiles are given by the green curves. Clearly,
+    there is a mismatch in the response, especially for the two lower tanks.
+    Think about why the model does not match the data, i.e., which parameters
+    may have wrong values.</para>
+
+    <para>The next step towards solving a parameter estimation problem is to
+    identify which parameters to tune. Typically, parameters which are not
+    known precisely are selected. Also, the selected parameters need of course
+    affect the mismatch between model response and data, when tuned. In a
+    first attempt, we aim at decreasing the mismatch for the two lower tanks,
+    and therefore we select the lower tank outflow areas, a1 and a2, as
+    parameters to optimize. The Optimica specification for the estimation
+    problem contained in the class
+    <literal>QuadTankPack.QuadTank_ParEst</literal>:</para>
+
+    <programlisting>optimization QuadTank_ParEst (objective=sum((y1_meas[i] - qt.x1(t_meas[i]))^2 + 
+                                            (y2_meas[i] - qt.x2(t_meas[i]))^2 for i in 1:N_meas),
+                                             startTime=0,finalTime=60)
+    
+    // Initial tank levels
+  parameter Modelica.SIunits.Length x1_0 = 0.06255;
+  parameter Modelica.SIunits.Length x2_0 = 0.06045;
+  parameter Modelica.SIunits.Length x3_0 = 0.02395;
+  parameter Modelica.SIunits.Length x4_0 = 0.02325;
+
+  QuadTank qt(x1(fixed=true),x1_0=x1_0,
+              x2(fixed=true),x2_0=x2_0,
+              x3(fixed=true),x3_0=x3_0,
+              x4(fixed=true),x4_0=x4_0,
+              a1(free=true,initialGuess = 0.03e-4,min=0,max=0.1e-4),
+              a2(free=true,initialGuess = 0.03e-4,min=0,max=0.1e-4));
+
+  // Number of measurement points
+  parameter Integer N_meas = 61;
+  // Vector of measurement times
+  parameter Real t_meas[N_meas] = 0:60.0/(N_meas-1):60;
+  // Measurement values for x1 
+  // Notice that dummy values are entered here:
+  // the real measurement values will be set from Python
+  parameter Real y1_meas[N_meas] = ones(N_meas);
+  // Measurement values for x2 	
+  parameter Real y2_meas[N_meas] = ones(N_meas);
+  // Input trajectory for u1 
+  PRBS1 prbs1;
+  // Input trajectory for u2
+  PRBS2 prbs2;	
+equation
+  connect(prbs1.y,qt.u1);
+  connect(prbs2.y,qt.u2);
+end QuadTank_ParEst;</programlisting>
+
+    <para>The cost function is here given as a squared sum of the difference
+    between the measured profiles for x1 and x2 and the corresponding model
+    profiles. Also the, parameters a1 and a2 are set to be free, and are given
+    initial guesses as well as bounds. As for the measurement data, parameter
+    vectors are declared, but only dummy data is provided in the model - the
+    actual data values will be set from the Python script. Also, the input
+    profiles are connected to signal generators that outputs the same input
+    profiles as those used in the experiment. Take some time to look at
+    QuadTankPack.mo and locate the classes used above.</para>
+
+    <para>Before the optimization problem can be solved, the Optimica
+    specification needs to be compiled:</para>
+
+    <programlisting># Create Optimica compiler
+oc = OptimicaCompiler()
+
+# Compile model
+qt_par_est = oc.compile_model("QuadTankPack.QuadTank_ParEst",
+                              "QuadTankPack.mo",target='ipopt')</programlisting>
+
+    <para>Next, we load the measurement data into the model:</para>
+
+    <programlisting># Number of measurement points
+N_meas = N.size(u1,0)
+
+# Set measurement data into model
+for i in range(0,N_meas):
+    qt_par_est.set_value("t_meas["+`i+1`+"]",t_meas[i])
+    qt_par_est.set_value("y1_meas["+`i+1`+"]",y1_meas[i])
+    qt_par_est.set_value("y2_meas["+`i+1`+"]",y2_meas[i])</programlisting>
+
+    <para>We are now ready to solve the optimization problem:</para>
+
+    <programlisting># Number of element in collocation algorithm
+n_e = 100
+# Normalized element lengths
+hs = N.ones(n_e)/n_e
+# Number of collocation points
+n_cp = 3
+
+# Solve parameter optimization problem
+res_opt = optimize(qt_par_est,alg_args={"n_e":n_e,"n_cp":3, \
+                                        "result_mesh":"element_interpolation",
+                                        "hs":hs})</programlisting>
+
+    <para>Now, lets extract the optimal values of the parameters a1 and a2 and
+    print them to the console:</para>
+
+    <programlisting># Extract optimal values of parameters
+a1_opt = res_opt.result_data.get_variable_data("qt.a1")
+a2_opt = res_opt.result_data.get_variable_data("qt.a2")
+
+# Print optimal parameter values
+print('a1: ' + str(a1_opt.x[-1]*1e4) + 'cm^2')
+print('a2: ' + str(a2_opt.x[-1]*1e4) + 'cm^2')</programlisting>
+
+    <para>You should get an output similar to:</para>
+
+    <programlisting>a1: 0.0266cm^2
+a2: 0.0272cm^2</programlisting>
+
+    <para>The estimated values are slightly smaller than the nominal values -
+    think about why this may be the case. Also note that the estimated values
+    do not necessarily correspond to the physically true values. Rather, the
+    parameter values are adjusted to compensate for all kinds of modeling
+    errors in order to minimize the mismatch between model response and
+    measurement data.</para>
+
+    <para>Next we plot the optimized profiles:</para>
+
+    <programlisting># Load state profiles
+x1_opt = res_opt.result_data.get_variable_data("qt.x1")
+x2_opt = res_opt.result_data.get_variable_data("qt.x2")
+x3_opt = res_opt.result_data.get_variable_data("qt.x3")
+x4_opt = res_opt.result_data.get_variable_data("qt.x4")
+u1_opt = res_opt.result_data.get_variable_data("qt.u1")
+u2_opt = res_opt.result_data.get_variable_data("qt.u2")
+
+plt.figure(1)
+plt.subplot(2,2,1)
+plt.plot(x3_opt.t,x3_opt.x,'k')
+plt.subplot(2,2,2)
+plt.plot(x4_opt.t,x4_opt.x,'k')
+plt.subplot(2,2,3)
+plt.plot(x1_opt.t,x1_opt.x,'k')
+plt.subplot(2,2,4)
+plt.plot(x2_opt.t,x2_opt.x,'k')
+plt.show()</programlisting>
+
+    <para>You will now see a plot looking like:</para>
+
+    <figure>
+      <title>State profiles corresponding to estimated values of a1 and
+      a2.</title>
+
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="images/qt_est1.svg" scalefit="1" width="60%"></imagedata>
+        </imageobject>
+      </mediaobject>
+    </figure>
+
+    <para>The profiles corresponding to the estimated values of a1 and a2 are
+    shown in black curves. As can be seen, the match between the model
+    response and the measurement data has been significantly increased. Is the
+    behavior of the model consistent with the estimated parameter
+    values?</para>
+
+    <para>Never the less, There is still a mismatch for the upper tanks,
+    especially for tank 4. In order to improve the match, a second estimation
+    problem may be formulated, where the parameters a1, a2, a3, a4 are free
+    optimization variables, and where the squared errors of all four tank
+    levels are penalized. Take a minute to locate the class
+    <literal>QuadTankPack.QuadTank_ParEst2</literal> and make sure that you
+    understand the model. Solve the optimization problem by typing the Python
+    code:</para>
+
+    <programlisting># Compile second parameter estimation model
+qt_par_est2 = oc.compile_model("QuadTankPack.QuadTank_ParEst2",
+                               "QuadTankPack.mo",target='ipopt')
+
+# Number of measurement points
+N_meas = N.size(u1,0)
+
+# Set measurement data into model
+for i in range(0,N_meas):
+    qt_par_est2.set_value("t_meas["+`i+1`+"]",t_meas[i])
+    qt_par_est2.set_value("y1_meas["+`i+1`+"]",y1_meas[i])
+    qt_par_est2.set_value("y2_meas["+`i+1`+"]",y2_meas[i])
+    qt_par_est2.set_value("y3_meas["+`i+1`+"]",y3_meas[i])
+    qt_par_est2.set_value("y4_meas["+`i+1`+"]",y4_meas[i])
+
+# Solve parameter estimation problem
+res_opt2 = optimize(qt_par_est2,alg_args={"n_e":n_e,"n_cp":3, \
+                                          "result_mesh":"element_interpolation","hs":hs})
+</programlisting>
+
+    <para>Next, we print the optimal parameter values:</para>
+
+    <programlisting># Get optimal parameter values
+a1_opt2 = res_opt2.result_data.get_variable_data("qt.a1")
+a2_opt2 = res_opt2.result_data.get_variable_data("qt.a2")
+a3_opt2 = res_opt2.result_data.get_variable_data("qt.a3")
+a4_opt2 = res_opt2.result_data.get_variable_data("qt.a4")
+
+# Print optimal parameter values 
+print('a1:' + str(a1_opt2.x[-1]*1e4) + 'cm^2')
+print('a2:' + str(a2_opt2.x[-1]*1e4) + 'cm^2')
+print('a3:' + str(a3_opt2.x[-1]*1e4) + 'cm^2')
+print('a4:' + str(a4_opt2.x[-1]*1e4) + 'cm^2')
+</programlisting>
+
+    <para>The output in the console should be similar to:</para>
+
+    <programlisting>a1:0.0266cm^2
+a2:0.0271cm^2
+a3:0.0301cm^2
+a4:0.0293cm^2
+</programlisting>
+
+    <para>Think about the result - can you explain why the estimated value of
+    a4 is slightly smaller than the nominal value? Finally, plot the state
+    profiles corresponding to the estimated parameters:</para>
+
+    <programlisting># Extract state and input profiles
+x1_opt2 = res_opt2.result_data.get_variable_data("qt.x1")
+x2_opt2 = res_opt2.result_data.get_variable_data("qt.x2")
+x3_opt2 = res_opt2.result_data.get_variable_data("qt.x3")
+x4_opt2 = res_opt2.result_data.get_variable_data("qt.x4")
+u1_opt2 = res_opt2.result_data.get_variable_data("qt.u1")
+u2_opt2 = res_opt2.result_data.get_variable_data("qt.u2")
+
+# Plot
+plt.figure(1)
+plt.subplot(2,2,1)
+plt.plot(x3_opt2.t,x3_opt2.x,'r')
+plt.subplot(2,2,2)
+plt.plot(x4_opt2.t,x4_opt2.x,'r')
+plt.subplot(2,2,3)
+plt.plot(x1_opt2.t,x1_opt2.x,'r')
+plt.subplot(2,2,4)
+plt.plot(x2_opt2.t,x2_opt2.x,'r')
+plt.show()</programlisting>
+
+    <para>The resulting plot should look like:</para>
+
+    <figure>
+      <title>State profiles corresponding to estimated values of a1, a2, a3
+      and a4</title>
+
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="images/qt_est2.svg" scalefit="1" width="60%"></imagedata>
+        </imageobject>
+      </mediaobject>
+    </figure>
+
+    <para>The red curves represent the case where a1, a2, a3 and a4 has been
+    estimated.</para>
+
+    <para>Take a moment to think about the results. Are there other parameters
+    that could have been selected for estimation?</para>
   </section>
 
   <section>

@@ -315,12 +315,9 @@ class Test_FMI:
         """
         This test the attribute debugging.
         """
-        self._bounce.set_debug_logging(True)
-        assert len(self._bounce.get_log()) == 0
-        self._bounce.set_real([0], [1.0])
-        assert len(self._bounce.get_log()) > 0 #Stored information in log
-        
-    
-        
-        
-        
+        model = FMIModel('bouncingBall.fmu',path_to_fmus)
+        model.initialize()
+        model.set_debug_logging(True) #Activates the logging
+        assert len(model.get_log()) == 0 #Get the current log (empty)
+        model.set_real([0],[1.0]) #Set value which generates log message
+        assert len(model.get_log()) > 0 
