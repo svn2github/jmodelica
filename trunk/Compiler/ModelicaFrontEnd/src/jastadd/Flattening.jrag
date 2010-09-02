@@ -931,6 +931,10 @@ aspect FlatExpressions {
 	public FExp FExp.flatten(FQName prefix) {
 		return null;
 	}
+	
+	public FIgnoredBuiltIn FIgnoredBuiltIn.flatten(FQName prefix) {
+		return new FIgnoredBuiltIn();
+	}
 
     public FIdUse FIdUse.flatten(FQName prefix) {
     	return (FIdUse)fullCopy();

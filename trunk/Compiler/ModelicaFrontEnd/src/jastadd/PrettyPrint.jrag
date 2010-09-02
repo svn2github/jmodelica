@@ -718,13 +718,15 @@ aspect FlattPrettyPrint {
 	    			p.toString(e, str, indent, o);
 	    			wroteEquation = false;
 	    		} else {
-	    			if (!wroteEquation) {
-	    				str.print(indent);
-	    				str.print("equation\n");
-	    				wroteEquation = true;
+	    			if (!e.isIgnored()) {
+		    			if (!wroteEquation) {
+		    				str.print(indent);
+		    				str.print("equation\n");
+		    				wroteEquation = true;
+		    			}
+		    			p.toString(e, str, nextInd, o);
+			    		str.print(";\n");
 	    			}
-	    			p.toString(e, str, nextInd, o);
-		    		str.print(";\n");
 	    		}
 	    	}
 	    }

@@ -310,7 +310,7 @@ model UnsupportedBuiltins5_Err
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.ErrorTestCase(
          name="UnsupportedBuiltins5_Err",
-         description="Ignored builtins can't have outputs'",
+         description="Ignored builtins can't have outputs",
          errorMessage="
 2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
@@ -327,6 +327,21 @@ Semantic error at line 314, column 3:
   (a, b) = assert(1);
   a = assert(1);
 end UnsupportedBuiltins5_Err;
+
+
+model UnsupportedBuiltins6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="UnsupportedBuiltins6",
+         description="Check that ignored built-ins aren't printed and doesn't cause exceptions",
+         flatModel="
+fclass ComplianceTests.UnsupportedBuiltins6
+end ComplianceTests.UnsupportedBuiltins6;
+")})));
+
+equation
+ assert(1);
+end UnsupportedBuiltins6;
 
 
 model StringConcat_ComplErr

@@ -1035,6 +1035,9 @@ aspect FlatNames {
     syn boolean FAbstractFunctionCall.isIgnored() = false;
     eq FIgnoredBuiltIn.isIgnored() = true;
     
+    syn boolean FAbstractEquation.isIgnored() = false;
+    eq FFunctionCallEquation.isIgnored() = getCall().isIgnored();
+    
     /**
      * \brief Add an equation to the first equation block.
      */

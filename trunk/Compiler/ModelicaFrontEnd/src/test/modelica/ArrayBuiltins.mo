@@ -910,6 +910,30 @@ Semantic error at line 1489, column 15:
 end SumExp5;
 
 
+model SumExp6
+	parameter Integer N = 3;
+	Real wbar[N];
+	Real dMdt[N + 1] ;
+equation
+	dMdt = 1:(N + 1);
+	for j in 1:N loop
+		wbar[j] = sum(dMdt[1:j+1]) + dMdt[j] / 2;
+	end for;
+end SumExp6;
+
+
+model SumExp7
+	parameter Integer N = 3;
+	Real wbar[N + 1];
+	Real dMdt[N] ;
+equation
+	dMdt = 1:N;
+	for j in 1:(N + 1) loop
+		wbar[j] = sum(dMdt[1:j-1]) + dMdt[j] / 2;
+	end for;
+end SumExp7;
+
+
 
 model Transpose1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
@@ -1904,4 +1928,4 @@ end ScalarSize2;
 
 
 
-end ArrayBuiltins;
+end ArrayBuiltins;
