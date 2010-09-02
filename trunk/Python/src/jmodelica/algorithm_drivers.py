@@ -139,6 +139,7 @@ class ResultBase:
         """ Set the name of the result file created in the algorithm.
         
         Parameters::
+        
             file_name --
                 The name of the result file.
             
@@ -292,6 +293,18 @@ class AssimuloFMIAlg(AlgorithmBase):
     def __init__(self,
                  model,
                  alg_args={}):
+        """ Create a simulation algorithm using Assimulo.
+        
+        Parameters::
+        
+            model -- 
+                fmi.FMIModel object representation of the model
+            alg_args -- 
+                All arguments for the algorithm. See _set_alg_args
+                function call for names and default values.
+        
+        """
+
         if isinstance(model,FMIModel):
             self.model = model
         else:
@@ -546,7 +559,6 @@ class AssimuloAlg(AlgorithmBase):
  
     def get_result(self):
         """ Write result to file, load result data and return AssimuloSimResult."""
-        
         write_data(self.simulator)
         # result file name
         resultfile = self.model.get_name()+'_result.txt'
