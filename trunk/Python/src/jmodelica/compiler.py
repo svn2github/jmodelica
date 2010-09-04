@@ -711,11 +711,23 @@ class ModelicaCompiler():
             arraylist = ex.__javaobject__.getProblems()
             itr = arraylist.iterator()
             
-            problems = "\n"
+            #problems = "\n"
+            #while itr.hasNext():
+            #    problems = problems + str(itr.next()) + "\n"
+
+            compliance_errors = []
+            errors = []
+            warnings = []
             while itr.hasNext():
-                problems = problems + str(itr.next()) + "\n"
-                
-            raise CompilerError(problems)
+                p = str(itr.next())
+                if p.count('Compliance error')>0:
+                    compliance_errors.append(p)
+                elif p.count('Warning')>0:
+                    warnings.append(p)
+                else:
+                    errors.append(p)
+                    
+            raise CompilerError(errors,compliance_errors,warnings)
         
         if ex.javaClass() is org.jmodelica.modelica.compiler.ModelicaClassNotFoundException:
             raise ModelicaClassNotFoundError(str(ex.__javaobject__.getClassName()))
@@ -895,7 +907,30 @@ class CompilerError(JError):
     
     """
 
-    pass
+    def __init__(self, errors, compliance_errors, warnings):
+        """ Create CompilerError with a list of error messages. """
+        self.compliance_errors = compliance_errors
+        self.warnings = warnings
+        self.errors = errors
+        
+    def __str__(self):
+        """ Print error messages.
+         
+        Override the general-purpose special method such that a string 
+        representation of an instance of this class will a string representation
+        of the error messages.
+        """
+    
+        problems = '\n' + str(len(self.errors)) + ' error(s), ' + str(len(self.compliance_errors)) + \
+                   ' compliance error(s) and ' + str(len(self.warnings)) + ' warning(s) found:\n\n' 
+        for e in self.errors:
+            problems = problems + e + "\n\n"
+        for ec in self.compliance_errors:
+            problems = problems + ec + "\n\n"
+        for w in self.warnings:
+            problems = problems + w + "\n\n"
+        
+        return problems
 
 class CcodeCompilationError(JError):
     """ Class for errors thrown when compiling a DLL file from c code."""
