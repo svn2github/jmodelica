@@ -1377,9 +1377,7 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
         """
 
         if model._n_sw.value>0 or model._n_sw_init.value>0:
-            raise Exception("The collocation optimization algorithm does \
-            not support models with events. Please consider using the \
-            noEvent() operator or rewriting the model.")
+            raise Exception("The collocation optimization algorithm does not support models with events. Please consider using the noEvent() operator or rewriting the model.")
         
         if len(hs) != n_e:
             raise jmi.JMIException("arg hs is not of length n_e")

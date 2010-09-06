@@ -4653,8 +4653,7 @@ class JMIModel(object):
             byref(start_time), byref(start_time_free), byref(final_time), 
             byref(final_time_free)) is not 0:
             raise JMIException("Getting the optimization interval failed.")
-        return start_time.value, start_time_free.value, final_time.value, 
-        final_time_free.value
+        return start_time.value, start_time_free.value, final_time.value, final_time_free.value
         
     def opt_set_p_opt_indices(self, n_p_opt, p_opt_indices):
         """ Specify optimization parameters for the model.
@@ -4712,13 +4711,13 @@ class JMIModel(object):
         n_eq_Cineq = ct.c_int()
         n_eq_Heq = ct.c_int()
         n_eq_Hineq = ct.c_int()
-        if self._dll.jmi_opt_get_sizes(self._jmi, byref(n_eq_J), 
-            byref(n_eq_L), byref(n_eq_Ffdp), byref(n_eq_Ceq), 
+        if self._dll.jmi_opt_get_sizes(self._jmi, byref(n_eq_J), \
+            byref(n_eq_L), byref(n_eq_Ffdp), byref(n_eq_Ceq), \
             byref(n_eq_Cineq), byref(n_eq_Heq), byref(n_eq_Hineq)) is not 0:
             raise JMIException("Getting the sizes of the optimization \
             functions failed.")
-        return n_eq_J.value, n_eq_L.value, n_eq_Ffdp.value, 
-        n_eq_Ceq.value, n_eq_Cineq.value, n_eq_Heq.value, 
+        return n_eq_J.value, n_eq_L.value, n_eq_Ffdp.value, \
+        n_eq_Ceq.value, n_eq_Cineq.value, n_eq_Heq.value, \
         n_eq_Hineq.value
 
     def opt_Ffdp(self, res):
