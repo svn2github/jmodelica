@@ -68,7 +68,7 @@ ENUMERATION = 4
 
 def _translate_xmlbool(xmlbool):
     """ Helper function which translates strings 'true' and 'false' 
-        to bool types.
+    to bool types.
     """
     if xmlbool == 'false':
         return False
@@ -80,7 +80,7 @@ def _translate_xmlbool(xmlbool):
             
 def _translate_variability(variability):
     """ Helper function which translates strings from the attribute 
-        variability to corresponding enumeration value.
+    variability to corresponding enumeration value.
     """
     if variability == "continuous":
         return CONTINUOUS
@@ -95,7 +95,7 @@ def _translate_variability(variability):
 
 def _translate_alias(alias):
     """ Helper function which translates strings from the attribute 
-        alias to corresponding enumeration value.
+    alias to corresponding enumeration value.
     """
     if alias == "noAlias":
         return NO_ALIAS
@@ -108,7 +108,7 @@ def _translate_alias(alias):
             
 def _translate_variable_category(category):
     """ Helper function which translates strings from the attribute 
-        variable category to corresponding enumeration value.
+    variable category to corresponding enumeration value.
     """
     if category == "algebraic":
         return ALGEBRAIC
@@ -130,7 +130,7 @@ def _translate_variable_category(category):
     
 def _translate_causality(causality):
     """ Helper function which translates strings from the attribute 
-        causality to corresponding enumeration value.
+    causality to corresponding enumeration value.
     """
     if causality == "internal":
         return INTERNAL
@@ -145,7 +145,7 @@ def _translate_causality(causality):
         
 def _translate_fundamental_type(type):
     """ Helper function which translates strings from the scalar variable 
-        fundamental type to corresponding enumeration value.
+    fundamental type to corresponding enumeration value.
     """
     if isinstance(type, Real):
         return REAL
@@ -162,11 +162,9 @@ def _translate_fundamental_type(type):
             str(type))
 
 def _parse_XML(filename, schemaname=''):
+    """ Parse and validate (optional) an XML file.
 
-    """ 
-    Parses and validates (optional) an XML file.
-
-    Parses an XML file and returns an object representing the parsed 
+    Parse an XML file and return an object representing the parsed 
     XML. If the optional parameter schemaname is set the XML file is 
     also validated against the XML Schema file provided before 
     parsing. 
@@ -179,6 +177,7 @@ def _parse_XML(filename, schemaname=''):
         schemaname --
             Name of XML Schema file including absolute or relative 
             path.
+            Default: Empty string.
     
     Exceptions::
        
@@ -189,7 +188,7 @@ def _parse_XML(filename, schemaname=''):
     
     Returns::
        
-        Reference to the ElementTree object containing the parsed XML.
+        A reference to the ElementTree object containing the parsed XML.
     
     """
 
@@ -226,6 +225,14 @@ class ModelDescription:
         Parse an XML document and create a full XML document object 
         representation. Validate against XML schema before parsing if 
         the parameter schemaname is set.
+        
+        Parameters::
+        
+            filename --
+                The name of the XML file to parse.
+            schemaname --
+                The name of the XSD file to validate against.
+                Default: Empty string (no validation).
          
         """
         # set up cache, parse XML file and obtain the root
@@ -252,7 +259,7 @@ class ModelDescription:
 
     def _parse_element_tree(self, root):
         """ Parse the XML element tree and build up internal data 
-            structure. 
+        structure. 
         """
         # model (root) attributes
         self._fill_attributes(root)
@@ -276,6 +283,7 @@ class ModelDescription:
         self._fill_optimization(root)
       
     def _fill_attributes(self, root):
+        """ Set the Model Description attributes. """
         # declare attributes with default values
         self._attributes = {'fmiVersion':'',
                            'modelName':'',
@@ -295,7 +303,7 @@ class ModelDescription:
             
     def _fill_unit_definitions(self, root):
         """ Create the unit definitions data structure and fill with data 
-            from the XML file.
+        from the XML file.
         """
         self._unit_definitions = []
         
@@ -308,7 +316,7 @@ class ModelDescription:
                 
     def _fill_type_definitions(self, root):
         """ Create the type definitions data structure and fill with data 
-            from the XML file.
+        from the XML file.
         """
         self._type_definitions = []
         
@@ -321,7 +329,7 @@ class ModelDescription:
                 
     def _fill_default_experiment(self, root):
         """ Create the default experiment data structure and fill with 
-            data from the XML file.
+        data from the XML file.
         """
         self._default_experiment = None
         
@@ -332,7 +340,7 @@ class ModelDescription:
     
     def _fill_vendor_annotations(self, root):
         """ Create the vendor annotations data structure and fill with 
-            data from the XML file.
+        data from the XML file.
         """
         self._vendor_annotations = []
         
@@ -345,7 +353,7 @@ class ModelDescription:
                 
     def _fill_model_variables(self, root):
         """ Create the model variables data structure (list with all 
-            scalar variables) and fill with data from the XML file.
+        scalar variables) and fill with data from the XML file.
         """
         self._model_variables = []
         self._model_variables_dict = {}
@@ -368,7 +376,7 @@ class ModelDescription:
                 
     def _fill_optimization(self, root):
         """ Create the optimization data structure (if any) and fill 
-            with data from the XML file.
+        with data from the XML file.
         """
         self._optimization = None
         
@@ -385,8 +393,7 @@ class ModelDescription:
             
     def _update_alias_defaults(self):
         """ Update all alias variable attributes variability and 
-            causality. They should get their value from the aliased 
-            variable.
+        causality. They should get their value from the aliased variable.
         """
         # create dict with no aliases and vref as key
         names_noalias = self.get_variable_names(include_alias=False)
@@ -407,24 +414,27 @@ class ModelDescription:
     def get_fmi_version(self):
         """ Get model attribute fmi version.
         
-        Returns:
-            fmi version attribute as string.
+        Returns::
+        
+            The FMI version attribute as string.
         """
         return self._attributes['fmiVersion']
         
     def get_model_name(self):
         """ Get model attribute name.
         
-        Returns:
-            model name as string.
+        Returns::
+        
+            The model name attribute value as string.
         """
         return self._attributes['modelName']
         
     def get_model_identifier(self):
         """ Get model attribute model identifier.
         
-        Returns:
-            model identifier as string.
+        Returns::
+        
+            The model identifier attribute value as string.
         """
         return self._attributes['modelIdentifier']
         
@@ -433,7 +443,7 @@ class ModelDescription:
         
         Returns::
         
-            GUID as string.
+            The GUID attribute value as string.
         """
         return self._attributes['guid']
         
@@ -442,7 +452,8 @@ class ModelDescription:
         
         Returns::
         
-            description as string (empty string if not specified in XML).
+            The description attribute value as string (empty string if 
+            not specified in XML).
         """
         return self._attributes['description']
     
@@ -451,7 +462,8 @@ class ModelDescription:
         
         Returns::
         
-            author as string (empty string if not specified in XML).
+            The author attribute value as string (empty string if not 
+            specified in XML).
         """
         return self._attributes['author']
         
@@ -460,7 +472,7 @@ class ModelDescription:
         
         Returns::
         
-            version as float if set, otherwise None.
+            The version attribute value as float if set, otherwise None.
         """
         if self._attributes['version'] == '':
             return None
@@ -471,7 +483,8 @@ class ModelDescription:
         
         Returns::
         
-            generation tool as string (empty string if not specified in XML).
+            The generation tool attribute value as string (empty string 
+            if not specified in XML).
         """
         return self._attributes['generationTool']
         
@@ -480,7 +493,8 @@ class ModelDescription:
         
         Returns::
         
-            date and time as string (empty string if not specified in XML).
+            The date and time attribute value as string (empty string if 
+            not specified in XML).
         """
         return self._attributes['generationDateAndTime']
         
@@ -489,7 +503,7 @@ class ModelDescription:
         
         Returns::
         
-            variable naming convention as string.
+            The variable naming convention attribute value as string.
         """
         return self._attributes['variableNamingConvention']
         
@@ -498,7 +512,8 @@ class ModelDescription:
         
         Returns::
         
-            number of continuous states as unsigned int.
+            The number of continuous states attribute value as unsigned 
+            int.
          """
         if self._attributes['numberOfContinuousStates'] == '':
             return None
@@ -509,7 +524,8 @@ class ModelDescription:
         
         Returns::
         
-            number of event indicators as unsigned int.
+            The number of event indicators attribute value as unsigned 
+            int.
          """
         if self._attributes['numberOfEventIndicators'] == '':
             return None
@@ -520,7 +536,7 @@ class ModelDescription:
         
         Returns::
         
-            List of unit definitions (type: BaseUnit)
+            A list of unit definitions (type: BaseUnit)
         """
         return self._unit_definitions
         
@@ -529,7 +545,7 @@ class ModelDescription:
         
         Returns::
         
-            List of type definitions (type: Type)
+            A list of type definitions (type: Type)
         """
         return self._type_definitions
         
@@ -538,7 +554,7 @@ class ModelDescription:
         
         Returns::
         
-            Object of type DefaultExperiment or None if not set.
+            An object of type DefaultExperiment or None if not set.
         """
         return self._default_experiment
         
@@ -547,7 +563,7 @@ class ModelDescription:
         
         Returns::
         
-            List of vendor annotations (type: Tool)
+            A list of vendor annotations (type: Tool)
         """
         return self._vendor_annotations
         
@@ -556,7 +572,7 @@ class ModelDescription:
         
         Returns::
         
-            List of all variables (type: ScalarVariable)
+            A list of all variables (type: ScalarVariable)
         """
         return self._model_variables
         
@@ -565,26 +581,32 @@ class ModelDescription:
         
         Returns::
         
-            Object of type Optimization if model is Optimica, otherwise 
-            None.
+            An object of type Optimization if model is Optimica, 
+            otherwise None.
         """
         return self._optimization
         
     # ========== Here begins the more complex functions ================
     
     def get_value_reference(self, variablename, ignore_cache=False):
-        """
-        Get the value reference given a variable name.
+        """ Get the value reference given a variable name.
         
         Parameters::
         
-            variablename -- the name of the variable
+            variablename -- 
+                The name of the variable
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
             
         Returns::
         
-            The value reference for the variable passed as argument. 
+            The value reference for the variable passed as argument.
         
-        Raises exception if variable was not found.
+        Raises::
+        
+            XMLEexception if variable was not found.
         """
         if not ignore_cache:
             return self.function_cache.get(self, 'get_value_reference', 
@@ -598,9 +620,24 @@ class ModelDescription:
                 found in model.")
         
     def is_alias(self, variablename, ignore_cache=False):
-        """ Return true is variable is an alias or negated alias.
+        """ Find out if variable is an alias or negated alias.
         
-        Raises exception if variable was not found.
+        Parameters::
+        
+            variablename --
+                The name of the variable.
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
+        
+        Returns::
+        
+            True if variable is alias or negated alias, False otherwise.
+        
+        Raises::
+        
+            XMLException if variable was not found.
         """
         if not ignore_cache:
             return self.function_cache.get(self, 'is_alias', 
@@ -614,9 +651,24 @@ class ModelDescription:
                 found in model.")
 
     def is_negated_alias(self, variablename, ignore_cache=False):
-        """ Return true is variable is a negated alias. 
+        """ Find out if variable is a negated alias or not.
         
-        Raises exception if variable was not found.
+        Parameters::
+        
+            variablename --
+                The name of the variable.
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
+                
+        Returns::
+        
+            True if variable is a negated alias, False otherwise.
+        
+        Raises::
+        
+            XMLException if variable was not found.
         """
         if not ignore_cache:
             return self.function_cache.get(self, 'is_negated_alias', 
@@ -630,9 +682,24 @@ class ModelDescription:
                 found in model.")
         
     def is_constant(self, variablename, ignore_cache=False):
-        """ Return true if variable is a constant and false if not. 
+        """ Find out if variable is a constant or not. 
         
-        Raises exception if variable was not found.
+        Parameters::
+        
+            variablename --
+                The name of the variable.
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
+                
+        Returns::
+        
+            True if variable is a constant, False otherwise.
+        
+        Raises::
+        
+            XMLException if variable was not found.
         """
         if not ignore_cache:
             return self.function_cache.get(self, 'is_constant', 
@@ -648,9 +715,22 @@ class ModelDescription:
     def get_data_type(self, variablename, ignore_cache=False):
         """ Get data type of variable. 
         
-        Returns: Variable type, REAL, INTEGER, BOOLEAN or STRING.
+        Parameters::
         
-        Raises exception if variable was not found.
+            variablename --
+                The name of the variable.
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
+        
+        Returns::
+        
+            The type of the variable, REAL, INTEGER, BOOLEAN or STRING.
+        
+        Raises::
+        
+            XMLException if variable was not found.
         """
         if not ignore_cache:
             return self.function_cache.get(self, 'get_data_type', 
@@ -665,13 +745,31 @@ class ModelDescription:
 
 
     def get_aliases_for_variable(self, variablename, ignore_cache=False):
-        """ Return list of all alias variables belonging to the aliased 
-            variable along with a list of booleans indicating whether the 
-            alias variable should be negated or not.
+        """ Get a list of all alias variables belonging to the aliased 
+        variable passed as argument to the function along with a list of 
+        booleans indicating whether the alias variable should be negated 
+        or not.
+        
+        Parameters::
             
-            Returns empty lists if variable has no alias variables.
+            variable --
+                The aliased variable.
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
             
-            Returns None if variable cannot be found in model.
+        Returns::
+                
+                A tuple of lists, the first containing the names of the 
+                alias variables, the second containing booleans for each 
+                alias variable indicating whether the variable is a 
+                negated variable or not.
+                
+                A tuple of empty lists if the variable has no alias 
+                variables. 
+                
+                None if variable cannot be found in model.
 
         """
         if not ignore_cache:
@@ -692,12 +790,23 @@ class ModelDescription:
         return None
 
     def get_variable_names(self, include_alias=True, ignore_cache=False):
-        """
-        Extract the names of the variables in a model.
+        """ Extract the names of the variables in a model.
+        
+        Parameters::
+        
+            include_alias --
+                If True, also include variables which are alias 
+                variables in the result. If False, only non-alias 
+                variables will be included in the result.
+                Default: True
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
 
         Returns::
         
-            List of tuples containing value references and names 
+            A list of tuples containing value references and names 
             respectively.
         """
         if not ignore_cache:
@@ -721,9 +830,16 @@ class ModelDescription:
     def get_variable_aliases(self, ignore_cache=False):
         """ Extract the alias data for each variable in the model.
         
+        Parameters::
+        
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
+        
         Returns::
         
-            List of tuples containing value references and alias data 
+            A list of tuples containing value references and alias data 
             respectively.
         """
         if not ignore_cache:
@@ -737,12 +853,23 @@ class ModelDescription:
 
     def get_variable_descriptions(self, include_alias=True, 
         ignore_cache=False):
-        """
-        Extract the descriptions of the variables in a model.
+        """ Extract the descriptions of the variables in a model.
+
+        Parameters::
+        
+            include_alias --
+                If True, also include variables which are alias 
+                variables in the result. If False, only non-alias 
+                variables will be included in the result.
+                Default: True
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
 
         Returns::
         
-            List of tuples containing value reference and description 
+            A list of tuples containing value reference and description 
             respectively.
         """
         if not ignore_cache:
@@ -766,9 +893,21 @@ class ModelDescription:
         ignore_cache=False):
         """ Get the variability of the variables in the model.
         
+        Parameters::
+        
+            include_alias --
+                If True, also include variables which are alias 
+                variables in the result. If False, only non-alias 
+                variables will be included in the result.
+                Default: True
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
+                
         Returns::
         
-            List of tuples containing value reference and variability 
+            A list of tuples containing value reference and variability 
             respectively.
         """
         if not ignore_cache:
@@ -792,9 +931,21 @@ class ModelDescription:
             ignore_cache=False):
         """ Get the nominal attribute of the variables in the model.
         
+        Parameters::
+        
+            include_alias --
+                If True, also include variables which are alias 
+                variables in the result. If False, only non-alias 
+                variables will be included in the result.
+                Default: True
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
+        
         Returns::
         
-            List of tuples containing value reference and value of 
+            A list of tuples containing value reference and value of 
             nominal attribute respectively.
         """
         if not ignore_cache:
@@ -826,9 +977,21 @@ class ModelDescription:
         ignore_cache=False):
         """ Get the start attributes of the variables in the model.
         
+        Parameters::
+        
+            include_alias --
+                If True, also include variables which are alias 
+                variables in the result. If False, only non-alias 
+                variables will be included in the result.
+                Default: True
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
+        
         Returns::
         
-            List of tuples containing value reference and value of 
+            A list of tuples containing value reference and value of 
             start attribute respectively.
         """
         if not ignore_cache:
@@ -854,9 +1017,21 @@ class ModelDescription:
         ignore_cache=False):
         """ Get all real variables in the model.
         
+        Parameters::
+        
+            include_alias --
+                If True, also include variables which are alias 
+                variables in the result. If False, only non-alias 
+                variables will be included in the result.
+                Default: True
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
+        
         Returns::
         
-            List of all ScalarVariables of type Real.
+            A list of all ScalarVariables of type Real.
         """
         if not ignore_cache:
             return self.function_cache.get(self, 
@@ -868,9 +1043,21 @@ class ModelDescription:
         ignore_cache=False):
         """ Get all string variables in the model.
         
+        Parameters::
+        
+            include_alias --
+                If True, also include variables which are alias 
+                variables in the result. If False, only non-alias 
+                variables will be included in the result.
+                Default: True
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
+        
         Returns::
         
-            List of all ScalarVariables of type String.
+            A list of all ScalarVariables of type String.
         """
         if not ignore_cache:
             return self.function_cache.get(self, 
@@ -882,9 +1069,21 @@ class ModelDescription:
         ignore_cache=False):
         """ Get all integer variables in the model.
         
+        Parameters::
+        
+            include_alias --
+                If True, also include variables which are alias 
+                variables in the result. If False, only non-alias 
+                variables will be included in the result.
+                Default: True
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
+        
         Returns::
         
-            List of all ScalarVariables of type Integer.
+            A list of all ScalarVariables of type Integer.
         """
         if not ignore_cache:
             return self.function_cache.get(self, 
@@ -896,9 +1095,21 @@ class ModelDescription:
         ignore_cache=False):
         """ Get all boolean variables in the model.
         
+        Parameters::
+        
+            include_alias --
+                If True, also include variables which are alias 
+                variables in the result. If False, only non-alias 
+                variables will be included in the result.
+                Default: True
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
+        
         Returns::
         
-            List of all ScalarVariables of type Boolean.
+            A list of all ScalarVariables of type Boolean.
         """
         if not ignore_cache:
             return self.function_cache.get(self, 
@@ -908,8 +1119,7 @@ class ModelDescription:
 
         
     def _get_all_variables(self, type, include_alias):
-        """ 
-        Helper function which returns all variables of type: 'type'.
+        """ Helper function which returns all variables of type: 'type'.
         """
         typevars = []
         scalarvariables = self.get_model_variables()
@@ -928,12 +1138,23 @@ class ModelDescription:
 
     def get_p_opt_variable_names(self, include_alias=True, 
         ignore_cache=False):
-        """ 
-        Get the names of all optimized independent parameters.
+        """ Get the names of all optimized independent parameters.
+        
+        Parameters::
+        
+            include_alias --
+                If True, also include variables which are alias 
+                variables in the result. If False, only non-alias 
+                variables will be included in the result.
+                Default: True
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
         
         Returns::
         
-            List of tuples containing value reference and name 
+            A list of tuples containing value reference and name 
             respectively.
             
         """
@@ -966,9 +1187,21 @@ class ModelDescription:
         """ 
         Get the names of all derivatives.
         
+        Parameters::
+        
+            include_alias --
+                If True, also include variables which are alias 
+                variables in the result. If False, only non-alias 
+                variables will be included in the result.
+                Default: True
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
+        
         Returns::
         
-            List of tuples containing value reference and name 
+            A list of tuples containing value reference and name 
             respectively.
             
         """
@@ -996,12 +1229,23 @@ class ModelDescription:
                     
     def get_x_variable_names(self, include_alias=True, 
         ignore_cache=False):
-        """ 
-        Get the names of all states.
+        """ Get the names of all states.
+        
+        Parameters::
+        
+            include_alias --
+                If True, also include variables which are alias 
+                variables in the result. If False, only non-alias 
+                variables will be included in the result.
+                Default: True
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
         
         Returns::
         
-            List of tuples containing value reference and name 
+            A list of tuples containing value reference and name 
             respectively.
             
         """
@@ -1029,12 +1273,23 @@ class ModelDescription:
                     
     def get_u_variable_names(self, include_alias=True, 
         ignore_cache=False):
-        """ 
-        Get the names of all inputs.
+        """ Get the names of all inputs.
+        
+        Parameters::
+        
+            include_alias --
+                If True, also include variables which are alias 
+                variables in the result. If False, only non-alias 
+                variables will be included in the result.
+                Default: True
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
         
         Returns::
         
-            List of tuples containing value reference and name 
+            A list of tuples containing value reference and name 
             respectively.
             
         """
@@ -1064,12 +1319,23 @@ class ModelDescription:
 
     def get_w_variable_names(self, include_alias=True, 
         ignore_cache=False):
-        """ 
-        Get the names of all algebraic variables.
+        """ Get the names of all algebraic variables.
+        
+        Parameters::
+        
+            include_alias --
+                If True, also include variables which are alias 
+                variables in the result. If False, only non-alias 
+                variables will be included in the result.
+                Default: True
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
         
         Returns::
         
-            List of tuples containing value reference and name 
+            A list of tuples containing value reference and name 
             respectively.
             
         """
@@ -1100,11 +1366,23 @@ class ModelDescription:
     def get_p_opt_start(self, include_alias=True, 
         ignore_cache=False):
         """ Get the start attributes of the independent paramenters 
-            (variability:parameter, free: true) in the model.
+        (variability:parameter, free: true) in the model.
+        
+        Parameters::
+        
+            include_alias --
+                If True, also include variables which are alias 
+                variables in the result. If False, only non-alias 
+                variables will be included in the result.
+                Default: True
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
         
         Returns::
         
-            List of tuples containing value reference and value of 
+            A list of tuples containing value reference and value of 
             start attribute respectively.
         """
         if not ignore_cache:
@@ -1134,11 +1412,23 @@ class ModelDescription:
     def get_dx_start(self, include_alias=True, 
         ignore_cache=False):
         """ Get the start attributes of the derivatives 
-            (variable_category:derivative) in the model.
+        (variable_category:derivative) in the model.
+        
+        Parameters::
+        
+            include_alias --
+                If True, also include variables which are alias 
+                variables in the result. If False, only non-alias 
+                variables will be included in the result.
+                Default: True
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
         
         Returns::
         
-            List of tuples containing value reference and value of 
+            A list of tuples containing value reference and value of 
             start attribute respectively.
         """
         if not ignore_cache:
@@ -1166,11 +1456,23 @@ class ModelDescription:
     def get_x_start(self, include_alias=True, 
         ignore_cache=False):
         """ Get the start attributes of the states 
-            (variable_category:state) in the model.
+        (variable_category:state) in the model.
+        
+        Parameters::
+        
+            include_alias --
+                If True, also include variables which are alias 
+                variables in the result. If False, only non-alias 
+                variables will be included in the result.
+                Default: True
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
         
         Returns::
         
-            List of tuples containing value reference and value of 
+            A list of tuples containing value reference and value of 
             start attribute respectively.
         """
         if not ignore_cache:
@@ -1198,11 +1500,23 @@ class ModelDescription:
     def get_u_start(self, include_alias=True, 
         ignore_cache=False):
         """ Get the start attributes of the inputs 
-            (variable_category:algebraic, causality: input) in the model.
+        (variable_category:algebraic, causality: input) in the model.
+        
+        Parameters::
+        
+            include_alias --
+                If True, also include variables which are alias 
+                variables in the result. If False, only non-alias 
+                variables will be included in the result.
+                Default: True
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
         
         Returns::
         
-            List of tuples containing value reference and value of 
+            A list of tuples containing value reference and value of 
             start attribute respectively.
         """
         if not ignore_cache:
@@ -1232,11 +1546,23 @@ class ModelDescription:
     def get_w_start(self, include_alias=True, 
         ignore_cache=False):
         """ Get the start attributes of the algebraic variables 
-            (variable_category:algebraic, causality: not input) in the model.
+        (variable_category:algebraic, causality: not input) in the model.
+        
+        Parameters::
+        
+            include_alias --
+                If True, also include variables which are alias 
+                variables in the result. If False, only non-alias 
+                variables will be included in the result.
+                Default: True
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
         
         Returns::
         
-            List of tuples containing value reference and value of 
+            A list of tuples containing value reference and value of 
             start attribute respectively.
         """
         if not ignore_cache:
@@ -1265,13 +1591,25 @@ class ModelDescription:
 
     def get_p_opt_initial_guess(self, include_alias=True, 
         ignore_cache=False):
-        """ 
-        Get value reference and initial guess attribute for all optimized 
-        independent parameters (variability:parameter, free: true).
+        """ Get value reference and initial guess attribute for all 
+        optimized independent parameters (variability:parameter, 
+        free: true).
+        
+        Parameters::
+        
+            include_alias --
+                If True, also include variables which are alias 
+                variables in the result. If False, only non-alias 
+                variables will be included in the result.
+                Default: True
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
         
         Returns::
         
-            List of tuples containing value reference and value of 
+            A list of tuples containing value reference and value of 
             initial guess attribute respectively.
         
         """
@@ -1308,11 +1646,23 @@ class ModelDescription:
     def get_dx_initial_guess(self, include_alias=True, 
         ignore_cache=False):
         """ Get the initial guess attribute of the derivatives 
-            (variable_category:derivative) in the model.
+        (variable_category:derivative) in the model.
+        
+        Parameters::
+        
+            include_alias --
+                If True, also include variables which are alias 
+                variables in the result. If False, only non-alias 
+                variables will be included in the result.
+                Default: True
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
         
         Returns::
         
-            List of tuples containing value reference and value of 
+            A list of tuples containing value reference and value of 
             initial guess attribute respectively.
         """
         if not ignore_cache:
@@ -1348,11 +1698,23 @@ class ModelDescription:
     def get_x_initial_guess(self, include_alias=True, 
         ignore_cache=False):
         """ Get the initial guess attributes of the states 
-            (variable_category:state) in the model.
+        (variable_category:state) in the model.
+        
+        Parameters::
+        
+            include_alias --
+                If True, also include variables which are alias 
+                variables in the result. If False, only non-alias 
+                variables will be included in the result.
+                Default: True
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
         
         Returns::
         
-            List of tuples containing value reference and value of 
+            A list of tuples containing value reference and value of 
             initial guess attribute respectively.
         """
         if not ignore_cache:
@@ -1388,11 +1750,23 @@ class ModelDescription:
     def get_u_initial_guess(self, include_alias=True, 
         ignore_cache=False):
         """ Get the initial guess attributes of the inputs 
-            (variable_category:algebraic, causality: input) in the model.
+        (variable_category:algebraic, causality: input) in the model.
+        
+        Parameters::
+        
+            include_alias --
+                If True, also include variables which are alias 
+                variables in the result. If False, only non-alias 
+                variables will be included in the result.
+                Default: True
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
         
         Returns::
         
-            List of tuples containing value reference and value of 
+            A list of tuples containing value reference and value of 
             initial guess attribute respectively.
         """
         if not ignore_cache:
@@ -1430,11 +1804,23 @@ class ModelDescription:
     def get_w_initial_guess(self, include_alias=True, 
         ignore_cache=False):
         """ Get the initial guess attributes of the algebraic variables 
-            (variable_category:algebraic, causality: not input) in the model.
+        (variable_category:algebraic, causality: not input) in the model.
+        
+        Parameters::
+        
+            include_alias --
+                If True, also include variables which are alias 
+                variables in the result. If False, only non-alias 
+                variables will be included in the result.
+                Default: True
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
         
         Returns::
         
-            List of tuples containing value reference and value of 
+            A list of tuples containing value reference and value of 
             initial guess attribute respectively.
         """
         if not ignore_cache:
@@ -1471,13 +1857,24 @@ class ModelDescription:
 
     def get_p_opt_min(self, include_alias=True, 
         ignore_cache=False):
-        """ 
-        Get value reference and min attribute for all optimized 
+        """ Get value reference and min attribute for all optimized 
         independent parameters (variability:parameter, free: true).
+        
+        Parameters::
+        
+            include_alias --
+                If True, also include variables which are alias 
+                variables in the result. If False, only non-alias 
+                variables will be included in the result.
+                Default: True
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
         
         Returns::
         
-            List of tuples containing value reference and value of 
+            A list of tuples containing value reference and value of 
             min attribute respectively.
         
         """
@@ -1514,11 +1911,23 @@ class ModelDescription:
     def get_dx_min(self, include_alias=True, 
         ignore_cache=False):
         """ Get the min attribute of the derivatives 
-            (variable_category:derivative) in the model.
+        (variable_category:derivative) in the model.
+        
+        Parameters::
+        
+            include_alias --
+                If True, also include variables which are alias 
+                variables in the result. If False, only non-alias 
+                variables will be included in the result.
+                Default: True
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
         
         Returns::
         
-            List of tuples containing value reference and value of 
+            A list of tuples containing value reference and value of 
             min attribute respectively.
         """
         if not ignore_cache:
@@ -1554,11 +1963,23 @@ class ModelDescription:
     def get_x_min(self, include_alias=True, 
         ignore_cache=False):
         """ Get the min attributes of the states 
-            (variable_category:state) in the model.
+        (variable_category:state) in the model.
+        
+        Parameters::
+        
+            include_alias --
+                If True, also include variables which are alias 
+                variables in the result. If False, only non-alias 
+                variables will be included in the result.
+                Default: True
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
         
         Returns::
         
-            List of tuples containing value reference and value of 
+            A list of tuples containing value reference and value of 
             min attribute respectively.
         """
         if not ignore_cache:
@@ -1594,11 +2015,23 @@ class ModelDescription:
     def get_u_min(self, include_alias=True, 
         ignore_cache=False):
         """ Get the min attributes of the inputs 
-            (variable_category:algebraic, causality: input) in the model.
+        (variable_category:algebraic, causality: input) in the model.
+        
+        Parameters::
+        
+            include_alias --
+                If True, also include variables which are alias 
+                variables in the result. If False, only non-alias 
+                variables will be included in the result.
+                Default: True
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
         
         Returns::
         
-            List of tuples containing value reference and value of 
+            A list of tuples containing value reference and value of 
             min attribute respectively.
         """
         if not ignore_cache:
@@ -1636,11 +2069,23 @@ class ModelDescription:
     def get_w_min(self, include_alias=True, 
         ignore_cache=False):
         """ Get the min attributes of the algebraic variables 
-            (variable_category:algebraic, causality: not input) in the model.
+        (variable_category:algebraic, causality: not input) in the model.
+        
+        Parameters::
+        
+            include_alias --
+                If True, also include variables which are alias 
+                variables in the result. If False, only non-alias 
+                variables will be included in the result.
+                Default: True
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
         
         Returns::
         
-            List of tuples containing value reference and value of 
+            A list of tuples containing value reference and value of 
             min attribute respectively.
         """
         if not ignore_cache:
@@ -1677,13 +2122,24 @@ class ModelDescription:
 
     def get_p_opt_max(self, include_alias=True, 
         ignore_cache=False):
-        """ 
-        Get value reference and max attribute for all optimized 
+        """ Get value reference and max attribute for all optimized 
         independent parameters (variability:parameter, free: true).
+        
+        Parameters::
+        
+            include_alias --
+                If True, also include variables which are alias 
+                variables in the result. If False, only non-alias 
+                variables will be included in the result.
+                Default: True
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
         
         Returns::
         
-            List of tuples containing value reference and value of 
+            A list of tuples containing value reference and value of 
             max attribute respectively.
         
         """
@@ -1722,9 +2178,21 @@ class ModelDescription:
         """ Get the max attribute of the derivatives 
             (variable_category:derivative) in the model.
         
+        Parameters::
+        
+            include_alias --
+                If True, also include variables which are alias 
+                variables in the result. If False, only non-alias 
+                variables will be included in the result.
+                Default: True
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
+        
         Returns::
         
-            List of tuples containing value reference and value of 
+            A list of tuples containing value reference and value of 
             max attribute respectively.
         """
         if not ignore_cache:
@@ -1760,11 +2228,23 @@ class ModelDescription:
     def get_x_max(self, include_alias=True, 
         ignore_cache=False):
         """ Get the max attributes of the states 
-            (variable_category:state) in the model.
+        (variable_category:state) in the model.
+        
+        Parameters::
+        
+            include_alias --
+                If True, also include variables which are alias 
+                variables in the result. If False, only non-alias 
+                variables will be included in the result.
+                Default: True
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
         
         Returns::
         
-            List of tuples containing value reference and value of 
+            A list of tuples containing value reference and value of 
             max attribute respectively.
         """
         if not ignore_cache:
@@ -1800,11 +2280,23 @@ class ModelDescription:
     def get_u_max(self, include_alias=True, 
         ignore_cache=False):
         """ Get the max attributes of the inputs 
-            (variable_category:algebraic, causality: input) in the model.
+        (variable_category:algebraic, causality: input) in the model.
+        
+        Parameters::
+        
+            include_alias --
+                If True, also include variables which are alias 
+                variables in the result. If False, only non-alias 
+                variables will be included in the result.
+                Default: True
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
         
         Returns::
         
-            List of tuples containing value reference and value of 
+            A list of tuples containing value reference and value of 
             max attribute respectively.
         """
         if not ignore_cache:
@@ -1839,14 +2331,25 @@ class ModelDescription:
                     max_values.append(ftype.get_max())
         return zip(tuple(vrefs), tuple(max_values))
 
-    def get_w_max(self, include_alias=True, 
-        ignore_cache=False):
+    def get_w_max(self, include_alias=True, ignore_cache=False):
         """ Get the max attributes of the algebraic variables 
-            (variable_category:algebraic, causality: not input) in the model.
+        (variable_category:algebraic, causality: not input) in the model.
+        
+        Parameters::
+        
+            include_alias --
+                If True, also include variables which are alias 
+                variables in the result. If False, only non-alias 
+                variables will be included in the result.
+                Default: True
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
         
         Returns::
         
-            List of tuples containing value reference and value of 
+            A list of tuples containing value reference and value of 
             max attribute respectively.
         """
         if not ignore_cache:
@@ -1882,14 +2385,25 @@ class ModelDescription:
         return zip(tuple(vrefs), tuple(max_values))
 
     def get_p_opt_islinear(self, include_alias=True, ignore_cache=False):
-        """ 
-        Get value reference and boolean value describing if variable 
+        """ Get value reference and boolean value describing if variable 
         appears linearly in all equations and constraints for all optimized 
         independent parameters.
         
+        Parameters::
+        
+            include_alias --
+                If True, also include variables which are alias 
+                variables in the result. If False, only non-alias 
+                variables will be included in the result.
+                Default: True
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
+        
         Returns::
         
-            List of tuples containing value reference and value of 
+            A list of tuples containing value reference and value of 
             is linear element respectively.
 
         """
@@ -1915,16 +2429,26 @@ class ModelDescription:
                     is_linear.append(sv.get_is_linear())
         return zip(tuple(vrefs), tuple(is_linear))
 
-    def get_dx_islinear(self, include_alias=True, 
-        ignore_cache=False):
-        """ 
-        Get value reference and boolean value describing if variable 
+    def get_dx_islinear(self, include_alias=True, ignore_cache=False):
+        """ Get value reference and boolean value describing if variable 
         appears linearly in all equations and constraints for all 
         derivatives (variable_category:derivative) in the model.
         
+        Parameters::
+        
+            include_alias --
+                If True, also include variables which are alias 
+                variables in the result. If False, only non-alias 
+                variables will be included in the result.
+                Default: True
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
+        
         Returns::
         
-            List of tuples containing value reference and value of 
+            A list of tuples containing value reference and value of 
             is linear element respectively.
         """
         if not ignore_cache:
@@ -1949,16 +2473,26 @@ class ModelDescription:
                     is_linear.append(sv.get_is_linear())
         return zip(tuple(vrefs), tuple(is_linear))
 
-    def get_x_islinear(self, include_alias=True, 
-        ignore_cache=False):
-        """ 
-        Get value reference and boolean value describing if variable 
+    def get_x_islinear(self, include_alias=True, ignore_cache=False):
+        """ Get value reference and boolean value describing if variable 
         appears linearly in all equations and constraints for all states 
         (variable_category:state) in the model.
         
+        Parameters::
+        
+            include_alias --
+                If True, also include variables which are alias 
+                variables in the result. If False, only non-alias 
+                variables will be included in the result.
+                Default: True
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
+        
         Returns::
         
-            List of tuples containing value reference and value of 
+            A list of tuples containing value reference and value of 
             is linear element respectively.
         """
         if not ignore_cache:
@@ -1983,16 +2517,26 @@ class ModelDescription:
                     is_linear.append(sv.get_is_linear())
         return zip(tuple(vrefs), tuple(is_linear))
 
-    def get_u_islinear(self, include_alias=True, 
-        ignore_cache=False):
-        """ 
-        Get value reference and boolean value describing if variable 
+    def get_u_islinear(self, include_alias=True, ignore_cache=False):
+        """ Get value reference and boolean value describing if variable 
         appears linearly in all equations and constraints for all inputs 
         (variable_category:algebraic, causality: input) in the model.
         
+        Parameters::
+        
+            include_alias --
+                If True, also include variables which are alias 
+                variables in the result. If False, only non-alias 
+                variables will be included in the result.
+                Default: True
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
+        
         Returns::
         
-            List of tuples containing value reference and value of 
+            A list of tuples containing value reference and value of 
             is linear element respectively.
         """
         if not ignore_cache:
@@ -2019,17 +2563,27 @@ class ModelDescription:
                     is_linear.append(sv.get_is_linear())
         return zip(tuple(vrefs), tuple(is_linear))
 
-    def get_w_islinear(self, include_alias=True, 
-        ignore_cache=False):
-        """ 
-        Get value reference and boolean value describing if variable 
+    def get_w_islinear(self, include_alias=True, ignore_cache=False):
+        """ Get value reference and boolean value describing if variable 
         appears linearly in all equations and constraints for all 
         algebraic variables (variable_category:algebraic, 
         causality: not input) in the model.
         
+        Parameters::
+        
+            include_alias --
+                If True, also include variables which are alias 
+                variables in the result. If False, only non-alias 
+                variables will be included in the result.
+                Default: True
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
+        
         Returns::
         
-            List of tuples containing value reference and value of 
+            A list of tuples containing value reference and value of 
             is linear element respectively.
         """
         if not ignore_cache:
@@ -2058,13 +2612,24 @@ class ModelDescription:
         
     def get_dx_linear_timed_variables(self, include_alias=True, 
         ignore_cache=False):
-        """ 
-        Get value reference and linear timed variables for all derivatives 
+        """ Get value reference and linear timed variables for all derivatives 
         (variable_category:derivative) in the model.
+
+        Parameters::
+        
+            include_alias --
+                If True, also include variables which are alias 
+                variables in the result. If False, only non-alias 
+                variables will be included in the result.
+                Default: True
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
 
         Returns::
         
-            List of tuples with value reference and list of linear time 
+            A list of tuples with value reference and list of linear time 
             variables respectively. 
         
         """
@@ -2101,13 +2666,24 @@ class ModelDescription:
         
     def get_x_linear_timed_variables(self, include_alias=True, 
         ignore_cache=False):
-        """ 
-        Get value reference and linear timed variables for all states 
+        """ Get value reference and linear timed variables for all states 
         (variable_category:state) in the model.
 
+        Parameters::
+        
+            include_alias --
+                If True, also include variables which are alias 
+                variables in the result. If False, only non-alias 
+                variables will be included in the result.
+                Default: True
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
+    
         Returns::
         
-            List of tuples with value reference and list of linear time 
+            A list of tuples with value reference and list of linear time 
             variables respectively. 
         
         """
@@ -2144,13 +2720,24 @@ class ModelDescription:
 
     def get_u_linear_timed_variables(self, include_alias=True, 
         ignore_cache=False):
-        """ 
-        Get value reference and linear timed variables for all inputs 
+        """ Get value reference and linear timed variables for all inputs 
         (variable_category:algebraic, causality: input) in the model.
+
+        Parameters::
+        
+            include_alias --
+                If True, also include variables which are alias 
+                variables in the result. If False, only non-alias 
+                variables will be included in the result.
+                Default: True
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
 
         Returns::
         
-            List of tuples with value reference and list of linear time 
+            A list of tuples with value reference and list of linear time 
             variables respectively. 
         
         """
@@ -2189,14 +2776,25 @@ class ModelDescription:
 
     def get_w_linear_timed_variables(self, include_alias=True, 
         ignore_cache=False):
-        """ 
-        Get value reference and linear timed variables for all algebraic 
+        """ Get value reference and linear timed variables for all algebraic 
         variables (variable_category:algebraic, causality: not input) in 
         the model.
 
+        Parameters::
+        
+            include_alias --
+                If True, also include variables which are alias 
+                variables in the result. If False, only non-alias 
+                variables will be included in the result.
+                Default: True
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
+
         Returns::
         
-            List of tuples with value reference and list of linear time 
+            A list of tuples with value reference and list of linear time 
             variables respectively. 
         
         """
@@ -2234,12 +2832,18 @@ class ModelDescription:
         return tot_timepoints
 
     def get_p_opt_value_reference(self, ignore_cache=False):
-        """ 
-        Get value reference for all optimized independent parameters.
+        """ Get value reference for all optimized independent parameters.
+        
+        Parameters::
+        
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
         
         Returns::
         
-            List of value reference for all optimized independent 
+            A list of value reference for all optimized independent 
             parameters.
             
         """
@@ -2256,9 +2860,23 @@ class ModelDescription:
         return vrefs
 
     def get_external_libraries(self, ignore_cache=False):
-        """ Get all external library entries and return as list. """
+        """ Get all external library entries. 
+        
+        Parameters::
+
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
+                
+        Returns::
+        
+            The external library entries in a list.
+        
+        """
         if not ignore_cache:
-            return self.function_cache.get(self, 'get_external_libraries', None)
+            return self.function_cache.get(self, 
+            'get_external_libraries', None)
         
         libraries = []
         
@@ -2272,9 +2890,22 @@ class ModelDescription:
         return libraries
         
     def get_external_includes(self, ignore_cache=False):
-        """Get all external file includes and return as list."""
+        """Get all external file includes.
+        
+        Parameters::
+        
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
+                
+        Returns::
+        
+            The external file includes in a list.
+        """
         if not ignore_cache:
-            return self.function_cache.get(self, 'get_external_includes', None)
+            return self.function_cache.get(self, 
+            'get_external_includes', None)
         
         includes = []
         
@@ -2288,7 +2919,19 @@ class ModelDescription:
         return includes
         
     def get_external_lib_dirs(self, ignore_cache=False):
-        """ Get all external library directories and return as list. """
+        """ Get all external library directories. 
+        
+        Parameters::
+        
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
+                
+        Returns::
+        
+            The external library directories in a list.
+        """
         if not ignore_cache:
             return self.function_cache.get(self, 'get_external_lib_dirs', None)
             
@@ -2304,7 +2947,19 @@ class ModelDescription:
         return libdirs
         
     def get_external_incl_dirs(self, ignore_cache=False):
-        """ Get all external include directories and return as list. """
+        """ Get all external include directories. 
+        
+        Parameters::
+        
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
+                
+        Returns::
+        
+            The external include directories in a list.
+        """
         if not ignore_cache:
             return self.function_cache.get(self, 'get_external_incl_dirs', None)
             
@@ -2320,7 +2975,20 @@ class ModelDescription:
         return includedirs
 
     def get_opt_starttime(self, ignore_cache=False):
-        """ Get the optimization interval start time. """
+        """ Get the optimization interval start time. 
+        
+        Parameters::
+        
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
+        
+        Returns::
+        
+            The optimization interval start time. None if there is no 
+            optimization part.
+        """
         if not ignore_cache:
             return self.function_cache.get(self, 'get_opt_starttime', 
                 None)
@@ -2333,7 +3001,20 @@ class ModelDescription:
         return optimization.get_interval_start_time().get_value()
 
     def get_opt_finaltime(self, ignore_cache=False):
-        """ Get the optimization interval final time. """
+        """ Get the optimization interval final time. 
+        
+        Parameters::
+
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
+                
+        Returns::
+        
+            The optimization interval final time. None if there is no 
+            optimization part.
+        """
         if not ignore_cache:
             return self.function_cache.get(self, 'get_opt_finaltime', 
                 None)
@@ -2346,7 +3027,20 @@ class ModelDescription:
         return optimization.get_interval_final_time().get_value()
         
     def get_opt_starttime_free(self, ignore_cache=False):
-        """ Get the optimization interval start time free attribute. """
+        """ Get the optimization interval start time free attribute. 
+        
+        Parameters::
+
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
+                
+        Returns::
+        
+            The optimization interval start time free attribute. None if 
+            there is no optimization part.
+        """
         if not ignore_cache:
             return self.function_cache.get(self, 'get_opt_starttime_free', 
                 None)
@@ -2359,7 +3053,20 @@ class ModelDescription:
         return optimization.get_interval_start_time().get_free()
 
     def get_opt_finaltime_free(self, ignore_cache=False):
-        """ Get the optimization interval final time free attribute. """
+        """ Get the optimization interval final time free attribute. 
+        
+        Parameters::
+
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
+                
+        Returns::
+        
+            The optimization interval final time free attribute. None if 
+            there is no optimization part.
+        """
         if not ignore_cache:
             return self.function_cache.get(self, 'get_opt_finaltime_free', 
                 None)
@@ -2372,7 +3079,20 @@ class ModelDescription:
         return optimization.get_interval_final_time().get_free()
         
     def get_opt_timepoints(self, ignore_cache=False):
-        """ Get the optimization time points. """
+        """ Get the optimization time points. 
+        
+        Parameters::
+
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
+                
+        Returns::
+        
+            The optimization time points. None if there is no 
+            optimization part.
+        """
         if not ignore_cache:
             return self.function_cache.get(self, 'get_opt_timepoints', 
                 None)
@@ -2406,17 +3126,19 @@ class BaseUnit:
             
         # set list of display units
         self._display_unit_definitions = [];
-        # fill list by calling constructor for DisplayUnitDefinition for each element
+        # fill list by calling constructor for DisplayUnitDefinition for 
+        # each element
         e_unitdefs = element.getchildren()
         for e_unitdef in e_unitdefs:
-            self._display_unit_definitions.append(DisplayUnitDefinition(e_unitdef))
+            self._display_unit_definitions.append(
+                DisplayUnitDefinition(e_unitdef))
             
     def get_unit(self):
         """ Get the BaseUnit attribute unit.
         
         Returns::
         
-            unit as string.
+            The unit attribute value as string.
         """
         return self._attributes['unit']
             
@@ -2425,7 +3147,7 @@ class BaseUnit:
         
         Returns::
         
-            List of all display units (type: DisplayUnitDefinition)
+            A list of all display units (type: DisplayUnitDefinition)
          """
         return self._display_unit_definitions
         
@@ -2435,8 +3157,8 @@ class DisplayUnitDefinition:
     """
     def __init__(self, element):
         """ Constructor which takes an XML element object describing the 
-            DisplayUnitDefinition element and creates a 
-            DisplayUnitDefinition object copy.
+        DisplayUnitDefinition element and creates a DisplayUnitDefinition 
+        object copy.
         """
         # attributes
         self._attributes = {'displayUnit':'',
@@ -2451,7 +3173,7 @@ class DisplayUnitDefinition:
         
         Returns::
         
-            display unit as string.
+            The display unit attribute value as string.
         """
         return self._attributes['displayUnit']
         
@@ -2460,7 +3182,7 @@ class DisplayUnitDefinition:
         
         Returns::
         
-            gain as float (default: 1).
+            The gain attribute value as float (default: 1).
         """
         return float(self._attributes['gain'])
         
@@ -2469,7 +3191,7 @@ class DisplayUnitDefinition:
         
         Returns::
         
-            offset as float (default: 0).
+            The offset attribute value as float (default: 0).
         """
         return float(self._attributes['offset'])
         
@@ -2478,7 +3200,7 @@ class Type:
     """
     def __init__(self, element):
         """ Constructor which takes an XML element object describing the 
-            Type element and creates a Type object copy.
+        Type element and creates a Type object copy.
         """
         # attributes
         self._attributes = {'name':'',
@@ -2506,7 +3228,7 @@ class Type:
         
         Returns::
         
-            name as string.
+            The name attribute value as string.
         """
         return self._attributes['name']
         
@@ -2515,18 +3237,19 @@ class Type:
         
         Returns::
         
-            description as string (empty string if not set).
+            The description attribute value as string (empty string if 
+            not set).
         """
         return self._attributes['description']
         
     def get_fundamental_type(self):
         """ Get the type of the type defined. (Real, Integer, Boolean, 
-            String or Enumeration Type)
+        String or Enumeration Type)
         
         Returns::
         
-                Object of type RealType, IntegerType, BooleanType, 
-                StringType or EnumerationType.
+            An object of type RealType, IntegerType, BooleanType, 
+            StringType or EnumerationType.
         """
         return self._fundamentaltype
         
@@ -2535,7 +3258,7 @@ class RealType:
     """
     def __init__(self, element):
         """ Constructor which takes an XML element object describing the 
-            RealType element and creates a RealType object copy.
+        RealType element and creates a RealType object copy.
         """
         # attributes
         self._attributes = {'quantity':'',
@@ -2554,7 +3277,8 @@ class RealType:
         
         Returns::
         
-            quantity as string (empty string if not set).
+            The quantity attribute value as string (empty string if not 
+            set).
         """
         return self._attributes['quantity']
     
@@ -2563,7 +3287,7 @@ class RealType:
         
         Returns::
         
-            unit as string (empty string if not set).
+            The unit attribute value as string (empty string if not set).
         """
         return self._attributes['unit']
         
@@ -2572,7 +3296,8 @@ class RealType:
         
         Returns::
         
-            display unit as string (empty string if not set).
+            The display unit attribute value as string (empty string if 
+            not set).
         """
         return self._attributes['displayUnit']
         
@@ -2581,7 +3306,8 @@ class RealType:
         
         Returns::
         
-            relative quantity as bool (default: false).
+            The relative quantity attribute value as bool (default: 
+            false).
         """
         return _translate_xmlbool(self._attributes['relativeQuantity'])
     
@@ -2590,7 +3316,7 @@ class RealType:
         
         Returns::
         
-            min as float (None if not set).
+            The min attribute value as float (None if not set).
         """
         if self._attributes['min'] == '':
             return None
@@ -2601,7 +3327,7 @@ class RealType:
         
         Returns::
         
-            max as float (None if not set).
+            The max attribute value as float (None if not set).
         """
         if self._attributes['max'] == '':
             return None
@@ -2612,7 +3338,7 @@ class RealType:
         
         Returns::
         
-            nominal as float (None if not set).
+            The nominal attribute value as float (None if not set).
         """
         if self._attributes['nominal'] == '':
             return None
@@ -2624,7 +3350,7 @@ class IntegerType:
     """
     def __init__(self, element):
         """ Constructor which takes an XML element object describing the 
-            IntegerType element and creates a IntegerType object copy.
+        IntegerType element and creates a IntegerType object copy.
         """
         self._attributes = {'quantity':'',
                             'min':'',
@@ -2635,7 +3361,8 @@ class IntegerType:
         
         Returns::
         
-            quantity as string (empty string if not set).
+            The quantity attribute value as string (empty string if not 
+            set).
         """
         return self._attributes['quantity']
         
@@ -2644,7 +3371,7 @@ class IntegerType:
         
         Returns::
         
-            min as int (None if not set).
+            The min attribute value as int (None if not set).
         """
         if self._attributes['min'] == '':
             return None
@@ -2655,7 +3382,7 @@ class IntegerType:
         
         Returns::
         
-            max as int (None if not set).
+            The max attribute value as int (None if not set).
         """
         if self._attributes['max'] == '':
             return None
@@ -2681,8 +3408,8 @@ class EnumerationType:
     """
     def __init__(self, element):
         """ Constructor which takes an XML element object describing the 
-            EnumerationType element and creates a EnumerationType object 
-            copy.
+        EnumerationType element and creates a EnumerationType object 
+        copy.
         """
         self._attributes = {'quantity':'',
                             'min':'',
@@ -2702,7 +3429,8 @@ class EnumerationType:
         
         Returns::
         
-            quantity as string (empty string if not set).
+            The quantity attribute value as string (empty string if not 
+            set).
         """
         return self._attributes['quantity']
         
@@ -2711,7 +3439,7 @@ class EnumerationType:
         
         Returns::
         
-            min as int (None if not set).
+            The min attribute value as int (None if not set).
         """
         if self._attributes['min'] == '':
             return None
@@ -2722,18 +3450,18 @@ class EnumerationType:
         
         Returns::
         
-            max as int (None if not set).
+            The max attribute value as int (None if not set).
         """
         if self._attributes['max'] == '':
             return None
         return int(self._attributes['max'])
         
     def get_items(self):
-        """ Get items defined in the enumeration.
+        """ Get the items defined in the enumeration.
         
         Returns::
         
-            List of all items (type: Item)
+            A list of all items (type: Item)
         """
         return self._items
 
@@ -2743,7 +3471,7 @@ class Item:
     """
     def __init__(self, element):
         """ Constructor which takes an XML element object describing the 
-            Item element and creates a Item object copy.
+        Item element and creates a Item object copy.
         """
         self._attributes = {'name':'',
                             'description':''}
@@ -2756,7 +3484,7 @@ class Item:
         
         Returns::
         
-            name as string.
+            The name attribute value as string.
         """
         return self._attributes['name']
         
@@ -2765,7 +3493,7 @@ class Item:
         
         Returns::
         
-            description as string.
+            The description attribute value as string.
         """
         return self._attributes['description']
 
@@ -2775,8 +3503,8 @@ class DefaultExperiment:
     """
     def __init__(self, element):
         """ Constructor which takes an XML element object describing the 
-            DefaultExperiment element and creates a DefaultExperiment 
-            object copy.
+        DefaultExperiment element and creates a DefaultExperiment 
+        object copy.
         """
         self._attributes = {'startTime':'',
                             'stopTime':'',
@@ -2790,7 +3518,7 @@ class DefaultExperiment:
         
         Returns::
         
-            start time as float (None if not set).
+            The start time attribute value as float (None if not set).
         """
         if self._attributes['startTime'] == '':
             return None
@@ -2801,7 +3529,7 @@ class DefaultExperiment:
         
         Returns::
         
-            stop time as float (None if not set).
+            The stop time attribute value as float (None if not set).
         """
         if self._attributes['stopTime'] == '':
             return None
@@ -2812,7 +3540,7 @@ class DefaultExperiment:
         
         Returns::
         
-            tolerance as float (None if not set).
+            The tolerance attribute value as float (None if not set).
         """
         if self._attributes['tolerance'] == '':
             return None
@@ -2824,7 +3552,7 @@ class Tool:
     """
     def __init__(self, element):
         """ Constructor which takes an XML element object describing the 
-            Tool element and creates a Tool object copy.
+        Tool element and creates a Tool object copy.
         """
         self._attributes = {'name':''}
         
@@ -2842,7 +3570,7 @@ class Tool:
         
         Returns::
         
-            name as string.
+            The name attribute value as string.
         """
         return self._attributes['name']
 
@@ -2851,7 +3579,7 @@ class Tool:
         
         Returns::
         
-            List of all annotations (type: Annotation)
+            A list of all annotations (type: Annotation)
         """
         return self._annotations
         
@@ -2861,7 +3589,7 @@ class Annotation:
     """
     def __init__(self, element):
         """ Constructor which takes an XML element object describing the 
-            Annotation element and creates a Annotation object copy.
+        Annotation element and creates a Annotation object copy.
         """
         self._attributes = {'name':'',
                             'value':''}
@@ -2874,7 +3602,7 @@ class Annotation:
         
         Returns::
         
-            name as string.
+            The name attribute value as string.
         """
         return self._attributes['name']
         
@@ -2883,7 +3611,7 @@ class Annotation:
         
         Returns::
         
-            value as string.
+            The value attribute value as string.
         """
         return self._attributes['value']
         
@@ -2893,8 +3621,7 @@ class ScalarVariable:
     """
     def __init__(self, element):
         """ Constructor which takes an XML element object describing the 
-            ScalarVariable element and creates a ScalarVariable object 
-            copy.
+        ScalarVariable element and creates a ScalarVariable object copy.
         """
         self._attributes = {'name':'',
                             'valueReference':'',
@@ -2955,7 +3682,7 @@ class ScalarVariable:
         
         Returns::
         
-            name as string.
+            The name attribute value as string.
         """
         return self._attributes['name']
         
@@ -2964,7 +3691,7 @@ class ScalarVariable:
         
         Returns::
         
-            value reference as unsigned int.
+            The value reference as unsigned int.
         """
         if self._attributes['valueReference'] == '':
             return None
@@ -2975,7 +3702,8 @@ class ScalarVariable:
         
         Returns::
         
-            description as string (empty string if not set).
+            The description attribute value as string (empty string if not 
+            set).
         """
         return self._attributes['description']
         
@@ -2984,8 +3712,8 @@ class ScalarVariable:
         
         Returns::
         
-            variability as enumeration: CONTINUOUS, CONSTANT, PARAMETER 
-            or DISCRETE (default: CONTINUOUS).
+            The variability attribute value as enumeration: CONTINUOUS, 
+            CONSTANT, PARAMETER or DISCRETE (default: CONTINUOUS).
         """
         return _translate_variability(self._attributes['variability'])
         
@@ -2994,8 +3722,8 @@ class ScalarVariable:
         
         Returns::
         
-            causality as enumeration: INTERNAL, INPUT ,OUTPUT or NONE. 
-            (default: INTERNAL).
+            The causality attribute value as enumeration: INTERNAL, INPUT, 
+            OUTPUT or NONE. (default: INTERNAL).
         """
         return _translate_causality(self._attributes['causality'])
         
@@ -3004,19 +3732,19 @@ class ScalarVariable:
         
         Returns::
         
-            alias as enumeration: NO_ALIAS, ALIAS or NEGATED_ALIAS. 
-            (default: NO_ALIAS).
+            The alias attribute value as enumeration: NO_ALIAS, ALIAS or 
+            NEGATED_ALIAS. (default: NO_ALIAS).
         """
         return _translate_alias(self._attributes['alias'])
         
     def get_fundamental_type(self):
         """ Get the type of the type defined. (Real, Integer, Boolean, 
-            String or Enumeration Type)
+        String or Enumeration Type)
         
         Returns::
         
-                Object of type Real, Integer, Boolean, String or 
-                Enumeration.
+            An object of type Real, Integer, Boolean, String or 
+            Enumeration.
         """
         return self._fundamental_type
         
@@ -3025,7 +3753,7 @@ class ScalarVariable:
         
         Returns::
         
-            Object of type DirectDependency (None if not set).
+            An object of type DirectDependency (None if not set).
         """
         return self._direct_dependency
         
@@ -3034,7 +3762,7 @@ class ScalarVariable:
         
         Returns::
         
-            is linear as bool (None if not set).
+            The is linear attribute value as bool (None if not set).
         """
         return self._is_linear
         
@@ -3043,7 +3771,7 @@ class ScalarVariable:
         
         Returns::
         
-            List of all linear timed variables (type: TimePoint)
+            A list of all linear timed variables (type: TimePoint)
         """
         return self._is_linear_timed_variables
     
@@ -3052,8 +3780,8 @@ class ScalarVariable:
         
         Returns::
         
-            variable category as enumeration: ALGEBRAIC, STATE, 
-            DEPENDENT_CONSTANT, INDEPENDENT_CONSTANT, 
+            The variable category attribute value as enumeration: 
+            ALGEBRAIC, STATE, DEPENDENT_CONSTANT, INDEPENDENT_CONSTANT, 
             DEPENDENT_PARAMETER, INDEPENDENT_PARAMETER or DERIVATIVE  
             (default: ALGEBRAIC).
         """
@@ -3065,7 +3793,7 @@ class Real:
     """
     def __init__(self, element):
         """ Constructor which takes an XML element object describing the 
-            Real element and creates a Real object copy.
+        Real element and creates a Real object copy.
         """
         self._attributes = {'declaredType':'',
                             'quantity':'',
@@ -3088,7 +3816,8 @@ class Real:
         
         Returns::
         
-            declared type as string (empty string if not set).
+            The declared type attribute value as string (empty string 
+            if not set).
         """
         return self._attributes['declaredType']
         
@@ -3097,7 +3826,8 @@ class Real:
         
         Returns::
         
-            quantity as string (empty string if not set).
+            The quantity attribute value as string (empty string if 
+            not set).
         """
         return self._attributes['quantity']
         
@@ -3106,7 +3836,7 @@ class Real:
         
         Returns::
         
-            unit as string (empty string if not set).
+            The unit attribute value as string (empty string if not set).
         """
         return self._attributes['unit']
         
@@ -3115,7 +3845,8 @@ class Real:
         
         Returns::
         
-            display unit as string (empty string if not set).
+            The display unit attribute value as string (empty string if 
+            not set).
         """
         return self._attributes['displayUnit']
         
@@ -3124,7 +3855,8 @@ class Real:
         
         Returns::
         
-            relative quantity as bool (default: false).
+            The relative quantity attribute value as bool (default: 
+            false).
         """
         return _translate_xmlbool(self._attributes['relativeQuantity'])
         
@@ -3133,7 +3865,7 @@ class Real:
         
         Returns::
         
-            min as float (None if not set).
+            The min attribute value as float (None if not set).
         """
         min = self._attributes['min']
         if min == '':
@@ -3145,7 +3877,7 @@ class Real:
         
         Returns::
         
-            max as float (None if not set).
+            The max attribute value as float (None if not set).
         """
         max = self._attributes['max']
         if max == '':
@@ -3157,7 +3889,7 @@ class Real:
         
         Returns::
         
-            nominal as float (None if not set).
+            The nominal attribute value as float (None if not set).
         """
         nominal = self._attributes['nominal']
         if nominal == '':
@@ -3169,7 +3901,7 @@ class Real:
         
         Returns::
         
-            start as float (None if not set).
+            The start attribute value as float (None if not set).
         """
         start = self._attributes['start']
         if start == '':
@@ -3181,7 +3913,7 @@ class Real:
         
         Returns::
         
-            fixed as bool (None if not set).
+            The fixed attribute value as bool (None if not set).
         """
         fixed = self._attributes['fixed']
         if fixed == '':
@@ -3193,7 +3925,7 @@ class Real:
         
         Returns::
         
-            free as bool (None if not set).
+            The free attribute value as bool (None if not set).
         """
         free = self._attributes['free']
         if free == '':
@@ -3205,7 +3937,7 @@ class Real:
         
         Returns::
         
-            initial guess as float (None if not set).
+            The initial guess attribute value as float (None if not set).
         """
         initialguess = self._attributes['initialGuess']
         if initialguess == '':
@@ -3218,7 +3950,7 @@ class Integer:
     """
     def __init__(self, element):
         """ Constructor which takes an XML element object describing the 
-            Integer element and creates a Integer object copy.
+        Integer element and creates a Integer object copy.
         """
         self._attributes = {'declaredType':'',
                             'quantity':'',
@@ -3237,7 +3969,8 @@ class Integer:
         
         Returns::
         
-            declared type as string (empty string if not set).
+            The declared type attribute value as string (empty string if 
+            not set).
         """
         return self._attributes['declaredType']
         
@@ -3246,7 +3979,8 @@ class Integer:
         
         Returns::
         
-            quantity as string (empty string if not set).
+            The quantity attribute value as string (empty string if not 
+            set).
         """
         return self._attributes['quantity']
                 
@@ -3255,7 +3989,7 @@ class Integer:
         
         Returns::
         
-            min as int (None if not set).
+            The min attribute value as int (None if not set).
         """
         min = self._attributes['min']
         if min == '':
@@ -3267,7 +4001,7 @@ class Integer:
         
         Returns::
         
-            max as int (None if not set).
+            The max attribute value as int (None if not set).
         """
         max = self._attributes['max']
         if max == '':
@@ -3279,7 +4013,7 @@ class Integer:
         
         Returns::
         
-            start as int (None if not set).
+            The start attribute value as int (None if not set).
         """
         start = self._attributes['start']
         if start == '':
@@ -3291,7 +4025,7 @@ class Integer:
         
         Returns::
         
-            fixed as bool (None if not set).
+            The fixed attribute value as bool (None if not set).
         """
         fixed = self._attributes['fixed']
         if fixed == '':
@@ -3303,7 +4037,7 @@ class Integer:
         
         Returns::
         
-            free as bool (None if not set).
+            The free attribute value as bool (None if not set).
         """
         free = self._attributes['free']
         if free == '':
@@ -3315,7 +4049,7 @@ class Integer:
         
         Returns::
         
-            initial guess as int (None if not set).
+            The initial guess attribute value as int (None if not set).
         """
         initialguess = self._attributes['initialGuess']
         if initialguess == '':
@@ -3328,7 +4062,7 @@ class Boolean:
     """
     def __init__(self, element):
         """ Constructor which takes an XML element object describing the 
-            Boolean element and creates a Boolean object copy.
+        Boolean element and creates a Boolean object copy.
         """
         self._attributes = {'declaredType':'',
                             'start':'',
@@ -3344,7 +4078,8 @@ class Boolean:
         
         Returns::
         
-            declared type as string (empty string if not set).
+            The declared type attribute value as string (empty string if 
+            not set).
         """
         return self._attributes['declaredType']
         
@@ -3353,7 +4088,7 @@ class Boolean:
         
         Returns::
         
-            start as bool (None if not set).
+            The start attribute value as bool (None if not set).
         """
         start = self._attributes['start']
         if start == '':
@@ -3365,7 +4100,7 @@ class Boolean:
         
         Returns::
         
-            fixed as bool (None if not set).
+            The fixed attribute value as bool (None if not set).
         """
         fixed = self._attributes['fixed']
         if fixed == '':
@@ -3377,7 +4112,7 @@ class Boolean:
         
         Returns::
         
-            free as bool (None if not set).
+            The free attribute value as bool (None if not set).
         """
         free = self._attributes['free']
         if free == '':
@@ -3389,7 +4124,7 @@ class Boolean:
         
         Returns::
         
-            initial guess as bool (None if not set).
+            The initial guess attribute value as bool (None if not set).
         """
         initialguess = self._attributes['initialGuess']
         if initialguess == '':
@@ -3402,7 +4137,7 @@ class String:
     """
     def __init__(self, element):
         """ Constructor which takes an XML element object describing the 
-            String element and creates a String object copy.
+        String element and creates a String object copy.
         """
         self._attributes = {'declaredType':'',
                             'start':'',
@@ -3416,7 +4151,8 @@ class String:
         
         Returns::
         
-            declared type as string (empty string if not set).
+            The declared type attribute value as string (empty string if 
+            not set).
         """
         return self._attributes['declaredType']
         
@@ -3425,7 +4161,7 @@ class String:
         
         Returns::
         
-            start as string (None if not set).
+            The start attribute value as string (None if not set).
         """
         return self._attributes['start']
 
@@ -3434,7 +4170,7 @@ class String:
         
         Returns::
         
-            fixed as bool (None if not set).
+            The fixed attribute value as bool (None if not set).
         """
         fixed = self._attributes['fixed']
         if fixed == '':
@@ -3448,7 +4184,7 @@ class Enumeration:
     """
     def __init__(self, element):
         """ Constructor which takes an XML element object describing the 
-            Enumeration element and creates a Enumeration object copy.
+        Enumeration element and creates a Enumeration object copy.
         """
         self._attributes = {'declaredType':'',
                             'quantity':'',
@@ -3465,7 +4201,7 @@ class Enumeration:
         
         Returns::
         
-            declared type as string.
+            The declared type attribute value as string.
         """
         return self._attributes['declaredType']
         
@@ -3474,7 +4210,8 @@ class Enumeration:
         
         Returns::
         
-            quantity as string (empty string if not set).
+            The quantity attribute value as string (empty string if not 
+            set).
         """
         return self._attributes['quantity']
 
@@ -3483,7 +4220,7 @@ class Enumeration:
         
         Returns::
         
-            min as int (None if not set).
+            The min attribute value as int (None if not set).
         """
         min = self._attributes['min']
         if min == '':
@@ -3494,7 +4231,8 @@ class Enumeration:
         """ Get the value of the max attribute.
         
         Returns::
-            max as int (None if not set).
+        
+            The max attribute value as int (None if not set).
         """
         max = self._attributes['max']
         if max == '':
@@ -3506,7 +4244,7 @@ class Enumeration:
         
         Returns::
         
-            start as int (None if not set).
+            The start attribute value as int (None if not set).
         """
         start = self._attributes['start']
         if start == '':
@@ -3518,7 +4256,7 @@ class Enumeration:
         
         Returns::
         
-            fixed as bool (None if not set).
+            The fixed attribute value as bool (None if not set).
         """
         fixed = self._attributes['fixed']
         if fixed == '':
@@ -3531,8 +4269,8 @@ class DirectDependency:
     """
     def __init__(self, element):
         """ Constructor which takes an XML element object describing the 
-            DirectDependency element and creates a DirectDependency 
-            object copy.
+        DirectDependency element and creates a DirectDependency object 
+        copy.
         """
         self._names = []
         e_names = element.getchildren()
@@ -3541,11 +4279,11 @@ class DirectDependency:
             
     def get_names(self):
         """ Get the names of the input variables needed to compute this 
-            output.
+        output.
         
         Returns::
         
-                List of variable names as string.
+                A list of variable names as string.
         """
         return self._names
 
@@ -3555,7 +4293,7 @@ class TimePoint:
     """
     def __init__(self, element):
         """ Constructor which takes an XML element object describing the 
-            TimePoint element and creates a TimePoint object copy.
+        TimePoint element and creates a TimePoint object copy.
         """
         self._attributes = {'index':'',
                             'isLinear':''}
@@ -3568,7 +4306,7 @@ class TimePoint:
         
         Returns::
         
-            index as int.
+            The index attribute value as int.
         """
         return int(self._attributes['index'])
             
@@ -3577,7 +4315,7 @@ class TimePoint:
         
         Returns::
         
-            is linear as bool.
+            The is linear attribute value as bool.
         """
         return _translate_xmlbool(self._attributes['isLinear'])
             
@@ -3587,7 +4325,7 @@ class Optimization:
     """
     def __init__(self, element):
         """ Constructor which takes an XML element object describing the 
-            Optimization element and creates an Optimization object copy.
+        Optimization element and creates an Optimization object copy.
         """
         self._attributes = {'static':''}
 
@@ -3626,7 +4364,7 @@ class Optimization:
         
         Returns::
         
-            static as bool (None if not set).
+            The static attribute value as bool (None if not set).
         """
         if self._attributes['static'] == '':
             return None
@@ -3637,7 +4375,7 @@ class Optimization:
         
         Returns::
         
-            Object of type Opt_IntervalTime containing start time data 
+            An object of type Opt_IntervalTime containing start time data 
             (None if not set).
         """
         return self._interval_start_time
@@ -3647,7 +4385,7 @@ class Optimization:
         
         Returns::
         
-            Object of type Opt_IntervalTime containing final time data 
+            An object of type Opt_IntervalTime containing final time data 
             (None if not set).
         """
         return self._interval_final_time
@@ -3657,7 +4395,7 @@ class Optimization:
         
         Returns::
         
-            List of all time points (type: Opt_TimePoint).
+            A list of all time points (type: Opt_TimePoint).
         """
         return self._time_points
         
@@ -3667,9 +4405,8 @@ class Opt_IntervalTime:
     """
     def __init__(self, element):
         """ Constructor which takes an XML element object describing the 
-            ns:opt IntervalStartTime and IntervalFinalTime elements and 
-            creates an Opt_IntervalTime object with start or final time 
-            data.
+        ns:opt IntervalStartTime and IntervalFinalTime elements and 
+        creates an Opt_IntervalTime object with start or final time data.
         """
         opt=element.nsmap['opt']
         ns="{"+opt+"}"
@@ -3701,7 +4438,7 @@ class Opt_IntervalTime:
         
         Returns::
         
-            value as float (None if not set).
+            The value attribute value as float (None if not set).
         """
         return self._value
 
@@ -3710,7 +4447,7 @@ class Opt_IntervalTime:
         
         Returns::
         
-            free as bool (None if not set).
+            The free attribute value as bool (None if not set).
         """
         return self._free
         
@@ -3719,7 +4456,7 @@ class Opt_IntervalTime:
         
         Returns::
         
-            initial guess as float (None if not set).
+            The initial guess attribute value as float (None if not set).
         """
         return self._initial_guess
     
@@ -3729,8 +4466,8 @@ class Opt_TimePoint:
     """
     def __init__(self, e_index, e_value):
         """ Constructor which takes an XML element object describing the 
-            ns:opt TimePoint element and creates an Opt_TimePoint object 
-            with time point data.
+        ns:opt TimePoint element and creates an Opt_TimePoint object 
+        with time point data.
         """
         self._index = e_index.text
         self._value = e_value.text
@@ -3740,7 +4477,7 @@ class Opt_TimePoint:
         
         Returns::
         
-            index as int.
+            The index attribute value as int.
         """
         return int(self._index)
         
@@ -3749,7 +4486,7 @@ class Opt_TimePoint:
         
         Returns::
         
-            value as float.
+            The value attribute value as float.
         """
         return float(self._value)
 
@@ -3779,11 +4516,22 @@ class XMLFunctionCache:
         
     def add(self, obj, function, key=None):
         """ Add a function call to cache and save result dependent on 
-            the argument key. If key is None, the function has no arguments 
-            and the dict entry will simply contain one value which is the 
-            return value for the specific function. If key is not none, the 
-            value of the dict entry will contain yet another dict with an entry 
-            for each argument to the function.
+        the argument key. If key is None, the function has no arguments 
+        and the dict entry will simply contain one value which is the 
+        return value for the specific function. If key is not none, the 
+        value of the dict entry will contain yet another dict with an 
+        entry for each argument to the function.
+        
+        Parameters::
+        
+            obj --
+                The object instance on which the function call is made.
+            function --
+                The function call for which the result should be saved.
+            key --
+                Function argument. If None then the function has no 
+                arguments.
+                Default: None
         """
         # load xmlparser-function
         f = getattr(obj, function)
@@ -3816,8 +4564,24 @@ class XMLFunctionCache:
         return result                        
                     
     def get(self, obj, function, key=None):
-        """ Get the function return value (cached value) for 
-            the specific function and key.
+        """ Get the function return value (cached value) for the specific 
+        function and key.
+        
+        Parameters::
+        
+            obj --
+                The object instance on which the function call is made.
+            function --
+                The function call for which the result is saved.
+            key --
+                Function argument. If None then the function has no 
+                arguments.
+                Default: None
+                
+        Returns::
+        
+            The return value of the function for the specific key (if 
+            any) as saved in the cache.
             
         """
         # Get function result value/values from cache
@@ -3838,7 +4602,6 @@ class XMLFunctionCache:
         
         
 class XMLBaseDoc:
-    
     """ Base class representing a parsed XML file."""
     
     def __init__(self, filename, schemaname=''):
@@ -3851,6 +4614,14 @@ class XMLBaseDoc:
         for the parsed XML which can be used to evaluate XPath expressions on 
         the XML.
          
+         Parameters::
+         
+            filename --
+                The name of the XML file.
+            schemaname --
+                The name of the XSD file to validate against.
+                Default: Empty string (no validation).
+         
         """
         self.function_cache = XMLFunctionCache()
         self._doc = _parse_XML(filename, schemaname)
@@ -3858,7 +4629,6 @@ class XMLBaseDoc:
         self._xpatheval = etree.XPathEvaluator(self._doc, namespaces=root.nsmap)
             
 class XMLValuesDoc(XMLBaseDoc):
-    
     """ 
     Class representing a parsed XML file containing values for all 
     independent parameters. 
@@ -3866,13 +4636,12 @@ class XMLValuesDoc(XMLBaseDoc):
     """
                 
     def get_iparam_values(self):
-        """ 
-        Extract name and value for all independent parameters in the 
+        """ Extract name and value for all independent parameters in the 
         XML document.
         
         Returns::
            
-            Dict with variable name as key and parameter as value.
+            A dict with variable name as key and parameter as value.
             
         """
         keys = self._xpatheval("//*/@name")
@@ -3899,6 +4668,17 @@ class XMLValuesDoc(XMLBaseDoc):
         return dict(zip(names, iparam_values))
     
     def get_parameter_type(self, variablename):
+        """ Get the parameter type for a specific variable.
+        
+        Parameters::
+        
+            variablename --
+                The name of the variable.
+                
+        Returns::
+        
+            The type of parameter, Real, Integer, Boolean or String.
+        """
         type_ = self._xpatheval("//IndependentParameters/node()[@name=\""+str(variablename)+"\"]")
         if len(type_) > 0:
             return type_[0].tag
@@ -3906,7 +4686,5 @@ class XMLValuesDoc(XMLBaseDoc):
         
              
 class XMLException(Exception):
-    
     """ Class for all XML related errors that can occur in this module. """
-    
     pass

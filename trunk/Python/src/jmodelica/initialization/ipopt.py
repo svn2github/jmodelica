@@ -33,14 +33,13 @@ class InitializationOptimizer(object):
     """ An interface to the NLP solver Ipopt. """
     
     def __init__(self, nlp_init):
-        
-        """ 
-        Class for solving a DAE initialization problem my means
+        """ Class for solving a DAE initialization problem my means
         of optimization using IPOPT.
         
         Parameters::
         
-            nlp_init -- NLPInitialization object.
+            nlp_init -- 
+                The NLPInitialization object.
         
         """
         
@@ -88,54 +87,60 @@ class InitializationOptimizer(object):
             raise jmi.JMIException("Solving IPOPT failed.")
     
     def init_opt_ipopt_set_string_option(self, key, val):
-        """
-        Set Ipopt string option.
+        """ Set an Ipopt string option.
         
         Parameters::
         
-            key -- Name of option.
-            val -- Value of option.
+            key -- 
+                The name of the option.
+            val -- 
+                The value of the option.
             
         """
         if self._nlp_init._jmi_model._dll.jmi_init_opt_ipopt_set_string_option(self._ipopt_init, key, val) is not 0:
             raise jmi.JMIException("The Ipopt string option " + key + " is unknown")
         
     def init_opt_ipopt_set_int_option(self, key, val):
-        """
-        Set Ipopt integer option.
+        """ Set an Ipopt integer option.
         
         Parameters::
         
-            key -- Name of option.
-            val -- Value of option.
+            key -- 
+                The name of the option.
+            val -- 
+                The value of the option.
             
         """        
         if self._nlp_init._jmi_model._dll.jmi_init_opt_ipopt_set_int_option(self._ipopt_init, key, val) is not 0:
             raise jmi.JMIException("The Ipopt integer option " + key + " is unknown")
 
     def init_opt_ipopt_set_num_option(self, key, val):
-        """
-        Set Ipopt double option.
+        """ Set an Ipopt double option.
         
         Parameters::
         
-            key -- Name of option.
-            val -- Value of option.
+            key -- 
+                The name of the option.
+            val -- 
+                The value of the option.
             
         """
         if self._nlp_init._jmi_model._dll.jmi_init_opt_ipopt_set_num_option(self._ipopt_init, key, val) is not 0:
             raise jmi.JMIException("The Ipopt real option " + key + " is unknown")
 
     def init_opt_ipopt_get_statistics(self):
-        """
-        Get statistics from the last optimization run.
+        """ Get statistics from the last optimization run.
 
         Returns::
         
-            return_status -- Return status from IPOPT
-            nbr_iter -- Number of iterations 
-            objective -- Final value of objective function
-            total_exec_time -- Execution time
+            return_status -- 
+                The return status from IPOPT.
+            nbr_iter -- 
+                The number of iterations. 
+            objective -- 
+                The final value of the objective function.
+            total_exec_time -- 
+                The execution time.
         """
         return_code = ct.c_int()
         iters = ct.c_int()
@@ -150,22 +155,21 @@ class InitializationOptimizer(object):
         return (return_code.value,iters.value,objective.value,exec_time.value)
 
 class NLPInitialization(object):
-    """
-    NLP interface for a DAE initialization optimization
+    """ NLP interface for a DAE initialization optimization
     problem.    
     """    
     def __init__(self, model, stat = 0):
-        """
-        Constructor where main data structure is created. 
+        """ Constructor where main data structure is created. 
         
-        Initial guesses, lower and upper bounds and linearity information is 
-        set for optimized parameters, derivatives, states, inputs and 
-        algebraic variables. These values are taken from the XML files created 
-        at compilation.
+        Initial guesses, lower and upper bounds and linearity information 
+        is set for optimized parameters, derivatives, states, inputs and 
+        algebraic variables. These values are taken from the XML files 
+        created at compilation.
         
         Parameters::
         
-            model -- The Model object.
+            model -- 
+                The Model object.
         
         """
         self._jmi_init_opt = ct.c_voidp() 
@@ -439,14 +443,14 @@ class NLPInitialization(object):
             pass                 
         
     def init_opt_get_dimensions(self):
-        """ 
-        Get the number of variables and the number of constraints in the 
+        """ Get the number of variables and the number of constraints in the 
         problem.
         
         Returns::
         
-            Tuple with the number of variables in the NLP problem, equality constraints,
-            and non-zeros in the Jacobian of the equality constraints respectively. 
+            Tuple with the number of variables in the NLP problem, 
+            equality constraints, and non-zeros in the Jacobian of the 
+            equality constraints respectively. 
             
         """
         n_real_x = ct.c_int()
@@ -458,16 +462,21 @@ class NLPInitialization(object):
         return n_real_x.value, n_h.value, dh_n_nz.value 
         
     def init_opt_get_x(self):
-        """ Return the x vector of the NLP. """
+        """ Get the x vector of the NLP. 
+        
+        Returns::
+        
+            The x vector of the NLP.
+        """
         return self._jmi_model._dll.jmi_init_opt_get_x(self._jmi_init_opt)
 
     def init_opt_get_initial(self, x_init):
-        """ 
-        Get the initial point of the NLP.
+        """ Get the initial point of the NLP.
         
         Parameters::
         
-            x_init -- The initial guess vector. (Return)
+            x_init -- 
+                The initial guess vector. (Return variable)
         
         """
         if self._jmi_model._dll.jmi_init_opt_get_initial(self._jmi_init_opt, x_init) is not 0:
@@ -478,121 +487,131 @@ class NLPInitialization(object):
 
         Parameters::
         
-            x_init --- The initial guess vector.
+            x_init --
+                The initial guess vector.
         """
         if self._jmi_model._dll.jmi_init_opt_set_initial(self._jmi_init_opt, x_init) is not 0:
             raise jmi.JMIException("Setting the initial point failed.")
  
     def init_opt_get_bounds(self, x_lb, x_ub):
-        """ 
-        Get the upper and lower bounds of the optimization variables.
+        """ Get the upper and lower bounds of the optimization variables.
         
         Parameters::
         
-            x_lb -- The lower bounds vector. (Return)
-            x_ub -- The upper bounds vector. (Return)
+            x_lb -- 
+                The lower bounds vector. (Return variable)
+            x_ub -- 
+                The upper bounds vector. (Return variable)
         
         """
         if self._jmi_model._dll.jmi_init_opt_get_bounds(self._jmi_init_opt, x_lb, x_ub) is not 0:
             raise jmi.JMIException("Getting upper and lower bounds of the optimization variables failed.")
 
     def init_opt_set_bounds(self, x_lb, x_ub):
-        """ 
-        Set the upper and lower bounds of the optimization variables.
+        """ Set the upper and lower bounds of the optimization variables.
         
         Parameters::
         
-            x_lb -- The lower bounds vector. (Return)
-            x_ub -- The upper bounds vector. (Return)
+            x_lb -- 
+                The lower bounds vector. (Return variable)
+            x_ub -- 
+                The upper bounds vector. (Return variable)
         
         """
         if self._jmi_model._dll.jmi_init_opt_set_bounds(self._jmi_init_opt, x_lb, x_ub) is not 0:
             raise jmi.JMIException("Getting upper and lower bounds of the optimization variables failed.")
 
     def init_opt_f(self, f):
-        """ 
-        Get the cost function value at a given point in search space.
+        """ Get the cost function value at a given point in search space.
         
         Parameters::
         
-            f -- Value of the cost function. (Return)
+            f -- 
+                The value of the cost function. (Return variable)
         
         """
         if self._jmi_model._dll.jmi_init_opt_f(self._jmi_init_opt, f) is not 0:
             raise jmi.JMIException("Getting the cost function failed.")
         
     def init_opt_df(self, df):
-        """ 
-        Get the gradient of the cost function value at a given point in search 
-        space.
+        """ Get the gradient of the cost function value at a given point 
+        in search space.
         
         Parameters::
         
-            df -- Value of the gradient of the cost function. (Return)
+            df -- 
+                The value of the gradient of the cost function. (Return 
+                variable)
             
         """
         if self._jmi_model._dll.jmi_init_opt_df(self._jmi_init_opt, df) is not 0:
             raise jmi.JMIException("Getting the gradient of the cost function value failed.")
                
     def init_opt_h(self, res):
-        """ 
-        Get the residual of the equality constraints h.
+        """ Get the residual of the equality constraints h.
         
         Parameters::
         
-            res -- The residual of the equality constraints. (Return)
+            res -- 
+                The residual of the equality constraints. (Return 
+                variable)
         
         """
         if self._jmi_model._dll.jmi_init_opt_h(self._jmi_init_opt, res) is not 0:
             raise jmi.JMIException("Getting the residual of the equality constraints failed.")
         
     def init_opt_dh(self, jac):
-        """ 
-        Get the Jacobian of the residual of the equality constraints.
+        """ Get the Jacobian of the residual of the equality constraints.
         
         Parameters::
         
-            jac -- The Jacobian of the residual of the equality constraints. (Return)
+            jac -- 
+                The Jacobian of the residual of the equality 
+                constraints. (Return variable)
         
         """
         if self._jmi_model._dll.jmi_init_opt_dh(self._jmi_init_opt, jac) is not 0:
             raise jmi.JMIException("Getting the Jacobian of the residual of the equality constraints.")
         
     def init_opt_dh_nz_indices(self, irow, icol):
-        """ 
-        Get the indices of the non-zeros in the equality constraint Jacobian.
+        """ Get the indices of the non-zeros in the equality constraint 
+        Jacobian.
         
         Parameters::
         
             irow -- 
-                Row indices of the non-zero entries in the Jacobian of the 
-                residual of the equality constraints. (Return)
+                The row indices of the non-zero entries in the Jacobian 
+                of the residual of the equality constraints. (Return 
+                variable)
             icol -- 
-                Column indices of the non-zero entries in the Jacobian of the 
-                residual of the equality constraints. (Return)
+                The column indices of the non-zero entries in the 
+                Jacobian of the residual of the equality constraints. 
+                (Return variable)
         
         """
         if self._jmi_model._dll.jmi_init_opt_dh_nz_indices(self._jmi_init_opt, irow, icol) is not 0:
             raise jmi.JMIException("Getting the indices of the non-zeros in the equality constraint Jacobian failed.")
 
     def init_opt_set_initial_from_model(self):
-        """ 
-        Set the initial point of the NLP based on values in the JMI model.                
+        """ Set the initial point of the NLP based on values in the JMI 
+        model.
         """
         if self._jmi_model._dll.jmi_init_opt_set_initial_from_model(self._jmi_init_opt) is not 0:
             raise jmi.JMIException("Could not set initial point from model.")
 
     def export_result_dymola(self, file_name='', format='txt'):
-        """
-        Export the initialization result in Dymola format. 
+        """ Export the initialization result in Dymola format. 
 
         Parameters::
         
             file_name --
                 Name of the result file.
+                Default: Empty string.
             format --
-                A string equal either to 'txt' for output to Dymola textual
-                format or 'mat' for output to Dymola binary Matlab format.
+                A string equal either to 'txt' for output to Dymola 
+                textual format or 'mat' for output to Dymola binary 
+                Matlab format.
+                Default: 'txt'
 
         Limitations::
         

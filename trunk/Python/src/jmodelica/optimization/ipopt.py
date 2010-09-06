@@ -37,16 +37,15 @@ class CollocationOptimizer(object):
     """ An interface to the NLP solver Ipopt. """
     
     def __init__(self, nlp_collocation):
-        
-        """ 
-        Constructor where main data structure is created. Needs a 
+        """ Constructor where main data structure is created. Needs a 
         NLPCollocation implementation instance, for example a 
-        NLPCollocationLagrangePolynomials object. The underlying model must 
-        have been compiled with support for ipopt.
+        NLPCollocationLagrangePolynomials object. The underlying model 
+        must have been compiled with support for ipopt.
         
         Parameters::
         
-            nlp_collocation -- NLPCollocation object.
+            nlp_collocation -- 
+                The NLPCollocation object.
         
         """
         
@@ -56,11 +55,12 @@ class CollocationOptimizer(object):
         self._set_collocationOpt_typedefs()
         
         try:
-            assert self._nlp_collocation._model.jmimodel._dll.jmi_opt_sim_ipopt_new(byref(self._ipopt_opt), 
-                                                                                 self._nlp_collocation._jmi_opt_sim) == 0, \
+            assert self._nlp_collocation._model.jmimodel._dll.jmi_opt_sim_ipopt_new(
+                byref(self._ipopt_opt), self._nlp_collocation._jmi_opt_sim) == 0, \
                    "jmi_opt_sim_ipopt_new returned non-zero"
         except AttributeError, e:
-            raise jmi.JMIException("Can not create JMISimultaneousOptIPOPT object. Please recompile model with target='ipopt")
+            raise jmi.JMIException("Can not create JMISimultaneousOptIPOPT \
+            object. Please recompile model with target='ipopt")
         
         assert self._ipopt_opt.value is not None, \
                "jmi struct not returned correctly"
@@ -93,54 +93,66 @@ class CollocationOptimizer(object):
             raise jmi.JMIException("Solving IPOPT failed.")
     
     def opt_sim_ipopt_set_string_option(self, key, val):
-        """
-        Set Ipopt string option.
+        """ Set an Ipopt string option.
         
         Parameters::
         
-            key -- Name of option.
-            val -- Value of option.
+            key -- 
+                The name of the option.
+            val -- 
+                The value of the option.
             
         """
-        if self._nlp_collocation._model.jmimodel._dll.jmi_opt_sim_ipopt_set_string_option(self._ipopt_opt, key, val) is not 0:
-            raise jmi.JMIException("The Ipopt string option " + key + " is unknown")
+        if self._nlp_collocation._model.jmimodel._dll.jmi_opt_sim_ipopt_set_string_option(
+            self._ipopt_opt, key, val) is not 0: 
+                raise jmi.JMIException("The Ipopt string option \
+                " + key + " is unknown")
         
     def opt_sim_ipopt_set_int_option(self, key, val):
-        """
-        Set Ipopt integer option.
+        """ Set an Ipopt integer option.
         
         Parameters::
         
-            key -- Name of option.
-            val -- Value of option.
+            key -- 
+                The name of the option.
+            val -- 
+                The value of the option.
             
         """        
-        if self._nlp_collocation._model.jmimodel._dll.jmi_opt_sim_ipopt_set_int_option(self._ipopt_opt, key, val) is not 0:
-            raise jmi.JMIException("The Ipopt integer option " + key + " is unknown")
+        if self._nlp_collocation._model.jmimodel._dll.jmi_opt_sim_ipopt_set_int_option(
+            self._ipopt_opt, key, val) is not 0:
+            raise jmi.JMIException("The Ipopt integer option \
+            " + key + " is unknown")
 
     def opt_sim_ipopt_set_num_option(self, key, val):
-        """
-        Set Ipopt double option.
+        """ Set an Ipopt double option.
         
         Parameters::
         
-            key -- Name of option.
-            val -- Value of option.
+            key -- 
+                The name of the option.
+            val -- 
+                The value of the option.
             
         """
-        if self._nlp_collocation._model.jmimodel._dll.jmi_opt_sim_ipopt_set_num_option(self._ipopt_opt, key, val) is not 0:
-            raise jmi.JMIException("The Ipopt real option " + key + " is unknown")
+        if self._nlp_collocation._model.jmimodel._dll.jmi_opt_sim_ipopt_set_num_option(
+            self._ipopt_opt, key, val) is not 0:
+            raise jmi.JMIException("The Ipopt real option \
+            " + key + " is unknown")
 
     def opt_sim_ipopt_get_statistics(self):
-        """
-        Get statistics from the last optimization run.
+        """ Get statistics from the last optimization run.
 
         Returns::
         
-            return_status -- Return status from IPOPT
-            nbr_iter -- Number of iterations 
-            objective -- Final value of objective function
-            total_exec_time -- Execution time
+            return_status -- 
+                Return status from IPOPT.
+            nbr_iter -- 
+                Number of iterations.
+            objective -- 
+                Final value of objective function.
+            total_exec_time -- 
+                Execution time.
         """
         return_code = ct.c_int()
         iters = ct.c_int()
@@ -156,14 +168,18 @@ class CollocationOptimizer(object):
 
 
 class NLPCollocation(object):
+    """ NLP interface for a dynamic optimization problem. Abstract class 
+    which provides some methods but can not be instantiated. Use together 
+    with an implementation of an algorithm by extending this class.
     """
-    NLP interface for a dynamic optimization problem. Abstract class which 
-    provides some methods but can not be instantiated. Use together with 
-    an implementation of an algorithm by extending this class.
-    
-    """    
 
     def __init__(self):
+        """ This is an abstract class and can not be instantiated.
+        
+        Raises::
+        
+            JMIException if used.
+         """
         raise jmi.JMIException("This class can not be instantiated. ")
     
     def _initialize(self, model):
@@ -377,14 +393,14 @@ class NLPCollocation(object):
             pass
        
     def get_result(self):
-        """
-        Get the optimization result. The result is given for the
+        """ Get the optimization result. The result is given for the
         collocation points used in the algorithm.
         
         Returns::
         
             p_opt --
-                A vector containing the values of the optimized parameters.
+                A vector containing the values of the optimized 
+                parameters.
             data --
                 A two dimensional array of variable trajectory data. The
                 first column represents the time vector. The following
@@ -440,25 +456,26 @@ class NLPCollocation(object):
         return p_opt, data
 
     def get_result_element_interpolation(self,n_interpolation_points=20):
-        """
-        Get the optimization results. The variable trajectories are
-        evaluated at n_interpolation points inside each finite
-        element. The interpolation points at which the variables
-        are computed are equally spaced, and includes the element
-        start and end points within each finite element. The collocation
-        interpolation polynomials are used to compute the value of the
-        variable trajectories at each point.
+        """ Get the optimization results. The variable trajectories are
+        evaluated at n_interpolation points inside each finite element. 
+        The interpolation points at which the variables are computed are 
+        equally spaced, and includes the element start and end points 
+        within each finite element. The collocation interpolation 
+        polynomials are used to compute the value of the variable 
+        trajectories at each point.
 
         Parameters::
         
             n_interpolation_points --
-                Number of points in each finite element at which the
+                The number of points in each finite element at which the
                 solution trajectories are evaluated.
+                Default: 20
         
         Returns::
         
             p_opt --
-                A vector containing the values of the optimized parameters.
+                A vector containing the values of the optimized 
+                parameters.
             data --
                 A two dimensional array of variable trajectory data. The
                 first column represents the time vector. The following
@@ -485,7 +502,8 @@ class NLPCollocation(object):
         w_ = N.zeros(n_real_w*n_points)
         
         # Get the result
-        self.opt_sim_get_result_element_interpolation(n_interpolation_points,p_opt,t_,dx_,x_,u_,w_)
+        self.opt_sim_get_result_element_interpolation(
+            n_interpolation_points,p_opt,t_,dx_,x_,u_,w_)
         
         data = N.zeros((n_points,1+n_real_dx+n_real_x+n_real_u+n_real_w))
         data[:,0] = t_
@@ -514,8 +532,7 @@ class NLPCollocation(object):
         return p_opt, data
 
     def get_result_mesh_interpolation(self,mesh):
-        """
-        Get the optimization results. The result is given at a user
+        """ Get the optimization results. The result is given at a user
         defined mesh of time points. The collocation interpolation
         polynomials are used to compute the value of the variable
         trajectories at eachpoint.
@@ -523,12 +540,13 @@ class NLPCollocation(object):
         Parameters::
         
             mesh --
-                Vector of time points.
+                The vector of time points.
         
         Returns::
         
             p_opt --
-                A vector containing the values of the optimized parameters.
+                A vector containing the values of the optimized 
+                parameters.
             data --
                 A two dimensional array of variable trajectory data. The
                 first column represents the time vector. The following
@@ -584,18 +602,20 @@ class NLPCollocation(object):
         return p_opt, data
 
     def export_result_dymola(self, file_name='', format='txt'):
-        """
-        Export the optimization result in Dymola format. The function
-        get_result is used to retrieve the solution trajectories.
-        The result is given at the collocation points.
+        """ Export the optimization result in Dymola format. The 
+        function get_result is used to retrieve the solution 
+        trajectories. The result is given at the collocation points.
 
         Parameters::
         
             file_name --
-                Name of the result file.
+                The name of the result file.
+                Default: Empty string.
             format --
-                A string equal either to 'txt' for output to Dymola textual
-                format or 'mat' for output to Dymola binary Matlab format.
+                A string equal either to 'txt' for output to Dymola 
+                textual format or 'mat' for output to Dymola binary 
+                Matlab format.
+                Default: 'txt'
 
         Limitations::
         
@@ -609,21 +629,24 @@ class NLPCollocation(object):
         io.export_result_dymola(self._model,data, file_name=file_name, format=format)
 
     def export_result_dymola_element_interpolation(self, n_interpolation_points=20, file_name='', format='txt'):
-        """
-        Export the optimization result in Dymola format. The function
-        export_result_dymola_element_interpolation is used to retrieve the
-        solution trajectories. 
+        """ Export the optimization result in Dymola format. The 
+        function export_result_dymola_element_interpolation is used to 
+        retrieve the solution trajectories. 
         
         Parameters::
         
             n_interpolation_points --
-                The number of points in each finite element at which the result
-                is returned.
+                The number of points in each finite element at which the 
+                result is returned.
+                Default: 20
             file_name --
-                Name of the result file.
+                The name of the result file.
+                Default: Empty string.
             format --
-                A string equal either to 'txt' for output to Dymola textual
-                format or 'mat' for output to Dymola binary Matlab format.
+                A string equal either to 'txt' for output to Dymola 
+                textual format or 'mat' for output to Dymola binary 
+                Matlab format.
+                Default: 'txt'
 
         Limitations::
         
@@ -631,26 +654,31 @@ class NLPCollocation(object):
         """
 
         # Get results
-        p_opt, data = self.get_result_element_interpolation(n_interpolation_points)
+        p_opt, data = self.get_result_element_interpolation(
+            n_interpolation_points)
         
         # Write result
-        io.export_result_dymola(self._model,data, file_name=file_name, format=format)
+        io.export_result_dymola(
+            self._model,data, file_name=file_name, format=format)
 
-    def export_result_dymola_mesh_interpolation(self, mesh, file_name='', format='txt'):
-        """
-        Export the optimization result in Dymola format. The function
-        export_result_dymola_element_interpolation is used to retrieve the
-        solution trajectories. 
+    def export_result_dymola_mesh_interpolation(self, mesh, file_name='', 
+        format='txt'):
+        """ Export the optimization result in Dymola format. The 
+        function export_result_dymola_element_interpolation is used to 
+        retrieve the solution trajectories. 
 
         Parameters::
         
             mesh --
                 A vector of time points at wich the result is given. 
             file_name --
-                Name of the result file.
+                The name of the result file.
+                Default: Empty string.
             format --
-                A string equal either to 'txt' for output to Dymola textual
-                format or 'mat' for output to Dymola binary Matlab format.
+                A string equal either to 'txt' for output to Dymola 
+                textual format or 'mat' for output to Dymola binary 
+                Matlab format.
+                Default: 'txt'
 
         Limitations::
         
@@ -665,87 +693,52 @@ class NLPCollocation(object):
 
 
     def set_initial_from_dymola(self,res, hs_init, start_time_init, final_time_init):
-        """
-        Initialize the optimization vector from an object of either ResultDymolaTextual
-        or ResultDymolaBinary.
+        """ Initialize the optimization vector from an object of either 
+        ResultDymolaTextual or ResultDymolaBinary.
 
         Parameters::
         
             res --
                 A reference to an object of type ResultDymolaTextual or
                 ResultDymolaBinary.
-            hs_init -- A vector of length n_e containing initial guesses of the
-                normalized lengths of the finite elements. This argument is
-                neglected if the problem does not have free element lengths.
+            hs_init -- 
+                A vector of length n_e containing initial guesses of the
+                normalized lengths of the finite elements. This argument 
+                is neglected if the problem does not have free element 
+                lengths.
             start_time_init --
-                Initial guess of interval start time. This argument is neglected
-                if the start time is fixed.
+                The initial guess of the interval start time. This 
+                argument is neglected if the start time is fixed.
             final_time_init --
-                Initial guess of interval final time. This argument is neglected
-                if the final time is fixed.
+                The initial guess of the interval final time. This 
+                argument is neglected if the final time is fixed.
         """
         # Obtain the names
         names = self._model.get_dx_variable_names(include_alias=False)
-        #dx_names = dx_names_and_refs.keys()
-        # sort in value reference order
-        
-        #sorted_names = sorted(dx_names_and_refs.items(),key=itemgetter(1))
         dx_names=[]
         for name in sorted(names):
             dx_names.append(name[1])
-        
-
-        #dx_name_value_refs = dx_names.keys()
-        #dx_name_value_refs.sort(key=int)
 
         names = self._model.get_x_variable_names(include_alias=False)
-        #x_names = x_names_and_refs.keys()
-        # sort in value reference order
-        #sorted_names = sorted(x_names_and_refs.items(),key=itemgetter(1))
         x_names=[]
         for name in sorted(names):
             x_names.append(name[1])
 
-        #x_name_value_refs = x_names.keys()
-        #x_name_value_refs.sort(key=int)
 
         names = self._model.get_u_variable_names(include_alias=False)
-        #u_names = u_names_and_refs.keys()
-        # sort in value reference order
-        #sorted_names = sorted(u_names_and_refs.items(),key=itemgetter(1))
         u_names=[]
         for name in sorted(names):
             u_names.append(name[1])
 
-        #u_name_value_refs = u_names.keys()
-        #u_name_value_refs.sort(key=int)
-
         names = self._model.get_w_variable_names(include_alias=False)
-        #w_names = w_names_and_refs.keys()
-        # sort in value reference order
-        #sorted_names = sorted(w_names_and_refs.items(),key=itemgetter(1))
         w_names=[]
         for name in sorted(names):
             w_names.append(name[1])
 
-        #w_name_value_refs = w_names.keys()
-        #w_name_value_refs.sort(key=int)
-
         names = self._model.get_p_opt_variable_names(include_alias=False)
-        #p_opt_names = p_opt_names_and_refs.keys()
-        # sort in value reference order
-        #sorted_names = sorted(p_opt_names_and_refs.items(),key=itemgetter(1))
         p_opt_names=[]
         for name in sorted(names):
             p_opt_names.append(name[1])
-
-        #p_opt_name_value_refs = p_opt_names.keys()
-        #p_opt_name_value_refs.sort(key=int)
-
-        #print(dx_names)
-        #print(x_names)
-        #print(u_names)
-        #print(w_names)
         
         # Obtain vector sizes
         n_points = 0
@@ -921,16 +914,15 @@ class NLPCollocation(object):
                                                  hs_init,start_time_init,final_time_init)
         
     def opt_sim_get_dimensions(self):
-        """ 
-        Get the number of variables and the number of constraints in the 
-        problem.
+        """ Get the number of variables and the number of constraints in 
+        the problem.
         
         Returns::
         
-            Tuple with the number of variables in the NLP problem, inequality 
-            constraints, equality constraints, non-zeros in the Jacobian of 
-            the inequality constraints and non-zeros in the Jacobian of the 
-            equality constraints respectively. 
+            Tuple with the number of variables in the NLP problem, 
+            inequality constraints, equality constraints, non-zeros in 
+            the Jacobian of the inequality constraints and non-zeros in 
+            the Jacobian of the equality constraints respectively. 
             
         """
         n_real_x = ct.c_int()
@@ -938,53 +930,72 @@ class NLPCollocation(object):
         n_h = ct.c_int()
         dg_n_nz = ct.c_int()
         dh_n_nz = ct.c_int()
-        if self._model.jmimodel._dll.jmi_opt_sim_get_dimensions(self._jmi_opt_sim, byref(n_real_x), byref(n_g), 
-                                                        byref(n_h), byref(dg_n_nz), byref(dh_n_nz)) is not 0:
-            raise jmi.JMIException("Getting the number of variables and constraints failed.")
+        if self._model.jmimodel._dll.jmi_opt_sim_get_dimensions(
+            self._jmi_opt_sim, byref(n_real_x), byref(n_g), byref(n_h), 
+            byref(dg_n_nz), byref(dh_n_nz)) is not 0:
+            raise jmi.JMIException("Getting the number of variables and \
+            constraints failed.")
         return n_real_x.value, n_g.value, n_h.value, dg_n_nz.value, dh_n_nz.value
 
     def opt_sim_get_n_e(self):
-        """ 
-        Get the number of finite elements.
+        """ Get the number of finite elements.
         
         Returns::
         
             The number of inite elements         
         """
         n_e = ct.c_int()
-        if self._model.jmimodel._dll.jmi_opt_sim_get_n_e(self._jmi_opt_sim,byref(n_e)) is not 0:
-            raise jmi.JMIException("Getting the optimization interval data failed.")
+        if self._model.jmimodel._dll.jmi_opt_sim_get_n_e(
+            self._jmi_opt_sim,byref(n_e)) is not 0:
+            raise jmi.JMIException("Getting the optimization interval \
+            data failed.")
         return n_e.value
 
-    def opt_sim_get_interval_spec(self, start_time, start_time_free, final_time, final_time_free):
-        """ 
-        Get data that specifies the optimization interval.
+    def opt_sim_get_interval_spec(self, start_time, start_time_free, 
+        final_time, final_time_free):
+        """ Get data that specifies the optimization interval.
         
         Parameters::
         
-            start_time -- Optimization interval start time. (Return)
-            start_time_free -- 0 if start time should be fixed or 1 if free. (Return)
-            final_time -- Optimization final time. (Return)
-            final_time_free -- 0 if start time should be fixed or 1 if free. (Return)
+            start_time -- 
+                The optimization interval start time. (Return variable)
+            start_time_free -- 
+                0 if start time should be fixed or 1 if free. (Return 
+                variable)
+            final_time -- 
+                The optimization final time. (Return variable)
+            final_time_free -- 
+                0 if start time should be fixed or 1 if free. (Return 
+                variable)
         
         """
-        if self._model.jmimodel._dll.jmi_opt_sim_get_interval_spec(self._jmi_opt_sim, start_time, start_time_free, final_time, final_time_free) is not 0:
-            raise jmi.JMIException("Getting the optimization interval data failed.")
+        if self._model.jmimodel._dll.jmi_opt_sim_get_interval_spec(
+            self._jmi_opt_sim, start_time, start_time_free, final_time, 
+            final_time_free) is not 0:
+            raise jmi.JMIException("Getting the optimization interval \
+            data failed.")
         
     def opt_sim_get_x(self):
-        """ Return the x vector of the NLP. """
-        return self._model.jmimodel._dll.jmi_opt_sim_get_x(self._jmi_opt_sim)
+        """ Get the x vector of the NLP. 
+        
+        Returns::
+        
+            The x vector of the NLP.
+        """
+        return self._model.jmimodel._dll.jmi_opt_sim_get_x(
+            self._jmi_opt_sim)
 
     def opt_sim_get_initial(self, x_init):
-        """ 
-        Get the initial point of the NLP.
+        """ Get the initial point of the NLP.
         
         Parameters::
         
-            x_init -- The initial guess vector. (Return)
+            x_init -- 
+                The initial guess vector. (Return variable)
         
         """
-        if self._model.jmimodel._dll.jmi_opt_sim_get_initial(self._jmi_opt_sim, x_init) is not 0:
+        if self._model.jmimodel._dll.jmi_opt_sim_get_initial(
+            self._jmi_opt_sim, x_init) is not 0:
             raise jmi.JMIException("Getting the initial point failed.")
 
     def opt_sim_set_initial(self, x_init):
@@ -992,277 +1003,339 @@ class NLPCollocation(object):
 
         Parameters::
         
-            x_init --- The initial guess vector.
+            x_init --- 
+                The initial guess vector.
         """
         if self._model.jmimodel._dll.jmi_opt_sim_set_initial(self._jmi_opt_sim, x_init) is not 0:
             raise jmi.JMIException("Setting the initial point failed.")
  
-    def opt_sim_set_initial_from_trajectory(self, p_opt_init, trajectory_data_init, traj_n_points,
-                                            hs_init, start_time_init, final_time_init):
-        """
-        Set the initial point based on time series trajectories of the
-        variables of the problem.
+    def opt_sim_set_initial_from_trajectory(self, p_opt_init, 
+        trajectory_data_init, traj_n_points, hs_init, start_time_init, 
+        final_time_init):
+        """ Set the initial point based on time series trajectories of 
+        the variables of the problem.
 
-        Also, initial guesses for the optimization interval and element lengths
-        are provided.
+        Also, initial guesses for the optimization interval and element 
+        lengths are provided.
 
         Parameters::
         
             p_opt_init --
-                A vector of size n_p_opt containing initial values for the
-                optimized parameters.
+                A vector of size n_p_opt containing initial values for 
+                the optimized parameters.
             trajectory_data_init --
-                A matrix stored in column major format. The
-                first column contains the time vector. The following column
-                contains, in order, the derivative, state, input, and algebraic
+                A matrix stored in column major format. The first column 
+                contains the time vector. The following column contains, 
+                in order, the derivative, state, input, and algebraic
                 variable profiles.
             traj_n_points --
-                Number of time points in trajectory_data_init.
+                The number of time points in trajectory_data_init.
             hs_init --
                 A vector of length n_e containing initial guesses of the
-                normalized lengths of the finite elements. This argument is neglected
-                if the problem does not have free element lengths.
+                normalized lengths of the finite elements. This argument 
+                is neglected if the problem does not have free element 
+                lengths.
             start_time_init --
-                Initial guess of interval start time. This argument is neglected if
-                the start time is fixed.
+                The initial guess of interval start time. This argument 
+                is neglected if the start time is fixed.
             final_time_init --
-                Initial guess of interval final time. This argument is neglected if
-                the final time is fixed.
+                The initial guess of interval final time. This argument 
+                is neglected if the final time is fixed.
         """
         # check sum (n_real_x, n_real_dx, n_real_u, n_real_w +1 (time)) mult with traj_n_points = size trajectory_data_init
-        sum = self._model._n_real_x.value + self._model._n_real_dx.value + self._model._n_real_u.value + self._model._n_real_w.value + 1
+        sum = self._model._n_real_x.value + self._model._n_real_dx.value \
+            + self._model._n_real_u.value + self._model._n_real_w.value + 1
         if sum*traj_n_points != len(trajectory_data_init):
             raise jmi.JMIException("trajectory_data_init vector has the wrong size.")        
-        if self._model.jmimodel._dll.jmi_opt_sim_set_initial_from_trajectory(self._jmi_opt_sim, \
-                                                                        p_opt_init, \
-                                                                        trajectory_data_init, \
-                                                                        traj_n_points, \
-                                                                        hs_init, \
-                                                                        start_time_init, \
-                                                                        final_time_init) is not 0:
+        if self._model.jmimodel._dll.jmi_opt_sim_set_initial_from_trajectory(
+            self._jmi_opt_sim, \
+            p_opt_init, \
+            trajectory_data_init, \
+            traj_n_points, \
+            hs_init, \
+            start_time_init, \
+            final_time_init) is not 0:
             raise jmi.JMIException("Setting the initial point failed.")
 
     def opt_sim_get_bounds(self, x_lb, x_ub):
-        """ 
-        Get the upper and lower bounds of the optimization variables.
+        """ Get the upper and lower bounds of the optimization variables.
         
         Parameters::
         
-            x_lb -- The lower bounds vector. (Return)
-            x_ub -- The upper bounds vector. (Return)
+            x_lb -- 
+                The lower bounds vector. (Return variable)
+            x_ub -- 
+                The upper bounds vector. (Return variable)
         
         """
-        if self._model.jmimodel._dll.jmi_opt_sim_get_bounds(self._jmi_opt_sim, x_lb, x_ub) is not 0:
-            raise jmi.JMIException("Getting upper and lower bounds of the optimization variables failed.")
+        if self._model.jmimodel._dll.jmi_opt_sim_get_bounds(
+            self._jmi_opt_sim, x_lb, x_ub) is not 0:
+            raise jmi.JMIException("Getting upper and lower bounds of \
+            the optimization variables failed.")
 
     def opt_sim_set_bounds(self, x_lb, x_ub):
-        """ 
-        Set the upper and lower bounds of the optimization variables.
+        """ Set the upper and lower bounds of the optimization variables.
         
         Parameters::
         
-            x_lb -- The lower bounds vector. (Return)
-            x_ub -- The upper bounds vector. (Return)
+            x_lb -- 
+                The lower bounds vector. (Return variable)
+            x_ub -- 
+                The upper bounds vector. (Return variable)
         
         """
-        if self._model.jmimodel._dll.jmi_opt_sim_set_bounds(self._jmi_opt_sim, x_lb, x_ub) is not 0:
-            raise jmi.JMIException("Getting upper and lower bounds of the optimization variables failed.")
+        if self._model.jmimodel._dll.jmi_opt_sim_set_bounds(
+            self._jmi_opt_sim, x_lb, x_ub) is not 0:
+            raise jmi.JMIException("Getting upper and lower bounds of \
+            the optimization variables failed.")
         
     def opt_sim_f(self, f):
-        """ 
-        Get the cost function value at a given point in search space.
+        """ Get the cost function value at a given point in search space.
         
         Parameters::
         
-            f -- Value of the cost function. (Return)
+            f -- 
+                Value of the cost function. (Return variable)
         
         """
         if self._model.jmimodel._dll.jmi_opt_sim_f(self._jmi_opt_sim, f) is not 0:
             raise jmi.JMIException("Getting the cost function failed.")
         
     def opt_sim_df(self, df):
-        """ 
-        Get the gradient of the cost function value at a given point in search 
-        space.
+        """ Get the gradient of the cost function value at a given point 
+        in search space.
         
         Parameters::
         
-            df -- Value of the gradient of the cost function. (Return)
+            df -- 
+                Value of the gradient of the cost function. (Return 
+                variable)
             
         """
-        if self._model.jmimodel._dll.jmi_opt_sim_df(self._jmi_opt_sim, df) is not 0:
-            raise jmi.JMIException("Getting the gradient of the cost function value failed.")
+        if self._model.jmimodel._dll.jmi_opt_sim_df(
+            self._jmi_opt_sim, df) is not 0:
+            raise jmi.JMIException("Getting the gradient of the cost \
+            function value failed.")
         
     def opt_sim_g(self, res):
-        """ 
-        Get the residual of the inequality constraints g.
+        """ Get the residual of the inequality constraints g.
         
         Parameters::
         
-            res -- Residual of the inequality constraints. (Return)
+            res -- 
+                The residual of the inequality constraints. (Return 
+                variable)
             
         """
-        if self._model.jmimodel._dll.jmi_opt_sim_g(self._jmi_opt_sim, res) is not 0:
-            raise jmi.JMIException("Getting the residual of the inequality constraints failed.")
+        if self._model.jmimodel._dll.jmi_opt_sim_g(
+            self._jmi_opt_sim, res) is not 0:
+            raise jmi.JMIException("Getting the residual of the \
+            inequality constraints failed.")
         
     def opt_sim_dg(self, jac):
-        """ 
-        Get the Jacobian of the residual of the inequality constraints.
+        """ Get the Jacobian of the residual of the inequality 
+        constraints.
         
         Parameters::
         
-            jac -- The Jacobian of the residual of the inequality constraints. (Return)
+            jac -- 
+                The Jacobian of the residual of the inequality 
+                constraints. (Return variable)
         
         """
-        if self._model.jmimodel._dll.jmi_opt_sim_dg(self._jmi_opt_sim, jac) is not 0:
-            raise jmi.JMIException("Getting the Jacobian of the residual of the inequality constraints failed.")
+        if self._model.jmimodel._dll.jmi_opt_sim_dg(
+            self._jmi_opt_sim, jac) is not 0:
+            raise jmi.JMIException("Getting the Jacobian of the residual \
+            of the inequality constraints failed.")
         
     def opt_sim_dg_nz_indices(self, irow, icol):
-        """ 
-        Get the indices of the non-zeros in the inequality constraint Jacobian.
+        """ Get the indices of the non-zeros in the inequality 
+        constraint Jacobian.
         
         Parameters::
         
             irow -- 
-                Row indices of the non-zero entries in the Jacobian of the 
-                residual of the inequality constraints. (Return)
+                The row indices of the non-zero entries in the Jacobian 
+                of the residual of the inequality constraints. (Return 
+                variable)
             icol --- 
-                Column indices of the non-zero entries in the Jacobian of 
-                the residual of the inequality constraints. (Return)
+                The column indices of the non-zero entries in the 
+                Jacobian of the residual of the inequality constraints. 
+                (Return variable)
         
         """
-        if self._model.jmimodel._dll.jmi_opt_sim_dg_nz_indices(self._jmi_opt_sim, irow, icol) is not 0:
-            raise jmi.JMIException("Getting the indices of the non-zeros in the equality constraint Jacobian failed.")
+        if self._model.jmimodel._dll.jmi_opt_sim_dg_nz_indices(
+            self._jmi_opt_sim, irow, icol) is not 0:
+            raise jmi.JMIException("Getting the indices of the non-zeros \
+            in the equality constraint Jacobian failed.")
         
     def opt_sim_h(self, res):
-        """ 
-        Get the residual of the equality constraints h.
+        """ Get the residual of the equality constraints h.
         
         Parameters::
         
-            res -- The residual of the equality constraints. (Return)
+            res -- 
+                The residual of the equality constraints. (Return variable)
         
         """
-        if self._model.jmimodel._dll.jmi_opt_sim_h(self._jmi_opt_sim, res) is not 0:
-            raise jmi.JMIException("Getting the residual of the equality constraints failed.")
+        if self._model.jmimodel._dll.jmi_opt_sim_h(
+            self._jmi_opt_sim, res) is not 0:
+            raise jmi.JMIException("Getting the residual of the equality \
+            constraints failed.")
         
     def opt_sim_dh(self, jac):
-        """ 
-        Get the Jacobian of the residual of the equality constraints.
+        """ Get the Jacobian of the residual of the equality constraints.
         
         Parameters::
         
-            jac -- The Jacobian of the residual of the equality constraints. (Return)
+            jac -- 
+                The Jacobian of the residual of the equality constraints. 
+                (Return variable)
         
         """
-        if self._model.jmimodel._dll.jmi_opt_sim_dh(self._jmi_opt_sim, jac) is not 0:
-            raise jmi.JMIException("Getting the Jacobian of the residual of the equality constraints.")
+        if self._model.jmimodel._dll.jmi_opt_sim_dh(
+            self._jmi_opt_sim, jac) is not 0:
+            raise jmi.JMIException("Getting the Jacobian of the residual \
+            of the equality constraints.")
         
     def opt_sim_dh_nz_indices(self, irow, icol):
-        """ 
-        Get the indices of the non-zeros in the equality constraint Jacobian.
+        """ Get the indices of the non-zeros in the equality constraint 
+        Jacobian.
         
         Parameters::
         
             irow -- 
-                Row indices of the non-zero entries in the Jacobian of the 
-                residual of the equality constraints. (Return)
+                The row indices of the non-zero entries in the Jacobian 
+                of the residual of the equality constraints. (Return 
+                variable)
             icol -- 
-                Column indices of the non-zero entries in the Jacobian of the 
-                residual of the equality constraints. (Return)
+                The column indices of the non-zero entries in the 
+                Jacobian of the residual of the equality constraints. 
+                (Return variable)
         
         """
-        if self._model.jmimodel._dll.jmi_opt_sim_dh_nz_indices(self._jmi_opt_sim, irow, icol) is not 0:
-            raise jmi.JMIException("Getting the indices of the non-zeros in the equality constraint Jacobian failed.")
+        if self._model.jmimodel._dll.jmi_opt_sim_dh_nz_indices(
+            self._jmi_opt_sim, irow, icol) is not 0:
+            raise jmi.JMIException("Getting the indices of the non-zeros \
+            in the equality constraint Jacobian failed.")
         
     def opt_sim_write_file_matlab(self, file_name):
-        """ 
-        Write the optimization result to file in Matlab format.
+        """ Write the optimization result to file in Matlab format.
         
         Parameters::
         
-            file_name -- Name of file to write to.
+            file_name -- 
+                The name of file to write to.
         
         """
-        if self._model.jmimodel._dll.jmi_opt_sim_write_file_matlab(self._jmi_opt_sim, file_name) is not 0:
-            raise jmi.JMIException("Writing the optimization result to file in Matlab format failed.")
+        if self._model.jmimodel._dll.jmi_opt_sim_write_file_matlab(
+            self._jmi_opt_sim, file_name) is not 0:
+            raise jmi.JMIException("Writing the optimization result to \
+            file in Matlab format failed.")
         
     def opt_sim_get_result_variable_vector_length(self):
-        """ Return the length of the result variable vectors. """
+        """ Get the length of the result variable vectors. 
+        
+        Returns::
+        
+            The length of the result variable vectors.
+        
+        """
         n = ct.c_int()
-        if self._model.jmimodel._dll.jmi_opt_sim_get_result_variable_vector_length(self._jmi_opt_sim, byref(n)) is not 0:
-            raise jmi.JMIException("Getting the length of the result variable vectors failed.")
+        if self._model.jmimodel._dll.jmi_opt_sim_get_result_variable_vector_length(
+            self._jmi_opt_sim, byref(n)) is not 0:
+            raise jmi.JMIException("Getting the length of the result \
+            variable vectors failed.")
         return n.value
         
     def opt_sim_get_result(self, p_opt, t, dx, x, u, w):
-        """ 
-        Get the results, stored in column major format.
+        """ Get the results, stored in column major format.
         
         Parameters::
         
-            p_opt -- Vector containing optimal parameter values. (Return)
-            t -- The time vector. (Return)
-            dx -- The derivatives. (Return)
-            x -- The states. (Return)
-            u -- The inputs. (Return)
-            w -- The algebraic variables. (Return)
+            p_opt -- 
+                The vector containing optimal parameter values. (Return 
+                variable)
+            t -- 
+                The time vector. (Return variable)
+            dx -- 
+                The derivatives. (Return variable)
+            x -- 
+                The states. (Return variable)
+            u -- 
+                The inputs. (Return variable)
+            w -- 
+                The algebraic variables. (Return variable)
              
         """
-        if self._model.jmimodel._dll.jmi_opt_sim_get_result(self._jmi_opt_sim, p_opt, t, dx, x, u, w) is not 0:
+        if self._model.jmimodel._dll.jmi_opt_sim_get_result(
+            self._jmi_opt_sim, p_opt, t, dx, x, u, w) is not 0:
             raise jmi.JMIException("Getting the results failed.")
 
-    def opt_sim_get_result_element_interpolation(self, n_interpolation_points, p_opt, t, dx, x, u, w):
-        """ 
-        Get the results, stored in column major format.
+    def opt_sim_get_result_element_interpolation(self, 
+        n_interpolation_points, p_opt, t, dx, x, u, w):
+        """ Get the results, stored in column major format.
         
         Parameters::
         
-            n_interpolation_points -- Number of time points in each element.
-            p_opt -- Vector containing optimal parameter values. (Return)
-            t -- The time vector. (Return)
-            dx -- The derivatives. (Return)
-            x -- The states. (Return)
-            u -- The inputs. (Return)
-            w -- The algebraic variables. (Return)
+            n_interpolation_points -- 
+                The number of time points in each element.
+            p_opt -- 
+                The vector containing optimal parameter values. (Return 
+                variable)
+            t -- 
+                The time vector. (Return variable)
+            dx -- 
+                The derivatives. (Return variable)
+            x -- 
+                The states. (Return variable)
+            u -- 
+                The inputs. (Return variable)
+            w -- 
+                The algebraic variables. (Return variable)
              
         """
-        if self._model.jmimodel._dll.jmi_opt_sim_get_result_element_interpolation(self._jmi_opt_sim,
-                                                                                  n_interpolation_points,p_opt,
-                                                                                  t, dx, x, u, w) is not 0:
+        if self._model.jmimodel._dll.jmi_opt_sim_get_result_element_interpolation(
+            self._jmi_opt_sim, n_interpolation_points,p_opt, t, dx, x, u, w) is not 0:
             raise jmi.JMIException("Getting the results failed.")
 
-    def opt_sim_get_result_mesh_interpolation(self, mesh, n_mesh, p_opt, t, dx, x, u, w):
-        """ 
-        Get the results, stored in column major format.
+    def opt_sim_get_result_mesh_interpolation(self, mesh, n_mesh, p_opt, 
+        t, dx, x, u, w):
+        """ Get the results, stored in column major format.
         
         Parameters::
         
-            mesh -- Mesh of time points.
-            p_opt -- Vector containing optimal parameter values. (Return)
-            t -- The time vector. (Return)
-            dx -- The derivatives. (Return)
-            x -- The states. (Return)
-            u -- The inputs. (Return)
-            w -- The algebraic variables. (Return)
+            mesh -- 
+                The mesh of time points.
+            p_opt -- 
+                The vector containing optimal parameter values. (Return 
+                variable)
+            t -- 
+                The time vector. (Return variable)
+            dx -- 
+                The derivatives. (Return variable)
+            x -- 
+                The states. (Return variable)
+            u -- 
+                The inputs. (Return variable)
+            w -- 
+                The algebraic variables. (Return variable)
              
         """
-        if self._model.jmimodel._dll.jmi_opt_sim_get_result_mesh_interpolation(self._jmi_opt_sim,
-                                                                                  mesh,n_mesh,p_opt,
-                                                                                  t, dx, x, u, w) is not 0:
+        if self._model.jmimodel._dll.jmi_opt_sim_get_result_mesh_interpolation(
+            self._jmi_opt_sim, mesh,n_mesh,p_opt, t, dx, x, u, w) is not 0:
             raise jmi.JMIException("Getting the results failed.")
-
-
+            
 
 class NLPCollocationLagrangePolynomials(NLPCollocation):
-    """ 
-    An implementation of a transcription method based on Lagrange polynomials 
-    and Radau points. Extends the abstract class NLPCollocation. 
+    """ An implementation of a transcription method based on Lagrange 
+    polynomials and Radau points. Extends the abstract class 
+    NLPCollocation. 
     """
-
     
-    def __init__(self, model, n_e, hs, n_cp, blocking_factors=N.array([],dtype=int)):
-        """
-        Constructor where main data structure is created. 
+    def __init__(self, model, n_e, hs, n_cp, blocking_factors=N.array([],
+        dtype=int)):
+        """ Constructor where main data structure is created. 
         
         Initial guesses, lower and upper bounds and linearity
         information is set for optimized parameters, derivatives,
@@ -1291,15 +1364,22 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
         
         Parameters::
         
-            model -- The Model object.
-            n_e -- Number of finite elements.
-            hs -- Vector containing the normalized element lengths.
-            n_cp -- Number of collocation points. 
-            blocking_factors -- Blocking factor vector.
+            model -- 
+                The Model object.
+            n_e -- 
+                The number of finite elements.
+            hs -- 
+                The vector containing the normalized element lengths.
+            n_cp -- 
+                The number of collocation points. 
+            blocking_factors -- 
+                The blocking factor vector.
         """
 
         if model._n_sw.value>0 or model._n_sw_init.value>0:
-            raise Exception("The collocation optimization algorithm does not support models with events. Please consider using the noEvent() operator or rewriting the model.")
+            raise Exception("The collocation optimization algorithm does \
+            not support models with events. Please consider using the \
+            noEvent() operator or rewriting the model.")
         
         if len(hs) != n_e:
             raise jmi.JMIException("arg hs is not of length n_e")
@@ -1359,26 +1439,25 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
         _u_tp_lin = N.ones(model._n_real_u.value*model._n_tp.value,dtype=int)        
         _w_tp_lin = N.ones(model._n_real_w.value*model._n_tp.value,dtype=int)
 
-        self._model._set_lin_values(_p_opt_lin, _dx_lin, _x_lin, _u_lin, _w_lin, _dx_tp_lin, _x_tp_lin, _u_tp_lin, _w_tp_lin)
+        self._model._set_lin_values(_p_opt_lin, _dx_lin, _x_lin, _u_lin,
+            _w_lin, _dx_tp_lin, _x_tp_lin, _u_tp_lin, _w_tp_lin)
 
         try:       
-            assert model.jmimodel._dll.jmi_opt_sim_lp_new(byref(self._jmi_opt_sim), model.jmimodel._jmi, n_e,
-                                      hs, hs_free,
-                                     _p_opt_init, _dx_init, _x_init,
-                                     _u_init, _w_init,
-                                     _p_opt_lb, _dx_lb, _x_lb,
-                                     _u_lb, _w_lb, _t0_lb,
-                                     _tf_lb, _hs_lb,
-                                     _p_opt_ub, _dx_ub, _x_ub,
-                                     _u_ub, _w_ub, _t0_ub,
-                                     _tf_ub, _hs_ub,
-                                     _linearity_information_provided,                
-                                     _p_opt_lin, _dx_lin, _x_lin, _u_lin, _w_lin,
-                                     _dx_tp_lin, _x_tp_lin, _u_tp_lin, _w_tp_lin,                
-                                     n_cp,jmi.JMI_DER_CPPAD,N.size(self._blocking_factors),self._blocking_factors) is 0, \
-                                     " jmi_opt_lp_new returned non-zero."
+            assert model.jmimodel._dll.jmi_opt_sim_lp_new(
+                byref(self._jmi_opt_sim), model.jmimodel._jmi, n_e, hs, 
+                hs_free, _p_opt_init, _dx_init, _x_init, _u_init, _w_init,
+                _p_opt_lb, _dx_lb, _x_lb,_u_lb, _w_lb, _t0_lb, _tf_lb, 
+                _hs_lb, _p_opt_ub, _dx_ub, _x_ub, _u_ub, _w_ub, _t0_ub,
+                _tf_ub, _hs_ub, _linearity_information_provided, 
+                _p_opt_lin, _dx_lin, _x_lin, _u_lin, _w_lin, _dx_tp_lin, 
+                _x_tp_lin, _u_tp_lin, _w_tp_lin, n_cp,
+                jmi.JMI_DER_CPPAD,N.size(self._blocking_factors),
+                self._blocking_factors) is 0, \
+                " jmi_opt_lp_new returned non-zero."
         except AttributeError,e:
-             raise jmi.JMIException("Can not create NLPCollocationLagrangePolynomials object. Try recompiling model with target='algorithms'")
+             raise jmi.JMIException("Can not create \
+             NLPCollocationLagrangePolynomials object. Try recompiling \
+             model with target='algorithms'")
         
         assert self._jmi_opt_sim.value is not None, \
             "jmi_opt_sim_lp struct has not returned correctly."
@@ -1388,7 +1467,8 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
     def __del__(self):
         """ Free jmi_opt_sim data structure. """
         try:
-            assert self._model.jmimodel._dll.jmi_opt_sim_lp_delete(self._jmi_opt_sim) == 0, \
+            assert self._model.jmimodel._dll.jmi_opt_sim_lp_delete(
+                self._jmi_opt_sim) == 0, \
                    "jmi_delete failed"
         except AttributeError, e:
             pass
@@ -1558,10 +1638,15 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
         
         Parameters::
         
-            tau -- Value of independent variable in polynomial evaluation.
-            n -- Order of polynomials.
-            pol -- Vector containing the polynomial coefficients. 
-            k -- Specify evaluation of the k:th Lagrange polynomial.
+            tau -- 
+                The value of independent variable in polynomial 
+                evaluation.
+            n -- 
+                The order of polynomials.
+            pol -- 
+                The vector containing the polynomial coefficients. 
+            k -- 
+                Specify evaluation of the k:th Lagrange polynomial.
         """
         if len(pol)!=n*n:
             raise jmi.JMIException("argument pol has the wrong size. Should be n*n.")
@@ -1569,33 +1654,37 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
             raise jmi.JMIException("Evaluating Lagrange polynomial failed.")
         
     
-    def opt_sim_lp_get_pols(self, n_cp, cp, cpp, Lp_coeffs, Lpp_coeffs, Lp_dot_coeffs, Lpp_dot_coeffs, Lp_dot_vals, Lpp_dot_vals):
-        """
-        Get the Lagrange polynomials of a specified order.
+    def opt_sim_lp_get_pols(self, n_cp, cp, cpp, Lp_coeffs, Lpp_coeffs, 
+        Lp_dot_coeffs, Lpp_dot_coeffs, Lp_dot_vals, Lpp_dot_vals):
+        """ Get the Lagrange polynomials of a specified order.
         
         Parameters::
         
             n_cp -- 
-                Number of collocation points.
+                The number of collocation points.
             cp -- 
-                Radau collocation points for polynomials of order n_cp-1. (Return)
+                The Radau collocation points for polynomials of order 
+                n_cp-1. (Return variable)
             cpp -- 
-                Radau collocation points for polynomials of order n_cp. (Return)
+                The Radau collocation points for polynomials of order 
+                n_cp. (Return variable)
             Lp_coeffs -- 
-                Polynomial coefficients for polynomials based on the points 
-                given by cp. (Return)
+                The polynomial coefficients for polynomials based on the 
+                points given by cp. (Return variable)
             Lp_dot_coeffs -- 
-                Polynomial coefficients for polynomials based on the points 
-                given by cpp. (Return) 
+                The polynomial coefficients for polynomials based on the 
+                points given by cpp. (Return variable)
             Lpp__dot_coeffs -- 
-                Polynomial coefficients for the derivatives of the polynomials 
-                based on the cp points. (Return)
+                The polynomial coefficients for the derivatives of the 
+                polynomials based on the cp points. (Return variable)
             Lp_dot_vals -- 
-                Values of the derivatives of the cp polynomials when evaluated 
-                at the Radau collocation points.(Return)
+                The values of the derivatives of the cp polynomials when 
+                evaluated at the Radau collocation points.(Return 
+                variable)
             Lpp_dot_vals --  
-                Values of the derivatives of the cpp polynomials when evaluated 
-                at the collocation points. (Return)
+                The values of the derivatives of the cpp polynomials 
+                when evaluated at the collocation points. (Return 
+                variable)
             
         """
         self._model.jmimodel._dll.jmi_opt_sim_lp_get_pols.argtypes = [ct.c_int,

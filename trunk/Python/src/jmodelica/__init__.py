@@ -79,24 +79,27 @@ def optimize(model,
              solver_args={}):
     """ Compact function for model optimization.
     
-    The intention with this function is to wrap model compilation, creation of 
-    a model object and optimization in one function call. The optimization 
-    method depends on which algorithm is used, this can be set with the 
-    function argument 'algorithm'. Arguments for the algorithm and solver are 
-    passed as dicts. Which arguments that are valid depends on which algorithm 
-    is used, see the algorithm implementation in algorithm_drivers.py for details.
+    The intention with this function is to wrap model compilation, 
+    creation of a model object and optimization in one function call. 
+    The optimization method depends on which algorithm is used, this can 
+    be set with the function argument 'algorithm'. Arguments for the 
+    algorithm and solver are passed as dicts. Which arguments that are 
+    valid depends on which algorithm is used, see the algorithm 
+    implementation in algorithm_drivers.py for details.
     
-    The default algorithm for this function is CollocationLagrangePolynomialsAlg. 
+    The default algorithm for this function is 
+    CollocationLagrangePolynomialsAlg. 
     
-    The simplest way of using the function is to pass the model name and path 
-    to the model file (a jmi.Model is enough if model is already compiled) and 
-    use the default values for all other arguments.
+    The simplest way of using the function is to pass the model name and 
+    path to the model file (a jmi.Model is enough if model is already 
+    compiled) and use the default values for all other arguments.
     
     Parameters::
     
         model -- 
-            Model object or model name (supply model name if model should be 
-            (re)compiled, then mo-file(s) must also be provided)
+            Model object or model name (supply model name if model 
+            should be (re)compiled, then mo-file(s) must also be 
+            provided)
         file_name --
             Path to model file or list of paths to model files. 
             Default: empty string (no compilation)
@@ -104,27 +107,29 @@ def optimize(model,
             Target argument to compiler. 
             Default: 'ipopt'
         compiler_options --
-            Dict with options for the compiler (see options.xml for possible 
-            values). 
+            Dict with options for the compiler (see options.xml for 
+            possible values). 
             Default: empty dict
         algorithm --
             The algorithm which will be used for the simulation is 
-            specified by passing the algorithm class in this argument. The 
-            algorithm class can be any class which implements the abstract 
-            class AlgorithmBase (found in algorithm_drivers.py). In this way 
-            it is possible to write own algorithms and use them with this 
-            function.
+            specified by passing the algorithm class in this argument. 
+            The algorithm class can be any class which implements the 
+            abstract class AlgorithmBase (found in algorithm_drivers.py). 
+            In this way it is possible to write own algorithms and use 
+            them with this function.
             Default: CollocationLagrangePolynomialsAlg
         alg_args --
-            All arguments for the chosen algorithm should be listed in this dict.
-            Valid arguments depend on the algorithm chosen, see algorithm 
-            implementation in algorithm_drivers.py for details.      
+            All arguments for the chosen algorithm should be listed in 
+            this dict. Valid arguments depend on the algorithm chosen, 
+            see algorithm implementation in algorithm_drivers.py for 
+            details.      
             Default: empty dict
         solver_args --
-            All arguments for the chosen solver should be listed in this dict.
-            Valid arguments depend on the chosen algorithm and possibly which 
-            solver has been selected for the algorithm. See algorithm 
-            implementation in algorithm_drivers.py for details.
+            All arguments for the chosen solver should be listed in this 
+            dict. Valid arguments depend on the chosen algorithm and 
+            possibly which solver has been selected for the algorithm. 
+            See algorithm implementation in algorithm_drivers.py for 
+            details.
             Default: empty dict
     
     Returns::
@@ -153,56 +158,59 @@ def simulate(model,
              solver_args={}):
     """ Compact function for model simulation.
     
-    The intention with this function is to wrap model compilation, creation of 
-    a model object and simulation in one function call. The simulation 
-    method depends on which algorithm is used, this can be set with the 
-    function argument 'algorithm'. Arguments for the algorithm and solver are 
-    passed as dicts. Which arguments that are valid depends on which algorithm 
-    is used, see the algorithm implementation in algorithm_drivers.py for details.
+    The intention with this function is to wrap model compilation, 
+    creation of a model object and simulation in one function call. The 
+    simulation method depends on which algorithm is used, this can be set 
+    with the function argument 'algorithm'. Arguments for the algorithm 
+    and solver are passed as dicts. Which arguments that are valid 
+    depends on which algorithm is used, see the algorithm implementation 
+    in algorithm_drivers.py for details.
     
     The default algorithm for this function is AssimuloAlg. 
     
-    The simplest way of using the function is to pass the model name and path 
-    to the model file (a jmi.Model is enough if model is already compiled) and 
-    use the default values for all other arguments.
+    The simplest way of using the function is to pass the model name and 
+    path to the model file (a jmi.Model is enough if model is already 
+    compiled) and use the default values for all other arguments.
     
     Parameters::
     
         model -- 
-            Model object or model name (supply model name if model should be 
-            (re)compiled, then mo-file must also be provided)
+            Model object or model name (supply model name if model 
+            should be (re)compiled, then mo-file must also be provided)
         file_name --
             Path to model file or list of paths to model files.
             Default: empty string (no compilation)
         compiler --
-            Set compiler that model should be compiled with, 'modelica' or 
-            'optimica'.
+            Set compiler that model should be compiled with, 'modelica' 
+            or 'optimica'.
             Default: 'modelica'
         compiler_target --
             Target argument to compiler. 
             Default: 'ipopt'
         compiler_options --
-            Dict with options for the compiler (see options.xml for possible 
-            values). 
+            Dict with options for the compiler (see options.xml for 
+            possible values). 
             Default: empty dict
         algorithm --
             The algorithm which will be used for the simulation is 
-            specified by passing the algorithm class in this argument. The 
-            algorithm class can be any class which implements the abstract 
-            class AlgorithmBase (found in algorithm_drivers.py). In this way 
-            it is possible to write own algorithms and use them with this 
-            function.
+            specified by passing the algorithm class in this argument. 
+            The algorithm class can be any class which implements the 
+            abstract class AlgorithmBase (found in algorithm_drivers.py). 
+            In this way it is possible to write own algorithms and use 
+            them with this function.
             Default: AssimuloAlg
         alg_args --
-            All arguments for the chosen algorithm should be listed in this dict.
-            Valid arguments depend on the algorithm chosen, see algorithm 
-            implementation in algorithm_drivers.py for details.      
+            All arguments for the chosen algorithm should be listed in 
+            this dict. Valid arguments depend on the algorithm chosen, 
+            see algorithm implementation in algorithm_drivers.py for 
+            details.
             Default: empty dict
         solver_args --
-            All arguments for the chosen solver should be listed in this dict.
-            Valid arguments depend on the chosen algorithm and possibly which 
-            solver has been selected for the algorithm. See algorithm 
-            implementation in algorithm_drivers.py for details.
+            All arguments for the chosen solver should be listed in this 
+            dict. Valid arguments depend on the chosen algorithm and 
+            possibly which solver has been selected for the algorithm. 
+            See algorithm implementation in algorithm_drivers.py for 
+            details.
             Default: empty dict
     
     Returns::
@@ -229,56 +237,59 @@ def initialize(model,
                solver_args={}):
     """ Compact function for model initialization.
     
-    The intention with this function is to wrap model compilation, creation of 
-    a model object and initialization in one function call. The initialization 
-    method depends on which algorithm is used, this can be set with the 
-    function argument 'algorithm'. Arguments for the algorithm and solver are 
-    passed as dicts. Which arguments that are valid depends on which algorithm 
-    is used, see the algorithm implementation in algorithm_drivers.py for details.
+    The intention with this function is to wrap model compilation, 
+    creation of a model object and initialization in one function call. 
+    The initialization method depends on which algorithm is used, this 
+    can be set with the function argument 'algorithm'. Arguments for the 
+    algorithm and solver are passed as dicts. Which arguments that are 
+    valid depends on which algorithm is used, see the algorithm 
+    implementation in algorithm_drivers.py for details.
     
     The default algorithm for this function is IpoptInitializationAlg. 
     
-    The simplest way of using the function is to pass the model name and path 
-    to the model file (a jmi.Model is enough if model is already compiled) and 
-    use the default values for all other arguments.
+    The simplest way of using the function is to pass the model name and 
+    path to the model file (a jmi.Model is enough if model is already 
+    compiled) and use the default values for all other arguments.
     
     Parameters::
     
         model -- 
-            Model object or model name (supply model name if model should be 
-            (re)compiled, then mo-file must also be provided)
+            Model object or model name (supply model name if model 
+            should be (re)compiled, then mo-file must also be provided)
         file_name --
             Path to model file or list of paths to model files. 
             Default: empty string (no compilation)
         compiler --
-            Set compiler that model should be compiled with, 'modelica' or 
-            'optimica'.
+            Set compiler that model should be compiled with, 'modelica' 
+            or 'optimica'.
             Default: 'modelica'
         compiler_target --
             Target argument to compiler. 
             Default: 'ipopt'
         compiler_options --
-            Dict with options for the compiler (see options.xml for possible 
-            values). 
+            Dict with options for the compiler (see options.xml for 
+            possible values). 
             Default: empty dict
         algorithm --
             The algorithm which will be used for the initialization is 
-            specified by passing the algorithm class in this argument. The 
-            algorithm class can be any class which implements the abstract 
-            class AlgorithmBase (found in algorithm_drivers.py). In this way 
-            it is possible to write own algorithms and use them with this 
-            function.
+            specified by passing the algorithm class in this argument. 
+            The algorithm class can be any class which implements the 
+            abstract class AlgorithmBase (found in algorithm_drivers.py). 
+            In this way it is possible to write own algorithms and use 
+            them with this function.
             Default: IpoptInitializationAlg
         alg_args --
-            All arguments for the chosen algorithm should be listed in this dict.
-            Valid arguments depend on the algorithm chosen, see algorithm 
-            implementation in algorithm_drivers.py for details.      
+            All arguments for the chosen algorithm should be listed in 
+            this dict. Valid arguments depend on the algorithm chosen, 
+            see algorithm implementation in algorithm_drivers.py for 
+            details.      
             Default: empty dict
         solver_args --
-            All arguments for the chosen solver should be listed in this dict.
-            Valid arguments depend on the chosen algorithm and possibly which 
-            solver has been selected for the algorithm. See algorithm 
-            implementation in algorithm_drivers.py for details.
+            All arguments for the chosen solver should be listed in this 
+            dict. Valid arguments depend on the chosen algorithm and 
+            possibly which solver has been selected for the algorithm. 
+            See algorithm implementation in algorithm_drivers.py for 
+            details.
             Default: empty dict
             
     Returns::
@@ -304,27 +315,30 @@ def _exec_algorithm(model,
              algorithm, 
              alg_args, 
              solver_args):
-    """ Helper function which performs all steps of an algorithm run which are 
-    common to all algortihms.
+    """ Helper function which performs all steps of an algorithm run 
+    which are common to all algortihms.
     
-    Throws exception if algorithm is not a subclass of algorithm_drivers.AlgorithmBase.
+    Throws exception if algorithm is not a subclass of 
+    algorithm_drivers.AlgorithmBase.
     """
 
     if not issubclass(algorithm, AlgorithmBase):
         raise Exception(str(algorithm)+
-                        " must be a subclass of jmodelica.algorithm_drivers.AlgorithmBase")
+        " must be a subclass of jmodelica.algorithm_drivers.AlgorithmBase")
 
     if isinstance(model, str) and file_name !='':
         # model class and mo-file must be set
         
         if not ipopt_present and compiler_target=='ipopt':
-            raise Exception('Could not find IPOPT. Check jmodelica.check_packages()')
+            raise Exception('Could not find IPOPT. \
+            Check jmodelica.check_packages()')
         
         model = _compile(model, file_name, compiler=compiler, 
                           compiler_options=compiler_options, 
                           compiler_target=compiler_target)
     
-    if isinstance(model,str) and model.lower().endswith('.fmu') and issubclass(algorithm, AssimuloAlg):
+    if isinstance(model,str) and model.lower().endswith('.fmu') and \
+        issubclass(algorithm, AssimuloAlg):
         algorithm = AssimuloFMIAlg
     if isinstance(model,fmi.FMIModel) and issubclass(algorithm, AssimuloAlg):
         algorithm = AssimuloFMIAlg
@@ -338,7 +352,8 @@ def _exec_algorithm(model,
     # get and return result
     return alg.get_result()
     
-def _compile(model_name, file_name, compiler='modelica', compiler_target = "ipopt", compiler_options={}):
+def _compile(model_name, file_name, compiler='modelica', 
+    compiler_target = "ipopt", compiler_options={}):
     """ Helper function which performs compilation of chosen model.
     
     Returns jmi.Model object.
@@ -476,7 +491,8 @@ def check_packages():
             sys.stdout.write("   - "+str(er))
             sys.stdout.write("\n")
         sys.stdout.write("\n")
-        sys.stdout.write("could not be found. It is not possible to run the jmodelica package without them.\n")
+        sys.stdout.write("could not be found. It is not possible to run \
+        the jmodelica package without them.\n")
     
     if len(warning_packages) > 0:
         sys.stdout.write("\n")
@@ -495,7 +511,8 @@ def check_packages():
 - Some of the examples in the jmodelica.examples package")
             elif w == 'nose':
                 sys.stdout.write("** The package nose could not be found. \n   \
-This package is needed in the jmodelica.tests package. You will not be able to run any tests.")
+This package is needed in the jmodelica.tests package. \
+You will not be able to run any tests.")
 		
             sys.stdout.write("\n\n")
 

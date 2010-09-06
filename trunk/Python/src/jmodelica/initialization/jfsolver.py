@@ -1,4 +1,19 @@
+#!/usr/bin/env python 
 # -*- coding: utf-8 -*-
+
+# Copyright (C) 2010 Modelon AB
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
 """ The jfsolver initialization module.
     Written by Johan Ylikiiskilä
 """
@@ -17,12 +32,12 @@ class JFSolver(object):
     """
     
     def __init__(self, model):
-        """
-        Create a solver used to initialize the model
+        """ Create a solver used to initialize the model
             
-        Parameters:
+        Parameters::
+        
             model --
-                the model object
+                The model object.
                 
         """
         
@@ -62,11 +77,11 @@ class JFSolver(object):
         print "Jacobian dimensions: ", self._ncol, "x", self._nrow
         
     def set_jac_usage(self,use_jac):
-        """
-        Set whether to use the jacobian supplied by the JMIinterface
+        """ Set whether to use the jacobian supplied by the JMIinterface
         or if we are to calculate it numericaly
             
-        Parameters:
+        Parameters::
+        
             use_jac --
                 Boolean set to True if the jacobian is to be 
                 supplied by the JMIinterface
@@ -74,13 +89,8 @@ class JFSolver(object):
         self._use_jac = use_jac
         
     def initialize(self):
-        """
-        Function that calculates the solution of the F0 = 0
+        """ Function that calculates the solution of the F0 = 0
         where F0 is the F0 of the JMIinterface
-            
-        Parameters:
-            
-            none
         
         """
         # call solver
@@ -113,17 +123,19 @@ class JFSolver(object):
         self._model.set_real_w(w)
             
     def export_result_dymola(self, file_name='', format='txt'):
-        """
-        Export the initialization result in Dymola format. 
+        """ Export the initialization result in Dymola format. 
 
-        Parameters:
+        Parameters::
+        
             file_name --
                 Name of the result file.
             format --
-                A string equal either to 'txt' for output to Dymola textual
-                format or 'mat' for output to Dymola binary Matlab format.
+                A string equal either to 'txt' for output to Dymola 
+                textual format or 'mat' for output to Dymola binary 
+                Matlab format.
 
-        Limitations:
+        Limitations::
+        
             Only format='txt' is currently supported.
         """
 
@@ -145,8 +157,8 @@ class JFSolver(object):
 
         
     def _wrap_init_F0(self,input):
-        """
-        Function used to get the residual of the F0 function for fsolve
+        """ Function used to get the residual of the F0 function for 
+        fsolve.
         """
         inp_size = input.shape[0]
     
@@ -166,8 +178,8 @@ class JFSolver(object):
         return output
 
     def _wrap_init_dF0(self,input):
-        """
-        Function used to get the jacobian of the F0 function for fsolve
+        """ Function used to get the jacobian of the F0 function for 
+        fsolve.
         """
         inp_size = input.shape[0]
     
