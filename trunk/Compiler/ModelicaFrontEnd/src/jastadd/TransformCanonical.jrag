@@ -140,13 +140,15 @@ aspect TransformCanonical {
 			
 	}
 
+	ArrayList<FVariable> FEquationBlock.activeVariables = new ArrayList<FVariable>();
+	
 	public void FClass.blt() {
 		
 		LinkedList<Stack<org.jmodelica.graphs.Equation>> blt_result = eqSys.blt();
 
 		StringBuffer str = new StringBuffer();
 		str.append("BLT:\n");
-		LinkedList<Stack<org.jmodelica.graphs.Equation>> blt = eqSys.blt();
+		//LinkedList<Stack<org.jmodelica.graphs.Equation>> blt = eqSys.blt();
 		int i = 0;
 		for (Stack<org.jmodelica.graphs.Equation> s : blt_result) {
 			str.append("Block "+i+":\n");
@@ -155,7 +157,40 @@ aspect TransformCanonical {
 			}
 			i++;
 		}
+
+		// Create a map from equation Ids to equations. Insert them
+		// in the same order as they were inserted in the equation system
+		// to get the same mapping. This needs to be changed... 
+		HashMap<String,FAbstractEquation> eqns = new HashMap<String,FAbstractEquation>();
+		int k = 1;
+		for (FAbstractEquation e : equations()) {
+			eqns.put("eq_"+k,e);
+			k++;
+		}		
+		str.append("\n Sorted equations:"); 
+		// Create blocks and insert into FClass
+		List<FEquationBlock> l = new List<FEquationBlock>();
+		for (Stack<org.jmodelica.graphs.Equation> s : blt_result) {
+			str.append("Block "+i+":\n");
+			FEquationBlock eb = new FEquationBlock();
+			l.add(eb);
+			for (org.jmodelica.graphs.Equation e : s) {
+				int eq_index = (int)Integer.parseInt(e.toString().substring(3));
+				eb.addFAbstractEquation(eqns.get(e.getName()));
+				String varName = e.getMatch().getName();
+				FQName fqn = new FQName(varName);
+				System.out.println(fqn.name());
+				AbstractFVariable fv = lookupFV(fqn,
+						e.getMatch().getTimesDiffed()==1); // TODO: handle higher order derivatives
+				if (fv instanceof FVariable) {
+					eb.activeVariables.add((FVariable)fv);
+				}
+				str.append(eqns.get(e.getName()).prettyPrint(" ") + "\n");
+			}
+			i++;
+		}
 		System.out.println(str.toString());
+		setFEquationBlockList(l);
 	}
 	
 	/**

@@ -711,8 +711,18 @@ aspect FlattPrettyPrint {
 			str.print(indent + "parameter equation\n");
 		getFParameterEquations().prettyPrintWithFix(p, str, nextInd, o, "", ";\n");
 	
+		int block_index = 0;
 	    boolean wroteEquation = false;
 	    for (FEquationBlock b : getFEquationBlocks()) {
+	    	if (root().options.getBooleanOption("equation_sorting")) {
+	    		if (block_index!=0) {
+	    			str.print("/* Block " + block_index + ": ");
+	    			for (FVariable fv : b.activeVariables) {
+	    				str.print(fv.name() + " ");
+	    			}
+	    			str.print("*/\n");
+	    		}
+	    	}
 	    	for (FAbstractEquation e : b.getFAbstractEquations()) {
 	    		if (e instanceof FAlgorithmBlock) {
 	    			p.toString(e, str, indent, o);
@@ -723,12 +733,22 @@ aspect FlattPrettyPrint {
 		    				str.print(indent);
 		    				str.print("equation\n");
 		    				wroteEquation = true;
+		    				if (root().options.getBooleanOption("equation_sorting")) {
+		    					if (block_index==0) {
+		    						str.print("/* Block " + block_index + ": ");
+		    						for (FVariable fv : b.activeVariables) {
+		    							str.print(fv.name() + " ");
+		    						}
+		    						str.print("*/\n");
+		    					}
+		    				}
 		    			}
 		    			p.toString(e, str, nextInd, o);
 			    		str.print(";\n");
 	    			}
 	    		}
 	    	}
+	    	block_index++;
 	    }
 	    
     	p.toString(getFFunctionDecls(), str, nextInd, o);

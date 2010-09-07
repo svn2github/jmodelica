@@ -619,5 +619,5 @@ aspect InheritedFactoryMethods {
 		node.setFStatementList(stmts);
 		return node;
 	}
-	
+		
 }
