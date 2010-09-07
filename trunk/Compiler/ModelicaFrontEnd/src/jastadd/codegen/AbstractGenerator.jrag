@@ -136,8 +136,15 @@ public abstract class AbstractGenerator {
 	 */
 	public void generate(String templateFile, String outputFile) 
 	  throws FileNotFoundException {
-		generate(new BufferedReader(new FileReader(new File(templateFile))),
-		  new PrintStream(new File(outputFile)));
+		try {
+			BufferedReader template = new BufferedReader(new FileReader(new File(templateFile)));
+			PrintStream output = new PrintStream(new File(outputFile));
+			generate(template, output);
+			template.close();
+			output.close();
+		} catch (IOException e) { // TODO: introduce specific exception type
+			throw new RuntimeException("IOException during code generation");
+		}
 	}
 	
 	/**

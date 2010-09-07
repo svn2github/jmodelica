@@ -82,6 +82,7 @@ aspect RootAccess {
         parser.setLineBreakMap(scanner.getLineBreakMap());
         sr = (SourceRoot)parser.parse(scanner);
         sr.setFileName(fileName);
+        reader.close();
         return sr;
     }
     
