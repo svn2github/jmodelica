@@ -1386,3 +1386,33 @@ class TestDependentParameterEvaluation9(TZValues):
         z = [ 3.,  3.,  4.,  6.,  3.,  3.,  4.,  6.,  3.,  3.,  4.,  6.,  0.]
         super(TestDependentParameterEvaluation9,self).__init__(fpath,cpath,z)
 
+
+class Test_JMU_methods:
+    """
+    This class tests the methods jmu_name and package_jmu.
+    """
+    
+    @testattr(stddist = True)
+    def test_jmu_name(self):
+        """
+        Test the method jmu_name.
+        """
+        name = jmi.jmu_name('VDP_pack.VDP')
+        assert name == 'VDP_pack_VDP'
+        name = jmi.jmu_name('VDP')
+        assert name == 'VDP'
+        name = jmi.jmu_name('VDP_pack')
+        assert name == 'VDP_pack'
+    
+    @testattr(stddist = True)
+    def test_package_jmu(self):
+        """
+        Test the method package_jmu. Basic test.
+        """
+        fpath_ODE = os.path.join(get_files_path(), 'Modelica', 'VDP.mo')
+        cpath_ODE = 'VDP_pack.VDP'
+        oc.compile_model(cpath_ODE, fpath_ODE)
+        
+        jmi.package_JMU(cpath_ODE)
+        
+        assert os.path.exists('VDP_pack_VDP.jmu')

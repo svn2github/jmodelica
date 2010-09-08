@@ -33,6 +33,8 @@ import shutil
 import _ctypes
 import atexit
 from lxml import etree
+import zipfile
+import platform as PL
 
 import xmlparser
 import io
@@ -5611,3 +5613,71 @@ class JMIModel(object):
             raise JMIException("Computing the number of columns and \
             non-zero elements failed.")
         return int(dHineq_n_cols.value), int(dHineq_n_nz.value)
+
+def jmu_name(class_name):
+    """
+    Computes the JMU name from a class name.
+    
+    Parameters::
+        
+        class_name  - the name of the model
+        
+    Returns::
+    
+        The JMU name (replaced dots with underscores)
+    """
+    return class_name.replace('.','_')
+
+def package_JMU(class_name):
+    """
+    Method that takes as input a class name and package all model related files into a JMU.
+    """
+    mName = class_name
+    mMangledName = class_name.replace('.','_') #The mangled name, replaces dots with underscores
+    
+    #Look for operating system and architecture
+    if sys.platform == 'win32':
+        platform = 'win'
+        suffix = '.dll'
+    elif sys.platform == 'darwin':
+        platform = 'darwin'
+        suffix = '.dylib'
+    else:
+        platform = 'linux'
+        suffix = '.so'
+    
+    if PL.architecture()[0].startswith('32'):
+        platform += '32'
+    else:
+        platform += '64'
+    
+    
+    file = zipfile.ZipFile(mMangledName+'.jmu', 'w') #Create the new archive
+    try:
+        #Write the xml file
+        file.write(mMangledName+'.xml', 'modelDescription.xml', zipfile.ZIP_DEFLATED)
+        #Write the .c file
+        file.write(mMangledName+'.c','sources'+os.sep+mMangledName+'.c',zipfile.ZIP_DEFLATED)
+        #Write the .mof file
+        file.write(mName+'.mof','resources'+os.sep+mName+'.mof',zipfile.ZIP_DEFLATED)
+        #Write the transformed .mof file
+        file.write(mName+'_transformed.mof','resources'+os.sep+mName+'_transformed.mof',zipfile.ZIP_DEFLATED)
+        #Write the parameter file
+        file.write(mMangledName+'_values.xml','resources'+os.sep+mMangledName+'_values.xml',zipfile.ZIP_DEFLATED)
+        #Write the binary
+        file.write(mMangledName+suffix,'binaries'+os.sep+platform+os.sep+mMangledName+suffix, zipfile.ZIP_DEFLATED)
+    except OSError:
+        raise JMIException('No such file or directory')
+    finally:
+        file.close()
+    
+    #Remove files
+    try:
+        os.remove(mMangledName+'.xml')        #XML
+        os.remove(mMangledName+'.c')          #Source file
+        os.remove(mName+'.mof')               #Mof file
+        os.remove(mName+'_transformed.mof')   #Transformed mof file
+        os.remove(mMangledName+'_values.xml') #XML
+        os.remove(mMangledName+suffix)        #Binary
+    except OSError, msg:
+        warnings.warn(msg)
