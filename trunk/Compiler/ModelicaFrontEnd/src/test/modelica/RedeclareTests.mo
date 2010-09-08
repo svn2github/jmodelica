@@ -3557,6 +3557,158 @@ end RedeclareTests.RedeclareElement14;
 end RedeclareElement14;
 
 
+model RedeclareElement15
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+	 JModelica.UnitTesting.TransformCanonicalTestCase(
+		 name="RedeclareElement15",
+		 description="Class declared in same scope as replacing class",
+		 flatModel="
+fclass RedeclareTests.RedeclareElement15
+ Real z.y;
+ Real z.x;
+equation
+ z.y = RedeclareTests.RedeclareElement15.C.f(z.x);
+ z.x = 1;
+
+ function RedeclareTests.RedeclareElement15.C.f
+  input Real i;
+  output Real o;
+ algorithm
+  o := ( i ) * ( 2 );
+  return;
+ end RedeclareTests.RedeclareElement15.C.f;
+end RedeclareTests.RedeclareElement15;
+")})));
+
+	package A
+		replaceable model B
+			Real x = 1;
+		end B;
+	end A;
+	
+	package C
+		extends A;
+		
+		function f
+			input Real i;
+			output Real o;
+		algorithm
+			o := i * 2;
+		end f;
+		
+		redeclare model extends B
+			Real y = f(x);
+		end B;
+	end C;
+	
+	C.B z;
+end RedeclareElement15;
+
+
+model RedeclareElement16
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="RedeclareElement16",
+         description="Class declared in same scope as replacing class",
+         flatModel="
+fclass RedeclareTests.RedeclareElement16
+ Real z.x;
+ Real z.y;
+equation
+ z.x = 1;
+ z.y = RedeclareTests.RedeclareElement16.D.f(z.x);
+
+ function RedeclareTests.RedeclareElement16.D.f
+  input Real i;
+  output Real o;
+ algorithm
+  o := ( i ) * ( 2 );
+  return;
+ end RedeclareTests.RedeclareElement16.D.f;
+end RedeclareTests.RedeclareElement16;
+")})));
+
+	package A
+		replaceable model B
+			Real x = 1;
+		end B;
+	end A;
+	
+	package C
+		extends A;
+		
+		redeclare model B = D.E;
+	end C;
+	
+	package D
+		function f
+			input Real i;
+			output Real o;
+		algorithm
+			o := i * 2;
+		end f;
+		
+		model E
+			Real x = 1;
+			Real y = f(x);
+		end E;
+	end D;
+	
+	C.B z;
+end RedeclareElement16;
+
+
+model RedeclareElement17
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="RedeclareElement17",
+         description="Class declared in same scope as replacing class",
+         flatModel="
+fclass RedeclareTests.RedeclareElement17
+ Real z.x;
+ Real z.y;
+equation
+ z.x = 1;
+ z.y = RedeclareTests.RedeclareElement17.D.f(z.x);
+
+ function RedeclareTests.RedeclareElement17.D.f
+  input Real i;
+  output Real o;
+ algorithm
+  o := ( i ) * ( 2 );
+  return;
+ end RedeclareTests.RedeclareElement17.D.f;
+end RedeclareTests.RedeclareElement17;
+")})));
+
+	package A
+		replaceable model B
+			Real x = 1;
+		end B;
+	end A;
+	
+	package C
+		extends A(redeclare model B = D.E);
+	end C;
+	
+	package D
+		function f
+			input Real i;
+			output Real o;
+		algorithm
+			o := i * 2;
+		end f;
+		
+		model E
+			Real x = 1;
+			Real y = f(x);
+		end E;
+	end D;
+	
+	C.B z;
+end RedeclareElement17;
+
+
 
 model RedeclareSameLevel10
 	package A

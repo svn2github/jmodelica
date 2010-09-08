@@ -283,10 +283,14 @@ aspect InstLookupClasses {
 	
 	syn HashSet InstAccess.qualifiedLookupInstClass(String name) circular [emptyHashSet()] = emptyHashSet();	
 	eq InstClassAccess.qualifiedLookupInstClass(String name) = myInstClassDecl().memberInstClass(name);
-
-	// TODO: rewrite so that classes are only looked up in constraining types.	
-	syn lazy HashSet InstNode.genericLookupInstClass(String name) circular [emptyHashSet()] {
 	
+	syn HashSet InstNode.lookupInstClassInSurrounding(String name) = lookupInstClass(name);
+	eq InstReplacingFullClassDecl.lookupInstClassInSurrounding(String name) = 
+		getInstClassRedeclare().lookupInstClass(name);
+	eq InstReplacingShortClassDecl.lookupInstClassInSurrounding(String name) = 
+		getInstClassRedeclare().lookupInstClass(name);
+
+	syn lazy HashSet InstNode.genericLookupInstClass(String name) circular [emptyHashSet()] {
 		HashSet set = new HashSet(4);
 		
 		for (InstClassDecl icd : instClassDecls()) {
@@ -306,11 +310,10 @@ aspect InstLookupClasses {
 		if (set.size()>0)
 			return set;
 		else
-			return lookupInstClass(name);
+			return lookupInstClassInSurrounding(name);
 	}
 	
 	syn HashSet InstNode.superLookupInstClass(String name) circular [emptyHashSet()] {
-	
 		HashSet set = new HashSet();
 
 		for (InstImport ii : instImports()) {
@@ -319,7 +322,7 @@ aspect InstLookupClasses {
 						
 		for (InstClassDecl icd : instClassDecls()) {
 			if (icd.matchInstClassDecl(name)) {
-					set.add(icd);
+				set.add(icd);
 			}
 		}		
 	
@@ -329,9 +332,7 @@ aspect InstLookupClasses {
 			return lookupInstClass(name);
 	}
 
-	// TODO: rewrite so that classes are only looked up in constraining types.	
 	syn lazy HashSet InstComponentDecl.genericLookupInstClass(String name) circular [emptyHashSet()] {
-	
 		HashSet set = new HashSet(4);
 		
 		for (InstClassDecl icd : instClassDecls()) {
@@ -354,8 +355,6 @@ aspect InstLookupClasses {
 			return myInstClass().genericLookupInstClass(name);
 	}
 
-
-	// TODO: rewrite so that classes are only looked up in constraining types.	
 	syn lazy HashSet InstComponentDecl.genericLookupInstClassInComponent(String name) circular [emptyHashSet()] {
 		HashSet set = new HashSet(4);
 		
@@ -373,7 +372,6 @@ aspect InstLookupClasses {
 			return set;
 		else // continue search at myInstClass()
 			return myInstClass().genericLookupInstClass(name);
-		// TODO: really search in myInstClass()?
 	}
 	
 	syn HashSet InstComponentDecl.superLookupInstClassInComponent(String name) circular [emptyHashSet()] {
@@ -394,13 +392,11 @@ aspect InstLookupClasses {
 			return set;
 		else // else search for non-local class
 			return myInstClass().superLookupInstClass(name);
-		// TODO: really search in myInstClass()?
 	}
 
 	
 	// TODO: rewrite so that classes are only looked up in constraining types.	
 	syn lazy HashSet InstExtends.genericLookupInstClassInExtends(String name) circular [emptyHashSet()] {
-	
 		HashSet set = new HashSet(4);
 		
 		for (InstClassDecl icd : instClassDecls()) 
@@ -414,7 +410,6 @@ aspect InstLookupClasses {
 			return set;
 		else // continue search at myInstClass()
 			return getClassName().myInstClassDecl().genericLookupInstClass(name);
-		// TODO: really search in myInstClass()?
 	}
 	
 	syn HashSet InstExtends.superLookupInstClassInExtends(String name) circular [emptyHashSet()] {
@@ -427,7 +422,6 @@ aspect InstLookupClasses {
 			return set;
 		else // else search for non-local class
 			return getClassName().myInstClassDecl().superLookupInstClass(name);
-		// TODO: really search in myInstClass()?
 	}
 
 	/**
