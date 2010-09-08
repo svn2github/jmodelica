@@ -47,7 +47,7 @@ import org.jmodelica.modelica.compiler.*;
  *     -t=<type>    set type of test, e.g. ErrorTestCase
  *     -c=<class>   set name of class to generate annotation for, if name 
  *                  does not contain a dot, base name of .mo file is prepended
- *     -d=<data>    set extra data to send to the specific generator
+ *     -d=<data>    set extra data to send to the specific generator, \n is interpreted
  *     -p=<opts>    comma-separated list of compiler options to override defaults for,
  *                  example: -p=eliminate_alias_variables=false,default_msl_version="2.2"
  *     -h           print this help

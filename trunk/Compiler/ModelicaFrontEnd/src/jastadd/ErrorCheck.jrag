@@ -385,36 +385,15 @@ aspect ErrorCheck {
 aspect InstanceErrorCheck {
 
  // Error checking in instance tree
-    syn lazy InstFullClassDecl InstNode.retrieveInstFullClassDecl(String className) {
-      for(InstNode n : getInstClassDecls()) {
-		  InstFullClassDecl fcd = n.retrieveInstFullClassDecl(className);
-	  	  if (fcd != null)
-	  	  	return fcd;
-	  }
-	  return null;
-    }   
-  	
-  	eq InstFullClassDecl.retrieveInstFullClassDecl(String className) {
-	   	if (className.equals(qualifiedName())) {
-	   		return this;
-		} else
-			for (InstClassDecl icd : instClassDecls()) {
-				InstFullClassDecl fcd = icd.retrieveInstFullClassDecl(className);
-				if (fcd!=null) 
-					return fcd;
-			}
-		return null;
-	}
 
 	// We don't want to error check an entire model, just the classes
 	//   that are used. 
 	public Collection<Problem> InstProgramRoot.checkErrorsInInstClass(String className) throws ModelicaClassNotFoundException{
-		InstFullClassDecl fcd = retrieveInstFullClassDecl(className);
-		if (fcd == null) {
+		InstClassDecl icd = simpleLookupInstClassDecl(className);
+		if (icd.isUnknown()) 
 			throw new ModelicaClassNotFoundException(className);
-		} else {
-			return fcd.errorCheck();
-		}
+		else
+			return icd.errorCheck();
 	}
 
 	boolean InstNode.errorChecked = false;
@@ -761,7 +740,7 @@ aspect InstanceErrorCheck {
 			    boolean pos = true;
 			    String desc = functionCallDecription();
 			    for (InstFunctionArgument arg : unbindableArgs) 
-			    	pos = arg.generateUnbindableError(desc, pos) && pos;
+			    	pos = arg.generateUnbindableError(desc, pos);
 	    	}
 	    }
 	}

@@ -393,9 +393,8 @@ end NameTest12_Err;
  model NameTest13_Err
      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.ErrorTestCase(name="NameTest13_Err",
-                                              description="Test that names are looked up correct.",
-                                               errorMessage=
-"
+          description="Test that names are looked up correct.",
+          errorMessage="
  4 error(s) found...
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 386, column 39:
@@ -406,10 +405,6 @@ Semantic error at line 386, column 37:
 In file 'src/test/modelica/NameTests.mo':
 Semantic error at line 386, column 39:
   The component y is undeclared
-In file 'src/test/modelica/NameTests.mo':
-Semantic error at line 389, column 12:
-  The component y is undeclared
- 
 ")})));
   
   

@@ -416,44 +416,50 @@ aspect FileNames {
     
 aspect Names {
   // simple names
-  syn String Access.name() = getID();
-  syn String ParseAccess.name() = getID();
-  syn String ClassAccess.name() = getID();
+  syn String Access.name()          = getID();
+  syn String ParseAccess.name()     = getID();
+  syn String ClassAccess.name()     = getID();
   syn String AmbiguousAccess.name() = getID();
   syn String ComponentAccess.name() = getID();
-  syn String IdDecl.name() = getID();
-  syn String Dot.name() = getLeft().name() + "." + getRight().name();
+  syn String IdDecl.name()          = getID();
+  syn String Dot.name() = getLeftNoTransform().name() + "." + getRightNoTransform().name();
   
    // simple names of InstAccess:es
-  syn String InstAccess.name() = getID();
-  syn String InstParseAccess.name() = getID();
-  syn String InstClassAccess.name() = getID();
+  syn String InstAccess.name()          = getID();
+  syn String InstParseAccess.name()     = getID();
+  syn String InstClassAccess.name()     = getID();
   syn String InstAmbiguousAccess.name() = getID();
   syn String InstComponentAccess.name() = getID();
   syn String InstDot.name() = getLeftNoTransform().name() + "." + getRightNoTransform().name(); 
   
-  syn String InstNamedModification.name() = getName().name();
+  syn String InstNamedModification.name() = getNameNoTransform().name();
   
-  syn String Access.qualifiedName() = getID();
+  syn String Access.qualifiedName()   = getID();
   syn lazy String Dot.qualifiedName() = getLeft().qualifiedName() + "." + getRight().qualifiedName();
   
-  syn String InstAccess.qualifiedName() = getID();
+  syn String InstAccess.qualifiedName()   = getID();
   syn lazy String InstDot.qualifiedName() = getLeft().qualifiedName() + "." + getRight().qualifiedName();
   
   syn String ClassDecl.name();
-  eq BaseClassDecl.name() = getName().getID();
-  eq BuiltInClassDecl.name() = getName().getID();
+  eq BaseClassDecl.name()    = getNameNoTransform().getID();
+  eq BuiltInClassDecl.name() = getNameNoTransform().getID();
   //eq LibNode.name() = getName();
   
-  syn String ComponentDecl.name() = getName().getID();
+  syn String ComponentDecl.name() = getNameNoTransform().getID();
   
-  syn String FunctionCall.name() = getName().name();
+  syn String FunctionCall.name() = getNameNoTransform().name();
   
   syn String InstImport.name();
-  eq InstImportQualified.name()   = getPackageName().getLastInstAccess().name();
-  eq InstImportRename.name()      = ((ImportClauseRename) getImportClause()).getIdDecl().getID();
+  eq InstImportQualified.name()   = getPackageNameNoTransform().lastName();
+  eq InstImportRename.name()      = 
+	  ((ImportClauseRename) getImportClause()).getIdDeclNoTransform().getID();
   eq InstImportUnqualified.name() = "*";    // To avoid returning null
   
+  syn String Access.lastName() = name();
+  eq Dot.lastName() = getRightNoTransform().lastName();
+  
+  syn String InstAccess.lastName() = name();
+  eq InstDot.lastName() = getRightNoTransform().lastName();
   
   syn String ClassDecl.qualifiedName();
   eq BaseClassDecl.qualifiedName() = combineName(classNamePrefix(), name());
@@ -508,8 +514,8 @@ aspect Names {
           return name();
   }
   
-  syn String InstForIndex.name() = getInstPrimitive().name();
-  syn String FForIndex.name()    = getFVariable().name();
+  syn String InstForIndex.name() = getInstPrimitiveNoTransform().name();
+  syn String FForIndex.name()    = getFVariableNoTransform().name();
  
   syn String InstAccess.enclosingName() = "";
   eq InstDot.enclosingName() = name().substring(0, name().lastIndexOf('.'));
@@ -859,29 +865,29 @@ aspect FlatNames {
     syn String FIdUse.name() = getFQName().name();
     syn String FIdUseExp.name() = getFIdUse().name();
     eq FDerExp.name() = derName();
-    syn String FInstAccessExp.name() = getInstAccess().name();
-    syn String FIdUseInstAccess.name() = getInstAccess().name();
+    syn String FInstAccessExp.name() = getInstAccessNoTransform().name();
+    syn String FIdUseInstAccess.name() = getInstAccessNoTransform().name();
     
-    syn String FIdDecl.name() = getFQName().name();
+    syn String FIdDecl.name() = getFQNameNoTransform().name();
 
-    syn String FClass.name()        = getFQName().name();
-    syn String FFunctionDecl.name() = getFQName().name();
-    syn String FRecordDecl.name()   = getFQName().name();
+    syn String FClass.name()        = getFQNameNoTransform().name();
+    syn String FFunctionDecl.name() = getFQNameNoTransform().name();
+    syn String FRecordDecl.name()   = getFQNameNoTransform().name();
     
     syn String FAbstractFunctionCall.name();
-    eq InstFunctionCall.name()     = getName().name();
-    eq FFunctionCall.name()        = getName().name();
+    eq InstFunctionCall.name()     = getNameNoTransform().name();
+    eq FFunctionCall.name()        = getNameNoTransform().name();
     eq FBuiltInFunctionCall.name() = builtInName();
     
     syn String AbstractFVariable.name() = null;
-    eq FVariable.name()         = getFQName().name();
-    eq FFunctionVariable.name() = getFQName().name();
+    eq FVariable.name()         = getFQNameNoTransform().name();
+    eq FFunctionVariable.name() = getFQNameNoTransform().name();
 
 //  syn lazy String FQName.derName() = "der(" + name() + ")";
     
-    eq FDerivativeVariable.name() = getFQName().derName();
-    syn String FIdUse.derName() = getFQName().derName();
-    syn String FIdUseExp.derName() = getFIdUse().derName();
+    eq FDerivativeVariable.name()  = getFQNameNoTransform().derName();
+    syn String FIdUse.derName()    = getFQNameNoTransform().derName();
+    syn String FIdUseExp.derName() = getFIdUseNoTransform().derName();
 
     syn lazy String FQName.derName() {
         StringBuilder str = new StringBuilder();

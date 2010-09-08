@@ -3520,6 +3520,44 @@ end RedeclareTests.RedeclareElement13;
 end RedeclareElement13;
 
 
+model RedeclareElement14
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="RedeclareElement14",
+         description="Looking up replacing class through extends",
+         flatModel="
+fclass RedeclareTests.RedeclareElement14
+ Real d.y;
+ Real d.x;
+equation
+ d.y = 2;
+ d.x = 1;
+end RedeclareTests.RedeclareElement14;
+")})));
+
+	package A
+		extends B;
+		
+		redeclare model extends D
+			Real y;
+		end D;
+	end A;
+	
+	package B
+		extends C;
+	end B;
+	
+	package C
+		replaceable model D
+			Real x;
+		end D;
+	end C;
+
+	A.D d(x = 1, y = 2);
+end RedeclareElement14;
+
+
+
 model RedeclareSameLevel10
 	package A
 		replaceable partial model C
@@ -3723,6 +3761,64 @@ end RedeclareTests.RedeclareFunction2;
 	
 	C.D x = C.B({1, 2});
 end RedeclareFunction2;
+
+
+// TODO: flat name of func looks wrong
+model RedeclareFunction3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="RedeclareFunction3",
+         description="Functions redeclared in replacing package",
+         flatModel="
+fclass RedeclareTests.RedeclareFunction3
+ Real z.x;
+ Real z.y;
+equation
+ z.x = RedeclareTests.f(z.y);
+ z.y = 1;
+
+ function RedeclareTests.f
+  input Real i;
+  output Real o;
+ algorithm
+  o := ( i ) * ( 2 );
+  return;
+ end RedeclareTests.f;
+end RedeclareTests.RedeclareFunction3;
+")})));
+
+	package A
+		extends B;
+		redeclare model extends C(redeclare package D = E)
+			Real x = D.f(y);
+		end C;
+	end A;
+	
+	package B
+		replaceable model C
+			replaceable package D = F;
+			Real y = 1;
+		end C;
+	end B;
+	
+	package E
+		extends F;
+		
+		redeclare function extends f
+		algorithm
+			o := i * 2;
+		end f;
+	end E;
+	
+	package F
+		replaceable function f
+			input Real i;
+			output Real o;
+		end f;
+	end F;
+
+	A.C z;
+end RedeclareFunction3;
 
 
 

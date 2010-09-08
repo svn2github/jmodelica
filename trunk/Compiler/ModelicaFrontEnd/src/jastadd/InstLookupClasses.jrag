@@ -62,7 +62,10 @@ aspect InstLookupClasses {
 	eq InstExtendsShortClass.getInstClassModification().lookupInstClass(String name)   = lookupInstClass(name);
 	eq InstShortClassDecl.getChild().lookupInstClass(String name)                      = lookupInstClass(name);
 	eq InstReplacingShortClassDecl.getChild().lookupInstClass(String name) = getInstClassRedeclare().lookupInstClass(name);
-	eq InstReplacingFullClassDecl.getChild().lookupInstClass(String name)  = getInstClassRedeclare().lookupInstClass(name);
+/* TODO: This makes RedeclareTests.RedeclareFunction3 fail. Shouldn't names be looked up *in* 
+ *       redeclare, not *from* it? This should apply to the 3 other similar ones, but removing 
+ *       them makes other tests fail. */
+//	eq InstReplacingFullClassDecl.getChild().lookupInstClass(String name)  = getInstClassRedeclare().lookupInstClass(name);
 	eq InstReplacingShortClassDecl.getOriginalInstClass().lookupInstClass(String name) = lookupInstClass(name);
 	eq InstReplacingFullClassDecl.getOriginalInstClass().lookupInstClass(String name)  = lookupInstClass(name);
 	
@@ -354,97 +357,77 @@ aspect InstLookupClasses {
 
 	// TODO: rewrite so that classes are only looked up in constraining types.	
 	syn lazy HashSet InstComponentDecl.genericLookupInstClassInComponent(String name) circular [emptyHashSet()] {
-	    if (myInstClass().isRedeclared())
-			return myInstClass().lookupInstClassInInstClassRedeclare(name);
-		
 		HashSet set = new HashSet(4);
 		
-		for (InstClassDecl icd : instClassDecls()) {
-			if (icd.matchInstClassDecl(name)) {
+		for (InstClassDecl icd : instClassDecls()) 
+			if (icd.matchInstClassDecl(name)) 
 				set.add(icd);
-			}
-		}
 		
-		for (InstExtends ie : instExtends()) {
+		for (InstExtends ie : instExtends()) 
 			set.addAll(ie.memberInstClass(name));
-		}
 
-		for (InstExtends ie : instExtends()) {
-			HashSet h = ie.getClassName().lookupInstClass();
-			if (h.size()==1)
-				set.addAll(((InstClassDecl)h.iterator().next()).memberInstClass(name));
-		}
-
-		for (InstImport ii : instImports()) {
+		for (InstImport ii : instImports()) 
 			set.addAll(ii.lookupInstClassInImport(name));		
-		}
 
 		if (set.size()>0) // Did not find any local class
 			return set;
-		else // continue search att myInstClass()
+		else // continue search at myInstClass()
 			return myInstClass().genericLookupInstClass(name);
+		// TODO: really search in myInstClass()?
 	}
 	
 	syn HashSet InstComponentDecl.superLookupInstClassInComponent(String name) circular [emptyHashSet()] {
+		// TODO: Why do we do this? Seems to be needed, as tests fail without it
 		if (myInstClass().isRedeclared())
 			return myInstClass().lookupInstClassInInstClassRedeclare(name);
 		
 		HashSet set = new HashSet();
 
-		for (InstImport ii : instImports()) {
+		for (InstImport ii : instImports()) 
 			set.addAll(ii.lookupInstClassInImport(name));		
-		}
 							
-		for (InstClassDecl icd : instClassDecls()) {
-			if (icd.matchInstClassDecl(name)) {
+		for (InstClassDecl icd : instClassDecls()) 
+			if (icd.matchInstClassDecl(name)) 
 					set.add(icd);
-			}
-		}		
 	
 		if (set.size()>0) //Found local class
 			return set;
 		else // else search for non-local class
 			return myInstClass().superLookupInstClass(name);
+		// TODO: really search in myInstClass()?
 	}
 
 	
 	// TODO: rewrite so that classes are only looked up in constraining types.	
 	syn lazy HashSet InstExtends.genericLookupInstClassInExtends(String name) circular [emptyHashSet()] {
-	   	if (getClassName().myInstClassDecl().isRedeclared())
-			return getClassName().myInstClassDecl().lookupInstClassInInstClassRedeclare(name);
 	
 		HashSet set = new HashSet(4);
 		
-		for (InstClassDecl icd : instClassDecls()) {
-			if (icd.matchInstClassDecl(name)) {
+		for (InstClassDecl icd : instClassDecls()) 
+			if (icd.matchInstClassDecl(name)) 
 				set.add(icd);
-			}
-		}
 		
-		for (InstExtends ie : instExtends()) {
+		for (InstExtends ie : instExtends()) 
 			set.addAll(ie.memberInstClass(name));
-		}
 	
 		if (set.size()>0) // Did not find any local class
 			return set;
-		else // continue search att myInstClass()
+		else // continue search at myInstClass()
 			return getClassName().myInstClassDecl().genericLookupInstClass(name);
+		// TODO: really search in myInstClass()?
 	}
 	
 	syn HashSet InstExtends.superLookupInstClassInExtends(String name) circular [emptyHashSet()] {
-	   	if (getClassName().myInstClassDecl().isRedeclared())
-			return getClassName().myInstClassDecl().lookupInstClassInInstClassRedeclare(name);
-		
 		HashSet set = new HashSet();
-		for (InstClassDecl icd : instClassDecls()) {
-			if (icd.matchInstClassDecl(name)) {
+		for (InstClassDecl icd : instClassDecls()) 
+			if (icd.matchInstClassDecl(name)) 
 					set.add(icd);
-			}
-		}		
+
 		if (set.size()>0) //Found local class
 			return set;
 		else // else search for non-local class
 			return getClassName().myInstClassDecl().superLookupInstClass(name);
+		// TODO: really search in myInstClass()?
 	}
 
 	/**
