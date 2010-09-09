@@ -57,7 +57,7 @@ class TestNLPInitWrappers:
         """Test setUp. Load the test model.""" 
         cpath = "CSTR.CSTR_Init"
         fname = cpath.replace('.','_')       
-        cstr = jmi.Model(fname)    
+        cstr = jmi.JMUModel(fname)    
         self.init_nlp = NLPInitialization(cstr)     
      
     @testattr(ipopt = True)   
@@ -145,7 +145,7 @@ class TestNLPInit:
         # Load the dynamic library and XML data
         cpath_daeinit = "DAEInitTest"
         fname_daeinit = cpath_daeinit.replace('.','_',1)
-        self.dae_init_test = jmi.Model(fname_daeinit)
+        self.dae_init_test = jmi.JMUModel(fname_daeinit)
 
         # This is to check that values set in the model prior to
         # creation of the NLPInitialization object are used as an

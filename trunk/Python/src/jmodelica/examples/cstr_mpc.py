@@ -57,7 +57,7 @@ def run_demo(with_plots=True):
     oc.compile_model("CSTR.CSTR_Init", curr_dir+"/files/CSTR.mo", target='ipopt')
 
     # Load a model instance into Python
-    init_model = jmi.Model("CSTR_CSTR_Init")
+    init_model = jmi.JMUModel("CSTR_CSTR_Init")
 
     # Create DAE initialization object.
     init_nlp = NLPInitialization(init_model)
@@ -93,7 +93,7 @@ def run_demo(with_plots=True):
     
     oc.compile_model("CSTR.CSTR_Opt_MPC", curr_dir+"/files/CSTR.mo", target='ipopt')
 
-    cstr = jmi.Model("CSTR_CSTR_Opt_MPC")
+    cstr = jmi.JMUModel("CSTR_CSTR_Opt_MPC")
 
     cstr.set_value('Tc_ref',Tc_0_B)
     cstr.set_value('c_ref',c_0_B)
@@ -136,7 +136,7 @@ def run_demo(with_plots=True):
     oc.compile_model("CSTR.CSTR", curr_dir+"/files/CSTR.mo", target='ipopt')
     
     # Load a model instance into Python
-    sim_model = jmi.Model("CSTR_CSTR")
+    sim_model = jmi.JMUModel("CSTR_CSTR")
     
     sim_model.set_value('c_init',c_0_A)
     sim_model.set_value('T_init',T_0_A)
@@ -150,8 +150,9 @@ def run_demo(with_plots=True):
     
     i = 0
     
-    plt.figure(4)
-    plt.clf()
+    if with_plots:
+        plt.figure(4)
+        plt.clf()
     
     for t in t_mpc[0:-1]:
         Tc_ref = ref_mpc[i]
@@ -191,42 +192,46 @@ def run_demo(with_plots=True):
         cstr.set_value('cstr.T_init',cstr_sim.y_cur[1])
         sim_model.set_value('c_init',cstr_sim.y_cur[0])
         sim_model.set_value('T_init',cstr_sim.y_cur[1])
-        plt.figure(4)
-        plt.subplot(3,1,1)
-        plt.plot(t_T_sim,N.array(cstr_sim.y)[:,0],'b')
-        plt.show()
         
-        plt.subplot(3,1,2)
-        plt.plot(t_T_sim,N.array(cstr_sim.y)[:,1],'b')
-        plt.show()
+        if with_plots:
+            plt.figure(4)
+            plt.subplot(3,1,1)
+            plt.plot(t_T_sim,N.array(cstr_sim.y)[:,0],'b')
+            plt.show()
+            
+            plt.subplot(3,1,2)
+            plt.plot(t_T_sim,N.array(cstr_sim.y)[:,1],'b')
+            plt.show()
         
-        if t_mpc[i]==0:
-            plt.subplot(3,1,3)
-            plt.plot([t_mpc[i],t_mpc[i+1]],[Tc_ctrl,Tc_ctrl],'b')
-        else:
-            plt.subplot(3,1,3)
-            plt.plot([t_mpc[i],t_mpc[i],t_mpc[i+1]],[Tc_ctrl_old,Tc_ctrl,Tc_ctrl],'b')
+            if t_mpc[i]==0:
+                plt.subplot(3,1,3)
+                plt.plot([t_mpc[i],t_mpc[i+1]],[Tc_ctrl,Tc_ctrl],'b')
+            else:
+                plt.subplot(3,1,3)
+                plt.plot([t_mpc[i],t_mpc[i],t_mpc[i+1]],[Tc_ctrl_old,Tc_ctrl,Tc_ctrl],'b')
             
         Tc_ctrl_old = Tc_ctrl
             
         i = i+1
-        plt.show()
+        if with_plots:
+            plt.show()
 
 
-    plt.figure(4)
-    plt.subplot(3,1,1)
-    plt.ylabel('c')
-    plt.plot([0,T_final],[c_0_B,c_0_B],'--')
-    plt.grid()
-    plt.subplot(3,1,2)
-    plt.ylabel('T')
-    plt.plot([0,T_final],[T_0_B,T_0_B],'--')
-    plt.grid()
-    plt.subplot(3,1,3)
-    plt.ylabel('Tc')
-    plt.plot([0,T_final],[Tc_0_B,Tc_0_B],'--')
-    plt.grid()
-    plt.xlabel('t')
+    if with_plots:
+        plt.figure(4)
+        plt.subplot(3,1,1)
+        plt.ylabel('c')
+        plt.plot([0,T_final],[c_0_B,c_0_B],'--')
+        plt.grid()
+        plt.subplot(3,1,2)
+        plt.ylabel('T')
+        plt.plot([0,T_final],[T_0_B,T_0_B],'--')
+        plt.grid()
+        plt.subplot(3,1,3)
+        plt.ylabel('Tc')
+        plt.plot([0,T_final],[Tc_0_B,Tc_0_B],'--')
+        plt.grid()
+        plt.xlabel('t')
 
 
 if __name__ == "__main__":

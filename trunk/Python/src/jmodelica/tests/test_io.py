@@ -61,7 +61,7 @@ class TestIO:
         """
         # Load the dynamic library and XML data
         self.fname = "VDP_pack_VDP_Opt_Min_Time"
-        self.vdp = jmi.Model(self.fname)
+        self.vdp = jmi.JMUModel(self.fname)
         
         
     @testattr(ipopt = True)
@@ -117,8 +117,8 @@ class test_ResultWriterDymola:
         """
         Sets up the test case.
         """
-        self._bounce  = FMIModel('bouncingBall.fmu',path_to_fmus)
-        self._dq = FMIModel('dq.fmu',path_to_fmus)
+        self._bounce  = FMUModel('bouncingBall.fmu',path_to_fmus)
+        self._dq = FMUModel('dq.fmu',path_to_fmus)
         self._bounce.initialize()
         self._dq.initialize()
         

@@ -56,7 +56,7 @@ def run_demo(with_plots=True,with_blocking_factors = False):
     mc.compile_model("DISTLib.Binary_Dist_initial", curr_dir+"/files/DISTLib.mo", target='ipopt')
 
     # Load a model instance into Python
-    init_model = jmi.Model("DISTLib_Binary_Dist_initial")
+    init_model = jmi.JMUModel("DISTLib_Binary_Dist_initial")
     
     # Set inputs for Stationary point A
     u1_0_A = 3.0

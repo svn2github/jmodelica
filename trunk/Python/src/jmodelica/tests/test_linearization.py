@@ -59,7 +59,7 @@ class TestLinearization:
     def test_linearization(self):
         
         # Load the dynamic library and XML data
-        model = jmi.Model(fname)
+        model = jmi.JMUModel(fname)
 
         # Create DAE initialization object.
         init_nlp = NLPInitialization(model)

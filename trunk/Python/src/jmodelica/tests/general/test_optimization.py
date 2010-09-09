@@ -257,7 +257,7 @@ class TestStaticOptimizationDependentParameters:
         mofile = os.path.join(get_files_path(), 'Modelica', 'StaticOptimizationTest.mo')
         oc.compile_model("StaticOptimizationTest.StaticOptimizationTest2",
                          mofile,target="ipopt")
-        cls.model = jmi.Model("StaticOptimizationTest_StaticOptimizationTest2")
+        cls.model = jmi.JMUModel("StaticOptimizationTest_StaticOptimizationTest2")
         cls.nlp = NLPInitialization(cls.model,stat=1)
         cls.ipopt_nlp = InitializationOptimizer(cls.nlp)
 

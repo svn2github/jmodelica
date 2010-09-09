@@ -47,7 +47,7 @@ def run_demo(with_plots=True):
                      target='ipopt')
     
     # Load the dynamic library and XML data
-    model=jmi.Model("ParEst_ParEst")
+    model=jmi.JMUModel("ParEst_ParEst")
     
     # Retreive parameter and variable vectors
     pi = model.get_real_pi();

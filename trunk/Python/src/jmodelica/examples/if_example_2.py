@@ -45,7 +45,7 @@ def run_demo(with_plots=True):
     mc.compile_model(model_name,mofile,target='ipopt')
 
     # Load the dynamic library and XML data
-    model=jmi.Model(compiled_model_name)
+    model=jmi.JMUModel(compiled_model_name)
 
     # Initialize the switches (1=true, 0=false)
     model.set_sw(N.array([1,1]))

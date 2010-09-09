@@ -55,7 +55,7 @@ def test_unzip():
     assert tempxml.endswith('.xml')
     assert modelname == 'bouncingBall'
     
-    nose.tools.assert_raises(FMIException,unzip_FMU,'Coupled')
+    nose.tools.assert_raises(FMUException,unzip_FMU,'Coupled')
     
     #FMU
     fmu = 'dq.fmu'
@@ -92,8 +92,8 @@ class Test_FMI:
         """
         Sets up the test case.
         """
-        self._bounce  = FMIModel('bouncingBall.fmu',path_to_fmus)
-        self._dq = FMIModel('dq.fmu',path_to_fmus)
+        self._bounce  = FMUModel('bouncingBall.fmu',path_to_fmus)
+        self._dq = FMUModel('dq.fmu',path_to_fmus)
         self._bounce.initialize()
         self._dq.initialize()
     
@@ -151,7 +151,7 @@ class Test_FMI:
         
         assert self._bounce.time == 1.0
         
-        nose.tools.assert_raises(FMIException, self._bounce._set_time, N.array([1.0,1.0]))
+        nose.tools.assert_raises(FMUException, self._bounce._set_time, N.array([1.0,1.0]))
         
         
     @testattr(fmi = True)
@@ -159,8 +159,8 @@ class Test_FMI:
         """
         This tests the property of the continuous_states.
         """
-        nose.tools.assert_raises(FMIException, self._bounce._set_continuous_states,N.array([1.]))
-        nose.tools.assert_raises(FMIException, self._dq._set_continuous_states,N.array([1.0,1.0]))
+        nose.tools.assert_raises(FMUException, self._bounce._set_continuous_states,N.array([1.]))
+        nose.tools.assert_raises(FMUException, self._dq._set_continuous_states,N.array([1.0,1.0]))
         
         temp = N.array([2.0,1.0])
         self._bounce.continuous_states = temp
@@ -315,7 +315,7 @@ class Test_FMI:
         """
         This test the attribute debugging.
         """
-        model = FMIModel('bouncingBall.fmu',path_to_fmus)
+        model = FMUModel('bouncingBall.fmu',path_to_fmus)
         model.initialize()
         model.set_debug_logging(True) #Activates the logging
         assert len(model.get_log()) == 0 #Get the current log (empty)

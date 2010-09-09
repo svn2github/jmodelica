@@ -446,7 +446,7 @@ class ModelicaCompiler():
         except jpype.JavaException, ex:
             self._handle_exception(ex)
 
-        return jmi.Model(c_file)
+        return jmi.JMUModel(c_file)
 
     def parse_model(self,model_file_name):   
         """ 

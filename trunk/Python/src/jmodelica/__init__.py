@@ -340,7 +340,7 @@ def _exec_algorithm(model,
     if isinstance(model,str) and model.lower().endswith('.fmu') and \
         issubclass(algorithm, AssimuloAlg):
         algorithm = AssimuloFMIAlg
-    if isinstance(model,fmi.FMIModel) and issubclass(algorithm, AssimuloAlg):
+    if isinstance(model,fmi.FMUModel) and issubclass(algorithm, AssimuloAlg):
         algorithm = AssimuloFMIAlg
 
     # initialize algorithm
@@ -383,7 +383,7 @@ def _compile(model_name, file_name, compiler='modelica',
         comp.compile_model(model_name, file_name, target=compiler_target)
         # Load the dynamic library and XML data
         compiled_name = model_name.replace('.','_',1)
-        model = jmi.Model(compiled_name)
+        model = jmi.JMUModel(compiled_name)
 
     else:
         raise Exception("Provide a model name and one or more \

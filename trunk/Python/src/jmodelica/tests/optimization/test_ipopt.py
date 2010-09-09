@@ -56,7 +56,7 @@ class TestNLP_VDP:
         """Test setUp. Load the test model."""
         cpath_cstr = "CSTR.CSTR_Opt"
         fname_cstr = cpath_cstr.replace('.','_')        
-        self.cstr = jmi.Model(fname_cstr)
+        self.cstr = jmi.JMUModel(fname_cstr)
         # Initialize the mesh
         n_e = 150 # Number of elements 
         hs = N.ones(n_e)*1./n_e # Equidistant points
@@ -201,7 +201,7 @@ class TestNLP_CSTR():
         cpath_vdp = "VDP_pack.VDP_Opt_Min_Time"
         fname_vdp = cpath_vdp.replace('.','_',1)
         self.fname_vdp = fname_vdp   
-        self.vdp = jmi.Model(fname_vdp)
+        self.vdp = jmi.JMUModel(fname_vdp)
         # Initialize the mesh
         n_e = 100 # Number of elements 
         hs = N.ones(n_e)*1./n_e # Equidistant points
@@ -388,7 +388,7 @@ class TestCollocationEventException:
         """Test setUp. Load the test model."""
         cpath_model = "IfExpTestEvents"
         fname_model = cpath_model.replace('.','_')
-        self.model = jmi.Model(fname_model)
+        self.model = jmi.JMUModel(fname_model)
 
     @testattr(ipopt = True)
     def test_exception_thrown(self):

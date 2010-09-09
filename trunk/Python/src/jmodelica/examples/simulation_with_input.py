@@ -46,7 +46,7 @@ def run_demo(with_plots=True):
     mc.compile_model(model_name,mofile,target='ipopt')
 
     # Load the dynamic library and XML data
-    model=jmi.Model(model_name)
+    model=jmi.JMUModel(model_name)
 
     model.set_value('u',u[0])
     

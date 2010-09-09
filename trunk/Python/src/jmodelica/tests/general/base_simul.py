@@ -78,7 +78,7 @@ class _BaseSimOptTest:
         self.rel_tol = rel_tol
         self.abs_tol = abs_tol
         self.model_name = _model_name
-        self.model = jmi.Model(self.model_name)
+        self.model = jmi.JMUModel(self.model_name)
 
 
     def run(self):

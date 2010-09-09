@@ -36,6 +36,15 @@ from jmodelica.compiler import ModelicaCompiler
 import jmodelica.xmlparser as xp
 import jmodelica.io
 
+try:
+    from jmodelica.simulation.assimulo_interface import JMIODE
+    #, JMIDAE, FMIODE, JMIModel_Exception
+    #from jmodelica.simulation.assimulo_interface import write_data
+    #from jmodelica.simulation.assimulo_interface import TrajectoryLinearInterpolation
+    from assimulo.explicit_ode import CVode
+except NameError, ImportError:
+    warnings.warn('Could not load Assimulo module. Check jmodelica.check_packages()')
+
 int = N.int32
 N.int = N.int32
 
@@ -71,7 +80,7 @@ class TestModel_VDP:
         """
         Sets up the test case.
         """
-        self.vdp = jmi.Model("VDP_pack_VDP_Opt")
+        self.vdp = jmi.JMUModel("VDP_pack_VDP_Opt")
         
     @testattr(stddist = True)
     def test_has_cppad_derivatives(self):
@@ -425,33 +434,35 @@ class TestModel_VDP:
                 all_zeros = False
                 
         assert not all_zeros
-            
+    
+    @testattr(assimulo = True)
     def test_optimization_cost_eval(self):
         """Test evaluation of optimization cost function."""
-        simulator_mod = JMIODE(self.m)
+        simulator_mod = JMIODE(self.vdp)
         simulator = CVode(simulator_mod)
         simulator.simulate(10)
 
         T, ys = [simulator.t, simulator.y]
         
-        self.vdp.set_x_p(ys[-1], 0)
-        self.vdp.set_dx_p(self.vdp.real_dx, 0)
+        self.vdp.set_real_x_p(ys[-1], 0)
+        self.vdp.set_real_dx_p(self.vdp.real_dx, 0)
         cost = self.vdp.opt_eval_J()
         nose.tools.assert_not_equal(cost, 0)
-        
+    
+    @testattr(assimulo = True)
     def test_optimization_cost_jacobian(self):
         """Test evaluation of optimization cost function jacobian.
         Note:
         This test is model specific for the VDP oscillator.
         """
-        simulator_mod = JMIODE(self.m)
+        simulator_mod = JMIODE(self.vdp)
         simulator = CVode(simulator_mod)
         simulator.simulate(10)
 
         T, ys = [simulator.t, simulator.y]
         
-        self.vdp.set_x_p(ys[-1], 0)
-        self.vdp.set_dx_p(self.vdp.real_dx, 0)
+        self.vdp.set_real_x_p(ys[-1], 0)
+        self.vdp.set_real_dx_p(self.vdp.real_dx, 0)
         jac = self.vdp.opt_eval_jac_J(jmi.JMI_DER_X_P)
         N.testing.assert_almost_equal(jac, [[0, 0, 1]])
     
@@ -583,7 +594,7 @@ class TestModel_RLC:
         """
         Sets up the test case.
         """
-        self.rlc = jmi.Model("RLC_Circuit")
+        self.rlc = jmi.JMUModel("RLC_Circuit")
 
     # removed method
     #@testattr(stddist = True)
@@ -652,7 +663,7 @@ class TestJMIModel_VDP:
         """
         Sets up the test case.
         """
-        self.vdp = jmi.Model("VDP_pack_VDP_Opt")               
+        self.vdp = jmi.JMUModel("VDP_pack_VDP_Opt")               
 
     @testattr(stddist = True)
     def test_initAD(self):
@@ -1231,7 +1242,7 @@ class TestJMIModel_VDP:
         mc.compile_model(cpath, fpath)
     
         # Load the dynamic library and XML data
-        vdp = jmi.Model(fname)
+        vdp = jmi.JMUModel(fname)
     
         res_n_eq_F = 2
         n_eq_F, n_eq_R = vdp.jmimodel.dae_get_sizes()
@@ -1261,7 +1272,7 @@ class TestModelGeneric:
     
     def setUp(self):
         """Set up the test case."""
-        self.m = jmi.Model("DependentParameterTest")
+        self.m = jmi.JMUModel("DependentParameterTest")
 
     @testattr(stddist = True)
     def test_setget_independent_parameter(self):

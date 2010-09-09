@@ -24,7 +24,7 @@ import warnings
 import numpy as N
 
 import jmodelica
-from jmodelica.fmi import FMIModel
+from jmodelica.fmi import FMUModel
 from jmodelica.optimization import ipopt
 from jmodelica.initialization.ipopt import NLPInitialization
 from jmodelica.initialization.ipopt import InitializationOptimizer
@@ -305,10 +305,10 @@ class AssimuloFMIAlg(AlgorithmBase):
         
         """
 
-        if isinstance(model,FMIModel):
+        if isinstance(model,FMUModel):
             self.model = model
         else:
-            self.model = FMIModel(model) #Create an FMIModel
+            self.model = FMUModel(model) #Create an FMIModel
             self.model.initialize()      #Set the start attributes
         
         if not assimulo_present:

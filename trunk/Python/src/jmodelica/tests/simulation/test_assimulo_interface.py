@@ -65,7 +65,7 @@ class Test_JMI_ODE:
         package_ODE = 'VDP_pack_VDP_Opt'
 
         # Load the dynamic library and XML data
-        self.m_ODE = jmi.Model(package_ODE)
+        self.m_ODE = jmi.JMUModel(package_ODE)
         
         # Creates the solvers
         self.ODE = JMIODE(self.m_ODE)
@@ -117,7 +117,7 @@ class Test_JMI_ODE:
         mc.compile_model(cpath_DAE, fpath_DAE)
         package_DAE = 'RLC_Circuit'
         # Load the dynamic library and XML data
-        m_DAE = jmi.Model(package_DAE)
+        m_DAE = jmi.JMUModel(package_DAE)
         
         nose.tools.assert_raises(JMIModel_Exception, JMIODE, m_DAE)
         
@@ -129,7 +129,7 @@ class Test_JMI_ODE:
         mc.compile_model(cpath_DISC, fpath_DISC)
         package_DISC = 'IfExpExamples_IfExpExample2'
         # Load the dynamic library and XML data
-        m_DISC = jmi.Model(package_DISC)
+        m_DISC = jmi.JMUModel(package_DISC)
         
         nose.tools.assert_raises(JMIModel_Exception, JMIODE, m_DISC)
     
@@ -219,8 +219,8 @@ class Test_JMI_DAE:
         package_DISC = 'IfExpExamples_IfExpExample2'
 
         # Load the dynamic library and XML data
-        self.m_DAE = jmi.Model(package_DAE)
-        self.m_DISC = jmi.Model(package_DISC)
+        self.m_DAE = jmi.JMUModel(package_DAE)
+        self.m_DISC = jmi.JMUModel(package_DISC)
         
         # Creates the solvers
         self.DAE = JMIDAE(self.m_DAE)
@@ -477,8 +477,8 @@ class Test_FMI_ODE:
         """
         Load the test model.
         """
-        self._bounce  = fmi.FMIModel('bouncingBall.fmu',path_to_fmus)
-        self._dq = fmi.FMIModel('dq.fmu',path_to_fmus)
+        self._bounce  = fmi.FMUModel('bouncingBall.fmu',path_to_fmus)
+        self._dq = fmi.FMUModel('dq.fmu',path_to_fmus)
         self._bounce.initialize()
         self._dq.initialize()
         self._bounceSim = FMIODE(self._bounce)
@@ -498,7 +498,7 @@ class Test_FMI_ODE:
         assert self._dqSim._g_nbr == 0
         try:
             self._dqSim.state_events
-            raise FMIException('')
+            raise FMUException('')
         except AttributeError:
             pass
         
@@ -624,8 +624,8 @@ class Test_FMI_ODE:
         nose.tools.assert_almost_equal(height.x[-1],-0.9804523,5)
         nose.tools.assert_almost_equal(height.t[-1],3.000000,5)
         
-        #Test with predefined FMIModel
-        model = fmi.FMIModel(os.path.join(path_to_fmus,'bouncingBall.fmu'))
+        #Test with predefined FMUModel
+        model = fmi.FMUModel(os.path.join(path_to_fmus,'bouncingBall.fmu'))
         model.initialize()
         res_obj = simulate(model, alg_args={'final_time':3.})
         res = res_obj.result_data

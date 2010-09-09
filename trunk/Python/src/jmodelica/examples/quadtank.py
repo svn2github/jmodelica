@@ -43,7 +43,7 @@ def run_demo(with_plots=True):
                      target='ipopt')
 
     # Load the dynamic library and XML data
-    qt=jmi.Model("QuadTank_pack_QuadTank_Opt")
+    qt=jmi.JMUModel("QuadTank_pack_QuadTank_Opt")
 
     # Define inputs for operating point A
     u_A = N.array([2.,2])

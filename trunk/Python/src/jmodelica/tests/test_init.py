@@ -107,7 +107,7 @@ class Test_init_ipopt:
         """
         Sets up the test case.
         """
-        self.model_vdp = jmi.Model(Test_init_ipopt.dll_vdp)
+        self.model_vdp = jmi.JMUModel(Test_init_ipopt.dll_vdp)
 
     @testattr(ipopt = True)
     def test_initialize(self):
@@ -254,7 +254,7 @@ class Test_init_assimulo:
         self.fpath_minit = os.path.join(get_files_path(), 'Modelica', 'must_initialize.mo')
         self.fpath_rlc = os.path.join(get_files_path(),'Modelica','RLC_Circuit.mo')
         self.cpath_rlc = "RLC_Circuit"
-        self.model_rlc = jmi.Model(Test_init_assimulo.dll_rlc)
+        self.model_rlc = jmi.JMUModel(Test_init_assimulo.dll_rlc)
 
     @testattr(assimulo = True)
     def test_simulate(self):

@@ -19,7 +19,7 @@
 import pylab as P
 import numpy as N
 import os as O
-from jmodelica.fmi import FMIModel
+from jmodelica.fmi import FMUModel
 
 curr_dir = O.path.dirname(O.path.abspath(__file__));
 path_to_fmus = O.path.join(curr_dir, 'files', 'FMUs')
@@ -36,7 +36,7 @@ def run_demo(with_plots=True):
     """
     
     #Load the FMU by specifying the fmu and the directory
-    bouncing_fmu = FMIModel('bouncingBall.fmu',path_to_fmus)
+    bouncing_fmu = FMUModel('bouncingBall.fmu',path_to_fmus)
 
     Tstart = 0.5 #The start time.
     Tend   = 3.0 #The final simulation time.

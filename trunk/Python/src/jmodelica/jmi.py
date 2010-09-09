@@ -38,6 +38,7 @@ import platform as PL
 
 import xmlparser
 import io
+from jmodelica.core import BaseModel
 
 int = N.int32
 N.int = N.int32
@@ -343,12 +344,12 @@ atexit.register(_cleanup)
 #                        HIGH LEVEL INTERFACE
 # ================================================================
 
-class Model(object):
+class JMUModel(BaseModel):
     
     """ High-level interface to a JMIModel. """
     
     def __init__(self, libname, path ='.'):
-        """ Create a jmi.Model. 
+        """ Create a jmi.JMUModel. 
         
         Create a Model object. Load generated binary file, set default 
         values from the model variables XML file, set dependent 

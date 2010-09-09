@@ -31,9 +31,10 @@ from lxml import etree
 from operator import itemgetter
 import warnings
 
+from jmodelica.core import BaseModel
 
-class FMIException(Exception):
-    """A JMI exception."""
+class FMUException(Exception):
+    """An FMU exception."""
     pass
 
 
@@ -46,7 +47,7 @@ def unzip_FMU(archive, path='.'):
     try:
         archive = ZipFile(os.path.join(path,archive))
     except IOError:
-        raise FMIException('Could not locate the FMU.')
+        raise FMUException('Could not locate the FMU.')
     
     dir = ['binaries','sources']
     
@@ -85,7 +86,7 @@ def unzip_FMU(archive, path='.'):
             fout.close()
             break
     else:
-        raise FMIException('Could not find modelDescription.xml in the FMU.')
+        raise FMUException('Could not find modelDescription.xml in the FMU.')
     # --
     
     #Extrating the binary
@@ -111,10 +112,10 @@ def unzip_FMU(archive, path='.'):
         return [tempdllname.split(os.sep)[-1], tempxmlname.split(os.sep)[-1], modelname]
 
     else:
-        raise FMIException('Could not find binaries for your platform.')
+        raise FMUException('Could not find binaries for your platform.')
         return False
 
-class FMIModel(object):
+class FMUModel(BaseModel):
     """
     A JMI Model loaded from a DLL.
     """
@@ -522,7 +523,7 @@ class FMIModel(object):
         """
         t = N.array(t)
         if t.size > 1:
-            raise FMIException('Failed to set the time. The size of "t" is greater than one.')
+            raise FMUException('Failed to set the time. The size of "t" is greater than one.')
         self.__t = t
         temp = self._fmiReal(t)
         self._fmiSetTime(self._model,temp)
@@ -548,7 +549,7 @@ class FMIModel(object):
         status = self._fmiGetContinuousStates(self._model, values, self._nContinuousStates)
         
         if status != 0:
-            raise FMIException('Failed to retrieve the continuous states.')
+            raise FMUException('Failed to retrieve the continuous states.')
         
         return values
         
@@ -569,13 +570,13 @@ class FMIModel(object):
         """
         values = N.array(values)
         if values.size != self._nContinuousStates:
-            raise FMIException('Failed to set the new continuous states. The number of values are not consistent' \
+            raise FMUException('Failed to set the new continuous states. The number of values are not consistent' \
                                 ' with the number of continuous states.')
         
         status = self._fmiSetContinuousStates(self._model, values, self._nContinuousStates)
         
         if status >= 3:
-            raise FMIException('Failed to set the new continuous states.')
+            raise FMUException('Failed to set the new continuous states.')
     
     continuous_states = property(_get_continuous_states, _set_continuous_states)
     
@@ -601,7 +602,7 @@ class FMIModel(object):
         status = self._fmiGetNominalContinuousStates(self._model, values, self._nContinuousStates)
         
         if status != 0:
-            raise FMIException('Failed to get the nominal values.')
+            raise FMUException('Failed to get the nominal values.')
             
         return values
     
@@ -629,7 +630,7 @@ class FMIModel(object):
         status = self._fmiGetDerivatives(self._model, values, self._nContinuousStates)
         
         if status != 0:
-            raise FMIException('Failed to get the derivative values.')
+            raise FMUException('Failed to get the derivative values.')
             
         return values
         
@@ -655,7 +656,7 @@ class FMIModel(object):
         status = self._fmiGetEventIndicators(self._model, values, self._nEventIndicators)
         
         if status != 0:
-            raise FMIException('Failed to get the event indicators.')
+            raise FMUException('Failed to get the event indicators.')
             
         return values
 
@@ -709,7 +710,7 @@ class FMIModel(object):
         status = self._fmiEventUpdate(self._model, intermediateResult, C.byref(self._eventInfo))
         
         if status != 0:
-            raise FMIException('Failed to update the events.')
+            raise FMUException('Failed to update the events.')
     
     def save_time_point(self):
         """
@@ -797,7 +798,7 @@ class FMIModel(object):
         status = self._fmiGetStateValueReferences(self._model, values, self._nContinuousStates)
         
         if status != 0:
-            raise FMIException('Failed to get the continuous state reference values.')
+            raise FMUException('Failed to get the continuous state reference values.')
             
         return values
     
@@ -889,7 +890,7 @@ class FMIModel(object):
         status = self._fmiGetReal(self._model, valueref, nref, values)
         
         if status != 0:
-            raise FMIException('Failed to get the Real values.')
+            raise FMUException('Failed to get the Real values.')
             
         return values
         
@@ -918,12 +919,12 @@ class FMIModel(object):
         values = N.array(values)
 
         if valueref.size != values.size:
-            raise FMIException('The length of valueref and values are inconsistent.')
+            raise FMUException('The length of valueref and values are inconsistent.')
 
         status = self._fmiSetReal(self._model,valueref, nref, values)
 
         if status != 0:
-            raise FMIException('Failed to set the Real values.')
+            raise FMUException('Failed to set the Real values.')
         
         
     def get_integer(self, valueref):
@@ -951,7 +952,7 @@ class FMIModel(object):
         status = self._fmiGetInteger(self._model, valueref, nref, values)
         
         if status != 0:
-            raise FMIException('Failed to get the Integer values.')
+            raise FMUException('Failed to get the Integer values.')
             
         return values
         
@@ -980,12 +981,12 @@ class FMIModel(object):
         values = N.array(values)
         
         if valueref.size != values.size:
-            raise FMIException('The length of valueref and values are inconsistent.')
+            raise FMUException('The length of valueref and values are inconsistent.')
         
         status = self._fmiSetInteger(self._model,valueref, nref, values)
         
         if status != 0:
-            raise FMIException('Failed to set the Integer values.')
+            raise FMUException('Failed to set the Integer values.')
         
         
     def get_boolean(self, valueref):
@@ -1013,7 +1014,7 @@ class FMIModel(object):
         status = self._fmiGetBoolean(self._model, valueref, nref, values)
         
         if status != 0:
-            raise FMIException('Failed to get the Boolean values.')
+            raise FMUException('Failed to get the Boolean values.')
         
         bol = []
         for i in values:
@@ -1052,12 +1053,12 @@ class FMIModel(object):
         values = N.array(values)
         
         if valueref.size != values.size:
-            raise FMIException('The length of valueref and values are inconsistent.')
+            raise FMUException('The length of valueref and values are inconsistent.')
         
         status = self._fmiSetBoolean(self._model,valueref, nref, values)
         
         if status != 0:
-            raise FMIException('Failed to set the Boolean values.')
+            raise FMUException('Failed to set the Boolean values.')
         
     def get_string(self, valueref):
         """
@@ -1086,7 +1087,7 @@ class FMIModel(object):
         status = self._fmiGetString(self._model, valueref, nref, temp)
 
         if status != 0:
-            raise FMIException('Failed to set the String values.')
+            raise FMUException('Failed to set the String values.')
         
         return N.array(temp)[:]
     
@@ -1119,12 +1120,12 @@ class FMIModel(object):
             temp[i] = values[i]
         
         if valueref.size != values.size:
-            raise FMIException('The length of valueref and values are inconsistent.')
+            raise FMUException('The length of valueref and values are inconsistent.')
 
         status = self._fmiSetString(self._model, valueref, nref, temp)
         
         if status != 0:
-            raise FMIException('Failed to set the String values.')
+            raise FMUException('Failed to set the String values.')
     
     def set_debug_logging(self,flag):
         """
@@ -1146,7 +1147,7 @@ class FMIModel(object):
             status = self._fmiSetDebugLogging(self._model, self._fmiFalse)
             
         if status != 0:
-            raise FMIException('Failed to set the debugging option.')
+            raise FMUException('Failed to set the debugging option.')
         
     
     def get_nominal(self, valueref):
@@ -1177,7 +1178,7 @@ class FMIModel(object):
         status = self._fmiCompletedIntegratorStep(self._model, C.byref(callEventUpdate))
         
         if status != 0:
-            raise FMIException('Failed to call FMI Completed Step.')
+            raise FMUException('Failed to call FMI Completed Step.')
             
         if callEventUpdate.value == self._fmiTrue:
             return True
@@ -1237,7 +1238,7 @@ class FMIModel(object):
             warnings.warn('Initialize returned with a warning. Check the log for information.')
         
         if status > 1:
-            raise FMIException('Failed to Initialize the model.')
+            raise FMUException('Failed to Initialize the model.')
     
     
     def instantiate_model(self, name='Model', logging=False):

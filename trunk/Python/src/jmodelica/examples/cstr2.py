@@ -64,7 +64,7 @@ def run_demo(with_plots=True):
 					curr_dir+"/files/CSTRLib.mo", target='ipopt')
 
     # Load a model instance into Python
-    init_model = jmi.Model("CSTRLib_Components_Two_CSTRs_stat_init")
+    init_model = jmi.JMUModel("CSTRLib_Components_Two_CSTRs_stat_init")
     
     # Set inputs for Stationary point A
     u1_0_A = 1
@@ -119,7 +119,7 @@ def run_demo(with_plots=True):
                      target='ipopt')
 
     # Load the dynamic library and XML data
-    model = jmi.Model("CSTR2_Opt")
+    model = jmi.JMUModel("CSTR2_Opt")
 
     # Initialize the model with parameters
 

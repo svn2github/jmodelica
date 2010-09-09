@@ -41,7 +41,7 @@ def run_demo(with_plots=True):
                      target='ipopt')
 
     # Load static calibration model
-    qt_static=jmi.Model("QuadTank_pack_QuadTank_Static")
+    qt_static=jmi.JMUModel("QuadTank_pack_QuadTank_Static")
 
     # Set control inputs
     qt_static.set_value("u1",2.5)
