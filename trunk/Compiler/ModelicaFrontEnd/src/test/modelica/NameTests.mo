@@ -1318,14 +1318,12 @@ end ConstantLookup27;
 
 model ConstantLookup28
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.TransformCanonicalTestCase(
+     JModelica.UnitTesting.FlatteningTestCase(
          name="ConstantLookup28",
-         description="Package constant in extended class",
+         description="",
          flatModel="
 fclass NameTests.ConstantLookup28
- Real y.x;
-equation
- y.x = 2.0;
+ Real y.x = 2.0;
 end NameTests.ConstantLookup28;
 ")})));
 
@@ -1334,14 +1332,18 @@ end NameTests.ConstantLookup28;
 	end A;
 	
 	package B
-		extends A;
+		extends C;
 		
-		model C
+		model D
 			Real x = a;
-		end C;
+		end D;
 	end B;
 	
-	B.C y;
+	package C
+		extends A;
+	end C;
+	
+	B.D y;
 end ConstantLookup28;
 
 
