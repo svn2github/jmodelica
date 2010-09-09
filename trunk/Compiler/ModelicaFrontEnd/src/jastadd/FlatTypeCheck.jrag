@@ -30,8 +30,9 @@ aspect FlatTypeCheck {
     		if (myBindingExpHasEach() && !inArrayComponent()) {
     			error("The 'each' keyword cannot be applied to members of non-array components");
      		} else {
-    			if (!bindingType().typeCompatible(bexp.type())) {
-    				if (!myBindingExpHasEach() && type().typeCompatible(bexp.type())) {
+     			boolean func = inFunction();
+    			if (!bindingType().typeCompatible(bexp.type(), func)) {
+    				if (!myBindingExpHasEach() && type().typeCompatible(bexp.type(), func)) {
 						warning("Assuming 'each' for the binding expression to the variable " + name());
     				} else if (!bindingType().scalarType().typeCompatible(bexp.type().scalarType())) {
     					error("The binding expression of the variable " + name() +

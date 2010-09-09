@@ -19,7 +19,7 @@ $C_DAE_equation_residuals$
 #define _w_4 ((*(jmi->z))[jmi->offs_real_w+0])
 #define time ((*(jmi->z))[jmi->offs_t])
 
-    (*res)[0] = ( 1 - ( ((_x2_1)*(_x2_1)) ) ) * ( _x1_0 ) - ( _x2_1 ) + ( _p_3 ) * ( _u_2 ) - (_der_x1_5);
+    (*res)[0] = ( 1 - ( (1.0 * (_x2_1) * (_x2_1)) ) ) * ( _x1_0 ) - ( _x2_1 ) + ( _p_3 ) * ( _u_2 ) - (_der_x1_5);
     (*res)[1] = _x1_0 - (_der_x2_6);
     (*res)[2] = _x1_0 + _x2_1 - (_w_4);
 ")})));
@@ -303,7 +303,7 @@ model CCodeGenTest12
          description="C code generation: test that x^2 is represented by x*x in the generated code. ",
          template="$C_DAE_equation_residuals$",
          generatedCode="
-    (*res)[0] = pow(_x_0 - ( 0.3 ),0.3) + ((_x_0 - ( 0.3 ))*(_x_0 - ( 0.3 ))*(_x_0 - ( 0.3 ))*(_x_0 - ( 0.3 ))*(_x_0 - ( 0.3 ))*(
+    (*res)[0] = pow(_x_0 - ( 0.3 ),0.3) + (1.0 * (_x_0 - ( 0.3 ))*(_x_0 - ( 0.3 ))*(_x_0 - ( 0.3 ))*(_x_0 - ( 0.3 ))*(_x_0 - ( 0.3 ))*(
 _x_0 - ( 0.3 ))*(_x_0 - ( 0.3 ))*(_x_0 - ( 0.3 ))*(_x_0 - ( 0.3 ))*(_x_0 - ( 0.3 ))) - (_der_x_1);
 ")})));
 
@@ -3330,5 +3330,22 @@ model IfExpInParExp
   parameter Integer N = 2;
   parameter Real r[3] = array((if i<=N then 1. else 2.) for i in 1:3); 
 end IfExpInParExp;
+
+
+
+model CIntegerExp
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CIntegerExp",
+         description="",
+         template="$C_DAE_equation_residuals$",
+         generatedCode="
+    (*res)[0] = (1.0 * (10) * (10) * (10) * (10)) - (_x_0);
+")})));
+
+	Real x = 10 ^ 4;
+end CIntegerExp;
+
+
 
 end CCodeGenTests;

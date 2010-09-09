@@ -2145,9 +2145,6 @@ aspect ConstantEvaluation {
 	  CValue.UNKNOWN;
   eq FRealType.pow(CValue v1, CValue v2) =
 	  new CValueReal(java.lang.Math.pow(v1.realValue(),v2.realValue()));
-  
-  eq FIntegerType.pow(CValue v1, CValue v2) = 
-	  new CValueReal(java.lang.Math.pow(v1.realValue(),v2.realValue()));
 
   /**
    * \brief Negation of a constant value.

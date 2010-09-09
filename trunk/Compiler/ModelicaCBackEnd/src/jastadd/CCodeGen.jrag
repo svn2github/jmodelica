@@ -65,18 +65,14 @@ aspect CCodeGen {
 	}
 	
 	public void FDotPowExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
-		if (getRight().variability().lessOrEqual(fParameter()) && getRight().type().isInteger()) {
+		if (getRight().variability().constantVariability() && getRight().type().isInteger()) {
 			str.print("(");
 			int exponent = getRight().ceval().intValue();
-			if (exponent == 0)
-				str.print("1");
-			for (int i=0;i<exponent;i++) {
-				str.print("(");
-				p.toString(getLeft(),str,indent,o); 
+			str.print("1.0");
+			for (int i = 0; i < exponent; i++) {
+				str.print(" * (");
+				p.toString(getLeft(), str, indent, o); 
 				str.print(")");
-				if (i<exponent-1) {
-					str.print("*");
-				}
 			}
 			str.print(")");
 		} else {

@@ -154,6 +154,11 @@ aspect FlatTypeAnalysis {
 			return res.arrayType(size());
 	}
 	
+	eq FDotPowExp.type() {
+		FType t = getLeft().type().looseNumericPromotion(getRight().type());
+		return t.isUnknown() ? t : fRealType(t.size());
+	}
+	
 	eq FPowExp.type() {
 		if (getRight().type().isUnknown() || getRight().ndims() != 0)
 			return fUnknownType();
@@ -166,7 +171,7 @@ aspect FlatTypeAnalysis {
 			return fUnknownType();
 		if (getRight().ceval().intValue() < 0)
 			return fUnknownType();
-		return getLeft().type();
+		return fRealArrayType(size());
 	}
 	
 	eq FIntegerExp.type() = fIntegerScalarType();

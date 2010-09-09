@@ -4478,7 +4478,46 @@ end FunctionTests.UnknownArray21;
 end UnknownArray21;
 
 
+model UnknownArray22
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="UnknownArray22",
+         description="",
+         flatModel="
+fclass FunctionTests.UnknownArray22
+ Real x;
+equation
+ x = FunctionTests.UnknownArray22.f({1,2}, {3,4});
 
+ function FunctionTests.UnknownArray22.f
+  input Real[:] a;
+  input Real[:] b;
+  Real temp_1;
+  output Real c;
+ algorithm
+  temp_1 := 0.0;
+  for i1 in 1:size(b, 1) loop
+   temp_1 := temp_1 + ( a[i1] ) * ( b[i1] );
+  end for;
+  c := temp_1;
+  return;
+ end FunctionTests.UnknownArray22.f;
+end FunctionTests.UnknownArray22;
+")})));
+
+	function f
+		input Real a[:] = {1, 2, 3};
+		input Real b[:] = {4, 5, 6};
+		output Real c = a * b;
+	algorithm
+	end f;
+	
+	Real x = f({1,2}, {3,4});
+end UnknownArray22;
+
+
+
+// TODO: need more complex cases
 model IncompleteFunc1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.ErrorTestCase(
