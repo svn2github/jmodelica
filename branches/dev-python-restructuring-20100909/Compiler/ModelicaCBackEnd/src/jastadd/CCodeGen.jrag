@@ -1,0 +1,1165 @@
+/*
+Copyright (C) 2009 Modelon AB
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+import java.io.PrintStream;
+import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
+
+aspect CCodeGen {
+	
+	class CPrettyPrinter extends Printer {
+		
+		public CPrettyPrinter() {
+			super("    ");
+		}
+		
+ 		public void toString(ASTNode node, PrintStream str, String indent, Object o) { 
+ 			node.prettyPrint_C(this, str, indent, o); 
+ 		}
+  		
+  		public String op(FBinExp e) { return e.op_C(); }
+	}
+	
+	static CPrettyPrinter ASTNode.printer_C = new CPrettyPrinter();
+	
+	public String ASTNode.prettyPrint_C(String indent) {
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		PrintStream str = new PrintStream(os);
+		prettyPrint_C(str,indent,null);
+		return os.toString();
+	}
+
+	public String ASTNode.prettyPrint_C(String indent,Object o) {
+		ByteArrayOutputStream os = new ByteArrayOutputStream();	
+		PrintStream str = new PrintStream(os);
+		prettyPrint_C(str,indent,o);
+		return os.toString();
+	}
+
+	public void ASTNode.prettyPrint_C(PrintStream str,String indent) {
+ 		prettyPrint_C(printer_C, str, indent, null);
+	}
+
+	public void ASTNode.prettyPrint_C(PrintStream str,String indent, Object o) {
+ 		prettyPrint_C(printer_C, str, indent, o);
+	}
+	
+	public void ASTNode.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		prettyPrint(p,str,indent,o);
+		/*for(int i = 0; i < getNumChild(); i++)
+   			p.toString(getChild(i),str,indent,o); // distpatch through Printer
+	    */
+	}
+	
+	public void FDotPowExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		if (getRight().variability().constantVariability() && getRight().type().isInteger()) {
+			str.print("(");
+			int exponent = getRight().ceval().intValue();
+			str.print("1.0");
+			for (int i = 0; i < exponent; i++) {
+				str.print(" * (");
+				p.toString(getLeft(), str, indent, o); 
+				str.print(")");
+			}
+			str.print(")");
+		} else {
+			str.print("pow(");
+			p.toString(getLeft(),str,indent,o); 
+			str.print(",");
+			p.toString(getRight(),str,indent,o);
+			str.print(")");
+		}
+	}
+	
+	public void FMinMaxExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		str.print("jmi_" + builtInName() + "(");
+		p.toString(getX(), str, indent, o); 
+		str.print(", ");
+		p.toString(getY(), str, indent, o);
+		str.print(")");
+	}
+		
+	public void FDerExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		if (root().options.getBooleanOption("enable_variable_scaling")) {
+			str.print("(");
+			str.print(myFV().name_C());
+			str.print("*sf(");
+			str.print(myFV().valueReference());
+			str.print("))");
+		} else {
+			str.print(myFV().name_C());
+		}
+	}
+	
+	public void FIdUseExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		if (isArray() && keepAsArray()) {
+			str.print(getFIdUse().toString_C(p, o));
+		} else {
+			if (myFV().isReal() && root().options.getBooleanOption("enable_variable_scaling")) {
+				str.print("(");
+				p.toString(getFIdUse(), str, indent, o);
+				str.print("*sf(");
+				str.print(myFV().valueReference());
+				str.print("))");
+			} else {
+				p.toString(getFIdUse(), str, indent, o);
+			}
+		}
+	}
+	
+	inh boolean FIdUse.isAssignUse();
+	eq InstNode.getChild().isAssignUse()          = false;
+	eq FClass.getChild().isAssignUse()            = false;
+	eq FIdUseExp.getChild().isAssignUse()         = false;
+	eq FFunctionCallLeft.getChild().isAssignUse() = true;
+	eq FAssignStmt.getChild().isAssignUse()       = true;
+	
+	syn String FIdUse.name_C() = toString_C(printer_C, null);
+	
+	syn String FIdUse.toString_C(Printer p, Object o) {
+		String type = myFV().funcArrayType(isAssignUse());
+		if (myFV().inRecord() && inFunction()) 
+			return myRecordFV().genRecordUse_C(p, o, getFQName(), type);
+		else
+			return myFV().genUse_C(p, o, getFQName().getLastFArraySubscripts(), type);
+	}
+	
+	public void FIdUse.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		str.print(toString_C(p, o));
+	}
+	
+	public String AbstractFVariable.genUse_C(Printer p, Object o, FArraySubscripts fas, String type) {
+		return name_C();
+	}
+	
+	public String FFunctionArray.genUse_C(Printer p, Object o, FArraySubscripts fas, String type) {
+		if (fas == null)
+			return name_C();
+		else
+			return fas.genFunctionArrayUse_C(p, o, name_C(), type);
+	}
+	
+	public String FArraySubscripts.genFunctionArrayUse_C(Printer p, Object o, String name, String type) {
+		ByteArrayOutputStream os = new ByteArrayOutputStream();	
+		PrintStream str = new PrintStream(os);
+		str.print("jmi_array_");
+		str.print(type);
+		str.print("_");
+		str.print(getNumFSubscript());
+		str.print("(");
+		str.print(name);
+		str.print(", ");
+		getFSubscripts().prettyPrintWithSep(p, str, "", o, ", ");
+		str.print(")");
+		return os.toString();
+	}
+	
+	public String AbstractFVariable.genRecordUse_C(Printer p, Object o, FQName name, String type) {
+		FQNamePart part = name.getFQNamePart(0);
+		FArraySubscripts fas = part.hasFArraySubscripts() ? part.getFArraySubscripts() : null;
+		String res = genUse_C(p, o, fas, C_ARRAY_RECORD);
+		for (int i = 1, n = name.getNumFQNamePart(); i < n; i++) {
+			part = name.getFQNamePart(i);
+			res = res + "->" + part.getName();
+			if (part.hasFArraySubscripts()) {
+				String curType = (n - i > 1 ? C_ARRAY_RECORD : type);
+				res = part.getFArraySubscripts().genFunctionArrayUse_C(p, o, res, curType);
+			}
+		}
+		return res;
+	}	
+	
+	public void FFunctionCall.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		boolean exp = functionCallIsExp();
+		if (!exp)
+			str.print(indent);
+		str.print(getName().funcNameUnderscore(exp ? C_SUFFIX_EXP : C_SUFFIX_DEF));
+		str.print("(");
+		String sep = "";
+		for (FExp arg : getArgs()) {
+			str.print(sep);
+			arg.genArgument_C(p, str, indent, o);
+			sep = ", ";
+		}
+		if (!exp) {
+			int tot = myOutputs().size();
+			int lefts = myLefts().size();
+			for (int i = 0; i < tot; i++) {
+				str.print(sep);
+				if (i < lefts)
+					myLefts().get(i).genArgument_C(str);
+				else
+					str.print("NULL");
+				sep = ", ";
+			}
+		}
+		str.print(")");
+	}
+	
+	public String FunctionReturnDefinition.getDeclaredType_C() {
+		if (outputs.size() > 0) 
+			return outputs.get(0).type_C();
+		else
+			return "void";
+	}
+	
+	public void FunctionReturnDefinition.printReturnForExp_C(PrintStream str, String indent) {
+		str.print(indent);
+		str.print("return");
+		if (outputs.size() > 0) { 
+			str.print(" ");
+			str.print(outputs.get(0).name_C());
+		}
+		str.print(";\n");
+	}
+	
+	public void FunctionReturnDefinition.printDeclarationForExp_C(Printer p, PrintStream str, String indent, Object o) {
+		if (outputs.size() > 0) 
+			p.toString(outputs.get(0), str, indent, o);
+	}
+	
+	public void FunctionReturnDefinition.printReturnWrite_C(PrintStream str, String indent) {
+		for (FFunctionVariable v : outputs) 
+			v.printReturnWrite_C(str, indent);
+	}
+	
+	private void FFunctionDecl.prettyPrintHead_C(Printer p, PrintStream str, String indent, Object o, 
+			String type, String suffix, boolean returnArgs) {
+		str.print(indent);
+		str.print(type);
+		str.print(" ");
+		str.print(getFQName().funcNameUnderscore(suffix));
+		str.print("(");
+		String sep = "";
+		for (FFunctionVariable v : myInputs()) {
+			str.print(sep);
+			v.printArgument_C(str);
+			sep = ", ";
+		}
+		if (returnArgs) {
+			for (FFunctionVariable v : myOutputs()) {
+				str.print(sep);
+				v.printReturnArgument_C(str);
+				sep = ", ";
+			}
+		}
+		str.print(")");
+	}
+	
+	private void FFunctionDecl.prettyPrintWrappedCall_C(PrintStream str, String indent) {
+		str.print(indent);
+		str.print(getFQName().funcNameUnderscore(C_SUFFIX_DEF));
+		str.print("(");
+		String sep = "";
+		for (FFunctionVariable v : myInputs()) {
+			str.print(sep);
+			str.print(v.name_C());
+			sep = ", ";
+		}
+		if (myOutputs().size() > 0) {
+			str.print(sep);
+			str.print("&");
+			str.print(myOutputs().get(0).name_C());
+			for (int i = myOutputs().size() - 1; i > 0; i--)
+				str.print(", NULL");
+		}
+		str.print(");\n");
+	}
+	
+	public void FFunctionDecl.genHeader_C(PrintStream str, String indent) {
+		prettyPrintHead_C(printer_C, str, indent, null, "void", C_SUFFIX_DEF, true);
+		str.print(";\n");
+    	if (generateExpFunction()) {
+    		String type = returnDefinition().getDeclaredType_C();
+			prettyPrintHead_C(printer_C, str, indent, null, type, C_SUFFIX_EXP, false);
+			str.print(";\n");
+    	}
+	}
+	
+	public void FFunctionDecl.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		String next = p.indent(indent);
+		// Print definition
+		prettyPrintHead_C(p, str, indent, o, "void", C_SUFFIX_DEF, true);
+		str.print(" {\n");
+		// TODO: Check if there are any dynamic declarations first
+		str.print(next + "JMI_DYNAMIC_INIT()\n");
+		for (FFunctionVariable ffv : myNonInputs())
+			p.toString(ffv, str, next, o);
+		for (FFunctionVariable ffv : myOutputs())
+			ffv.printNullOutputReplacement_C(p, str, next, o);
+    	p.toString(getFAlgorithmBlock(), str, next, o);
+    	str.print(indent);
+    	str.print("}\n\n");
+    	
+    	// Print wrapper for expressions
+    	if (generateExpFunction()) {
+	    	String type = returnDefinition().getDeclaredType_C();
+			prettyPrintHead_C(p, str, indent, o, type, C_SUFFIX_EXP, false);
+			str.print(" {\n");
+			returnDefinition().printDeclarationForExp_C(p, str, next, o);
+			prettyPrintWrappedCall_C(str, next);
+			returnDefinition().printReturnForExp_C(str, next);
+	    	str.print(indent);
+	    	str.print("}\n\n");
+    	}
+	}
+	
+	/**
+	 * \brief Check if we need to generate a wrapper for expressions for this function.
+	 */
+	syn boolean FFunctionDecl.generateExpFunction() = hasOutputs() && !isComposite();
+	
+	syn String FRecordDecl.name_C()      = getFQName().lastFQNamePart().getName() + "_" + 
+										       recordIndex() + "_" + C_SUFFIX_RECORD;
+	syn String FRecordDecl.nameArray_C() = name_C() + C_SUFFIX_ARRAY;
+	syn String FRecordType.name_C()      = myFRecordDecl().name_C();
+	syn String FRecordType.nameArray_C() = myFRecordDecl().nameArray_C();
+	
+	// TODO: Handle arrays of records and arrays in records
+	public void FRecordDecl.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		// Record type (struct)
+		str.print(indent);
+		str.print("typedef struct _");
+		str.print(name_C());
+		str.print(" {\n");
+		String next = p.indent(indent);
+		for (FVariable fv : getFVariables())
+			fv.printInRecord_C(p, str, next, o);
+		str.print(indent);
+		str.print("} ");
+		str.print(name_C());
+		str.print(";\n");
+		
+		// Array record type
+		str.print(indent);
+		str.print("JMI_RECORD_ARRAY_TYPE(");
+		str.print(name_C());
+		str.print(", ");
+		str.print(nameArray_C());
+		str.print(")\n\n");
+	}
+	
+	public void FVariable.printInRecord_C(Printer p, PrintStream str, String indent, Object o) {
+		str.print(indent);
+		str.print(type_C());
+		str.print(" ");
+		str.print(nameUnderscore());
+		str.print(";\n");
+	}
+	
+	// Suffixes that are used with variables in JMI: size, var, arr, rec
+	public static final String ASTNode.C_SUFFIX_DEF      = "def";
+	public static final String ASTNode.C_SUFFIX_EXP      = "exp";
+	public static final String ASTNode.C_SUFFIX_RECORD   = "r";
+	public static final String ASTNode.C_SUFFIX_INDEX    = "i";
+	public static final String ASTNode.C_SUFFIX_VARIABLE = "v";
+	public static final String ASTNode.C_SUFFIX_ARRAY    = "a";
+	public static final String ASTNode.C_SUFFIX_RETURN   = "o";
+	public static final String ASTNode.C_SUFFIX_NULL     = "n";
+
+	public static final String ASTNode.C_ARRAY_RECORD    = "rec";
+	public static final String ASTNode.C_ARRAY_REFERENCE = "ref";
+	public static final String ASTNode.C_ARRAY_VALUE     = "val";
+	
+	syn String AbstractFVariable.funcArrayType(boolean assign) = 
+		isRecord() ? C_ARRAY_RECORD : (assign ? C_ARRAY_REFERENCE : C_ARRAY_VALUE);
+
+	syn lazy String AbstractFVariable.name_C() = null;
+	eq FVariable.name_C()         = isForIndex() ? 
+			                        nameUnderscore() + "_" + C_SUFFIX_INDEX :
+			                        '_' + nameUnderscore() + '_' + variableIndex();
+	eq FFunctionVariable.name_C() = nameUnderscore() + "_" + C_SUFFIX_VARIABLE;
+	eq FFunctionArray.name_C()    = nameUnderscore() + "_" + C_SUFFIX_ARRAY;
+	
+	syn String FFunctionVariable.nameReturn_C() = 
+		isRecord() ? name_C() : (getFQName().nameUnderscore() + "_" + C_SUFFIX_RETURN);
+	syn String FFunctionArray.nameReturn_C()    = name_C();
+	
+	syn String AbstractFVariable.type_C() = type().type_C();
+	syn String FFunctionCallLeft.type_C() = type().type_C();
+	
+	syn String FType.type_C() = isArray() ? arrayType_C() : scalarType_C();
+	
+	syn String FType.scalarType_C() = "jmi_ad_var_t";
+	eq FRecordType.scalarType_C()   = name_C() + "*";
+	
+	syn String FType.arrayType_C() = "jmi_array_t*";
+	eq FRecordType.arrayType_C()   = nameArray_C() + "*";
+
+	syn String FFunctionVariable.typeReturn_C() = isRecord() ? type_C() : (type_C() + "*");
+	eq FFunctionArray.typeReturn_C()            = type_C();
+	
+	public void FFunctionVariable.printReturnArgument_C(PrintStream str) {
+		str.print(typeReturn_C());
+		str.print(" ");
+		str.print(nameReturn_C());
+	}
+	
+	public void FFunctionVariable.printReturnWrite_C(PrintStream str, String indent) {
+		if (!isRecord()) {
+			str.print(indent);
+			str.print("if (");
+			str.print(nameReturn_C());
+			str.print(" != NULL) *");
+			str.print(nameReturn_C());
+			str.print(" = ");
+			str.print(name_C());
+			str.print(";\n");
+		}
+	}
+	
+	public void FFunctionArray.printReturnWrite_C(PrintStream str, String indent) {}
+	
+	public void FFunctionVariable.printArgument_C(PrintStream str) {
+		str.print(type_C());
+		str.print(" ");
+		str.print(name_C());
+	}
+	
+	public void FFunctionVariable.printDecl_C(Printer p, PrintStream str, String indent, Object o, String name) {
+		// This is a rather ugly hack, but we temporarily need an FExp that is in the tree
+		FExp dummy = null;
+		if (!hasBindingExp())
+			setBindingExp(dummy = new FNoExp());
+		type().printDecl_C(p, str, indent, o, name, getBindingExp());
+		if (dummy != null)
+			setBindingExpOpt(new Opt());
+	}	
+	
+	public void FFunctionVariable.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		if (!isOutput() || !isRecord())
+			printDecl_C(p, str, indent, o, name_C());
+	}
+	
+	public void FFunctionArray.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		if (!isOutput()) 
+			printDecl_C(p, str, indent, o, name_C());
+	}
+	
+	public void FFunctionVariable.printNullOutputReplacement_C(Printer p, PrintStream str, String indent, Object o) {
+		if (isComposite()) {
+			String name_C = name_C();
+			String name_r = name_C + C_SUFFIX_NULL;
+			String next = p.indent(indent);
+			str.print(indent + "if (" + name_C + " == NULL) {\n");
+			printDecl_C(p, str, next, o, name_r);
+			str.print(next + name_C + " = " + name_r + ";\n");
+			str.print(indent + "}\n");
+		}
+	}
+	
+	public void FType.printDecl_C(Printer p, PrintStream str, String indent, Object o, String name, FExp src) {
+		str.print(indent);
+		if (isArray()) {
+			String dyn = size().isUnknown() ? "DYNAMIC" : "STATIC";
+			str.print("JMI_ARRAY_" + dyn + "(" + name);
+			size().printArrayDeclEnd_C(p, str, indent, o, src);
+		} else {
+			str.print(type_C() + " " + name + ";\n");
+		}
+	}
+	
+	public void FRecordType.printDecl_C(Printer p, PrintStream str, String indent, Object o, String name, FExp src) {
+		str.print(indent);
+		if (isArray()) {
+			String dyn = size().isUnknown() ? "DYNAMIC" : "STATIC";
+			str.print("JMI_RECORD_ARRAY_" + dyn + "(" + name_C() + ", " + nameArray_C() + ", " + name);
+			size().printArrayDeclEnd_C(p, str, indent, o, src);
+			String pre = "jmi_array_rec_" + ndims() + "(" + name + ", ";
+			for (Index i : indices())
+				printChildDecls_C(p, str, indent, o, pre + i.toUnclosedString() + ")", src);
+		} else {
+			str.print("JMI_RECORD_STATIC(" + name_C() + ", " + name + ")\n");
+			printChildDecls_C(p, str, indent, o, name, src);
+		}
+	}
+	
+	public void FRecordType.printChildDecls_C(Printer p, PrintStream str, String indent, Object o, String name, FExp src) {
+		for (FRecordComponentType comp : getComponents()) {
+			if (comp.getFType().isComposite()) {
+				String compName = name + "->" + comp.getName();
+				String tempName = "tmp_" + nextTempNbr_C();
+				comp.getFType().printDecl_C(p, str, indent, o, tempName, src);
+				str.print(indent + compName + " = " + tempName + ";\n");
+			}
+		}
+	}
+	
+	public void Size.printArrayDeclEnd_C(Printer p, PrintStream str, String indent, Object o, FExp src) {
+		str.print(", ");
+		str.print(numElements());
+		str.print(", ");
+		str.print(toUnclosedString());
+		str.print(")\n");
+	}
+	
+	public void MutableSize.printArrayDeclEnd_C(Printer p, PrintStream str, String indent, Object o, FExp src) {
+		if (isUnknown()) {
+			str.print(", ");
+			// TODO: These FExps aren't in any tree - that might make this fail
+			FQName empty = new FQName();
+			FExp numElem = src.dynamicFExp(createNumElementsFExp().flatten(empty));
+			p.toString(numElem, str, indent, o);
+			for (int i = 0; i < size.length; i++) {
+				str.print(", ");
+				if (exps[i] == null) {
+					str.print(size[i]);
+				} else {
+					FExp exp = src.dynamicFExp(exps[i].flatten(empty));
+					p.toString(exp, str, indent, o);
+				}
+			}
+			str.print(")\n");
+		} else {
+			super.printArrayDeclEnd_C(p, str, indent, o, src);
+		}
+	}
+	
+	public void FAlgorithmBlock.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		p.toString(getFStatements(), str, indent, o);
+	}
+	
+	public void FFunctionCallStmt.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		if (!getCall().isIgnored()) {
+			genTempVars_C(p, str, indent, o);
+			str.print(indent);
+			p.toString(getCall(), str, "", o);
+			str.print(";\n");
+		}
+	}
+
+	public void FAssignStmt.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		genTempVars_C(p, str, indent, o);
+		str.print(indent);
+		p.toString(getLeft(), str, indent, o);
+		str.print(" = ");
+		p.toString(getRight(), str, indent, o);
+		str.print(";\n");
+	}
+	
+	public void FReturnStmt.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		returnDefinition().printReturnWrite_C(str, indent);
+		// TODO: Check if there are any dynamic declarations first
+		str.print(indent + "JMI_DYNAMIC_FREE()\n");
+		str.print(indent + "return;\n");
+	}
+	
+	public void FIfWhenStmt.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		for (FIfWhenClause clause : getFIfWhenClauses())
+			clause.getTest().genTempVars_C(p, str, indent, o);
+		str.print(indent);
+		getFIfWhenClauses().prettyPrintWithSep(p, str, indent, o, indent + "} else ");
+		prettyPrintElse_C(p, str, indent, o);
+		str.print(indent);
+		str.print("}\n");
+	}
+	
+	protected void FIfWhenStmt.prettyPrintElse_C(Printer p, PrintStream str, String indent, Object o) {}
+	
+	protected void FIfStmt.prettyPrintElse_C(Printer p, PrintStream str, String indent, Object o) {
+		if (getNumElseStmt() > 0) {
+			str.print(indent);
+			str.print("} else {\n");
+			p.toString(getElseStmts(), str, p.indent(indent), o);
+		}
+	}
+	
+	public void FIfWhenClause.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		str.print("if (");
+		p.toString(getTest(), str, indent, o);
+		str.print(") {\n");
+		p.toString(getFStatements(), str, p.indent(indent), o);
+	}
+	
+	public void FWhileStmt.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		getTest().genTempVars_C(p, str, indent, o);
+		str.print(indent);
+		str.print("while (");
+		p.toString(getTest(), str, "", o);
+		str.print(") {\n");
+		p.toString(getWhileStmts(), str, p.indent(indent), o);
+		str.print("}\n");		
+	}
+	
+	public void FForStmt.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		getIndex().genTempVars_C(p, str, indent, o);
+		getIndex().printForArrayDecl_C(p, str, indent, o);
+		str.print(indent);
+		str.print("for (");
+		p.toString(getIndex(), str, indent, o);
+		str.print(") {\n");
+		getIndex().printForArrayNext_C(p, str, p.indent(indent), o);
+		p.toString(getForStmts(), str, p.indent(indent), o);
+		str.print(indent);		
+		str.print("}\n");		
+	}
+	
+	public void FForIndex.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		if (hasFExp()) 
+			getFExp().printForIndex_C(p, str, indent, o, getFVariable().name_C());
+	}
+	
+	public void FForIndex.printForArrayDecl_C(Printer p, PrintStream str, String indent, Object o) {
+		if (needsForArray()) {
+			str.print(indent);
+			str.print("jmi_ad_var_t ");
+			str.print(getFVariable().name_C());
+			str.print("a[] = { ");
+			getFExp().getArray().getFExps().prettyPrintWithSep(p, str, indent, o, ", ");
+			str.print(" };\n");
+		}
+	}
+	
+	public void FForIndex.printForArrayNext_C(Printer p, PrintStream str, String indent, Object o) {
+		if (needsForArray()) {
+			String name = getFVariable().name_C();
+			str.print(indent);
+			str.print("jmi_ad_var_t ");
+			str.print(name);
+			str.print(" = ");
+			str.print(name);
+			str.print("a[");
+			str.print(name);
+			str.print("i];\n");
+		}
+	}
+	
+	syn boolean FForIndex.needsForArray() = hasFExp() && getFExp().needsForArray();
+	syn boolean FExp.needsForArray()      = true;
+	eq FRangeExp.needsForArray()          = false;
+	
+	public void FRangeExp.printForIndex_C(Printer p, PrintStream str, String indent, Object o, String name) {
+		boolean hasStep = getNumFExp() > 2;
+		str.print("jmi_ad_var_t ");
+		str.print(name);
+		str.print(" = ");
+		p.toString(getFExp(0), str, indent, o);
+		str.print("; ");
+		str.print(name);
+		str.print(" <= ");
+		p.toString(getFExp(hasStep ? 2 : 1), str, indent, o);
+		str.print("; ");
+		str.print(name);
+		str.print(" += ");
+		if (hasStep) 
+			p.toString(getFExp(1), str, indent, o);
+		else
+			str.print("1");
+	}
+	
+	public void FExp.printForIndex_C(Printer p, PrintStream str, String indent, Object o, String name) {
+		str.print("int ");
+		str.print(name);
+		str.print("i = 0; ");
+		str.print(name);
+		str.print("i < ");
+		str.print(size().numElements());
+		str.print("; ");
+		str.print(name);
+		str.print("i++");
+	}
+	
+	public void FSizeExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		getFExp().prettyPrintSize_C(p, str, indent, o, dimension());
+	}
+	
+	public void FExp.prettyPrintSize_C(Printer p, PrintStream str, String indent, Object o, int dim) {}
+	
+	public void FIdUseExp.prettyPrintSize_C(Printer p, PrintStream str, String indent, Object o, int dim) {
+		str.print("jmi_array_size(");
+		p.toString(getFIdUse(), str, indent, o);
+		str.print(", ");
+		str.print(dim);
+		str.print(")");
+	}
+	
+	syn String FBinExp.op_C() = op();
+	eq FDotAddExp.op_C() = " + ";
+	eq FDotSubExp.op_C() = " - ";
+	eq FDotMulExp.op_C() = " * ";
+	eq FDotDivExp.op_C() = " / ";
+
+	public void FDotDivExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		str.print("jmi_divide(");
+		p.toString(getLeft(),str,indent,o);
+		str.print(","); 
+		p.toString(getRight(),str,indent,o);
+		str.print(","); 
+		str.print("\"Divide by zero: "+prettyPrint("")+"\")");
+	}
+	
+	public void FIfExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		
+		int end_parenthesis = 1;
+		
+		str.print("(COND_EXP_EQ(");
+		p.toString(getIfExp(),str,indent,o);
+		str.print(",JMI_TRUE,");
+		p.toString(getThenExp(),str,indent,o);
+		str.print(",");
+		for (FElseIfExp el_if : getFElseIfExps()) {
+			end_parenthesis++;
+
+			str.print("(COND_EXP_EQ(");
+			p.toString(el_if.getIfExp(),str,indent,o);
+			str.print(",JMI_TRUE,");
+			p.toString(el_if.getThenExp(),str,indent,o);
+			str.print(",");			
+		}
+		p.toString(getElseExp(),str,indent,o);
+		for (int i=0;i<end_parenthesis*2;i++) {
+			str.print(")");
+		}
+	}
+	
+	public void FAbsExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		str.print("jmi_abs(");
+		p.toString(getFExp(), str, indent, o);
+		str.print(")");
+	}
+
+	public void FNoEventExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		p.toString(getFExp(),str,indent,o);
+	}
+	
+	public void FIntegerExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		str.print("jmi_real_to_integer(");
+		p.toString(getFExp(), str, indent, o);
+		str.print(")");
+	}
+	
+	syn String FBoolBinExp.macro_C();
+	eq FEqExp.macro_C()  = "COND_EXP_EQ";
+	eq FNeqExp.macro_C() = "COND_EXP_EQ";
+	eq FLtExp.macro_C()  = "COND_EXP_LT";
+	eq FLeqExp.macro_C() = "COND_EXP_LE";
+	eq FGtExp.macro_C()  = "COND_EXP_GT";
+	eq FGeqExp.macro_C() = "COND_EXP_GE";
+	eq FAndExp.macro_C() = "LOG_EXP_AND";
+	eq FOrExp.macro_C()  = "LOG_EXP_OR";
+	
+	syn boolean FRelExp.relIsInverted_C() = false;
+	eq FNeqExp.relIsInverted_C() = true;
+	
+	public void FRelExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		if (inNoEventExp()) {
+			str.print(macro_C()+"(");
+			p.toString(getLeft(), str, indent, o);
+			str.print(", ");
+			p.toString(getRight(), str, indent, o);
+			str.print(relIsInverted_C() ? ", JMI_FALSE, JMI_TRUE)" : ", JMI_TRUE, JMI_FALSE)");
+		} else {
+			if (inEquationSection()) {
+				str.print("_sw");
+				str.print("(" + relExpInEquationsIndex() + ")");
+			} else {
+				str.print("_sw_init");
+				str.print("(" + relExpInInitialEquationsIndex() + ")");
+			}
+		}
+	}
+	
+	public void FLogBinExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		str.print(macro_C());
+		str.print("(");
+		p.toString(getLeft(), str, indent, o);
+		str.print(", ");
+		p.toString(getRight(), str, indent, o);
+		str.print(")");
+	}
+	
+	public void FNotExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		str.print("LOG_EXP_NOT(");
+		p.toString(getFExp(), str, indent, o);
+		str.print(")");
+	}
+			 	
+	public void FRealLitExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		if (inIfCondition()) 
+			str.print("AD_WRAP_LITERAL(");
+		str.print(getUNSIGNED_NUMBER());
+		if (inIfCondition()) 
+			str.print(")");
+	}
+
+	public void FIntegerLitExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		if (inIfCondition()) 
+			str.print("AD_WRAP_LITERAL(");
+		str.print(getUNSIGNED_INTEGER());
+		if (inIfCondition()) 
+			str.print(")");
+	}
+	
+	public void FBooleanLitExpTrue.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		str.print("JMI_TRUE");
+	}
+	
+	public void FBooleanLitExpFalse.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		str.print("JMI_FALSE");
+	}
+	
+	public void FExternalStmt.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		if(hasReturnVar()) {
+			String ret = getReturnVar().name_C();
+			str.print(indent);
+			str.print(ret+" = ");
+		} else {
+			str.print(indent);
+		}		
+		str.print(getName()+"(");
+		String prefix = "";
+		for (FExp arg : getArgs()) {
+			str.print(prefix);
+			if (arg instanceof FIdUseExp && ((FIdUseExp)arg).myFV() instanceof FFunctionVariable) {
+				if(((FFunctionVariable)((FIdUseExp)arg).myFV()).isOutput()){
+					str.print("&");
+				}
+			}
+			p.toString(arg, str, indent, o);
+			prefix = ", ";
+		}
+		str.print(");\n");
+	}
+	
+	public void ASTNode.genTempVars_C(Printer p, PrintStream str, String indent, Object o) {
+		for (ASTNode node : this)
+			node.genTempVars_C(p, str, indent, o);
+	}
+	
+	public void FExp.genTempVars_C(Printer p, PrintStream str, String indent, Object o) {
+		if (isArray() && !size().isUnknown())
+			getArray().genTempVars_C(p, str, indent, o);
+		else
+			super.genTempVars_C(p, str, indent, o);
+	}
+	
+	public void FFunctionCall.genTempVars_C(Printer p, PrintStream str, String indent, Object o) {
+		getArgs().genTempVars_C(p, str, indent, o);
+		for (FExp arg : getArgs()) 
+			if (!arg.keepAsArray()) 
+				arg.genTempInput_C(p, str, indent, o);
+	}
+	
+	public void FFunctionCallLeft.genTempVars_C(Printer p, PrintStream str, String indent, Object o) {
+		if (hasFExp())
+			getFExp().genTempOutput_C(p, str, indent, o);
+	}
+	
+	syn lazy String FExp.tempName_C() {
+		return "tmp_" + nextTempNbr_C();
+	}
+	
+	private int FClass.nextTempNbr_C        = 1;
+	private int FFunctionDecl.nextTempNbr_C = 1;
+	
+	inh int FExp.nextTempNbr_C();
+	inh int FType.nextTempNbr_C();
+	eq InstNode.getChild().nextTempNbr_C()      = 0;
+	eq FClass.getChild().nextTempNbr_C()        = nextTempNbr_C++;
+	eq FFunctionDecl.getChild().nextTempNbr_C() = nextTempNbr_C++;
+	
+	public void FExp.genTempInput_C(Printer p, PrintStream str, String indent, Object o) {
+		if (isComposite()) {
+			String name = tempName_C();
+			type().printDecl_C(p, str, indent, o, name, this);
+			type().genTempInputAssigns_C(p, str, indent, o, name, this);
+		}
+	}
+	
+	public void FType.genTempInputAssigns_C(
+			Printer p, PrintStream str, String indent, Object o, String name, FExp exp) {
+		if (isArray()) {
+			String type = isRecord() ? C_ARRAY_RECORD : C_ARRAY_REFERENCE;
+			String pre = "jmi_array_" + type + "_" + ndims() + "(" + name + ", ";
+			Array arr = exp.getArray();
+			for (Index i : arr.indices()) {
+				String cellName = pre + i.toUnclosedString() + ")";
+				genTempInputCellAssigns_C(p, str, indent, o, cellName, arr.get(i));
+			}
+		} else {
+			genTempInputCellAssigns_C(p, str, indent, o, name, exp);
+		}
+	}
+	
+	public void FType.genTempInputCellAssigns_C(
+			Printer p, PrintStream str, String indent, Object o, String name, FExp exp) {
+		str.print(indent + name + " = ");
+		p.toString(exp, str, indent, o);
+		str.print(";\n");
+	}
+	
+	public void FRecordType.genTempInputCellAssigns_C(
+			Printer p, PrintStream str, String indent, Object o, String name, FExp exp) {
+		for (FRecordComponentType comp : getComponents()) {
+			String compName = name + "->" + comp.getName();
+			FExp compExp = exp.extractRecordComponentExp(comp.getName());
+			comp.getFType().genTempInputAssigns_C(p, str, indent, o, compName, compExp);
+		}
+	}
+	
+	// TODO: maybe this should be moved to front-end
+	public FExp FExp.extractRecordComponentExp(String name) {
+		throw new UnsupportedOperationException(getClass().getSimpleName() + " shouldn't have record type.");
+	}
+	
+	public FExp FIdUseExp.extractRecordComponentExp(String name) {
+		FIdUseExp res = fullCopy();
+		res.getFIdUse().getFQName().addFQNamePart(new FQNamePart(name, new Opt()));
+		return dynamicFExp(res);
+	}
+	
+	public FExp FRecordConstructor.extractRecordComponentExp(String name) {
+		return getArg(getRecord().myFRecordDecl().indexOf(name));
+	}
+	
+	public void FExp.genTempOutput_C(Printer p, PrintStream str, String indent, Object o) {}
+	
+	public void FArray.genTempOutput_C(Printer p, PrintStream str, String indent, Object o) {
+		type().printDecl_C(p, str, indent, o, tempName_C(), this);
+	}
+	
+	public void FRecordConstructor.genTempOutput_C(Printer p, PrintStream str, String indent, Object o) {
+		type().printDecl_C(p, str, indent, o, tempName_C(), this);
+	}
+	
+	
+	public void FAbstractEquation.genResidual_C(int i, String indent, PrintStream str) {}
+	
+	public void FEquation.genResidual_C(int i, String indent, PrintStream str) {
+		genTempVars_C(printer_C, str, indent, null);
+		str.print(indent + "(*res)[" + i + "] = ");
+		getRight().prettyPrint_C(str,"");
+		str.print(" - (");
+		getLeft().prettyPrint_C(str,"");
+		str.print(");\n");
+	}
+	
+	public void FFunctionCallEquation.genResidual_C(int i, String indent, PrintStream str) {
+		if (!getCall().isIgnored()) {
+			genTempVars_C(printer_C, str, indent, null);
+			for (FFunctionCallLeft l : getLefts()) {
+				l.setBaseIndex(i);
+				l.genTempVar_C(indent, str);
+			}
+			getCall().prettyPrint_C(str, indent);
+			str.print(";\n");
+			for (FFunctionCallLeft l : getLefts())
+				l.genWriteBack_C(str, indent);
+		}
+	}
+
+	public void FAbstractEquation.genAssignment_C(String indent, PrintStream str) {}
+	
+	public void FEquation.genAssignment_C(String indent, PrintStream str) {
+		genTempVars_C(printer_C, str, indent, null);
+		str.print(indent);
+		getLeft().prettyPrint_C(str,"");
+		str.print(" = ");
+		getRight().prettyPrint_C(str,"");
+		str.print(";\n");
+	}
+
+	public void FFunctionCallEquation.genAssignment_C(String indent, PrintStream str) {
+		if (!getCall().isIgnored()) {
+			genTempVars_C(printer_C, str, indent, null);
+			int i = 0;
+			for (FFunctionCallLeft l : getLefts()) {
+				l.setBaseIndex(i);
+				l.genTempVar_C(indent, str);
+			}
+			getCall().prettyPrint_C(str, indent);
+			str.print(";\n");
+			for (FFunctionCallLeft l : getLefts())
+				l.genWriteBackAssignment_C(str, indent);
+		}
+	}
+
+	private int FFunctionCallLeft.equationIndex = -1;
+	public void FFunctionCallLeft.setBaseIndex(int i) {
+		equationIndex = i + myIndex();
+	}
+	syn String FFunctionCallLeft.name_C() {
+		// TODO: use getFExp().tempName_C() instead of first case as well?
+		if (equationIndex >= 0 && !getFExp().isComposite()) {
+			StringBuilder b = new StringBuilder();
+			b.append("tmp_var_");
+			b.append(equationIndex);
+			return b.toString();
+		} else if (equationIndex < 0 || getFExp().keepAsArray()) {
+			return ((FIdUseExp) getFExp()).getFIdUse().name_C();
+		} else {
+			return getFExp().tempName_C();
+		}
+	}
+	
+	public void FFunctionCallLeft.genTempVar_C(String indent, PrintStream str) {
+		if (hasFExp() && !getFExp().isComposite()) {
+			str.print(indent);
+			str.print(type_C());
+			str.print(" ");
+			str.print(name_C());
+			str.print(";\n");
+		}
+	}
+	
+	public void FFunctionCallLeft.genArgument_C(PrintStream str) {
+		if (hasFExp()) {
+			if (!getFExp().isComposite())
+				str.print("&");
+			str.print(name_C());
+		} else {
+			str.print("NULL");
+		}
+	}
+	
+	public void FFunctionCallLeft.genWriteBack_C(PrintStream str, String indent) {
+		if (hasFExp()) 
+			getFExp().type().genWriteBack_C(str, indent, name_C(), getFExp(), equationIndex);
+	}
+	
+	public void FType.genWriteBack_C(PrintStream str, String indent, String name, FExp exp, int index) {
+		if (isArray()) {
+			String type = isRecord() ? C_ARRAY_RECORD : C_ARRAY_VALUE;
+			String pre = String.format("jmi_array_%s_%d(%s, ", type, ndims(), name);
+			Array arr = exp.getArray();
+			for (Index i : arr.indices()) {
+				String cellName = pre + i.toUnclosedString() + ")";
+				genCellWriteBack_C(str, indent, cellName, arr.get(i), index++);
+			}
+		} else {
+			genCellWriteBack_C(str, indent, name, exp, index);
+		}
+	}
+	
+	public void FType.genCellWriteBack_C(PrintStream str, String indent, String name, FExp exp, int index) {
+		exp.genWriteBack_C(str, indent, name, index);
+	}
+	
+	public void FRecordType.genCellWriteBack_C(PrintStream str, String indent, String name, FExp exp, int index) {
+		for (FRecordComponentType comp : getComponents()) {
+			String compName = name + "->" + comp.getName();
+			FExp compExp = exp.extractRecordComponentExp(comp.getName());
+			comp.getFType().genWriteBack_C(str, indent, compName, compExp, index++);
+		}
+	}
+	
+	public void FExp.genWriteBack_C(PrintStream str, String indent, String name, int index) {
+		str.print(indent);
+		str.print("(*res)[");
+		str.print(index);
+		str.print("] = ");
+		str.print(name);
+		str.print(" - (");
+		prettyPrint_C(str, "");
+		str.print(");\n");
+	}
+	
+	public void FFunctionCallLeft.genWriteBackAssignment_C(PrintStream str, String indent) {
+		if (hasFExp()) 
+			getFExp().type().genWriteBackAssignment_C(str, indent, name_C(), getFExp());
+	}
+	
+	public void FType.genWriteBackAssignment_C(PrintStream str, String indent, String name, FExp exp) {
+		if (isArray()) {
+			String type = isRecord() ? C_ARRAY_RECORD : C_ARRAY_VALUE;
+			String pre = String.format("jmi_array_%s_%d(%s, ", type, ndims(), name);
+			Array arr = exp.getArray();
+			for (Index i : arr.indices()) {
+				String cellName = pre + i.toUnclosedString() + ")";
+				genCellWriteBackAssignment_C(str, indent, cellName, arr.get(i));
+			}
+		} else {
+			genCellWriteBackAssignment_C(str, indent, name, exp);
+		}
+	}
+	
+	public void FType.genCellWriteBackAssignment_C(PrintStream str, String indent, String name, FExp exp) {
+		exp.genWriteBackAssignment_C(str, indent, name);
+	}
+	
+	public void FRecordType.genCellWriteBackAssignment_C(PrintStream str, String indent, String name, FExp exp) {
+		for (FRecordComponentType comp : getComponents()) {
+			String compName = name + "->" + comp.getName();
+			FExp compExp = exp.extractRecordComponentExp(comp.getName());
+			comp.getFType().genWriteBackAssignment_C(str, indent, compName, compExp);
+		}
+	}
+
+	public void FExp.genWriteBackAssignment_C(PrintStream str, String indent, String name) {
+		str.print(indent);
+		prettyPrint_C(str, "");
+		str.print(" = ");
+		str.print(name);
+		str.print(";\n");
+	}
+	
+	public void FExp.genArgument_C(Printer p, PrintStream str, String indent, Object o) {
+		if (isComposite() && !keepAsArray())
+			str.print(tempName_C());
+		else
+			p.toString(this, str, indent, o);
+	}
+
+	public void FRelExp.genResidual_C(int i, String indent, PrintStream str) {
+		str.print(indent + "(*res)[" + i + "] = ");
+		getRight().prettyPrint_C(str,"");
+		str.print(" - (");
+		getLeft().prettyPrint_C(str,"");
+		str.print(");\n");
+	}	
+
+	public void FGtExp.genResidual_C(int i, String indent, PrintStream str) {
+		str.print(indent + "(*res)[" + i + "] = ");
+		getLeft().prettyPrint_C(str,"");
+		str.print(" - (");
+		getRight().prettyPrint_C(str,"");
+		str.print(");\n");
+	}	
+
+	public void FGeqExp.genResidual_C(int i, String indent, PrintStream str) {
+		str.print(indent + "(*res)[" + i + "] = ");
+		getLeft().prettyPrint_C(str,"");
+		str.print(" - (");
+		getRight().prettyPrint_C(str,"");
+		str.print(");\n");
+	}	
+	
+	public void FRealVariable.genStartAttributeResidual_C(int i, String indent, PrintStream str) {
+		if (!(this instanceof FDerivativeVariable)) {
+			str.print(indent + "(*res)[" + i + "] = ");
+			if (startAttributeSet()) {
+				if (root().options.getBooleanOption("enable_variable_scaling")) {
+					str.print("(");
+					startAttributeExp().prettyPrint_C(str,"");					
+					str.print(")");
+					str.print("/sf(");
+					str.print(valueReference());
+					str.print(")");
+				} else {
+					startAttributeExp().prettyPrint_C(str,"");					
+				}
+			} else {
+				str.print("0.0");
+			}
+			str.print(" - ");
+			str.print(name_C());	
+			str.print(";\n");
+		}
+	}
+	
+}
+
+
