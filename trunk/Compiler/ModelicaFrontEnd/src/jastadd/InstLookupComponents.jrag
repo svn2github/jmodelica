@@ -132,7 +132,8 @@ aspect InstLookupComponents {
 	
 	eq InstComponentDecl.genericLookupInstConstant(String name) {
 		HashSet set = super.genericLookupInstConstant(name);
-		set.addAll(myInstClass().lookupInstConstant(name));
+		if (set.isEmpty())
+			set.addAll(myInstClass().lookupInstConstant(name));
 		return set;
 	}
 	
@@ -178,9 +179,15 @@ aspect InstLookupComponents {
 	eq Root.getChild().lookupInstConstant(String name) = emptyHashSet();
 	eq InstNode.getChild().lookupInstConstant(String name) {
 		HashSet set = new HashSet(4);
+
 		set.addAll(memberInstConstant(name));
+
+		for (InstExtends ie : instExtends()) 
+			set.addAll(ie.memberInstConstant(name));
+
 		if (set.isEmpty())
 			set.addAll(lookupInstConstant(name));
+
 		return set.isEmpty() ? emptyHashSet() : set;
 	}
 	
