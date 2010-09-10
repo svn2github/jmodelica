@@ -482,7 +482,7 @@ class TestModel_VDP:
         real_values = [0.0, 0.0, 0.0]
         # set_values
         new_values = [1.0, 2.0, 3.0]
-        self.vdp.set_values(parameters, new_values)
+        self.vdp.set(parameters, new_values)
         for index, val in enumerate(new_values):
             nose.tools.assert_equal(val, self.vdp.get(parameters[index]))
             

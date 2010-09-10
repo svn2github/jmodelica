@@ -57,10 +57,51 @@ class BaseModel(object):
         raise NotImplementedError('This method is currently not supported.')
     
     def set(self, variable_name, value):
-        raise NotImplementedError('This method is currently not supported.')
+        """
+        Sets the given value(s) to the specified variable name(s)
+        into the model. The method both accept a single variable 
+        and a list of variables.
+        
+        Parameters::
+            
+            variable_name  - The name of the variable(s) as string/list
+            value          - The value(s) to set.
+            
+        Example::
+        
+            (FMU/JMU)Model.set('damper.d', 1.1)
+            (FMU/JMU)Model.set(['damper.d','gear.a'], [1.1, 10])
+        """
+        if isinstance(variable_name, str):
+            self._set(variable_name, value) #Scalar case
+        else:
+            for i in xrange(len(variable_name)): #A list of variables
+                self._set(variable_name[i], value[i])
     
     def get(self, variable_name):
-        raise NotImplementedError('This method is currently not supported.')
+        """
+        Returns the value(s) of the specified variable(s). The
+        method both accept a single variable and a list of variables.
+        
+            Parameters::
+                
+                variable_name - The name of the variable(s) as string/list.
+                
+            Returns::
+            
+                The value(s).
+                
+            Example::
+            
+                (FMU/JMU)Model.get('damper.d') #Returns the variable d
+                (FMU/JMU)Model.get(['damper.d','gear.a']) #Returns a list of the variables
+        """
+        if isinstance(variable_name, str):
+            return self._get(variable_name) #Scalar case
+        else:
+            ret = []
+            for i in xrange(len(variable_name)): #A list of variables
+                ret += self._get(variable_name[i])
     
     def _exec_algorithm(self,
                  algorithm, 

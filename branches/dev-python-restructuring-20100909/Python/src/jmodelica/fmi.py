@@ -1361,14 +1361,9 @@ class FMUModel(BaseModel):
                                alg_args,
                                solver_args)
     
-    def set(self, variable_name, value):
+    def _set(self, variable_name, value):
         """
-        Sets the given value to the specified variable name into the model.
-        
-        Parameters::
-            
-            variable_name  - The name of the variable as string
-            value          - The value to set.
+        Helper method to set, see docstring on set.
         """
         ref = self.get_valueref(variable_name)
         type = self.get_data_type(variable_name)
@@ -1383,18 +1378,11 @@ class FMUModel(BaseModel):
             self.set_boolean([ref], [value])
         else:
             raise FMUException('Type not supported.')
-    
-    def get(self, variable_name):
-        """
-        Returns the value of the specified variable.
         
-            Parameters::
-                
-                variable_name - The name of the variable as string.
-                
-            Returns::
-            
-                The value.
+    
+    def _get(self, variable_name):
+        """
+        Helper method to get, see docstring on get.
         """
         ref = self.get_valueref(variable_name)
         type = self.get_data_type(variable_name)

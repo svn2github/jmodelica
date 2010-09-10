@@ -2293,8 +2293,10 @@ class JMUModel(BaseModel):
         """
         return self._libname
 
-    def get(self, name):
-        """ Get the value of a variable or parameter given the name.
+    def _get(self, name):
+        """
+        Helper method to model.get. Get the value of a variable or 
+        parameter given the name.
         
         Parameters::
         
@@ -2327,30 +2329,7 @@ class JMUModel(BaseModel):
             not be found in model.")
         return value
         
-    def get_values(self, names):
-        """ Get the values for a list of variables or parameters given a 
-        list of variable names.
-        
-        Parameters::
-        
-            names -- 
-                The list of names of variables or parameters
-            
-        Returns::
-        
-            A list of values corresponding to the variables/parameters 
-            passed as argument.
-            
-        Raises::
-        
-            Exception if any of the names is not present in model.
-        """
-        values = []
-        for name in names:
-            values.append(self.get_value(name))
-        return values
-        
-    def set(self, name, value, recompute_dependent_parameters=True):
+    def _set(self, name, value, recompute_dependent_parameters=True):
         """ Set the value of a parameter or variable given a name. If an 
         independent parameter is set, the dependent parameters are 
         recomputed if recompute_dependent_parameters is set to True.
@@ -2398,29 +2377,6 @@ class JMUModel(BaseModel):
         else:
             raise Exception("Parameter or variable "+name+" could not \
             be found in model.")
-    
-    def set_values(self, names, values):
-        """ Set the values for a list parameters or variables. 
-
-        Parameters::
-        
-            names -- 
-                The names of the parameters or variables to set.
-            values -- 
-                The new values for parameters or variables in names.
-                
-        Raises::
-        
-            Exception if the number of names is not equal to the number 
-            of values or if any of the names can not be found in the 
-            model.
-        """
-        if len(names) != len(values):
-            raise Exception("Number of names and values must be the same.")
-        
-        for name, value in zip(names, values):
-            self.set(name, value)
-
     
     def load_parameters_from_XML(self, filename="", path="."):
         """ Reset the pi vector with values from the XML file created 
