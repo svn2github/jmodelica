@@ -33,7 +33,6 @@ import jmodelica.xmlparser as xp
 import jmodelica.io
 from jmodelica.optimization import ipopt
 from jmodelica.fmi import *
-from jmodelica import simulate
 
 oc = OptimicaCompiler()
 

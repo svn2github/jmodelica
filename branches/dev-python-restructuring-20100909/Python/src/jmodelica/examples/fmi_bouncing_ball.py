@@ -19,7 +19,7 @@
 import pylab as P
 import numpy as N
 import os as O
-from jmodelica import simulate
+from jmodelica.fmi import FMUModel
 
 curr_dir = O.path.dirname(O.path.abspath(__file__));
 path_to_fmus = O.path.join(curr_dir, 'files', 'FMUs')
@@ -30,9 +30,10 @@ def run_demo(with_plots=True):
     """
 
 
-    model = O.path.join(path_to_fmus,'bouncingBall.fmu')
-    
-    res_obj = simulate(model, alg_args={'final_time':2.})
+    fmu_name = O.path.join(path_to_fmus,'bouncingBall.fmu')
+    model = FMUModel(fmu_name)
+    model.initialize()
+    res_obj = model.simulate(alg_args={'final_time':2.})
     
     #Retrieve the result data
     res = res_obj.result_data

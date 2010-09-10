@@ -1,6 +1,6 @@
+#!/usr/bin/env python 
 # -*- coding: utf-8 -*-
-"""Module containing the FMI interface Python wrappers.
-"""
+
 #    Copyright (C) 2009 Modelon AB
 #
 #    This program is free software: you can redistribute it and/or modify
@@ -14,7 +14,7 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
+"""Module containing the FMI interface Python wrappers."""
 
 import sys
 import jmodelica.jmi
@@ -1313,6 +1313,53 @@ class FMUModel(BaseModel):
                 
         """
         return self._log 
+    
+    def simulate(self, 
+                 algorithm='AssimuloFMIAlg', 
+                 alg_args={}, 
+                 solver_args={}):
+        """ Compact function for model simulation.
+        
+        The simulation method depends on which algorithm is used, this can be set 
+        with the function argument 'algorithm'. Arguments for the algorithm 
+        and solver are passed as dicts. Which arguments that are valid 
+        depends on which algorithm is used, see the algorithm implementation 
+        in algorithm_drivers.py for details.
+        
+        The default algorithm for this function is AssimuloFMIAlg. 
+        
+        Parameters::
+        
+            algorithm --
+                The algorithm which will be used for the simulation is 
+                specified by passing the algorithm class in this argument. 
+                The algorithm class can be any class which implements the 
+                abstract class AlgorithmBase (found in algorithm_drivers.py). 
+                In this way it is possible to write own algorithms and use 
+                them with this function.
+                Default: AssimuloFMIAlg
+            alg_args --
+                All arguments for the chosen algorithm should be listed in 
+                this dict. Valid arguments depend on the algorithm chosen, 
+                see algorithm implementation in algorithm_drivers.py for 
+                details.
+                Default: empty dict
+            solver_args --
+                All arguments for the chosen solver should be listed in this 
+                dict. Valid arguments depend on the chosen algorithm and 
+                possibly which solver has been selected for the algorithm. 
+                See algorithm implementation in algorithm_drivers.py for 
+                details.
+                Default: empty dict
+        
+        Returns::
+        
+            Result object, subclass of algorithm_drivers.ResultBase.
+        
+        """
+        return self._exec_algorithm(algorithm,
+                               alg_args,
+                               solver_args)
     
     #XML PART
     def get_variable_descriptions(self, include_alias=True):

@@ -70,12 +70,12 @@ class Test_init_std:
         """
         pass
     
-    @testattr(stddist = True)
-    def test_exception_raised(self):
-        """ Test compact functions without passing mofile raises exception."""
-        cpath = "Pendulum_pack.Pendulum"   
-        nose.tools.assert_raises(Exception, jmodelica.simulate, cpath)
-        nose.tools.assert_raises(Exception, jmodelica.optimize, cpath)
+    #@testattr(stddist = True)
+    #def test_exception_raised(self):
+        #""" Test compact functions without passing mofile raises exception."""
+        #cpath = "Pendulum_pack.Pendulum"   
+        #nose.tools.assert_raises(Exception, jmodelica.simulate, cpath)
+        #nose.tools.assert_raises(Exception, jmodelica.optimize, cpath)
         
     @testattr(stddist = True)
     def test_dependent_parameters(self):

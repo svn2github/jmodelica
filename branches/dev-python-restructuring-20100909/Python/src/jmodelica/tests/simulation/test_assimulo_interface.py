@@ -28,7 +28,6 @@ from jmodelica.compiler import OptimicaCompiler
 from jmodelica.io import ResultDymolaTextual
 from jmodelica.tests import testattr
 from jmodelica.tests import get_files_path
-from jmodelica import simulate
 
 try:
     from jmodelica.simulation.assimulo_interface import JMIODE, JMIDAE, FMIODE, JMIModel_Exception

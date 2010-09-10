@@ -24,7 +24,6 @@ import warnings
 import numpy as N
 
 import jmodelica
-from jmodelica.fmi import FMUModel
 from jmodelica.optimization import ipopt
 from jmodelica.initialization.ipopt import NLPInitialization
 from jmodelica.initialization.ipopt import InitializationOptimizer
@@ -304,12 +303,7 @@ class AssimuloFMIAlg(AlgorithmBase):
                 function call for names and default values.
         
         """
-
-        if isinstance(model,FMUModel):
-            self.model = model
-        else:
-            self.model = FMUModel(model) #Create an FMIModel
-            self.model.initialize()      #Set the start attributes
+        self.model = model
         
         if not assimulo_present:
             raise Exception('Could not find Assimulo package. Check jmodelica.check_packages()')
