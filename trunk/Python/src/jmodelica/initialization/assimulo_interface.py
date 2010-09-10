@@ -79,13 +79,15 @@ class JMIInitProblem(NL_Problem):
         
         # Get initial guess if supplied, otherwise get it from the model
         if x0 != None:
-            self.set_initial_guess(x0)
+            self._x0 = x0
         else:
             # Get a x0 from the model
             self._x0 = N.zeros(self._neqF0)
             self._x0[0:self._dx_size] = self._model.get_real_dx()
             self._x0[self._dx_size:self._mark] = self._model.get_real_x()
             self._x0[self._mark:self._neqF0] = self._model.get_real_w()
+            
+
     
     def f(self,input):
 
@@ -157,7 +159,7 @@ class JMIInitProblem(NL_Problem):
      
         # get the jacobian from the model
         jac = N.zeros(self._nonzeros)
-        self._jmi_model.init_dF0(jmi.JMI_DER_CPPAD, jmi.JMI_DER_DENSE_COL_MAJOR, self._ind_vars, self._mask, jac)
+        self._jmi_model.init_dF0(jmi.JMI_DER_CPPAD, jmi.JMI_DER_DENSE_ROW_MAJOR, self._ind_vars, self._mask, jac)
     
         # return output from result
         return N.reshape(jac,(self._nrow,self._ncol))

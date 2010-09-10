@@ -50,6 +50,7 @@ class JFSolver(object):
         # get model and create problem
         self._model = model
         self._problem = JMIInitProblem(model)
+        self._use_jac = True
         
         # create KINSOL solver
         self._solver = KINSOL()
@@ -81,7 +82,7 @@ class JFSolver(object):
         """
         # call solver
         print "Running JFSolver"
-        self._res = self._solver.solve(self._problem)
+        self._res = self._solver.solve(self._problem,self._use_jac)
 
         dx = self._res[0:self._dx_size]
         x = self._res[self._dx_size:self._mark]
