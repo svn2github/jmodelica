@@ -2293,7 +2293,7 @@ class JMUModel(BaseModel):
         """
         return self._libname
 
-    def get_value(self, name):
+    def get(self, name):
         """ Get the value of a variable or parameter given the name.
         
         Parameters::
@@ -2350,7 +2350,7 @@ class JMUModel(BaseModel):
             values.append(self.get_value(name))
         return values
         
-    def set_value(self, name, value, recompute_dependent_parameters=True):
+    def set(self, name, value, recompute_dependent_parameters=True):
         """ Set the value of a parameter or variable given a name. If an 
         independent parameter is set, the dependent parameters are 
         recomputed if recompute_dependent_parameters is set to True.
@@ -2419,7 +2419,7 @@ class JMUModel(BaseModel):
             raise Exception("Number of names and values must be the same.")
         
         for name, value in zip(names, values):
-            self.set_value(name, value)
+            self.set(name, value)
 
     
     def load_parameters_from_XML(self, filename="", path="."):

@@ -83,9 +83,9 @@ class Test_init_std:
         path = os.path.join(get_files_path(), 'Modelica', 'DepPar.mo')
         model = mc.compile_model('DepPar.DepPar1', path)
         
-        assert (model.get_value('p1') == 1.0), 'Wrong value of independent parameter p1'
-        assert (model.get_value('p2') == 2.0), 'Wrong value of dependent parameter p2'
-        assert (model.get_value('p3') == 6.0), 'Wrong value of dependent parameter p3'
+        assert (model.get('p1') == 1.0), 'Wrong value of independent parameter p1'
+        assert (model.get('p2') == 2.0), 'Wrong value of dependent parameter p2'
+        assert (model.get('p3') == 6.0), 'Wrong value of dependent parameter p3'
         
         
 class Test_init_ipopt:

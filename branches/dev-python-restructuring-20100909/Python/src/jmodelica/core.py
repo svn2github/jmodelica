@@ -31,8 +31,37 @@ class BaseModel(object):
     
     def initialize(self):
         raise NotImplementedError('This method is currently not supported.')
-                               
-
+    
+    def set_real(self, valueref, value):
+        raise NotImplementedError('This method is currently not supported.')                           
+    
+    def get_real(self, valueref):
+        raise NotImplementedError('This method is currently not supported.')
+    
+    def set_integer(self, valueref, value):
+        raise NotImplementedError('This method is currently not supported.')                           
+    
+    def get_integer(self, valueref):
+        raise NotImplementedError('This method is currently not supported.')
+    
+    def set_boolean(self, valueref, value):
+        raise NotImplementedError('This method is currently not supported.')                           
+    
+    def get_boolean(self, valueref):
+        raise NotImplementedError('This method is currently not supported.')
+    
+    def set_string(self, valueref, value):
+        raise NotImplementedError('This method is currently not supported.')                           
+    
+    def get_string(self, valueref):
+        raise NotImplementedError('This method is currently not supported.')
+    
+    def set(self, variable_name, value):
+        raise NotImplementedError('This method is currently not supported.')
+    
+    def get(self, variable_name):
+        raise NotImplementedError('This method is currently not supported.')
+    
     def _exec_algorithm(self,
                  algorithm, 
                  alg_args, 
@@ -43,19 +72,17 @@ class BaseModel(object):
         Throws exception if algorithm is not a subclass of 
         algorithm_drivers.AlgorithmBase.
         """
+        base_path = 'jmodelica.algorithm_drivers'
+        algdrive = __import__(base_path)
+        algdrive = getattr(algdrive, 'algorithm_drivers')
+        AlgorithmBase = getattr(algdrive, 'AlgorithmBase')
+        
         if isinstance(algorithm, str):
-            base_path = 'jmodelica.algorithm_drivers.'
-            fullalg = base_path+algorithm
-            algdrive = __import__(base_path)
-            algdrive = getattr(algdrive, 'algorithm_drivers')
             algorithm = getattr(algdrive, algorithm)
-            AlgorithmBase = getattr(algdrive, 'AlgorithmBase')
-
         
         if not issubclass(algorithm, AlgorithmBase):
             raise Exception(str(algorithm)+
             " must be a subclass of jmodelica.algorithm_drivers.AlgorithmBase")
-        
 
         # initialize algorithm
         alg = algorithm(self, alg_args)

@@ -472,8 +472,8 @@ class TestModel_VDP:
         parameter = 'p1'
         # set_value
         new_value = 2.0
-        self.vdp.set_value(parameter, new_value)
-        nose.tools.assert_equal(self.vdp.get_value(parameter), new_value)
+        self.vdp.set(parameter, new_value)
+        nose.tools.assert_equal(self.vdp.get(parameter), new_value)
 
     @testattr(stddist = True)        
     def test_setget_values(self):
@@ -484,7 +484,7 @@ class TestModel_VDP:
         new_values = [1.0, 2.0, 3.0]
         self.vdp.set_values(parameters, new_values)
         for index, val in enumerate(new_values):
-            nose.tools.assert_equal(val, self.vdp.get_value(parameters[index]))
+            nose.tools.assert_equal(val, self.vdp.get(parameters[index]))
             
     @testattr(stddist = True)
     def test_writeload_parameters_from_XML(self):
@@ -626,17 +626,17 @@ class TestModel_RLC:
        """ Test set and get the value of a alias variable. """ 
        alias_variable = 'capacitor.i'
        aliased_variable = 'capacitor.p.i'
-       cap_i = self.rlc.get_value(aliased_variable)
-       cap_p_i = self.rlc.get_value(alias_variable)
+       cap_i = self.rlc.get(aliased_variable)
+       cap_p_i = self.rlc.get(alias_variable)
        nose.tools.assert_equal(cap_i, cap_p_i)
        new_value = 1.0
-       self.rlc.set_value(alias_variable, new_value)
-       nose.tools.assert_equal(self.rlc.get_value(aliased_variable), new_value)
+       self.rlc.set(alias_variable, new_value)
+       nose.tools.assert_equal(self.rlc.get(aliased_variable), new_value)
        
     @testattr(stddist = True)
     def test_set_constant(self):
         """ Test that set_value of constant should raise error."""
-        nose.tools.assert_raises(Exception, self.rlc.set_value, 'sine.pi',1.0)
+        nose.tools.assert_raises(Exception, self.rlc.set, 'sine.pi',1.0)
 
 class TestJMIModel_VDP:
     """ Test the JMI Model Interface wrappers.
@@ -1279,10 +1279,10 @@ class TestModelGeneric:
        """ Test recomputation of dependent parameters when setting
            independent parameters."""
 
-       self.m.set_value("p1",5)
+       self.m.set("p1",5)
        
-       nose.tools.assert_equal(self.m.get_value("p2"),15)
-       nose.tools.assert_equal(self.m.get_value("p3"),20)
+       nose.tools.assert_equal(self.m.get("p2"),15)
+       nose.tools.assert_equal(self.m.get("p3"),20)
 
 class TZValues(object):
     """Base class for testing that the z vector has correct values

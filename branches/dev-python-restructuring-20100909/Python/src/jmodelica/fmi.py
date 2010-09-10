@@ -1361,6 +1361,55 @@ class FMUModel(BaseModel):
                                alg_args,
                                solver_args)
     
+    def set(self, variable_name, value):
+        """
+        Sets the given value to the specified variable name into the model.
+        
+        Parameters::
+            
+            variable_name  - The name of the variable as string
+            value          - The value to set.
+        """
+        ref = self.get_valueref(variable_name)
+        type = self.get_data_type(variable_name)
+        
+        if type == 0:  #REAL
+            self.set_real([ref], [value])
+        elif type == 1: #INTEGER
+            self.set_integer([ref], [value])
+        elif type == 2: #STRING
+            self.set_string([ref], [value])
+        elif type == 3: #BOOLEAN
+            self.set_boolean([ref], [value])
+        else:
+            raise FMUException('Type not supported.')
+    
+    def get(self, variable_name):
+        """
+        Returns the value of the specified variable.
+        
+            Parameters::
+                
+                variable_name - The name of the variable as string.
+                
+            Returns::
+            
+                The value.
+        """
+        ref = self.get_valueref(variable_name)
+        type = self.get_data_type(variable_name)
+        
+        if type == 0:  #REAL
+            return self.get_real([ref])
+        elif type == 1: #INTEGER
+            return self.get_integer([ref])
+        elif type == 2: #STRING
+            return self.get_string([ref])
+        elif type == 3: #BOOLEAN
+            return self.get_boolean([ref])
+        else:
+            raise FMUException('Type not supported.')
+    
     #XML PART
     def get_variable_descriptions(self, include_alias=True):
         """
