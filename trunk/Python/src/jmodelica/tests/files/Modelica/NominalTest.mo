@@ -10,6 +10,10 @@ equation
  der(y) = -y;
 end NominalTest1;
 
+model NominalTest2
+  Real x(min=-3, max=-1,nominal=-2)=-2;
+end NominalTest2;
+
 optimization NominalOptTest1(objective=y(finalTime),startTime=0,finalTime=10)
 extends NominalTest1(x(fixed=true),y(fixed=true));
 end NominalOptTest1;

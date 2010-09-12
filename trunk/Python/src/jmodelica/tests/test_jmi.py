@@ -1307,6 +1307,29 @@ class TZValues(object):
 
        N.testing.assert_almost_equal(self._model.get_z(),self._z)    
 
+class TestNegativeNominalScaling(object):
+    """Test that scaling factors are set to the absolute value of
+    the nominal attribute.
+    """
+
+    def __init__(self):
+        self._fpath = os.path.join(get_files_path(), 'Modelica', "NominalTest.mo")
+        self._cpath = "NominalTests.NominalTest2"
+    
+    def setUp(self):
+        """
+        Sets up the test class.
+        """
+        oc.set_boolean_option('enable_variable_scaling',True)
+        self._model = oc.compile_model(self._cpath, self._fpath)
+        oc.set_boolean_option('enable_variable_scaling',False)
+
+    @testattr(stddist = True)
+    def test_scaling_factors(self):
+       """Test positivity of scaling factors."""
+       res = [2., 1.]
+       N.testing.assert_almost_equal(self._model.get_variable_scaling_factors(),res)    
+
 class TestDependentParameterEvaluation1(TZValues):
     """Test evaluation of dependent parameters.
     """

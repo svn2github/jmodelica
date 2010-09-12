@@ -522,7 +522,7 @@ class JMUModel(BaseModel):
             value = attr[1]
             if(ptype == 0 and value != None):
                 # Only set scaling factors for Reals
-                sc[i] = value
+                sc[i] = N.abs(value)
         
         #keys = nominal_attr.keys()
         #keys.sort(key=str)
