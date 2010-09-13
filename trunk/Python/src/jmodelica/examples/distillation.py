@@ -103,7 +103,7 @@ def run_demo(with_plots=True,with_blocking_factors = False):
                      target='ipopt')
 
     # Load the dynamic library and XML data
-    model = jmi.Model("DISTLib_Opt_Binary_Dist_Opt1")
+    model = jmi.JMUModel("DISTLib_Opt_Binary_Dist_Opt1")
 
     # Initialize the model with parameters
 
