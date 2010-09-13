@@ -16,6 +16,11 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """Module containing base classes."""
 
+from zipfile import ZipFile
+import tempfile
+import platform as PL
+import os
+import sys
 
 class BaseModel(object):
     """ Abstract base class for JMUModel and FMUModel."""
@@ -133,3 +138,99 @@ class BaseModel(object):
         alg.solve()
         # get and return result
         return alg.get_result()
+        
+    
+def unzip_unit(archive, path='.'):
+    """
+    Unzip the FMU/JMU.
+    """
+
+    try:
+        archive = ZipFile(os.path.join(path,archive))
+    except IOError:
+        raise Exception('Could not locate the FMU/JMU.')
+    
+    dir = ['binaries','sources']
+    
+    if sys.platform == 'win32':
+        platform = 'win'
+        suffix = '.dll'
+    elif sys.platform == 'darwin':
+        platform = 'darwin'
+        suffix = '.dylib'
+    else:
+        platform = 'linux'
+        suffix = '.so'
+    
+    if PL.architecture()[0].startswith('32'):
+        platform += '32'
+    else:
+        platform += '64'
+    
+    #if platform == 'win32' or platform == 'win64':
+    #    suffix = '.dll'
+    #elif platform == 'linux32' or platform == 'linux64':
+    #    suffix = '.so'
+    #else: 
+    #    suffix = '.dylib'
+    
+    #Extracting the XML
+    for file in archive.filelist:
+        if 'modelDescription.xml' in file.filename:
+            
+            data = archive.read(file) #Reading the file
+
+            fhandle, tempxmlname = tempfile.mkstemp(suffix='.xml') #Creating temp file
+            os.close(fhandle)
+            fout = open(tempxmlname, 'w') #Writing to the temp file
+            fout.write(data)
+            fout.close()
+            break
+    else:
+        raise FMUException('Could not find modelDescription.xml in the FMU.')
+        
+    #Extracting the XML values (if any)
+    is_jmu = False
+    for file in archive.filelist:
+        if file.filename.endswith('values.xml'):
+            
+            data = archive.read(file) #Reading the file
+
+            fhandle, tempxmlvaluesname = tempfile.mkstemp(suffix='.xml') #Creating temp file
+            os.close(fhandle)
+            fout = open(tempxmlvaluesname, 'w') #Writing to the temp file
+            fout.write(data)
+            fout.close()
+            is_jmu = True
+            break
+    # --
+    
+    #Extrating the binary
+    
+    found_files = [] #Found files
+    
+    for file in archive.filelist: #Looping over the archive to find correct binary
+        if dir[0] in file.filename and platform in file.filename and file.filename.endswith(suffix): #Binary directory found
+            found_files.append(file)
+    
+    if found_files:
+        #Unzip
+        data = archive.read(found_files[0]) #Reading the first found dll
+        
+        modelname = found_files[0].filename.split('/')[-1][:-len(suffix)]
+        
+        fhandle, tempdllname = tempfile.mkstemp(suffix=suffix)
+        os.close(fhandle)
+        fout = open(tempdllname, 'w+b')
+        fout.write(data)
+        fout.close()
+        
+        if is_jmu:
+            return [tempdllname.split(os.sep)[-1], tempxmlname.split(os.sep)[-1], modelname, tempxmlvaluesname.split(os.sep)[-1]]
+        else:
+            return [tempdllname.split(os.sep)[-1], tempxmlname.split(os.sep)[-1], modelname]
+
+    else:
+        raise Exception('Could not find binaries for your platform.')
+        return False
+        

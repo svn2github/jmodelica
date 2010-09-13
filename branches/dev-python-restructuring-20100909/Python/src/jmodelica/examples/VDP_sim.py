@@ -27,7 +27,7 @@ def run_demo(with_plots=True):
     An example on how to simulate a model using the ODE simulator.
     """
     curr_dir = os.path.dirname(os.path.abspath(__file__));
-    file_name = os.path.join(curr_dir,'VDP.mo')
+    file_name = os.path.join(curr_dir,'files','VDP.mop')
     
     jmu_name = compile_jmu('VDP_pack.VDP', file_name,
                         compiler_options={'state_start_values_fixed':True})

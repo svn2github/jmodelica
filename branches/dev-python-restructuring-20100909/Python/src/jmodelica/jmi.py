@@ -39,6 +39,9 @@ import platform as PL
 import xmlparser
 import io
 from jmodelica.core import BaseModel
+from jmodelica.core import unzip_unit
+from jmodelica.compiler import ModelicaCompiler
+from jmodelica.compiler import OptimicaCompiler
 
 int = N.int32
 N.int = N.int32
@@ -348,7 +351,7 @@ class JMUModel(BaseModel):
     
     """ High-level interface to a JMIModel. """
     
-    def __init__(self, libname, path ='.'):
+    def __init__(self, jmu_name, path ='.'):
         """ Create a jmi.JMUModel. 
         
         Create a Model object. Load generated binary file, set default 
@@ -357,13 +360,20 @@ class JMUModel(BaseModel):
         
         Parameters::
         
-            libname --
-                Name of binary file.
+            jmu_name --
+                Name of JMU file.
             path --
-                Path to the binary on the file system.
+                Path to the JMU on the file system.
                 Default: Current directory.
         """
-        self.jmimodel = JMIModel(libname, path)
+        # extract files from JMU
+        jmu_files = unzip_unit(jmu_name, path)
+        lib_name = jmu_files[0]
+        self._xml_name = jmu_files[1]
+        self._model_name = jmu_files[2]
+        self._xml_values_name = jmu_files[3]
+        
+        self.jmimodel = JMIModel(lib_name)
 
         # sizes of all arrays
         self._n_real_ci = ct.c_int()
@@ -429,9 +439,7 @@ class JMUModel(BaseModel):
         #n_p_opt set in _setDefaultValuesFromMetadata() -> _set_p_opt_indices()
         self._n_p_opt=0
         
-        self._path = os.path.abspath(path)
-        self._libname = libname
-        self._setDefaultValuesFromMetadata()        
+        self._setDefaultValuesFromMetadata()
         self.jmimodel.initAD()
         self._set_dependent_parameters()
 
@@ -474,22 +482,16 @@ class JMUModel(BaseModel):
         etc.
         
         """
-        if libname is None:
-            libname = self._libname
-        if path is None:
-            path = self._path
-        
-        # set start attributes
-        xml_file=libname+'.xml' 
-        # assumes libname is name of model and xmlfile is located in the same dir as the dll
-        self._set_XMLDoc(xmlparser.ModelDescription(os.path.join(path,xml_file)))
+        # xml file has been unzipped from JMU and is located in the tempdir
+        self._set_XMLDoc(xmlparser.ModelDescription(os.path.join(
+            tempfile.gettempdir(),self._xml_name)))
         
         self._set_scaling_factors()
         self._set_start_attributes()
 
         # set independent parameter values
-        xml_values_file = libname+'_values.xml'
-        self._set_XMLValuesDoc(xmlparser.XMLValuesDoc(os.path.join(path,xml_values_file)))
+        self._set_XMLValuesDoc(xmlparser.XMLValuesDoc(os.path.join(
+            tempfile.gettempdir(),self._xml_values_name)))
         self._set_iparam_values()
 
         # set optimizataion interval, time points and optimization indices
@@ -2291,7 +2293,7 @@ class JMUModel(BaseModel):
         
             The name of the model.
         """
-        return self._libname
+        return self._model_name
 
     def _get(self, name):
         """
@@ -2613,27 +2615,31 @@ class JMIModel(object):
     
     """ A JMI Model loaded from a binary file."""
     
-    def __init__(self, libname, path='.'):
+    def __init__(self, libname, path='.', is_jmu = True):
         """ Create a jmi.JMIModel object from a binary file."""
-                
-        # detect platform specific shared library file extension
-        suffix = ''
-        if sys.platform == 'win32':
-            suffix = '.dll'
-        elif sys.platform == 'darwin':
-            suffix = '.dylib'
-        else:
-            suffix = '.so'
 
-        # create temp dll
-        fhandle,self._tempfname = tempfile.mkstemp(suffix=suffix)
-        shutil.copyfile(path+os.sep+libname+suffix,self._tempfname)
-        os.close(fhandle)
-        fname = self._tempfname.split(os.sep)
-        fname = fname[len(fname)-1]
-        
-        #load temp dll
-        self._dll = load_DLL(fname,tempfile.gettempdir())
+        if is_jmu:
+            self._dll = load_DLL(libname, tempfile.gettempdir())
+            self._tempfname = libname
+        else:
+            # detect platform specific shared library file extension
+            suffix = ''
+            if sys.platform == 'win32':
+                suffix = '.dll'
+            elif sys.platform == 'darwin':
+                suffix = '.dylib'
+            else:
+                suffix = '.so'
+    
+            # create temp dll
+            fhandle,self._tempfname = tempfile.mkstemp(suffix=suffix)
+            shutil.copyfile(path+os.sep+libname+suffix,self._tempfname)
+            os.close(fhandle)
+            fname = self._tempfname.split(os.sep)
+            fname = fname[len(fname)-1]
+            
+            #load temp dll
+            self._dll = load_DLL(fname,tempfile.gettempdir())
 
         # save dll file name so that it can be deleted when python
         # exits if not before
@@ -5717,7 +5723,7 @@ class JMIModel(object):
         
     
 
-def jmu_name(class_name):
+def get_jmu_name(class_name):
     """
     Computes the JMU name from a class name.
     
@@ -5729,14 +5735,14 @@ def jmu_name(class_name):
     
         The JMU name (replaced dots with underscores)
     """
-    return class_name.replace('.','_')
+    return class_name.replace('.','_')+'.jmu'
 
 def package_JMU(class_name):
     """
     Method that takes as input a class name and package all model related files into a JMU.
     """
     mName = class_name
-    mMangledName = class_name.replace('.','_') #The mangled name, replaces dots with underscores
+    mMangledName = class_name.replace('.','_')
     
     #Look for operating system and architecture
     if sys.platform == 'win32':
@@ -5784,3 +5790,64 @@ def package_JMU(class_name):
         os.remove(mMangledName+suffix)        #Binary
     except OSError, msg:
         warnings.warn(msg)
+        
+def compile_jmu(class_name, file_name=[], compiler='modelica', 
+    target='ipopt', compiler_options={}):
+    
+    if isinstance(file_name, str):
+        file_name = [file_name]
+        
+    # Detect file suffix - otherwise use the default = modelica
+    for f in file_name:
+        basename, ext = os.path.splitext(f)
+        if ext == '.mop':
+            compiler = 'optimica'
+            break
+    
+    comp = None
+    if compiler.lower() == 'modelica':
+        comp = ModelicaCompiler()
+    else:
+        comp = OptimicaCompiler()
+        
+    # set compiler options
+    for key, value in compiler_options.iteritems():
+        if isinstance(value, bool):
+            comp.set_boolean_option(key, value)
+        elif isinstance(value, str):
+            comp.set_string_option(key,value)
+        elif isinstance(value, int):
+            comp.set_integer_option(key,value)
+        elif isinstance(value, float):
+            comp.set_real_options(key,value)
+        elif isinstance(value, list):
+            comp.set_string_option(key, _list_to_string(value))
+        else:
+            raise JMIException("Unknown compiler option type for key: %s. \
+            Should be of the following types: boolean, string, integer, \
+            float or list" %key)
+                
+    #compile model
+    comp.compile_model(class_name, file_name, target=target)
+    
+    # pack JMU file
+    package_JMU(class_name)
+    
+    return get_jmu_name(class_name)
+
+
+def _list_to_string(item_list):
+    """Helper function that takes a list of items, which are typed to 
+    str and returned as a string with the list items separated by 
+    platform dependent path separator. 
+    For example: (platform = win)
+    item_list = [1, 2, 3]
+    return value: '1;2;3'
+    """
+    ret_str = ''
+    for l in item_list:
+        ret_str =ret_str+str(l)+os.pathsep
+    return ret_str
+        
+    
+    

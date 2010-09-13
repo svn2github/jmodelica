@@ -31,7 +31,7 @@ import subprocess
 import jpype
 import string
 import jmodelica as jm
-import jmodelica.jmi as jmi
+#import jmodelica.jmi as jmi
 from jmodelica import xmlparser
 
 #start JVM
@@ -446,7 +446,7 @@ class ModelicaCompiler():
         except jpype.JavaException, ex:
             self._handle_exception(ex)
 
-        return jmi.JMUModel(c_file)
+        #return jmi.JMUModel(c_file)
 
     def parse_model(self,model_file_name):   
         """ 

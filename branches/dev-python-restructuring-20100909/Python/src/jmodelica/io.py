@@ -76,8 +76,9 @@ def export_result_dymola(model, data, file_name='', format='txt'):
         f.write('1.1\n')
         f.write('\n')
         
-        xmlfile = model.get_name()+'.xml'
-        md = xmlparser.ModelDescription(xmlfile)
+        #xmlfile = model.get_name()+'.xml'
+        #md = xmlparser.ModelDescription(xmlfile)
+        md = model._get_XMLDoc()
         
         # sort in value reference order (must match order in data)
         names = sorted(md.get_variable_names(), key=itemgetter(0))

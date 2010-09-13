@@ -20,13 +20,12 @@ import sys
 import jmodelica.jmi
 from jmodelica import xmlparser
 import os
-import tempfile
+
 import ctypes as C
 import numpy as N
 from ctypes.util import find_library
-import platform as PL
 import numpy.ctypeslib as Nct
-from zipfile import ZipFile
+
 from lxml import etree
 from operator import itemgetter
 import warnings
@@ -37,83 +36,6 @@ class FMUException(Exception):
     """An FMU exception."""
     pass
 
-
-    
-def unzip_FMU(archive, path='.'):
-    """
-    Unzip the FMU.
-    """
-
-    try:
-        archive = ZipFile(os.path.join(path,archive))
-    except IOError:
-        raise FMUException('Could not locate the FMU.')
-    
-    dir = ['binaries','sources']
-    
-    if sys.platform == 'win32':
-        platform = 'win'
-        suffix = '.dll'
-    elif sys.platform == 'darwin':
-        platform = 'darwin'
-        suffix = '.dylib'
-    else:
-        platform = 'linux'
-        suffix = '.so'
-    
-    if PL.architecture()[0].startswith('32'):
-        platform += '32'
-    else:
-        platform += '64'
-    
-    #if platform == 'win32' or platform == 'win64':
-    #    suffix = '.dll'
-    #elif platform == 'linux32' or platform == 'linux64':
-    #    suffix = '.so'
-    #else: 
-    #    suffix = '.dylib'
-    
-    #Extracting the XML
-    for file in archive.filelist:
-        if 'modelDescription.xml' in file.filename:
-            
-            data = archive.read(file) #Reading the file
-
-            fhandle, tempxmlname = tempfile.mkstemp(suffix='.xml') #Creating temp file
-            os.close(fhandle)
-            fout = open(tempxmlname, 'w') #Writing to the temp file
-            fout.write(data)
-            fout.close()
-            break
-    else:
-        raise FMUException('Could not find modelDescription.xml in the FMU.')
-    # --
-    
-    #Extrating the binary
-    
-    found_files = [] #Found files
-    
-    for file in archive.filelist: #Looping over the archive to find correct binary
-        if dir[0] in file.filename and platform in file.filename and file.filename.endswith(suffix): #Binary directory found
-            found_files.append(file)
-    
-    if found_files:
-        #Unzip
-        data = archive.read(found_files[0]) #Reading the first found dll
-        
-        modelname = found_files[0].filename.split('/')[-1][:-len(suffix)]
-        
-        fhandle, tempdllname = tempfile.mkstemp(suffix=suffix)
-        os.close(fhandle)
-        fout = open(tempdllname, 'w+b')
-        fout.write(data)
-        fout.close()
-        
-        return [tempdllname.split(os.sep)[-1], tempxmlname.split(os.sep)[-1], modelname]
-
-    else:
-        raise FMUException('Could not find binaries for your platform.')
-        return False
 
 class FMUModel(BaseModel):
     """
