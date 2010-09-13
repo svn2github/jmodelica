@@ -18,12 +18,13 @@
 # Import library for path manipulations
 import os.path
 
-# Import the JModelica.org Python packages
-from jmodelica import optimize
-
 # Import numerical libraries
 import numpy as N
 import matplotlib.pyplot as plt
+
+# Import the JModelica.org Python packages
+from jmodelica.jmi import compile_jmu
+from jmodelica.jmi import JMUModel
 
 def run_demo(with_plots=True):
     """Demonstrate how to solve a minimum time
@@ -32,10 +33,12 @@ def run_demo(with_plots=True):
 
     curr_dir = os.path.dirname(os.path.abspath(__file__));
     model_name = 'VDP_pack.VDP_Opt_Min_Time'
-    mo_file = curr_dir+'/files/VDP.mo'
+    mo_file = curr_dir+'/files/VDP.mop'
 
-    opt_res = optimize(model_name, mo_file)
-							
+    jmu_name = compile_jmu(model_name, mo_file)
+    vdp = JMUModel(jmu_name)
+    opt_res = vdp.optimize()
+
     # Extract variable profiles
     res = opt_res.result_data
     x1=res.get_variable_data('x1')

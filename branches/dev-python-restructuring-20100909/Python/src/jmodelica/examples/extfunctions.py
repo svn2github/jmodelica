@@ -16,7 +16,8 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 
-import jmodelica
+from jmodelica.jmi import compile_jmu
+from jmodelica.jmi import JMUModel
 import pylab as p
 import numpy as N
 import os
@@ -25,11 +26,14 @@ import os
 def run_demo(with_plots=True):
     
     curr_dir = os.path.dirname(os.path.abspath(__file__));
-    model_name = 'ExtFunctions.addTwo'
+    class_name = 'ExtFunctions.addTwo'
     mofile = curr_dir+'/files/ExtFunctions.mo'
+    
+    jmu_name = compile_jmu(class_name, mofile, target='model_noad')
+    model = JMUModel(jmu_name)
 
     #simulate
-    simres = jmodelica.simulate(model_name, mofile, compiler_target='model_noad')
+    simres = model.simulate()
     
     res = simres.result_data
     sim_a = res.get_variable_data('a')

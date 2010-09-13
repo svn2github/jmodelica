@@ -21,9 +21,8 @@ import pylab as P
 import warnings
 import nose
 
-import jmodelica
-from jmodelica import jmi
-from jmodelica.compiler import OptimicaCompiler
+from jmodelica.jmi import compile_jmu
+from jmodelica.jmi import JMUModel
 
 try:
     from jmodelica.simulation.assimulo_interface import JMIDAESens
@@ -39,14 +38,10 @@ def run_demo(with_plots=True):
     
     curr_dir = O.path.join(O.path.dirname(O.path.abspath(__file__)),'files')
     
-    # Create a Optimica compiler instance
-    oc = OptimicaCompiler()
-    
-    # Compile the stationary initialization model into a DLL
-    oc.compile_model("Robertson", O.path.join(curr_dir,"Robertson.mo"), target='ipopt')
+    jmu_name = compile_jmu("Robertson", O.path.join(curr_dir,"Robertson.mop"))
     
     # Load a model instance into Python
-    jm_model = jmi.Model("Robertson")
+    jm_model = JMUModel(jmu_name)
     
     global rob_mod
     global rob_sim

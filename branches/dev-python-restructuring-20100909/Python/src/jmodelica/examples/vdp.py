@@ -18,12 +18,13 @@
 # Import library for path manipulations
 import os.path
 
-# Import the JModelica.org Python packages
-from jmodelica import optimize
-
 # Import numerical libraries
 import numpy as N
 import matplotlib.pyplot as plt
+
+# Import the JModelica.org Python packages
+from jmodelica.jmi import compile_jmu
+from jmodelica.jmi import JMUModel
 
 def run_demo(with_plots=True):
     """Demonstrate how to solve a dynamic optimization problem based
@@ -31,7 +32,10 @@ def run_demo(with_plots=True):
 
     curr_dir = os.path.dirname(os.path.abspath(__file__));
 
-    opt_res = optimize("VDP_pack.VDP_Opt", curr_dir+"/files/VDP.mo")
+    jmu_name = compile_jmu("VDP_pack.VDP_Opt", curr_dir+"/files/VDP.mop")
+    vdp = JMUModel(jmu_name)
+    
+    opt_res = vdp.optimize()
 
     # Extract variable profiles
     res = opt_res.result_data

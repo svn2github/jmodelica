@@ -17,15 +17,11 @@
 
 # Import library for path manipulations
 import os.path
-from jmodelica import initialize
-from jmodelica import simulate
-from jmodelica import optimize
-
-import jmodelica.jmi as jmi
-from jmodelica.compiler import OptimicaCompiler
 
 import numpy as N
 import matplotlib.pyplot as plt
+
+from jmodelica.jmi import compile_jmu
 
 def run_demo(with_plots=True):
     """ Example demonstrating how to use BLT.
@@ -33,9 +29,6 @@ def run_demo(with_plots=True):
 
     curr_dir = os.path.dirname(os.path.abspath(__file__));
 
-    # Create a Modelica compiler instance
-    oc = OptimicaCompiler()
-    oc.set_boolean_option("equation_sorting",True)
-
     # Compile model
-    pend = oc.compile_model("BLT_Example", curr_dir+"/files/BLT_Example.mo", target='ipopt')
+    jmu_name = compile_jmu("BLT_Example", curr_dir+"/files/BLT_Example.mo", 
+        compiler_options={"equation_sorting":True})

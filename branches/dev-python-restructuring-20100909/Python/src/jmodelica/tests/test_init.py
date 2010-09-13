@@ -25,10 +25,9 @@ import numpy as N
 import nose
 import nose.tools
 import warnings
-import jmodelica
-from jmodelica.compiler import ModelicaCompiler
-from jmodelica.compiler import OptimicaCompiler
-from jmodelica import jmi
+
+from jmodelica.jmi import compile_jmu
+from jmodelica.jmi import JMUModel
 from jmodelica.tests import testattr
 from jmodelica.tests import get_files_path
 from jmodelica.algorithm_drivers import InvalidAlgorithmArgumentException
@@ -46,13 +45,6 @@ except:
 
 int = N.int32
 N.int = N.int32
-
-# Create compilers
-mc = ModelicaCompiler()
-mc.set_boolean_option('state_start_values_fixed',True)
-oc = OptimicaCompiler()
-oc.set_boolean_option('state_start_values_fixed',True)
-
     
 class Test_init_std:
     """ Class which contains std tests for the init module. """
@@ -81,7 +73,9 @@ class Test_init_std:
     def test_dependent_parameters(self):
         """ Test evaluation of dependent parameters. """
         path = os.path.join(get_files_path(), 'Modelica', 'DepPar.mo')
-        model = mc.compile_model('DepPar.DepPar1', path)
+        jmu_name = compile_jmu('DepPar.DepPar1', path, 
+            compiler_options={'state_start_values_fixed':True})
+        model = JMUModel(jmu_name)
         
         assert (model.get('p1') == 1.0), 'Wrong value of independent parameter p1'
         assert (model.get('p2') == 2.0), 'Wrong value of dependent parameter p2'
@@ -100,14 +94,13 @@ class Test_init_ipopt:
         fpath_vdp = os.path.join(get_files_path(),'Modelica','VDP.mop')
         cpath_vdp = "VDP_pack.VDP_Opt"
         
-        jmi.compile_jmu(cpath_vdp, fpath_vdp)
-        cls.dll_vdp = cpath_vdp.replace('.','_',1)
+        cls.jmu_name = compile_jmu(cpath_vdp, fpath_vdp)
         
     def setUp(self):
         """
         Sets up the test case.
         """
-        self.model_vdp = jmi.JMUModel(Test_init_ipopt.dll_vdp+'.jmu')
+        self.model_vdp = JMUModel(Test_init_ipopt.jmu_name)
 
     @testattr(ipopt = True)
     def test_initialize(self):
@@ -115,8 +108,8 @@ class Test_init_ipopt:
         fpath_pend = os.path.join(get_files_path(), 'Modelica', 'Pendulum_pack.mop')
         cpath_pend = "Pendulum_pack.Pendulum"
         
-        jmu_pend = jmi.compile_jmu(cpath_pend, fpath_pend)
-        pend = jmi.JMUModel(jmu_pend)
+        jmu_pend = compile_jmu(cpath_pend, fpath_pend)
+        pend = JMUModel(jmu_pend)
         
         init_res = pend.initialize()
         res = init_res.result_data
@@ -152,8 +145,8 @@ class Test_init_ipopt:
         fpath_pend = os.path.join(get_files_path(), 'Modelica', 'Pendulum_pack.mop')
         cpath_pend = "Pendulum_pack.Pendulum"
         
-        jmu_pend = jmi.compile_jmu(cpath_pend, fpath_pend)
-        pend = jmi.JMUModel(jmu_pend)
+        jmu_pend = compile_jmu(cpath_pend, fpath_pend)
+        pend = JMUModel(jmu_pend)
         
         init_res = pend.initialize(solver_args={'max_iter':1000})
         res = init_res.result_data
@@ -188,8 +181,8 @@ class Test_init_ipopt:
         """ Test the jmodelica.optimize function using all default parameters. """
         fpath_pend = os.path.join(get_files_path(), 'Modelica', 'Pendulum_pack.mop')
         cpath_pend = "Pendulum_pack.Pendulum_Opt"
-        jmu_pend = jmi.compile_jmu(cpath_pend, fpath_pend,compiler_options={'state_start_values_fixed':True})
-        pend = jmi.JMUModel(jmu_pend)
+        jmu_pend = compile_jmu(cpath_pend, fpath_pend,compiler_options={'state_start_values_fixed':True})
+        pend = JMUModel(jmu_pend)
         
         opt_res = pend.optimize()
         cost=opt_res.result_data.get_variable_data('cost')
@@ -228,7 +221,7 @@ class Test_init_ipopt:
         """ Test that the jmodelica.optimize function raises exception for an 
             invalid algorithm argument.
         """
-        nose.tools.assert_raises(jmodelica.algorithm_drivers.InvalidAlgorithmArgumentException,
+        nose.tools.assert_raises(InvalidAlgorithmArgumentException,
                                  self.model_vdp.optimize,
                                  alg_args={'ne':10})
                                  
@@ -244,7 +237,7 @@ class Test_init_assimulo:
         fpath_rlc = os.path.join(get_files_path(),'Modelica','RLC_Circuit.mo')
         cpath_rlc = "RLC_Circuit"
 
-        jmi.compile_jmu(cpath_rlc, fpath_rlc, compiler_options={'state_start_values_fixed':True})
+        cls.jmu_name = compile_jmu(cpath_rlc, fpath_rlc, compiler_options={'state_start_values_fixed':True})
         
     def setUp(self):
         """
@@ -256,7 +249,7 @@ class Test_init_assimulo:
         self.fpath_minit = os.path.join(get_files_path(), 'Modelica', 'must_initialize.mo')
         self.fpath_rlc = os.path.join(get_files_path(),'Modelica','RLC_Circuit.mo')
         self.cpath_rlc = "RLC_Circuit"
-        self.model_rlc = jmi.JMUModel('RLC_Circuit.jmu')
+        self.model_rlc = JMUModel(Test_init_assimulo.jmu_name)
 
     @testattr(assimulo = True)
     def test_simulate(self):
@@ -281,7 +274,7 @@ class Test_init_assimulo:
         """ Test that it is possible to set properties in assimulo and that an 
             exception is raised if the argument is invalid. """
         sim_res = self.model_rlc.simulate(solver_args={'max_eIter':100, 'maxh':0.1})
-        nose.tools.assert_raises(jmodelica.algorithm_drivers.InvalidSolverArgumentException,
+        nose.tools.assert_raises(InvalidSolverArgumentException,
                                  self.model_rlc.simulate,
                                  solver_args={'maxeter':10})
         
@@ -290,7 +283,7 @@ class Test_init_assimulo:
         """ Test that the jmodelica.simulate function raises an exception for an 
             invalid solver argument.
         """    
-        nose.tools.assert_raises(jmodelica.algorithm_drivers.InvalidSolverArgumentException,
+        nose.tools.assert_raises(InvalidSolverArgumentException,
                                  self.model_rlc.simulate,
                                  solver_args={'mxiter':10})
 
@@ -299,17 +292,16 @@ class Test_init_assimulo:
         """ Test that the jmodelica.optimize function raises exception for an 
             invalid algorithm argument.
         """
-        nose.tools.assert_raises(jmodelica.algorithm_drivers.InvalidAlgorithmArgumentException,
+        nose.tools.assert_raises(InvalidAlgorithmArgumentException,
                                  self.model_rlc.simulate,
                                  alg_args={'starttime':10})
       
     @testattr(assimulo=True)
     def test_simulate_w_ode(self):
         """ Test jmodelica.simulate with ODE problem and setting solver args."""
-        jmi.compile_jmu(self.cpath_vdp, self.fpath_vdp, compiler_options={'state_start_values_fixed':True}
-                        ,target='model')
-        jmu_name = jmi.get_jmu_name(self.cpath_vdp)
-        model = jmi.JMUModel(jmu_name)
+        jmu_name = compile_jmu(self.cpath_vdp, self.fpath_vdp, 
+            compiler_options={'state_start_values_fixed':True},target='model')
+        model = JMUModel(jmu_name)
         sim_res = model.simulate(alg_args={'solver':'CVode', 'final_time':20, 'num_communication_points':0},
                                      solver_args={'discr':'BDF', 'iter':'Newton'})
         x1=sim_res.result_data.get_variable_data('x1')
@@ -319,8 +311,6 @@ class Test_init_assimulo:
                "Wrong value in simulation result in VDP_assimulo.py" 
         assert N.abs(x2.x[-1] - 1.57833994) < 1e-5, \
                "Wrong value in simulation result in VDP_assimulo.py"
-
-
     
     @testattr(assimulo=True)
     def test_simulate_initialize_arg(self):
@@ -332,12 +322,12 @@ class Test_init_assimulo:
         # unspecific (the test will pass for every type of error thrown). Therefore,
         # I first test that running the simulation with default settings succeeds, so
         # at least one knows that the error has with initialization to do.
-        name = jmi.compile_jmu(self.cpath_minit, self.fpath_minit)
-        model = jmi.JMUModel(name)
+        name = compile_jmu(self.cpath_minit, self.fpath_minit)
+        model = JMUModel(name)
         
         nose.tools.ok_(model.simulate())
         
-        model = jmi.JMUModel(name)
+        model = JMUModel(name)
         
         nose.tools.assert_raises(Exception,
                                  model.simulate,

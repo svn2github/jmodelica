@@ -30,12 +30,11 @@ import nose.tools as ntools
 from jmodelica.tests import testattr
 from jmodelica.tests import get_files_path
 
-import jmodelica.jmi as jmi
-from jmodelica.compiler import OptimicaCompiler
-from jmodelica.compiler import ModelicaCompiler
 import jmodelica.xmlparser as xp
 import jmodelica.io
+import jmodelica.jmi as jmi
 from jmodelica.jmi import compile_jmu
+from jmodelica.jmi import JMUModel
 
 try:
     from jmodelica.simulation.assimulo_interface import JMIODE
@@ -48,10 +47,6 @@ except NameError, ImportError:
 
 int = N.int32
 N.int = N.int32
-
-# get a compiler
-mc = ModelicaCompiler()
-oc = OptimicaCompiler()
 
 # constants used in TestJMIModel
 eval_alg = jmi.JMI_DER_CPPAD
@@ -84,7 +79,7 @@ class TestModel_VDP:
         """
         Sets up the test case.
         """
-        self.vdp = jmi.JMUModel("VDP_pack_VDP_Opt.jmu")
+        self.vdp = JMUModel("VDP_pack_VDP_Opt.jmu")
         
     @testattr(stddist = True)
     def test_has_cppad_derivatives(self):
@@ -598,7 +593,7 @@ class TestModel_RLC:
         """
         Sets up the test case.
         """
-        self.rlc = jmi.JMUModel("RLC_Circuit.jmu")
+        self.rlc = JMUModel("RLC_Circuit.jmu")
 
     # removed method
     #@testattr(stddist = True)
@@ -666,7 +661,7 @@ class TestJMIModel_VDP:
         """
         Sets up the test case.
         """
-        self.vdp = jmi.JMUModel("VDP_pack_VDP_Opt.jmu")               
+        self.vdp = JMUModel("VDP_pack_VDP_Opt.jmu")               
 
     @testattr(stddist = True)
     def test_initAD(self):
@@ -1239,13 +1234,11 @@ class TestJMIModel_VDP:
         
         fpath = os.path.join(get_files_path(), 'Modelica', "VDP_pack.mo")
         cpath = "VDP_pack.VDP"
-        fname = cpath.replace('.','_',1)
-
-        mc.set_boolean_option('state_start_values_fixed',False)
-        mc.compile_model(cpath, fpath)
     
+        jmu_name = compile_jmu(cpath, fpath, 
+            compiler_options={'state_start_values_fixed':False})
         # Load the dynamic library and XML data
-        vdp = jmi.JMUModel(fname+'.jmu')
+        vdp = JMUModel(jmu_name)
     
         res_n_eq_F = 2
         n_eq_F, n_eq_R = vdp.jmimodel.dae_get_sizes()
@@ -1275,7 +1268,7 @@ class TestModelGeneric:
     
     def setUp(self):
         """Set up the test case."""
-        self.m = jmi.JMUModel("DependentParameterTest.jmu")
+        self.m = JMUModel("DependentParameterTest.jmu")
 
     @testattr(stddist = True)
     def test_setget_independent_parameter(self):
@@ -1425,8 +1418,6 @@ class Test_JMU_methods:
         """
         fpath_ODE = os.path.join(get_files_path(), 'Modelica', 'VDP.mop')
         cpath_ODE = 'VDP_pack.VDP'
-        oc.compile_model(cpath_ODE, fpath_ODE)
+        jmu_name = compile_jmu(cpath_ODE, fpath_ODE)
         
-        jmi.package_JMU(cpath_ODE)
-        
-        assert os.path.exists('VDP_pack_VDP.jmu')
+        assert os.path.exists(jmu_name)

@@ -18,12 +18,13 @@
 # Import library for path manipulations
 import os.path
 
-# Import the JModelica.org Python packages
-from jmodelica import optimize
-
 # Import numerical libraries
 import numpy as N
 import matplotlib.pyplot as plt
+
+# Import the JModelica.org Python packages
+from jmodelica.jmi import compile_jmu
+from jmodelica.jmi import JMUModel
 
 def run_demo(with_plots=True):
     """This example demonstrates how to solve optimization problems
@@ -37,8 +38,11 @@ def run_demo(with_plots=True):
     n_cp = 3 # Number of collocation points
     b_f = 3*N.ones(10) # Blocking factors
 
-    res = optimize("LagrangeCost.OptTest", curr_dir+"/files/LagrangeCost.mo",
-                       alg_args={'n_e':n_e,'hs':hs,'n_cp':n_cp,'blocking_factors':b_f})
+    jmu_name = compile_jmu("LagrangeCost.OptTest", 
+        curr_dir+"/files/LagrangeCost.mop")
+    model = JMUModel(jmu_name)
+    res = model.optimize(
+        alg_args={'n_e':n_e,'hs':hs,'n_cp':n_cp,'blocking_factors':b_f})
 
     x1 = res.result_data.get_variable_data('sys.x[1]')
     x2 = res.result_data.get_variable_data('sys.x[2]')

@@ -17,15 +17,11 @@
 
 # Import library for path manipulations
 import os.path
-from jmodelica import initialize
-from jmodelica import simulate
-from jmodelica import optimize
-
-import jmodelica.jmi as jmi
-from jmodelica.compiler import OptimicaCompiler
 
 import numpy as N
 import matplotlib.pyplot as plt
+
+from jmodelica.jmi import compile_jmu
 
 def run_demo(with_plots=True):
     """ Example demonstrating how to use index reduction.
@@ -33,9 +29,7 @@ def run_demo(with_plots=True):
 
     curr_dir = os.path.dirname(os.path.abspath(__file__));
 
-    # Create a Modelica compiler instance
-    oc = OptimicaCompiler()
-    oc.set_boolean_option("index_reduction",True)
-
     # Compile model
-    pend = oc.compile_model("Pendulum_pack.PlanarPendulum", curr_dir+"/files/Pendulum_pack.mo", target='ipopt')
+    jmu_name = compile_jmu("Pendulum_pack.PlanarPendulum", 
+        curr_dir+"/files/Pendulum_pack.mo", 
+        compiler_options={"index_reduction":True})

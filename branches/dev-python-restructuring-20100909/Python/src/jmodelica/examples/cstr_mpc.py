@@ -18,12 +18,13 @@
 # Import library for path manipulations
 import os.path
 import warnings
-import jmodelica
-import jmodelica.jmi as jmi
-from jmodelica.compiler import OptimicaCompiler
+
+from jmodelica.jmi import compile_jmu
+from jmodelica.jmi import JMUModel
 from jmodelica.initialization.ipopt import NLPInitialization
 from jmodelica.initialization.ipopt import InitializationOptimizer
 from jmodelica.optimization import ipopt
+from jmodelica.io import ResultDymolaTextual
 
 try:
     from jmodelica.simulation.assimulo_interface import JMIDAE, write_data
@@ -49,15 +50,12 @@ def run_demo(with_plots=True):
     """
 
     curr_dir = os.path.dirname(os.path.abspath(__file__));
-
-    # Create a Modelica compiler instance
-    oc = OptimicaCompiler()
     
-    # Compile the stationary initialization model into a DLL
-    oc.compile_model("CSTR.CSTR_Init", curr_dir+"/files/CSTR.mo", target='ipopt')
+    # Compile the stationary initialization model into a JMU
+    jmu_name = compile_jmu("CSTR.CSTR_Init", curr_dir+"/files/CSTR.mop")
 
-    # Load a model instance into Python
-    init_model = jmi.JMUModel("CSTR_CSTR_Init")
+    # Load a JMUModel instance
+    init_model = JMUModel(jmu_name)
 
     # Create DAE initialization object.
     init_nlp = NLPInitialization(init_model)
@@ -66,10 +64,10 @@ def run_demo(with_plots=True):
     init_nlp_ipopt = InitializationOptimizer(init_nlp)
 
     def compute_stationary(Tc_stat):
-        init_model.set_value('Tc',Tc_stat)
+        init_model.set('Tc',Tc_stat)
         # Solve the DAE initialization system with Ipopt
         init_nlp_ipopt.init_opt_ipopt_solve()
-        return (init_model.get_value('c'),init_model.get_value('T'))
+        return (init_model.get('c'),init_model.get('T'))
 
     # Set inputs for Stationary point A
     Tc_0_A = 250
@@ -91,16 +89,16 @@ def run_demo(with_plots=True):
     print('c = %f' % c_0_B)
     print('T = %f' % T_0_B)
     
-    oc.compile_model("CSTR.CSTR_Opt_MPC", curr_dir+"/files/CSTR.mo", target='ipopt')
+    jmu_name = compile_jmu("CSTR.CSTR_Opt_MPC", curr_dir+"/files/CSTR.mop")
 
-    cstr = jmi.JMUModel("CSTR_CSTR_Opt_MPC")
+    cstr = JMUModel(jmu_name)
 
-    cstr.set_value('Tc_ref',Tc_0_B)
-    cstr.set_value('c_ref',c_0_B)
-    cstr.set_value('T_ref',T_0_B)
+    cstr.set('Tc_ref',Tc_0_B)
+    cstr.set('c_ref',c_0_B)
+    cstr.set('T_ref',T_0_B)
     
-    cstr.set_value('cstr.c_init',c_0_A)
-    cstr.set_value('cstr.T_init',T_0_A)
+    cstr.set('cstr.c_init',c_0_A)
+    cstr.set('cstr.T_init',T_0_A)
     
     # Initialize the mesh
     n_e = 50 # Number of elements 
@@ -129,17 +127,17 @@ def run_demo(with_plots=True):
     ref_mpc[0:3] = N.ones(3)*Tc_0_A
     ref_mpc[3:] = N.ones(n_samples-3)*Tc_0_B
     
-    cstr.set_value('cstr.c_init',c_0_A)
-    cstr.set_value('cstr.T_init',T_0_A)
+    cstr.set('cstr.c_init',c_0_A)
+    cstr.set('cstr.T_init',T_0_A)
     
     # Compile the simulation model into a DLL
-    oc.compile_model("CSTR.CSTR", curr_dir+"/files/CSTR.mo", target='ipopt')
+    jmu_name = compile_jmu("CSTR.CSTR", curr_dir+"/files/CSTR.mop")
     
     # Load a model instance into Python
-    sim_model = jmi.JMUModel("CSTR_CSTR")
+    sim_model = JMUModel(jmu_name)
     
-    sim_model.set_value('c_init',c_0_A)
-    sim_model.set_value('T_init',T_0_A)
+    sim_model.set('c_init',c_0_A)
+    sim_model.set('T_init',T_0_A)
     
     
     global cstr_mod
@@ -158,9 +156,9 @@ def run_demo(with_plots=True):
         Tc_ref = ref_mpc[i]
         c_ref, T_ref = compute_stationary(Tc_ref)
 
-        cstr.set_value('Tc_ref',Tc_ref)
-        cstr.set_value('c_ref',c_ref)
-        cstr.set_value('T_ref',T_ref)
+        cstr.set('Tc_ref',Tc_ref)
+        cstr.set('c_ref',c_ref)
+        cstr.set('T_ref',T_ref)
         
         # Solve the optimization problem
         nlp_ipopt.opt_sim_ipopt_solve()
@@ -169,7 +167,7 @@ def run_demo(with_plots=True):
         nlp.export_result_dymola()
         
         # Load the file we just wrote to file
-        res = jmodelica.io.ResultDymolaTextual('CSTR_CSTR_Opt_MPC_result.txt')
+        res = ResultDymolaTextual('CSTR_CSTR_Opt_MPC_result.txt')
         
         # Extract variable profiles
         c_res=res.get_variable_data('cstr.c')
@@ -180,7 +178,7 @@ def run_demo(with_plots=True):
         Tc_ctrl = Tc_res.x[0]
         
         # Set the value to the model
-        sim_model.set_value('Tc',Tc_ctrl)
+        sim_model.set('Tc',Tc_ctrl)
       
         cstr_sim.initiate() #Calculate initial conditions (from the model)
         cstr_sim.simulate(t_mpc[i+1]) #Simulate
@@ -188,10 +186,10 @@ def run_demo(with_plots=True):
         t_T_sim = cstr_sim.t
         
         # Set terminal values of the states
-        cstr.set_value('cstr.c_init',cstr_sim.y_cur[0])
-        cstr.set_value('cstr.T_init',cstr_sim.y_cur[1])
-        sim_model.set_value('c_init',cstr_sim.y_cur[0])
-        sim_model.set_value('T_init',cstr_sim.y_cur[1])
+        cstr.set('cstr.c_init',cstr_sim.y_cur[0])
+        cstr.set('cstr.T_init',cstr_sim.y_cur[1])
+        sim_model.set('c_init',cstr_sim.y_cur[0])
+        sim_model.set('T_init',cstr_sim.y_cur[1])
         
         if with_plots:
             plt.figure(4)
