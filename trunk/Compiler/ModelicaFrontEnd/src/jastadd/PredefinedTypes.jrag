@@ -155,8 +155,7 @@ aspect PredefinedTypes {
         try {
         
             String builtInFunc = 
-"//function der end der;\n"
-+"//function initial end initial;\n"
+"function initial end initial;\n"
 +"function terminal end terminal;\n"
 +"function smooth end smooth;\n"
 +"function noEvent \n"

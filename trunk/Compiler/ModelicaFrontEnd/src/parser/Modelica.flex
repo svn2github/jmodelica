@@ -196,7 +196,6 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   "input"         { return newSymbol(Terminals.INPUT); }
   "output"        { return newSymbol(Terminals.OUTPUT); }
   
-  "initial"       { return newSymbol(Terminals.INITIAL); }
   "equation"      { return newSymbol(Terminals.EQUATION); }
   "algorithm"     { return newSymbol(Terminals.ALGORITHM); }
   

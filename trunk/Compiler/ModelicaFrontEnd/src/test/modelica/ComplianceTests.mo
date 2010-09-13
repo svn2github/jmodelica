@@ -244,35 +244,35 @@ model UnsupportedBuiltins3_ComplErr
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.ComplianceErrorTestCase(
          name="UnsupportedBuiltins3_ComplErr",
-         description="Compliance error for unsupported builtins",
+         description="",
          errorMessage="
 9 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 263, column 3:
+Compliance error at line 280, column 3:
   The semiLinear() function-like operator is not supported
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Semantic error at line 265, column 3:
-  The function initial() is undeclared
+Compliance error at line 281, column 3:
+  The initial() function-like operator is not supported
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 266, column 3:
+Compliance error at line 282, column 3:
   The terminal() function-like operator is not supported
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 267, column 3:
+Compliance error at line 283, column 3:
   The smooth() function-like operator is not supported
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 268, column 3:
+Compliance error at line 284, column 3:
   The sample() function-like operator is not supported
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 269, column 3:
+Compliance error at line 285, column 3:
   The pre() function-like operator is not supported
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 270, column 3:
+Compliance error at line 286, column 3:
   The edge() function-like operator is not supported
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 271, column 3:
+Compliance error at line 287, column 3:
   The reinit() function-like operator is not supported
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 266, column 3:
+Compliance error at line 288, column 3:
   The terminate() function-like operator is not supported
 ")})));
 

@@ -1037,10 +1037,6 @@ Exp primary =
  FunctionCall function_call =
     parse_access LPAREN function_arguments? RPAREN 
                                       {: return new FunctionCall(parse_access, function_arguments); :}
-  | INITIAL LPAREN function_arguments? RPAREN 
-                                      {: ParseAccess p = new ParseAccess("initial", new Opt());
-                                         p.setLocationNoTree(function_arguments);
-                                         return new FunctionCall(p, function_arguments);  :}
   ;  
   
 FunctionArguments function_arguments =
