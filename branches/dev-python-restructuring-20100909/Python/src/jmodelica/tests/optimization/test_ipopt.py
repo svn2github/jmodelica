@@ -34,8 +34,6 @@ from jmodelica.optimization import ipopt
 int = N.int32
 N.int = N.int32
 
-oc = OptimicaCompiler()
-oc.set_boolean_option('state_start_values_fixed',True)
 
 class TestNLP_VDP:
     """ Tests for NLPCollocation wrapper methods using the CSTR model.
@@ -47,16 +45,14 @@ class TestNLP_VDP:
         Compile the test model.
         """
         # compile cstr
-        fpath_cstr = os.path.join(get_files_path(), 'Modelica', 'CSTR.mo')
+        fpath_cstr = os.path.join(get_files_path(), 'Modelica', 'CSTR.mop')
         cpath_cstr = "CSTR.CSTR_Opt"
-        fname_cstr = cpath_cstr.replace('.','_')
-        oc.compile_model(cpath_cstr, fpath_cstr, 'ipopt')
+        jmi.compile_jmu(cpath_cstr, fpath_cstr, compiler_options={'state_start_values_fixed':True})
     
     def setUp(self):
         """Test setUp. Load the test model."""
-        cpath_cstr = "CSTR.CSTR_Opt"
-        fname_cstr = cpath_cstr.replace('.','_')        
-        self.cstr = jmi.JMUModel(fname_cstr)
+
+        self.cstr = jmi.JMUModel("CSTR_CSTR_Opt.jmu")
         # Initialize the mesh
         n_e = 150 # Number of elements 
         hs = N.ones(n_e)*1./n_e # Equidistant points
@@ -191,17 +187,16 @@ class TestNLP_CSTR():
         Compile the test model.
         """
         # compile vdp
-        fpath_vdp = os.path.join(get_files_path(), 'Modelica', 'VDP.mo')
+        fpath_vdp = os.path.join(get_files_path(), 'Modelica', 'VDP.mop')
         cpath_vdp = "VDP_pack.VDP_Opt_Min_Time"
-        fname_vdp = cpath_vdp.replace('.','_',1)
-        oc.compile_model(cpath_vdp, fpath_vdp, target='ipopt')
+        jmi.compile_jmu(cpath_vdp, fpath_vdp,compiler_options={'state_start_values_fixed':True}) 
     
     def setUp(self):
         """Test setUp. Load the test model."""   
         cpath_vdp = "VDP_pack.VDP_Opt_Min_Time"
         fname_vdp = cpath_vdp.replace('.','_',1)
         self.fname_vdp = fname_vdp   
-        self.vdp = jmi.JMUModel(fname_vdp)
+        self.vdp = jmi.JMUModel(fname_vdp+'.jmu')
         # Initialize the mesh
         n_e = 100 # Number of elements 
         hs = N.ones(n_e)*1./n_e # Equidistant points
@@ -379,16 +374,16 @@ class TestCollocationEventException:
         Compile the test model.
         """
         # compile cstr
-        fpath_cstr = os.path.join(get_files_path(), 'Modelica', 'IfExpTest.mo')
+        fpath_cstr = os.path.join(get_files_path(), 'Modelica', 'IfExpTest.mop')
         cpath_cstr = "IfExpTestEvents"
-        fname_cstr = cpath_cstr.replace('.','_')
-        oc.compile_model(cpath_cstr, fpath_cstr, 'ipopt')
+        
+        jmi.compile_jmu(cpath_cstr, fpath_cstr, compiler_options={'state_start_values_fixed':True})
     
     def setUp(self):
         """Test setUp. Load the test model."""
         cpath_model = "IfExpTestEvents"
         fname_model = cpath_model.replace('.','_')
-        self.model = jmi.JMUModel(fname_model)
+        self.model = jmi.JMUModel(fname_model+'.jmu')
 
     @testattr(ipopt = True)
     def test_exception_thrown(self):
