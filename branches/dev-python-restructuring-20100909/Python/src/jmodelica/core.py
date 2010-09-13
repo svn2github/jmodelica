@@ -148,7 +148,7 @@ def unzip_unit(archive, path='.'):
     try:
         archive = ZipFile(os.path.join(path,archive))
     except IOError:
-        raise Exception('Could not locate the FMU/JMU.')
+        raise IOError('Could not locate the FMU/JMU.')
     
     dir = ['binaries','sources']
     
@@ -187,7 +187,7 @@ def unzip_unit(archive, path='.'):
             fout.close()
             break
     else:
-        raise FMUException('Could not find modelDescription.xml in the FMU.')
+        raise IOError('Could not find modelDescription.xml in the FMU.')
         
     #Extracting the XML values (if any)
     is_jmu = False
@@ -231,6 +231,5 @@ def unzip_unit(archive, path='.'):
             return [tempdllname.split(os.sep)[-1], tempxmlname.split(os.sep)[-1], modelname]
 
     else:
-        raise Exception('Could not find binaries for your platform.')
-        return False
-        
+        raise IOError('Could not find binaries for your platform.')
+
