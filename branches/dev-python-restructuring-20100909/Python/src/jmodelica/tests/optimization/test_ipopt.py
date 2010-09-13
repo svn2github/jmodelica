@@ -27,7 +27,6 @@ import nose.tools
 import jmodelica
 from jmodelica.tests import testattr
 from jmodelica.tests import get_files_path
-from jmodelica.compiler import OptimicaCompiler
 from jmodelica import jmi
 from jmodelica.optimization import ipopt
 

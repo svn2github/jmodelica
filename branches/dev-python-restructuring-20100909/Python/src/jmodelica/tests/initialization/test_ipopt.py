@@ -27,8 +27,6 @@ import nose.tools
 import jmodelica
 from jmodelica.tests import testattr
 from jmodelica.tests import get_files_path
-from jmodelica.compiler import OptimicaCompiler
-from jmodelica.compiler import ModelicaCompiler
 from jmodelica import jmi
 from jmodelica.initialization.ipopt import NLPInitialization
 from jmodelica.initialization.ipopt import InitializationOptimizer
@@ -37,8 +35,6 @@ from jmodelica import io
 int = N.int32
 N.int = N.int32
 
-oc = OptimicaCompiler()
-mc = ModelicaCompiler()
 
 class TestNLPInitWrappers:
     """ Tests for NLPInitialization wrapper methods.
@@ -47,17 +43,16 @@ class TestNLPInitWrappers:
     @classmethod
     def setUpClass(cls):
         """Sets up the class."""
-        fpath = os.path.join(get_files_path(), 'Modelica', 'CSTR.mo')
+        fpath = os.path.join(get_files_path(), 'Modelica', 'CSTR.mop')
         cpath = "CSTR.CSTR_Init"
-        fname = cpath.replace('.','_')
-        oc.set_boolean_option('state_start_values_fixed',False)
-        oc.compile_model(cpath, fpath, 'ipopt')
+
+        jmi.compile_jmu(cpath, fpath, compiler_options={'state_start_values_fixed':False})
         
     def setUp(self):
         """Test setUp. Load the test model.""" 
         cpath = "CSTR.CSTR_Init"
         fname = cpath.replace('.','_')       
-        cstr = jmi.JMUModel(fname)    
+        cstr = jmi.JMUModel(fname+'.jmu')    
         self.init_nlp = NLPInitialization(cstr)     
      
     @testattr(ipopt = True)   
@@ -135,22 +130,19 @@ class TestNLPInit:
         """Sets up the test class."""
         fpath_daeinit = os.path.join(get_files_path(), 'Modelica', 'DAEInitTest.mo')
         cpath_daeinit = "DAEInitTest"
-        fname_daeinit = cpath_daeinit.replace('.','_',1)
+        jmi.compile_jmu(cpath_daeinit, fpath_daeinit, compiler_options={'state_start_values_fixed':True})
         
-        mc.set_boolean_option('state_start_values_fixed',True)
-        mc.compile_model(cpath_daeinit, fpath_daeinit, target='ipopt')
-    
     def setUp(self):
         """Test setUp. Load the test model."""                    
         # Load the dynamic library and XML data
         cpath_daeinit = "DAEInitTest"
         fname_daeinit = cpath_daeinit.replace('.','_',1)
-        self.dae_init_test = jmi.JMUModel(fname_daeinit)
+        self.dae_init_test = jmi.JMUModel(fname_daeinit+'.jmu')
 
         # This is to check that values set in the model prior to
         # creation of the NLPInitialization object are used as an
         # initial guess.
-        self.dae_init_test.set_value('y1',0.3)
+        self.dae_init_test.set('y1',0.3)
     
         self.init_nlp = NLPInitialization(self.dae_init_test)
         self.init_nlp_ipopt = InitializationOptimizer(self.init_nlp)
