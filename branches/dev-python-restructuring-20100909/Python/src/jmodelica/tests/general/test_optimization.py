@@ -74,7 +74,7 @@ class TestFreeInitialConditions(OptimizationTest):
     @classmethod
     def setUpClass(cls):
         OptimizationTest.setup_class_base(
-            'FreeInitialConditions.mo', 'FreeInitialConditions')
+            'FreeInitialConditions.mop', 'FreeInitialConditions')
 
     @testattr(ipopt = True)
     def setUp(self):
@@ -93,7 +93,7 @@ class TestBlockingFactors(OptimizationTest):
     @classmethod
     def setUpClass(cls):
         OptimizationTest.setup_class_base(
-            'BlockingTest.mo', 'BlockingTest')
+            'BlockingTest.mop', 'BlockingTest')
 
     @testattr(ipopt = True)
     def setUp(self):
@@ -118,7 +118,7 @@ class TestElementInterpolationResult(OptimizationTest):
     @classmethod
     def setUpClass(cls):
         OptimizationTest.setup_class_base(
-            'DI_opt.mo', 'DI_opt')
+            'DI_opt.mop', 'DI_opt')
 
     @testattr(ipopt = True)
     def setUp(self):
@@ -139,7 +139,7 @@ class TestMeshInterpolationResult(OptimizationTest):
     @classmethod
     def setUpClass(cls):
         OptimizationTest.setup_class_base(
-            'DI_opt.mo', 'DI_opt')
+            'DI_opt.mop', 'DI_opt')
 
     @testattr(ipopt = True)
     def setUp(self):
@@ -160,7 +160,7 @@ class TestIntegersNBooleanParameters(OptimizationTest):
     @classmethod
     def setUpClass(cls):
         OptimizationTest.setup_class_base(
-            'ArrayIntBoolPars_Opt.mo', 'ArrayIntBoolPars_Opt')
+            'ArrayIntBoolPars_Opt.mop', 'ArrayIntBoolPars_Opt')
 
     @testattr(ipopt = True)
     def setUp(self):
@@ -211,7 +211,7 @@ class TestFunction1(OptimizationTest):
     @classmethod
     def setUpClass(cls):
         OptimizationTest.setup_class_base(
-            'FunctionAR_opt.mo', 'FunctionAR.UnknownArray1')
+            'FunctionAR_opt.mop', 'FunctionAR.UnknownArray1')
 
     @testattr(ipopt = True)
     def setUp(self):
@@ -233,7 +233,7 @@ class TestFunction1(OptimizationTest):
     @classmethod
     def setUpClass(cls):
         OptimizationTest.setup_class_base(
-            'FunctionAR_opt.mo', 'FunctionAR.FuncRecord1')
+            'FunctionAR_opt.mop', 'FunctionAR.FuncRecord1')
 
     @testattr(ipopt = True)
     def setUp(self):
@@ -253,11 +253,9 @@ class TestStaticOptimizationDependentParameters:
     @classmethod
     def setUpClass(cls):
         curr_dir = os.path.dirname(os.path.abspath(__file__));
-        oc = OptimicaCompiler() 
-        mofile = os.path.join(get_files_path(), 'Modelica', 'StaticOptimizationTest.mo')
-        oc.compile_model("StaticOptimizationTest.StaticOptimizationTest2",
-                         mofile,target="ipopt")
-        cls.model = jmi.JMUModel("StaticOptimizationTest_StaticOptimizationTest2")
+        mofile = os.path.join(get_files_path(), 'Modelica', 'StaticOptimizationTest.mop')
+        jmi.compile_jmu("StaticOptimizationTest.StaticOptimizationTest2", mofile)
+        cls.model = jmi.JMUModel("StaticOptimizationTest_StaticOptimizationTest2.jmu")
         cls.nlp = NLPInitialization(cls.model,stat=1)
         cls.ipopt_nlp = InitializationOptimizer(cls.nlp)
 
@@ -274,7 +272,7 @@ class TestStaticOptimizationDependentParameters:
 
     @testattr(ipopt = True)
     def test_initialization_from_model(self):
-        self.model.set_value("k",-1)
+        self.model.set("k",-1)
         self.nlp.init_opt_set_initial_from_model()
         assert self.nlp.init_opt_get_x()[0] == -1, "Wrong value of parameter."
 
@@ -283,13 +281,14 @@ class TestOptInitBlockingFactors:
     def setUpClass(cls):
         cls.curr_dir = os.path.dirname(os.path.abspath(__file__));
         oc = OptimicaCompiler()
-        mofile = os.path.join(get_files_path(), 'Modelica', 'BlockingError.mo')
-        cls.model = oc.compile_model("BlockingInitPack.M_init",
-                                     mofile, target='ipopt')
+        mofile = os.path.join(get_files_path(), 'Modelica', 'BlockingError.mop')
 
-        cls.opt_model = oc.compile_model("BlockingInitPack.M_Opt",
-                                         mofile, target='ipopt')
-
+        m = jmi.compile_jmu("BlockingInitPack.M_init", mofile)
+        cls.model = jmi.JMUModel(m)
+        
+        m = jmi.compile_jmu("BlockingInitPack.M_Opt",mofile)
+        cls.opt_model = jmi.JMUModel(m)
+        
     @testattr(ipopt = True)
     def setUp(self):
         resfile = os.path.join(get_files_path(), 'Results', 'BlockingInitPack_M_init_result.txt')
@@ -496,7 +495,7 @@ class TestLagrangeCost1(OptimizationTest):
 
     @classmethod
     def setUpClass(cls):
-        OptimizationTest.setup_class_base('LagrangeCost.mo','LagrangeCost.OptTest1')
+        OptimizationTest.setup_class_base('LagrangeCost.mop','LagrangeCost.OptTest1')
 
     @testattr(ipopt = True)
     def setUp(self):
@@ -515,7 +514,7 @@ class TestLagrangeCost2(OptimizationTest):
 
     @classmethod
     def setUpClass(cls):
-        OptimizationTest.setup_class_base('LagrangeCost.mo','LagrangeCost.OptTest1')
+        OptimizationTest.setup_class_base('LagrangeCost.mop','LagrangeCost.OptTest1')
 
     @testattr(ipopt = True)
     def setUp(self):
@@ -535,7 +534,7 @@ class TestLagrangeCost3(OptimizationTest):
 
     @classmethod
     def setUpClass(cls):
-        OptimizationTest.setup_class_base('LagrangeCost.mo','LagrangeCost.OptTest4')
+        OptimizationTest.setup_class_base('LagrangeCost.mop','LagrangeCost.OptTest4')
 
     @testattr(ipopt = True)
     def setUp(self):
@@ -554,7 +553,7 @@ class TestLagrangeCost4(OptimizationTest):
 
     @classmethod
     def setUpClass(cls):
-        OptimizationTest.setup_class_base('LagrangeCost.mo','LagrangeCost.OptTest4')
+        OptimizationTest.setup_class_base('LagrangeCost.mop','LagrangeCost.OptTest4')
 
     @testattr(ipopt = True)
     def setUp(self):
@@ -574,7 +573,7 @@ class TestDependentParametersInCollocation(OptimizationTest):
 
     @classmethod
     def setUpClass(cls):
-        OptimizationTest.setup_class_base('DependentParameterTest2.mo','DependentParameterTest2')
+        OptimizationTest.setup_class_base('DependentParameterTest2.mop','DependentParameterTest2')
 
     @testattr(ipopt = True)
     def setUp(self):
@@ -595,7 +594,7 @@ class TestMinTimeProblem1(OptimizationTest):
     @classmethod
     def setUpClass(cls):
         OptimizationTest.setup_class_base(
-            'MinTimeProblems.mo', 'MinTimeProblems.MinTimeProblem1')
+            'MinTimeProblems.mop', 'MinTimeProblems.MinTimeProblem1')
 
     @testattr(ipopt = True)
     def setUp(self):
@@ -616,7 +615,7 @@ class TestMinTimeProblem2(OptimizationTest):
     @classmethod
     def setUpClass(cls):
         OptimizationTest.setup_class_base(
-            'MinTimeProblems.mo', 'MinTimeProblems.MinTimeProblem2')
+            'MinTimeProblems.mop', 'MinTimeProblems.MinTimeProblem2')
 
     @testattr(ipopt = True)
     def setUp(self):
@@ -637,7 +636,7 @@ class TestMinTimeProblem3(OptimizationTest):
     @classmethod
     def setUpClass(cls):
         OptimizationTest.setup_class_base(
-            'MinTimeProblems.mo', 'MinTimeProblems.MinTimeProblem3')
+            'MinTimeProblems.mop', 'MinTimeProblems.MinTimeProblem3')
 
     @testattr(ipopt = True)
     def setUp(self):
@@ -658,7 +657,7 @@ class TestMinTimeProblem4(OptimizationTest):
     @classmethod
     def setUpClass(cls):
         OptimizationTest.setup_class_base(
-            'MinTimeProblems.mo', 'MinTimeProblems.MinTimeProblem4')
+            'MinTimeProblems.mop', 'MinTimeProblems.MinTimeProblem4')
 
     @testattr(ipopt = True)
     def setUp(self):
@@ -680,7 +679,7 @@ class TestMinTimeProblem5(OptimizationTest):
     @classmethod
     def setUpClass(cls):
         OptimizationTest.setup_class_base(
-            'MinTimeProblems.mo', 'MinTimeProblems.MinTimeProblem5')
+            'MinTimeProblems.mop', 'MinTimeProblems.MinTimeProblem5')
 
     @testattr(ipopt = True)
     def setUp(self):

@@ -88,7 +88,7 @@ class TestIO:
         nlp.export_result_dymola()
 
         # Load the file we just wrote
-        res = jmodelica.io.ResultDymolaTextual(self.fname+'_result.txt')
+        res = jmodelica.io.ResultDymolaTextual(self.fname[:-len('.jmu')]+'_result.txt')
 
         # Check that one of the trajectories match.
         assert max(N.abs(traj[:,3]-res.get_variable_data('x1').x))<1e-12, \

@@ -97,25 +97,28 @@ class Test_init_ipopt:
         Sets up the test class.
         """
         # VDP model
-        fpath_vdp = os.path.join(get_files_path(),'Modelica','VDP.mo')
+        fpath_vdp = os.path.join(get_files_path(),'Modelica','VDP.mop')
         cpath_vdp = "VDP_pack.VDP_Opt"
-        oc.compile_model(cpath_vdp, fpath_vdp, target='ipopt')
         
+        jmi.compile_jmu(cpath_vdp, fpath_vdp)
         cls.dll_vdp = cpath_vdp.replace('.','_',1)
         
     def setUp(self):
         """
         Sets up the test case.
         """
-        self.model_vdp = jmi.JMUModel(Test_init_ipopt.dll_vdp)
+        self.model_vdp = jmi.JMUModel(Test_init_ipopt.dll_vdp+'.jmu')
 
     @testattr(ipopt = True)
     def test_initialize(self):
         """ Test the jmodelica.initialize function using all default parameters. """
-        fpath_pend = os.path.join(get_files_path(), 'Modelica', 'Pendulum_pack.mo')
+        fpath_pend = os.path.join(get_files_path(), 'Modelica', 'Pendulum_pack.mop')
         cpath_pend = "Pendulum_pack.Pendulum"
         
-        init_res = jmodelica.initialize(cpath_pend, fpath_pend,compiler='optimica')
+        jmu_pend = jmi.compile_jmu(cpath_pend, fpath_pend)
+        pend = jmi.JMUModel(jmu_pend)
+        
+        init_res = pend.initialize()
         res = init_res.result_data
         theta=res.get_variable_data('theta')
         dtheta=res.get_variable_data('dtheta')
@@ -146,10 +149,13 @@ class Test_init_ipopt:
     @testattr(ipopt = True)
     def test_initialize_with_solverargs(self):
         """ Test the jmodelica.initialize function using all default parameters. """
-        fpath_pend = os.path.join(get_files_path(), 'Modelica', 'Pendulum_pack.mo')
+        fpath_pend = os.path.join(get_files_path(), 'Modelica', 'Pendulum_pack.mop')
         cpath_pend = "Pendulum_pack.Pendulum"
         
-        init_res = jmodelica.initialize(cpath_pend, fpath_pend,compiler='optimica', solver_args={'max_iter':1000})
+        jmu_pend = jmi.compile_jmu(cpath_pend, fpath_pend)
+        pend = jmi.JMUModel(jmu_pend)
+        
+        init_res = pend.initialize(solver_args={'max_iter':1000})
         res = init_res.result_data
         theta=res.get_variable_data('theta')
         dtheta=res.get_variable_data('dtheta')
@@ -180,11 +186,12 @@ class Test_init_ipopt:
     @testattr(ipopt = True)
     def test_optimize(self):
         """ Test the jmodelica.optimize function using all default parameters. """
-        fpath_pend = os.path.join(get_files_path(), 'Modelica', 'Pendulum_pack.mo')
+        fpath_pend = os.path.join(get_files_path(), 'Modelica', 'Pendulum_pack.mop')
         cpath_pend = "Pendulum_pack.Pendulum_Opt"
+        jmu_pend = jmi.compile_jmu(cpath_pend, fpath_pend,compiler_options={'state_start_values_fixed':True})
+        pend = jmi.JMUModel(jmu_pend)
         
-        opt_res = jmodelica.optimize(cpath_pend, fpath_pend, 
-                                     compiler_options={'state_start_values_fixed':True})
+        opt_res = pend.optimize()
         cost=opt_res.result_data.get_variable_data('cost')
         
         assert N.abs(cost.x[-1] - 1.2921683e-01) < 1e-3, \
@@ -195,8 +202,7 @@ class Test_init_ipopt:
     def test_optimize_set_n_cp(self):
         """ Test the jmodelica.optimize function and setting n_cp in alg_args.
         """
-        opt_res = jmodelica.optimize(self.model_vdp, 
-                                     alg_args={'n_cp':10})
+        opt_res = self.model_vdp.optimize(alg_args={'n_cp':10})
         cost=opt_res.result_data.get_variable_data('cost')
         
         assert N.abs(cost.x[-1] - 2.34602647e+01 ) < 1e-3, \
@@ -208,8 +214,7 @@ class Test_init_ipopt:
         """Test the jmodelica.optimize function and setting some algorithm and solver args.
         """
         res_file_name = 'test_optimize_set_result_mesh.txt'
-        opt_res = jmodelica.optimize(self.model_vdp, 
-                                     alg_args={'result_mesh':'element_interpolation', 
+        opt_res = self.model_vdp.optimize(alg_args={'result_mesh':'element_interpolation', 
                                                'result_file_name':res_file_name},
                                      solver_args={'max_iter':100})
         cost=opt_res.result_data.get_variable_data('cost')
@@ -224,8 +229,7 @@ class Test_init_ipopt:
             invalid algorithm argument.
         """
         nose.tools.assert_raises(jmodelica.algorithm_drivers.InvalidAlgorithmArgumentException,
-                                 jmodelica.optimize,
-                                 self.model_vdp,
+                                 self.model_vdp.optimize,
                                  alg_args={'ne':10})
                                  
 class Test_init_assimulo:

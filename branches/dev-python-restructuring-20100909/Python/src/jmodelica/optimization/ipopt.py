@@ -448,8 +448,8 @@ class NLPCollocation(object):
         if non_fixed_interval:
             # A minimum time problem has been solved,
             # interval is normalized to [0,1]
-            t0 = self._model.get_value('startTime')
-            tf = self._model.get_value('finalTime')
+            t0 = self._model.get('startTime')
+            tf = self._model.get('finalTime')
             for i in range(N.size(data,0)):
                 data[i,0] = t0 + data[i,0]*(tf-t0)
 
