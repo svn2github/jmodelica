@@ -29,7 +29,7 @@ class TestNominal(SimulationTest):
     def setUpClass(cls):
         oc = OptimicaCompiler()
         SimulationTest.setup_class_base(
-                'NominalTest.mo', 'NominalTests.NominalTest1',compiler=oc,
+                'NominalTest.mop', 'NominalTests.NominalTest1',compiler=oc,
                 options={"enable_variable_scaling":True})
 
     @testattr(assimulo = True)

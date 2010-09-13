@@ -240,26 +240,24 @@ class Test_init_assimulo:
         fpath_rlc = os.path.join(get_files_path(),'Modelica','RLC_Circuit.mo')
         cpath_rlc = "RLC_Circuit"
 
-        mc.compile_model(cpath_rlc, fpath_rlc, target='ipopt')
-
-        cls.dll_rlc = cpath_rlc.replace('.','_',1)
+        jmi.compile_jmu(cpath_rlc, fpath_rlc, compiler_options={'state_start_values_fixed':True})
         
     def setUp(self):
         """
         Sets up the test case.
         """
         self.cpath_vdp = "VDP_pack.VDP_Opt"
-        self.fpath_vdp = os.path.join(get_files_path(),'Modelica','VDP.mo')
+        self.fpath_vdp = os.path.join(get_files_path(),'Modelica','VDP.mop')
         self.cpath_minit = "must_initialize"
         self.fpath_minit = os.path.join(get_files_path(), 'Modelica', 'must_initialize.mo')
         self.fpath_rlc = os.path.join(get_files_path(),'Modelica','RLC_Circuit.mo')
         self.cpath_rlc = "RLC_Circuit"
-        self.model_rlc = jmi.JMUModel(Test_init_assimulo.dll_rlc)
+        self.model_rlc = jmi.JMUModel('RLC_Circuit.jmu')
 
     @testattr(assimulo = True)
     def test_simulate(self):
         """ Test the jmodelica.simulate function using all default parameters."""
-        sim_res = jmodelica.simulate(self.cpath_rlc, self.fpath_rlc)
+        sim_res = self.model_rlc.simulate()
         resistor_v = sim_res.result_data.get_variable_data('resistor.v')
         
         assert N.abs(resistor_v.x[-1] - 0.138037041741) < 1e-3, \
@@ -268,7 +266,7 @@ class Test_init_assimulo:
     @testattr(assimulo = True)
     def test_simulate_set_alg_arg(self):
         """ Test the jmodelica.simulate function and setting an algorithm argument."""    
-        sim_res = jmodelica.simulate(self.model_rlc, alg_args={'final_time':30.0})
+        sim_res = self.model_rlc.simulate(alg_args={'final_time':30.0})
         resistor_v = sim_res.result_data.get_variable_data('resistor.v')
         
         assert N.abs(resistor_v.x[-1] - 0.159255008028) < 1e-3, \
@@ -278,10 +276,9 @@ class Test_init_assimulo:
     def test_simulate_set_probl_arg(self):
         """ Test that it is possible to set properties in assimulo and that an 
             exception is raised if the argument is invalid. """
-        sim_res = jmodelica.simulate(self.model_rlc, solver_args={'max_eIter':100, 'maxh':0.1})
+        sim_res = self.model_rlc.simulate(solver_args={'max_eIter':100, 'maxh':0.1})
         nose.tools.assert_raises(jmodelica.algorithm_drivers.InvalidSolverArgumentException,
-                                 jmodelica.simulate,
-                                 self.model_rlc,
+                                 self.model_rlc.simulate,
                                  solver_args={'maxeter':10})
         
     @testattr(assimulo = True)
@@ -290,8 +287,7 @@ class Test_init_assimulo:
             invalid solver argument.
         """    
         nose.tools.assert_raises(jmodelica.algorithm_drivers.InvalidSolverArgumentException,
-                                 jmodelica.simulate,
-                                 self.model_rlc,
+                                 self.model_rlc.simulate,
                                  solver_args={'mxiter':10})
 
     @testattr(assimulo = True)
@@ -300,19 +296,17 @@ class Test_init_assimulo:
             invalid algorithm argument.
         """
         nose.tools.assert_raises(jmodelica.algorithm_drivers.InvalidAlgorithmArgumentException,
-                                 jmodelica.simulate,
-                                 self.model_rlc,
+                                 self.model_rlc.simulate,
                                  alg_args={'starttime':10})
       
     @testattr(assimulo=True)
     def test_simulate_w_ode(self):
         """ Test jmodelica.simulate with ODE problem and setting solver args."""
-        sim_res = jmodelica.simulate(self.cpath_vdp, 
-                                     self.fpath_vdp,
-                                     compiler='optimica',
-                                     compiler_options={'state_start_values_fixed':True},
-                                     compiler_target='model',
-                                     alg_args={'solver':'CVode', 'final_time':20, 'num_communication_points':0},
+        jmi.compile_jmu(self.cpath_vdp, self.fpath_vdp, compiler_options={'state_start_values_fixed':True}
+                        ,target='model')
+        jmu_name = jmi.get_jmu_name(self.cpath_vdp)
+        model = jmi.JMUModel(jmu_name)
+        sim_res = model.simulate(alg_args={'solver':'CVode', 'final_time':20, 'num_communication_points':0},
                                      solver_args={'discr':'BDF', 'iter':'Newton'})
         x1=sim_res.result_data.get_variable_data('x1')
         x2=sim_res.result_data.get_variable_data('x2')
@@ -334,11 +328,15 @@ class Test_init_assimulo:
         # unspecific (the test will pass for every type of error thrown). Therefore,
         # I first test that running the simulation with default settings succeeds, so
         # at least one knows that the error has with initialization to do.
-        nose.tools.ok_(jmodelica.simulate(self.cpath_minit, self.fpath_minit))
+        name = jmi.compile_jmu(self.cpath_minit, self.fpath_minit)
+        model = jmi.JMUModel(name)
+        
+        nose.tools.ok_(model.simulate())
+        
+        model = jmi.JMUModel(name)
+        
         nose.tools.assert_raises(Exception,
-                                 jmodelica.simulate,
-                                 self.cpath_minit,
-                                 self.fpath_minit,
+                                 model.simulate,
                                  alg_args={'initialize':False})
 
 

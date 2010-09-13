@@ -62,9 +62,10 @@ class _BaseSimOptTest:
         global _model_name
         _model_name = class_name.replace('.','_')
         path = os.path.join(get_files_path(), 'Modelica', mo_file)
-        _set_compiler_options(compiler, options)
-        compiler.compile_model(class_name, path, target='ipopt')
-
+        #_set_compiler_options(compiler, options)
+        #compiler.compile_model(class_name, path, target='ipopt')
+        
+        _model_name = jmi.compile_jmu(class_name, path, compiler_options=options)
 
     def setup_base(self, rel_tol, abs_tol):
         """ 
@@ -87,7 +88,7 @@ class _BaseSimOptTest:
         Call this from setUp() or within a test depending if all tests should run simulation.
         """
         self._run_and_write_data()
-        self.data = ResultDymolaTextual(self.model_name + '_result.txt')
+        self.data = ResultDymolaTextual(self.model_name[:-len('.jmu')] + '_result.txt')
 
 
     def load_expected_data(self, name):

@@ -33,7 +33,7 @@ class TestOptimization(OptimizationTest):
 
     @classmethod
     def setUpClass(cls):
-        mofile = os.path.join(get_files_path(), 'Modelica', 'VDP.mo')
+        mofile = os.path.join(get_files_path(), 'Modelica', 'VDP.mop')
         OptimizationTest.setup_class_base(mofile, 'VDP_pack.VDP_Opt', 
                 options = { 'state_start_values_fixed': True })
 
@@ -55,7 +55,7 @@ class TestIfExp(OptimizationTest):
     @classmethod
     def setUpClass(cls):
         OptimizationTest.setup_class_base(
-                'IfExpTest.mo', 'IfExpTest')
+                'IfExpTest.mop', 'IfExpTest')
 
     @testattr(ipopt = True)
     def setUp(self):
@@ -180,7 +180,7 @@ class TestNominal(OptimizationTest):
     @classmethod
     def setUpClass(cls):
         OptimizationTest.setup_class_base(
-            'NominalTest.mo', 'NominalTests.NominalOptTest2',
+            'NominalTest.mop', 'NominalTests.NominalOptTest2',
             options={"enable_variable_scaling":True})
 
     @testattr(ipopt = True)

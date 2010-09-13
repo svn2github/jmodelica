@@ -28,13 +28,11 @@ from jmodelica.tests import testattr
 from jmodelica.tests import get_files_path
 
 import jmodelica.jmi as jmi
-from jmodelica.compiler import OptimicaCompiler
 import jmodelica.xmlparser as xp
 import jmodelica.io
 from jmodelica.optimization import ipopt
 from jmodelica.fmi import *
 
-oc = OptimicaCompiler()
 
 path_to_fmus = os.path.join(get_files_path(), 'FMUs')
 
@@ -45,21 +43,20 @@ class TestIO:
         """
         Sets up the test class.
         """
-        oc.set_boolean_option('state_start_values_fixed',True)
-        oc.set_log_level(OptimicaCompiler.LOG_ERROR)
+        #oc.set_boolean_option('state_start_values_fixed',True)
+        #oc.set_log_level(OptimicaCompiler.LOG_ERROR)
         
-        fpath = os.path.join(get_files_path(), 'Modelica', 'VDP.mo')
+        fpath = os.path.join(get_files_path(), 'Modelica', 'VDP.mop')
         cpath = "VDP_pack.VDP_Opt_Min_Time"
-        fname = cpath.replace('.','_',1)
 
-        oc.compile_model(cpath, fpath, target='ipopt')
+        jmi.compile_jmu(cpath, fpath, compiler_options={'state_start_values_fixed':True})
     
     def setUp(self):
         """ 
         Setup test cases.
         """
         # Load the dynamic library and XML data
-        self.fname = "VDP_pack_VDP_Opt_Min_Time"
+        self.fname = "VDP_pack_VDP_Opt_Min_Time.jmu"
         self.vdp = jmi.JMUModel(self.fname)
         
         
@@ -107,7 +104,9 @@ class TestIO:
             (Test so that write to file does not crash.)
         """
         model_file = os.path.join(get_files_path(), 'Modelica', 'ParameterAlias.mo')
-        simulate("ParameterAlias",model_file)
+        jmi.compile_jmu('ParameterAlias', model_file)
+        model = jmi.JMUModel('ParameterAlias.jmu')
+        model.simulate()
 
 class test_ResultWriterDymola:
     """Tests the class ResultWriterDymola."""
