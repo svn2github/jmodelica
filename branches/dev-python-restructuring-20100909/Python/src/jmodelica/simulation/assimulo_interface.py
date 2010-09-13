@@ -949,7 +949,7 @@ class JMIDAESens(Implicit_Problem):
         
         #Set the free parameters
         for ind, val in enumerate(p):
-            self._model.set_value(self._parameter_names[ind],val)
+            self._model.set(self._parameter_names[ind],val)
         
         #Evaluating the residual function
         residual = N.array([.0]*self._f_nbr)
