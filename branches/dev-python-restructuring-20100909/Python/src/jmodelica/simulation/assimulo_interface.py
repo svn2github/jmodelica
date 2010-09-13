@@ -932,7 +932,7 @@ class JMIDAESens(Implicit_Problem):
         #Set the start values to the parameters.
         self.p0 = N.array([])
         for n in self._parameter_names:
-            self.p0 = N.append(self.p0, self._model.get_value(n))
+            self.p0 = N.append(self.p0, self._model.get(n))
             self._sens_matrix += [[]] 
         
         self._p_nbr = len(self.p0) #Number of parameters
