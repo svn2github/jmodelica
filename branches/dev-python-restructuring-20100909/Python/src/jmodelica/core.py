@@ -106,7 +106,8 @@ class BaseModel(object):
         else:
             ret = []
             for i in xrange(len(variable_name)): #A list of variables
-                ret += self._get(variable_name[i])
+                ret += [self._get(variable_name[i])]
+            return ret
     
     def _exec_algorithm(self,
                  algorithm, 

@@ -25,12 +25,11 @@ import ctypes as C
 import numpy as N
 from ctypes.util import find_library
 import numpy.ctypeslib as Nct
-
+import tempfile
 from lxml import etree
 from operator import itemgetter
 import warnings
-
-from jmodelica.core import BaseModel
+from jmodelica.core import BaseModel, unzip_unit
 
 class FMUException(Exception):
     """An FMU exception."""
@@ -59,7 +58,7 @@ class FMUModel(BaseModel):
 
             
         #Create temp binary
-        self._tempnames = unzip_FMU(archive=fmu, path=path)
+        self._tempnames = unzip_unit(archive=fmu, path=path)
         self._tempdll = self._tempnames[0]
         self._tempxml = self._tempnames[1]
         self._modelname = self._tempnames[2]
