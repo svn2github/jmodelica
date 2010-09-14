@@ -24,6 +24,7 @@ import warnings
 import numpy as N
 
 import jmodelica
+from jmodelica.io import ResultDymolaTextual
 from jmodelica.optimization import ipopt
 from jmodelica.initialization.ipopt import NLPInitialization
 from jmodelica.initialization.ipopt import InitializationOptimizer
@@ -53,8 +54,8 @@ N.int = N.int32
 
 class AlgorithmBase:
     """ Abstract class which all algorithms that are to be used with 
-        jmodelica.optimize, jmodelica.simulate or jmodelica.initialize must 
-        implement.
+        jmodelica.jmi.JMUModel.optimize, jmodelica.jmi.JMUModel.simulate 
+        or jmodelica.jmi.JMUModel.initialize must implement.
     """
 #    __metaclass__=ABCMeta
     
@@ -76,15 +77,17 @@ class ResultBase:
         this class.
     """
     
-    def __init__(self, model=None, result_file_name=None, solver=None, result_data=None):
-        """ Create a result object containing the model used in the algorithm,
-        the name of the result file, the solver used in the algorithm and 
-        the result data object.
+    def __init__(self, model=None, result_file_name=None, solver=None, 
+        result_data=None):
+        """ Create a result object containing the model used in the 
+        algorithm, the name of the result file, the solver used in the 
+        algorithm and the result data object.
                        
         Parameters::
         
             model -- 
-                The jmi.Model object for the model used in the algorithm.
+                The jmi.JMUModel object for the model used in the 
+                algorithm.
             result_file_name --
                 Name of the file containing the algorithm result created
                 on the file system.
@@ -100,24 +103,24 @@ class ResultBase:
         self.result_data = result_data
     
     def get_model(self):
-        """ Get the jmi.Model object representing the model that was 
+        """ Get the jmi.JMUModel object representing the model that was 
         used in the algorithm.
         
         Returns::
         
-            The jmi.Model object that was used in the algorithm.
+            The jmi.JMUModel object that was used in the algorithm.
         """
         if self.model != None:
             return self.model
         raise Exception("model has not been set")
         
     def set_model(self, model):
-        """ Set the jmi.Model that was used in the algorithm.
+        """ Set the jmi.JMUModel that was used in the algorithm.
         
         Parameters::
         
             model --
-                The jmi.Model object that was used in the algorithm.
+                The jmi.JMUModel object that was used in the algorithm.
         """
         self.model = model
         
@@ -208,7 +211,7 @@ class IpoptInitializationAlg(AlgorithmBase):
         Parameters::
         
             model -- 
-                jmi.Model object representation of the model
+                jmi.JMUModel object representation of the model
             alg_args -- 
                 All arguments for the algorithm. See _set_alg_args
                 function call for names and default values.        
@@ -224,7 +227,7 @@ class IpoptInitializationAlg(AlgorithmBase):
         if not ipopt_present:
             raise Exception('Could not find IPOPT. Check jmodelica.check_packages()')
 
-        self.nlp = NLPInitialization(model,self.stat)            
+        self.nlp = NLPInitialization(model,self.stat)
         self.nlp_ipopt = InitializationOptimizer(self.nlp)
             
     def _set_alg_args(self,
@@ -240,7 +243,8 @@ class IpoptInitializationAlg(AlgorithmBase):
                 Default: False
             result_file_name --
                 Name of result file.
-                Default: empty string (default generated file name will be used)
+                Default: empty string (default generated file name will 
+                be used)
             result_format --
                 Format of result file.
                 Default: 'txt'
@@ -278,7 +282,7 @@ class IpoptInitializationAlg(AlgorithmBase):
         if not resultfile:
             resultfile=self.model.get_name()+'_result.txt'
         # load result file
-        res = jmodelica.io.ResultDymolaTextual(resultfile)
+        res = ResultDymolaTextual(resultfile)
         
         # create and return result object
         return IpoptInitResult(self.model, resultfile, self.nlp_ipopt, res)
@@ -423,7 +427,7 @@ class AssimuloFMIAlg(AlgorithmBase):
         # result file name
         resultfile = self.model.get_name()+'_result.txt'
         # load result file
-        res = jmodelica.io.ResultDymolaTextual(resultfile)
+        res = ResultDymolaTextual(resultfile)
         # create and return result object
         return AssimuloSimResult(self.model, resultfile, self.simulator, res)
 
@@ -557,7 +561,7 @@ class AssimuloAlg(AlgorithmBase):
         # result file name
         resultfile = self.model.get_name()+'_result.txt'
         # load result file
-        res = jmodelica.io.ResultDymolaTextual(resultfile)
+        res = ResultDymolaTextual(resultfile)
         
         # create and return result object
         return AssimuloSimResult(self.model, resultfile, self.simulator, res)
@@ -576,7 +580,7 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
         Parameters::
               
             model -- 
-                jmodelica.jmi.Model model object
+                jmodelica.jmi.JMUModel model object
             alg_args -- 
                 Dict with algorithm arguments. See the _set_alg_args function 
                 call for names and default values.
@@ -701,7 +705,7 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
             resultfile=self.model.get_name()+'_result.txt'
         
         # load result file
-        res = jmodelica.io.ResultDymolaTextual(resultfile)
+        res = ResultDymolaTextual(resultfile)
         
         # create and return result object
         return CollocationLagrangePolynomialsResult(self.model, resultfile, self.nlp_ipopt, res)
@@ -789,7 +793,7 @@ class JFSInitAlg(AlgorithmBase):
         if not resultfile:
             resultfile=self.model.get_name()+'_result.txt'
         # load result file
-        res = jmodelica.io.ResultDymolaTextual(resultfile)
+        res = ResultDymolaTextual(resultfile)
         
         # create and return result object
         return JFSInitResult(self.model, resultfile, self.solver, res)

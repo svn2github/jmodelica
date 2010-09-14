@@ -20,11 +20,10 @@ import warnings
 import nose
 import os
 import numpy as N
-import jmodelica
-import jmodelica.jmi as jmi
+
+from jmodelica.jmi import compile_jmu
+from jmodelica.jmi import JMUModel
 import jmodelica.fmi as fmi
-from jmodelica.compiler import ModelicaCompiler
-from jmodelica.compiler import OptimicaCompiler
 from jmodelica.io import ResultDymolaTextual
 from jmodelica.tests import testattr
 from jmodelica.tests import get_files_path
@@ -37,10 +36,6 @@ try:
 except NameError, ImportError:
     warnings.warn('Could not load Assimulo module. Check jmodelica.check_packages()')
 
-
-mc = ModelicaCompiler()
-oc = OptimicaCompiler()
-oc.set_boolean_option('state_start_values_fixed',True)
 path_to_fmus = os.path.join(get_files_path(), 'FMUs')
 
 class Test_JMI_ODE:
@@ -57,7 +52,7 @@ class Test_JMI_ODE:
         cpath_ODE = 'VDP_pack.VDP_Opt'
 
         # compile VDP
-        fname_ODE = jmi.compile_jmu(cpath_ODE, fpath_ODE, 
+        fname_ODE = compile_jmu(cpath_ODE, fpath_ODE, 
                     compiler_options={'state_start_values_fixed':True})
         
     def setUp(self):
@@ -65,7 +60,7 @@ class Test_JMI_ODE:
         package_ODE = 'VDP_pack_VDP_Opt.jmu'
 
         # Load the dynamic library and XML data
-        self.m_ODE = jmi.JMUModel(package_ODE)
+        self.m_ODE = JMUModel(package_ODE)
         
         # Creates the solvers
         self.ODE = JMIODE(self.m_ODE)
@@ -88,7 +83,7 @@ class Test_JMI_ODE:
         write_data(vdp_sim)
     
         # Load the file we just wrote to file
-        res = jmodelica.io.ResultDymolaTextual('VDP_pack_VDP_Opt_result.txt')
+        res = ResultDymolaTextual('VDP_pack_VDP_Opt_result.txt')
     
         x1=res.get_variable_data('x1')
         x2=res.get_variable_data('x2')
@@ -98,8 +93,6 @@ class Test_JMI_ODE:
         nose.tools.assert_almost_equal(x1.x[-1], -0.54108518, 5)
         nose.tools.assert_almost_equal(x2.x[-1], -0.81364915, 5)
 
-        
-    
     @testattr(assimulo = True) 
     def test_init(self):
         """
@@ -111,13 +104,14 @@ class Test_JMI_ODE:
             assert self.m_ODE.real_x[i] == self.ODE.y0[i]
             
         #Test for algebraic variables
-        fpath_DAE = os.path.join(get_files_path(), 'Modelica', 'RLC_Circuit.mo')
+        fpath_DAE = os.path.join(get_files_path(), 'Modelica', 
+            'RLC_Circuit.mo')
         cpath_DAE = 'RLC_Circuit'
 
-        fname_DAE = jmi.compile_jmu(cpath_DAE, fpath_DAE)
+        fname_DAE = compile_jmu(cpath_DAE, fpath_DAE)
         package_DAE = 'RLC_Circuit.jmu'
         # Load the dynamic library and XML data
-        m_DAE = jmi.JMUModel(package_DAE)
+        m_DAE = JMUModel(package_DAE)
         
         nose.tools.assert_raises(JMIModel_Exception, JMIODE, m_DAE)
         
@@ -126,10 +120,10 @@ class Test_JMI_ODE:
         fpath_DISC = os.path.join(get_files_path(), 'Modelica', 'IfExpExamples.mo')
         cpath_DISC = 'IfExpExamples.IfExpExample2'
 
-        fname_ODE = jmi.compile_jmu(cpath_DISC, fpath_DISC)
+        fname_ODE = compile_jmu(cpath_DISC, fpath_DISC)
         package_DISC = 'IfExpExamples_IfExpExample2.jmu'
         # Load the dynamic library and XML data
-        m_DISC = jmi.JMUModel(package_DISC)
+        m_DISC = JMUModel(package_DISC)
         
         nose.tools.assert_raises(JMIModel_Exception, JMIODE, m_DISC)
     
@@ -201,15 +195,17 @@ class Test_JMI_DAE:
         Compile the test model.
         """
         #DAE test model
-        fpath_DAE = os.path.join(get_files_path(), 'Modelica', 'Pendulum_pack_no_opt.mo')
+        fpath_DAE = os.path.join(get_files_path(), 'Modelica', 
+            'Pendulum_pack_no_opt.mo')
         cpath_DAE = 'Pendulum_pack.Pendulum'
 
-        fname_DISC = jmi.compile_jmu(cpath_DAE, fpath_DAE)
+        fname_DISC = compile_jmu(cpath_DAE, fpath_DAE)
         
-        fpath_DISC = os.path.join(get_files_path(), 'Modelica', 'IfExpExamples.mo')
+        fpath_DISC = os.path.join(get_files_path(), 'Modelica', 
+            'IfExpExamples.mo')
         cpath_DISC = 'IfExpExamples.IfExpExample2'
         
-        fname_DISC = jmi.compile_jmu(cpath_DISC, fpath_DISC)
+        fname_DISC = compile_jmu(cpath_DISC, fpath_DISC)
         
     def setUp(self):
         """Load the test model."""
@@ -217,8 +213,8 @@ class Test_JMI_DAE:
         package_DISC = 'IfExpExamples_IfExpExample2.jmu'
 
         # Load the dynamic library and XML data
-        self.m_DAE = jmi.JMUModel(package_DAE)
-        self.m_DISC = jmi.JMUModel(package_DISC)
+        self.m_DAE = JMUModel(package_DAE)
+        self.m_DISC = JMUModel(package_DISC)
         
         # Creates the solvers
         self.DAE = JMIDAE(self.m_DAE)

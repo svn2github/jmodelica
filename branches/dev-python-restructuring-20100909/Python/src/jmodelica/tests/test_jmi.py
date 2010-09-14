@@ -26,7 +26,6 @@ import nose
 import matplotlib.pyplot as plt
 import nose.tools as ntools
 
-#from jmodelica.tests import load_example_standard_model
 from jmodelica.tests import testattr
 from jmodelica.tests import get_files_path
 
@@ -54,7 +53,7 @@ sparsity = jmi.JMI_DER_SPARSE
 indep_vars = jmi.JMI_DER_ALL
 
 class TestModel_VDP:
-    """Test the high level model class, jmi.Model.
+    """Test the high level model class, jmi.JMUModel.
     
     The tests are based on the Van der Pol oscillator.
     
@@ -70,10 +69,6 @@ class TestModel_VDP:
         cpath_vdp = "VDP_pack.VDP_Opt"
         fname_vdp = compile_jmu(cpath_vdp, fpath_vdp, 
                     compiler_options={'state_start_values_fixed':True})
-        
-        #fname_vdp = cpath_vdp.replace('.','_',1)
-        #oc.set_boolean_option('state_start_values_fixed',True)
-        #oc.compile_model(cpath_vdp, fpath_vdp)#, target='ipopt')
     
     def setUp(self):
         """
@@ -83,18 +78,18 @@ class TestModel_VDP:
         
     @testattr(stddist = True)
     def test_has_cppad_derivatives(self):
-        """ Test jmi.Model.has_cppad_derivatives function."""
+        """ Test jmi.JMUModel.has_cppad_derivatives function."""
         nose.tools.assert_equal(self.vdp.has_cppad_derivatives(), True)
     
-    @testattr(stddist = True)                                          
+    @testattr(stddist = True)
     def test_model_size(self):
-        """Test jmi.Model length of x"""
+        """Test jmi.JMUModel length of x"""
         size = len(self.vdp.real_x)
         nose.tools.assert_equal(size, 3)
 
     @testattr(stddist = True)    
     def test_reset(self):
-        """Testing resetting the a jmi.Model."""
+        """Testing resetting the a jmi.JMUModel."""
         random = N.array([12, 31, 42])
         self.vdp.real_x = random
         self.vdp.reset()
@@ -103,31 +98,31 @@ class TestModel_VDP:
 
     @testattr(stddist = True)    
     def test_get_variable_names(self):
-        """ Test jmi.Model.get_variable_names method."""
+        """ Test jmi.JMUModel.get_variable_names method."""
         names = self.vdp.get_variable_names()
         ntools.assert_equal(names[0][1],'p1')
         
     @testattr(stddist = True)
     def test_get_dx_variable_names(self):
-        """ Test jmi.Model.get_dx_variable_names method."""
+        """ Test jmi.JMUModel.get_dx_variable_names method."""
         names = [(5,'der(x1)'),(6,'der(x2)'),(7,'der(cost)')]
         ntools.assert_equal(self.vdp.get_dx_variable_names(),names)
     
     @testattr(stddist = True)
     def test_get_x_variable_names(self):
-        """ Test jmi.Model.get_x_variable_names method."""
+        """ Test jmi.JMUModel.get_x_variable_names method."""
         names = [(8,'x1'),(9,'x2'),(10,'cost')]
         ntools.assert_equal(self.vdp.get_x_variable_names(),names)
     
     @testattr(stddist = True)
     def test_get_u_variable_names(self):
-        """ Test jmi.Model.get_u_variable_names method."""
+        """ Test jmi.JMUModel.get_u_variable_names method."""
         names = [(11,'u')]
         ntools.assert_equal(self.vdp.get_u_variable_names(),names)
     
     @testattr(stddist = True)
     def test_get_w_variable_names(self):
-        """ Test jmi.Model.get_w_variable_names method."""
+        """ Test jmi.JMUModel.get_w_variable_names method."""
         # TODO improve test 
         # there are no algebraic variables in the vdp model
         names = []
@@ -135,7 +130,7 @@ class TestModel_VDP:
     
     @testattr(stddist = True)
     def test_get_p_opt_variable_names(self):
-        """ Test jmi.Model.get_p_opt_variable_names method."""
+        """ Test jmi.JMUModel.get_p_opt_variable_names method."""
         # TODO improve test 
         # there are no popt variables in the model
         names = []
@@ -143,24 +138,24 @@ class TestModel_VDP:
      
     @testattr(stddist = True)   
     def test_get_sizes(self):
-        """ Test jmi.Model.get_sizes method."""
+        """ Test jmi.JMUModel.get_sizes method."""
         sizes = [0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 20]
         ntools.assert_equal(self.vdp.get_sizes(),sizes)
     
     @testattr(stddist = True)    
     def test_get_offsets(self):
-        """ Test jmi.Model.get_offsets method."""
+        """ Test jmi.JMUModel.get_offsets method."""
         offsets = [0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 8, 11, 12, 12, 13, 16, 19, 20, 20, 20, 20, 20, 20, 20, 20]
         ntools.assert_equal(self.vdp.get_offsets(),offsets)
     
     @testattr(stddist = True)
     def test_get_n_tp(self):
-        """ Test jmi.Model.get_n_tp method."""
+        """ Test jmi.JMUModel.get_n_tp method."""
         ntools.assert_equal(self.vdp.get_n_tp(),1)
         
     @testattr(stddist = True)    
     def test_states_get_set(self):
-        """Test jmi.Model.set_real_x(...) and jmi.Model.get_real_x()."""
+        """Test jmi.JMUModel.set_real_x(...) and jmi.JMUModel.get_real_x()."""
         new_states = [1.74, 3.38, 12.45]
         reset = [0, 0, 0]
         self.vdp.real_x = reset
@@ -172,7 +167,7 @@ class TestModel_VDP:
 
     @testattr(stddist = True)    
     def test_states_p_get_set(self):
-        """Test jmi.Model.set_real_x_p(...) and jmi.Model.get_real_x_p()."""
+        """Test jmi.JMUModel.set_real_x_p(...) and jmi.JMUModel.get_real_x_p()."""
         new_states = N.ones(3)
         timepoint=0
         self.vdp.set_real_x_p(new_states, 0)
@@ -180,7 +175,7 @@ class TestModel_VDP:
 
     @testattr(stddist = True)    
     def test_real_ci_get_set(self):
-        """Test jmi.Model.set_real_ci(...) and jmi.Model.get_real_ci()."""
+        """Test jmi.JMUModel.set_real_ci(...) and jmi.JMUModel.get_real_ci()."""
         # cd is empty
         ci_new = N.ones(1)
         self.vdp.set_real_ci(ci_new)
@@ -188,7 +183,7 @@ class TestModel_VDP:
 
     @testattr(stddist = True)    
     def test_real_cd_get_set(self):
-        """Test jmi.Model.set_real_cd(...) and jmi.Model.get_real_cd()."""
+        """Test jmi.JMUModel.set_real_cd(...) and jmi.JMUModel.get_real_cd()."""
         # cd is empty
         cd_new = N.ones(1)
         self.vdp.set_real_cd(cd_new)
@@ -196,7 +191,7 @@ class TestModel_VDP:
         
     @testattr(stddist = True)    
     def test_real_pd_get_set(self):
-        """Test jmi.Model.set_real_pd(...) and jmi.Model.get_real_pd()."""
+        """Test jmi.JMUModel.set_real_pd(...) and jmi.JMUModel.get_real_pd()."""
         # pd is empty
         pd_new = N.ones(1)
         self.vdp.set_real_pd(pd_new)
@@ -204,7 +199,7 @@ class TestModel_VDP:
 
     @testattr(stddist = True)    
     def test_integer_ci_get_set(self):
-        """Test jmi.Model.set_integer_ci(...) and jmi.Model.get_integer_ci()."""
+        """Test jmi.JMUModel.set_integer_ci(...) and jmi.JMUModel.get_integer_ci()."""
         # cd is empty
         ci_new = N.ones(1)
         self.vdp.set_integer_ci(ci_new)
@@ -212,7 +207,7 @@ class TestModel_VDP:
 
     @testattr(stddist = True)    
     def test_integer_cd_get_set(self):
-        """Test jmi.Model.set_integer_cd(...) and jmi.Model.get_integer_cd()."""
+        """Test jmi.JMUModel.set_integer_cd(...) and jmi.JMUModel.get_integer_cd()."""
         # cd is empty
         cd_new = N.ones(1)
         self.vdp.set_integer_cd(cd_new)
@@ -220,7 +215,7 @@ class TestModel_VDP:
 
     @testattr(stddist = True)    
     def test_integer_pi_get_set(self):
-        """Test jmi.Model.set_integer_pi(...) and jmi.Model.get_integer_pi()."""
+        """Test jmi.JMUModel.set_integer_pi(...) and jmi.JMUModel.get_integer_pi()."""
         # pd is empty
         pi_new = N.ones(1)
         self.vdp.set_integer_pi(pi_new)
@@ -228,7 +223,7 @@ class TestModel_VDP:
         
     @testattr(stddist = True)    
     def test_integer_pd_get_set(self):
-        """Test jmi.Model.set_integer_pd(...) and jmi.Model.get_integer_pd()."""
+        """Test jmi.JMUModel.set_integer_pd(...) and jmi.JMUModel.get_integer_pd()."""
         # pd is empty
         pd_new = N.ones(1)
         self.vdp.set_integer_pd(pd_new)
@@ -236,7 +231,7 @@ class TestModel_VDP:
 
     @testattr(stddist = True)    
     def test_boolean_ci_get_set(self):
-        """Test jmi.Model.set_boolean_ci(...) and jmi.Model.get_boolean_ci()."""
+        """Test jmi.JMUModel.set_boolean_ci(...) and jmi.JMUModel.get_boolean_ci()."""
         # cd is empty
         ci_new = N.ones(1)
         self.vdp.set_boolean_ci(ci_new)
@@ -244,7 +239,7 @@ class TestModel_VDP:
 
     @testattr(stddist = True)    
     def test_boolean_cd_get_set(self):
-        """Test jmi.Model.set_boolean_cd(...) and jmi.Model.get_boolean_cd()."""
+        """Test jmi.JMUModel.set_boolean_cd(...) and jmi.JMUModel.get_boolean_cd()."""
         # cd is empty
         cd_new = N.ones(1)
         self.vdp.set_boolean_cd(cd_new)
@@ -252,7 +247,7 @@ class TestModel_VDP:
 
     @testattr(stddist = True)    
     def test_boolean_pi_get_set(self):
-        """Test jmi.Model.set_boolean_pi(...) and jmi.Model.get_boolean_pi()."""
+        """Test jmi.JMUModel.set_boolean_pi(...) and jmi.JMUModel.get_boolean_pi()."""
         # pd is empty
         pi_new = N.ones(1)
         self.vdp.set_boolean_pi(pi_new)
@@ -260,7 +255,7 @@ class TestModel_VDP:
         
     @testattr(stddist = True)    
     def test_boolean_pd_get_set(self):
-        """Test jmi.Model.set_boolean_pd(...) and jmi.Model.get_boolean_pd()."""
+        """Test jmi.JMUModel.set_boolean_pd(...) and jmi.JMUModel.get_boolean_pd()."""
         # pd is empty
         pd_new = N.ones(1)
         self.vdp.set_boolean_pd(pd_new)
@@ -268,7 +263,7 @@ class TestModel_VDP:
     
     @testattr(stddist = True)   
     def test_derivatives(self):
-        """Test jmi.Model.set_real_dx(...) and jmi.Model.get_real_dx()."""
+        """Test jmi.JMUModel.set_real_dx(...) and jmi.JMUModel.get_real_dx()."""
         reset = [0, 0, 0]
         diffs = self.vdp.real_dx
         diffs[:] = reset
@@ -281,7 +276,7 @@ class TestModel_VDP:
 
     @testattr(stddist = True)    
     def test_derivatives_p_get_set(self):
-        """Test jmi.Model.set_real_dx_p(...) and jmi.Model.get_real_dx_p()."""
+        """Test jmi.JMUModel.set_real_dx_p(...) and jmi.JMUModel.get_real_dx_p()."""
         new_diffs = N.ones(3)
         timepoint=0
         self.vdp.set_real_dx_p(new_diffs, 0)
@@ -289,7 +284,7 @@ class TestModel_VDP:
             
     @testattr(stddist = True)    
     def test_inputs(self):
-        """Test jmi.Model.set_real_u(...) and jmi.Model.get_real_u()."""
+        """Test jmi.JMUModel.set_real_u(...) and jmi.JMUModel.get_real_u()."""
         new_inputs = [1.54]
         reset = [0]
         self.vdp.real_u = reset
@@ -301,7 +296,7 @@ class TestModel_VDP:
 
     @testattr(stddist = True)    
     def test_inputs_p_get_set(self):
-        """Test jmi.Model.set_real_u_p(...) and jmi.Model.get_real_u_p()."""
+        """Test jmi.JMUModel.set_real_u_p(...) and jmi.JMUModel.get_real_u_p()."""
         new_inputs = N.ones(1)
         timepoint=0
         self.vdp.set_real_u_p(new_inputs, 0)
@@ -309,7 +304,7 @@ class TestModel_VDP:
         
     @testattr(stddist = True)    
     def test_real_w_get_set(self):
-        """Test jmi.Model.set_real_w(...) and jmi.Model.get_real_w()."""
+        """Test jmi.JMUModel.set_real_w(...) and jmi.JMUModel.get_real_w()."""
         # w is empty
         w_new = N.ones(1)
         self.vdp.set_real_w(w_new)
@@ -317,7 +312,7 @@ class TestModel_VDP:
 
     @testattr(stddist = True)    
     def test_real_w_p_get_set(self):
-        """Test jmi.Model.set_real_w_p(...) and jmi.Model.get_real_w_p()."""
+        """Test jmi.JMUModel.set_real_w_p(...) and jmi.JMUModel.get_real_w_p()."""
         new_alg = N.ones(1)
         timepoint=0
         self.vdp.set_real_w_p(new_alg, 0)
@@ -325,7 +320,7 @@ class TestModel_VDP:
 
     @testattr(stddist = True)    
     def test_real_d_get_set(self):
-        """Test jmi.Model.set_real_d(...) and jmi.Model.get_real_d()."""
+        """Test jmi.JMUModel.set_real_d(...) and jmi.JMUModel.get_real_d()."""
         # d is empty
         d_new = N.ones(1)
         self.vdp.set_real_d(d_new)
@@ -333,7 +328,7 @@ class TestModel_VDP:
 
     @testattr(stddist = True)    
     def test_integer_d_get_set(self):
-        """Test jmi.Model.set_integer_d(...) and jmi.Model.get_integer_d()."""
+        """Test jmi.JMUModel.set_integer_d(...) and jmi.JMUModel.get_integer_d()."""
         # d is empty
         d_new = N.ones(1)
         self.vdp.set_integer_d(d_new)
@@ -341,7 +336,7 @@ class TestModel_VDP:
 
     @testattr(stddist = True)    
     def test_integer_u_get_set(self):
-        """Test jmi.Model.set_integer_u(...) and jmi.Model.get_integer_u()."""
+        """Test jmi.JMUModel.set_integer_u(...) and jmi.JMUModel.get_integer_u()."""
         # u is empty
         u_new = N.ones(1)
         self.vdp.set_integer_u(u_new)
@@ -349,7 +344,7 @@ class TestModel_VDP:
 
     @testattr(stddist = True)    
     def test_boolean_d_get_set(self):
-        """Test jmi.Model.set_boolean_d(...) and jmi.Model.get_boolean_d()."""
+        """Test jmi.JMUModel.set_boolean_d(...) and jmi.JMUModel.get_boolean_d()."""
         # d is empty
         d_new = N.ones(1)
         self.vdp.set_boolean_d(d_new)
@@ -357,7 +352,7 @@ class TestModel_VDP:
 
     @testattr(stddist = True)    
     def test_boolean_u_get_set(self):
-        """Test jmi.Model.set_boolean_u(...) and jmi.Model.get_boolean_u()."""
+        """Test jmi.JMUModel.set_boolean_u(...) and jmi.JMUModel.get_boolean_u()."""
         # u is empty
         u_new = N.ones(1)
         self.vdp.set_boolean_u(u_new)
@@ -365,7 +360,7 @@ class TestModel_VDP:
         
     @testattr(stddist = True)    
     def test_z_get_set(self):
-        """Test jmi.Model.set_z(...) and jmi.Model.get_z()."""
+        """Test jmi.JMUModel.set_z(...) and jmi.JMUModel.get_z()."""
         z_new = self.vdp.get_z()
         z_new.itemset(0,2)
         self.vdp.set_z(z_new)
@@ -373,21 +368,21 @@ class TestModel_VDP:
 
     @testattr(stddist = True)    
     def test_get_sw(self):
-        """Test jmi.Model.set_sw(...) and jmi.Model.get_sw()."""
+        """Test jmi.JMUModel.set_sw(...) and jmi.JMUModel.get_sw()."""
         sw_new = self.vdp.get_sw()
         self.vdp.set_sw(sw_new)
         N.testing.assert_array_almost_equal(self.vdp.get_sw(),sw_new)
 
     @testattr(stddist = True)    
     def test_get_sw_init(self):
-        """Test jmi.Model.set_sw_init(...) and jmi.Model.get_sw_init()."""
+        """Test jmi.JMUModel.set_sw_init(...) and jmi.JMUModel.get_sw_init()."""
         sw_init_new = self.vdp.get_sw_init()
         self.vdp.set_sw_init(sw_init_new)
         N.testing.assert_array_almost_equal(self.vdp.get_sw_init(),sw_init_new)
 
     @testattr(stddist = True)    
     def test_variable_scaling_factors_get_set(self):
-        """Test jmi.Model.set_variable_scaling_factors(...) and jmi.Model.get_variable_scaling_factors()."""
+        """Test jmi.JMUModel.set_variable_scaling_factors(...) and jmi.JMUModel.get_variable_scaling_factors()."""
         variable_scaling_factors_new = self.vdp.get_variable_scaling_factors()
         variable_scaling_factors_new.itemset(0,2)
         self.vdp.set_variable_scaling_factors(variable_scaling_factors_new)
@@ -395,12 +390,12 @@ class TestModel_VDP:
 
     @testattr(stddist = True)    
     def test_get_scaling_method(self):
-        """Test jmi.Model.get_scaling_method()."""
+        """Test jmi.JMUModel.get_scaling_method()."""
         ntools.assert_equal(self.vdp.get_scaling_method(),jmi.JMI_SCALING_NONE)
     
     @testattr(stddist = True)    
     def test_parameters(self):
-        """Test methods jmi.Model.[set|get]_real_pi(...)."""
+        """Test methods jmi.JMUModel.[set|get]_real_pi(...)."""
         new_params = [1.54, 19.54, 78.12, 0, 3]
         reset = [0] * 5
         self.vdp.real_pi = reset
@@ -412,7 +407,7 @@ class TestModel_VDP:
     
     @testattr(stddist = True)    
     def test_time_get_set(self):
-        """Test jmi.Model.[set|get]_t(...)."""
+        """Test jmi.JMUModel.[set|get]_t(...)."""
         new_time = 0.47
         reset = 0
         self.vdp.t = reset
@@ -424,7 +419,7 @@ class TestModel_VDP:
     
     @testattr(stddist = True)   
     def test_evaluation(self):
-        """Test jmi.Model.eval_ode_f()."""
+        """Test jmi.JMUModel.eval_ode_f()."""
         self.vdp.real_dx = [0, 0, 0]
         self.vdp.eval_ode_f()
         all_zeros = True
@@ -537,41 +532,41 @@ class TestModel_VDP:
             
     @testattr(stddist = True)        
     def test_get_name(self):
-        """Test jmi.Model.get_name method."""
+        """Test jmi.JMUModel.get_name method."""
         ntools.assert_equal(self.vdp.get_name(),"VDP_pack_VDP_Opt")
     
     @testattr(stddist = True)    
     def test_opt_interval_starttime_free(self):
-        """Test jmi.Model.get_name method."""
+        """Test jmi.JMUModel.get_name method."""
         ntools.assert_equal(self.vdp.opt_interval_starttime_free(),False)
     
     @testattr(stddist = True)    
     def test_opt_interval_starttime_fixed(self):
-        """Test jmi.Model.opt_interval_starttime_fixed method."""
+        """Test jmi.JMUModel.opt_interval_starttime_fixed method."""
         ntools.assert_equal(self.vdp.opt_interval_starttime_fixed(),True)
     
     @testattr(stddist = True)        
     def test_opt_interval_finaltime_free(self):
-        """Test jmi.Model.opt_interval_finaltime_free method."""
+        """Test jmi.JMUModel.opt_interval_finaltime_free method."""
         ntools.assert_equal(self.vdp.opt_interval_finaltime_free(),False)
     
     @testattr(stddist = True)    
     def test_opt_interval_finaltime_fixed(self):
-        """Test jmi.Model.opt_interval_finaltime_fixed method."""
+        """Test jmi.JMUModel.opt_interval_finaltime_fixed method."""
         ntools.assert_equal(self.vdp.opt_interval_finaltime_fixed(),True)
     
     @testattr(stddist = True)   
     def test_opt_interval_get_start_time(self):
-        """Test jmi.Model.opt_interval_get_start_time method."""
+        """Test jmi.JMUModel.opt_interval_get_start_time method."""
         ntools.assert_equal(self.vdp.opt_interval_get_start_time(),0.0)
     
     @testattr(stddist = True)   
     def test_opt_interval_get_final_time(self):
-        """Test jmi.Model.opt_interval_get_final_time method."""
+        """Test jmi.JMUModel.opt_interval_get_final_time method."""
         ntools.assert_equal(self.vdp.opt_interval_get_final_time(),20.0)
         
 class TestModel_RLC:
-    """Test the high level model class, jmi.Model with alias variables 
+    """Test the high level model class, jmi.JMUModel with alias variables 
         enabled.
     
     The tests are based on the RLC_Circuit example file.
@@ -602,18 +597,18 @@ class TestModel_RLC:
         
     @testattr(stddist = True)
     def test_get_variable_descriptions(self):
-        """Test jmi.Model.get_variable_descriptions method."""
+        """Test jmi.JMUModel.get_variable_descriptions method."""
         descriptions = self.rlc.get_variable_descriptions()
         ntools.assert_equal(descriptions[0][1],"Potential at the pin")
 
     @testattr(stddist = True)
     def test_is_negated_alias(self):
-        """Test jmi.Model.is_negated_alias method."""
+        """Test jmi.JMUModel.is_negated_alias method."""
         ntools.assert_equal(self.rlc.is_negated_alias("resistor.n.i"),True)
     
     @testattr(stddist = True)
     def test_get_aliases(self):
-        """Test jmi.Model.get_aliases_for_variable method."""
+        """Test jmi.JMUModel.get_aliases_for_variable method."""
         (aliases,is_neg_alias) = self.rlc.get_aliases_for_variable("capacitor.p.i")
         ntools.assert_equal(aliases[0],"capacitor.i")
         ntools.assert_equal(aliases[1], "capacitor.n.i")
@@ -1254,7 +1249,7 @@ class TestJMIModel_VDP:
                "test_jmi.py: test_Model_dae_get_sizes: Wrong number of DAE initialization equations."
                
 class TestModelGeneric:
-    """ Test methods in the jmodelica.jmi.Model class
+    """ Test methods in the jmodelica.jmi.JMUModel class
     """
 
     @classmethod

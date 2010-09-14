@@ -24,13 +24,13 @@ import ctypes as ct
 from ctypes import byref
 import nose.tools
 
-import jmodelica
 from jmodelica.tests import testattr
 from jmodelica.tests import get_files_path
-from jmodelica import jmi
+from jmodelica.jmi import compile_jmu
+from jmodelica.jmi import JMUModel
 from jmodelica.initialization.ipopt import NLPInitialization
 from jmodelica.initialization.ipopt import InitializationOptimizer
-from jmodelica import io
+from jmodelica.io import ResultDymolaTextual
 
 int = N.int32
 N.int = N.int32
@@ -46,13 +46,14 @@ class TestNLPInitWrappers:
         fpath = os.path.join(get_files_path(), 'Modelica', 'CSTR.mop')
         cpath = "CSTR.CSTR_Init"
 
-        jmi.compile_jmu(cpath, fpath, compiler_options={'state_start_values_fixed':False})
+        compile_jmu(cpath, fpath, 
+            compiler_options={'state_start_values_fixed':False})
         
     def setUp(self):
         """Test setUp. Load the test model.""" 
         cpath = "CSTR.CSTR_Init"
         fname = cpath.replace('.','_')       
-        cstr = jmi.JMUModel(fname+'.jmu')    
+        cstr = JMUModel(fname+'.jmu')    
         self.init_nlp = NLPInitialization(cstr)     
      
     @testattr(ipopt = True)   
@@ -128,16 +129,18 @@ class TestNLPInit:
     @classmethod
     def setUpClass(cls):
         """Sets up the test class."""
-        fpath_daeinit = os.path.join(get_files_path(), 'Modelica', 'DAEInitTest.mo')
+        fpath_daeinit = os.path.join(get_files_path(), 'Modelica', 
+            'DAEInitTest.mo')
         cpath_daeinit = "DAEInitTest"
-        jmi.compile_jmu(cpath_daeinit, fpath_daeinit, compiler_options={'state_start_values_fixed':True})
+        compile_jmu(cpath_daeinit, fpath_daeinit, 
+            compiler_options={'state_start_values_fixed':True})
         
     def setUp(self):
         """Test setUp. Load the test model."""                    
         # Load the dynamic library and XML data
         cpath_daeinit = "DAEInitTest"
         fname_daeinit = cpath_daeinit.replace('.','_',1)
-        self.dae_init_test = jmi.JMUModel(fname_daeinit+'.jmu')
+        self.dae_init_test = JMUModel(fname_daeinit+'.jmu')
 
         # This is to check that values set in the model prior to
         # creation of the NLPInitialization object are used as an
@@ -328,7 +331,7 @@ class TestNLPInit:
 
         self.init_nlp.export_result_dymola()
         
-        res = io.ResultDymolaTextual(fname_daeinit + "_result.txt")
+        res = ResultDymolaTextual(fname_daeinit + "_result.txt")
 
         res_Z = N.array([5.,
                          -198.1585290151921,

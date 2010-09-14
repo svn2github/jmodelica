@@ -16,8 +16,8 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-__all__ = ['jmi', 'xmlparser', 'compiler','optimization',
-           'examples', 'tests','io','initialization','simulation','core',
+__all__ = ['jmi', 'xmlparser', 'compiler','optimization','examples', 
+           'tests','io','initialization','simulation','core',
            'linearization', 'algorithm_drivers']
 
 __version__=''

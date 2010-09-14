@@ -23,11 +23,10 @@ This file holds base classes for simulation and optimization tests.
 import os
 import numpy
 import warnings
-import jmodelica.jmi as jmi
+from jmodelica.jmi import compile_jmu
+from jmodelica.jmi import JMUModel
 import jmodelica.initialization.ipopt as ipopt_init
 from jmodelica.optimization import ipopt
-from jmodelica.compiler import ModelicaCompiler
-from jmodelica.compiler import OptimicaCompiler
 from jmodelica.io import ResultDymolaTextual
 from jmodelica.tests import get_files_path
 
@@ -50,22 +49,18 @@ class _BaseSimOptTest:
     """
 
     @classmethod
-    def setup_class_base(cls, mo_file, class_name, compiler, options = {}):
+    def setup_class_base(cls, mo_file, class_name, options = {}):
         """
         Set up a new test model. Compiles the model. 
         Call this with proper args from setUpClass(). 
           mo_file     - the relative path from the files dir to the .mo file to compile
           class_name  - the qualified name of the class to simulate
           options     - a dict of options to set in the compiler, defaults to no options
-          compiler    - the compiler to use
         """
         global _model_name
-        _model_name = class_name.replace('.','_')
         path = os.path.join(get_files_path(), 'Modelica', mo_file)
-        #_set_compiler_options(compiler, options)
-        #compiler.compile_model(class_name, path, target='ipopt')
         
-        _model_name = jmi.compile_jmu(class_name, path, compiler_options=options)
+        _model_name = compile_jmu(class_name, path, compiler_options=options)
 
     def setup_base(self, rel_tol, abs_tol):
         """ 
@@ -79,7 +74,7 @@ class _BaseSimOptTest:
         self.rel_tol = rel_tol
         self.abs_tol = abs_tol
         self.model_name = _model_name
-        self.model = jmi.JMUModel(self.model_name)
+        self.model = JMUModel(self.model_name)
 
 
     def run(self):
@@ -239,21 +234,19 @@ class SimulationTest(_BaseSimOptTest):
     """
 
     @classmethod
-    def setup_class_base(cls, mo_file, class_name, options = {}, compiler = None):
+    def setup_class_base(cls, mo_file, class_name, options = {}):
         """
         Set up a new test model. Compiles the model. 
         Call this with proper args from setUpClass(). 
           mo_file     - the relative path from the files dir to the .mo file to compile
           class_name  - the qualified name of the class to simulate
           options     - a dict of options to set in the compiler, defaults to no options
-          compiler    - the compiler to use, defaults to an instance of ModelicaCompiler
         """
-        if compiler is None:
-            compiler = ModelicaCompiler()
-        _BaseSimOptTest.setup_class_base(mo_file, class_name, compiler, options)
+        _BaseSimOptTest.setup_class_base(mo_file, class_name, options)
 
 
-    def setup_base(self, rel_tol = 1.0e-4, abs_tol = 1.0e-6, start_time=0.0, final_time=10.0, time_step=0.01):
+    def setup_base(self, rel_tol = 1.0e-4, abs_tol = 1.0e-6, 
+        start_time=0.0, final_time=10.0, time_step=0.01):
         """ 
         Set up a new test case. Creates and configures the simulation.
         Call this with proper args from setUp(). 
@@ -289,21 +282,19 @@ class OptimizationTest(_BaseSimOptTest):
     """
 
     @classmethod
-    def setup_class_base(cls, mo_file, class_name, options = {}, compiler = None):
+    def setup_class_base(cls, mo_file, class_name, options = {}):
         """
         Set up a new test model. Compiles the model. 
         Call this with proper args from setUpClass(). 
           mo_file     - the relative path from the files dir to the .mo file to compile
           class_name  - the qualified name of the class to simulate
           options     - a dict of options to set in the compiler, defaults to no options
-          compiler    - the compiler to use, defaults to a new instance of OptimicaCompiler
         """
-        if compiler is None:
-            compiler = OptimicaCompiler()
-        _BaseSimOptTest.setup_class_base(mo_file, class_name, compiler, options)
+        _BaseSimOptTest.setup_class_base(mo_file, class_name, options)
 
 
-    def setup_base(self, nlp_args = (), rel_tol = 1.0e-4, abs_tol = 1.0e-6, options = {}, result_mesh='default', result_arguments = {}):
+    def setup_base(self, nlp_args = (), rel_tol = 1.0e-4, abs_tol = 1.0e-6, 
+        options = {}, result_mesh='default', result_arguments = {}):
         """ 
         Set up a new test case. Creates and configures the optimization.
         Call this with proper args from setUp(). 

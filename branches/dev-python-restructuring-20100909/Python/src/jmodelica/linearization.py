@@ -5,7 +5,7 @@ int = N.int32
 N.int = N.int32
 
 def linearize_dae(model):
-    """ Linearize a DAE represented by a jmodelica.jmi.Model object. The 
+    """ Linearize a DAE represented by a jmodelica.jmi.JMUModel object. The 
     DAE is represented by
 
       F(dx,x,u,w,t) = 0
@@ -16,7 +16,7 @@ def linearize_dae(model):
 
     where E, A, B, F and g are constant coefficient matrices. The 
     linearization is done around the current values of the dx, x, u, w, 
-    and t values in the Model object.
+    and t values in the JMUModel object.
 
     The matrices are computed by evaluating Jacobians with the AD package 
     CppAD which provides derivatives with machine precision. (That is, 
@@ -25,7 +25,7 @@ def linearize_dae(model):
     Parameters::
     
         model --
-            The jmi.Model object representing the model.
+            The jmi.JMUModel object representing the model.
 
     Returns::
     
@@ -208,8 +208,8 @@ def linear_dae_to_ode(E_dae,A_dae,B_dae,F_dae,g_dae):
     return A,B,g,H,M,q
 
 def linearize_ode(model):
-    """ Linearize a DAE represented by a jmodelica.jmi.Model object. The 
-    DAE is represented by
+    """ Linearize a DAE represented by a jmodelica.jmi.JMUModel object. 
+    The DAE is represented by
 
       F(dx,x,u,w,t) = 0
 
@@ -229,7 +229,7 @@ def linearize_ode(model):
     Parameters::
     
         model --
-            The jmi.Model object representing the model.
+            The jmi.JMUModel object representing the model.
 
     Returns::
     

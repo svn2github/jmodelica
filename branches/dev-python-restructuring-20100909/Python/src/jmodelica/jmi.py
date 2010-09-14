@@ -354,8 +354,8 @@ class JMUModel(BaseModel):
     def __init__(self, jmu_name, path ='.'):
         """ Create a jmi.JMUModel. 
         
-        Create a Model object. Load generated binary file, set default 
-        values from the model variables XML file, set dependent 
+        Create a JMU Model object. Load generated binary file, set 
+        default values from the model variables XML file, set dependent 
         parameters and initialize AD.
         
         Parameters::
@@ -478,11 +478,12 @@ class JMUModel(BaseModel):
     def _setDefaultValuesFromMetadata(self, libname=None, path=None):
         """ Load metadata saved in XML files.
         
-        Meta data can be things like time points, initial states, initial cost
-        etc.
+        Meta data can be things like time points, initial states, 
+        initial cost etc.
         
         """
-        # xml file has been unzipped from JMU and is located in the tempdir
+        # xml file has been unzipped from JMU and is located in the 
+        # tempdir
         self._set_XMLDoc(xmlparser.ModelDescription(os.path.join(
             tempfile.gettempdir(),self._xml_name)))
         
@@ -494,7 +495,8 @@ class JMUModel(BaseModel):
             tempfile.gettempdir(),self._xml_values_name)))
         self._set_iparam_values()
 
-        # set optimizataion interval, time points and optimization indices
+        # set optimizataion interval, time points and optimization 
+        # indices
         if self._is_optimica():
             self._set_opt_interval()
             self._set_timepoints()
@@ -502,14 +504,10 @@ class JMUModel(BaseModel):
         
     def _is_optimica(self):
         """ Find out if model is compiled with OptimicaCompiler. """
-        return self._get_XMLDoc().get_opt_starttime()!=None        
+        return self._get_XMLDoc().get_opt_starttime()!=None
 
     def _set_scaling_factors(self):
-        """ Load metadata saved in XML files.
-        
-        Meta data can be things like time points, initial states, 
-        initial cost etc.
-        
+        """ Set scaling factors from XML file.
         """
         xmldoc = self._get_XMLDoc()
         nominal_attr = xmldoc.get_variable_nominal_attributes(
@@ -2181,7 +2179,8 @@ class JMUModel(BaseModel):
         """
         
         xmldoc = self._get_XMLDoc()
-        start_attr = xmldoc.get_variable_start_attributes(include_alias=False)
+        start_attr = xmldoc.get_variable_start_attributes(
+            include_alias=False)
         
         #Real variables vector
         z = self.get_z()
@@ -2208,7 +2207,7 @@ class JMUModel(BaseModel):
                     # Primitive type is String
                     pass
                 else:
-                    "Unknown type"
+                    raise JMIException("Unknown type")
     
     def _set_iparam_values(self, xml_values_doc=None):
         """ Set the values for the independent parameters. """
@@ -2223,7 +2222,8 @@ class JMUModel(BaseModel):
         for name in values.keys():
             value = values.get(name)
             #value_ref = variables.get(name)
-            (i, ptype) = _translate_value_ref(xmldoc.get_value_reference(name))
+            (i, ptype) = _translate_value_ref(
+                xmldoc.get_value_reference(name))
 
             if(ptype == 0):
                 # Primitive type is Real
@@ -2241,7 +2241,7 @@ class JMUModel(BaseModel):
                 # Primitive type is String
                 pass
             else:
-                JMIException("Unknown type")
+                raise JMIException("Unknown type")
             
     def _set_opt_interval(self):
         """ Set the optimization intervals (if Optimica). """
@@ -5737,7 +5737,13 @@ def get_jmu_name(class_name):
 
 def package_JMU(class_name):
     """
-    Method that takes as input a class name and package all model related files into a JMU.
+    Method that takes as input a class name and package all model related 
+    files into a JMU.
+    
+    Parameters::
+    
+        class_name --
+            The name of the model
     """
     mName = class_name
     mMangledName = class_name.replace('.','_')
@@ -5762,17 +5768,23 @@ def package_JMU(class_name):
     file = zipfile.ZipFile(mMangledName+'.jmu', 'w') #Create the new archive
     try:
         #Write the xml file
-        file.write(mMangledName+'.xml', 'modelDescription.xml', zipfile.ZIP_DEFLATED)
+        file.write(mMangledName+'.xml', 'modelDescription.xml', 
+            zipfile.ZIP_DEFLATED)
         #Write the .c file
-        file.write(mMangledName+'.c','sources'+os.sep+mMangledName+'.c',zipfile.ZIP_DEFLATED)
+        file.write(mMangledName+'.c','sources'+os.sep+mMangledName+'.c',
+            zipfile.ZIP_DEFLATED)
         #Write the .mof file
-        file.write(mName+'.mof','resources'+os.sep+mName+'.mof',zipfile.ZIP_DEFLATED)
+        file.write(mName+'.mof','resources'+os.sep+mName+'.mof',
+            zipfile.ZIP_DEFLATED)
         #Write the transformed .mof file
-        file.write(mName+'_transformed.mof','resources'+os.sep+mName+'_transformed.mof',zipfile.ZIP_DEFLATED)
+        file.write(mName+'_transformed.mof','resources'+os.sep+mName+'_transformed.mof',
+            zipfile.ZIP_DEFLATED)
         #Write the parameter file
-        file.write(mMangledName+'_values.xml','resources'+os.sep+mMangledName+'_values.xml',zipfile.ZIP_DEFLATED)
+        file.write(mMangledName+'_values.xml','resources'+os.sep+mMangledName+'_values.xml',
+            zipfile.ZIP_DEFLATED)
         #Write the binary
-        file.write(mMangledName+suffix,'binaries'+os.sep+platform+os.sep+mMangledName+suffix, zipfile.ZIP_DEFLATED)
+        file.write(mMangledName+suffix,'binaries'+os.sep+platform+os.sep+mMangledName+suffix, 
+            zipfile.ZIP_DEFLATED)
     except OSError:
         raise JMIException('No such file or directory')
     finally:
@@ -5791,65 +5803,65 @@ def package_JMU(class_name):
         
 def compile_jmu(class_name, file_name=[], compiler='modelica', 
     target='ipopt', compiler_options={}):
-        """ Compile a Modelica or Optimica model to a JMU.
+    """ Compile a Modelica or Optimica model to a JMU.
+    
+    A model class name must be passed, all other arguments have 
+    default values. The different scenarios are:
+    
+    * Only class_name is passed: 
+        - Default compiler is ModelicaCompiler.
+        - Class is assumed to be in MODELICAPATH.
+    
+    * class_name and file_name is passed:
+        - file_name can be a single file as a string or a list of 
+          file_names (strings).
+        - Default compiler is ModelicaCompiler but will switch to 
+          OptimicaCompiler if a .mop file is found in file_name.
+    
+    Library directories can be added to MODELICAPATH by listing them 
+    in a special compiler option 'extra_lib_dirs', for example:
+    
+        compiler_options = 
+            {'extra_lib_dirs':['c:\MyLibs\MyLib1','c:\MyLibs\MyLib2']}
         
-        A model class name must be passed, all other arguments have 
-        default values. The different scenarios are:
-        
-        * Only class_name is passed: 
-            - Default compiler is ModelicaCompiler.
-            - Class is assumed to be in MODELICAPATH.
-        
-        * class_name and file_name is passed:
-            - file_name can be a single file as a string or a list of 
-              file_names (strings).
-            - Default compiler is ModelicaCompiler but will switch to 
-              OptimicaCompiler if a .mop file is found in file_name.
-        
-        Library directories can be added to MODELICAPATH by listing them 
-        in a special compiler option 'extra_lib_dirs', for example:
-        
-            compiler_options = 
-                {'extra_lib_dirs':['c:\MyLibs\MyLib1','c:\MyLibs\MyLib2']}
+    Other options for the compiler should also be listed in the 
+    compiler_options dict.
+    
+    The compiler target is 'ipopt' by default which means that 
+    libraries for AD and optimization/initialization algortihms will 
+    be available as well as the JMI. The other targets are:
+    
+    'model' - AD and JMI is included.
+    'algorithm' - AD and algorithm but no Ipopt linking.
+    'model_noad' - Only JMI, that is no AD interface. (Must 
+    currently be used when model includes external functions.)
+    
+    Parameters::
+    
+        class_name -- 
+            The name of the model class.
+        file_name -- 
+            Model file (string) or files (list of strings), can be 
+            both .mo or .mop files.
+            Default: Empty list.
+        compiler -- 
+            'modelica' or 'optimica' depending on whether a 
+            ModelicaCompiler or OptimicaCompiler should be used. 
+            Set this argument if default behaviour should be 
+            overridden.
+            Default: Depends on argument file_name.
+        target --
+            Compiler target. 'model', 'algorithm', 'ipopt' or 
+            'model_noad'.
+            Default: 'ipopt'
+        compiler_options --
+            Options for the compiler.
+            Default: Empty dict.
             
-        Other options for the compiler should also be listed in the 
-        compiler_options dict.
-        
-        The compiler target is 'ipopt' by default which means that 
-        libraries for AD and optimization/initialization algortihms will 
-        be available as well as the JMI. The other targets are:
-        
-        'model' - AD and JMI is included.
-        'algorithm' - AD and algorithm but no Ipopt linking.
-        'model_noad' - Only JMI, that is no AD interface. (Must 
-        currently be used when model includes external functions.)
-        
-        Parameters::
-        
-            class_name -- 
-                The name of the model class.
-            file_name -- 
-                Model file (string) or files (list of strings), can be 
-                both .mo or .mop files.
-                Default: Empty list.
-            compiler -- 
-                'modelica' or 'optimica' depending on whether a 
-                ModelicaCompiler or OptimicaCompiler should be used. 
-                Set this argument if default behaviour should be 
-                overridden.
-                Default: Depends on argument file_name.
-            target --
-                Compiler target. 'model', 'algorithm', 'ipopt' or 
-                'model_noad'.
-                Default: 'ipopt'
-            compiler_options --
-                Options for the compiler.
-                Default: Empty dict.
-                
-        Returns::
-        
-            Name of the JMU which has been created.
-        """
+    Returns::
+    
+        Name of the JMU which has been created.
+    """
     
     if isinstance(file_name, str):
         file_name = [file_name]

@@ -17,24 +17,23 @@
 """
 Module for testing Simulation.
 """
-from jmodelica.tests.general.base_simul import *
-from jmodelica.tests import testattr
-from jmodelica.compiler import OptimicaCompiler
 import numpy as N
 
+from jmodelica.tests.general.base_simul import *
+from jmodelica.tests import testattr
 
 class TestNominal(SimulationTest):
 
     @classmethod
     def setUpClass(cls):
-        oc = OptimicaCompiler()
         SimulationTest.setup_class_base(
-                'NominalTest.mop', 'NominalTests.NominalTest1',compiler=oc,
-                options={"enable_variable_scaling":True})
+                'NominalTest.mop', 'NominalTests.NominalTest1',
+                    options={"enable_variable_scaling":True})
 
     @testattr(assimulo = True)
     def setUp(self):
-        self.setup_base(start_time=0.0, final_time=10.0, time_step = 0.1, abs_tol=1.0e-8)
+        self.setup_base(start_time=0.0, final_time=10.0, 
+            time_step = 0.1, abs_tol=1.0e-8)
         self.run()
         self.load_expected_data('NominalTests_NominalTest1_result.txt')
 
@@ -52,7 +51,8 @@ class TestFunction1(SimulationTest):
 
     @testattr(assimulo = True)
     def setUp(self):
-        self.setup_base(start_time=0.0, final_time=1.0, time_step = 0.002, rel_tol=1.0e-2, abs_tol=1.0e-2)
+        self.setup_base(start_time=0.0, final_time=1.0, time_step = 0.002, 
+            rel_tol=1.0e-2, abs_tol=1.0e-2)
         self.run()
         self.load_expected_data('UnknownArray.txt')
 
@@ -71,7 +71,8 @@ class TestFunction2(SimulationTest):
 
     @testattr(assimulo = True)
     def setUp(self):
-        self.setup_base(start_time=0.0, final_time=1.0, time_step = 0.002, rel_tol=1.0e-2)
+        self.setup_base(start_time=0.0, final_time=1.0, time_step = 0.002, 
+            rel_tol=1.0e-2)
         self.run()
         self.load_expected_data('FuncRecord.txt')
 
@@ -85,13 +86,16 @@ class TestStreams1(SimulationTest):
     @classmethod
     def setUpClass(cls):
         SimulationTest.setup_class_base(
-            'StreamExample.mo', 'StreamExample.Examples.Systems.HeatedGas_SimpleWrap',options={'enable_variable_scaling':True})
+            'StreamExample.mo', 
+            'StreamExample.Examples.Systems.HeatedGas_SimpleWrap',
+            options={'enable_variable_scaling':True})
 
     @testattr(assimulo = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=10, time_step = 0.1,)
         self.run()
-        self.load_expected_data('StreamExample_Examples_Systems_HeatedGas_SimpleWrap_result.txt')
+        self.load_expected_data(
+            'StreamExample_Examples_Systems_HeatedGas_SimpleWrap_result.txt')
 
     @testattr(assimulo = True)
     def test_trajectories(self):
@@ -105,13 +109,15 @@ class TestStreams2(SimulationTest):
     @classmethod
     def setUpClass(cls):
         SimulationTest.setup_class_base(
-            'StreamExample.mo', 'StreamExample.Examples.Systems.HeatedGas',options={'enable_variable_scaling':True})
+            'StreamExample.mo', 'StreamExample.Examples.Systems.HeatedGas',
+            options={'enable_variable_scaling':True})
 
     @testattr(assimulo = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=10, time_step = 0.1,)
         self.run()
-        self.load_expected_data('StreamExample_Examples_Systems_HeatedGas_result.txt')
+        self.load_expected_data(
+            'StreamExample_Examples_Systems_HeatedGas_result.txt')
 
     @testattr(assimulo = True)
     def test_trajectories(self):

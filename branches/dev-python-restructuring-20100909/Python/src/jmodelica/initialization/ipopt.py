@@ -169,7 +169,7 @@ class NLPInitialization(object):
         Parameters::
         
             model -- 
-                The Model object.
+                The jmodelica.jmi.JMUModel object.
         
         """
         self._jmi_init_opt = ct.c_voidp() 

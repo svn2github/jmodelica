@@ -1365,7 +1365,7 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
         Parameters::
         
             model -- 
-                The Model object.
+                The jmodelica.jmi.JMUModel object.
             n_e -- 
                 The number of finite elements.
             hs -- 

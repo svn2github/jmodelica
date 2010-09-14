@@ -43,11 +43,12 @@ class JMIInitProblem(NL_Problem):
         """
         Create an instance of the JMIInitProblem
         
-        Parameters:
-            model:
-                An instance of the instance jmi.model
+        Parameters::
+        
+            model --
+                An instance of the instance jmi.JMUModel
                 
-            x0:
+            x0 --
                 A numpy array containing the initial guess. 
                 If not supplied, an initial guess is read from the model.
         """
@@ -91,8 +92,10 @@ class JMIInitProblem(NL_Problem):
 
         """
         Function used to get the residual of the F0 function in JMI
-        Parameters:
-            input:
+        
+        Parameters::
+        
+            input --
                 A numpy array, the vector input for which the residual will be
                 evaluated
         """
@@ -117,8 +120,9 @@ class JMIInitProblem(NL_Problem):
         """
         Set the initial guess of the system to x0
         
-        Parameters:
-            x0:
+        Parameters::
+        
+            x0 --
                 A numpy array, the vector x0 is the initial guess for the problem
         
         """
@@ -138,8 +142,9 @@ class JMIInitProblem(NL_Problem):
         """
         Function used to get the jacobian of the F0 function in JMI
         
-        Parameters:
-            input:
+        Parameters::
+        
+            input --
                 A numpy array, the vector input for which the jacobian will be
                 evaluated
         """

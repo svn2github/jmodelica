@@ -28,10 +28,11 @@ import os
 import sys
 import platform
 import subprocess
-import jpype
 import string
+
+import jpype
+
 import jmodelica as jm
-#import jmodelica.jmi as jmi
 from jmodelica import xmlparser
 
 #start JVM
