@@ -664,9 +664,38 @@ Semantic error at line 1, column 1:
 end FunctionBinding14;
 
 model FunctionBinding15
- /* Should bind to TestFunction1(1.0)? */
- parameter Real a = 1;
- Real x = TestFunction1(a);
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="FunctionBinding15",
+         description="Access to constant in default input value",
+         flatModel="
+fclass FunctionTests.FunctionBinding15
+ Real d.c = FunctionTests.FunctionBinding15.A.f(1.0);
+
+ function FunctionTests.FunctionBinding15.A.f
+  input Real b := 1.0;
+  output Real c := b;
+ algorithm
+  return;
+ end FunctionTests.FunctionBinding15.A.f;
+end FunctionTests.FunctionBinding15;
+")})));
+
+    package A
+        constant Real a = 1;
+        
+        function f
+            input  Real b = a;
+            output Real c = b;
+        algorithm
+        end f;
+    end A;
+    
+    model B
+        Real c = A.f();
+    end B;
+    
+    B d;
 end FunctionBinding15;
 
 
