@@ -2380,11 +2380,10 @@ class JMUModel(BaseModel):
             raise Exception("Parameter or variable "+name+" could not \
             be found in model.")
     
-    def load_parameters_from_XML(self, filename="", path="."):
+    def load_parameters_from_XML(self, filename=''):
         """ Reset the pi vector with values from the XML file created 
         when the model was compiled. If an XML file other than this 
-        should be used instead, set the filename and path (if no path is 
-        set file is assumed to be in the current directory) of the file 
+        should be used instead, set the filename of the file 
         to load.
         
         Parameters::
@@ -2392,50 +2391,46 @@ class JMUModel(BaseModel):
             filename -- 
                 The name of XML file that should be loaded.
                 Default: Empty string.
-            path -- 
-                The directory where XML file is located.
-                Default: Empty string.
         
         Raises::
         
             IOError if file could not be found.
         """
         if filename:
-                xml_values_name = os.path.join(path, filename)
+            if os.path.exists(filename):
+                self._set_XMLValuesDoc(xmlparser.XMLValuesDoc(filename))
+            else:
+                raise IOError("The file: "+filename+" could not be found.")
         else:
-            #load original xml
-            xml_values_name = os.path.join(path, self.get_name()+'_values.xml')
+            self._set_XMLValuesDoc(xmlparser.XMLValuesDoc(
+                os.path.join(tempfile.gettempdir(),self._xml_values_name)))
+            
+        self._set_iparam_values(self._get_XMLValuesDoc())
         
-        if os.path.exists(xml_values_name):
-            self._set_iparam_values(xmlparser.XMLValuesDoc(xml_values_name))
-        else:
-            raise IOError("The file: "+xml_values_name+" could not be found.")
-        
-    def write_parameters_to_XML(self, filename="", path="."):
+    def write_parameters_to_XML(self, filename=''):
         """ Write parameter values (real, integer, boolean supported) in 
         the pi vector to XML. The default behaviour is to overwrite the 
         XML file created when model was compiled. To write to a new file, 
-        set the file name and path (if no path is set file is assumed 
-        to be in the current directory) of the new file to write to. 
+        set the file name of the new file to write to. 
         
         Parameters::
         
             filename -- 
-                The filename of the XML file that should be loaded.
-                Default: Empty string.
-            path -- 
-                The directory where the XML file is located.
+                The filename of the XML file that the parameter vector 
+                should be written to.
                 Default: Empty string.
         """       
         # get xmldoc and z-vector
         xmldoc = self._get_XMLDoc()
         z = self.get_z()
         
-        # create new XMLValuesDoc from the xml values file
-        valuesfile = self.get_name()+'_values.xml'
-        xml_values_doc = xmlparser.XMLValuesDoc(valuesfile)        
+        # create temp XMLValuesDoc from the xml values file for writing 
+        # the new parameters to
+        temp_doc = xmlparser.XMLValuesDoc(os.path.join(
+            tempfile.gettempdir(),self._xml_values_name))
+        
         # get all parameter elements
-        root = xml_values_doc._doc.getroot()
+        root = temp_doc._doc.getroot()
         parameters = root.getchildren()
         
         for p in parameters:
@@ -2455,11 +2450,14 @@ class JMUModel(BaseModel):
             
         # finally, write to file
         if filename:
-            if not os.path.exists(path):
-                os.mkdir(path)
-            xml_values_doc._doc.write(os.path.join(path,filename))
+            # create directory if it does not exist
+            dir = os.path.dirname(filename)
+            if dir and not os.path.exists(dir):
+                os.mkdir(dir)
+            temp_doc._doc.write(filename)
         else:
-            xml_values_doc._doc.write(xml_values_doc._doc.docinfo.URL)
+            temp_doc._doc.write(os.path.join(tempfile.gettempdir(), 
+                self._xml_values_name))
             
     def get_aliases_for_variable(self, variable):
         """ Get a list of all alias variables belonging to the aliased 

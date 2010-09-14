@@ -1294,7 +1294,8 @@ class TZValues(object):
         """
         Sets up the test class.
         """
-        self._model = oc.compile_model(self._cpath, self._fpath)
+        jmu_name = compile_jmu(self._cpath, self._fpath)
+        self._model = JMUModel(jmu_name)
 
     @testattr(stddist = True)
     def test_z_values(self):
