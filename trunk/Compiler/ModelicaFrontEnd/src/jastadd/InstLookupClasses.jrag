@@ -59,8 +59,9 @@ aspect InstLookupClasses {
 
 	// The lexical scope of modifiers in short classes is the "outer" scope, although
 	// the short class declaration is modeled as containing an extends clause
-	eq InstExtendsShortClass.getInstClassModification().lookupInstClass(String name)   = lookupInstClass(name);
-	eq InstShortClassDecl.getChild().lookupInstClass(String name)                      = lookupInstClass(name);
+	eq InstExtendsShortClass.getInstClassModification().lookupInstClass(String name) = lookupInstClass(name);
+	eq InstExtendsShortClass.getClassName().lookupInstClass(String name)             = lookupInstClassInChain(name);
+	eq InstShortClassDecl.getChild().lookupInstClass(String name)                    = lookupInstClass(name);
 	eq InstReplacingShortClassDecl.getChild().lookupInstClass(String name) = getInstClassRedeclare().lookupInstClass(name);
 /* TODO: This makes RedeclareTests.RedeclareFunction3 fail. Shouldn't names be looked up *in* 
  *       redeclare, not *from* it? This should apply to the 3 other similar ones, but removing 
@@ -82,6 +83,16 @@ aspect InstLookupClasses {
 	syn HashSet InstClassDecl.lookupInstClassInInstClassRedeclare(String name) = emptyHashSet();
 	eq InstReplacingShortClassDecl.lookupInstClassInInstClassRedeclare(String name) = getInstClassRedeclare().lookupInstClass(name);
 	eq InstReplacingFullClassDecl.lookupInstClassInInstClassRedeclare(String name) = getInstClassRedeclare().lookupInstClass(name);
+
+	inh HashSet InstExtendsShortClass.lookupInstClassInChain(String name);
+	// Default to using normal lookup
+	// TODO: don't use JastAdd internal stuff (child)
+	eq InstNode.getChild().lookupInstClassInChain(String name) = ((InstNode) child).lookupInstClass(name);
+	eq InstExtendsShortClass.getInstExtends().lookupInstClassInChain(String name) = 
+		getClassName().myInstClassDecl().superLookupInstClassFromChain(name);
+	
+	syn HashSet InstClassDecl.superLookupInstClassFromChain(String name)      = superLookupInstClass(name);
+	eq InstReplacingShortClassDecl.superLookupInstClassFromChain(String name) = getInstExtends(0).lookupInstClass(name);
 
 	syn boolean InstClassDecl.isRedeclared() = false;
 	eq InstReplacingShortClassDecl.isRedeclared() = true;

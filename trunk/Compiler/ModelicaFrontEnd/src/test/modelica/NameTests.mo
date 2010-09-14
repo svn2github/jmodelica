@@ -652,6 +652,81 @@ end NameTests.NameTest20;
 end NameTest20;
 
 
+model NameTest21
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="NameTest21",
+         description="Chain of redeclared short class declarations",
+         flatModel="
+fclass NameTests.NameTest21
+ Real d.b.c.x = 2.0;
+end NameTests.NameTest21;
+")})));
+
+    model A
+        replaceable package B = C;
+        
+        J c(redeclare package I = B);
+    end A;
+    
+    package C
+        constant Real a = 1;
+    end C;
+    
+    model D
+        package E = F;
+        
+        A b(redeclare package B = E.G);
+    end D;
+    
+    package F
+        package G
+            extends C(a = 2);
+        end G;
+    end F;
+    
+    model J
+        replaceable package I = C;
+        
+        Real x = I.a;
+    end J;
+    
+    D d;
+end NameTest21;
+
+
+model NameTest22
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="NameTest22",
+         description="Chain of short class declarations",
+         flatModel="
+fclass NameTests.NameTest22
+ Real d.x = 3.0;
+end NameTests.NameTest22;
+")})));
+
+  model C
+   constant Real a = 1;
+  end C;
+  
+  package F
+	package G
+	  extends C(a=2);
+	end G;
+  end F;
+
+  model D
+   package E = F;
+   package B = E.G(a=3);
+   package I = B;
+   Real x = I.a; 
+  end D;
+
+ D d;
+end NameTest22;
+
+
 
 /* Used for tests ConstantLookup1-3. */
 constant Real constant_1 = 1.0;
