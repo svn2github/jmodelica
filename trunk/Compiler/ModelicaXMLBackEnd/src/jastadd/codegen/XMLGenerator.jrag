@@ -445,7 +445,7 @@ public class XMLGenerator extends GenericGenerator {
 			genPrinter.print("nominal=\""+realvariable.nominalAttribute()+"\" ");
 		}
 		//start
-		if (realvariable.useBindingExpAsStart()) {
+		if (realvariable.isIndependentParameter() || realvariable.useBindingExpAsStart()) {
 			genPrinter.print("start=\""+realvariable.ceval().realValue()+"\" ");
 		} else {
 			genPrinter.print("start=\""+realvariable.startAttribute()+"\" ");
@@ -473,7 +473,7 @@ public class XMLGenerator extends GenericGenerator {
 			genPrinter.print("max=\""+integervariable.maxAttribute()+"\" ");
 		}
 		//start
-		if (integervariable.useBindingExpAsStart()) {
+		if (integervariable.isIndependentParameter() || integervariable.useBindingExpAsStart()) {
 			genPrinter.print("start=\"" +integervariable.ceval().intValue() +"\" ");
 		} else {
 			genPrinter.print("start=\"" +integervariable.startAttribute()+"\" ");
@@ -488,7 +488,7 @@ public class XMLGenerator extends GenericGenerator {
 		//declaredType
 		//genPrinter.print("declaredType=\"String\" ");
 		//start attribute
-		if (booleanvariable.useBindingExpAsStart()) {
+		if (booleanvariable.isIndependentParameter() || booleanvariable.useBindingExpAsStart()) {
 			genPrinter.print("start=\"" +booleanvariable.ceval().booleanValue() + "\" ");
 		} else {
 			genPrinter.print("start=\"" +booleanvariable.startAttribute()+"\" ");
@@ -503,7 +503,7 @@ public class XMLGenerator extends GenericGenerator {
 		//declaredType
 		//genPrinter.print("declaredType=\"String\" ");
 		//start attribute
-		if (stringvariable.useBindingExpAsStart()) {
+		if (stringvariable.isIndependentParameter() || stringvariable.useBindingExpAsStart()) {
 			genPrinter.print("start=\"" +stringvariable.ceval().stringValue() + "\" ");
 		} else if(stringvariable.startAttributeSet()) {
 			genPrinter.print("start=\""+stringvariable.startAttribute()+"\" ");

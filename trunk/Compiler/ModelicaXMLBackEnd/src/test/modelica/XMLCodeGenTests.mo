@@ -132,10 +132,55 @@ end XMLExtFuncAnnotations2;
      s2 = "hello";
   end XMLCodeGenTest1;
 
+model XMLCodeGenTest2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.XMLCodeGenTestCase(
+         name="XMLCodeGenTest2",
+         description="Start attribute of independent parameters.",
+         template="$XML_variables$",
+         generatedCode="
 
+		<ScalarVariable name=\"p1\" valueReference=\"0\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"5.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>independentParameter</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"p2\" valueReference=\"1\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"9.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>dependentParameter</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"i1\" valueReference=\"268435458\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Integer start=\"1\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>independentParameter</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"i2\" valueReference=\"268435459\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Integer start=\"2\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>dependentParameter</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"b1\" valueReference=\"536870916\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Boolean start=\"true\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>independentParameter</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"b2\" valueReference=\"536870917\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Boolean start=\"false\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>independentParameter</VariableCategory>
+		</ScalarVariable>")})));
 
-	model XMLCodeGenTest3
-	
+	parameter Real p1 = 5;
+	parameter Real p2 = p1+4;
+	parameter Integer i1 = 1;
+	parameter Integer i2 = i1+1;
+	parameter Boolean b1 = true;
+	parameter Boolean b2 = false;
+	equation		
+end XMLCodeGenTest2;
+
+	model XMLCodeGenTest3	
 		parameter Real p1 = 5;
 		parameter Real p2 = p1+4;
 		parameter Real p3 = p2-1;

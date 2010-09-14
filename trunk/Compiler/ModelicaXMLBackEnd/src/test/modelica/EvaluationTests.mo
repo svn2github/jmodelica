@@ -27,7 +27,7 @@ model VectorMul
          generatedCode="
 
 		<ScalarVariable name=\"n\" valueReference=\"268435463\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
-			<Integer start=\"0\" />
+			<Integer start=\"3\" />
 			<isLinear>true</isLinear>
 			<VariableCategory>independentParameter</VariableCategory>
 		</ScalarVariable>
@@ -71,6 +71,7 @@ model VectorMul
 			<isLinear>true</isLinear>
 			<VariableCategory>algebraic</VariableCategory>
 		</ScalarVariable>")})));
+
 
 	parameter Integer n = 3;
 	parameter Real x[n] = 1:n;
@@ -224,13 +225,14 @@ model FunctionEval6
          description="Constant evaluation of functions: array output",
          template="$XML_variables$",
          generatedCode="
+
 		<ScalarVariable name=\"x[1]\" valueReference=\"0\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
-			<Real relativeQuantity=\"false\" start=\"0.0\" />
+			<Real relativeQuantity=\"false\" start=\"1.0\" />
 			<isLinear>true</isLinear>
 			<VariableCategory>independentParameter</VariableCategory>
 		</ScalarVariable>
 		<ScalarVariable name=\"x[2]\" valueReference=\"1\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
-			<Real relativeQuantity=\"false\" start=\"0.0\" />
+			<Real relativeQuantity=\"false\" start=\"2.0\" />
 			<isLinear>true</isLinear>
 			<VariableCategory>independentParameter</VariableCategory>
 		</ScalarVariable>
@@ -253,8 +255,7 @@ model FunctionEval6
 			<Real relativeQuantity=\"false\" start=\"2.0\" />
 			<isLinear>true</isLinear>
 			<VariableCategory>dependentParameter</VariableCategory>
-		</ScalarVariable>
-")})));
+		</ScalarVariable>")})));
 
 	parameter Real x[2] = {1, 2};
 	parameter Real y[2] = f(x);
@@ -275,13 +276,14 @@ model FunctionEval7
          description="Constant evaluation of functions: array output, unknown size",
          template="$XML_variables$",
          generatedCode="
+
 		<ScalarVariable name=\"x[1]\" valueReference=\"0\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
-			<Real relativeQuantity=\"false\" start=\"0.0\" />
+			<Real relativeQuantity=\"false\" start=\"1.0\" />
 			<isLinear>true</isLinear>
 			<VariableCategory>independentParameter</VariableCategory>
 		</ScalarVariable>
 		<ScalarVariable name=\"x[2]\" valueReference=\"1\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
-			<Real relativeQuantity=\"false\" start=\"0.0\" />
+			<Real relativeQuantity=\"false\" start=\"2.0\" />
 			<isLinear>true</isLinear>
 			<VariableCategory>independentParameter</VariableCategory>
 		</ScalarVariable>
@@ -304,8 +306,7 @@ model FunctionEval7
 			<Real relativeQuantity=\"false\" start=\"2.0\" />
 			<isLinear>true</isLinear>
 			<VariableCategory>dependentParameter</VariableCategory>
-		</ScalarVariable>
-")})));
+		</ScalarVariable>")})));
 
 	parameter Real x[2] = {1, 2};
 	parameter Real y[2] = f(x);
@@ -427,7 +428,7 @@ model FunctionEval11
 			<VariableCategory>dependentParameter</VariableCategory>
 		</ScalarVariable>
 		<ScalarVariable name=\"y\" valueReference=\"0\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
-			<Real relativeQuantity=\"false\" start=\"0.0\" />
+			<Real relativeQuantity=\"false\" start=\"5.0\" />
 			<isLinear>true</isLinear>
 			<VariableCategory>independentParameter</VariableCategory>
 		</ScalarVariable>")})));
