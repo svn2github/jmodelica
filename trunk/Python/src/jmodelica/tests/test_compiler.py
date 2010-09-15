@@ -27,7 +27,6 @@ import nose.tools
 
 from jmodelica.tests import testattr
 from jmodelica.tests import get_files_path
-
 from jmodelica.compiler import ModelicaCompiler
 from jmodelica.compiler import OptimicaCompiler
 import jmodelica as jm
@@ -60,7 +59,7 @@ class Test_Compiler:
         self.fpath_mc = os.path.join(get_files_path(), 'Modelica', 'Pendulum_pack_no_opt.mo')
         self.cpath_mc = "Pendulum_pack.Pendulum"
 
-        self.fpath_oc = os.path.join(get_files_path(), 'Modelica', 'Pendulum_pack.mo')
+        self.fpath_oc = os.path.join(get_files_path(), 'Modelica', 'Pendulum_pack.mop')
         self.cpath_oc = "Pendulum_pack.Pendulum_Opt"
 
     @testattr(stddist = True)

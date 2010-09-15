@@ -18,49 +18,44 @@
 # Import library for path manipulations
 import os.path
 
-# Import the JModelica.org Python packages
-from jmodelica import jmi
-from jmodelica.compiler import OptimicaCompiler
-from jmodelica import initialize
-
 # Import numerical libraries
 import numpy as N
 import matplotlib.pyplot as plt
-
 import scipy.integrate as int
+
+# Import the JModelica.org Python packages
+from jmodelica.jmi import compile_jmu
+from jmodelica.jmi import JMUModel
 
 def run_demo(with_plots=True):
     """Static calibration of the quad tank model."""
 
-    oc = OptimicaCompiler()
-
     curr_dir = os.path.dirname(os.path.abspath(__file__));
     
-    oc.compile_model("QuadTank_pack.QuadTank_Static",
-                     curr_dir+"/files/QuadTank.mo",
-                     target='ipopt')
+    jmu_name = compile_jmu("QuadTank_pack.QuadTank_Static", 
+        curr_dir+"/files/QuadTank.mop")
 
     # Load static calibration model
-    qt_static=jmi.JMUModel("QuadTank_pack_QuadTank_Static")
+    qt_static=JMUModel(jmu_name)
 
     # Set control inputs
-    qt_static.set_value("u1",2.5)
-    qt_static.set_value("u2",2.5)
+    qt_static.set("u1",2.5)
+    qt_static.set("u2",2.5)
 
     # Save nominal values
-    a1_nom = qt_static.get_value("a1")
-    a2_nom = qt_static.get_value("a2")
+    a1_nom = qt_static.get("a1")
+    a2_nom = qt_static.get("a2")
 
-    init_res = initialize(qt_static, alg_args={'stat':1})
+    init_res = qt_static.initialize(alg_args={'stat':1})
 
     print "Optimal parameter values:"
-    print "a1: %2.2e (nominal: %2.2e)" % (qt_static.get_value("a1"),a1_nom)
-    print "a2: %2.2e (nominal: %2.2e)" % (qt_static.get_value("a2"),a2_nom)
+    print "a1: %2.2e (nominal: %2.2e)" % (qt_static.get("a1"),a1_nom)
+    print "a2: %2.2e (nominal: %2.2e)" % (qt_static.get("a2"),a2_nom)
 
-    assert N.abs(qt_static.get_value("a1") - 7.95797110936e-06) < 1e-3, \
+    assert N.abs(qt_static.get("a1") - 7.95797110936e-06) < 1e-3, \
            "Wrong value of parameter a1 function in quadtank_static_opt.py"  
 
-    assert N.abs(qt_static.get_value("a2") - 7.73425542448e-06) < 1e-3, \
+    assert N.abs(qt_static.get("a2") - 7.73425542448e-06) < 1e-3, \
            "Wrong value of parameter a2 function in quadtank_static_opt.py"  
 
     if __name__ == "__main__":

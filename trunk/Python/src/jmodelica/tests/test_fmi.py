@@ -27,7 +27,7 @@ import sys as S
 from jmodelica.tests import testattr
 from jmodelica.tests import get_files_path
 from jmodelica.fmi import *
-
+from jmodelica.core import unzip_unit
 path_to_fmus = O.path.join(get_files_path(), 'FMUs')
 
 @testattr(fmi = True)
@@ -41,7 +41,7 @@ def test_unzip():
     fmu = 'bouncingBall.fmu'
     
     #Unzip FMU
-    tempnames = unzip_FMU(archive=fmu, path=path_to_fmus)
+    tempnames = unzip_unit(archive=fmu, path=path_to_fmus)
     tempdll = tempnames[0]
     tempxml = tempnames[1]
     modelname = tempnames[2]
@@ -55,13 +55,13 @@ def test_unzip():
     assert tempxml.endswith('.xml')
     assert modelname == 'bouncingBall'
     
-    nose.tools.assert_raises(FMUException,unzip_FMU,'Coupled')
+    nose.tools.assert_raises(IOError,unzip_unit,'Coupled')
     
     #FMU
     fmu = 'dq.fmu'
     
     #Unzip FMU
-    tempnames = unzip_FMU(archive=fmu, path=path_to_fmus)
+    tempnames = unzip_unit(archive=fmu, path=path_to_fmus)
     tempdll = tempnames[0]
     tempxml = tempnames[1]
     modelname = tempnames[2]
@@ -119,6 +119,11 @@ class Test_FMI:
         """
         const = self._bounce.get_real([3,4])
         
+        nose.tools.assert_almost_equal(const[0],-9.81000000)
+        nose.tools.assert_almost_equal(const[1],0.70000000)
+        
+        const = self._bounce.get(['der(v)','e'])
+
         nose.tools.assert_almost_equal(const[0],-9.81000000)
         nose.tools.assert_almost_equal(const[1],0.70000000)
     

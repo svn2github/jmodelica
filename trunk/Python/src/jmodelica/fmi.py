@@ -1,6 +1,6 @@
+#!/usr/bin/env python 
 # -*- coding: utf-8 -*-
-"""Module containing the FMI interface Python wrappers.
-"""
+
 #    Copyright (C) 2009 Modelon AB
 #
 #    This program is free software: you can redistribute it and/or modify
@@ -14,106 +14,27 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
+"""Module containing the FMI interface Python wrappers."""
 
 import sys
 import jmodelica.jmi
 from jmodelica import xmlparser
 import os
-import tempfile
+
 import ctypes as C
 import numpy as N
 from ctypes.util import find_library
-import platform as PL
 import numpy.ctypeslib as Nct
-from zipfile import ZipFile
+import tempfile
 from lxml import etree
 from operator import itemgetter
 import warnings
-
-from jmodelica.core import BaseModel
+from jmodelica.core import BaseModel, unzip_unit
 
 class FMUException(Exception):
     """An FMU exception."""
     pass
 
-
-    
-def unzip_FMU(archive, path='.'):
-    """
-    Unzip the FMU.
-    """
-
-    try:
-        archive = ZipFile(os.path.join(path,archive))
-    except IOError:
-        raise FMUException('Could not locate the FMU.')
-    
-    dir = ['binaries','sources']
-    
-    if sys.platform == 'win32':
-        platform = 'win'
-        suffix = '.dll'
-    elif sys.platform == 'darwin':
-        platform = 'darwin'
-        suffix = '.dylib'
-    else:
-        platform = 'linux'
-        suffix = '.so'
-    
-    if PL.architecture()[0].startswith('32'):
-        platform += '32'
-    else:
-        platform += '64'
-    
-    #if platform == 'win32' or platform == 'win64':
-    #    suffix = '.dll'
-    #elif platform == 'linux32' or platform == 'linux64':
-    #    suffix = '.so'
-    #else: 
-    #    suffix = '.dylib'
-    
-    #Extracting the XML
-    for file in archive.filelist:
-        if 'modelDescription.xml' in file.filename:
-            
-            data = archive.read(file) #Reading the file
-
-            fhandle, tempxmlname = tempfile.mkstemp(suffix='.xml') #Creating temp file
-            os.close(fhandle)
-            fout = open(tempxmlname, 'w') #Writing to the temp file
-            fout.write(data)
-            fout.close()
-            break
-    else:
-        raise FMUException('Could not find modelDescription.xml in the FMU.')
-    # --
-    
-    #Extrating the binary
-    
-    found_files = [] #Found files
-    
-    for file in archive.filelist: #Looping over the archive to find correct binary
-        if dir[0] in file.filename and platform in file.filename and file.filename.endswith(suffix): #Binary directory found
-            found_files.append(file)
-    
-    if found_files:
-        #Unzip
-        data = archive.read(found_files[0]) #Reading the first found dll
-        
-        modelname = found_files[0].filename.split('/')[-1][:-len(suffix)]
-        
-        fhandle, tempdllname = tempfile.mkstemp(suffix=suffix)
-        os.close(fhandle)
-        fout = open(tempdllname, 'w+b')
-        fout.write(data)
-        fout.close()
-        
-        return [tempdllname.split(os.sep)[-1], tempxmlname.split(os.sep)[-1], modelname]
-
-    else:
-        raise FMUException('Could not find binaries for your platform.')
-        return False
 
 class FMUModel(BaseModel):
     """
@@ -137,7 +58,7 @@ class FMUModel(BaseModel):
 
             
         #Create temp binary
-        self._tempnames = unzip_FMU(archive=fmu, path=path)
+        self._tempnames = unzip_unit(archive=fmu, path=path)
         self._tempdll = self._tempnames[0]
         self._tempxml = self._tempnames[1]
         self._modelname = self._tempnames[2]
@@ -1313,6 +1234,90 @@ class FMUModel(BaseModel):
                 
         """
         return self._log 
+    
+    def simulate(self, 
+                 algorithm='AssimuloFMIAlg', 
+                 alg_args={}, 
+                 solver_args={}):
+        """ Compact function for model simulation.
+        
+        The simulation method depends on which algorithm is used, this can be set 
+        with the function argument 'algorithm'. Arguments for the algorithm 
+        and solver are passed as dicts. Which arguments that are valid 
+        depends on which algorithm is used, see the algorithm implementation 
+        in algorithm_drivers.py for details.
+        
+        The default algorithm for this function is AssimuloFMIAlg. 
+        
+        Parameters::
+        
+            algorithm --
+                The algorithm which will be used for the simulation is 
+                specified by passing the algorithm class in this argument. 
+                The algorithm class can be any class which implements the 
+                abstract class AlgorithmBase (found in algorithm_drivers.py). 
+                In this way it is possible to write own algorithms and use 
+                them with this function.
+                Default: AssimuloFMIAlg
+            alg_args --
+                All arguments for the chosen algorithm should be listed in 
+                this dict. Valid arguments depend on the algorithm chosen, 
+                see algorithm implementation in algorithm_drivers.py for 
+                details.
+                Default: empty dict
+            solver_args --
+                All arguments for the chosen solver should be listed in this 
+                dict. Valid arguments depend on the chosen algorithm and 
+                possibly which solver has been selected for the algorithm. 
+                See algorithm implementation in algorithm_drivers.py for 
+                details.
+                Default: empty dict
+        
+        Returns::
+        
+            Result object, subclass of algorithm_drivers.ResultBase.
+        
+        """
+        return self._exec_algorithm(algorithm,
+                               alg_args,
+                               solver_args)
+    
+    def _set(self, variable_name, value):
+        """
+        Helper method to set, see docstring on set.
+        """
+        ref = self.get_valueref(variable_name)
+        type = self.get_data_type(variable_name)
+        
+        if type == 0:  #REAL
+            self.set_real([ref], [value])
+        elif type == 1: #INTEGER
+            self.set_integer([ref], [value])
+        elif type == 2: #STRING
+            self.set_string([ref], [value])
+        elif type == 3: #BOOLEAN
+            self.set_boolean([ref], [value])
+        else:
+            raise FMUException('Type not supported.')
+        
+    
+    def _get(self, variable_name):
+        """
+        Helper method to get, see docstring on get.
+        """
+        ref = self.get_valueref(variable_name)
+        type = self.get_data_type(variable_name)
+        
+        if type == 0:  #REAL
+            return self.get_real([ref])
+        elif type == 1: #INTEGER
+            return self.get_integer([ref])
+        elif type == 2: #STRING
+            return self.get_string([ref])
+        elif type == 3: #BOOLEAN
+            return self.get_boolean([ref])
+        else:
+            raise FMUException('Type not supported.')
     
     #XML PART
     def get_variable_descriptions(self, include_alias=True):

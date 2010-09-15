@@ -19,9 +19,10 @@ import os
 import numpy as N
 import pylab as p
 
-from jmodelica import simulate
-from jmodelica import initialize
-from jmodelica.linearization import *
+from jmodelica.jmi import compile_jmu
+from jmodelica.jmi import JMUModel
+from jmodelica.linearization import linearize_dae
+from jmodelica.linearization import linear_dae_to_ode
 
 int = N.int32
 N.int = N.int32
@@ -38,15 +39,20 @@ def run_demo(with_plots=True):
     model_name = 'RLC_Circuit'
     mofile = curr_dir+'/files/RLC_Circuit.mo'
     
-    init_res = initialize(model_name, mofile)
+    jmu_name = compile_jmu(model_name, mofile)
+    model = JMUModel(jmu_name)
+    init_res = model.initialize()
 
     (E_dae,A_dae,B_dae,F_dae,g_dae,state_names,input_names,algebraic_names, \
      dx0,x0,u0,w0,t0) = linearize_dae(init_res.model)
     
     (A_ode,B_ode,g_ode,H_ode,M_ode,q_ode) = linear_dae_to_ode(E_dae,A_dae,B_dae,F_dae,g_dae)
 
-    sim_res1 = simulate("RLC_Circuit",mofile)
-    sim_res2 = simulate("RLC_Circuit_Linearized",mofile)
+    sim_res1 = model.simulate()
+    
+    jmu_name = compile_jmu("RLC_Circuit_Linearized",mofile)
+    lin_model = JMUModel(jmu_name)
+    sim_res2 = lin_model.simulate()
     
     res1 = sim_res1.result_data
     c_v_1 = res1.get_variable_data('capacitor.v')

@@ -19,12 +19,8 @@
 import os.path
 
 # Import the JModelica.org Python packages
-import jmodelica
-import jmodelica.jmi as jmi
-from jmodelica.compiler import OptimicaCompiler
-from jmodelica.compiler import ModelicaCompiler
-from jmodelica import initialize
-from jmodelica import optimize
+from jmodelica.jmi import compile_jmu
+from jmodelica.jmi import JMUModel
 
 # Import numerical libraries
 import numpy as N
@@ -55,31 +51,28 @@ def run_demo(with_plots=True):
        the important variables are plotted."""
     
     curr_dir = os.path.dirname(os.path.abspath(__file__));
-
-    # Create a Modelica compiler instance
-    mc = ModelicaCompiler()
     
     # Compile the stationary initialization model into a DLL
-    mc.compile_model("CSTRLib.Components.Two_CSTRs_stat_init", 
-					curr_dir+"/files/CSTRLib.mo", target='ipopt')
+    jmu_name = compile_jmu("CSTRLib.Components.Two_CSTRs_stat_init", 
+        curr_dir+"/files/CSTRLib.mo")
 
-    # Load a model instance into Python
-    init_model = jmi.JMUModel("CSTRLib_Components_Two_CSTRs_stat_init")
+    # Load a JMU model instance
+    init_model = JMUModel(jmu_name)
     
     # Set inputs for Stationary point A
     u1_0_A = 1
     u2_0_A = 1
-    init_model.set_value('u1',u1_0_A)
-    init_model.set_value('u2',u2_0_A)
+    init_model.set('u1',u1_0_A)
+    init_model.set('u2',u2_0_A)
     
     # Solve the DAE initialization system with Ipopt
-    init_result = initialize(init_model)        
+    init_result = init_model.initialize()
     
     # Store stationary point A
-    CA1_0_A = init_model.get_value('CA1')
-    CA2_0_A = init_model.get_value('CA2')
-    T1_0_A = init_model.get_value('T1')
-    T2_0_A = init_model.get_value('T2')
+    CA1_0_A = init_model.get('CA1')
+    CA2_0_A = init_model.get('CA2')
+    T1_0_A = init_model.get('T1')
+    T2_0_A = init_model.get('T2')
     
     # Print some data for stationary point A
     print(' *** Stationary point A ***')
@@ -90,17 +83,17 @@ def run_demo(with_plots=True):
     # Set inputs for stationary point B
     u1_0_B = 1.1
     u2_0_B = 0.9
-    init_model.set_value('u1',u1_0_B)
-    init_model.set_value('u2',u2_0_B)
+    init_model.set('u1',u1_0_B)
+    init_model.set('u2',u2_0_B)
     
     # Solve the DAE initialization system with Ipopt
-    init_result = initialize(init_model)
+    init_result = init_model.initialize()
    
     # Stationary point B
-    CA1_0_B = init_model.get_value('CA1')
-    CA2_0_B = init_model.get_value('CA2')
-    T1_0_B = init_model.get_value('T1')
-    T2_0_B = init_model.get_value('T2')
+    CA1_0_B = init_model.get('CA1')
+    CA2_0_B = init_model.get('CA2')
+    T1_0_B = init_model.get('T1')
+    T2_0_B = init_model.get('T2')
 
     # Print some data for stationary point B
     print(' *** Stationary point B ***')
@@ -110,39 +103,35 @@ def run_demo(with_plots=True):
     
     ## Set up and solve an optimal control problem. 
 
-    # Create an OptimicaCompiler instance
-    oc = OptimicaCompiler()
-    oc.set_log_level('INFO')
     # Compile the Model
-    oc.compile_model("CSTR2_Opt", 
-                     (curr_dir+"/files/CSTRLib.mo", curr_dir+"/files/CSTR2_Opt.mo"),
-                     target='ipopt')
+    jmu_name = compile_jmu("CSTR2_Opt", 
+        [curr_dir+"/files/CSTRLib.mo", curr_dir+"/files/CSTR2_Opt.mop"],
+        compiler_options={'enable_variable_scaling':True,'index_reduction':True})
 
     # Load the dynamic library and XML data
-    model = jmi.JMUModel("CSTR2_Opt")
+    model = JMUModel(jmu_name)
 
     # Initialize the model with parameters
 
     # Initialize the model to stationary point A
-    model.set_value('cstr.two_CSTRs_Series.CA1_0',CA1_0_A)
-    model.set_value('cstr.two_CSTRs_Series.CA2_0',CA2_0_A)
-    model.set_value('cstr.two_CSTRs_Series.T1_0',T1_0_A)
-    model.set_value('cstr.two_CSTRs_Series.T2_0',T2_0_A)
+    model.set('cstr.two_CSTRs_Series.CA1_0',CA1_0_A)
+    model.set('cstr.two_CSTRs_Series.CA2_0',CA2_0_A)
+    model.set('cstr.two_CSTRs_Series.T1_0',T1_0_A)
+    model.set('cstr.two_CSTRs_Series.T2_0',T2_0_A)
     
     # Set the target values to stationary point B
-    model.set_value('u1_ref',u1_0_B)
-    model.set_value('u2_ref',u2_0_B)
-    model.set_value('CA1_ref',CA1_0_B)
-    model.set_value('CA2_ref',CA2_0_B)
+    model.set('u1_ref',u1_0_B)
+    model.set('u2_ref',u2_0_B)
+    model.set('CA1_ref',CA1_0_B)
+    model.set('CA2_ref',CA2_0_B)
     
     # Initialize the optimization mesh
     n_e = 50 # Number of elements 
     hs = N.ones(n_e)*1./n_e # Equidistant points
     n_cp = 3; # Number of collocation points in each element
     
-    opt_res = optimize(model, compiler_options={'enable_variable_scaling':True,'index_reduction':True},
-                       alg_args={'n_e':n_e, 'hs':hs, 'n_cp':n_cp,'blocking_factors':2*N.ones(n_e/2,dtype=N.int)},
-                       solver_args={'tol':1e-4})
+    opt_res = model.optimize(alg_args={'n_e':n_e, 'hs':hs, 'n_cp':n_cp,'blocking_factors':2*N.ones(n_e/2,dtype=N.int)},
+        solver_args={'tol':1e-4})
         
     # Extract variable profiles
     res = opt_res.result_data

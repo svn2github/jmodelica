@@ -18,32 +18,26 @@
 # Import library for path manipulations
 import os.path
 
-# Import the JModelica.org Python packages
-import jmodelica
-import jmodelica.jmi as jmi
-from jmodelica.compiler import OptimicaCompiler
-from jmodelica import optimize
-
 # Import numerical libraries
 import numpy as N
 import matplotlib.pyplot as plt
 import scipy.integrate as integr
 
+# Import the JModelica.org Python packages
+from jmodelica.jmi import compile_jmu
+from jmodelica.jmi import JMUModel
+
 def run_demo(with_plots=True):
     """Optimal control of the quadruple tank process."""
 
-    oc = OptimicaCompiler()
-
     curr_dir = os.path.dirname(os.path.abspath(__file__));
     
-    # Compile the Optimica model first to C code and
-    # then to a dynamic library
-    oc.compile_model("QuadTank_pack.QuadTank_Opt",
-                     curr_dir+"/files/QuadTank.mo",
-                     target='ipopt')
+    # Compile the Optimica model to JMU
+    jmu_name = compile_jmu("QuadTank_pack.QuadTank_Opt", 
+        curr_dir+"/files/QuadTank.mop")
 
     # Load the dynamic library and XML data
-    qt=jmi.JMUModel("QuadTank_pack_QuadTank_Opt")
+    qt=JMUModel(jmu_name)
 
     # Define inputs for operating point A
     u_A = N.array([2.,2])
@@ -93,21 +87,21 @@ def run_demo(with_plots=True):
         plt.grid()
         plt.show()
     
-    qt.set_value("x1_0",x_A[0])
-    qt.set_value("x2_0",x_A[1])
-    qt.set_value("x3_0",x_A[2])
-    qt.set_value("x4_0",x_A[3])
+    qt.set("x1_0",x_A[0])
+    qt.set("x2_0",x_A[1])
+    qt.set("x3_0",x_A[2])
+    qt.set("x4_0",x_A[3])
 
-    qt.set_value("x1_r",x_B[0])
-    qt.set_value("x2_r",x_B[1])
-    qt.set_value("x3_r",x_B[2])
-    qt.set_value("x4_r",x_B[3])
+    qt.set("x1_r",x_B[0])
+    qt.set("x2_r",x_B[1])
+    qt.set("x3_r",x_B[2])
+    qt.set("x4_r",x_B[3])
 
-    qt.set_value("u1_r",u_B[0])
-    qt.set_value("u2_r",u_B[1])
+    qt.set("u1_r",u_B[0])
+    qt.set("u2_r",u_B[1])
 
     # Solve optimal control problem
-    opt_res = optimize(qt, solver_args={'max_iter':500})
+    opt_res = qt.optimize(solver_args={'max_iter':500})
 
     # Extract variable profiles
     res = opt_res.result_data

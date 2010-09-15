@@ -39,6 +39,9 @@ import platform as PL
 import xmlparser
 import io
 from jmodelica.core import BaseModel
+from jmodelica.core import unzip_unit
+from jmodelica.compiler import ModelicaCompiler
+from jmodelica.compiler import OptimicaCompiler
 
 int = N.int32
 N.int = N.int32
@@ -348,22 +351,29 @@ class JMUModel(BaseModel):
     
     """ High-level interface to a JMIModel. """
     
-    def __init__(self, libname, path ='.'):
+    def __init__(self, jmu_name, path ='.'):
         """ Create a jmi.JMUModel. 
         
-        Create a Model object. Load generated binary file, set default 
-        values from the model variables XML file, set dependent 
+        Create a JMU Model object. Load generated binary file, set 
+        default values from the model variables XML file, set dependent 
         parameters and initialize AD.
         
         Parameters::
         
-            libname --
-                Name of binary file.
+            jmu_name --
+                Name of JMU file.
             path --
-                Path to the binary on the file system.
+                Path to the JMU on the file system.
                 Default: Current directory.
         """
-        self.jmimodel = JMIModel(libname, path)
+        # extract files from JMU
+        jmu_files = unzip_unit(jmu_name, path)
+        lib_name = jmu_files[0]
+        self._xml_name = jmu_files[1]
+        self._model_name = jmu_files[2]
+        self._xml_values_name = jmu_files[3]
+        
+        self.jmimodel = JMIModel(lib_name)
 
         # sizes of all arrays
         self._n_real_ci = ct.c_int()
@@ -429,9 +439,7 @@ class JMUModel(BaseModel):
         #n_p_opt set in _setDefaultValuesFromMetadata() -> _set_p_opt_indices()
         self._n_p_opt=0
         
-        self._path = os.path.abspath(path)
-        self._libname = libname
-        self._setDefaultValuesFromMetadata()        
+        self._setDefaultValuesFromMetadata()
         self.jmimodel.initAD()
         self._set_dependent_parameters()
 
@@ -470,29 +478,25 @@ class JMUModel(BaseModel):
     def _setDefaultValuesFromMetadata(self, libname=None, path=None):
         """ Load metadata saved in XML files.
         
-        Meta data can be things like time points, initial states, initial cost
-        etc.
+        Meta data can be things like time points, initial states, 
+        initial cost etc.
         
         """
-        if libname is None:
-            libname = self._libname
-        if path is None:
-            path = self._path
-        
-        # set start attributes
-        xml_file=libname+'.xml' 
-        # assumes libname is name of model and xmlfile is located in the same dir as the dll
-        self._set_XMLDoc(xmlparser.ModelDescription(os.path.join(path,xml_file)))
+        # xml file has been unzipped from JMU and is located in the 
+        # tempdir
+        self._set_XMLDoc(xmlparser.ModelDescription(os.path.join(
+            tempfile.gettempdir(),self._xml_name)))
         
         self._set_scaling_factors()
         self._set_start_attributes()
 
         # set independent parameter values
-        xml_values_file = libname+'_values.xml'
-        self._set_XMLValuesDoc(xmlparser.XMLValuesDoc(os.path.join(path,xml_values_file)))
+        self._set_XMLValuesDoc(xmlparser.XMLValuesDoc(os.path.join(
+            tempfile.gettempdir(),self._xml_values_name)))
         self._set_iparam_values()
 
-        # set optimizataion interval, time points and optimization indices
+        # set optimizataion interval, time points and optimization 
+        # indices
         if self._is_optimica():
             self._set_opt_interval()
             self._set_timepoints()
@@ -500,14 +504,10 @@ class JMUModel(BaseModel):
         
     def _is_optimica(self):
         """ Find out if model is compiled with OptimicaCompiler. """
-        return self._get_XMLDoc().get_opt_starttime()!=None        
+        return self._get_XMLDoc().get_opt_starttime()!=None
 
     def _set_scaling_factors(self):
-        """ Load metadata saved in XML files.
-        
-        Meta data can be things like time points, initial states, 
-        initial cost etc.
-        
+        """ Set scaling factors from XML file.
         """
         xmldoc = self._get_XMLDoc()
         nominal_attr = xmldoc.get_variable_nominal_attributes(
@@ -2008,7 +2008,151 @@ class JMUModel(BaseModel):
         self.jmimodel._z[:] = z
         
     z = property(get_z, set_z)
-
+    
+    def initialize(self,
+                   algorithm='IpoptInitializationAlg', 
+                   alg_args={}, 
+                   solver_args={}):
+        """ Compact function for model initialization.
+            
+        The initialization method depends on which algorithm is used, this 
+        can be set with the function argument 'algorithm'. Arguments for the 
+        algorithm and solver are passed as dicts. Which arguments that are 
+        valid depends on which algorithm is used, see the algorithm 
+        implementation in algorithm_drivers.py for details.
+            
+        The default algorithm for this function is IpoptInitializationAlg. 
+            
+        Parameters::
+            
+            algorithm --
+                The algorithm which will be used for the initialization is 
+                specified by passing the algorithm class in this argument. 
+                The algorithm class can be any class which implements the 
+                abstract class AlgorithmBase (found in algorithm_drivers.py). 
+                In this way it is possible to write own algorithms and use 
+                them with this function.
+                Default: IpoptInitializationAlg
+            alg_args --
+                All arguments for the chosen algorithm should be listed in 
+                this dict. Valid arguments depend on the algorithm chosen, 
+                see algorithm implementation in algorithm_drivers.py for 
+                details.      
+                Default: empty dict
+            solver_args --
+                All arguments for the chosen solver should be listed in this 
+                dict. Valid arguments depend on the chosen algorithm and 
+                possibly which solver has been selected for the algorithm. 
+                See algorithm implementation in algorithm_drivers.py for 
+                details.
+                Default: empty dict
+                    
+        Returns::
+            
+            Result object, subclass of algorithm_drivers.ResultBase.
+            
+        """
+        return self._exec_algorithm(algorithm,
+                                alg_args,
+                                solver_args)
+        
+    def simulate(self, 
+                algorithm='AssimuloAlg', 
+                alg_args={}, 
+                solver_args={}):
+        """ Compact function for model simulation.
+            
+        The simulation method depends on which algorithm is used, this can be set 
+        with the function argument 'algorithm'. Arguments for the algorithm 
+        and solver are passed as dicts. Which arguments that are valid 
+        depends on which algorithm is used, see the algorithm implementation 
+        in algorithm_drivers.py for details.
+            
+        The default algorithm for this function is AssimuloAlg. 
+            
+        Parameters::
+            
+            algorithm --
+                The algorithm which will be used for the simulation is 
+                specified by passing the algorithm class in this argument. 
+                The algorithm class can be any class which implements the 
+                abstract class AlgorithmBase (found in algorithm_drivers.py). 
+                In this way it is possible to write own algorithms and use 
+                them with this function.
+                Default: AssimuloAlg
+            alg_args --
+                All arguments for the chosen algorithm should be listed in 
+                this dict. Valid arguments depend on the algorithm chosen, 
+                see algorithm implementation in algorithm_drivers.py for 
+                details.
+                Default: empty dict
+            solver_args --
+                All arguments for the chosen solver should be listed in this 
+                dict. Valid arguments depend on the chosen algorithm and 
+                possibly which solver has been selected for the algorithm. 
+                See algorithm implementation in algorithm_drivers.py for 
+                details.
+                Default: empty dict
+            
+        Returns::
+            
+            Result object, subclass of algorithm_drivers.ResultBase.
+            
+        """
+        return self._exec_algorithm(algorithm,
+                                   alg_args,
+                                   solver_args)
+                               
+        
+    def optimize(self, 
+            algorithm='CollocationLagrangePolynomialsAlg', 
+            alg_args={}, 
+            solver_args={}):
+        """ Compact function for model optimization.
+            
+        The optimization method depends on which algorithm is used, this can 
+        be set with the function argument 'algorithm'. Arguments for the 
+        algorithm and solver are passed as dicts. Which arguments that are 
+        valid depends on which algorithm is used, see the algorithm 
+        implementation in algorithm_drivers.py for details.
+            
+        The default algorithm for this function is 
+        CollocationLagrangePolynomialsAlg. 
+            
+        Parameters::
+            
+            algorithm --
+                The algorithm which will be used for the simulation is 
+                specified by passing the algorithm class in this argument. 
+                The algorithm class can be any class which implements the 
+                abstract class AlgorithmBase (found in algorithm_drivers.py). 
+                In this way it is possible to write own algorithms and use 
+                them with this function.
+                Default: CollocationLagrangePolynomialsAlg
+            alg_args --
+                All arguments for the chosen algorithm should be listed in 
+                this dict. Valid arguments depend on the algorithm chosen, 
+                see algorithm implementation in algorithm_drivers.py for 
+                details.      
+                Default: empty dict
+            solver_args --
+                All arguments for the chosen solver should be listed in this 
+                dict. Valid arguments depend on the chosen algorithm and 
+                possibly which solver has been selected for the algorithm. 
+                See algorithm implementation in algorithm_drivers.py for 
+                details.
+                Default: empty dict
+            
+        Returns::
+            
+            Result object, subclass of algorithm_drivers.ResultBase.
+            
+            
+        """
+        return self._exec_algorithm(algorithm,
+                                alg_args,
+                                solver_args)
+    
     def _get_XMLDoc(self):
         """ Get the XMLDoc for the model variables XML file. """
         return self._xmldoc
@@ -2035,7 +2179,8 @@ class JMUModel(BaseModel):
         """
         
         xmldoc = self._get_XMLDoc()
-        start_attr = xmldoc.get_variable_start_attributes(include_alias=False)
+        start_attr = xmldoc.get_variable_start_attributes(
+            include_alias=False)
         
         #Real variables vector
         z = self.get_z()
@@ -2062,7 +2207,7 @@ class JMUModel(BaseModel):
                     # Primitive type is String
                     pass
                 else:
-                    "Unknown type"
+                    raise JMIException("Unknown type")
     
     def _set_iparam_values(self, xml_values_doc=None):
         """ Set the values for the independent parameters. """
@@ -2077,7 +2222,8 @@ class JMUModel(BaseModel):
         for name in values.keys():
             value = values.get(name)
             #value_ref = variables.get(name)
-            (i, ptype) = _translate_value_ref(xmldoc.get_value_reference(name))
+            (i, ptype) = _translate_value_ref(
+                xmldoc.get_value_reference(name))
 
             if(ptype == 0):
                 # Primitive type is Real
@@ -2095,7 +2241,7 @@ class JMUModel(BaseModel):
                 # Primitive type is String
                 pass
             else:
-                JMIException("Unknown type")
+                raise JMIException("Unknown type")
             
     def _set_opt_interval(self):
         """ Set the optimization intervals (if Optimica). """
@@ -2147,10 +2293,12 @@ class JMUModel(BaseModel):
         
             The name of the model.
         """
-        return self._libname
+        return self._model_name
 
-    def get_value(self, name):
-        """ Get the value of a variable or parameter given the name.
+    def _get(self, name):
+        """
+        Helper method to model.get. Get the value of a variable or 
+        parameter given the name.
         
         Parameters::
         
@@ -2183,30 +2331,7 @@ class JMUModel(BaseModel):
             not be found in model.")
         return value
         
-    def get_values(self, names):
-        """ Get the values for a list of variables or parameters given a 
-        list of variable names.
-        
-        Parameters::
-        
-            names -- 
-                The list of names of variables or parameters
-            
-        Returns::
-        
-            A list of values corresponding to the variables/parameters 
-            passed as argument.
-            
-        Raises::
-        
-            Exception if any of the names is not present in model.
-        """
-        values = []
-        for name in names:
-            values.append(self.get_value(name))
-        return values
-        
-    def set_value(self, name, value, recompute_dependent_parameters=True):
+    def _set(self, name, value, recompute_dependent_parameters=True):
         """ Set the value of a parameter or variable given a name. If an 
         independent parameter is set, the dependent parameters are 
         recomputed if recompute_dependent_parameters is set to True.
@@ -2255,34 +2380,10 @@ class JMUModel(BaseModel):
             raise Exception("Parameter or variable "+name+" could not \
             be found in model.")
     
-    def set_values(self, names, values):
-        """ Set the values for a list parameters or variables. 
-
-        Parameters::
-        
-            names -- 
-                The names of the parameters or variables to set.
-            values -- 
-                The new values for parameters or variables in names.
-                
-        Raises::
-        
-            Exception if the number of names is not equal to the number 
-            of values or if any of the names can not be found in the 
-            model.
-        """
-        if len(names) != len(values):
-            raise Exception("Number of names and values must be the same.")
-        
-        for name, value in zip(names, values):
-            self.set_value(name, value)
-
-    
-    def load_parameters_from_XML(self, filename="", path="."):
+    def load_parameters_from_XML(self, filename=''):
         """ Reset the pi vector with values from the XML file created 
         when the model was compiled. If an XML file other than this 
-        should be used instead, set the filename and path (if no path is 
-        set file is assumed to be in the current directory) of the file 
+        should be used instead, set the filename of the file 
         to load.
         
         Parameters::
@@ -2290,50 +2391,46 @@ class JMUModel(BaseModel):
             filename -- 
                 The name of XML file that should be loaded.
                 Default: Empty string.
-            path -- 
-                The directory where XML file is located.
-                Default: Empty string.
         
         Raises::
         
             IOError if file could not be found.
         """
         if filename:
-                xml_values_name = os.path.join(path, filename)
+            if os.path.exists(filename):
+                self._set_XMLValuesDoc(xmlparser.XMLValuesDoc(filename))
+            else:
+                raise IOError("The file: "+filename+" could not be found.")
         else:
-            #load original xml
-            xml_values_name = os.path.join(path, self.get_name()+'_values.xml')
+            self._set_XMLValuesDoc(xmlparser.XMLValuesDoc(
+                os.path.join(tempfile.gettempdir(),self._xml_values_name)))
+            
+        self._set_iparam_values(self._get_XMLValuesDoc())
         
-        if os.path.exists(xml_values_name):
-            self._set_iparam_values(xmlparser.XMLValuesDoc(xml_values_name))
-        else:
-            raise IOError("The file: "+xml_values_name+" could not be found.")
-        
-    def write_parameters_to_XML(self, filename="", path="."):
+    def write_parameters_to_XML(self, filename=''):
         """ Write parameter values (real, integer, boolean supported) in 
         the pi vector to XML. The default behaviour is to overwrite the 
         XML file created when model was compiled. To write to a new file, 
-        set the file name and path (if no path is set file is assumed 
-        to be in the current directory) of the new file to write to. 
+        set the file name of the new file to write to. 
         
         Parameters::
         
             filename -- 
-                The filename of the XML file that should be loaded.
-                Default: Empty string.
-            path -- 
-                The directory where the XML file is located.
+                The filename of the XML file that the parameter vector 
+                should be written to.
                 Default: Empty string.
         """       
         # get xmldoc and z-vector
         xmldoc = self._get_XMLDoc()
         z = self.get_z()
         
-        # create new XMLValuesDoc from the xml values file
-        valuesfile = self.get_name()+'_values.xml'
-        xml_values_doc = xmlparser.XMLValuesDoc(valuesfile)        
+        # create temp XMLValuesDoc from the xml values file for writing 
+        # the new parameters to
+        temp_doc = xmlparser.XMLValuesDoc(os.path.join(
+            tempfile.gettempdir(),self._xml_values_name))
+        
         # get all parameter elements
-        root = xml_values_doc._doc.getroot()
+        root = temp_doc._doc.getroot()
         parameters = root.getchildren()
         
         for p in parameters:
@@ -2353,11 +2450,14 @@ class JMUModel(BaseModel):
             
         # finally, write to file
         if filename:
-            if not os.path.exists(path):
-                os.mkdir(path)
-            xml_values_doc._doc.write(os.path.join(path,filename))
+            # create directory if it does not exist
+            dir = os.path.dirname(filename)
+            if dir and not os.path.exists(dir):
+                os.mkdir(dir)
+            temp_doc._doc.write(filename)
         else:
-            xml_values_doc._doc.write(xml_values_doc._doc.docinfo.URL)
+            temp_doc._doc.write(os.path.join(tempfile.gettempdir(), 
+                self._xml_values_name))
             
     def get_aliases_for_variable(self, variable):
         """ Get a list of all alias variables belonging to the aliased 
@@ -2513,27 +2613,31 @@ class JMIModel(object):
     
     """ A JMI Model loaded from a binary file."""
     
-    def __init__(self, libname, path='.'):
+    def __init__(self, libname, path='.', is_jmu = True):
         """ Create a jmi.JMIModel object from a binary file."""
-                
-        # detect platform specific shared library file extension
-        suffix = ''
-        if sys.platform == 'win32':
-            suffix = '.dll'
-        elif sys.platform == 'darwin':
-            suffix = '.dylib'
-        else:
-            suffix = '.so'
 
-        # create temp dll
-        fhandle,self._tempfname = tempfile.mkstemp(suffix=suffix)
-        shutil.copyfile(path+os.sep+libname+suffix,self._tempfname)
-        os.close(fhandle)
-        fname = self._tempfname.split(os.sep)
-        fname = fname[len(fname)-1]
-        
-        #load temp dll
-        self._dll = load_DLL(fname,tempfile.gettempdir())
+        if is_jmu:
+            self._dll = load_DLL(libname, tempfile.gettempdir())
+            self._tempfname = libname
+        else:
+            # detect platform specific shared library file extension
+            suffix = ''
+            if sys.platform == 'win32':
+                suffix = '.dll'
+            elif sys.platform == 'darwin':
+                suffix = '.dylib'
+            else:
+                suffix = '.so'
+    
+            # create temp dll
+            fhandle,self._tempfname = tempfile.mkstemp(suffix=suffix)
+            shutil.copyfile(path+os.sep+libname+suffix,self._tempfname)
+            os.close(fhandle)
+            fname = self._tempfname.split(os.sep)
+            fname = fname[len(fname)-1]
+            
+            #load temp dll
+            self._dll = load_DLL(fname,tempfile.gettempdir())
 
         # save dll file name so that it can be deleted when python
         # exits if not before
@@ -5614,8 +5718,10 @@ class JMIModel(object):
             raise JMIException("Computing the number of columns and \
             non-zero elements failed.")
         return int(dHineq_n_cols.value), int(dHineq_n_nz.value)
+        
+    
 
-def jmu_name(class_name):
+def get_jmu_name(class_name):
     """
     Computes the JMU name from a class name.
     
@@ -5627,14 +5733,20 @@ def jmu_name(class_name):
     
         The JMU name (replaced dots with underscores)
     """
-    return class_name.replace('.','_')
+    return class_name.replace('.','_')+'.jmu'
 
 def package_JMU(class_name):
     """
-    Method that takes as input a class name and package all model related files into a JMU.
+    Method that takes as input a class name and package all model related 
+    files into a JMU.
+    
+    Parameters::
+    
+        class_name --
+            The name of the model
     """
     mName = class_name
-    mMangledName = class_name.replace('.','_') #The mangled name, replaces dots with underscores
+    mMangledName = class_name.replace('.','_')
     
     #Look for operating system and architecture
     if sys.platform == 'win32':
@@ -5656,17 +5768,23 @@ def package_JMU(class_name):
     file = zipfile.ZipFile(mMangledName+'.jmu', 'w') #Create the new archive
     try:
         #Write the xml file
-        file.write(mMangledName+'.xml', 'modelDescription.xml', zipfile.ZIP_DEFLATED)
+        file.write(mMangledName+'.xml', 'modelDescription.xml', 
+            zipfile.ZIP_DEFLATED)
         #Write the .c file
-        file.write(mMangledName+'.c','sources'+os.sep+mMangledName+'.c',zipfile.ZIP_DEFLATED)
+        file.write(mMangledName+'.c','sources'+os.sep+mMangledName+'.c',
+            zipfile.ZIP_DEFLATED)
         #Write the .mof file
-        file.write(mName+'.mof','resources'+os.sep+mName+'.mof',zipfile.ZIP_DEFLATED)
+        file.write(mName+'.mof','resources'+os.sep+mName+'.mof',
+            zipfile.ZIP_DEFLATED)
         #Write the transformed .mof file
-        file.write(mName+'_transformed.mof','resources'+os.sep+mName+'_transformed.mof',zipfile.ZIP_DEFLATED)
+        file.write(mName+'_transformed.mof','resources'+os.sep+mName+'_transformed.mof',
+            zipfile.ZIP_DEFLATED)
         #Write the parameter file
-        file.write(mMangledName+'_values.xml','resources'+os.sep+mMangledName+'_values.xml',zipfile.ZIP_DEFLATED)
+        file.write(mMangledName+'_values.xml','resources'+os.sep+mMangledName+'_values.xml',
+            zipfile.ZIP_DEFLATED)
         #Write the binary
-        file.write(mMangledName+suffix,'binaries'+os.sep+platform+os.sep+mMangledName+suffix, zipfile.ZIP_DEFLATED)
+        file.write(mMangledName+suffix,'binaries'+os.sep+platform+os.sep+mMangledName+suffix, 
+            zipfile.ZIP_DEFLATED)
     except OSError:
         raise JMIException('No such file or directory')
     finally:
@@ -5682,3 +5800,123 @@ def package_JMU(class_name):
         os.remove(mMangledName+suffix)        #Binary
     except OSError, msg:
         warnings.warn(msg)
+        
+def compile_jmu(class_name, file_name=[], compiler='modelica', 
+    target='ipopt', compiler_options={}):
+    """ Compile a Modelica or Optimica model to a JMU.
+    
+    A model class name must be passed, all other arguments have 
+    default values. The different scenarios are:
+    
+    * Only class_name is passed: 
+        - Default compiler is ModelicaCompiler.
+        - Class is assumed to be in MODELICAPATH.
+    
+    * class_name and file_name is passed:
+        - file_name can be a single file as a string or a list of 
+          file_names (strings).
+        - Default compiler is ModelicaCompiler but will switch to 
+          OptimicaCompiler if a .mop file is found in file_name.
+    
+    Library directories can be added to MODELICAPATH by listing them 
+    in a special compiler option 'extra_lib_dirs', for example:
+    
+        compiler_options = 
+            {'extra_lib_dirs':['c:\MyLibs\MyLib1','c:\MyLibs\MyLib2']}
+        
+    Other options for the compiler should also be listed in the 
+    compiler_options dict.
+    
+    The compiler target is 'ipopt' by default which means that 
+    libraries for AD and optimization/initialization algortihms will 
+    be available as well as the JMI. The other targets are:
+    
+    'model' - AD and JMI is included.
+    'algorithm' - AD and algorithm but no Ipopt linking.
+    'model_noad' - Only JMI, that is no AD interface. (Must 
+    currently be used when model includes external functions.)
+    
+    Parameters::
+    
+        class_name -- 
+            The name of the model class.
+        file_name -- 
+            Model file (string) or files (list of strings), can be 
+            both .mo or .mop files.
+            Default: Empty list.
+        compiler -- 
+            'modelica' or 'optimica' depending on whether a 
+            ModelicaCompiler or OptimicaCompiler should be used. 
+            Set this argument if default behaviour should be 
+            overridden.
+            Default: Depends on argument file_name.
+        target --
+            Compiler target. 'model', 'algorithm', 'ipopt' or 
+            'model_noad'.
+            Default: 'ipopt'
+        compiler_options --
+            Options for the compiler.
+            Default: Empty dict.
+            
+    Returns::
+    
+        Name of the JMU which has been created.
+    """
+    
+    if isinstance(file_name, str):
+        file_name = [file_name]
+        
+    # Detect file suffix - otherwise use the default = modelica
+    for f in file_name:
+        basename, ext = os.path.splitext(f)
+        if ext == '.mop':
+            compiler = 'optimica'
+            break
+    
+    comp = None
+    if compiler.lower() == 'modelica':
+        comp = ModelicaCompiler()
+    else:
+        comp = OptimicaCompiler()
+        
+    # set compiler options
+    for key, value in compiler_options.iteritems():
+        if isinstance(value, bool):
+            comp.set_boolean_option(key, value)
+        elif isinstance(value, str):
+            comp.set_string_option(key,value)
+        elif isinstance(value, int):
+            comp.set_integer_option(key,value)
+        elif isinstance(value, float):
+            comp.set_real_options(key,value)
+        elif isinstance(value, list):
+            comp.set_string_option(key, _list_to_string(value))
+        else:
+            raise JMIException("Unknown compiler option type for key: %s. \
+            Should be of the following types: boolean, string, integer, \
+            float or list" %key)
+                
+    #compile model
+    comp.compile_model(class_name, file_name, target=target)
+    
+    # pack JMU file
+    package_JMU(class_name)
+    
+    return get_jmu_name(class_name)
+
+
+def _list_to_string(item_list):
+    """Helper function that takes a list of items, which are typed to 
+    str and returned as a string with the list items separated by 
+    platform dependent path separator. 
+    For example: (platform = win)
+    item_list = [1, 2, 3]
+    return value: '1;2;3'
+    """
+    ret_str = ''
+    for l in item_list:
+        ret_str =ret_str+str(l)+os.pathsep
+    return ret_str
+        
+    
+    

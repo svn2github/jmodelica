@@ -19,12 +19,8 @@
 import os.path
 
 # Import the JModelica.org Python packages
-import jmodelica
-import jmodelica.jmi as jmi
-from jmodelica.compiler import OptimicaCompiler
-from jmodelica.compiler import ModelicaCompiler
-from jmodelica import initialize
-from jmodelica import optimize
+from jmodelica.jmi import compile_jmu
+from jmodelica.jmi import JMUModel
 
 from jmodelica.algorithm_drivers import JFSInitAlg
 
@@ -49,20 +45,18 @@ def run_demo(with_plots=True,with_blocking_factors = False):
     
     curr_dir = os.path.dirname(os.path.abspath(__file__));
 
-    # Create a Modelica compiler instance
-    mc = ModelicaCompiler()
-
-    # Compile the stationary initialization model into a DLL
-    mc.compile_model("DISTLib.Binary_Dist_initial", curr_dir+"/files/DISTLib.mo", target='ipopt')
+    # Compile the stationary initialization model into a JMU
+    jmu_name = compile_jmu("DISTLib.Binary_Dist_initial", 
+        curr_dir+"/files/DISTLib.mo")
 
     # Load a model instance into Python
-    init_model = jmi.JMUModel("DISTLib_Binary_Dist_initial")
+    init_model = JMUModel(jmu_name)
     
     # Set inputs for Stationary point A
     u1_0_A = 3.0
-    init_model.set_value('u1',u1_0_A)
+    init_model.set('u1',u1_0_A)
     
-    init_result = initialize(init_model)
+    init_result = init_model.initialize(algorithm=JFSInitAlg)
     	
     # Store stationary point A
     y_A = N.zeros(32)
@@ -70,14 +64,14 @@ def run_demo(with_plots=True,with_blocking_factors = False):
     # print(' *** Stationary point A ***')
     print '(Tray index, x_i_A, y_i_A)'
     for i in range(N.size(y_A)):
-        y_A[i] = init_model.get_value('y[' + str(i+1) + ']')
-        x_A[i] = init_model.get_value('x[' + str(i+1) + ']')
+        y_A[i] = init_model.get('y[' + str(i+1) + ']')
+        x_A[i] = init_model.get('x[' + str(i+1) + ']')
         print '(' + str(i+1) + ', %f, %f)' %(x_A[i], y_A[i])
     
     # Set inputs for stationary point B
     u1_0_B = 3.0 - 1
-    init_model.set_value('u1',u1_0_B)
-    init_result = initialize(init_model)
+    init_model.set('u1',u1_0_B)
+    init_result = init_model.initialize(algorithm=JFSolver)
 
     # Store stationary point B
     y_B = N.zeros(32)
@@ -85,35 +79,29 @@ def run_demo(with_plots=True,with_blocking_factors = False):
     # print(' *** Stationary point B ***')
     print '(Tray index, x_i_B, y_i_B)'
     for i in range(N.size(y_B)):
-        y_B[i] = init_model.get_value('y[' + str(i+1) + ']')
-        x_B[i] = init_model.get_value('x[' + str(i+1) + ']')
+        y_B[i] = init_model.get('y[' + str(i+1) + ']')
+        x_B[i] = init_model.get('x[' + str(i+1) + ']')
         print '(' + str(i+1) + ', %f, %f)' %(x_B[i], y_B[i])
 
     # ## Set up and solve an optimal control problem. 
 
-    # Create an OptimicaCompiler instance
-    oc = OptimicaCompiler()
-
-    # Generate initial equations for states even if fixed=false
-    oc.set_boolean_option('state_start_values_fixed',True)
-
-    # Compil the Model
-    oc.compile_model("DISTLib_Opt.Binary_Dist_Opt1", 
-                     (curr_dir+"/files/DISTLib.mo",curr_dir+"/files/DISTLib_Opt.mo"), 
-                     target='ipopt')
+    # Compile the JMU
+    jmu_name = compile_jmu("DISTLib_Opt.Binary_Dist_Opt1", 
+        (curr_dir+"/files/DISTLib.mo",curr_dir+"/files/DISTLib_Opt.mop"), 
+        compiler_options={'state_start_values_fixed':True})
 
     # Load the dynamic library and XML data
-    model = jmi.JMUModel("DISTLib_Opt_Binary_Dist_Opt1")
+    model = JMUModel(jmu_name)
 
     # Initialize the model with parameters
 
     # Initialize the model to stationary point A
     for i in range(N.size(x_A)):
-        model.set_value('x_0[' + str(i+1) + ']', x_A[i])
+        model.set('x_0[' + str(i+1) + ']', x_A[i])
 
     # Set the target values to stationary point B
-    model.set_value('u1_ref',u1_0_B)
-    model.set_value('y1_ref',y_B[0])
+    model.set('u1_ref',u1_0_B)
+    model.set('y1_ref',y_B[0])
 
     n_e = 100 # Number of elements 
     hs = N.ones(n_e)*1./n_e # Equidistant points
@@ -124,10 +112,10 @@ def run_demo(with_plots=True,with_blocking_factors = False):
         # Blocking factors for control parametrization
         blocking_factors=4*N.ones(n_e/4,dtype=N.int)
         
-        opt_res = optimize(model, alg_args={'n_e':n_e, 'n_cp':n_cp,
-                                            'hs':hs,'blocking_factors': blocking_factors})
+        opt_res = model.optimize(alg_args={'n_e':n_e, 'n_cp':n_cp,'hs':hs,
+            'blocking_factors': blocking_factors})
     else:
-        opt_res = optimize(model, alg_args={'n_e':n_e, 'n_cp':n_cp, 'hs':hs})
+        opt_res = model.optimize(alg_args={'n_e':n_e, 'n_cp':n_cp, 'hs':hs})
 
     # Extract variable profiles
     res = opt_res.result_data

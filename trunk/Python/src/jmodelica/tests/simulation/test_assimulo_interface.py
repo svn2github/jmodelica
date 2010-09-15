@@ -20,15 +20,13 @@ import warnings
 import nose
 import os
 import numpy as N
-import jmodelica
-import jmodelica.jmi as jmi
+
+from jmodelica.jmi import compile_jmu
+from jmodelica.jmi import JMUModel
 import jmodelica.fmi as fmi
-from jmodelica.compiler import ModelicaCompiler
-from jmodelica.compiler import OptimicaCompiler
 from jmodelica.io import ResultDymolaTextual
 from jmodelica.tests import testattr
 from jmodelica.tests import get_files_path
-from jmodelica import simulate
 
 try:
     from jmodelica.simulation.assimulo_interface import JMIODE, JMIDAE, FMIODE, JMIModel_Exception
@@ -38,10 +36,6 @@ try:
 except NameError, ImportError:
     warnings.warn('Could not load Assimulo module. Check jmodelica.check_packages()')
 
-
-mc = ModelicaCompiler()
-oc = OptimicaCompiler()
-oc.set_boolean_option('state_start_values_fixed',True)
 path_to_fmus = os.path.join(get_files_path(), 'FMUs')
 
 class Test_JMI_ODE:
@@ -54,18 +48,19 @@ class Test_JMI_ODE:
         """
         Compile the test model.
         """
-        fpath_ODE = os.path.join(get_files_path(), 'Modelica', 'VDP.mo')
+        fpath_ODE = os.path.join(get_files_path(), 'Modelica', 'VDP.mop')
         cpath_ODE = 'VDP_pack.VDP_Opt'
-        fname_ODE = cpath_ODE.replace('.','_',1)
-        
-        oc.compile_model(cpath_ODE, fpath_ODE)
+
+        # compile VDP
+        fname_ODE = compile_jmu(cpath_ODE, fpath_ODE, 
+                    compiler_options={'state_start_values_fixed':True})
         
     def setUp(self):
         """Load the test model."""
-        package_ODE = 'VDP_pack_VDP_Opt'
+        package_ODE = 'VDP_pack_VDP_Opt.jmu'
 
         # Load the dynamic library and XML data
-        self.m_ODE = jmi.JMUModel(package_ODE)
+        self.m_ODE = JMUModel(package_ODE)
         
         # Creates the solvers
         self.ODE = JMIODE(self.m_ODE)
@@ -88,7 +83,7 @@ class Test_JMI_ODE:
         write_data(vdp_sim)
     
         # Load the file we just wrote to file
-        res = jmodelica.io.ResultDymolaTextual('VDP_pack_VDP_Opt_result.txt')
+        res = ResultDymolaTextual('VDP_pack_VDP_Opt_result.txt')
     
         x1=res.get_variable_data('x1')
         x2=res.get_variable_data('x2')
@@ -98,8 +93,6 @@ class Test_JMI_ODE:
         nose.tools.assert_almost_equal(x1.x[-1], -0.54108518, 5)
         nose.tools.assert_almost_equal(x2.x[-1], -0.81364915, 5)
 
-        
-    
     @testattr(assimulo = True) 
     def test_init(self):
         """
@@ -111,13 +104,14 @@ class Test_JMI_ODE:
             assert self.m_ODE.real_x[i] == self.ODE.y0[i]
             
         #Test for algebraic variables
-        fpath_DAE = os.path.join(get_files_path(), 'Modelica', 'RLC_Circuit.mo')
+        fpath_DAE = os.path.join(get_files_path(), 'Modelica', 
+            'RLC_Circuit.mo')
         cpath_DAE = 'RLC_Circuit'
-        fname_DAE = cpath_DAE.replace('.','_',1)
-        mc.compile_model(cpath_DAE, fpath_DAE)
-        package_DAE = 'RLC_Circuit'
+
+        fname_DAE = compile_jmu(cpath_DAE, fpath_DAE)
+        package_DAE = 'RLC_Circuit.jmu'
         # Load the dynamic library and XML data
-        m_DAE = jmi.JMUModel(package_DAE)
+        m_DAE = JMUModel(package_DAE)
         
         nose.tools.assert_raises(JMIModel_Exception, JMIODE, m_DAE)
         
@@ -125,11 +119,11 @@ class Test_JMI_ODE:
         #Test for discontinious model
         fpath_DISC = os.path.join(get_files_path(), 'Modelica', 'IfExpExamples.mo')
         cpath_DISC = 'IfExpExamples.IfExpExample2'
-        fname_DISC = cpath_DISC.replace('.','_',1)
-        mc.compile_model(cpath_DISC, fpath_DISC)
-        package_DISC = 'IfExpExamples_IfExpExample2'
+
+        fname_ODE = compile_jmu(cpath_DISC, fpath_DISC)
+        package_DISC = 'IfExpExamples_IfExpExample2.jmu'
         # Load the dynamic library and XML data
-        m_DISC = jmi.JMUModel(package_DISC)
+        m_DISC = JMUModel(package_DISC)
         
         nose.tools.assert_raises(JMIModel_Exception, JMIODE, m_DISC)
     
@@ -201,26 +195,26 @@ class Test_JMI_DAE:
         Compile the test model.
         """
         #DAE test model
-        fpath_DAE = os.path.join(get_files_path(), 'Modelica', 'Pendulum_pack_no_opt.mo')
+        fpath_DAE = os.path.join(get_files_path(), 'Modelica', 
+            'Pendulum_pack_no_opt.mo')
         cpath_DAE = 'Pendulum_pack.Pendulum'
-        fname_DAE = cpath_DAE.replace('.','_',1)
 
-        mc.compile_model(cpath_DAE, fpath_DAE)
+        fname_DISC = compile_jmu(cpath_DAE, fpath_DAE)
         
-        fpath_DISC = os.path.join(get_files_path(), 'Modelica', 'IfExpExamples.mo')
+        fpath_DISC = os.path.join(get_files_path(), 'Modelica', 
+            'IfExpExamples.mo')
         cpath_DISC = 'IfExpExamples.IfExpExample2'
-        fname_DISC = cpath_DISC.replace('.','_',1)
-
-        mc.compile_model(cpath_DISC, fpath_DISC)
+        
+        fname_DISC = compile_jmu(cpath_DISC, fpath_DISC)
         
     def setUp(self):
         """Load the test model."""
-        package_DAE = 'Pendulum_pack_Pendulum'
-        package_DISC = 'IfExpExamples_IfExpExample2'
+        package_DAE = 'Pendulum_pack_Pendulum.jmu'
+        package_DISC = 'IfExpExamples_IfExpExample2.jmu'
 
         # Load the dynamic library and XML data
-        self.m_DAE = jmi.JMUModel(package_DAE)
-        self.m_DISC = jmi.JMUModel(package_DISC)
+        self.m_DAE = JMUModel(package_DAE)
+        self.m_DISC = JMUModel(package_DISC)
         
         # Creates the solvers
         self.DAE = JMIDAE(self.m_DAE)
@@ -607,7 +601,9 @@ class Test_FMI_ODE:
         This tests the basic simulation and writing.
         """
         #Writing continuous
-        res_obj = simulate(os.path.join(path_to_fmus,'bouncingBall.fmu'), alg_args={'final_time':3.})
+        bounce = fmi.FMUModel('bouncingBall.fmu', path_to_fmus)
+        bounce.initialize()
+        res_obj = bounce.simulate(alg_args={'final_time':3.})
         res = res_obj.result_data
         height = res.get_variable_data('h')
 
@@ -616,7 +612,9 @@ class Test_FMI_ODE:
         nose.tools.assert_almost_equal(height.t[-1],3.000000,5)
         
         #Writing after
-        res_obj = simulate(os.path.join(path_to_fmus,'bouncingBall.fmu'), alg_args={'final_time':3.}, solver_args={'write_cont':False})
+        bounce = fmi.FMUModel('bouncingBall.fmu', path_to_fmus)
+        bounce.initialize()
+        res_obj = bounce.simulate(alg_args={'final_time':3.}, solver_args={'write_cont':False})
         res = res_obj.result_data
         height = res.get_variable_data('h')
 
@@ -627,7 +625,7 @@ class Test_FMI_ODE:
         #Test with predefined FMUModel
         model = fmi.FMUModel(os.path.join(path_to_fmus,'bouncingBall.fmu'))
         model.initialize()
-        res_obj = simulate(model, alg_args={'final_time':3.})
+        res_obj = model.simulate(alg_args={'final_time':3.})
         res = res_obj.result_data
         height = res.get_variable_data('h')
 
@@ -642,7 +640,9 @@ class Test_FMI_ODE:
         This test the default values of the simulation using simulate.
         """
         #Writing continuous
-        res_obj = simulate(os.path.join(path_to_fmus,'bouncingBall.fmu'), alg_args={'final_time':3.})
+        bounce = fmi.FMUModel('bouncingBall.fmu', path_to_fmus)
+        bounce.initialize()
+        res_obj = bounce.simulate(alg_args={'final_time':3.})
         res = res_obj.result_data
         height = res.get_variable_data('h')
         
@@ -654,7 +654,9 @@ class Test_FMI_ODE:
         nose.tools.assert_almost_equal(height.t[-1],3.000000,5)
         
         #Writing continuous
-        res_obj = simulate(os.path.join(path_to_fmus,'bouncingBall.fmu'), alg_args={'final_time':3.},
+        bounce = fmi.FMUModel('bouncingBall.fmu', path_to_fmus)
+        bounce.initialize()
+        res_obj = bounce.simulate(alg_args={'final_time':3.},
                                             solver_args={'rtol':1e-6, 'iter':'FixedPoint'})
         res = res_obj.result_data
         height = res.get_variable_data('h')

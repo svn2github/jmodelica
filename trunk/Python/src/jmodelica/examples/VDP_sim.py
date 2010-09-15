@@ -19,23 +19,23 @@ import os
 import numpy as N
 import pylab as p
 
-from jmodelica import simulate
+from jmodelica.jmi import compile_jmu
+from jmodelica.jmi import JMUModel
 
 def run_demo(with_plots=True):
     """
     An example on how to simulate a model using the ODE simulator.
     """
-
     curr_dir = os.path.dirname(os.path.abspath(__file__));
-
-    model_name = 'VDP_pack.VDP'
-    mofile = curr_dir+'/files/VDP.mo'
+    file_name = os.path.join(curr_dir,'files','VDP.mop')
     
-    sim_res = simulate(model_name, mofile, 
-                       compiler='optimica',
-                       compiler_options={'state_start_values_fixed':True},
-                       alg_args={'final_time':20,'num_communication_points':0,'solver':'CVode'},
-                       solver_args={'discr':'BDF','iter':'Newton'})
+    jmu_name = compile_jmu('VDP_pack.VDP', file_name,
+                        compiler_options={'state_start_values_fixed':True})
+
+    model = JMUModel(jmu_name)
+    
+    sim_res = model.simulate(alg_args={'final_time':20,'num_communication_points':0,'solver':'CVode'},
+                             solver_args={'discr':'BDF','iter':'Newton'})
 
     res = sim_res.result_data
     x1=res.get_variable_data('x1')

@@ -17,15 +17,13 @@
 
 # Import library for path manipulations
 import os.path
-from jmodelica import initialize
-from jmodelica import simulate
-from jmodelica import optimize
-
-import jmodelica.jmi as jmi
-from jmodelica.compiler import OptimicaCompiler
 
 import numpy as N
 import matplotlib.pyplot as plt
+
+from jmodelica.jmi import compile_jmu
+from jmodelica.jmi import JMUModel
+
 
 def run_demo(with_plots=True):
     """This example is based on the Hicks-Ray
@@ -74,20 +72,20 @@ def run_demo(with_plots=True):
 """
 
     curr_dir = os.path.dirname(os.path.abspath(__file__));
-
-    # Create a Modelica compiler instance
-    oc = OptimicaCompiler()
-    oc.set_boolean_option("enable_variable_scaling",True)
         
-    # Compile the stationary initialization model into a DLL
-    init_model = oc.compile_model("CSTR.CSTR_Init", curr_dir+"/files/CSTR.mo", target='ipopt')
-        
+    # Compile the stationary initialization model into a JMU
+    jmu_name = compile_jmu("CSTR.CSTR_Init", curr_dir+"/files/CSTR.mop", 
+        compiler_options={"enable_variable_scaling":True})
+    
+    # load the JMU
+    init_model = JMUModel(jmu_name)
+    
     # Set inputs for Stationary point A
     Tc_0_A = 250
-    init_model.set_value('Tc',Tc_0_A)
+    init_model.set('Tc',Tc_0_A)
         
     # Solve the DAE initialization system with Ipopt
-    init_result = initialize(init_model)
+    init_result = init_model.initialize()
     
     # Store stationary point A
     c_0_A = init_result.result_data.get_variable_data('c').x[0]
@@ -101,11 +99,10 @@ def run_demo(with_plots=True):
 
     # Set inputs for Stationary point B
     Tc_0_B = 280
-    init_model.set_value('Tc',Tc_0_B)
+    init_model.set('Tc',Tc_0_B)
         
     # Solve the DAE initialization system with Ipopt
-    init_result = initialize(init_model)
-    
+    init_result = init_model.initialize()
     # Store stationary point B
     res = init_result.result_data
     c_0_B = res.get_variable_data('c').x[0]
@@ -130,18 +127,21 @@ def run_demo(with_plots=True):
     u_traj = N.transpose(N.vstack((t,u)))
 
     # Compile the optimization initialization model and load the DLL
-    init_sim_model = oc.compile_model("CSTR.CSTR_Init_Optimization",curr_dir+"/files/CSTR.mo",target='ipopt')
+    jmu_name = compile_jmu("CSTR.CSTR_Init_Optimization", 
+        curr_dir+"/files/CSTR.mop")
+
+    init_sim_model = JMUModel(jmu_name)
 
     # Set model parameters
-    init_sim_model.set_value('cstr.c_init',c_0_A)
-    init_sim_model.set_value('cstr.T_init',T_0_A)
-    init_sim_model.set_value('Tc_0',Tc_0_A)
-    init_sim_model.set_value('c_ref',c_0_B)
-    init_sim_model.set_value('T_ref',T_0_B)
-    init_sim_model.set_value('Tc_ref',u[0])
+    init_sim_model.set('cstr.c_init',c_0_A)
+    init_sim_model.set('cstr.T_init',T_0_A)
+    init_sim_model.set('Tc_0',Tc_0_A)
+    init_sim_model.set('c_ref',c_0_B)
+    init_sim_model.set('T_ref',T_0_B)
+    init_sim_model.set('Tc_ref',u[0])
 
-    sim_res = simulate(init_sim_model,alg_args={'start_time':0.,'final_time':150.,
-                                                'input_trajectory':u_traj})
+    sim_res = init_sim_model.simulate(
+        alg_args={'start_time':0.,'final_time':150.,'input_trajectory':u_traj})
     
     # Extract variable profiles
     res = sim_res.result_data
@@ -173,20 +173,23 @@ def run_demo(with_plots=True):
 
 
     # Solve optimal control problem    
-    cstr = oc.compile_model("CSTR.CSTR_Opt", curr_dir+"/files/CSTR.mo", target='ipopt')
+    jmu_name = compile_jmu("CSTR.CSTR_Opt", curr_dir+"/files/CSTR.mop")
 
-    cstr.set_value('Tc_ref',Tc_0_B)
-    cstr.set_value('c_ref',c_0_B)
-    cstr.set_value('T_ref',T_0_B)
+    cstr = JMUModel(jmu_name)
 
-    cstr.set_value('cstr.c_init',c_0_A)
-    cstr.set_value('cstr.T_init',T_0_A)
+    cstr.set('Tc_ref',Tc_0_B)
+    cstr.set('c_ref',c_0_B)
+    cstr.set('T_ref',T_0_B)
+
+    cstr.set('cstr.c_init',c_0_A)
+    cstr.set('cstr.T_init',T_0_A)
 
     n_e = 100 # Number of elements 
     hs = N.ones(n_e)*1./n_e # Equidistant points
     n_cp = 3; # Number of collocation points in each element
 
-    opt_res = optimize(cstr,alg_args={'n_e':n_e,'hs':hs,'n_cp':n_cp,'init_traj':res})
+    opt_res = cstr.optimize(
+        alg_args={'n_e':n_e,'hs':hs,'n_cp':n_cp,'init_traj':res})
 
     # Extract variable profiles
     res = opt_res.result_data
@@ -234,17 +237,17 @@ def run_demo(with_plots=True):
     u = Tc_res.x
     u_traj = N.transpose(N.vstack((t,u)))
     
-    # Comile the Modelica model first to C code and
-    # then to a dynamic library
-    sim_model = oc.compile_model("CSTR.CSTR",curr_dir+"/files/CSTR.mo",target='ipopt')
+    # Compile the Modelica model to a JMU
+    jmu_name = compile_jmu("CSTR.CSTR", curr_dir+"/files/CSTR.mop")
 
-    sim_model.set_value('c_init',c_0_A)
-    sim_model.set_value('T_init',T_0_A)
-    sim_model.set_value('Tc',u[0])
+    sim_model = JMUModel(jmu_name)
 
-    sim_res = simulate(sim_model,compiler='optimica',
-                       alg_args={'start_time':0.,'final_time':150.,
-                       'input_trajectory':u_traj})
+    sim_model.set('c_init',c_0_A)
+    sim_model.set('T_init',T_0_A)
+    sim_model.set('Tc',u[0])
+
+    sim_res = sim_model.simulate(
+        alg_args={'start_time':0.,'final_time':150.,'input_trajectory':u_traj})
     
     # Extract variable profiles
     res = sim_res.result_data

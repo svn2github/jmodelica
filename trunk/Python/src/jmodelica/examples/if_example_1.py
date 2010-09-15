@@ -19,8 +19,8 @@ import os
 import numpy as N
 import pylab as p
 
-import jmodelica
-from jmodelica import simulate
+from jmodelica.jmi import compile_jmu
+from jmodelica.jmi import JMUModel
 
 def run_demo(with_plots=True):
     """
@@ -32,11 +32,13 @@ def run_demo(with_plots=True):
     
     curr_dir = os.path.dirname(os.path.abspath(__file__));
 
-    model_name = 'IfExpExamples.IfExpExample1'
+    class_name = 'IfExpExamples.IfExpExample1'
     mofile = curr_dir+'/files/IfExpExamples.mo'
     
-    sim_res = simulate(model_name, mofile,
-                       alg_args={'final_time':5, 'num_communication_points':500})
+    jmu_name = compile_jmu(class_name, mofile)
+    model = JMUModel(jmu_name)
+    sim_res = model.simulate(
+        alg_args={'final_time':5, 'num_communication_points':500})
                         
     res = sim_res.result_data
     x = res.get_variable_data('x')
@@ -52,7 +54,6 @@ def run_demo(with_plots=True):
         p.plot(x.t, x.x, u.t, u.x)
         p.legend(('x','u'))
         p.show()
-
 
 if __name__=="__main__":
     run_demo()

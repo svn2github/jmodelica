@@ -14,35 +14,35 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
+import matplotlib.pyplot as plt
+import numpy as N
+import os.path
 
 from jmodelica.initialization.ipopt import *
-from jmodelica.compiler import OptimicaCompiler
-import jmodelica.jmi as jmi
-import jmodelica.io
+from jmodelica.jmi import compile_jmu
+from jmodelica.jmi import JMUModel
 from jmodelica.io import ResultDymolaTextual
 from jmodelica.optimization.ipopt import NLPCollocationLagrangePolynomials
 from jmodelica.optimization.ipopt import CollocationOptimizer
-import matplotlib.pyplot as plt
 from jmodelica.tests.general.base_simul import *
 from jmodelica.tests import testattr
 from jmodelica.tests import get_files_path
-import numpy as N
-import os.path
 
 class TestOptimization(OptimizationTest):
 
     @classmethod
     def setUpClass(cls):
-        mofile = os.path.join(get_files_path(), 'Modelica', 'VDP.mo')
+        mofile = os.path.join(get_files_path(), 'Modelica', 'VDP.mop')
         OptimizationTest.setup_class_base(mofile, 'VDP_pack.VDP_Opt', 
-                options = { 'state_start_values_fixed': True })
+                options = {'state_start_values_fixed': True})
 
     @testattr(ipopt = True)
     def setUp(self):
         n_e = 50
         hs = N.ones(n_e)*1./n_e
         n_cp = 3
-        self.setup_base(nlp_args = (n_e, hs, n_cp), options = { 'max_iter': 500 })
+        self.setup_base(nlp_args = (n_e, hs, n_cp), 
+            options = {'max_iter': 500})
         self.run()
 
     @testattr(ipopt = True)
@@ -55,14 +55,15 @@ class TestIfExp(OptimizationTest):
     @classmethod
     def setUpClass(cls):
         OptimizationTest.setup_class_base(
-                'IfExpTest.mo', 'IfExpTest')
+                'IfExpTest.mop', 'IfExpTest')
 
     @testattr(ipopt = True)
     def setUp(self):
         n_e = 50
         hs = N.ones(n_e)*1./n_e
         n_cp = 3
-        self.setup_base(nlp_args = (n_e, hs, n_cp), options = { 'max_iter': 500 })
+        self.setup_base(nlp_args = (n_e, hs, n_cp), 
+            options = {'max_iter': 500})
         self.run()
 
     @testattr(ipopt = True)
@@ -74,14 +75,15 @@ class TestFreeInitialConditions(OptimizationTest):
     @classmethod
     def setUpClass(cls):
         OptimizationTest.setup_class_base(
-            'FreeInitialConditions.mo', 'FreeInitialConditions')
+            'FreeInitialConditions.mop', 'FreeInitialConditions')
 
     @testattr(ipopt = True)
     def setUp(self):
         n_e = 50
         hs = N.ones(n_e)*1./n_e
         n_cp = 3
-        self.setup_base(nlp_args = (n_e, hs, n_cp), options = { 'max_iter': 500 })
+        self.setup_base(nlp_args = (n_e, hs, n_cp), 
+            options = {'max_iter': 500})
         self.run()
 
     @testattr(ipopt = True)
@@ -93,7 +95,7 @@ class TestBlockingFactors(OptimizationTest):
     @classmethod
     def setUpClass(cls):
         OptimizationTest.setup_class_base(
-            'BlockingTest.mo', 'BlockingTest')
+            'BlockingTest.mop', 'BlockingTest')
 
     @testattr(ipopt = True)
     def setUp(self):
@@ -101,7 +103,8 @@ class TestBlockingFactors(OptimizationTest):
         hs = N.ones(n_e)*1./n_e
         n_cp = 3
         blocking_factors = N.array([5,10,5,3])
-        self.setup_base(nlp_args = (n_e, hs, n_cp, blocking_factors), options = { 'max_iter': 500 })
+        self.setup_base(nlp_args = (n_e, hs, n_cp, blocking_factors), 
+            options = {'max_iter': 500})
         self.run()
         self.load_expected_data('BlockingTest_result.txt')
 
@@ -111,22 +114,24 @@ class TestBlockingFactors(OptimizationTest):
 
     @testattr(ipopt = True)
     def test_trajectories(self):
-        self.assert_all_trajectories(['x[1]', 'x[2]', 'w1', 'w2', 'w3', 'w4'])
+        self.assert_all_trajectories(
+            ['x[1]', 'x[2]', 'w1', 'w2', 'w3', 'w4'])
 
 class TestElementInterpolationResult(OptimizationTest):
 
     @classmethod
     def setUpClass(cls):
         OptimizationTest.setup_class_base(
-            'DI_opt.mo', 'DI_opt')
+            'DI_opt.mop', 'DI_opt')
 
     @testattr(ipopt = True)
     def setUp(self):
         n_e = 8
         hs = N.ones(n_e)*1./n_e
         n_cp = 3
-        self.setup_base(nlp_args = (n_e, hs, n_cp), options = { 'max_iter': 500 },
-                        result_mesh='element_interpolation')
+        self.setup_base(nlp_args = (n_e, hs, n_cp), 
+            options = { 'max_iter': 500 }, 
+            result_mesh='element_interpolation')
         self.run()
         self.load_expected_data('DI_opt_element_interpolation_result.txt')
 
@@ -139,15 +144,16 @@ class TestMeshInterpolationResult(OptimizationTest):
     @classmethod
     def setUpClass(cls):
         OptimizationTest.setup_class_base(
-            'DI_opt.mo', 'DI_opt')
+            'DI_opt.mop', 'DI_opt')
 
     @testattr(ipopt = True)
     def setUp(self):
         n_e = 8
         hs = N.ones(n_e)*1./n_e
         n_cp = 3
-        self.setup_base(nlp_args = (n_e, hs, n_cp), options = { 'max_iter': 500 },
-                        result_mesh='mesh_interpolation',result_arguments={"mesh":N.linspace(-0.1,2.2,50)})
+        self.setup_base(nlp_args = (n_e, hs, n_cp), 
+            options = {'max_iter': 500}, result_mesh='mesh_interpolation', 
+            result_arguments={"mesh":N.linspace(-0.1,2.2,50)})
         self.run()
         self.load_expected_data('DI_opt_mesh_interpolation_result.txt')
 
@@ -160,14 +166,15 @@ class TestIntegersNBooleanParameters(OptimizationTest):
     @classmethod
     def setUpClass(cls):
         OptimizationTest.setup_class_base(
-            'ArrayIntBoolPars_Opt.mo', 'ArrayIntBoolPars_Opt')
+            'ArrayIntBoolPars_Opt.mop', 'ArrayIntBoolPars_Opt')
 
     @testattr(ipopt = True)
     def setUp(self):
         n_e = 50
         hs = N.ones(n_e)*1./n_e
         n_cp = 3
-        self.setup_base(nlp_args = (n_e, hs, n_cp), options = { 'max_iter': 500 })
+        self.setup_base(nlp_args = (n_e, hs, n_cp), 
+            options = {'max_iter': 500})
         self.run()
         self.load_expected_data('ArrayIntBoolPars_Opt_result.txt')
 
@@ -180,7 +187,7 @@ class TestNominal(OptimizationTest):
     @classmethod
     def setUpClass(cls):
         OptimizationTest.setup_class_base(
-            'NominalTest.mo', 'NominalTests.NominalOptTest2',
+            'NominalTest.mop', 'NominalTests.NominalOptTest2',
             options={"enable_variable_scaling":True})
 
     @testattr(ipopt = True)
@@ -188,7 +195,8 @@ class TestNominal(OptimizationTest):
         n_e = 50
         hs = N.ones(n_e)*1./n_e
         n_cp = 3
-        self.setup_base(nlp_args = (n_e, hs, n_cp), options = { 'max_iter': 500 })
+        self.setup_base(nlp_args = (n_e, hs, n_cp), 
+            options = {'max_iter': 500})
         self.run()
         self.load_expected_data('NominalTests_NominalOptTest2_result.txt')
 
@@ -197,12 +205,13 @@ class TestNominal(OptimizationTest):
         self.assert_all_trajectories(['x', 'der(x)', 'u'])
 
     @testattr(ipopt = True)
-    def test_initialization_from_data(self):       
+    def test_initialization_from_data(self):
         n_e = 50
         hs = N.ones(n_e)*1./n_e
         self.nlp.set_initial_from_dymola(self.expected,hs,0,1)
         self.nlp.export_result_dymola()
-        self.data = ResultDymolaTextual("NominalTests_NominalOptTest2_result.txt")
+        self.data = ResultDymolaTextual(
+            "NominalTests_NominalOptTest2_result.txt")
         self.assert_all_trajectories(['x', 'der(x)', 'u'])
 
 
@@ -211,14 +220,15 @@ class TestFunction1(OptimizationTest):
     @classmethod
     def setUpClass(cls):
         OptimizationTest.setup_class_base(
-            'FunctionAR_opt.mo', 'FunctionAR.UnknownArray1')
+            'FunctionAR_opt.mop', 'FunctionAR.UnknownArray1')
 
     @testattr(ipopt = True)
     def setUp(self):
         n_e = 50
         hs = N.ones(n_e)*1./n_e
         n_cp = 3
-        self.setup_base(nlp_args = (n_e, hs, n_cp), options = { 'max_iter': 500 }, rel_tol=1.0e-2, abs_tol=1.0e-2)
+        self.setup_base(nlp_args = (n_e, hs, n_cp), 
+            options = {'max_iter': 500}, rel_tol=1.0e-2, abs_tol=1.0e-2)
         self.run()
         self.load_expected_data('UnknownArray.txt')
 
@@ -233,14 +243,15 @@ class TestFunction1(OptimizationTest):
     @classmethod
     def setUpClass(cls):
         OptimizationTest.setup_class_base(
-            'FunctionAR_opt.mo', 'FunctionAR.FuncRecord1')
+            'FunctionAR_opt.mop', 'FunctionAR.FuncRecord1')
 
     @testattr(ipopt = True)
     def setUp(self):
         n_e = 50
         hs = N.ones(n_e)*1./n_e
         n_cp = 3
-        self.setup_base(nlp_args = (n_e, hs, n_cp), options = { 'max_iter': 500 }, rel_tol=1.0e-2)
+        self.setup_base(nlp_args = (n_e, hs, n_cp), 
+            options = {'max_iter': 500}, rel_tol=1.0e-2)
         self.run()
         self.load_expected_data('FuncRecord.txt')
 
@@ -253,11 +264,9 @@ class TestStaticOptimizationDependentParameters:
     @classmethod
     def setUpClass(cls):
         curr_dir = os.path.dirname(os.path.abspath(__file__));
-        oc = OptimicaCompiler() 
-        mofile = os.path.join(get_files_path(), 'Modelica', 'StaticOptimizationTest.mo')
-        oc.compile_model("StaticOptimizationTest.StaticOptimizationTest2",
-                         mofile,target="ipopt")
-        cls.model = jmi.JMUModel("StaticOptimizationTest_StaticOptimizationTest2")
+        mofile = os.path.join(get_files_path(), 'Modelica', 'StaticOptimizationTest.mop')
+        compile_jmu("StaticOptimizationTest.StaticOptimizationTest2", mofile)
+        cls.model = JMUModel("StaticOptimizationTest_StaticOptimizationTest2.jmu")
         cls.nlp = NLPInitialization(cls.model,stat=1)
         cls.ipopt_nlp = InitializationOptimizer(cls.nlp)
 
@@ -265,7 +274,8 @@ class TestStaticOptimizationDependentParameters:
     def setUp(self):
         self.ipopt_nlp.init_opt_ipopt_solve();
         self.nlp.export_result_dymola()
-        self.res = ResultDymolaTextual("StaticOptimizationTest_StaticOptimizationTest2_result.txt")
+        self.res = ResultDymolaTextual(
+            "StaticOptimizationTest_StaticOptimizationTest2_result.txt")
 
     @testattr(ipopt = True)
     def test_parameter_value(self):
@@ -274,7 +284,7 @@ class TestStaticOptimizationDependentParameters:
 
     @testattr(ipopt = True)
     def test_initialization_from_model(self):
-        self.model.set_value("k",-1)
+        self.model.set("k",-1)
         self.nlp.init_opt_set_initial_from_model()
         assert self.nlp.init_opt_get_x()[0] == -1, "Wrong value of parameter."
 
@@ -282,18 +292,20 @@ class TestOptInitBlockingFactors:
     @classmethod
     def setUpClass(cls):
         cls.curr_dir = os.path.dirname(os.path.abspath(__file__));
-        oc = OptimicaCompiler()
-        mofile = os.path.join(get_files_path(), 'Modelica', 'BlockingError.mo')
-        cls.model = oc.compile_model("BlockingInitPack.M_init",
-                                     mofile, target='ipopt')
+        mofile = os.path.join(get_files_path(), 'Modelica', 
+                'BlockingError.mop')
 
-        cls.opt_model = oc.compile_model("BlockingInitPack.M_Opt",
-                                         mofile, target='ipopt')
-
+        m = compile_jmu("BlockingInitPack.M_init", mofile)
+        cls.model = JMUModel(m)
+        
+        m = jmi.compile_jmu("BlockingInitPack.M_Opt",mofile)
+        cls.opt_model = jmi.JMUModel(m)
+        
     @testattr(ipopt = True)
     def setUp(self):
-        resfile = os.path.join(get_files_path(), 'Results', 'BlockingInitPack_M_init_result.txt')
-        self.res_init = jmodelica.io.ResultDymolaTextual(resfile)
+        resfile = os.path.join(get_files_path(), 'Results', 
+            'BlockingInitPack_M_init_result.txt')
+        self.res_init = ResultDymolaTextual(resfile)
 
         self.n_e = 5 # Number of elements 
         self.hs = N.ones(self.n_e)*1./self.n_e # Equidistant points
@@ -302,13 +314,14 @@ class TestOptInitBlockingFactors:
         # Blocking factors for control parametrization
         blocking_factors=N.ones(self.n_e,dtype=N.int)
 
-        self.nlp = NLPCollocationLagrangePolynomials(self.opt_model,self.n_e,self.hs,self.n_cp,blocking_factors)
+        self.nlp = NLPCollocationLagrangePolynomials(self.opt_model,
+            self.n_e,self.hs,self.n_cp,blocking_factors)
 
         self.nlp.set_initial_from_dymola(self.res_init, self.hs, 0., 10.)
 
         self.nlp.export_result_dymola("qwe.txt")
 
-        self.res_init2 = jmodelica.io.ResultDymolaTextual('qwe.txt')
+        self.res_init2 = ResultDymolaTextual('qwe.txt')
 
 
     @testattr(ipopt = True)
@@ -496,14 +509,16 @@ class TestLagrangeCost1(OptimizationTest):
 
     @classmethod
     def setUpClass(cls):
-        OptimizationTest.setup_class_base('LagrangeCost.mo','LagrangeCost.OptTest1')
+        OptimizationTest.setup_class_base('LagrangeCost.mop',
+            'LagrangeCost.OptTest1')
 
     @testattr(ipopt = True)
     def setUp(self):
         n_e = 50
         hs = N.ones(n_e)*1./n_e
         n_cp = 3
-        self.setup_base(nlp_args = (n_e, hs, n_cp), options = { 'max_iter': 500 })
+        self.setup_base(nlp_args = (n_e, hs, n_cp), 
+            options = {'max_iter': 500})
         self.run()
         self.load_expected_data('LagrangeCost_OptTest1_result.txt')
 
@@ -515,7 +530,8 @@ class TestLagrangeCost2(OptimizationTest):
 
     @classmethod
     def setUpClass(cls):
-        OptimizationTest.setup_class_base('LagrangeCost.mo','LagrangeCost.OptTest1')
+        OptimizationTest.setup_class_base('LagrangeCost.mop',
+            'LagrangeCost.OptTest1')
 
     @testattr(ipopt = True)
     def setUp(self):
@@ -523,7 +539,8 @@ class TestLagrangeCost2(OptimizationTest):
         hs = N.ones(n_e)*1./n_e
         n_cp = 3
         b_f = 3*N.ones(10)
-        self.setup_base(nlp_args = (n_e, hs, n_cp,b_f), options = { 'max_iter': 500 })
+        self.setup_base(nlp_args = (n_e, hs, n_cp,b_f), 
+            options = {'max_iter': 500})
         self.run()
         self.load_expected_data('LagrangeCost_OptTest1_bf_result.txt')
 
@@ -535,14 +552,16 @@ class TestLagrangeCost3(OptimizationTest):
 
     @classmethod
     def setUpClass(cls):
-        OptimizationTest.setup_class_base('LagrangeCost.mo','LagrangeCost.OptTest4')
+        OptimizationTest.setup_class_base('LagrangeCost.mop',
+            'LagrangeCost.OptTest4')
 
     @testattr(ipopt = True)
     def setUp(self):
         n_e = 50
         hs = N.ones(n_e)*1./n_e
         n_cp = 3
-        self.setup_base(nlp_args = (n_e, hs, n_cp), options = { 'max_iter': 500 })
+        self.setup_base(nlp_args = (n_e, hs, n_cp), 
+            options = {'max_iter': 500})
         self.run()
         self.load_expected_data('LagrangeCost_OptTest4_result.txt')
 
@@ -554,7 +573,8 @@ class TestLagrangeCost4(OptimizationTest):
 
     @classmethod
     def setUpClass(cls):
-        OptimizationTest.setup_class_base('LagrangeCost.mo','LagrangeCost.OptTest4')
+        OptimizationTest.setup_class_base('LagrangeCost.mop',
+            'LagrangeCost.OptTest4')
 
     @testattr(ipopt = True)
     def setUp(self):
@@ -562,7 +582,8 @@ class TestLagrangeCost4(OptimizationTest):
         hs = N.ones(n_e)*1./n_e
         n_cp = 3
         b_f = 3*N.ones(10)
-        self.setup_base(nlp_args = (n_e, hs, n_cp,b_f), options = { 'max_iter': 500 })
+        self.setup_base(nlp_args = (n_e, hs, n_cp,b_f), 
+            options = {'max_iter': 500})
         self.run()
         self.load_expected_data('LagrangeCost_OptTest4_bf_result.txt')
 
@@ -574,7 +595,8 @@ class TestDependentParametersInCollocation(OptimizationTest):
 
     @classmethod
     def setUpClass(cls):
-        OptimizationTest.setup_class_base('DependentParameterTest2.mo','DependentParameterTest2')
+        OptimizationTest.setup_class_base('DependentParameterTest2.mop',
+            'DependentParameterTest2')
 
     @testattr(ipopt = True)
     def setUp(self):
@@ -582,7 +604,8 @@ class TestDependentParametersInCollocation(OptimizationTest):
         hs = N.ones(n_e)*1./n_e
         n_cp = 3
         b_f = N.ones(n_e)
-        self.setup_base(nlp_args = (n_e, hs, n_cp,b_f), options = { 'max_iter': 500 })
+        self.setup_base(nlp_args = (n_e, hs, n_cp,b_f), 
+            options = {'max_iter': 500})
         self.run()
         self.load_expected_data('DependentParameterTest2_result.txt')
 
@@ -595,7 +618,7 @@ class TestMinTimeProblem1(OptimizationTest):
     @classmethod
     def setUpClass(cls):
         OptimizationTest.setup_class_base(
-            'MinTimeProblems.mo', 'MinTimeProblems.MinTimeProblem1')
+            'MinTimeProblems.mop', 'MinTimeProblems.MinTimeProblem1')
 
     @testattr(ipopt = True)
     def setUp(self):
@@ -616,7 +639,7 @@ class TestMinTimeProblem2(OptimizationTest):
     @classmethod
     def setUpClass(cls):
         OptimizationTest.setup_class_base(
-            'MinTimeProblems.mo', 'MinTimeProblems.MinTimeProblem2')
+            'MinTimeProblems.mop', 'MinTimeProblems.MinTimeProblem2')
 
     @testattr(ipopt = True)
     def setUp(self):
@@ -637,7 +660,7 @@ class TestMinTimeProblem3(OptimizationTest):
     @classmethod
     def setUpClass(cls):
         OptimizationTest.setup_class_base(
-            'MinTimeProblems.mo', 'MinTimeProblems.MinTimeProblem3')
+            'MinTimeProblems.mop', 'MinTimeProblems.MinTimeProblem3')
 
     @testattr(ipopt = True)
     def setUp(self):
@@ -658,7 +681,7 @@ class TestMinTimeProblem4(OptimizationTest):
     @classmethod
     def setUpClass(cls):
         OptimizationTest.setup_class_base(
-            'MinTimeProblems.mo', 'MinTimeProblems.MinTimeProblem4')
+            'MinTimeProblems.mop', 'MinTimeProblems.MinTimeProblem4')
 
     @testattr(ipopt = True)
     def setUp(self):
@@ -680,7 +703,7 @@ class TestMinTimeProblem5(OptimizationTest):
     @classmethod
     def setUpClass(cls):
         OptimizationTest.setup_class_base(
-            'MinTimeProblems.mo', 'MinTimeProblems.MinTimeProblem5')
+            'MinTimeProblems.mop', 'MinTimeProblems.MinTimeProblem5')
 
     @testattr(ipopt = True)
     def setUp(self):

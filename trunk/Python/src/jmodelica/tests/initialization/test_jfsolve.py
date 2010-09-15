@@ -22,19 +22,15 @@ import os.path
 import numpy as N
 import nose.tools
 
-import jmodelica
-import jmodelica.jmi as jmi
-from jmodelica import initialize
+from jmodelica.jmi import compile_jmu
+from jmodelica.jmi import JMUModel
 from jmodelica.tests import testattr
 from jmodelica.tests import get_files_path
-from jmodelica.compiler import ModelicaCompiler
 from jmodelica.algorithm_drivers import JFSInitAlg
 from jmodelica.initialization.jfsolver import JFSolver
 
 int = N.int32
 N.int = N.int32
-
-mc = ModelicaCompiler()
 
 class TestJFSolve:
     """ Test evaluation of function in NLPInitialization and solution
@@ -44,23 +40,22 @@ class TestJFSolve:
     @classmethod
     def setUpClass(cls):
         """Sets up the test class."""
-        # Compile the stationary initialization model into a DLL
+        # Compile the stationary initialization model into a JMU
         fpath = os.path.join(get_files_path(), 'Modelica', 'CSTRLib.mo')
-        mc.compile_model("CSTRLib.Components.Two_CSTRs_stat_init", 
-                         fpath, target='ipopt')
+        compile_jmu("CSTRLib.Components.Two_CSTRs_stat_init", fpath)
         
     
     def setUp(self):
-        """Test setUp. Load the test model."""                    
+        """Test setUp. Load the test model."""
         # Load model
-        self.model = jmi.JMUModel("CSTRLib_Components_Two_CSTRs_stat_init")
+        self.model = JMUModel("CSTRLib_Components_Two_CSTRs_stat_init.jmu")
         self.solver = JFSolver(self.model)
         
         # Set inputs for Stationary point A
         u1_0_A = 1
         u2_0_A = 1
-        self.model.set_value('u1',u1_0_A)
-        self.model.set_value('u2',u2_0_A)
+        self.model.set('u1',u1_0_A)
+        self.model.set('u2',u2_0_A)
         
         self.dx0 = N.zeros(6)
         self.x0 = N.array([200., 3.57359316e-02, 446.471014, 100., 1.79867213e-03,453.258466])

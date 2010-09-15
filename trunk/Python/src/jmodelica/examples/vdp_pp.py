@@ -18,8 +18,9 @@
 import os
 import numpy as N
 import pylab as p
-from jmodelica.compiler import OptimicaCompiler
-from jmodelica import simulate
+
+from jmodelica.jmi import compile_jmu
+from jmodelica.jmi import JMUModel
 
 def run_demo(with_plots=True):
     """
@@ -30,14 +31,12 @@ def run_demo(with_plots=True):
 
     # Define model file name and class name
     model_name = 'VDP_pack.VDP'
-    mofile = curr_dir+'/files/VDP.mo'
+    mofile = curr_dir+'/files/VDP.mop'
 
-    # Optimica compiler needed since the .mo file contains
-    # Optimica code
-    oc = OptimicaCompiler()
+    jmu_name = compile_jmu(model_name,mofile)
 
     # Compile and load model
-    model = oc.compile_model(model_name,mofile,target='ipopt')
+    model = JMUModel(jmu_name)
 
     # Define initial conditions
     N_points = 11
@@ -55,10 +54,10 @@ def run_demo(with_plots=True):
     # Loop over initial conditions    
     for i in range(N_points):
         # Set initial conditions in model
-        model.set_value('x1_0',x1_0[i])
-        model.set_value('x2_0',x2_0[i])
+        model.set('x1_0',x1_0[i])
+        model.set('x2_0',x2_0[i])
         # Simulate 
-        sim_res = simulate(model,alg_args={'final_time':20})
+        sim_res = model.simulate(alg_args={'final_time':20})
         # Get simulation result
         res = sim_res.result_data
         x1=res.get_variable_data('x1')
@@ -70,8 +69,6 @@ def run_demo(with_plots=True):
     if with_plots:
         p.grid()
         p.show()
-    
-        
 
 if __name__=="__main__":
     run_demo()

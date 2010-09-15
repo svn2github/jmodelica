@@ -19,10 +19,9 @@ import os;
 from scipy.io.matlab.mio import loadmat
 import matplotlib.pyplot as plt
 import numpy as N
-from jmodelica import initialize
-from jmodelica import simulate
-from jmodelica import optimize
-from jmodelica.compiler import OptimicaCompiler
+
+from jmodelica.jmi import compile_jmu
+from jmodelica.jmi import JMUModel
 
 def run_demo(with_plots=True):
     """
@@ -89,11 +88,14 @@ def run_demo(with_plots=True):
     # Build input trajectory matrix for use in simulation
     u = N.transpose(N.vstack((t_meas,u1,u2)))
 
+    # compile JMU
+    jmu_name = compile_jmu('QuadTankPack.Sim_QuadTank', 
+        curr_dir+'/files/QuadTankPack.mop')
+    model = JMUModel(jmu_name)
+    
     # Simulate model response with nominal parameters
-    res_sim = simulate('QuadTankPack.Sim_QuadTank',
-                       curr_dir+'/files/QuadTankPack.mo',
-                       compiler='opimica',
-                       alg_args={"input_trajectory":u,'start_time':0.,'final_time':60})
+    res_sim = model.simulate(
+        alg_args={"input_trajectory":u,'start_time':0.,'final_time':60})
 
     # Load simulation result
     x1_sim = res_sim.result_data.get_variable_data('qt.x1')
@@ -124,21 +126,19 @@ def run_demo(with_plots=True):
         plt.plot(u2_sim.t,u2_sim.x,'r')
         plt.show()
 
-    # Create Optimica compiler
-    oc = OptimicaCompiler()
-
     # Compile model
-    qt_par_est = oc.compile_model("QuadTankPack.QuadTank_ParEst",
-                                  curr_dir+"/files/QuadTankPack.mo",target='ipopt')
+    jmu_name = compile_jmu("QuadTankPack.QuadTank_ParEst",
+        curr_dir+"/files/QuadTankPack.mop")
+    qt_par_est = JMUModel(jmu_name)
 
     # Number of measurement points
     N_meas = N.size(u1,0)
 
     # Set measurement data into model
     for i in range(0,N_meas):
-        qt_par_est.set_value("t_meas["+`i+1`+"]",t_meas[i])
-        qt_par_est.set_value("y1_meas["+`i+1`+"]",y1_meas[i])
-        qt_par_est.set_value("y2_meas["+`i+1`+"]",y2_meas[i])
+        qt_par_est.set("t_meas["+`i+1`+"]",t_meas[i])
+        qt_par_est.set("y1_meas["+`i+1`+"]",y1_meas[i])
+        qt_par_est.set("y2_meas["+`i+1`+"]",y2_meas[i])
 
     # Numer of element in collocation algorithm
     n_e = 100
@@ -148,9 +148,8 @@ def run_demo(with_plots=True):
     n_cp = 3
 
     # Solve parameter optimization problem
-    res_opt = optimize(qt_par_est,alg_args={"n_e":n_e,"n_cp":3, \
-                                            "result_mesh":"element_interpolation",
-                                            "hs":hs})
+    res_opt = qt_par_est.optimize(
+        alg_args={"n_e":n_e,"n_cp":3, "result_mesh":"element_interpolation","hs":hs})
 
     # Extract optimal values of parameters
     a1_opt = res_opt.result_data.get_variable_data("qt.a1")
@@ -187,22 +186,24 @@ def run_demo(with_plots=True):
         plt.show()
 
     # Compile second parameter estimation model
-    qt_par_est2 = oc.compile_model("QuadTankPack.QuadTank_ParEst2",
-                                   curr_dir+"/files/QuadTankPack.mo",target='ipopt')
+    jmu_name = compile_jmu("QuadTankPack.QuadTank_ParEst2", 
+        curr_dir+"/files/QuadTankPack.mop")
+    qt_par_est2 = JMUModel(jmu_name)
+    
     # Number of measurement points
     N_meas = N.size(u1,0)
 
     # Set measurement data into model
     for i in range(0,N_meas):
-        qt_par_est2.set_value("t_meas["+`i+1`+"]",t_meas[i])
-        qt_par_est2.set_value("y1_meas["+`i+1`+"]",y1_meas[i])
-        qt_par_est2.set_value("y2_meas["+`i+1`+"]",y2_meas[i])
-        qt_par_est2.set_value("y3_meas["+`i+1`+"]",y3_meas[i])
-        qt_par_est2.set_value("y4_meas["+`i+1`+"]",y4_meas[i])
+        qt_par_est2.set("t_meas["+`i+1`+"]",t_meas[i])
+        qt_par_est2.set("y1_meas["+`i+1`+"]",y1_meas[i])
+        qt_par_est2.set("y2_meas["+`i+1`+"]",y2_meas[i])
+        qt_par_est2.set("y3_meas["+`i+1`+"]",y3_meas[i])
+        qt_par_est2.set("y4_meas["+`i+1`+"]",y4_meas[i])
 
     # Solve parameter estimation problem
-    res_opt2 = optimize(qt_par_est2,alg_args={"n_e":n_e,"n_cp":3, \
-                                              "result_mesh":"element_interpolation","hs":hs})
+    res_opt2 = qt_par_est2.optimize(
+        alg_args={"n_e":n_e,"n_cp":3, "result_mesh":"element_interpolation","hs":hs})
 
     # Get optimal parameter values
     a1_opt2 = res_opt2.result_data.get_variable_data("qt.a1")

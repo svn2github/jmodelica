@@ -19,10 +19,8 @@ import os
 import numpy as N
 import pylab as p
 
-import jmodelica
-from jmodelica import jmi
-from jmodelica.compiler import ModelicaCompiler
-from jmodelica import simulate
+from jmodelica.jmi import compile_jmu
+from jmodelica.jmi import JMUModel
 
 def run_demo(with_plots=True):
     """
@@ -31,28 +29,22 @@ def run_demo(with_plots=True):
     of the variables is needed at the event points.
     """
 
-
     curr_dir = os.path.dirname(os.path.abspath(__file__));
 
-    model_name = 'IfExpExamples.IfExpExample2'
-    compiled_model_name = 'IfExpExamples_IfExpExample2'
+    class_name = 'IfExpExamples.IfExpExample2'
     mofile = curr_dir+'/files/IfExpExamples.mo'
-    
-    mc = ModelicaCompiler()
-    
-    # Compile the Modelica model first to C code and
-    # then to a dynamic library
-    mc.compile_model(model_name,mofile,target='ipopt')
+
+    jmu_name = compile_jmu(class_name, mofile)
 
     # Load the dynamic library and XML data
-    model=jmi.JMUModel(compiled_model_name)
+    model = JMUModel(jmu_name)
 
     # Initialize the switches (1=true, 0=false)
     model.set_sw(N.array([1,1]))
     
     #Simulate
-    sim_res = simulate(model,
-                       alg_args={'final_time':5.0})
+    sim_res = model.simulate(alg_args={'final_time':5.0})
+    
     # Get results
     res = sim_res.result_data
     x = res.get_variable_data('x')

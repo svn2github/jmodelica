@@ -26,18 +26,15 @@ import nose
 
 from jmodelica.tests import testattr
 from jmodelica.tests import get_files_path
-
-import jmodelica.jmi as jmi
-from jmodelica.compiler import OptimicaCompiler
-import jmodelica.xmlparser as xp
-import jmodelica.io
+from jmodelica.jmi import compile_jmu
+from jmodelica.jmi import JMUModel
 from jmodelica.optimization import ipopt
 from jmodelica.linearization import *
 from jmodelica.initialization.ipopt import NLPInitialization
 from jmodelica.initialization.ipopt import InitializationOptimizer
 
 
-fpath = os.path.join(get_files_path(), 'Modelica', 'CSTR.mo')
+fpath = os.path.join(get_files_path(), 'Modelica', 'CSTR.mop')
 cpath = "CSTR.CSTR_Opt"
 fname = cpath.replace('.','_',1)
 
@@ -49,17 +46,14 @@ class TestLinearization:
         Setup test module. Compile test model (only needs to be done once) and 
         set log level. 
         """
-        oc = OptimicaCompiler()
-        oc.set_boolean_option('state_start_values_fixed',True)
-        OptimicaCompiler.set_log_level(OptimicaCompiler.LOG_ERROR)
-        oc.compile_model(cpath, fpath, target='ipopt')
-        oc.compile_model(cpath, fpath, target='ipopt')
+        compile_jmu(cpath, fpath, compiler_options={'state_start_values_fixed':True})
+
 
     @testattr(ipopt = True)
     def test_linearization(self):
         
         # Load the dynamic library and XML data
-        model = jmi.JMUModel(fname)
+        model = JMUModel(fname+'.jmu')
 
         # Create DAE initialization object.
         init_nlp = NLPInitialization(model)

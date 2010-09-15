@@ -24,18 +24,16 @@ import ctypes as ct
 from ctypes import byref
 import nose.tools
 
-import jmodelica
 from jmodelica.tests import testattr
 from jmodelica.tests import get_files_path
-from jmodelica.compiler import OptimicaCompiler
-from jmodelica import jmi
+from jmodelica.jmi import compile_jmu
+from jmodelica.jmi import JMUModel
 from jmodelica.optimization import ipopt
+from jmodelica.io import ResultDymolaTextual
 
 int = N.int32
 N.int = N.int32
 
-oc = OptimicaCompiler()
-oc.set_boolean_option('state_start_values_fixed',True)
 
 class TestNLP_VDP:
     """ Tests for NLPCollocation wrapper methods using the CSTR model.
@@ -47,23 +45,23 @@ class TestNLP_VDP:
         Compile the test model.
         """
         # compile cstr
-        fpath_cstr = os.path.join(get_files_path(), 'Modelica', 'CSTR.mo')
+        fpath_cstr = os.path.join(get_files_path(), 'Modelica', 'CSTR.mop')
         cpath_cstr = "CSTR.CSTR_Opt"
-        fname_cstr = cpath_cstr.replace('.','_')
-        oc.compile_model(cpath_cstr, fpath_cstr, 'ipopt')
+        compile_jmu(cpath_cstr, fpath_cstr, 
+            compiler_options={'state_start_values_fixed':True})
     
     def setUp(self):
         """Test setUp. Load the test model."""
-        cpath_cstr = "CSTR.CSTR_Opt"
-        fname_cstr = cpath_cstr.replace('.','_')        
-        self.cstr = jmi.JMUModel(fname_cstr)
+
+        self.cstr = JMUModel("CSTR_CSTR_Opt.jmu")
         # Initialize the mesh
         n_e = 150 # Number of elements 
         hs = N.ones(n_e)*1./n_e # Equidistant points
-        n_cp = 3; # Number of collocation points in each element        
+        n_cp = 3; # Number of collocation points in each element
         
         # Create an NLP object
-        self.nlp = ipopt.NLPCollocationLagrangePolynomials(self.cstr,n_e,hs,n_cp)
+        self.nlp = ipopt.NLPCollocationLagrangePolynomials(
+            self.cstr,n_e,hs,n_cp)
         
         
     @testattr(ipopt = True)    
@@ -78,7 +76,8 @@ class TestNLP_VDP:
         start_time_free=ct.c_int()
         final_time=ct.c_double()
         final_time_free=ct.c_int()        
-        self.nlp.opt_sim_get_interval_spec(byref(start_time),byref(start_time_free),byref(final_time),byref(final_time_free))
+        self.nlp.opt_sim_get_interval_spec(byref(start_time),
+            byref(start_time_free),byref(final_time),byref(final_time_free))
 
     @testattr(ipopt = True)
     def test_opt_sim_get_x(self):
@@ -89,7 +88,9 @@ class TestNLP_VDP:
 
     @testattr(ipopt = True)
     def test_opt_sim_getset_initial(self):
-        """ Test NLPCollocation.opt_sim_get_initial and NLPCollocation.opt_sim_set_initial"""
+        """ Test NLPCollocation.opt_sim_get_initial and 
+        NLPCollocation.opt_sim_set_initial.
+        """
         (n_x,n_g,n_h,dg_n_nz,dh_n_nz)=self.nlp.opt_sim_get_dimensions()
         x_init=N.zeros(n_x)
         self.nlp.opt_sim_get_initial(x_init)
@@ -97,7 +98,9 @@ class TestNLP_VDP:
      
     @testattr(ipopt = True)
     def test_opt_sim_getset_bounds(self):
-        """ Test NLPCollocation.opt_sim_get_bounds and NLPCollocation.opt_sim_set_bounds"""
+        """ Test NLPCollocation.opt_sim_get_bounds and 
+        NLPCollocation.opt_sim_set_bounds.
+        """
         (n_x,n_g,n_h,dg_n_nz,dh_n_nz)=self.nlp.opt_sim_get_dimensions()
         x_lb=N.zeros(n_x)
         x_ub=N.zeros(n_x)
@@ -191,17 +194,17 @@ class TestNLP_CSTR():
         Compile the test model.
         """
         # compile vdp
-        fpath_vdp = os.path.join(get_files_path(), 'Modelica', 'VDP.mo')
+        fpath_vdp = os.path.join(get_files_path(), 'Modelica', 'VDP.mop')
         cpath_vdp = "VDP_pack.VDP_Opt_Min_Time"
-        fname_vdp = cpath_vdp.replace('.','_',1)
-        oc.compile_model(cpath_vdp, fpath_vdp, target='ipopt')
+        compile_jmu(cpath_vdp, fpath_vdp,
+            compiler_options={'state_start_values_fixed':True}) 
     
     def setUp(self):
         """Test setUp. Load the test model."""   
         cpath_vdp = "VDP_pack.VDP_Opt_Min_Time"
         fname_vdp = cpath_vdp.replace('.','_',1)
         self.fname_vdp = fname_vdp   
-        self.vdp = jmi.JMUModel(fname_vdp)
+        self.vdp = JMUModel(fname_vdp+'.jmu')
         # Initialize the mesh
         n_e = 100 # Number of elements 
         hs = N.ones(n_e)*1./n_e # Equidistant points
@@ -209,7 +212,8 @@ class TestNLP_CSTR():
         n_cp = 3; # Number of collocation points in each element
         
         # Create an NLP object
-        self.nlp = ipopt.NLPCollocationLagrangePolynomials(self.vdp,n_e,hs,n_cp)
+        self.nlp = ipopt.NLPCollocationLagrangePolynomials(
+            self.vdp,n_e,hs,n_cp)
         self.nlp_ipopt = ipopt.CollocationOptimizer(self.nlp)
 
     @testattr(ipopt = True)
@@ -220,12 +224,14 @@ class TestNLP_CSTR():
     @testattr(ipopt = True)
     def test_invalid_int_option(self):
         """Test that exceptions are thrown when invalid IPOPT options are set."""
-        nose.tools.assert_raises(Exception, self.nlp_ipopt.opt_sim_ipopt_set_int_option, 'invalid_option',1)
+        nose.tools.assert_raises(Exception, 
+            self.nlp_ipopt.opt_sim_ipopt_set_int_option, 'invalid_option',1)
 
     @testattr(ipopt = True)
     def test_invalid_num_option(self):
         """Test that exceptions are thrown when invalid IPOPT options are set."""
-        nose.tools.assert_raises(Exception, self.nlp_ipopt.opt_sim_ipopt_set_num_option, 'invalid_option',1.0)
+        nose.tools.assert_raises(Exception, 
+            self.nlp_ipopt.opt_sim_ipopt_set_num_option, 'invalid_option',1.0)
 
     @testattr(ipopt = True)
     def test_jmi_opt_sim_set_initial_from_trajectory(self):
@@ -258,7 +264,8 @@ class TestNLP_CSTR():
         z_ = N.concatenate((t_,dx_,x_,u_))
         hs = N.zeros(1)
     
-        self.vdp.jmimodel._dll.jmi_opt_sim_set_initial_from_trajectory(self.nlp._jmi_opt_sim,p_opt,z_,n_points,hs,0.,0.)
+        self.vdp.jmimodel._dll.jmi_opt_sim_set_initial_from_trajectory(
+            self.nlp._jmi_opt_sim,p_opt,z_,n_points,hs,0.,0.)
         
         p_opt2 = N.zeros(1)
         t_2 = N.zeros(n_points)
@@ -274,8 +281,7 @@ class TestNLP_CSTR():
                "The values used in initialization does not match the values that were read back after initialization."        
     @testattr(ipopt = True)
     def test_statistics(self):
-        """ Test of 'jmi_opt_sim_get_statistics'.
-        """
+        """ Test of 'jmi_opt_sim_get_statistics'."""
         # Solve the optimization problem
         self.nlp_ipopt.opt_sim_ipopt_solve()
         (return_status,iters,cost,time) = self.nlp_ipopt.opt_sim_ipopt_get_statistics()
@@ -315,7 +321,7 @@ class TestNLP_CSTR():
         self.nlp.export_result_dymola()
     
         # Load the file we just wrote
-        res = jmodelica.io.ResultDymolaTextual(self.fname_vdp+'_result.txt')
+        res = ResultDymolaTextual(self.fname_vdp+'_result.txt')
     
         self.nlp.set_initial_from_dymola(res,self.hs,0.,0.)
     
@@ -379,16 +385,18 @@ class TestCollocationEventException:
         Compile the test model.
         """
         # compile cstr
-        fpath_cstr = os.path.join(get_files_path(), 'Modelica', 'IfExpTest.mo')
+        fpath_cstr = os.path.join(get_files_path(), 'Modelica', 
+            'IfExpTest.mop')
         cpath_cstr = "IfExpTestEvents"
-        fname_cstr = cpath_cstr.replace('.','_')
-        oc.compile_model(cpath_cstr, fpath_cstr, 'ipopt')
+        
+        compile_jmu(cpath_cstr, fpath_cstr, 
+            compiler_options={'state_start_values_fixed':True})
     
     def setUp(self):
         """Test setUp. Load the test model."""
         cpath_model = "IfExpTestEvents"
         fname_model = cpath_model.replace('.','_')
-        self.model = jmi.JMUModel(fname_model)
+        self.model = JMUModel(fname_model+'.jmu')
 
     @testattr(ipopt = True)
     def test_exception_thrown(self):
@@ -399,7 +407,8 @@ class TestCollocationEventException:
         
         # Create an NLP object
         try:
-            self.nlp = ipopt.NLPCollocationLagrangePolynomials(self.model,n_e,hs,n_cp)
+            self.nlp = ipopt.NLPCollocationLagrangePolynomials(
+                self.model,n_e,hs,n_cp)
         except Exception as e:
             assert str(e) == "The collocation optimization algorithm does not support models with events. Please consider using the noEvent() operator or rewriting the model.", "Wrong message in thrown exception."
         else:

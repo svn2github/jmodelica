@@ -19,7 +19,8 @@ import os
 import numpy as N
 import pylab as p
 
-from jmodelica import simulate
+from jmodelica.jmi import compile_jmu
+from jmodelica.jmi import JMUModel
 
 def run_demo(with_plots=True):
     """
@@ -32,9 +33,12 @@ def run_demo(with_plots=True):
     m_name = 'SolAngles'
     mofile = curr_dir+'/files/SolAngles.mo'
     
-    sim_res = simulate(m_name, mofile,
-                       alg_args={'final_time':86400.0, 'num_communication_points':86400},
-                       solver_args={'make_consistency':'IDA_YA_YDP_INIT'})
+    jmu_name = compile_jmu(m_name, mofile)
+    model = JMUModel(jmu_name)
+    
+    sim_res = model.simulate(
+        alg_args={'final_time':86400.0, 'num_communication_points':86400},
+        solver_args={'make_consistency':'IDA_YA_YDP_INIT'})
     
     res = sim_res.result_data
     theta = res.get_variable_data('theta')

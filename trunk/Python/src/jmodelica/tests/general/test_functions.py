@@ -25,7 +25,8 @@ class TestFunction1(SimulationTest):
 
     @classmethod
     def setUpClass(cls):
-        SimulationTest.setup_class_base('FunctionTests.mo', 'FunctionTests.FunctionTest1')
+        SimulationTest.setup_class_base('FunctionTests.mo', 
+            'FunctionTests.FunctionTest1')
 
     @testattr(assimulo = True)
     def setUp(self):
@@ -48,7 +49,8 @@ class TestFunction2(SimulationTest):
 
     @classmethod
     def setUpClass(cls):
-        SimulationTest.setup_class_base('FunctionTests.mo', 'FunctionTests.FunctionTest2')
+        SimulationTest.setup_class_base('FunctionTests.mo', 
+            'FunctionTests.FunctionTest2')
 
     @testattr(assimulo = True)
     def setUp(self):
@@ -71,7 +73,8 @@ class TestIntegerArg1(SimulationTest):
 
     @classmethod
     def setUpClass(cls):
-        SimulationTest.setup_class_base('FunctionTests.mo', 'FunctionTests.IntegerArg1')
+        SimulationTest.setup_class_base('FunctionTests.mo', 
+            'FunctionTests.IntegerArg1')
 
     @testattr(assimulo = True)
     def setUp(self):

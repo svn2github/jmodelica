@@ -26,8 +26,6 @@ import numpy as n
 
 from jmodelica.tests import testattr
 from jmodelica.tests import get_files_path
-from jmodelica.compiler import OptimicaCompiler
-from jmodelica.compiler import ModelicaCompiler
 from jmodelica import xmlparser
 
 #type defs

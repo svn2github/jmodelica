@@ -19,10 +19,8 @@ import os
 import numpy as N
 import pylab as p
 
-from jmodelica import jmi
-from jmodelica.compiler import ModelicaCompiler
-from jmodelica import simulate
-
+from jmodelica.jmi import compile_jmu
+from jmodelica.jmi import JMUModel
 
 def run_demo(with_plots=True):
     """
@@ -39,19 +37,16 @@ def run_demo(with_plots=True):
     u = N.cos(t)
     u_traj = N.transpose(N.vstack((t,u)))
     
-    mc = ModelicaCompiler()
-    
-    # Compile the Modelica model first to C code and
-    # then to a dynamic library
-    mc.compile_model(model_name,mofile,target='ipopt')
+    # Compile the Modelica model to JMU
+    jmu_name = compile_jmu(model_name,mofile)
 
     # Load the dynamic library and XML data
-    model=jmi.JMUModel(model_name)
+    model=JMUModel(jmu_name)
 
-    model.set_value('u',u[0])
+    model.set('u',u[0])
     
-    sim_res = simulate(model, alg_args={'final_time':30, 
-                       'num_communication_points':3000, 'input_trajectory':u_traj})
+    sim_res = model.simulate(alg_args={'final_time':30, 
+        'num_communication_points':3000, 'input_trajectory':u_traj})
     
     res = sim_res.result_data
     x1_sim = res.get_variable_data('x1')

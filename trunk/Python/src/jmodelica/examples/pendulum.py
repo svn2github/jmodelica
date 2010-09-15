@@ -18,13 +18,13 @@
 # Import library for path manipulations
 import os.path
 
-# Import the JModelica.org Python packages
-import jmodelica
-from jmodelica import optimize
-
 # Import numerical libraries
 import numpy as N
 import matplotlib.pyplot as plt
+
+# Import the JModelica.org Python packages
+from jmodelica.jmi import compile_jmu
+from jmodelica.jmi import JMUModel
 
 def run_demo(with_plots=True):
     """Demonstrate how to solve a dynamic optimization
@@ -32,11 +32,15 @@ def run_demo(with_plots=True):
     
     
     curr_dir = os.path.dirname(os.path.abspath(__file__));
-    model_name = "Pendulum_pack.Pendulum_Opt"
+    class_name = "Pendulum_pack.Pendulum_Opt"
     
+    # compile JMU
+    jmu_name = compile_jmu(class_name, curr_dir+"/files/Pendulum_pack.mop",
+        compiler_options={'state_start_values_fixed':True})
+    
+    model = JMUModel(jmu_name)
     # optimize
-    opt_res = optimize(model_name, curr_dir+"/files/Pendulum_pack.mo",
-                       compiler_options={'state_start_values_fixed':True})
+    opt_res = model.optimize()
 
     # Extract variable profiles
     res = opt_res.result_data

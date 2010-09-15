@@ -18,36 +18,29 @@
 # Import library for path manipulations
 import os.path
 
-# Import the JModelica.org Python packages
-import jmodelica
-import jmodelica.jmi as jmi
-from jmodelica.compiler import OptimicaCompiler
-from jmodelica.optimization import ipopt
-from jmodelica import optimize
-
 # Import numerical libraries
 import numpy as N
 import ctypes as ct
 import matplotlib.pyplot as plt
 import scipy.integrate as integr
 
+# Import the JModelica.org Python packages
+from jmodelica.jmi import compile_jmu
+from jmodelica.jmi import JMUModel
+from jmodelica.optimization import ipopt
+
 def run_demo(with_plots=True):
     """Demonstrate how to solve a simple
     parameter estimation problem."""
 
-    oc = OptimicaCompiler()
-#    oc.set_boolean_option('state_start_values_fixed',True)
-
     curr_dir = os.path.dirname(os.path.abspath(__file__));
 
-    # Compile the Optimica model first to C code and
-    # then to a dynamic library
-    oc.compile_model("ParEst.ParEst",
-                     curr_dir+"/files/ParameterEstimation_1.mo",
-                     target='ipopt')
+    # Compile the Optimica model to a JMU
+    jmu_name = compile_jmu("ParEst.ParEst",
+        curr_dir+"/files/ParameterEstimation_1.mop")
     
     # Load the dynamic library and XML data
-    model=jmi.JMUModel("ParEst_ParEst")
+    model=JMUModel(jmu_name)
     
     # Retreive parameter and variable vectors
     pi = model.get_real_pi();
@@ -111,7 +104,7 @@ def run_demo(with_plots=True):
         plt.show()
     
     # optimize
-    opt_res = optimize(model, solver_args={"max_iter":500})
+    opt_res = model.optimize(solver_args={"max_iter":500})
     
     # Extract variable profiles
     res = opt_res.result_data
