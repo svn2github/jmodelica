@@ -92,6 +92,14 @@
 				</Description>
 			</BooleanAttributes>
 		</Option>
+	        <Option type="boolean">
+			<BooleanAttributes key="automatic_add_initial_equations" value="false">
+				<Description>
+                                     When this option is set to true (default is true), then additional initial equations are added to the model based on a the result of a matching algorithm. Initial equations are added for states that are not matched to an equation.
+				</Description>
+			</BooleanAttributes>
+		</Option>
 	</Options>	
+
 
 </OptionRegistry>

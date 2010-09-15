@@ -23,6 +23,11 @@ import java.util.Stack;
 import java.util.HashSet;
 import java.util.Collections;
 
+import org.jmodelica.util.BiPGraph;
+import org.jmodelica.util.Eq;
+import org.jmodelica.util.Var;
+
+
 /* This causes conflicts
 import org.jmodelica.graphs.EquationSystem;
 import org.jmodelica.graphs.Equation;
@@ -84,6 +89,10 @@ aspect TransformCanonical {
 		if (root().options.getBooleanOption("equation_sorting")) {
 			indexReduction();
 			blt();
+		}
+		
+		if (root().options.getBooleanOption("automatic_add_initial_equations")) {
+			addInitialEquations();
 		}
 		
         root().flushAllRecursive();
@@ -192,6 +201,89 @@ aspect TransformCanonical {
 		System.out.println(str.toString());
 		setFEquationBlockList(l);
 	}
+
+	public void FClass.addInitialEquations() {
+		
+		BiPGraph g = new BiPGraph(name(),"");
+		
+		Eq eqn = null;
+		Var v = null;
+		
+		int k = 1;
+		for (FAbstractEquation e : equations()) {
+			eqn = g.addEquation("eq_"+k,e.prettyPrint(""));
+			k++;
+			
+			for (FVariable y : e.algebraicVariables()) { 
+				log.debug("  Algebraic: " + y.name()); 
+					 	 
+				v = g.addVariable(y.name(),"");     
+				g.addEdge(eqn,v); 
+			} 
+
+			for (FDerivativeVariable dx : e.derivativeVariables()) { 
+				log.debug("  Diffed state: " + dx.name()); 
+ 
+				v = g.addVariable(dx.name(),"");     
+				g.addEdge(eqn,v); 
+			} 
+		}
+		
+		System.out.println(g);
+		g.maximumMatching(true);	
+		System.out.print("DAE system ");
+		System.out.println(g.printMatching());
+
+		k = 1;
+		for (FAbstractEquation e : equations()) {
+			eqn = g.getEquation("eq_"+k);
+			k++;
+
+			for (FVariable x : e.differentiatedVariables()) { 
+				log.debug("  State: " + x.name()); 
+					 	 
+				v = g.addVariable(x.name(),"");     
+				g.addEdge(eqn,v); 
+			} 			
+		}
+
+		for (FAbstractEquation e : initialEquations()) {
+			eqn = g.addEquation("eq_"+k,e.prettyPrint(""));
+			k++;
+			
+			for (FVariable y : e.algebraicVariables()) { 
+				log.debug("  Algebraic: " + y.name()); 
+					 	 
+				v = g.addVariable(y.name(),"");     
+				g.addEdge(eqn,v); 
+			} 
+					
+			for (FVariable x : e.differentiatedVariables()) { 
+				log.debug("  State: " + x.name()); 
+					 	 
+				v = g.addVariable(x.name(),"");     
+				g.addEdge(eqn,v); 
+			} 
+				 	
+			for (FDerivativeVariable dx : e.derivativeVariables()) { 
+				log.debug("  Diffed state: " + dx.name()); 
+ 
+				v = g.addVariable(dx.name(),"");     
+				g.addEdge(eqn,v); 
+			} 
+		}
+
+		System.out.println(g);
+		g.maximumMatching(false);	
+		System.out.print("DAE initial ");
+		System.out.println(g.printMatching());
+
+		
+//		g.randomTest(100,100,500);
+//		g.randomTest(1000,1000,5000);
+//		g.randomTest(10000,10000,50000);
+			
+	}	
 	
 	/**
 	 * \brief Convert variable binding equations into regular equations.
