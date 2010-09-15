@@ -1744,6 +1744,7 @@ aspect InstanceDumpTree {
 	
 }
 
+/* TODO: If we are doing this, we should do it properly
 aspect InstancePrettyPrint {
 
 	public String InstNode.prettyPrint(String indent) {
@@ -1817,3 +1818,4 @@ aspect InstancePrettyPrint {
 
 	
 }
+*/

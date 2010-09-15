@@ -784,6 +784,19 @@ aspect BuiltInFlatTypes {
 aspect InstClassRestriction {
 	
 	/**
+	 * \brief Is this class a connector?
+	 */
+	syn boolean InstClassDecl.isConnector() = false;
+	eq InstBaseClassDecl.isConnector()      = getInstRestriction().isConnector();
+	eq UnknownInstClassDecl.isConnector()   = false;
+	
+	/**
+	 * \brief Is this restriction "connector"?
+	 */
+	syn boolean InstRestriction.isConnector() = false;
+	eq InstConnector.isConnector() = true;
+	
+	/**
 	 * \brief Is this class a function?
 	 */
 	syn boolean InstClassDecl.isFunction() = false;

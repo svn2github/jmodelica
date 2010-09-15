@@ -2309,7 +2309,7 @@ model ConditionalComponentTest10
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.FlatteningTestCase(
          name="ConditionalComponentTest10",
-         description="Test flattening of conditional components.",
+         description="Test flattening of conditional components",
          flatModel="
 fclass NameTests.ConditionalComponentTest10
  parameter Boolean b = true /* true */;
@@ -2320,9 +2320,9 @@ fclass NameTests.ConditionalComponentTest10
  parameter Real source1.p = 1 /* 1 */;
  Real sink.u;
 equation
- m.u1 = m.y;
+ m.u1 = source1.y;
  m.y = sink.u;
- sink.u = source1.y;
+ m.u1 = m.y;
 end NameTests.ConditionalComponentTest10;
 ")})));
 
@@ -2364,7 +2364,7 @@ model ConditionalComponentTest11
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.FlatteningTestCase(
          name="ConditionalComponentTest11",
-         description="Test flattening of conditional components.",
+         description="Test flattening of conditional components",
          flatModel="
 fclass NameTests.ConditionalComponentTest11
  parameter Boolean b = false /* false */;
@@ -2375,9 +2375,9 @@ fclass NameTests.ConditionalComponentTest11
  parameter Real source2.p = 1 /* 1 */;
  Real sink.u;
 equation
- m.u2 = m.y;
+ m.u2 = source2.y;
  m.y = sink.u;
- sink.u = source2.y;
+ m.u2 = m.y;
 end NameTests.ConditionalComponentTest11;
 ")})));
 

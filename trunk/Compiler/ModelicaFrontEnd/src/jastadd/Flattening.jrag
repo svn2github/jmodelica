@@ -778,39 +778,10 @@ aspect FlatExpressions {
 	}
 
 	public FAbstractEquation FConnectClause.flattenEqn(FQName prefix, FClass fc) {
-		
 		if (!getConnector1().isDisabled() && !getConnector2().isDisabled()) {
-
-			InstAccess ia1 = getConnector1().getInstAccess();
-			InstAccess ia2 = getConnector2().getInstAccess();
-
-			InstComponentDecl comp1 = ia1.myInstComponentDecl();
-			InstComponentDecl comp2 = ia2.myInstComponentDecl();
-
-			InstFullClassDecl c1 = (InstFullClassDecl) comp1.myInstClass().finalClass();
-			InstFullClassDecl c2 = (InstFullClassDecl) comp2.myInstClass().finalClass();
-
-			FQName name1 = ia1.flatten(prefix);
-			FQName name2 = ia2.flatten(prefix);
-
-			// Is it two "primitives" that are connected?
-			if (c1.extendsPrimitive() || c1.isPrimitive()) {
-				fc.getConnectionSetManager().addVars(comp1, false, name1, comp2, false, name2);
-				return null;
-			}
-
-			InstClassDecl eicd = enclosingInstClassDecl();
-			boolean outside1 = eicd.memberInstComponent(ia1.name()).size() > 0;
-			boolean outside2 = eicd.memberInstComponent(ia2.name()).size() > 0;
-
-			InstComponentDecl var1, var2;
-			for (InstComponentDecl icd : comp1.containedInstComponents()) {
-				var1 = icd;
-				var2 = (InstComponentDecl) comp2.memberInstComponent(var1.name()).iterator().next();
-				FQName fqn1 = var1.flattenedAccess(name1);
-				FQName fqn2 = var2.flattenedAccess(name2);
-				fc.getConnectionSetManager().addVars(var1, outside1, fqn1, var2, outside2, fqn2);
-			}
+			InstAccess left  = getConnector1().getInstAccess();
+			InstAccess right = getConnector2().getInstAccess();
+			left.connectTo(right, prefix, fc.getConnectionSetManager());
 		}
 		return null;
 	}

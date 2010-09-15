@@ -427,5 +427,46 @@ aspect Connections {
 		}
 	
 	}
+	
+	
+	public void InstAccess.connectTo(InstAccess right, FQName prefix, ConnectionSetManager csm) {
+		FQName leftName  = flatten(prefix);
+		FQName rightName = right.flatten(prefix);
+		
+		boolean leftOutside  = isOutsideConnector();
+		boolean rightOutside = right.isOutsideConnector();
+		
+		InstComponentDecl leftComp  = myInstComponentDecl().findCell(leftName);
+		InstComponentDecl rightComp = right.myInstComponentDecl().findCell(rightName);
+		
+		leftComp.connectTo(leftOutside, leftName, rightComp, rightOutside, rightName, csm);
+	}
+	
+	public void InstComponentDecl.connectTo(boolean leftOutside, FQName leftName, 
+			InstComponentDecl rightComp, boolean rightOutside, FQName rightName, ConnectionSetManager csm) {
+		SortedSet<InstComponentDecl> rightChildren = rightComp.containedInstComponents();
+		for (InstComponentDecl leftComp2 : containedInstComponents()) {
+			InstComponentDecl rightComp2 = rightChildren.tailSet(leftComp2).first();
+			FQName leftName2  = leftComp2.flattenedAccess(leftName);
+			FQName rightName2 = rightComp2.flattenedAccess(rightName);
+			leftComp2.connectTo(leftOutside, leftName2, rightComp2, rightOutside, rightName2, csm);
+		}
+	}
+
+	public void InstPrimitive.connectTo(boolean leftOutside, FQName leftName, 
+			InstComponentDecl rightComp, boolean rightOutside, FQName rightName, ConnectionSetManager csm) {
+		csm.addVars(this, leftOutside, leftName, rightComp, rightOutside, rightName);
+	}
+	
+	syn InstComponentDecl InstComponentDecl.findCell(Index i, int j) = 
+		(j < i.ndims()) ? getInstComponentDecl(i.get(j) - 1).findCell(i, j + 1) : this;
+	eq InstPrimitive.findCell(Index i, int j) = this;
+
+	syn InstComponentDecl InstComponentDecl.findCell(FQName name) = 
+		name.hasFArraySubscripts() ? findCell(name.getFArraySubscripts().asIndex(), 0) : this;
+
+	syn boolean InstAccess.isOutsideConnector() = getFirstInstAccess().myInstComponentDecl().isConnector();
+	
+	syn boolean InstComponentDecl.isConnector() = myInstClassDecl().isConnector();
 
 }

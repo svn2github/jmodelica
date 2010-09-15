@@ -361,13 +361,13 @@ package StreamExample
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
          name="HeatedGas",
-         description="Test of stream connectors.",
+         description="Test of stream connectors",
          eliminate_alias_variables=false,
          flatModel="
 fclass StreamTests.StreamExample.Examples.Systems.HeatedGas
  parameter Real R_gas(final quantity = \"SpecificHeatCapacity\",final unit = \"J/(kg.K)\") = ( 8.314472 ) / ( 0.0289651159 ) /* 287.0512249529787 */;
- parameter Real cp(final quantity = \"SpecificHeatCapacity\",final unit = \"J/(kg.K)\") = 1000 /* 1000.0 */;
- parameter Real flowSource.mflow0(quantity = \"MassFlowRate\",final unit = \"kg/s\") = 1 /* 1.0 */;
+ parameter Real cp(final quantity = \"SpecificHeatCapacity\",final unit = \"J/(kg.K)\") = 1000 /* 1000 */;
+ parameter Real flowSource.mflow0(quantity = \"MassFlowRate\",final unit = \"kg/s\") = 1 /* 1 */;
  parameter Real flowSource.T0(final quantity = \"ThermodynamicTemperature\",final unit = \"K\",min = 0,displayUnit = \"degC\") = 303.15 /* 303.15 */;
  parameter Real flowSource.cp(final quantity = \"SpecificHeatCapacity\",final unit = \"J/(kg.K)\");
  Real flowSource.h(nominal = 400000,final quantity = \"SpecificEnergy\",final unit = \"J/kg\");
@@ -375,9 +375,9 @@ fclass StreamTests.StreamExample.Examples.Systems.HeatedGas
  Real flowSource.flowPort.p(nominal = 100000,start = 100000,final quantity = \"Pressure\",final unit = \"Pa\",displayUnit = \"bar\");
  Real flowSource.flowPort.h_outflow(nominal = 400000,start = 400000,final quantity = \"SpecificEnergy\",final unit = \"J/kg\");
  parameter Integer multiPortVolume.nP = 2 \"Number of flow ports\" /* 2 */;
- parameter Real multiPortVolume.V(final quantity = \"Volume\",final unit = \"m3\") = 1 /* 1.0 */;
+ parameter Real multiPortVolume.V(final quantity = \"Volume\",final unit = \"m3\") = 1 /* 1 */;
  parameter Real multiPortVolume.T_start(final quantity = \"ThermodynamicTemperature\",final unit = \"K\",min = 0,displayUnit = \"degC\") = 303.15 /* 303.15 */;
- parameter Real multiPortVolume.p_start(final quantity = \"Pressure\",final unit = \"Pa\",displayUnit = \"bar\") = 100000 /* 100000.0 */;
+ parameter Real multiPortVolume.p_start(final quantity = \"Pressure\",final unit = \"Pa\",displayUnit = \"bar\") = 100000 /* 100000 */;
  parameter Real multiPortVolume.cp(final quantity = \"SpecificHeatCapacity\",final unit = \"J/(kg.K)\");
  parameter Real multiPortVolume.R(final quantity = \"SpecificHeatCapacity\",final unit = \"J/(kg.K)\");
  Real multiPortVolume.heatPort.T(start = multiPortVolume.T_start,final quantity = \"ThermodynamicTemperature\",final unit = \"K\",min = 0,displayUnit = \"degC\") \"Port temperature\";
@@ -400,9 +400,9 @@ fclass StreamTests.StreamExample.Examples.Systems.HeatedGas
  Real multiPortVolume.u(nominal = 250000,start = 250000,final quantity = \"SpecificEnergy\",final unit = \"J/kg\");
  Real multiPortVolume.rho(nominal = 1.0,final quantity = \"Density\",final unit = \"kg/m3\",displayUnit = \"g/cm3\",min = 0);
  Real multiPortVolume.U(nominal = 250000,start = 250000,final quantity = \"Energy\",final unit = \"J\");
- parameter Real heatSource.Q_flow(final quantity = \"Power\",final unit = \"W\") = 100000 \"Fixed heat flow rate at port\" /* 100000.0 */;
+ parameter Real heatSource.Q_flow(final quantity = \"Power\",final unit = \"W\") = 100000 \"Fixed heat flow rate at port\" /* 100000 */;
  parameter Real heatSource.T_ref(final quantity = \"ThermodynamicTemperature\",final unit = \"K\",min = 0,displayUnit = \"degC\") = 373.15 \"Reference temperature\" /* 373.15 */;
- parameter Real heatSource.alpha(final quantity = \"LinearTemperatureCoefficient\",final unit = \"1/K\") = 0 \"Temperature coefficient of heat flow rate\" /* 0.0 */;
+ parameter Real heatSource.alpha(final quantity = \"LinearTemperatureCoefficient\",final unit = \"1/K\") = 0 \"Temperature coefficient of heat flow rate\" /* 0 */;
  Real heatSource.port.T(final quantity = \"ThermodynamicTemperature\",final unit = \"K\",min = 0,displayUnit = \"degC\") \"Port temperature\";
  Real heatSource.port.Q_flow(final quantity = \"Power\",final unit = \"W\") \"Heat flow rate (positive if flowing from outside into the component)\";
  Real linearResistance.port_a.m_flow(quantity = \"MassFlowRate\",final unit = \"kg/s\");
@@ -412,7 +412,7 @@ fclass StreamTests.StreamExample.Examples.Systems.HeatedGas
  Real linearResistance.port_b.p(nominal = 100000,start = 100000,final quantity = \"Pressure\",final unit = \"Pa\",displayUnit = \"bar\");
  Real linearResistance.port_b.h_outflow(nominal = 400000,start = 400000,final quantity = \"SpecificEnergy\",final unit = \"J/kg\");
  Real linearResistance.u(start = 1);
- parameter Real reservoir.p0(final quantity = \"Pressure\",final unit = \"Pa\",displayUnit = \"bar\") = 100000 /* 100000.0 */;
+ parameter Real reservoir.p0(final quantity = \"Pressure\",final unit = \"Pa\",displayUnit = \"bar\") = 100000 /* 100000 */;
  parameter Real reservoir.T0(final quantity = \"ThermodynamicTemperature\",final unit = \"K\",min = 0,displayUnit = \"degC\") = 303.15 /* 303.15 */;
  parameter Real reservoir.cp(final quantity = \"SpecificHeatCapacity\",final unit = \"J/(kg.K)\");
  parameter Real reservoir.h0(final quantity = \"SpecificEnergy\",final unit = \"J/kg\");
@@ -420,9 +420,9 @@ fclass StreamTests.StreamExample.Examples.Systems.HeatedGas
  Real reservoir.flowPort.p(nominal = 100000,start = 100000,final quantity = \"Pressure\",final unit = \"Pa\",displayUnit = \"bar\");
  Real reservoir.flowPort.h_outflow(nominal = 400000,start = 400000,final quantity = \"SpecificEnergy\",final unit = \"J/kg\");
  parameter Real ramp.height = 1e4 \"Height of ramps\" /* 10000.0 */;
- parameter Real ramp.duration(min = 1.0E-60,start = 2,final quantity = \"Time\",final unit = \"s\") = 1 \"Durations of ramp\" /* 1.0 */;
+ parameter Real ramp.duration(min = 1.0E-60,start = 2,final quantity = \"Time\",final unit = \"s\") = 1 \"Durations of ramp\" /* 1 */;
  parameter Real ramp.offset = 1e4 \"Offset of output signal\" /* 10000.0 */;
- parameter Real ramp.startTime(final quantity = \"Time\",final unit = \"s\") = 5 \"Output = offset for time < startTime\" /* 5.0 */;
+ parameter Real ramp.startTime(final quantity = \"Time\",final unit = \"s\") = 5 \"Output = offset for time < startTime\" /* 5 */;
  Real ramp.y \"Connector of Real output signal\";
 initial equation 
  multiPortVolume.p = multiPortVolume.p_start;
@@ -462,8 +462,8 @@ equation
  reservoir.flowPort.p = reservoir.p0;
  reservoir.flowPort.h_outflow = reservoir.h0;
  ramp.y = ramp.offset + (if time < ramp.startTime then 0 elseif time < ramp.startTime + ramp.duration then ( ( time - ( ramp.startTime ) ) * ( ramp.height ) ) / ( ramp.duration ) else ramp.height);
- heatSource.port.T = multiPortVolume.heatPort.T;
  heatSource.port.Q_flow + multiPortVolume.heatPort.Q_flow = 0;
+ heatSource.port.T = multiPortVolume.heatPort.T;
  flowSource.flowPort.m_flow + multiPortVolume.flowPort[1].m_flow = 0;
  flowSource.flowPort.p = multiPortVolume.flowPort[1].p;
  linearResistance.port_b.m_flow + reservoir.flowPort.m_flow = 0;
@@ -582,20 +582,20 @@ end StreamTests.StreamExample.Examples.Systems.HeatedGas;
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
          name="HeatedGas_SimpleWrap",
-         description="Test of inside and outside stream connectors.",
+         description="Test of inside and outside stream connectors",
          eliminate_alias_variables=false,
          flatModel="
 fclass StreamTests.StreamExample.Examples.Systems.HeatedGas_SimpleWrap
  parameter Real R_gas(final quantity = \"SpecificHeatCapacity\",final unit = \"J/(kg.K)\") = ( 8.314472 ) / ( 0.0289651159 ) /* 287.0512249529787 */;
- parameter Real cp(final quantity = \"SpecificHeatCapacity\",final unit = \"J/(kg.K)\") = 1000 /* 1000.0 */;
- parameter Real flowSource.mflow0(quantity = \"MassFlowRate\",final unit = \"kg/s\") = 1 /* 1.0 */;
+ parameter Real cp(final quantity = \"SpecificHeatCapacity\",final unit = \"J/(kg.K)\") = 1000 /* 1000 */;
+ parameter Real flowSource.mflow0(quantity = \"MassFlowRate\",final unit = \"kg/s\") = 1 /* 1 */;
  parameter Real flowSource.T0(final quantity = \"ThermodynamicTemperature\",final unit = \"K\",min = 0,displayUnit = \"degC\") = 303.15 /* 303.15 */;
  parameter Real flowSource.cp(final quantity = \"SpecificHeatCapacity\",final unit = \"J/(kg.K)\");
  Real flowSource.h(nominal = 400000,final quantity = \"SpecificEnergy\",final unit = \"J/kg\");
  Real flowSource.flowPort.m_flow(quantity = \"MassFlowRate\",final unit = \"kg/s\");
  Real flowSource.flowPort.p(nominal = 100000,start = 100000,final quantity = \"Pressure\",final unit = \"Pa\",displayUnit = \"bar\");
  Real flowSource.flowPort.h_outflow(nominal = 400000,start = 400000,final quantity = \"SpecificEnergy\",final unit = \"J/kg\");
- parameter Real reservoir.p0(final quantity = \"Pressure\",final unit = \"Pa\",displayUnit = \"bar\") = 100000 /* 100000.0 */;
+ parameter Real reservoir.p0(final quantity = \"Pressure\",final unit = \"Pa\",displayUnit = \"bar\") = 100000 /* 100000 */;
  parameter Real reservoir.T0(final quantity = \"ThermodynamicTemperature\",final unit = \"K\",min = 0,displayUnit = \"degC\") = 303.15 /* 303.15 */;
  parameter Real reservoir.cp(final quantity = \"SpecificHeatCapacity\",final unit = \"J/(kg.K)\");
  parameter Real reservoir.h0(final quantity = \"SpecificEnergy\",final unit = \"J/kg\");
@@ -603,9 +603,9 @@ fclass StreamTests.StreamExample.Examples.Systems.HeatedGas_SimpleWrap
  Real reservoir.flowPort.p(nominal = 100000,start = 100000,final quantity = \"Pressure\",final unit = \"Pa\",displayUnit = \"bar\");
  Real reservoir.flowPort.h_outflow(nominal = 400000,start = 400000,final quantity = \"SpecificEnergy\",final unit = \"J/kg\");
  parameter Real ramp.height = 1e4 \"Height of ramps\" /* 10000.0 */;
- parameter Real ramp.duration(min = 1.0E-60,start = 2,final quantity = \"Time\",final unit = \"s\") = 1 \"Durations of ramp\" /* 1.0 */;
+ parameter Real ramp.duration(min = 1.0E-60,start = 2,final quantity = \"Time\",final unit = \"s\") = 1 \"Durations of ramp\" /* 1 */;
  parameter Real ramp.offset = 1e4 \"Offset of output signal\" /* 10000.0 */;
- parameter Real ramp.startTime(final quantity = \"Time\",final unit = \"s\") = 5 \"Output = offset for time < startTime\" /* 5.0 */;
+ parameter Real ramp.startTime(final quantity = \"Time\",final unit = \"s\") = 5 \"Output = offset for time < startTime\" /* 5 */;
  Real ramp.y \"Connector of Real output signal\";
  Real linearResistanceWrap.port_a.m_flow(quantity = \"MassFlowRate\",final unit = \"kg/s\");
  Real linearResistanceWrap.port_a.p(nominal = 100000,start = 100000,final quantity = \"Pressure\",final unit = \"Pa\",displayUnit = \"bar\");
@@ -636,18 +636,18 @@ equation
  linearResistanceWrap.linearResistance.port_a.m_flow + linearResistanceWrap.linearResistance.port_b.m_flow = 0;
  linearResistanceWrap.linearResistance.port_a.h_outflow = reservoir.flowPort.h_outflow;
  linearResistanceWrap.linearResistance.port_b.h_outflow = flowSource.flowPort.h_outflow;
- linearResistanceWrap.linearResistance.u = linearResistanceWrap.u;
  linearResistanceWrap.u = ramp.y;
  linearResistanceWrap.port_b.m_flow + reservoir.flowPort.m_flow = 0;
  linearResistanceWrap.port_b.p = reservoir.flowPort.p;
  flowSource.flowPort.m_flow + linearResistanceWrap.port_a.m_flow = 0;
  flowSource.flowPort.p = linearResistanceWrap.port_a.p;
+ linearResistanceWrap.linearResistance.port_b.h_outflow = linearResistanceWrap.port_b.h_outflow;
  linearResistanceWrap.linearResistance.port_b.m_flow - ( linearResistanceWrap.port_b.m_flow ) = 0;
  linearResistanceWrap.linearResistance.port_b.p = linearResistanceWrap.port_b.p;
- linearResistanceWrap.linearResistance.port_b.h_outflow = linearResistanceWrap.port_b.h_outflow;
+ linearResistanceWrap.linearResistance.port_a.h_outflow = linearResistanceWrap.port_a.h_outflow;
  linearResistanceWrap.linearResistance.port_a.m_flow - ( linearResistanceWrap.port_a.m_flow ) = 0;
  linearResistanceWrap.linearResistance.port_a.p = linearResistanceWrap.port_a.p;
- linearResistanceWrap.linearResistance.port_a.h_outflow = linearResistanceWrap.port_a.h_outflow;
+ linearResistanceWrap.linearResistance.u = linearResistanceWrap.u;
 end StreamTests.StreamExample.Examples.Systems.HeatedGas_SimpleWrap;
 ")})));
 

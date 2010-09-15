@@ -251,13 +251,13 @@ fclass ConnectTests.ConnectTest6
  Real b2.a2.y[2];
  Real b2.a2.x[2];
 equation
- b1.a1.y[1:2] = b2.a2.y[1:2];
  b1.a1.x[1:2] + b2.a2.x[1:2] = zeros(2);
- b1.a1.y[1:2] = b1.a2.y[1:2];
+ b1.a1.y[1:2] = b2.a2.y[1:2];
   - ( b1.a1.x[1:2] ) - ( b1.a2.x[1:2] ) = zeros(2);
+ b1.a1.y[1:2] = b1.a2.y[1:2];
  b1.a2.x = zeros(2);
- b2.a1.y[1:2] = b2.a2.y[1:2];
   - ( b2.a1.x[1:2] ) - ( b2.a2.x[1:2] ) = zeros(2);
+ b2.a1.y[1:2] = b2.a2.y[1:2];
  b2.a1.x = zeros(2);
 end ConnectTests.ConnectTest6;
 ")})));
@@ -308,6 +308,114 @@ equation
         connect(a[i], a[i+1]);
     end for;
 end ConnectTest8;
+
+
+model ConnectTest9
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ConnectTest9",
+         description="",
+         flatModel="
+fclass ConnectTests.ConnectTest9
+ Real a[1].x;
+ Real a[1].y;
+ Real a[2].x;
+ Real a[2].y;
+equation
+ a[1].x = a[2].x;
+  - ( a[1].y ) - ( a[2].y ) = 0;
+ a[1].y = 0;
+ a[2].y = 0;
+end ConnectTests.ConnectTest9;
+")})));
+
+	connector A
+		Real x;
+		flow Real y;
+	end A;
+	
+	A a[2];
+equation
+	connect(a[1], a[2]);
+end ConnectTest9;
+
+
+model ConnectTest10
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ConnectTest10",
+         description="Check that order of variables within connector does not matter",
+         flatModel="
+fclass ConnectTests.ConnectTest10
+ Real a.x;
+ Real a.y;
+ Real b.y;
+ Real b.x;
+equation
+ a.x = b.x;
+ a.y = b.y;
+end ConnectTests.ConnectTest10;
+")})));
+
+	connector A
+		Real x;
+		Real y;
+	end A;
+	
+	connector B
+		Real y;
+		Real x;
+	end B;
+	
+	A a;
+	B b;
+equation
+	connect(a, b);
+end ConnectTest10;
+
+
+model ConnectTest11
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ConnectTest11",
+         description="",
+         flatModel="
+fclass ConnectTests.ConnectTest11
+ Real c1.b1.x;
+ Real c1.b1.y;
+ Real c1.b2.x;
+ Real c1.b2.y;
+ Real c2.b1.x;
+ Real c2.b1.y;
+ Real c2.b2.x;
+ Real c2.b2.y;
+equation
+ c1.b1.x = c2.b1.x;
+  - ( c1.b1.y ) - ( c2.b1.y ) = 0;
+ c1.b2.x = c2.b2.x;
+  - ( c1.b2.y ) - ( c2.b2.y ) = 0;
+ c1.b1.y = 0;
+ c1.b2.y = 0;
+ c2.b1.y = 0;
+ c2.b2.y = 0;
+end ConnectTests.ConnectTest11;
+")})));
+
+	connector B
+	    Real x;
+	    flow Real y;
+	end B;
+  
+	connector C
+	    B b1;
+	    B b2;
+	end C;
+  
+	C c1;
+	C c2;
+equation
+	connect(c1, c2);
+end ConnectTest11;
 
 
 
@@ -388,13 +496,13 @@ model Electrical
 end Electrical;
 
   model CircuitTest1
-  
-  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="CircuitTest1",
-        description="Test of generation of connection equations.",
-                                               flatModel=
-"fclass ConnectTests.CircuitTest1
- parameter Real cv.V=1 \"Value of constant voltage\";
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="CircuitTest1",
+         description="Test of generation of connection equations.",
+         flatModel="
+fclass ConnectTests.CircuitTest1
+ parameter Real cv.V = 1 \"Value of constant voltage\" /* 1 */;
  Real cv.v \"Voltage drop between the two pins (= p.v - n.v)\";
  Real cv.i \"Current flowing from pin p to pin n\";
  Real cv.p.v \"Potential at the pin\";
@@ -403,21 +511,21 @@ end Electrical;
  Real cv.n.i \"Current flowing into the pin\";
  Real g.p.v \"Potential at the pin\";
  Real g.p.i \"Current flowing into the pin\";
- parameter Real r.R=1 \"Resistance\";
+ parameter Real r.R = 1 \"Resistance\" /* 1 */;
  Real r.v \"Voltage drop between the two pins (= p.v - n.v)\";
  Real r.i \"Current flowing from pin p to pin n\";
  Real r.p.v \"Potential at the pin\";
  Real r.p.i \"Current flowing into the pin\";
  Real r.n.v \"Potential at the pin\";
  Real r.n.i \"Current flowing into the pin\";
- parameter Real c.C=1 \"Capacitance\";
+ parameter Real c.C = 1 \"Capacitance\" /* 1 */;
  Real c.v \"Voltage drop between the two pins (= p.v - n.v)\";
  Real c.i \"Current flowing from pin p to pin n\";
  Real c.p.v \"Potential at the pin\";
  Real c.p.i \"Current flowing into the pin\";
  Real c.n.v \"Potential at the pin\";
  Real c.n.i \"Current flowing into the pin\";
-equation 
+equation
  cv.v = cv.V;
  cv.v = cv.p.v - ( cv.n.v );
  0 = cv.p.i + cv.n.i;
@@ -431,13 +539,13 @@ equation
  c.v = c.p.v - ( c.n.v );
  0 = c.p.i + c.n.i;
  c.i = c.p.i;
+ c.p.i + cv.p.i + r.p.i = 0;
  c.p.v = cv.p.v;
  cv.p.v = r.p.v;
- c.p.i + cv.p.i + r.p.i = 0;
+ c.n.i + cv.n.i + g.p.i + r.n.i = 0;
  c.n.v = cv.n.v;
  cv.n.v = g.p.v;
  g.p.v = r.n.v;
- c.n.i + cv.n.i + g.p.i + r.n.i = 0;
 end ConnectTests.CircuitTest1;
 ")})));
   
@@ -454,12 +562,13 @@ end ConnectTests.CircuitTest1;
   end CircuitTest1;
 
   model CircuitTest2
-  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="CircuitTest2",
-        description="Test of generation of connection equations.",
-                                               flatModel=
-"fclass ConnectTests.CircuitTest2
- parameter Real cv.V=1 \"Value of constant voltage\";
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="CircuitTest2",
+         description="Test of generation of connection equations",
+         flatModel="
+fclass ConnectTests.CircuitTest2
+ parameter Real cv.V = 1 \"Value of constant voltage\" /* 1 */;
  Real cv.v \"Voltage drop between the two pins (= p.v - n.v)\";
  Real cv.i \"Current flowing from pin p to pin n\";
  Real cv.p.v \"Potential at the pin\";
@@ -468,21 +577,21 @@ end ConnectTests.CircuitTest1;
  Real cv.n.i \"Current flowing into the pin\";
  Real g.p.v \"Potential at the pin\";
  Real g.p.i \"Current flowing into the pin\";
- parameter Real r.R=1 \"Resistance\";
+ parameter Real r.R = 1 \"Resistance\" /* 1 */;
  Real r.v \"Voltage drop between the two pins (= p.v - n.v)\";
  Real r.i \"Current flowing from pin p to pin n\";
  Real r.p.v \"Potential at the pin\";
  Real r.p.i \"Current flowing into the pin\";
  Real r.n.v \"Potential at the pin\";
  Real r.n.i \"Current flowing into the pin\";
- parameter Real f.r.R=1 \"Resistance\";
+ parameter Real f.r.R = 1 \"Resistance\" /* 1 */;
  Real f.r.v \"Voltage drop between the two pins (= p.v - n.v)\";
  Real f.r.i \"Current flowing from pin p to pin n\";
  Real f.r.p.v \"Potential at the pin\";
  Real f.r.p.i \"Current flowing into the pin\";
  Real f.r.n.v \"Potential at the pin\";
  Real f.r.n.i \"Current flowing into the pin\";
- parameter Real f.c.C=1 \"Capacitance\";
+ parameter Real f.c.C = 1 \"Capacitance\" /* 1 */;
  Real f.c.v \"Voltage drop between the two pins (= p.v - n.v)\";
  Real f.c.i \"Current flowing from pin p to pin n\";
  Real f.c.p.v \"Potential at the pin\";
@@ -494,7 +603,7 @@ end ConnectTests.CircuitTest1;
  Real f.p.i \"Current flowing into the pin\";
  Real f.n.v \"Potential at the pin\";
  Real f.n.i \"Current flowing into the pin\";
-equation 
+equation
  cv.v = cv.V;
  cv.v = cv.p.v - ( cv.n.v );
  0 = cv.p.i + cv.n.i;
@@ -513,19 +622,19 @@ equation
  0 = f.c.p.i + f.c.n.i;
  f.c.i = f.c.p.i;
  f.v = f.p.v - ( f.n.v );
+ cv.p.i + f.p.i + r.p.i = 0;
  cv.p.v = f.p.v;
  f.p.v = r.p.v;
- cv.p.i + f.p.i + r.p.i = 0;
+ cv.n.i + f.n.i + g.p.i + r.n.i = 0;
  cv.n.v = f.n.v;
  f.n.v = g.p.v;
  g.p.v = r.n.v;
- cv.n.i + f.n.i + g.p.i + r.n.i = 0;
+ f.c.p.i - ( f.p.i ) + f.r.p.i = 0;
  f.c.p.v = f.p.v;
  f.p.v = f.r.p.v;
- f.c.p.i - ( f.p.i ) + f.r.p.i = 0;
+ f.c.n.i - ( f.n.i ) + f.r.n.i = 0;
  f.c.n.v = f.n.v;
  f.n.v = f.r.n.v;
- f.c.n.i - ( f.n.i ) + f.r.n.i = 0;
 end ConnectTests.CircuitTest2;
 ")})));
   
@@ -564,33 +673,33 @@ end ConnectTests.CircuitTest2;
   end CircuitTest2;
 
 model ConnectorTest
-
-  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="ConnectorTest",
-        description="Test of generation of connection equations.",
-                                               flatModel=
-"fclass ConnectTests.ConnectorTest
- parameter Real c.b.firstOrder.k = 1 \"Gain\" /* 1.0 */;
- parameter Real c.b.firstOrder.T(start = 1,final quantity = \"Time\",final unit = \"s\") = 1 \"Time Constant\" /* 1.0 */;
- parameter Real c.b.firstOrder.y_start = 0 \"Initial or guess value of output (= state)\" /* 0.0 */;
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ConnectorTest",
+         description="Test of generation of connection equations",
+         flatModel="
+fclass ConnectTests.ConnectorTest
+ parameter Real c.b.firstOrder.k = 1 \"Gain\" /* 1 */;
+ parameter Real c.b.firstOrder.T(start = 1,final quantity = \"Time\",final unit = \"s\") = 1 \"Time Constant\" /* 1 */;
+ parameter Real c.b.firstOrder.y_start = 0 \"Initial or guess value of output (= state)\" /* 0 */;
  Real c.b.firstOrder.u \"Connector of Real input signal\";
  Real c.b.firstOrder.y(start = c.b.firstOrder.y_start) \"Connector of Real output signal\";
  Real c.b.feedback.u1;
  Real c.b.feedback.u2;
  Real c.b.feedback.y;
  Real c.b.u;
- parameter Real c.const.k(start = 1) = 1 \"Constant output value\" /* 1.0 */;
+ parameter Real c.const.k(start = 1) = 1 \"Constant output value\" /* 1 */;
  Real c.const.y \"Connector of Real output signal\";
 initial equation 
  c.b.firstOrder.y = c.b.firstOrder.y_start;
-equation 
+equation
  c.b.firstOrder.der(y) = ( ( c.b.firstOrder.k ) * ( c.b.firstOrder.u ) - ( c.b.firstOrder.y ) ) / ( c.b.firstOrder.T );
  c.b.feedback.y = c.b.feedback.u1 - ( c.b.feedback.u2 );
  c.const.y = c.const.k;
- c.b.feedback.u1 = c.b.u;
  c.b.u = c.const.y;
  c.b.feedback.y = c.b.firstOrder.u;
  c.b.feedback.u2 = c.b.firstOrder.y;
+ c.b.feedback.u1 = c.b.u;
 end ConnectTests.ConnectorTest;
 ")})));
 
@@ -708,12 +817,11 @@ end ConnectTests.ConnectorTest;
 end ConnectorTest;
 
 model CauerLowPassAnalog
-
-  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.FlatteningTestCase(name="CauerLowPassAnalog",
-        description="Test of generation of connection equations.",
-                                               flatModel=
-"
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="CauerLowPassAnalog",
+         description="Test of generation of connection equations",
+         flatModel="
 fclass ConnectTests.CauerLowPassAnalog
  parameter Real l1(final quantity = \"Inductance\",final unit = \"H\") = 1.304 \"filter coefficient I1\" /* 1.304 */;
  parameter Real l2(final quantity = \"Inductance\",final unit = \"H\") = 0.8586 \"filter coefficient I2\" /* 0.8586 */;
@@ -773,23 +881,23 @@ fclass ConnectTests.CauerLowPassAnalog
  Real L2.p.i(final quantity = \"ElectricCurrent\",final unit = \"A\") \"Current flowing into the pin\";
  Real L2.n.v(final quantity = \"ElectricPotential\",final unit = \"V\") \"Potential at the pin\";
  Real L2.n.i(final quantity = \"ElectricCurrent\",final unit = \"A\") \"Current flowing into the pin\";
- parameter Real R1.R(start = 1,final quantity = \"Resistance\",final unit = \"Ohm\") = 1 \"Resistance\" /* 1.0 */;
+ parameter Real R1.R(start = 1,final quantity = \"Resistance\",final unit = \"Ohm\") = 1 \"Resistance\" /* 1 */;
  Real R1.v(final quantity = \"ElectricPotential\",final unit = \"V\") \"Voltage drop between the two pins (= p.v - n.v)\";
  Real R1.i(final quantity = \"ElectricCurrent\",final unit = \"A\") \"Current flowing from pin p to pin n\";
  Real R1.p.v(final quantity = \"ElectricPotential\",final unit = \"V\") \"Potential at the pin\";
  Real R1.p.i(final quantity = \"ElectricCurrent\",final unit = \"A\") \"Current flowing into the pin\";
  Real R1.n.v(final quantity = \"ElectricPotential\",final unit = \"V\") \"Potential at the pin\";
  Real R1.n.i(final quantity = \"ElectricCurrent\",final unit = \"A\") \"Current flowing into the pin\";
- parameter Real R2.R(start = 1,final quantity = \"Resistance\",final unit = \"Ohm\") = 1 \"Resistance\" /* 1.0 */;
+ parameter Real R2.R(start = 1,final quantity = \"Resistance\",final unit = \"Ohm\") = 1 \"Resistance\" /* 1 */;
  Real R2.v(final quantity = \"ElectricPotential\",final unit = \"V\") \"Voltage drop between the two pins (= p.v - n.v)\";
  Real R2.i(final quantity = \"ElectricCurrent\",final unit = \"A\") \"Current flowing from pin p to pin n\";
  Real R2.p.v(final quantity = \"ElectricPotential\",final unit = \"V\") \"Potential at the pin\";
  Real R2.p.i(final quantity = \"ElectricCurrent\",final unit = \"A\") \"Current flowing into the pin\";
  Real R2.n.v(final quantity = \"ElectricPotential\",final unit = \"V\") \"Potential at the pin\";
  Real R2.n.i(final quantity = \"ElectricCurrent\",final unit = \"A\") \"Current flowing into the pin\";
- parameter Real V.V(start = 1,final quantity = \"ElectricPotential\",final unit = \"V\") = 0 \"Height of step\" /* 0.0 */;
- parameter Real V.offset(final quantity = \"ElectricPotential\",final unit = \"V\") = 0 \"Voltage offset\" /* 0.0 */;
- parameter Real V.startTime(final quantity = \"Time\",final unit = \"s\") = 1 \"Time offset\" /* 1.0 */;
+ parameter Real V.V(start = 1,final quantity = \"ElectricPotential\",final unit = \"V\") = 0 \"Height of step\" /* 0 */;
+ parameter Real V.offset(final quantity = \"ElectricPotential\",final unit = \"V\") = 0 \"Voltage offset\" /* 0 */;
+ parameter Real V.startTime(final quantity = \"Time\",final unit = \"s\") = 1 \"Time offset\" /* 1 */;
  parameter Real V.signalSource.height = V.V \"Height of step\";
  parameter Real V.signalSource.offset = V.offset \"Offset of output signal y\";
  parameter Real V.signalSource.startTime(final quantity = \"Time\",final unit = \"s\") = V.startTime \"Output y = offset for time < startTime\";
@@ -800,7 +908,7 @@ fclass ConnectTests.CauerLowPassAnalog
  Real V.p.i(final quantity = \"ElectricCurrent\",final unit = \"A\") \"Current flowing into the pin\";
  Real V.n.v(final quantity = \"ElectricPotential\",final unit = \"V\") \"Potential at the pin\";
  Real V.n.i(final quantity = \"ElectricCurrent\",final unit = \"A\") \"Current flowing into the pin\";
-equation 
+equation
  G.p.v = 0;
  C1.i = ( C1.C ) * ( C1.der(v) );
  C1.v = C1.p.v - ( C1.n.v );
@@ -839,32 +947,31 @@ equation
  0 = R2.p.i + R2.n.i;
  R2.i = R2.p.i;
  V.v = V.signalSource.y;
- V.signalSource.y = V.signalSource.offset + (if time < V.signalSource.startTime then 0
- else V.signalSource.height);
+ V.signalSource.y = V.signalSource.offset + (if time < V.signalSource.startTime then 0 else V.signalSource.height);
  V.v = V.p.v - ( V.n.v );
  0 = V.p.i + V.n.i;
  V.i = V.p.i;
+ C1.p.i + C2.p.i + L1.p.i + R1.n.i = 0;
  C1.p.v = C2.p.v;
  C2.p.v = L1.p.v;
  L1.p.v = R1.n.v;
- C1.p.i + C2.p.i + L1.p.i + R1.n.i = 0;
+ C1.n.i + C3.n.i + C5.n.i + G.p.i + R2.n.i + V.n.i = 0;
  C1.n.v = C3.n.v;
  C3.n.v = C5.n.v;
  C5.n.v = G.p.v;
  G.p.v = R2.n.v;
  R2.n.v = V.n.v;
- C1.n.i + C3.n.i + C5.n.i + G.p.i + R2.n.i + V.n.i = 0;
+ C2.n.i + C3.p.i + C4.p.i + L1.n.i + L2.p.i = 0;
  C2.n.v = C3.p.v;
  C3.p.v = C4.p.v;
  C4.p.v = L1.n.v;
  L1.n.v = L2.p.v;
- C2.n.i + C3.p.i + C4.p.i + L1.n.i + L2.p.i = 0;
+ C4.n.i + C5.p.i + L2.n.i + R2.p.i = 0;
  C4.n.v = C5.p.v;
  C5.p.v = L2.n.v;
  L2.n.v = R2.p.v;
- C4.n.i + C5.p.i + L2.n.i + R2.p.i = 0;
- R1.p.v = V.p.v;
  R1.p.i + V.p.i = 0;
+ R1.p.v = V.p.v;
 end ConnectTests.CauerLowPassAnalog;
 ")})));
 

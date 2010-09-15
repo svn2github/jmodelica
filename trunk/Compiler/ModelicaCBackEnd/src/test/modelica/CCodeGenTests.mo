@@ -47,26 +47,26 @@ $C_DAE_initial_equation_residuals$
 $C_DAE_initial_guess_equation_residuals$
 ",
          generatedCode="
-#define _der_z_4 ((*(jmi->z))[jmi->offs_real_dx+0])
+#define _der_x_4 ((*(jmi->z))[jmi->offs_real_dx+0])
 #define _der_v_5 ((*(jmi->z))[jmi->offs_real_dx+1])
-#define _z_1 ((*(jmi->z))[jmi->offs_real_x+0])
+#define _x_0 ((*(jmi->z))[jmi->offs_real_x+0])
 #define _v_3 ((*(jmi->z))[jmi->offs_real_x+1])
-#define _y_0 ((*(jmi->z))[jmi->offs_real_w+0])
+#define _y_1 ((*(jmi->z))[jmi->offs_real_w+0])
 #define _w_2 ((*(jmi->z))[jmi->offs_real_w+1])
 #define time ((*(jmi->z))[jmi->offs_t])
 
-    (*res)[0] =  - ( _z_1 ) - (_der_z_4);
+    (*res)[0] =  - ( _x_0 ) - (_der_x_4);
     (*res)[1] = 4 - (_der_v_5);
-    (*res)[2] = 3 - (_y_0);
+    (*res)[2] = 3 - (_y_1);
     (*res)[3] = 2 - (_w_2);
 
-    (*res)[0] =  - ( _z_1 ) - (_der_z_4);
+    (*res)[0] =  - ( _x_0 ) - (_der_x_4);
     (*res)[1] = 4 - (_der_v_5);
-    (*res)[2] = 3 - (_y_0);
+    (*res)[2] = 3 - (_y_1);
     (*res)[3] = 2 - (_w_2);
-    (*res)[4] = 3 - (_y_0);
+    (*res)[4] = 3 - (_y_1);
 
-   (*res)[0] = 0.0 - _z_1;
+   (*res)[0] = 1 - _x_0;
    (*res)[1] = 1 - _w_2;
    (*res)[2] = 0.0 - _v_3;
 ")})));

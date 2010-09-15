@@ -16,6 +16,7 @@
 
 import java.util.Iterator;
 import java.util.Collection;
+import java.util.Arrays;
 
 aspect TestCases {
 
@@ -358,8 +359,26 @@ abstract public class TestCase {
 	protected void testPrettyPrint(FClass fc, String correct) {
 		TokenTester tt = new TokenTester();
 		String test = fc.prettyPrint("");
-		if (!tt.test(test, correct)) 
-			fail("Flat class does not match expected." + compareMsg(test, correct));
+		if (!tt.test(test, correct)) {
+			String err = "Flat class does not match expected.";
+			if (tt.test(sortLines(test), sortLines(correct)))
+				err += "\nOnly the order of the lines differ.";
+			fail(err + compareMsg(test, correct));
+		}
+	}
+	
+	/**
+	 * \brief Sort lines in string alphabetically.
+	 */
+	protected String sortLines(String str) {
+		String[] lines = str.split("\n");
+		Arrays.sort(lines);
+		StringBuilder buf = new StringBuilder();
+		for (String line : lines) {
+			buf.append(line);
+			buf.append('\n');
+		}
+		return buf.toString();
 	}
 	
 	/**

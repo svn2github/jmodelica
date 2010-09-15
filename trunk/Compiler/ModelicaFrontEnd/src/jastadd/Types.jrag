@@ -17,6 +17,9 @@
 
 import java.util.HashSet;
 import java.util.ArrayList;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.Comparator;
 
 aspect Types { 
  
@@ -99,17 +102,22 @@ aspect Types {
      return set;
   }
 
+  public static final Comparator<InstComponentDecl> InstComponentDecl.NAME_COMPARATOR = 
+	  new Comparator<InstComponentDecl>() {
+	  public int compare(InstComponentDecl o1, InstComponentDecl o2) {
+		  return o1.name().compareTo(o2.name());
+	  }
+  };
 
-  syn lazy ArrayList<InstComponentDecl> InstNode.containedInstComponents() {
-  	ArrayList<InstComponentDecl> l = new ArrayList<InstComponentDecl>();
-    for (InstNode node : getInstExtendss()) {
-       	 l.addAll(node.containedInstComponents());
-    }
-    for (InstComponentDecl node : getInstComponentDecls()) { 
-         l.add(node);
-    }
-    return l;
+  syn lazy SortedSet<InstComponentDecl> InstNode.containedInstComponents() {
+	  SortedSet<InstComponentDecl> s = new TreeSet<InstComponentDecl>(InstComponentDecl.NAME_COMPARATOR);
+	  for (InstNode node : getInstExtendss())
+		  s.addAll(node.containedInstComponents());
+	  for (InstComponentDecl node : getInstComponentDecls())
+		  s.add(node);
+	  return s;
   }
+  
   
   // TODO: Shouldn't this be in TypeCheck.jrag?
   // TODO: Does InstRecord need this?

@@ -141,32 +141,17 @@ aspect AliasVariables {
 		 * @return The iteration variable of the alias set.
 		 */
 		public AliasVariable getIterationVariable(LinkedHashSet<AliasVariable> aliasSet) {
-			// 1. Select an input in the alias set
+			// Find the variable with highest heuristic score
+			AliasVariable best = null;
+			int max = 0;
 			for (AliasVariable av : aliasSet) {
-				if (av.getFVariable().isInput()) {
-					return av;
+				int score = av.getFVariable().aliasHeuristicScore();
+				if (score > max) {
+					max = score;
+					best = av;
 				}
 			}
-			
-			// 2. Select a variable whith fixed attribute set to true
-			for (AliasVariable av : aliasSet) {
-				FExp fixed = av.getFVariable().fixedAttributeExp();
-				if (!av.getFVariable().isParameter() && fixed!=null) {
-					if (fixed.ceval().booleanValue()) {
-						return av;
-					}
-				}
-			}
-
-			// 3. Select a variable that is a parameter
-			for (AliasVariable av : aliasSet) {
-				if (av.getFVariable().isParameter()) {
-					return av;
-				}
-			}
-
-			return aliasSet.iterator().next();
-			
+			return best;
 		}
 
 		/**
@@ -540,6 +525,37 @@ aspect AliasVariables {
 		
 		}
 	
+	}
+	
+	/**
+	 * \brief Get the heuristic score for keeping this variable in an alias set.
+	 * 
+	 * The variable with the highest score should be kept. Score is always > 0.
+	 */
+	syn int FVariable.aliasHeuristicScore() {
+		int score = 1000;
+		
+		// 1. Input
+		if (isInput())
+			return score;
+		score--;
+		
+		// 2. non-parameter with fixed attribute set to true
+		if (!isParameter() && fixedAttributeSet() && fixedAttributeExp().ceval().booleanValue())
+			return score;
+		score--;
+		
+		// 3. parameter
+		if (isParameter())
+			return score;
+		score--;
+		
+		// 4. start attribute set
+		if (startAttributeSet())
+			return score;
+		score--;
+		
+		return score;
 	}
 
 }

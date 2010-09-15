@@ -932,6 +932,15 @@ aspect FlattPrettyPrint {
    		p.toString(getRight(),str,indent,o);
 	}
 
+	public void FConnectClause.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+		str.print(indent);
+		str.print("connect(");
+    	p.toString(getConnector1(),str,indent,o);
+   		str.print(", ");
+   		p.toString(getConnector2(),str,indent,o);
+   		str.print(")");
+	}
+
 	public void FFunctionCallEquation.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
 		str.print(indent);
 		if (getNumLeft() > 0) {
