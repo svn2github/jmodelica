@@ -146,6 +146,9 @@ aspect OptimicaTransformCanonical {
 		
 	}
 	
+	// Don't add initial equations for optimization problems
+	public void FOptClass.addInitialEquations() {}
+	
 	public void FOptClass.scalarize() {
 		
 		/* Note that it is not ok to call super.scalarize() here, since
