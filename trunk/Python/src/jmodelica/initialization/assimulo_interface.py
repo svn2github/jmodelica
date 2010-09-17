@@ -25,30 +25,29 @@ import numpy as N
 import jmodelica.jmi as jmi
 
 try:
-    from assimulo.non_linear_problem import NL_Problem
+    from assimulo.problem_algebraic import ProblemAlgebraic
 except ImportError:
     warnings.warn('Could not find Assimulo package. Check jmodelica.check_packages()')
 
 
-class JMIInit_Exception(Exception):
+class JMUAlg_Exception(Exception):
     """
     A JMIModel Exception.
     """
     pass
 
 
-class JMIInitProblem(NL_Problem):
+class JMUAlgebraic(ProblemAlgebraic):
     
-    def __init__(self,model,x0 = None):
+    def __init__(self,model,x0 = None,constraints = None, use_constraints = False):
         """
         Create an instance of the JMIInitProblem
         
-        Parameters::
-        
-            model --
-                An instance of the instance jmi.JMUModel
+        Parameters:
+            model:
+                An instance of the instance jmi.model
                 
-            x0 --
+            x0:
                 A numpy array containing the initial guess. 
                 If not supplied, an initial guess is read from the model.
         """
@@ -88,16 +87,16 @@ class JMIInitProblem(NL_Problem):
             self._x0[self._dx_size:self._mark] = self._model.get_real_x()
             self._x0[self._mark:self._neqF0] = self._model.get_real_w()
             
+        self.constraints = constraints
+        self.use_constraints = use_constraints
 
     
     def f(self,input):
 
         """
         Function used to get the residual of the F0 function in JMI
-        
-        Parameters::
-        
-            input --
+        Parameters:
+            input:
                 A numpy array, the vector input for which the residual will be
                 evaluated
         """
@@ -122,9 +121,8 @@ class JMIInitProblem(NL_Problem):
         """
         Set the initial guess of the system to x0
         
-        Parameters::
-        
-            x0 --
+        Parameters:
+            x0:
                 A numpy array, the vector x0 is the initial guess for the problem
         
         """
@@ -144,9 +142,8 @@ class JMIInitProblem(NL_Problem):
         """
         Function used to get the jacobian of the F0 function in JMI
         
-        Parameters::
-        
-            input --
+        Parameters:
+            input:
                 A numpy array, the vector input for which the jacobian will be
                 evaluated
         """
@@ -166,6 +163,47 @@ class JMIInitProblem(NL_Problem):
         jac = N.zeros(self._nonzeros)
         self._jmi_model.init_dF0(jmi.JMI_DER_CPPAD, jmi.JMI_DER_DENSE_ROW_MAJOR, self._ind_vars, self._mask, jac)
     
-        # return output from result
+        # return output from result 
         return N.reshape(jac,(self._nrow,self._ncol))
+        
+    def get_constraints(self):
+        """
+        Function that returns the users constraints if there are any,
+        no constraints if the option self.no_constraints is set to True.
+        Otherwise the assimulo_interface will try to calculate reasonable constraints
+        
+        Returns:
+            A numpy array, size len(_x0) containing
+            the constraints, if constraint[i] is:
+                0.0  - no constraint on x[i]
+                1.0  - x[i] greater or equal than 0.0
+                -1.0 - x[i] lesser or equal than 0.0
+                2.0  - x[i] greater  than 0.0
+                -2.0 - x[i] lesser than 0.0
+        """
+        
+        if self.use_constraints:
+            if self.constraints != None:
+                return self.constraints
+            else:
+                return self._guess_constraints()
+        else:
+            return None
+        
+    def _guess_constraints(self):
+        """
+        Fct used to guess the constraints based on the initial guesses of a model
+        """
+        
+        res = N.zeros(self._neqF0)
+        for i in N.arange(self._dx_size,self._mark):
+            if self._x0[i] < 0:
+                res[i] = -2.0
+            elif self._x0[i] > 0:
+                res[i] = 2.0
+            else:
+                res[i] = 0.0
+                
+        return res
+        
         

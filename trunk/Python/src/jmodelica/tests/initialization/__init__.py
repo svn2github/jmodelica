@@ -16,5 +16,5 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 """Tests for the initialization package."""
-__all__ = ['test_ipopt']
+__all__ = ['test_ipopt','test_kinitsolve.py']
 

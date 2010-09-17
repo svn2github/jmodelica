@@ -22,7 +22,7 @@ import os.path
 from jmodelica.jmi import compile_jmu
 from jmodelica.jmi import JMUModel
 
-from jmodelica.algorithm_drivers import JFSInitAlg
+from jmodelica.algorithm_drivers import KInitSolveAlg
 
 # Import numerical libraries
 import numpy as N
@@ -56,7 +56,7 @@ def run_demo(with_plots=True,with_blocking_factors = False):
     u1_0_A = 3.0
     init_model.set('u1',u1_0_A)
     
-    init_result = init_model.initialize(algorithm=JFSInitAlg)
+    init_result = init_model.initialize(algorithm=KInitSolveAlg)
     	
     # Store stationary point A
     y_A = N.zeros(32)
@@ -71,7 +71,7 @@ def run_demo(with_plots=True,with_blocking_factors = False):
     # Set inputs for stationary point B
     u1_0_B = 3.0 - 1
     init_model.set('u1',u1_0_B)
-    init_result = init_model.initialize(algorithm=JFSolver)
+    init_result = init_model.initialize(algorithm=KInitSolveAlg)
 
     # Store stationary point B
     y_B = N.zeros(32)

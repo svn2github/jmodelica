@@ -28,7 +28,7 @@ from jmodelica.io import ResultDymolaTextual
 from jmodelica.optimization import ipopt
 from jmodelica.initialization.ipopt import NLPInitialization
 from jmodelica.initialization.ipopt import InitializationOptimizer
-from jmodelica.initialization.jfsolver import JFSolver
+from jmodelica.initialization.kinitsol import KInitSolver
 
 try:
     from jmodelica.simulation.assimulo_interface import JMIDAE, JMIODE, FMIODE, write_data
@@ -732,9 +732,9 @@ class InvalidSolverArgumentException(Exception):
     def __str__(self):
         return repr(self.msg)
     
-class JFSInitResult(ResultBase): pass
+class KInitSolveResult(ResultBase): pass
     
-class JFSInitAlg(AlgorithmBase):
+class KInitSolveAlg(AlgorithmBase):
     """ Initialization using a solver of non-linear eq-systems"""
 
     def __init__(self, model, alg_args={}):
@@ -745,12 +745,13 @@ class JFSInitAlg(AlgorithmBase):
             model -- 
                 jmi.Model object representation of the model
             alg_args -- 
-                All arguments for the algorithm. See _set_alg_args
+                All arguments for the algorithm in the shape 
+                of a dictionary. See _set_alg_args
                 function call for names and default values.        
         """
         
         self.model = model
-        self.solver = JFSolver(model)
+        self.solver = KInitSolver(model)
         #try to set algorithm arguments
         try:
             self._set_alg_args(**alg_args)
@@ -759,6 +760,8 @@ class JFSInitAlg(AlgorithmBase):
         
     def _set_alg_args(self,
                       use_jac=True,
+                      use_constraints = False,
+                      constraints = None,
                       result_file_name='', 
                       result_format='txt'):
         """ Set arguments for initialization algorithm.
@@ -769,6 +772,19 @@ class JFSInitAlg(AlgorithmBase):
                 Boolean set to True if the jacobian is to be 
                 supplied by the JMIinterface
                 Default: True
+            use_const --
+                Boolean set to True if constraints are to be used at all
+                Default: False
+            constraints = None --
+                If supplied these will be used. The constraints should 
+                be a numpy array of size len(x0) with the following number
+                in the ith position.
+                0.0  - no constraint on x[i]
+                1.0  - x[i] greater or equal than 0.0
+                -1.0 - x[i] lesser or equal than 0.0
+                2.0  - x[i] greater  than 0.0
+                -2.0 - x[i] lesser than 0.0
+                Default: None
             result_file_name --
                 Name of result file.
                 Default: empty string (default generated file name will be used)
@@ -777,6 +793,7 @@ class JFSInitAlg(AlgorithmBase):
                 Default: 'txt'
         """
         self.solver.set_jac_usage(use_jac)
+        self.solver.set_constraints_usage(use_constraints,constraints)
         self.result_args = dict(file_name=result_file_name, format=result_format)
           
     def set_solver_options(self, solver_args): pass
@@ -796,4 +813,4 @@ class JFSInitAlg(AlgorithmBase):
         res = ResultDymolaTextual(resultfile)
         
         # create and return result object
-        return JFSInitResult(self.model, resultfile, self.solver, res)
+        return KInitSolveResult(self.model, resultfile, self.solver, res)

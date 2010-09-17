@@ -15,22 +15,20 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 """ The jfsolver initialization module.
-    Written by Johan Ylikiiskilä
+    Written by Johan Ylikiiskil�
 """
 
-
-from scipy.optimize import fsolve
 from assimulo.kinsol import KINSOL
 from numpy import *
 import jmodelica.jmi as jmi
 from jmodelica.jmi import JMIException
 from jmodelica import io
 
-from assimulo_interface import JMIInitProblem
-from assimulo_interface import JMIInit_Exception
+from assimulo_interface import JMUAlgebraic
+from assimulo_interface import JMUAlg_Exception
 
 
-class JFSolver(object):
+class KInitSolver(object):
     """ Class handling the initialization of a DAE using a solver of nl-eqs 
         and the JMIinterface
     """
@@ -49,8 +47,11 @@ class JFSolver(object):
         
         # get model and create problem
         self._model = model
-        self._problem = JMIInitProblem(model)
+        self._problem = JMUAlgebraic(model)
         self._use_jac = True
+        self._use_const = False
+        self._constraints = None
+        
         
         # create KINSOL solver
         self._solver = KINSOL()
@@ -73,7 +74,42 @@ class JFSolver(object):
                 Boolean set to True if the jacobian is to be 
                 supplied by the JMIinterface
         """
-        self._use_jac = use_jac
+        if type(use_jac).__name__ == 'bool':
+            self._use_jac = use_jac
+        else:
+            raise JMIException("The variable sent to 'set_jac_usage' must be a boolean.")
+        
+    def set_constraints_usage(self,use_const,constraints = None):
+        """ Set whether to use constraints or not. If constraints are supplied
+        they will be applied (if use_const = True) otherwise constraints will be
+        guessed.
+            
+        Parameters::
+        
+            use_const --
+                Boolean set to True if constraints are to be used at all
+            constraints = None --
+                If supplied these will be used. The constraints should 
+                be a numpy array of size len(x0) with the following number
+                in the ith position.
+                0.0  - no constraint on x[i]
+                1.0  - x[i] greater or equal than 0.0
+                -1.0 - x[i] lesser or equal than 0.0
+                2.0  - x[i] greater  than 0.0
+                -2.0 - x[i] lesser than 0.0
+                
+        """
+        # check for bad input
+        if type(use_const).__name__ != 'bool':
+            raise JMIException("First argument sent to 'set_constraint_usage' must be a boolean.")
+        if constraints != None:
+            if type(constraints).__name__ != 'ndarray':
+                raise JMIException("Constraints must be an numpy.ndarray")
+        
+        self._use_const = use_const
+        self._constraints = constraints
+        self._problem.use_constraints = self._use_const
+        self._problem.constraints = self._constraints
         
     def initialize(self):
         """ Function that calculates the solution of the F0 = 0
