@@ -791,14 +791,12 @@ class OptimicaCompiler(ModelicaCompiler):
                                                    self.fmi_ext_tpl,
                                                    self.model_values_tpl,
                                                    self.c_tpl_path,
-                                                   self.fmi_ext_tpl,
                                                    self.optimica_c_tpl_path)
         else:
             self._compiler = self.OptimicaCompiler(options, 
                                                    self.jmodelica_tpl,
                                                    self.model_values_tpl,
                                                    self.c_tpl_path,
-                                                   self.jmodelica_tpl,
                                                    self.optimica_c_tpl_path)
     @classmethod
     def set_log_level(self,level):

@@ -73,14 +73,12 @@ import org.jmodelica.util.OptionRegistry;
  */
 public class OptimicaCompiler extends ModelicaCompiler{
 	
-	private String optimicaXmlTpl=null;
 	private String optimicaCTemplatefile=null;
 	
 	public OptimicaCompiler(OptionRegistry options, String xmlTpl, 
-			String xmlValuesTpl, String cTemplatefile, String optimicaXmlTpl,
+			String xmlValuesTpl, String cTemplatefile, 
 			String optimicaCTemplatefile) {
 		super(options, xmlTpl, xmlValuesTpl, cTemplatefile);
-		this.optimicaXmlTpl = optimicaXmlTpl;
 		this.optimicaCTemplatefile = optimicaCTemplatefile;
 	}	
 		
@@ -189,21 +187,6 @@ public class OptimicaCompiler extends ModelicaCompiler{
 	}
 
 	/**
-	 * \brief get the XML template. 
-	 * 
-	 * @param fc A reference to an FClass object. This is convenient in
-	 * extensions of ModelicaCompiler that need to distinguish between
-	 * different kinds of flattened classes.
-	 */
-	protected String getXmlTpl(FClass fc) {
-		if (fc instanceof FOptClass) {
-			return this.optimicaXmlTpl;
-		} else {
-			return this.xmlTpl;
-		}
-	}
-
-	/**
 	 * \brief get the C template. 
 	 * 
 	 * @param fc A reference to an FClass object. This is convenient in
@@ -220,6 +203,15 @@ public class OptimicaCompiler extends ModelicaCompiler{
 
 	protected OptimicaCompiler(String[] args, Hashtable<String, String> programarguments) {
 		super("OptimicaCompiler", args, programarguments);
+		int arg = programarguments.size();
+		if (args.length >= arg+6) {
+			optimicaCTemplatefile = args[arg+5];
+		} else {
+			// set default template
+			String filesep = System.getProperty("file.separator");
+			String templatepath = System.getenv("JMODELICA_HOME")+filesep+"CodeGenTemplates"+filesep;
+			optimicaCTemplatefile = templatepath+"jmi_optimica_template.c";
+		}
 	}
 	
 	public static void main(String args[]) {

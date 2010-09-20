@@ -805,7 +805,7 @@ public class ModelicaCompiler {
 	/**
 	 * \brief Convenience constructor intended to be called from main method.
 	 */
-	protected ModelicaCompiler(String compilerName, String[] args, Hashtable<String, String> programarguments) {
+	protected ModelicaCompiler(String compilerName, String[] args, Hashtable<String, String> programarguments){
 		staticBlocks();
 		
 		String filesep = System.getProperty("file.separator");
@@ -842,6 +842,13 @@ public class ModelicaCompiler {
 			xmlTpl = args[arg+2];
 			xmlValuesTpl = args[arg+3];
 			cTemplatefile = args[arg+4];
+		} 
+		else {
+			// give templates default values based on $JMODELICA_HOME
+			String templatepath = System.getenv("JMODELICA_HOME")+filesep+"CodeGenTemplates"+filesep;
+			xmlTpl = templatepath+"jmodelica_model_description.tpl";
+			xmlValuesTpl = templatepath+"jmodelica_model_values.tpl";
+			cTemplatefile = templatepath+"jmi_modelica_template.c";
 		}
 		
 		String optionsfile = null;
