@@ -351,7 +351,7 @@ class JMUModel(BaseModel):
     
     """ High-level interface to a JMIModel. """
     
-    def __init__(self, jmu_name, path ='.'):
+    def __init__(self, jmu_name):
         """ Create a jmi.JMUModel. 
         
         Create a JMU Model object. Load generated binary file, set 
@@ -361,12 +361,10 @@ class JMUModel(BaseModel):
         Parameters::
         
             jmu_name --
-                Name of JMU file.
-            path --
-                Path to the JMU on the file system.
-                Default: Current directory.
+                Whole name of JMU file, including path.
         """
         # extract files from JMU
+        path, jmu_name = os.path.split(jmu_name)
         jmu_files = unzip_unit(jmu_name, path)
         lib_name = jmu_files[0]
         self._xml_name = jmu_files[1]
@@ -5735,7 +5733,7 @@ def get_jmu_name(class_name):
     """
     return class_name.replace('.','_')+'.jmu'
 
-def package_JMU(class_name):
+def package_JMU(class_name, path='.'):
     """
     Method that takes as input a class name and package all model related 
     files into a JMU.
@@ -5744,7 +5742,12 @@ def package_JMU(class_name):
     
         class_name --
             The name of the model
+        path --
+            The directory to compile to. Created if does not exist.
     """
+    if not os.path.isdir(path):
+        os.mkdir(path)
+        
     mName = class_name
     mMangledName = class_name.replace('.','_')
     
@@ -5765,7 +5768,7 @@ def package_JMU(class_name):
         platform += '64'
     
     
-    file = zipfile.ZipFile(mMangledName+'.jmu', 'w') #Create the new archive
+    file = zipfile.ZipFile(os.path.join(path, mMangledName+'.jmu'), 'w') #Create the new archive
     try:
         #Write the xml file
         file.write(mMangledName+'.xml', 'modelDescription.xml', 
@@ -5802,7 +5805,7 @@ def package_JMU(class_name):
         warnings.warn(msg)
         
 def compile_jmu(class_name, file_name=[], compiler='modelica', 
-    target='ipopt', compiler_options={}):
+    target='ipopt', compiler_options={}, compile_to='.'):
     """ Compile a Modelica or Optimica model to a JMU.
     
     A model class name must be passed, all other arguments have 
@@ -5857,6 +5860,10 @@ def compile_jmu(class_name, file_name=[], compiler='modelica',
         compiler_options --
             Options for the compiler.
             Default: Empty dict.
+        compile_to --
+            Specify location of the compiled jmu. Directory will be 
+            created if it does not exist.
+            Default: Current directory.
             
     Returns::
     
@@ -5900,10 +5907,9 @@ def compile_jmu(class_name, file_name=[], compiler='modelica',
     comp.compile_model(class_name, file_name, target=target)
     
     # pack JMU file
-    package_JMU(class_name)
+    package_JMU(class_name, compile_to)
     
-    return get_jmu_name(class_name)
-
+    return os.path.join(compile_to, get_jmu_name(class_name))
 
 def _list_to_string(item_list):
     """Helper function that takes a list of items, which are typed to 

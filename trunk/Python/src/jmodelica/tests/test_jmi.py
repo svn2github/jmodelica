@@ -1440,3 +1440,15 @@ class Test_JMU_methods:
         jmu_name = compile_jmu(cpath_ODE, fpath_ODE)
         
         assert os.path.exists(jmu_name)
+    
+    @testattr(stddist = True)
+    def test_compile_to(self):
+        """
+        Test to specify a location for the jmu file (argument compile_to).
+        """
+        fpath_ODE = os.path.join(get_files_path(), 'Modelica', 'VDP.mop')
+        cpath_ODE = 'VDP_pack.VDP'
+        new_dir = os.path.join('.','test_compile_to')
+        jmu_name = compile_jmu(cpath_ODE, fpath_ODE, compile_to=new_dir)
+        
+        assert os.path.exists(jmu_name)
