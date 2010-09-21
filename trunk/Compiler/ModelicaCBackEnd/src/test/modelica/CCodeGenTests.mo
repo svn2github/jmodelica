@@ -40,6 +40,7 @@ end CCodeGenTest1;
      JModelica.UnitTesting.CCodeGenTestCase(
          name="CCodeGenTest2",
          description="Test of code generation",
+         automatic_add_initial_equations = false,
          template="
 $C_variable_aliases$
 $C_DAE_equation_residuals$

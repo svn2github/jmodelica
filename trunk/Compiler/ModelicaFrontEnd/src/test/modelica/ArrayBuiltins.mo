@@ -1766,14 +1766,13 @@ end ArrayBuiltins.NdimsExp1;
  Integer x = n * 2;
 end NdimsExp1;
 
-
-
 model ArrayIfExp1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
 	 JModelica.UnitTesting.TransformCanonicalTestCase(
 		 name="ArrayIfExp1",
 		 description="Array if expressions",
-		 flatModel="
+		 automatic_add_initial_equations = false, 
+		flatModel="
 fclass ArrayBuiltins.ArrayIfExp1
  parameter Integer N = 3 /* 3 */;
  parameter Real A[1,1] = 1 /* 1.0 */;

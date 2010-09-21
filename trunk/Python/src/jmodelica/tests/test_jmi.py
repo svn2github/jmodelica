@@ -1231,7 +1231,7 @@ class TestJMIModel_VDP:
         cpath = "VDP_pack.VDP"
     
         jmu_name = compile_jmu(cpath, fpath, 
-            compiler_options={'state_start_values_fixed':False})
+            compiler_options={'state_start_values_fixed':False,'automatic_add_initial_equations':False})
         # Load the dynamic library and XML data
         vdp = JMUModel(jmu_name)
     

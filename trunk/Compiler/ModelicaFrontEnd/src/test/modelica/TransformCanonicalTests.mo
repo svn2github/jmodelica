@@ -1183,5 +1183,502 @@ equation
  y = C*x + D*u;
 end DiffsAndDersTest1;
 
+  model InitialEqTest1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="InitialEqTest1",
+         description="Test algorithm for adding additional initial equations.",
+         flatModel="
+fclass TransformCanonicalTests.InitialEqTest1
+ Real x1(start = 1);
+ Real x2(start = 2);
+ Real y1;
+ Real y2;
+initial equation 
+ x1 = 1;
+ x2 = 2;
+equation
+ der(x1) = x1 + x2 + y1;
+ der(x2) = x1 - ( x2 ) + y2;
+ y1 = ( 3 ) * ( x1 );
+ y2 = ( 4 ) * ( x2 );
+end TransformCanonicalTests.InitialEqTest1;
+")})));
+
+    Real x1(start=1);
+    Real x2(start=2);
+    Real y1;
+    Real y2;
+  equation
+    der(x1) = x1 + x2 + y1;
+    der(x2) = x1 - x2 + y2;
+    y1 = 3*x1;
+    y2 = 4*x2;
+  end InitialEqTest1;
+
+  model InitialEqTest2
+
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="InitialEqTest2",
+         description="Test algorithm for adding additional initial equations.",
+         flatModel="
+fclass TransformCanonicalTests.InitialEqTest2
+ Real v1;
+ Real v2;
+ Real v3;
+ Real v4;
+ Real v5;
+ Real v6;
+ Real v7;
+ Real v8;
+ Real v9;
+ Real v10;
+equation
+ v1 + v2 + v3 + v4 + v5 = 1;
+ v1 + v2 + v3 + v4 + v6 = 1;
+ v1 + v2 + v3 + v4 = 1;
+ v1 + v2 + v3 + v4 = 1;
+ v5 + v6 + v8 + v7 + v9 = 1;
+ v5 + v6 + v8 = 0;
+ v1 = 1;
+ v2 = 1;
+ v9 + v10 = 1;
+ v10 = 1;
+end TransformCanonicalTests.InitialEqTest2;
+")})));
+
+    Real v1;
+    Real v2;
+    Real v3;
+    Real v4;
+    Real v5;
+    Real v6;
+    Real v7;
+    Real v8;
+    Real v9;	
+    Real v10;	
+  equation
+    v1 + v2 + v3 + v4 + v5 = 1;
+    v1 + v2 + v3 + v4 + v6 = 1;
+    v1 + v2 + v3 + v4 = 1;
+    v1 + v2 + v3 + v4 = 1;
+    v5 + v6 + v8 + v7 + v9 = 1;
+    v5 + v6 + v8 = 0;
+    v1 = 1;
+    v2 = 1;
+    v9 + v10 = 1;
+    v10 = 1;
+  end InitialEqTest2;
+
+  model InitialEqTest3
+
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={ 
+    JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="InitialEqTest3",
+         description="Test algorithm for adding additional initial equations.",
+         flatModel="
+fclass TransformCanonicalTests.InitialEqTest3
+ Real x1(start = 1,fixed = true);
+ Real x2(start = 2);
+ Real y1;
+ Real y2;
+initial equation 
+ x2 = 2;
+ x1 = 1;
+equation
+ der(x1) = x1 + x2 + y1;
+ der(x2) = x1 - ( x2 ) + y2;
+ y1 = ( 3 ) * ( x1 );
+ y2 = ( 4 ) * ( x2 );
+end TransformCanonicalTests.InitialEqTest3;
+")})));
+
+    Real x1(start=1,fixed=true);
+    Real x2(start=2);
+    Real y1;
+    Real y2;
+  equation
+    der(x1) = x1 + x2 + y1;
+    der(x2) = x1 - x2 + y2;
+    y1 = 3*x1;
+    y2 = 4*x2;
+  end InitialEqTest3;
+
+  model InitialEqTest4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={ 
+    JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="InitialEqTest4",
+         description="Test algorithm for adding additional initial equations.",
+         flatModel="
+fclass TransformCanonicalTests.InitialEqTest4
+ Real x1(start = 1,fixed = true);
+ Real x2(start = 2,fixed = true);
+ Real y1;
+ Real y2;
+initial equation 
+ x1 = 1;
+ x2 = 2;
+equation
+ der(x1) = x1 + x2 + y1;
+ der(x2) = x1 - ( x2 ) + y2;
+ y1 = ( 3 ) * ( x1 );
+ y2 = ( 4 ) * ( x2 );
+end TransformCanonicalTests.InitialEqTest4;
+")})));
+    Real x1(start=1,fixed=true);
+    Real x2(start=2,fixed=true);
+    Real y1;
+    Real y2;
+  equation
+    der(x1) = x1 + x2 + y1;
+    der(x2) = x1 - x2 + y2;
+    y1 = 3*x1;
+    y2 = 4*x2;
+  end InitialEqTest4;
+
+  model InitialEqTest5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={ 
+    JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="InitialEqTest5",
+         description="Test algorithm for adding additional initial equations.",
+         flatModel="
+fclass TransformCanonicalTests.InitialEqTest5
+ Real x1(start = 1);
+ Real x2(start = 2);
+ Real y1;
+ Real y2;
+initial equation 
+ x2 = 2;
+ der(x1) = 0;
+equation
+ der(x1) = x1 + x2 + y1;
+ der(x2) = x1 - ( x2 ) + y2;
+ y1 = ( 3 ) * ( x1 );
+ y2 = ( 4 ) * ( x2 );
+end TransformCanonicalTests.InitialEqTest5;
+")})));
+
+    Real x1(start=1);
+    Real x2(start=2);
+    Real y1;
+    Real y2;
+  equation
+    der(x1) = x1 + x2 + y1;
+    der(x2) = x1 - x2 + y2;
+    y1 = 3*x1;
+    y2 = 4*x2;
+   initial equation
+    der(x1) = 0;
+  end InitialEqTest5;
+
+  model InitialEqTest6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={ 
+    JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="InitialEqTest6",
+         description="Test algorithm for adding additional initial equations.",
+         flatModel="
+fclass TransformCanonicalTests.InitialEqTest6
+ Real x1(start = 1);
+ Real x2(start = 2);
+ Real y1;
+ Real y2;
+initial equation 
+ der(x1) = 0;
+ y2 = 0;
+equation
+ der(x1) = x1 + x2 + y1;
+ der(x2) = x1 - ( x2 ) + y2;
+ y1 = ( 3 ) * ( x1 );
+ y2 = ( 4 ) * ( x2 );
+end TransformCanonicalTests.InitialEqTest6;
+")})));
+
+    Real x1(start=1);
+    Real x2(start=2);
+    Real y1;
+    Real y2;
+  equation
+    der(x1) = x1 + x2 + y1;
+    der(x2) = x1 - x2 + y2;
+    y1 = 3*x1;
+    y2 = 4*x2;
+   initial equation
+    der(x1) = 0;
+    y2 = 0;
+  end InitialEqTest6;
+
+  function f1
+    input Real x;
+    input Real y;
+    output Real w;
+    output Real z;
+  algorithm
+   w := x;
+   z := y;
+  end f1;
+
+  model InitialEqTest7
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={ 
+    JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="InitialEqTest7",
+         description="Test algorithm for adding additional initial equations.",
+         flatModel="
+fclass TransformCanonicalTests.InitialEqTest7
+ Real x;
+ Real y;
+equation
+ (x, y) = TransformCanonicalTests.f1(1, 2);
+
+ function TransformCanonicalTests.f1
+  input Real x;
+  input Real y;
+  output Real w;
+  output Real z;
+ algorithm
+  w := x;
+  z := y;
+  return;
+ end TransformCanonicalTests.f1;
+end TransformCanonicalTests.InitialEqTest7;
+")})));
+
+    Real x, y;
+  equation
+    (x,y) = f1(1,2);
+  end InitialEqTest7;
+
+  model InitialEqTest8
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={ 
+    JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="InitialEqTest8",
+         description="Test algorithm for adding additional initial equations.",
+         flatModel="
+fclass TransformCanonicalTests.InitialEqTest8
+ Real x;
+ Real y;
+initial equation 
+ (x, y) = TransformCanonicalTests.f1(1, 2);
+equation
+ der(x) =  - ( x );
+ der(y) =  - ( y );
+
+ function TransformCanonicalTests.f1
+  input Real x;
+  input Real y;
+  output Real w;
+  output Real z;
+ algorithm
+  w := x;
+  z := y;
+  return;
+ end TransformCanonicalTests.f1;
+end TransformCanonicalTests.InitialEqTest8;
+")})));
+
+    Real x, y;
+  equation
+    der(x) = -x;
+    der(y) = -y;
+  initial equation
+    (x,y) = f1(1,2);
+  end InitialEqTest8;
+
+  function f2
+    input Real x[3];
+    input Real y[4];
+    output Real w[3];
+    output Real z[4];
+  algorithm
+   w := x;
+   z := y;
+  end f2;
+
+  model InitialEqTest9
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={ 
+    JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="InitialEqTest9",
+         description="Test algorithm for adding additional initial equations.",
+         flatModel="
+fclass TransformCanonicalTests.InitialEqTest9
+ Real x[1];
+ Real x[2];
+ Real x[3];
+ Real y[1];
+ Real y[2];
+ Real y[3];
+ Real y[4];
+equation
+ ({x[1],x[2],x[3]}, {y[1],y[2],y[3],y[4]}) = TransformCanonicalTests.f2({1,1,1}, {1,1,1,1});
+
+ function TransformCanonicalTests.f2
+  input Real[3] x;
+  input Real[4] y;
+  output Real[3] w;
+  output Real[4] z;
+ algorithm
+  w[1] := x[1];
+  w[2] := x[2];
+  w[3] := x[3];
+  z[1] := y[1];
+  z[2] := y[2];
+  z[3] := y[3];
+  z[4] := y[4];
+  return;
+ end TransformCanonicalTests.f2;
+end TransformCanonicalTests.InitialEqTest9;
+")})));
+
+    Real x[3], y[4];
+  equation
+    (x,y) = f2(ones(3),ones(4));
+  end InitialEqTest9;
+
+  model InitialEqTest10
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={ 
+    JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="InitialEqTest10",
+         description="Test algorithm for adding additional initial equations.",
+         flatModel="
+fclass TransformCanonicalTests.InitialEqTest10
+ Real x[1];
+ Real x[2];
+ Real x[3];
+ Real y[1];
+ Real y[2];
+ Real y[3];
+ Real y[4];
+initial equation 
+ ({x[1],x[2],x[3]}, {y[1],y[2],y[3],y[4]}) = TransformCanonicalTests.f2({1,1,1}, {1,1,1,1});
+equation
+ der(x[1]) =  - ( x[1] );
+ der(x[2]) =  - ( x[2] );
+ der(x[3]) =  - ( x[3] );
+ der(y[1]) =  - ( y[1] );
+ der(y[2]) =  - ( y[2] );
+ der(y[3]) =  - ( y[3] );
+ der(y[4]) =  - ( y[4] );
+
+ function TransformCanonicalTests.f2
+  input Real[3] x;
+  input Real[4] y;
+  output Real[3] w;
+  output Real[4] z;
+ algorithm
+  w[1] := x[1];
+  w[2] := x[2];
+  w[3] := x[3];
+  z[1] := y[1];
+  z[2] := y[2];
+  z[3] := y[3];
+  z[4] := y[4];
+  return;
+ end TransformCanonicalTests.f2;
+end TransformCanonicalTests.InitialEqTest10;
+")})));
+
+    Real x[3], y[4];
+  initial equation
+    (x,y) = f2(ones(3),ones(4));
+  equation
+    der(x) = -x;
+    der(y) = -y;
+  end InitialEqTest10;
+
+  model InitialEqTest11
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={ 
+    JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="InitialEqTest11",
+         description="Test algorithm for adding additional initial equations.",
+         flatModel="
+fclass TransformCanonicalTests.InitialEqTest11
+ Real x[1];
+ Real x[2];
+ Real x[3];
+ Real y[1];
+ Real y[2];
+ Real y[3];
+ Real y[4];
+initial equation 
+ ({x[1],x[2],x[3]}, ) = TransformCanonicalTests.f2({1,1,1}, {1,1,1,1});
+equation
+ der(x[1]) =  - ( x[1] );
+ der(x[2]) =  - ( x[2] );
+ der(x[3]) =  - ( x[3] );
+ (, {y[1],y[2],y[3],y[4]}) = TransformCanonicalTests.f2({1,1,1}, {1,1,1,1});
+
+ function TransformCanonicalTests.f2
+  input Real[3] x;
+  input Real[4] y;
+  output Real[3] w;
+  output Real[4] z;
+ algorithm
+  w[1] := x[1];
+  w[2] := x[2];
+  w[3] := x[3];
+  z[1] := y[1];
+  z[2] := y[2];
+  z[3] := y[3];
+  z[4] := y[4];
+  return;
+ end TransformCanonicalTests.f2;
+end TransformCanonicalTests.InitialEqTest11;
+")})));
+
+    Real x[3], y[4];
+  initial equation
+    (x,) = f2(ones(3),ones(4));
+  equation
+    der(x) = -x;
+    (,y) = f2(ones(3),ones(4));
+  end InitialEqTest11;
+
+  model InitialEqTest12
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={ 
+    JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="InitialEqTest12",
+         description="Test algorithm for adding additional initial equations.",
+         flatModel="
+fclass TransformCanonicalTests.InitialEqTest12
+ Real x[1](start = 3);
+ Real x[2](start = 3);
+ Real x[3](start = 3);
+ Real y[1];
+ Real y[2];
+ Real y[3];
+ Real y[4];
+initial equation 
+ x[1] = 3;
+ x[2] = 3;
+ x[3] = 3;
+equation
+ der(x[1]) =  - ( x[1] );
+ der(x[2]) =  - ( x[2] );
+ der(x[3]) =  - ( x[3] );
+ (, {y[1],y[2],y[3],y[4]}) = TransformCanonicalTests.f2({1,1,1}, {1,1,1,1});
+
+ function TransformCanonicalTests.f2
+  input Real[3] x;
+  input Real[4] y;
+  output Real[3] w;
+  output Real[4] z;
+ algorithm
+  w[1] := x[1];
+  w[2] := x[2];
+  w[3] := x[3];
+  z[1] := y[1];
+  z[2] := y[2];
+  z[3] := y[3];
+  z[4] := y[4];
+  return;
+ end TransformCanonicalTests.f2;
+end TransformCanonicalTests.InitialEqTest12;
+")})));
+    Real x[3](each start=3), y[4];
+  equation
+    der(x) = -x;
+    (,y) = f2(ones(3),ones(4));
+  end InitialEqTest12;
+
 
 end TransformCanonicalTests;

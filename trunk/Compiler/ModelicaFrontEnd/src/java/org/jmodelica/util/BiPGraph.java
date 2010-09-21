@@ -29,8 +29,8 @@ public class BiPGraph {
 	private String description;
 	
 	private ArrayList<Eq> equations = new ArrayList<Eq>();
-	private HashMap<String,Var> variableMap = new HashMap<String,Var>();
-	private HashMap<String,Eq> equationMap = new HashMap<String,Eq>();
+	private LinkedHashMap<String,Var> variableMap = new LinkedHashMap<String,Var>();
+	private LinkedHashMap<String,Eq> equationMap = new LinkedHashMap<String,Eq>();
 	
 	public BiPGraph(String name, String description) {
 		this.name = name;

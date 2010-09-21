@@ -70,7 +70,7 @@ public class OptionRegistry {
 							" When this option is set to true (default is true) then minimum time " +
 							"optimal control problems encoded in Optimica are converted to fixed " + 
 							"interval problems by scaling of the derivative variables."),
-			ADD_INIT_EQ  ("automatic_add_initial_equations", false, 
+			ADD_INIT_EQ  ("automatic_add_initial_equations", true, 
 							" When this option is set to true (default is true), then additional initial " +
 							"equations are added to the model based on a the result of a matching algorithm. " +
 							"Initial equations are added for states that are not matched to an equation.");
