@@ -52,7 +52,7 @@ default_int = int
 int = N.int32
 N.int = N.int32
 
-class AlgorithmBase:
+class AlgorithmBase(object):
     """ Abstract class which all algorithms that are to be used with 
         jmodelica.jmi.JMUModel.optimize, jmodelica.jmi.JMUModel.simulate 
         or jmodelica.jmi.JMUModel.initialize must implement.
@@ -71,7 +71,7 @@ class AlgorithmBase:
 #   @abstractmethod
     def get_result(self): pass
     
-class ResultBase:
+class ResultBase(object):
     """ Base class for an algorithm result. All algorithms used in any 
         of the high-level functions must return an object which extends 
         this class.
@@ -97,10 +97,10 @@ class ResultBase:
                 The result data object created when running the 
                 algorithm. Holds the whole result data matrix.
         """
-        self.model = model
-        self.result_file_name = result_file_name
-        self.solver = solver
-        self.result_data = result_data
+        self._model = model
+        self._result_file_name = result_file_name
+        self._solver = solver
+        self._result_data = result_data
     
     def get_model(self):
         """ Get the jmi.JMUModel object representing the model that was 
@@ -110,8 +110,8 @@ class ResultBase:
         
             The jmi.JMUModel object that was used in the algorithm.
         """
-        if self.model != None:
-            return self.model
+        if self._model != None:
+            return self._model
         raise Exception("model has not been set")
         
     def set_model(self, model):
@@ -122,7 +122,7 @@ class ResultBase:
             model --
                 The jmi.JMUModel object that was used in the algorithm.
         """
-        self.model = model
+        self._model = model
         
     model = property(fget=get_model, fset=set_model)
         
@@ -133,8 +133,8 @@ class ResultBase:
         
             The name of the result file.
         """
-        if self.result_file_name != None:
-            return self.result_file_name
+        if self._result_file_name != None:
+            return self._result_file_name
         raise Exception("result file name has not been set")
     
     def set_result_name_file(self, file_name):
@@ -146,7 +146,7 @@ class ResultBase:
                 The name of the result file.
             
         """
-        self.result_file_name = result_file_name
+        self._result_file_name = result_file_name
         
     result_file_name = property(fget=get_result_file_name, fset=set_result_name_file)
         
@@ -158,8 +158,8 @@ class ResultBase:
         
             The solver object that was used in the algorithm.
         """
-        if self.solver != None:
-            return self.solver
+        if self._solver != None:
+            return self._solver
         raise Exception("solver has not been set")
 
     def set_solver(self, solver):
@@ -170,7 +170,7 @@ class ResultBase:
             solver --
                 The solver that was used in the algorithm.
         """
-        self.solver = solver
+        self._solver = solver
         
     solver = property(fget=get_solver, fset=set_solver)
         
@@ -181,8 +181,8 @@ class ResultBase:
         
             The result data matrix.
         """
-        if self.result_data != None:
-            return self.result_data
+        if self._result_data != None:
+            return self._result_data
         raise Exception("result data has not been set")
         
     def set_result_data(self, result_data):
@@ -193,10 +193,65 @@ class ResultBase:
             result_data --
                 The result data matrix.
         """
-        self.result_data = result_data
+        self._result_data = result_data
         
     result_data = property(fget=get_result_data, fset=set_result_data)
     
+    
+class OptionBase(dict):
+    """ Base class for an algorithm option class. 
+    
+    All algorithm option classes should extend this class. This class 
+    extends the dict class but overrides constructor __init__ and 
+    __setitem__ with the purpose of offering a key check for the 
+    extending classes. If the extending class has an attribute 
+    '_allowed_keys', which is a list of keys, then it will not be 
+    possible to create an instance or add a key to an instance of this 
+    class that is not in the list '_allowed_keys'. If the extending class 
+    does not have an attribute '_allowed_keys' the class will behave like 
+    a normal dict, that is, it is possible to add any key:value set.
+    """
+
+    def __init__(self, *args, **kw):
+        """ Create an OptionBase instance. If this class is extended and 
+        there is an attribute '_allowed_keys' in the extending class 
+        there will be a key check of all items in the list 
+        '_allowed_keys'. If any of the keys are not in the list 
+        '_allowed_keys' an UnrecognizedOptionError will be thrown.
+        """
+        # determine whether there are key restrictions or not
+        if self.__dict__.has_key('_allowed_keys'):
+            self._has_restrictions = True
+        else:
+            self._has_restrictions = False
+            
+        # create dict
+        super(OptionBase,self).__init__(*args, **kw)
+        # get keys of dict
+        keys = super(OptionBase,self).keys()
+        # check if there are restrictions on dict keys
+        if self._has_restrictions:
+            # check each key and make sure it is in the _allowed_keys list
+            for k in keys:
+                if not k in self._allowed_keys:
+                    # key is not allowed
+                    raise UnrecognizedOptionError("The key: %s, is not a valid algorithm option" %str(k))
+
+    def __setitem__(self, key, value):
+        """ Add a key:value set or update the key 'key' with the value 
+        'value'. If this class is extended and there is an attribute 
+        '_allowed_keys' in the extending class there will be a key check 
+        of all items in the list '_allowed_keys'. If the key 'key' is 
+        not in the list '_allowed_keys' an UnrecognizedOptionError will 
+        be thrown.
+        """
+        # check if there are restrictions on dict keys
+        if self._has_restrictions:
+            # check key and make sure it is in the _allowed_keys list
+            if not key in self._allowed_keys:
+                raise UnrecognizedOptionError("The key: %s, is not a valid algorithm option" %str(key))
+        super(OptionBase,self).__setitem__(key, value)
+        
     
 class IpoptInitResult(ResultBase): pass
 
@@ -814,3 +869,5 @@ class KInitSolveAlg(AlgorithmBase):
         
         # create and return result object
         return KInitSolveResult(self.model, resultfile, self.solver, res)
+
+class UnrecognizedOptionError(Exception): pass
