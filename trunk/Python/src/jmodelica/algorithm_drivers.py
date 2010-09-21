@@ -196,62 +196,75 @@ class ResultBase(object):
         self._result_data = result_data
         
     result_data = property(fget=get_result_data, fset=set_result_data)
-    
-    
+
 class OptionBase(dict):
     """ Base class for an algorithm option class. 
     
-    All algorithm option classes should extend this class. This class 
-    extends the dict class but overrides constructor __init__ and 
-    __setitem__ with the purpose of offering a key check for the 
-    extending classes. If the extending class has an attribute 
-    '_allowed_keys', which is a list of keys, then it will not be 
-    possible to create an instance or add a key to an instance of this 
-    class that is not in the list '_allowed_keys'. If the extending class 
-    does not have an attribute '_allowed_keys' the class will behave like 
-    a normal dict, that is, it is possible to add any key:value set.
-    """
-
-    def __init__(self, *args, **kw):
-        """ Create an OptionBase instance. If this class is extended and 
-        there is an attribute '_allowed_keys' in the extending class 
-        there will be a key check of all items in the list 
-        '_allowed_keys'. If any of the keys are not in the list 
-        '_allowed_keys' an UnrecognizedOptionError will be thrown.
-        """
-        # determine whether there are key restrictions or not
-        if self.__dict__.has_key('_allowed_keys'):
-            self._has_restrictions = True
-        else:
-            self._has_restrictions = False
+    All algorithm option classes should extend this class. 
+    
+    This class extends the dict class overriding __init__, __setitem__, 
+    update and setdefault methods with the purpose of offering a key 
+    check for the extending classes.
+    
+    The extending class can define a set of keys and default values by 
+    overriding __init__ or when instantiating the extended class and 
+    thereby not allow any other keys to be added to the dict.
+    
+     * Example overriding __init__:
+    
+    class MyOptionsClass(OptionBase):
+        def __init__(self, *args, **kw):
+            mydefaults = {'def1':1, 'def2':2}
+            super(MyOptionsClass,self).__init__(mydefaults)
+        
+            self.update(*args, **kw)
             
+    >> opts = MyOptionsClass()
+    >> opts['def1'] = 3   // ok
+    >> opts.update({'def2':4})   // ok
+    >> opts['def3']= 5   // not ok
+    
+            
+     * Example setting defaults in constructor:
+     
+     class MyOptionsClass(OptionBase):pass
+     
+    >> opts = MyOptionsClass(def1=1, def2=2)
+    >> opts['def1'] = 3   // ok
+    >> opts.update({'def2':4})   // ok
+    >> opts['def3']= 5   // not ok
+    
+    >> opts2 = MyOptionsClass()   // this class has no restrictions on keys
+    >> opts2['def5'] = 'hello'   //ok
+    """
+    
+    def __init__(self, *args, **kw):
         # create dict
         super(OptionBase,self).__init__(*args, **kw)
-        # get keys of dict
-        keys = super(OptionBase,self).keys()
-        # check if there are restrictions on dict keys
-        if self._has_restrictions:
-            # check each key and make sure it is in the _allowed_keys list
-            for k in keys:
-                if not k in self._allowed_keys:
-                    # key is not allowed
-                    raise UnrecognizedOptionError("The key: %s, is not a valid algorithm option" %str(k))
+        # save keys - these are now the set of allowed keys
+        self._keys = super(OptionBase,self).keys()
 
     def __setitem__(self, key, value):
-        """ Add a key:value set or update the key 'key' with the value 
-        'value'. If this class is extended and there is an attribute 
-        '_allowed_keys' in the extending class there will be a key check 
-        of all items in the list '_allowed_keys'. If the key 'key' is 
-        not in the list '_allowed_keys' an UnrecognizedOptionError will 
-        be thrown.
-        """
-        # check if there are restrictions on dict keys
-        if self._has_restrictions:
-            # check key and make sure it is in the _allowed_keys list
-            if not key in self._allowed_keys:
+        if self._keys:
+            if not key in self._keys:
                 raise UnrecognizedOptionError("The key: %s, is not a valid algorithm option" %str(key))
+            
         super(OptionBase,self).__setitem__(key, value)
-        
+    
+    def update(self, *args, **kw):
+        if args:
+            if len(args) > 1:
+                raise TypeError("update expected at most 1 arguments, got %d" % len(args))
+            other = dict(args[0])
+            for key in other:
+                self[key] = other[key]
+        for key in kw:
+            self[key] = kw[key]
+
+    def setdefault(self, key, value=None):
+        if key not in self:
+            self[key] = value
+        return self[key]
     
 class IpoptInitResult(ResultBase): pass
 
