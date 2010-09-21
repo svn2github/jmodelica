@@ -267,9 +267,42 @@ BaseClassDecl base_class_decl
             end_s, 
             class_modification); 
   :}  
+   |
+    encapsulated? 
+    partial? 
+    restriction  
+    id_decl.enum_name EQUALS
+    ENUMERATION LPAREN enum_specification RPAREN
+    comment {:
+    return new PN_EnumDecl(
+            new UnknownVisibilityType(),
+            encapsulated,
+            partial,
+            restriction,
+            enum_name,
+            new Opt(), new Opt(), new Opt(), new Opt(), new Opt(), new Opt(), new Opt(),
+            enum_specification,
+            comment); 
+    
+    :}
   | error {: 
       return new BadClassDecl(); 
   :};
+
+EnumSpecification enum_specification =
+  COLON {: return new EnumUnspecified(); :}
+  | enum_literal_list {: return new EnumLiteralList(enum_literal_list); :}
+  ;
+  
+List enum_literal_list =
+  enum_literal                          {: return new List().add(enum_literal); :}
+  | enum_literal_list COMMA enum_literal    {: enum_literal_list.add(enum_literal); 
+                                       return enum_literal_list; :}
+  ;
+
+EnumLiteral enum_literal = 
+  id_decl comment {: return new EnumLiteral(id_decl,comment); :}
+  ;
 
 Partial partial = 
   PARTIAL {: return new Partial(); :}

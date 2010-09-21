@@ -178,6 +178,8 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
                                 return newSymbol(Terminals.END_WHEN); }
   "end" {WhiteSpace} {ID}     { String s = yytext();
   			                    return newSymbol(Terminals.END_ID, s); }  										 
+  					
+  "enumeration"     { return newSymbol(Terminals.ENUMERATION); }
   										 
   "each"          { return newSymbol(Terminals.EACH); }
   "final"         { return newSymbol(Terminals.FINAL); }   

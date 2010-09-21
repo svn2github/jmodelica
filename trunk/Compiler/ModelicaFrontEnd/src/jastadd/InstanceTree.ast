@@ -41,6 +41,7 @@ InstFullClassDecl      : InstBaseClassDecl ::= [InstExternal];
 InstExtendClassDecl    : InstFullClassDecl ::= ;
 InstShortClassDecl     : InstBaseClassDecl ::= [FArraySubscripts];
 InstPrimitiveClassDecl : InstFullClassDecl;
+InstEnumClassDecl      : InstPrimitiveClassDecl;
 InstBuiltInClassDecl   : InstClassDecl;
 UnknownInstClassDecl   : InstFullClassDecl;
 
@@ -89,8 +90,10 @@ abstract InstComponentDecl : InstNode ::= ClassName:InstAccess
 InstComposite            : InstComponentDecl;
 abstract InstAssignable  : InstComponentDecl ::= /BindingFExp:FExp/;
 InstPrimitive            : InstAssignable;
+InstEnum	             : InstPrimitive;
 InstRecord               : InstAssignable;
 InstBuiltIn              : InstPrimitive;
+InstEnumLiteral          : InstBuiltIn;
 UnknownInstComponentDecl : InstComponentDecl;
 InstArrayComponentDecl   : InstComponentDecl ::= <Index:int>;
                          

@@ -475,6 +475,14 @@ aspect InstanceErrorCheck {
             getInstExternalOpt().collectErrors();
     	}
   	}
+
+  	public void InstEnumClassDecl.collectErrors() {  		
+  		// TODO: Error checking of enumeration declarations
+  	}
+
+  	public void InstEnum.collectErrors() {  		
+  		// TODO: Error checking of enumeration declarations
+  	}
   	
 	boolean InstImport.errorChecked = false;
     public void InstImport.collectErrors() {

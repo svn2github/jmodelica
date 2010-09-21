@@ -899,6 +899,26 @@ aspect FlatAPI {
 	
 }
 
+aspect FlatEnumerations {
+	
+	public ArrayList<FEnumLiteral> FEnumDecl.enumLiterals() {
+		return getFEnumSpecification().enumLiterals();
+	}
+
+	public ArrayList<FEnumLiteral> FEnumSpecification.enumLiterals() {
+		return new ArrayList<FEnumLiteral>();
+	}
+
+	public ArrayList<FEnumLiteral> FEnumLiteralList.enumLiterals() {
+		ArrayList<FEnumLiteral> l = new ArrayList<FEnumLiteral>();
+		for (FEnumLiteral el : getFEnumLiterals()) {
+			l.add(el);
+		}
+		return l;
+	}
+	
+}
+
 aspect FlatCausality {
 
 	syn boolean FTypePrefixInputOutput.inputCausality() = false;

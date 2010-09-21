@@ -875,8 +875,29 @@ aspect InstanceTreeConstruction {
 		return ipr;
 	}
 
+	public InstComponentDecl InstEnumClassDecl.newInstComponentDecl(ComponentDecl cd, Access className) {
+		Opt fas_opt = new Opt();
+		if (cd.hasVarArraySubscripts()) {
+			fas_opt.setChild(cd.getVarArraySubscripts().instantiate(),0);
+		}
+		Opt cond_attr_opt = new Opt();
+		if (cd.hasConditionalAttribute()) {
+			cond_attr_opt.setChild(cd.getConditionalAttribute().getExp().instantiate(),0);
+		}		
+		InstEnum ie = new InstEnum(className.newInstAccess(),fas_opt,cd,new Opt(),new Opt(),cond_attr_opt);
+		if (cd.hasModification())
+			ie.setInstModification(cd.getModification().newInstModification());
+		ie.setInstConstrainingOpt(cd.newInstConstrainingComponentOpt());
+		ie.setLocation(cd);
+		return ie;
+	}
+	
 	public InstComponentDecl InstBuiltInClassDecl.newInstComponentDecl(ComponentDecl cd, Access className) {
-		return new InstBuiltIn(className.newInstAccess(),new Opt(),cd,new Opt(),new Opt(),new Opt());
+		if (cd.isEnumLiteral()) {
+			return new InstEnumLiteral(className.newInstAccess(),new Opt(),cd,new Opt(),new Opt(),new Opt());	
+		} else {
+			return new InstBuiltIn(className.newInstAccess(),new Opt(),cd,new Opt(),new Opt(),new Opt());
+		}
 	}
 	
 	public InstComponentDecl InstClassDecl.newInstConstrainingComponentDecl(ComponentDecl cd, Access className) {
@@ -968,6 +989,12 @@ aspect InstanceTreeConstruction {
     	return new InstBuiltInClassDecl(this);
     }
 
+    public InstEnumClassDecl EnumClassDecl.newInstClassDecl() {
+    	InstEnumClassDecl ecd = new InstEnumClassDecl(this, new Opt(), newInstRestriction(), newInstExternalOpt());
+    	ecd.setLocation(this);
+    	return ecd;
+    }
+  
     public InstClassDecl ClassDecl.newInstReplacingClass(ClassDecl replacingClass, InstRedeclareClassNode icr) {
     	return replacingClass.createInstReplacingClass(this, icr);
     }    
@@ -1274,7 +1301,15 @@ aspect InstanceAST_API {
 	syn PrimitiveClassDecl InstPrimitiveClassDecl.getPrimitiveClassDecl() = (PrimitiveClassDecl)getBaseClassDecl();
 */
 
-
+	public ArrayList<InstEnumLiteral> InstEnumClassDecl.enumLiterals() {
+		ArrayList<InstEnumLiteral> l = new ArrayList<InstEnumLiteral>();
+		for (InstComponentDecl icd : getInstComponentDecls()) {
+			if (icd.isEnumLiteral()) {
+				l.add((InstEnumLiteral)icd);
+			}
+		}
+		return l;
+	}
 
 	syn lazy ArrayList<InstClassDecl> InstNode.instClassDecls() {
 		ArrayList<InstClassDecl> l = new ArrayList<InstClassDecl>();	

@@ -81,6 +81,21 @@ aspect PredefinedTypes {
         builtInDef += "parameter StringType start=\"\";\n";
         builtInDef += "end String;\n";  
 
+        /*
+        builtInDef += "type StateSelect = enumeration("; 
+        builtInDef += "never \"Do not use as state at all.\","; 
+        builtInDef += " avoid \"Use as state, if it cannot be avoided (but only if variable appears"; 
+        builtInDef += " differentiated and no other potential state with attribute";  
+        builtInDef += " default, prefer, or always can be selected).\","; 
+        builtInDef += " default \"Use as state if appropriate, but only if variable appears"; 
+        builtInDef += " differentiated.\","; 
+        builtInDef += "	prefer \"Prefer it as state over those having the default value";  
+        builtInDef += " (also variables can be selected, which do not appear"; 
+        builtInDef += " differentiated). \","; 
+        builtInDef += " always \"Do use it as a state.\""; 
+        builtInDef += ");\n"; 
+         */
+        
         // Since we don't support Enumerations, this is a workaround
         builtInDef += "package StateSelect\n"; 
         builtInDef += "constant Integer never = 0;\n";
@@ -106,8 +121,94 @@ aspect PredefinedTypes {
             for (int i=0;i<p.getUnstructuredEntity(0).getNumElement();i++) {
             //log.debug("Program.getPredefinedTypeList(): Hepp!: " + i);
             FullClassDecl cd = (FullClassDecl)(p.getUnstructuredEntity(0).getElement(i));   
+       
+            //if (!cd.name().equals("StateSelect")) {
+            	pcd = new PrimitiveClassDecl(new PublicVisibilityType(),
+                        new Opt(),
+                        new Opt(),
+                        cd.getRestriction(),
+                        cd.getName(),
+                        new Opt(),
+                        new Opt(),
+                        new Opt(),
+                        new Opt(),
+                        new Opt(),
+                        new Opt(),
+                        new Opt(),
+                        new Opt(),
+                        cd.getEquationList(),
+                        cd.getAlgorithmList(),
+                        cd.getSuperList(),
+                        cd.getImportList(),
+                        cd.getClassDeclList(),
+                        cd.getComponentDeclList(),
+                        cd.getAnnotationList(),
+                        new Opt(),
+                        cd.getEndName());
+            	l.add(pcd); 
+          /*  } else {
+            	pcd = new EnumClassDecl(new PublicVisibilityType(),
+                        new Opt(),
+                        new Opt(),
+                        cd.getRestriction(),
+                        cd.getName(),
+                        new Opt(),
+                        new Opt(),
+                        new Opt(),
+                        new Opt(),
+                        new Opt(),
+                        new Opt(),
+                        new Opt(),
+                        new Opt(),
+                        cd.getEquationList(),
+                        cd.getAlgorithmList(),
+                        cd.getSuperList(),
+                        cd.getImportList(),
+                        cd.getClassDeclList(),
+                        cd.getComponentDeclList(),
+                        cd.getAnnotationList(),
+                        new Opt(),
+                        cd.getEndName());
+            	l.add(pcd); 	
+            }*/
+        }   
+        
+        } catch(Exception e){e.printStackTrace();}
+            
+        //log.debug("Program.getPredefinedTypeList(): "+l.getNumChild());
+        
+        return l;
+        
+    }
+    
+    /**
+     * This attribute defines the NTA for obtaining a base enumeration
+     * declaration, which is used to construct user defined enumeration
+     * types.
+     */
+    syn lazy EnumClassDecl Program.getEnumBaseDecl() {
 
-            pcd = new PrimitiveClassDecl(new PublicVisibilityType(),
+        // Build a string with a Modelica class corresponding to a basic
+    	// enumeration
+        String builtInDef= "type BaseEnum\n"; 
+        builtInDef += "EnumType value;\n";
+        builtInDef += "parameter StringType quantity=\"\";\n";
+        builtInDef += "parameter EnumType min, max;\n";
+        builtInDef += "parameter EnumType start;\n";
+        builtInDef += "parameter BooleanType fixed=false;\n";
+        builtInDef += "end BaseEnum;\n";
+        
+        EnumClassDecl ecd = null;
+  
+        try {
+        
+            ParserHandler ph = new ParserHandler();
+            SourceRoot sr = ph.parseString(builtInDef,"");
+            Program p = sr.getProgram();
+
+            FullClassDecl cd = (FullClassDecl)(p.getUnstructuredEntity(0).getElement(0));   
+            
+            ecd = new EnumClassDecl(new PublicVisibilityType(),
                                    new Opt(),
                                    new Opt(),
                                    cd.getRestriction(),
@@ -130,14 +231,12 @@ aspect PredefinedTypes {
                                    new Opt(),
                                    cd.getEndName());
         
-            l.add(pcd); 
-        }   
         
         } catch(Exception e){e.printStackTrace();}
             
         //log.debug("Program.getPredefinedTypeList(): "+l.getNumChild());
         
-        return l;
+        return ecd;
         
     }
     
@@ -353,6 +452,7 @@ aspect PredefinedTypes {
         l.add(new BuiltInClassDecl(new IdDecl("IntegerType")));         
         l.add(new BuiltInClassDecl(new IdDecl("BooleanType")));         
         l.add(new BuiltInClassDecl(new IdDecl("StringType")));              
+        l.add(new BuiltInClassDecl(new IdDecl("EnumType")));              
         return l;
     }
     

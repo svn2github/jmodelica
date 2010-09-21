@@ -394,6 +394,7 @@ public class ModelicaCompiler {
 			
 			// compute instance tree
 			InstClassDecl icl = instantiateModel(sr, cl);
+			//icl.dumpTree("");
 //			dumpMemoryUseFile(icl, "instance");
 			
 			// flattening
@@ -612,7 +613,7 @@ public class ModelicaCompiler {
 		log.info("Flattening model...");
 		
 		icl.flattenInstClassDecl(fc);
-
+		//fc.dumpTree("");
 		// Output the untransformed flattened model
 		log.debug("Creating raw .mof file...");
 		PrintStream out = new PrintStream(icl.qualifiedName() + ".mof");

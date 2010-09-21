@@ -239,6 +239,30 @@ aspect Constructors {
 		this(new FIdUse(name), new List());
 	}
 	
+	public EnumLiteralDecl.EnumLiteralDecl(IdDecl name, Comment comment) {
+
+		this(new Opt(),
+                new Opt(),
+                new Opt(),
+                new Opt(),
+                new Opt(),
+                new Opt(),
+                new Opt(new Constant()),      
+                new Opt(),
+                new ClassAccess("EnumType"),
+                new Opt(),
+                new PublicVisibilityType(),
+                new IdDecl(name.getID()),
+                new Opt(),
+                new Opt(),        
+                new Opt(),
+                (Comment)comment.fullCopy(),
+                new Opt(),
+                new Comment(new Opt(),new Opt()));
+		this.setLocation(name);
+		
+	}
+	
 	public ComponentDecl.ComponentDecl(boolean isParameter,
 	                                   String type,
 	                                   String name,

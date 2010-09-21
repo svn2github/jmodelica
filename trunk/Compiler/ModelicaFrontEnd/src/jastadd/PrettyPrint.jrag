@@ -753,7 +753,8 @@ aspect FlattPrettyPrint {
 	    
     	p.toString(getFFunctionDecls(), str, nextInd, o);
     	p.toString(getFRecordDecls(), str, nextInd, o);
-		
+    	p.toString(getFEnumDecls(), str, nextInd, o);
+    	
   		str.print(indent);
   		str.print("end ");
   		str.print(name());
@@ -869,6 +870,34 @@ aspect FlattPrettyPrint {
     	str.print(indent + "end " + name() + ";\n");
     }
 
+    public void FEnumDecl.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+    	str.print("\n" + indent + " type " + getName().name() + " = enumeration(");
+    	p.toString(getFEnumSpecification(),str,indent,o);
+    	str.print(");\n");
+    }
+    
+    public abstract void FEnumSpecification.prettyPrint(Printer p, PrintStream str, String indent, Object o);
+    
+    public void FEnumUnspecified.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+    	str.print(":");
+    }
+
+    public void FEnumLiteralList.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
+    	int i = 0;
+    	for (FEnumLiteral fe : getFEnumLiterals()) {
+    		p.toString(fe.getName(),str,indent,o);
+    		if (fe.hasFStringComment()) {
+    		   	str.print(" \"");
+    		   	str.print(fe.getFStringComment().getComment());
+    		   	str.print("\"");
+    		}
+    		if (i<getNumFEnumLiteral()-1) {
+    			str.print(", ");
+    		}
+    		i++;
+    	}
+    }
+    
     public void FFunctionVariable.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
     	if (hasFTypePrefixInputOutput()) {
     		str.print(getFTypePrefixInputOutput());

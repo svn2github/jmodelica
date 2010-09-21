@@ -882,7 +882,9 @@ aspect FlatNames {
     syn String AbstractFVariable.name() = null;
     eq FVariable.name()         = getFQNameNoTransform().name();
     eq FFunctionVariable.name() = getFQNameNoTransform().name();
-
+    
+    syn String FEnumDecl.name() = getName().name();
+    
 //  syn lazy String FQName.derName() = "der(" + name() + ")";
     
     eq FDerivativeVariable.name()  = getFQNameNoTransform().derName();
@@ -957,6 +959,7 @@ aspect FlatNames {
     eq FClass.getAliasVariable(int i).variableIndex() = getNumFVariable() + i;
     eq FForIndex.getFVariable().variableIndex()       = -1;
     eq FRecordDecl.getFVariable().variableIndex()     = -1;
+    eq FEnumDecl.getChild().variableIndex()     = -1;
 
     inh int FRecordDecl.recordIndex();
     eq FClass.getFRecordDecl(int i).recordIndex() = i;
@@ -1036,6 +1039,8 @@ aspect FlatNames {
     eq FIntegerType.name() = "Integer";
     eq FBooleanType.name() = "Boolean";
     eq FStringType.name()  = "String";
+    eq FEnumType.name()  = getName();
+    eq FEnumLiteralType.name()  = "EnumType";
     eq FRecordType.name()  = getName();
     eq FUnknownType.name() = "(unknown type)";
     
@@ -1532,6 +1537,11 @@ aspect ShortClassUtil {
         }
         return getInstExtends(0).getClassName().myInstClassDecl().isOutput();
     }
+    
+    syn boolean BaseComponentDecl.isEnumLiteral() = false;
+    eq EnumLiteralDecl.isEnumLiteral() = true;
+    syn boolean InstComponentDecl.isEnumLiteral() = false;
+    eq InstEnumLiteral.isEnumLiteral() = true;
     
 }
 

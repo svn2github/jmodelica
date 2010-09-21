@@ -380,6 +380,66 @@ aspect Flattening {
 		myInstClassDecl().flattenRecord(fc);
 	}
 	
+	public FVariable InstEnum.createFEnumVariable() {
+	
+		FEnumVariable fv = createEmptyFVariable();
+		
+		fv.setEnum(new FQName(myInstClassDecl().qualifiedName()));
+		
+		fv.setFVisibilityType(getComponentDecl().isPublic() ? 
+				new FPublicVisibilityType() : new FProtectedVisibilityType());
+		
+		fv.setFTypePrefixVariability((FTypePrefixVariability) variability().fullCopy());
+ 		
+		// Only set prefix for top level inputs and outputs
+		// TODO: Make sure that prefixes specified in short class declarations are propagated
+		if (isInput() && getFQName().getNumFQNamePart()==1)
+			fv.setFTypePrefixInputOutput(new FInput());
+		if (isOutput() && getFQName().getNumFQNamePart()==1)
+			fv.setFTypePrefixInputOutput(new FOutput());
+		
+		/*
+		addAttributesToFV(fv.getFAttributes());
+		*/
+		
+		FExp e = flattenBindingFExp();
+		if (e != null)
+			fv.setBindingExp(e);
+		
+		if (getComponentDecl().getComment().hasStringComment())
+			fv.setFStringComment(new FStringComment(getComponentDecl().getComment().getStringComment().getComment()));
+				
+		fv.setFQName(getFQName());
+		
+		return fv;
+	}
+
+	public void InstEnum.flatten(FClass fc) {
+		myInstClass().flatten(fc);
+		fc.addFVariable(createFEnumVariable());
+	}
+	
+	public FEnumLiteral InstEnumLiteral.createFEnumLiteral() {
+		FEnumLiteral e = new FEnumLiteral(new FIdUse(new FQName(name())),new Opt());
+		if (getComponentDecl().getComment().hasStringComment())
+			e.setFStringComment(new FStringComment(getComponentDecl().getComment().getStringComment().getComment()));
+		return e;
+	}
+
+	private FClass InstEnumClassDecl.flatEnumClassDeclAddedTo = null;
+	
+	public void InstEnumClassDecl.flatten(FClass fc) {		
+		if (flatEnumClassDeclAddedTo != fc) {
+			flatEnumClassDeclAddedTo = fc;
+			// Flatten all InstEnums corresponding to FEnumLiterals
+			FEnumLiteralList l = new FEnumLiteralList();
+			for (InstEnumLiteral ie : enumLiterals()) {
+				l.addFEnumLiteral(ie.createFEnumLiteral());
+			}
+			fc.addFEnumDecl(new FEnumDecl(new FIdDecl(new FQName(qualifiedName())),l));	
+		}
+	}
+	
 	public abstract FVariable InstAssignable.createEmptyFVariable();
 	
 	public FVariable InstPrimitive.createEmptyFVariable() {
@@ -392,6 +452,10 @@ aspect Flattening {
 		if (isString()) 
 			return new FStringVariable();
 		return null;
+	}	
+
+	public FEnumVariable InstEnum.createEmptyFVariable() {
+		return new FEnumVariable();
 	}	
 	
 	public FVariable InstRecord.createEmptyFVariable() {

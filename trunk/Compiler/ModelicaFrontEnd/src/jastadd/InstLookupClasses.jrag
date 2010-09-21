@@ -630,7 +630,37 @@ aspect SimpleInstClassLookup {
 }
 
 
+aspect EnumLookup {
+	
+	inh HashSet InstEnumClassDecl.lookupInstBuiltInClass(String name);
+	
+	eq InstEnumClassDecl.getChild().lookupInstClass(String name) = lookupInstBuiltInClass(name);
 
+	eq InstRoot.getChild().lookupInstBuiltInClass(String name) {return emptyHashSet();}
+	eq FlatRoot.getChild().lookupInstBuiltInClass(String name) {return emptyHashSet();}
+	
+	eq InstProgramRoot.getChild().lookupInstBuiltInClass(String name) {
+		HashSet set = new HashSet(4);
+/*
+		for (InstClassDecl bcd : getInstPredefinedTypes()) {
+			if (bcd.matchInstClassDecl(name))
+				set.add(bcd);	
+		}		
+*/
+		for (InstClassDecl bcd : getInstBuiltInTypes()) {
+			if (bcd.matchInstClassDecl(name))
+				set.add(bcd);	
+		}		
+
+		if (set.size()>0)
+			return set;
+		else
+			return emptyHashSet();
+	}
+
+	
+	
+}
 
 
 

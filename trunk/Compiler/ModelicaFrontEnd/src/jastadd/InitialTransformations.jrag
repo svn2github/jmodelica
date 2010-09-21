@@ -129,6 +129,51 @@
     }
     
     /**
+     * Rewrite the PN_EnumDecl to a EnumClassDecl including visibility info.
+     */
+    rewrite PN_EnumDecl {
+        to EnumClassDecl {
+        	EnumClassDecl ecd = (EnumClassDecl)((SourceRoot)root()).getProgram().getEnumBaseDecl().fullCopy();
+        	
+        	// Copy fields
+        	ecd.setVisibilityType(visibility());
+        	ecd.setEncapsulatedOpt(getEncapsulatedOpt());
+        	ecd.setPartialOpt(getPartialOpt());
+        	ecd.setRestriction(getRestriction());
+        	ecd.setName(getName());
+        	ecd.setRedeclareOpt(getRedeclareOpt());
+        	ecd.setFinalOpt(getFinalOpt());
+        	ecd.setInnerOpt(getInnerOpt());
+        	ecd.setOuterOpt(getOuterOpt());
+        	ecd.setReplaceableOpt(getReplaceableOpt());
+        	ecd.setStringCommentOpt(getComment().getStringCommentOpt());
+        	ecd.setEndName(getName().getID());
+        	
+        	// TODO: Copy min, max and start
+        	
+        	// TODO: Add components for the enumeration literals
+        	for (ComponentDecl d : getEnumSpecification().enumComponents()) {
+        		ecd.addComponentDecl(d);
+        	}
+        	
+            ecd.setLocationNoTree(getName());
+            return ecd;
+        }
+    }
+    
+    public ArrayList<ComponentDecl> EnumSpecification.enumComponents() {
+    	return new ArrayList<ComponentDecl>();
+    }
+
+    public ArrayList<ComponentDecl> EnumLiteralList.enumComponents() {
+    	ArrayList<ComponentDecl> l = new ArrayList<ComponentDecl>();
+    	for (EnumLiteral el : getEnumLiterals()) {
+    		l.add(new EnumLiteralDecl(el.getIdDecl(),el.getComment()));
+    	}
+    	return l;
+    }
+    
+    /**
      * \brief Extract elements from Composition and add to a FullClassDecl.
      */
     public void Composition.extractElementsTo(FullClassDecl fcd) {

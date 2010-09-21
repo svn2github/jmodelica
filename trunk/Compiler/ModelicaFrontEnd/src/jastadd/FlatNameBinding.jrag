@@ -285,6 +285,56 @@ aspect FlatRecordBinding {
 	
 }
 
+aspect FlatEnumBinding {
+	
+	syn AbstractFVariable FIdUse.myEnumFV() = lookupFV(getFQName().copyPrefix());
+	
+	syn lazy FEnumDecl AbstractFVariable.myFEnumDecl() = null;
+	eq FEnumVariable.myFEnumDecl() = lookupFEnum(getEnum().name());
+	eq FFunctionVariable.myFEnumDecl() = type().myFEnumDecl();
+	
+	syn lazy FEnumDecl FIdUse.myFEnumDecl() = lookupFEnum(name());
+	
+	syn lazy FEnumDecl FType.myFEnumDecl() = null;
+	eq FEnumType.myFEnumDecl() = lookupFEnum(getName());
+	
+	inh FEnumDecl FEnumVariable.lookupFEnum(String name);
+	inh FEnumDecl FEnumType.lookupFEnum(String name);
+	inh FEnumDecl FIdUse.lookupFEnum(String name);
+	eq Root.getChild().lookupFEnum(String name) = null;
+	eq FClass.getChild().lookupFEnum(String name) = lookupFEnum(name);
+	syn FEnumDecl FClass.lookupFEnum(String name) {
+		for (FEnumDecl r : getFEnumDecls()) {
+			if (r.name().equals(name))
+				return r;
+		}
+		return null;
+	}
+	/*
+	syn AbstractFVariable FEnumDecl.findComponent(FQName name) {
+		UnknownFVariable unknown = unknownFVariable();
+		FEnumDecl rec = this;
+		AbstractFVariable res = unknown;
+		for (FQNamePart p : name.getFQNameParts()) {
+			if (rec == null)
+				return unknown;
+			res = unknown;
+			for (FVariable v : rec.getFVariables()) {
+				if (v.getFQName().getFQNamePart(0).getName().equals(p.getName())) {
+					res = v;
+					rec = v.myFEnumDecl();
+					break;
+				}
+			}
+			if (res == unknown)
+				return unknown;
+		}
+		return res;
+	}
+	*/
+}
+
+
 aspect UnknownFVariables {
 
 	syn UnknownFVariable FClass.getUnknownFVariable() = new UnknownFVariable();

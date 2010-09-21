@@ -22,8 +22,7 @@ aspect FlatTypeCheck {
   public void ASTNode.typeCheck() {
 	  
   }
- 
- 
+  
     public void InstAssignable.typeCheck() {
     	FExp bexp = myBindingInstExp();
     	if (bexp != null && !inRecordWithBindingExp() && !bexp.type().isUnknown()) {

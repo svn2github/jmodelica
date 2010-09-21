@@ -76,6 +76,7 @@ Program : BaseNode ::=
 	        UnstructuredEntity:StoredDefinition* 
             /UnknownClassDecl/
             /UnknownComponentDecl/
+            /EnumBaseDecl:EnumClassDecl/
             /PredefinedType:BaseClassDecl*/ 
             /BuiltInType:ClassDecl*/   
             /BuiltInFunction:BaseClassDecl*/
@@ -146,12 +147,17 @@ RealClassDecl      : PrimitiveClassDecl;
 IntegerClassDecl   : PrimitiveClassDecl;
 BooleanClassDecl   : PrimitiveClassDecl;
 StringClassDecl    : PrimitiveClassDecl;
+EnumClassDecl : PrimitiveClassDecl;
+
+PN_EnumDecl : BaseClassDecl ::= EnumSpecification Comment;
+abstract EnumSpecification : BaseNode;
+EnumLiteralList : EnumSpecification ::= EnumLiteral*;
+EnumUnspecified : EnumSpecification;
+EnumLiteral : BaseNode ::= IdDecl Comment;
+
+EnumLiteralDecl : ComponentDecl;
 
 BuiltInClassDecl : ClassDecl ::= Name:IdDecl;
-//RealType : BuiltInClassDecl ::=;
-//IntegerType : BuiltInClassDecl ::=;
-//StringType : BuiltInClassDecl ::=;
-//BooleanType : BuiltInClassDecl ::=;
 
 ConstrainingClause : BaseNode ::= Access [ClassModification];
 
