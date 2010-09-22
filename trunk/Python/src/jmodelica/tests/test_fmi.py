@@ -28,6 +28,8 @@ from jmodelica.tests import testattr
 from jmodelica.tests import get_files_path
 from jmodelica.fmi import *
 from jmodelica.core import unzip_unit
+import jmodelica.algorithm_drivers as ad
+
 path_to_fmus = O.path.join(get_files_path(), 'FMUs')
 
 @testattr(fmi = True)
@@ -326,3 +328,11 @@ class Test_FMI:
         assert len(model.get_log()) == 0 #Get the current log (empty)
         model.set_real([0],[1.0]) #Set value which generates log message
         assert len(model.get_log()) > 0 
+        
+    @testattr(fmi = True)
+    def test_get_fmi_options(self):
+        """
+        Test that simulate_options on an FMU returns the correct options 
+        class instance.
+        """
+        assert isinstance(self._bounce.simulate_options(), ad.AssimuloFMIAlgOptions)

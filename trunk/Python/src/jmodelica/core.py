@@ -140,6 +140,73 @@ class BaseModel(object):
         # get and return result
         return alg.get_result()
         
+    def initialize_options(self, algorithm='IpoptInitializationAlg'):
+        """ Get an instance of the initialize options class, prefilled 
+        with default values. If called without argument then the options 
+        class for the default initialization algorithm will be returned.
+        
+        Parameters::
+        
+            algorithm --
+                The algorithm for which the options class should be 
+                fetched. Possible values are: 'IpoptInitializationAlg', 
+                'KInitSolveAlg'.
+                Default: 'IpoptInitializationAlg'
+                
+        Returns::
+        
+            Options class for the algorithm specified with default values.
+        """
+        return self._default_options(algorithm)
+        
+    def simulate_options(self, algorithm='AssimuloAlg'):
+        """ Get an instance of the simulate options class, prefilled 
+        with default values. If called without argument then the options 
+        class for the default simulation algorithm will be returned.
+        
+        Parameters::
+        
+            algorithm --
+                The algorithm for which the options class should be 
+                fetched. Possible values are: 'AssimuloAlg', 
+                'AssimuloFMIAlg'.
+                Default: 'AssimuloAlg'
+                
+        Returns::
+        
+            Options class for the algorithm specified with default values.
+        """
+        return self._default_options(algorithm)
+        
+    def optimize_options(self, algorithm='CollocationLagrangePolynomialsAlg'):
+        """ Get an instance of the optimize options class, prefilled 
+        with default values. If called without argument then the options 
+        class for the default optimization algorithm will be returned.
+        
+        Parameters::
+        
+            algorithm --
+                The algorithm for which the options class should be 
+                fetched. Possible values are: 
+                'CollocationLagrangePolynomialsAlg'.
+                Default: 'CollocationLagrangePolynomialsAlg'
+                
+        Returns::
+        
+            Options class for the algorithm specified with default values.
+        """
+        return self._default_options(algorithm)
+        
+    def _default_options(self, algorithm):
+        """ Help method. Gets the options class for the algorithm 
+        specified in 'algorithm'.
+        """
+        base_path = 'jmodelica.algorithm_drivers'
+        algdrive = __import__(base_path)
+        algdrive = getattr(algdrive, 'algorithm_drivers')
+        algorithm = getattr(algdrive, algorithm)
+        return algorithm.get_default_options()
+    
     
 def unzip_unit(archive, path='.'):
     """

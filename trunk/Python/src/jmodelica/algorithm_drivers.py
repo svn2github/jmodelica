@@ -71,6 +71,9 @@ class AlgorithmBase(object):
 #   @abstractmethod
     def get_result(self): pass
     
+    @classmethod
+    def get_default_options(self): pass
+    
 class ResultBase(object):
     """ Base class for an algorithm result. All algorithms used in any 
         of the high-level functions must return an object which extends 
@@ -268,6 +271,19 @@ class OptionBase(dict):
     
 class IpoptInitResult(ResultBase): pass
 
+class IpoptInitializationAlgOptions(OptionBase):
+    """ Options for the IpoptInitialization initialize algorithm. 
+    """
+    def __init__(self, *args, **kw):
+        _defaults= {
+            'stat':False,
+            'result_file_name':'', 
+            'result_format':'txt',
+            'IPOPT_options':{}
+            }
+        super(IpoptInitializationAlgOptions,self).__init__(_defaults)
+        self.update(*args, **kw)
+
 class IpoptInitializationAlg(AlgorithmBase):
     """ Initialization of a model using Ipopt. """
     
@@ -354,9 +370,27 @@ class IpoptInitializationAlg(AlgorithmBase):
         
         # create and return result object
         return IpoptInitResult(self.model, resultfile, self.nlp_ipopt, res)
-            
+
+    @classmethod
+    def get_default_options(cls):
+        """ Get an instance of the options class, prefilled with default 
+        values, for the IpoptInitializationAlg algorithm. (Class method.)
+        """
+        return IpoptInitializationAlgOptions()
 
 class AssimuloSimResult(ResultBase): pass
+
+class AssimuloFMIAlgOptions(OptionBase):
+    """ Options for the AssimuloFMI simulation algorithm. 
+    """
+    def __init__(self, *args, **kw):
+        _defaults= {
+            'solver': 'CVode', 
+            'num_communication_points':500, 
+            'CVode_options':{}
+            }
+        super(AssimuloFMIAlgOptions,self).__init__(_defaults)
+        self.update(*args, **kw)
 
 class AssimuloFMIAlg(AlgorithmBase):
     """Simulation algortihm for FMUs using the Assimulo package."""
@@ -498,6 +532,27 @@ class AssimuloFMIAlg(AlgorithmBase):
         res = ResultDymolaTextual(resultfile)
         # create and return result object
         return AssimuloSimResult(self.model, resultfile, self.simulator, res)
+        
+    @classmethod
+    def get_default_options(cls):
+        """ Get an instance of the options class, prefilled with default 
+        values, for the AssimuloFMIAlg algorithm. (Class method.)
+        """
+        return AssimuloFMIAlgOptions()
+
+class AssimuloAlgOptions(OptionBase):
+    """ Options for the Assimulo simulation algorithm. 
+    """
+    def __init__(self, *args, **kw):
+        _defaults= {
+            'solver': 'IDA', 
+            'num_communication_points':500, 
+            'initialize':True,
+            'IDA_options':{},
+            'CVode_options':{}
+            }
+        super(AssimuloAlgOptions,self).__init__(_defaults)
+        self.update(*args, **kw)
 
 class AssimuloAlg(AlgorithmBase):
     """ Simulation algorithm using the Assimulo package. """
@@ -634,8 +689,35 @@ class AssimuloAlg(AlgorithmBase):
         # create and return result object
         return AssimuloSimResult(self.model, resultfile, self.simulator, res)
     
+    @classmethod
+    def get_default_options(cls):
+        """ Get an instance of the options class, prefilled with default 
+        values, for the AssimuloAlg algorithm. (Class method.)
+        """
+        return AssimuloAlgOptions()
+    
 
 class CollocationLagrangePolynomialsResult(ResultBase): pass
+
+class CollocationLagrangePolynomialsAlgOptions(OptionBase):
+    """ Options for the CollocationLagrangePolynomials optimization 
+    algorithm. 
+    """
+    def __init__(self, *args, **kw):
+        _defaults= {
+            'n_e':50, 
+            'n_cp':3, 
+            'hs':N.ones(50)*1./50, 
+            'blocking_factors':None,
+            'init_traj':None,
+            'result_mesh':'default', 
+            'result_file_name':'', 
+            'result_format':'txt',
+            'n_interpolation_points':None,
+            'IPOPT_options':{}
+            }
+        super(CollocationLagrangePolynomialsAlgOptions,self).__init__(_defaults)
+        self.update(*args, **kw)
 
 class CollocationLagrangePolynomialsAlg(AlgorithmBase):
     """ Optimization algorithm using CollocationLagrangePolynomials method. """
@@ -777,6 +859,14 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
         
         # create and return result object
         return CollocationLagrangePolynomialsResult(self.model, resultfile, self.nlp_ipopt, res)
+        
+    @classmethod
+    def get_default_options(cls):
+        """ Get an instance of the options class, prefilled with default 
+        values, for the CollocationLagrangePolynomialsAlg algorithm. 
+        (Class method.)
+        """
+        return CollocationLagrangePolynomialsAlgOptions()
     
 class InvalidAlgorithmArgumentException(Exception):
     """ Exception raised when an algorithm argument is encountered that does 
@@ -801,7 +891,21 @@ class InvalidSolverArgumentException(Exception):
         return repr(self.msg)
     
 class KInitSolveResult(ResultBase): pass
-    
+
+class KInitSolveAlgOptions(OptionBase):
+    """ Options for the KInitSolve initialize algorithm. 
+    """
+    def __init__(self, *args, **kw):
+        _defaults= {
+            'use_jac':True,
+            'use_constraints':False,
+            'constraints':None,
+            'result_file_name':'', 
+            'result_format':'txt'
+            }
+        super(KInitSolveAlgOptions,self).__init__(_defaults)
+        self.update(*args, **kw)
+        
 class KInitSolveAlg(AlgorithmBase):
     """ Initialization using a solver of non-linear eq-systems"""
 
@@ -815,7 +919,7 @@ class KInitSolveAlg(AlgorithmBase):
             alg_args -- 
                 All arguments for the algorithm in the shape 
                 of a dictionary. See _set_alg_args
-                function call for names and default values.        
+                function call for names and default values.
         """
         
         self.model = model
@@ -882,5 +986,12 @@ class KInitSolveAlg(AlgorithmBase):
         
         # create and return result object
         return KInitSolveResult(self.model, resultfile, self.solver, res)
+        
+    @classmethod
+    def get_default_options(cls):
+        """ Get an instance of the options class, prefilled with default 
+        values, for the KInitSolveAlg algorithm. (Class method.)
+        """
+        return KInitSolveAlgOptions()
 
 class UnrecognizedOptionError(Exception): pass

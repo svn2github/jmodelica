@@ -34,6 +34,7 @@ import jmodelica.io
 import jmodelica.jmi as jmi
 from jmodelica.jmi import compile_jmu
 from jmodelica.jmi import JMUModel
+import jmodelica.algorithm_drivers as ad
 
 try:
     from jmodelica.simulation.assimulo_interface import JMIODE
@@ -1415,7 +1416,8 @@ class TestDependentParameterEvaluation9(TZValues):
 
 class Test_JMU_methods:
     """
-    This class tests the methods jmu_name and package_jmu.
+    This class tests the methods jmu_name, package_jmu and 
+    simulate/initialize/optimize_options.
     """
     
     @testattr(stddist = True)
@@ -1452,3 +1454,35 @@ class Test_JMU_methods:
         jmu_name = compile_jmu(cpath_ODE, fpath_ODE, compile_to=new_dir)
         
         assert os.path.exists(jmu_name)
+        
+    @testattr(assimulo = True)
+    def test_get_default_options(self):
+        """
+        Test that simulate/initialize/optimize_options returns an 
+        options class instance for the correct algorithm.
+        """
+        fpath_ODE = os.path.join(get_files_path(), 'Modelica', 'VDP.mop')
+        cpath_ODE = 'VDP_pack.VDP'
+        new_dir = os.path.join('.','test_compile_to')
+        jmu_name = compile_jmu(cpath_ODE, fpath_ODE)
+        model = JMUModel(jmu_name)
+        assert isinstance(model.initialize_options(), 
+            ad.IpoptInitializationAlgOptions)
+        assert isinstance(model.simulate_options(), 
+            ad.AssimuloAlgOptions)
+        assert isinstance(model.optimize_options(), 
+            ad.CollocationLagrangePolynomialsAlgOptions)
+        
+    @testattr(assimulo = True)
+    def test_get_specific_option(self):
+        """
+        Test that it is possible to specify algorithm when getting 
+        options class. 
+        """
+        fpath_ODE = os.path.join(get_files_path(), 'Modelica', 'VDP.mop')
+        cpath_ODE = 'VDP_pack.VDP'
+        new_dir = os.path.join('.','test_compile_to')
+        jmu_name = compile_jmu(cpath_ODE, fpath_ODE)
+        model = JMUModel(jmu_name)
+        assert isinstance(model.initialize_options('KInitSolveAlg'), 
+            ad.KInitSolveAlgOptions)

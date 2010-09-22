@@ -1281,6 +1281,24 @@ class FMUModel(BaseModel):
         return self._exec_algorithm(algorithm,
                                alg_args,
                                solver_args)
+                               
+    def simulate_options(self, algorithm='AssimuloFMIAlg'):
+        """ Get an instance of the simulate options class, prefilled 
+        with default values. If called without argument then the options 
+        class for the default simulation algorithm will be returned.
+        
+        Parameters::
+        
+            algorithm --
+                The algorithm for which the options class should be 
+                fetched. Possible values are: 'AssimuloFMIAlg'.
+                Default: 'AssimuloFMIAlg'
+                
+        Returns::
+        
+            Options class for the algorithm specified with default values.
+        """
+        return self._default_options(algorithm)
     
     def _set(self, variable_name, value):
         """
