@@ -35,17 +35,16 @@ def run_demo(with_plots=True):
     jmu_name = compile_jmu("VDP_pack.VDP_Opt", curr_dir+"/files/VDP.mop")
     vdp = JMUModel(jmu_name)
     
-    opt_res = vdp.optimize()
+    res = vdp.optimize()
 
     # Extract variable profiles
-    res = opt_res.result_data
-    x1=res.get_variable_data('x1')
-    x2=res.get_variable_data('x2')
-    u=res.get_variable_data('u')
-
-    cost=res.get_variable_data('cost')
+    x1=res['x1']
+    x2=res['x2']
+    u=res['u']
+    t=res['time']
+    cost=res['cost']
     
-    assert N.abs(cost.x[-1] - 2.3469089e+01) < 1e-3, \
+    assert N.abs(cost[-1] - 2.3469089e+01) < 1e-3, \
             "Wrong value of cost function in vdp.py"  
 
     if with_plots:
@@ -53,17 +52,17 @@ def run_demo(with_plots=True):
         plt.figure(1)
         plt.clf()
         plt.subplot(311)
-        plt.plot(x1.t,x1.x)
+        plt.plot(t,x1)
         plt.grid()
         plt.ylabel('x1')
         
         plt.subplot(312)
-        plt.plot(x2.t,x2.x)
+        plt.plot(t,x2)
         plt.grid()
         plt.ylabel('x2')
         
         plt.subplot(313)
-        plt.plot(u.t,u.x)
+        plt.plot(t,u)
         plt.grid()
         plt.ylabel('u')
         plt.xlabel('time')

@@ -33,29 +33,29 @@ def run_demo(with_plots=True):
     model = JMUModel(jmu_name)
 
     #simulate
-    simres = model.simulate()
+    res = model.simulate()
     
-    res = simres.result_data
-    sim_a = res.get_variable_data('a')
-    sim_b = res.get_variable_data('b')
-    sim_c = res.get_variable_data('c')
+    sim_a = res['a']
+    sim_b = res['b']
+    sim_c = res['c']
+    t     = res['time']
 
-    assert N.abs(sim_a.x[-1] - 1) < 1e-6, \
+    assert N.abs(sim_a[-1] - 1) < 1e-6, \
            "Wrong value in simulation result in extfunctions.py" 
-    assert N.abs(sim_b.x[-1] - 2) < 1e-6, \
+    assert N.abs(sim_b[-1] - 2) < 1e-6, \
            "Wrong value in simulation result in extfunctions.py"
-    assert N.abs(sim_c.x[-1] - 3) < 1e-6, \
+    assert N.abs(sim_c[-1] - 3) < 1e-6, \
            "Wrong value in simulation result in extfunctions.py"
 
     if with_plots:
         fig = p.figure()
         p.clf()
         p.subplot(3,1,1)
-        p.plot(sim_a.t, sim_a.x)
+        p.plot(t, sim_a)
         p.subplot(3,1,2) 
-        p.plot(sim_b.t, sim_b.x) 
+        p.plot(t, sim_b) 
         p.subplot(3,1,3)
-        p.plot(sim_c.t, sim_c.x)
+        p.plot(t, sim_c)
         p.show()
 
 if __name__=="__main__":

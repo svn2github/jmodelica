@@ -89,9 +89,9 @@ class Test_JMI_ODE:
         x2=res.get_variable_data('x2')
         u =res.get_variable_data('u')
         
-        assert u.x[-1] == 0.75
-        nose.tools.assert_almost_equal(x1.x[-1], -0.54108518, 5)
-        nose.tools.assert_almost_equal(x2.x[-1], -0.81364915, 5)
+        assert u[-1] == 0.75
+        nose.tools.assert_almost_equal(x1[-1], -0.54108518, 5)
+        nose.tools.assert_almost_equal(x2[-1], -0.81364915, 5)
 
     @testattr(assimulo = True) 
     def test_init(self):
@@ -603,35 +603,37 @@ class Test_FMI_ODE:
         #Writing continuous
         bounce = fmi.FMUModel('bouncingBall.fmu', path_to_fmus)
         bounce.initialize()
-        res_obj = bounce.simulate(alg_args={'final_time':3.})
-        res = res_obj.result_data
-        height = res.get_variable_data('h')
+        res = bounce.simulate(alg_args={'final_time':3.})
+        height = res['h']
+        time = res['time']
 
-        nose.tools.assert_almost_equal(height.x[0],1.000000,5)
-        nose.tools.assert_almost_equal(height.x[-1],-0.9804523,5)
-        nose.tools.assert_almost_equal(height.t[-1],3.000000,5)
+        nose.tools.assert_almost_equal(height[0],1.000000,5)
+        nose.tools.assert_almost_equal(height[-1],-0.9804523,5)
+        nose.tools.assert_almost_equal(time[-1],3.000000,5)
         
         #Writing after
         bounce = fmi.FMUModel('bouncingBall.fmu', path_to_fmus)
         bounce.initialize()
-        res_obj = bounce.simulate(alg_args={'final_time':3.}, solver_args={'write_cont':False})
-        res = res_obj.result_data
-        height = res.get_variable_data('h')
-
-        nose.tools.assert_almost_equal(height.x[0],1.000000,5)
-        nose.tools.assert_almost_equal(height.x[-1],-0.9804523,5)
-        nose.tools.assert_almost_equal(height.t[-1],3.000000,5)
+        res = bounce.simulate(alg_args={'final_time':3.}, solver_args={'write_cont':False})
+        
+        height = res['h']
+        time = res['time']
+        
+        nose.tools.assert_almost_equal(height[0],1.000000,5)
+        nose.tools.assert_almost_equal(height[-1],-0.9804523,5)
+        nose.tools.assert_almost_equal(time[-1],3.000000,5)
         
         #Test with predefined FMUModel
         model = fmi.FMUModel(os.path.join(path_to_fmus,'bouncingBall.fmu'))
         model.initialize()
-        res_obj = model.simulate(alg_args={'final_time':3.})
-        res = res_obj.result_data
-        height = res.get_variable_data('h')
+        res = model.simulate(alg_args={'final_time':3.})
 
-        nose.tools.assert_almost_equal(height.x[0],1.000000,5)
-        nose.tools.assert_almost_equal(height.x[-1],-0.9804523,5)
-        nose.tools.assert_almost_equal(height.t[-1],3.000000,5)
+        height = res['h']
+        time = res['time']
+
+        nose.tools.assert_almost_equal(height[0],1.000000,5)
+        nose.tools.assert_almost_equal(height[-1],-0.9804523,5)
+        nose.tools.assert_almost_equal(time[-1],3.000000,5)
 
 
     @testattr(assimulo = True)
@@ -642,28 +644,29 @@ class Test_FMI_ODE:
         #Writing continuous
         bounce = fmi.FMUModel('bouncingBall.fmu', path_to_fmus)
         bounce.initialize()
-        res_obj = bounce.simulate(alg_args={'final_time':3.})
-        res = res_obj.result_data
-        height = res.get_variable_data('h')
+        res = bounce.simulate(alg_args={'final_time':3.})
+
+        height = res['h']
+        time = res['time']
         
-        nose.tools.assert_almost_equal(res_obj.solver.rtol, 0.000100, 5)
-        assert res_obj.solver.iter == 'Newton'
+        nose.tools.assert_almost_equal(res.solver.rtol, 0.000100, 5)
+        assert res.solver.iter == 'Newton'
         
-        nose.tools.assert_almost_equal(height.x[0],1.000000,5)
-        nose.tools.assert_almost_equal(height.x[-1],-0.9804523,5)
-        nose.tools.assert_almost_equal(height.t[-1],3.000000,5)
+        nose.tools.assert_almost_equal(height[0],1.000000,5)
+        nose.tools.assert_almost_equal(height[-1],-0.9804523,5)
+        nose.tools.assert_almost_equal(time[-1],3.000000,5)
         
         #Writing continuous
         bounce = fmi.FMUModel('bouncingBall.fmu', path_to_fmus)
         bounce.initialize()
-        res_obj = bounce.simulate(alg_args={'final_time':3.},
+        res = bounce.simulate(alg_args={'final_time':3.},
                                             solver_args={'rtol':1e-6, 'iter':'FixedPoint'})
-        res = res_obj.result_data
-        height = res.get_variable_data('h')
+        height = res['h']
+        time = res['time']
     
-        nose.tools.assert_almost_equal(res_obj.solver.rtol, 0.00000100, 7)
-        assert res_obj.solver.iter == 'FixedPoint'
+        nose.tools.assert_almost_equal(res.solver.rtol, 0.00000100, 7)
+        assert res.solver.iter == 'FixedPoint'
         
-        nose.tools.assert_almost_equal(height.x[0],1.000000,5)
-        nose.tools.assert_almost_equal(height.x[-1],-0.98018113,5)
-        nose.tools.assert_almost_equal(height.t[-1],3.000000,5)
+        nose.tools.assert_almost_equal(height[0],1.000000,5)
+        nose.tools.assert_almost_equal(height[-1],-0.98018113,5)
+        nose.tools.assert_almost_equal(time[-1],3.000000,5)

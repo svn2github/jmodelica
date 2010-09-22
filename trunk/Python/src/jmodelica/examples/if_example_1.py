@@ -37,21 +37,21 @@ def run_demo(with_plots=True):
     
     jmu_name = compile_jmu(class_name, mofile)
     model = JMUModel(jmu_name)
-    sim_res = model.simulate(
+    res = model.simulate(
         alg_args={'final_time':5, 'num_communication_points':500})
                         
-    res = sim_res.result_data
-    x = res.get_variable_data('x')
-    u = res.get_variable_data('u')
+    x = res['x']
+    u = res['u']
+    t = res['time']
     
-    assert N.abs(x.x[-1] - 3.5297357) < 1e-3, \
+    assert N.abs(x[-1] - 3.5297357) < 1e-3, \
             "Wrong value, last value of x in if_example.py"
-    assert N.abs(u.x[-1] - (-0.2836625)) < 1e-3, \
+    assert N.abs(u[-1] - (-0.2836625)) < 1e-3, \
             "Wrong value, last value of u in if_example.py"
 
     if with_plots:
         fig = p.figure()
-        p.plot(x.t, x.x, u.t, u.x)
+        p.plot(t, x, t, u)
         p.legend(('x','u'))
         p.show()
 

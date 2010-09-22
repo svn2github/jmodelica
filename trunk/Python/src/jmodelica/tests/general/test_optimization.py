@@ -280,7 +280,7 @@ class TestStaticOptimizationDependentParameters:
     @testattr(ipopt = True)
     def test_parameter_value(self):
         k = self.res.get_variable_data("k")
-        assert k.x[-1] == 1.1, "Wrong value of optimized parameter."
+        assert k == 1.1, "Wrong value of optimized parameter."
 
     @testattr(ipopt = True)
     def test_initialization_from_model(self):
@@ -490,10 +490,10 @@ class TestOptInitBlockingFactors:
                            [ 1.11922602],
                            [ 0.56787771]])
         
-        assert N.sum(N.abs(m_x1_2.x-m_x1_2_res))<1e-3, "Error in initialization of x[1]"
-        assert N.sum(N.abs(m_x2_2.x-m_x2_2_res))<1e-3, "Error in initialization of x[2]"
-        assert N.sum(N.abs(m_u_2.x-m_u_2_res))<1e-3, "Error in initialization of u"
-        assert N.sum(N.abs(m_y_2.x-m_y_2_res))<1e-3, "Error in initialization of y"
+        assert N.sum(N.abs(m_x1_2-m_x1_2_res))<1e-3, "Error in initialization of x[1]"
+        assert N.sum(N.abs(m_x2_2-m_x2_2_res))<1e-3, "Error in initialization of x[2]"
+        assert N.sum(N.abs(m_u_2-m_u_2_res))<1e-3, "Error in initialization of u"
+        assert N.sum(N.abs(m_y_2-m_y_2_res))<1e-3, "Error in initialization of y"
         
         assert N.sum(N.abs(x_el_junc-x_el_junc_res))<1e-3, "Error in initialization of x_el_junc"
         

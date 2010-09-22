@@ -101,20 +101,20 @@ def run_demo(with_plots=True):
     qt.set("u2_r",u_B[1])
 
     # Solve optimal control problem
-    opt_res = qt.optimize(solver_args={'max_iter':500})
+    res = qt.optimize(solver_args={'max_iter':500})
 
     # Extract variable profiles
-    res = opt_res.result_data
-    x1=res.get_variable_data('x1')
-    x2=res.get_variable_data('x2')
-    x3=res.get_variable_data('x3')
-    x4=res.get_variable_data('x4')
-    u1=res.get_variable_data('u1')
-    u2=res.get_variable_data('u2')
+    x1=res['x1']
+    x2=res['x2']
+    x3=res['x3']
+    x4=res['x4']
+    u1=res['u1']
+    u2=res['u2']
+    t =res['time']
 
-    cost=res.get_variable_data('cost')
+    cost=res['cost']
 
-    assert N.abs(cost.x[-1] - 5.0333257e+02) < 1e-3, \
+    assert N.abs(cost[-1] - 5.0333257e+02) < 1e-3, \
            "Wrong value of cost function in quadtank.py"  
 
     if with_plots:
@@ -122,22 +122,22 @@ def run_demo(with_plots=True):
         plt.figure(2)
         plt.clf()
         plt.subplot(411)
-        plt.plot(x1.t,x1.x)
+        plt.plot(t,x1)
         plt.grid()
         plt.ylabel('x1')
         
         plt.subplot(412)
-        plt.plot(x2.t,x2.x)
+        plt.plot(t,x2)
         plt.grid()
         plt.ylabel('x2')
         
         plt.subplot(413)
-        plt.plot(x3.t,x3.x)
+        plt.plot(t,x3)
         plt.grid()
         plt.ylabel('x3')
         
         plt.subplot(414)
-        plt.plot(x4.t,x4.x)
+        plt.plot(t,x4)
         plt.grid()
         plt.ylabel('x4')
         plt.show()
@@ -145,12 +145,12 @@ def run_demo(with_plots=True):
         plt.figure(3)
         plt.clf()
         plt.subplot(211)
-        plt.plot(u1.t,u1.x)
+        plt.plot(t,u1)
         plt.grid()
         plt.ylabel('u1')
         
         plt.subplot(212)
-        plt.plot(u2.t,u2.x)
+        plt.plot(t,u2)
         plt.grid()
         plt.ylabel('u2')
         

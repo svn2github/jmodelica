@@ -111,32 +111,32 @@ class Test_init_ipopt:
         jmu_pend = compile_jmu(cpath_pend, fpath_pend)
         pend = JMUModel(jmu_pend)
         
-        init_res = pend.initialize()
-        res = init_res.result_data
-        theta=res.get_variable_data('theta')
-        dtheta=res.get_variable_data('dtheta')
-        x=res.get_variable_data('x')
-        dx=res.get_variable_data('dx')
-        _dtheta=res.get_variable_data('der(theta)')
-        ddtheta=res.get_variable_data('der(dtheta)')
-        _dx=res.get_variable_data('der(x)')
-        ddx=res.get_variable_data('der(dx)')
+        res = pend.initialize()
+
+        theta=res['theta']
+        dtheta=res['dtheta']
+        x=res['x']
+        dx=res['dx']
+        _dtheta=res['der(theta)']
+        ddtheta=res['der(dtheta)']
+        _dx=res['der(x)']
+        ddx=res['der(dx)']
     
-        assert N.abs(theta.x[-1] - 0.1) < 1e-3, \
+        assert N.abs(theta[-1] - 0.1) < 1e-3, \
             "Wrong value of variable theta using jmodelica.initialize."
-        assert N.abs(dtheta.x[-1] - 0.) < 1e-3, \
+        assert N.abs(dtheta[-1] - 0.) < 1e-3, \
             "Wrong value of variable dtheta using jmodelica.initialize."
-        assert N.abs(x.x[-1] - 0) < 1e-3, \
+        assert N.abs(x[-1] - 0) < 1e-3, \
             "Wrong value of variable x using jmodelica.initialize."
-        assert N.abs(dx.x[-1] - 0) < 1e-3, \
+        assert N.abs(dx[-1] - 0) < 1e-3, \
             "Wrong value of variable dx using jmodelica.initialize."
-        assert N.abs(_dtheta.x[-1] - 0) < 1e-3, \
+        assert N.abs(_dtheta[-1] - 0) < 1e-3, \
             "Wrong value of variable der(theta) using jmodelica.initialize."
-        assert N.abs(ddtheta.x[-1] - 0.09983341) < 1e-3, \
+        assert N.abs(ddtheta[-1] - 0.09983341) < 1e-3, \
             "Wrong value of variable der(dtheta) using jmodelica.initialize."
-        assert N.abs(_dx.x[-1] - 0) < 1e-3, \
+        assert N.abs(_dx[-1] - 0) < 1e-3, \
             "Wrong value of variable der(x) using jmodelica.initialize."
-        assert N.abs(ddx.x[-1] - 0) < 1e-3, \
+        assert N.abs(ddx[-1] - 0) < 1e-3, \
             "Wrong value of variable der(dx) using jmodelica.initialize."
         
     @testattr(ipopt = True)
@@ -148,32 +148,32 @@ class Test_init_ipopt:
         jmu_pend = compile_jmu(cpath_pend, fpath_pend)
         pend = JMUModel(jmu_pend)
         
-        init_res = pend.initialize(solver_args={'max_iter':1000})
-        res = init_res.result_data
-        theta=res.get_variable_data('theta')
-        dtheta=res.get_variable_data('dtheta')
-        x=res.get_variable_data('x')
-        dx=res.get_variable_data('dx')
-        _dtheta=res.get_variable_data('der(theta)')
-        ddtheta=res.get_variable_data('der(dtheta)')
-        _dx=res.get_variable_data('der(x)')
-        ddx=res.get_variable_data('der(dx)')
+        res = pend.initialize(solver_args={'max_iter':1000})
+
+        theta=res['theta']
+        dtheta=res['dtheta']
+        x=res['x']
+        dx=res['dx']
+        _dtheta=res['der(theta)']
+        ddtheta=res['der(dtheta)']
+        _dx=res['der(x)']
+        ddx=res['der(dx)']
     
-        assert N.abs(theta.x[-1] - 0.1) < 1e-3, \
+        assert N.abs(theta[-1] - 0.1) < 1e-3, \
             "Wrong value of variable theta using jmodelica.initialize."
-        assert N.abs(dtheta.x[-1] - 0.) < 1e-3, \
+        assert N.abs(dtheta[-1] - 0.) < 1e-3, \
             "Wrong value of variable dtheta using jmodelica.initialize."
-        assert N.abs(x.x[-1] - 0) < 1e-3, \
+        assert N.abs(x[-1] - 0) < 1e-3, \
             "Wrong value of variable x using jmodelica.initialize."
-        assert N.abs(dx.x[-1] - 0) < 1e-3, \
+        assert N.abs(dx[-1] - 0) < 1e-3, \
             "Wrong value of variable dx using jmodelica.initialize."
-        assert N.abs(_dtheta.x[-1] - 0) < 1e-3, \
+        assert N.abs(_dtheta[-1] - 0) < 1e-3, \
             "Wrong value of variable der(theta) using jmodelica.initialize."
-        assert N.abs(ddtheta.x[-1] - 0.09983341) < 1e-3, \
+        assert N.abs(ddtheta[-1] - 0.09983341) < 1e-3, \
             "Wrong value of variable der(dtheta) using jmodelica.initialize."
-        assert N.abs(_dx.x[-1] - 0) < 1e-3, \
+        assert N.abs(_dx[-1] - 0) < 1e-3, \
             "Wrong value of variable der(x) using jmodelica.initialize."
-        assert N.abs(ddx.x[-1] - 0) < 1e-3, \
+        assert N.abs(ddx[-1] - 0) < 1e-3, \
             "Wrong value of variable der(dx) using jmodelica.initialize."
 
     @testattr(ipopt = True)
@@ -184,10 +184,10 @@ class Test_init_ipopt:
         jmu_pend = compile_jmu(cpath_pend, fpath_pend,compiler_options={'state_start_values_fixed':True})
         pend = JMUModel(jmu_pend)
         
-        opt_res = pend.optimize()
-        cost=opt_res.result_data.get_variable_data('cost')
+        res = pend.optimize()
+        cost=res['cost']
         
-        assert N.abs(cost.x[-1] - 1.2921683e-01) < 1e-3, \
+        assert N.abs(cost[-1] - 1.2921683e-01) < 1e-3, \
             "Wrong value of cost function using jmodelica.optimize with vdp."
    
 
@@ -195,24 +195,24 @@ class Test_init_ipopt:
     def test_optimize_set_n_cp(self):
         """ Test the jmodelica.optimize function and setting n_cp in alg_args.
         """
-        opt_res = self.model_vdp.optimize(alg_args={'n_cp':10})
-        cost=opt_res.result_data.get_variable_data('cost')
+        res = self.model_vdp.optimize(alg_args={'n_cp':10})
+        cost=res['cost']
         
-        assert N.abs(cost.x[-1] - 2.34602647e+01 ) < 1e-3, \
+        assert N.abs(cost[-1] - 2.34602647e+01 ) < 1e-3, \
                 "Wrong value of cost function using jmodelica.optimize with vdp. \
-                cost.x[-1] was: "+str(cost.x[-1])
+                cost.x[-1] was: "+str(cost[-1])
             
     @testattr(ipopt = True)
     def test_optimize_set_args(self):
         """Test the jmodelica.optimize function and setting some algorithm and solver args.
         """
         res_file_name = 'test_optimize_set_result_mesh.txt'
-        opt_res = self.model_vdp.optimize(alg_args={'result_mesh':'element_interpolation', 
+        res = self.model_vdp.optimize(alg_args={'result_mesh':'element_interpolation', 
                                                'result_file_name':res_file_name},
                                      solver_args={'max_iter':100})
-        cost=opt_res.result_data.get_variable_data('cost')
+        cost=res['cost']
         
-        assert N.abs(cost.x[-1] - 2.3469089e+01) < 1e-3, \
+        assert N.abs(cost[-1] - 2.3469089e+01) < 1e-3, \
                 "Wrong value of cost function using jmodelica.optimize with vdp."
 
 
@@ -255,18 +255,18 @@ class Test_init_assimulo:
     def test_simulate(self):
         """ Test the jmodelica.simulate function using all default parameters."""
         sim_res = self.model_rlc.simulate()
-        resistor_v = sim_res.result_data.get_variable_data('resistor.v')
+        resistor_v = sim_res['resistor.v']
         
-        assert N.abs(resistor_v.x[-1] - 0.138037041741) < 1e-3, \
+        assert N.abs(resistor_v[-1] - 0.138037041741) < 1e-3, \
             "Wrong value in simulation result using jmodelica.simulate with rlc."
         
     @testattr(assimulo = True)
     def test_simulate_set_alg_arg(self):
         """ Test the jmodelica.simulate function and setting an algorithm argument."""    
         sim_res = self.model_rlc.simulate(alg_args={'final_time':30.0})
-        resistor_v = sim_res.result_data.get_variable_data('resistor.v')
+        resistor_v = sim_res['resistor.v']
         
-        assert N.abs(resistor_v.x[-1] - 0.159255008028) < 1e-3, \
+        assert N.abs(resistor_v[-1] - 0.159255008028) < 1e-3, \
             "Wrong value in simulation result using jmodelica.simulate with rlc."
         
     @testattr(assimulo = True)
@@ -304,12 +304,12 @@ class Test_init_assimulo:
         model = JMUModel(jmu_name)
         sim_res = model.simulate(alg_args={'solver':'CVode', 'final_time':20, 'num_communication_points':0},
                                      solver_args={'discr':'BDF', 'iter':'Newton'})
-        x1=sim_res.result_data.get_variable_data('x1')
-        x2=sim_res.result_data.get_variable_data('x2')
+        x1=sim_res['x1']
+        x2=sim_res['x2']
         
-        assert N.abs(x1.x[-1] + 0.736680243) < 1e-5, \
+        assert N.abs(x1[-1] + 0.736680243) < 1e-5, \
                "Wrong value in simulation result in VDP_assimulo.py" 
-        assert N.abs(x2.x[-1] - 1.57833994) < 1e-5, \
+        assert N.abs(x2[-1] - 1.57833994) < 1e-5, \
                "Wrong value in simulation result in VDP_assimulo.py"
     
     @testattr(assimulo=True)

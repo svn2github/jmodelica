@@ -105,31 +105,31 @@ class ResultBase(object):
         self._solver = solver
         self._result_data = result_data
     
-    def get_model(self):
-        """ Get the jmi.JMUModel object representing the model that was 
+    def _get_model(self):
+        """ Get the model object representing the model that was 
         used in the algorithm.
         
         Returns::
         
-            The jmi.JMUModel object that was used in the algorithm.
+            The model object that was used in the algorithm.
         """
         if self._model != None:
             return self._model
         raise Exception("model has not been set")
         
-    def set_model(self, model):
-        """ Set the jmi.JMUModel that was used in the algorithm.
+    def _set_model(self, model):
+        """ Set the model that was used in the algorithm.
         
         Parameters::
         
             model --
-                The jmi.JMUModel object that was used in the algorithm.
+                The model object that was used in the algorithm.
         """
         self._model = model
         
-    model = property(fget=get_model, fset=set_model)
+    model = property(fget=_get_model, fset=_set_model)
         
-    def get_result_file_name(self):
+    def _get_result_file(self):
         """ Get the name of the result file created on the file system.
         
         Returns::
@@ -140,7 +140,7 @@ class ResultBase(object):
             return self._result_file_name
         raise Exception("result file name has not been set")
     
-    def set_result_name_file(self, file_name):
+    def _set_result_file(self, file_name):
         """ Set the name of the result file created in the algorithm.
         
         Parameters::
@@ -151,9 +151,9 @@ class ResultBase(object):
         """
         self._result_file_name = result_file_name
         
-    result_file_name = property(fget=get_result_file_name, fset=set_result_name_file)
+    result_file = property(fget=_get_result_file, fset=_set_result_file)
         
-    def get_solver(self):
+    def _get_solver(self):
         """ Get the solver object repesenting the solver that was used 
         in the algorithm.
         
@@ -165,7 +165,7 @@ class ResultBase(object):
             return self._solver
         raise Exception("solver has not been set")
 
-    def set_solver(self, solver):
+    def _set_solver(self, solver):
         """ Set the solver that was used in the algorithm.
         
         Parameters::
@@ -175,9 +175,9 @@ class ResultBase(object):
         """
         self._solver = solver
         
-    solver = property(fget=get_solver, fset=set_solver)
+    solver = property(fget=_get_solver, fset=_set_solver)
         
-    def get_result_data(self):
+    def _get_result_data(self):
         """ Get the result data matrix created in the algorithm.
         
         Returns::
@@ -188,7 +188,7 @@ class ResultBase(object):
             return self._result_data
         raise Exception("result data has not been set")
         
-    def set_result_data(self, result_data):
+    def _set_result_data(self, result_data):
         """ Set the result data matrix that was created in the algorithm.
         
         Parameters::
@@ -198,7 +198,7 @@ class ResultBase(object):
         """
         self._result_data = result_data
         
-    result_data = property(fget=get_result_data, fset=set_result_data)
+    result_data = property(fget=_get_result_data, fset=_set_result_data)
 
 class OptionBase(dict):
     """ Base class for an algorithm option class. 
@@ -269,7 +269,24 @@ class OptionBase(dict):
             self[key] = value
         return self[key]
     
-class IpoptInitResult(ResultBase): pass
+class IpoptInitResult(ResultBase):
+    def __getitem__(self, key):
+        return self.result_data.get_variable_data(key)
+    
+    def is_variable(self, name):
+        """
+        Returns True if the given name corresponds to a time-varying
+        variable.
+        
+            Parameters::
+            
+                name - Name of the variable/parameter/constant
+                
+            Returns::
+            
+                True if the variable is time-varying.
+        """
+        return self.result_data.is_variable(name)
 
 class IpoptInitializationAlgOptions(OptionBase):
     """ Options for the IpoptInitialization initialize algorithm. 
@@ -378,7 +395,24 @@ class IpoptInitializationAlg(AlgorithmBase):
         """
         return IpoptInitializationAlgOptions()
 
-class AssimuloSimResult(ResultBase): pass
+class AssimuloSimResult(ResultBase):
+    def __getitem__(self, key):
+        return self.result_data.get_variable_data(key)
+        
+    def is_variable(self, name):
+        """
+        Returns True if the given name corresponds to a time-varying
+        variable.
+        
+            Parameters::
+            
+                name - Name of the variable/parameter/constant
+                
+            Returns::
+            
+                True if the variable is time-varying.
+        """
+        return self.result_data.is_variable(name)
 
 class AssimuloFMIAlgOptions(OptionBase):
     """ Options for the AssimuloFMI simulation algorithm. 
@@ -697,7 +731,24 @@ class AssimuloAlg(AlgorithmBase):
         return AssimuloAlgOptions()
     
 
-class CollocationLagrangePolynomialsResult(ResultBase): pass
+class CollocationLagrangePolynomialsResult(ResultBase):
+    def __getitem__(self, key):
+        return self.result_data.get_variable_data(key)
+    
+    def is_variable(self, name):
+        """
+        Returns True if the given name corresponds to a time-varying
+        variable.
+        
+            Parameters::
+            
+                name - Name of the variable/parameter/constant
+                
+            Returns::
+            
+                True if the variable is time-varying.
+        """
+        return self.result_data.is_variable(name)
 
 class CollocationLagrangePolynomialsAlgOptions(OptionBase):
     """ Options for the CollocationLagrangePolynomials optimization 
@@ -890,7 +941,24 @@ class InvalidSolverArgumentException(Exception):
     def __str__(self):
         return repr(self.msg)
     
-class KInitSolveResult(ResultBase): pass
+class KInitSolveResult(ResultBase):
+    def __getitem__(self, key):
+        return self.result_data.get_variable_data(key)
+
+    def is_variable(self, name):
+        """
+        Returns True if the given name corresponds to a time-varying
+        variable.
+        
+            Parameters::
+            
+                name - Name of the variable/parameter/constant
+                
+            Returns::
+            
+                True if the variable is time-varying.
+        """
+        return self.result_data.is_variable(name)
 
 class KInitSolveAlgOptions(OptionBase):
     """ Options for the KInitSolve initialize algorithm. 

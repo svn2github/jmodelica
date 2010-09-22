@@ -45,21 +45,21 @@ def run_demo(with_plots=True):
 
     model.set('u',u[0])
     
-    sim_res = model.simulate(alg_args={'final_time':30, 
+    res = model.simulate(alg_args={'final_time':30, 
         'num_communication_points':3000, 'input_trajectory':u_traj})
     
-    res = sim_res.result_data
-    x1_sim = res.get_variable_data('x1')
-    x2_sim = res.get_variable_data('x2')
-    u_sim = res.get_variable_data('u')
+    x1_sim = res['x1']
+    x2_sim = res['x2']
+    u_sim = res['u']
+    t_sim = res['time']
     
-    assert N.abs(x1_sim.x[-1]*1.e1 - (-8.3999640)) < 1e-3, \
+    assert N.abs(x1_sim[-1]*1.e1 - (-8.3999640)) < 1e-3, \
             "Wrong value of x1_sim function in simulation_with_input.py"
 
-    assert N.abs(x2_sim.x[-1]*1.e1 - (-5.0691179)) < 1e-3, \
+    assert N.abs(x2_sim[-1]*1.e1 - (-5.0691179)) < 1e-3, \
             "Wrong value of x2_sim function in simulation_with_input.py"  
 
-    assert N.abs(u_sim.x[-1]*1.e1 - (-8.3907153)) < 1e-3, \
+    assert N.abs(u_sim[-1]*1.e1 - (-8.3907153)) < 1e-3, \
             "Wrong value of u_sim function in simulation_with_input.py"  
 
 
@@ -72,9 +72,9 @@ def run_demo(with_plots=True):
         fig = p.figure()
         p.clf()
         p.subplot(2,1,1)
-        p.plot(x1_sim.t, x1_sim.x, x2_sim.t, x2_sim.x)
+        p.plot(t_sim, x1_sim, t, x2_sim)
         p.subplot(2,1,2)
-        p.plot(u_sim.t, u_sim.x,'x-',t, u[:],'x-')
+        p.plot(t_sim, u_sim,'x-',t, u[:],'x-')
 
         p.show()
 

@@ -344,23 +344,23 @@ class TestNLPInit:
                          -0.92009689684513785,
                          0.])
 
-        assert N.abs(res_Z[0] - res.get_variable_data("p").x[0])<1e-3, \
+        assert N.abs(res_Z[0] - res.get_variable_data("p"))<1e-3, \
                "test_jmi.py: test_init_opt_write_result: Wrong solution to initialization system for variable p." 
-        assert N.abs(res_Z[1] - res.get_variable_data("der(x1)").x[0])<1e-3, \
+        assert N.abs(res_Z[1] - res.get_variable_data("der(x1)")[0])<1e-3, \
                "test_jmi.py: test_init_opt_write_result: Wrong solution to initialization system for variable der(x1)." 
-        assert N.abs(res_Z[2] - res.get_variable_data("der(x2)").x[0])<1e-3, \
+        assert N.abs(res_Z[2] - res.get_variable_data("der(x2)")[0])<1e-3, \
                "test_jmi.py: test_init_opt_write_result: Wrong solution to initialization system for variable der(x2)." 
-        assert N.abs(res_Z[3] - res.get_variable_data("x1").x[0])<1e-3, \
+        assert N.abs(res_Z[3] - res.get_variable_data("x1")[0])<1e-3, \
                "test_jmi.py: test_init_opt_write_result: Wrong solution to initialization system for variable x1." 
-        assert N.abs(res_Z[4] - res.get_variable_data("x2").x[0])<1e-3, \
+        assert N.abs(res_Z[4] - res.get_variable_data("x2")[0])<1e-3, \
                "test_jmi.py: test_init_opt_write_result: Wrong solution to initialization system for variable x2." 
-        assert N.abs(res_Z[5] - res.get_variable_data("u").x[0])<1e-3, \
+        assert N.abs(res_Z[5] - res.get_variable_data("u")[0])<1e-3, \
                "test_jmi.py: test_init_opt_write_result: Wrong solution to initialization system for variable u." 
-        assert N.abs(res_Z[6] - res.get_variable_data("y1").x[0])<1e-3, \
+        assert N.abs(res_Z[6] - res.get_variable_data("y1")[0])<1e-3, \
                "test_jmi.py: test_init_opt_write_result: Wrong solution to initialization system for variable y1." 
-        assert N.abs(res_Z[7] - res.get_variable_data("y2").x[0])<1e-3, \
+        assert N.abs(res_Z[7] - res.get_variable_data("y2")[0])<1e-3, \
                "test_jmi.py: test_init_opt_write_result: Wrong solution to initialization system for variable y2." 
-        assert N.abs(res_Z[8] - res.get_variable_data("y3").x[0])<1e-3, \
+        assert N.abs(res_Z[8] - res.get_variable_data("y3")[0])<1e-3, \
                "test_jmi.py: test_init_opt_write_result: Wrong solution to initialization system for variable y3."
         
     @testattr(ipopt = True)

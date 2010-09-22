@@ -34,22 +34,22 @@ def run_demo(with_plots=True):
 
     model = JMUModel(jmu_name)
     
-    sim_res = model.simulate(alg_args={'final_time':20,'num_communication_points':0,'solver':'CVode'},
+    res = model.simulate(alg_args={'final_time':20,'num_communication_points':0,'solver':'CVode'},
                              solver_args={'discr':'BDF','iter':'Newton'})
 
-    res = sim_res.result_data
-    x1=res.get_variable_data('x1')
-    x2=res.get_variable_data('x2')
+    x1 = res['x1']
+    x2 = res['x2']
+    t  = res['time']
     
-    assert N.abs(x1.x[-1] + 0.736680243) < 1e-3, \
+    assert N.abs(x1[-1] + 0.736680243) < 1e-3, \
            "Wrong value in simulation result in VDP_assimulo.py" 
-    assert N.abs(x2.x[-1] - 1.57833994) < 1e-3, \
+    assert N.abs(x2[-1] - 1.57833994) < 1e-3, \
            "Wrong value in simulation result in VDP_assimulo.py"
     #assert VDP_sim.stats['Number of F-Eval During Jac-Eval         '] == 0
     
     if with_plots:
         fig = p.figure()
-        p.plot(x1.t, x1.x, x2.t, x2.x)
+        p.plot(t, x1, t, x2)
         p.legend(('x1','x2'))
         p.show()
         

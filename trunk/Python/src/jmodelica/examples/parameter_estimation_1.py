@@ -104,18 +104,18 @@ def run_demo(with_plots=True):
         plt.show()
     
     # optimize
-    opt_res = model.optimize(solver_args={"max_iter":500})
+    res = model.optimize(solver_args={"max_iter":500})
     
     # Extract variable profiles
-    res = opt_res.result_data
-    x1 = res.get_variable_data('sys.x1')
-    u = res.get_variable_data('u')
-    w = res.get_variable_data('sys.w')
-    z = res.get_variable_data('sys.z')
+    x1 = res['sys.x1']
+    u = res['u']
+    w = res['sys.w']
+    z = res['sys.z']
+    t = res['time']
     
-    assert N.abs(w.x[-1] - 1.051198) < 1e-4, \
+    assert N.abs(w - 1.051198) < 1e-4, \
             "Wrong value of parameter w in parameter_estimation_1.py"  
-    assert N.abs(z.x[-1] - 0.448710 ) < 1e-4, \
+    assert N.abs(z - 0.448710 ) < 1e-4, \
             "Wrong value of parameter z in parameter_estimation_1.py"  
     
     if with_plots:
@@ -123,14 +123,14 @@ def run_demo(with_plots=True):
         plt.figure(2)
         plt.clf()
         plt.subplot(211)
-        plt.plot(x1.t,x1.x,'g')
+        plt.plot(t,x,'g')
         plt.plot(t_sim,xx[:,0])
         plt.plot(t_meas,xx_meas[:,0],'x')
         plt.grid()
         plt.ylabel('y')
         
         plt.subplot(212)
-        plt.plot(u.t,u.x)
+        plt.plot(t,u)
         plt.grid()
         plt.ylabel('u')
         plt.show()

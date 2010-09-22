@@ -130,28 +130,28 @@ def run_demo(with_plots=True):
     hs = N.ones(n_e)*1./n_e # Equidistant points
     n_cp = 3; # Number of collocation points in each element
     
-    opt_res = model.optimize(alg_args={'n_e':n_e, 'hs':hs, 'n_cp':n_cp,'blocking_factors':2*N.ones(n_e/2,dtype=N.int)},
+    res = model.optimize(alg_args={'n_e':n_e, 'hs':hs, 'n_cp':n_cp,'blocking_factors':2*N.ones(n_e/2,dtype=N.int)},
         solver_args={'tol':1e-4})
         
     # Extract variable profiles
-    res = opt_res.result_data
-    CA1_res=res.get_variable_data('cstr.two_CSTRs_Series.CA1')
-    CA2_res=res.get_variable_data('cstr.two_CSTRs_Series.CA2')
-    T1_res=res.get_variable_data('cstr.two_CSTRs_Series.T1')
-    T2_res=res.get_variable_data('cstr.two_CSTRs_Series.T2')
-    u1_res=res.get_variable_data('cstr.two_CSTRs_Series.u1')
-    u2_res=res.get_variable_data('cstr.two_CSTRs_Series.u2')
-    der_u2_res=res.get_variable_data('der_u2')
+    CA1_res=res['cstr.two_CSTRs_Series.CA1']
+    CA2_res=res['cstr.two_CSTRs_Series.CA2']
+    T1_res=res['cstr.two_CSTRs_Series.T1']
+    T2_res=res['cstr.two_CSTRs_Series.T2']
+    u1_res=res['cstr.two_CSTRs_Series.u1']
+    u2_res=res['cstr.two_CSTRs_Series.u2']
+    der_u2_res=res['der_u2']
     
-    CA1_ref_res=res.get_variable_data('CA1_ref')
-    CA2_ref_res=res.get_variable_data('CA2_ref')
+    CA1_ref_res=res['CA1_ref']
+    CA2_ref_res=res['CA2_ref']
     
-    u1_ref_res=res.get_variable_data('u1_ref')
-    u2_ref_res=res.get_variable_data('u2_ref')
+    u1_ref_res=res['u1_ref']
+    u2_ref_res=res['u2_ref']
     
-    cost=res.get_variable_data('cost')
+    cost=res['cost']
+    time=res['time']
     
-    assert N.abs(cost.x[-1] - 1.4745648e+01) < 1e-3, \
+    assert N.abs(cost[-1] - 1.4745648e+01) < 1e-3, \
            "Wrong value of cost function in cstr2.py"
     
     # Plot the results
@@ -160,13 +160,13 @@ def run_demo(with_plots=True):
         plt.clf()
         plt.hold(True)
         plt.subplot(211)
-        plt.plot(CA1_res.t,CA1_res.x)
-        plt.plot(CA1_ref_res.t,CA1_ref_res.x,'--')
+        plt.plot(time,CA1_res)
+        plt.plot(time,CA1_ref_res,'--')
         plt.ylabel('Concentration reactor 1 [J/l]')
         plt.grid()
         plt.subplot(212)
-        plt.plot(CA2_res.t,CA2_res.x)
-        plt.plot(CA2_ref_res.t,CA2_ref_res.x,'--')
+        plt.plot(time,CA2_res)
+        plt.plot(time,CA2_ref_res,'--')
         plt.ylabel('Concentration reactor 2 [J/l]')
         plt.xlabel('t [s]')
         plt.grid()
@@ -176,11 +176,11 @@ def run_demo(with_plots=True):
         plt.clf()
         plt.hold(True)
         plt.subplot(211)
-        plt.plot(T1_res.t,T1_res.x)
+        plt.plot(time,T1_res)
         plt.ylabel('Temperature reactor 1 [K]')
         plt.grid()
         plt.subplot(212)
-        plt.plot(T2_res.t,T2_res.x)
+        plt.plot(time,T2_res)
         plt.ylabel('Temperature reactor 2 [K]')
         plt.grid()
         plt.xlabel('t [s]')
@@ -190,12 +190,12 @@ def run_demo(with_plots=True):
         plt.clf()
         plt.hold(True)
         plt.subplot(211)
-        plt.plot(u2_res.t,u2_res.x)
+        plt.plot(time,u2_res)
         plt.ylabel('Input 2')
-        plt.plot(u2_ref_res.t,u2_ref_res.x,'--')
+        plt.plot(time,u2_ref_res,'--')
         plt.grid()
         plt.subplot(212)
-        plt.plot(der_u2_res.t,der_u2_res.x)
+        plt.plot(time,der_u2_res)
         plt.ylabel('Derivative of input 2')
         plt.xlabel('t [s]')
         plt.grid()

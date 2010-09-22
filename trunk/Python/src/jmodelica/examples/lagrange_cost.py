@@ -44,11 +44,12 @@ def run_demo(with_plots=True):
     res = model.optimize(
         alg_args={'n_e':n_e,'hs':hs,'n_cp':n_cp,'blocking_factors':b_f})
 
-    x1 = res.result_data.get_variable_data('sys.x[1]')
-    x2 = res.result_data.get_variable_data('sys.x[2]')
-    u = res.result_data.get_variable_data('sys.u')
+    x1 = res['sys.x[1]']
+    x2 = res['sys.x[2]']
+    u = res['sys.u']
+    t = res['time']
 
-    assert N.abs(x1.x[-1] - 0.20172085497700001) < 1e-3, \
+    assert N.abs(x1[-1] - 0.20172085497700001) < 1e-3, \
             "Wrong value of final state x[1] in lagrange_cost.py"  
 
     if with_plots:
@@ -56,13 +57,13 @@ def run_demo(with_plots=True):
         plt.figure(1)
         plt.clf()
         plt.subplot(211)
-        plt.plot(x1.t,x1.x)
+        plt.plot(t,x1)
         plt.hold(True)
         plt.ylabel('x[1], x[2]')
-        plt.plot(x2.t,x2.x)
+        plt.plot(t,x2)
         plt.grid(True)
         plt.subplot(212)
-        plt.plot(u.t,u.x)
+        plt.plot(t,u)
         plt.ylabel('u')
         plt.xlabel('t[s]')
         plt.grid(True)

@@ -37,20 +37,20 @@ def run_demo(with_plots=True):
     jmu_name = compile_jmu(class_name, mofile)
     rlc = JMUModel(jmu_name)
     
-    sim_res = rlc.simulate(alg_args={'final_time':30})
+    res = rlc.simulate(alg_args={'final_time':30})
     
-    res = sim_res.result_data
-    sine_y = res.get_variable_data('sine.y')
-    resistor_v = res.get_variable_data('resistor.v')
-    inductor1_i = res.get_variable_data('inductor1.i')
+    sine_y = res['sine.y']
+    resistor_v = res['resistor.v']
+    inductor1_i = res['inductor1.i']
+    t = res['time']
 
-    assert N.abs(resistor_v.x[-1] - 0.159255008028) < 1e-3, \
+    assert N.abs(resistor_v[-1] - 0.159255008028) < 1e-3, \
            "Wrong value in simulation result in RLC.py"
 
     
     if with_plots:
         fig = p.figure()
-        p.plot(sine_y.t, sine_y.x, resistor_v.t, resistor_v.x, inductor1_i.t, inductor1_i.x)
+        p.plot(t, sine_y, t, resistor_v, t, inductor1_i)
         p.legend(('sine.y','resistor.v','inductor1.i'))
         p.show()
 

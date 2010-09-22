@@ -48,23 +48,23 @@ def run_demo(with_plots=True):
     
     (A_ode,B_ode,g_ode,H_ode,M_ode,q_ode) = linear_dae_to_ode(E_dae,A_dae,B_dae,F_dae,g_dae)
 
-    sim_res1 = model.simulate()
+    res1 = model.simulate()
     
     jmu_name = compile_jmu("RLC_Circuit_Linearized",mofile)
     lin_model = JMUModel(jmu_name)
-    sim_res2 = lin_model.simulate()
+    res2 = lin_model.simulate()
     
-    res1 = sim_res1.result_data
-    c_v_1 = res1.get_variable_data('capacitor.v')
-    i_p_i_1 = res1.get_variable_data('inductor.p.i')
-    i_p1_i_1 = res1.get_variable_data('inductor1.p.i')
+    c_v_1 = res1['capacitor.v']
+    i_p_i_1 = res1['inductor.p.i']
+    i_p1_i_1 = res1['inductor1.p.i']
+    t_1 = res1['time']
     
-    res2 = sim_res2.result_data
-    c_v_2 = res2.get_variable_data('x[1]')
-    i_p_i_2 = res2.get_variable_data('x[2]')
-    i_p1_i_2 = res2.get_variable_data('x[3]')
+    c_v_2 = res2['x[1]']
+    i_p_i_2 = res2['x[2]']
+    i_p1_i_2 = res2['x[3]']
+    t_2 = res2['time']
 
-    assert N.abs(c_v_1.x[-1] - c_v_2.x[-1]) < 1e-3, \
+    assert N.abs(c_v_1[-1] - c_v_2[-1]) < 1e-3, \
            "Wrong value in simulation result in RLC_linearization.py"
     
     if with_plots:
@@ -72,19 +72,19 @@ def run_demo(with_plots=True):
         p.figure(1)
         p.hold(True)
         p.subplot(311)
-        p.plot(c_v_1.t,c_v_1.x)
-        p.plot(c_v_2.t,c_v_2.x,'g')
+        p.plot(t_1,c_v_1)
+        p.plot(t_2,c_v_2,'g')
         p.ylabel('c.v')
         p.legend(('original model','linearized ODE'))
         p.grid()
         p.subplot(312)
-        p.plot(i_p_i_1.t,i_p_i_1.x)
-        p.plot(i_p_i_2.t,i_p_i_2.x,'g')
+        p.plot(t_1,i_p_i_1)
+        p.plot(t_2,i_p_i_2,'g')
         p.ylabel('i.p.i')
         p.grid()
         p.subplot(313)
-        p.plot(i_p1_i_1.t,i_p1_i_1.x)
-        p.plot(i_p1_i_2.t,i_p1_i_2.x,'g')
+        p.plot(t_1,i_p1_i_1)
+        p.plot(t_2,i_p1_i_2,'g')
         p.ylabel('i.p1.i')
         p.grid()
         p.show()

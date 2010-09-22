@@ -33,16 +33,15 @@ def run_demo(with_plots=True):
     fmu_name = O.path.join(path_to_fmus,'bouncingBall.fmu')
     model = FMUModel(fmu_name)
     model.initialize()
-    res_obj = model.simulate(alg_args={'final_time':2.})
     
-    #Retrieve the result data
-    res = res_obj.result_data
+    res = model.simulate(alg_args={'final_time':2.})
     
     #Retrieve the result for the variables
-    h_res = res.get_variable_data('h')
-    v_res = res.get_variable_data('v')
+    h_res = res['h']
+    v_res = res['v']
+    t     = res['time']
 
-    assert N.abs(h_res.x[-1] - (0.0424044)) < 1e-4, \
+    assert N.abs(h_res[-1] - (0.0424044)) < 1e-4, \
             "Wrong value of h_res in fmi_bouncing_ball.py"
     
     #Plot the solution
@@ -51,12 +50,12 @@ def run_demo(with_plots=True):
         fig = P.figure()
         P.clf()
         P.subplot(2,1,1)
-        P.plot(h_res.t, h_res.x)
+        P.plot(t, h_res)
         P.ylabel('Height (m)')
         P.xlabel('Time (s)')
         #Plot the velocity
         P.subplot(2,1,2)
-        P.plot(v_res.t, v_res.x)
+        P.plot(t, v_res)
         P.ylabel('Velocity (m/s)')
         P.xlabel('Time (s)')
         P.suptitle('FMI Bouncing Ball')

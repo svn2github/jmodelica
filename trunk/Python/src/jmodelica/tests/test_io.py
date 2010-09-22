@@ -88,7 +88,7 @@ class TestIO:
         res = ResultDymolaTextual(self.fname[:-len('.jmu')]+'_result.txt')
 
         # Check that one of the trajectories match.
-        assert max(N.abs(traj[:,3]-res.get_variable_data('x1').x))<1e-12, \
+        assert max(N.abs(traj[:,3]-res.get_variable_data('x1')))<1e-12, \
                "The result in the loaded result file does not match that of the loaded file."        
 
         # Check that the value of the cost function is correct
@@ -134,6 +134,6 @@ class test_ResultWriterDymola:
         derh = res.get_variable_data('der(h)')
         g = res.get_variable_data('g')
         
-        nose.tools.assert_almost_equal(h.x, 1.000000, 5)
-        nose.tools.assert_almost_equal(derh.x, 0.000000, 5)
-        nose.tools.assert_almost_equal(g.x, 9.810000, 5)
+        nose.tools.assert_almost_equal(h, 1.000000, 5)
+        nose.tools.assert_almost_equal(derh, 0.000000, 5)
+        nose.tools.assert_almost_equal(g, 9.810000, 5)

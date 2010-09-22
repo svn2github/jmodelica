@@ -748,7 +748,7 @@ class NLPCollocation(object):
                 try:
                     traj = res.get_variable_data(name)
                     num_name_hits = num_name_hits + 1
-                    if N.size(traj.x)>2:
+                    if N.size(traj)>2:
                         break
                 except:
                     pass
@@ -758,7 +758,7 @@ class NLPCollocation(object):
                 try:
                     traj = res.get_variable_data(name)
                     num_name_hits = num_name_hits + 1
-                    if N.size(traj.x)>2:
+                    if N.size(traj)>2:
                         break
                 except:
                     pass
@@ -768,7 +768,7 @@ class NLPCollocation(object):
                 try:
                     traj = res.get_variable_data(name)
                     num_name_hits = num_name_hits + 1
-                    if N.size(traj.x)>2:
+                    if N.size(traj)>2:
                         break
                 except:
                     pass
@@ -778,7 +778,7 @@ class NLPCollocation(object):
                 try:
                     traj = res.get_variable_data(name)
                     num_name_hits = num_name_hits + 1
-                    if N.size(traj.x)>2:
+                    if N.size(traj)>2:
                         break
                 except:
                     pass
@@ -790,12 +790,12 @@ class NLPCollocation(object):
         
         #print(traj.t)
         
-        n_points = N.size(traj.t,0)
+        n_points = N.size(traj,0)
         n_cols = 1+len(dx_names)+len(x_names)+len(u_names)+len(w_names)
 
         var_data = N.zeros((n_points,n_cols))
         # Initialize time vector
-        var_data[:,0] = traj.t;
+        var_data[:,0] = res.get_variable_data('time')
 
         p_opt_data = N.zeros(len(p_opt_names))
 
@@ -817,9 +817,9 @@ class NLPCollocation(object):
                     i_pi_opt = p_opt_indices.index(i_pi)
                     traj = res.get_variable_data(name)
                     if self._model.get_scaling_method() & jmi.JMI_SCALING_VARIABLES > 0:
-                        p_opt_data[i_pi_opt] = traj.x[0]/sc[z_i]
+                        p_opt_data[i_pi_opt] = traj/sc[z_i]
                     else:
-                        p_opt_data[i_pi_opt] = traj.x[0]
+                        p_opt_data[i_pi_opt] = traj
                 except VariableNotFoundError:
                     print "Warning: Could not find value for parameter " + name
                     
@@ -844,9 +844,9 @@ class NLPCollocation(object):
                 #print(col_index)
                 traj = res.get_variable_data(name)
                 if self._model.get_scaling_method() & jmi.JMI_SCALING_VARIABLES > 0:
-                    var_data[:,col_index] = traj.x/sc_dx[dx_index]
+                    var_data[:,col_index] = traj/sc_dx[dx_index]
                 else:
-                    var_data[:,col_index] = traj.x
+                    var_data[:,col_index] = traj
                 dx_index = dx_index + 1
                 col_index = col_index + 1
             except:
@@ -859,9 +859,9 @@ class NLPCollocation(object):
                 #print(col_index)
                 traj = res.get_variable_data(name)
                 if self._model.get_scaling_method() & jmi.JMI_SCALING_VARIABLES > 0:
-                    var_data[:,col_index] = traj.x/sc_x[x_index]
+                    var_data[:,col_index] = traj/sc_x[x_index]
                 else:
-                    var_data[:,col_index] = traj.x
+                    var_data[:,col_index] = traj
                 x_index = x_index + 1
                 col_index = col_index + 1
             except VariableNotFoundError:
@@ -875,9 +875,9 @@ class NLPCollocation(object):
                 #print(col_index)
                 traj = res.get_variable_data(name)
                 if self._model.get_scaling_method() & jmi.JMI_SCALING_VARIABLES > 0:
-                    var_data[:,col_index] = traj.x/sc_u[u_index]
+                    var_data[:,col_index] = traj/sc_u[u_index]
                 else:
-                    var_data[:,col_index] = traj.x
+                    var_data[:,col_index] = traj
                 u_index = u_index + 1
                 col_index = col_index + 1
             except VariableNotFoundError:
@@ -890,16 +890,16 @@ class NLPCollocation(object):
                 #print(name)
                 #print(col_index)
                 traj = res.get_variable_data(name)
-                if N.size(traj.x)==2:
+                if not res.is_variable(name):
                     if self._model.get_scaling_method() & jmi.JMI_SCALING_VARIABLES > 0:
-                        var_data[:,col_index] = N.ones(n_points)*traj.x[0]/sc_w[w_index]
+                        var_data[:,col_index] = N.ones(n_points)*traj/sc_w[w_index]
                     else:
-                        var_data[:,col_index] = N.ones(n_points)*traj.x[0]
+                        var_data[:,col_index] = N.ones(n_points)*traj
                 else:
                     if self._model.get_scaling_method() & jmi.JMI_SCALING_VARIABLES > 0:
-                        var_data[:,col_index] = traj.x/sc_w[w_index]
+                        var_data[:,col_index] = traj/sc_w[w_index]
                     else:
-                        var_data[:,col_index] = traj.x
+                        var_data[:,col_index] = traj
                 w_index = w_index + 1
                 col_index = col_index + 1
             except VariableNotFoundError:

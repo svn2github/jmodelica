@@ -129,7 +129,8 @@ class _BaseSimOptTest:
         """
         for var in variables:
             expected = self.expected.get_variable_data(var)
-            self.assert_trajectory(var, expected, same_span, rel_tol, abs_tol)
+            expected_t = self.expected.get_variable_data('time')
+            self.assert_trajectory(var, expected, expected_t, same_span, rel_tol, abs_tol)
 
 
     def assert_initial_value(self, variable, value, rel_tol = None, abs_tol = None):
@@ -154,7 +155,7 @@ class _BaseSimOptTest:
         self._assert_value(variable, value, -1, rel_tol, abs_tol)
 
     
-    def assert_trajectory(self, variable, expected, same_span = True, rel_tol = None, abs_tol = None):
+    def assert_trajectory(self, variable, expected, expected_t, same_span = True, rel_tol = None, abs_tol = None):
         """
         Assert that the trajectory of a simulation variable matches expected trajectory. 
           variable  -  the name of the variable
@@ -169,26 +170,28 @@ class _BaseSimOptTest:
         if abs_tol is None:
             abs_tol = self.abs_tol
         ans = expected
+        ans_t = expected_t
         res = self.data.get_variable_data(variable)
+        res_t = self.data.get_variable_data('time')
 
         if same_span:
             msg = 'paths do not span the same time interval for ' + variable
-            assert _check_error(ans.t[0], res.t[0], rel_tol, abs_tol), msg
-            assert _check_error(ans.t[-1], res.t[-1], rel_tol, abs_tol), msg
+            assert _check_error(ans_t[0], res_t[0], rel_tol, abs_tol), msg
+            assert _check_error(ans_t[-1], res_t[-1], rel_tol, abs_tol), msg
 
         # Merge the time lists
-        time = list(set(ans.t) | set(res.t))
+        time = list(set(ans_t) | set(res_t))
 
         # Get overlapping span
-        (t1, t2) = (max(ans.t[0], res.t[0]), min(ans.t[-1], res.t[-1]))
+        (t1, t2) = (max(ans_t[0], res_t[0]), min(ans_t[-1], res_t[-1]))
 
         # Remove values outside overlap
         time = filter((lambda t: t >= t1 and t <= t2), time)
 
         # Check error for each time point
         for t in time:
-            ans_x = _trajectory_eval(ans, t)
-            res_x = _trajectory_eval(res, t)
+            ans_x = _trajectory_eval(ans, ans_t, t)
+            res_x = _trajectory_eval(res, res_t, t)
             (rel, abs) = _error(ans_x, res_x)
             msg = 'error of %s at time %f is too large (rel=%f, abs=%f)' % (variable, t, rel, abs)
             assert (rel <= 100*rel_tol or abs <= 100*abs_tol), msg
@@ -204,7 +207,7 @@ class _BaseSimOptTest:
           abs_tol -  the absolute error tolerance, defaults to the value set with setup_base()
         """
         for var in variables:
-            value = self.expected.get_variable_data(var).x[index]
+            value = self.expected.get_variable_data(var)[index]
             self._assert_value(var, value, index, rel_tol, abs_tol)
 
 
@@ -222,7 +225,7 @@ class _BaseSimOptTest:
         if abs_tol is None:
             abs_tol = self.abs_tol
         res = self.data.get_variable_data(variable)
-        (rel, abs) = _error(value, res.x[index])
+        (rel, abs) = _error(value, res[index])
         msg = 'error of %s at index %i is too large (rel=%f, abs=%f)' % (variable, index, rel, abs)
         assert (rel <= rel_tol or abs <= abs_tol), msg
 
@@ -376,13 +379,19 @@ def _check_error(ans, res, rel_tol, abs_tol):
     return rel <= rel_tol or abs <= abs_tol
 
 
-def _trajectory_eval(var, t):
+def _trajectory_eval(var, var_t, t):
     """
     Given the variable var, evaluate the variable for the time t.
     Values in var.t must be in increasing order, and t must be within the span of var.t.
     """
-    (pt, px) = (var.t[0], var.x[0])
-    for (ct, cx) in zip(var.t, var.x):
+    try:
+        len(var)
+    except TypeError:
+        var = numpy.array([var,var])
+        var_t = numpy.array([var_t[0],var_t[-1]])
+        
+    (pt, px) = (var_t[0], var[0])
+    for (ct, cx) in zip(var_t, var):
         # Since the t values are copies of the ones in the trajectories, we can use equality
         if ct == t:
             return cx

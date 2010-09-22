@@ -40,18 +40,18 @@ def run_demo(with_plots=True):
     
     model = JMUModel(jmu_name)
     # optimize
-    opt_res = model.optimize()
+    res = model.optimize()
 
     # Extract variable profiles
-    res = opt_res.result_data
-    theta=res.get_variable_data('pend.theta')
-    dtheta=res.get_variable_data('pend.dtheta')
-    x=res.get_variable_data('pend.x')
-    dx=res.get_variable_data('pend.dx')
-    u=res.get_variable_data('u')
+    theta=res['pend.theta']
+    dtheta=res['pend.dtheta']
+    x=res['pend.x']
+    dx=res['pend.dx']
+    u=res['u']
+    t=res['time']
     
-    cost=res.get_variable_data('cost')
-    assert N.abs(cost.x[-1] - 1.2921683e-01) < 1e-3, \
+    cost=res['cost']
+    assert N.abs(cost[-1] - 1.2921683e-01) < 1e-3, \
            "Wrong value of cost function in pendulum.py"  
 
     if with_plots:
@@ -59,12 +59,12 @@ def run_demo(with_plots=True):
         plt.figure(1)
         plt.clf()
         plt.subplot(211)
-        plt.plot(theta.t,theta.x)
+        plt.plot(t,theta)
         plt.grid()
         plt.ylabel('th')
         
         plt.subplot(212)
-        plt.plot(theta.t,theta.x)
+        plt.plot(t,theta)
         plt.grid()
         plt.ylabel('dth')
         plt.xlabel('time')
@@ -73,18 +73,18 @@ def run_demo(with_plots=True):
         plt.figure(2)
         plt.clf()
         plt.subplot(311)
-        plt.plot(x.t,x.x)
+        plt.plot(t,x)
         plt.grid()
         plt.ylabel('x')
         
         plt.subplot(312)
-        plt.plot(dx.t,dx.x)
+        plt.plot(t,dx)
         plt.grid()
         plt.ylabel('dx')
         plt.xlabel('time')
         
         plt.subplot(313)
-        plt.plot(u.t,u.x)
+        plt.plot(t,u)
         plt.grid()
         plt.ylabel('u')
         plt.xlabel('time')

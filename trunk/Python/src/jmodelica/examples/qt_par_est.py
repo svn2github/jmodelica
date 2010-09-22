@@ -94,36 +94,37 @@ def run_demo(with_plots=True):
     model = JMUModel(jmu_name)
     
     # Simulate model response with nominal parameters
-    res_sim = model.simulate(
+    res = model.simulate(
         alg_args={"input_trajectory":u,'start_time':0.,'final_time':60})
 
     # Load simulation result
-    x1_sim = res_sim.result_data.get_variable_data('qt.x1')
-    x2_sim = res_sim.result_data.get_variable_data('qt.x2')
-    x3_sim = res_sim.result_data.get_variable_data('qt.x3')
-    x4_sim = res_sim.result_data.get_variable_data('qt.x4')
+    x1_sim = res['qt.x1']
+    x2_sim = res['qt.x2']
+    x3_sim = res['qt.x3']
+    x4_sim = res['qt.x4']
+    t_sim  = res['time']
     
-    u1_sim = res_sim.result_data.get_variable_data('u1')
-    u2_sim = res_sim.result_data.get_variable_data('u2')
+    u1_sim = res['u1']
+    u2_sim = res['u2']
 
     # Plot simulation result
     if with_plots:
         plt.figure(1)
         plt.subplot(2,2,1)
-        plt.plot(x1_sim.t,x3_sim.x)
+        plt.plot(t_sim,x3_sim)
         plt.subplot(2,2,2)
-        plt.plot(x2_sim.t,x4_sim.x)
+        plt.plot(t_sim,x4_sim)
         plt.subplot(2,2,3)
-        plt.plot(x3_sim.t,x1_sim.x)
+        plt.plot(t_sim,x1_sim)
         plt.subplot(2,2,4)
-        plt.plot(x4_sim.t,x2_sim.x)
+        plt.plot(t_sim,x2_sim)
         plt.show()
 
         plt.figure(2)
         plt.subplot(2,1,1)
-        plt.plot(u1_sim.t,u1_sim.x,'r')
+        plt.plot(t_sim,u1_sim,'r')
         plt.subplot(2,1,2)
-        plt.plot(u2_sim.t,u2_sim.x,'r')
+        plt.plot(t_sim,u2_sim,'r')
         plt.show()
 
     # Compile model
@@ -148,41 +149,42 @@ def run_demo(with_plots=True):
     n_cp = 3
 
     # Solve parameter optimization problem
-    res_opt = qt_par_est.optimize(
+    res = qt_par_est.optimize(
         alg_args={"n_e":n_e,"n_cp":3, "result_mesh":"element_interpolation","hs":hs})
 
     # Extract optimal values of parameters
-    a1_opt = res_opt.result_data.get_variable_data("qt.a1")
-    a2_opt = res_opt.result_data.get_variable_data("qt.a2")
+    a1_opt = res["qt.a1"]
+    a2_opt = res["qt.a2"]
 
     # Print optimal parameter values
-    print('a1: ' + str(a1_opt.x[-1]*1e4) + 'cm^2')
-    print('a2: ' + str(a2_opt.x[-1]*1e4) + 'cm^2')
+    print('a1: ' + str(a1_opt*1e4) + 'cm^2')
+    print('a2: ' + str(a2_opt*1e4) + 'cm^2')
 
-    assert N.abs(a1_opt.x[-1]*1.e6 - 2.658636) < 1e-3, \
+    assert N.abs(a1_opt*1.e6 - 2.658636) < 1e-3, \
            "Wrong value of parameter a1"  
-    assert N.abs(a2_opt.x[-1]*1.e6 - 2.715543) < 1e-3, \
+    assert N.abs(a2_opt*1.e6 - 2.715543) < 1e-3, \
            "Wrong value of parameter a2"  
 
     # Load state profiles
-    x1_opt = res_opt.result_data.get_variable_data("qt.x1")
-    x2_opt = res_opt.result_data.get_variable_data("qt.x2")
-    x3_opt = res_opt.result_data.get_variable_data("qt.x3")
-    x4_opt = res_opt.result_data.get_variable_data("qt.x4")
-    u1_opt = res_opt.result_data.get_variable_data("qt.u1")
-    u2_opt = res_opt.result_data.get_variable_data("qt.u2")
+    x1_opt = res["qt.x1"]
+    x2_opt = res["qt.x2"]
+    x3_opt = res["qt.x3"]
+    x4_opt = res["qt.x4"]
+    u1_opt = res["qt.u1"]
+    u2_opt = res["qt.u2"]
+    t_opt  = res["time"]
 
     # Plot
     if with_plots:
         plt.figure(1)
         plt.subplot(2,2,1)
-        plt.plot(x3_opt.t,x3_opt.x,'k')
+        plt.plot(t_opt,x3_opt,'k')
         plt.subplot(2,2,2)
-        plt.plot(x4_opt.t,x4_opt.x,'k')
+        plt.plot(t_opt,x4_opt,'k')
         plt.subplot(2,2,3)
-        plt.plot(x1_opt.t,x1_opt.x,'k')
+        plt.plot(t_opt,x1_opt,'k')
         plt.subplot(2,2,4)
-        plt.plot(x2_opt.t,x2_opt.x,'k')
+        plt.plot(t_opt,x2_opt,'k')
         plt.show()
 
     # Compile second parameter estimation model
@@ -206,43 +208,44 @@ def run_demo(with_plots=True):
         alg_args={"n_e":n_e,"n_cp":3, "result_mesh":"element_interpolation","hs":hs})
 
     # Get optimal parameter values
-    a1_opt2 = res_opt2.result_data.get_variable_data("qt.a1")
-    a2_opt2 = res_opt2.result_data.get_variable_data("qt.a2")
-    a3_opt2 = res_opt2.result_data.get_variable_data("qt.a3")
-    a4_opt2 = res_opt2.result_data.get_variable_data("qt.a4")
+    a1_opt2 = res_opt2["qt.a1"]
+    a2_opt2 = res_opt2["qt.a2"]
+    a3_opt2 = res_opt2["qt.a3"]
+    a4_opt2 = res_opt2["qt.a4"]
 
     # Print optimal parameter values 
-    print('a1:' + str(a1_opt2.x[-1]*1e4) + 'cm^2')
-    print('a2:' + str(a2_opt2.x[-1]*1e4) + 'cm^2')
-    print('a3:' + str(a3_opt2.x[-1]*1e4) + 'cm^2')
-    print('a4:' + str(a4_opt2.x[-1]*1e4) + 'cm^2')
+    print('a1:' + str(a1_opt2*1e4) + 'cm^2')
+    print('a2:' + str(a2_opt2*1e4) + 'cm^2')
+    print('a3:' + str(a3_opt2*1e4) + 'cm^2')
+    print('a4:' + str(a4_opt2*1e4) + 'cm^2')
 
-    assert N.abs(a1_opt2.x[-1]*1.e6 - 2.659686) < 1e-3, \
+    assert N.abs(a1_opt2*1.e6 - 2.659686) < 1e-3, \
            "Wrong value of parameter a1"  
-    assert N.abs(a2_opt2.x[-1]*1.e6 - 2.706181) < 1e-3, \
+    assert N.abs(a2_opt2*1.e6 - 2.706181) < 1e-3, \
            "Wrong value of parameter a2"  
-    assert N.abs(a3_opt2.x[-1]*1.e6 - 3.007429) < 1e-3, \
+    assert N.abs(a3_opt2*1.e6 - 3.007429) < 1e-3, \
            "Wrong value of parameter a3"  
-    assert N.abs(a4_opt2.x[-1]*1.e6 - 2.933729) < 1e-3, \
+    assert N.abs(a4_opt2*1.e6 - 2.933729) < 1e-3, \
            "Wrong value of parameter a4"  
 
     # Extract state and input profiles
-    x1_opt2 = res_opt2.result_data.get_variable_data("qt.x1")
-    x2_opt2 = res_opt2.result_data.get_variable_data("qt.x2")
-    x3_opt2 = res_opt2.result_data.get_variable_data("qt.x3")
-    x4_opt2 = res_opt2.result_data.get_variable_data("qt.x4")
-    u1_opt2 = res_opt2.result_data.get_variable_data("qt.u1")
-    u2_opt2 = res_opt2.result_data.get_variable_data("qt.u2")
+    x1_opt2 = res_opt2["qt.x1"]
+    x2_opt2 = res_opt2["qt.x2"]
+    x3_opt2 = res_opt2["qt.x3"]
+    x4_opt2 = res_opt2["qt.x4"]
+    u1_opt2 = res_opt2["qt.u1"]
+    u2_opt2 = res_opt2["qt.u2"]
+    t_opt2  = res_opt2["time"]
 
     # Plot
     if with_plots:
         plt.figure(1)
         plt.subplot(2,2,1)
-        plt.plot(x3_opt2.t,x3_opt2.x,'r')
+        plt.plot(t_opt2,x3_opt2,'r')
         plt.subplot(2,2,2)
-        plt.plot(x4_opt2.t,x4_opt2.x,'r')
+        plt.plot(t_opt2,x4_opt2,'r')
         plt.subplot(2,2,3)
-        plt.plot(x1_opt2.t,x1_opt2.x,'r')
+        plt.plot(t_opt2,x1_opt2,'r')
         plt.subplot(2,2,4)
-        plt.plot(x2_opt2.t,x2_opt2.x,'r')
+        plt.plot(t_opt2,x2_opt2,'r')
         plt.show()

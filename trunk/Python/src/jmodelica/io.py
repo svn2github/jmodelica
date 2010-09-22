@@ -354,21 +354,50 @@ class ResultDymolaTextual:
             A Trajectory object containing the time vector and the data 
             vector of the variable.
         """
-        varInd  = self.get_variable_index(name)
-        dataInd = self.dataInfo[varInd][1]
-        factor = 1
-        if dataInd<0:
-            factor = -1
-            dataInd = -dataInd -1
+        if name == 'time':
+            return self.data[1][:,0]
         else:
-            dataInd = dataInd - 1
+            varInd  = self.get_variable_index(name)
+            dataInd = self.dataInfo[varInd][1]
+            factor = 1
+            if dataInd<0:
+                factor = -1
+                dataInd = -dataInd -1
+            else:
+                dataInd = dataInd - 1
+            dataMat = self.dataInfo[varInd][0]-1
+            # Take into account that the 'Time' variable has data matrix index 0,
+            # which means that it is
+            if dataMat<0:
+                dataMat = 0
+            #return Trajectory(self.data[dataMat][:,0],factor*self.data[dataMat][:,dataInd])
+            if dataMat == 0:
+                return factor*self.data[dataMat][0,dataInd]
+            else:
+                return factor*self.data[dataMat][:,dataInd]
+        
+    def is_variable(self, name):
+        """
+        Returns True if the given name corresponds to a time-varying
+        variable.
+        
+            Parameters::
+            
+                name - Name of the variable/parameter/constant
+                
+            Returns::
+            
+                True if the variable is time-varying.
+        """
+        varInd  = self.get_variable_index(name)
         dataMat = self.dataInfo[varInd][0]-1
-        # Take into account that the 'Time' variable has data matrix index 0,
-        # which means that it is
         if dataMat<0:
             dataMat = 0
-        return Trajectory(self.data[dataMat][:,0],factor*self.data[dataMat][:,dataInd])
         
+        if dataMat == 0:
+            return False
+        else:
+            return True
         
 class ResultDymolaBinary:
     """ Class representing a simulation or optimization result loaded 
@@ -423,22 +452,53 @@ class ResultDymolaBinary:
             A Trajectory object containing the time vector and the data vector
             of the variable.
         """
-        varInd  = self.get_variable_index(name)
-        dataInd = self.raw['dataInfo'][1][varInd]
-        dataMat = self.raw['dataInfo'][0][varInd]
-        factor = 1
-        if dataInd<0:
-            factor = -1
-            dataInd = -dataInd -1
+        if name == 'time':
+            return self.raw['data_%d'%2][0,:]
         else:
-            dataInd = dataInd - 1
-        
-        # Take into account that the 'Time' variable has data matrix index 0
+            varInd  = self.get_variable_index(name)
+            dataInd = self.raw['dataInfo'][1][varInd]
+            dataMat = self.raw['dataInfo'][0][varInd]
+            factor = 1
+            if dataInd<0:
+                factor = -1
+                dataInd = -dataInd -1
+            else:
+                dataInd = dataInd - 1
             
+            # Take into account that the 'Time' variable has data matrix index 0
+                
+            if dataMat<1:
+                dataMat = 1
+            #return Trajectory(self.raw['data_%d'%dataMat][0,:],factor*self.raw['data_%d'%dataMat][dataInd,:])
+            
+            if dataMat == 0:
+                return factor*self.raw['data_%d'%dataMat][dataInd,0]
+            else:
+                return factor*self.raw['data_%d'%dataMat][dataInd,:]
+    
+    def is_variable(self, name):
+        """
+        Returns True if the given name corresponds to a time-varying
+        variable.
+        
+            Parameters::
+            
+                name - Name of the variable/parameter/constant
+                
+            Returns::
+            
+                True if the variable is time-varying.
+        """
+        varInd  = self.get_variable_index(name)
+        dataMat = self.raw['dataInfo'][0][varInd]
         if dataMat<1:
             dataMat = 1
-        return Trajectory(self.raw['data_%d'%dataMat][0,:],factor*self.raw['data_%d'%dataMat][dataInd,:])
-
+        
+        if dataMat == 1:
+            return False
+        else:
+            return True
+        
 class ResultWriter():
     """ Base class for writing results to file. """
     

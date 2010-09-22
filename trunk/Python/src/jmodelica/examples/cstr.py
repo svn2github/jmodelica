@@ -88,8 +88,8 @@ def run_demo(with_plots=True):
     init_result = init_model.initialize()
     
     # Store stationary point A
-    c_0_A = init_result.result_data.get_variable_data('c').x[0]
-    T_0_A = init_result.result_data.get_variable_data('T').x[0]
+    c_0_A = init_result['c'][0]
+    T_0_A = init_result['T'][0]
     
     # Print some data for stationary point A
     print(' *** Stationary point A ***')
@@ -104,9 +104,8 @@ def run_demo(with_plots=True):
     # Solve the DAE initialization system with Ipopt
     init_result = init_model.initialize()
     # Store stationary point B
-    res = init_result.result_data
-    c_0_B = res.get_variable_data('c').x[0]
-    T_0_B = res.get_variable_data('T').x[0]
+    c_0_B = init_result['c'][0]
+    T_0_B = init_result['T'][0]
 
     # Print some data for stationary point B
     print(' *** Stationary point B ***')
@@ -140,14 +139,14 @@ def run_demo(with_plots=True):
     init_sim_model.set('T_ref',T_0_B)
     init_sim_model.set('Tc_ref',u[0])
 
-    sim_res = init_sim_model.simulate(
+    res = init_sim_model.simulate(
         alg_args={'start_time':0.,'final_time':150.,'input_trajectory':u_traj})
     
     # Extract variable profiles
-    res = sim_res.result_data
-    c_init_sim=res.get_variable_data('cstr.c')
-    T_init_sim=res.get_variable_data('cstr.T')
-    Tc_init_sim=res.get_variable_data('cstr.Tc')
+    c_init_sim=res['cstr.c']
+    T_init_sim=res['cstr.T']
+    Tc_init_sim=res['cstr.Tc']
+    t_init_sim = res['time']
 
     # Plot the results
     if with_plots:
@@ -155,17 +154,17 @@ def run_demo(with_plots=True):
         plt.clf()
         plt.hold(True)
         plt.subplot(311)
-        plt.plot(c_init_sim.t,c_init_sim.x)
+        plt.plot(t_init_sim,c_init_sim)
         plt.grid()
         plt.ylabel('Concentration')
 
         plt.subplot(312)
-        plt.plot(T_init_sim.t,T_init_sim.x)
+        plt.plot(t_init_sim,T_init_sim)
         plt.grid()
         plt.ylabel('Temperature')
 
         plt.subplot(313)
-        plt.plot(Tc_init_sim.t,Tc_init_sim.x)
+        plt.plot(t_init_sim,Tc_init_sim)
         plt.grid()
         plt.ylabel('Cooling temperature')
         plt.xlabel('time')
@@ -188,22 +187,22 @@ def run_demo(with_plots=True):
     hs = N.ones(n_e)*1./n_e # Equidistant points
     n_cp = 3; # Number of collocation points in each element
 
-    opt_res = cstr.optimize(
-        alg_args={'n_e':n_e,'hs':hs,'n_cp':n_cp,'init_traj':res})
+    res = cstr.optimize(
+        alg_args={'n_e':n_e,'hs':hs,'n_cp':n_cp,'init_traj':res.result_data})
 
     # Extract variable profiles
-    res = opt_res.result_data
-    c_res=res.get_variable_data('cstr.c')
-    T_res=res.get_variable_data('cstr.T')
-    Tc_res=res.get_variable_data('cstr.Tc')
+    c_res=res['cstr.c']
+    T_res=res['cstr.T']
+    Tc_res=res['cstr.Tc']
+    time_res = res['time']
 
-    c_ref=res.get_variable_data('c_ref')
-    T_ref=res.get_variable_data('T_ref')
-    Tc_ref=res.get_variable_data('Tc_ref')
+    c_ref=res['c_ref']
+    T_ref=res['T_ref']
+    Tc_ref=res['Tc_ref']
 
-    cost=res.get_variable_data('cost')
+    cost=res['cost']
     
-    assert N.abs(cost.x[-1]/1.e7 - 1.8585429) < 1e-3, \
+    assert N.abs(cost[-1]/1.e7 - 1.8585429) < 1e-3, \
             "Wrong value of cost function in cstr.py"  
 
     # Plot the results
@@ -212,20 +211,20 @@ def run_demo(with_plots=True):
         plt.clf()
         plt.hold(True)
         plt.subplot(311)
-        plt.plot(c_res.t,c_res.x)
-        plt.plot(c_ref.t,c_ref.x,'--')
+        plt.plot(time_res,c_res)
+        plt.plot(time_res,c_ref,'--')
         plt.grid()
         plt.ylabel('Concentration')
 
         plt.subplot(312)
-        plt.plot(T_res.t,T_res.x)
-        plt.plot(T_ref.t,T_ref.x,'--')
+        plt.plot(time_res,T_res)
+        plt.plot(time_res,T_ref,'--')
         plt.grid()
         plt.ylabel('Temperature')
 
         plt.subplot(313)
-        plt.plot(Tc_res.t,Tc_res.x)
-        plt.plot(Tc_ref.t,Tc_ref.x,'--')
+        plt.plot(time_res,Tc_res)
+        plt.plot(time_res,Tc_ref,'--')
         plt.grid()
         plt.ylabel('Cooling temperature')
         plt.xlabel('time')
@@ -233,8 +232,8 @@ def run_demo(with_plots=True):
 
     # Simulate to verify the optimal solution
     # Set up input trajectory
-    t = Tc_res.t 
-    u = Tc_res.x
+    t = time_res 
+    u = Tc_res
     u_traj = N.transpose(N.vstack((t,u)))
     
     # Compile the Modelica model to a JMU
@@ -246,14 +245,14 @@ def run_demo(with_plots=True):
     sim_model.set('T_init',T_0_A)
     sim_model.set('Tc',u[0])
 
-    sim_res = sim_model.simulate(
+    res = sim_model.simulate(
         alg_args={'start_time':0.,'final_time':150.,'input_trajectory':u_traj})
     
     # Extract variable profiles
-    res = sim_res.result_data
-    c_sim=res.get_variable_data('c')
-    T_sim=res.get_variable_data('T')
-    Tc_sim=res.get_variable_data('Tc')
+    c_sim=res['c']
+    T_sim=res['T']
+    Tc_sim=res['Tc']
+    time = res['time']
 
     # Plot the results
     if with_plots:
@@ -261,22 +260,22 @@ def run_demo(with_plots=True):
         plt.clf()
         plt.hold(True)
         plt.subplot(311)
-        plt.plot(c_res.t,c_res.x,'--')
-        plt.plot(c_sim.t,c_sim.x)
+        plt.plot(time,c_res,'--')
+        plt.plot(time,c_sim)
         plt.legend(('optimized','simulated'))
         plt.grid()
         plt.ylabel('Concentration')
 
         plt.subplot(312)
-        plt.plot(T_res.t,T_res.x,'--')
-        plt.plot(T_sim.t,T_sim.x)
+        plt.plot(time,T_res,'--')
+        plt.plot(time,T_sim)
         plt.legend(('optimized','simulated'))
         plt.grid()
         plt.ylabel('Temperature')
 
         plt.subplot(313)
-        plt.plot(Tc_res.t,Tc_res.x,'--')
-        plt.plot(Tc_sim.t,Tc_sim.x)
+        plt.plot(time,Tc_res,'--')
+        plt.plot(time,Tc_sim)
         plt.legend(('optimized','simulated'))
         plt.grid()
         plt.ylabel('Cooling temperature')
