@@ -57,7 +57,7 @@ def run_demo(with_plots=True):
         model.set('x1_0',x1_0[i])
         model.set('x2_0',x2_0[i])
         # Simulate 
-        sim_res = model.simulate(alg_args={'final_time':20})
+        sim_res = model.simulate(final_time=20)
         # Get simulation result
         res = sim_res.result_data
         x1=res.get_variable_data('x1')

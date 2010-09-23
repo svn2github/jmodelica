@@ -36,9 +36,8 @@ def run_demo(with_plots=True):
     jmu_name = compile_jmu(m_name, mofile)
     model = JMUModel(jmu_name)
     
-    sim_res = model.simulate(
-        alg_args={'final_time':86400.0, 'num_communication_points':86400},
-        solver_args={'make_consistency':'IDA_YA_YDP_INIT'})
+    sim_res = model.simulate(final_time=86400.0, 
+        options={'num_communication_points':86400, 'IDA_options':{'make_consistency':'IDA_YA_YDP_INIT'}})
     
     res = sim_res.result_data
     theta = res.get_variable_data('theta')

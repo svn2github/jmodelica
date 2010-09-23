@@ -34,8 +34,8 @@ def run_demo(with_plots=True):
 
     model = JMUModel(jmu_name)
     
-    res = model.simulate(alg_args={'final_time':20,'num_communication_points':0,'solver':'CVode'},
-                             solver_args={'discr':'BDF','iter':'Newton'})
+    res = model.simulate(final_time=20,
+        options={'num_communication_points':0,'solver':'CVode', 'CVode_options':{'discr':'BDF','iter':'Newton'}})
 
     x1 = res['x1']
     x2 = res['x2']
