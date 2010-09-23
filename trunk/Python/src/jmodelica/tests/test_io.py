@@ -30,6 +30,7 @@ from jmodelica.jmi import compile_jmu
 from jmodelica.jmi import JMUModel
 from jmodelica.io import ResultDymolaTextual
 from jmodelica.io import ResultWriterDymola
+from jmodelica.io import VariableNotTimeVarying
 from jmodelica.optimization import ipopt
 from jmodelica.fmi import *
 
@@ -104,6 +105,52 @@ class TestIO:
         compile_jmu('ParameterAlias', model_file)
         model = JMUModel('ParameterAlias.jmu')
         model.simulate()
+        
+    @testattr(assimulo = True)
+    def test_result(self):
+        """ Test simulate and write to file when model has parameter alias.
+            Also tests the methods is_variable and get_column in io.ResultDymolaTextual.
+        """
+        model_file = os.path.join(get_files_path(), 'Modelica', 'ParameterAlias.mo')
+        compile_jmu('ParameterAlias', model_file)
+        model = JMUModel('ParameterAlias.jmu')
+        res = model.simulate()
+        
+        assert not res.is_variable('p2')
+        assert not res.is_variable('x')
+        assert not res.is_variable('p1')
+        assert res.is_variable('der(y)')
+        assert res.is_variable('y')
+        
+        assert res.get_column('der(y)') == 1
+        assert res.get_column('y') == 2
+        assert res.get_column('time') == 0
+        
+        assert res.is_negated('der(y)') == False
+        assert res.is_negated('y') == False
+        
+    @testattr(assimulo = True)
+    def test_get_column(self):
+        """
+        Test the get_column and get_data_matrix.
+        """
+        model_file = os.path.join(get_files_path(), 'Modelica', 'RLC_Circuit.mo')
+        compile_jmu('RLC_Circuit', model_file)
+        model = JMUModel('RLC_Circuit.jmu')
+        res = model.simulate()
+        
+        assert res.is_negated('resistor1.n.i')
+        assert res.is_negated('capacitor.n.i')
+        assert not res.is_variable('sine.freqHz')
+        
+        dataMatrix = res.data_matrix
+        
+        col = res.get_column('capacitor.v')
+        
+        nose.tools.assert_almost_equal(dataMatrix[0,col], res['capacitor.v'][0],5)
+        nose.tools.assert_almost_equal(dataMatrix[-1,col], res['capacitor.v'][-1],5)
+        
+        nose.tools.assert_raises(VariableNotTimeVarying, res.get_column, 'sine.freqHz')
 
 class test_ResultWriterDymola:
     """Tests the class ResultWriterDymola."""

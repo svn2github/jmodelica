@@ -398,6 +398,71 @@ class ResultDymolaTextual:
             return False
         else:
             return True
+            
+    def is_negated(self, name):
+        """
+        Returns True if the given name corresponds to a negated result
+        vector.
+        
+            Parameters::
+            
+                name - Name of the variable/parameter/constant
+                
+            Returns::
+            
+                True if the result should be negated
+        """
+        varInd  = self.get_variable_index(name)
+        dataInd = self.dataInfo[varInd][1]
+        if dataInd<0:
+            return True
+        else:
+            return False
+    
+    def get_column(self, name):
+        """
+        Returns the column number in the data matrix where the values
+        of the variable are stored.
+        
+        Parameters::
+        
+            name - Name of the variable/parameter/constant
+            
+        Returns::
+        
+            The column number.
+        """
+        if name == 'time':
+            return 0
+
+        if not self.is_variable(name):
+            raise VariableNotTimeVarying("Variable " +
+                                        name + " is not time-varying.")
+        varInd  = self.get_variable_index(name)
+        dataInd = self.dataInfo[varInd][1]
+        factor = 1
+        if dataInd<0:
+            factor = -1
+            dataInd = -dataInd -1
+        else:
+            dataInd = dataInd - 1
+            
+        return dataInd
+        
+    def get_data_matrix(self):
+        """
+        Returns the result matrix.
+        
+            Parameters::
+            
+                None
+                
+            Returns::
+            
+                The result data matrix.
+        """
+        return self.data[1]
+        
         
 class ResultDymolaBinary:
     """ Class representing a simulation or optimization result loaded 
@@ -471,7 +536,7 @@ class ResultDymolaBinary:
                 dataMat = 1
             #return Trajectory(self.raw['data_%d'%dataMat][0,:],factor*self.raw['data_%d'%dataMat][dataInd,:])
             
-            if dataMat == 0:
+            if dataMat == 1:
                 return factor*self.raw['data_%d'%dataMat][dataInd,0]
             else:
                 return factor*self.raw['data_%d'%dataMat][dataInd,:]
@@ -498,6 +563,70 @@ class ResultDymolaBinary:
             return False
         else:
             return True
+            
+    def is_negated(self, name):
+        """
+        Returns True if the given name corresponds to a negated result
+        vector.
+        
+            Parameters::
+            
+                name - Name of the variable/parameter/constant
+                
+            Returns::
+            
+                True if the result should be negated
+        """
+        varInd  = self.get_variable_index(name)
+        dataInd = self.raw['dataInfo'][1][varInd]
+        if dataInd<0:
+            return True
+        else:
+            return False
+    
+    def get_column(self, name):
+        """
+        Returns the column number in the data matrix where the values
+        of the variable are stored.
+        
+        Parameters::
+        
+            name - Name of the variable/parameter/constant
+            
+        Returns::
+        
+            The column number.
+        """
+        if name == 'time':
+            return 0
+        
+        if not self.is_variable(name):
+            raise VariableNotTimeVarying("Variable " +
+                                        name + " is not time-varying.")
+        varInd  = self.get_variable_index(name)
+        dataInd = self.raw['dataInfo'][1][varInd]
+        factor = 1
+        if dataInd<0:
+            factor = -1
+            dataInd = -dataInd -1
+        else:
+            dataInd = dataInd - 1
+            
+        return dataInd
+    
+    def get_data_matrix(self):
+        """
+        Returns the result matrix.
+        
+            Parameters::
+            
+                None
+                
+            Returns::
+            
+                The result data matrix.
+        """
+        return self.raw['data_%d'%2]
         
 class ResultWriter():
     """ Base class for writing results to file. """
@@ -831,3 +960,9 @@ class VariableNotFoundError(JIOError):
     data file.
     """
     pass
+    
+class VariableNotTimeVarying(JIOError):
+    """
+    Exception that is thrown when a column is asked for a parameter/constant.
+    """
+    pass 

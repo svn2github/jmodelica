@@ -229,6 +229,71 @@ class ResultBase(object):
         
     options = property(fget=_get_options, fset=_set_options)
 
+class JMResultBase(ResultBase):
+    def __getitem__(self, key):
+        return self.result_data.get_variable_data(key)
+
+    def is_variable(self, name):
+        """
+        Returns True if the given name corresponds to a time-varying
+        variable.
+        
+            Parameters::
+            
+                name - Name of the variable/parameter/constant
+                
+            Returns::
+            
+                True if the variable is time-varying.
+        """
+        return self.result_data.is_variable(name)
+    
+    def is_negated(self, name):
+        """
+        Returns True if the given name corresponds to a negated result
+        vector.
+        
+            Parameters::
+            
+                name - Name of the variable/parameter/constant
+                
+            Returns::
+            
+                True if the result should be negated
+        """
+        return self.result_data.is_negated(name)
+    
+    def _get_data_matrix(self):
+        """
+        Returns the result matrix.
+        
+            Parameters::
+            
+                None
+                
+            Returns::
+            
+                The result data matrix.
+        """
+        return self.result_data.get_data_matrix()
+        
+    data_matrix = property(fget=_get_data_matrix)
+
+    def get_column(self, name):
+        """
+        Returns the column number in the data matrix where the values
+        of the variable are stored.
+        
+        Parameters::
+        
+            name - Name of the variable/parameter/constant
+            
+        Returns::
+        
+            The column number.
+        """
+        return self.result_data.get_column(name)
+
 class OptionBase(dict):
     """ Base class for an algorithm option class. 
     
@@ -298,24 +363,8 @@ class OptionBase(dict):
             self[key] = value
         return self[key]
     
-class IpoptInitResult(ResultBase):
-    def __getitem__(self, key):
-        return self.result_data.get_variable_data(key)
-    
-    def is_variable(self, name):
-        """
-        Returns True if the given name corresponds to a time-varying
-        variable.
-        
-            Parameters::
-            
-                name - Name of the variable/parameter/constant
-                
-            Returns::
-            
-                True if the variable is time-varying.
-        """
-        return self.result_data.is_variable(name)
+class IpoptInitResult(JMResultBase):
+    pass
 
 class IpoptInitializationAlgOptions(OptionBase):
     """ Options for the IpoptInitialization initialize algorithm. 
@@ -442,24 +491,8 @@ class IpoptInitializationAlg(AlgorithmBase):
         """
         return IpoptInitializationAlgOptions()
 
-class AssimuloSimResult(ResultBase):
-    def __getitem__(self, key):
-        return self.result_data.get_variable_data(key)
-        
-    def is_variable(self, name):
-        """
-        Returns True if the given name corresponds to a time-varying
-        variable.
-        
-            Parameters::
-            
-                name - Name of the variable/parameter/constant
-                
-            Returns::
-            
-                True if the variable is time-varying.
-        """
-        return self.result_data.is_variable(name)
+class AssimuloSimResult(JMResultBase):
+    pass
 
 class AssimuloFMIAlgOptions(OptionBase):
     """ Options for the AssimuloFMI simulation algorithm. 
@@ -794,24 +827,8 @@ class AssimuloAlg(AlgorithmBase):
         """
         return AssimuloAlgOptions()
 
-class CollocationLagrangePolynomialsResult(ResultBase):
-    def __getitem__(self, key):
-        return self.result_data.get_variable_data(key)
-    
-    def is_variable(self, name):
-        """
-        Returns True if the given name corresponds to a time-varying
-        variable.
-        
-            Parameters::
-            
-                name - Name of the variable/parameter/constant
-                
-            Returns::
-            
-                True if the variable is time-varying.
-        """
-        return self.result_data.is_variable(name)
+class CollocationLagrangePolynomialsResult(JMResultBase):
+    pass
 
 class CollocationLagrangePolynomialsAlgOptions(OptionBase):
     """ Options for the CollocationLagrangePolynomials optimization 
@@ -997,24 +1014,8 @@ class InvalidSolverArgumentException(Exception):
     def __str__(self):
         return repr(self.msg)
     
-class KInitSolveResult(ResultBase):
-    def __getitem__(self, key):
-        return self.result_data.get_variable_data(key)
-
-    def is_variable(self, name):
-        """
-        Returns True if the given name corresponds to a time-varying
-        variable.
-        
-            Parameters::
-            
-                name - Name of the variable/parameter/constant
-                
-            Returns::
-            
-                True if the variable is time-varying.
-        """
-        return self.result_data.is_variable(name)
+class KInitSolveResult(JMResultBase):
+    pass
 
 class KInitSolveAlgOptions(OptionBase):
     """ Options for the KInitSolve initialize algorithm. 

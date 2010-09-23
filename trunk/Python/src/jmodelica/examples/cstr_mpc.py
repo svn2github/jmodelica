@@ -175,7 +175,7 @@ def run_demo(with_plots=True):
         Tc_res=res.get_variable_data('cstr.Tc')
         
         # Get the first Tc sample
-        Tc_ctrl = Tc_res.x[0]
+        Tc_ctrl = Tc_res[0]
         
         # Set the value to the model
         sim_model.set('Tc',Tc_ctrl)
