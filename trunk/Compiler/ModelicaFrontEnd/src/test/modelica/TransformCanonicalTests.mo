@@ -15,22 +15,23 @@ fclass TransformCanonicalTests.TransformCanonicalTest1
 initial equation 
  x = 1;
  y = 3;
-equation 
+equation
  der(x) =  - ( x );
  der(v) = 4;
- y = 3;
+ y + v = 1;
  w = 2;
 end TransformCanonicalTests.TransformCanonicalTest1;
 ")})));
 
 		Real x(start=1,fixed=true);
-		Real y(start=3,fixed=true)=3;
+		Real y(start=3,fixed=true);
 	    Real z = x;
 	    Real w(start=1) = 2;
 	    Real v;
 	equation
 		der(x) = -x;
 		der(v) = 4;
+                y + v = 1;
 	end TransformCanonicalTest1;
 	
   model TransformCanonicalTest2
@@ -766,6 +767,7 @@ end TransformCanonicalTests.AliasTest22;
 	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.TransformCanonicalTestCase(name="AliasTest23",
         description="Test elimination of alias variables",
+        automatic_add_initial_equations = false,
                                                flatModel=
 "
 fclass TransformCanonicalTests.AliasTest23
@@ -785,6 +787,7 @@ end TransformCanonicalTests.AliasTest23;
 	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.TransformCanonicalTestCase(name="AliasTest24",
         description="Test elimination of alias variables",
+        automatic_add_initial_equations = false,
                                                flatModel=
 "
 fclass TransformCanonicalTests.AliasTest24
@@ -1679,6 +1682,30 @@ end TransformCanonicalTests.InitialEqTest12;
     der(x) = -x;
     (,y) = f2(ones(3),ones(4));
   end InitialEqTest12;
+
+  model InitialEqTest13
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={ 
+    JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="InitialEqTest13",
+         description="Test algorithm for adding additional initial equations.",
+         flatModel="
+fclass TransformCanonicalTests.InitialEqTest13
+ Real x1(start = 1);
+ Real x2(start = 2);
+initial equation 
+ x1 = 1;
+ x2 = 2;
+equation
+ der(x1) =  - ( x1 );
+ der(x2) = x1;
+end TransformCanonicalTests.InitialEqTest13;
+")})));
+    Real x1 (start=1);
+    Real x2 (start=2);
+  equation
+    der(x1) = -x1;
+    der(x2) = x1;
+  end InitialEqTest13;
 
 
 end TransformCanonicalTests;

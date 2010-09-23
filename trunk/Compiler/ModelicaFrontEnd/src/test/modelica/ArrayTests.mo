@@ -66,6 +66,7 @@ end ArrayTests.ArrayTest1b;
 	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.TransformCanonicalTestCase(name="ArrayTest1c",
         description="Test scalarization of variables",
+         automatic_add_initial_equations = false,
                                                flatModel=
 "
 fclass ArrayTests.ArrayTest1c
@@ -519,6 +520,7 @@ model ArrayTest17
      JModelica.UnitTesting.TransformCanonicalTestCase(
          name="ArrayTest17",
          description="Test scalarization of variables",
+         automatic_add_initial_equations = false,
          flatModel="
 fclass ArrayTests.ArrayTest17
  Real n[1].m[1,1].x[1];
@@ -719,6 +721,7 @@ model ArrayTest26
         annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.TransformCanonicalTestCase(name="ArrayTest26",
         description="Flattening of arrays.",
+         automatic_add_initial_equations = false,
                                                flatModel=
 "fclass ArrayTests.ArrayTest26
  Real x[1,1];
@@ -842,6 +845,7 @@ model ArrayTest29
         annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.TransformCanonicalTestCase(name="ArrayTest29",
         description="Flattening of arrays.",
+         automatic_add_initial_equations = false,
                                                flatModel=
 "fclass ArrayTests.ArrayTest29
  Real x[1](start = 1);
@@ -865,6 +869,7 @@ model ArrayTest30
         annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.TransformCanonicalTestCase(name="ArrayTest30",
         description="Flattening of arrays.",
+         automatic_add_initial_equations = false,
                                                flatModel=
 "
 fclass ArrayTests.ArrayTest30
@@ -1486,6 +1491,7 @@ model SubscriptExpression7
      JModelica.UnitTesting.TransformCanonicalTestCase(
          name="SubscriptExpression7",
          description="Type checking array subscripts: using min in subscripts",
+         automatic_add_initial_equations = false,
          flatModel="
 fclass ArrayTests.SubscriptExpression7
  Real x[1,1];
@@ -5946,6 +5952,7 @@ model MixedIndices1
      JModelica.UnitTesting.TransformCanonicalTestCase(
          name="MixedIndices1",
          description="Mixing for index subscripts with colon subscripts",
+         automatic_add_initial_equations = false,
          flatModel="
 fclass ArrayTests.MixedIndices1
  Real y[1,1,1];

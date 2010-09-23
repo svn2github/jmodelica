@@ -60,6 +60,10 @@ public class BiPGraph {
 		return v;
 	}
 	
+	public Var getVariable(String name) {
+		return variableMap.get(name);
+	}
+	
 	public boolean addEdge(String equationName, String variableName) {
 		Eq e = equationMap.get(equationName);
 		Var v = variableMap.get(variableName);

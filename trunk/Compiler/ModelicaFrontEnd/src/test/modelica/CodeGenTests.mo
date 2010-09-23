@@ -22,6 +22,7 @@ package CodeGenTests
   	  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.GenericCodeGenTestCase(name="CodeGenTest1",
         description="Test of code generation",
+         automatic_add_initial_equations = false,
         template = 
         "n_ci: $n_ci$
 n_real_ci: $n_real_ci$

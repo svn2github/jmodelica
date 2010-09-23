@@ -209,6 +209,16 @@ aspect TransformCanonical {
 		Eq eqn = null;
 		Var v = null;
 		
+		// Add all derivatives
+		for (FVariable fv : derivativeVariables()) {
+			g.addVariable(fv.name(),"");     
+		}
+		
+		// Add all algebraics
+		for (FVariable fv : algebraicRealVariables()) {
+			g.addVariable(fv.name(),"");     
+		}
+		
 		int k = 1;
 		for (FAbstractEquation e : equations()) {
 			//k = e.extractDerAlgIncidence(g,k);
@@ -220,14 +230,14 @@ aspect TransformCanonical {
 				for (FVariable y : e.algebraicVariables()) { 
 					log.debug("  Algebraic: " + y.name()); 
 						 	 
-					v = g.addVariable(y.name(),"");     
+					v = g.getVariable(y.name());     
 					g.addEdge(eqn,v); 
 				} 
 
 				for (FDerivativeVariable dx : e.derivativeVariables()) { 
 					log.debug("  Diffed state: " + dx.name()); 
 
-					v = g.addVariable(dx.name(),"");     
+					v = g.getVariable(dx.name());     
 					g.addEdge(eqn,v); 
 				} 
 
@@ -241,6 +251,12 @@ aspect TransformCanonical {
 		log.info("DAE system ");
 		log.info(g.printMatching());
 
+		// Add all algebraics
+		for (FVariable fv : differentiatedRealVariables()) {
+			g.addVariable(fv.name(),"");     
+		}
+		
+		
 		k = 1;
 		for (FAbstractEquation e : equations()) {
 			int n_eq = e.numScalarEquations();
@@ -252,14 +268,14 @@ aspect TransformCanonical {
 				for (FVariable x : e.differentiatedVariables()) { 
 					log.debug("  State: " + x.name()); 
 					 	 
-					v = g.addVariable(x.name(),"");     
+					v = g.getVariable(x.name());     
 					g.addEdge(eqn,v); 
 				} 			
 			}
 			
 			//k = e.extractStateIncidence(g,k);
 		}
-
+		
 		for (FAbstractEquation e : initialEquations()) {
 
 			//k = e.extractIncidence(g,k);
@@ -273,7 +289,7 @@ aspect TransformCanonical {
 				for (FVariable y : e.algebraicVariables()) { 
 					log.debug("  Algebraic: " + y.name()); 
 					 	 
-					v = g.addVariable(y.name(),"");     
+					v = g.getVariable(y.name());     
 					g.addEdge(eqn,v); 
 				} 
 					
@@ -293,7 +309,6 @@ aspect TransformCanonical {
 			}
 		}
 
-		
 		log.info(g.toString());
 		g.maximumMatching(false);	
 		log.info("DAE initial ");
