@@ -236,10 +236,10 @@ aspect TransformCanonical {
 		
 		}
 		
-		System.out.println(g);
+		log.info(g.toString());
 		g.maximumMatching(true);	
-		System.out.print("DAE system ");
-		System.out.println(g.printMatching());
+		log.info("DAE system ");
+		log.info(g.printMatching());
 
 		k = 1;
 		for (FAbstractEquation e : equations()) {
@@ -294,10 +294,10 @@ aspect TransformCanonical {
 		}
 
 		
-		System.out.println(g);
+		log.info(g.toString());
 		g.maximumMatching(false);	
-		System.out.print("DAE initial ");
-		System.out.println(g.printMatching());
+		log.info("DAE initial ");
+		log.info(g.printMatching());
 
 		List<FAbstractEquation> l = new List<FAbstractEquation>();
 		for (Var var : g.getUnmatchedVariables()) {
