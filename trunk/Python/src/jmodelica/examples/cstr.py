@@ -139,8 +139,8 @@ def run_demo(with_plots=True):
     init_sim_model.set('T_ref',T_0_B)
     init_sim_model.set('Tc_ref',u[0])
 
-    res = init_sim_model.simulate(
-        alg_args={'start_time':0.,'final_time':150.,'input_trajectory':u_traj})
+    res = init_sim_model.simulate(start_time=0.,final_time=150.,
+        input_trajectory=u_traj)
     
     # Extract variable profiles
     c_init_sim=res['cstr.c']
@@ -188,7 +188,7 @@ def run_demo(with_plots=True):
     n_cp = 3; # Number of collocation points in each element
 
     res = cstr.optimize(
-        alg_args={'n_e':n_e,'hs':hs,'n_cp':n_cp,'init_traj':res.result_data})
+        options={'n_e':n_e,'hs':hs,'n_cp':n_cp,'init_traj':res.result_data})
 
     # Extract variable profiles
     c_res=res['cstr.c']
@@ -245,8 +245,8 @@ def run_demo(with_plots=True):
     sim_model.set('T_init',T_0_A)
     sim_model.set('Tc',u[0])
 
-    res = sim_model.simulate(
-        alg_args={'start_time':0.,'final_time':150.,'input_trajectory':u_traj})
+    res = sim_model.simulate(start_time=0.,final_time=150.,
+        input_trajectory=u_traj)
     
     # Extract variable profiles
     c_sim=res['c']

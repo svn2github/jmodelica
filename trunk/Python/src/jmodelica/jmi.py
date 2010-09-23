@@ -2007,64 +2007,70 @@ class JMUModel(BaseModel):
         
     z = property(get_z, set_z)
     
-    def initialize(self,
-                   algorithm='IpoptInitializationAlg', 
-                   alg_args={}, 
-                   solver_args={}):
+    def initialize(self, algorithm='IpoptInitializationAlg', 
+        options='default'):
         """ Compact function for model initialization.
             
-        The initialization method depends on which algorithm is used, this 
-        can be set with the function argument 'algorithm'. Arguments for the 
-        algorithm and solver are passed as dicts. Which arguments that are 
-        valid depends on which algorithm is used, see the algorithm 
-        implementation in algorithm_drivers.py for details.
+        The initialization method depends on which algorithm is used, 
+        this can be set with the function argument 'algorithm'. Options 
+        for the algorithm are passed as option classes or as pure dicts. 
+        See JMUModel.initialize_options for more details.
             
-        The default algorithm for this function is IpoptInitializationAlg. 
+        The default algorithm for this function is 
+        IpoptInitializationAlg. 
             
         Parameters::
             
             algorithm --
-                The algorithm which will be used for the initialization is 
-                specified by passing the algorithm class in this argument. 
-                The algorithm class can be any class which implements the 
-                abstract class AlgorithmBase (found in algorithm_drivers.py). 
-                In this way it is possible to write own algorithms and use 
-                them with this function.
-                Default: IpoptInitializationAlg
-            alg_args --
-                All arguments for the chosen algorithm should be listed in 
-                this dict. Valid arguments depend on the algorithm chosen, 
-                see algorithm implementation in algorithm_drivers.py for 
-                details.      
-                Default: empty dict
-            solver_args --
-                All arguments for the chosen solver should be listed in this 
-                dict. Valid arguments depend on the chosen algorithm and 
-                possibly which solver has been selected for the algorithm. 
-                See algorithm implementation in algorithm_drivers.py for 
-                details.
-                Default: empty dict
+                The algorithm which will be used for the initialization 
+                is specified by passing the algorithm class as string or 
+                class object in this argument. 'algorithm' can be any 
+                class which implements the abstract class AlgorithmBase 
+                (found in algorithm_drivers.py). In this way it is 
+                possible to write own algorithms and use them with this 
+                function.
+                Default: 'IpoptInitializationAlg'
+            options -- 
+                The options that should be used in the algorithm. For 
+                details on the options, see:
+                
+                * JMUModel.initialize_options?
+                
+                or look at the docstring for an options object with help, 
+                for example:
+                
+                * help(jmodelica.algorithm_drivers.IpoptInitializationAlgOptions)
+                
+                Valid values are: 
+                
+                - 'default' which gives IpoptInitializationAlgOptions 
+                  with default values on all options (since default 
+                  algorithm is IpoptInitializationAlg)
+                - a dict which gives IpoptInitializationAlgOptions with 
+                  default values on all options except the ones listed 
+                  in the dict
+                - an options object
+                Default: 'default'
                     
         Returns::
             
             Result object, subclass of algorithm_drivers.ResultBase.
-            
         """
         return self._exec_algorithm(algorithm,
-                                alg_args,
-                                solver_args)
+                                    options)
         
     def simulate(self, 
-                algorithm='AssimuloAlg', 
-                alg_args={}, 
-                solver_args={}):
+                 start_time=0.0,
+                 final_time=1.0,
+                 input_trajectory=N.array([]),
+                 algorithm='AssimuloAlg', 
+                 options='default'):
         """ Compact function for model simulation.
             
-        The simulation method depends on which algorithm is used, this can be set 
-        with the function argument 'algorithm'. Arguments for the algorithm 
-        and solver are passed as dicts. Which arguments that are valid 
-        depends on which algorithm is used, see the algorithm implementation 
-        in algorithm_drivers.py for details.
+        The simulation method depends on which algorithm is used, this 
+        can be set with the function argument 'algorithm'. Options 
+        for the algorithm are passed as option classes or as pure dicts. 
+        See JMUModel.simulate_options for more details.
             
         The default algorithm for this function is AssimuloAlg. 
             
@@ -2072,47 +2078,54 @@ class JMUModel(BaseModel):
             
             algorithm --
                 The algorithm which will be used for the simulation is 
-                specified by passing the algorithm class in this argument. 
-                The algorithm class can be any class which implements the 
-                abstract class AlgorithmBase (found in algorithm_drivers.py). 
-                In this way it is possible to write own algorithms and use 
-                them with this function.
-                Default: AssimuloAlg
-            alg_args --
-                All arguments for the chosen algorithm should be listed in 
-                this dict. Valid arguments depend on the algorithm chosen, 
-                see algorithm implementation in algorithm_drivers.py for 
-                details.
-                Default: empty dict
-            solver_args --
-                All arguments for the chosen solver should be listed in this 
-                dict. Valid arguments depend on the chosen algorithm and 
-                possibly which solver has been selected for the algorithm. 
-                See algorithm implementation in algorithm_drivers.py for 
-                details.
-                Default: empty dict
+                specified by passing the algorithm class as string or 
+                class object in this argument. 'algorithm' can be any 
+                class which implements the abstract class AlgorithmBase 
+                (found in algorithm_drivers.py). In this way it is 
+                possible to write own algorithms and use them with this 
+                function.
+                Default: 'AssimuloAlg'
+            options -- 
+                The options that should be used in the algorithm. For 
+                details on the options, see:
+                
+                * JMUModel.simulate_options?
+                
+                or look at the docstring for an options object with help, 
+                for example:
+                
+                * help(jmodelica.algorithm_drivers.AssimuloAlgOptions)
+                
+                Valid values are: 
+                
+                - 'default' which gives AssimuloAlgOptions with default 
+                  values on all options (since default algorithm is 
+                  AssimuloAlg)
+                - a dict which gives AssimuloAlgOptions with default 
+                  values on all options except the ones listed 
+                  in the dict
+                - an options object
+                Default: 'default'
             
         Returns::
             
             Result object, subclass of algorithm_drivers.ResultBase.
-            
         """
-        return self._exec_algorithm(algorithm,
-                                   alg_args,
-                                   solver_args)
-                               
+        return self._exec_simulate_algorithm(start_time, 
+                                             final_time, 
+                                             input_trajectory, 
+                                             algorithm,
+                                             options)
         
     def optimize(self, 
-            algorithm='CollocationLagrangePolynomialsAlg', 
-            alg_args={}, 
-            solver_args={}):
+                 algorithm='CollocationLagrangePolynomialsAlg', 
+                 options='default'):
         """ Compact function for model optimization.
             
-        The optimization method depends on which algorithm is used, this can 
-        be set with the function argument 'algorithm'. Arguments for the 
-        algorithm and solver are passed as dicts. Which arguments that are 
-        valid depends on which algorithm is used, see the algorithm 
-        implementation in algorithm_drivers.py for details.
+        The optimization method depends on which algorithm is used, this 
+        can be set with the function argument 'algorithm'. Options 
+        for the algorithm are passed as option classes or as pure dicts. 
+        See JMUModel.optimize_options for more details.
             
         The default algorithm for this function is 
         CollocationLagrangePolynomialsAlg. 
@@ -2121,35 +2134,41 @@ class JMUModel(BaseModel):
             
             algorithm --
                 The algorithm which will be used for the simulation is 
-                specified by passing the algorithm class in this argument. 
-                The algorithm class can be any class which implements the 
-                abstract class AlgorithmBase (found in algorithm_drivers.py). 
-                In this way it is possible to write own algorithms and use 
-                them with this function.
-                Default: CollocationLagrangePolynomialsAlg
-            alg_args --
-                All arguments for the chosen algorithm should be listed in 
-                this dict. Valid arguments depend on the algorithm chosen, 
-                see algorithm implementation in algorithm_drivers.py for 
-                details.      
-                Default: empty dict
-            solver_args --
-                All arguments for the chosen solver should be listed in this 
-                dict. Valid arguments depend on the chosen algorithm and 
-                possibly which solver has been selected for the algorithm. 
-                See algorithm implementation in algorithm_drivers.py for 
-                details.
-                Default: empty dict
+                specified by passing the algorithm class as string or 
+                class object in this argument. 'algorithm' can be any 
+                class which implements the abstract class AlgorithmBase (
+                found in algorithm_drivers.py). In this way it is 
+                possible to write own algorithms and use them with this 
+                function.
+                Default: 'CollocationLagrangePolynomialsAlg'
+            options -- 
+                The options that should be used in the algorithm. For 
+                details on the options, see:
+                
+                * JMUModel.optimize_options?
+                
+                or look at the docstring for an options object with help, 
+                for example:
+                
+                * help(jmodelica.algorithm_drivers.CollocationLagrangePolynomialsAlgOptions)
+                
+                Valid values are: 
+                
+                - 'default' which gives CollocationLagrangePolynomialsAlgOptions 
+                  with default values on all options (since default 
+                  algorithm is CollocationLagrangePolynomialsAlg)
+                - a dict which gives CollocationLagrangePolynomialsAlgOptions 
+                  with default values on all options except the ones 
+                  listed in the dict
+                - an options object
+                Default: 'default'
             
         Returns::
             
             Result object, subclass of algorithm_drivers.ResultBase.
-            
-            
         """
         return self._exec_algorithm(algorithm,
-                                alg_args,
-                                solver_args)
+                                    options)
     
     def _get_XMLDoc(self):
         """ Get the XMLDoc for the model variables XML file. """

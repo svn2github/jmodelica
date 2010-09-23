@@ -110,14 +110,13 @@ class BaseModel(object):
             return ret
     
     def _exec_algorithm(self,
-                 algorithm, 
-                 alg_args, 
-                 solver_args):
+                        algorithm, 
+                        options):
         """ Helper function which performs all steps of an algorithm run 
-        which are common to all algortihms.
+        which are common to all initialize and optimize algortihms.
         
         Throws exception if algorithm is not a subclass of 
-        algorithm_drivers.AlgorithmBase.
+        jmodelica.algorithm_drivers.AlgorithmBase.
         """
         base_path = 'jmodelica.algorithm_drivers'
         algdrive = __import__(base_path)
@@ -132,10 +131,40 @@ class BaseModel(object):
             " must be a subclass of jmodelica.algorithm_drivers.AlgorithmBase")
 
         # initialize algorithm
-        alg = algorithm(self, alg_args)
-        # set arguments to solver, if any
-        alg.set_solver_options(solver_args)
-        # solve optimization problem/simulate
+        alg = algorithm(self, options)
+        # solve optimization problem/initialize
+        alg.solve()
+        # get and return result
+        return alg.get_result()
+
+    def _exec_simulate_algorithm(self,
+                                 start_time,
+                                 final_time,
+                                 input_trajectory,
+                                 algorithm, 
+                                 options):
+        """ Helper function which performs all steps of an algorithm run 
+        which are common to all simulate algortihms.
+        
+        Throws exception if algorithm is not a subclass of 
+        jmodelica.algorithm_drivers.AlgorithmBase.
+        """
+        base_path = 'jmodelica.algorithm_drivers'
+        algdrive = __import__(base_path)
+        algdrive = getattr(algdrive, 'algorithm_drivers')
+        AlgorithmBase = getattr(algdrive, 'AlgorithmBase')
+        
+        if isinstance(algorithm, str):
+            algorithm = getattr(algdrive, algorithm)
+        
+        if not issubclass(algorithm, AlgorithmBase):
+            raise Exception(str(algorithm)+
+            " must be a subclass of jmodelica.algorithm_drivers.AlgorithmBase")
+
+        # initialize algorithm
+        alg = algorithm(start_time, final_time, input_trajectory, self, 
+            options)
+        # simulate
         alg.solve()
         # get and return result
         return alg.get_result()
@@ -155,7 +184,8 @@ class BaseModel(object):
                 
         Returns::
         
-            Options class for the algorithm specified with default values.
+            Options class for the algorithm specified with default 
+            values.
         """
         return self._default_options(algorithm)
         
@@ -174,7 +204,8 @@ class BaseModel(object):
                 
         Returns::
         
-            Options class for the algorithm specified with default values.
+            Options class for the algorithm specified with default 
+            values.
         """
         return self._default_options(algorithm)
         
@@ -193,7 +224,8 @@ class BaseModel(object):
                 
         Returns::
         
-            Options class for the algorithm specified with default values.
+            Options class for the algorithm specified with default 
+            values.
         """
         return self._default_options(algorithm)
         
@@ -206,7 +238,6 @@ class BaseModel(object):
         algdrive = getattr(algdrive, 'algorithm_drivers')
         algorithm = getattr(algdrive, algorithm)
         return algorithm.get_default_options()
-    
     
 def unzip_unit(archive, path='.'):
     """

@@ -43,7 +43,7 @@ def run_demo(with_plots=True):
     model.set_sw(N.array([1,1]))
     
     #Simulate
-    res = model.simulate(alg_args={'final_time':5.0})
+    res = model.simulate(final_time=5.0)
     
     # Get results
     x = res['x']

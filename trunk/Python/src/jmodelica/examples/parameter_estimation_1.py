@@ -104,7 +104,7 @@ def run_demo(with_plots=True):
         plt.show()
     
     # optimize
-    res = model.optimize(solver_args={"max_iter":500})
+    res = model.optimize(options={'IPOPT_options':{"max_iter":500}})
     
     # Extract variable profiles
     x1 = res['sys.x1']

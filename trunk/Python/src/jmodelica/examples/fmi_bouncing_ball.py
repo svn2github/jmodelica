@@ -34,7 +34,7 @@ def run_demo(with_plots=True):
     model = FMUModel(fmu_name)
     model.initialize()
     
-    res = model.simulate(alg_args={'final_time':2.})
+    res = model.simulate(final_time=2.)
     
     #Retrieve the result for the variables
     h_res = res['h']

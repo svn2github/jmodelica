@@ -112,10 +112,10 @@ def run_demo(with_plots=True,with_blocking_factors = False):
         # Blocking factors for control parametrization
         blocking_factors=4*N.ones(n_e/4,dtype=N.int)
         
-        opt_res = model.optimize(alg_args={'n_e':n_e, 'n_cp':n_cp,'hs':hs,
+        opt_res = model.optimize(options={'n_e':n_e, 'n_cp':n_cp,'hs':hs,
             'blocking_factors': blocking_factors})
     else:
-        opt_res = model.optimize(alg_args={'n_e':n_e, 'n_cp':n_cp, 'hs':hs})
+        opt_res = model.optimize(options={'n_e':n_e, 'n_cp':n_cp, 'hs':hs})
 
     # Extract variable profiles
     res = opt_res.result_data

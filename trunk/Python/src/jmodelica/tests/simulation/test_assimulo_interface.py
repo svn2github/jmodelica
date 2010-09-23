@@ -603,7 +603,7 @@ class Test_FMI_ODE:
         #Writing continuous
         bounce = fmi.FMUModel('bouncingBall.fmu', path_to_fmus)
         bounce.initialize()
-        res = bounce.simulate(alg_args={'final_time':3.})
+        res = bounce.simulate(final_time=3.)
         height = res['h']
         time = res['time']
 
@@ -614,7 +614,7 @@ class Test_FMI_ODE:
         #Writing after
         bounce = fmi.FMUModel('bouncingBall.fmu', path_to_fmus)
         bounce.initialize()
-        res = bounce.simulate(alg_args={'final_time':3.}, solver_args={'write_cont':False})
+        res = bounce.simulate(final_time=3., options={'CVode_options':{'write_cont':False}})
         
         height = res['h']
         time = res['time']
@@ -626,7 +626,7 @@ class Test_FMI_ODE:
         #Test with predefined FMUModel
         model = fmi.FMUModel(os.path.join(path_to_fmus,'bouncingBall.fmu'))
         model.initialize()
-        res = model.simulate(alg_args={'final_time':3.})
+        res = model.simulate(final_time=3.)
 
         height = res['h']
         time = res['time']
@@ -644,7 +644,7 @@ class Test_FMI_ODE:
         #Writing continuous
         bounce = fmi.FMUModel('bouncingBall.fmu', path_to_fmus)
         bounce.initialize()
-        res = bounce.simulate(alg_args={'final_time':3.})
+        res = bounce.simulate(final_time=3.)
 
         height = res['h']
         time = res['time']
@@ -659,8 +659,8 @@ class Test_FMI_ODE:
         #Writing continuous
         bounce = fmi.FMUModel('bouncingBall.fmu', path_to_fmus)
         bounce.initialize()
-        res = bounce.simulate(alg_args={'final_time':3.},
-                                            solver_args={'rtol':1e-6, 'iter':'FixedPoint'})
+        res = bounce.simulate(final_time=3.,
+            options={'CVode_options':{'rtol':1e-6, 'iter':'FixedPoint'}})
         height = res['h']
         time = res['time']
     

@@ -37,8 +37,7 @@ def run_demo(with_plots=True):
     
     jmu_name = compile_jmu(class_name, mofile)
     model = JMUModel(jmu_name)
-    res = model.simulate(
-        alg_args={'final_time':5, 'num_communication_points':500})
+    res = model.simulate(final_time=5, options={'num_communication_points':500})
                         
     x = res['x']
     u = res['u']

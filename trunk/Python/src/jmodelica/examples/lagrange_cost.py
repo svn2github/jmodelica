@@ -42,7 +42,7 @@ def run_demo(with_plots=True):
         curr_dir+"/files/LagrangeCost.mop")
     model = JMUModel(jmu_name)
     res = model.optimize(
-        alg_args={'n_e':n_e,'hs':hs,'n_cp':n_cp,'blocking_factors':b_f})
+        options={'n_e':n_e,'hs':hs,'n_cp':n_cp,'blocking_factors':b_f})
 
     x1 = res['sys.x[1]']
     x2 = res['sys.x[2]']

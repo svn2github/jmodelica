@@ -30,8 +30,9 @@ from jmodelica.jmi import compile_jmu
 from jmodelica.jmi import JMUModel
 from jmodelica.tests import testattr
 from jmodelica.tests import get_files_path
-from jmodelica.algorithm_drivers import InvalidAlgorithmArgumentException
+from jmodelica.algorithm_drivers import InvalidAlgorithmOptionException
 from jmodelica.algorithm_drivers import InvalidSolverArgumentException
+from jmodelica.algorithm_drivers import UnrecognizedOptionError
 
 try:
     from assimulo.explicit_ode import *
@@ -148,7 +149,7 @@ class Test_init_ipopt:
         jmu_pend = compile_jmu(cpath_pend, fpath_pend)
         pend = JMUModel(jmu_pend)
         
-        res = pend.initialize(solver_args={'max_iter':1000})
+        res = pend.initialize(options={'IPOPT_options':{'max_iter':1000}})
 
         theta=res['theta']
         dtheta=res['dtheta']
@@ -195,7 +196,7 @@ class Test_init_ipopt:
     def test_optimize_set_n_cp(self):
         """ Test the jmodelica.optimize function and setting n_cp in alg_args.
         """
-        res = self.model_vdp.optimize(alg_args={'n_cp':10})
+        res = self.model_vdp.optimize(options={'n_cp':10})
         cost=res['cost']
         
         assert N.abs(cost[-1] - 2.34602647e+01 ) < 1e-3, \
@@ -204,12 +205,14 @@ class Test_init_ipopt:
             
     @testattr(ipopt = True)
     def test_optimize_set_args(self):
-        """Test the jmodelica.optimize function and setting some algorithm and solver args.
+        """Test the jmodelica.optimize function and setting some 
+        algorithm and solver args.
         """
         res_file_name = 'test_optimize_set_result_mesh.txt'
-        res = self.model_vdp.optimize(alg_args={'result_mesh':'element_interpolation', 
-                                               'result_file_name':res_file_name},
-                                     solver_args={'max_iter':100})
+        res = self.model_vdp.optimize(
+            options={'result_mesh':'element_interpolation', 
+                     'result_file_name':res_file_name,
+                     'IPOPT_options':{'max_iter':100}})
         cost=res['cost']
         
         assert N.abs(cost[-1] - 2.3469089e+01) < 1e-3, \
@@ -217,13 +220,13 @@ class Test_init_ipopt:
 
 
     @testattr(ipopt = True)
-    def test_optimize_invalid_algorithm_arg(self):
-        """ Test that the jmodelica.optimize function raises exception for an 
-            invalid algorithm argument.
+    def test_optimize_invalid_options(self):
+        """ Test that the jmodelica.optimize function raises exception 
+        for an invalid algorithm option.
         """
-        nose.tools.assert_raises(InvalidAlgorithmArgumentException,
+        nose.tools.assert_raises(UnrecognizedOptionError,
                                  self.model_vdp.optimize,
-                                 alg_args={'ne':10})
+                                 options={'ne':10})
                                  
 class Test_init_assimulo:
     """ Class which contains assimulo tests for the init module. """
@@ -261,9 +264,11 @@ class Test_init_assimulo:
             "Wrong value in simulation result using jmodelica.simulate with rlc."
         
     @testattr(assimulo = True)
-    def test_simulate_set_alg_arg(self):
-        """ Test the jmodelica.simulate function and setting an algorithm argument."""    
-        sim_res = self.model_rlc.simulate(alg_args={'final_time':30.0})
+    def test_simulate_set_argument(self):
+        """ Test the jmodelica.simulate function and setting an 
+        algorithm argument.
+        """
+        sim_res = self.model_rlc.simulate(final_time=30.0)
         resistor_v = sim_res['resistor.v']
         
         assert N.abs(resistor_v[-1] - 0.159255008028) < 1e-3, \
@@ -271,39 +276,50 @@ class Test_init_assimulo:
         
     @testattr(assimulo = True)
     def test_simulate_set_probl_arg(self):
-        """ Test that it is possible to set properties in assimulo and that an 
-            exception is raised if the argument is invalid. """
-        sim_res = self.model_rlc.simulate(solver_args={'max_eIter':100, 'maxh':0.1})
+        """ Test that it is possible to set properties in assimulo and 
+        that an exception is raised if the argument is invalid. 
+        """
+        opts = self.model_rlc.simulate_options()
+        opts['IDA_options']={'max_eIter':100, 'maxh':0.1}
+        sim_res = self.model_rlc.simulate(options = opts)
+        
+        opts = sim_res.options
+        opts['IDA_options']={'maxeter':10}
         nose.tools.assert_raises(InvalidSolverArgumentException,
-                                 self.model_rlc.simulate,
-                                 solver_args={'maxeter':10})
+                                 self.model_rlc.simulate,options=opts)
         
     @testattr(assimulo = True)
     def test_simulate_invalid_solver_arg(self):
         """ Test that the jmodelica.simulate function raises an exception for an 
             invalid solver argument.
-        """    
+        """
+        opts = self.model_rlc.simulate_options()
+        opts['IDA_options']={'mxiter':10}
         nose.tools.assert_raises(InvalidSolverArgumentException,
-                                 self.model_rlc.simulate,
-                                 solver_args={'mxiter':10})
+                                 self.model_rlc.simulate, options=opts)
 
     @testattr(assimulo = True)
-    def test_simulate_invalid_algorithm_arg(self):
-        """ Test that the jmodelica.optimize function raises exception for an 
-            invalid algorithm argument.
+    def test_simulate_invalid_solver(self):
+        """ Test that the jmodelica.optimize function raises exception 
+        for an invalid solver.
         """
-        nose.tools.assert_raises(InvalidAlgorithmArgumentException,
-                                 self.model_rlc.simulate,
-                                 alg_args={'starttime':10})
+        opts = self.model_rlc.simulate_options()
+        opts['solver']='IDAR'
+        nose.tools.assert_raises(InvalidAlgorithmOptionException,
+                                 self.model_rlc.simulate,options=opts)
       
     @testattr(assimulo=True)
     def test_simulate_w_ode(self):
-        """ Test jmodelica.simulate with ODE problem and setting solver args."""
+        """ Test jmodelica.simulate with ODE problem and setting solver 
+        options."""
         jmu_name = compile_jmu(self.cpath_vdp, self.fpath_vdp, 
             compiler_options={'state_start_values_fixed':True},target='model')
         model = JMUModel(jmu_name)
-        sim_res = model.simulate(alg_args={'solver':'CVode', 'final_time':20, 'num_communication_points':0},
-                                     solver_args={'discr':'BDF', 'iter':'Newton'})
+        opts = model.simulate_options()
+        opts['solver']='CVode'
+        opts['num_communication_points']=0
+        opts['CVode_options']={'discr':'BDF', 'iter':'Newton'}
+        sim_res = model.simulate(final_time=20, options=opts)
         x1=sim_res['x1']
         x2=sim_res['x2']
         

@@ -1235,52 +1235,72 @@ class FMUModel(BaseModel):
         """
         return self._log 
     
-    def simulate(self, 
+    def simulate(self,
+                 start_time=0.0,
+                 final_time=1.0,
+                 input_trajectory=N.array([]),
                  algorithm='AssimuloFMIAlg', 
-                 alg_args={}, 
-                 solver_args={}):
+                 options='default'):
         """ Compact function for model simulation.
         
-        The simulation method depends on which algorithm is used, this can be set 
-        with the function argument 'algorithm'. Arguments for the algorithm 
-        and solver are passed as dicts. Which arguments that are valid 
-        depends on which algorithm is used, see the algorithm implementation 
-        in algorithm_drivers.py for details.
+        The simulation method depends on which algorithm is used, this 
+        can be set with the function argument 'algorithm'. Options 
+        for the algorithm are passed as option classes or as pure dicts. 
+        See FMUModel.simulate_options for more details.
         
         The default algorithm for this function is AssimuloFMIAlg. 
         
         Parameters::
         
+            start_time --
+                Start time for the simulation.
+                Default: 0.0
+            final_time --
+                Final time for the simulation.
+                Default: 1.0
+            input_trajectory --
+                Input signal for the simulation.
+                Default: Empty numpy array.
             algorithm --
                 The algorithm which will be used for the simulation is 
-                specified by passing the algorithm class in this argument. 
-                The algorithm class can be any class which implements the 
-                abstract class AlgorithmBase (found in algorithm_drivers.py). 
-                In this way it is possible to write own algorithms and use 
-                them with this function.
-                Default: AssimuloFMIAlg
-            alg_args --
-                All arguments for the chosen algorithm should be listed in 
-                this dict. Valid arguments depend on the algorithm chosen, 
-                see algorithm implementation in algorithm_drivers.py for 
-                details.
-                Default: empty dict
-            solver_args --
-                All arguments for the chosen solver should be listed in this 
-                dict. Valid arguments depend on the chosen algorithm and 
-                possibly which solver has been selected for the algorithm. 
-                See algorithm implementation in algorithm_drivers.py for 
-                details.
-                Default: empty dict
+                specified by passing the algorithm class as string or 
+                class object in this argument. 'algorithm' can be any 
+                class which implements the abstract class AlgorithmBase 
+                (found in algorithm_drivers.py). In this way it is 
+                possible to write own algorithms and use them with this 
+                function.
+                Default: 'AssimuloFMIAlg'
+            options -- 
+                The options that should be used in the algorithm. For 
+                details on the options, see:
+                
+                * FMUModel.simulate_options?
+                
+                or look at the docstring for an options object with help, 
+                for example:
+                
+                * help(jmodelica.algorithm_drivers.AssimuloFMIAlgOptions)
+                
+                Valid values are: 
+                
+                - 'default' which gives AssimuloFMIAlgOptions with default 
+                  values on all options (since default algorithm is 
+                  AssimuloFMIAlg)
+                - a dict which gives AssimuloFMIAlgOptions with default 
+                  values on all options except the ones listed 
+                  in the dict
+                - an options object
+                Default: 'default'
         
         Returns::
         
             Result object, subclass of algorithm_drivers.ResultBase.
-        
         """
-        return self._exec_algorithm(algorithm,
-                               alg_args,
-                               solver_args)
+        return self._exec_simulate_algorithm(start_time, 
+                                             final_time, 
+                                             input_trajectory, 
+                                             algorithm,
+                                             options)
                                
     def simulate_options(self, algorithm='AssimuloFMIAlg'):
         """ Get an instance of the simulate options class, prefilled 
@@ -1296,7 +1316,8 @@ class FMUModel(BaseModel):
                 
         Returns::
         
-            Options class for the algorithm specified with default values.
+            Options class for the algorithm specified with default 
+            values.
         """
         return self._default_options(algorithm)
     

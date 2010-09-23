@@ -94,8 +94,7 @@ def run_demo(with_plots=True):
     model = JMUModel(jmu_name)
     
     # Simulate model response with nominal parameters
-    res = model.simulate(
-        alg_args={"input_trajectory":u,'start_time':0.,'final_time':60})
+    res = model.simulate(input_trajectory=u,start_time=0.,final_time=60)
 
     # Load simulation result
     x1_sim = res['qt.x1']
@@ -150,7 +149,7 @@ def run_demo(with_plots=True):
 
     # Solve parameter optimization problem
     res = qt_par_est.optimize(
-        alg_args={"n_e":n_e,"n_cp":3, "result_mesh":"element_interpolation","hs":hs})
+        options={"n_e":n_e,"n_cp":3, "result_mesh":"element_interpolation","hs":hs})
 
     # Extract optimal values of parameters
     a1_opt = res["qt.a1"]
@@ -205,7 +204,7 @@ def run_demo(with_plots=True):
 
     # Solve parameter estimation problem
     res_opt2 = qt_par_est2.optimize(
-        alg_args={"n_e":n_e,"n_cp":3, "result_mesh":"element_interpolation","hs":hs})
+        options={"n_e":n_e,"n_cp":3, "result_mesh":"element_interpolation","hs":hs})
 
     # Get optimal parameter values
     a1_opt2 = res_opt2["qt.a1"]

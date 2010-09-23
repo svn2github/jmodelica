@@ -37,7 +37,7 @@ def run_demo(with_plots=True):
     jmu_name = compile_jmu(class_name, mofile)
     rlc = JMUModel(jmu_name)
     
-    res = rlc.simulate(alg_args={'final_time':30})
+    res = rlc.simulate(final_time=30)
     
     sine_y = res['sine.y']
     resistor_v = res['resistor.v']

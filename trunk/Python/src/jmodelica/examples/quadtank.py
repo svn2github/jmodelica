@@ -101,7 +101,7 @@ def run_demo(with_plots=True):
     qt.set("u2_r",u_B[1])
 
     # Solve optimal control problem
-    res = qt.optimize(solver_args={'max_iter':500})
+    res = qt.optimize(options={'IPOPT_options':{'max_iter':500}})
 
     # Extract variable profiles
     x1=res['x1']

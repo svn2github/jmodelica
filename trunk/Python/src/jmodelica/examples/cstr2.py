@@ -130,8 +130,8 @@ def run_demo(with_plots=True):
     hs = N.ones(n_e)*1./n_e # Equidistant points
     n_cp = 3; # Number of collocation points in each element
     
-    res = model.optimize(alg_args={'n_e':n_e, 'hs':hs, 'n_cp':n_cp,'blocking_factors':2*N.ones(n_e/2,dtype=N.int)},
-        solver_args={'tol':1e-4})
+    res = model.optimize(
+        options={'n_e':n_e, 'hs':hs, 'n_cp':n_cp,'blocking_factors':2*N.ones(n_e/2,dtype=N.int),'IPOPT_options':{'tol':1e-4}})
         
     # Extract variable profiles
     CA1_res=res['cstr.two_CSTRs_Series.CA1']
