@@ -63,7 +63,7 @@ class TestKInitSolve:
         self.x0 = N.array([200., 3.57359316e-02, 446.471014, 100., 1.79867213e-03,453.258466])
         self.w0 = N.array([100., 100., -48.1909])
     
-    @testattr(stddist = True)
+    @testattr(assimulo = True)
     def test_inits(self):
         """
         test if solver is correctly initialized
@@ -75,7 +75,7 @@ class TestKInitSolve:
         nose.tools.assert_equals(self.solver._w_size,3)
         nose.tools.assert_equals(self.solver._mark,12)
     
-    @testattr(stddist = True)  
+    @testattr(assimulo = True)  
     def test_jac_settings(self):
         """
         test if user can set usage of jacobian
@@ -94,7 +94,7 @@ class TestKInitSolve:
         nose.tools.assert_raises(JMIException,self.solver.set_jac_usage,N.array([True,False]))
         
         
-    @testattr(stddist = True)   
+    @testattr(assimulo = True)   
     def test_constraint_settings(self):
         """
         test if user can set usage of constraints
@@ -149,7 +149,7 @@ class TestKInitSolve:
         nose.tools.assert_raises(JMIException, self.solver.set_constraints_usage,False,True)
         nose.tools.assert_raises(JMIException, self.solver.set_constraints_usage,False,[5.,6.])
         
-    @testattr(stddist = True)
+    @testattr(assimulo = True)
     def test_initialize(self):
         """
         test if the initialize function works
