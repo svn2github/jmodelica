@@ -1106,6 +1106,21 @@ class FMUModel(BaseModel):
         else:
             return False
     
+    def reset(self):
+        """ 
+        Calling this function is equivalent to reopening the model.
+        """
+        #Instantiate
+        self.instantiate_model()
+        
+        #Default values
+        self.__t = None
+        
+        #Internal values
+        self._file_open = False
+        self._npoints = 0
+        self._log = []
+    
     def initialize(self, tolControlled=True):
         """
         Initializes the model and computes initial values for all variables, including
