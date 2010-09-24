@@ -400,23 +400,18 @@ class IpoptInitializationAlg(AlgorithmBase):
                 * help(jmodelica.algorithm_drivers.IpoptInitializationAlgOptions)
                 
                 Valid values are: 
-                
-                - 'default' which gives IpoptInitializationAlgOptions 
-                  with default values on all options
-                - dict which gives IpoptInitializationAlgOptions with 
+                - A dict which gives IpoptInitializationAlgOptions with 
                   default values on all options except the ones listed 
-                  in the dict
-                - IpoptInitializationAlgOptions object
+                  in the dict. Empty dict will thus give all options 
+                  with default values.
+                - IpoptInitializationAlgOptions object.
         """
         self.model = model
         
         # handle options argument
-        if options == 'default':
-            # use default options for the algorithm
-            self.options = IpoptInitializationAlgOptions()
-        elif isinstance(options, dict) and not \
+        if isinstance(options, dict) and not \
             isinstance(options, IpoptInitializationAlgOptions):
-            # user has passed dict with options
+            # user has passed dict with options or empty dict = default
             self.options = IpoptInitializationAlgOptions(options)
         elif isinstance(options, IpoptInitializationAlgOptions):
             # user has passed IpoptInitializationAlgOptions instance
@@ -572,13 +567,11 @@ class AssimuloFMIAlg(AlgorithmBase):
                 * help(jmodelica.algorithm_drivers.AssimuloFMIAlgOptions)
                 
                 Valid values are: 
-                
-                - 'default' which gives AssimuloFMIAlgOptions with 
-                  default values on all options
-                - dict which gives AssimuloFMIAlgOptions with default 
+                - A dict which gives AssimuloFMIAlgOptions with default 
                   values on all options except the ones listed in the 
-                  dict
-                - AssimuloFMIAlgOptions object
+                  dict. Empty dict will thus give all options with 
+                  default values.
+                - AssimuloFMIAlgOptions object.
         """
         self.model = model
         
@@ -591,12 +584,9 @@ class AssimuloFMIAlg(AlgorithmBase):
         self.input_trajectory = input_trajectory
         
         # handle options argument
-        if options == 'default':
-            # use default options for the algorithm
-            self.options = AssimuloFMIAlgOptions()
-        elif isinstance(options, dict) and not \
+        if isinstance(options, dict) and not \
             isinstance(options, AssimuloFMIAlgOptions):
-            # user has passed dict with options
+            # user has passed dict with options or empty dict = default
             self.options = AssimuloFMIAlgOptions(options)
         elif isinstance(options, AssimuloFMIAlgOptions):
             # user has passed AssimuloFMIAlgOptions instance
@@ -804,13 +794,11 @@ class AssimuloAlg(AlgorithmBase):
                 * help(jmodelica.algorithm_drivers.AssimuloAlgOptions)
                 
                 Valid values are: 
-                
-                - 'default' which gives AssimuloAlgOptions with default 
-                  values on all options
-                - dict which gives AssimuloAlgOptions with default 
+                - A dict which gives AssimuloAlgOptions with default 
                   values on all options except the ones listed in the 
-                  dict
-                - AssimuloAlgOptions object
+                  dict. Empty dict will thus give all options with 
+                  default values.
+                - AssimuloAlgOptions object.
         """
         self.model = model
         
@@ -823,12 +811,9 @@ class AssimuloAlg(AlgorithmBase):
         self.input_trajectory = input_trajectory
         
         # handle options argument
-        if options == 'default':
-            # use default options for the algorithm
-            self.options = AssimuloAlgOptions()
-        elif isinstance(options, dict) and not \
+        if isinstance(options, dict) and not \
             isinstance(options, AssimuloAlgOptions):
-            # user has passed dict with options
+            # user has passed dict with options or empty dict = default
             self.options = AssimuloAlgOptions(options)
         elif isinstance(options, AssimuloAlgOptions):
             # user has passed AssimuloAlgOptions instance
@@ -974,23 +959,18 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
                 * help(jmodelica.algorithm_drivers.CollocationLagrangePolynomialsAlgOptions)
                 
                 Valid values are: 
-                
-                - 'default' which gives CollocationLagrangePolynomialsAlgOptions with default 
-                  values on all options
-                - dict which gives CollocationLagrangePolynomialsAlgOptions with default 
-                  values on all options except the ones listed in the 
-                  dict
-                - CollocationLagrangePolynomialsAlgOptions object
+                - A dict which gives CollocationLagrangePolynomialsAlgOptions 
+                  with default values on all options except the ones 
+                  listed in the dict. Empty dict will thus give all 
+                  options with default values.
+                - CollocationLagrangePolynomialsAlgOptions object.
         """
         self.model = model
         
         # handle options argument
-        if options == 'default':
-            # use default options for the algorithm
-            self.options = CollocationLagrangePolynomialsAlgOptions()
-        elif isinstance(options, dict) and not \
+        if isinstance(options, dict) and not \
             isinstance(options, CollocationLagrangePolynomialsAlgOptions):
-            # user has passed dict with options
+            # user has passed dict with options or empty dict = default
             self.options = CollocationLagrangePolynomialsAlgOptions(options)
         elif isinstance(options, CollocationLagrangePolynomialsAlgOptions):
             # user has passed CollocationLagrangePolynomialsAlgOptions instance
@@ -1154,23 +1134,18 @@ class KInitSolveAlg(AlgorithmBase):
                 * help(jmodelica.algorithm_drivers.KInitSolveAlgOptions)
                 
                 Valid values are: 
-                
-                - 'default' which gives KInitSolveAlgOptions with default 
-                  values on all options
-                - dict which gives KInitSolveAlgOptions with default 
-                  values on all options except the ones listed in the 
-                  dict
-                - KInitSolveAlgOptions object
+                - A dict which gives KInitSolveAlgOptions with 
+                  default values on all options except the ones listed 
+                  in the dict. Empty dict will thus give all options 
+                  with default values.
+                - KInitSolveAlgOptions object.
         """
         self.model = model
         
         # handle options argument
-        if options == 'default':
-            # use default options for the algorithm
-            self.options = KInitSolveAlgOptions()
-        elif isinstance(options, dict) and not \
+        if isinstance(options, dict) and not \
             isinstance(options, KInitSolveAlgOptions):
-            # user has passed dict with options
+            # user has passed dict with options or empty dict = default
             self.options = KInitSolveAlgOptions(options)
         elif isinstance(options, KInitSolveAlgOptions):
             # user has passed KInitSolveAlgOptions instance

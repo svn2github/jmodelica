@@ -2007,8 +2007,7 @@ class JMUModel(BaseModel):
         
     z = property(_get_z, _set_z)
     
-    def initialize(self, algorithm='IpoptInitializationAlg', 
-        options='default'):
+    def initialize(self, algorithm='IpoptInitializationAlg', options={}):
         """ Compact function for model initialization.
             
         The initialization method depends on which algorithm is used, 
@@ -2042,15 +2041,12 @@ class JMUModel(BaseModel):
                 * help(jmodelica.algorithm_drivers.IpoptInitializationAlgOptions)
                 
                 Valid values are: 
-                
-                - 'default' which gives IpoptInitializationAlgOptions 
-                  with default values on all options (since default 
-                  algorithm is IpoptInitializationAlg)
-                - a dict which gives IpoptInitializationAlgOptions with 
+                - A dict which gives IpoptInitializationAlgOptions with 
                   default values on all options except the ones listed 
-                  in the dict
-                - an options object
-                Default: 'default'
+                  in the dict. Empty dict will thus give all options 
+                  with default values.
+                - An options object.
+                Default: Empty dict
                     
         Returns::
             
@@ -2064,7 +2060,7 @@ class JMUModel(BaseModel):
                  final_time=1.0,
                  input_trajectory=N.array([]),
                  algorithm='AssimuloAlg', 
-                 options='default'):
+                 options={}):
         """ Compact function for model simulation.
             
         The simulation method depends on which algorithm is used, this 
@@ -2097,15 +2093,12 @@ class JMUModel(BaseModel):
                 * help(jmodelica.algorithm_drivers.AssimuloAlgOptions)
                 
                 Valid values are: 
-                
-                - 'default' which gives AssimuloAlgOptions with default 
-                  values on all options (since default algorithm is 
-                  AssimuloAlg)
-                - a dict which gives AssimuloAlgOptions with default 
-                  values on all options except the ones listed 
-                  in the dict
-                - an options object
-                Default: 'default'
+                - A dict which gives AssimuloAlgOptions with default 
+                  values on all options except the ones listed in the 
+                  dict. Empty dict will thus give all options with 
+                  default values.
+                - An options object.
+                Default: Empty dict
             
         Returns::
             
@@ -2119,7 +2112,7 @@ class JMUModel(BaseModel):
         
     def optimize(self, 
                  algorithm='CollocationLagrangePolynomialsAlg', 
-                 options='default'):
+                 options={}):
         """ Compact function for model optimization.
             
         The optimization method depends on which algorithm is used, this 
@@ -2153,15 +2146,12 @@ class JMUModel(BaseModel):
                 * help(jmodelica.algorithm_drivers.CollocationLagrangePolynomialsAlgOptions)
                 
                 Valid values are: 
-                
-                - 'default' which gives CollocationLagrangePolynomialsAlgOptions 
-                  with default values on all options (since default 
-                  algorithm is CollocationLagrangePolynomialsAlg)
-                - a dict which gives CollocationLagrangePolynomialsAlgOptions 
+                - A dict which gives CollocationLagrangePolynomialsAlgOptions 
                   with default values on all options except the ones 
-                  listed in the dict
-                - an options object
-                Default: 'default'
+                  listed in the dict. Empty dict will thus give all 
+                  options with default values.
+                - An options object.
+                Default: Empty dict
             
         Returns::
             

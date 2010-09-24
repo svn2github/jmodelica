@@ -1255,7 +1255,7 @@ class FMUModel(BaseModel):
                  final_time=1.0,
                  input_trajectory=N.array([]),
                  algorithm='AssimuloFMIAlg', 
-                 options='default'):
+                 options={}):
         """ Compact function for model simulation.
         
         The simulation method depends on which algorithm is used, this 
@@ -1297,15 +1297,12 @@ class FMUModel(BaseModel):
                 * help(jmodelica.algorithm_drivers.AssimuloFMIAlgOptions)
                 
                 Valid values are: 
-                
-                - 'default' which gives AssimuloFMIAlgOptions with default 
-                  values on all options (since default algorithm is 
-                  AssimuloFMIAlg)
-                - a dict which gives AssimuloFMIAlgOptions with default 
-                  values on all options except the ones listed 
-                  in the dict
-                - an options object
-                Default: 'default'
+                - A dict which gives AssimuloFMIAlgOptions with default 
+                  values on all options except the ones listed in the 
+                  dict. Empty dict will thus give all options with 
+                  default values.
+                - An options object.
+                Default: Empty dict
         
         Returns::
         
