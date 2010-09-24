@@ -992,19 +992,22 @@ aspect FlatNames {
      * \brief Create a copy of the first part of this name.
      */
     public FQName FQName.copyPrefix() {
-        FQName res = new FQName();
-        if (getNumFQNamePart() > 0)
-            res.addFQNamePart(getFQNamePart(0).fullCopy());
-        res.scalarized = scalarized;
-        return res;
+    	return copyPrefix(1);
     }
 
     /**
-     * \brief Create a copy of the name excluding the last name.
+     * \brief Create a copy of the name excluding the last part.
      */
     public FQName FQName.copyFullPrefix() {
+    	return copyPrefix(getNumFQNamePart() - 1);
+    }
+
+    /**
+     * \brief Create a copy of the first <code>n</code> parts of this name.
+     */
+    public FQName FQName.copyPrefix(int n) {
         FQName res = new FQName();
-        for (int i = 0; i < getNumFQNamePart()-1; i++)
+        for (int i = 0; i < n; i++)
             res.addFQNamePart(getFQNamePart(i).fullCopy());
         res.scalarized = scalarized;
         return res;

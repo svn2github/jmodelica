@@ -152,7 +152,7 @@ aspect Scalarization {
 		FQName name = prefix.fullCopy().append(getFQName());
 		if (isArray()) {
 			FExp nbexp = null;
-			for (Index i : indices()) {
+			for (Index i : scalarizationIndices(last)) {
 				if (bexp != null)
 					nbexp = bexp.getArray().get(i);
 				name.setLastFArraySubscripts(i.newFArraySubscripts());
@@ -193,8 +193,26 @@ aspect Scalarization {
 		for (FVariable comp : myFRecordDecl().getFVariables()) {
 			if (bexp != null)
 				nbexp = bexp.scalarRecordFExp(emptyIndexMap, comp.getFQName());
+			else
+				nbexp = attributeExp(comp.name());
 			comp.scalarRecordFVariables(vars, name, tmp, nbexp);
 		}
+	}
+	
+	/**
+	 * \brief The Indices object to use when scalarizing records.
+	 * 
+	 * Either returns indices() or calculates from "size()" attribute.
+	 * 
+	 * @param outer  the enclosing FVariable, used to get "size()" attribute 
+	 */
+	syn Indices FVariable.scalarizationIndices(FVariable outer) {
+		if (outer != null && outer.attributeSet(name())) {
+			FAttribute attr = outer.findAttribute(name()).findAttribute(FAttribute.SIZE);
+			if (attr != null && attr.hasValue())
+				return Indices.create(new MutableSize(attr.getValue()));
+		}
+		return indices();
 	}
 	
 	/**
@@ -222,11 +240,18 @@ aspect Scalarization {
 					addFAttribute(na);
 				} else {
 					for (FAttribute ia : a.getFAttributes()) 
-						addFAttribute(ia);
+						if (!ia.isInternal())
+							addFAttribute(ia);
 				}
 			}
 		}
 	}
+	
+	/**
+	 * \brief Check if this is an internal generated attribute.
+	 */
+	syn boolean FAttribute.isInternal() = false;
+	eq FInternalAttribute.isInternal()  = true;
 	
 	/**
 	 * \brief Scalarize the attribute, picking out the specific element from an array 
@@ -853,7 +878,12 @@ aspect Scalarization {
 			List<FAbstractEquation> eqns, FQName suffix, 
 			Map<String,FExp> indexMap, FExp left, FExp right) {
 		if (isArray()) {
-			for (Index i : indices()) {
+			Indices ind = null;
+			if (size().isComplete()) 
+				ind = indices(); 
+			else  // TODO: This is calculated each time - introduce some kind of lazy attribute?
+				ind = left.dynamicFExp(left.scalarRecordFExp(indexMap, suffix)).indices();
+			for (Index i : ind) {
 				suffix.setLastFArraySubscripts(i.newFArraySubscripts());
 				scalarRecordFEquations(eqns, suffix, indexMap, left, right);
 			}
@@ -1019,7 +1049,7 @@ aspect Scalarization {
 	}
 	
 	/**
-	 * \brief Creates temporary varables for a record with the given name.
+	 * \brief Creates temporary variables for a record with the given name.
 	 * 
 	 * @param vars      list of variable to add the new variables to
 	 * @param equation  if <code>true</code>, generate FVariables, otherwise a FFunctionVariable

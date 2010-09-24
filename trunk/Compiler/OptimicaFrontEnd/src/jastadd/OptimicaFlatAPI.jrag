@@ -19,132 +19,69 @@ import java.util.Set;
 
 aspect OptimicaFlatAPI {
 	
+	public static final String FAttribute.FREE = "free";
+	public static final String FAttribute.INITIAL_GUESS = "initialGuess";
+	
+	// === free ===
 	/**
 	 * \brief Check if the free attribute is set for a variable.
-	 * 
-	 * @return True if attribute set.
 	 */
-	syn lazy boolean FVariable.freeAttributeSet() {
-		for (FAttribute a : getFAttributes()) {
-			if (a.getName().name().equals("free")) {
-				return a.getAttributeSet();
-			}
-		}
-		return false;
-	}
+	syn boolean FVariable.freeAttributeSet()    = attributeSet(FAttribute.FREE);
 		
 	/**
 	 * \brief Get the free attribute expression.
 	 * 
 	 * @return Attribute expression or null if not set.
 	 */
-	syn lazy FExp FVariable.freeAttributeExp() {
-		for (FAttribute a : getFAttributes()) {
-			if (a.getName().name().equals("free")) {
-				return a.hasValue()? a.getValue(): null;
-			}
-		}
-		return null;
-	}
+	syn FExp    FVariable.freeAttributeExp()    = attributeExp(FAttribute.FREE);
 
 	/**
 	 * \brief Get the free attribute CValue.
-	 * 
-	 * @return A CValue containing the evaluated attribute expression or 
-	 * false if not set.
 	 */
-	syn CValue FVariable.freeAttributeCValue() =
-		freeAttributeSet()? freeAttributeExp().ceval():
-			new CValueBoolean(false);
+	syn CValue  FVariable.freeAttributeCValue() = attributeCValueBoolean(FAttribute.FREE, false);
 		
 	/**
 	 * \brief Get the free attribute value.
-	 * 
-	 * @return Attribute value, false if attribute not set.
 	 */
-	syn boolean FVariable.freeAttribute() = 
-		freeAttributeCValue().booleanValue();
+	syn boolean FVariable.freeAttribute()       = freeAttributeCValue().booleanValue();	
 
+	// === initialGuess ===
 	/**
 	 * \brief Check if the initialGuess attribute is set for a variable.
-	 * 
-	 * @return True if attribute set.
 	 */
-	syn lazy boolean FVariable.initialGuessAttributeSet() {
-		for (FAttribute a : getFAttributes()) {
-			if (a.getName().name().equals("initialGuess")) {
-				return a.getAttributeSet();
-			}
-		}
-		return false;
-	}
+	syn boolean FVariable.initialGuessAttributeSet()     = attributeSet(FAttribute.INITIAL_GUESS);
 
 	/**
 	 * \brief Get the initialGuess attribute expression.
-	 * 
-	 * @return Attribute expression or null if not set.
 	 */
-	syn lazy FExp FVariable.initialGuessAttributeExp() {
-		for (FAttribute a : getFAttributes()) {
-			if (a.getName().name().equals("initialGuess")) {
-				return a.hasValue()? a.getValue(): null;
-			}
-		}
-		return null;
-	}
-
-	/**
-	 * \brief Get the initialGuess attribute CValue.
-	 * 
-	 * @return A CValue containing the evaluated attribute expression or 
-	 * 0.0 if not set.
-	 */
-	syn CValue FRealVariable.initialGuessAttributeCValue() =
-		initialGuessAttributeSet()? initialGuessAttributeExp().ceval():
-			new CValueReal(0.0);
-
-	/**
-	 * \brief Get the initialGuess attribute CValue.
-	 * 
-	 * @return A CValue containing the evaluated attribute expression or 
-	 * 0 if not set.
-	 */		
-	syn CValue FIntegerVariable.initialGuessAttributeCValue() =
-		initialGuessAttributeSet()? initialGuessAttributeExp().ceval():
-			new CValueInteger(0);
-	/**
-	 * \brief Get the initialGuess attribute CValue.
-	 * 
-	 * @return A CValue containing the evaluated attribute expression or 
-	 * false if not set.
-	 */	
-	syn CValue FBooleanVariable.initialGuessAttributeCValue() =
-		initialGuessAttributeSet()? initialGuessAttributeExp().ceval():
-			new CValueBoolean(false);
-
-	/**
-	 * \brief Get the initialGuess attribute value.
-	 * 
-	 * @return Attribute value, 0.0 if attribute not set.
-	 */
-	syn double FRealVariable.initialGuessAttribute() = 
-		initialGuessAttributeCValue().realValue();
+	syn FExp    FVariable.initialGuessAttributeExp()     = attributeExp(FAttribute.INITIAL_GUESS);
 	
 	/**
-	 * \brief Get the initialGuess attribute value.
-	 * 
-	 * @return Attribute value, 0 if attribute not set.
+	 * \brief Get the initialGuess attribute CValue.
 	 */
-	syn int FIntegerVariable.initialGuessAttribute() = 
-		initialGuessAttributeCValue().intValue();	
-	
+	syn CValue FVariable.initialGuessAttributeCValue()   = CValue.UNKNOWN;
+	eq FRealVariable.initialGuessAttributeCValue()       = attributeCValueReal(FAttribute.INITIAL_GUESS, 0.0);
+	eq FDerivativeVariable.initialGuessAttributeCValue() = new CValueReal(0.0);
+	eq FIntegerVariable.initialGuessAttributeCValue()    = attributeCValueInteger(FAttribute.INITIAL_GUESS, 0);
+	eq FBooleanVariable.initialGuessAttributeCValue()    = attributeCValueBoolean(FAttribute.INITIAL_GUESS, false);
+	eq FStringVariable.initialGuessAttributeCValue()     = attributeCValueString(FAttribute.INITIAL_GUESS);
+
 	/**
 	 * \brief Get the initialGuess attribute value.
-	 * 
-	 * @return Attribute value, false if attribute not set.
 	 */
-	syn boolean FBooleanVariable.initialGuessAttribute() = 
-		initialGuessAttributeCValue().booleanValue();	
+	syn double  FRealVariable.initialGuessAttribute()    = initialGuessAttributeCValue().realValue();
+	/**
+	 * \brief Get the initialGuess attribute value.
+	 */
+	syn int     FIntegerVariable.initialGuessAttribute() = initialGuessAttributeCValue().intValue();
+	/**
+	 * \brief Get the initialGuess attribute value.
+	 */
+	syn boolean FBooleanVariable.initialGuessAttribute() = initialGuessAttributeCValue().booleanValue();
+	/**
+	 * \brief Get the initialGuess attribute value.
+	 */
+	syn String  FStringVariable.initialGuessAttribute()  = initialGuessAttributeCValue().stringValue();
 
 	/**
 	 * \brief Get the cost function expression.

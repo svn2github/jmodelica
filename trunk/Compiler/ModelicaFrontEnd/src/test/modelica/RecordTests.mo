@@ -2688,4 +2688,184 @@ end RecordParBexp1;
 
 
 
+model RecordWithParam1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+	 JModelica.UnitTesting.TransformCanonicalTestCase(
+		 name="RecordWithParam1",
+		 description="Record with independent parameter getting value from modification",
+		 flatModel="
+fclass RecordTests.RecordWithParam1
+ parameter Real c.a = 1 /* 1 */;
+ Real c.b;
+equation
+ c.b = 2;
+
+ record RecordTests.RecordWithParam1.R
+  parameter Real a;
+  Real b;
+ end RecordTests.RecordWithParam1.R;
+end RecordTests.RecordWithParam1;
+")})));
+
+	record R
+		parameter Real a;
+		Real b;
+	end R;
+	
+	R c(a = 1, b = 2);
+end RecordWithParam1;
+
+
+model RecordWithParam2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="RecordWithParam2",
+         description="Record with dependent parameter getting value from modification",
+         flatModel="
+fclass RecordTests.RecordWithParam2
+ parameter Real c.a;
+ Real c.b;
+ parameter Real d = 1 /* 1 */;
+parameter equation
+ c.a = d;
+equation
+ c.b = 2;
+
+ record RecordTests.RecordWithParam2.R
+  parameter Real a;
+  Real b;
+ end RecordTests.RecordWithParam2.R;
+end RecordTests.RecordWithParam2;
+")})));
+
+	record R
+		parameter Real a;
+		Real b;
+	end R;
+	
+	R c(a = d, b = 2);
+	parameter Real d = 1;
+end RecordWithParam2;
+
+
+
+model RecordWithColonArray1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="RecordWithColonArray1",
+         description="Variable with : size in record",
+         flatModel="
+fclass RecordTests.RecordWithColonArray1
+ Real c.a[1];
+ Real c.a[2];
+ Real c.a[3];
+ Real c.b;
+ Real d.a[1];
+ Real d.a[2];
+ Real d.b;
+equation
+ c.a[1] = 1;
+ c.a[2] = 2;
+ c.a[3] = 3;
+ c.b = 4;
+ d.a[1] = 5;
+ d.a[2] = 6;
+ d.b = 7;
+
+ record RecordTests.RecordWithColonArray1.A
+  Real a[:];
+  Real b;
+ end RecordTests.RecordWithColonArray1.A;
+end RecordTests.RecordWithColonArray1;
+")})));
+
+	record A
+		Real a[:];
+		Real b;
+	end A;
+
+	A c = A({1, 2, 3}, 4);
+	A d = A({5, 6}, 7);
+end RecordWithColonArray1;
+
+
+model RecordWithColonArray2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="RecordWithColonArray2",
+         description="Variable with : size without binding exp",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
+Semantic error at line 2794, column 8:
+  Can not infer array size of the variable a
+")})));
+
+	record A
+		Real a[:];
+		Real b;
+	end A;
+
+	A c;
+end RecordWithColonArray2;
+
+
+model RecordWithColonArray3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="RecordWithColonArray3",
+         description="Variable with : size in record",
+         flatModel="
+fclass RecordTests.RecordWithColonArray3
+ Real c.a[1];
+ Real c.a[2];
+ Real c.a[3];
+ Real c.b;
+ Real d.a[1];
+ Real d.a[2];
+ Real d.b;
+equation
+ c.a[1] = 1;
+ c.a[2] = 2;
+ c.a[3] = 3;
+ c.b = 4;
+ d.a[1] = 5;
+ d.a[2] = 6;
+ d.b = 7;
+
+ record RecordTests.RecordWithColonArray3.A
+  Real a[:];
+  Real b;
+ end RecordTests.RecordWithColonArray3.A;
+end RecordTests.RecordWithColonArray3;
+")})));
+
+	record A
+		Real a[:];
+		Real b;
+	end A;
+
+	A c(a = {1, 2, 3}, b = 4);
+	A d(a = {5, 6}, b = 7);
+end RecordWithColonArray3;
+
+
+// TODO: causes exception during flattening
+model RecordWithColonArray4
+	record A
+		B a[:];
+		B b[:];
+	end A;
+	
+	record B
+		Real c[:];
+		Real d[:];
+	end B;
+
+	// TODO: support different sizes for b[1].c & b[2].c, etc
+	A e(a = {B(c = {1,2,3}, d = {1,2,3,4})}, b = {B(c = {1,2,3,4}, d = {1,2,3,4,5}), B(c = {1,2,3,4}, d = {1,2,3,4,5})});
+end RecordWithColonArray4;
+
+
+
 end RecordTests;

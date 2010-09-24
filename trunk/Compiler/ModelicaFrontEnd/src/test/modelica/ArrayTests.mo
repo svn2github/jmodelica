@@ -1076,7 +1076,7 @@ end ArrayTests.UnknownSize2;
 ")})));
 
  model A
-  Real z[:];
+  Real z[:] = {1};
  end A;
  
  model B
@@ -1116,6 +1116,8 @@ model UnknownSize4
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 789, column 7:
   Array size mismatch in declaration of x, size of declaration is [1, :] and size of binding expression is [2]
+Semantic error at line 789, column 7:
+  Can not infer array size of the variable x
 ")})));
 
  Real x[1,:] = {1,2};
@@ -1146,6 +1148,8 @@ model UnknownSize6
          errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 821, column 7:
+  Can not infer array size of the variable x
 Semantic error at line 823, column 2:
   The right and left expression types of equation are not compatible
 ")})));

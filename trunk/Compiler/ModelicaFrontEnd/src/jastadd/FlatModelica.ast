@@ -316,6 +316,12 @@ FAttribute : BaseNode ::= Type:FIdUse
                           FAttribute*;
 
 /**
+ * \brief An internal generated attribute that is removed during the transform 
+ *        canonical step.
+ */
+FInternalAttribute : FAttribute;
+
+/**
  * \brief Node representing the each prefix for attributes.
  */
 FEach : BaseNode;

@@ -333,8 +333,34 @@ aspect Arrays {
 	 */
 	syn FArraySubscripts FIdUse.getExpandedSubscripts() {
 		FArraySubscripts res = new FArraySubscripts();
-		for (int i = 0; i < myFV().ndims(); i++)
-			res.addFSubscript(myFV().size().createExpandedFSubscript(i));
+		Size s = myFV().size();
+		if (s.isUnknown() && myFV().inRecord()) {
+			// Find enclosing record
+			// TODO: extract method? problem: need i after
+			// TODO: this is O(n^2) for n+1 parts in name of record (lookupFV() is O(n) if name isn't found)
+			FQName name = getFQName();
+			int i;
+			int n = name.getNumFQNamePart();
+			FVariable record = null;
+			for (i = 1; record == null && i < n; i++) {
+				AbstractFVariable tmp = lookupFV(name.copyPrefix(i));
+				if (!tmp.isUnknown())
+					record = (FVariable) tmp;
+			}
+			
+			// Find size attribute for this member
+			if (record != null) {
+				FAttribute attr = record.findAttribute(name.getFQNamePart(i-1).getName());
+				for (; attr != null && i < n; i++)
+					attr = attr.findAttribute(name.getFQNamePart(i).getName());
+				if (attr != null)
+					attr = attr.findAttribute(FAttribute.SIZE);
+				if (attr != null && attr.hasValue())
+					s = new MutableSize(attr.getValue());
+			}
+		}
+		for (int i = 0; i < s.ndims(); i++)
+			res.addFSubscript(s.createExpandedFSubscript(i));
 		return res;
 	}
 	
@@ -2029,6 +2055,18 @@ aspect ArrayHelpers {
 		}
 		
 		/**
+		 * \brief Create an FExp that describes this size.
+		 * 
+		 * The resulting expression is not expanded like createSizeFExp().
+		 */
+		public FExp createFExp() {
+			List<FExp> cells = new List<FExp>();
+			for (int i = 0; i < size.length; i++)
+				cells.add(createFExp(i));
+			return new FArray(cells);
+		}
+		
+		/**
 		 * \brief Create an FExp that describes the length of dimension <code>d</code>.
 		 * 
 		 * The resulting expression is not expanded like createSizeFExp().
@@ -2086,6 +2124,15 @@ aspect ArrayHelpers {
 			Arrays.fill(size, UNKNOWN);
 			exps = new FExp[ndims];
 			i = 0;
+		}
+		
+		/**
+		 * \brief Constructs the size descrived by a vector expression.
+		 */
+		public MutableSize(FExp exp) {
+			this(exp.ndims() == 1 ? exp.size().get(0) : 0);
+			for (FExp dim : exp.getArray().iterable())
+				append(dim);
 		}
 		
 		/**

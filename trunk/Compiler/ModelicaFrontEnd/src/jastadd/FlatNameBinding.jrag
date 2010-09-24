@@ -22,8 +22,8 @@ aspect FlatNameBinding {
 	inh AbstractFVariable FIdUse.lookupDerFV(FQName fqn);
 	inh AbstractFVariable FExp.lookupFV(FQName fqn);
 	inh AbstractFVariable FFunctionVariable.lookupFV(FQName fqn);
-	syn lazy AbstractFVariable FIdUse.myFV() = lookupFV(getFQName());
 	
+	syn AbstractFVariable FIdUse.myFV() = lookupFV(getFQName());
 	syn lazy AbstractFVariable FIdUseExp.myFV() = getFIdUse().myFV();
 	eq FDerExp.myFV() = getFIdUse().lookupDerFV(getFIdUse().getFQName());
 
@@ -168,6 +168,7 @@ aspect ParameterEquations {
 		parameterEquationsMap().get(getAliasVariable(i));
 	eq FForIndex.getChild().parameterEquation()           = null;
 	eq FFunctionDecl.getChild().parameterEquation()       = null;
+	eq FRecordDecl.getChild().parameterEquation()         = null;
 	
 	syn lazy HashMap<AbstractFVariable,FAbstractEquation> FClass.parameterEquationsMap() {
 		HashMap<AbstractFVariable,FAbstractEquation> map = new HashMap<AbstractFVariable,FAbstractEquation>();

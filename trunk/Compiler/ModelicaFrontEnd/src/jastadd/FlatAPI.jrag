@@ -956,6 +956,11 @@ aspect FlatTypes {
 	eq InstRecord.getInstComponentDecl().inRecord()             = true;
 	eq InstArrayComponentDecl.getInstComponentDecl().inRecord() = inRecord();
 	
+	inh boolean InstComponentDecl.inRecordDecl();
+	eq InstNode.getChild().inRecordDecl()                  = false;
+	eq InstForIndex.getInstPrimitive().inRecordDecl()      = false;
+	eq InstClassDecl.getInstComponentDecl().inRecordDecl() = isRecord();
+	
 	syn int FRecordDecl.indexOf(String name) {
 		for (int i = 0; i < getNumFVariable(); i++)
 			if (getFVariable(i).name().equals(name))
@@ -969,9 +974,20 @@ aspect FlatTypes {
  */
 aspect Attributes {
 	
+	public static final String FAttribute.QUANTITY     = "quantity";
+	public static final String FAttribute.UNIT         = "unit";
+	public static final String FAttribute.DISPLAY_UNIT = "displayUnit";
+	public static final String FAttribute.MIN          = "min";
+	public static final String FAttribute.MAX          = "max";
+	public static final String FAttribute.START        = "start";
+	public static final String FAttribute.FIXED        = "fixed";
+	public static final String FAttribute.NOMINAL      = "nominal";
+	public static final String FAttribute.SIZE         = "size()";
+	
 	eq FAttribute.matches(String str) = getName().name().equals(str);
 	
-	syn lazy FAttribute FVariable.findAttribute(String name) = findMatching(getFAttributes(), name);
+	syn lazy FAttribute FVariable.findAttribute(String name)  = findMatching(getFAttributes(), name);
+	syn      FAttribute FAttribute.findAttribute(String name) = findMatching(getFAttributes(), name);
 	syn boolean FVariable.attributeSet(FAttribute a)   = (a != null) ? a.getAttributeSet() : false;
 	syn FExp    FVariable.attributeExp(FAttribute a)   = (a != null && a.hasValue()) ? a.getValue() : null;
 	syn boolean FVariable.attributeSet(String name)    = attributeSet(findAttribute(name));
@@ -996,36 +1012,36 @@ aspect Attributes {
 	}
 
 	// Quantity attribute
-	syn boolean FVariable.quantityAttributeSet()    = attributeSet("quantity");
-	syn FExp    FVariable.quantityAttributeExp()    = attributeExp("quantity");
-	syn CValue  FVariable.quantityAttributeCValue() = attributeCValueString("quantity");
+	syn boolean FVariable.quantityAttributeSet()    = attributeSet(FAttribute.QUANTITY);
+	syn FExp    FVariable.quantityAttributeExp()    = attributeExp(FAttribute.QUANTITY);
+	syn CValue  FVariable.quantityAttributeCValue() = attributeCValueString(FAttribute.QUANTITY);
 	syn String  FVariable.quantityAttribute()       = quantityAttributeCValue().stringValue();
 
 	// Unit attribute
-	syn boolean FVariable.unitAttributeSet()    = attributeSet("unit");
-	syn FExp    FVariable.unitAttributeExp()    = attributeExp("unit");
-	syn CValue  FVariable.unitAttributeCValue() = attributeCValueString("unit");
+	syn boolean FVariable.unitAttributeSet()    = attributeSet(FAttribute.UNIT);
+	syn FExp    FVariable.unitAttributeExp()    = attributeExp(FAttribute.UNIT);
+	syn CValue  FVariable.unitAttributeCValue() = attributeCValueString(FAttribute.UNIT);
 	syn String  FVariable.unitAttribute()       = unitAttributeCValue().stringValue();
 
 	// Display Unit attribute
-	syn boolean FVariable.displayUnitAttributeSet()    = attributeSet("displayUnit");
-	syn FExp    FVariable.displayUnitAttributeExp()    = attributeExp("displayUnit");
-	syn CValue  FVariable.displayUnitAttributeCValue() = attributeCValueString("displayUnit");
+	syn boolean FVariable.displayUnitAttributeSet()    = attributeSet(FAttribute.DISPLAY_UNIT);
+	syn FExp    FVariable.displayUnitAttributeExp()    = attributeExp(FAttribute.DISPLAY_UNIT);
+	syn CValue  FVariable.displayUnitAttributeCValue() = attributeCValueString(FAttribute.DISPLAY_UNIT);
 	syn String  FVariable.displayUnitAttribute()       = displayUnitAttributeCValue().stringValue();
 
 	// min attribute
-	syn boolean FVariable.minAttributeSet()           = attributeSet("min");
-	syn FExp    FVariable.minAttributeExp()           = attributeExp("min");
-	syn CValue  FRealVariable.minAttributeCValue()    = attributeCValueReal("min", -1e20);
-	syn CValue  FIntegerVariable.minAttributeCValue() = attributeCValueInteger("min", (int) -1e10);
+	syn boolean FVariable.minAttributeSet()           = attributeSet(FAttribute.MIN);
+	syn FExp    FVariable.minAttributeExp()           = attributeExp(FAttribute.MIN);
+	syn CValue  FRealVariable.minAttributeCValue()    = attributeCValueReal(FAttribute.MIN, -1e20);
+	syn CValue  FIntegerVariable.minAttributeCValue() = attributeCValueInteger(FAttribute.MIN, (int) -1e10);
 	syn double  FRealVariable.minAttribute()          = minAttributeCValue().realValue();
 	syn int     FIntegerVariable.minAttribute()       = minAttributeCValue().intValue();
 
 	// max attribute
-	syn boolean FVariable.maxAttributeSet()           = attributeSet("max");
-	syn FExp    FVariable.maxAttributeExp()           = attributeExp("max");
-	syn CValue  FRealVariable.maxAttributeCValue()    = attributeCValueReal("max", 1e20);
-	syn CValue  FIntegerVariable.maxAttributeCValue() = attributeCValueInteger("max", (int) 1e10);
+	syn boolean FVariable.maxAttributeSet()           = attributeSet(FAttribute.MAX);
+	syn FExp    FVariable.maxAttributeExp()           = attributeExp(FAttribute.MAX);
+	syn CValue  FRealVariable.maxAttributeCValue()    = attributeCValueReal(FAttribute.MAX, 1e20);
+	syn CValue  FIntegerVariable.maxAttributeCValue() = attributeCValueInteger(FAttribute.MAX, (int) 1e10);
 	syn double  FRealVariable.maxAttribute()          = maxAttributeCValue().realValue();
 	syn int     FIntegerVariable.maxAttribute()       = maxAttributeCValue().intValue();
 
@@ -1034,15 +1050,15 @@ aspect Attributes {
 	syn boolean FVariable.useBindingExpAsStart()  = 
 		(isDependentParameter() && !startAttributeSet()) || isIndependentConstant();
 	
-	syn boolean FVariable.startAttributeSet()     = attributeSet("start");
-	syn FExp    FVariable.startAttributeExp()     = attributeExp("start");
+	syn boolean FVariable.startAttributeSet()     = attributeSet(FAttribute.START);
+	syn FExp    FVariable.startAttributeExp()     = attributeExp(FAttribute.START);
 	
 	syn CValue FVariable.startAttributeCValue()   = CValue.UNKNOWN;
-	eq FRealVariable.startAttributeCValue()       = attributeCValueReal("start", 0.0);
+	eq FRealVariable.startAttributeCValue()       = attributeCValueReal(FAttribute.START, 0.0);
 	eq FDerivativeVariable.startAttributeCValue() = new CValueReal(0.0);
-	eq FIntegerVariable.startAttributeCValue()    = attributeCValueInteger("start", 0);
-	eq FBooleanVariable.startAttributeCValue()    = attributeCValueBoolean("start", false);
-	eq FStringVariable.startAttributeCValue()     = attributeCValueString("start");
+	eq FIntegerVariable.startAttributeCValue()    = attributeCValueInteger(FAttribute.START, 0);
+	eq FBooleanVariable.startAttributeCValue()    = attributeCValueBoolean(FAttribute.START, false);
+	eq FStringVariable.startAttributeCValue()     = attributeCValueString(FAttribute.START);
 
 	syn double  FRealVariable.startAttribute()    = startAttributeCValue().realValue();
 	syn int     FIntegerVariable.startAttribute() = startAttributeCValue().intValue();
@@ -1050,19 +1066,19 @@ aspect Attributes {
 	syn String  FStringVariable.startAttribute()  = startAttributeCValue().stringValue();
 
 	// fixed attribute
-	syn boolean FVariable.fixedAttributeSet()           = attributeSet("fixed");
-	syn FExp    FVariable.fixedAttributeExp()           = attributeExp("fixed");
-	syn CValue  FRealVariable.fixedAttributeCValue()    = attributeCValueBoolean("fixed", isParameter() || isConstant());
-	syn CValue  FIntegerVariable.fixedAttributeCValue() = attributeCValueBoolean("fixed", isParameter() || isConstant());
-	syn CValue  FBooleanVariable.fixedAttributeCValue() = attributeCValueBoolean("fixed", isParameter() || isConstant());
+	syn boolean FVariable.fixedAttributeSet()           = attributeSet(FAttribute.FIXED);
+	syn FExp    FVariable.fixedAttributeExp()           = attributeExp(FAttribute.FIXED);
+	syn CValue  FRealVariable.fixedAttributeCValue()    = attributeCValueBoolean(FAttribute.FIXED, isParameter() || isConstant());
+	syn CValue  FIntegerVariable.fixedAttributeCValue() = attributeCValueBoolean(FAttribute.FIXED, isParameter() || isConstant());
+	syn CValue  FBooleanVariable.fixedAttributeCValue() = attributeCValueBoolean(FAttribute.FIXED, isParameter() || isConstant());
 	syn boolean FRealVariable.fixedAttribute()          = fixedAttributeCValue().booleanValue();
 	syn boolean FIntegerVariable.fixedAttribute()       = fixedAttributeCValue().booleanValue();	
 	syn boolean FBooleanVariable.fixedAttribute()       = fixedAttributeCValue().booleanValue();	
 		
 	// Nominal attribute
-	syn boolean FRealVariable.nominalAttributeSet()    = attributeSet("nominal");
-	syn FExp    FRealVariable.nominalAttributeExp()    = attributeExp("nominal");
-	syn CValue  FRealVariable.nominalAttributeCValue() = attributeCValueReal("nominal", 1.0);
+	syn boolean FRealVariable.nominalAttributeSet()    = attributeSet(FAttribute.NOMINAL);
+	syn FExp    FRealVariable.nominalAttributeExp()    = attributeExp(FAttribute.NOMINAL);
+	syn CValue  FRealVariable.nominalAttributeCValue() = attributeCValueReal(FAttribute.NOMINAL, 1.0);
 	syn double  FRealVariable.nominalAttribute()       = nominalAttributeCValue().realValue();
 
 	syn boolean FDerivativeVariable.nominalAttributeSet()    = myDifferentiatedVariable().nominalAttributeSet();

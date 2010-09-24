@@ -368,16 +368,23 @@ aspect TransformCanonical {
 	 * \brief Generate equations from an attribute of a record variable.
 	 */
 	public void FAttribute.genBindingEquations(FClass fc, FRecordDecl rec, FQName prefix, boolean depPar) {
-		AbstractFVariable comp = rec.findComponent(getName().getFQName());
-		if (hasValue() && !comp.isUnknown()) {
-			// TODO: handle 'each'
+		FVariable comp = (FVariable) rec.findComponent(getName().getFQName());
+		if (!comp.isUnknown() && !comp.isConstant()) {
 			FQName fqn = prefix.copyAndAppend(getName().getFQName());
-			FEquation feq = new FEquation(new FIdUseExp(fqn), getValue());
-			if (depPar)
-				fc.addFParameterEquation(feq);
-			else
-				fc.addFEquation(feq);
-			setValueOpt(new Opt());
+			
+			if (hasValue()) {
+				boolean indPar = !depPar && comp.isParameter() && getValue().isIndependentParameterExp();
+				// TODO: handle 'each'
+				if (!indPar) {
+					FEquation feq = new FEquation(new FIdUseExp(fqn), getValue());
+					if (depPar || comp.isParameter())
+						fc.addFParameterEquation(feq);
+					else
+						fc.addFEquation(feq);
+					setValueOpt(new Opt());
+				}
+			}
+			
 			if (comp.isRecord()) {
 				FRecordDecl next = comp.myFRecordDecl();
 				for (FAttribute a : getFAttributes())

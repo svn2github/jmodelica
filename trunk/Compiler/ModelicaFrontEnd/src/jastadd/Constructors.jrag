@@ -305,6 +305,15 @@ aspect Constructors {
 	}
 	
 	/**
+	 * \brief Create an FInternalAttribute with only the children that are 
+	 *        valid for them.
+	 */
+	public FInternalAttribute.FInternalAttribute(String name, FExp value) {
+		this(new FIdUse(new FQName()), new FIdDecl(new FQName(name)), new Opt(value), 
+				true, new Opt(), new Opt(), new List());
+	}
+	
+	/**
 	 * \brief Create an FFunctionArray with the given name and type. 
 	 *        Extracts array subscripts from type.
 	 */

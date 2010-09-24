@@ -489,17 +489,42 @@ aspect Flattening {
 	
 	public void InstAssignable.addAttributesToFV(List<FAttribute> attr) {
 		AttributeExpRetriever mut = new AttributeExpRetriever() {
-			public FExp retrieve(InstValueModification im, boolean isEach) { 
+			public FExp retrieve(InstValueModification im, boolean isEach) {
 				FExp exp = super.retrieve(im, isEach);
 				InstNode decl = im.myInstNode();
 				return (isEach || decl == InstAssignable.this || !enclosedBy(decl)) ? 
-						exp : exp.dynamicFExp(splitBindingFExp(exp, decl)); 
+						exp : exp.dynamicFExp(splitBindingFExp(exp, decl));
 			}
 		};
-		// TODO: does this apply to records?
 		for (InstModification im : totalMergedEnvironment()) 
 			im.collectAttributes(attr, im.myInstNode().getFQNamePrefix(), mut);
 		addParametersToFV(attr);
+	}
+	
+	public void InstRecord.addAttributesToFV(List<FAttribute> attr) {
+		super.addAttributesToFV(attr);
+		generateSizeAttributes(attr);
+//		if (hasBindingFExp())
+//			generateSizeAttributesFromBExp(attr, getBindingFExp());
+	}
+	
+	public void InstComponentDecl.generateSizeAttributes(List<FAttribute> attr) {}
+	
+	public void InstRecord.generateSizeAttributes(List<FAttribute> attr) {
+		for (InstComponentDecl icd : getInstComponentDecls()) {
+			FAttribute a = findMatching(attr, icd.name());
+			boolean create = (a == null);
+			List<FAttribute> list = create ? new List<FAttribute>() : a.getFAttributes();
+			if (!icd.declaredSize().isComplete()) // TODO: use isUnknown instead?
+				list.add(new FInternalAttribute("size()", icd.size().createFExp()));
+			icd.generateSizeAttributes(list);
+			if (create && list.getNumChild() > 0) {
+				a = new FAttribute(new FIdUse(icd.getClassName().flatten(new FQName())), 
+						new FIdDecl(new FQName(icd.name())), 
+						new Opt(), true, new Opt(), new Opt(), list);
+				attr.add(a);
+			}
+		}
 	}
 	
 	public FVariable InstAssignable.createFVariable() {

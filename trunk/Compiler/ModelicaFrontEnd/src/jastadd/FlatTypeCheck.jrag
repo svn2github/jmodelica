@@ -19,17 +19,17 @@ import java.util.Collections;
 
 aspect FlatTypeCheck {
 	
-  public void ASTNode.typeCheck() {
-	  
-  }
-  
+    public void ASTNode.typeCheck() {}
+ 
     public void InstAssignable.typeCheck() {
     	FExp bexp = myBindingInstExp();
+		boolean func = inFunction();
+    	if (!size().isComplete() && !func && !inRecordDecl()) 
+    		error("Can not infer array size of the variable " + name());
     	if (bexp != null && !inRecordWithBindingExp() && !bexp.type().isUnknown()) {
     		if (myBindingExpHasEach() && !inArrayComponent()) {
     			error("The 'each' keyword cannot be applied to members of non-array components");
      		} else {
-     			boolean func = inFunction();
     			if (!bindingType().typeCompatible(bexp.type(), func)) {
     				if (!myBindingExpHasEach() && type().typeCompatible(bexp.type(), func)) {
 						warning("Assuming 'each' for the binding expression to the variable " + name());
