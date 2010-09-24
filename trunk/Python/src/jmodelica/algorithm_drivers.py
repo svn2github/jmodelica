@@ -495,12 +495,52 @@ class AssimuloSimResult(JMResultBase):
     pass
 
 class AssimuloFMIAlgOptions(OptionBase):
-    """ Options for the AssimuloFMI simulation algorithm. 
+    """
+    Options for the solving the FMU using the Assimulo simulation package.
+    Currently, the only solver in the Assimulo package that fully supports
+    simulation of FMUs is the solver CVode.
+    
+    Assimulo options::
+    
+        solver - Specifies the simulation algorithm that is to be used.
+                 Currently the only supported solver is 'CVode'.
+                 
+                 Default 'CVode'
+                 
+        num_communcation_points
+               - Number of communication points. If ncp is zero, the solver
+                 will return the internal steps taken.
+                 
+                 Default '0'
+                 
+    The different solvers provided by the Assimulo simulation package provides
+    different options. These options are given in dictionaries with names
+    consisting of the solver name concatenated by the string '_option'. The most
+    common solver options are documented below, for a complete list of options
+    see, http://www.jmodelica.org/assimulo
+    
+    Options for CVode::
+    
+        rtol    - The relative tolerance. The relative tolerance are retrieved from
+                  the 'default experiment' section in the XML-file and if not
+                  found are set to 1.0e-4
+        
+        atol    - The absolute tolerance.
+        
+                  Default rtol*0.01*(nominal values of the continuous states)
+        
+        discr   - The discretization method. Can be either 'BDF' or 'Adams'
+        
+                  Default 'BDF'
+        
+        iter    - The iteration method. Can be either 'Newton' or 'FixedPoint'
+        
+                  Default 'Newton'
     """
     def __init__(self, *args, **kw):
         _defaults= {
             'solver': 'CVode', 
-            'num_communication_points':500, 
+            'num_communication_points':0, 
             'CVode_options':{}
             }
         super(AssimuloFMIAlgOptions,self).__init__(_defaults)
@@ -664,12 +704,73 @@ class AssimuloFMIAlg(AlgorithmBase):
         return AssimuloFMIAlgOptions()
 
 class AssimuloAlgOptions(OptionBase):
-    """ Options for the Assimulo simulation algorithm. 
+    """
+    Options for the solving the JMU using the Assimulo simulation package.
+    The Assimulo package contain both explicit solvers (CVode) for ODEs and 
+    implicit solvers (IDA) for DAEs. The ODE solvers require that the problem
+    is written on the form, ydot = f(t,y).
+    
+    Assimulo options::
+    
+        solver     - Specifies the simulation algorithm that is to be used.
+                 
+                     Default 'IDA'
+                 
+        num_communication_points    
+                   - Number of communication points. If ncp is zero, the solver
+                     will return the internal steps taken.
+                 
+                     Default '0'
+                 
+        initialize - If set to True, an algorithm for initializing the
+                     differential equation is invoked, otherwise the
+                     differential equation is assumed to have consistent
+                     initial conditions. 
+                     
+                     Default is True.
+                 
+    The different solvers provided by the Assimulo simulation package provides
+    different options. These options are given in dictionaries with names
+    consisting of the solver name concatenated by the string '_option'. The most
+    common solver options are documented below, for a complete list of options
+    see, http://www.jmodelica.org/assimulo
+    
+    Options for IDA::
+    
+        rtol    - The relative tolerance.
+        
+                  Default 1.0e-6
+                  
+        atol    - The absolute tolerance.
+        
+                  Default 1.0e-6
+        
+        maxord  - The maximum order of the solver. Can range between 1 to 5.
+        
+                  Default 5
+    
+    Options for CVode::
+    
+        rtol    - The relative tolerance. The relative tolerance are retrieved from
+                  the 'default experiment' section in the XML-file and if not
+                  found are set to 1.0e-4
+        
+        atol    - The absolute tolerance.
+        
+                  Default rtol*0.01*(nominal values of the continuous states)
+        
+        discr   - The discretization method. Can be either 'BDF' or 'Adams'
+        
+                  Default 'BDF'
+        
+        iter    - The iteration method. Can be either 'Newton' or 'FixedPoint'
+        
+                  Default 'Newton'
     """
     def __init__(self, *args, **kw):
         _defaults= {
             'solver': 'IDA', 
-            'num_communication_points':500, 
+            'num_communication_points':0, 
             'initialize':True,
             'IDA_options':{},
             'CVode_options':{}
