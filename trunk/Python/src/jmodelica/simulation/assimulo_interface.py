@@ -742,7 +742,7 @@ class JMIDAE(Implicit_Problem):
                 self._log_initiate_mode = True #Logg f evaluations
                 i = len(self._log_information) #Where to put the information
             try:
-                solver.make_consistency('IDA_YA_YDP_INIT') #Calculate consistency
+                solver.make_consistent('IDA_YA_YDP_INIT') #Calculate consistency
                 if self.log_events:
                     self._log_information[i-1][3].append(True) #Success
             except Sundials_Exception, data:

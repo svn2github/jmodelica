@@ -430,7 +430,7 @@ class Test_JMI_DAE:
         """
         solver = lambda x:1
         solver.switches = [True, True]
-        solver.make_consistency = lambda x:1
+        solver.make_consistent = lambda x:1
         
         self.DISC.init_mode(solver)
         
