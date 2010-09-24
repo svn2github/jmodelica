@@ -158,9 +158,9 @@ class TestKInitSolve:
         self.solver.set_jac_usage(True)
         self.solver.initialize()
         
-        dx = self.model.get_real_dx()
-        x = self.model.get_real_x()
-        w = self.model.get_real_w()
+        dx = self.model.real_dx
+        x = self.model.real_x
+        w = self.model.real_w
         
         # Test equalities
         for pre,calced in zip(self.dx0,dx):

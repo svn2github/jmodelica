@@ -43,11 +43,11 @@ def run_demo(with_plots=True):
     model=JMUModel(jmu_name)
     
     # Retreive parameter and variable vectors
-    pi = model.get_real_pi();
-    x = model.get_real_x();
-    dx = model.get_real_dx();
-    u = model.get_real_u();
-    w = model.get_real_w();
+    pi = model.real_pi
+    x = model.real_x
+    dx = model.real_dx
+    u = model.real_u
+    w = model.real_w
     
     # Set model input
     w[0] = 1

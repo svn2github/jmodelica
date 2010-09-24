@@ -179,88 +179,88 @@ class TestModel_VDP:
         """Test jmi.JMUModel.set_real_ci(...) and jmi.JMUModel.get_real_ci()."""
         # cd is empty
         ci_new = N.ones(1)
-        self.vdp.set_real_ci(ci_new)
-        N.testing.assert_array_almost_equal(self.vdp.get_real_ci(),N.zeros(0))
+        self.vdp.real_ci = ci_new
+        N.testing.assert_array_almost_equal(self.vdp.real_ci,N.zeros(0))
 
     @testattr(stddist = True)    
     def test_real_cd_get_set(self):
         """Test jmi.JMUModel.set_real_cd(...) and jmi.JMUModel.get_real_cd()."""
         # cd is empty
         cd_new = N.ones(1)
-        self.vdp.set_real_cd(cd_new)
-        N.testing.assert_array_almost_equal(self.vdp.get_real_cd(),N.zeros(0))
+        self.vdp.real_cd = cd_new
+        N.testing.assert_array_almost_equal(self.vdp.real_cd,N.zeros(0))
         
     @testattr(stddist = True)    
     def test_real_pd_get_set(self):
         """Test jmi.JMUModel.set_real_pd(...) and jmi.JMUModel.get_real_pd()."""
         # pd is empty
         pd_new = N.ones(1)
-        self.vdp.set_real_pd(pd_new)
-        N.testing.assert_array_almost_equal(self.vdp.get_real_pd(),N.zeros(0))
+        self.vdp.real_pd = pd_new
+        N.testing.assert_array_almost_equal(self.vdp.real_pd,N.zeros(0))
 
     @testattr(stddist = True)    
     def test_integer_ci_get_set(self):
         """Test jmi.JMUModel.set_integer_ci(...) and jmi.JMUModel.get_integer_ci()."""
         # cd is empty
         ci_new = N.ones(1)
-        self.vdp.set_integer_ci(ci_new)
-        N.testing.assert_array_almost_equal(self.vdp.get_integer_ci(),N.zeros(0))
+        self.vdp.integer_ci = ci_new
+        N.testing.assert_array_almost_equal(self.vdp.integer_ci,N.zeros(0))
 
     @testattr(stddist = True)    
     def test_integer_cd_get_set(self):
         """Test jmi.JMUModel.set_integer_cd(...) and jmi.JMUModel.get_integer_cd()."""
         # cd is empty
         cd_new = N.ones(1)
-        self.vdp.set_integer_cd(cd_new)
-        N.testing.assert_array_almost_equal(self.vdp.get_integer_cd(),N.zeros(0))
+        self.vdp.integer_cd = cd_new
+        N.testing.assert_array_almost_equal(self.vdp.integer_cd,N.zeros(0))
 
     @testattr(stddist = True)    
     def test_integer_pi_get_set(self):
         """Test jmi.JMUModel.set_integer_pi(...) and jmi.JMUModel.get_integer_pi()."""
         # pd is empty
         pi_new = N.ones(1)
-        self.vdp.set_integer_pi(pi_new)
-        N.testing.assert_array_almost_equal(self.vdp.get_integer_pi(),N.zeros(0))
+        self.vdp.integer_pi = pi_new
+        N.testing.assert_array_almost_equal(self.vdp.integer_pi,N.zeros(0))
         
     @testattr(stddist = True)    
     def test_integer_pd_get_set(self):
         """Test jmi.JMUModel.set_integer_pd(...) and jmi.JMUModel.get_integer_pd()."""
         # pd is empty
         pd_new = N.ones(1)
-        self.vdp.set_integer_pd(pd_new)
-        N.testing.assert_array_almost_equal(self.vdp.get_integer_pd(),N.zeros(0))
+        self.vdp.integer_pd = pd_new
+        N.testing.assert_array_almost_equal(self.vdp.integer_pd,N.zeros(0))
 
     @testattr(stddist = True)    
     def test_boolean_ci_get_set(self):
         """Test jmi.JMUModel.set_boolean_ci(...) and jmi.JMUModel.get_boolean_ci()."""
         # cd is empty
         ci_new = N.ones(1)
-        self.vdp.set_boolean_ci(ci_new)
-        N.testing.assert_array_almost_equal(self.vdp.get_boolean_ci(),N.zeros(0))
+        self.vdp.boolean_ci=ci_new
+        N.testing.assert_array_almost_equal(self.vdp.boolean_ci,N.zeros(0))
 
     @testattr(stddist = True)    
     def test_boolean_cd_get_set(self):
         """Test jmi.JMUModel.set_boolean_cd(...) and jmi.JMUModel.get_boolean_cd()."""
         # cd is empty
         cd_new = N.ones(1)
-        self.vdp.set_boolean_cd(cd_new)
-        N.testing.assert_array_almost_equal(self.vdp.get_boolean_cd(),N.zeros(0))
+        self.vdp.boolean_cd=cd_new
+        N.testing.assert_array_almost_equal(self.vdp.boolean_cd,N.zeros(0))
 
     @testattr(stddist = True)    
     def test_boolean_pi_get_set(self):
         """Test jmi.JMUModel.set_boolean_pi(...) and jmi.JMUModel.get_boolean_pi()."""
         # pd is empty
         pi_new = N.ones(1)
-        self.vdp.set_boolean_pi(pi_new)
-        N.testing.assert_array_almost_equal(self.vdp.get_boolean_pi(),N.zeros(0))
+        self.vdp.boolean_pi = pi_new
+        N.testing.assert_array_almost_equal(self.vdp.boolean_pi,N.zeros(0))
         
     @testattr(stddist = True)    
     def test_boolean_pd_get_set(self):
         """Test jmi.JMUModel.set_boolean_pd(...) and jmi.JMUModel.get_boolean_pd()."""
         # pd is empty
         pd_new = N.ones(1)
-        self.vdp.set_boolean_pd(pd_new)
-        N.testing.assert_array_almost_equal(self.vdp.get_boolean_pd(),N.zeros(0))
+        self.vdp.boolean_pd = pd_new
+        N.testing.assert_array_almost_equal(self.vdp.boolean_pd,N.zeros(0))
     
     @testattr(stddist = True)   
     def test_derivatives(self):
@@ -308,8 +308,8 @@ class TestModel_VDP:
         """Test jmi.JMUModel.set_real_w(...) and jmi.JMUModel.get_real_w()."""
         # w is empty
         w_new = N.ones(1)
-        self.vdp.set_real_w(w_new)
-        N.testing.assert_array_almost_equal(self.vdp.get_real_w(),N.zeros(0))
+        self.vdp.real_w = w_new
+        N.testing.assert_array_almost_equal(self.vdp.real_w,N.zeros(0))
 
     @testattr(stddist = True)    
     def test_real_w_p_get_set(self):
@@ -324,70 +324,70 @@ class TestModel_VDP:
         """Test jmi.JMUModel.set_real_d(...) and jmi.JMUModel.get_real_d()."""
         # d is empty
         d_new = N.ones(1)
-        self.vdp.set_real_d(d_new)
-        N.testing.assert_array_almost_equal(self.vdp.get_real_d(),N.zeros(0))
+        self.vdp.real_d = d_new
+        N.testing.assert_array_almost_equal(self.vdp.real_d,N.zeros(0))
 
     @testattr(stddist = True)    
     def test_integer_d_get_set(self):
         """Test jmi.JMUModel.set_integer_d(...) and jmi.JMUModel.get_integer_d()."""
         # d is empty
         d_new = N.ones(1)
-        self.vdp.set_integer_d(d_new)
-        N.testing.assert_array_almost_equal(self.vdp.get_integer_d(),N.zeros(0))
+        self.vdp.integer_d = d_new
+        N.testing.assert_array_almost_equal(self.vdp.integer_d,N.zeros(0))
 
     @testattr(stddist = True)    
     def test_integer_u_get_set(self):
         """Test jmi.JMUModel.set_integer_u(...) and jmi.JMUModel.get_integer_u()."""
         # u is empty
         u_new = N.ones(1)
-        self.vdp.set_integer_u(u_new)
-        N.testing.assert_array_almost_equal(self.vdp.get_integer_u(),N.zeros(0))
+        self.vdp.integer_u = u_new
+        N.testing.assert_array_almost_equal(self.vdp.integer_u,N.zeros(0))
 
     @testattr(stddist = True)    
     def test_boolean_d_get_set(self):
         """Test jmi.JMUModel.set_boolean_d(...) and jmi.JMUModel.get_boolean_d()."""
         # d is empty
         d_new = N.ones(1)
-        self.vdp.set_boolean_d(d_new)
-        N.testing.assert_array_almost_equal(self.vdp.get_boolean_d(),N.zeros(0))
+        self.vdp.boolean_d=d_new
+        N.testing.assert_array_almost_equal(self.vdp.boolean_d,N.zeros(0))
 
     @testattr(stddist = True)    
     def test_boolean_u_get_set(self):
         """Test jmi.JMUModel.set_boolean_u(...) and jmi.JMUModel.get_boolean_u()."""
         # u is empty
         u_new = N.ones(1)
-        self.vdp.set_boolean_u(u_new)
-        N.testing.assert_array_almost_equal(self.vdp.get_boolean_u(),N.zeros(0))
+        self.vdp.boolean_u = u_new
+        N.testing.assert_array_almost_equal(self.vdp.boolean_u,N.zeros(0))
         
     @testattr(stddist = True)    
     def test_z_get_set(self):
         """Test jmi.JMUModel.set_z(...) and jmi.JMUModel.get_z()."""
-        z_new = self.vdp.get_z()
+        z_new = self.vdp.z
         z_new.itemset(0,2)
-        self.vdp.set_z(z_new)
-        N.testing.assert_array_almost_equal(self.vdp.get_z(),z_new)
+        self.vdp.z = z_new
+        N.testing.assert_array_almost_equal(self.vdp.z,z_new)
 
     @testattr(stddist = True)    
     def test_get_sw(self):
         """Test jmi.JMUModel.set_sw(...) and jmi.JMUModel.get_sw()."""
-        sw_new = self.vdp.get_sw()
-        self.vdp.set_sw(sw_new)
-        N.testing.assert_array_almost_equal(self.vdp.get_sw(),sw_new)
+        sw_new = self.vdp.sw
+        self.vdp.sw = sw_new
+        N.testing.assert_array_almost_equal(self.vdp.sw,sw_new)
 
     @testattr(stddist = True)    
     def test_get_sw_init(self):
         """Test jmi.JMUModel.set_sw_init(...) and jmi.JMUModel.get_sw_init()."""
-        sw_init_new = self.vdp.get_sw_init()
-        self.vdp.set_sw_init(sw_init_new)
-        N.testing.assert_array_almost_equal(self.vdp.get_sw_init(),sw_init_new)
+        sw_init_new = self.vdp.sw_init
+        self.vdp.sw_init = sw_init_new
+        N.testing.assert_array_almost_equal(self.vdp.sw_init,sw_init_new)
 
     @testattr(stddist = True)    
     def test_variable_scaling_factors_get_set(self):
         """Test jmi.JMUModel.set_variable_scaling_factors(...) and jmi.JMUModel.get_variable_scaling_factors()."""
-        variable_scaling_factors_new = self.vdp.get_variable_scaling_factors()
+        variable_scaling_factors_new = self.vdp.variable_scaling_factors
         variable_scaling_factors_new.itemset(0,2)
-        self.vdp.set_variable_scaling_factors(variable_scaling_factors_new)
-        N.testing.assert_array_almost_equal(self.vdp.get_variable_scaling_factors(),variable_scaling_factors_new)
+        self.vdp.variable_scaling_factors = variable_scaling_factors_new
+        N.testing.assert_array_almost_equal(self.vdp.variable_scaling_factors,variable_scaling_factors_new)
 
     @testattr(stddist = True)    
     def test_get_scaling_method(self):
@@ -484,52 +484,52 @@ class TestModel_VDP:
     @testattr(stddist = True)
     def test_writeload_parameters_from_XML(self):
         """ Test writing and loading parameters parameters from XML."""
-        original_values = self.vdp.get_real_pi()
+        original_values = self.vdp.real_pi
         new_values = N.ones(len(original_values))
-        self.vdp.set_real_pi(new_values)
+        self.vdp.real_pi = new_values
 
         # new values are set
-        N.testing.assert_array_equal(self.vdp.get_real_pi(),new_values)
+        N.testing.assert_array_equal(self.vdp.real_pi,new_values)
       
         #load original values, pi are now = old values
         self.vdp.load_parameters_from_XML()
-        N.testing.assert_array_equal(self.vdp.get_real_pi(),original_values)
+        N.testing.assert_array_equal(self.vdp.real_pi,original_values)
        
         # set new values and write to xml
-        self.vdp.set_real_pi(new_values)
+        self.vdp.real_pi = new_values
         self.vdp.write_parameters_to_XML()
        
         #load values, pi are now = new values
         self.vdp.load_parameters_from_XML()
-        N.testing.assert_array_equal(self.vdp.get_real_pi(),new_values)
+        N.testing.assert_array_equal(self.vdp.real_pi,new_values)
 
     @testattr(stddist = True)
     def test_writeload_params_new_file(self):
         """ Test writing and loading parameters parameters from XML 
             with new file. 
         """
-        original_values = self.vdp.get_real_pi()
+        original_values = self.vdp.real_pi
         new_values = N.ones(len(original_values))
-        self.vdp.set_real_pi(new_values)
+        self.vdp.real_pi = new_values
 
         # new values are set
-        N.testing.assert_array_equal(self.vdp.get_real_pi(),new_values)
+        N.testing.assert_array_equal(self.vdp.real_pi,new_values)
        
         #load original values, pi are now = old values
         self.vdp.load_parameters_from_XML()
-        N.testing.assert_array_equal(self.vdp.get_real_pi(),original_values)
+        N.testing.assert_array_equal(self.vdp.real_pi,original_values)
         
         # set new values and write to xml
-        self.vdp.set_real_pi(new_values)
+        self.vdp.real_pi = new_values
         self.vdp.write_parameters_to_XML("test_jmi.xml")
         
         #load values, pi are now = new values
         self.vdp.load_parameters_from_XML("test_jmi.xml")
-        N.testing.assert_array_equal(self.vdp.get_real_pi(),new_values)
+        N.testing.assert_array_equal(self.vdp.real_pi,new_values)
         
         #load original values, pi are now = old values
         self.vdp.load_parameters_from_XML()
-        N.testing.assert_array_equal(self.vdp.get_real_pi(),original_values)          
+        N.testing.assert_array_equal(self.vdp.real_pi,original_values)          
             
     @testattr(stddist = True)        
     def test_get_name(self):
@@ -1321,7 +1321,7 @@ class TestNegativeNominalScaling(object):
     def test_scaling_factors(self):
        """Test positivity of scaling factors."""
        res = [2., 1.]
-       N.testing.assert_almost_equal(self._model.get_variable_scaling_factors(),res)    
+       N.testing.assert_almost_equal(self._model.variable_scaling_factors,res)    
 
 class TestDependentParameterEvaluation1(TZValues):
     """Test evaluation of dependent parameters.

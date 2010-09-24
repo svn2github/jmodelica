@@ -304,7 +304,7 @@ class TestNLPInit:
                          -0.92009689684513785,
                          0.])
     
-        assert max(N.abs(res_Z-self.dae_init_test.get_z()))<1e-3, \
+        assert max(N.abs(res_Z-self.dae_init_test.z))<1e-3, \
                "test_jmi.py: test_init_opt: Wrong solution to initialization system." 
 
     @testattr(ipopt = True)

@@ -155,7 +155,7 @@ def export_result_dymola(model, data, file_name='', format='txt'):
         f.write('\n')
 
         sc = model.jmimodel.get_variable_scaling_factors()
-        z = model.get_z()
+        z = model.z
 
         scaling_method = model.get_scaling_method()
 

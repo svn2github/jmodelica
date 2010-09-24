@@ -1040,25 +1040,25 @@ class Trajectory:
         """
         pass
 
-    def set_abscissa(self, absscissa):
+    def _set_abscissa(self, absscissa):
         """ Set the abscissa of the trajectory."""
         self._abscissa[:] = abscissa
 
-    def get_abscissa(self):
+    def _get_abscissa(self):
         """ Get the abscissa of the trajectory."""
         return self._abscissa
 
-    abscissa = property(get_abscissa, set_abscissa, doc="Abscissa")
+    abscissa = property(_get_abscissa, _set_abscissa, doc="Abscissa")
 
-    def set_ordinate(self, absscissa):
+    def _set_ordinate(self, absscissa):
         """ Set the ordinate of the trajectory."""
         self._ordinate[:] = ordinate
 
-    def get_ordinate(self):
+    def _get_ordinate(self):
         """ Get the ordinate of the trajectory."""
         return self._ordinate
 
-    ordinate = property(get_ordinate, set_ordinate, doc="Ordinate")
+    ordinate = property(_get_ordinate, _set_ordinate, doc="Ordinate")
 
 
 

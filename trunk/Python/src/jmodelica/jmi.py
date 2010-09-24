@@ -512,7 +512,7 @@ class JMUModel(BaseModel):
             include_alias=False)
         
         #Real variables vector
-        sc = self.get_variable_scaling_factors()
+        sc = self.variable_scaling_factors
         
         for attr in nominal_attr:
             (i, ptype) = _translate_value_ref(attr[0])
@@ -1309,7 +1309,7 @@ class JMUModel(BaseModel):
         self.jmimodel.get_n_tp(self._n_tp)
         return self._n_tp.value
 
-    def get_real_ci(self):
+    def _get_real_ci(self):
         """ Get the real independent constants vector.
         
         Returns::
@@ -1318,7 +1318,7 @@ class JMUModel(BaseModel):
         """
         return self.jmimodel.get_real_ci()
         
-    def set_real_ci(self, real_ci):
+    def _set_real_ci(self, real_ci):
         """ Set the real independent constants vector.
         
         Parameters::
@@ -1328,9 +1328,9 @@ class JMUModel(BaseModel):
         """
         self.jmimodel._real_ci[:] = real_ci
         
-    real_ci = property(get_real_ci, set_real_ci)
+    real_ci = property(_get_real_ci, _set_real_ci)
 
-    def get_real_cd(self):
+    def _get_real_cd(self):
         """ Get the real dependent constants vector.
         
         Returns::
@@ -1339,7 +1339,7 @@ class JMUModel(BaseModel):
         """
         return self.jmimodel.get_real_cd()
 
-    def set_real_cd(self, real_cd):
+    def _set_real_cd(self, real_cd):
         """ Set the dependent real constants vector.
         
         Parameters::
@@ -1349,9 +1349,9 @@ class JMUModel(BaseModel):
         """
         self.jmimodel._real_cd[:] = real_cd
         
-    real_cd = property(get_real_cd, set_real_cd)
+    real_cd = property(_get_real_cd, _set_real_cd)
     
-    def get_real_pi(self):
+    def _get_real_pi(self):
         """ Get the real independent parameters vector.
         
         Returns::
@@ -1360,7 +1360,7 @@ class JMUModel(BaseModel):
         """
         return self.jmimodel.get_real_pi()
         
-    def set_real_pi(self, real_pi):
+    def _set_real_pi(self, real_pi):
         """ Set the real independent parameters vector.
         
         Parameters::
@@ -1370,9 +1370,9 @@ class JMUModel(BaseModel):
         """
         self.jmimodel._real_pi[:] = real_pi
         
-    real_pi = property(get_real_pi, set_real_pi)
+    real_pi = property(_get_real_pi, _set_real_pi)
 
-    def get_real_pd(self):
+    def _get_real_pd(self):
         """ Get the real dependent parameters vector.
         
         Returns::
@@ -1381,7 +1381,7 @@ class JMUModel(BaseModel):
         """
         return self.jmimodel._real_pd
         
-    def set_real_pd(self, real_pd):
+    def _set_real_pd(self, real_pd):
         """ Set the real dependent parameters vector.
         
         Parameters::
@@ -1391,9 +1391,9 @@ class JMUModel(BaseModel):
         """
         self.jmimodel._real_pd[:] = real_pd
         
-    real_pd = property(get_real_pd, set_real_pd)
+    real_pd = property(_get_real_pd, _set_real_pd)
 
-    def get_integer_ci(self):
+    def _get_integer_ci(self):
         """ Get the integer independent constants vector.
         
         Returns::
@@ -1402,7 +1402,7 @@ class JMUModel(BaseModel):
         """
         return self.jmimodel.get_integer_ci()
         
-    def set_integer_ci(self, integer_ci):
+    def _set_integer_ci(self, integer_ci):
         """ Set the integer independent constants vector.
         
         Parameters::
@@ -1412,9 +1412,9 @@ class JMUModel(BaseModel):
         """
         self.jmimodel._integer_ci[:] = integer_ci
         
-    integer_ci = property(get_integer_ci, set_integer_ci)
+    integer_ci = property(_get_integer_ci, _set_integer_ci)
 
-    def get_integer_cd(self):
+    def _get_integer_cd(self):
         """ Get the integer dependent constants vector.
         
         Returns::
@@ -1423,7 +1423,7 @@ class JMUModel(BaseModel):
         """
         return self.jmimodel.get_integer_cd()
 
-    def set_integer_cd(self, integer_cd):
+    def _set_integer_cd(self, integer_cd):
         """ Set the dependent integer constants vector.
         
         Parameters::
@@ -1433,9 +1433,9 @@ class JMUModel(BaseModel):
         """
         self.jmimodel._integer_cd[:] = integer_cd
         
-    integer_cd = property(get_integer_cd, set_integer_cd)
+    integer_cd = property(_get_integer_cd, _set_integer_cd)
     
-    def get_integer_pi(self):
+    def _get_integer_pi(self):
         """ Get the integer independent parameters vector.
         
         Returns::
@@ -1444,7 +1444,7 @@ class JMUModel(BaseModel):
         """
         return self.jmimodel.get_integer_pi()
         
-    def set_integer_pi(self, integer_pi):
+    def _set_integer_pi(self, integer_pi):
         """ Set the integer independent parameters vector.
         
         Parameters::
@@ -1454,9 +1454,9 @@ class JMUModel(BaseModel):
         """
         self.jmimodel._integer_pi[:] = integer_pi
         
-    integer_pi = property(get_integer_pi, set_integer_pi)
+    integer_pi = property(_get_integer_pi, _set_integer_pi)
 
-    def get_integer_pd(self):
+    def _get_integer_pd(self):
         """ Get the integer dependent parameters vector.
         
         Returns::
@@ -1466,7 +1466,7 @@ class JMUModel(BaseModel):
         """
         return self.jmimodel._integer_pd
         
-    def set_integer_pd(self, integer_pd):
+    def _set_integer_pd(self, integer_pd):
         """ Set the integer dependent parameters vector.
         
         Parameters::
@@ -1476,9 +1476,9 @@ class JMUModel(BaseModel):
         """
         self.jmimodel._integer_pd[:] = integer_pd
         
-    integer_pd = property(get_integer_pd, set_integer_pd)
+    integer_pd = property(_get_integer_pd, _set_integer_pd)
 
-    def get_boolean_ci(self):
+    def _get_boolean_ci(self):
         """ Get the boolean independent constants vector.
         
         Returns::
@@ -1487,7 +1487,7 @@ class JMUModel(BaseModel):
         """
         return self.jmimodel.get_boolean_ci()
         
-    def set_boolean_ci(self, boolean_ci):
+    def _set_boolean_ci(self, boolean_ci):
         """ Set the integer independent constants vector.
         
         Parameters::
@@ -1497,9 +1497,9 @@ class JMUModel(BaseModel):
         """
         self.jmimodel._boolean_ci[:] = boolean_ci
         
-    boolean_ci = property(get_boolean_ci, set_boolean_ci)
+    boolean_ci = property(_get_boolean_ci, _set_boolean_ci)
 
-    def get_boolean_cd(self):
+    def _get_boolean_cd(self):
         """ Get the boolean dependent constants vector.
         
         Returns::
@@ -1508,7 +1508,7 @@ class JMUModel(BaseModel):
         """
         return self.jmimodel.get_boolean_cd()
 
-    def set_boolean_cd(self, boolean_cd):
+    def _set_boolean_cd(self, boolean_cd):
         """ Set the dependent boolean constants vector.
         
         Parameters::
@@ -1518,9 +1518,9 @@ class JMUModel(BaseModel):
         """
         self.jmimodel._boolean_cd[:] = boolean_cd
         
-    boolean_cd = property(get_boolean_cd, set_boolean_cd)
+    boolean_cd = property(_get_boolean_cd, _set_boolean_cd)
     
-    def get_boolean_pi(self):
+    def _get_boolean_pi(self):
         """ Get the boolean independent parameters vector.
         
         Returns::
@@ -1529,7 +1529,7 @@ class JMUModel(BaseModel):
         """
         return self.jmimodel.get_boolean_pi()
         
-    def set_boolean_pi(self, boolean_pi):
+    def _set_boolean_pi(self, boolean_pi):
         """ Set the boolean independent parameters vector.
         
         Parameters::
@@ -1539,9 +1539,9 @@ class JMUModel(BaseModel):
         """
         self.jmimodel._boolean_pi[:] = boolean_pi
         
-    boolean_pi = property(get_boolean_pi, set_boolean_pi)
+    boolean_pi = property(_get_boolean_pi, _set_boolean_pi)
 
-    def get_boolean_pd(self):
+    def _get_boolean_pd(self):
         """ Get the boolean dependent parameters vector.
         
         Returns::
@@ -1550,7 +1550,7 @@ class JMUModel(BaseModel):
         """
         return self.jmimodel._boolean_pd
         
-    def set_boolean_pd(self, boolean_pd):
+    def _set_boolean_pd(self, boolean_pd):
         """ Set the boolean dependent parameters vector.
         
         Parameters::
@@ -1560,9 +1560,9 @@ class JMUModel(BaseModel):
         """
         self.jmimodel._boolean_pd[:] = boolean_pd
         
-    boolean_pd = property(get_boolean_pd, set_boolean_pd)
+    boolean_pd = property(_get_boolean_pd, _set_boolean_pd)
 
-    def get_real_dx(self):
+    def _get_real_dx(self):
         """ Get the real derivatives vector.
         
         Returns::
@@ -1571,7 +1571,7 @@ class JMUModel(BaseModel):
         """
         return self.jmimodel.get_real_dx()
         
-    def set_real_dx(self, real_dx):
+    def _set_real_dx(self, real_dx):
         """ Set the real derivatives vector.
         
         Parameters::
@@ -1581,9 +1581,9 @@ class JMUModel(BaseModel):
         """
         self.jmimodel._real_dx[:] = real_dx
         
-    real_dx = property(get_real_dx, set_real_dx)
+    real_dx = property(_get_real_dx, _set_real_dx)
 
-    def get_real_x(self):
+    def _get_real_x(self):
         """ Get the real differentiated variables vector.
         
         Returns::
@@ -1592,7 +1592,7 @@ class JMUModel(BaseModel):
         """
         return self.jmimodel.get_real_x()
         
-    def set_real_x(self, real_x):
+    def _set_real_x(self, real_x):
         """ Set the real differentiated variables vector.
         
         Parameters::
@@ -1602,9 +1602,9 @@ class JMUModel(BaseModel):
         """
         self.jmimodel._real_x[:] = real_x
         
-    real_x = property(get_real_x, set_real_x)
+    real_x = property(_get_real_x, _set_real_x)
 
-    def get_real_u(self):
+    def _get_real_u(self):
         """ Get the real inputs vector.
         
         Returns::
@@ -1613,7 +1613,7 @@ class JMUModel(BaseModel):
         """
         return self.jmimodel.get_real_u()
         
-    def set_real_u(self, real_u):
+    def _set_real_u(self, real_u):
         """ Set the real inputs vector.
         
         Parameters::
@@ -1623,9 +1623,9 @@ class JMUModel(BaseModel):
         """
         self.jmimodel._real_u[:] = real_u
         
-    real_u = property(get_real_u, set_real_u)
+    real_u = property(_get_real_u, _set_real_u)
 
-    def get_real_w(self):
+    def _get_real_w(self):
         """ Get the real algebraic variables vector.
         
         Returns::
@@ -1634,7 +1634,7 @@ class JMUModel(BaseModel):
         """
         return self.jmimodel.get_real_w()
         
-    def set_real_w(self, real_w):
+    def _set_real_w(self, real_w):
         """ Set the real algebraic variables vector.
         
         Parameters::
@@ -1644,9 +1644,9 @@ class JMUModel(BaseModel):
         """
         self.jmimodel._real_w[:] = real_w
         
-    real_w = property(get_real_w, set_real_w)
+    real_w = property(_get_real_w, _set_real_w)
 
-    def get_t(self):
+    def _get_t(self):
         """ Get the time value.
         
         Returns::
@@ -1655,7 +1655,7 @@ class JMUModel(BaseModel):
         """
         return self.jmimodel.get_t()
         
-    def set_t(self, t):
+    def _set_t(self, t):
         """ Set the time value.
         
         Parameters::
@@ -1665,7 +1665,7 @@ class JMUModel(BaseModel):
         """
         self.jmimodel._t[:] = t
         
-    t = property(get_t, set_t)
+    t = property(_get_t, _set_t)
 
     def get_real_dx_p(self, i):
         """ Get the real derivatives variables vector corresponding to 
@@ -1790,7 +1790,7 @@ class JMUModel(BaseModel):
         _real_w_p = self.jmimodel.get_real_w_p(i)
         _real_w_p[:] = real_w_p
 
-    def get_real_d(self):
+    def _get_real_d(self):
         """ Get the real discrete variables vector.
         
         Returns::
@@ -1799,7 +1799,7 @@ class JMUModel(BaseModel):
         """
         return self.jmimodel.get_real_d()
         
-    def set_real_d(self, real_d):
+    def _set_real_d(self, real_d):
         """ Set the real discrete variables vector.
         
         Parameters::
@@ -1809,9 +1809,9 @@ class JMUModel(BaseModel):
         """
         self.jmimodel._real_d[:] = real_d
         
-    real_d = property(get_real_d, set_real_d)
+    real_d = property(_get_real_d, _set_real_d)
 
-    def get_integer_d(self):
+    def _get_integer_d(self):
         """ Get the integer discrete variables vector.
         
         Returns::
@@ -1820,7 +1820,7 @@ class JMUModel(BaseModel):
         """
         return self.jmimodel.get_integer_d()
         
-    def set_integer_d(self, integer_d):
+    def _set_integer_d(self, integer_d):
         """ Set the integer discrete variables vector.
         
         Parameters::
@@ -1830,9 +1830,9 @@ class JMUModel(BaseModel):
         """
         self.jmimodel._integer_d[:] = integer_d
         
-    integer_d = property(get_integer_d, set_integer_d)
+    integer_d = property(_get_integer_d, _set_integer_d)
 
-    def get_integer_u(self):
+    def _get_integer_u(self):
         """ Get the integer input variables vector.
         
         Returns::
@@ -1841,7 +1841,7 @@ class JMUModel(BaseModel):
         """
         return self.jmimodel.get_integer_u()
         
-    def set_integer_u(self, integer_u):
+    def _set_integer_u(self, integer_u):
         """ Set the integer input variables vector.
         
         Parameters::
@@ -1851,9 +1851,9 @@ class JMUModel(BaseModel):
         """
         self.jmimodel._integer_u[:] = integer_u
         
-    integer_u = property(get_integer_u, set_integer_u)
+    integer_u = property(_get_integer_u, _set_integer_u)
 
-    def get_boolean_d(self):
+    def _get_boolean_d(self):
         """ Get the boolean discrete variables vector.
         
         Returns::
@@ -1862,7 +1862,7 @@ class JMUModel(BaseModel):
         """
         return self.jmimodel.get_boolean_d()
         
-    def set_boolean_d(self, boolean_d):
+    def _set_boolean_d(self, boolean_d):
         """ Set the boolean discrete variables vector.
         
         Parameters::
@@ -1872,9 +1872,9 @@ class JMUModel(BaseModel):
         """
         self.jmimodel._boolean_d[:] = boolean_d
         
-    boolean_d = property(get_boolean_d, set_boolean_d)
+    boolean_d = property(_get_boolean_d, _set_boolean_d)
 
-    def get_boolean_u(self):
+    def _get_boolean_u(self):
         """ Get the boolean input variables vector.
         
         Returns::
@@ -1883,7 +1883,7 @@ class JMUModel(BaseModel):
         """
         return self.jmimodel.get_boolean_u()
         
-    def set_boolean_u(self, boolean_u):
+    def _set_boolean_u(self, boolean_u):
         """ Set the boolean input variables vector.
         
         Parameters::
@@ -1893,10 +1893,10 @@ class JMUModel(BaseModel):
         """
         self.jmimodel._boolean_u[:] = boolean_u
         
-    boolean_u = property(get_boolean_u, set_boolean_u)
+    boolean_u = property(_get_boolean_u, _set_boolean_u)
 
 
-    def get_sw(self):
+    def _get_sw(self):
         """ Get the switch function vector of the DAE. A switch value of 
         1 corresponds to true and 0 corresponds to false.
         
@@ -1906,7 +1906,7 @@ class JMUModel(BaseModel):
         """
         return self.jmimodel.get_sw()
         
-    def set_sw(self, sw):
+    def _set_sw(self, sw):
         """ Set the switch function vector of the DAE. A switch value of 
         1 corresponds to true and 0 corresponds to false.
         
@@ -1917,9 +1917,9 @@ class JMUModel(BaseModel):
         """
         self.jmimodel._sw[:] = sw
         
-    sw = property(get_sw, set_sw)
+    sw = property(_get_sw, _set_sw)
 
-    def get_sw_init(self):
+    def _get_sw_init(self):
         """ Get the switch function vector of the DAE initialization 
         system. A switch value of 1 corresponds to true and 0 corresponds 
         to false.
@@ -1931,7 +1931,7 @@ class JMUModel(BaseModel):
         """
         return self.jmimodel.get_sw_init()
         
-    def set_sw_init(self, sw_init):
+    def _set_sw_init(self, sw_init):
         """ Set the switch function vector of the DAE initialization 
         system. A switch value of 1 corresponds to true and 0 corresponds 
         to false.
@@ -1944,9 +1944,9 @@ class JMUModel(BaseModel):
         """
         self.jmimodel._sw_init[:] = sw_init
         
-    sw_init = property(get_sw_init, set_sw_init)
+    sw_init = property(_get_sw_init, _set_sw_init)
 
-    def get_variable_scaling_factors(self):
+    def _get_variable_scaling_factors(self):
         """ Get the variable scaling factor vector. The scaling variable 
         vector has the same size as the z vector: scaling factors for 
         booleans, integers and switches are ignored.
@@ -1957,7 +1957,7 @@ class JMUModel(BaseModel):
         """
         return self.jmimodel.get_variable_scaling_factors()
         
-    def set_variable_scaling_factors(self, variable_scaling_factors):
+    def _set_variable_scaling_factors(self, variable_scaling_factors):
         """ Set the variable scaling vector of the DAE initialization 
         system. The scaling variable vector has the same size as the z 
         vector: scaling factors for booleans, integers and switches are 
@@ -1971,8 +1971,8 @@ class JMUModel(BaseModel):
         """
         self.jmimodel._variable_scaling_factors[:] = variable_scaling_factors
         
-    variable_scaling_factors = property(get_variable_scaling_factors, 
-        set_variable_scaling_factors)
+    variable_scaling_factors = property(_get_variable_scaling_factors, 
+        _set_variable_scaling_factors)
 
     def get_scaling_method(self):
         """ Get the scaling_method. Valid values are JMI_SCALING_NONE and
@@ -1984,7 +1984,7 @@ class JMUModel(BaseModel):
         """
         return self.jmimodel.get_scaling_method()
         
-    def get_z(self):
+    def _get_z(self):
         """ Get the vector containing all parameters, variables and 
         point-wise evalutated variables vector.
         
@@ -1994,7 +1994,7 @@ class JMUModel(BaseModel):
         """
         return self.jmimodel.get_z()
         
-    def set_z(self, z):
+    def _set_z(self, z):
         """ Set the vector containing all parameters, variables and 
         point-wise evalutated variables vector.
         
@@ -2005,7 +2005,7 @@ class JMUModel(BaseModel):
         """
         self.jmimodel._z[:] = z
         
-    z = property(get_z, set_z)
+    z = property(_get_z, _set_z)
     
     def initialize(self, algorithm='IpoptInitializationAlg', 
         options='default'):
@@ -2200,8 +2200,8 @@ class JMUModel(BaseModel):
             include_alias=False)
         
         #Real variables vector
-        z = self.get_z()
-        sc = self.get_variable_scaling_factors()
+        z = self.z
+        sc = self.variable_scaling_factors
         
         for attr in start_attr:
             (i, ptype) = _translate_value_ref(attr[0])
@@ -2233,8 +2233,8 @@ class JMUModel(BaseModel):
         values = xml_values_doc.get_iparam_values() #{variablename:value}
         xmldoc = self._get_XMLDoc()
        
-        z = self.get_z()       
-        sc = self.get_variable_scaling_factors()
+        z = self.z
+        sc = self.variable_scaling_factors
 
         for name in values.keys():
             value = values.get(name)
@@ -2329,20 +2329,20 @@ class JMUModel(BaseModel):
         
         xmldoc = self._get_XMLDoc()
         valref = xmldoc.get_value_reference(name.strip())
-        sc = self.get_variable_scaling_factors()
+        sc = self.variable_scaling_factors
         value = None
         if valref != None:
             (z_i, ptype) = _translate_value_ref(valref)
             if xmldoc.is_negated_alias(name):
                 if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0 and ptype==0: 
-                    value = -(self.get_z()[z_i])*sc[z_i]
+                    value = -(self.z[z_i])*sc[z_i]
                 else:
-                    value = -self.get_z()[z_i]
+                    value = -self.z[z_i]
             else:
                 if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0 and ptype==0: 
-                    value = (self.get_z()[z_i])*sc[z_i]
+                    value = (self.z[z_i])*sc[z_i]
                 else:
-                    value = self.get_z()[z_i]
+                    value = self.z[z_i]
         else:
             raise Exception("Parameter or variable "+name.strip()+" could \
             not be found in model.")
@@ -2372,21 +2372,21 @@ class JMUModel(BaseModel):
         
         xmldoc = self._get_XMLDoc()
         valref = xmldoc.get_value_reference(name)
-        sc = self.get_variable_scaling_factors()
+        sc = self.variable_scaling_factors
         if valref != None:
             if xmldoc.is_constant(name):
                raise Exception("%s is a constant, it can not be modified." %name)
             (z_i, ptype) = _translate_value_ref(valref)
             if xmldoc.is_negated_alias(name):
                 if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0 and ptype==0: 
-                    self.get_z()[z_i] = -(value)/sc[z_i]
+                    self.z[z_i] = -(value)/sc[z_i]
                 else:
-                    self.get_z()[z_i] = -(value)
+                    self.z[z_i] = -(value)
             else:
                 if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0 and ptype==0: 
-                    self.get_z()[z_i] = (value)/sc[z_i]
+                    self.z[z_i] = (value)/sc[z_i]
                 else:
-                    self.get_z()[z_i] = (value)
+                    self.z[z_i] = (value)
 
             if recompute_dependent_parameters and \
                    z_i>=self._offs_real_pi and \
@@ -2439,7 +2439,7 @@ class JMUModel(BaseModel):
         """       
         # get xmldoc and z-vector
         xmldoc = self._get_XMLDoc()
-        z = self.get_z()
+        z = self.z
         
         # create temp XMLValuesDoc from the xml values file for writing 
         # the new parameters to

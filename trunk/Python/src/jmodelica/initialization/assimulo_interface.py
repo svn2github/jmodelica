@@ -72,7 +72,7 @@ class JMUAlgebraic(ProblemAlgebraic):
             raise JMIInit_Exception("Model error: nb eqs not equal to nb vars")
         
         # get the data needed for evaluating the jacobian
-        self._mask = N.ones(self._model.get_z().size, dtype=N.int32)
+        self._mask = N.ones(self._model.z.size, dtype=N.int32)
         self._ind_vars = [jmi.JMI_DER_W, jmi.JMI_DER_X, jmi.JMI_DER_DX]
         self._ncol, self._nonzeros = self._jmi_model.init_dF0_dim(jmi.JMI_DER_CPPAD, jmi.JMI_DER_DENSE_COL_MAJOR, self._ind_vars, self._mask)
         self._nrow = self._nonzeros / self._ncol
@@ -83,9 +83,9 @@ class JMUAlgebraic(ProblemAlgebraic):
         else:
             # Get a x0 from the model
             self._x0 = N.zeros(self._neqF0)
-            self._x0[0:self._dx_size] = self._model.get_real_dx()
-            self._x0[self._dx_size:self._mark] = self._model.get_real_x()
-            self._x0[self._mark:self._neqF0] = self._model.get_real_w()
+            self._x0[0:self._dx_size] = self._model.real_dx
+            self._x0[self._dx_size:self._mark] = self._model.real_x
+            self._x0[self._mark:self._neqF0] = self._model.real_w
             
         self.constraints = constraints
         self.use_constraints = use_constraints
@@ -108,9 +108,9 @@ class JMUAlgebraic(ProblemAlgebraic):
         w = input[self._mark:inp_size]
     
         # input the values
-        self._model.set_real_dx(dx)
-        self._model.set_real_x(x)
-        self._model.set_real_w(w)
+        self._model.real_dx = dx
+        self._model.real_x = x
+        self._model.real_w = w
     
         # get size of residual and return the result
         output = N.zeros(self._neqF0)
@@ -155,9 +155,9 @@ class JMUAlgebraic(ProblemAlgebraic):
         w = input[self._mark:inp_size]
     
         # input the values
-        self._model.set_real_dx(dx)
-        self._model.set_real_x(x)
-        self._model.set_real_w(w)
+        self._model.real_dx = dx
+        self._model.real_x = x
+        self._model.real_w = w
      
         # get the jacobian from the model
         jac = N.zeros(self._nonzeros)

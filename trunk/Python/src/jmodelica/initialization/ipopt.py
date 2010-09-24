@@ -628,13 +628,13 @@ class NLPInitialization(object):
                         n_x + \
                         n_u + \
                         n_w))
-        data[0,:] = self._model.get_t()
-        data[0,1:1+n_dx] = self._model.get_real_dx()
-        data[0,1+n_dx:1+n_dx + n_x] = self._model.get_real_x()
-        data[0,1+n_dx + n_x:1+n_dx + n_x + n_u] = self._model.get_real_u()
+        data[0,:] = self._model.t
+        data[0,1:1+n_dx] = self._model.real_dx
+        data[0,1+n_dx:1+n_dx + n_x] = self._model.real_x
+        data[0,1+n_dx + n_x:1+n_dx + n_x + n_u] = self._model.real_u
         data[0,1+n_dx + n_x + n_u: \
              1+n_dx + n_x + \
-             n_u + n_w] = self._model.get_real_w()
+             n_u + n_w] = self._model.real_w
                         
         # Write result
         io.export_result_dymola(self._model,data, file_name=file_name, format=format)

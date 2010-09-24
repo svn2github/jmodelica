@@ -49,12 +49,12 @@ def run_demo(with_plots=True):
 
     def res(y,t):
         for i in range(4):
-            qt.get_real_x()[i+1] = y[i]
+            qt.real_x[i+1] = y[i]
         qt.jmimodel.ode_f()
-        return qt.get_real_dx()[1:5]
+        return qt.real_dx[1:5]
 
     # Compute stationary state values for operating point A
-    qt.set_real_u(u_A)
+    qt.real_u = u_A
     #qt.getPI()[21] = u_A[0]
     #qt.getPI()[22] = u_A[1]
     
@@ -72,7 +72,7 @@ def run_demo(with_plots=True):
         plt.grid()
     
     # Compute stationary state values for operating point A
-    qt.set_real_u(u_B)
+    qt.real_u = u_B
     
     t_sim = N.linspace(0.,2000.,500)
     y_sim = integr.odeint(res,x_0,t_sim)

@@ -40,7 +40,7 @@ def run_demo(with_plots=True):
     model = JMUModel(jmu_name)
 
     # Initialize the switches (1=true, 0=false)
-    model.set_sw(N.array([1,1]))
+    model.sw = N.array([1,1])
     
     #Simulate
     res = model.simulate(final_time=5.0)

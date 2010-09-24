@@ -124,9 +124,9 @@ class KInitSolver(object):
         x = self._res[self._dx_size:self._mark]
         w = self._res[self._mark:self._neqF0]
             
-        self._model.set_real_dx(dx)
-        self._model.set_real_x(x)
-        self._model.set_real_w(w)
+        self._model.real_dx = dx
+        self._model.real_x = x
+        self._model.real_w = w
             
     def export_result_dymola(self, file_name='', format='txt'):
         """ Export the initialization result in Dymola format. 
@@ -150,13 +150,13 @@ class KInitSolver(object):
                         self._x_size + \
                         self._u_size + \
                         self._w_size))
-        data[0,:] = self._model.get_t()
-        data[0,1:1+self._dx_size] = self._model.get_real_dx()
-        data[0,1+self._dx_size:1+self._dx_size + self._x_size] = self._model.get_real_x()
-        data[0,1+self._dx_size + self._x_size:1+self._dx_size + self._x_size + self._u_size] = self._model.get_real_u()
+        data[0,:] = self._model.t
+        data[0,1:1+self._dx_size] = self._model.real_dx
+        data[0,1+self._dx_size:1+self._dx_size + self._x_size] = self._model.real_x
+        data[0,1+self._dx_size + self._x_size:1+self._dx_size + self._x_size + self._u_size] = self._model.real_u
         data[0,1+self._dx_size + self._x_size + self._u_size: \
              1+self._dx_size + self._x_size + \
-             self._u_size + self._w_size] = self._model.get_real_w()
+             self._u_size + self._w_size] = self._model.real_w
                         
         # Write result
         io.export_result_dymola(self._model,data, file_name=file_name, format=format)
