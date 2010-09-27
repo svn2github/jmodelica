@@ -23,7 +23,7 @@ __all__ = ['jmi', 'xmlparser', 'compiler','optimization','examples',
 __version__=''
 
 import os
-import warnings
+import logging
 
 try:
     _p = os.environ['JMODELICA_HOME']
@@ -40,7 +40,7 @@ try:
     f = open(_fpath)
     __version__=f.readline().strip()
 except IOError:
-    warnings.warn('Version file not found. Environment may be corrupt.')
+    logging.warning('Version file not found. Environment may be corrupt.')
 finally:
     if f is not None:
         f.close()   
@@ -49,7 +49,7 @@ try:
     _f = os.path.join(os.environ['JMODELICA_HOME'],'startup.py')
     execfile(_f)
 except IOError:
-    warnings.warn('Startup script ''%s'' not found. Environment may be corrupt'
+    logging.warning('Startup script ''%s'' not found. Environment may be corrupt'
                   % _f)
 
 

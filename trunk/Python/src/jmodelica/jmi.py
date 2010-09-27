@@ -22,8 +22,9 @@
 
 
 import os
-
 import sys
+import logging
+
 import ctypes as ct
 from ctypes import byref
 import numpy as N
@@ -36,8 +37,7 @@ from lxml import etree
 import zipfile
 import platform as PL
 
-import xmlparser
-import io
+from jmodelica import xmlparser
 from jmodelica.core import BaseModel
 from jmodelica.core import unzip_unit
 from jmodelica.compiler import ModelicaCompiler
@@ -5811,7 +5811,7 @@ def package_JMU(class_name, path='.'):
         os.remove(mMangledName+'_values.xml') #XML
         os.remove(mMangledName+suffix)        #Binary
     except OSError, msg:
-        warnings.warn(msg)
+        logging.warning(msg)
         
 def compile_jmu(class_name, file_name=[], compiler='modelica', 
     target='ipopt', compiler_options={}, compile_to='.'):

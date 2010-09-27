@@ -18,7 +18,7 @@
 import os as O
 import numpy as N
 import pylab as P
-import warnings
+import logging
 import nose
 
 from jmodelica.jmi import compile_jmu
@@ -28,7 +28,7 @@ try:
     from jmodelica.simulation.assimulo_interface import JMIDAESens
     from assimulo.implicit_ode import IDA
 except:
-    warnings.warn('Could not find Assimulo package. Check jmodelica.check_packages()')
+    logging.warning('Could not find Assimulo package. Check jmodelica.check_packages()')
 
 
 def run_demo(with_plots=True):

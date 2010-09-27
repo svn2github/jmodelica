@@ -20,14 +20,14 @@ This file contains code for mapping our JMI Models to the Problem
 specifications required by Assimulo.
 """
 
-import warnings
+import logging
 import numpy as N
 import jmodelica.jmi as jmi
 
 try:
     from assimulo.problem_algebraic import ProblemAlgebraic
 except ImportError:
-    warnings.warn('Could not find Assimulo package. Check jmodelica.check_packages()')
+    logging.warning('Could not find Assimulo package. Check jmodelica.check_packages()')
 
 
 class JMUAlg_Exception(Exception):

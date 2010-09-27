@@ -21,7 +21,7 @@ jmodelica.jmi.JMUModel.initialize respectively.
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #from abc import ABCMeta, abstractmethod
-import warnings
+import logging
 import numpy as N
 
 import jmodelica
@@ -41,7 +41,7 @@ try:
 
     assimulo_present = True
 except:
-    warnings.warn('Could not load Assimulo module. Check jmodelica.check_packages()')
+    logging.warning('Could not load Assimulo module. Check jmodelica.check_packages()')
     assimulo_present = False
 
 try:

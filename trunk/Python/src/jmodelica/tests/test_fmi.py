@@ -19,7 +19,6 @@
 Module containing the tests for the FMI interface.
 """
 
-import warnings
 import nose
 import os as O
 import numpy as N

@@ -25,6 +25,7 @@ import numpy as N
 import nose
 import matplotlib.pyplot as plt
 import nose.tools as ntools
+import logging
 
 from jmodelica.tests import testattr
 from jmodelica.tests import get_files_path
@@ -43,7 +44,7 @@ try:
     #from jmodelica.simulation.assimulo_interface import TrajectoryLinearInterpolation
     from assimulo.explicit_ode import CVode
 except NameError, ImportError:
-    warnings.warn('Could not load Assimulo module. Check jmodelica.check_packages()')
+    logging.warning('Could not load Assimulo module. Check jmodelica.check_packages()')
 
 int = N.int32
 N.int = N.int32

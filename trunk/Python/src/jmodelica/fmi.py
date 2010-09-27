@@ -17,8 +17,6 @@
 """Module containing the FMI interface Python wrappers."""
 
 import sys
-import jmodelica.jmi
-from jmodelica import xmlparser
 import os
 
 import ctypes as C
@@ -28,7 +26,10 @@ import numpy.ctypeslib as Nct
 import tempfile
 from lxml import etree
 from operator import itemgetter
-import warnings
+import logging
+
+import jmodelica.jmi
+from jmodelica import xmlparser
 from jmodelica.core import BaseModel, unzip_unit
 
 class FMUException(Exception):
@@ -1171,7 +1172,7 @@ class FMUModel(BaseModel):
         status = self._fmiInitialize(self._model, tolcontrolledC, tol, C.byref(self._eventInfo))
         
         if status == 1:
-            warnings.warn('Initialize returned with a warning. Check the log for information.')
+            logging.warning('Initialize returned with a warning. Check the log for information.')
         
         if status > 1:
             raise FMUException('Failed to Initialize the model.')

@@ -22,7 +22,7 @@ This file holds base classes for simulation and optimization tests.
 
 import os
 import numpy
-import warnings
+import logging
 from jmodelica.jmi import compile_jmu
 from jmodelica.jmi import JMUModel
 import jmodelica.initialization.ipopt as ipopt_init
@@ -34,7 +34,7 @@ try:
     from jmodelica.simulation.assimulo_interface import JMIDAE, write_data
     from assimulo.implicit_ode import IDA
 except:
-    warnings.warn('Could not load Assimulo module. Check jmodelica.check_packages()')
+    logging.warning('Could not load Assimulo module. Check jmodelica.check_packages()')
 
 #_jm_home = os.environ.get('JMODELICA_HOME')
 #_tests_path = os.path.join(_jm_home, "Python", "jmodelica", "tests")

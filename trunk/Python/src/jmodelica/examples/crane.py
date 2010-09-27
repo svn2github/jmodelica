@@ -16,10 +16,12 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import os
+
 import numpy as N
 import pylab as p
 import matplotlib
-import warnings
+import logging
+
 import jmodelica
 import jmodelica.jmi as jmi
 from jmodelica.compiler import ModelicaCompiler
@@ -30,7 +32,7 @@ try:
     from jmodelica.simulation.assimulo_interface import JMIDAE, write_data
     from assimulo.implicit_ode import IDA
 except:
-    warnings.warn('Could not find Assimulo package. Check jmodelica.check_packages()')
+    logging.warning('Could not find Assimulo package. Check jmodelica.check_packages()')
 
 def run_demo(with_plots=True):
     """

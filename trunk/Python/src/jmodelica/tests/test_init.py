@@ -24,7 +24,7 @@ import os
 import numpy as N
 import nose
 import nose.tools
-import warnings
+import logging
 
 from jmodelica.jmi import compile_jmu
 from jmodelica.jmi import JMUModel
@@ -37,7 +37,7 @@ from jmodelica.algorithm_drivers import UnrecognizedOptionError
 try:
     from assimulo.explicit_ode import *
 except ImportError:
-    warnings.warn('Could not load Assimulo module. Check jmodelica.check_packages()')
+    logging.warning('Could not load Assimulo module. Check jmodelica.check_packages()')
 
 try:
     ipopt_present = jmodelica.environ['IPOPT_HOME']

@@ -20,7 +20,7 @@ This file contains code for mapping our JMI Models to the Problem
 specifications required by Assimulo.
 """
 
-import warnings
+import logging
 import numpy as N
 import pylab as P
 import jmodelica.io as io
@@ -34,7 +34,7 @@ try:
     from assimulo.problem import Explicit_Problem
     from assimulo.sundials import Sundials_Exception
 except ImportError:
-    warnings.warn('Could not find Assimulo package. Check jmodelica.check_packages()')
+    logging.warning('Could not find Assimulo package. Check jmodelica.check_packages()')
 
 
 class JMIModel_Exception(Exception):

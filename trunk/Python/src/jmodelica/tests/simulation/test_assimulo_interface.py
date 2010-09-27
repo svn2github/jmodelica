@@ -16,7 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 """Tests for the jmodelica.simulation.assimulo module."""
-import warnings
+import logging
 import nose
 import os
 import numpy as N
@@ -34,7 +34,7 @@ try:
     from jmodelica.simulation.assimulo_interface import TrajectoryLinearInterpolation
     from assimulo.explicit_ode import CVode
 except NameError, ImportError:
-    warnings.warn('Could not load Assimulo module. Check jmodelica.check_packages()')
+    logging.warning('Could not load Assimulo module. Check jmodelica.check_packages()')
 
 path_to_fmus = os.path.join(get_files_path(), 'FMUs')
 
