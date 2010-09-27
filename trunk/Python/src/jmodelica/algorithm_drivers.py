@@ -502,8 +502,7 @@ class AssimuloFMIAlgOptions(OptionBase):
                  
                  Default 'CVode'
                  
-        num_communcation_points
-               - Number of communication points. If ncp is zero, the solver
+        ncp    - Number of communication points. If ncp is zero, the solver
                  will return the internal steps taken.
                  
                  Default '0'
@@ -535,7 +534,7 @@ class AssimuloFMIAlgOptions(OptionBase):
     def __init__(self, *args, **kw):
         _defaults= {
             'solver': 'CVode', 
-            'num_communication_points':0, 
+            'ncp':0, 
             'CVode_options':{'discr':'BDF','iter':'Newton'}
             }
         super(AssimuloFMIAlgOptions,self).__init__(_defaults)
@@ -611,7 +610,7 @@ class AssimuloFMIAlg(AlgorithmBase):
         """ Helper function that sets options for AssimuloFMI algorithm.
         """
         # no of communication points
-        self.num_communication_points = self.options['num_communication_points']
+        self.ncp = self.options['ncp']
         
         # solver
         solver = self.options['solver']
@@ -655,7 +654,7 @@ class AssimuloFMIAlg(AlgorithmBase):
     def solve(self):
         """ Runs the simulation. """
         self.simulator.simulate(self.final_time, 
-            self.num_communication_points)
+            self.ncp)
  
     def get_result(self):
         """ Write result to file, load result data and create an 
@@ -695,8 +694,7 @@ class AssimuloAlgOptions(OptionBase):
                  
                      Default 'IDA'
                  
-        num_communication_points    
-                   - Number of communication points. If ncp is zero, the solver
+        ncp        - Number of communication points. If ncp is zero, the solver
                      will return the internal steps taken.
                  
                      Default '0'
@@ -749,7 +747,7 @@ class AssimuloAlgOptions(OptionBase):
     def __init__(self, *args, **kw):
         _defaults= {
             'solver': 'IDA', 
-            'num_communication_points':0, 
+            'ncp':0, 
             'initialize':True,
             'IDA_options':{'atol':1.0e-6,'rtol':1.0e-6,
                            'maxord':5},
@@ -837,7 +835,7 @@ class AssimuloAlg(AlgorithmBase):
         """ Helper function that sets options for Assimulo algorithm.
         """
         # no of communication points
-        self.num_communication_points = self.options['num_communication_points']
+        self.ncp = self.options['ncp']
         
         # solver
         solver = self.options['solver']
@@ -877,7 +875,7 @@ class AssimuloAlg(AlgorithmBase):
         if self.model.has_cppad_derivatives() and self.initialize:
             self.simulator.initiate()
         self.simulator.simulate(self.final_time, 
-            self.num_communication_points)
+            self.ncp)
  
     def get_result(self):
         """ Write result to file, load result data and create an 

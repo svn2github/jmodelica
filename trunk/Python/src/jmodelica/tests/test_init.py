@@ -317,7 +317,7 @@ class Test_init_assimulo:
         model = JMUModel(jmu_name)
         opts = model.simulate_options()
         opts['solver']='CVode'
-        opts['num_communication_points']=0
+        opts['ncp']=0
         opts['CVode_options']={'discr':'BDF', 'iter':'Newton'}
         sim_res = model.simulate(final_time=20, options=opts)
         x1=sim_res['x1']
