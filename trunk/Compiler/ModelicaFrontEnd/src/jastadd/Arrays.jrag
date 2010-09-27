@@ -237,6 +237,9 @@ aspect Arrays {
 	eq FIfExp.ndims()     = getThenExp().ndims();
 	eq FElseIfExp.ndims() = getThenExp().ndims();
 	
+	// TODO: Expand to cover vectorization of all scalar built-in functions (see #528)
+	eq FStreamBuiltIn.ndims() = getFExp().ndims();
+	
 	/**
 	 * \brief Check if multiplication is equivalent with an element-wise multiplication.
 	 * 
@@ -685,6 +688,9 @@ aspect Arrays {
 	}
 	
 	eq FSizeExp.size() = hasDim() ? Size.SCALAR : new Size(getFExp().ndims());
+	
+	// TODO: Expand to cover vectorization of all scalar built-in functions (see #528)
+	eq FStreamBuiltIn.size() = getFExp().size();
 	
 	eq FInfArgsFunctionCall.size() {
 		if (!isArray())
@@ -1236,6 +1242,18 @@ aspect Arrays {
 		Indices ind = arr.indices();
 		for (Index i : ind)
 			arr.set(i, old.get(ind.translate(i)));
+		return arr;
+	}
+	
+	// TODO: Expand to cover vectorization of all scalar built-in functions (see #528)
+	eq FStreamBuiltIn.getArray() {
+		if (!isArray())
+			return super.getArray();
+		
+		Array arr = new Array(indices());
+		Array inner = getFExp().getArray();
+		for (Index i : arr.indices())
+			arr.set(i, createNode(inner.get(i)));
 		return arr;
 	}
 	

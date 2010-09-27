@@ -128,6 +128,78 @@ end StreamTests.StreamTest3;
      connect(r1.fluidPort,res.port_a);
      connect(r2.fluidPort,res.port_b);
   end StreamTest3;
+  
+  model StreamTest4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="StreamTest4",
+         description="Using inStream() on array.",
+         eliminate_alias_variables=false,
+         flatModel="
+fclass StreamTests.StreamTest4
+ parameter Real r[1].p0 = 1 /* 1 */;
+ parameter Real r[1].h0 = 1 /* 1 */;
+ Real r[1].fluidPort.m_flow;
+ Real r[1].fluidPort.h_outflow;
+ Real r[1].fluidPort.p;
+ parameter Real r[2].p0 = 1 /* 1 */;
+ parameter Real r[2].h0 = 1 /* 1 */;
+ Real r[2].fluidPort.m_flow;
+ Real r[2].fluidPort.h_outflow;
+ Real r[2].fluidPort.p;
+ Real h[1];
+ Real h[2];
+equation
+ r[1].fluidPort.p = r[1].p0;
+ r[1].fluidPort.h_outflow = r[1].h0;
+ r[2].fluidPort.p = r[2].p0;
+ r[2].fluidPort.h_outflow = r[2].h0;
+ r[1].fluidPort.m_flow = 0;
+ r[2].fluidPort.m_flow = 0;
+ h[1] = r[1].fluidPort.h_outflow;
+ h[2] = r[2].fluidPort.h_outflow;
+end StreamTests.StreamTest4;
+")})));
+
+     Reservoir r[2];
+     Real h[2] = inStream(r.fluidPort.h_outflow);
+  end StreamTest4;
+	
+  model StreamTest5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="StreamTest5",
+         description="Using actualStream() on array.",
+         eliminate_alias_variables=false,
+         flatModel="
+fclass StreamTests.StreamTest5
+ parameter Real r[1].p0 = 1 /* 1 */;
+ parameter Real r[1].h0 = 1 /* 1 */;
+ Real r[1].fluidPort.m_flow;
+ Real r[1].fluidPort.h_outflow;
+ Real r[1].fluidPort.p;
+ parameter Real r[2].p0 = 1 /* 1 */;
+ parameter Real r[2].h0 = 1 /* 1 */;
+ Real r[2].fluidPort.m_flow;
+ Real r[2].fluidPort.h_outflow;
+ Real r[2].fluidPort.p;
+ Real h[1];
+ Real h[2];
+equation
+ r[1].fluidPort.p = r[1].p0;
+ r[1].fluidPort.h_outflow = r[1].h0;
+ r[2].fluidPort.p = r[2].p0;
+ r[2].fluidPort.h_outflow = r[2].h0;
+ r[1].fluidPort.m_flow = 0;
+ r[2].fluidPort.m_flow = 0;
+ h[1] = (if r[1].fluidPort.m_flow > 0 then r[1].fluidPort.h_outflow else r[1].fluidPort.h_outflow);
+ h[2] = (if r[2].fluidPort.m_flow > 0 then r[2].fluidPort.h_outflow else r[2].fluidPort.h_outflow);
+end StreamTests.StreamTest5;
+")})));
+
+	 Reservoir r[2];
+	 Real h[2] = actualStream(r.fluidPort.h_outflow);
+  end StreamTest5;
 
 model StreamComplErr
  // This is actually a compliance error but is kept here in order to avoid copying dependent classes.
