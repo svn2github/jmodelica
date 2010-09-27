@@ -16464,7 +16464,7 @@ fi
 
 
 
-ANT_OPTS="ANT_OPTS=-Xmx512M"
+ANT_OPTS="ANT_OPTS=-Xmx1024M"
 
  if test "x$ANT" != x; then
   HAVE_ANT_TRUE=
