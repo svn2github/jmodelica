@@ -536,7 +536,7 @@ class AssimuloFMIAlgOptions(OptionBase):
         _defaults= {
             'solver': 'CVode', 
             'num_communication_points':0, 
-            'CVode_options':{}
+            'CVode_options':{'discr':'BDF','iter':'Newton'}
             }
         super(AssimuloFMIAlgOptions,self).__init__(_defaults)
         self.update(*args, **kw)
@@ -638,17 +638,6 @@ class AssimuloFMIAlg(AlgorithmBase):
             solver_options['rtol']
         except KeyError:
             solver_options['rtol'] = rtol
-        
-        #Sets the default CVode solver to BDF using Newton iteration 
-        #(if not set)
-        try:
-            solver_options['discr']
-        except KeyError:
-            solver_options['discr'] = 'BDF'
-        try:
-            solver_options['iter']
-        except KeyError:
-            solver_options['iter'] = 'Newton'
 
         #loop solver_args and set properties of solver
         for k, v in solver_options.iteritems():
@@ -741,14 +730,14 @@ class AssimuloAlgOptions(OptionBase):
     
     Options for CVode::
     
-        rtol    - The relative tolerance. The relative tolerance are retrieved from
-                  the 'default experiment' section in the XML-file and if not
-                  found are set to 1.0e-4
+        rtol    - The relative tolerance. 
         
+                  Default 1.0e-6
+                
         atol    - The absolute tolerance.
         
-                  Default rtol*0.01*(nominal values of the continuous states)
-        
+                  Default 1.0e-6
+                  
         discr   - The discretization method. Can be either 'BDF' or 'Adams'
         
                   Default 'BDF'
@@ -762,8 +751,10 @@ class AssimuloAlgOptions(OptionBase):
             'solver': 'IDA', 
             'num_communication_points':0, 
             'initialize':True,
-            'IDA_options':{},
-            'CVode_options':{}
+            'IDA_options':{'atol':1.0e-6,'rtol':1.0e-6,
+                           'maxord':5},
+            'CVode_options':{'discr':'BDF','iter':'Newton',
+                             'atol':1.0e-6,'rtol':1.0e-6}
             }
         super(AssimuloAlgOptions,self).__init__(_defaults)
         self.update(*args, **kw)

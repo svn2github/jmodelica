@@ -614,7 +614,9 @@ class Test_FMI_ODE:
         #Writing after
         bounce = fmi.FMUModel('bouncingBall.fmu', path_to_fmus)
         bounce.initialize()
-        res = bounce.simulate(final_time=3., options={'CVode_options':{'write_cont':False}})
+        opt = bounce.simulate_options()
+        opt['CVode_options']['write_cont'] = False
+        res = bounce.simulate(final_time=3., options=opt)
         
         height = res['h']
         time = res['time']
@@ -660,7 +662,7 @@ class Test_FMI_ODE:
         bounce = fmi.FMUModel('bouncingBall.fmu', path_to_fmus)
         bounce.initialize()
         res = bounce.simulate(final_time=3.,
-            options={'CVode_options':{'rtol':1e-6, 'iter':'FixedPoint'}})
+            options={'CVode_options':{'rtol':1e-6, 'iter':'FixedPoint', 'discr':'BDF'}})
         height = res['h']
         time = res['time']
     
