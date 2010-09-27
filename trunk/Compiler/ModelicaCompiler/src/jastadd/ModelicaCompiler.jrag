@@ -124,13 +124,16 @@ public class ModelicaCompiler {
 	protected String cTemplatefile=null;
 	private OptionRegistry options = null;
 	
-	
 	public ModelicaCompiler(OptionRegistry options, String xmlTpl, String xmlValuesTpl, String cTemplatefile) {
 		staticBlocks();
 		this.options = options;
 		this.xmlTpl = xmlTpl;
 		this.xmlValuesTpl = xmlValuesTpl;
-		this.cTemplatefile = cTemplatefile;		
+		this.cTemplatefile = cTemplatefile;
+	}
+	
+	protected ModelicaCompiler() {
+		staticBlocks();
 	}
 	
 	public String getStringOption(String key) throws UnknownOptionException {
@@ -803,11 +806,43 @@ public class ModelicaCompiler {
 		return programargs;
 	}
 	
-	/**
-	 * \brief Convenience constructor intended to be called from main method.
-	 */
-	protected ModelicaCompiler(String compilerName, String[] args, Hashtable<String, String> programarguments){
-		staticBlocks();
+	private void setOptions(Hashtable<String, String> programarguments, String modelicapath) {
+		String filesep = System.getProperty("file.separator");
+		String optionsfile = null;
+		//look for options.xml in $JMODELICA_HOME/Options/ and program arguments
+		if (programarguments.get("optfile") != null) {
+			optionsfile = programarguments.get("optfile");
+		} else {
+			optionsfile = System.getenv("JMODELICA_HOME")+filesep+"Options"+filesep+"options.xml";
+		}
+
+		try {
+			options = new OptionRegistry(optionsfile);
+		} catch(Exception e) {
+			handleException(e, "The options XML file could not be loaded.");
+		}
+		
+		//add modelicapath to optionregistry
+		if (modelicapath == null) {
+			//modelicapath was not set in program arguments -> check envir variable or via JMODELICA_HOME
+			if (System.getenv("MODELICAPATH") != null) { 
+				modelicapath=System.getenv("MODELICAPATH");
+			} else {
+				modelicapath=System.getenv("JMODELICA_HOME")+filesep+"ThirdParty"+filesep+"MSL";
+			}
+		}
+		options.setStringOption("MODELICAPATH", modelicapath);
+		
+		// set options field
+		this.options = options;
+	}
+	
+	protected void setArguments(String compilerName, String[] args, Hashtable<String, String> programarguments) 
+		throws JModelicaHomeNotFoundException {
+		// check that JMODELICA_HOME exists
+		if (System.getenv("JMODELICA_HOME") == null) {
+			throw new JModelicaHomeNotFoundException("The environment variable JMODELICA_HOME has not been set.");
+		}
 		
 		String filesep = System.getProperty("file.separator");
 		if (args.length < 1) {
@@ -837,53 +872,38 @@ public class ModelicaCompiler {
 			log.error(compilerName + " expects a file name and a class name as " +
 					"command line arguments.");
 			System.exit(1);
-		}				
+		}
 		
+		// set templates and options		
 		if (args.length >= arg+5) {
-			xmlTpl = args[arg+2];
-			xmlValuesTpl = args[arg+3];
-			cTemplatefile = args[arg+4];
+			this.xmlTpl = args[arg+2];
+			this.xmlValuesTpl = args[arg+3];
+			this.cTemplatefile = args[arg+4];
 		} 
 		else {
 			// give templates default values based on $JMODELICA_HOME
 			String templatepath = System.getenv("JMODELICA_HOME")+filesep+"CodeGenTemplates"+filesep;
-			xmlTpl = templatepath+"jmodelica_model_description.tpl";
-			xmlValuesTpl = templatepath+"jmodelica_model_values.tpl";
-			cTemplatefile = templatepath+"jmi_modelica_template.c";
+			this.xmlTpl = templatepath+"jmodelica_model_description.tpl";
+			this.xmlValuesTpl = templatepath+"jmodelica_model_values.tpl";
+			this.cTemplatefile = templatepath+"jmi_modelica_template.c";
 		}
 		
-		String optionsfile = null;
-		//look for options.xml in $JMODELICA_HOME/Options/ and program arguments
-		if (programarguments.get("optfile") != null) {
-			optionsfile = programarguments.get("optfile");
-		} else {
-			optionsfile = System.getenv("JMODELICA_HOME")+filesep+"Options"+filesep+"options.xml";
-		}
-
-		try {
-			options = new OptionRegistry(optionsfile);
-		} catch(Exception e) {
-			handleException(e, "The options XML file could not be loaded.");
-		}
-		
-		//add modelicapath to optionregistry
-		if (modelicapath == null) {
-			//modelicapath was not set in program arguments -> check envir variable or via JMODELICA_HOME
-			if (System.getenv("MODELICAPATH") != null) { 
-				modelicapath=System.getenv("MODELICAPATH");
-			} else {
-				modelicapath=System.getenv("JMODELICA_HOME")+filesep+"ThirdParty"+filesep+"MSL";
-			}
-		}
-		options.setStringOption("MODELICAPATH", modelicapath);
+		// set options
+		this.setOptions(programarguments, modelicapath);
 	}
 	
 	public static void main(String[] args) {
 		// TODO: Add a class representing the arguments of the program, with getX methods for arguments.
 		// Get any program options set
 		Hashtable<String, String> programarguments = extractProgramArguments(args, 0);
-		// Create compiler
-		ModelicaCompiler mc = new ModelicaCompiler("ModelicaCompiler", args, programarguments);
+		// create an empty compiler
+		ModelicaCompiler mc = new ModelicaCompiler();
+		// set arguments
+		try {
+			mc.setArguments("ModelicaCompiler", args, programarguments);
+		} catch(JModelicaHomeNotFoundException e) {
+			mc.handleException(e);
+		}
 		// Compile model
 		mc.compileModelFromCommandLine(args, programarguments);
 	}
@@ -1046,6 +1066,14 @@ public class ModelicaCompiler {
 		    }
 			
 		}
+	}
+}
+
+public class JModelicaHomeNotFoundException extends Exception {
+	public JModelicaHomeNotFoundException () {
+	}
+	public JModelicaHomeNotFoundException(String msg) {
+		super(msg);
 	}
 }
 

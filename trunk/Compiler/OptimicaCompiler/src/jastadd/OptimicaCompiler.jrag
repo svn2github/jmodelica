@@ -71,7 +71,7 @@ import org.jmodelica.util.OptionRegistry;
  * to get/set logging level.
  * 
  */
-public class OptimicaCompiler extends ModelicaCompiler{
+public class OptimicaCompiler extends ModelicaCompiler {
 	
 	private String optimicaCTemplatefile=null;
 	
@@ -80,7 +80,11 @@ public class OptimicaCompiler extends ModelicaCompiler{
 			String optimicaCTemplatefile) {
 		super(options, xmlTpl, xmlValuesTpl, cTemplatefile);
 		this.optimicaCTemplatefile = optimicaCTemplatefile;
-	}	
+	}
+	
+	protected OptimicaCompiler() {
+		super();
+	}
 		
 	/**
 	 * Compiles an Optimica model. A model file name and class must be provided.
@@ -201,24 +205,31 @@ public class OptimicaCompiler extends ModelicaCompiler{
 		}
 	}
 
-	protected OptimicaCompiler(String[] args, Hashtable<String, String> programarguments) {
-		super("OptimicaCompiler", args, programarguments);
+	@Override
+	protected void setArguments(String compilerName, String[] args, Hashtable<String, String> programarguments) 
+		throws JModelicaHomeNotFoundException {
+		super.setArguments(compilerName, args, programarguments);
 		int arg = programarguments.size();
 		if (args.length >= arg+6) {
-			optimicaCTemplatefile = args[arg+5];
+			this.optimicaCTemplatefile = args[arg+5];
 		} else {
 			// set default template
 			String filesep = System.getProperty("file.separator");
 			String templatepath = System.getenv("JMODELICA_HOME")+filesep+"CodeGenTemplates"+filesep;
-			optimicaCTemplatefile = templatepath+"jmi_optimica_template.c";
-		}
+			this.optimicaCTemplatefile = templatepath+"jmi_optimica_template.c";
+		}		
 	}
 	
-	public static void main(String args[]) {
-		// Get any program options set
+	public static void main(String args[]) {		
 		Hashtable<String, String> programarguments = extractProgramArguments(args, 0);
-		// Create compiler
-		OptimicaCompiler oc = new OptimicaCompiler(args, programarguments);
+		// create an empty compiler
+		OptimicaCompiler oc = new OptimicaCompiler();
+		// set arguments
+		try {
+			oc.setArguments("OptimicaCompiler", args, programarguments);
+		} catch(JModelicaHomeNotFoundException e) {
+			oc.handleException(e);
+		}
 		// Compile model
 		oc.compileModelFromCommandLine(args, programarguments);
 	}	
