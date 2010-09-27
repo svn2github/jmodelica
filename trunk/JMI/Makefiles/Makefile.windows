@@ -135,9 +135,11 @@ MAKEFILE = $(lastword $(MAKEFILE_LIST))
 ifeq ($(JMI_AD),JMI_AD_CPPAD)
 model: $(OBJS)
 	$(CXX) $(SHARED_LDFLAGS) $(CXXLINKFLAGS) $(CXXFLAGS) -o $(SHARED) $(OBJS) $(LIBS_CPPAD)
+	$(RM) $(OBJS)
 else
 model: $(OBJS)
 	$(CC) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) $(LIBS_NOCPPAD) $(EXTERNAL_DIRS) $(EXTERNAL_LIBS)
+	$(RM) $(OBJS)
 endif
 
 model_noad: 
@@ -153,6 +155,7 @@ endif
 	$(CXX) $(SHARED_LDFLAGS) $(CXXLINKFLAGS) $(CXXFLAGS) -o $(SHARED) $(OBJS) ./.jmi_objs/*.o $(LIBS_CPPAD)
 	$(RM) .jmi_objs\*.o
 	rmdir .jmi_objs
+	$(RM) $(OBJS)
 
 ipopt: $(OBJS)
 # This is to ensure that the contents of libjmi_algorithm_cppad and
@@ -164,6 +167,7 @@ endif
 	$(CXX) $(SHARED_LDFLAGS) $(CXXLINKFLAGS) $(CXXFLAGS) -o $(SHARED) $(OBJS) ./.jmi_objs/*.o $(LIBS_IPOPT)
 	$(RM) .jmi_objs\*.o
 	rmdir .jmi_objs
+	$(RM) $(OBJS)
 
 all: $(SHARED)
 

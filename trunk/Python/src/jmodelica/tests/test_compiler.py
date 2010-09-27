@@ -87,9 +87,6 @@ class Test_Compiler:
         assert os.access(fname+'_values.xml', os.F_OK) == True, \
                fname+'_values.xml'+" was not created."
         
-        assert os.access(fname+'.o', os.F_OK) == True, \
-               fname+'.o'+" was not created."        
-        
         assert os.access(fname+'.c', os.F_OK) == True, \
                fname+'.c'+" was not created."        
         
@@ -121,9 +118,6 @@ class Test_Compiler:
         assert os.access(fname+'_values.xml', os.F_OK) == True, \
                fname+'_values.xml'+" was not created."
             
-        assert os.access(fname+'.o', os.F_OK) == True, \
-               fname+'.o'+" was not created."        
-        
         assert os.access(fname+'.c', os.F_OK) == True, \
                fname+'.c'+" was not created."        
         
