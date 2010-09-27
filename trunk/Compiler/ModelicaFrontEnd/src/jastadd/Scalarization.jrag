@@ -116,7 +116,7 @@ aspect Scalarization {
 				// Copy original declaration
 				FVariable fv_tmp = (FVariable) fullCopy();
 				// Set new array subscripts corresponding to index
-				fv_tmp.getFQName().setLastFArraySubscripts(i.newFArraySubscripts());
+				fv_tmp.getFQName().setLastFArraySubscripts(i.createFArraySubscripts());
 				// Constants and parameters still have binding expressions
 				if (hasBindingExp())
 					fv_tmp.setBindingExp(getBindingExp().getArray().get(i).scalarize(constIndexMap));
@@ -155,7 +155,7 @@ aspect Scalarization {
 			for (Index i : scalarizationIndices(last)) {
 				if (bexp != null)
 					nbexp = bexp.getArray().get(i);
-				name.setLastFArraySubscripts(i.newFArraySubscripts());
+				name.setLastFArraySubscripts(i.createFArraySubscripts());
 				scalarRecordCellFVariables(vars, name, last, nbexp);
 			}
 		} else {
@@ -508,6 +508,28 @@ aspect Scalarization {
 		}
 	}
 	
+	public void FArray.addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names) {
+		useTempVar = true;
+		FIdUse use = new FIdUse(tempVarName());
+		use.getFQName().setLastFArraySubscripts(names.createFArraySubscripts());
+		indexMap.put(tempVarName(), new FIdUseExp(use));
+	}
+	
+	public void FArray.createArrayTemporaries(List clauses, List vars, 
+			Map<String,FExp> indexMap, boolean addVar) {
+		if (useTempVar) {
+			if (addVar) 
+				vars.add(new FFunctionArray((FType) type().unboundCopy(), tempVarName()));
+			Array arr = getArray();
+			for (Index i : indices()) {
+				FQName name = new FQName(tempVarName());
+				name.setLastFArraySubscripts(i.createFArraySubscripts());
+				name.scalarized = true;
+				clauses.add(new FAssignStmt(new FIdUse(name), arr.get(i)));
+			}
+		}
+	}
+	
 	public void FRangeExp.addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names) {
 		indexNames = names;
 	}
@@ -605,7 +627,7 @@ aspect Scalarization {
 				scalarizeRecordAssignment(vars, inner, indexMap, fqn, exp);
 			} else {
 				for (Index i : indices()) {
-					fqn.setLastFArraySubscripts(i.newFArraySubscripts());
+					fqn.setLastFArraySubscripts(i.createFArraySubscripts());
 					FExp exp = right.getArray().get(i);
 					scalarizeRecordAssignment(vars, stmts, indexMap, fqn, exp);
 				}
@@ -884,7 +906,7 @@ aspect Scalarization {
 			else  // TODO: This is calculated each time - introduce some kind of lazy attribute?
 				ind = left.dynamicFExp(left.scalarRecordFExp(indexMap, suffix)).indices();
 			for (Index i : ind) {
-				suffix.setLastFArraySubscripts(i.newFArraySubscripts());
+				suffix.setLastFArraySubscripts(i.createFArraySubscripts());
 				scalarRecordFEquations(eqns, suffix, indexMap, left, right);
 			}
 		} else {
@@ -1042,7 +1064,7 @@ aspect Scalarization {
 			Array arr = getFExp().getArray();
 			for (Index i : arr.indices()) {
 				FExp exp = arr.get(i).scalarize(indexMap);
-				FIdUse use = new FIdUse(name, i.newFArraySubscripts());
+				FIdUse use = new FIdUse(name, i.createFArraySubscripts());
 				clauses.add(new FAssignStmt(use, exp));
 			}
 		}
@@ -1077,7 +1099,7 @@ aspect Scalarization {
 			FQName fqn = name.fullCopy();
 			FArray arr = new FArray();
 			for (Index i : indices()) {
-				fqn.setLastFArraySubscripts(i.newFArraySubscripts());
+				fqn.setLastFArraySubscripts(i.createFArraySubscripts());
 				arr.addFExp(createRecordConstructorCell(fqn));
 			}
 			return arr;
@@ -1119,7 +1141,7 @@ aspect Scalarization {
 		if (isArray()) {
 			FQName fqn = name.fullCopy();
 			for (Index i : indices()) {
-				fqn.setLastFArraySubscripts(i.newFArraySubscripts());
+				fqn.setLastFArraySubscripts(i.createFArraySubscripts());
 				createTempCellFVariables(vars, fqn, param);
 			}
 		} else {
@@ -1229,7 +1251,9 @@ aspect Scalarization {
 	 */
 	public FExp FExp.scalarize(Map<String,FExp> indexMap) {
 		if (useTempVar) 
-			return new FIdUseExp(tempVarName());
+			return indexMap.containsKey(tempVarName()) ? 
+					(FExp) indexMap.get(tempVarName()).fullCopy() : 
+					new FIdUseExp(tempVarName());
     	if (type().isRecord() && wantsRecordCon())
     		return buildRecordConstructor(indexMap);
  		else if (isArray() && !keepAsArray()) 

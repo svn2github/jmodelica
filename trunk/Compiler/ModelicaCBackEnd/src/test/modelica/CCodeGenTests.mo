@@ -2042,6 +2042,51 @@ void func_CCodeGenTests_CUnknownArray1_f_def(jmi_array_t* a_a, jmi_array_t* b_a,
 end CUnknownArray1;
 
 
+// TODO: assignment to temp array should be outside loop - see #699
+model CUnknownArray2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CUnknownArray2",
+         description="C code generation for unknown array sizes: array constructor * array with unknown size",
+         template="$C_functions$",
+         generatedCode="
+void func_CCodeGenTests_CUnknownArray2_f_def(jmi_array_t* x_a, jmi_array_t* y_a) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t temp_1_v;
+    JMI_ARRAY_STATIC(temp_2_a, 4, 2, 2)
+    if (y_a == NULL) {
+        JMI_ARRAY_DYNAMIC(y_an, ( jmi_array_size(x_a, 0) ) * ( 2 ), jmi_array_size(x_a, 0), 2)
+        y_a = y_an;
+    }
+    for (jmi_ad_var_t i1_i = 1; i1_i <= jmi_array_size(y_a, 0); i1_i += 1) {
+        for (jmi_ad_var_t i2_i = 1; i2_i <= jmi_array_size(y_a, 1); i2_i += 1) {
+            temp_1_v = 0.0;
+            for (jmi_ad_var_t i3_i = 1; i3_i <= 2; i3_i += 1) {
+                jmi_array_ref_2(temp_2_a, 1, 1) = 1;
+                jmi_array_ref_2(temp_2_a, 1, 2) = 2;
+                jmi_array_ref_2(temp_2_a, 2, 1) = 3;
+                jmi_array_ref_2(temp_2_a, 2, 2) = 4;
+                temp_1_v = temp_1_v + ( jmi_array_val_2(x_a, i1_i, i3_i) ) * ( jmi_array_val_2(temp_2_a, i3_i, i2_i) );
+            }
+            jmi_array_ref_2(y_a, i1_i, i2_i) = temp_1_v;
+        }
+    }
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+")})));
+
+	function f
+		input Real x[:,2];
+		output Real y[size(x, 1), 2];
+	algorithm
+		y := x * {{1, 2}, {3, 4}};
+	end f;
+
+	Real x[3,2] = f({{5,6},{7,8},{9,0}});
+end CUnknownArray2;
+
 
 
 model CRecordDecl1

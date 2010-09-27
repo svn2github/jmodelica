@@ -1286,7 +1286,7 @@ aspect Arrays {
 		Array arr = new Array(indices());
 		for (Index i : arr.indices()) {
 			FQName n = new FQName(tempVarName());
-			n.setLastFArraySubscripts(i.newFArraySubscripts());
+			n.setLastFArraySubscripts(i.createFArraySubscripts());
 			arr.set(i, new FIdUseExp(n));
 		}
 		return arr;
@@ -2831,7 +2831,7 @@ aspect ArrayHelpers {
 		/**
 		 * \brief Create a new FArraySubscripts object describing this index.
 		 */
-		public FArraySubscripts newFArraySubscripts() {
+		public FArraySubscripts createFArraySubscripts() {
 			return FArraySubscripts.createLiteralSubscripts(index);
 		}
 		

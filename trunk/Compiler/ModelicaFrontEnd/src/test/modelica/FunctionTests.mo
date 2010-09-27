@@ -4511,7 +4511,7 @@ model UnknownArray22
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
          name="UnknownArray22",
-         description="",
+         description="Scalarizing multiplication between two inputs of unknown size, with defaults",
          flatModel="
 fclass FunctionTests.UnknownArray22
  Real x;
@@ -4544,6 +4544,98 @@ end FunctionTests.UnknownArray22;
 	Real x = f({1,2}, {3,4});
 end UnknownArray22;
 
+
+// TODO: assignment to temp array should be outside loop - see #699
+model UnknownArray23
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="UnknownArray23",
+         description="Using array constructors with inputs of unknown size",
+         flatModel="
+fclass FunctionTests.UnknownArray23
+ Real x;
+equation
+ x = FunctionTests.UnknownArray23.f({1,2,3});
+
+ function FunctionTests.UnknownArray23.f
+  input Real[:] a;
+  Real temp_1;
+  Integer[3] temp_2;
+  output Real c;
+ algorithm
+  temp_1 := 0.0;
+  for i1 in 1:3 loop
+   temp_2[1] := 1;
+   temp_2[2] := 2;
+   temp_2[3] := 3;
+   temp_1 := temp_1 + ( a[i1] ) * ( temp_2[i1] );
+  end for;
+  c := temp_1;
+  return;
+ end FunctionTests.UnknownArray23.f;
+end FunctionTests.UnknownArray23;
+")})));
+
+	function f
+		input Real a[:];
+		output Real c = a * {1, 2, 3};
+	algorithm
+	end f;
+
+	Real x = f({1,2,3});
+end UnknownArray23;
+
+
+// TODO: assignment to temp array should be outside loop - see #699
+model UnknownArray24
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+	 JModelica.UnitTesting.TransformCanonicalTestCase(
+		 name="UnknownArray24",
+		 description="Using array constructors with inputs of unknown size",
+		 flatModel="
+fclass FunctionTests.UnknownArray24
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real x[3,1];
+ Real x[3,2];
+equation
+ ({{x[1,1],x[1,2]},{x[2,1],x[2,2]},{x[3,1],x[3,2]}}) = FunctionTests.UnknownArray24.f({{5,6},{7,8},{9,0}});
+
+ function FunctionTests.UnknownArray24.f
+  input Real[:, 2] x;
+  output Real[size(x, 1), 2] y;
+  Real temp_1;
+  Integer[2, 2] temp_2;
+ algorithm
+  for i1 in 1:size(y, 1) loop
+   for i2 in 1:size(y, 2) loop
+	temp_1 := 0.0;
+	for i3 in 1:2 loop
+	 temp_2[1,1] := 1;
+	 temp_2[1,2] := 2;
+	 temp_2[2,1] := 3;
+	 temp_2[2,2] := 4;
+	 temp_1 := temp_1 + ( x[i1,i3] ) * ( temp_2[i3,i2] );
+	end for;
+	y[i1,i2] := temp_1;
+   end for;
+  end for;
+  return;
+ end FunctionTests.UnknownArray24.f;
+end FunctionTests.UnknownArray24;
+")})));
+
+	function f
+		input Real x[:,2];
+		output Real y[size(x, 1), 2];
+	algorithm
+		y := x * {{1, 2}, {3, 4}};
+	end f;
+
+	Real x[3,2] = f({{5,6},{7,8},{9,0}});
+end UnknownArray24;
 
 
 // TODO: need more complex cases
