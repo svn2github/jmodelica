@@ -36,19 +36,18 @@ def run_demo(with_plots=True):
     jmu_name = compile_jmu(m_name, mofile)
     model = JMUModel(jmu_name)
     
-    sim_res = model.simulate(final_time=86400.0, 
-        options={'num_communication_points':86400, 'IDA_options':{'make_consistency':'IDA_YA_YDP_INIT'}})
-    
-    res = sim_res.result_data
-    theta = res.get_variable_data('theta')
-    azim = res.get_variable_data('azim')
-    N_day = res.get_variable_data('N_day')
+    res = model.simulate(final_time=86400.0, 
+        options={'ncp':86400})
 
+    theta = res['theta']
+    azim = res['azim']
+    N_day = res['N_day']
+    time = res['time']
     
     # Plot results
     if with_plots:
         p.figure(1)
-        p.plot(theta.t, theta.x)
+        p.plot(time, theta)
         p.xlabel('time [s]')
         p.ylabel('theta [deg]')
         p.title('Angle of Incidence on Surface')

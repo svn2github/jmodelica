@@ -57,7 +57,7 @@ def run_demo(with_plots=True):
     rob_sim.pbar = rob_mod.p0 #Value used when IDA estimates the tolerances on the parameters
     
     #Let Sundials find consistent initial conditions by use of 'IDA_YA_YDP_INIT'
-    rob_sim.make_consistency('IDA_YA_YDP_INIT')
+    rob_sim.make_consistent('IDA_YA_YDP_INIT')
     
     #Simulate
     rob_sim.simulate(4,400) #Simulate 4 seconds with 400 communication points
