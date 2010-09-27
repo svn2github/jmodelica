@@ -1,6 +1,6 @@
 #!/bin/sh
 
-if test "${JAVA_HOME}" == ""; then
+if test "${JAVA_HOME}" = ""; then
   export JAVA_HOME=@_JAVA_HOME_@
 fi
 JMODELICA_HOME=@prefix@ \
