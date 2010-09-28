@@ -36,6 +36,12 @@
 
   <xi:include href="GettingStarted.xml" xpointer="element(/1)" />
 
+  <xi:include href="Models.xml" xpointer="element(/1)" />
+
+  <xi:include href="Simulation.xml" xpointer="element(/1)" />
+
+  <xi:include href="Optimization.xml" xpointer="element(/1)" />
+
   <xi:include href="FMI.xml" xpointer="element(/1)" />
 
   <xi:include href="HighlevelFunctions.xml" xpointer="element(/1)" />
