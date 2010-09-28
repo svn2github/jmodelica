@@ -121,9 +121,11 @@ def check_packages():
             vers="--"
             if package=='assimulo':
                 fp, path, desc = imp.find_module('problem', [assimulo_path])
+                mod = imp.load_module('problem', fp, path, desc)
             else:    
                 fp, path, desc = imp.find_module(package)
-            mod = imp.load_module(package, fp, path, desc)
+                mod = imp.load_module(package, fp, path, desc)
+                
             try:
                 if package == "pyreadline":
                     vers = mod.release.version
