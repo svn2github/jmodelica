@@ -87,21 +87,13 @@ aspect Connections {
 			n.enableStreamsRewrite();
 	}
 	
-	public void FActualStream.enableStreamsRewrite() {
+	public void FStreamBuiltIn.enableStreamsRewrite() {
 		super.enableStreamsRewrite();
 		rewriteStreams = true;
 		is$Final = false;
 	}
 	
-	boolean FActualStream.rewriteStreams = false;
-
-	public void FInStream.enableStreamsRewrite() {
-		super.enableStreamsRewrite();
-		rewriteStreams = true;
-		is$Final = false;
-	}
-	
-	boolean FInStream.rewriteStreams = false;
+	protected boolean FStreamBuiltIn.rewriteStreams = false;
 
 	
 	/**
@@ -114,37 +106,35 @@ aspect Connections {
 			// rewrite to an access. If it occurs in an inside-outside connection
 			// rewrite to a new inStream operator operating on the outside
 			// stream variable in the same connection set.
-			ConnectionSet cs = myFClass().getConnectionSetManager().
-				getConnectionSet(((FIdUseExp)getFExp()).name(),false);
-			//System.out.println(getFExp().prettyPrint(""));
-			//System.out.println(cs);
-			if (cs!=null) {
-				ConnectionSetEntry cses[] = cs.toArray(new ConnectionSetEntry[cs.size()]);
-				if (cses.length==1 && cses[0].isInside()) { // N=1 M=0
-					return cses[0].getFQName().createFIdUseExp();
-				} else if (cses.length==2) {
-					if ((cses[0].isInside()&&cses[1].isOutside()) || // N=1 M=1
-							(cses[1].isInside()&&cses[0].isOutside())) {
-						if (cses[0].isInside()) { // Rewrite recursively to the inStream(c.streamVar<outside>)
-							FInStream fis = (FInStream)createNode(cses[1].getFQName().createFIdUseExp());
-							fis.rewriteStreams = true;
-							return fis;
-						} else {
-							FInStream fis =  (FInStream)createNode(cses[0].getFQName().createFIdUseExp());
-							fis.rewriteStreams = true;
-							return fis;
-						}
-					}
-					if ((cses[0].isInside()&&cses[1].isInside())) { // N=2 M=0
-						if (((FIdUseExp)getFExp()).name() == cses[0].name()) {
-							return cses[1].getFQName().createFIdUseExp();
-						} else {
-							return cses[0].getFQName().createFIdUseExp();
-						}
-					}
-					
+			FQName fqn = ((FIdUseExp) getFExp()).getFIdUse().getFQName().fullCopy();
+			fqn.scalarized = false;
+			String name = fqn.name();
+			FArraySubscripts fas = fqn.hasFArraySubscripts() ? fqn.getFArraySubscripts() : null;
+			ConnectionSet cs = myFClass().getConnectionSetManager().getConnectionSet(name, false);
+			if (cs != null) {
+				int N = 0; // # of inside
+				for (ConnectionSetEntry cse : cs)
+					if (cse.isInside())
+						N++;
+				int M = cs.size() - N; // # of outside
+				
+				Iterator<ConnectionSetEntry> it = cs.iterator();
+				ConnectionSetEntry cse = it.next();
+				if (N == 1 && M == 0) {
+					return cse.getFQName().createFIdUseExp(fas);
+				} else if (N == 1 && M == 1) {
+					if (cse.isInside())
+						cse = it.next();
+					FInStream fis = new FInStream(cse.getFQName().createFIdUseExp(fas));
+					fis.rewriteStreams = true;
+					return fis;
+				} else if (N == 2 && M == 0) {
+					if (cse.name().equals(name))
+						cse = it.next();
+					return cse.getFQName().createFIdUseExp(fas);
 				}
 			}
+			// TODO: should throw an exception here, but this situation is detected *after* this rewrite
 			this.rewriteStreams = false;
 			return this;
 		}
@@ -169,7 +159,8 @@ aspect Connections {
 				FIfExp if_exp = new FIfExp(guard,then_exp,new List(),else_exp);
 				return if_exp;
 			}
-			return null;
+			throw new UnsupportedOperationException("Rewriting actualStream() for '" + var_name.name() + 
+					"': found " + cses.size() + " matching flow variables");
 		}
 	}
 

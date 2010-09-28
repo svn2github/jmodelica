@@ -714,15 +714,8 @@ aspect FlattPrettyPrint {
 		int block_index = 0;
 	    boolean wroteEquation = false;
 	    for (FEquationBlock b : getFEquationBlocks()) {
-	    	if (root().options.getBooleanOption("equation_sorting")) {
-	    		if (block_index!=0) {
-	    			str.print("/* Block " + block_index + ": ");
-	    			for (FVariable fv : b.activeVariables) {
-	    				str.print(fv.name() + " ");
-	    			}
-	    			str.print("*/\n");
-	    		}
-	    	}
+    		if (block_index != 0)
+    			b.printBlockComment(block_index, str);
 	    	for (FAbstractEquation e : b.getFAbstractEquations()) {
 	    		if (e instanceof FAlgorithmBlock) {
 	    			p.toString(e, str, indent, o);
@@ -733,15 +726,8 @@ aspect FlattPrettyPrint {
 		    				str.print(indent);
 		    				str.print("equation\n");
 		    				wroteEquation = true;
-		    				if (root().options.getBooleanOption("equation_sorting")) {
-		    					if (block_index==0) {
-		    						str.print("/* Block " + block_index + ": ");
-		    						for (FVariable fv : b.activeVariables) {
-		    							str.print(fv.name() + " ");
-		    						}
-		    						str.print("*/\n");
-		    					}
-		    				}
+	    					if (block_index == 0) 
+	    		    			b.printBlockComment(block_index, str);
 		    			}
 		    			p.toString(e, str, nextInd, o);
 			    		str.print(";\n");
@@ -759,6 +745,16 @@ aspect FlattPrettyPrint {
   		str.print("end ");
   		str.print(name());
   		str.print(";\n");
+	}
+	
+	public void FEquationBlock.printBlockComment(int index, PrintStream str) {
+		if (root().options.getBooleanOption("equation_sorting")) {
+			str.print("/* Block " + index + ": ");
+			for (FVariable fv : activeVariables) {
+				str.print(fv.name() + " ");
+			}
+			str.print("*/\n");
+		}
 	}
 
 	public void FVariable.prettyPrint(Printer p, PrintStream str, String indent, Object o) {

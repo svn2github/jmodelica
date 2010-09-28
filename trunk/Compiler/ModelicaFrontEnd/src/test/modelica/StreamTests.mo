@@ -169,7 +169,7 @@ end StreamTests.StreamTest4;
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
          name="StreamTest5",
-         description="Using actualStream() on array.",
+         description="Using actualStream() on stream variables from array of connectors.",
          eliminate_alias_variables=false,
          flatModel="
 fclass StreamTests.StreamTest5
@@ -200,6 +200,61 @@ end StreamTests.StreamTest5;
 	 Reservoir r[2];
 	 Real h[2] = actualStream(r.fluidPort.h_outflow);
   end StreamTest5;
+  
+  model StreamTest6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="StreamTest6",
+         description="Using actualStream() on array of stream variables.",
+         eliminate_alias_variables=false,
+         flatModel="
+fclass StreamTests.StreamTest6
+ Real d.a;
+ Real d.b[1];
+ Real d.b[2];
+ Real d.c;
+ Real f[1];
+ Real f[2];
+equation
+ f[1] = (if d.a > 0 then d.b[1] else d.b[1]);
+ f[2] = (if d.a > 0 then d.b[2] else d.b[2]);
+ f[1] = 1;
+ f[2] = 2;
+ d.c = 0;
+ d.a = 0;
+end StreamTests.StreamTest6;
+")})));
+
+	  connector A
+		 flow Real a;
+		 stream Real[2] b;
+		 Real c;
+	  end A;
+	  
+	  A d;
+	  Real f[2];
+  equation
+	  f = actualStream(d.b);
+	  f = {1,2};
+	  d.c = 0;
+  end StreamTest6;
+  
+// TODO: rewrite from actualStream() does not handle this
+  model StreamTest7
+	  connector A
+		 flow Real a;
+		 stream Real b;
+		 Real c;
+	  end A;
+	  
+	  A d;
+	  A e;
+	  Real f;
+  equation
+	  connect(d, e);
+	  f = actualStream(d.b);
+  end StreamTest7;
+
 
 model StreamComplErr
  // This is actually a compliance error but is kept here in order to avoid copying dependent classes.
@@ -530,7 +585,7 @@ equation
  linearResistance.port_a.m_flow = ( linearResistance.port_a.p - ( linearResistance.port_b.p ) ) / ( linearResistance.u );
  linearResistance.port_a.m_flow + linearResistance.port_b.m_flow = 0;
  linearResistance.port_a.h_outflow = reservoir.flowPort.h_outflow;
- linearResistance.port_b.h_outflow = linearResistance.port_a.h_outflow;
+ linearResistance.port_b.h_outflow = multiPortVolume.flowPort[2].h_outflow;
  reservoir.flowPort.p = reservoir.p0;
  reservoir.flowPort.h_outflow = reservoir.h0;
  ramp.y = ramp.offset + (if time < ramp.startTime then 0 elseif time < ramp.startTime + ramp.duration then ( ( time - ( ramp.startTime ) ) * ( ramp.height ) ) / ( ramp.duration ) else ramp.height);

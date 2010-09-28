@@ -1037,6 +1037,27 @@ aspect FlatNames {
         return new FIdUse(fullCopy()); 
     }
     
+    /**
+     * \brief Create an FIdUseExp using a copy of this name.
+     * 
+     * @param fas  array subscripts to use for the last name part.
+     */
+    public FIdUseExp FQName.createFIdUseExp(FArraySubscripts fas) {
+        return new FIdUseExp(createFIdUse(fas)); 
+    }
+    
+    /**
+     * \brief Create an FIdUse using a copy of this name.
+     * 
+     * @param fas  array subscripts to use for the last name part.
+     */
+    public FIdUse FQName.createFIdUse(FArraySubscripts fas) {
+    	FQName fqn = fullCopy();
+    	if (fas != null)
+    		fqn.lastFQNamePart().setFArraySubscripts(fas);
+        return new FIdUse(fqn); 
+    }
+    
     syn String FType.name();
     eq FRealType.name()    = "Real";
     eq FIntegerType.name() = "Integer";
