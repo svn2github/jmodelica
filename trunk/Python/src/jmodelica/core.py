@@ -190,10 +190,10 @@ class BaseModel(object):
         return self._default_options(algorithm)
         
     def simulate_options(self, algorithm='AssimuloAlg'):
-        """ Get an instance of the simulate options class, prefilled 
-        with default values. If called without argument then the options 
+        """ Get an instance of the simulate options class, prefilled with 
+        default values. If called without argument then the options 
         class for the default simulation algorithm will be returned.
-        
+
         Parameters::
         
             algorithm --

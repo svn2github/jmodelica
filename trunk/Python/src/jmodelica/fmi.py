@@ -1288,21 +1288,18 @@ class FMUModel(BaseModel):
                 Default: 'AssimuloFMIAlg'
             options -- 
                 The options that should be used in the algorithm. For 
-                details on the options, see:
+                details on the options do:
                 
-                * FMUModel.simulate_options?
-                
-                or look at the docstring for an options object with help, 
-                for example:
-                
-                * help(jmodelica.algorithm_drivers.AssimuloFMIAlgOptions)
-                
+                    >> myModel = FMUModel(...)
+                    >> opts = myModel.simulate_options()
+                    >> opts?
+
                 Valid values are: 
-                - A dict which gives AssimuloFMIAlgOptions with default 
-                  values on all options except the ones listed in the 
-                  dict. Empty dict will thus give all options with 
-                  default values.
-                - An options object.
+                    - A dict which gives AssimuloFMIAlgOptions with 
+                      default values on all options except the ones 
+                      listed in the dict. Empty dict will thus give all 
+                      options with default values.
+                    - An options object.
                 Default: Empty dict
         
         Returns::

@@ -2031,23 +2031,20 @@ class JMUModel(BaseModel):
                 Default: 'IpoptInitializationAlg'
             options -- 
                 The options that should be used in the algorithm. For 
-                details on the options, see:
+                details on the options do:
                 
-                * JMUModel.initialize_options?
-                
-                or look at the docstring for an options object with help, 
-                for example:
-                
-                * help(jmodelica.algorithm_drivers.IpoptInitializationAlgOptions)
-                
+                    >> myModel = JMUModel(...)
+                    >> opts = myModel.initialize_options()
+                    >> opts?
+
                 Valid values are: 
-                - A dict which gives IpoptInitializationAlgOptions with 
-                  default values on all options except the ones listed 
-                  in the dict. Empty dict will thus give all options 
-                  with default values.
-                - An options object.
+                    - A dict which gives IpoptInitializationAlgOptions 
+                      with default values on all options except the ones 
+                      listed in the dict. Empty dict will thus give all 
+                      options with default values.
+                    - An options object.
                 Default: Empty dict
-                    
+
         Returns::
             
             Result object, subclass of algorithm_drivers.ResultBase.
@@ -2064,14 +2061,23 @@ class JMUModel(BaseModel):
         """ Compact function for model simulation.
             
         The simulation method depends on which algorithm is used, this 
-        can be set with the function argument 'algorithm'. Options 
-        for the algorithm are passed as option classes or as pure dicts. 
-        See JMUModel.simulate_options for more details.
+        can be set with the function argument 'algorithm'. Options for 
+        the algorithm are passed as option classes or as pure dicts. See 
+        JMUModel.simulate_options for more details.
             
         The default algorithm for this function is AssimuloAlg. 
             
         Parameters::
-            
+        
+            start_time --
+                Start time for the simulation.
+                Default: 0.0
+            final_time --
+                Final time for the simulation.
+                Default: 1.0
+            input_trajectory --
+                Input signal for the simulation.
+                Default: Empty numpy array.
             algorithm --
                 The algorithm which will be used for the simulation is 
                 specified by passing the algorithm class as string or 
@@ -2083,21 +2089,18 @@ class JMUModel(BaseModel):
                 Default: 'AssimuloAlg'
             options -- 
                 The options that should be used in the algorithm. For 
-                details on the options, see:
+                details on the options do:
                 
-                * JMUModel.simulate_options?
-                
-                or look at the docstring for an options object with help, 
-                for example:
-                
-                * help(jmodelica.algorithm_drivers.AssimuloAlgOptions)
-                
+                    >> myModel = JMUModel(...)
+                    >> opts = myModel.simulate_options()
+                    >> opts?
+
                 Valid values are: 
-                - A dict which gives AssimuloAlgOptions with default 
-                  values on all options except the ones listed in the 
-                  dict. Empty dict will thus give all options with 
-                  default values.
-                - An options object.
+                    - A dict which gives AssimuloAlgOptions with default 
+                      values on all options except the ones listed in 
+                      the dict. Empty dict will thus give all options 
+                      with default values.
+                    - An options object.
                 Default: Empty dict
             
         Returns::
@@ -2129,28 +2132,25 @@ class JMUModel(BaseModel):
                 The algorithm which will be used for the simulation is 
                 specified by passing the algorithm class as string or 
                 class object in this argument. 'algorithm' can be any 
-                class which implements the abstract class AlgorithmBase (
-                found in algorithm_drivers.py). In this way it is 
+                class which implements the abstract class AlgorithmBase 
+                (found in algorithm_drivers.py). In this way it is 
                 possible to write own algorithms and use them with this 
                 function.
                 Default: 'CollocationLagrangePolynomialsAlg'
             options -- 
                 The options that should be used in the algorithm. For 
-                details on the options, see:
+                details on the options do:
                 
-                * JMUModel.optimize_options?
-                
-                or look at the docstring for an options object with help, 
-                for example:
-                
-                * help(jmodelica.algorithm_drivers.CollocationLagrangePolynomialsAlgOptions)
-                
+                    >> myModel = JMUModel(...)
+                    >> opts = myModel.optimize_options()
+                    >> opts?
+
                 Valid values are: 
-                - A dict which gives CollocationLagrangePolynomialsAlgOptions 
-                  with default values on all options except the ones 
-                  listed in the dict. Empty dict will thus give all 
-                  options with default values.
-                - An options object.
+                    - A dict which gives CollocationLagrangePolynomialsAlgOptions 
+                      with default values on all options except the ones 
+                      listed in the dict. Empty dict will thus give all 
+                      options with default values.
+                    - An options object.
                 Default: Empty dict
             
         Returns::
