@@ -72,7 +72,12 @@ function find_python_tests() {
 }
 
 function python_tests() {
-  TEST_DIR=$(mktemp -dqt)
+  if [ "${KEEP_PYTHON}" == 1 ]; then
+    TEST_DIR=$(mktemp -dqt)
+  else
+    TEST_DIR=tests_$(date "+%F_%H-%M-%S")
+    mkdir ${TEST_DIR}
+  fi 
   PATTERN=----------------------------------------------------------------------
   TAGS="-a stddist -a fmi"
   if [[ "${IPOPT_HOME}" != "" ]]; then
@@ -120,8 +125,10 @@ function python_tests() {
       fi
       ;;
   esac
-  cd ..
-  rm -rf ${TEST_DIR}
+  if [ ! "${KEEP_PYTHON}" == 1 ]; then
+    cd ..
+    rm -rf ${TEST_DIR}
+  fi
 }
 
 # Helper functions
@@ -240,12 +247,15 @@ for a in ${DEFAULT_ARGS} $*; do
       i)
         NO_BUILD_JMODELICA=1
         ;;
+      k)
+        KEEP_PYTHON=1
+        ;;
       h)
         echo "usage: tests [-ajmopvnqcCh]"
-        echo "The -ajmop options each control a set of tests, and select all"
-        echo "tests in set for running, or, if all in set are already selected,"
-        echo "deselects them. Thus, \"tests -am\" runs all tests except"
-        echo "modelica. If no tests are chosen, a default set is run (${DEFAULT_TESTS})."
+        echo "The -ajmop options each control a set of tests, and select all tests in set "
+        echo "for running, or, if all in set are already selected, deselects them. "
+        echo "Thus, \"tests -am\" runs all tests except modelica. If no tests are chosen, "
+        echo "a default set is run (${DEFAULT_TESTS})." 
         echo "  -a  Select/deselect all tests"
         echo "  -j  Select/deselect junit tests"
         echo "  -m  Select/deselect modelica tests"
@@ -257,6 +267,7 @@ for a in ${DEFAULT_ARGS} $*; do
         echo "  -c  Do a clean before junit tests"
         echo "  -C  Do a clean before each test suite"
         echo "  -i  Do not re-build before python tests"
+        echo "  -k  Keep generated files from python tests"
         echo "  -h  Print this help and exit"
 	exit
         ;;
