@@ -2868,4 +2868,42 @@ end RecordWithColonArray4;
 
 
 
+model RecordDer1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="RecordDer1",
+         description="der() on record members",
+         eliminate_alias_variables=false,
+         flatModel="
+fclass RecordTests.RecordDer1
+ Real a.x;
+ Real a.y;
+initial equation 
+ a.x = 1;
+ a.y = 0;
+equation
+ a.der(x) =  - ( a.y );
+ a.der(y) =  - ( a.x );
+
+ record RecordTests.RecordDer1.A
+  Real x;
+  Real y;
+ end RecordTests.RecordDer1.A;
+end RecordTests.RecordDer1;
+")})));
+
+	record A
+		Real x;
+		Real y;
+	end A;
+	
+	A a;
+initial equation
+	a = A(1, 0);
+equation
+	der(a.x) = -a.y;
+	der(a.y) = -a.x;
+end RecordDer1;
+
+
 end RecordTests;
