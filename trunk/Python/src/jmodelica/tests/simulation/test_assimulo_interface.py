@@ -662,7 +662,7 @@ class Test_FMI_ODE:
         bounce = fmi.FMUModel('bouncingBall.fmu', path_to_fmus)
         bounce.initialize()
         res = bounce.simulate(final_time=3.,
-            options={'CVode_options':{'rtol':1e-6, 'iter':'FixedPoint', 'discr':'BDF'}})
+            options={'CVode_options':{'iter':'FixedPoint','rtol':1e-6}})
         height = res['h']
         time = res['time']
     

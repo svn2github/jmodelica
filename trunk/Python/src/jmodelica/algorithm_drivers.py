@@ -362,6 +362,57 @@ class OptionBase(dict):
         if key not in self:
             self[key] = value
         return self[key]
+        
+    def _update_keep_dict_defaults(self, *args, **kw):
+        """ Go through args/kw and for each value in a key-value-set 
+        that is a dict - update the current dict with the new dict (don't 
+        overwrite).
+        """
+        if args:
+            if len(args) > 1:
+                raise TypeError("update expected at most 1 arguments, got %d" % len(args))
+            other = dict(args[0])
+            for key in other:
+                if not key in self._keys:
+                    raise UnrecognizedOptionError("The key: %s, is not a valid algorithm option" %str(key))
+                if isinstance(self[key], dict):
+                    self[key].update(other[key])
+                else:
+                    self[key] = other[key]
+            
+        for key in kw:
+            if not key in self._keys:
+                raise UnrecognizedOptionError("The key: %s, is not a valid algorithm option" %str(key))
+            if isinstance(self[key], dict):
+                self[key].update(kw[key])
+            else:
+                self[key] = kw[key]
+        
+    #def _update_dict_values(self, *args, **kw):
+        #""" Go through args/kw and for each value in a key-value-set 
+        #that is a dict - update the current dict with the new dict (don't 
+        #overwrite).
+        #"""
+        #if args:
+            #if len(args) > 1:
+                #raise TypeError("update expected at most 1 arguments, got %d" % len(args))
+            #other = dict(args[0])
+            #for key in other:
+                #if not key in self._keys:
+                    #raise UnrecognizedOptionError("The key: %s, is not a valid algorithm option" %str(key))
+                #if isinstance(self[key], dict):
+                    #self[key].update(other[key])
+                    #other[key]=self[key]
+            #args=(other.items(),)
+            
+        #for key in kw:
+            #if not key in self._keys:
+                #raise UnrecognizedOptionError("The key: %s, is not a valid algorithm option" %str(key))
+            #if isinstance(self[key], dict):
+                #self[key].update(kw[key])
+                #kw[key] = self[key]
+                
+        #return args, kw
     
 class IpoptInitResult(JMResultBase):
     pass
@@ -377,7 +428,10 @@ class IpoptInitializationAlgOptions(OptionBase):
             'IPOPT_options':{}
             }
         super(IpoptInitializationAlgOptions,self).__init__(_defaults)
-        self.update(*args, **kw)
+        # for those key-value-sets where the value is a dict, don't 
+        # overwrite the whole dict but instead update the default dict 
+        # with the new values
+        self._update_keep_dict_defaults(*args, **kw)
 
 class IpoptInitializationAlg(AlgorithmBase):
     """ Initialization of a model using Ipopt. """
@@ -538,7 +592,10 @@ class AssimuloFMIAlgOptions(OptionBase):
             'CVode_options':{'discr':'BDF','iter':'Newton'}
             }
         super(AssimuloFMIAlgOptions,self).__init__(_defaults)
-        self.update(*args, **kw)
+        # for those key-value-sets where the value is a dict, don't 
+        # overwrite the whole dict but instead update the default dict 
+        # with the new values
+        self._update_keep_dict_defaults(*args, **kw)
 
 class AssimuloFMIAlg(AlgorithmBase):
     """Simulation algortihm for FMUs using the Assimulo package."""
@@ -754,8 +811,12 @@ class AssimuloAlgOptions(OptionBase):
             'CVode_options':{'discr':'BDF','iter':'Newton',
                              'atol':1.0e-6,'rtol':1.0e-6}
             }
+        # create options with default values
         super(AssimuloAlgOptions,self).__init__(_defaults)
-        self.update(*args, **kw)
+        # for those key-value-sets where the value is a dict, don't 
+        # overwrite the whole dict but instead update the default dict 
+        # with the new values
+        self._update_keep_dict_defaults(*args, **kw)
 
 class AssimuloAlg(AlgorithmBase):
     """ Simulation algorithm using the Assimulo package. """
@@ -923,7 +984,10 @@ class CollocationLagrangePolynomialsAlgOptions(OptionBase):
             'IPOPT_options':{}
             }
         super(CollocationLagrangePolynomialsAlgOptions,self).__init__(_defaults)
-        self.update(*args, **kw)
+        # for those key-value-sets where the value is a dict, don't 
+        # overwrite the whole dict but instead update the default dict 
+        # with the new values
+        self._update_keep_dict_defaults(*args, **kw)
 
 class CollocationLagrangePolynomialsAlg(AlgorithmBase):
     """ Optimization algorithm using CollocationLagrangePolynomials method. """
@@ -1099,7 +1163,10 @@ class KInitSolveAlgOptions(OptionBase):
             'result_format':'txt'
             }
         super(KInitSolveAlgOptions,self).__init__(_defaults)
-        self.update(*args, **kw)
+        # for those key-value-sets where the value is a dict, don't 
+        # overwrite the whole dict but instead update the default dict 
+        # with the new values
+        self._update_keep_dict_defaults(*args, **kw)
         
 class KInitSolveAlg(AlgorithmBase):
     """ Initialization using a solver of non-linear eq-systems"""

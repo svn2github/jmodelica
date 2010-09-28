@@ -280,11 +280,12 @@ class Test_init_assimulo:
         that an exception is raised if the argument is invalid. 
         """
         opts = self.model_rlc.simulate_options()
-        opts['IDA_options']={'max_eIter':100, 'maxh':0.1}
+        opts['IDA_options']['max_eIter']=100 
+        opts['IDA_options']['maxh']=0.1
         sim_res = self.model_rlc.simulate(options = opts)
         
         opts = sim_res.options
-        opts['IDA_options']={'maxeter':10}
+        opts['IDA_options']['maxeter']=10
         nose.tools.assert_raises(InvalidSolverArgumentException,
                                  self.model_rlc.simulate,options=opts)
         
@@ -294,7 +295,7 @@ class Test_init_assimulo:
             invalid solver argument.
         """
         opts = self.model_rlc.simulate_options()
-        opts['IDA_options']={'mxiter':10}
+        opts['IDA_options']['mxiter']=10
         nose.tools.assert_raises(InvalidSolverArgumentException,
                                  self.model_rlc.simulate, options=opts)
 
@@ -317,8 +318,6 @@ class Test_init_assimulo:
         model = JMUModel(jmu_name)
         opts = model.simulate_options()
         opts['solver']='CVode'
-        opts['ncp']=0
-        opts['CVode_options']={'discr':'BDF', 'iter':'Newton'}
         sim_res = model.simulate(final_time=20, options=opts)
         x1=sim_res['x1']
         x2=sim_res['x2']
@@ -347,6 +346,6 @@ class Test_init_assimulo:
         
         nose.tools.assert_raises(Exception,
                                  model.simulate,
-                                 alg_args={'initialize':False})
+                                 options={'initialize':False})
 
 

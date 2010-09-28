@@ -36,8 +36,7 @@ def run_demo(with_plots=True):
     jmu_name = compile_jmu(m_name, mofile)
     model = JMUModel(jmu_name)
     
-    res = model.simulate(final_time=86400.0, 
-        options={'ncp':86400})
+    res = model.simulate(final_time=86400.0, options={'ncp':86400})
 
     theta = res['theta']
     azim = res['azim']
