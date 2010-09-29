@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter version="5.0" xmlns="http://docbook.org/ns/docbook"
+<chapter version="5.0" xml:id="chap-optimica"
+         xmlns="http://docbook.org/ns/docbook"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xmlns:xs="http://www.w3.org/2001/XMLSchema"
          xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -311,7 +312,8 @@ end DoubleIntegrator; </programlisting>
   </itemizedlist>
 
   <section>
-    <title>A new specialized class: <literal>optimization</literal></title>
+    <title xml:id="sec-optimica-spec-class">A new specialized class:
+    <literal>optimization</literal></title>
 
     <para>A new specialized class, called <literal>optimization</literal>, in
     which the proposed Optimica-specific constructs are valid is supported by
@@ -430,7 +432,7 @@ end DIMinTime; </programlisting>
     to classify an expression <literal>y(t_i)</literal> based on the context,
     i.e., what function and variable declarations are visible. This feature of
     Optimica is used in the constraint section of the double integrator
-    example, and is described below. </para>
+    example, and is described below.</para>
   </section>
 
   <section>
@@ -441,8 +443,8 @@ end DIMinTime; </programlisting>
     elements are intrinsic properties of the respective optimization
     formulations, and should be specified, once, by the user. In this respect
     the cost function and optimization interval differ from, for example,
-    constraints, since the user may specify zero, one or more of the latter.
-    </para>
+    constraints, since the user may specify zero, one or more of the
+    latter.</para>
 
     <para>In order to encode these elements, class attributes are introduced.
     A class attribute is an intrinsic element of a specialized class, and may
@@ -472,7 +474,7 @@ end DIMinTime;</programlisting>
     reference to the built-in class have been eliminated, and the modification
     construct is instead given directly after the name of the class itself.
     The class attributes may be accessed and modified in the same way as if
-    they were inherited. </para>
+    they were inherited.</para>
   </section>
 
   <section>

@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <chapter version="5.0" xmlns="http://docbook.org/ns/docbook"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:xs="http://www.w3.org/2001/XMLSchema"
          xmlns:xlink="http://www.w3.org/1999/xlink"
          xmlns:xi="http://www.w3.org/2001/XInclude"
          xmlns:svg="http://www.w3.org/2000/svg"
@@ -8,8 +10,174 @@
          xmlns:db="http://docbook.org/ns/docbook">
   <title>Optimization</title>
 
+  <section xml:id="opt_sec_intro">
+    <title>Introduction</title>
+
+    <para>JModelica.org supports optimization of dynamic and steady state
+    models. Models are usually formulated in the Modelica language, whereas
+    </para>
+  </section>
+
   <section>
-    <title></title>
+    <title>A first example</title>
+
+    <para>We consider the following Optimica model:</para>
+
+    <programlisting>optimization VDP_Opt (objective = cost(finalTime),
+                      startTime = 0,
+                      finalTime = 20)
+
+  // The states
+  Real x1(start=0,fixed=true);
+  Real x2(start=1,fixed=true);
+
+  // The control signal
+  input Real u;
+
+  Real cost(start=0,fixed=true);
+
+equation
+  der(x1) = (1 - x2^2) * x1 - x2 + u;
+  der(x2) = x1;
+  der(cost) = x1^2 + x2^2 + u^2;
+constraint 
+   u&lt;=0.75;
+end VDP_Opt;
+</programlisting>
+
+    <para>Create a new file named VDP_Opt.mop and save it in you working
+    directory. Next, create a Python script file and a write (or copy paste)
+    the following commands:</para>
+
+    <programlisting language="python"># Import the optimize function
+from jmodelica import optimize
+
+# Import the plotting library
+import matplotlib.pyplot as plt</programlisting>
+
+    <para>Next, we call the 'optimize' function which encapsulates operations
+    for compiling, loading, executing the optimization algorithm, and loading
+    the result from file:</para>
+
+    <programlisting language="python">res_object = optimize("VDP_Opt", "VDP_Opt.mo")</programlisting>
+
+    <para>In this case, we use the default settings for the optimization
+    algorithm and provide only the name of the Optimica class (the first
+    argument) and the name of the file (VDP.mo). The return object is a result
+    object which contains a reference to a jmodelica.Model object representing
+    the compiled model and also the optimization result. To access the
+    optimization result and the optimal trajectories:</para>
+
+    <programlisting language="python">res = res_object.get_result_data() #Get the result data
+x1=res.get_variable_data('x1')
+x2=res.get_variable_data('x2')
+u=res.get_variable_data('u')</programlisting>
+
+    <para>The return arguments are objects of the Python class
+    jmodelica.io.Trajectory, which has two fields: 't' which represents the
+    time vector and 'x' which represents the trajectory vector. t and x are
+    both numpy arrays of the same length. Using the matplotlib package, we can
+    visualize the optimization result:</para>
+
+    <programlisting language="python">plt.figure(1)
+plt.clf()
+plt.subplot(311)
+plt.plot(x1.t,x1.x)
+plt.grid()
+plt.ylabel('x1')
+        
+plt.subplot(312)
+plt.plot(x2.t,x2.x)
+plt.grid()
+plt.ylabel('x2')
+        
+plt.subplot(313)
+plt.plot(u.t,u.x)
+plt.grid()
+plt.ylabel('u')
+plt.xlabel('time')
+plt.show()</programlisting>
+
+    <para>You should now see the optimization result as shown in <xref
+    linkend="fig-vdp-opt" />.</para>
+
+    <figure floatstyle="top" xml:id="fig-vdp-opt">
+      <title></title>
+
+      <mediaobject>
+        <imageobject>
+          <imagedata align="left" fileref="images/vdp.svg" scalefit="1"
+                     width="40%"></imagedata>
+        </imageobject>
+      </mediaobject>
+
+      <caption>
+        <para><emphasis linkend="fig-vdp-opt" role="bold"><xref
+        linkend="fig-vdp-opt" /></emphasis>.This figure shows the optimal
+        control and state profiles for the Van Der Pol optimal control
+        problem.</para>
+      </caption>
+    </figure>
+
+    <para>Some additional text a reference to </para>
+  </section>
+
+  <section>
+    <title>Solving optimization problems</title>
+
+    <para></para>
+
+    <section>
+      <title>Selection of algorithm</title>
+
+      <para></para>
+    </section>
+
+    <section>
+      <title>Options</title>
+
+      <para></para>
+    </section>
+  </section>
+
+  <section>
+    <title>Optimal control</title>
+
+    <para></para>
+  </section>
+
+  <section>
+    <title>Minimum time problems</title>
+
+    <para></para>
+  </section>
+
+  <section>
+    <title>Parameter optimization</title>
+
+    <para></para>
+  </section>
+
+  <section>
+    <title>Steady state problems</title>
+
+    <para></para>
+  </section>
+
+  <section>
+    <title>Initial guesses</title>
+
+    <para></para>
+  </section>
+
+  <section>
+    <title>Scaling</title>
+
+    <para></para>
+  </section>
+
+  <section>
+    <title>Generating output</title>
 
     <para></para>
   </section>
