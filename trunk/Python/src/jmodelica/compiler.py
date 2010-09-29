@@ -80,7 +80,7 @@ class ModelicaCompiler():
         except jpype.JavaException, ex:
             self._handle_exception(ex)
             
-        options.setStringOption('MODELICAPATH',jm.environ['MODELICAPATH'])
+        options.addStringOption('MODELICAPATH',jm.environ['MODELICAPATH'])
         fmi = options.getBooleanOption('generate_fmi_xml')
         equ = options.getBooleanOption('generate_xml_equations')
         if fmi and not equ:
@@ -158,7 +158,7 @@ class ModelicaCompiler():
             self._handle_exception(ex)
         return bool(option)
     
-    def set_boolean_option(self, key, value, description=""):
+    def set_boolean_option(self, key, value):
         """ Set the boolean option with key to value and an optional
         description. 
         
@@ -175,7 +175,7 @@ class ModelicaCompiler():
                 Default: Empty string.
         """
         try:
-            self._compiler.setBooleanOption(key, value, description)
+            self._compiler.setBooleanOption(key, value)
             
             if key.strip() == 'generate_fmi_xml' or key.strip() == 'generate_xml_equations':
                 fmi = self.get_boolean_option('generate_fmi_xml')
@@ -204,7 +204,7 @@ class ModelicaCompiler():
             self._handle_exception(ex)
         return option
     
-    def set_integer_option(self, key, value, description=""):
+    def set_integer_option(self, key, value):
         """ Set the integer option with key to value and an optional
         description. 
         
@@ -221,7 +221,7 @@ class ModelicaCompiler():
                 Default: Empty string.
         """
         try:
-            self._compiler.setIntegerOption(key, value, description)
+            self._compiler.setIntegerOption(key, value)
         except jpype.JavaException, ex:
             self._handle_exception(ex)
         
@@ -239,7 +239,7 @@ class ModelicaCompiler():
             self._handle_exception(ex)
         return option
     
-    def set_real_option(self, key, value, description=""):
+    def set_real_option(self, key, value):
         """ Set the real option with key to value and an optional
         description. 
         
@@ -256,7 +256,7 @@ class ModelicaCompiler():
                 Default: Empty string.
         """
         try:
-            self._compiler.setRealOption(key, value, description)
+            self._compiler.setRealOption(key, value)
         except jpype.JavaException, ex:
             self._handle_exception(ex)
                     
@@ -274,7 +274,7 @@ class ModelicaCompiler():
             self._handle_exception(ex)
         return str(option)
         
-    def set_string_option(self, key, value, description=""):
+    def set_string_option(self, key, value):
         """ Set the string option with key to value and an optional
         description. 
         
@@ -291,7 +291,7 @@ class ModelicaCompiler():
                 Default: Empty string.
         """
         try:
-            self._compiler.setStringOption(key, value, description)
+            self._compiler.setStringOption(key, value)
         except jpype.JavaException, ex:
             self._handle_exception(ex)
         
@@ -783,7 +783,7 @@ class OptimicaCompiler(ModelicaCompiler):
         except jpype.JavaException, ex:
             self._handle_exception(ex)
             
-        options.setStringOption('MODELICAPATH',jm.environ['MODELICAPATH'])
+        options.addStringOption('MODELICAPATH',jm.environ['MODELICAPATH'])
         
         fmi = options.getBooleanOption('generate_fmi_xml')
         if fmi:
@@ -824,7 +824,7 @@ class OptimicaCompiler(ModelicaCompiler):
         """
         return self.OptimicaCompiler.getLogLevel(self.ModelicaCompiler.log)
 
-    def set_boolean_option(self, key, value, description=""):
+    def set_boolean_option(self, key, value):
         """ Set the boolean option with key to value and an optional
         description. 
         
@@ -841,7 +841,7 @@ class OptimicaCompiler(ModelicaCompiler):
                 Default: Empty string.
         """
         try:
-            self._compiler.setBooleanOption(key, value, description)
+            self._compiler.setBooleanOption(key, value)
             
             if key.strip() == 'generate_fmi_xml':
                 fmi = self.get_boolean_option('generate_fmi_xml')

@@ -144,10 +144,6 @@ public class ModelicaCompiler {
 		options.setStringOption(key,value);
 	}
 	
-	public void setStringOption(String key, String value, String description) throws UnknownOptionException {
-		options.setStringOption(key, value, description);
-	}
-	
 	public int getIntegerOption(String key) throws UnknownOptionException {
 		return options.getIntegerOption(key);
 	}
@@ -156,20 +152,12 @@ public class ModelicaCompiler {
 		options.setIntegerOption(key, value);
 	}
 	
-	public void setIntegerOption(String key, int value, String description) throws UnknownOptionException {
-		options.setIntegerOption(key, value, description);
-	}	
-	
 	public double getRealOption(String key) throws UnknownOptionException {
 		return options.getRealOption(key);
 	}
 	
 	public void setRealOption(String key, double value) throws UnknownOptionException {
 		options.setRealOption(key, value);
-	}
-
-	public void setRealOption(String key, double value, String description) throws UnknownOptionException {
-		options.setRealOption(key, value, description);
 	}
 	
 	public boolean getBooleanOption(String key) throws UnknownOptionException{
@@ -178,10 +166,6 @@ public class ModelicaCompiler {
 	
 	public void setBooleanOption(String key, boolean value) throws UnknownOptionException {
 		options.setBooleanOption(key, value);
-	}
-
-	public void setBooleanOption(String key, boolean value, String description) throws UnknownOptionException {
-		options.setBooleanOption(key, value, description);
 	}
 	
 	public String getOptionDescription(String key) throws UnknownOptionException {
@@ -204,7 +188,7 @@ public class ModelicaCompiler {
 	 * @param path The new modelicapath.
 	 */
 	public void setModelicapath(String path) {
-		options.setStringOption("MODELICAPATH", path);
+		options.addStringOption("MODELICAPATH", path);
 	}
 	
 	/**
@@ -831,7 +815,7 @@ public class ModelicaCompiler {
 				modelicapath=System.getenv("JMODELICA_HOME")+filesep+"ThirdParty"+filesep+"MSL";
 			}
 		}
-		options.setStringOption("MODELICAPATH", modelicapath);
+		options.addStringOption("MODELICAPATH", modelicapath);
 		
 		// set options field
 		this.options = options;

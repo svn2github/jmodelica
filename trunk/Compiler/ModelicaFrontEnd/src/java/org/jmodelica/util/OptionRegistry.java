@@ -41,6 +41,9 @@ public class OptionRegistry {
 	
 		private enum DefOpt {
 			MSL_VER    ("default_msl_version",       "3.0.1", ""),
+			EXTRA_LIB  ("extra_lib_dirs",            "", 
+					"The value of this option is appended to the value of the MODELICAPATH environment " +
+					"variable for determining in what directories to search for libraries."),
 			START_FIX  ("state_start_values_fixed",  false, 
 					"This option enables the user to specify if initial equations should be " + 
 					"generated automatically for differentiated variables even though the fixed " +
@@ -55,7 +58,7 @@ public class OptionRegistry {
 			XML_EQU    ("generate_xml_equations",    false, 
 					"If this option is true, then model equations are generated in XML format. " + 
 					"Default is false."),
-			INDEX_RED  ("index_reduction",           false, 
+			INDEX_RED  ("index_reduction",           false, // NB: this description used in a Python test 
 					"If this option is true (default is false), index reduction is performed."),
 			EQU_SORT   ("equation_sorting",          false, 
 					"If this option is true (default is false), equations are sorted using the BLT algorithm."),
@@ -104,7 +107,6 @@ public class OptionRegistry {
 			optionsMap = new HashMap<String,Option>();
 			for (DefOpt o : DefOpt.values())
 				defaultOption(o);
-//			defaultBooleanOption(DefOpt.MIN_T_TRANS,  true);
 		}
 
 		public OptionRegistry(OptionRegistry registry) {
@@ -145,20 +147,14 @@ public class OptionRegistry {
 					String key = attributes.getNamedItem("key").getTextContent();
 					String value = attributes.getNamedItem("value").getTextContent();
 					
-					String description;
-					// description
-					expr = xpath.compile("/OptionRegistry/Options/Option/*/Description[parent::*/parent::Option[attribute::type=\""+type+"\"]][parent::*[attribute::key=\""+key+"\"]]");
-					org.w3c.dom.Node descr = (org.w3c.dom.Node)expr.evaluate(doc, javax.xml.xpath.XPathConstants.NODE);
-					description = descr != null ? descr.getTextContent().trim():"";
-					
 					if(type.equals("string")) {
-						setStringOption(key, value, description);
+						setStringOption(key, value);
 					} else if(type.equals("integer")) {
-						setIntegerOption(key, Integer.parseInt(value), description);
+						setIntegerOption(key, Integer.parseInt(value));
 					} else if(type.equals("real")) {
-						setRealOption(key, Double.parseDouble(value), description);
+						setRealOption(key, Double.parseDouble(value));
 					} else if(type.equals("boolean")) {
-						setBooleanOption(key, Boolean.parseBoolean(value), description);
+						setBooleanOption(key, Boolean.parseBoolean(value));
 					}
 				}				
 			}	
@@ -217,6 +213,21 @@ public class OptionRegistry {
 			}
 		}
 		
+		/**
+		 * \brief Main method. Exports default options to XML file. 
+		 */
+		public static void main(String[] args) {
+			if (args.length < 1) {
+				System.err.println("Missing argument: file name to export to.");
+			} else {
+				try {
+					new OptionRegistry().exportXML(args[0]);
+				} catch (FileNotFoundException e) {
+					System.err.println("Could not open file for writing: " + e.getMessage());
+				}
+			}
+		}
+		
 		protected void defaultOption(DefOpt o) {
 			if (o.val instanceof Integer)
 				createIntegerOption(o.key, o.desc, ((Integer) o.val).intValue());
@@ -228,140 +239,164 @@ public class OptionRegistry {
 				createBooleanOption(o.key, o.desc, ((Boolean) o.val).booleanValue());
 		}
 		
-		protected void createIntegerOption(String key, String description,
-				int defaultValue) {
-			optionsMap.put(key,new IntegerOption(key, description,
-					defaultValue));			
+		protected void createIntegerOption(String key, String description, int defaultValue) {
+			optionsMap.put(key, new IntegerOption(key, description, defaultValue));			
 		}
 		
-		public void setIntegerOption(String key, int value, String description) {
-			Option o = optionsMap.get(key);
-			if (o == null) {
-				createIntegerOption(key, description, value);
-			} else if (o instanceof IntegerOption) {
-				((IntegerOption)o).setValue(value);
-			} else {
-				throw new UnknownOptionException("Option: "+key +" is not of " +
-						"integer type");
-			}			
+		public void addIntegerOption(String key, int value, String description) {
+			setIntegerOption(key, value, description, true);
+		}
+		
+		public void addIntegerOption(String key, int value) {
+			setIntegerOption(key, value, "", true);
 		}
 		
 		public void setIntegerOption(String key, int value) {
-			setIntegerOption(key, value, "");
+			setIntegerOption(key, value, "", false);
+		}
+		
+		protected void setIntegerOption(String key, int value, String description, boolean add) {
+			IntegerOption opt = findIntegerOption(key, add);
+			if (opt == null)
+				createIntegerOption(key, description, value);
+			else
+				opt.setValue(value);
 		}
 
 		public int getIntegerOption(String key) {
-			Option o = optionsMap.get(key);
-			if (o == null) {
-				throw new UnknownOptionException("Unknown option: "+key);
-			} else if (o instanceof IntegerOption) {
-				return ((IntegerOption)o).getValue();
-			} else {
-				throw new UnknownOptionException("Option: "+key +" is not of " +
-						"integer type");
-			}
-		}
-
-		protected void createStringOption(String key, String description,
-				String defaultValue) {
-			optionsMap.put(key,new StringOption(key, description,
-					defaultValue));			
+			return findIntegerOption(key, false).getValue();
 		}
 		
-		public void setStringOption(String key, String value, String description) {
+		protected IntegerOption findIntegerOption(String key, boolean allowMissing) {
 			Option o = optionsMap.get(key);
-			if (o == null) {
-				createStringOption(key, description, value);
-			} else if (o instanceof StringOption) {
-				((StringOption)o).setValue(value);
-			} else {
-				throw new UnknownOptionException("Option: "+key +" is not of " +
-						"string type");
-			}			
+			if (o instanceof IntegerOption)
+				return (IntegerOption) o;
+			if (o != null)
+				throw new UnknownOptionException("Option: " + key + " is not of " +
+						"integer type");
+			if (allowMissing)
+				return null;
+			throw new UnknownOptionException("Unknown option: " + key);
+		}
+		
+		protected void createStringOption(String key, String description, String defaultValue) {
+			optionsMap.put(key, new StringOption(key, description, defaultValue));			
+		}
+		
+		public void addStringOption(String key, String value, String description) {
+			setStringOption(key, value, description, true);
+		}
+		
+		public void addStringOption(String key, String value) {
+			setStringOption(key, value, "", true);
 		}
 		
 		public void setStringOption(String key, String value) {
-			setStringOption(key, value, "");
+			setStringOption(key, value, "", false);
+		}
+		
+		protected void setStringOption(String key, String value, String description, boolean add) {
+			StringOption opt = findStringOption(key, add);
+			if (opt == null)
+				createStringOption(key, description, value);
+			else
+				opt.setValue(value);
 		}
 
 		public String getStringOption(String key) {
+			return findStringOption(key, false).getValue();
+		}
+		
+		protected StringOption findStringOption(String key, boolean allowMissing) {
 			Option o = optionsMap.get(key);
-			if (o == null) {
-				throw new UnknownOptionException("Unknown option: "+key);
-			} else if (o instanceof StringOption) {
-				return ((StringOption)o).getValue();
-			} else {
-				throw new UnknownOptionException("Option: "+key +" is not of " +
+			if (o instanceof StringOption)
+				return (StringOption) o;
+			if (o != null)
+				throw new UnknownOptionException("Option: " + key + " is not of " +
 						"string type");
-			}
+			if (allowMissing)
+				return null;
+			throw new UnknownOptionException("Unknown option: " + key);
 		}
 		
-		protected void createRealOption(String key, String description,
-				double defaultValue) {
-			optionsMap.put(key,new RealOption(key, description,
-					defaultValue));			
+		protected void createRealOption(String key, String description, double defaultValue) {
+			optionsMap.put(key, new RealOption(key, description, defaultValue));			
 		}
 		
-		public void setRealOption(String key, double value, String description) {
-			Option o = optionsMap.get(key);
-			if (o == null) {
-				createRealOption(key, description, value);
-			} else if (o instanceof RealOption) {
-				((RealOption)o).setValue(value);
-			} else {
-				throw new UnknownOptionException("Option: "+key +" is not of " +
-						"real type");
-			}			
+		public void addRealOption(String key, double value, String description) {
+			setRealOption(key, value, description, true);
 		}
-
+		
+		public void addRealOption(String key, double value) {
+			setRealOption(key, value, "", true);
+		}
+		
 		public void setRealOption(String key, double value) {
-			setRealOption(key, value, "");
+			setRealOption(key, value, "", false);
 		}
 		
-		public double getRealOption(String key) {
-			Option o = optionsMap.get(key);
-			if (o == null) {
-				throw new UnknownOptionException("Unknown option: "+key);
-			} else if (o instanceof RealOption) {
-				return ((RealOption)o).getValue();
-			} else {
-				throw new UnknownOptionException("Option: "+key +" is not of " +
-						"real type");
-			}
-		}
-		
-		protected void createBooleanOption(String key, String description,
-				boolean defaultValue) {
-			optionsMap.put(key,new BooleanOption(key, description,
-					defaultValue));			
-		}
-		
-		public void setBooleanOption(String key, boolean value, String description) {
-			Option o = optionsMap.get(key);
-			if (o == null) {
-				createBooleanOption(key, description, value);
-			} else if (o instanceof BooleanOption) {
-				((BooleanOption)o).setValue(value);
-			} else {
-				throw new UnknownOptionException("Option: "+key +" is not of " +
-						"boolean type");
-			}			
+		protected void setRealOption(String key, double value, String description, boolean add) {
+			RealOption opt = findRealOption(key, add);
+			if (opt == null)
+				createRealOption(key, description, value);
+			else
+				opt.setValue(value);
 		}
 
-		public void setBooleanOption(String key, boolean value) {
-			setBooleanOption(key, value, "");
+		public double getRealOption(String key) {
+			return findRealOption(key, false).getValue();
 		}
 		
-		public boolean getBooleanOption(String key) {
+		protected RealOption findRealOption(String key, boolean allowMissing) {
 			Option o = optionsMap.get(key);
-			if (o == null) {
-				throw new UnknownOptionException("Unknown option: "+key);
-			} else if (o instanceof BooleanOption) {
-				return ((BooleanOption)o).getValue();
-			} else {
-				throw new UnknownOptionException("Option: "+key +" is not of " +
+			if (o instanceof RealOption)
+				return (RealOption) o;
+			if (o != null)
+				throw new UnknownOptionException("Option: " + key + " is not of " +
+						"real type");
+			if (allowMissing)
+				return null;
+			throw new UnknownOptionException("Unknown option: " + key);
+		}
+		
+		protected void createBooleanOption(String key, String description, boolean defaultValue) {
+			optionsMap.put(key, new BooleanOption(key, description, defaultValue));			
+		}
+		
+		public void addBooleanOption(String key, boolean value, String description) {
+			setBooleanOption(key, value, description, true);
+		}
+		
+		public void addBooleanOption(String key, boolean value) {
+			setBooleanOption(key, value, "", true);
+		}
+		
+		public void setBooleanOption(String key, boolean value) {
+			setBooleanOption(key, value, "", false);
+		}
+		
+		protected void setBooleanOption(String key, boolean value, String description, boolean add) {
+			BooleanOption opt = findBooleanOption(key, add);
+			if (opt == null)
+				createBooleanOption(key, description, value);
+			else
+				opt.setValue(value);
+		}
+
+		public boolean getBooleanOption(String key) {
+			return findBooleanOption(key, false).getValue();
+		}
+		
+		protected BooleanOption findBooleanOption(String key, boolean allowMissing) {
+			Option o = optionsMap.get(key);
+			if (o instanceof BooleanOption)
+				return (BooleanOption) o;
+			if (o != null)
+				throw new UnknownOptionException("Option: " + key + " is not of " +
 						"boolean type");
-			}
+			if (allowMissing)
+				return null;
+			throw new UnknownOptionException("Unknown option: " + key);
 		}
 		
 		public String getDescription(String key){
@@ -387,13 +422,13 @@ public class OptionRegistry {
 				String key = entry.getKey();
 				Option o = entry.getValue();
 				if(o instanceof StringOption) {
-					setStringOption(key, ((StringOption) o).getValue());
+					addStringOption(key, ((StringOption) o).getValue());
 				} else if(o instanceof IntegerOption) {
-					setIntegerOption(key, ((IntegerOption) o).getValue());
+					addIntegerOption(key, ((IntegerOption) o).getValue());
 				} else if(o instanceof RealOption) {
-					setRealOption(key, ((RealOption) o).getValue());
+					addRealOption(key, ((RealOption) o).getValue());
 				} else if(o instanceof BooleanOption) {
-					setBooleanOption(key, ((BooleanOption) o).getValue());
+					addBooleanOption(key, ((BooleanOption) o).getValue());
 				} else {
 					throw new UnknownOptionException(
 							"Trying to copy unknown option with key: "+key+
@@ -417,12 +452,16 @@ public class OptionRegistry {
 			while (end < len) {
 				while (end > start && !Character.isWhitespace(str.charAt(end)))
 					end--;
-				if (end <= start)
-					end = start + width;
 				buf.append(prefix);
-				buf.append(str.substring(start, end));
+				if (end <= start) {
+					buf.append(str.substring(start, start + width - 1));
+					start += width - 1;
+					buf.append('-');
+				} else {
+					buf.append(str.substring(start, end));
+					start = end + 1;
+				}
 				buf.append('\n');
-				start = end + 1;
 				end = start + width;
 			}
 			buf.append(prefix);

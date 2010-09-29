@@ -44,7 +44,7 @@ public class TestSuite {
 		OptionRegistry or = new OptionRegistry();
 		String modelica_path = System.getenv("JMODELICA_HOME") + File.separator + 
 				"ThirdParty" + File.separator + "MSL";
-		or.setStringOption("MODELICAPATH", modelica_path);
+		or.addStringOption("MODELICAPATH", modelica_path);
 		sr.options = or;
 
 		sr.collectTestCases(this,className);

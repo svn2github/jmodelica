@@ -208,10 +208,16 @@ aspect Library {
         List libnodes = new List();
         
         String modelicaPath = root().options.getStringOption("MODELICAPATH");
-        log.info("MODELICAPATH=" + modelicaPath);
+        log.info("MODELICAPATH = " + modelicaPath);
+        String extraPath = root().options.getStringOption("extra_lib_dirs");
+        log.info("extra_lib_dirs = " + extraPath);
+        StringBuilder buf = new StringBuilder(modelicaPath);
+        if (!extraPath.startsWith(File.pathSeparator) && !extraPath.equals(""))
+        	buf.append(File.pathSeparator);
+        buf.append(extraPath);
            
         // For each directory detect all libraries
-        for (String pathElement : modelicaPath.split(File.pathSeparator)) {
+        for (String pathElement : buf.toString().split(File.pathSeparator)) {
             try {
                 File baseDir = new File(pathElement);
                 if (baseDir.listFiles() == null) 

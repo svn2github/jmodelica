@@ -250,17 +250,15 @@ class Test_Compiler:
     @testattr(stddist = True)
     def test_setget_boolean_option(self):
         """ Test boolean option setter and getter. """
-        option = 'boolean_testoption'
-        setvalue = True
-        # create new option
-        mc.set_boolean_option(option, setvalue)
-        nose.tools.assert_equal(mc.get_boolean_option(option), setvalue)
+        option = 'halt_on_warning'
+        value = mc.get_boolean_option(option)
         # change value of option
-        setvalue = False
-        mc.set_boolean_option(option, setvalue)
-        nose.tools.assert_equal(mc.get_boolean_option(option), setvalue)
+        mc.set_boolean_option(option, not value)
+        nose.tools.assert_equal(mc.get_boolean_option(option), not value)
         # option should be of type bool
-        assert isinstance(mc.get_boolean_option(option),bool)
+        assert isinstance(mc.get_boolean_option(option), bool)
+        # reset to original value
+        mc.set_boolean_option(option, value)
     
     @testattr(stddist = True)
     def test_setget_boolean_option_error(self):
@@ -269,20 +267,21 @@ class Test_Compiler:
         #try to get an unknown option
         nose.tools.assert_raises(jm.compiler.UnknownOptionError, mc.get_boolean_option, option)
 
-    @testattr(stddist = True)
-    def test_setget_integer_option(self):
-        """ Test integer option setter and getter. """
-        option = 'integer_testoption'
-        setvalue = 10
-        # create new option
-        mc.set_integer_option(option, setvalue)
-        nose.tools.assert_equal(mc.get_integer_option(option), setvalue)
-        # change value of option
-        setvalue = 100
-        mc.set_integer_option(option, setvalue)
-        nose.tools.assert_equal(mc.get_integer_option(option), setvalue)
-        # option should be of type int
-        assert isinstance(mc.get_integer_option(option),int)
+# There are no integer options yet
+#    @testattr(stddist = True)
+#    def test_setget_integer_option(self):
+#        """ Test integer option setter and getter. """
+#        option = 'integer_testoption'
+#        setvalue = 10
+#        # create new option
+#        mc.set_integer_option(option, setvalue)
+#        nose.tools.assert_equal(mc.get_integer_option(option), setvalue)
+#        # change value of option
+#        setvalue = 100
+#        mc.set_integer_option(option, setvalue)
+#        nose.tools.assert_equal(mc.get_integer_option(option), setvalue)
+#        # option should be of type int
+#        assert isinstance(mc.get_integer_option(option),int)
     
     @testattr(stddist = True)
     def test_setget_integer_option_error(self):
@@ -291,20 +290,21 @@ class Test_Compiler:
         #try to get an unknown option
         nose.tools.assert_raises(jm.compiler.UnknownOptionError, mc.get_integer_option, option) 
 
-    @testattr(stddist = True)
-    def test_setget_real_option(self):
-        """ Test real option setter and getter. """
-        option = 'real_testoption'
-        setvalue = 10.0
-        # create new option
-        mc.set_real_option(option, setvalue)
-        nose.tools.assert_equal(mc.get_real_option(option), setvalue)
-        # change value of option
-        setvalue = 100.0
-        mc.set_real_option(option, setvalue)
-        nose.tools.assert_equal(mc.get_real_option(option), setvalue)
-        # option should be of type float
-        assert isinstance(mc.get_real_option(option),float)
+# There are no real options yet
+#    @testattr(stddist = True)
+#    def test_setget_real_option(self):
+#        """ Test real option setter and getter. """
+#        option = 'real_testoption'
+#        setvalue = 10.0
+#        # create new option
+#        mc.set_real_option(option, setvalue)
+#        nose.tools.assert_equal(mc.get_real_option(option), setvalue)
+#        # change value of option
+#        setvalue = 100.0
+#        mc.set_real_option(option, setvalue)
+#        nose.tools.assert_equal(mc.get_real_option(option), setvalue)
+#        # option should be of type float
+#        assert isinstance(mc.get_real_option(option),float)
     
     @testattr(stddist = True)
     def test_setget_real_option_error(self):
@@ -316,17 +316,16 @@ class Test_Compiler:
     @testattr(stddist = True)
     def test_setget_string_option(self):
         """ Test string option setter and getter. """
-        option = 'string_testoption'
+        option = 'extra_lib_dirs'
+        value = mc.get_string_option(option)
         setvalue = 'option 1'
-        # create new option
-        mc.set_string_option(option, setvalue)
-        nose.tools.assert_equal(mc.get_string_option(option), setvalue)
         # change value of option
-        setvalue = 'option 2'
         mc.set_string_option(option, setvalue)
         nose.tools.assert_equal(mc.get_string_option(option), setvalue)
         # option should be of type str
         assert isinstance(mc.get_string_option(option),str)
+        # reset to original value
+        mc.set_string_option(option, value)
     
     @testattr(stddist = True)
     def test_setget_string_option_error(self):
@@ -338,10 +337,8 @@ class Test_Compiler:
     @testattr(stddist = True)
     def test_get_option_description(self):
         """ Test that it is possible to get a description for an option. """
-        option = 'get_desc_test'
-        value = 'value'
-        description = 'this is the description'
-        mc.set_string_option(option, value, description)
+        option = 'index_reduction'
+        description = 'If this option is true (default is false), index reduction is performed.'
         nose.tools.assert_equal(mc.get_option_description(option),description)
 
     @testattr(ipopt = True)
