@@ -378,8 +378,38 @@ aspect FlatTypeCheck {
   }
   
   public void InstAccess.typeCheck() {
-	  if (getTopInstAccess() == this && !type().isUnknown()) {
+//	  if (getTopInstAccess() == this && !type().isUnknown()) {
 		  // TODO: if this is a slice, check that all branches are of equal size
+//	  }
+  }
+  
+  public void InstDot.typeCheck() {
+	  // Check for accesses to non-constant component in class
+	  getLeft().checkAccessCompInClassLeft(getRight());
+	  super.typeCheck();
+  }
+  
+  public void InstAccess.checkAccessCompInClassLeft(InstAccess right) {}
+  
+  public void InstDot.checkAccessCompInClassLeft(InstAccess right) {
+	  getRight().checkAccessCompInClassLeft(right);
+  }
+  
+  public void InstClassAccess.checkAccessCompInClassLeft(InstAccess right) {
+	  right.checkAccessCompInClassRight(myInstClassDecl().isPackage());
+  }
+  
+  public void InstAccess.checkAccessCompInClassRight(boolean isPackage) {}
+  
+  public void InstDot.checkAccessCompInClassRight(boolean isPackage) {
+	  getLeft().checkAccessCompInClassRight(isPackage);
+  }
+  
+  public void InstComponentAccess.checkAccessCompInClassRight(boolean isPackage) {
+	  if (!isPackage || !myInstComponentDecl().isConstant()) {
+		  InstAccess top = getTopInstAccess();
+		  String type = isPackage ? "non-constant component in package" : "component in non-package class";
+		  top.error("Can not access " + type + ": " + top.name());
 	  }
   }
   

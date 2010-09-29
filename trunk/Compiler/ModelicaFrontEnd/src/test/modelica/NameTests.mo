@@ -889,19 +889,22 @@ end NameTests.ConstantLookup9;
 end ConstantLookup9;
 
 
-// TODO: Maybe a better error message is needed for the errors in ConstantLookup10-12
+// TODO: Maybe the last error message each in ConstantLookup10-11 are redundant - let lookup succeed?
 class ConstantLookup10
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.ErrorTestCase(
          name="ConstantLookup10",
          description="Constant lookup: trying to import non-constant component",
          errorMessage="
-2 errors found:
+3 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 700, column 17:
+Semantic error at line 908, column 9:
+  Can not access non-constant component in package: NameTests.TestPackage.x
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
+Semantic error at line 909, column 17:
   Could not evaluate binding expression for parameter 'p': 'x'
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 700, column 21:
+Semantic error at line 909, column 21:
   Cannot find class or component declaration for x
 ")})));
 
@@ -916,12 +919,15 @@ class ConstantLookup11
          name="ConstantLookup11",
          description="Constant lookup: trying to import non-constant component (named import)",
          errorMessage="
-2 errors found:
+3 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 720, column 17:
+Semantic error at line 931, column 14:
+  Can not access non-constant component in package: NameTests.TestPackage.x
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
+Semantic error at line 932, column 17:
   Could not evaluate binding expression for parameter 'p': 'x2'
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 720, column 21:
+Semantic error at line 932, column 21:
   Cannot find class or component declaration for x2
 ")})));
 
@@ -930,6 +936,7 @@ Semantic error at line 720, column 21:
 end ConstantLookup11;
 
 
+// TODO: Maybe a better error message is needed here
 class ConstantLookup12
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.ErrorTestCase(
@@ -997,18 +1004,31 @@ Semantic error at line 799, column 23:
 end ConstantLookup16;
 
 
-// TODO: Compiling this model causes an exception, it should cause an error message
 model ConstantLookup17
-	model A
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ConstantLookup17",
+         description="Illegal accesses of components in local classes",
+         errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
+Semantic error at line 1023, column 11:
+  Can not access non-constant component in package: A.n
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
+Semantic error at line 1024, column 11:
+  Can not access component in non-package class: B.n
+")})));
+
+	package A
 		parameter Integer n = 2;
-		Real x[n] = fill(1, n);
 	end A;
 	
 	model B
 		constant Integer n = 3;
 	end B;
 	
-	A a(n = B.n);
+	Real a = A.n;
+	Real b = B.n;
 end ConstantLookup17;
 
 

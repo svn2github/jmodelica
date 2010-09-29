@@ -665,6 +665,7 @@ aspect InstanceErrorCheck {
 			getLeft().collectErrors();
 			if (!getLeft().isUnknown())
 				getRight().collectErrors();
+			allChecks();
 	    }
 	}
 

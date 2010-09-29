@@ -102,15 +102,15 @@ aspect FlatVariability {
     eq InstComponentDecl.getInstComponentDecl().overrideVariability(TypePrefixVariability var) =
     	var.combineDown(findVariability());
     
-	syn boolean InstAssignable.isConstant()   = findVariability().constantVariability();
-	syn boolean InstAssignable.isParameter()  = findVariability().parameterVariability();
-	syn boolean InstAssignable.isDiscrete()   = findVariability().discreteVariability();
-	syn boolean InstAssignable.isContinuous() = findVariability().continuousVariability();
+	syn boolean InstComponentDecl.isConstant()   = findVariability().constantVariability();
+	syn boolean InstComponentDecl.isParameter()  = findVariability().parameterVariability();
+	syn boolean InstComponentDecl.isDiscrete()   = findVariability().discreteVariability();
+	syn boolean InstComponentDecl.isContinuous() = findVariability().continuousVariability();
 		
 		
-	syn boolean FExp.isConstantExp() = variability().constantVariability();
-	syn boolean FExp.isParameterExp() = variability().parameterVariability();
-	syn boolean FExp.isDiscreteExp() = variability().discreteVariability();
+	syn boolean FExp.isConstantExp()   = variability().constantVariability();
+	syn boolean FExp.isParameterExp()  = variability().parameterVariability();
+	syn boolean FExp.isDiscreteExp()   = variability().discreteVariability();
 	syn boolean FExp.isContinuousExp() = variability().continuousVariability();
 	
 	syn boolean FSubscript.isConstant() = true;
