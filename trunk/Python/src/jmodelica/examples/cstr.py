@@ -212,19 +212,19 @@ def run_demo(with_plots=True):
         plt.hold(True)
         plt.subplot(311)
         plt.plot(time_res,c_res)
-        plt.plot(time_res,c_ref,'--')
+        plt.plot([time_res[0],time_res[-1]],[c_ref,c_ref],'--')
         plt.grid()
         plt.ylabel('Concentration')
 
         plt.subplot(312)
         plt.plot(time_res,T_res)
-        plt.plot(time_res,T_ref,'--')
+        plt.plot([time_res[0],time_res[-1]],[T_ref,T_ref],'--')
         plt.grid()
         plt.ylabel('Temperature')
 
         plt.subplot(313)
         plt.plot(time_res,Tc_res)
-        plt.plot(time_res,Tc_ref,'--')
+        plt.plot([time_res[0],time_res[-1]],[Tc_ref,Tc_ref],'--')
         plt.grid()
         plt.ylabel('Cooling temperature')
         plt.xlabel('time')
@@ -252,7 +252,7 @@ def run_demo(with_plots=True):
     c_sim=res['c']
     T_sim=res['T']
     Tc_sim=res['Tc']
-    time = res['time']
+    time_sim = res['time']
 
     # Plot the results
     if with_plots:
@@ -260,22 +260,22 @@ def run_demo(with_plots=True):
         plt.clf()
         plt.hold(True)
         plt.subplot(311)
-        plt.plot(time,c_res,'--')
-        plt.plot(time,c_sim)
+        plt.plot(time_res,c_res,'--')
+        plt.plot(time_sim,c_sim)
         plt.legend(('optimized','simulated'))
         plt.grid()
         plt.ylabel('Concentration')
 
         plt.subplot(312)
-        plt.plot(time,T_res,'--')
-        plt.plot(time,T_sim)
+        plt.plot(time_res,T_res,'--')
+        plt.plot(time_sim,T_sim)
         plt.legend(('optimized','simulated'))
         plt.grid()
         plt.ylabel('Temperature')
 
         plt.subplot(313)
-        plt.plot(time,Tc_res,'--')
-        plt.plot(time,Tc_sim)
+        plt.plot(time_res,Tc_res,'--')
+        plt.plot(time_sim,Tc_sim)
         plt.legend(('optimized','simulated'))
         plt.grid()
         plt.ylabel('Cooling temperature')
