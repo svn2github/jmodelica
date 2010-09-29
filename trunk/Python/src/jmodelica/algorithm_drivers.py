@@ -740,7 +740,7 @@ class AssimuloFMIAlg(AlgorithmBase):
 
 class AssimuloAlgOptions(OptionBase):
     """
-    Options for the solving the JMU using the Assimulo simulation package.
+    Options for simulation of a JMU model using the Assimulo simulation package.
     The Assimulo package contain both explicit solvers (CVode) for ODEs and 
     implicit solvers (IDA) for DAEs. The ODE solvers require that the problem
     is written on the form, ydot = f(t,y).
@@ -967,21 +967,133 @@ class CollocationLagrangePolynomialsResult(JMResultBase):
     pass
 
 class CollocationLagrangePolynomialsAlgOptions(OptionBase):
-    """ Options for the CollocationLagrangePolynomials optimization 
+    """
+    Options for optimizing JMU models using a collocation
     algorithm. 
+
+    Collocation algorithm options::
+    
+        n_e --
+            Number of elements of the finite element mesh.
+            Default: 50
+            
+        n_cp --
+            Number of collocation points in each element. Values
+            between 1 and 10 are supported
+            Default: 3
+            
+        hs --
+            A vector containing n_e elements representing the finite
+            element lengths. The sum of all element should equal to 1.
+            Default: numpy.ones(n_e)/n_e (Uniform mesh)
+            
+        blocking_factors --
+            A vector of blocking factors. Blocking factors are
+            specified by a vector of integers, where each entry in the
+            vector corresponds to the number of elements for which the
+            control profile should be kept constant. For example, the
+            blocking factor specification [2,1,5] means that u_0=u_1
+            and u_3=u_4=u_5=u_6=u_7 assuming that the number of
+            elements is 8. Notice that specification of blocking
+            factors implies that controls are present in only one
+            collocation point (the first) in each element. The number
+            of constant control levels in the optimization interval is
+            equal to the length of the blocking factor vector. In the
+            example above, this implies that there are three constant
+            control levels. If the sum of the entries in the blocking
+            factor vector is not equal to the number of elements, the
+            vector is normalized, either by truncation (if the sum of
+            the entries is larger than the number of element) or by
+            increasing the last entry of the vector. For example, if
+            the number of elements is 4, the normalized blocking
+            factor vector in the example is [2,2]. If the number of
+            elements is 10, then the normalized vector is [2,1,7].
+            Default: None
+            
+        init_traj --
+            Variable trajectory data used for initialization of the
+            optimization problem. The data is represented by an object
+            of the type jmodelica.io.DymolaResultTextual.
+            Default: None
+            
+        result_mode --
+            Specifies the output format of the optimization result.
+             - 'default' gives the the optimization result at the
+               collocation points.
+             - 'element_interpolation' computes the values of the
+               variable trajectories using the collocation interpolation
+               polynomials. The option 'n_interpolation_points' is used
+               to specify the number of evaluation points within each
+               finite element.
+             - 'mesh_interpolation' computes the values of the variable
+               trajectories at points defined by the option
+               'result_mesh'.
+            Default: 'default'
+            
+        n_interpolation_points --
+            Number of interpolation points in each finite element
+            if the result reporting option result_mode is set to
+            'element_interpolation'.
+            Default: 20
+            
+        result_mesh --
+            A vector of time points at which the the optimization
+            result is computed. This option is used if result_mode
+            is set to 'mesh_interpolation'.
+            Default: None
+            
+        result_file_name --
+            Specifies the name of the file where the optimization
+            result is written. Setting this option to an empty
+            string results in a default file name that is based
+            on the name of the optimization class.
+            Default: ''
+            
+        result_format --
+            Specifies in which format to write the result. Currently
+            only textual mode is supported.
+            Default: 'txt'
+
+    Options are set by using the syntax for dictionaries::
+
+        >>> opts = my_model.optimize_options()
+        >>> opts['n_e'] = 100
+        
+    In addition, IPOPT options can be provided in the option
+    IPOPT_options. For a complete list of IPOPT options, please
+    consult the IPOPT documentation available at
+    http://www.coin-or.org/Ipopt/documentation/).
+
+    Some commonly used IPOPT options are provided by default::
+
+        max_iter --
+           Maximum number of iterations.
+           Default: 3000
+                      
+        derivative_test --
+           Check the correctness of the NLP derivatives. Valid values are
+           'none', 'first-order', 'second-order', 'only-second-order'.
+           Default: 'none'
+
+    IPOPT options are set using the syntax for dictionaries::
+
+        >>> opts['IPOPT_options']['max_iter'] = 200
+
     """
     def __init__(self, *args, **kw):
         _defaults= {
             'n_e':50, 
             'n_cp':3, 
-            'hs':N.ones(50)*1./50, 
+            'hs':None, 
             'blocking_factors':None,
             'init_traj':None,
-            'result_mesh':'default', 
+            'result_mode':'default', 
+            'n_interpolation_points':20,
+            'result_mesh':None,
             'result_file_name':'', 
             'result_format':'txt',
-            'n_interpolation_points':None,
-            'IPOPT_options':{}
+            'IPOPT_options':{'max_iter':3000,
+                             'derivative_test':'none'}
             }
         super(CollocationLagrangePolynomialsAlgOptions,self).__init__(_defaults)
         # for those key-value-sets where the value is a dict, don't 
@@ -990,19 +1102,27 @@ class CollocationLagrangePolynomialsAlgOptions(OptionBase):
         self._update_keep_dict_defaults(*args, **kw)
 
 class CollocationLagrangePolynomialsAlg(AlgorithmBase):
-    """ Optimization algorithm using CollocationLagrangePolynomials method. """
+    """
+    The algorithm is based on orthogonal collocation and
+    relies on the solver IPOPT for solving a non-linear programming
+    problem. 
+
+    Optimization algorithm using CollocationLagrangePolynomials method.
+    """
     
     def __init__(self, 
                  model, 
                  options):
-        """ Create a CollocationLagrangePolynomials algorithm.
+        """
+        Create a CollocationLagrangePolynomials algorithm.
         
         Parameters::
               
             model -- 
                 jmodelica.jmi.JMUModel model object
+
             options -- 
-                The options that should be used in the algorithm. For 
+                The options that should be used by the algorithm. For 
                 details on the options, see:
                 
                 * model.simulate_options('CollocationLagrangePolynomialsAlgOptions')
@@ -1012,11 +1132,10 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
                 * help(jmodelica.algorithm_drivers.CollocationLagrangePolynomialsAlgOptions)
                 
                 Valid values are: 
-                - A dict which gives CollocationLagrangePolynomialsAlgOptions 
-                  with default values on all options except the ones 
-                  listed in the dict. Empty dict will thus give all 
-                  options with default values.
-                - CollocationLagrangePolynomialsAlgOptions object.
+                - A dict that overrides some or all of the default values
+                  provided by CollocationLagrangePolynomialsAlgOptions. An empty
+                  dict will thus give all options with default values.
+                - A CollocationLagrangePolynomialsAlgOptions object.
         """
         self.model = model
         
@@ -1030,13 +1149,16 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
             self.options = options
         else:
             raise InvalidAlgorithmOptionException(options)
-            
+
+        if self.options['hs'] == None:
+            self.options['hs'] = N.ones(self.options['n_e'])/self.options['n_e']
+
         # set options
         self._set_options()
             
         if not ipopt_present:
             raise Exception('Could not find IPOPT. Check jmodelica.check_packages()')
-        
+
         if self.blocking_factors == None:
             self.nlp = ipopt.NLPCollocationLagrangePolynomials(
                 model,self.n_e, self.hs, self.n_cp)
@@ -1060,18 +1182,25 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
         self.hs=self.options['hs']
         self.blocking_factors=self.options['blocking_factors']
         self.init_traj=self.options['init_traj']
-        self.result_mesh=self.options['result_mesh']
-        n_interpolation_points = self.options['n_interpolation_points']
-        if not n_interpolation_points:
+        #self.result_mesh=self.options['result_mesh']
+        self.result_mode = self.options['result_mode']
+        if self.result_mode == 'default':
             self.result_args = dict(
-                file_name=self.options['result_file_name'], 
-                format=self.options['result_format'])
+                file_name = self.options['result_file_name'], 
+                format = self.options['result_format'])
+        elif self.result_mode == 'element_interpolation':
+            self.result_args = dict(
+                file_name = self.options['result_file_name'], 
+                format = self.options['result_format'], 
+                n_interpolation_points = self.options['n_interpolation_points'])
+        elif self.result_mode == 'mesh_interpolation':
+            self.result_args = dict(
+                file_name = self.options['result_file_name'], 
+                format = self.options['result_format'], 
+                mesh = self.options['result_mesh'])
         else:
-            self.result_args = dict(
-                file_name=self.options['result_file_name'], 
-                format=self.options['result_format'], 
-                n_interpolation_points=self.options['n_interpolation_points'])
-        
+            raise InvalidAlgorithmArgumentException(self.result_mesh)
+
         # solver options
         self.solver_options = self.options['IPOPT_options']
         
@@ -1098,14 +1227,14 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
         
             The CollocationLagrangePolynomialsResult object.
         """
-        if self.result_mesh=='element_interpolation':
+        if self.result_mode=='element_interpolation':
             self.nlp.export_result_dymola_element_interpolation(**self.result_args)
-        elif self.result_mesh=='mesh_interpolation':
+        elif self.result_mode=='mesh_interpolation':
             self.nlp.export_result_dymola_mesh_interpolation(**self.result_args)
-        elif self.result_mesh=='default':
+        elif self.result_mode=='default':
             self.nlp.export_result_dymola(**self.result_args)
         else:
-             raise InvalidAlgorithmArgumentException(self.result_mesh)
+             raise InvalidAlgorithmArgumentException(self.resul_mode)
             
         # result file name
         resultfile = self.result_args['file_name']

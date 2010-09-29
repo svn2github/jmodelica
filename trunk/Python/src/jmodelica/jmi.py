@@ -2058,12 +2058,13 @@ class JMUModel(BaseModel):
                  input_trajectory=N.array([]),
                  algorithm='AssimuloAlg', 
                  options={}):
-        """ Compact function for model simulation.
+        """
+        Simulation of a model.
             
-        The simulation method depends on which algorithm is used, this 
-        can be set with the function argument 'algorithm'. Options for 
-        the algorithm are passed as option classes or as pure dicts. See 
-        JMUModel.simulate_options for more details.
+        The simulation method depends on which algorithm is used,
+        which can be set by the function argument 'algorithm'. Options
+        for the simulation algorithm are passed as option classes or
+        as pure dicts. See JMUModel.simulate_options for more details.
             
         The default algorithm for this function is AssimuloAlg. 
             
@@ -2072,40 +2073,43 @@ class JMUModel(BaseModel):
             start_time --
                 Start time for the simulation.
                 Default: 0.0
+                
             final_time --
                 Final time for the simulation.
                 Default: 1.0
+                
             input_trajectory --
-                Input signal for the simulation.
+                Top level input trajectories for the simulation.
                 Default: Empty numpy array.
+                
             algorithm --
-                The algorithm which will be used for the simulation is 
+                The algorithm that will be used for the simulation is 
                 specified by passing the algorithm class as string or 
                 class object in this argument. 'algorithm' can be any 
                 class which implements the abstract class AlgorithmBase 
-                (found in algorithm_drivers.py). In this way it is 
-                possible to write own algorithms and use them with this 
-                function.
+                which is found in the module jmodelica.algorithm_drivers.
+                In this way it is possible to write custom algorithms
+                and use them with this function.
                 Default: 'AssimuloAlg'
+                
             options -- 
-                The options that should be used in the algorithm. For 
-                details on the options do:
+                The options to be used in the algorithm. For 
+                details on available options do:
                 
                     >> myModel = JMUModel(...)
                     >> opts = myModel.simulate_options()
                     >> opts?
 
                 Valid values are: 
-                    - A dict which gives AssimuloAlgOptions with default 
-                      values on all options except the ones listed in 
-                      the dict. Empty dict will thus give all options 
-                      with default values.
-                    - An options object.
+                - A dict that overrides some or all of the default values
+                  provided by AssimuloAlgOptions. An empty
+                  dict will thus give all options with default values.
+                - A AssimuloAlgOptions object.
                 Default: Empty dict
             
         Returns::
             
-            Result object, subclass of algorithm_drivers.ResultBase.
+            A result object, subclass of algorithm_drivers.ResultBase.
         """
         return self._exec_simulate_algorithm(start_time, 
                                              final_time, 
@@ -2116,10 +2120,11 @@ class JMUModel(BaseModel):
     def optimize(self, 
                  algorithm='CollocationLagrangePolynomialsAlg', 
                  options={}):
-        """ Compact function for model optimization.
+        """
+        Solve an optimization problem.
             
         The optimization method depends on which algorithm is used, this 
-        can be set with the function argument 'algorithm'. Options 
+        can be set by the function argument 'algorithm'. Options 
         for the algorithm are passed as option classes or as pure dicts. 
         See JMUModel.optimize_options for more details.
             
@@ -2129,33 +2134,33 @@ class JMUModel(BaseModel):
         Parameters::
             
             algorithm --
-                The algorithm which will be used for the simulation is 
-                specified by passing the algorithm class as string or 
+                The algorithm which will be used for the optimization is 
+                specified by passing the algorithm class name as string or 
                 class object in this argument. 'algorithm' can be any 
                 class which implements the abstract class AlgorithmBase 
                 (found in algorithm_drivers.py). In this way it is 
-                possible to write own algorithms and use them with this 
+                possible to write custom algorithms and to use them with this 
                 function.
                 Default: 'CollocationLagrangePolynomialsAlg'
+                
             options -- 
                 The options that should be used in the algorithm. For 
                 details on the options do:
                 
-                    >> myModel = JMUModel(...)
-                    >> opts = myModel.optimize_options()
-                    >> opts?
+                    >>> myModel = JMUModel(...)
+                    >>> opts = myModel.optimize_options()
+                    >>> opts?
 
                 Valid values are: 
-                    - A dict which gives CollocationLagrangePolynomialsAlgOptions 
-                      with default values on all options except the ones 
-                      listed in the dict. Empty dict will thus give all 
-                      options with default values.
-                    - An options object.
+                - A dict that overrides some or all of the default values
+                  provided by CollocationLagrangePolynomialsAlgOptions. An empty
+                  dict will thus give all options with default values.
+                - A CollocationLagrangePolynomialsAlgOptions object.
                 Default: Empty dict
             
         Returns::
             
-            Result object, subclass of algorithm_drivers.ResultBase.
+            A result object, subclass of algorithm_drivers.ResultBase.
         """
         return self._exec_algorithm(algorithm,
                                     options)

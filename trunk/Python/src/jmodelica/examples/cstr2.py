@@ -150,7 +150,7 @@ def run_demo(with_plots=True):
     
     cost=res['cost']
     time=res['time']
-    
+
     assert N.abs(cost[-1] - 1.4745648e+01) < 1e-3, \
            "Wrong value of cost function in cstr2.py"
     
@@ -161,12 +161,12 @@ def run_demo(with_plots=True):
         plt.hold(True)
         plt.subplot(211)
         plt.plot(time,CA1_res)
-        plt.plot(time,CA1_ref_res,'--')
+        plt.plot([time[0],time[-1]],[CA1_ref_res, CA1_ref_res],'--')
         plt.ylabel('Concentration reactor 1 [J/l]')
         plt.grid()
         plt.subplot(212)
         plt.plot(time,CA2_res)
-        plt.plot(time,CA2_ref_res,'--')
+        plt.plot([time[0],time[-1]],[CA2_ref_res, CA2_ref_res],'--')
         plt.ylabel('Concentration reactor 2 [J/l]')
         plt.xlabel('t [s]')
         plt.grid()
@@ -192,7 +192,7 @@ def run_demo(with_plots=True):
         plt.subplot(211)
         plt.plot(time,u2_res)
         plt.ylabel('Input 2')
-        plt.plot(time,u2_ref_res,'--')
+        plt.plot([time[0],time[-1]],[u2_ref_res, u2_ref_res],'--')
         plt.grid()
         plt.subplot(212)
         plt.plot(time,der_u2_res)
