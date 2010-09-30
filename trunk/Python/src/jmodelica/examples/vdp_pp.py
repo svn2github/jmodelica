@@ -57,14 +57,13 @@ def run_demo(with_plots=True):
         model.set('x1_0',x1_0[i])
         model.set('x2_0',x2_0[i])
         # Simulate 
-        sim_res = model.simulate(final_time=20)
+        res = model.simulate(final_time=20)
         # Get simulation result
-        res = sim_res.result_data
-        x1=res.get_variable_data('x1')
-        x2=res.get_variable_data('x2')
+        x1=res['x1']
+        x2=res['x2']
         # Plot simulation result in phase plane plot
         if with_plots:
-            p.plot(x1.x, x2.x,'b')
+            p.plot(x1, x2,'b')
 
     if with_plots:
         p.grid()

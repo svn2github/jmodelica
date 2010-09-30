@@ -72,7 +72,7 @@ def run_demo(with_plots=True):
         fig = p.figure()
         p.clf()
         p.subplot(2,1,1)
-        p.plot(t_sim, x1_sim, t, x2_sim)
+        p.plot(t_sim, x1_sim, t_sim, x2_sim)
         p.subplot(2,1,2)
         p.plot(t_sim, u_sim,'x-',t, u[:],'x-')
 

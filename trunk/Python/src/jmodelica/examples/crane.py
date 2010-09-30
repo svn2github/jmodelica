@@ -44,19 +44,19 @@ def run_demo(with_plots=True):
     
     """
     
-    curr_dir = os.path.dirname(os.path.abspath(__file__));
+    #curr_dir = os.path.dirname(os.path.abspath(__file__));
 
-    model_name = 'PyMBSModels.CraneCrab_recursive_der_state_Test'
-    mofile = curr_dir+'/files/PyMBSModels.mo'
+    #model_name = 'PyMBSModels.CraneCrab_recursive_der_state_Test'
+    #mofile = curr_dir+'/files/PyMBSModels.mo'
     
-    mc = ModelicaCompiler()
+    #mc = ModelicaCompiler()
     
     # Comile the Modelica model first to C code and
     # then to a dynamic library
-    mc.compile_model(model_name,mofile,target='ipopt')
+    #mc.compile_model(model_name,mofile,target='ipopt')
 
     # Load the dynamic library and XML data
-    model=jmi.Model(model_name.replace('.', '_'))
+    #model=jmi.Model(model_name.replace('.', '_'))
     
     #crane_mod = JMIDAE(model) #Create an Assimulo model
     #crane_sim = IDA(crane_mod) #Create an IDA solver

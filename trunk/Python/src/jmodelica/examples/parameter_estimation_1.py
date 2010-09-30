@@ -123,7 +123,7 @@ def run_demo(with_plots=True):
         plt.figure(2)
         plt.clf()
         plt.subplot(211)
-        plt.plot(t,x,'g')
+        plt.plot(t,x1,'g')
         plt.plot(t_sim,xx[:,0])
         plt.plot(t_meas,xx_meas[:,0],'x')
         plt.grid()

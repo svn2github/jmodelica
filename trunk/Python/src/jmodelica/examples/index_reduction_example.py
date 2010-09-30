@@ -31,5 +31,5 @@ def run_demo(with_plots=True):
 
     # Compile model
     jmu_name = compile_jmu("Pendulum_pack.PlanarPendulum", 
-        curr_dir+"/files/Pendulum_pack.mo", 
+        curr_dir+"/files/Pendulum_pack.mop", 
         compiler_options={"index_reduction":True})

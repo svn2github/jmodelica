@@ -39,9 +39,6 @@ def run_demo(with_plots=True):
     # Load the dynamic library and XML data
     model = JMUModel(jmu_name)
 
-    # Initialize the switches (1=true, 0=false)
-    model.sw = N.array([1,1])
-    
     #Simulate
     res = model.simulate(final_time=5.0)
     
