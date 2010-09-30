@@ -791,6 +791,8 @@ all-local:
 @WITH_SUNDIALS_TRUE@	cd $(abs_top_srcdir)/Assimulo; \
 @WITH_SUNDIALS_TRUE@	python setup_source.py install --sundials-home=$(SUNDIALS_HOME) --prefix=$(assimulo_install_dir)
 	$(abs_top_srcdir)/get_version.sh $(abs_top_srcdir) > $(abs_builddir)/version.txt
+	mkdir -p $(abs_builddir)/Options
+	$(abs_top_srcdir)/run_java.sh org.jmodelica.util.OptionRegistry $(abs_builddir)/Options/options.xml
 	mkdir -p $(abs_builddir)/build_tmp
 	$(CC) -c -fPIC $(abs_top_srcdir)/Python/util/FMILogger.c -o $(abs_builddir)/build_tmp/FMILogger.o
 	case $(build) in \
@@ -827,8 +829,7 @@ install-exec-local:
 	cp $(abs_top_srcdir)/JMI/Makefiles/Makefile.linux $(DESTDIR)$(prefix)/Makefiles/MakeFile ;; \
 	esac
 	mkdir -p $(DESTDIR)$(prefix)/Options
-	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy options file" || cp $(abs_top_srcdir)/Options/options.xml $(DESTDIR)$(prefix)/Options/options.xml
-	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy LICENSE file" || cp $(abs_top_srcdir)/Options/LICENSE $(DESTDIR)$(prefix)/Options/LICENSE
+	cp $(abs_builddir)/Options/options.xml $(DESTDIR)$(prefix)/Options/options.xml
 	mkdir -p $(DESTDIR)$(prefix)/Python
 	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy LICENSE file" || cp $(abs_top_srcdir)/Python/LICENSE $(DESTDIR)$(prefix)/Python
 	cd $(abs_top_srcdir)/Python/src/; find jmodelica -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python

@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.Iterator;
+import java.util.regex.Pattern;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
@@ -40,43 +41,42 @@ import org.xml.sax.SAXException;
 public class OptionRegistry {
 	
 		private enum DefOpt {
-			MSL_VER    ("default_msl_version",       "3.0.1", ""),
-			EXTRA_LIB  ("extra_lib_dirs",            "", 
+			EXTRA_LIB   ("extra_lib_dirs",            "", 
 					"The value of this option is appended to the value of the MODELICAPATH environment " +
 					"variable for determining in what directories to search for libraries."),
-			START_FIX  ("state_start_values_fixed",  false, 
+			START_FIX   ("state_start_values_fixed",  false, 
 					"This option enables the user to specify if initial equations should be " + 
 					"generated automatically for differentiated variables even though the fixed " +
 					"attribute is equal to fixed. Setting this option to true is, however, often " +
 					"practical in optimization problems."),
-			ELIM_ALIAS ("eliminate_alias_variables", true, 
+			ELIM_ALIAS  ("eliminate_alias_variables", true, 
 					"If this option is set to true (default), then alias variables are " +
                     "eliminated from the model."),
-			HALT_WARN  ("halt_on_warning",           false, 
+			HALT_WARN   ("halt_on_warning",           false, 
 					"If this option is set to false (default) one or more compiler " +
                     "warnings will not stop compilation of the model."),
-			XML_EQU    ("generate_xml_equations",    false, 
+			XML_EQU     ("generate_xml_equations",    false, 
 					"If this option is true, then model equations are generated in XML format. " + 
 					"Default is false."),
-			INDEX_RED  ("index_reduction",           false, // NB: this description used in a Python test 
+			INDEX_RED   ("index_reduction",           false, // NB: this description used in a Python test 
 					"If this option is true (default is false), index reduction is performed."),
-			EQU_SORT   ("equation_sorting",          false, 
+			EQU_SORT    ("equation_sorting",          false, 
 					"If this option is true (default is false), equations are sorted using the BLT algorithm."),
-			XML_FMI    ("generate_fmi_xml",          false, 
+			XML_FMI     ("generate_fmi_xml",          false, 
 					"If this option is true the model description part of the XML variables file " + 
 					"will be FMI compliant. Default is false. To generate an XML which will " + 
 					"validate with FMI schema the option generate_xml_equations must also be false."),
-			VAR_SCALE  ("enable_variable_scaling",   false, 
+			VAR_SCALE   ("enable_variable_scaling",   false, 
 					"If this option is true (default is false), then the \"nominal\" attribute will " + 
 					"be used to scale variables in the model."),
-			MIN_T_TRANS  ("normalize_minimum_time_problems", true, 
-							" When this option is set to true (default is true) then minimum time " +
-							"optimal control problems encoded in Optimica are converted to fixed " + 
-							"interval problems by scaling of the derivative variables."),
-			ADD_INIT_EQ  ("automatic_add_initial_equations", true, 
-							" When this option is set to true (default is true), then additional initial " +
-							"equations are added to the model based on a the result of a matching algorithm. " +
-							"Initial equations are added for states that are not matched to an equation.");
+			MIN_T_TRANS ("normalize_minimum_time_problems", true, 
+					"When this option is set to true (default is true) then minimum time " +
+					"optimal control problems encoded in Optimica are converted to fixed " + 
+					"interval problems by scaling of the derivative variables."),
+			ADD_INIT_EQ ("automatic_add_initial_equations", true, 
+					"When this option is set to true (default is true), then additional initial " +
+					"equations are added to the model based on a the result of a matching algorithm. " +
+					"Initial equations are added for states that are not matched to an equation.");
 						
 			public String key;
 			public String desc;
@@ -186,16 +186,25 @@ public class OptionRegistry {
 			return doc;
 		}
 		
+		private static final String INDENT = "    ";
+		
+		/**
+		 * \brief Replace tabs with INDENT.
+		 */
+		protected static String indent(String str) {
+			return str.replace("\t", INDENT);
+		}
+		
 		/**
 		 * \brief Export all options as XML.
 		 * 
 		 * @param out  the stream to write to
 		 */
 		public void exportXML(PrintStream out) {
-			out.print("<OptionsRegistry>\n\t<Options>\n");
+			out.print(indent("<OptionsRegistry>\n\t<Options>\n"));
 			for (Option o : optionsMap.values())
 				o.exportXML(out);
-			out.print("\t</Options>\n</OptionsRegistry>\n");
+			out.print(indent("\t</Options>\n</OptionsRegistry>\n"));
 		}
 		
 		/**
@@ -214,17 +223,19 @@ public class OptionRegistry {
 		}
 		
 		/**
-		 * \brief Main method. Exports default options to XML file. 
+		 * \brief Main method. Exports default options to XML.
+		 * 
+		 * If given an argument, XML is saved in file with that path.
 		 */
 		public static void main(String[] args) {
-			if (args.length < 1) {
-				System.err.println("Missing argument: file name to export to.");
-			} else {
-				try {
-					new OptionRegistry().exportXML(args[0]);
-				} catch (FileNotFoundException e) {
-					System.err.println("Could not open file for writing: " + e.getMessage());
-				}
+			try {
+				OptionRegistry or = new OptionRegistry();
+				if (args.length < 1) 
+					or.exportXML(System.out);
+				else 
+					or.exportXML(args[0]);
+			} catch (FileNotFoundException e) {
+				System.err.println("Could not open file for writing: " + e.getMessage());
 			}
 		}
 		
@@ -483,19 +494,19 @@ public class OptionRegistry {
 			String type = getType();
 			String tag = capitalize(type) + "Attributes";
 			String attrs = String.format("\t\t\t<%s key=\"%s\" value=\"%s\"", tag, key, getValueString());
-			out.print(String.format("\t\t<Option type=\"%s\">\n", type));
-			out.print(attrs);
+			out.print(String.format(indent("\t\t<Option type=\"%s\">\n"), type));
+			out.print(indent(attrs));
 //			if (description == null || description.isEmpty()) {
 			if (description == null || description.equals("")) {
 				out.print("/>\n");
 			} else {
-				out.print(">\n\t\t\t\t<Description>\n");
-				out.print(wrap(description, "\t\t\t\t\t", 80));
-				out.print("\t\t\t\t</Description>\n\t\t\t</");
+				out.print(indent(">\n\t\t\t\t<Description>\n"));
+				out.print(wrap(description, indent("\t\t\t\t\t"), 80));
+				out.print(indent("\t\t\t\t</Description>\n\t\t\t</"));
 				out.print(tag);
 				out.print(">\n");
 			}
-			out.print("\t\t</Option>\n");
+			out.print(indent("\t\t</Option>\n"));
 		}
 		
 		public abstract String getType();
@@ -625,9 +636,6 @@ public class OptionRegistry {
 	
 	public static class UnknownOptionException extends RuntimeException { 
 		
-		/**
-		 * 
-		 */
 		private static final long serialVersionUID = 3884972549318063140L;
 
 		public UnknownOptionException(String message) {

@@ -4,9 +4,11 @@
 REL=.
 # Path to source dir (relative to cwd or absolute depending on $0)
 SRC=$(dirname $0)/${REL}
+CLS=$1
 
-FILE=${SRC}/Compiler/ModelicaFrontEnd/src/java/org/jmodelica/util/GetJavaHome.java
+shift
+FILE=${SRC}/Compiler/ModelicaFrontEnd/src/java/${CLS//.//}.java
 TEMP=$(mktemp -dqt)
 javac -d ${TEMP} ${FILE}
-java -cp ${TEMP} org.jmodelica.util.GetJavaHome
+java -cp ${TEMP} ${CLS} $@
 rm -rf ${TEMP}

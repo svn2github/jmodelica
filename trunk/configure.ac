@@ -182,10 +182,11 @@ AC_SUBST(_JAVA_HOME_)
 
 case $build in
   *-mingw*)
+    # The SDK installer sets the environment variable JAVA_HOME, so there we don't need _JAVA_HOME_
 	_JAVA_HOME_=
     ;;
   *)
-	_JAVA_HOME_=`$(dirname $0)/java_home.sh`
+	_JAVA_HOME_=`$(dirname $0)/run_java.sh org.jmodelica.util.GetJavaHome`
     ;;  
 esac
 
