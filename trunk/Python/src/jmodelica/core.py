@@ -210,7 +210,8 @@ class BaseModel(object):
         return self._default_options(algorithm)
         
     def optimize_options(self, algorithm='CollocationLagrangePolynomialsAlg'):
-        """ Get an instance of the optimize options class, prefilled 
+        """
+        Get an instance of the optimize options class, prefilled 
         with default values. If called without argument then the options 
         class for the default optimization algorithm will be returned.
         

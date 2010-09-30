@@ -2123,14 +2123,6 @@ class JMUModel(BaseModel):
         """
         Solve an optimization problem.
             
-        The optimization method depends on which algorithm is used, this 
-        can be set by the function argument 'algorithm'. Options 
-        for the algorithm are passed as option classes or as pure dicts. 
-        See JMUModel.optimize_options for more details.
-            
-        The default algorithm for this function is 
-        CollocationLagrangePolynomialsAlg. 
-            
         Parameters::
             
             algorithm --
@@ -2141,11 +2133,16 @@ class JMUModel(BaseModel):
                 (found in algorithm_drivers.py). In this way it is 
                 possible to write custom algorithms and to use them with this 
                 function.
+
+                The following algorithms are available:
+                - 'CollocationLagrangePolynomialsAlg'. This algorithm is based on
+                  direct collocation on finite elements and the algorithm IPOPT
+                  is used to obtain a numerical solution to the problem.
                 Default: 'CollocationLagrangePolynomialsAlg'
                 
             options -- 
-                The options that should be used in the algorithm. For 
-                details on the options do:
+                The options that should be used in the algorithm. The options
+                documentation can be retrieved from an options object:
                 
                     >>> myModel = JMUModel(...)
                     >>> opts = myModel.optimize_options()

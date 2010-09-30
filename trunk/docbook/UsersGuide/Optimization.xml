@@ -14,14 +14,29 @@
     <title>Introduction</title>
 
     <para>JModelica.org supports optimization of dynamic and steady state
-    models. Models are usually formulated in the Modelica language, whereas
-    </para>
+    models. Many engineering problems can be cast as optimization problems,
+    including optimal control, minimum time problems, optimal design, and
+    model calibration. In this these different types of problems will be
+    illustrated and it will be shown how they can be formulated and solved.
+    The chapter starts with an introductory example in <xref
+    linkend="opt-sec-first" /> and in <xref linkend="opt-sec-solve" />, the
+    details of how the optimization algorithms are invoked are explained. The
+    following sections contain tutorial exercises that illustrates how to set
+    up and solve different kinds of optimization problems.</para>
+
+    <para>When formulating optimization problems, models are expressed in the
+    Modelica language, whereas optimization specifications are given in the
+    Optimica extension which is described in XX. The tutorial exercises in
+    this chapter assumes that the reader is familiar with the basics of
+    Modelica and Optimica. </para>
   </section>
 
-  <section>
+  <section xml:id="opt-sec-first">
     <title>A first example</title>
 
-    <para>We consider the following Optimica model:</para>
+    <para>In this section, a simple optimal control problem will be solved.
+    Consider the optimal control problem for the Van der Pol oscillator
+    model:</para>
 
     <programlisting>optimization VDP_Opt (objective = cost(finalTime),
                       startTime = 0,
@@ -46,57 +61,72 @@ end VDP_Opt;
 </programlisting>
 
     <para>Create a new file named VDP_Opt.mop and save it in you working
-    directory. Next, create a Python script file and a write (or copy paste)
-    the following commands:</para>
+    directory. Notice that this model contains both the dynamic system to be
+    optimized and the optimization specification. This is possible since
+    Optimica is an extension of Modelica and thereby supports also Modelica
+    constructs such as variable declarations and equations. In most cases,
+    however, Modelica models are stored separately from the Optimica
+    specifications.</para>
 
-    <programlisting language="python"># Import the optimize function
-from jmodelica import optimize
+    <para>Next, create a Python script file and a write (or copy paste) the
+    following commands:</para>
+
+    <programlisting language="python"># Import the function for compilation of models and the JMUModel class
+from jmodelica.jmi import compile_jmu
+from jmodelica.jmi import JMUModel
 
 # Import the plotting library
 import matplotlib.pyplot as plt</programlisting>
 
-    <para>Next, we call the 'optimize' function which encapsulates operations
-    for compiling, loading, executing the optimization algorithm, and loading
-    the result from file:</para>
+    <para>Next, we compile and load the model:</para>
 
-    <programlisting language="python">res_object = optimize("VDP_Opt", "VDP_Opt.mo")</programlisting>
+    <programlisting language="python"># Compile model
+jmu_name = compile_jmu("VDP_pack.VDP_Opt","VDP.mop")
+# Load model
+vdp = JMUModel(jmu_name)
+</programlisting>
+
+    <para>The function <literal>compile_jmu</literal> invokes the Optimica
+    compiler and compiles the model into a DLL, which is then loaded when the
+    <literal>vdp</literal> object is created. This object represents the
+    compiled model and is used to invoke the optimization algorithm:</para>
+
+    <programlisting>res = vdp.optimize()</programlisting>
 
     <para>In this case, we use the default settings for the optimization
-    algorithm and provide only the name of the Optimica class (the first
-    argument) and the name of the file (VDP.mo). The return object is a result
-    object which contains a reference to a jmodelica.Model object representing
-    the compiled model and also the optimization result. To access the
-    optimization result and the optimal trajectories:</para>
+    algorithm. The result object can now be used to access the optimization
+    result:</para>
 
-    <programlisting language="python">res = res_object.get_result_data() #Get the result data
-x1=res.get_variable_data('x1')
-x2=res.get_variable_data('x2')
-u=res.get_variable_data('u')</programlisting>
+    <programlisting language="python"># Extract variable profiles
+x1=res['x1']
+x2=res['x2']
+u=res['u']
+t=res['time']
+</programlisting>
 
-    <para>The return arguments are objects of the Python class
-    jmodelica.io.Trajectory, which has two fields: 't' which represents the
-    time vector and 'x' which represents the trajectory vector. t and x are
-    both numpy arrays of the same length. Using the matplotlib package, we can
-    visualize the optimization result:</para>
+    <para>The variable trajectories are returned as numpy arrays and can be
+    used for further analysis of the optimization result or for
+    visualization:</para>
 
     <programlisting language="python">plt.figure(1)
 plt.clf()
 plt.subplot(311)
-plt.plot(x1.t,x1.x)
+plt.plot(t,x1)
 plt.grid()
 plt.ylabel('x1')
-        
+
 plt.subplot(312)
-plt.plot(x2.t,x2.x)
+plt.plot(t,x2)
 plt.grid()
 plt.ylabel('x2')
-        
+
 plt.subplot(313)
-plt.plot(u.t,u.x)
+plt.plot(t,u)
 plt.grid()
 plt.ylabel('u')
 plt.xlabel('time')
-plt.show()</programlisting>
+plt.show()
+</programlisting>
 
     <para>You should now see the optimization result as shown in <xref
     linkend="fig-vdp-opt" />.</para>
@@ -107,43 +137,1318 @@ plt.show()</programlisting>
       <mediaobject>
         <imageobject>
           <imagedata align="left" fileref="images/vdp.svg" scalefit="1"
-                     width="40%"></imagedata>
+                     width="60%"></imagedata>
         </imageobject>
       </mediaobject>
 
       <caption>
         <para><emphasis linkend="fig-vdp-opt" role="bold"><xref
-        linkend="fig-vdp-opt" /></emphasis>.This figure shows the optimal
-        control and state profiles for the Van Der Pol optimal control
-        problem.</para>
+        linkend="fig-vdp-opt" /></emphasis>.Optimal control and state profiles
+        for the Van Der Pol optimal control problem.</para>
       </caption>
     </figure>
-
-    <para>Some additional text a reference to </para>
   </section>
 
-  <section>
+  <section xml:id="opt-sec-solve">
     <title>Solving optimization problems</title>
 
-    <para></para>
+    <para>The first step when solving an optimization problem is to formulate
+    a model and an optimization specification and then compile the model as
+    described in XX. To illustrate how to solve optimization problems the Van
+    der Pol problem presented above is used. First, the model is compiled and
+    loaded: </para>
 
-    <section>
-      <title>Selection of algorithm</title>
+    <programlisting language="python">model_name = compile_jmu("VDP_Opt","VDP.mo")
+model = JMUModel(model_name)
+</programlisting>
 
-      <para></para>
-    </section>
+    <para>All operations that can be performed on the model are available as
+    methods of the <literal>model</literal> object and can be accessed by tab
+    completion. Invoking an optimization algorithm is done by calling the
+    method <literal>JMUModel.optimize</literal>, which performs the following
+    tasks: </para>
 
-    <section>
-      <title>Options</title>
+    <itemizedlist>
+      <listitem>
+        <para>Sets up the selected algorithm with default or user defined
+        options</para>
+      </listitem>
 
-      <para></para>
+      <listitem>
+        <para>Invokes the algorithm to find a numerical solution to the
+        problem</para>
+      </listitem>
+
+      <listitem>
+        <para>Writes the result to file</para>
+      </listitem>
+
+      <listitem>
+        <para>Returns a result object from which the solution can be
+        retrieved</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>The interactive help for the <literal>optimize</literal> method is
+    displayed by the command:</para>
+
+    <programlisting>&gt;&gt;&gt; help(model.optimize)
+    Solve an optimization problem.
+        
+    Parameters::
+        
+        algorithm --
+            The algorithm which will be used for the optimization is 
+            specified by passing the algorithm class name as string or 
+            class object in this argument. 'algorithm' can be any 
+            class which implements the abstract class AlgorithmBase 
+            (found in algorithm_drivers.py). In this way it is 
+            possible to write custom algorithms and to use them with this 
+            function.
+    
+            The following algorithms are available:
+            - 'CollocationLagrangePolynomialsAlg'. This algorithm is based on
+              direct collocation on finite elements and the algorithm IPOPT
+              is used to obtain a numerical solution to the problem.
+            Default: 'CollocationLagrangePolynomialsAlg'
+            
+        options -- 
+            The options that should be used in the algorithm. The options
+            documentation can be retrieved from an options object:
+            
+                &gt;&gt;&gt; myModel = JMUModel(...)
+                &gt;&gt;&gt; opts = myModel.optimize_options()
+                &gt;&gt;&gt; opts?
+    
+            Valid values are: 
+            - A dict that overrides some or all of the default values
+              provided by CollocationLagrangePolynomialsAlgOptions. An empty
+              dict will thus give all options with default values.
+            - A CollocationLagrangePolynomialsAlgOptions object.
+            Default: Empty dict
+        
+    Returns::
+        
+        A result object, subclass of algorithm_drivers.ResultBase.
+</programlisting>
+
+    <para>The optimize method can be invoked without any arguments, which case
+    the default optimization algorithm, with default options, is
+    invoked:</para>
+
+    <programlisting>res = vdp.optimize()</programlisting>
+
+    <para>In the next section the available algorithms are described. Options
+    for an algorithm can be set using the <literal>options</literal> argument
+    to the <literal>optimize</literal> method. It is convenient to first
+    obtain an options object in order to access the documentation and default
+    option values. This is done by invoking the method
+    optimize_options:</para>
+
+    <programlisting>&gt;&gt;&gt; help(vpd.optimize)
+    Get an instance of the simulate options class, prefilled with 
+    default values. If called without argument then the options 
+    class for the default simulation algorithm will be returned.
+    
+    Parameters::
+    
+        algorithm --
+            The algorithm for which the options class should be 
+            fetched. Possible values are: 'AssimuloAlg', 
+            'AssimuloFMIAlg'.
+            Default: 'AssimuloAlg'
+            
+    Returns::
+    
+        Options class for the algorithm specified with default 
+        values.
+</programlisting>
+
+    <para>The option object is essentially a Python dictionary and options are
+    set simply by using standard dictionary syntax:</para>
+
+    <programlisting>opts = vpd.optimize_options()
+opts['n_e'] = 5</programlisting>
+
+    <para>The optimization algorithm may then be invoked again with the new
+    options:</para>
+
+    <programlisting>res = vdp.optimize(options=opts)</programlisting>
+
+    <para>Available options for supported algorithms are documented in <xref
+    linkend="opt-sec-alg" />.</para>
+
+    <para>The <literal>optimize</literal> method returns a result object
+    containing the optimization result and some meta information about the
+    solution. The most common operation is to retrieve variable trajectories
+    from the result object:</para>
+
+    <programlisting>time = res['time']
+x1 = res['x1']</programlisting>
+
+    <para>Variable data is returned as numpy arrays in case of variables and
+    as numeric values in the case of parameters. The result object also
+    contains references to the model that was optimized, the name of the
+    result file that was written to disk, a solver object representing the
+    optimization algorithm and an options object that as used when solving the
+    optimization problem.</para>
+
+    <section xml:id="opt-sec-alg">
+      <title>Algorithms</title>
+
+      <section>
+        <title>Direct collocation</title>
+
+        <para>The direct collocation method supported by JModelica.org can be
+        used to solve dynamic optimization problems, including optimal control
+        problems and parameter optimization problems. In the collocation
+        method, the dynamic model variable profiles are approximated by
+        piecewise polynomials. This method of approximating a differential
+        equation corresponds to a fixed step implicit Runge-Kutta scheme,
+        where the mesh defines the length of each step. Also, the number of
+        collocation points in each element, or step, needs to be provided.
+        This number corresponds to the stage order of the Runge-Kutta scheme.
+        The selection of mesh is analogous to the choice of step length in a
+        one-step algorithm for solving differential equations. Accordingly,
+        the mesh needs to be fine-grained enough to ensure sufficiently
+        accurate approximation of the differential constraint. For an overview
+        of simultaneous optimization algorithms, see [2]. The algorithm <link
+        xlink:href="https://projects.coin-or.org/Ipopt">IPOPT</link> is used
+        to solve the non-linear program resulting from collocation.</para>
+
+        <para>The collocation method implemented in JModelica.org requires
+        that the model to be optimized does not contain discontinuities such
+        as if equations, when clauses or integer variables.</para>
+
+        <para>The mathematical formulation of the algorithm can be found in
+        the <link
+        xlink:href="http://www.jmodelica.org/api-docs/jmi/group__jmi__opt__sim__lp.html">JMI
+        API documentation</link>.</para>
+
+        <para>A the collocation algorithm provides a number of options,
+        summarized in <xref linkend="opt-tab-collopts" />.</para>
+
+        <table>
+          <title>Options for the collocation-based optimization
+          algorithm</title>
+
+          <tgroup cols="3" xml:id="opt-tab-collopts">
+            <colspec align="left" colname="col–opt" colwidth="1*" />
+
+            <colspec align="left" colname="col–desc" colwidth="2*" />
+
+            <colspec align="left" colname="col–def" colwidth="1*" />
+
+            <thead>
+              <row>
+                <entry align="center">Option</entry>
+
+                <entry align="center">Description</entry>
+
+                <entry align="center">Default value</entry>
+              </row>
+            </thead>
+
+            <tbody>
+              <row>
+                <entry><literal>n_e</literal></entry>
+
+                <entry>Number of elements of the finite element mesh.</entry>
+
+                <entry>50</entry>
+              </row>
+
+              <row>
+                <entry><literal>n_cp</literal></entry>
+
+                <entry>Number of collocation points in each element. Values
+                between 1 and 10 are supported</entry>
+
+                <entry>3</entry>
+              </row>
+
+              <row>
+                <entry><literal>hs</literal></entry>
+
+                <entry>A vector containing n_e elements representing the
+                finite element lengths. The sum of all element should equal to
+                1.</entry>
+
+                <entry>Equidistant points using default n_e.</entry>
+              </row>
+
+              <row>
+                <entry><literal>blocking_factors</literal></entry>
+
+                <entry>A vector of blocking factors. Blocking factors are
+                specified by a vector of integers, where each entry in the
+                vector corresponds to the number of elements for which the
+                control profile should be kept constant. For example, the
+                blocking factor specification [2,1,5] means that u_0=u_1 and
+                u_3=u_4=u_5=u_6=u_7 assuming that the number of elements is 8.
+                Notice that specification of blocking factors implies that
+                controls are present in only one collocation point (the first)
+                in each element. The number of constant control levels in the
+                optimization interval is equal to the length of the blocking
+                factor vector. In the example above, this implies that there
+                are three constant control levels. If the sum of the entries
+                in the blocking factor vector is not equal to the number of
+                elements, the vector is normalized, either by truncation (if
+                the sum of the entries is larger than the number of element)
+                or by increasing the last entry of the vector. For example, if
+                the number of elements is 4, the normalized blocking factor
+                vector in the example is [2,2]. If the number of elements is
+                10, then the normalized vector is [2,1,7].</entry>
+
+                <entry>None (not used)</entry>
+              </row>
+
+              <row>
+                <entry><literal>init_traj</literal></entry>
+
+                <entry>Variable trajectory data used for initialization of the
+                optimization problem. The data is represented by an object of
+                the type
+                <literal>jmodelica.io.DymolaResultTextual</literal>.</entry>
+
+                <entry>None (i.e. not used, set this argument to activate
+                initialization)</entry>
+              </row>
+
+              <row>
+                <entry><literal>result_mode</literal></entry>
+
+                <entry>Specifies the output format of the optimization result.
+                'default' gives the the optimization result at the collocation
+                points. 'element_interpolation' computes the values of the
+                variable trajectories using the collocation interpolation
+                polynomials. The option 'n_interpolation_points' is used to
+                specify the number of evaluation points within each finite
+                element. 'mesh_interpolation' computes the values of the
+                variable trajectories at points defined by the option
+                'result_mesh'.</entry>
+
+                <entry>'default'</entry>
+              </row>
+
+              <row>
+                <entry><literal>n_interpolation_points</literal></entry>
+
+                <entry>Number of interpolation points in each finite element
+                if the result reporting option result_mode is set to
+                'element_interpolation'.</entry>
+
+                <entry>20</entry>
+              </row>
+
+              <row>
+                <entry><literal>result_mesh</literal></entry>
+
+                <entry>A vector of time points at which the the optimization
+                result is computed. This option is used if result_mode is set
+                to 'mesh_interpolation'.</entry>
+
+                <entry>None</entry>
+              </row>
+
+              <row>
+                <entry><literal>result_file_name</literal></entry>
+
+                <entry>Specifies the name of the file where the optimization
+                result is written. Setting this option to an empty string
+                results in a default file name that is based on the name of
+                the optimization class.</entry>
+
+                <entry>Empty string (default generated file name will be
+                used)</entry>
+              </row>
+
+              <row>
+                <entry><literal>result_format</literal></entry>
+
+                <entry>Specifies in which format to write the result.
+                Currently only textual mode is supported.</entry>
+
+                <entry>'txt'</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </table>
+
+        <para>In addition to the options for the collocation algorithm, IPOPT
+        options can also be set by modifying the dictionary
+        <literal>IPOPT_options</literal> contained in the collocation
+        algorithm options object. Here, all valid IPOPT options can be
+        specified, see the <link
+        xlink:href="http://www.coin-or.org/Ipopt/documentation/">IPOPT
+        documentation</link> for further information. For example, setting the
+        option <literal>max_iter</literal>:</para>
+
+        <programlisting>opts['IPOPT_options']['max_iter'] = 300</programlisting>
+
+        <para>makes IPOPT terminate after 300 iterations even if no optimal
+        solution has been found.</para>
+      </section>
     </section>
   </section>
 
   <section>
     <title>Optimal control</title>
 
-    <para></para>
+    <para>This tutorial is based on the Hicks-Ray Continuously Stirred Tank
+    Reactors (CSTR) system. The model was originally presented in [1]. The
+    system has two states, the concentration, c, and the temperature, T. The
+    control input to the system is the temperature, Tc, of the cooling flow in
+    the reactor jacket. The chemical reaction in the reactor is exothermic,
+    and also temperature dependent; high temperature results in high reaction
+    rate. The CSTR dynamics is given by:</para>
+
+    <informalequation>
+      <m:math display="block" overflow="scroll">
+        <m:mtable>
+          <m:mtr>
+            <m:mtd columnalign="right">
+              <m:mover>
+                <m:mi>c</m:mi>
+
+                <m:mo>.</m:mo>
+              </m:mover>
+
+              <m:mfenced>
+                <m:mi>t</m:mi>
+              </m:mfenced>
+            </m:mtd>
+
+            <m:mtd columnalign="left">
+              <m:mo>=</m:mo>
+
+              <m:mfrac>
+                <m:mrow>
+                  <m:msub>
+                    <m:mi>F</m:mi>
+
+                    <m:mn>0</m:mn>
+                  </m:msub>
+
+                  <m:mfenced separators="">
+                    <m:msub>
+                      <m:mi>c</m:mi>
+
+                      <m:mn>0</m:mn>
+                    </m:msub>
+
+                    <m:mo>-</m:mo>
+
+                    <m:mi>c</m:mi>
+
+                    <m:mo>⁡</m:mo>
+
+                    <m:mfenced>
+                      <m:mi>t</m:mi>
+                    </m:mfenced>
+                  </m:mfenced>
+                </m:mrow>
+
+                <m:mi>V</m:mi>
+              </m:mfrac>
+
+              <m:mo>-</m:mo>
+
+              <m:msub>
+                <m:mi>k</m:mi>
+
+                <m:mn>0</m:mn>
+              </m:msub>
+
+              <m:mi>c</m:mi>
+
+              <m:mo>⁡</m:mo>
+
+              <m:mfenced>
+                <m:mi>t</m:mi>
+              </m:mfenced>
+
+              <m:msup>
+                <m:mi>e</m:mi>
+
+                <m:mrow>
+                  <m:mo>-</m:mo>
+
+                  <m:mi>EdivR</m:mi>
+
+                  <m:mo>/</m:mo>
+
+                  <m:mi>T</m:mi>
+
+                  <m:mo>⁡</m:mo>
+
+                  <m:mfenced>
+                    <m:mi>t</m:mi>
+                  </m:mfenced>
+                </m:mrow>
+              </m:msup>
+            </m:mtd>
+          </m:mtr>
+
+          <m:mtr>
+            <m:mtd columnalign="right">
+              <m:mover>
+                <m:mi>T</m:mi>
+
+                <m:mo>.</m:mo>
+              </m:mover>
+
+              <m:mfenced>
+                <m:mi>t</m:mi>
+              </m:mfenced>
+            </m:mtd>
+
+            <m:mtd columnalign="left">
+              <m:mo>=</m:mo>
+
+              <m:mfrac>
+                <m:mrow>
+                  <m:msub>
+                    <m:mi>F</m:mi>
+
+                    <m:mn>0</m:mn>
+                  </m:msub>
+
+                  <m:mfenced separators="">
+                    <m:msub>
+                      <m:mi>T</m:mi>
+
+                      <m:mn>0</m:mn>
+                    </m:msub>
+
+                    <m:mo>-</m:mo>
+
+                    <m:mi>T</m:mi>
+
+                    <m:mo>⁡</m:mo>
+
+                    <m:mfenced>
+                      <m:mi>t</m:mi>
+                    </m:mfenced>
+                  </m:mfenced>
+                </m:mrow>
+
+                <m:mi>V</m:mi>
+              </m:mfrac>
+
+              <m:mo>-</m:mo>
+
+              <m:mfrac>
+                <m:mrow>
+                  <m:mrow>
+                    <m:mi>d</m:mi>
+
+                    <m:mi>H</m:mi>
+                  </m:mrow>
+
+                  <m:msub>
+                    <m:mi>k</m:mi>
+
+                    <m:mn>0</m:mn>
+                  </m:msub>
+
+                  <m:mi>c</m:mi>
+
+                  <m:mo>⁡</m:mo>
+
+                  <m:mfenced>
+                    <m:mi>t</m:mi>
+                  </m:mfenced>
+                </m:mrow>
+
+                <m:mrow>
+                  <m:mi>ρ</m:mi>
+
+                  <m:msub>
+                    <m:mi>C</m:mi>
+
+                    <m:mi>p</m:mi>
+                  </m:msub>
+                </m:mrow>
+              </m:mfrac>
+
+              <m:msup>
+                <m:mi>e</m:mi>
+
+                <m:mrow>
+                  <m:mo>-</m:mo>
+
+                  <m:mi>EdivR</m:mi>
+
+                  <m:mo>/</m:mo>
+
+                  <m:mi>T</m:mi>
+
+                  <m:mo>⁡</m:mo>
+
+                  <m:mfenced>
+                    <m:mi>t</m:mi>
+                  </m:mfenced>
+                </m:mrow>
+              </m:msup>
+
+              <m:mo>+</m:mo>
+
+              <m:mfrac>
+                <m:mrow>
+                  <m:mn>2</m:mn>
+
+                  <m:mi>U</m:mi>
+                </m:mrow>
+
+                <m:mrow>
+                  <m:mi>r</m:mi>
+
+                  <m:mi>ρ</m:mi>
+
+                  <m:msub>
+                    <m:mi>C</m:mi>
+
+                    <m:mi>p</m:mi>
+                  </m:msub>
+                </m:mrow>
+              </m:mfrac>
+
+              <m:mfenced separators="">
+                <m:mrow>
+                  <m:mi>T</m:mi>
+
+                  <m:mi>c</m:mi>
+                </m:mrow>
+
+                <m:mfenced>
+                  <m:mi>t</m:mi>
+                </m:mfenced>
+
+                <m:mo>-</m:mo>
+
+                <m:mi>T</m:mi>
+
+                <m:mo>⁡</m:mo>
+
+                <m:mfenced>
+                  <m:mi>t</m:mi>
+                </m:mfenced>
+              </m:mfenced>
+            </m:mtd>
+          </m:mtr>
+        </m:mtable>
+
+        <m:mspace linebreak="newline" />
+      </m:math>
+    </informalequation>
+
+    <para>This tutorial will cover the following topics:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>How to solve a DAE initialization problem. The initialization
+        model have equations specifying that all derivatives should be
+        identically zero, which implies that a stationary solution is
+        obtained. Two stationary points, corresponding to different inputs,
+        are computed. We call the stationary points A and B respectively.
+        Point A corresponds to operating conditions where the reactor is cold
+        and the reaction rate is low, whereas point B corresponds to a higher
+        temperature where the reaction rate is high. For more information
+        about the DAE initialization algorithm, see the JMI API
+        documentation.</para>
+      </listitem>
+
+      <listitem>
+        <para>An optimal control problem is solved where the objective is to
+        transfer the state of the system from stationary point A to point B.
+        The challenge is to ignite the reactor while avoiding uncontrolled
+        temperature increase. It is also demonstrated how to set parameter and
+        variable values in a model. More information about the simultaneous
+        optimization algorithm can be found at JModelica.org API
+        documentation.</para>
+      </listitem>
+
+      <listitem>
+        <para>The optimization result is saved to file and then the important
+        variables are plotted.</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>The Python commands in this tutorial may be copied and pasted
+    directely into a Python shell, in some cases with minor modifications.
+    Alternatively, you may copy the commands into a text file, e.g.,
+    cstr.py.</para>
+
+    <para>Start the tutorial by creating a working directory and copy the file
+    $JMODELICA_HOME/Python/jmodelica/examples/files/CSTR.mo to your working
+    directory. An on-line version of <link
+    xlink:href="https://svn.jmodelica.org/trunk/Python/src/jmodelica/examples/files/CSTR.mo">CSTR.mo</link>
+    is also available (depending on which browser you use, you may have to
+    accept the site certificate by clicking through a few steps). If you
+    choose to create Python script file, save it to the working
+    directory.</para>
+
+    <section>
+      <title>Compile and instantiate a model object</title>
+
+      <para>The functions and classes used in the tutorial script need to be
+      imported into the Python script. This is done by the following Python
+      commands. Copy them and past them either directly into you Python shell
+      or, preferably, into your Python script file.</para>
+
+      <programlisting language="python">import os.path
+from jmodelica import initialize
+from jmodelica import simulate
+from jmodelica import optimize
+
+import jmodelica.jmi as jmi
+from jmodelica.compiler import OptimicaCompiler
+
+import numpy as N
+import matplotlib.pyplot as plt
+</programlisting>
+
+      <para>Before we can do operations on the model, such as optimizing it,
+      the model file must be compiled and the resulting DLL file loaded in
+      Python. These steps are described in more detail in the tutorial on
+      Compilation of models.</para>
+
+      <programlisting language="python"># Create a Modelica compiler instance
+oc = OptimicaCompiler()
+    
+# Compile the stationary initialization model into a DLL and load it
+init_model = oc.compile_model("CSTR.CSTR_Init", "CSTR.mo", target='ipopt')
+</programlisting>
+
+      <para>At this point, you may open the file CSTR.mo, containing the CSTR
+      model and the static initialization model used in this section. Study
+      the classes CSTR.CSTR and CSTR.CSTR_Init and make sure you understand
+      the models. Before proceeding, have a look at the interactive help for
+      one of the functions you used:</para>
+
+      <programlisting language="python">In [8]: help(oc.compile_model)
+</programlisting>
+    </section>
+
+    <section>
+      <title>Solve the DAE initialization problem</title>
+
+      <para>In the next step, we would like to specify the first operating
+      point, A, by means of a constant input cooling temperature, and then
+      solve the initialization problem assuming that all derivatives are
+      zero.</para>
+
+      <programlisting language="python"># Set inputs for Stationary point A
+Tc_0_A = 250
+init_model.set_value('Tc',Tc_0_A)
+    
+# Solve the DAE initialization system with Ipopt
+init_result_object = initialize(init_model)
+init_result = init_result_object.get_result_data()
+    
+# Store stationary point A
+c_0_A = init_result.get_variable_data('c').x[0]
+T_0_A = init_result.get_variable_data('T').x[0]
+
+# Print some data for stationary point A 
+print(' *** Stationary point A ***') 
+print('input Tc = %f' % Tc_0_A) 
+print('state c = %f' % c_0_A) 
+print('state T = %f' % T_0_A)
+</programlisting>
+
+      <para>Notice how the function set_value is used to set the value of the
+      control input. The initialization algorithm is invoked by calling the
+      function 'initialize', which returns a result object where the
+      initialization result is accessed with 'get_result_data' and stored in
+      'init_result'. The 'initialize' function relies on the algorithm Ipopt
+      for computing the solution of the initialization problem. The values of
+      the states corresponding to grade A can then be extracted from the
+      result object. Look carefully at the printouts in the Python shell to
+      see a printout of the stationary values. Display the help text for the
+      'initialize' function and take a moment to look through it. The
+      procedure is now repeated for operating point B:</para>
+
+      <programlisting language="python"># Set inputs for Stationary point B
+Tc_0_B = 280
+init_model.set_value('Tc',Tc_0_B)
+        
+# Solve the DAE initialization system with Ipopt
+init_result_object = initialize(init_model)
+init_result = init_result_object.get_result_data()
+    
+# Store stationary point B
+c_0_B = init_result.get_variable_data('c').x[0]
+T_0_B = init_result.get_variable_data('T').x[0]
+
+# Print some data for stationary point B 
+print(' *** Stationary point B ***') 
+print('input Tc = %f' % Tc_0_B) 
+print('state c = %f' % c_0_B) 
+print('state T = %f' % T_0_B)
+</programlisting>
+
+      <para>We have now computed two stationary points for the system based on
+      constant control inputs.</para>
+    </section>
+
+    <section>
+      <title>Solving an optimal control problem</title>
+
+      <para>The optimal control problem we are about to solve is given
+      by:</para>
+
+      <informalequation>
+        <m:math display="block" overflow="scroll">
+          <m:mtable>
+            <m:mtr>
+              <m:mtd columnalign="right"></m:mtd>
+
+              <m:mtd columnalign="left">
+                <m:msub>
+                  <m:mi mathvariant="normal">min</m:mi>
+
+                  <m:mrow>
+                    <m:mi>u</m:mi>
+
+                    <m:mo>⁡</m:mo>
+
+                    <m:mfenced>
+                      <m:mi>t</m:mi>
+                    </m:mfenced>
+                  </m:mrow>
+                </m:msub>
+
+                <m:munderover>
+                  <m:mo>∫</m:mo>
+
+                  <m:mn>0</m:mn>
+
+                  <m:mn>150</m:mn>
+                </m:munderover>
+
+                <m:msup>
+                  <m:mfenced close=")" open="(" separators="">
+                    <m:msup>
+                      <m:mi>c</m:mi>
+
+                      <m:mrow>
+                        <m:mi>r</m:mi>
+
+                        <m:mi>e</m:mi>
+
+                        <m:mi>f</m:mi>
+                      </m:mrow>
+                    </m:msup>
+
+                    <m:mo>-</m:mo>
+
+                    <m:mi>c</m:mi>
+
+                    <m:mo>⁡</m:mo>
+
+                    <m:mfenced>
+                      <m:mi>t</m:mi>
+                    </m:mfenced>
+                  </m:mfenced>
+
+                  <m:mn>2</m:mn>
+                </m:msup>
+
+                <m:mo>+</m:mo>
+
+                <m:msup>
+                  <m:mfenced close=")" open="(" separators="">
+                    <m:msup>
+                      <m:mi>T</m:mi>
+
+                      <m:mrow>
+                        <m:mi>r</m:mi>
+
+                        <m:mi>e</m:mi>
+
+                        <m:mi>f</m:mi>
+                      </m:mrow>
+                    </m:msup>
+
+                    <m:mo>-</m:mo>
+
+                    <m:mi>T</m:mi>
+
+                    <m:mo>⁡</m:mo>
+
+                    <m:mfenced>
+                      <m:mi>t</m:mi>
+                    </m:mfenced>
+                  </m:mfenced>
+
+                  <m:mn>2</m:mn>
+                </m:msup>
+
+                <m:mo>+</m:mo>
+
+                <m:msup>
+                  <m:mfenced close=")" open="(" separators="">
+                    <m:msubsup>
+                      <m:mi>T</m:mi>
+
+                      <m:mi>c</m:mi>
+
+                      <m:mrow>
+                        <m:mi>r</m:mi>
+
+                        <m:mi>e</m:mi>
+
+                        <m:mi>f</m:mi>
+                      </m:mrow>
+                    </m:msubsup>
+
+                    <m:mo>-</m:mo>
+
+                    <m:msub>
+                      <m:mi>T</m:mi>
+
+                      <m:mi>c</m:mi>
+                    </m:msub>
+
+                    <m:mfenced>
+                      <m:mi>t</m:mi>
+                    </m:mfenced>
+                  </m:mfenced>
+
+                  <m:mn>2</m:mn>
+                </m:msup>
+
+                <m:mrow>
+                  <m:mi>d</m:mi>
+
+                  <m:mi>t</m:mi>
+                </m:mrow>
+              </m:mtd>
+            </m:mtr>
+
+            <m:mtr>
+              <m:mtd columnalign="right"></m:mtd>
+
+              <m:mtd columnalign="left">
+                <m:mstyle mathvariant="normal">
+                  <m:mi>subject</m:mi>
+
+                  <m:mo> </m:mo>
+
+                  <m:mo> </m:mo>
+
+                  <m:mi>to</m:mi>
+                </m:mstyle>
+              </m:mtd>
+            </m:mtr>
+
+            <m:mtr>
+              <m:mtd columnalign="right"></m:mtd>
+
+              <m:mtd columnalign="left">
+                <m:mn>230</m:mn>
+
+                <m:mo>≤</m:mo>
+
+                <m:mi>u</m:mi>
+
+                <m:mo>⁡</m:mo>
+
+                <m:mfenced>
+                  <m:mi>t</m:mi>
+                </m:mfenced>
+
+                <m:mo>≤</m:mo>
+
+                <m:mn>370</m:mn>
+              </m:mtd>
+            </m:mtr>
+
+            <m:mtr>
+              <m:mtd columnalign="right"></m:mtd>
+
+              <m:mtd columnalign="left">
+                <m:mi>T</m:mi>
+
+                <m:mo>⁡</m:mo>
+
+                <m:mfenced>
+                  <m:mi>t</m:mi>
+                </m:mfenced>
+
+                <m:mo>≤</m:mo>
+
+                <m:mn>350</m:mn>
+              </m:mtd>
+            </m:mtr>
+          </m:mtable>
+
+          <m:mspace linebreak="newline" />
+        </m:math>
+      </informalequation>
+
+      <para>and is expressed in Optimica format in the class CSTR.CSTR_Opt in
+      the CSTR.mo file above. Have a look at this class and make sure that you
+      understand how the optimization problem is formulated and what the
+      objective is.</para>
+
+      <para>Direct collocation methods often require good initial guesses in
+      order to ensure robust convergence. Since initial guesses are needed for
+      all discretized variables along the optimization interval, simulation
+      provides a convenient mean to generate state and derivative profiles
+      given an initial guess for the control input(s). It is then convenient
+      to set up a dedicated model for computation of initial trajectories. In
+      the model CSTR.CSTR_Init_Optimization in the CSTR.mo file, a step input
+      is filtered through a first order filter in order to generate a smooth
+      input for the CSTR system. The filtering is done in order not to excite
+      unstable modes of the system, and in particular to avoid sudden
+      ignition. Notice also that the variable names in the initialization
+      model must match those in the optimal control model. Therefore, also the
+      cost function is included in the initialization model.</para>
+
+      <para>Start by creating an input trajectory to be passed to the
+      simulator:</para>
+
+      <programlisting language="python"># Create the time vector
+t = N.linspace(1,150.,100)
+# Create the input vector from the target input value. The
+# target input value is here increased in order to get a
+# better initial guess.
+u = (Tc_0_B+35)*N.ones(N.size(t,0))
+# Create a matrix where the first column is time and the second column represents
+# the input trajectory.
+u_traj = N.transpose(N.vstack((t,u)))
+</programlisting>
+
+      <para>Next, compile the model and set model parameters:</para>
+
+      <programlisting language="python"># Compile the optimization initialization model and load the DLL
+init_sim_model = oc.compile_model("CSTR.CSTR_Init_Optimization", "CSTR.mo", target='ipopt')
+
+# Set model parameters
+init_sim_model.set_value('cstr.c_init',c_0_A)
+init_sim_model.set_value('cstr.T_init',T_0_A)
+init_sim_model.set_value('Tc_0',Tc_0_A)
+init_sim_model.set_value('c_ref',c_0_B)
+init_sim_model.set_value('T_ref',T_0_B)
+init_sim_model.set_value('Tc_ref',u[0])
+</programlisting>
+
+      <para>Having initialized the model parameters, we can simulate the model
+      using the 'simulate' function.</para>
+
+      <programlisting language="python">sim_result_object = simulate(init_sim_model,alg_args={'start_time':0.,'final_time':150.,
+                                                         'input_trajectory':u_traj})
+res = sim_result_object.get_result_data()
+</programlisting>
+
+      <para>The function 'simulation' first computes consistent initial
+      conditions and then simulates the model in the interval 0 to 150 seconds
+      with the input trajectory specified by 'u_traj'. Notice that the
+      arguments to the simulation function is specified in a Python
+      dictionary. Take a moment to read the interactive help for the
+      'simulate' function.</para>
+
+      <para>The simulation result object is returned and to retrieve the
+      simulation data use the method 'get_result_data', from which you may now
+      retrieve trajectories for plotting:</para>
+
+      <programlisting language="python"># Extract variable profiles
+c_init_sim=res.get_variable_data('cstr.c')
+T_init_sim=res.get_variable_data('cstr.T')
+Tc_init_sim=res.get_variable_data('cstr.Tc')
+
+# Plot the results
+plt.figure(1)
+plt.clf()
+plt.hold(True)
+plt.subplot(311)
+plt.plot(c_init_sim.t,c_init_sim.x)
+plt.grid()
+plt.ylabel('Concentration')
+
+plt.subplot(312)
+plt.plot(T_init_sim.t,T_init_sim.x)
+plt.grid()
+plt.ylabel('Temperature')
+
+plt.subplot(313)
+plt.plot(Tc_init_sim.t,Tc_init_sim.x)
+plt.grid()
+plt.ylabel('Cooling temperature')
+plt.xlabel('time')
+plt.show()
+</programlisting>
+
+      <para>Look at the plots and make sure you understand the effect of the
+      filter. Think about alternative, better ways to chose the input profile.
+      Also, try to increase the value 35 that was added to the target input:
+      how much can you increase this value without experiencing sudden
+      ignition of the reactor?</para>
+
+      <para>Once the initial guess is generated, we compile the model
+      containing the optimal control problem:</para>
+
+      <programlisting language="python">cstr = oc.compile_model("CSTR.CSTR_Opt", "CSTR.mo", target='ipopt')</programlisting>
+
+      <para>We will now initialize the parameters of the model so that their
+      values correspond to the optimization objective of transferring the
+      system state from operating point A to operating point B. Accordingly,
+      we set the parameters representing the initial values of the states to
+      point A and the reference values in the cost function to point B:</para>
+
+      <programlisting language="python">cstr.set_value('Tc_ref',Tc_0_B)
+cstr.set_value('c_ref',c_0_B)
+cstr.set_value('T_ref',T_0_B)
+
+cstr.set_value('cstr.c_init',c_0_A)
+cstr.set_value('cstr.T_init',T_0_A)
+</programlisting>
+
+      <para></para>
+
+      <para>Collocation-based optimization algorithms often require a good
+      initial guess in order to achieve fast convergence. Also, if the problem
+      is non-convex, initialization is even more critical. Initial guesses can
+      be provided in Optimica by the 'initialGuess' attribute, see the CSTR.mo
+      file for an example for this. Notice that initialization in the case of
+      collocation-based optimization methods means initialization of all the
+      control and state profiles as a function of time. In some cases, it is
+      sufficient to use constant profiles. For this purpose, the
+      'initialGuess' attribute works well. In more difficult cases, however,
+      it may be necessary to initialize the profiles using simulation data,
+      where an initial guess for the input(s) has been used to generate the
+      profiles for the dependent variables. This approach for initializing the
+      optimization problem is used in this tutorial.</para>
+
+      <para>We are now ready to solve the actual optimization problem. This is
+      done by invoking the method optimize:</para>
+
+      <programlisting language="python"># Initialize the mesh
+n_e = 100 # Number of elements 
+hs = N.ones(n_e)*1./n_e # Equidistant points
+n_cp = 3; # Number of collocation points in each element
+
+opt_result_object = optimize(cstr,alg_args={'n_e':n_e,'hs':hs,'n_cp':n_cp,'init_traj':res})
+res = opt_result_object.get_result_data()
+</programlisting>
+
+      <para>You should see the output of Ipopt in the Python shell as the
+      algorithm iterates to find the optimal solution. Ipopt should terminate
+      with a message like 'Optimal solution found' or 'Solved to an acceptable
+      level' in order for an optimum to be found. Again, the arguments to the
+      algorithm (number of elements, number of collocation points, element
+      length vector and initial guess object) are given in a Python
+      dictionary. The optimization result object is returned and the
+      optimization data are stored in 'res'.</para>
+
+      <para>We can now retrieve the trajectories of the variables that we
+      intend to plot:</para>
+
+      <programlisting language="python"># Extract variable profiles
+c_res=res.get_variable_data('cstr.c')
+T_res=res.get_variable_data('cstr.T')
+Tc_res=res.get_variable_data('cstr.Tc')
+
+c_ref=res.get_variable_data('c_ref') 
+T_ref=res.get_variable_data('T_ref')
+Tc_ref=res.get_variable_data('Tc_ref')
+</programlisting>
+
+      <para>Finally, we plot the result using the functions available in
+      matplotlib:</para>
+
+      <programlisting language="python">plt.figure(1)
+plt.clf()
+plt.hold(True)
+plt.subplot(311)
+plt.plot(c_res.t,c_res.x)
+plt.plot(c_ref.t,c_ref.x,'--')
+plt.grid()
+plt.ylabel('Concentration')
+
+plt.subplot(312)
+plt.plot(T_res.t,T_res.x)
+plt.plot(T_ref.t,T_ref.x,'--')
+plt.grid()
+plt.ylabel('Temperature')
+
+plt.subplot(313)
+plt.plot(Tc_res.t,Tc_res.x)
+plt.plot(Tc_ref.t,Tc_ref.x,'--')
+plt.grid()
+plt.ylabel('Cooling temperature')
+plt.xlabel('time')
+plt.show()
+</programlisting>
+
+      <para>Your should now see a plot as the one below:</para>
+
+      <figure>
+        <title>Optimization result</title>
+
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="images/cstr.svg" scalefit="1" width="60%"></imagedata>
+          </imageobject>
+        </mediaobject>
+      </figure>
+
+      <para>Take a minute to analyze the optimal profiles and to answer the
+      following questions:</para>
+
+      <orderedlist>
+        <listitem>
+          <para>Why is the concentration high in the beginning of the
+          interval?</para>
+        </listitem>
+
+        <listitem>
+          <para>Why is the input cooling temperature high in the beginning of
+          the interval?</para>
+        </listitem>
+      </orderedlist>
+    </section>
+
+    <section>
+      <title>Verify optimal control solution</title>
+
+      <para>Solving optimal control problems by means of direct collocation
+      implies that the differential equation is approximated by a discrete
+      time counterpart. The accuracy of the solution is dependent on the
+      method of collocation and the number of elements. In order to assess the
+      accuracy of the discretization, we may simulate the system using a DAE
+      solver using the optimal control profile as input. With this approach,
+      the state profiles are computed with high accuracy and the result may
+      then be compared with the profiles resulting from optimization. Notice
+      that this procedure does not verify the optimality of the resulting
+      optimal control profiles, but only the accuracy of the discretization of
+      the dynamics.</para>
+
+      <para>The procedure for setting up and executing this simulation is
+      similar to above:</para>
+
+      <programlisting language="python"># Simulate to verify the optimal solution
+# Set up input trajectory
+t = Tc_res.t 
+u = Tc_res.x
+u_traj = N.transpose(N.vstack((t,u)))
+    
+# Comile the Modelica model first to C code and
+# then to a dynamic library
+sim_model = oc.compile_model("CSTR.CSTR","CSTR.mo",target='ipopt')
+
+sim_model.set_value('c_init',c_0_A)
+sim_model.set_value('T_init',T_0_A)
+sim_model.set_value('Tc',u[0])
+
+sim_result_object = simulate(sim_model,compiler='optimica',
+                           alg_args={'start_time':0.,'final_time':150.,
+                                     'input_trajectory':u_traj})
+res = sim_result_object.get_result_data()
+</programlisting>
+
+      <para>Finally, we load the simulated data and plot it to compare with
+      the optimized trajectories:</para>
+
+      <programlisting language="python"># Extract variable profiles
+c_sim=res.get_variable_data('c')
+T_sim=res.get_variable_data('T')
+Tc_sim=res.get_variable_data('Tc')
+
+# Plot the results
+plt.figure(3)
+plt.clf()
+plt.hold(True)
+plt.subplot(311)
+plt.plot(c_res.t,c_res.x,'--')
+plt.plot(c_sim.t,c_sim.x)
+plt.legend(('optimized','simulated'))
+plt.grid()
+plt.ylabel('Concentration')
+
+plt.subplot(312)
+plt.plot(T_res.t,T_res.x,'--')
+plt.plot(T_sim.t,T_sim.x)
+plt.legend(('optimized','simulated'))
+plt.grid()
+plt.ylabel('Temperature')
+
+plt.subplot(313)
+plt.plot(Tc_res.t,Tc_res.x,'--')
+plt.plot(Tc_sim.t,Tc_sim.x)
+plt.legend(('optimized','simulated'))
+plt.grid()
+plt.ylabel('Cooling temperature')
+plt.xlabel('time')
+plt.show()
+</programlisting>
+
+      <para>You should now see a plot similar to:</para>
+
+      <figure>
+        <title>Simulated system response</title>
+
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="images/cstr_opt_cmp.svg" scalefit="1"
+                       width="60%"></imagedata>
+          </imageobject>
+        </mediaobject>
+      </figure>
+
+      <para>Discuss why the simulated trajectories differs from the optimized
+      counterparts.</para>
+    </section>
+
+    <section>
+      <title>Exercises</title>
+
+      <para>After completing the tutorial you may continue to modify the
+      optimization problem and study the results.</para>
+
+      <orderedlist>
+        <listitem>
+          <para>Remove the constraint on cstr.T. What is then the maximum
+          temperature?</para>
+        </listitem>
+
+        <listitem>
+          <para>Play around with weights in the cost function. What happens if
+          you penalize the control variable with a larger weight? Do a
+          parameter sweep for the control variable weight and plot the optimal
+          profiles in the same figure.</para>
+        </listitem>
+
+        <listitem>
+          <para>Add terminal constraints ('cstr.T(finalTime)=someParameter')
+          for the states so that they are equal to point B at the end of the
+          optimization interval. Now reduce the length of the optimization
+          interval. How short can you make the interval?</para>
+        </listitem>
+
+        <listitem>
+          <para>Try varying the number of elements in the mesh and the number
+          of collocation points in each interval. 2-10 collocation points are
+          supported.</para>
+        </listitem>
+      </orderedlist>
+    </section>
+
+    <section>
+      <title>References</title>
+
+      <para>[1] G.A. Hicks and W.H. Ray. Approximation Methods for Optimal
+      Control Synthesis. <emphasis>Can. J. Chem. Eng</emphasis>., 40:522–529,
+      1971.</para>
+
+      <para>[2] Bieger, L., A. Cervantes, and A. Wächter (2002): "Advances in
+      simultaneous strategies for dynamic optimization." <emphasis>Chemical
+      Engineering Science</emphasis>, <emphasis role="bold">57</emphasis>, pp.
+      575-593.</para>
+    </section>
   </section>
 
   <section>
