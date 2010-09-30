@@ -26,7 +26,8 @@ from jmodelica.jmi import JMUModel
 
 
 def run_demo(with_plots=True):
-    """This example is based on the Hicks-Ray
+    """
+    This example is based on the Hicks-Ray
     Continuously Stirred Tank Reactors (CSTR) system. The system
     has two states, the concentration and the temperature. The
     control input to the system is the temperature of the cooling
@@ -114,33 +115,21 @@ def run_demo(with_plots=True):
     print('T = %f' % T_0_B)
 
     # Compute initial guess trajectories by means of simulation
-
-    # Create the time vector
-    t = N.linspace(1,150.,100)
-    # Create the input vector from the target input value. The
-    # target input value is here increased in order to get a
-    # better initial guess.
-    u = (Tc_0_B+35)*N.ones(N.size(t,0))
-    # Create a matrix where the first column is time and the second column represents
-    # the input trajectory.
-    u_traj = N.transpose(N.vstack((t,u)))
-
-    # Compile the optimization initialization model and load the DLL
+    # Compile the optimization initialization model
     jmu_name = compile_jmu("CSTR.CSTR_Init_Optimization", 
         curr_dir+"/files/CSTR.mop")
 
+    # Load the model
     init_sim_model = JMUModel(jmu_name)
 
     # Set model parameters
     init_sim_model.set('cstr.c_init',c_0_A)
     init_sim_model.set('cstr.T_init',T_0_A)
-    init_sim_model.set('Tc_0',Tc_0_A)
     init_sim_model.set('c_ref',c_0_B)
     init_sim_model.set('T_ref',T_0_B)
-    init_sim_model.set('Tc_ref',u[0])
+    init_sim_model.set('Tc_ref',Tc_0_B)
 
-    res = init_sim_model.simulate(start_time=0.,final_time=150.,
-        input_trajectory=u_traj)
+    res = init_sim_model.simulate(start_time=0.,final_time=150.)
     
     # Extract variable profiles
     c_init_sim=res['cstr.c']
@@ -164,31 +153,37 @@ def run_demo(with_plots=True):
         plt.ylabel('Temperature')
 
         plt.subplot(313)
-        plt.plot(t_init_sim,Tc_init_sim)
+        # TO BE CHANGED!!!
+        plt.plot([t_init_sim[0], t_init_sim[-1]],[Tc_init_sim, Tc_init_sim])
         plt.grid()
         plt.ylabel('Cooling temperature')
         plt.xlabel('time')
         plt.show()
 
-
-    # Solve optimal control problem    
+    # Solve the optimal control problem
+    # Compile model
     jmu_name = compile_jmu("CSTR.CSTR_Opt", curr_dir+"/files/CSTR.mop")
 
+    # Load model
     cstr = JMUModel(jmu_name)
 
+    # Set reference values
     cstr.set('Tc_ref',Tc_0_B)
     cstr.set('c_ref',c_0_B)
     cstr.set('T_ref',T_0_B)
 
+    # Set initial values
     cstr.set('cstr.c_init',c_0_A)
     cstr.set('cstr.T_init',T_0_A)
 
     n_e = 100 # Number of elements 
-    hs = N.ones(n_e)*1./n_e # Equidistant points
-    n_cp = 3; # Number of collocation points in each element
 
-    res = cstr.optimize(
-        options={'n_e':n_e,'hs':hs,'n_cp':n_cp,'init_traj':res.result_data})
+    # Set options
+    opt_opts = cstr.optimize_options()
+    opt_opts['n_e'] = n_e
+    opt_opts['init_traj'] = res.result_data
+
+    res = cstr.optimize(options=opt_opts)
 
     # Extract variable profiles
     c_res=res['cstr.c']
@@ -231,7 +226,7 @@ def run_demo(with_plots=True):
         plt.show()
 
     # Simulate to verify the optimal solution
-    # Set up input trajectory
+    # Set up the input trajectory
     t = time_res 
     u = Tc_res
     u_traj = N.transpose(N.vstack((t,u)))
@@ -239,6 +234,7 @@ def run_demo(with_plots=True):
     # Compile the Modelica model to a JMU
     jmu_name = compile_jmu("CSTR.CSTR", curr_dir+"/files/CSTR.mop")
 
+    # Load model
     sim_model = JMUModel(jmu_name)
 
     sim_model.set('c_init',c_0_A)

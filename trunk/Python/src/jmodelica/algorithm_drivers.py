@@ -1047,7 +1047,7 @@ class CollocationLagrangePolynomialsAlgOptions(OptionBase):
             result is written. Setting this option to an empty
             string results in a default file name that is based
             on the name of the optimization class.
-            Default: ''
+            Default: Empty string
             
         result_format --
             Specifies in which format to write the result. Currently

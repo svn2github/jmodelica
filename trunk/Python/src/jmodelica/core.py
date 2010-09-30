@@ -211,15 +211,15 @@ class BaseModel(object):
         
     def optimize_options(self, algorithm='CollocationLagrangePolynomialsAlg'):
         """
-        Get an instance of the optimize options class, prefilled 
-        with default values. If called without argument then the options 
+        Returns an instance of the optimize options class containing 
+        options default values. If called without argument then the options 
         class for the default optimization algorithm will be returned.
         
         Parameters::
         
             algorithm --
                 The algorithm for which the options class should be 
-                fetched. Possible values are: 
+                returned. Possible values are: 
                 'CollocationLagrangePolynomialsAlg'.
                 Default: 'CollocationLagrangePolynomialsAlg'
                 

@@ -142,9 +142,8 @@ plt.show()
       </mediaobject>
 
       <caption>
-        <para><emphasis linkend="fig-vdp-opt" role="bold"><xref
-        linkend="fig-vdp-opt" /></emphasis>.Optimal control and state profiles
-        for the Van Der Pol optimal control problem.</para>
+        <para>Optimal control and state profiles for the Van Der Pol optimal
+        control problem.</para>
       </caption>
     </figure>
   </section>
@@ -781,9 +780,9 @@ x1 = res['x1']</programlisting>
     cstr.py.</para>
 
     <para>Start the tutorial by creating a working directory and copy the file
-    $JMODELICA_HOME/Python/jmodelica/examples/files/CSTR.mo to your working
+    $JMODELICA_HOME/Python/jmodelica/examples/files/CSTR.mop to your working
     directory. An on-line version of <link
-    xlink:href="https://svn.jmodelica.org/trunk/Python/src/jmodelica/examples/files/CSTR.mo">CSTR.mo</link>
+    xlink:href="https://svn.jmodelica.org/trunk/Python/src/jmodelica/examples/files/CSTR.mo">CSTR.mop</link>
     is also available (depending on which browser you use, you may have to
     accept the site certificate by clicking through a few steps). If you
     choose to create Python script file, save it to the working
@@ -797,37 +796,33 @@ x1 = res['x1']</programlisting>
       commands. Copy them and past them either directly into you Python shell
       or, preferably, into your Python script file.</para>
 
-      <programlisting language="python">import os.path
-from jmodelica import initialize
-from jmodelica import simulate
-from jmodelica import optimize
-
-import jmodelica.jmi as jmi
-from jmodelica.compiler import OptimicaCompiler
-
-import numpy as N
+      <programlisting language="python">import numpy as N
 import matplotlib.pyplot as plt
-</programlisting>
+
+from jmodelica.jmi import compile_jmu
+from jmodelica.jmi import JMUModel</programlisting>
 
       <para>Before we can do operations on the model, such as optimizing it,
       the model file must be compiled and the resulting DLL file loaded in
-      Python. These steps are described in more detail in the tutorial on
-      Compilation of models.</para>
+      Python. These steps are described in more detail ZZ.</para>
 
-      <programlisting language="python"># Create a Modelica compiler instance
-oc = OptimicaCompiler()
-    
-# Compile the stationary initialization model into a DLL and load it
-init_model = oc.compile_model("CSTR.CSTR_Init", "CSTR.mo", target='ipopt')
+      <programlisting language="python"># Compile the stationary initialization model into a JMU
+jmu_name = compile_jmu("CSTR.CSTR_Init","CSTR.mop", 
+    compiler_options={"enable_variable_scaling":True})
+
+# load the JMU
+init_model = JMUModel(jmu_name)
 </programlisting>
 
-      <para>At this point, you may open the file CSTR.mo, containing the CSTR
-      model and the static initialization model used in this section. Study
-      the classes CSTR.CSTR and CSTR.CSTR_Init and make sure you understand
-      the models. Before proceeding, have a look at the interactive help for
-      one of the functions you used:</para>
+      <para>Notice that automatic scaling of the model is enabled by setting
+      the compiler option <literal>enable_variable_scaling</literal> to true.
+      At this point, you may open the file CSTR.mop, containing the CSTR model
+      and the static initialization model used in this section. Study the
+      classes CSTR.CSTR and CSTR.CSTR_Init and make sure you understand the
+      models. Before proceeding, have a look at the interactive help for one
+      of the functions you used:</para>
 
-      <programlisting language="python">In [8]: help(oc.compile_model)
+      <programlisting language="python">In [8]: help(compile_jmu)
 </programlisting>
     </section>
 
@@ -841,56 +836,55 @@ init_model = oc.compile_model("CSTR.CSTR_Init", "CSTR.mo", target='ipopt')
 
       <programlisting language="python"># Set inputs for Stationary point A
 Tc_0_A = 250
-init_model.set_value('Tc',Tc_0_A)
+init_model.set('Tc',Tc_0_A)
     
 # Solve the DAE initialization system with Ipopt
-init_result_object = initialize(init_model)
-init_result = init_result_object.get_result_data()
-    
-# Store stationary point A
-c_0_A = init_result.get_variable_data('c').x[0]
-T_0_A = init_result.get_variable_data('T').x[0]
+init_result = init_model.initialize()
 
-# Print some data for stationary point A 
-print(' *** Stationary point A ***') 
-print('input Tc = %f' % Tc_0_A) 
-print('state c = %f' % c_0_A) 
-print('state T = %f' % T_0_A)
+# Store stationary point A
+c_0_A = init_result['c'][0]
+T_0_A = init_result['T'][0]
+
+# Print some data for stationary point A
+print(' *** Stationary point A ***')
+print('Tc = %f' % Tc_0_A)
+print('c = %f' % c_0_A)
+print('T = %f' % T_0_A)
 </programlisting>
 
-      <para>Notice how the function set_value is used to set the value of the
-      control input. The initialization algorithm is invoked by calling the
-      function 'initialize', which returns a result object where the
-      initialization result is accessed with 'get_result_data' and stored in
-      'init_result'. The 'initialize' function relies on the algorithm Ipopt
-      for computing the solution of the initialization problem. The values of
-      the states corresponding to grade A can then be extracted from the
-      result object. Look carefully at the printouts in the Python shell to
-      see a printout of the stationary values. Display the help text for the
-      'initialize' function and take a moment to look through it. The
-      procedure is now repeated for operating point B:</para>
+      <para>Notice how the method <literal>set</literal> is used to set the
+      value of the control input. The initialization algorithm is invoked by
+      calling the <literal>JMUModel</literal> method
+      <literal>initialize</literal>, which returns a result object from which
+      the initialization result can be accessed. The
+      <literal>initialize</literal> method relies on the algorithm IPOPT for
+      computing the solution of the initialization problem. The values of the
+      states corresponding to grade A can then be extracted from the result
+      object. Look carefully at the printouts in the Python shell to see a
+      printout of the stationary values. Display the help text for the
+      <literal>initialize</literal> method and take a moment to look through
+      it. The procedure is now repeated for operating point B:</para>
 
       <programlisting language="python"># Set inputs for Stationary point B
 Tc_0_B = 280
-init_model.set_value('Tc',Tc_0_B)
-        
-# Solve the DAE initialization system with Ipopt
-init_result_object = initialize(init_model)
-init_result = init_result_object.get_result_data()
+init_model.set('Tc',Tc_0_B)
     
+# Solve the DAE initialization system with Ipopt
+init_result = init_model.initialize()
 # Store stationary point B
-c_0_B = init_result.get_variable_data('c').x[0]
-T_0_B = init_result.get_variable_data('T').x[0]
+c_0_B = init_result['c'][0]
+T_0_B = init_result['T'][0]
 
-# Print some data for stationary point B 
-print(' *** Stationary point B ***') 
-print('input Tc = %f' % Tc_0_B) 
-print('state c = %f' % c_0_B) 
-print('state T = %f' % T_0_B)
+# Print some data for stationary point B
+print(' *** Stationary point B ***')
+print('Tc = %f' % Tc_0_B)
+print('c = %f' % c_0_B)
+print('T = %f' % T_0_B)
 </programlisting>
 
       <para>We have now computed two stationary points for the system based on
-      constant control inputs.</para>
+      constant control inputs. In the next section, these will be used to set
+      up an optimal control problem.</para>
     </section>
 
     <section>
@@ -1090,8 +1084,8 @@ print('state T = %f' % T_0_B)
       </informalequation>
 
       <para>and is expressed in Optimica format in the class CSTR.CSTR_Opt in
-      the CSTR.mo file above. Have a look at this class and make sure that you
-      understand how the optimization problem is formulated and what the
+      the CSTR.mop file above. Have a look at this class and make sure that
+      you understand how the optimization problem is formulated and what the
       objective is.</para>
 
       <para>Direct collocation methods often require good initial guesses in
@@ -1100,98 +1094,84 @@ print('state T = %f' % T_0_B)
       provides a convenient mean to generate state and derivative profiles
       given an initial guess for the control input(s). It is then convenient
       to set up a dedicated model for computation of initial trajectories. In
-      the model CSTR.CSTR_Init_Optimization in the CSTR.mo file, a step input
-      is filtered through a first order filter in order to generate a smooth
-      input for the CSTR system. The filtering is done in order not to excite
-      unstable modes of the system, and in particular to avoid sudden
-      ignition. Notice also that the variable names in the initialization
-      model must match those in the optimal control model. Therefore, also the
-      cost function is included in the initialization model.</para>
+      the model CSTR.CSTR_Init_Optimization in the CSTR.mop file, a step input
+      is applied to the system in order obtain an initial guess. Notice that
+      the variable names in the initialization model must match those in the
+      optimal control model. Therefore, also the cost function is included in
+      the initialization model.</para>
 
-      <para>Start by creating an input trajectory to be passed to the
-      simulator:</para>
+      <para>First, compile the model and set model parameters:</para>
 
-      <programlisting language="python"># Create the time vector
-t = N.linspace(1,150.,100)
-# Create the input vector from the target input value. The
-# target input value is here increased in order to get a
-# better initial guess.
-u = (Tc_0_B+35)*N.ones(N.size(t,0))
-# Create a matrix where the first column is time and the second column represents
-# the input trajectory.
-u_traj = N.transpose(N.vstack((t,u)))
-</programlisting>
+      <programlisting language="python"># Compile the optimization initialization model
+jmu_name = compile_jmu("CSTR.CSTR_Init_Optimization","CSTR.mop")
 
-      <para>Next, compile the model and set model parameters:</para>
-
-      <programlisting language="python"># Compile the optimization initialization model and load the DLL
-init_sim_model = oc.compile_model("CSTR.CSTR_Init_Optimization", "CSTR.mo", target='ipopt')
+# Load the model
+init_sim_model = JMUModel(jmu_name)
 
 # Set model parameters
-init_sim_model.set_value('cstr.c_init',c_0_A)
-init_sim_model.set_value('cstr.T_init',T_0_A)
-init_sim_model.set_value('Tc_0',Tc_0_A)
-init_sim_model.set_value('c_ref',c_0_B)
-init_sim_model.set_value('T_ref',T_0_B)
-init_sim_model.set_value('Tc_ref',u[0])
+init_sim_model.set('cstr.c_init',c_0_A)
+init_sim_model.set('cstr.T_init',T_0_A)
+init_sim_model.set('c_ref',c_0_B)
+init_sim_model.set('T_ref',T_0_B)
+init_sim_model.set('Tc_ref',Tc_0_B)
 </programlisting>
 
       <para>Having initialized the model parameters, we can simulate the model
       using the 'simulate' function.</para>
 
-      <programlisting language="python">sim_result_object = simulate(init_sim_model,alg_args={'start_time':0.,'final_time':150.,
-                                                         'input_trajectory':u_traj})
-res = sim_result_object.get_result_data()
+      <programlisting language="python">res = init_sim_model.simulate(start_time=0.,final_time=150.)
 </programlisting>
 
-      <para>The function 'simulation' first computes consistent initial
-      conditions and then simulates the model in the interval 0 to 150 seconds
-      with the input trajectory specified by 'u_traj'. Notice that the
-      arguments to the simulation function is specified in a Python
-      dictionary. Take a moment to read the interactive help for the
-      'simulate' function.</para>
+      <para>The method <literal>simulate</literal> first computes consistent
+      initial conditions and then simulates the model in the interval 0 to 150
+      seconds. Take a moment to read the interactive help for the
+      <literal>simulate</literal> method.</para>
 
       <para>The simulation result object is returned and to retrieve the
-      simulation data use the method 'get_result_data', from which you may now
-      retrieve trajectories for plotting:</para>
+      simulation data use Python dictionary access to retrieve the variable
+      trajectories.</para>
 
       <programlisting language="python"># Extract variable profiles
-c_init_sim=res.get_variable_data('cstr.c')
-T_init_sim=res.get_variable_data('cstr.T')
-Tc_init_sim=res.get_variable_data('cstr.Tc')
+c_init_sim=res['cstr.c']
+T_init_sim=res['cstr.T']
+Tc_init_sim=res['cstr.Tc']
+t_init_sim = res['time']
 
 # Plot the results
 plt.figure(1)
 plt.clf()
 plt.hold(True)
 plt.subplot(311)
-plt.plot(c_init_sim.t,c_init_sim.x)
+plt.plot(t_init_sim,c_init_sim)
 plt.grid()
 plt.ylabel('Concentration')
 
 plt.subplot(312)
-plt.plot(T_init_sim.t,T_init_sim.x)
+plt.plot(t_init_sim,T_init_sim)
 plt.grid()
 plt.ylabel('Temperature')
 
 plt.subplot(313)
-plt.plot(Tc_init_sim.t,Tc_init_sim.x)
+# TO BE CHANGED!!!
+plt.plot([t_init_sim[0], t_init_sim[-1]],[Tc_init_sim, Tc_init_sim])
 plt.grid()
 plt.ylabel('Cooling temperature')
 plt.xlabel('time')
 plt.show()
 </programlisting>
 
-      <para>Look at the plots and make sure you understand the effect of the
-      filter. Think about alternative, better ways to chose the input profile.
-      Also, try to increase the value 35 that was added to the target input:
-      how much can you increase this value without experiencing sudden
-      ignition of the reactor?</para>
+      <para>Look at the plots and try to relate the trajectories to the
+      optimal control problem. Why is this a good initial guess?</para>
 
       <para>Once the initial guess is generated, we compile the model
       containing the optimal control problem:</para>
 
-      <programlisting language="python">cstr = oc.compile_model("CSTR.CSTR_Opt", "CSTR.mo", target='ipopt')</programlisting>
+      <programlisting language="python"># Compile model
+jmu_name = compile_jmu("CSTR.CSTR_Opt", "CSTR.mop")
+
+# Load model
+cstr = JMUModel(jmu_name)
+</programlisting>
 
       <para>We will now initialize the parameters of the model so that their
       values correspond to the optimization objective of transferring the
@@ -1199,68 +1179,95 @@ plt.show()
       we set the parameters representing the initial values of the states to
       point A and the reference values in the cost function to point B:</para>
 
-      <programlisting language="python">cstr.set_value('Tc_ref',Tc_0_B)
-cstr.set_value('c_ref',c_0_B)
-cstr.set_value('T_ref',T_0_B)
+      <programlisting language="python"># Set reference values
+cstr.set('Tc_ref',Tc_0_B)
+cstr.set('c_ref',c_0_B)
+cstr.set('T_ref',T_0_B)
 
-cstr.set_value('cstr.c_init',c_0_A)
-cstr.set_value('cstr.T_init',T_0_A)
+# Set initial values
+cstr.set('cstr.c_init',c_0_A)
+cstr.set('cstr.T_init',T_0_A)
 </programlisting>
-
-      <para></para>
 
       <para>Collocation-based optimization algorithms often require a good
       initial guess in order to achieve fast convergence. Also, if the problem
       is non-convex, initialization is even more critical. Initial guesses can
-      be provided in Optimica by the 'initialGuess' attribute, see the CSTR.mo
-      file for an example for this. Notice that initialization in the case of
-      collocation-based optimization methods means initialization of all the
-      control and state profiles as a function of time. In some cases, it is
-      sufficient to use constant profiles. For this purpose, the
-      'initialGuess' attribute works well. In more difficult cases, however,
-      it may be necessary to initialize the profiles using simulation data,
-      where an initial guess for the input(s) has been used to generate the
-      profiles for the dependent variables. This approach for initializing the
-      optimization problem is used in this tutorial.</para>
+      be provided in Optimica by the <literal>initialGuess</literal>
+      attribute, see the CSTR.mop file for an example for this. Notice that
+      initialization in the case of collocation-based optimization methods
+      means initialization of all the control and state profiles as a function
+      of time. In some cases, it is sufficient to use constant profiles. For
+      this purpose, the <literal>initialGuess</literal> attribute works well.
+      In more difficult cases, however, it may be necessary to initialize the
+      profiles using simulation data, where an initial guess for the input(s)
+      has been used to generate the profiles for the dependent variables. This
+      approach for initializing the optimization problem is used in this
+      tutorial.</para>
 
       <para>We are now ready to solve the actual optimization problem. This is
       done by invoking the method optimize:</para>
 
-      <programlisting language="python"># Initialize the mesh
-n_e = 100 # Number of elements 
-hs = N.ones(n_e)*1./n_e # Equidistant points
-n_cp = 3; # Number of collocation points in each element
+      <programlisting language="python">n_e = 100 # Number of elements 
 
-opt_result_object = optimize(cstr,alg_args={'n_e':n_e,'hs':hs,'n_cp':n_cp,'init_traj':res})
-res = opt_result_object.get_result_data()
+# Set options
+opt_opts = cstr.optimize_options()
+opt_opts['n_e'] = n_e
+opt_opts['init_traj'] = res.result_data
+
+res = cstr.optimize(options=opt_opts)
 </programlisting>
 
-      <para>You should see the output of Ipopt in the Python shell as the
-      algorithm iterates to find the optimal solution. Ipopt should terminate
-      with a message like 'Optimal solution found' or 'Solved to an acceptable
-      level' in order for an optimum to be found. Again, the arguments to the
-      algorithm (number of elements, number of collocation points, element
-      length vector and initial guess object) are given in a Python
-      dictionary. The optimization result object is returned and the
-      optimization data are stored in 'res'.</para>
+      <para>In this case, we would like to increase the number of finite
+      elements in the mesh from 50 to 100. This is done by setting the
+      corresponding option and provide it as an argument to the
+      <literal>optimize</literal> method. You should see the output of Ipopt
+      in the Python shell as the algorithm iterates to find the optimal
+      solution. Ipopt should terminate with a message like 'Optimal solution
+      found' or 'Solved to an acceptable level' in order for an optimum to be
+      found. The optimization result object is returned and the optimization
+      data are stored in <literal>res</literal>.</para>
 
       <para>We can now retrieve the trajectories of the variables that we
       intend to plot:</para>
 
       <programlisting language="python"># Extract variable profiles
-c_res=res.get_variable_data('cstr.c')
-T_res=res.get_variable_data('cstr.T')
-Tc_res=res.get_variable_data('cstr.Tc')
+c_res=res['cstr.c']
+T_res=res['cstr.T']
+Tc_res=res['cstr.Tc']
+time_res = res['time']
 
-c_ref=res.get_variable_data('c_ref') 
-T_ref=res.get_variable_data('T_ref')
-Tc_ref=res.get_variable_data('Tc_ref')
+c_ref=res['c_ref']
+T_ref=res['T_ref']
+Tc_ref=res['Tc_ref']
 </programlisting>
 
       <para>Finally, we plot the result using the functions available in
       matplotlib:</para>
 
-      <programlisting language="python">plt.figure(1)
+      <programlisting language="python"># Plot the result
+plt.figure(2)
+plt.clf()
+plt.hold(True)
+plt.subplot(311)
+plt.plot(time_res,c_res)
+plt.plot([time_res[0],time_res[-1]],[c_ref,c_ref],'--')
+plt.grid()
+plt.ylabel('Concentration')
+
+plt.subplot(312)
+plt.plot(time_res,T_res)
+plt.plot([time_res[0],time_res[-1]],[T_ref,T_ref],'--')
+plt.grid()
+plt.ylabel('Temperature')
+
+plt.subplot(313)
+plt.plot(time_res,Tc_res)
+plt.plot([time_res[0],time_res[-1]],[Tc_ref,Tc_ref],'--')
+plt.grid()
+plt.ylabel('Cooling temperature')
+plt.xlabel('time')
+plt.show()
+plt.figure(1)
 plt.clf()
 plt.hold(True)
 plt.subplot(311)
@@ -1284,16 +1291,24 @@ plt.xlabel('time')
 plt.show()
 </programlisting>
 
-      <para>Your should now see a plot as the one below:</para>
+      <para>Notice that parameters are returned as scalar values whereas
+      variables are returned as vectors and that this must be taken into
+      account when plotting. Your should now the plot shown in <xref
+      linkend="opt-fig-cstr-opt1" />.</para>
 
       <figure>
-        <title>Optimization result</title>
+        <title></title>
 
         <mediaobject>
           <imageobject>
-            <imagedata fileref="images/cstr.svg" scalefit="1" width="60%"></imagedata>
+            <imagedata fileref="images/cstr.svg" scalefit="1" width="60%"
+                       xml:id="opt-fig-cstr-opt1"></imagedata>
           </imageobject>
         </mediaobject>
+
+        <caption>
+          <para>Optimal profiles for the CSTR problem.</para>
+        </caption>
       </figure>
 
       <para>Take a minute to analyze the optimal profiles and to answer the
@@ -1331,54 +1346,55 @@ plt.show()
       similar to above:</para>
 
       <programlisting language="python"># Simulate to verify the optimal solution
-# Set up input trajectory
-t = Tc_res.t 
-u = Tc_res.x
+# Set up the input trajectory
+t = time_res 
+u = Tc_res
 u_traj = N.transpose(N.vstack((t,u)))
-    
-# Comile the Modelica model first to C code and
-# then to a dynamic library
-sim_model = oc.compile_model("CSTR.CSTR","CSTR.mo",target='ipopt')
 
-sim_model.set_value('c_init',c_0_A)
-sim_model.set_value('T_init',T_0_A)
-sim_model.set_value('Tc',u[0])
+# Compile the Modelica model to a JMU
+jmu_name = compile_jmu("CSTR.CSTR", curr_dir+"/files/CSTR.mop")
 
-sim_result_object = simulate(sim_model,compiler='optimica',
-                           alg_args={'start_time':0.,'final_time':150.,
-                                     'input_trajectory':u_traj})
-res = sim_result_object.get_result_data()
+# Load model
+sim_model = JMUModel(jmu_name)
+
+sim_model.set('c_init',c_0_A)
+sim_model.set('T_init',T_0_A)
+sim_model.set('Tc',u[0])
+
+res = sim_model.simulate(start_time=0.,final_time=150.,
+    input_trajectory=u_traj)
 </programlisting>
 
       <para>Finally, we load the simulated data and plot it to compare with
       the optimized trajectories:</para>
 
       <programlisting language="python"># Extract variable profiles
-c_sim=res.get_variable_data('c')
-T_sim=res.get_variable_data('T')
-Tc_sim=res.get_variable_data('Tc')
+c_sim=res['c']
+T_sim=res['T']
+Tc_sim=res['Tc']
+time_sim = res['time']
 
 # Plot the results
 plt.figure(3)
 plt.clf()
 plt.hold(True)
 plt.subplot(311)
-plt.plot(c_res.t,c_res.x,'--')
-plt.plot(c_sim.t,c_sim.x)
+plt.plot(time_res,c_res,'--')
+plt.plot(time_sim,c_sim)
 plt.legend(('optimized','simulated'))
 plt.grid()
 plt.ylabel('Concentration')
 
 plt.subplot(312)
-plt.plot(T_res.t,T_res.x,'--')
-plt.plot(T_sim.t,T_sim.x)
+plt.plot(time_res,T_res,'--')
+plt.plot(time_sim,T_sim)
 plt.legend(('optimized','simulated'))
 plt.grid()
 plt.ylabel('Temperature')
 
 plt.subplot(313)
-plt.plot(Tc_res.t,Tc_res.x,'--')
-plt.plot(Tc_sim.t,Tc_sim.x)
+plt.plot(time_res,Tc_res,'--')
+plt.plot(time_sim,Tc_sim)
 plt.legend(('optimized','simulated'))
 plt.grid()
 plt.ylabel('Cooling temperature')
@@ -1386,10 +1402,11 @@ plt.xlabel('time')
 plt.show()
 </programlisting>
 
-      <para>You should now see a plot similar to:</para>
+      <para>You should now see the plot shown in <xref
+      linkend="opt-fig-cstr-opt2" />.</para>
 
-      <figure>
-        <title>Simulated system response</title>
+      <figure xml:id="opt-fig-cstr-opt2">
+        <title></title>
 
         <mediaobject>
           <imageobject>
@@ -1397,6 +1414,11 @@ plt.show()
                        width="60%"></imagedata>
           </imageobject>
         </mediaobject>
+
+        <caption>
+          <para>Optimal control profiles and simulated trajectories
+          corresponding to the optimal control input.</para>
+        </caption>
       </figure>
 
       <para>Discuss why the simulated trajectories differs from the optimized
