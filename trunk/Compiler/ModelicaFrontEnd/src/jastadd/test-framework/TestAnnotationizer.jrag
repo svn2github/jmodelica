@@ -170,7 +170,7 @@ abstract public class TestAnnotationizerHelper {
 		try {
 			root = ph.parseFile(filePath);
 			root.options = createOptionRegistry();
-			root.options.setStringOption("MODELICAPATH", modelicapath);
+			root.options.addStringOption("MODELICAPATH", modelicapath);
 		} catch (ParserException e) {
 			e.getProblem().setFileName(filePath);
 			CompilerException ce = new CompilerException();

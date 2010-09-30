@@ -493,13 +493,18 @@ aspect InstanceErrorCheck {
 	}
 	
 	public void InstComponentDecl.collectErrors() {
-    if (!errorChecked) {
-		super.collectErrors();
-		getClassName().collectErrors();
-		if (hasInstModification())
-			getInstModification().collectErrors();
-		if (hasInstConstraining())
-			getInstConstraining().collectErrors();
+	    if (!errorChecked) {
+	    	if (isRecursed()) {
+	    		errorChecked = true;
+	    		error("Recursive class structure");
+	    	} else {
+	    		super.collectErrors();
+	    		getClassName().collectErrors();
+	    		if (hasInstModification())
+	    			getInstModification().collectErrors();
+	    		if (hasInstConstraining())
+	    			getInstConstraining().collectErrors();
+	    	}
 		}
 	}
 	
@@ -569,35 +574,41 @@ aspect InstanceErrorCheck {
 	}
 	
 	public void InstExtends.collectErrors() {
-    if (!errorChecked) {
-		super.collectErrors();
-		getClassName().collectErrors();
-		if (hasInstClassModification())
-			getInstClassModification().collectErrors();
-		
-		}
+	    if (!errorChecked) {
+	    	if (isRecursed()) {
+	    		error("Recursive class structure");
+	    	} else {
+				super.collectErrors();
+				getClassName().collectErrors();
+				if (hasInstClassModification())
+					getInstClassModification().collectErrors();
+			}
+	    }
 	}	
 	
 	public void InstExtendsShortClass.collectErrors() {
-    if (!errorChecked) {
-      errorChecked = true;
-	  allChecks();
-      // Normally the class modifications in an InstExtendsShortClass
-      // does not need to be checked, since they are checked in InstShortClassDecl.
-      // This is not the case if the short class decl references
-      // an primitive variable, however, and in this case the
-      // class modification needs to be checked for errors.
- 	  if (extendsPrimitive() && hasInstClassModification())
-		 getInstClassModification().collectErrors();
-      
-	  getClassName().collectErrors();
-	  for(InstNode n : getInstComponentDecls()) 
-		  n.collectErrors();
-	  collectErrorsInClassDecls();
-	  for(InstNode n : getInstExtendss()) 
-		  n.collectErrors();
-	  
-	}
+	    if (!errorChecked) {
+    		errorChecked = true;
+	    	if (isRecursed()) {
+	    		error("Recursive class structure");
+	    	} else {
+	    		allChecks();
+	    		// Normally the class modifications in an InstExtendsShortClass
+	    		// does not need to be checked, since they are checked in InstShortClassDecl.
+	    		// This is not the case if the short class decl references
+	    		// an primitive variable, however, and in this case the
+	    		// class modification needs to be checked for errors.
+	    		if (extendsPrimitive() && hasInstClassModification())
+	    			getInstClassModification().collectErrors();
+
+	    		getClassName().collectErrors();
+	    		for(InstNode n : getInstComponentDecls()) 
+	    			n.collectErrors();
+	    		collectErrorsInClassDecls();
+	    		for(InstNode n : getInstExtendss()) 
+	    			n.collectErrors();
+	    	}
+		}
     }
 	
 	//public void InstPrimitiveClassDecl.collectErrors() {}
@@ -795,6 +806,57 @@ aspect InstanceErrorCheck {
 			getFExp().collectErrors();
 	    }
 	}
+	
+	/**
+	 * \brief Check if this component is in a recursive component structure.
+	 */
+	syn boolean InstComponentDecl.isRecursed() = isWithin(getClassName().myInstClassDecl());
+	
+	/**
+	 * \brief Check if this component is in a recursive class structure.
+	 */
+	syn boolean InstExtends.isRecursed()       = isWithin(getClassName().myInstClassDecl());
+	
+	/**
+	 * \brief Check if extends tree is recursive.
+	 */
+	public boolean InstExtends.isRecursive() {
+		if (recursiveCache == RECURSIVE_UNKNOWN)
+			calcIsRecursive(new HashSet<InstExtends>());
+		return recursiveCache == RECURSIVE_YES;
+	}
+	
+	/**
+	 * \brief Examine extends tree to find recursive extends nodes.
+	 */
+	private void InstExtends.calcIsRecursive(HashSet<InstExtends> visited) {
+		recursiveCache = visited.contains(this) ? RECURSIVE_YES : RECURSIVE_NO;
+		visited.add(this);
+		if (recursiveCache == RECURSIVE_NO) 
+			for (InstExtends ie : getClassName().myInstClassDecl().getInstExtendss())
+				ie.calcIsRecursive(visited);
+	}
+	
+	private byte InstExtends.recursiveCache = RECURSIVE_UNKNOWN;
+	private static final byte InstExtends.RECURSIVE_UNKNOWN = 0;
+	private static final byte InstExtends.RECURSIVE_YES     = 1;
+	private static final byte InstExtends.RECURSIVE_NO      = 2;
+	
+	/**
+	 * \brief Check if <code>icd</code> is an ancestor of this node or any ancestor is an 
+	 *        instance of <code>icd</code>.
+	 */
+	inh boolean InstNode.isWithin(InstClassDecl icd);
+	eq InstNode.getChild().isWithin(InstClassDecl icd) = isOfInstClassDecl(icd) || isWithin(icd);
+	eq InstRoot.getChild().isWithin(InstClassDecl icd) = false;
+	
+	/**
+	 * \brief Check if this node is equal to or an instance of <code>icd</code>.
+	 */
+	syn boolean InstNode.isOfInstClassDecl(InstClassDecl icd) = false;
+	eq InstClassDecl.isOfInstClassDecl(InstClassDecl icd)     = icd == this;
+	eq InstComponentDecl.isOfInstClassDecl(InstClassDecl icd) = icd == getClassName().myInstClassDecl();
+	eq InstExtends.isOfInstClassDecl(InstClassDecl icd)       = icd == getClassName().myInstClassDecl();
 	
 }
 

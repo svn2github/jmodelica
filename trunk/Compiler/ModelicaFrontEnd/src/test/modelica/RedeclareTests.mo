@@ -3915,7 +3915,6 @@ end RedeclareTests.RedeclareFunction2;
 end RedeclareFunction2;
 
 
-// TODO: flat name of func looks wrong
 model RedeclareFunction3
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
@@ -3926,16 +3925,16 @@ fclass RedeclareTests.RedeclareFunction3
  Real z.x;
  Real z.y;
 equation
- z.x = RedeclareTests.f(z.y);
+ z.x = RedeclareTests.RedeclareFunction3.z.D.f(z.y);
  z.y = 1;
 
- function RedeclareTests.f
+ function RedeclareTests.RedeclareFunction3.z.D.f
   input Real i;
   output Real o;
  algorithm
   o := ( i ) * ( 2 );
   return;
- end RedeclareTests.f;
+ end RedeclareTests.RedeclareFunction3.z.D.f;
 end RedeclareTests.RedeclareFunction3;
 ")})));
 
@@ -3971,6 +3970,60 @@ end RedeclareTests.RedeclareFunction3;
 
 	A.C z;
 end RedeclareFunction3;
+
+
+
+model RedeclareFunction4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="RedeclareFunction4",
+         description="Redeclared versions of same function",
+         flatModel="
+fclass RedeclareTests.RedeclareFunction4
+ Real b.x;
+ Real b.y;
+equation
+ b.x = RedeclareTests.RedeclareFunction4.b.A2.f({1,2});
+ b.y = RedeclareTests.RedeclareFunction4.b.A3.f({1,2,3});
+
+ function RedeclareTests.RedeclareFunction4.b.A2.f
+  input Real[2] a;
+  output Real b;
+ algorithm
+  b := ( a[1] ) * ( 1 ) + ( a[2] ) * ( 2 );
+  return;
+ end RedeclareTests.RedeclareFunction4.b.A2.f;
+
+ function RedeclareTests.RedeclareFunction4.b.A3.f
+  input Real[3] a;
+  output Real b;
+ algorithm
+  b := ( a[1] ) * ( 1 ) + ( a[2] ) * ( 2 ) + ( a[3] ) * ( 3 );
+  return;
+ end RedeclareTests.RedeclareFunction4.b.A3.f;
+end RedeclareTests.RedeclareFunction4;
+")})));
+
+    package A
+        constant Integer n = 2;
+        function f
+            input Real a[n];
+            output Real b;
+        algorithm
+            b := a * (1:n);
+        end f;
+    end A;
+    
+    model B
+        package A2 = A;
+        package A3 = A(n = 3);
+        
+        Real x = A2.f(1:2);
+        Real y = A3.f(1:3);
+    end B;
+    
+    B b;
+end RedeclareFunction4;
 
 
 

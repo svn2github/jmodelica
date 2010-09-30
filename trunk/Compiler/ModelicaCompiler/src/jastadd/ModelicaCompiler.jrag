@@ -803,7 +803,9 @@ public class ModelicaCompiler {
 		try {
 			options = new OptionRegistry(optionsfile);
 		} catch(Exception e) {
-			handleException(e, "The options XML file could not be loaded.");
+			log.warning("The options XML file could not be loaded, using defaults.");
+			log.stackTrace(e);
+			options = new OptionRegistry();
 		}
 		
 		//add modelicapath to optionregistry

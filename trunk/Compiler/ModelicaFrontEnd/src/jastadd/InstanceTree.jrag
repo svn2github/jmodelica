@@ -1347,12 +1347,12 @@ aspect InstanceAST_API {
 
 	syn boolean InstNode.extendsPrimitive()  = false;
 	eq InstShortClassDecl.extendsPrimitive() = 
-		getNumInstExtends()==1 && getInstExtends(0).extendsPrimitive();
+		getNumInstExtends() == 1 && getInstExtends(0).extendsPrimitive();
 	eq InstFullClassDecl.extendsPrimitive()  = 
-		getNumInstExtends()==1 && getInstExtends(0).extendsPrimitive();
+		getNumInstExtends() == 1 && getInstExtends(0).extendsPrimitive();
 	eq InstExtends.extendsPrimitive() {
 		InstClassDecl icd = getClassName().myInstClassDecl();
-		return icd.isPrimitive() ||	icd.extendsPrimitive();
+		return !isRecursive() && (icd.isPrimitive() || icd.extendsPrimitive());
 	}
 	
 	syn InstClassDecl InstClassDecl.getBaseInstClass() = 

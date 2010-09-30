@@ -1012,4 +1012,85 @@ end UnknownTypeAccess1;
 
 
 
+model RecursiveStructure1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="RecursiveStructure1",
+         description="Detect recursive class structures",
+         errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 1017, column 5:
+  Recursive class structure
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 1021, column 5:
+  Recursive class structure
+")})));
+
+	model A
+		B b;
+	end A;
+	
+	model B
+		A a1;
+	end B;
+	
+	A a2;
+end RecursiveStructure1;
+
+
+model RecursiveStructure2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="RecursiveStructure2",
+         description="Detect recursive class structures",
+         errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 1058, column 3:
+  Recursive class structure
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 1062, column 3:
+  Recursive class structure
+")})));
+
+	model A
+		extends B;
+	end A;
+	
+	model B
+		extends A;
+	end B;
+	
+	A a;
+end RecursiveStructure2;
+
+
+model RecursiveStructure3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="RecursiveStructure3",
+         description="Detect recursive class structures",
+         errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 1071, column 3:
+  Recursive class structure
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 1075, column 5:
+  Recursive class structure
+")})));
+
+	model A
+		extends B;
+	end A;
+	
+	model B
+		A a1;
+	end B;
+	
+	A a2;
+end RecursiveStructure3;
+
+
 end TypeTests;

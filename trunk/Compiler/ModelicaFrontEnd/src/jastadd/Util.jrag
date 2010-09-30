@@ -491,10 +491,10 @@ aspect Names {
   syn String InstClassDecl.qualifiedName();
   eq InstBaseClassDecl.qualifiedName() = combineName(instClassNamePrefix(), name());
   
-  inh lazy String InstBaseClassDecl.instClassNamePrefix();
-  eq InstFullClassDecl.getInstClassDecl().instClassNamePrefix() = 
+  inh lazy String InstNode.instClassNamePrefix();
+  eq InstBaseClassDecl.getChild().instClassNamePrefix() = 
 	  combineName(instClassNamePrefix(), name());
-  eq InstFullClassDecl.getInstExtends().instClassNamePrefix()   = 
+  eq InstComponentDecl.getChild().instClassNamePrefix() = 
 	  combineName(instClassNamePrefix(), name());
 
   eq InstBuiltInClassDecl.qualifiedName() = name();
