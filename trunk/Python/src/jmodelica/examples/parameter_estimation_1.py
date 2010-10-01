@@ -39,7 +39,7 @@ def run_demo(with_plots=True):
     jmu_name = compile_jmu("ParEst.ParEst",
         curr_dir+"/files/ParameterEstimation_1.mop")
     
-    # Load the dynamic library and XML data
+    # Load the dynamic library
     model=JMUModel(jmu_name)
     
     # Retreive parameter and variable vectors

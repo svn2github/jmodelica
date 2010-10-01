@@ -31,7 +31,7 @@ def run_demo(with_plots=True):
     The data used in the example was recorded by Kristian Soltesz
     at the Department of Automatic Control. 
     """
-
+    
     curr_dir = os.path.dirname(os.path.abspath(__file__));
 
     # Load measurement data from file
@@ -91,6 +91,8 @@ def run_demo(with_plots=True):
     # compile JMU
     jmu_name = compile_jmu('QuadTankPack.Sim_QuadTank', 
         curr_dir+'/files/QuadTankPack.mop')
+
+    # Load model
     model = JMUModel(jmu_name)
     
     # Simulate model response with nominal parameters
@@ -126,9 +128,11 @@ def run_demo(with_plots=True):
         plt.plot(t_sim,u2_sim,'r')
         plt.show()
 
-    # Compile model
+    # Compile parameter optimization model
     jmu_name = compile_jmu("QuadTankPack.QuadTank_ParEst",
         curr_dir+"/files/QuadTankPack.mop")
+
+    # Load the model
     qt_par_est = JMUModel(jmu_name)
 
     # Number of measurement points
@@ -140,16 +144,15 @@ def run_demo(with_plots=True):
         qt_par_est.set("y1_meas["+`i+1`+"]",y1_meas[i])
         qt_par_est.set("y2_meas["+`i+1`+"]",y2_meas[i])
 
-    # Numer of element in collocation algorithm
-    n_e = 100
-    # Normalized element lengths
-    hs = N.ones(n_e)/n_e
-    # Number of collocation points
-    n_cp = 3
+    n_e = 100 # Numer of element in collocation algorithm
 
+    # Get an options object for the optimization algorithm
+    opt_opts = qt_par_est.optimize_options()
+    # Set the number of collocation points
+    opt_opts['n_e'] = n_e
+    
     # Solve parameter optimization problem
-    res = qt_par_est.optimize(
-        options={"n_e":n_e,"n_cp":3, "result_mesh":"element_interpolation","hs":hs})
+    res = qt_par_est.optimize(options=opt_opts)
 
     # Extract optimal values of parameters
     a1_opt = res["qt.a1"]
@@ -189,6 +192,8 @@ def run_demo(with_plots=True):
     # Compile second parameter estimation model
     jmu_name = compile_jmu("QuadTankPack.QuadTank_ParEst2", 
         curr_dir+"/files/QuadTankPack.mop")
+
+    # Load model
     qt_par_est2 = JMUModel(jmu_name)
     
     # Number of measurement points
@@ -203,8 +208,7 @@ def run_demo(with_plots=True):
         qt_par_est2.set("y4_meas["+`i+1`+"]",y4_meas[i])
 
     # Solve parameter estimation problem
-    res_opt2 = qt_par_est2.optimize(
-        options={"n_e":n_e,"n_cp":3, "result_mesh":"element_interpolation","hs":hs})
+    res_opt2 = qt_par_est2.optimize(options=opt_opts)
 
     # Get optimal parameter values
     a1_opt2 = res_opt2["qt.a1"]
