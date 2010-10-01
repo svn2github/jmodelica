@@ -231,6 +231,11 @@ class ResultBase(object):
 
 class JMResultBase(ResultBase):
     def __getitem__(self, key):
+        #val = self.result_data.get_variable_data(key)
+        #if self.is_variable(key):
+        #    return val.x
+        #else:
+        #    
         return self.result_data.get_variable_data(key)
 
     def is_variable(self, name):
@@ -551,15 +556,15 @@ class AssimuloFMIAlgOptions(OptionBase):
     
     Assimulo options::
     
-        solver - Specifies the simulation algorithm that is to be used.
-                 Currently the only supported solver is 'CVode'.
+        solver --
+            Specifies the simulation algorithm that is to be used.
+            Currently the only supported solver is 'CVode'.
+            Default 'CVode'
                  
-                 Default 'CVode'
-                 
-        ncp    - Number of communication points. If ncp is zero, the solver
-                 will return the internal steps taken.
-                 
-                 Default '0'
+        ncp    --
+            Number of communication points. If ncp is zero, the solver
+            will return the internal steps taken.
+            Default '0'
                  
     The different solvers provided by the Assimulo simulation package provides
     different options. These options are given in dictionaries with names
@@ -569,21 +574,23 @@ class AssimuloFMIAlgOptions(OptionBase):
     
     Options for CVode::
     
-        rtol    - The relative tolerance. The relative tolerance are retrieved from
-                  the 'default experiment' section in the XML-file and if not
-                  found are set to 1.0e-4
+        rtol    -- 
+            The relative tolerance. The relative tolerance are retrieved from
+            the 'default experiment' section in the XML-file and if not
+            found are set to 1.0e-4
+            Default 1.0e-4
+            
+        atol    --
+            The absolute tolerance.
+            Default rtol*0.01*(nominal values of the continuous states)
         
-        atol    - The absolute tolerance.
+        discr   --
+            The discretization method. Can be either 'BDF' or 'Adams'
+            Default 'BDF'
         
-                  Default rtol*0.01*(nominal values of the continuous states)
-        
-        discr   - The discretization method. Can be either 'BDF' or 'Adams'
-        
-                  Default 'BDF'
-        
-        iter    - The iteration method. Can be either 'Newton' or 'FixedPoint'
-        
-                  Default 'Newton'
+        iter    --
+            The iteration method. Can be either 'Newton' or 'FixedPoint'
+            Default 'Newton'
     """
     def __init__(self, *args, **kw):
         _defaults= {
@@ -747,21 +754,21 @@ class AssimuloAlgOptions(OptionBase):
     
     Assimulo options::
     
-        solver     - Specifies the simulation algorithm that is to be used.
+        solver     --
+            Specifies the simulation algorithm that is to be used.
+            Default 'IDA'
                  
-                     Default 'IDA'
+        ncp        --
+            Number of communication points. If ncp is zero, the solver
+            will return the internal steps taken.
+            Default '0'
                  
-        ncp        - Number of communication points. If ncp is zero, the solver
-                     will return the internal steps taken.
-                 
-                     Default '0'
-                 
-        initialize - If set to True, an algorithm for initializing the
-                     differential equation is invoked, otherwise the
-                     differential equation is assumed to have consistent
-                     initial conditions. 
-                     
-                     Default is True.
+        initialize --
+            If set to True, an algorithm for initializing the
+            differential equation is invoked, otherwise the
+            differential equation is assumed to have consistent
+            initial conditions. 
+            Default is True.
                  
     The different solvers provided by the Assimulo simulation package provides
     different options. These options are given in dictionaries with names
@@ -771,35 +778,35 @@ class AssimuloAlgOptions(OptionBase):
     
     Options for IDA::
     
-        rtol    - The relative tolerance.
-        
-                  Default 1.0e-6
+        rtol    --
+            The relative tolerance.
+            Default 1.0e-6
                   
-        atol    - The absolute tolerance.
+        atol    --
+            The absolute tolerance.
+            Default 1.0e-6
         
-                  Default 1.0e-6
-        
-        maxord  - The maximum order of the solver. Can range between 1 to 5.
-        
-                  Default 5
+        maxord  --
+            The maximum order of the solver. Can range between 1 to 5.
+            Default 5
     
     Options for CVode::
     
-        rtol    - The relative tolerance. 
-        
-                  Default 1.0e-6
+        rtol    --
+            The relative tolerance. 
+            Default 1.0e-6
                 
-        atol    - The absolute tolerance.
-        
-                  Default 1.0e-6
+        atol    --
+            The absolute tolerance.
+            Default 1.0e-6
                   
-        discr   - The discretization method. Can be either 'BDF' or 'Adams'
+        discr   --
+            The discretization method. Can be either 'BDF' or 'Adams'
+            Default 'BDF'
         
-                  Default 'BDF'
-        
-        iter    - The iteration method. Can be either 'Newton' or 'FixedPoint'
-        
-                  Default 'Newton'
+        iter    --
+            The iteration method. Can be either 'Newton' or 'FixedPoint'
+            Default 'Newton'
     """
     def __init__(self, *args, **kw):
         _defaults= {

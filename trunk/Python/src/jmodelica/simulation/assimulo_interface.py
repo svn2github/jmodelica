@@ -106,7 +106,27 @@ def write_data(simulator):
         map(export.write_point,(row for row in data))
         export.write_finalize()
         #fmi.export_result_dymola(model, data)
-        
+
+def createLogger(model, minimum_level):
+    """
+    Creates a logger.
+    """
+    filename = model.get_name()+'.log'
+    
+    log = logging.getLogger(filename)
+    log.setLevel(logging.DEBUG)
+
+    #ch = logging.StreamHandler()
+    ch = logging.FileHandler(filename, mode='w')
+    ch.setLevel(minimum_level)
+
+    formatter = logging.Formatter("%(name)s - %(message)s")
+    
+    ch.setFormatter(formatter)
+
+    log.addHandler(ch)
+
+    return log
 
 class FMIODE(Explicit_Problem):
     """
@@ -536,6 +556,7 @@ class JMIDAE(Implicit_Problem):
         self._pre = self.y0.copy()
         self._iter = 0
         self._temp_f = N.array([0.]*self._f_nbr)
+        self._log = createLogger(model, logging.DEBUG)
         
         
     def f(self, t, y, yd, sw=None):
@@ -651,41 +672,31 @@ class JMIDAE(Implicit_Problem):
         This method is called when assimulo finds an event.
         """
         event_info = event_info[0] #Only look at the state event information
-        
+        self._log.debug('State event occurred at time: %f'%solver.t_cur)
         nbr_iteration = 0
         
         if self.log_events:
             self._log_information.append([solver.t[-1], [list(event_info)], [[]], [],[], [[]],[]])
         
         while self.max_eIter > nbr_iteration: #Event Iteration
-            
-            if self.log_events:
-                if nbr_iteration > 0: #Used for logging
-                    i = len(self._log_information)
-                    self._log_information[i-1][1].append(event_info)
-                    self._log_information[i-1][2].append([])
-                    self._log_information[i-1][5].append([])
+        
+            self._log.debug(' Current switches: ' +str(solver.switches))
+            self._log.debug(' Event information: '+str(event_info))
+            self._log.debug(' Current States: '+str(solver.y_cur))
+            self._log.debug(' Current State Derivatives: '+str(solver.yd_cur))
                 
             self.event_switch(solver, event_info) #Turns the switches
 
             b_mode = self.g(solver.t_cur, solver.y_cur, solver.yd_cur, solver.switches)
             self.init_mode(solver) #Pass in the solver to the problem specified init_mode
             a_mode = self.g(solver.t_cur, solver.y_cur, solver.yd_cur, solver.switches)
-
+            
             #Log information
-            if self.log_events:
-                i = len(self._log_information)
-                self._log_information[i-1][4].append(self._model.sw.copy()) #Switches
-                self._log_information[i-1][6].append([b_mode,a_mode])
+            self._log.debug(' Root equations (pre)  : '+str(b_mode))
+            self._log.debug(' Root equations (after): '+str(a_mode))
 
             [event_info, iter] = self.check_eIter(b_mode, a_mode)
 
-            if iter:
-                if solver.verbosity >= solver.NORMAL:
-                    print '\nEvent iteration?: Yes'
-                if solver.verbosity >= solver.LOUD:
-                    print 'Iteration info: ', event_info
-                
             if not iter: #Breaks the iteration loop
                 break
             
