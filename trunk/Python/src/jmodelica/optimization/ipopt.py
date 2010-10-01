@@ -601,7 +601,7 @@ class NLPCollocation(object):
 
         return p_opt, data
 
-    def export_result_dymola(self, file_name='', format='txt'):
+    def export_result_dymola(self, file_name='', format='txt', write_scaled_result = False):
         """ Export the optimization result in Dymola format. The 
         function get_result is used to retrieve the solution 
         trajectories. The result is given at the collocation points.
@@ -616,6 +616,12 @@ class NLPCollocation(object):
                 textual format or 'mat' for output to Dymola binary 
                 Matlab format.
                 Default: 'txt'
+            write_scaled_result --
+                Set this parameter to True to write the result to file without
+                taking scaling into account. If the value of scaled is False,
+                then the variable scaling factors of the model are used to
+                reproduced the unscaled variable values.
+                Default: False
 
         Limitations::
         
@@ -628,7 +634,8 @@ class NLPCollocation(object):
         # Write result
         io.export_result_dymola(self._model,data, file_name=file_name, format=format)
 
-    def export_result_dymola_element_interpolation(self, n_interpolation_points=20, file_name='', format='txt'):
+    def export_result_dymola_element_interpolation(self, n_interpolation_points=20, file_name='', format='txt',
+                                                   write_scaled_result = False):
         """ Export the optimization result in Dymola format. The 
         function export_result_dymola_element_interpolation is used to 
         retrieve the solution trajectories. 
@@ -647,7 +654,12 @@ class NLPCollocation(object):
                 textual format or 'mat' for output to Dymola binary 
                 Matlab format.
                 Default: 'txt'
-
+            write_scaled_result --
+                Set this parameter to True to write the result to file without
+                taking scaling into account. If the value of scaled is False,
+                then the variable scaling factors of the model are used to
+                reproduced the unscaled variable values.
+                Default: False
         Limitations::
         
             Only format='txt' is currently supported.
@@ -662,7 +674,7 @@ class NLPCollocation(object):
             self._model,data, file_name=file_name, format=format)
 
     def export_result_dymola_mesh_interpolation(self, mesh, file_name='', 
-        format='txt'):
+                                                format='txt', write_scaled_result = False):
         """ Export the optimization result in Dymola format. The 
         function export_result_dymola_element_interpolation is used to 
         retrieve the solution trajectories. 
@@ -679,7 +691,12 @@ class NLPCollocation(object):
                 textual format or 'mat' for output to Dymola binary 
                 Matlab format.
                 Default: 'txt'
-
+            write_scaled_result --
+                Set this parameter to True to write the result to file without
+                taking scaling into account. If the value of scaled is False,
+                then the variable scaling factors of the model are used to
+                reproduced the unscaled variable values.
+                Default: False
         Limitations::
         
             Only format='txt' is currently supported.

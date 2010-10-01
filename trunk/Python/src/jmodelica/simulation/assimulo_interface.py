@@ -49,7 +49,7 @@ class FMIModel_Exception(Exception):
     """
     pass
 
-def write_data(simulator):
+def write_data(simulator,write_scaled_result=False):
     """
     Writes simulation data to a file.
     
@@ -73,7 +73,7 @@ def write_data(simulator):
         data = N.c_[data, u]
         data = N.c_[data, y[:,len(model.real_x):len(model.real_x)+len(model.real_w)]]
 
-        io.export_result_dymola(model,data)
+        io.export_result_dymola(model,data,scaled=write_scaled_result)
     elif isinstance(simulator._problem, JMIODE):
         model = simulator._problem._model
         
@@ -87,7 +87,7 @@ def write_data(simulator):
         data = N.c_[data, y]
         data = N.c_[data, u]
         
-        io.export_result_dymola(model,data)
+        io.export_result_dymola(model,data,scaled=write_scaled_result)
     else:
         model = simulator._problem._model
         

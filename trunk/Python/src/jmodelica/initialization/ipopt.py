@@ -599,7 +599,7 @@ class NLPInitialization(object):
         if self._jmi_model._dll.jmi_init_opt_set_initial_from_model(self._jmi_init_opt) is not 0:
             raise jmi.JMIException("Could not set initial point from model.")
 
-    def export_result_dymola(self, file_name='', format='txt'):
+    def export_result_dymola(self, file_name='', format='txt', write_scaled_result = False):
         """ Export the initialization result in Dymola format. 
 
         Parameters::
@@ -612,6 +612,12 @@ class NLPInitialization(object):
                 textual format or 'mat' for output to Dymola binary 
                 Matlab format.
                 Default: 'txt'
+            write_scaled_result --
+                Set this parameter to True to write the result to file without
+                taking scaling into account. If the value of scaled is False,
+                then the variable scaling factors of the model are used to
+                reproduced the unscaled variable values.
+                Default: False
 
         Limitations::
         
@@ -637,5 +643,5 @@ class NLPInitialization(object):
              n_u + n_w] = self._model.real_w
                         
         # Write result
-        io.export_result_dymola(self._model,data, file_name=file_name, format=format)
+        io.export_result_dymola(self._model,data, file_name=file_name, format=format, scaled = write_scaled_result)
 

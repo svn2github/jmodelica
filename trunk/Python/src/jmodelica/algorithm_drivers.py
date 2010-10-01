@@ -424,12 +424,21 @@ class IpoptInitResult(JMResultBase):
 
 class IpoptInitializationAlgOptions(OptionBase):
     """ Options for the IpoptInitialization initialize algorithm. 
+
+            write_scaled_result --
+                Set this parameter to True to write the result to file without
+                taking scaling into account. If the value of scaled is False,
+                then the variable scaling factors of the model are used to
+                reproduced the unscaled variable values.
+                Default: False
+
     """
     def __init__(self, *args, **kw):
         _defaults= {
             'stat':False,
             'result_file_name':'', 
             'result_format':'txt',
+            'write_scaled_result':False,
             'IPOPT_options':{}
             }
         super(IpoptInitializationAlgOptions,self).__init__(_defaults)
@@ -497,7 +506,8 @@ class IpoptInitializationAlg(AlgorithmBase):
         self.stat=self.options['stat']
         self.result_args = dict(
             file_name=self.options['result_file_name'], 
-            format=self.options['result_format'])
+            format=self.options['result_format'],
+            write_scaled_result=self.options['write_scaled_result'])
             
         # solver options
         self.solver_options = self.options['IPOPT_options']
@@ -506,6 +516,8 @@ class IpoptInitializationAlg(AlgorithmBase):
         """ Helper function that sets options for the solver.
         """
         for k, v in self.solver_options.iteritems():
+            print k
+            print v
             if isinstance(v, default_int):
                 self.nlp_ipopt.init_opt_ipopt_set_int_option(k, v)
             elif isinstance(v, float):
@@ -566,6 +578,18 @@ class AssimuloFMIAlgOptions(OptionBase):
             will return the internal steps taken.
             Default '0'
                  
+        ncp    - Number of communication points. If ncp is zero, the solver
+                 will return the internal steps taken.
+                 
+                 Default '0'
+
+        write_scaled_result --
+                 Set this parameter to True to write the result to file without
+                 taking scaling into account. If the value of scaled is False,
+                 then the variable scaling factors of the model are used to
+                 reproduced the unscaled variable values.
+                 Default: False
+                 
     The different solvers provided by the Assimulo simulation package provides
     different options. These options are given in dictionaries with names
     consisting of the solver name concatenated by the string '_option'. The most
@@ -595,7 +619,8 @@ class AssimuloFMIAlgOptions(OptionBase):
     def __init__(self, *args, **kw):
         _defaults= {
             'solver': 'CVode', 
-            'ncp':0, 
+            'ncp':0,
+            'write_scaled_result':False,
             'CVode_options':{'discr':'BDF','iter':'Newton'}
             }
         super(AssimuloFMIAlgOptions,self).__init__(_defaults)
@@ -675,6 +700,8 @@ class AssimuloFMIAlg(AlgorithmBase):
         """
         # no of communication points
         self.ncp = self.options['ncp']
+
+        self.write_scaled_result = self.options['write_scaled_result']
         
         # solver
         solver = self.options['solver']
@@ -729,7 +756,7 @@ class AssimuloFMIAlg(AlgorithmBase):
             The AssimuloSimResult object.
         """
         if not self.probl.write_cont:
-            write_data(self.simulator)
+            write_data(self.simulator,self.write_scaled_result)
         # result file name
         resultfile = self.model.get_name()+'_result.txt'
         # load result file
@@ -770,6 +797,22 @@ class AssimuloAlgOptions(OptionBase):
             initial conditions. 
             Default is True.
                  
+                     Default '0'
+                 
+        initialize - If set to True, an algorithm for initializing the
+                     differential equation is invoked, otherwise the
+                     differential equation is assumed to have consistent
+                     initial conditions. 
+                     
+                     Default is True.
+
+        write_scaled_result --
+            Set this parameter to True to write the result to file without
+            taking scaling into account. If the value of scaled is False,
+            then the variable scaling factors of the model are used to
+            reproduced the unscaled variable values.
+            Default: False
+
     The different solvers provided by the Assimulo simulation package provides
     different options. These options are given in dictionaries with names
     consisting of the solver name concatenated by the string '_option'. The most
@@ -813,6 +856,7 @@ class AssimuloAlgOptions(OptionBase):
             'solver': 'IDA', 
             'ncp':0, 
             'initialize':True,
+            'write_scaled_result':False,
             'IDA_options':{'atol':1.0e-6,'rtol':1.0e-6,
                            'maxord':5},
             'CVode_options':{'discr':'BDF','iter':'Newton',
@@ -916,6 +960,9 @@ class AssimuloAlg(AlgorithmBase):
             
         # do initialize?
         self.initialize = self.options['initialize']
+
+        # write scaled result?
+        self.write_scaled_result = self.options['write_scaled_result']
         
         # solver options
         self.solver_options = self.options[solver+'_options']
@@ -1061,6 +1108,12 @@ class CollocationLagrangePolynomialsAlgOptions(OptionBase):
             only textual mode is supported.
             Default: 'txt'
 
+        write_scaled_result --
+            Write the scaled optimization result if set to true.
+            This option is only applicable when automatic variable
+            scaling is enabled. Only for debugging use.
+            Default: False.
+
     Options are set by using the syntax for dictionaries::
 
         >>> opts = my_model.optimize_options()
@@ -1099,6 +1152,7 @@ class CollocationLagrangePolynomialsAlgOptions(OptionBase):
             'result_mesh':None,
             'result_file_name':'', 
             'result_format':'txt',
+            'write_scaled_result':False,
             'IPOPT_options':{'max_iter':3000,
                              'derivative_test':'none'}
             }
@@ -1193,18 +1247,21 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
         self.result_mode = self.options['result_mode']
         if self.result_mode == 'default':
             self.result_args = dict(
-                file_name = self.options['result_file_name'], 
-                format = self.options['result_format'])
+                file_name=self.options['result_file_name'], 
+                format=self.options['result_format'])
+                #write_scaled_result=self.options['write_scaled_result'])
         elif self.result_mode == 'element_interpolation':
             self.result_args = dict(
                 file_name = self.options['result_file_name'], 
-                format = self.options['result_format'], 
+                format = self.options['result_format'],
                 n_interpolation_points = self.options['n_interpolation_points'])
+                #write_scaled_result=self.options['write_scaled_result'])
         elif self.result_mode == 'mesh_interpolation':
             self.result_args = dict(
                 file_name = self.options['result_file_name'], 
                 format = self.options['result_format'], 
                 mesh = self.options['result_mesh'])
+                #write_scaled_result=self.options['write_scaled_result'])
         else:
             raise InvalidAlgorithmArgumentException(self.result_mesh)
 

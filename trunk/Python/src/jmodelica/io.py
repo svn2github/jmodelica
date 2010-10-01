@@ -27,7 +27,7 @@ from operator import itemgetter
 import jmodelica.jmi
 from jmodelica import xmlparser
 
-def export_result_dymola(model, data, file_name='', format='txt'):
+def export_result_dymola(model, data, file_name='', format='txt', scaled=False):
     """
     Export an optimization or simulation result to file in Dymolas
     result file format. The parameter values are read from the z
@@ -54,6 +54,12 @@ def export_result_dymola(model, data, file_name='', format='txt'):
             A text string equal either to 'txt' for textual format or
             'mat' for binary Matlab format.
             Default: txt
+        scaled --
+            Set this parameter to True to write the result to file without
+            taking scaling into account. If the value of scaled is False,
+            then the variable scaling factors of the model are used to
+            reproduced the unscaled variable values.
+            Default: False
 
     Limitations::
     
@@ -157,7 +163,7 @@ def export_result_dymola(model, data, file_name='', format='txt'):
         sc = model.jmimodel.get_variable_scaling_factors()
         z = model.z
 
-        scaling_method = model.get_scaling_method()
+        rescale = (model.get_scaling_method() == jmodelica.jmi.JMI_SCALING_VARIABLES) and (not scaled)
 
         # Write data
         # Write data set 1
@@ -165,9 +171,14 @@ def export_result_dymola(model, data, file_name='', format='txt'):
         f.write("%12.12f" % data[0,0])
         str_text = ''
         for ref in range(n_parameters):
-            if scaling_method & jmodelica.jmi.JMI_SCALING_VARIABLES > 0:
+            #print ref
+            if rescale:
+                #print z[ref]*sc[ref]
+                #print "hej"
                 str_text += " %12.12f" % (z[ref]*sc[ref])
             else:
+                #print z[ref]
+                #print "hopp"
                 str_text += " %12.12f" % (z[ref])
                 
         f.write(str_text)
@@ -187,7 +198,7 @@ def export_result_dymola(model, data, file_name='', format='txt'):
                 if ref==0: # Don't scale time
                     str = str + (" %12.12f" % data[i,ref])
                 else:
-                    if scaling_method & jmodelica.jmi.JMI_SCALING_VARIABLES > 0:
+                    if rescale:
                         str = str + (" %12.12f" % (data[i,ref]*sc[ref-1+n_parameters]))
                     else:
                         str = str + (" %12.12f" % data[i,ref])
