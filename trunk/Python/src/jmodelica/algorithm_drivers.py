@@ -429,15 +429,58 @@ class IpoptInitResult(JMResultBase):
     pass
 
 class IpoptInitializationAlgOptions(OptionBase):
-    """ Options for the IpoptInitialization initialize algorithm. 
+    """
+    Options for the IPOPT-based initialization algorithm.
 
-            write_scaled_result --
-                Set this parameter to True to write the result to file without
-                taking scaling into account. If the value of scaled is False,
-                then the variable scaling factors of the model are used to
-                reproduced the unscaled variable values.
-                Default: False
+    Initialization algorithm options::
 
+        stat --
+            Solve a static optimization problem.
+            Default: False
+
+        result_file_name --
+            Specifies the name of the file where the optimization
+            result is written. Setting this option to an empty
+            string results in a default file name that is based
+            on the name of the optimization class.
+            Default: Empty string
+            
+        result_format --
+            Specifies in which format to write the result. Currently
+            only textual mode is supported.
+            Default: 'txt'
+
+        write_scaled_result --
+            Set this parameter to True to write the result to file without
+            taking scaling into account. If the value of scaled is False,
+            then the variable scaling factors of the model are used to
+            reproduced the unscaled variable values.
+            Default: False
+
+    Options are set by using the syntax for dictionaries::
+
+        >>> opts = my_model.initialize_options()
+        >>> opts['stat'] = True
+        
+    In addition, IPOPT options can be provided in the option
+    IPOPT_options. For a complete list of IPOPT options, please
+    consult the IPOPT documentation available at
+    http://www.coin-or.org/Ipopt/documentation/).
+
+    Some commonly used IPOPT options are provided by default::
+
+        max_iter --
+           Maximum number of iterations.
+           Default: 3000
+                      
+        derivative_test --
+           Check the correctness of the NLP derivatives. Valid values are
+           'none', 'first-order', 'second-order', 'only-second-order'.
+           Default: 'none'
+
+    IPOPT options are set using the syntax for dictionaries::
+
+        >>> opts['IPOPT_options']['max_iter'] = 200
     """
     def __init__(self, *args, **kw):
         _defaults= {
@@ -445,7 +488,8 @@ class IpoptInitializationAlgOptions(OptionBase):
             'result_file_name':'', 
             'result_format':'txt',
             'write_scaled_result':False,
-            'IPOPT_options':{}
+            'IPOPT_options':{'max_iter':3000,
+                             'derivative_test':'none'
             }
         super(IpoptInitializationAlgOptions,self).__init__(_defaults)
         # for those key-value-sets where the value is a dict, don't 
@@ -457,7 +501,8 @@ class IpoptInitializationAlg(AlgorithmBase):
     """ Initialization of a model using Ipopt. """
     
     def __init__(self, model, options):
-        """ Create an initialization algorithm using IpoptInitialization.
+        """
+        Create an initialization algorithm using IpoptInitialization.
         
         Parameters::
         
@@ -474,10 +519,9 @@ class IpoptInitializationAlg(AlgorithmBase):
                 * help(jmodelica.algorithm_drivers.IpoptInitializationAlgOptions)
                 
                 Valid values are: 
-                - A dict which gives IpoptInitializationAlgOptions with 
-                  default values on all options except the ones listed 
-                  in the dict. Empty dict will thus give all options 
-                  with default values.
+                - A dict that overrides some or all of the default values
+                  provided by CollocationLagrangePolynomialsAlgOptions. An empty
+                  dict will thus give all options with default values.
                 - IpoptInitializationAlgOptions object.
         """
         self.model = model
@@ -662,10 +706,9 @@ class AssimuloFMIAlg(AlgorithmBase):
                 * help(jmodelica.algorithm_drivers.AssimuloFMIAlgOptions)
                 
                 Valid values are: 
-                - A dict which gives AssimuloFMIAlgOptions with default 
-                  values on all options except the ones listed in the 
-                  dict. Empty dict will thus give all options with 
-                  default values.
+                - A dict that overrides some or all of the default values
+                  provided by CollocationLagrangePolynomialsAlgOptions. An empty
+                  dict will thus give all options with default values.
                 - AssimuloFMIAlgOptions object.
         """
         self.model = model
@@ -1185,8 +1228,6 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
     The algorithm is based on orthogonal collocation and
     relies on the solver IPOPT for solving a non-linear programming
     problem. 
-
-    Optimization algorithm using CollocationLagrangePolynomials method.
     """
     
     def __init__(self, 

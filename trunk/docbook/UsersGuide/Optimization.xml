@@ -470,6 +470,16 @@ x1 = res['x1']</programlisting>
 
                 <entry>'txt'</entry>
               </row>
+
+              <row>
+                <entry><literal>write_scaled_result</literal></entry>
+
+                <entry>Write the scaled optimization result if set to true.
+                This option is only applicable when automatic variable scaling
+                is enabled. Only for debugging use.</entry>
+
+                <entry>False</entry>
+              </row>
             </tbody>
           </tgroup>
         </table>
@@ -1960,7 +1970,7 @@ plt.show()
     pumps.</para>
 
     <para>The Modelica model for the system is located in <link
-    xlink:href="https://svn.jmodelica.org/tags/1.3b1/Python/src/jmodelica/examples/files/QuadTankPack.mo">QuadTankPack.mo</link>.
+    xlink:href="https://svn.jmodelica.org/tags/1.3b1/Python/src/jmodelica/examples/files/QuadTankPack.mo">QuadTankPack.mop</link>.
     Download the file to your working directory and open it in a text editor.
     Locate the class <literal>QuadTankPack.QuadTank</literal> and make sure
     you understand the model. In particular, notice that all model variables
@@ -1977,9 +1987,10 @@ plt.show()
     <programlisting>from scipy.io.matlab.mio import loadmat
 import matplotlib.pyplot as plt
 import numpy as N
-from jmodelica import simulate
-from jmodelica import optimize
-from jmodelica.compiler import OptimicaCompiler</programlisting>
+
+from jmodelica.jmi import compile_jmu
+from jmodelica.jmi import JMUModel
+</programlisting>
 
     <para>into the file. Next, we enter code to open the data file, extract
     the measurement time series and plot the measurements:</para>
@@ -2035,26 +2046,36 @@ plt.grid()
 plt.show()  </programlisting>
 
     <para>You should now see two plots showing the measurement state profiles
-    and the control input profiles:</para>
+    and the control input profiles similar to <xref
+    linkend="opt-fig-qt_data" /> and <xref
+    linkend="opt-fig-qtinput" />.</para>
 
-    <figure>
-      <title>Measured state profiles</title>
+    <figure xml:id="opt-fig-qt_data">
+      <title></title>
 
       <mediaobject>
         <imageobject>
           <imagedata fileref="images/qt_x.svg" scalefit="1" width="60%"></imagedata>
         </imageobject>
       </mediaobject>
+
+      <caption>
+        <para>Measured state profiles.</para>
+      </caption>
     </figure>
 
-    <figure>
-      <title>Input profiles used in estimation experiment</title>
+    <figure xml:id="opt-fig-qtinput">
+      <title></title>
 
       <mediaobject>
         <imageobject>
           <imagedata fileref="images/qt_u.svg" scalefit="1" width="60%"></imagedata>
         </imageobject>
       </mediaobject>
+
+      <caption>
+        <para>Control inputs used in the identification experiment.</para>
+      </caption>
     </figure>
 
     <para>In order to evaluate the accuracy of nominal model parameter values,
