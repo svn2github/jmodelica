@@ -789,6 +789,38 @@ class ModelDescription:
             return aliasnames, isnegated
         return None
 
+    def get_variability(self, variablename, ignore_cache=False):
+        """ Get variability of variable. 
+        
+        Parameters::
+        
+            variablename --
+                The name of the variable.
+            ignore_cache -- 
+                If False look for the value in the cache first, if True 
+                skip cache and derive value from data structure.
+                Default: False
+                
+        Returns::
+        
+            The variability of the variable, CONTINUOUS, CONSTANT, 
+            PARAMETER or DISCRETE
+        
+        Raises::
+        
+            XMLException if variable was not found.
+        """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_variability', 
+                variablename)
+                
+        sv = self._model_variables_dict.get(variablename)
+        if sv != None:
+            return sv.get_variability()
+        else:
+            raise XMLException("Variable: "+str(variablename)+" was not \
+                found in model.")
+
     def get_variable_names(self, include_alias=True, ignore_cache=False):
         """ Extract the names of the variables in a model.
         

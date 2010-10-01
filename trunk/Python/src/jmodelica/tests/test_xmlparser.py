@@ -1071,3 +1071,19 @@ class TestXMLParser:
         timepoints = [150.0, 150.0, 150.0]
         
         nose.tools.assert_equal(self.md.get_opt_timepoints(), timepoints)
+        
+    @testattr(stddist = True)
+    def test_get_data_type(self):
+        """
+        Test xmlparser.ModelDescription.get_data_type method.
+        
+        """
+        nose.tools.assert_equal(self.md.get_data_type('cstr.F0'), xmlparser.REAL)
+
+    @testattr(stddist = True)
+    def test_get_variability(self):
+        """
+        Test xmlparser.ModelDescription.get_variability method.
+        
+        """
+        nose.tools.assert_equal(self.md.get_variability('cstr.F0'), xmlparser.PARAMETER)
