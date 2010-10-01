@@ -1049,7 +1049,21 @@ class JMUModel(BaseModel):
             Exception if variable was not found.
         """
         return self._get_XMLDoc().get_value_reference(variablename)
+    
+    def get_variability(self, variablename):
+        """ Get variability of variable. 
+            
+            Parameters::
+            
+                variablename --
+                    The name of the variable.
+                    
+            Returns::
         
+                The variability of the variable, CONTINUOUS(0), 
+                CONSTANT(1), PARAMETER(2) or DISCRETE(3)
+        """
+        return self._get_XMLDoc().get_variability(variablename)
 
     def get_variable_names(self, include_alias=True):
         """ Get the names of all variables in the model.

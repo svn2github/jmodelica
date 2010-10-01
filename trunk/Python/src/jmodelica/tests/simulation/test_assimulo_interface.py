@@ -89,9 +89,9 @@ class Test_JMI_ODE:
         x2=res.get_variable_data('x2')
         u =res.get_variable_data('u')
         
-        assert u[-1] == 0.75
-        nose.tools.assert_almost_equal(x1[-1], -0.54108518, 5)
-        nose.tools.assert_almost_equal(x2[-1], -0.81364915, 5)
+        assert u.x[-1] == 0.75
+        nose.tools.assert_almost_equal(x1.x[-1], -0.54108518, 5)
+        nose.tools.assert_almost_equal(x2.x[-1], -0.81364915, 5)
 
     @testattr(assimulo = True) 
     def test_init(self):

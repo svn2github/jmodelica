@@ -1453,6 +1453,21 @@ class FMUModel(BaseModel):
     
     def get_variable_aliases(self):
         return self._md.get_variable_aliases()
+        
+    def get_variability(self, variablename):
+        """ Get variability of variable. 
+            
+            Parameters::
+            
+                variablename --
+                    The name of the variable.
+                    
+            Returns::
+        
+                The variability of the variable, CONTINUOUS(0), 
+                CONSTANT(1), PARAMETER(2) or DISCRETE(3)
+        """
+        return self._md.get_variability(variablename)
     
     def get_name(self):
         """ Return the name of the model. """

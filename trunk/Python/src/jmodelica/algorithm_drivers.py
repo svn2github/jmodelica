@@ -231,12 +231,19 @@ class ResultBase(object):
 
 class JMResultBase(ResultBase):
     def __getitem__(self, key):
-        #val = self.result_data.get_variable_data(key)
-        #if self.is_variable(key):
-        #    return val.x
-        #else:
-        #    
-        return self.result_data.get_variable_data(key)
+        val = self.result_data.get_variable_data(key)
+
+        if self.is_variable(key):
+            return val.x
+        else:
+            variability = self.model.get_variability(key)
+            if variability == 1 or variability == 2: #Variable is a parameter or constant
+                return val.x[0]
+            else:
+                time = self.result_data.get_variable_data('time')
+                return N.array([val.x[0]]*N.size(time.t))
+                
+        #return self.result_data.get_variable_data(key)
 
     def is_variable(self, name):
         """
@@ -245,7 +252,8 @@ class JMResultBase(ResultBase):
         
             Parameters::
             
-                name - Name of the variable/parameter/constant
+                name --
+                    Name of the variable/parameter/constant
                 
             Returns::
             
@@ -260,7 +268,8 @@ class JMResultBase(ResultBase):
         
             Parameters::
             
-                name - Name of the variable/parameter/constant
+                name --
+                    Name of the variable/parameter/constant
                 
             Returns::
             
@@ -271,10 +280,6 @@ class JMResultBase(ResultBase):
     def _get_data_matrix(self):
         """
         Returns the result matrix.
-        
-            Parameters::
-            
-                None
                 
             Returns::
             
@@ -291,7 +296,8 @@ class JMResultBase(ResultBase):
         
         Parameters::
         
-            name - Name of the variable/parameter/constant
+            name --
+                Name of the variable/parameter/constant
             
         Returns::
         
@@ -644,6 +650,7 @@ class AssimuloFMIAlg(AlgorithmBase):
         
             model -- 
                 fmi.FMUModel object representation of the model.
+                
             options -- 
                 The options that should be used in the algorithm. For 
                 details on the options, see:
@@ -696,7 +703,8 @@ class AssimuloFMIAlg(AlgorithmBase):
         self._set_solver_options()
     
     def _set_options(self):
-        """ Helper function that sets options for AssimuloFMI algorithm.
+        """ 
+        Helper function that sets options for AssimuloFMI algorithm.
         """
         # no of communication points
         self.ncp = self.options['ncp']
@@ -714,7 +722,8 @@ class AssimuloFMIAlg(AlgorithmBase):
         self.solver_options = self.options[solver+'_options']
     
     def _set_solver_options(self):
-        """ Helper function that sets options for the solver.
+        """ 
+        Helper function that sets options for the solver.
         """
         rtol, atol = self.model.get_tolerances()
         solver_options = self.solver_options.copy()
@@ -743,12 +752,15 @@ class AssimuloFMIAlg(AlgorithmBase):
             setattr(self.simulator, k, v)
                 
     def solve(self):
-        """ Runs the simulation. """
+        """ 
+        Runs the simulation. 
+        """
         self.simulator.simulate(self.final_time, 
             self.ncp)
  
     def get_result(self):
-        """ Write result to file, load result data and create an 
+        """ 
+        Write result to file, load result data and create an 
         AssimuloSimResult object.
         
         Returns::
@@ -884,6 +896,7 @@ class AssimuloAlg(AlgorithmBase):
         
             model -- 
                 jmi.Model object representation of the model
+                
             options -- 
                 The options that should be used in the algorithm. For 
                 details on the options, see:
@@ -944,7 +957,8 @@ class AssimuloAlg(AlgorithmBase):
         self._set_solver_options()
         
     def _set_options(self):
-        """ Helper function that sets options for Assimulo algorithm.
+        """ 
+        Helper function that sets options for Assimulo algorithm.
         """
         # no of communication points
         self.ncp = self.options['ncp']
@@ -968,7 +982,8 @@ class AssimuloAlg(AlgorithmBase):
         self.solver_options = self.options[solver+'_options']
         
     def _set_solver_options(self):
-        """ Helper functions that sets options for the solver.
+        """ 
+        Helper functions that sets options for the solver.
         """
         #loop solver_args and set properties of solver
         for k, v in self.solver_options.iteritems():
@@ -984,7 +999,9 @@ class AssimuloAlg(AlgorithmBase):
             setattr(self.simulator, k, v)
                 
     def solve(self):
-        """ Runs the simulation. """
+        """ 
+        Runs the simulation. 
+        """
         # Only run initiate if model has been compiled with CppAD
         # and if alg arg 'initialize' is True.
         if self.model.has_cppad_derivatives() and self.initialize:
@@ -993,7 +1010,8 @@ class AssimuloAlg(AlgorithmBase):
             self.ncp)
  
     def get_result(self):
-        """ Write result to file, load result data and create an 
+        """ 
+        Write result to file, load result data and create an 
         AssimuloSimResult object.
         
         Returns::

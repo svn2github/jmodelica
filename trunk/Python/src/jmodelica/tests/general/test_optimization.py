@@ -280,7 +280,7 @@ class TestStaticOptimizationDependentParameters:
     @testattr(ipopt = True)
     def test_parameter_value(self):
         k = self.res.get_variable_data("k")
-        assert k == 1.1, "Wrong value of optimized parameter."
+        assert k.x[0] == 1.1, "Wrong value of optimized parameter."
 
     @testattr(ipopt = True)
     def test_initialization_from_model(self):
@@ -328,17 +328,17 @@ class TestOptInitBlockingFactors:
     def test_initialization(self):
 
 
-        m_x1_1 = self.res_init.get_variable_data("m.x[1]")
-        m_x1_2 = self.res_init2.get_variable_data("m.x[1]")
+        m_x1_1 = self.res_init.get_variable_data("m.x[1]").x
+        m_x1_2 = self.res_init2.get_variable_data("m.x[1]").x
         
-        m_x2_1 = self.res_init.get_variable_data("m.x[2]")
-        m_x2_2 = self.res_init2.get_variable_data("m.x[2]")
+        m_x2_1 = self.res_init.get_variable_data("m.x[2]").x
+        m_x2_2 = self.res_init2.get_variable_data("m.x[2]").x
         
-        m_y_1 = self.res_init.get_variable_data("m.y")
-        m_y_2 = self.res_init2.get_variable_data("m.y")
+        m_y_1 = self.res_init.get_variable_data("m.y").x
+        m_y_2 = self.res_init2.get_variable_data("m.y").x
         
-        m_u_1 = self.res_init.get_variable_data("m.u")
-        m_u_2 = self.res_init2.get_variable_data("m.u")
+        m_u_1 = self.res_init.get_variable_data("m.u").x
+        m_u_2 = self.res_init2.get_variable_data("m.u").x
         
         (n_x, n_g, n_h, dg_n_nz, dh_n_nz) = self.nlp.opt_sim_get_dimensions()
         

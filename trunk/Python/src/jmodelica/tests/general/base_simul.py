@@ -176,14 +176,14 @@ class _BaseSimOptTest:
 
         if same_span:
             msg = 'paths do not span the same time interval for ' + variable
-            assert _check_error(ans_t[0], res_t[0], rel_tol, abs_tol), msg
-            assert _check_error(ans_t[-1], res_t[-1], rel_tol, abs_tol), msg
+            assert _check_error(ans.t[0], res.t[0], rel_tol, abs_tol), msg
+            assert _check_error(ans.t[-1], res.t[-1], rel_tol, abs_tol), msg
 
         # Merge the time lists
-        time = list(set(ans_t) | set(res_t))
+        time = list(set(ans.t) | set(res.t))
 
         # Get overlapping span
-        (t1, t2) = (max(ans_t[0], res_t[0]), min(ans_t[-1], res_t[-1]))
+        (t1, t2) = (max(ans.t[0], res.t[0]), min(ans.t[-1], res.t[-1]))
 
         # Remove values outside overlap
         time = filter((lambda t: t >= t1 and t <= t2), time)
@@ -225,7 +225,7 @@ class _BaseSimOptTest:
         if abs_tol is None:
             abs_tol = self.abs_tol
         res = self.data.get_variable_data(variable)
-        (rel, abs) = _error(value, res[index])
+        (rel, abs) = _error(value, res.x[index])
         msg = 'error of %s at index %i is too large (rel=%f, abs=%f)' % (variable, index, rel, abs)
         assert (rel <= rel_tol or abs <= abs_tol), msg
 
@@ -384,14 +384,8 @@ def _trajectory_eval(var, var_t, t):
     Given the variable var, evaluate the variable for the time t.
     Values in var.t must be in increasing order, and t must be within the span of var.t.
     """
-    try:
-        len(var)
-    except TypeError:
-        var = numpy.array([var,var])
-        var_t = numpy.array([var_t[0],var_t[-1]])
-        
-    (pt, px) = (var_t[0], var[0])
-    for (ct, cx) in zip(var_t, var):
+    (pt, px) = (var.t[0], var.x[0])
+    for (ct, cx) in zip(var.t, var.x):
         # Since the t values are copies of the ones in the trajectories, we can use equality
         if ct == t:
             return cx
