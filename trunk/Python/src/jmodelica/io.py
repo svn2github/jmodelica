@@ -355,8 +355,7 @@ class ResultDymolaTextual:
             vector of the variable.
         """
         if name == 'time':
-            #return self.data[1][:,0]
-            return  Trajectory(self.data[1][:,0],self.data[1][:,0])
+            return self.data[1][:,0]
         else:
             varInd  = self.get_variable_index(name)
             dataInd = self.dataInfo[varInd][1]
@@ -371,11 +370,11 @@ class ResultDymolaTextual:
             # which means that it is
             if dataMat<0:
                 dataMat = 0
-            return Trajectory(self.data[dataMat][:,0],factor*self.data[dataMat][:,dataInd])
-            #if dataMat == 0:
-            #    return factor*self.data[dataMat][0,dataInd]
-            #else:
-            #    return factor*self.data[dataMat][:,dataInd]
+            #return Trajectory(self.data[dataMat][:,0],factor*self.data[dataMat][:,dataInd])
+            if dataMat == 0:
+                return factor*self.data[dataMat][0,dataInd]
+            else:
+                return factor*self.data[dataMat][:,dataInd]
         
     def is_variable(self, name):
         """
@@ -519,8 +518,7 @@ class ResultDymolaBinary:
             of the variable.
         """
         if name == 'time':
-            #return self.raw['data_%d'%2][0,:]
-            return Trajectory(self.raw['data_%d'%2][0,:],self.raw['data_%d'%2][0,:])
+            return self.raw['data_%d'%2][0,:]
         else:
             varInd  = self.get_variable_index(name)
             dataInd = self.raw['dataInfo'][1][varInd]
@@ -536,12 +534,12 @@ class ResultDymolaBinary:
                 
             if dataMat<1:
                 dataMat = 1
-            return Trajectory(self.raw['data_%d'%dataMat][0,:],factor*self.raw['data_%d'%dataMat][dataInd,:])
+            #return Trajectory(self.raw['data_%d'%dataMat][0,:],factor*self.raw['data_%d'%dataMat][dataInd,:])
             
-            #if dataMat == 1:
-            #    return factor*self.raw['data_%d'%dataMat][dataInd,0]
-            #else:
-            #    return factor*self.raw['data_%d'%dataMat][dataInd,:]
+            if dataMat == 1:
+                return factor*self.raw['data_%d'%dataMat][dataInd,0]
+            else:
+                return factor*self.raw['data_%d'%dataMat][dataInd,:]
     
     def is_variable(self, name):
         """
