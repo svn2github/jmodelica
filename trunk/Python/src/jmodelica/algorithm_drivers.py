@@ -489,7 +489,7 @@ class IpoptInitializationAlgOptions(OptionBase):
             'result_format':'txt',
             'write_scaled_result':False,
             'IPOPT_options':{'max_iter':3000,
-                             'derivative_test':'none'
+                             'derivative_test':'none'}
             }
         super(IpoptInitializationAlgOptions,self).__init__(_defaults)
         # for those key-value-sets where the value is a dict, don't 
