@@ -520,7 +520,7 @@ class IpoptInitializationAlg(AlgorithmBase):
                 
                 Valid values are: 
                 - A dict that overrides some or all of the default values
-                  provided by CollocationLagrangePolynomialsAlgOptions. An empty
+                  provided by IpoptInitializationAlgOptions. An empty
                   dict will thus give all options with default values.
                 - IpoptInitializationAlgOptions object.
         """
@@ -707,7 +707,7 @@ class AssimuloFMIAlg(AlgorithmBase):
                 
                 Valid values are: 
                 - A dict that overrides some or all of the default values
-                  provided by CollocationLagrangePolynomialsAlgOptions. An empty
+                  provided by AssimuloFMIAlgOptions. An empty
                   dict will thus give all options with default values.
                 - AssimuloFMIAlgOptions object.
         """
@@ -1307,20 +1307,20 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
         if self.result_mode == 'default':
             self.result_args = dict(
                 file_name=self.options['result_file_name'], 
-                format=self.options['result_format'])
-                #write_scaled_result=self.options['write_scaled_result'])
+                format=self.options['result_format'],
+                write_scaled_result=self.options['write_scaled_result'])
         elif self.result_mode == 'element_interpolation':
             self.result_args = dict(
                 file_name = self.options['result_file_name'], 
                 format = self.options['result_format'],
-                n_interpolation_points = self.options['n_interpolation_points'])
-                #write_scaled_result=self.options['write_scaled_result'])
+                n_interpolation_points = self.options['n_interpolation_points'],
+                write_scaled_result=self.options['write_scaled_result'])
         elif self.result_mode == 'mesh_interpolation':
             self.result_args = dict(
                 file_name = self.options['result_file_name'], 
                 format = self.options['result_format'], 
-                mesh = self.options['result_mesh'])
-                #write_scaled_result=self.options['write_scaled_result'])
+                mesh = self.options['result_mesh'],
+                write_scaled_result=self.options['write_scaled_result'])
         else:
             raise InvalidAlgorithmArgumentException(self.result_mesh)
 

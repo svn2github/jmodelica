@@ -632,7 +632,7 @@ class NLPCollocation(object):
         p_opt, data = self.get_result()
         
         # Write result
-        io.export_result_dymola(self._model,data, file_name=file_name, format=format)
+        io.export_result_dymola(self._model,data, file_name=file_name, format=format, scaled=write_scaled_result)
 
     def export_result_dymola_element_interpolation(self, n_interpolation_points=20, file_name='', format='txt',
                                                    write_scaled_result = False):
@@ -671,7 +671,7 @@ class NLPCollocation(object):
         
         # Write result
         io.export_result_dymola(
-            self._model,data, file_name=file_name, format=format)
+            self._model,data, file_name=file_name, format=format, scaled=write_scaled_result)
 
     def export_result_dymola_mesh_interpolation(self, mesh, file_name='', 
                                                 format='txt', write_scaled_result = False):
@@ -706,7 +706,7 @@ class NLPCollocation(object):
         p_opt, data = self.get_result_mesh_interpolation(mesh)
         
         # Write result
-        io.export_result_dymola(self._model,data, file_name=file_name, format=format)
+        io.export_result_dymola(self._model,data, file_name=file_name, format=format, scaled=write_scaled_result)
 
 
     def set_initial_from_dymola(self,res, hs_init, start_time_init, final_time_init):
