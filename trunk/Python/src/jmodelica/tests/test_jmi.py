@@ -1299,7 +1299,7 @@ class TZValues(object):
        """ Test recomputation of dependent parameters when setting
            independent parameters."""
 
-       N.testing.assert_almost_equal(self._model.get_z(),self._z)    
+       N.testing.assert_almost_equal(self._model.z,self._z)    
 
 class TestNegativeNominalScaling(object):
     """Test that scaling factors are set to the absolute value of
