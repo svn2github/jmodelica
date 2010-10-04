@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter version="5.0" xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+  <title>Initialization</title>
+
+  <section>
+    <title>Initialization</title>
+
+    <para>Before a model can be simulated it must be initialized, e.g.
+    consistent initial values must be found to the underlying DAE. To do this
+    JModelica.org supplies the JMUmodel member function
+    <literal>initialize</literal> which initializes the JMUmodel. The function
+    is called after compiling and creating a JMUModel such as:</para>
+
+    <programlisting># Compile the stationary initialization model into a DLL
+model_name = compile_jmu("My.Model", "/path/to/MyModel.mo")
+
+# Load a model instance into Python
+init_model = JMUModel(model_name)
+    
+# Solve the DAE initialization system
+init_result = init_model.initialize()</programlisting>
+
+    <para>The JMUModel instance init_model is now initialized and ready to use
+    for simulation.</para>
+
+    <section>
+      <title>How JModelica.org creates the initialization system of
+      equations</title>
+
+      <para>To find a set of consistent initial values a system of non-linear
+      equations, called the system of initial equations, is solved. This
+      system is read from the modelica model, in particular its equations,
+      initial equations as well as variables with the attribute start.</para>
+
+      <para>The system contains the DAE equations as well as the initial
+      equations defined in the model.</para>
+
+      <para>In addition, all variables with the attribute
+      <literal>fixed</literal> set to <literal>True</literal> will be treated
+      as extra equations keeping the value of this variable fixed. If the
+      attribute <literal>fixed</literal> is set to <literal>False</literal>
+      however, the value will still be given to the initialization algorithm,
+      but as a guess or suggestion not guaranteeing that it will remain fixed
+      after initialization. The default of the attribute
+      <literal>fixed</literal> is <literal>False</literal>, so if the user
+      wants to guarantee a variable to keep its starting value after
+      initialization the attribute <literal>fixed</literal> must be set to
+      <literal>True.</literal></para>
+
+      <para>Some initialization algorithms require the system of initial
+      equations to be well defined meaning that the number of variables must
+      be equal to the number of equations. If this is not the case
+      JModelica.org handles the situation as follows:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>If the number of equations is greater than the number of
+          variables the system is overdetermined, such a system usually lacks
+          a solution. JModelica.org will treat such a model as ill-defined and
+          throw an exception.</para>
+        </listitem>
+
+        <listitem>
+          <para>If the number of equations is less than the number of
+          variables the system is underdetermined and such a system has
+          infinitely many solutions. In this case JModelica.org will try to
+          limit the number of solutions by adding either initial equations or
+          setting some variables to <literal>fixed = True</literal>. So if the
+          user supplies an underdetermined system, some variables with the
+          attribute <literal>fixed</literal> set to <literal>False</literal>
+          may be changed to <literal>True</literal> upon
+          initialization.</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Initialization algorithms</title>
+
+      <para>JModelica.org has the ability to support different initialization
+      algorithms, the choisc of algorithm is passed when calling
+      initialize:</para>
+
+      <programlisting># Solve the DAE initialization system
+init_result = init_model.initialize(algorithm='IpoptInitializationAlg')</programlisting>
+
+      <para>In the example above the default algorithm using IPOPT is chosen.
+      This is currently the only fully implemented initialization
+      algorithm.</para>
+    </section>
+  </section>
+</chapter>
