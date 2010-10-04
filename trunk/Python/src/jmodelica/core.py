@@ -140,7 +140,7 @@ class BaseModel(object):
     def _exec_simulate_algorithm(self,
                                  start_time,
                                  final_time,
-                                 input_trajectory,
+                                 input,
                                  algorithm, 
                                  options):
         """ Helper function which performs all steps of an algorithm run 
@@ -162,7 +162,7 @@ class BaseModel(object):
             " must be a subclass of jmodelica.algorithm_drivers.AlgorithmBase")
 
         # initialize algorithm
-        alg = algorithm(start_time, final_time, input_trajectory, self, 
+        alg = algorithm(start_time, final_time, input, self, 
             options)
         # simulate
         alg.solve()

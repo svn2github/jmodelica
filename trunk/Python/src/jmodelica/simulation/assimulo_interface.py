@@ -63,7 +63,17 @@ def write_data(simulator,write_scaled_result=False):
         y = N.array(simulator.y)
         yd = N.array(simulator.yd)
         if simulator._problem.input:
-            u = simulator._problem.input.eval(t)
+            u_name = [k[1] for k in model.get_u_variable_names()]
+            u = N.zeros((len(t), len(u_name)))
+            u_mat = simulator._problem.input[1].eval(t)
+            
+            if not isinstance(simulator._problem.input[0],list):
+                u_input_name = [simulator._problem.input[0]]
+            else:
+                u_input_name = simulator._problem.input[0]
+            
+            for i,n in enumerate(u_input_name):
+                u[:,u_name.index(n)] = u_mat[:,i]
         else:
             u = N.ones((len(t),len(model.real_u)))*model.real_u
         
@@ -76,12 +86,25 @@ def write_data(simulator,write_scaled_result=False):
         io.export_result_dymola(model,data,scaled=write_scaled_result)
     elif isinstance(simulator._problem, JMIODE):
         model = simulator._problem._model
-        
+    
         t = N.array(simulator.t)
         y = N.array(simulator.y)
-        u = N.ones((len(t),len(model.real_u)))*model.real_u
+        if simulator._problem.input:
+            u_name = [k[1] for k in model.get_u_variable_names()]
+            u = N.zeros((len(t), len(u_name)))
+            u_mat = simulator._problem.input[1].eval(t)
+            
+            if not isinstance(simulator._problem.input[0],list):
+                u_input_name = [simulator._problem.input[0]]
+            else:
+                u_input_name = simulator._problem.input[0]
+            
+            for i,n in enumerate(u_input_name):
+                u[:,u_name.index(n)] = u_mat[:,i]
+        else:
+            u = N.ones((len(t),len(model.real_u)))*model.real_u
         yd = N.array(map(simulator.f,t,y))
-        
+
         # extends the time array with the states columnwise
         data = N.c_[t,yd]
         data = N.c_[data, y]
@@ -163,7 +186,7 @@ class FMIODE(Explicit_Problem):
         
         #Sets the inputs, if any
         if self.input!=None:
-            self._model.set_real(self.input_names,self.input.eval(t)[0,:])
+            self._model.set(self.input[0], self.input[1].eval(t)[0,:])
         
         #Evaluating the rhs
         rhs = self._model.get_derivatives()
@@ -180,7 +203,7 @@ class FMIODE(Explicit_Problem):
         
         #Sets the inputs, if any
         if self.input!=None:
-            self._model.set_real(self.input_names,self.input.eval(t)[0,:])
+            self._model.set(self.input[0], self.input[1].eval(t)[0,:])
         
         #Evaluating the event indicators
         eventInd = self._model.get_event_indicators()
@@ -257,7 +280,7 @@ class FMIODE(Explicit_Problem):
             
             #Sets the inputs, if any
             if self.input!=None:
-                self._model.set_real(self.input_names,self.input.eval(N.array([solver.t_cur]))[0,:])
+                self._model.set(self.input[0], self.input[1].eval(N.array([solver.t_cur]))[0,:])
             
             #Evaluating the rhs (Have to evaluate the values in the model)
             rhs = self._model.get_derivatives()
@@ -293,7 +316,7 @@ class FMIODE(Explicit_Problem):
             
             #Sets the inputs, if any
             if self.input!=None:
-                self._model.set_real(self.input_names,self.input.eval(N.array([solver.t_cur]))[0,:])
+                self._model.set(self.input[0], self.input[1].eval(N.array([solver.t_cur]))[0,:])
             
             #Evaluating the rhs (Have to evaluate the values in the model)
             rhs = self._model.get_derivatives()
@@ -321,63 +344,21 @@ class FMIODE(Explicit_Problem):
     
     def _set_input(self, input):
         """
-        Sets the input. The input must be a subclass of the class Trajectory.
-        The property input_names must also be specified if the input is set
-        as the names map the input to the correct variable.
+        Defines the input. The input must be a 2-tuple with the first 
+        object as a list of names of the input variables and with the
+        other as a subclass of the class Trajectory.
         """
         self.__input = input
         
     def _get_input(self):
         """
-        Sets the input. The input must be a subclass of the class Trajectory.
-        The property input_names must also be specified if the input is set
-        as the names map the input to the correct variable.
+        Defines the input. The input must be a 2-tuple with the first 
+        object as a list of names of the input variables and with the
+        other as a subclass of the class Trajectory.
         """
         return self.__input
 
     input = property(_get_input, _set_input)
-    
-    def _set_input_variables(self, names):
-        """
-        Defines the input variables.
-        
-            Parameters::
-            
-                names  -
-                        Should be a list of names with the causality 'input'.
-                        These names are then mapped to the input values specified
-                        with the 'input' option.
-                        
-            Returns::
-            
-                none
-        """
-        if not isinstance(names,list):
-            raise FMIModel_Exception('Names must be a LIST of names.')
-        
-        self.__names = []
-        
-        for n in names:
-            self.__names += [self._model.get_valueref(n)]
-            
-    def _get_input_variables(self):
-        """
-        Defines the input variables.
-        
-            Parameters::
-            
-                names  -
-                        Should be a list of names with the causality 'input'.
-                        These names are then mapped to the input values specified
-                        with the 'input' option.
-                        
-            Return::
-            
-                none
-        """
-        return self.__names
-
-    input_names = property(fget=_get_input_variables,fset=_set_input_variables)
         
 
 class JMIODE(Explicit_Problem):
@@ -421,7 +402,7 @@ class JMIODE(Explicit_Problem):
         
         #Sets the inputs, if any
         if self.input!=None:
-            self._model.real_u = self.input.eval(t)[0,:]
+            self._model.set(self.input[0], self.input[1].eval(t)[0,:])
         
         #Evaluating the rhs
         self._model.eval_ode_f()
@@ -439,7 +420,7 @@ class JMIODE(Explicit_Problem):
         
         #Sets the inputs, if any
         if self.input!=None:
-            self._model.real_u = self.input.eval(t)[0,:]
+            self._model.set(self.input[0], self.input[1].eval(t)[0,:])
         
         #Evaluating the jacobian
         #-Setting options
@@ -470,19 +451,17 @@ class JMIODE(Explicit_Problem):
         raise JMIModel_Exception('Not implemented.')
    
     def _set_input(self, input):
-        """
-        Sets the input.
-        """
         self.__input = input
         
     def _get_input(self):
         """
-        Returns the input.
+        Defines the input. The input must be a 2-tuple with the first 
+        object as a list of names of the input variables and with the
+        other as a subclass of the class Trajectory.
         """
         return self.__input
         
-    inputdocstring='The input.'
-    input = property(_get_input, _set_input, doc=inputdocstring)
+    input = property(_get_input, _set_input)
     
     def reset(self):
         """
@@ -550,7 +529,7 @@ class JMIDAE(Implicit_Problem):
         
         #Sets the inputs, if any
         if self.input!=None:
-            self._model.real_u = self.input.eval(t)[0,:]
+            self._model.set(self.input[0], self.input[1].eval(t)[0,:])
 
         #Evaluating the residual function
         residual = N.array([.0]*self._f_nbr)
@@ -587,7 +566,7 @@ class JMIDAE(Implicit_Problem):
         
         #Sets the inputs, if any
         if self.input!=None:
-            self._model.real_u = self.input.eval(t)[0,:]
+            self._model.set(self.input[0], self.input[1].eval(t)[0,:])
         
         #Evaluating the jacobian
         #-Setting options
@@ -620,6 +599,10 @@ class JMIDAE(Implicit_Problem):
         self._model.real_x = y[0:self._x_nbr]
         self._model.real_w = y[self._x_nbr:self._f_nbr]
         self._model.real_dx = yd[0:self._dx_nbr]
+        
+        #Sets the inputs, if any
+        if self.input!=None:
+            self._model.set(self.input[0], self.input[1].eval(t)[0,:])
         
         #Evaluating the switching functions
         eventInd = N.array([.0]*len(sw))
@@ -813,20 +796,18 @@ class JMIDAE(Implicit_Problem):
     max_eIter = property(_get_max_eIteration, _set_max_eIteration, doc=max_eIterdocstring)
     
     def _set_input(self, input):
-        """
-        Sets the input.
-        """
         self.__input = input
         
     def _get_input(self):
         """
-        Returns the input.
+        Defines the input. The input must be a 2-tuple with the first 
+        object as a list of names of the input variables and with the
+        other as a subclass of the class Trajectory.
         """
         return self.__input
-        
-    inputdocstring='The input.'
-    input = property(_get_input, _set_input, doc=inputdocstring)
 
+    input = property(_get_input, _set_input)
+    
     def _set_eps(self, eps):
         """
         Sets the epsilon used in the event indicators.

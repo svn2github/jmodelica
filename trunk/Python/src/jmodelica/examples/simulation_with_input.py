@@ -45,7 +45,7 @@ def run_demo(with_plots=True):
 
     model.set('u',u[0])
     
-    res = model.simulate(final_time=30, input_trajectory=u_traj,
+    res = model.simulate(final_time=30, input=('u',u_traj),
         options={'ncp':3000})
     
     x1_sim = res['x1']

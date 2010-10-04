@@ -96,7 +96,7 @@ def run_demo(with_plots=True):
     model = JMUModel(jmu_name)
     
     # Simulate model response with nominal parameters
-    res = model.simulate(input_trajectory=u,start_time=0.,final_time=60)
+    res = model.simulate(input=(['u1','u2'],u),start_time=0.,final_time=60)
 
     # Load simulation result
     x1_sim = res['qt.x1']

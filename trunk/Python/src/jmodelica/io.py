@@ -165,9 +165,9 @@ def export_result_dymola(model, data, file_name='', format='txt', scaled=False):
 
         rescale = (model.get_scaling_method() == jmodelica.jmi.JMI_SCALING_VARIABLES) and (not scaled)
 
-        print model.get_scaling_method()
-        print scaled
-        print rescale
+        #print model.get_scaling_method()
+        #print scaled
+        #print rescale
 
         # Write data
         # Write data set 1

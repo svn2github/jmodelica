@@ -685,7 +685,7 @@ class AssimuloFMIAlg(AlgorithmBase):
     def __init__(self,
                  start_time,
                  final_time,
-                 input_trajectory,
+                 input,
                  model,
                  options):
         """ Create a simulation algorithm using Assimulo.
@@ -719,7 +719,7 @@ class AssimuloFMIAlg(AlgorithmBase):
         # set start time, final time and input trajectory
         self.start_time = start_time
         self.final_time = final_time
-        self.input_trajectory = input_trajectory
+        self.input = input
         
         # handle options argument
         if isinstance(options, dict) and not \
@@ -735,11 +735,12 @@ class AssimuloFMIAlg(AlgorithmBase):
         # set options
         self._set_options()
         
-        if (N.size(self.input_trajectory)==0):
+        if not self.input:
             self.probl = FMIODE(self.model)
         else:
-            self.probl = FMIODE(self.model,TrajectoryLinearInterpolation(self.input_trajectory[:,0], \
-                                                                        self.input_trajectory[:,1:]))
+            self.probl = FMIODE(self.model,(self.input[0], 
+                                        TrajectoryLinearInterpolation(self.input[1][:,0], \
+                                                                        self.input[1][:,1:])))
         
         # instantiate solver and set options
         self.simulator = self.solver(self.probl, t0=self.start_time)
@@ -930,7 +931,7 @@ class AssimuloAlg(AlgorithmBase):
     def __init__(self,
                  start_time,
                  final_time,
-                 input_trajectory,
+                 input,
                  model,
                  options):
         """ Create a simulation algorithm using Assimulo.
@@ -965,7 +966,7 @@ class AssimuloAlg(AlgorithmBase):
         # set start time, final time and input trajectory
         self.start_time = start_time
         self.final_time = final_time
-        self.input_trajectory = input_trajectory
+        self.input = input
         
         # handle options argument
         if isinstance(options, dict) and not \
@@ -982,19 +983,19 @@ class AssimuloAlg(AlgorithmBase):
         self._set_options()
         
         if issubclass(self.solver, Implicit_ODE):
-            if (N.size(self.input_trajectory)==0):
+            if not self.input:
                 self.probl = JMIDAE(model)
             else:
-                self.probl = JMIDAE(model,
-                    TrajectoryLinearInterpolation(self.input_trajectory[:,0], \
-                                                  self.input_trajectory[:,1:]))
+                self.probl = JMIDAE(model,(self.input[0],
+                    TrajectoryLinearInterpolation(self.input[1][:,0], \
+                                                  self.input[1][:,1:])))
         else:
-            if (N.size(self.input_trajectory)==0):
+            if not self.input:
                 self.probl = JMIODE(model)
             else:
-                self.probl = JMIODE(model,
-                    TrajectoryLinearInterpolation(self.input_trajectory[:,0], \
-                                                  self.input_trajectory[:,1:]))
+                self.probl = JMIODE(model,(self.input[0],
+                    TrajectoryLinearInterpolation(self.input[1][:,0], \
+                                                  self.input[1][:,1:])))
         # instantiate solver and set options
         self.simulator = self.solver(self.probl, t0=self.start_time)
         self._set_solver_options()

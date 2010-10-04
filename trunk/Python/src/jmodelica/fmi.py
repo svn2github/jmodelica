@@ -1254,7 +1254,7 @@ class FMUModel(BaseModel):
     def simulate(self,
                  start_time=0.0,
                  final_time=1.0,
-                 input_trajectory=N.array([]),
+                 input=(),
                  algorithm='AssimuloFMIAlg', 
                  options={}):
         """ Compact function for model simulation.
@@ -1271,12 +1271,17 @@ class FMUModel(BaseModel):
             start_time --
                 Start time for the simulation.
                 Default: 0.0
+                
             final_time --
                 Final time for the simulation.
                 Default: 1.0
-            input_trajectory --
-                Input signal for the simulation.
-                Default: Empty numpy array.
+                
+            input --
+                Input signal for the simulation. The input should be a 
+                2-tuple consisting of first the names of the input
+                variable(s) and then the data matrix.
+                Default: Empty tuple.
+                
             algorithm --
                 The algorithm which will be used for the simulation is 
                 specified by passing the algorithm class as string or 
@@ -1286,6 +1291,7 @@ class FMUModel(BaseModel):
                 possible to write own algorithms and use them with this 
                 function.
                 Default: 'AssimuloFMIAlg'
+                
             options -- 
                 The options that should be used in the algorithm. For 
                 details on the options do:
@@ -1308,7 +1314,7 @@ class FMUModel(BaseModel):
         """
         return self._exec_simulate_algorithm(start_time, 
                                              final_time, 
-                                             input_trajectory, 
+                                             input, 
                                              algorithm,
                                              options)
                                

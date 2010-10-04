@@ -2069,7 +2069,7 @@ class JMUModel(BaseModel):
     def simulate(self, 
                  start_time=0.0,
                  final_time=1.0,
-                 input_trajectory=N.array([]),
+                 input=(),
                  algorithm='AssimuloAlg', 
                  options={}):
         """
@@ -2092,9 +2092,11 @@ class JMUModel(BaseModel):
                 Final time for the simulation.
                 Default: 1.0
                 
-            input_trajectory --
-                Top level input trajectories for the simulation.
-                Default: Empty numpy array.
+            input --
+                Input signal for the simulation. The input should be a 
+                2-tuple consisting of first the names of the input
+                variable(s) and then the data matrix.
+                Default: Empty tuple.
                 
             algorithm --
                 The algorithm that will be used for the simulation is 
@@ -2127,7 +2129,7 @@ class JMUModel(BaseModel):
         """
         return self._exec_simulate_algorithm(start_time, 
                                              final_time, 
-                                             input_trajectory, 
+                                             input, 
                                              algorithm,
                                              options)
         

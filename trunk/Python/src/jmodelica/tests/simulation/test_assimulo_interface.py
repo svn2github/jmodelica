@@ -20,6 +20,7 @@ import logging
 import nose
 import os
 import numpy as N
+import pylab as P
 
 from jmodelica.jmi import compile_jmu
 from jmodelica.jmi import JMUModel
@@ -74,7 +75,7 @@ class Test_JMI_ODE:
         u = (0.75)*N.ones(N.size(t,0))
         u_traj = TrajectoryLinearInterpolation(t,u.reshape(100,1))
         
-        self.ODE.input = u_traj
+        self.ODE.input = ('u',u_traj)
         
         vdp_sim = CVode(self.ODE)
 
@@ -150,7 +151,7 @@ class Test_JMI_ODE:
         test_t = 2
         
         temp_j = self.ODE.j(test_t,test_x)
-        print temp_j
+        #print temp_j
         assert temp_j[0,0] == 0.0
         assert temp_j[0,1] == -3.0
         assert temp_j[0,2] == 0.0
@@ -183,6 +184,63 @@ class Test_JMI_ODE:
         """
         #This is not implemented in JMIODE yet.
         pass
+        
+    @testattr(assimulo = True)
+    def test_double_input(self):
+        """
+        This tests double input.
+        """
+        fpath = os.path.join(get_files_path(), 'Modelica', 'DoubleInput.mo')
+        cpath = 'DoubleInput'
+
+        # compile VDP
+        fname = compile_jmu(cpath, fpath, 
+                    compiler_options={'state_start_values_fixed':True})
+
+        # Load the dynamic library and XML data
+        dInput = JMUModel(fname)
+        
+        t = N.linspace(0.,10.,100) 
+        u1 = N.cos(t)
+        u2 = N.sin(t)
+        u_traj = N.transpose(N.vstack((t,u1,u2)))
+        
+        res = dInput.simulate(final_time=10, input=(['u1','u2'],u_traj),options={'solver':'CVode'})
+        
+        r1=res['u1']
+        r2=res['u2']
+        t1=res['time']
+        
+        #P.plot(t1,r1,t1,r2)
+        #P.show()
+        nose.tools.assert_almost_equal(r1[0], 1.000000000, 3)
+        nose.tools.assert_almost_equal(r2[0], 0.000000000, 3)
+        nose.tools.assert_almost_equal(r1[-1], -0.839071529, 3)
+        nose.tools.assert_almost_equal(r2[-1], -0.544021110, 3)
+        
+        #TEST REVERSE ORDER OF INPUT
+        
+        # Load the dynamic library and XML data
+        dInput = JMUModel(fname)
+        
+        t = N.linspace(0.,10.,100) 
+        u1 = N.cos(t)
+        u2 = N.sin(t)
+        u_traj = N.transpose(N.vstack((t,u2,u1)))
+        
+        res = dInput.simulate(final_time=10, input=(['u2','u1'],u_traj),options={'solver':'CVode'})
+        
+        r1=res['u1']
+        r2=res['u2']
+        t1=res['time']
+        
+        #P.plot(t1,r1,t1,r2)
+        #P.show()
+        nose.tools.assert_almost_equal(r1[0], 1.000000000, 3)
+        nose.tools.assert_almost_equal(r2[0], 0.000000000, 3)
+        nose.tools.assert_almost_equal(r1[-1], -0.839071529, 3)
+        nose.tools.assert_almost_equal(r2[-1], -0.544021110, 3)
+
         
 class Test_JMI_DAE:
     """
@@ -392,7 +450,7 @@ class Test_JMI_DAE:
         test_t = 2
         
         temp_j = self.DAE.j(0.1,test_t,test_x,test_dx)
-        print temp_j
+        #print temp_j
         assert temp_j[0,0] == -0.1
         assert temp_j[0,1] == 1.0
         assert temp_j[1,1] == -0.1
@@ -453,6 +511,62 @@ class Test_JMI_DAE:
 
         assert solver.switches[0] == True
         assert solver.switches[1] == True
+        
+    @testattr(assimulo = True)
+    def test_double_input(self):
+        """
+        This tests double input.
+        """
+        fpath = os.path.join(get_files_path(), 'Modelica', 'DoubleInput.mo')
+        cpath = 'DoubleInput'
+
+        # compile VDP
+        fname = compile_jmu(cpath, fpath, 
+                    compiler_options={'state_start_values_fixed':True})
+
+        # Load the dynamic library and XML data
+        dInput = JMUModel(fname)
+        
+        t = N.linspace(0.,10.,100) 
+        u1 = N.cos(t)
+        u2 = N.sin(t)
+        u_traj = N.transpose(N.vstack((t,u1,u2)))
+        
+        res = dInput.simulate(final_time=10, input=(['u1','u2'],u_traj))
+        
+        r1=res['u1']
+        r2=res['u2']
+        t1=res['time']
+        
+        #P.plot(t1,r1,t1,r2)
+        #P.show()
+        nose.tools.assert_almost_equal(r1[0], 1.000000000, 3)
+        nose.tools.assert_almost_equal(r2[0], 0.000000000, 3)
+        nose.tools.assert_almost_equal(r1[-1], -0.839071529, 3)
+        nose.tools.assert_almost_equal(r2[-1], -0.544021110, 3)
+        
+        #TEST REVERSE ORDER OF INPUT
+        
+        # Load the dynamic library and XML data
+        dInput = JMUModel(fname)
+        
+        t = N.linspace(0.,10.,100) 
+        u1 = N.cos(t)
+        u2 = N.sin(t)
+        u_traj = N.transpose(N.vstack((t,u2,u1)))
+        
+        res = dInput.simulate(final_time=10, input=(['u2','u1'],u_traj))
+        
+        r1=res['u1']
+        r2=res['u2']
+        t1=res['time']
+        
+        #P.plot(t1,r1,t1,r2)
+        #P.show()
+        nose.tools.assert_almost_equal(r1[0], 1.000000000, 3)
+        nose.tools.assert_almost_equal(r2[0], 0.000000000, 3)
+        nose.tools.assert_almost_equal(r1[-1], -0.839071529, 3)
+        nose.tools.assert_almost_equal(r2[-1], -0.544021110, 3)
 
 class Test_FMI_ODE:
     """
