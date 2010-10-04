@@ -57,11 +57,6 @@
         </listitem>
 
         <listitem>
-          <para>Generics (redeclare constructs) is only partially
-          supported</para>
-        </listitem>
-
-        <listitem>
           <para>Partial support for external functions, only external C
           functions with scalar inputs and outputs are supported.</para>
         </listitem>
