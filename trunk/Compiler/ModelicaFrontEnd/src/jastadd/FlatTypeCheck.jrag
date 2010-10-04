@@ -345,11 +345,12 @@ aspect FlatTypeCheck {
   
   public void InstFunctionArgument.typeCheck() {
 	  if (!getFExp().type().isUnknown() && (getBoundInput() == null || !getBoundInput().type().isUnknown())) {
+		  FType type = getFExp().type();
 		  boolean typeOk;
 		  if (argumentDefinedTypeValid()) 
-			  typeOk = getBoundInput().type().typeCompatible(getFExp().type(), true);
+			  typeOk = getBoundInput().type().typeCompatible(type, true);		  
 		  else
-			  typeOk = argumentTypeValid(getFExp().type());
+			  typeOk = argumentTypeValid(type);
 		  if (!typeOk) {
 			  error(functionCallDecription() + ": types of " + argumentDesc() + 
 					  " and input " + getBoundInput().name() + " are not compatible");
@@ -397,6 +398,13 @@ aspect FlatTypeCheck {
   
   public void InstClassAccess.checkAccessCompInClassLeft(InstAccess right) {
 	  right.checkAccessCompInClassRight(myInstClassDecl().isPackage());
+  }
+  
+  public void InstComponentAccess.checkAccessCompInClassLeft(InstAccess right) {
+	  if (myInstComponentDecl().isPrimitive()) {
+		  InstAccess top = getTopInstAccess();
+		  top.error("Can not access attribute of primitive with dot notation: " + top.name());
+	  }
   }
   
   public void InstAccess.checkAccessCompInClassRight(boolean isPackage) {}

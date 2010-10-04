@@ -421,7 +421,7 @@ aspect InstFunctionBinding {
 		    	return this;
 
 		    // Get info
-	    	String name = getName().myInstClassDecl().qualifiedName();
+	    	String name = target.qualifiedName();
     		ArrayList<InstComponentDecl> inputs = myInputs();
 
 	    	// Check if we should try to bind arguments

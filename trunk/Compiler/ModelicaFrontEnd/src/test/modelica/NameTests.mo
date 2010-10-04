@@ -2435,4 +2435,24 @@ end NameTests.ConditionalComponentTest11;
 
 end ConditionalComponentTest11;
 
+
+
+model AttributeDot1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="AttributeDot1",
+         description="Access to attribute with dot notation",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
+Semantic error at line 2442, column 22:
+  Can not access attribute of primitive with dot notation: x.start
+")})));
+
+  Real x=1;
+  parameter Real p = x.start;
+end AttributeDot1;
+
+
+
 end NameTests;

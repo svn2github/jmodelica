@@ -488,14 +488,13 @@ aspect Names {
 	  return first + "." + second;
   }
     
-  syn String InstClassDecl.qualifiedName();
+  syn lazy String InstClassDecl.qualifiedName();
   eq InstBaseClassDecl.qualifiedName() = combineName(instClassNamePrefix(), name());
   
   inh lazy String InstNode.instClassNamePrefix();
-  eq InstBaseClassDecl.getChild().instClassNamePrefix() = 
-	  combineName(instClassNamePrefix(), name());
-  eq InstComponentDecl.getChild().instClassNamePrefix() = 
-	  combineName(instClassNamePrefix(), name());
+  eq InstBaseClassDecl.getChild().instClassNamePrefix() = combineName(instClassNamePrefix(), name());
+  eq InstComponentDecl.getChild().instClassNamePrefix() = combineName(instClassNamePrefix(), name());
+//  eq InstImport.getChild().instClassNamePrefix()      = getPackageName().myInstClassDecl().qualifiedName();
 
   eq InstBuiltInClassDecl.qualifiedName() = name();
   
