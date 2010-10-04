@@ -67,23 +67,29 @@ function optimica_tests() {
   junit_test Optimica
 }
 
+TESTS_DIR="${JMODELICA_HOME}/Python/jmodelica/tests"
 function find_python_tests() {
-  TESTS="$(find ${JMODELICA_HOME}/Python/jmodelica/tests -name \*.py | grep test_)"
+  if [[ "${TESTS}" == "" ]]; then
+    TESTS="$(find ${TESTS_DIR} -name \*.py | grep test_)"
+  fi
 }
 
 function python_tests() {
   if [ "${KEEP_PYTHON}" == 1 ]; then
-    TEST_DIR=$(mktemp -dqt)
-  else
     TEST_DIR=tests_$(date "+%F_%H-%M-%S")
     mkdir ${TEST_DIR}
+    TEST_DIR=${TEST_DIR:a}
+  else
+    TEST_DIR=$(mktemp -dqt)
   fi 
   PATTERN=----------------------------------------------------------------------
+  if [[ "${TAGS_SET}" != "1" ]]; then
   TAGS="-a stddist -a fmi"
-  if [[ "${IPOPT_HOME}" != "" ]]; then
-    TAGS="${TAGS} -a ipopt"
-    if [[ "${SUNDIALS_HOME}" != "" ]]; then
-      TAGS="${TAGS} -a assimulo"
+    if [[ "${IPOPT_HOME}" != "" ]]; then
+      TAGS="${TAGS} -a ipopt"
+      if [[ "${SUNDIALS_HOME}" != "" ]]; then
+        TAGS="${TAGS} -a assimulo"
+      fi
     fi
   fi
   print_name Python
@@ -111,7 +117,9 @@ function python_tests() {
       fi
       ;;
     n)
-      echo Building...
+      if [[ "${NO_BUILD_JMODELICA}" != "1" ]]; then
+        echo Building...
+      fi
       if build_jmodelica > /dev/null; then
         find_python_tests
         cd ${TEST_DIR}
@@ -226,56 +234,99 @@ done
 export JAVA_HOME JMODELICA_HOME IPOPT_HOME CPPAD_HOME PYTHONPATH LD_LIBRARY_PATH ANT_OPTS
 TIME=$(date +%s)
 
+TAGS=
+TESTS=
+ARG_TYPE=flag
 for a in ${DEFAULT_ARGS} $*; do
-  for b in $(echo "" ${a}|sed 's!\(.\)!\1 !g'); do
-    case ${b} in
-      -)
-        ;;
-      v|q|n)
-        OUTPUT=${b}
-        ;;
-      a|j|m|o|p)
-        test_set="test_set_${b}"
-        switch_test_flags ${!test_set}
-        ;;
-      c|C)
-        CLEAN_JUNIT=clean
-        if [[ "${b}" == C ]]; then
-          CLEAN_BUILD="make clean"
-        fi
-        ;;
-      i)
-        NO_BUILD_JMODELICA=1
-        ;;
-      k)
-        KEEP_PYTHON=1
-        ;;
-      h)
-        echo "usage: tests [-ajmopvnqcCh]"
-        echo "The -ajmop options each control a set of tests, and select all tests in set "
-        echo "for running, or, if all in set are already selected, deselects them. "
-        echo "Thus, \"tests -am\" runs all tests except modelica. If no tests are chosen, "
-        echo "a default set is run (${DEFAULT_TESTS})." 
-        echo "  -a  Select/deselect all tests"
-        echo "  -j  Select/deselect junit tests"
-        echo "  -m  Select/deselect modelica tests"
-        echo "  -o  Select/deselect optimca tests"
-        echo "  -p  Select/deselect python tests"
-        echo "  -v  Verbose output, show everything"
-        echo "  -n  Normal output, only show results and compilation errors"
-        echo "  -q  Quiet output, only show brief results"
-        echo "  -c  Do a clean before junit tests"
-        echo "  -C  Do a clean before each test suite"
-        echo "  -i  Do not re-build before python tests"
-        echo "  -k  Keep generated files from python tests"
-        echo "  -h  Print this help and exit"
-	exit
-        ;;
-      *)
-        echo "Unknown flag -${b}."
-	exit
-    esac
-  done
+  if [[ "$(echo $a | head -c1)" == "-" ]]; then
+    ARG_TYPE=flag
+  fi
+  FLAG=0
+  case ${ARG_TYPE} in
+    flag)
+      FLAG=1
+      ;;
+    tag)
+      TAGS="${TAGS} -a ${a}"
+      ;;
+    file)
+      if [[ -f ${a} ]]; then
+        FILE="${a:a}"
+      else
+        FILE="${TESTS_DIR}/${a}"
+      fi
+      if [[ -f ${FILE} ]]; then
+        TESTS="${TESTS} ${FILE}"
+      else
+        echo "Cannot find test file ${a}"
+        exit
+      fi
+      ;;
+  esac
+  if [[ ${FLAG} == 1 ]]; then
+    for b in $(echo "" ${a}|sed 's!\(.\)!\1 !g'); do
+      case ${b} in
+        -)
+          ;;
+        v|q|n)
+          OUTPUT=${b}
+          ;;
+        a|j|m|o|p)
+          test_set="test_set_${b}"
+          switch_test_flags ${!test_set}
+          ;;
+        c|C)
+          CLEAN_JUNIT=clean
+          if [[ "${b}" == C ]]; then
+            CLEAN_BUILD="make clean"
+          fi
+          ;;
+        i)
+          NO_BUILD_JMODELICA=1
+          ;;
+        k)
+          KEEP_PYTHON=1
+          ;;
+        f)
+          ARG_TYPE=file
+          ;;
+        t)
+          TAGS_SET=1
+          ARG_TYPE=tag
+          ;;
+        h)
+          echo "usage: tests [-ajmopvnqcCh] [-t [tag1 ...]] [-f file1 ...]"
+          echo "The -ajmop options each control a set of tests, and select all tests in set "
+          echo "for running, or, if all in set are already selected, deselects them. "
+          echo "Thus, \"tests -am\" runs all tests except modelica. If no tests are chosen, "
+          echo "a default set is run (${DEFAULT_TESTS})." 
+          echo "  -a  Select/deselect all tests"
+          echo "  -j  Select/deselect junit tests"
+          echo "  -m  Select/deselect modelica tests"
+          echo "  -o  Select/deselect optimca tests"
+          echo "  -p  Select/deselect python tests"
+          echo "  -v  Verbose output, show everything"
+          echo "  -n  Normal output, only show results and compilation errors"
+          echo "  -q  Quiet output, only show brief results"
+          echo "  -c  Do a clean before junit tests"
+          echo "  -C  Do a clean before each test suite"
+          echo "  -i  Do not re-build before python tests"
+          echo "  -k  Keep generated files from python tests"
+          echo "  -t  When running python tests, only run tests marked with one of the "
+          echo "      listed tags. If given without tags, all tests are run"
+          echo "  -f  When running python tests, only run tests from the listed files. "
+          echo "      Paths relative to the tests directory are accepted, as well as "
+          echo "      absolute or relative to current directory"
+          echo "  -h  Print this help and exit"
+	      exit
+          ;;
+        *)
+          echo "Unknown flag -${b}"
+	      exit
+	      ;;
+      esac
+    done
+  fi
 done
 
 ANY_ON=0
