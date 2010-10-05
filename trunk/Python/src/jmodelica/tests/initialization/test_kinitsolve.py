@@ -28,8 +28,8 @@ from jmodelica.jmi import JMIException
 
 from jmodelica.tests import testattr
 from jmodelica.tests import get_files_path
-from jmodelica.algorithm_drivers import KInitSolveAlg
-from jmodelica.initialization.kinitsol import KInitSolver
+from assimulo.kinsol import KINSOL, KINSOL_Exception
+from jmodelica.initialization.assimulo_interface import JMUAlgebraic, JMUAlgebraic_Exception
 
 int = N.int32
 N.int = N.int32
@@ -51,7 +51,8 @@ class TestKInitSolve:
         """Test setUp. Load the test model."""
         # Load model
         self.model = JMUModel("CSTRLib_Components_Two_CSTRs_stat_init.jmu")
-        self.solver = KInitSolver(self.model)
+        self.problem = JMUAlgebraic(self.model)
+        self.solver = KINSOL(self.problem)
         
         # Set inputs for Stationary point A
         u1_0_A = 1
@@ -69,11 +70,11 @@ class TestKInitSolve:
         test if solver is correctly initialized
         """
         nose.tools.assert_true(self.solver._use_jac)
-        nose.tools.assert_equals(self.solver._neqF0,15)
-        nose.tools.assert_equals(self.solver._dx_size,6)
-        nose.tools.assert_equals(self.solver._x_size,6)
-        nose.tools.assert_equals(self.solver._w_size,3)
-        nose.tools.assert_equals(self.solver._mark,12)
+        nose.tools.assert_equals(self.problem._neqF0,15)
+        nose.tools.assert_equals(self.problem._dx_size,6)
+        nose.tools.assert_equals(self.problem._x_size,6)
+        nose.tools.assert_equals(self.problem._w_size,3)
+        nose.tools.assert_equals(self.problem._mark,12)
     
     @testattr(assimulo = True)  
     def test_jac_settings(self):
@@ -87,11 +88,11 @@ class TestKInitSolve:
         self.solver.set_jac_usage(True)
         
         # test bad cases
-        nose.tools.assert_raises(JMIException,self.solver.set_jac_usage,2)
-        nose.tools.assert_raises(JMIException,self.solver.set_jac_usage,'a')
-        nose.tools.assert_raises(JMIException,self.solver.set_jac_usage,None)
-        nose.tools.assert_raises(JMIException,self.solver.set_jac_usage,[True,False])
-        nose.tools.assert_raises(JMIException,self.solver.set_jac_usage,N.array([True,False]))
+        nose.tools.assert_raises(KINSOL_Exception,self.solver.set_jac_usage,2)
+        nose.tools.assert_raises(KINSOL_Exception,self.solver.set_jac_usage,'a')
+        nose.tools.assert_raises(KINSOL_Exception,self.solver.set_jac_usage,None)
+        nose.tools.assert_raises(KINSOL_Exception,self.solver.set_jac_usage,[True,False])
+        nose.tools.assert_raises(KINSOL_Exception,self.solver.set_jac_usage,N.array([True,False]))
         
         
     @testattr(assimulo = True)   
@@ -99,55 +100,48 @@ class TestKInitSolve:
         """
         test if user can set usage of constraints
         """
-        const = N.ones(self.solver._neqF0)
+        const = N.ones(self.problem._neqF0)
         # test boolean settings
-        self.solver.set_constraints_usage(True)
-        nose.tools.assert_true(self.solver._use_const)
-        nose.tools.assert_true(self.solver._problem.use_constraints)
-        self.solver.set_constraints_usage(False)
-        nose.tools.assert_false(self.solver._use_const)
-        nose.tools.assert_false(self.solver._problem.use_constraints)
+        self.problem.set_constraints_usage(True)
+        nose.tools.assert_true(self.problem.use_constraints)
+        self.problem.set_constraints_usage(False)
+        nose.tools.assert_false(self.problem.use_constraints)
+ 
         
-        # test if constraits can be set properly
-        self.solver.set_constraints_usage(True,const)
-        nose.tools.assert_true(self.solver._use_const)
-        nose.tools.assert_true(self.solver._problem.use_constraints)
-        res1 = const == self.solver._constraints
-        res2 = const == self.solver._problem.constraints
-        for r1,r2 in zip(res1,res2):
+        # test if constraints can be set properly
+        self.problem.set_constraints_usage(True,const)
+        nose.tools.assert_true(self.problem.use_constraints)
+
+        res1 = const == self.problem.constraints
+
+        for r1 in res1:
             nose.tools.assert_true(r1)
-            nose.tools.assert_true(r2)
-            
-        self.solver.set_constraints_usage(False,const)
-        nose.tools.assert_false(self.solver._use_const,const)
-        nose.tools.assert_false(self.solver._problem.use_constraints)
-        res1 = const == self.solver._constraints
-        res2 = const == self.solver._problem.constraints
-        for r1,r2 in zip(res1,res2):
+
+        self.problem.set_constraints_usage(False,const)
+        nose.tools.assert_false(self.problem.use_constraints)
+        res1 = const == self.problem.constraints
+        for r1 in res1:
             nose.tools.assert_true(r1)
-            nose.tools.assert_true(r2)
-        
+
         # test if constraints resets
-        self.solver.set_constraints_usage(False)
-        nose.tools.assert_true(self.solver._constraints == None)
-        nose.tools.assert_true(self.solver._problem.constraints == None)
+        self.problem.set_constraints_usage(False)
+        nose.tools.assert_true(self.problem.constraints == None)
         
-        self.solver.set_constraints_usage(True,const)
-        self.solver.set_constraints_usage(True)
-        nose.tools.assert_true(self.solver._constraints == None)
-        nose.tools.assert_true(self.solver._problem.constraints == None)
+        self.problem.set_constraints_usage(True,const)
+        self.problem.set_constraints_usage(True)
+        nose.tools.assert_true(self.problem.constraints == None)
         
         #test bad input
-        nose.tools.assert_raises(JMIException, self.solver.set_constraints_usage,2)
-        nose.tools.assert_raises(JMIException, self.solver.set_constraints_usage,'a')
-        nose.tools.assert_raises(JMIException, self.solver.set_constraints_usage,None)
-        nose.tools.assert_raises(JMIException, self.solver.set_constraints_usage,[True,False])
-        nose.tools.assert_raises(JMIException, self.solver.set_constraints_usage,N.array([True,False]))
+        nose.tools.assert_raises(JMUAlgebraic_Exception, self.problem.set_constraints_usage,2)
+        nose.tools.assert_raises(JMUAlgebraic_Exception, self.problem.set_constraints_usage,'a')
+        nose.tools.assert_raises(JMUAlgebraic_Exception, self.problem.set_constraints_usage,None)
+        nose.tools.assert_raises(JMUAlgebraic_Exception, self.problem.set_constraints_usage,[True,False])
+        nose.tools.assert_raises(JMUAlgebraic_Exception, self.problem.set_constraints_usage,N.array([True,False]))
         
-        nose.tools.assert_raises(JMIException, self.solver.set_constraints_usage,False,2)
-        nose.tools.assert_raises(JMIException, self.solver.set_constraints_usage,False,'a')
-        nose.tools.assert_raises(JMIException, self.solver.set_constraints_usage,False,True)
-        nose.tools.assert_raises(JMIException, self.solver.set_constraints_usage,False,[5.,6.])
+        nose.tools.assert_raises(JMUAlgebraic_Exception, self.problem.set_constraints_usage,False,2)
+        nose.tools.assert_raises(JMUAlgebraic_Exception, self.problem.set_constraints_usage,False,'a')
+        nose.tools.assert_raises(JMUAlgebraic_Exception, self.problem.set_constraints_usage,False,True)
+        nose.tools.assert_raises(JMUAlgebraic_Exception, self.problem.set_constraints_usage,False,[5.,6.])
         
     @testattr(assimulo = True)
     def test_initialize(self):
@@ -156,7 +150,7 @@ class TestKInitSolve:
         """
         
         self.solver.set_jac_usage(True)
-        self.solver.initialize()
+        self.solver.solve()
         
         dx = self.model.real_dx
         x = self.model.real_x

@@ -30,14 +30,19 @@ except ImportError:
     logging.warning('Could not find Assimulo package. Check jmodelica.check_packages()')
 
 
-class JMUAlg_Exception(Exception):
+class JMUAlgebraic_Exception(Exception):
     """
-    A JMIModel Exception.
+    A JMUAlgebraic problem Exception.
     """
     pass
 
 
 class JMUAlgebraic(ProblemAlgebraic):
+    """
+    Class derived from ProblemAlgebraic.
+    The purpose of this problem class is to ne used as an interface between a JMUmodel
+    and the kinsol.py wrapper around the KINSOL solver from the SUNDIALS package.
+    """
     
     def __init__(self,model,x0 = None,constraints = None, use_constraints = False):
         """
@@ -69,7 +74,7 @@ class JMUAlgebraic(ProblemAlgebraic):
         print "nvar: ", self._x_size + self._w_size + self._dx_size
         
         if self._neqF0 != (self._x_size + self._w_size + self._dx_size):
-            raise JMIInit_Exception("Model error: nb eqs not equal to nb vars")
+            raise JMUAlgebraic_Exception("Model error: nb eqs not equal to nb vars")
         
         # get the data needed for evaluating the jacobian
         self._mask = N.ones(self._model.z.size, dtype=N.int32)
@@ -86,7 +91,8 @@ class JMUAlgebraic(ProblemAlgebraic):
             self._x0[0:self._dx_size] = self._model.real_dx
             self._x0[self._dx_size:self._mark] = self._model.real_x
             self._x0[self._mark:self._neqF0] = self._model.real_w
-            
+        
+        # Set constraints settings
         self.constraints = constraints
         self.use_constraints = use_constraints
 
@@ -165,6 +171,37 @@ class JMUAlgebraic(ProblemAlgebraic):
     
         # return output from result 
         return N.reshape(jac,(self._nrow,self._ncol))
+    
+    def set_constraints_usage(self,use_const,constraints = None):
+        """ Set whether to use constraints or not. If constraints are supplied
+        they will be applied (if use_const = True) otherwise constraints will be
+        guessed.
+            
+        Parameters::
+        
+            use_const --
+                Boolean set to True if constraints are to be used at all
+            constraints = None --
+                If supplied these will be used. The constraints should 
+                be a numpy array of size len(x0) with the following number
+                in the ith position.
+                0.0  - no constraint on x[i]
+                1.0  - x[i] greater or equal than 0.0
+                -1.0 - x[i] lesser or equal than 0.0
+                2.0  - x[i] greater  than 0.0
+                -2.0 - x[i] lesser than 0.0
+                
+        """
+        # check for bad input
+        if type(use_const).__name__ != 'bool':
+            raise JMUAlgebraic_Exception("First argument sent to 'set_constraint_usage' must be a boolean.")
+        if constraints != None:
+            if type(constraints).__name__ != 'ndarray':
+                raise JMUAlgebraic_Exception("Constraints must be an numpy.ndarray")
+        
+
+        self.use_constraints = use_const
+        self.constraints = constraints
         
     def get_constraints(self):
         """
@@ -207,3 +244,51 @@ class JMUAlgebraic(ProblemAlgebraic):
         return res
         
         
+def write_resdata(problem, file_name='', format='txt'):
+    """
+    Function that prints out results from a solved problem
+    
+    Parameters::
+        
+        problem--
+            Instance of JMUAlgebraic, must be solved
+        
+        file_name --
+            Name of the result file.
+            Default: ''
+        
+        format --
+            A string equal either to 'txt' for output to Dymola 
+            textual format or 'mat' for output to Dymola binary 
+            Matlab format.
+            Default: 'txt'
+
+        Limitations::
+        
+            Only format='txt' is currently supported.
+    
+    """
+    if not isinstance(problem, JMUAlgebraic):
+        raise JMUAlgebraic_Exception("Problem sent to write_resdata is not an instance of JMUAlgebraic")
+    
+    model = problem._model
+    dx_s = problem._dx_size
+    x_s = problem._x_size
+    w_s = problem._w_size
+    u_s = problem._u_size
+    
+    # Create data matrix
+    data = zeros((1,1+dx_s+ \
+                    x_s + \
+                    u_s + \
+                    w_s))
+    data[0,:] = model.t
+    data[0,1:1+dx_s] = model.real_dx
+    data[0,1+dx_s:1+dx_s + x_s] = model.real_x
+    data[0,1+dx_s + x_s:1+dx_s + x_s + u_s] = model.real_u
+    data[0,1+dx_s + x_s + u_s: \
+             1+dx_s + x_s + \
+             u_s + w_s] = model.real_w
+                        
+    # Write result
+    io.export_result_dymola(model,data, file_name=file_name, format=format)
