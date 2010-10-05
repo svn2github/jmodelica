@@ -150,7 +150,7 @@ class Test_Compiler:
         sourceroot = mc.parse_model(self.fpath_mc)
         icd = mc.instantiate_model(sourceroot, self.cpath_mc)
         fclass = mc.flatten_model(icd)
-        mc.compile_dll(self.cpath_mc.replace('.','_',1))
+        mc.compile_binary(self.cpath_mc.replace('.','_',1))
 
     @testattr(stddist = True)
     def test_optimica_stepbystep(self):
@@ -158,7 +158,7 @@ class Test_Compiler:
         sourceroot = oc.parse_model(self.fpath_oc)
         icd = oc.instantiate_model(sourceroot, self.cpath_oc)
         fclass = oc.flatten_model(icd)
-        oc.compile_dll(self.cpath_oc.replace('.','_',1))
+        oc.compile_binary(self.cpath_oc.replace('.','_',1))
 
     @testattr(stddist = True)
     def test_compiler_error(self):

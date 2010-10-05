@@ -383,14 +383,14 @@ class ModelicaCompiler():
         Compile a model.
 
         Perform all steps in the compilation of a model: parsing, 
-        instantiating, flattening, code generation and dll generation. 
-        Outputs are object file, c-code file, xml file and dll which are 
-        all written to the folder in which the compilation is performed. 
-        All files will get the default name <model_class_name>.<ext>. 
-        Set target to specify the contents of the object file used to 
-        build the .dll. Default is"model". Other three options are 
-        "model_noad", "algorithms" and "ipopt". See makefile in install 
-        folder for details.
+        instantiating, flattening, code generation and binary file 
+        generation. Outputs are object file, c-code file, xml file and 
+        binary file which are all written to the folder in which the 
+        compilation is performed. All files will get the default name 
+        <model_class_name>.<ext>. Set target to specify the contents of 
+        the object file used to build the binary. Default is"model". 
+        Other three options are "model_noad", "algorithms" and "ipopt". 
+        See makefile in install folder for details.
 
         Parameters::
         
@@ -440,9 +440,9 @@ class ModelicaCompiler():
             ext_incl_dirs = xmldoc.get_external_incl_dirs()
             
             if len(ext_libs) > 0:
-                self.compile_dll(c_file, target, ext_libs=ext_libs, ext_lib_dirs=ext_lib_dirs, ext_incl_dirs=ext_incl_dirs)
+                self.compile_binary(c_file, target, ext_libs=ext_libs, ext_lib_dirs=ext_lib_dirs, ext_incl_dirs=ext_incl_dirs)
             else:
-                self.compile_dll(c_file, target)
+                self.compile_binary(c_file, target)
 
         except jpype.JavaException, ex:
             self._handle_exception(ex)
@@ -595,13 +595,13 @@ class ModelicaCompiler():
         except jpype.JavaException, ex:
             self._handle_exception(ex)
 
-    def compile_dll(self, c_file_name, target="model", ext_libs=[], 
+    def compile_binary(self, c_file_name, target="model", ext_libs=[], 
         ext_lib_dirs=[], ext_incl_dirs=[]):
 
         """ 
         Compile a c code representation of a model.
 
-        Compile a c code representation of a model and output a .dll
+        Compile a c code representation of a model and output a binary 
         file. Default output folder is the current folder from which
         this module is run. Needs a c-file which is generated with
         generate_code.
@@ -615,8 +615,8 @@ class ModelicaCompiler():
         Parameters::
         
             c_file_name --
-                Name of c-file for which the .dll should be compiled without 
-                file extention.
+                Name of c-file for which the binary file should be 
+                compiled without file extention.
             target --
                 Build target. Valid options are 'model', 'model_noad', 
                 'algorithm' and 'ipopt'.
@@ -932,7 +932,7 @@ class CompilerError(JError):
         return problems
 
 class CcodeCompilationError(JError):
-    """ Class for errors thrown when compiling a DLL file from c code."""
+    """ Class for errors thrown when compiling a binary file from c code."""
     pass
 
 class XPathExpressionError(JError):
