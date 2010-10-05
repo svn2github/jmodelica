@@ -2904,7 +2904,7 @@ int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 				}
 				el_ind += (*jmi_opt_sim)->blocking_factors[i];
 			}
-
+			/*
 			FILE *f = fopen("sparsity.m","wt");
 
 			fprintf(f,"n_x=%d;\n",jmi->n_real_x);
@@ -2967,7 +2967,7 @@ int jmi_opt_sim_lp_new(jmi_opt_sim_t **jmi_opt_sim, jmi_t *jmi, int n_e,
 					dHineq_dp_n_cols,dHineq_ddx_p_dx_p_du_p_dw_p_n_cols, \
 			ind_dg,ind_dh,1)");
 			fclose(f);
-
+*/
 
 			// Set the bounds vector
 			// Bounds for optimization parameters
