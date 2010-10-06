@@ -1277,30 +1277,6 @@ class TestModelGeneric:
        nose.tools.assert_equal(self.m.get("p2"),15)
        nose.tools.assert_equal(self.m.get("p3"),20)
 
-class TZValues(object):
-    """Base class for testing that the z vector has correct values
-    after creation of model.
-    """
-
-    def __init__(self,fpath,cpath,z):
-        self._fpath = fpath
-        self._cpath = cpath
-        self._z = z
-    
-    def setUp(self):
-        """
-        Sets up the test class.
-        """
-        jmu_name = compile_jmu(self._cpath, self._fpath)
-        self._model = JMUModel(jmu_name)
-
-    @testattr(stddist = True)
-    def test_z_values(self):
-       """ Test recomputation of dependent parameters when setting
-           independent parameters."""
-
-       N.testing.assert_almost_equal(self._model.z,self._z)    
-
 class TestNegativeNominalScaling(object):
     """Test that scaling factors are set to the absolute value of
     the nominal attribute.
@@ -1324,96 +1300,80 @@ class TestNegativeNominalScaling(object):
        res = [2., 1.]
        N.testing.assert_almost_equal(self._model.variable_scaling_factors,res)    
 
-class TestDependentParameterEvaluation1(TZValues):
-    """Test evaluation of dependent parameters.
-    """
+class TestDependentParameterEvaluation:
 
-    def __init__(self):
+    def run(self,fpath,cpath,z):
+        """
+        Test recomputation of dependent parameters when setting
+        independent parameters.
+        """
+
+        jmu_name = compile_jmu(cpath,fpath)
+        model = JMUModel(jmu_name)
+        N.testing.assert_almost_equal(model.z,z)    
+
+    @testattr(stddist = True)
+    def test_dep_par_1(self):
         fpath = os.path.join(get_files_path(), 'Modelica', "DepParTests.mo")
         cpath = "DepParTests.DepPar1"
         z = [ 2.,  2.,  1.,  1.,  2.,  2.,  2.,  1.,  1.,  1.,  2.,  2.,  1., 0., 1.,  0.,  0.]
-        super(TestDependentParameterEvaluation1,self).__init__(fpath,cpath,z)
+        self.run(fpath,cpath,z)
 
-class TestDependentParameterEvaluation2(TZValues):
-    """Test evaluation of dependent parameters.
-    """
-
-    def __init__(self):
+    @testattr(stddist = True)
+    def test_dep_par_2(self):
         fpath = os.path.join(get_files_path(), 'Modelica', "DepParTests.mo")
         cpath = "DepParTests.DepPar2"
         z = [1., 4., 0.]
-        super(TestDependentParameterEvaluation2,self).__init__(fpath,cpath,z)
+        self.run(fpath,cpath,z)
 
-class TestDependentParameterEvaluation3(TZValues):
-    """Test evaluation of dependent parameters.
-    """
-
-    def __init__(self):
+    @testattr(stddist = True)
+    def test_dep_par_3(self):
         fpath = os.path.join(get_files_path(), 'Modelica', "DepParTests.mo")
         cpath = "DepParTests.DepPar3"
         z = [  2.,   3.,   4.,   6.,  10.,   0.]
-        super(TestDependentParameterEvaluation3,self).__init__(fpath,cpath,z)
+        self.run(fpath,cpath,z)
 
-class TestDependentParameterEvaluation4(TZValues):
-    """Test evaluation of dependent parameters.
-    """
-
-    def __init__(self):
+    @testattr(stddist = True)
+    def test_dep_par_4(self):
         fpath = os.path.join(get_files_path(), 'Modelica', "DepParTests.mo")
         cpath = "DepParTests.DepPar4"
         z = [ 2.,  3.,  2.,  3.,  0.]
-        super(TestDependentParameterEvaluation4,self).__init__(fpath,cpath,z)
+        self.run(fpath,cpath,z)
 
-class TestDependentParameterEvaluation5(TZValues):
-    """Test evaluation of dependent parameters.
-    """
-
-    def __init__(self):
+    @testattr(stddist = True)
+    def test_dep_par_5(self):
         fpath = os.path.join(get_files_path(), 'Modelica', "DepParTests.mo")
         cpath = "DepParTests.DepPar5"
         z = [ 2.,  3.,  4.,  6.,  4.,  6.,  0.]
-        super(TestDependentParameterEvaluation5,self).__init__(fpath,cpath,z)
+        self.run(fpath,cpath,z)
 
-class TestDependentParameterEvaluation6(TZValues):
-    """Test evaluation of dependent parameters.
-    """
-
-    def __init__(self):
+    @testattr(stddist = True)
+    def test_dep_par_6(self):
         fpath = os.path.join(get_files_path(), 'Modelica', "DepParTests.mo")
         cpath = "DepParTests.DepPar6"
         z =[ 2.,  3.,  4.,  6.,  4.,  6.,  4.,  6.,  4.,  6.,  0.]
-        super(TestDependentParameterEvaluation6,self).__init__(fpath,cpath,z)
+        self.run(fpath,cpath,z)
 
-class TestDependentParameterEvaluation7(TZValues):
-    """Test evaluation of dependent parameters.
-    """
-
-    def __init__(self):
+    @testattr(stddist = True)
+    def test_dep_par_7(self):
         fpath = os.path.join(get_files_path(), 'Modelica', "DepParTests.mo")
         cpath = "DepParTests.DepPar7"
         z = [ 2.,  3.,  4.,  6.,  4.,  6.,  0.]
-        super(TestDependentParameterEvaluation7,self).__init__(fpath,cpath,z)
+        self.run(fpath,cpath,z)
 
-class TestDependentParameterEvaluation8(TZValues):
-    """Test evaluation of dependent parameters.
-    """
-
-    def __init__(self):
+    @testattr(stddist = True)
+    def test_dep_par_8(self):
         fpath = os.path.join(get_files_path(), 'Modelica', "DepParTests.mo")
         cpath = "DepParTests.DepPar8"
         z = [ 2.,  1.,  3.,  0.,  1.,  1.,  0.,  0.,  0.,  1.,  1.,  1.,  0.]
-        super(TestDependentParameterEvaluation8,self).__init__(fpath,cpath,z)
+        self.run(fpath,cpath,z)
 
-class TestDependentParameterEvaluation9(TZValues):
-    """Test evaluation of dependent parameters.
-    """
-
-    def __init__(self):
+    @testattr(stddist = True)
+    def test_dep_par_9(self):
         fpath = os.path.join(get_files_path(), 'Modelica', "DepParTests.mo")
         cpath = "DepParTests.DepRec1"
         z = [ 3.,  3.,  4.,  6.,  3.,  3.,  4.,  6.,  3.,  3.,  4.,  6.,  0.]
-        super(TestDependentParameterEvaluation9,self).__init__(fpath,cpath,z)
-
+        self.run(fpath,cpath,z)
 
 class Test_JMU_methods:
     """
