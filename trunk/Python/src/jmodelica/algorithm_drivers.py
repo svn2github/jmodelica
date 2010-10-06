@@ -629,11 +629,6 @@ class AssimuloFMIAlgOptions(OptionBase):
             Number of communication points. If ncp is zero, the solver
             will return the internal steps taken.
             Default '0'
-                 
-        ncp    - Number of communication points. If ncp is zero, the solver
-                 will return the internal steps taken.
-                 
-                 Default '0'
 
         write_scaled_result --
                  Set this parameter to True to write the result to file without
@@ -854,15 +849,6 @@ class AssimuloAlgOptions(OptionBase):
             differential equation is assumed to have consistent
             initial conditions. 
             Default is True.
-                 
-                     Default '0'
-                 
-        initialize - If set to True, an algorithm for initializing the
-                     differential equation is invoked, otherwise the
-                     differential equation is assumed to have consistent
-                     initial conditions. 
-                     
-                     Default is True.
 
         write_scaled_result --
             Set this parameter to True to write the result to file without
