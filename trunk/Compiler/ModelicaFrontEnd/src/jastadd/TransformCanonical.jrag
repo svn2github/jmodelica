@@ -820,6 +820,17 @@ aspect TransformCanonical {
 			return new_exp;
 		}
 	}
+
+	/*
+	 * Rewrite derivatives of parameters to zeros.
+	 */
+	rewrite FDerExp {
+		when (!getFIdUse().myFV().isUnknown() &&
+				((FVariable)getFIdUse().myFV()).variability().lessOrEqual(fParameter())) to FExp {
+			return new FRealLitExp("0.0");
+		}
+	}
+
 }
 
 aspect ParameterSorting {

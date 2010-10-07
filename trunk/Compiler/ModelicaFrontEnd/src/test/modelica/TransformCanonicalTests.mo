@@ -1707,5 +1707,27 @@ end TransformCanonicalTests.InitialEqTest13;
     der(x2) = x1;
   end InitialEqTest13;
 
+model ParameterDerivativeTest
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={ 
+    JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ParameterDerivativeTest",
+         description="Test that derivatives of parameters are translated into zeros.",
+         flatModel="
+fclass TransformCanonicalTests.ParameterDerivativeTest
+ Real y;
+ parameter Real p = 2 /* 2 */;
+equation
+ y = 0.0 + 0.0;
+end TransformCanonicalTests.ParameterDerivativeTest;
+")})));
+
+ Real x(start=1);
+ Real y;
+ parameter Real p = 2;
+equation
+ y = der(x) + der(p);
+ x = p;
+end ParameterDerivativeTest;
+
 
 end TransformCanonicalTests;
