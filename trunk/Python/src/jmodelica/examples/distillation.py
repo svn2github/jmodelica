@@ -18,20 +18,22 @@
 # Import library for path manipulations
 import os.path
 
-# Import the JModelica.org Python packages
-from jmodelica.jmi import compile_jmu
-from jmodelica.jmi import JMUModel
-
 # Import numerical libraries
 import numpy as N
 import matplotlib.pyplot as plt
 
+# Import the JModelica.org Python packages
+from jmodelica.jmi import compile_jmu
+from jmodelica.jmi import JMUModel
+
 def run_demo(with_plots=True,with_blocking_factors = False):
-    """ Load change of a distillation column. The distillation column model
-    is documented in the paper:
+    """ 
+    Load change of a distillation column. The distillation column model is 
+    documented in the paper:
 
     @Article{hahn+02,
-    title={An improved method for nonlinear model reduction using balancing of empirical gramians},
+    title={An improved method for nonlinear model reduction using balancing of 
+        empirical gramians},
     author={Hahn, J. and Edgar, T.F.},
     journal={Computers and Chemical Engineering},
     volume={26},

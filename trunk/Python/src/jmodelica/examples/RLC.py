@@ -16,6 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import os
+
 import numpy as N
 import pylab as p
 
@@ -24,9 +25,9 @@ from jmodelica.jmi import JMUModel
 
 def run_demo(with_plots=True):
     """
-    An example on how to simulate a model using the DAE simulator. The
-    result can be compared with that of sim_rlc.py which has solved the
-    same problem using dymola. Also writes information to a file.
+    An example on how to simulate a model using the DAE simulator. The result 
+    can be compared with that of sim_rlc.py which has solved the same problem 
+    using dymola. Also writes information to a file.
     """
 
     curr_dir = os.path.dirname(os.path.abspath(__file__));

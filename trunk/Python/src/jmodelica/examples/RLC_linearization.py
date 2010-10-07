@@ -16,6 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import os
+
 import numpy as N
 import pylab as p
 
@@ -29,9 +30,9 @@ N.int = N.int32
 
 def run_demo(with_plots=True):
     """
-    An example on how to simulate a model using the DAE simulator. The
-    result can be compared with that of sim_rlc.py which has solved the
-    same problem using dymola. Also writes information to a file.
+    An example on how to simulate a model using the DAE simulator. The result 
+    can be compared with that of sim_rlc.py which has solved the same problem 
+    using dymola. Also writes information to a file.
     """
 
     curr_dir = os.path.dirname(os.path.abspath(__file__));
@@ -46,7 +47,8 @@ def run_demo(with_plots=True):
     (E_dae,A_dae,B_dae,F_dae,g_dae,state_names,input_names,algebraic_names, \
      dx0,x0,u0,w0,t0) = linearize_dae(init_res.model)
     
-    (A_ode,B_ode,g_ode,H_ode,M_ode,q_ode) = linear_dae_to_ode(E_dae,A_dae,B_dae,F_dae,g_dae)
+    (A_ode,B_ode,g_ode,H_ode,M_ode,q_ode) = linear_dae_to_ode(
+        E_dae,A_dae,B_dae,F_dae,g_dae)
 
     res1 = model.simulate()
     

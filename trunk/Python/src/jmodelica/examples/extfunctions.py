@@ -14,14 +14,13 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
+import os
 
+import pylab as p
+import numpy as N
 
 from jmodelica.jmi import compile_jmu
 from jmodelica.jmi import JMUModel
-import pylab as p
-import numpy as N
-import os
-
 
 def run_demo(with_plots=True):
     
@@ -60,4 +59,3 @@ def run_demo(with_plots=True):
 
 if __name__=="__main__":
     run_demo()
-

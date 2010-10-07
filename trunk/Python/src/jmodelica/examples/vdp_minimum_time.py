@@ -27,9 +27,10 @@ from jmodelica.jmi import compile_jmu
 from jmodelica.jmi import JMUModel
 
 def run_demo(with_plots=True):
-    """Demonstrate how to solve a minimum time
-    dynamic optimization problem based on a
-    Van der Pol oscillator system."""
+    """
+    Demonstrate how to solve a minimum time dynamic optimization problem based 
+    on a Van der Pol oscillator system.
+    """
 
     curr_dir = os.path.dirname(os.path.abspath(__file__));
     model_name = 'VDP_pack.VDP_Opt_Min_Time'

@@ -30,8 +30,9 @@ from jmodelica.jmi import JMUModel
 from jmodelica.optimization import ipopt
 
 def run_demo(with_plots=True):
-    """Demonstrate how to solve a simple
-    parameter estimation problem."""
+    """
+    Demonstrate how to solve a simple parameter estimation problem.
+    """
 
     curr_dir = os.path.dirname(os.path.abspath(__file__));
 
@@ -79,8 +80,8 @@ def run_demo(with_plots=True):
 
     # Add measurement noice
     #noice = N.random.random(N_points_meas)*0.2-0.1
-    noice = [ 0.01463904,  0.0139424,   0.09834249,  0.0768069,   0.01971631, -0.03827911,
-  0.05266659, -0.02608245,  0.05270525,  0.04717024,  0.0779514, ]
+    noice = [0.01463904, 0.0139424, 0.09834249, 0.0768069, 0.01971631, 
+        -0.03827911, 0.05266659, -0.02608245, 0.05270525, 0.04717024, 0.0779514,]
     xx_meas[:,0] = xx_meas[:,0] + noice
     
     # Set parameters corresponding to measurement data in model

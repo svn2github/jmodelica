@@ -27,49 +27,46 @@ from jmodelica.jmi import JMUModel
 
 def run_demo(with_plots=True):
     """
-    This example is based on the Hicks-Ray
-    Continuously Stirred Tank Reactors (CSTR) system. The system
-    has two states, the concentration and the temperature. The
-    control input to the system is the temperature of the cooling
-    flow in the reactor jacket. The chemical reaction in the reactor
-    is exothermic, and also temperature dependent; high temperature
-    results in high reaction rate.
+    This example is based on the Hicks-Ray Continuously Stirred Tank Reactors 
+    (CSTR) system. The system has two states, the concentration and the 
+    temperature. The control input to the system is the temperature of the 
+    cooling flow in the reactor jacket. The chemical reaction in the reactor is 
+    exothermic, and also temperature dependent; high temperature results in high 
+    reaction rate.
     
     The example demonstrates the following steps:
     
-    1. How to solve a DAE initialization problem. The initialization
-       model have equations specifying that all derivatives
-       should be identically zero, which implies that a
-       stationary solution is obtained. Two stationary points,
-       corresponding to different inputs, are computed. We call
-       the stationary points A and B respectively. point A corresponds
-       to operating conditions where the reactor is cold and
-       the reaction rate is low, whereas point B corresponds to
-       a higher temperature where the reaction rate is high.
+    1. How to solve a DAE initialization problem. The initialization model have 
+       equations specifying that all derivatives should be identically zero, 
+       which implies that a stationary solution is obtained. Two stationary 
+       points, corresponding to different inputs, are computed. We call the 
+       stationary points A and B respectively. point A corresponds to operating 
+       conditions where the reactor is cold and the reaction rate is low, 
+       whereas point B corresponds to a higher temperature where the reaction 
+       rate is high.
 
        For more information about the DAE initialization algorithm, see
        http://www.jmodelica.org/page/10.
 
-    2. How to generate an initial guess for a direct collocation method
-       by means of simulation. The trajectories resulting from simulation
-       are used to initialize the variables in the transcribed NLP.
+    2. How to generate an initial guess for a direct collocation method by means 
+       of simulation. The trajectories resulting from simulation are used to 
+       initialize the variables in the transcribed NLP.
        
-    3. An optimal control problem is solved where the objective Is to
-       transfer the state of the system from stationary point A to point
-       B. The challenge is to ignite the reactor while avoiding
-       uncontrolled temperature increase. It is also demonstrated how to
-       set parameter and variable values in a model.
+    3. An optimal control problem is solved where the objective Is to transfer 
+       the state of the system from stationary point A to point B. The challenge 
+       is to ignite the reactor while avoiding uncontrolled temperature 
+       increase. It is also demonstrated how to set parameter and variable 
+       values in a model.
 
-       More information about the simultaneous optimization algorithm
-       can be found at http://www.jmodelica.org/page/10.
+       More information about the simultaneous optimization algorithm can be 
+       found at http://www.jmodelica.org/page/10.
 
-    4. The optimization result is saved to file and then
-       the important variables are plotted.
+    4. The optimization result is saved to file and then the important variables 
+       are plotted.
 
-    5. Simulate the system with the optimal control profile. This step
-       is important in order to verify that the approximation in the
-       transcription step is valid.
-       
+    5. Simulate the system with the optimal control profile. This step is 
+       important in order to verify that the approximation in the transcription 
+       step is valid.
 """
 
     curr_dir = os.path.dirname(os.path.abspath(__file__));

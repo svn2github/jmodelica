@@ -27,9 +27,10 @@ from jmodelica.jmi import compile_jmu
 from jmodelica.jmi import JMUModel
 
 def run_demo(with_plots=True):
-    """Demonstrate how to solve a dynamic optimization
-    problem based on an inverted pendulum system."""
-    
+    """
+    Demonstrate how to solve a dynamic optimization problem based on an inverted 
+    pendulum system.
+    """
     
     curr_dir = os.path.dirname(os.path.abspath(__file__));
     class_name = "Pendulum_pack.Pendulum_Opt"

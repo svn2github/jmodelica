@@ -16,13 +16,14 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 """
-This file contains code for mapping our JMI Models to the Problem 
-specifications required by Assimulo.
+This file contains code for mapping our JMI Models to the Problem specifications 
+required by Assimulo.
 """
-
 import logging
+
 import numpy as N
 import pylab as P
+
 import jmodelica.io as io
 import jmodelica.jmi as jmi
 import jmodelica.fmi as fmi
@@ -34,8 +35,8 @@ try:
     from assimulo.problem import Explicit_Problem
     from assimulo.sundials import Sundials_Exception
 except ImportError:
-    logging.warning('Could not find Assimulo package. Check jmodelica.check_packages()')
-
+    logging.warning(
+        'Could not find Assimulo package. Check jmodelica.check_packages()')
 
 class JMIModel_Exception(Exception):
     """
@@ -51,9 +52,7 @@ class FMIModel_Exception(Exception):
 
 def write_data(simulator,write_scaled_result=False):
     """
-    Writes simulation data to a file.
-    
-    Takes as input a simulated model.
+    Writes simulation data to a file. Takes as input a simulated model.
     """
     if isinstance(simulator._problem, JMIDAE):
         
@@ -81,7 +80,8 @@ def write_data(simulator,write_scaled_result=False):
         data = N.c_[t,yd[:,0:len(model.real_dx)]]
         data = N.c_[data, y[:,0:len(model.real_x)]]
         data = N.c_[data, u]
-        data = N.c_[data, y[:,len(model.real_x):len(model.real_x)+len(model.real_w)]]
+        data = N.c_[data, y[
+            :,len(model.real_x):len(model.real_x)+len(model.real_w)]]
 
         io.export_result_dymola(model,data,scaled=write_scaled_result)
     elif isinstance(simulator._problem, JMIODE):
@@ -139,7 +139,8 @@ def write_data(simulator,write_scaled_result=False):
         data = N.c_[t,yd[:,0:len(model.real_dx)]]
         data = N.c_[data, y[:,0:len(model.real_x)]]
         data = N.c_[data, u]
-        data = N.c_[data, y[:,len(model.real_x):len(model.real_x)+len(model.real_w)]]
+        data = N.c_[data, y[
+            :,len(model.real_x):len(model.real_x)+len(model.real_w)]]
 
         for i in range(len(p_data)):
             data = N.c_[data, p_data[i]]
@@ -159,7 +160,8 @@ def write_data(simulator,write_scaled_result=False):
             i = N.array(simulator._problem._sol_int)
             data = N.c_[data,i]
         if len(simulator._problem._sol_bool) > 0:
-            b = N.array(simulator._problem._sol_bool).reshape(-1,len(model._save_cont_valueref[2]))
+            b = N.array(simulator._problem._sol_bool).reshape(
+                -1,len(model._save_cont_valueref[2]))
             data = N.c_[data,b]
 
         export = io.ResultWriterDymola(model)
@@ -280,20 +282,16 @@ class FMIODE(Explicit_Problem):
             return None
     
     def _set_write_cont(self, cont):
-        """
-        Defines if the values should be written to the file continuously
-        during the simulation.
-        """
         self.__write_cont = cont
         
     def _get_write_cont(self):
-        """
-        Defines if the values should be written to the file continuously
-        during the simulation.
-        """
         return self.__write_cont
 
-    write_cont = property(_get_write_cont, _set_write_cont)
+    write_cont = property(_get_write_cont, _set_write_cont, doc = 
+    """
+    Property for accessing the values should be written to the file continuously 
+    during the simulation.
+    """)
     
     def handle_result(self, solver, t, y):
         """
@@ -338,7 +336,8 @@ class FMIODE(Explicit_Problem):
             
             #Sets the inputs, if any
             if self.input!=None:
-                self._model.set(self.input[0], self.input[1].eval(N.array([solver.t_cur]))[0,:])
+                self._model.set(self.input[0], 
+                    self.input[1].eval(N.array([solver.t_cur]))[0,:])
             
             #Evaluating the rhs (Have to evaluate the values in the model)
             rhs = self._model.get_derivatives()
@@ -374,14 +373,16 @@ class FMIODE(Explicit_Problem):
             
             #Sets the inputs, if any
             if self.input!=None:
-                self._model.set(self.input[0], self.input[1].eval(N.array([solver.t_cur]))[0,:])
+                self._model.set(self.input[0], 
+                    self.input[1].eval(N.array([solver.t_cur]))[0,:])
             
             #Evaluating the rhs (Have to evaluate the values in the model)
             rhs = self._model.get_derivatives()
         
         if self._model.completed_integrator_step():
             self._logg_step_event += [solver.t_cur]
-            self.handle_event(solver,[0]) #Event have been detect, call event iteration.
+            #Event have been detect, call event iteration.
+            self.handle_event(solver,[0]) 
             return 1 #Tell to reinitiate the solver.
         else:
             return 0
@@ -399,35 +400,29 @@ class FMIODE(Explicit_Problem):
         if self.write_cont:
             self.export.write_finalize()
         
-    
     def _set_input(self, input):
-        """
-        Defines the input. The input must be a 2-tuple with the first 
-        object as a list of names of the input variables and with the
-        other as a subclass of the class Trajectory.
-        """
         self.__input = input
         
     def _get_input(self):
-        """
-        Defines the input. The input must be a 2-tuple with the first 
-        object as a list of names of the input variables and with the
-        other as a subclass of the class Trajectory.
-        """
         return self.__input
 
-    input = property(_get_input, _set_input)
+    input = property(_get_input, _set_input, doc = 
+    """
+    Property for accessing the input. The input must be a 2-tuple with the first 
+    object as a list of names of the input variables and with the other as a 
+    subclass of the class Trajectory.
+    """)
         
 
 class JMIODE(Explicit_Problem):
     """
-    An Assimulo Explicit Model extended to JMI interface.
+    An Assimulo Explicit Model extended to JMI interface. 
     
-        Not extended with handling for discontinuities.
+    Not extended with handling for discontinuities.
     
-        To use an explicit solver the problem have to be defined
-        in specific way, namely: der(x) = f(t,x) in the modelica
-        model. See http://www.jmodelica.org/page/10
+    To use an explicit solver the problem have to be defined in specific way, 
+    namely: der(x) = f(t,x) in the modelica model. See 
+    http://www.jmodelica.org/page/10
     """
     
     def __init__(self, model, input=None):
@@ -440,12 +435,15 @@ class JMIODE(Explicit_Problem):
         self.y0 = self._model.real_x
         
         if len(self._model.real_w):
-            raise JMIModel_Exception('There can be no algebraic variables when using an ODE solver.')
-            
-        [f_nbr, g_nbr] = self._model.jmimodel.dae_get_sizes() #Used for determine if there are discontinuities
+            raise JMIModel_Exception(
+                'There can be no algebraic variables when using an ODE solver.')
+        
+        #Used for determine if there are discontinuities
+        [f_nbr, g_nbr] = self._model.jmimodel.dae_get_sizes() 
         
         if g_nbr > 0:
-            raise JMIModel_Exception('There is no support for discontinuities when using an ODE solver.')
+            raise JMIModel_Exception(
+                'There is no support for discontinuities when using an ODE solver.')
         
         if self._model.has_cppad_derivatives():
             self.jac = self.j #Activates the jacobian
@@ -482,14 +480,19 @@ class JMIODE(Explicit_Problem):
         
         #Evaluating the jacobian
         #-Setting options
-        z_l = N.array([1]*len(self._model.z),dtype=N.int32) #Used to give independent_vars full control
-        independent_vars = [jmi.JMI_DER_X] #Derivation with respect to X
+        #Used to give independent_vars full control
+        z_l = N.array([1]*len(self._model.z),dtype=N.int32) 
+        #Derivation with respect to X
+        independent_vars = [jmi.JMI_DER_X] 
         sparsity = jmi.JMI_DER_DENSE_ROW_MAJOR
-        evaluation_options = jmi.JMI_DER_CPPAD #Determine to use CPPAD
+        #Determine to use CPPAD
+        evaluation_options = jmi.JMI_DER_CPPAD 
         
         #-Evaluating
         Jac = N.zeros(len(y)**2) #Matrix that holds the information
-        self._model.jmimodel.ode_df(evaluation_options, sparsity, independent_vars, z_l, Jac) #Output Jac
+        #Output Jac
+        self._model.jmimodel.ode_df(
+            evaluation_options, sparsity, independent_vars, z_l, Jac)
         
         #-Vector manipulation
         Jac = Jac.reshape(len(y),len(y)) #Reshape to a matrix
@@ -512,14 +515,14 @@ class JMIODE(Explicit_Problem):
         self.__input = input
         
     def _get_input(self):
-        """
-        Defines the input. The input must be a 2-tuple with the first 
-        object as a list of names of the input variables and with the
-        other as a subclass of the class Trajectory.
-        """
         return self.__input
         
-    input = property(_get_input, _set_input)
+    input = property(_get_input, _set_input, doc = 
+    """
+    Property for accessing the input. The input must be a 2-tuple with the first 
+    object as a list of names of the input variables and with the other as a 
+    subclass of the class Trajectory.
+    """)
     
     def reset(self):
         """
@@ -544,13 +547,15 @@ class JMIDAE(Implicit_Problem):
         
         self.y0 = N.append(self._model.real_x,self._model.real_w)
         self.yd0 = N.append(self._model.real_dx,[0]*len(self._model.real_w))
-        self.algvar = [1.0]*len(self._model.real_x) + [0.0]*len(self._model.real_w) #Sets the algebraic components of the model
+        #Sets the algebraic components of the model
+        self.algvar = [1.0]*len(self._model.real_x) + [0.0]*len(self._model.real_w) 
                 
-        
-        [f_nbr, g_nbr] = self._model.jmimodel.dae_get_sizes() #Used for determine if there are discontinuities
+        #Used for determine if there are discontinuities
+        [f_nbr, g_nbr] = self._model.jmimodel.dae_get_sizes() 
         
         if g_nbr > 0:
-            self.switches0 = [bool(x) for x in self._model.sw] #Change the models values of the switches from ints to booleans
+            #Change the models values of the switches from ints to booleans
+            self.switches0 = [bool(x) for x in self._model.sw] 
             self.state_events = self.g_adjust #Activates the event function
             
         #Sets default values
@@ -577,28 +582,19 @@ class JMIDAE(Implicit_Problem):
         self._log = createLogger(model, self._logLevel)
         
     def _set_logging_level(self, level):
-        """
-        Sets the logging level.
-        """
         if bool(level):
             self._log.setLevel(0) #Log all entries
         else:
             self._log.setLevel(50) #Log nothing (log nothing below level 50)
     
     def _get_logging_level(self):
-        """
-        Activate and deactivate the logging.
-        
-            Parameter::
-            
-                level   --
-                    Determines if the logging should be activated (True)
-                    or deactivated (False).
-                    Default False
-        """
         return self._logLevel
         
-    log = property(fget=_get_logging_level, fset=_set_logging_level)
+    log = property(fget=_get_logging_level, fset=_set_logging_level, doc = 
+    """
+    Property for accessing the logging level. Determines if the logging should 
+    be activated (True) or deactivated (False).
+    """)
         
     def f(self, t, y, yd, sw=None):
         """
@@ -636,17 +632,25 @@ class JMIDAE(Implicit_Problem):
         
         #Evaluating the jacobian
         #-Setting options
-        z_l = N.array([1]*len(self._model.z),dtype=N.int32) #Used to give independent_vars full control
-        independent_vars = [jmi.JMI_DER_DX, jmi.JMI_DER_X, jmi.JMI_DER_W] #Derivation with respect to these variables
+        #Used to give independent_vars full control
+        z_l = N.array([1]*len(self._model.z),dtype=N.int32) 
+        #Derivation with respect to these variables
+        independent_vars = [jmi.JMI_DER_DX, jmi.JMI_DER_X, jmi.JMI_DER_W] 
         sparsity = jmi.JMI_DER_DENSE_ROW_MAJOR
         evaluation_options = jmi.JMI_DER_CPPAD#jmi.JMI_DER_SYMBOLIC
         
         #-Evaluating
-        Jac = N.zeros(self._f_nbr**2) #Matrix that hold information about dx and dw
-        self._model.jmimodel.dae_dF(evaluation_options, sparsity, independent_vars[1:], z_l, Jac) #Output x+w
+        #Matrix that hold information about dx and dw
+        Jac = N.zeros(self._f_nbr**2) 
+        #Output x+w
+        self._model.jmimodel.dae_dF(
+            evaluation_options, sparsity, independent_vars[1:], z_l, Jac) 
         
-        dx = N.zeros(len(self._model.real_dx)*self._f_nbr) #Matrix that hold information about dx'
-        self._model.jmimodel.dae_dF(evaluation_options, sparsity, independent_vars[0], z_l, dx) #Output dx'
+        #Matrix that hold information about dx'
+        dx = N.zeros(len(self._model.real_dx)*self._f_nbr) 
+        #Output dx'
+        self._model.jmimodel.dae_dF(
+            evaluation_options, sparsity, independent_vars[0], z_l, dx) 
         dx = dx*c #Scale
         
         #-Vector manipulation
@@ -678,8 +682,8 @@ class JMIDAE(Implicit_Problem):
     
     def g_adjust(self, t, y, yd, sw):
         """
-        This function adjusts the event functions according to Martin Otter et al defined
-        in 'Modeling of Mixed Continuous/Discrete Systems in Modelica'.
+        This function adjusts the event functions according to Martin Otter et 
+        al defined in 'Modeling of Mixed Continuous/Discrete Systems in Modelica'.
         """
         r = N.array(self.g(t,y,yd,sw))
         rp = N.zeros(len(r))
@@ -713,9 +717,12 @@ class JMIDAE(Implicit_Problem):
             
             self.event_switch(solver, event_info) #Turns the switches
 
-            b_mode = self.g(solver.t_cur, solver.y_cur, solver.yd_cur, solver.switches)
-            self.init_mode(solver) #Pass in the solver to the problem specified init_mode
-            a_mode = self.g(solver.t_cur, solver.y_cur, solver.yd_cur, solver.switches)
+            b_mode = self.g(
+                solver.t_cur, solver.y_cur, solver.yd_cur, solver.switches)
+            #Pass in the solver to the problem specified init_mode
+            self.init_mode(solver) 
+            a_mode = self.g(
+                solver.t_cur, solver.y_cur, solver.yd_cur, solver.switches)
 
             self._log.debug(' Root equations (pre)  : '+str(b_mode))
             self._log.debug(' Root equations (after): '+str(a_mode))
@@ -729,14 +736,14 @@ class JMIDAE(Implicit_Problem):
         
     def event_switch(self, solver, event_info):
         """
-        This is where we turn the switches. If we have an event, this is
-        where it will be taken care of. ::
+        This is where we turn the switches. If we have an event, this is where 
+        it will be taken care of. ::
         
-            event_info is a vector consisting of -1, 0, +1, and is as long
-            as the number of event functions. A -1 symbolises that an event
-            has occured at the specified switch and is decreasing. A 0
-            symbolises that nothing has happend. A +1 symbolises that an
-            event has occured at the specified switch and is increasing.
+            event_info is a vector consisting of -1, 0, +1, and is as long as 
+            the number of event functions. A -1 symbolises that an event has 
+            occured at the specified switch and is decreasing. A 0 symbolises 
+            that nothing has happend. A +1 symbolises that an event has occured 
+            at the specified switch and is increasing.
             
         This is the default event handling.
         """
@@ -771,23 +778,25 @@ class JMIDAE(Implicit_Problem):
                 i = len(self._log_information) #Where to put the information
             try:
                 solver.make_consistent('IDA_YA_YDP_INIT') #Calculate consistency
-                self._log.debug(' Calculation of consistent initial conditions: True')
+                self._log.debug(
+                    ' Calculation of consistent initial conditions: True')
             except Sundials_Exception, data:
                 print data
                 print 'Failed to calculate initial conditions. Trying to continue...'
-                self._log.debug(' Calculation of consistent initial conditions: True')
+                self._log.debug(
+                    ' Calculation of consistent initial conditions: True')
             
             self._log_initiate_mode = False #Stop logging f
                 
     def check_eIter(self, before, after):
         """
-        Helper function for handle_event to determine if we have event
+        Helper function for handle_event to determine if we have event 
         iteration.
         
         Parameters::
         
-            Values of the event indicator functions (state_events)
-            before and after we have changed mode of operations.
+            Values of the event indicator functions (state_events) before and 
+            after we have changed mode of operations.
         """
         
         eIter = [0]*len(before)
@@ -822,50 +831,43 @@ class JMIDAE(Implicit_Problem):
         self.yd0 = N.append(self._model.real_dx,[0]*len(self._model.real_w))
 
     def _set_max_eIteration(self, max_eIter):
-        """
-        Sets the maximum number of iterations allowed in the event iteration.
-        """
         if not isinstance(max_eIter, int) or max_eIter < 0:
             raise JMIModel_Exception('max_eIter must be a positive integer.')
         self.__max_eIter = max_eIter
         
     def _get_max_eIteration(self):
-        """
-        Returns max_eIter.
-        """
         return self.__max_eIter
-        
-    max_eIterdocstring='Maximum number of event iterations allowed.'
-    max_eIter = property(_get_max_eIteration, _set_max_eIteration, doc=max_eIterdocstring)
+
+    max_eIter = property(_get_max_eIteration, _set_max_eIteration, doc=
+    """
+    Property for setting the maximum number of event iterations allowed.
+    """)
     
     def _set_input(self, input):
         self.__input = input
         
     def _get_input(self):
-        """
-        Defines the input. The input must be a 2-tuple with the first 
-        object as a list of names of the input variables and with the
-        other as a subclass of the class Trajectory.
-        """
         return self.__input
 
-    input = property(_get_input, _set_input)
+    input = property(_get_input, _set_input, doc = 
+    """
+    Property for accessing the input. The input must be a 2-tuple with the first 
+    object as a list of names of the input variables and with the other as a 
+    subclass of the class Trajectory.
+    """)
     
     def _set_eps(self, eps):
-        """
-        Sets the epsilon used in the event indicators.
-        """
         if not isinstance(eps, float) or eps < 0.0:
             raise JMIModel_Exception('Epsilon must be a positive float.')
         self.__eps = eps
         
     def _get_eps(self):
-        """
-        Returns the epsilon used in the event indicators.
-        """
         return self.__eps
-    epsdocstring='Value used for adjusting the event indicators'
-    eps = property(_get_eps,_set_eps, doc=epsdocstring)
+        
+    eps = property(_get_eps,_set_eps, doc=
+    """
+    Property for accessing the epsilon used for adjusting the event indicators.
+    """)
 
     def initiate(self,solver):
         """
@@ -929,8 +931,8 @@ class JMIDAE(Implicit_Problem):
 
 class JMIDAESens(Implicit_Problem):
     """
-    An Assimulo Implicit Model extended to JMI interface with support 
-    for sensitivities.
+    An Assimulo Implicit Model extended to JMI interface with support for 
+    sensitivities.
     """
     def __init__(self, model):
         """
@@ -941,12 +943,15 @@ class JMIDAESens(Implicit_Problem):
         
         self.y0 = N.append(self._model.real_x,self._model.real_w)
         self.yd0 = N.append(self._model.real_dx,[0]*len(self._model.real_w))
-        self.algvar = [1.0]*len(self._model.real_x) + [0.0]*len(self._model.real_w) #Sets the algebraic components of the model
+        #Sets the algebraic components of the model
+        self.algvar = [1.0]*len(self._model.real_x) + [0.0]*len(self._model.real_w) 
         
-        [f_nbr, g_nbr] = self._model.jmimodel.dae_get_sizes() #Used for determine if there are discontinuities
+        #Used for determine if there are discontinuities
+        [f_nbr, g_nbr] = self._model.jmimodel.dae_get_sizes() 
         
         #Internal values
-        self._parameter_names = [name[1] for name in self._model.get_p_opt_variable_names()]
+        self._parameter_names = [
+            name[1] for name in self._model.get_p_opt_variable_names()]
         self._sens_matrix = [] #Sensitivity matrix
         self._f_nbr = f_nbr #Number of equations
         self._g_nbr = g_nbr #Number of event indicatiors
@@ -998,22 +1003,22 @@ class JMIDAESens(Implicit_Problem):
         """
         Returns the sensitivity results together with the names.
         
-            Returns::
-            
-                parameter_names, sensitivity_matrix = JMIDAESens.get_sens_result()
+        Returns::
+        
+            parameter_names, sensitivity_matrix = JMIDAESens.get_sens_result()
                 
-                    parameters_names   - The names of the parameters for which sensitivities
-                                         have been calculated.
+            parameters_names -- 
+                The names of the parameters for which sensitivities have been 
+                calculated.
                                        
-                    sensitivity_matrix - A matrix containing the sensitivities for all the
-                                         parameters.
-                                         
-                                         sensitivity_matrix[0], gives the result for the first
-                                                                parameter in the parameters_names
-                                                                list.
+            sensitivity_matrix -- 
+                A matrix containing the sensitivities for all the parameters. 
+                sensitivity_matrix[0], gives the result for the first parameter 
+                in the parameters_names list.
         """
         for i in range(self._p_nbr):
-            self._sens_matrix[i] = N.array(self._sens_matrix[i]).reshape(-1,self._f_nbr)
+            self._sens_matrix[i] = N.array(
+                self._sens_matrix[i]).reshape(-1,self._f_nbr)
             
         return self._parameter_names, self._sens_matrix
 
@@ -1028,13 +1033,15 @@ class Trajectory:
 
         Parameters::
         
-            abscissa -- One dimensional numpy array containing
-                        the n abscissa (independent) values
-            ordinate -- Two dimensional n x m numpy matrix containing
-                        the ordiate values. The matrix has the same
-                        number of rows as the abscissa has elements.
-                        The number of columns is equal to the number of
-                        output variables.
+            abscissa -- 
+                One dimensional numpy array containing the n abscissa 
+                (independent) values.
+                
+            ordinate -- 
+                Two dimensional n x m numpy matrix containing the ordiate 
+                values. The matrix has the same number of rows as the abscissa 
+                has elements. The number of columns is equal to the number of
+                output variables.
         """
         self._abscissa = abscissa
         self._ordinate = ordinate
@@ -1056,37 +1063,38 @@ class Trajectory:
 
         Parameters::
         
-            x -- One dimensional numpy array, or scalar number,
-                 containing n abscissa value(s).
+            x -- 
+                One dimensional numpy array, or scalar number, containing n 
+                abscissa value(s).
 
         Returns::
         
-            Two dimensional n x m matrix containing the
-            ordinate values corresponding to the argument x.
+            Two dimensional n x m matrix containing the ordinate values 
+            corresponding to the argument x.
         """
         pass
 
     def _set_abscissa(self, absscissa):
-        """ Set the abscissa of the trajectory."""
         self._abscissa[:] = abscissa
 
     def _get_abscissa(self):
-        """ Get the abscissa of the trajectory."""
         return self._abscissa
 
-    abscissa = property(_get_abscissa, _set_abscissa, doc="Abscissa")
+    abscissa = property(_get_abscissa, _set_abscissa, doc=
+    """
+    Property for accessing the abscissa of the trajectory.
+    """)
 
     def _set_ordinate(self, absscissa):
-        """ Set the ordinate of the trajectory."""
         self._ordinate[:] = ordinate
 
     def _get_ordinate(self):
-        """ Get the ordinate of the trajectory."""
         return self._ordinate
 
-    ordinate = property(_get_ordinate, _set_ordinate, doc="Ordinate")
-
-
+    ordinate = property(_get_ordinate, _set_ordinate, doc=
+    """
+    Property for accessing the ordinate of the trajectory.
+    """)
 
 class TrajectoryLinearInterpolation(Trajectory):
 
@@ -1096,13 +1104,14 @@ class TrajectoryLinearInterpolation(Trajectory):
 
         Parameters::
         
-            x -- One dimensional numpy array, or scalar number,
-                 containing n abscissa value(s).
+            x -- 
+                One dimensional numpy array, or scalar number, containing n 
+                abscissa value(s).
 
         Returns::
         
-            Two dimensional n x m matrix containing the
-            ordinate values corresponding to the argument x.
+            Two dimensional n x m matrix containing the ordinate values 
+            corresponding to the argument x.
         """        
         y = N.zeros([N.size(x),N.size(self.ordinate,1)])
         for i in range(N.size(y,1)):

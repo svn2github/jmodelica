@@ -18,50 +18,48 @@
 # Import library for path manipulations
 import os.path
 
+# Import numerical libraries
+import numpy as N
+import ctypes as ct
+import matplotlib.pyplot as plt
+# Import JPype
+import jpype
+
 # Import the JModelica.org Python packages
 import jmodelica
 import jmodelica.jmi as jmi
 from jmodelica.compiler import ModelicaCompiler
 
-# Import numerical libraries
-import numpy as N
-import ctypes as ct
-import matplotlib.pyplot as plt
-
-# Import JPype
-import jpype
-
 # Create a reference to the java package 'org'
 org = jpype.JPackage('org')
 
 def run_demo(with_plots=True):
-    """This example demonstrates how the Python interface to the three
-    different ASTs in the compiler can be used. The JPype package is
-    used to create Java objects in a Java Virtual Machine which is
-    seamlessly integrated with the Python shell. The Java objects can
-    be accessed interactively and methods of the object can be
-    invoked.
+    """
+    This example demonstrates how the Python interface to the three different 
+    ASTs in the compiler can be used. The JPype package is used to create Java 
+    objects in a Java Virtual Machine which is seamlessly integrated with the 
+    Python shell. The Java objects can be accessed interactively and methods of 
+    the object can be invoked.
 
-    For more information about the Java classes and their methods used
-    in this example, please consult the API documentation for the
-    Modelica compiler, <a href=http://www.jmodelica.org/page/22>. Notice
-    however that the documentation for the compiler front-ends is
-    still very rudimentary. Also, the interfaces to the source and
-    instance AST will be made more user friendly in upcoming versions.
+    For more information about the Java classes and their methods used in this 
+    example, please consult the API documentation for the Modelica compiler, 
+    <a href=http://www.jmodelica.org/page/22>. Notice however that the 
+    documentation for the compiler front-ends is still very rudimentary. Also, 
+    the interfaces to the source and instance AST will be made more user 
+    friendly in upcoming versions.
 
     Three different usages of ASTs are shown:
 
-    1. Count the number of classes in the Modelica standard
-    library. In this example, a Python function is defined to traverse
-    the source AST which results from parsing of the Modelica standard
-    library.
+    1. Count the number of classes in the Modelica standard library. In this 
+       example, a Python function is defined to traverse the source AST which 
+       results from parsing of the Modelica standard library.
 
-    2. Instantiate the CauerLowPassAnalog model. The instance AST for
-    this model is dumped and it is demonstrated how the merged
-    modification environments can be accessed.
+    2. Instantiate the CauerLowPassAnalog model. The instance AST for this model 
+       is dumped and it is demonstrated how the merged modification environments 
+       can be accessed.
 
-    3. Flatten the CauerLowPassAnalog model instance and print some
-    statistics of the flattened Model.
+    3. Flatten the CauerLowPassAnalog model instance and print some statistics 
+       of the flattened Model.
     """
 
     curr_dir = os.path.dirname(os.path.abspath(__file__));
@@ -88,8 +86,10 @@ def run_demo(with_plots=True):
                    getStoredDefinition().getElement(0)
             
     def count_classes(class_decl,depth):
-        """ Count the number of classes hierarchically contained
-        in a class declaration."""
+        """ 
+        Count the number of classes hierarchically contained in a class 
+        declaration.
+        """
         
         # Get a list of local classes using the method ClassDecl.classes()
         # which returns a Java ArrayList object containing ClassDecl objects.
@@ -128,7 +128,9 @@ def run_demo(with_plots=True):
         filter_instance = mc.instantiate_model(source_root,"CauerLowPassAnalog")
 
     def dump_inst_ast(inst_node, indent):
-        """Pretty print an instance node, including its merged enviroment."""
+        """
+        Pretty print an instance node, including its merged enviroment.
+        """
     
         # Get the merged environment of an instance node
         env = inst_node.getMergedEnvironment()
@@ -184,7 +186,3 @@ def run_demo(with_plots=True):
     print("Number of algebraic variables:      %d" % filter_flat_model.numAlgebraicRealVariables())
     print("Number of equations:                %d" % filter_flat_model.numEquations())
     print("Number of initial equation:         %d" % filter_flat_model.numInitialEquations())
-
-
-
-

@@ -16,6 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import os
+
 import numpy as N
 import pylab as p
 
@@ -24,9 +25,9 @@ from jmodelica.jmi import JMUModel
 
 def run_demo(with_plots=True):
     """
-    This example shows how to simulate a system that contains switches.
-    The example model is simple in the sense that no reinitialization
-    of the variables is needed at the event points.
+    This example shows how to simulate a system that contains switches. The 
+    example model is simple in the sense that no reinitialization of the 
+    variables is needed at the event points.
     """
 
     curr_dir = os.path.dirname(os.path.abspath(__file__));

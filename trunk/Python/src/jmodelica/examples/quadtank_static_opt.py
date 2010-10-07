@@ -28,7 +28,9 @@ from jmodelica.jmi import compile_jmu
 from jmodelica.jmi import JMUModel
 
 def run_demo(with_plots=True):
-    """Static calibration of the quad tank model."""
+    """
+    Static calibration of the quad tank model.
+    """
 
     curr_dir = os.path.dirname(os.path.abspath(__file__));
     

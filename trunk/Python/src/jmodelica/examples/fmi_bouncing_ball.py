@@ -14,11 +14,11 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
-
+import os as O
 
 import pylab as P
 import numpy as N
-import os as O
+
 from jmodelica.fmi import FMUModel
 
 curr_dir = O.path.dirname(O.path.abspath(__file__));
@@ -28,7 +28,6 @@ def run_demo(with_plots=True):
     """
     Demonstrates how to use JModelica.org for simulation of FMUs.
     """
-
 
     fmu_name = O.path.join(path_to_fmus,'bouncingBall.fmu')
     model = FMUModel(fmu_name)

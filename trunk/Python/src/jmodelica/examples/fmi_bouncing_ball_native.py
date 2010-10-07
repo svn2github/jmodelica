@@ -14,11 +14,11 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
-
+import os as O
 
 import pylab as P
 import numpy as N
-import os as O
+
 from jmodelica.fmi import FMUModel
 
 curr_dir = O.path.dirname(O.path.abspath(__file__));
@@ -29,10 +29,12 @@ def run_demo(with_plots=True):
     This example shows how to use the raw (JModelica.org) FMI interface for
     simulation of an FMU.
     
-    FMU = bouncingBall.fmu (Generated using Qtronic FMU SDK (http://www.qtronic.de/en/fmusdk.html) )
+    FMU = bouncingBall.fmu 
+    (Generated using Qtronic FMU SDK (http://www.qtronic.de/en/fmusdk.html) )
     
-    This example is written similair to the example in the documentation of the 'Functional Mock-up Interface
-    for Model Exchange' version 1.0 (http://www.functional-mockup-interface.org/) 
+    This example is written similair to the example in the documentation of the 
+    'Functional Mock-up Interface for Model Exchange' version 1.0 
+    (http://www.functional-mockup-interface.org/) 
     """
     
     #Load the FMU by specifying the fmu and the directory
@@ -43,8 +45,9 @@ def run_demo(with_plots=True):
     
     bouncing_fmu.time = Tstart #Set the start time before the initialization.
     
-    bouncing_fmu.initialize() #Initialize the model. Also sets all the start attributes
-                              #defined in the XML file.
+    #Initialize the model. Also sets all the start attributes defined in the 
+    # XML file.
+    bouncing_fmu.initialize() 
                               
     #Get Continuous States
     x = bouncing_fmu.continuous_states
@@ -57,8 +60,9 @@ def run_demo(with_plots=True):
     #bouncing_fmu.get_real,get_integer,get_boolean,get_string (valueref)
     
     #Values for the solution
-    vref  = [bouncing_fmu.get_valueref('h')] + [bouncing_fmu.get_valueref('v')] #Retrieve the valureferences for the
-                                                                                #values 'h' and 'v'
+    #Retrieve the valureferences for the values 'h' and 'v'
+    vref  = [bouncing_fmu.get_valueref('h')] + [bouncing_fmu.get_valueref('v')] 
+
     t_sol = [Tstart]
     sol = [bouncing_fmu.get_real(vref)]
     
@@ -108,7 +112,8 @@ def run_demo(with_plots=True):
 
                 #Retrieve solutions (if needed)
                 if eInfo.iterationConverged == False:
-                    #bouncing_fmu.get_real,get_integer,get_boolean,get_string (valueref)
+                    #bouncing_fmu.get_real, get_integer, get_boolean, 
+                    # get_string(valueref)
                     pass
             
             #Check if the event affected the state values and if so sets them

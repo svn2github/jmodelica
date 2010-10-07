@@ -27,9 +27,10 @@ from jmodelica.jmi import compile_jmu
 from jmodelica.jmi import JMUModel
 
 def run_demo(with_plots=True):
-    """This example demonstrates how to solve optimization problems
-       with a Lagrange cost term encoded using the Optimica attribute
-       objectiveIntegrand."""
+    """
+    This example demonstrates how to solve optimization problems with a Lagrange 
+    cost term encoded using the Optimica attribute objectiveIntegrand.
+    """
 
     curr_dir = os.path.dirname(os.path.abspath(__file__));
 

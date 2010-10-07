@@ -15,7 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import os;
+import os
+
 from scipy.io.matlab.mio import loadmat
 import matplotlib.pyplot as plt
 import numpy as N
@@ -25,11 +26,10 @@ from jmodelica.jmi import JMUModel
 
 def run_demo(with_plots=True):
     """
-    This example demonstrates how to solve parameter estimation
-    problmes.
+    This example demonstrates how to solve parameter estimation problmes.
 
-    The data used in the example was recorded by Kristian Soltesz
-    at the Department of Automatic Control. 
+    The data used in the example was recorded by Kristian Soltesz at the 
+    Department of Automatic Control. 
     """
     
     curr_dir = os.path.dirname(os.path.abspath(__file__));
@@ -162,10 +162,8 @@ def run_demo(with_plots=True):
     print('a1: ' + str(a1_opt*1e4) + 'cm^2')
     print('a2: ' + str(a2_opt*1e4) + 'cm^2')
 
-    assert N.abs(a1_opt*1.e6 - 2.658636) < 1e-3, \
-           "Wrong value of parameter a1"  
-    assert N.abs(a2_opt*1.e6 - 2.715543) < 1e-3, \
-           "Wrong value of parameter a2"  
+    assert N.abs(a1_opt*1.e6 - 2.658636) < 1e-3, "Wrong value of parameter a1"  
+    assert N.abs(a2_opt*1.e6 - 2.715543) < 1e-3, "Wrong value of parameter a2"  
 
     # Load state profiles
     x1_opt = res["qt.x1"]
@@ -222,14 +220,10 @@ def run_demo(with_plots=True):
     print('a3:' + str(a3_opt2*1e4) + 'cm^2')
     print('a4:' + str(a4_opt2*1e4) + 'cm^2')
 
-    assert N.abs(a1_opt2*1.e6 - 2.659686) < 1e-3, \
-           "Wrong value of parameter a1"  
-    assert N.abs(a2_opt2*1.e6 - 2.706181) < 1e-3, \
-           "Wrong value of parameter a2"  
-    assert N.abs(a3_opt2*1.e6 - 3.007429) < 1e-3, \
-           "Wrong value of parameter a3"  
-    assert N.abs(a4_opt2*1.e6 - 2.933729) < 1e-3, \
-           "Wrong value of parameter a4"  
+    assert N.abs(a1_opt2*1.e6 - 2.659686) < 1e-3, "Wrong value of parameter a1"  
+    assert N.abs(a2_opt2*1.e6 - 2.706181) < 1e-3, "Wrong value of parameter a2"  
+    assert N.abs(a3_opt2*1.e6 - 3.007429) < 1e-3, "Wrong value of parameter a3"  
+    assert N.abs(a4_opt2*1.e6 - 2.933729) < 1e-3, "Wrong value of parameter a4"  
 
     # Extract state and input profiles
     x1_opt2 = res_opt2["qt.x1"]

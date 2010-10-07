@@ -14,7 +14,9 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
-""" The IPOPT solver module. """
+""" 
+The IPOPT solver module. 
+"""
 
 from operator import itemgetter
 
@@ -25,7 +27,6 @@ import numpy.ctypeslib as Nct
 
 from jmodelica import jmi 
 from jmodelica import io
-
 from jmodelica.io import VariableNotFoundError
 
 int = N.int32
@@ -34,19 +35,21 @@ N.int = N.int32
 c_jmi_real_t = ct.c_double
 
 class CollocationOptimizer(object):
-    """ An interface to the NLP solver Ipopt. """
+    """ 
+    An interface to the NLP solver Ipopt. 
+    """
     
     def __init__(self, nlp_collocation):
-        """ Constructor where main data structure is created. Needs a 
-        NLPCollocation implementation instance, for example a 
-        NLPCollocationLagrangePolynomials object. The underlying model 
-        must have been compiled with support for ipopt.
+        """ 
+        Constructor where main data structure is created. Needs a NLPCollocation 
+        implementation instance, for example a NLPCollocationLagrangePolynomials 
+        object. The underlying model must have been compiled with support for 
+        ipopt.
         
         Parameters::
         
             nlp_collocation -- 
                 The NLPCollocation object.
-        
         """
         
         self._nlp_collocation = nlp_collocation
@@ -67,41 +70,51 @@ class CollocationOptimizer(object):
                
     def _set_collocationOpt_typedefs(self):
         try:
-            self._nlp_collocation._model.jmimodel._dll.jmi_opt_coll_ipopt_new.argtypes = [ct.c_void_p,
-                                                                                         ct.c_void_p]
-            self._nlp_collocation._model.jmimodel._dll.jmi_opt_coll_ipopt_solve.argtypes = [ct.c_void_p]
-            self._nlp_collocation._model.jmimodel._dll.jmi_opt_coll_ipopt_set_string_option.argtypes = [ct.c_void_p,
-                                                                                                       ct.c_char_p,
-                                                                                                       ct.c_char_p]
-            self._nlp_collocation._model.jmimodel._dll.jmi_opt_coll_ipopt_set_int_option.argtypes = [ct.c_void_p,
-                                                                                                    ct.c_char_p,
-                                                                                                    ct.c_int]
-            self._nlp_collocation._model.jmimodel._dll.jmi_opt_coll_ipopt_set_num_option.argtypes = [ct.c_void_p,
-                                                                                                    ct.c_char_p,
-                                                                                                    c_jmi_real_t]
-            self._nlp_collocation._model.jmimodel._dll.jmi_opt_coll_ipopt_get_statistics.argtypes = [ct.c_void_p,
-                                                                                         ct.POINTER(ct.c_int),
-                                                                                         ct.POINTER(ct.c_int),
-                                                                                         ct.POINTER(c_jmi_real_t),
-                                                                                         ct.POINTER(c_jmi_real_t)]
+            self._nlp_collocation._model.jmimodel._dll.jmi_opt_coll_ipopt_new.argtypes = [
+                ct.c_void_p,
+                ct.c_void_p]
+            self._nlp_collocation._model.jmimodel._dll.jmi_opt_coll_ipopt_solve.argtypes = [
+                ct.c_void_p]
+            self._nlp_collocation._model.jmimodel._dll.jmi_opt_coll_ipopt_set_string_option.argtypes = [
+                ct.c_void_p,
+                ct.c_char_p,
+                ct.c_char_p]
+            self._nlp_collocation._model.jmimodel._dll.jmi_opt_coll_ipopt_set_int_option.argtypes = [
+                ct.c_void_p,
+                ct.c_char_p,
+                ct.c_int]
+            self._nlp_collocation._model.jmimodel._dll.jmi_opt_coll_ipopt_set_num_option.argtypes = [
+                ct.c_void_p,
+                ct.c_char_p,
+                c_jmi_real_t]
+            self._nlp_collocation._model.jmimodel._dll.jmi_opt_coll_ipopt_get_statistics.argtypes = [
+                ct.c_void_p,
+                ct.POINTER(ct.c_int),
+                ct.POINTER(ct.c_int),
+                ct.POINTER(c_jmi_real_t),
+                ct.POINTER(c_jmi_real_t)]
         except AttributeError, e:
-            pass       
+            pass
                
     def opt_coll_ipopt_solve(self):
-        """ Solve the NLP problem."""
-        if self._nlp_collocation._model.jmimodel._dll.jmi_opt_coll_ipopt_solve(self._ipopt_opt) > 1:
+        """ 
+        Solve the NLP problem.
+        """
+        if self._nlp_collocation._model.jmimodel._dll.jmi_opt_coll_ipopt_solve(
+            self._ipopt_opt) > 1:
             raise jmi.JMIException("Solving IPOPT failed.")
     
     def opt_coll_ipopt_set_string_option(self, key, val):
-        """ Set an Ipopt string option.
+        """ 
+        Set an Ipopt string option.
         
         Parameters::
         
             key -- 
                 The name of the option.
+                
             val -- 
                 The value of the option.
-            
         """
         if self._nlp_collocation._model.jmimodel._dll.jmi_opt_coll_ipopt_set_string_option(
             self._ipopt_opt, key, val) is not 0: 
@@ -109,15 +122,16 @@ class CollocationOptimizer(object):
                 " + key + " is unknown")
         
     def opt_coll_ipopt_set_int_option(self, key, val):
-        """ Set an Ipopt integer option.
+        """ 
+        Set an Ipopt integer option.
         
         Parameters::
         
             key -- 
                 The name of the option.
+                
             val -- 
                 The value of the option.
-            
         """        
         if self._nlp_collocation._model.jmimodel._dll.jmi_opt_coll_ipopt_set_int_option(
             self._ipopt_opt, key, val) is not 0:
@@ -125,15 +139,16 @@ class CollocationOptimizer(object):
             " + key + " is unknown")
 
     def opt_coll_ipopt_set_num_option(self, key, val):
-        """ Set an Ipopt double option.
+        """ 
+        Set an Ipopt double option.
         
         Parameters::
         
             key -- 
                 The name of the option.
+                
             val -- 
                 The value of the option.
-            
         """
         if self._nlp_collocation._model.jmimodel._dll.jmi_opt_coll_ipopt_set_num_option(
             self._ipopt_opt, key, val) is not 0:
@@ -141,16 +156,20 @@ class CollocationOptimizer(object):
             " + key + " is unknown")
 
     def opt_coll_ipopt_get_statistics(self):
-        """ Get statistics from the last optimization run.
+        """ 
+        Get statistics from the last optimization run.
 
         Returns::
         
             return_status -- 
                 Return status from IPOPT.
+                
             nbr_iter -- 
                 Number of iterations.
+                
             objective -- 
                 Final value of objective function.
+                
             total_exec_time -- 
                 Execution time.
         """
@@ -158,23 +177,26 @@ class CollocationOptimizer(object):
         iters = ct.c_int()
         objective = c_jmi_real_t()
         exec_time = c_jmi_real_t()
-        if self._nlp_collocation._model.jmimodel._dll.jmi_opt_coll_ipopt_get_statistics(self._ipopt_opt,
-                                                                           byref(return_code),
-                                                                           byref(iters),
-                                                                           byref(objective),
-                                                                            byref(exec_time)) is not 0:
-            raise jmi.JMIException("Error when retrieve statistics - optimization problem may not be solved.")
+        if self._nlp_collocation._model.jmimodel._dll.jmi_opt_coll_ipopt_get_statistics(
+            self._ipopt_opt,
+            byref(return_code),
+            byref(iters),
+            byref(objective),
+            byref(exec_time)) is not 0:
+            raise jmi.JMIException(
+                "Error when retrieve statistics - optimization problem may not be solved.")
         return (return_code.value,iters.value,objective.value,exec_time.value)
 
-
 class NLPCollocation(object):
-    """ NLP interface for a dynamic optimization problem. Abstract class 
-    which provides some methods but can not be instantiated. Use together 
-    with an implementation of an algorithm by extending this class.
+    """ 
+    NLP interface for a dynamic optimization problem. Abstract class which 
+    provides some methods but can not be instantiated. Use together with an 
+    implementation of an algorithm by extending this class.
     """
 
     def __init__(self):
-        """ This is an abstract class and can not be instantiated.
+        """ 
+        This is an abstract class and can not be instantiated.
         
         Raises::
         
@@ -188,124 +210,145 @@ class NLPCollocation(object):
      
     def _set_nlpCollocation_typedefs(self):
         try:
-            self._model.jmimodel._dll.jmi_opt_coll_get_dimensions.argtypes = [ct.c_void_p,
-                                                                             ct.POINTER(ct.c_int),
-                                                                             ct.POINTER(ct.c_int),
-                                                                             ct.POINTER(ct.c_int),
-                                                                             ct.POINTER(ct.c_int),
-                                                                             ct.POINTER(ct.c_int)]
+            self._model.jmimodel._dll.jmi_opt_coll_get_dimensions.argtypes = [
+                ct.c_void_p,
+                ct.POINTER(ct.c_int),
+                ct.POINTER(ct.c_int),
+                ct.POINTER(ct.c_int),
+                ct.POINTER(ct.c_int),
+                ct.POINTER(ct.c_int)]
+                
             n_real_x = ct.c_int()
             n_g = ct.c_int()
             n_h = ct.c_int()
             dg_n_nz = ct.c_int()
             dh_n_nz = ct.c_int()
-            assert self._model.jmimodel._dll.jmi_opt_coll_get_dimensions(self._jmi_opt_coll, byref(n_real_x), byref(n_g),
-                                           byref(n_h), byref(dg_n_nz), byref(dh_n_nz)) \
+            assert self._model.jmimodel._dll.jmi_opt_coll_get_dimensions(
+                self._jmi_opt_coll, byref(n_real_x), byref(n_g), byref(n_h), 
+                byref(dg_n_nz), byref(dh_n_nz)) \
             is 0, \
                "getting NLP problem dimensions failed"        
 
-            self._model.jmimodel._dll.jmi_opt_coll_get_n_e.argtypes = [ct.c_void_p,
-                                                                      ct.POINTER(ct.c_int)]
+            self._model.jmimodel._dll.jmi_opt_coll_get_n_e.argtypes = [
+                ct.c_void_p,
+                ct.POINTER(ct.c_int)]
             
-            self._model.jmimodel._dll.jmi_opt_coll_get_interval_spec.argtypes = [ct.c_void_p,
-                                                                                ct.POINTER(c_jmi_real_t),
-                                                                                ct.POINTER(ct.c_int),
-                                                                                ct.POINTER(c_jmi_real_t),
-                                                                                ct.POINTER(ct.c_int)]
+            self._model.jmimodel._dll.jmi_opt_coll_get_interval_spec.argtypes = [
+                ct.c_void_p,
+                ct.POINTER(c_jmi_real_t),
+                ct.POINTER(ct.c_int),
+                ct.POINTER(c_jmi_real_t),
+                ct.POINTER(ct.c_int)]
             self._model.jmimodel._dll.jmi_opt_coll_get_x.argtypes =[ct.c_void_p]
-            self._model.jmimodel._dll.jmi_opt_coll_get_initial.argtypes = [ct.c_void_p,
-                                                                          Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                                        ndim=1,
-                                                                                        shape=n_real_x.value,
-                                                                                        flags='C')]
-            self._model.jmimodel._dll.jmi_opt_coll_set_initial.argtypes =  [ct.c_void_p,
-                                                                           Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                                         ndim=1,
-                                                                                         shape=n_real_x.value,
-                                                                                         flags='C')]
-            self._model.jmimodel._dll.jmi_opt_coll_set_initial_from_trajectory.argtypes = [ct.c_void_p,
-                                                                                          Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                                                        ndim=1,
-                                                                                                        shape=self._model._n_p_opt,
-                                                                                                        flags='C'),
-                                                                                          Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                                                        ndim=1,
-                                                                                                        flags='C'),
-                                                                                          ct.c_int,
-                                                                                          Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                                                        ndim=1,
-                                                                                                        flags='C'),
-                                                                                          c_jmi_real_t,
-                                                                                          c_jmi_real_t]
-            self._model.jmimodel._dll.jmi_opt_coll_get_bounds.argtypes = [ct.c_void_p,
-                                                                         Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                                       ndim=1,
-                                                                                       shape=n_real_x.value,
-                                                                                       flags='C'),
-                                                                         Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                                       ndim=1,
-                                                                                       shape=n_real_x.value,
-                                                                                       flags='C')]
-            self._model.jmimodel._dll.jmi_opt_coll_set_bounds.argtypes = [ct.c_void_p,
-                                                                         Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                                       ndim=1,
-                                                                                       shape=n_real_x.value,
-                                                                                       flags='C'),
-                                                                         Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                                       ndim=1,
-                                                                                       shape=n_real_x.value,
-                                                                                       flags='C')]
-            self._model.jmimodel._dll.jmi_opt_coll_f.argtypes = [ct.c_void_p,
-                                                                ct.POINTER(c_jmi_real_t)]
-            self._model.jmimodel._dll.jmi_opt_coll_df.argtypes = [ct.c_void_p,
-                                                                 Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                               ndim=1,
-                                                                               shape=n_real_x.value,
-                                                                               flags='C')]
-            self._model.jmimodel._dll.jmi_opt_coll_g.argtypes = [ct.c_void_p,
-                                                                Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                              ndim=1,
-                                                                              shape=n_g.value,
-                                                                              flags='C')]
-            self._model.jmimodel._dll.jmi_opt_coll_dg.argtypes = [ct.c_void_p,
-                                                                 Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                               ndim=1,
-                                                                               shape=dg_n_nz.value,
-                                                                               flags='C')]
-            self._model.jmimodel._dll.jmi_opt_coll_dg_nz_indices.argtypes = [ct.c_void_p,
-                                                                            Nct.ndpointer(dtype=ct.c_int,
-                                                                                          ndim=1,
-                                                                                          shape=dg_n_nz.value,
-                                                                                          flags='C'),
-                                                                            Nct.ndpointer(dtype=ct.c_int,
-                                                                                          ndim=1,
-                                                                                          shape=dg_n_nz.value,
-                                                                                          flags='C')]
-            self._model.jmimodel._dll.jmi_opt_coll_h.argtypes = [ct.c_void_p,
-                                                                Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                              ndim=1,
-                                                                              shape=n_h.value,
-                                                                              flags='C')]
-            self._model.jmimodel._dll.jmi_opt_coll_dh.argtypes = [ct.c_void_p,
-                                                                 Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                               ndim=1,
-                                                                               shape=dh_n_nz.value,
-                                                                               flags='C')]
-            self._model.jmimodel._dll.jmi_opt_coll_dh_nz_indices.argtypes = [ct.c_void_p,
-                                                                            Nct.ndpointer(dtype=ct.c_int,
-                                                                                          ndim=1,
-                                                                                          shape=dh_n_nz.value,
-                                                                                          flags='C'),
-                                                                            Nct.ndpointer(dtype=ct.c_int,
-                                                                                          ndim=1,
-                                                                                          shape=dh_n_nz.value,
-                                                                                          flags='C')]
-            self._model.jmimodel._dll.jmi_opt_coll_write_file_matlab.argtypes = [ct.c_void_p,
-                                                                                ct.c_char_p]
-            self._model.jmimodel._dll.jmi_opt_coll_get_result_variable_vector_length.argtypes = [ct.c_void_p,
-                                                                                                ct.POINTER(ct.c_int)]
+            self._model.jmimodel._dll.jmi_opt_coll_get_initial.argtypes = [
+                ct.c_void_p,
+                Nct.ndpointer(dtype=c_jmi_real_t,
+                                    ndim=1,
+                                    shape=n_real_x.value,
+                                    flags='C')]
+            self._model.jmimodel._dll.jmi_opt_coll_set_initial.argtypes = [
+                ct.c_void_p,
+                Nct.ndpointer(dtype=c_jmi_real_t,
+                                    ndim=1,
+                                    shape=n_real_x.value,
+                                    flags='C')]
+            self._model.jmimodel._dll.jmi_opt_coll_set_initial_from_trajectory.argtypes = [
+                ct.c_void_p,
+                Nct.ndpointer(dtype=c_jmi_real_t,
+                                    ndim=1,
+                                    shape=self._model._n_p_opt,
+                                    flags='C'),
+                                    Nct.ndpointer(dtype=c_jmi_real_t,
+                                                        ndim=1,
+                                                        flags='C'),
+                                                        ct.c_int,
+                                    Nct.ndpointer(dtype=c_jmi_real_t,
+                                                        ndim=1,
+                                                        flags='C'),
+                                    c_jmi_real_t,
+                                    c_jmi_real_t]
+            self._model.jmimodel._dll.jmi_opt_coll_get_bounds.argtypes = [
+                ct.c_void_p,
+                Nct.ndpointer(dtype=c_jmi_real_t,
+                                    ndim=1,
+                                    shape=n_real_x.value,
+                                    flags='C'),
+                Nct.ndpointer(dtype=c_jmi_real_t,
+                                    ndim=1,
+                                    shape=n_real_x.value,
+                                    flags='C')]
+            self._model.jmimodel._dll.jmi_opt_coll_set_bounds.argtypes = [
+                ct.c_void_p,
+                Nct.ndpointer(dtype=c_jmi_real_t,
+                                    ndim=1,
+                                    shape=n_real_x.value,
+                                    flags='C'),
+                Nct.ndpointer(dtype=c_jmi_real_t,
+                                    ndim=1,
+                                    shape=n_real_x.value,
+                                    flags='C')]
+            self._model.jmimodel._dll.jmi_opt_coll_f.argtypes = [
+                ct.c_void_p,
+                ct.POINTER(c_jmi_real_t)]
+            self._model.jmimodel._dll.jmi_opt_coll_df.argtypes = [
+                ct.c_void_p,
+                Nct.ndpointer(dtype=c_jmi_real_t,
+                                    ndim=1,
+                                    shape=n_real_x.value,
+                                    flags='C')]
+            self._model.jmimodel._dll.jmi_opt_coll_g.argtypes = [
+                ct.c_void_p,
+                Nct.ndpointer(dtype=c_jmi_real_t,
+                                    ndim=1,
+                                    shape=n_g.value,
+                                    flags='C')]
+            self._model.jmimodel._dll.jmi_opt_coll_dg.argtypes = [
+                ct.c_void_p,
+                Nct.ndpointer(dtype=c_jmi_real_t,
+                                    ndim=1,
+                                    shape=dg_n_nz.value,
+                                    flags='C')]
+            self._model.jmimodel._dll.jmi_opt_coll_dg_nz_indices.argtypes = [
+                ct.c_void_p,
+                Nct.ndpointer(dtype=ct.c_int,
+                                    ndim=1,
+                                    shape=dg_n_nz.value,
+                                    flags='C'),
+                Nct.ndpointer(dtype=ct.c_int,
+                                    ndim=1,
+                                    shape=dg_n_nz.value,
+                                    flags='C')]
+            self._model.jmimodel._dll.jmi_opt_coll_h.argtypes = [
+                ct.c_void_p,
+                Nct.ndpointer(dtype=c_jmi_real_t,
+                                    ndim=1,
+                                    shape=n_h.value,
+                                    flags='C')]
+            self._model.jmimodel._dll.jmi_opt_coll_dh.argtypes = [
+                ct.c_void_p,
+                Nct.ndpointer(dtype=c_jmi_real_t,
+                                    ndim=1,
+                                    shape=dh_n_nz.value,
+                                    flags='C')]
+            self._model.jmimodel._dll.jmi_opt_coll_dh_nz_indices.argtypes = [
+                ct.c_void_p,
+                Nct.ndpointer(dtype=ct.c_int,
+                                    ndim=1,
+                                    shape=dh_n_nz.value,
+                                    flags='C'),
+                Nct.ndpointer(dtype=ct.c_int,
+                                    ndim=1,
+                                    shape=dh_n_nz.value,
+                                    flags='C')]
+            self._model.jmimodel._dll.jmi_opt_coll_write_file_matlab.argtypes = [
+                ct.c_void_p,
+                ct.c_char_p]
+            self._model.jmimodel._dll.jmi_opt_coll_get_result_variable_vector_length.argtypes = [
+                ct.c_void_p,
+                ct.POINTER(ct.c_int)]
             timepoints = ct.c_int()
-            assert self._model.jmimodel._dll.jmi_opt_coll_get_result_variable_vector_length(self._jmi_opt_coll, byref(timepoints)) \
+            assert self._model.jmimodel._dll.jmi_opt_coll_get_result_variable_vector_length(
+                self._jmi_opt_coll, byref(timepoints)) \
             is 0, \
                "getting number of points in the independent time vector failed"
 
@@ -313,100 +356,105 @@ class NLPCollocation(object):
             res_x = timepoints.value*self._model._n_real_x.value
             res_u = timepoints.value*self._model._n_real_u.value
             res_w = timepoints.value*self._model._n_real_w.value
-            self._model.jmimodel._dll.jmi_opt_coll_get_result.argtypes = [ct.c_void_p,
-                                                                         Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                                       ndim=1,
-                                                                                       shape=self._model._n_p_opt,
-                                                                                       flags='C'),
-                                                                         Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                                       ndim=1,
-                                                                                       shape=timepoints.value,
-                                                                                       flags='C'),
-                                                                         Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                                       ndim=1,
-                                                                                       shape=res_dx,
-                                                                                       flags='C'),
-                                                                         Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                                       ndim=1,
-                                                                                       shape=res_x,
-                                                                                       flags='C'),
-                                                                         Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                                       ndim=1,
-                                                                                       shape=res_u,
-                                                                                       flags='C'),
-                                                                         Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                                       ndim=1,
-                                                                                       shape=res_w,
-                                                                                       flags='C')]
+            self._model.jmimodel._dll.jmi_opt_coll_get_result.argtypes = [
+                ct.c_void_p,
+                Nct.ndpointer(dtype=c_jmi_real_t,
+                                    ndim=1,
+                                    shape=self._model._n_p_opt,
+                                    flags='C'),
+                Nct.ndpointer(dtype=c_jmi_real_t,
+                                    ndim=1,
+                                    shape=timepoints.value,
+                                    flags='C'),
+                Nct.ndpointer(dtype=c_jmi_real_t,
+                                    ndim=1,
+                                    shape=res_dx,
+                                    flags='C'),
+                Nct.ndpointer(dtype=c_jmi_real_t,
+                                    ndim=1,
+                                    shape=res_x,
+                                    flags='C'),
+                Nct.ndpointer(dtype=c_jmi_real_t,
+                                    ndim=1,
+                                    shape=res_u,
+                                    flags='C'),
+                Nct.ndpointer(dtype=c_jmi_real_t,
+                                    ndim=1,
+                                    shape=res_w,
+                                    flags='C')]
 
-            self._model.jmimodel._dll.jmi_opt_coll_get_result_element_interpolation.argtypes = [ct.c_void_p,
-                                                                                               ct.c_int,
-                                                                         Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                                       ndim=1,
-                                                                                       shape=self._model._n_p_opt,
-                                                                                       flags='C'),
-                                                                         Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                                       ndim=1,
-                                                                                       flags='C'),
-                                                                         Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                                       ndim=1,
-                                                                                       flags='C'),
-                                                                         Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                                       ndim=1,
-                                                                                       flags='C'),
-                                                                         Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                                       ndim=1,
-                                                                                       flags='C'),
-                                                                         Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                                       ndim=1,
-                                                                                       flags='C')]
+            self._model.jmimodel._dll.jmi_opt_coll_get_result_element_interpolation.argtypes = [
+                ct.c_void_p,
+                ct.c_int,
+                Nct.ndpointer(dtype=c_jmi_real_t,
+                                    ndim=1,
+                                    shape=self._model._n_p_opt,
+                                    flags='C'),
+                Nct.ndpointer(dtype=c_jmi_real_t,
+                                    ndim=1,
+                                    flags='C'),
+                Nct.ndpointer(dtype=c_jmi_real_t,
+                                    ndim=1,
+                                    flags='C'),
+                Nct.ndpointer(dtype=c_jmi_real_t,
+                                    ndim=1,
+                                    flags='C'),
+                Nct.ndpointer(dtype=c_jmi_real_t,
+                                    ndim=1,
+                                    flags='C'),
+                Nct.ndpointer(dtype=c_jmi_real_t,
+                                    ndim=1,
+                                    flags='C')]
             
-            self._model.jmimodel._dll.jmi_opt_coll_get_result_mesh_interpolation.argtypes = [ct.c_void_p,
-                                                                                            Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                                                          ndim=1,
-                                                                                                          flags='C'),
-                                                                                               ct.c_int,
-                                                                         Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                                       ndim=1,
-                                                                                       shape=self._model._n_p_opt,
-                                                                                       flags='C'),
-                                                                         Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                                       ndim=1,
-                                                                                       flags='C'),
-                                                                         Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                                       ndim=1,
-                                                                                       flags='C'),
-                                                                         Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                                       ndim=1,
-                                                                                       flags='C'),
-                                                                         Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                                       ndim=1,
-                                                                                       flags='C'),
-                                                                         Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                                       ndim=1,
-                                                                                       flags='C')]
+            self._model.jmimodel._dll.jmi_opt_coll_get_result_mesh_interpolation.argtypes = [
+                ct.c_void_p,
+                Nct.ndpointer(dtype=c_jmi_real_t,
+                                    ndim=1,
+                                    flags='C'),
+                ct.c_int,
+                Nct.ndpointer(dtype=c_jmi_real_t,
+                                    ndim=1,
+                                    shape=self._model._n_p_opt,
+                                    flags='C'),
+                Nct.ndpointer(dtype=c_jmi_real_t,
+                                    ndim=1,
+                                    flags='C'),
+                Nct.ndpointer(dtype=c_jmi_real_t,
+                                    ndim=1,
+                                    flags='C'),
+                Nct.ndpointer(dtype=c_jmi_real_t,
+                                    ndim=1,
+                                    flags='C'),
+                Nct.ndpointer(dtype=c_jmi_real_t,
+                                    ndim=1,
+                                    flags='C'),
+                Nct.ndpointer(dtype=c_jmi_real_t,
+                                    ndim=1,
+                                    flags='C')]
 
 
             # n_real_x from jmi_opt_coll_get_dimensions
-            jmi._returns_ndarray(self._model.jmimodel._dll.jmi_opt_coll_get_x, c_jmi_real_t, n_real_x.value, order='C')
+            jmi._returns_ndarray(self._model.jmimodel._dll.jmi_opt_coll_get_x, 
+                c_jmi_real_t, n_real_x.value, order='C')
         except AttributeError, e:
             pass
        
     def get_result(self):
-        """ Get the optimization result. The result is given for the
-        collocation points used in the algorithm.
+        """ 
+        Get the optimization result. The result is given for the collocation 
+        points used in the algorithm.
         
         Returns::
         
             p_opt --
-                A vector containing the values of the optimized 
-                parameters.
+                A vector containing the values of the optimized parameters.
+                
             data --
-                A two dimensional array of variable trajectory data. The
-                first column represents the time vector. The following
-                colums contain, in order, the derivatives, the states,
-                the inputs and the algebraic variables. The ordering is
-                according to increasing value references.
+                A two dimensional array of variable trajectory data. The first 
+                column represents the time vector. The following colums contain, 
+                in order, the derivatives, the states, the inputs and the 
+                algebraic variables. The ordering is according to increasing 
+                value references.
         """
         
         n_points = self.opt_coll_get_result_variable_vector_length()
@@ -438,7 +486,8 @@ class NLPCollocation(object):
         for i in range(n_real_u):
             data[:,n_real_dx+n_real_x+i+1] = u_[i*n_points:(i+1)*n_points]
         for i in range(n_real_w):
-            data[:,n_real_dx+n_real_x+n_real_u+i+1] = w_[i*n_points:(i+1)*n_points]
+            data[:,n_real_dx+n_real_x+n_real_u+i+1] = w_[
+                i*n_points:(i+1)*n_points]
 
         # If a normalized minimum time problem has been solved,
         # then, the time vector should be rescaled
@@ -456,32 +505,32 @@ class NLPCollocation(object):
         return p_opt, data
 
     def get_result_element_interpolation(self,n_interpolation_points=20):
-        """ Get the optimization results. The variable trajectories are
-        evaluated at n_interpolation points inside each finite element. 
-        The interpolation points at which the variables are computed are 
-        equally spaced, and includes the element start and end points 
-        within each finite element. The collocation interpolation 
-        polynomials are used to compute the value of the variable 
-        trajectories at each point.
+        """ 
+        Get the optimization results. The variable trajectories are evaluated 
+        at n_interpolation points inside each finite element. The interpolation 
+        points at which the variables are computed are equally spaced, and 
+        includes the element start and end points within each finite element. 
+        The collocation interpolation polynomials are used to compute the value 
+        of the variable trajectories at each point.
 
         Parameters::
         
             n_interpolation_points --
-                The number of points in each finite element at which the
+                The number of points in each finite element at which the 
                 solution trajectories are evaluated.
                 Default: 20
         
         Returns::
         
             p_opt --
-                A vector containing the values of the optimized 
-                parameters.
+                A vector containing the values of the optimized parameters.
+                
             data --
-                A two dimensional array of variable trajectory data. The
-                first column represents the time vector. The following
-                colums contain, in order, the derivatives, the states,
-                the inputs and the algebraic variables. The ordering is
-                according to increasing value references.
+                A two dimensional array of variable trajectory data. The first 
+                column represents the time vector. The following colums contain, 
+                in order, the derivatives, the states, the inputs and the 
+                algebraic variables. The ordering is according to increasing 
+                value references.
         """
 
         n_points = self.opt_coll_get_n_e()*n_interpolation_points
@@ -514,7 +563,8 @@ class NLPCollocation(object):
         for i in range(n_real_u):
             data[:,n_real_dx+n_real_x+i+1] = u_[i*n_points:(i+1)*n_points]
         for i in range(n_real_w):
-            data[:,n_real_dx+n_real_x+n_real_u+i+1] = w_[i*n_points:(i+1)*n_points]
+            data[:,n_real_dx+n_real_x+n_real_u+i+1] = w_[
+                i*n_points:(i+1)*n_points]
 
         # If a normalized minimum time problem has been solved,
         # then, the time vector should be rescaled
@@ -532,10 +582,10 @@ class NLPCollocation(object):
         return p_opt, data
 
     def get_result_mesh_interpolation(self,mesh):
-        """ Get the optimization results. The result is given at a user
-        defined mesh of time points. The collocation interpolation
-        polynomials are used to compute the value of the variable
-        trajectories at eachpoint.
+        """ 
+        Get the optimization results. The result is given at a user defined mesh 
+        of time points. The collocation interpolation polynomials are used to 
+        compute the value of the variable trajectories at eachpoint.
 
         Parameters::
         
@@ -545,14 +595,14 @@ class NLPCollocation(object):
         Returns::
         
             p_opt --
-                A vector containing the values of the optimized 
-                parameters.
+                A vector containing the values of the optimized parameters.
+                
             data --
-                A two dimensional array of variable trajectory data. The
-                first column represents the time vector. The following
-                colums contain, in order, the derivatives, the states,
-                the inputs and the algebraic variables. The ordering is
-                according to increasing value references.
+                A two dimensional array of variable trajectory data. The first 
+                column represents the time vector. The following colums contain, 
+                in order, the derivatives, the states, the inputs and the 
+                algebraic variables. The ordering is according to increasing 
+                value references.
         """
 
         n_points = len(mesh)
@@ -573,7 +623,8 @@ class NLPCollocation(object):
         w_ = N.zeros(n_real_w*n_points)
         
         # Get the result
-        self.opt_coll_get_result_mesh_interpolation(mesh,n_points,p_opt,t_,dx_,x_,u_,w_)
+        self.opt_coll_get_result_mesh_interpolation(
+            mesh,n_points,p_opt,t_,dx_,x_,u_,w_)
         
         data = N.zeros((n_points,1+n_real_dx+n_real_x+n_real_u+n_real_w))
         data[:,0] = t_
@@ -584,7 +635,8 @@ class NLPCollocation(object):
         for i in range(n_real_u):
             data[:,n_real_dx+n_real_x+i+1] = u_[i*n_points:(i+1)*n_points]
         for i in range(n_real_w):
-            data[:,n_real_dx+n_real_x+n_real_u+i+1] = w_[i*n_points:(i+1)*n_points]
+            data[:,n_real_dx+n_real_x+n_real_u+i+1] = w_[
+                i*n_points:(i+1)*n_points]
 
         # If a normalized minimum time problem has been solved,
         # then, the time vector should be rescaled
@@ -601,21 +653,24 @@ class NLPCollocation(object):
 
         return p_opt, data
 
-    def export_result_dymola(self, file_name='', format='txt', write_scaled_result = False):
-        """ Export the optimization result in Dymola format. The 
-        function get_result is used to retrieve the solution 
-        trajectories. The result is given at the collocation points.
+    def export_result_dymola(self, file_name='', format='txt', 
+        write_scaled_result = False):
+        """ 
+        Export the optimization result in Dymola format. The function get_result 
+        is used to retrieve the solution trajectories. The result is given at 
+        the collocation points.
 
         Parameters::
         
             file_name --
                 The name of the result file.
                 Default: Empty string.
+                
             format --
-                A string equal either to 'txt' for output to Dymola 
-                textual format or 'mat' for output to Dymola binary 
-                Matlab format.
+                A string equal either to 'txt' for output to Dymola textual 
+                format or 'mat' for output to Dymola binary Matlab format.
                 Default: 'txt'
+                
             write_scaled_result --
                 Set this parameter to True to write the result to file without
                 taking scaling into account. If the value of scaled is False,
@@ -632,34 +687,40 @@ class NLPCollocation(object):
         p_opt, data = self.get_result()
         
         # Write result
-        io.export_result_dymola(self._model,data, file_name=file_name, format=format, scaled=write_scaled_result)
+        io.export_result_dymola(self._model,data, file_name=file_name, 
+            format=format, scaled=write_scaled_result)
 
-    def export_result_dymola_element_interpolation(self, n_interpolation_points=20, file_name='', format='txt',
-                                                   write_scaled_result = False):
-        """ Export the optimization result in Dymola format. The 
-        function export_result_dymola_element_interpolation is used to 
-        retrieve the solution trajectories. 
+    def export_result_dymola_element_interpolation(self, 
+        n_interpolation_points=20, file_name='', format='txt', 
+        write_scaled_result = False):
+        """ 
+        Export the optimization result in Dymola format. The function 
+        export_result_dymola_element_interpolation is used to retrieve the 
+        solution trajectories. 
         
         Parameters::
         
             n_interpolation_points --
-                The number of points in each finite element at which the 
-                result is returned.
+                The number of points in each finite element at which the result 
+                is returned.
                 Default: 20
+                
             file_name --
                 The name of the result file.
                 Default: Empty string.
+                
             format --
-                A string equal either to 'txt' for output to Dymola 
-                textual format or 'mat' for output to Dymola binary 
-                Matlab format.
+                A string equal either to 'txt' for output to Dymola textual 
+                format or 'mat' for output to Dymola binary Matlab format.
                 Default: 'txt'
+                
             write_scaled_result --
                 Set this parameter to True to write the result to file without
-                taking scaling into account. If the value of scaled is False,
+                taking scaling into account. If the value of scaled is False, 
                 then the variable scaling factors of the model are used to
                 reproduced the unscaled variable values.
                 Default: False
+                
         Limitations::
         
             Only format='txt' is currently supported.
@@ -670,47 +731,53 @@ class NLPCollocation(object):
             n_interpolation_points)
         
         # Write result
-        io.export_result_dymola(
-            self._model,data, file_name=file_name, format=format, scaled=write_scaled_result)
+        io.export_result_dymola(self._model,data, file_name=file_name, 
+            format=format, scaled=write_scaled_result)
 
     def export_result_dymola_mesh_interpolation(self, mesh, file_name='', 
-                                                format='txt', write_scaled_result = False):
-        """ Export the optimization result in Dymola format. The 
-        function export_result_dymola_element_interpolation is used to 
-        retrieve the solution trajectories. 
+        format='txt', write_scaled_result = False):
+        """ 
+        Export the optimization result in Dymola format. The function 
+        export_result_dymola_element_interpolation is used to retrieve the 
+        solution trajectories. 
 
         Parameters::
         
             mesh --
                 A vector of time points at wich the result is given. 
+                
             file_name --
                 The name of the result file.
                 Default: Empty string.
+                
             format --
-                A string equal either to 'txt' for output to Dymola 
-                textual format or 'mat' for output to Dymola binary 
-                Matlab format.
+                A string equal either to 'txt' for output to Dymola textual 
+                format or 'mat' for output to Dymola binary Matlab format.
                 Default: 'txt'
+                
             write_scaled_result --
                 Set this parameter to True to write the result to file without
                 taking scaling into account. If the value of scaled is False,
                 then the variable scaling factors of the model are used to
                 reproduced the unscaled variable values.
                 Default: False
+                
         Limitations::
         
             Only format='txt' is currently supported.
         """
-
         # Get results
         p_opt, data = self.get_result_mesh_interpolation(mesh)
         
         # Write result
-        io.export_result_dymola(self._model,data, file_name=file_name, format=format, scaled=write_scaled_result)
+        io.export_result_dymola(self._model,data, file_name=file_name, 
+            format=format, scaled=write_scaled_result)
 
 
-    def set_initial_from_dymola(self,res, hs_init, start_time_init, final_time_init):
-        """ Initialize the optimization vector from an object of either 
+    def set_initial_from_dymola(self,res, hs_init, start_time_init, 
+        final_time_init):
+        """ 
+        Initialize the optimization vector from an object of either 
         ResultDymolaTextual or ResultDymolaBinary.
 
         Parameters::
@@ -718,17 +785,19 @@ class NLPCollocation(object):
             res --
                 A reference to an object of type ResultDymolaTextual or
                 ResultDymolaBinary.
+                
             hs_init -- 
-                A vector of length n_e containing initial guesses of the
-                normalized lengths of the finite elements. This argument 
-                is neglected if the problem does not have free element 
-                lengths.
+                A vector of length n_e containing initial guesses of the 
+                normalized lengths of the finite elements. This argument is 
+                neglected if the problem does not have free element lengths.
+                
             start_time_init --
-                The initial guess of the interval start time. This 
-                argument is neglected if the start time is fixed.
+                The initial guess of the interval start time. This argument is 
+                neglected if the start time is fixed.
+                
             final_time_init --
-                The initial guess of the interval final time. This 
-                argument is neglected if the final time is fixed.
+                The initial guess of the interval final time. This argument is 
+                neglected if the final time is fixed.
         """
         # Obtain the names
         names = self._model.get_dx_variable_names(include_alias=False)
@@ -800,10 +869,12 @@ class NLPCollocation(object):
                 except:
                     pass
         else:
-            raise Exception("None of the model variables not found in result file.")
+            raise Exception(
+                "None of the model variables not found in result file.")
 
         if num_name_hits==0:
-            raise Exception("None of the model variables not found in result file.")
+            raise Exception(
+                "None of the model variables not found in result file.")
         
         #print(traj.t)
         
@@ -845,10 +916,14 @@ class NLPCollocation(object):
         # Initialize variable names
         # Loop over all the names
 
-        sc_dx = self._model.jmimodel.get_variable_scaling_factors()[self._model._offs_real_dx.value:self._model._offs_real_x.value]
-        sc_x = self._model.jmimodel.get_variable_scaling_factors()[self._model._offs_real_x.value:self._model._offs_real_u.value]
-        sc_u = self._model.jmimodel.get_variable_scaling_factors()[self._model._offs_real_u.value:self._model._offs_real_w.value]
-        sc_w = self._model.jmimodel.get_variable_scaling_factors()[self._model._offs_real_w.value:self._model._offs_t.value]
+        sc_dx = self._model.jmimodel.get_variable_scaling_factors()[
+            self._model._offs_real_dx.value:self._model._offs_real_x.value]
+        sc_x = self._model.jmimodel.get_variable_scaling_factors()[
+            self._model._offs_real_x.value:self._model._offs_real_u.value]
+        sc_u = self._model.jmimodel.get_variable_scaling_factors()[
+            self._model._offs_real_u.value:self._model._offs_real_w.value]
+        sc_w = self._model.jmimodel.get_variable_scaling_factors()[
+            self._model._offs_real_w.value:self._model._offs_t.value]
 
         col_index = 1;
         dx_index = 0;
@@ -927,20 +1002,21 @@ class NLPCollocation(object):
         #print(var_data)
         #print(N.reshape(var_data,(n_cols*n_points,1),order='F')[:,0])
             
-        self.opt_coll_set_initial_from_trajectory(p_opt_data,N.reshape(var_data,(n_cols*n_points,1),order='F')[:,0],N.size(var_data,0),
-                                                 hs_init,start_time_init,final_time_init)
+        self.opt_coll_set_initial_from_trajectory(p_opt_data, 
+            N.reshape(var_data,(n_cols*n_points,1),order='F')[:,0],N.size(var_data,0),
+            hs_init,start_time_init,final_time_init)
         
     def opt_coll_get_dimensions(self):
-        """ Get the number of variables and the number of constraints in 
-        the problem.
+        """ 
+        Get the number of variables and the number of constraints in the 
+        problem.
         
         Returns::
         
-            Tuple with the number of variables in the NLP problem, 
-            inequality constraints, equality constraints, non-zeros in 
-            the Jacobian of the inequality constraints and non-zeros in 
-            the Jacobian of the equality constraints respectively. 
-            
+            Tuple with the number of variables in the NLP problem, inequality 
+            constraints, equality constraints, non-zeros in the Jacobian of the 
+            inequality constraints and non-zeros in the Jacobian of the equality 
+            constraints respectively. 
         """
         n_real_x = ct.c_int()
         n_g = ct.c_int()
@@ -955,7 +1031,8 @@ class NLPCollocation(object):
         return n_real_x.value, n_g.value, n_h.value, dg_n_nz.value, dh_n_nz.value
 
     def opt_coll_get_n_e(self):
-        """ Get the number of finite elements.
+        """ 
+        Get the number of finite elements.
         
         Returns::
         
@@ -970,21 +1047,22 @@ class NLPCollocation(object):
 
     def opt_coll_get_interval_spec(self, start_time, start_time_free, 
         final_time, final_time_free):
-        """ Get data that specifies the optimization interval.
+        """ 
+        Get data that specifies the optimization interval.
         
         Parameters::
         
             start_time -- 
                 The optimization interval start time. (Return variable)
+                
             start_time_free -- 
-                0 if start time should be fixed or 1 if free. (Return 
-                variable)
+                0 if start time should be fixed or 1 if free. (Return variable)
+                
             final_time -- 
                 The optimization final time. (Return variable)
+                
             final_time_free -- 
-                0 if start time should be fixed or 1 if free. (Return 
-                variable)
-        
+                0 if start time should be fixed or 1 if free. (Return variable)
         """
         if self._model.jmimodel._dll.jmi_opt_coll_get_interval_spec(
             self._jmi_opt_coll, start_time, start_time_free, final_time, 
@@ -993,7 +1071,8 @@ class NLPCollocation(object):
             data failed.")
         
     def opt_coll_get_x(self):
-        """ Get the x vector of the NLP. 
+        """ 
+        Get the x vector of the NLP. 
         
         Returns::
         
@@ -1003,67 +1082,76 @@ class NLPCollocation(object):
             self._jmi_opt_coll)
 
     def opt_coll_get_initial(self, x_init):
-        """ Get the initial point of the NLP.
+        """ 
+        Get the initial point of the NLP.
         
         Parameters::
         
             x_init -- 
                 The initial guess vector. (Return variable)
-        
         """
         if self._model.jmimodel._dll.jmi_opt_coll_get_initial(
             self._jmi_opt_coll, x_init) is not 0:
             raise jmi.JMIException("Getting the initial point failed.")
 
     def opt_coll_set_initial(self, x_init):
-        """ Set the initial point of the NLP.
+        """ 
+        Set the initial point of the NLP.
 
         Parameters::
         
             x_init --- 
                 The initial guess vector.
         """
-        if self._model.jmimodel._dll.jmi_opt_coll_set_initial(self._jmi_opt_coll, x_init) is not 0:
+        if self._model.jmimodel._dll.jmi_opt_coll_set_initial(
+            self._jmi_opt_coll, x_init) is not 0:
             raise jmi.JMIException("Setting the initial point failed.")
  
     def opt_coll_set_initial_from_trajectory(self, p_opt_init, 
         trajectory_data_init, traj_n_points, hs_init, start_time_init, 
         final_time_init):
-        """ Set the initial point based on time series trajectories of 
-        the variables of the problem.
+        """ 
+        Set the initial point based on time series trajectories of the variables 
+        of the problem.
 
-        Also, initial guesses for the optimization interval and element 
-        lengths are provided.
+        Also, initial guesses for the optimization interval and element lengths 
+        are provided.
 
         Parameters::
         
             p_opt_init --
-                A vector of size n_p_opt containing initial values for 
-                the optimized parameters.
+                A vector of size n_p_opt containing initial values for the 
+                optimized parameters.
+                
             trajectory_data_init --
                 A matrix stored in column major format. The first column 
-                contains the time vector. The following column contains, 
-                in order, the derivative, state, input, and algebraic
-                variable profiles.
+                contains the time vector. The following column contains, in 
+                order, the derivative, state, input, and algebraic variable 
+                profiles.
+                
             traj_n_points --
                 The number of time points in trajectory_data_init.
+                
             hs_init --
-                A vector of length n_e containing initial guesses of the
-                normalized lengths of the finite elements. This argument 
-                is neglected if the problem does not have free element 
-                lengths.
+                A vector of length n_e containing initial guesses of the 
+                normalized lengths of the finite elements. This argument is 
+                neglected if the problem does not have free element lengths.
+                
             start_time_init --
-                The initial guess of interval start time. This argument 
-                is neglected if the start time is fixed.
+                The initial guess of interval start time. This argument is 
+                neglected if the start time is fixed.
+                
             final_time_init --
-                The initial guess of interval final time. This argument 
-                is neglected if the final time is fixed.
+                The initial guess of interval final time. This argument is 
+                neglected if the final time is fixed.
         """
-        # check sum (n_real_x, n_real_dx, n_real_u, n_real_w +1 (time)) mult with traj_n_points = size trajectory_data_init
+        # check sum (n_real_x, n_real_dx, n_real_u, n_real_w +1 (time)) 
+        # mult with traj_n_points = size trajectory_data_init
         sum = self._model._n_real_x.value + self._model._n_real_dx.value \
             + self._model._n_real_u.value + self._model._n_real_w.value + 1
         if sum*traj_n_points != len(trajectory_data_init):
-            raise jmi.JMIException("trajectory_data_init vector has the wrong size.")        
+            raise jmi.JMIException(
+                "trajectory_data_init vector has the wrong size.")
         if self._model.jmimodel._dll.jmi_opt_coll_set_initial_from_trajectory(
             self._jmi_opt_coll, \
             p_opt_init, \
@@ -1075,125 +1163,123 @@ class NLPCollocation(object):
             raise jmi.JMIException("Setting the initial point failed.")
 
     def opt_coll_get_bounds(self, x_lb, x_ub):
-        """ Get the upper and lower bounds of the optimization variables.
+        """ 
+        Get the upper and lower bounds of the optimization variables.
         
         Parameters::
         
             x_lb -- 
                 The lower bounds vector. (Return variable)
+                
             x_ub -- 
                 The upper bounds vector. (Return variable)
-        
         """
         if self._model.jmimodel._dll.jmi_opt_coll_get_bounds(
             self._jmi_opt_coll, x_lb, x_ub) is not 0:
-            raise jmi.JMIException("Getting upper and lower bounds of \
-            the optimization variables failed.")
+            raise jmi.JMIException("Getting upper and lower bounds of the \
+            optimization variables failed.")
 
     def opt_coll_set_bounds(self, x_lb, x_ub):
-        """ Set the upper and lower bounds of the optimization variables.
+        """ 
+        Set the upper and lower bounds of the optimization variables.
         
         Parameters::
         
             x_lb -- 
                 The lower bounds vector. (Return variable)
+                
             x_ub -- 
                 The upper bounds vector. (Return variable)
-        
         """
         if self._model.jmimodel._dll.jmi_opt_coll_set_bounds(
             self._jmi_opt_coll, x_lb, x_ub) is not 0:
-            raise jmi.JMIException("Getting upper and lower bounds of \
-            the optimization variables failed.")
+            raise jmi.JMIException("Getting upper and lower bounds of the \
+            optimization variables failed.")
         
     def opt_coll_f(self, f):
-        """ Get the cost function value at a given point in search space.
+        """ 
+        Get the cost function value at a given point in search space.
         
         Parameters::
         
             f -- 
                 Value of the cost function. (Return variable)
-        
         """
-        if self._model.jmimodel._dll.jmi_opt_coll_f(self._jmi_opt_coll, f) is not 0:
+        if self._model.jmimodel._dll.jmi_opt_coll_f(
+            self._jmi_opt_coll, f) is not 0:
             raise jmi.JMIException("Getting the cost function failed.")
         
     def opt_coll_df(self, df):
-        """ Get the gradient of the cost function value at a given point 
-        in search space.
+        """ 
+        Get the gradient of the cost function value at a given point in search 
+        space.
         
         Parameters::
         
             df -- 
-                Value of the gradient of the cost function. (Return 
-                variable)
-            
+                Value of the gradient of the cost function. (Return variable)
         """
         if self._model.jmimodel._dll.jmi_opt_coll_df(
             self._jmi_opt_coll, df) is not 0:
-            raise jmi.JMIException("Getting the gradient of the cost \
-            function value failed.")
+            raise jmi.JMIException("Getting the gradient of the cost function \
+            value failed.")
         
     def opt_coll_g(self, res):
-        """ Get the residual of the inequality constraints g.
+        """ 
+        Get the residual of the inequality constraints g.
         
         Parameters::
         
             res -- 
-                The residual of the inequality constraints. (Return 
-                variable)
-            
+                The residual of the inequality constraints. (Return variable)
         """
         if self._model.jmimodel._dll.jmi_opt_coll_g(
             self._jmi_opt_coll, res) is not 0:
-            raise jmi.JMIException("Getting the residual of the \
-            inequality constraints failed.")
+            raise jmi.JMIException("Getting the residual of the inequality \
+            constraints failed.")
         
     def opt_coll_dg(self, jac):
-        """ Get the Jacobian of the residual of the inequality 
-        constraints.
+        """ 
+        Get the Jacobian of the residual of the inequality constraints.
         
         Parameters::
         
             jac -- 
-                The Jacobian of the residual of the inequality 
-                constraints. (Return variable)
-        
+                The Jacobian of the residual of the inequality constraints. 
+                (Return variable)
         """
         if self._model.jmimodel._dll.jmi_opt_coll_dg(
             self._jmi_opt_coll, jac) is not 0:
-            raise jmi.JMIException("Getting the Jacobian of the residual \
-            of the inequality constraints failed.")
+            raise jmi.JMIException("Getting the Jacobian of the residual of \
+            the inequality constraints failed.")
         
     def opt_coll_dg_nz_indices(self, irow, icol):
-        """ Get the indices of the non-zeros in the inequality 
-        constraint Jacobian.
+        """ 
+        Get the indices of the non-zeros in the inequality constraint Jacobian.
         
         Parameters::
         
             irow -- 
-                The row indices of the non-zero entries in the Jacobian 
-                of the residual of the inequality constraints. (Return 
-                variable)
+                The row indices of the non-zero entries in the Jacobian of the 
+                residual of the inequality constraints. (Return variable)
+                
             icol --- 
-                The column indices of the non-zero entries in the 
-                Jacobian of the residual of the inequality constraints. 
-                (Return variable)
-        
+                The column indices of the non-zero entries in the Jacobian of 
+                the residual of the inequality constraints. (Return variable)
         """
         if self._model.jmimodel._dll.jmi_opt_coll_dg_nz_indices(
             self._jmi_opt_coll, irow, icol) is not 0:
-            raise jmi.JMIException("Getting the indices of the non-zeros \
-            in the equality constraint Jacobian failed.")
+            raise jmi.JMIException("Getting the indices of the non-zeros in \
+            the equality constraint Jacobian failed.")
         
     def opt_coll_h(self, res):
-        """ Get the residual of the equality constraints h.
+        """ 
+        Get the residual of the equality constraints h.
         
         Parameters::
         
             res -- 
                 The residual of the equality constraints. (Return variable)
-        
         """
         if self._model.jmimodel._dll.jmi_opt_coll_h(
             self._jmi_opt_coll, res) is not 0:
@@ -1201,89 +1287,92 @@ class NLPCollocation(object):
             constraints failed.")
         
     def opt_coll_dh(self, jac):
-        """ Get the Jacobian of the residual of the equality constraints.
+        """ 
+        Get the Jacobian of the residual of the equality constraints.
         
         Parameters::
         
             jac -- 
                 The Jacobian of the residual of the equality constraints. 
                 (Return variable)
-        
         """
         if self._model.jmimodel._dll.jmi_opt_coll_dh(
             self._jmi_opt_coll, jac) is not 0:
-            raise jmi.JMIException("Getting the Jacobian of the residual \
-            of the equality constraints.")
+            raise jmi.JMIException("Getting the Jacobian of the residual of \
+            the equality constraints.")
         
     def opt_coll_dh_nz_indices(self, irow, icol):
-        """ Get the indices of the non-zeros in the equality constraint 
-        Jacobian.
+        """ 
+        Get the indices of the non-zeros in the equality constraint Jacobian.
         
         Parameters::
         
             irow -- 
-                The row indices of the non-zero entries in the Jacobian 
-                of the residual of the equality constraints. (Return 
-                variable)
+                The row indices of the non-zero entries in the Jacobian of the 
+                residual of the equality constraints. (Return variable)
+                
             icol -- 
-                The column indices of the non-zero entries in the 
-                Jacobian of the residual of the equality constraints. 
-                (Return variable)
-        
+                The column indices of the non-zero entries in the Jacobian of 
+                the residual of the equality constraints. (Return variable)
         """
         if self._model.jmimodel._dll.jmi_opt_coll_dh_nz_indices(
             self._jmi_opt_coll, irow, icol) is not 0:
-            raise jmi.JMIException("Getting the indices of the non-zeros \
-            in the equality constraint Jacobian failed.")
+            raise jmi.JMIException("Getting the indices of the non-zeros in \
+            the equality constraint Jacobian failed.")
         
     def opt_coll_write_file_matlab(self, file_name):
-        """ Write the optimization result to file in Matlab format.
+        """ 
+        Write the optimization result to file in Matlab format.
         
         Parameters::
         
             file_name -- 
                 The name of file to write to.
-        
         """
         if self._model.jmimodel._dll.jmi_opt_coll_write_file_matlab(
             self._jmi_opt_coll, file_name) is not 0:
-            raise jmi.JMIException("Writing the optimization result to \
-            file in Matlab format failed.")
+            raise jmi.JMIException("Writing the optimization result to file in \
+            Matlab format failed.")
         
     def opt_coll_get_result_variable_vector_length(self):
-        """ Get the length of the result variable vectors. 
+        """ 
+        Get the length of the result variable vectors. 
         
         Returns::
         
             The length of the result variable vectors.
-        
         """
         n = ct.c_int()
         if self._model.jmimodel._dll.jmi_opt_coll_get_result_variable_vector_length(
             self._jmi_opt_coll, byref(n)) is not 0:
-            raise jmi.JMIException("Getting the length of the result \
-            variable vectors failed.")
+            raise jmi.JMIException("Getting the length of the result variable \
+            vectors failed.")
         return n.value
         
     def opt_coll_get_result(self, p_opt, t, dx, x, u, w):
-        """ Get the results, stored in column major format.
+        """ 
+        Get the results, stored in column major format.
         
         Parameters::
         
             p_opt -- 
                 The vector containing optimal parameter values. (Return 
                 variable)
+                
             t -- 
                 The time vector. (Return variable)
+                
             dx -- 
                 The derivatives. (Return variable)
+                
             x -- 
                 The states. (Return variable)
+                
             u -- 
                 The inputs. (Return variable)
+                
             w -- 
                 The algebraic variables. (Return variable)
-             
         """
         if self._model.jmimodel._dll.jmi_opt_coll_get_result(
             self._jmi_opt_coll, p_opt, t, dx, x, u, w) is not 0:
@@ -1291,53 +1380,65 @@ class NLPCollocation(object):
 
     def opt_coll_get_result_element_interpolation(self, 
         n_interpolation_points, p_opt, t, dx, x, u, w):
-        """ Get the results, stored in column major format.
+        """ 
+        Get the results, stored in column major format.
         
         Parameters::
         
             n_interpolation_points -- 
                 The number of time points in each element.
+                
             p_opt -- 
                 The vector containing optimal parameter values. (Return 
                 variable)
+                
             t -- 
                 The time vector. (Return variable)
+                
             dx -- 
                 The derivatives. (Return variable)
+                
             x -- 
                 The states. (Return variable)
+                
             u -- 
                 The inputs. (Return variable)
+                
             w -- 
                 The algebraic variables. (Return variable)
-             
         """
         if self._model.jmimodel._dll.jmi_opt_coll_get_result_element_interpolation(
             self._jmi_opt_coll, n_interpolation_points,p_opt, t, dx, x, u, w) is not 0:
             raise jmi.JMIException("Getting the results failed.")
 
-    def opt_coll_get_result_mesh_interpolation(self, mesh, n_mesh, p_opt, 
-        t, dx, x, u, w):
-        """ Get the results, stored in column major format.
+    def opt_coll_get_result_mesh_interpolation(self, mesh, n_mesh, p_opt, t, dx, 
+        x, u, w):
+        """ 
+        Get the results, stored in column major format.
         
         Parameters::
         
             mesh -- 
                 The mesh of time points.
+                
             p_opt -- 
                 The vector containing optimal parameter values. (Return 
                 variable)
+                
             t -- 
                 The time vector. (Return variable)
+                
             dx -- 
                 The derivatives. (Return variable)
+                
             x -- 
                 The states. (Return variable)
+                
             u -- 
                 The inputs. (Return variable)
+                
             w -- 
                 The algebraic variables. (Return variable)
-             
         """
         if self._model.jmimodel._dll.jmi_opt_coll_get_result_mesh_interpolation(
             self._jmi_opt_coll, mesh,n_mesh,p_opt, t, dx, x, u, w) is not 0:
@@ -1345,56 +1446,61 @@ class NLPCollocation(object):
             
 
 class NLPCollocationLagrangePolynomials(NLPCollocation):
-    """ An implementation of a transcription method based on Lagrange 
-    polynomials and Radau points. Extends the abstract class 
-    NLPCollocation. 
+    """ 
+    An implementation of a transcription method based on Lagrange polynomials 
+    and Radau points. Extends the abstract class NLPCollocation. 
     """
     
-    def __init__(self, model, n_e, hs, n_cp, blocking_factors=N.array([],
+    def __init__(self, model, n_e, hs, n_cp, blocking_factors=N.array([], 
         dtype=int)):
-        """ Constructor where main data structure is created. 
+        """ 
+        Constructor where main data structure is created. 
         
-        Initial guesses, lower and upper bounds and linearity
-        information is set for optimized parameters, derivatives,
-        states, inputs and algebraic variables. These values are taken
-        from the XML files created at compilation.
+        Initial guesses, lower and upper bounds and linearity information is set 
+        for optimized parameters, derivatives, states, inputs and algebraic 
+        variables. These values are taken from the XML files created at 
+        compilation.
 
-        Blocking factors are specified by a vector of integers, where
-        each entry in the vector corresponds to the number of elements
-        for which the control profile should be kept constant. For
-        example, the blocking factor specification [2,1,5] means that
-        u_0=u_1 and u_3=u_4=u_5=u_6=u_7 assuming that the
-        number of elements is 8. Notice that specification of blocking
-        factors implies that controls are present in only one
-        collocation point (the first) in each element. The number of
-        constant control levels in the optimization interval is equal
-        to the length of the blocking factor vector. In the example
-        above, this implies that there are three constant control
-        levels. If the sum of the entries in the blocking factor
-        vector is not equal to the number of elements, the vector is
-        normalized, either by truncation (if the sum of the entries is
-        larger than the number of element) or by increasing the last
-        entry of the vector. For example, if the number of elements is
-        4, the normalized blocking factor vector in the example is
-        [2,2]. If the number of elements is 10, then the normalized
-        vector is [2,1,7].
+        Blocking factors are specified by a vector of integers, where each entry 
+        in the vector corresponds to the number of elements for which the 
+        control profile should be kept constant. For example, the blocking 
+        factor specification [2,1,5] means that u_0=u_1 and u_3=u_4=u_5=u_6=u_7 
+        assuming that the number of elements is 8. Notice that specification of 
+        blocking factors implies that controls are present in only one 
+        collocation point (the first) in each element. The number of constant 
+        control levels in the optimization interval is equal to the length of 
+        the blocking factor vector. In the example above, this implies that 
+        there are three constant control levels. If the sum of the entries in 
+        the blocking factor vector is not equal to the number of elements, the 
+        vector is normalized, either by truncation (if the sum of the entries is 
+        larger than the number of element) or by increasing the last entry of 
+        the vector. For example, if the number of elements is 4, the normalized 
+        blocking factor vector in the example is [2,2]. If the number of 
+        elements is 10, then the normalizedvector is [2,1,7].
         
         Parameters::
         
             model -- 
                 The jmodelica.jmi.JMUModel object.
+                
             n_e -- 
                 The number of finite elements.
+                
             hs -- 
                 The vector containing the normalized element lengths.
+                
             n_cp -- 
                 The number of collocation points. 
+                
             blocking_factors -- 
                 The blocking factor vector.
         """
 
         if model._n_sw.value>0 or model._n_sw_init.value>0:
-            raise Exception("The collocation optimization algorithm does not support models with events. Please consider using the noEvent() operator or rewriting the model.")
+            raise Exception(
+                "The collocation optimization algorithm does not support \
+                models with events. Please consider using the noEvent() \
+                operator or rewriting the model.")
         
         if len(hs) != n_e:
             raise jmi.JMIException("arg hs is not of length n_e")
@@ -1439,7 +1545,8 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
         # default values
         hs_free = 0
         
-        self._model._set_initial_values(_p_opt_init, _dx_init, _x_init, _u_init, _w_init)
+        self._model._set_initial_values(
+            _p_opt_init, _dx_init, _x_init, _u_init, _w_init)
         self._model._set_lb_values(_p_opt_lb, _dx_lb, _x_lb, _u_lb, _w_lb)
         self._model._set_ub_values(_p_opt_ub, _dx_ub, _x_ub, _u_ub, _w_ub)
 
@@ -1490,253 +1597,269 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
 
     def _set_nlpLagrangePols_typedefs(self):
         try:
-            self._model.jmimodel._dll.jmi_opt_coll_radau_new.argtypes = [ct.c_void_p,                                   # jmi_opt_coll
-                                                                     ct.c_void_p,                                   # jmi
-                                                                     ct.c_int,                                      # n_e
-                                                                     Nct.ndpointer(dtype=c_jmi_real_t,              # hs             
-                                                                                   ndim=1,
-                                                                                   shape=self._n_e,
-                                                                                   flags='C'),
-                                                                     ct.c_int,                                      # hs_free               
-                                                                     Nct.ndpointer(dtype=c_jmi_real_t,              # p_opt_init             
-                                                                                   ndim=1,
-                                                                                   shape=self.n_p_opt,
-                                                                                   flags='C'),
-                                                                     Nct.ndpointer(dtype=c_jmi_real_t,              # dx_init             
-                                                                                   ndim=1,
-                                                                                   shape=self._model._n_real_dx.value,   
-                                                                                   flags='C'),
-                                                                     Nct.ndpointer(dtype=c_jmi_real_t,              # x_init
-                                                                                   ndim=1,
-                                                                                   shape=self._model._n_real_x.value,
-                                                                                   flags='C'),
-                                                                     Nct.ndpointer(dtype=c_jmi_real_t,              # u_init              
-                                                                                   ndim=1,
-                                                                                   shape=self._model._n_real_u.value,
-                                                                                   flags='C'),
-                                                                     Nct.ndpointer(dtype=c_jmi_real_t,              # w_init
-                                                                                   ndim=1,
-                                                                                   shape=self._model._n_real_w.value,
-                                                                                   flags='C'),
-                                                                     Nct.ndpointer(dtype=c_jmi_real_t,              # p_opt_lb
-                                                                                   ndim=1,
-                                                                                   shape=self.n_p_opt,
-                                                                                   flags='C'),
-                                                                     Nct.ndpointer(dtype=c_jmi_real_t,              # dx_lb
-                                                                                   ndim=1,
-                                                                                   shape=self._model._n_real_dx.value,
-                                                                                   flags='C'),
-                                                                     Nct.ndpointer(dtype=c_jmi_real_t,              # x_lb
-                                                                                   ndim=1,
-                                                                                   shape=self._model._n_real_x.value,
-                                                                                   flags='C'),
-                                                                     Nct.ndpointer(dtype=c_jmi_real_t,              # u_lb
-                                                                                   ndim=1,
-                                                                                   shape=self._model._n_real_u.value,
-                                                                                   flags='C'),
-                                                                     Nct.ndpointer(dtype=c_jmi_real_t,              # w_lb
-                                                                                   ndim=1,
-                                                                                   shape=self._model._n_real_w.value,
-                                                                                   flags='C'),
-                                                                     c_jmi_real_t,                                  # t0_lb
-                                                                     c_jmi_real_t,                                  # tf_lb
-                                                                     Nct.ndpointer(dtype=c_jmi_real_t,              # hs_lb
-                                                                                   ndim=1,
-                                                                                   flags='C'),
-                                                                     Nct.ndpointer(dtype=c_jmi_real_t,              # p_opt_ub
-                                                                                   ndim=1,
-                                                                                   shape=self.n_p_opt,
-                                                                                   flags='C'),
-                                                                     Nct.ndpointer(dtype=c_jmi_real_t,              # dx_ub
-                                                                                   ndim=1,
-                                                                                   shape=self._model._n_real_dx.value,
-                                                                                   flags='C'),
-                                                                     Nct.ndpointer(dtype=c_jmi_real_t,              # x_ub
-                                                                                   ndim=1,
-                                                                                   shape=self._model._n_real_x.value,
-                                                                                   flags='C'),
-                                                                     Nct.ndpointer(dtype=c_jmi_real_t,              # u_ub
-                                                                                   ndim=1,
-                                                                                   shape=self._model._n_real_u.value,
-                                                                                   flags='C'),
-                                                                     Nct.ndpointer(dtype=c_jmi_real_t,              # w_ub
-                                                                                   ndim=1,
-                                                                                   shape=self._model._n_real_w.value,
-                                                                                   flags='C'),
-                                                                     c_jmi_real_t,                                  # t0_ub
-                                                                     c_jmi_real_t,                                  # tf_ub
-                                                                     Nct.ndpointer(dtype=c_jmi_real_t,              # hs_ub
-                                                                                   ndim=1,
-                                                                                   flags='C'),
-                                                                     ct.c_int,                                      # linearity_information_provided
-                                                                     Nct.ndpointer(dtype=ct.c_int,                  # p_opt_lin
-                                                                                   ndim=1,
-                                                                                   shape=self.n_p_opt,
-                                                                                   flags='C'),                                           
-                                                                     Nct.ndpointer(dtype=ct.c_int,                  # dx_lin
-                                                                                   ndim=1,
-                                                                                   shape=self._model._n_real_dx.value,
-                                                                                   flags='C'),                                           
-                                                                     Nct.ndpointer(dtype=ct.c_int,                  # x_lin
-                                                                                   ndim=1,
-                                                                                   shape=self._model._n_real_x.value,
-                                                                                   flags='C'),                                           
-                                                                     Nct.ndpointer(dtype=ct.c_int,                  # u_lin
-                                                                                   ndim=1,
-                                                                                   shape=self._model._n_real_u.value,
-                                                                                   flags='C'),                                           
-                                                                     Nct.ndpointer(dtype=ct.c_int,                  # w_lin
-                                                                                   ndim=1,
-                                                                                   shape=self._model._n_real_w.value,
-                                                                                   flags='C'),                                           
-                                                                     Nct.ndpointer(dtype=ct.c_int,                  # dx_tp_lin
-                                                                                   ndim=1,
-                                                                                   shape=self._model._n_real_dx.value*self._model._n_tp.value,
-                                                                                   flags='C'),                                           
-                                                                     Nct.ndpointer(dtype=ct.c_int,                  # x_tp_lin
-                                                                                   ndim=1,
-                                                                                   shape=self._model._n_real_x.value*self._model._n_tp.value,
-                                                                                   flags='C'),                                           
-                                                                     Nct.ndpointer(dtype=ct.c_int,                  # u_tp_lin
-                                                                                   ndim=1,
-                                                                                   shape=self._model._n_real_u.value*self._model._n_tp.value,
-                                                                                   flags='C'),                                           
-                                                                     Nct.ndpointer(dtype=ct.c_int,                  # w_tp_lin
-                                                                                   ndim=1,
-                                                                                   shape=self._model._n_real_w.value*self._model._n_tp.value,
-                                                                                   flags='C'),                                           
-                                                                     ct.c_int,                                      # n_cp
-                                                                     ct.c_int,                                      # der_eval_alg
-                                                                     ct.c_int,                                      #n_blocking_factors
-                                                                     Nct.ndpointer(dtype=ct.c_int,                  # blocking_factors
-                                                                                   ndim=1,
-                                                                                   shape=N.size(self._blocking_factors),
-                                                                                   flags='C')]                                           
+            self._model.jmimodel._dll.jmi_opt_coll_radau_new.argtypes = [
+                ct.c_void_p,                                   # jmi_opt_coll
+                ct.c_void_p,                                   # jmi
+                ct.c_int,                                      # n_e
+                Nct.ndpointer(dtype=c_jmi_real_t,              # hs
+                              ndim=1,
+                              shape=self._n_e,
+                              flags='C'),
+                ct.c_int,                                      # hs_free
+                Nct.ndpointer(dtype=c_jmi_real_t,              # p_opt_init
+                              ndim=1,
+                              shape=self.n_p_opt,
+                              flags='C'),
+                Nct.ndpointer(dtype=c_jmi_real_t,              # dx_init
+                              ndim=1,
+                              shape=self._model._n_real_dx.value,
+                              flags='C'),
+                Nct.ndpointer(dtype=c_jmi_real_t,              # x_init
+                              ndim=1,
+                             shape=self._model._n_real_x.value,
+                              flags='C'),
+                Nct.ndpointer(dtype=c_jmi_real_t,              # u_init
+                              ndim=1,
+                              shape=self._model._n_real_u.value,
+                              flags='C'),
+                Nct.ndpointer(dtype=c_jmi_real_t,              # w_init
+                              ndim=1,
+                              shape=self._model._n_real_w.value,
+                              flags='C'),
+                Nct.ndpointer(dtype=c_jmi_real_t,              # p_opt_lb
+                              ndim=1,
+                              shape=self.n_p_opt,
+                              flags='C'),
+                Nct.ndpointer(dtype=c_jmi_real_t,              # dx_lb
+                              ndim=1,
+                              shape=self._model._n_real_dx.value,
+                              flags='C'),
+                Nct.ndpointer(dtype=c_jmi_real_t,              # x_lb
+                              ndim=1,
+                              shape=self._model._n_real_x.value,
+                              flags='C'),
+                Nct.ndpointer(dtype=c_jmi_real_t,              # u_lb
+                              ndim=1,
+                              shape=self._model._n_real_u.value,
+                              flags='C'),
+                Nct.ndpointer(dtype=c_jmi_real_t,              # w_lb
+                              ndim=1,
+                              shape=self._model._n_real_w.value,
+                              flags='C'),
+                c_jmi_real_t,                                  # t0_lb
+                c_jmi_real_t,                                  # tf_lb
+                Nct.ndpointer(dtype=c_jmi_real_t,              # hs_lb
+                              ndim=1,
+                              flags='C'),
+                Nct.ndpointer(dtype=c_jmi_real_t,              # p_opt_ub
+                              ndim=1,
+                              shape=self.n_p_opt,
+                              flags='C'),
+                Nct.ndpointer(dtype=c_jmi_real_t,              # dx_ub
+                              ndim=1,
+                              shape=self._model._n_real_dx.value,
+                              flags='C'),
+                Nct.ndpointer(dtype=c_jmi_real_t,              # x_ub
+                              ndim=1,
+                              shape=self._model._n_real_x.value,
+                              flags='C'),
+                Nct.ndpointer(dtype=c_jmi_real_t,              # u_ub
+                              ndim=1,
+                              shape=self._model._n_real_u.value,
+                              flags='C'),
+                Nct.ndpointer(dtype=c_jmi_real_t,              # w_ub
+                              ndim=1,
+                              shape=self._model._n_real_w.value,
+                              flags='C'),
+                c_jmi_real_t,                                  # t0_ub
+                c_jmi_real_t,                                  # tf_ub
+                Nct.ndpointer(dtype=c_jmi_real_t,              # hs_ub
+                              ndim=1,
+                              flags='C'),
+                ct.c_int,                      # linearity_information_provided
+                Nct.ndpointer(dtype=ct.c_int,                  # p_opt_lin
+                              ndim=1,
+                              shape=self.n_p_opt,
+                              flags='C'),
+                Nct.ndpointer(dtype=ct.c_int,                  # dx_lin
+                              ndim=1,
+                              shape=self._model._n_real_dx.value,
+                              flags='C'), 
+                Nct.ndpointer(dtype=ct.c_int,                  # x_lin
+                              ndim=1,
+                              shape=self._model._n_real_x.value,
+                              flags='C'), 
+                Nct.ndpointer(dtype=ct.c_int,                  # u_lin
+                              ndim=1,
+                              shape=self._model._n_real_u.value,
+                              flags='C'), 
+                Nct.ndpointer(dtype=ct.c_int,                  # w_lin
+                              ndim=1,
+                              shape=self._model._n_real_w.value,
+                              flags='C'), 
+                Nct.ndpointer(dtype=ct.c_int,                  # dx_tp_lin
+                              ndim=1,
+                              shape=self._model._n_real_dx.value*self._model._n_tp.value,
+                              flags='C'), 
+                Nct.ndpointer(dtype=ct.c_int,                  # x_tp_lin
+                              ndim=1,
+                              shape=self._model._n_real_x.value*self._model._n_tp.value,
+                              flags='C'), 
+                Nct.ndpointer(dtype=ct.c_int,                  # u_tp_lin
+                              ndim=1,
+                              shape=self._model._n_real_u.value*self._model._n_tp.value,
+                              flags='C'), 
+                Nct.ndpointer(dtype=ct.c_int,                  # w_tp_lin
+                              ndim=1,
+                              shape=self._model._n_real_w.value*self._model._n_tp.value,
+                              flags='C'), 
+                ct.c_int,                                      # n_cp
+                ct.c_int,                                      # der_eval_alg
+                ct.c_int,                                      #n_blocking_factors
+                Nct.ndpointer(dtype=ct.c_int,                  # blocking_factors
+                              ndim=1,
+                              shape=N.size(self._blocking_factors),
+                              flags='C')]
    
-            self._model.jmimodel._dll.jmi_opt_coll_radau_delete.argtypes = [ct.c_void_p]
-            self._model.jmimodel._dll.jmi_opt_coll_radau_eval_pol.argtypes = [c_jmi_real_t,
-                                                                          ct.c_int,
-                                                                          Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                                        ndim=1,
-                                                                                        flags='C'),
-                                                                          ct.c_int]
-            self._model.jmimodel._dll.jmi_opt_coll_radau_get_pols.argtypes = [ct.c_int,
-                                                                          Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                                        ndim=1,
-                                                                                        flags='C'),
-                                                                          Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                                        ndim=1,
-                                                                                        flags='C'),
-                                                                          Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                                        ndim=1,
-                                                                                        flags='C'),
-                                                                          Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                                        ndim=1,
-                                                                                        flags='C'),
-                                                                          Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                                        ndim=1,
-                                                                                        flags='C'),
-                                                                          Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                                        ndim=1,
-                                                                                       flags='C'),
-                                                                          Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                                        ndim=1,
-                                                                                        flags='C'),
-                                                                          Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                                        ndim=1,
-                                                                                        flags='C')]
+            self._model.jmimodel._dll.jmi_opt_coll_radau_delete.argtypes = [
+                ct.c_void_p]
+            self._model.jmimodel._dll.jmi_opt_coll_radau_eval_pol.argtypes = [
+                c_jmi_real_t,
+                ct.c_int,
+                Nct.ndpointer(dtype=c_jmi_real_t,
+                              ndim=1,
+                              flags='C'),
+                              ct.c_int]
+            self._model.jmimodel._dll.jmi_opt_coll_radau_get_pols.argtypes = [
+                ct.c_int,
+                Nct.ndpointer(dtype=c_jmi_real_t,
+                              ndim=1,
+                              flags='C'),
+                Nct.ndpointer(dtype=c_jmi_real_t,
+                              ndim=1,
+                              flags='C'),
+                Nct.ndpointer(dtype=c_jmi_real_t,
+                              ndim=1,
+                              flags='C'),
+                Nct.ndpointer(dtype=c_jmi_real_t,
+                              ndim=1,
+                              flags='C'),
+                Nct.ndpointer(dtype=c_jmi_real_t,
+                              ndim=1,
+                              flags='C'),
+                Nct.ndpointer(dtype=c_jmi_real_t,
+                              ndim=1,
+                              flags='C'),
+                Nct.ndpointer(dtype=c_jmi_real_t,
+                              ndim=1,
+                              flags='C'),
+                Nct.ndpointer(dtype=c_jmi_real_t,
+                              ndim=1,
+                              flags='C')]
         except AttributeError, e:
             pass
         
     def opt_coll_radau_eval_pol(self, tau, n, pol, k):
-        """ Evaluate Lagrange polynomial. 
+        """ 
+        Evaluate Lagrange polynomial. 
         
         Parameters::
         
             tau -- 
-                The value of independent variable in polynomial 
-                evaluation.
+                The value of independent variable in polynomial evaluation.
+                
             n -- 
                 The order of polynomials.
+                
             pol -- 
                 The vector containing the polynomial coefficients. 
+                
             k -- 
                 Specify evaluation of the k:th Lagrange polynomial.
         """
         if len(pol)!=n*n:
-            raise jmi.JMIException("argument pol has the wrong size. Should be n*n.")
-        if self._model.jmimodel._dll.jmi_opt_coll_radau_eval_pol(tau, n, pol, k) is not 0:
+            raise jmi.JMIException(
+                "argument pol has the wrong size. Should be n*n.")
+        if self._model.jmimodel._dll.jmi_opt_coll_radau_eval_pol(
+            tau, n, pol, k) is not 0:
             raise jmi.JMIException("Evaluating Lagrange polynomial failed.")
         
     
     def opt_coll_radau_get_pols(self, n_cp, cp, cpp, Lp_coeffs, Lpp_coeffs, 
         Lp_dot_coeffs, Lpp_dot_coeffs, Lp_dot_vals, Lpp_dot_vals):
-        """ Get the Lagrange polynomials of a specified order.
+        """ 
+        Get the Lagrange polynomials of a specified order.
         
         Parameters::
         
             n_cp -- 
                 The number of collocation points.
+                
             cp -- 
-                The Radau collocation points for polynomials of order 
-                n_cp-1. (Return variable)
+                The Radau collocation points for polynomials of order n_cp-1. 
+                (Return variable)
+                
             cpp -- 
-                The Radau collocation points for polynomials of order 
-                n_cp. (Return variable)
+                The Radau collocation points for polynomials of order n_cp. 
+                (Return variable)
+                
             Lp_coeffs -- 
-                The polynomial coefficients for polynomials based on the 
-                points given by cp. (Return variable)
+                The polynomial coefficients for polynomials based on the points 
+                given by cp. (Return variable)
+                
             Lp_dot_coeffs -- 
-                The polynomial coefficients for polynomials based on the 
-                points given by cpp. (Return variable)
+                The polynomial coefficients for polynomials based on the points 
+                given by cpp. (Return variable)
+                
             Lpp__dot_coeffs -- 
                 The polynomial coefficients for the derivatives of the 
                 polynomials based on the cp points. (Return variable)
+                
             Lp_dot_vals -- 
                 The values of the derivatives of the cp polynomials when 
-                evaluated at the Radau collocation points.(Return 
-                variable)
+                evaluated at the Radau collocation points.(Return variable)
+                
             Lpp_dot_vals --  
-                The values of the derivatives of the cpp polynomials 
-                when evaluated at the collocation points. (Return 
-                variable)
-            
+                The values of the derivatives of the cpp polynomials when 
+                evaluated at the collocation points. (Return variable)
         """
-        self._model.jmimodel._dll.jmi_opt_coll_radau_get_pols.argtypes = [ct.c_int,
-                                                                      Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                                    ndim=1,
-                                                                                    shape=self._n_cp-1,
-                                                                                    flags='C'),
-                                                                      Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                                    ndim=1,
-                                                                                    shape=self._n_cp,
-                                                                                    flags='C'),
-                                                                      Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                                    ndim=1,
-                                                                                    shape=self._n_cp*self._n_cp,
-                                                                                    flags='C'),
-                                                                      Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                                    ndim=1,
-                                                                                    shape=(self._n_cp+1)*(self._n_cp+1),
-                                                                                    flags='C'),
-                                                                      Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                                    ndim=1,
-                                                                                    shape=self._n_cp*(self._n_cp-1),
-                                                                                    flags='C'),
-                                                                      Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                                    ndim=1,
-                                                                                    shape=(self._n_cp+1)*self._n_cp,
-                                                                                    flags='C'),
-                                                                      Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                                    ndim=1,
-                                                                                    shape=self._n_cp,
-                                                                                    flags='C'),
-                                                                      Nct.ndpointer(dtype=c_jmi_real_t,
-                                                                                    ndim=1,
-                                                                                    shape=self._n_cp+1,
-                                                                                    flags='C')]
+        self._model.jmimodel._dll.jmi_opt_coll_radau_get_pols.argtypes = [
+            ct.c_int,
+            Nct.ndpointer(dtype=c_jmi_real_t,
+                          ndim=1,
+                          shape=self._n_cp-1,
+                          flags='C'),
+            Nct.ndpointer(dtype=c_jmi_real_t,
+                          ndim=1,
+                          shape=self._n_cp,
+                          flags='C'),
+            Nct.ndpointer(dtype=c_jmi_real_t,
+                          ndim=1,
+                          shape=self._n_cp*self._n_cp,
+                          flags='C'),
+            Nct.ndpointer(dtype=c_jmi_real_t,
+                          ndim=1,
+                          shape=(self._n_cp+1)*(self._n_cp+1),
+                          flags='C'),
+            Nct.ndpointer(dtype=c_jmi_real_t,
+                          ndim=1,
+                          shape=self._n_cp*(self._n_cp-1),
+                          flags='C'),
+            Nct.ndpointer(dtype=c_jmi_real_t,
+                          ndim=1,
+                          shape=(self._n_cp+1)*self._n_cp,
+                          flags='C'),
+            Nct.ndpointer(dtype=c_jmi_real_t,
+                          ndim=1,
+                          shape=self._n_cp,
+                          flags='C'),
+            Nct.ndpointer(dtype=c_jmi_real_t,
+                          ndim=1,
+                          shape=self._n_cp+1,
+                          flags='C')]
 
-        if self._model.jmimodel._dll.jmi_opt_coll_radau_get_pols(n_cp, cp, cpp, Lp_coeffs, Lpp_coeffs, Lp_dot_coeffs, 
-                                                        Lpp_dot_coeffs, Lp_dot_vals, Lpp_dot_vals) is not 0:
+        if self._model.jmimodel._dll.jmi_opt_coll_radau_get_pols(
+            n_cp, cp, cpp, Lp_coeffs, Lpp_coeffs, Lp_dot_coeffs, Lpp_dot_coeffs, 
+            Lp_dot_vals, Lpp_dot_vals) is not 0:
             raise jmi.JMIException("Getting sim lp pols failed.")
 

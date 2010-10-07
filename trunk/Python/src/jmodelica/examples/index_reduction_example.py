@@ -24,7 +24,8 @@ import matplotlib.pyplot as plt
 from jmodelica.jmi import compile_jmu
 
 def run_demo(with_plots=True):
-    """ Example demonstrating how to use index reduction.
+    """ 
+    Example demonstrating how to use index reduction.
     """
 
     curr_dir = os.path.dirname(os.path.abspath(__file__));

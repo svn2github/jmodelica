@@ -18,37 +18,36 @@
 # Import library for path manipulations
 import os.path
 
-# Import the JModelica.org Python packages
-from jmodelica.jmi import compile_jmu
-from jmodelica.jmi import JMUModel
-
 # Import numerical libraries
 import numpy as N
 import matplotlib.pyplot as plt
 
+# Import the JModelica.org Python packages
+from jmodelica.jmi import compile_jmu
+from jmodelica.jmi import JMUModel
+
+
 def run_demo(with_plots=True):
-    """This example is based on a system composed of two
-    Continously Stirred Tank Reactors (CSTRs) in series.
-    The example demonstrates the following steps:
+    """
+    This example is based on a system composed of two Continously Stirred Tank 
+    Reactors (CSTRs) in series. The example demonstrates the following steps:
     
-    1. How to solve a DAE initialization problem. The initialization
-       model have equations specifying that all derivatives
-       should be identically zero, which implies that a
-       stationary solution is obtained. Two stationary points,
-       corresponding to different inputs, are computed. We call
-       the stationary points A and B respectively. For more information
-       about the DAE initialization algorithm, see
+    1. How to solve a DAE initialization problem. The initialization model have 
+       equations specifying that all derivatives should be identically zero, 
+       which implies that a stationary solution is obtained. Two stationary 
+       points, corresponding to different inputs, are computed. We call the 
+       stationary points A and B respectively. For more information about the 
+       DAE initialization algorithm, see http://www.jmodelica.org/page/10.
+    
+    2. An optimal control problem is solved where the objective is to transfer 
+       the state of the system from stationary point A to point B. Here, it is 
+       also demonstrated how to set parameter values in a model. More 
+       information about the simultaneous optimization algorithm can be found at 
        http://www.jmodelica.org/page/10.
     
-    2. An optimal control problem is solved where the objective
-       Is to transfer the state of the system from stationary
-       point A to point B. Here, it is also demonstrated how
-       to set parameter values in a model. More information
-       about the simultaneous optimization algorithm can be
-       found at http://www.jmodelica.org/page/10.
-    
-    3. The optimization result is saved to file and then
-       the important variables are plotted."""
+    3. The optimization result is saved to file and then the important variables 
+       are plotted.
+    """
     
     curr_dir = os.path.dirname(os.path.abspath(__file__));
     
@@ -106,7 +105,8 @@ def run_demo(with_plots=True):
     # Compile the Model
     jmu_name = compile_jmu("CSTR2_Opt", 
         [curr_dir+"/files/CSTRLib.mo", curr_dir+"/files/CSTR2_Opt.mop"],
-        compiler_options={'enable_variable_scaling':True,'index_reduction':True})
+        compiler_options={'enable_variable_scaling':True,
+            'index_reduction':True})
 
     # Load the dynamic library and XML data
     model = JMUModel(jmu_name)
@@ -131,7 +131,9 @@ def run_demo(with_plots=True):
     n_cp = 3; # Number of collocation points in each element
     
     res = model.optimize(
-        options={'n_e':n_e, 'hs':hs, 'n_cp':n_cp,'blocking_factors':2*N.ones(n_e/2,dtype=N.int),'IPOPT_options':{'tol':1e-4}})
+        options={'n_e':n_e, 'hs':hs, 'n_cp':n_cp, 
+            'blocking_factors':2*N.ones(n_e/2,dtype=N.int), 
+            'IPOPT_options':{'tol':1e-4}})
         
     # Extract variable profiles
     CA1_res=res['cstr.two_CSTRs_Series.CA1']

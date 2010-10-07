@@ -16,6 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import os
+
 import numpy as N
 import pylab as p
 
@@ -24,10 +25,9 @@ from jmodelica.jmi import JMUModel
 
 def run_demo(with_plots=True):
     """
-    Simulation of a model containing if expressions. The
-    relational expressions in the model does not, however,
-    generate events since they are contained inside the
-    noEvent(.) operator.
+    Simulation of a model containing if expressions. The relational expressions 
+    in the model does not, however, generate events since they are contained 
+    inside the noEvent(.) operator.
     """
     
     curr_dir = os.path.dirname(os.path.abspath(__file__));

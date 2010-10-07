@@ -16,9 +16,10 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import os as O
+import logging
+
 import numpy as N
 import pylab as P
-import logging
 import nose
 
 from jmodelica.jmi import compile_jmu
@@ -29,7 +30,8 @@ try:
     from jmodelica.simulation.assimulo_interface import JMIDAESens, write_data
     from assimulo.implicit_ode import IDA
 except ImportError:
-    logging.warning('Could not find Assimulo package. Check jmodelica.check_packages()')
+    logging.warning(
+        'Could not find Assimulo package. Check jmodelica.check_packages()')
 
 
 def run_demo(with_plots=True):
@@ -52,10 +54,12 @@ def run_demo(with_plots=True):
     
     #Sets the paramters
     rob_sim.atol = N.array([1.0e-8, 1.0e-14, 1.0e-6])
-    rob_sim.store_cont = True #Store data continuous during the simulation, important when solving a problem
-                              #with sensitivites.
+    #Store data continuous during the simulation, important when solving a 
+    #problem with sensitivites.
+    rob_sim.store_cont = True 
     
-    rob_sim.pbar = rob_mod.p0 #Value used when IDA estimates the tolerances on the parameters
+    #Value used when IDA estimates the tolerances on the parameters
+    rob_sim.pbar = rob_mod.p0 
     
     #Let Sundials find consistent initial conditions by use of 'IDA_YA_YDP_INIT'
     rob_sim.make_consistent('IDA_YA_YDP_INIT')

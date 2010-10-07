@@ -16,6 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import os
+
 import numpy as N
 import pylab as p
 
@@ -24,8 +25,8 @@ from jmodelica.jmi import JMUModel
 
 def run_demo(with_plots=True):
     """
-    An example on how to simulate a model using a DAE simulator with 
-    Assimulo. The model used is made by Maja Djačić.
+    An example on how to simulate a model using a DAE simulator with Assimulo. 
+    The model used is made by Maja Djačić.
     """
 
     curr_dir = os.path.dirname(os.path.abspath(__file__));

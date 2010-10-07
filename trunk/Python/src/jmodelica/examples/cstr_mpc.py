@@ -19,6 +19,12 @@
 import os.path
 import logging
 
+import numpy as N
+import scipy as S
+import scipy.optimize as opt
+import ctypes as ct
+import matplotlib.pyplot as plt
+
 from jmodelica.jmi import compile_jmu
 from jmodelica.jmi import JMUModel
 from jmodelica.initialization.ipopt import NLPInitialization
@@ -30,23 +36,18 @@ try:
     from jmodelica.simulation.assimulo_interface import JMIDAE, write_data
     from assimulo.implicit_ode import IDA
 except:
-    logging.warning('Could not find Assimulo package. Check jmodelica.check_packages()')
-
-import numpy as N
-import scipy as S
-import scipy.optimize as opt
-import ctypes as ct
-import matplotlib.pyplot as plt
+    logging.warning(
+        'Could not find Assimulo package. Check jmodelica.check_packages()')
 
 def run_demo(with_plots=True):
-    """ Model predicitve control of the Hicks-Ray CSTR reactor.
-        This example demonstrates how to use the blocking factor
-        feature of the collocation algorithm.
+    """ 
+    Model predicitve control of the Hicks-Ray CSTR reactor. This example 
+    demonstrates how to use the blocking factor feature of the collocation 
+    algorithm.
 
-        This example also shows how to use classes for initialization,
-        simulation and optimization directly rather than calling then
-        through the high-level classes 'initialialize', 'simulate' and
-        'optimize'.
+    This example also shows how to use classes for initialization, simulation 
+    and optimization directly rather than calling then through the high-level 
+    classes 'initialialize', 'simulate' and 'optimize'.
     """
 
     curr_dir = os.path.dirname(os.path.abspath(__file__));
@@ -110,8 +111,8 @@ def run_demo(with_plots=True):
     # number of elements is 50, which gives a blocking factor
     # vector of 2*ones(n_e/2) to match the sampling interval
     # of 2s.
-    nlp = ipopt.NLPCollocationLagrangePolynomials(cstr,n_e,hs,n_cp,
-                                                  blocking_factors=2*N.ones(n_e/2,dtype=N.int))
+    nlp = ipopt.NLPCollocationLagrangePolynomials(
+        cstr, n_e, hs, n_cp, blocking_factors=2*N.ones(n_e/2,dtype=N.int))
 
     # Create an Ipopt NLP object
     nlp_ipopt = ipopt.CollocationOptimizer(nlp)
@@ -206,7 +207,10 @@ def run_demo(with_plots=True):
                 plt.plot([t_mpc[i],t_mpc[i+1]],[Tc_ctrl,Tc_ctrl],'b')
             else:
                 plt.subplot(3,1,3)
-                plt.plot([t_mpc[i],t_mpc[i],t_mpc[i+1]],[Tc_ctrl_old,Tc_ctrl,Tc_ctrl],'b')
+                plt.plot(
+                    [t_mpc[i],t_mpc[i],t_mpc[i+1]],
+                    [Tc_ctrl_old,Tc_ctrl,Tc_ctrl],
+                    'b')
             
         Tc_ctrl_old = Tc_ctrl
             

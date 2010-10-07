@@ -410,6 +410,8 @@ class TestCollocationEventException:
             self.nlp = ipopt.NLPCollocationLagrangePolynomials(
                 self.model,n_e,hs,n_cp)
         except Exception as e:
-            assert str(e) == "The collocation optimization algorithm does not support models with events. Please consider using the noEvent() operator or rewriting the model.", "Wrong message in thrown exception."
+            assert str(e) == "The collocation optimization algorithm does not support \
+                models with events. Please consider using the noEvent() \
+                operator or rewriting the model."
         else:
             assert False, "No exception thrown when creating a collocation optimization object based on a model containing events."

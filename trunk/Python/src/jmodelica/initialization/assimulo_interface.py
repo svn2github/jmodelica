@@ -16,19 +16,21 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 """
-This file contains code for mapping our JMI Models to the Problem 
-specifications required by Assimulo.
+This file contains code for mapping our JMI Models to the Problem specifications 
+required by Assimulo.
 """
-
 import logging
+
 import numpy as N
+
 import jmodelica.jmi as jmi
 import jmodelica.io as io
 
 try:
     from assimulo.problem_algebraic import ProblemAlgebraic
 except ImportError:
-    logging.warning('Could not find Assimulo package. Check jmodelica.check_packages()')
+    logging.warning(
+        'Could not find Assimulo package. Check jmodelica.check_packages()')
 
 
 class JMUAlgebraic_Exception(Exception):
@@ -37,25 +39,26 @@ class JMUAlgebraic_Exception(Exception):
     """
     pass
 
-
 class JMUAlgebraic(ProblemAlgebraic):
     """
     Class derived from ProblemAlgebraic.
-    The purpose of this problem class is to ne used as an interface between a JMUmodel
-    and the kinsol.py wrapper around the KINSOL solver from the SUNDIALS package.
+    The purpose of this problem class is to ne used as an interface between a 
+    JMUmodel and the kinsol.py wrapper around the KINSOL solver from the 
+    SUNDIALS package.
     """
     
-    def __init__(self,model,x0 = None,constraints = None, use_constraints = False):
+    def __init__(self,model,x0 = None,constraints=None,use_constraints=False):
         """
         Create an instance of the JMIInitProblem
         
-        Parameters:
-            model:
-                An instance of the instance jmi.model
+        Parameters::
+        
+            model --
+                An instance of the instance jmi.JMUModel.
                 
-            x0:
-                A numpy array containing the initial guess. 
-                If not supplied, an initial guess is read from the model.
+            x0 --
+                A numpy array containing the initial guess. If not supplied, an 
+                initial guess is read from the model.
         """
         
         # Read the model
@@ -80,7 +83,8 @@ class JMUAlgebraic(ProblemAlgebraic):
         # get the data needed for evaluating the jacobian
         self._mask = N.ones(self._model.z.size, dtype=N.int32)
         self._ind_vars = [jmi.JMI_DER_W, jmi.JMI_DER_X, jmi.JMI_DER_DX]
-        self._ncol, self._nonzeros = self._jmi_model.init_dF0_dim(jmi.JMI_DER_CPPAD, jmi.JMI_DER_DENSE_COL_MAJOR, self._ind_vars, self._mask)
+        self._ncol, self._nonzeros = self._jmi_model.init_dF0_dim(
+            jmi.JMI_DER_CPPAD, jmi.JMI_DER_DENSE_COL_MAJOR, self._ind_vars, self._mask)
         self._nrow = self._nonzeros / self._ncol
         
         # Get initial guess if supplied, otherwise get it from the model
@@ -96,16 +100,16 @@ class JMUAlgebraic(ProblemAlgebraic):
         # Set constraints settings
         self.constraints = constraints
         self.use_constraints = use_constraints
-
     
     def f(self,input):
-
         """
         Function used to get the residual of the F0 function in JMI
-        Parameters:
-            input:
+        
+        Parameters::
+        
+            input --
                 A numpy array, the vector input for which the residual will be
-                evaluated
+                evaluated.
         """
         inp_size = input.shape[0]
     
@@ -126,12 +130,13 @@ class JMUAlgebraic(ProblemAlgebraic):
     
     def set_x0(self,x0):
         """
-        Set the initial guess of the system to x0
+        Set the initial guess of the system to x0.
         
-        Parameters:
-            x0:
-                A numpy array, the vector x0 is the initial guess for the problem
+        Parameters::
         
+            x0 --
+                A numpy array, the vector x0 is the initial guess for the 
+                problem.
         """
         self._x0 = x0
         
@@ -147,12 +152,13 @@ class JMUAlgebraic(ProblemAlgebraic):
         
     def jac(self,input):
         """
-        Function used to get the jacobian of the F0 function in JMI
+        Function used to get the jacobian of the F0 function in JMI.
         
-        Parameters:
-            input:
+        Parameters::
+        
+            input --
                 A numpy array, the vector input for which the jacobian will be
-                evaluated
+                evaluated.
         """
         inp_size = input.shape[0]
     
@@ -168,49 +174,54 @@ class JMUAlgebraic(ProblemAlgebraic):
      
         # get the jacobian from the model
         jac = N.zeros(self._nonzeros)
-        self._jmi_model.init_dF0(jmi.JMI_DER_CPPAD, jmi.JMI_DER_DENSE_ROW_MAJOR, self._ind_vars, self._mask, jac)
+        self._jmi_model.init_dF0(jmi.JMI_DER_CPPAD, jmi.JMI_DER_DENSE_ROW_MAJOR, 
+            self._ind_vars, self._mask, jac)
     
         # return output from result 
         return N.reshape(jac,(self._nrow,self._ncol))
     
     def set_constraints_usage(self,use_const,constraints = None):
-        """ Set whether to use constraints or not. If constraints are supplied
-        they will be applied (if use_const = True) otherwise constraints will be
+        """ 
+        Set whether to use constraints or not. If constraints are supplied they 
+        will be applied (if use_const = True) otherwise constraints will be
         guessed.
             
         Parameters::
         
             use_const --
-                Boolean set to True if constraints are to be used at all
-            constraints = None --
-                If supplied these will be used. The constraints should 
-                be a numpy array of size len(x0) with the following number
-                in the ith position.
+                Boolean set to True if constraints are to be used at all.
+                
+            constraints --
+                If supplied these will be used. The constraints should be a 
+                numpy array of size len(x0) with the following number in the ith 
+                position.
                 0.0  - no constraint on x[i]
                 1.0  - x[i] greater or equal than 0.0
                 -1.0 - x[i] lesser or equal than 0.0
                 2.0  - x[i] greater  than 0.0
                 -2.0 - x[i] lesser than 0.0
-                
+                Default: None
         """
         # check for bad input
         if type(use_const).__name__ != 'bool':
-            raise JMUAlgebraic_Exception("First argument sent to 'set_constraint_usage' must be a boolean.")
+            raise JMUAlgebraic_Exception(
+                "First argument sent to 'set_constraint_usage' must be a boolean.")
         if constraints != None:
             if type(constraints).__name__ != 'ndarray':
-                raise JMUAlgebraic_Exception("Constraints must be an numpy.ndarray")
+                raise JMUAlgebraic_Exception(
+                    "Constraints must be an numpy.ndarray")
         
-
         self.use_constraints = use_const
         self.constraints = constraints
         
     def get_constraints(self):
         """
-        Function that returns the users constraints if there are any,
-        no constraints if the option self.no_constraints is set to True.
-        Otherwise the assimulo_interface will try to calculate reasonable constraints
+        Function that returns the users constraints if there are any, no 
+        constraints if the option self.no_constraints is set to True. Otherwise 
+        the assimulo_interface will try to calculate reasonable constraints.
         
-        Returns:
+        Returns::
+        
             A numpy array, size len(_x0) containing
             the constraints, if constraint[i] is:
                 0.0  - no constraint on x[i]
@@ -219,7 +230,6 @@ class JMUAlgebraic(ProblemAlgebraic):
                 2.0  - x[i] greater  than 0.0
                 -2.0 - x[i] lesser than 0.0
         """
-        
         if self.use_constraints:
             if self.constraints != None:
                 return self.constraints
@@ -230,9 +240,9 @@ class JMUAlgebraic(ProblemAlgebraic):
         
     def _guess_constraints(self):
         """
-        Fct used to guess the constraints based on the initial guesses of a model
+        Fct used to guess the constraints based on the initial guesses of a 
+        model.
         """
-        
         res = N.zeros(self._neqF0)
         for i in N.arange(self._dx_size,self._mark):
             if self._x0[i] < 0:
@@ -244,33 +254,31 @@ class JMUAlgebraic(ProblemAlgebraic):
                 
         return res
         
-        
 def write_resdata(problem, file_name='', format='txt'):
     """
-    Function that prints out results from a solved problem
+    Function that prints out results from a solved problem.
     
     Parameters::
         
         problem--
-            Instance of JMUAlgebraic, must be solved
+            Instance of JMUAlgebraic, must be solved.
         
         file_name --
             Name of the result file.
             Default: ''
         
         format --
-            A string equal either to 'txt' for output to Dymola 
-            textual format or 'mat' for output to Dymola binary 
-            Matlab format.
+            A string equal either to 'txt' for output to Dymola textual format 
+            or 'mat' for output to Dymola binary Matlab format.
             Default: 'txt'
 
         Limitations::
         
             Only format='txt' is currently supported.
-    
     """
     if not isinstance(problem, JMUAlgebraic):
-        raise JMUAlgebraic_Exception("Problem sent to write_resdata is not an instance of JMUAlgebraic")
+        raise JMUAlgebraic_Exception(
+            "Problem sent to write_resdata is not an instance of JMUAlgebraic")
     
     model = problem._model
     dx_s = problem._dx_size

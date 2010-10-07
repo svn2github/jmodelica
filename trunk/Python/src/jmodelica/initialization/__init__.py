@@ -15,5 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-""" The JModelica Python Initialization toolkit. """
+""" 
+The JModelica Python Initialization toolkit. 
+"""
 __all__=['ipopt','kinitsol']

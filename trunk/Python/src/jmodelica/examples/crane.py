@@ -16,11 +16,11 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import logging
 
 import numpy as N
 import pylab as p
 import matplotlib
-import logging
 
 import jmodelica
 import jmodelica.jmi as jmi
@@ -32,16 +32,16 @@ try:
     from jmodelica.simulation.assimulo_interface import JMIDAE, write_data
     from assimulo.implicit_ode import IDA
 except:
-    logging.warning('Could not find Assimulo package. Check jmodelica.check_packages()')
+    logging.warning(
+        'Could not find Assimulo package. Check jmodelica.check_packages()')
 
 def run_demo(with_plots=True):
     """
-    An example on how to simulate a model using the DAE
-    simulator. Also writes information to a file.
+    An example on how to simulate a model using the DAE simulator. Also writes 
+    information to a file.
 
-    NOTICE: The script does not run since the compiler does
-    not support all constructs needed.
-    
+    NOTICE: The script does not run since the compiler does not support all 
+    constructs needed.
     """
     
     #curr_dir = os.path.dirname(os.path.abspath(__file__));
