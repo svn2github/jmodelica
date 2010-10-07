@@ -14,26 +14,30 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-"""Module containing the FMI interface Python wrappers."""
+"""
+Module containing the FMI interface Python wrappers.
+"""
 
 import sys
 import os
+import logging
+from operator import itemgetter
+import tempfile
 
 import ctypes as C
 import numpy as N
 from ctypes.util import find_library
 import numpy.ctypeslib as Nct
-import tempfile
 from lxml import etree
-from operator import itemgetter
-import logging
 
 import jmodelica.jmi
 from jmodelica import xmlparser
 from jmodelica.core import BaseModel, unzip_unit
 
 class FMUException(Exception):
-    """An FMU exception."""
+    """
+    An FMU exception.
+    """
     pass
 
 
@@ -66,7 +70,8 @@ class FMUModel(BaseModel):
         self._tempdir = tempfile.gettempdir()
         
         #Retrieve and load the binary
-        self._dll = jmodelica.jmi.load_DLL(self._tempdll[:-len(suffix)],self._tempdir)
+        self._dll = jmodelica.jmi.load_DLL(
+            self._tempdll[:-len(suffix)],self._tempdir)
         
         #Load calloc and free
         self._load_c()
@@ -128,7 +133,8 @@ class FMUModel(BaseModel):
         """
         Loads the XML information.
         """
-        self._md = xmlparser.ModelDescription(self._tempdir+os.sep+self._tempxml) 
+        self._md = xmlparser.ModelDescription(
+            self._tempdir+os.sep+self._tempxml) 
         self._nContinuousStates = self._md.get_number_of_continuous_states()
         self._nEventIndicators = self._md.get_number_of_event_indicators()
         self._GUID = self._md.get_guid()
@@ -153,7 +159,8 @@ class FMUModel(BaseModel):
         for real in reals:
             start= real.get_fundamental_type().get_start()
             if start != None:
-                real_start_values.append(real.get_fundamental_type().get_start())
+                real_start_values.append(
+                    real.get_fundamental_type().get_start())
                 real_keys.append(real.get_value_reference())
                 real_names.append(real.get_name())
 
@@ -183,7 +190,8 @@ class FMUModel(BaseModel):
         for bool in bools:
             start = bool.get_fundamental_type().get_start()
             if start != None:
-                bool_start_values.append(bool.get_fundamental_type().get_start())
+                bool_start_values.append(
+                    bool.get_fundamental_type().get_start())
                 bool_keys.append(bool.get_value_reference())
                 bool_names.append(bool.get_name())
 
@@ -219,10 +227,14 @@ class FMUModel(BaseModel):
                     self._XMLStartBooleanValues[i] = '0'
                 
         for i in xrange(len(self._XMLStartRealValues)):
-            self._XMLStartRealValues[i] = -1*self._XMLStartRealValues[i] if self._md.is_negated_alias(self._XMLStartRealNames[i]) else self._XMLStartRealValues[i]
+            self._XMLStartRealValues[i] = -1*self._XMLStartRealValues[i] if \
+                self._md.is_negated_alias(self._XMLStartRealNames[i]) else \
+                self._XMLStartRealValues[i]
         
         for i in xrange(len(self._XMLStartIntegerValues)):
-            self._XMLStartIntegerValues[i] = -1*self._XMLStartIntegerValues[i] if self._md.is_negated_alias(self._XMLStartIntegerNames[i]) else self._XMLStartIntegerValues[i]
+            self._XMLStartIntegerValues[i] = -1*self._XMLStartIntegerValues[i] if \
+                self._md.is_negated_alias(self._XMLStartIntegerNames[i]) else \
+                self._XMLStartIntegerValues[i]
         
         
         cont_name = []
@@ -257,7 +269,10 @@ class FMUModel(BaseModel):
                     disc_name_b.append(bool.get_name())
                     disc_valueref_b.append(bool.get_value_reference())
 
-        self._save_cont_valueref = [N.array(cont_valueref+disc_valueref_r,dtype=N.uint), disc_valueref_i, disc_valueref_b]
+        self._save_cont_valueref = [
+            N.array(cont_valueref+disc_valueref_r,dtype=N.uint), 
+            disc_valueref_i, 
+            disc_valueref_b]
         self._save_cont_name = [cont_name+disc_name_r, disc_name_i, disc_name_b]
         self._save_nbr_points = 0
         
@@ -265,7 +280,8 @@ class FMUModel(BaseModel):
         """
         Connects the FMU to Python by retrieving the C-function by use of ctypes. 
         """
-        self._validplatforms = self._dll.__getattr__(self._modelname+'_fmiGetModelTypesPlatform')
+        self._validplatforms = self._dll.__getattr__(
+            self._modelname+'_fmiGetModelTypesPlatform')
         self._validplatforms.restype = C.c_char_p
     
         self._version = self._dll.__getattr__(self._modelname+'_fmiGetVersion')
@@ -294,8 +310,10 @@ class FMUModel(BaseModel):
         self._fmiUndefinedValueReference = self._fmiValueReference(-1).value
         
         #Struct
-        self._fmiCallbackLogger = C.CFUNCTYPE(None, self._fmiComponent, self._fmiString, self._fmiStatus, self._fmiString, self._fmiString)
-        self._fmiCallbackAllocateMemory = C.CFUNCTYPE(C.c_void_p, C.c_size_t, C.c_size_t)
+        self._fmiCallbackLogger = C.CFUNCTYPE(None, self._fmiComponent, 
+            self._fmiString, self._fmiStatus, self._fmiString, self._fmiString)
+        self._fmiCallbackAllocateMemory = C.CFUNCTYPE(C.c_void_p, C.c_size_t, 
+            C.c_size_t)
         self._fmiCallbackFreeMemory = C.CFUNCTYPE(None, C.c_void_p) 
         
         
@@ -327,148 +345,148 @@ class FMUModel(BaseModel):
         self._pyEventInfo = pyEventInfo()
         
         #Methods
-        self._fmiInstantiateModel = self._dll.__getattr__(self._modelname+'_fmiInstantiateModel')
+        self._fmiInstantiateModel = self._dll.__getattr__(
+            self._modelname+'_fmiInstantiateModel')
         self._fmiInstantiateModel.restype = self._fmiComponent
-        self._fmiInstantiateModel.argtypes = [self._fmiString, self._fmiString, self._fmiCallbackFunctions, self._fmiBoolean]
+        self._fmiInstantiateModel.argtypes = [self._fmiString, self._fmiString, 
+            self._fmiCallbackFunctions, self._fmiBoolean]
         
-        self._fmiFreeModelInstance = self._dll.__getattr__(self._modelname+'_fmiFreeModelInstance')
+        self._fmiFreeModelInstance = self._dll.__getattr__(
+            self._modelname+'_fmiFreeModelInstance')
         self._fmiFreeModelInstance.restype = C.c_void_p
         self._fmiFreeModelInstance.argtypes = [self._fmiComponent]
         
-        self._fmiSetDebugLogging = self._dll.__getattr__(self._modelname+'_fmiSetDebugLogging')
+        self._fmiSetDebugLogging = self._dll.__getattr__(
+            self._modelname+'_fmiSetDebugLogging')
         self._fmiSetDebugLogging.restype = C.c_int
-        self._fmiSetDebugLogging.argtypes = [self._fmiComponent, self._fmiBoolean]
+        self._fmiSetDebugLogging.argtypes = [
+            self._fmiComponent, self._fmiBoolean]
         
         self._fmiSetTime = self._dll.__getattr__(self._modelname+'_fmiSetTime')
         self._fmiSetTime.restype = C.c_int
         self._fmiSetTime.argtypes = [self._fmiComponent, self._fmiReal]
         
-        self._fmiCompletedIntegratorStep = self._dll.__getattr__(self._modelname+'_fmiCompletedIntegratorStep')
+        self._fmiCompletedIntegratorStep = self._dll.__getattr__(
+            self._modelname+'_fmiCompletedIntegratorStep')
         self._fmiCompletedIntegratorStep.restype = self._fmiStatus
-        self._fmiCompletedIntegratorStep.argtypes = [self._fmiComponent, C.POINTER(self._fmiBoolean)]
+        self._fmiCompletedIntegratorStep.argtypes = [
+            self._fmiComponent, C.POINTER(self._fmiBoolean)]
         
-        self._fmiInitialize = self._dll.__getattr__(self._modelname+'_fmiInitialize')
+        self._fmiInitialize = self._dll.__getattr__(
+            self._modelname+'_fmiInitialize')
         self._fmiInitialize.restype = self._fmiStatus
-        self._fmiInitialize.argtypes = [self._fmiComponent, self._fmiBoolean, self._fmiReal, C.POINTER(self._fmiEventInfo)]
+        self._fmiInitialize.argtypes = [self._fmiComponent, self._fmiBoolean, 
+            self._fmiReal, C.POINTER(self._fmiEventInfo)]
         
-        self._fmiTerminate = self._dll.__getattr__(self._modelname+'_fmiTerminate')
+        self._fmiTerminate = self._dll.__getattr__(
+            self._modelname+'_fmiTerminate')
         self._fmiTerminate.restype = self._fmiStatus
         self._fmiTerminate.argtypes = [self._fmiComponent]
         
-        self._fmiEventUpdate = self._dll.__getattr__(self._modelname+'_fmiEventUpdate')
+        self._fmiEventUpdate = self._dll.__getattr__(
+            self._modelname+'_fmiEventUpdate')
         self._fmiEventUpdate.restype = self._fmiStatus
-        self._fmiEventUpdate.argtypes = [self._fmiComponent, self._fmiBoolean, C.POINTER(self._fmiEventInfo)]
+        self._fmiEventUpdate.argtypes = [self._fmiComponent, self._fmiBoolean, 
+            C.POINTER(self._fmiEventInfo)]
         
-        self._fmiSetContinuousStates = self._dll.__getattr__(self._modelname+'_fmiSetContinuousStates')
+        self._fmiSetContinuousStates = self._dll.__getattr__(
+            self._modelname+'_fmiSetContinuousStates')
         self._fmiSetContinuousStates.restype = self._fmiStatus
-        self._fmiSetContinuousStates.argtypes = [self._fmiComponent, Nct.ndpointer() ,C.c_size_t]
-        self._fmiGetContinuousStates = self._dll.__getattr__(self._modelname+'_fmiGetContinuousStates')
+        self._fmiSetContinuousStates.argtypes = [self._fmiComponent, 
+            Nct.ndpointer() ,C.c_size_t]
+        self._fmiGetContinuousStates = self._dll.__getattr__(
+            self._modelname+'_fmiGetContinuousStates')
         self._fmiGetContinuousStates.restype = self._fmiStatus
-        self._fmiGetContinuousStates.argtypes = [self._fmiComponent, Nct.ndpointer() ,C.c_size_t]
+        self._fmiGetContinuousStates.argtypes = [self._fmiComponent, 
+            Nct.ndpointer() ,C.c_size_t]
         
         self._fmiGetReal = self._dll.__getattr__(self._modelname+'_fmiGetReal')
         self._fmiGetReal.restype = self._fmiStatus
-        self._fmiGetReal.argtypes = [self._fmiComponent, Nct.ndpointer(),C.c_size_t, Nct.ndpointer()]
-        self._fmiGetInteger = self._dll.__getattr__(self._modelname+'_fmiGetInteger')
+        self._fmiGetReal.argtypes = [self._fmiComponent, Nct.ndpointer(),
+            C.c_size_t, Nct.ndpointer()]
+        self._fmiGetInteger = self._dll.__getattr__(
+            self._modelname+'_fmiGetInteger')
         self._fmiGetInteger.restype = self._fmiStatus
-        self._fmiGetInteger.argtypes = [self._fmiComponent, Nct.ndpointer(),C.c_size_t, Nct.ndpointer()]
-        self._fmiGetBoolean = self._dll.__getattr__(self._modelname+'_fmiGetBoolean')
+        self._fmiGetInteger.argtypes = [self._fmiComponent, Nct.ndpointer(), 
+            C.c_size_t, Nct.ndpointer()]
+        self._fmiGetBoolean = self._dll.__getattr__(
+            self._modelname+'_fmiGetBoolean')
         self._fmiGetBoolean.restype = self._fmiStatus
-        self._fmiGetBoolean.argtypes = [self._fmiComponent, Nct.ndpointer(),C.c_size_t, Nct.ndpointer()]
-        self._fmiGetString = self._dll.__getattr__(self._modelname+'_fmiGetString')
+        self._fmiGetBoolean.argtypes = [self._fmiComponent, Nct.ndpointer(), 
+            C.c_size_t, Nct.ndpointer()]
+        self._fmiGetString = self._dll.__getattr__(
+            self._modelname+'_fmiGetString')
         self._fmiGetString.restype = self._fmiStatus
         #self._fmiGetString.argtypes = [self._fmiComponent, Nct.ndpointer(),C.c_size_t, Nct.ndpointer()]
-        self._fmiGetString.argtypes = [self._fmiComponent, Nct.ndpointer(),C.c_size_t, self._PfmiString]
+        self._fmiGetString.argtypes = [self._fmiComponent, Nct.ndpointer(), 
+            C.c_size_t, self._PfmiString]
         
         self._fmiSetReal = self._dll.__getattr__(self._modelname+'_fmiSetReal')
         self._fmiSetReal.restype = self._fmiStatus
-        self._fmiSetReal.argtypes = [self._fmiComponent, Nct.ndpointer(),C.c_size_t,Nct.ndpointer()]
-        self._fmiSetInteger = self._dll.__getattr__(self._modelname+'_fmiSetInteger')
+        self._fmiSetReal.argtypes = [self._fmiComponent, Nct.ndpointer(), 
+            C.c_size_t,Nct.ndpointer()]
+        self._fmiSetInteger = self._dll.__getattr__(
+            self._modelname+'_fmiSetInteger')
         self._fmiSetInteger.restype = self._fmiStatus
-        self._fmiSetInteger.argtypes = [self._fmiComponent, Nct.ndpointer(),C.c_size_t,Nct.ndpointer()]
-        self._fmiSetBoolean = self._dll.__getattr__(self._modelname+'_fmiSetBoolean')
+        self._fmiSetInteger.argtypes = [self._fmiComponent, Nct.ndpointer(), 
+            C.c_size_t,Nct.ndpointer()]
+        self._fmiSetBoolean = self._dll.__getattr__(
+            self._modelname+'_fmiSetBoolean')
         self._fmiSetBoolean.restype = self._fmiStatus
-        self._fmiSetBoolean.argtypes = [self._fmiComponent, Nct.ndpointer(),C.c_size_t,Nct.ndpointer()]
-        self._fmiSetString = self._dll.__getattr__(self._modelname+'_fmiSetString')
+        self._fmiSetBoolean.argtypes = [self._fmiComponent, Nct.ndpointer(), 
+            C.c_size_t,Nct.ndpointer()]
+        self._fmiSetString = self._dll.__getattr__(
+            self._modelname+'_fmiSetString')
         self._fmiSetString.restype = self._fmiStatus
-        self._fmiSetString.argtypes = [self._fmiComponent, Nct.ndpointer(),C.c_size_t,self._PfmiString]
+        self._fmiSetString.argtypes = [self._fmiComponent, Nct.ndpointer(), 
+            C.c_size_t,self._PfmiString]
         
-        self._fmiGetDerivatives = self._dll.__getattr__(self._modelname+'_fmiGetDerivatives')
+        self._fmiGetDerivatives = self._dll.__getattr__(
+            self._modelname+'_fmiGetDerivatives')
         self._fmiGetDerivatives.restype = self._fmiStatus
-        self._fmiGetDerivatives.argtypes = [self._fmiComponent, Nct.ndpointer(),C.c_size_t]
+        self._fmiGetDerivatives.argtypes = [self._fmiComponent, Nct.ndpointer(),
+            C.c_size_t]
         
-        self._fmiGetEventIndicators = self._dll.__getattr__(self._modelname+'_fmiGetEventIndicators')
+        self._fmiGetEventIndicators = self._dll.__getattr__(
+            self._modelname+'_fmiGetEventIndicators')
         self._fmiGetEventIndicators.restype = self._fmiStatus
-        self._fmiGetEventIndicators.argtypes = [self._fmiComponent, Nct.ndpointer(),C.c_size_t]
+        self._fmiGetEventIndicators.argtypes = [self._fmiComponent, 
+            Nct.ndpointer(), C.c_size_t]
         
-        self._fmiGetNominalContinuousStates = self._dll.__getattr__(self._modelname+'_fmiGetNominalContinuousStates')
+        self._fmiGetNominalContinuousStates = self._dll.__getattr__(
+            self._modelname+'_fmiGetNominalContinuousStates')
         self._fmiGetNominalContinuousStates.restype = self._fmiStatus
-        self._fmiGetNominalContinuousStates.argtypes = [self._fmiComponent, Nct.ndpointer(), C.c_size_t]
+        self._fmiGetNominalContinuousStates.argtypes = [self._fmiComponent, 
+            Nct.ndpointer(), C.c_size_t]
         
-        self._fmiGetStateValueReferences = self._dll.__getattr__(self._modelname+'_fmiGetStateValueReferences')
+        self._fmiGetStateValueReferences = self._dll.__getattr__(
+            self._modelname+'_fmiGetStateValueReferences')
         self._fmiGetStateValueReferences.restype = self._fmiStatus
-        self._fmiGetStateValueReferences.argtypes = [self._fmiComponent, Nct.ndpointer(), C.c_size_t]
+        self._fmiGetStateValueReferences.argtypes = [self._fmiComponent, 
+            Nct.ndpointer(), C.c_size_t]
        
     def _get_time(self):
-        """
-        Sets/Gets the current time of the simulation.
-        
-            Parameters::
-            
-                time
-                        - Sets the time.
-                        
-            Returns::
-            
-                time
-                        - The current time.
-        
-        Calls the low-level FMI function: fmiSetTime.
-        """
         return self.__t
     
     def _set_time(self, t):
-        """
-        Sets/Gets the current time of the simulation.
-        
-            Parameters::
-            
-                time
-                        - Sets the time.
-                        
-            Returns::
-            
-                time
-                        - The current time.
-        
-        Calls the low-level FMI function: fmiSetTime.
-        """
         t = N.array(t)
         if t.size > 1:
-            raise FMUException('Failed to set the time. The size of "t" is greater than one.')
+            raise FMUException(
+                'Failed to set the time. The size of "t" is greater than one.')
         self.__t = t
         temp = self._fmiReal(t)
         self._fmiSetTime(self._model,temp)
         
-    time = property(_get_time,_set_time)
+    time = property(_get_time,_set_time, doc = 
+    """
+    Property for accessing the current time of the simulation. Calls the 
+    low-level FMI function: fmiSetTime.
+    """)
     
     def _get_continuous_states(self):
-        """
-        Gets/Sets the continuous state vector.
-        
-            Parameters::
-            
-                values
-                        - The new values of the continuous states.
-            
-            Returns::
-            
-                The current values of the continuous states.
-                
-        Calls the low-level FMI function: fmiSetContinuousStates/fmiGetContinuousStates
-        """
         values = N.array([0.0]*self._nContinuousStates, dtype=N.double)
-        status = self._fmiGetContinuousStates(self._model, values, self._nContinuousStates)
+        status = self._fmiGetContinuousStates(
+            self._model, values, self._nContinuousStates)
         
         if status != 0:
             raise FMUException('Failed to retrieve the continuous states.')
@@ -476,80 +494,60 @@ class FMUModel(BaseModel):
         return values
         
     def _set_continuous_states(self, values):
-        """
-        Gets/Sets the continuous state vector.
-        
-            Parameters::
-            
-                values
-                        - The new values of the continuous states.
-            
-            Returns::
-            
-                The current values of the continuous states.
-                
-        Calls the low-level FMI function: fmiSetContinuousStates/fmiGetContinuousStates
-        """
         values = N.array(values)
         if values.size != self._nContinuousStates:
-            raise FMUException('Failed to set the new continuous states. The number of values are not consistent' \
-                                ' with the number of continuous states.')
+            raise FMUException(
+                'Failed to set the new continuous states. ' \
+                'The number of values are not consistent with the number of '\
+                'continuous states.')
         
-        status = self._fmiSetContinuousStates(self._model, values, self._nContinuousStates)
+        status = self._fmiSetContinuousStates(
+            self._model, values, self._nContinuousStates)
         
         if status >= 3:
             raise FMUException('Failed to set the new continuous states.')
     
-    continuous_states = property(_get_continuous_states, _set_continuous_states)
+    continuous_states = property(_get_continuous_states, _set_continuous_states, 
+        doc=
+    """
+    Property for accessing the current values of the continuous states. Calls 
+    the low-level FMI function: fmiSetContinuousStates/fmiGetContinuousStates.
+    """)
     
     def _get_nominal_continuous_states(self):
-        """
-        Returns the nominal values of the continuous states.
-        
-            Parameters::
-            
-                None
-                
-            Return::
-            
-                nomial    - The nominal values as an array.
-                
-            Example::
-            
-                nominal = model.nominal_continuous_states
-                
-        Calls the low-level FMI function: fmiGetNominalContinuousStates
-        """
         values = N.array([0.0]*self._nContinuousStates,dtype=N.double)
-        status = self._fmiGetNominalContinuousStates(self._model, values, self._nContinuousStates)
+        status = self._fmiGetNominalContinuousStates(
+            self._model, values, self._nContinuousStates)
         
         if status != 0:
             raise FMUException('Failed to get the nominal values.')
             
         return values
     
-    nominal_continuous_states = property(_get_nominal_continuous_states)
+    nominal_continuous_states = property(_get_nominal_continuous_states, doc = 
+    """
+    Property for accessing the nominal values of the continuous states. Calls 
+    the low-level FMI function: fmiGetNominalContinuousStates.
+    """)
     
     def get_derivatives(self):
         """
         Returns the derivative of the continuous states.
+                
+        Returns::
         
-            Parameters::
-            
-                None
+            dx -- 
+                The derivative as an array.
                 
-            Return::
-            
-                dx    - The derivative as an array.
-                
-            Example::
-            
-                dx = model.get_derivatives()
+        Example::
+        
+            dx = model.get_derivatives()
                 
         Calls the low-level FMI function: fmiGetDerivatives
         """
         values = N.array([0.0]*self._nContinuousStates,dtype=N.double)
-        status = self._fmiGetDerivatives(self._model, values, self._nContinuousStates)
+        status = self._fmiGetDerivatives(
+            self._model, values, self._nContinuousStates)
         
         if status != 0:
             raise FMUException('Failed to get the derivative values.')
@@ -559,23 +557,21 @@ class FMUModel(BaseModel):
     def get_event_indicators(self):
         """
         Returns the event indicators at the current time-point.
+
+        Return::
         
-            Parameters::
-            
-                None
+            evInd -- 
+                The event indicators as an array.
                 
-            Return::
-            
-                evInd   - The event indicators as an array.
-                
-            Example::
-            
-                evInd = model.get_event_indicators()
+        Example::
+        
+            evInd = model.get_event_indicators()
                 
         Calls the low-level FMI function: fmiGetEventIndicators
         """
         values = N.array([0.0]*self._nEventIndicators,dtype=N.double)
-        status = self._fmiGetEventIndicators(self._model, values, self._nEventIndicators)
+        status = self._fmiGetEventIndicators(
+            self._model, values, self._nEventIndicators)
         
         if status != 0:
             raise FMUException('Failed to get the event indicators.')
@@ -588,21 +584,20 @@ class FMUModel(BaseModel):
         Returns the relative and absolute tolerances. If the relative tolerance
         is defined in the XML-file it is used, otherwise a default of 1.e-4 is 
         used. The absolute tolerance is calculated and returned according to
-        the FMI specification, atol = 0.01*rtol*(nominal values of the continuous states)
+        the FMI specification, atol = 0.01*rtol*(nominal values of the 
+        continuous states).
+                
+        Returns::
         
-            Parameters::
-            
-                None
+            rtol -- 
+                The relative tolerance.
                 
-            Return::
-            
-                rtol    - The relative tolerance.
+            atol -- 
+                The absolute tolerance.
                 
-                atol    - The absolute tolerance.
-                
-            Example::
+        Example::
             
-                [rtol, atol] = model.get_tolerances()
+            [rtol, atol] = model.get_tolerances()
         """
         rtol = self._XMLTolerance
         atol = 0.01*rtol*self.nominal_continuous_states
@@ -611,25 +606,26 @@ class FMUModel(BaseModel):
     
     def event_update(self, intermediateResult='0'):
         """
-        Updates the event information at the current time-point. If intermediateResult is
-        set to '1' the update_event will stop at each event iteration which would require
-        to loop until event_info.iterationConverged == fmiTrue.
+        Updates the event information at the current time-point. If 
+        intermediateResult is set to '1' the update_event will stop at each 
+        event iteration which would require to loop until 
+        event_info.iterationConverged == fmiTrue.
         
-            Parameters::
-            
-                intermediateResult  - Default '0'.
+        Parameters::
+        
+            intermediateResult -- 
+                If set to '1', the update_event will stop at each event 
+                iteration.
+                Default: '0'.
                 
-            Return::
-            
-                None
-                
-            Example::
-            
-                model.event_update()
+        Example::
+        
+            model.event_update()
         
         Calls the low-level FMI function: fmiEventUpdate
         """
-        status = self._fmiEventUpdate(self._model, intermediateResult, C.byref(self._eventInfo))
+        status = self._fmiEventUpdate(
+            self._model, intermediateResult, C.byref(self._eventInfo))
         
         if status != 0:
             raise FMUException('Failed to update the events.')
@@ -637,24 +633,23 @@ class FMUModel(BaseModel):
     def save_time_point(self):
         """
         Retrieves the data at the current time-point of the variables defined
-        to be continuous and the variables defined to be discrete. The information
-        about the variables are retrieved from the XML-file.
+        to be continuous and the variables defined to be discrete. The 
+        information about the variables are retrieved from the XML-file.
+                
+        Returns::
         
-            Parameters::
-            
-                None
+            sol_real -- 
+                The Real-valued variables.
                 
-            Return::
-            
-                sol_real    - The Real-valued variables.
+            sol_int -- 
+                The Integer-valued variables.
                 
-                sol_int     - The Integer-valued variables.
+            sol_bool -- 
+                The Boolean-valued variables.
                 
-                sol_bool    - The Boolean-valued variables.
-                
-            Example::
-            
-                [r,i,b] = model.save_time_point()
+        Example::
+        
+            [r,i,b] = model.save_time_point()
         """
         sol_real = self.get_real(self._save_cont_valueref[0])
         sol_int  = self.get_integer(self._save_cont_valueref[1])
@@ -664,29 +659,34 @@ class FMUModel(BaseModel):
     
     def get_event_info(self):
         """
-        Returns the event information from the FMU. The event information
-        is a struct which contains, ::
+        Returns the event information from the FMU. 
         
-            iterationConverged          - Event iteration converged (if True).
-            stateValueReferencesChanged - ValueReferences of states x changed (if True).
-            stateValuesChanged          - Values of states x have changed (if True).
-            terminateSimulation         - Error, terminate simulation (if True).
-            upcomingTimeEvent           - if True, nextEventTime is the next time event.
-            nextEventTime               - The next time event.
+        Returns::
         
-        Parameters::
+            The event information, a struct which contains:
         
-            None
+            iterationConverged -- 
+                Event iteration converged (if True).
                 
-        Return::
-            
-            eventInfo   - The eventInfo struct.
+            stateValueReferencesChanged -- 
+                ValueReferences of states x changed (if True).
+                
+            stateValuesChanged -- 
+                Values of states x have changed (if True).
+                
+            terminateSimulation -- 
+                Error, terminate simulation (if True).
+                
+            upcomingTimeEvent - 
+                If True, nextEventTime is the next time event.
+                
+            nextEventTime -- 
+                The next time event.
                 
         Example::
             
             event_info    = model.event_info
             nextEventTime = model.event_info.nextEventTime
-        
         """
         
         self._pyEventInfo.iterationConverged          = self._eventInfo.iterationConverged == self._fmiTrue
@@ -701,45 +701,40 @@ class FMUModel(BaseModel):
     def get_state_value_references(self):
         """
         Returns the continuous states valuereferences.
+                
+        Returns::
+            
+            val -- 
+                The references to the continuous states.
+                
+        Example::
         
-            Parameters::
-            
-                None
-                
-            Return::
-            
-                val     - The references to the continuous states.
-                
-            Example::
-            
-                val = model.get_continuous_value_reference()
+            val = model.get_continuous_value_reference()
             
         Calls the low-level FMI function: fmiGetStateValueReferences
         """
         values = N.array([0]*self._nContinuousStates,dtype=N.uint32)
-        status = self._fmiGetStateValueReferences(self._model, values, self._nContinuousStates)
+        status = self._fmiGetStateValueReferences(
+            self._model, values, self._nContinuousStates)
         
         if status != 0:
-            raise FMUException('Failed to get the continuous state reference values.')
+            raise FMUException(
+                'Failed to get the continuous state reference values.')
             
         return values
     
     def _get_version(self):
         """
         Returns the FMI version of the Model which it was generated according.
-            
-            Parameters::
-            
-                None
                 
-            Return::
-            
-                version   - The version.
-                
-            Example::
-            
-                model.version
+        Returns::
         
+            version -- 
+                The version.
+                
+        Example::
+        
+            model.version
         """
         return self._version()
         
@@ -750,17 +745,14 @@ class FMUModel(BaseModel):
         Returns the set of valid compatible platforms for the Model, extracted
         from the XML.
         
-            Parameters::
+        Returns::
             
-                None
+            model_types_platform -- 
+                The valid platforms.
                 
-            Return::
-            
-                model_types_platform   - The valid platforms.
-                
-            Example::
-            
-                model.model_types_platform
+        Example::
+        
+            model.model_types_platform
         """
         return self._validplatforms()
         
@@ -768,22 +760,20 @@ class FMUModel(BaseModel):
     
     def get_ode_sizes(self):
         """
-        Returns the number of continuous states and the number of
-        event indicators.
+        Returns the number of continuous states and the number of event 
+        indicators.
+                
+        Returns::
         
-            Parameters::
-            
-                None
+            nbr_cont -- 
+                The number of continuous states.
                 
-            Return::
-            
-                nbr_cont    - The number of continuous states.
+            nbr_ind -- 
+                The number of event indicators.
                 
-                nbr_ind     - The number of event indicators.
-                
-            Example::
-            
-                [nCont, nEvent] = model.get_ode_sizes()
+        Example::
+        
+            [nCont, nEvent] = model.get_ode_sizes()
         """
         return self._nContinuousStates, self._nEventIndicators
     
@@ -791,17 +781,19 @@ class FMUModel(BaseModel):
         """
         Returns the real-values from the valuereference(s).
         
-            Parameters::
-            
-                valueref    - A list of valuereferences.
+        Parameters::
+        
+            valueref -- 
+                A list of valuereferences.
                 
-            Return::
-            
-                values      - The values retrieved from the FMU.
+        Returns::
+        
+            values -- 
+                The values retrieved from the FMU.
                 
-            Example::
-            
-                val = model.get_real([232])
+        Example::
+        
+            val = model.get_real([232])
                 
         Calls the low-level FMI function: fmiGetReal/fmiSetReal
         """
@@ -820,19 +812,17 @@ class FMUModel(BaseModel):
         """
         Sets the real-values in the FMU as defined by the valuereference(s).
         
-            Parameters::
-                
-                valueref    - A list of valuereferences.
-                
-                values      - Values to be set.
-                
-            Return::
-                
-                None
+        Parameters::
         
-            Example::
-            
-                model.set_real([234,235],[2.34,10.4])
+            valueref -- 
+                A list of valuereferences.
+                
+            values -- 
+                Values to be set.
+        
+        Example::
+        
+            model.set_real([234,235],[2.34,10.4])
         
         Calls the low-level FMI function: fmiGetReal/fmiSetReal
         """
@@ -841,29 +831,31 @@ class FMUModel(BaseModel):
         values = N.array(values)
 
         if valueref.size != values.size:
-            raise FMUException('The length of valueref and values are inconsistent.')
+            raise FMUException(
+                'The length of valueref and values are inconsistent.')
 
         status = self._fmiSetReal(self._model,valueref, nref, values)
 
         if status != 0:
             raise FMUException('Failed to set the Real values.')
         
-        
     def get_integer(self, valueref):
         """
         Returns the integer-values from the valuereference(s).
         
-            Parameters::
-            
-                valueref    - A list of valuereferences.
+        Parameters::
+        
+            valueref -- 
+                A list of valuereferences.
                 
-            Return::
+        Return::
             
-                values      - The values retrieved from the FMU.
+            values -- 
+                The values retrieved from the FMU.
                 
-            Example::
-            
-                val = model.get_integer([232])
+        Example::
+        
+            val = model.get_integer([232])
                 
         Calls the low-level FMI function: fmiGetInteger/fmiSetInteger
         """
@@ -882,19 +874,17 @@ class FMUModel(BaseModel):
         """
         Sets the integer-values in the FMU as defined by the valuereference(s).
         
-            Parameters::
-                
-                valueref    - A list of valuereferences.
-                
-                values      - Values to be set.
-                
-            Return::
-                
-                None
+        Parameters::
         
-            Example::
-            
-                model.set_integer([234,235],[12,-3])
+            valueref -- 
+                A list of valuereferences.
+                
+            values -- 
+                Values to be set.
+        
+        Example::
+        
+            model.set_integer([234,235],[12,-3])
         
         Calls the low-level FMI function: fmiGetInteger/fmiSetInteger
         """
@@ -903,7 +893,8 @@ class FMUModel(BaseModel):
         values = N.array(values)
         
         if valueref.size != values.size:
-            raise FMUException('The length of valueref and values are inconsistent.')
+            raise FMUException(
+                'The length of valueref and values are inconsistent.')
         
         status = self._fmiSetInteger(self._model,valueref, nref, values)
         
@@ -915,17 +906,19 @@ class FMUModel(BaseModel):
         """
         Returns the boolean-values from the valuereference(s).
         
-            Parameters::
-            
-                valueref    - A list of valuereferences.
+        Parameters::
+        
+            valueref -- 
+                A list of valuereferences.
                 
-            Return::
-            
-                values      - The values retrieved from the FMU.
+        Returns::
+        
+            values -- 
+                The values retrieved from the FMU.
                 
-            Example::
-            
-                val = model.get_boolean([232])
+        Example::
+        
+            val = model.get_boolean([232])
                 
         Calls the low-level FMI function: fmiGetBoolean/fmiSetBoolean
         """
@@ -954,19 +947,17 @@ class FMUModel(BaseModel):
         """
         Sets the boolean-values in the FMU as defined by the valuereference(s).
         
-            Parameters::
-                
-                valueref    - A list of valuereferences.
-                
-                values      - Values to be set.
-                
-            Return::
-                
-                None
+        Parameters::
         
-            Example::
-            
-                model.set_boolean([234,235],[True,False])
+            valueref -- 
+                A list of valuereferences.
+                
+            values -- 
+                Values to be set.
+
+        Example::
+        
+            model.set_boolean([234,235],[True,False])
         
         Calls the low-level FMI function: fmiGetBoolean/fmiSetBoolean
         """
@@ -975,7 +966,8 @@ class FMUModel(BaseModel):
         values = N.array(values)
         
         if valueref.size != values.size:
-            raise FMUException('The length of valueref and values are inconsistent.')
+            raise FMUException(
+                'The length of valueref and values are inconsistent.')
         
         status = self._fmiSetBoolean(self._model,valueref, nref, values)
         
@@ -986,17 +978,19 @@ class FMUModel(BaseModel):
         """
         Returns the string-values from the valuereference(s).
         
-            Parameters::
-            
-                valueref    - A list of valuereferences.
+        Parameters::
+        
+            valueref -- 
+                A list of valuereferences.
                 
-            Return::
-            
-                values      - The values retrieved from the FMU.
+        Returns::
+        
+            values -- 
+                The values retrieved from the FMU.
                 
-            Example::
-            
-                val = model.get_string([232])
+        Example::
+        
+            val = model.get_string([232])
                 
         Calls the low-level FMI function: fmiGetString/fmiSetString
         """
@@ -1017,19 +1011,17 @@ class FMUModel(BaseModel):
         """
         Sets the string-values in the FMU as defined by the valuereference(s).
         
-            Parameters::
-                
-                valueref    - A list of valuereferences.
-                
-                values      - Values to be set.
-                
-            Return::
-                
-                None
+        Parameters::
         
-            Example::
-            
-                model.set_string([234,235],['text','text'])
+            valueref -- 
+                A list of valuereferences.
+                
+            values -- 
+                Values to be set.
+        
+        Example::
+        
+            model.set_string([234,235],['text','text'])
         
         Calls the low-level FMI function: fmiGetString/fmiSetString
         """
@@ -1042,7 +1034,8 @@ class FMUModel(BaseModel):
             temp[i] = values[i]
         
         if valueref.size != values.size:
-            raise FMUException('The length of valueref and values are inconsistent.')
+            raise FMUException(
+                'The length of valueref and values are inconsistent.')
 
         status = self._fmiSetString(self._model, valueref, nref, temp)
         
@@ -1053,15 +1046,12 @@ class FMUModel(BaseModel):
         """
         Specifies if the debugging should be turned on or off.
         
-            Parameters::
-            
-                flag     - Boolean value
+        Parameters::
+        
+            flag -- 
+                Boolean value.
                 
-            Return::
-            
-                None
-                
-        Calss the low-level FMI function: fmiSetDebuggLogging
+        Calls the low-level FMI function: fmiSetDebuggLogging
         """
         if flag:
             status = self._fmiSetDebugLogging(self._model, self._fmiTrue)
@@ -1076,7 +1066,9 @@ class FMUModel(BaseModel):
         """
         Returns the nominal value from valueref.
         """
-        values = self._xmldoc._xpatheval('//ScalarVariable/Real/@nominal[../../@valueReference=\''+valueref+'\']')
+        values = self._xmldoc._xpatheval(
+            '//ScalarVariable/Real/@nominal[../../@valueReference=\''+\
+            valueref+'\']')
         
         if len(values) == 0:
             return 1.0
@@ -1085,19 +1077,20 @@ class FMUModel(BaseModel):
     
     def completed_integrator_step(self):
         """
-        This method must be called by the environment after every completed step of the 
-        integrator. If the return is True, then the environment must call event_update()
-        otherwise, no action is needed.
+        This method must be called by the environment after every completed step 
+        of the integrator. If the return is True, then the environment must call 
+        event_update() otherwise, no action is needed.
         
-            Returns::
-            
-                True  -> Call event_update().
-                False -> Do nothing.
+        Returns::
+        
+            True -> Call event_update().
+            False -> Do nothing.
                 
         Calls the low-level FMI function: fmiCompletedIntegratorStep.
         """
         callEventUpdate = self._fmiBoolean(self._fmiFalse)
-        status = self._fmiCompletedIntegratorStep(self._model, C.byref(callEventUpdate))
+        status = self._fmiCompletedIntegratorStep(
+            self._model, C.byref(callEventUpdate))
         
         if status != 0:
             raise FMUException('Failed to call FMI Completed Step.')
@@ -1124,20 +1117,16 @@ class FMUModel(BaseModel):
     
     def initialize(self, tolControlled=True):
         """
-        Initializes the model and computes initial values for all variables, including
-        setting the start values of variables defined with a the start attribute in the
-        XML-file. 
+        Initializes the model and computes initial values for all variables, 
+        including setting the start values of variables defined with a the start 
+        attribute in the XML-file. 
             
-            Parameters::
+        Parameters::
+        
+            tolControlled -- 
+                If the model are going to be called by numerical solver using
+                step-size control. Boolean flag.
             
-                tolControllled - If the model are going to be called by numerical solver using
-                                 step-size control.
-                               - Boolean flag.
-            
-            Returns::
-            
-                None
-                
         Calls the low-level FMI function: fmiInitialize.
         """
         
@@ -1167,12 +1156,16 @@ class FMUModel(BaseModel):
             tolcontrolledC = self._fmiBoolean(self._fmiFalse)
             tol = self._fmiReal(0.0)
         
-        self._eventInfo = self._fmiEventInfo('0','0','0','0','0',self._fmiReal(0.0))
+        self._eventInfo = self._fmiEventInfo(
+            '0','0','0','0','0',self._fmiReal(0.0))
         
-        status = self._fmiInitialize(self._model, tolcontrolledC, tol, C.byref(self._eventInfo))
+        status = self._fmiInitialize(
+            self._model, tolcontrolledC, tol, C.byref(self._eventInfo))
         
         if status == 1:
-            logging.warning('Initialize returned with a warning. Check the log for information.')
+            logging.warning(
+                'Initialize returned with a warning.' \
+                'Check the log for information.')
         
         if status > 1:
             raise FMUException('Failed to Initialize the model.')
@@ -1182,20 +1175,16 @@ class FMUModel(BaseModel):
         """
         Instantiate the model.
         
-            Parameters::
-            
-                name    
-                        - The name of the instance.
-                        - Default 'Model'
+        Parameters::
+        
+            name -- 
+                The name of the instance.
+                Default: 'Model'
                         
-                logging
-                        - Defines if the logging should be turned on or off.
-                        - Default False, no logging.
+            logging -- 
+                Defines if the logging should be turned on or off.
+                Default: False, no logging.
                         
-            Returns::
-
-                None
-                
         Calls the low-level FMI function: fmiInstantiateModel.
         """
         instance = self._fmiString(name)
@@ -1209,15 +1198,18 @@ class FMUModel(BaseModel):
         
         
         functions.logger = self._fmiCallbackLogger(self.fmiCallbackLogger)
-        functions.allocateMemory = self._fmiCallbackAllocateMemory(self.fmiCallbackAllocateMemory)
-        functions.freeMemory = self._fmiCallbackFreeMemory(self.fmiCallbackFreeMemory)
+        functions.allocateMemory = self._fmiCallbackAllocateMemory(
+            self.fmiCallbackAllocateMemory)
+        functions.freeMemory = self._fmiCallbackFreeMemory(
+            self.fmiCallbackFreeMemory)
         
         self._functions = functions
         self._modFunctions = self._fmiCallbackFunctions()
         self._modFunctions = self._fmiHelperLogger(self._functions)
         self._modFunctions = self._modFunctions.contents
         
-        self._model = self._fmiInstantiateModel(instance,guid,self._modFunctions,logging)
+        self._model = self._fmiInstantiateModel(
+            instance,guid,self._modFunctions,logging)
         
     def fmiCallbackLogger(self,c, instanceName, status, category, message):
         """
@@ -1233,21 +1225,22 @@ class FMUModel(BaseModel):
 
     def fmiCallbackFreeMemory(self, obj):
         """
-        Callback function for the FMU which deallocates memory allocated by fmiCallbackAllocateMemory
+        Callback function for the FMU which deallocates memory allocated by 
+        fmiCallbackAllocateMemory.
         """
         self._free(obj)
     
     def get_log(self):
         """
-        Returns the log information as a list. To turn on the logging use the method, 
-        set_debug_logging(True). The log is stored as a list of lists. For example
-        log[0] are the first log message to the log and consists of, in the following
-        order, the instance name, the status, the category and the message.
+        Returns the log information as a list. To turn on the logging use the 
+        method, set_debug_logging(True). The log is stored as a list of lists. 
+        For example log[0] are the first log message to the log and consists of, 
+        in the following order, the instance name, the status, the category and 
+        the message.
         
-            Returns::
-            
-                log     - A list of lists.
-                
+        Returns::
+        
+            log - A list of lists.
         """
         return self._log 
     
@@ -1257,12 +1250,13 @@ class FMUModel(BaseModel):
                  input=(),
                  algorithm='AssimuloFMIAlg', 
                  options={}):
-        """ Compact function for model simulation.
+        """ 
+        Compact function for model simulation.
         
-        The simulation method depends on which algorithm is used, this 
-        can be set with the function argument 'algorithm'. Options 
-        for the algorithm are passed as option classes or as pure dicts. 
-        See FMUModel.simulate_options for more details.
+        The simulation method depends on which algorithm is used, this can be 
+        set with the function argument 'algorithm'. Options for the algorithm 
+        are passed as option classes or as pure dicts. See 
+        FMUModel.simulate_options for more details.
         
         The default algorithm for this function is AssimuloFMIAlg. 
         
@@ -1277,24 +1271,23 @@ class FMUModel(BaseModel):
                 Default: 1.0
                 
             input --
-                Input signal for the simulation. The input should be a 
-                2-tuple consisting of first the names of the input
-                variable(s) and then the data matrix.
+                Input signal for the simulation. The input should be a 2-tuple 
+                consisting of first the names of the input variable(s) and then 
+                the data matrix.
                 Default: Empty tuple.
                 
             algorithm --
-                The algorithm which will be used for the simulation is 
-                specified by passing the algorithm class as string or 
-                class object in this argument. 'algorithm' can be any 
-                class which implements the abstract class AlgorithmBase 
-                (found in algorithm_drivers.py). In this way it is 
-                possible to write own algorithms and use them with this 
-                function.
+                The algorithm which will be used for the simulation is specified 
+                by passing the algorithm class as string or class object in this 
+                argument. 'algorithm' can be any class which implements the 
+                abstract class AlgorithmBase (found in algorithm_drivers.py). In 
+                this way it is possible to write own algorithms and use them 
+                with this function.
                 Default: 'AssimuloFMIAlg'
                 
             options -- 
-                The options that should be used in the algorithm. For 
-                details on the options do:
+                The options that should be used in the algorithm. For details on 
+                the options do:
                 
                     >> myModel = FMUModel(...)
                     >> opts = myModel.simulate_options()
@@ -1319,21 +1312,21 @@ class FMUModel(BaseModel):
                                              options)
                                
     def simulate_options(self, algorithm='AssimuloFMIAlg'):
-        """ Get an instance of the simulate options class, prefilled 
-        with default values. If called without argument then the options 
-        class for the default simulation algorithm will be returned.
+        """ 
+        Get an instance of the simulate options class, prefilled with default 
+        values. If called without argument then the options class for the 
+        default simulation algorithm will be returned.
         
         Parameters::
         
             algorithm --
-                The algorithm for which the options class should be 
-                fetched. Possible values are: 'AssimuloFMIAlg'.
+                The algorithm for which the options class should be fetched. 
+                Possible values are: 'AssimuloFMIAlg'.
                 Default: 'AssimuloFMIAlg'
                 
         Returns::
         
-            Options class for the algorithm specified with default 
-            values.
+            Options class for the algorithm specified with default values.
         """
         return self._default_options(algorithm)
     
@@ -1379,13 +1372,16 @@ class FMUModel(BaseModel):
         """
         Extract the descriptions of the variables in a model.
 
-        Returns:
+        Returns::
+        
             Dict with ValueReference as key and description as value.
         """
         return self._md.get_variable_descriptions(include_alias)
         
     def get_data_type(self, variablename):
-        """ Get data type of variable. """
+        """ 
+        Get data type of variable. 
+        """
         return self._md.get_data_type(variablename)
         
     def get_valueref(self, variablename=None, type=None):
@@ -1394,7 +1390,8 @@ class FMUModel(BaseModel):
         
         Parameters::
         
-            variablename -- the name of the variable
+            variablename -- 
+                The name of the variable.
             
         Returns::
         
@@ -1418,7 +1415,6 @@ class FMUModel(BaseModel):
         Returns::
         
             Dict with variable name as key and value reference as value.
-        
         """
         
         if type != None:
@@ -1442,41 +1438,55 @@ class FMUModel(BaseModel):
             return self._md.get_variable_names(include_alias)
     
     def get_alias_for_variable(self, aliased_variable, ignore_cache=False):
-        """ Return list of all alias variables belonging to the aliased 
-            variable along with a list of booleans indicating whether the 
-            alias variable should be negated or not.
-            
-            Raises exception if argument is not in model.
+        """ 
+        Return list of all alias variables belonging to the aliased variable 
+        along with a list of booleans indicating whether the alias variable 
+        should be negated or not.
 
-            Returns::
+        Returns::
+        
+            A list consisting of the alias variable names and another list 
+            consisting of booleans indicating if the corresponding alias is 
+            negated.
             
-                A list consisting of the alias variable names and another
-                list consisting of booleans indicating if the corresponding
-                alias is negated.
-
+        Raises:: 
+        
+            XMLException if alias_variable is not in model.
         """
         return self._md.get_aliases_for_variable(aliased_variable)
     
     def get_variable_aliases(self):
+        """
+        Extract the alias data for each variable in the model.
+        
+        Returns::
+        
+            A list of tuples containing value references and alias data 
+            respectively.
+        """
         return self._md.get_variable_aliases()
         
     def get_variability(self, variablename):
-        """ Get variability of variable. 
+        """ 
+        Get variability of variable. 
             
-            Parameters::
-            
-                variablename --
-                    The name of the variable.
-                    
-            Returns::
+        Parameters::
         
-                The variability of the variable, CONTINUOUS(0), 
-                CONSTANT(1), PARAMETER(2) or DISCRETE(3)
+            variablename --
+            
+                The name of the variable.
+                    
+        Returns::
+        
+            The variability of the variable, CONTINUOUS(0), CONSTANT(1), 
+            PARAMETER(2) or DISCRETE(3)
         """
         return self._md.get_variability(variablename)
     
     def get_name(self):
-        """ Return the name of the model. """
+        """ 
+        Return the name of the model. 
+        """
         return self._modelname
     
     def __del__(self):

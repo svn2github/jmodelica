@@ -14,7 +14,9 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-"""Module containing base classes."""
+"""
+Module containing base classes.
+"""
 
 from zipfile import ZipFile
 import tempfile
@@ -23,7 +25,9 @@ import os
 import sys
 
 class BaseModel(object):
-    """ Abstract base class for JMUModel and FMUModel."""
+    """ 
+    Abstract base class for JMUModel and FMUModel.
+    """
     
     def __init__(self):
         raise Exception("This is an abstract class it can not be instantiated.")
@@ -38,39 +42,41 @@ class BaseModel(object):
         raise NotImplementedError('This method is currently not supported.')
     
     def set_real(self, valueref, value):
-        raise NotImplementedError('This method is currently not supported.')                           
+        raise NotImplementedError('This method is currently not supported.')
     
     def get_real(self, valueref):
         raise NotImplementedError('This method is currently not supported.')
     
     def set_integer(self, valueref, value):
-        raise NotImplementedError('This method is currently not supported.')                           
+        raise NotImplementedError('This method is currently not supported.')
     
     def get_integer(self, valueref):
         raise NotImplementedError('This method is currently not supported.')
     
     def set_boolean(self, valueref, value):
-        raise NotImplementedError('This method is currently not supported.')                           
+        raise NotImplementedError('This method is currently not supported.')
     
     def get_boolean(self, valueref):
         raise NotImplementedError('This method is currently not supported.')
     
     def set_string(self, valueref, value):
-        raise NotImplementedError('This method is currently not supported.')                           
+        raise NotImplementedError('This method is currently not supported.')
     
     def get_string(self, valueref):
         raise NotImplementedError('This method is currently not supported.')
     
     def set(self, variable_name, value):
         """
-        Sets the given value(s) to the specified variable name(s)
-        into the model. The method both accept a single variable 
-        and a list of variables.
+        Sets the given value(s) to the specified variable name(s) into the 
+        model. The method both accept a single variable and a list of variables.
         
         Parameters::
             
-            variable_name  - The name of the variable(s) as string/list
-            value          - The value(s) to set.
+            variable_name -- 
+                The name of the variable(s) as string/list.
+                
+            value -- 
+                The value(s) to set.
             
         Example::
         
@@ -85,21 +91,24 @@ class BaseModel(object):
     
     def get(self, variable_name):
         """
-        Returns the value(s) of the specified variable(s). The
-        method both accept a single variable and a list of variables.
+        Returns the value(s) of the specified variable(s). The method both 
+        accept a single variable and a list of variables.
         
-            Parameters::
+        Parameters::
+        
+            variable_name -- 
+                The name of the variable(s) as string/list.
                 
-                variable_name - The name of the variable(s) as string/list.
+        Returns::
+        
+            The value(s).
                 
-            Returns::
+        Example::
             
-                The value(s).
-                
-            Example::
-            
-                (FMU/JMU)Model.get('damper.d') #Returns the variable d
-                (FMU/JMU)Model.get(['damper.d','gear.a']) #Returns a list of the variables
+            # Returns the variable d
+            (FMU/JMU)Model.get('damper.d') 
+            # Returns a list of the variables
+            (FMU/JMU)Model.get(['damper.d','gear.a'])
         """
         if isinstance(variable_name, str):
             return self._get(variable_name) #Scalar case
@@ -109,14 +118,15 @@ class BaseModel(object):
                 ret += [self._get(variable_name[i])]
             return ret
     
-    def _exec_algorithm(self,
-                        algorithm, 
-                        options):
-        """ Helper function which performs all steps of an algorithm run 
-        which are common to all initialize and optimize algortihms.
+    def _exec_algorithm(self, algorithm, options):
+        """ 
+        Helper function which performs all steps of an algorithm run which are 
+        common to all initialize and optimize algortihms.
         
-        Throws exception if algorithm is not a subclass of 
-        jmodelica.algorithm_drivers.AlgorithmBase.
+        Raises:: 
+        
+            Exception if algorithm is not a subclass of 
+            jmodelica.algorithm_drivers.AlgorithmBase.
         """
         base_path = 'jmodelica.algorithm_drivers'
         algdrive = __import__(base_path)
@@ -143,11 +153,14 @@ class BaseModel(object):
                                  input,
                                  algorithm, 
                                  options):
-        """ Helper function which performs all steps of an algorithm run 
-        which are common to all simulate algortihms.
+        """ 
+        Helper function which performs all steps of an algorithm run which are 
+        common to all simulate algortihms.
         
-        Throws exception if algorithm is not a subclass of 
-        jmodelica.algorithm_drivers.AlgorithmBase.
+        Raises:: 
+        
+            Exception if algorithm is not a subclass of 
+            jmodelica.algorithm_drivers.AlgorithmBase.
         """
         base_path = 'jmodelica.algorithm_drivers'
         algdrive = __import__(base_path)
@@ -170,69 +183,66 @@ class BaseModel(object):
         return alg.get_result()
         
     def initialize_options(self, algorithm='IpoptInitializationAlg'):
-        """ Get an instance of the initialize options class, prefilled 
-        with default values. If called without argument then the options 
-        class for the default initialization algorithm will be returned.
+        """ 
+        Get an instance of the initialize options class, prefilled with default 
+        values. If called without argument then the options class for the 
+        default initialization algorithm will be returned.
         
         Parameters::
         
             algorithm --
-                The algorithm for which the options class should be 
-                fetched. Possible values are: 'IpoptInitializationAlg', 
-                'KInitSolveAlg'.
+                The algorithm for which the options class should be fetched. 
+                Possible values are: 'IpoptInitializationAlg', 'KInitSolveAlg'.
                 Default: 'IpoptInitializationAlg'
                 
         Returns::
         
-            Options class for the algorithm specified with default 
-            values.
+            Options class for the algorithm specified with default values.
         """
         return self._default_options(algorithm)
         
     def simulate_options(self, algorithm='AssimuloAlg'):
-        """ Get an instance of the simulate options class, prefilled with 
-        default values. If called without argument then the options 
-        class for the default simulation algorithm will be returned.
+        """ 
+        Get an instance of the simulate options class, prefilled with default 
+        values. If called without argument then the options class for the 
+        default simulation algorithm will be returned.
 
         Parameters::
         
             algorithm --
-                The algorithm for which the options class should be 
-                fetched. Possible values are: 'AssimuloAlg', 
-                'AssimuloFMIAlg'.
+                The algorithm for which the options class should be fetched. 
+                Possible values are: 'AssimuloAlg', 'AssimuloFMIAlg'.
                 Default: 'AssimuloAlg'
                 
         Returns::
         
-            Options class for the algorithm specified with default 
-            values.
+            Options class for the algorithm specified with default values.
         """
         return self._default_options(algorithm)
         
     def optimize_options(self, algorithm='CollocationLagrangePolynomialsAlg'):
         """
-        Returns an instance of the optimize options class containing 
-        options default values. If called without argument then the options 
-        class for the default optimization algorithm will be returned.
+        Returns an instance of the optimize options class containing options 
+        default values. If called without argument then the options class for 
+        the default optimization algorithm will be returned.
         
         Parameters::
         
             algorithm --
-                The algorithm for which the options class should be 
-                returned. Possible values are: 
-                'CollocationLagrangePolynomialsAlg'.
+                The algorithm for which the options class should be returned. 
+                Possible values are: 'CollocationLagrangePolynomialsAlg'.
                 Default: 'CollocationLagrangePolynomialsAlg'
                 
         Returns::
         
-            Options class for the algorithm specified with default 
-            values.
+            Options class for the algorithm specified with default values.
         """
         return self._default_options(algorithm)
         
     def _default_options(self, algorithm):
-        """ Help method. Gets the options class for the algorithm 
-        specified in 'algorithm'.
+        """ 
+        Help method. Gets the options class for the algorithm specified in 
+        'algorithm'.
         """
         base_path = 'jmodelica.algorithm_drivers'
         algdrive = __import__(base_path)
@@ -279,10 +289,12 @@ def unzip_unit(archive, path='.'):
         if 'modelDescription.xml' in file.filename:
             
             data = archive.read(file) #Reading the file
-
-            fhandle, tempxmlname = tempfile.mkstemp(suffix='.xml') #Creating temp file
+            
+            # Creating temp file
+            fhandle, tempxmlname = tempfile.mkstemp(suffix='.xml') 
             os.close(fhandle)
-            fout = open(tempxmlname, 'w') #Writing to the temp file
+            # Writing to the temp file
+            fout = open(tempxmlname, 'w') 
             fout.write(data)
             fout.close()
             break
@@ -295,10 +307,12 @@ def unzip_unit(archive, path='.'):
         if file.filename.endswith('values.xml'):
             
             data = archive.read(file) #Reading the file
-
-            fhandle, tempxmlvaluesname = tempfile.mkstemp(suffix='.xml') #Creating temp file
+            
+            # Creating temp file
+            fhandle, tempxmlvaluesname = tempfile.mkstemp(suffix='.xml') 
             os.close(fhandle)
-            fout = open(tempxmlvaluesname, 'w') #Writing to the temp file
+            # Writing to the temp file
+            fout = open(tempxmlvaluesname, 'w') 
             fout.write(data)
             fout.close()
             is_jmu = True
@@ -308,9 +322,12 @@ def unzip_unit(archive, path='.'):
     #Extrating the binary
     
     found_files = [] #Found files
-    
-    for file in archive.filelist: #Looping over the archive to find correct binary
-        if dir[0] in file.filename and platform in file.filename and file.filename.endswith(suffix): #Binary directory found
+
+    # Looping over the archive to find correct binary
+    for file in archive.filelist: 
+        if dir[0] in file.filename and platform in file.filename and \
+            file.filename.endswith(suffix): 
+            # Binary directory found
             found_files.append(file)
     
     if found_files:
@@ -326,10 +343,12 @@ def unzip_unit(archive, path='.'):
         fout.close()
         
         if is_jmu:
-            return [tempdllname.split(os.sep)[-1], tempxmlname.split(os.sep)[-1], modelname, tempxmlvaluesname.split(os.sep)[-1]]
+            return [tempdllname.split(os.sep)[-1], \
+                tempxmlname.split(os.sep)[-1], \
+                modelname, tempxmlvaluesname.split(os.sep)[-1]]
         else:
-            return [tempdllname.split(os.sep)[-1], tempxmlname.split(os.sep)[-1], modelname]
+            return [tempdllname.split(os.sep)[-1], \
+                tempxmlname.split(os.sep)[-1], modelname]
 
     else:
         raise IOError('Could not find binaries for your platform.')
-

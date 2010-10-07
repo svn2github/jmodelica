@@ -1,12 +1,34 @@
+# -*- coding: utf-8 -*-
+#    Copyright (C) 2009 Modelon AB
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, version 3 of the License.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# References:
+#     http://www.python.org/doc/2.5.2/lib/module-ctypes.html
+#     http://starship.python.net/crew/theller/ctypes/tutorial.html
+#     http://www.scipy.org/Cookbook/Ctypes 
+
 import numpy as N
+
 import jmodelica.jmi as jmi
 
 int = N.int32
 N.int = N.int32
 
 def linearize_dae(model):
-    """ Linearize a DAE represented by a jmodelica.jmi.JMUModel object. The 
-    DAE is represented by
+    """ 
+    Linearize a DAE represented by a jmodelica.jmi.JMUModel object. The DAE is 
+    represented by
 
       F(dx,x,u,w,t) = 0
 
@@ -14,13 +36,13 @@ def linearize_dae(model):
 
       E*dx = A*x + B*u + F*w + g
 
-    where E, A, B, F and g are constant coefficient matrices. The 
-    linearization is done around the current values of the dx, x, u, w, 
-    and t values in the JMUModel object.
+    where E, A, B, F and g are constant coefficient matrices. The linearization 
+    is done around the current values of the dx, x, u, w, and t values in the 
+    JMUModel object.
 
-    The matrices are computed by evaluating Jacobians with the AD package 
-    CppAD which provides derivatives with machine precision. (That is, 
-    no numerical finite differences are used in the linearization.)
+    The matrices are computed by evaluating Jacobians with the AD package CppAD 
+    which provides derivatives with machine precision. (That is, no numerical 
+    finite differences are used in the linearization.)
     
     Parameters::
     
@@ -31,41 +53,47 @@ def linearize_dae(model):
     
         E -- 
             n_eq_F x n_dx matrix corresponding to dF/ddx.
+            
         A -- 
             n_eq_F x n_x matrix corresponding to -dF/dx.
+            
         B -- 
             n_eq_F x n_u matrix corresponding to -dF/du.
+            
         F -- 
             n_eq_F x n_w matrix corresponding to -dF/dw.
+            
         g -- 
             n_eq_F x 1 matrix corresponding to F(dx0,x0,u0,w0,t0)
+            
         state_names -- 
             Names of the differential variables.
+            
         input_names -- 
             Names of the input variables.
+            
         algebraic_names -- 
             Names of the algebraic variables.
+            
         dx0 -- 
-            Derivative variable vector around which the linearization is 
-            done.
+            Derivative variable vector around which the linearization is done.
+            
         x0 -- 
-            Differential variable vector around which the linearization 
-            is done.
+            Differential variable vector around which the linearization is done.
+            
         u0 -- 
             Input variable vector around which the linearization is done.
+            
         w0 -- 
-            Algebraic variable vector around which the linearization is 
-            done.
+            Algebraic variable vector around which the linearization is done.
+            
         t0 -- 
             Time for which the linearization is done.  
 
     Limitations::
     
-        Currently only dense matrix format supported. Sparse format
-        to be added.
-
+        Currently only dense matrix format supported. Sparse format to be added.
     """
-
     n_x = model._n_real_x.value
     n_u = model._n_real_u.value
     n_w = model._n_real_w.value
@@ -147,8 +175,9 @@ def linearize_dae(model):
     return E,A,B,F,g,state_names,input_names,algebraic_names,dx0,x0,u0,w0,t0
 
 def linear_dae_to_ode(E_dae,A_dae,B_dae,F_dae,g_dae):
-    """ Transform a linear constant coefficient index-1 DAE to ODE form. 
-    The DAE is given by the system
+    """ 
+    Transform a linear constant coefficient index-1 DAE to ODE form. The DAE is 
+    given by the system
 
       E_dae*dx = A_dae*x + B_dae*u + F_dae*w + g_dae
 
@@ -162,31 +191,39 @@ def linear_dae_to_ode(E_dae,A_dae,B_dae,F_dae,g_dae):
     Parameters::
     
         E_dae -- 
+        
         A_dae -- 
+        
         B_dae -- 
+        
         F_dae -- 
+        
         g_dae -- 
 
     Returns::
     
         A -- 
             n_x x n_x matrix of constant coefficients.
+            
         B -- 
             n_x x n_u matrix of constant coefficients.
+            
         g -- 
             n_x x 1 matrix of constant coefficients.
+            
         H -- 
             n_w x n_x matrix of constant coefficients.
+            
         M -- 
             n_w x n_u matrix of constant coefficients.
+            
         q -- 
             n_w x 1 matrix of constant coefficients
         
     Limitations::
     
-        Outputs in the Modelica model are currently not taken into 
-        account - all algebraic variables are provided as outputs. 
-        
+        Outputs in the Modelica model are currently not taken into account - all 
+        algebraic variables are provided as outputs. 
     """
     
     n_x = N.size(A_dae,1)
@@ -208,8 +245,9 @@ def linear_dae_to_ode(E_dae,A_dae,B_dae,F_dae,g_dae):
     return A,B,g,H,M,q
 
 def linearize_ode(model):
-    """ Linearize a DAE represented by a jmodelica.jmi.JMUModel object. 
-    The DAE is represented by
+    """ 
+    Linearize a DAE represented by a jmodelica.jmi.JMUModel object. The DAE is 
+    represented by
 
       F(dx,x,u,w,t) = 0
 
@@ -218,13 +256,13 @@ def linearize_ode(model):
       dx = A*x + B*u + g
        w = H*x + M*u + q
 
-    The linearization is performed performed by first linearizing the DAE 
-    using jmodelica.linearization.linearize_model and the resulting 
-    linear DAE is then transformed into an ODE by the function 
+    The linearization is performed performed by first linearizing the DAE using 
+    jmodelica.linearization.linearize_model and the resulting linear DAE is then 
+    transformed into an ODE by the function 
     jmodelica.linearization.linear_dae_ode.
 
-    Notice that the conversion into ODE form works only if the linear DAE 
-    has index 1.
+    Notice that the conversion into ODE form works only if the linear DAE has 
+    index 1.
     
     Parameters::
     
@@ -235,46 +273,57 @@ def linearize_ode(model):
     
         A -- 
             n_x x n_x matrix of constant coefficients.
+            
         B -- 
             n_x x n_u matrix of constant coefficients.
+            
         g -- 
             n_x x 1 matrix of constant coefficients.
+            
         H -- 
             n_w x n_x matrix of constant coefficients.
+            
         M -- 
             n_w x n_u matrix of constant coefficients.
+            
         q -- 
-            n_w x 1 matrix of constant coefficients
+            n_w x 1 matrix of constant coefficients.
+            
         state_names -- 
             Names of the differential variables.
+            
         input_names -- 
             Names of the input variables.
+            
         algebraic_names -- 
             Names of the algebraic variables.
+            
         dx0 -- 
-            Derivative variable vector around which the linearization is 
-            done.
+            Derivative variable vector around which the linearization is done.
+            
         x0 -- 
-            Differential variable vector around which the linearization 
-            is done.
+            Differential variable vector around which the linearization is done.
+            
         u0 -- 
             Input variable vector around which the linearization is done.
+            
         w0 -- 
-            Algebraic variable vector around which the linearization is 
-            done.
+            Algebraic variable vector around which the linearization is done.
+            
         t0 -- 
             Time for which the linearization is done.  
 
     Limitations::
     
-        Outputs in the Modelica model are currently not taken into 
-        account - all algebraic variables are provided as outputs.         
+        Outputs in the Modelica model are currently not taken into account - all 
+        algebraic variables are provided as outputs.         
     """
 
     E_dae_jmi,A_dae_jmi,B_dae_jmi,F_dae_jmi,g_dae_jmi,\
     state_names,input_names,algebraic_names,\
     dx0,x0,u0,w0,t0 = linearize_dae(model)
 
-    A,B,g,H,M,q = linear_dae_to_ode(E_dae_jmi,A_dae_jmi,B_dae_jmi,F_dae_jmi,g_dae_jmi)
+    A,B,g,H,M,q = linear_dae_to_ode(
+        E_dae_jmi,A_dae_jmi,B_dae_jmi,F_dae_jmi,g_dae_jmi)
 
     return A,B,g,H,M,q,state_names,input_names,algebraic_names,dx0,x0,u0,w0,t0

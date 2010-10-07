@@ -334,13 +334,6 @@ class Test_Compiler:
         #try to get an unknown option
         nose.tools.assert_raises(jm.compiler.UnknownOptionError, mc.get_string_option, option)
 
-    @testattr(stddist = True)
-    def test_get_option_description(self):
-        """ Test that it is possible to get a description for an option. """
-        option = 'index_reduction'
-        description = 'If this option is true (default is false), index reduction is performed.'
-        nose.tools.assert_equal(mc.get_option_description(option),description)
-
     @testattr(ipopt = True)
     def TO_ADDtest_MODELICAPATH(self):
         """ Test that the MODELICAPATH is loaded correctly.

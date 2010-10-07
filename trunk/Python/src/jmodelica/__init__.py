@@ -1,24 +1,26 @@
+#!/usr/bin/env python 
 # -*- coding: utf-8 -*-
-"""The JModelica.org Python package <http:/www.jmodelica.org/>
+
+# Copyright (C) 2010 Modelon AB
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
 """
-#    Copyright (C) 2009 Modelon AB
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, version 3 of the License.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
-#
-#    You should have received a copy of the GNU General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+The JModelica.org Python package <http:/www.jmodelica.org/>
+"""
 
-
-__all__ = ['jmi', 'xmlparser', 'compiler','optimization','examples', 
-           'tests','io','initialization','simulation','core',
-           'linearization', 'algorithm_drivers']
+__all__ = ['jmi', 'xmlparser', 'compiler','optimization','examples', 'tests', 
+    'io','initialization','simulation','core', 'linearization', 
+    'algorithm_drivers', 'fmi']
 
 __version__=''
 
@@ -30,8 +32,8 @@ try:
     if not os.path.exists(_p):
         raise IOError
 except KeyError, IOError:
-    raise EnvironmentError('The environment variable JMODELICA_HOME is not '
-                           'set or points to a non-existing location.')
+    raise EnvironmentError('The environment variable JMODELICA_HOME is not set \
+        or points to a non-existing location.')
     
 # set version
 f= None
@@ -78,20 +80,23 @@ def check_packages():
 
     # check os
     platform = sys.platform
-    sys.stdout.write("%s %s" %("Platform".ljust(le,'.'),(str(platform)).ljust(le)+"\n\n"))
+    sys.stdout.write(
+        "%s %s" %("Platform".ljust(le,'.'),(str(platform)).ljust(le)+"\n\n"))
     sys.stdout.flush()
     time.sleep(0.25)
     
     #check python version
     pyversion = sys.version.partition(" ")[0]
-    sys.stdout.write("%s %s" % ("Python version:".ljust(le,'.'),pyversion.ljust(le)))
+    sys.stdout.write(
+        "%s %s" % ("Python version:".ljust(le,'.'),pyversion.ljust(le)))
     sys.stdout.write("\n\n")
     sys.stdout.flush()
     time.sleep(0.25)
     
     #check jmodelica version
     jmversion = jmodelica.__version__
-    sys.stdout.write("%s %s" % ("JModelica version:".ljust(le,'.'),jmversion.ljust(le)))
+    sys.stdout.write(
+        "%s %s" % ("JModelica version:".ljust(le,'.'),jmversion.ljust(le)))
     sys.stdout.write("\n")
     sys.stdout.flush()
     time.sleep(0.25)
@@ -104,11 +109,14 @@ def check_packages():
     verstr="Version"
     sys.stdout.write("%s %s" % (modstr.ljust(le), verstr.ljust(le)))
     sys.stdout.write("\n")
-    sys.stdout.write("%s %s" % (("-"*len(modstr)).ljust(le), ("-"*len(verstr)).ljust(le)))
+    sys.stdout.write(
+        "%s %s" % (("-"*len(modstr)).ljust(le), ("-"*len(verstr)).ljust(le)))
     sys.stdout.write("\n")
     
-    packages=["numpy", "scipy", "matplotlib", "jpype", "lxml", "nose", "assimulo"]
-    assimulo_path=os.path.join(jmodelica.environ['JMODELICA_HOME'],'Python','assimulo')
+    packages=["numpy", "scipy", "matplotlib", "jpype", "lxml", "nose", 
+        "assimulo"]
+    assimulo_path=os.path.join(jmodelica.environ['JMODELICA_HOME'],'Python',
+        'assimulo')
     
     if platform == "win32":
         packages.append("pyreadline")

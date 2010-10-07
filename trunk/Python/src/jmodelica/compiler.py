@@ -1,13 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""Interfaces to the JModelica compilers
-
-Module containing functions for compiling models. Options which are user 
-specific can be set either before importing this module by editing the file 
-options.xml or interactively. If options are not changed the default option 
-settings will be used.
-
-"""
 
 #    Copyright (C) 2009 Modelon AB
 #
@@ -22,7 +14,14 @@ settings will be used.
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+"""
+Interfaces to the JModelica compilers.
 
+Module containing functions for compiling models. Options which are user 
+specific can be set either before importing this module by editing the file 
+options.xml or interactively. If options are not changed the default option 
+settings will be used.
+"""
 
 import os
 import sys
@@ -39,21 +38,26 @@ from jmodelica import xmlparser
 # note that startJVM() fails after shutdownJVM(), hence, only one start
 if not jpype.isJVMStarted():
     _jvm_args = string.split(jm.environ['JVM_ARGS'],' ')
-    _jvm_class_path = jm.environ['MC_JAR'] + os.pathsep + jm.environ['OC_JAR']+ os.pathsep + jm.environ['UTIL_JAR'] + os.pathsep + jm.environ['GRAPHS_JAR']
+    _jvm_class_path = jm.environ['MC_JAR'] + os.pathsep + jm.environ['OC_JAR']+\
+        os.pathsep + jm.environ['UTIL_JAR'] + os.pathsep + \
+        jm.environ['GRAPHS_JAR']
     _jvm_ext_dirs = jm.environ['BEAVER_PATH']
-    jpype.startJVM(jm.environ['JVM_PATH'],
-                   '-Djava.class.path=%s' % _jvm_class_path,
-                   '-Djava.ext.dirs=%s' % _jvm_ext_dirs,
-                   *_jvm_args)
+    jpype.startJVM(jm.environ['JVM_PATH'], 
+        '-Djava.class.path=%s' % _jvm_class_path, 
+        '-Djava.ext.dirs=%s' % _jvm_ext_dirs,
+        *_jvm_args)
     org = jpype.JPackage('org')
     print "JVM started."
 
 OptionRegistry = org.jmodelica.util.OptionRegistry
 
-UnknownOptionException = jpype.JClass('org.jmodelica.util.OptionRegistry$UnknownOptionException')
+UnknownOptionException = jpype.JClass(
+    'org.jmodelica.util.OptionRegistry$UnknownOptionException')
 
 class ModelicaCompiler():
-    """ User class for accessing the Java ModelicaCompiler class. """
+    """ 
+    User class for accessing the Java ModelicaCompiler class. 
+    """
     
     ModelicaCompiler = org.jmodelica.modelica.compiler.ModelicaCompiler
     
@@ -63,17 +67,22 @@ class ModelicaCompiler():
     
     jm_home = jm.environ['JMODELICA_HOME']
     
-    fmi_tpl = os.path.join(jm_home, 'CodeGenTemplates', 'fmi_model_description.tpl') 
-    fmi_ext_tpl = os.path.join(jm_home, 'CodeGenTemplates', 'fmi_extended_model_description.tpl')
-    jmodelica_tpl = os.path.join(jm_home, 'CodeGenTemplates','jmodelica_model_description.tpl')
-    model_values_tpl = os.path.join(jm_home, 'CodeGenTemplates', 'jmodelica_model_values.tpl')
-    c_tpl_path = os.path.join(jm_home, 'CodeGenTemplates', 'jmi_modelica_template.c')    
+    fmi_tpl = os.path.join(jm_home, 
+        'CodeGenTemplates', 'fmi_model_description.tpl') 
+    fmi_ext_tpl = os.path.join(jm_home, 'CodeGenTemplates', 
+        'fmi_extended_model_description.tpl')
+    jmodelica_tpl = os.path.join(jm_home, 'CodeGenTemplates', 
+        'jmodelica_model_description.tpl')
+    model_values_tpl = os.path.join(jm_home, 'CodeGenTemplates', 
+        'jmodelica_model_values.tpl')
+    c_tpl_path = os.path.join(jm_home, 'CodeGenTemplates', 
+        'jmi_modelica_template.c')    
     options_file_path = os.path.join(jm_home, 'Options','options.xml')
 
     def __init__(self):
-        """ Create a Modelica compiler. The compiler can be used to compile 
-        pure Modelica models. A compiler instance can be used multiple 
-        times.
+        """ 
+        Create a Modelica compiler. The compiler can be used to compile pure 
+        Modelica models. A compiler instance can be used multiple times.
         """
         try:
             options = OptionRegistry(self.options_file_path)
@@ -101,23 +110,25 @@ class ModelicaCompiler():
             
     @classmethod
     def set_log_level(self,level):
-        """ Set the level of log messages. Valid options are 
+        """ 
+        Set the level of log messages. Valid options are 
         ModelicaCompiler.LOG_ERROR, ModelicaCompiler.LOG_WARNING and 
-        ModelicaCompiler.LOG_INFO. They will print, errors only, both 
-        errors and warnings and all log messages respectively.
+        ModelicaCompiler.LOG_INFO. They will print, errors only, both errors and 
+        warnings and all log messages respectively.
         
         Parameters::
         
             level --
                 Level of log messages to set. Valid options are 
-                ModelicaCompiler.LOG_ERROR, ModelicaCompiler.LOG_WARNING 
-                and ModelicaCompiler.LOG_INFO.
+                ModelicaCompiler.LOG_ERROR, ModelicaCompiler.LOG_WARNING and 
+                ModelicaCompiler.LOG_INFO.
         """
         self.ModelicaCompiler.setLogLevel(self.ModelicaCompiler.log, level)
 
     @classmethod
     def get_log_level(self):
-        """ Get the current level of log messages set. 
+        """ 
+        Get the current level of log messages set. 
         
         Returns::
         
@@ -126,7 +137,8 @@ class ModelicaCompiler():
         return self.ModelicaCompiler.getLogLevel(self.ModelicaCompiler.log)
         
     def get_modelicapath(self):
-        """ Get the path to Modelica libraries set for this compiler.
+        """ 
+        Get the path to Modelica libraries set for this compiler.
         
         Returns::
         
@@ -135,7 +147,8 @@ class ModelicaCompiler():
         return self._compiler.getModelicapath()
     
     def set_modelicapath(self, path):
-        """ Set the path to Modelica libraries for this compiler instance. 
+        """ 
+        Set the path to Modelica libraries for this compiler instance. 
         
         Parameters::
         
@@ -145,7 +158,8 @@ class ModelicaCompiler():
         self._compiler.setModelicapath(path)
 
     def get_boolean_option(self, key):
-        """ Get the boolean option set for the specific key. 
+        """ 
+        Get the boolean option set for the specific key. 
         
         Parameters::
         
@@ -159,25 +173,27 @@ class ModelicaCompiler():
         return bool(option)
     
     def set_boolean_option(self, key, value):
-        """ Set the boolean option with key to value and an optional
-        description. 
-        
-        If the option already exists it will be overwritten. 
+        """ 
+        Set the boolean option with key to value. If the option does not exist 
+        an exception will be raised. 
         
         Parameters::
         
             key --
                 Key for the boolean option.
+                
             value --
                 Boolean option.
-            description --
-                Description for the option.
-                Default: Empty string.
+                
+        Raises::
+        
+            UnknownOptionError if the options does not exist.
         """
         try:
             self._compiler.setBooleanOption(key, value)
             
-            if key.strip() == 'generate_fmi_xml' or key.strip() == 'generate_xml_equations':
+            if key.strip() == 'generate_fmi_xml' or \
+                key.strip() == 'generate_xml_equations':
                 fmi = self.get_boolean_option('generate_fmi_xml')
                 equ = self.get_boolean_option('generate_xml_equations')
                 if fmi and not equ:
@@ -191,7 +207,8 @@ class ModelicaCompiler():
             self._handle_exception(ex)
         
     def get_integer_option(self, key):
-        """ Get the integer option set for the specific key. 
+        """ 
+        Get the integer option set for the specific key. 
         
         Parameters::
         
@@ -205,20 +222,21 @@ class ModelicaCompiler():
         return option
     
     def set_integer_option(self, key, value):
-        """ Set the integer option with key to value and an optional
-        description. 
-        
-        If the option already exists it will be overwritten. 
+        """ 
+        Set the integer option with key to value. If the option does not exist 
+        an exception will be raised. 
         
         Parameters::
         
             key --
                 Key for the integer option.
+                
             value --
                 Integer option.
-            description --
-                Description for the option.
-                Default: Empty string.
+                
+        Raises::
+        
+            UnknownOptionError if the options does not exist.
         """
         try:
             self._compiler.setIntegerOption(key, value)
@@ -226,7 +244,8 @@ class ModelicaCompiler():
             self._handle_exception(ex)
         
     def get_real_option(self, key):
-        """ Get the real option set for the specific key. 
+        """ 
+        Get the real option set for the specific key. 
         
         Parameters::
         
@@ -240,20 +259,21 @@ class ModelicaCompiler():
         return option
     
     def set_real_option(self, key, value):
-        """ Set the real option with key to value and an optional
-        description. 
-        
-        If the option already exists it will be overwritten. 
+        """ 
+        Set the real option with key to value. If the option does not exist an 
+        exception will be raised.
         
         Parameters::
         
             key --
                 Key for the real option.
+                
             value --
                 Real option.
-            description --
-                Description for the option.
-                Default: Empty string.
+                
+        Raises::
+        
+            UnknownOptionError if the options does not exist.
         """
         try:
             self._compiler.setRealOption(key, value)
@@ -261,7 +281,8 @@ class ModelicaCompiler():
             self._handle_exception(ex)
                     
     def get_string_option(self, key):
-        """ Get the string option set for the specific key. 
+        """ 
+        Get the string option set for the specific key. 
         
         Parameters::
         
@@ -275,46 +296,30 @@ class ModelicaCompiler():
         return str(option)
         
     def set_string_option(self, key, value):
-        """ Set the string option with key to value and an optional
-        description. 
-        
-        If the option already exists it will be overwritten. 
+        """ 
+        Set the string option with key to value. If the option does not exist an 
+        exception will be raised.
         
         Parameters::
         
             key --
                 Key for the string option.
+                
             value --
                 String option.
-            description --
-                Description for the option.
-                Default: Empty string.
+                
+        Raises::
+        
+            UnknownOptionError if the options does not exist.
         """
         try:
             self._compiler.setStringOption(key, value)
         except jpype.JavaException, ex:
             self._handle_exception(ex)
-        
-    def get_option_description(self, key):
-        """ Get the description set for a certain option. 
-        
-        Parameters::
-        
-            key --
-                The key for the option.
-                
-        Returns::
-        
-            The description for the option.
-        """
-        try:
-            desc = self._compiler.getOptionDescription(key)    
-        except jpype.JavaException, ex:
-            self._handle_exception(ex)
-        return str(desc)
     
     def get_XML_tpl(self):
-        """ Get the file path to the XML model description template.
+        """ 
+        Get the file path to the XML model description template.
         
         Returns::
         
@@ -323,8 +328,9 @@ class ModelicaCompiler():
         return self._compiler.getXMLTpl()
 
     def set_XML_tpl(self, template):
-        """ Set the XML model description template to the file pointed 
-        out by template.
+        """ 
+        Set the XML model description template to the file pointed out by 
+        template.
         
         Parameters::
         
@@ -335,7 +341,8 @@ class ModelicaCompiler():
         self._compiler.setXMLTpl(template)
 
     def get_XML_values_tpl(self):
-        """ Get the file path to the XML model values template. 
+        """ 
+        Get the file path to the XML model values template. 
         
         Returns::
         
@@ -344,8 +351,8 @@ class ModelicaCompiler():
         return self._compiler.getXMLValuesTpl()
     
     def set_XML_values_tpl(self, template):
-        """ Set the XML values template to the file pointed out by 
-        template.
+        """ 
+        Set the XML values template to the file pointed out by template.
         
         Parameters::
         
@@ -356,7 +363,8 @@ class ModelicaCompiler():
         self._compiler.setXMLValuesTpl(template)
         
     def get_cTemplate(self):
-        """ Get the file path to the c code template. 
+        """ 
+        Get the file path to the c code template. 
         
         Returns::
         
@@ -365,7 +373,8 @@ class ModelicaCompiler():
         return self._compiler.getCTemplate()
     
     def set_cTemplate(self, template):
-        """ Set the c code template to the file pointed out by template.
+        """ 
+        Set the c code template to the file pointed out by template.
         
         Parameters::
         
@@ -382,54 +391,49 @@ class ModelicaCompiler():
         """ 
         Compile a model.
 
-        Perform all steps in the compilation of a model: parsing, 
-        instantiating, flattening, code generation and binary file 
-        generation. Outputs are object file, c-code file, xml file and 
-        binary file which are all written to the folder in which the 
-        compilation is performed. All files will get the default name 
-        <model_class_name>.<ext>. Set target to specify the contents of 
-        the object file used to build the binary. Default is"model". 
-        Other three options are "model_noad", "algorithms" and "ipopt". 
-        See makefile in install folder for details.
+        Perform all steps in the compilation of a model: parsing, instantiating, 
+        flattening, code generation and binary file generation. Outputs are 
+        object file, c-code file, xml file and binary file which are all written 
+        to the folder in which the compilation is performed. All files will get 
+        the default name <model_class_name>.<ext>. Set target to specify the 
+        contents of the object file used to build the binary. Default is"model". 
+        Other three options are "model_noad", "algorithms" and "ipopt". See 
+        makefile in install folder for details.
 
         Parameters::
         
             model_class_name -- 
                 Name of model class in the model file to compile.
+                
             model_file_name -- 
                 Path to file or list of paths to files in which the model is 
                 contained.
+                
             target -- 
                 The build target. Valid options are 'model', 'model_noad', 
                 'algorithms' and 'ipopt'.
-                Default: model
+                Default: 'model'
 
-        Returns::
+        Raises::
         
-            A jmi.Model object.
+            CompilerError if one or more error is found during compilation.
+            
+            ModelicaClassNotFoundError if the model class is not found.
+            
+            IOError if the model file is not found, can not be read or any other 
+            IO related error.
+            
+            Exception if there are general errors related to the parsing of the 
+            model.
+            
+            JError if there was a runtime exception thrown by the underlying 
+            Java classes.
 
-        Exceptions::
-        
-            CompilerError -- 
-                Raised if one or more error is found during compilation.
-            ModelicaClassNotFoundError -- 
-                If the model class is not found.
-            IOError -- 
-                If the model file is not found, can not be read or any 
-                other IO related error.
-            Exception -- 
-                If there are general errors related to the parsing of the 
-                model.       
-            JError -- 
-                If there was a runtime exception thrown by the underlying 
-                Java classes.
-
-        """        
+        """
         if isinstance(model_file_name, str):
-            model_file_name = [model_file_name]           
+            model_file_name = [model_file_name]
         try:
-            self._compiler.compileModel(model_file_name,
-                                        model_class_name)
+            self._compiler.compileModel(model_file_name, model_class_name)
             c_file = model_class_name.replace('.','_')
             
             # get external libs and include dirs from XML doc
@@ -440,47 +444,43 @@ class ModelicaCompiler():
             ext_incl_dirs = xmldoc.get_external_incl_dirs()
             
             if len(ext_libs) > 0:
-                self.compile_binary(c_file, target, ext_libs=ext_libs, ext_lib_dirs=ext_lib_dirs, ext_incl_dirs=ext_incl_dirs)
+                self.compile_binary(c_file, target, ext_libs=ext_libs, 
+                    ext_lib_dirs=ext_lib_dirs, ext_incl_dirs=ext_incl_dirs)
             else:
                 self.compile_binary(c_file, target)
 
         except jpype.JavaException, ex:
             self._handle_exception(ex)
 
-        #return jmi.JMUModel(c_file)
-
     def parse_model(self,model_file_name):   
         """ 
         Parse a model.
 
-        Parse a model and return a reference to the source tree
-        representation.
+        Parse a model and return a reference to the source tree representation.
 
         Parameters::
             
             model_file_name -- 
-                Path to file or list of paths to files in which the model 
-                is contained.
+                Path to file or list of paths to files in which the model is 
+                contained.
 
-        Return::
+        Returns::
         
             Reference to the root of the source tree representation of the 
             parsed model.
 
-        Exceptions::
+        Raises::
         
-            CompilerError --
-                If one or more error is found during compilation.
-            IOError --
-                If the model file is not found, can not be read or any 
-                other IO related error.
-            Exception --
-                If there are general errors related to the parsing of the 
-                model.       
-            JError -- 
-                If there was a runtime exception thrown by the underlying 
-                Java classes.
-
+            CompilerError if one or more error is found during compilation.
+            
+            IOError if the model file is not found, can not be read or any other 
+            IO related error.
+            
+            Exception if there are general errors related to the parsing of the 
+            model.
+            
+            JError if there was a runtime exception thrown by the underlying 
+            Java classes.
         """        
         if isinstance(model_file_name, str):
             model_file_name = [model_file_name]
@@ -502,24 +502,22 @@ class ModelicaCompiler():
           
             source_root -- 
                 Reference to the root of the source tree representation.
+                
             model_class_name -- 
                 Name of model class in the model file to compile.
 
         Returns::
         
-            Reference to the instance AST node representing the model 
-            instance. 
+            Reference to the instance AST node representing the model instance. 
 
-        Exceptions::
+        Raises::
         
-            CompilerError -- 
-                If one or more error is found during compilation.
-            ModelicaClassNotFoundError -- 
-                If the model class is not found.
-            JError --
-                If there was a runtime exception thrown by the underlying 
-                Java classes.
-
+            CompilerError if one or more error is found during compilation.
+            
+            ModelicaClassNotFoundError if the model class is not found.
+            
+            JError if there was a runtime exception thrown by the underlying 
+            Java classes.
         """    
         try:
             ipr = self._compiler.instantiateModel(source_root, model_class_name)
@@ -531,8 +529,8 @@ class ModelicaCompiler():
         """ 
         Compute a flattened representation of a model. 
 
-        Compute a flattened representation of a model using the instance 
-        tree belonging to the model which must first be created with 
+        Compute a flattened representation of a model using the instance tree 
+        belonging to the model which must first be created with 
         instantiate_model.
 
         Parameters::
@@ -544,19 +542,17 @@ class ModelicaCompiler():
         
             Object (FClass) representing the flattened model. 
 
-        Exceptions::
+        Raises::
         
-            CompilerError --
-                If one or more error is found during compilation.
-            ModelicaClassNotFoundError --
-                If the model class is not found.
-            IOError --
-                If the model file is not found, can not be read or any 
-                other IO related error.
-            JError -- 
-                If there was a runtime exception thrown by the underlying 
-                Java classes.
-
+            CompilerError if one or more error is found during compilation.
+            
+            ModelicaClassNotFoundError if the model class is not found.
+            
+            IOError if the model file is not found, can not be read or any 
+            other IO related error.
+            
+            JError if there was a runtime exception thrown by the underlying 
+            Java classes.
         """
         try:
             fclass = self._compiler.flattenModel(inst_class_decl)
@@ -565,30 +561,26 @@ class ModelicaCompiler():
             self._handle_exception(ex)
 
     def generate_code(self,fclass):
-    
         """ 
         Generate code for a model.
 
-        Generate code for a model c and xml code for a model using the 
-        FClass represenation created with flatten_model and template 
-        files located in the JModelica installation folder. Default 
-        output folder is the current folder from which this module is 
-        run.
+        Generate code for a model c and xml code for a model using the FClass 
+        represenation created with flatten_model and template files located in 
+        the JModelica installation folder. Default output folder is the current 
+        folder from which this module is run.
 
         Parameters::
         
             fclass -- 
                 Reference to the flattened model object representation.  
 
-        Exceptions::
+        Raises::
         
-            IOError -- 
-                If the model file is not found, can not be read or any 
-                other IO related error.
-            JError --
-                If there was a runtime exception thrown by the underlying 
-                Java classes.
-
+            IOError if the model file is not found, can not be read or any other 
+            IO related error.
+                
+            JError if there was a runtime exception thrown by the underlying 
+            Java classes.
         """
         try:
             self._compiler.generateCode(fclass)
@@ -596,41 +588,41 @@ class ModelicaCompiler():
             self._handle_exception(ex)
 
     def compile_binary(self, c_file_name, target="model", ext_libs=[], 
-        ext_lib_dirs=[], ext_incl_dirs=[]):
-
+            ext_lib_dirs=[], ext_incl_dirs=[]):
         """ 
         Compile a c code representation of a model.
 
-        Compile a c code representation of a model and output a binary 
-        file. Default output folder is the current folder from which
-        this module is run. Needs a c-file which is generated with
-        generate_code.
+        Compile a c code representation of a model and output a binary file. 
+        Default output folder is the current folder from which this module is 
+        run. Needs a c-file which is generated with generate_code.
         
-        If there are external functions in the model, the libaries, 
-        library directories and include directories should be passed in 
-        ext_libs, ext_lib_dirs and ext_incl_dirs lists respectively.
-        External functions can currently only be combined with the target 
-        'model_noad'.
+        If there are external functions in the model, the libaries, library 
+        directories and include directories should be passed in ext_libs, 
+        ext_lib_dirs and ext_incl_dirs lists respectively. External functions 
+        can currently only be combined with the target 'model_noad'.
         
         Parameters::
         
             c_file_name --
-                Name of c-file for which the binary file should be 
-                compiled without file extention.
+                Name of c-file for which the binary file should be compiled 
+                without file extention.
+            
             target --
                 Build target. Valid options are 'model', 'model_noad', 
                 'algorithm' and 'ipopt'.
                 Default: model
+            
             ext_libs --
                 List of external libraries.
                 Default: Empty list.
+            
             ext_lib_dirs --
                 List of external library directories.
                 Default: Empty list.
+            
             ext_incl_dirs --
                 List of external include file directories.
                 Default: Empty list.
-
         """
         #make settings
         make_file = os.path.join(self.jm_home, 'Makefiles', 'MakeFile')
@@ -664,8 +656,10 @@ class ModelicaCompiler():
         extincdir = extincdir+incdir+"\""
 
         if sys.platform == 'win32':
-            make = os.path.join(jm.environ['MINGW_HOME'],'bin','mingw32-make') + ' -f '
-            compiler = ' CXX=' + os.path.join(jm.environ['MINGW_HOME'],'bin','g++')
+            make = os.path.join(
+                jm.environ['MINGW_HOME'],'bin','mingw32-make') + ' -f '
+            compiler = ' CXX=' + os.path.join(
+                jm.environ['MINGW_HOME'],'bin','g++')
             ar = ' AR=' + os.path.join(os.environ['MINGW_HOME'],'bin','ar')
 
             cmd = make + \
@@ -702,19 +696,15 @@ class ModelicaCompiler():
             print >>sys.stderr, "make returned", retcode
             
     def _handle_exception(self, ex):
-        """ Catch and handle all expected Java Exceptions that the 
-        underlying Java classes might throw.
-        
-        Raise an appropriate Python error or the default JError.
+        """ 
+        Catch and handle all expected Java Exceptions that the 
+        underlying Java classes might throw. Raises an appropriate Python error 
+        or the default JError.
         """
         if ex.javaClass() is org.jmodelica.modelica.compiler.CompilerException \
             or ex.javaClass() is org.jmodelica.optimica.compiler.CompilerException:
             arraylist = ex.__javaobject__.getProblems()
             itr = arraylist.iterator()
-            
-            #problems = "\n"
-            #while itr.hasNext():
-            #    problems = problems + str(itr.next()) + "\n"
 
             compliance_errors = []
             errors = []
@@ -730,35 +720,53 @@ class ModelicaCompiler():
                     
             raise CompilerError(errors,compliance_errors,warnings)
         
-        if ex.javaClass() is org.jmodelica.modelica.compiler.ModelicaClassNotFoundException:
-            raise ModelicaClassNotFoundError(str(ex.__javaobject__.getClassName()))
+        if ex.javaClass() is \
+            org.jmodelica.modelica.compiler.ModelicaClassNotFoundException:
+            raise ModelicaClassNotFoundError(
+                str(ex.__javaobject__.getClassName()))
         
-        if ex.javaClass() is org.jmodelica.optimica.compiler.ModelicaClassNotFoundException:
-            raise OptimicaClassNotFoundError(str(ex.__javaobject__.getClassName()))
+        if ex.javaClass() is \
+            org.jmodelica.optimica.compiler.ModelicaClassNotFoundException:
+            raise OptimicaClassNotFoundError(
+                str(ex.__javaobject__.getClassName()))
         
         if ex.javaClass() is jpype.java.io.FileNotFoundException:
-            raise IOError('Message: '+ex.message().encode('utf-8')+'\n Stacktrace: '+ex.stacktrace().encode('utf-8'))
+            raise IOError(
+                'Message: '+ex.message().encode('utf-8')+\
+                    '\n Stacktrace: '+ex.stacktrace().encode('utf-8'))
         
         if ex.javaClass() is jpype.java.io.IOException:
-            raise IOError('Message: '+ex.message().encode('utf-8')+'\n Stacktrace: '+ex.stacktrace().encode('utf-8'))
+            raise IOError(
+                'Message: '+ex.message().encode('utf-8')+\
+                    '\n Stacktrace: '+ex.stacktrace().encode('utf-8'))
         
         if ex.javaClass() is jpype.javax.xml.xpath.XPathExpressionException:
-            raise XPathExpressionError('Message: '+ex.message().encode('utf-8')+'\n Stacktrace: '+ex.stacktrace().encode('utf-8'))
+            raise XPathExpressionError(
+                'Message: '+ex.message().encode('utf-8')+\
+                    '\n Stacktrace: '+ex.stacktrace().encode('utf-8'))
         
         if ex.javaClass() is jpype.javax.xml.parsers.ParserConfigurationException:
-            raise ParserConfigurationError('Message: '+ex.message().encode('utf-8')+'\n Stacktrace: '+ex.stacktrace().encode('utf-8'))
+            raise ParserConfigurationError(
+                'Message: '+ex.message().encode('utf-8')+\
+                    '\n Stacktrace: '+ex.stacktrace().encode('utf-8'))
         
         if ex.javaClass() is org.xml.sax.SAXException or \
             ex.javaClass() is org.xml.sax.SAXNotRecognizedException or \
             ex.javaClass() is org.xml.sax.SAXNotSupportedException or \
             ex.javaClass() is org.xml.sax.SAXParseException:
-            raise SAXError('Message: '+ex.message().encode('utf-8')+'\n Stacktrace: '+ex.stacktrace().encode('utf-8'))
+            raise SAXError(
+                'Message: '+ex.message().encode('utf-8')+\
+                    '\n Stacktrace: '+ex.stacktrace().encode('utf-8'))
     
         if ex.javaClass() is UnknownOptionException:
-            raise UnknownOptionError(ex.message().encode('utf-8')+'\n Stacktrace: '+ex.stacktrace().encode('utf-8'))
+            raise UnknownOptionError(
+                ex.message().encode('utf-8')+'\n Stacktrace: '+\
+                    ex.stacktrace().encode('utf-8'))
         
         if ex.javaClass() is jpype.java.lang.Exception:
-            raise Exception('Message: '+ex.message().encode('utf-8')+'\n Stacktrace: '+ex.stacktrace().encode('utf-8'))
+            raise Exception(
+                'Message: '+ex.message().encode('utf-8')+\
+                    '\n Stacktrace: '+ex.stacktrace().encode('utf-8'))
         
         if ex.javaClass() is jpype.java.lang.NullPointerException:
             raise JError(ex.stacktrace().encode('utf-8'))
@@ -766,17 +774,21 @@ class ModelicaCompiler():
         raise JError(ex.stacktrace().encode('utf-8'))
 
 class OptimicaCompiler(ModelicaCompiler):
-    """ User class for accessing the Java OptimicaCompiler class. """
+    """ 
+    User class for accessing the Java OptimicaCompiler class. 
+    """
 
     OptimicaCompiler = org.jmodelica.optimica.compiler.OptimicaCompiler
 
     jm_home = jm.environ['JMODELICA_HOME']
-    optimica_c_tpl_path = os.path.join(jm_home, 'CodeGenTemplates', 'jmi_optimica_template.c')
+    optimica_c_tpl_path = os.path.join(
+        jm_home, 'CodeGenTemplates', 'jmi_optimica_template.c')
 
     def __init__(self):
-        """ Create an Optimica compiler. The compiler can be used to 
-        compile both Modelica and Optimica models. A compiler instance 
-        can be used multiple times.
+        """ 
+        Create an Optimica compiler. The compiler can be used to compile both 
+        Modelica and Optimica models. A compiler instance can be used multiple 
+        times.
         """
         try:
             options = OptionRegistry(self.options_file_path)
@@ -800,10 +812,11 @@ class OptimicaCompiler(ModelicaCompiler):
                                                    self.optimica_c_tpl_path)
     @classmethod
     def set_log_level(self,level):
-        """ Set the level of log messages. Valid options are 
+        """ 
+        Set the level of log messages. Valid options are 
         OptimicaCompiler.LOG_ERROR, OptimicaCompiler.LOG_WARNING and 
-        OptimicaCompiler.LOG_INFO. They will print, errors only, both 
-        errors and warnings and all log messages respectively.
+        OptimicaCompiler.LOG_INFO. They will print, errors only, both errors and 
+        warnings and all log messages respectively.
         
         Parameters::
         
@@ -816,7 +829,8 @@ class OptimicaCompiler(ModelicaCompiler):
 
     @classmethod
     def get_log_level(self):
-        """ Get the current level of log messages set. 
+        """ 
+        Get the current level of log messages set. 
         
         Returns::
         
@@ -825,20 +839,21 @@ class OptimicaCompiler(ModelicaCompiler):
         return self.OptimicaCompiler.getLogLevel(self.ModelicaCompiler.log)
 
     def set_boolean_option(self, key, value):
-        """ Set the boolean option with key to value and an optional
-        description. 
-        
-        If the option already exists it will be overwritten. 
+        """ 
+        Set the boolean option with key to value. If the option does not exist 
+        an exception will be raised. 
         
         Parameters::
         
             key --
                 Key for the boolean option.
+                
             value --
                 Boolean option.
-            description --
-                Description for the option.
-                Default: Empty string.
+                
+        Raises::
+        
+            UnknownOptionError if the options does not exist.
         """
         try:
             self._compiler.setBooleanOption(key, value)
@@ -855,11 +870,13 @@ class OptimicaCompiler(ModelicaCompiler):
               
 
 class JError(Exception):
-    
-    """ Base class for exceptions specific to this module."""
+    """ 
+    Base class for exceptions specific to this module.
+    """
     
     def __init__(self, message):
-        """ Create new error with a specific message. 
+        """ 
+        Create new error with a specific message. 
         
         Parameters::
         
@@ -869,59 +886,60 @@ class JError(Exception):
         self.message = message
         
     def __str__(self):
-        """ Print error message when class instance is printed.
+        """ 
+        Print error message when class instance is printed.
          
         Override the general-purpose special method such that a string 
-        representation of an instance of this class will be the error 
-        message.
+        representation of an instance of this class will be the error message.
         
         Returns::
-            The error message.
         
+            The error message.
         """
         return self.message
 
 class ModelicaClassNotFoundError(JError):
-    
-    """ Class for errors raised if the Modelica model class to be 
-    compiled can not be found.
-    
+    """ 
+    Class for errors raised if the Modelica model class to be compiled can not 
+    be found.
     """
     pass
 
 class OptimicaClassNotFoundError(JError):
-    
-    """ Class for a errors raised if the Optimica model class to be 
-    compiled can not be found.
-    
+    """ 
+    Class for a errors raised if the Optimica model class to be compiled can not 
+    be found.
     """ 
     pass
 
 
 class CompilerError(JError):
-    
-    """ Class representing a compiler error. Raised if there were one or more 
-    errors found during compilation of the model. If there are several errors 
-    in one model, they are collected and presented in one CompilerError.
-    
+    """ 
+    Class representing a compiler error. Raised if there were one or more errors 
+    found during compilation of the model. If there are several errors in one 
+    model, they are collected and presented in one CompilerError.
     """
 
     def __init__(self, errors, compliance_errors, warnings):
-        """ Create CompilerError with a list of error messages. """
+        """ 
+        Create CompilerError with a list of error messages. 
+        """
         self.compliance_errors = compliance_errors
         self.warnings = warnings
         self.errors = errors
         
     def __str__(self):
-        """ Print error messages.
+        """ 
+        Print error messages.
          
         Override the general-purpose special method such that a string 
         representation of an instance of this class will a string representation
         of the error messages.
         """
     
-        problems = '\n' + str(len(self.errors)) + ' error(s), ' + str(len(self.compliance_errors)) + \
-                   ' compliance error(s) and ' + str(len(self.warnings)) + ' warning(s) found:\n\n' 
+        problems = '\n' + str(len(self.errors)) + ' error(s), ' + \
+            str(len(self.compliance_errors)) + ' compliance error(s) and ' + \
+            str(len(self.warnings)) + ' warning(s) found:\n\n' 
         for e in self.errors:
             problems = problems + e + "\n\n"
         for ec in self.compliance_errors:
@@ -932,39 +950,48 @@ class CompilerError(JError):
         return problems
 
 class CcodeCompilationError(JError):
-    """ Class for errors thrown when compiling a binary file from c code."""
+    """ 
+    Class for errors thrown when compiling a binary file from c code.
+    """
     pass
 
 class XPathExpressionError(JError):
-    """ Class representing errors in XPath expressions. """
+    """ 
+    Class representing errors in XPath expressions. 
+    """
     pass
 
 class ParserConfigurationError(JError):
-    """ Class for errors thrown when configuring XML parser. """
+    """ 
+    Class for errors thrown when configuring XML parser. 
+    """
     pass
 
 class SAXError(JError):
-    """ Class representing a SAX error. """
+    """ 
+    Class representing a SAX error. 
+    """
     pass
 
 class UnknownOptionError(JError):
-    """ Class for error thrown when trying to access unknown compiler 
-    option. 
-    
+    """ 
+    Class for error thrown when trying to access unknown compiler option. 
     """
     pass
     
 def _get_platform():
-    """ Helper function. Returns string describing the platform 
-        on which jmodelica is run. The different possible return values 
-        are::
+    """ 
+    Helper function. Returns string describing the platform on which jmodelica 
+    is run. 
+    
+    Possible return values::
         
-            win32
-            win64
-            darwin32
-            darwin64
-            linux32
-            linux64
+        win32
+        win64
+        darwin32
+        darwin64
+        linux32
+        linux64
     """
     _platform = ''
     if sys.platform == 'win32':
@@ -984,5 +1011,3 @@ def _get_platform():
         _platform = _platform + '64'
     
     return _platform
-    
-    

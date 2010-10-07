@@ -17,54 +17,54 @@
 """
 Module for writing optimization and simulation results to file.
 """
+from operator import itemgetter
+import array
 
 import numpy as N
-import array
 import scipy.io
-
-from operator import itemgetter
 
 import jmodelica.jmi
 from jmodelica import xmlparser
 
 def export_result_dymola(model, data, file_name='', format='txt', scaled=False):
     """
-    Export an optimization or simulation result to file in Dymolas
-    result file format. The parameter values are read from the z
-    vector of the model object and the time series are read from
-    the data argument.
+    Export an optimization or simulation result to file in Dymolas result file 
+    format. The parameter values are read from the z vector of the model object 
+    and the time series are read from the data argument.
 
     Parameters::
     
         model --
             A Model object.
+            
         data --
-            A two dimensional array of variable trajectory data. The
-            first column represents the time vector. The following
-            colums contain, in order, the derivatives, the states,
-            the inputs and the algebraic variables. The ordering is
-            according to increasing value references.
+            A two dimensional array of variable trajectory data. The first 
+            column represents the time vector. The following colums contain, in 
+            order, the derivatives, the states, the inputs and the algebraic 
+            variables. The ordering is according to increasing value references.
+            
         file_name --
-            If no file name is given, the name of the model (as defined
-            by JMIModel.get_name()) concatenated with the string
-            '_result' is used. A file suffix equal to the format
-            argument is then appended to the file name.
+            If no file name is given, the name of the model (as defined by 
+            JMIModel.get_name()) concatenated with the string '_result' is used. 
+            A file suffix equal to the format argument is then appended to the 
+            file name.
             Default: Empty string.
+            
         format --
-            A text string equal either to 'txt' for textual format or
-            'mat' for binary Matlab format.
-            Default: txt
+            A text string equal either to 'txt' for textual format or 'mat' for 
+            binary Matlab format.
+            Default: 'txt'
+            
         scaled --
             Set this parameter to True to write the result to file without
-            taking scaling into account. If the value of scaled is False,
-            then the variable scaling factors of the model are used to
-            reproduced the unscaled variable values.
+            taking scaling into account. If the value of scaled is False, then 
+            the variable scaling factors of the model are used to reproduced the 
+            unscaled variable values.
             Default: False
 
     Limitations::
     
         Currently only textual format is supported.
-
     """
 
     if (format=='txt'):
@@ -90,7 +90,8 @@ def export_result_dymola(model, data, file_name='', format='txt', scaled=False):
         names = sorted(md.get_variable_names(), key=itemgetter(0))
         aliases = sorted(md.get_variable_aliases(), key=itemgetter(0))
         descriptions = sorted(md.get_variable_descriptions(), key=itemgetter(0))
-        variabilities = sorted(md.get_variable_variabilities(), key=itemgetter(0))
+        variabilities = sorted(
+            md.get_variable_variabilities(), key=itemgetter(0))
         
         num_vars = len(names)
         
@@ -163,7 +164,8 @@ def export_result_dymola(model, data, file_name='', format='txt', scaled=False):
         sc = model.jmimodel.get_variable_scaling_factors()
         z = model.z
 
-        rescale = (model.get_scaling_method() == jmodelica.jmi.JMI_SCALING_VARIABLES) and (not scaled)
+        rescale = (model.get_scaling_method() == 
+            jmodelica.jmi.JMI_SCALING_VARIABLES) and (not scaled)
 
         # Write data
         # Write data set 1
@@ -232,8 +234,9 @@ class Trajectory:
         self.x = x
 
 class ResultDymolaTextual:
-    """ Class representing a simulation or optimization result loaded from a
-    Dymola binary file.
+    """ 
+    Class representing a simulation or optimization result loaded from a Dymola 
+    binary file.
     """
 
     def __init__(self,fname):
@@ -362,8 +365,8 @@ class ResultDymolaTextual:
 
         Returns::
         
-            A Trajectory object containing the time vector and the data 
-            vector of the variable.
+            A Trajectory object containing the time vector and the data vector 
+            of the variable.
         """
         if name == 'time':
             #return self.data[1][:,0]
@@ -382,7 +385,8 @@ class ResultDymolaTextual:
             # which means that it is
             if dataMat<0:
                 dataMat = 0
-            return Trajectory(self.data[dataMat][:,0],factor*self.data[dataMat][:,dataInd])
+            return Trajectory(
+                self.data[dataMat][:,0],factor*self.data[dataMat][:,dataInd])
             #if dataMat == 0:
             #    return factor*self.data[dataMat][0,dataInd]
             #else:
@@ -390,16 +394,16 @@ class ResultDymolaTextual:
         
     def is_variable(self, name):
         """
-        Returns True if the given name corresponds to a time-varying
-        variable.
+        Returns True if the given name corresponds to a time-varying variable.
         
-            Parameters::
-            
-                name - Name of the variable/parameter/constant
+        Parameters::
+        
+            name -- 
+                Name of the variable/parameter/constant
                 
-            Returns::
-            
-                True if the variable is time-varying.
+        Returns::
+        
+            True if the variable is time-varying.
         """
         if name == 'time':
             return True
@@ -415,16 +419,16 @@ class ResultDymolaTextual:
             
     def is_negated(self, name):
         """
-        Returns True if the given name corresponds to a negated result
-        vector.
+        Returns True if the given name corresponds to a negated result vector.
         
-            Parameters::
-            
-                name - Name of the variable/parameter/constant
+        Parameters::
+        
+            name -- 
+                Name of the variable/parameter/constant.
                 
-            Returns::
-            
-                True if the result should be negated
+        Returns::
+        
+            True if the result should be negated
         """
         varInd  = self.get_variable_index(name)
         dataInd = self.dataInfo[varInd][1]
@@ -435,12 +439,13 @@ class ResultDymolaTextual:
     
     def get_column(self, name):
         """
-        Returns the column number in the data matrix where the values
-        of the variable are stored.
+        Returns the column number in the data matrix where the values of the 
+        variable are stored.
         
         Parameters::
         
-            name - Name of the variable/parameter/constant
+            name -- 
+                Name of the variable/parameter/constant.
             
         Returns::
         
@@ -467,20 +472,17 @@ class ResultDymolaTextual:
         """
         Returns the result matrix.
         
-            Parameters::
-            
-                None
-                
-            Returns::
-            
-                The result data matrix.
+        Returns::
+        
+            The result data matrix.
         """
         return self.data[1]
         
         
 class ResultDymolaBinary:
-    """ Class representing a simulation or optimization result loaded 
-        from a Dymola binary file.
+    """ 
+    Class representing a simulation or optimization result loaded from a Dymola 
+    binary file.
     """
 
     def __init__(self,fname):
@@ -494,9 +496,17 @@ class ResultDymolaBinary:
         """
         self.raw = scipy.io.loadmat(fname,chars_as_strings=False)
         name = self.raw['name']
-        self.name = [array.array('u',name[:,i].tolist()).tounicode().rstrip().replace(" ","") for i in range(0,name[0,:].size)]
+        self.name = [
+            array.array(
+                'u',
+                name[:,i].tolist()).tounicode().rstrip().replace(" ","") \
+                for i in range(0,name[0,:].size)]
         description = self.raw['description']
-        self.description = [array.array('u',description[:,i].tolist()).tounicode().rstrip() for i in range(0,description[0,:].size)]
+        self.description = [
+            array.array(
+                'u',
+                description[:,i].tolist()).tounicode().rstrip() \
+                for i in range(0,description[0,:].size)]
         
     def get_variable_index(self,name): 
         """
@@ -528,7 +538,7 @@ class ResultDymolaBinary:
 
         Returns::
         
-            A Trajectory object containing the time vector and the data vector
+            A Trajectory object containing the time vector and the data vector 
             of the variable.
         """
         if name == 'time':
@@ -558,16 +568,16 @@ class ResultDymolaBinary:
     
     def is_variable(self, name):
         """
-        Returns True if the given name corresponds to a time-varying
-        variable.
+        Returns True if the given name corresponds to a time-varying variable.
         
-            Parameters::
-            
-                name - Name of the variable/parameter/constant
+        Parameters::
+        
+            name -- 
+                Name of the variable/parameter/constant.
                 
-            Returns::
-            
-                True if the variable is time-varying.
+        Returns::
+        
+            True if the variable is time-varying.
         """
         if name == 'time':
             return True
@@ -583,16 +593,16 @@ class ResultDymolaBinary:
             
     def is_negated(self, name):
         """
-        Returns True if the given name corresponds to a negated result
-        vector.
+        Returns True if the given name corresponds to a negated result vector.
         
-            Parameters::
-            
-                name - Name of the variable/parameter/constant
+        Parameters::
+        
+            name -- 
+                Name of the variable/parameter/constant.
                 
-            Returns::
-            
-                True if the result should be negated
+        Returns::
+        
+            True if the result should be negated
         """
         varInd  = self.get_variable_index(name)
         dataInd = self.raw['dataInfo'][1][varInd]
@@ -603,12 +613,13 @@ class ResultDymolaBinary:
     
     def get_column(self, name):
         """
-        Returns the column number in the data matrix where the values
-        of the variable are stored.
+        Returns the column number in the data matrix where the values of the 
+        variable are stored.
         
         Parameters::
         
-            name - Name of the variable/parameter/constant
+            name -- 
+                Name of the variable/parameter/constant.
             
         Returns::
         
@@ -634,53 +645,56 @@ class ResultDymolaBinary:
     def get_data_matrix(self):
         """
         Returns the result matrix.
-        
-            Parameters::
-            
-                None
                 
-            Returns::
-            
-                The result data matrix.
+        Returns::
+        
+            The result data matrix.
         """
         return self.raw['data_%d'%2]
         
 class ResultWriter():
-    """ Base class for writing results to file. """
+    """ 
+    Base class for writing results to file. 
+    """
     
     def write_header():
-        """ The header is intended to be used for writing general information
-        about the model. This is intended to be called once.
+        """ 
+        The header is intended to be used for writing general information about 
+        the model. This is intended to be called once.
         """
         pass
         
     def write_point():
-        """ This method does the writing of the actual result. """
+        """ 
+        This method does the writing of the actual result. 
+        """
         pass
         
     def write_finalize():
-        """ The finalize method can be used to for instance close the 
-        file.
+        """ 
+        The finalize method can be used to for instance close the file.
         """
         pass
         
 class ResultWriterDymola(ResultWriter):
-    """ Export an optimization or simulation result to file in Dymola's
-    result file format.
+    """ 
+    Export an optimization or simulation result to file in Dymola's result file 
+    format.
     """
     def __init__(self, model, format='txt'):
         """
-        Export an optimization or simulation result to file in Dymolas
-        result file format.
+        Export an optimization or simulation result to file in Dymolas result 
+        file format.
 
         Parameters::
         
             model --
                 A FMIModel object.
+            
             format --
-                A text string equal either to 'txt' for textual format or
-                'mat' for binary Matlab format.
-                Default: txt
+                A text string equal either to 'txt' for textual format or 'mat' 
+                for binary Matlab format.
+                Default: 'txt'
 
         Limitations::
         
@@ -698,17 +712,17 @@ class ResultWriterDymola(ResultWriter):
     
     def write_header(self, file_name=''):
         """
-        Opens the file and writes the header. This includes the 
-        information about the variables and a table determining the link 
-        between variables and data.
+        Opens the file and writes the header. This includes the information 
+        about the variables and a table determining the link between variables 
+        and data.
         
         Parameters::
         
             file_name --
-                If no file name is given, the name of the model (as 
-                defined by FMIModel.get_name()) concatenated with the 
-                string '_result' is used. A file suffix equal to the 
-                format argument is then appended to the file name.
+                If no file name is given, the name of the model (as defined by 
+                FMIModel.get_name()) concatenated with the string '_result' is 
+                used. A file suffix equal to the format argument is then 
+                appended to the file name.
                 Default: Empty string.
         """
         if file_name=='':
@@ -753,14 +767,16 @@ class ResultWriterDymola(ResultWriter):
                         aliases.append(var.get_alias())
                         descriptions.append(var.get_description())
                         variabilities_noalias.append(var.get_variability())
-                        types_noalias.append(xmlparser._translate_fundamental_type(ftype))
+                        types_noalias.append(
+                            xmlparser._translate_fundamental_type(ftype))
                     else:
                         vrefs_alias.append(var.get_value_reference())
                         names_alias.append(var.get_name())
                         aliases_alias.append(var.get_alias())
                         descriptions_alias.append(var.get_description())
                         variabilities_alias.append(var.get_variability())
-                        types_alias.append(xmlparser._translate_fundamental_type(ftype))
+                        types_alias.append(
+                            xmlparser._translate_fundamental_type(ftype))
                         
         # need to save these no alias lists for later
         vrefs = vrefs_noalias[:]
@@ -778,13 +794,34 @@ class ResultWriterDymola(ResultWriter):
         
         # zip to list of tuples and sort - non alias variables are now
         # guaranteed to be first in list
-        names_noalias = sorted(zip(tuple(vrefs_noalias),tuple(names_noalias)), key=itemgetter(0))
-        variabilities_noalias = sorted(zip(tuple(vrefs_noalias),tuple(variabilities_noalias)), key=itemgetter(0))
-        names = sorted(zip(tuple(vrefs),tuple(names)), key=itemgetter(0))
-        aliases = sorted(zip(tuple(vrefs),tuple(aliases)), key=itemgetter(0))
-        descriptions = sorted(zip(tuple(vrefs),tuple(descriptions)), key=itemgetter(0))
-        variabilities = sorted(zip(tuple(vrefs),tuple(variabilities)), key=itemgetter(0))
-        types = sorted(zip(tuple(vrefs),tuple(types)), key=itemgetter(0))
+        names_noalias = sorted(zip(
+            tuple(vrefs_noalias), 
+            tuple(names_noalias)), 
+            key=itemgetter(0))
+        variabilities_noalias = sorted(zip(
+            tuple(vrefs_noalias), 
+            tuple(variabilities_noalias)), 
+            key=itemgetter(0))
+        names = sorted(zip(
+            tuple(vrefs), 
+            tuple(names)), 
+            key=itemgetter(0))
+        aliases = sorted(zip(
+            tuple(vrefs), 
+            tuple(aliases)), 
+            key=itemgetter(0))
+        descriptions = sorted(zip(
+            tuple(vrefs), 
+            tuple(descriptions)), 
+            key=itemgetter(0))
+        variabilities = sorted(zip(
+            tuple(vrefs), 
+            tuple(variabilities)), 
+            key=itemgetter(0))
+        types = sorted(zip(
+            tuple(vrefs), 
+            tuple(types)), 
+            key=itemgetter(0))
         
         num_vars = len(names)
 
@@ -825,9 +862,12 @@ class ResultWriterDymola(ResultWriter):
         f.write('int dataInfo(%d,%d)\n' % (num_vars + 1, 4))
         f.write('0 1 0 -1 # time\n')
         
-        list_of_continuous_states = N.append(self.model._save_cont_valueref[0],self.model._save_cont_valueref[1])
-        list_of_continuous_states = N.append(list_of_continuous_states, self.model._save_cont_valueref[2]).tolist()
-        list_of_continuous_states = dict(zip(list_of_continuous_states,xrange(len(list_of_continuous_states))))
+        list_of_continuous_states = N.append(self.model._save_cont_valueref[0], 
+            self.model._save_cont_valueref[1])
+        list_of_continuous_states = N.append(list_of_continuous_states, 
+            self.model._save_cont_valueref[2]).tolist()
+        list_of_continuous_states = dict(zip(list_of_continuous_states, 
+            xrange(len(list_of_continuous_states))))
         valueref_of_continuous_states = []
         
         cnt_1 = 1
@@ -846,7 +886,8 @@ class ResultWriterDymola(ResultWriter):
                     f.write('1 -%d 0 -1 # ' % cnt_1 + name[1] +'\n')
             else:
                 if aliases[i][1] == 0: # noalias
-                    valueref_of_continuous_states.append(list_of_continuous_states[name[0]])
+                    valueref_of_continuous_states.append(
+                        list_of_continuous_states[name[0]])
                     cnt_2 += 1   
                     f.write('2 %d 0 -1 # ' % cnt_2 + name[1] +'\n')
                 elif aliases[i][1] == 1: # alias
@@ -866,13 +907,16 @@ class ResultWriterDymola(ResultWriter):
             if variabilities_noalias[i][1] == xmlparser.CONSTANT or \
                 variabilities_noalias[i][1] == xmlparser.PARAMETER:
                     if types_noalias[i] == xmlparser.REAL:
-                        str_text = str_text + (" %12.12f" % (self.model.get_real([name[0]])))
+                        str_text = str_text + (
+                            " %12.12f" % (self.model.get_real([name[0]])))
                     elif types_noalias[i] == xmlparser.INTEGER:
-                        str_text = str_text + (" %12.12f" % (self.model.get_integer([name[0]])))
+                        str_text = str_text + (
+                            " %12.12f" % (self.model.get_integer([name[0]])))
                     elif types_noalias[i] == xmlparser.BOOLEAN:
-                        str_text = str_text + (" %12.12f" % (float(self.model.get_boolean([name[0]])[0])))
+                        str_text = str_text + (
+                            " %12.12f" % (float(
+                                self.model.get_boolean([name[0]])[0])))
                         
-                    
         f.write(str_text)
         f.write('\n')
         self._point_last_t = f.tell()
@@ -895,16 +939,17 @@ class ResultWriterDymola(ResultWriter):
         self._data_order = valueref_of_continuous_states
         
     def write_point(self, data=None):
-        """ Writes the current status of the model to file. If the header
-        has not been written previously it is written now. If data is 
-        specified it is written instead of the current status.
+        """ 
+        Writes the current status of the model to file. If the header has not 
+        been written previously it is written now. If data is specified it is 
+        written instead of the current status.
         
         Parameters::
             
                 data --
-                    A one dimensional array of variable trajectory data.
-                    data should consist of information about the status
-                    in the order specified by FMIModel.save_time_point()
+                    A one dimensional array of variable trajectory data. data 
+                    should consist of information about the status in the order 
+                    specified by FMIModel.save_time_point()
                     Default: None
         """
         f = self._file
@@ -926,9 +971,10 @@ class ResultWriterDymola(ResultWriter):
         self._npoints+=1
 
     def write_finalize(self):
-        """ Finalize the writing by filling in the blanks in the created 
-        file. The blanks consists of the number of points and the final 
-        time (in data set 1). Also closes the file.
+        """ 
+        Finalize the writing by filling in the blanks in the created file. The 
+        blanks consists of the number of points and the final time (in data set 
+        1). Also closes the file.
         """
         #If open, finalize and close
         if self._file_open:
@@ -950,10 +996,13 @@ class ResultWriterDymola(ResultWriter):
     
     
 class JIOError(Exception):
-    """ Base class for exceptions specific to this module."""
+    """ 
+    Base class for exceptions specific to this module.
+    """
     
     def __init__(self, message):
-        """ Create new error with a specific message. 
+        """ 
+        Create new error with a specific message. 
         
         Parameters::
         
@@ -963,18 +1012,18 @@ class JIOError(Exception):
         self.message = message
         
     def __str__(self):
-        """ Print error message when class instance is printed.
+        """ 
+        Print error message when class instance is printed.
          
         Overrides the general-purpose special method such that a string 
-        representation of an instance of this class will be the error 
-        message.
+        representation of an instance of this class will be the error message.
         """
         return self.message
 
 
 class VariableNotFoundError(JIOError):
-    """ Exception that is thrown when a variable is not found in a
-    data file.
+    """ 
+    Exception that is thrown when a variable is not found in a data file.
     """
     pass
     

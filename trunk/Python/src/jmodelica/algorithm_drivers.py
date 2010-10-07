@@ -1,10 +1,5 @@
 #!/usr/bin/env python 
 # -*- coding: utf-8 -*-
-""" Module for optimization, simulation and initialization algorithms to be 
-used together with jmodelica.jmi.JMUModel.optimize, 
-jmodelica.jmi.JMUModel.simulate, jmodelica.fmi.FMUModel.simulate and 
-jmodelica.jmi.JMUModel.initialize respectively.
-"""
 
 # Copyright (C) 2010 Modelon AB
 #
@@ -19,6 +14,12 @@ jmodelica.jmi.JMUModel.initialize respectively.
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
+""" 
+Module for optimization, simulation and initialization algorithms to be used 
+together with jmodelica.jmi.JMUModel.optimize, jmodelica.jmi.JMUModel.simulate, 
+jmodelica.fmi.FMUModel.simulate and jmodelica.jmi.JMUModel.initialize 
+respectively.
+"""
 
 #from abc import ABCMeta, abstractmethod
 import logging
@@ -32,18 +33,21 @@ from jmodelica.initialization.ipopt import InitializationOptimizer
 
 
 try:
-    from jmodelica.simulation.assimulo_interface import JMIDAE, JMIODE, FMIODE, write_data
+    from jmodelica.simulation.assimulo_interface import JMIDAE, JMIODE, FMIODE
+    from jmodelica.simulation.assimulo_interface import write_data
     from jmodelica.simulation.assimulo_interface import TrajectoryLinearInterpolation
     from assimulo.implicit_ode import *
     from assimulo.explicit_ode import *
     from assimulo import implicit_ode as impl_ode
     from assimulo import explicit_ode as expl_ode
     from assimulo.kinsol import KINSOL
-    from jmodelica.initialization.assimulo_interface import JMUAlgebraic, JMUAlgebraic_Exception
+    from jmodelica.initialization.assimulo_interface import JMUAlgebraic
+    from jmodelica.initialization.assimulo_interface import JMUAlgebraic_Exception
     from jmodelica.initialization.assimulo_interface import write_resdata
     assimulo_present = True
 except:
-    logging.warning('Could not load Assimulo module. Check jmodelica.check_packages()')
+    logging.warning(
+        'Could not load Assimulo module. Check jmodelica.check_packages()')
     assimulo_present = False
 
 try:
@@ -56,10 +60,11 @@ int = N.int32
 N.int = N.int32
 
 class AlgorithmBase(object):
-    """ Abstract class which all algorithms that are to be used with 
-        jmodelica.jmi.JMUModel.optimize, jmodelica.jmi.JMUModel.simulate, 
-        jmodelica.fmi.FMUModel.simulate or jmodelica.jmi.JMUModel.initialize 
-        must implement.
+    """ 
+    Abstract class which all algorithms that are to be used with 
+    jmodelica.jmi.JMUModel.optimize, jmodelica.jmi.JMUModel.simulate, 
+    jmodelica.fmi.FMUModel.simulate or jmodelica.jmi.JMUModel.initialize must 
+    implement.
     """
 #    __metaclass__=ABCMeta
     
@@ -76,34 +81,38 @@ class AlgorithmBase(object):
     def get_default_options(self): pass
     
 class ResultBase(object):
-    """ Base class for an algorithm result. All algorithms used in any 
-        of the high-level functions should return an object which extends 
-        this class.
+    """ 
+    Base class for an algorithm result. All algorithms used in any of the 
+    high-level functions should return an object which extends this class.
     """
     
     def __init__(self, model=None, result_file_name=None, solver=None, 
         result_data=None, options=None):
-        """ Create a result object containing the model used in the 
-        algorithm, the name of the result file, the solver used in the 
-        algorithm, the result data object and the object (dict) holding 
-        the options used in the algorithm run.
+        """ 
+        Create a result object containing the model used in the algorithm, the 
+        name of the result file, the solver used in the algorithm, the result 
+        data object and the object (dict) holding the options used in the 
+        algorithm run.
                        
         Parameters::
         
             model -- 
-                The jmi.JMUModel object for the model used in the 
-                algorithm.
+                The jmi.JMUModel object for the model used in the algorithm.
+                
             result_file_name --
-                Name of the file containing the algorithm result created
-                on the file system.
+                Name of the file containing the algorithm result created on the 
+                file system.
+                
             solver --
                 The solver object used in the algorithm.
+                
             result_data --
-                The result data object created when running the 
-                algorithm. Holds the whole result data matrix.
+                The result data object created when running the algorithm. Holds 
+                the whole result data matrix.
+                
             options --
-                The options object with the options that the algorithm 
-                was run with.
+                The options object with the options that the algorithm was run 
+                with.
         """
         self._model = model
         self._result_file_name = result_file_name
@@ -112,124 +121,71 @@ class ResultBase(object):
         self._options = options
     
     def _get_model(self):
-        """ Get the model object representing the model that was 
-        used in the algorithm.
-        
-        Returns::
-        
-            The model object that was used in the algorithm.
-        """
         if self._model != None:
             return self._model
         raise Exception("model has not been set")
         
     def _set_model(self, model):
-        """ Set the model that was used in the algorithm.
-        
-        Parameters::
-        
-            model --
-                The model object that was used in the algorithm.
-        """
         self._model = model
         
-    model = property(fget=_get_model, fset=_set_model)
+    model = property(fget=_get_model, fset=_set_model, doc = 
+    """
+    Property for accessing the model that was used in the algorithm.
+    """)
         
     def _get_result_file(self):
-        """ Get the name of the result file created on the file system.
-        
-        Returns::
-        
-            The name of the result file.
-        """
         if self._result_file_name != None:
             return self._result_file_name
         raise Exception("result file name has not been set")
     
     def _set_result_file(self, file_name):
-        """ Set the name of the result file created in the algorithm.
-        
-        Parameters::
-        
-            file_name --
-                The name of the result file.
-            
-        """
         self._result_file_name = result_file_name
         
-    result_file = property(fget=_get_result_file, fset=_set_result_file)
+    result_file = property(fget=_get_result_file, fset=_set_result_file, doc = 
+    """
+    Property for accessing the name of the result file created in the algorithm.
+    """)
         
     def _get_solver(self):
-        """ Get the solver object repesenting the solver that was used 
-        in the algorithm.
-        
-        Returns::
-        
-            The solver object that was used in the algorithm.
-        """
         if self._solver != None:
             return self._solver
         raise Exception("solver has not been set")
 
     def _set_solver(self, solver):
-        """ Set the solver that was used in the algorithm.
-        
-        Parameters::
-        
-            solver --
-                The solver that was used in the algorithm.
-        """
         self._solver = solver
         
-    solver = property(fget=_get_solver, fset=_set_solver)
+    solver = property(fget=_get_solver, fset=_set_solver, doc = 
+    """
+    Property for accessing the solver that was used in the algorithm.
+    """)
         
     def _get_result_data(self):
-        """ Get the result data matrix created in the algorithm.
-        
-        Returns::
-        
-            The result data matrix.
-        """
         if self._result_data != None:
             return self._result_data
         raise Exception("result data has not been set")
         
     def _set_result_data(self, result_data):
-        """ Set the result data matrix that was created in the algorithm.
-        
-        Parameters::
-        
-            result_data --
-                The result data matrix.
-        """
         self._result_data = result_data
         
-    result_data = property(fget=_get_result_data, fset=_set_result_data)
+    result_data = property(fget=_get_result_data, fset=_set_result_data, doc = 
+    """
+    Property for accessing the result data matrix that was created in the 
+    algorithm.
+    """)
     
     def _get_options(self):
-        """ Get the options object holding the options used in the 
-        algorithm.
-        
-        Returns::
-        
-            The options object.
-        """
         if self._options != None:
             return self._options
         raise Exception("options has not been set")
         
     def _set_options(self, options):
-        """ Set the options object holding the options used in the 
-        algorithm.
-        
-        Parameters::
-        
-            options --
-                The options object.
-        """
         self._options = options
         
-    options = property(fget=_get_options, fset=_set_options)
+    options = property(fget=_get_options, fset=_set_options, doc = 
+    """
+    Property for accessing he options object holding the options used in the 
+    algorithm.
+    """)
 
 class JMResultBase(ResultBase):
     def __getitem__(self, key):
@@ -239,7 +195,8 @@ class JMResultBase(ResultBase):
             return val.x
         else:
             variability = self.model.get_variability(key)
-            if variability == 1 or variability == 2: #Variable is a parameter or constant
+            if variability == 1 or variability == 2: 
+            #Variable is a parameter or constant
                 return val.x[0]
             else:
                 time = self.result_data.get_variable_data('time')
@@ -249,57 +206,39 @@ class JMResultBase(ResultBase):
 
     def is_variable(self, name):
         """
-        Returns True if the given name corresponds to a time-varying
-        variable.
-        
-            Parameters::
-            
-                name --
-                    Name of the variable/parameter/constant
-                
-            Returns::
-            
-                True if the variable is time-varying.
-        """
-        return self.result_data.is_variable(name)
-    
-    def is_negated(self, name):
-        """
-        Returns True if the given name corresponds to a negated result
-        vector.
-        
-            Parameters::
-            
-                name --
-                    Name of the variable/parameter/constant
-                
-            Returns::
-            
-                True if the result should be negated
-        """
-        return self.result_data.is_negated(name)
-    
-    def _get_data_matrix(self):
-        """
-        Returns the result matrix.
-                
-            Returns::
-            
-                The result data matrix.
-        """
-        return self.result_data.get_data_matrix()
-        
-    data_matrix = property(fget=_get_data_matrix)
-
-    def get_column(self, name):
-        """
-        Returns the column number in the data matrix where the values
-        of the variable are stored.
+        Returns True if the given name corresponds to a time-varying variable.
         
         Parameters::
         
             name --
-                Name of the variable/parameter/constant
+                Name of the variable/parameter/constant.
+                
+        Returns::
+        
+            True if the variable is time-varying.
+        """
+        return self.result_data.is_variable(name)
+    
+    def is_negated(self, name):
+        return self.result_data.is_negated(name)
+    
+    def _get_data_matrix(self):
+        return self.result_data.get_data_matrix()
+        
+    data_matrix = property(fget=_get_data_matrix, doc = 
+    """
+    Property for accessing the result matrix.
+    """)
+
+    def get_column(self, name):
+        """
+        Returns the column number in the data matrix where the values of the 
+        variable are stored.
+        
+        Parameters::
+        
+            name --
+                Name of the variable/parameter/constant.
             
         Returns::
         
@@ -308,17 +247,18 @@ class JMResultBase(ResultBase):
         return self.result_data.get_column(name)
 
 class OptionBase(dict):
-    """ Base class for an algorithm option class. 
+    """ 
+    Base class for an algorithm option class. 
     
     All algorithm option classes should extend this class. 
     
-    This class extends the dict class overriding __init__, __setitem__, 
-    update and setdefault methods with the purpose of offering a key 
-    check for the extending classes.
+    This class extends the dict class overriding __init__, __setitem__, update 
+    and setdefault methods with the purpose of offering a key check for the 
+    extending classes.
     
     The extending class can define a set of keys and default values by 
-    overriding __init__ or when instantiating the extended class and 
-    thereby not allow any other keys to be added to the dict.
+    overriding __init__ or when instantiating the extended class and thereby not 
+    allow any other keys to be added to the dict.
     
      * Example overriding __init__:
     
@@ -357,14 +297,16 @@ class OptionBase(dict):
     def __setitem__(self, key, value):
         if self._keys:
             if not key in self._keys:
-                raise UnrecognizedOptionError("The key: %s, is not a valid algorithm option" %str(key))
+                raise UnrecognizedOptionError(
+                    "The key: %s, is not a valid algorithm option" %str(key))
             
         super(OptionBase,self).__setitem__(key, value)
     
     def update(self, *args, **kw):
         if args:
             if len(args) > 1:
-                raise TypeError("update expected at most 1 arguments, got %d" % len(args))
+                raise TypeError(
+                    "update expected at most 1 arguments, got %d" % len(args))
             other = dict(args[0])
             for key in other:
                 self[key] = other[key]
@@ -377,17 +319,19 @@ class OptionBase(dict):
         return self[key]
         
     def _update_keep_dict_defaults(self, *args, **kw):
-        """ Go through args/kw and for each value in a key-value-set 
-        that is a dict - update the current dict with the new dict (don't 
-        overwrite).
+        """ 
+        Go through args/kw and for each value in a key-value-set that is a dict 
+        - update the current dict with the new dict (don't overwrite).
         """
         if args:
             if len(args) > 1:
-                raise TypeError("update expected at most 1 arguments, got %d" % len(args))
+                raise TypeError(
+                    "update expected at most 1 arguments, got %d" % len(args))
             other = dict(args[0])
             for key in other:
                 if not key in self._keys:
-                    raise UnrecognizedOptionError("The key: %s, is not a valid algorithm option" %str(key))
+                    raise UnrecognizedOptionError(
+                        "The key: %s, is not a valid algorithm option" %str(key))
                 if isinstance(self[key], dict):
                     self[key].update(other[key])
                 else:
@@ -395,37 +339,12 @@ class OptionBase(dict):
             
         for key in kw:
             if not key in self._keys:
-                raise UnrecognizedOptionError("The key: %s, is not a valid algorithm option" %str(key))
+                raise UnrecognizedOptionError(
+                    "The key: %s, is not a valid algorithm option" %str(key))
             if isinstance(self[key], dict):
                 self[key].update(kw[key])
             else:
                 self[key] = kw[key]
-        
-    #def _update_dict_values(self, *args, **kw):
-        #""" Go through args/kw and for each value in a key-value-set 
-        #that is a dict - update the current dict with the new dict (don't 
-        #overwrite).
-        #"""
-        #if args:
-            #if len(args) > 1:
-                #raise TypeError("update expected at most 1 arguments, got %d" % len(args))
-            #other = dict(args[0])
-            #for key in other:
-                #if not key in self._keys:
-                    #raise UnrecognizedOptionError("The key: %s, is not a valid algorithm option" %str(key))
-                #if isinstance(self[key], dict):
-                    #self[key].update(other[key])
-                    #other[key]=self[key]
-            #args=(other.items(),)
-            
-        #for key in kw:
-            #if not key in self._keys:
-                #raise UnrecognizedOptionError("The key: %s, is not a valid algorithm option" %str(key))
-            #if isinstance(self[key], dict):
-                #self[key].update(kw[key])
-                #kw[key] = self[key]
-                
-        #return args, kw
     
 class IpoptInitResult(JMResultBase):
     pass
@@ -441,22 +360,21 @@ class IpoptInitializationAlgOptions(OptionBase):
             Default: False
 
         result_file_name --
-            Specifies the name of the file where the optimization
-            result is written. Setting this option to an empty
-            string results in a default file name that is based
-            on the name of the optimization class.
+            Specifies the name of the file where the optimization result is 
+            written. Setting this option to an empty string results in a default 
+            file name that is based on the name of the optimization class.
             Default: Empty string
             
         result_format --
-            Specifies in which format to write the result. Currently
-            only textual mode is supported.
+            Specifies in which format to write the result. Currently only 
+            textual mode is supported.
             Default: 'txt'
 
         write_scaled_result --
-            Set this parameter to True to write the result to file without
-            taking scaling into account. If the value of scaled is False,
-            then the variable scaling factors of the model are used to
-            reproduced the unscaled variable values.
+            Set this parameter to True to write the result to file without 
+            taking scaling into account. If the value of scaled is False, then 
+            the variable scaling factors of the model are used to reproduced the 
+            unscaled variable values.
             Default: False
 
     Options are set by using the syntax for dictionaries::
@@ -500,7 +418,9 @@ class IpoptInitializationAlgOptions(OptionBase):
         self._update_keep_dict_defaults(*args, **kw)
 
 class IpoptInitializationAlg(AlgorithmBase):
-    """ Initialization of a model using Ipopt. """
+    """ 
+    Initialization of a model using Ipopt. 
+    """
     
     def __init__(self, model, options):
         """
@@ -511,8 +431,8 @@ class IpoptInitializationAlg(AlgorithmBase):
             model -- 
                 The jmi.JMUModel object representation of the model.
             options -- 
-                The options that should be used in the algorithm. For 
-                details on the options, see:
+                The options that should be used in the algorithm. For details on 
+                the options, see:
                 
                 * model.initialize_options('IpoptInitializationAlgOptions')
                 
@@ -522,8 +442,8 @@ class IpoptInitializationAlg(AlgorithmBase):
                 
                 Valid values are: 
                 - A dict that overrides some or all of the default values
-                  provided by IpoptInitializationAlgOptions. An empty
-                  dict will thus give all options with default values.
+                  provided by IpoptInitializationAlgOptions. An empty dict will 
+                  thus give all options with default values.
                 - IpoptInitializationAlgOptions object.
         """
         self.model = model
@@ -543,7 +463,8 @@ class IpoptInitializationAlg(AlgorithmBase):
         self._set_options()
             
         if not ipopt_present:
-            raise Exception('Could not find IPOPT. Check jmodelica.check_packages()')
+            raise Exception(
+                'Could not find IPOPT. Check jmodelica.check_packages()')
 
         self.nlp = NLPInitialization(model,self.stat)
         self.nlp_ipopt = InitializationOptimizer(self.nlp)
@@ -552,8 +473,8 @@ class IpoptInitializationAlg(AlgorithmBase):
         self._set_solver_options()
         
     def _set_options(self):
-        """ Helper function that sets options for the IpoptInitialization 
-        algorithm.
+        """ 
+        Helper function that sets options for the IpoptInitialization algorithm.
         """
         self.stat=self.options['stat']
         self.result_args = dict(
@@ -565,7 +486,8 @@ class IpoptInitializationAlg(AlgorithmBase):
         self.solver_options = self.options['IPOPT_options']
                 
     def _set_solver_options(self):
-        """ Helper function that sets options for the solver.
+        """ 
+        Helper function that sets options for the solver.
         """
         for k, v in self.solver_options.iteritems():
             print k
@@ -578,12 +500,15 @@ class IpoptInitializationAlg(AlgorithmBase):
                 self.nlp_ipopt.init_opt_ipopt_set_string_option(k, v)
                         
     def solve(self):
-        """ Solve the initialization problem using ipopt solver. """
+        """ 
+        Solve the initialization problem using ipopt solver. 
+        """
         self.nlp_ipopt.init_opt_ipopt_solve()
         
     def get_result(self):
-        """ Write result to file, load result data and create an 
-        IpoptInitResult object.
+        """ 
+        Write result to file, load result data and create an IpoptInitResult 
+        object.
         
         Returns::
         
@@ -603,9 +528,9 @@ class IpoptInitializationAlg(AlgorithmBase):
 
     @classmethod
     def get_default_options(cls):
-        """ Get an instance of the options class for the 
-        IpoptInitializationAlg algorithm, prefilled with default values. 
-        (Class method.)
+        """ 
+        Get an instance of the options class for the IpoptInitializationAlg 
+        algorithm, prefilled with default values. (Class method.)
         """
         return IpoptInitializationAlgOptions()
 
@@ -621,14 +546,14 @@ class AssimuloFMIAlgOptions(OptionBase):
     Assimulo options::
     
         solver --
-            Specifies the simulation algorithm that is to be used.
-            Currently the only supported solver is 'CVode'.
-            Default 'CVode'
+            Specifies the simulation algorithm that is to be used. Currently the 
+            only supported solver is 'CVode'.
+            Default: 'CVode'
                  
         ncp    --
-            Number of communication points. If ncp is zero, the solver
-            will return the internal steps taken.
-            Default '0'
+            Number of communication points. If ncp is zero, the solver will 
+            return the internal steps taken.
+            Default: '0'
 
         write_scaled_result --
                  Set this parameter to True to write the result to file without
@@ -649,19 +574,19 @@ class AssimuloFMIAlgOptions(OptionBase):
             The relative tolerance. The relative tolerance are retrieved from
             the 'default experiment' section in the XML-file and if not
             found are set to 1.0e-4
-            Default 1.0e-4
+            Default: 1.0e-4
             
         atol    --
             The absolute tolerance.
-            Default rtol*0.01*(nominal values of the continuous states)
+            Default: rtol*0.01*(nominal values of the continuous states)
         
         discr   --
             The discretization method. Can be either 'BDF' or 'Adams'
-            Default 'BDF'
+            Default: 'BDF'
         
         iter    --
             The iteration method. Can be either 'Newton' or 'FixedPoint'
-            Default 'Newton'
+            Default: 'Newton'
     """
     def __init__(self, *args, **kw):
         _defaults= {
@@ -677,7 +602,9 @@ class AssimuloFMIAlgOptions(OptionBase):
         self._update_keep_dict_defaults(*args, **kw)
 
 class AssimuloFMIAlg(AlgorithmBase):
-    """Simulation algortihm for FMUs using the Assimulo package."""
+    """
+    Simulation algortihm for FMUs using the Assimulo package.
+    """
     
     def __init__(self,
                  start_time,
@@ -685,7 +612,8 @@ class AssimuloFMIAlg(AlgorithmBase):
                  input,
                  model,
                  options):
-        """ Create a simulation algorithm using Assimulo.
+        """ 
+        Create a simulation algorithm using Assimulo.
         
         Parameters::
         
@@ -693,8 +621,8 @@ class AssimuloFMIAlg(AlgorithmBase):
                 fmi.FMUModel object representation of the model.
                 
             options -- 
-                The options that should be used in the algorithm. For 
-                details on the options, see:
+                The options that should be used in the algorithm. For details on 
+                the options, see:
                 
                 * model.simulate_options('AssimuloFMIAlgOptions')
                 
@@ -704,14 +632,15 @@ class AssimuloFMIAlg(AlgorithmBase):
                 
                 Valid values are: 
                 - A dict that overrides some or all of the default values
-                  provided by AssimuloFMIAlgOptions. An empty
-                  dict will thus give all options with default values.
+                  provided by AssimuloFMIAlgOptions. An empty dict will thus 
+                  give all options with default values.
                 - AssimuloFMIAlgOptions object.
         """
         self.model = model
         
         if not assimulo_present:
-            raise Exception('Could not find Assimulo package. Check jmodelica.check_packages()')
+            raise Exception(
+                'Could not find Assimulo package. Check jmodelica.check_packages()')
         
         # set start time, final time and input trajectory
         self.start_time = start_time
@@ -735,9 +664,11 @@ class AssimuloFMIAlg(AlgorithmBase):
         if not self.input:
             self.probl = FMIODE(self.model)
         else:
-            self.probl = FMIODE(self.model,(self.input[0], 
-                                        TrajectoryLinearInterpolation(self.input[1][:,0], \
-                                                                        self.input[1][:,1:])))
+            self.probl = FMIODE(
+                self.model,
+                (self.input[0], 
+                    TrajectoryLinearInterpolation(self.input[1][:,0], 
+                    self.input[1][:,1:])))
         
         # instantiate solver and set options
         self.simulator = self.solver(self.probl, t0=self.start_time)
@@ -757,7 +688,8 @@ class AssimuloFMIAlg(AlgorithmBase):
         if hasattr(expl_ode, solver):
             self.solver = getattr(expl_ode, solver)
         else:
-            raise InvalidAlgorithmOptionException("The solver: "+solver+ " is unknown.")
+            raise InvalidAlgorithmOptionException(
+                "The solver: "+solver+ " is unknown.")
             
         # solver options
         self.solver_options = self.options[solver+'_options']
@@ -801,8 +733,8 @@ class AssimuloFMIAlg(AlgorithmBase):
  
     def get_result(self):
         """ 
-        Write result to file, load result data and create an 
-        AssimuloSimResult object.
+        Write result to file, load result data and create an AssimuloSimResult 
+        object.
         
         Returns::
         
@@ -820,8 +752,9 @@ class AssimuloFMIAlg(AlgorithmBase):
         
     @classmethod
     def get_default_options(cls):
-        """ Get an instance of the options class for the AssimuloFMIAlg 
-        algorithm, prefilled with default values. (Class method.)
+        """ 
+        Get an instance of the options class for the AssimuloFMIAlg algorithm, 
+        prefilled with default values. (Class method.)
         """
         return AssimuloFMIAlgOptions()
 
@@ -834,27 +767,26 @@ class AssimuloAlgOptions(OptionBase):
     
     Assimulo options::
     
-        solver     --
+        solver --
             Specifies the simulation algorithm that is to be used.
             Default 'IDA'
                  
-        ncp        --
-            Number of communication points. If ncp is zero, the solver
-            will return the internal steps taken.
+        ncp --
+            Number of communication points. If ncp is zero, the solver will 
+            return the internal steps taken.
             Default '0'
                  
         initialize --
-            If set to True, an algorithm for initializing the
-            differential equation is invoked, otherwise the
-            differential equation is assumed to have consistent
-            initial conditions. 
+            If set to True, an algorithm for initializing the differential 
+            equation is invoked, otherwise the differential equation is assumed 
+            to have consistent initial conditions. 
             Default is True.
 
         write_scaled_result --
-            Set this parameter to True to write the result to file without
-            taking scaling into account. If the value of scaled is False,
-            then the variable scaling factors of the model are used to
-            reproduced the unscaled variable values.
+            Set this parameter to True to write the result to file without 
+            taking scaling into account. If the value of scaled is False, then 
+            the variable scaling factors of the model are used to reproduced the 
+            unscaled variable values.
             Default: False
 
     The different solvers provided by the Assimulo simulation package provides
@@ -867,33 +799,33 @@ class AssimuloAlgOptions(OptionBase):
     
         rtol    --
             The relative tolerance.
-            Default 1.0e-6
+            Default: 1.0e-6
                   
         atol    --
             The absolute tolerance.
-            Default 1.0e-6
+            Default: 1.0e-6
         
         maxord  --
             The maximum order of the solver. Can range between 1 to 5.
-            Default 5
+            Default: 5
     
     Options for CVode::
     
         rtol    --
             The relative tolerance. 
-            Default 1.0e-6
+            Default: 1.0e-6
                 
         atol    --
             The absolute tolerance.
-            Default 1.0e-6
+            Default: 1.0e-6
                   
         discr   --
-            The discretization method. Can be either 'BDF' or 'Adams'
-            Default 'BDF'
+            The discretization method. Can be either 'BDF' or 'Adams'.
+            Default: 'BDF'
         
         iter    --
-            The iteration method. Can be either 'Newton' or 'FixedPoint'
-            Default 'Newton'
+            The iteration method. Can be either 'Newton' or 'FixedPoint'.
+            Default: 'Newton'
     """
     def __init__(self, *args, **kw):
         _defaults= {
@@ -914,7 +846,9 @@ class AssimuloAlgOptions(OptionBase):
         self._update_keep_dict_defaults(*args, **kw)
 
 class AssimuloAlg(AlgorithmBase):
-    """ Simulation algorithm using the Assimulo package. """
+    """ 
+    Simulation algorithm using the Assimulo package. 
+    """
     
     def __init__(self,
                  start_time,
@@ -922,7 +856,8 @@ class AssimuloAlg(AlgorithmBase):
                  input,
                  model,
                  options):
-        """ Create a simulation algorithm using Assimulo.
+        """ 
+        Create a simulation algorithm using Assimulo.
         
         Parameters::
         
@@ -930,8 +865,8 @@ class AssimuloAlg(AlgorithmBase):
                 jmi.Model object representation of the model
                 
             options -- 
-                The options that should be used in the algorithm. For 
-                details on the options, see:
+                The options that should be used in the algorithm. For details on 
+                the options, see:
                 
                 * model.simulate_options('AssimuloAlgOptions')
                 
@@ -940,16 +875,16 @@ class AssimuloAlg(AlgorithmBase):
                 * help(jmodelica.algorithm_drivers.AssimuloAlgOptions)
                 
                 Valid values are: 
-                - A dict which gives AssimuloAlgOptions with default 
-                  values on all options except the ones listed in the 
-                  dict. Empty dict will thus give all options with 
-                  default values.
+                - A dict which gives AssimuloAlgOptions with default values on 
+                  all options except the ones listed in the dict. Empty dict 
+                  will thus give all options with default values.
                 - AssimuloAlgOptions object.
         """
         self.model = model
         
         if not assimulo_present:
-            raise Exception('Could not find Assimulo package. Check jmodelica.check_packages()')
+            raise Exception(
+                'Could not find Assimulo package. Check jmodelica.check_packages()')
         
         # set start time, final time and input trajectory
         self.start_time = start_time
@@ -1002,7 +937,8 @@ class AssimuloAlg(AlgorithmBase):
         elif hasattr(expl_ode, solver):
             self.solver = getattr(expl_ode, solver)
         else:
-            raise InvalidAlgorithmOptionException("The solver: "+solver+ " is unknown.")
+            raise InvalidAlgorithmOptionException(
+                "The solver: "+solver+ " is unknown.")
             
         # do initialize?
         self.initialize = self.options['initialize']
@@ -1038,13 +974,12 @@ class AssimuloAlg(AlgorithmBase):
         # and if alg arg 'initialize' is True.
         if self.model.has_cppad_derivatives() and self.initialize:
             self.simulator.initiate()
-        self.simulator.simulate(self.final_time, 
-            self.ncp)
+        self.simulator.simulate(self.final_time, self.ncp)
  
     def get_result(self):
         """ 
-        Write result to file, load result data and create an 
-        AssimuloSimResult object.
+        Write result to file, load result data and create an AssimuloSimResult 
+        object.
         
         Returns::
         
@@ -1057,13 +992,14 @@ class AssimuloAlg(AlgorithmBase):
         res = ResultDymolaTextual(resultfile)
         
         # create and return result object
-        return AssimuloSimResult(self.model, resultfile, self.simulator, 
-            res, self.options)
+        return AssimuloSimResult(self.model, resultfile, self.simulator, res, 
+            self.options)
     
     @classmethod
     def get_default_options(cls):
-        """ Get an instance of the options class for the AssimuloAlg 
-        algorithm, prefilled with default values. (Class method.)
+        """ 
+        Get an instance of the options class for the AssimuloAlg algorithm, 
+        prefilled with default values. (Class method.)
         """
         return AssimuloAlgOptions()
 
@@ -1072,8 +1008,7 @@ class CollocationLagrangePolynomialsResult(JMResultBase):
 
 class CollocationLagrangePolynomialsAlgOptions(OptionBase):
     """
-    Options for optimizing JMU models using a collocation
-    algorithm. 
+    Options for optimizing JMU models using a collocation algorithm. 
 
     Collocation algorithm options::
     
@@ -1082,75 +1017,69 @@ class CollocationLagrangePolynomialsAlgOptions(OptionBase):
             Default: 50
             
         n_cp --
-            Number of collocation points in each element. Values
-            between 1 and 10 are supported
+            Number of collocation points in each element. Values between 1 and 
+            10 are supported
             Default: 3
             
         hs --
-            A vector containing n_e elements representing the finite
-            element lengths. The sum of all element should equal to 1.
+            A vector containing n_e elements representing the finite element 
+            lengths. The sum of all element should equal to 1.
             Default: numpy.ones(n_e)/n_e (Uniform mesh)
             
         blocking_factors --
-            A vector of blocking factors. Blocking factors are
-            specified by a vector of integers, where each entry in the
-            vector corresponds to the number of elements for which the
-            control profile should be kept constant. For example, the
-            blocking factor specification [2,1,5] means that u_0=u_1
-            and u_3=u_4=u_5=u_6=u_7 assuming that the number of
-            elements is 8. Notice that specification of blocking
-            factors implies that controls are present in only one
-            collocation point (the first) in each element. The number
-            of constant control levels in the optimization interval is
-            equal to the length of the blocking factor vector. In the
-            example above, this implies that there are three constant
-            control levels. If the sum of the entries in the blocking
-            factor vector is not equal to the number of elements, the
-            vector is normalized, either by truncation (if the sum of
-            the entries is larger than the number of element) or by
-            increasing the last entry of the vector. For example, if
-            the number of elements is 4, the normalized blocking
-            factor vector in the example is [2,2]. If the number of
-            elements is 10, then the normalized vector is [2,1,7].
+            A vector of blocking factors. Blocking factors are specified by a 
+            vector of integers, where each entry in the vector corresponds to 
+            the number of elements for which the control profile should be kept 
+            constant. For example, the blocking factor specification [2,1,5] 
+            means that u_0=u_1 and u_3=u_4=u_5=u_6=u_7 assuming that the number 
+            of elements is 8. Notice that specification of blocking factors 
+            implies that controls are present in only one collocation point 
+            (the first) in each element. The number of constant control levels 
+            in the optimization interval is equal to the length of the blocking 
+            factor vector. In the example above, this implies that there are 
+            three constant control levels. If the sum of the entries in the 
+            blocking factor vector is not equal to the number of elements, the
+            vector is normalized, either by truncation (if the sum of the 
+            entries is larger than the number of element) or by increasing the 
+            last entry of the vector. For example, if the number of elements is 
+            4, the normalized blocking factor vector in the example is [2,2]. 
+            If the number of elements is 10, then the normalized vector is 
+            [2,1,7].
             Default: None
             
         init_traj --
-            Variable trajectory data used for initialization of the
-            optimization problem. The data is represented by an object
-            of the type jmodelica.io.DymolaResultTextual.
+            Variable trajectory data used for initialization of the optimization 
+            problem. The data is represented by an object of the type 
+            jmodelica.io.DymolaResultTextual.
             Default: None
             
         result_mode --
             Specifies the output format of the optimization result.
-             - 'default' gives the the optimization result at the
-               collocation points.
-             - 'element_interpolation' computes the values of the
-               variable trajectories using the collocation interpolation
-               polynomials. The option 'n_interpolation_points' is used
-               to specify the number of evaluation points within each
-               finite element.
+             - 'default' gives the the optimization result at the collocation 
+               points.
+             - 'element_interpolation' computes the values of the variable 
+               trajectories using the collocation interpolation polynomials. The 
+               option 'n_interpolation_points' is used to specify the number of 
+               evaluation points within each finite element.
              - 'mesh_interpolation' computes the values of the variable
-               trajectories at points defined by the option
-               'result_mesh'.
+               trajectories at points defined by the option 'result_mesh'.
             Default: 'default'
             
         n_interpolation_points --
-            Number of interpolation points in each finite element
-            if the result reporting option result_mode is set to
-            'element_interpolation'.
+            Number of interpolation points in each finite element if the result 
+            reporting option result_mode is set to 'element_interpolation'.
             Default: 20
             
         result_mesh --
-            A vector of time points at which the the optimization
-            result is computed. This option is used if result_mode
-            is set to 'mesh_interpolation'.
+            A vector of time points at which the the optimization result is 
+            computed. This option is used if result_mode is set to 
+            'mesh_interpolation'.
             Default: None
             
         result_file_name --
-            Specifies the name of the file where the optimization
-            result is written. Setting this option to an empty
-            string results in a default file name that is based
-            on the name of the optimization class.
+            Specifies the name of the file where the optimization result is 
+            written. Setting this option to an empty string results in a default 
+            file name that is based on the name of the optimization class.
             Default: Empty string
             
         result_format --
@@ -1159,9 +1088,9 @@ class CollocationLagrangePolynomialsAlgOptions(OptionBase):
             Default: 'txt'
 
         write_scaled_result --
-            Write the scaled optimization result if set to true.
-            This option is only applicable when automatic variable
-            scaling is enabled. Only for debugging use.
+            Write the scaled optimization result if set to true. This option is 
+            only applicable when automatic variable scaling is enabled. Only for 
+            debugging use.
             Default: False.
 
     Options are set by using the syntax for dictionaries::
@@ -1169,10 +1098,9 @@ class CollocationLagrangePolynomialsAlgOptions(OptionBase):
         >>> opts = my_model.optimize_options()
         >>> opts['n_e'] = 100
         
-    In addition, IPOPT options can be provided in the option
-    IPOPT_options. For a complete list of IPOPT options, please
-    consult the IPOPT documentation available at
-    http://www.coin-or.org/Ipopt/documentation/).
+    In addition, IPOPT options can be provided in the option IPOPT_options. For 
+    a complete list of IPOPT options, please consult the IPOPT documentation 
+    available at http://www.coin-or.org/Ipopt/documentation/).
 
     Some commonly used IPOPT options are provided by default::
 
@@ -1181,7 +1109,7 @@ class CollocationLagrangePolynomialsAlgOptions(OptionBase):
            Default: 3000
                       
         derivative_test --
-           Check the correctness of the NLP derivatives. Valid values are
+           Check the correctness of the NLP derivatives. Valid values are 
            'none', 'first-order', 'second-order', 'only-second-order'.
            Default: 'none'
 
@@ -1214,9 +1142,8 @@ class CollocationLagrangePolynomialsAlgOptions(OptionBase):
 
 class CollocationLagrangePolynomialsAlg(AlgorithmBase):
     """
-    The algorithm is based on orthogonal collocation and
-    relies on the solver IPOPT for solving a non-linear programming
-    problem. 
+    The algorithm is based on orthogonal collocation and relies on the solver 
+    IPOPT for solving a non-linear programming problem. 
     """
     
     def __init__(self, 
@@ -1266,7 +1193,8 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
         self._set_options()
             
         if not ipopt_present:
-            raise Exception('Could not find IPOPT. Check jmodelica.check_packages()')
+            raise Exception(
+                'Could not find IPOPT. Check jmodelica.check_packages()')
 
         if self.blocking_factors == None:
             self.nlp = ipopt.NLPCollocationLagrangePolynomials(
@@ -1283,8 +1211,9 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
         self._set_solver_options()
         
     def _set_options(self):
-        """ Helper function that sets options for the 
-        CollocationLagrangePolynomials algorithm.
+        """ 
+        Helper function that sets options for the CollocationLagrangePolynomials 
+        algorithm.
         """
         self.n_e=self.options['n_e']
         self.n_cp=self.options['n_cp']
@@ -1317,7 +1246,8 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
         self.solver_options = self.options['IPOPT_options']
         
     def _set_solver_options(self):
-        """ Helper function that sets options for the solver.
+        """ 
+        Helper function that sets options for the solver.
         """
         for k, v in self.solver_options.iteritems():
             if isinstance(v, default_int):
@@ -1328,11 +1258,14 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
                 self.nlp_ipopt.opt_coll_ipopt_set_string_option(k, v)
                         
     def solve(self):
-        """ Solve the optimization problem using ipopt solver. """
+        """ 
+        Solve the optimization problem using ipopt solver. 
+        """
         self.nlp_ipopt.opt_coll_ipopt_solve()
         
     def get_result(self):
-        """ Write result to file, load result data and create an 
+        """ 
+        Write result to file, load result data and create an 
         CollocationLagrangePolynomialsResult object.
         
         Returns::
@@ -1340,7 +1273,8 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
             The CollocationLagrangePolynomialsResult object.
         """
         if self.result_mode=='element_interpolation':
-            self.nlp.export_result_dymola_element_interpolation(**self.result_args)
+            self.nlp.export_result_dymola_element_interpolation(
+                **self.result_args)
         elif self.result_mode=='mesh_interpolation':
             self.nlp.export_result_dymola_mesh_interpolation(**self.result_args)
         elif self.result_mode=='default':
@@ -1362,16 +1296,17 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
         
     @classmethod
     def get_default_options(cls):
-        """ Get an instance of the options class for the 
-        CollocationLagrangePolynomialsAlg algorithm, prefilled with 
-        default values. 
-        (Class method.)
+        """ 
+        Get an instance of the options class for the 
+        CollocationLagrangePolynomialsAlg algorithm, prefilled with default 
+        values. (Class method.)
         """
         return CollocationLagrangePolynomialsAlgOptions()
     
 class InvalidAlgorithmOptionException(Exception):
-    """ Exception raised when an algorithm options argument is 
-    encountered that is not valid.
+    """ 
+    Exception raised when an algorithm options argument is encountered that is 
+    not valid.
     """
     def __init__(self, arg):
         self.msg='Invalid algorithm options object: '+str(arg)
@@ -1380,8 +1315,8 @@ class InvalidAlgorithmOptionException(Exception):
         return repr(self.msg)
 
 class InvalidSolverArgumentException(Exception):
-    """ Exception raised when a solver argument is encountered that does 
-        not exist.
+    """ 
+    Exception raised when a solver argument is encountered that does not exist.
     """
     def __init__(self, arg):
         self.msg='Invalid solver argument: '+str(arg)
@@ -1394,22 +1329,23 @@ class KInitSolveResult(JMResultBase):
 
 class KInitSolveAlgOptions(OptionBase):
     """
-    Options for the initialization of a JMU using the KInitSolve
-    algorithm based on the KINSOL wrapper in the assimulo package.
+    Options for the initialization of a JMU using the KInitSolve algorithm based 
+    on the KINSOL wrapper in the assimulo package.
     
     KInitSolve options::
             
         use_constraints --
             Boolean set to True if constraints are to be used. If set to False,
             the initialization will not be constraind even if constraints are
-            supplied by the user. If set to True but constraints are not supplied
-            please see the documentation of constraints below.
+            supplied by the user. If set to True but constraints are not 
+            supplied please see the documentation of constraints below.
             Default: False
             
         constraints --
             Numpy.array that should be of same size as the number of variables.
-            The array contains numbers specifying what type of constraint to use for
-            each variable. The array contains the following number in the ith position:
+            The array contains numbers specifying what type of constraint to use 
+            for each variable. The array contains the following number in the 
+            ith position:
                 0.0  -  no constraint on x[i]
                 1.0  -  x[i] greater or equal than 0.0
                 -1.0 -  x[i] lesser or equal than 0.0
@@ -1417,29 +1353,30 @@ class KInitSolveAlgOptions(OptionBase):
                 -2.0 -  x[i] lesser than 0.0
                 
             If no constraints are supplied but use_constraints are set to True
-            the solver will 'guess' constraints basically meaning that the sign of a
-            variable is kept the same as the sign of the initial guess for the variable.
+            the solver will 'guess' constraints basically meaning that the sign 
+            of a variable is kept the same as the sign of the initial guess for 
+            the variable.
             Default: None
             
         result_file_name --
-            A string containing the name of the file the results should be written to.
-            If not specified the name of the model will be used.
+            A string containing the name of the file the results should be 
+            written to. If not specified the name of the model will be used.
             Default: ''
             
         result_format --
-            A string specifying the format of the output file.
-            So far only '.txt' is supported
+            A string specifying the format of the output file. So far only 
+            '.txt' is supported
             Default: '.txt'
             
-    The solver used by kinitsol is KINSOL, the options for KINSOL is passed in the
-    dictionary KINSOL_options. The options are listed below:
+    The solver used by kinitsol is KINSOL, the options for KINSOL is passed in 
+    the dictionary KINSOL_options. The options are listed below:
         
     KINSOL options::
         use_jac --
-            Boolean set to True if the jacobian supplied by the JMUmodel
-            is to be used in the solving of the initialization problem.
-            If set to False a jacobian generated by KINSOL using 
-            finite differences is used.
+            Boolean set to True if the jacobian supplied by the JMUmodel is to 
+            be used in the solving of the initialization problem. If set to 
+            False a jacobian generated by KINSOL using finite differences is 
+            used.
             Default: True
     """
     def __init__(self, *args, **kw):
@@ -1457,19 +1394,21 @@ class KInitSolveAlgOptions(OptionBase):
         self._update_keep_dict_defaults(*args, **kw)
         
 class KInitSolveAlg(AlgorithmBase):
-    """ Initialization using a solver of non-linear eq-systems"""
+    """ 
+    Initialization using a solver of non-linear eq-systems.
+    """
 
     def __init__(self, model, options):
-        """ Create algorithm objects.
+        """ 
+        Create algorithm objects.
         
         Parameters::
         
             model -- 
-                jmodelica.jmi.JMUModel object representation of the 
-                model.
+                jmodelica.jmi.JMUModel object representation of the model.
             options -- 
-                The options that should be used in the algorithm. For 
-                details on the options, see:
+                The options that should be used in the algorithm. For details on 
+                the options, see:
                 
                 * model.simulate_options('KInitSolveAlgOptions')
                 
@@ -1478,10 +1417,9 @@ class KInitSolveAlg(AlgorithmBase):
                 * help(jmodelica.algorithm_drivers.KInitSolveAlgOptions)
                 
                 Valid values are: 
-                - A dict which gives KInitSolveAlgOptions with 
-                  default values on all options except the ones listed 
-                  in the dict. Empty dict will thus give all options 
-                  with default values.
+                - A dict which gives KInitSolveAlgOptions with default values on 
+                  all options except the ones listed in the dict. Empty dict 
+                  will thus give all options with default values.
                 - KInitSolveAlgOptions object.
         """
         self.model = model
@@ -1505,8 +1443,7 @@ class KInitSolveAlg(AlgorithmBase):
         
     def _set_options(self):
         """
-        Helper function that sets options for the KInitSolve 
-        algorithm.
+        Helper function that sets options for the KInitSolve algorithm.
         """
         
         self.problem.set_constraints_usage(self.options['use_constraints'],
@@ -1538,8 +1475,9 @@ class KInitSolveAlg(AlgorithmBase):
         self.model.real_w = w
 
     def get_result(self):
-        """ Write result to file, load result data and create an 
-        NLSInitResult object.
+        """ 
+        Write result to file, load result data and create an NLSInitResult 
+        object.
         
         Returns::
         
@@ -1560,8 +1498,9 @@ class KInitSolveAlg(AlgorithmBase):
         
     @classmethod
     def get_default_options(cls):
-        """ Get an instance of the options class for the KInitSolveAlg 
-        algorithm, prefilled with default values. (Class method.)
+        """ 
+        Get an instance of the options class for the KInitSolveAlg algorithm, 
+        prefilled with default values. (Class method.)
         """
         return KInitSolveAlgOptions()
 
