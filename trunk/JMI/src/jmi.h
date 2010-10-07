@@ -45,9 +45,9 @@
  *    based on Lagrange polynomials on Radau points.
  *     - <a href="group__jmi__init__opt.html"> Documentation of DAE initialization
  *     optimization algorithm.</a>
- *     - <a href="group__jmi__opt__sim.html"> Documentation of simultaneous
+ *     - <a href="group__jmi__opt__coll.html"> Documentation of simultaneous
  *     interface optimization </a>
- *     - <a href="group__jmi__opt__sim__lp.html"> Documentation of implementation
+ *     - <a href="group__jmi__opt__coll__radau.html"> Documentation of implementation
  *     based on Lagrange polynomials and Radau points</a>
  *  \section jmi_solver_interface The JMI Solver interface
  *    Typically, the JMI Model and Algorithm interfaces are intended to
@@ -55,7 +55,7 @@
  *    an interface to the NLP solver Ipopt (https://projects.coin-or.org/Ipopt).
  *     - <a href="group__jmi__init__opt__ipopt.html"> Documentation of the Ipopt
  *     interface to the DAE initialization optimization algorithm</a>
- *     - <a href="group__jmi__opt__sim__ipopt.html"> Documentation of the Ipopt
+ *     - <a href="group__jmi__opt__coll__ipopt.html"> Documentation of the Ipopt
  *     interface to the JMI simultaneous optimization interface</a>
  *
  * \section limitations Limitations

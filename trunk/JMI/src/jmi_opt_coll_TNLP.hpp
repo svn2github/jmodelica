@@ -2,11 +2,11 @@
 // All Rights reserved
 // This file is published under the Common Public License 1.0.
 
-#ifndef JMI_TNLP_HPP_
-#define JMI_TNLP_HPP_
+#ifndef JMI_OPT_COLL_TNLP_HPP_
+#define JMI_OPT_COLL_TNLP_HPP_
 
 #include "IpTNLP.hpp"
-#include "jmi_opt_sim.h"
+#include "jmi_opt_coll.h"
 
 using namespace Ipopt;
 
@@ -14,14 +14,14 @@ using namespace Ipopt;
  * This is the class that present the dynamic optimization
  * problem from Optimica to Ipopt
  */
-class jmi_TNLP : public TNLP
+class jmi_opt_coll_TNLP : public TNLP
 {
 public:
   // Construct an OptimicaTNLP - SimultaneousInterface pointer
   // must be valid
-  jmi_TNLP(jmi_opt_sim_t* problem);
+  jmi_opt_coll_TNLP(jmi_opt_coll_t* problem);
 
-  virtual ~jmi_TNLP();
+  virtual ~jmi_opt_coll_TNLP();
 
   /** @name NLP initialization methods */
   //@{
@@ -83,17 +83,17 @@ public:
      * they will not be implicitly created/called. */
     //@{
     /** Default Constructor */
-    jmi_TNLP();
+    jmi_opt_coll_TNLP();
 
     /** Copy Constructor */
-    jmi_TNLP(const jmi_TNLP&);
+    jmi_opt_coll_TNLP(const jmi_opt_coll_TNLP&);
 
     /** Overloaded Equals Operator */
-    void operator=(const jmi_TNLP&);
+    void operator=(const jmi_opt_coll_TNLP&);
     //@}
 
     // Problem definition
-    jmi_opt_sim_t* problem_;
+    jmi_opt_coll_t* problem_;
     Index n_;
     Index n_h_;
     Index n_g_;

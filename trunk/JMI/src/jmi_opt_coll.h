@@ -19,13 +19,13 @@
 
 
 
-/** \file jmi_opt_sim.h
+/** \file jmi_opt_coll.h
  *  \brief An interface to an NLP resulting from discretization of a dynamic
  *  optimization problem by means of a simultaneous method.
  **/
 
 /**
- * \defgroup jmi_opt_sim JMI Simultaneous Optimization interface
+ * \defgroup jmi_opt_coll JMI Simultaneous Optimization interface
  *
  * \brief The JMI Simultaneous optimization interface provides an NLP interface
  * for a dynamic optimization problem transcribed using a simultaneous method.
@@ -46,24 +46,24 @@
  * well as parsity patterns for \f$g\f$ and \f$h\f$.
  *
  * The method of transcription is not specified by the interface. Rather, such
- * a method is specified by the call-back functions in the struct jmi_opt_sim_t.
+ * a method is specified by the call-back functions in the struct jmi_opt_coll_t.
  * This design enables different methods to be implemented and accessed in a
  * unified way.
  *
  * The main data structure of the JMI Simultaneous Optimization interface is
- * jmi_opt_sim_t. In this struct, pointers to the call-back functions for
+ * jmi_opt_coll_t. In this struct, pointers to the call-back functions for
  * evaluation of the functions \f$f\f$, \f$g\f$, and \f$h\f$, and their
  * derivatives, as well as for accessing sparsity information. Notice that the
  * content of the vector \f$x\f$ is specific for a particular transcription
- * method. A jmi_opt_sim_t struct is typically created by a corresponding
+ * method. A jmi_opt_coll_t struct is typically created by a corresponding
  * create-function that is implemented by a particular implementation of a
  * transcription method.
  *
  */
 
 /* @{ */
-#ifndef _JMI_OPT_SIM_H
-#define _JMI_OPT_SIM_H
+#ifndef _JMI_OPT_COLL_H
+#define _JMI_OPT_COLL_H
 
 #include "jmi.h"
 
@@ -72,72 +72,72 @@ extern "C" {
 #endif
 
 /**
- * \defgroup jmi_opt_sim_typedefs Typedefs
+ * \defgroup jmi_opt_coll_typedefs Typedefs
  * \brief Typedefs for data stuctures and call-back function pointers.
  */
 /* @{ */
 
-typedef struct jmi_opt_sim_t jmi_opt_sim_t;
+typedef struct jmi_opt_coll_t jmi_opt_coll_t;
 
 // Function typedefs
-typedef int (*jmi_opt_sim_get_dimensions_t)(jmi_opt_sim_t *jmi_opt_sim, int *n_x, int *n_g, int *n_h,
+typedef int (*jmi_opt_coll_get_dimensions_t)(jmi_opt_coll_t *jmi_opt_coll, int *n_x, int *n_g, int *n_h,
 		int *dg_n_nz, int *dh_n_nz);
 
-typedef int (*jmi_opt_sim_get_interval_spec_t)(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *startTime, int *startTimeFree,
+typedef int (*jmi_opt_coll_get_interval_spec_t)(jmi_opt_coll_t *jmi_opt_coll, jmi_real_t *startTime, int *startTimeFree,
 		jmi_real_t *finalTime, int *finalTimeFree);
 
-typedef int (*jmi_opt_sim_f_t)(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *f);
+typedef int (*jmi_opt_coll_f_t)(jmi_opt_coll_t *jmi_opt_coll, jmi_real_t *f);
 
-typedef int (*jmi_opt_sim_df_t)(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *df);
+typedef int (*jmi_opt_coll_df_t)(jmi_opt_coll_t *jmi_opt_coll, jmi_real_t *df);
 
-typedef int (*jmi_opt_sim_h_t)(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *res);
+typedef int (*jmi_opt_coll_h_t)(jmi_opt_coll_t *jmi_opt_coll, jmi_real_t *res);
 
-typedef int (*jmi_opt_sim_dh_t)(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac);
+typedef int (*jmi_opt_coll_dh_t)(jmi_opt_coll_t *jmi_opt_coll, jmi_real_t *jac);
 
-typedef int (*jmi_opt_sim_g_t)(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *res);
+typedef int (*jmi_opt_coll_g_t)(jmi_opt_coll_t *jmi_opt_coll, jmi_real_t *res);
 
-typedef int (*jmi_opt_sim_dg_t)(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac);
+typedef int (*jmi_opt_coll_dg_t)(jmi_opt_coll_t *jmi_opt_coll, jmi_real_t *jac);
 
-typedef int (*jmi_opt_sim_get_bounds_t)(jmi_opt_sim_t *jmi_opt_sim,
+typedef int (*jmi_opt_coll_get_bounds_t)(jmi_opt_coll_t *jmi_opt_coll,
 		jmi_real_t *x_lb, jmi_real_t *x_ub);
 
-typedef int (*jmi_opt_sim_set_bounds_t)(jmi_opt_sim_t *jmi_opt_sim,
+typedef int (*jmi_opt_coll_set_bounds_t)(jmi_opt_coll_t *jmi_opt_coll,
 		jmi_real_t *x_lb, jmi_real_t *x_ub);
 
-typedef int (*jmi_opt_sim_get_initial_t)(jmi_opt_sim_t *jmi_opt_sim,
+typedef int (*jmi_opt_coll_get_initial_t)(jmi_opt_coll_t *jmi_opt_coll,
 		jmi_real_t *x_init);
 
-typedef int (*jmi_opt_sim_set_initial_t)(jmi_opt_sim_t *jmi_opt_sim,
+typedef int (*jmi_opt_coll_set_initial_t)(jmi_opt_coll_t *jmi_opt_coll,
 		jmi_real_t *x_init);
 
-typedef int (*jmi_opt_sim_set_initial_from_trajectory_t)(
-		jmi_opt_sim_t *jmi_opt_sim,
+typedef int (*jmi_opt_coll_set_initial_from_trajectory_t)(
+		jmi_opt_coll_t *jmi_opt_coll,
 		jmi_real_t *p_opt_init, jmi_real_t *trajectory_data_init,
 		int traj_n_points, jmi_real_t *hs_init, jmi_real_t start_time_init,
 		jmi_real_t final_time_init);
 
-typedef int (*jmi_opt_sim_h_nz_indices_t)(jmi_opt_sim_t *jmi_opt_sim,
+typedef int (*jmi_opt_coll_h_nz_indices_t)(jmi_opt_coll_t *jmi_opt_coll,
 		int *colIndex, int *rowIndex);
 
-typedef int (*jmi_opt_sim_g_nz_indices_t)(jmi_opt_sim_t *jmi_opt_sim,
+typedef int (*jmi_opt_coll_g_nz_indices_t)(jmi_opt_coll_t *jmi_opt_coll,
 		int *colIndex, int *rowIndex);
 
-typedef int (*jmi_opt_sim_write_file_matlab_t)(jmi_opt_sim_t *jmi_opt_sim,
+typedef int (*jmi_opt_coll_write_file_matlab_t)(jmi_opt_coll_t *jmi_opt_coll,
 		const char *file_name);
 
-typedef int (*jmi_opt_sim_get_result_variable_vector_length_t)(jmi_opt_sim_t
-		*jmi_opt_sim, int *n);
+typedef int (*jmi_opt_coll_get_result_variable_vector_length_t)(jmi_opt_coll_t
+		*jmi_opt_coll, int *n);
 
-typedef int (*jmi_opt_sim_get_result_t)(jmi_opt_sim_t *jmi_opt_sim,
+typedef int (*jmi_opt_coll_get_result_t)(jmi_opt_coll_t *jmi_opt_coll,
 		jmi_real_t *p_opt, jmi_real_t *t, jmi_real_t *dx, jmi_real_t *x,
 		jmi_real_t *u, jmi_real_t *w);
 
-typedef int (*jmi_opt_sim_get_result_mesh_interpolation_t)(jmi_opt_sim_t *jmi_opt_sim,
+typedef int (*jmi_opt_coll_get_result_mesh_interpolation_t)(jmi_opt_coll_t *jmi_opt_coll,
 		jmi_real_t *mesh, int n_mesh, jmi_real_t *p_opt,
 		jmi_real_t *t, jmi_real_t *dx, jmi_real_t *x, jmi_real_t *u,
 		jmi_real_t *w);
 
-typedef int (*jmi_opt_sim_get_result_element_interpolation_t)(jmi_opt_sim_t *jmi_opt_sim,
+typedef int (*jmi_opt_coll_get_result_element_interpolation_t)(jmi_opt_coll_t *jmi_opt_coll,
 		int n_interpolation_points, jmi_real_t *p_opt,
 		jmi_real_t *t, jmi_real_t *dx, jmi_real_t *x, jmi_real_t *u,
 		jmi_real_t *w);
@@ -145,8 +145,8 @@ typedef int (*jmi_opt_sim_get_result_element_interpolation_t)(jmi_opt_sim_t *jmi
 /* @} */
 
 /**
- * \defgroup jmi_opt_sim_t The jmi_opt_sim_t struct, setters and getters.
- * \brief Documentation of the jmi_opt_sim_t struct and it setters and getters.
+ * \defgroup jmi_opt_coll_t The jmi_opt_coll_t struct, setters and getters.
+ * \brief Documentation of the jmi_opt_coll_t struct and it setters and getters.
  */
 /* @{ */
 
@@ -154,7 +154,7 @@ typedef int (*jmi_opt_sim_get_result_element_interpolation_t)(jmi_opt_sim_t *jmi
  * \brief Get the number of variables and the number of
  * constraints, respectively, in the NLP problem.
  *
- * @param jmi_opt_sim_t A jmi_opt_sim_t struct.
+ * @param jmi_opt_coll_t A jmi_opt_coll_t struct.
  * @param n_x (Output) Number of variables in the NLP problem.
  * @param n_g (Output) Number of inequality constraints.
  * @param n_h (Output) Number of equality constraints.
@@ -163,75 +163,75 @@ typedef int (*jmi_opt_sim_get_result_element_interpolation_t)(jmi_opt_sim_t *jmi
  * @param dh_n_nz (Output) Number of non-zeros in the Jacobian of the equality
  * constraints.
  */
-int jmi_opt_sim_get_dimensions(jmi_opt_sim_t *jmi_opt_sim, int *n_x, int *n_g,
+int jmi_opt_coll_get_dimensions(jmi_opt_coll_t *jmi_opt_coll, int *n_x, int *n_g,
 		int *n_h, int *dg_n_nz, int *dh_n_nz);
 
 /**
  * \brief Retrieve data that specifies the optimization interval.
  *
- * @param jmi_opt_sim A jmi_opt_sim_t struct.
+ * @param jmi_opt_coll A jmi_opt_coll_t struct.
  * @param start_time (Output) Optimization interval start time.
  * @param start_time_free (Output) 0 if the start time is fixed, otherwise 1.
  * @param final_time (Output) Optimization interval final time.
  * @param final_time_free (Output) 0 if the final time is fixed, otherwise 1.
  * \return Error code.
  */
-int jmi_opt_sim_get_interval_spec(jmi_opt_sim_t *jmi_opt_sim,
+int jmi_opt_coll_get_interval_spec(jmi_opt_coll_t *jmi_opt_coll,
 		jmi_real_t *start_time, int *start_time_free,
 		jmi_real_t *final_time, int *final_time_free);
 
 /**
  * \brief Get the number of finite elements
  *
- * @param jmi_opt_sim A jmi_opt_sim_t struct.
+ * @param jmi_opt_coll A jmi_opt_coll_t struct.
  * @param n_e (Output) Number of elements.
  * \return Error code.
  */
-int jmi_opt_sim_get_n_e(jmi_opt_sim_t *jmi_opt_sim,int *n_e);
+int jmi_opt_coll_get_n_e(jmi_opt_coll_t *jmi_opt_coll,int *n_e);
 
 /**
  * \brief Get the x vector of the NLP.
  *
- * @param jmi_opt_sim A jmi_opt_sim_t struct.
+ * @param jmi_opt_coll A jmi_opt_coll_t struct.
  * @return The x vector.
  */
-jmi_real_t* jmi_opt_sim_get_x(jmi_opt_sim_t *jmi_opt_sim);
+jmi_real_t* jmi_opt_coll_get_x(jmi_opt_coll_t *jmi_opt_coll);
 
 /**
  * \brief Get the initial point of the NLP.
  *
- * @param jmi_opt_sim A jmi_opt_sim_t struct.
+ * @param jmi_opt_coll A jmi_opt_coll_t struct.
  * @param x_init (Output) the initial guess vector.
  * @return Error code.
  */
-int jmi_opt_sim_get_initial(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *x_init);
+int jmi_opt_coll_get_initial(jmi_opt_coll_t *jmi_opt_coll, jmi_real_t *x_init);
 
 /**
  * \brief Get blocking factors.
  *
- * @param jmi_opt_sim A jmi_opt_sim_t struct.
+ * @param jmi_opt_coll A jmi_opt_coll_t struct.
  * @param blocking_factors (Output) A vector of blocking factors.
  * @return Error code.
  */
-int jmi_opt_sim_get_blocking_factors(jmi_opt_sim_t *jmi_opt_sim, int *blocking_Factors);
+int jmi_opt_coll_get_blocking_factors(jmi_opt_coll_t *jmi_opt_coll, int *blocking_Factors);
 
 /**
  * \brief Get number of blocking factors.
  *
- * @param jmi_opt_sim A jmi_opt_sim_t struct.
+ * @param jmi_opt_coll A jmi_opt_coll_t struct.
  * @param n_blocking_factors (Output) Number of blocking factors.
  * @return Error code.
  */
-int jmi_opt_sim_get_blocking_factors(jmi_opt_sim_t *jmi_opt_sim, int *n_blocking_Factors);
+int jmi_opt_coll_get_blocking_factors(jmi_opt_coll_t *jmi_opt_coll, int *n_blocking_Factors);
 
 /**
  * \brief Set the initial point of the NLP.
  *
- * @param jmi_opt_sim A jmi_opt_sim_t struct.
+ * @param jmi_opt_coll A jmi_opt_coll_t struct.
  * @param (Output) x_init The initial guess vector.
  * @return Error code.
  */
- int jmi_opt_sim_set_initial(jmi_opt_sim_t *jmi_opt_sim,
+ int jmi_opt_coll_set_initial(jmi_opt_coll_t *jmi_opt_coll,
 		jmi_real_t *x_init);
 
 /**
@@ -241,7 +241,7 @@ int jmi_opt_sim_get_blocking_factors(jmi_opt_sim_t *jmi_opt_sim, int *n_blocking
  * Also, initial guesses for the optimization interval and element lengths
  * are provided.
  *
- * @param jmi_opt_sim A jmi_opt_sim_t struct.
+ * @param jmi_opt_coll A jmi_opt_coll_t struct.
  * @param p_opt_init A vector of size n_p_opt containing initial values for the
  * optimized parameters.
  * @param trajectory_data_init A matrix stored in column major format. The
@@ -258,19 +258,19 @@ int jmi_opt_sim_get_blocking_factors(jmi_opt_sim_t *jmi_opt_sim, int *n_blocking
  * argument is neglected if the final time is fixed.
  *
  */
-int jmi_opt_sim_set_initial_from_trajectory(
-		jmi_opt_sim_t *jmi_opt_sim,
+int jmi_opt_coll_set_initial_from_trajectory(
+		jmi_opt_coll_t *jmi_opt_coll,
 		jmi_real_t *p_opt_init, jmi_real_t *trajectory_data_init,
 		int traj_n_points,jmi_real_t *hs_init, jmi_real_t start_time_init,
 		jmi_real_t final_time_init);
 
 /**
- * \brief The main struct in the jmi_opt_sim interface is jmi_opt_sim_t.
+ * \brief The main struct in the jmi_opt_coll interface is jmi_opt_coll_t.
  *
  * This struct contains a pointer to a jmi_t struct, dimension information of
  * the NLP, and variable vectors.
  */
-struct jmi_opt_sim_t{
+struct jmi_opt_coll_t{
 	jmi_t *jmi;                      // jmi_t struct
 	int n_x;                         // Number of variables
 	int n_e;                         // Number of elements in mesh
@@ -294,53 +294,53 @@ struct jmi_opt_sim_t{
 	int *dh_col;
 	int n_nonlinear_variables;
 	int *non_linear_variables_indices; // Stored Fortran style (first index = 1)
-	jmi_opt_sim_get_dimensions_t get_dimensions;
-	jmi_opt_sim_get_interval_spec_t get_interval_spec;
-	jmi_opt_sim_f_t f;
-	jmi_opt_sim_df_t df;
-	jmi_opt_sim_h_t h;
-	jmi_opt_sim_dh_t dh;
-	jmi_opt_sim_g_t g;
-	jmi_opt_sim_dg_t dg;
+	jmi_opt_coll_get_dimensions_t get_dimensions;
+	jmi_opt_coll_get_interval_spec_t get_interval_spec;
+	jmi_opt_coll_f_t f;
+	jmi_opt_coll_df_t df;
+	jmi_opt_coll_h_t h;
+	jmi_opt_coll_dh_t dh;
+	jmi_opt_coll_g_t g;
+	jmi_opt_coll_dg_t dg;
 	int n_g;                          // Number of inequality constraints
 	int n_h;                          // Number of equality constraints
-	jmi_opt_sim_get_bounds_t get_bounds;
-	jmi_opt_sim_get_initial_t get_initial;
-	jmi_opt_sim_set_initial_from_trajectory_t set_initial_from_trajectory;
-	jmi_opt_sim_g_nz_indices_t dg_nz_indices;
-	jmi_opt_sim_h_nz_indices_t dh_nz_indices;
-	jmi_opt_sim_write_file_matlab_t write_file_matlab;
-	jmi_opt_sim_get_result_variable_vector_length_t get_result_variable_vector_length;
-	jmi_opt_sim_get_result_t get_result;
-	jmi_opt_sim_get_result_mesh_interpolation_t get_result_mesh_interpolation;
-	jmi_opt_sim_get_result_element_interpolation_t get_result_element_interpolation;
+	jmi_opt_coll_get_bounds_t get_bounds;
+	jmi_opt_coll_get_initial_t get_initial;
+	jmi_opt_coll_set_initial_from_trajectory_t set_initial_from_trajectory;
+	jmi_opt_coll_g_nz_indices_t dg_nz_indices;
+	jmi_opt_coll_h_nz_indices_t dh_nz_indices;
+	jmi_opt_coll_write_file_matlab_t write_file_matlab;
+	jmi_opt_coll_get_result_variable_vector_length_t get_result_variable_vector_length;
+	jmi_opt_coll_get_result_t get_result;
+	jmi_opt_coll_get_result_mesh_interpolation_t get_result_mesh_interpolation;
+	jmi_opt_coll_get_result_element_interpolation_t get_result_element_interpolation;
 };
 
 /**
  * \brief Get the upper and lower bounds of the optimization variables.
  *
- * @param jmi_opt_sim A jmi_opt_sim_t struct.
+ * @param jmi_opt_coll A jmi_opt_coll_t struct.
  * @param x_lb (Output) Lower bounds vector.
  * @param x_lb (Output) Upper bounds vector.
  * @return Error code.
  */
-int jmi_opt_sim_get_bounds(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *x_lb, jmi_real_t *x_ub);
+int jmi_opt_coll_get_bounds(jmi_opt_coll_t *jmi_opt_coll, jmi_real_t *x_lb, jmi_real_t *x_ub);
 
 /**
  * \brief Get the upper and lower bounds of the optimization variables.
  *
- * @param jmi_opt_sim A jmi_opt_sim_t struct.
+ * @param jmi_opt_coll A jmi_opt_coll_t struct.
  * @param x_lb (Output) Lower bounds vector.
  * @param x_lb (Output) Upper bounds vector.
  * @return Error code.
  */
-int jmi_opt_sim_set_bounds(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *x_lb, jmi_real_t *x_ub);
+int jmi_opt_coll_set_bounds(jmi_opt_coll_t *jmi_opt_coll, jmi_real_t *x_lb, jmi_real_t *x_ub);
 
 
 /* @} */
 
 /**
- * \defgroup jmi_opt_sim_eval_functions Evaluation of NLP functions.
+ * \defgroup jmi_opt_coll_eval_functions Evaluation of NLP functions.
  * \brief Functions for evaluation of \f$f\f$, \f$g\f$, and \f$h\f$.
  */
 /* @{ */
@@ -348,71 +348,71 @@ int jmi_opt_sim_set_bounds(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *x_lb, jmi_rea
 /**
  * \brief Returns the cost function value at a given point in search space.
  *
- * @param jmi_opt_sim A jmi_opt_sim_t struct.
+ * @param jmi_opt_coll A jmi_opt_coll_t struct.
  * @param f (Output) Value of the cost function.
  * @param Error code.
  */
-int jmi_opt_sim_f(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *f);
+int jmi_opt_coll_f(jmi_opt_coll_t *jmi_opt_coll, jmi_real_t *f);
 
 /**
  * \brief Returns the gradient of the cost function value at
  * a given point in search space.
  *
- * @param jmi_opt_sim A jmi_opt_sim_t struct.
+ * @param jmi_opt_coll A jmi_opt_coll_t struct.
  * @param df (Output) Value of the gradient of the cost function.
  * @param Error code.
  */
-int jmi_opt_sim_df(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *df);
+int jmi_opt_coll_df(jmi_opt_coll_t *jmi_opt_coll, jmi_real_t *df);
 
 /**
  * \brief Returns the residual of the inequality constraints.
  *
- * @param jmi_opt_sim A jmi_opt_sim_t struct.
+ * @param jmi_opt_coll A jmi_opt_coll_t struct.
  * @param res (Output) Residual of the inequality constraints.
  * @param Error code.
  */
-int jmi_opt_sim_g(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *res);
+int jmi_opt_coll_g(jmi_opt_coll_t *jmi_opt_coll, jmi_real_t *res);
 
 /**
  * \brief Returns the Jacobian of the residual of the inequality constraints.
  *
- * @param jmi_opt_sim A jmi_opt_sim_t struct.
+ * @param jmi_opt_coll A jmi_opt_coll_t struct.
  * @param jac (Output) Jacobian of the residual of the inequality constraints.
  * @param Error code.
  */
-int jmi_opt_sim_dg(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac);
+int jmi_opt_coll_dg(jmi_opt_coll_t *jmi_opt_coll, jmi_real_t *jac);
 
 /**
  * \Brief Returns the indices of the non-zeros in the
  * inequality constraint Jacobian. The indices are returned in Fortran style
  * with the first entry indexed as 1.
  *
- * @param jmi_opt_sim A jmi_opt_sim_t struct.
+ * @param jmi_opt_coll A jmi_opt_coll_t struct.
  * @param irow (Output) Row indices of the non-zero entries in the
  *  Jacobian of the residual of the inequality constraints.
  * @param icol (Output) Column indices of the non-zero entries in the
  *  Jacobian of the residual of the inequality constraints.
  * @param Error code.
  */
-int jmi_opt_sim_dg_nz_indices(jmi_opt_sim_t *jmi_opt_sim, int *irow, int *icol);
+int jmi_opt_coll_dg_nz_indices(jmi_opt_coll_t *jmi_opt_coll, int *irow, int *icol);
 
 /**
  * \brief Returns the residual of the equality constraints.
  *
- * @param jmi_opt_sim A jmi_opt_sim_t struct.
+ * @param jmi_opt_coll A jmi_opt_coll_t struct.
  * @param res (Output) Residual of the equality constraints.
  * @param Error code.
  */
-int jmi_opt_sim_h(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *res);
+int jmi_opt_coll_h(jmi_opt_coll_t *jmi_opt_coll, jmi_real_t *res);
 
 /**
  * \brief Returns the Jacobian of the residual of the equality constraints.
  *
- * @param jmi_opt_sim A jmi_opt_sim_t struct.
+ * @param jmi_opt_coll A jmi_opt_coll_t struct.
  * @param jac (Output) Jacobian of the residual of the equality constraints.
  * @param Error code.
  */
-int jmi_opt_sim_dh(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac);
+int jmi_opt_coll_dh(jmi_opt_coll_t *jmi_opt_coll, jmi_real_t *jac);
 
 
 /**
@@ -420,20 +420,20 @@ int jmi_opt_sim_dh(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *jac);
  * equality constraint Jacobian. The indices are returned in Fortran style
  * with the first entry indexed as 1.
  *
- * @param jmi_opt_sim A jmi_opt_sim_t struct.
+ * @param jmi_opt_coll A jmi_opt_coll_t struct.
  * @param irow (Output) Row indices of the non-zero entries in the
  *  Jacobian of the residual of the equality constraints.
  * @param icol (Output) Column indices of the non-zero entries in the
  *  Jacobian of the residual of the equality constraints.
  * @param Error code.
  */
-int jmi_opt_sim_dh_nz_indices(jmi_opt_sim_t *jmi_opt_sim, int *irow, int *icol);
+int jmi_opt_coll_dh_nz_indices(jmi_opt_coll_t *jmi_opt_coll, int *irow, int *icol);
 
 
 /* @} */
 
 /**
- * \defgroup jmi_opt_sim_misc Miscanellous
+ * \defgroup jmi_opt_coll_misc Miscanellous
  * \brief Miscanellous functions.
  */
 /* @{ */
@@ -442,24 +442,24 @@ int jmi_opt_sim_dh_nz_indices(jmi_opt_sim_t *jmi_opt_sim, int *irow, int *icol);
 /**
  * \brief Write the the optimization result to file in Matlab format.
  *
- * @param jmi_opt_sim A jmi_opt_sim_t struct.
+ * @param jmi_opt_coll A jmi_opt_coll_t struct.
  * @param file_name Name of the file.
  * @return Error code.
  *
  */
-int jmi_opt_sim_write_file_matlab(jmi_opt_sim_t *jmi_opt_sim_t,
+int jmi_opt_coll_write_file_matlab(jmi_opt_coll_t *jmi_opt_coll_t,
 		const char *file_name);
 
 /**
  * \brief Get the length of the result variable vectors.
  *
- * @param jmi_opt_sim A jmi_opt_sim_t struct.
+ * @param jmi_opt_coll A jmi_opt_coll_t struct.
  * @param n (Output) the number of points in the independent time vector.
  * @return Error code.
  *
  */
-int jmi_opt_sim_get_result_variable_vector_length(jmi_opt_sim_t
-		*jmi_opt_sim, int *n);
+int jmi_opt_coll_get_result_variable_vector_length(jmi_opt_coll_t
+		*jmi_opt_coll, int *n);
 
 /**
  * \brief Get the optimization results.
@@ -469,9 +469,9 @@ int jmi_opt_sim_get_result_variable_vector_length(jmi_opt_sim_t
  * format) where each row contains the variable values at a particular time
  * point and were each column contains the trajectory of a particular variable.
  * The number of rows of these matrices are given by the function
- * jmi_opt_sim_get_result_variable_vector_length.
+ * jmi_opt_coll_get_result_variable_vector_length.
  *
- * @param jmi_opt_sim A jmi_opt_sim_t struct.
+ * @param jmi_opt_coll A jmi_opt_coll_t struct.
  * @param p_opt (Output) A vector containing the optimal values of the
  * parameters.
  * @param t (Output) The time vector.
@@ -480,7 +480,7 @@ int jmi_opt_sim_get_result_variable_vector_length(jmi_opt_sim_t
  * @param u (Output) The inputs.
  * @param w (Output) The algebraic variables.
  */
-int jmi_opt_sim_get_result(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *p_opt,
+int jmi_opt_coll_get_result(jmi_opt_coll_t *jmi_opt_coll, jmi_real_t *p_opt,
 		jmi_real_t *t, jmi_real_t *dx, jmi_real_t *x, jmi_real_t *u,
 		jmi_real_t *w);
 
@@ -495,7 +495,7 @@ int jmi_opt_sim_get_result(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *p_opt,
  * the length of the user provided mesh. The variable values are computed using
  * interpolation.
  *
- * @param jmi_opt_sim A jmi_opt_sim_t struct.
+ * @param jmi_opt_coll A jmi_opt_coll_t struct.
  * @param mesh Mesh used for computation of the result.
  * @param n_mesh Length of the mesh.
  * @param p_opt (Output) A vector containing the optimal values of the
@@ -506,7 +506,7 @@ int jmi_opt_sim_get_result(jmi_opt_sim_t *jmi_opt_sim, jmi_real_t *p_opt,
  * @param u (Output) The inputs.
  * @param w (Output) The algebraic variables.
  */
-int jmi_opt_sim_get_result_mesh_interpolation(jmi_opt_sim_t *jmi_opt_sim,
+int jmi_opt_coll_get_result_mesh_interpolation(jmi_opt_coll_t *jmi_opt_coll,
 		jmi_real_t *mesh, int n_mesh, jmi_real_t *p_opt,
 		jmi_real_t *t, jmi_real_t *dx, jmi_real_t *x, jmi_real_t *u,
 		jmi_real_t *w);
@@ -526,7 +526,7 @@ int jmi_opt_sim_get_result_mesh_interpolation(jmi_opt_sim_t *jmi_opt_sim,
  * points within each finite element. Interpolation is used to compute the
  * variables at each point.
  *
- * @param jmi_opt_sim A jmi_opt_sim_t struct.
+ * @param jmi_opt_coll A jmi_opt_coll_t struct.
  * @param n_interpolation_points Number of interpolation points in each
  * interval.
  * @param p_opt (Output) A vector containing the optimal values of the
@@ -537,7 +537,7 @@ int jmi_opt_sim_get_result_mesh_interpolation(jmi_opt_sim_t *jmi_opt_sim,
  * @param u (Output) The inputs.
  * @param w (Output) The algebraic variables.
  */
-int jmi_opt_sim_get_result_element_interpolation(jmi_opt_sim_t *jmi_opt_sim,
+int jmi_opt_coll_get_result_element_interpolation(jmi_opt_coll_t *jmi_opt_coll,
 		int n_interpolation_points, jmi_real_t *p_opt,
 		jmi_real_t *t, jmi_real_t *dx, jmi_real_t *x, jmi_real_t *u,
 		jmi_real_t *w);
@@ -548,7 +548,7 @@ int jmi_opt_sim_get_result_element_interpolation(jmi_opt_sim_t *jmi_opt_sim,
 #endif
 
 
-#endif /* JMI_OPT_SIM_H_ */
+#endif /* JMI_OPT_COLL_H_ */
 
 /* @} */
 /* @} */

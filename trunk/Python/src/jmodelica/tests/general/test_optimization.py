@@ -340,10 +340,10 @@ class TestOptInitBlockingFactors:
         m_u_1 = self.res_init.get_variable_data("m.u").x
         m_u_2 = self.res_init2.get_variable_data("m.u").x
         
-        (n_x, n_g, n_h, dg_n_nz, dh_n_nz) = self.nlp.opt_sim_get_dimensions()
+        (n_x, n_g, n_h, dg_n_nz, dh_n_nz) = self.nlp.opt_coll_get_dimensions()
         
         x_init = N.zeros(n_x)
-        self.nlp.opt_sim_get_initial(x_init)
+        self.nlp.opt_coll_get_initial(x_init)
 
         offs_x_el_junc = 8 + 7*self.n_e*self.n_cp + self.n_e
 
@@ -378,7 +378,7 @@ class TestOptInitBlockingFactors:
         t_tp = N.linspace(1,10,10)
 
         h=N.zeros(n_h)
-        self.nlp.opt_sim_h(h)
+        self.nlp.opt_coll_h(h)
         print N.max(N.abs(h))
 
 #         plt.figure(3)
@@ -503,7 +503,7 @@ class TestOptInitBlockingFactors:
         assert N.sum(N.abs(w_p-w_p_res))<1e-3, "Error in initialization of w_p"
         
         optimizer = CollocationOptimizer(self.nlp)
-        optimizer.opt_sim_ipopt_solve()
+        optimizer.opt_coll_ipopt_solve()
 
 class TestLagrangeCost1(OptimizationTest):
 

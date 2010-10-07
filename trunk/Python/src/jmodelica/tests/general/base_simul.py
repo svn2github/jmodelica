@@ -318,7 +318,7 @@ class OptimizationTest(_BaseSimOptTest):
         """
         Run optimization and write result to file.
         """
-        self.ipopt.opt_sim_ipopt_solve()
+        self.ipopt.opt_coll_ipopt_solve()
         if self._result_mesh=='element_interpolation':
             print "hej"
             self.nlp.export_result_dymola_element_interpolation(**self._result_arguments)
@@ -339,11 +339,11 @@ def _set_ipopt_options(nlp, opts):
     """
     for k, v in opts.iteritems():
         if isinstance(v, int):
-            nlp.opt_sim_ipopt_set_int_option(k, v)
+            nlp.opt_coll_ipopt_set_int_option(k, v)
         elif isinstance(v, float):
-            nlp.opt_sim_ipopt_set_num_option(k, v)
+            nlp.opt_coll_ipopt_set_num_option(k, v)
         elif isinstance(v, str):
-            nlp.opt_sim_ipopt_set_string_option(k, v)
+            nlp.opt_coll_ipopt_set_string_option(k, v)
 
 
 def _set_compiler_options(cmp, opts):

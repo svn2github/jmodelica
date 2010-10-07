@@ -77,7 +77,7 @@ class TestIO:
         nlp_ipopt = ipopt.CollocationOptimizer(nlp)
 
         # Solve the optimization problem
-        nlp_ipopt.opt_sim_ipopt_solve()
+        nlp_ipopt.opt_coll_ipopt_solve()
        
         # Get the result
         p_opt, traj = nlp.get_result()

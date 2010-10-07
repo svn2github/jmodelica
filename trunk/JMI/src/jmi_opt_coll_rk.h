@@ -18,7 +18,7 @@
 */
 
 
-/** \file jmi_opt_sim_rk.h
+/** \file jmi_opt_coll_rk.h
  *  \brief An implementation of a simultaneous optimization method based on
  *  a Runge-Kutta scheme.
  */

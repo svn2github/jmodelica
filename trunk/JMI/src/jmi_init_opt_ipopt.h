@@ -17,8 +17,8 @@
     <http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
 */
 
-/** \file jmi_opt_sim_ipopt.h
- *  \brief An interface between the NLP representation provided by jmi_opt_sim_t
+/** \file jmi_init_opt_ipopt.h
+ *  \brief An interface between the NLP representation provided by jmi_init_opt_t
  *  and IPOPT.
  **/
 

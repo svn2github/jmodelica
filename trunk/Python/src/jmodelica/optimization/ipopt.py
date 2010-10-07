@@ -55,9 +55,9 @@ class CollocationOptimizer(object):
         self._set_collocationOpt_typedefs()
         
         try:
-            assert self._nlp_collocation._model.jmimodel._dll.jmi_opt_sim_ipopt_new(
-                byref(self._ipopt_opt), self._nlp_collocation._jmi_opt_sim) == 0, \
-                   "jmi_opt_sim_ipopt_new returned non-zero"
+            assert self._nlp_collocation._model.jmimodel._dll.jmi_opt_coll_ipopt_new(
+                byref(self._ipopt_opt), self._nlp_collocation._jmi_opt_coll) == 0, \
+                   "jmi_opt_coll_ipopt_new returned non-zero"
         except AttributeError, e:
             raise jmi.JMIException("Can not create JMISimultaneousOptIPOPT \
             object. Please recompile model with target='ipopt")
@@ -67,19 +67,19 @@ class CollocationOptimizer(object):
                
     def _set_collocationOpt_typedefs(self):
         try:
-            self._nlp_collocation._model.jmimodel._dll.jmi_opt_sim_ipopt_new.argtypes = [ct.c_void_p,
+            self._nlp_collocation._model.jmimodel._dll.jmi_opt_coll_ipopt_new.argtypes = [ct.c_void_p,
                                                                                          ct.c_void_p]
-            self._nlp_collocation._model.jmimodel._dll.jmi_opt_sim_ipopt_solve.argtypes = [ct.c_void_p]
-            self._nlp_collocation._model.jmimodel._dll.jmi_opt_sim_ipopt_set_string_option.argtypes = [ct.c_void_p,
+            self._nlp_collocation._model.jmimodel._dll.jmi_opt_coll_ipopt_solve.argtypes = [ct.c_void_p]
+            self._nlp_collocation._model.jmimodel._dll.jmi_opt_coll_ipopt_set_string_option.argtypes = [ct.c_void_p,
                                                                                                        ct.c_char_p,
                                                                                                        ct.c_char_p]
-            self._nlp_collocation._model.jmimodel._dll.jmi_opt_sim_ipopt_set_int_option.argtypes = [ct.c_void_p,
+            self._nlp_collocation._model.jmimodel._dll.jmi_opt_coll_ipopt_set_int_option.argtypes = [ct.c_void_p,
                                                                                                     ct.c_char_p,
                                                                                                     ct.c_int]
-            self._nlp_collocation._model.jmimodel._dll.jmi_opt_sim_ipopt_set_num_option.argtypes = [ct.c_void_p,
+            self._nlp_collocation._model.jmimodel._dll.jmi_opt_coll_ipopt_set_num_option.argtypes = [ct.c_void_p,
                                                                                                     ct.c_char_p,
                                                                                                     c_jmi_real_t]
-            self._nlp_collocation._model.jmimodel._dll.jmi_opt_sim_ipopt_get_statistics.argtypes = [ct.c_void_p,
+            self._nlp_collocation._model.jmimodel._dll.jmi_opt_coll_ipopt_get_statistics.argtypes = [ct.c_void_p,
                                                                                          ct.POINTER(ct.c_int),
                                                                                          ct.POINTER(ct.c_int),
                                                                                          ct.POINTER(c_jmi_real_t),
@@ -87,12 +87,12 @@ class CollocationOptimizer(object):
         except AttributeError, e:
             pass       
                
-    def opt_sim_ipopt_solve(self):
+    def opt_coll_ipopt_solve(self):
         """ Solve the NLP problem."""
-        if self._nlp_collocation._model.jmimodel._dll.jmi_opt_sim_ipopt_solve(self._ipopt_opt) > 1:
+        if self._nlp_collocation._model.jmimodel._dll.jmi_opt_coll_ipopt_solve(self._ipopt_opt) > 1:
             raise jmi.JMIException("Solving IPOPT failed.")
     
-    def opt_sim_ipopt_set_string_option(self, key, val):
+    def opt_coll_ipopt_set_string_option(self, key, val):
         """ Set an Ipopt string option.
         
         Parameters::
@@ -103,12 +103,12 @@ class CollocationOptimizer(object):
                 The value of the option.
             
         """
-        if self._nlp_collocation._model.jmimodel._dll.jmi_opt_sim_ipopt_set_string_option(
+        if self._nlp_collocation._model.jmimodel._dll.jmi_opt_coll_ipopt_set_string_option(
             self._ipopt_opt, key, val) is not 0: 
                 raise jmi.JMIException("The Ipopt string option \
                 " + key + " is unknown")
         
-    def opt_sim_ipopt_set_int_option(self, key, val):
+    def opt_coll_ipopt_set_int_option(self, key, val):
         """ Set an Ipopt integer option.
         
         Parameters::
@@ -119,12 +119,12 @@ class CollocationOptimizer(object):
                 The value of the option.
             
         """        
-        if self._nlp_collocation._model.jmimodel._dll.jmi_opt_sim_ipopt_set_int_option(
+        if self._nlp_collocation._model.jmimodel._dll.jmi_opt_coll_ipopt_set_int_option(
             self._ipopt_opt, key, val) is not 0:
             raise jmi.JMIException("The Ipopt integer option \
             " + key + " is unknown")
 
-    def opt_sim_ipopt_set_num_option(self, key, val):
+    def opt_coll_ipopt_set_num_option(self, key, val):
         """ Set an Ipopt double option.
         
         Parameters::
@@ -135,12 +135,12 @@ class CollocationOptimizer(object):
                 The value of the option.
             
         """
-        if self._nlp_collocation._model.jmimodel._dll.jmi_opt_sim_ipopt_set_num_option(
+        if self._nlp_collocation._model.jmimodel._dll.jmi_opt_coll_ipopt_set_num_option(
             self._ipopt_opt, key, val) is not 0:
             raise jmi.JMIException("The Ipopt real option \
             " + key + " is unknown")
 
-    def opt_sim_ipopt_get_statistics(self):
+    def opt_coll_ipopt_get_statistics(self):
         """ Get statistics from the last optimization run.
 
         Returns::
@@ -158,7 +158,7 @@ class CollocationOptimizer(object):
         iters = ct.c_int()
         objective = c_jmi_real_t()
         exec_time = c_jmi_real_t()
-        if self._nlp_collocation._model.jmimodel._dll.jmi_opt_sim_ipopt_get_statistics(self._ipopt_opt,
+        if self._nlp_collocation._model.jmimodel._dll.jmi_opt_coll_ipopt_get_statistics(self._ipopt_opt,
                                                                            byref(return_code),
                                                                            byref(iters),
                                                                            byref(objective),
@@ -184,11 +184,11 @@ class NLPCollocation(object):
     
     def _initialize(self, model):
         self._model = model
-        self._jmi_opt_sim = ct.c_voidp()
+        self._jmi_opt_coll = ct.c_voidp()
      
     def _set_nlpCollocation_typedefs(self):
         try:
-            self._model.jmimodel._dll.jmi_opt_sim_get_dimensions.argtypes = [ct.c_void_p,
+            self._model.jmimodel._dll.jmi_opt_coll_get_dimensions.argtypes = [ct.c_void_p,
                                                                              ct.POINTER(ct.c_int),
                                                                              ct.POINTER(ct.c_int),
                                                                              ct.POINTER(ct.c_int),
@@ -199,31 +199,31 @@ class NLPCollocation(object):
             n_h = ct.c_int()
             dg_n_nz = ct.c_int()
             dh_n_nz = ct.c_int()
-            assert self._model.jmimodel._dll.jmi_opt_sim_get_dimensions(self._jmi_opt_sim, byref(n_real_x), byref(n_g),
+            assert self._model.jmimodel._dll.jmi_opt_coll_get_dimensions(self._jmi_opt_coll, byref(n_real_x), byref(n_g),
                                            byref(n_h), byref(dg_n_nz), byref(dh_n_nz)) \
             is 0, \
                "getting NLP problem dimensions failed"        
 
-            self._model.jmimodel._dll.jmi_opt_sim_get_n_e.argtypes = [ct.c_void_p,
+            self._model.jmimodel._dll.jmi_opt_coll_get_n_e.argtypes = [ct.c_void_p,
                                                                       ct.POINTER(ct.c_int)]
             
-            self._model.jmimodel._dll.jmi_opt_sim_get_interval_spec.argtypes = [ct.c_void_p,
+            self._model.jmimodel._dll.jmi_opt_coll_get_interval_spec.argtypes = [ct.c_void_p,
                                                                                 ct.POINTER(c_jmi_real_t),
                                                                                 ct.POINTER(ct.c_int),
                                                                                 ct.POINTER(c_jmi_real_t),
                                                                                 ct.POINTER(ct.c_int)]
-            self._model.jmimodel._dll.jmi_opt_sim_get_x.argtypes =[ct.c_void_p]
-            self._model.jmimodel._dll.jmi_opt_sim_get_initial.argtypes = [ct.c_void_p,
+            self._model.jmimodel._dll.jmi_opt_coll_get_x.argtypes =[ct.c_void_p]
+            self._model.jmimodel._dll.jmi_opt_coll_get_initial.argtypes = [ct.c_void_p,
                                                                           Nct.ndpointer(dtype=c_jmi_real_t,
                                                                                         ndim=1,
                                                                                         shape=n_real_x.value,
                                                                                         flags='C')]
-            self._model.jmimodel._dll.jmi_opt_sim_set_initial.argtypes =  [ct.c_void_p,
+            self._model.jmimodel._dll.jmi_opt_coll_set_initial.argtypes =  [ct.c_void_p,
                                                                            Nct.ndpointer(dtype=c_jmi_real_t,
                                                                                          ndim=1,
                                                                                          shape=n_real_x.value,
                                                                                          flags='C')]
-            self._model.jmimodel._dll.jmi_opt_sim_set_initial_from_trajectory.argtypes = [ct.c_void_p,
+            self._model.jmimodel._dll.jmi_opt_coll_set_initial_from_trajectory.argtypes = [ct.c_void_p,
                                                                                           Nct.ndpointer(dtype=c_jmi_real_t,
                                                                                                         ndim=1,
                                                                                                         shape=self._model._n_p_opt,
@@ -237,7 +237,7 @@ class NLPCollocation(object):
                                                                                                         flags='C'),
                                                                                           c_jmi_real_t,
                                                                                           c_jmi_real_t]
-            self._model.jmimodel._dll.jmi_opt_sim_get_bounds.argtypes = [ct.c_void_p,
+            self._model.jmimodel._dll.jmi_opt_coll_get_bounds.argtypes = [ct.c_void_p,
                                                                          Nct.ndpointer(dtype=c_jmi_real_t,
                                                                                        ndim=1,
                                                                                        shape=n_real_x.value,
@@ -246,7 +246,7 @@ class NLPCollocation(object):
                                                                                        ndim=1,
                                                                                        shape=n_real_x.value,
                                                                                        flags='C')]
-            self._model.jmimodel._dll.jmi_opt_sim_set_bounds.argtypes = [ct.c_void_p,
+            self._model.jmimodel._dll.jmi_opt_coll_set_bounds.argtypes = [ct.c_void_p,
                                                                          Nct.ndpointer(dtype=c_jmi_real_t,
                                                                                        ndim=1,
                                                                                        shape=n_real_x.value,
@@ -255,24 +255,24 @@ class NLPCollocation(object):
                                                                                        ndim=1,
                                                                                        shape=n_real_x.value,
                                                                                        flags='C')]
-            self._model.jmimodel._dll.jmi_opt_sim_f.argtypes = [ct.c_void_p,
+            self._model.jmimodel._dll.jmi_opt_coll_f.argtypes = [ct.c_void_p,
                                                                 ct.POINTER(c_jmi_real_t)]
-            self._model.jmimodel._dll.jmi_opt_sim_df.argtypes = [ct.c_void_p,
+            self._model.jmimodel._dll.jmi_opt_coll_df.argtypes = [ct.c_void_p,
                                                                  Nct.ndpointer(dtype=c_jmi_real_t,
                                                                                ndim=1,
                                                                                shape=n_real_x.value,
                                                                                flags='C')]
-            self._model.jmimodel._dll.jmi_opt_sim_g.argtypes = [ct.c_void_p,
+            self._model.jmimodel._dll.jmi_opt_coll_g.argtypes = [ct.c_void_p,
                                                                 Nct.ndpointer(dtype=c_jmi_real_t,
                                                                               ndim=1,
                                                                               shape=n_g.value,
                                                                               flags='C')]
-            self._model.jmimodel._dll.jmi_opt_sim_dg.argtypes = [ct.c_void_p,
+            self._model.jmimodel._dll.jmi_opt_coll_dg.argtypes = [ct.c_void_p,
                                                                  Nct.ndpointer(dtype=c_jmi_real_t,
                                                                                ndim=1,
                                                                                shape=dg_n_nz.value,
                                                                                flags='C')]
-            self._model.jmimodel._dll.jmi_opt_sim_dg_nz_indices.argtypes = [ct.c_void_p,
+            self._model.jmimodel._dll.jmi_opt_coll_dg_nz_indices.argtypes = [ct.c_void_p,
                                                                             Nct.ndpointer(dtype=ct.c_int,
                                                                                           ndim=1,
                                                                                           shape=dg_n_nz.value,
@@ -281,17 +281,17 @@ class NLPCollocation(object):
                                                                                           ndim=1,
                                                                                           shape=dg_n_nz.value,
                                                                                           flags='C')]
-            self._model.jmimodel._dll.jmi_opt_sim_h.argtypes = [ct.c_void_p,
+            self._model.jmimodel._dll.jmi_opt_coll_h.argtypes = [ct.c_void_p,
                                                                 Nct.ndpointer(dtype=c_jmi_real_t,
                                                                               ndim=1,
                                                                               shape=n_h.value,
                                                                               flags='C')]
-            self._model.jmimodel._dll.jmi_opt_sim_dh.argtypes = [ct.c_void_p,
+            self._model.jmimodel._dll.jmi_opt_coll_dh.argtypes = [ct.c_void_p,
                                                                  Nct.ndpointer(dtype=c_jmi_real_t,
                                                                                ndim=1,
                                                                                shape=dh_n_nz.value,
                                                                                flags='C')]
-            self._model.jmimodel._dll.jmi_opt_sim_dh_nz_indices.argtypes = [ct.c_void_p,
+            self._model.jmimodel._dll.jmi_opt_coll_dh_nz_indices.argtypes = [ct.c_void_p,
                                                                             Nct.ndpointer(dtype=ct.c_int,
                                                                                           ndim=1,
                                                                                           shape=dh_n_nz.value,
@@ -300,12 +300,12 @@ class NLPCollocation(object):
                                                                                           ndim=1,
                                                                                           shape=dh_n_nz.value,
                                                                                           flags='C')]
-            self._model.jmimodel._dll.jmi_opt_sim_write_file_matlab.argtypes = [ct.c_void_p,
+            self._model.jmimodel._dll.jmi_opt_coll_write_file_matlab.argtypes = [ct.c_void_p,
                                                                                 ct.c_char_p]
-            self._model.jmimodel._dll.jmi_opt_sim_get_result_variable_vector_length.argtypes = [ct.c_void_p,
+            self._model.jmimodel._dll.jmi_opt_coll_get_result_variable_vector_length.argtypes = [ct.c_void_p,
                                                                                                 ct.POINTER(ct.c_int)]
             timepoints = ct.c_int()
-            assert self._model.jmimodel._dll.jmi_opt_sim_get_result_variable_vector_length(self._jmi_opt_sim, byref(timepoints)) \
+            assert self._model.jmimodel._dll.jmi_opt_coll_get_result_variable_vector_length(self._jmi_opt_coll, byref(timepoints)) \
             is 0, \
                "getting number of points in the independent time vector failed"
 
@@ -313,7 +313,7 @@ class NLPCollocation(object):
             res_x = timepoints.value*self._model._n_real_x.value
             res_u = timepoints.value*self._model._n_real_u.value
             res_w = timepoints.value*self._model._n_real_w.value
-            self._model.jmimodel._dll.jmi_opt_sim_get_result.argtypes = [ct.c_void_p,
+            self._model.jmimodel._dll.jmi_opt_coll_get_result.argtypes = [ct.c_void_p,
                                                                          Nct.ndpointer(dtype=c_jmi_real_t,
                                                                                        ndim=1,
                                                                                        shape=self._model._n_p_opt,
@@ -339,7 +339,7 @@ class NLPCollocation(object):
                                                                                        shape=res_w,
                                                                                        flags='C')]
 
-            self._model.jmimodel._dll.jmi_opt_sim_get_result_element_interpolation.argtypes = [ct.c_void_p,
+            self._model.jmimodel._dll.jmi_opt_coll_get_result_element_interpolation.argtypes = [ct.c_void_p,
                                                                                                ct.c_int,
                                                                          Nct.ndpointer(dtype=c_jmi_real_t,
                                                                                        ndim=1,
@@ -361,7 +361,7 @@ class NLPCollocation(object):
                                                                                        ndim=1,
                                                                                        flags='C')]
             
-            self._model.jmimodel._dll.jmi_opt_sim_get_result_mesh_interpolation.argtypes = [ct.c_void_p,
+            self._model.jmimodel._dll.jmi_opt_coll_get_result_mesh_interpolation.argtypes = [ct.c_void_p,
                                                                                             Nct.ndpointer(dtype=c_jmi_real_t,
                                                                                                           ndim=1,
                                                                                                           flags='C'),
@@ -387,8 +387,8 @@ class NLPCollocation(object):
                                                                                        flags='C')]
 
 
-            # n_real_x from jmi_opt_sim_get_dimensions
-            jmi._returns_ndarray(self._model.jmimodel._dll.jmi_opt_sim_get_x, c_jmi_real_t, n_real_x.value, order='C')
+            # n_real_x from jmi_opt_coll_get_dimensions
+            jmi._returns_ndarray(self._model.jmimodel._dll.jmi_opt_coll_get_x, c_jmi_real_t, n_real_x.value, order='C')
         except AttributeError, e:
             pass
        
@@ -409,7 +409,7 @@ class NLPCollocation(object):
                 according to increasing value references.
         """
         
-        n_points = self.opt_sim_get_result_variable_vector_length()
+        n_points = self.opt_coll_get_result_variable_vector_length()
 
         sizes = self._model.get_sizes()
         n_real_dx = sizes[12]
@@ -427,7 +427,7 @@ class NLPCollocation(object):
         w_ = N.zeros(n_real_w*n_points)
         
         # Get the result
-        self.opt_sim_get_result(p_opt,t_,dx_,x_,u_,w_)
+        self.opt_coll_get_result(p_opt,t_,dx_,x_,u_,w_)
 
         data = N.zeros((n_points,1+n_real_dx+n_real_x+n_real_u+n_real_w))
         data[:,0] = t_
@@ -484,7 +484,7 @@ class NLPCollocation(object):
                 according to increasing value references.
         """
 
-        n_points = self.opt_sim_get_n_e()*n_interpolation_points
+        n_points = self.opt_coll_get_n_e()*n_interpolation_points
 
         sizes = self._model.get_sizes()
         n_real_dx = sizes[12]
@@ -502,7 +502,7 @@ class NLPCollocation(object):
         w_ = N.zeros(n_real_w*n_points)
         
         # Get the result
-        self.opt_sim_get_result_element_interpolation(
+        self.opt_coll_get_result_element_interpolation(
             n_interpolation_points,p_opt,t_,dx_,x_,u_,w_)
         
         data = N.zeros((n_points,1+n_real_dx+n_real_x+n_real_u+n_real_w))
@@ -573,7 +573,7 @@ class NLPCollocation(object):
         w_ = N.zeros(n_real_w*n_points)
         
         # Get the result
-        self.opt_sim_get_result_mesh_interpolation(mesh,n_points,p_opt,t_,dx_,x_,u_,w_)
+        self.opt_coll_get_result_mesh_interpolation(mesh,n_points,p_opt,t_,dx_,x_,u_,w_)
         
         data = N.zeros((n_points,1+n_real_dx+n_real_x+n_real_u+n_real_w))
         data[:,0] = t_
@@ -927,10 +927,10 @@ class NLPCollocation(object):
         #print(var_data)
         #print(N.reshape(var_data,(n_cols*n_points,1),order='F')[:,0])
             
-        self.opt_sim_set_initial_from_trajectory(p_opt_data,N.reshape(var_data,(n_cols*n_points,1),order='F')[:,0],N.size(var_data,0),
+        self.opt_coll_set_initial_from_trajectory(p_opt_data,N.reshape(var_data,(n_cols*n_points,1),order='F')[:,0],N.size(var_data,0),
                                                  hs_init,start_time_init,final_time_init)
         
-    def opt_sim_get_dimensions(self):
+    def opt_coll_get_dimensions(self):
         """ Get the number of variables and the number of constraints in 
         the problem.
         
@@ -947,14 +947,14 @@ class NLPCollocation(object):
         n_h = ct.c_int()
         dg_n_nz = ct.c_int()
         dh_n_nz = ct.c_int()
-        if self._model.jmimodel._dll.jmi_opt_sim_get_dimensions(
-            self._jmi_opt_sim, byref(n_real_x), byref(n_g), byref(n_h), 
+        if self._model.jmimodel._dll.jmi_opt_coll_get_dimensions(
+            self._jmi_opt_coll, byref(n_real_x), byref(n_g), byref(n_h), 
             byref(dg_n_nz), byref(dh_n_nz)) is not 0:
             raise jmi.JMIException("Getting the number of variables and \
             constraints failed.")
         return n_real_x.value, n_g.value, n_h.value, dg_n_nz.value, dh_n_nz.value
 
-    def opt_sim_get_n_e(self):
+    def opt_coll_get_n_e(self):
         """ Get the number of finite elements.
         
         Returns::
@@ -962,13 +962,13 @@ class NLPCollocation(object):
             The number of inite elements         
         """
         n_e = ct.c_int()
-        if self._model.jmimodel._dll.jmi_opt_sim_get_n_e(
-            self._jmi_opt_sim,byref(n_e)) is not 0:
+        if self._model.jmimodel._dll.jmi_opt_coll_get_n_e(
+            self._jmi_opt_coll,byref(n_e)) is not 0:
             raise jmi.JMIException("Getting the optimization interval \
             data failed.")
         return n_e.value
 
-    def opt_sim_get_interval_spec(self, start_time, start_time_free, 
+    def opt_coll_get_interval_spec(self, start_time, start_time_free, 
         final_time, final_time_free):
         """ Get data that specifies the optimization interval.
         
@@ -986,23 +986,23 @@ class NLPCollocation(object):
                 variable)
         
         """
-        if self._model.jmimodel._dll.jmi_opt_sim_get_interval_spec(
-            self._jmi_opt_sim, start_time, start_time_free, final_time, 
+        if self._model.jmimodel._dll.jmi_opt_coll_get_interval_spec(
+            self._jmi_opt_coll, start_time, start_time_free, final_time, 
             final_time_free) is not 0:
             raise jmi.JMIException("Getting the optimization interval \
             data failed.")
         
-    def opt_sim_get_x(self):
+    def opt_coll_get_x(self):
         """ Get the x vector of the NLP. 
         
         Returns::
         
             The x vector of the NLP.
         """
-        return self._model.jmimodel._dll.jmi_opt_sim_get_x(
-            self._jmi_opt_sim)
+        return self._model.jmimodel._dll.jmi_opt_coll_get_x(
+            self._jmi_opt_coll)
 
-    def opt_sim_get_initial(self, x_init):
+    def opt_coll_get_initial(self, x_init):
         """ Get the initial point of the NLP.
         
         Parameters::
@@ -1011,11 +1011,11 @@ class NLPCollocation(object):
                 The initial guess vector. (Return variable)
         
         """
-        if self._model.jmimodel._dll.jmi_opt_sim_get_initial(
-            self._jmi_opt_sim, x_init) is not 0:
+        if self._model.jmimodel._dll.jmi_opt_coll_get_initial(
+            self._jmi_opt_coll, x_init) is not 0:
             raise jmi.JMIException("Getting the initial point failed.")
 
-    def opt_sim_set_initial(self, x_init):
+    def opt_coll_set_initial(self, x_init):
         """ Set the initial point of the NLP.
 
         Parameters::
@@ -1023,10 +1023,10 @@ class NLPCollocation(object):
             x_init --- 
                 The initial guess vector.
         """
-        if self._model.jmimodel._dll.jmi_opt_sim_set_initial(self._jmi_opt_sim, x_init) is not 0:
+        if self._model.jmimodel._dll.jmi_opt_coll_set_initial(self._jmi_opt_coll, x_init) is not 0:
             raise jmi.JMIException("Setting the initial point failed.")
  
-    def opt_sim_set_initial_from_trajectory(self, p_opt_init, 
+    def opt_coll_set_initial_from_trajectory(self, p_opt_init, 
         trajectory_data_init, traj_n_points, hs_init, start_time_init, 
         final_time_init):
         """ Set the initial point based on time series trajectories of 
@@ -1064,8 +1064,8 @@ class NLPCollocation(object):
             + self._model._n_real_u.value + self._model._n_real_w.value + 1
         if sum*traj_n_points != len(trajectory_data_init):
             raise jmi.JMIException("trajectory_data_init vector has the wrong size.")        
-        if self._model.jmimodel._dll.jmi_opt_sim_set_initial_from_trajectory(
-            self._jmi_opt_sim, \
+        if self._model.jmimodel._dll.jmi_opt_coll_set_initial_from_trajectory(
+            self._jmi_opt_coll, \
             p_opt_init, \
             trajectory_data_init, \
             traj_n_points, \
@@ -1074,7 +1074,7 @@ class NLPCollocation(object):
             final_time_init) is not 0:
             raise jmi.JMIException("Setting the initial point failed.")
 
-    def opt_sim_get_bounds(self, x_lb, x_ub):
+    def opt_coll_get_bounds(self, x_lb, x_ub):
         """ Get the upper and lower bounds of the optimization variables.
         
         Parameters::
@@ -1085,12 +1085,12 @@ class NLPCollocation(object):
                 The upper bounds vector. (Return variable)
         
         """
-        if self._model.jmimodel._dll.jmi_opt_sim_get_bounds(
-            self._jmi_opt_sim, x_lb, x_ub) is not 0:
+        if self._model.jmimodel._dll.jmi_opt_coll_get_bounds(
+            self._jmi_opt_coll, x_lb, x_ub) is not 0:
             raise jmi.JMIException("Getting upper and lower bounds of \
             the optimization variables failed.")
 
-    def opt_sim_set_bounds(self, x_lb, x_ub):
+    def opt_coll_set_bounds(self, x_lb, x_ub):
         """ Set the upper and lower bounds of the optimization variables.
         
         Parameters::
@@ -1101,12 +1101,12 @@ class NLPCollocation(object):
                 The upper bounds vector. (Return variable)
         
         """
-        if self._model.jmimodel._dll.jmi_opt_sim_set_bounds(
-            self._jmi_opt_sim, x_lb, x_ub) is not 0:
+        if self._model.jmimodel._dll.jmi_opt_coll_set_bounds(
+            self._jmi_opt_coll, x_lb, x_ub) is not 0:
             raise jmi.JMIException("Getting upper and lower bounds of \
             the optimization variables failed.")
         
-    def opt_sim_f(self, f):
+    def opt_coll_f(self, f):
         """ Get the cost function value at a given point in search space.
         
         Parameters::
@@ -1115,10 +1115,10 @@ class NLPCollocation(object):
                 Value of the cost function. (Return variable)
         
         """
-        if self._model.jmimodel._dll.jmi_opt_sim_f(self._jmi_opt_sim, f) is not 0:
+        if self._model.jmimodel._dll.jmi_opt_coll_f(self._jmi_opt_coll, f) is not 0:
             raise jmi.JMIException("Getting the cost function failed.")
         
-    def opt_sim_df(self, df):
+    def opt_coll_df(self, df):
         """ Get the gradient of the cost function value at a given point 
         in search space.
         
@@ -1129,12 +1129,12 @@ class NLPCollocation(object):
                 variable)
             
         """
-        if self._model.jmimodel._dll.jmi_opt_sim_df(
-            self._jmi_opt_sim, df) is not 0:
+        if self._model.jmimodel._dll.jmi_opt_coll_df(
+            self._jmi_opt_coll, df) is not 0:
             raise jmi.JMIException("Getting the gradient of the cost \
             function value failed.")
         
-    def opt_sim_g(self, res):
+    def opt_coll_g(self, res):
         """ Get the residual of the inequality constraints g.
         
         Parameters::
@@ -1144,12 +1144,12 @@ class NLPCollocation(object):
                 variable)
             
         """
-        if self._model.jmimodel._dll.jmi_opt_sim_g(
-            self._jmi_opt_sim, res) is not 0:
+        if self._model.jmimodel._dll.jmi_opt_coll_g(
+            self._jmi_opt_coll, res) is not 0:
             raise jmi.JMIException("Getting the residual of the \
             inequality constraints failed.")
         
-    def opt_sim_dg(self, jac):
+    def opt_coll_dg(self, jac):
         """ Get the Jacobian of the residual of the inequality 
         constraints.
         
@@ -1160,12 +1160,12 @@ class NLPCollocation(object):
                 constraints. (Return variable)
         
         """
-        if self._model.jmimodel._dll.jmi_opt_sim_dg(
-            self._jmi_opt_sim, jac) is not 0:
+        if self._model.jmimodel._dll.jmi_opt_coll_dg(
+            self._jmi_opt_coll, jac) is not 0:
             raise jmi.JMIException("Getting the Jacobian of the residual \
             of the inequality constraints failed.")
         
-    def opt_sim_dg_nz_indices(self, irow, icol):
+    def opt_coll_dg_nz_indices(self, irow, icol):
         """ Get the indices of the non-zeros in the inequality 
         constraint Jacobian.
         
@@ -1181,12 +1181,12 @@ class NLPCollocation(object):
                 (Return variable)
         
         """
-        if self._model.jmimodel._dll.jmi_opt_sim_dg_nz_indices(
-            self._jmi_opt_sim, irow, icol) is not 0:
+        if self._model.jmimodel._dll.jmi_opt_coll_dg_nz_indices(
+            self._jmi_opt_coll, irow, icol) is not 0:
             raise jmi.JMIException("Getting the indices of the non-zeros \
             in the equality constraint Jacobian failed.")
         
-    def opt_sim_h(self, res):
+    def opt_coll_h(self, res):
         """ Get the residual of the equality constraints h.
         
         Parameters::
@@ -1195,12 +1195,12 @@ class NLPCollocation(object):
                 The residual of the equality constraints. (Return variable)
         
         """
-        if self._model.jmimodel._dll.jmi_opt_sim_h(
-            self._jmi_opt_sim, res) is not 0:
+        if self._model.jmimodel._dll.jmi_opt_coll_h(
+            self._jmi_opt_coll, res) is not 0:
             raise jmi.JMIException("Getting the residual of the equality \
             constraints failed.")
         
-    def opt_sim_dh(self, jac):
+    def opt_coll_dh(self, jac):
         """ Get the Jacobian of the residual of the equality constraints.
         
         Parameters::
@@ -1210,12 +1210,12 @@ class NLPCollocation(object):
                 (Return variable)
         
         """
-        if self._model.jmimodel._dll.jmi_opt_sim_dh(
-            self._jmi_opt_sim, jac) is not 0:
+        if self._model.jmimodel._dll.jmi_opt_coll_dh(
+            self._jmi_opt_coll, jac) is not 0:
             raise jmi.JMIException("Getting the Jacobian of the residual \
             of the equality constraints.")
         
-    def opt_sim_dh_nz_indices(self, irow, icol):
+    def opt_coll_dh_nz_indices(self, irow, icol):
         """ Get the indices of the non-zeros in the equality constraint 
         Jacobian.
         
@@ -1231,12 +1231,12 @@ class NLPCollocation(object):
                 (Return variable)
         
         """
-        if self._model.jmimodel._dll.jmi_opt_sim_dh_nz_indices(
-            self._jmi_opt_sim, irow, icol) is not 0:
+        if self._model.jmimodel._dll.jmi_opt_coll_dh_nz_indices(
+            self._jmi_opt_coll, irow, icol) is not 0:
             raise jmi.JMIException("Getting the indices of the non-zeros \
             in the equality constraint Jacobian failed.")
         
-    def opt_sim_write_file_matlab(self, file_name):
+    def opt_coll_write_file_matlab(self, file_name):
         """ Write the optimization result to file in Matlab format.
         
         Parameters::
@@ -1245,12 +1245,12 @@ class NLPCollocation(object):
                 The name of file to write to.
         
         """
-        if self._model.jmimodel._dll.jmi_opt_sim_write_file_matlab(
-            self._jmi_opt_sim, file_name) is not 0:
+        if self._model.jmimodel._dll.jmi_opt_coll_write_file_matlab(
+            self._jmi_opt_coll, file_name) is not 0:
             raise jmi.JMIException("Writing the optimization result to \
             file in Matlab format failed.")
         
-    def opt_sim_get_result_variable_vector_length(self):
+    def opt_coll_get_result_variable_vector_length(self):
         """ Get the length of the result variable vectors. 
         
         Returns::
@@ -1259,13 +1259,13 @@ class NLPCollocation(object):
         
         """
         n = ct.c_int()
-        if self._model.jmimodel._dll.jmi_opt_sim_get_result_variable_vector_length(
-            self._jmi_opt_sim, byref(n)) is not 0:
+        if self._model.jmimodel._dll.jmi_opt_coll_get_result_variable_vector_length(
+            self._jmi_opt_coll, byref(n)) is not 0:
             raise jmi.JMIException("Getting the length of the result \
             variable vectors failed.")
         return n.value
         
-    def opt_sim_get_result(self, p_opt, t, dx, x, u, w):
+    def opt_coll_get_result(self, p_opt, t, dx, x, u, w):
         """ Get the results, stored in column major format.
         
         Parameters::
@@ -1285,11 +1285,11 @@ class NLPCollocation(object):
                 The algebraic variables. (Return variable)
              
         """
-        if self._model.jmimodel._dll.jmi_opt_sim_get_result(
-            self._jmi_opt_sim, p_opt, t, dx, x, u, w) is not 0:
+        if self._model.jmimodel._dll.jmi_opt_coll_get_result(
+            self._jmi_opt_coll, p_opt, t, dx, x, u, w) is not 0:
             raise jmi.JMIException("Getting the results failed.")
 
-    def opt_sim_get_result_element_interpolation(self, 
+    def opt_coll_get_result_element_interpolation(self, 
         n_interpolation_points, p_opt, t, dx, x, u, w):
         """ Get the results, stored in column major format.
         
@@ -1312,11 +1312,11 @@ class NLPCollocation(object):
                 The algebraic variables. (Return variable)
              
         """
-        if self._model.jmimodel._dll.jmi_opt_sim_get_result_element_interpolation(
-            self._jmi_opt_sim, n_interpolation_points,p_opt, t, dx, x, u, w) is not 0:
+        if self._model.jmimodel._dll.jmi_opt_coll_get_result_element_interpolation(
+            self._jmi_opt_coll, n_interpolation_points,p_opt, t, dx, x, u, w) is not 0:
             raise jmi.JMIException("Getting the results failed.")
 
-    def opt_sim_get_result_mesh_interpolation(self, mesh, n_mesh, p_opt, 
+    def opt_coll_get_result_mesh_interpolation(self, mesh, n_mesh, p_opt, 
         t, dx, x, u, w):
         """ Get the results, stored in column major format.
         
@@ -1339,8 +1339,8 @@ class NLPCollocation(object):
                 The algebraic variables. (Return variable)
              
         """
-        if self._model.jmimodel._dll.jmi_opt_sim_get_result_mesh_interpolation(
-            self._jmi_opt_sim, mesh,n_mesh,p_opt, t, dx, x, u, w) is not 0:
+        if self._model.jmimodel._dll.jmi_opt_coll_get_result_mesh_interpolation(
+            self._jmi_opt_coll, mesh,n_mesh,p_opt, t, dx, x, u, w) is not 0:
             raise jmi.JMIException("Getting the results failed.")
             
 
@@ -1458,8 +1458,8 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
             _w_lin, _dx_tp_lin, _x_tp_lin, _u_tp_lin, _w_tp_lin)
 
         try:       
-            assert model.jmimodel._dll.jmi_opt_sim_lp_new(
-                byref(self._jmi_opt_sim), model.jmimodel._jmi, n_e, hs, 
+            assert model.jmimodel._dll.jmi_opt_coll_radau_new(
+                byref(self._jmi_opt_coll), model.jmimodel._jmi, n_e, hs, 
                 hs_free, _p_opt_init, _dx_init, _x_init, _u_init, _w_init,
                 _p_opt_lb, _dx_lb, _x_lb,_u_lb, _w_lb, _t0_lb, _tf_lb, 
                 _hs_lb, _p_opt_ub, _dx_ub, _x_ub, _u_ub, _w_ub, _t0_ub,
@@ -1474,23 +1474,23 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
              NLPCollocationLagrangePolynomials object. Try recompiling \
              model with target='algorithms'")
         
-        assert self._jmi_opt_sim.value is not None, \
-            "jmi_opt_sim_lp struct has not returned correctly."
+        assert self._jmi_opt_coll.value is not None, \
+            "jmi_opt_coll_radau struct has not returned correctly."
                         
         self._set_nlpCollocation_typedefs()
             
     def __del__(self):
-        """ Free jmi_opt_sim data structure. """
+        """ Free jmi_opt_coll data structure. """
         try:
-            assert self._model.jmimodel._dll.jmi_opt_sim_lp_delete(
-                self._jmi_opt_sim) == 0, \
+            assert self._model.jmimodel._dll.jmi_opt_coll_radau_delete(
+                self._jmi_opt_coll) == 0, \
                    "jmi_delete failed"
         except AttributeError, e:
             pass
 
     def _set_nlpLagrangePols_typedefs(self):
         try:
-            self._model.jmimodel._dll.jmi_opt_sim_lp_new.argtypes = [ct.c_void_p,                                   # jmi_opt_sim
+            self._model.jmimodel._dll.jmi_opt_coll_radau_new.argtypes = [ct.c_void_p,                                   # jmi_opt_coll
                                                                      ct.c_void_p,                                   # jmi
                                                                      ct.c_int,                                      # n_e
                                                                      Nct.ndpointer(dtype=c_jmi_real_t,              # hs             
@@ -1613,14 +1613,14 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
                                                                                    shape=N.size(self._blocking_factors),
                                                                                    flags='C')]                                           
    
-            self._model.jmimodel._dll.jmi_opt_sim_lp_delete.argtypes = [ct.c_void_p]
-            self._model.jmimodel._dll.jmi_opt_sim_lp_eval_pol.argtypes = [c_jmi_real_t,
+            self._model.jmimodel._dll.jmi_opt_coll_radau_delete.argtypes = [ct.c_void_p]
+            self._model.jmimodel._dll.jmi_opt_coll_radau_eval_pol.argtypes = [c_jmi_real_t,
                                                                           ct.c_int,
                                                                           Nct.ndpointer(dtype=c_jmi_real_t,
                                                                                         ndim=1,
                                                                                         flags='C'),
                                                                           ct.c_int]
-            self._model.jmimodel._dll.jmi_opt_sim_lp_get_pols.argtypes = [ct.c_int,
+            self._model.jmimodel._dll.jmi_opt_coll_radau_get_pols.argtypes = [ct.c_int,
                                                                           Nct.ndpointer(dtype=c_jmi_real_t,
                                                                                         ndim=1,
                                                                                         flags='C'),
@@ -1648,7 +1648,7 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
         except AttributeError, e:
             pass
         
-    def opt_sim_lp_eval_pol(self, tau, n, pol, k):
+    def opt_coll_radau_eval_pol(self, tau, n, pol, k):
         """ Evaluate Lagrange polynomial. 
         
         Parameters::
@@ -1665,11 +1665,11 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
         """
         if len(pol)!=n*n:
             raise jmi.JMIException("argument pol has the wrong size. Should be n*n.")
-        if self._model.jmimodel._dll.jmi_opt_sim_lp_eval_pol(tau, n, pol, k) is not 0:
+        if self._model.jmimodel._dll.jmi_opt_coll_radau_eval_pol(tau, n, pol, k) is not 0:
             raise jmi.JMIException("Evaluating Lagrange polynomial failed.")
         
     
-    def opt_sim_lp_get_pols(self, n_cp, cp, cpp, Lp_coeffs, Lpp_coeffs, 
+    def opt_coll_radau_get_pols(self, n_cp, cp, cpp, Lp_coeffs, Lpp_coeffs, 
         Lp_dot_coeffs, Lpp_dot_coeffs, Lp_dot_vals, Lpp_dot_vals):
         """ Get the Lagrange polynomials of a specified order.
         
@@ -1702,7 +1702,7 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
                 variable)
             
         """
-        self._model.jmimodel._dll.jmi_opt_sim_lp_get_pols.argtypes = [ct.c_int,
+        self._model.jmimodel._dll.jmi_opt_coll_radau_get_pols.argtypes = [ct.c_int,
                                                                       Nct.ndpointer(dtype=c_jmi_real_t,
                                                                                     ndim=1,
                                                                                     shape=self._n_cp-1,
@@ -1736,7 +1736,7 @@ class NLPCollocationLagrangePolynomials(NLPCollocation):
                                                                                     shape=self._n_cp+1,
                                                                                     flags='C')]
 
-        if self._model.jmimodel._dll.jmi_opt_sim_lp_get_pols(n_cp, cp, cpp, Lp_coeffs, Lpp_coeffs, Lp_dot_coeffs, 
+        if self._model.jmimodel._dll.jmi_opt_coll_radau_get_pols(n_cp, cp, cpp, Lp_coeffs, Lpp_coeffs, Lp_dot_coeffs, 
                                                         Lpp_dot_coeffs, Lp_dot_vals, Lpp_dot_vals) is not 0:
             raise jmi.JMIException("Getting sim lp pols failed.")
 

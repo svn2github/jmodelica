@@ -65,113 +65,113 @@ class TestNLP_VDP:
         
         
     @testattr(ipopt = True)    
-    def test_opt_sim_get_dimensions(self):
-        """ Test NLPCollocation.opt_sim_get_dimensions"""
-        (n_x,n_g,n_h,dg_n_nz,dh_n_nz)=self.nlp.opt_sim_get_dimensions()
+    def test_opt_coll_get_dimensions(self):
+        """ Test NLPCollocation.opt_coll_get_dimensions"""
+        (n_x,n_g,n_h,dg_n_nz,dh_n_nz)=self.nlp.opt_coll_get_dimensions()
            
     @testattr(ipopt = True)
-    def test_opt_sim_get_interval_spec(self):
-        """ Test NLPCollocation.opt_sim_get_interval_spec"""
+    def test_opt_coll_get_interval_spec(self):
+        """ Test NLPCollocation.opt_coll_get_interval_spec"""
         start_time=ct.c_double()
         start_time_free=ct.c_int()
         final_time=ct.c_double()
         final_time_free=ct.c_int()        
-        self.nlp.opt_sim_get_interval_spec(byref(start_time),
+        self.nlp.opt_coll_get_interval_spec(byref(start_time),
             byref(start_time_free),byref(final_time),byref(final_time_free))
 
     @testattr(ipopt = True)
-    def test_opt_sim_get_x(self):
-        """ Test NLPCollocation.opt_sim_get_x"""
-        (n_x,n_g,n_h,dg_n_nz,dh_n_nz)=self.nlp.opt_sim_get_dimensions()
-        x=self.nlp.opt_sim_get_x()
+    def test_opt_coll_get_x(self):
+        """ Test NLPCollocation.opt_coll_get_x"""
+        (n_x,n_g,n_h,dg_n_nz,dh_n_nz)=self.nlp.opt_coll_get_dimensions()
+        x=self.nlp.opt_coll_get_x()
         nose.tools.assert_equal(len(x),n_x)
 
     @testattr(ipopt = True)
-    def test_opt_sim_getset_initial(self):
-        """ Test NLPCollocation.opt_sim_get_initial and 
-        NLPCollocation.opt_sim_set_initial.
+    def test_opt_coll_getset_initial(self):
+        """ Test NLPCollocation.opt_coll_get_initial and 
+        NLPCollocation.opt_coll_set_initial.
         """
-        (n_x,n_g,n_h,dg_n_nz,dh_n_nz)=self.nlp.opt_sim_get_dimensions()
+        (n_x,n_g,n_h,dg_n_nz,dh_n_nz)=self.nlp.opt_coll_get_dimensions()
         x_init=N.zeros(n_x)
-        self.nlp.opt_sim_get_initial(x_init)
-        self.nlp.opt_sim_set_initial(x_init)
+        self.nlp.opt_coll_get_initial(x_init)
+        self.nlp.opt_coll_set_initial(x_init)
      
     @testattr(ipopt = True)
-    def test_opt_sim_getset_bounds(self):
-        """ Test NLPCollocation.opt_sim_get_bounds and 
-        NLPCollocation.opt_sim_set_bounds.
+    def test_opt_coll_getset_bounds(self):
+        """ Test NLPCollocation.opt_coll_get_bounds and 
+        NLPCollocation.opt_coll_set_bounds.
         """
-        (n_x,n_g,n_h,dg_n_nz,dh_n_nz)=self.nlp.opt_sim_get_dimensions()
+        (n_x,n_g,n_h,dg_n_nz,dh_n_nz)=self.nlp.opt_coll_get_dimensions()
         x_lb=N.zeros(n_x)
         x_ub=N.zeros(n_x)
-        self.nlp.opt_sim_get_bounds(x_lb,x_ub)
-        self.nlp.opt_sim_set_bounds(x_lb,x_ub)
+        self.nlp.opt_coll_get_bounds(x_lb,x_ub)
+        self.nlp.opt_coll_set_bounds(x_lb,x_ub)
     
     @testattr(ipopt = True)    
-    def test_opt_sim_f(self):
-        """ Test NLPCollocation.opt_sim_f"""
+    def test_opt_coll_f(self):
+        """ Test NLPCollocation.opt_coll_f"""
         f=ct.c_double()
-        self.nlp.opt_sim_f(byref(f))
+        self.nlp.opt_coll_f(byref(f))
     
     @testattr(ipopt = True)   
-    def test_opt_sim_df(self):
-        """ Test NLPCollocation.opt_sim_df"""
-        (n_x,n_g,n_h,dg_n_nz,dh_n_nz)=self.nlp.opt_sim_get_dimensions()
+    def test_opt_coll_df(self):
+        """ Test NLPCollocation.opt_coll_df"""
+        (n_x,n_g,n_h,dg_n_nz,dh_n_nz)=self.nlp.opt_coll_get_dimensions()
         df=N.zeros(n_x)
-        self.nlp.opt_sim_df(df)
+        self.nlp.opt_coll_df(df)
     
     @testattr(ipopt = True)  
-    def test_opt_sim_g(self):
-        """ Test NLPCollocation.opt_sim_g"""
-        (n_x,n_g,n_h,dg_n_nz,dh_n_nz)=self.nlp.opt_sim_get_dimensions()
+    def test_opt_coll_g(self):
+        """ Test NLPCollocation.opt_coll_g"""
+        (n_x,n_g,n_h,dg_n_nz,dh_n_nz)=self.nlp.opt_coll_get_dimensions()
         res = N.zeros(n_g)
-        self.nlp.opt_sim_g(res)
+        self.nlp.opt_coll_g(res)
     
     @testattr(ipopt = True)   
-    def test_opt_sim_dg(self):
-        """ Test NLPCollocation.opt_sim_dg"""
-        (n_x,n_g,n_h,dg_n_nz,dh_n_nz)=self.nlp.opt_sim_get_dimensions()
+    def test_opt_coll_dg(self):
+        """ Test NLPCollocation.opt_coll_dg"""
+        (n_x,n_g,n_h,dg_n_nz,dh_n_nz)=self.nlp.opt_coll_get_dimensions()
         jac=N.zeros(dg_n_nz)
-        self.nlp.opt_sim_dg(jac)
+        self.nlp.opt_coll_dg(jac)
     
     @testattr(ipopt = True)    
-    def test_opt_sim_dg_nz_indices(self):
-        """ Test NLPCollocation.opt_sim_dg_nz_indices"""
-        (n_x,n_g,n_h,dg_n_nz,dh_n_nz)=self.nlp.opt_sim_get_dimensions()
+    def test_opt_coll_dg_nz_indices(self):
+        """ Test NLPCollocation.opt_coll_dg_nz_indices"""
+        (n_x,n_g,n_h,dg_n_nz,dh_n_nz)=self.nlp.opt_coll_get_dimensions()
         irow=N.zeros(dg_n_nz,dtype=int)
         icol=N.zeros(dg_n_nz,dtype=int)
-        self.nlp.opt_sim_dg_nz_indices(irow,icol)   
+        self.nlp.opt_coll_dg_nz_indices(irow,icol)   
     
     @testattr(ipopt = True)   
-    def test_opt_sim_h(self):
-        """ Test NLPCollocation.opt_sim_h"""
-        (n_x,n_g,n_h,dg_n_nz,dh_n_nz)=self.nlp.opt_sim_get_dimensions()
+    def test_opt_coll_h(self):
+        """ Test NLPCollocation.opt_coll_h"""
+        (n_x,n_g,n_h,dg_n_nz,dh_n_nz)=self.nlp.opt_coll_get_dimensions()
         res=N.zeros(n_h)
-        self.nlp.opt_sim_h(res)
+        self.nlp.opt_coll_h(res)
     
     @testattr(ipopt = True)   
-    def test_opt_sim_dh(self):
-        """ Test NLPCollocation.opt_sim_dh"""
-        (n_x,n_g,n_h,dg_n_nz,dh_n_nz)=self.nlp.opt_sim_get_dimensions()
+    def test_opt_coll_dh(self):
+        """ Test NLPCollocation.opt_coll_dh"""
+        (n_x,n_g,n_h,dg_n_nz,dh_n_nz)=self.nlp.opt_coll_get_dimensions()
         jac=N.zeros(dh_n_nz)
-        self.nlp.opt_sim_dh(jac)
+        self.nlp.opt_coll_dh(jac)
     
     @testattr(ipopt = True)    
-    def test_opt_sim_dh_nz_indices(self):
-        """ Test NLPCollocation.opt_sim_dh_nz_indices"""
-        (n_x,n_g,n_h,dg_n_nz,dh_n_nz)=self.nlp.opt_sim_get_dimensions()
+    def test_opt_coll_dh_nz_indices(self):
+        """ Test NLPCollocation.opt_coll_dh_nz_indices"""
+        (n_x,n_g,n_h,dg_n_nz,dh_n_nz)=self.nlp.opt_coll_get_dimensions()
         irow=N.zeros(dh_n_nz,dtype=int)
         icol=N.zeros(dh_n_nz,dtype=int)
-        self.nlp.opt_sim_dh_nz_indices(irow,icol)   
+        self.nlp.opt_coll_dh_nz_indices(irow,icol)   
     
     @testattr(ipopt = True)    
-    def test_opt_sim_write_file_matlab(self):
+    def test_opt_coll_write_file_matlab(self):
         pass
         
     @testattr(ipopt = True)
-    def test_opt_sim_get_result(self):
-        """ Test NLPCollocation.opt_sim_get_result"""
-        timepoints = self.nlp.opt_sim_get_result_variable_vector_length()
+    def test_opt_coll_get_result(self):
+        """ Test NLPCollocation.opt_coll_get_result"""
+        timepoints = self.nlp.opt_coll_get_result_variable_vector_length()
         res_dx = timepoints*self.cstr._n_real_dx.value
         res_x = timepoints*self.cstr._n_real_x.value
         res_u = timepoints*self.cstr._n_real_u.value
@@ -183,7 +183,7 @@ class TestNLP_VDP:
         x=N.zeros(res_x)
         u=N.zeros(res_u)
         w=N.zeros(res_w)
-        self.nlp.opt_sim_get_result(p_opt, t, dx, x, u, w)
+        self.nlp.opt_coll_get_result(p_opt, t, dx, x, u, w)
         
 class TestNLP_CSTR():
     """ Tests for NLPCollocation wrapper methods using the VDP model. """
@@ -219,23 +219,23 @@ class TestNLP_CSTR():
     @testattr(ipopt = True)
     def test_invalid_string_option(self):
         """Test that exceptions are thrown when invalid IPOPT options are set."""
-        nose.tools.assert_raises(Exception, self.nlp_ipopt.opt_sim_ipopt_set_string_option, 'invalid_option','val')
+        nose.tools.assert_raises(Exception, self.nlp_ipopt.opt_coll_ipopt_set_string_option, 'invalid_option','val')
 
     @testattr(ipopt = True)
     def test_invalid_int_option(self):
         """Test that exceptions are thrown when invalid IPOPT options are set."""
         nose.tools.assert_raises(Exception, 
-            self.nlp_ipopt.opt_sim_ipopt_set_int_option, 'invalid_option',1)
+            self.nlp_ipopt.opt_coll_ipopt_set_int_option, 'invalid_option',1)
 
     @testattr(ipopt = True)
     def test_invalid_num_option(self):
         """Test that exceptions are thrown when invalid IPOPT options are set."""
         nose.tools.assert_raises(Exception, 
-            self.nlp_ipopt.opt_sim_ipopt_set_num_option, 'invalid_option',1.0)
+            self.nlp_ipopt.opt_coll_ipopt_set_num_option, 'invalid_option',1.0)
 
     @testattr(ipopt = True)
-    def test_jmi_opt_sim_set_initial_from_trajectory(self):
-        """ Test of 'jmi_opt_sim_set_initial_from_trajectory'.
+    def test_jmi_opt_coll_set_initial_from_trajectory(self):
+        """ Test of 'jmi_opt_coll_set_initial_from_trajectory'.
     
         An optimization problem is solved and then the result
         is used to reinitialize the NLP. The variable profiles
@@ -244,11 +244,11 @@ class TestNLP_CSTR():
         """
         
         # Solve the optimization problem
-        self.nlp_ipopt.opt_sim_ipopt_solve()
+        self.nlp_ipopt.opt_coll_ipopt_solve()
         
         # Retreive the number of points in each column in the
         # result matrix
-        n_points = self.nlp.opt_sim_get_result_variable_vector_length()
+        n_points = self.nlp.opt_coll_get_result_variable_vector_length()
         
         # Create result data vectors
         p_opt = N.zeros(1)
@@ -259,13 +259,13 @@ class TestNLP_CSTR():
         w_ = N.zeros(0)
         
         # Get the result
-        self.nlp.opt_sim_get_result(p_opt,t_,dx_,x_,u_,w_)
+        self.nlp.opt_coll_get_result(p_opt,t_,dx_,x_,u_,w_)
     
         z_ = N.concatenate((t_,dx_,x_,u_))
         hs = N.zeros(1)
     
-        self.vdp.jmimodel._dll.jmi_opt_sim_set_initial_from_trajectory(
-            self.nlp._jmi_opt_sim,p_opt,z_,n_points,hs,0.,0.)
+        self.vdp.jmimodel._dll.jmi_opt_coll_set_initial_from_trajectory(
+            self.nlp._jmi_opt_coll,p_opt,z_,n_points,hs,0.,0.)
         
         p_opt2 = N.zeros(1)
         t_2 = N.zeros(n_points)
@@ -275,23 +275,23 @@ class TestNLP_CSTR():
         w_2 = N.zeros(0)
             
         # Get the result
-        self.nlp.opt_sim_get_result(p_opt2,t_2,dx_2,x_2,u_2,w_2)
+        self.nlp.opt_coll_get_result(p_opt2,t_2,dx_2,x_2,u_2,w_2)
         
         assert max(N.abs(x_-x_2))<1e-12, \
                "The values used in initialization does not match the values that were read back after initialization."        
     @testattr(ipopt = True)
     def test_statistics(self):
-        """ Test of 'jmi_opt_sim_get_statistics'."""
+        """ Test of 'jmi_opt_coll_get_statistics'."""
         # Solve the optimization problem
-        self.nlp_ipopt.opt_sim_ipopt_solve()
-        (return_status,iters,cost,time) = self.nlp_ipopt.opt_sim_ipopt_get_statistics()
+        self.nlp_ipopt.opt_coll_ipopt_solve()
+        (return_status,iters,cost,time) = self.nlp_ipopt.opt_coll_ipopt_get_statistics()
 
         assert return_status==0, "Return status from Ipopt should be 0"
         assert abs(cost-2.2811985e+00)<1e-3, "Wrong value of cost function"
     
     @testattr(ipopt = True)
     def test_set_initial_from_dymola(self):
-        """ Test of 'jmi_opt_sim_set_initial_from_trajectory'.
+        """ Test of 'jmi_opt_coll_set_initial_from_trajectory'.
     
         An optimization problem is solved and then the result
         is used to reinitialize the NLP. The variable profiles
@@ -300,11 +300,11 @@ class TestNLP_CSTR():
         """
         
         # Solve the optimization problem
-        self.nlp_ipopt.opt_sim_ipopt_solve()
+        self.nlp_ipopt.opt_coll_ipopt_solve()
     
         # Retreive the number of points in each column in the
         # result matrix
-        n_points = self.nlp.opt_sim_get_result_variable_vector_length()
+        n_points = self.nlp.opt_coll_get_result_variable_vector_length()
     
         # Create result data vectors
         p_opt = N.zeros(1)
@@ -315,7 +315,7 @@ class TestNLP_CSTR():
         w_ = N.zeros(0)
         
         # Get the result
-        self.nlp.opt_sim_get_result(p_opt,t_,dx_,x_,u_,w_)
+        self.nlp.opt_coll_get_result(p_opt,t_,dx_,x_,u_,w_)
     
         # Write to file
         self.nlp.export_result_dymola()
@@ -334,7 +334,7 @@ class TestNLP_CSTR():
         w_2 = N.zeros(0)
         
         # Get the result
-        self.nlp.opt_sim_get_result(p_opt_2,t_2,dx_2,x_2,u_2,w_2)
+        self.nlp.opt_coll_get_result(p_opt_2,t_2,dx_2,x_2,u_2,w_2)
     
     
         assert max(N.abs(p_opt-p_opt_2))<1e-3, \
