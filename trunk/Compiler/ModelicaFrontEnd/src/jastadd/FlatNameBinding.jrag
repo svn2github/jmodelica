@@ -48,7 +48,6 @@ aspect FlatNameBinding {
 	
 	public static AbstractFVariable ASTNode.lookupFVFromMap(
 			HashMap<String, ? extends AbstractFVariable> map, FQName fqn, boolean der) {
-		// TODO: der() on members of records
 		AbstractFVariable variable = map.get(der ? fqn.derName() : fqn.name());
 		if (variable == null) {
 			int i = fqn.getNumFQNamePart();
@@ -291,8 +290,13 @@ aspect FlatEnumBinding {
 	syn AbstractFVariable FIdUse.myEnumFV() = lookupFV(getFQName().copyPrefix());
 	
 	syn lazy FEnumDecl AbstractFVariable.myFEnumDecl() = null;
-	eq FEnumVariable.myFEnumDecl() = lookupFEnum(getEnum().name());
+	eq FEnumVariable.myFEnumDecl()     = lookupFEnum(getEnum().name());
 	eq FFunctionVariable.myFEnumDecl() = type().myFEnumDecl();
+	eq FEnumLiteral.myFEnumDecl()      = retrieveFEnumDecl();
+	
+	inh FEnumDecl FEnumLiteral.retrieveFEnumDecl();
+	eq FEnumDecl.getChild().retrieveFEnumDecl() = this;
+	eq FlatRoot.getChild().retrieveFEnumDecl()  = null;
 	
 	syn lazy FEnumDecl FIdUse.myFEnumDecl() = lookupFEnum(name());
 	

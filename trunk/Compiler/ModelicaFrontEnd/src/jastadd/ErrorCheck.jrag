@@ -476,13 +476,9 @@ aspect InstanceErrorCheck {
     	}
   	}
 
-  	public void InstEnumClassDecl.collectErrors() {  		
-  		// TODO: Error checking of enumeration declarations
-  	}
-
-  	public void InstEnum.collectErrors() {  		
-  		// TODO: Error checking of enumeration declarations
-  	}
+//  	public void InstEnumClassDecl.collectErrors() {  		
+//  		// TODO: Error checking of enumeration declarations
+//  	}
   	
 	boolean InstImport.errorChecked = false;
     public void InstImport.collectErrors() {
@@ -548,8 +544,13 @@ aspect InstanceErrorCheck {
 				else if (!isForIndex())
 					warning("The " + type + " " + qualifiedName() + " does not have a binding expression");
 			}
+			
+			// Check array indices
+			getClassName().collectErrors();
+			getLocalFArraySubscriptsOpt().collectErrors();
+			
 			// Check if the expressions of the attributes can be evaluated
-			// Notice that this check has to be done locally in the
+			// Note that this check has to be done locally in the
 			// context of an InstAssignable node in order to avoid
 			// evaluation of all value modifications also for non
 			// parameters.
@@ -704,7 +705,8 @@ aspect InstanceErrorCheck {
 	public void FArraySubscripts.collectErrors() {
 		// Should this check be in the access instead?
 		int ndims = mySize().ndims();
-		if (getNumFSubscript() > ndims) {
+		if (getNumFSubscript() > ndims && !isInstComponentSize()) {
+			// TODO: shouldn't this check for to few as well? (no [] or all dimensions given)
 			error("Too many array subscripts for access: " + getNumFSubscript() + 
 					" subscripts given, component has " + mySize().ndims() + " dimensions");
 			allChecks();
@@ -810,12 +812,12 @@ aspect InstanceErrorCheck {
 	/**
 	 * \brief Check if this component is in a recursive component structure.
 	 */
-	syn boolean InstComponentDecl.isRecursed() = isWithin(getClassName().myInstClassDecl());
+	syn boolean InstComponentDecl.isRecursed() = isWithin(myInstClass());
 	
 	/**
 	 * \brief Check if this component is in a recursive class structure.
 	 */
-	syn boolean InstExtends.isRecursed()       = isWithin(getClassName().myInstClassDecl());
+	syn boolean InstExtends.isRecursed()       = isWithin(myInstClass());
 	
 	/**
 	 * \brief Check if extends tree is recursive.
@@ -833,7 +835,7 @@ aspect InstanceErrorCheck {
 		recursiveCache = visited.contains(this) ? RECURSIVE_YES : RECURSIVE_NO;
 		visited.add(this);
 		if (recursiveCache == RECURSIVE_NO) 
-			for (InstExtends ie : getClassName().myInstClassDecl().getInstExtendss())
+			for (InstExtends ie : myInstClass().getInstExtendss())
 				ie.calcIsRecursive(visited);
 	}
 	
@@ -855,8 +857,8 @@ aspect InstanceErrorCheck {
 	 */
 	syn boolean InstNode.isOfInstClassDecl(InstClassDecl icd) = false;
 	eq InstClassDecl.isOfInstClassDecl(InstClassDecl icd)     = icd == this;
-	eq InstComponentDecl.isOfInstClassDecl(InstClassDecl icd) = icd == getClassName().myInstClassDecl();
-	eq InstExtends.isOfInstClassDecl(InstClassDecl icd)       = icd == getClassName().myInstClassDecl();
+	eq InstComponentDecl.isOfInstClassDecl(InstClassDecl icd) = icd == myInstClass();
+	eq InstExtends.isOfInstClassDecl(InstClassDecl icd)       = icd == myInstClass();
 	
 }
 

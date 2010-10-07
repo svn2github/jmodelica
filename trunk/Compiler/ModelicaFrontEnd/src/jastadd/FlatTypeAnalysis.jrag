@@ -86,7 +86,7 @@ aspect FlatTypeAnalysis {
 		InstComponentDecl root = isArray() ? getInstComponentDecl(0) : this;
 		for (InstComponentDecl icd : root.getInstComponentDecls()) 
 			comps.add(new FRecordComponentType(icd.name(), (FType) icd.type().fullCopy()));
-		FRecordType type = new FRecordType(size(), myInstClassDecl().qualifiedName(), new List());
+		FRecordType type = new FRecordType(size(), myInstClass().qualifiedName(), new List());
 		for (FRecordComponentType comp : comps)
 			type.addComponent(comp);
 		return type;
@@ -110,13 +110,23 @@ aspect FlatTypeAnalysis {
 
 	syn lazy FType FEnumDecl.type() {
 		FEnumType type = new FEnumType(Size.SCALAR, name(), new List());
-		for (FEnumLiteral el : enumLiterals()) {
-			type.addFEnumLiteralType(new FEnumLiteralType(Size.SCALAR,name()));
-		}
+		for (FEnumLiteral el : enumLiterals()) 
+			type.addFEnumLiteralType(new FEnumLiteralType(Size.SCALAR, el.name()));
 		return type;
 	}
 	
-	syn lazy FType FEnumLiteral.type() = new FEnumLiteralType(Size.SCALAR,name());
+	syn FType FEnumLiteral.type() = myFEnumDecl().type();
+	
+	eq InstEnum.type()        = myInstClass().enumType().sizedType(size());
+	eq InstEnumLiteral.type() = myInstEnumClassDecl().enumType();
+	
+	syn FType InstClassDecl.enumType() = fUnknownType();
+	eq InstEnumClassDecl.enumType() {
+		FEnumType type = new FEnumType(Size.SCALAR, qualifiedName(), new List());
+		for (InstEnumLiteral el : enumLiterals()) 
+			type.addFEnumLiteralType(new FEnumLiteralType(Size.SCALAR, el.name()));
+		return type;
+	}
 	
 	syn lazy FType FExp.type() = fUnknownType();
 	
@@ -628,6 +638,8 @@ aspect FTypeCompatibility {
 		type.isString() && dimensionCompatible(type, allowUnknown);
 	eq FRecordType.typeCompatible(FType type, boolean allowUnknown) = 
 		typeMatches(type, true, allowUnknown);
+	eq FEnumType.typeCompatible(FType type, boolean allowUnknown) = 
+		typeMatches(type, true, allowUnknown);
 	
 	syn boolean FType.typeMatches(FType type, boolean compatible, boolean allowUnknown) =
 		compatible ? typeCompatible(type, allowUnknown) : equivalentTo(type, allowUnknown);
@@ -646,6 +658,21 @@ aspect FTypeCompatibility {
 					!c1.getFType().typeMatches(c2.getFType(), compatible, allowUnknown))
 				return false;
 		}
+		return true;
+	}
+	eq FEnumType.typeMatches(FType type, boolean compatible, boolean allowUnknown) {
+		if (!dimensionCompatible(type, allowUnknown) || !type.isEnum())
+			return false;
+		FEnumType enu = (FEnumType) type;
+		if (getName().equals(enu.getName())) 
+			return true;
+		int n1 = getNumFEnumLiteralType(), n2 = enu.getNumFEnumLiteralType();
+		if (n1 != n2)
+			return n1 == 0 || n2 == 0;
+		Iterator<FEnumLiteralType> it = enu.getFEnumLiteralTypes().iterator();
+		for (FEnumLiteralType elt : getFEnumLiteralTypes())
+			if (!elt.getName().equals(it.next().getName()))
+				return false;
 		return true;
 	}
 	
@@ -672,6 +699,8 @@ aspect FTypeEquivalent {
 		type.isString() && dimensionCompatible(type, allowUnknown);
 	eq FRecordType.equivalentTo(FType type, boolean allowUnknown) = 
 		typeMatches(type, false, allowUnknown);
+	eq FEnumType.equivalentTo(FType type, boolean allowUnknown) = 
+		typeMatches(type, false, allowUnknown);
  
 }
 
@@ -681,13 +710,18 @@ aspect BuiltInFlatTypes {
  	syn boolean InstAssignable.isInteger() = false;
  	syn boolean InstAssignable.isBoolean() = false;
  	syn boolean InstAssignable.isString()  = false;
- 	syn boolean InstAssignable.isEnum()  = false;
+ 	syn boolean InstAssignable.isEnum()    = false;
  	
- 	eq InstPrimitive.isReal()    = myInstClass().finalClass().primitiveName().equals("Real");
- 	eq InstPrimitive.isInteger() = myInstClass().finalClass().primitiveName().equals("Integer");
- 	eq InstPrimitive.isBoolean() = myInstClass().finalClass().primitiveName().equals("Boolean");
- 	eq InstPrimitive.isString()  = myInstClass().finalClass().primitiveName().equals("String");
- 	eq InstEnum.isEnum()  = true;
+ 	eq InstPrimitive.isReal()    = myInstClass().isRealClass();
+ 	eq InstPrimitive.isInteger() = myInstClass().isIntegerClass();
+ 	eq InstPrimitive.isBoolean() = myInstClass().isBooleanClass();
+ 	eq InstPrimitive.isString()  = myInstClass().isStringClass();
+ 	eq InstEnum.isEnum()         = true;
+ 	
+ 	syn boolean InstClassDecl.isRealClass()    = finalClass().primitiveName().equals("Real");
+ 	syn boolean InstClassDecl.isIntegerClass() = finalClass().primitiveName().equals("Integer");
+ 	syn boolean InstClassDecl.isBooleanClass() = finalClass().primitiveName().equals("Boolean");
+ 	syn boolean InstClassDecl.isStringClass()  = finalClass().primitiveName().equals("String");
 
  	syn boolean InstBuiltIn.isReal() = 
  		myInstClass().finalClass().primitiveName().equals("RealType");
@@ -703,7 +737,6 @@ aspect BuiltInFlatTypes {
 	public static final FIntegerType FIntegerType.SCALAR = new FIntegerType(Size.SCALAR);
 	public static final FBooleanType FBooleanType.SCALAR = new FBooleanType(Size.SCALAR);
 	public static final FStringType  FStringType.SCALAR  = new FStringType(Size.SCALAR);
-//	public static final FEnumType  FEnumType.SCALAR  = new FEnumType(Size.SCALAR,(String)getName().fullCopy(),(List)getFEnumLiteralTypeList().fullCopy());
 	public static final FUnknownType FUnknownType.SCALAR = new FUnknownType(Size.SCALAR);
 
 	syn boolean FType.isReal()    = false;
@@ -714,6 +747,10 @@ aspect BuiltInFlatTypes {
 	eq FBooleanType.isBoolean()   = true;
 	syn boolean FType.isString()  = false;
 	eq FStringType.isString()     = true;
+	syn boolean FType.isRecord()  = false;
+	eq FRecordType.isRecord()     = true;
+	syn boolean FType.isEnum()    = false;
+	eq FEnumType.isEnum()         = true;
 	
 	syn boolean FType.isArray()  = getSize() != Size.SCALAR;
 	syn boolean FType.isScalar() = getSize() == Size.SCALAR;
@@ -723,12 +760,15 @@ aspect BuiltInFlatTypes {
 	
 	syn boolean FType.isPrimitive() = false;
 	eq FPrimitiveType.isPrimitive() = true;
-	syn boolean FType.isRecord()    = false;
-	eq FRecordType.isRecord()       = true;
 	
 	syn boolean FType.hasAdd()        = false;
 	eq FPrimitiveNumericType.hasAdd() = true;
 	eq FStringType.hasAdd()           = true;
+	
+	syn boolean FType.canBeIndex() = false;
+	eq FIntegerType.canBeIndex()   = true;
+	eq FBooleanType.canBeIndex()   = true;
+	eq FEnumType.canBeIndex()      = true;
 
 	syn int FType.ndims() = getSize().ndims();
  	
@@ -737,36 +777,19 @@ aspect BuiltInFlatTypes {
 	syn FType FType.sizedType(Size s) = 
 		(s == Size.SCALAR) ? scalarType() : arrayType(s);
  	
-	syn FType FType.scalarType() = FUnknownType.SCALAR;
+	syn FType FType.scalarType() {
+  		if (isScalar())
+  			return this;
+  		FType copy = (FType) fullCopy();
+  		copy.setSize(Size.SCALAR);
+  		return copy;
+	}
+	eq FUnknownType.scalarType() = FUnknownType.SCALAR;
 	eq FRealType.scalarType()    = FRealType.SCALAR;
 	eq FIntegerType.scalarType() = FIntegerType.SCALAR;
 	eq FBooleanType.scalarType() = FBooleanType.SCALAR;
 	eq FStringType.scalarType()  = FStringType.SCALAR;
   	
- 	eq FEnumType.scalarType() {
-  		if (isScalar())
-  			return this;
-  		FEnumType copy = (FEnumType) fullCopy();
-  		copy.setSize(Size.SCALAR);
-  		return copy;
-  	}
-
- 	eq FEnumLiteralType.scalarType() {
-  		if (isScalar())
-  			return this;
-  		FEnumLiteralType copy = (FEnumLiteralType) fullCopy();
-  		copy.setSize(Size.SCALAR);
-  		return copy;
-  	}
- 	
-	eq FRecordType.scalarType() {
-  		if (isScalar())
-  			return this;
-  		FRecordType copy = (FRecordType) fullCopy();
-  		copy.setSize(Size.SCALAR);
-  		return copy;
-  	}
- 	
 	syn boolean FType.isUnknown() = false;
  	eq FUnknownType.isUnknown() = true;
  	
@@ -776,13 +799,11 @@ aspect BuiltInFlatTypes {
 	syn FPrimitiveType ASTNode.fIntegerScalarType() = FIntegerType.SCALAR;
 	syn FPrimitiveType ASTNode.fBooleanScalarType() = FBooleanType.SCALAR;
 	syn FPrimitiveType ASTNode.fStringScalarType()  = FStringType.SCALAR;
-//	syn FEnumType ASTNode.fEnumScalarType()  = FEnumType.SCALAR;	
  	
 	syn FPrimitiveType ASTNode.fRealArrayType(Size size)    = new FRealType(size);
 	syn FPrimitiveType ASTNode.fIntegerArrayType(Size size) = new FIntegerType(size);
 	syn FPrimitiveType ASTNode.fBooleanArrayType(Size size) = new FBooleanType(size);
 	syn FPrimitiveType ASTNode.fStringArrayType(Size size)  = new FStringType(size);
-//	syn FEnumType ASTNode.fEnumArrayType(Size size)  = new FEnumType(size);
  	
 	syn FPrimitiveType ASTNode.fRealType(Size size) = 
  		(size == Size.SCALAR) ? fRealScalarType() : fRealArrayType(size);
@@ -792,32 +813,18 @@ aspect BuiltInFlatTypes {
  		(size == Size.SCALAR) ? fBooleanScalarType() : fBooleanArrayType(size);
 	syn FPrimitiveType ASTNode.fStringType(Size size) = 
  		(size == Size.SCALAR) ? fStringScalarType() : fStringArrayType(size);
-// 	syn FEnumType ASTNode.fEnumType(Size size) = 
-// 	 	(size == Size.SCALAR) ? fEnumScalarType() : fEnumArrayType(size);
  		
- 	syn FType FType.arrayType(Size size);
+ 	syn FType FType.arrayType(Size size) {
+  		FType copy = (FType) fullCopy();
+  		copy.setSize(size);
+  		return copy;
+ 	}
  	eq FUnknownType.arrayType(Size size)  = this;
 	eq FRealType.arrayType(Size size)     = fRealArrayType(size);
  	eq FIntegerType.arrayType(Size size)  = fIntegerArrayType(size);
  	eq FStringType.arrayType(Size size)   = fStringArrayType(size);
 	eq FBooleanType.arrayType(Size size)  = fBooleanArrayType(size);
-  	eq FEnumType.arrayType(Size size) {
-  		FEnumType copy = (FEnumType) fullCopy();
-  		copy.setSize(size);
-  		return copy;
-  	}
-  	eq FEnumLiteralType.arrayType(Size size) {
-  		FEnumLiteralType copy = (FEnumLiteralType) fullCopy();
-  		copy.setSize(size);
-  		return copy;
-  	}	
-  	
-	eq FRecordType.arrayType(Size size) {
-  		FRecordType copy = (FRecordType) fullCopy();
-  		copy.setSize(size);
-  		return copy;
-  	}
- 	
+	
  	/**
  	 * \brief Create a literal with the zero value for the given type.
  	 */
@@ -896,5 +903,11 @@ aspect InstClassRestriction {
 	 */
 	syn boolean InstRestriction.isPackage() = false;
 	eq InstMPackage.isPackage() = true;
+	
+	/**
+	 * \brief Is this class an enumeration?
+	 */
+	syn boolean InstClassDecl.isEnum() = false;
+	eq InstEnumClassDecl.isEnum()      = true;
 	
 }

@@ -89,7 +89,7 @@ aspect InstLookupClasses {
 	// TODO: don't use JastAdd internal stuff (child)
 	eq InstNode.getChild().lookupInstClassInChain(String name) = ((InstNode) child).lookupInstClass(name);
 	eq InstExtendsShortClass.getInstExtends().lookupInstClassInChain(String name) = 
-		getClassName().myInstClassDecl().superLookupInstClassFromChain(name);
+		myInstClass().superLookupInstClassFromChain(name);
 	
 	syn HashSet InstClassDecl.superLookupInstClassFromChain(String name)      = superLookupInstClass(name);
 	eq InstReplacingShortClassDecl.superLookupInstClassFromChain(String name) = getInstExtends(0).lookupInstClass(name);
@@ -420,7 +420,7 @@ aspect InstLookupClasses {
 		if (set.size()>0) // Did not find any local class
 			return set;
 		else // continue search at myInstClass()
-			return getClassName().myInstClassDecl().genericLookupInstClass(name);
+			return myInstClass().genericLookupInstClass(name);
 	}
 	
 	syn HashSet InstExtends.superLookupInstClassInExtends(String name) circular [emptyHashSet()] {
@@ -432,7 +432,7 @@ aspect InstLookupClasses {
 		if (set.size()>0) //Found local class
 			return set;
 		else // else search for non-local class
-			return getClassName().myInstClassDecl().superLookupInstClass(name);
+			return myInstClass().superLookupInstClass(name);
 	}
 
 	/**
@@ -502,8 +502,6 @@ aspect InstLookupClasses {
 	eq InstBuiltInClassDecl.matchInstClassDecl(String name) = name().equals(name); 
 	eq InstBaseClassDecl.matchInstClassDecl(String name) = name().equals(name);
 	
-	syn InstClassDecl InstComponentDecl.myInstClassDecl() = getClassName().myInstClassDecl();
-	
 	// This attribute should to be circular due to lookup in import-statements
 	// If the lookup is triggered by lookup of A in 'extends A', and
 	// there are import statements, evaluation might get back to the 
@@ -519,15 +517,13 @@ aspect InstLookupClasses {
 		else
 			return unknownInstClassDecl();
 	}
-	eq InstDot.myInstClassDecl() {
-	 	return getRight().myInstClassDecl();
-	}	
+	eq InstDot.myInstClassDecl() = getRight().myInstClassDecl();
 	
-	syn lazy InstClassDecl InstNode.myInstClass() circular [unknownInstClassDecl()] = unknownInstClassDecl(); 
-	eq InstComponentDecl.myInstClass() = getClassName().myInstClassDecl();
+	syn InstClassDecl InstNode.myInstClass()  = unknownInstClassDecl(); 
+	eq InstComponentDecl.myInstClass()        = getClassName().myInstClassDecl();
 	//eq InstShortClassDecl.myInstClass()  = getClassName().myInstClassDecl();
-	eq InstClassDecl.myInstClass() = this;
-	eq InstExtends.myInstClass() = getClassName().myInstClassDecl();
+	eq InstClassDecl.myInstClass()            = this;
+	eq InstExtends.myInstClass()              = getClassName().myInstClassDecl();
 	eq UnknownInstComponentDecl.myInstClass() = unknownInstClassDecl();	
 
 }
@@ -577,7 +573,7 @@ aspect InstLookupClassesInModifications {
 
 	eq InstComponentDecl.getInstModification().lookupInstClassInInstClass(String name) = /*myInstClass().*/memberInstClass(name);		
 	eq InstElementModification.getInstModification().lookupInstClassInInstClass(String name) = getName().myInstComponentDecl().memberInstClass(name);
-	eq InstExtends.getInstClassModification().lookupInstClassInInstClass(String name) = /*getClassName().myInstClassDecl().*/memberInstClass(name);
+	eq InstExtends.getInstClassModification().lookupInstClassInInstClass(String name) = /*myInstClass().*/memberInstClass(name);
 	
 //	eq InstShortClassDecl.getInstClassModification().lookupInstClassInInstClass(String name) = getClassName().myInstClassDecl().memberInstClass(name);
 	

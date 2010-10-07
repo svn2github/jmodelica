@@ -42,7 +42,7 @@ aspect Flattening {
 		}	
 		getInstComponentDeclList().flatten(fc);
 		getInstExtendsList().flatten(fc);
-		flattenCalledFunctions(fc);
+		flattenUsedFuncsAndEnums(fc);
 		
 		fc.genConnectionEquations();
 
@@ -56,32 +56,37 @@ aspect Flattening {
     }
 
     /**
-     * \brief Find functions that needs to be flattened.
+     * \brief Find functions, record and enumeration declarations that need to be flattened.
      */
-	public void ASTNode.flattenCalledFunctions(FClass fc) {
+	public void ASTNode.flattenUsedFuncsAndEnums(FClass fc) {
 		for (int i = 0; i < getNumChild(); i++) 
-			getChild(i).flattenCalledFunctions(fc);
+			getChild(i).flattenUsedFuncsAndEnums(fc);
 	}
     
-    public void InstNode.flattenCalledFunctions(FClass fc) {
-		getInstComponentDeclList().flattenCalledFunctions(fc);
-		getFAbstractEquationList().flattenCalledFunctions(fc);
-		getInstExtendsList().flattenCalledFunctions(fc);
-		super.flattenCalledFunctions(fc);
+    public void InstNode.flattenUsedFuncsAndEnums(FClass fc) {
+		getInstComponentDeclList().flattenUsedFuncsAndEnums(fc);
+		getFAbstractEquationList().flattenUsedFuncsAndEnums(fc);
+		getInstExtendsList().flattenUsedFuncsAndEnums(fc);
+		super.flattenUsedFuncsAndEnums(fc);
     }
 
-	public void InstValueModification.flattenCalledFunctions(FClass fc) {
-		getFExp().flattenCalledFunctions(fc);
+	public void InstValueModification.flattenUsedFuncsAndEnums(FClass fc) {
+		getFExp().flattenUsedFuncsAndEnums(fc);
 	}
 	
-	public void InstFunctionCall.flattenCalledFunctions(FClass fc) {
+	public void InstFunctionCall.flattenUsedFuncsAndEnums(FClass fc) {
 		getName().myInstClassDecl().flattenFunction(fc);
-		getArgs().flattenCalledFunctions(fc);
+		getArgs().flattenUsedFuncsAndEnums(fc);
 	}
 	
-	public void FRecordConstructor.flattenCalledFunctions(FClass fc) {
+	public void FRecordConstructor.flattenUsedFuncsAndEnums(FClass fc) {
 		getRecord().flattenMyRecord(fc);
-		getArgs().flattenCalledFunctions(fc);
+		getArgs().flattenUsedFuncsAndEnums(fc);
+	}
+	
+	public void InstClassAccess.flattenUsedFuncsAndEnums(FClass fc) {
+		if (myInstClassDecl().isEnum())
+			myInstClassDecl().flatten(fc);
 	}
 	
 	public void FIdUse.flattenMyRecord(FClass fc) {}
@@ -130,7 +135,7 @@ aspect Flattening {
 	
 			fc.addFFunctionDecl(ffd);
 			
-			flattenCalledFunctions(fc);
+			flattenUsedFuncsAndEnums(fc);
 		}
 	}
 	
@@ -178,7 +183,7 @@ aspect Flattening {
 			
 			fc.addFRecordDecl(frd);
 			
-			flattenCalledFunctions(fc);
+			flattenUsedFuncsAndEnums(fc);
 		}
 	}
 	
@@ -250,7 +255,7 @@ aspect Flattening {
 				ffv.setFTypePrefixInputOutput(new FOutput());
 			// TODO: Mark var as constant if isConstant is true?
 			ffd.addFFunctionVariable(ffv);
-			myInstClassDecl().flattenRecord(fc);
+			myInstClass().flattenRecord(fc);
 		}
 	}
 
@@ -362,7 +367,7 @@ aspect Flattening {
 	
 	public void InstRecord.flattenInRecord(FRecordDecl frd, FClass fc) {
 		frd.addFVariable(createFVariable());
-		myInstClassDecl().flattenRecord(fc);
+		myInstClass().flattenRecord(fc);
 	}
 	
 	public void InstPrimitive.flatten(FClass fc) {
@@ -377,14 +382,14 @@ aspect Flattening {
 	
 	public void InstRecord.flatten(FClass fc) {
 		fc.addFVariable(createFVariable());
-		myInstClassDecl().flattenRecord(fc);
+		myInstClass().flattenRecord(fc);
 	}
 	
 	public FVariable InstEnum.createFEnumVariable() {
 	
 		FEnumVariable fv = createEmptyFVariable();
 		
-		fv.setEnum(new FQName(myInstClassDecl().qualifiedName()));
+		fv.setEnum(new FQName(myInstClass().qualifiedName()));
 		
 		fv.setFVisibilityType(getComponentDecl().isPublic() ? 
 				new FPublicVisibilityType() : new FProtectedVisibilityType());
@@ -460,7 +465,7 @@ aspect Flattening {
 	
 	public FVariable InstRecord.createEmptyFVariable() {
 		FRecordVariable rec = new FRecordVariable();
-		rec.setRecord(new FQName(myInstClassDecl().qualifiedName()));
+		rec.setRecord(new FQName(myInstClass().qualifiedName()));
 		return rec;
 	}
 	
@@ -785,8 +790,7 @@ aspect Flattening {
 				List<FAttribute> my_attr = new List<FAttribute>();
 				getInstModification().collectAttributes(my_attr, prefix, aer);
 				FQName fqn2 = new FQName();
-				fqn2.addFQNamePart(new FQNamePart(getName().myInstComponentDecl().myInstClass().name(),
-					new Opt()));
+				fqn2.addFQNamePart(getName().myInstComponentDecl().myInstClass().name());
 				boolean isEach  = getComponentModification().hasEach();
 				boolean isFinal = getComponentModification().hasFinal();
 				Opt oe;
@@ -1081,6 +1085,9 @@ aspect FlatExpressions {
 	eq FColonSubscript.isUnknownIndex() = false;
 	
 	public FQName InstAccess.flatten(FQName prefix) { 
+		if (myInstComponentDecl().isEnumLiteral())
+			return new FQName(myInstComponentDecl().getFQName());
+		
 		FQName myName = isForIndex() ? new FQName() : new FQName(prefix);
 		ArrayList<FArraySubscripts> fasl = allFArraySubscripts();
 		InstAccess cur = getFirstInstAccess();

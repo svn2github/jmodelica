@@ -458,6 +458,6 @@ aspect Connections {
 
 	syn boolean InstAccess.isOutsideConnector() = getFirstInstAccess().myInstComponentDecl().isConnector();
 	
-	syn boolean InstComponentDecl.isConnector() = myInstClassDecl().isConnector();
+	syn boolean InstComponentDecl.isConnector() = myInstClass().isConnector();
 
 }

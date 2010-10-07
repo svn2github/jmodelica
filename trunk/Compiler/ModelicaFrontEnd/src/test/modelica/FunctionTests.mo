@@ -4415,12 +4415,15 @@ model UnknownArray19
          name="UnknownArray19",
          description="Function inputs of unknown size: using size() of non-existent component",
          errorMessage="
-2 errors found:
+3 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Semantic error at line 4226, column 7:
+Semantic error at line 4429, column 32:
+  Cannot find class or component declaration for b
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
+Semantic error at line 4433, column 7:
   Array size mismatch in declaration of x, size of declaration is [2, 2] and size of binding expression is [2, size(zeros(), 2)]
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Semantic error at line 4226, column 16:
+Semantic error at line 4433, column 16:
   Could not evaluate array size of output c
 ")})));
 

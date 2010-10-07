@@ -28,11 +28,11 @@ aspect OptimicaFlattening {
     	return copyLocationTo(new InstOptimizationClass());
     }
     
-    public void InstOptClassDecl.flattenCalledFunctions(FClass fc) {
-		getFConstraints().flattenCalledFunctions(fc);
+    public void InstOptClassDecl.flattenUsedFuncsAndEnums(FClass fc) {
+		getFConstraints().flattenUsedFuncsAndEnums(fc);
 		if (hasInstClassModification()) 
-			getInstClassModification().flattenCalledFunctions(fc);
-		super.flattenCalledFunctions(fc);
+			getInstClassModification().flattenUsedFuncsAndEnums(fc);
+		super.flattenUsedFuncsAndEnums(fc);
     }
         
     refine Flattening void InstClassDecl.flattenInstClassDecl(FClass fc) {
@@ -43,7 +43,7 @@ aspect OptimicaFlattening {
 		}
 		getInstComponentDeclList().flatten(fc);
 		getInstExtendsList().flatten(fc);
-		flattenCalledFunctions(fc);
+		flattenUsedFuncsAndEnums(fc);
 		
 		if (this instanceof InstOptClassDecl) {
 			FOptClass foc = (FOptClass)fc;

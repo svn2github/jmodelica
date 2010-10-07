@@ -126,7 +126,14 @@ aspect Constructors {
     public FQName.FQName(String name) {
         this(new List());
         for (String part : name.split("\\."))
-            addFQNamePart(new FQNamePart(part, new Opt()));
+            addFQNamePart(part);
+    }
+    
+    /**
+     * \brief Creates and adds a new FQNamePart without array subscripts.
+     */
+    public void FQName.addFQNamePart(String name) {
+    	addFQNamePart(new FQNamePart(name, new Opt()));
     }
 	
 	/**

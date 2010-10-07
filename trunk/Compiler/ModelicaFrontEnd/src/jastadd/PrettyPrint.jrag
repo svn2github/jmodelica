@@ -867,7 +867,7 @@ aspect FlattPrettyPrint {
     }
 
     public void FEnumDecl.prettyPrint(Printer p, PrintStream str, String indent, Object o) {
-    	str.print("\n" + indent + " type " + getName().name() + " = enumeration(");
+    	str.print("\n" + indent + "type " + getName().name() + " = enumeration(");
     	p.toString(getFEnumSpecification(),str,indent,o);
     	str.print(");\n");
     }

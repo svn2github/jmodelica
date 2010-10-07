@@ -873,6 +873,54 @@ aspect ConstantEvaluation {
 	    }
     	
     }
+    
+    /**
+     * \brief Constant value for enumeration literal.
+     */
+    public class CValueEnum extends CValue {
+    	
+    	private String enumName;
+    	private String valueName;
+    	private int index;
+    	
+    	/**
+    	 * \brief Create a new constant value for enumeration literal.
+    	 * 
+    	 * @param enumName   the name of the enumeration
+    	 * @param valueName  the name of the enumeration literal
+    	 * @param index      the ordinal for the enumeration literal
+    	 */
+    	public CValueEnum(String enumName, String valueName, int index) {
+    		this.enumName = enumName;
+    		this.valueName = valueName;
+    		this.index = index;
+    	}
+    	
+    	public int intValue() {
+    		return index;
+    	}
+    	
+    	public String stringValue() {
+    		return valueName;
+    	}
+    	
+    	public String toString() {
+    		return enumName + "." + valueName;
+    	}
+	    
+	    /**
+	     * \brief Create a literal AST node from constant.
+	     * 
+	     * Always creates node for the flat tree.
+	     *  
+	     *  @return an FIdUseExp pointing to the literal in the FEnumDecl.
+	     */
+	    public FExp buildLiteral() {
+	    	// TODO: perhaps we need an FEnumLiteralExp?
+	    	return new FIdUseExp(toString());
+	    }
+    	
+    }
 
     
     /** 
@@ -1297,6 +1345,10 @@ aspect ConstantEvaluation {
 			val = val.array().getCell(i);
 		return val;
 	}
+	
+	// Can never be an array - assume i == Index.NULL
+	eq InstEnumLiteral.ceval(Index i) = 
+		new CValueEnum(myInstEnumClassDecl().qualifiedName(), name(), myIndex());
 	
 	/**
 	 * \brief Find and evaluate the "start" attribute. If it is not found, use default value.

@@ -126,12 +126,36 @@ aspect FlatTypeCheck {
 	  return n instanceof FExp && ((FExp) n).type().isUnknown();
   }
   
-  // TODO: Add specialized typeError() methods that gived better error message
+  // TODO: Add specialized typeError() methods that gives better error messages
   
   public void FExp.typeError() {
+	  // TODO: add expression to end of error message to make it clearer
 	  error("Type error in expression");	  
   }
 
+  public void FInstAccessExp.typeError() {
+	  getInstAccess().typeError();
+  }
+  
+  public void InstAccess.typeError() {
+	  typeError(this);
+  }
+  
+  protected void InstAccess.typeError(InstAccess top) {}
+  
+  protected void InstDot.typeError(InstAccess top) {
+	  getRight().typeError(top);
+  }
+  
+  protected void InstComponentAccess.typeError(InstAccess top) {
+	  if (!myInstComponentDecl().isUnknown())
+		  top.error("Accesses to composite components other than records are not allowed: " + top.name());
+  }
+  
+  protected void InstClassAccess.typeError(InstAccess top) {
+	  if (!isComponentSizeClass() || !isInstComponentSize())
+		  top.error("Illegal access to class in expression: " + top.name());
+  }
   
   public void FIdUseExp.typeCheck() {
 	  if (!getFIdUse().isUnknown() && type().isUnknown())
@@ -180,15 +204,37 @@ aspect FlatTypeCheck {
 				  getFExp() + " has " + getFExp().ndims() + " dimension(s)");
   }
   
-  public void FExpSubscript.typeCheck() {
+  public void FExpSubscript.typeCheckAsSize() {
+	  if (ndims() > 0) { 
+		  error("Array size must be scalar expression: " + getFExp());
+	  } else if (!type().isInteger()) { // TODO: Expand to support Boolean and enums
+		  if (getFExp().canBeComponentSize())
+			  compliance("Array sizes of Boolean or enumeration type are not supported: " + getFExp());
+		  else if (!type().isUnknown())
+			  error("Array size must be Integer expression: " + getFExp());
+	  } else if (!inFunction()) { 
+		  try {
+			  getFExp().ceval().intValue();
+		  } catch (ConstantEvaluationException e) {
+			  error("Could not evaluate array size expression: " + getFExp());
+		  }
+	  }
+  }
+  
+  public void FExpSubscript.typeCheckAsIndex() {
 	  if (ndims() > 1) { 
 		  error("Array index must be scalar or vector expression: " + getFExp());
 	  } else if (!type().isInteger()) { // TODO: Expand to support Boolean and enums
-		  error("Array index must be Integer expression: " + getFExp());
+		  if (type().canBeIndex())
+			  compliance("Array indices of Boolean or enumeration type not supported: " + getFExp());
+		  else if (!type().isUnknown())
+			  error("Array index must be Integer expression: " + getFExp());
 	  } else if (!inFunction()) { 
 		  if (!getFExp().variability().lessOrEqual(fParameter())) {
 			  error("Array index in equation must be constant, parameter or loop index: " + getFExp());
-		  } else { // TODO: Perform bounds check in functions if index has parameter variability or lower?
+		  } else { 
+			  // Check array bounds
+			  // TODO: Perform bounds check in functions if index has parameter variability or lower?
 			  try {
 				  int max = mySize().get(0);
 				  for (FExp e : getExpanded().iterable()) {
@@ -205,6 +251,41 @@ aspect FlatTypeCheck {
 	  }
   }
   
+  public void FExpSubscript.typeCheck() {
+	  if (isInstComponentSize()) 
+		  typeCheckAsSize();
+	  else 
+		  typeCheckAsIndex();
+  }
+  
+  syn boolean FExp.canBeComponentSize()  = type().isInteger();
+  eq FInstAccessExp.canBeComponentSize() = type().isInteger() || getInstAccess().isComponentSizeClass();
+  eq FIdUseExp.canBeComponentSize()      = type().isInteger() || getFIdUse().isComponentSizeClass();
+  
+  syn boolean InstAccess.isComponentSizeClass() = myInstClassDecl().isComponentSizeClass();
+  syn boolean FIdUse.isComponentSizeClass()     = false;
+  eq FIdUseInstAccess.isComponentSizeClass()    = getInstAccess().isComponentSizeClass();
+  
+  syn boolean InstClassDecl.isComponentSizeClass() = isBooleanClass();
+  eq InstEnumClassDecl.isComponentSizeClass()      = true;
+  
+  inh boolean InstClassAccess.isInstComponentSize();
+  inh boolean FInstAccessExp.isInstComponentSize();
+  inh boolean FExpSubscript.isInstComponentSize();
+  inh boolean FArraySubscripts.isInstComponentSize();
+  eq InstComponentDecl.getLocalFArraySubscripts().isInstComponentSize() = true;
+  eq InstComponentDecl.getFArraySubscripts().isInstComponentSize()      = true;
+  eq InstShortClassDecl.getFArraySubscripts().isInstComponentSize()     = true;
+  eq InstAccess.getChild().isInstComponentSize()                        = false;
+  eq FQNamePart.getChild().isInstComponentSize()                        = false;
+  eq FIdUse.getChild().isInstComponentSize()                            = false;
+  eq FExp.getChild().isInstComponentSize()                              = false;
+  eq FInstAccessExp.getChild().isInstComponentSize()                    = isInstComponentSize();
+  eq AbstractFVariable.getChild().isInstComponentSize()                 = false;
+  eq FAbstractEquation.getChild().isInstComponentSize()                 = false;
+  eq InstNode.getChild().isInstComponentSize()                          = false;
+  eq FlatRoot.getChild().isInstComponentSize()                          = false;
+	
   
   public void InstComponentAccess.typeCheck() {
 	//  log.debug("InstComponentAccess.typeCheck: " + printSlice());
@@ -397,7 +478,7 @@ aspect FlatTypeCheck {
   }
   
   public void InstClassAccess.checkAccessCompInClassLeft(InstAccess right) {
-	  right.checkAccessCompInClassRight(myInstClassDecl().isPackage());
+	  right.checkAccessCompInClassRight(myInstClassDecl());
   }
   
   public void InstComponentAccess.checkAccessCompInClassLeft(InstAccess right) {
@@ -407,16 +488,25 @@ aspect FlatTypeCheck {
 	  }
   }
   
-  public void InstAccess.checkAccessCompInClassRight(boolean isPackage) {}
+  public void InstAccess.checkAccessCompInClassRight(InstClassDecl icd) {}
   
-  public void InstDot.checkAccessCompInClassRight(boolean isPackage) {
-	  getLeft().checkAccessCompInClassRight(isPackage);
+  public void InstDot.checkAccessCompInClassRight(InstClassDecl icd) {
+	  getLeft().checkAccessCompInClassRight(icd);
   }
   
-  public void InstComponentAccess.checkAccessCompInClassRight(boolean isPackage) {
-	  if (!isPackage || !myInstComponentDecl().isConstant()) {
+  public void InstComponentAccess.checkAccessCompInClassRight(InstClassDecl icd) {
+	  String type = null;
+	  if (icd.isPackage()) {
+		  if (!myInstComponentDecl().isConstant())
+			  type = "non-constant component in package";
+	  } else if (icd.isEnum()) {
+		  if (!myInstComponentDecl().isEnumLiteral())
+			  type = "attribute of primitive with dot notation";
+	  } else {
+		  type = "component in non-package class";
+	  }
+	  if (type != null) {
 		  InstAccess top = getTopInstAccess();
-		  String type = isPackage ? "non-constant component in package" : "component in non-package class";
 		  top.error("Can not access " + type + ": " + top.name());
 	  }
   }

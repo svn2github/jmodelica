@@ -228,7 +228,7 @@ aspect Environments {
 			l.add(getInstConstraining().getInstClassModification());
           }
         } 
-        l.addAll(getInstExtends(0).getClassName().myInstClassDecl().classInstModifications());
+        l.addAll(getInstExtends(0).myInstClass().classInstModifications());
    		return l;
 	}	 
  	
@@ -245,7 +245,7 @@ aspect Environments {
      		if (getOriginalInstClass().hasInstClassModification())
 				l.add(getOriginalInstClass().getInstClassModification());     
         }	
-        l.addAll(getInstExtends(0).getClassName().myInstClassDecl().classInstModifications());
+        l.addAll(getInstExtends(0).myInstClass().classInstModifications());
 		return l;
 	}
  	
@@ -275,7 +275,7 @@ aspect Environments {
 		ArrayList<InstModification> l = new ArrayList<InstModification>();
 		if (hasInstClassModification())
 			l.add(getInstClassModification());
-        l.addAll(getClassName().myInstClassDecl().classInstModifications());
+        l.addAll(myInstClass().classInstModifications());
 		return l;
 	}
 
@@ -1251,17 +1251,32 @@ aspect InstanceAST_API {
 	syn BuiltInClassDecl InstBuiltInClassDecl.getBuiltInClassDecl() = (BuiltInClassDecl)getClassDecl();
 
     syn String InstComponentDecl.qualifiedName() = getFQName().name();
+    
+    syn lazy String InstClassDecl.qualifiedName();
+    eq InstBaseClassDecl.qualifiedName()    = buildQualifiedName(name());
+    eq InstBuiltInClassDecl.qualifiedName() = name();
+    
+    syn String InstNode.buildQualifiedName(String last) = combineName(instClassNamePrefix(), last);
+    
+    inh lazy String InstNode.instClassNamePrefix();
+    eq InstBaseClassDecl.getChild().instClassNamePrefix() = buildQualifiedName(name());
+    eq InstComponentDecl.getChild().instClassNamePrefix() = buildQualifiedName(name());
+  //  eq InstImport.getChild().instClassNamePrefix()      = getPackageName().myInstClassDecl().qualifiedName();
+    
+    eq SourceRoot.getChild().instClassNamePrefix() = "";
+    eq FlatRoot.getChild().instClassNamePrefix() = "";
+    eq InstRoot.getChild().instClassNamePrefix() = "";
 	
 	syn ArrayList<AbstractEquation> InstNode.equations() = new ArrayList<AbstractEquation>();
 	eq InstClassRoot.equations() = getClassDecl().equations();
 	eq InstComponentDecl.equations() = myInstClass().equations();
-	eq InstExtends.equations() = getClassName().myInstClassDecl().equations();
+	eq InstExtends.equations() = myInstClass().equations();
 	eq InstFullClassDecl.equations() = getBaseClassDecl().equations();	
 	
 	syn ArrayList<Algorithm> InstNode.algorithms() = new ArrayList<Algorithm>();
 	eq InstClassRoot.algorithms() = getClassDecl().algorithms();
 	eq InstComponentDecl.algorithms() = myInstClass().algorithms();
-	eq InstExtends.algorithms() = getClassName().myInstClassDecl().algorithms();
+	eq InstExtends.algorithms() = myInstClass().algorithms();
 	eq InstFullClassDecl.algorithms() = getBaseClassDecl().algorithms();	
 	
 	syn lazy ArrayList<ComponentDecl> InstNode.components() = new ArrayList<ComponentDecl>();
@@ -1269,7 +1284,7 @@ aspect InstanceAST_API {
 	eq InstComponentDecl.components() = myInstClass().components();
 	eq InstArrayComponentDecl.components() = instComponentDecl().isPrimitive()? 
 			new ArrayList<ComponentDecl>() : instComponentDecl().components();
-	eq InstExtends.components() = extendsPrimitive()? new ArrayList<ComponentDecl>() : getClassName().myInstClassDecl().components();
+	eq InstExtends.components() = extendsPrimitive()? new ArrayList<ComponentDecl>() : myInstClass().components();
 	eq InstBaseClassDecl.components() = getBaseClassDecl().components();
 //    eq InstPrimitiveClassDecl.components() = new ArrayList<ComponentDecl>();
 	
@@ -1278,7 +1293,7 @@ aspect InstanceAST_API {
 	eq InstComponentDecl.superClasses() = myInstClass().superClasses();
 	eq InstArrayComponentDecl.superClasses() = instComponentDecl().isPrimitive()? 
 			new ArrayList<ExtendsClause>() : instComponentDecl().superClasses();
-	eq InstExtends.superClasses() = getClassName().myInstClassDecl().superClasses();
+	eq InstExtends.superClasses() = myInstClass().superClasses();
     eq InstBaseClassDecl.superClasses() = getBaseClassDecl().superClasses();
 
 	syn lazy ArrayList<ClassDecl> InstNode.classes() = new ArrayList<ClassDecl>();
@@ -1286,7 +1301,7 @@ aspect InstanceAST_API {
 	eq InstProgramRoot.classes() = getProgram().classes();
 	eq InstComponentDecl.classes() = myInstClass().classes();
 	eq InstBaseClassDecl.classes() = getBaseClassDecl().classes();
-	eq InstExtends.classes() = getClassName().myInstClassDecl().classes();
+	eq InstExtends.classes() = myInstClass().classes();
 	
 //    eq InstShortClassDecl.classes() = getClassName().myInstClass().classes();
 
@@ -1300,8 +1315,19 @@ aspect InstanceAST_API {
 	syn ShortClassDecl InstShortClassDecl.getShortClassDecl() = (ShortClassDecl)getBaseClassDecl();
 	syn PrimitiveClassDecl InstPrimitiveClassDecl.getPrimitiveClassDecl() = (PrimitiveClassDecl)getBaseClassDecl();
 */
+	
+	inh InstEnumClassDecl InstEnumLiteral.myInstEnumClassDecl();
+	eq InstEnumClassDecl.getInstComponentDecl().myInstEnumClassDecl() = this;
+	eq InstNode.getChild().myInstEnumClassDecl()                      = null;
+	eq FlatRoot.getChild().myInstEnumClassDecl()                      = null;
+	
+	inh int InstEnumLiteral.myIndex();
+	eq InstEnumClassDecl.getInstComponentDecl(int i).myIndex() = 
+		enumLiterals().indexOf(getInstComponentDecl(i)) + 1;
+	eq InstNode.getChild().myIndex()                           = 0;
+	eq FlatRoot.getChild().myIndex()                           = 0;
 
-	public ArrayList<InstEnumLiteral> InstEnumClassDecl.enumLiterals() {
+	syn lazy ArrayList<InstEnumLiteral> InstEnumClassDecl.enumLiterals() {
 		ArrayList<InstEnumLiteral> l = new ArrayList<InstEnumLiteral>();
 		for (InstComponentDecl icd : getInstComponentDecls()) {
 			if (icd.isEnumLiteral()) {
@@ -1351,14 +1377,14 @@ aspect InstanceAST_API {
 	eq InstFullClassDecl.extendsPrimitive()  = 
 		getNumInstExtends() == 1 && getInstExtends(0).extendsPrimitive();
 	eq InstExtends.extendsPrimitive() {
-		InstClassDecl icd = getClassName().myInstClassDecl();
+		InstClassDecl icd = myInstClass();
 		return !isRecursive() && (icd.isPrimitive() || icd.extendsPrimitive());
 	}
 	
 	syn InstClassDecl InstClassDecl.getBaseInstClass() = 
 		(getNumInstExtends() > 0) ? getInstExtends(0).getBaseInstClass() : this;
 	syn InstClassDecl InstExtends.getBaseInstClass()   = 
-		getClassName().myInstClassDecl().getBaseInstClass();
+		myInstClass().getBaseInstClass();
 	
 	inh boolean InstNode.enclosedBy(InstNode node);
 	eq InstNode.getChild().enclosedBy(InstNode node) = (node == this) || enclosedBy(node);
@@ -1523,7 +1549,7 @@ aspect InstArrays {
 				l.add(fs);
 			}
 		}
-		l.addAll(myInstClassDecl().myFSubscripts());
+		l.addAll(myInstClass().myFSubscripts());
 		return l;
 	}
 

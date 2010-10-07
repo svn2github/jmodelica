@@ -1783,6 +1783,27 @@ model ImportTest9
 end ImportTest9;
 
 
+model ImportTest10
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ImportTest10",
+         description="Using constant from imported package.",
+         flatModel="
+fclass NameTests.ImportTest10
+ Real y.x = 3.141592653589793;
+end NameTests.ImportTest10;
+")})));
+
+	model A
+		import C = Modelica.Constants;
+		Real x = C.pi;
+	end A;
+	
+	A y;
+end ImportTest10;
+
+
+
 model ShortClassDeclTest1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.FlatteningTestCase(name="ShortClassDeclTest1",

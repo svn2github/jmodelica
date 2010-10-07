@@ -487,20 +487,6 @@ aspect Names {
 		  return first;
 	  return first + "." + second;
   }
-    
-  syn lazy String InstClassDecl.qualifiedName();
-  eq InstBaseClassDecl.qualifiedName() = combineName(instClassNamePrefix(), name());
-  
-  inh lazy String InstNode.instClassNamePrefix();
-  eq InstBaseClassDecl.getChild().instClassNamePrefix() = combineName(instClassNamePrefix(), name());
-  eq InstComponentDecl.getChild().instClassNamePrefix() = combineName(instClassNamePrefix(), name());
-//  eq InstImport.getChild().instClassNamePrefix()      = getPackageName().myInstClassDecl().qualifiedName();
-
-  eq InstBuiltInClassDecl.qualifiedName() = name();
-  
-  eq SourceRoot.getChild().instClassNamePrefix() = "";
-  eq FlatRoot.getChild().instClassNamePrefix() = "";
-  eq InstRoot.getChild().instClassNamePrefix() = "";
   
   syn String InstClassDecl.primitiveName();
   eq InstBaseClassDecl.primitiveName() = name();
@@ -508,7 +494,7 @@ aspect Names {
   
   eq InstFullClassDecl.primitiveName() {
       if (extendsPrimitive())
-          return getInstExtends(0).getClassName().myInstClassDecl().finalClass().primitiveName();
+          return getInstExtends(0).myInstClass().finalClass().primitiveName();
       else 
           return name();
   }
@@ -755,7 +741,7 @@ aspect FlatNames {
     }
 
     public FQName FQName.append(String name) {
-        addFQNamePart(new FQNamePart(name, new Opt()));
+        addFQNamePart(name);
         return this;
     }
 
@@ -804,6 +790,7 @@ aspect FlatNames {
     syn lazy FQName InstNode.getFQNamePrefix() = new FQName(retrieveFQName());
     
     syn lazy FQName InstNode.getFQName() = getFQNamePrefix();
+    eq InstClassDecl.getFQName()         = new FQName();
     
     eq InstComponentDecl.getFQName() {
         FQName myName = new FQName(retrieveFQName());
@@ -821,16 +808,22 @@ aspect FlatNames {
         myName.getFArraySubscripts().addFSubscript(new FExpSubscript(getIndex()));
         return myName;
     }
-
-    eq InstClassDecl.getFQName() = new FQName();
+    
+    eq InstEnumLiteral.getFQName() {
+    	FQName name = new FQName(retrieveFQName());
+    	name.addFQNamePart(name());
+    	return name;
+    }
+    
     inh lazy FQName InstNode.retrieveFQName();
-    eq InstComponentDecl.getChild().retrieveFQName() = getFQName();
-    eq InstComponentDecl.getInstModification().retrieveFQName() = retrieveFQName();
+    eq InstComponentDecl.getChild().retrieveFQName()                      = getFQName();
+    eq InstComponentDecl.getInstModification().retrieveFQName()           = retrieveFQName();
     eq InstReplacingComposite.getOriginalInstComponent().retrieveFQName() = retrieveFQName();
     eq InstReplacingPrimitive.getOriginalInstComponent().retrieveFQName() = retrieveFQName();
-    eq InstReplacingShortClassDecl.getChild().retrieveFQName() = retrieveFQName();
-    eq InstClassDecl.getChild().retrieveFQName() = new FQName(); //getFQName();
-    eq InstForIndex.getChild().retrieveFQName() = new FQName();
+    eq InstReplacingShortClassDecl.getChild().retrieveFQName()            = retrieveFQName();
+    eq InstClassDecl.getChild().retrieveFQName()                          = new FQName(); //getFQName();
+    eq InstForIndex.getChild().retrieveFQName()                           = new FQName();
+    eq InstEnumClassDecl.getChild().retrieveFQName()                      = new FQName(qualifiedName());
     
     eq InstRoot.getChild().retrieveFQName() = new FQName();
     eq SourceRoot.getProgram().retrieveFQName() = new FQName();
@@ -1018,7 +1011,7 @@ aspect FlatNames {
     public FQName FQName.copyWithoutSubscripts() {
         FQName res = new FQName();
         for (FQNamePart part : getFQNameParts())
-        	res.addFQNamePart(new FQNamePart(part.getName(), new Opt()));
+        	res.addFQNamePart(part.getName());
         return res;
     }
     
@@ -1526,7 +1519,7 @@ aspect ComponentDeclMethods {
 aspect ShortClassUtil {
 
     syn InstClassDecl InstClassDecl.finalClass() = this;
-    eq InstShortClassDecl.finalClass() = getInstExtends(0).getClassName().myInstClassDecl().finalClass();
+    eq InstShortClassDecl.finalClass() = getInstExtends(0).myInstClass().finalClass();
 
 
     syn boolean ClassDecl.isInput() = false;
@@ -1550,7 +1543,7 @@ aspect ShortClassUtil {
         if (getClassDecl().isInput()) {
             return true;
         }
-        return getInstExtends(0).getClassName().myInstClassDecl().isInput();
+        return getInstExtends(0).myInstClass().isInput();
     }
 
     syn boolean InstClassDecl.isOutput() = false;
@@ -1558,7 +1551,7 @@ aspect ShortClassUtil {
         if (getClassDecl().isOutput()) {
             return true;
         }
-        return getInstExtends(0).getClassName().myInstClassDecl().isOutput();
+        return getInstExtends(0).myInstClass().isOutput();
     }
     
     syn boolean BaseComponentDecl.isEnumLiteral() = false;

@@ -20,7 +20,8 @@
        clean           - removes all generated files and class files
      Targets for working from Eclipse:
        gen             - generates java files
-       genClean        - removes all generated files and their class files
+       gen-test        - generates junit test cases from test files
+       cleanGen        - removes all generated files and their class files
  -->
 
 <project name="OptimicaCompiler" default="build" basedir=".">

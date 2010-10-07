@@ -917,7 +917,7 @@ aspect CCodeGen {
 	
 	public FExp FIdUseExp.extractRecordComponentExp(String name) {
 		FIdUseExp res = fullCopy();
-		res.getFIdUse().getFQName().addFQNamePart(new FQNamePart(name, new Opt()));
+		res.getFIdUse().getFQName().addFQNamePart(name);
 		return dynamicFExp(res);
 	}
 	

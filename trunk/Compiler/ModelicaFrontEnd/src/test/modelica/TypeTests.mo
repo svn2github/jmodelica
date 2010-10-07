@@ -998,8 +998,8 @@ model UnknownTypeAccess1
          errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 999, column 8:
-  Type error in expression
+Semantic error at line 1010, column 8:
+  Accesses to composite components other than records are not allowed: c
 ")})));
 
  model C
