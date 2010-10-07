@@ -8,7 +8,7 @@
          xmlns:m="http://www.w3.org/1998/Math/MathML"
          xmlns:html="http://www.w3.org/1999/xhtml"
          xmlns:db="http://docbook.org/ns/docbook">
-  <title>FMI Interface</title>
+  <title xml:id="sec_fmi">FMI Interface</title>
 
   <para>FMI (Functional Mock-up Interface) is a standard for exchanging models
   between different modeling and simulation environments. FMI defines a model

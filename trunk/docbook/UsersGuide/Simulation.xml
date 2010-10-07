@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <chapter version="5.0" xmlns="http://docbook.org/ns/docbook"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:xs="http://www.w3.org/2001/XMLSchema"
          xmlns:xlink="http://www.w3.org/1999/xlink"
          xmlns:xi="http://www.w3.org/2001/XInclude"
          xmlns:svg="http://www.w3.org/2000/svg"
@@ -9,8 +11,982 @@
   <title>Simulation</title>
 
   <section>
-    <title></title>
+    <title>Introduction</title>
+
+    <para>JModelica.org supports simulation of models described in the
+    Modelica language and models following the FMI standard (see ###). The
+    simulation environment uses <link linkend="???"><link
+    xlink:href="http://www.jmodelica.org/assimulo">Assimulo</link></link> as
+    standard which is a standalone Python package for solving ordinary
+    differential and differential algebraic equations.</para>
 
     <para></para>
+  </section>
+
+  <section>
+    <title xml:id="sim_sec_first">A first example</title>
+
+    <para>This example focus on how to use JModelica.org's simulation
+    functionality in the most basic way. The model which is to be simulated is
+    the Van der Pol problem described in <xref linkend="sim_list_vdp" />. The
+    model is also available from the examples in the file VDP.mop.</para>
+
+    <programlisting xml:id="sim_list_vdp">model VDP
+    // State start values
+    parameter Real x1_0 = 0;
+    parameter Real x2_0 = 1;
+
+    // The states
+    Real x1(start = x1_0);
+    Real x2(start = x2_0);
+
+    // The control signal
+    input Real u;
+
+  equation
+    der(x1) = (1 - x2^2) * x1 - x2 + u;
+    der(x2) = x1;
+  end VDP;</programlisting>
+
+    <para>Create a new file in your working directory called
+    <literal>VDP.mo</literal> and save the model. Note that this model is
+    described as an ODE and can thus be simulated using ODE solvers from
+    Assimulo.</para>
+
+    <para>Next, create a Python script file and write or (copy paste) the
+    commands for compiling and loading a model:</para>
+
+    <programlisting># Import the function for compilation of models and the JMUModel class
+from jmodelica.jmi import compile_jmu
+from jmodelica.jmi import JMUModel
+
+# Import the plotting library
+import matplotlib.pyplot as plt</programlisting>
+
+    <para>Next, we compile and load the model:</para>
+
+    <programlisting># Compile model
+jmu_name = compile_jmu("VDP","VDP.mo")
+
+# Load model
+vdp = JMUModel(jmu_name)</programlisting>
+
+    <para>The function <literal>compile_jmu</literal> compiles the model into
+    a binary, which is then loaded when the <literal>vdp</literal> object is
+    created. This object represents the compiled model and is used to invoke
+    the simulation algorithm (for more information about model creations and
+    options, see ###):</para>
+
+    <programlisting>res = vdp.simulate(final_time=10)</programlisting>
+
+    <para>In this case we use the default simulation algorithm together with
+    default options, except for the final time which we set to 10. The result
+    object can now be used to access in a dictionary-like way the simulation
+    result:</para>
+
+    <programlisting>x1 = res['x1']
+x2 = res['x2']
+t  = res['time']</programlisting>
+
+    <para>The variable trajectories are returned as numpy arrays and can be
+    used for further analysis of the simulation result or for
+    visualization:</para>
+
+    <programlisting>plt.figure(1)
+plt.plot(t, x1, t, x2)
+plt.legend(('x1','x2'))
+plt.title('Van der Pol oscillator.')
+plt.ylabel('Angle (rad)')
+plt.xlabel('Time (s)')
+plt.show()</programlisting>
+
+    <para>In <xref linkend="sim_fig_vdp_res" /> the simulation result is
+    shown.</para>
+
+    <figure>
+      <title>Simulation result of the Van der Pol oscillator.</title>
+
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="images/vdp_result.svg" scale="70"
+                     xml:id="sim_fig_vdp_res"></imagedata>
+        </imageobject>
+      </mediaobject>
+    </figure>
+  </section>
+
+  <section>
+    <title>Simulation of Models</title>
+
+    <para>Simulation of models in JModelica.org is preformed via the simulate
+    method of a model object. The model objects in JModelica.org are:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para><literal>JMUModel (located in jmodelica.jmi)</literal></para>
+      </listitem>
+
+      <listitem>
+        <para><literal>FMUModel (located in jmodelica.fmi)</literal></para>
+      </listitem>
+    </itemizedlist>
+
+    <para>The difference between the two are that <literal>JMUModel</literal>
+    supports compiled models from JModelica.org (extension .jmu) while the
+    <literal>FMUModel</literal> supports compiled models from other
+    simulation/modelling tools that follows the FMI standard (extension .fmu).
+    For more information about compiling a model in JModelica.org see
+    ###.</para>
+
+    <para>The simulation method is the preferred method for simulation of
+    models and which by default is connected to the Assimulo simulation
+    package but can also be connected to other simulation platforms. The
+    simulation method for <literal>JMUModel</literal> is defined as:</para>
+
+    <programlisting>class JMUModel(...)
+    ...
+    def simulate(self,
+             start_time=0.0,
+             final_time=1.0,
+             input=(),
+             algorithm='AssimuloAlg', 
+             options={}):</programlisting>
+
+    <para>And used in the following way:</para>
+
+    <programlisting>res = JMUModel.simulate() #Using default values</programlisting>
+
+    <para>The only difference between the simulation method in
+    <literal>FMUModel</literal> is that the algorithm is
+    <literal>AssimuloFMIAlg</literal>. They are although both connected to the
+    Assimulo package and able to use its solvers with the limitation that the
+    FMI standard only support ODEs.</para>
+
+    <para>RETURN ARGUMENT!!!</para>
+
+    <section>
+      <title>Arguments</title>
+
+      <para>The start and final time attributes are simply the time where the
+      solver should start the integration and stop the integration. The input
+      however is a bit more complex. The input defines the input trajectories
+      to the model and should be a 2-tuple consisting of the name(s) of the
+      input variables in the model and the second argument should be a data
+      matrix with the time vector as the first column and second column should
+      correspond to the first name in the in the first argument and so
+      forth.</para>
+
+      <para>For example, consider that we have a model with an input variable
+      <literal>u1 and that the model should be driven by a sinus curve as
+      input. Also we are interested in the interval 0 to 10.</literal></para>
+
+      <programlisting>t = N.linspace(0.,10.,100) #Create one hundred evenly spaced points
+u = N.sin(t) #Create the input vector
+u_traj = N.transpose(N.hstack((t,u))) #Create the data matrix and transpose 
+                                      #it to the correct form</programlisting>
+
+      <para>The above code have created the data matrix that we are interested
+      in giving to the model as input, we just need to connect the data to a
+      specific input variable, <literal>u1</literal>:</para>
+
+      <programlisting>input_model = ('u1', u_traj)</programlisting>
+
+      <para>Now we are ready to simulate using the input and simulate 10
+      seconds.</para>
+
+      <programlisting>res = model.simulate(final_time=10, input=input_model)</programlisting>
+
+      <para>If we on the other hand would have two input variables, u1 and u2
+      the script would instead look like:</para>
+
+      <programlisting>t = N.linspace(0.,10.,100) #Create one hundred evenly spaced points
+u1 = N.sin(t) #Create the first input vector
+u2 = N.cos(t) #Create the second input vector
+u_traj = N.transpose(N.hstack((t,u1,u2))) #Create the data matrix and 
+                                          #transpose it to the correct form
+
+input_model = (['u1','u2'], u_traj)
+
+res = model.simulate(final_time=10, input=input_model)</programlisting>
+
+      <para>Note that the variables are now a List of variables.</para>
+
+      <para>The algorithm attribute is where the different simulation package
+      can be specified, however currently only a connection to Assimulo is
+      supported and connected through the algorithm
+      <literal>AssimuloAlg</literal> for <literal>JMUModel</literal> and
+      <literal>AssimuloFMIAlg</literal> for
+      <literal>FMUModel</literal>.</para>
+
+      <section>
+        <title>Options</title>
+
+        <para>The options attribute are where options to the specified
+        algorithm are stored and are preferably used together with:</para>
+
+        <programlisting>opts = JMUModel.simulate_options()</programlisting>
+
+        <para>which returns the default options for the default algorithm.
+        Information about the available options can be viewed by typing help
+        on the <literal>opts</literal> variable:</para>
+
+        <programlisting>&gt;&gt;&gt; help(opts)
+   Options for simulation of a JMU model using the Assimulo simulation package.
+   The Assimulo package contain both explicit solvers (CVode) for ODEs and 
+   implicit solvers (IDA) for DAEs. The ODE solvers require that the problem
+   is written on the form, ydot = f(t,y).
+   
+   Assimulo options::
+   
+       solver     --
+           Specifies the simulation algorithm that is to be used.
+           Default 'IDA'
+                
+       ncp        --
+           Number of communication points. If ncp is zero, the solver
+           will return the internal steps taken.
+           Default '0'
+                
+       initialize --
+           If set to True, an algorithm for initializing the
+           differential equation is invoked, otherwise the
+           differential equation is assumed to have consistent
+           initial conditions. 
+           Default is True.
+                
+       write_scaled_result --
+           Set this parameter to True to write the result to file without
+           taking scaling into account. If the value of scaled is False,
+           then the variable scaling factors of the model are used to
+           reproduced the unscaled variable values.
+           Default: False
+   
+   The different solvers provided by the Assimulo simulation package provides
+   different options. These options are given in dictionaries with names
+   consisting of the solver name concatenated by the string '_option'. The most
+   common solver options are documented below, for a complete list of options
+   see, http://www.jmodelica.org/assimulo
+   
+   Options for IDA::
+   
+       rtol    --
+           The relative tolerance.
+           Default 1.0e-6
+                 
+       atol    --
+           The absolute tolerance.
+           Default 1.0e-6
+       
+       maxord  --
+           The maximum order of the solver. Can range between 1 to 5.
+           Default 5
+   
+   Options for CVode::
+
+       rtol    --
+           The relative tolerance. 
+           Default 1.0e-6
+               
+       atol    --
+           The absolute tolerance.
+           Default 1.0e-6
+                 
+       discr   --
+           The discretization method. Can be either 'BDF' or 'Adams'
+           Default 'BDF'
+       
+       iter    --
+           The iteration method. Can be either 'Newton' or 'FixedPoint'
+           Default 'Newton'
+ </programlisting>
+
+        <para></para>
+
+        <programlisting></programlisting>
+
+        <para>Lets look at an example, consider that you want to simulate a
+        JMU model using the solver CVode together with changing the
+        discretization method (discr) from BDF to Adams:</para>
+
+        <programlisting>...
+opts = model.simulate_options() #Retrieve the default options
+
+opts['solver'] = 'CVode' #Change the solver from IDA to CVode
+
+opts['CVode_options']['discr'] = 'Adams' #Change from using BDF to Adams
+
+model.simulate(options=opts) #Pass in the options to simulate and simulate</programlisting>
+
+        <para></para>
+
+        <para>More information regarding the solver options can be found here,
+        http://www.jmodelica.org/assimulo and a selection of solver arguments
+        for the ODE solver CVode can be found in <xref
+        linkend="sim_table_cvode" /> and for the DAE solver IDA in <xref
+        linkend="sim_table_ida" />.</para>
+
+        <table xml:id="sim_table_cvode">
+          <title>Selection of solver arguments for CVode</title>
+
+          <tgroup cols="2" xml:id="sim_table_cvode">
+            <thead>
+              <row>
+                <entry align="center">Argument</entry>
+
+                <entry align="center">Option</entry>
+              </row>
+            </thead>
+
+            <tbody>
+              <row>
+                <entry>discr (The discretization method)</entry>
+
+                <entry>'BDF' or 'Adams'</entry>
+              </row>
+
+              <row>
+                <entry>iter (The iteration method)</entry>
+
+                <entry>'Newton' or 'FixedPoint'</entry>
+              </row>
+
+              <row>
+                <entry>maxord (The maximum order used)</entry>
+
+                <entry>Integer of max 5 (BDF) or 12 (Adams)</entry>
+              </row>
+
+              <row>
+                <entry>maxh (Maximum step-size)</entry>
+
+                <entry>Positive float</entry>
+              </row>
+
+              <row>
+                <entry>atol (Absolute Tolerance)</entry>
+
+                <entry>Array of floats or Float</entry>
+              </row>
+
+              <row>
+                <entry>rtol (Relative Tolerance)</entry>
+
+                <entry>Float</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </table>
+
+        <table xml:id="sim_table_ida">
+          <title>Selection of solver arguments for IDA</title>
+
+          <tgroup cols="2">
+            <thead>
+              <row>
+                <entry align="center">Argument</entry>
+
+                <entry align="center">Option</entry>
+              </row>
+            </thead>
+
+            <tbody>
+              <row>
+                <entry>maxord (The maximum order used)</entry>
+
+                <entry>Integer of max 5</entry>
+              </row>
+
+              <row>
+                <entry>maxh (Maximum step-size)</entry>
+
+                <entry>Positive float</entry>
+              </row>
+
+              <row>
+                <entry>atol (Absolute Tolerance)</entry>
+
+                <entry>Array of floats or Float</entry>
+              </row>
+
+              <row>
+                <entry>rtol (Relative Tolerance)</entry>
+
+                <entry>Float</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </table>
+      </section>
+    </section>
+
+    <section>
+      <title>Simulation of FMUs</title>
+
+      <para></para>
+    </section>
+  </section>
+
+  <section>
+    <title>Examples</title>
+
+    <para>In the next sections, it will be shown how to use the JModelica.org
+    platform for simulation of various JMUs and FMUs.</para>
+
+    <para>The Python commands in these examples may be copied and pasted
+    directly into a Python shell, in some cases with minor modifications.
+    Alternatively, they may be copied into a text file, which also is the
+    recommended way.</para>
+
+    <section>
+      <title>Simulation with inputs</title>
+
+      <para>This example will demonstrate how a model with two inputs with
+      data from a matlab-file can be simulated.</para>
+    </section>
+
+    <section>
+      <title>Simulation of an ODE</title>
+
+      <para>Simulation of ODEs in JModelica.org is currently limited to models
+      written explicitly on the form:</para>
+
+      <equation>
+        <m:math display="block">
+          <m:mrow>
+            <m:mover>
+              <m:mi>y</m:mi>
+
+              <m:mo>.</m:mo>
+            </m:mover>
+
+            <m:mo>=</m:mo>
+
+            <m:mi>f(t,y)</m:mi>
+          </m:mrow>
+        </m:math>
+      </equation>
+
+      <para>An example is the Van der Pol oscillator described in <xref
+      linkend="sim_sec_first" />. In <xref linkend="sim_list_vdp2" /> it is
+      shown again for convenience.</para>
+
+      <programlisting xml:id="sim_list_vdp2">model VDP
+    // State start values
+    parameter Real x1_0 = 0;
+    parameter Real x2_0 = 1;
+
+    // The states
+    Real x1(start = x1_0);
+    Real x2(start = x2_0);
+
+    // The control signal
+    input Real u;
+
+  equation
+    der(x1) = (1 - x2^2) * x1 - x2 + u;
+    der(x2) = x1;
+end VDP;</programlisting>
+
+      <para>We see here that the state derivatives are written on the left
+      hand side while the equations are written on the right hand side. There
+      is also a limitation that events are currently not handled.</para>
+
+      <para>Lets begin with the the example, copy and paste the Modelica code
+      and save it into <literal>VDP.mo</literal> and open a python script
+      file. We start by importing the necessary objects:</para>
+
+      <programlisting># Import the function for compilation of models and the JMUModel class
+from jmodelica.jmi import compile_jmu
+from jmodelica.jmi import JMUModel
+
+# Import the plotting library
+import matplotlib.pyplot as plt</programlisting>
+
+      <para>Next, we compile and load the model:</para>
+
+      <programlisting># Compile model
+jmu_name = compile_jmu("VDP","VDP.mo")
+
+# Load model
+vdp = JMUModel(jmu_name)</programlisting>
+
+      <para>Now we would like to change the default solver IDA to the ODE
+      solver CVode and also change the relative tolerance to 0.0001. First we
+      retrieve the default options and then change the option:</para>
+
+      <programlisting>opts = vdp.simulate_options() #Retrieve the default options
+
+opts['solver'] = 'CVode' #Change the solver to CVode
+opts['CVode_options']['rtol'] = 0.0001 #Change the relative tolerance for CVode</programlisting>
+
+      <para>Now lets simulate the problem ten seconds:</para>
+
+      <programlisting>res = vdp.simulate(final_time=10, options=opts)</programlisting>
+
+      <para>The result is retrieved by accessing the <literal>res</literal>
+      variable as a dictionary with the variable name as key:</para>
+
+      <programlisting>x1 = res['x1']
+x2 = res['x2']
+t  = res['time']</programlisting>
+
+      <para>The variable trajectories are returned as numpy arrays and can be
+      used for further analysis of the simulation result or for
+      visualization:</para>
+
+      <programlisting>plt.figure(1)
+plt.plot(t, x1, t, x2)
+plt.legend(('x1','x2'))
+plt.title('Van der Pol oscillator.')
+plt.ylabel('Angle (rad)')
+plt.xlabel('Time (s)')
+plt.show()</programlisting>
+
+      <para>In <xref linkend="sim_fig_cvode_vdp" /> the simulation result is
+      shown.</para>
+
+      <figure>
+        <title>Simulation result of the Van der Pol oscillator.</title>
+
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="images/vdp_cvode.svg" scale="70"
+                       xml:id="sim_fig_cvode_vdp"></imagedata>
+          </imageobject>
+        </mediaobject>
+      </figure>
+    </section>
+
+    <section>
+      <title>Simulation of a discontinuous system</title>
+
+      <para>The model which is to be simulated is an electric circuit. The
+      model is depicted in <xref linkend="sim_fig_rlc" /> and consists of
+      resistances, inductors and a capacitor. The circuit is connected to a
+      voltage source which generates a square-wave with an amplitude of 1.0
+      and a frequency of 0.6 Hz. The model is also available from the examples
+      in the file RLC_Circuit.mo.</para>
+
+      <figure>
+        <title>Electric Circuit</title>
+
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="images/RLC.png" scalefit="1" width="60%"
+                       xml:id="sim_fig_rlc"></imagedata>
+          </imageobject>
+        </mediaobject>
+      </figure>
+
+      <para>This examples assumes that the file
+      <literal>RLC_Circuit.mo</literal> is located in the working
+      directory.</para>
+
+      <para>Start by creating a Python script file and write or (copy paste)
+      the command for importing the model object and for compiling a model
+      together with the library used for plotting:</para>
+
+      <programlisting language="Python"># Import the function for compilation of models and the JMUModel class
+from jmodelica.jmi import compile_jmu
+from jmodelica.jmi import JMUModel
+
+# Import the plotting library
+import matplotlib.pyplot as plt</programlisting>
+
+      <para>Next, we compile and load the model:</para>
+
+      <programlisting># Compile model
+jmu_name = compile_jmu("RLC_Circuit_Square","RLC_Circuit.mo")
+
+# Load model
+rlc = JMUModel(jmu_name)</programlisting>
+
+      <para>Now we are ready to simulate our model. We are interested in
+      simulating the model from 0.0 to 20.0 seconds. The start time is default
+      to 0.0 so no need to change that, but the final time needs to be
+      changed:</para>
+
+      <programlisting>res = rlc.simulate(final_time=20.0) #Simulate the model from 0.0 to 20.0 seconds</programlisting>
+
+      <para>After a successful simulation the statistics are printed in the
+      prompt and the results are stored in the variable 'res'. To view the
+      result, we have to retrieve information about the variables we are
+      interested of. This is easily done in the following way,</para>
+
+      <programlisting>square_y    = res['square.y']
+resistor_v  = res['resistor.v']
+inductor1_i = res['inductor1.i']
+time        = res['time']</programlisting>
+
+      <para>And then plotted with the help from
+      <literal>matplotlib</literal>,</para>
+
+      <programlisting>plt.figure(1)
+plt.plot(time, square_y, time, resistor_v, time, inductor1_i)    
+plt.legend(('square.y','resistor.v','inductor1.i'))
+plt.show()</programlisting>
+
+      <para>The simulation result is shown in <xref
+      linkend="sim_fig_rlc_res" />.</para>
+
+      <figure>
+        <title>Simulation result</title>
+
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="images/Result_RLC.svg" scalefit="1"
+                       width="60%" xml:id="sim_fig_rlc_res"></imagedata>
+          </imageobject>
+        </mediaobject>
+      </figure>
+    </section>
+
+    <section>
+      <title>Simulation of an FMU</title>
+
+      <para>This example will show how to use the JModelica.org's
+      FMI-interface together with its simulation package, Assimulo. The FMU to
+      be simulated is the full Robot from the Modelica standard library (3.1)
+      where it is located in
+      <literal>Mechanics.MultiBody.Examples.Systems.RobotR3</literal>. It
+      consists of brakes, motors, gears and path planning. The model consists
+      of 36 continuous states and around 700 algebraic variables together with
+      98 event functions and also a few thousand constants/parameters. The FMU
+      was generated using Dymola 7.4.</para>
+
+      <figure>
+        <title>Full Robot</title>
+
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="images/fullRobot.png" scalefit="1" width="60%"
+                       xml:id="sim_fig_rob"></imagedata>
+          </imageobject>
+        </mediaobject>
+      </figure>
+
+      <para>This examples assumes that an FMU of the robot named
+      <literal>Modelica_Mechanics_MultiBody_Examples_Systems_RobotR3_fullRobot.fmu</literal>
+      exists in the working folder.</para>
+
+      <para>Start by creating a Python script file and write or (copy paste)
+      the command for importing the model object and the library used for
+      plotting:</para>
+
+      <programlisting language="Python"># Import the FMUModel class
+from jmodelica.fmi import FMUModel
+
+# Import the plotting library
+import matplotlib.pyplot as plt</programlisting>
+
+      <para>Next, we load the FMU into the model object:</para>
+
+      <programlisting>robot = FMUModel('Modelica_Mechanics_MultiBody_Examples_Systems_RobotR3_fullRobot.fmu')</programlisting>
+
+      <para>We are interested in simulating the Robot from time 0.0 to 1.8
+      using 1000 communication points and using tolerances specified in the
+      FMU. This information is specified to the simulate method:</para>
+
+      <programlisting>res = robot.simulate(start_time=0.0, final_time=1.8, options={'ncp':1000})</programlisting>
+
+      <para>This preforms the simulation and the statistics will be printed in
+      the prompt.</para>
+
+      <para>To retrieve data about a variable from the result data, access it
+      as a dictionary with the name of the variable as key.</para>
+
+      <programlisting language="Python">dq1  = res['der(mechanics.q[1])']
+dq6  = res['der(mechanics.q[6])']
+time = res['time']</programlisting>
+
+      <para>Now we have loaded and retrieved the variables of interest. So
+      lets plot them.</para>
+
+      <programlisting language="Python">plt.plot(time,dq1,time,dq6)
+plt.legend(['der(mechanics.q[1])','der(mechanics.q[6])'])
+plt.xlabel('Time (s)')
+plt.ylabel('Joint Velocity (rad/s)')
+plt.title('Full Robot')
+plt.show()</programlisting>
+
+      <para>In <xref linkend="sim_fig_rob_res" /> the result is shown and in
+      <xref linkend="sim_fig_rob_dym" /> a comparison between Dymola and
+      JModelica.org is plotted.</para>
+
+      <figure>
+        <title>Robot Results</title>
+
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="images/robot_result.svg" scalefit="1"
+                       width="60%" xml:id="sim_fig_rob_res"></imagedata>
+          </imageobject>
+        </mediaobject>
+      </figure>
+
+      <figure>
+        <title>Comparison with Dymola</title>
+
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="images/DymolaFullRobotComparison.png"
+                       scalefit="1" width="60%" xml:id="sim_fig_rob_dym"></imagedata>
+          </imageobject>
+        </mediaobject>
+      </figure>
+    </section>
+
+    <section>
+      <title>Simulation using the native FMI interface</title>
+
+      <para>This example shows how to use the native JModelica.org FMI
+      interface for simulation of an FMU. The FMU that is to be simulated is
+      the bouncing ball example from Qtronics FMU SDK
+      (http://www.qtronic.de/en/fmusdk.html). This example is written similar
+      to the example in the documentation of the 'Functional Mock-up Interface
+      for Model Exchange' version 1.0
+      (http://www.functional-mockup-interface.org/). The bouncing ball model
+      is to be simulated using the explicit Euler method with event
+      detection.</para>
+
+      <para>The example can also be found in the Python examples catalog in
+      the JModelica.org platform.</para>
+
+      <para>The bouncing ball consists of two equations,</para>
+
+      <para><inlinemediaobject>
+          <imageobject>
+            <imagedata fileref="images/bounc_eq.png" scale="100"></imagedata>
+          </imageobject>
+        </inlinemediaobject></para>
+
+      <para>and one event function (also commonly called root
+      function),</para>
+
+      <para><inlinemediaobject>
+          <imageobject>
+            <imagedata fileref="images/event_eq.png"></imagedata>
+          </imageobject>
+        </inlinemediaobject></para>
+
+      <para>Where the ball bounces and lose some of its energy according
+      to,</para>
+
+      <para><inlinemediaobject>
+          <imageobject>
+            <imagedata fileref="images/event_handle.png"></imagedata>
+          </imageobject>
+        </inlinemediaobject></para>
+
+      <para>Here, h is the height, g the gravity, v the velocity and e a
+      dimensionless parameter. The starting values are, h=1 and v=0 and for
+      the parameters, e=0.7 and g = 9.81.</para>
+
+      <section>
+        <title>Implementation</title>
+
+        <para>Start by importing the necessary modules,</para>
+
+        <programlisting language="Python">        import numpy as N 
+        import pylab as P #Used for plotting
+        from jmodelica.fmi import FMIModel #The FMI Interface      </programlisting>
+
+        <para>Next, the FMU is to be loaded and initialized,</para>
+
+        <programlisting language="Python">        #Load the FMU by specifying the fmu together with the path.
+        bouncing_fmu = FMIModel('/path/to/FMU/bouncingBall.fmu')
+
+        Tstart = 0.5 #The start time.
+        Tend   = 3.0 #The final simulation time.
+        
+        bouncing_fmu.time = Tstart #Set the start time before the initialization.
+                                   #(Defaults to 0.0)
+        
+        bouncing_fmu.initialize() #Initialize the model. Also sets all the start 
+                                  #attributes defined in the XML file.     </programlisting>
+
+        <para>The first line loads the FMU and connects the C-functions of the
+        model to Python together with loading the information from the
+        XML-file. The start time also needs to be specified by setting the
+        property <literal>time</literal>. The model is also initialized, which
+        must be done before the simulation is started.</para>
+
+        <para>Note that if the start time is not specified,
+        <literal>FMIModel</literal> tries to find the starting time in the
+        XML-file structure 'default experiment' and if successful starts the
+        simulation from that time. Also if the XML-file does not contain any
+        information about the default experiment the simulation is started
+        from time zero.</para>
+
+        <para>Then information about the first step is retrieved and stored
+        for later use.</para>
+
+        <programlisting language="Python">        #Get Continuous States
+        x = bouncing_fmu.continuous_states
+        #Get the Nominal Values
+        x_nominal = bouncing_fmu.nominal_continuous_states
+        #Get the Event Indicators
+        event_ind = bouncing_fmu.get_event_indicators()
+        
+        #Values for the solution
+        vref  = [bouncing_fmu.get_valueref('h')] + \
+                [bouncing_fmu.get_valueref('v')] #Retrieve the valureferences for the
+                                                 #values 'h' and 'v't_sol = [Tstart]
+        sol = [bouncing_fmu.get_real(vref)]        </programlisting>
+
+        <para>Here the continuous states together with the nominal values and
+        the event indicators are stored to be used in the integration loop. In
+        our case the nominal values are all equal to one. This information is
+        available in the XML-file. We also create lists which are used for
+        storing the result. The final step before the integration is started
+        is to define the step-size.</para>
+
+        <programlisting language="Python">        time = Tstart
+        Tnext = Tend #Used for time events
+        dt = 0.01 #Step-size      </programlisting>
+
+        <para>We are now ready to create our main integration loop where the
+        solution is advanced using the explicit Euler method.</para>
+
+        <programlisting language="Python">        #Main integration loop.
+        while time &lt; Tend and not bouncing_fmu.get_event_info().terminateSimulation:
+            #Compute the derivative of the previous step f(x(n), t(n))
+            dx = bouncing_fmu.get_derivatives()
+            
+            #Advance
+            h = min(dt, Tnext-time)
+            time = time + h
+            
+            #Set the time
+            bouncing_fmu.time = time
+            
+            #Set the inputs at the current time (if any)
+            #bouncing_fmu.set_real,set_integer,set_boolean,set_string (valueref, values)
+            
+            #Set the states at t = time (Perform the step using x(n+1)=x(n)+hf(x(n), t(n))
+            x = x + h*dx 
+            bouncing_fmu.continuous_states = x    </programlisting>
+
+        <para>This is the integration loop for advancing the solution one
+        step. The loop continues until the final time have been reached or if
+        the FMU reported that the simulation is to be terminated. At the start
+        of the loop the derivatives of the continuous states are retrieved and
+        then the simulation time is incremented by the step-size and set to
+        the model. It could also be the case that the model is depended on
+        inputs which can be set using the <literal>set_(real/...)</literal>
+        methods.</para>
+
+        <para>Note that only variables defined in the XML-file to be inputs
+        can be set using the <literal>set_(real/...)</literal> methods
+        according to the FMI specification.</para>
+
+        <para>The step is performed by calculating the new states (x+h*dx) and
+        setting the values into the model. As our model, the bouncing ball
+        also consist of event functions which needs to be monitored during the
+        simulation, we have to check the indicators which is done
+        below.</para>
+
+        <programlisting language="Python">            #Get the event indicators at t = time
+            event_ind_new = bouncing_fmu.get_event_indicators()
+            
+            #Inform the model about an accepted step and check for step events
+            step_event = bouncing_fmu.completed_integrator_step()
+            
+            #Check for time and state events
+            time_event  = abs(time-Tnext) &lt;= 1.e-10
+            state_event = True if True in ((event_ind_new&gt;0.0) != (event_ind&gt;0.0))\
+                          else False   </programlisting>
+
+        <para>Events can be, time, state or step events. The time events are
+        checked by continuously monitor the current time and the next time
+        event (Tnext). State events are checked against sign changes of the
+        event functions. Step events are monitored in the FMU, in the method
+        <literal>completed_integrator_step()</literal> and return True if any
+        event handling is necessary. If an event have occurred, it needs to be
+        handled, see below.</para>
+
+        <programlisting language="Python">            #Event handling
+            if step_event or time_event or state_event:
+                
+                eInfo = bouncing_fmu.get_event_info()
+                eInfo.iterationConverged = False
+                
+                #Event iteration
+                while eInfo.iterationConverged == False:
+                    bouncing_fmu.event_update('0') #Stops at each event iteration
+                    eInfo = bouncing_fmu.get_event_info()
+
+                    #Retrieve solutions (if needed)
+                    if eInfo.iterationConverged == False:
+                        #bouncing_fmu.get_real,get_integer,get_boolean,get_string(valueref)
+                        pass
+                
+                #Check if the event affected the state values and if so sets them
+                if eInfo.stateValuesChanged:
+                    x = bouncing_fmu.continuous_states
+            
+                #Get new nominal values.
+                if eInfo.stateValueReferencesChanged:
+                    atol = 0.01*rtol*bouncing_fmu.nominal_continuous_states
+                    
+                #Check for new time event
+                if eInfo.upcomingTimeEvent:
+                    Tnext = min(eInfo.nextEventTime, Tend)
+                else:
+                    Tnext = Tend  </programlisting>
+
+        <para>If an event occurred, we enter the iteration loop where we loop
+        until the solution of the new states have converged. During this
+        iteration we can also retrieve the intermediate values with the normal
+        <literal>get</literal> methods. At this point <literal>eInfo</literal>
+        contains information about the changes made in the iteration. If the
+        state values have changed, they are retrieved. If the state references
+        have changed, meaning that the state variables no longer have the same
+        meaning as before by pointing to another set of continuous variables
+        in the model, for example in the case with dynamic state selection,
+        new absolute tolerances are calculated with the new nominal values.
+        Finally the model is checked for a new time event.</para>
+
+        <programlisting language="Python">            event_ind = event_ind_new
+        
+            #Retrieve solutions at t=time for outputs
+            #bouncing_fmu.get_real,get_integer,get_boolean,get_string (valueref)
+            
+            t_sol += [time]
+            sol += [bouncing_fmu.get_real(vref)]   </programlisting>
+
+        <para>In the end of the loop, the solution is stored and the old event
+        indicators are stored for use in the next loop.</para>
+
+        <para>After the loop have finished, by reaching the final time, we
+        plot the simulation results</para>
+
+        <programlisting language="Python">        #Plot the height
+        P.subplot(211)
+        P.plot(t_sol,N.array(sol)[:,0])
+        P.title(bouncing_fmu.get_name())
+        P.ylabel('Height (m)')
+        #Plot the velocity
+        P.subplot(212
+        P.plot(t_sol,N.array(sol)[:,1])
+        P.ylabel('Velocity (m/s)')
+        P.xlabel('Time (s)')
+        P.show()     </programlisting>
+
+        <para>and in <xref linkend="sim_fig_fmi_native" /> the result is
+        shown.</para>
+
+        <figure>
+          <title>Simulation result of the bouncing ball</title>
+
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref="images/bouncing_nativ.svg" scale="70"
+                         xml:id="sim_fig_fmi_native"></imagedata>
+            </imageobject>
+          </mediaobject>
+        </figure>
+      </section>
+    </section>
   </section>
 </chapter>
