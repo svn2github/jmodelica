@@ -23,6 +23,7 @@ specifications required by Assimulo.
 import logging
 import numpy as N
 import jmodelica.jmi as jmi
+import jmodelica.io as io
 
 try:
     from assimulo.problem_algebraic import ProblemAlgebraic
@@ -278,7 +279,7 @@ def write_resdata(problem, file_name='', format='txt'):
     u_s = problem._u_size
     
     # Create data matrix
-    data = zeros((1,1+dx_s+ \
+    data = N.zeros((1,1+dx_s+ \
                     x_s + \
                     u_s + \
                     w_s))
