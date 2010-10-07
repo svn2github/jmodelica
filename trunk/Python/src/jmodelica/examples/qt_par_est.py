@@ -252,3 +252,7 @@ def run_demo(with_plots=True):
         plt.subplot(2,2,4)
         plt.plot(t_opt2,x2_opt2,'r')
         plt.show()
+
+
+if __name__=="__main__":
+    run_demo()

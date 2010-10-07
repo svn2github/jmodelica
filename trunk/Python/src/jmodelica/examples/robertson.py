@@ -23,11 +23,12 @@ import nose
 
 from jmodelica.jmi import compile_jmu
 from jmodelica.jmi import JMUModel
+from jmodelica.io import ResultDymolaTextual
 
 try:
-    from jmodelica.simulation.assimulo_interface import JMIDAESens
+    from jmodelica.simulation.assimulo_interface import JMIDAESens, write_data
     from assimulo.implicit_ode import IDA
-except:
+except ImportError:
     logging.warning('Could not find Assimulo package. Check jmodelica.check_packages()')
 
 
@@ -61,13 +62,19 @@ def run_demo(with_plots=True):
     
     #Simulate
     rob_sim.simulate(4,400) #Simulate 4 seconds with 400 communication points
-    
-    #Get the result
-    names, sens_matrix = rob_mod.get_sens_result()
 
-    nose.tools.assert_almost_equal(sens_matrix[0][40,0], -0.35590, 3)
-    nose.tools.assert_almost_equal(sens_matrix[0][40,1],  3.9026e-04, 6)
-    nose.tools.assert_almost_equal(sens_matrix[0][40,2],  3.5551e-01 , 3)
+    write_data(rob_sim)
+
+    res = ResultDymolaTextual('Robertson_result.txt')
+
+    dy1dp1 = res.get_variable_data('dy1/dp1')
+    dy2dp1 = res.get_variable_data('dy2/dp1')
+    dy3dp1 = res.get_variable_data('dy3/dp1')
+    
+    nose.tools.assert_almost_equal(dy1dp1.x[40], -0.35590, 3)
+    nose.tools.assert_almost_equal(dy2dp1.x[40],  3.9026e-04, 6)
+    nose.tools.assert_almost_equal(dy3dp1.x[40],  3.5551e-01 , 3)
+
     
 if __name__ == "__main__":
     run_demo()

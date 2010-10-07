@@ -675,7 +675,294 @@ class ResultWriter():
         The finalize method can be used to for instance close the file.
         """
         pass
+
+class ResultWriterDymolaSensitivity(ResultWriter):
+    """
+    Export an simulation result With calculated sensitivities in Dymola's
+    result file format.
+    """
+    def __init__(self, model, format='txt'):
+        """
+        Export an simulation result With calculated sensitivities in Dymola's
+        result file format.
         
+        Parameters::
+        
+            model   --
+                A JMUModel object.
+            format  --
+                A text string equal either to 'txt for textual format
+                or 'mat' for binary Matlab format.
+                Defaults: txt
+                
+        Limitations::
+        
+            Currently only textual format is supported.
+        """
+        self.model = model
+        
+        if format!='txt':
+            raise JIOError('The format is currently not supported.')
+        
+        #Internal values
+        self._file_open = False
+        self._npoints = 0
+        
+    def write_header(self, file_name=''):
+        """
+        Opens the file and writes the header. This includes the 
+        information about the variables and a table determining the link 
+        between variables and data.
+        
+        Parameters::
+        
+            file_name --
+                If no file name is given, the name of the model (as 
+                defined by JMUModel.get_name()) concatenated with the 
+                string '_result' is used. A file suffix equal to the 
+                format argument is then appended to the file name.
+                Default: Empty string.
+        """
+        model = self.model
+        if file_name=='':
+            file_name=model.get_name() + '_result.txt'
+
+        # Open file
+        f = open(file_name,'w')
+        self._file_open = True
+
+        # Write header
+        f.write('#1\n')
+        f.write('char Aclass(3,11)\n')
+        f.write('Atrajectory\n')
+        f.write('1.1\n')
+        f.write('\n')
+        
+        # Retrieve the xml-file
+        md = model._get_XMLDoc()
+        
+        # Parameters for sensitivity calculations
+        sens_p = model.get_p_opt_variable_names()
+        sens_x = model.get_x_variable_names()
+        sens_w = model.get_w_variable_names()
+        
+        sens_xw = sens_x+sens_w
+        
+        sens_names = []
+        sens_desc = []
+        
+        for j in range(len(sens_p)):
+            for i in range(len(sens_xw)):
+                sens_names += ['d'+sens_xw[i][1]+'/d'+sens_p[j][1]]
+                sens_desc  += ['Sensitivity of '+sens_xw[i][1]+' with respect to '+sens_p[j][1]+'.']
+        
+        
+        # sort in value reference order (must match order in data)
+        names = sorted(md.get_variable_names(), key=itemgetter(0))
+        aliases = sorted(md.get_variable_aliases(), key=itemgetter(0))
+        descriptions = sorted(md.get_variable_descriptions(), key=itemgetter(0))
+        variabilities = sorted(md.get_variable_variabilities(), key=itemgetter(0))
+        
+        num_vars = len(names)+len(sens_names)
+        
+        # Find the maximum name and description length
+        max_name_length = len('Time')
+        max_desc_length = len('Time in [s]')
+        
+        for i in range(len(names)):
+            name = names[i][1]
+            desc = descriptions[i][1]
+            
+            if (len(name)>max_name_length):
+                max_name_length = len(name)
+                
+            if (len(desc)>max_desc_length):
+                max_desc_length = len(desc)
+        
+        for i in range(len(sens_names)):
+            
+            if (len(sens_names[i])>max_name_length):
+                max_name_length = len(sens_names[i])
+                
+            if (len(sens_desc[i])>max_desc_length):
+                max_desc_length = len(sens_desc[i])
+        
+        f.write('char name(%d,%d)\n' % (num_vars + 1, max_name_length))
+        f.write('time\n')
+        
+        self._rescale = (model.get_scaling_method() == jmodelica.jmi.JMI_SCALING_VARIABLES) and (not scaled)
+
+        for name in names:
+            f.write(name[1] +'\n')
+        for name in sens_names:
+            f.write(name+'\n')
+
+        f.write('\n')
+
+        # Write descriptions       
+        f.write('char description(%d,%d)\n' % (num_vars + 1, max_desc_length))
+        f.write('Time in [s]\n')
+
+        # write descriptions
+        for desc in descriptions:
+            f.write(desc[1]+'\n')
+            
+        # Write sensitivity descriptions
+        for desc in sens_desc:
+            f.write(desc+'\n')
+            
+        f.write('\n')
+
+        # Write data meta information
+        offs = model.get_offsets()
+        n_parameters = offs[12] # offs[12] = offs_dx
+        f.write('int dataInfo(%d,%d)\n' % (num_vars + 1, 4))
+        f.write('0 1 0 -1 # time\n')
+
+        cnt_1 = 1
+        cnt_2 = 1
+        
+        for i, name in enumerate(names):
+            (ref, type) = jmodelica.jmi._translate_value_ref(name[0])
+            
+            if int(ref) < n_parameters: # Put parameters in data set
+                if aliases[i][1] == 0: # no alias
+                    cnt_1 = cnt_1 + 1
+                    f.write('1 %d 0 -1 # ' % cnt_1 + name[1]+'\n')
+                elif aliases[i][1] == 1: # alias
+                    f.write('1 %d 0 -1 # ' % cnt_1 + name[1]+'\n')
+                else: # negated alias
+                    f.write('1 -%d 0 -1 # ' % cnt_1 + name[1] +'\n')
+                
+                
+            else:
+                if aliases[i][1] == 0: # noalias
+                    cnt_2 = cnt_2 + 1   
+                    f.write('2 %d 0 -1 # ' % cnt_2 + name[1] +'\n')
+                elif aliases[i][1] == 1: # alias
+                    f.write('2 %d 0 -1 # ' % cnt_2 + name[1] +'\n')
+                else: #neg alias
+                    f.write('2 -%d 0 -1 # ' % cnt_2 + name[1] +'\n')
+        
+        self._nvariables_without_sens = cnt_2
+        
+        #Write sensitivity variables into the table (No alias, no parameters)
+        for i,name in enumerate(sens_names):
+            cnt_2 = cnt_2+1
+            f.write('2 %d 0 -1 # ' % cnt_2 + name + '\n')
+            
+        
+        self._nvariables_total = cnt_2 #Store the number of variables
+        f.write('\n')
+
+        sc = model.jmimodel.get_variable_scaling_factors()
+        z = model.z
+
+        # Write data
+        # Write data set 1
+        f.write('float data_1(%d,%d)\n' % (2, n_parameters + 1))
+        
+        str_text = ''
+        for ref in range(n_parameters):
+            #print ref
+            if self._rescale:
+                #print z[ref]*sc[ref]
+                #print "hej"
+                str_text += " %12.12f" % (z[ref]*sc[ref])
+            else:
+                #print z[ref]
+                #print "hopp"
+                str_text += " %12.12f" % (z[ref])
+        
+        #f.write("%12.12f" % data[0,0])
+        self._point_first_t = f.tell()
+        f.write("%s" % ' '*28)
+        f.write(str_text)
+        f.write('\n')
+        self._point_last_t = f.tell()
+        f.write("%s" % ' '*28)
+        f.write(str_text)
+
+        f.write('\n\n')
+        
+        f.write('float data_2(')
+        self._point_npoints = f.tell()
+        f.write(' '*(14+4+14))
+        f.write('\n')
+        
+        self._file = f
+        
+        
+    def write_point(self, data=None):
+        """ Writes the current status of the model to file. If the header
+        has not been written previously it is written now. If data is 
+        specified it is written instead of the current status.
+        
+        Parameters::
+            
+                data --
+                    A one dimensional array of variable trajectory data.
+                    data should consist of information about the status.
+                    Default: None
+        """
+        f = self._file
+        rescale = self._rescale
+
+        #If data is none, store the current point from the model
+        #if data==None:
+        #    #Retrieves the time-point
+        #    [r,i,b] = self.model.save_time_point()
+        #    data = N.append(N.append(N.append(self.model.time,r),i),b)
+        #Store the start time
+        if self._npoints == 0:
+            self._tstart = data[0]
+        
+        #Write the point
+        str_text = (" %12.12f" % data[0])
+        for j in xrange(self._nvariables_without_sens-1):
+            if rescale:
+                str_text = str_text + (" %12.12f" %(data[1+j]*sc[j-1+n_parameters]))
+            else:
+                str_text = str_text + (" %12.12f" % data[1+j])
+
+        for j in xrange(self._nvariables_total-self._nvariables_without_sens):
+            str_text = str_text + (" %12.12f" % data[j+self._nvariables_without_sens])
+        
+        f.write(str_text+'\n')
+        
+        #Update number of points
+        self._npoints+=1
+
+        
+    def write_finalize(self):
+        """ Finalize the writing by filling in the blanks in the created 
+        file. The blanks consists of the number of points and the final 
+        time (in data set 1). Also closes the file.
+        """
+        #If open, finalize and close
+        if self._file_open:
+            
+            f = self._file
+            
+            f.seek(self._point_first_t)
+            
+            f.write('%12.12f'%self._tstart)
+            
+            f.seek(self._point_last_t)
+            
+            f.write('%12.12f'%self.model.t)
+            
+            f.seek(self._point_npoints)
+            f.write('%d,%d)' % (self._npoints, self._nvariables_total))
+
+            f.seek(-1,2)
+            #Close the file
+            f.write('\n')
+            f.close()
+            self._file_open = False
+    
+        
+
 class ResultWriterDymola(ResultWriter):
     """ 
     Export an optimization or simulation result to file in Dymola's result file 

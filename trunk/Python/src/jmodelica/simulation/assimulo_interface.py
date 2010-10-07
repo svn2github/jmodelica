@@ -55,7 +55,7 @@ def write_data(simulator,write_scaled_result=False):
     
     Takes as input a simulated model.
     """
-    if isinstance(simulator._problem, Implicit_Problem):
+    if isinstance(simulator._problem, JMIDAE):
         
         model = simulator._problem._model
         
@@ -111,6 +111,44 @@ def write_data(simulator,write_scaled_result=False):
         data = N.c_[data, u]
         
         io.export_result_dymola(model,data,scaled=write_scaled_result)
+    elif isinstance(simulator._problem, JMIDAESens):
+        
+        model = simulator._problem._model
+        
+        t = N.array(simulator.t)
+        y = N.array(simulator.y)
+        yd = N.array(simulator.yd)
+        if simulator._problem.input:
+            u_name = [k[1] for k in model.get_u_variable_names()]
+            u = N.zeros((len(t), len(u_name)))
+            u_mat = simulator._problem.input[1].eval(t)
+            
+            if not isinstance(simulator._problem.input[0],list):
+                u_input_name = [simulator._problem.input[0]]
+            else:
+                u_input_name = simulator._problem.input[0]
+            
+            for i,n in enumerate(u_input_name):
+                u[:,u_name.index(n)] = u_mat[:,i]
+        else:
+            u = N.ones((len(t),len(model.real_u)))*model.real_u
+        
+        p_names , p_data = simulator._problem.get_sens_result()
+        
+        # extends the time array with the states columnwise
+        data = N.c_[t,yd[:,0:len(model.real_dx)]]
+        data = N.c_[data, y[:,0:len(model.real_x)]]
+        data = N.c_[data, u]
+        data = N.c_[data, y[:,len(model.real_x):len(model.real_x)+len(model.real_w)]]
+
+        for i in range(len(p_data)):
+            data = N.c_[data, p_data[i]]
+
+        export = io.ResultWriterDymolaSensitivity(model)
+        export.write_header()
+        map(export.write_point,(row for row in data))
+        export.write_finalize()
+        
     else:
         model = simulator._problem._model
         
@@ -899,6 +937,7 @@ class JMIDAESens(Implicit_Problem):
         Sets the initial values.
         """
         self._model = model
+        self.input = None #NO INPUT
         
         self.y0 = N.append(self._model.real_x,self._model.real_w)
         self.yd0 = N.append(self._model.real_dx,[0]*len(self._model.real_w))
@@ -947,8 +986,9 @@ class JMIDAESens(Implicit_Problem):
         """
         Post processing (stores the time points and the sensitivity result).
         """
-        solver.t += [t]
-        solver.y += [y]
+        solver.t  += [t]
+        solver.y  += [y]
+        solver.yd += [yd]
         
         #Store the sensitivity matrix
         for i in range(self._p_nbr):
