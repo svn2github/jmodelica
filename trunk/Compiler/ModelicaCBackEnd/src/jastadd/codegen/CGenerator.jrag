@@ -184,11 +184,18 @@ public class CGenerator extends GenericGenerator {
 	
 		public void generate(PrintStream genPrinter) {
 			for (FAbstractEquation e : fclass.getFParameterEquations()) {
-				e.genAssignment_C(INDENT, genPrinter);		
-/*				e.getLeft().prettyPrint_C(genPrinter,"");
-				genPrinter.print(" = ");
-				e.getRight().prettyPrint_C(genPrinter,"");
-				genPrinter.print(";\n");*/
+				// TODO: This is just to avoid errounous generation of parameter enumeration
+				// binding equations.
+				if (e instanceof FEquation) {
+					FEquation fe = (FEquation)e;
+					AbstractFVariable fv = ((FIdUseExp)fe.getLeft()).myFV();
+					//System.out.println("********** " +fv.prettyPrint(""));
+					if (!fv.isEnum()) {
+						e.genAssignment_C(INDENT, genPrinter);		
+					}
+				} else {
+					e.genAssignment_C(INDENT, genPrinter);			
+				}
 			}
 		}
 	

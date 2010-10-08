@@ -57,7 +57,7 @@ aspect PredefinedTypes {
         builtInDef += "parameter RealType start=0;\n";
         builtInDef += "parameter BooleanType fixed=false;\n";
         builtInDef += "parameter RealType nominal=0;\n";
-        builtInDef += "parameter IntegerType stateSelect=0;\n";
+        builtInDef += "parameter EnumType stateSelect=StateSelect.default;\n";
         builtInDef += "end Real;\n";
         
         builtInDef += "type Integer\n"; 
@@ -81,7 +81,6 @@ aspect PredefinedTypes {
         builtInDef += "parameter StringType start=\"\";\n";
         builtInDef += "end String;\n";  
 
-        /*
         builtInDef += "type StateSelect = enumeration("; 
         builtInDef += "never \"Do not use as state at all.\","; 
         builtInDef += " avoid \"Use as state, if it cannot be avoided (but only if variable appears"; 
@@ -94,8 +93,7 @@ aspect PredefinedTypes {
         builtInDef += " differentiated). \","; 
         builtInDef += " always \"Do use it as a state.\""; 
         builtInDef += ");\n"; 
-         */
-        
+        /*        
         // Since we don't support Enumerations, this is a workaround
         builtInDef += "package StateSelect\n"; 
         builtInDef += "constant Integer never = 0;\n";
@@ -104,7 +102,7 @@ aspect PredefinedTypes {
         builtInDef += "constant Integer prefer = 3;\n";
         builtInDef += "constant Integer always = 4;\n";
         builtInDef += "end StateSelect;\n";
-        
+        */
 //          java.io.StringReader builtInDefReader = new java.io.StringReader(builtInDef);
 //      ModelicaParser parser = new ModelicaParser();
         PrimitiveClassDecl pcd=null;
@@ -122,7 +120,7 @@ aspect PredefinedTypes {
             //log.debug("Program.getPredefinedTypeList(): Hepp!: " + i);
             FullClassDecl cd = (FullClassDecl)(p.getUnstructuredEntity(0).getElement(i));   
        
-            //if (!cd.name().equals("StateSelect")) {
+            if (!cd.name().equals("StateSelect")) {
             	pcd = new PrimitiveClassDecl(new PublicVisibilityType(),
                         new Opt(),
                         new Opt(),
@@ -146,7 +144,7 @@ aspect PredefinedTypes {
                         new Opt(),
                         cd.getEndName());
             	l.add(pcd); 
-          /*  } else {
+            } else {
             	pcd = new EnumClassDecl(new PublicVisibilityType(),
                         new Opt(),
                         new Opt(),
@@ -170,7 +168,7 @@ aspect PredefinedTypes {
                         new Opt(),
                         cd.getEndName());
             	l.add(pcd); 	
-            }*/
+            }
         }   
         
         } catch(Exception e){e.printStackTrace();}

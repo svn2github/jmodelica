@@ -2110,17 +2110,18 @@ model StateSelectTest
         description="Test for equations.",
                                                flatModel=
 "fclass NameTests.StateSelectTest
- Real x(stateSelect = 0);
- Real y(stateSelect = 1);
- Real z(stateSelect = 2);
- Real w(stateSelect = 3);
- Real v(stateSelect = 4);
+ Real x(stateSelect = StateSelect.never);
+ Real y(stateSelect = StateSelect.avoid);
+ Real z(stateSelect = StateSelect.default);
+ Real w(stateSelect = StateSelect.prefer);
+ Real v(stateSelect = StateSelect.always);
 equation
  x = 2;
  y = 1;
  der(z) = 1;
  der(w) = 1;
  der(v) = 1;
+type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 end NameTests.StateSelectTest;
 ")})));
 

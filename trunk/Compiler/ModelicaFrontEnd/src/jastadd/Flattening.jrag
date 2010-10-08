@@ -484,8 +484,8 @@ aspect Flattening {
 						exists = true;
 				if (!exists) {
 					FIdUse type = new FIdUse(new FQName(c.getClassName().name()));
-					// TODO: Can we really trust that parameters in primitive classes only have ValueModifications?
-					FExp value = ((ValueModification) c.getModification()).getExp().instantiate().flatten(new FQName());
+					FExp value = ((ValueModification) c.getModification()).getExp().instantiate();
+					value = dynamicFExp(value).flatten(new FQName());
 					attr.add(new FAttribute(type, name, new Opt(value), false, new Opt(), new Opt(), new List()));				
 				}
 			}

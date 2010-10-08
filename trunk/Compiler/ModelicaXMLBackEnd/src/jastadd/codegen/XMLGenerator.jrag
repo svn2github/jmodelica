@@ -283,8 +283,8 @@ public class XMLGenerator extends GenericGenerator {
 		 * (non-Javadoc)
 		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
 		 */
-		public void generate(PrintStream genPrinter) {			
-			for(FVariable variable:fclass.allVariables()) {		
+		public void generate(PrintStream genPrinter) {		
+			for(FVariable variable:fclass.allVariables()) {	
 				genPrinter.print("\n\t\t<ScalarVariable ");
 				genPrinter.print("name=\""+variable.name()+"\" ");
 				genPrinter.print("valueReference=\""+variable.valueReference()+"\" ");
@@ -342,9 +342,12 @@ public class XMLGenerator extends GenericGenerator {
 					genPrinter.print("\n\t\t\t<String ");
 					addStringAttributes(genPrinter, (FStringVariable)variable);
 					genPrinter.print("/>");				
-					
-				} else if(false) {
+				} else if(variable.isEnum()) {
 //					TODO: Enumeration variable
+					genPrinter.print("\n\t\t\t<Integer ");
+					addEnumAttributes(genPrinter, (FEnumVariable)variable);
+					genPrinter.print("/>");				
+				
 				}
 				 else {
 					//TODO: errorhandling
@@ -480,6 +483,36 @@ public class XMLGenerator extends GenericGenerator {
 		}
 		// fixed - unsupported
 	}
+
+	/*
+	 * Helper method generating all integer attributes.
+	 */
+	protected void addEnumAttributes(PrintStream genPrinter, FEnumVariable enumvariable) {
+		//declaredType
+		//genPrinter.print("declaredType=\"String\" ");		
+		//quantity
+		/*
+		if(integervariable.quantityAttributeSet()) {
+			genPrinter.print("quantity=\""+integervariable.quantityAttribute()+"\" ");
+		}					
+		//min
+		if(integervariable.minAttributeSet()) {
+			genPrinter.print("min=\""+integervariable.minAttribute()+"\" ");
+		}
+		//max
+		if(integervariable.maxAttributeSet()) {
+			genPrinter.print("max=\""+integervariable.maxAttribute()+"\" ");
+		}
+		//start
+		if (enumvariable.isIndependentParameter() || enumvariable.useBindingExpAsStart()) {
+			genPrinter.print("start=\"" +enumvariable.ceval().intValue() +"\" ");
+		} else {
+			genPrinter.print("start=\"" +enumvariable.startAttribute()+"\" ");
+		}
+		*/
+		// fixed - unsupported
+	}
+
 	
 	/*
 	 * Helper method generating all boolean attributes.

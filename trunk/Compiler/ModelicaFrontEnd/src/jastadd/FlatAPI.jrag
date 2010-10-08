@@ -940,6 +940,7 @@ aspect FlatTypes {
 	syn boolean AbstractFVariable.isBoolean() = type().isBoolean();
 	syn boolean AbstractFVariable.isString()  = type().isString();
 	syn boolean AbstractFVariable.isRecord()  = type().isRecord();
+	syn boolean AbstractFVariable.isEnum()  = type().isEnum();
 	
 	syn boolean FExp.isComposite()              = isArray() || type().isRecord();
 	syn boolean FType.isComposite()             = isArray() || isRecord();
@@ -1059,11 +1060,13 @@ aspect Attributes {
 	eq FIntegerVariable.startAttributeCValue()    = attributeCValueInteger(FAttribute.START, 0);
 	eq FBooleanVariable.startAttributeCValue()    = attributeCValueBoolean(FAttribute.START, false);
 	eq FStringVariable.startAttributeCValue()     = attributeCValueString(FAttribute.START);
+	//eq FEnumVariable.startAttributeCValue()     = attributeCValueInteger(FAttribute.START,0);
 
 	syn double  FRealVariable.startAttribute()    = startAttributeCValue().realValue();
 	syn int     FIntegerVariable.startAttribute() = startAttributeCValue().intValue();
 	syn boolean FBooleanVariable.startAttribute() = startAttributeCValue().booleanValue();
 	syn String  FStringVariable.startAttribute()  = startAttributeCValue().stringValue();
+	//syn int  FEnumVariable.startAttribute()  = startAttributeCValue().intValue();
 
 	// fixed attribute
 	syn boolean FVariable.fixedAttributeSet()           = attributeSet(FAttribute.FIXED);
