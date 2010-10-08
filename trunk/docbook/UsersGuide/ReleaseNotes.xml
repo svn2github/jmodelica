@@ -9,6 +9,365 @@
   <title>Release notes</title>
 
   <section>
+    <title>Release notes for JModelica.org version 1.4</title>
+
+    <section>
+      <title>Highlights</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>Improved Python user interaction functions</para>
+        </listitem>
+
+        <listitem>
+          <para>Improvements in compiler front-end</para>
+        </listitem>
+
+        <listitem>
+          <para>Support for sensitivity analysis of DAEs using Sundials</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+  </section>
+
+  <section>
+    <title>Release notes for JModelica.org version 1.3</title>
+
+    <section>
+      <title>Highlights</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>Functional Mockup Interface (FMI) simulation support</para>
+        </listitem>
+
+        <listitem>
+          <para>Support for minimum time problems</para>
+        </listitem>
+
+        <listitem>
+          <para>Improved support for redeclare/replaceable in the compiler
+          frontend</para>
+        </listitem>
+
+        <listitem>
+          <para>Limited support for external functions</para>
+        </listitem>
+
+        <listitem>
+          <para>Support for stream connections (with up to two connectors in a
+          connection)</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Compilers</title>
+
+      <section>
+        <title>The Modelica compiler</title>
+
+        <section>
+          <title>Arrays</title>
+
+          <para>Slice operations are now supported.</para>
+
+          <para>Array support is now nearly complete. The exceptions
+          are:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>Functions with array inputs with sizes declared as ':' -
+              only basic support.</para>
+            </listitem>
+
+            <listitem>
+              <para>A few array-related function-like operators are not
+              supported.</para>
+            </listitem>
+
+            <listitem>
+              <para>Connect clauses does not handle arrays of connectors
+              properly.</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+
+        <section>
+          <title>Redecare</title>
+
+          <para>Redeclares as class elements are now supported.</para>
+        </section>
+
+        <section>
+          <title>Conditional components</title>
+
+          <para>Conditional components are now supported.</para>
+        </section>
+
+        <section>
+          <title>Constants and parameters</title>
+
+          <para>Function calls can now be used as binding expressions for
+          parameters and constants. The handling of Integer, Boolean and
+          record type parameters is also improved.</para>
+        </section>
+
+        <section>
+          <title>External functions</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>Basic support for external functions written in C.</para>
+            </listitem>
+
+            <listitem>
+              <para>Annotations for libraries, includes, library directories
+              and include directories supported.</para>
+            </listitem>
+
+            <listitem>
+              <para>Platform directories supported.</para>
+            </listitem>
+
+            <listitem>
+              <para>Can not be used together with CppAD.</para>
+            </listitem>
+
+            <listitem>
+              <para>Arrays as arguments are not yet supported. Functions in
+              Modelica_utilies are also not supported.</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+
+        <section>
+          <title>Stream connectors</title>
+
+          <para>Stream connectors, including the operators inStream and
+          actualStream and connections with up to two stream connectors are
+          supported.</para>
+        </section>
+
+        <section>
+          <title>Miscellaneous</title>
+
+          <para>The error checking has been improved, eliminating many
+          erroneous error messages for correct Modelica code.</para>
+
+          <para>The memory and time usage for the compiler has been greatly
+          reduced for medium and large models, especially for complex class
+          structures.</para>
+        </section>
+      </section>
+
+      <section>
+        <title>The Optimica compiler</title>
+
+        <para>All support mentioned for the Modelica compiler applies to the
+        Optimica compiler as well.</para>
+
+        <section>
+          <title>New class attribute objectiveIntegrand</title>
+
+          <para>Support for the objectiveIntegrand class attribute. In order
+          to encode Lagrange cost functions of the type</para>
+
+          <informalequation>
+            <m:math display="block">
+              <m:mrow>
+                <m:munderover>
+                  <m:mo>∫</m:mo>
+
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mi>0</m:mi>
+                  </m:msub>
+
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mi>f</m:mi>
+                  </m:msub>
+                </m:munderover>
+
+                <m:mrow>
+                  <m:mrow>
+                    <m:mi>L</m:mi>
+
+                    <m:mo>⁡</m:mo>
+
+                    <m:mfenced>
+                      <m:mi>.</m:mi>
+                    </m:mfenced>
+                  </m:mrow>
+
+                  <m:mspace depth="0.5ex" height="0.5ex" width="1ex" />
+
+                  <m:mtext>dt</m:mtext>
+                </m:mrow>
+              </m:mrow>
+            </m:math>
+          </informalequation>
+
+          <para>the Optimica class attribute
+          <literal>objectiveIntegrand</literal> is supported by the Optimica
+          compiler. The expression <emphasis>L</emphasis> may be utilized by
+          optimization algorithms providing dedicated support for Lagrange
+          cost functions.</para>
+        </section>
+
+        <section>
+          <title>Support for minimum time problems</title>
+
+          <para>Optimization problems with free initial and terminal times can
+          now be solved by setting the free attribute of the class attributes
+          startTime and finalTime to true. The Optimica compiler automatically
+          translates the problem into a fixed horizon problems with free
+          parameters for the start en terminal times, which in turn are used
+          to rescale the time of the problem.</para>
+
+          <para>Using this method, no changes are required to the optimization
+          algorithm, since a fixed horizon problem is solved.</para>
+        </section>
+      </section>
+    </section>
+
+    <section>
+      <title>JModelica.org Model Interface (JMI)</title>
+
+      <section>
+        <title>The collocation optimization algorithm</title>
+
+        <section>
+          <title>Dependent parameters</title>
+
+          <para>Support for free dependent parameters in the collocation
+          optimization algorithm is now implemented. In models containing
+          parameter declarations such as:</para>
+
+          <programlisting>parameter Real p1(free=true);
+parameter Real p2 = p1;</programlisting>
+
+          <para>where the parameter p2 needs to be considered as being free in
+          the optimization problem, with the additional equality
+          constraint:</para>
+
+          <programlisting>p1 = p2</programlisting>
+
+          <para>included in the problem.</para>
+        </section>
+
+        <section>
+          <title>Support for Lagrange cost functions</title>
+
+          <para>The new Optimica class attribute objectiveIntegrand, see
+          above, is supported by the collocation optimization algorithm. The
+          integral cost is approximated by a Radau quadrature formula.</para>
+        </section>
+      </section>
+    </section>
+
+    <section>
+      <title>Assimulo</title>
+
+      <para>Support for simulation of an FMU (see below) using Assimulo.
+      Simulation of an FMU can either be done by using the high-level method
+      *simulate* or creating a model from the FMIModel class together with a
+      problem class, FMIODE which is then passed to CVode.</para>
+    </section>
+
+    <section>
+      <title>FMI compliance</title>
+
+      <para>Improved support for the Functional Mockup Interface (FMI)
+      standard. Support for importing an FMI model, FMU (Functional Mockup
+      Unit). The import consist of loading the FMU into Python and connecting
+      the models C execution interface to Python. Note, strings are not
+      currently supported.</para>
+
+      <para>Imported FMUs can be simulated using the Assimulo package.</para>
+    </section>
+
+    <section>
+      <title>XML model export</title>
+
+      <section>
+        <title><literal>noEvent</literal> operator</title>
+
+        <para>Support for the built-in operator <literal>noEvent</literal> has
+        been implemented.</para>
+      </section>
+
+      <section>
+        <title><literal>static</literal> attribute</title>
+
+        <para>Support for the Optimica attribute static has been
+        implemented.</para>
+      </section>
+    </section>
+
+    <section>
+      <title>Python integration</title>
+
+      <section>
+        <title>High-level functions</title>
+
+        <section>
+          <title>Model files</title>
+
+          <para>Passing more than one model file to high-level functions
+          supported.</para>
+        </section>
+
+        <section>
+          <title>New result object</title>
+
+          <para>A result object is used as return argument for all algorithms.
+          The result object for each algorithm extends the base class
+          <literal>ResultBase</literal> and will therefore (at least) contain:
+          the model object, the result file name, the solver used and the
+          result data object.</para>
+        </section>
+      </section>
+
+      <section>
+        <title>File I/O</title>
+
+        <para>Rewriting xmlparser.py has improved performance when writing
+        simulation result data to file considerably.</para>
+      </section>
+    </section>
+
+    <section>
+      <title>Contributors</title>
+
+      <para>Christian Andersson</para>
+
+      <para>Tove Bergdahl</para>
+
+      <para>Magnus Gäfvert</para>
+
+      <para>Jesper Mattsson</para>
+
+      <para>Roberto Parrotto</para>
+
+      <para>Johan Åkesson</para>
+
+      <para>Philip Reuterswärd</para>
+
+      <section>
+        <title>Previous contributors</title>
+
+        <para>Philip Nilsson</para>
+
+        <para>Jens Rantil</para>
+      </section>
+    </section>
+  </section>
+
+  <section>
     <title>Release notes for JModelica.org version 1.2</title>
 
     <section>
@@ -411,343 +770,6 @@
 
       <section>
         <title>Previous contributors</title>
-
-        <para>Jens Rantil</para>
-      </section>
-    </section>
-  </section>
-
-  <section>
-    <title>Release notes for JModelica.org version 1.3</title>
-
-    <section>
-      <title>Highlights</title>
-
-      <itemizedlist>
-        <listitem>
-          <para>Functional Mockup Interface (FMI) simulation support</para>
-        </listitem>
-
-        <listitem>
-          <para>Support for minimum time problems</para>
-        </listitem>
-
-        <listitem>
-          <para>Improved support for redeclare/replaceable in the compiler
-          frontend</para>
-        </listitem>
-
-        <listitem>
-          <para>Limited support for external functions</para>
-        </listitem>
-
-        <listitem>
-          <para>Support for stream connections (with up to two connectors in a
-          connection)</para>
-        </listitem>
-      </itemizedlist>
-    </section>
-
-    <section>
-      <title>Compilers</title>
-
-      <section>
-        <title>The Modelica compiler</title>
-
-        <section>
-          <title>Arrays</title>
-
-          <para>Slice operations are now supported.</para>
-
-          <para>Array support is now nearly complete. The exceptions
-          are:</para>
-
-          <itemizedlist>
-            <listitem>
-              <para>Functions with array inputs with sizes declared as ':' -
-              only basic support.</para>
-            </listitem>
-
-            <listitem>
-              <para>A few array-related function-like operators are not
-              supported.</para>
-            </listitem>
-
-            <listitem>
-              <para>Connect clauses does not handle arrays of connectors
-              properly.</para>
-            </listitem>
-          </itemizedlist>
-        </section>
-
-        <section>
-          <title>Redecare</title>
-
-          <para>Redeclares as class elements are now supported.</para>
-        </section>
-
-        <section>
-          <title>Conditional components</title>
-
-          <para>Conditional components are now supported.</para>
-        </section>
-
-        <section>
-          <title>Constants and parameters</title>
-
-          <para>Function calls can now be used as binding expressions for
-          parameters and constants. The handling of Integer, Boolean and
-          record type parameters is also improved.</para>
-        </section>
-
-        <section>
-          <title>External functions</title>
-
-          <itemizedlist>
-            <listitem>
-              <para>Basic support for external functions written in C.</para>
-            </listitem>
-
-            <listitem>
-              <para>Annotations for libraries, includes, library directories
-              and include directories supported.</para>
-            </listitem>
-
-            <listitem>
-              <para>Platform directories supported.</para>
-            </listitem>
-
-            <listitem>
-              <para>Can not be used together with CppAD.</para>
-            </listitem>
-
-            <listitem>
-              <para>Arrays as arguments are not yet supported. Functions in
-              Modelica_utilies are also not supported.</para>
-            </listitem>
-          </itemizedlist>
-        </section>
-
-        <section>
-          <title>Stream connectors</title>
-
-          <para>Stream connectors, including the operators inStream and
-          actualStream and connections with up to two stream connectors are
-          supported.</para>
-        </section>
-
-        <section>
-          <title>Miscellaneous</title>
-
-          <para>The error checking has been improved, eliminating many
-          erroneous error messages for correct Modelica code.</para>
-
-          <para>The memory and time usage for the compiler has been greatly
-          reduced for medium and large models, especially for complex class
-          structures.</para>
-        </section>
-      </section>
-
-      <section>
-        <title>The Optimica compiler</title>
-
-        <para>All support mentioned for the Modelica compiler applies to the
-        Optimica compiler as well.</para>
-
-        <section>
-          <title>New class attribute objectiveIntegrand</title>
-
-          <para>Support for the objectiveIntegrand class attribute. In order
-          to encode Lagrange cost functions of the type</para>
-
-          <informalequation>
-            <m:math display="block">
-              <m:mrow>
-                <m:munderover>
-                  <m:mo>∫</m:mo>
-
-                  <m:msub>
-                    <m:mi>t</m:mi>
-
-                    <m:mi>0</m:mi>
-                  </m:msub>
-
-                  <m:msub>
-                    <m:mi>t</m:mi>
-
-                    <m:mi>f</m:mi>
-                  </m:msub>
-                </m:munderover>
-
-                <m:mrow>
-                  <m:mrow>
-                    <m:mi>L</m:mi>
-
-                    <m:mo>⁡</m:mo>
-
-                    <m:mfenced>
-                      <m:mi>.</m:mi>
-                    </m:mfenced>
-                  </m:mrow>
-
-                  <m:mspace depth="0.5ex" height="0.5ex" width="1ex" />
-
-                  <m:mtext>dt</m:mtext>
-                </m:mrow>
-              </m:mrow>
-            </m:math>
-          </informalequation>
-
-          <para>the Optimica class attribute
-          <literal>objectiveIntegrand</literal> is supported by the Optimica
-          compiler. The expression <emphasis>L</emphasis> may be utilized by
-          optimization algorithms providing dedicated support for Lagrange
-          cost functions.</para>
-        </section>
-
-        <section>
-          <title>Support for minimum time problems</title>
-
-          <para>Optimization problems with free initial and terminal times can
-          now be solved by setting the free attribute of the class attributes
-          startTime and finalTime to true. The Optimica compiler automatically
-          translates the problem into a fixed horizon problems with free
-          parameters for the start en terminal times, which in turn are used
-          to rescale the time of the problem.</para>
-
-          <para>Using this method, no changes are required to the optimization
-          algorithm, since a fixed horizon problem is solved.</para>
-        </section>
-      </section>
-    </section>
-
-    <section>
-      <title>JModelica.org Model Interface (JMI)</title>
-
-      <section>
-        <title>The collocation optimization algorithm</title>
-
-        <section>
-          <title>Dependent parameters</title>
-
-          <para>Support for free dependent parameters in the collocation
-          optimization algorithm is now implemented. In models containing
-          parameter declarations such as:</para>
-
-          <programlisting>parameter Real p1(free=true);
-parameter Real p2 = p1;</programlisting>
-
-          <para>where the parameter p2 needs to be considered as being free in
-          the optimization problem, with the additional equality
-          constraint:</para>
-
-          <programlisting>p1 = p2</programlisting>
-
-          <para>included in the problem.</para>
-        </section>
-
-        <section>
-          <title>Support for Lagrange cost functions</title>
-
-          <para>The new Optimica class attribute objectiveIntegrand, see
-          above, is supported by the collocation optimization algorithm. The
-          integral cost is approximated by a Radau quadrature formula.</para>
-        </section>
-      </section>
-    </section>
-
-    <section>
-      <title>Assimulo</title>
-
-      <para>Support for simulation of an FMU (see below) using Assimulo.
-      Simulation of an FMU can either be done by using the high-level method
-      *simulate* or creating a model from the FMIModel class together with a
-      problem class, FMIODE which is then passed to CVode.</para>
-    </section>
-
-    <section>
-      <title>FMI compliance</title>
-
-      <para>Improved support for the Functional Mockup Interface (FMI)
-      standard. Support for importing an FMI model, FMU (Functional Mockup
-      Unit). The import consist of loading the FMU into Python and connecting
-      the models C execution interface to Python. Note, strings are not
-      currently supported.</para>
-
-      <para>Imported FMUs can be simulated using the Assimulo package.</para>
-    </section>
-
-    <section>
-      <title>XML model export</title>
-
-      <section>
-        <title><literal>noEvent</literal> operator</title>
-
-        <para>Support for the built-in operator <literal>noEvent</literal> has
-        been implemented.</para>
-      </section>
-
-      <section>
-        <title><literal>static</literal> attribute</title>
-
-        <para>Support for the Optimica attribute static has been
-        implemented.</para>
-      </section>
-    </section>
-
-    <section>
-      <title>Python integration</title>
-
-      <section>
-        <title>High-level functions</title>
-
-        <section>
-          <title>Model files</title>
-
-          <para>Passing more than one model file to high-level functions
-          supported.</para>
-        </section>
-
-        <section>
-          <title>New result object</title>
-
-          <para>A result object is used as return argument for all algorithms.
-          The result object for each algorithm extends the base class
-          <literal>ResultBase</literal> and will therefore (at least) contain:
-          the model object, the result file name, the solver used and the
-          result data object.</para>
-        </section>
-      </section>
-
-      <section>
-        <title>File I/O</title>
-
-        <para>Rewriting xmlparser.py has improved performance when writing
-        simulation result data to file considerably.</para>
-      </section>
-    </section>
-
-    <section>
-      <title>Contributors</title>
-
-      <para>Christian Andersson</para>
-
-      <para>Tove Bergdahl</para>
-
-      <para>Magnus Gäfvert</para>
-
-      <para>Jesper Mattsson</para>
-
-      <para>Roberto Parrotto</para>
-
-      <para>Johan Åkesson</para>
-
-      <para>Philip Reuterswärd</para>
-
-      <section>
-        <title>Previous contributors</title>
-
-        <para>Philip Nilsson</para>
 
         <para>Jens Rantil</para>
       </section>
