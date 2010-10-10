@@ -198,7 +198,7 @@
       <itemizedlist>
         <listitem>
           <para>The FMI interface only supports FMUs distributed with
-          binaries, not only source code.</para>
+          binaries, not source code.</para>
         </listitem>
 
         <listitem>
