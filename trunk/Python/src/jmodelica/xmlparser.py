@@ -421,7 +421,7 @@ class ModelDescription:
                 aliased_sv = self._model_variables_dict[aliased_name]
                 
                 # update attributes of alias variable
-                sv._attributes['variability'] = aliased_sv._attributes['variability']
+                #sv._attributes['variability'] = aliased_sv._attributes['variability']
                 sv._attributes['causality'] = aliased_sv._attributes['causality']
             
     def get_fmi_version(self):

@@ -183,4 +183,35 @@ class test_ResultWriterDymola:
 
         nose.tools.assert_almost_equal(h.x, 1.000000, 5)
         nose.tools.assert_almost_equal(derh.x, 0.000000, 5)
-        nose.tools.assert_almost_equal(g.x, 9.810000, 5)
+#        nose.tools.assert_almost_equal(g.x, 9.810000, 5)
+
+class TestParameterAliasVector:
+    """Tests IO"""
+    @classmethod
+    def setUpClass(cls):
+        """
+        Sets up the test class.
+        """
+        fpath = os.path.join(get_files_path(), 'Modelica', 'CSTR.mop')
+        cpath = "CSTR.CSTR_Init_Optimization"
+
+        compile_jmu(cpath, fpath)
+    
+    def setUp(self):
+        """ 
+        Setup test cases.
+        """
+        # Load the dynamic library and XML data
+        self.fname = "CSTR_CSTR_Init_Optimization.jmu"
+        self.mod = JMUModel(self.fname)
+        
+    @testattr(ipopt = True)
+    def test_parameter_alias_is_vector(self):
+        """
+        Test for export and import the result file on Dymola textual format.
+        """
+        opts = self.mod.simulate_options()
+        opts['ncp'] = 30
+        res = self.mod.simulate(0,1,options=opts)
+        Tc = res['cstr.Tc']
+        nose.tools.assert_equal(N.size(Tc),31,"Wrong size of result vector")

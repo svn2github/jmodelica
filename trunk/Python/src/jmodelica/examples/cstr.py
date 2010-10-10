@@ -150,8 +150,7 @@ def run_demo(with_plots=True):
         plt.ylabel('Temperature')
 
         plt.subplot(313)
-        # TO BE CHANGED!!!
-        plt.plot([t_init_sim[0], t_init_sim[-1]],[Tc_init_sim, Tc_init_sim])
+        plt.plot(t_init_sim,Tc_init_sim)
         plt.grid()
         plt.ylabel('Cooling temperature')
         plt.xlabel('time')

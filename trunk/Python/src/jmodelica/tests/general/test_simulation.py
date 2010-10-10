@@ -124,3 +124,4 @@ class TestStreams2(SimulationTest):
         self.assert_all_trajectories(['linearResistance.port_a.m_flow',
                                       'multiPortVolume.flowPort[1].h_outflow'
                                       ], same_span=True, rel_tol=1e-2, abs_tol=1e-2)
+

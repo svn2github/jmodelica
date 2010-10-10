@@ -28,7 +28,7 @@
     Modelica language, whereas optimization specifications are given in the
     Optimica extension which is described in XX. The tutorial exercises in
     this chapter assumes that the reader is familiar with the basics of
-    Modelica and Optimica. </para>
+    Modelica and Optimica.</para>
   </section>
 
   <section xml:id="opt-sec-first">
@@ -155,7 +155,7 @@ plt.show()
     a model and an optimization specification and then compile the model as
     described in XX. To illustrate how to solve optimization problems the Van
     der Pol problem presented above is used. First, the model is compiled and
-    loaded: </para>
+    loaded:</para>
 
     <programlisting language="python">model_name = compile_jmu("VDP_Opt","VDP.mo")
 model = JMUModel(model_name)
@@ -165,7 +165,7 @@ model = JMUModel(model_name)
     methods of the <literal>model</literal> object and can be accessed by tab
     completion. Invoking an optimization algorithm is done by calling the
     method <literal>JMUModel.optimize</literal>, which performs the following
-    tasks: </para>
+    tasks:</para>
 
     <itemizedlist>
       <listitem>
@@ -244,7 +244,7 @@ model = JMUModel(model_name)
     option values. This is done by invoking the method
     optimize_options:</para>
 
-    <programlisting>&gt;&gt;&gt; help(vpd.optimize)
+    <programlisting>&gt;&gt;&gt; help(vpd.optimize_options)
     Get an instance of the simulate options class, prefilled with 
     default values. If called without argument then the options 
     class for the default simulation algorithm will be returned.
@@ -1162,8 +1162,7 @@ plt.grid()
 plt.ylabel('Temperature')
 
 plt.subplot(313)
-# TO BE CHANGED!!!
-plt.plot([t_init_sim[0], t_init_sim[-1]],[Tc_init_sim, Tc_init_sim])
+plt.plot(t_init_sim,Tc_init_sim)
 plt.grid()
 plt.ylabel('Cooling temperature')
 plt.xlabel('time')
