@@ -82,6 +82,12 @@ aspect ComplianceCheck {
 			compliance("String concatenation is not supported");
 	}
 	
+	public void InstComponentDecl.complianceCheck() {
+		super.complianceCheck();
+		if (getComponentDecl().isInner() || getComponentDecl().isOuter())
+			compliance("Inner/outer components are not supported");
+	}
+	
 	public void InstPrimitive.complianceCheck() {
 		super.complianceCheck();
 		if (isString())

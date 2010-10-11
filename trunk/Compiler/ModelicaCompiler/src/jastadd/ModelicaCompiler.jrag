@@ -482,7 +482,7 @@ public class ModelicaCompiler {
 		for (String name : names) {
 			SourceRoot sr_tmp = parseModel(name);
 			//copy options from local optionregistry to sourceroot optionregistry
-			sr_tmp.options.copyAllOptions(this.options);
+			sr_tmp.options.copyAllOptions(options);
 			if (sr == null) 
 				sr = sr_tmp;
 			else 
@@ -818,9 +818,6 @@ public class ModelicaCompiler {
 			}
 		}
 		options.addStringOption("MODELICAPATH", modelicapath);
-		
-		// set options field
-		this.options = options;
 	}
 	
 	protected void setArguments(String compilerName, String[] args, Hashtable<String, String> programarguments) 

@@ -68,6 +68,31 @@ Compliance error at line 103, column 10:
 
 end EnumVariable_ComplErr;
 
+
+model InnerOuter
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ComplianceErrorTestCase(
+         name="InnerOuter",
+         description="Compliance error for inner and outer",
+         errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 74, column 14:
+  Inner/outer components are not supported
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 75, column 14:
+  Inner/outer components are not supported
+")})));
+
+	model A
+		inner Real x;
+		outer Real y;
+	end A;
+	
+	A z;
+end InnerOuter;
+
+
 model ArrayOfRecords_Warn
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.WarningTestCase(
