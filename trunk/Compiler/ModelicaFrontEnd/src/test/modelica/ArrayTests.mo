@@ -6345,5 +6345,28 @@ end ArrayConst4;
 
 
 
-  annotation (uses(Modelica(version="3.0.1")));
+model ArraySize1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArraySize1",
+         description="Using input as array size",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 6351, column 15:
+  Array size must be constant or parameter: N
+")})));
+
+	function f
+		input Integer N;
+		output Real[N] o = 1:N;
+	algorithm
+	end f;
+	
+	Real x[3] = f(3);
+end ArraySize1;
+
+
+
+  annotation(uses(Modelica(version="3.0.1")));
 end ArrayTests;

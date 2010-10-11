@@ -212,6 +212,8 @@ aspect FlatTypeCheck {
 			  compliance("Array sizes of Boolean or enumeration type are not supported: " + getFExp());
 		  else if (!type().isUnknown())
 			  error("Array size must be Integer expression: " + getFExp());
+	  } else if (!getFExp().variability().lessOrEqual(fParameter())) {
+		  error("Array size must be constant or parameter: " + getFExp());
 	  } else if (!inFunction()) { 
 		  try {
 			  getFExp().ceval().intValue();
