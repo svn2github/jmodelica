@@ -215,14 +215,14 @@
     <title>Software Development Kit</title>
 
     <para>The JModelica.org Software Development Kit (SDK) is a bundle of
-    tools needed to build the JModelica.org sources on Windows. The JModelica
-    SDK windows installer sets up a pre-configured complete environment with
-    convenient start menu shortcuts.</para>
+    tools needed to build the JModelica.org sources on Windows. The
+    JModelica.org SDK windows installer sets up a complete pre-configured
+    environment with convenient start menu shortcuts.</para>
 
     <section xml:id="inst_sec_sdk_prereq">
-      <title>Prerequisities</title>
+      <title>Prerequisites</title>
 
-      <para>The Python prerequisities for installing the JModelica.org SDK are
+      <para>The Python prerequisites for installing the JModelica.org SDK are
       the same as listed in <xref linkend="inst_sec_prereq_python" />. For
       Java however it is required to have a JDK installed, not only a JRE as
       for the binary installation.</para>
@@ -246,9 +246,9 @@
     <section>
       <title>Installing the JModelica.org SDK</title>
 
-      <para>Make sure that the prerequisities listed in <xref
+      <para>Make sure that the prerequisites listed in <xref
       linkend="inst_sec_sdk_prereq" /> are installed before starting the
-      JModelica.org SDK installation. </para>
+      JModelica.org SDK installation.</para>
 
       <section>
         <title>Bundled tools</title>
@@ -320,7 +320,7 @@
 
             <listitem>
               <para>Run the file by double-clicking and selecting Run if
-              promted with a security warning. This will launch an installer
+              prompted with a security warning. This will launch an installer
               which should be self-explanatory. Select "Yes" at the end when
               asked if the source code should be checked out from
               JModelica.org as this is needed in the next step.</para>

@@ -175,7 +175,7 @@ compile_jmu(model_name, mo_file)
 
                 <entry><literal>'.'</literal> (Current directory)</entry>
 
-                <entry>Location of the compiled jmu. Directory will be created
+                <entry>Location of the compiled JMU. Directory will be created
                 if it does not exist.</entry>
               </row>
             </tbody>
@@ -393,8 +393,8 @@ compile_jmu(model_name, mo_file)
         <literal>target</literal> is '<literal>ipopt</literal>' by default
         which will work for most cases. However, if JModelica.org has been
         built without Ipopt libraries the <literal>target</literal> parameter
-        would have to be changed to, any other suitable target that does not
-        include the Ipopt libaraies. The target <literal>model_noad</literal>
+        would have to be changed to any other suitable target that does not
+        include the Ipopt libraries. The target <literal>model_noad</literal>
         must be used if the model contains external equations since external
         equations do not work with the AD interface at the moment.</para>
       </section>
@@ -406,7 +406,8 @@ compile_jmu(model_name, mo_file)
       <para>Compiling with <literal>compile_jmu</literal> bundles quite a few
       steps required for the compilation. These steps will be described
       briefly here, for a more detailed review on the compilation steps see
-      [Länk: the Architecture section in the Introduction].</para>
+      <xref linkend="intro_sec_architecture" /> in <xref
+      linkend="ch_intro" />.</para>
 
       <section>
         <title>Create a compiler</title>
@@ -482,9 +483,9 @@ mc.compile_binary(c_file, target='ipopt')
     model can be manipulated once it has been instantiated. Amongst the most
     important methods are the <literal>initialize</literal>,
     <literal>simulate</literal> and <literal>optimize</literal> methods. These
-    are explained in the &lt;länk: simulation and optimization chapters&gt;.
-    The more basic <literal>JMUModel</literal> methods for variable and
-    parameter manipulation are explained in <xref
+    are explained in <xref linkend="ch_simulation" /> and <xref
+    linkend="ch_optimization" />. The more basic <literal>JMUModel</literal>
+    methods for variable and parameter manipulation are explained in <xref
     linkend="models_sec_variable_and_parameter_manipulation" />.</para>
 
     <section xml:id="models_sec_the_jmu_file">
@@ -564,8 +565,8 @@ myModel = JMUModel(jmu_name)
       <para>The variable meta data is saved in <filename>&lt;model class
       name&gt;.xml</filename> and the parameter values in <filename>&lt;model
       class name&gt;_values.xml</filename>. The name of the parameter is used
-      to map a parameter value in the values XML file to a parameter
-      specification in the variables XML file.</para>
+      to map a parameter value in the XML values file to a parameter
+      specification in the XML variables file.</para>
     </section>
 
     <section xml:id="models_sec_setting_and_getting_variables">
@@ -677,7 +678,8 @@ rlc_circuit.set('inductor.L', 1.5)
 # Save parameters to the XML values file
 rlc_circuit.write_parameters_to_XML()
 
-# load the XML values file once again and see that the changed parameter was saved in XML file
+# load the XML values file once again and see that the changed parameter was saved in 
+# the XML file
 rlc_circuit.load_parameters_from_XML()
 rlc_circuit.get('inductor.L')
 &gt;&gt; 1.5
@@ -688,7 +690,7 @@ rlc_circuit.get('inductor.L')
         the JMU which was created when the model was compiled (following the
         name conventions mentioned above). It is also possible to save the
         changes in a new XML file. This is quite convenient since different
-        parameter value settings can easily be saved and loaded in the
+        parameter value settings can then easily be saved and reloaded in the
         model.</para>
 
         <programlisting language="python"># Save to specific XML file

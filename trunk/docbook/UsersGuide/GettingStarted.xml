@@ -10,620 +10,119 @@
          xmlns:db="http://docbook.org/ns/docbook">
   <title>Getting started</title>
 
-  <para>The examples in JModelica.org uses the Python scientific library
-  SciPy, which is dependent on NumPy and the mathematical plotting library
-  matplotlib for plotting. These packages will thus also be used in some
-  examples in this chapter. Most Python functions have built-in documentation,
-  which can be accessed from the Python shell by invoking the help function,
-  for example <literal>help(numpy.size)</literal>. Use this feature frequently
-  to learn more about the packages used in this tutorial, including the
-  jmodelica package. It is possible do the tutorials without any Python
-  knowledge (although it helps to know the basics).</para>
+  <para>This chapter is intended to give a brief introduction to using the
+  JModelica.org Python interface and will not go into any details. Please
+  refer to the other chapters of this manual for more information on each
+  specific topic.</para>
 
-  <para>The tutorials in this chapter are preferably run in a Python shell
-  using the Pylab mode. If you are running Windows, select the menu option
-  'pylab' provided with the JModelica.org installation. If you are running
-  Linux or Mac OS X, open a terminal and enter the command:</para>
+  <section xml:id="gs_sec_starting_a_python_session">
+    <title>Starting a Python session</title>
 
-  <programlisting language="python">&gt; $JMODELICA_HOME/Python/jm_ipython.sh -pylab
-</programlisting>
-
-  <para>As your first action, go to the working directory you have
-  created:</para>
-
-  <programlisting language="python">In [1]: cd '/path/to/working/directory'
-</programlisting>
-
-  <para>In order to run the Python script, use the 'run' command:</para>
-
-  <programlisting language="python">in [2]: run cstr.py
-</programlisting>
-
-  <para>In most cases it is convenient to store the Python commands in a
-  script file and run the script from the file by invoking the Python command
-  run:</para>
-
-  <programlisting>&gt;&gt;&gt; run my_script.py</programlisting>
-
-  <para>or</para>
-
-  <programlisting>&gt;&gt;&gt; run -i my_script.py</programlisting>
-
-  <para>where the latter will render all variables to be accessible in the
-  Python interpreter after termination of the script.</para>
-
-  <section>
-    <title>Compilation of models</title>
-
-    <para>This tutorial covers how to compile Modelica and Optimica models
-    into C and XML and how to load the resulting DLLs into Python.</para>
+    <para>Starting a Python session differs somewhat depending on your
+    operating system.</para>
 
     <section>
-      <title>Compilation</title>
+      <title>Windows</title>
 
-      <para>There are two compilers available,
-      <literal>ModelicaCompiler</literal> and
-      <literal>OptimicaCompiler</literal>. Any model containing Optimica code
-      has to be compiled with the <literal>OptimicaCompiler</literal>. This is
-      the case with the CSTR model which will be used in the following
-      examples.</para>
+      <para>If you are running Windows, three different Python shells are
+      available under the JModelica.org start menu.<itemizedlist>
+          <listitem>
+            <para>Python - Normal command shell started with Python.</para>
+          </listitem>
 
-      <section>
-        <title>Simple compilation example</title>
+          <listitem>
+            <para>IPython - Interactive shell for Python with, for example,
+            code highlighting and tab completion.</para>
+          </listitem>
 
-        <para>Compiling a model file can be done with just a few lines of
-        code.</para>
+          <listitem>
+            <para>pylab - IPython shell which also loads the package
+            pylab.</para>
+          </listitem>
+        </itemizedlist></para>
+    </section>
 
-        <section>
-          <title>Instantiating the compiler</title>
+    <section>
+      <title>Linux or Mac OS</title>
 
-          <para>First the <literal>OptimicaCompiler</literal> must be imported
-          and instantiated. The compiler instance can then be used multiple
-          times on different model files.</para>
+      <para>To start the IPython shell with the package pylab on Linux or Mac
+      OS X, open a terminal and enter the command:</para>
 
-          <programlisting language="python"># Import the compiler
-from jmodelica.compiler import OptimicaCompiler
-
-# Get an instance of OptimicaCompiler
-oc = OptimicaCompiler()
+      <programlisting language="python">&gt; $JMODELICA_HOME/Python/jm_ipython.sh -pylab
 </programlisting>
-        </section>
-
-        <section>
-          <title>Options</title>
-
-          <para>Compiler options are read from an XML file 'options.xml' which
-          can be found in the JModelica.org installation folder. The options
-          are loaded from the file as the compiler is instantiated. Options
-          for a compiler instance can be modified and new options can be added
-          interactively. There are four type categories: string, real, integer
-          and boolean. The following example demonstrates how to get and set a
-          string option.</para>
-
-          <programlisting language="python"># Get the string option default_msl_version
-oc.get_string_option('default_msl_version')
-&gt;&gt; '3.0.1'
-
-# Set the default_msl_version to 3.0.1
-oc.set_string_option('default_msl_version','3.0.1')
-</programlisting>
-        </section>
-
-        <section>
-          <title>Compiling</title>
-
-          <para>Compile a model, using the previously created compiler
-          instance, with the method <literal>compile_model</literal> which
-          takes a model name and a model file name as arguments. Once
-          compilation has completed successfully a DLL file along with a few
-          other files will have been created on the file system. The DLL file
-          can then be loaded using the class jmi.Model. The result model
-          object is used to interact with the JMI Model interface.
-          <literal>compile_model</literal> does the DLL loading for you and
-          will return with the jmi.Model model object as return
-          argument.</para>
-
-          <programlisting language="python"># Compile the model and get a jmi.Model as return argument
-cstr_model = oc.compile_model('CSTR.CSTR_Opt', 'CSTR.mo')</programlisting>
-
-          <para>If the compilation has failed an exception will be
-          raised.</para>
-        </section>
-      </section>
-
-      <section>
-        <title>Targets</title>
-
-        <para>The <literal>compile_model</literal> method takes an optional
-        argument target which is '<literal>mode</literal>l' by default. There
-        are three other options for this argument,
-        '<literal>model_noad</literal>', '<literal>algorithm</literal>' and
-        '<literal>ipopt</literal>'. It is necessary to compile with target
-        '<literal>ipopt</literal>' to use the Ipopt algorithm interface for
-        optimization.</para>
-
-        <programlisting language="python"># Compile the model with support for Ipopt and get a jmi.Model as return argument
-cstr_model = oc.compile_model('CSTR.CSTR_Opt', 'CSTR.mo', target='ipopt')
-</programlisting>
-      </section>
-
-      <section>
-        <title>Compilation in more detail</title>
-
-        <para>Compiling with <literal>compile_model</literal> actually bundles
-        a few steps required for the compilation which can be run one by one.
-        These steps will be described briefly here, for more information on
-        these steps, see the Architecture section in the Introduction.</para>
-
-        <section>
-          <title>Flattening</title>
-
-          <para>In the first step, the model is transformed into a flat
-          representation which can be used to generate C and XML code. Before
-          this can be done the model must be parsed and instantiated. If there
-          are errors in the model, for example syntax or type errors, Python
-          exceptions will be thrown during these steps.</para>
-
-          <programlisting language="python"># Parse the model and get a reference to the source root
-source_root = oc.parse_model('CSTR.mo')
-
-# Generate an instance tree representation and get a reference to the model instance
-model_instance = oc.instantiate_model(source_root, 'CSTR.CSTR_Opt')
-
-# Perform flattening and get a flat representation
-flat_rep = oc.flatten_model(model_instance)
-</programlisting>
-        </section>
-
-        <section>
-          <title>Code generation</title>
-
-          <para>The next step is the code generation which produces C code
-          containing the model equations and a couple of XML files containing
-          model meta data such as variable names and types.</para>
-
-          <programlisting language="python"># Generate code
-oc.generate_code(flat_rep)
-</programlisting>
-
-          <para>Several files are generated in this step.</para>
-        </section>
-
-        <section>
-          <title>Generate Shared Object file (DLL)</title>
-
-          <para>Finally, the DLL file is built where the C code is linked with
-          the JModelica.org Model Interface (JMI) runtime library. The target
-          argument must be set here if something other than the default
-          'model' is wanted.</para>
-
-          <programlisting># Compile DLL
-oc.compile_dll('CSTR_CSTR_Opt', target='ipopt')
-</programlisting>
-        </section>
-
-        <section>
-          <title>Loading the Shared Object file (DLL)</title>
-
-          <para>The DLL file is loaded using the class Model from which the
-          JMI Model interface can be reached.</para>
-
-          <programlisting># Import Model
-from jmodelica.jmi import Model
-# Load dll file and create Model object
-model = Model('CSTR_CSTR_Opt')
-</programlisting>
-
-          <para>The model object can now be used to manipulate parameters and
-          for optimization and simulation.</para>
-        </section>
-      </section>
     </section>
   </section>
 
   <section>
-    <title>Simulation of models</title>
+    <title>Run an example</title>
 
-    <section>
-      <title>Simulation of an electrical circuit</title>
+    <para>There are several example scripts which compile, load and
+    simulate/optimize models in the <filename>examples</filename> folder under
+    the Python package in the JModelica.org installation. The models
+    themselves are located in the subdirectory <filename>files</filename>. The
+    following code demonstrates how to run such an example. First a Python
+    session must be started, see <xref
+    linkend="gs_sec_starting_a_python_session" />. The JModelica.org Python
+    interface is preferably run in a IPython shell with Pylab mode.
+    <programlisting># import the VDP example
+from jmodelica.examples import vdp
 
-      <para>This example focus on how to use the high-level simulation
-      functionality on a model of an electric circuit. The model is depicted
-      in Figure (RLC.png) and consists of resistances, inductors and a
-      capacitor. The circuit is connected to a voltage source which generates
-      a square-wave with an amplitude of 1.0 and a frequency of 0.6 Hz. This
-      model is written in Modelica code and saved in the file RLC_Circuit.mo
-      and is depicted in below.<figure>
-          <title>Electric Circuit</title>
+# run the example
+vdp.run_demo()</programlisting></para>
 
-          <mediaobject>
-            <imageobject>
-              <imagedata fileref="images/RLC.png" scalefit="1" width="60%"></imagedata>
-            </imageobject>
-          </mediaobject>
-        </figure></para>
-
-      <para>To use the functionality provided by the JModelica.org platform
-      they first have to be imported into the Python script. So we start by
-      importing the following:</para>
-
-      <programlisting language="Python">from jmodelica import simulate
-import pylab as P</programlisting>
-
-      <para>The method 'simulate' is the high-level simulation method and the
-      'pylab' package is used here for plotting.</para>
-
-      <para>Next, we need to provide the 'simulate' method with information
-      about which model we would like to simulate and where it is stored. We
-      also need information about the simulation interval. The information is
-      then passed down in the following way,</para>
-
-      <programlisting>res_object = simulate(model='RLC_Circuit_Square', file_name='RLC_Circuit.mo',
-                          alg_args={'start_time':0.0,'final_time':20.0,'num_communication_points':0})
-</programlisting>
-
-      <para>The return argument from 'simulate' is a result object where the
-      simulation result can be retrieved using the method
-      <literal>get_result_data</literal>. Here 'alg_args' are the arguments
-      for the algorithm stored in a dictionary. The 'num_communication_points'
-      represents the number of communication points stored by the algorithm.
-      The default is 500 points and when set to zero (0), the internal steps
-      calculated by the algorithm are stored. If the problem requires that the
-      default options in the specific solver needs to be changed, they should
-      be passed down in a dictionary called 'solver_args'. Typically these
-      options can be the tolerances. Using the default simulation package,
-      Assimulo, information regarding which algorithms are supported and the
-      solver arguments can be found here, http://www.jmodelica.org/assimulo .
-      The default solver is IDA and for a selection of the solver arguments to
-      IDA, see the table below.</para>
-
-      <table>
-        <title>Selection of solver arguments for IDA</title>
-
-        <tgroup cols="2">
-          <thead>
-            <row>
-              <entry align="center">Argument</entry>
-
-              <entry align="center">Option</entry>
-            </row>
-          </thead>
-
-          <tbody>
-            <row>
-              <entry>suppress_alg (Suppress the algebraic variables on the
-              error test)</entry>
-
-              <entry>Boolean flag</entry>
-            </row>
-
-            <row>
-              <entry>initstep (The initial step-size)</entry>
-
-              <entry>Positive float</entry>
-            </row>
-
-            <row>
-              <entry>maxorder (The maximum order used)</entry>
-
-              <entry>Integer of max 5</entry>
-            </row>
-
-            <row>
-              <entry>maxh (Maximum step-size)</entry>
-
-              <entry>Positive float</entry>
-            </row>
-
-            <row>
-              <entry>atol (Absolute Tolerance)</entry>
-
-              <entry>Array of floats or Float</entry>
-            </row>
-
-            <row>
-              <entry>rtol (Relative Tolerance)</entry>
-
-              <entry>Float</entry>
-            </row>
-          </tbody>
-        </tgroup>
-      </table>
-
-      <para>After a successful simulation the statistics are printed in the
-      prompt and the results are stored in the variable 'res'. To view the
-      result, we have to retrieve information about the variables we are
-      interested of. This is easily done in the following way,</para>
-
-      <programlisting>res = res_object.get_result_data()
-square_y = res.get_variable_data('square.y')
-resistor_v = res.get_variable_data('resistor.v')
-inductor1_i = res.get_variable_data('inductor1.i')    </programlisting>
-
-      <para>And then plotted with the help from pylab,</para>
-
-      <programlisting>P.plot(square_y.t, square_y.x, resistor_v.t, resistor_v.x, inductor1_i.t, inductor1_i.x)    
-P.legend(('square.y','resistor.v','inductor1.i'))
-P.show()</programlisting>
-
-      <para>The simulation result is shown in the figure below:</para>
-
-      <figure>
-        <title>Simulation result</title>
-
-        <mediaobject>
-          <imageobject>
-            <imagedata fileref="images/Result_RLC.svg" scalefit="1"
-                       width="60%"></imagedata>
-          </imageobject>
-        </mediaobject>
-      </figure>
-    </section>
-
-    <section>
-      <title>Simulation and parameter sweeps</title>
-
-      <para>This tutorial demonstrates how to run multiple simulations with
-      different parameter values. Sweeping parameters is a useful technique
-      for analysing model sensitivity with respect to uncertainty in physical
-      parameters or initial conditions. Consider the following model of the
-      Van der Pol oscillator:</para>
-
-      <programlisting>  model VDP
-    // State start values
-    parameter Real x1_0 = 0;
-    parameter Real x2_0 = 1;
-
-    // The states
-    Real x1(start = x1_0);
-    Real x2(start = x2_0);
-
-    // The control signal
-    input Real u;
-
-  equation
-    der(x1) = (1 - x2^2) * x1 - x2 + u;
-    der(x2) = x1;
-  end VDP;</programlisting>
-
-      <para>Notice that the initial values of the states are parametrized by
-      the parameters <literal>x1_0</literal> and <literal>x2_0</literal>.
-      Next, copy the Modelica code above into a file VDP.mo and save it in
-      your working directory. Also, create a Python script file and name it
-      vdp_pp.py. Start by copying the commands:</para>
-
-      <programlisting>import numpy as N
-import pylab as p
-from jmodelica.compiler import ModelicaCompiler
-from jmodelica import simulate</programlisting>
-
-      <para>into the Python file. Compile and load the model:</para>
-
-      <programlisting># Define model file name and class name
-model_name = 'VDP'
-mofile = 'VDP.mo'
-
-# Create a Modelica compiler
-mc = ModelicaCompiler()
-
-# Compile and load model
-model = mc.compile_model(model_name,mofile,target='ipopt')</programlisting>
-
-      <para>Next, we define the initial conditions for which the parameter
-      sweep will be done. The state <literal>x2</literal> starts at 0, whereas
-      the initial condition for <literal>x1</literal> is swept between -3 and
-      3:</para>
-
-      <programlisting># Define initial conditions
-N_points = 11
-x1_0 = N.linspace(-3.,3.,N_points)
-x2_0 = N.zeros(N_points)</programlisting>
-
-      <para>In order to visualize the results of the simulations, we open a
-      plot window:</para>
-
-      <programlisting>fig = p.figure()
-p.clf()
-p.hold(True)
-p.xlabel('x1')
-p.ylabel('x2')</programlisting>
-
-      <para>The actual parameter sweep is done by looping over the initial
-      condition vectors and in each iteration set the parameter values into
-      the model, simulate and plot:</para>
-
-      <programlisting>for i in range(N_points):
-    # Set initial conditions in model
-    model.set_value('x1_0',x1_0[i])
-    model.set_value('x2_0',x2_0[i])
-    # Simulate 
-    sim_res = simulate(model,alg_args={'final_time':20})
-    # Get simulation result
-    res = sim_res.result_data
-    x1=res.get_variable_data('x1')
-    x2=res.get_variable_data('x2')
-    # Plot simulation result in phase plane plot
-    p.plot(x1.x, x2.x,'b')
-p.grid()
-p.show()</programlisting>
-
-      <para>You should now see the following plot:</para>
-
-      <figure>
-        <title>Simulation result-phase plane</title>
-
-        <mediaobject>
-          <imageobject>
-            <imagedata fileref="images/vdp_pp.png" scalefit="1" width="60%"></imagedata>
-          </imageobject>
-        </mediaobject>
-      </figure>
-    </section>
+    <para>This code will run the example and plot some results.</para>
   </section>
 
   <section>
-    <title>Working with file I/O</title>
+    <title>Check your installation</title>
 
-    <para>In this tutorial you will learn how to load simulation/optimization
-    results.</para>
+    <para>The JModelica.org Python interface requires a few Python packages in
+    order to run correctly. Use the function
+    <literal>jmodelica.check_packages()</literal> to list the dependencies and
+    version located.<programlisting># import the function from jmodelica
+from jmodelica import check_packages
 
-    <section>
-      <title>I/O functionality</title>
+# run check_packages
+check_packages()
 
-      <para>The module <literal>jmodelica.io</literal> provides useful
-      functions for exporting and loading simulation or optimization results
-      from Dymola. The result files can be in Dymola textural or Dymola binary
-      format. The variable data is saved together with the variable names
-      which makes it possible to load the result files and match result data
-      with a specific variable.</para>
-    </section>
+Performing JModelica package check
+==================================
 
-    <section>
-      <title>Loading result data</title>
+Platform...................... win32
 
-      <para>To load a result data file saved using the export functionality
-      <literal>jmodelica.io.export_result_dymola</literal> the class
-      <literal>ResultDymolaTextual</literal> in the same module,
-      <literal>jmodelica.io</literal>, is used. The result object can then be
-      used to retrieve data for a specific variable.</para>
+Python version:............... 2.6.5
 
-      <programlisting language="python"># Load the CSTR results
-res = jmodelica.io.ResultDymolaTextual('CSTR_CSTR_Opt_result.txt')
+JModelica version:............ r2074
 
-# Get variable data for T_ref
-res.get_variable_data('T_ref').x
-&gt;&gt; array([ 280.099198,  280.099198])
-</programlisting>
 
-      <para>There is a similar function for retrieving results from a file in
-      Dymola binary format.</para>
-    </section>
+Dependencies:
+
+Package                        Version
+-------                        -------
+numpy......................... 1.3.0                          Ok
+scipy......................... 0.7.1                          Ok
+matplotlib.................... 0.99.1                         Ok
+jpype......................... --                             Ok
+lxml.......................... 2.2.8                          Ok
+nose.......................... 0.11.3                         Ok
+assimulo...................... --                             Ok
+pyreadline.................... 1.5                            Ok
+
+</programlisting></para>
+
+    <para>Missing or having the wrong version of a package can be a source of
+    errors. Therefore it can be useful to run
+    <literal>jmodelica.check_packages()</literal> after installation or when
+    trouble-shooting.</para>
   </section>
 
   <section>
-    <title>Setting and saving model parameters</title>
+    <title>The JModelica.org user forum</title>
 
-    <para>This tutorial shows how to set model parameters and how to load and
-    save parameter data from/to XML files.</para>
-
-    <section>
-      <title>Model parameter XML files</title>
-
-      <para>The model parameter meta data and values are saved in XML files
-      which are generated during the compilation. They follow the name
-      convention:</para>
-
-      <itemizedlist>
-        <listitem>
-          <para>&lt;model class name&gt;.xml</para>
-        </listitem>
-
-        <listitem>
-          <para>&lt;model class name&gt;_values.xml</para>
-        </listitem>
-      </itemizedlist>
-
-      <para>The parameter meta data is saved in &lt;model class name&gt;.xml
-      and the parameter values in &lt;model class name&gt;_values.xml. The
-      name of the parameter is used to map a parameter value in the values
-      file to a parameter specification.</para>
-    </section>
-
-    <section>
-      <title>Get and set value</title>
-
-      <para>The model parameters can be accessed with via the
-      <literal>jmi.Model</literal> interface. It is possible to look at the
-      whole vector of, for example, all real parameters in the model or one
-      specific parameter. Accessing one specific parameter requires that the
-      parameter name is known.</para>
-
-      <para>The following code example assumes the CSTR model has been
-      compiled and the DLL file loaded in <literal>jmi.Model</literal>.</para>
-
-      <programlisting language="python"># Get independent real parameter vector
-cstr_model.get_real_pi()
-&gt;&gt; array([  1.66666667e-03,   1.00000000e+03,   1.66666667e-03,
-            3.50000000e+02,   2.19000000e-01,   1.20000000e+09,
-            8.75000000e+03,   9.15600000e+02,   1.00000000e+03,
-            2.39000000e+02,  -5.00000000e+04,   1.00000000e+02,
-            1.00000000e+03,   3.50000000e+02,   5.00000000e+02,
-            3.20000000e+02,   3.00000000e+02,   1.00000000e+00,
-            1.00000000e+00,   1.00000000e+00,   0.00000000e+00,
-            1.50000000e+02])
-
-# Get independent parameter c_ref
-cstr_model.get_value('c_ref')
-&gt;&gt; 500.0
-
-# Set independent parameter
-cstr_model.set_value('c_ref', 450)
-# c_ref has now changed
-cstr_model.get_value('c_ref')
-&gt;&gt; 450.0
-</programlisting>
-    </section>
-
-    <section>
-      <title>Loading from and saving to XML</title>
-
-      <section>
-        <title>Loading XML values file</title>
-
-        <para>It is possible to load the values from an XML file as is done
-        automatically when the <literal>jmi.Model</literal> object was first
-        created. If, for example, there were many local changes to parameters
-        it could be desirable to reset everything as it was from the
-        beginning.</para>
-
-        <programlisting language="python"># Set parameter
-cstr_model.set_value('c_ref', 450)
-cstr_model.get_value('c_ref')
-&gt;&gt; 450.0
-# Load values XML file
-cstr_model.load_parameters_from_XML()
-# Parameter has now been reset
-cstr_model.get_value('c_ref')
-&gt;&gt; 500.0
-</programlisting>
-
-        <para>Default behaviour is to load the same file as was created during
-        compilation. If another file should be used this must be passed to the
-        method.</para>
-
-        <programlisting language="python"># Load other XML file
-cstr_model.load_parameters_from_XML('new_values.xml')</programlisting>
-      </section>
-
-      <section>
-        <title>Writing to XML values file</title>
-
-        <para>Setting a parameter value with
-        <literal>Model.set_value</literal> only changes the value in the
-        vector loaded when <literal>jmi.Model</literal> was created, which
-        means that they will not be saved. To save all changes made to
-        parameters in a model, the values have to be written to the XML values
-        file.</para>
-
-        <programlisting language="python"># Set parameter
-cstr_model.set_value('c_ref', 450)
-# Save parameters to values XML
-cstr_model.write_parameters_to_XML()
-# Changed parameter has now been saved in XML file
-cstr_model.get_value('c_ref')
-&gt;&gt; 450.0
-</programlisting>
-
-        <para>If <literal>write_parameters_to_XML()</literal> is called
-        without arguments the values will be written to the XML file which was
-        created when the model was compiled (following the name conventions
-        mentioned above). It is also possible to save the changes in a new XML
-        file. This is quite convenient since different parameter value
-        settings can easily be saved and loaded in the model.</para>
-
-        <programlisting language="python"># Save to specific XML file
-cstr_model.write_parameters_to_XML('test_values.xml')</programlisting>
-      </section>
-    </section>
+    <para>Please use the <link
+    xlink:href="http://www.jmodelica.org/forum">JModelica.org forum</link> for
+    any questions related to JModelica.org. You can search in old threads to
+    see if someone has asked your question before or, if you are a member,
+    start a new thread.</para>
   </section>
 </chapter>
