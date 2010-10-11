@@ -31,7 +31,6 @@ def run_demo(with_plots=True):
 
     fmu_name = O.path.join(path_to_fmus,'bouncingBall.fmu')
     model = FMUModel(fmu_name)
-    model.initialize()
     
     res = model.simulate(final_time=2.)
     

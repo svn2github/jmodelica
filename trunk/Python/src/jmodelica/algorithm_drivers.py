@@ -554,13 +554,19 @@ class AssimuloFMIAlgOptions(OptionBase):
             Number of communication points. If ncp is zero, the solver will 
             return the internal steps taken.
             Default: '0'
+            
+        initialize --
+            If set to True, the initializing algorithm defined in the FMU model
+            is invoked, otherwise it is assumed the user have manually invoked
+            model.initialize()
+            Default is True.
 
         write_scaled_result --
-                 Set this parameter to True to write the result to file without
-                 taking scaling into account. If the value of scaled is False,
-                 then the variable scaling factors of the model are used to
-                 reproduced the unscaled variable values.
-                 Default: False
+            Set this parameter to True to write the result to file without
+            taking scaling into account. If the value of scaled is False,
+            then the variable scaling factors of the model are used to
+            reproduced the unscaled variable values.
+            Default: False
                  
     The different solvers provided by the Assimulo simulation package provides
     different options. These options are given in dictionaries with names
@@ -592,6 +598,7 @@ class AssimuloFMIAlgOptions(OptionBase):
         _defaults= {
             'solver': 'CVode', 
             'ncp':0,
+            'initialize':True,
             'write_scaled_result':False,
             'CVode_options':{'discr':'BDF','iter':'Newton'}
             }
@@ -690,7 +697,11 @@ class AssimuloFMIAlg(AlgorithmBase):
         else:
             raise InvalidAlgorithmOptionException(
                 "The solver: "+solver+ " is unknown.")
-            
+        
+        # Initialize?
+        if self.options['initialize']:
+            self.model.initialize()
+        
         # solver options
         self.solver_options = self.options[solver+'_options']
     
@@ -728,8 +739,7 @@ class AssimuloFMIAlg(AlgorithmBase):
         """ 
         Runs the simulation. 
         """
-        self.simulator.simulate(self.final_time, 
-            self.ncp)
+        self.simulator.simulate(self.final_time, self.ncp)
  
     def get_result(self):
         """ 

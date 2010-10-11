@@ -716,7 +716,7 @@ class Test_FMI_ODE:
         """
         #Writing continuous
         bounce = fmi.FMUModel('bouncingBall.fmu', path_to_fmus)
-        bounce.initialize()
+        #bounce.initialize()
         res = bounce.simulate(final_time=3.)
         height = res['h']
         time = res['time']
@@ -730,6 +730,7 @@ class Test_FMI_ODE:
         bounce.initialize()
         opt = bounce.simulate_options()
         opt['CVode_options']['write_cont'] = False
+        opt['initialize']=False
         res = bounce.simulate(final_time=3., options=opt)
         
         height = res['h']
@@ -741,7 +742,7 @@ class Test_FMI_ODE:
         
         #Test with predefined FMUModel
         model = fmi.FMUModel(os.path.join(path_to_fmus,'bouncingBall.fmu'))
-        model.initialize()
+        #model.initialize()
         res = model.simulate(final_time=3.)
 
         height = res['h']
@@ -759,7 +760,7 @@ class Test_FMI_ODE:
         """
         #Writing continuous
         bounce = fmi.FMUModel('bouncingBall.fmu', path_to_fmus)
-        bounce.initialize()
+        #bounce.initialize()
         res = bounce.simulate(final_time=3.)
 
         height = res['h']
@@ -774,9 +775,9 @@ class Test_FMI_ODE:
         
         #Writing continuous
         bounce = fmi.FMUModel('bouncingBall.fmu', path_to_fmus)
-        bounce.initialize()
+        #bounce.initialize(options={'initialize':False})
         res = bounce.simulate(final_time=3.,
-            options={'CVode_options':{'iter':'FixedPoint','rtol':1e-6}})
+            options={'initialize':True,'CVode_options':{'iter':'FixedPoint','rtol':1e-6}})
         height = res['h']
         time = res['time']
     
@@ -794,7 +795,7 @@ class Test_FMI_ODE:
         """
         #Writing continuous
         bounce = fmi.FMUModel('bouncingBall.fmu', path_to_fmus)
-        bounce.initialize()
+        #bounce.initialize()
         res = bounce.simulate(final_time=3.)
 
         height = res['h']
@@ -804,7 +805,7 @@ class Test_FMI_ODE:
         nose.tools.assert_almost_equal(height[-1],-0.9804523,5)
         
         bounce.reset()
-        bounce.initialize()
+        #bounce.initialize()
         
         nose.tools.assert_almost_equal(bounce.get('h'), 1.00000,5)
         
