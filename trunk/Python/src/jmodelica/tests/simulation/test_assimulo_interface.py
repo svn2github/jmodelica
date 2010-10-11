@@ -21,7 +21,7 @@ import nose
 import os
 import numpy as N
 import pylab as P
-
+from scipy.io.matlab.mio import loadmat
 from jmodelica.jmi import compile_jmu
 from jmodelica.jmi import JMUModel
 import jmodelica.fmi as fmi
@@ -31,9 +31,11 @@ from jmodelica.tests import get_files_path
 
 try:
     from jmodelica.simulation.assimulo_interface import JMIODE, JMIDAE, FMIODE, JMIModel_Exception
+    from jmodelica.simulation.assimulo_interface import JMIDAESens
     from jmodelica.simulation.assimulo_interface import write_data
     from jmodelica.simulation.assimulo_interface import TrajectoryLinearInterpolation
     from assimulo.explicit_ode import CVode
+    from assimulo.implicit_ode import IDA
 except NameError, ImportError:
     logging.warning('Could not load Assimulo module. Check jmodelica.check_packages()')
 
@@ -816,3 +818,115 @@ class Test_FMI_ODE:
         
         nose.tools.assert_almost_equal(height[0],1.000000,5)
         nose.tools.assert_almost_equal(height[-1],-0.9804523,5)
+        
+        
+class Test_JMI_DAE_Sens:
+    """
+    This class tests jmodelica.simulation.assimulo.JMIDAESens
+    """
+    
+    @classmethod
+    def setUpClass(cls):
+        """
+        Compile the test model.
+        """
+        #DAE test model
+        fpath_DAE = os.path.join(get_files_path(), 'Modelica', 
+            'Pendulum_pack_no_opt.mo')
+        cpath_DAE = 'Pendulum_pack.Pendulum'
+
+        fname_DAE = compile_jmu(cpath_DAE, fpath_DAE)
+        
+        #DAE with sens
+        fpath_SENS = os.path.join(get_files_path(), 'Modelica', 
+            'QuadTankSens.mop')
+        cpath_SENS = 'QuadTankSens'
+        
+        fname_SENS = compile_jmu(cpath_SENS, fpath_SENS)
+        
+    def setUp(self):
+        """Load the test model."""
+        package_DAE = 'Pendulum_pack_Pendulum.jmu'
+        package_SENS = 'QuadTankSens.jmu'
+
+        # Load the dynamic library and XML data
+        self.m_DAE = JMUModel(package_DAE)
+        self.m_SENS = JMUModel(package_SENS)
+
+        # Creates the solvers
+        self.DAE = JMIDAESens(self.m_DAE)
+        self.SENS = JMIDAESens(self.m_SENS)
+        
+    @testattr(assimulo = True)
+    def test_ordinary_dae(self):
+        """
+        This tests a simulation using JMIDAESens without any parameters.
+        """
+        sim = IDA(self.DAE)
+        
+        sim.simulate(1.0)
+
+        nose.tools.assert_almost_equal(sim.y[-1][0], 0.15420124, 4)
+        nose.tools.assert_almost_equal(sim.y[-1][1], 0.11721253, 4)
+    
+    @testattr(assimulo = True)
+    def test_p0(self):
+        """
+        This test that the correct number of parameters are found.
+        """
+        assert self.SENS._p_nbr == 4
+        assert self.SENS._parameter_names[0] == 'a1'
+        assert self.SENS._parameter_names[1] == 'a2'
+        assert self.SENS._parameter_names[2] == 'a3'
+        assert self.SENS._parameter_names[3] == 'a4'
+        
+    @testattr(assimulo = True)
+    def test_input_simulation(self):
+        """
+        This tests that input simulation works.
+        """
+        path_result = os.path.join(get_files_path(), 'Results', 
+                                'qt_par_est_data.mat')
+        
+        data = loadmat(path_result,appendmat=False)
+
+        # Extract data series  
+        t_meas = data['t'][6000::100,0]-60  
+        u1 = data['u1_d'][6000::100,0]
+        u2 = data['u2_d'][6000::100,0]
+                
+        # Build input trajectory matrix for use in simulation
+        u_data = N.transpose(N.vstack((t_meas,u1,u2)))
+
+        u_traj = TrajectoryLinearInterpolation(u_data[:,0], 
+                            u_data[:,1:])
+
+        input_object = (['u1','u2'], u_traj)
+        
+        qt_mod = JMIDAESens(self.m_SENS, input_object)
+
+        qt_sim = IDA(qt_mod)
+
+        #Store data continuous during the simulation, important when solving a 
+        #problem with sensitivites.
+        qt_sim.store_cont = True 
+            
+        #Value used when IDA estimates the tolerances on the parameters
+        qt_sim.pbar = qt_mod.p0 
+            
+        #Let Sundials find consistent initial conditions by use of 'IDA_YA_YDP_INIT'
+        qt_sim.make_consistent('IDA_YA_YDP_INIT')
+            
+        #Simulate
+        qt_sim.simulate(60) #Simulate 4 seconds with 400 communication points
+
+        write_data(qt_sim)
+
+        res = ResultDymolaTextual('QuadTankSens_result.txt')
+    
+        dx1da1 = res.get_variable_data('dx1/da1')
+        dx1da2 = res.get_variable_data('dx1/da2')
+        dx4da1 = res.get_variable_data('dx4/da1')
+        
+        nose.tools.assert_almost_equal(dx1da2.x[0], 0.000000, 4)
+        nose.tools.assert_almost_equal(dx1da2.x[-1], 0.00000, 4)

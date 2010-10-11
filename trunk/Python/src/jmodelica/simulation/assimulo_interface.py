@@ -934,12 +934,12 @@ class JMIDAESens(Implicit_Problem):
     An Assimulo Implicit Model extended to JMI interface with support for 
     sensitivities.
     """
-    def __init__(self, model):
+    def __init__(self, model, input=None):
         """
         Sets the initial values.
         """
         self._model = model
-        self.input = None #NO INPUT
+        self.input = input
         
         self.y0 = N.append(self._model.real_x,self._model.real_w)
         self.yd0 = N.append(self._model.real_dx,[0]*len(self._model.real_w))
@@ -959,15 +959,24 @@ class JMIDAESens(Implicit_Problem):
         self._w_nbr = len(self._model.real_w) #Number of algebraic
         self._dx_nbr = len(self._model.real_dx) #Number of derivatives
         
+        #Used for logging
+        self._logLevel = logging.CRITICAL
+        self._log = createLogger(model, self._logLevel)
+        
         #Set the start values to the parameters.
-        self.p0 = N.array([])
-        for n in self._parameter_names:
-            self.p0 = N.append(self.p0, self._model.get(n))
-            self._sens_matrix += [[]] 
+        if self._parameter_names:
+            self.p0 = N.array([])
+            for n in self._parameter_names:
+                self.p0 = N.append(self.p0, self._model.get(n))
+                self._sens_matrix += [[]] 
         
-        self._p_nbr = len(self.p0) #Number of parameters
+            self._p_nbr = len(self.p0) #Number of parameters
+        else:
+            self._p_nbr = 0
+            
+        self._log.debug('Number of parameters: ' +str(self._p_nbr))
         
-    def f(self, t, y, yd, p):
+    def f(self, t, y, yd, p=None):
         """
         The residual function for an DAE problem.
         """
@@ -978,8 +987,13 @@ class JMIDAESens(Implicit_Problem):
         self._model.real_dx = yd[0:self._dx_nbr]
         
         #Set the free parameters
-        for ind, val in enumerate(p):
-            self._model.set(self._parameter_names[ind],val)
+        if not p==None:
+            for ind, val in enumerate(p):
+                self._model.set(self._parameter_names[ind],val)
+            
+        #Sets the inputs, if any
+        if self.input!=None:
+            self._model.set(self.input[0], self.input[1].eval(t)[0,:])
         
         #Evaluating the residual function
         residual = N.array([.0]*self._f_nbr)
@@ -1021,6 +1035,21 @@ class JMIDAESens(Implicit_Problem):
                 self._sens_matrix[i]).reshape(-1,self._f_nbr)
             
         return self._parameter_names, self._sens_matrix
+        
+    def _set_logging_level(self, level):
+        if bool(level):
+            self._log.setLevel(0) #Log all entries
+        else:
+            self._log.setLevel(50) #Log nothing (log nothing below level 50)
+    
+    def _get_logging_level(self):
+        return self._logLevel
+        
+    log = property(fget=_get_logging_level, fset=_set_logging_level, doc = 
+    """
+    Property for accessing the logging level. Determines if the logging should 
+    be activated (True) or deactivated (False).
+    """)
 
 class Trajectory:
     """
