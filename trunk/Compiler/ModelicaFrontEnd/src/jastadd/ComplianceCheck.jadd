@@ -92,6 +92,12 @@ aspect ComplianceCheck {
 			compliance("Boolean variables are not supported, only constants and parameters");
 	}
 	
+	public void InstEnum.complianceCheck() {
+		super.complianceCheck();
+		if (!variability().lessOrEqual(fParameter()))
+			compliance("Enumeration variables are not supported, only constants and parameters");
+	}
+	
 	public void InstNamedModification.complianceCheck() {
 		if (getName().hasFArraySubscripts())
 			compliance("Modifiers of specific array elements are not supported");

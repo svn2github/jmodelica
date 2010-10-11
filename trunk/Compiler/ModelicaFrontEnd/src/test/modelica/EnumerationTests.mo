@@ -8,14 +8,14 @@ package EnumerationTests
           description="Test basic use of enumerations",
           flatModel="
 fclass EnumerationTests.EnumerationTest1
- EnumerationTests.EnumerationTest1.Size t_shirt_size = EnumerationTests.EnumerationTest1.Size.medium;
+ parameter EnumerationTests.EnumerationTest1.Size t_shirt_size = EnumerationTests.EnumerationTest1.Size.medium;
 
  type EnumerationTests.EnumerationTest1.Size = enumeration(small \"1st\", medium, large, xlarge);
 end EnumerationTests.EnumerationTest1;
 ")})));
 
     type Size = enumeration(small "1st", medium, large, xlarge); 
-    Size t_shirt_size = Size.medium; 
+	parameter Size t_shirt_size = Size.medium; 
   end EnumerationTest1;
 
   
@@ -26,9 +26,9 @@ end EnumerationTests.EnumerationTest1;
          description="Test basic use of enumerations",
          flatModel="
 fclass EnumerationTests.EnumerationTest2
- EnumerationTests.EnumerationTest2.Size a1.t_shirt_size = EnumerationTests.EnumerationTest2.Size.medium;
- EnumerationTests.EnumerationTest2.Size a2.t_shirt_size = EnumerationTests.EnumerationTest2.Size.medium;
- EnumerationTests.EnumerationTest2.Size s = EnumerationTests.EnumerationTest2.Size.large;
+ parameter EnumerationTests.EnumerationTest2.Size a1.t_shirt_size = EnumerationTests.EnumerationTest2.Size.medium;
+ parameter EnumerationTests.EnumerationTest2.Size a2.t_shirt_size = EnumerationTests.EnumerationTest2.Size.medium;
+ parameter EnumerationTests.EnumerationTest2.Size s = EnumerationTests.EnumerationTest2.Size.large;
 
  type EnumerationTests.EnumerationTest2.Size = enumeration(small \"1st\", medium, large, xlarge);
 end EnumerationTests.EnumerationTest2;
@@ -37,12 +37,12 @@ end EnumerationTests.EnumerationTest2;
     type Size = enumeration(small "1st", medium, large, xlarge); 
 	  
     model A
-      Size t_shirt_size = Size.medium; 
+      parameter Size t_shirt_size = Size.medium; 
 	end A;
 	
     A a1;
     A a2;
-    Size s = Size.large;
+	parameter Size s = Size.large;
   end EnumerationTest2;
 
 
@@ -54,7 +54,7 @@ end EnumerationTests.EnumerationTest2;
          flatModel="
 fclass EnumerationTests.EnumerationTest3
  constant EnumerationTests.EnumerationTest3.A x = EnumerationTests.EnumerationTest3.A.b;
- EnumerationTests.EnumerationTest3.A y = EnumerationTests.EnumerationTest3.A.b;
+ parameter EnumerationTests.EnumerationTest3.A y = EnumerationTests.EnumerationTest3.A.b;
 
  type EnumerationTests.EnumerationTest3.A = enumeration(a, b, c);
 end EnumerationTests.EnumerationTest3;
@@ -62,7 +62,7 @@ end EnumerationTests.EnumerationTest3;
 
     type A = enumeration(a, b, c);
     constant A x = A.b;
-    A y = x;
+	parameter A y = x;
   end EnumerationTest3;
   
   
@@ -80,7 +80,7 @@ Semantic error at line 72, column 6:
 
     type A = enumeration(a, b, c);
     type B = enumeration(a, c, b);
-    A x = B.a;
+	parameter A x = B.a;
   end EnumerationTest4;
   
   
@@ -98,7 +98,7 @@ Semantic error at line 92, column 4:
 
     type A = enumeration(a, b, c);
     type B = enumeration(a, c, b);
-	  A x;
+	parameter A x;
   equation
     x = B.a;
   end EnumerationTest5;
@@ -111,7 +111,7 @@ Semantic error at line 92, column 4:
          description="Using equivalent enumerations",
          flatModel="
 fclass EnumerationTests.EnumerationTest6
- EnumerationTests.EnumerationTest6.A x = EnumerationTests.EnumerationTest6.B.a;
+ parameter EnumerationTests.EnumerationTest6.A x = EnumerationTests.EnumerationTest6.B.a;
 
  type EnumerationTests.EnumerationTest6.A = enumeration(a, b, c);
 
@@ -121,7 +121,7 @@ end EnumerationTests.EnumerationTest6;
 
     type A = enumeration(a, b, c);
     type B = enumeration(a, b, c);
-    A x = B.a;
+	parameter A x = B.a;
   end EnumerationTest6;
   
   
@@ -142,6 +142,104 @@ Compliance error at line 117, column 12:
     Real x[A];
   end EnumerationTest7;
   
+  
+  model EnumerationTest8
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="EnumerationTest8",
+         description="Range expressions with Booleans and enumerations",
+         flatModel="
+fclass EnumerationTests.EnumerationTest8
+ constant Boolean a[2] = false:true;
+ parameter Boolean b[2] = {false,true} /* { false, true } */;
+ constant EnumerationTests.EnumerationTest8.A c[3] = EnumerationTests.EnumerationTest8.A.b:EnumerationTests.EnumerationTest8.A.d;
+ parameter EnumerationTests.EnumerationTest8.A d[3] = {EnumerationTests.EnumerationTest8.A.b,EnumerationTests.EnumerationTest8.A.c,EnumerationTests.EnumerationTest8.A.d} /* { EnumerationTests.EnumerationTest8.A.b, EnumerationTests.EnumerationTest8.A.c, EnumerationTests.EnumerationTest8.A.d } */;
+
+ type EnumerationTests.EnumerationTest8.A = enumeration(a, b, c, d, e);
+end EnumerationTests.EnumerationTest8;
+")})));
+
+	  type A = enumeration(a, b, c, d, e);
+	
+	  constant Boolean a[2] = false:true;
+	  parameter Boolean b[2] = a;
+	  constant A c[3] = A.b:A.d;
+	  parameter A d[3] = c;
+  end EnumerationTest8;
+  
+  
+  model EnumerationTest9
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="EnumerationTest9",
+         description="Relational operators with enumerations",
+         flatModel="
+fclass EnumerationTests.EnumerationTest9
+ constant Boolean x[6,3] = {{EnumerationTests.EnumerationTest9.A.c < EnumerationTests.EnumerationTest9.A.b,EnumerationTests.EnumerationTest9.A.c < EnumerationTests.EnumerationTest9.A.c,EnumerationTests.EnumerationTest9.A.c < EnumerationTests.EnumerationTest9.A.d},{EnumerationTests.EnumerationTest9.A.c <= EnumerationTests.EnumerationTest9.A.b,EnumerationTests.EnumerationTest9.A.c <= EnumerationTests.EnumerationTest9.A.c,EnumerationTests.EnumerationTest9.A.c <= EnumerationTests.EnumerationTest9.A.d},{EnumerationTests.EnumerationTest9.A.c > EnumerationTests.EnumerationTest9.A.b,EnumerationTests.EnumerationTest9.A.c > EnumerationTests.EnumerationTest9.A.c,EnumerationTests.EnumerationTest9.A.c > EnumerationTests.EnumerationTest9.A.d},{EnumerationTests.EnumerationTest9.A.c >= EnumerationTests.EnumerationTest9.A.b,EnumerationTests.EnumerationTest9.A.c >= EnumerationTests.EnumerationTest9.A.c,EnumerationTests.EnumerationTest9.A.c >= EnumerationTests.EnumerationTest9.A.d},{EnumerationTests.EnumerationTest9.A.c == EnumerationTests.EnumerationTest9.A.b,EnumerationTests.EnumerationTest9.A.c == EnumerationTests.EnumerationTest9.A.c,EnumerationTests.EnumerationTest9.A.c == EnumerationTests.EnumerationTest9.A.d},{EnumerationTests.EnumerationTest9.A.c <> EnumerationTests.EnumerationTest9.A.b,EnumerationTests.EnumerationTest9.A.c <> EnumerationTests.EnumerationTest9.A.c,EnumerationTests.EnumerationTest9.A.c <> EnumerationTests.EnumerationTest9.A.d}};
+ parameter Boolean y[6,3] = {{false,false,true},{false,true,true},{true,false,false},{true,true,false},{false,true,false},{true,false,true}} /* { { false, false, true }, { false, true, true }, { true, false, false }, { true, true, false }, { false, true, false }, { true, false, true } } */;
+
+ type EnumerationTests.EnumerationTest9.A = enumeration(a, b, c, d, e);
+end EnumerationTests.EnumerationTest9;
+")})));
+
+	  type A = enumeration(a, b, c, d, e);
+	  constant Boolean[:,:] x = {
+		  { A.c <  A.b, A.c <  A.c, A.c <  A.d }, 
+		  { A.c <= A.b, A.c <= A.c, A.c <= A.d }, 
+		  { A.c >  A.b, A.c >  A.c, A.c >  A.d }, 
+		  { A.c >= A.b, A.c >= A.c, A.c >= A.d }, 
+		  { A.c == A.b, A.c == A.c, A.c == A.d }, 
+		  { A.c <> A.b, A.c <> A.c, A.c <> A.d } 
+		  };
+	  parameter Boolean[:,:] y = x;
+  end EnumerationTest9;
+  
+  
+  model EnumerationTest10
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="EnumerationTest10",
+         description="Using the Integer() operator: basic test",
+         flatModel="
+fclass EnumerationTests.EnumerationTest10
+ constant Integer i[3] = {Integer(EnumerationTests.EnumerationTest10.A.a),Integer(EnumerationTests.EnumerationTest10.A.c),Integer(EnumerationTests.EnumerationTest10.A.e)};
+ parameter Integer j[3] = {1,3,5} /* { 1, 3, 5 } */;
+
+ type EnumerationTests.EnumerationTest10.A = enumeration(a, b, c, d, e);
+end EnumerationTests.EnumerationTest10;
+")})));
+
+	  type A = enumeration(a, b, c, d, e);
+	  constant Integer i[:] = { Integer(A.a), Integer(A.c), Integer(A.e) };
+	  parameter Integer j[:] = i;
+  end EnumerationTest10;
+  
+  
+  model EnumerationTest11
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="EnumerationTest11",
+         description="Using the Integer() operator: wrong type of argument",
+         errorMessage="
+4 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/EnumerationTests.mo':
+Semantic error at line 219, column 22:
+  Could not evaluate binding expression for parameter 'is': 'Integer(\"1\")'
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/EnumerationTests.mo':
+Semantic error at line 219, column 35:
+  Calling function Integer(): types of positional argument 1 and input x are not compatible
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/EnumerationTests.mo':
+Semantic error at line 220, column 35:
+  Calling function Integer(): types of positional argument 1 and input x are not compatible
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/EnumerationTests.mo':
+Semantic error at line 221, column 35:
+  Calling function Integer(): types of positional argument 1 and input x are not compatible
+")})));
+
+	  parameter Integer is = Integer("1");
+	  parameter Integer ir = Integer(1.0);
+	  parameter Integer ii = Integer(1);
+  end EnumerationTest11;
 
 
 end EnumerationTests;

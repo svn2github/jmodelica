@@ -1190,11 +1190,12 @@ aspect FlatFunctionUtils {
          return l;
      }
      
-     syn ArrayList<InstComponentDecl> InstFunctionCall.myInputs() {
-         InstClassDecl icd = getName().myInstClassDecl();
-         // If class is a record, then function call is record constructor
-         return icd.isRecord() ? icd.myModifiableComponents() : icd.myInputs();
-     }
+     syn ArrayList<InstComponentDecl> InstFunctionCall.myInputs() = 
+    	 myInputs(getName().myInstClassDecl());
+     // If class is a record, then function call is record constructor
+     syn ArrayList<InstComponentDecl> InstFunctionCall.myInputs(InstClassDecl icd) = 
+    	 icd.isRecord() ? icd.myModifiableComponents() : icd.myInputs();
+    	 
      syn ArrayList<InstComponentDecl> InstFunctionCall.myOutputs() = getName().myInstClassDecl().myOutputs();
      syn ArrayList<FFunctionVariable> FFunctionCall.myInputs()     = myFFunctionDecl().myInputs();
      syn ArrayList<FFunctionVariable> FFunctionCall.myOutputs()    = myFFunctionDecl().myOutputs();

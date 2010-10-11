@@ -1166,9 +1166,10 @@ aspect FlatExpressions {
 	}
 	
 
-	public FExp FBinExp.flatten(FQName prefix)   { return createNode(getLeft().flatten(prefix), getRight().flatten(prefix)); }
-	public FExp FUnaryExp.flatten(FQName prefix) { return createNode(getFExp().flatten(prefix)); }
-	public FExp FLitExp.flatten(FQName prefix)   { return (FLitExp) fullCopy(); }
+	public FExp FBinExp.flatten(FQName prefix)     { return createNode(getLeft().flatten(prefix), getRight().flatten(prefix)); }
+	public FExp FUnaryExp.flatten(FQName prefix)   { return createNode(getFExp().flatten(prefix)); }
+	public FExp FLitExp.flatten(FQName prefix)     { return (FLitExp) fullCopy(); }
+	public FExp FEnumLitExp.flatten(FQName prefix) { return new FEnumLitExp(getEnum(), getValue(), null); }
 	
 	public abstract FAbstractFunctionCall FAbstractFunctionCall.flatten(FQName prefix);
 	public abstract FBuiltInFunctionCall  FBuiltInFunctionCall.flatten(FQName prefix);

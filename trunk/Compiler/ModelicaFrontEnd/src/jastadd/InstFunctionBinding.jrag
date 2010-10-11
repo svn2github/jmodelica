@@ -230,32 +230,33 @@ aspect InstFunctionBinding {
 			
 			public BuiltInTranslator() {
 				map = new HashMap<String, BuiltInCreator>();
-				//       name                              math       node             # args
-				map.put("sin",          new BuiltInCreator(true,  new FSinExp(),       1));
-				map.put("cos",          new BuiltInCreator(true,  new FCosExp(),       1));
-				map.put("tan",          new BuiltInCreator(true,  new FTanExp(),       1));
-				map.put("asin",         new BuiltInCreator(true,  new FAsinExp(),      1));
-				map.put("acos",         new BuiltInCreator(true,  new FAcosExp(),      1));
-				map.put("atan",         new BuiltInCreator(true,  new FAtanExp(),      1));
-				map.put("atan2",        new BuiltInCreator(true,  new FAtan2Exp(),     2));
-				map.put("sinh",         new BuiltInCreator(true,  new FSinhExp(),      1));
-				map.put("cosh",         new BuiltInCreator(true,  new FCoshExp(),      1));
-				map.put("tanh",         new BuiltInCreator(true,  new FTanhExp(),      1));
-				map.put("exp",          new BuiltInCreator(true,  new FExpExp(),       1));
-				map.put("log",          new BuiltInCreator(true,  new FLogExp(),       1));
-				map.put("log10",        new BuiltInCreator(true,  new FLog10Exp(),     1));
-				map.put("noEvent",      new BuiltInCreator(false, new FNoEventExp(),   1));
-				map.put("identity",     new BuiltInCreator(false, new FIdentity(),     1));
-				map.put("sqrt",         new BuiltInCreator(false, new FSqrtExp(),      1));
-				map.put("transpose",    new BuiltInCreator(false, new FTranspose(),    1));
-				map.put("cross",        new BuiltInCreator(false, new FCross(),        2));
-				map.put("sum",          new BuiltInCreator(false, new FSumExp(),       1));
-				map.put("abs",          new BuiltInCreator(false, new FAbsExp(),       1));
-				map.put("ndims",        new BuiltInCreator(false, new FNdimsExp(),     1));
-				map.put("linspace",     new BuiltInCreator(false, new FLinspace(),     3));
-				map.put("integer",      new BuiltInCreator(false, new FIntegerExp(),   1));
-				map.put("inStream",     new BuiltInCreator(false, new FInStream(),     1));
-				map.put("actualStream", new BuiltInCreator(false, new FActualStream(), 1));
+				//       name                              math       node               # args
+				map.put("sin",          new BuiltInCreator(true,  new FSinExp(),         1));
+				map.put("cos",          new BuiltInCreator(true,  new FCosExp(),         1));
+				map.put("tan",          new BuiltInCreator(true,  new FTanExp(),         1));
+				map.put("asin",         new BuiltInCreator(true,  new FAsinExp(),        1));
+				map.put("acos",         new BuiltInCreator(true,  new FAcosExp(),        1));
+				map.put("atan",         new BuiltInCreator(true,  new FAtanExp(),        1));
+				map.put("atan2",        new BuiltInCreator(true,  new FAtan2Exp(),       2));
+				map.put("sinh",         new BuiltInCreator(true,  new FSinhExp(),        1));
+				map.put("cosh",         new BuiltInCreator(true,  new FCoshExp(),        1));
+				map.put("tanh",         new BuiltInCreator(true,  new FTanhExp(),        1));
+				map.put("exp",          new BuiltInCreator(true,  new FExpExp(),         1));
+				map.put("log",          new BuiltInCreator(true,  new FLogExp(),         1));
+				map.put("log10",        new BuiltInCreator(true,  new FLog10Exp(),       1));
+				map.put("noEvent",      new BuiltInCreator(false, new FNoEventExp(),     1));
+				map.put("identity",     new BuiltInCreator(false, new FIdentity(),       1));
+				map.put("sqrt",         new BuiltInCreator(false, new FSqrtExp(),        1));
+				map.put("transpose",    new BuiltInCreator(false, new FTranspose(),      1));
+				map.put("cross",        new BuiltInCreator(false, new FCross(),          2));
+				map.put("sum",          new BuiltInCreator(false, new FSumExp(),         1));
+				map.put("abs",          new BuiltInCreator(false, new FAbsExp(),         1));
+				map.put("ndims",        new BuiltInCreator(false, new FNdimsExp(),       1));
+				map.put("linspace",     new BuiltInCreator(false, new FLinspace(),       3));
+				map.put("integer",      new BuiltInCreator(false, new FIntegerExp(),     1));
+				map.put("Integer",      new BuiltInCreator(false, new FEnumIntegerExp(), 1));
+				map.put("inStream",     new BuiltInCreator(false, new FInStream(),       1));
+				map.put("actualStream", new BuiltInCreator(false, new FActualStream(),   1));
 				//       name                                         node           # fixed args
 				map.put("array",        new InfArgsBuiltInCreator(new FParseArray(), 0));
 				map.put("ones",         new InfArgsBuiltInCreator(new FOnes(),       0));
@@ -271,7 +272,7 @@ aspect InstFunctionBinding {
 						// Ticket 678: Support for array related functions
 						"scalar", "vector", "matrix", "diagonal", "product", "outerProduct", "symmetric", "skew", 
 						// Ticket 664: Support all function-like operators
-						"sign", "Integer", "String", "div", "mod", "rem", "ceil", "floor", "delay", "cardinality", 
+						"sign", "String", "div", "mod", "rem", "ceil", "floor", "delay", "cardinality", 
 						"semiLinear", "initial", "terminal", "smooth", "sample", "pre", "edge", "reinit", 
 						"terminate"
 					};
@@ -413,16 +414,22 @@ aspect InstFunctionBinding {
     	when (!rewritten) to FAbstractFunctionCall {
 		    // Make sure we only do this once.
 		    rewritten = true;
+
+		    // Get info
+		    InstClassDecl target = getName().myInstClassDecl();
+	    	String name = target.qualifiedName();
+		    if (target.isPrimitive()) {
+		    	// Look for conversion operator with same name as primitive class (if one exists)
+				HashSet set = getName().lookupInstClass("!" + target.name());
+				if (set.size() > 0)
+					target = (InstClassDecl) set.iterator().next();
+		    }
+    		ArrayList<InstComponentDecl> inputs = myInputs(target);
 		    
 		    /* If we can't resolve the name as a function or record, don't try to bind arguments, 
 		     * just leave it for the error check. */
-		    InstClassDecl target = getName().myInstClassDecl();
 		    if (!target.isCallable())
 		    	return this;
-
-		    // Get info
-	    	String name = target.qualifiedName();
-    		ArrayList<InstComponentDecl> inputs = myInputs();
 
 	    	// Check if we should try to bind arguments
 	    	InstFunctionArgument[] temp;

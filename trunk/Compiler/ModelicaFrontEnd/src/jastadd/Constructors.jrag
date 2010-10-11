@@ -103,6 +103,27 @@ aspect Constructors {
 	}
 	
 	/**
+	 * \brief Constructs a enumeration literal expression from a type and an ordinal.
+	 */
+	public FEnumLitExp.FEnumLitExp(FEnumType type, int val) {
+		this(type.getName(), type.getFEnumLiteralType(val - 1).getName(), type);
+	}
+	
+	/**
+	 * \brief Constructs a enumeration literal expression from a type and a literal name.
+	 */
+	public FEnumLitExp.FEnumLitExp(FEnumType type, String val) {
+		this(type.getName(), val, type);
+	}
+	
+	/**
+	 * \brief Constructs a enumeration literal expression from an enum name and a value name.
+	 */
+	public FEnumLitExp.FEnumLitExp(String name, String val) {
+		this(name, val, null);
+	}
+	
+	/**
 	 * \brief Constructs an FIdUse that refers to the variable with the given name.
 	 */
 	public FIdUse.FIdUse(String name) {
@@ -446,6 +467,7 @@ aspect InheritedFactoryMethods {
 	public FBooleanLitExpTrue  FBooleanLitExpTrue.createEmptyNode()  { return new FBooleanLitExpTrue();  }
 	public FBooleanLitExpFalse FBooleanLitExpFalse.createEmptyNode() { return new FBooleanLitExpFalse(); }
 	public FStringLitExp       FStringLitExp.createEmptyNode()       { return new FStringLitExp();       }
+	public FEnumLitExp         FEnumLitExp.createEmptyNode()         { return new FEnumLitExp();         }
 	
 	// Misc expressions
 	public FIfExp          FIfExp.createEmptyNode()          { return new FIfExp();          }
@@ -496,22 +518,23 @@ aspect InheritedFactoryMethods {
 	public FSqrtExp  FSqrtExp.createEmptyNode()  { return new FSqrtExp();  }
 	
 	// Built-in function calls and function call-like operators
-	public FNdimsExp     FNdimsExp.createEmptyNode()     { return new FNdimsExp();     }
-	public FSizeExp      FSizeExp.createEmptyNode()      { return new FSizeExp();      }
-	public FIntegerExp   FIntegerExp.createEmptyNode()   { return new FIntegerExp();   }
-	public FScalar       FScalar.createEmptyNode()       { return new FScalar();       }
-	public FTranspose    FTranspose.createEmptyNode()    { return new FTranspose();    }
-	public FCross        FCross.createEmptyNode()        { return new FCross();        }
-	public FIdentity     FIdentity.createEmptyNode()     { return new FIdentity();     }
-	public FOnes         FOnes.createEmptyNode()         { return new FOnes();         }
-	public FZeros        FZeros.createEmptyNode()        { return new FZeros();        }
-	public FFillExp      FFillExp.createEmptyNode()      { return new FFillExp();      }
-	public FMinExp       FMinExp.createEmptyNode()       { return new FMinExp();       }
-	public FMaxExp       FMaxExp.createEmptyNode()       { return new FMaxExp();       }
-	public FSumExp       FSumExp.createEmptyNode()       { return new FSumExp();       }
-	public FAbsExp       FAbsExp.createEmptyNode()       { return new FAbsExp();       }
-	public FInStream     FInStream.createEmptyNode()     { return new FInStream();     }
-	public FActualStream FActualStream.createEmptyNode() { return new FActualStream(); }
+	public FNdimsExp       FNdimsExp.createEmptyNode()       { return new FNdimsExp();       }
+	public FSizeExp        FSizeExp.createEmptyNode()        { return new FSizeExp();        }
+	public FIntegerExp     FIntegerExp.createEmptyNode()     { return new FIntegerExp();     }
+	public FEnumIntegerExp FEnumIntegerExp.createEmptyNode() { return new FEnumIntegerExp(); }
+	public FScalar         FScalar.createEmptyNode()         { return new FScalar();         }
+	public FTranspose      FTranspose.createEmptyNode()      { return new FTranspose();      }
+	public FCross          FCross.createEmptyNode()          { return new FCross();          }
+	public FIdentity       FIdentity.createEmptyNode()       { return new FIdentity();       }
+	public FOnes           FOnes.createEmptyNode()           { return new FOnes();           }
+	public FZeros          FZeros.createEmptyNode()          { return new FZeros();          }
+	public FFillExp        FFillExp.createEmptyNode()        { return new FFillExp();        }
+	public FMinExp         FMinExp.createEmptyNode()         { return new FMinExp();         }
+	public FMaxExp         FMaxExp.createEmptyNode()         { return new FMaxExp();         }
+	public FSumExp         FSumExp.createEmptyNode()         { return new FSumExp();         }
+	public FAbsExp         FAbsExp.createEmptyNode()         { return new FAbsExp();         }
+	public FInStream       FInStream.createEmptyNode()       { return new FInStream();       }
+	public FActualStream   FActualStream.createEmptyNode()   { return new FActualStream();   }
 	
 	/**
 	 * \brief Create new node of same class as this, with the specified 

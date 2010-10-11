@@ -160,6 +160,7 @@ aspect FlatVariability {
 			total = total.combine(icd.variability());
 		return total;
 	}
+	eq InstEnumLiteral.variability() = fConstant();
 	
 	eq FLitExp.variability()   = fConstant();
 	eq FNoExp.variability()    = fConstant();
@@ -168,6 +169,8 @@ aspect FlatVariability {
 	eq FTimeExp.variability()  = fContinuous();
 
 	eq FSizeExp.variability() = hasDim() ? getDim().variability() : fParameter();
+	
+	eq FIntegerExp.variability() = getFExp().variability().combineDown(fDiscrete());
 	
 	eq FIterExp.variability() {
 		FTypePrefixVariability total = getArray().iteratorFExp().next().variability();

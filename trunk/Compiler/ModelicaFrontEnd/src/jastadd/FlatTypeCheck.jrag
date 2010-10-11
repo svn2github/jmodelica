@@ -376,6 +376,13 @@ aspect FlatTypeCheck {
 		  error("Function " + builtInName() + "() has no outputs, but is used in expression");
   }
   
+  public void FEnumIntegerExp.typeCheck() {
+	  super.typeCheck();
+	  int n = getNumOriginalArg();
+	  if (n != 1)
+		  error("Calling function Integer(): too " + (n > 1 ? "many" : "few") + " arguments");
+  }
+  
   syn boolean FBuiltInFunctionCall.builtInHasOutput() = true;
   eq FIgnoredBuiltIn.builtInHasOutput() = false;
   
@@ -524,6 +531,7 @@ aspect FlatTypeCheck {
   eq FSizeExp.getOriginalArg(int i).argumentDefinedTypeValid()   = i != 0;
   eq FInfArgsFunctionCall.getChild().argumentDefinedTypeValid()  = false;
   eq FStreamBuiltIn.getChild().argumentDefinedTypeValid()        = false;
+  eq FEnumIntegerExp.getChild().argumentDefinedTypeValid()       = false;
 
   /**
    * \brief Check if the type supplied is valid for this argument.
@@ -534,6 +542,7 @@ aspect FlatTypeCheck {
   eq FAbstractFunctionCall.getChild().argumentTypeValid(FType type) = type.isPrimitive();
   eq FTranspose.getChild().argumentTypeValid(FType type)            = type.ndims() >= 2 && type.isPrimitive();
   eq FSumExp.getChild().argumentTypeValid(FType type)               = type.ndims() > 0 && type.hasAdd();
+  eq FEnumIntegerExp.getChild().argumentTypeValid(FType type)       = type.isEnumScalar();
   eq FMinMaxExp.getOriginalArg(int i).argumentTypeValid(FType type) = 
 	  hasY() != getOriginalArg(i).getFExp().isArray() && type.isPrimitive();
   

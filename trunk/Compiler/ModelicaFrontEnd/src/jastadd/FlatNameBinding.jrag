@@ -298,13 +298,14 @@ aspect FlatEnumBinding {
 	eq FEnumDecl.getChild().retrieveFEnumDecl() = this;
 	eq FlatRoot.getChild().retrieveFEnumDecl()  = null;
 	
-	syn lazy FEnumDecl FIdUse.myFEnumDecl() = lookupFEnum(name());
-	
-	syn lazy FEnumDecl FType.myFEnumDecl() = null;
-	eq FEnumType.myFEnumDecl() = lookupFEnum(getName());
+	syn lazy FEnumDecl FIdUse.myFEnumDecl()      = lookupFEnum(name());
+	syn lazy FEnumDecl FEnumLitExp.myFEnumDecl() = lookupFEnum(getEnum());
+	syn lazy FEnumDecl FType.myFEnumDecl()       = null;
+	eq FEnumType.myFEnumDecl()                   = lookupFEnum(getName());
 	
 	inh FEnumDecl FEnumVariable.lookupFEnum(String name);
 	inh FEnumDecl FEnumType.lookupFEnum(String name);
+	inh FEnumDecl FEnumLitExp.lookupFEnum(String name);
 	inh FEnumDecl FIdUse.lookupFEnum(String name);
 	eq Root.getChild().lookupFEnum(String name) = null;
 	eq FClass.getChild().lookupFEnum(String name) = lookupFEnum(name);

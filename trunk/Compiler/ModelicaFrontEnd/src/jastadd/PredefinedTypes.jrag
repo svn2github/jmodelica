@@ -284,7 +284,10 @@ aspect PredefinedTypes {
 +"  input Real x;\n"
 +"  output Integer y;\n"
 +"end integer;\n"
-+"//function Integer end Integer;\n"
++"function Integer"
++"  input Real x;\n"      // Type not used
++"  output Integer y;\n"
++"end Integer;\n"
 +"//function String end String;\n"
 +"function delay end delay;\n"
 +"function cardinality end cardinality;\n"
@@ -427,8 +430,16 @@ aspect PredefinedTypes {
             
             ExternalClause builtin = new ExternalClause(new Opt(new ExternalLanguage("builtin")), new Opt(), new Opt(), new Opt());
             for (Element e : p.getUnstructuredEntity(0).getElements()) {
-                ((FullClassDecl) e).setExternalClause(builtin.fullCopy());
-                l.add(e);
+            	FullClassDecl fcd = (FullClassDecl) e;
+            	String name = fcd.getName().getID();
+            	if (name.equals("Integer") || name.equals("String")) {
+            		// Add character that isn't allowed in identifiers to prevent collision with user class or the primitive class
+            		name = "!" + name;
+            		fcd.getName().setID(name);
+            		fcd.setEndName(name);
+            	}
+                fcd.setExternalClause(builtin.fullCopy());
+                l.add(fcd);
             }
         
         } catch(Exception e){}

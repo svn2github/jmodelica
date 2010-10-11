@@ -39,9 +39,9 @@ end IntegerVariable_ComplErr;
 
 model BooleanVariable_ComplErr
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ComplianceErrorTestCase(name="BooleanVariable_ComplErr",
-        description="Compliance error for boolean variables",
-                                               errorMessage=
+	  JModelica.UnitTesting.ComplianceErrorTestCase(name="BooleanVariable_ComplErr",
+		description="Compliance error for boolean variables",
+											   errorMessage=
 "
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 103, column 10:
@@ -51,6 +51,22 @@ Compliance error at line 103, column 10:
  Boolean b=true;
 
 end BooleanVariable_ComplErr;
+
+model EnumVariable_ComplErr
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+	  JModelica.UnitTesting.ComplianceErrorTestCase(name="EnumVariable_ComplErr",
+		description="Compliance error for enumeration variables",
+											   errorMessage=
+"
+Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 103, column 10:
+  Enumeration variables are not supported, only constants and parameters
+")})));
+
+ type A = enumeration(a, b, c);
+ A x = A.b;
+
+end EnumVariable_ComplErr;
 
 model ArrayOfRecords_Warn
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={

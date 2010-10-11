@@ -879,21 +879,36 @@ aspect ConstantEvaluation {
      */
     public class CValueEnum extends CValue {
     	
-    	private String enumName;
-    	private String valueName;
+    	private FEnumType type;
+    	private String value;
     	private int index;
     	
     	/**
     	 * \brief Create a new constant value for enumeration literal.
     	 * 
-    	 * @param enumName   the name of the enumeration
-    	 * @param valueName  the name of the enumeration literal
-    	 * @param index      the ordinal for the enumeration literal
+    	 * @param type   the type of the enumeration
+    	 * @param value  the name of the enumeration literal
     	 */
-    	public CValueEnum(String enumName, String valueName, int index) {
-    		this.enumName = enumName;
-    		this.valueName = valueName;
-    		this.index = index;
+    	public CValueEnum(FType type, String value) {
+    		this.type = (FEnumType) type;
+    		this.value = value;
+    		index = 0;
+    		int n = this.type.getNumFEnumLiteralType();
+    		for (int i = 0; i < n && index == 0; i++)
+    			if (this.type.getFEnumLiteralType(i).getName().equals(value))
+    				index = i + 1;
+    	}
+    	
+    	/**
+    	 * \brief Create a new constant value for enumeration literal.
+    	 * 
+    	 * @param type   the type of the enumeration
+    	 * @param index  the ordinal for the enumeration literal
+    	 */
+    	public CValueEnum(FType type, int index) {
+    		this.type = (FEnumType) type;
+     		this.index = index;
+     		value = this.type.getFEnumLiteralType(index - 1).getName();
     	}
     	
     	public int intValue() {
@@ -901,11 +916,11 @@ aspect ConstantEvaluation {
     	}
     	
     	public String stringValue() {
-    		return valueName;
+    		return value;
     	}
     	
     	public String toString() {
-    		return enumName + "." + valueName;
+    		return type.getName() + "." + value;
     	}
 	    
 	    /**
@@ -916,8 +931,7 @@ aspect ConstantEvaluation {
 	     *  @return an FIdUseExp pointing to the literal in the FEnumDecl.
 	     */
 	    public FExp buildLiteral() {
-	    	// TODO: perhaps we need an FEnumLiteralExp?
-	    	return new FIdUseExp(toString());
+	    	return type.createLiteral(index);
 	    }
     	
     }
@@ -1088,7 +1102,8 @@ aspect ConstantEvaluation {
 	  return end != Size.UNKNOWN ? new CValueInteger(end) : CValue.UNKNOWN;
   }
   
-  eq FIntegerExp.cevalCalc() = getFExp().ceval().convertInteger();
+  eq FIntegerExp.cevalCalc()     = getFExp().ceval().convertInteger();
+  eq FEnumIntegerExp.cevalCalc() = getFExp().ceval().convertInteger();
   
   eq FNdimsExp.cevalCalc() = new CValueInteger(getFExp().ndims());
  
@@ -1137,11 +1152,12 @@ aspect ConstantEvaluation {
   eq FMinExp.selectLesser() = true;
   eq FMaxExp.selectLesser() = false;
 
-  eq FRealLitExp.cevalCalc() = new CValueReal(Double.parseDouble(getUNSIGNED_NUMBER()));
-  eq FIntegerLitExp.cevalCalc() = new CValueInteger(Integer.parseInt(getUNSIGNED_INTEGER()));
-  eq FBooleanLitExpTrue.cevalCalc() = new CValueBoolean(true);
+  eq FRealLitExp.cevalCalc()         = new CValueReal(Double.parseDouble(getUNSIGNED_NUMBER()));
+  eq FIntegerLitExp.cevalCalc()      = new CValueInteger(Integer.parseInt(getUNSIGNED_INTEGER()));
+  eq FBooleanLitExpTrue.cevalCalc()  = new CValueBoolean(true);
   eq FBooleanLitExpFalse.cevalCalc() = new CValueBoolean(false);
-  eq FStringLitExp.cevalCalc() = new CValueString(getString());
+  eq FStringLitExp.cevalCalc()       = new CValueString(getString());
+  eq FEnumLitExp.cevalCalc()         = new CValueEnum(type(), getValue());
   
   syn CValue FIdUse.ceval() {
 	  boolean func = inFunction();
@@ -1347,8 +1363,7 @@ aspect ConstantEvaluation {
 	}
 	
 	// Can never be an array - assume i == Index.NULL
-	eq InstEnumLiteral.ceval(Index i) = 
-		new CValueEnum(myInstEnumClassDecl().qualifiedName(), name(), myIndex());
+	eq InstEnumLiteral.ceval(Index i) = new CValueEnum(type(), myIndex());
 	
 	/**
 	 * \brief Find and evaluate the "start" attribute. If it is not found, use default value.
@@ -2266,15 +2281,13 @@ aspect ConstantEvaluation {
    * @return Resulting constant value.
    */
   syn CValue FType.equ(CValue v1, CValue v2) = 
-	  CValue.UNKNOWN;
-  eq FBooleanType.equ(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.intValue() == v2.intValue());
   eq FRealType.equ(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.realValue() == v2.realValue());
-  eq FIntegerType.equ(CValue v1, CValue v2) = 
-	  new CValueBoolean(v1.intValue() == v2.intValue());
   eq FStringType.equ(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.stringValue().compareTo(v2.stringValue()) == 0);
+  eq CValueUnknown.equ(CValue v1, CValue v2) = 
+	  CValue.UNKNOWN;
   
   /**
    * \brief Not equal comparison for constant values.
@@ -2284,15 +2297,13 @@ aspect ConstantEvaluation {
    * @return Resulting constant value.
    */
   syn CValue FType.neq(CValue v1, CValue v2) = 
-	  CValue.UNKNOWN;
-  eq FBooleanType.neq(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.intValue() != v2.intValue());
   eq FRealType.neq(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.realValue() != v2.realValue());
-  eq FIntegerType.neq(CValue v1, CValue v2) = 
-	  new CValueBoolean(v1.intValue() != v2.intValue());
   eq FStringType.neq(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.stringValue().compareTo(v2.stringValue()) != 0);
+  eq CValueUnknown.neq(CValue v1, CValue v2) = 
+	  CValue.UNKNOWN;
   
   /**
    * \brief Greater or equal than comparison for constant values.
@@ -2302,15 +2313,13 @@ aspect ConstantEvaluation {
    * @return Resulting constant value.
    */
   syn CValue FType.geq(CValue v1, CValue v2) = 
-	  CValue.UNKNOWN;
-  eq FBooleanType.geq(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.intValue() >= v2.intValue());
   eq FRealType.geq(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.realValue() >= v2.realValue());
-  eq FIntegerType.geq(CValue v1, CValue v2) = 
-	  new CValueBoolean(v1.intValue() >= v2.intValue());
   eq FStringType.geq(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.stringValue().compareTo(v2.stringValue()) >= 0);
+  eq CValueUnknown.geq(CValue v1, CValue v2) = 
+	  CValue.UNKNOWN;
   
   /**
    * \brief Greater than comparison for constant values.
@@ -2320,15 +2329,13 @@ aspect ConstantEvaluation {
    * @return Resulting constant value.
    */
   syn CValue FType.gt(CValue v1, CValue v2) = 
-	  CValue.UNKNOWN;
-  eq FBooleanType.gt(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.intValue() > v2.intValue());
   eq FRealType.gt(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.realValue() > v2.realValue());
-  eq FIntegerType.gt(CValue v1, CValue v2) = 
-	  new CValueBoolean(v1.intValue() > v2.intValue());
   eq FStringType.gt(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.stringValue().compareTo(v2.stringValue()) > 0);
+  eq CValueUnknown.gt(CValue v1, CValue v2) = 
+	  CValue.UNKNOWN;
   
   /**
    * \brief Less or equal than comparison for constant values.
@@ -2338,15 +2345,13 @@ aspect ConstantEvaluation {
    * @return Resulting constant value.
    */
   syn CValue FType.leq(CValue v1, CValue v2) = 
-	  CValue.UNKNOWN;
-  eq FBooleanType.leq(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.intValue() <= v2.intValue());
   eq FRealType.leq(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.realValue() <= v2.realValue());
-  eq FIntegerType.leq(CValue v1, CValue v2) = 
-	  new CValueBoolean(v1.intValue() <= v2.intValue());
   eq FStringType.leq(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.stringValue().compareTo(v2.stringValue()) <= 0);
+  eq CValueUnknown.leq(CValue v1, CValue v2) = 
+	  CValue.UNKNOWN;
   
   /**
    * \brief Less than comparison for constant values.
@@ -2356,15 +2361,13 @@ aspect ConstantEvaluation {
    * @return Resulting constant value.
    */
   syn CValue FType.lt(CValue v1, CValue v2) = 
-	  CValue.UNKNOWN;
-  eq FBooleanType.lt(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.intValue() < v2.intValue());
   eq FRealType.lt(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.realValue() < v2.realValue());
-  eq FIntegerType.lt(CValue v1, CValue v2) = 
-	  new CValueBoolean(v1.intValue() < v2.intValue());
   eq FStringType.lt(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.stringValue().compareTo(v2.stringValue()) < 0);
+  eq CValueUnknown.lt(CValue v1, CValue v2) = 
+	  CValue.UNKNOWN;
 	  
 }
 
@@ -2398,7 +2401,7 @@ aspect CircularExpressions {
 	/**
 	 * \brief Check if expression is circular.
 	 * 
-	 * Default implemenation returns <code>true</code> if any direct FExp child 
+	 * Default implementation returns <code>true</code> if any direct FExp child 
 	 * is circular.
 	 */
 	syn lazy boolean FExp.isCircular() circular [true] {

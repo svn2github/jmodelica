@@ -605,20 +605,45 @@ aspect Arrays {
  		if (!hasStep && start.isIntegerLiteral(1) && stop.type().isInteger()) {
  			s.append(stop);
  		} else {
- 			start = (FExp) start.fullCopy();
- 			stop = (FExp) stop.fullCopy();
+ 			start = start.makeRangeSizeExp();
+ 			stop = stop.makeRangeSizeExp();
  	 		FExp step = hasStep ? (FExp) getFExp(1).fullCopy() : null;
  			FExp exp = new FSubExp(stop, start);
  			if (hasStep)
  				exp = new FDivExp(exp, step);
  			exp = new FAddExp(new FIntegerExp(exp), new FIntegerLitExp(1));
- 			s.append(dynamicFExp(new FMaxExp(exp, new Opt(new FIntegerLitExp(0)))));
+ 			exp = new FMaxExp(exp, new Opt(new FIntegerLitExp(0)));
+ 			s.append(dynamicFExp(exp));
 		}
 		return s;
 	}
  	
+ 	/**
+ 	 * \brief Create a new expression suitable for use in an expression calculating the 
+ 	 *        array size of a range expression.
+ 	 */
+ 	public FExp FExp.makeRangeSizeExp() {
+ 		return type().wrapRangeSizeExp((FExp) fullCopy());
+ 	}
+ 	
+ 	/**
+ 	 * \brief Wrap the given expression so it is suitable for use in an expression 
+ 	 *        calculating the array size of a range expression.
+ 	 */
+ 	public FExp FType.wrapRangeSizeExp(FExp exp) {
+ 		return exp;
+ 	}
+ 	
+ 	public FExp FEnumType.wrapRangeSizeExp(FExp exp) {
+ 		return new FEnumIntegerExp(exp);
+ 	}
+ 	
+ 	public FExp FBooleanType.wrapRangeSizeExp(FExp exp) {
+ 		return new FIfExp(exp, new FIntegerLitExp(2), new List(), new FIntegerLitExp(1));
+ 	}
+ 	
  	syn boolean FExp.isIntegerLiteral(int v)  = false;
- 	eq FIntegerLitExp.isIntegerLiteral(int v) = getUNSIGNED_INTEGER().equals(Integer.toString(v));
+ 	eq FIntegerLitExp.isIntegerLiteral(int v) = Integer.parseInt(getUNSIGNED_INTEGER()) == v;
  	
  	eq FLinspace.size() {
 		MutableSize s = new MutableSize(ndims());
@@ -1496,7 +1521,7 @@ aspect Arrays {
 			if (getNumFExp() > 2) 
 				i2 = getFExp(1).ceval().intValue();
 			for (Index i : array.indices()) { 
-				array.set(i, new FIntegerLitExp(i1));
+				array.set(i, type().createLiteral(i1));
 				i1 += i2;
 			}
 		}

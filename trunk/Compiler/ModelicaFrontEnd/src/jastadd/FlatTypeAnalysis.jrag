@@ -119,13 +119,32 @@ aspect FlatTypeAnalysis {
 	
 	eq InstEnum.type()        = myInstClass().enumType().sizedType(size());
 	eq InstEnumLiteral.type() = myInstEnumClassDecl().enumType();
+	eq FEnumLitExp.type()     = hasType() ? getType() : myFEnumDecl().type();
+	
+	syn boolean FEnumLitExp.hasType() = getType() != null;
 	
 	syn FType InstClassDecl.enumType() = fUnknownType();
 	eq InstEnumClassDecl.enumType() {
 		FEnumType type = new FEnumType(Size.SCALAR, qualifiedName(), new List());
+		type.originatingInstClassDecl = this;
 		for (InstEnumLiteral el : enumLiterals()) 
 			type.addFEnumLiteralType(new FEnumLiteralType(Size.SCALAR, el.name()));
 		return type;
+	}
+	
+	/**
+	 * \brief If this type is created from a class in the instance tree, a reference to that class.
+	 */
+	public InstEnumClassDecl FEnumType.originatingInstClassDecl = null;
+	
+	public FType FExp.promoteTypeForFExpList(Iterable<FExp> exps) {
+		Iterator<FExp> it = exps.iterator();
+		if (!it.hasNext())
+			return fUnknownType();
+		FType tot = it.next().type();
+		while (it.hasNext())
+			tot = tot.typePromotion(it.next().type());
+		return tot;
 	}
 	
 	syn lazy FType FExp.type() = fUnknownType();
@@ -197,7 +216,8 @@ aspect FlatTypeAnalysis {
 		return fRealArrayType(size());
 	}
 	
-	eq FIntegerExp.type() = fIntegerScalarType();
+	eq FIntegerExp.type()     = getFExp().type().isNumericScalar() ? fIntegerScalarType() : fUnknownType();
+	eq FEnumIntegerExp.type() = getFExp().type().isEnumScalar() ? fIntegerScalarType() : fUnknownType();
 	
 	syn FType FRecordConstructor.type() = getType();
 	syn FType FRecordConstructor.getType() = getRecord().recordType();
@@ -220,7 +240,7 @@ aspect FlatTypeAnalysis {
 		if (hasDim()) {
 			if (!getDim().variability().lessOrEqual(fParameter()))
 				return fUnknownType();
-			if (!getDim().type().isScalar() || !getDim().type().isInteger())
+			if (!getDim().type().isIntegerScalar())
 				return fUnknownType();
 			int dim = dimension();
 			if (dim < 0 || dim > getFExp().ndims() - 1)
@@ -238,16 +258,20 @@ aspect FlatTypeAnalysis {
 			getX().type().scalarType();
 	
 	eq FRangeExp.type() {
-		FType tot = fIntegerScalarType();
-		for (FExp e : getFExps()) {
-			if (!e.type().isScalar() || !e.type().isNumeric())
+		FType tot = promoteTypeForFExpList(getFExps());
+		if (!tot.isScalar() || !tot.canBeRange() || (!tot.isNumeric() && getNumFExp() > 2))
 				return fUnknownType();
-			tot = tot.scalarNumericPromotion(e.type());
-		}
 		return tot.arrayType(size());
 	}
 	
+	syn boolean FType.canBeRange() = false;
+	eq FIntegerType.canBeRange()   = true;
+	eq FRealType.canBeRange()      = true;
+	eq FBooleanType.canBeRange()   = true;
+	eq FEnumType.canBeRange()      = true;
+	
 	eq FLinspace.type() {
+		// TODO: check that endpoints are real
 		if (!getN().variability().lessOrEqual(fParameter()) || getN().ceval().intValue() < 2)
 			return fUnknownType();
 		return fRealArrayType(size());
@@ -761,6 +785,23 @@ aspect BuiltInFlatTypes {
 	syn boolean FType.isPrimitive() = false;
 	eq FPrimitiveType.isPrimitive() = true;
 	
+	syn boolean FType.isRealScalar()      = isReal() && isScalar();
+	syn boolean FType.isRealArray()       = isReal() && isArray();
+	syn boolean FType.isIntegerScalar()   = isInteger() && isScalar();
+	syn boolean FType.isIntegerArray()    = isInteger() && isArray();
+	syn boolean FType.isBooleanScalar()   = isBoolean() && isScalar();
+	syn boolean FType.isBooleanArray()    = isBoolean() && isArray();
+	syn boolean FType.isStringScalar()    = isString() && isScalar();
+	syn boolean FType.isStringArray()     = isString() && isArray();
+	syn boolean FType.isRecordScalar()    = isRecord() && isScalar();
+	syn boolean FType.isRecordArray()     = isRecord() && isArray();
+	syn boolean FType.isEnumScalar()      = isEnum() && isScalar();
+	syn boolean FType.isEnumArray()       = isEnum() && isArray();
+	syn boolean FType.isNumericScalar()   = isNumeric() && isScalar();
+	syn boolean FType.isNumericArray()    = isNumeric() && isArray();
+	syn boolean FType.isPrimitiveScalar() = isPrimitive() && isScalar();
+	syn boolean FType.isPrimitiveArray()  = isPrimitive() && isArray();
+	
 	syn boolean FType.hasAdd()        = false;
 	eq FPrimitiveNumericType.hasAdd() = true;
 	eq FStringType.hasAdd()           = true;
@@ -826,13 +867,25 @@ aspect BuiltInFlatTypes {
 	eq FBooleanType.arrayType(Size size)  = fBooleanArrayType(size);
 	
  	/**
- 	 * \brief Create a literal with the zero value for the given type.
+ 	 * \brief Create a literal with the zero value for this type, if applicable.
  	 */
  	public FExp FType.zeroLiteral()        { return null; }
  	public FExp FRealType.zeroLiteral()    { return new FRealLitExp(0.0); }
  	public FExp FIntegerType.zeroLiteral() { return new FIntegerLitExp(0); }
  	public FExp FStringType.zeroLiteral()  { return new FStringLitExp(""); }
  	public FExp FBooleanType.zeroLiteral() { return new FBooleanLitExpFalse(); }
+ 	
+ 	/**
+ 	 * \brief Create a literal of the given integer value for this type, if applicable.
+ 	 */
+ 	public FExp FType.createLiteral(int v)        { return null; }
+ 	public FExp FIntegerType.createLiteral(int v) { return new FIntegerLitExp(v); }
+ 	public FExp FRealType.createLiteral(int v)    { return new FRealLitExp(v); }
+  	public FExp FEnumType.createLiteral(int v)    { return new FEnumLitExp(this, v); }
+	
+ 	public FExp FBooleanType.createLiteral(int v) { 
+ 		return (v == 1 || v == 2) ? FBooleanLitExp.create(v == 2) : null; 
+ 	}
 
 }
  

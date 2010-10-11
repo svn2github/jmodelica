@@ -734,9 +734,17 @@ FBooleanLitExpFalse : FBooleanLitExp;
  */
 FStringLitExp : FLitExp ::= <String>;
 
+/**
+ * \brief Enumeration literal expression.
+ * 
+ * All accesses to enumeration literals should be replaced by FEnumLitExps in flat tree.
+ * Note that Type may be <code>null</code> in the flat tree - use type().
+ */
+FEnumLitExp : FLitExp ::= <Enum> <Value> <Type:FEnumType>;
+
 
 /**
- * Expressions of the form "<exp> for i in <exp>" in the flat tree.
+ * Expressions of the form "(exp) for i in (exp)" in the flat tree.
  */
 FIterExp : FExp ::= FExp ForIndex:CommonForIndex*;
 
@@ -1032,9 +1040,14 @@ FNdimsExp : FUnaryBuiltIn;
 FSizeExp : FBuiltInFunctionCall ::= FExp [Dim:FExp];
 
 /**
- * \brief integer() built-in function.
+ * \brief The integer() built-in function (convert Real to Integer).
  */
 FIntegerExp : FUnaryBuiltIn;
+
+/**
+ * \brief The Integer() built-in function (convert enumeration value to Integer).
+ */
+FEnumIntegerExp : FUnaryBuiltIn;
 
 /**
  * \brief Scalar built-in function.
