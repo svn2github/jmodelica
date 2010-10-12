@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter version="5.0" xmlns="http://docbook.org/ns/docbook"
+<chapter version="5.0" xml:id="ch_fmi" xmlns="http://docbook.org/ns/docbook"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xmlns:xs="http://www.w3.org/2001/XMLSchema"
          xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -43,7 +43,7 @@
     simulated.</para>
 
     <para>The interface is located in <literal>jmodelica.fmi</literal> and
-    consist of the class <literal>FMIModel</literal> together with methods for
+    consist of the class <literal>FMUModel</literal> together with methods for
     unzipping the FMU and for writing the simulation results. Connected to
     this interface is a wrapper for JModelica.org's simulation package to
     enable an easy simulation of the FMUs. The simulation wrapper is located
@@ -74,112 +74,112 @@
           <row>
             <entry>const char* fmiGetModelTypesPlatform()</entry>
 
-            <entry>string FMIModel.model_types_platform</entry>
+            <entry>string FMUModel.model_types_platform</entry>
           </row>
 
           <row>
             <entry>const char* fmiGetVersion()</entry>
 
-            <entry>string FMIModel.version</entry>
+            <entry>string FMUModel.version</entry>
           </row>
 
           <row>
             <entry>fmiComponent fmiInstantiateModel(...)</entry>
 
-            <entry>FMIModel.__init__()</entry>
+            <entry>FMUModel.__init__()</entry>
           </row>
 
           <row>
             <entry>void fmiFreeModelInstance(fmiComponent c)</entry>
 
-            <entry>FMIModel.__del__()</entry>
+            <entry>FMUModel.__del__()</entry>
           </row>
 
           <row>
             <entry>fmiStatus fmiSetDebugLogging(...)</entry>
 
-            <entry>none FMIModel.set_debug_logging(flag)</entry>
+            <entry>none FMUModel.set_debug_logging(flag)</entry>
           </row>
 
           <row>
             <entry>fmiStatus fmiSetTime(...)</entry>
 
-            <entry>FMIModel.time</entry>
+            <entry>FMUModel.time</entry>
           </row>
 
           <row>
             <entry>fmiStatus fmi(Get/Set)ContinuousStates(...)</entry>
 
-            <entry>FMIModel.continuous_states</entry>
+            <entry>FMUModel.continuous_states</entry>
           </row>
 
           <row>
             <entry>fmiStatus fmiCompletedIntegratorStep(...)</entry>
 
-            <entry>boolean FMIModel.completed_integrator_step()</entry>
+            <entry>boolean FMUModel.completed_integrator_step()</entry>
           </row>
 
           <row>
             <entry>fmiStatus fmiSetReal/Integer/Boolean/String(...)</entry>
 
             <entry>none
-            FMIModel.set_real/integer/boolean/string(valueref,values)</entry>
+            FMUModel.set_real/integer/boolean/string(valueref,values)</entry>
           </row>
 
           <row>
             <entry>fmiStatus fmiInitialize(...)</entry>
 
-            <entry>none FMIModel.initialize() (also sets the start
+            <entry>none FMUModel.initialize() (also sets the start
             attributes)</entry>
           </row>
 
           <row>
             <entry>struct fmiEventInfo</entry>
 
-            <entry>FMIModel.get_event_info()</entry>
+            <entry>FMUModel.get_event_info()</entry>
           </row>
 
           <row>
             <entry>fmiStatus fmiGetDerivatives(...)</entry>
 
-            <entry>numpy.array FMIModel.get_derivatives()</entry>
+            <entry>numpy.array FMUModel.get_derivatives()</entry>
           </row>
 
           <row>
             <entry>fmiStatus fmiGetEventIndicators(...)</entry>
 
-            <entry>numpy.array FMIModel.get_event_indicators()</entry>
+            <entry>numpy.array FMUModel.get_event_indicators()</entry>
           </row>
 
           <row>
             <entry>fmiStatus fmiGetReal/Integer/Boolean/String(...)</entry>
 
             <entry>numpy.array
-            FMIModel.get_real/integer/boolean/string(valueref)</entry>
+            FMUModel.get_real/integer/boolean/string(valueref)</entry>
           </row>
 
           <row>
             <entry>fmiStatus fmiEventUpdate(...)</entry>
 
-            <entry>none FMIModel.event_update()</entry>
+            <entry>none FMUModel.event_update()</entry>
           </row>
 
           <row>
             <entry>fmiStatus fmiGetNominalContinuousStates(...)</entry>
 
-            <entry>FMIModel.nominal_continuous_states</entry>
+            <entry>FMUModel.nominal_continuous_states</entry>
           </row>
 
           <row>
             <entry>fmiStatus fmiGetStateValueReferences(...)</entry>
 
-            <entry>numpy.array FMIModel.get_state_value_references()</entry>
+            <entry>numpy.array FMUModel.get_state_value_references()</entry>
           </row>
 
           <row>
             <entry>fmiStatus fmiTerminate(...)</entry>
 
-            <entry>FMIModel.__del__()</entry>
+            <entry>FMUModel.__del__()</entry>
           </row>
         </tbody>
       </tgroup>
@@ -188,12 +188,12 @@
     <para>If logging is set to <literal>True</literal> the log can be
     retrieved with the method,</para>
 
-    <programlisting language="Python">FMIModel.get_log()</programlisting>
+    <programlisting language="Python">FMUModel.get_log()</programlisting>
 
     <para>Documentation of the functions can also be accessed interactively
     from IPython by using for instance,</para>
 
-    <programlisting language="Python">FMIModel.get_real?</programlisting>
+    <programlisting language="Python">FMUModel.get_real?</programlisting>
 
     <para>There is also a one-to-one map to the C-functions, meaning that
     there is an option to use the low-level C-functions as they are specified
@@ -204,17 +204,12 @@
   </section>
 
   <section>
-    <title>Examples</title>
+    <title>Example</title>
 
-    <para>In the next two sections, it will be shown how to use the
-    JModelica.org platform both for simulation of an FMU using the native
-    Python interface and how to simulate an FMU using JModelica.org's
-    simulation package, Assimulo.</para>
-
-    <para>The Python commands in these examples may be copied and pasted
-    directly into a Python shell, in some cases with minor modifications.
-    Alternatively, they may be copied into a text file, which also is the
-    recommended way.</para>
+    <para>The Python commands in the following example may be copied and
+    pasted directly into a Python shell, in some cases with minor
+    modifications. Alternatively, they may be copied into a text file, which
+    also is the recommended way.</para>
 
     <section>
       <title>Simulation using the native FMI interface</title>
@@ -462,172 +457,8 @@
 
           <mediaobject>
             <imageobject>
-              <imagedata fileref="images/bouncing_h.svg" scalefit="1"
+              <imagedata fileref="images/bouncing_nativ.svg" scalefit="1"
                          width="50%"></imagedata>
-            </imageobject>
-          </mediaobject>
-
-          <mediaobject>
-            <imageobject>
-              <imagedata fileref="images/bouncing_v.svg" scalefit="1"
-                         width="50%"></imagedata>
-            </imageobject>
-          </mediaobject>
-        </figure>
-      </section>
-    </section>
-
-    <section>
-      <title>Example using a compiled FMU</title>
-
-      <para>This example will show how to use the JModelica.org's
-      FMI-interface together with its simulation package, Assimulo. The FMU to
-      be simulated is the full Robot from the Modelica standard library (3.1)
-      where it is located in
-      <literal>Mechanics.MultiBody.Examples.Systems.RobotR3</literal>. It
-      consists of brakes, motors, gears and path planning. The model consists
-      of 36 continuous states and around 700 algebraic variables together with
-      98 event functions and also a few thousand constants/parameters. The FMU
-      was generated using Dymola 7.4.</para>
-
-      <figure>
-        <title>Full Robot</title>
-
-        <mediaobject>
-          <imageobject>
-            <imagedata fileref="images/fullRobot.png" scalefit="1" width="60%"></imagedata>
-          </imageobject>
-        </mediaobject>
-      </figure>
-
-      <section>
-        <title>Implementation</title>
-
-        <para>We start by importing the necessary method and module,</para>
-
-        <programlisting language="Python">    from jmodelica import simulate
-    import pylab as P </programlisting>
-
-        <para>The <literal>simulate</literal> method is a high-level method
-        for simulation where the input are the model of interest together with
-        options for the algorithm and options for the solver. We are
-        interested in simulating the Robot from time 0.0 to 1.8 using 1000
-        communication points. This information is specified in a dictionary
-        called <literal>alg_args</literal> where all the algorithms options
-        are specified. For the solver options there is another dictionary
-        called <literal>solver_args</literal>, where for example the
-        tolerances can be specified. Information regarding the solver
-        arguments can be found here, http://www.jmodelica.org/assimulo and a
-        selection of solver arguments can be found in the table below.
-        Currently only the solver CVode is supported.</para>
-
-        <table>
-          <title>Selection of solver arguments for CVode</title>
-
-          <tgroup align="left" cols="2">
-            <thead>
-              <row>
-                <entry align="center">Argument</entry>
-
-                <entry align="center">Option</entry>
-              </row>
-            </thead>
-
-            <tbody>
-              <row>
-                <entry>discr (Discretization method)</entry>
-
-                <entry>Adams / BDF (string), (default BDF)</entry>
-              </row>
-
-              <row>
-                <entry>iter (Iteration method)</entry>
-
-                <entry>Newton / FixedPoint (string), (default Newton)</entry>
-              </row>
-
-              <row>
-                <entry>maxord (The maximum order)</entry>
-
-                <entry>Positive float (max 5 for BDF and 12 for Adams)</entry>
-              </row>
-
-              <row>
-                <entry>write_cont (Turn on continuous writing of
-                result)</entry>
-
-                <entry>Boolean (default True)</entry>
-              </row>
-
-              <row>
-                <entry>rtol (Relative Tolerance)</entry>
-
-                <entry>Float (default value in XML-file or 1.0e-4)</entry>
-              </row>
-
-              <row>
-                <entry>atol (Absolute Tolerance(s))</entry>
-
-                <entry>Float or Array of Floats (default
-                0.01*rtol*nominal_continuous_states)</entry>
-              </row>
-            </tbody>
-          </tgroup>
-        </table>
-
-        <para>In the code below, the simulation options are passed on to
-        <literal>simulate</literal></para>
-
-        <programlisting language="Python">    simRobot = simulate('Robot.fmu', alg_args={'final_time':1.8, 
-                       'num_communication_points':1000}) </programlisting>
-
-        <para>This preforms the simulation and the statistics will be printed
-        in the prompt.</para>
-
-        <para>The simulation result can then be retrieved from the result
-        object <literal>simRobot</literal> by calling the method
-        <literal>get_result_data()</literal>.</para>
-
-        <programlisting language="Python">    res = sim_res.get_result_data() </programlisting>
-
-        <para>To retrieve data about a variable from the result data (res),
-        use the method <literal>get_variable_data</literal> together with the
-        name of the variable.</para>
-
-        <programlisting language="Python">    dq1 = res.get_variable_data('der(mechanics.q[1])')
-    dq6 = res.get_variable_data('der(mechanics.q[6])')  </programlisting>
-
-        <para>Now we have loaded and retrieved the variables of interest. So
-        lets plot them.</para>
-
-        <programlisting language="Python">    P.plot(dq1.t,dq1.x,dq6.t,dq6.x)
-    P.legend(['der(mechanics.q[1])','der(mechanics.q[6])'])
-    P.xlabel('Time (s)')
-    P.ylabel('Joint Velocity (rad/s)')
-    P.title('Full Robot')
-    P.show()</programlisting>
-
-        <para>Below is the resulting figure together with a comparison from
-        the simulation result generated by Dymola.</para>
-
-        <figure>
-          <title>Full Robot Results</title>
-
-          <mediaobject>
-            <imageobject>
-              <imagedata fileref="images/robot_result.svg" scalefit="1"
-                         width="60%"></imagedata>
-            </imageobject>
-          </mediaobject>
-        </figure>
-
-        <figure>
-          <title>Comparison with Dymola</title>
-
-          <mediaobject>
-            <imageobject>
-              <imagedata fileref="images/DymolaFullRobotComparison.png"
-                         scalefit="1" width="60%"></imagedata>
             </imageobject>
           </mediaobject>
         </figure>
