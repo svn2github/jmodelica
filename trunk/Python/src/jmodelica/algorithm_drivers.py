@@ -34,6 +34,7 @@ from jmodelica.initialization.ipopt import InitializationOptimizer
 
 try:
     from jmodelica.simulation.assimulo_interface import JMIDAE, JMIODE, FMIODE
+    from jmodelica.simulation.assimulo_interface import JMIDAESens
     from jmodelica.simulation.assimulo_interface import write_data
     from jmodelica.simulation.assimulo_interface import TrajectoryLinearInterpolation
     from assimulo.implicit_ode import *
@@ -844,7 +845,7 @@ class AssimuloAlgOptions(OptionBase):
             'initialize':True,
             'write_scaled_result':False,
             'IDA_options':{'atol':1.0e-6,'rtol':1.0e-6,
-                           'maxord':5},
+                           'maxord':5,'sensitivity':False},
             'CVode_options':{'discr':'BDF','iter':'Newton',
                              'atol':1.0e-6,'rtol':1.0e-6}
             }
@@ -892,6 +893,9 @@ class AssimuloAlg(AlgorithmBase):
         """
         self.model = model
         
+        #Internal values
+        self.sensitivity = False
+        
         if not assimulo_present:
             raise Exception(
                 'Could not find Assimulo package. Check jmodelica.check_packages()')
@@ -917,11 +921,19 @@ class AssimuloAlg(AlgorithmBase):
         
         if issubclass(self.solver, Implicit_ODE):
             if not self.input:
-                self.probl = JMIDAE(model)
+                if not self.sensitivity:
+                    self.probl = JMIDAE(model)
+                else:
+                    self.probl = JMIDAESens(model)
             else:
-                self.probl = JMIDAE(model,(self.input[0],
-                    TrajectoryLinearInterpolation(self.input[1][:,0], \
-                                                  self.input[1][:,1:])))
+                if not self.sensitivity:
+                    self.probl = JMIDAE(model,(self.input[0],
+                        TrajectoryLinearInterpolation(self.input[1][:,0], \
+                                                      self.input[1][:,1:])))
+                else:
+                    self.probl = JMIDAESens(model,(self.input[0],
+                        TrajectoryLinearInterpolation(self.input[1][:,0], \
+                                                      self.input[1][:,1:])))
         else:
             if not self.input:
                 self.probl = JMIODE(model)
@@ -959,12 +971,25 @@ class AssimuloAlg(AlgorithmBase):
         # solver options
         self.solver_options = self.options[solver+'_options']
         
+        # sensitivity
+        self.sensitivity = self.solver_options.get('sensitivity',False)
+        #self.solver_options.pop('sensitivity',False)
+
+        # store cont is currently crucial when solving sensitivity problems
+        if self.sensitivity:
+            try:
+                self.solver_options['store_cont']
+            except KeyError:
+                self.solver_options['store_cont'] = True
+        
     def _set_solver_options(self):
         """ 
         Helper functions that sets options for the solver.
         """
         #loop solver_args and set properties of solver
         for k, v in self.solver_options.iteritems():
+            if k == 'sensitivity':
+                continue
             try:
                 getattr(self.simulator,k)
             except AttributeError:
@@ -980,10 +1005,14 @@ class AssimuloAlg(AlgorithmBase):
         """ 
         Runs the simulation. 
         """
-        # Only run initiate if model has been compiled with CppAD
-        # and if alg arg 'initialize' is True.
-        if self.model.has_cppad_derivatives() and self.initialize:
-            self.simulator.initiate()
+        if self.sensitivity:
+            if self.initialize:
+                self.simulator.make_consistent('IDA_YA_YDP_INIT')
+        else:
+            # Only run initiate if model has been compiled with CppAD
+            # and if alg arg 'initialize' is True.
+            if self.model.has_cppad_derivatives() and self.initialize:
+                self.simulator.initiate()
         self.simulator.simulate(self.final_time, self.ncp)
  
     def get_result(self):

@@ -930,3 +930,43 @@ class Test_JMI_DAE_Sens:
         
         nose.tools.assert_almost_equal(dx1da2.x[0], 0.000000, 4)
         nose.tools.assert_almost_equal(dx1da2.x[-1], 0.00000, 4)
+
+    @testattr(assimulo = True)
+    def test_input_simulation_high_level(self):
+        """
+        This tests that input simulation works using high-level methods.
+        """
+        model = self.m_SENS
+        path_result = os.path.join(get_files_path(), 'Results', 
+                                'qt_par_est_data.mat')
+        
+        data = loadmat(path_result,appendmat=False)
+
+        # Extract data series  
+        t_meas = data['t'][6000::100,0]-60  
+        u1 = data['u1_d'][6000::100,0]
+        u2 = data['u2_d'][6000::100,0]
+                
+        # Build input trajectory matrix for use in simulation
+        u_data = N.transpose(N.vstack((t_meas,u1,u2)))
+
+        input_object = (['u1','u2'], u_data)
+        
+        opts = model.simulate_options()
+        opts['IDA_options']['sensitivity']=True
+        
+        ##Store data continuous during the simulation, important when solving a 
+        ##problem with sensitivites. FIXED INTERNALLY
+        #opts['IDA_options']['store_cont']=True
+        
+        res = model.simulate(final_time=60, input=input_object, options=opts)
+
+        #Value used when IDA estimates the tolerances on the parameters
+        #qt_sim.pbar = qt_mod.p0 
+
+        dx1da1 = res['dx1/da1']
+        dx1da2 = res['dx1/da2']
+        dx4da1 = res['dx4/da1']
+        
+        nose.tools.assert_almost_equal(dx1da2[0], 0.000000, 4)
+        nose.tools.assert_almost_equal(dx1da2[-1], 0.00000, 4)
