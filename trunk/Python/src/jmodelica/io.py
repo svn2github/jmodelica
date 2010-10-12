@@ -1160,27 +1160,33 @@ class ResultWriterDymola(ResultWriter):
         cnt_1 = 1
         cnt_2 = 1
         n_parameters = 0
+        datatable1 = False
         for i, name in enumerate(names):
-            if variabilities[i][1] == xmlparser.PARAMETER or \
-                variabilities[i][1] == xmlparser.CONSTANT:
-                if aliases[i][1] == 0: # no alias
+            if aliases[i][1] == 0: # no alias
+                if variabilities[i][1] == xmlparser.PARAMETER or \
+                    variabilities[i][1] == xmlparser.CONSTANT:
                     cnt_1 += 1
                     n_parameters += 1
                     f.write('1 %d 0 -1 # ' % cnt_1 + name[1]+'\n')
-                elif aliases[i][1] == 1: # alias
-                    f.write('1 %d 0 -1 # ' % cnt_1 + name[1]+'\n')
-                else: # negated alias
-                    f.write('1 -%d 0 -1 # ' % cnt_1 + name[1] +'\n')
-            else:
-                if aliases[i][1] == 0: # noalias
+                    datatable1 = True
+                else:
+                    cnt_2 += 1
                     valueref_of_continuous_states.append(
                         list_of_continuous_states[name[0]])
-                    cnt_2 += 1   
                     f.write('2 %d 0 -1 # ' % cnt_2 + name[1] +'\n')
-                elif aliases[i][1] == 1: # alias
+                    datatable1 = False
+                
+            elif aliases[i][1] == 1: # alias
+                if datatable1:
+                    f.write('1 %d 0 -1 # ' % cnt_1 + name[1]+'\n')
+                else:
                     f.write('2 %d 0 -1 # ' % cnt_2 + name[1] +'\n')
-                else: #neg alias
+            else:
+                if datatable1:
+                    f.write('1 -%d 0 -1 # ' % cnt_1 + name[1]+'\n')
+                else:
                     f.write('2 -%d 0 -1 # ' % cnt_2 + name[1] +'\n')
+
         f.write('\n')
 
         # Write data

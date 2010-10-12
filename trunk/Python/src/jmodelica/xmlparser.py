@@ -257,10 +257,6 @@ class ModelDescription:
         # create tuple
         self._vrefs = tuple(self._vrefs)
         self._vrefs_noAlias = tuple(self._vrefs_noAlias)
-        
-        # update alias variables default attributes
-        # they should inherit the aliased variables values
-        self._update_alias_defaults()
 
     def _parse_element_tree(self, root):
         """ 
@@ -402,27 +398,6 @@ class ModelDescription:
         e_optimization = root.find(ns+'Optimization')
         if e_optimization != None:
             self._optimization = Optimization(e_optimization)
-            
-    def _update_alias_defaults(self):
-        """ 
-        Update all alias variable attributes variability and causality. They 
-        should get their value from the aliased variable.
-        """
-        # create dict with no aliases and vref as key
-        names_noalias = self.get_variable_names(include_alias=False)
-        noalias_dict = dict(zip(self._vrefs_noAlias,names_noalias))
-        
-        for sv in self.get_model_variables():
-            if sv.get_alias() != NO_ALIAS:
-                # alias variable found
-                
-                # get aliased variable
-                aliased_name = noalias_dict[sv.get_value_reference()][1]
-                aliased_sv = self._model_variables_dict[aliased_name]
-                
-                # update attributes of alias variable
-                #sv._attributes['variability'] = aliased_sv._attributes['variability']
-                sv._attributes['causality'] = aliased_sv._attributes['causality']
             
     def get_fmi_version(self):
         """ 

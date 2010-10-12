@@ -185,6 +185,25 @@ class test_ResultWriterDymola:
         nose.tools.assert_almost_equal(derh.x, 0.000000, 5)
 #        nose.tools.assert_almost_equal(g.x, 9.810000, 5)
 
+    @testattr(windows = True)
+    def test_variable_alias(self):
+        """ 
+        Tests the variable with parameter alias is presented as variable in the 
+        result.
+        """
+        simple_alias = FMUModel('SimpleAlias.fmu',path_to_fmus)
+        res = simple_alias.simulate()
+        
+        # test that res['y'] returns a vector of the same length as the time
+        # vector
+        nose.tools.assert_equal(len(res['y']),len(res['time']), 
+            "Wrong size of result vector.")
+            
+        # test that y really is saved in result as a parameter
+        res_traj = res.result_data.get_variable_data('y')
+        nose.tools.assert_equal(len(res_traj.x), 2, 
+            "Wrong size of y returned by result_data.get_variable_data")
+
 class TestParameterAliasVector:
     """Tests IO"""
     @classmethod
