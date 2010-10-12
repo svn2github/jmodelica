@@ -120,3 +120,7 @@ def test_qt_par_est():
     """ Run parameter estimation example """
     qt_par_est.run_demo(False)
 
+@testattr(windows = True)
+def test_fmu_with_input():
+    """ Run FMU with input example. """
+    fmu_with_input.run_demo(False)

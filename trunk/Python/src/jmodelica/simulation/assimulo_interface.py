@@ -305,7 +305,7 @@ class FMIODE(Explicit_Problem):
             
             #Sets the inputs, if any
             if self.input!=None:
-                self._model.set_real(self.input_names,self.input.eval(t)[0,:])
+                self._model.set(self.input[0], self.input[1].eval(t)[0,:])
             
             #Evaluating the rhs (Have to evaluate the values in the model)
             rhs = self._model.get_derivatives()
