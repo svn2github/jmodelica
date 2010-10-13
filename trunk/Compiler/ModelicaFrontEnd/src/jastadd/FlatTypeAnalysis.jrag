@@ -29,6 +29,14 @@ aspect FlatTypeAnalysis {
 	eq FDerivativeVariable.type() = fRealScalarType();
 	eq FFunctionVariable.type()   = getType();
 	eq UnknownFVariable.type()    = fUnknownType();
+	
+	syn FType FRealVariable.stateSelectType() = myFClass().stateSelectType();
+	syn lazy FType FClass.stateSelectType() {
+		FEnumType type = new FEnumType(Size.SCALAR, "StateSelect", new List());
+		for (String el : new String[] { "never", "avoid", "default", "prefer", "always" }) 
+			type.addFEnumLiteralType(new FEnumLiteralType(Size.SCALAR, el));
+		return type;
+	}
 		
 	// Re-evaluate record types for function variables
 	private boolean FFunctionVariable.typeRewritten = false;

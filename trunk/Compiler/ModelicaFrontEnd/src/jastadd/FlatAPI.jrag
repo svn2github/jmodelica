@@ -826,6 +826,7 @@ aspect Attributes {
 	public static final String FAttribute.START        = "start";
 	public static final String FAttribute.FIXED        = "fixed";
 	public static final String FAttribute.NOMINAL      = "nominal";
+	public static final String FAttribute.STATE_SELECT = "stateSelect";
 	public static final String FAttribute.SIZE         = "size()";
 	
 	eq FAttribute.matches(String str) = getName().name().equals(str);
@@ -854,9 +855,9 @@ aspect Attributes {
 		FAttribute a = findAttribute(name);
 		return attributeSet(a) ? attributeExp(a).ceval() : new CValueInteger(def);
 	}
-	syn CValue FVariable.attributeCValueEnum(String name, int def) {
+	syn CValue FVariable.attributeCValueEnum(String name, FType type, int def) {
 		FAttribute a = findAttribute(name);
-		return attributeSet(a) ? attributeExp(a).ceval() : new CValueEnum(type(), def);
+		return attributeSet(a) ? attributeExp(a).ceval() : new CValueEnum(type, def);
 	}
 
 	// Quantity attribute
@@ -882,7 +883,7 @@ aspect Attributes {
 	syn FExp    FVariable.minAttributeExp()           = attributeExp(FAttribute.MIN);
 	syn CValue  FRealVariable.minAttributeCValue()    = attributeCValueReal(FAttribute.MIN, -1e20);
 	syn CValue  FIntegerVariable.minAttributeCValue() = attributeCValueInteger(FAttribute.MIN, (int) -1e10);
-	syn CValue  FEnumVariable.minAttributeCValue()    = attributeCValueEnum(FAttribute.MIN, 1);
+	syn CValue  FEnumVariable.minAttributeCValue()    = attributeCValueEnum(FAttribute.MIN, type(), 1);
 	syn double  FRealVariable.minAttribute()          = minAttributeCValue().realValue();
 	syn int     FIntegerVariable.minAttribute()       = minAttributeCValue().intValue();
 	syn int     FEnumVariable.minAttribute()          = minAttributeCValue().intValue();
@@ -892,7 +893,7 @@ aspect Attributes {
 	syn FExp    FVariable.maxAttributeExp()           = attributeExp(FAttribute.MAX);
 	syn CValue  FRealVariable.maxAttributeCValue()    = attributeCValueReal(FAttribute.MAX, 1e20);
 	syn CValue  FIntegerVariable.maxAttributeCValue() = attributeCValueInteger(FAttribute.MAX, (int) 1e10);
-	syn CValue  FEnumVariable.maxAttributeCValue()    = attributeCValueEnum(FAttribute.MAX, numEnumLiterals());
+	syn CValue  FEnumVariable.maxAttributeCValue()    = attributeCValueEnum(FAttribute.MAX, type(), numEnumLiterals());
 	syn double  FRealVariable.maxAttribute()          = maxAttributeCValue().realValue();
 	syn int     FIntegerVariable.maxAttribute()       = maxAttributeCValue().intValue();
 	syn int     FEnumVariable.maxAttribute()          = maxAttributeCValue().intValue();
@@ -911,7 +912,7 @@ aspect Attributes {
 	eq FIntegerVariable.startAttributeCValue()    = attributeCValueInteger(FAttribute.START, 0);
 	eq FBooleanVariable.startAttributeCValue()    = attributeCValueBoolean(FAttribute.START, false);
 	eq FStringVariable.startAttributeCValue()     = attributeCValueString(FAttribute.START);
-	eq FEnumVariable.startAttributeCValue()       = attributeCValueEnum(FAttribute.START, 1);
+	eq FEnumVariable.startAttributeCValue()       = attributeCValueEnum(FAttribute.START, type(), 1);
 
 	syn double  FRealVariable.startAttribute()    = startAttributeCValue().realValue();
 	syn int     FIntegerVariable.startAttribute() = startAttributeCValue().intValue();
@@ -941,7 +942,19 @@ aspect Attributes {
 	syn boolean FDerivativeVariable.nominalAttributeSet()    = myDifferentiatedVariable().nominalAttributeSet();
 	syn FExp    FDerivativeVariable.nominalAttributeExp()    = myDifferentiatedVariable().nominalAttributeExp();
 	syn CValue  FDerivativeVariable.nominalAttributeCValue() = myDifferentiatedVariable().nominalAttributeCValue();
-				
+	
+	// State Select attribute
+	syn boolean     FRealVariable.stateSelectAttributeSet()    = attributeSet(FAttribute.STATE_SELECT);
+	syn FExp        FRealVariable.stateSelectAttributeExp()    = attributeExp(FAttribute.STATE_SELECT);
+	syn CValue      FRealVariable.stateSelectAttributeCValue() = attributeCValueEnum(FAttribute.STATE_SELECT, stateSelectType(), 3);
+	syn int         FRealVariable.stateSelectAttributeInt()    = stateSelectAttributeCValue().intValue();
+	syn StateSelect FRealVariable.stateSelectAttribute()       = StateSelect.values()[stateSelectAttributeInt() - 1];
+	
+	public class FRealVariable {
+		public enum StateSelect {
+			NEVER, AVOID, DEFAULT, PREFER, ALWAYS
+		}
+	}
 }
 
 aspect FVariableUses {
