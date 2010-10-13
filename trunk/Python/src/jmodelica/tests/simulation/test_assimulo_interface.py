@@ -711,6 +711,36 @@ class Test_FMI_ODE:
         assert self._bounceSim.completed_step(solver) == 0
         #Further testing of the completed step function is needed.
         
+    @testattr(windows = True)
+    def test_simulation_completed_step(self):
+        """
+        This tests a simulation of a Pendulum with dynamic state selection.
+        """
+        model = fmi.FMUModel('Pendulum_0Dynamic.fmu')
+        
+        res = model.simulate(final_time=10)
+    
+        x1_sim = res['x']
+        x2_sim = res['y']
+        
+        nose.tools.assert_almost_equal(x1_sim[0], 1.000000, 5)
+        nose.tools.assert_almost_equal(x2_sim[0], 0.000000, 5)
+        nose.tools.assert_almost_equal(x1_sim[-1], 0.290109468, 5)
+        nose.tools.assert_almost_equal(x2_sim[-1], -0.956993467, 5)
+        
+        model = fmi.FMUModel('Pendulum_0Dynamic.fmu')
+        
+        res = model.simulate(final_time=10, options={'ncp':1000)
+    
+        x1_sim = res['x']
+        x2_sim = res['y']
+        
+        nose.tools.assert_almost_equal(x1_sim[0], 1.000000, 5)
+        nose.tools.assert_almost_equal(x2_sim[0], 0.000000, 5)
+        nose.tools.assert_almost_equal(x1_sim[-1], 0.290109468, 5)
+        nose.tools.assert_almost_equal(x2_sim[-1], -0.956993467, 5)
+        
+        
     @testattr(assimulo = True)
     def test_basic_simulation(self):
         """
@@ -793,7 +823,8 @@ class Test_FMI_ODE:
     @testattr(assimulo = True)
     def test_reset(self):
         """
-        Test resetting an FMU.
+        Test resetting an FMU. (Multiple instances is NOT supported on Dymola
+        FMUs)
         """
         #Writing continuous
         bounce = fmi.FMUModel('bouncingBall.fmu', path_to_fmus)
