@@ -39,6 +39,8 @@ endif
 endif
 
 libjmi_la_SOURCES = jmi.h \
+                    fmiModelFunctions.h \
+                    fmiModelTypes.h \
                     jmi_common.h \
                     jmi.c \
                     jmi_common.c \
@@ -78,6 +80,8 @@ libjmi_solver_la_CXXFLAGS = -Wall -I$(IPOPT_INC) -DJMI_AD=JMI_AD_NONE -g
 libjmi_solver_la_LDFLAGS = -no-undefined -static-libtool-libs
 
 libjmi_cppad_la_SOURCES = jmi.h \
+                    fmiModelFunctions.h \
+                    fmiModelTypes.h \
                     jmi_common.c \
                     jmi_cppad.cpp\
                     jmi_common.c \
@@ -112,6 +116,9 @@ libjmi_solver_cppad_la_LDFLAGS = -no-undefined -static-libtool-libs -g
 
 
 include_HEADERS = jmi.h \
+                  fmiModelFunctions.h \
+	          fmiModelTypes.h \
+                  fmi.c \
                   jmi_common.h \
                   jmi_init_opt.h \
                   jmi_opt_coll.h \

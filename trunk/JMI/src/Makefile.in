@@ -188,10 +188,10 @@ DIST_SOURCES = $(libjmi_la_SOURCES) $(libjmi_algorithm_la_SOURCES) \
 	$(libjmi_algorithm_cppad_la_SOURCES) \
 	$(libjmi_cppad_la_SOURCES) $(libjmi_solver_la_SOURCES) \
 	$(libjmi_solver_cppad_la_SOURCES)
-am__include_HEADERS_DIST = jmi.h jmi_common.h jmi_init_opt.h \
-	jmi_opt_coll.h jmi_opt_coll_radau.h jmi_array_common.h \
-	jmi_array_none.h jmi_array_cppad.h jmi_opt_coll_ipopt.h \
-	jmi_init_opt_ipopt.h
+am__include_HEADERS_DIST = jmi.h fmiModelFunctions.h fmiModelTypes.h \
+	fmi.c jmi_common.h jmi_init_opt.h jmi_opt_coll.h \
+	jmi_opt_coll_radau.h jmi_array_common.h jmi_array_none.h \
+	jmi_array_cppad.h jmi_opt_coll_ipopt.h jmi_init_opt_ipopt.h
 HEADERS = $(include_HEADERS)
 ETAGS = etags
 CTAGS = ctags
@@ -260,7 +260,6 @@ PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
 PACKAGE_NAME = @PACKAGE_NAME@
 PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
-PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 RANLIB = @RANLIB@
@@ -338,6 +337,8 @@ AUTOMAKE_OPTIONS = foreign
 lib_LTLIBRARIES = libjmi.la libjmi_algorithm.la $(am__append_1) \
 	$(am__append_2) $(am__append_3)
 libjmi_la_SOURCES = jmi.h \
+                    fmiModelFunctions.h \
+                    fmiModelTypes.h \
                     jmi_common.h \
                     jmi.c \
                     jmi_common.c \
@@ -374,6 +375,8 @@ libjmi_solver_la_CXXFLAGS = -Wall -I$(IPOPT_INC) -DJMI_AD=JMI_AD_NONE -g
 # static inclusion of the runtime libraries when creating model so:s.
 libjmi_solver_la_LDFLAGS = -no-undefined -static-libtool-libs
 libjmi_cppad_la_SOURCES = jmi.h \
+                    fmiModelFunctions.h \
+                    fmiModelTypes.h \
                     jmi_common.c \
                     jmi_cppad.cpp\
                     jmi_common.c \
@@ -402,7 +405,8 @@ libjmi_solver_cppad_la_CFLAGS = -Wall -x c++ -I$(CPPAD_HOME) -I$(IPOPT_INC) -DJM
 libjmi_solver_cppad_la_CXXFLAGS = -Wall -I$(CPPAD_HOME) -I$(IPOPT_INC) -DJMI_AD=JMI_AD_CPPAD -g
 libjmi_solver_cppad_la_LDFLAGS = -no-undefined -static-libtool-libs -g
 #libjmi_cppad_la_LDFLAGS = -no-undefined 
-include_HEADERS = jmi.h jmi_common.h jmi_init_opt.h jmi_opt_coll.h \
+include_HEADERS = jmi.h fmiModelFunctions.h fmiModelTypes.h fmi.c \
+	jmi_common.h jmi_init_opt.h jmi_opt_coll.h \
 	jmi_opt_coll_radau.h jmi_array_common.h jmi_array_none.h \
 	jmi_array_cppad.h $(am__append_4)
 all: all-am
