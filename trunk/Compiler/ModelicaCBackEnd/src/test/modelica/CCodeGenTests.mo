@@ -1058,6 +1058,58 @@ equation
  TestFunctionNoOut(1);
 end CFunctionTest11;
 
+model CFunctionTest12
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CFunctionTest12",
+         description="C code gen: function and variable scaling",
+         enable_variable_scaling=true,
+         template="
+$C_function_headers$
+$C_functions$
+$C_DAE_equation_residuals$
+",
+         generatedCode="
+void func_CCodeGenTests_CFunctionTest12_f_def(jmi_array_t* x_a, jmi_array_t* y_a);
+
+
+void func_CCodeGenTests_CFunctionTest12_f_def(jmi_array_t* x_a, jmi_array_t* y_a) {
+    JMI_DYNAMIC_INIT()
+    if (y_a == NULL) {
+        JMI_ARRAY_STATIC(y_an, 2, 2)
+        y_a = y_an;
+    }
+    jmi_array_ref_1(y_a, 1) = jmi_array_val_1(x_a, 1);
+    jmi_array_ref_1(y_a, 2) = jmi_array_val_1(x_a, 2);
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+    JMI_ARRAY_STATIC(tmp_1, 2, 2)
+    JMI_ARRAY_STATIC(tmp_2, 2, 2)
+    jmi_array_ref_1(tmp_2, 1) = (_z_1_0*sf(0));
+    jmi_array_ref_1(tmp_2, 2) = (_z_2_1*sf(1));
+    func_CCodeGenTests_CFunctionTest12_f_def(tmp_2, tmp_1);
+    (*res)[0] = jmi_array_val_1(tmp_1, 1) - ((_w_1_2*sf(2)));
+    (*res)[1] = jmi_array_val_1(tmp_1, 2) - ((_w_2_3*sf(3)));
+    (*res)[2] = 1 - ((_z_1_0*sf(0)));
+    (*res)[3] = 1 - ((_z_2_1*sf(1)));
+
+")})));
+
+
+function f
+  input Real x[2];
+  output Real y[2];
+algorithm
+  y:=x;
+end f;
+Real z[2](each nominal=3)={1,1};
+Real w[2];
+equation
+w=f(z);
+end CFunctionTest12;
+
 
 
 model CForLoop1

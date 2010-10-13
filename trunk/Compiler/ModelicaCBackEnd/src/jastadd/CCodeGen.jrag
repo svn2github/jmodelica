@@ -93,7 +93,7 @@ aspect CCodeGen {
 	}
 		
 	public void FDerExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
-		if (root().options.getBooleanOption("enable_variable_scaling")) {
+		if (root().options.getBooleanOption("enable_variable_scaling") && !inFunction()) {
 			str.print("(");
 			str.print(myFV().name_C());
 			str.print("*sf(");
@@ -108,7 +108,7 @@ aspect CCodeGen {
 		if (isArray() && keepAsArray()) {
 			str.print(getFIdUse().toString_C(p, o));
 		} else {
-			if (myFV().isReal() && root().options.getBooleanOption("enable_variable_scaling")) {
+			if (myFV().isReal() && root().options.getBooleanOption("enable_variable_scaling") && !inFunction()) {
 				str.print("(");
 				p.toString(getFIdUse(), str, indent, o);
 				str.print("*sf(");
