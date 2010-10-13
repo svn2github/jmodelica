@@ -375,8 +375,14 @@ public class ModelicaCompiler {
 		
 		SourceRoot sr = null;
 		try {
-			// build source tree
-			sr = parseModel(name);
+			if (name.length == 0) {
+				// empty list of files -> class is instantiated from libraries
+				sr = new SourceRoot(new Program());
+				sr.options.copyAllOptions(this.options);
+			} else {
+				// build source tree
+				sr = parseModel(name);
+			}
 //			dumpMemoryUseFile(sr, "source");  // TODO: add comman-line arg for this
 			
 			// compute instance tree
@@ -389,7 +395,7 @@ public class ModelicaCompiler {
 //			dumpMemoryUseFile(fc, "flat");
 
 			// Generate code?
-			if (this.xmlTpl != null && this.xmlValuesTpl !=null && this.cTemplatefile != null) 
+			if (this.getXmlTpl(fc) != null && this.getXmlValuesTpl(fc) !=null && this.getCTemplatefile(fc) != null) 
 				generateCode(fc);
 		} finally {
 			logCompilationInfo();

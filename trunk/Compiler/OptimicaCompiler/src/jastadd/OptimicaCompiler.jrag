@@ -85,53 +85,6 @@ public class OptimicaCompiler extends ModelicaCompiler {
 	protected OptimicaCompiler() {
 		super();
 	}
-		
-	/**
-	 * Compiles an Optimica model. A model file name and class must be provided.
-	 * Prints an error and returns without completion if, for example, a file 
-	 * can not be found or if the parsing fails. Supports multiple model files.
-	 * 
-	 * @param name
-	 *            Array of names of the model files.
-	 * @param cl
-	 *            The name of the class in the model file to compile.
-	 *            
-	 * @throws beaver.Parser.Exception If there was an Beaver parsing exception.
-	 * @throws CompilerException
-	 *             If errors have been found during the parsing, instantiation
-	 *             or flattening.
-	 * @throws FileNotFoundException
-	 *             If the model file can not be found.
-	 * @throws IOException
-	 *             If there was an error reading the model file. (Beaver
-	 *             exception.)
-	 * @throws IOException
-	 *             If there was an error creating the .mof file.
-	 * @throws ModelicaClassNotFoundException
-	 *             If the Modelica class to parse, instantiate or flatten is not
-	 *             found.
-	 * 
-	 */
-	public void compileModel(String name[], String cl) 
-	  throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, beaver.Parser.Exception {
-		log.info("======= Compiling model =======");
-		
-		// build source tree
-		SourceRoot sr = parseModel(name);
-
-		// compute instance tree
-		InstClassDecl icd = instantiateModel(sr, cl);
-			
-		// flattening
-		FClass fc = flattenModel(icd);
-
-		// Generate code?
-		if (getXMLTpl() != null && getXMLValuesTpl() != null && getCTemplate() != null) 
-			generateCode(fc);
-		
-		log.info("====== Model compiled successfully =======");
-	}
-
 	
 	/**
 	 * \brief Create a new FOptClass object.

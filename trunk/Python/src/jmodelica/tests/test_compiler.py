@@ -56,10 +56,12 @@ class Test_Compiler:
         """
         Sets up the test case.
         """
-        self.fpath_mc = os.path.join(get_files_path(), 'Modelica', 'Pendulum_pack_no_opt.mo')
+        self.fpath_mc = os.path.join(get_files_path(), 'Modelica', 
+            'Pendulum_pack_no_opt.mo')
         self.cpath_mc = "Pendulum_pack.Pendulum"
 
-        self.fpath_oc = os.path.join(get_files_path(), 'Modelica', 'Pendulum_pack.mop')
+        self.fpath_oc = os.path.join(get_files_path(), 'Modelica', 
+            'Pendulum_pack.mop')
         self.cpath_oc = "Pendulum_pack.Pendulum_Opt"
 
     @testattr(stddist = True)
@@ -332,7 +334,40 @@ class Test_Compiler:
         """ Test that string option getter raises the proper error. """
         option = 'nonexist_real'
         #try to get an unknown option
-        nose.tools.assert_raises(jm.compiler.UnknownOptionError, mc.get_string_option, option)
+        nose.tools.assert_raises(jm.compiler.UnknownOptionError, 
+            mc.get_string_option, option)
+            
+    @testattr(stddist = True)
+    def test_compile_no_mofile(self):
+        """ 
+        Test that compiling without mo-file (load class from libraries in 
+        MODELICAPATH) works.
+        """
+        cpath = "Modelica.Electrical.Analog.Examples.CauerLowPassAnalog"
+        
+        # detect platform specific shared library file extension
+        suffix = ''
+        if sys.platform == 'win32':
+            suffix = '.dll'
+        elif sys.platform == 'darwin':
+            suffix = '.dylib'
+        else:
+            suffix = '.so'
+            
+        mc.compile_model(cpath, [])
+        
+        fname = cpath.replace('.','_')
+        assert os.access(fname+'.xml',os.F_OK) == True, \
+               fname+'.xml'+" was not created."
+        
+        assert os.access(fname+'_values.xml', os.F_OK) == True, \
+               fname+'_values.xml'+" was not created."
+        
+        assert os.access(fname+'.c', os.F_OK) == True, \
+               fname+'.c'+" was not created."        
+        
+        assert os.access(fname+suffix, os.F_OK) == True, \
+               fname+suffix+" was not created."
 
     @testattr(ipopt = True)
     def TO_ADDtest_MODELICAPATH(self):
