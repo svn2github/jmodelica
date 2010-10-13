@@ -1447,3 +1447,40 @@ class Test_JMU_methods:
         model = JMUModel(jmu_name)
         assert isinstance(model.initialize_options('KInitSolveAlg'), 
             ad.KInitSolveAlgOptions)
+
+class TestInitializeModelFromData(object):
+    """Test that a model can be initialized from a data object
+    """
+
+    def __init__(self):
+        self._fpath = os.path.join(get_files_path(), 'Modelica', "InitTest.mo")
+        self._cpath = "InitTest"
+    
+    def setUp(self):
+        """
+        Sets up the test class.
+        """
+        jmu_name = compile_jmu(self._cpath, self._fpath)
+        self.model = JMUModel(jmi.get_jmu_name(self._cpath))
+        self.res = self.model.simulate(0,10)
+
+    @testattr(stddist = True)
+    def test_initialize_from_data1(self):
+       """
+       Test that the initalization is performed correctly.
+       """
+       self.model.initialize_from_data(self.res.result_data)
+       res = self.model.get(['der(x)','x','y','u'])
+       res_true = N.array([-1.0, 1.0, 0.5, 0.0])
+       N.testing.assert_almost_equal(res_true,res)    
+
+
+    @testattr(stddist = True)
+    def test_initialize_from_data2(self):
+       """
+       Test that the initalization is performed correctly.
+       """
+       self.model.initialize_from_data(self.res.result_data,1)
+       res = self.model.get(['der(x)','x','y','u'])
+       res_true = N.array([-0.36841480742239074, 0.36841480742239074, 0.18420740371169539, 0.0])
+       N.testing.assert_almost_equal(res_true,res)    

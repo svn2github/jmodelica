@@ -33,7 +33,7 @@ try:
     from jmodelica.simulation.assimulo_interface import JMIODE, JMIDAE, FMIODE, JMIModel_Exception
     from jmodelica.simulation.assimulo_interface import JMIDAESens
     from jmodelica.simulation.assimulo_interface import write_data
-    from jmodelica.simulation.assimulo_interface import TrajectoryLinearInterpolation
+    from jmodelica.core import TrajectoryLinearInterpolation
     from assimulo.explicit_ode import CVode
     from assimulo.implicit_ode import IDA
 except NameError, ImportError:

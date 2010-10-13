@@ -29,6 +29,7 @@ import jmodelica.jmi as jmi
 import jmodelica.fmi as fmi
 from jmodelica.initialization.ipopt import NLPInitialization
 from jmodelica.initialization.ipopt import InitializationOptimizer
+from jmodelica.core import TrajectoryLinearInterpolation
 
 try:
     from assimulo.problem import Implicit_Problem
@@ -1051,98 +1052,3 @@ class JMIDAESens(Implicit_Problem):
     be activated (True) or deactivated (False).
     """)
 
-class Trajectory:
-    """
-    Base class for representation of trajectories.
-    """
-    
-    def __init__(self, abscissa, ordinate):
-        """
-        Default constructor for creating a tracjectory object.
-
-        Parameters::
-        
-            abscissa -- 
-                One dimensional numpy array containing the n abscissa 
-                (independent) values.
-                
-            ordinate -- 
-                Two dimensional n x m numpy matrix containing the ordiate 
-                values. The matrix has the same number of rows as the abscissa 
-                has elements. The number of columns is equal to the number of
-                output variables.
-        """
-        self._abscissa = abscissa
-        self._ordinate = ordinate
-        self._n = N.size(abscissa)
-        self._x0 = abscissa[0]
-        self._xf = abscissa[-1]
-
-        if not N.all(N.diff(self.abscissa)>=0):
-            raise Exception("The abscissa must be increasing.")
-
-        small = 1e-8
-        double_point_indices = N.nonzero(N.abs(N.diff(self.abscissa))<=small)
-        for i in double_point_indices:
-            self.abscissa[i+1] = self.abscissa[i+1] + small
-
-    def eval(self,x):
-        """
-        Evaluate the trajectory at a specifed abscissa.
-
-        Parameters::
-        
-            x -- 
-                One dimensional numpy array, or scalar number, containing n 
-                abscissa value(s).
-
-        Returns::
-        
-            Two dimensional n x m matrix containing the ordinate values 
-            corresponding to the argument x.
-        """
-        pass
-
-    def _set_abscissa(self, absscissa):
-        self._abscissa[:] = abscissa
-
-    def _get_abscissa(self):
-        return self._abscissa
-
-    abscissa = property(_get_abscissa, _set_abscissa, doc=
-    """
-    Property for accessing the abscissa of the trajectory.
-    """)
-
-    def _set_ordinate(self, absscissa):
-        self._ordinate[:] = ordinate
-
-    def _get_ordinate(self):
-        return self._ordinate
-
-    ordinate = property(_get_ordinate, _set_ordinate, doc=
-    """
-    Property for accessing the ordinate of the trajectory.
-    """)
-
-class TrajectoryLinearInterpolation(Trajectory):
-
-    def eval(self,x):
-        """
-        Evaluate the trajectory at a specifed abscissa.
-
-        Parameters::
-        
-            x -- 
-                One dimensional numpy array, or scalar number, containing n 
-                abscissa value(s).
-
-        Returns::
-        
-            Two dimensional n x m matrix containing the ordinate values 
-            corresponding to the argument x.
-        """        
-        y = N.zeros([N.size(x),N.size(self.ordinate,1)])
-        for i in range(N.size(y,1)):
-            y[:,i] = N.interp(x,self.abscissa,self.ordinate[:,i])
-        return y

@@ -42,6 +42,9 @@ from jmodelica.core import BaseModel
 from jmodelica.core import unzip_unit
 from jmodelica.compiler import ModelicaCompiler
 from jmodelica.compiler import OptimicaCompiler
+from jmodelica.io import ResultDymolaTextual
+from jmodelica.io import VariableNotFoundError
+from jmodelica.core import TrajectoryLinearInterpolation
 
 int = N.int32
 N.int = N.int32
@@ -346,6 +349,16 @@ def _cleanup():
 
 # _cleanup registered to run on termination       
 atexit.register(_cleanup)
+
+def strip_der(name):
+    (before,sep,after) = name.partition('der(')
+    (var_name,sep,after) = after.partition(')')
+    return before + var_name
+
+def der_name(name):
+    (before,sep,after) = name.rpartition('.')
+    return before + '.der(' + after + ')'
+
 
 # ================================================================
 #                        HIGH LEVEL INTERFACE
@@ -1981,6 +1994,116 @@ class JMUModel(BaseModel):
         """
         return self._exec_algorithm(algorithm,
                                     options)
+
+    def initialize_from_data(self,res,time=0.0):
+        """
+        Initialize the JMUModel from a result data object. All
+        variables, but not the parametes, in the model are initialized
+        with variable values extracted from the data at a time instant
+        specified by the argument time. Linear interpolation is used
+        to compute the variable values from the trajectory data.
+
+        Parameters::
+            res --
+                A result data object of the class
+                jmodelica.io.ResultDymolaTextual
+            time --
+                The time at which variable values are extracted from
+                the result data.
+
+        Limitations::
+            Only real variables are initialized.
+            
+        """
+        # Obtain the names
+        names = self.get_dx_variable_names(include_alias=False)
+        dx_names=[]
+        for name in sorted(names):
+            dx_names.append(name[1])
+
+        names = self.get_x_variable_names(include_alias=False)
+        x_names=[]
+        for name in sorted(names):
+            x_names.append(name[1])
+
+
+        names = self.get_u_variable_names(include_alias=False)
+        u_names=[]
+        for name in sorted(names):
+            u_names.append(name[1])
+
+        names = self.get_w_variable_names(include_alias=False)
+        w_names=[]
+        for name in sorted(names):
+            w_names.append(name[1])
+    
+        # Initialize variable names
+        # Loop over all the names
+
+        for name in dx_names:
+            try:
+                #print(name)
+                traj = res.get_variable_data(name)
+                if N.ndim(traj.x)>0:
+                    traj_li = TrajectoryLinearInterpolation(traj.t,N.transpose(N.array([traj.x])))
+                    self.set(name,traj_li.eval(time))
+                else:
+                    self.set(name,traj.x)
+            except VariableNotFoundError:
+                var_name = strip_der(name)
+                print var_name
+                found = False
+                (alias_names,neg) = self.get_aliases_for_variable(var_name)
+                print alias_names
+                for n in alias_names:
+                    d_name = der_name(n)
+                    try:
+                        traj = res.get_variable_data(d_name)
+                        if N.ndim(traj.x)>0:
+                            traj_li = TrajectoryLinearInterpolation(traj.t,N.transpose(N.array([traj.x])))
+                            self.set(name,traj_li.eval(time))
+                        else:
+                            self.set(name,traj.x)
+                            found = True
+                    except VariableNotFoundError:
+                        print "Did not find " + d_name
+                if not found:
+                    print "Warning: Could not find trajectory for derivative variable " + name
+        for name in x_names:
+            try:
+                #print(name)
+                traj = res.get_variable_data(name)
+                if N.ndim(traj.x)>0:
+                    traj_li = TrajectoryLinearInterpolation(traj.t,N.transpose(N.array([traj.x])))
+                    self.set(name,traj_li.eval(time))
+                else:
+                    self.set(name,traj.x)
+            except:
+                print "Warning: Could not find trajectory for state variable " + name
+        for name in u_names:
+            try:
+                #print(name)
+                traj = res.get_variable_data(name)
+                if N.ndim(traj.x)>0:
+                    traj_li = TrajectoryLinearInterpolation(traj.t,N.transpose(N.array([traj.x])))
+                    self.set(name,traj_li.eval(time))
+                else:
+                    self.set(name,traj.x)
+            except:
+                print "Warning: Could not find trajectory for input variable " + name
+
+        for name in w_names:
+            try:
+                #print(name)
+                traj = res.get_variable_data(name)
+                if N.ndim(traj.x)>0:
+                    traj_li = TrajectoryLinearInterpolation(traj.t,N.transpose(N.array([traj.x])))
+                    self.set(name,traj_li.eval(time))
+                else:
+                    self.set(name,traj.x)
+            except:
+                print "Warning: Could not find trajectory for algebraic variable " + name
+
     
     def _get_XMLDoc(self):
         """ 
