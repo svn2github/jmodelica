@@ -968,28 +968,20 @@ aspect OptimicaFreeParameters {
 	
 	syn int FOptClass.numFreeIndependentRealParameters() = 
 		freeIndependentRealParameters().size();
-	syn lazy ArrayList<FRealVariable> FOptClass.freeIndependentRealParameters() {
-      ArrayList<FRealVariable> set = new ArrayList<FRealVariable>();
-      set.addAll(reals());
-      set.retainAll(freeIndependentParameters());
-      return set;
-     }
+	syn lazy ArrayList<FRealVariable> FOptClass.freeIndependentRealParameters() =
+      intersection(reals(), freeIndependentParameters());
 
 	syn int FOptClass.numFreeIndependentIntegerParameters() = freeIndependentIntegerParameters().size();
-	syn lazy ArrayList<FIntegerVariable> FOptClass.freeIndependentIntegerParameters() {
-      ArrayList<FIntegerVariable> set = new ArrayList<FIntegerVariable>();
-      set.addAll(integers());
-      set.retainAll(freeIndependentParameters());
-      return set;
-     }
+	syn lazy ArrayList<FIntegerVariable> FOptClass.freeIndependentIntegerParameters() =
+      intersection(integers(), freeIndependentParameters());
+
+	syn int FOptClass.numFreeIndependentEnumParameters() = freeIndependentEnumParameters().size();
+	syn lazy ArrayList<FEnumVariable> FOptClass.freeIndependentEnumParameters() =
+      intersection(enums(), freeIndependentParameters());
 
 	syn int FOptClass.numFreeIndependentBooleanParameters() = freeIndependentBooleanParameters().size();
-	syn lazy ArrayList<FBooleanVariable> FOptClass.freeIndependentBooleanParameters() {
-      ArrayList<FBooleanVariable> set = new ArrayList<FBooleanVariable>();
-      set.addAll(booleans());
-      set.retainAll(freeIndependentParameters());
-      return set;
-     }
+	syn lazy ArrayList<FBooleanVariable> FOptClass.freeIndependentBooleanParameters() =
+      intersection(booleans(), freeIndependentParameters());
 	
 	/**
 	 * \brief Get a list of all dependent parameters that depends on

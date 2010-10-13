@@ -240,6 +240,127 @@ Semantic error at line 221, column 35:
 	  parameter Integer ir = Integer(1.0);
 	  parameter Integer ii = Integer(1);
   end EnumerationTest11;
+  
+  
+  
+  model FlatAPIEnum1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FClassMethodTestCase(
+         name="FlatAPIEnum1",
+         description="FlatAPI for enumerations: diagnostics",
+         methodName="diagnostics",
+         methodResult="
+Diagnostics for flattened class EnumerationTests.FlatAPIEnum1
+Number of independent constants:              4
+  Number of Real independent constants:       0
+  Number of Integer independent constants:    0
+  Number of Enum independent constants:       4
+  Number of Boolean independent constants:    0
+  Number of String independent constants:     0
+Number of dependent constants:                0
+  Number of Real dependent constants:         0
+  Number of Integer dependent constants:      0
+  Number of Enum dependent constants:         0
+  Number of Boolean dependent constants:      0
+  Number of String dependent constants:       0
+Number of independent parameters:             2
+  Number of Real independent parameters:      0
+  Number of Integer independent parameters:   0
+  Number of Enum independent parameters:      2
+  Number of Boolean independent parameters:   0
+  Number of String independent parameters:    0
+Number of dependent parameters:               2
+  Number of Real dependent parameters:        0
+  Number of Integer dependent parameters:     0
+  Number of Enum dependent parameters:        2
+  Number of Boolean dependent parameters:     0
+  Number of String dependent parameters:      0
+Number of variables :                         2
+  Number of Real variables:                   0
+  Number of Integer variables:                0
+  Number of Enum variables:                   2
+  Number of Boolean variables:                0
+  Number of String variables:                 0
+Number of Real differentiated variables:      0
+Number of Real derivative variables:          0
+Number of Real algebraic variables:           0
+Number of inputs:                             0
+  Number of Real inputs:                      0
+  Number of Integer inputs:                   0
+  Number of Enum inputs:                      0
+  Number of Boolean inputs:                   0
+  Number of String inputs:                    0
+Number of discrete variables :                2
+  Number of Real discrete variables:          0
+  Number of Integer discrete variables:       0
+  Number of Enum discrete variables:          2
+  Number of Boolean discrete variables:       0
+  Number of String discrete variables:        0
+Number of equations:                          2
+Number of variables with binding expression:  0
+  Number of Real variables with binding exp:  0
+  Number of Integer variables binding exp:    0
+  Number of Enum variables binding exp:       0
+  Number of Boolean variables binding exp:    0
+  Number of String variables binding exp:     0
+Total number of equations:                    2
+Number of initial equations:                  0
+Number of relational exps in equations:       0
+Number of relational exps in init equations:  0
+
+Independent constants: 
+ aic: number of uses: 0, isLinear: true
+ bic: number of uses: 0, isLinear: true
+ adc: number of uses: 0, isLinear: true
+ bdc: number of uses: 0, isLinear: true
+
+Dependent constants: 
+
+Independent parameters: 
+ aip: number of uses: 1, isLinear: true, evaluated binding exp: EnumerationTests.FlatAPIEnum1.A.b
+ bip: number of uses: 1, isLinear: true, evaluated binding exp: EnumerationTests.FlatAPIEnum1.B.f
+
+Dependent parameters: 
+ adp: number of uses: 1, isLinear: true
+ bdp: number of uses: 1, isLinear: true
+
+Differentiated variables: 
+
+Derivative variables: 
+
+Discrete variables: 
+ av: number of uses: 1, isLinear: true, alias: no
+ bv: number of uses: 1, isLinear: true, alias: no
+
+Algebraic real variables: 
+
+Input variables: 
+
+Alias sets:
+0 variables can be eliminated
+
+Incidence:
+ eq 0: av 
+ eq 1: bv 
+
+Connection sets: 0 sets
+")})));
+
+	  type A = enumeration(a, b, c);
+	  type B = enumeration(d, e, f);
+	  
+	  constant A aic = A.a;
+	  constant B bic = B.e;
+	  constant A adc = aic;
+	  constant B bdc = bic;
+	  parameter A aip = A.b;
+	  parameter B bip = B.f;
+	  parameter A adp = aip;
+	  parameter B bdp = bip;
+	  A av = A.c;
+	  B bv = B.d;
+  end FlatAPIEnum1;
+
 
 
 end EnumerationTests;

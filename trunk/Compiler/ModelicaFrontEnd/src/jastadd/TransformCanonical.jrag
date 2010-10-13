@@ -984,24 +984,24 @@ aspect ParameterSorting {
 
 aspect TransformCanonicalErrorCheck {
 	
+	syn int FClass.numDAEEquations()     = numScalarEquations();
+	syn int FClass.numDAEVariables()     = 
+		numAlgebraicRealVariables() + numDifferentiatedRealVariables() + numDiscreteVariables();
+	syn int FClass.numDAEInitEquations() = numDAEEquations() + numInitialEquations();
+	syn int FClass.numDAEInitVariables() = numDAEVariables() + numDifferentiatedRealVariables();
+	
 	public void FClass.checkFClassDimensions() {
 		// Check dimensions of DAE
-		int n_eq_F = numScalarEquations();
-		int n_vars_F = numAlgebraicRealVariables() + 
-		               numDifferentiatedRealVariables() + 
-		               numDiscreteVariables();
-		if (n_eq_F!=n_vars_F) {
+		int n_eq_F = numDAEEquations();
+		int n_vars_F = numDAEVariables();
+		if (n_eq_F != n_vars_F) 
 			error("The DAE system has " + n_eq_F + " equations and " + n_vars_F + " free variables.");
-		}
 		
 		// Check dimensions of DAE initialization system
-		int n_eq_F0 = numInitialEquations() + numScalarEquations();
-		int n_vars_F0 = numAlgebraicRealVariables() + 
-		                2*numDifferentiatedRealVariables() + 
-		                numDiscreteVariables();
-		if (n_eq_F0>n_vars_F0) {
+		int n_eq_F0 = numDAEInitEquations();
+		int n_vars_F0 = numDAEInitVariables();
+		if (n_eq_F0 > n_vars_F0) 
 			error("The DAE initialization system has " + n_eq_F0 + " equations and " + n_vars_F0 + " free variables.");
-		}
 		
 	}
 	

@@ -201,19 +201,19 @@ end TransformCanonicalTests.TransformCanonicalTest6;
 Dependent constants: 
 
 Independent parameters: 
- p1: number of uses: 0, isLinear: true evaluated binding exp: 0.8414709848078965
- p2: number of uses: 0, isLinear: true evaluated binding exp: 0.5403023058681398
- p3: number of uses: 0, isLinear: true evaluated binding exp: 1.5574077246549023
- p4: number of uses: 0, isLinear: true evaluated binding exp: 0.3046926540153975
- p5: number of uses: 0, isLinear: true evaluated binding exp: 1.2661036727794992
- p6: number of uses: 0, isLinear: true evaluated binding exp: 0.2914567944778671
- p7: number of uses: 0, isLinear: true evaluated binding exp: 0.5404195002705842
- p8: number of uses: 0, isLinear: true evaluated binding exp: 1.1752011936438014
- p9: number of uses: 0, isLinear: true evaluated binding exp: 1.543080634815244
- p10: number of uses: 0, isLinear: true evaluated binding exp: 0.7615941559557649
- p11: number of uses: 0, isLinear: true evaluated binding exp: 2.7182818284590455
- p12: number of uses: 0, isLinear: true evaluated binding exp: 0.0
- p13: number of uses: 0, isLinear: true evaluated binding exp: 0.0
+ p1: number of uses: 0, isLinear: true, evaluated binding exp: 0.8414709848078965
+ p2: number of uses: 0, isLinear: true, evaluated binding exp: 0.5403023058681398
+ p3: number of uses: 0, isLinear: true, evaluated binding exp: 1.5574077246549023
+ p4: number of uses: 0, isLinear: true, evaluated binding exp: 0.3046926540153975
+ p5: number of uses: 0, isLinear: true, evaluated binding exp: 1.2661036727794992
+ p6: number of uses: 0, isLinear: true, evaluated binding exp: 0.2914567944778671
+ p7: number of uses: 0, isLinear: true, evaluated binding exp: 0.5404195002705842
+ p8: number of uses: 0, isLinear: true, evaluated binding exp: 1.1752011936438014
+ p9: number of uses: 0, isLinear: true, evaluated binding exp: 1.543080634815244
+ p10: number of uses: 0, isLinear: true, evaluated binding exp: 0.7615941559557649
+ p11: number of uses: 0, isLinear: true, evaluated binding exp: 2.7182818284590455
+ p12: number of uses: 0, isLinear: true, evaluated binding exp: 0.0
+ p13: number of uses: 0, isLinear: true, evaluated binding exp: 0.0
 
 Dependent parameters: 
 
@@ -257,7 +257,7 @@ Input variables:
 Dependent constants: 
 
 Independent parameters: 
- p1: number of uses: 0, isLinear: true evaluated binding exp: 10000.0
+ p1: number of uses: 0, isLinear: true, evaluated binding exp: 10000.0
 
 Dependent parameters: 
 
@@ -294,7 +294,7 @@ Independent constants:
 Dependent constants: 
 
 Independent parameters: 
- p1: number of uses: 3, isLinear: true evaluated binding exp: 1.0
+ p1: number of uses: 3, isLinear: true, evaluated binding exp: 1
 
 Dependent parameters: 
 

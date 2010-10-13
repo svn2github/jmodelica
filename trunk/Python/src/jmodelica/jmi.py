@@ -2042,7 +2042,7 @@ class JMUModel(BaseModel):
                     # Primitive type is String
                     pass
                 else:
-                    raise JMIException("Unknown type")
+                    raise JMIException("Unknown type: index=" + str(i) + ", type=" + str(ptype))
     
     def _set_iparam_values(self, xml_values_doc=None):
         """ 

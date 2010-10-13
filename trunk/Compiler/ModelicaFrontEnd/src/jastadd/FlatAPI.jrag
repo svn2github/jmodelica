@@ -24,160 +24,142 @@ import java.net.URISyntaxException;
 
 aspect FlatAPI {
 	
+	public class FClass {
+		/**
+		 * Calculates and holds value references for all variables.
+		 */
+		private class ValueReferenceMap {
+			private int index = 0;
+			private int type = 0;
+			private HashMap<FVariable, Integer> map = new HashMap<FVariable, Integer>();
+			
+			/**
+			 * Start a new variable vector, i.e. reset the index part to 0.
+			 */
+			public void resetIndex() {
+				index = 0;
+			}
+			
+			/**
+			 * Set the value to use for the type bits.
+			 */
+			public void setType(int t) {
+				type = t << 28;
+			}
+			
+			/**
+			 * Calculate indices for the variables in a list and add them to the map.
+			 * 
+			 * Indices are assigned in the order variable lists are added. Within a list, 
+			 * they are assigned in iterator order.
+			 */
+			public void add(Iterable<? extends FVariable> list) {
+				for (FVariable fv : list) {
+					map.put(fv, new Integer(index + type));
+					index++;
+				}
+			}
+			
+			/**
+			 * Get the index for a variable.
+			 * 
+			 * If it is not in the map, -1 is returned.
+			 */
+			public int get(FVariable fv) {
+				Integer i = map.get(fv);
+				return (i == null) ? -1 : i.intValue();
+			}
+		}
+	}
+	
+	syn lazy ValueReferenceMap FClass.valueReferenceMap() {
+		ValueReferenceMap map = new ValueReferenceMap();
+		map.setType(0);
+		map.add(independentRealConstants());
+		map.add(dependentRealConstants());
+		map.add(independentRealParameters());
+		map.add(dependentRealParameters());
+		
+		map.setType(1);
+		// Handle enums as Integers
+		map.add(independentIntegerConstants());
+		map.add(independentEnumConstants());
+		map.add(dependentIntegerConstants());
+		map.add(dependentEnumConstants());
+		map.add(independentIntegerParameters());
+		map.add(independentEnumParameters());
+		map.add(dependentIntegerParameters());
+		map.add(dependentEnumParameters());
+		
+		map.setType(2);
+		map.add(independentBooleanConstants());
+		map.add(dependentBooleanConstants());
+		map.add(independentBooleanParameters());
+		map.add(dependentBooleanParameters());
+		
+		map.setType(0);
+		map.add(derivativeVariables());
+		map.add(differentiatedRealVariables());
+		map.add(realInputs());
+		map.add(algebraicRealVariables());
+		map.add(discreteRealVariables());
+		
+		map.setType(1);
+		// Handle enums as Integers
+		map.add(discreteIntegerVariables());
+		map.add(discreteEnumVariables());
+		map.add(integerInputs());
+		map.add(enumInputs());
+		
+		map.setType(2);
+		map.add(discreteBooleanVariables());
+		map.add(booleanInputs());
+		
+		map.resetIndex();
+		map.setType(3);
+		map.add(independentStringConstants());
+		map.add(dependentStringConstants());
+		map.add(independentStringParameters());
+		map.add(dependentStringParameters());
+		map.add(stringInputs());
+		map.add(discreteStringVariables());
+		
+		return map;
+	}
+	
 	/**
 	 * The value reference value is represented by a 32 bit unsigned integer 
 	 * variable. The lowest 28 bits is used to represent the index of a 
-	 * variable of the corresponding Real, Integer, Boolean and String vector. 
+	 * variable of the corresponding variable vector. Real, Integer, Boolean and 
+	 * enumeration variables share a vector, while String variables has their 
+	 * own vector. 
 	 * Bits 29-31 represents the primitive type, where:
 	 * 0: Real
-	 * 1: Integer
+	 * 1: Integer or enumeration
 	 * 2: Boolean
 	 * 3: String
 	 * Bit 32 is left unused.
 	 *
 	 */
 	inh lazy int AbstractFVariable.valueReference();
-	eq FClass.getFVariable(int i).valueReference() {
-		int index = 0;
-		index = 0x00000000; 
-		FVariable fv = getFVariable(i);
-		if (independentRealConstants().indexOf(fv) >= 0) {
-			return index + independentRealConstants().indexOf(fv);
-		} 
-		index += numIndependentRealConstants();
-		if (dependentRealConstants().indexOf(fv) >= 0) {
-			return index + dependentRealConstants().indexOf(fv);
-		} 
-		index += numDependentRealConstants();
-		if (independentRealParameters().indexOf(fv) >= 0) {
-			return index + independentRealParameters().indexOf(fv);
-		} 
-		index += numIndependentRealParameters();
-		if (dependentRealParameters().indexOf(fv) >= 0) {
-			return index + dependentRealParameters().indexOf(fv);
-		} 
-		index += numDependentRealParameters();
-		
-		index += 0x10000000; 
-		if (independentIntegerConstants().indexOf(fv) >= 0) {
-			return index + independentIntegerConstants().indexOf(fv);
-		} 
-		index += numIndependentIntegerConstants();
-		if (dependentIntegerConstants().indexOf(fv) >= 0) {
-			return index + dependentIntegerConstants().indexOf(fv);
-		} 
-		index += numDependentIntegerConstants();
-		if (independentIntegerParameters().indexOf(fv) >= 0) {
-			return index + independentIntegerParameters().indexOf(fv);
-		} 
-		index += numIndependentIntegerParameters();
-		if (dependentIntegerParameters().indexOf(fv) >= 0) {
-			return index + dependentIntegerParameters().indexOf(fv);
-		} 
-		index += numDependentIntegerParameters();
-		index -= 0x10000000; 
-		
-		index += 0x20000000; 
-		if (independentBooleanConstants().indexOf(fv) >= 0) {
-			return index + independentBooleanConstants().indexOf(fv);
-		} 
-		index += numIndependentBooleanConstants();
-		if (dependentBooleanConstants().indexOf(fv) >= 0) {
-			return index + dependentBooleanConstants().indexOf(fv);
-		} 
-		index += numDependentBooleanConstants();
-		if (independentBooleanParameters().indexOf(fv) >= 0) {
-			return index + independentBooleanParameters().indexOf(fv);
-		} 
-		index += numIndependentBooleanParameters();
-		if (dependentBooleanParameters().indexOf(fv) >= 0) {
-			return index + dependentBooleanParameters().indexOf(fv);
-		} 
-		index += numDependentBooleanParameters();
-		index -= 0x20000000; 
-		
-		if (derivativeVariables().indexOf(fv) >= 0) {
-			return index + derivativeVariables().indexOf(fv);
-		} 		
-		index += numDerivativeVariables(); 
-		if (differentiatedRealVariables().indexOf(fv) >= 0) {
-			return index + differentiatedRealVariables().indexOf(fv);
-		} 
-		index += numDifferentiatedRealVariables();
-		if (realInputs().indexOf(fv) >= 0) {
-			return index + realInputs().indexOf(fv);
-		} 
-		index += numRealInputs();
-		if (algebraicRealVariables().indexOf(fv) >= 0) {
-			return index + algebraicRealVariables().indexOf(fv);
-		} 
-		index += numAlgebraicRealVariables();
-		if (discreteRealVariables().indexOf(fv) >= 0) {
-			return index + discreteRealVariables().indexOf(fv);
-		} 
-		index += numDiscreteRealVariables(); 
-
-		index += 0x10000000; 
-		if (discreteIntegerVariables().indexOf(fv) >= 0) {
-			return index + discreteIntegerVariables().indexOf(fv);
-		} 
-		index += numDiscreteIntegerVariables();
-		if (integerInputs().indexOf(fv) >= 0) {
-			return index + integerInputs().indexOf(fv);
-		} 
-		index += numIntegerInputs();
-		index -= 0x10000000; 
-		
-		index += 0x20000000; 
-		if (discreteBooleanVariables().indexOf(fv) >= 0) {
-			return index + discreteBooleanVariables().indexOf(fv);
-		} 
-		index += numDiscreteBooleanVariables();
-		if (booleanInputs().indexOf(fv) >= 0) {
-			return index + booleanInputs().indexOf(fv);
-		} 
-		index += numBooleanInputs();
-		index -= 0x20000000;
-		
-		index = 0x30000000; 
-		if (independentStringConstants().indexOf(fv) >= 0) {
-			return index + independentStringConstants().indexOf(fv);
-		} 
-		index += numIndependentStringConstants();
-		if (dependentStringConstants().indexOf(fv) >= 0) {
-			return index + dependentStringConstants().indexOf(fv);
-		} 
-		index += numDependentStringConstants();
-		if (independentStringParameters().indexOf(fv) >= 0) {
-			return index + independentStringParameters().indexOf(fv);
-		} 
-		index += numIndependentStringParameters();
-		if (dependentStringParameters().indexOf(fv) >= 0) {
-			return index + dependentStringParameters().indexOf(fv);
-		} 
-		index += numDependentStringParameters();
-		if (stringInputs().indexOf(fv) >= 0) {
-			return index + stringInputs().indexOf(fv);
-		} 
-		index += numStringInputs();
-		if (discreteStringVariables().indexOf(fv) >= 0) {
-			return index + discreteStringVariables().indexOf(fv);
-		} 
-
-		return index;
-	}
-
-	eq FClass.getAliasVariable(int i).valueReference() {
-		return getAliasVariable(i).aliasValueReference();
-	}
-	
-	eq FClass.getFEquationBlock().valueReference() = -1;
-	eq Root.getChild().valueReference() = -1;
+	eq FClass.getFVariable(int i).valueReference()     = valueReferenceMap().get(getFVariable(i));
+	eq FClass.getAliasVariable(int i).valueReference() = getAliasVariable(i).aliasValueReference();
+	eq FClass.getFEquationBlock().valueReference()     = -1;
+	eq Root.getChild().valueReference()                = -1;
 	
 	syn int FVariable.aliasValueReference() = alias()!=null? 
 		alias().valueReference(): -1;
-		
+
+
 	syn boolean FVariable.shouldContribute() = !isAlias() && !inRecord() && !isForIndex();
+	
+	public class FClass {
+		public static <T extends FVariable> ArrayList<T> intersection(ArrayList<T> a, Collection<? extends FVariable> b) {
+			ArrayList<T> res = (ArrayList<T>) a.clone();
+			res.retainAll(b);
+			return res;
+		}
+	}
 
     syn int FClass.numReals() = reals().size();
 	coll ArrayList<FRealVariable> FClass.reals() 
@@ -189,6 +171,11 @@ aspect FlatAPI {
 	coll ArrayList<FIntegerVariable> FClass.integers() 
 	  [new ArrayList<FIntegerVariable>()] with add root FlatRoot;
 	FIntegerVariable contributes this when shouldContribute() to FClass.integers() for myFClass();
+
+    syn int FClass.numEnums() = enums().size();
+	coll ArrayList<FEnumVariable> FClass.enums() 
+	  [new ArrayList<FEnumVariable>()] with add root FlatRoot;
+	FEnumVariable contributes this when shouldContribute() to FClass.enums() for myFClass();
 
     syn int FClass.numBooleans() = booleans().size();
 	coll ArrayList<FBooleanVariable> FClass.booleans() 
@@ -208,45 +195,24 @@ aspect FlatAPI {
 	  to FClass.independentConstants() for myFClass();
 
 	syn int FClass.numIndependentRealConstants() = independentRealConstants().size();
-	syn lazy ArrayList<FRealVariable> FClass.independentRealConstants() {
-      ArrayList<FRealVariable> set = new ArrayList<FRealVariable>();
-      set.addAll(reals());
-      set.retainAll(independentConstants());
-      return set;
-     }
-	syn int FVariable.independentRealConstantIndex() =
-		myFClass().independentRealConstants().indexOf(this);
+	syn lazy ArrayList<FRealVariable> FClass.independentRealConstants() = 
+		intersection(reals(), independentConstants());
 	
 	syn int FClass.numIndependentIntegerConstants() = independentIntegerConstants().size();
-	syn lazy ArrayList<FIntegerVariable> FClass.independentIntegerConstants() {
-      ArrayList<FIntegerVariable> set = new ArrayList<FIntegerVariable>();
-      set.addAll(integers());
-      set.retainAll(independentConstants());
-      return set;
-     }
-	syn int FVariable.independentIntegerConstantIndex() =
-		myFClass().independentIntegerConstants().indexOf(this);
-
+	syn lazy ArrayList<FIntegerVariable> FClass.independentIntegerConstants() = 
+		intersection(integers(), independentConstants());
+	
+	syn int FClass.numIndependentEnumConstants() = independentEnumConstants().size();
+	syn lazy ArrayList<FEnumVariable> FClass.independentEnumConstants() = 
+		intersection(enums(), independentConstants());
 	
 	syn int FClass.numIndependentBooleanConstants() = independentBooleanConstants().size();
-	syn lazy ArrayList<FBooleanVariable> FClass.independentBooleanConstants() {
-      ArrayList<FBooleanVariable> set = new ArrayList<FBooleanVariable>();
-      set.addAll(booleans());
-      set.retainAll(independentConstants());
-      return set;
-     }
-	syn int FVariable.independentBooleanConstantIndex() =
-		myFClass().independentBooleanConstants().indexOf(this);
+	syn lazy ArrayList<FBooleanVariable> FClass.independentBooleanConstants() = 
+		intersection(booleans(), independentConstants());
 	
 	syn int FClass.numIndependentStringConstants() = independentStringConstants().size();
-	syn lazy ArrayList<FStringVariable> FClass.independentStringConstants() {
-      ArrayList<FStringVariable> set = new ArrayList<FStringVariable>();
-      set.addAll(strings());
-      set.retainAll(independentConstants());
-      return set;
-     }
-	syn int FVariable.independentStringConstantIndex() =
-		myFClass().independentStringConstants().indexOf(this);
+	syn lazy ArrayList<FStringVariable> FClass.independentStringConstants() = 
+		intersection(strings(), independentConstants());
 
 	// TODO: Is there such a thing as a dependent constant??
     syn int FClass.numDependentConstants() = dependentConstants().size();
@@ -257,44 +223,24 @@ aspect FlatAPI {
 	to FClass.dependentConstants() for myFClass();
 	
 	syn int FClass.numDependentRealConstants() = dependentRealConstants().size();
-	syn lazy ArrayList<FRealVariable> FClass.dependentRealConstants() {
-      ArrayList<FRealVariable> set = new ArrayList<FRealVariable>();
-      set.addAll(reals());
-      set.retainAll(dependentConstants());
-      return set;
-     }
-	syn int FVariable.dependentRealConstantIndex() =
-		myFClass().dependentRealConstants().indexOf(this);
+	syn lazy ArrayList<FRealVariable> FClass.dependentRealConstants() =
+      intersection(reals(), dependentConstants());
 	
 	syn int FClass.numDependentIntegerConstants() = dependentIntegerConstants().size();
-	syn lazy ArrayList<FIntegerVariable> FClass.dependentIntegerConstants() {
-      ArrayList<FIntegerVariable> set = new ArrayList<FIntegerVariable>();
-      set.addAll(integers());
-      set.retainAll(dependentConstants());
-      return set;
-     }
-	syn int FVariable.dependentIntegerConstantIndex() =
-		myFClass().dependentIntegerConstants().indexOf(this);
+	syn lazy ArrayList<FIntegerVariable> FClass.dependentIntegerConstants() =
+      intersection(integers(), dependentConstants());
+	
+	syn int FClass.numDependentEnumConstants() = dependentEnumConstants().size();
+	syn lazy ArrayList<FEnumVariable> FClass.dependentEnumConstants() =
+      intersection(enums(), dependentConstants());
 	
 	syn int FClass.numDependentBooleanConstants() = dependentBooleanConstants().size();
-	syn lazy ArrayList<FBooleanVariable> FClass.dependentBooleanConstants() {
-      ArrayList<FBooleanVariable> set = new ArrayList<FBooleanVariable>();
-      set.addAll(booleans());
-      set.retainAll(dependentConstants());
-      return set;
-     }
-	syn int FVariable.dependentBooleanConstantIndex() =
-		myFClass().dependentBooleanConstants().indexOf(this);
+	syn lazy ArrayList<FBooleanVariable> FClass.dependentBooleanConstants() =
+      intersection(booleans(), dependentConstants());
 	
 	syn int FClass.numDependentStringConstants() = dependentStringConstants().size();
-	syn lazy ArrayList<FStringVariable> FClass.dependentStringConstants() {
-      ArrayList<FStringVariable> set = new ArrayList<FStringVariable>();
-      set.addAll(strings());
-      set.retainAll(dependentConstants());
-      return set;
-     }
-	syn int FVariable.dependentStringConstantIndex() =
-		myFClass().dependentStringConstants().indexOf(this);
+	syn lazy ArrayList<FStringVariable> FClass.dependentStringConstants() =
+      intersection(strings(), dependentConstants());
 
     syn int FClass.numIndependentParameters() = independentParameters().size();
 	coll ArrayList<FVariable> FClass.independentParameters() 
@@ -304,44 +250,24 @@ aspect FlatAPI {
 	to FClass.independentParameters() for myFClass();
 	
 	syn int FClass.numIndependentRealParameters() = independentRealParameters().size();
-	syn lazy ArrayList<FRealVariable> FClass.independentRealParameters() {
-      ArrayList<FRealVariable> set = new ArrayList<FRealVariable>();
-      set.addAll(reals());
-      set.retainAll(independentParameters());
-      return set;
-     }
-	syn int FVariable.independentRealParameterIndex() =
-		myFClass().independentRealParameters().indexOf(this);
+	syn lazy ArrayList<FRealVariable> FClass.independentRealParameters() =
+      intersection(reals(), independentParameters());
 
 	syn int FClass.numIndependentIntegerParameters() = independentIntegerParameters().size();
-	syn lazy ArrayList<FIntegerVariable> FClass.independentIntegerParameters() {
-      ArrayList<FIntegerVariable> set = new ArrayList<FIntegerVariable>();
-      set.addAll(integers());
-      set.retainAll(independentParameters());
-      return set;
-     }
-	syn int FVariable.independentIntegerParameterIndex() =
-		myFClass().independentIntegerParameters().indexOf(this);
+	syn lazy ArrayList<FIntegerVariable> FClass.independentIntegerParameters() =
+      intersection(integers(), independentParameters());
+
+	syn int FClass.numIndependentEnumParameters() = independentEnumParameters().size();
+	syn lazy ArrayList<FEnumVariable> FClass.independentEnumParameters() =
+      intersection(enums(), independentParameters());
 	
 	syn int FClass.numIndependentBooleanParameters() = independentBooleanParameters().size();
-	syn lazy ArrayList<FBooleanVariable> FClass.independentBooleanParameters() {
-      ArrayList<FBooleanVariable> set = new ArrayList<FBooleanVariable>();
-      set.addAll(booleans());
-      set.retainAll(independentParameters());
-      return set;
-     }
-	syn int FVariable.independentBooleanParameterIndex() =
-		myFClass().independentBooleanParameters().indexOf(this);
+	syn lazy ArrayList<FBooleanVariable> FClass.independentBooleanParameters() =
+      intersection(booleans(), independentParameters());
 
 	syn int FClass.numIndependentStringParameters() = independentStringParameters().size();
-	syn lazy ArrayList<FStringVariable> FClass.independentStringParameters() {
-      ArrayList<FStringVariable> set = new ArrayList<FStringVariable>();
-      set.addAll(strings());
-      set.retainAll(independentParameters());
-      return set;
-     }
-	syn int FVariable.independentStringParameterIndex() =
-		myFClass().independentStringParameters().indexOf(this);
+	syn lazy ArrayList<FStringVariable> FClass.independentStringParameters() =
+      intersection(strings(), independentParameters());
 
     syn int FClass.numDependentParameters() = dependentParameters().size();
 	coll ArrayList<FVariable> FClass.dependentParameters() 
@@ -351,84 +277,44 @@ aspect FlatAPI {
 	to FClass.dependentParameters() for myFClass();
 
 	syn int FClass.numDependentRealParameters() = dependentRealParameters().size();
-	syn lazy ArrayList<FRealVariable> FClass.dependentRealParameters() {
-      ArrayList<FRealVariable> set = new ArrayList<FRealVariable>();
-      set.addAll(reals());
-      set.retainAll(dependentParameters());
-      return set;
-     }
-	syn int FVariable.dependentRealParameterIndex() =
-		myFClass().dependentRealParameters().indexOf(this);
+	syn lazy ArrayList<FRealVariable> FClass.dependentRealParameters() =
+      intersection(reals(), dependentParameters());
 
 	syn int FClass.numDependentIntegerParameters() = dependentIntegerParameters().size();
-	syn lazy ArrayList<FIntegerVariable> FClass.dependentIntegerParameters() {
-      ArrayList<FIntegerVariable> set = new ArrayList<FIntegerVariable>();
-      set.addAll(integers());
-      set.retainAll(dependentParameters());
-      return set;
-     }
-	syn int FVariable.dependentIntegerParameterIndex() =
-		myFClass().dependentIntegerParameters().indexOf(this);
+	syn lazy ArrayList<FIntegerVariable> FClass.dependentIntegerParameters() =
+      intersection(integers(), dependentParameters());
+
+	syn int FClass.numDependentEnumParameters() = dependentEnumParameters().size();
+	syn lazy ArrayList<FEnumVariable> FClass.dependentEnumParameters() =
+      intersection(enums(), dependentParameters());
 	
 	syn int FClass.numDependentBooleanParameters() = dependentBooleanParameters().size();
-	syn lazy ArrayList<FBooleanVariable> FClass.dependentBooleanParameters() {
-      ArrayList<FBooleanVariable> set = new ArrayList<FBooleanVariable>();
-      set.addAll(booleans());
-      set.retainAll(dependentParameters());
-      return set;
-     }
-	syn int FVariable.dependentBooleanParameterIndex() =
-		myFClass().dependentBooleanParameters().indexOf(this);
+	syn lazy ArrayList<FBooleanVariable> FClass.dependentBooleanParameters() =
+      intersection(booleans(), dependentParameters());
 	
 	syn int FClass.numDependentStringParameters() = dependentStringParameters().size();
-	syn lazy ArrayList<FStringVariable> FClass.dependentStringParameters() {
-      ArrayList<FStringVariable> set = new ArrayList<FStringVariable>();
-      set.addAll(strings());
-      set.retainAll(dependentParameters());
-      return set;
-     }
-	syn int FVariable.dependentStringParameterIndex() =
-		myFClass().dependentStringParameters().indexOf(this);
+	syn lazy ArrayList<FStringVariable> FClass.dependentStringParameters() =
+      intersection(strings(), dependentParameters());
 
 	syn int FClass.numDiscreteRealVariables() = discreteRealVariables().size();
-	syn lazy ArrayList<FRealVariable> FClass.discreteRealVariables() {
-      ArrayList<FRealVariable> set = new ArrayList<FRealVariable>();
-      set.addAll(reals());
-      set.retainAll(discreteVariables());
-      return set;
-     }
-	syn int FVariable.discreteRealVariableIndex() =
-		myFClass().discreteRealVariables().indexOf(this);
+	syn lazy ArrayList<FRealVariable> FClass.discreteRealVariables() =
+      intersection(reals(), discreteVariables());
 
 	syn int FClass.numDiscreteIntegerVariables() = discreteIntegerVariables().size();
-	syn lazy ArrayList<FIntegerVariable> FClass.discreteIntegerVariables() {
-      ArrayList<FIntegerVariable> set = new ArrayList<FIntegerVariable>();
-      set.addAll(integers());
-      set.retainAll(discreteVariables());
-      return set;
-     }
-	syn int FVariable.discreteIntegerVariableIndex() =
-		myFClass().discreteIntegerVariables().indexOf(this);
+	syn lazy ArrayList<FIntegerVariable> FClass.discreteIntegerVariables() =
+      intersection(integers(), discreteVariables());
+
+	syn int FClass.numDiscreteEnumVariables() = discreteEnumVariables().size();
+	syn lazy ArrayList<FEnumVariable> FClass.discreteEnumVariables() =
+      intersection(enums(), discreteVariables());
 
 	syn int FClass.numDiscreteBooleanVariables() = discreteBooleanVariables().size();
-	syn lazy ArrayList<FBooleanVariable> FClass.discreteBooleanVariables() {
-      ArrayList<FBooleanVariable> set = new ArrayList<FBooleanVariable>();
-      set.addAll(booleans());
-      set.retainAll(discreteVariables());
-      return set;
-     }
-	syn int FVariable.discreteBooleanVariableIndex() =
-		myFClass().discreteBooleanVariables().indexOf(this);
+	syn lazy ArrayList<FBooleanVariable> FClass.discreteBooleanVariables() =
+      intersection(booleans(), discreteVariables());
 
 	syn int FClass.numDiscreteStringVariables() = discreteStringVariables().size();
-	syn lazy ArrayList<FStringVariable> FClass.discreteStringVariables() {
-      ArrayList<FStringVariable> set = new ArrayList<FStringVariable>();
-      set.addAll(strings());
-      set.retainAll(discreteVariables());
-      return set;
-     }
-	syn int FVariable.discreteStringVariableIndex() =
-		myFClass().discreteStringVariables().indexOf(this);
+	syn lazy ArrayList<FStringVariable> FClass.discreteStringVariables() =
+      intersection(strings(), discreteVariables());
 	
 	
     syn int FClass.numDifferentiatedRealVariables() = differentiatedRealVariables().size();
@@ -454,8 +340,6 @@ aspect FlatAPI {
 	FDerivativeVariable contributes
 		this when shouldContribute()
 	to FClass.derivativeVariables() for myFClass();
-	syn int FVariable.derivativeVariableIndex() =
-		myFClass().derivativeVariables().indexOf(this);
 	
     syn int FClass.numVariables() = variables().size();
 	coll ArrayList<FVariable> FClass.variables() 
@@ -471,6 +355,9 @@ aspect FlatAPI {
 		this when isDiscrete() && !isInput() && shouldContribute()
 	to FClass.discreteVariables() for myFClass();	
 	FIntegerVariable contributes
+		this when !isParameter() && !isInput() && !isConstant() && shouldContribute()
+	to FClass.discreteVariables() for myFClass();	
+	FEnumVariable contributes
 		this when !isParameter() && !isInput() && !isConstant() && shouldContribute()
 	to FClass.discreteVariables() for myFClass();	
 	FBooleanVariable contributes
@@ -500,42 +387,28 @@ aspect FlatAPI {
 	}
 	
 	syn int FClass.numRealVariables() = realVariables().size();
-	syn lazy ArrayList<FRealVariable> FClass.realVariables() {
-      ArrayList<FRealVariable> set = new ArrayList<FRealVariable>();
-      set.addAll(reals());
-      set.retainAll(variables());
-      return set;
-     }
+	syn lazy ArrayList<FRealVariable> FClass.realVariables() =
+      intersection(reals(), variables());
 
 	syn int FClass.numIntegerVariables() = integerVariables().size();
-	syn lazy ArrayList<FIntegerVariable> FClass.integerVariables() {
-      ArrayList<FIntegerVariable> set = new ArrayList<FIntegerVariable>();
-      set.addAll(integers());
-      set.retainAll(variables());
-      return set;
-     }
+	syn lazy ArrayList<FIntegerVariable> FClass.integerVariables() =
+      intersection(integers(), variables());
+
+	syn int FClass.numEnumVariables() = enumVariables().size();
+	syn lazy ArrayList<FEnumVariable> FClass.enumVariables() =
+      intersection(enums(), variables());
 
 	syn int FClass.numBooleanVariables() = booleanVariables().size();
-	syn lazy ArrayList<FBooleanVariable> FClass.booleanVariables() {
-      ArrayList<FBooleanVariable> set = new ArrayList<FBooleanVariable>();
-      set.addAll(booleans());
-      set.retainAll(variables());
-      return set;
-     }
+	syn lazy ArrayList<FBooleanVariable> FClass.booleanVariables() =
+      intersection(booleans(), variables());
 
 	syn int FClass.numStringVariables() = stringVariables().size();
-	syn lazy ArrayList<FStringVariable> FClass.stringVariables() {
-      ArrayList<FStringVariable> set = new ArrayList<FStringVariable>();
-      set.addAll(strings());
-      set.retainAll(variables());
-      return set;
-     }
+	syn lazy ArrayList<FStringVariable> FClass.stringVariables() =
+      intersection(strings(), variables());
 	
     syn int FClass.numAlgebraicRealVariables() = algebraicRealVariables().size();
 	syn lazy ArrayList<FVariable> FClass.algebraicRealVariables() { 
-	  ArrayList<FVariable> set = new ArrayList<FVariable>();
-  	  set.addAll(reals());
-  	  set.retainAll(variables());
+	  ArrayList<FVariable> set = intersection(variables(), reals());
   	  set.removeAll(differentiatedRealVariables());
   	  set.removeAll(derivativeVariables());
   	  set.removeAll(discreteVariables());
@@ -558,34 +431,20 @@ aspect FlatAPI {
 	
 	/*
     syn int FClass.numAlgebraicIntegerVariables() = algebraicIntegerVariables().size();
-	syn lazy ArrayList<FVariable> FClass.algebraicIntegerVariables() { 
-	  ArrayList<FVariable> set = new ArrayList<FVariable>();
-	    set.addAll(algebraicVariables());
-	    set.retainAll(integers());
-      return set;
-	}
-	syn int FVariable.algebraicIntegerVariableIndex() =
-		myFClass().algebraicIntegerVariables().indexOf(this);
+	syn lazy ArrayList<FVariable> FClass.algebraicIntegerVariables() = 
+	  intersection(algebraicVariables(), integers());
+	
+    syn int FClass.numAlgebraicEnumVariables() = algebraicEnumVariables().size();
+	syn lazy ArrayList<FVariable> FClass.algebraicEnumVariables() = 
+	  intersection(algebraicVariables(), enums());
 	
     syn int FClass.numAlgebraicBooleanVariables() = algebraicBooleanVariables().size();
-	syn lazy ArrayList<FVariable> FClass.algebraicBooleanVariables() { 
-	  ArrayList<FVariable> set = new ArrayList<FVariable>();
-	    set.addAll(algebraicVariables());
-	    set.retainAll(booleans());
-      return set;
-	}
-	syn int FVariable.algebraicBooleanVariableIndex() =
-		myFClass().algebraicBooleanVariables().indexOf(this);
+	syn lazy ArrayList<FVariable> FClass.algebraicBooleanVariables() = 
+	  intersection(algebraicVariables(), booleans());
 
     syn int FClass.numAlgebraicStringVariables() = algebraicStringVariables().size();
-	syn lazy ArrayList<FVariable> FClass.algebraicStringVariables() { 
-	  ArrayList<FVariable> set = new ArrayList<FVariable>();
-	    set.addAll(algebraicVariables());
-	    set.retainAll(strings());
-      return set;
-	}
-	syn int FVariable.algebraicStringVariableIndex() =
-		myFClass().algebraicStringVariables().indexOf(this);
+	syn lazy ArrayList<FVariable> FClass.algebraicStringVariables() = 
+	  intersection(algebraicVariables(), strings());
 */
 	
     syn int FClass.numVariablesWithBindingExp() = variablesWithBindingExp().size();
@@ -597,36 +456,24 @@ aspect FlatAPI {
 	to FClass.variablesWithBindingExp() for myFClass();
 
 	syn int FClass.numRealVariablesWithBindingExp() = realVariablesWithBindingExp().size();
-	syn lazy ArrayList<FVariable> FClass.realVariablesWithBindingExp() {
-      ArrayList<FVariable> set = new ArrayList<FVariable>();
-      set.addAll(variablesWithBindingExp());
-      set.retainAll(reals());
-      return set;
-     }
+	syn lazy ArrayList<FVariable> FClass.realVariablesWithBindingExp() =
+      intersection(variablesWithBindingExp(), reals());
 
 	syn int FClass.numIntegerVariablesWithBindingExp() = integerVariablesWithBindingExp().size();
-	syn lazy ArrayList<FVariable> FClass.integerVariablesWithBindingExp() {
-      ArrayList<FVariable> set = new ArrayList<FVariable>();
-      set.addAll(variablesWithBindingExp());
-      set.retainAll(integers());
-      return set;
-     }
+	syn lazy ArrayList<FVariable> FClass.integerVariablesWithBindingExp() =
+      intersection(variablesWithBindingExp(), integers());
+
+	syn int FClass.numEnumVariablesWithBindingExp() = enumVariablesWithBindingExp().size();
+	syn lazy ArrayList<FVariable> FClass.enumVariablesWithBindingExp() =
+      intersection(variablesWithBindingExp(), enums());
 
 	syn int FClass.numBooleanVariablesWithBindingExp() = booleanVariablesWithBindingExp().size();
-	syn lazy ArrayList<FVariable> FClass.booleanVariablesWithBindingExp() {
-      ArrayList<FVariable> set = new ArrayList<FVariable>();
-      set.addAll(variablesWithBindingExp());
-      set.retainAll(booleans());
-      return set;
-     }
+	syn lazy ArrayList<FVariable> FClass.booleanVariablesWithBindingExp() =
+      intersection(variablesWithBindingExp(), booleans());
 
 	syn int FClass.numStringVariablesWithBindingExp() = stringVariablesWithBindingExp().size();
-	syn lazy ArrayList<FVariable> FClass.stringVariablesWithBindingExp() {
-      ArrayList<FVariable> set = new ArrayList<FVariable>();
-      set.addAll(variablesWithBindingExp());
-      set.retainAll(strings());
-      return set;
-     }
+	syn lazy ArrayList<FVariable> FClass.stringVariablesWithBindingExp() =
+      intersection(variablesWithBindingExp(), strings());
      
     syn int FClass.numInputs() = inputs().size();
 	coll ArrayList<FVariable> FClass.inputs() 
@@ -636,44 +483,24 @@ aspect FlatAPI {
 	to FClass.inputs() for myFClass();
 
 	syn int FClass.numRealInputs() = realInputs().size();
-	syn lazy ArrayList<FVariable> FClass.realInputs() {
-      ArrayList<FVariable> set = new ArrayList<FVariable>();
-      set.addAll(inputs());
-      set.retainAll(reals());
-      return set;
-     }
-	syn int FVariable.realInputIndex() =
-		myFClass().realInputs().indexOf(this);
+	syn lazy ArrayList<FVariable> FClass.realInputs() =
+      intersection(inputs(), reals());
 	
 	syn int FClass.numIntegerInputs() = integerInputs().size();
-	syn lazy ArrayList<FVariable> FClass.integerInputs() {
-      ArrayList<FVariable> set = new ArrayList<FVariable>();
-      set.addAll(inputs());
-      set.retainAll(integers());
-      return set;
-     }
-	syn int FVariable.integerInputIndex() =
-		myFClass().integerInputs().indexOf(this);
+	syn lazy ArrayList<FVariable> FClass.integerInputs() =
+      intersection(inputs(), integers());
+	
+	syn int FClass.numEnumInputs() = enumInputs().size();
+	syn lazy ArrayList<FVariable> FClass.enumInputs() =
+      intersection(inputs(), enums());
 
 	syn int FClass.numBooleanInputs() = booleanInputs().size();
-	syn lazy ArrayList<FVariable> FClass.booleanInputs() {
-      ArrayList<FVariable> set = new ArrayList<FVariable>();
-      set.addAll(inputs());
-      set.retainAll(booleans());
-      return set;
-     }
-	syn int FVariable.booleanInputIndex() =
-		myFClass().booleanInputs().indexOf(this);
+	syn lazy ArrayList<FVariable> FClass.booleanInputs() =
+      intersection(inputs(), booleans());
 
 	syn int FClass.numStringInputs() = stringInputs().size();
-	syn lazy ArrayList<FVariable> FClass.stringInputs() {
-      ArrayList<FVariable> set = new ArrayList<FVariable>();
-      set.addAll(inputs());
-      set.retainAll(strings());
-      return set;
-     }
-	syn int FVariable.stringInputIndex() =
-		myFClass().stringInputs().indexOf(this);
+	syn lazy ArrayList<FVariable> FClass.stringInputs() =
+      intersection(inputs(), strings());
 
     syn lazy int FClass.numScalarEquations() {
     	int res = 0;
@@ -917,6 +744,22 @@ aspect FlatEnumerations {
 		return l;
 	}
 	
+	/**
+	 * The number of enumeration literals defined in the enumeration this variable is of.
+	 */
+	syn int FEnumVariable.numEnumLiterals() = myFEnumDecl().numEnumLiterals();
+	
+	/**
+	 * The number of enumeration literals defined in this enumeration.
+	 */
+	syn int FEnumDecl.numEnumLiterals() = getFEnumSpecification().numEnumLiterals();
+	
+	/**
+	 * The number of enumeration literals defined in this enumeration.
+	 */
+	syn int FEnumSpecification.numEnumLiterals() = 0;
+	eq FEnumLiteralList.numEnumLiterals() = getNumFEnumLiteral();
+	
 }
 
 aspect FlatCausality {
@@ -940,7 +783,7 @@ aspect FlatTypes {
 	syn boolean AbstractFVariable.isBoolean() = type().isBoolean();
 	syn boolean AbstractFVariable.isString()  = type().isString();
 	syn boolean AbstractFVariable.isRecord()  = type().isRecord();
-	syn boolean AbstractFVariable.isEnum()  = type().isEnum();
+	syn boolean AbstractFVariable.isEnum()    = type().isEnum();
 	
 	syn boolean FExp.isComposite()              = isArray() || type().isRecord();
 	syn boolean FType.isComposite()             = isArray() || isRecord();
@@ -1011,6 +854,10 @@ aspect Attributes {
 		FAttribute a = findAttribute(name);
 		return attributeSet(a) ? attributeExp(a).ceval() : new CValueInteger(def);
 	}
+	syn CValue FVariable.attributeCValueEnum(String name, int def) {
+		FAttribute a = findAttribute(name);
+		return attributeSet(a) ? attributeExp(a).ceval() : new CValueEnum(type(), def);
+	}
 
 	// Quantity attribute
 	syn boolean FVariable.quantityAttributeSet()    = attributeSet(FAttribute.QUANTITY);
@@ -1035,16 +882,20 @@ aspect Attributes {
 	syn FExp    FVariable.minAttributeExp()           = attributeExp(FAttribute.MIN);
 	syn CValue  FRealVariable.minAttributeCValue()    = attributeCValueReal(FAttribute.MIN, -1e20);
 	syn CValue  FIntegerVariable.minAttributeCValue() = attributeCValueInteger(FAttribute.MIN, (int) -1e10);
+	syn CValue  FEnumVariable.minAttributeCValue()    = attributeCValueEnum(FAttribute.MIN, 1);
 	syn double  FRealVariable.minAttribute()          = minAttributeCValue().realValue();
 	syn int     FIntegerVariable.minAttribute()       = minAttributeCValue().intValue();
+	syn int     FEnumVariable.minAttribute()          = minAttributeCValue().intValue();
 
 	// max attribute
 	syn boolean FVariable.maxAttributeSet()           = attributeSet(FAttribute.MAX);
 	syn FExp    FVariable.maxAttributeExp()           = attributeExp(FAttribute.MAX);
 	syn CValue  FRealVariable.maxAttributeCValue()    = attributeCValueReal(FAttribute.MAX, 1e20);
 	syn CValue  FIntegerVariable.maxAttributeCValue() = attributeCValueInteger(FAttribute.MAX, (int) 1e10);
+	syn CValue  FEnumVariable.maxAttributeCValue()    = attributeCValueEnum(FAttribute.MAX, numEnumLiterals());
 	syn double  FRealVariable.maxAttribute()          = maxAttributeCValue().realValue();
 	syn int     FIntegerVariable.maxAttribute()       = maxAttributeCValue().intValue();
+	syn int     FEnumVariable.maxAttribute()          = maxAttributeCValue().intValue();
 
 	// start attribute
 	// TODO: What about independent parameters?
@@ -1060,23 +911,26 @@ aspect Attributes {
 	eq FIntegerVariable.startAttributeCValue()    = attributeCValueInteger(FAttribute.START, 0);
 	eq FBooleanVariable.startAttributeCValue()    = attributeCValueBoolean(FAttribute.START, false);
 	eq FStringVariable.startAttributeCValue()     = attributeCValueString(FAttribute.START);
-	//eq FEnumVariable.startAttributeCValue()     = attributeCValueInteger(FAttribute.START,0);
+	eq FEnumVariable.startAttributeCValue()       = attributeCValueEnum(FAttribute.START, 1);
 
 	syn double  FRealVariable.startAttribute()    = startAttributeCValue().realValue();
 	syn int     FIntegerVariable.startAttribute() = startAttributeCValue().intValue();
 	syn boolean FBooleanVariable.startAttribute() = startAttributeCValue().booleanValue();
 	syn String  FStringVariable.startAttribute()  = startAttributeCValue().stringValue();
-	//syn int  FEnumVariable.startAttribute()  = startAttributeCValue().intValue();
+	syn int     FEnumVariable.startAttribute()    = startAttributeCValue().intValue();
 
 	// fixed attribute
 	syn boolean FVariable.fixedAttributeSet()           = attributeSet(FAttribute.FIXED);
 	syn FExp    FVariable.fixedAttributeExp()           = attributeExp(FAttribute.FIXED);
+	// TODO: merge these? we can override with unknown or something for strings
 	syn CValue  FRealVariable.fixedAttributeCValue()    = attributeCValueBoolean(FAttribute.FIXED, isParameter() || isConstant());
 	syn CValue  FIntegerVariable.fixedAttributeCValue() = attributeCValueBoolean(FAttribute.FIXED, isParameter() || isConstant());
 	syn CValue  FBooleanVariable.fixedAttributeCValue() = attributeCValueBoolean(FAttribute.FIXED, isParameter() || isConstant());
+	syn CValue  FEnumVariable.fixedAttributeCValue()    = attributeCValueBoolean(FAttribute.FIXED, isParameter() || isConstant());
 	syn boolean FRealVariable.fixedAttribute()          = fixedAttributeCValue().booleanValue();
 	syn boolean FIntegerVariable.fixedAttribute()       = fixedAttributeCValue().booleanValue();	
 	syn boolean FBooleanVariable.fixedAttribute()       = fixedAttributeCValue().booleanValue();	
+	syn boolean FEnumVariable.fixedAttribute()          = fixedAttributeCValue().booleanValue();	
 		
 	// Nominal attribute
 	syn boolean FRealVariable.nominalAttributeSet()    = attributeSet(FAttribute.NOMINAL);
@@ -1114,33 +968,17 @@ aspect FVariableUses {
 		     ((FVariable) myFV()).isParameter()
 		to AbstractFVariable.dependentParameters() for myFV();
 	
-	syn lazy ArrayList<FRealVariable> AbstractFVariable.dependentRealParameters() {
-      ArrayList<FRealVariable> set = new ArrayList<FRealVariable>();
-      set.addAll(myFClass().reals());
-      set.retainAll(dependentParameters());
-      return set;
-     }
+	syn lazy ArrayList<FRealVariable> AbstractFVariable.dependentRealParameters() =
+        FClass.intersection(myFClass().reals(), dependentParameters());
 
-	syn lazy ArrayList<FIntegerVariable> AbstractFVariable.dependentIntegerParameters() {
-	      ArrayList<FIntegerVariable> set = new ArrayList<FIntegerVariable>();
-	      set.addAll(myFClass().integers());
-	      set.retainAll(dependentParameters());
-	      return set;
-	     }
+	syn lazy ArrayList<FIntegerVariable> AbstractFVariable.dependentIntegerParameters() =
+	    FClass.intersection(myFClass().integers(), dependentParameters());
 
-	syn lazy ArrayList<FBooleanVariable> AbstractFVariable.dependentBooleanParameters() {
-	      ArrayList<FBooleanVariable> set = new ArrayList<FBooleanVariable>();
-	      set.addAll(myFClass().booleans());
-	      set.retainAll(dependentParameters());
-	      return set;
-	     }
+	syn lazy ArrayList<FBooleanVariable> AbstractFVariable.dependentBooleanParameters() =
+	    FClass.intersection(myFClass().booleans(), dependentParameters());
 
-	syn lazy ArrayList<FStringVariable> AbstractFVariable.dependentStringParameters() {
-	      ArrayList<FStringVariable> set = new ArrayList<FStringVariable>();
-	      set.addAll(myFClass().strings());
-	      set.retainAll(dependentParameters());
-	      return set;
-	     }
+	syn lazy ArrayList<FStringVariable> AbstractFVariable.dependentStringParameters() =
+	    FClass.intersection(myFClass().strings(), dependentParameters());
 	
 	/**
 	 * \brief Collection attribute returning all algebraic variables (FVariables)
@@ -1267,48 +1105,56 @@ aspect FlatDiagnostics {
 		str.append("Diagnostics for flattened class " + name() + "\n");
 
 		str.append("Number of independent constants:              " + 
-		  numIndependentConstants() + "\n");
+				numIndependentConstants() + "\n");
 		str.append("  Number of Real independent constants:       " + 
-		  numIndependentRealConstants() + "\n");
+				numIndependentRealConstants() + "\n");
 		str.append("  Number of Integer independent constants:    " + 
-		  numIndependentIntegerConstants() + "\n");
+				numIndependentIntegerConstants() + "\n");
+		str.append("  Number of Enum independent constants:       " + 
+				numIndependentEnumConstants() + "\n");
 		str.append("  Number of Boolean independent constants:    " + 
-		  numIndependentBooleanConstants() + "\n");
+				numIndependentBooleanConstants() + "\n");
 		str.append("  Number of String independent constants:     " + 
-		  numIndependentStringConstants() + "\n");
+				numIndependentStringConstants() + "\n");
 
 		str.append("Number of dependent constants:                " + 
-		  numDependentConstants() + "\n");
+				numDependentConstants() + "\n");
 		str.append("  Number of Real dependent constants:         " + 
-		  numDependentRealConstants() + "\n");
+				numDependentRealConstants() + "\n");
 		str.append("  Number of Integer dependent constants:      " + 
-		  numDependentIntegerConstants() + "\n");
+				numDependentIntegerConstants() + "\n");
+		str.append("  Number of Enum dependent constants:         " + 
+				numDependentEnumConstants() + "\n");
 		str.append("  Number of Boolean dependent constants:      " + 
-		  numDependentBooleanConstants() + "\n");
+				numDependentBooleanConstants() + "\n");
 		str.append("  Number of String dependent constants:       " + 
-		  numDependentStringConstants() + "\n");
+				numDependentStringConstants() + "\n");
 
 		str.append("Number of independent parameters:             " + 
-		  numIndependentParameters() + "\n");
+				numIndependentParameters() + "\n");
 		str.append("  Number of Real independent parameters:      " + 
-		  numIndependentRealParameters() + "\n");
+				numIndependentRealParameters() + "\n");
 		str.append("  Number of Integer independent parameters:   " + 
-		  numIndependentIntegerParameters() + "\n");
+				numIndependentIntegerParameters() + "\n");
+		str.append("  Number of Enum independent parameters:      " + 
+				numIndependentEnumParameters() + "\n");
 		str.append("  Number of Boolean independent parameters:   " + 
-		  numIndependentBooleanParameters() + "\n");
+				numIndependentBooleanParameters() + "\n");
 		str.append("  Number of String independent parameters:    " + 
-		  numIndependentStringParameters() + "\n");
+				numIndependentStringParameters() + "\n");
 		  		  
 		str.append("Number of dependent parameters:               " + 
-		  numDependentParameters() + "\n");
+				numDependentParameters() + "\n");
 		str.append("  Number of Real dependent parameters:        " + 
-		  numDependentRealParameters() + "\n");
+				numDependentRealParameters() + "\n");
 		str.append("  Number of Integer dependent parameters:     " + 
-		  numDependentIntegerParameters() + "\n");
+				numDependentIntegerParameters() + "\n");
+		str.append("  Number of Enum dependent parameters:        " + 
+				numDependentEnumParameters() + "\n");
 		str.append("  Number of Boolean dependent parameters:     " + 
-		  numDependentBooleanParameters() + "\n");
+				numDependentBooleanParameters() + "\n");
 		str.append("  Number of String dependent parameters:      " + 
-		  numDependentStringParameters() + "\n");
+				numDependentStringParameters() + "\n");
 		
 		str.append("Number of variables :                         " + 
 				numVariables() + "\n");
@@ -1316,28 +1162,32 @@ aspect FlatDiagnostics {
 				numRealVariables() + "\n");
 		str.append("  Number of Integer variables:                " + 
 				numIntegerVariables() + "\n");
+		str.append("  Number of Enum variables:                   " + 
+				numEnumVariables() + "\n");
 		str.append("  Number of Boolean variables:                " + 
 				numBooleanVariables() + "\n");
 		str.append("  Number of String variables:                 " + 
 				numStringVariables() + "\n");
 
 		str.append("Number of Real differentiated variables:      " + 
-				  numDifferentiatedRealVariables() + "\n"); 
+				numDifferentiatedRealVariables() + "\n"); 
 		str.append("Number of Real derivative variables:          " + 
-				  numDerivativeVariables() + "\n"); 
+				numDerivativeVariables() + "\n"); 
 		str.append("Number of Real algebraic variables:           " + 
-				  numAlgebraicRealVariables() + "\n");
+				numAlgebraicRealVariables() + "\n");
 
 		str.append("Number of inputs:                             " + 
-		  numInputs() + "\n");
+				numInputs() + "\n");
 		str.append("  Number of Real inputs:                      " + 
-		  numRealInputs() + "\n");
+				numRealInputs() + "\n");
 		str.append("  Number of Integer inputs:                   " + 
-		  numIntegerInputs() + "\n");
+				numIntegerInputs() + "\n");
+		str.append("  Number of Enum inputs:                      " + 
+				numEnumInputs() + "\n");
 		str.append("  Number of Boolean inputs:                   " + 
-		  numBooleanInputs() + "\n");
+				numBooleanInputs() + "\n");
 		str.append("  Number of String inputs:                    " + 
-		  numStringInputs() + "\n");
+				numStringInputs() + "\n");
 				
 		str.append("Number of discrete variables :                " + 
 				numDiscreteVariables() + "\n");
@@ -1345,36 +1195,40 @@ aspect FlatDiagnostics {
 				numDiscreteRealVariables() + "\n");
 		str.append("  Number of Integer discrete variables:       " + 
 				numDiscreteIntegerVariables() + "\n");
+		str.append("  Number of Enum discrete variables:          " + 
+				numDiscreteEnumVariables() + "\n");
 		str.append("  Number of Boolean discrete variables:       " + 
 				numDiscreteBooleanVariables() + "\n");
 		str.append("  Number of String discrete variables:        " + 
 				numDiscreteStringVariables() + "\n");
 		
 		str.append("Number of equations:                          " + 
-		  numEquations() + "\n");
+				numEquations() + "\n");
 		
 		str.append("Number of variables with binding expression:  " + 
-		  numVariablesWithBindingExp() + "\n");
+				numVariablesWithBindingExp() + "\n");
 		str.append("  Number of Real variables with binding exp:  " + 
-		  numRealVariablesWithBindingExp() + "\n");
+				numRealVariablesWithBindingExp() + "\n");
 		str.append("  Number of Integer variables binding exp:    " + 
-		  numIntegerVariablesWithBindingExp() + "\n");
+				numIntegerVariablesWithBindingExp() + "\n");
+		str.append("  Number of Enum variables binding exp:       " + 
+				numEnumVariablesWithBindingExp() + "\n");
 		str.append("  Number of Boolean variables binding exp:    " + 
-		  numBooleanVariablesWithBindingExp() + "\n");
+				numBooleanVariablesWithBindingExp() + "\n");
 		str.append("  Number of String variables binding exp:     " + 
-		  numStringVariablesWithBindingExp() + "\n");
+				numStringVariablesWithBindingExp() + "\n");
 			
 		str.append("Total number of equations:                    " + 
-				  (numEquations()+numVariablesWithBindingExp()) + "\n");
+				(numEquations()+numVariablesWithBindingExp()) + "\n");
 	
 		str.append("Number of initial equations:                  " + 
-		  numInitialEquations() + "\n");
+				numInitialEquations() + "\n");
 
 		str.append("Number of relational exps in equations:       " + 
-				  (numRelExpInEquations()) + "\n");
+				numRelExpInEquations() + "\n");
 
 		str.append("Number of relational exps in init equations:  " + 
-				  (numRelExpInInitialEquations()) + "\n");
+				numRelExpInInitialEquations() + "\n");
 		
 		str.append("\n");
 		
@@ -1446,16 +1300,8 @@ aspect FlatDiagnostics {
 			str.append(": number of uses: " + fv.uses().size() + ", isLinear: " 
 					+ fv.isLinear());
 			if (fv.hasBindingExp()) {
-				str.append(" evaluated binding exp: ");
-				if (fv.isReal()) {
-					str.append(fv.getBindingExp().ceval().realValue());
-				} else if (fv.isInteger()) {
-					str.append(fv.getBindingExp().ceval().intValue());
-				} else if (fv.isBoolean()) {
-					str.append(fv.getBindingExp().ceval().booleanValue());
-				} else if (fv.isString()) {
-					str.append(fv.getBindingExp().ceval().stringValue());
-				}
+				str.append(", evaluated binding exp: ");
+				str.append(fv.getBindingExp().ceval());
 			}
 			str.append("\n");
 		}

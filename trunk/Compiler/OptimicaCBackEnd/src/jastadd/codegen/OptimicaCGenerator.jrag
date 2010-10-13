@@ -145,31 +145,27 @@ public class OptimicaCGenerator extends CGenerator {
 			  myGenerator,foptclass);
 		}
 	
+		private void generateVar(PrintStream genPrinter, FVariable fv, String offset, int index) {
+			genPrinter.print("#define ");
+			genPrinter.print(fv.name_C());
+			genPrinter.print("_p_(j) ((*(jmi->z))[jmi->offs_");
+			genPrinter.print(offset);
+			genPrinter.print("+j*(jmi->n_real_dx + jmi->n_real_x + jmi->n_real_u + jmi->n_real_w) +");
+			genPrinter.print(index);
+			genPrinter.print("])\n");
+		}
+
+		private void generateVarList(PrintStream genPrinter, Iterable<? extends FVariable> list, String offset) {
+			int index = 0;
+			for (FVariable fv : list)
+				generateVar(genPrinter, fv, offset, index++);
+		}
+
 		public void generate(PrintStream genPrinter) {
-			for (FVariable fv : foptclass.derivativeVariables()) {
-				genPrinter.print("#define " + fv.name_C());
-				genPrinter.print("_p_(j) ((*(jmi->z))[jmi->offs_real_dx_p+" + 
-						"j*(jmi->n_real_dx + jmi->n_real_x + jmi->n_real_u + jmi->n_real_w) +" +
-						fv.derivativeVariableIndex() + "])\n");
-			}
-			for (FVariable fv : foptclass.differentiatedRealVariables()) {
-				genPrinter.print("#define " + fv.name_C());
-				genPrinter.print("_p_(j) ((*(jmi->z))[jmi->offs_real_x_p+" + 
-						"j*(jmi->n_real_dx + jmi->n_real_x + jmi->n_real_u + jmi->n_real_w) +" +
-						fv.differentiatedRealVariableIndex() + "])\n");
-			}
-			for (FVariable fv : foptclass.realInputs()) {
-				genPrinter.print("#define " + fv.name_C());
-				genPrinter.print("_p_(j) ((*(jmi->z))[jmi->offs_real_u_p+" + 
-						"j*(jmi->n_real_dx + jmi->n_real_x + jmi->n_real_u + jmi->n_real_w) +" +
-						fv.realInputIndex() + "])\n");
-			}
-			for (FVariable fv : foptclass.algebraicRealVariables()) {
-				genPrinter.print("#define " + fv.name_C());
-				genPrinter.print("_p_(j) ((*(jmi->z))[jmi->offs_real_w_p+" +
-						"j*(jmi->n_real_dx + jmi->n_real_x + jmi->n_real_u + jmi->n_real_w) +" +
-						fv.algebraicRealVariableIndex() + "])\n");
-			}
+			generateVarList(genPrinter, foptclass.derivativeVariables(),         "real_dx_p");
+			generateVarList(genPrinter, foptclass.differentiatedRealVariables(), "real_x_p");
+			generateVarList(genPrinter, foptclass.realInputs(),                  "real_u_p");
+			generateVarList(genPrinter, foptclass.algebraicRealVariables(),      "real_w_p");
 		}
 	}
 
