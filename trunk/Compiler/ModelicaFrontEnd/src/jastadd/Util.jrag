@@ -1403,6 +1403,16 @@ aspect ComponentDeclMethods {
 	syn boolean ComponentDecl.isStream()  = hasTypePrefixFlow() && getTypePrefixFlow().isStream();
 	syn boolean TypePrefixFlow.isStream() = false;
 	eq Stream.isStream()                  = true;
+      
+    /**
+     * Check if a ComponentDecl is declared inner.
+     */
+    syn boolean ComponentDecl.isInner() = hasInner();
+    
+    /**
+     * Check if a ComponentDecl is declared outer.
+     */
+    syn boolean ComponentDecl.isOuter() = hasOuter();
 
     /**
      * Check if a ComponentDecl is declared parameter.
@@ -1414,20 +1424,6 @@ aspect ComponentDeclMethods {
                 return true;
     
         return false;
-    }
-      
-    /**
-     * Check if a ComponentDecl is declared inner.
-     */
-    syn boolean ComponentDecl.isInner() {
-        return hasInner();
-    }
-    
-    /**
-     * Check if a ComponentDecl is declared outer.
-     */
-    syn boolean ComponentDecl.isOuter() {
-        return hasOuter();
     }
     
     

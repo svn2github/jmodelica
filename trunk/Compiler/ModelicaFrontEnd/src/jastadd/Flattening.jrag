@@ -385,43 +385,15 @@ aspect Flattening {
 		myInstClass().flattenRecord(fc);
 	}
 	
-	public FVariable InstEnum.createFEnumVariable() {
-	
-		FEnumVariable fv = createEmptyFVariable();
-		
+	public FVariable InstEnum.createFVariable() {
+		FEnumVariable fv = (FEnumVariable) super.createFVariable();
 		fv.setEnum(new FQName(myInstClass().qualifiedName()));
-		
-		fv.setFVisibilityType(getComponentDecl().isPublic() ? 
-				new FPublicVisibilityType() : new FProtectedVisibilityType());
-		
-		fv.setFTypePrefixVariability((FTypePrefixVariability) variability().fullCopy());
- 		
-		// Only set prefix for top level inputs and outputs
-		// TODO: Make sure that prefixes specified in short class declarations are propagated
-		if (isInput() && getFQName().getNumFQNamePart()==1)
-			fv.setFTypePrefixInputOutput(new FInput());
-		if (isOutput() && getFQName().getNumFQNamePart()==1)
-			fv.setFTypePrefixInputOutput(new FOutput());
-		
-		/*
-		addAttributesToFV(fv.getFAttributes());
-		*/
-		
-		FExp e = flattenBindingFExp();
-		if (e != null)
-			fv.setBindingExp(e);
-		
-		if (getComponentDecl().getComment().hasStringComment())
-			fv.setFStringComment(new FStringComment(getComponentDecl().getComment().getStringComment().getComment()));
-				
-		fv.setFQName(getFQName());
-		
 		return fv;
 	}
 
 	public void InstEnum.flatten(FClass fc) {
 		myInstClass().flatten(fc);
-		fc.addFVariable(createFEnumVariable());
+		fc.addFVariable(createFVariable());
 	}
 	
 	public FEnumLiteral InstEnumLiteral.createFEnumLiteral() {
@@ -476,7 +448,7 @@ aspect Flattening {
 		// TODO: Maybe this needs a more generalized solution? Or to be moved to instantiation step?
 		PrimitiveClassDecl pcd = (PrimitiveClassDecl) myInstClass().getBaseInstClass().getClassDecl();
 		for (ComponentDecl c : pcd.getComponentDecls()) {
-			if (c.isParameter()) {
+			if (c.isParameter() && c.hasModification()) {
 				FIdDecl name = new FIdDecl(new FQName(c.getName().name()));
 				boolean exists = false;
 				for (FAttribute a2 : attr)

@@ -26,9 +26,9 @@ end EnumerationTests.EnumerationTest1;
          description="Test basic use of enumerations",
          flatModel="
 fclass EnumerationTests.EnumerationTest2
- parameter EnumerationTests.EnumerationTest2.Size a1.t_shirt_size = EnumerationTests.EnumerationTest2.Size.medium;
- parameter EnumerationTests.EnumerationTest2.Size a2.t_shirt_size = EnumerationTests.EnumerationTest2.Size.medium;
- parameter EnumerationTests.EnumerationTest2.Size s = EnumerationTests.EnumerationTest2.Size.large;
+ parameter EnumerationTests.EnumerationTest2.Size a1.t_shirt_size(start = EnumerationTests.EnumerationTest2.Size.large) = EnumerationTests.EnumerationTest2.Size.medium /* EnumerationTests.EnumerationTest2.Size.medium */;
+ parameter EnumerationTests.EnumerationTest2.Size a2.t_shirt_size(start = EnumerationTests.EnumerationTest2.Size.large) = EnumerationTests.EnumerationTest2.Size.medium /* EnumerationTests.EnumerationTest2.Size.medium */;
+ parameter EnumerationTests.EnumerationTest2.Size s = EnumerationTests.EnumerationTest2.Size.large /* EnumerationTests.EnumerationTest2.Size.large */;
 
  type EnumerationTests.EnumerationTest2.Size = enumeration(small \"1st\", medium, large, xlarge);
 end EnumerationTests.EnumerationTest2;
@@ -37,7 +37,7 @@ end EnumerationTests.EnumerationTest2;
     type Size = enumeration(small "1st", medium, large, xlarge); 
 	  
     model A
-      parameter Size t_shirt_size = Size.medium; 
+      parameter Size t_shirt_size(start = Size.large) = Size.medium; 
 	end A;
 	
     A a1;
