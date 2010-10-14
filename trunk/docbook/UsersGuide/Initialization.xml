@@ -9,7 +9,7 @@
   <title>Initialization</title>
 
   <section>
-    <title>Initialization</title>
+    <title>Solving DAE initialization problems</title>
 
     <para>Before a model can be simulated it must be initialized, i.e.
     consistent initial values must be computed. To do this, JModelica.org
@@ -27,59 +27,125 @@ init_model = JMUModel(model_name)
 init_result = init_model.initialize()</programlisting>
 
     <para>The JMUModel instance <literal>init_model</literal> is now
-    initialized and is ready to be simulated.</para>
+    initialized and is ready to be simulated. </para>
 
-    <section>
-      <title>How JModelica.org creates the initialization system of
-      equations</title>
+    <para>The interactive help for the initialize method is shown by the
+    command:</para>
 
-      <para>To find a set of consistent initial values a system of non-linear
-      equations, called the system of initialization equations, is solved.
-      This system is composed from the DAE equations, the initial equations,
-      some resulting from start attributes with the fixed attribute set to
-      true. Start attributes with the fixed attribute set to false are treated
-      as initial guesses for the numerical algorithm used to solve the
-      initialization problem</para>
+    <programlisting>&gt;&gt;&gt; help(init_model.initialize)   
+    The initialization method depends on which algorithm is used, this can 
+    be set with the function argument 'algorithm'. Options for the algorithm 
+    are passed as option classes or as pure dicts. See 
+    JMUModel.initialize_options for more details.
+        
+    The default algorithm for this function is IpoptInitializationAlg. 
+        
+    Parameters::
+        
+        algorithm --
+            The algorithm which will be used for the initialization is 
+            specified by passing the algorithm class as string or class 
+            object in this argument. 'algorithm' can be any class which 
+            implements the abstract class AlgorithmBase (found in 
+            algorithm_drivers.py). In this way it is possible to write own 
+            algorithms and use them with this function.
+            Default: 'IpoptInitializationAlg'
+            
+        options -- 
+            The options that should be used in the algorithm. For details on 
+            the options do:
+            
+                &gt;&gt; myModel = JMUModel(...)
+                &gt;&gt; opts = myModel.initialize_options()
+                &gt;&gt; opts?
+    
+            Valid values are: 
+                - A dict which gives IpoptInitializationAlgOptions with 
+                  default values on all options except the ones listed in 
+                  the dict. Empty dict will thus give all options with 
+                  default values.
+                - An options object.
+            Default: Empty dict
+    
+    Returns::
+        
+        Result object, subclass of algorithm_drivers.ResultBase.
+</programlisting>
 
-      <para>Some initialization algorithms require the system of initial
-      equations to be well defined in the sense that the number of variables
-      must be equal to the number of equations. If this is not the case, the
-      </para>
+    <para>Options for the available initialization algorithms can be set by
+    first retrieving an options object using the <literal>JMUModel</literal>
+    method <literal>initialize_options:</literal><programlisting>&gt;&gt;&gt; help(init_model.initialize_options)
+    Get an instance of the initialize options class, prefilled with default 
+    values. If called without argument then the options class for the 
+    default initialization algorithm will be returned.
+    
+    Parameters::
+    
+        algorithm --
+            The algorithm for which the options class should be fetched. 
+            Possible values are: 'IpoptInitializationAlg', 'KInitSolveAlg'.
+            Default: 'IpoptInitializationAlg'
+            
+    Returns::
+    
+        Options class for the algorithm specified with default values.</programlisting>Having
+    solved the initialization problem, the result of the initialization can be
+    retrieved from the return result object:</para>
 
-      <itemizedlist>
-        <listitem>
-          <para>If the number of equations is greater than the number of
-          variables the system is overdetermined. Such a system may not have a
-          solution, and will be treated as ill-defined. An exception is thrown
-          in this case.</para>
-        </listitem>
+    <programlisting>x = init_model['x']
+y = init_model['y']
+</programlisting>
+  </section>
 
-        <listitem>
-          <para>If the number of equations is less than the number of
-          variables the system is underdetermined and such a system has
-          infinitely many solutions. In this case, the compiler tries to
-          balance the system by setting some fixed attributes to
-          <literal>true</literal>. So if the user supplies too few initial
-          conditions, some variables with the attribute
-          <literal>fixed</literal> set to <literal>false</literal> may be
-          changed to <literal>true</literal> during initialization.</para>
-        </listitem>
-      </itemizedlist>
-    </section>
+  <section>
+    <title>How JModelica.org creates the initialization system of
+    equations</title>
 
-    <section>
-      <title>Initialization algorithms</title>
+    <para>To find a set of consistent initial values a system of non-linear
+    equations, called the system of initialization equations, is solved. This
+    system is composed from the DAE equations, the initial equations, some
+    resulting from start attributes with the fixed attribute set to true.
+    Start attributes with the fixed attribute set to false are treated as
+    initial guesses for the numerical algorithm used to solve the
+    initialization problem</para>
 
-      <para>JModelica.org has the ability to support different initialization
-      algorithms. The choice of algorithm is done when calling the
-      <literal>initialize</literal>:</para>
+    <para>Some initialization algorithms require the system of initial
+    equations to be well defined in the sense that the number of variables
+    must be equal to the number of equations. If this is not the case,
+    the</para>
 
-      <programlisting># Solve the DAE initialization system
+    <itemizedlist>
+      <listitem>
+        <para>If the number of equations is greater than the number of
+        variables the system is overdetermined. Such a system may not have a
+        solution, and will be treated as ill-defined. An exception is thrown
+        in this case.</para>
+      </listitem>
+
+      <listitem>
+        <para>If the number of equations is less than the number of variables
+        the system is underdetermined and such a system has infinitely many
+        solutions. In this case, the compiler tries to balance the system by
+        setting some fixed attributes to <literal>true</literal>. So if the
+        user supplies too few initial conditions, some variables with the
+        attribute <literal>fixed</literal> set to <literal>false</literal> may
+        be changed to <literal>true</literal> during initialization.</para>
+      </listitem>
+    </itemizedlist>
+  </section>
+
+  <section>
+    <title>Initialization algorithms</title>
+
+    <para>JModelica.org has the ability to support different initialization
+    algorithms. The choice of algorithm is done when calling the
+    <literal>initialize</literal>:</para>
+
+    <programlisting># Solve the DAE initialization system
 init_result = init_model.initialize(algorithm='IpoptInitializationAlg')</programlisting>
 
-      <para>In the example above the default algorithm using IPOPT is chosen.
-      This is currently the only fully implemented initialization
-      algorithm.</para>
-    </section>
+    <para>In the example above the default algorithm using IPOPT is chosen.
+    This is currently the only fully implemented initialization
+    algorithm.</para>
   </section>
 </chapter>

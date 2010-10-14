@@ -357,6 +357,17 @@ compile_jmu(model_name, mo_file)
                   <entry>If this option is <literal>true</literal>, index
                   reduction is performed.</entry>
                 </row>
+
+                <row>
+                  <entry>enable_symbolic_diagnosis</entry>
+
+                  <entry>true</entry>
+
+                  <entry>boolean</entry>
+
+                  <entry>Enable this option to invoke the structural error
+                  diagnosis based on the matching algorithm.</entry>
+                </row>
               </tbody>
             </tgroup>
           </table></para>

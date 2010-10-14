@@ -39,7 +39,7 @@
     Consider the optimal control problem for the Van der Pol oscillator
     model:</para>
 
-    <programlisting>optimization VDP_Opt (objective = cost(finalTime),
+    <programlisting language="optimica">optimization VDP_Opt (objective = cost(finalTime),
                       startTime = 0,
                       finalTime = 20)
 
@@ -335,17 +335,17 @@ x1 = res['x1']</programlisting>
           <tgroup cols="3">
             <colspec align="left" colname="col–opt" colwidth="1*" />
 
-            <colspec align="left" colname="col–desc" colwidth="2*" />
+            <colspec align="left" colname="col–desc" colwidth="1*" />
 
-            <colspec align="left" colname="col–def" colwidth="1*" />
+            <colspec align="left" colname="col–def" colwidth="2*" />
 
             <thead>
               <row>
                 <entry align="center">Option</entry>
 
-                <entry align="center">Description</entry>
+                <entry align="center">Default</entry>
 
-                <entry align="center">Default value</entry>
+                <entry align="center">Description</entry>
               </row>
             </thead>
 
@@ -353,32 +353,34 @@ x1 = res['x1']</programlisting>
               <row>
                 <entry><literal>n_e</literal></entry>
 
-                <entry>Number of elements of the finite element mesh.</entry>
-
                 <entry>50</entry>
+
+                <entry>Number of elements of the finite element mesh.</entry>
               </row>
 
               <row>
                 <entry><literal>n_cp</literal></entry>
 
-                <entry>Number of collocation points in each element. Values
-                between 1 and 10 are supported</entry>
-
                 <entry>3</entry>
+
+                <entry>Number of collocation points in each element. Values
+                between 1 and 10 are supported.</entry>
               </row>
 
               <row>
                 <entry><literal>hs</literal></entry>
 
+                <entry>Equidistant points using default n_e</entry>
+
                 <entry>A vector containing n_e elements representing the
                 finite element lengths. The sum of all element should equal to
                 1.</entry>
-
-                <entry>Equidistant points using default n_e</entry>
               </row>
 
               <row>
                 <entry><literal>blocking_factors</literal></entry>
+
+                <entry>None (not used)</entry>
 
                 <entry>A vector of blocking factors. Blocking factors are
                 specified by a vector of integers, where each entry in the
@@ -399,24 +401,24 @@ x1 = res['x1']</programlisting>
                 the number of elements is 4, the normalized blocking factor
                 vector in the example is [2,2]. If the number of elements is
                 10, then the normalized vector is [2,1,7].</entry>
-
-                <entry>None (not used)</entry>
               </row>
 
               <row>
                 <entry><literal>init_traj</literal></entry>
 
+                <entry>None (i.e. not used, set this argument to activate
+                initialization)</entry>
+
                 <entry>Variable trajectory data used for initialization of the
                 optimization problem. The data is represented by an object of
                 the type
-                <literal>jmodelica.io.DymolaResultTextual</literal>.</entry>
-
-                <entry>None (i.e. not used, set this argument to activate
-                initialization)</entry>
+                <literal>jmodelica.io.DymolaResultTextual.</literal></entry>
               </row>
 
               <row>
                 <entry><literal>result_mode</literal></entry>
+
+                <entry>'default'</entry>
 
                 <entry>Specifies the output format of the optimization result.
                 'default' gives the the optimization result at the collocation
@@ -427,59 +429,57 @@ x1 = res['x1']</programlisting>
                 element. 'mesh_interpolation' computes the values of the
                 variable trajectories at points defined by the option
                 'result_mesh'.</entry>
-
-                <entry>'default'</entry>
               </row>
 
               <row>
                 <entry><literal>n_interpolation_points</literal></entry>
 
+                <entry>20</entry>
+
                 <entry>Number of interpolation points in each finite element
                 if the result reporting option result_mode is set to
                 'element_interpolation'.</entry>
-
-                <entry>20</entry>
               </row>
 
               <row>
                 <entry><literal>result_mesh</literal></entry>
 
+                <entry>None</entry>
+
                 <entry>A vector of time points at which the the optimization
                 result is computed. This option is used if result_mode is set
                 to 'mesh_interpolation'.</entry>
-
-                <entry>None</entry>
               </row>
 
               <row>
                 <entry><literal>result_file_name</literal></entry>
 
+                <entry>Empty string (default generated file name will be
+                used)</entry>
+
                 <entry>Specifies the name of the file where the optimization
                 result is written. Setting this option to an empty string
                 results in a default file name that is based on the name of
                 the optimization class.</entry>
-
-                <entry>Empty string (default generated file name will be
-                used)</entry>
               </row>
 
               <row>
                 <entry><literal>result_format</literal></entry>
 
+                <entry>'txt'</entry>
+
                 <entry>Specifies in which format to write the result.
                 Currently only textual mode is supported.</entry>
-
-                <entry>'txt'</entry>
               </row>
 
               <row>
                 <entry><literal>write_scaled_result</literal></entry>
 
+                <entry>False</entry>
+
                 <entry>Write the scaled optimization result if set to true.
                 This option is only applicable when automatic variable scaling
                 is enabled. Only for debugging use.</entry>
-
-                <entry>False</entry>
               </row>
             </tbody>
           </tgroup>
@@ -2773,26 +2773,48 @@ plt.show()
   </section>
 
   <section>
-    <title>Steady state problems</title>
-
-    <para></para>
-  </section>
-
-  <section>
-    <title>Initial guesses</title>
-
-    <para></para>
-  </section>
-
-  <section>
     <title>Scaling</title>
 
-    <para></para>
-  </section>
+    <para>Many physical models contains variables with values that differs
+    several orders of magnitude. A typical example is thermodynamic models
+    containing pressures, temperatures and mass flows. Such large differences
+    in values may have a severe deteriorating effect on the performance of
+    numerical algorithms, and may in some cases even lead to the algorithm
+    failing. In order to relieve the user from the burden of manually scaling
+    variables, Modelica offers the <literal>nominal</literal> attribute, which
+    can be used to automatically scale a model. Consider the Modelica variable
+    declaration:</para>
 
-  <section>
-    <title>Generating output</title>
+    <programlisting>Real pressure(start=101.3e3, nominal=1e5);</programlisting>
 
-    <para></para>
+    <para>Here, the <literal>nominal</literal> attribute is used to specify
+    that the variable pressure takes on values which are about 1e5. In order
+    to use <literal>nominal</literal> attributes for scaling, the compiler
+    option <literal>enable_variable_scaling</literal> is set to
+    <literal>True</literal>, see Section 2.2.2. All variables with a nominal
+    attribute set to true, is then scaled by dividing the variable value with
+    its nominal value, i.e., from an algorithm point of view, all variables
+    will take on values close to one. Notice that variables typically vary
+    during a simulation or optimization and that it is therefore not possible
+    to obtain perfect scaling. In order to ensure that model equations are
+    fulfilled, each occurrence of a variable is multiplied with its nominal
+    value in equations. For example, the equation: </para>
+
+    <programlisting>T = f(p)</programlisting>
+
+    <para>is replaced by the equation</para>
+
+    <programlisting>T_scaled*T_nom = f(p_scaled*T_nom)</programlisting>
+
+    <para>when <literal>enable_variable_scaling</literal> is set to
+    <literal>true.</literal></para>
+
+    <para>For debugging purposes, is is sometimes useful to write a
+    simulation/optimization/initialization result to file in scaled format, in
+    order to detect if there are some variables which requires additional
+    scaling. The option write_scaled_result has been introduced as an option
+    to the <literal>initialize</literal>, <literal>simulate</literal> and
+    <literal>optimize</literal> methods of <literal>JMUModel</literal> for
+    this purpose.</para>
   </section>
 </chapter>

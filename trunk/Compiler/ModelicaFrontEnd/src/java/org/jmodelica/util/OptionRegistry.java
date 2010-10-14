@@ -74,8 +74,7 @@ public class OptionRegistry {
 					"optimal control problems encoded in Optimica are converted to fixed " + 
 					"interval problems by scaling of the derivative variables."),
 			STRUCTURAL_DIAGNOSIS ("enable_structural_diagnosis", true, 
-					"Enable this option to invoke error diagnosis based on the matching algorithm. " +
-					"Experimental."),
+					"Enable this option to invoke the structural error diagnosis based on the matching algorithm."),
 			ADD_INIT_EQ ("automatic_add_initial_equations", true, 
 					"When this option is set to true (default is true), then additional initial " +
 					"equations are added to the model based on a the result of a matching algorithm. " +
