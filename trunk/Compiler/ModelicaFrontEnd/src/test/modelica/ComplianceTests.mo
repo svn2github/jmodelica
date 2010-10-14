@@ -448,6 +448,7 @@ model DuplicateVariables_ComplErr
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.ComplianceErrorTestCase(
          name="DuplicateVariables_ComplErr",
+         enable_structural_diagnosis=false,
          description="Compliance error test checking for duplicate variables",
          errorMessage="
 1 Errors found:

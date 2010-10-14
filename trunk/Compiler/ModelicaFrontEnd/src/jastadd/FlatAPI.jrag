@@ -513,7 +513,9 @@ aspect FlatAPI {
 		ArrayList<FAbstractEquation> l = new ArrayList<FAbstractEquation>();
 		for (FEquationBlock b : getFEquationBlocks()) {
 			for (FAbstractEquation e : b.getFAbstractEquations()) {
-				l.add(e);
+				if (!e.isIgnored()) {
+					l.add(e);
+				}
 			}
 		}
 		return l;
@@ -662,7 +664,12 @@ aspect FlatAPI {
 	syn lazy boolean FVariable.isDerivativeVariable() = false;
 	eq FDerivativeVariable.isDerivativeVariable() = true;
 	syn lazy boolean FVariable.isAlgebraicVariable() = 
-		  myFClass().algebraicRealVariables().contains(this);
+		  myFClass().algebraicRealVariables().contains(this) ||
+		  myFClass().discreteRealVariables().contains(this) ||
+		  myFClass().enumVariables().contains(this) ||
+		  myFClass().integerVariables().contains(this) || 
+		  myFClass().booleanVariables().contains(this) ||
+		  myFClass().stringVariables().contains(this);
 	syn lazy boolean FVariable.isDiscreteVariable() = 
 		  myFClass().discreteVariables().contains(this);
 
@@ -1416,6 +1423,8 @@ aspect FlatDiagnostics {
 				str.append(fv.name() + " ");
 			}
 			str.append("\n");
+//			str.append(fe.getClass().getName() + " " + fe.prettyPrint(""));
+//			str.append("\n");
 			i++;
 		}
 		

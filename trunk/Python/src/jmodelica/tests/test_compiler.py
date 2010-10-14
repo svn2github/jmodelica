@@ -353,8 +353,11 @@ class Test_Compiler:
             suffix = '.dylib'
         else:
             suffix = '.so'
-            
+
+        # Turn off structural analysis since the problem is of high index
+        mc.set_boolean_option("enable_structural_diagnosis",False)    
         mc.compile_model(cpath, [])
+        mc.set_boolean_option("enable_structural_diagnosis",True)    
         
         fname = cpath.replace('.','_')
         assert os.access(fname+'.xml',os.F_OK) == True, \

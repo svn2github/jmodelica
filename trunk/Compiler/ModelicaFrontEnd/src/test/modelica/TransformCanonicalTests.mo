@@ -1729,5 +1729,76 @@ equation
  x = p;
 end ParameterDerivativeTest;
 
+model UnbalancedTest1_Err
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="UnbalancedTest1_Err",
+        description="Test error messages for unbalanced systems.",
+                                               errorMessage=
+"
+Error: in file 'TransformCanonicalTests.UnbalancedTest1_Err.mof':
+Semantic error at line 0, column 0:
+  The DAE system has 1 equations and 3 free variables.
+
+Error: in file 'TransformCanonicalTests.UnbalancedTest1_Err.mof':
+Semantic error at line 0, column 0:
+  The system is structurally singuar (or of high index). The following varible(s) could not be matched to any equation:
+   y
+   z
+")})));
+
+  Real x = 1;
+  Real y;
+  Real z;
+end UnbalancedTest1_Err;
+
+model UnbalancedTest2_Err
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="UnbalancedTest2_Err",
+        description="Test error messages for unbalanced systems.",
+                                               errorMessage=
+"
+Error: in file 'TransformCanonicalTests.UnbalancedTest2_Err.mof':
+Semantic error at line 0, column 0:
+  The system is structurally singuar (or of high index). The following varible(s) could not be matched to any equation:
+   y
+
+  The follwowing equation(s) could not be matched to any variable:
+   x = 1 + 2
+")})));
+
+  Real x;
+  Real y;
+equation
+  x = 1;
+  x = 1+2;
+end UnbalancedTest2_Err;
+
+model UnbalancedTest3_Err
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="UnbalancedTest3_Err",
+        description="Test error messages for unbalanced systems.",
+                                               errorMessage=
+"
+Error: in file 'TransformCanonicalTests.UnbalancedTest3_Err.mof':
+Semantic error at line 0, column 0:
+  The DAE initialization system has 2 equations and 1 free variables.
+
+Error: in file 'TransformCanonicalTests.UnbalancedTest3_Err.mof':
+Semantic error at line 0, column 0:
+  The DAE system has 2 equations and 1 free variables.
+
+Error: in file 'TransformCanonicalTests.UnbalancedTest3_Err.mof':
+Semantic error at line 0, column 0:
+  The system is structurally singuar (or of high index). The following equation(s) could not be matched to any variable:
+   x = 5
+")})));
+
+  Real x;
+equation
+  x = 4;
+  x = 5;
+end UnbalancedTest3_Err;
+
+
 
 end TransformCanonicalTests;

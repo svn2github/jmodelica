@@ -202,6 +202,8 @@ aspect TransformCanonical {
 		setFEquationBlockList(l);
 	}
 
+	ArrayList<String> FClass.structuralErrors = new ArrayList<String>();
+	
 	public void FClass.addInitialEquations() {
 		
 		BiPGraph g = new BiPGraph(name(),"");
@@ -216,6 +218,21 @@ aspect TransformCanonical {
 		
 		// Add all algebraics
 		for (FVariable fv : algebraicRealVariables()) {
+			g.addVariable(fv.name(),"");     
+		}
+		for (FVariable fv : integerVariables()) {
+			g.addVariable(fv.name(),"");     
+		}
+		for (FVariable fv : booleanVariables()) {
+			g.addVariable(fv.name(),"");     
+		}
+		for (FVariable fv : stringVariables()) {
+			g.addVariable(fv.name(),"");     
+		}
+		for (FVariable fv : discreteRealVariables()) {
+			g.addVariable(fv.name(),"");     
+		}
+		for (FVariable fv : enumVariables()) {
 			g.addVariable(fv.name(),"");     
 		}
 		
@@ -240,10 +257,7 @@ aspect TransformCanonical {
 					v = g.getVariable(dx.name());     
 					g.addEdge(eqn,v); 
 				} 
-
 			}
-
-		
 		}
 		
 		log.info(g.toString());
@@ -251,11 +265,40 @@ aspect TransformCanonical {
 		log.info("DAE system ");
 		log.info(g.printMatching());
 
+		if (root().options.getBooleanOption("enable_structural_diagnosis")) {
+		boolean unbalanced = false;
+		StringBuffer err_str = new StringBuffer();
+		if (g.getUnmatchedVariables().size() > 0 ) {
+			err_str.append("The system is structurally singuar (or of high index). The following varible(s) could not be matched to any equation:\n");
+			for (Var var : g.getUnmatchedVariables()) {
+				err_str.append("   " + var.getName());
+				err_str.append("\n");
+			}
+			unbalanced = true;
+		}
+		if (g.getUnmatchedEquations().size() > 0 ) {
+			if (!unbalanced) {
+				err_str.append("The system is structurally singuar (or of high index). The following equation(s) could not be matched to any variable:\n");
+			} else {
+				err_str.append("\n  The follwowing equation(s) could not be matched to any variable:\n");
+			}
+			for (Eq ee : g.getUnmatchedEquations()) {
+				err_str.append("   " + ee.getDescription());
+				err_str.append("\n");
+			}
+			unbalanced = true;
+		}
+		
+		if (unbalanced) {
+			structuralErrors.add(err_str.toString());
+			return;
+		}
+		}
+		
 		// Add all algebraics
 		for (FVariable fv : differentiatedRealVariables()) {
 			g.addVariable(fv.name(),"");     
 		}
-		
 		
 		k = 1;
 		for (FAbstractEquation e : equations()) {
@@ -1017,9 +1060,9 @@ aspect TransformCanonicalErrorCheck {
 		}
 		checkDuplicateVariables();
 		checkFClassDimensions();
-//		for (String str : structuralErrors) {
-//			error(str);
-//		}		
+		for (String str : structuralErrors) {
+			error(str);
+		}		
 		checkUnsupportedStreamConnections();
 	}
 }
