@@ -525,6 +525,9 @@ public class ModelicaCompiler {
 		InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
 		ipr.options = new OptionRegistry(sr.options);
 		
+		if (sr.options.getBooleanOption("compliance_as_warning"))
+			sr.setErrorHandler(new ComplianceWarnErrorHandler(sr));
+		
 		log.info("Checking for errors...");
 		Collection<Problem> problems = ipr.checkErrorsInInstClass(cl);
 		if (problems.size()>0) {
