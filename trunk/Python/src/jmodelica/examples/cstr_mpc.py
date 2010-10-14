@@ -117,7 +117,7 @@ def run_demo(with_plots=True):
     # Create an Ipopt NLP object
     nlp_ipopt = ipopt.CollocationOptimizer(nlp)
    
-    nlp_ipopt.opt_sim_ipopt_set_int_option("max_iter",500)
+    nlp_ipopt.opt_coll_ipopt_set_int_option("max_iter",500)
 
     h = 2. # Sampling interval
     T_final = 180. # Final time of simulation
@@ -162,7 +162,7 @@ def run_demo(with_plots=True):
         cstr.set('T_ref',T_ref)
         
         # Solve the optimization problem
-        nlp_ipopt.opt_sim_ipopt_solve()
+        nlp_ipopt.opt_coll_ipopt_solve()
         
         # Write to file. 
         nlp.export_result_dymola()
@@ -176,7 +176,7 @@ def run_demo(with_plots=True):
         Tc_res=res.get_variable_data('cstr.Tc')
         
         # Get the first Tc sample
-        Tc_ctrl = Tc_res[0]
+        Tc_ctrl = Tc_res.x[0]
         
         # Set the value to the model
         sim_model.set('Tc',Tc_ctrl)
