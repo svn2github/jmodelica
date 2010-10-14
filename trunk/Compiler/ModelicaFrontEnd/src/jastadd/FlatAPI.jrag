@@ -1447,7 +1447,6 @@ aspect FlatAlgorithmAPI {
 	
 	syn boolean FIdUse.inFAlgorithm() = myFAlgorithm() != null;
 	
-	inh lazy FAlgorithmBlock FStatement.myFAlgorithm();
 	inh lazy FAlgorithmBlock FIdUse.myFAlgorithm();
 	eq FAlgorithmBlock.getChild().myFAlgorithm() = this;
 	eq Root.getChild().myFAlgorithm() = null;
@@ -1456,22 +1455,37 @@ aspect FlatAlgorithmAPI {
 	    [new ArrayList<FAlgorithmBlock>()] with add root FClass;
 	FAlgorithmBlock contributes this when !inFunction()
 	    to FClass.myAlgorithms() for myFClass();
+
+	coll ArrayList<FIdUse> FAlgorithmBlock.containedFIdUses() 
+    	[new ArrayList<FIdUse>()] with add root FAlgorithmBlock;
+	// TODO: need to check for *ForIndex?
+	FIdUse contributes this to FAlgorithmBlock.containedFIdUses() for myFAlgorithm();
 	
-	coll ArrayList<FIdUse> FAlgorithmBlock.assignedFIdUses() 
-	    [new ArrayList<FIdUse>()] with add root FAlgorithmBlock;
-	FAssignStmt contributes getLeft() to FAlgorithmBlock.assignedFIdUses() for myFAlgorithm();
+	syn lazy ArrayList<FIdUse> FAlgorithmBlock.assignedFIdUses() {
+		ArrayList<FIdUse> res = new ArrayList<FIdUse>();
+		for (FIdUse use : containedFIdUses())
+			if (use.useIsAssignment())
+				res.add(use);
+		return res;
+	}
 	
-	coll ArrayList<FIdUse> FAlgorithmBlock.usedFIdUses() 
-	    [new ArrayList<FIdUse>()] with add root FAlgorithmBlock;
-	FIdUse contributes this when !useIsAssignment() // TODO: need to check for *ForIndex?
-	    to FAlgorithmBlock.usedFIdUses() for myFAlgorithm();
+	syn lazy ArrayList<FIdUse> FAlgorithmBlock.usedFIdUses() {
+		ArrayList<FIdUse> res = new ArrayList<FIdUse>();
+		for (FIdUse use : containedFIdUses())
+			if (!use.useIsAssignment())
+				res.add(use);
+		return res;
+	}
 	
 	inh boolean FIdUse.useIsAssignment();
-	eq FAssignStmt.getLeft().useIsAssignment() = true;
-	eq FExp.getChild().useIsAssignment() = false;
-	eq FStatement.getChild().useIsAssignment() = false;
-	eq FAlgorithmBlock.getChild().useIsAssignment() = false;
-	eq Root.getChild().useIsAssignment() = false;
+	inh boolean FIdUseExp.useIsAssignment();
+	eq FAssignStmt.getLeft().useIsAssignment()       = true;
+	eq FFunctionCallLeft.getFExp().useIsAssignment() = true;
+	eq FIdUseExp.getFIdUse().useIsAssignment()       = useIsAssignment();
+	eq FExp.getChild().useIsAssignment()             = false;
+	eq FStatement.getChild().useIsAssignment()       = false;
+	eq FAlgorithmBlock.getChild().useIsAssignment()  = false;
+	eq Root.getChild().useIsAssignment()             = false;
 	
 	private String FAlgorithmBlock.functionName = null;
 	public String FAlgorithmBlock.generateFunctionName() {

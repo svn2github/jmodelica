@@ -2568,6 +2568,63 @@ algorithm
 end AlgorithmTransformation14;
 
 
+model AlgorithmTransformation15
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="AlgorithmTransformation15",
+         description="Generating functions from algorithms: function call statement",
+         flatModel="
+fclass FunctionTests.AlgorithmTransformation15
+ Real a_in;
+ Real b_in;
+ Real c_out;
+ Real d_out;
+equation
+ (c_out, d_out) = FunctionTests.AlgorithmTransformation15.algorithm_1(a_in, b_in);
+ a_in = 1;
+ b_in = 2;
+
+ function FunctionTests.AlgorithmTransformation15.f
+  input Real a;
+  input Real b;
+  output Real c;
+  output Real d;
+ algorithm
+  c := a;
+  d := b;
+  return;
+ end FunctionTests.AlgorithmTransformation15.f;
+
+ function FunctionTests.AlgorithmTransformation15.algorithm_1
+  output Real c_out;
+  output Real d_out;
+  input Real a_in;
+  input Real b_in;
+ algorithm
+  (c_out, d_out) := FunctionTests.AlgorithmTransformation15.f(a_in, b_in);
+  return;
+ end FunctionTests.AlgorithmTransformation15.algorithm_1;
+end FunctionTests.AlgorithmTransformation15;
+")})));
+
+	Real a_in = 1;
+	Real b_in = 2;
+	Real c_out;
+	Real d_out;
+
+	function f
+		input Real a;
+		input Real b;
+		output Real c = a;
+		output Real d = b;
+	algorithm
+	end f;
+
+algorithm
+	(c_out, d_out) := f(a_in, b_in);
+end AlgorithmTransformation15;
+
+
 
 /* =========================== Arrays in functions =========================== */
 

@@ -104,6 +104,14 @@ aspect CCodeGen {
 		}
 	}
 	
+	public void FEnumIntegerExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		p.toString(getFExp(), str, indent, o);
+	}
+	
+	public void FEnumLitExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		str.print(ceval().intValue());
+	}
+	
 	public void FIdUseExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
 		if (isArray() && keepAsArray()) {
 			str.print(getFIdUse().toString_C(p, o));

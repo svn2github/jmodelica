@@ -183,20 +183,8 @@ public class CGenerator extends GenericGenerator {
 		}
 	
 		public void generate(PrintStream genPrinter) {
-			for (FAbstractEquation e : fclass.getFParameterEquations()) {
-				// TODO: This is just to avoid errounous generation of parameter enumeration
-				// binding equations.
-				if (e instanceof FEquation) {
-					FEquation fe = (FEquation)e;
-					AbstractFVariable fv = ((FIdUseExp)fe.getLeft()).myFV();
-					//System.out.println("********** " +fv.prettyPrint(""));
-					if (!fv.isEnum()) {
-						e.genAssignment_C(INDENT, genPrinter);		
-					}
-				} else {
-					e.genAssignment_C(INDENT, genPrinter);			
-				}
-			}
+			for (FAbstractEquation e : fclass.getFParameterEquations()) 
+				e.genAssignment_C(INDENT, genPrinter);
 		}
 	
 	}
@@ -230,10 +218,15 @@ public class CGenerator extends GenericGenerator {
 			generateVarList(genPrinter, fclass.dependentRealConstants(),       "real_cd");
 			generateVarList(genPrinter, fclass.independentRealParameters(),    "real_pi");
 			generateVarList(genPrinter, fclass.dependentRealParameters(),      "real_pd");
+			// Handle enums as Integers
 			generateVarList(genPrinter, fclass.independentIntegerConstants(),  "integer_ci");
+			generateVarList(genPrinter, fclass.independentEnumConstants(),     "integer_ci");
 			generateVarList(genPrinter, fclass.dependentIntegerConstants(),    "integer_cd");
+			generateVarList(genPrinter, fclass.dependentEnumConstants(),       "integer_cd");
 			generateVarList(genPrinter, fclass.independentIntegerParameters(), "integer_pi");
+			generateVarList(genPrinter, fclass.independentEnumParameters(),    "integer_pi");
 			generateVarList(genPrinter, fclass.dependentIntegerParameters(),   "integer_pd");
+			generateVarList(genPrinter, fclass.dependentEnumParameters(),      "integer_pd");
 			generateVarList(genPrinter, fclass.independentBooleanConstants(),  "boolean_ci");
 			generateVarList(genPrinter, fclass.dependentBooleanConstants(),    "boolean_cd");
 			generateVarList(genPrinter, fclass.independentBooleanParameters(), "boolean_pi");
@@ -245,10 +238,11 @@ public class CGenerator extends GenericGenerator {
 			genPrinter.print("#define time ((*(jmi->z))[jmi->offs_t])\n"); 
 			generateVarList(genPrinter, fclass.discreteRealVariables(),        "real_d");
 			generateVarList(genPrinter, fclass.discreteIntegerVariables(),     "integer_d");
-			generateVarList(genPrinter, fclass.integerInputs(),                "boolean_u");
+			generateVarList(genPrinter, fclass.discreteEnumVariables(),        "integer_d");
+			generateVarList(genPrinter, fclass.integerInputs(),                "integer_u");
+			generateVarList(genPrinter, fclass.enumInputs(),                   "integer_u");
 			generateVarList(genPrinter, fclass.discreteBooleanVariables(),     "boolean_d");
 			generateVarList(genPrinter, fclass.booleanInputs(),                "boolean_u");
-			generateVarList(genPrinter, fclass.integerInputs(),                "boolean_u");
 		}
 	}
 	

@@ -26,10 +26,10 @@ static const int N_real_cd = $n_real_cd$;
 static const int N_real_pi = $n_real_pi$;
 static const int N_real_pd = $n_real_pd$;
 
-static const int N_integer_ci = $n_integer_ci$;
-static const int N_integer_cd = $n_integer_cd$;
-static const int N_integer_pi = $n_integer_pi$;
-static const int N_integer_pd = $n_integer_pd$;
+static const int N_integer_ci = $n_integer_ci$ + $n_enum_ci$;
+static const int N_integer_cd = $n_integer_cd$ + $n_enum_cd$;
+static const int N_integer_pi = $n_integer_pi$ + $n_enum_pi$;
+static const int N_integer_pd = $n_integer_pd$ + $n_enum_pd$;
 
 static const int N_boolean_ci = $n_boolean_ci$;
 static const int N_boolean_cd = $n_boolean_cd$;
@@ -48,8 +48,8 @@ static const int N_real_w = $n_real_w$;
 
 static const int N_real_d = $n_real_d$;
 
-static const int N_integer_d = $n_integer_d$;
-static const int N_integer_u = $n_integer_u$;
+static const int N_integer_d = $n_integer_d$ + $n_enum_d$;
+static const int N_integer_u = $n_integer_u$ + $n_enum_u$;
 
 static const int N_boolean_d = $n_boolean_d$;
 static const int N_boolean_u = $n_boolean_u$;

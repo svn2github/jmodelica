@@ -313,6 +313,40 @@ equation
   der(x) = (x-0.3)^0.3 + (x-0.3)^10;
 end CCodeGenTest12;
 
+
+model CCodeGenTest13
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CCodeGenTest13",
+         description="Code generation for enumerations: variable aliases",
+         template="$C_variable_aliases$",
+         generatedCode="
+#define _aic_0 ((*(jmi->z))[jmi->offs_integer_ci+0])
+#define _bic_1 ((*(jmi->z))[jmi->offs_integer_ci+1])
+#define _adc_2 ((*(jmi->z))[jmi->offs_integer_ci+2])
+#define _bdc_3 ((*(jmi->z))[jmi->offs_integer_ci+3])
+#define _aip_4 ((*(jmi->z))[jmi->offs_integer_pi+0])
+#define _bip_5 ((*(jmi->z))[jmi->offs_integer_pi+1])
+#define _adp_6 ((*(jmi->z))[jmi->offs_integer_pd+0])
+#define _bdp_7 ((*(jmi->z))[jmi->offs_integer_pd+1])
+#define time ((*(jmi->z))[jmi->offs_t])
+")})));
+
+	type A = enumeration(a, b, c);
+	type B = enumeration(d, e, f);
+	
+	constant A aic = A.a;
+	constant B bic = B.e;
+	constant A adc = aic;
+	constant B bdc = bic;
+	parameter A aip = A.b;
+	parameter B bip = B.f;
+	parameter A adp = aip;
+	parameter B bdp = bip;
+end CCodeGenTest13;
+
+
+
 model CLogExp1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.CCodeGenTestCase(
