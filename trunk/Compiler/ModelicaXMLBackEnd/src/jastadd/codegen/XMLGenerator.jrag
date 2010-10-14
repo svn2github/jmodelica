@@ -200,18 +200,18 @@ public class XMLGenerator extends GenericGenerator {
 					genPrinter.print(">");
 					
 					// Enumeration type
-					genPrinter.print("\n\t\t\t<EnumerationType quantity=\"string\"");
+					genPrinter.print("\n\t\t\t<EnumerationType quantity=\"string\" ");
 					//min
-					genPrinter.print(" min=\"1\"");
+					genPrinter.print("min=\"1\" ");
 					//max
-					genPrinter.print(" max=\""+enumdecl.numEnumLiterals()+"\"/>");
+					genPrinter.print("max=\""+enumdecl.numEnumLiterals()+"\"/>");
 					
 					//Items
 					ArrayList<FEnumLiteral> literals = enumdecl.enumLiterals();
 					for (FEnumLiteral literal:literals) {
-						genPrinter.print("\n\t\t\t\t<Item name=\""+literal.name()+"\"");
+						genPrinter.print("\n\t\t\t\t<Item name=\""+literal.name()+"\" ");
 						if (literal.hasFStringComment()) {
-							genPrinter.print(" description=\""+literal.getFStringComment().getComment()+"\"");
+							genPrinter.print("description=\""+literal.getFStringComment().getComment()+"\"");
 						}
 						genPrinter.print(">");
 					}
@@ -484,7 +484,7 @@ public class XMLGenerator extends GenericGenerator {
 		}
 		// fixed
 		if (realvariable.fixedAttributeSet()) {
-			genPrinter.print("fixed=\""+realvariable.fixedAttribute()+"\"");
+			genPrinter.print("fixed=\""+realvariable.fixedAttribute()+"\" ");
 		}
 	}
 	
@@ -514,7 +514,7 @@ public class XMLGenerator extends GenericGenerator {
 		}
 		// fixed
 		if (integervariable.fixedAttributeSet()) {
-			genPrinter.print("fixed=\""+integervariable.fixedAttribute()+"\"");
+			genPrinter.print("fixed=\""+integervariable.fixedAttribute()+"\" ");
 		}
 	}
 
@@ -527,25 +527,25 @@ public class XMLGenerator extends GenericGenerator {
 		
 		//quantity
 		if(enumvariable.quantityAttributeSet()) {
-			genPrinter.print(" quantity=\""+enumvariable.quantityAttribute()+"\"");
+			genPrinter.print("quantity=\""+enumvariable.quantityAttribute()+"\" ");
 		}					
 		//min
 		if(enumvariable.minAttributeSet()) {
-			genPrinter.print(" min=\""+enumvariable.minAttribute()+"\"");
+			genPrinter.print("min=\""+enumvariable.minAttribute()+"\" ");
 		}
 		//max
 		if(enumvariable.maxAttributeSet()) {
-			genPrinter.print(" max=\""+enumvariable.maxAttribute()+"\"");
+			genPrinter.print("max=\""+enumvariable.maxAttribute()+"\" ");
 		}
 		//start
 		if (enumvariable.isIndependentParameter() || enumvariable.useBindingExpAsStart()) {
-			genPrinter.print(" start=\"" +enumvariable.ceval().intValue() +"\"");
+			genPrinter.print("start=\"" +enumvariable.ceval().intValue() +"\" ");
 		} else {
-			genPrinter.print(" start=\"" +enumvariable.startAttribute()+"\"");
+			genPrinter.print("start=\"" +enumvariable.startAttribute()+"\" ");
 		}
 		// fixed
 		if (enumvariable.fixedAttributeSet()) {
-			genPrinter.print(" fixed=\""+enumvariable.fixedAttribute()+"\"");
+			genPrinter.print("fixed=\""+enumvariable.fixedAttribute()+"\" ");
 		}
 	}
 
@@ -564,7 +564,7 @@ public class XMLGenerator extends GenericGenerator {
 		}
 		// fixed
 		if (booleanvariable.fixedAttributeSet()) {
-			genPrinter.print("fixed=\""+booleanvariable.fixedAttribute()+"\"");
+			genPrinter.print("fixed=\""+booleanvariable.fixedAttribute()+"\" ");
 		}
 	}
 	
@@ -582,7 +582,7 @@ public class XMLGenerator extends GenericGenerator {
 		}
 		// fixed - not supported
 		//if (stringvariable.fixedAttributeSet()) {
-		//	genPrinter.print("fixed=\""+stringvariable.fixedAttribute()+"\"");
+		//	genPrinter.print("fixed=\""+stringvariable.fixedAttribute()+"\" ");
 		//}		
 	}
 		
