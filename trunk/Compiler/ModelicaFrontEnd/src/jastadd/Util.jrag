@@ -877,6 +877,8 @@ aspect FlatNames {
     
     syn String FEnumDecl.name() = getName().name();
     
+    syn String FEnumLiteral.name() = getName().name();
+    
 //  syn lazy String FQName.derName() = "der(" + name() + ")";
     
     eq FDerivativeVariable.name()  = getFQNameNoTransform().derName();

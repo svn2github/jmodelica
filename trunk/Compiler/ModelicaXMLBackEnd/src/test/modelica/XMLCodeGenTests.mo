@@ -225,4 +225,118 @@ end XMLCodeGenTest2;
 		
 	end XMLCodeGenTest5;	
 
+	
+	model EnumerationTest1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.XMLCodeGenTestCase(
+         name="EnumerationTest1",
+         description="Test that TypeDefinitions section is generated correctly.",
+         template="$XML_typeDefinitions$",
+         generatedCode="
+<TypeDefinitions>
+		<Type name=\"XMLCodeGenTests.EnumerationTest1.A\" description=\"This is A\">
+			<EnumerationType quantity=\"string\" min=\"1\" max=\"3\"/>
+				<Item name=\"a\" description=\"This is a\">
+				<Item name=\"b\">
+				<Item name=\"c\">
+			</EnumerationType>
+		</Type>
+		<Type name=\"XMLCodeGenTests.EnumerationTest1.B\" >
+			<EnumerationType quantity=\"string\" min=\"1\" max=\"3\"/>
+				<Item name=\"a\">
+				<Item name=\"c\">
+				<Item name=\"b\" description=\"This is b\">
+			</EnumerationType>
+		</Type>
+	</TypeDefinitions>")})));
+
+		type A = enumeration(a "This is a", b, c) "This is A";
+		type B = enumeration(a, c, b "This is b");
+		
+		parameter A x = A.a;
+		parameter B y = B.b;
+
+	end EnumerationTest1;
+	
+	model EnumerationTest2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.XMLCodeGenTestCase(
+         name="EnumerationTest2",
+         description="",
+         template="$XML_variables$",
+         generatedCode="
+
+		<ScalarVariable name=\"x\" valueReference=\"268435456\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Enumeration declaredType=\"XMLCodeGenTests.EnumerationTest2.A\" start=\"1\"/>
+			<isLinear>true</isLinear>
+			<VariableCategory>independentParameter</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"y\" valueReference=\"268435457\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Enumeration declaredType=\"XMLCodeGenTests.EnumerationTest2.B\" start=\"3\"/>
+			<isLinear>true</isLinear>
+			<VariableCategory>independentParameter</VariableCategory>
+		</ScalarVariable>")})));
+
+		type A = enumeration(a "This is a", b, c) "This is A";
+		type B = enumeration(a, c, b "This is b");
+		
+		parameter A x = A.a;
+		parameter B y = B.b;
+
+	end EnumerationTest2;
+	
+	model EnumerationTest3		
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.XMLCodeGenTestCase(
+         name="EnumerationTest3",
+         description="",
+         template="$XML_variables$",
+         generatedCode="
+
+		<ScalarVariable name=\"x\" valueReference=\"268435456\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Enumeration declaredType=\"XMLCodeGenTests.EnumerationTest3.A\" quantity=\"a\" min=\"1\" max=\"3\" start=\"1\"/>
+			<isLinear>true</isLinear>
+			<VariableCategory>independentParameter</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"y\" valueReference=\"268435457\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Enumeration declaredType=\"XMLCodeGenTests.EnumerationTest3.B\" start=\"1\" fixed=\"true\"/>
+			<isLinear>true</isLinear>
+			<VariableCategory>independentParameter</VariableCategory>
+		</ScalarVariable>")})));
+
+		type A = enumeration(a "This is a", b, c) "This is A";
+		type B = enumeration(a, c, b "This is b");
+		
+		parameter A x(quantity="a", min=A.a, max=A.c);
+		parameter B y(fixed=true);
+		
+	end EnumerationTest3;
+	
+	model EnumerationTest4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.XMLCodeGenTestCase(
+         name="EnumerationTest4",
+         description="",
+         template="$XML_variables$",
+         generatedCode="
+
+		<ScalarVariable name=\"c\" valueReference=\"268435456\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Enumeration declaredType=\"XMLCodeGenTests.EnumerationTest4.DigitalCurrentChoices\" start=\"2\" fixed=\"true\"/>
+			<isLinear>true</isLinear>
+			<VariableCategory>independentParameter</VariableCategory>
+		</ScalarVariable>")})));
+
+		type DigitalCurrentChoices = enumeration(zero, one);
+
+		parameter DigitalCurrentChoices c(start = DigitalCurrentChoices.one, fixed = true);
+
+	end EnumerationTest4;
+	
+	//model EnumerationTest5
+		//type DigitalCurrentChoices = enumeration(zero, one);
+		//type DigitalCurrent = DigitalCurrentChoices(quantity="Current",start = one, fixed = true);
+		//DigitalCurrent c(start = DigitalCurrent.one, fixed = true);
+		//DigitalCurrentChoices c(start = DigitalCurrentChoices.one, fixed = true);
+	//end EnumerationTest5;
+		
 end XMLCodeGenTests;

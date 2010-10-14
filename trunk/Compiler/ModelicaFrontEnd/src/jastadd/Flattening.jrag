@@ -413,7 +413,15 @@ aspect Flattening {
 			for (InstEnumLiteral ie : enumLiterals()) {
 				l.addFEnumLiteral(ie.createFEnumLiteral());
 			}
-			fc.addFEnumDecl(new FEnumDecl(new FIdDecl(new FQName(qualifiedName())),l));	
+			FIdDecl id = new FIdDecl(new FQName(qualifiedName()));
+			FullClassDecl classDecl = (FullClassDecl)getClassDecl();
+			Opt opt = null;
+			if (classDecl.hasStringComment()) {
+				opt = new Opt(new FStringComment(classDecl.getStringComment().getComment()));
+			} else {
+				opt = new Opt();
+			}
+			fc.addFEnumDecl(new FEnumDecl(id,l,opt));	
 		}
 	}
 	

@@ -53,7 +53,7 @@ FRecordDecl : BaseNode ::= FQName FVariable*;
 /**
  * \brief A flattenend enumeration declaration.
  */
-FEnumDecl : BaseNode ::= Name:FIdDecl FEnumSpecification;
+FEnumDecl : BaseNode ::= Name:FIdDecl FEnumSpecification [FStringComment];
 abstract FEnumSpecification : BaseNode;
 FEnumLiteralList : FEnumSpecification ::= FEnumLiteral*;
 FEnumUnspecified : FEnumSpecification;

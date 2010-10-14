@@ -186,9 +186,40 @@ public class XMLGenerator extends GenericGenerator {
 		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
 		 */
 		public void generate(PrintStream genPrinter) {
-//				genPrinter.print("<TypeDefinitions>");
-//				genPrinter.print("\n\t\t TODO (optional element)");
-//				genPrinter.print("\n\t </TypeDefinitions>");
+			if (fclass.getNumFEnumDecl() > 0) {
+				genPrinter.print("<TypeDefinitions>");
+				List<FEnumDecl> enumDecls = fclass.getFEnumDecls();
+				for (FEnumDecl enumdecl: enumDecls) {
+					//name
+					genPrinter.print("\n\t\t<Type name=\""+enumdecl.name()+"\" ");
+					//description
+					if (enumdecl.hasFStringComment()) {
+						genPrinter.print("description=\""+enumdecl.getFStringComment().getComment()+"\"");
+					}
+					// close Type-element
+					genPrinter.print(">");
+					
+					// Enumeration type
+					genPrinter.print("\n\t\t\t<EnumerationType quantity=\"string\"");
+					//min
+					genPrinter.print(" min=\"1\"");
+					//max
+					genPrinter.print(" max=\""+enumdecl.numEnumLiterals()+"\"/>");
+					
+					//Items
+					ArrayList<FEnumLiteral> literals = enumdecl.enumLiterals();
+					for (FEnumLiteral literal:literals) {
+						genPrinter.print("\n\t\t\t\t<Item name=\""+literal.name()+"\"");
+						if (literal.hasFStringComment()) {
+							genPrinter.print(" description=\""+literal.getFStringComment().getComment()+"\"");
+						}
+						genPrinter.print(">");
+					}
+					genPrinter.print("\n\t\t\t</EnumerationType>");
+					genPrinter.print("\n\t\t</Type>");
+				}
+				genPrinter.print("\n\t</TypeDefinitions>");
+			}
 		}
 	}
 	
@@ -329,7 +360,7 @@ public class XMLGenerator extends GenericGenerator {
 					// TODO: move this to a method on FVariable that is overridden in subclasses
 					genPrinter.print("\n\t\t\t<Real ");
 					addRealAttributes(genPrinter, (FRealVariable)variable);
-					genPrinter.print("/>");					
+					genPrinter.print("/>");		
 				} else if(variable.isInteger()) {
 					genPrinter.print("\n\t\t\t<Integer ");
 					addIntegerAttributes(genPrinter, (FIntegerVariable)variable);
@@ -341,13 +372,11 @@ public class XMLGenerator extends GenericGenerator {
 				} else if(variable.isString()) {
 					genPrinter.print("\n\t\t\t<String ");
 					addStringAttributes(genPrinter, (FStringVariable)variable);
-					genPrinter.print("/>");				
+					genPrinter.print("/>");
 				} else if(variable.isEnum()) {
-//					TODO: Enumeration variable
-					genPrinter.print("\n\t\t\t<Integer ");
+					genPrinter.print("\n\t\t\t<Enumeration ");
 					addEnumAttributes(genPrinter, (FEnumVariable)variable);
-					genPrinter.print("/>");				
-				
+					genPrinter.print("/>");
 				}
 				 else {
 					//TODO: errorhandling
@@ -453,8 +482,10 @@ public class XMLGenerator extends GenericGenerator {
 		} else {
 			genPrinter.print("start=\""+realvariable.startAttribute()+"\" ");
 		}
-		// fixed - unsupported
-		
+		// fixed
+		if (realvariable.fixedAttributeSet()) {
+			genPrinter.print("fixed=\""+realvariable.fixedAttribute()+"\"");
+		}
 	}
 	
 	/*
@@ -481,7 +512,10 @@ public class XMLGenerator extends GenericGenerator {
 		} else {
 			genPrinter.print("start=\"" +integervariable.startAttribute()+"\" ");
 		}
-		// fixed - unsupported
+		// fixed
+		if (integervariable.fixedAttributeSet()) {
+			genPrinter.print("fixed=\""+integervariable.fixedAttribute()+"\"");
+		}
 	}
 
 	/*
@@ -489,28 +523,30 @@ public class XMLGenerator extends GenericGenerator {
 	 */
 	protected void addEnumAttributes(PrintStream genPrinter, FEnumVariable enumvariable) {
 		//declaredType
-		//genPrinter.print("declaredType=\"String\" ");		
+		genPrinter.print("declaredType=\""+enumvariable.myFEnumDecl().name()+"\"");	
+		
 		//quantity
-		/*
-		if(integervariable.quantityAttributeSet()) {
-			genPrinter.print("quantity=\""+integervariable.quantityAttribute()+"\" ");
+		if(enumvariable.quantityAttributeSet()) {
+			genPrinter.print(" quantity=\""+enumvariable.quantityAttribute()+"\"");
 		}					
 		//min
-		if(integervariable.minAttributeSet()) {
-			genPrinter.print("min=\""+integervariable.minAttribute()+"\" ");
+		if(enumvariable.minAttributeSet()) {
+			genPrinter.print(" min=\""+enumvariable.minAttribute()+"\"");
 		}
 		//max
-		if(integervariable.maxAttributeSet()) {
-			genPrinter.print("max=\""+integervariable.maxAttribute()+"\" ");
+		if(enumvariable.maxAttributeSet()) {
+			genPrinter.print(" max=\""+enumvariable.maxAttribute()+"\"");
 		}
 		//start
 		if (enumvariable.isIndependentParameter() || enumvariable.useBindingExpAsStart()) {
-			genPrinter.print("start=\"" +enumvariable.ceval().intValue() +"\" ");
+			genPrinter.print(" start=\"" +enumvariable.ceval().intValue() +"\"");
 		} else {
-			genPrinter.print("start=\"" +enumvariable.startAttribute()+"\" ");
+			genPrinter.print(" start=\"" +enumvariable.startAttribute()+"\"");
 		}
-		*/
-		// fixed - unsupported
+		// fixed
+		if (enumvariable.fixedAttributeSet()) {
+			genPrinter.print(" fixed=\""+enumvariable.fixedAttribute()+"\"");
+		}
 	}
 
 	
@@ -526,7 +562,10 @@ public class XMLGenerator extends GenericGenerator {
 		} else {
 			genPrinter.print("start=\"" +booleanvariable.startAttribute()+"\" ");
 		}
-		// fixed - unsupported
+		// fixed
+		if (booleanvariable.fixedAttributeSet()) {
+			genPrinter.print("fixed=\""+booleanvariable.fixedAttribute()+"\"");
+		}
 	}
 	
 	/*
@@ -541,7 +580,10 @@ public class XMLGenerator extends GenericGenerator {
 		} else if(stringvariable.startAttributeSet()) {
 			genPrinter.print("start=\""+stringvariable.startAttribute()+"\" ");
 		}
-		// fixed - unsupported
+		// fixed - not supported
+		//if (stringvariable.fixedAttributeSet()) {
+		//	genPrinter.print("fixed=\""+stringvariable.fixedAttribute()+"\"");
+		//}		
 	}
 		
 	/**
