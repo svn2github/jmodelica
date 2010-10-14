@@ -35,6 +35,7 @@ import jmodelica.io
 import jmodelica.jmi as jmi
 from jmodelica.jmi import compile_jmu
 from jmodelica.jmi import JMUModel
+from jmodelica.jmi import JMIException
 import jmodelica.algorithm_drivers as ad
 
 try:
@@ -1484,3 +1485,25 @@ class TestInitializeModelFromData(object):
        res = self.model.get(['der(x)','x','y','u'])
        res_true = N.array([-0.36841480742239074, 0.36841480742239074, 0.18420740371169539, 0.0])
        N.testing.assert_almost_equal(res_true,res)    
+
+class TestEmptyModelException(object):
+    """
+    Test that an empty model generates an exception
+    """
+
+    def __init__(self):
+        self._fpath = os.path.join(get_files_path(), 'Modelica', "Empty.mo")
+        self._cpath = "Empty"
+    
+    def setUp(self):
+        """
+        Sets up the test class.
+        """
+        self.jmu_name = compile_jmu(self._cpath, self._fpath)
+        
+    @testattr(stddist = True)
+    def test_empty_model(self):
+       """
+       Test that an exception is raised.
+       """
+       nose.tools.assert_raises(JMIException,JMUModel,jmi.get_jmu_name(self._cpath))

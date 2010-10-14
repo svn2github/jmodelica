@@ -460,6 +460,9 @@ class JMUModel(BaseModel):
         self.jmimodel.initAD()
         self._set_dependent_parameters()
 
+        if self._n_z.value <= 1: # The time variable is always present
+            raise JMIException("Model contains no variables.")
+
     def has_cppad_derivatives(self):
         """ 
         Check if there is support for CppAD derivatives.
