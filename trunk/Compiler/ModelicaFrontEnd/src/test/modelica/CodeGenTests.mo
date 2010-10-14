@@ -154,6 +154,7 @@ n_initial_equations: 0")})));
         der(x)=1;
 	end CodeGenTest2;
 
+	
 	model CodeGenTest3
 	
 		parameter Real p1 = 5;
@@ -167,6 +168,7 @@ n_initial_equations: 0")})));
    	 equation
    	end CodeGenTest3;
 
+	
 	model CodeGenTest4	
 		Real r(quantity="q", unit="kg", displayUnit="g", 
 		  min=-2-1,max=4,start=1+1,fixed=false,nominal=4-3) = 1;
@@ -176,7 +178,39 @@ n_initial_equations: 0")})));
 
 
    	 equation
-   	end CodeGenTest4;
+	end CodeGenTest4;
+	
+	
+	model CodeGenTest5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.GenericCodeGenTestCase(
+         name="CodeGenTest5",
+         description="Code generation for enumerations: number of enum vars of different types",
+         template="
+n_enum_ci: $n_enum_ci$
+n_enum_cd: $n_enum_cd$
+n_enum_pi: $n_enum_pi$
+n_enum_pd: $n_enum_pd$
+",
+         generatedCode="
+n_enum_ci: 4
+n_enum_cd: 0
+n_enum_pi: 2
+n_enum_pd: 2
+")})));
+
+		type A = enumeration(a, b, c);
+		type B = enumeration(d, e, f);
+		
+		constant A aic = A.a;
+		constant B bic = B.e;
+		constant A adc = aic;
+		constant B bdc = bic;
+		parameter A aip = A.b;
+		parameter B bip = B.f;
+		parameter A adp = aip;
+		parameter B bdp = bip;
+	end CodeGenTest5;
 
 
 

@@ -155,6 +155,20 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
+	class DAETag_numIndependentEnumConstants extends DAETag {
+		
+		public DAETag_numIndependentEnumConstants(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_enum_ci","Number of independent enum constants",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numIndependentEnumConstants());
+		}
+	
+	}
+
 	class DAETag_numDependentIntegerConstants extends DAETag {
 		
 		public DAETag_numDependentIntegerConstants(AbstractGenerator myGenerator, 
@@ -165,6 +179,20 @@ public class GenericGenerator extends AbstractGenerator {
 	
 		public void generate(PrintStream genPrinter) {
 			genPrinter.print(fclass.numDependentIntegerConstants());
+		}
+	
+	}
+
+	class DAETag_numDependentEnumConstants extends DAETag {
+		
+		public DAETag_numDependentEnumConstants(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_enum_cd","Number of dependent enum constants",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numDependentEnumConstants());
 		}
 	
 	}
@@ -183,6 +211,20 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
+	class DAETag_numIndependentEnumParameters extends DAETag {
+		
+		public DAETag_numIndependentEnumParameters(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_enum_pi","Number of independent enum parameters",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numIndependentEnumParameters());
+		}
+	
+	}
+
 	class DAETag_numDependentIntegerParameters extends DAETag {
 		
 		public DAETag_numDependentIntegerParameters(AbstractGenerator myGenerator, 
@@ -193,6 +235,20 @@ public class GenericGenerator extends AbstractGenerator {
 	
 		public void generate(PrintStream genPrinter) {
 			genPrinter.print(fclass.numDependentIntegerParameters());
+		}
+	
+	}
+
+	class DAETag_numDependentEnumParameters extends DAETag {
+		
+		public DAETag_numDependentEnumParameters(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_enum_pd","Number of dependent enum parameters",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numDependentEnumParameters());
 		}
 	
 	}
@@ -393,6 +449,20 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
+	class DAETag_numDiscreteEnumVariables extends DAETag {
+		
+		public DAETag_numDiscreteEnumVariables(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_enum_d","Number of discrete enum variables",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numDiscreteEnumVariables());
+		}
+	
+	}
+
 	class DAETag_numDiscreteBooleanVariables extends DAETag {
 		
 		public DAETag_numDiscreteBooleanVariables(AbstractGenerator myGenerator, 
@@ -459,6 +529,20 @@ public class GenericGenerator extends AbstractGenerator {
 	
 		public void generate(PrintStream genPrinter) {
 			genPrinter.print(fclass.numIntegerInputs());
+		}
+	
+	}
+
+	class DAETag_numEnumInputs extends DAETag {
+		
+		public DAETag_numEnumInputs(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_enum_u","Number of enum inputs",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numEnumInputs());
 		}
 	
 	}
