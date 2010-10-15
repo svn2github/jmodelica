@@ -188,12 +188,12 @@
     <para>If logging is set to <literal>True</literal> the log can be
     retrieved with the method,</para>
 
-    <programlisting language="Python">FMUModel.get_log()</programlisting>
+    <programlisting language="python">FMUModel.get_log()</programlisting>
 
     <para>Documentation of the functions can also be accessed interactively
     from IPython by using for instance,</para>
 
-    <programlisting language="Python">FMUModel.get_real?</programlisting>
+    <programlisting language="python">FMUModel.get_real?</programlisting>
 
     <para>There is also a one-to-one map to the C-functions, meaning that
     there is an option to use the low-level C-functions as they are specified
@@ -265,13 +265,13 @@
 
         <para>Start by importing the necessary modules,</para>
 
-        <programlisting language="Python">        import numpy as N 
+        <programlisting language="python">        import numpy as N 
         import pylab as P #Used for plotting
         from jmodelica.fmi import FMIModel #The FMI Interface      </programlisting>
 
         <para>Next, the FMU is to be loaded and initialized,</para>
 
-        <programlisting language="Python">        #Load the FMU by specifying the fmu together with the path.
+        <programlisting language="python">        #Load the FMU by specifying the fmu together with the path.
         bouncing_fmu = FMIModel('/path/to/FMU/bouncingBall.fmu')
 
         Tstart = 0.5 #The start time.
@@ -299,7 +299,7 @@
         <para>Then information about the first step is retrieved and stored
         for later use.</para>
 
-        <programlisting language="Python">        #Get Continuous States
+        <programlisting language="python">        #Get Continuous States
         x = bouncing_fmu.continuous_states
         #Get the Nominal Values
         x_nominal = bouncing_fmu.nominal_continuous_states
@@ -319,14 +319,14 @@
         storing the result. The final step before the integration is started
         is to define the step-size.</para>
 
-        <programlisting language="Python">        time = Tstart
+        <programlisting language="python">        time = Tstart
         Tnext = Tend #Used for time events
         dt = 0.01 #Step-size      </programlisting>
 
         <para>We are now ready to create our main integration loop where the
         solution is advanced using the explicit Euler method.</para>
 
-        <programlisting language="Python">        #Main integration loop.
+        <programlisting language="python">        #Main integration loop.
         while time &lt; Tend and not bouncing_fmu.get_event_info().terminateSimulation:
             #Compute the derivative of the previous step f(x(n), t(n))
             dx = bouncing_fmu.get_derivatives()
@@ -364,7 +364,7 @@
         simulation, we have to check the indicators which is done
         below.</para>
 
-        <programlisting language="Python">            #Get the event indicators at t = time
+        <programlisting language="python">            #Get the event indicators at t = time
             event_ind_new = bouncing_fmu.get_event_indicators()
             
             #Inform the model about an accepted step and check for step events
@@ -383,7 +383,7 @@
         event handling is necessary. If an event have occurred, it needs to be
         handled, see below.</para>
 
-        <programlisting language="Python">            #Event handling
+        <programlisting language="python">            #Event handling
             if step_event or time_event or state_event:
                 
                 eInfo = bouncing_fmu.get_event_info()
@@ -425,7 +425,7 @@
         new absolute tolerances are calculated with the new nominal values.
         Finally the model is checked for a new time event.</para>
 
-        <programlisting language="Python">            event_ind = event_ind_new
+        <programlisting language="python">            event_ind = event_ind_new
         
             #Retrieve solutions at t=time for outputs
             #bouncing_fmu.get_real,get_integer,get_boolean,get_string (valueref)
@@ -439,7 +439,7 @@
         <para>After the loop have finished, by reaching the final time, we
         plot the simulation results</para>
 
-        <programlisting language="Python">        #Plot the height
+        <programlisting language="python">        #Plot the height
         P.figure(1)
         P.plot(t_sol,N.array(sol)[:,0])
         P.title(bouncing_fmu.get_name())
