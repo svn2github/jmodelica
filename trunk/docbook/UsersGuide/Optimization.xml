@@ -92,7 +92,7 @@ vdp = JMUModel(jmu_name)
     <literal>vdp</literal> object is created. This object represents the
     compiled model and is used to invoke the optimization algorithm:</para>
 
-    <programlisting>res = vdp.optimize()</programlisting>
+    <programlisting language="python">res = vdp.optimize()</programlisting>
 
     <para>In this case, we use the default settings for the optimization
     algorithm. The result object can now be used to access the optimization
@@ -267,13 +267,13 @@ model = JMUModel(model_name)
     <para>The option object is essentially a Python dictionary and options are
     set simply by using standard dictionary syntax:</para>
 
-    <programlisting>opts = vpd.optimize_options()
+    <programlisting language="python">opts = vpd.optimize_options()
 opts['n_e'] = 5</programlisting>
 
     <para>The optimization algorithm may then be invoked again with the new
     options:</para>
 
-    <programlisting>res = vdp.optimize(options=opts)</programlisting>
+    <programlisting language="python">res = vdp.optimize(options=opts)</programlisting>
 
     <para>Available options for supported algorithms are documented in <xref
     linkend="opt-sec-alg" />.</para>
@@ -283,7 +283,7 @@ opts['n_e'] = 5</programlisting>
     solution. The most common operation is to retrieve variable trajectories
     from the result object:</para>
 
-    <programlisting>time = res['time']
+    <programlisting language="python">time = res['time']
 x1 = res['x1']</programlisting>
 
     <para>Variable data is returned as numpy arrays in case of variables and
@@ -494,7 +494,7 @@ x1 = res['x1']</programlisting>
         documentation</link> for further information. For example, setting the
         option <literal>max_iter</literal>:</para>
 
-        <programlisting>opts['IPOPT_options']['max_iter'] = 300</programlisting>
+        <programlisting language="python">opts['IPOPT_options']['max_iter'] = 300</programlisting>
 
         <para>makes IPOPT terminate after 300 iterations even if no optimal
         solution has been found.</para>
@@ -1734,7 +1734,7 @@ plt.show()
     <para>This problem is encoded in the following Optimica
     specification:</para>
 
-    <programlisting>optimization VDP_Opt_Min_Time (objective = finalTime,
+    <programlisting language="optimica">optimization VDP_Opt_Min_Time (objective = finalTime,
                                startTime = 0,
                                finalTime(free=true,min=0.2,initialGuess=1)) 
 
@@ -1761,7 +1761,7 @@ end VDP_Opt_Min_Time;
     to be free in the optimization. The problem is solved by the following
     Python script:</para>
 
-    <programlisting># Import numerical libraries
+    <programlisting language="python"># Import numerical libraries
 import numpy as N
 import matplotlib.pyplot as plt
 
@@ -2320,7 +2320,7 @@ plt.show()
     <para>Open a text file and name it qt_par_est.py. Then enter the
     imports:</para>
 
-    <programlisting>from scipy.io.matlab.mio import loadmat
+    <programlisting language="python">from scipy.io.matlab.mio import loadmat
 import matplotlib.pyplot as plt
 import numpy as N
 
@@ -2331,7 +2331,7 @@ from jmodelica.jmi import JMUModel
     <para>into the file. Next, we enter code to open the data file, extract
     the measurement time series and plot the measurements:</para>
 
-    <programlisting># Load measurement data from file
+    <programlisting language="python"># Load measurement data from file
 data = loadmat('qt_par_est_data.mat',appendmat=False)
 
 # Extract data series
@@ -2419,7 +2419,7 @@ plt.show()  </programlisting>
     states are given by the state measurement at the start of the experiment.
     This assumption can be expressed in the model:</para>
 
-    <programlisting>model Sim_QuadTank
+    <programlisting language="python">model Sim_QuadTank
   QuadTank qt;
   input Real u1 = qt.u1;
   input Real u2 = qt.u2;
@@ -2434,12 +2434,12 @@ end Sim_QuadTank;</programlisting>
     the model is simulated, a matrix containing the input trajectories is
     created:</para>
 
-    <programlisting># Build input trajectory matrix for use in simulation
+    <programlisting language="python"># Build input trajectory matrix for use in simulation
 u = N.transpose(N.vstack((t_meas,u1,u2)))</programlisting>
 
     <para>Now, the model can be simulated:</para>
 
-    <programlisting># compile JMU
+    <programlisting language="python"># compile JMU
 jmu_name = compile_jmu('QuadTankPack.Sim_QuadTank','QuadTankPack.mop')
 
 # Load model
@@ -2451,7 +2451,7 @@ res = model.simulate(input=(['u1','u2'],u),start_time=0.,final_time=60)
 
     <para>The simulation result can now be extracted:</para>
 
-    <programlisting># Load simulation result
+    <programlisting language="python"># Load simulation result
 x1_sim = res['qt.x1']
 x2_sim = res['qt.x2']
 x3_sim = res['qt.x3']
@@ -2463,7 +2463,7 @@ u2_sim = res['u2']
 
     <para>and then plotted:</para>
 
-    <programlisting># Plot simulation result
+    <programlisting language="python"># Plot simulation result
 plt.figure(1)
 plt.subplot(2,2,1)
 plt.plot(t_sim,x3_sim)
@@ -2515,7 +2515,7 @@ plt.show()
     problem contained in the class
     <literal>QuadTankPack.QuadTank_ParEst</literal>:</para>
 
-    <programlisting>optimization QuadTank_ParEst (objective=sum((y1_meas[i] - qt.x1(t_meas[i]))^2 + 
+    <programlisting language="optimica">optimization QuadTank_ParEst (objective=sum((y1_meas[i] - qt.x1(t_meas[i]))^2 + 
                                             (y2_meas[i] - qt.x2(t_meas[i]))^2 for i in 1:N_meas),
                                              startTime=0,finalTime=60)
     
@@ -2564,7 +2564,7 @@ end QuadTank_ParEst;</programlisting>
     <para>Before the optimization problem can be solved, the Optimica
     specification needs to be compiled:</para>
 
-    <programlisting># Compile parameter optimization model
+    <programlisting language="python"># Compile parameter optimization model
 jmu_name = compile_jmu("QuadTankPack.QuadTank_ParEst","QuadTankPack.mop")
 
 # Load the model
@@ -2573,7 +2573,7 @@ qt_par_est = JMUModel(jmu_name)
 
     <para>Next, we load the measurement data into the model:</para>
 
-    <programlisting># Number of measurement points
+    <programlisting language="python"># Number of measurement points
 N_meas = N.size(u1,0)
 
 # Set measurement data into model
@@ -2585,7 +2585,7 @@ for i in range(0,N_meas):
 
     <para>We are now ready to solve the optimization problem:</para>
 
-    <programlisting>n_e = 100 # Numer of element in collocation algorithm
+    <programlisting language="python">n_e = 100 # Numer of element in collocation algorithm
 
 # Get an options object for the optimization algorithm
 opt_opts = qt_par_est.optimize_options()
@@ -2599,7 +2599,7 @@ res = qt_par_est.optimize(options=opt_opts)
     <para>Now, lets extract the optimal values of the parameters a1 and a2 and
     print them to the console:</para>
 
-    <programlisting># Extract optimal values of parameters
+    <programlisting language="python"># Extract optimal values of parameters
 a1_opt = res["qt.a1"]
 a2_opt = res["qt.a2"]
 
@@ -2610,7 +2610,7 @@ print('a2: ' + str(a2_opt*1e4) + 'cm^2')
 
     <para>You should get an output similar to:</para>
 
-    <programlisting>a1: 0.0266cm^2
+    <programlisting language="python">a1: 0.0266cm^2
 a2: 0.0272cm^2</programlisting>
 
     <para>The estimated values are slightly smaller than the nominal values -
@@ -2622,7 +2622,7 @@ a2: 0.0272cm^2</programlisting>
 
     <para>Next we plot the optimized profiles:</para>
 
-    <programlisting># Load state profiles
+    <programlisting language="python"># Load state profiles
 x1_opt = res["qt.x1"]
 x2_opt = res["qt.x2"]
 x3_opt = res["qt.x3"]
@@ -2677,7 +2677,7 @@ plt.show()
     understand the model. Solve the optimization problem by typing the Python
     code:</para>
 
-    <programlisting># Compile second parameter estimation model
+    <programlisting language="python"># Compile second parameter estimation model
 jmu_name = compile_jmu("QuadTankPack.QuadTank_ParEst2", "QuadTankPack.mop")
 
 # Load model
@@ -2700,7 +2700,7 @@ res_opt2 = qt_par_est2.optimize(options=opt_opts)
 
     <para>Next, we print the optimal parameter values:</para>
 
-    <programlisting># Get optimal parameter values
+    <programlisting language="python"># Get optimal parameter values
 a1_opt2 = res_opt2["qt.a1"]
 a2_opt2 = res_opt2["qt.a2"]
 a3_opt2 = res_opt2["qt.a3"]
@@ -2715,7 +2715,7 @@ print('a4:' + str(a4_opt2*1e4) + 'cm^2')
 
     <para>The output in the console should be similar to:</para>
 
-    <programlisting>a1:0.0266cm^2
+    <programlisting language="python">a1:0.0266cm^2
 a2:0.0271cm^2
 a3:0.0301cm^2
 a4:0.0293cm^2
@@ -2725,7 +2725,7 @@ a4:0.0293cm^2
     a4 is slightly smaller than the nominal value? Finally, plot the state
     profiles corresponding to the estimated parameters:</para>
 
-    <programlisting># Extract state and input profiles
+    <programlisting language="python"># Extract state and input profiles
 x1_opt2 = res_opt2["qt.x1"]
 x2_opt2 = res_opt2["qt.x2"]
 x3_opt2 = res_opt2["qt.x3"]
@@ -2785,7 +2785,7 @@ plt.show()
     can be used to automatically scale a model. Consider the Modelica variable
     declaration:</para>
 
-    <programlisting>Real pressure(start=101.3e3, nominal=1e5);</programlisting>
+    <programlisting language="python">Real pressure(start=101.3e3, nominal=1e5);</programlisting>
 
     <para>Here, the <literal>nominal</literal> attribute is used to specify
     that the variable pressure takes on values which are about 1e5. In order
@@ -2798,13 +2798,13 @@ plt.show()
     during a simulation or optimization and that it is therefore not possible
     to obtain perfect scaling. In order to ensure that model equations are
     fulfilled, each occurrence of a variable is multiplied with its nominal
-    value in equations. For example, the equation: </para>
+    value in equations. For example, the equation:</para>
 
-    <programlisting>T = f(p)</programlisting>
+    <programlisting language="python">T = f(p)</programlisting>
 
     <para>is replaced by the equation</para>
 
-    <programlisting>T_scaled*T_nom = f(p_scaled*T_nom)</programlisting>
+    <programlisting language="python">T_scaled*T_nom = f(p_scaled*T_nom)</programlisting>
 
     <para>when <literal>enable_variable_scaling</literal> is set to
     <literal>true.</literal></para>

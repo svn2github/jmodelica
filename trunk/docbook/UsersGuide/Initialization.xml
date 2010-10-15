@@ -17,7 +17,7 @@
     initializes the JMUmodel. The function is called after compiling and
     creating a JMUModel:</para>
 
-    <programlisting># Compile the stationary initialization model into a DLL
+    <programlisting language="python"># Compile the stationary initialization model into a DLL
 model_name = compile_jmu("My.Model", "/path/to/MyModel.mo")
 
 # Load a model instance into Python
@@ -27,7 +27,7 @@ init_model = JMUModel(model_name)
 init_result = init_model.initialize()</programlisting>
 
     <para>The JMUModel instance <literal>init_model</literal> is now
-    initialized and is ready to be simulated. </para>
+    initialized and is ready to be simulated.</para>
 
     <para>The interactive help for the initialize method is shown by the
     command:</para>
@@ -141,7 +141,7 @@ y = init_model['y']
     algorithms. The choice of algorithm is done when calling the
     <literal>initialize</literal>:</para>
 
-    <programlisting># Solve the DAE initialization system
+    <programlisting language="python"># Solve the DAE initialization system
 init_result = init_model.initialize(algorithm='IpoptInitializationAlg')</programlisting>
 
     <para>In the example above the default algorithm using IPOPT is chosen.
