@@ -1253,6 +1253,98 @@ p.show()</programlisting>
     </section>
 
     <section>
+      <title>Simulation with sensitivities</title>
+
+      <para>This example will show how to use JModelica.org to simulate an
+      Optimica model and calculate sensitivities of the state variables with
+      respect to a number of free parameters.</para>
+
+      <para>The model equations is taken from the Robertson example in the
+      Sundials suite (https://computation.llnl.gov/casc/sundials/main.html)
+      and the model is shown in the code below.</para>
+
+      <programlisting>optimization Robertson
+    parameter Real p1(free=true)=0.040;
+    parameter Real p2(free=true)=1.0e4;
+    parameter Real p3(free=true)=3.0e7;
+    
+    Real y1(start=1.0, fixed=true);
+    Real y2(start=0.0, fixed=true);
+    Real y3(start=0.0);
+  equation
+    der(y1) = -p1*y1 + p2*y2*y3;
+    der(y2) =  p1*y1 - p2*y2*y3 - p3*(y2*y2);
+    0.0 = y1 + y2 + y3 - 1;
+end Robertson;</programlisting>
+
+      <para>In the model we have set the parameters to free which means that
+      we want to calculate sensitivities of the states with respect to the
+      free parameters.</para>
+
+      <para>Lets begin with the the example, copy and paste the Optimica code
+      and save it into <literal>Robertson.mop</literal> and open a python
+      script file. We start by importing the necessary objects:</para>
+
+      <programlisting language="python"># Import the function for compilation of models and the JMUModel class
+from jmodelica.jmi import compile_jmu
+from jmodelica.jmi import JMUModel
+
+# Import the plotting library
+import matplotlib.pyplot as plt</programlisting>
+
+      <para>Next, we compile and load the model:</para>
+
+      <programlisting language="python"># Compile model
+jmu_name = compile_jmu("Robertson","Robertson.mop")
+
+# Load model
+model = JMUModel(jmu_name)</programlisting>
+
+      <para>Now that the model is loaded, we have to change the option to
+      activate the sensitivity calculations and also the absolute tolerances:
+      </para>
+
+      <programlisting># Get and set the options
+opts = model.simulate_options() #Get the options
+opts['IDA_options']['atol'] = [1.0e-8, 1.0e-14, 1.0e-6] #Change the tolerance
+opts['IDA_options']['sensitivity'] = True #Activate the sensitivity calculations
+opts['ncp'] = 400 #Change the number of communication points</programlisting>
+
+      <para>Now lets simulate the model:</para>
+
+      <programlisting>res = model.simulate(final_time=4, options=opts)</programlisting>
+
+      <para>The sensitivity results are stored as <literal>d{variable
+      name}/d{parameter name}</literal> in the result object. We are
+      interested in the following sensitivities:</para>
+
+      <programlisting>dy1dp1 = res['dy1/dp1']
+dy2dp1 = res['dy2/dp1']
+dy3dp1 = res['dy3/dp1']
+time = res['time']</programlisting>
+
+      <para>To plot the trajectories using <literal>matplotlib</literal>, use
+      the following commands:</para>
+
+      <programlisting>plt.plot(time, dy1dp1, time, dy2dp1, time, dy3dp1)
+plt.legend(('dy1/dp1', 'dy2/dp1', 'dy3/dp1'))
+plt.show()</programlisting>
+
+      <para>In <xref linkend="sim_fig_sens" /> the sensitivities are
+      plotted.</para>
+
+      <figure xml:id="sim_fig_sens">
+        <title>Sensitivity results.</title>
+
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="images/robertson_sens.svg" scale="70"></imagedata>
+          </imageobject>
+        </mediaobject>
+      </figure>
+    </section>
+
+    <section>
       <title>Simulation of an FMU</title>
 
       <para>This example will show how to use the JModelica.org's
@@ -1275,10 +1367,9 @@ p.show()</programlisting>
         </mediaobject>
       </figure>
 
-      <para>This examples assumes that an FMU of the robot named: </para>
+      <para>This examples assumes that an FMU of the robot named:</para>
 
-      <para><literal>Modelica_Mechanics_MultiBody_Examples_Systems_RobotR3_fullRobot.fmu</literal>
-      </para>
+      <para><literal>Modelica_Mechanics_MultiBody_Examples_Systems_RobotR3_fullRobot.fmu</literal></para>
 
       <para>exists in the working folder.</para>
 
