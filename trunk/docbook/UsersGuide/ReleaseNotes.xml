@@ -26,6 +26,10 @@
         <listitem>
           <para>Support for sensitivity analysis of DAEs using Sundials</para>
         </listitem>
+
+        <listitem>
+          <para>Introduced new model concept, jmu-models.</para>
+        </listitem>
       </itemizedlist>
     </section>
 
@@ -51,7 +55,8 @@
               <para><literal>jmodelica.jmi.JMIModel.get_value</literal> and
               <literal>set_value</literal> have changed to
               <literal>jmodelica.jmi.JMUModel.get</literal> and
-              <literal>set</literal>.</para>
+              <literal>set</literal>, which have also been introduced for
+              <literal>jmodelica.fmi.FMUModel</literal></para>
             </listitem>
           </itemizedlist></para>
       </section>
@@ -62,7 +67,7 @@
         <para><itemizedlist>
             <listitem>
               <para>Introduced JMU files which are compressed files containing
-              files created during compilation. </para>
+              files created during compilation.</para>
             </listitem>
 
             <listitem>
@@ -92,7 +97,7 @@
             <literal>jmodelica.jmi.JMUModel</literal> and
             <literal>jmodelica.fmi.FMUModel</literal>
             (<literal>initialize</literal> and <literal>simulate</literal>
-            only). </para>
+            only).</para>
           </listitem>
 
           <listitem>
@@ -104,9 +109,48 @@
             <literal>solver_args</literal> can now be found in the options
             object. Each algorithm for <literal>initialize</literal>,
             <literal>simulate</literal> and <literal>optimize</literal> have
-            their own options object. </para>
+            their own options object.</para>
           </listitem>
         </itemizedlist>
+      </section>
+
+      <section>
+        <title>Result object</title>
+
+        <para>Added convenience methods for getting variable trajectories from
+        the result. The result trajectories are now accessed as objects in a
+        dictionary:</para>
+
+        <programlisting>res = model.simulate()
+yres = res['y']</programlisting>
+      </section>
+    </section>
+
+    <section>
+      <title>Simulation</title>
+
+      <section>
+        <title>Input trajectories</title>
+
+        <para>Changed how the input trajectories are handled. The trajectories
+        now have to be connected to an input variable as a 2-tuple. The first
+        argument should be a list of variables or a single variable. The
+        second argument should be a data matrix with the first column as the
+        time vector and the following columns corresponding to the variables
+        in the first argument.</para>
+      </section>
+
+      <section>
+        <title>Sensitivity calculations</title>
+
+        <para>Sensitivity calculations have been implemented when using the
+        solver IDA from the Assimulo package. The sensitivity calculations are
+        activated with the the option:</para>
+
+        <para>opts['IDA_options']['sensitivity'] = True</para>
+
+        <para>which calculates sensitivities of the states with respect to the
+        free parameters.</para>
       </section>
     </section>
   </section>
