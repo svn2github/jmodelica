@@ -247,6 +247,21 @@ def run_demo(with_plots=True):
         plt.plot(t_opt2,x2_opt2,'r')
         plt.show()
 
+    # compile JMU
+    jmu_name = compile_jmu('QuadTankPack.QuadTank_Sens', 
+        curr_dir+'/files/QuadTankPack.mop')
+
+    # Load model
+    model = JMUModel(jmu_name)
+
+    sens_opts = model.simulate_options()
+
+    sens_opts['IDA_options']['sensitivity'] = True
+    
+    # Simulate model response with nominal parameters
+    res = model.simulate(input=(['u1','u2'],u),start_time=0.,final_time=60, options = sens_opts)
+
+
 
 if __name__=="__main__":
     run_demo()

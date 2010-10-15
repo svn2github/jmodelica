@@ -220,25 +220,24 @@ end QuadTank_ParEst2;
 
 optimization QuadTank_Sens 
     
-    // Initial tank levels
-	parameter Modelica.SIunits.Length x1_0 = 0.06255;
-	parameter Modelica.SIunits.Length x2_0 = 0.06045;
-	parameter Modelica.SIunits.Length x3_0 = 0.02395;
-	parameter Modelica.SIunits.Length x4_0 = 0.02325;
-
-   QuadTank qt(x1(fixed=true),x1_0=x1_0,
-    	             x2(fixed=true),x2_0=x2_0,
-                     x3(fixed=true),x3_0=x3_0,
-                     x4(fixed=true),x4_0=x4_0,
-                     a1(free=true,initialGuess = 0.03e-4,nominal=0.03e-4,min=0,max=0.1e-4),
-                     a2(free=true,initialGuess = 0.03e-4,nominal=0.03e-4,min=0,max=0.1e-4));
-
-    PRBS1 prbs1;
-    PRBS2 prbs2;	
-equation
-    connect(prbs1.y,qt.u1);
-    connect(prbs2.y,qt.u2);
+   extends QuadTank (x1(fixed=true),x1_0 = 0.0627,
+    	             x2(fixed=true),x2_0 = 0.06044,
+                     x3(fixed=true),x3_0 = 0.024,
+                     x4(fixed=true),x4_0 = 0.023,
+                     a1(free=true,initialGuess = 0.02658636e-4,min=0,max=0.1e-4)=0.02658636e-4,
+                     a2(free=true,initialGuess = 0.02715543e-4,min=0,max=0.1e-4)=0.02715543e-4);
 end QuadTank_Sens;
 
+
+
+model QuadTank_Sim2
+    
+   extends QuadTank (x1(fixed=true),x1_0 = 0.0627,
+    	             x2(fixed=true),x2_0 = 0.06044,
+                     x3(fixed=true),x3_0 = 0.024,
+                     x4(fixed=true),x4_0 = 0.023,
+                     a1=0.02658636e-4,
+                     a2=0.02715543e-4);
+end QuadTank_Sim2;
 
 end QuadTankPack;
