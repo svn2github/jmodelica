@@ -213,7 +213,7 @@ public class XMLGenerator extends GenericGenerator {
 						if (literal.hasFStringComment()) {
 							genPrinter.print("description=\""+literal.getFStringComment().getComment()+"\"");
 						}
-						genPrinter.print(">");
+						genPrinter.print("/>");
 					}
 					genPrinter.print("\n\t\t\t</EnumerationType>");
 					genPrinter.print("\n\t\t</Type>");

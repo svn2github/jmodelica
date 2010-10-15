@@ -124,4 +124,29 @@ class TestStreams2(SimulationTest):
         self.assert_all_trajectories(['linearResistance.port_a.m_flow',
                                       'multiPortVolume.flowPort[1].h_outflow'
                                       ], same_span=True, rel_tol=1e-2, abs_tol=1e-2)
+                                      
+class TestEnumerations(SimulationTest):
+    
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            'Enumerations.mo', 'Enumerations.Enumeration1')
+
+    @testattr(assimulo = True)
+    def setUp(self):
+        self.setup_base()
+
+    @testattr(assimulo = True)
+    def test_enumerations_1(self):
+        self.run()
+        self.assert_end_value('x',7)
+        
+        
+    @testattr(assimulo = True)
+    def test_enumerations_2(self):
+        self.model.set('y',2)
+        self.run()
+        self.assert_end_value('x',9)
+    
+    
 
