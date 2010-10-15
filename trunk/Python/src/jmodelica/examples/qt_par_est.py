@@ -24,6 +24,8 @@ import numpy as N
 from jmodelica.jmi import compile_jmu
 from jmodelica.jmi import JMUModel
 
+from jmodelica.core import TrajectoryLinearInterpolation
+
 def run_demo(with_plots=True):
     """
     This example demonstrates how to solve parameter estimation problmes.
@@ -247,19 +249,170 @@ def run_demo(with_plots=True):
         plt.plot(t_opt2,x2_opt2,'r')
         plt.show()
 
+
+    # Compute parameter standard deviations for case 1
     # compile JMU
-    jmu_name = compile_jmu('QuadTankPack.QuadTank_Sens', 
-        curr_dir+'/files/QuadTankPack.mop')
+    jmu_name = compile_jmu('QuadTankPack.QuadTank_Sens1',
+                           curr_dir+'/files/QuadTankPack.mop')
 
     # Load model
     model = JMUModel(jmu_name)
 
+    model.set('a1',a1_opt)
+    model.set('a2',a2_opt)
+    
     sens_opts = model.simulate_options()
 
+    # Enable sensitivity computations
     sens_opts['IDA_options']['sensitivity'] = True
+    #sens_opts['IDA_options']['atol'] = 1e-12
+
+    # Simulate sensitivity equations
+    sens_res = model.simulate(input=(['u1','u2'],u),start_time=0.,final_time=60, options = sens_opts)
+
+    # Get result trajectories
+    x1_sens = sens_res['x1']
+    x2_sens = sens_res['x2']
+    dx1da1 = sens_res['dx1/da1']
+    dx1da2 = sens_res['dx1/da2']
+    dx2da1 = sens_res['dx2/da1']
+    dx2da2 = sens_res['dx2/da2']
+    t_sens = sens_res['time']
     
-    # Simulate model response with nominal parameters
-    res = model.simulate(input=(['u1','u2'],u),start_time=0.,final_time=60, options = sens_opts)
+    # Compute Jacobian
+
+    # Create a trajectory object for interpolation
+    traj=TrajectoryLinearInterpolation(t_sens,N.transpose(N.vstack((x1_sens,x2_sens,dx1da1,dx1da2,dx2da1,dx2da2))))
+
+    # Jacobian
+    jac = N.zeros((61*2,2))
+
+    # Error vector
+    err = N.zeros(61*2)
+
+    # Extract Jacobian and error information
+    i = 0
+    for t_p in t_meas:
+        vals = traj.eval(t_p)
+        for j in range(2):
+            for k in range(2):
+                jac[i+j,k] = vals[0,2*j+k+2]
+            err[i] = vals[0,0] - y1_meas[i/2]
+            err[i+1] = vals[0,1] - y2_meas[i/2]
+        i = i + 2
+
+    # Compute estimated variance of measurement noice    
+    v_err = N.sum(err**2)/(61*2-2)
+
+    # Compute J^T*J
+    A = N.dot(N.transpose(jac),jac)
+
+    # Compute parameter covariance matrix
+    P = v_err*N.linalg.inv(A)
+
+    # Compute standard deviations for parameters
+    sigma_a1 = N.sqrt(P[0,0])
+    sigma_a2 = N.sqrt(P[1,1])
+
+    print "a1: " + str(sens_res['a1']) + ", standard deviation: " + str(sigma_a1)
+    print "a2: " + str(sens_res['a2']) + ", standard deviation: " + str(sigma_a2)
+
+    # Compute parameter standard deviations for case 2
+    # compile JMU
+    jmu_name = compile_jmu('QuadTankPack.QuadTank_Sens2',
+                           curr_dir+'/files/QuadTankPack.mop')
+
+    # Load model
+    model = JMUModel(jmu_name)
+
+    model.set('a1',a1_opt2)
+    model.set('a2',a2_opt2)
+    model.set('a3',a3_opt2)
+    model.set('a4',a4_opt2)
+    
+    sens_opts = model.simulate_options()
+
+    # Enable sensitivity computations
+    sens_opts['IDA_options']['sensitivity'] = True
+    #sens_opts['IDA_options']['atol'] = 1e-12
+
+    # Simulate sensitivity equations
+    sens_res = model.simulate(input=(['u1','u2'],u),start_time=0.,final_time=60, options = sens_opts)
+
+    # Get result trajectories
+    x1_sens = sens_res['x1']
+    x2_sens = sens_res['x2']
+    x3_sens = sens_res['x3']
+    x4_sens = sens_res['x4']
+    
+    dx1da1 = sens_res['dx1/da1']
+    dx1da2 = sens_res['dx1/da2']
+    dx1da3 = sens_res['dx1/da3']
+    dx1da4 = sens_res['dx1/da4']
+
+    dx2da1 = sens_res['dx2/da1']
+    dx2da2 = sens_res['dx2/da2']
+    dx2da3 = sens_res['dx2/da3']
+    dx2da4 = sens_res['dx2/da4']
+
+    dx3da1 = sens_res['dx3/da1']
+    dx3da2 = sens_res['dx3/da2']
+    dx3da3 = sens_res['dx3/da3']
+    dx3da4 = sens_res['dx3/da4']
+
+    dx4da1 = sens_res['dx4/da1']
+    dx4da2 = sens_res['dx4/da2']
+    dx4da3 = sens_res['dx4/da3']
+    dx4da4 = sens_res['dx4/da4']
+    t_sens = sens_res['time']
+    
+    # Compute Jacobian
+
+    # Create a trajectory object for interpolation
+    traj=TrajectoryLinearInterpolation(t_sens,N.transpose(N.vstack((x1_sens,x2_sens,x3_sens,x4_sens,
+                                                                    dx1da1,dx1da2,dx1da3,dx1da4,
+                                                                    dx2da1,dx2da2,dx2da3,dx2da4,
+                                                                    dx3da1,dx3da2,dx3da3,dx3da4,
+                                                                    dx4da1,dx4da2,dx4da3,dx4da4))))
+
+    # Jacobian
+    jac = N.zeros((61*4,4))
+
+    # Error vector
+    err = N.zeros(61*4)
+
+    # Extract Jacobian and error information
+    i = 0
+    for t_p in t_meas:
+        vals = traj.eval(t_p)
+        for j in range(4):
+            for k in range(4):
+                jac[i+j,k] = vals[0,4*j+k+4]
+            err[i] = vals[0,0] - y1_meas[i/4]
+            err[i+1] = vals[0,1] - y2_meas[i/4]
+            err[i+2] = vals[0,2] - y3_meas[i/4]
+            err[i+3] = vals[0,3] - y4_meas[i/4]
+        i = i + 4
+
+    # Compute estimated variance of measurement noice    
+    v_err = N.sum(err**2)/(61*4-4)
+
+    # Compute J^T*J
+    A = N.dot(N.transpose(jac),jac)
+
+    # Compute parameter covariance matrix
+    P = v_err*N.linalg.inv(A)
+
+    # Compute standard deviations for parameters
+    sigma_a1 = N.sqrt(P[0,0])
+    sigma_a2 = N.sqrt(P[1,1])
+    sigma_a3 = N.sqrt(P[2,2])
+    sigma_a4 = N.sqrt(P[3,3])
+
+    print "a1: " + str(sens_res['a1']) + ", standard deviation: " + str(sigma_a1)
+    print "a2: " + str(sens_res['a2']) + ", standard deviation: " + str(sigma_a2)
+    print "a3: " + str(sens_res['a3']) + ", standard deviation: " + str(sigma_a3)
+    print "a4: " + str(sens_res['a4']) + ", standard deviation: " + str(sigma_a4)
 
 
 

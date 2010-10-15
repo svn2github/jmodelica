@@ -176,6 +176,28 @@
         <pubdate>2010</pubdate>
       </biblioset>
     </biblioentry>
+
+    <biblioentry>
+      <abbrev>Eng2001</abbrev>
+
+      <authorgroup>
+        <author>
+          <orgname>Peter Englezos</orgname>
+        </author>
+
+        <author>
+          <orgname>Nicolas Kalogerakis</orgname>
+        </author>
+      </authorgroup>
+
+      <title>Applied Parameter Estimation for Chemical Engineers</title>
+
+      <publisher>
+        <publishername>Marcel Dekker Inc.</publishername>
+      </publisher>
+
+      <pubdate>2001</pubdate>
+    </biblioentry>
   </bibliography>
 
   <index></index>

@@ -218,26 +218,31 @@ equation
 end QuadTank_ParEst2;
 
 
-optimization QuadTank_Sens 
+optimization QuadTank_Sens1 
     
    extends QuadTank (x1(fixed=true),x1_0 = 0.0627,
     	             x2(fixed=true),x2_0 = 0.06044,
                      x3(fixed=true),x3_0 = 0.024,
                      x4(fixed=true),x4_0 = 0.023,
-                     a1(free=true,initialGuess = 0.02658636e-4,min=0,max=0.1e-4)=0.02658636e-4,
-                     a2(free=true,initialGuess = 0.02715543e-4,min=0,max=0.1e-4)=0.02715543e-4);
-end QuadTank_Sens;
+                     a1(free=true)=0.02658636e-4,
+                     a2(free=true)=0.02715543e-4);
+end QuadTank_Sens1;
 
-
-
-model QuadTank_Sim2
+optimization QuadTank_Sens2 
     
    extends QuadTank (x1(fixed=true),x1_0 = 0.0627,
     	             x2(fixed=true),x2_0 = 0.06044,
                      x3(fixed=true),x3_0 = 0.024,
                      x4(fixed=true),x4_0 = 0.023,
-                     a1=0.02658636e-4,
-                     a2=0.02715543e-4);
-end QuadTank_Sim2;
+                     a1(free=true)=0.02658636e-4,
+                     a2(free=true)=0.02715543e-4,
+                     a3(free=true)=0.03007429e-4,
+                     a4(free=true)=0.02933729e-4);
+
+end QuadTank_Sens2;
+
+
+
+
 
 end QuadTankPack;
