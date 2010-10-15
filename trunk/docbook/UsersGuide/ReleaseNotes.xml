@@ -30,7 +30,29 @@
         <listitem>
           <para>Introduced new model concept, jmu-models.</para>
         </listitem>
+
+        <listitem>
+          <para>Support for enumerations</para>
+        </listitem>
       </itemizedlist>
+    </section>
+
+    <section>
+      <title>Compilers</title>
+
+      <section>
+        <title>Enumerations</title>
+
+        <para>Added support for enumerations to the same extent as Integers,
+        except that arrays indexed with enumerations are not supported.</para>
+      </section>
+
+      <section>
+        <title>Miscellaneous</title>
+
+        <para>Fixed many compiler bugs, especially concerning complex class
+        structures.</para>
+      </section>
     </section>
 
     <section>
@@ -299,41 +321,13 @@ yres = res['y']</programlisting>
           to encode Lagrange cost functions of the type</para>
 
           <informalequation>
-            <m:math display="block">
-              <m:mrow>
-                <m:munderover>
-                  <m:mo>∫</m:mo>
-
-                  <m:msub>
-                    <m:mi>t</m:mi>
-
-                    <m:mi>0</m:mi>
-                  </m:msub>
-
-                  <m:msub>
-                    <m:mi>t</m:mi>
-
-                    <m:mi>f</m:mi>
-                  </m:msub>
-                </m:munderover>
-
-                <m:mrow>
-                  <m:mrow>
-                    <m:mi>L</m:mi>
-
-                    <m:mo>⁡</m:mo>
-
-                    <m:mfenced>
-                      <m:mi>.</m:mi>
-                    </m:mfenced>
-                  </m:mrow>
-
-                  <m:mspace depth="0.5ex" height="0.5ex" width="1ex" />
-
-                  <m:mtext>dt</m:mtext>
-                </m:mrow>
-              </m:mrow>
-            </m:math>
+            <m:math display="block"><m:mrow> <m:munderover> <m:mo>∫</m:mo>
+            <m:msub> <m:mi>t</m:mi> <m:mi>0</m:mi> </m:msub> <m:msub>
+            <m:mi>t</m:mi> <m:mi>f</m:mi> </m:msub> </m:munderover> <m:mrow>
+            <m:mrow> <m:mi>L</m:mi> <m:mo>⁡</m:mo> <m:mfenced> <m:mi>.</m:mi>
+            </m:mfenced> </m:mrow> <m:mspace depth="0.5ex" height="0.5ex"
+            width="1ex"></m:mspace> <m:mtext>dt</m:mtext> </m:mrow>
+            </m:mrow></m:math>
           </informalequation>
 
           <para>the Optimica class attribute

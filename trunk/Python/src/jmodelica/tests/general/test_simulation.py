@@ -135,18 +135,20 @@ class TestEnumerations(SimulationTest):
     @testattr(assimulo = True)
     def setUp(self):
         self.setup_base()
+        
+    def check_init(self, val):
+        self.model.initialize();
+        assert self.model.get('x') == val
 
     @testattr(assimulo = True)
     def test_enumerations_1(self):
-        self.run()
-        self.assert_end_value('x',7)
+        self.check_init(7)
         
         
-#    @testattr(assimulo = True)
-#    def test_enumerations_2(self):
-#        self.model.set('y',2)
-#        self.run()
-#        self.assert_end_value('x',9)
+    @testattr(assimulo = True)
+    def test_enumerations_2(self):
+        self.model.set('y',2)
+        self.check_init(9)
     
     
 

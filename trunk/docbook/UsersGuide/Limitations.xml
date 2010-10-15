@@ -57,6 +57,16 @@
         </listitem>
 
         <listitem>
+          <para>Functions with array inputs with sizes declared as ':' are
+          only partially supported.</para>
+        </listitem>
+
+        <listitem>
+          <para>Connect clauses does not handle arrays of connectors
+          properly.</para>
+        </listitem>
+
+        <listitem>
           <para>Partial support for external functions, only external C
           functions with scalar inputs and outputs are supported.</para>
         </listitem>
@@ -73,70 +83,66 @@
               </tr>
 
               <tr>
-                <td>Integer(e)</td>
-
                 <td>semiLinear(...)</td>
 
                 <td>scalar(A)</td>
+
+                <td>String(...)</td>
               </tr>
 
               <tr>
-                <td>String(...)</td>
-
                 <td>Subtask.decouple(v)</td>
 
                 <td>vector(A)</td>
+
+                <td>div(x,y)</td>
               </tr>
 
               <tr>
-                <td>div(x,y)</td>
-
                 <td>initial()</td>
 
                 <td>matrix(A)</td>
+
+                <td>mod(x,y)</td>
               </tr>
 
               <tr>
-                <td>mod(x,y)</td>
-
                 <td>terminal()</td>
 
                 <td>diagonal(v)</td>
+
+                <td>rem(x,y)</td>
               </tr>
 
               <tr>
-                <td>rem(x,y)</td>
-
                 <td>smooth(p, expr)</td>
 
                 <td>product(...)</td>
+
+                <td>ceil(x)</td>
               </tr>
 
               <tr>
-                <td>ceil(x)</td>
-
                 <td>sample(start, interval)</td>
 
                 <td>outerProduct(v1, v2)</td>
+
+                <td>floor(x)</td>
               </tr>
 
               <tr>
-                <td>floor(x)</td>
-
                 <td>pre(y)</td>
 
                 <td>symmetric(A)</td>
+
+                <td>integer(x)</td>
               </tr>
 
               <tr>
-                <td>integer(x)</td>
-
                 <td>edge(b)</td>
 
                 <td>skew(x)</td>
-              </tr>
 
-              <tr>
                 <td>delay(...)</td>
               </tr>
             </informaltable></para>

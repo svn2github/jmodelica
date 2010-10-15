@@ -2160,10 +2160,10 @@ class JMUModel(BaseModel):
                         z[i] = value
                 elif(ptype == 1):
                     # Primitive type is Integer
-                    pass
+                    z[i] = value
                 elif(ptype == 2):
                     # Primitive type is Boolean
-                    pass
+                    z[i] = value
                 elif(ptype == 3):
                     # Primitive type is String
                     pass
