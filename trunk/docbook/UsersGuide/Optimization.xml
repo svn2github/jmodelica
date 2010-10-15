@@ -325,7 +325,7 @@ x1 = res['x1']</programlisting>
         xlink:href="http://www.jmodelica.org/api-docs/jmi/group__jmi__opt__sim__lp.html">JMI
         API documentation</link>.</para>
 
-        <para>A the collocation algorithm provides a number of options,
+        <para>The collocation algorithm provides a number of options,
         summarized in <xref linkend="opt-tab-collopts" />.</para>
 
         <table xml:id="opt-tab-collopts">

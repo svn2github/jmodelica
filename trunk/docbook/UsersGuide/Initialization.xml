@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <chapter version="5.0" xmlns="http://docbook.org/ns/docbook"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:xs="http://www.w3.org/2001/XMLSchema"
          xmlns:xlink="http://www.w3.org/1999/xlink"
          xmlns:xi="http://www.w3.org/2001/XInclude"
          xmlns:svg="http://www.w3.org/2000/svg"
@@ -17,7 +19,7 @@
     initializes the JMUmodel. The function is called after compiling and
     creating a JMUModel:</para>
 
-    <programlisting language="python"># Compile the stationary initialization model into a DLL
+    <programlisting># Compile the stationary initialization model into a DLL
 model_name = compile_jmu("My.Model", "/path/to/MyModel.mo")
 
 # Load a model instance into Python
@@ -27,7 +29,7 @@ init_model = JMUModel(model_name)
 init_result = init_model.initialize()</programlisting>
 
     <para>The JMUModel instance <literal>init_model</literal> is now
-    initialized and is ready to be simulated.</para>
+    initialized and is ready to be simulated. </para>
 
     <para>The interactive help for the initialize method is shown by the
     command:</para>
@@ -137,15 +139,86 @@ y = init_model['y']
   <section>
     <title>Initialization algorithms</title>
 
-    <para>JModelica.org has the ability to support different initialization
-    algorithms. The choice of algorithm is done when calling the
-    <literal>initialize</literal>:</para>
+    <section>
+      <title>Initialization using IPOPT</title>
 
-    <programlisting language="python"># Solve the DAE initialization system
-init_result = init_model.initialize(algorithm='IpoptInitializationAlg')</programlisting>
+      <para>JModelica.org provides a method for DAE initialization that is
+      based on IPOPT, the mathematical formulation of the algorithm can be
+      found in the <link
+      xlink:href="http://www.jmodelica.org/api-docs/jmi/group__jmi__opt__sim__lp.html">JMI
+      API documentation</link>.</para>
 
-    <para>In the example above the default algorithm using IPOPT is chosen.
-    This is currently the only fully implemented initialization
-    algorithm.</para>
+      <para>The algorithm provides the options summarized in <xref
+      linkend="init-tab-collopts" />.</para>
+
+      <table xml:id="init-tab-collopts">
+        <title>Options for the collocation-based optimization
+        algorithm</title>
+
+        <tgroup cols="3">
+          <colspec align="left" colname="col–opt" colwidth="1*" />
+
+          <colspec align="left" colname="col–desc" colwidth="1*" />
+
+          <colspec align="left" colname="col–def" colwidth="2*" />
+
+          <thead>
+            <row>
+              <entry align="center">Option</entry>
+
+              <entry align="center">Default</entry>
+
+              <entry align="center">Description</entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry><literal>result_file_name</literal></entry>
+
+              <entry>Empty string (default generated file name will be
+              used)</entry>
+
+              <entry>Specifies the name of the file where the optimization
+              result is written. Setting this option to an empty string
+              results in a default file name that is based on the name of the
+              optimization class.</entry>
+            </row>
+
+            <row>
+              <entry><literal>result_format</literal></entry>
+
+              <entry>'txt'</entry>
+
+              <entry>Specifies in which format to write the result. Currently
+              only textual mode is supported.</entry>
+            </row>
+
+            <row>
+              <entry><literal>write_scaled_result</literal></entry>
+
+              <entry>False</entry>
+
+              <entry>Write the scaled optimization result if set to true. This
+              option is only applicable when automatic variable scaling is
+              enabled. Only for debugging use.</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+
+      <para>In addition to the options for the collocation algorithm, IPOPT
+      options can also be set by modifying the dictionary
+      <literal>IPOPT_options</literal> contained in the collocation algorithm
+      options object. Here, all valid IPOPT options can be specified, see the
+      <link xlink:href="http://www.coin-or.org/Ipopt/documentation/">IPOPT
+      documentation</link> for further information. For example, setting the
+      option <literal>max_iter</literal>:</para>
+
+      <programlisting language="python">opts['IPOPT_options']['max_iter'] = 300</programlisting>
+
+      <para>makes IPOPT terminate after 300 iterations even if no optimal
+      solution has been found.</para>
+    </section>
   </section>
 </chapter>
