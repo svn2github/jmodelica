@@ -211,6 +211,9 @@
     modifications. Alternatively, they may be copied into a text file, which
     also is the recommended way.</para>
 
+    <para>For more examples on how to simulate an FMU using JModelica.org's
+    high-level features, see <xref linkend="ch_simulation" />.</para>
+
     <section>
       <title>Simulation using the native FMI interface</title>
 
