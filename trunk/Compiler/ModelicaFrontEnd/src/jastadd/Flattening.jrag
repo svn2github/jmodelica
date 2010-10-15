@@ -85,8 +85,8 @@ aspect Flattening {
 	}
 	
 	public void InstClassAccess.flattenUsedFuncsAndEnums(FClass fc) {
-		if (myInstClassDecl().isEnum())
-			myInstClassDecl().flatten(fc);
+		if (myInstClassDecl().extendsEnum())
+			myInstClassDecl().flattenEnum(fc);
 	}
 	
 	public void FIdUse.flattenMyRecord(FClass fc) {}
@@ -392,7 +392,7 @@ aspect Flattening {
 	}
 
 	public void InstEnum.flatten(FClass fc) {
-		myInstClass().flatten(fc);
+		myInstClass().flattenEnum(fc);
 		fc.addFVariable(createFVariable());
 	}
 	
@@ -403,25 +403,23 @@ aspect Flattening {
 		return e;
 	}
 
-	private FClass InstEnumClassDecl.flatEnumClassDeclAddedTo = null;
+	private FClass InstClassDecl.flatEnumClassDeclAddedTo = null;
 	
-	public void InstEnumClassDecl.flatten(FClass fc) {		
+	public void InstClassDecl.flattenEnum(FClass fc) {		
 		if (flatEnumClassDeclAddedTo != fc) {
 			flatEnumClassDeclAddedTo = fc;
 			// Flatten all InstEnums corresponding to FEnumLiterals
 			FEnumLiteralList l = new FEnumLiteralList();
-			for (InstEnumLiteral ie : enumLiterals()) {
+			for (InstEnumLiteral ie : enumLiterals()) 
 				l.addFEnumLiteral(ie.createFEnumLiteral());
-			}
 			FIdDecl id = new FIdDecl(new FQName(qualifiedName()));
-			FullClassDecl classDecl = (FullClassDecl)getClassDecl();
-			Opt opt = null;
-			if (classDecl.hasStringComment()) {
-				opt = new Opt(new FStringComment(classDecl.getStringComment().getComment()));
-			} else {
-				opt = new Opt();
-			}
-			fc.addFEnumDecl(new FEnumDecl(id,l,opt));	
+			ClassDecl classDecl = getClassDecl();
+			Opt comment = null;
+			if (classDecl.hasStringComment()) 
+				comment = new Opt(new FStringComment(classDecl.getStringComment().getComment()));
+			else 
+				comment = new Opt();
+			fc.addFEnumDecl(new FEnumDecl(id, l, comment));	
 		}
 	}
 	

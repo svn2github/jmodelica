@@ -1720,6 +1720,16 @@ aspect Strings {
 
 }
 
+aspect StringComments {
+	
+	syn boolean       ClassDecl.hasStringComment() = false;
+	syn StringComment ClassDecl.getStringComment() = null;
+	
+	eq ShortClassDecl.hasStringComment() = getExtendsClauseShortClass().getComment().hasStringComment();
+	eq ShortClassDecl.getStringComment() = getExtendsClauseShortClass().getComment().getStringComment();
+	
+}
+
 aspect GeneralHelpers {
 	
 	/**

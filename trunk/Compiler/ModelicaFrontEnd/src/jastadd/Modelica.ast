@@ -147,7 +147,7 @@ RealClassDecl      : PrimitiveClassDecl;
 IntegerClassDecl   : PrimitiveClassDecl;
 BooleanClassDecl   : PrimitiveClassDecl;
 StringClassDecl    : PrimitiveClassDecl;
-EnumClassDecl : PrimitiveClassDecl;
+EnumClassDecl      : PrimitiveClassDecl;
 
 PN_EnumDecl : BaseClassDecl ::= EnumSpecification Comment;
 abstract EnumSpecification : BaseNode;

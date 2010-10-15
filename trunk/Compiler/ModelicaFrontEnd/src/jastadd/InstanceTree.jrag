@@ -833,71 +833,42 @@ aspect InstanceTreeConstruction {
 	public abstract InstComponentDecl InstClassDecl.newInstComponentDecl(ComponentDecl cd, Access className);
 
 	public InstComponentDecl InstBaseClassDecl.newInstComponentDecl(ComponentDecl cd, Access className) {
-		Opt fas_opt = new Opt();
-		FArraySubscripts fas = null;
-		if (cd.hasVarArraySubscripts()) { 
-			fas = cd.getVarArraySubscripts().instantiate();
-		}
-		fas_opt.setChild(fas,0);
-		Opt cond_attr_opt = new Opt();
-		if (cd.hasConditionalAttribute()) {
-			cond_attr_opt.setChild(cd.getConditionalAttribute().getExp().instantiate(),0);
-		}
-		InstAccess name = className.newInstAccess();
-		InstComponentDecl icd;
-		if (isRecord()) 
-			icd = new InstRecord(name, fas_opt, cd, new Opt(), new Opt(),cond_attr_opt);
-		else if (!extendsPrimitive()) 
-			icd = new InstComposite(name, fas_opt, cd, new Opt(), new Opt(),cond_attr_opt);
-		else
-			icd = new InstPrimitive(name, fas_opt, cd, new Opt(), new Opt(),cond_attr_opt);
+		InstComponentDecl icd = emptyInstComponentDecl(cd, className.newInstAccess());
+		if (cd.hasVarArraySubscripts()) 
+			icd.setLocalFArraySubscripts(cd.getVarArraySubscripts().instantiate());
+		if (cd.hasConditionalAttribute())
+			icd.setConditionalAttribute(cd.getConditionalAttribute().getExp().instantiate());
 		if (cd.hasModification())
 			icd.setInstModification(cd.getModification().newInstModification());
 		icd.setInstConstrainingOpt(cd.newInstConstrainingComponentOpt());
 		icd.setLocation(cd);
 		return icd;
 	}
-
-	public InstComponentDecl InstPrimitiveClassDecl.newInstComponentDecl(ComponentDecl cd, Access className) {
-		Opt fas_opt = new Opt();
-		if (cd.hasVarArraySubscripts()) {
-			fas_opt.setChild(cd.getVarArraySubscripts().instantiate(),0);
-		}
-		Opt cond_attr_opt = new Opt();
-		if (cd.hasConditionalAttribute()) {
-			cond_attr_opt.setChild(cd.getConditionalAttribute().getExp().instantiate(),0);
-		}		
-		InstPrimitive ipr = new InstPrimitive(className.newInstAccess(),fas_opt,cd,new Opt(),new Opt(),cond_attr_opt);
-		if (cd.hasModification())
-			ipr.setInstModification(cd.getModification().newInstModification());
-		ipr.setInstConstrainingOpt(cd.newInstConstrainingComponentOpt());
-		ipr.setLocation(cd);
-		return ipr;
+	
+	public InstComponentDecl InstBaseClassDecl.emptyInstComponentDecl(ComponentDecl cd, InstAccess name) {
+		if (isRecord()) 
+			return new InstRecord(name, new Opt(), cd, new Opt(), new Opt(), new Opt());
+		else if (extendsEnum()) 
+			return new InstEnum(name, new Opt(), cd, new Opt(), new Opt(), new Opt());
+		else if (extendsPrimitive()) 
+			return new InstPrimitive(name, new Opt(), cd, new Opt(), new Opt(), new Opt());
+		else
+			return new InstComposite(name, new Opt(), cd, new Opt(), new Opt(), new Opt());
 	}
-
-	public InstComponentDecl InstEnumClassDecl.newInstComponentDecl(ComponentDecl cd, Access className) {
-		Opt fas_opt = new Opt();
-		if (cd.hasVarArraySubscripts()) {
-			fas_opt.setChild(cd.getVarArraySubscripts().instantiate(),0);
-		}
-		Opt cond_attr_opt = new Opt();
-		if (cd.hasConditionalAttribute()) {
-			cond_attr_opt.setChild(cd.getConditionalAttribute().getExp().instantiate(),0);
-		}		
-		InstEnum ie = new InstEnum(className.newInstAccess(),fas_opt,cd,new Opt(),new Opt(),cond_attr_opt);
-		if (cd.hasModification())
-			ie.setInstModification(cd.getModification().newInstModification());
-		ie.setInstConstrainingOpt(cd.newInstConstrainingComponentOpt());
-		ie.setLocation(cd);
-		return ie;
+	
+	public InstComponentDecl InstPrimitiveClassDecl.emptyInstComponentDecl(ComponentDecl cd, InstAccess name) {
+		return new InstPrimitive(name, new Opt(), cd, new Opt(), new Opt(), new Opt());
+	}
+	
+	public InstComponentDecl InstEnumClassDecl.emptyInstComponentDecl(ComponentDecl cd, InstAccess name) {
+		return new InstEnum(name, new Opt(), cd, new Opt(), new Opt(), new Opt());
 	}
 	
 	public InstComponentDecl InstBuiltInClassDecl.newInstComponentDecl(ComponentDecl cd, Access className) {
-		if (cd.isEnumLiteral()) {
-			return new InstEnumLiteral(className.newInstAccess(),new Opt(),cd,new Opt(),new Opt(),new Opt());	
-		} else {
-			return new InstBuiltIn(className.newInstAccess(),new Opt(),cd,new Opt(),new Opt(),new Opt());
-		}
+		if (cd.isEnumLiteral()) 
+			return new InstEnumLiteral(className.newInstAccess(), new Opt(), cd, new Opt(), new Opt(), new Opt());	
+		else 
+			return new InstBuiltIn(className.newInstAccess(), new Opt(), cd, new Opt(), new Opt(), new Opt());
 	}
 	
 	public InstComponentDecl InstClassDecl.newInstConstrainingComponentDecl(ComponentDecl cd, Access className) {
@@ -1327,6 +1298,8 @@ aspect InstanceAST_API {
 	eq InstNode.getChild().myIndex()                           = 0;
 	eq FlatRoot.getChild().myIndex()                           = 0;
 
+	syn ArrayList<InstEnumLiteral> InstClassDecl.enumLiterals() =
+		extendsEnum() ? getInstExtends(0).myInstClass().enumLiterals() : new ArrayList<InstEnumLiteral>();
 	syn lazy ArrayList<InstEnumLiteral> InstEnumClassDecl.enumLiterals() {
 		ArrayList<InstEnumLiteral> l = new ArrayList<InstEnumLiteral>();
 		for (InstComponentDecl icd : getInstComponentDecls()) {
@@ -1380,6 +1353,14 @@ aspect InstanceAST_API {
 		InstClassDecl icd = myInstClass();
 		return !isRecursive() && (icd.isPrimitive() || icd.extendsPrimitive());
 	}
+	
+	/**
+	 * Check if this class is or extends an enumeration.
+	 */
+	syn boolean InstNode.extendsEnum() = false;
+	eq InstClassDecl.extendsEnum()     = getNumInstExtends() == 1 && getInstExtends(0).extendsEnum();
+	eq InstEnumClassDecl.extendsEnum() = true;
+	eq InstExtends.extendsEnum()       = !isRecursive() && myInstClass().extendsEnum();
 	
 	syn InstClassDecl InstClassDecl.getBaseInstClass() = 
 		(getNumInstExtends() > 0) ? getInstExtends(0).getBaseInstClass() : this;

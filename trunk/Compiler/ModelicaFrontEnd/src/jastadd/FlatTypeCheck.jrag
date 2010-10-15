@@ -508,7 +508,7 @@ aspect FlatTypeCheck {
 	  if (icd.isPackage()) {
 		  if (!myInstComponentDecl().isConstant())
 			  type = "non-constant component in package";
-	  } else if (icd.isEnum()) {
+	  } else if (icd.extendsEnum()) {
 		  if (!myInstComponentDecl().isEnumLiteral())
 			  type = "attribute of primitive with dot notation";
 	  } else {

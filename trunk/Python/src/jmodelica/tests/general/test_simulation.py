@@ -142,11 +142,11 @@ class TestEnumerations(SimulationTest):
         self.assert_end_value('x',7)
         
         
-    @testattr(assimulo = True)
-    def test_enumerations_2(self):
-        self.model.set('y',2)
-        self.run()
-        self.assert_end_value('x',9)
+#    @testattr(assimulo = True)
+#    def test_enumerations_2(self):
+#        self.model.set('y',2)
+#        self.run()
+#        self.assert_end_value('x',9)
     
     
 

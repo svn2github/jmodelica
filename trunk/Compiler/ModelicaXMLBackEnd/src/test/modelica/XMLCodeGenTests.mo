@@ -235,17 +235,17 @@ end XMLCodeGenTest2;
          generatedCode="
 <TypeDefinitions>
 		<Type name=\"XMLCodeGenTests.EnumerationTest1.A\" description=\"This is A\">
-			<EnumerationType quantity=\"string\" min=\"1\" max=\"3\"/>
-				<Item name=\"a\" description=\"This is a\">
-				<Item name=\"b\">
-				<Item name=\"c\">
+			<EnumerationType min=\"1\" max=\"3\">
+				<Item name=\"a\" description=\"This is a\"/>
+				<Item name=\"b\"/>
+				<Item name=\"c\"/>
 			</EnumerationType>
 		</Type>
 		<Type name=\"XMLCodeGenTests.EnumerationTest1.B\" >
-			<EnumerationType quantity=\"string\" min=\"1\" max=\"3\"/>
-				<Item name=\"a\">
-				<Item name=\"c\">
-				<Item name=\"b\" description=\"This is b\">
+			<EnumerationType min=\"1\" max=\"3\">
+				<Item name=\"a\"/>
+				<Item name=\"c\"/>
+				<Item name=\"b\" description=\"This is b\"/>
 			</EnumerationType>
 		</Type>
 	</TypeDefinitions>")})));
@@ -334,7 +334,7 @@ end XMLCodeGenTest2;
 	
 	//model EnumerationTest5
 		//type DigitalCurrentChoices = enumeration(zero, one);
-		//type DigitalCurrent = DigitalCurrentChoices(quantity="Current",start = one, fixed = true);
+		//type DigitalCurrent = DigitalCurrentChoices(quantity="Current",start = DigitalCurrentChoices.one, fixed = true);
 		//DigitalCurrent c(start = DigitalCurrent.one, fixed = true);
 		//DigitalCurrentChoices c(start = DigitalCurrentChoices.one, fixed = true);
 	//end EnumerationTest5;

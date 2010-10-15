@@ -242,6 +242,27 @@ Semantic error at line 221, column 35:
   end EnumerationTest11;
   
   
+  model EnumerationTest12
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="EnumerationTest12",
+         description="",
+         flatModel="
+fclass EnumerationTests.EnumerationTest12
+ parameter EnumerationTests.EnumerationTest12.DigitalCurrent c(quantity = \"Current\",start = EnumerationTests.EnumerationTest12.DigitalCurrentChoices.one,fixed = true) = EnumerationTests.EnumerationTest12.DigitalCurrentChoices.one /* EnumerationTests.EnumerationTest12.DigitalCurrentChoices.one */;
+
+ type EnumerationTests.EnumerationTest12.DigitalCurrent = enumeration(zero, one);
+
+ type EnumerationTests.EnumerationTest12.DigitalCurrentChoices = enumeration(zero, one);
+end EnumerationTests.EnumerationTest12;
+")})));
+
+	  type DigitalCurrentChoices = enumeration(zero, one);
+	  type DigitalCurrent = DigitalCurrentChoices(quantity="Current", start = DigitalCurrentChoices.one, fixed = true);
+	  parameter DigitalCurrent c = DigitalCurrent.one;
+  end EnumerationTest12;
+  
+  
   
   model FlatAPIEnum1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={

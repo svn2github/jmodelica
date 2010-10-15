@@ -44,8 +44,8 @@
         </listitem>
 
         <listitem>
-          <para>Integer and boolean variables (integer and boolean parameters
-          and constants are supported)</para>
+          <para>Integer, Boolean and enumeration variables (parameters and
+          constants are supported)</para>
         </listitem>
 
         <listitem>
@@ -53,7 +53,7 @@
         </listitem>
 
         <listitem>
-          <para>Enumerations</para>
+          <para>Arrays indexed with enumerations or Booleans</para>
         </listitem>
 
         <listitem>

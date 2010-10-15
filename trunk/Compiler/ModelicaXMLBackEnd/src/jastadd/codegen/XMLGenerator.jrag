@@ -200,11 +200,12 @@ public class XMLGenerator extends GenericGenerator {
 					genPrinter.print(">");
 					
 					// Enumeration type
-					genPrinter.print("\n\t\t\t<EnumerationType quantity=\"string\" ");
+					genPrinter.print("\n\t\t\t<EnumerationType ");
+					// TODO: add support for quantity attribute on type
 					//min
 					genPrinter.print("min=\"1\" ");
 					//max
-					genPrinter.print("max=\""+enumdecl.numEnumLiterals()+"\"/>");
+					genPrinter.print("max=\""+enumdecl.numEnumLiterals()+"\">");
 					
 					//Items
 					ArrayList<FEnumLiteral> literals = enumdecl.enumLiterals();
@@ -523,7 +524,7 @@ public class XMLGenerator extends GenericGenerator {
 	 */
 	protected void addEnumAttributes(PrintStream genPrinter, FEnumVariable enumvariable) {
 		//declaredType
-		genPrinter.print("declaredType=\""+enumvariable.myFEnumDecl().name()+"\"");	
+		genPrinter.print("declaredType=\""+enumvariable.myFEnumDecl().name()+"\" ");	
 		
 		//quantity
 		if(enumvariable.quantityAttributeSet()) {

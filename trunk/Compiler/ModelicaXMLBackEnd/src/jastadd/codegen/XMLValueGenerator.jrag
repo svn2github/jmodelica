@@ -67,6 +67,7 @@ public class XMLValueGenerator extends GenericGenerator{
 			//       If not, we could iterate over independentParameters() instead.
 			printParameterList(fclass.independentBooleanParameters(), genPrinter);
 			printParameterList(fclass.independentIntegerParameters(), genPrinter);
+			printParameterList(fclass.independentEnumParameters(), genPrinter);
 			printParameterList(fclass.independentRealParameters(), genPrinter);
 //			printParameterList(fclass.independentStringParameters(), genPrinter);
 		}
@@ -75,7 +76,7 @@ public class XMLValueGenerator extends GenericGenerator{
 			for (FVariable fv : list) {
 				genPrinter.print("\t <" + fv.type() + "Parameter ");
 				genPrinter.print("name=\"" + fv.name() + "\" ");
-				genPrinter.print("value=\"" + fv.ceval() + "\"");
+				genPrinter.print("value=\"" + fv.ceval().valueXML() + "\"");
 				genPrinter.print("/>\n");
 			}
 		}
@@ -100,6 +101,18 @@ public class XMLValueGenerator extends GenericGenerator{
 	 */
 	public XMLValueGenerator(Printer expPrinter, char escapeCharacter, FClass fclass) {
 		super(expPrinter, escapeCharacter, fclass);
+	}
+
+}
+
+aspect XMLValueMethods {
+	
+	public CValue CValue.valueXML() { 
+		return this;
+	}
+	
+	public CValue CValueEnum.valueXML() {
+		return convertInteger();
 	}
 
 }

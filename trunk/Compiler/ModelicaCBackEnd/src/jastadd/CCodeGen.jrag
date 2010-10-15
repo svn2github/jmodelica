@@ -109,7 +109,11 @@ aspect CCodeGen {
 	}
 	
 	public void FEnumLitExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+		if (inIfCondition()) 
+			str.print("AD_WRAP_LITERAL(");
 		str.print(ceval().intValue());
+		if (inIfCondition()) 
+			str.print(")");
 	}
 	
 	public void FIdUseExp.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {

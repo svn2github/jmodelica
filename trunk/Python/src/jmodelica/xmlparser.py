@@ -4305,6 +4305,7 @@ class Enumeration:
                             'min':'',
                             'max':'',
                             'start':'',
+                            'free':'',
                             'fixed':''}
                             
         # update attribute dict with attributes from XML file
@@ -4369,6 +4370,19 @@ class Enumeration:
         if start == '':
             return None
         return int(start)
+        
+    def get_free(self):
+        """ 
+        Get the value of the free attribute.
+        
+        Returns::
+        
+            The free attribute value as bool (None if not set).
+        """
+        free = self._attributes['free']
+        if free == '':
+            return None
+        return _translate_xmlbool(free)
 
     def get_fixed(self):
         """ 
