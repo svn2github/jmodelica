@@ -28,10 +28,10 @@
 
     <para>This example focus on how to use JModelica.org's simulation
     functionality in the most basic way. The model which is to be simulated is
-    the Van der Pol problem described in <xref linkend="sim_list_vdp" />. The
-    model is also available from the examples in the file VDP.mop.</para>
+    the Van der Pol problem described in the code below. The model is also
+    available from the examples in JModelica.org in the file VDP.mop.</para>
 
-    <programlisting xml:id="sim_list_vdp">model VDP
+    <programlisting language="modelica" xml:id="sim_list_vdp">model VDP
     // State start values
     parameter Real x1_0 = 0;
     parameter Real x2_0 = 1;
@@ -56,7 +56,7 @@
     <para>Next, create a Python script file and write or (copy paste) the
     commands for compiling and loading a model:</para>
 
-    <programlisting># Import the function for compilation of models and the JMUModel class
+    <programlisting language="python"># Import the function for compilation of models and the JMUModel class
 from jmodelica.jmi import compile_jmu
 from jmodelica.jmi import JMUModel
 
@@ -65,7 +65,7 @@ import matplotlib.pyplot as plt</programlisting>
 
     <para>Next, we compile and load the model:</para>
 
-    <programlisting># Compile model
+    <programlisting language="python"># Compile model
 jmu_name = compile_jmu("VDP","VDP.mo")
 
 # Load model
@@ -75,16 +75,16 @@ vdp = JMUModel(jmu_name)</programlisting>
     a binary, which is then loaded when the <literal>vdp</literal> object is
     created. This object represents the compiled model and is used to invoke
     the simulation algorithm (for more information about model creations and
-    options, see ###):</para>
+    options, see <xref linkend="ch_models" />):</para>
 
-    <programlisting>res = vdp.simulate(final_time=10)</programlisting>
+    <programlisting language="python">res = vdp.simulate(final_time=10)</programlisting>
 
     <para>In this case we use the default simulation algorithm together with
     default options, except for the final time which we set to 10. The result
     object can now be used to access in a dictionary-like way the simulation
     result:</para>
 
-    <programlisting>x1 = res['x1']
+    <programlisting language="python">x1 = res['x1']
 x2 = res['x2']
 t  = res['time']</programlisting>
 
@@ -92,7 +92,7 @@ t  = res['time']</programlisting>
     used for further analysis of the simulation result or for
     visualization:</para>
 
-    <programlisting>plt.figure(1)
+    <programlisting language="python">plt.figure(1)
 plt.plot(t, x1, t, x2)
 plt.legend(('x1','x2'))
 plt.title('Van der Pol oscillator.')
@@ -133,16 +133,16 @@ plt.show()</programlisting>
     <para>The difference between the two are that <literal>JMUModel</literal>
     supports compiled models from JModelica.org (extension .jmu) while the
     <literal>FMUModel</literal> supports compiled models from other
-    simulation/modelling tools that follows the FMI standard (extension .fmu).
-    For more information about compiling a model in JModelica.org see
-    ###.</para>
+    simulation/modelling tools that follow the FMI standard (extension .fmu).
+    For more information about compiling a model in JModelica.org see <xref
+    linkend="ch_models" />.</para>
 
     <para>The simulation method is the preferred method for simulation of
     models and which by default is connected to the Assimulo simulation
     package but can also be connected to other simulation platforms. The
     simulation method for <literal>JMUModel</literal> is defined as:</para>
 
-    <programlisting>class JMUModel(...)
+    <programlisting language="python">class JMUModel(...)
     ...
     def simulate(self,
              start_time=0.0,
@@ -153,13 +153,13 @@ plt.show()</programlisting>
 
     <para>And used in the following way:</para>
 
-    <programlisting>res = JMUModel.simulate() #Using default values</programlisting>
+    <programlisting language="python">res = JMUModel.simulate() #Using default values</programlisting>
 
     <para>The only difference between the simulation method in
-    <literal>FMUModel</literal> is that the algorithm is
-    <literal>AssimuloFMIAlg</literal>. They are although both connected to the
-    Assimulo package and able to use its solvers with the limitation that the
-    FMI standard only support ODEs.</para>
+    <literal>FMUModel</literal> compared to <literal>JMUModel</literal> is
+    that the algorithm is <literal>AssimuloFMIAlg</literal>. They are although
+    both connected to the Assimulo package and able to use its solvers with
+    the limitation that the FMI standard only support ODEs.</para>
 
     <section>
       <title>Arguments</title>
@@ -168,16 +168,15 @@ plt.show()</programlisting>
       solver should start the integration and stop the integration. The input
       however is a bit more complex. The input defines the input trajectories
       to the model and should be a 2-tuple consisting of the name(s) of the
-      input variables in the model and the second argument should be a data
-      matrix with the time vector as the first column and second column should
-      correspond to the first name in the in the first argument and so
-      forth.</para>
+      input variables and the second argument should be a data matrix with the
+      time vector as the first column and the second column should correspond
+      to the first name in the first argument and so forth.</para>
 
       <para>For example, consider that we have a model with an input variable
-      <literal>u1 and that the model should be driven by a sinus curve as
-      input. Also we are interested in the interval 0 to 10.</literal></para>
+      <literal>u1 </literal>and that the model should be driven by a sinus
+      wave as input. Also we are interested in the interval 0 to 10.</para>
 
-      <programlisting>t = N.linspace(0.,10.,100) #Create one hundred evenly spaced points
+      <programlisting language="python">t = N.linspace(0.,10.,100) #Create one hundred evenly spaced points
 u = N.sin(t) #Create the input vector
 u_traj = N.transpose(N.hstack((t,u))) #Create the data matrix and transpose 
                                       #it to the correct form</programlisting>
@@ -186,17 +185,17 @@ u_traj = N.transpose(N.hstack((t,u))) #Create the data matrix and transpose
       in giving to the model as input, we just need to connect the data to a
       specific input variable, <literal>u1</literal>:</para>
 
-      <programlisting>input_model = ('u1', u_traj)</programlisting>
+      <programlisting language="python">input_model = ('u1', u_traj)</programlisting>
 
       <para>Now we are ready to simulate using the input and simulate 10
       seconds.</para>
 
-      <programlisting>res = model.simulate(final_time=10, input=input_model)</programlisting>
+      <programlisting language="python">res = model.simulate(final_time=10, input=input_model)</programlisting>
 
       <para>If we on the other hand would have two input variables, u1 and u2
       the script would instead look like:</para>
 
-      <programlisting>t = N.linspace(0.,10.,100) #Create one hundred evenly spaced points
+      <programlisting language="python">t = N.linspace(0.,10.,100) #Create one hundred evenly spaced points
 u1 = N.sin(t) #Create the first input vector
 u2 = N.cos(t) #Create the second input vector
 u_traj = N.transpose(N.hstack((t,u1,u2))) #Create the data matrix and 
@@ -227,81 +226,85 @@ res = model.simulate(final_time=10, input=input_model)</programlisting>
         Information about the available options can be viewed by typing help
         on the <literal>opts</literal> variable:</para>
 
-        <programlisting>&gt;&gt;&gt; help(opts)
+        <programlisting language="python">&gt;&gt;&gt; help(opts)
    Options for simulation of a JMU model using the Assimulo simulation package.
    The Assimulo package contain both explicit solvers (CVode) for ODEs and 
    implicit solvers (IDA) for DAEs. The ODE solvers require that the problem
    is written on the form, ydot = f(t,y).
    
-   Assimulo options::
-   
-       solver     --
-           Specifies the simulation algorithm that is to be used.
-           Default 'IDA'
-                
-       ncp        --
-           Number of communication points. If ncp is zero, the solver
-           will return the internal steps taken.
-           Default '0'
-                
-       initialize --
-           If set to True, an algorithm for initializing the
-           differential equation is invoked, otherwise the
-           differential equation is assumed to have consistent
-           initial conditions. 
-           Default is True.
-                
-       write_scaled_result --
-           Set this parameter to True to write the result to file without
-           taking scaling into account. If the value of scaled is False,
-           then the variable scaling factors of the model are used to
-           reproduced the unscaled variable values.
-           Default: False
-   
-   The different solvers provided by the Assimulo simulation package provides
-   different options. These options are given in dictionaries with names
-   consisting of the solver name concatenated by the string '_option'. The most
-   common solver options are documented below, for a complete list of options
-   see, http://www.jmodelica.org/assimulo
-   
-   Options for IDA::
-   
-       rtol    --
-           The relative tolerance.
-           Default 1.0e-6
-                 
-       atol    --
-           The absolute tolerance.
-           Default 1.0e-6
-       
-       maxord  --
-           The maximum order of the solver. Can range between 1 to 5.
-           Default 5
-   
-   Options for CVode::
+   ...</programlisting>
 
-       rtol    --
-           The relative tolerance. 
-           Default 1.0e-6
-               
-       atol    --
-           The absolute tolerance.
-           Default 1.0e-6
-                 
-       discr   --
-           The discretization method. Can be either 'BDF' or 'Adams'
-           Default 'BDF'
-       
-       iter    --
-           The iteration method. Can be either 'Newton' or 'FixedPoint'
-           Default 'Newton'
- </programlisting>
+        <para>In <xref linkend="sim_table_gen_Jalg" /> the general options for
+        the AssimuloAlg algorithm are described while in <xref
+        linkend="sim_table_ida" /> a selection of the different solver
+        arguments for the DAE solver IDA is shown. In <xref
+        linkend="sim_table_cvode" /> a selection of solver arguments for the
+        ODE solver CVode is shown. More information regarding the solver
+        options can be found here, http://www.jmodelica.org/assimulo.</para>
+
+        <table xml:id="sim_table_gen_Jalg">
+          <title>General options for AssimuloAlg.</title>
+
+          <tgroup cols="3">
+            <thead>
+              <row>
+                <entry align="center">Option</entry>
+
+                <entry align="center">Default</entry>
+
+                <entry align="center">Description</entry>
+              </row>
+            </thead>
+
+            <tbody>
+              <row>
+                <entry>solver</entry>
+
+                <entry>'IDA'</entry>
+
+                <entry>Specifies the simulation method that is to be
+                used.</entry>
+              </row>
+
+              <row>
+                <entry>ncp</entry>
+
+                <entry>0</entry>
+
+                <entry>Number of communication points. If ncp is zero, the
+                solver will return the internal steps taken.</entry>
+              </row>
+
+              <row>
+                <entry>initialize</entry>
+
+                <entry>True</entry>
+
+                <entry>If set to True, an algorithm for initializing the
+                differential equation is invoked, otherwise the differential
+                equation is assumed to have consistent initial
+                conditions.</entry>
+              </row>
+
+              <row>
+                <entry>write_scaled_result</entry>
+
+                <entry>False</entry>
+
+                <entry>Set this parameter to True to write the result to file
+                without taking scaling into account. If the value of scaled is
+                False, then the variable scaling factors of the model are used
+                to reproduced the unscaled variable values.</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </table>
 
         <para>Lets look at an example, consider that you want to simulate a
         JMU model using the solver CVode together with changing the
         discretization method (discr) from BDF to Adams:</para>
 
-        <programlisting>...
+        <programlisting language="python">...
 opts = model.simulate_options() #Retrieve the default options
 
 opts['solver'] = 'CVode' #Change the solver from IDA to CVode
@@ -316,65 +319,85 @@ model.simulate(options=opts) #Pass in the options to simulate and simulate</prog
         in a double dictionary where the first is named after the solver
         concatenated with <literal>_options</literal>:</para>
 
-        <programlisting>opts['CVode_options'] = {'atol':1.0e-6} #Options specific for CVode
+        <programlisting language="python">opts['CVode_options']['atol'] = 1.0e-6 #Options specific for CVode
 
 #or
 
-opts['IDA_options'] = {'atol':1.0e-6} #Options specific for IDA</programlisting>
+opts['IDA_options']['atol']  = 1.0e-6 #Options specific for IDA</programlisting>
 
-        <para>More information regarding the solver options can be found here,
-        http://www.jmodelica.org/assimulo and a selection of solver arguments
-        for the ODE solver CVode can be found in <xref
-        linkend="sim_table_cvode" /> and for the DAE solver IDA in <xref
-        linkend="sim_table_ida" />.</para>
+        <para>For the general options, as changing the solver, they are
+        accessed as a single dictionary:</para>
+
+        <programlisting language="python">opts['solver'] = 'CVode' #Changing the solver
+opts['ncp'] = 1000 #Changing the number of communication points.</programlisting>
 
         <table xml:id="sim_table_cvode">
           <title>Selection of solver arguments for CVode</title>
 
-          <tgroup cols="2" xml:id="sim_table_cvode">
+          <tgroup cols="3" xml:id="sim_table_cvode">
             <thead>
               <row>
-                <entry align="center">Argument</entry>
-
                 <entry align="center">Option</entry>
+
+                <entry align="center">Default</entry>
+
+                <entry align="center">Description</entry>
               </row>
             </thead>
 
             <tbody>
               <row>
-                <entry>discr (The discretization method)</entry>
+                <entry>discr</entry>
 
-                <entry>'BDF' or 'Adams'</entry>
+                <entry>'BDF'</entry>
+
+                <entry>The discretization method. Can be either 'BDF' or
+                'Adams'</entry>
               </row>
 
               <row>
-                <entry>iter (The iteration method)</entry>
+                <entry>iter</entry>
 
-                <entry>'Newton' or 'FixedPoint'</entry>
+                <entry>'Newton'</entry>
+
+                <entry>The iteration method. Can be either 'Newton' or
+                'FixedPoint'.</entry>
               </row>
 
               <row>
-                <entry>maxord (The maximum order used)</entry>
+                <entry>maxord</entry>
 
-                <entry>Integer of max 5 (BDF) or 12 (Adams)</entry>
+                <entry>5</entry>
+
+                <entry>The maximum order used. Maximum for 'BDF' is 5 while
+                for the 'Adams' method the maximum is 12</entry>
               </row>
 
               <row>
-                <entry>maxh (Maximum step-size)</entry>
+                <entry>maxh</entry>
 
-                <entry>Positive float</entry>
+                <entry>Inf</entry>
+
+                <entry>Maximum step-size. Positive float.</entry>
               </row>
 
               <row>
-                <entry>atol (Absolute Tolerance)</entry>
+                <entry>atol</entry>
 
-                <entry>Array of floats or Float</entry>
+                <entry>1.0e-6</entry>
+
+                <entry>Absolute Tolerance. Can be an array of floats where
+                each value corresponds to the absolute tolerance for the
+                corresponding variable. Can also be a single positive
+                float.</entry>
               </row>
 
               <row>
-                <entry>rtol (Relative Tolerance)</entry>
+                <entry>rtol</entry>
 
-                <entry>Float</entry>
+                <entry>1.0e-6</entry>
+
+                <entry>Relative Tolerance. Positive float.</entry>
               </row>
             </tbody>
           </tgroup>
@@ -383,45 +406,70 @@ opts['IDA_options'] = {'atol':1.0e-6} #Options specific for IDA</programlisting>
         <table xml:id="sim_table_ida">
           <title>Selection of solver arguments for IDA</title>
 
-          <tgroup cols="2">
+          <tgroup cols="3">
             <thead>
               <row>
-                <entry align="center">Argument</entry>
-
                 <entry align="center">Option</entry>
+
+                <entry align="center">Default</entry>
+
+                <entry align="center">Description</entry>
               </row>
             </thead>
 
             <tbody>
               <row>
-                <entry>maxord (The maximum order used)</entry>
+                <entry>maxord</entry>
 
-                <entry>Integer of max 5</entry>
+                <entry>5</entry>
+
+                <entry>The maximum order used. Positive integer.</entry>
               </row>
 
               <row>
-                <entry>maxh (Maximum step-size)</entry>
+                <entry>maxh</entry>
 
-                <entry>Positive float</entry>
+                <entry>Inf</entry>
+
+                <entry>Maximum step-size. Positive float.</entry>
               </row>
 
               <row>
-                <entry>atol (Absolute Tolerance)</entry>
+                <entry>atol</entry>
 
-                <entry>Array of floats or Float</entry>
+                <entry>1.0e-6</entry>
+
+                <entry>Absolute Tolerance. Can be an array of floats where
+                each value corresponds to the absolute tolerance for the
+                corresponding variable. Can also be a single positive
+                float.</entry>
               </row>
 
               <row>
-                <entry>rtol (Relative Tolerance)</entry>
+                <entry>rtol</entry>
 
-                <entry>Float</entry>
+                <entry>1.0e-6</entry>
+
+                <entry>Relative Tolerance. Positive float.</entry>
               </row>
 
               <row>
-                <entry>suppress_alg (Suppress the algebraic variables on the
-                error test)</entry>
+                <entry>suppress_alg</entry>
 
-                <entry>Boolean</entry>
+                <entry>False</entry>
+
+                <entry>Suppress the algebraic variables on the error test. Can
+                be either False or True.</entry>
+              </row>
+
+              <row>
+                <entry>sensitivity</entry>
+
+                <entry>False</entry>
+
+                <entry>If set to True, sensitivities for the states with
+                respect to parameters set to free in the model will be
+                calculated.</entry>
               </row>
             </tbody>
           </tgroup>
@@ -434,75 +482,92 @@ opts['IDA_options'] = {'atol':1.0e-6} #Options specific for IDA</programlisting>
         <para>The options attribute are where options to the specified
         algorithm are stored and are preferably used together with:</para>
 
-        <programlisting>opts = FMUModel.simulate_options()</programlisting>
+        <programlisting language="python">opts = FMUModel.simulate_options()</programlisting>
 
         <para>which returns the default options for the default algorithm.
         Information about the available options can be viewed by typing help
         on the <literal>opts</literal> variable:</para>
 
-        <programlisting>&gt;&gt;&gt; help(opts)
+        <programlisting language="python">&gt;&gt;&gt; help(opts)
    Options for the solving the FMU using the Assimulo simulation package.
    Currently, the only solver in the Assimulo package that fully supports
    simulation of FMUs is the solver CVode.
    
-   Assimulo options::
-   
-       solver --
-           Specifies the simulation algorithm that is to be used. Currently the 
-           only supported solver is 'CVode'.
-           Default: 'CVode'
-                
-       ncp    --
-           Number of communication points. If ncp is zero, the solver will 
-           return the internal steps taken.
-           Default: '0'
-           
-       initialize --
-           If set to True, the initializing algorithm defined in the FMU model
-           is invoked, otherwise it is assumed the user have manually invoked
-           model.initialize()
-           Default is True.
-   
-       write_scaled_result --
-           Set this parameter to True to write the result to file without
-           taking scaling into account. If the value of scaled is False,
-           then the variable scaling factors of the model are used to
-           reproduced the unscaled variable values.
-           Default: False
-                
-   The different solvers provided by the Assimulo simulation package provides
-   different options. These options are given in dictionaries with names
-   consisting of the solver name concatenated by the string '_option'. The most
-   common solver options are documented below, for a complete list of options
-   see, http://www.jmodelica.org/assimulo
-   
-   Options for CVode::
-   
-       rtol    -- 
-           The relative tolerance. The relative tolerance are retrieved from
-           the 'default experiment' section in the XML-file and if not
-           found are set to 1.0e-4
-           Default: 1.0e-4
-           
-       atol    --
-           The absolute tolerance.
-           Default: rtol*0.01*(nominal values of the continuous states)
-       
-       discr   --
-           The discretization method. Can be either 'BDF' or 'Adams'
-           Default: 'BDF'
-       
-       iter    --
-           The iteration method. Can be either 'Newton' or 'FixedPoint'
-           Default: 'Newton'
+   ...
 </programlisting>
+
+        <para>In <xref linkend="sim_table_gen_Falg" /> the general options for
+        the AssimuloFMIAlg algorithm are described while in <xref
+        linkend="sim_table_cvodeFMI" /> a selection of the different solver
+        arguments for the ODE solver CVode is shown. Note that there are minor
+        differences in the tolerances compared to the options described in
+        <xref linkend="sim_table_cvode" />. More information regarding the
+        solver options can be found here,
+        http://www.jmodelica.org/assimulo.</para>
+
+        <table xml:id="sim_table_gen_Falg">
+          <title>General options for AssimuloFMIAlg.</title>
+
+          <tgroup cols="3">
+            <thead>
+              <row>
+                <entry align="center">Option</entry>
+
+                <entry align="center">Default</entry>
+
+                <entry align="center">Description</entry>
+              </row>
+            </thead>
+
+            <tbody>
+              <row>
+                <entry>solver</entry>
+
+                <entry>'CVode'</entry>
+
+                <entry>Specifies the simulation method that is to be
+                used.</entry>
+              </row>
+
+              <row>
+                <entry>ncp</entry>
+
+                <entry>0</entry>
+
+                <entry>Number of communication points. If ncp is zero, the
+                solver will return the internal steps taken.</entry>
+              </row>
+
+              <row>
+                <entry>initialize</entry>
+
+                <entry>True</entry>
+
+                <entry>If set to True, the initializing algorithm defined in
+                the FMU model is invoked, otherwise it is assumed the user
+                have manually invoked model.initialize()</entry>
+              </row>
+
+              <row>
+                <entry>write_scaled_result</entry>
+
+                <entry>False</entry>
+
+                <entry>Set this parameter to True to write the result to file
+                without taking scaling into account. If the value of scaled is
+                False, then the variable scaling factors of the model are used
+                to reproduced the unscaled variable values.</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </table>
 
         <para>Lets look at an example, consider that you want to simulate a
         FMU model using the solver CVode together with changing the
-        discretization method (discr) from BDF to Adams and that you have
-        already initialized the model:</para>
+        discretization method (<literal>discr</literal>) from BDF to
+        Adams:</para>
 
-        <programlisting>...
+        <programlisting language="python">...
 opts = model.simulate_options() #Retrieve the default options
 
 #opts['solver'] = 'CVode' #Not necessary, default solver is CVode
@@ -519,13 +584,89 @@ model.simulate(options=opts) #Pass in the options to simulate and simulate</prog
         where the first is named after the solver concatenated with
         <literal>_options</literal>:</para>
 
-        <programlisting>opts['CVode_options'] = {'atol':1.0e-6} #Options specific for CVode
+        <programlisting language="python">opts['CVode_options']['atol'] = 1.0e-6 #Options specific for CVode
 </programlisting>
 
-        <para>More information regarding the solver options can be found here,
-        http://www.jmodelica.org/assimulo and a selection of solver arguments
-        for the ODE solver CVode can be found in <xref
-        linkend="sim_table_cvode" />.</para>
+        <para>For the general options, as changing the solver, they are
+        accessed as a single dictionary:</para>
+
+        <programlisting language="python">opts['solver'] = 'CVode' #Changing the solver
+opts['ncp'] = 1000 #Changing the number of communication points.</programlisting>
+
+        <table xml:id="sim_table_cvodeFMI">
+          <title>Selection of solver arguments for CVode</title>
+
+          <tgroup cols="3" xml:id="sim_table_cvode">
+            <thead>
+              <row>
+                <entry align="center">Option</entry>
+
+                <entry align="center">Default</entry>
+
+                <entry align="center">Description</entry>
+              </row>
+            </thead>
+
+            <tbody>
+              <row>
+                <entry>discr</entry>
+
+                <entry>'BDF'</entry>
+
+                <entry>The discretization method. Can be either 'BDF' or
+                'Adams'</entry>
+              </row>
+
+              <row>
+                <entry>iter</entry>
+
+                <entry>'Newton'</entry>
+
+                <entry>The iteration method. Can be either 'Newton' or
+                'FixedPoint'.</entry>
+              </row>
+
+              <row>
+                <entry>maxord</entry>
+
+                <entry>5</entry>
+
+                <entry>The maximum order used. Maximum for 'BDF' is 5 while
+                for the 'Adams' method the maximum is 12</entry>
+              </row>
+
+              <row>
+                <entry>maxh</entry>
+
+                <entry>Inf</entry>
+
+                <entry>Maximum step-size. Positive float.</entry>
+              </row>
+
+              <row>
+                <entry>atol</entry>
+
+                <entry>rtol*0.01*(nominal values of the continuous
+                states)</entry>
+
+                <entry>Absolute Tolerance. Can be an array of floats where
+                each value corresponds to the absolute tolerance for the
+                corresponding variable. Can also be a single positive
+                float.</entry>
+              </row>
+
+              <row>
+                <entry>rtol</entry>
+
+                <entry>1.0e-4</entry>
+
+                <entry>The relative tolerance. The relative tolerance are
+                retrieved from the 'default experiment' section in the
+                XML-file and if not found are set to 1.0e-4</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </table>
       </section>
     </section>
 
@@ -539,7 +680,7 @@ model.simulate(options=opts) #Pass in the options to simulate and simulate</prog
       way as a dictionary type in Python with the name of the variable as
       key.</para>
 
-      <programlisting>res = model.simulate()
+      <programlisting language="python">res = model.simulate()
 
 y = res['y'] #Return the result for the variable/parameter/constant y
 dery = res['der(y)'] #Return the result for the variable/parameter/constant der(y)</programlisting>
@@ -552,10 +693,12 @@ dery = res['der(y)'] #Return the result for the variable/parameter/constant der(
       <table xml:id="sim_table_result">
         <title>Result Object</title>
 
-        <tgroup cols="2">
+        <tgroup cols="3">
           <thead>
             <row>
               <entry align="center">Option</entry>
+
+              <entry align="center">Type</entry>
 
               <entry align="center">Description</entry>
             </row>
@@ -563,21 +706,27 @@ dery = res['der(y)'] #Return the result for the variable/parameter/constant der(
 
           <tbody>
             <row>
-              <entry>options (Property)</entry>
+              <entry>options</entry>
+
+              <entry>Property</entry>
 
               <entry>Gets the options object that was used during the
               simulation.</entry>
             </row>
 
             <row>
-              <entry>solver (Property)</entry>
+              <entry>solver</entry>
+
+              <entry>Property</entry>
 
               <entry>Gets the solver that was used during the
               integration.</entry>
             </row>
 
             <row>
-              <entry>result_file (Property)</entry>
+              <entry>result_file</entry>
+
+              <entry>Property</entry>
 
               <entry>Gets the name of the generated result file.</entry>
             </row>
@@ -585,12 +734,16 @@ dery = res['der(y)'] #Return the result for the variable/parameter/constant der(
             <row>
               <entry>is_variable(name)</entry>
 
+              <entry>Method</entry>
+
               <entry>Returns True if the given name is a time-varying
               variable.</entry>
             </row>
 
             <row>
-              <entry>data_matrix (Property)</entry>
+              <entry>data_matrix</entry>
+
+              <entry>Property</entry>
 
               <entry>Gets the raw data matrix.</entry>
             </row>
@@ -598,12 +751,16 @@ dery = res['der(y)'] #Return the result for the variable/parameter/constant der(
             <row>
               <entry>is_negated(name)</entry>
 
+              <entry>Method</entry>
+
               <entry>Returns True if the given name is negated in the result
               matrix.</entry>
             </row>
 
             <row>
               <entry>get_column(name)</entry>
+
+              <entry>Method</entry>
 
               <entry>Returns the column number in the data matrix which
               corresponds to the given variable.</entry>
@@ -632,8 +789,7 @@ dery = res['der(y)'] #Return the result for the variable/parameter/constant der(
       data from a matlab-file can be simulated. The model to be simulated is a
       quadruple tank connected to two pumps, which is also the inputs to the
       model. The model is depicted in <xref linkend="sim_fig_quadtank" /> and
-      in <xref linkend="sim_list_qt" /> the corresponding Modelica code is
-      listed.</para>
+      in the code below the corresponding Modelica code is listed.</para>
 
       <figure xml:id="sim_fig_quadtank">
         <title></title>
@@ -650,7 +806,7 @@ dery = res['der(y)'] #Return the result for the variable/parameter/constant der(
         </caption>
       </figure>
 
-      <programlisting xml:id="sim_list_qt">model QuadTank
+      <programlisting language="modelica" xml:id="sim_list_qt">model QuadTank
     // Process parameters
   parameter Modelica.SIunits.Area A1=4.9e-4, A2=4.9e-4, A3=4.9e-4, A4=4.9e-4;
   parameter Modelica.SIunits.Area a1=0.03e-4, a2=0.03e-4, a3=0.03e-4, a4=0.03e-4;
@@ -688,7 +844,7 @@ end QuadTank;</programlisting>
       and save it into <literal>QuadTank.mo</literal> and open a python script
       file. We start by importing the necessary objects:</para>
 
-      <programlisting>from scipy.io.matlab.mio import loadmat
+      <programlisting language="python">from scipy.io.matlab.mio import loadmat
 import matplotlib.pyplot as plt
 import numpy as N
 
@@ -699,9 +855,9 @@ from jmodelica.jmi import JMUModel</programlisting>
       which can be found in the <literal>examples/files</literal> catalogue in
       JModelica.org. Copy it into your working directory and paste the
       following commands to load the data-file and extract the data
-      trajectories: </para>
+      trajectories:</para>
 
-      <programlisting>data = loadmat('qt_par_est_data.mat',appendmat=False)
+      <programlisting language="python">data = loadmat('qt_par_est_data.mat',appendmat=False)
 
 # Extract data series  
 t_meas = data['t'][6000::100,0]-60  
@@ -714,13 +870,13 @@ u2 = data['u2_d'][6000::100,0]</programlisting>
       <literal>u2</literal>. The names of the variables needs also be
       connected in the input object:</para>
 
-      <programlisting># Build input trajectory matrix for use in simulation
+      <programlisting language="python"># Build input trajectory matrix for use in simulation
 u_data = N.transpose(N.vstack((t_meas,u1,u2)))
 input_object = (['u1','u2'], u_data)</programlisting>
 
       <para>Next, we compile and load the model:</para>
 
-      <programlisting># compile JMU
+      <programlisting language="python"># compile JMU
 jmu_name = compile_jmu('QuadTank', 'QuadTank.mo')
 
 # Load model
@@ -729,13 +885,13 @@ model = JMUModel(jmu_name)</programlisting>
       <para>Now, that the model is compiled and the input have been adapted,
       lets give the information to the simulate method and simulate:</para>
 
-      <programlisting># Simulate model with input trajectories
+      <programlisting language="python"># Simulate model with input trajectories
 res = model.simulate(final_time=60, input=input_object)</programlisting>
 
       <para>The result is retrieved by accessing the <literal>res</literal>
       variable as a dictionary with the variable name as key:</para>
 
-      <programlisting>x1_sim = res['x1']
+      <programlisting language="python">x1_sim = res['x1']
 x2_sim = res['x2']
 x3_sim = res['x3']
 x4_sim = res['x4']
@@ -746,7 +902,7 @@ t_sim  = res['time']</programlisting>
       <para>And then plotted with the help from
       <literal>matplotlib</literal>:</para>
 
-      <programlisting>plt.figure(1)
+      <programlisting language="python">plt.figure(1)
 plt.subplot(2,2,1)
 plt.plot(t_sim,x3_sim)
 plt.title('x3')
@@ -820,11 +976,14 @@ plt.show()</programlisting>
         </m:math>
       </equation>
 
-      <para>An example is the Van der Pol oscillator described in <xref
-      linkend="sim_sec_first" />. In <xref linkend="sim_list_vdp2" /> it is
-      shown again for convenience.</para>
+      <para>There is also a limitation that events are currently not
+      handled.</para>
 
-      <programlisting xml:id="sim_list_vdp2">model VDP
+      <para>An example is the Van der Pol oscillator described in <xref
+      linkend="sim_sec_first" />. In the code below it is shown again for
+      convenience.</para>
+
+      <programlisting language="modelica" xml:id="sim_list_vdp2">model VDP
     // State start values
     parameter Real x1_0 = 0;
     parameter Real x2_0 = 1;
@@ -842,14 +1001,13 @@ plt.show()</programlisting>
 end VDP;</programlisting>
 
       <para>We see here that the state derivatives are written on the left
-      hand side while the equations are written on the right hand side. There
-      is also a limitation that events are currently not handled.</para>
+      hand side while the equations are written on the right hand side.</para>
 
       <para>Lets begin with the the example, copy and paste the Modelica code
       and save it into <literal>VDP.mo</literal> and open a python script
       file. We start by importing the necessary objects:</para>
 
-      <programlisting># Import the function for compilation of models and the JMUModel class
+      <programlisting language="python"># Import the function for compilation of models and the JMUModel class
 from jmodelica.jmi import compile_jmu
 from jmodelica.jmi import JMUModel
 
@@ -858,7 +1016,7 @@ import matplotlib.pyplot as plt</programlisting>
 
       <para>Next, we compile and load the model:</para>
 
-      <programlisting># Compile model
+      <programlisting language="python"># Compile model
 jmu_name = compile_jmu("VDP","VDP.mo")
 
 # Load model
@@ -868,19 +1026,20 @@ vdp = JMUModel(jmu_name)</programlisting>
       solver CVode and also change the relative tolerance to 0.0001. First we
       retrieve the default options and then change the option:</para>
 
-      <programlisting>opts = vdp.simulate_options() #Retrieve the default options
+      <programlisting language="python">opts = vdp.simulate_options() #Retrieve the default options
 
 opts['solver'] = 'CVode' #Change the solver to CVode
 opts['CVode_options']['rtol'] = 0.0001 #Change the relative tolerance for CVode</programlisting>
 
-      <para>Now lets simulate the problem ten seconds:</para>
+      <para>Now lets provide the options to the simulate method and simulate
+      the problem ten seconds:</para>
 
-      <programlisting>res = vdp.simulate(final_time=10, options=opts)</programlisting>
+      <programlisting language="python">res = vdp.simulate(final_time=10, options=opts)</programlisting>
 
       <para>The result is retrieved by accessing the <literal>res</literal>
       variable as a dictionary with the variable name as key:</para>
 
-      <programlisting>x1 = res['x1']
+      <programlisting language="python">x1 = res['x1']
 x2 = res['x2']
 t  = res['time']</programlisting>
 
@@ -888,7 +1047,7 @@ t  = res['time']</programlisting>
       used for further analysis of the simulation result or for
       visualization:</para>
 
-      <programlisting>plt.figure(1)
+      <programlisting language="python">plt.figure(1)
 plt.plot(t, x1, t, x2)
 plt.legend(('x1','x2'))
 plt.title('Van der Pol oscillator.')
@@ -938,7 +1097,7 @@ plt.show()</programlisting>
       the command for importing the model object and for compiling a model
       together with the library used for plotting:</para>
 
-      <programlisting language="Python"># Import the function for compilation of models and the JMUModel class
+      <programlisting language="python"># Import the function for compilation of models and the JMUModel class
 from jmodelica.jmi import compile_jmu
 from jmodelica.jmi import JMUModel
 
@@ -947,7 +1106,7 @@ import matplotlib.pyplot as plt</programlisting>
 
       <para>Next, we compile and load the model:</para>
 
-      <programlisting># Compile model
+      <programlisting language="python"># Compile model
 jmu_name = compile_jmu("RLC_Circuit_Square","RLC_Circuit.mo")
 
 # Load model
@@ -958,14 +1117,14 @@ rlc = JMUModel(jmu_name)</programlisting>
       to 0.0 so no need to change that, but the final time needs to be
       changed:</para>
 
-      <programlisting>res = rlc.simulate(final_time=20.0) #Simulate the model from 0.0 to 20.0 seconds</programlisting>
+      <programlisting language="python">res = rlc.simulate(final_time=20.0) #Simulate the model from 0.0 to 20.0 seconds</programlisting>
 
       <para>After a successful simulation the statistics are printed in the
       prompt and the results are stored in the variable 'res'. To view the
       result, we have to retrieve information about the variables we are
-      interested of. This is easily done in the following way,</para>
+      interested of which is easily done in the following way:</para>
 
-      <programlisting>square_y    = res['square.y']
+      <programlisting language="python">square_y    = res['square.y']
 resistor_v  = res['resistor.v']
 inductor1_i = res['inductor1.i']
 time        = res['time']</programlisting>
@@ -973,7 +1132,7 @@ time        = res['time']</programlisting>
       <para>And then plotted with the help from
       <literal>matplotlib</literal>,</para>
 
-      <programlisting>plt.figure(1)
+      <programlisting language="python">plt.figure(1)
 plt.plot(time, square_y, time, resistor_v, time, inductor1_i)    
 plt.legend(('square.y','resistor.v','inductor1.i'))
 plt.show()</programlisting>
@@ -996,13 +1155,13 @@ plt.show()</programlisting>
     <section>
       <title>Simulation and parameter sweeps</title>
 
-      <para>This tutorial demonstrates how to run multiple simulations with
+      <para>This example demonstrates how to run multiple simulations with
       different parameter values. Sweeping parameters is a useful technique
       for analysing model sensitivity with respect to uncertainty in physical
       parameters or initial conditions. Consider the following model of the
       Van der Pol oscillator:</para>
 
-      <programlisting>  model VDP
+      <programlisting language="modelica">  model VDP
     // State start values
     parameter Real x1_0 = 0;
     parameter Real x2_0 = 1;
@@ -1025,13 +1184,13 @@ plt.show()</programlisting>
       your working directory. Also, create a Python script file and name it
       vdp_pp.py. Start by copying the commands:</para>
 
-      <programlisting>import numpy as N
+      <programlisting language="python">import numpy as N
 import pylab as p
 from jmodelica.jmi import compile_jmu, JMUModel</programlisting>
 
       <para>into the Python file. Compile and load the model:</para>
 
-      <programlisting># Define model file name and class name
+      <programlisting language="python"># Define model file name and class name
 model_name = 'VDP'
 mofile = 'VDP.mo'
 
@@ -1047,7 +1206,7 @@ vdp = JMUModel(jmu_name)
       the initial condition for <literal>x1</literal> is swept between -3 and
       3:</para>
 
-      <programlisting># Define initial conditions
+      <programlisting language="python"># Define initial conditions
 N_points = 11
 x1_0 = N.linspace(-3.,3.,N_points)
 x2_0 = N.zeros(N_points)</programlisting>
@@ -1055,7 +1214,7 @@ x2_0 = N.zeros(N_points)</programlisting>
       <para>In order to visualize the results of the simulations, we open a
       plot window:</para>
 
-      <programlisting>fig = p.figure()
+      <programlisting language="python">fig = p.figure()
 p.clf()
 p.hold(True)
 p.xlabel('x1')
@@ -1065,7 +1224,7 @@ p.ylabel('x2')</programlisting>
       condition vectors and in each iteration set the parameter values into
       the model, simulate and plot:</para>
 
-      <programlisting>for i in range(N_points):
+      <programlisting language="python">for i in range(N_points):
     # Set initial conditions in model
     model.set('x1_0',x1_0[i])
     model.set('x2_0',x2_0[i])
@@ -1079,7 +1238,7 @@ p.ylabel('x2')</programlisting>
 p.grid()
 p.show()</programlisting>
 
-      <para>You should now see a plot like in <xref
+      <para>You should now see a plot similar to that in <xref
       linkend="sim_fig_psweep" />.</para>
 
       <figure xml:id="sim_fig_psweep">
@@ -1116,15 +1275,18 @@ p.show()</programlisting>
         </mediaobject>
       </figure>
 
-      <para>This examples assumes that an FMU of the robot named
-      <literal>Modelica_Mechanics_MultiBody_Examples_Systems_RobotR3_fullRobot.fmu</literal>
-      exists in the working folder.</para>
+      <para>This examples assumes that an FMU of the robot named: </para>
+
+      <para><literal>Modelica_Mechanics_MultiBody_Examples_Systems_RobotR3_fullRobot.fmu</literal>
+      </para>
+
+      <para>exists in the working folder.</para>
 
       <para>Start by creating a Python script file and write or (copy paste)
       the command for importing the model object and the library used for
       plotting:</para>
 
-      <programlisting language="Python"># Import the FMUModel class
+      <programlisting language="python"># Import the FMUModel class
 from jmodelica.fmi import FMUModel
 
 # Import the plotting library
@@ -1132,28 +1294,28 @@ import matplotlib.pyplot as plt</programlisting>
 
       <para>Next, we load the FMU into the model object:</para>
 
-      <programlisting>robot = FMUModel('Modelica_Mechanics_MultiBody_Examples_Systems_RobotR3_fullRobot.fmu')</programlisting>
+      <programlisting language="python">robot = FMUModel('Modelica_Mechanics_MultiBody_Examples_Systems_RobotR3_fullRobot.fmu')</programlisting>
 
       <para>We are interested in simulating the Robot from time 0.0 to 1.8
       using 1000 communication points and using tolerances specified in the
       FMU. This information is specified to the simulate method:</para>
 
-      <programlisting>res = robot.simulate(start_time=0.0, final_time=1.8, options={'ncp':1000})</programlisting>
+      <programlisting language="python">res = robot.simulate(start_time=0.0, final_time=1.8, options={'ncp':1000})</programlisting>
 
       <para>This preforms the simulation and the statistics will be printed in
       the prompt.</para>
 
       <para>To retrieve data about a variable from the result data, access it
-      as a dictionary with the name of the variable as key.</para>
+      as a dictionary with the name of the variable as key:</para>
 
-      <programlisting language="Python">dq1  = res['der(mechanics.q[1])']
+      <programlisting language="python">dq1  = res['der(mechanics.q[1])']
 dq6  = res['der(mechanics.q[6])']
 time = res['time']</programlisting>
 
       <para>Now we have loaded and retrieved the variables of interest. So
       lets plot them.</para>
 
-      <programlisting language="Python">plt.plot(time,dq1,time,dq6)
+      <programlisting language="python">plt.plot(time,dq1,time,dq6)
 plt.legend(['der(mechanics.q[1])','der(mechanics.q[6])'])
 plt.xlabel('Time (s)')
 plt.ylabel('Joint Velocity (rad/s)')
