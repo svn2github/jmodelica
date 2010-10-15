@@ -818,6 +818,11 @@ class AssimuloAlgOptions(OptionBase):
         maxord  --
             The maximum order of the solver. Can range between 1 to 5.
             Default: 5
+            
+        sensitivity --
+            If set to True, sensitivities for the states with respect to 
+            parameters set to free in the model will be calculated.
+            Default: False
     
     Options for CVode::
     
