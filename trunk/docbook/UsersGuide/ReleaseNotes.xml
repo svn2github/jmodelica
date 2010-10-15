@@ -28,6 +28,87 @@
         </listitem>
       </itemizedlist>
     </section>
+
+    <section>
+      <title>Python interface</title>
+
+      <section>
+        <title>Models</title>
+
+        <para><itemizedlist>
+            <listitem>
+              <para>Introduced new model class
+              <literal>jmodelica.jmi.JMUModel</literal> which replaced
+              <literal>jmodelica.jmi.JMIModel</literal>.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>jmodelica.fmi.FMIModel</literal> changed name to
+              <literal>jmodelica.fmi.FMUModel</literal>.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>jmodelica.jmi.JMIModel.get_value</literal> and
+              <literal>set_value</literal> have changed to
+              <literal>jmodelica.jmi.JMUModel.get</literal> and
+              <literal>set</literal>.</para>
+            </listitem>
+          </itemizedlist></para>
+      </section>
+
+      <section>
+        <title>Compiling</title>
+
+        <para><itemizedlist>
+            <listitem>
+              <para>Introduced JMU files which are compressed files containing
+              files created during compilation. </para>
+            </listitem>
+
+            <listitem>
+              <para>Introduced new method
+              <literal>jmodelica.jmi.compile_jmu</literal> which compiles
+              Modelica or Optimica models to JMUs. These JMUs are then used
+              when creating a <literal>JMUModel</literal> which loads the
+              model in a Python object.</para>
+            </listitem>
+
+            <listitem>
+              <para>Removed possibility to compile models directly in
+              high-level functions, initialize, simulate and optimize. Instead
+              <literal>compile_jmu</literal> should be used.</para>
+            </listitem>
+          </itemizedlist></para>
+      </section>
+
+      <section>
+        <title>initialize, simulate and optimize</title>
+
+        <itemizedlist>
+          <listitem>
+            <para><literal>initialize</literal>, <literal>simulate</literal>
+            and <literal>optimize</literal> are no longer functions under
+            <literal>jmodelica</literal> but methods of
+            <literal>jmodelica.jmi.JMUModel</literal> and
+            <literal>jmodelica.fmi.FMUModel</literal>
+            (<literal>initialize</literal> and <literal>simulate</literal>
+            only). </para>
+          </listitem>
+
+          <listitem>
+            <para>New objects for options to <literal>initialize</literal>,
+            <literal>simulate</literal> and <literal>optimize</literal> have
+            been introduced. The <literal>alg_args</literal> and
+            <literal>solver_args</literal> parameters have therefore been
+            removed. The options from <literal>alg_args</literal> and
+            <literal>solver_args</literal> can now be found in the options
+            object. Each algorithm for <literal>initialize</literal>,
+            <literal>simulate</literal> and <literal>optimize</literal> have
+            their own options object. </para>
+          </listitem>
+        </itemizedlist>
+      </section>
+    </section>
   </section>
 
   <section>
