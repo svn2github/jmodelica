@@ -53,6 +53,24 @@
         <para>Fixed many compiler bugs, especially concerning complex class
         structures.</para>
       </section>
+
+      <section>
+        <title>Improved reporting of structural singularities</title>
+
+        <para>Systems which are structurally singular now generates an error
+        message. Also, high-index systems, which are not yet supported, are
+        reported as structurally singular systems.</para>
+      </section>
+
+      <section>
+        <title>Automatic addition of initial equations</title>
+
+        <para>A matching algorithm is used to automatically add initial
+        equations to obtain a balanced DAE initialization system. If too few
+        initial equations are given, the algorithm will set the
+        <literal>fixed</literal> attribute to true for some of the
+        differentiated variables in the model.</para>
+      </section>
     </section>
 
     <section>
@@ -173,6 +191,17 @@ yres = res['y']</programlisting>
 
         <para>which calculates sensitivities of the states with respect to the
         free parameters.</para>
+      </section>
+
+      <section>
+        <title>Write scaled simulation result to file</title>
+
+        <para>In some cases, it is useful to be able to write the scaled
+        simulation result when the option
+        <literal>enable_variable_scaling</literal> is set to true.
+        Specifically, this supports debugging to detect if additional
+        variables should have a nominal value. This feature is available also
+        for initialization and optimization.</para>
       </section>
     </section>
   </section>
@@ -321,13 +350,41 @@ yres = res['y']</programlisting>
           to encode Lagrange cost functions of the type</para>
 
           <informalequation>
-            <m:math display="block"><m:mrow> <m:munderover> <m:mo>∫</m:mo>
-            <m:msub> <m:mi>t</m:mi> <m:mi>0</m:mi> </m:msub> <m:msub>
-            <m:mi>t</m:mi> <m:mi>f</m:mi> </m:msub> </m:munderover> <m:mrow>
-            <m:mrow> <m:mi>L</m:mi> <m:mo>⁡</m:mo> <m:mfenced> <m:mi>.</m:mi>
-            </m:mfenced> </m:mrow> <m:mspace depth="0.5ex" height="0.5ex"
-            width="1ex"></m:mspace> <m:mtext>dt</m:mtext> </m:mrow>
-            </m:mrow></m:math>
+            <m:math display="block">
+              <m:mrow>
+                <m:munderover>
+                  <m:mo>∫</m:mo>
+
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mi>0</m:mi>
+                  </m:msub>
+
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mi>f</m:mi>
+                  </m:msub>
+                </m:munderover>
+
+                <m:mrow>
+                  <m:mrow>
+                    <m:mi>L</m:mi>
+
+                    <m:mo>⁡</m:mo>
+
+                    <m:mfenced>
+                      <m:mi>.</m:mi>
+                    </m:mfenced>
+                  </m:mrow>
+
+                  <m:mspace depth="0.5ex" height="0.5ex" width="1ex" />
+
+                  <m:mtext>dt</m:mtext>
+                </m:mrow>
+              </m:mrow>
+            </m:math>
           </informalequation>
 
           <para>the Optimica class attribute
