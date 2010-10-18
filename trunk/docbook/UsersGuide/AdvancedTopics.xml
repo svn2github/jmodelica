@@ -99,7 +99,7 @@
       </itemizedlist>
 
       <para>The Python commands in this tutorial may be copied and pasted
-      directely into a Python shell, in some cases with minor modifications.
+      directly into a Python shell, in some cases with minor modifications.
       You are, however, strongly encouraged to copy the commands into a text
       file, e.g., ast_example.py.</para>
 
@@ -112,33 +112,6 @@
       choose to create Python script file, save it to the working directory.
       The tutorial is based on a model from the Modelica Standard Library:
       Modelica.Electrical.Analog.Basic.Examples.CauerLowPassAnalog.</para>
-    </section>
-
-    <section>
-      <title>Start the Python shell</title>
-
-      <para>Next, open a Python shell, preferably using the Pylab mode. If you
-      are running Windows, select the menu option provided with the
-      JModelica.org installation. If you are running Linux or Mac OS X, open a
-      terminal and enter the command:</para>
-
-      <programlisting language="python">&gt; /path/to/jmodelica_installation/Python/jm_ipython.sh -pylab
-</programlisting>
-
-      <para>As your first action, go to the working directory you have
-      created:</para>
-
-      <programlisting language="python">In [1]: cd '/path/to/working/directory'
-</programlisting>
-
-      <para>In order to run the Python script, use the 'run' command:</para>
-
-      <programlisting language="python">In [2]: run -i ast_example.py
-</programlisting>
-
-      <para>Notice the '-i' switch which is used in this tutorial in order to
-      avoid loading the Modelica standard library multiple times and thereby
-      preventing the Python shell from running out of memory.</para>
     </section>
 
     <section>
@@ -164,13 +137,15 @@ import matplotlib.pyplot as plt
 import jpype
 
 # Create a reference to the java package 'org'
-org = jpype.JPackage('org')</programlisting>
+org = jpype.JPackage('org')
+</programlisting>
 
       <para>Also, we need to create an instance of a Modelica compiler in
       order to compile models:</para>
 
       <programlisting language="python"># Create a compiler
-mc = ModelicaCompiler()</programlisting>
+mc = ModelicaCompiler()
+</programlisting>
 
       <para>In order to avoid parsing the same file multiple times (we will
       not change the Modelica file in this tutorial), we will check the
@@ -183,13 +158,15 @@ try:
 except:
     # Parse the file CauerLowPassAnalog.mo and get the root node
     # of the source AST
-    source_root = mc.parse_model("CauerLowPassAnalog.mo")</programlisting>
+    source_root = mc.parse_model("CauerLowPassAnalog.mo")
+</programlisting>
 
       <para>At this point, try the built-in help feature of Python by typing
       the following command in the shell to see the help text for the function
       you just used.</para>
 
-      <programlisting language="python">In [2]: help(mc.parse_model)</programlisting>
+      <programlisting language="python">In [2]: help(mc.parse_model)
+</programlisting>
 
       <para>In the first part of the tutorial, we will not work with the
       filter model, but rather load the Modelica standard library. Again, we
@@ -203,7 +180,8 @@ except NameError, e:
     # declaration AST node corresponding to the Modelica
     # package.
     modelica = source_root.getProgram().getLibNode(1). \
-               getStoredDefinition().getElement(0)</programlisting>
+               getStoredDefinition().getElement(0)
+</programlisting>
 
       <para>The means to access the node in the source AST corresponding to
       the class (package) declaration of the Modelica library is somewhat
@@ -248,12 +226,14 @@ except NameError, e:
               %(class_decl.qualifiedName(),num_classes))
 
     # Return the number of hierachically contained classes
-    return num_classes</programlisting>
+    return num_classes
+</programlisting>
 
       <para>We then call the function:</para>
 
       <programlisting language="python"># Call count_classes for 'Modelica'
-num_classes = count_classes(modelica,0)</programlisting>
+num_classes = count_classes(modelica,0)
+</programlisting>
 
       <para>Now run the script and study the printouts in the Python shell.
       The first time the script is run, you will se printouts corresponding
@@ -263,7 +243,7 @@ num_classes = count_classes(modelica,0)</programlisting>
       switch), to get a cleaner output, which should now look similar
       to:</para>
 
-      <programlisting language="python">The package Modelica.UsersGuide has 16 hierachically contained classes
+      <programlisting>The package Modelica.UsersGuide has 16 hierachically contained classes
 The package Modelica.Constants has 0 hierachically contained classes
 The package Modelica.Icons has 16 hierachically contained classes
 The package Modelica.SIunits has 532 hierachically contained classes
@@ -275,7 +255,8 @@ The package Modelica.Mechanics has 474 hierachically contained classes
 The package Modelica.Media has 1064 hierachically contained classes
 The package Modelica.Thermal has 88 hierachically contained classes
 The package Modelica.Utilities has 86 hierachically contained classes
-The package Modelica has 3045 hierachically contained classes</programlisting>
+The package Modelica has 3045 hierachically contained classes
+</programlisting>
 
       <para>Take some time to ponder the results and make sure that you
       understand how the Python function 'count_classes' works and which
@@ -361,7 +342,8 @@ except:
         # Assume that primitive variables are leafs in the instance AST
         if (inst_node.getClass() is \
             org.jmodelica.modelica.compiler.InstPrimitive) is False:
-            dump_inst_ast(extends.getChild(i),indent + "  ")</programlisting>
+            dump_inst_ast(extends.getChild(i),indent + "  ")
+</programlisting>
 
       <para>Take a minute and make sure that you understand the essential
       parts of the function.</para>
@@ -370,13 +352,14 @@ except:
       CauerLowPassAnalog instance as an argument.</para>
 
       <programlisting language="python"># Dump the filter instance
-dump_inst_ast(filter_instance,"")</programlisting>
+dump_inst_ast(filter_instance,"")
+</programlisting>
 
       <para>You should now see a rather lengthy printout in your shell window.
       Let us have a closer look at a few of the instances in the model. First
       look at the printouts for a resistor in the model:</para>
 
-      <programlisting language="python">    InstComposite: Modelica.Electrical.Analog.Basic.Resistor R1 {R=1}
+      <programlisting>    InstComposite: Modelica.Electrical.Analog.Basic.Resistor R1 {R=1}
       InstPrimitive: SI.Resistance R {=1, start=1, final quantity="Resistance", \
                                       final unit="Ohm"}
       InstExtends: Interfaces.OnePort {R=1}
@@ -387,7 +370,8 @@ dump_inst_ast(filter_instance,"")</programlisting>
           InstPrimitive: SI.Current i {final quantity="ElectricCurrent", final unit="A"}
         InstComposite: NegativePin n {}
           InstPrimitive: SI.Voltage v {final quantity="ElectricPotential", final unit="V"}
-          InstPrimitive: SI.Current i {final quantity="ElectricCurrent", final unit="A"}</programlisting>
+          InstPrimitive: SI.Current i {final quantity="ElectricCurrent", final unit="A"}
+</programlisting>
 
       <para>The model instance if of type InstComposite, and contains two
       elements, one primitive variable, R, and one extends clause. The
@@ -405,7 +389,7 @@ dump_inst_ast(filter_instance,"")</programlisting>
       signal source to a step. The instance node for the step voltage source
       'V' is given below:</para>
 
-      <programlisting language="python">    InstComposite: Modelica.Electrical.Analog.Sources.StepVoltage V {V=0, startTime=1, \
+      <programlisting>    InstComposite: Modelica.Electrical.Analog.Sources.StepVoltage V {V=0, startTime=1, \
                                                                      offset=0}
       InstPrimitive: SI.Voltage V {=0, start=1, final quantity="ElectricPotential", \
                                    final unit="V"}
@@ -425,7 +409,8 @@ dump_inst_ast(filter_instance,"")</programlisting>
             InstExtends: SO {height=V, final offset=offset, final startTime=startTime}
               InstPrimitive: RealOutput y {}
               InstExtends: BlockIcon {height=V, final offset=offset, 
-                                      final startTime=startTime}</programlisting>
+                                      final startTime=startTime}
+</programlisting>
 
       <para>Here we see how the modification "redeclare
       Modelica.Blocks.Sources.Step signalSource(height=V)" affects the
@@ -453,7 +438,8 @@ try:
     filter_flat_model.name()
 except:
     # Flatten the model instance filter_instance
-    filter_flat_model = mc.flatten_model(filter_instance)</programlisting>
+    filter_flat_model = mc.flatten_model(filter_instance)
+</programlisting>
 
       <para>During flattening, the instance tree is traversed and all
       primitive declarations and equations are collected. In addition, such as
@@ -461,7 +447,8 @@ except:
 
       <para>Let us have a look at the flattened model:</para>
 
-      <programlisting language="python">print(filter_flat_model)</programlisting>
+      <programlisting language="python">print(filter_flat_model)
+</programlisting>
 
       <para>We may also retrieve some model statistics:</para>
 
@@ -473,7 +460,8 @@ print("Number of algebraic variables:      %d" \
 print("Number of equations:                %d" \
        % filter_flat_model.numEquations())
 print("Number of initial equations:        %d" \
-       % filter_flat_model.numInitialEquations())</programlisting>
+       % filter_flat_model.numInitialEquations())
+</programlisting>
 
       <para>How many variables and equations is the model composed of? Does
       the model seem to be well posed?</para>

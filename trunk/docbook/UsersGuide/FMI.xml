@@ -188,12 +188,14 @@
     <para>If logging is set to <literal>True</literal> the log can be
     retrieved with the method,</para>
 
-    <programlisting language="python">FMUModel.get_log()</programlisting>
+    <programlisting language="python">FMUModel.get_log()
+</programlisting>
 
     <para>Documentation of the functions can also be accessed interactively
     from IPython by using for instance,</para>
 
-    <programlisting language="python">FMUModel.get_real?</programlisting>
+    <programlisting language="python">FMUModel.get_real?
+</programlisting>
 
     <para>There is also a one-to-one map to the C-functions, meaning that
     there is an option to use the low-level C-functions as they are specified
@@ -267,7 +269,8 @@
 
         <programlisting language="python">        import numpy as N 
         import pylab as P #Used for plotting
-        from jmodelica.fmi import FMIModel #The FMI Interface      </programlisting>
+        from jmodelica.fmi import FMIModel #The FMI Interface
+</programlisting>
 
         <para>Next, the FMU is to be loaded and initialized,</para>
 
@@ -281,7 +284,8 @@
                                    #(Defaults to 0.0)
         
         bouncing_fmu.initialize() #Initialize the model. Also sets all the start 
-                                  #attributes defined in the XML file.     </programlisting>
+                                  #attributes defined in the XML file.
+</programlisting>
 
         <para>The first line loads the FMU and connects the C-functions of the
         model to Python together with loading the information from the
@@ -310,7 +314,8 @@
         vref  = [bouncing_fmu.get_valueref('h')] + \
                 [bouncing_fmu.get_valueref('v')] #Retrieve the valureferences for the
                                                  #values 'h' and 'v't_sol = [Tstart]
-        sol = [bouncing_fmu.get_real(vref)]        </programlisting>
+        sol = [bouncing_fmu.get_real(vref)]
+</programlisting>
 
         <para>Here the continuous states together with the nominal values and
         the event indicators are stored to be used in the integration loop. In
@@ -321,7 +326,8 @@
 
         <programlisting language="python">        time = Tstart
         Tnext = Tend #Used for time events
-        dt = 0.01 #Step-size      </programlisting>
+        dt = 0.01 #Step-size
+</programlisting>
 
         <para>We are now ready to create our main integration loop where the
         solution is advanced using the explicit Euler method.</para>
@@ -343,7 +349,8 @@
             
             #Set the states at t = time (Perform the step using x(n+1)=x(n)+hf(x(n), t(n))
             x = x + h*dx 
-            bouncing_fmu.continuous_states = x    </programlisting>
+            bouncing_fmu.continuous_states = x
+</programlisting>
 
         <para>This is the integration loop for advancing the solution one
         step. The loop continues until the final time have been reached or if
@@ -373,7 +380,8 @@
             #Check for time and state events
             time_event  = abs(time-Tnext) &lt;= 1.e-10
             state_event = True if True in ((event_ind_new&gt;0.0) != (event_ind&gt;0.0))\
-                          else False   </programlisting>
+                          else False
+</programlisting>
 
         <para>Events can be, time, state or step events. The time events are
         checked by continuously monitor the current time and the next time
@@ -411,7 +419,8 @@
                 if eInfo.upcomingTimeEvent:
                     Tnext = min(eInfo.nextEventTime, Tend)
                 else:
-                    Tnext = Tend  </programlisting>
+                    Tnext = Tend
+</programlisting>
 
         <para>If an event occurred, we enter the iteration loop where we loop
         until the solution of the new states have converged. During this
@@ -431,7 +440,8 @@
             #bouncing_fmu.get_real,get_integer,get_boolean,get_string (valueref)
             
             t_sol += [time]
-            sol += [bouncing_fmu.get_real(vref)]   </programlisting>
+            sol += [bouncing_fmu.get_real(vref)]
+</programlisting>
 
         <para>In the end of the loop, the solution is stored and the old event
         indicators are stored for use in the next loop.</para>
@@ -451,7 +461,8 @@
         P.title(bouncing_fmu.get_name())
         P.ylabel('Velocity (m/s)')
         P.xlabel('Time (s)')
-        P.show()     </programlisting>
+        P.show()
+</programlisting>
 
         <para>and the figure below shows the results.</para>
 

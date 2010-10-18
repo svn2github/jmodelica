@@ -46,7 +46,8 @@
   equation
     der(x1) = (1 - x2^2) * x1 - x2 + u;
     der(x2) = x1;
-  end VDP;</programlisting>
+  end VDP;
+</programlisting>
 
     <para>Create a new file in your working directory called
     <literal>VDP.mo</literal> and save the model. Note that this model is
@@ -61,7 +62,8 @@ from jmodelica.jmi import compile_jmu
 from jmodelica.jmi import JMUModel
 
 # Import the plotting library
-import matplotlib.pyplot as plt</programlisting>
+import matplotlib.pyplot as plt
+</programlisting>
 
     <para>Next, we compile and load the model:</para>
 
@@ -69,7 +71,8 @@ import matplotlib.pyplot as plt</programlisting>
 jmu_name = compile_jmu("VDP","VDP.mo")
 
 # Load model
-vdp = JMUModel(jmu_name)</programlisting>
+vdp = JMUModel(jmu_name)
+</programlisting>
 
     <para>The function <literal>compile_jmu</literal> compiles the model into
     a binary, which is then loaded when the <literal>vdp</literal> object is
@@ -77,7 +80,8 @@ vdp = JMUModel(jmu_name)</programlisting>
     the simulation algorithm (for more information about model creations and
     options, see <xref linkend="ch_models" />):</para>
 
-    <programlisting language="python">res = vdp.simulate(final_time=10)</programlisting>
+    <programlisting language="python">res = vdp.simulate(final_time=10)
+</programlisting>
 
     <para>In this case we use the default simulation algorithm together with
     default options, except for the final time which we set to 10. The result
@@ -86,7 +90,8 @@ vdp = JMUModel(jmu_name)</programlisting>
 
     <programlisting language="python">x1 = res['x1']
 x2 = res['x2']
-t  = res['time']</programlisting>
+t  = res['time']
+</programlisting>
 
     <para>The variable trajectories are returned as numpy arrays and can be
     used for further analysis of the simulation result or for
@@ -98,7 +103,8 @@ plt.legend(('x1','x2'))
 plt.title('Van der Pol oscillator.')
 plt.ylabel('Angle (rad)')
 plt.xlabel('Time (s)')
-plt.show()</programlisting>
+plt.show()
+</programlisting>
 
     <para>In <xref linkend="sim_fig_vdp_res" /> the simulation result is
     shown.</para>
@@ -149,11 +155,13 @@ plt.show()</programlisting>
              final_time=1.0,
              input=(),
              algorithm='AssimuloAlg', 
-             options={}):</programlisting>
+             options={}):
+</programlisting>
 
     <para>And used in the following way:</para>
 
-    <programlisting language="python">res = JMUModel.simulate() #Using default values</programlisting>
+    <programlisting language="python">res = JMUModel.simulate() #Using default values
+</programlisting>
 
     <para>The only difference between the simulation method in
     <literal>FMUModel</literal> compared to <literal>JMUModel</literal> is
@@ -179,18 +187,21 @@ plt.show()</programlisting>
       <programlisting language="python">t = N.linspace(0.,10.,100) #Create one hundred evenly spaced points
 u = N.sin(t) #Create the input vector
 u_traj = N.transpose(N.hstack((t,u))) #Create the data matrix and transpose 
-                                      #it to the correct form</programlisting>
+                                      #it to the correct form
+</programlisting>
 
       <para>The above code have created the data matrix that we are interested
       in giving to the model as input, we just need to connect the data to a
       specific input variable, <literal>u1</literal>:</para>
 
-      <programlisting language="python">input_model = ('u1', u_traj)</programlisting>
+      <programlisting language="python">input_model = ('u1', u_traj)
+</programlisting>
 
       <para>Now we are ready to simulate using the input and simulate 10
       seconds.</para>
 
-      <programlisting language="python">res = model.simulate(final_time=10, input=input_model)</programlisting>
+      <programlisting language="python">res = model.simulate(final_time=10, input=input_model)
+</programlisting>
 
       <para>If we on the other hand would have two input variables, u1 and u2
       the script would instead look like:</para>
@@ -203,7 +214,8 @@ u_traj = N.transpose(N.hstack((t,u1,u2))) #Create the data matrix and
 
 input_model = (['u1','u2'], u_traj)
 
-res = model.simulate(final_time=10, input=input_model)</programlisting>
+res = model.simulate(final_time=10, input=input_model)
+</programlisting>
 
       <para>Note that the variables are now a List of variables.</para>
 
@@ -220,7 +232,8 @@ res = model.simulate(final_time=10, input=input_model)</programlisting>
         <para>The options attribute are where options to the specified
         algorithm are stored and are preferably used together with:</para>
 
-        <programlisting>opts = JMUModel.simulate_options()</programlisting>
+        <programlisting>opts = JMUModel.simulate_options()
+</programlisting>
 
         <para>which returns the default options for the default algorithm.
         Information about the available options can be viewed by typing help
@@ -232,7 +245,8 @@ res = model.simulate(final_time=10, input=input_model)</programlisting>
    implicit solvers (IDA) for DAEs. The ODE solvers require that the problem
    is written on the form, ydot = f(t,y).
    
-   ...</programlisting>
+   ...
+</programlisting>
 
         <para>In <xref linkend="sim_table_gen_Jalg" /> the general options for
         the AssimuloAlg algorithm are described while in <xref
@@ -311,7 +325,8 @@ opts['solver'] = 'CVode' #Change the solver from IDA to CVode
 
 opts['CVode_options']['discr'] = 'Adams' #Change from using BDF to Adams
 
-model.simulate(options=opts) #Pass in the options to simulate and simulate</programlisting>
+model.simulate(options=opts) #Pass in the options to simulate and simulate
+</programlisting>
 
         <para>It should also be noted from the above example the options
         regarding a specific solver, say the tolerances for
@@ -323,13 +338,15 @@ model.simulate(options=opts) #Pass in the options to simulate and simulate</prog
 
 #or
 
-opts['IDA_options']['atol']  = 1.0e-6 #Options specific for IDA</programlisting>
+opts['IDA_options']['atol']  = 1.0e-6 #Options specific for IDA
+</programlisting>
 
         <para>For the general options, as changing the solver, they are
         accessed as a single dictionary:</para>
 
         <programlisting language="python">opts['solver'] = 'CVode' #Changing the solver
-opts['ncp'] = 1000 #Changing the number of communication points.</programlisting>
+opts['ncp'] = 1000 #Changing the number of communication points.
+</programlisting>
 
         <table xml:id="sim_table_cvode">
           <title>Selection of solver arguments for CVode</title>
@@ -482,7 +499,8 @@ opts['ncp'] = 1000 #Changing the number of communication points.</programlisting
         <para>The options attribute are where options to the specified
         algorithm are stored and are preferably used together with:</para>
 
-        <programlisting language="python">opts = FMUModel.simulate_options()</programlisting>
+        <programlisting language="python">opts = FMUModel.simulate_options()
+</programlisting>
 
         <para>which returns the default options for the default algorithm.
         Information about the available options can be viewed by typing help
@@ -576,7 +594,8 @@ opts['CVode_options']['discr'] = 'Adams' #Change from using BDF to Adams
 
 opts['initialize'] = False #Dont initialize the model
 
-model.simulate(options=opts) #Pass in the options to simulate and simulate</programlisting>
+model.simulate(options=opts) #Pass in the options to simulate and simulate
+</programlisting>
 
         <para>It should also be noted from the above example the options
         regarding a specific solver, say the tolerances for
@@ -591,7 +610,8 @@ model.simulate(options=opts) #Pass in the options to simulate and simulate</prog
         accessed as a single dictionary:</para>
 
         <programlisting language="python">opts['solver'] = 'CVode' #Changing the solver
-opts['ncp'] = 1000 #Changing the number of communication points.</programlisting>
+opts['ncp'] = 1000 #Changing the number of communication points.
+</programlisting>
 
         <table xml:id="sim_table_cvodeFMI">
           <title>Selection of solver arguments for CVode</title>
@@ -683,7 +703,8 @@ opts['ncp'] = 1000 #Changing the number of communication points.</programlisting
       <programlisting language="python">res = model.simulate()
 
 y = res['y'] #Return the result for the variable/parameter/constant y
-dery = res['der(y)'] #Return the result for the variable/parameter/constant der(y)</programlisting>
+dery = res['der(y)'] #Return the result for the variable/parameter/constant der(y)
+</programlisting>
 
       <para>This can be done for all the variables, parameters and constants
       defined in the model and is the preferred way of retrieving the result.
@@ -838,7 +859,8 @@ dery = res['der(y)'] #Return the result for the variable/parameter/constant der(
    der(x3) = -a3/A3*sqrt(2*g*x3) + (1-g2_nmp)*k2_nmp/A3*u2;
    der(x4) = -a4/A4*sqrt(2*g*x4) + (1-g1_nmp)*k1_nmp/A4*u1;
 
-end QuadTank;</programlisting>
+end QuadTank;
+</programlisting>
 
       <para>Lets begin with the the example, copy and paste the Modelica code
       and save it into <literal>QuadTank.mo</literal> and open a python script
@@ -849,7 +871,8 @@ import matplotlib.pyplot as plt
 import numpy as N
 
 from jmodelica.jmi import compile_jmu
-from jmodelica.jmi import JMUModel</programlisting>
+from jmodelica.jmi import JMUModel
+</programlisting>
 
       <para>The input data is stored in <literal>qt_par_est_data.mat</literal>
       which can be found in the <literal>examples/files</literal> catalogue in
@@ -862,7 +885,8 @@ from jmodelica.jmi import JMUModel</programlisting>
 # Extract data series  
 t_meas = data['t'][6000::100,0]-60  
 u1 = data['u1_d'][6000::100,0]
-u2 = data['u2_d'][6000::100,0]</programlisting>
+u2 = data['u2_d'][6000::100,0]
+</programlisting>
 
       <para>The trajectories have now been extracted and needs to be stacked
       into a data matrix with the first column as the time vector and the
@@ -872,7 +896,8 @@ u2 = data['u2_d'][6000::100,0]</programlisting>
 
       <programlisting language="python"># Build input trajectory matrix for use in simulation
 u_data = N.transpose(N.vstack((t_meas,u1,u2)))
-input_object = (['u1','u2'], u_data)</programlisting>
+input_object = (['u1','u2'], u_data)
+</programlisting>
 
       <para>Next, we compile and load the model:</para>
 
@@ -880,13 +905,15 @@ input_object = (['u1','u2'], u_data)</programlisting>
 jmu_name = compile_jmu('QuadTank', 'QuadTank.mo')
 
 # Load model
-model = JMUModel(jmu_name)</programlisting>
+model = JMUModel(jmu_name)
+</programlisting>
 
       <para>Now, that the model is compiled and the input have been adapted,
       lets give the information to the simulate method and simulate:</para>
 
       <programlisting language="python"># Simulate model with input trajectories
-res = model.simulate(final_time=60, input=input_object)</programlisting>
+res = model.simulate(final_time=60, input=input_object)
+</programlisting>
 
       <para>The result is retrieved by accessing the <literal>res</literal>
       variable as a dictionary with the variable name as key:</para>
@@ -897,7 +924,8 @@ x3_sim = res['x3']
 x4_sim = res['x4']
 u1_sim = res['u1']
 u2_sim = res['u2']
-t_sim  = res['time']</programlisting>
+t_sim  = res['time']
+</programlisting>
 
       <para>And then plotted with the help from
       <literal>matplotlib</literal>:</para>
@@ -927,7 +955,8 @@ plt.subplot(2,1,2)
 plt.plot(t_sim,u2_sim,'r')
 plt.title('u2')
 plt.xlabel('t[s]')
-plt.show()</programlisting>
+plt.show()
+</programlisting>
 
       <para>In <xref linkend="sim_fig_qt_x" /> the result of the tank levels
       are shown and in <xref linkend="sim_fig_qt_u" /> the input signals are
@@ -998,7 +1027,8 @@ plt.show()</programlisting>
   equation
     der(x1) = (1 - x2^2) * x1 - x2 + u;
     der(x2) = x1;
-end VDP;</programlisting>
+end VDP;
+</programlisting>
 
       <para>We see here that the state derivatives are written on the left
       hand side while the equations are written on the right hand side.</para>
@@ -1012,7 +1042,8 @@ from jmodelica.jmi import compile_jmu
 from jmodelica.jmi import JMUModel
 
 # Import the plotting library
-import matplotlib.pyplot as plt</programlisting>
+import matplotlib.pyplot as plt
+</programlisting>
 
       <para>Next, we compile and load the model:</para>
 
@@ -1020,7 +1051,8 @@ import matplotlib.pyplot as plt</programlisting>
 jmu_name = compile_jmu("VDP","VDP.mo")
 
 # Load model
-vdp = JMUModel(jmu_name)</programlisting>
+vdp = JMUModel(jmu_name)
+</programlisting>
 
       <para>Now we would like to change the default solver IDA to the ODE
       solver CVode and also change the relative tolerance to 0.0001. First we
@@ -1029,19 +1061,22 @@ vdp = JMUModel(jmu_name)</programlisting>
       <programlisting language="python">opts = vdp.simulate_options() #Retrieve the default options
 
 opts['solver'] = 'CVode' #Change the solver to CVode
-opts['CVode_options']['rtol'] = 0.0001 #Change the relative tolerance for CVode</programlisting>
+opts['CVode_options']['rtol'] = 0.0001 #Change the relative tolerance for CVode
+</programlisting>
 
       <para>Now lets provide the options to the simulate method and simulate
       the problem ten seconds:</para>
 
-      <programlisting language="python">res = vdp.simulate(final_time=10, options=opts)</programlisting>
+      <programlisting language="python">res = vdp.simulate(final_time=10, options=opts)
+</programlisting>
 
       <para>The result is retrieved by accessing the <literal>res</literal>
       variable as a dictionary with the variable name as key:</para>
 
       <programlisting language="python">x1 = res['x1']
 x2 = res['x2']
-t  = res['time']</programlisting>
+t  = res['time']
+</programlisting>
 
       <para>The variable trajectories are returned as numpy arrays and can be
       used for further analysis of the simulation result or for
@@ -1053,7 +1088,8 @@ plt.legend(('x1','x2'))
 plt.title('Van der Pol oscillator.')
 plt.ylabel('Angle (rad)')
 plt.xlabel('Time (s)')
-plt.show()</programlisting>
+plt.show()
+</programlisting>
 
       <para>In <xref linkend="sim_fig_cvode_vdp" /> the simulation result is
       shown.</para>
@@ -1102,7 +1138,8 @@ from jmodelica.jmi import compile_jmu
 from jmodelica.jmi import JMUModel
 
 # Import the plotting library
-import matplotlib.pyplot as plt</programlisting>
+import matplotlib.pyplot as plt
+</programlisting>
 
       <para>Next, we compile and load the model:</para>
 
@@ -1110,14 +1147,16 @@ import matplotlib.pyplot as plt</programlisting>
 jmu_name = compile_jmu("RLC_Circuit_Square","RLC_Circuit.mo")
 
 # Load model
-rlc = JMUModel(jmu_name)</programlisting>
+rlc = JMUModel(jmu_name)
+</programlisting>
 
       <para>Now we are ready to simulate our model. We are interested in
       simulating the model from 0.0 to 20.0 seconds. The start time is default
       to 0.0 so no need to change that, but the final time needs to be
       changed:</para>
 
-      <programlisting language="python">res = rlc.simulate(final_time=20.0) #Simulate the model from 0.0 to 20.0 seconds</programlisting>
+      <programlisting language="python">res = rlc.simulate(final_time=20.0) #Simulate the model from 0.0 to 20.0 seconds
+</programlisting>
 
       <para>After a successful simulation the statistics are printed in the
       prompt and the results are stored in the variable 'res'. To view the
@@ -1127,7 +1166,8 @@ rlc = JMUModel(jmu_name)</programlisting>
       <programlisting language="python">square_y    = res['square.y']
 resistor_v  = res['resistor.v']
 inductor1_i = res['inductor1.i']
-time        = res['time']</programlisting>
+time        = res['time']
+</programlisting>
 
       <para>And then plotted with the help from
       <literal>matplotlib</literal>,</para>
@@ -1135,7 +1175,8 @@ time        = res['time']</programlisting>
       <programlisting language="python">plt.figure(1)
 plt.plot(time, square_y, time, resistor_v, time, inductor1_i)    
 plt.legend(('square.y','resistor.v','inductor1.i'))
-plt.show()</programlisting>
+plt.show()
+</programlisting>
 
       <para>The simulation result is shown in <xref
       linkend="sim_fig_rlc_res" />.</para>
@@ -1176,7 +1217,8 @@ plt.show()</programlisting>
   equation
     der(x1) = (1 - x2^2) * x1 - x2 + u;
     der(x2) = x1;
-  end VDP;</programlisting>
+  end VDP;
+</programlisting>
 
       <para>Notice that the initial values of the states are parametrized by
       the parameters <literal>x1_0</literal> and <literal>x2_0</literal>.
@@ -1186,7 +1228,8 @@ plt.show()</programlisting>
 
       <programlisting language="python">import numpy as N
 import pylab as p
-from jmodelica.jmi import compile_jmu, JMUModel</programlisting>
+from jmodelica.jmi import compile_jmu, JMUModel
+</programlisting>
 
       <para>into the Python file. Compile and load the model:</para>
 
@@ -1209,7 +1252,8 @@ vdp = JMUModel(jmu_name)
       <programlisting language="python"># Define initial conditions
 N_points = 11
 x1_0 = N.linspace(-3.,3.,N_points)
-x2_0 = N.zeros(N_points)</programlisting>
+x2_0 = N.zeros(N_points)
+</programlisting>
 
       <para>In order to visualize the results of the simulations, we open a
       plot window:</para>
@@ -1218,7 +1262,8 @@ x2_0 = N.zeros(N_points)</programlisting>
 p.clf()
 p.hold(True)
 p.xlabel('x1')
-p.ylabel('x2')</programlisting>
+p.ylabel('x2')
+</programlisting>
 
       <para>The actual parameter sweep is done by looping over the initial
       condition vectors and in each iteration set the parameter values into
@@ -1236,7 +1281,8 @@ p.ylabel('x2')</programlisting>
     # Plot simulation result in phase plane plot
     p.plot(x1.x, x2.x,'b')
 p.grid()
-p.show()</programlisting>
+p.show()
+</programlisting>
 
       <para>You should now see a plot similar to that in <xref
       linkend="sim_fig_psweep" />.</para>
@@ -1275,7 +1321,8 @@ p.show()</programlisting>
     der(y1) = -p1*y1 + p2*y2*y3;
     der(y2) =  p1*y1 - p2*y2*y3 - p3*(y2*y2);
     0.0 = y1 + y2 + y3 - 1;
-end Robertson;</programlisting>
+end Robertson;
+</programlisting>
 
       <para>In the model we have set the parameters to free which means that
       we want to calculate sensitivities of the states with respect to the
@@ -1290,7 +1337,8 @@ from jmodelica.jmi import compile_jmu
 from jmodelica.jmi import JMUModel
 
 # Import the plotting library
-import matplotlib.pyplot as plt</programlisting>
+import matplotlib.pyplot as plt
+</programlisting>
 
       <para>Next, we compile and load the model:</para>
 
@@ -1298,7 +1346,8 @@ import matplotlib.pyplot as plt</programlisting>
 jmu_name = compile_jmu("Robertson","Robertson.mop")
 
 # Load model
-model = JMUModel(jmu_name)</programlisting>
+model = JMUModel(jmu_name)
+</programlisting>
 
       <para>Now that the model is loaded, we have to change the option to
       activate the sensitivity calculations and also the absolute
@@ -1308,11 +1357,13 @@ model = JMUModel(jmu_name)</programlisting>
 opts = model.simulate_options() #Get the options
 opts['IDA_options']['atol'] = [1.0e-8, 1.0e-14, 1.0e-6] #Change the tolerance
 opts['IDA_options']['sensitivity'] = True #Activate the sensitivity calculations
-opts['ncp'] = 400 #Change the number of communication points</programlisting>
+opts['ncp'] = 400 #Change the number of communication points
+</programlisting>
 
       <para>Now lets simulate the model:</para>
 
-      <programlisting>res = model.simulate(final_time=4, options=opts)</programlisting>
+      <programlisting>res = model.simulate(final_time=4, options=opts)
+</programlisting>
 
       <para>The sensitivity results are stored as <literal>d{variable
       name}/d{parameter name}</literal> in the result object. We are
@@ -1321,14 +1372,16 @@ opts['ncp'] = 400 #Change the number of communication points</programlisting>
       <programlisting>dy1dp1 = res['dy1/dp1']
 dy2dp1 = res['dy2/dp1']
 dy3dp1 = res['dy3/dp1']
-time = res['time']</programlisting>
+time = res['time']
+</programlisting>
 
       <para>To plot the trajectories using <literal>matplotlib</literal>, use
       the following commands:</para>
 
       <programlisting>plt.plot(time, dy1dp1, time, dy2dp1, time, dy3dp1)
 plt.legend(('dy1/dp1', 'dy2/dp1', 'dy3/dp1'))
-plt.show()</programlisting>
+plt.show()
+</programlisting>
 
       <para>In <xref linkend="sim_fig_sens" /> the sensitivities are
       plotted.</para>
@@ -1381,17 +1434,20 @@ plt.show()</programlisting>
 from jmodelica.fmi import FMUModel
 
 # Import the plotting library
-import matplotlib.pyplot as plt</programlisting>
+import matplotlib.pyplot as plt
+</programlisting>
 
       <para>Next, we load the FMU into the model object:</para>
 
-      <programlisting language="python">robot = FMUModel('Modelica_Mechanics_MultiBody_Examples_Systems_RobotR3_fullRobot.fmu')</programlisting>
+      <programlisting language="python">robot = FMUModel('Modelica_Mechanics_MultiBody_Examples_Systems_RobotR3_fullRobot.fmu')
+</programlisting>
 
       <para>We are interested in simulating the Robot from time 0.0 to 1.8
       using 1000 communication points and using tolerances specified in the
       FMU. This information is specified to the simulate method:</para>
 
-      <programlisting language="python">res = robot.simulate(start_time=0.0, final_time=1.8, options={'ncp':1000})</programlisting>
+      <programlisting language="python">res = robot.simulate(start_time=0.0, final_time=1.8, options={'ncp':1000})
+</programlisting>
 
       <para>This preforms the simulation and the statistics will be printed in
       the prompt.</para>
@@ -1401,7 +1457,8 @@ import matplotlib.pyplot as plt</programlisting>
 
       <programlisting language="python">dq1  = res['der(mechanics.q[1])']
 dq6  = res['der(mechanics.q[6])']
-time = res['time']</programlisting>
+time = res['time']
+</programlisting>
 
       <para>Now we have loaded and retrieved the variables of interest. So
       lets plot them.</para>
@@ -1411,7 +1468,8 @@ plt.legend(['der(mechanics.q[1])','der(mechanics.q[6])'])
 plt.xlabel('Time (s)')
 plt.ylabel('Joint Velocity (rad/s)')
 plt.title('Full Robot')
-plt.show()</programlisting>
+plt.show()
+</programlisting>
 
       <para>In <xref linkend="sim_fig_rob_res" /> the result is shown and in
       <xref linkend="sim_fig_rob_dym" /> a comparison between Dymola and

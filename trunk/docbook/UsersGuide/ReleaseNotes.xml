@@ -161,8 +161,9 @@
         the result. The result trajectories are now accessed as objects in a
         dictionary:</para>
 
-        <programlisting>res = model.simulate()
-yres = res['y']</programlisting>
+        <programlisting language="python">res = model.simulate()
+yres = res['y']
+</programlisting>
       </section>
     </section>
 
@@ -202,6 +203,34 @@ yres = res['y']</programlisting>
         Specifically, this supports debugging to detect if additional
         variables should have a nominal value. This feature is available also
         for initialization and optimization.</para>
+      </section>
+    </section>
+
+    <section>
+      <title>Contributors</title>
+
+      <para>Christian Andersson</para>
+
+      <para>Tove Bergdahl</para>
+
+      <para>Magnus Gäfvert</para>
+
+      <para>Jesper Mattsson</para>
+
+      <para>Johan Ylikiiskilä</para>
+
+      <para>Johan Åkesson</para>
+
+      <section>
+        <title>Previous contributors</title>
+
+        <para>Philip Nilsson</para>
+
+        <para>Roberto Parrotto</para>
+
+        <para>Jens Rantil</para>
+
+        <para>Philip Reuterswärd</para>
       </section>
     </section>
   </section>
@@ -424,13 +453,15 @@ yres = res['y']</programlisting>
           parameter declarations such as:</para>
 
           <programlisting>parameter Real p1(free=true);
-parameter Real p2 = p1;</programlisting>
+parameter Real p2 = p1;
+</programlisting>
 
           <para>where the parameter p2 needs to be considered as being free in
           the optimization problem, with the additional equality
           constraint:</para>
 
-          <programlisting>p1 = p2</programlisting>
+          <programlisting>p1 = p2
+</programlisting>
 
           <para>included in the problem.</para>
         </section>

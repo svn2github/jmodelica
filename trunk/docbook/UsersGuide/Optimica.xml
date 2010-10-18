@@ -275,7 +275,8 @@
 equation
   der(x)=v;
   der(v)=u;
-end DoubleIntegrator; </programlisting>
+end DoubleIntegrator;
+</programlisting>
 
   <para>In summary, the Optimica extension consists of the following
   elements:</para>
@@ -346,7 +347,8 @@ end DoubleIntegrator; </programlisting>
     <programlisting>optimization DIMinTime
   DoubleIntegrator di;
   input Real u = di.u;
-end DIMinTime; </programlisting>
+end DIMinTime;
+</programlisting>
 
     <para>This class contains only one component representing the dynamic
     system model, but will be extended in the following to incorporate also
@@ -393,7 +395,8 @@ end DIMinTime; </programlisting>
   DoubleIntegrator di(u(free=true,
                         initialGuess=0.0));
   input Real u = di.u;
-end DIMinTime; </programlisting>
+end DIMinTime;
+</programlisting>
   </section>
 
   <section>
@@ -466,7 +469,8 @@ end DIMinTime; </programlisting>
  DoubleIntegrator di(u(free=true,
                        initialGuess=0.0));
  input Real u = di.u;
-end DIMinTime;</programlisting>
+end DIMinTime;
+</programlisting>
 
     <para>The default value of the class attribute <literal>static</literal>
     is <literal>false</literal>, and accordingly, it does not have to be set
@@ -515,7 +519,8 @@ constraint
  di.v(finalTime)=0;
  di.v&lt;=0.5;
  di.u&gt;=-1; di.u&lt;=1;
-end DIMinTime;</programlisting>
+end DIMinTime;
+</programlisting>
 
     <para>The Optimica specification can be translated into executable format
     and solved by a numerical solver, yielding the result:</para>

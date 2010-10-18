@@ -177,26 +177,30 @@
       </biblioset>
     </biblioentry>
 
-    <biblioentry>
+    <biblioentry role="article">
       <abbrev>Eng2001</abbrev>
 
-      <authorgroup>
-        <author>
-          <orgname>Peter Englezos</orgname>
-        </author>
+      <biblioset role="article">
+        <authorgroup>
+          <author>
+            <personname><firstname>Peter</firstname><surname>Englezos</surname></personname>
+          </author>
 
-        <author>
-          <orgname>Nicolas Kalogerakis</orgname>
-        </author>
-      </authorgroup>
+          <author>
+            <personname><firstname>Nicolas</firstname><surname>Kalogerakis</surname></personname>
+          </author>
+        </authorgroup>
 
-      <title>Applied Parameter Estimation for Chemical Engineers</title>
+        <title>Applied Parameter Estimation for Chemical Engineers</title>
 
-      <publisher>
-        <publishername>Marcel Dekker Inc.</publishername>
-      </publisher>
+        <publisher>
+          <publishername>Marcel Dekker Inc</publishername>
+        </publisher>
+      </biblioset>
 
-      <pubdate>2001</pubdate>
+      <biblioset relation="journal">
+        <pubdate>2001</pubdate>
+      </biblioset>
     </biblioentry>
   </bibliography>
 

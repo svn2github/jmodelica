@@ -19,17 +19,18 @@
     initializes the JMUmodel. The function is called after compiling and
     creating a JMUModel:</para>
 
-    <programlisting># Compile the stationary initialization model into a DLL
+    <programlisting language="python"># Compile the stationary initialization model into a DLL
 model_name = compile_jmu("My.Model", "/path/to/MyModel.mo")
 
 # Load a model instance into Python
 init_model = JMUModel(model_name)
     
 # Solve the DAE initialization system
-init_result = init_model.initialize()</programlisting>
+init_result = init_model.initialize()
+</programlisting>
 
     <para>The JMUModel instance <literal>init_model</literal> is now
-    initialized and is ready to be simulated. </para>
+    initialized and is ready to be simulated.</para>
 
     <para>The interactive help for the initialize method is shown by the
     command:</para>
@@ -90,11 +91,11 @@ init_result = init_model.initialize()</programlisting>
             
     Returns::
     
-        Options class for the algorithm specified with default values.</programlisting>Having
-    solved the initialization problem, the result of the initialization can be
-    retrieved from the return result object:</para>
+        Options class for the algorithm specified with default values.
+</programlisting>Having solved the initialization problem, the result of the
+    initialization can be retrieved from the return result object:</para>
 
-    <programlisting>x = init_model['x']
+    <programlisting language="python">x = init_model['x']
 y = init_model['y']
 </programlisting>
   </section>
@@ -215,7 +216,8 @@ y = init_model['y']
       documentation</link> for further information. For example, setting the
       option <literal>max_iter</literal>:</para>
 
-      <programlisting language="python">opts['IPOPT_options']['max_iter'] = 300</programlisting>
+      <programlisting language="python">opts['IPOPT_options']['max_iter'] = 300
+</programlisting>
 
       <para>makes IPOPT terminate after 300 iterations even if no optimal
       solution has been found.</para>

@@ -77,7 +77,8 @@ from jmodelica.jmi import compile_jmu
 from jmodelica.jmi import JMUModel
 
 # Import the plotting library
-import matplotlib.pyplot as plt</programlisting>
+import matplotlib.pyplot as plt
+</programlisting>
 
     <para>Next, we compile and load the model:</para>
 
@@ -92,7 +93,8 @@ vdp = JMUModel(jmu_name)
     <literal>vdp</literal> object is created. This object represents the
     compiled model and is used to invoke the optimization algorithm:</para>
 
-    <programlisting language="python">res = vdp.optimize()</programlisting>
+    <programlisting language="python">res = vdp.optimize()
+</programlisting>
 
     <para>In this case, we use the default settings for the optimization
     algorithm. The result object can now be used to access the optimization
@@ -236,7 +238,8 @@ model = JMUModel(model_name)
     the default optimization algorithm, with default options, is
     invoked:</para>
 
-    <programlisting>res = vdp.optimize()</programlisting>
+    <programlisting>res = vdp.optimize()
+</programlisting>
 
     <para>In the next section the available algorithms are described. Options
     for an algorithm can be set using the <literal>options</literal> argument
@@ -268,12 +271,14 @@ model = JMUModel(model_name)
     set simply by using standard dictionary syntax:</para>
 
     <programlisting language="python">opts = vpd.optimize_options()
-opts['n_e'] = 5</programlisting>
+opts['n_e'] = 5
+</programlisting>
 
     <para>The optimization algorithm may then be invoked again with the new
     options:</para>
 
-    <programlisting language="python">res = vdp.optimize(options=opts)</programlisting>
+    <programlisting language="python">res = vdp.optimize(options=opts)
+</programlisting>
 
     <para>Available options for supported algorithms are documented in <xref
     linkend="opt-sec-alg" />.</para>
@@ -284,7 +289,8 @@ opts['n_e'] = 5</programlisting>
     from the result object:</para>
 
     <programlisting language="python">time = res['time']
-x1 = res['x1']</programlisting>
+x1 = res['x1']
+</programlisting>
 
     <para>Variable data is returned as numpy arrays in case of variables and
     as numeric values in the case of parameters. The result object also
@@ -494,7 +500,8 @@ x1 = res['x1']</programlisting>
         documentation</link> for further information. For example, setting the
         option <literal>max_iter</literal>:</para>
 
-        <programlisting language="python">opts['IPOPT_options']['max_iter'] = 300</programlisting>
+        <programlisting language="python">opts['IPOPT_options']['max_iter'] = 300
+</programlisting>
 
         <para>makes IPOPT terminate after 300 iterations even if no optimal
         solution has been found.</para>
@@ -811,7 +818,8 @@ x1 = res['x1']</programlisting>
 import matplotlib.pyplot as plt
 
 from jmodelica.jmi import compile_jmu
-from jmodelica.jmi import JMUModel</programlisting>
+from jmodelica.jmi import JMUModel
+</programlisting>
 
       <para>Before we can do operations on the model, such as optimizing it,
       the model file must be compiled and the resulting DLL file loaded in
@@ -2379,7 +2387,8 @@ plt.title('u2')
 plt.xlabel('t[s]')
 plt.hold(True)
 plt.grid()
-plt.show()  </programlisting>
+plt.show()
+</programlisting>
 
     <para>You should now see two plots showing the measurement state profiles
     and the control input profiles similar to <xref
@@ -2428,14 +2437,16 @@ initial equation
   qt.x2 = 0.06044;
   qt.x3 = 0.024;
   qt.x4 = 0.023;
-end Sim_QuadTank;</programlisting>
+end Sim_QuadTank;
+</programlisting>
 
     <para>Notice that initial equations have been added to the model. Before
     the model is simulated, a matrix containing the input trajectories is
     created:</para>
 
     <programlisting language="python"># Build input trajectory matrix for use in simulation
-u = N.transpose(N.vstack((t_meas,u1,u2)))</programlisting>
+u = N.transpose(N.vstack((t_meas,u1,u2)))
+</programlisting>
 
     <para>Now, the model can be simulated:</para>
 
@@ -2549,7 +2560,8 @@ plt.show()
 equation
   connect(prbs1.y,qt.u1);
   connect(prbs2.y,qt.u2);
-end QuadTank_ParEst;</programlisting>
+end QuadTank_ParEst;
+</programlisting>
 
     <para>The cost function is here given as a squared sum of the difference
     between the measured profiles for x1 and x2 and the corresponding model
@@ -2611,7 +2623,8 @@ print('a2: ' + str(a2_opt*1e4) + 'cm^2')
     <para>You should get an output similar to:</para>
 
     <programlisting language="python">a1: 0.0266cm^2
-a2: 0.0272cm^2</programlisting>
+a2: 0.0272cm^2
+</programlisting>
 
     <para>The estimated values are slightly smaller than the nominal values -
     think about why this may be the case. Also note that the estimated values
@@ -2836,12 +2849,12 @@ plt.show()
 
     <para>where <emphasis>J</emphasis> is the Jacobian of the error residual
     and σ is the estimated measurement noise variance. In order to compute the
-    residual Jacobian, the sensitivity equations needs to be computed. </para>
+    residual Jacobian, the sensitivity equations needs to be computed.</para>
 
     <para>The model <literal>QuadTankPack.QuadTank_Sens2</literal> is used for
     the sensitivity simulation. Notice that the <literal>free</literal>
     attribute is used to mark the parameters for which sensitivities should be
-    computed: </para>
+    computed:</para>
 
     <programlisting language="modelica">optimization QuadTank_Sens2 
     
@@ -2991,7 +3004,8 @@ print "a4: " + str(sens_res['a4']) + ", standard deviation: " + str(sigma_a4)
     can be used to automatically scale a model. Consider the Modelica variable
     declaration:</para>
 
-    <programlisting language="python">Real pressure(start=101.3e3, nominal=1e5);</programlisting>
+    <programlisting language="python">Real pressure(start=101.3e3, nominal=1e5);
+</programlisting>
 
     <para>Here, the <literal>nominal</literal> attribute is used to specify
     that the variable pressure takes on values which are about 1e5. In order
@@ -3006,11 +3020,13 @@ print "a4: " + str(sens_res['a4']) + ", standard deviation: " + str(sigma_a4)
     fulfilled, each occurrence of a variable is multiplied with its nominal
     value in equations. For example, the equation:</para>
 
-    <programlisting language="python">T = f(p)</programlisting>
+    <programlisting language="python">T = f(p)
+</programlisting>
 
     <para>is replaced by the equation</para>
 
-    <programlisting language="python">T_scaled*T_nom = f(p_scaled*T_nom)</programlisting>
+    <programlisting language="python">T_scaled*T_nom = f(p_scaled*T_nom)
+</programlisting>
 
     <para>when <literal>enable_variable_scaling</literal> is set to
     <literal>true.</literal></para>

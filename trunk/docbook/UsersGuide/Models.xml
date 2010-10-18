@@ -170,7 +170,8 @@ compile_jmu(class_name, file_name=[], compiler='modelica', target='ipopt',
 
     Returns::
 
-        Name of the JMU which has been created.</programlisting></para>
+        Name of the JMU which has been created.
+</programlisting></para>
       </section>
 
       <section xml:id="models_sec_compiler_options">
@@ -517,7 +518,8 @@ myModel = JMUModel(jmu_name)
       module. The following short example demonstrates how to do this in a
       Python shell or script.<programlisting># import FMUModel from jmodelica.fmi
 from jmodelica.fmi import FMUModel
-myModel = FMUModel('myFMU.fmu')</programlisting></para>
+myModel = FMUModel('myFMU.fmu')
+</programlisting></para>
 
       <para>The FMUModel instance can then be used to set parameters and used
       for simulations. Read more about the FMI and FMU in <xref
@@ -655,7 +657,8 @@ rlc_circuit.get('sine.offset')
         as an argument to the method.</para>
 
         <programlisting language="python"># Load other XML file
-rlc_circuit.load_parameters_from_XML('new_values.xml')</programlisting>
+rlc_circuit.load_parameters_from_XML('new_values.xml')
+</programlisting>
       </section>
 
       <section>
@@ -690,7 +693,8 @@ rlc_circuit.get('inductor.L')
         model.</para>
 
         <programlisting language="python"># Save to specific XML file
-rlc_circuit.write_parameters_to_XML('test_values.xml')</programlisting>
+rlc_circuit.write_parameters_to_XML('test_values.xml')
+</programlisting>
       </section>
     </section>
   </section>
