@@ -66,6 +66,7 @@ def run_demo(with_plots=True):
 
     # Create a compiler
     mc = ModelicaCompiler()
+    mc.set_boolean_option("enable_structural_diagnosis",False)
 
     # Don't parse the file if it har already been parsed.
     try:
