@@ -226,7 +226,7 @@ res = model.simulate(final_time=10, input=input_model)</programlisting>
         Information about the available options can be viewed by typing help
         on the <literal>opts</literal> variable:</para>
 
-        <programlisting language="python">&gt;&gt;&gt; help(opts)
+        <programlisting>&gt;&gt;&gt; help(opts)
    Options for simulation of a JMU model using the Assimulo simulation package.
    The Assimulo package contain both explicit solvers (CVode) for ODEs and 
    implicit solvers (IDA) for DAEs. The ODE solvers require that the problem
@@ -488,7 +488,7 @@ opts['ncp'] = 1000 #Changing the number of communication points.</programlisting
         Information about the available options can be viewed by typing help
         on the <literal>opts</literal> variable:</para>
 
-        <programlisting language="python">&gt;&gt;&gt; help(opts)
+        <programlisting>&gt;&gt;&gt; help(opts)
    Options for the solving the FMU using the Assimulo simulation package.
    Currently, the only solver in the Assimulo package that fully supports
    simulation of FMUs is the solver CVode.
@@ -1301,8 +1301,8 @@ jmu_name = compile_jmu("Robertson","Robertson.mop")
 model = JMUModel(jmu_name)</programlisting>
 
       <para>Now that the model is loaded, we have to change the option to
-      activate the sensitivity calculations and also the absolute tolerances:
-      </para>
+      activate the sensitivity calculations and also the absolute
+      tolerances:</para>
 
       <programlisting># Get and set the options
 opts = model.simulate_options() #Get the options
