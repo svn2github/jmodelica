@@ -83,6 +83,11 @@ aspect PrettyPrint {
 		prettyPrint(str,indent,null);
 		return os.toString();
 	}
+	
+	// Override ASTNode.prettyPrint to get method on Python side (jpype bug)
+	public String BaseNode.prettyPrint(String indent) {
+		return super.prettyPrint(indent);
+	}
 
 	public String ASTNode.prettyPrint(String indent,Object o) {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();	
