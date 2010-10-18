@@ -213,6 +213,15 @@ aspect ParameterEquations {
 	eq FFunctionDecl.getChild().inParameterEquation()       = false;
 	eq Root.getChild().inParameterEquation()                = false;
 	
+	/**
+	 * \brief Is this expression in the value of an attribute?
+	 */
+	inh boolean FExp.inAttributeValue();
+	eq FAttribute.getValue().inAttributeValue()    = true;
+	eq FClass.getChild().inAttributeValue()        = false;
+	eq FFunctionDecl.getChild().inAttributeValue() = false;
+	eq Root.getChild().inAttributeValue()          = false;
+	
 }
 
 aspect FlatFunctionBinding {

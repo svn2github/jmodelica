@@ -672,6 +672,14 @@ aspect InheritedFactoryMethods {
 	public FIfStmt   FIfStmt.createEmptyNode()   { return new FIfStmt(); }
 	public FWhenStmt FWhenStmt.createEmptyNode() { return new FWhenStmt(); }
 	
+	public abstract FVariable FVariable.createEmptyNode();
+	public FRealVariable    FRealVariable.createEmptyNode()    { return new FRealVariable(); }
+	public FIntegerVariable FIntegerVariable.createEmptyNode() { return new FIntegerVariable(); }
+	public FBooleanVariable FBooleanVariable.createEmptyNode() { return new FBooleanVariable(); }
+	public FStringVariable  FStringVariable.createEmptyNode()  { return new FStringVariable(); }
+	public FEnumVariable    FEnumVariable.createEmptyNode()    { return new FEnumVariable(); }
+	public FRecordVariable  FRecordVariable.createEmptyNode()  { return new FRecordVariable(); }
+	
 	/**
 	 * \brief Create new node of same class as this, with the specified 
 	 *        children.

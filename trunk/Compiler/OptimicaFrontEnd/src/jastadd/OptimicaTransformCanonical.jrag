@@ -156,6 +156,8 @@ aspect OptimicaTransformCanonical {
 		 * scalarizing the constraints and costfunctions, which will make
 		 * lookup in the constraint scalarization fail.
 		 */
+		
+		// TODO: refactor out parts of FClass.scalarize to reduce code duplication here
 				
 		List<FVariable> vars = new List<FVariable>();
 		List<FVariable> alias_vars = new List<FVariable>();
@@ -181,10 +183,15 @@ aspect OptimicaTransformCanonical {
 
 		// Scalarize class attributes
 		// Iterate over all attributes and scalarize.
+		List<FAttribute> al = new List<FAttribute>();
 		for (FAttribute a : getFAttributes()) 
-			a.scalarize(Index.NULL);
+			al.add(a.scalarize(Index.NULL));
+		setFAttributeList(al);
 		
 		// Replace variables
+		Map<String,FExp> im = Collections.emptyMap();
+		getFVariables().createArrayTemporaries(getFParameterEquations(), vars, im, true);
+		getAliasVariables().createArrayTemporaries(getFParameterEquations(), vars, im, true);
 		setFVariableList(vars);
 		setAliasVariableList(alias_vars);
 		
