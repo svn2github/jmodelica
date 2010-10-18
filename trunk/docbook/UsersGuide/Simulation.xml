@@ -813,7 +813,7 @@ dery = res['der(y)'] #Return the result for the variable/parameter/constant der(
       in the code below the corresponding Modelica code is listed.</para>
 
       <figure xml:id="sim_fig_quadtank">
-        <title></title>
+        <title>A schematic picture of the quadruple tank process.</title>
 
         <mediaobject>
           <imageobject>
@@ -821,10 +821,6 @@ dery = res['der(y)'] #Return the result for the variable/parameter/constant der(
                        width="40%"></imagedata>
           </imageobject>
         </mediaobject>
-
-        <caption>
-          <para>A schematic picture of the quadruple tank process.</para>
-        </caption>
       </figure>
 
       <programlisting language="modelica" xml:id="sim_list_qt">model QuadTank

@@ -27,8 +27,8 @@
 
     <para>When formulating optimization problems, models are expressed in the
     Modelica language, whereas optimization specifications are given in the
-    Optimica extension which is described in XX. The tutorial exercises in
-    this chapter assumes that the reader is familiar with the basics of
+    Optimica extension which is described in Section 9. The tutorial exercises
+    in this chapter assumes that the reader is familiar with the basics of
     Modelica and Optimica.</para>
   </section>
 
@@ -823,7 +823,7 @@ from jmodelica.jmi import JMUModel
 
       <para>Before we can do operations on the model, such as optimizing it,
       the model file must be compiled and the resulting DLL file loaded in
-      Python. These steps are described in more detail ZZ.</para>
+      Python. These steps are described in more detail Section 4.</para>
 
       <programlisting language="python"># Compile the stationary initialization model into a JMU
 jmu_name = compile_jmu("CSTR.CSTR_Init","CSTR.mop", 
@@ -1315,7 +1315,7 @@ plt.show()
       linkend="opt-fig-cstr-opt1" />.</para>
 
       <figure>
-        <title></title>
+        <title>Optimal profiles for the CSTR problem.</title>
 
         <mediaobject>
           <imageobject>
@@ -1323,10 +1323,6 @@ plt.show()
                        xml:id="opt-fig-cstr-opt1"></imagedata>
           </imageobject>
         </mediaobject>
-
-        <caption>
-          <para>Optimal profiles for the CSTR problem.</para>
-        </caption>
       </figure>
 
       <para>Take a minute to analyze the optimal profiles and to answer the
@@ -1424,7 +1420,8 @@ plt.show()
       linkend="opt-fig-cstr-opt2" />.</para>
 
       <figure xml:id="opt-fig-cstr-opt2">
-        <title></title>
+        <title>Optimal control profiles and simulated trajectories
+        corresponding to the optimal control input.</title>
 
         <mediaobject>
           <imageobject>
@@ -1432,11 +1429,6 @@ plt.show()
                        width="60%"></imagedata>
           </imageobject>
         </mediaobject>
-
-        <caption>
-          <para>Optimal control profiles and simulated trajectories
-          corresponding to the optimal control input.</para>
-        </caption>
       </figure>
 
       <para>Discuss why the simulated trajectories differs from the optimized
@@ -1818,7 +1810,7 @@ plt.show()
     system is optimized using a quadratic objective function.</para>
 
     <figure xml:id="opt-fig-vdp-min-time">
-      <title></title>
+      <title>Minimum time profiles for the Van der Pol Oscillator.</title>
 
       <mediaobject>
         <imageobject>
@@ -1826,10 +1818,6 @@ plt.show()
                      width="60%"></imagedata>
         </imageobject>
       </mediaobject>
-
-      <caption>
-        <para>Minimum time profiles for the Van der Pol Oscillator.</para>
-      </caption>
     </figure>
   </section>
 
@@ -1841,7 +1829,7 @@ plt.show()
     linkend="opt-fig-quadtank" />.</para>
 
     <figure xml:id="opt-fig-quadtank">
-      <title></title>
+      <title>A schematic picture of the quadruple tank process.</title>
 
       <mediaobject>
         <imageobject>
@@ -1849,13 +1837,9 @@ plt.show()
                      width="40%"></imagedata>
         </imageobject>
       </mediaobject>
-
-      <caption>
-        <para>A schematic picture of the quadruple tank process.</para>
-      </caption>
     </figure>
 
-    <para>The dynamics of the system is given by the differential
+    <para>The dynamics of the system are given by the differential
     equations:</para>
 
     <informalequation>
@@ -2396,31 +2380,23 @@ plt.show()
     linkend="opt-fig-qtinput" />.</para>
 
     <figure xml:id="opt-fig-qt_data">
-      <title></title>
+      <title>Measured state profiles.</title>
 
       <mediaobject>
         <imageobject>
           <imagedata fileref="images/qt_x.svg" scalefit="1" width="60%"></imagedata>
         </imageobject>
       </mediaobject>
-
-      <caption>
-        <para>Measured state profiles.</para>
-      </caption>
     </figure>
 
     <figure xml:id="opt-fig-qtinput">
-      <title></title>
+      <title>Control inputs used in the identification experiment.</title>
 
       <mediaobject>
         <imageobject>
           <imagedata fileref="images/qt_u.svg" scalefit="1" width="60%"></imagedata>
         </imageobject>
       </mediaobject>
-
-      <caption>
-        <para>Control inputs used in the identification experiment.</para>
-      </caption>
     </figure>
 
     <para>In order to evaluate the accuracy of nominal model parameter values,
@@ -2498,17 +2474,13 @@ plt.show()
     simulation.</para>
 
     <figure xml:id="opt-fig-sim-nom">
-      <title></title>
+      <title>Simulation result for the nominal model.</title>
 
       <mediaobject>
         <imageobject>
           <imagedata fileref="images/qt_sim.svg" scalefit="1" width="60%"></imagedata>
         </imageobject>
       </mediaobject>
-
-      <caption>
-        <para>Simulation result for the nominal model.</para>
-      </caption>
     </figure>
 
     <para>Here, the simulated profiles are given by the green curves. Clearly,
@@ -2661,18 +2633,14 @@ plt.show()
     linkend="opt-fig-par-est1" />.</para>
 
     <figure xml:id="opt-fig-par-est1">
-      <title></title>
+      <title>State profiles corresponding to estimated values of a1 and
+      a2.</title>
 
       <mediaobject>
         <imageobject>
           <imagedata fileref="images/qt_est1.svg" scalefit="1" width="60%"></imagedata>
         </imageobject>
       </mediaobject>
-
-      <caption>
-        <para>State profiles corresponding to estimated values of a1 and
-        a2.</para>
-      </caption>
     </figure>
 
     <para>The profiles corresponding to the estimated values of a1 and a2 are
@@ -2764,18 +2732,14 @@ plt.show()
     linkend="opt-fig-par-est2" />.</para>
 
     <figure xml:id="opt-fig-par-est2">
-      <title></title>
+      <title>State profiles corresponding to estimated values of a1, a2, a3
+      and a4.</title>
 
       <mediaobject>
         <imageobject>
           <imagedata fileref="images/qt_est2.svg" scalefit="1" width="60%"></imagedata>
         </imageobject>
       </mediaobject>
-
-      <caption>
-        <para>State profiles corresponding to estimated values of a1, a2, a3
-        and a4.</para>
-      </caption>
     </figure>
 
     <para>The red curves represent the case where a1, a2, a3 and a4 has been
