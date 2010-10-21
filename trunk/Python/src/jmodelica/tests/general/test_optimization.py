@@ -117,27 +117,53 @@ class TestBlockingFactors(OptimizationTest):
         self.assert_all_trajectories(
             ['x[1]', 'x[2]', 'w1', 'w2', 'w3', 'w4'])
 
-class TestElementInterpolationResult(OptimizationTest):
+class TestBlockingFactors(OptimizationTest):
 
     @classmethod
     def setUpClass(cls):
         OptimizationTest.setup_class_base(
-            'DI_opt.mop', 'DI_opt')
+            'BlockingTest.mop', 'BlockingTest')
 
     @testattr(ipopt = True)
     def setUp(self):
-        n_e = 8
+        n_e = 50
         hs = N.ones(n_e)*1./n_e
         n_cp = 3
-        self.setup_base(nlp_args = (n_e, hs, n_cp), 
-            options = { 'max_iter': 500 }, 
-            result_mesh='element_interpolation')
+        blocking_factors = N.array([5,10,5,3])
+        self.setup_base(nlp_args = (n_e, hs, n_cp, blocking_factors), 
+            options = {'max_iter': 500})
         self.run()
-        self.load_expected_data('DI_opt_element_interpolation_result.txt')
+        self.load_expected_data('BlockingTest_result.txt')
+
+    @testattr(ipopt = True)
+    def test_cost_end(self):
+        self.assert_end_value('cost', 8.1819533e-01)
 
     @testattr(ipopt = True)
     def test_trajectories(self):
-        self.assert_all_trajectories(['x', 'v', 'w1', 'w2', 'u', 'cost'])
+        self.assert_all_trajectories(
+            ['x[1]', 'x[2]', 'w1', 'w2', 'w3', 'w4'])
+
+class TestTerminalConstraintNominal(OptimizationTest):
+
+    @classmethod
+    def setUpClass(cls):
+        OptimizationTest.setup_class_base(
+            'TerminalConstraintTest.mop', 'TerminalConstraintTest',options={'enable_variable_scaling':True})
+
+    @testattr(ipopt = True)
+    def setUp(self):
+        n_e = 50
+        hs = N.ones(n_e)*1./n_e
+        n_cp = 3
+        self.setup_base(nlp_args = (n_e, hs, n_cp), 
+            options = { 'max_iter': 500 })
+        self.run()
+        self.load_expected_data('TerminalConstraintTest_result.txt')
+
+    @testattr(ipopt = True)
+    def test_trajectories(self):
+        self.assert_all_trajectories(['x', 'v', 'u'])
 
 class TestMeshInterpolationResult(OptimizationTest):
 

@@ -19,8 +19,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 aspect OptimicaCCodeGen {
 	
 	public void FTimedVariable.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
-		str.print(getName().name_C()+"_p_(" + 
-				myFOptClass().timePointIndex(getArg().ceval().realValue()) + ")");
+		if (getName().myFV().isReal() && root().options.getBooleanOption("enable_variable_scaling") && !inFunction()) {
+			str.print("(");
+			str.print(getName().name_C()+"_p_(" + 
+					myFOptClass().timePointIndex(getArg().ceval().realValue()) + ")");
+			str.print("*sf(");
+			str.print(getName().myFV().valueReference());
+			str.print("))");
+		} else {
+			str.print(getName().name_C()+"_p_(" + 
+					myFOptClass().timePointIndex(getArg().ceval().realValue()) + ")");
+		}		
 	}
 
 	public void FConstraintEq.genResidual_C(int i, String indent, PrintStream str) {
