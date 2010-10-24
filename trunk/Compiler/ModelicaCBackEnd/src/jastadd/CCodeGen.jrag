@@ -978,9 +978,17 @@ aspect CCodeGen {
 	public void FEquation.genAssignment_C(String indent, PrintStream str) {
 		genTempVars_C(printer_C, str, indent, null);
 		str.print(indent);
-		getLeft().prettyPrint_C(str,"");
-		str.print(" = ");
+		FIdUseExp left = (FIdUseExp)getLeft();
+		left.getFIdUse().prettyPrint_C(str,"");
+//		getLeft().prettyPrint_C(str,"");
+		str.print(" = (");
 		getRight().prettyPrint_C(str,"");
+		str.print(")");
+		if (left.myFV().isReal() && root().options.getBooleanOption("enable_variable_scaling") && !inFunction()) {
+			str.print("/sf(");
+			str.print(left.myFV().valueReference());
+			str.print(")");
+		}
 		str.print(";\n");
 	}
 
@@ -1112,9 +1120,17 @@ aspect CCodeGen {
 
 	public void FExp.genWriteBackAssignment_C(PrintStream str, String indent, String name) {
 		str.print(indent);
-		prettyPrint_C(str, "");
-		str.print(" = ");
+		FIdUseExp e = (FIdUseExp)this;
+		e.getFIdUse().prettyPrint_C(str,"");
+//		prettyPrint_C(str, "");
+		str.print(" = (");
 		str.print(name);
+		str.print(")");
+		if (e.myFV().isReal() && root().options.getBooleanOption("enable_variable_scaling") && !inFunction()) {
+			str.print("/sf(");
+			str.print(e.myFV().valueReference());
+			str.print(")");
+		}
 		str.print(";\n");
 	}
 	
