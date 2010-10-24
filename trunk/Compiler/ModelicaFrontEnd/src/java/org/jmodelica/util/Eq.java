@@ -16,15 +16,20 @@
 
 package org.jmodelica.util;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 public class Eq {
 
 	private String name;
 	private ArrayList<Var> variables = new ArrayList<Var>();
+	private Iterator<Var> varIterator;
 	private Var matching = null;
     private boolean visited = false;
     private int layer = 1000000;
     private String description;
+
+	private int tarjanNbr = 0;
+    private int tarjanLowLink = 0;
 	
 	public Eq(String name,String description) {
 		this.name = name;
@@ -92,6 +97,39 @@ public class Eq {
 	public void setDescription(String description) {
 		this.description = description;
 	}	
+	
+	  
+    public int getTarjanNbr() {
+		return tarjanNbr;
+	}
+
+	public void setTarjanNbr(int tarjanNbr) {
+		this.tarjanNbr = tarjanNbr;
+	}
+
+	public int getTarjanLowLink() {
+		return tarjanLowLink;
+	}
+
+	public void setTarjanLowLink(int tarjanLowLink) {
+		this.tarjanLowLink = tarjanLowLink;
+	}
+	
+    public void resetVariableIterator() {
+        varIterator = variables.iterator();
+    }
+
+    public Var getNextVariable() {
+        if (varIterator == null) {
+            resetVariableIterator();
+        }
+
+        if (!varIterator.hasNext()) {
+            return null;
+        }
+
+        return varIterator.next();
+    }
 	
 	public String toString() {
 		return getName();

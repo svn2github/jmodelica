@@ -264,6 +264,18 @@ aspect TransformCanonical {
 		g.maximumMatching(true);	
 		log.info("DAE system ");
 		log.info(g.printMatching());
+		/*
+		LinkedList<Stack<Eq>> blt = g.computeBLT();
+		
+		System.out.println("BLT: " + blt.size() + " blocks");
+		for (Stack<Eq> bl : blt) {
+			System.out.println("Block: " + bl.size() + "-----");
+			for (Eq bl_eqn : bl) {
+				System.out.println(bl_eqn.getMatching() + ": " + bl_eqn.getDescription());
+			}
+			System.out.println("-----------------");
+		}
+		*/
 
 		if (root().options.getBooleanOption("enable_structural_diagnosis")) {
 		boolean unbalanced = false;

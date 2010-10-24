@@ -16,12 +16,12 @@
 
 package org.jmodelica.util;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.Random;
+import java.util.Stack;
 
 public class BiPGraph {
 
@@ -274,6 +274,116 @@ public class BiPGraph {
 		}
 		return l;
 	}
+	
+    public LinkedList<Stack<Eq>> computeBLT() {
+
+        int nbr = 0;
+        Stack<Eq> stack = new Stack<Eq>();
+        Stack<Eq> eStack = new Stack<Eq>();
+
+        LinkedList<Stack<Eq>> components = new LinkedList<Stack<Eq>>();
+
+        for (Eq eqn : getEquations()) {
+//        while (!activeEqns.empty()) {
+ //           Equation eq = activeEqns.pop();
+
+            System.out.println("active: " + eqn);
+
+            if (eqn.getTarjanNbr() == 0) {
+                eqn.setTarjanNbr(++nbr);
+                eqn.setTarjanLowLink(nbr);
+
+                System.out.println("push: " + eqn);
+                stack.push(eqn);
+                eStack.push(eqn);
+
+                while (!stack.empty()) {
+                    eqn = stack.peek();
+                    Var var = eqn.getNextVariable();
+
+                    if (var != null) {
+                        System.out.println("top: " + eqn + " - " + var);
+                        Eq eqn2 = var.getMatching();
+                        System.out.println("match: " + eqn2);
+
+                        if (eqn2.getTarjanNbr() == 0) {
+                            eqn2.setTarjanNbr(++nbr);
+                            eqn2.setTarjanLowLink(nbr);
+
+                            System.out.println("push: " + eqn2);
+
+                            stack.push(eqn2); // recurse
+                            eStack.push(eqn2);
+                        } else if (eqn2.getTarjanNbr() < eqn.getTarjanNbr()) {
+                            if (eStack.contains(eqn2)) {
+                                eqn.setTarjanLowLink(Math.min(eqn.getTarjanLowLink(), 
+                                                          	eqn2.getTarjanNbr()));
+                            }
+                        }
+                    } else {
+                        System.out.println("top: " + eqn + 
+                            " - exhausted variables (estack = " + eStack.size() + ")");
+
+                        if (eqn.getTarjanLowLink() == eqn.getTarjanNbr()) {
+                        	System.out.println("Heppp---------------");
+                            // 'eq' is the root of a strong component
+                            if (!eStack.empty()) {
+                                // new strong component
+                                System.out.println("Strong component:");
+                                Eq eqn2 = eStack.peek();
+
+								/*
+                                System.out.println("this: " + eq + " (" + 
+                                                   eq.getTarjanNbr() + ", " + 
+                                                   eq.getTarjanLink() + ")");
+                                System.out.println("that: " + eq2 + " (" + 
+                                                   eq2.getTarjanNbr() + ", " + 
+                                                   eq2.getTarjanLink() + ")");
+                               
+                                System.out.print(" ");
+								*/
+                                Stack<Eq> comp = new Stack<Eq>();
+                                while (eqn2.getTarjanNbr() >= eqn.getTarjanNbr()) {
+                                    eqn2 = eStack.pop();
+
+                                    comp.push(eqn2);
+									
+                                    System.out.println("In COMPONENT: (" + eqn2 + 
+                                                     ", " + eqn2.getMatching() + ")");
+													 
+
+                                    if (eStack.empty()) {
+                                        break;
+                                    } else {
+                                        eqn2 = eStack.peek();
+										/*
+                                        System.out.println("that: " + eq2 + " (" + 
+                                                   eq2.getTarjanNbr() + ", " + 
+                                                   eq2.getTarjanLink() + ")");
+										*/
+                                    }
+                                }
+
+                                if (!comp.empty()) {
+                                    components.addLast(comp);
+                                }
+                            }
+                        }
+
+                        Eq eqn2 = stack.pop();
+                        //System.out.println("pop: " + eq2);
+                        if (!stack.empty()) {
+                            eqn.setTarjanLowLink(Math.min(eqn.getTarjanLowLink(), 
+                                                      eqn2.getTarjanLowLink()));
+                        }
+                    }
+                }
+            }
+        }
+
+		return components;
+
+    }
 	
 	public void randomTest(int n_eq, int n_var, int n_ed) {
 		
