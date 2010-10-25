@@ -19,7 +19,7 @@
 #ifndef fmi_h
 #define fmi_h
 
-#include "fmiModelTypes.h"
+#include "fmiModelFunctions.h"
 
 /* Creation and destruction of model instances and setting debug status */
 fmiComponent fmi_instantiate_model(fmiString instanceName, fmiString GUID, fmiCallbackFunctions functions, fmiBoolean loggingOn);
