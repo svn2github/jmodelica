@@ -254,6 +254,13 @@ aspect Constructors {
 	}
 	
 	/**
+	 * \brief Constructs an FRangeExp with the given start and stop literal values.
+	 */
+	public FRangeExp.FRangeExp(int start, int stop) {
+		this(new FIntegerLitExp(start), new FIntegerLitExp(stop));
+	}
+	
+	/**
 	 * \brief Constructs an FRangeExp with the given start, step and and stop expressions.
 	 */
 	public FRangeExp.FRangeExp(FExp start, FExp step, FExp stop) {

@@ -197,8 +197,11 @@ aspect Scalarization {
 	public void FVariable.scalarRecordCellFVariables(
 			List<FVariable> vars, FQName name, FVariable last, FExp bexp) {
 		FVariable fv = (FVariable) fullCopy();
+		Map<String,FExp> im = Collections.emptyMap();
 		if (bexp != null)
-			fv.setBindingExp(bexp.scalarizeExp(Collections.<String,FExp>emptyMap()));
+			fv.setBindingExp(bexp.scalarizeExp(im));
+		else if (fv.hasBindingExp() && (isConstant() || isIndependentParameter()))
+			fv.setBindingExp(getBindingExp().scalarizeExp(im));
 		else
 			fv.setBindingExpOpt(new Opt());
 		fv.inheritFrom(last);
@@ -958,7 +961,7 @@ aspect Scalarization {
 	}
 	
 	public FExp FIdUseExp.scalarRecordFExp(Map<String,FExp> indexMap, FQName suffix) {
-		return scalarizeExp(indexMap).extractRecordFExp(suffix);
+		return scalarizeExp(indexMap).extractScalarRecordFExp(suffix);
 	}
 	
 	public FExp FRecordConstructor.scalarRecordFExp(Map<String,FExp> indexMap, FQName suffix) {
@@ -972,7 +975,7 @@ aspect Scalarization {
 	}
 	
 	public FExp FFunctionCall.scalarRecordFExp(Map<String,FExp> indexMap, FQName suffix) {
-		return scalarizeExp(indexMap).extractRecordFExp(suffix);
+		return scalarizeExp(indexMap).extractScalarRecordFExp(suffix);
 	}
 	
 	/**
@@ -982,11 +985,11 @@ aspect Scalarization {
 	 * 
 	 * @param suffix    the suffix to add to a use of the record to access the specific component
 	 */
-	public FExp FExp.extractRecordFExp(FQName suffix) {
+	protected FExp FExp.extractScalarRecordFExp(FQName suffix) {
 		return this;
 	}
 	
-	public FExp FIdUseExp.extractRecordFExp(FQName suffix) {
+	protected FExp FIdUseExp.extractScalarRecordFExp(FQName suffix) {
 		FQName name = getFIdUse().getFQName().append(suffix);
 		name.scalarized = true;
 		return new FIdUseExp(name);

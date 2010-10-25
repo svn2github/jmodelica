@@ -1319,8 +1319,8 @@ equation
  x[2].a = y[2].a;
  x[2].b = y[2].b;
  x[1].a = 1;
- x[1].b = 2;
  x[2].a = 3;
+ x[1].b = 2;
  x[2].b = 4;
 
  record RecordTests.RecordScalarize13.A
@@ -2454,8 +2454,8 @@ fclass RecordTests.RecordInput4
  Real x;
 equation
  a[1].x = 1;
- a[1].y = 2;
  a[2].x = 3;
+ a[1].y = 2;
  a[2].y = 4;
  x = RecordTests.RecordInput4.f({RecordTests.RecordInput4.A(a[1].x, a[1].y),RecordTests.RecordInput4.A(a[2].x, a[2].y)});
 
@@ -2904,6 +2904,180 @@ equation
 	der(a.x) = -a.y;
 	der(a.y) = -a.x;
 end RecordDer1;
+
+
+
+model RecordParam1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="RecordParam1",
+         description="Parameter with default value in record",
+         flatModel="
+fclass RecordTests.RecordParam1
+ parameter Real a1.x = 1 /* 1 */;
+ Real a1.y;
+equation
+ a1.y = 2;
+
+ record RecordTests.RecordParam1.A
+  parameter Real x = 1 /* 1 */;
+  Real y;
+ end RecordTests.RecordParam1.A;
+end RecordTests.RecordParam1;
+")})));
+
+	record A
+		parameter Real x = 1;
+		Real y;
+	end A;
+	
+	A a1(y=2);
+end RecordParam1;
+
+
+model RecordParam2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="RecordParam2",
+         description="Parameter with default value in record",
+         flatModel="
+fclass RecordTests.RecordParam2
+ parameter Real a1.x = 1 /* 1 */;
+ Real a1.y;
+equation
+ a1.y = 2;
+
+ record RecordTests.RecordParam2.A
+  parameter Real x = 1 /* 1 */;
+  Real y;
+ end RecordTests.RecordParam2.A;
+end RecordTests.RecordParam2;
+")})));
+
+	record A
+		parameter Real x = 1;
+		Real y;
+	end A;
+	
+	A a1 = A(y=2);
+end RecordParam2;
+
+
+model RecordParam3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="RecordParam3",
+         description="Parameter with default value in record",
+         flatModel="
+fclass RecordTests.RecordParam3
+ parameter Real temp_1[1];
+ parameter Real temp_1[2];
+ Real a1.y;
+ parameter Real a1.x[1];
+ parameter Real a1.x[2];
+parameter equation
+ ({temp_1[1],temp_1[2]}) = RecordTests.RecordParam3.f(1);
+ a1.x[1] = temp_1[1];
+ a1.x[2] = temp_1[2];
+equation
+ a1.y = 2;
+
+ function RecordTests.RecordParam3.f
+  input Real i;
+  output Real[2] o;
+ algorithm
+  o[1] := i;
+  o[2] :=  - ( i );
+  return;
+ end RecordTests.RecordParam3.f;
+
+ record RecordTests.RecordParam3.A
+  parameter Real x[2] = RecordTests.RecordParam3.f(1);
+  Real y;
+ end RecordTests.RecordParam3.A;
+end RecordTests.RecordParam3;
+")})));
+
+	function f
+		input Real i;
+		output Real[2] o = { i, -i };
+	algorithm
+	end f;
+	
+	record A
+		parameter Real[2] x = f(1);
+		Real y;
+	end A;
+	
+	A a1(y=2);
+end RecordParam3;
+
+
+model RecordParam4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="RecordParam4",
+         description="Parameter with default value in record",
+         flatModel="
+fclass RecordTests.RecordParam4
+ parameter Real a1.x = 1 /* 1 */;
+ parameter Real a1.z;
+ Real a1.y;
+parameter equation
+ a1.z = x;
+equation
+ a1.y = 2;
+
+ record RecordTests.RecordParam4.A
+  parameter Real x = 1 /* 1 */;
+  parameter Real z = x;
+  Real y;
+ end RecordTests.RecordParam4.A;
+end RecordTests.RecordParam4;
+")})));
+
+	record A
+		parameter Real x = 1;
+		parameter Real z = x;
+		Real y;
+	end A;
+	
+	A a1(y=2);
+end RecordParam4;
+
+
+model RecordParam5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="RecordParam5",
+         description="Parameter with default value in record",
+         flatModel="
+fclass RecordTests.RecordParam5
+ parameter Real a1.x = 1 /* 1 */;
+ parameter Real a1.z;
+ Real a1.y;
+parameter equation
+ a1.z = a1.x;
+equation
+ a1.y = 2;
+
+ record RecordTests.RecordParam5.A
+  parameter Real x = 2 /* 2 */;
+  parameter Real z = 3 /* 3 */;
+  Real y;
+ end RecordTests.RecordParam5.A;
+end RecordTests.RecordParam5;
+")})));
+
+	record A
+		parameter Real x = 2;
+		parameter Real z = 3;
+		Real y;
+	end A;
+	
+	A a1 = A(y = 2, x = 1, z = a1.x);
+end RecordParam5;
+
 
 
 end RecordTests;

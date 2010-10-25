@@ -25,7 +25,6 @@ model VectorMul
          description="Constant evaluation of vector multiplication",
          template="$XML_variables$",
          generatedCode="
-
 		<ScalarVariable name=\"n\" valueReference=\"268435463\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
 			<Integer start=\"3\" />
 			<isLinear>true</isLinear>
@@ -34,32 +33,32 @@ model VectorMul
 		<ScalarVariable name=\"x[1]\" valueReference=\"0\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
 			<Real relativeQuantity=\"false\" start=\"1.0\" />
 			<isLinear>true</isLinear>
-			<VariableCategory>dependentParameter</VariableCategory>
+			<VariableCategory>independentParameter</VariableCategory>
 		</ScalarVariable>
 		<ScalarVariable name=\"x[2]\" valueReference=\"1\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
 			<Real relativeQuantity=\"false\" start=\"2.0\" />
 			<isLinear>true</isLinear>
-			<VariableCategory>dependentParameter</VariableCategory>
+			<VariableCategory>independentParameter</VariableCategory>
 		</ScalarVariable>
 		<ScalarVariable name=\"x[3]\" valueReference=\"2\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
 			<Real relativeQuantity=\"false\" start=\"3.0\" />
 			<isLinear>true</isLinear>
-			<VariableCategory>dependentParameter</VariableCategory>
+			<VariableCategory>independentParameter</VariableCategory>
 		</ScalarVariable>
 		<ScalarVariable name=\"y[1]\" valueReference=\"3\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
 			<Real relativeQuantity=\"false\" start=\"3.0\" />
 			<isLinear>true</isLinear>
-			<VariableCategory>dependentParameter</VariableCategory>
+			<VariableCategory>independentParameter</VariableCategory>
 		</ScalarVariable>
 		<ScalarVariable name=\"y[2]\" valueReference=\"4\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
 			<Real relativeQuantity=\"false\" start=\"2.0\" />
 			<isLinear>true</isLinear>
-			<VariableCategory>dependentParameter</VariableCategory>
+			<VariableCategory>independentParameter</VariableCategory>
 		</ScalarVariable>
 		<ScalarVariable name=\"y[3]\" valueReference=\"5\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
 			<Real relativeQuantity=\"false\" start=\"1.0\" />
 			<isLinear>true</isLinear>
-			<VariableCategory>dependentParameter</VariableCategory>
+			<VariableCategory>independentParameter</VariableCategory>
 		</ScalarVariable>
 		<ScalarVariable name=\"z\" valueReference=\"6\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
 			<Real relativeQuantity=\"false\" start=\"10.0\" />
@@ -70,8 +69,8 @@ model VectorMul
 			<Real relativeQuantity=\"false\" start=\"0.0\" />
 			<isLinear>true</isLinear>
 			<VariableCategory>algebraic</VariableCategory>
-		</ScalarVariable>")})));
-
+		</ScalarVariable>
+")})));
 
 	parameter Integer n = 3;
 	parameter Real x[n] = 1:n;
