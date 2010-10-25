@@ -1268,18 +1268,19 @@ aspect InstanceAST_API {
     eq InstBaseClassDecl.superClasses() = getBaseClassDecl().superClasses();
 
 	syn lazy ArrayList<ClassDecl> InstNode.classes() = new ArrayList<ClassDecl>();
-	eq InstClassRoot.classes() = getClassDecl().classes();
-	eq InstProgramRoot.classes() = getProgram().classes();
+	eq InstClassRoot.classes()     = getClassDecl().classes();
+	eq InstProgramRoot.classes()   = getProgram().classes();
 	eq InstComponentDecl.classes() = myInstClass().classes();
 	eq InstBaseClassDecl.classes() = getBaseClassDecl().classes();
-	eq InstExtends.classes() = myInstClass().classes();
+	eq InstExtends.classes()       = myInstClass().classes();
 	
 //    eq InstShortClassDecl.classes() = getClassName().myInstClass().classes();
 
 	syn lazy ArrayList<ImportClause> InstNode.imports() = new ArrayList<ImportClause>();
-	eq InstClassRoot.imports() = getClassDecl().imports();
+	eq InstClassRoot.imports()     = getClassDecl().imports();
 	eq InstComponentDecl.imports() = myInstClass().imports();
 	eq InstBaseClassDecl.imports() = getBaseClassDecl().imports();
+	eq InstExtends.imports()       = myInstClass().imports();
 
 /*
 	syn FullClassDecl InstFullClassDecl.getFullClassDecl() = (FullClassDecl)getBaseClassDecl();
