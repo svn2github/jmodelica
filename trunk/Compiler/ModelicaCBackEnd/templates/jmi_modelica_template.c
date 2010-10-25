@@ -21,6 +21,8 @@
 #include <jmi.h>
 $external_func_includes$
 
+#define MODEL_IDENTIFIER $C_model_id$
+
 static const int N_real_ci = $n_real_ci$;
 static const int N_real_cd = $n_real_cd$;
 static const int N_real_pi = $n_real_pi$;
