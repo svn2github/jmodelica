@@ -118,6 +118,7 @@ libjmi_solver_cppad_la_LDFLAGS = -no-undefined -static-libtool-libs -g
 include_HEADERS = jmi.h \
                   fmiModelFunctions.h \
 	          fmiModelTypes.h \
+                  fmi.h \
                   fmi.c \
                   jmi_common.h \
                   jmi_init_opt.h \
