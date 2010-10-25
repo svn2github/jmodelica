@@ -22,6 +22,7 @@
 $external_func_includes$
 
 #define MODEL_IDENTIFIER $C_model_id$
+#include "fmiModelFunctions.h"
 
 static const int N_real_ci = $n_real_ci$;
 static const int N_real_cd = $n_real_cd$;
@@ -220,4 +221,99 @@ int jmi_new(jmi_t** jmi) {
 		     *model_opt_Hineq, N_eq_Hineq, NULL, 0, NULL, NULL);
 
 	return 0;
+}
+
+/* FMI Functions*/
+
+/* Creation and destruction of model instances and setting debug status */
+DllExport fmiComponent fmiInstantiateModel(fmiString instanceName, fmiString GUID, fmiCallbackFunctions functions, fmiBoolean loggingOn) {
+ 
+}
+
+DllExport void fmiFreeModelInstance(fmiComponent c) {
+
+}
+
+DllExport fmiStatus fmiSetDebugLogging(fmiComponent c, fmiBoolean loggingOn) {
+
+}
+
+
+/* Providing independent variables and re-initialization of caching */
+DllExport fmiStatus fmiSetTime(fmiComponent c, fmiReal fmitime) {
+
+}
+
+DllExport fmiStatus fmiSetContinuousStates(fmiComponent c, const fmiReal x[], size_t nx) {
+
+}
+
+DllExport fmiStatus fmiCompletedIntegratorStep(fmiComponent c, fmiBoolean* callEventUpdate) {
+
+}
+
+DllExport fmiStatus fmiSetReal(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiReal value[]) {
+
+}
+
+DllExport fmiStatus fmiSetInteger(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiInteger value[]) {
+
+}
+
+DllExport fmiStatus fmiSetBoolean(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiBoolean value[]) {
+
+}
+
+DllExport fmiStatus fmiSetString(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiString  value[]) {
+
+}
+
+
+/* Evaluation of the model equations */
+DllExport fmiStatus fmiInitialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal relativeTolerance, fmiEventInfo* eventInfo) {
+
+}
+
+DllExport fmiStatus fmiGetDerivatives(fmiComponent c, fmiReal derivatives[] , size_t nx) {
+
+}
+
+DllExport fmiStatus fmiGetEventIndicators(fmiComponent c, fmiReal eventIndicators[], size_t ni) {
+
+}
+
+DllExport fmiStatus fmiGetReal(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiReal value[]) {
+
+}
+
+DllExport fmiStatus fmiGetInteger(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiInteger value[]) {
+
+}
+
+DllExport fmiStatus fmiGetBoolean(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiBoolean value[]) {
+
+}
+
+DllExport fmiStatus fmiGetString(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiString  value[]) {
+
+}
+
+DllExport fmiStatus fmiEventUpdate(fmiComponent c, fmiBoolean intermediateResults, fmiEventInfo* eventInfo) {
+
+}
+
+DllExport fmiStatus fmiGetContinuousStates(fmiComponent c, fmiReal states[], size_t nx) {
+
+}
+
+DllExport fmiStatus fmiGetNominalContinuousStates(fmiComponent c, fmiReal x_nominal[], size_t nx) {
+
+}
+
+DllExport fmiStatus fmiGetStateValueReferences(fmiComponent c, fmiValueReference vrx[], size_t nx) {
+
+}
+
+DllExport fmiStatus fmiTerminate(fmiComponent c) {
+
 }
