@@ -11,7 +11,7 @@
   <title>Limitations</title>
 
   <para>This page lists the current limitations of the JModelica.org platform,
-  as of version 1.3.0. The development of the platform can be followed at the
+  as of version 1.4.0. The development of the platform can be followed at the
   <link xlink:href="http://trac.jmodelica.org">Trac</link> site, where future
   releases and associated features are planned. In order to get an idea of the
   current Modelica compliance of the compiler front-end, you may look at the
