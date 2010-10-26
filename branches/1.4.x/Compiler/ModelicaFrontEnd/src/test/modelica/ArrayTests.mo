@@ -6198,7 +6198,6 @@ end ArrayTests.EmptyArray4;
 end EmptyArray4;
 
 
-// TODO: This test should not have a dependent parameter equation section - partly covered by #935
 model EmptyArray5
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
@@ -6213,15 +6212,10 @@ fclass ArrayTests.EmptyArray5
  input Real u[2];
  Real y[1];
  Real y[2];
- parameter Real D[1,1];
- parameter Real D[1,2];
- parameter Real D[2,1];
- parameter Real D[2,2];
-parameter equation
- D[1,1] = ( 1 ) * ( 1 );
- D[1,2] = ( 1 ) * ( 2 );
- D[2,1] = ( 2 ) * ( 1 );
- D[2,2] = ( 2 ) * ( 2 );
+ parameter Real D[1,1] = ( 1 ) * ( 1 ) /* 1 */;
+ parameter Real D[1,2] = ( 1 ) * ( 2 ) /* 2 */;
+ parameter Real D[2,1] = ( 2 ) * ( 1 ) /* 2 */;
+ parameter Real D[2,2] = ( 2 ) * ( 2 ) /* 4 */;
 equation
  y[1] = 0.0 + ( D[1,1] ) * ( u[1] ) + ( D[1,2] ) * ( u[2] );
  y[2] = 0.0 + ( D[2,1] ) * ( u[1] ) + ( D[2,2] ) * ( u[2] );

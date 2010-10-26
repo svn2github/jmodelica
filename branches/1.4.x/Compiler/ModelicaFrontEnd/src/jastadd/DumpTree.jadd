@@ -372,7 +372,7 @@ aspect FlatDumpTree {
 	}
 	
 	
-	
+	/*
 	public void FSubExp.dumpTree(String indent) {
 		log.debug("FSubExp.dumpTree, Left: "+
 		            getLeftNoTransform().getClass().getName()+ " Right: "+
@@ -380,7 +380,7 @@ aspect FlatDumpTree {
 		for(int i = 0; i < getNumChild(); i++)
       		getChild(i).dumpTree(indent + "  ");
 	}
-	
+	*/
 	
 	public void FQNamePart.dumpTree(String indent) {
 		String s = indent + dump() +": " + name() + " at line: " + beginLine();

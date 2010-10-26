@@ -72,12 +72,12 @@ class TestLinearization:
         (A_ode2,B_ode2,g_ode2,H_ode2,M_ode2,q_ode2,state_names2,input_names2,algebraic_names2, \
          dx02,x02,u02,w02,t02) = linearize_ode(model)
 
-        assert (A_ode==A_ode2).all()==True, "Error in linearization: A_ode."
-        assert (B_ode==B_ode2).all()==True, "Error in linearization: B_ode."
-        assert (g_ode==g_ode2).all()==True, "Error in linearization: g_ode."
-        assert (H_ode==H_ode2).all()==True, "Error in linearization: H_ode."
-        assert (M_ode==M_ode2).all()==True, "Error in linearization: M_ode."
-        assert (q_ode==q_ode2).all()==True, "Error in linearization: q_ode."
+        N.testing.assert_array_almost_equal(A_ode, A_ode2, err_msg="Error in linearization: A_ode.")
+        N.testing.assert_array_almost_equal(B_ode, B_ode2, err_msg="Error in linearization: B_ode.")
+        N.testing.assert_array_almost_equal(g_ode, g_ode2, err_msg="Error in linearization: g_ode.")
+        N.testing.assert_array_almost_equal(H_ode, H_ode2, err_msg="Error in linearization: H_ode.")
+        N.testing.assert_array_almost_equal(M_ode, M_ode2, err_msg="Error in linearization: M_ode.")
+        N.testing.assert_array_almost_equal(q_ode, q_ode2, err_msg="Error in linearization: q_ode.")
         assert (state_names==state_names2)==True, "Error in linearization: state names"
         assert (input_names==input_names2)==True, "Error in linearization: state names"
         assert (algebraic_names==algebraic_names2)==True, "Error in linearization: state names"

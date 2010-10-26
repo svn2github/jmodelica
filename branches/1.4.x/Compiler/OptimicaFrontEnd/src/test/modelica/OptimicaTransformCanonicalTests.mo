@@ -578,11 +578,11 @@ fclass OptimicaTransformCanonicalTests.DAETest1
  Real x[4](start = 3,fixed = dynamic[4]) \"States/algebraics\";
  Real x[5](start = 3,fixed = dynamic[5]) \"States/algebraics\";
  input Real u \"Control input\";
- parameter Real a[1] \"Time constants\";
- parameter Real a[2] \"Time constants\";
- parameter Real a[3] \"Time constants\";
- parameter Real a[4] \"Time constants\";
- parameter Real a[5] \"Time constants\";
+ parameter Real a[1] = 3.0 \"Time constants\" /* 3.0 */;
+ parameter Real a[2] = 2.5 \"Time constants\" /* 2.5 */;
+ parameter Real a[3] = 2.0 \"Time constants\" /* 2.0 */;
+ parameter Real a[4] = 1.5 \"Time constants\" /* 1.5 */;
+ parameter Real a[5] = 1.0 \"Time constants\" /* 1.0 */;
  parameter Boolean dynamic[1] \"Switches for turning ODEs into DAEs\";
  parameter Boolean dynamic[2] \"Switches for turning ODEs into DAEs\";
  parameter Boolean dynamic[3] \"Switches for turning ODEs into DAEs\";
@@ -593,11 +593,6 @@ initial equation
  x[2] = 3;
  x[3] = 3;
 parameter equation
- a[1] = 3.0;
- a[2] = 2.5;
- a[3] = 2.0;
- a[4] = 1.5;
- a[5] = 1.0;
  dynamic[1] = (if 1 <= N_states then true else false);
  dynamic[2] = (if 2 <= N_states then true else false);
  dynamic[3] = (if 3 <= N_states then true else false);

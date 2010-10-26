@@ -41,7 +41,6 @@ class TestNominal(SimulationTest):
     def test_trajectories(self):
         self.assert_all_trajectories(['x', 'y', 'z', 'der(x)', 'der(y)'])
 
-
 class TestFunction1(SimulationTest):
 
     @classmethod

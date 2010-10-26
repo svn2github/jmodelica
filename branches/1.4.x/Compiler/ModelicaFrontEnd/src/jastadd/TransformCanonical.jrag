@@ -382,29 +382,151 @@ aspect TransformCanonical {
 	 * \brief Convert variable binding equations into regular equations.
 	 */
 	public void FClass.genBindingEquations() {
-		for (FVariable fv : getFVariables()) {
-			if (!fv.isIndependentParameter() && !fv.isConstant()) {
-				boolean depPar = fv.isDependentParameter();
-				FQName var_name = fv.getFQName().fullCopy();
-				// Do not copy array indices
-				var_name.setLastFArraySubscripts(null);
-				if (fv.hasBindingExp()) {
-					FExp bexp = fv.getBindingExp();
-					fv.setBindingExpOpt(new Opt());
-					FEquation feq = new FEquation(new FIdUseExp(var_name), bexp);
-					if (depPar)
-						addFParameterEquation(feq);
-					else
-						addFEquation(feq);
-				} else if (fv.isRecord()) {
-					FRecordDecl rec = fv.myFRecordDecl();
-					for (FAttribute a : fv.getFAttributes()) 
-						a.genBindingEquations(this, rec, var_name, depPar);
-				}
-			}
-		}
+		FQName empty = new FQName();
+		for (FVariable fv : getFVariables()) 
+			if (!fv.isConstant()) 
+				fv.genBindingEquations(this, empty);
 //		flush();
 		flushAllRecursive();
+	}
+	
+	public FExp FVariable.selectBindingFExp(FAttribute attr) {
+		if (attr != null && attr.hasValue())
+			return attr.getValue();
+		else if (hasBindingExp())
+			return getBindingExp();
+		else
+			return null;
+	}
+	
+	public FQName FVariable.createNameForBindingEquation(FQName prefix, FAttribute attr) {
+		FQName name = prefix.copyAndAppend(getFQName());
+		FArraySubscripts fas = null;
+		if (isArray()) {
+			if (attr != null)
+				attr = attr.findAttribute(FAttribute.SIZE);
+			Size size = (attr != null && attr.hasValue()) ? new MutableSize(attr.getValue()) : size();
+			fas = size.rangeFArraySubscripts();
+		}
+		name.setLastFArraySubscripts(fas);
+		return name;
+	}
+	
+	public void FVariable.genBindingEquations(FClass fc, FQName prefix) {
+		genBindingEquations(fc, prefix, null, false);
+	}
+	
+	public void FVariable.genBindingEquations(FClass fc, FQName prefix, FAttribute attr, boolean param) {
+		FExp bexp = selectBindingFExp(attr);
+		boolean isAttr = attr != null && attr.hasValue();
+		param = param || isParameter();
+		if (bexp != null && !(param && bexp.isIndependentParameterExp())) {
+			if (!inRecord())
+				setBindingExpOpt(new Opt());
+			genBindingEquationsFromExp(fc, prefix, attr, bexp, param);
+			if (isAttr)
+				attr.setValueOpt(new Opt());
+		}
+	}
+	
+	public void FRecordVariable.genBindingEquations(FClass fc, FQName prefix, FAttribute attr, boolean param) {
+		/* TODO: Perhaps this is the wrong approach? Could we instead convert binding expressions 
+		 *       for records into attributes on the variable, and sort it out into binding expressions 
+		 *       during scalarization?
+		 */
+		FExp bexp = selectBindingFExp(attr);
+		if (bexp != null) {
+			super.genBindingEquations(fc, prefix, attr, param);
+		} else {
+			List<FAttribute> attrs = selectFAttributeList(attr);
+			FQName name = createNameForBindingEquation(prefix, attr);
+			for (FVariable comp : myFRecordDecl().getFVariables()) {
+				FAttribute cAttr = findMatching(attrs, comp.name());
+				comp.genBindingEquations(fc, name, cAttr, param || isParameter());
+			}
+		}
+	}
+	
+	protected void FVariable.genBindingEquationsFromExp(FClass fc, FQName prefix, 
+			FAttribute attr, FExp bexp, boolean param) {
+		FQName name = createNameForBindingEquation(prefix, attr);
+		param = param || isParameter();
+		FEquation feq = new FEquation(new FIdUseExp(name), bexp);
+		if (param)
+			fc.addFParameterEquation(feq);
+		else
+			fc.addFEquation(feq);	
+	}
+	
+	protected void FRecordVariable.genBindingEquationsFromExp(FClass fc, FQName prefix, 
+			FAttribute attr, FExp bexp, boolean param) {
+		/* If we get here, then we won't be able to leave expressions for independent parameters 
+		 * as binding expressions on the FVariable - we'll have to clean that up later. Since it 
+		 * has to be done after records are broken into separate variables, we'll do it during 
+		 * parameter equation sorting.
+		 */
+		if (bexp.canExtractRecordComponents()) {
+			List<FAttribute> attrs = selectFAttributeList(attr);
+			FQName name = createNameForBindingEquation(prefix, attr);
+			for (FVariable comp : myFRecordDecl().getFVariables()) {
+				FAttribute cAttr = findMatching(attrs, comp.name());
+				FExp cExp = bexp.dynamicFExp(bexp.extractRecordFExp(comp.name()));
+				comp.genBindingEquationsFromExp(fc, name, cAttr, cExp, param || isParameter());
+			}
+		} else {
+			super.genBindingEquationsFromExp(fc, prefix, attr, bexp, param);
+		}
+	}
+	
+	protected List<FAttribute> FRecordVariable.selectFAttributeList(FAttribute attr) {
+		if (attr != null && attr.getFAttributes().getNumChild() > 0)
+			return attr.getFAttributes();
+		else
+			return getFAttributes();
+	}
+	
+	syn boolean FExp.canExtractRecordComponents()      = false;
+	eq FIdUseExp.canExtractRecordComponents()          = true;
+	eq FRecordConstructor.canExtractRecordComponents() = true;
+	eq FArray.canExtractRecordComponents()             = true;
+	eq FAbstractCat.canExtractRecordComponents()       = true;
+	
+	/**
+	 * \brief Create an FExp that represents a specific component of this record expression.
+	 * 
+	 * @param suffix    the suffix to add to a use of the record to access the specific component
+	 */
+	public FExp FExp.extractRecordFExp(String suffix) {
+		throw new UnsupportedOperationException("Can't extract record component of " + getClass().getSimpleName());
+	}
+	
+	public FExp FIdUseExp.extractRecordFExp(String suffix) {
+		FQName name = getFIdUse().getFQName().copyAndAppend(suffix);
+		return new FIdUseExp(name);
+	}
+	
+	public FExp FRecordConstructor.extractRecordFExp(String suffix) {
+		return (FExp) getArg(getRecord().myFRecordDecl().indexOf(suffix)).fullCopy();
+	}
+	
+	public FExp FArray.extractRecordFExp(String suffix) {
+		FArray res = createEmptyNode();
+		for (FExp e : getFExps())
+			res.addFExp(e.extractRecordFExp(suffix));
+		return res;
+	}
+	
+	public FExp FAbstractCat.extractRecordFExp(String suffix) {
+		FInfArgsFunctionCall res = createEmptyNode();
+		for (FExp e : getFExps())
+			res.addFExp(e.extractRecordFExp(suffix));
+		return res;
+	}
+	
+	public FExp FCatExp.extractRecordFExp(String suffix) {
+		FCatExp res = (FCatExp) super.extractRecordFExp(suffix);
+		res.setDim((FExp) getDim().fullCopy());
+		return res;
 	}
 	
 	/**
@@ -934,7 +1056,7 @@ aspect ParameterSorting {
 		for (int i = 0; i < n_eqns; i++)
 			eqns.get(i).sortingIndex = i;
 		for (FVariable fv : vars)
-			fv.parameterEquation();  // Calculate these befor changing anything
+			fv.parameterEquation();  // Calculate these before changing anything
 		
 		// If there is nothing to do, return.
 		if (n_eqns == 0)
@@ -975,11 +1097,21 @@ aspect ParameterSorting {
 		
 		// Repeat while S is not empty
 		int si = 0;
+		int n_indep = 0;
 		while (S.size() > 0) {
 			// Remove a node n from S
 			FAbstractEquation n = S.remove();
-			// Insert n into L
-			L.add(n);
+			// Take care of n
+			if (n.isIndependentParameterEquation()) {
+				/* This equation should be the binding expression of an independent parameter.
+				 * There are several ways this could happen, e.g. using iteration expressions.
+				 * These could be removed from list before sorting, but this way is simpler. */ 
+				n.revertToBindingExp();
+				n_indep++;
+			} else {
+				// Insert n into L
+				L.add(n);
+			}
 			// For each node m with an edge e from n to m (in original order)
 			Set<FAbstractEquation> nodes = FAbstractEquation.sortingSet();
 			nodes.addAll(toNodes.get(n.sortingIndex));
@@ -997,7 +1129,7 @@ aspect ParameterSorting {
 		}
 		
 		// Not possible to find an ordering without cycles?
-		if (L.getNumChild() != eqns.size()) {
+		if (L.getNumChild() != eqns.size() - n_indep) {
 			cyclicParameters = true;
 			return;
 		}
@@ -1021,8 +1153,72 @@ aspect ParameterSorting {
 
 		// Flush AST since the structure has changed.
 		flush();
-	}	
 		
+		// Remove any binding expressions of variables with parameter equations
+		for (FAbstractEquation eqn : L)
+			eqn.removeBindingExpOfAssignedVars();
+	}
+	
+	/**
+	 * Remove binding expression of variables assigned in this equation.
+	 */
+	public void FAbstractEquation.removeBindingExpOfAssignedVars() {}
+
+	public void FEquation.removeBindingExpOfAssignedVars() {
+		getLeft().removeBindingExpOfReferencedVars();
+	}
+	
+	public void FFunctionCallEquation.removeBindingExpOfAssignedVars() {
+		for (FFunctionCallLeft left : getLefts())
+			if (left.hasFExp())
+				left.getFExp().removeBindingExpOfReferencedVars();
+	}
+	
+	/**
+	 * Remove binding expression of variables referenced in this expression.
+	 */
+	public void FExp.removeBindingExpOfReferencedVars() {
+		for (FExp e : childFExps())
+			e.removeBindingExpOfReferencedVars();
+	}
+	
+	public void FIdUseExp.removeBindingExpOfReferencedVars() {
+		getFIdUse().myFV().removeBindingExp();
+	}
+	
+	/**
+	 * Remove binding expression of this variable.
+	 */
+	public void AbstractFVariable.removeBindingExp() {}
+	
+	public void FVariable.removeBindingExp() {
+		if (hasBindingExp())
+			setBindingExpOpt(new Opt());
+	}
+	
+	/**
+	 * Test if this should be the binding expression of an independent parameter instead.
+	 */
+	syn boolean FAbstractEquation.isIndependentParameterEquation() = false;
+	eq FEquation.isIndependentParameterEquation() = 
+		getLeft().isFlatParameterUse() && getRight().isIndependentParameterExp();
+	
+	/**
+	 * Test if this is a use of a parameter (in the flat tree).
+	 */
+	syn boolean FExp.isFlatParameterUse()   = false;
+	eq FIdUseExp.isFlatParameterUse()       = getFIdUse().isFlatParameterUse();
+	syn boolean FIdUse.isFlatParameterUse() = myFV().isParameter();
+	
+	/**
+	 * Convert this parameter equation to a binding expression.
+	 */
+	public void FAbstractEquation.revertToBindingExp() {}
+	public void FEquation.revertToBindingExp() {
+		FVariable fv = (FVariable) ((FIdUseExp) getLeft()).getFIdUse().myFV();
+		fv.setBindingExp(getRight());
+	}
+
 }
 
 aspect TransformCanonicalErrorCheck {

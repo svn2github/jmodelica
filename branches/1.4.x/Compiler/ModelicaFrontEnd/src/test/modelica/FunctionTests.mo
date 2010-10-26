@@ -5301,4 +5301,41 @@ end ExtendFunc1;
 
 
 
+model AttributeTemp1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="AttributeTemp1",
+         description="Temporary variable for attribute",
+         flatModel="
+fclass FunctionTests.AttributeTemp1
+ Real x[1](start = temp_1[1]);
+ Real x[2](start = temp_1[2]);
+ parameter Real temp_1[1];
+ parameter Real temp_1[2];
+parameter equation
+ ({temp_1[1],temp_1[2]}) = FunctionTests.AttributeTemp1.f();
+equation
+ x[1] = 3;
+ x[2] = 4;
+
+ function FunctionTests.AttributeTemp1.f
+  output Real[2] o;
+ algorithm
+  o[1] := 1;
+  o[2] := 2;
+  return;
+ end FunctionTests.AttributeTemp1.f;
+end FunctionTests.AttributeTemp1;
+")})));
+
+	function f
+		output Real o[2] = {1, 2};
+	algorithm
+	end f;
+	
+	Real x[2](start = f()) = {3, 4};
+end AttributeTemp1;
+
+
+
 end FunctionTests;
