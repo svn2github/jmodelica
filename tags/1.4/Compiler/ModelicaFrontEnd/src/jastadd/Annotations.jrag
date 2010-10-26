@@ -1,0 +1,258 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+
+aspect AnnotationAPI {
+	
+	/**
+	 * \brief Get the annotation node for this AST node's annotation, if any.
+	 * 
+	 * This should be overridden for all nodes that can have annotations.
+	 */
+	syn AnnotationNode ASTNode.annotation() = AnnotationNode.NO_ANNOTATION;
+	
+	/**
+	 * \brief Get the annotation node for a sub-node of this AST node's annotation, if any.
+	 * 
+	 * Path is interpreted as a "/"-separated list of names of nested annotations.
+	 * 
+	 * Example:
+	 * <code>annotation(A(B(C = "foo")));</code>
+	 * Here the annotation given by the path <code>"A/B/C"</code> has the value <code>"foo"</code>.
+	 */
+	syn AnnotationNode ASTNode.annotation(String path) = annotation().forPath(path);
+	
+	eq Opt.annotation() = (getNumChild() > 0) ? getChild(0).annotation() : AnnotationNode.NO_ANNOTATION;
+	
+	eq ExternalClause.annotation() = getAnnotation1Opt().annotation();
+	eq InstExternal.annotation()   = getExternalClause().annotation();
+	
+	eq ParseAnnotation.annotation() = getClassModification().annotationNode();
+	
+	syn lazy AnnotationNode Modification.annotationNode() = AnnotationNode.NO_ANNOTATION;
+	eq ClassModification.annotationNode()     = new AnnotationNode.CMAnnotationNode(this);
+	eq ValueModification.annotationNode()     = new AnnotationNode.VMAnnotationNode(this);
+	eq ComponentModification.annotationNode() = 
+		hasModification() ? getModification().annotationNode() : AnnotationNode.NO_ANNOTATION;
+	
+	/**
+	 * \brief Describes a node in the tree formed by an annotation.
+	 */
+	public abstract class AnnotationNode {
+		
+		/**
+		 * \brief Represents an annotation that does not exist.
+		 */
+		public static AnnotationNode NO_ANNOTATION = new NullAnnotationNode();
+		
+		/**
+		 * \brief Finds an annotation node at the given path below this one.
+		 */
+		public AnnotationNode forPath(String path) {
+			return forPath(path.split("/"), 0);
+		}
+		
+		/**
+		 * \brief Internal definition of {@link #forPath(String)}.
+		 * 
+		 * @param path  the path elements to find
+		 * @param i     the first index in <code>path</code> to use
+		 */
+		protected AnnotationNode forPath(String[] path, int i) {
+			if (i >= path.length)
+				return this;
+			return NO_ANNOTATION;
+		}
+		
+		/**
+		 * \brief Checks if this annotation node represents an existing annotation.
+		 */
+		public boolean exists() {
+			return true;
+		}
+		
+		/**
+		 * \brief Returns the value for a node that represents a string value.
+		 */
+		public String string() {
+			return null;
+		}
+		
+		/**
+		 * \brief Returns the value for a node that represents a list of strings.
+		 */
+		public ArrayList<String> stringList() {
+			return null;
+		}
+		
+		/**
+		 * \brief Returns the value for a node that represents a list of strings, 
+		 *        or a single string value.
+		 */
+		public ArrayList<String> asStringList() {
+			ArrayList<String> res = stringList();
+			if (res == null) {
+				String str = string();
+				if (str != null) {
+					res = new ArrayList(1);
+					res.add(str);
+				}
+			}
+			return res;
+		}
+		
+		/**
+		 * \brief Represents a non-existing annotation.
+		 */
+		private static class NullAnnotationNode extends AnnotationNode {
+			public boolean exists() {
+				return false;
+			}
+		}
+		
+		/**
+		 * \brief Represents an annotation that is represented in the source tree by a ClassModification.
+		 */
+		public static class CMAnnotationNode extends AnnotationNode {
+			
+			private ClassModification mod;
+			
+			public CMAnnotationNode(ClassModification cm) {
+				mod = cm;
+			}
+			
+			protected AnnotationNode forPath(String[] path, int i) {
+				if (i >= path.length)
+					return this;
+				for (Argument arg : mod.getArguments()) 
+					if (arg.matches(path[i])) 
+						return arg.annotationNode().forPath(path, i+1);
+				return NO_ANNOTATION;
+			}
+			
+		}
+		
+		/**
+		 * \brief Represents an annotation that is represented in the source tree by a ValueModification.
+		 */
+		public static class VMAnnotationNode extends AnnotationNode {
+			
+			private ValueModification mod;
+			
+			public VMAnnotationNode(ValueModification vm) {
+				mod = vm;
+			}
+			
+			public String string() {
+				return mod.getExp().avalueString();
+			}
+			
+			public ArrayList<String> stringList() {
+				return mod.getExp().avalueStringList();
+			}
+			
+		}
+		
+	}
+	
+	syn boolean Argument.matches(String str) = false;
+	eq NamedModification.matches(String str) = getName().name().equals(str);
+	
+	syn String Exp.avalueString()  = null;
+	eq StringLitExp.avalueString() = unEscape();
+	
+	syn ArrayList<String> Exp.avalueStringList() = null;
+	eq ArrayConstructor.avalueStringList() {
+		ArrayList<String> l = new ArrayList<String>(getFunctionArguments().getNumExp());
+		for (Exp e : getFunctionArguments().getExps())
+			l.add(e.avalueString());
+		return l.contains(null) ? null : l;
+	}
+	
+}
+
+aspect TestAnnotations {
+/*
+	rewrite ParseAnnotation {
+		when (testCases().size() > 0)
+			to AUnitTesting {
+				Collection<FunctionCall> h = testCases();
+				AUnitTesting ut = new AUnitTesting();
+				for (Iterator<FunctionCall> iter = h.iterator(); iter.hasNext();) {
+				    FunctionCall f = iter.next();
+					FunctionArguments fa = f.getFunctionArguments();
+				    if (f.name().equals("FlatteningTestCase")) {
+						AFlatteningTestCase tc = new AFlatteningTestCase();
+						//for (int i=0;i<fa.getNumExp();i++) {
+						//	tc.setChild(((StringLitExp)fa.getExp(i)).getSTRING(),i);
+						//}
+						for (int i=0;i<fa.getNumNamedArgument();i++) {
+							if (fa.getNamedArgument(i).getName().name().equals("name")) {
+								log.debug("### rewrite ParseAnnotation: name found");
+								//tc.setName(((StringLitExp)fa.getNamedArgument(i).getExp()).getSTRING());
+								tc.setName((StringLitExp)((StringLitExp)fa.getNamedArgument(i).getExp()).fullCopy());
+							} else if (fa.getNamedArgument(i).getName().name().equals("description")) {
+								log.debug("### rewrite ParseAnnotation: description found");
+								//tc.setDescription(((StringLitExp)fa.getNamedArgument(i).getExp()).getSTRING());
+								tc.setDescription((StringLitExp)((StringLitExp)fa.getNamedArgument(i).getExp()).fullCopy());
+							} else if (fa.getNamedArgument(i).getName().name().equals("flatModel")) {
+								log.debug("### rewrite ParseAnnotation: flatModel found");
+								//tc.setFlatModel(((StringLitExp)fa.getNamedArgument(i).getExp()).getSTRING());	
+								tc.setFlatModel((StringLitExp)((StringLitExp)fa.getNamedArgument(i).getExp()).fullCopy());	
+							}
+						}
+						//log.debug("### rewrite ParseAnnotation: check name: "+tc.getName());
+						//log.debug("### rewrite ParseAnnotation: check description: "+tc.getDescription());
+						//log.debug("### rewrite ParseAnnotation: check flatModel: "+tc.getFlatModel());
+
+						//tc.dumpTreeBasic("");
+						ut.addATestCase(tc);	
+					}
+					
+				}
+			return ut;
+			}
+	
+	}
+
+	coll Collection<FunctionCall> Annotation.testCases() [new LinkedHashSet<FunctionCall>()] with add root ParseAnnotation;
+	 
+	FunctionCall contributes
+ 	   this when (hasTestCaseName())
+	to Annotation.testCases() for myAnnotation();
+
+	inh Annotation ASTNode.myAnnotation();
+	eq Annotation.getChild().myAnnotation() = this;
+	eq FClass.getChild().myAnnotation() = null;
+	eq Root.getChild().myAnnotation() = null;
+
+	syn boolean FunctionCall.hasTestCaseName() = 
+		(name().equals("FlatteningTestCase") || name().equals("ErrorTestCase"));
+	
+	syn String AFlatteningTestCase.name() = getName().getSTRING();
+	syn String AFlatteningTestCase.description() = getDescription().getSTRING();
+	syn String AFlatteningTestCase.flatModel() = getFlatModel().getSTRING();
+	
+    public FlatteningTestCase AFlatteningTestCase.createFlatteningTestCase() {
+       return new FlatteningTestCase(name(),description(),root().fileName(),enclosingClassDecl().qualifiedName(),flatModel(),false);
+    }
+
+*/
+}
