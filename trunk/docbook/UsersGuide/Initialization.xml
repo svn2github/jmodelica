@@ -95,8 +95,8 @@ init_result = init_model.initialize()
 </programlisting>Having solved the initialization problem, the result of the
     initialization can be retrieved from the return result object:</para>
 
-    <programlisting language="python">x = init_model['x']
-y = init_model['y']
+    <programlisting language="python">x = init_result['x']
+y = init_result['y']
 </programlisting>
   </section>
 
@@ -147,7 +147,15 @@ y = init_model['y']
       based on IPOPT, the mathematical formulation of the algorithm can be
       found in the <link
       xlink:href="http://www.jmodelica.org/api-docs/jmi/group__jmi__opt__sim__lp.html">JMI
-      API documentation</link>.</para>
+      API documentation</link>. Notice that this algorithm does not rely on
+      the causalization procedure (in particular the BLT transformation) which
+      is common. Instead, the DAE residual is introduced as an equality
+      constraint when solving an optimization problem where the squared
+      difference between the non-fixed start values and their corresponding
+      variables are minimized. As a consequence, the algorithm relies on
+      decent start values for <emphasis>all</emphasis> variables. This
+      approach is generally more sensitive to lacking initial guesses for
+      start values than are algorithms based on causalization.</para>
 
       <para>The algorithm provides the options summarized in <xref
       linkend="init-tab-collopts" />.</para>
@@ -221,6 +229,33 @@ y = init_model['y']
 
       <para>makes IPOPT terminate after 300 iterations even if no optimal
       solution has been found.</para>
+
+      <para>Some statistics from IPOPT can be obtained by issuing the
+      command:</para>
+
+      <programlisting>&gt;&gt;&gt; res_init.solver.init_opt_ipopt_get_statistics()
+</programlisting>
+
+      <para>The return argument of this function can be found by using the
+      interactive help:</para>
+
+      <programlisting>&gt;&gt;&gt; help(res_init.solver.init_opt_ipopt_get_statistics)
+    Get statistics from the last optimization run.
+    
+    Returns::
+    
+        return_status -- 
+            The return status from IPOPT.
+            
+        nbr_iter -- 
+            The number of iterations. 
+            
+        objective -- 
+            The final value of the objective function.
+            
+        total_exec_time -- 
+            The execution time.
+</programlisting>
     </section>
   </section>
 </chapter>

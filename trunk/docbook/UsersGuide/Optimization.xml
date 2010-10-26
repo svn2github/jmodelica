@@ -505,6 +505,33 @@ x1 = res['x1']
 
         <para>makes IPOPT terminate after 300 iterations even if no optimal
         solution has been found.</para>
+
+        <para>Some statistics from IPOPT can be obtained by issuing the
+        command:</para>
+
+        <programlisting>&gt;&gt;&gt; res_opt.solver.opt_coll_ipopt_get_statistics()
+</programlisting>
+
+        <para>The return argument of this function can be found by using the
+        interactive help:</para>
+
+        <programlisting>&gt;&gt;&gt; help(res.solver.opt_coll_ipopt_get_statistics)
+    Get statistics from the last optimization run.
+    
+    Returns::
+    
+        return_status -- 
+            Return status from IPOPT.
+            
+        nbr_iter -- 
+            Number of iterations.
+            
+        objective -- 
+            Final value of objective function.
+            
+        total_exec_time -- 
+            Execution time.
+</programlisting>
       </section>
     </section>
   </section>
