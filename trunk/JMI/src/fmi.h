@@ -21,6 +21,14 @@
 
 #include "fmiModelFunctions.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* Inquire version numbers of header files */
+const char* fmi_get_model_types_platform();
+const char* fmi_get_version();
+
 /* Creation and destruction of model instances and setting debug status */
 fmiComponent fmi_instantiate_model(fmiString instanceName, fmiString GUID, fmiCallbackFunctions functions, fmiBoolean loggingOn);
 void fmi_free_model_instance(fmiComponent c);
@@ -49,4 +57,7 @@ fmiStatus fmi_get_nominal_continuous_states(fmiComponent c, fmiReal x_nominal[],
 fmiStatus fmi_get_state_value_references(fmiComponent c, fmiValueReference vrx[], size_t nx);
 fmiStatus fmi_terminate(fmiComponent c);
 
+#ifdef __cplusplus
+}
+#endif
 #endif

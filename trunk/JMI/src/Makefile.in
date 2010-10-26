@@ -78,6 +78,12 @@ am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
 am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"
 libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
+libfmi_la_LIBADD =
+am_libfmi_la_OBJECTS = libfmi_la-fmi.lo
+libfmi_la_OBJECTS = $(am_libfmi_la_OBJECTS)
+libfmi_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(libfmi_la_CFLAGS) \
+	$(CFLAGS) $(libfmi_la_LDFLAGS) $(LDFLAGS) -o $@
 libjmi_la_LIBADD =
 am_libjmi_la_OBJECTS = libjmi_la-jmi.lo libjmi_la-jmi_common.lo
 libjmi_la_OBJECTS = $(am_libjmi_la_OBJECTS)
@@ -162,11 +168,13 @@ CXXLD = $(CXX)
 CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(libjmi_la_SOURCES) $(libjmi_algorithm_la_SOURCES) \
+SOURCES = $(libfmi_la_SOURCES) $(libjmi_la_SOURCES) \
+	$(libjmi_algorithm_la_SOURCES) \
 	$(libjmi_algorithm_cppad_la_SOURCES) \
 	$(libjmi_cppad_la_SOURCES) $(libjmi_solver_la_SOURCES) \
 	$(libjmi_solver_cppad_la_SOURCES)
-DIST_SOURCES = $(libjmi_la_SOURCES) $(libjmi_algorithm_la_SOURCES) \
+DIST_SOURCES = $(libfmi_la_SOURCES) $(libjmi_la_SOURCES) \
+	$(libjmi_algorithm_la_SOURCES) \
 	$(libjmi_algorithm_cppad_la_SOURCES) \
 	$(libjmi_cppad_la_SOURCES) $(libjmi_solver_la_SOURCES) \
 	$(libjmi_solver_cppad_la_SOURCES)
@@ -312,8 +320,8 @@ AUTOMAKE_OPTIONS = foreign
 
 #lib_LTLIBRARIES = libjmi.la \
 #                  libjmi_cppad.la
-lib_LTLIBRARIES = libjmi.la libjmi_algorithm.la $(am__append_1) \
-	$(am__append_2) $(am__append_3)
+lib_LTLIBRARIES = libjmi.la libjmi_algorithm.la libfmi.la \
+	$(am__append_1) $(am__append_2) $(am__append_3)
 libjmi_la_SOURCES = jmi.h \
                     fmiModelFunctions.h \
                     fmiModelTypes.h \
@@ -340,6 +348,18 @@ libjmi_algorithm_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g
 # really needed, and also (more importantly perhaps) I cannot force
 # static inclusion of the runtime libraries when creating model so:s.
 libjmi_algorithm_la_LDFLAGS = -no-undefined -static-libtool-libs
+libfmi_la_SOURCES = fmi.h \
+                    fmiModelFunctions.h \
+                    fmiModelTypes.h \
+                    jmi.h \
+                    fmi.c
+
+libfmi_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g
+libfmi_la_CXXFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g
+# Don't build shared libraries of libjmi and libjmicppad. This is not
+# really needed, and also (more importantly perhaps) I cannot force
+# static inclusion of the runtime libraries when creating model so:s.
+libfmi_la_LDFLAGS = -no-undefined -static-libtool-libs
 libjmi_solver_la_SOURCES = jmi_opt_coll_radau.c \
                            jmi_opt_coll_ipopt.cpp \
                            jmi_opt_coll_TNLP.cpp \
@@ -447,6 +467,8 @@ clean-libLTLIBRARIES:
 	  echo "rm -f \"$${dir}/so_locations\""; \
 	  rm -f "$${dir}/so_locations"; \
 	done
+libfmi.la: $(libfmi_la_OBJECTS) $(libfmi_la_DEPENDENCIES) 
+	$(libfmi_la_LINK) -rpath $(libdir) $(libfmi_la_OBJECTS) $(libfmi_la_LIBADD) $(LIBS)
 libjmi.la: $(libjmi_la_OBJECTS) $(libjmi_la_DEPENDENCIES) 
 	$(libjmi_la_LINK) -rpath $(libdir) $(libjmi_la_OBJECTS) $(libjmi_la_LIBADD) $(LIBS)
 libjmi_algorithm.la: $(libjmi_algorithm_la_OBJECTS) $(libjmi_algorithm_la_DEPENDENCIES) 
@@ -466,6 +488,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfmi_la-fmi.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjmi_algorithm_cppad_la-jmi_init_opt.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjmi_algorithm_cppad_la-jmi_opt_coll.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjmi_algorithm_cppad_la-jmi_opt_coll_radau.Plo@am__quote@
@@ -506,6 +529,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
+
+libfmi_la-fmi.lo: fmi.c
+@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfmi_la_CFLAGS) $(CFLAGS) -MT libfmi_la-fmi.lo -MD -MP -MF $(DEPDIR)/libfmi_la-fmi.Tpo -c -o libfmi_la-fmi.lo `test -f 'fmi.c' || echo '$(srcdir)/'`fmi.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/libfmi_la-fmi.Tpo $(DEPDIR)/libfmi_la-fmi.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='fmi.c' object='libfmi_la-fmi.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfmi_la_CFLAGS) $(CFLAGS) -c -o libfmi_la-fmi.lo `test -f 'fmi.c' || echo '$(srcdir)/'`fmi.c
 
 libjmi_la-jmi.lo: jmi.c
 @am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_la_CFLAGS) $(CFLAGS) -MT libjmi_la-jmi.lo -MD -MP -MF $(DEPDIR)/libjmi_la-jmi.Tpo -c -o libjmi_la-jmi.lo `test -f 'jmi.c' || echo '$(srcdir)/'`jmi.c
