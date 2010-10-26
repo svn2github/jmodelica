@@ -3491,4 +3491,50 @@ CCodeGenTests_ModelIdentifierTest")})));
 	Real r = 1.0;
 end ModelIdentifierTest;
 
+model DependentParametersWithScalingTest1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="DependentParametersWithScalingTest1",
+         description="",
+         enable_variable_scaling=true,
+         template="$C_DAE_initial_dependent_parameter_assignments$",
+         generatedCode=" 
+_p2_1 = (( 3 ) * ( (_p1_0*sf(0)) ))/sf(2);
+_r2_x_2 = ((_r_x_3*sf(1)))/sf(3);
+_p3_4 = (func_CCodeGenTests_DependentParametersWithScalingTest1_F_exp((_p2_1*sf(2))))/sf(4);
+JMI_RECORD_STATIC(R_0_r, tmp_1)
+JMI_RECORD_STATIC(R_0_r, tmp_2)
+tmp_2->x = (_r2_x_2*sf(3));
+func_CCodeGenTests_DependentParametersWithScalingTest1_FR_def(tmp_2, tmp_1);
+_temp_1_x_5 = (tmp_1->x)/sf(5);
+_r3_x_6 = ((_temp_1_x_5*sf(5)))/sf(6);
+")})));
+
+  record R
+    Real x = 1;
+  end R;
+
+  function F
+   input Real x;
+   output Real y;
+  algorithm
+   y := 2*x;
+  end F;
+
+  function FR
+   input R x;
+   output R y;
+  algorithm
+   y := R(x.x*5);
+  end FR;
+
+  parameter Real p1 = 1;
+  parameter Real p2 = 3*p1;
+  parameter Real p3 = F(p2);
+  parameter R r = R(3);
+  parameter R r2 = r;
+  parameter R r3 = FR(r2);
+end DependentParametersWithScalingTest1;
+
+
 end CCodeGenTests;
