@@ -179,7 +179,7 @@ DIST_SOURCES = $(libfmi_la_SOURCES) $(libjmi_la_SOURCES) \
 	$(libjmi_cppad_la_SOURCES) $(libjmi_solver_la_SOURCES) \
 	$(libjmi_solver_cppad_la_SOURCES)
 am__include_HEADERS_DIST = jmi.h fmiModelFunctions.h fmiModelTypes.h \
-	fmi.h fmi.c jmi_common.h jmi_init_opt.h jmi_opt_coll.h \
+	fmi.h jmi_common.h jmi_init_opt.h jmi_opt_coll.h \
 	jmi_opt_coll_radau.h jmi_array_common.h jmi_array_none.h \
 	jmi_array_cppad.h jmi_opt_coll_ipopt.h jmi_init_opt_ipopt.h
 includeHEADERS_INSTALL = $(INSTALL_HEADER)
@@ -355,7 +355,6 @@ libfmi_la_SOURCES = fmi.h \
                     fmi.c
 
 libfmi_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g
-libfmi_la_CXXFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g
 # Don't build shared libraries of libjmi and libjmicppad. This is not
 # really needed, and also (more importantly perhaps) I cannot force
 # static inclusion of the runtime libraries when creating model so:s.
@@ -404,7 +403,7 @@ libjmi_solver_cppad_la_CXXFLAGS = -Wall -I$(CPPAD_HOME) -I$(IPOPT_INC) -DJMI_AD=
 libjmi_solver_cppad_la_LDFLAGS = -no-undefined -static-libtool-libs -g
 #libjmi_cppad_la_LDFLAGS = -no-undefined 
 include_HEADERS = jmi.h fmiModelFunctions.h fmiModelTypes.h fmi.h \
-	fmi.c jmi_common.h jmi_init_opt.h jmi_opt_coll.h \
+	jmi_common.h jmi_init_opt.h jmi_opt_coll.h \
 	jmi_opt_coll_radau.h jmi_array_common.h jmi_array_none.h \
 	jmi_array_cppad.h $(am__append_4)
 all: all-am

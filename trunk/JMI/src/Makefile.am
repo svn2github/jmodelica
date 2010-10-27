@@ -74,7 +74,6 @@ libfmi_la_SOURCES = fmi.h \
                     fmi.c
 
 libfmi_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g
-libfmi_la_CXXFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g
 # Don't build shared libraries of libjmi and libjmicppad. This is not
 # really needed, and also (more importantly perhaps) I cannot force
 # static inclusion of the runtime libraries when creating model so:s.
@@ -131,9 +130,8 @@ libjmi_solver_cppad_la_LDFLAGS = -no-undefined -static-libtool-libs -g
 
 include_HEADERS = jmi.h \
                   fmiModelFunctions.h \
-	          fmiModelTypes.h \
+                  fmiModelTypes.h \
                   fmi.h \
-                  fmi.c \
                   jmi_common.h \
                   jmi_init_opt.h \
                   jmi_opt_coll.h \
