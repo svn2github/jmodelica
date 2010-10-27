@@ -22,6 +22,7 @@ required by Assimulo.
 import logging
 
 import numpy as N
+import scipy.sparse as ss
 
 import jmodelica.jmi as jmi
 import jmodelica.io as io
@@ -86,6 +87,15 @@ class JMUAlgebraic(ProblemAlgebraic):
         self._ncol, self._nonzeros = self._jmi_model.init_dF0_dim(
             jmi.JMI_DER_CPPAD, jmi.JMI_DER_DENSE_COL_MAJOR, self._ind_vars, self._mask)
         self._nrow = self._nonzeros / self._ncol
+        
+        # get sparse data
+        self.sparse_ncol, self.sparse_nonzeros = self._jmi_model.init_dF0_dim(
+            jmi.JMI_DER_CPPAD, jmi.JMI_DER_SPARSE, self._ind_vars, self._mask)
+
+        self.rows = N.zeros(self.sparse_nonzeros,dtype = N.int32)
+        self.cols = N.zeros(self.sparse_nonzeros,dtype = N.int32)
+        self._jmi_model.init_dF0_nz_indices(jmi.JMI_DER_CPPAD, self._ind_vars, self._mask, self.rows, self.cols)
+        
         
         # Get initial guess if supplied, otherwise get it from the model
         if x0 != None:
@@ -179,6 +189,38 @@ class JMUAlgebraic(ProblemAlgebraic):
     
         # return output from result 
         return N.reshape(jac,(self._nrow,self._ncol))
+    
+    def sparse_jac(self,input):
+        """
+        Function used to get the jacobian of the F0 function in JMI.
+        
+        Parameters::
+        
+            input --
+                A numpy array, the vector input for which the jacobian will be
+                evaluated.
+        """
+        inp_size = input.shape[0]
+    
+        # slice the input
+        dx = input[0:self._dx_size]
+        x = input[self._dx_size:self._mark]
+        w = input[self._mark:inp_size]
+    
+        # input the values
+        self._model.real_dx = dx
+        self._model.real_x = x
+        self._model.real_w = w
+        
+        # get the jacobian from the model
+        val = N.zeros(self.sparse_nonzeros)
+        self._jmi_model.init_dF0(jmi.JMI_DER_CPPAD, jmi.JMI_DER_SPARSE, 
+            self._ind_vars, self._mask, val)
+        
+        jac = ss.coo_matrix((val,(self.rows-1,self.cols-1)),shape=(self.sparse_ncol,self.sparse_ncol))
+
+        # return output from result 
+        return jac
     
     def set_constraints_usage(self,use_const,constraints = None):
         """ 
