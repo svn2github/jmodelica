@@ -1,0 +1,153 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+aspect EquationSolve {
+	
+	syn nta FExp FAbstractEquation.solution(String name) {
+		return new FNoExp();
+	}
+	
+	eq FEquation.solution(String name) {
+		// Only handle this special case of the unknown occurring once
+		if (nbrUses(name)!=1) {
+			return new FNoExp();
+		}
+		
+		// Get terms
+		ArrayList<FExp> t = terms();
+		
+		FExp theTerm = null;
+		// Find term
+		System.out.println("Equation:\n" + prettyPrint(""));			
+		for (FExp e : t) {
+			System.out.println("Term" + (e.isNegativeTerm()? "(-): ": "(+): ") + e.prettyPrint(""));
+			if (e.nbrUses(name)==1) {
+				theTerm = e;
+			}
+		}
+		System.out.println("Found term" + (theTerm.isNegativeTerm()? "(-): ": "(+): ") + theTerm.prettyPrint(""));	
+		
+		FExp sol = null;
+		// Build new AST for the remaining terms
+		for (FExp e : t) {
+			if (e!=theTerm) {
+				FExp ee = (FExp)e.fullCopy();
+				if (!e.isNegativeTerm()) {
+				  	ee = new FNegExp(ee);
+				}
+				if (sol==null) {
+					sol = ee;
+				} else {
+				    sol = new FAddExp(sol,ee);				  	
+				}
+			}
+		}
+	
+		if (theTerm.isIdentifier(name)) {
+			if (theTerm.isNegativeTerm()) {
+				sol = new FNegExp(sol);
+			}
+		} else if (theTerm.isMulTerm(name)>0) {
+			// not so hard
+			sol = new FNoExp();
+		} else if (theTerm.isDivTerm(name)) {
+			// actually not so hard either...
+			sol = new FNoExp();
+		} else {
+			// probably very hard, can't solve this.
+			sol = new FNoExp();
+	    }
+	
+		return sol;
+	}
+	
+	// Get terms
+	syn ArrayList<FExp> FEquation.terms() {
+		ArrayList<FExp> t = new ArrayList<FExp>();
+		t.addAll(getLeft().terms());
+		t.addAll(getRight().terms());
+		return t;
+	}
+	
+	syn ArrayList<FExp> FExp.terms() {
+		ArrayList<FExp> t = new ArrayList<FExp>();
+		t.add(this);
+		return t;
+	}
+	
+	eq FDotAddExp.terms() {
+		ArrayList<FExp> t = new ArrayList<FExp>();
+		t.addAll(getLeft().terms());
+		t.addAll(getRight().terms());
+		return t;
+	}
+
+	eq FDotSubExp.terms() {
+		ArrayList<FExp> t = new ArrayList<FExp>();
+		t.addAll(getLeft().terms());
+		t.addAll(getRight().terms());
+		return t;
+	}
+	
+	inh boolean FExp.isNegativeTerm();
+	eq FDotSubExp.getRight().isNegativeTerm() = !isNegativeTerm();
+	eq FEquation.getRight().isNegativeTerm() = true;
+	eq FEquation.getLeft().isNegativeTerm() = false;
+	eq Root.getChild().isNegativeTerm() = false;
+	
+	// Classification of terms
+	syn boolean FExp.isIdentifier(String name) = false;
+	eq FIdUseExp.isIdentifier(String name) = name.equals(name());
+	
+	syn int FExp.isMulTerm(String name) = 0;
+	eq FDotMulExp.isMulTerm(String name) {
+		if (getLeft().isIdentifier(name)) {
+			return 1;
+		} else if (getRight().isIdentifier(name)) {
+			return 2;
+		} else {
+			return 0;
+		}
+	}
+
+	syn boolean FExp.isDivTerm(String name) = false;
+	eq FDotDivExp.isDivTerm(String name) {
+		if (getLeft().isIdentifier(name)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	syn boolean FExp.isNegTerm(String name) = false;
+	eq FNegExp.isNegTerm(String name) = getFExp().isIdentifier(name);
+	
+	syn int FEquation.nbrUses(String name) {
+		return getLeft().nbrUses(name) + getRight().nbrUses(name);
+	}
+	
+	syn int ASTNode.nbrUses(String name) {
+		int n = 0;
+		for (int i=0;i<getNumChild();i++) {
+			n += getChild(i).nbrUses(name);
+		}
+		return n;
+	}
+	
+	eq FIdUseExp.nbrUses(String name) = name.equals(name())? 1: 0;
+	eq FDerExp.nbrUses(String name) = name.equals(name())? 1: 0;
+	
+}

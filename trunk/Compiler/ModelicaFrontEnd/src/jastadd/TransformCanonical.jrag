@@ -264,6 +264,23 @@ aspect TransformCanonical {
 		g.maximumMatching(true);	
 		log.info("DAE system ");
 		log.info(g.printMatching());
+		
+		/*
+		k = 1;
+		for (FAbstractEquation e : equations()) {				
+			//k = e.extractDerAlgIncidence(g,k);
+			int n_eq = e.numScalarEquations();
+			
+			for (int i=0;i<n_eq;i++) {
+				eqn = g.getEquation("eq_"+k);
+				v = eqn.getMatching();
+				FExp sol = e.solution(v.getName());
+				System.out.println("Solution: " + sol.prettyPrint(""));
+				k++;
+			}
+		}
+		*/
+		
 		/*
 		LinkedList<Stack<Eq>> blt = g.computeBLT();
 		
@@ -307,7 +324,7 @@ aspect TransformCanonical {
 		}
 		}
 		
-		// Add all algebraics
+		// Add all differentiated variables
 		for (FVariable fv : differentiatedRealVariables()) {
 			g.addVariable(fv.name(),"");     
 		}
