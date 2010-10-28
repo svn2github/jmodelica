@@ -21,7 +21,8 @@ aspect FlatNameBinding {
 	inh AbstractFVariable FIdUse.lookupFV(FQName fqn);
 	inh AbstractFVariable FIdUse.lookupDerFV(FQName fqn);
 	inh AbstractFVariable FExp.lookupFV(FQName fqn);
-	inh AbstractFVariable FFunctionVariable.lookupFV(FQName fqn);
+	inh AbstractFVariable AbstractFVariable.lookupFV(FQName fqn);
+	inh AbstractFVariable FRecordDecl.lookupFV(FQName fqn);
 	
 	syn AbstractFVariable FIdUse.myFV() = lookupFV(getFQName());
 	syn lazy AbstractFVariable FIdUseExp.myFV() = getFIdUse().myFV();
@@ -45,6 +46,11 @@ aspect FlatNameBinding {
 		AbstractFVariable variable = lookupFVFromMap(fullyQualifiedVariablesMap(), fqn, false);
 		return (variable == null) ? unknownFVariable() : variable;
 	}
+
+	eq FRecordDecl.getChild(int index).lookupFV(FQName fqn) {
+		AbstractFVariable variable = lookupFVInRecord(fqn, 0);
+		return (variable == null) ? lookupFV(fqn) : variable;
+	}
 	
 	public static AbstractFVariable ASTNode.lookupFVFromMap(
 			HashMap<String, ? extends AbstractFVariable> map, FQName fqn, boolean der) {
@@ -62,12 +68,17 @@ aspect FlatNameBinding {
 		return variable;
 	}
 	
-	public AbstractFVariable AbstractFVariable.lookupFVInRecord(FQName fqn, int part) {
+	public AbstractFVariable FRecordDecl.lookupFVInRecord(FQName fqn, int part) {
 		AbstractFVariable res = null;
-		if (myFRecordDecl() != null)
-			for (FVariable fv : myFRecordDecl().getFVariables())
-				if (fv.name().equals(fqn.getFQNamePart(part).getName()))
-					res = fv;
+		for (FVariable fv : getFVariables())
+			if (fv.name().equals(fqn.getFQNamePart(part).getName()))
+				res = fv;
+		return res;
+	}
+	
+	public AbstractFVariable AbstractFVariable.lookupFVInRecord(FQName fqn, int part) {
+		FRecordDecl rec = myFRecordDecl();
+		AbstractFVariable res = (rec != null) ? rec.lookupFVInRecord(fqn, part) : null;
 		if (part < fqn.getNumFQNamePart() - 1 && res != null)
 			res = res.lookupFVInRecord(fqn, part + 1);
 		return res;

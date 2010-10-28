@@ -3024,7 +3024,7 @@ fclass RecordTests.RecordParam4
  parameter Real a1.z;
  Real a1.y;
 parameter equation
- a1.z = x;
+ a1.z = a1.x;
 equation
  a1.y = 2;
 
@@ -3077,6 +3077,67 @@ end RecordTests.RecordParam5;
 	
 	A a1 = A(y = 2, x = 1, z = a1.x);
 end RecordParam5;
+
+
+model RecordParam6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="RecordParam6",
+         description="",
+         flatModel="
+fclass RecordTests.RecordParam6
+ parameter Real temp_1[1];
+ parameter Real temp_1[2];
+ parameter Real temp_2[1];
+ parameter Real temp_2[2];
+ parameter Real a1.x[1];
+ parameter Real a1.x[2];
+ parameter Real a2.x[1];
+ parameter Real a2.x[2];
+ parameter Real a1.y[1];
+ parameter Real a1.y[2];
+ parameter Real a2.y[1];
+ parameter Real a2.y[2];
+parameter equation
+ ({temp_1[1],temp_1[2]}) = RecordTests.RecordParam6.f();
+ ({temp_2[1],temp_2[2]}) = RecordTests.RecordParam6.f();
+ a1.x[1] = temp_1[1];
+ a1.x[2] = temp_1[2];
+ a2.x[1] = temp_2[1];
+ a2.x[2] = temp_2[2];
+ a1.y[1] = a1.x[1];
+ a1.y[2] = a1.x[2];
+ a2.y[1] = a2.x[1];
+ a2.y[2] = a2.x[2];
+
+ function RecordTests.RecordParam6.f
+  output Real[2] o;
+ algorithm
+  o[1] := 1;
+  o[2] := 2;
+  return;
+ end RecordTests.RecordParam6.f;
+
+ record RecordTests.RecordParam6.A
+  parameter Real x[2] = RecordTests.RecordParam6.f();
+  parameter Real y[2] = x[1:2];
+ end RecordTests.RecordParam6.A;
+end RecordTests.RecordParam6;
+")})));
+
+	function f
+		output Real[2] o = {1,2};
+	algorithm
+	end f;
+	
+	record A
+		parameter Real x[2] = f();
+		parameter Real y[2] = x;
+	end A;
+	
+	A a1;
+	A a2;
+end RecordParam6;
 
 
 

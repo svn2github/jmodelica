@@ -818,6 +818,11 @@ aspect FlatTypes {
 				return i;
 		return -1;
 	}
+	
+	inh FRecordDecl AbstractFVariable.containingRecordDecl();
+	eq FRecordDecl.getChild().containingRecordDecl() = this;
+	eq FlatRoot.getChild().containingRecordDecl()    = null;
+
 }
 
 /**

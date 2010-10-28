@@ -1457,18 +1457,18 @@ end NameTests.ConstantLookup29;
 
   package A
 	  constant Real c1 = 1;
- end A;
+  end A;
 
   model B
 	import NameTests.ConstantLookup29.A.*;
 	Real x(start=c1)=2;
   end B;
 
-  model A
+  model C
 	extends B;
-  end A;
+  end C;
   
-  A a;
+  C a;
 end ConstantLookup29;
 
 

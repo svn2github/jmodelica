@@ -463,7 +463,7 @@ aspect TransformCanonical {
 			FAttribute attr, FExp bexp, boolean param) {
 		FQName name = createNameForBindingEquation(prefix, attr);
 		param = param || isParameter();
-		FEquation feq = new FEquation(new FIdUseExp(name), bexp);
+		FEquation feq = new FEquation(new FIdUseExp(name), bexp.reflattenBindingExp(prefix, this));
 		if (param)
 			fc.addFParameterEquation(feq);
 		else
@@ -488,6 +488,35 @@ aspect TransformCanonical {
 		} else {
 			super.genBindingEquationsFromExp(fc, prefix, attr, bexp, param);
 		}
+	}
+	
+	public FExp FExp.reflattenBindingExp(FQName prefix, FVariable var) {
+		FExp res = dynamicFExp((FExp) fullCopy());
+		FRecordDecl decl = var.containingRecordDecl();
+		if (decl != null)
+			res.prefixInternalUses(prefix, decl);
+		return res;
+	}
+	
+	public void FExp.prefixInternalUses(FQName prefix, FRecordDecl decl) {
+		for (FExp e : childFExps())
+			e.prefixInternalUses(prefix, decl);
+	}
+	
+	public void FIdUseExp.prefixInternalUses(FQName prefix, FRecordDecl decl) {
+		FQName fqn = getFIdUse().getFQName();
+		for (FQNamePart p : fqn.getFQNameParts())
+			if (p.hasFArraySubscripts())
+				for (FSubscript s : p.getFArraySubscripts().getFSubscripts())
+					s.prefixInternalUses(prefix, decl);
+		if (decl == lookupFV(fqn.copyPrefix()).containingRecordDecl()) 
+			getFIdUse().setFQName(prefix.copyAndAppend(fqn));
+	}
+	
+	public void FSubscript.prefixInternalUses(FQName prefix, FRecordDecl decl) {}
+	
+	public void FExpSubscript.prefixInternalUses(FQName prefix, FRecordDecl decl) {
+		getFExp().prefixInternalUses(prefix, decl);
 	}
 	
 	protected List<FAttribute> FRecordVariable.selectFAttributeList(FAttribute attr) {
