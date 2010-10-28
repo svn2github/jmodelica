@@ -20,10 +20,20 @@
 #define fmi_h
 
 #include "fmiModelFunctions.h"
+#include "jmi.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/* Type definitions */
+typedef struct {
+    fmiString fmi_instance_name;
+    fmiString fmi_GUID;
+    fmiCallbackFunctions fmi_functions;
+    fmiBoolean fmi_logging_on;
+    jmi_t* jmi;
+} fmi_t;
 
 /* Inquire version numbers of header files */
 const char* fmi_get_model_types_platform();

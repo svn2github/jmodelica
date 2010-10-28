@@ -24,17 +24,35 @@
 
 /* Inquire version numbers of header files */
 const char* fmi_get_model_types_platform() {
-    return "fmiModelTypesPlatform";
+    return fmiModelTypesPlatform;
 }
 const char* fmi_get_version() {
-    return "fmiVersion";
+    return fmiVersion;
 }
 
 /* Creation and destruction of model instances and setting debug status */
-/*
-fmiComponent fmi_instantiate_model(fmiString instanceName, fmiString GUID, fmiCallbackFunctions functions, fmiBoolean loggingOn) 
+
+fmiComponent fmi_instantiate_model(fmiString instanceName, fmiString GUID, fmiCallbackFunctions functions, fmiBoolean loggingOn) {
+    
+    /* Create jmi struct*/
+    jmi_t* jmi = (jmi_t *)functions.allocateMemory(1, sizeof(jmi_t));
+    int retval = jmi_new(&jmi);
+    if(retval != 0) {
+        /* creating jmi struct failed */
+        return NULL;
+    }
+    
+    fmi_t *component;
+    component = (fmi_t *)functions.allocateMemory(1, sizeof(fmi_t));
+    component -> fmi_instance_name = instanceName;
+    component -> fmi_GUID = GUID;
+    component -> fmi_functions = functions;
+    component -> fmi_logging_on = loggingOn;
+    component -> jmi = jmi;
+        
+    return (fmiComponent)component;
 }
-*/
+
 void fmi_free_model_instance(fmiComponent c) {
 }
 fmiStatus fmi_set_debug_logging(fmiComponent c, fmiBoolean loggingOn) {

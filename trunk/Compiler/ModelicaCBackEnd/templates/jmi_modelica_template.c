@@ -238,7 +238,7 @@ DllExport const char* fmiGetVersion() {
 
 /* Creation and destruction of model instances and setting debug status */
 DllExport fmiComponent fmiInstantiateModel(fmiString instanceName, fmiString GUID, fmiCallbackFunctions functions, fmiBoolean loggingOn) {
-    
+    return fmi_instantiate_model(instanceName, GUID, functions, loggingOn);
 }
 
 DllExport void fmiFreeModelInstance(fmiComponent c) {
