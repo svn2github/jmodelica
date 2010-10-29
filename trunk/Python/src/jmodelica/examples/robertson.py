@@ -16,22 +16,13 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import os as O
-import logging
 
 import numpy as N
-import pylab as P
+import matplotlib.pyplot as plt
 import nose
 
 from jmodelica.jmi import compile_jmu
 from jmodelica.jmi import JMUModel
-from jmodelica.io import ResultDymolaTextual
-
-try:
-    from jmodelica.simulation.assimulo_interface import JMIDAESens, write_data
-    from assimulo.implicit_ode import IDA
-except ImportError:
-    logging.warning(
-        'Could not find Assimulo package. Check jmodelica.check_packages()')
 
 
 def run_demo(with_plots=True):
@@ -44,41 +35,30 @@ def run_demo(with_plots=True):
     jmu_name = compile_jmu("Robertson", O.path.join(curr_dir,"Robertson.mop"))
     
     # Load a model instance into Python
-    jm_model = JMUModel(jmu_name)
+    model = JMUModel(jmu_name)
     
-    global rob_mod
-    global rob_sim
-    
-    rob_mod = JMIDAESens(jm_model) #Create an Assimulo problem
-    rob_sim = IDA(rob_mod) #Create an IDA solver
-    
-    #Sets the paramters
-    rob_sim.atol = N.array([1.0e-8, 1.0e-14, 1.0e-6])
-    #Store data continuous during the simulation, important when solving a 
-    #problem with sensitivites.
-    rob_sim.store_cont = True 
-    
-    #Value used when IDA estimates the tolerances on the parameters
-    rob_sim.pbar = rob_mod.p0 
-    
-    #Let Sundials find consistent initial conditions by use of 'IDA_YA_YDP_INIT'
-    rob_sim.make_consistent('IDA_YA_YDP_INIT')
-    
+    # Get and set the options
+    opts = model.simulate_options()
+    opts['IDA_options']['atol'] = [1.0e-8, 1.0e-14, 1.0e-6]
+    opts['IDA_options']['sensitivity'] = True
+    opts['ncp'] = 400
+
     #Simulate
-    rob_sim.simulate(4,400) #Simulate 4 seconds with 400 communication points
+    res = model.simulate(final_time=4, options=opts)
 
-    write_data(rob_sim)
-
-    res = ResultDymolaTextual('Robertson_result.txt')
-
-    dy1dp1 = res.get_variable_data('dy1/dp1')
-    dy2dp1 = res.get_variable_data('dy2/dp1')
-    dy3dp1 = res.get_variable_data('dy3/dp1')
+    dy1dp1 = res['dy1/dp1']
+    dy2dp1 = res['dy2/dp1']
+    dy3dp1 = res['dy3/dp1']
+    time = res['time']
     
-    nose.tools.assert_almost_equal(dy1dp1.x[40], -0.35590, 3)
-    nose.tools.assert_almost_equal(dy2dp1.x[40],  3.9026e-04, 6)
-    nose.tools.assert_almost_equal(dy3dp1.x[40],  3.5551e-01 , 3)
-
+    nose.tools.assert_almost_equal(dy1dp1[40], -0.35590, 3)
+    nose.tools.assert_almost_equal(dy2dp1[40],  3.9026e-04, 6)
+    nose.tools.assert_almost_equal(dy3dp1[40],  3.5551e-01 , 3)
+    
+    plt.plot(time, dy1dp1, time, dy2dp1, time, dy3dp1)
+    plt.legend(('dy1/dp1', 'dy2/dp1', 'dy3/dp1'))
+    plt.show()
+    
     
 if __name__ == "__main__":
     run_demo()
