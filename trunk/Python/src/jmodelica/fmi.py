@@ -32,7 +32,153 @@ from lxml import etree
 
 import jmodelica.jmi
 from jmodelica import xmlparser
-from jmodelica.core import BaseModel, unzip_unit
+from jmodelica.core import BaseModel, unzip_unit, package_unit, get_unit_name
+from jmodelica.compiler import ModelicaCompiler, OptimicaCompiler
+
+
+def compile_fmu(class_name, file_name=[], compiler='modelica', target='ipopt', 
+    compiler_options={}, compile_to='.'):
+    """ 
+    Compile a Modelica or Optimica model to an FMU.
+    
+    A model class name must be passed, all other arguments have default values. 
+    The different scenarios are:
+    
+    * Only class_name is passed: 
+        - Default compiler is ModelicaCompiler.
+        - Class is assumed to be in MODELICAPATH.
+    
+    * class_name and file_name is passed:
+        - file_name can be a single file as a string or a list of file_names 
+          (strings).
+        - Default compiler is ModelicaCompiler but will switch to 
+          OptimicaCompiler if a .mop file is found in file_name.
+    
+    Library directories can be added to MODELICAPATH by listing them in a 
+    special compiler option 'extra_lib_dirs', for example:
+    
+        compiler_options = 
+            {'extra_lib_dirs':['c:\MyLibs\MyLib1','c:\MyLibs\MyLib2']}
+        
+    Other options for the compiler should also be listed in the compiler_options 
+    dict.
+    
+    The compiler target is 'ipopt' by default which means that libraries for AD 
+    and optimization/initialization algortihms will be available as well as the 
+    JMI. The other targets are:
+    
+        'model' -- 
+            AD and JMI is included.
+        'algorithm' -- 
+            AD and algorithm but no Ipopt linking.
+        'model_noad' -- 
+            Only JMI, that is no AD interface. (Must currently be used when 
+            model includes external functions.)
+    
+    Parameters::
+    
+        class_name -- 
+            The name of the model class.
+            
+        file_name -- 
+            Model file (string) or files (list of strings), can be both .mo or 
+            .mop files.
+            Default: Empty list.
+            
+        compiler -- 
+            'modelica' or 'optimica' depending on whether a ModelicaCompiler or 
+            OptimicaCompiler should be used. Set this argument if default 
+            behaviour should be overridden.
+            Default: Depends on argument file_name.
+            
+        target --
+            Compiler target. 'model', 'algorithm', 'ipopt' or 'model_noad'.
+            Default: 'ipopt'
+            
+        compiler_options --
+            Options for the compiler.
+            Default: Empty dict.
+            
+        compile_to --
+            Specify location of the compiled jmu. Directory will be created if 
+            it does not exist.
+            Default: Current directory.
+            
+    Returns::
+    
+        Name of the FMU which has been created.
+    """
+    if isinstance(file_name, str):
+        file_name = [file_name]
+        
+    # Detect file suffix - otherwise use the default = modelica
+    for f in file_name:
+        basename, ext = os.path.splitext(f)
+        if ext == '.mop':
+            compiler = 'optimica'
+            break
+    
+    comp = None
+    if compiler.lower() == 'modelica':
+        comp = ModelicaCompiler()
+    else:
+        comp = OptimicaCompiler()
+        
+    # set compiler options
+    for key, value in compiler_options.iteritems():
+        if isinstance(value, bool):
+            comp.set_boolean_option(key, value)
+        elif isinstance(value, str):
+            comp.set_string_option(key,value)
+        elif isinstance(value, int):
+            comp.set_integer_option(key,value)
+        elif isinstance(value, float):
+            comp.set_real_options(key,value)
+        elif isinstance(value, list):
+            comp.set_string_option(key, _list_to_string(value))
+        else:
+            raise JMIException("Unknown compiler option type for key: %s. \
+            Should be of the following types: boolean, string, integer, \
+            float or list" %key)
+                
+    #compile model
+    comp.compile_model(class_name, file_name, target=target)
+    
+    # pack FMU file
+    package_FMU(class_name, path=compile_to)
+    
+    return os.path.join(compile_to, get_fmu_name(class_name))
+    
+    
+def get_fmu_name(class_name):
+    """
+    Computes the FMU name from a class name.
+    
+    Parameters::
+        
+        class_name -- 
+            The name of the model.
+        
+    Returns::
+    
+        The FMU name (replaced dots with underscores).
+    """
+    return get_unit_name(class_name, unit_type='FMU')
+    
+def package_FMU(class_name, path='.'):
+    """
+    Method that takes as input a class name and package all model related files 
+    into a FMU.
+    
+    Parameters::
+    
+        class_name --
+            The name of the model.
+            
+        path --
+            The directory to compile to. Created if does not exist.
+    """
+    package_unit(class_name, path=path, unit_type='FMU')
 
 class FMUException(Exception):
     """

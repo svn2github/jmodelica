@@ -18,7 +18,7 @@
 Module containing base classes.
 """
 
-from zipfile import ZipFile
+import zipfile
 import tempfile
 import platform as PL
 import os
@@ -250,6 +250,93 @@ class BaseModel(object):
         algdrive = getattr(algdrive, 'algorithm_drivers')
         algorithm = getattr(algdrive, algorithm)
         return algorithm.get_default_options()
+        
+def package_unit(class_name, path='.', unit_type='JMU'):
+    """
+    Method that takes as input a class name and package all model related files 
+    into a JMU or FMU depending on the parameter 'unit_type'.
+    
+    Parameters::
+    
+        class_name --
+            The name of the model.
+            
+        path --
+            The directory to compile to. Created if does not exist.
+            Default: '.'
+            
+        unit_type --
+            To package a JMU or FMU, set this parameter to 'JMU' or 'FMU' 
+            respectively.
+            Default: 'JMU'
+    """
+    if not os.path.isdir(path):
+        os.mkdir(path)
+        
+    mName = class_name
+    mMangledName = class_name.replace('.','_')
+    
+    #Look for operating system and architecture
+    if sys.platform == 'win32':
+        platform = 'win'
+        suffix = '.dll'
+    elif sys.platform == 'darwin':
+        platform = 'darwin'
+        suffix = '.dylib'
+    else:
+        platform = 'linux'
+        suffix = '.so'
+    
+    if PL.architecture()[0].startswith('32'):
+        platform += '32'
+    else:
+        platform += '64'
+    
+    #Create the new archive
+    if unit_type == 'JMU':
+        file = zipfile.ZipFile(os.path.join(path, mMangledName+'.jmu'), 'w') 
+    elif unit_type == 'FMU':
+        file = zipfile.ZipFile(os.path.join(path, mMangledName+'.fmu'), 'w')
+    else:
+        raise Exception("The unit type %s is unknown" %unit_type)
+        
+    try:
+        #Write the xml file
+        file.write(mMangledName+'.xml', 'modelDescription.xml', 
+            zipfile.ZIP_DEFLATED)
+        #Write the .c file
+        file.write(mMangledName+'.c','sources'+os.sep+mMangledName+'.c',
+            zipfile.ZIP_DEFLATED)
+        #Write the .mof file
+        file.write(mName+'.mof','resources'+os.sep+mName+'.mof',
+            zipfile.ZIP_DEFLATED)
+        #Write the transformed .mof file
+        file.write(
+            mName+'_transformed.mof','resources'+os.sep+mName+'_transformed.mof',
+            zipfile.ZIP_DEFLATED)
+        #Write the parameter file
+        file.write(
+            mMangledName+'_values.xml','resources'+os.sep+mMangledName+'_values.xml',
+            zipfile.ZIP_DEFLATED)
+        #Write the binary
+        file.write(
+            mMangledName+suffix,'binaries'+os.sep+platform+os.sep+mMangledName+suffix, 
+            zipfile.ZIP_DEFLATED)
+    except OSError:
+        raise JMIException('No such file or directory')
+    finally:
+        file.close()
+    
+    #Remove files
+    try:
+        os.remove(mMangledName+'.xml')        #XML
+        os.remove(mMangledName+'.c')          #Source file
+        os.remove(mName+'.mof')               #Mof file
+        os.remove(mName+'_transformed.mof')   #Transformed mof file
+        os.remove(mMangledName+'_values.xml') #XML
+        os.remove(mMangledName+suffix)        #Binary
+    except OSError, msg:
+        logging.warning(msg)
     
 def unzip_unit(archive, path='.'):
     """
@@ -257,7 +344,7 @@ def unzip_unit(archive, path='.'):
     """
 
     try:
-        archive = ZipFile(os.path.join(path,archive))
+        archive = zipfile.ZipFile(os.path.join(path,archive))
     except IOError:
         raise IOError('Could not locate the FMU/JMU.')
     
@@ -353,6 +440,30 @@ def unzip_unit(archive, path='.'):
 
     else:
         raise IOError('Could not find binaries for your platform.')
+        
+def get_unit_name(class_name, unit_type='JMU'):
+    """
+    Computes the unit name from a class name.
+    
+    Parameters::
+        
+        class_name -- 
+            The name of the model.
+            
+        unit_type --
+            The unit type, JMU or FMU.
+            Default: 'JMU'
+        
+    Returns::
+    
+        The unit name (replaced dots with underscores).
+    """
+    if unit_type == 'JMU':
+        return class_name.replace('.','_')+'.jmu' 
+    elif unit_type == 'FMU':
+        return class_name.replace('.','_')+'.fmu' 
+    else:
+        raise Exception("The unit type %s is unknown" %unit_type)
 
 class Trajectory:
     """

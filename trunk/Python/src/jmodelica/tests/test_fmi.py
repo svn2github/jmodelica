@@ -30,6 +30,7 @@ from jmodelica.core import unzip_unit
 import jmodelica.algorithm_drivers as ad
 
 path_to_fmus = O.path.join(get_files_path(), 'FMUs')
+path_to_mofiles = O.path.join(get_files_path(), 'Modelica')
 
 @testattr(fmi = True)
 def test_unzip():
@@ -79,7 +80,7 @@ def test_unzip():
 
 class Test_FMI:
     """
-    This class tests jmodelica.fmi.FMIMODEL
+    This class tests jmodelica.fmi.FMIMODEL simulation functionality.
     """
     
     @classmethod
@@ -335,3 +336,33 @@ class Test_FMI:
         class instance.
         """
         assert isinstance(self._bounce.simulate_options(), ad.AssimuloFMIAlgOptions)
+        
+class Test_FMI_Compile:
+    """
+    This class tests jmodelica.fmi compilation functionality.
+    """
+    
+    @classmethod
+    def setUpClass(cls):
+        """
+        Sets up the test class.
+        """
+        pass
+        
+    def setUp(self):
+        """
+        Sets up the test case.
+        """
+        fpath = os.path.join(path_to_mofiles,'RLC_Circuit.mo')
+        fmuname = compile_fmu('RLC_Circuit',fpath)
+        
+        self._model  = FMUModel(fmuname)
+
+    def test_get_version(self):
+        """ Test the version property."""
+        nose.tools.assert_equal(self._model.version, "1.0")
+        
+    def test_get_model_types_platform(self):
+        """ Test the model types platform property. """
+        nose.tools.assert_equal(self._model.model_types_platform, "standard32")
+    
