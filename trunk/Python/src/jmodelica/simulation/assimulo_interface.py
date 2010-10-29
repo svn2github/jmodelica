@@ -330,8 +330,8 @@ class FMIODE(Explicit_Problem):
         """
         This method is called when Assimulo finds an event.
         """
-        if self._model.time != solver.t_cur:
-            #Moving data to the model
+        #Moving data to the model
+        if solver.t_cur != self._model.time:
             self._model.time = solver.t_cur
             self._model.continuous_states = solver.y_cur
             
@@ -342,7 +342,7 @@ class FMIODE(Explicit_Problem):
             
             #Evaluating the rhs (Have to evaluate the values in the model)
             rhs = self._model.get_derivatives()
-        
+            
         eInfo = self._model.get_event_info()
         eInfo.iterationConverged = False
 
@@ -553,7 +553,7 @@ class JMIDAE(Implicit_Problem):
                 
         #Used for determine if there are discontinuities
         [f_nbr, g_nbr] = self._model.jmimodel.dae_get_sizes() 
-        
+
         if g_nbr > 0:
             #Change the models values of the switches from ints to booleans
             self.switches0 = [bool(x) for x in self._model.sw] 
@@ -584,7 +584,7 @@ class JMIDAE(Implicit_Problem):
         
     def _set_logging_level(self, level):
         if bool(level):
-            self._log.setLevel(0) #Log all entries
+            self._log.setLevel(logging.DEBUG) #Log all entries
         else:
             self._log.setLevel(50) #Log nothing (log nothing below level 50)
     
@@ -950,6 +950,9 @@ class JMIDAESens(Implicit_Problem):
         #Used for determine if there are discontinuities
         [f_nbr, g_nbr] = self._model.jmimodel.dae_get_sizes() 
         
+        if self._model.has_cppad_derivatives():
+            self.jac = self.j #Activates the jacobian
+        
         #Internal values
         self._parameter_names = [
             name[1] for name in self._model.get_p_opt_variable_names()]
@@ -999,8 +1002,52 @@ class JMIDAESens(Implicit_Problem):
         #Evaluating the residual function
         residual = N.array([.0]*self._f_nbr)
         self._model.jmimodel.dae_F(residual)
-        
+
         return residual
+        
+    def j(self, c, t, y, yd, sw=None):
+        """
+        The jacobian function for an DAE problem.
+        """
+        #Moving data to the model
+        self._model.t = t
+        self._model.real_x = y[0:self._x_nbr]
+        self._model.real_w = y[self._x_nbr:self._f_nbr]
+        self._model.real_dx = yd[0:self._dx_nbr]
+        
+        #Sets the inputs, if any
+        if self.input!=None:
+            self._model.set(self.input[0], self.input[1].eval(t)[0,:])
+        
+        #Evaluating the jacobian
+        #-Setting options
+        #Used to give independent_vars full control
+        z_l = N.array([1]*len(self._model.z),dtype=N.int32) 
+        #Derivation with respect to these variables
+        independent_vars = [jmi.JMI_DER_DX, jmi.JMI_DER_X, jmi.JMI_DER_W] 
+        sparsity = jmi.JMI_DER_DENSE_ROW_MAJOR
+        evaluation_options = jmi.JMI_DER_CPPAD#jmi.JMI_DER_SYMBOLIC
+        
+        #-Evaluating
+        #Matrix that hold information about dx and dw
+        Jac = N.zeros(self._f_nbr**2) 
+        #Output x+w
+        self._model.jmimodel.dae_dF(
+            evaluation_options, sparsity, independent_vars[1:], z_l, Jac) 
+        
+        #Matrix that hold information about dx'
+        dx = N.zeros(len(self._model.real_dx)*self._f_nbr) 
+        #Output dx'
+        self._model.jmimodel.dae_dF(
+            evaluation_options, sparsity, independent_vars[0], z_l, dx) 
+        dx = dx*c #Scale
+        
+        #-Vector manipulation
+        Jac = Jac.reshape(self._f_nbr,self._f_nbr)
+        dx = dx.reshape(self._f_nbr,self._dx_nbr)
+        Jac[:,0:self._dx_nbr] += dx
+
+        return Jac
         
     def handle_result(self, solver, t ,y, yd):
         """
@@ -1039,7 +1086,7 @@ class JMIDAESens(Implicit_Problem):
         
     def _set_logging_level(self, level):
         if bool(level):
-            self._log.setLevel(0) #Log all entries
+            self._log.setLevel(logging.DEBUG) #Log all entries
         else:
             self._log.setLevel(50) #Log nothing (log nothing below level 50)
     

@@ -1001,3 +1001,20 @@ class Test_JMI_DAE_Sens:
         
         nose.tools.assert_almost_equal(dx1da2[0], 0.000000, 4)
         nose.tools.assert_almost_equal(dx1da2[-1], 0.00000, 4)
+        
+    @testattr(assimulo = True)
+    def test_jac(self):
+        """
+        This tests the jacobian for simulation of sensitivites.
+        """
+        model = self.m_SENS
+        
+        opts = model.simulate_options()
+        opts['IDA_options']['sensitivity'] = True
+        
+        res = model.simulate(final_time=10, options=opts)
+        
+        prob = res.solver._problem
+        
+        assert res.solver.usejac == True
+        assert prob.j == prob.jac
