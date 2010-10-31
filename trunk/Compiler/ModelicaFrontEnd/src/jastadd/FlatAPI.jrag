@@ -610,8 +610,22 @@ aspect FlatAPI {
 	inh Set<FVariable> FExp.boundParameters();
 	eq FVariable.getBindingExp().boundParameters()       = Collections.singleton(this);
 	eq Root.getChild().boundParameters()                 = Collections.emptySet();
-	eq FEquation.getRight().boundParameters()            = getLeft().referencedParametersInFExp();
-	eq FFunctionCallEquation.getCall().boundParameters() = referencedParametersInLefts();
+	
+	eq FEquation.getRight().boundParameters() {
+		if (isParameterEquation()) {
+			return getLeft().referencedParametersInFExp();
+		} else {
+			return Collections.emptySet();
+		}
+	}
+		
+	eq FFunctionCallEquation.getCall().boundParameters() { 
+		if (isParameterEquation()) { 
+			return referencedParametersInLefts(); 
+		} else {
+			return Collections.emptySet();
+		}
+	}
 	
 	inh boolean FExp.inFEquation();
 	eq FAbstractEquation.getChild().inFEquation()=true;
@@ -640,6 +654,10 @@ aspect FlatAPI {
 		(!hasParamValueExp() || paramValueExp().isIndependentParameterExp());
 
 	syn boolean FExp.isIndependentParameterExp() = isConstantExp() && !hasCompositeFunc();
+	
+	inh boolean FAbstractEquation.isParameterEquation();
+	eq FClass.getFParameterEquation().isParameterEquation() = true;
+	eq Root.getChild().isParameterEquation() = false;
 	
     /**
      * \brief Check if tree contains a function call returning an array or a record.

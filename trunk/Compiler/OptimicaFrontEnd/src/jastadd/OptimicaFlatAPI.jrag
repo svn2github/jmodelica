@@ -992,16 +992,17 @@ aspect OptimicaFreeParameters {
 		LinkedHashSet<FVariable> s = new LinkedHashSet<FVariable>();
 		// Retrieve the dependent parameters that depends directly on
 		// free independent parameters.
-		for (FVariable v : freeIndependentParameters()) 
+		for (FVariable v : freeIndependentParameters()) {
 			s.addAll(v.dependentParameters());
-		
+		}
 		// Fixed point iteration over the dependent parameters.
 		int n_dp = -1;
 		LinkedHashSet<FVariable> s_tmp = new LinkedHashSet<FVariable>();
 		while (n_dp != s.size()) {
 			n_dp = s.size();
-			for (FVariable v : s) 
+			for (FVariable v : s) {
 				s_tmp.addAll(v.dependentParameters());
+			}
 			s.addAll(s_tmp);
 		}
 		return s;
@@ -1020,8 +1021,9 @@ aspect OptimicaFreeParameters {
 	 */
 	syn lazy LinkedHashSet<FAbstractEquation> FOptClass.freeDependentParameterEquations() {
 		LinkedHashSet<FAbstractEquation> s = new LinkedHashSet<FAbstractEquation>();
-		for (FVariable v : freeDependentParameters())
+		for (FVariable v : freeDependentParameters()) {
 			s.add(v.parameterEquation());
+		}
 		return s;
 	}
 	
