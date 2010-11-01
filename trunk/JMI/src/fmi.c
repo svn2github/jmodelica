@@ -17,6 +17,7 @@
     <http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
 */
 #include <stdio.h>
+#include <string.h>
 #include "fmi.h"
 #include "fmiModelFunctions.h"
 #include "fmiModelTypes.h"
@@ -61,8 +62,15 @@ fmiComponent fmi_instantiate_model(fmiString instanceName, fmiString GUID, fmiCa
     
     fmi_t *component;
     component = (fmi_t *)functions.allocateMemory(1, sizeof(fmi_t));
-    component -> fmi_instance_name = instanceName;
-    component -> fmi_GUID = GUID;
+    
+    char* tmpname = (char*)(fmi_t *)functions.allocateMemory(strlen(instanceName)+1, sizeof(char));
+    strcpy(tmpname, instanceName);
+    component -> fmi_instance_name = tmpname;
+
+    char* tmpguid = (char*)(fmi_t *)functions.allocateMemory(strlen(GUID)+1, sizeof(char));
+    strcpy(tmpguid, GUID);
+    component -> fmi_GUID = tmpguid;
+    
     component -> fmi_functions = functions;
     component -> fmi_logging_on = loggingOn;
     component -> jmi = jmi;
@@ -71,8 +79,18 @@ fmiComponent fmi_instantiate_model(fmiString instanceName, fmiString GUID, fmiCa
 }
 
 void fmi_free_model_instance(fmiComponent c) {
+    /* Dispose the given model instance and deallocated all the allocated memory and other resources 
+     * that have been allocated by the functions of the Model Exchange Interface for instance "c".*/
+    if (c) {
+        fmiCallbackFreeMemory fmi_free = ((fmi_t*)c) -> fmi_functions.freeMemory;
+        fmi_free(((fmi_t*)c) -> jmi);
+        fmi_free((void*)((fmi_t*)c) -> fmi_instance_name);
+        fmi_free((void*)((fmi_t*)c) -> fmi_GUID);
+        fmi_free(c);
+    }
 }
 fmiStatus fmi_set_debug_logging(fmiComponent c, fmiBoolean loggingOn) {
+    ((fmi_t*)c) -> fmi_logging_on = loggingOn;
     return fmiOK;
 }
 
@@ -145,7 +163,9 @@ fmiStatus fmi_set_boolean (fmiComponent c, const fmiValueReference vr[], size_t 
     return fmiOK;
 }
 fmiStatus fmi_set_string(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiString value[]) {
-    return fmiOK;
+    /* Strings not yet supported. */
+    (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiWarning, "INFO", "Strings are not yet supported.");
+    return fmiWarning;
 }
 
 /* Evaluation of the model equations */
@@ -217,7 +237,9 @@ fmiStatus fmi_get_boolean(fmiComponent c, const fmiValueReference vr[], size_t n
     return fmiOK;
 }
 fmiStatus fmi_get_string(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiString  value[]) {
-    return fmiOK;
+    /* Strings not yet supported. */
+    (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiWarning, "INFO", "Strings are not yet supported.");
+    return fmiWarning;
 }
 fmiStatus fmi_event_update(fmiComponent c, fmiBoolean intermediateResults, fmiEventInfo* eventInfo) {
     return fmiOK;
@@ -232,5 +254,6 @@ fmiStatus fmi_get_state_value_references(fmiComponent c, fmiValueReference vrx[]
     return fmiOK;
 }
 fmiStatus fmi_terminate(fmiComponent c) {
+    /* Release all resources that have been allocated since fmi_initialize has been called. */
     return fmiOK;
 }
