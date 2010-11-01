@@ -50,7 +50,7 @@ aspect Flattening {
 		//fc.dumpTree("");
 		HashSet<InstAccess> instAccesses = fc.collectInstAccesses();
 		if (instAccesses.size()>0) {
-			log.error("Flat model contains InstAccesses!!!");
+			log.error("Flat model contains InstAccesses!");
 			//return null;
 		}
     }
@@ -1071,18 +1071,30 @@ aspect FlatExpressions {
 		InstAccess cur = getFirstInstAccess();
 		int last = fasl.size() - 1;
 		boolean func = inFunction();
+		boolean size = inSizeExp();
 		for (int i = 0; i <= last; i++, cur = cur.getNextInstAccess()) {
 			FArraySubscripts fas = fasl.get(i);
-			/* TODO: This is a temproary fix to make the slices code play nice 
-			 *        with functions - it will probably need to be replaced with 
-			 *        a more permanent fix later. See #741. */
-			boolean empty = (fas.getNumFSubscript() == 0) || 
-					        (func && i == last && !cur.hasFArraySubscripts()); 
+			boolean empty = fas.getNumFSubscript() == 0;
+			if (!empty && !cur.hasFArraySubscripts()) {
+				/* TODO: This is a temporary fix to make the slices code play nice 
+				 *        with functions - it will probably need to be replaced with 
+				 *        a more permanent fix later. See #741. */
+				if (func && i == last)
+					empty = true;
+		        /* This prevents a potential infinite recursion, see #1150. */
+				if (size)
+					empty = true;
+			}
 			Opt as = empty ? new Opt() : new Opt(fas.flatten(prefix));
 			myName.addFQNamePart(new FQNamePart(cur.name(), as));
 		}
 		return myName;
 	}
+	
+	inh boolean InstAccess.inSizeExp();
+	eq FSizeExp.getChild().inSizeExp() = true;
+	eq InstNode.getChild().inSizeExp() = false;
+	eq Root.getChild().inSizeExp()     = false;
 
 	public FIdUse FIdUseInstAccess.flatten(FQName prefix) {
 	   return new FIdUse(getInstAccess().flatten(prefix));

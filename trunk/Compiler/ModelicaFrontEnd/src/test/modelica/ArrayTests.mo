@@ -6361,6 +6361,25 @@ Semantic error at line 6351, column 15:
 end ArraySize1;
 
 
+model ArraySize2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="ArraySize2",
+         description="",
+         errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 6365, column 17:
+  Can not infer array size of the variable x
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 6365, column 22:
+  Could not evaluate array size expression: size(x, 1)
+")})));
+
+	parameter Real x[:, size(x,1)];
+end ArraySize2;
+
+
 
   annotation(uses(Modelica(version="3.0.1")));
 end ArrayTests;

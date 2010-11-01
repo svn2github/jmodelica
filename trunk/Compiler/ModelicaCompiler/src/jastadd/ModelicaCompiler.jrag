@@ -789,14 +789,21 @@ public class ModelicaCompiler {
 	protected static Hashtable<String, String> extractProgramArguments(String[] args, int pos) {
 		Hashtable<String, String> programargs = new Hashtable<String,String>();		
 		
-		while(pos < args.length && args[pos].trim().substring(0,1).equals("-")) {
-			String progarg = args[pos].trim().substring(1, args[pos].trim().indexOf("="));
-			if(args[pos].trim().indexOf("=")+1 <= args[pos].trim().length()) {
-				programargs.put(progarg, args[pos].trim().substring(args[pos].trim().indexOf("=")+1));
-			}
+		while(pos < args.length && argumentIsOption(args[pos])) {
+			addOptionToMap(programargs, args[pos]);
 			pos++;
 		}
 		return programargs;
+	}
+
+	private static void addOptionToMap(Hashtable<String, String> programargs, String arg) {
+		String[] parts = arg.trim().substring(1).split("=");
+		programargs.put(parts[0], (parts.length > 1) ? parts[1] : null);
+	}
+
+	private static boolean argumentIsOption(String arg) {
+		arg = arg.trim();
+		return !arg.equals("") && arg.startsWith("-");
 	}
 	
 	private void setOptions(Hashtable<String, String> programarguments, String modelicapath) {
@@ -906,7 +913,7 @@ public class ModelicaCompiler {
 	protected void compileModelFromCommandLine(String[] args, Hashtable<String, String> programarguments) {
 		// Get files and class
 		int arg = programarguments.size();
-		String[] name = args[arg].split(",");
+		String[] name = splitFiles(args[arg]);
 		String cl = args[arg+1];
 		
 		// Compile model
@@ -933,6 +940,17 @@ public class ModelicaCompiler {
 		}
 	}
 	
+	/**
+	 * Split the argument containing the list of files into an array of filenames.
+	 */
+	protected String[] splitFiles(String arg) {
+		ArrayList<String> res = new ArrayList<String>();
+		for (String part : arg.split(","))
+			if (!part.equals(""))
+				res.add(part);
+		return res.toArray(new String[res.size()]);
+	}
+		
 	/**
 	 * \brief Log error message for exception and exit.
 	 */
