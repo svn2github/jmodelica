@@ -193,6 +193,7 @@ class JMUAlgebraic(ProblemAlgebraic):
     def sparse_jac(self,input):
         """
         Function used to get the jacobian of the F0 function in JMI.
+        It will be returned as a sparse matrix in triplet, or coordinate, format.
         
         Parameters::
         
@@ -217,11 +218,8 @@ class JMUAlgebraic(ProblemAlgebraic):
         self._jmi_model.init_dF0(jmi.JMI_DER_CPPAD, jmi.JMI_DER_SPARSE, 
             self._ind_vars, self._mask, val)
         
-        jac = ss.coo_matrix((val,(self.rows-1,self.cols-1)),shape=(self.sparse_ncol,self.sparse_ncol))
+        return ss.coo_matrix((val,(self.rows-1,self.cols-1)),shape=(self.sparse_ncol,self.sparse_ncol))
 
-        # return output from result 
-        return jac
-    
     def set_constraints_usage(self,use_const,constraints = None):
         """ 
         Set whether to use constraints or not. If constraints are supplied they 

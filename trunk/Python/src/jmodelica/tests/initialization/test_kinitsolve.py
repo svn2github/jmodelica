@@ -15,12 +15,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-""" Tests the jmi wrappers for the IPOPT solver module. """
+""" Tests the jmi wrappers for the KinitSolve solver module. """
 
 import os.path
 
 import numpy as N
 import nose.tools
+
+import scipy.sparse as ss
 
 from jmodelica.jmi import compile_jmu
 from jmodelica.jmi import JMUModel
@@ -165,4 +167,40 @@ class TestKInitSolve:
             
         for pre,calced in zip(self.w0,w):
             nose.tools.assert_almost_equal(pre,calced,6)
-
+            
+    @testattr(assimulo = True)
+    def test_sparse_jac(self):
+        """
+        Test if the sparse jacobian works
+        """
+        
+        # calculate jacobians at given 'point' input
+        input = N.zeros(15)
+        input[0:6]   = self.dx0
+        input[6:12]  = self.x0
+        input[12:15] = self.w0
+        
+        jac_dense = self.problem.jac(input)
+        jac_sparse = self.problem.sparse_jac(input)
+        
+        # check the format of the sparse jacoban
+        type_name = type(jac_sparse).__name__
+        nose.tools.assert_equals(type_name,'coo_matrix')
+        
+        jac_sparse = N.array(jac_sparse.todense())
+        """
+        print "dense: \n",jac_dense
+        print "sparse: \n", jac_sparse.todense()
+        """
+        # check if it is the same result as the dense jacobian 
+        i = 0
+        j = 0
+        for d_col, sp_col in zip(jac_dense,jac_sparse):
+            
+            for dense,sparse in zip(d_col,sp_col):
+                nose.tools.assert_almost_equal(dense,sparse,6)
+                
+                j += 1
+                
+            j = 0
+            i += 1
