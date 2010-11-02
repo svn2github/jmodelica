@@ -63,16 +63,16 @@ aspect Scalarization {
 		setFVariableList(vars);
 		setAliasVariableList(alias_vars);
 		
-		// Replace subscript expressions with literals
-		eb.getFAbstractEquations().makeSubscriptsLiteral();
-		getFInitialEquations().makeSubscriptsLiteral();
-		getFParameterEquations().makeSubscriptsLiteral();
-		
 		// Scalarize functions
 		List<FFunctionDecl> funcs = new List<FFunctionDecl>();
 		for (FFunctionDecl f : getFFunctionDecls()) 
 			funcs.add(f.scalarize());
 		setFFunctionDeclList(funcs);
+		
+		// Replace subscript expressions with literals (enable rewrite)
+		eb.getFAbstractEquations().makeSubscriptsLiteral();
+		getFInitialEquations().makeSubscriptsLiteral();
+		getFParameterEquations().makeSubscriptsLiteral();
 		
 		scalarized = true;
 
@@ -89,6 +89,8 @@ aspect Scalarization {
 	
 	/**
 	 * \brief Replace all expressions in array subscripts with literals.
+	 * 
+	 * This method enables a rewrite that will be performed after the next flush.
 	 */
 	public void ASTNode.makeSubscriptsLiteral() {
 		for (ASTNode child : this)
@@ -96,7 +98,18 @@ aspect Scalarization {
 	}
 	
 	public void FExpSubscript.makeSubscriptsLiteral() {
-		setFExp(getFExp().ceval().buildLiteral());
+		rewriteToLiteral = true;
+		is$Final = false;
+	}
+	
+	private boolean FExpSubscript.rewriteToLiteral = false;
+	
+	rewrite FExpSubscript {
+		when (rewriteToLiteral) to FExpSubscript {
+			setFExp(getFExp().ceval().buildLiteral());
+			rewriteToLiteral = false;
+			return this;
+		}
 	}
 	
 	

@@ -1032,9 +1032,9 @@ aspect Arrays {
 	coll HashSet<CommonForIndex> FExpSubscript.collectForIndices() 
 		[new HashSet<CommonForIndex>()] with add root FExpSubscript;
 	FIdUse contributes myForIndex() when isForIndex()
-		to FExpSubscript.collectForIndices() for surroundingFExpSubscript();
+		to FExpSubscript.collectForIndices() for each allSurroundingFExpSubscripts();
 	FInstAccessExp contributes myForIndex() when isForIndex()
-		to FExpSubscript.collectForIndices() for surroundingFExpSubscript();
+		to FExpSubscript.collectForIndices() for each allSurroundingFExpSubscripts();
 	
 	/**
 	 * \brief Return the FForIndex or InstForIndex that this variable belongs to, if any.
@@ -1055,8 +1055,35 @@ aspect Arrays {
 	 */
 	inh FExpSubscript FIdUse.surroundingFExpSubscript();
 	inh FExpSubscript FInstAccessExp.surroundingFExpSubscript();
+	inh FExpSubscript FExpSubscript.surroundingFExpSubscript();
 	eq FExpSubscript.getChild().surroundingFExpSubscript() = this;
 	eq Root.getChild().surroundingFExpSubscript()          = null;
+	
+	/**
+	 * \brief Find the all ancestors that are FExpSubscripts, if any.
+	 */
+	syn ArrayList<FExpSubscript> FIdUse.allSurroundingFExpSubscripts() {
+		ArrayList<FExpSubscript> list = new ArrayList<FExpSubscript>();
+		FExpSubscript cur = surroundingFExpSubscript();
+		while (cur != null) {
+			list.add(cur);
+			cur = cur.surroundingFExpSubscript();
+		}
+		return list;
+	}
+	
+	/**
+	 * \brief Find the all ancestors that are FExpSubscripts, if any.
+	 */
+	syn ArrayList<FExpSubscript> FInstAccessExp.allSurroundingFExpSubscripts() {
+		ArrayList<FExpSubscript> list = new ArrayList<FExpSubscript>();
+		FExpSubscript cur = surroundingFExpSubscript();
+		while (cur != null) {
+			list.add(cur);
+			cur = cur.surroundingFExpSubscript();
+		}
+		return list;
+	}
 
 	/**
 	 * \brief Computes an Array where all elements are scalar expressions.

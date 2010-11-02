@@ -5831,6 +5831,42 @@ end ArrayTests.ForEquation1;
 end ForEquation1;
 
 
+model ForEquation2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ForEquation2",
+         description="",
+         flatModel="
+fclass ArrayTests.ForEquation2
+ parameter Integer a.N = 3 /* 3 */;
+ parameter Integer a.rev[1] = 3 /* 3 */;
+ parameter Integer a.rev[2] = 2 /* 2 */;
+ parameter Integer a.rev[3] = 1 /* 1 */;
+ Real a.x[1];
+ Real a.x[2];
+ Real a.x[3];
+equation
+ a.x[1] = 1;
+ a.x[2] = 2;
+ a.x[3] = 3;
+end ArrayTests.ForEquation2;
+")})));
+
+    model A
+        parameter Integer N;
+        parameter Integer[N] rev = N:-1:1;
+        Real[N] x;
+        Real[N] y;
+    equation
+        for i in 1:N loop
+            x[i] = y[rev[i]];
+        end for;
+    end A;
+    
+    A a(N=3, x={1,2,3});
+end ForEquation2;
+
+
 
 model SliceTest1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
