@@ -383,7 +383,8 @@ aspect FlatTypeAnalysis {
 				t = t.numericPromotion(t2, func);
 			
 			// Check that the sizes are consistent
-			if (!s.equivalentExcept(getFExp(i).size().promote(ndimsForArg(i)), func, dim))
+			Size s2 = getFExp(i).size().promote(ndimsForArg(i));
+			if (!s.equivalentExcept(s2, func, dim))
 				return fUnknownType();
 		}
 		return t.arrayType(size());

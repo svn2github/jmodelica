@@ -2325,7 +2325,7 @@ aspect ArrayHelpers {
 			try {
 				add(d, e.ceval().intValue());
 			} catch (ConstantEvaluationException uoe) {
-				exps[d] = new FAddExp(createFExp(d), e);
+				exps[d] = new FAddExp(createFExp(d), (FExp) e.unboundCopy());
 				size[d] = UNKNOWN;
 			}
 		}

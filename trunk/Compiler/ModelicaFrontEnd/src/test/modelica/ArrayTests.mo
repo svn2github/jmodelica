@@ -1023,6 +1023,43 @@ end ArrayTests.ArrayTest34;
 end ArrayTest34;
 
 
+// TODO: the result is wrong, but tests a fixed crash bug - change when cat + unknown array sizes are supported
+model ArrayTest35
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ArrayTest35",
+         description="Test adding array sizes that are present as expressions in tree",
+         flatModel="
+fclass ArrayTests.ArrayTest35
+ Real z[1];
+ Real z[2];
+ Real z[3];
+ Real z[4];
+ Real z[5];
+equation
+ ({z[1],z[2],z[3],z[4],z[5]}) = ArrayTests.ArrayTest35.f({1,2});
+
+ function ArrayTests.ArrayTest35.f
+  input Real[:] x;
+  output Real[( 2 ) * ( size(x, 1) ) + 1] y;
+ algorithm
+  for i1 in 1:size(y, 1) loop
+   y[i1] := cat(1, x, zeros(size(x, 1) + 1));
+  end for;
+  return;
+ end ArrayTests.ArrayTest35.f;
+end ArrayTests.ArrayTest35;
+")})));
+
+	function f
+		input Real[:] x;
+		output Real[2 * size(x, 1) + 1] y = cat(1, x, zeros(size(x, 1) + 1));
+	algorithm
+	end f;
+	
+	Real[5] z = f({1,2});
+end ArrayTest35;
+
 
 
 model UnknownSize1
