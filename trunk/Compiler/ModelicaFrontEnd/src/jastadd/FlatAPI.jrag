@@ -608,7 +608,8 @@ aspect FlatAPI {
 	*/
 	
 	inh Set<FVariable> FExp.boundParameters();
-	eq FVariable.getBindingExp().boundParameters()       = Collections.singleton(this);
+	eq FVariable.getBindingExp().boundParameters()   =	Collections.singleton(this);
+	
 	eq Root.getChild().boundParameters()                 = Collections.emptySet();
 	
 	eq FEquation.getRight().boundParameters() {
@@ -649,9 +650,8 @@ aspect FlatAPI {
 	
 	syn lazy boolean FVariable.isDependentParameter() = 
 		isParameter() && !isIndependentParameter();
-	syn lazy boolean FVariable.isIndependentParameter() = 
-		isParameter() && !hasParameterEquation() && 
-		(!hasParamValueExp() || paramValueExp().isIndependentParameterExp());
+	syn lazy boolean FVariable.isIndependentParameter() = isParameter() && 
+		!hasParameterEquation() && (!hasBindingExp() || getBindingExp().isIndependentParameterExp());
 
 	syn boolean FExp.isIndependentParameterExp() = isConstantExp() && !hasCompositeFunc();
 	
