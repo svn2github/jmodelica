@@ -30,17 +30,19 @@ aspect FlatTypeCheck {
     		if (myBindingExpHasEach() && !inArrayComponent()) {
     			error("The 'each' keyword cannot be applied to members of non-array components");
      		} else {
-    			if (!bindingType().typeCompatible(bexp.type(), func)) {
-    				if (!myBindingExpHasEach() && type().typeCompatible(bexp.type(), func)) {
+				FType expectedBT = bindingType();
+				FType actualBT = bexp.type();
+    			if (!expectedBT.typeCompatible(actualBT, func)) {
+    				if (!myBindingExpHasEach() && type().typeCompatible(actualBT, func)) {
 						warning("Assuming 'each' for the binding expression to the variable " + name());
-    				} else if (!bindingType().scalarType().typeCompatible(bexp.type().scalarType())) {
+    				} else if (!expectedBT.scalarType().typeCompatible(actualBT.scalarType())) {
     					error("The binding expression of the variable " + name() +
     							" does not match the declared type of the variable");
     				} else {
     					error("Array size mismatch in declaration of " + 
     							(myBindingExpHasEach() ? "each " : "") + name() +
-    							", size of declaration is " + bindingType().size() + 
-    							" and size of binding expression is " + bexp.size());
+    							", size of declaration is " + expectedBT.size() + 
+    							" and size of binding expression is " + actualBT.size());
      				}
     			}
     		}
@@ -231,7 +233,7 @@ aspect FlatTypeCheck {
 			  compliance("Array indices of Boolean or enumeration type not supported: " + getFExp());
 		  else if (!type().isUnknown())
 			  error("Array index must be Integer expression: " + getFExp());
-	  } else if (!inFunction()) { 
+	  } else if (!inAlgorithmOrFunction()) { 
 		  if (!getFExp().variability().lessOrEqual(fParameter())) {
 			  error("Array index in equation must be constant, parameter or loop index: " + getFExp());
 		  } else { 

@@ -1542,6 +1542,7 @@ aspect ConstantEvaluation {
 	  public void saveEvaluationValue(Map<CommonVariableDecl, CValue> map);
 	  public void readEvaluationValue(Map<CommonVariableDecl, CValue> map);
 	  public void setEvaluationValue(CValue val, Map<CommonVariableDecl, CValue> map);
+	  public void prepareForFunctionEval();
 	  public CValue evaluationValue();
 	  public String name();
   }
@@ -1586,8 +1587,10 @@ aspect ConstantEvaluation {
   public CValue[] FAbstractFunctionCall.evaluate() {
 	  Map<CommonVariableDecl, CValue> values = new HashMap<CommonVariableDecl, CValue>();
 	  int i = 0;
-	  for (CommonVariableDecl var : myFuncInputs())
+	  for (CommonVariableDecl var : myFuncInputs()) {
+		  var.prepareForFunctionEval();
 		  values.put(var, argument(i++).ceval());
+	  }
 	  
 	  evaluate(values);
 	  
@@ -1601,31 +1604,31 @@ aspect ConstantEvaluation {
   }
   
   /**
-   * \brief Make sure all size() attributes are calculated before function evaluation.
+   * \brief Prepare a function fro being function evaluation.
+   * 
+   * This entails: 
+   * <ul>
+   * <li>Make sure all size() attributes are calculated.</li>
+   * <li>Clear cached getArray() values for expressions with unknown size.</li>
+   * </ul>
    */
-  public void ASTNode.calcSizes() {
+  public void ASTNode.prepareForFunctionEval() {
 	  for (ASTNode n : this)
-		  n.calcSizes();
+		  n.prepareForFunctionEval();
   }
   
-  public void InstAssignable.calcSizes() {
-	  super.calcSizes();
+  public void InstAssignable.prepareForFunctionEval() {
+	  super.prepareForFunctionEval();
 	  if (hasBindingFExp())
-		  myBindingInstExp().calcSizes();
+		  myBindingInstExp().prepareForFunctionEval();
 	  size();
   }
   
-  public void FExp.calcSizes() {
-	  super.calcSizes();
-	  size();
-  }
-  
-  private boolean FAlgorithmBlock.calcSizesDone = false;
-  public void FAlgorithmBlock.calcSizes() {
-	  if (!calcSizesDone) {
-		  calcSizesDone = true;
-		  super.calcSizes();
-	  }
+  public void FExp.prepareForFunctionEval() {
+	  super.prepareForFunctionEval();
+	  // Flush getArray() - NB: uses internal JastAdd implementation details
+	  if (size().isUnknown())
+		  getArray_computed = false;
   }
   
   // TODO: reduce code duplication
@@ -1640,7 +1643,7 @@ aspect ConstantEvaluation {
  	  FAlgorithmBlock fab = getFAlgorithmBlock();
 	  Map<CommonVariableDecl, CValue> oldVal = currentEvaluationValues;
 	  currentEvaluationValues = values;
-	  fab.calcSizes();
+	  fab.prepareForFunctionEval();
 	  
 	  for (FFunctionVariable var : myInputs())
 		  var.readEvaluationValue(values);
@@ -1677,7 +1680,7 @@ aspect ConstantEvaluation {
 	  
 	  Map<CommonVariableDecl, CValue> oldVal = currentEvaluationValues;
 	  currentEvaluationValues = values;
-	  fab.calcSizes();
+	  fab.prepareForFunctionEval();
 	  
 	  for (InstComponentDecl var : myInputs())
 		  var.readEvaluationValue(values);

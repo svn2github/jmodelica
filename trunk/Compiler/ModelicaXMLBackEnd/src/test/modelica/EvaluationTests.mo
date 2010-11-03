@@ -795,7 +795,7 @@ model FunctionEval19
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.XMLCodeGenTestCase(
          name="FunctionEval19",
-         description="",
+         description="Constant evaluation of functions: arrays of records",
          template="$XML_variables$",
          generatedCode="
 
@@ -1087,6 +1087,37 @@ model FunctionEval19
 	
 	parameter Real x = f1(f2());
 end FunctionEval19;
+
+
+model FunctionEval20
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.XMLCodeGenTestCase(
+         name="FunctionEval20",
+         description="",
+         template="$XML_variables$",
+         generatedCode="
+
+		<ScalarVariable name=\"a\" valueReference=\"0\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"5.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>independentParameter</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"b\" valueReference=\"1\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"14.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>independentParameter</VariableCategory>
+		</ScalarVariable>")})));
+
+	function f
+		input Real x[:];
+		output Real y;
+	algorithm
+		y := x * x;
+	end f;
+	
+	parameter Real a = f({1, 2});
+	parameter Real b = f({1, 2, 3});
+end FunctionEval20;
 
 
 

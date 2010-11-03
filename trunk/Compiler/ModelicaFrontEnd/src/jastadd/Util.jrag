@@ -1058,7 +1058,7 @@ aspect FlatNames {
     eq FBooleanType.name() = "Boolean";
     eq FStringType.name()  = "String";
     eq FEnumType.name()  = getName();
-    eq FEnumLiteralType.name()  = "EnumType";
+    eq FEnumLiteralType.name()  = getName();
     eq FRecordType.name()  = getName();
     eq FUnknownType.name() = "(unknown type)";
     
