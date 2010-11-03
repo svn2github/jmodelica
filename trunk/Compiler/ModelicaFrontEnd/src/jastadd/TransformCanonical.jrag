@@ -587,6 +587,10 @@ aspect TransformCanonical {
 		return res;
 	}
 	
+	public FExp FNoEventExp.extractRecordFExp(String suffix) {
+		return createNode(getFExp().extractRecordFExp(suffix));
+	}
+	
 	/**
 	 * \brief Generate equations from an attribute of a record variable.
 	 */

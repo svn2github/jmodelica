@@ -210,6 +210,8 @@ aspect Arrays {
 	eq FCross.ndims() = 1;
 	eq FIdentity.ndims() = 2;
 	
+	eq FNoEventExp.ndims() = getFExp().ndims();
+	
 	eq FSizeExp.ndims() = hasDim() ? 0 : 1;
 	
 	eq FInfArgsFunctionCall.ndims() = getNumFExp();
@@ -713,6 +715,8 @@ aspect Arrays {
 	}
 	
 	eq FSizeExp.size() = hasDim() ? Size.SCALAR : new Size(getFExp().ndims());
+	
+	eq FNoEventExp.size() = getFExp().size();
 	
 	// TODO: Expand to cover vectorization of all scalar built-in functions (see #528)
 	eq FStreamBuiltIn.size() = getFExp().size();
@@ -1299,6 +1303,17 @@ aspect Arrays {
 	
 	// TODO: Expand to cover vectorization of all scalar built-in functions (see #528)
 	eq FStreamBuiltIn.getArray() {
+		if (!isArray())
+			return super.getArray();
+		
+		Array arr = new Array(indices());
+		Array inner = getFExp().getArray();
+		for (Index i : arr.indices())
+			arr.set(i, createNode(inner.get(i)));
+		return arr;
+	}
+	
+	eq FNoEventExp.getArray() {
 		if (!isArray())
 			return super.getArray();
 		

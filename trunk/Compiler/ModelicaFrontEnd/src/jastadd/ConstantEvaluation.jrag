@@ -1148,6 +1148,8 @@ aspect ConstantEvaluation {
 	  return sum;
   }
   
+  eq FNoEventExp.cevalCalc() = getFExp().ceval();
+  
   syn boolean FMinMaxExp.selectLesser();
   eq FMinExp.selectLesser() = true;
   eq FMaxExp.selectLesser() = false;

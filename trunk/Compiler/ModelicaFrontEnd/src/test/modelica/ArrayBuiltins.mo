@@ -1927,4 +1927,85 @@ end ScalarSize2;
 
 
 
+model NoEventArray1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+	 JModelica.UnitTesting.TransformCanonicalTestCase(
+		 name="NoEventArray1",
+		 description="noEvent() for Real array",
+		 flatModel="
+fclass ArrayBuiltins.NoEventArray1
+ Real x[1];
+ Real x[2];
+ Real y[1];
+ Real y[2];
+equation
+ x[1] = 1;
+ x[2] = 2;
+ y[1] = noEvent(x[1]);
+ y[2] = noEvent(x[2]);
+end ArrayBuiltins.NoEventArray1;
+")})));
+
+	Real x[2] = {1, 2};
+	Real y[2] = noEvent(x);
+end NoEventArray1;
+
+
+model NoEventArray2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="NoEventArray2",
+         description="noEvent() for Boolean array",
+         flatModel="
+fclass ArrayBuiltins.NoEventArray2
+ parameter Boolean x[1] = true /* true */;
+ parameter Boolean x[2] = false /* false */;
+ parameter Boolean y[1];
+ parameter Boolean y[2];
+parameter equation
+ y[1] = noEvent(x[1]);
+ y[2] = noEvent(x[2]);
+end ArrayBuiltins.NoEventArray2;
+")})));
+
+	parameter Boolean x[2] = {true, false};
+	parameter Boolean y[2] = noEvent(x);  // Not very logical, but we need to test this
+end NoEventArray2;
+
+
+model NoEventRecord1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="NoEventRecord1",
+         description="",
+         flatModel="
+fclass ArrayBuiltins.NoEventRecord1
+ Real x.a;
+ Real x.b;
+ Real y.a;
+ Real y.b;
+equation
+ x.a = 1;
+ x.b = 2;
+ y.a = noEvent(x.a);
+ y.b = noEvent(x.b);
+
+ record ArrayBuiltins.NoEventRecord1.A
+  Real a;
+  Real b;
+ end ArrayBuiltins.NoEventRecord1.A;
+end ArrayBuiltins.NoEventRecord1;
+")})));
+
+	record A
+		Real a;
+		Real b;
+	end A;
+	
+	A x = A(1, 2);
+	A y = noEvent(x);
+end NoEventRecord1;
+
+
+
 end ArrayBuiltins;

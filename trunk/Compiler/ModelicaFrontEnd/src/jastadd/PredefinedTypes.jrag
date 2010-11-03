@@ -256,7 +256,7 @@ aspect PredefinedTypes {
 +"function terminal end terminal;\n"
 +"function smooth end smooth;\n"
 +"function noEvent \n"
-+"  input Real x;\n"
++"  input Real x;\n"      // Type not used
 +"  output Real y;\n" 
 +"end noEvent;\n"
 +"function sample end sample;\n"

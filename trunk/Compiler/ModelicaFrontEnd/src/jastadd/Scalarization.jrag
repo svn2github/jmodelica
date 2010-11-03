@@ -890,6 +890,9 @@ aspect Scalarization {
 			for (Index i : indices()) 
 				createScalarFEquations(eqns, indexMap, 
 						getLeft().getArray().get(i), getRight().getArray().get(i));
+		} else {
+			throw new UnsupportedOperationException("Bad equation: ndims() for equation '" + 
+					this + "' returned " + ndims()); 
 		}
 	}
 	
@@ -991,10 +994,14 @@ aspect Scalarization {
 		return scalarizeExp(indexMap).extractScalarRecordFExp(suffix);
 	}
 	
+	public FExp FNoEventExp.scalarRecordFExp(Map<String,FExp> indexMap, FQName suffix) {
+		return createNode(getFExp().scalarRecordFExp(indexMap, suffix));
+	}
+	
 	/**
 	 * \brief Create an FExp that represents a specific scalar component of this record.
 	 * 
-	 * Assumed that this expression is already scalarized.
+	 * It is assumed that this expression is already scalarized.
 	 * 
 	 * @param suffix    the suffix to add to a use of the record to access the specific component
 	 */
