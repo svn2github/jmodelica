@@ -280,18 +280,89 @@ class JMUAlgebraic(ProblemAlgebraic):
         
     def _guess_constraints(self):
         """
-        Fct used to guess the constraints based on the initial guesses of a 
-        model.
+        Fct used to guess the constraints based on the min and max values of the model.
         """
+        print "Reading constraints from model..."
+        # get min and maxes from the model
+        dx_min = self._model._xmldoc.get_dx_min()
+        dx_max = self._model._xmldoc.get_dx_max()
+        
+        x_min = self._model._xmldoc.get_x_min()
+        x_max = self._model._xmldoc.get_x_max()
+        
+        w_min = self._model._xmldoc.get_w_min()
+        w_max = self._model._xmldoc.get_w_max()
+        
+        # Create constraint vector with default being no constraint
         res = N.zeros(self._neqF0)
-        for i in N.arange(self._dx_size,self._mark):
-            if self._x0[i] < 0:
-                res[i] = -2.0
-            elif self._x0[i] > 0:
-                res[i] = 2.0
-            else:
-                res[i] = 0.0
-                
+        
+        # iterate through dx
+        for i, min, max in zip(N.arange(0,self._dx_size),dx_min, dx_max):
+            
+            if min[1] != None and max[1] != None:
+                # Upper and lower bound
+                if max[1] <= 0.0:
+                    res[i] = -1.0
+                elif min[1] >= 0.0:
+                    res[i] = 1.0
+            elif min[1] != None and (min[1] - 0.0) < 1e-10:
+                # lower bound
+                if min[1] == 0.0:
+                    res[i] = 1.0
+                else:
+                    res[i] = 2.0
+            elif max[1] != None and max[1] <= 0.0:
+                # upper bound
+                if max[1] == 0.0:
+                    res[i] = -1.0
+                else:
+                    res[i] = -2.0
+
+                    
+        # iterate through x
+        for i, min, max in zip(N.arange(self._dx_size,self._mark),x_min, x_max):
+            if min[1] != None and max[1] != None:
+                # Upper and lower bound
+                if max[1] <= 0.0:
+                    res[i] = -1.0
+                elif min[1] >= 0.0:
+                    res[i] = 1.0
+            elif min[1] != None and min[1] >= 0.0:
+                # lower bound
+                if min[1] == 0.0:
+                    res[i] = 1.0
+                else:
+                    res[i] = 2.0
+            elif max[1] != None and max[1] <= 0.0:
+                # upper bound
+                if max[1] == 0.0:
+                    res[i] = -1.0
+                else:
+                    res[i] = -2.0
+
+                    
+        # iterate through w
+        for i, min, max in zip(N.arange(self._mark,self._neqF0),w_min, w_max):
+            if min[1] != None and max[1] != None:
+                # Upper and lower bound
+                if max[1] <= 0.0:
+                    res[i] = -1.0
+                elif min[1] >= 0.0:
+                    res[i] = 1.0
+            elif min[1] != None and min[1] >= 0.0:
+                # lower bound
+                if min[1] == 0.0:
+                    res[i] = 1.0
+                else:
+                    res[i] = 2.0
+            elif max[1] != None and max[1] <= 0.0:
+                # upper bound
+                if max[1] == 0.0:
+                    res[i] = -1.0
+                else:
+                    res[i] = -2.0
+
+        
         return res
         
 def write_resdata(problem, file_name='', format='txt'):

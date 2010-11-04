@@ -1497,17 +1497,17 @@ class KInitSolveAlg(AlgorithmBase):
             self.options = options
         else:
             raise InvalidAlgorithmOptionException(options)
-            
-        self.solver = KINSOL(self.problem)
         # set options
         self._set_options()
+        
+        # connect solver and set solver options
+        self.solver = KINSOL(self.problem)
         self._set_solver_options()
         
     def _set_options(self):
         """
         Helper function that sets options for the KInitSolve algorithm.
         """
-        
         self.problem.set_constraints_usage(self.options['use_constraints'],
             self.options['constraints'])
         self.result_args = dict(file_name=self.options['result_file_name'], 
