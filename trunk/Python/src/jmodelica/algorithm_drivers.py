@@ -1422,7 +1422,7 @@ class KInitSolveAlgOptions(OptionBase):
             used.
             Default: True
         
-        print_level --
+        verbosity --
             Integer regulationg the level of information
             output from KINSOL. Must be set to one of:
                 0:  no information displayed.
@@ -1447,7 +1447,7 @@ class KInitSolveAlgOptions(OptionBase):
             'constraints':None,
             'result_file_name':'', 
             'result_format':'txt',
-            'KINSOL_options':{'use_jac':True,'print_level':0}
+            'KINSOL_options':{'use_jac':True,'verbosity':0}
             }
         super(KInitSolveAlgOptions,self).__init__(_defaults)
         # for those key-value-sets where the value is a dict, don't 
@@ -1521,7 +1521,7 @@ class KInitSolveAlg(AlgorithmBase):
         """
         
         self.solver.set_jac_usage(self.solver_options['use_jac'])
-        self.solver.set_print_level(self.solver_options['print_level'])
+        self.solver.set_verbosity(self.solver_options['verbosity'])
 
     def solve(self):
         """
