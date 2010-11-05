@@ -514,7 +514,7 @@ end ArrayTest15_Err;
     m[2].x[2] = 4;
   end ArrayTest16;
 
-
+/* Commenting out since this is an errouneous test, see #1156
 model ArrayTest17
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
@@ -557,7 +557,7 @@ end ArrayTests.ArrayTest17;
   n.m.x[1]={{{1},{2}},{{3},{4}}};
 
 end ArrayTest17;
-
+*/
 
 model ArrayTest21
         annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
@@ -722,6 +722,7 @@ model ArrayTest26
       JModelica.UnitTesting.TransformCanonicalTestCase(name="ArrayTest26",
         description="Flattening of arrays.",
          automatic_add_initial_equations = false,
+         enable_structural_diagnosis = false,
                                                flatModel=
 "fclass ArrayTests.ArrayTest26
  Real x[1,1];
@@ -1533,6 +1534,7 @@ model SubscriptExpression7
          name="SubscriptExpression7",
          description="Type checking array subscripts: using min in subscripts",
          automatic_add_initial_equations = false,
+         enable_structural_diagnosis = false,
          flatModel="
 fclass ArrayTests.SubscriptExpression7
  Real x[1,1];

@@ -23,6 +23,7 @@ package CodeGenTests
       JModelica.UnitTesting.GenericCodeGenTestCase(name="CodeGenTest1",
         description="Test of code generation",
          automatic_add_initial_equations = false,
+         enable_structural_diagnosis = false,
         template = 
         "n_ci: $n_ci$
 n_real_ci: $n_real_ci$

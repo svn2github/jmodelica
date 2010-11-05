@@ -202,10 +202,100 @@ aspect TransformCanonical {
 		setFEquationBlockList(l);
 	}
 
-	ArrayList<String> FClass.structuralErrors = new ArrayList<String>();
+    public class MatchingPair {
+    	private FAbstractEquation eqn;
+    	private FVariable fv;
+    	
+    	public MatchingPair(FAbstractEquation eqn, FVariable fv) {
+    		this.eqn = eqn;
+    		this.fv = fv;
+    	}
+    
+    	public FAbstractEquation getEquation() {
+			return eqn;    	
+    	}
+    	
+    	public FVariable getFVariable() {
+    		return fv;
+    	}
+    
+    }
+
+	private ArrayList<MatchingPair> FClass.daeMatching = null;
+	syn lazy ArrayList<MatchingPair> FClass.getDAEMatching() {
+		if (daeMatching==null) {
+			computeMatchingsAndBLT();
+		}
+		return daeMatching;
+	}
 	
-	public void FClass.addInitialEquations() {
+	private ArrayList<MatchingPair> FClass.daeInitMatching = null;
+	syn lazy ArrayList<MatchingPair> FClass.getDAEInitMatching() { 
+		if (daeInitMatching==null) {
+			computeMatchingsAndBLT();
+		}
+		return daeInitMatching;
+	}	
+
+	private ArrayList<FAbstractEquation> FClass.daeUnmatchedEquations = null;
+	syn lazy ArrayList<FAbstractEquation> FClass.getDAEUnmatchedEquations() { 
+		if (daeUnmatchedEquations==null) {
+			computeMatchingsAndBLT();
+		}
+		return daeUnmatchedEquations;
+	}	
+
+	private ArrayList<FVariable> FClass.daeUnmatchedVariables = null;
+	syn lazy ArrayList<FVariable> FClass.getDAEUnmatchedVariables() { 
+		if (daeUnmatchedVariables==null) {
+			computeMatchingsAndBLT();
+		}
+		return daeUnmatchedVariables;
+	}	
+
+	private ArrayList<FAbstractEquation> FClass.daeInitUnmatchedEquations = null;
+	syn lazy ArrayList<FAbstractEquation> FClass.getDAEInitUnmatchedEquations() { 
+		if (daeInitUnmatchedEquations==null) {
+			computeMatchingsAndBLT();
+		}
+		return daeInitUnmatchedEquations;
+	}	
+
+	private ArrayList<FVariable> FClass.daeInitUnmatchedVariables = null;
+	syn lazy ArrayList<FVariable> FClass.getDAEInitUnmatchedVariables() { 
+		if (daeUnmatchedVariables==null) {
+			computeMatchingsAndBLT();
+		}
+		return daeInitUnmatchedVariables;
+	}	
+
+	private ArrayList<ArrayList<MatchingPair>> FClass.daeBLT = null;
+	syn lazy ArrayList<ArrayList<MatchingPair>> FClass.getDAEBLT() {
+		if (daeBLT==null) {
+			computeMatchingsAndBLT();
+		}
+		return daeBLT;
+	}
+	
+	private ArrayList<ArrayList<MatchingPair>> FClass.daeInitBLT = null;	
+	syn lazy ArrayList<ArrayList<MatchingPair>> FClass.getDAEInitBLT() {
+		if (daeInitBLT==null) {
+			computeMatchingsAndBLT();
+		}
+		return daeInitBLT;
+	}	
 		
+	public void FClass.computeMatchingsAndBLT() {
+		
+		daeMatching = new ArrayList<MatchingPair>();
+		daeInitMatching = new ArrayList<MatchingPair>();		
+	    daeBLT = new ArrayList<ArrayList<MatchingPair>>();
+	   	daeInitBLT = new ArrayList<ArrayList<MatchingPair>>();		
+		daeUnmatchedEquations = new ArrayList<FAbstractEquation>();		
+		daeUnmatchedVariables = new ArrayList<FVariable>();			
+		daeInitUnmatchedEquations = new ArrayList<FAbstractEquation>();		
+		daeInitUnmatchedVariables = new ArrayList<FVariable>();			
+			
 		BiPGraph g = new BiPGraph(name(),"");
 		
 		Eq eqn = null;
@@ -237,12 +327,13 @@ aspect TransformCanonical {
 		}
 		
 		int k = 1;
+		int j = 0;
 		for (FAbstractEquation e : equations()) {
 			//k = e.extractDerAlgIncidence(g,k);
 			int n_eq = e.numScalarEquations();
 			
 			for (int i=0;i<n_eq;i++) {
-				eqn = g.addEquation("eq_"+k,e.prettyPrint(""));
+				eqn = g.addEquation("eq_"+k,e.prettyPrint(""),j);
 				k++;
 				for (FVariable y : e.algebraicVariables()) { 
 					log.debug("  Algebraic: " + y.name()); 
@@ -258,6 +349,7 @@ aspect TransformCanonical {
 					g.addEdge(eqn,v); 
 				} 
 			}
+			j++;
 		}
 		
 		log.info(g.toString());
@@ -265,7 +357,6 @@ aspect TransformCanonical {
 		log.info("DAE system ");
 		log.info(g.printMatching());
 		
-		/*
 		k = 1;
 		for (FAbstractEquation e : equations()) {				
 			//k = e.extractDerAlgIncidence(g,k);
@@ -274,54 +365,39 @@ aspect TransformCanonical {
 			for (int i=0;i<n_eq;i++) {
 				eqn = g.getEquation("eq_"+k);
 				v = eqn.getMatching();
-				FExp sol = e.solution(v.getName());
-				System.out.println("Solution: " + sol.prettyPrint(""));
+				if (v!=null) {
+					daeMatching.add(new MatchingPair(e,(FVariable)lookupFV(new FQName(v.getName()),false)));
+				}
 				k++;
 			}
 		}
-		*/
 		
-		/*
-		LinkedList<Stack<Eq>> blt = g.computeBLT();
+		// TODO: If no complete matching found, then try index reduction
+	/*	
+		if (g.getUnmatchedVariables().size()==0 && g.getUnmatchedEquations().size()==0) {	
 		
-		System.out.println("BLT: " + blt.size() + " blocks");
-		for (Stack<Eq> bl : blt) {
-			System.out.println("Block: " + bl.size() + "-----");
-			for (Eq bl_eqn : bl) {
-				System.out.println(bl_eqn.getMatching() + ": " + bl_eqn.getDescription());
+			LinkedList<Stack<Eq>> blt = g.computeBLT();
+		
+			System.out.println("BLT: " + blt.size() + " blocks");
+			for (Stack<Eq> bl : blt) {
+				System.out.println("Block: " + bl.size() + "-----");
+				ArrayList<MatchingPair> l = new ArrayList<MatchingPair>();
+				daeBLT.add(l);
+				for (Eq bl_eqn : bl) {
+					v = bl_eqn.getMatching();
+					l.add(new MatchingPair(equations().get(bl_eqn.getId()),(FVariable)lookupFV(new FQName(v.getName()),false)));
+					System.out.println(bl_eqn.getMatching() + ": " + bl_eqn.getDescription());
+				}
+				System.out.println("-----------------");
 			}
-			System.out.println("-----------------");
 		}
-		*/
+	*/
+		for (Var var : g.getUnmatchedVariables()) {
+			daeUnmatchedVariables.add((FVariable)lookupFV(new FQName(var.getName()),false));
+		}
 
-		if (root().options.getBooleanOption("enable_structural_diagnosis")) {
-		boolean unbalanced = false;
-		StringBuffer err_str = new StringBuffer();
-		if (g.getUnmatchedVariables().size() > 0 ) {
-			err_str.append("The system is structurally singuar (or of high index). The following varible(s) could not be matched to any equation:\n");
-			for (Var var : g.getUnmatchedVariables()) {
-				err_str.append("   " + var.getName());
-				err_str.append("\n");
-			}
-			unbalanced = true;
-		}
-		if (g.getUnmatchedEquations().size() > 0 ) {
-			if (!unbalanced) {
-				err_str.append("The system is structurally singuar (or of high index). The following equation(s) could not be matched to any variable:\n");
-			} else {
-				err_str.append("\n  The follwowing equation(s) could not be matched to any variable:\n");
-			}
-			for (Eq ee : g.getUnmatchedEquations()) {
-				err_str.append("   " + ee.getDescription());
-				err_str.append("\n");
-			}
-			unbalanced = true;
-		}
-		
-		if (unbalanced) {
-			structuralErrors.add(err_str.toString());
-			return;
-		}
+		for (Eq ee : g.getUnmatchedEquations()) {
+			daeUnmatchedEquations.add(equations().get(ee.getId()));
 		}
 		
 		// Add all differentiated variables
@@ -330,11 +406,12 @@ aspect TransformCanonical {
 		}
 		
 		k = 1;
+		j = 0;
 		for (FAbstractEquation e : equations()) {
 			int n_eq = e.numScalarEquations();
 			
 			for (int i=0;i<n_eq;i++) {
-				eqn = g.addEquation("eq_"+k,e.prettyPrint(""));
+				eqn = g.addEquation("eq_"+k,e.prettyPrint(""),j);
 				k++;
 
 				for (FVariable x : e.differentiatedVariables()) { 
@@ -344,10 +421,11 @@ aspect TransformCanonical {
 					g.addEdge(eqn,v); 
 				} 			
 			}
-			
+			j++;
 			//k = e.extractStateIncidence(g,k);
 		}
 		
+		j = equations().size();
 		for (FAbstractEquation e : initialEquations()) {
 
 			//k = e.extractIncidence(g,k);
@@ -355,7 +433,7 @@ aspect TransformCanonical {
 			int n_eq = e.numScalarEquations();
 			
 			for (int i=0;i<n_eq;i++) {
-				eqn = g.addEquation("eq_"+k,e.prettyPrint(""));
+				eqn = g.addEquation("eq_"+k,e.prettyPrint(""),j);
 				k++;
 			
 				for (FVariable y : e.algebraicVariables()) { 
@@ -379,6 +457,7 @@ aspect TransformCanonical {
 					g.addEdge(eqn,v); 
 				} 
 			}
+			j++;
 		}
 
 		log.info(g.toString());
@@ -386,9 +465,75 @@ aspect TransformCanonical {
 		log.info("DAE initial ");
 		log.info(g.printMatching());
 
-		List<FAbstractEquation> l = new List<FAbstractEquation>();
+ 		k = 1;
+		for (FAbstractEquation e : equations()) {				
+			//k = e.extractDerAlgIncidence(g,k);
+			int n_eq = e.numScalarEquations();
+			
+			for (int i=0;i<n_eq;i++) {
+				eqn = g.getEquation("eq_"+k);
+				v = eqn.getMatching();
+				if (v!=null) {
+					daeInitMatching.add(new MatchingPair(e,(FVariable)lookupFV(new FQName(v.getName()),false)));
+				}
+				k++;
+			}
+		}
+
+		for (FAbstractEquation e : initialEquations()) {				
+			//k = e.extractDerAlgIncidence(g,k);
+			int n_eq = e.numScalarEquations();
+			
+			for (int i=0;i<n_eq;i++) {
+				eqn = g.getEquation("eq_"+k);
+				v = eqn.getMatching();
+				if (v!=null) {
+					daeInitMatching.add(new MatchingPair(e,(FVariable)lookupFV(new FQName(v.getName()),false)));
+				}
+				k++;
+			}
+		}
+		
+		// TODO: If no complete matching found, then try index reduction
+		/*
+		if (g.getUnmatchedVariables().size()==0 && g.getUnmatchedEquations().size()==0) {
+		
+			g.tarjanReset();
+			LinkedList<Stack<Eq>> blt = g.computeBLT();
+		
+			System.out.println("BLT: " + blt.size() + " blocks");
+			for (Stack<Eq> bl : blt) {
+				System.out.println("Block: " + bl.size() + "-----");
+				ArrayList<MatchingPair> l = new ArrayList<MatchingPair>();
+				daeInitBLT.add(l);
+				for (Eq bl_eqn : bl) {
+					v = bl_eqn.getMatching();
+					FAbstractEquation eee = bl_eqn.getId()<equations().size()?
+					    equations().get(bl_eqn.getId()): initialEquations().get(bl_eqn.getId()-equations().size());
+					l.add(new MatchingPair(eee,(FVariable)lookupFV(new FQName(v.getName()),false)));
+					System.out.println(bl_eqn.getMatching() + ": " + bl_eqn.getDescription());
+				}
+				System.out.println("-----------------");
+			}
+	
+		}
+	*/
 		for (Var var : g.getUnmatchedVariables()) {
-			FVariable fv = (FVariable)lookupFV(new FQName(var.getName()),false);
+			daeInitUnmatchedVariables.add((FVariable)lookupFV(new FQName(var.getName()),false));
+		}
+
+		for (Eq ee : g.getUnmatchedEquations()) {
+				FAbstractEquation eee = ee.getId()<equations().size()?
+				    equations().get(ee.getId()): initialEquations().get(ee.getId()-equations().size());
+			daeInitUnmatchedEquations.add(eee);
+		}
+			
+	}	
+	
+	public void FClass.addInitialEquations() {
+		
+		List<FAbstractEquation> l = new List<FAbstractEquation>();
+		for (FVariable fv : getDAEInitUnmatchedVariables()) {
 			l.add(new FEquation(new FIdUseExp(
 					new FIdUse(fv.getFQName().fullCopy())),
 					fv.startAttributeSet()? fv.startAttributeExp(): new FRealLitExp("0.0")));
@@ -400,12 +545,43 @@ aspect TransformCanonical {
 			}
 			setFInitialEquationList(l);
 		}
-		
-//		g.randomTest(100,100,500);
-//		g.randomTest(1000,1000,5000);
-//		g.randomTest(10000,10000,50000);
-			
+					
 	}	
+
+
+	syn lazy ArrayList<String> FClass.structuralErrors() {
+		ArrayList<String> structuralErrors = new ArrayList<String>();
+		if (root().options.getBooleanOption("enable_structural_diagnosis")) {
+		boolean unbalanced = false;
+		StringBuffer err_str = new StringBuffer();
+		if (getDAEUnmatchedVariables().size() > 0 ) {
+			err_str.append("The system is structurally singuar (or of high index). The following varible(s) could not be matched to any equation:\n");
+			for (FVariable fv : getDAEUnmatchedVariables()) {
+				err_str.append("   " + fv.name());
+				err_str.append("\n");
+			}
+			unbalanced = true;
+		}
+		if (getDAEUnmatchedEquations().size() > 0 ) {
+			if (!unbalanced) {
+				err_str.append("The system is structurally singuar (or of high index). The following equation(s) could not be matched to any variable:\n");
+			} else {
+				err_str.append("\n  The follwowing equation(s) could not be matched to any variable:\n");
+			}
+			for (FAbstractEquation ee : getDAEUnmatchedEquations()) {
+				err_str.append("   " + ee.prettyPrint(""));
+				err_str.append("\n");
+			}
+			unbalanced = true;
+		}
+		
+		if (unbalanced) {
+			structuralErrors.add(err_str.toString());
+		}
+		}
+		return structuralErrors;
+	}
+
 	
 	/**
 	 * \brief Convert variable binding equations into regular equations.
@@ -1318,7 +1494,7 @@ aspect TransformCanonicalErrorCheck {
 		}
 		checkDuplicateVariables();
 		checkFClassDimensions();
-		for (String str : structuralErrors) {
+		for (String str : structuralErrors()) {
 			error(str);
 		}		
 		checkUnsupportedStreamConnections();

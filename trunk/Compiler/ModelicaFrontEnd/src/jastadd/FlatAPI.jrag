@@ -610,7 +610,7 @@ aspect FlatAPI {
 	inh Set<FVariable> FExp.boundParameters();
 	eq FVariable.getBindingExp().boundParameters() = Collections.singleton(this);
 	eq Root.getChild().boundParameters()           = Collections.emptySet();
-	
+
 	eq FEquation.getRight().boundParameters() {
 		if (isParameterEquation()) {
 			return getLeft().referencedParametersInFExp();

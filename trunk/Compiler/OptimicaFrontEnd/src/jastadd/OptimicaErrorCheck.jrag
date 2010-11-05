@@ -71,6 +71,12 @@ aspect OptimicaErrorCheck {
 	eq FOptClass.numDAEEquations() = numScalarEquations() + numPathEqConstraints();
 	eq FOptClass.numDAEVariables() = numAlgebraicRealVariables() + numDifferentiatedRealVariables();
 
+	eq FOptClass.structuralErrors() {
+		/* This check needs to be updated to take constraints into account */
+		ArrayList<String> structuralErrors = new ArrayList<String>();
+		return structuralErrors;
+	}
+
   	public void FOptClass.checkFClassDimensions() {
   		if (!staticAttribute()) {
   			super.checkFClassDimensions();

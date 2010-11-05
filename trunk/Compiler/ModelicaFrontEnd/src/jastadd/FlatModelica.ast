@@ -59,10 +59,14 @@ FEnumLiteralList : FEnumSpecification ::= FEnumLiteral*;
 FEnumUnspecified : FEnumSpecification;
 FEnumLiteral : AbstractFVariable ::= Name:FIdUse [FStringComment];
 
+FAbstractEquationBlock : BaseNode;
+
 /**
  * \brief A list of equations corresponding to a BLT block.
  */
-FEquationBlock : BaseNode ::= FAbstractEquation*;
+FEquationBlock : FAbstractEquationBlock ::= FAbstractEquation*;
+
+//FSolvedEquationBlock : FAbstractEquationBlock ::= FExp;
 
 /**
  * \brief Abstract base class for flat variables.

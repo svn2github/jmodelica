@@ -27,13 +27,15 @@ public class Eq {
     private boolean visited = false;
     private int layer = 1000000;
     private String description;
+    private int id = -1;
 
 	private int tarjanNbr = 0;
     private int tarjanLowLink = 0;
 	
-	public Eq(String name,String description) {
+	public Eq(String name,String description,int id) {
 		this.name = name;
 		this.description = description;
+		this.id = id;
 	}
 	
 	public void addVariable(Var v) {
@@ -52,6 +54,11 @@ public class Eq {
 	public void lightReset() {
 		setVisited(false);
 		setLayer(1000000);
+	}
+	
+	public void tarjanReset() {
+		setTarjanLowLink(0);
+		setTarjanNbr(0);
 	}
 	
 	public String getName() {
@@ -97,9 +104,17 @@ public class Eq {
 	public void setDescription(String description) {
 		this.description = description;
 	}	
+	 
 	
-	  
-    public int getTarjanNbr() {
+    public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public int getTarjanNbr() {
 		return tarjanNbr;
 	}
 

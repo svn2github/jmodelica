@@ -41,10 +41,10 @@ public class BiPGraph {
 		return equationMap.get(name);
 	}
 	
-	public Eq addEquation(String name, String description) {
+	public Eq addEquation(String name, String description, int id) {
 		Eq e = equationMap.get(name);
 		if (e==null) {
-			e = new Eq(name,description);
+			e = new Eq(name,description,id);
 			equations.add(e);
 			equationMap.put(name,e);
 		}
@@ -390,7 +390,7 @@ public class BiPGraph {
 		BiPGraph g = new BiPGraph("Random Graph","");
 		
 		for (int i=0;i<n_eq;i++) {
-			g.addEquation("e_"+(i+1), "");
+			g.addEquation("e_"+(i+1), "",i);
 		}
 
 		for (int i=0;i<n_var;i++) {
@@ -437,6 +437,12 @@ public class BiPGraph {
 		}		
 	}
 
+	public void tarjanReset() {
+		for (Eq e : getEquations()) {
+			e.tarjanReset();
+		}		
+	}
+	
 	public String getName() {
 		return name;
 	}

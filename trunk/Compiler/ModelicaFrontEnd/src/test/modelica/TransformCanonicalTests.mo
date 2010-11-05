@@ -1759,6 +1759,10 @@ model UnbalancedTest2_Err
 "
 Error: in file 'TransformCanonicalTests.UnbalancedTest2_Err.mof':
 Semantic error at line 0, column 0:
+  The DAE initialization system has 3 equations and 2 free variables.
+
+Error: in file 'TransformCanonicalTests.UnbalancedTest2_Err.mof':
+Semantic error at line 0, column 0:
   The system is structurally singuar (or of high index). The following varible(s) could not be matched to any equation:
    y
 
