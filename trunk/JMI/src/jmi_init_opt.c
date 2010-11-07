@@ -127,6 +127,100 @@ int jmi_init_opt_new(jmi_init_opt_t **jmi_init_opt_new, jmi_t *jmi,
 		// Set number of equality constraints
 		jmi_init_opt->n_h = jmi->init->F0->n_eq_F + jmi->opt->Ffdp->n_eq_F;
 
+		if (linearity_information_provided==1) {
+
+			// Set linearity vector.
+			int n_nl_vars = 0;
+
+			// Count the number of non linear optimization parameters
+			int n_nl_p_opt = 0;
+			for (i=0;i<jmi->opt->n_p_opt;i++) {
+				if (p_opt_lin[i]==0) {
+					n_nl_p_opt++;
+				}
+			}
+
+			// Count the number of non linear derivative variables
+			int n_nl_dx = 0;
+			for (i=0;i<jmi->n_real_dx;i++) {
+				if (dx_lin[i]==0) {
+					n_nl_dx++;
+				}
+			}
+
+			// Count the number of non linear state variables
+			int n_nl_x = 0;
+			for (i=0;i<jmi->n_real_x;i++) {
+				if (x_lin[i]==0) {
+					n_nl_x++;
+				}
+			}
+
+			// Count the number of non linear algebraic variables
+			int n_nl_w = 0;
+			for (i=0;i<jmi->n_real_w;i++) {
+				if (w_lin[i]==0) {
+					n_nl_w++;
+				}
+			}
+/*
+			printf(">> %d\n",n_nl_vars);
+			printf(">> %d\n",n_nl_p_opt);
+			printf(">> %d\n",n_nl_dx);
+			printf(">> %d\n",n_nl_x);
+			printf(">> %d\n",n_nl_w);
+*/
+			// Compute the total number of non linear variables in the NLP x vector
+			n_nl_vars += n_nl_p_opt + n_nl_dx + n_nl_x + n_nl_w;
+
+	//		printf("--- %d\n",n_nl_vars);
+
+			// Initialize the corresponding field in the struct
+			jmi_init_opt->n_nonlinear_variables = n_nl_vars;
+
+			// Allocate memory.
+			jmi_init_opt->non_linear_variables_indices =
+				(int*)calloc(n_nl_vars,sizeof(int));
+
+			int ind = 0;   // Counter for the non_linear_variables_indices vector
+			int ind_x = 1; // Counter for the indices in the NLP x vector, Fortran style
+
+			// Set non linear variable indices corresponding to optimization parameters
+			for (i=0;i<jmi->opt->n_p_opt;i++) {
+				if (p_opt_lin[i]==0) {
+					jmi_init_opt->non_linear_variables_indices[ind++] = ind_x;
+				}
+				ind_x++;
+			}
+
+			int k = 0;
+			// Add non-linear entries for initial point
+			// Iterate over derivatives
+			for (k=0;k<jmi->n_real_dx;k++) {
+				if (dx_lin[k]==0) {
+					jmi_init_opt->non_linear_variables_indices[ind++] = ind_x;
+				}
+				ind_x++;
+			}
+			// Iterate over states
+			for (k=0;k<jmi->n_real_x;k++) {
+				if (x_lin[k]==0) {
+					jmi_init_opt->non_linear_variables_indices[ind++] = ind_x;
+				}
+				ind_x++;
+			}
+			// Iterate over algebraic variables
+			for (k=0;k<jmi->n_real_w;k++) {
+				if (w_lin[k]==0) {
+					jmi_init_opt->non_linear_variables_indices[ind++] = ind_x;
+				}
+				ind_x++;
+			}
+
+		} else {
+			jmi_init_opt->n_nonlinear_variables = -1;
+		}
+
 	} else {
 
 		// Copy information about free parameters
@@ -146,6 +240,7 @@ int jmi_init_opt_new(jmi_init_opt_t **jmi_init_opt_new, jmi_t *jmi,
 		// Set number of equality constraints
 		jmi_init_opt->n_h = jmi->init->F0->n_eq_F;
 
+		jmi_init_opt->n_nonlinear_variables = -1;
 	}
 
 	/*
@@ -220,7 +315,7 @@ int jmi_init_opt_new(jmi_init_opt_t **jmi_init_opt_new, jmi_t *jmi,
 	}
 
 	// Set non-linear variables: currently not supported TODO:
-	jmi_init_opt->n_nonlinear_variables = 0;
+	//jmi_init_opt->n_nonlinear_variables = 0;
 
 	// Initialized work vectors
 	jmi_init_opt->res_F1 = (jmi_real_t*)calloc(jmi->init->F1->n_eq_F,sizeof(jmi_real_t));
@@ -313,7 +408,7 @@ int jmi_init_opt_new(jmi_init_opt_t **jmi_init_opt_new, jmi_t *jmi,
 		printf(">>> %d %d %d\n",i,jmi_init_opt->dh_irow[i],jmi_init_opt->dh_icol[i]);
 	}
 */
-//	print_problem_stats(jmi_init_opt);
+	//print_problem_stats(jmi_init_opt);
 
 	free(merged_p_free_init);
 	free(merged_p_free_lb);
@@ -493,7 +588,7 @@ int jmi_init_opt_df(jmi_init_opt_t *jmi_init_opt, jmi_real_t *df) {
 
     for (i=0;i<jmi_init_opt->n_x;i++) {
     	df[i] = 0;
-//    	printf("%f\n",jmi_init_opt->x[i]);
+    	//printf("%f\n",jmi_init_opt->x[i]);
     }
 
 	if (jmi_init_opt->stat==1) {

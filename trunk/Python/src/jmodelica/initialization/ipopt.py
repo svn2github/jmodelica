@@ -252,14 +252,20 @@ class NLPInitialization(object):
         self._model._set_lb_values(_p_opt_lb, _dx_lb, _x_lb, _u_lb, _w_lb)
         self._model._set_ub_values(_p_opt_ub, _dx_ub, _x_ub, _u_ub, _w_ub)
                     
-        _linearity_information_provided = 0; # Not supported
-        _p_opt_lin = N.ones(self._n_p_opt,dtype=int)
-        _p_free_lin = N.ones(self._n_p_free,dtype=int)
+        _linearity_information_provided = 1;
+        _p_opt_lin = N.ones(model._n_p_opt,dtype=int)
+        _p_free_lin = N.ones(0,dtype=int)
         _dx_lin = N.ones(model._n_real_dx.value,dtype=int)
         _x_lin = N.ones(model._n_real_x.value,dtype=int)
+        _u_lin = N.ones(model._n_real_u.value,dtype=int)        
         _w_lin = N.ones(model._n_real_w.value,dtype=int)
-        
-#         self._set_lin_values(_p_opt_lin, _dx_lin, _x_lin,_w_lin)
+        _dx_tp_lin = N.ones(model._n_real_dx.value*model._n_tp.value,dtype=int)
+        _x_tp_lin = N.ones(model._n_real_x.value*model._n_tp.value,dtype=int)
+        _u_tp_lin = N.ones(model._n_real_u.value*model._n_tp.value,dtype=int)        
+        _w_tp_lin = N.ones(model._n_real_w.value*model._n_tp.value,dtype=int)
+
+        self._model._set_lin_values(_p_opt_lin, _dx_lin, _x_lin, _u_lin, _w_lin, 
+                                    _dx_tp_lin, _x_tp_lin, _u_tp_lin, _w_tp_lin)
         
         self._set_typedef_init_opt_new()
 #        try:       
@@ -296,7 +302,7 @@ class NLPInitialization(object):
             "jmi_init_opt struct has not returned correctly."
             
         self._set_nlpInit_typedefs()
-        
+
     def _set_typedef_init_opt_new(self):
         try:
             self._jmi_model._dll.jmi_init_opt_new.argtypes = [

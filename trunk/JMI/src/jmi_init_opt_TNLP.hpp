@@ -66,12 +66,11 @@ public:
                                    IpoptCalculatedQuantities* ip_cq);
     //@}
 
-    /*
     virtual Index get_number_of_nonlinear_variables();
 
     virtual bool get_list_of_nonlinear_variables(Index num_nonlin_vars,
         Index* pos_nonlin_vars);
-*/
+
   private:
     /**@name Default Compiler Generated Methods
      * (Hidden to avoid implicit creation/calling).

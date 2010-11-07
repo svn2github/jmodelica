@@ -193,7 +193,7 @@ void jmi_init_opt_TNLP::finalize_solution(SolverReturn status,
 //	printf("Return status: %d\n",status);
 }
 
-/*
+
 Index jmi_init_opt_TNLP::get_number_of_nonlinear_variables() {
 
 	return problem_->n_nonlinear_variables;
@@ -210,4 +210,5 @@ bool jmi_init_opt_TNLP::get_list_of_nonlinear_variables(Index num_nonlin_vars,
 	return true;
 
 }
-*/
+
+
