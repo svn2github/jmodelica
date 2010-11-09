@@ -4027,4 +4027,73 @@ end RedeclareFunction4;
 
 
 
+model RedeclareEach1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+	 JModelica.UnitTesting.TransformCanonicalTestCase(
+		 name="RedeclareEach1",
+		 description="Using redeclare on array",
+		 flatModel="
+fclass RedeclareTests.RedeclareEach1
+ Real a[1].a[1];
+ Real a[2].a[1];
+equation
+ a[1].a[1] = 0;
+ a[2].a[1] = 0;
+end RedeclareTests.RedeclareEach1;
+")})));
+
+	model A
+		package B = D;
+		Real a[B.N] = zeros(B.N);
+	end A;
+	
+	package C
+		extends D(N = 1);
+	end C;
+	
+	package D
+		constant Integer N = 2;
+	end D;
+	
+	A a[2](redeclare each package B = C);
+end RedeclareEach1;
+
+
+model RedeclareEach2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="RedeclareEach2",
+         description="Using redeclare on array",
+         flatModel="
+fclass RedeclareTests.RedeclareEach2
+ Real a[1].a[1];
+ Real a[2].a[1];
+equation
+ a[1].a[1] = 0;
+ a[2].a[1] = 0;
+end RedeclareTests.RedeclareEach2;
+")})));
+
+	model E
+		package B = D;
+	end E;
+	
+	model A
+		extends E;
+		Real a[B.N] = zeros(B.N);
+	end A;
+	
+	package C
+		extends D(N = 1);
+	end C;
+	
+	package D
+		constant Integer N = 2;
+	end D;
+	
+	A a[2](redeclare each package B = C);
+end RedeclareEach2;
+
+
+
 end RedeclareTests;

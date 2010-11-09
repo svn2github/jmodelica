@@ -127,19 +127,17 @@ aspect InstLookupComponents {
 		return getInstConstraining().getInstNode().memberInstComponent(name).size() > 0;
 	}
 	
+	syn HashSet InstNode.arrayMemberInstComponent(String name, int ndims) {
+		if (ndims == 0) 
+			return memberInstComponent(name);
+		if (getNumInstComponentDecl() == 0)
+			return emptyHashSet();
+		return getInstComponentDecl(0).arrayMemberInstComponent(name, ndims - 1);
+	}
+	
 	syn lazy HashSet InstNode.memberInstComponent(String name)  {
-
 		if (isArray()) {
-			if (getNumInstComponentDecl() == 0)
-				return emptyHashSet();
-			
-			int ndims = ndims();
-			InstNode n = getInstComponentDecl(0);
-			for (int i=0;i<ndims-1;i++) {
-				n = n.getInstComponentDecl(0);
-			}
-			return n.memberInstComponent(name);
-			
+			return arrayMemberInstComponent(name, ndims());
 		} else {	
 			HashSet set = new HashSet(4);
 		 	

@@ -25,22 +25,18 @@ aspect InstLookupClasses {
 	inh HashSet InstNode.lookupInstClass(String name);
     inh HashSet InstModification.lookupInstClass(String name);
 		
-	eq InstNode.getInstClassDecl().lookupInstClass(String name)           = genericLookupInstClass(name); 
-	eq InstNode.getRedeclaredInstClassDecl().lookupInstClass(String name) = genericLookupInstClass(name); 
-	eq InstNode.getInstComponentDecl().lookupInstClass(String name)       = genericLookupInstClass(name); 
-	eq InstNode.getFAbstractEquation().lookupInstClass(String name)       = genericLookupInstClass(name); 
-	eq InstNode.getInstExtends().lookupInstClass(String name)             = superLookupInstClass(name);
-
-    eq InstNode.getDynamicClassName().lookupInstClass(String name) = genericLookupInstClass(name);
-
-	eq InstComponentDecl.getInstClassDecl().lookupInstClass(String name)     = genericLookupInstClassInComponent(name);	
-	eq InstComponentDecl.getInstComponentDecl().lookupInstClass(String name) = genericLookupInstClassInComponent(name);	
-	eq InstComponentDecl.getInstExtends().lookupInstClass(String name)       = superLookupInstClassInComponent(name);
-    eq InstComponentDecl.getDynamicClassName().lookupInstClass(String name)  = genericLookupInstClassInComponent(name);
-    
-    eq InstAssignable.getBindingFExp().lookupInstClass(String name) = myInstValueMod().lookupInstClass(name);
+	eq InstNode.getInstClassDecl().lookupInstClass(String name)            = genericLookupInstClass(name); 
+	eq InstNode.getRedeclaredInstClassDecl().lookupInstClass(String name)  = genericLookupInstClass(name); 
+	eq InstNode.getInstComponentDecl().lookupInstClass(String name)        = genericLookupInstClass(name); 
+	eq InstNode.getFAbstractEquation().lookupInstClass(String name)        = genericLookupInstClass(name); 
+	eq InstNode.getInstExtends().lookupInstClass(String name)              = superLookupInstClass(name);
+    eq InstNode.getDynamicClassName().lookupInstClass(String name)         = genericLookupInstClass(name);
+                                                                           
+	eq InstComponentDecl.getInstExtends().lookupInstClass(String name)     = superLookupInstClassInComponent(name);
+                                                                           
+    eq InstAssignable.getBindingFExp().lookupInstClass(String name)        = myInstValueMod().lookupInstClass(name);
 	
-    eq InstArrayComponentDecl.getChild().lookupInstClass(String name) = lookupInstClass(name);
+    eq InstArrayComponentDecl.getChild().lookupInstClass(String name)      = lookupInstClass(name);
     
 	eq InstExtends.getInstClassDecl().lookupInstClass(String name)         = genericLookupInstClassInExtends(name);	
 	eq InstExtends.getInstComponentDecl().lookupInstClass(String name)     = genericLookupInstClassInExtends(name);	
@@ -51,7 +47,7 @@ aspect InstLookupClasses {
 	
 	inh HashSet InstExtends.lookupInstClassFromMod(String name);
 	eq InstNode.getInstExtends().lookupInstClassFromMod(String name)          = genericLookupInstClass(name);
-	eq InstComponentDecl.getInstExtends().lookupInstClassFromMod(String name) = genericLookupInstClassInComponent(name);
+	eq InstComponentDecl.getInstExtends().lookupInstClassFromMod(String name) = genericLookupInstClass(name);
 	eq InstExtends.getInstExtends().lookupInstClassFromMod(String name)       = genericLookupInstClassInExtends(name);
    
     eq InstInlineExtends.getClassName().lookupInstClass(String name) = 
@@ -345,43 +341,14 @@ aspect InstLookupClasses {
 
 	syn lazy HashSet InstComponentDecl.genericLookupInstClass(String name) circular [emptyHashSet()] {
 		HashSet set = new HashSet(4);
-		
-		for (InstClassDecl icd : instClassDecls()) {
-			if (icd.matchInstClassDecl(name)) {
-				set.add(icd);
-			}
-		}
-		
-		for (InstExtends ie : instExtends()) {
-			set.addAll(ie.memberInstClass(name));
-		}
-
-		for (InstImport ii : instImports()) {
-			set.addAll(ii.lookupInstClassInImport(name));		
-		}
-
-		if (set.size()>0)
-			return set;
-		else
-			return myInstClass().genericLookupInstClass(name);
-	}
-
-	syn lazy HashSet InstComponentDecl.genericLookupInstClassInComponent(String name) circular [emptyHashSet()] {
-		HashSet set = new HashSet(4);
-		
-		for (InstClassDecl icd : instClassDecls()) 
-			if (icd.matchInstClassDecl(name)) 
-				set.add(icd);
-		
-		for (InstExtends ie : instExtends()) 
-			set.addAll(ie.memberInstClass(name));
+		set.addAll(memberInstClass(name));
 
 		for (InstImport ii : instImports()) 
 			set.addAll(ii.lookupInstClassInImport(name));		
 
-		if (set.size()>0) // Did not find any local class
+		if (set.size()>0)
 			return set;
-		else // continue search at myInstClass()
+		else
 			return myInstClass().genericLookupInstClass(name);
 	}
 	
@@ -483,19 +450,36 @@ aspect InstLookupClasses {
 		return emptyHashSet();
 	}
 	
+	/**
+	 * Returns the InstComponentDecl representing the first cell of the array.
+	 * 
+	 * @param ndims  the number of dimensions of the array.
+	 */
+	syn InstComponentDecl InstComponentDecl.arrayCellInstComponent(int ndims) {
+		if (ndims == 0) 
+			return this;
+		if (getNumInstComponentDecl() == 0)
+			return unknownInstComponentDecl();
+		return getInstComponentDecl(0).arrayCellInstComponent(ndims - 1);
+	}
+	
 	eq InstComponentDecl.memberInstClass(String name) {
-		HashSet set = new HashSet();
-		
-		for (InstClassDecl icd : instClassDecls()) 
-			if (icd.matchInstClassDecl(name)) 
-				set.add(icd);
-		
-		for (InstExtends ie : instExtends()) 
-			set.addAll(ie.memberInstClass(name));
-		
-		if (set.size() > 0 && constrainMemberInstClass(name)) 
-			return set;
-		return emptyHashSet();
+		if (isArray()) {
+			return arrayCellInstComponent(ndims()).memberInstClass(name);
+		} else {
+			HashSet set = new HashSet();
+			
+			for (InstClassDecl icd : instClassDecls()) 
+				if (icd.matchInstClassDecl(name)) 
+					set.add(icd);
+			
+			for (InstExtends ie : instExtends()) 
+				set.addAll(ie.memberInstClass(name));
+			
+			if (set.size() > 0 && constrainMemberInstClass(name)) 
+				return set;
+			return emptyHashSet();
+		}
 	}
 	
 	syn boolean InstClassDecl.matchInstClassDecl(String name) = false;

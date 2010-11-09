@@ -158,7 +158,7 @@ WhiteSpace = ({LineTerminator} | {NonBreakingWhiteSpace})+
 /* comments */
 Comment = {TraditionalComment} | {EndOfLineComment} 
 
-TraditionalComment = "/*" [^*] ~"*/" | "/*" "*"+ "/"
+TraditionalComment = "/*" ~"*/"
 EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
 
 
