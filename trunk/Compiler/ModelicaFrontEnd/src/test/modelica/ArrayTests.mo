@@ -514,7 +514,6 @@ end ArrayTest15_Err;
     m[2].x[2] = 4;
   end ArrayTest16;
 
-/* Commenting out since this is an errouneous test, see #1156
 model ArrayTest17
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
@@ -536,10 +535,10 @@ equation
  n[1].m[2,1].x[1] = 2;
  n[2].m[1,1].x[1] = 3;
  n[2].m[2,1].x[1] = 4;
- n[1].m[1].x[2] = 1;
- n[1].m[2].x[2] = 1;
- n[2].m[1].x[2] = 1;
- n[2].m[2].x[2] = 1;
+ n[1].m[1,1].x[2] = 1;
+ n[1].m[2,1].x[2] = 1;
+ n[2].m[1,1].x[2] = 1;
+ n[2].m[2,1].x[2] = 1;
 end ArrayTests.ArrayTest17;
 ")})));
 
@@ -557,7 +556,6 @@ end ArrayTests.ArrayTest17;
   n.m.x[1]={{{1},{2}},{{3},{4}}};
 
 end ArrayTest17;
-*/
 
 model ArrayTest21
         annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
@@ -6440,7 +6438,7 @@ model ArraySize2
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.ErrorTestCase(
          name="ArraySize2",
-         description="",
+         description="Size of variable: one dimension refering to another",
          errorMessage="
 2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':

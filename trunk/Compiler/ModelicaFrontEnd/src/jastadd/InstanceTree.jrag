@@ -1165,19 +1165,21 @@ aspect InstaceConstrainingClauses {
 	    return l;
 	}
 	
+	public List InstArrayComponentDecl.buildFAbstractEquationList() {
+		return instComponentDecl().buildFAbstractEquationList();
+	}
+	
 	syn lazy List InstNode.getFAbstractEquationList() = 
 		buildFAbstractEquationList();
-	eq InstComposite.getFAbstractEquationList() = 
-		isArrayDecl() ? new List() : buildFAbstractEquationList();
-	eq InstArrayComponentDecl.getFAbstractEquationList() = 
-		retrieveFAbstractEquationList();
-	
-	inh List InstArrayComponentDecl.retrieveFAbstractEquationList();
-	eq InstNode.getInstComponentDecl().retrieveFAbstractEquationList() = 
-		buildFAbstractEquationList();
-	eq InstForIndex.getInstPrimitive().retrieveFAbstractEquationList() = 
-		new List();
+	eq InstComponentDecl.getFAbstractEquationList() = 
+		isArrayParent() ? new List() : buildFAbstractEquationList();
 
+	// TODO: Change behaviour of isArrayDecl to this instead?
+	syn boolean InstComponentDecl.isArrayParent() = 
+		getNumInstComponentDecl() > 0 && getInstComponentDecl(0).isArrayChild();
+
+	syn boolean InstComponentDecl.isArrayChild() = false;
+	eq InstArrayComponentDecl.isArrayChild()     = true;
 }
 
 aspect InstImportClauses {
