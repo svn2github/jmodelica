@@ -3491,6 +3491,30 @@ CCodeGenTests_ModelIdentifierTest")})));
 	Real r = 1.0;
 end ModelIdentifierTest;
 
+model GUIDTest1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="GUIDTest1",
+         description="",
+         template="$C_guid$",
+         generatedCode="
+c143b522ea1fdf6db1132a647457c83a")})));
+
+	Real r = 1.0;
+end GUIDTest1;
+
+model GUIDTest2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="GUIDTest2",
+         description="",
+         template="$C_guid$",
+         generatedCode="
+ff13c7197701d1a1e9559970770f01f0")})));
+	
+	Real r = 2.0;
+end GUIDTest2;
+
 model DependentParametersWithScalingTest1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.CCodeGenTestCase(

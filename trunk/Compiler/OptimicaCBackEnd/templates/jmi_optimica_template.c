@@ -13,7 +13,6 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -21,6 +20,7 @@
 #include "fmi.h"
 
 #define MODEL_IDENTIFIER $C_model_id$
+#define GUID $C_guid$
 #include "fmiModelFunctions.h"
 
 static const int N_real_ci = $n_real_ci$;

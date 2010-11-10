@@ -21,6 +21,15 @@ import java.util.ArrayList;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.math.BigInteger;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
+import java.io.PrintStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.DigestInputStream;
+import java.security.NoSuchAlgorithmException;
 
 aspect FlatAPI {
 	
@@ -747,7 +756,42 @@ aspect FlatAPI {
 	public Set<AbstractFVariable> FFunctionCallEquation.referencedFVariablesInRHS() {
 		return getCall().referencedFVariablesInFExp();
 	}
-	
+		
+	syn lazy String FClass.guid() {
+		try {
+			InputStream in = new PipedInputStream();
+			final PipedOutputStream out = new PipedOutputStream((PipedInputStream)in);
+			new Thread(
+					new Runnable() {
+						public void run(){
+							prettyPrint(new PrintStream(out),"");
+							try {
+								out.close();
+							} catch (IOException e) {
+								throw new RuntimeException(e);
+							}
+						}
+					}
+			).start();
+			
+			MessageDigest md5 = MessageDigest.getInstance("MD5");
+
+			try {
+				in = new DigestInputStream(in, md5);
+				byte[] b = new byte[512];
+				while(in.read(b) == b.length);
+			} finally {
+				in.close();
+			}
+			String signature = new BigInteger(1,md5.digest()).toString(16);
+			return signature;
+			
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		} catch (NoSuchAlgorithmException e) {
+			throw new RuntimeException(e);
+		}
+	}
 }
 
 aspect FlatEnumerations {

@@ -309,6 +309,21 @@ public class CGenerator extends GenericGenerator {
 		}
 	}
 
+	/**
+	 * Generates GUID.
+	 */
+	class DAETag_C_guid extends DAETag {
+		
+		public DAETag_C_guid(AbstractGenerator myGenerator, FClass fclass) {
+			super("C_guid","C: GUID",
+			  myGenerator,fclass);
+		}
+
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.guid());
+		}
+	}
+
 	
 	/**
 	 * \brief Returns the string denoting the beginning of the copyright blurb.

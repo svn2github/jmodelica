@@ -22,6 +22,7 @@
 $external_func_includes$
 
 #define MODEL_IDENTIFIER $C_model_id$
+#define GUID $C_guid$
 #include "fmiModelFunctions.h"
 
 static const int N_real_ci = $n_real_ci$;
