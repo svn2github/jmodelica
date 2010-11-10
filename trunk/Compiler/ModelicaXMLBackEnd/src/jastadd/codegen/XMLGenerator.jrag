@@ -65,7 +65,7 @@ public class XMLGenerator extends GenericGenerator {
 			genPrinter.print("fmiVersion=\"1.0\" ");
 			genPrinter.print("modelName=\""+fclass.name()+"\" ");
 			genPrinter.print("modelIdentifier=\""+fclass.nameUnderscore()+"\" ");
-			genPrinter.print("guid=\"unsupported\" ");
+			genPrinter.print("guid=\""+fclass.guid()+"\" ");
 			//genPrinter.print("description=\"String\" ");
 			//genPrinter.print("author=\"String\" ");
 			//genPrinter.print("version=\"0.0\" ");
