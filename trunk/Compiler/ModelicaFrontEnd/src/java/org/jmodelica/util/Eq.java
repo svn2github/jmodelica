@@ -59,6 +59,7 @@ public class Eq {
 	public void tarjanReset() {
 		setTarjanLowLink(0);
 		setTarjanNbr(0);
+		resetVariableIterator();
 	}
 	
 	public String getName() {

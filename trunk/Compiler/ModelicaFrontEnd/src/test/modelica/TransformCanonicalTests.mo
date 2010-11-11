@@ -1287,8 +1287,8 @@ fclass TransformCanonicalTests.InitialEqTest3
  Real y1;
  Real y2;
 initial equation 
- x2 = 2;
  x1 = 1;
+ x2 = 2;
 equation
  der(x1) = x1 + x2 + y1;
  der(x2) = x1 - ( x2 ) + y2;
@@ -1352,8 +1352,8 @@ fclass TransformCanonicalTests.InitialEqTest5
  Real y1;
  Real y2;
 initial equation 
- x2 = 2;
  der(x1) = 0;
+ x2 = 2;
 equation
  der(x1) = x1 + x2 + y1;
  der(x2) = x1 - ( x2 ) + y2;
@@ -1757,10 +1757,6 @@ model UnbalancedTest2_Err
         description="Test error messages for unbalanced systems.",
                                                errorMessage=
 "
-Error: in file 'TransformCanonicalTests.UnbalancedTest2_Err.mof':
-Semantic error at line 0, column 0:
-  The DAE initialization system has 3 equations and 2 free variables.
-
 Error: in file 'TransformCanonicalTests.UnbalancedTest2_Err.mof':
 Semantic error at line 0, column 0:
   The system is structurally singuar (or of high index). The following varible(s) could not be matched to any equation:

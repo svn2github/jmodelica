@@ -86,20 +86,21 @@ aspect TransformCanonical {
 			indexReduction();
 		}
 
+	/*
 		if (root().options.getBooleanOption("equation_sorting")) {
 			indexReduction();
-			blt();
+			performDAEBLT();
 		}
-		
+		*/
+/*
 		if (root().options.getBooleanOption("automatic_add_initial_equations")) {
 			addInitialEquations();
 		}
-		
+	*/	
         root().flushAllRecursive();
 		
 	}
 		
-	
 	private org.jmodelica.graphs.EquationSystem FClass.eqSys = null;
 	
 	public void FClass.indexReduction() {
@@ -149,57 +150,35 @@ aspect TransformCanonical {
 			
 	}
 
-	ArrayList<FVariable> FEquationBlock.activeVariables = new ArrayList<FVariable>();
+	public class BLT extends ArrayList {
 	
-	public void FClass.blt() {
+	}
+
+	public class EquationBlock {
+		private ArrayList<MatchingPair> mps = new ArrayList<MatchingPair>();
 		
-		LinkedList<Stack<org.jmodelica.graphs.Equation>> blt_result = eqSys.blt();
-
-		StringBuffer str = new StringBuffer();
-		str.append("BLT:\n");
-		//LinkedList<Stack<org.jmodelica.graphs.Equation>> blt = eqSys.blt();
-		int i = 0;
-		for (Stack<org.jmodelica.graphs.Equation> s : blt_result) {
-			str.append("Block "+i+":\n");
-			for (org.jmodelica.graphs.Equation e : s) {
-				str.append(e + " (" + e.getMatch()+")\n");
+		public EquationBlock() {
+		}
+		
+		public void addMatchingPair(MatchingPair m) {
+			mps.add(m);
+		}	
+		
+		public Set<FAbstractEquation> equations() {
+			LinkedHashSet<FAbstractEquation> s = new LinkedHashSet<FAbstractEquation>();
+			for (MatchingPair mp : mps) {
+				s.add(mp.getEquation());
 			}
-			i++;
+			return s;
 		}
 
-		// Create a map from equation Ids to equations. Insert them
-		// in the same order as they were inserted in the equation system
-		// to get the same mapping. This needs to be changed... 
-		HashMap<String,FAbstractEquation> eqns = new HashMap<String,FAbstractEquation>();
-		int k = 1;
-		for (FAbstractEquation e : equations()) {
-			eqns.put("eq_"+k,e);
-			k++;
+		public Set<FVariable> activeVariables() {
+			LinkedHashSet<FVariable> s = new LinkedHashSet<FVariable>();
+			for (MatchingPair mp : mps) {
+				s.add(mp.getFVariable());
+			}
+			return s;
 		}		
-		str.append("\n Sorted equations:"); 
-		// Create blocks and insert into FClass
-		List<FEquationBlock> l = new List<FEquationBlock>();
-		for (Stack<org.jmodelica.graphs.Equation> s : blt_result) {
-			str.append("Block "+i+":\n");
-			FEquationBlock eb = new FEquationBlock();
-			l.add(eb);
-			for (org.jmodelica.graphs.Equation e : s) {
-				int eq_index = (int)Integer.parseInt(e.toString().substring(3));
-				eb.addFAbstractEquation(eqns.get(e.getName()));
-				String varName = e.getMatch().getName();
-				FQName fqn = new FQName(varName);
-				System.out.println(fqn.name());
-				AbstractFVariable fv = lookupFV(fqn,
-						e.getMatch().getTimesDiffed()==1); // TODO: handle higher order derivatives
-				if (fv instanceof FVariable) {
-					eb.activeVariables.add((FVariable)fv);
-				}
-				str.append(eqns.get(e.getName()).prettyPrint(" ") + "\n");
-			}
-			i++;
-		}
-		System.out.println(str.toString());
-		setFEquationBlockList(l);
 	}
 
     public class MatchingPair {
@@ -269,16 +248,16 @@ aspect TransformCanonical {
 		return daeInitUnmatchedVariables;
 	}	
 
-	private ArrayList<ArrayList<MatchingPair>> FClass.daeBLT = null;
-	syn lazy ArrayList<ArrayList<MatchingPair>> FClass.getDAEBLT() {
+	private BLT FClass.daeBLT = null;
+	syn lazy BLT FClass.getDAEBLT() {
 		if (daeBLT==null) {
 			computeMatchingsAndBLT();
 		}
 		return daeBLT;
 	}
 	
-	private ArrayList<ArrayList<MatchingPair>> FClass.daeInitBLT = null;	
-	syn lazy ArrayList<ArrayList<MatchingPair>> FClass.getDAEInitBLT() {
+	private BLT FClass.daeInitBLT = null;	
+	syn lazy BLT FClass.getDAEInitBLT() {
 		if (daeInitBLT==null) {
 			computeMatchingsAndBLT();
 		}
@@ -289,8 +268,8 @@ aspect TransformCanonical {
 		
 		daeMatching = new ArrayList<MatchingPair>();
 		daeInitMatching = new ArrayList<MatchingPair>();		
-	    daeBLT = new ArrayList<ArrayList<MatchingPair>>();
-	   	daeInitBLT = new ArrayList<ArrayList<MatchingPair>>();		
+	    daeBLT = new BLT();
+	   	daeInitBLT = new BLT();		
 		daeUnmatchedEquations = new ArrayList<FAbstractEquation>();		
 		daeUnmatchedVariables = new ArrayList<FVariable>();			
 		daeInitUnmatchedEquations = new ArrayList<FAbstractEquation>();		
@@ -371,27 +350,7 @@ aspect TransformCanonical {
 				k++;
 			}
 		}
-		
-		// TODO: If no complete matching found, then try index reduction
-	/*	
-		if (g.getUnmatchedVariables().size()==0 && g.getUnmatchedEquations().size()==0) {	
-		
-			LinkedList<Stack<Eq>> blt = g.computeBLT();
-		
-			System.out.println("BLT: " + blt.size() + " blocks");
-			for (Stack<Eq> bl : blt) {
-				System.out.println("Block: " + bl.size() + "-----");
-				ArrayList<MatchingPair> l = new ArrayList<MatchingPair>();
-				daeBLT.add(l);
-				for (Eq bl_eqn : bl) {
-					v = bl_eqn.getMatching();
-					l.add(new MatchingPair(equations().get(bl_eqn.getId()),(FVariable)lookupFV(new FQName(v.getName()),false)));
-					System.out.println(bl_eqn.getMatching() + ": " + bl_eqn.getDescription());
-				}
-				System.out.println("-----------------");
-			}
-		}
-	*/
+	
 		for (Var var : g.getUnmatchedVariables()) {
 			daeUnmatchedVariables.add((FVariable)lookupFV(new FQName(var.getName()),false));
 		}
@@ -399,7 +358,33 @@ aspect TransformCanonical {
 		for (Eq ee : g.getUnmatchedEquations()) {
 			daeUnmatchedEquations.add(equations().get(ee.getId()));
 		}
+	
+		// TODO: If no complete matching found, then try index reduction
+		if (g.getUnmatchedVariables().size()>0 || g.getUnmatchedEquations().size()>0) {
+			return;
+		}
+	
+		// Perform BLT
+		if (root().options.getBooleanOption("equation_sorting") && g.getUnmatchedVariables().size()==0 && g.getUnmatchedEquations().size()==0) {	
 		
+			LinkedList<Stack<Eq>> blt = g.computeBLT();
+		
+//			System.out.println("BLT: " + blt.size() + " blocks");
+			for (Stack<Eq> bl : blt) {
+//				System.out.println("Block: " + bl.size() + "-----");
+				EquationBlock b = new EquationBlock();
+				daeBLT.add(b);
+				for (Eq bl_eqn : bl) {
+					v = bl_eqn.getMatching();
+					b.addMatchingPair(new MatchingPair(equations().get(bl_eqn.getId()),(FVariable)lookupFV(new FQName(v.getName()),false)));
+//					System.out.println(bl_eqn.getMatching() + ": " + bl_eqn.getDescription());
+				}
+//				System.out.println("-----------------");
+			}
+		}
+			
+		// Find matching for the initialization system	
+			
 		// Add all differentiated variables
 		for (FVariable fv : differentiatedRealVariables()) {
 			g.addVariable(fv.name(),"");     
@@ -465,6 +450,50 @@ aspect TransformCanonical {
 		log.info("DAE initial ");
 		log.info(g.printMatching());
 
+		if (g.getUnmatchedEquations().size()>0) {
+		   	return;
+		}
+
+		// Add initial equations if needed
+		if (root().options.getBooleanOption("automatic_add_initial_equations")) {
+			List<FAbstractEquation> l = new List<FAbstractEquation>();
+			for (FAbstractEquation e : initialEquations()) {
+				l.add(e);
+			}
+
+			for (Var var : g.getUnmatchedVariables()) {	
+			    FVariable fv = (FVariable)lookupFV(new FQName(var.getName()),false);
+				FEquation fe = new FEquation(new FIdUseExp(
+						new FIdUse(fv.getFQName().fullCopy())),
+						fv.startAttributeSet()? fv.startAttributeExp(): new FRealLitExp("0.0"));
+				l.add(fe);
+
+				eqn = g.addEquation("eq_"+k,fe.prettyPrint(""),j);
+				v = g.getVariable(var.getName());     
+				g.addEdge(eqn,v); 
+				k++;
+				j++;
+			}
+	
+			setFInitialEquationList(l);	
+	        root().flushAllRecursive();
+
+			g.maximumMatching(false);	
+			log.info("DAE initial after addition of initial equations");
+			log.info(g.printMatching());
+
+		}
+
+		for (Var var : g.getUnmatchedVariables()) {
+			daeInitUnmatchedVariables.add((FVariable)lookupFV(new FQName(var.getName()),false));
+		}
+
+		for (Eq ee : g.getUnmatchedEquations()) {
+				FAbstractEquation eee = ee.getId()<equations().size()?
+				    equations().get(ee.getId()): initialEquations().get(ee.getId()-equations().size());
+			daeInitUnmatchedEquations.add(eee);
+		}
+
  		k = 1;
 		for (FAbstractEquation e : equations()) {				
 			//k = e.extractDerAlgIncidence(g,k);
@@ -495,60 +524,33 @@ aspect TransformCanonical {
 		}
 		
 		// TODO: If no complete matching found, then try index reduction
-		/*
-		if (g.getUnmatchedVariables().size()==0 && g.getUnmatchedEquations().size()==0) {
+		if (g.getUnmatchedVariables().size()>0 || g.getUnmatchedEquations().size()>0) {
+			return;
+		}
+				
+		if (root().options.getBooleanOption("equation_sorting") && g.getUnmatchedVariables().size()==0 && g.getUnmatchedEquations().size()==0) {
 		
 			g.tarjanReset();
 			LinkedList<Stack<Eq>> blt = g.computeBLT();
 		
-			System.out.println("BLT: " + blt.size() + " blocks");
+//			System.out.println("BLT: " + blt.size() + " blocks");
 			for (Stack<Eq> bl : blt) {
-				System.out.println("Block: " + bl.size() + "-----");
-				ArrayList<MatchingPair> l = new ArrayList<MatchingPair>();
-				daeInitBLT.add(l);
+//				System.out.println("Block: " + bl.size() + "-----");
+				EquationBlock b = new EquationBlock();
+				daeInitBLT.add(b);
 				for (Eq bl_eqn : bl) {
 					v = bl_eqn.getMatching();
+//					System.out.println(">> " + bl_eqn.getId());
 					FAbstractEquation eee = bl_eqn.getId()<equations().size()?
 					    equations().get(bl_eqn.getId()): initialEquations().get(bl_eqn.getId()-equations().size());
-					l.add(new MatchingPair(eee,(FVariable)lookupFV(new FQName(v.getName()),false)));
-					System.out.println(bl_eqn.getMatching() + ": " + bl_eqn.getDescription());
+					b.addMatchingPair(new MatchingPair(eee,(FVariable)lookupFV(new FQName(v.getName()),false)));
+//					System.out.println(bl_eqn.getMatching() + ": " + bl_eqn.getDescription());
 				}
-				System.out.println("-----------------");
+//				System.out.println("-----------------");
 			}
-	
 		}
-	*/
-		for (Var var : g.getUnmatchedVariables()) {
-			daeInitUnmatchedVariables.add((FVariable)lookupFV(new FQName(var.getName()),false));
-		}
-
-		for (Eq ee : g.getUnmatchedEquations()) {
-				FAbstractEquation eee = ee.getId()<equations().size()?
-				    equations().get(ee.getId()): initialEquations().get(ee.getId()-equations().size());
-			daeInitUnmatchedEquations.add(eee);
-		}
-			
 	}	
 	
-	public void FClass.addInitialEquations() {
-		
-		List<FAbstractEquation> l = new List<FAbstractEquation>();
-		for (FVariable fv : getDAEInitUnmatchedVariables()) {
-			l.add(new FEquation(new FIdUseExp(
-					new FIdUse(fv.getFQName().fullCopy())),
-					fv.startAttributeSet()? fv.startAttributeExp(): new FRealLitExp("0.0")));
-		}
-	
-		if (l.getNumChild()>0) {
-			for (FAbstractEquation e : initialEquations()) {
-				l.add(e);
-			}
-			setFInitialEquationList(l);
-		}
-					
-	}	
-
-
 	syn lazy ArrayList<String> FClass.structuralErrors() {
 		ArrayList<String> structuralErrors = new ArrayList<String>();
 		if (root().options.getBooleanOption("enable_structural_diagnosis")) {
