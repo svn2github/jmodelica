@@ -320,7 +320,7 @@ public class CGenerator extends GenericGenerator {
 		}
 
 		public void generate(PrintStream genPrinter) {
-			genPrinter.print(fclass.guid());
+			genPrinter.print("\""+fclass.guid()+"\"");
 		}
 	}
 

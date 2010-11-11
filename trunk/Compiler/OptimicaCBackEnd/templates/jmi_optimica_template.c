@@ -20,7 +20,7 @@
 #include "fmi.h"
 
 #define MODEL_IDENTIFIER $C_model_id$
-#define GUID $C_guid$
+#define C_GUID $C_guid$
 #include "fmiModelFunctions.h"
 
 static const int N_real_ci = $n_real_ci$;
