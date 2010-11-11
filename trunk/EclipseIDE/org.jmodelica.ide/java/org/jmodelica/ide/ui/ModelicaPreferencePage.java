@@ -2,6 +2,9 @@ package org.jmodelica.ide.ui;
 
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.QualifiedName;
+import org.eclipse.core.runtime.preferences.ConfigurationScope;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.widgets.Composite;
@@ -10,20 +13,21 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.jmodelica.ide.Activator;
 import org.jmodelica.ide.IDEConstants;
+import org.jmodelica.ide.Preferences;
 import org.jmodelica.ide.helpers.Util;
 
 public class ModelicaPreferencePage extends PreferencePage  implements IWorkbenchPreferencePage {
 	
-	private static final QualifiedName LIBRARIES_ID = IDEConstants.PROPERTY_LIBRARIES_ID;
-	private static final QualifiedName OPTIONS_ID = IDEConstants.PROPERTY_OPTIONS_PATH_ID;
+	private static final String LIBRARIES_ID = IDEConstants.PROPERTY_LIBRARIES_ID;
+	private static final String OPTIONS_ID = IDEConstants.PROPERTY_OPTIONS_PATH_ID;
 	
 	private ModelicaSettingsControl settings;
 
 	@Override
 	protected Control createContents(Composite parent) {
 		settings = new ModelicaSettingsControl();
-		settings.setLibraryPaths(load(LIBRARIES_ID));
-		setOptionsPath(load(OPTIONS_ID));
+		settings.setLibraryPaths(Preferences.get(LIBRARIES_ID));
+		setOptionsPath(Preferences.get(OPTIONS_ID));
 		return settings.createControl(parent);
 	}
 
@@ -32,22 +36,9 @@ public class ModelicaPreferencePage extends PreferencePage  implements IWorkbenc
 		settings.setOptionsPath(options.equals(stateLoc) ? "" : options);
 	}
 
-	private String load(QualifiedName key) {
-		return getPreferenceStore().getString(key.getLocalName());
-	}
-
-	private void save(QualifiedName key, String value, boolean emptyOk) {
-		if (emptyOk || !value.isEmpty())
-			getPreferenceStore().setValue(key.getLocalName(), value);
-		else
-			defaults(key);
-	}
-
-	private String defaults(QualifiedName key) {
-		IPreferenceStore preferenceStore = getPreferenceStore();
-		String name = key.getLocalName();
-		preferenceStore.setToDefault(name);
-		return preferenceStore.getString(name);
+	private String defaults(String key) {
+		Preferences.clear(key);
+		return Preferences.get(key);
 	}
 
 	public void init(IWorkbench workbench) {
@@ -63,8 +54,8 @@ public class ModelicaPreferencePage extends PreferencePage  implements IWorkbenc
 
 	@Override
 	public boolean performOk() {
-		save(LIBRARIES_ID, settings.getLibraryPaths(), true);
-		save(OPTIONS_ID, settings.getOptionsPath(), false);
+		Preferences.set(LIBRARIES_ID, settings.getLibraryPaths());
+		Preferences.update(OPTIONS_ID, settings.getOptionsPath());
 		// TODO Trigger rebuild of all Modelica projects
 		return super.performOk();
 	}

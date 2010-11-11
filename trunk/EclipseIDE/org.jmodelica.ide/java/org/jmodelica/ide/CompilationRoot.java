@@ -33,8 +33,8 @@ import beaver.Parser;
  */
 public class CompilationRoot {
 
-	private final ModelicaParser PARSER = new ModelicaParser();
-	private final ModelicaScanner SCANNER = new ModelicaScanner(System.in); // Dummy stream
+	private final ModelicaParser parser = new ModelicaParser();
+	private final ModelicaScanner scanner = new ModelicaScanner(System.in); // Dummy stream
 	private final CompileErrorReport errorReport = new CompileErrorReport();
 
 	private final SourceRoot root;
@@ -49,7 +49,7 @@ public class CompilationRoot {
 		this.root = new SourceRoot(new Program(list));
 		this.handler = new InstanceErrorHandler();
 
-		PARSER.setReport(errorReport);
+		parser.setReport(errorReport);
 		root.setErrorHandler(handler);
 
 		root.options = new IDEOptions(project);
@@ -74,7 +74,7 @@ public class CompilationRoot {
 	protected StoredDefinition annotatedDefinition(StoredDefinition def, IFile file) {
 		def.setFile(file);
 		def.setFileName(file.getRawLocation().toOSString());
-		def.setLineBreakMap(SCANNER.getLineBreakMap());
+		def.setLineBreakMap(scanner.getLineBreakMap());
 
 		return def;
 	}
@@ -121,10 +121,10 @@ public class CompilationRoot {
 	public void parseFile(Reader reader, IFile file) {
 
 		errorReport.setFile(file);
-		SCANNER.reset(reader);
+		scanner.reset(reader);
 
 		try {
-			SourceRoot localRoot = (SourceRoot) PARSER.parse(SCANNER);
+			SourceRoot localRoot = (SourceRoot) parser.parse(scanner);
 			for (StoredDefinition def : localRoot.getProgram().getUnstructuredEntitys()) 
 				list.add(annotatedDefinition(def, file));
 		} catch (Parser.Exception e) {

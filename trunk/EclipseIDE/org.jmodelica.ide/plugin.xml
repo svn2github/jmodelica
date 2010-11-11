@@ -326,4 +326,10 @@
             name="JModelica">
       </page>
    </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="org.jmodelica.ide.Preferences">
+      </initializer>
+   </extension>
 </plugin>

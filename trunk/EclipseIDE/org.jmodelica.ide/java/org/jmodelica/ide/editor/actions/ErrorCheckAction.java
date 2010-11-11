@@ -46,7 +46,7 @@ public void run() {
             .getErrorHandler();
     errorHandler.resetCounter();
     String name = currentClass.qualifiedName();
-    ipr.retrieveInstFullClassDecl(name).collectErrors();
+    ipr.simpleLookupInstClassDecl(name).collectErrors();
     String msg;
     if (errorHandler.hasLostErrors()) {
         Collection<InstanceError> err = errorHandler.getLostErrors();

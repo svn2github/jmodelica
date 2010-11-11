@@ -15,66 +15,51 @@ import org.jmodelica.ide.editor.Editor;
  * Some things in Eclipse that are ridiculously verbose.
  * 
  * @author philip
- *
+ * 
  */
 public class EclipseUtil {
 
-public static Maybe<Editor> getModelicaEditorForFile(IFile file) {
+	public static Maybe<Editor> getModelicaEditorForFile(IFile file) {
 
-    // cuteness overload
+		// cuteness overload
 
-    IWorkbenchPage page = 
-        PlatformUI
-        .getWorkbench()
-        .getActiveWorkbenchWindow()
-        .getActivePage(); 
-    
-    IEditorDescriptor desc = 
-        PlatformUI.getWorkbench()
-        .getEditorRegistry()
-        .getDefaultEditor(
-            file.getName());
+		IWorkbenchPage page = PlatformUI.getWorkbench()
+				.getActiveWorkbenchWindow().getActivePage();
 
-    try {
-        
-        return 
-            Maybe.Just(
-                (Editor)
-                page.openEditor(
-                    new FileEditorInput(file),
-                    desc.getId()));
-        
-    } catch (Exception e) {
-        e.printStackTrace();
-        return Maybe.<Editor>Nothing();
-    } 
-}
-    
-public static Maybe<IFile> getFileForPath(String path) {
-    
-    if (path == null)
-        return Maybe.<IFile>Nothing();
-    
-    IWorkspaceRoot workspace =
-        ResourcesPlugin.getWorkspace().getRoot();
-    
-    // file inside workspace?
-    // TODO: If file is outside workspace, add linked resource?
-    if (!path.startsWith(workspace.getRawLocation().toOSString())) 
-        return Maybe.<IFile>Nothing();
+		IEditorDescriptor desc = PlatformUI.getWorkbench().getEditorRegistry()
+				.getDefaultEditor(file.getName());
 
-    // find files matching URI
-    IFile candidates[] = 
-        workspace
-        .findFilesForLocationURI(
-            new File(path).toURI());
-    
-    // just take first candidate if several possible for some reason. i have no
-    // idea why we do this
-    return candidates.length > 0 
-        ? Maybe.Just(candidates[0]) 
-        : Maybe.<IFile>Nothing();
-}
+		try {
 
+			return Maybe.Just((Editor) page.openEditor(
+					new FileEditorInput(file), desc.getId()));
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Maybe.<Editor> Nothing();
+		}
+	}
+
+	public static Maybe<IFile> getFileForPath(String path) {
+
+		if (path == null)
+			return Maybe.<IFile> Nothing();
+
+		IWorkspaceRoot workspace = ResourcesPlugin.getWorkspace().getRoot();
+
+		// file inside workspace?
+		// TODO: If file is outside workspace, add linked resource?
+		if (!path.startsWith(workspace.getRawLocation().toOSString()))
+			return Maybe.<IFile> Nothing();
+
+		// find files matching URI
+		IFile candidates[] = workspace.findFilesForLocationURI(new File(path)
+				.toURI());
+
+		// Just take first candidate if several possible.
+		// We need to select one in some way, and the first is as good as any.
+		return candidates.length > 0 ? Maybe.Just(candidates[0]) : Maybe
+				.<IFile> Nothing();
+	}
 
 }

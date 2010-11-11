@@ -59,8 +59,8 @@ public class IDEConstants {
 
 	public static final RGB BRACE_MATCHING_COLOR = new RGB(128, 128, 128);
 	
-	public static final QualifiedName PROPERTY_LIBRARIES_ID = new QualifiedName(PLUGIN_ID, "libraries");
-	public static final QualifiedName PROPERTY_OPTIONS_PATH_ID = new QualifiedName(PLUGIN_ID, "options_path");
+	public static final String PROPERTY_LIBRARIES_ID = "libraries";
+	public static final String PROPERTY_OPTIONS_PATH_ID = "options_path";
 
 	public static final String WIZARD_ID = PLUGIN_ID + ".wizard";
 	public static final String WIZARD_FILE_ID = WIZARD_ID + ".file";
@@ -78,10 +78,18 @@ public class IDEConstants {
 		System.arraycopy(a, 0, CONFIGURED_CONTENT_TYPES, 0, a.length);
 		System.arraycopy(b, 0, CONFIGURED_CONTENT_TYPES, a.length, b.length);
 	}
+	
+	public static final String PLUGIN_URL_PREFIX  = "platform:/plugin/" + PLUGIN_ID;
+	
+	public static final String MSL_ZIP_PATH = "/resources/MSL.zip";
+	public static final String MSL_ZIP_URL  = PLUGIN_URL_PREFIX + MSL_ZIP_PATH;
+	
+	public static final String DEF_OPTIONS_NAME = "options.xml";
+	public static final String DEF_OPTIONS_PATH = "/resources/" + DEF_OPTIONS_NAME;
+	public static final String DEF_OPTIONS_URL  = PLUGIN_URL_PREFIX + DEF_OPTIONS_PATH;
 
 	public static final String PACKAGE_FILE = "package.mo";
-	    
 	public static final String PACKAGES_IN_WORKSPACE_OPTION = "PACKAGEPATHS";
-	
 	public static final String PATH_SEP = File.pathSeparator;
+	
 }

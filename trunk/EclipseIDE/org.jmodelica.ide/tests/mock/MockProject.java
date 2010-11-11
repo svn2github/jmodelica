@@ -4,14 +4,17 @@ import java.io.File;
 import java.net.URI;
 import java.util.Map;
 
+import org.eclipse.core.resources.FileInfoMatcherDescription;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IPathVariableManager;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceFilterDescription;
 import org.eclipse.core.resources.IResourceProxy;
 import org.eclipse.core.resources.IResourceProxyVisitor;
 import org.eclipse.core.resources.IResourceVisitor;
@@ -466,4 +469,41 @@ public void build(int kind, IProgressMonitor monitor) throws CoreException {
     public boolean isConflicting(ISchedulingRule rule) {
         return false;
     }
+
+	@Override
+	public IResourceFilterDescription createFilter(int type,
+			FileInfoMatcherDescription matcherDescription, int updateFlags,
+			IProgressMonitor monitor) throws CoreException {
+		return null;
+	}
+
+	@Override
+	public IResourceFilterDescription[] getFilters() throws CoreException {
+		return null;
+	}
+
+	@Override
+	public IPathVariableManager getPathVariableManager() {
+		return null;
+	}
+
+	@Override
+	public boolean isVirtual() {
+		return false;
+	}
+
+	@Override
+	public void setDerived(boolean isDerived, IProgressMonitor monitor)
+			throws CoreException {
+	}
+
+	@Override
+	public void loadSnapshot(int options, URI snapshotLocation,
+			IProgressMonitor monitor) throws CoreException {
+	}
+
+	@Override
+	public void saveSnapshot(int options, URI snapshotLocation,
+			IProgressMonitor monitor) throws CoreException {
+	}
 }

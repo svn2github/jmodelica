@@ -238,21 +238,5 @@ public class Util {
             : new Dot("", res, createDotAccess(parts, i + 1));
         
     }
-    
-    /**
-     * \brief Get the value of a property from the project properties.
-     * 
-     * If property isn't set or project is <code>null</code>, get preference value instead. 
-     */
-    public static String getProperty(IProject proj, QualifiedName key) {
-    	String val = null;
-    	try {
-			val = proj.getPersistentProperty(key);
-		} catch (Exception e) {
-		}
-		if (val == null)
-			val = Activator.getDefault().getPreferenceStore().getString(key.getLocalName());
-		return val.isEmpty() ? null : val;
-    }
 
 }

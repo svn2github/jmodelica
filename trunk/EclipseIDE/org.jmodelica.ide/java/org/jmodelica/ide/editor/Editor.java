@@ -149,6 +149,7 @@ private void configureProjectionSupport(CharacterProjectionViewer viewer) {
 
 private void configureDecorationSupport(CharacterProjectionViewer viewer) {
 
+	// TODO: This should probably be updated to the new Preference API, not sure how, though
     // Set default values for brace matching.
     IPreferenceStore preferenceStore = getPreferenceStore();
     preferenceStore.setDefault(IDEConstants.KEY_BRACE_MATCHING, true);
@@ -159,8 +160,7 @@ private void configureDecorationSupport(CharacterProjectionViewer viewer) {
     // Configure brace matching and ensure decoration support
     // has been created and configured.
     SourceViewerDecorationSupport decoration = getSourceViewerDecorationSupport(viewer);
-    decoration
-            .setCharacterPairMatcher(new ModelicaCharacterPairMatcher(viewer));
+    decoration.setCharacterPairMatcher(new ModelicaCharacterPairMatcher(viewer));
     decoration.setMatchingCharacterPainterPreferenceKeys(
             IDEConstants.KEY_BRACE_MATCHING,
             IDEConstants.KEY_BRACE_MATCHING_COLOR);
@@ -177,6 +177,7 @@ protected void handlePreferenceStoreChanged(PropertyChangeEvent event) {
 
 private Color getCursorLineBackground() {
 
+	// TODO: This should probably be updated to the new Preference API, not sure how, though
     if (!getPreferenceStore().getBoolean(EDITOR_CURRENT_LINE))
         return null;
 

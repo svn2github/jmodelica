@@ -46,21 +46,22 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PropertyPage;
 import org.jmodelica.ide.IDEConstants;
+import org.jmodelica.ide.Preferences;
 import org.jmodelica.ide.helpers.Maybe;
 import org.jmodelica.ide.helpers.Util;
 
 public class ProjectPropertyPage extends PropertyPage {
 	
-	private static final QualifiedName LIBRARIES_ID = IDEConstants.PROPERTY_LIBRARIES_ID;
-	private static final QualifiedName OPTIONS_ID = IDEConstants.PROPERTY_OPTIONS_PATH_ID;
+	private static final String LIBRARIES_ID = IDEConstants.PROPERTY_LIBRARIES_ID;
+	private static final String OPTIONS_ID = IDEConstants.PROPERTY_OPTIONS_PATH_ID;
 	private ModelicaSettingsControl settings;
 
 	@Override
 	protected Control createContents(Composite parent) {
 		settings = new ModelicaSettingsControl();
 		IProject proj = getProject();
-		settings.setLibraryPaths(Util.getProperty(proj, LIBRARIES_ID));
-		settings.setOptionsPath(Util.getProperty(proj, OPTIONS_ID));
+		settings.setLibraryPaths(Preferences.get(proj, LIBRARIES_ID));
+		settings.setOptionsPath(Preferences.get(proj, OPTIONS_ID));
 		return settings.createControl(parent);
 	}
 
@@ -72,8 +73,8 @@ public class ProjectPropertyPage extends PropertyPage {
 	public boolean performOk() {
 		IProject proj = getProject();
 		try {
-			proj.setPersistentProperty(LIBRARIES_ID, settings.getLibraryPaths());
-			proj.setPersistentProperty(OPTIONS_ID, settings.getOptionsPath());
+			Preferences.set(proj, LIBRARIES_ID, settings.getLibraryPaths());
+			Preferences.set(proj, OPTIONS_ID, settings.getOptionsPath());
 			proj.build(IncrementalProjectBuilder.FULL_BUILD, null);
 		} catch (CoreException e) {
 		}
@@ -82,8 +83,9 @@ public class ProjectPropertyPage extends PropertyPage {
 
 	@Override
 	protected void performDefaults() {
-		settings.setLibraryPaths(Util.getProperty(null, LIBRARIES_ID));
-		settings.setOptionsPath(Util.getProperty(null, OPTIONS_ID));
+		// TODO: We should remember default status, and save by removing the property for this project - will cause preference to be used
+		settings.setLibraryPaths(Preferences.get(LIBRARIES_ID));
+		settings.setOptionsPath(Preferences.get(OPTIONS_ID));
 		super.performDefaults();
 	}
 

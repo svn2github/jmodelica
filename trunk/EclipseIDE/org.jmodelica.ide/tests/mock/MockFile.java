@@ -9,6 +9,7 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFileState;
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IPathVariableManager;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResourceProxy;
@@ -408,5 +409,20 @@ public class MockFile implements IFile {
     public boolean isConflicting(ISchedulingRule rule) {
         return false;
     }
+
+	@Override
+	public IPathVariableManager getPathVariableManager() {
+		return null;
+	}
+
+	@Override
+	public boolean isVirtual() {
+		return false;
+	}
+
+	@Override
+	public void setDerived(boolean isDerived, IProgressMonitor monitor)
+			throws CoreException {
+	}
 
 }

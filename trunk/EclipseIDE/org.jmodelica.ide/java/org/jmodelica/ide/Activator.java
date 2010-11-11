@@ -15,14 +15,23 @@
  */
 package org.jmodelica.ide;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -72,61 +81,5 @@ public class Activator extends AbstractUIPlugin {
 	public static Activator getDefault() {
 		return plugin;
 	}
-
-	/**
-	 * Initializes a preference store with default preference values for this plug-in.
-	 */
-	protected void initializeDefaultPreferences(IPreferenceStore store) {
-		// Try to extract options.xml, if not already extracted
-		IPath statePath = getStateLocation();
-		String defOptionsPath = statePath.append("options.xml").toOSString();
-		File defOptionsFile = new File(defOptionsPath);
-		if (!defOptionsFile.isFile()) {
-			try {
-				copyResource("/resources/options.xml", defOptionsPath);
-			} catch (IOException e) {
-				defOptionsFile.delete();
-			}
-		}
-
-		// Read default values from environment vars
-		String jmodelicaHome = System.getenv("JMODELICA_HOME");
-		String modelicaPath = System.getenv("MODELICAPATH");
-
-		// Calculate proper defaults from environment vars
-		if (modelicaPath == null && jmodelicaHome != null) {
-			modelicaPath = "/ThirdParty/MSL";
-			modelicaPath = jmodelicaHome
-					+ modelicaPath.replace('/', File.separatorChar);
-		}
-		String optionsPath = (jmodelicaHome != null) ? jmodelicaHome
-				+ File.separator + "Options" : statePath.toOSString();
-
-		// Store calculated values
-		store.setDefault(IDEConstants.PROPERTY_LIBRARIES_ID.getLocalName(),
-				modelicaPath);
-		store.setDefault(IDEConstants.PROPERTY_OPTIONS_PATH_ID.getLocalName(),
-				optionsPath);
-	}
-
-	/**
-	 * \brief Copies a resource from the jar to the file system.
-	 * 
-	 * @throws FileNotFoundException  If either the resource isn't found or a file 
-	 *                                can't be created at the target path.
-	 * @throws IOException  If an I/O error occurs.
-	 */
-	public void copyResource(String resource, String path) throws FileNotFoundException, IOException {
-		InputStream in = getClass().getResourceAsStream(resource);
-		if (in == null)
-			throw new FileNotFoundException("Resource '" + resource + "' not found.");
-		OutputStream out = new FileOutputStream(path);
-		
-		byte[] buf = new byte[1024];
-		int i = 0;
-		while ((i = in.read(buf)) != -1)
-			out.write(buf, 0, i);
-		out.close();
-		in.close();
-	}
+	
 }
