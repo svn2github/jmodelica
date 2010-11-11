@@ -134,12 +134,12 @@ public class OptionRegistry {
 			javax.xml.xpath.XPathExpression expr;
 				
 			//set other options if there are any
-			expr = xpath.compile("OptionRegistry/Options");
+			expr = xpath.compile("OptionsRegistry/Options");
 			org.w3c.dom.Node options = (org.w3c.dom.Node)expr.evaluate(doc, javax.xml.xpath.XPathConstants.NODE);
 			if(options !=null && options.hasChildNodes()) {				
-				expr = xpath.compile("OptionRegistry/Options/Option");
+				expr = xpath.compile("OptionsRegistry/Options/Option");
 				org.w3c.dom.NodeList theOptions = (org.w3c.dom.NodeList)expr.evaluate(doc, javax.xml.xpath.XPathConstants.NODESET);
-				expr = xpath.compile("OptionRegistry/Options/Option/*");
+				expr = xpath.compile("OptionsRegistry/Options/Option/*");
 				org.w3c.dom.NodeList theAttributes = (org.w3c.dom.NodeList)expr.evaluate(doc, javax.xml.xpath.XPathConstants.NODESET);
 				
 				for(int i=0; i<theOptions.getLength();i++) {
