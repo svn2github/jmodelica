@@ -274,7 +274,10 @@ int jmi_dae_init(jmi_t* jmi,
 		jmi_residual_func_t F, int n_eq_F, jmi_jacobian_func_t dF,
 		int dF_n_nz, int* dF_row, int* dF_col,
 		jmi_residual_func_t R, int n_eq_R, jmi_jacobian_func_t dR,
-		int dR_n_nz, int* dR_row, int* dR_col) {
+		int dR_n_nz, int* dR_row, int* dR_col,
+        jmi_generic_func_t ode_derivatives,
+        jmi_generic_func_t ode_outputs,
+        jmi_generic_func_t ode_initialize) {
 
 	// Create jmi_dae struct
 	jmi_dae_t* dae = (jmi_dae_t*)calloc(1,sizeof(jmi_dae_t));
@@ -288,6 +291,26 @@ int jmi_dae_init(jmi_t* jmi,
 	jmi_func_new(&jf_R,R,n_eq_R,dR,dR_n_nz,dR_row, dR_col);
 	jmi->dae->R = jf_R;
 
+	jmi->dae->ode_derivatives = ode_derivatives;
+	jmi->dae->ode_outputs = ode_outputs;
+	jmi->dae->ode_initialize = ode_initialize;
+
+	return 0;
+}
+
+int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, int n, int index) {
+	jmi_block_residual_t* b = (jmi_block_residual_t*)calloc(1,sizeof(jmi_block_residual_t));
+	b->F = F;
+	b->n = n;
+	jmi->dae_block_residuals[index] = b;
+	return 0;
+}
+
+int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, int n, int index) {
+	jmi_block_residual_t* b = (jmi_block_residual_t*)calloc(1,sizeof(jmi_block_residual_t));
+	b->F = F;
+	b->n = n;
+	jmi->dae_init_block_residuals[index] = b;
 	return 0;
 }
 

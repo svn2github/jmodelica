@@ -346,6 +346,10 @@ extern "C" {
 #define JMI_SCALING_VARIABLES 2 /**<  \brief Scale real variables by multiplying
 	incoming variables in residual functions by the scaling factors in jmi_t->variable_scaling_factors */
 
+/** \brief */
+#define JMI_BLOCK_INITIALIZE 0
+#define JMI_BLOCK_EVALUATE 1
+
 /* @} */
 
 /*
@@ -924,6 +928,30 @@ int jmi_ode_df_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
  */
 int jmi_ode_df_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
 		int *df_n_cols, int *df_n_nz);
+
+/**
+ * \brief Evaluate the ODE derivatives.
+ *
+ * @param jmi A jmi_t struct.
+ * @return Error code.
+ */
+int jmi_ode_derivatives(jmi_t* jmi);
+
+/**
+ * \brief Evaluate the ODE outputs.
+ *
+ * @param jmi A jmi_t struct.
+ * @return Error code.
+ */
+int jmi_ode_outputs(jmi_t* jmi);
+
+/**
+ * \brief Initialize the ODE.
+ *
+ * @param jmi A jmi_t struct.
+ * @return Error code.
+ */
+int jmi_ode_initialize(jmi_t* jmi);
 
 /* @} */
 

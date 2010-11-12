@@ -16,6 +16,10 @@
 
 aspect EquationSolve {
 	
+	syn boolean FAbstractEquation.isSolved(String name) {
+		return !(solution(name) instanceof FNoExp);
+	}
+	
 	syn nta FExp FAbstractEquation.solution(String name) {
 		return new FNoExp();
 	}

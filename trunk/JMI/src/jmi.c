@@ -35,6 +35,7 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 		int n_integer_d, int n_integer_u,
 		int n_boolean_d, int n_boolean_u,
 		int n_string_d, int n_string_u, int n_sw, int n_sw_init,
+		int n_dae_blocks, int n_dae_init_blocks,
 		int scaling_method) {
 
 	// Create jmi struct
@@ -159,6 +160,12 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 	jmi_->tp = (jmi_real_t*)calloc(jmi_->n_tp,sizeof(jmi_real_t));
 
 	jmi_->scaling_method = scaling_method;
+
+	jmi_->dae_block_residuals = (jmi_block_residual_t**)calloc(n_dae_blocks,
+			sizeof(jmi_block_residual_t*));
+
+	jmi_->dae_init_block_residuals = (jmi_block_residual_t**)calloc(n_dae_init_blocks,
+			sizeof(jmi_block_residual_t*));
 
 	return 0;
 
@@ -319,6 +326,63 @@ int jmi_ode_df_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars,
 	} else {
 		return -1;
 	}
+}
+
+int jmi_ode_derivatives(jmi_t* jmi) {
+
+	int i, return_status;
+	for (i=0;i<jmi->n_z;i++) {
+		(*(jmi->z))[i] = (*(jmi->z_val))[i];
+	}
+
+	return_status = jmi->dae->ode_derivatives(jmi);
+
+	// Write back evaluation result
+	if (return_status==0) {
+		for (i=0;i<jmi->n_z;i++) {
+			(*(jmi->z_val))[i] = (*(jmi->z))[i];
+		}
+		return 0;
+	}
+	return return_status;
+}
+
+int jmi_ode_outputs(jmi_t* jmi) {
+
+	int i, return_status;
+	for (i=0;i<jmi->n_z;i++) {
+		(*(jmi->z))[i] = (*(jmi->z_val))[i];
+	}
+
+	return_status = jmi->dae->ode_outputs(jmi);
+
+	// Write back evaluation result
+	if (return_status==0) {
+		for (i=0;i<jmi->n_z;i++) {
+			(*(jmi->z_val))[i] = (*(jmi->z))[i];
+		}
+		return 0;
+	}
+	return return_status;
+}
+
+int jmi_ode_initialize(jmi_t* jmi) {
+
+	int i, return_status;
+	for (i=0;i<jmi->n_z;i++) {
+		(*(jmi->z))[i] = (*(jmi->z_val))[i];
+	}
+
+	return_status = jmi->dae->ode_initialize(jmi);
+
+	// Write back evaluation result
+	if (return_status==0) {
+		for (i=0;i<jmi->n_z;i++) {
+			(*(jmi->z_val))[i] = (*(jmi->z))[i];
+		}
+		return 0;
+	}
+	return return_status;
 }
 
 int jmi_dae_F(jmi_t* jmi, jmi_real_t* res) {

@@ -65,6 +65,9 @@ static const int N_sw = $n_switches$;
 static const int N_eq_F = $n_equations$;
 static const int N_eq_R = $n_event_indicators$;
 
+static const int N_dae_blocks = $n_dae_blocks$;
+static const int N_dae_init_blocks = $n_dae_init_blocks$;
+
 static const int N_eq_F0 = $n_equations$ + $n_initial_equations$;
 static const int N_eq_F1 = $n_initial_guess_equations$;
 static const int N_eq_Fp = 0;
@@ -106,12 +109,30 @@ $C_variable_aliases$
 #define _sw(i) ((*(jmi->z))[jmi->offs_sw + i])
 #define _sw_init(i) ((*(jmi->z))[jmi->offs_sw_init + i])
 
+$C_dae_blocks_residual_functions$
+
+$C_dae_init_blocks_residual_functions$
 
 $C_records$
 
 $C_function_headers$
 
 $C_functions$
+
+static int model_ode_derivatives(jmi_t* jmi) {
+  $C_ode_derivatives$
+  return 0;
+}
+
+static int model_ode_outputs(jmi_t* jmi) {
+  $C_ode_outputs$
+  return 0;
+}
+
+static int model_ode_initialize(jmi_t* jmi) {
+  $C_ode_initialization$
+  return 0;
+}
 
 /*
  * The res argument is of type pointer to a vector. This means that
@@ -195,11 +216,19 @@ int jmi_new(jmi_t** jmi) {
 	   N_string_ci, N_string_cd, N_string_pi, N_string_pd,
 	   N_real_dx,N_real_x, N_real_u, N_real_w,N_t_p,
 	   N_real_d,N_integer_d,N_integer_u,N_boolean_d,N_boolean_u,
-	   N_string_d,N_string_u,N_sw,N_sw_init,Scaling_method);
+	   N_string_d,N_string_u,N_sw,N_sw_init,
+	   N_dae_blocks,N_dae_init_blocks,
+	   Scaling_method);
+
+  $C_dae_add_blocks_residual_functions$
+
+  $C_dae_init_add_blocks_residual_functions$
+
 
 	// Initialize the DAE interface
 	jmi_dae_init(*jmi, *model_dae_F, N_eq_F, NULL, 0, NULL, NULL,
-		     *model_dae_R, N_eq_R, NULL, 0, NULL, NULL);
+		     *model_dae_R, N_eq_R, NULL, 0, NULL, NULL,*model_ode_derivatives,
+                     *model_ode_outputs,*model_ode_initialize);
 
 	// Initialize the Init interface
 	jmi_init_init(*jmi, *model_init_F0, N_eq_F0, NULL,

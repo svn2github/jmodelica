@@ -147,6 +147,7 @@ typedef struct jmi_init_t jmi_init_t; ///< Forward declaration of struct.
 typedef struct jmi_opt_t jmi_opt_t; ///< Forward declaration of struct.
 typedef struct jmi_func_t jmi_func_t; ///< Forward declaration of struct.
 typedef struct jmi_func_ad_t jmi_func_ad_t; ///< Forward declaration of struct.
+typedef struct jmi_block_residual_t jmi_block_residual_t; ///<Forward declaration of struct.
 
 // Typedef for the doubles used in the interface.
 typedef double jmi_real_t; ///< Typedef for the real number
@@ -276,6 +277,23 @@ typedef int (*jmi_generic_func_t)(jmi_t* jmi);
  *
  */
 typedef int (*jmi_residual_func_t)(jmi_t* jmi, jmi_ad_var_vec_p res);
+
+/**
+ * \brief Function signature for evaluation of a equation block residual
+ * function in the generated code.
+ *
+ * @param jmi A jmi_t struct.
+ * @param x (Input/Output) The iteration variable vector. If the init argument is
+ * set to JMI_BLOCK_INITIALIZE then x is an output argument that holds the
+ * initial values. If init is set to JMI_BLOCK_EVALUATE, then x is an input
+ * argument used in the evaluation of the residual.
+ * @param residual (Output) The residual vector if init is set to
+ * JMI_BLOCK_EVALUATE, otherwise this argument is not used.
+ * @param init Set to either JMI_BLOCK_INITIALIZE or JMI_BLOCK_EVALUATE.
+ * @return Error code.
+ */
+typedef int (*jmi_block_residual_func_t)(jmi_t* jmi, jmi_real_t* x,
+		jmi_real_t* residual, int init);
 
 /**
  * \brief Evaluation of symbolic jacobian of a residual function in
@@ -447,6 +465,11 @@ struct jmi_func_ad_t{
 	jmi_real_vec_p z_work;          ///< A work vector for \f$z\f$.
 };
 
+struct jmi_block_residual_t {
+	jmi_block_residual_func_t F; ///< \brief A function pointer to the block residual function
+	int n; ///< \brief The number of unknowns in the equation system
+};
+
 /* @} */
 
 /**
@@ -498,6 +521,8 @@ struct jmi_func_ad_t{
  * @param n_string_u Number of string inputs.
  * @param n_sw Number of switching functions in DAE \$fF\$f.
  * @param n_sw_init Number of switching functions in DAE initialization system \$fF_0\$f.
+ * @param n_dae_blocks Number of DAE blocks.
+ * @param n_dae_init_blocks Number of DAE initialization blocks.
  * @param scaling_method Scaling method. Options are JMI_SCALING_NONE or JMI_SCALING_VARIABLES.
  * @return Error code.
  */
@@ -511,6 +536,7 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 		int n_integer_d, int n_integer_u,
 		int n_boolean_d, int n_boolean_u,
 		int n_string_d, int n_string_u, int n_sw, int n_sw_init,
+		int n_dae_blocks, int n_dae_init_blocks,
 		int scaling_method);
 
 /**
@@ -529,12 +555,22 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
  * @param dR_n_nz Number of non-zeros in the symbolic jacobian.
  * @param dR_row Row indices of the non-zeros in the symbolic Jacobain.
  * @param dR_col Column indices of the non-zeros in the symbolic Jacobain.
+ * @param ode_derivatives A function pointer to the ODE RHS function.
+ * @param ode_derivatives A function pointer to the ODE output function.
+ * @param ode_derivatives A function pointer to the ODE initialization function.
  * @return Error code.
  */
 int jmi_dae_init(jmi_t* jmi, jmi_residual_func_t F, int n_eq_F,
         jmi_jacobian_func_t dF, int dF_n_nz, int* dF_row, int* dF_col,
         jmi_residual_func_t R, int n_eq_R,
-        jmi_jacobian_func_t dR, int dR_n_nz, int* dR_row, int* dR_col);
+        jmi_jacobian_func_t dR, int dR_n_nz, int* dR_row, int* dR_col,
+        jmi_generic_func_t ode_derivatives,
+        jmi_generic_func_t ode_outputs,
+        jmi_generic_func_t ode_initialize);
+
+int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, int n, int index);
+
+int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, int n, int index);
 
 /**
  * \brief Allocates a jmi_init_t struct.
@@ -804,6 +840,8 @@ struct jmi_t{
 
 	jmi_real_t *variable_scaling_factors;        ///< Scaling factors. For convenience the vector has the same size as z but only scaling of reals are used.
 	int scaling_method;                 ///< Scaling method: JMI_SCALING_NONE, JMI_SCALING_VARIABLES
+	jmi_block_residual_t** dae_block_residuals; ///< A vector of function pointers to DAE equation blocks
+	jmi_block_residual_t** dae_init_block_residuals; ///< A vector of function pointers to DAE initialization equation blocks
 };
 
 /**
@@ -815,6 +853,9 @@ struct jmi_t{
 struct jmi_dae_t{
 	jmi_func_t* F;                       ///< A jmi_func_t struct representing the DAE residual \f$F\f$.
 	jmi_func_t* R;                       ///< A jmi_func_t struct representing the DAE event indicator function \f$R\f$.
+    jmi_generic_func_t ode_derivatives; ///<A function pointer to a function for evaluating the ODE derivatives.
+    jmi_generic_func_t ode_outputs; ///<A function pointer to a function for evaluating the ODE outputs.
+    jmi_generic_func_t ode_initialize; ///<A function pointer to a function for initializing the ODE.
 };
 
 /**

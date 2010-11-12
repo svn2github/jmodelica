@@ -245,6 +245,250 @@ public class CGenerator extends GenericGenerator {
 			generateVarList(genPrinter, fclass.booleanInputs(),                "boolean_u");
 		}
 	}
+
+	/**
+	 * Generates code for BLT block residuals
+	 */
+	class DAETag_C_dae_blocks_residual_functions extends DAETag {
+		
+		public DAETag_C_dae_blocks_residual_functions(AbstractGenerator myGenerator, FClass fclass) {
+			super("C_dae_blocks_residual_functions","C: C functions for the DAE BLT block residuals",
+			  myGenerator,fclass);
+		}
+
+		public void generate(PrintStream genPrinter) {
+			/*
+			int block_counter = 0;
+			for (EquationBlock block : fclass.getDAEBLT()) {
+			    if (!block.isSolved()) {
+					genPrinter.print("static int dae_block_"+block_counter+"(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {\n");
+					genPrinter.print("  if (init==JMI_BLOCK_INITIALIZE) {\n");
+					int var_counter = 0;
+					// Loop over all active variables and write their value to x	
+					for (FVariable fv : block.activeVariables()) {
+						genPrinter.print("    x["+var_counter+"] = " + fv.name_C() + ";\n");
+						var_counter++;
+					}
+					genPrinter.print("  } else if (init==JMI_BLOCK_EVALUATE) {\n");
+					// Loop over all active variables and write the values in x to the z vector
+					var_counter = 0;
+					for (FVariable fv : block.activeVariables()) {
+						genPrinter.print("    " + fv.name_C() + " = x["+var_counter+"];\n");
+						var_counter++;
+					}
+					// Write the residual expressions
+					genPrinter.print("  jmi_real_t** res = &residual;\n");
+					int equation_counter = 0;
+					for (FAbstractEquation e : block.equations()) {
+						e.genResidual_C(equation_counter,INDENT,genPrinter);				
+						equation_counter += e.numScalarEquations();
+					}
+					genPrinter.print("  }\n");
+					genPrinter.print("  return 0;\n}\n\n");
+					block_counter++;	
+				}
+			}
+			*/
+		}
+	}
+
+	/**
+	 * Generates code for adding BLT blocks 
+	 */
+	class DAETag_C_dae_add_blocks_residual_functions extends DAETag {
+		
+		public DAETag_C_dae_add_blocks_residual_functions(AbstractGenerator myGenerator, FClass fclass) {
+			super("C_dae_add_blocks_residual_functions","C: Add the DAE block functions to the JMI struct",
+			  myGenerator,fclass);
+		}
+
+		public void generate(PrintStream genPrinter) {
+			/*
+			int block_counter = 0;
+			for (EquationBlock block : fclass.getDAEBLT()) {
+			    if (!block.isSolved()) {
+					genPrinter.print(" jmi_dae_add_equation_block(*jmi,dae_block_" + 
+						block_counter + "," + block.activeVariables().size() + "," + 
+						block_counter + " );\n");
+					block_counter++;
+				}
+			}
+			*/
+		}
+	}
+
+	/**
+	 * Number of DAE blocks
+	 */
+	class DAETag_C_dae_n_blocks extends DAETag {
+		
+		public DAETag_C_dae_n_blocks(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_dae_blocks","C: Number of DAE blocks",
+			  myGenerator,fclass);
+		}
+
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print("0");
+		/*
+			genPrinter.print(fclass.getDAEBLT().size());
+			*/
+		}
+	}
+
+	/**
+	 * Generates code for BLT block residuals (DAE initialization system)
+	 */
+	class DAETag_C_dae_init_blocks_residual_functions extends DAETag {
+		
+		public DAETag_C_dae_init_blocks_residual_functions(AbstractGenerator myGenerator, FClass fclass) {
+			super("C_dae_init_blocks_residual_functions","C: C functions for the DAE BLT block residuals",
+			  myGenerator,fclass);
+		}
+
+		public void generate(PrintStream genPrinter) {
+			/*
+			int block_counter = 0;
+			for (EquationBlock block : fclass.getDAEInitBLT()) {
+			    if (!block.isSolved()) {
+					genPrinter.print("static int dae_init_block_"+block_counter+"(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {\n");
+					genPrinter.print("  if (init==JMI_BLOCK_INITIALIZE) {\n");
+					int var_counter = 0;
+					// Loop over all active variables and write their value to x	
+					for (FVariable fv : block.activeVariables()) {
+						genPrinter.print("    x["+var_counter+"] = " + fv.name_C() + ";\n");
+						var_counter++;
+					}
+					genPrinter.print("  } else if (init==JMI_BLOCK_EVALUATE) {\n");
+					// Loop over all active variables and write the values in x to the z vector
+					var_counter = 0;
+					for (FVariable fv : block.activeVariables()) {
+						genPrinter.print("    " + fv.name_C() + " = x["+var_counter+"];\n");
+						var_counter++;
+					}
+					// Write the residual expressions
+					genPrinter.print("  jmi_real_t** res = &residual;\n");
+					int equation_counter = 0;
+					for (FAbstractEquation e : block.equations()) {
+						e.genResidual_C(equation_counter,INDENT,genPrinter);				
+						equation_counter += e.numScalarEquations();
+					}
+					genPrinter.print("  }\n");
+					genPrinter.print("  return 0;\n}\n\n");
+					block_counter++;
+				}
+			}
+			*/
+		}
+	}
+
+	/**
+	 * Generates code for adding BLT blocks 
+	 */
+	class DAETag_C_dae_init_add_blocks_residual_functions extends DAETag {
+		
+		public DAETag_C_dae_init_add_blocks_residual_functions(AbstractGenerator myGenerator, FClass fclass) {
+			super("C_dae_init_add_blocks_residual_functions","C: Add the DAE initialization block functions to the JMI struct",
+			  myGenerator,fclass);
+		}
+
+		public void generate(PrintStream genPrinter) {
+		/*
+			int block_counter = 0;
+			for (EquationBlock block : fclass.getDAEInitBLT()) {
+			    if (!block.isSolved()) {
+					genPrinter.print(" jmi_dae_init_add_equation_block(*jmi,dae_init_block_" + 
+						block_counter + "," + block.activeVariables().size() + "," + 
+						block_counter + ");\n");
+					block_counter++;
+				}
+			}
+			*/
+		}
+	}
+
+	/**
+	 * Number of DAE initialization blocks
+	 */
+	class DAETag_C_dae_init_n_blocks extends DAETag {
+		
+		public DAETag_C_dae_init_n_blocks(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_dae_init_blocks","C: Number of DAE initialization blocks",
+			  myGenerator,fclass);
+		}
+
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print("0");
+		/*
+			genPrinter.print(fclass.getDAEInitBLT().size());
+		*/
+		}
+	}
+
+	/**
+	 * Generates code for solving the BLT blocks
+	 */
+	class DAETag_C_ode_derivatives extends DAETag {
+		
+		public DAETag_C_ode_derivatives(AbstractGenerator myGenerator, FClass fclass) {
+			super("C_ode_derivatives","C: Compute derivatives of the ODE",
+			  myGenerator,fclass);
+		}
+
+		public void generate(PrintStream genPrinter) {
+			/*int block_counter = 0;
+			for (EquationBlock block : fclass.getDAEBLT()) {
+				if (block.isSolved()) {
+					genPrinter.print("  " + block.activeVariables().get(0).name_C() + " = ");
+					block.solution().prettyPrint_C(genPrinter,"");
+					genPrinter.print(";\n");
+				} else {
+					genPrinter.print("  solve(jmi->dae_block_residuals["+block_counter+"]);\n");
+				}
+				block_counter++;
+			}
+			*/
+		}
+	}
+
+	/**
+	 * Generates code for solving the BLT blocks in the initialization system
+	 */
+	class DAETag_C_ode_initialization extends DAETag {
+		
+		public DAETag_C_ode_initialization(AbstractGenerator myGenerator, FClass fclass) {
+			super("C_ode_initialization","C: Solve the initialization system",
+			  myGenerator,fclass);
+		}
+
+		public void generate(PrintStream genPrinter) {
+			/*int block_counter = 0;
+			for (EquationBlock block : fclass.getDAEInitBLT()) {
+				if (block.isSolved()) {
+					genPrinter.print("  " + block.activeVariables().get(0).name_C() + " = ");
+					block.solution().prettyPrint_C(genPrinter,"");
+					genPrinter.print(";\n");
+				} else {
+					genPrinter.print("  solve(jmi->dae_init_block_residuals["+block_counter+"]);\n");
+				}
+				block_counter++;
+			}
+			*/
+		}
+	}
+
+	/**
+	 * Generates code for solving the BLT blocks for computing the outputs
+	 */
+	class DAETag_C_ode_outputs extends DAETag {
+		
+		public DAETag_C_ode_outputs(AbstractGenerator myGenerator, FClass fclass) {
+			super("C_ode_outputs","C: Compute the ODE outputs",
+			  myGenerator,fclass);
+		}
+
+		public void generate(PrintStream genPrinter) {
+		}
+	}
 	
 	/**
 	 * Generates headers for Modelica functions.

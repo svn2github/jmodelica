@@ -52,6 +52,7 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 		int n_integer_d, int n_integer_u,
 		int n_boolean_d, int n_boolean_u,
 		int n_string_d, int n_string_u, int n_sw, int n_sw_init,
+		int n_dae_blocks, int n_dae_init_blocks,
 		int scaling_method) {
 
 	// Create jmi struct
@@ -873,6 +874,18 @@ int jmi_delete(jmi_t* jmi){
 	free(jmi->variable_scaling_factors);
 	free(jmi);
 
+	return 0;
+}
+
+int jmi_ode_derivatives(jmi_t* jmi) {
+	return 0;
+}
+
+int jmi_ode_outputs(jmi_t* jmi) {
+	return 0;
+}
+
+int jmi_ode_initialize(jmi_t* jmi) {
 	return 0;
 }
 

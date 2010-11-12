@@ -150,7 +150,7 @@ aspect TransformCanonical {
 			
 	}
 
-	public class BLT extends ArrayList {
+	public class BLT extends ArrayList<EquationBlock> {
 	
 	}
 
@@ -164,21 +164,34 @@ aspect TransformCanonical {
 			mps.add(m);
 		}	
 		
-		public Set<FAbstractEquation> equations() {
-			LinkedHashSet<FAbstractEquation> s = new LinkedHashSet<FAbstractEquation>();
+		public ArrayList<FAbstractEquation> equations() {
+			ArrayList<FAbstractEquation> s = new ArrayList<FAbstractEquation>();
 			for (MatchingPair mp : mps) {
 				s.add(mp.getEquation());
 			}
 			return s;
 		}
 
-		public Set<FVariable> activeVariables() {
-			LinkedHashSet<FVariable> s = new LinkedHashSet<FVariable>();
+		public ArrayList<FVariable> activeVariables() {
+			ArrayList<FVariable> s = new ArrayList<FVariable>();
 			for (MatchingPair mp : mps) {
 				s.add(mp.getFVariable());
 			}
 			return s;
 		}		
+		
+		public boolean isSolved() {
+			return equations().size()==1 && equations().get(0).isSolved(activeVariables().get(0).name());
+		}
+		
+		public FExp solution() {
+			if (isSolved()) {
+				return equations().get(0).solution(activeVariables().get(0).name());
+			} else {
+			    return null;
+			}
+		}
+		
 	}
 
     public class MatchingPair {
@@ -197,7 +210,6 @@ aspect TransformCanonical {
     	public FVariable getFVariable() {
     		return fv;
     	}
-    
     }
 
 	private ArrayList<MatchingPair> FClass.daeMatching = null;

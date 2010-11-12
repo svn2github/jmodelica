@@ -2927,6 +2927,10 @@ class JMIModel(object):
                                                            flags='C'),
                                             ct.POINTER(ct.c_int),
                                             ct.POINTER(ct.c_int)]    
+
+        self._dll.jmi_ode_derivatives.argtypes = [ct.c_void_p]
+        self._dll.jmi_ode_outputs.argtypes = [ct.c_void_p]
+        self._dll.jmi_ode_initialize.argtypes = [ct.c_void_p]
     
         # DAE interface
         self._dll.jmi_dae_get_sizes.argtypes = [ct.c_void_p,
@@ -4090,7 +4094,28 @@ class JMIModel(object):
             raise JMIException("Getting number of columns and non-zero \
             elements failed.")        
         return int(df_n_cols.value), int(df_n_nz.value)
-    
+
+    def ode_derivatives(self):
+        """ 
+        Compute the derivatives of the ODE.
+        """
+        if self._dll.jmi_ode_derivatives(self._jmi) is not 0:
+            raise JMIException("Evaluation of ODE derivatives failed")
+
+    def ode_outputs(self):
+        """ 
+        Compute the outputs of the ODE.
+        """
+        if self._dll.jmi_ode_outputs(self._jmi) is not 0:
+            raise JMIException("Evaluation of ODE outputs failed")
+
+    def ode_initialize(self):
+        """ 
+        Initialize the ODE.
+        """
+        if self._dll.jmi_ode_initialize(self._jmi) is not 0:
+            raise JMIException("Initialization of the ODE failed")
+
     def dae_get_sizes(self):
         """ 
         Get the number of equations of the DAE.
