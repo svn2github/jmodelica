@@ -45,6 +45,7 @@ libjmi_la_SOURCES = jmi.h \
                     jmi_common.h \
                     jmi.c \
                     jmi_common.c \
+                    jmi_newton_solvers.c \
                     jmi_opt_coll.h \
                     jmi_array_common.h \
                     jmi_array_none.h
@@ -133,6 +134,7 @@ include_HEADERS = jmi.h \
                   fmiModelTypes.h \
                   fmi.h \
                   jmi_common.h \
+		  jmi_newton_solvers.h \
                   jmi_init_opt.h \
                   jmi_opt_coll.h \
                   jmi_opt_coll_radau.h \

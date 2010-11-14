@@ -300,16 +300,26 @@ int jmi_dae_init(jmi_t* jmi,
 
 int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, int n, int index) {
 	jmi_block_residual_t* b = (jmi_block_residual_t*)calloc(1,sizeof(jmi_block_residual_t));
+    b->jmi = jmi;
 	b->F = F;
 	b->n = n;
+	b->x = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
+	b->res = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
+	b->jac = (jmi_real_t*)calloc(n*n,sizeof(jmi_real_t));
+	b->ipiv = (int*)calloc(n,sizeof(int));
 	jmi->dae_block_residuals[index] = b;
 	return 0;
 }
 
 int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, int n, int index) {
 	jmi_block_residual_t* b = (jmi_block_residual_t*)calloc(1,sizeof(jmi_block_residual_t));
+	b->jmi = jmi;
 	b->F = F;
 	b->n = n;
+	b->x = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
+	b->res = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
+	b->jac = (jmi_real_t*)calloc(n*n,sizeof(jmi_real_t));
+	b->ipiv = (int*)calloc(n,sizeof(int));
 	jmi->dae_init_block_residuals[index] = b;
 	return 0;
 }

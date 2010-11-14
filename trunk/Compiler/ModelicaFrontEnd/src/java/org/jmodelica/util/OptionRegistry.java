@@ -41,6 +41,8 @@ import org.xml.sax.SAXException;
 public class OptionRegistry {
 	
 		private enum DefOpt {
+			GEN_ODE   ("generate_ode",            false, 
+					"If this option is set to true, code for solving ODEs are generated. "),
 			EXTRA_LIB   ("extra_lib_dirs",            "", 
 					"The value of this option is appended to the value of the MODELICAPATH environment " +
 					"variable for determining in what directories to search for libraries."),

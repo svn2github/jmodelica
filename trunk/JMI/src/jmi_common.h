@@ -466,8 +466,13 @@ struct jmi_func_ad_t{
 };
 
 struct jmi_block_residual_t {
+	jmi_t *jmi; ///< A pointer to the corresponding jmi_t struct
 	jmi_block_residual_func_t F; ///< \brief A function pointer to the block residual function
 	int n; ///< \brief The number of unknowns in the equation system
+	jmi_real_t* x; ///< Work vector for the iteration variables
+    jmi_real_t* res; ///< Work vector for the block residual
+    jmi_real_t* jac; ///< Work vector for the block Jacobian
+    int* ipiv; ///< Work vector needed for dgesv
 };
 
 /* @} */
