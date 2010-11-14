@@ -379,7 +379,8 @@ liblapack_a_SOURCES = \
 	ilaenv.f \
 	ilaver.f \
 	iparmq.f \
-	lsamen.f
+	lsamen.f \
+	dlamch.f
 
 FFLAGS = -O3
 
