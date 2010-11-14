@@ -17,7 +17,7 @@ AUTOMAKE_OPTIONS = foreign
 
 # EXTRA_DIST =
 
-SUBDIRS = JMI/src ThirdParty/Blas
+SUBDIRS = JMI/src ThirdParty/Blas ThirdParty/Lapack
 
 assimulo_install_dir=$(abs_builddir)/Assimulo_install
 

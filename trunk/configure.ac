@@ -283,6 +283,7 @@ AC_C_CONST
 AC_CONFIG_FILES([
  Makefile
  ThirdParty/Blas/Makefile
+ ThirdParty/Lapack/Makefile
  JMI/src/Makefile
  JMI/examples/Vdp/Makefile
  JMI/examples/Vdp_cppad/Makefile
