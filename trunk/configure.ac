@@ -24,6 +24,7 @@ AC_CONFIG_HEADER([config.h])
 
 # Checks for programs.
 AC_PROG_CXX
+AC_PROG_F77
 
 # Acquire information about the platform
 AC_CANONICAL_BUILD
@@ -281,6 +282,7 @@ AC_C_CONST
 
 AC_CONFIG_FILES([
  Makefile
+ ThirdParty/Blas/Makefile
  JMI/src/Makefile
  JMI/examples/Vdp/Makefile
  JMI/examples/Vdp_cppad/Makefile
