@@ -271,6 +271,13 @@ fmiStatus fmi_get_nominal_continuous_states(fmiComponent c, fmiReal x_nominal[],
     return fmiOK;
 }
 fmiStatus fmi_get_state_value_references(fmiComponent c, fmiValueReference vrx[], size_t nx) {
+	int offset = ((fmi_t *)c)->jmi->offs_real_x;
+	fmiValueReference valrefs[nx];
+	int i;
+	for(i = 0; i<nx; i = i + 1) {
+		valrefs[i] = offset + i;
+	}
+	memcpy (vrx, valrefs, nx*sizeof(fmiReal));
     return fmiOK;
 }
 fmiStatus fmi_terminate(fmiComponent c) {
