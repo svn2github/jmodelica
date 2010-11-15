@@ -122,7 +122,7 @@ JMI_LIB_DIR = ${JMODELICA_HOME}/lib
 
 # Libraries necessary to link with jmi
 LIBS_CPPAD = -L$(JMI_LIB_DIR) -ljmi_cppad -lfmi
-LIBS_NOCPPAD = -L${JMI_LIB_DIR} -ljmi -lfmi -llapack -lblas
+LIBS_NOCPPAD = -L${JMI_LIB_DIR} -ljmi -lfmi -llapack -lblas -lgfortran
 LIBS_IPOPT = -L$(JMI_LIB_DIR) -ljmi_cppad -ljmi_algorithm_cppad -ljmi_solver_cppad -lfmi -L$(IPOPT_HOME)/lib -lipopt -lm -lgfortran -lpthread -lmingw32 -lmoldname -lmingwex -lmsvcrt -luser32 -lkernel32 -ladvapi32 -lshell32 -lstdc++ 
 
 # Include paths for compilation

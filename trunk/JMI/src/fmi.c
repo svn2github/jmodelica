@@ -115,12 +115,9 @@ fmiStatus fmi_set_real(fmiComponent c, const fmiValueReference vr[], size_t nvr,
     for (i = 0; i <nvr; i = i + 1) {
         /* Get index in z vector from value reference. */ 
         index = get_index_from_value_ref(vr[i]);
-        printf("index %u\n", index);
         
         /* Set value from the value array to z vector. */
-        fmiReal thevalue = value[i];
-        printf("value %f\n",thevalue);
-        z[index] = thevalue;
+        z[index] = value[i];
     }
     return fmiOK;
 }
@@ -134,12 +131,9 @@ fmiStatus fmi_set_integer (fmiComponent c, const fmiValueReference vr[], size_t 
     for (i = 0; i <nvr; i = i + 1) {
         /* Get index in z vector from value reference. */ 
         index = get_index_from_value_ref(vr[i]);
-        printf("index %u\n", index);
         
         /* Set value from the value array to z vector. */
-        fmiInteger thevalue = value[i];
-        printf("value %d\n",thevalue);
-        z[index] = thevalue;
+        z[index] = value[i];
     }
     return fmiOK;
 }
@@ -153,12 +147,9 @@ fmiStatus fmi_set_boolean (fmiComponent c, const fmiValueReference vr[], size_t 
     for (i = 0; i <nvr; i = i + 1) {
         /* Get index in z vector from value reference. */ 
         index = get_index_from_value_ref(vr[i]);
-        printf("index %u\n", index);
         
         /* Set value from the value array to z vector. */
-        fmiBoolean thevalue = value[i];
-        printf("value %d\n",thevalue);
-        z[index] = thevalue;
+        z[index] = value[i];
     }
     return fmiOK;
 }
@@ -171,12 +162,23 @@ fmiStatus fmi_set_string(fmiComponent c, const fmiValueReference vr[], size_t nv
 /* Evaluation of the model equations */
 
 fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal relativeTolerance, fmiEventInfo* eventInfo) {
+	int retval = jmi_ode_initialize(((fmi_t *)c)->jmi);
+	if(retval != 0) {
+		(((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Initialization failed.");
+		return fmiError;
+	}
     return fmiOK;
 }
 fmiStatus fmi_get_derivatives(fmiComponent c, fmiReal derivatives[] , size_t nx) {
-    return fmiOK;
+	memcpy (derivatives, jmi_get_real_dx(((fmi_t *)c)->jmi), nx*sizeof(fmiReal));
+	return fmiOK;
 }
 fmiStatus fmi_get_event_indicators(fmiComponent c, fmiReal eventIndicators[], size_t ni) {
+	int retval = jmi_ode_derivatives(((fmi_t *)c)->jmi);
+	if(retval != 0) {
+		(((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the derivatives failed.");
+		return fmiError;
+	}
     return fmiOK;
 }
 fmiStatus fmi_get_real(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiReal value[]) {
@@ -189,11 +191,9 @@ fmiStatus fmi_get_real(fmiComponent c, const fmiValueReference vr[], size_t nvr,
     for (i = 0; i <nvr; i = i + 1) {
         /* Get index in z vector from value reference. */ 
         index = get_index_from_value_ref(vr[i]);
-        printf("index %u\n", index);
         
         /* Set value from z vector to return value array*/
-        fmiReal thevalue = z[index];
-        printf("value %f\n",thevalue);
+        //fmiReal thevalue = z[index];
         value[i] = z[index];
     }
     return fmiOK;
@@ -208,11 +208,9 @@ fmiStatus fmi_get_integer(fmiComponent c, const fmiValueReference vr[], size_t n
     for (i = 0; i <nvr; i = i + 1) {
         /* Get index in z vector from value reference. */ 
         index = get_index_from_value_ref(vr[i]);
-        printf("index %u\n", index);
         
         /* Set value from z vector to return value array*/
-        fmiInteger thevalue = z[index];
-        printf("value %d\n",thevalue);
+        //fmiInteger thevalue = z[index];
         value[i] = z[index];
     }
     return fmiOK;
@@ -227,11 +225,9 @@ fmiStatus fmi_get_boolean(fmiComponent c, const fmiValueReference vr[], size_t n
     for (i = 0; i <nvr; i = i + 1) {
         /* Get index in z vector from value reference. */ 
         index = get_index_from_value_ref(vr[i]);
-        printf("index %u\n", index);
         
         /* Set value from z vector to return value array*/
-        fmiBoolean thevalue = z[index];
-        printf("value %d\n",thevalue);
+        //fmiBoolean thevalue = z[index];
         value[i] = z[index];
     }
     return fmiOK;

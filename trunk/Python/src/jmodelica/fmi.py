@@ -36,7 +36,7 @@ from jmodelica.core import BaseModel, unzip_unit, package_unit, get_unit_name
 from jmodelica.compiler import ModelicaCompiler, OptimicaCompiler
 
 
-def compile_fmu(class_name, file_name=[], compiler='modelica', target='ipopt', 
+def compile_fmu(class_name, file_name=[], compiler='modelica', target='model_noad', 
     compiler_options={}, compile_to='.'):
     """ 
     Compile a Modelica or Optimica model to an FMU.
@@ -93,7 +93,8 @@ def compile_fmu(class_name, file_name=[], compiler='modelica', target='ipopt',
             
         target --
             Compiler target. 'model', 'algorithm', 'ipopt' or 'model_noad'.
-            Default: 'ipopt'
+            Note: Needs to be 'model_noad' at the moment.
+            Default: 'model_noad'
             
         compiler_options --
             Options for the compiler.
@@ -140,7 +141,11 @@ def compile_fmu(class_name, file_name=[], compiler='modelica', target='ipopt',
             raise JMIException("Unknown compiler option type for key: %s. \
             Should be of the following types: boolean, string, integer, \
             float or list" %key)
-                
+    
+    # always set this option
+    comp.set_boolean_option('generate_ode', True)
+    comp.set_boolean_option('equation_sorting', True)
+    
     #compile model
     comp.compile_model(class_name, file_name, target=target)
     
