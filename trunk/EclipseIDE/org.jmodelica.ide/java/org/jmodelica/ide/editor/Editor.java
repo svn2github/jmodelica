@@ -49,7 +49,7 @@ import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import org.jastadd.plugin.registry.IASTRegistryListener;
 import org.jmodelica.folding.CharacterProjectionSupport;
 import org.jmodelica.folding.CharacterProjectionViewer;
-import org.jmodelica.generated.scanners.Modelica22PartitionScanner;
+import org.jmodelica.generated.scanners.Modelica32PartitionScanner;
 import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.ModelicaCompiler;
 import org.jmodelica.ide.editor.actions.CollapseAllAction;
@@ -108,8 +108,8 @@ public Editor() {
         new ToggleAnnotationsAction(this);
     fPartitioner = 
         new FastPartitioner(
-            new Modelica22PartitionScanner(),
-            Modelica22PartitionScanner.LEGAL_PARTITIONS);
+            new Modelica32PartitionScanner(),
+            Modelica32PartitionScanner.LEGAL_PARTITIONS);
 }
 
 /**

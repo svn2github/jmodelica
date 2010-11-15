@@ -27,13 +27,8 @@ public class ModelicaPreferencePage extends PreferencePage  implements IWorkbenc
 	protected Control createContents(Composite parent) {
 		settings = new ModelicaSettingsControl();
 		settings.setLibraryPaths(Preferences.get(LIBRARIES_ID));
-		setOptionsPath(Preferences.get(OPTIONS_ID));
+		settings.setOptionsPath(Preferences.get(OPTIONS_ID));
 		return settings.createControl(parent);
-	}
-
-	private void setOptionsPath(String options) {
-		String stateLoc = Activator.getDefault().getStateLocation().toOSString();
-		settings.setOptionsPath(options.equals(stateLoc) ? "" : options);
 	}
 
 	private String defaults(String key) {
@@ -48,7 +43,7 @@ public class ModelicaPreferencePage extends PreferencePage  implements IWorkbenc
 	@Override
 	protected void performDefaults() {
 		settings.setLibraryPaths(defaults(LIBRARIES_ID));
-		setOptionsPath(defaults(OPTIONS_ID));
+		settings.setOptionsPath(defaults(OPTIONS_ID));
 		super.performDefaults();
 	}
 

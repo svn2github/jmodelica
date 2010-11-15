@@ -29,7 +29,7 @@ import org.jmodelica.folding.CharacterProjectionViewer;
 import org.jmodelica.generated.scanners.AnnotationNormalStateScanner;
 import org.jmodelica.generated.scanners.BackwardBraceScanner;
 import org.jmodelica.generated.scanners.ForwardBraceScanner;
-import org.jmodelica.generated.scanners.Modelica22PartitionScanner;
+import org.jmodelica.generated.scanners.Modelica32PartitionScanner;
 
 public class ModelicaCharacterPairMatcher implements ICharacterPairMatcher {
 
@@ -102,9 +102,9 @@ public class ModelicaCharacterPairMatcher implements ICharacterPairMatcher {
 	private boolean isNormalState(IDocument document, int offset) {
 		try {
 			ITypedRegion partition = document.getPartition(offset);
-			if (partition.getType() == Modelica22PartitionScanner.NORMAL_PARTITION)
+			if (partition.getType() == Modelica32PartitionScanner.NORMAL_PARTITION)
 				return true;
-			else if (partition.getType() == Modelica22PartitionScanner.ANNOTATION_PARTITION)
+			else if (partition.getType() == Modelica32PartitionScanner.ANNOTATION_PARTITION)
 				return getNormalStateScanner().isNormalState(document, partition.getOffset(), offset);
 		} catch (BadLocationException e) {
 		}

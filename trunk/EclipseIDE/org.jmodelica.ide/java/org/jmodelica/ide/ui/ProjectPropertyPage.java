@@ -74,7 +74,7 @@ public class ProjectPropertyPage extends PropertyPage {
 		IProject proj = getProject();
 		try {
 			Preferences.set(proj, LIBRARIES_ID, settings.getLibraryPaths());
-			Preferences.set(proj, OPTIONS_ID, settings.getOptionsPath());
+			Preferences.update(proj, OPTIONS_ID, settings.getOptionsPath());
 			proj.build(IncrementalProjectBuilder.FULL_BUILD, null);
 		} catch (CoreException e) {
 		}

@@ -20,7 +20,7 @@ import java.io.File;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.swt.graphics.RGB;
-import org.jmodelica.generated.scanners.Modelica22PartitionScanner;
+import org.jmodelica.generated.scanners.Modelica32PartitionScanner;
 import org.jmodelica.util.OptionRegistry;
 
 public class IDEConstants {
@@ -72,7 +72,7 @@ public class IDEConstants {
 	public static final String[] CONFIGURED_CONTENT_TYPES;
 	
 	static {
-		String[] a = Modelica22PartitionScanner.LEGAL_PARTITIONS;
+		String[] a = Modelica32PartitionScanner.LEGAL_PARTITIONS;
 		String[] b = new String[] { IDocument.DEFAULT_CONTENT_TYPE, CONTENT_TYPE_ID };
 		CONFIGURED_CONTENT_TYPES = new String[a.length + b.length];
 		System.arraycopy(a, 0, CONFIGURED_CONTENT_TYPES, 0, a.length);

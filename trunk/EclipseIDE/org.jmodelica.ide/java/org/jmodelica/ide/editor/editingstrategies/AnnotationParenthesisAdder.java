@@ -4,7 +4,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.IAutoEditStrategy;
 import org.eclipse.jface.text.IDocument;
-import org.jmodelica.generated.scanners.Modelica22PartitionScanner;
+import org.jmodelica.generated.scanners.Modelica32PartitionScanner;
 import org.jmodelica.ide.helpers.Util;
 import org.jmodelica.ide.indent.DocUtil;
 
@@ -31,9 +31,8 @@ public void customizeDocumentCommand(IDocument doc, DocumentCommand c) {
             .is(doc.getPartition(c.offset).getType())
             .among(
                 IDocument.DEFAULT_CONTENT_TYPE,
-                Modelica22PartitionScanner.ANNOTATION_PARTITION,
-                Modelica22PartitionScanner.DEFINITION_PARTITION,
-                Modelica22PartitionScanner.NORMAL_PARTITION);
+                Modelica32PartitionScanner.ANNOTATION_PARTITION,
+                Modelica32PartitionScanner.NORMAL_PARTITION);
         
         boolean atEndLine = 
             new DocUtil(doc)

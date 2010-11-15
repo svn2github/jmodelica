@@ -249,11 +249,6 @@
 				<include name="beaver-rt*" />
 			</fileset>
 		</copy>
-		<copy todir="${resource_dir}">
-			<fileset dir="${options_dir}">
-				<include name="options.xml" />
-			</fileset>
-		</copy>
 	</target>
 
 	<!-- generate the scanners -->

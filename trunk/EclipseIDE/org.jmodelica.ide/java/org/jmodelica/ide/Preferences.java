@@ -73,18 +73,6 @@ public class Preferences extends AbstractPreferenceInitializer {
 	public void initializeDefaultPreferences() {
 		Activator plugin = Activator.getDefault();
 		
-		// Try to extract options.xml, if not already extracted
-		IPath statePath = plugin.getStateLocation();
-		String defOptionsPath = statePath.toOSString();
-		File defOptionsFile = new File(defOptionsPath, IDEConstants.DEF_OPTIONS_NAME);
-		if (!defOptionsFile.isFile()) {
-			try {
-				saveFile(openResource(IDEConstants.DEF_OPTIONS_URL), defOptionsFile);
-			} catch (IOException e) {
-				defOptionsFile.delete();
-			}
-		}
-
 		// Read default values from environment vars
 		String jmodelicaHome = System.getenv("JMODELICA_HOME");
 		String modelicaPath = System.getenv("MODELICAPATH");
@@ -95,7 +83,7 @@ public class Preferences extends AbstractPreferenceInitializer {
 					+ "/ThirdParty/MSL".replace('/', File.separatorChar);
 		}
 		String optionsPath = (jmodelicaHome != null) ? 
-				(jmodelicaHome + File.separator + "Options") : defOptionsPath;
+				(jmodelicaHome + File.separator + "Options") : null;
 		
 		// If no MODELICAPATH can be calculated, try to extract MSL from plugin
 		if (modelicaPath == null) 

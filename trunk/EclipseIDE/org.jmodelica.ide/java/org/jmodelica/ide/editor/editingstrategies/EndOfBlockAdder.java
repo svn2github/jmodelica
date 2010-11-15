@@ -3,7 +3,7 @@ package org.jmodelica.ide.editor.editingstrategies;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.IDocument;
-import org.jmodelica.generated.scanners.Modelica22PartitionScanner;
+import org.jmodelica.generated.scanners.Modelica32PartitionScanner;
 import org.jmodelica.ide.helpers.Util;
 
 
@@ -38,8 +38,7 @@ public void customizeDocumentCommand(
                 doc.getPartition(c.offset).getType())
             .notAmong(
                 IDocument.DEFAULT_CONTENT_TYPE,
-                Modelica22PartitionScanner.DEFINITION_PARTITION,
-                Modelica22PartitionScanner.NORMAL_PARTITION)) 
+                Modelica32PartitionScanner.NORMAL_PARTITION)) 
         {
             return;
         }

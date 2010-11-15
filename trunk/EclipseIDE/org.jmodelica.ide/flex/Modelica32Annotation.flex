@@ -28,7 +28,7 @@ import org.jmodelica.ide.scanners.HilightScanner;
 
 %public
 %final
-%class Modelica22AnnotationScanner
+%class Modelica32AnnotationScanner
 %extends HilightScanner
 %unicode
 %buffer 2048
@@ -42,7 +42,7 @@ import org.jmodelica.ide.scanners.HilightScanner;
     private int start;
     private IToken last_token;
     
-    public Modelica22AnnotationScanner() {
+    public Modelica32AnnotationScanner() {
         this(new StringReader(""));
     }
     

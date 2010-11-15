@@ -12,10 +12,9 @@ import org.eclipse.jface.text.rules.DefaultDamagerRepairer;
 import org.eclipse.jface.text.rules.ITokenScanner;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
-import org.jmodelica.generated.scanners.Modelica22AnnotationScanner;
-import org.jmodelica.generated.scanners.Modelica22DefinitionScanner;
-import org.jmodelica.generated.scanners.Modelica22NormalScanner;
-import org.jmodelica.generated.scanners.Modelica22PartitionScanner;
+import org.jmodelica.generated.scanners.Modelica32AnnotationScanner;
+import org.jmodelica.generated.scanners.Modelica32NormalScanner;
+import org.jmodelica.generated.scanners.Modelica32PartitionScanner;
 import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.editor.editingstrategies.AnnotationParenthesisAdder;
 import org.jmodelica.ide.editor.editingstrategies.BracketAdder;
@@ -86,29 +85,25 @@ public IPresentationReconciler getPresentationReconciler(ISourceViewer sourceVie
     // DamageRepairer
     PresentationReconciler reconciler = new PresentationReconciler();
     addScanner(reconciler, 
-            new Modelica22NormalScanner(), 
+            new Modelica32NormalScanner(), 
             false,
-            Modelica22PartitionScanner.NORMAL_PARTITION);
-    addScanner(reconciler, 
-            new Modelica22DefinitionScanner(), 
-            false,
-            Modelica22PartitionScanner.DEFINITION_PARTITION);
+            Modelica32PartitionScanner.NORMAL_PARTITION);
     addScanner(reconciler, 
             new ModelicaStringScanner(), 
             false,
-            Modelica22PartitionScanner.STRING_PARTITION);
+            Modelica32PartitionScanner.STRING_PARTITION);
     addScanner(reconciler, 
             new ModelicaQIdentScanner(), 
             false,
-            Modelica22PartitionScanner.QIDENT_PARTITION);
+            Modelica32PartitionScanner.QIDENT_PARTITION);
     addScanner(reconciler, 
             new ModelicaCommentScanner(), 
             false,
-            Modelica22PartitionScanner.COMMENT_PARTITION);
+            Modelica32PartitionScanner.COMMENT_PARTITION);
     addScanner(reconciler, 
-            new Modelica22AnnotationScanner(), 
+            new Modelica32AnnotationScanner(), 
             true,
-            Modelica22PartitionScanner.ANNOTATION_PARTITION);
+            Modelica32PartitionScanner.ANNOTATION_PARTITION);
   return reconciler;
 }
 
@@ -136,14 +131,9 @@ public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
     
     ContentAssistant assist = new ContentAssistant();
     
-    for (String contentType : new String[] {
-            IDocument.DEFAULT_CONTENT_TYPE,
-            Modelica22PartitionScanner.NORMAL_PARTITION,
-            Modelica22PartitionScanner.DEFINITION_PARTITION})
-    {
-        assist.setContentAssistProcessor(completions, contentType);
-    }
-    
+    assist.setContentAssistProcessor(completions, IDocument.DEFAULT_CONTENT_TYPE);
+    assist.setContentAssistProcessor(completions, Modelica32PartitionScanner.NORMAL_PARTITION);
+     
     return assist;
 }
 

@@ -30,7 +30,7 @@ import org.jmodelica.ide.scanners.DocumentScanner;
 
 %public
 %final
-%class Modelica22PartitionScanner
+%class Modelica32PartitionScanner
 %extends DocumentScanner
 %implements IPartitionTokenScanner
 %unicode
@@ -47,11 +47,10 @@ import org.jmodelica.ide.scanners.DocumentScanner;
     public static final String QIDENT_PARTITION = PARTITION + ".qident";
     public static final String ANNOTATION_PARTITION = PARTITION + ".annotation";
     public static final String COMMENT_PARTITION = PARTITION + ".comment";
-    public static final String DEFINITION_PARTITION = PARTITION + ".definition";
 
     public static final String[] LEGAL_PARTITIONS = { 
         NORMAL_PARTITION, STRING_PARTITION, QIDENT_PARTITION, 
-        ANNOTATION_PARTITION, COMMENT_PARTITION, DEFINITION_PARTITION
+        ANNOTATION_PARTITION, COMMENT_PARTITION
         };
     
     private int offset;
@@ -59,7 +58,7 @@ import org.jmodelica.ide.scanners.DocumentScanner;
     private int saveOffset;
     private int level;
     
-    public Modelica22PartitionScanner() {
+    public Modelica32PartitionScanner() {
         this(new StringReader(""));
     }
     
@@ -101,8 +100,6 @@ import org.jmodelica.ide.scanners.DocumentScanner;
                 state = ANNOTATION;
             } else if (contentType == COMMENT_PARTITION) { 
                 state = COMMENT;
-            } else if (contentType == DEFINITION_PARTITION) {
-                restart = true; 
             }
         }
         this.offset = (restart ? 0 : partitionOffset - offset);
@@ -148,7 +145,8 @@ Q_CHAR = [^\'\\]
 S_ESCAPE = "\\\'" | "\\\"" | "\\?" | "\\\\" | "\\a" | "\\b" | "\\f" | "\\n" | "\\r" | "\\t" | "\\v"
 
 NL = \r|\n|\r\n
-WS = ({NL} | [ \t\f])+
+SingleWS = {NL} | [ \t\f]
+WS = {SingleWS}+
 NormalID = {NONDIGIT} ({DIGIT}|{NONDIGIT})*
 ID = {NormalID} | {QIdent}
 Class = "block" | "class" | "connector" | "function" | "model" | "package" | "record" | "type"
@@ -160,7 +158,7 @@ StringCont = ({S_CHAR}|{S_ESCAPE})*
 QIdent = "\'" {QIdentCont} "\'"
 String = "\"" {StringCont} "\""
 Comment = "/*" {CommentCont} "*"? "*/"
-Definition = {Class} {WS} {ID}
+AnnotationStart = "annotation" ( {SingleWS} | "(" )
 
 Other = .|{NL}
 
@@ -173,9 +171,7 @@ Other = .|{NL}
   "\'"				{ /* YYINITIAL: "\'" */ begin(QIDENT); }
   "/*"				{ /* YYINITIAL: "/*" */ begin(COMMENT); }
   "//" 				{ begin(LINE_COMMENT); }
-  "annotation"		{ /* YYINITIAL: "annotation" */ saveOffset = yychar; return beginAnnotation(); }
-  ^{Definition}		{ /* YYINITIAL: Definition */ offset = yychar; return new Token(DEFINITION_PARTITION); }
-  {WS}{Definition}	{ /* YYINITIAL: Definition */ offset = yychar; return new Token(DEFINITION_PARTITION); }
+  {AnnotationStart}	{ /* YYINITIAL: "annotation" */ yypushback(1); saveOffset = yychar; return beginAnnotation(); }
   {WS}				{ /* YYINITIAL: WS */ }
   {Other}			{ /* YYINITIAL: Other */ begin(NORMAL); }
   <<EOF>>			{ /* YYINITIAL: EOF */ offset = yychar; return Token.EOF; }
@@ -186,8 +182,7 @@ Other = .|{NL}
   "\'"				{ /* NORMAL: QIdentML */ return normalEnd(); }
   "/*"				{ /* NORMAL: CommentML */ return normalEnd(); }
   "//" 				{ begin(LINE_COMMENT); }
-  {WS}{Definition}	{ /* NORMAL: Definition */ return normalEnd(); }
-  "annotation"		{ /* NORMAL: "annotation" */ return beginAnnotation(); }
+  {AnnotationStart}	{ /* NORMAL: "annotation" */ yypushback(1); return beginAnnotation(); }
   {Other}			{ /* NORMAL: Other */ }
   <<EOF>>			{ /* NORMAL: EOF */ return normalEnd(); }
 }
