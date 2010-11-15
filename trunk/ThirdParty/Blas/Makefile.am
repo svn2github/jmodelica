@@ -63,5 +63,5 @@ libblas_a_SOURCES = \
 	lsame.f \
 	xerbla.f
 
-FFLAGS = -O3
+FFLAGS = -fPIC -O3
 

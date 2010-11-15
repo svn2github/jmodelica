@@ -191,7 +191,7 @@ am_liblapack_a_OBJECTS = dbdsdc.$(OBJEXT) dbdsqr.$(OBJEXT) \
 	dtrti2.$(OBJEXT) dtrtri.$(OBJEXT) dtrtrs.$(OBJEXT) \
 	dtzrqf.$(OBJEXT) dtzrzf.$(OBJEXT) dzsum1.$(OBJEXT) \
 	ieeeck.$(OBJEXT) ilaenv.$(OBJEXT) ilaver.$(OBJEXT) \
-	iparmq.$(OBJEXT) lsamen.$(OBJEXT)
+	iparmq.$(OBJEXT) lsamen.$(OBJEXT) dlamch.$(OBJEXT)
 liblapack_a_OBJECTS = $(am_liblapack_a_OBJECTS)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 F77COMPILE = $(F77) $(AM_FFLAGS) $(FFLAGS)
@@ -239,7 +239,7 @@ ECLIPSE_HOME = @ECLIPSE_HOME@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 F77 = @F77@
-FFLAGS = -O3
+FFLAGS = -fPIC -O3
 GREP = @GREP@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
@@ -695,7 +695,8 @@ liblapack_a_SOURCES = \
 	ilaenv.f \
 	ilaver.f \
 	iparmq.f \
-	lsamen.f
+	lsamen.f \
+	dlamch.f
 
 all: all-am
 

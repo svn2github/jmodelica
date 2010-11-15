@@ -382,5 +382,5 @@ liblapack_a_SOURCES = \
 	lsamen.f \
 	dlamch.f
 
-FFLAGS = -O3
+FFLAGS = -fPIC -O3
 
