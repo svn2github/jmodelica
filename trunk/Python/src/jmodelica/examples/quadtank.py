@@ -156,5 +156,5 @@ def run_demo(with_plots=True):
         plt.grid()
         plt.ylabel('u2')
         
-    if __name__ == "__main__":
-        run_demo()
+if __name__ == "__main__":
+    run_demo()
