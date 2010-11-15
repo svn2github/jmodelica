@@ -100,6 +100,7 @@ fmiStatus fmi_set_time(fmiComponent c, fmiReal time) {
     return fmiOK;
 }
 fmiStatus fmi_set_continuous_states(fmiComponent c, const fmiReal x[], size_t nx) {
+	memcpy (jmi_get_real_x(((fmi_t *)c)->jmi), x, nx*sizeof(fmiReal));
     return fmiOK;
 }
 fmiStatus fmi_completed_integrator_step(fmiComponent c, fmiBoolean* callEventUpdate) {
@@ -172,13 +173,18 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
     return fmiOK;
 }
 fmiStatus fmi_get_derivatives(fmiComponent c, fmiReal derivatives[] , size_t nx) {
+	int retval = jmi_ode_derivatives(((fmi_t *)c)->jmi);
+	if(retval != 0) {
+		(((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the derivatives failed.");
+		return fmiError;
+	}
 	memcpy (derivatives, jmi_get_real_dx(((fmi_t *)c)->jmi), nx*sizeof(fmiReal));
 	return fmiOK;
 }
 fmiStatus fmi_get_event_indicators(fmiComponent c, fmiReal eventIndicators[], size_t ni) {
     int retval = jmi_dae_R(((fmi_t *)c)->jmi,eventIndicators);
     jmi_real_t *switches = jmi_get_sw(((fmi_t *)c)->jmi);
-	//int retval = jmi_ode_derivatives(((fmi_t *)c)->jmi);
+
 	if(retval != 0) {
 		(((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the event indicators failed.");
 		return fmiError;
@@ -207,7 +213,6 @@ fmiStatus fmi_get_real(fmiComponent c, const fmiValueReference vr[], size_t nvr,
         index = get_index_from_value_ref(vr[i]);
         
         /* Set value from z vector to return value array*/
-        //fmiReal thevalue = z[index];
         value[i] = z[index];
     }
     return fmiOK;
@@ -224,7 +229,6 @@ fmiStatus fmi_get_integer(fmiComponent c, const fmiValueReference vr[], size_t n
         index = get_index_from_value_ref(vr[i]);
         
         /* Set value from z vector to return value array*/
-        //fmiInteger thevalue = z[index];
         value[i] = z[index];
     }
     return fmiOK;
@@ -241,7 +245,6 @@ fmiStatus fmi_get_boolean(fmiComponent c, const fmiValueReference vr[], size_t n
         index = get_index_from_value_ref(vr[i]);
         
         /* Set value from z vector to return value array*/
-        //fmiBoolean thevalue = z[index];
         value[i] = z[index];
     }
     return fmiOK;
@@ -255,9 +258,16 @@ fmiStatus fmi_event_update(fmiComponent c, fmiBoolean intermediateResults, fmiEv
     return fmiOK;
 }
 fmiStatus fmi_get_continuous_states(fmiComponent c, fmiReal states[], size_t nx) {
+	memcpy (states, jmi_get_real_x(((fmi_t *)c)->jmi), nx*sizeof(fmiReal));
     return fmiOK;
 }
 fmiStatus fmi_get_nominal_continuous_states(fmiComponent c, fmiReal x_nominal[], size_t nx) {
+	fmiReal ones[nx];
+	int i;
+	for(i = 0; i <nx; i = i + 1) {
+		ones[i]=1.0;
+	}
+	memcpy (x_nominal, ones, nx*sizeof(fmiReal));
     return fmiOK;
 }
 fmiStatus fmi_get_state_value_references(fmiComponent c, fmiValueReference vrx[], size_t nx) {
