@@ -32,6 +32,7 @@ typedef struct {
     fmiString fmi_GUID;
     fmiCallbackFunctions fmi_functions;
     fmiBoolean fmi_logging_on;
+    fmiReal fmi_epsilon;
     jmi_t* jmi;
 } fmi_t;
 

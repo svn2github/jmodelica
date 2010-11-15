@@ -163,6 +163,8 @@ fmiStatus fmi_set_string(fmiComponent c, const fmiValueReference vr[], size_t nv
 
 fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal relativeTolerance, fmiEventInfo* eventInfo) {
 	int retval = jmi_ode_initialize(((fmi_t *)c)->jmi);
+    ((fmi_t *)c) -> fmi_epsilon=0.0001*relativeTolerance; //Used in the event detection
+
 	if(retval != 0) {
 		(((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Initialization failed.");
 		return fmiError;
@@ -174,11 +176,23 @@ fmiStatus fmi_get_derivatives(fmiComponent c, fmiReal derivatives[] , size_t nx)
 	return fmiOK;
 }
 fmiStatus fmi_get_event_indicators(fmiComponent c, fmiReal eventIndicators[], size_t ni) {
-	int retval = jmi_ode_derivatives(((fmi_t *)c)->jmi);
+    int retval = jmi_dae_R(((fmi_t *)c)->jmi,eventIndicators);
+    jmi_real_t *switches = jmi_get_sw(((fmi_t *)c)->jmi);
+	//int retval = jmi_ode_derivatives(((fmi_t *)c)->jmi);
 	if(retval != 0) {
-		(((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the derivatives failed.");
+		(((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the event indicators failed.");
 		return fmiError;
 	}
+    int i;
+    
+    for (i = 0; i < ni; i=i+1){
+        if (switches[i] == 1){
+            eventIndicators[i] = eventIndicators[i]/1.0+((fmi_t *)c)->fmi_epsilon; //MISSING DIVIDING WITH NOMINAL
+        }else{
+            eventIndicators[i] = eventIndicators[i]/1.0-((fmi_t *)c)->fmi_epsilon; //MISSING DIVIDING WITH NOMINAL
+        }
+    }
+    
     return fmiOK;
 }
 fmiStatus fmi_get_real(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiReal value[]) {
