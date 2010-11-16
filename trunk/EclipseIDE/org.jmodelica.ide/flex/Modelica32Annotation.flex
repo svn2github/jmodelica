@@ -153,11 +153,17 @@ EndOfLineComment = "//" [^\n\r]* {LineTerminator}?
 Comment = {TraditionalComment} | {EndOfLineComment} 
 
 
-%state AFTER_ID, AFTER_DOT
+%state INSIDE, AFTER_ID, AFTER_DOT
 
 %%
 
 <YYINITIAL> {
+    "annotation"    { return KEYWORD; }
+    "("             { yybegin(INSIDE); return ANNO_OPERATOR; }
+    .               { return NORMAL; }
+}
+
+<INSIDE> {
     {Keyword}       { return ANNO_KEYWORD; }
     {ExtraKeyword}  { return ANNO_EXTRA_KEYWORD; }
     {BuiltIn} / {FuncParen}     { return ANNO_BUILT_IN; }
@@ -178,7 +184,7 @@ Comment = {TraditionalComment} | {EndOfLineComment}
     {Comment}       { return ANNO_COMMENT; }
     "."             { yybegin(AFTER_DOT); return ANNO_OPERATOR_DOT; }
     {WhiteSpace}    { return ANNO_NORMAL; }
-    .               { yybegin(YYINITIAL); yypushback(1); }
+    .               { yybegin(INSIDE); yypushback(1); }
 }
 
 <AFTER_DOT> {       
@@ -187,7 +193,7 @@ Comment = {TraditionalComment} | {EndOfLineComment}
     {OkIdInDotted}  { yybegin(AFTER_ID); return ANNO_ID; }
     {QID}	        { yybegin(AFTER_ID); return ANNO_QID; }
     {WhiteSpace}    { return ANNO_NORMAL; }
-    .               { yybegin(YYINITIAL); yypushback(1); }
+    .               { yybegin(INSIDE); yypushback(1); }
 }
 
 <<EOF>>             { return Token.EOF; }

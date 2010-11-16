@@ -38,7 +38,7 @@ import org.jmodelica.ide.scanners.DocumentScanner;
 %apiprivate
 %type IToken
 %char
-%table
+%pack
 
 %{
     private static final String PARTITION = IDEConstants.PLUGIN_ID + ".partition";
@@ -51,7 +51,7 @@ import org.jmodelica.ide.scanners.DocumentScanner;
     public static final String[] LEGAL_PARTITIONS = { 
         NORMAL_PARTITION, STRING_PARTITION, QIDENT_PARTITION, 
         ANNOTATION_PARTITION, COMMENT_PARTITION
-        };
+    };
     
     private int offset;
     private int start;
@@ -114,7 +114,6 @@ import org.jmodelica.ide.scanners.DocumentScanner;
     
     private void begin(int state) {
         saveOffset = yychar; 
-        level = 0; 
         yybegin(state);
     }
     
@@ -129,27 +128,21 @@ import org.jmodelica.ide.scanners.DocumentScanner;
         return end(NORMAL_PARTITION);
     }
     
-	private IToken beginAnnotation() {
+	private void beginAnnotation() {
 		level = 0;
+		yypushback(1);
 		yybegin(ANNOTATION);
-		offset = saveOffset;
-		saveOffset = yychar + yylength();
-		return new Token(NORMAL_PARTITION);
+		saveOffset = yychar;
 	}
 %}
 
-NONDIGIT = [a-zA-Z_]
-DIGIT = [0-9]
 S_CHAR = [^\"\\]
-Q_CHAR = [^\'\\]
-S_ESCAPE = "\\\'" | "\\\"" | "\\?" | "\\\\" | "\\a" | "\\b" | "\\f" | "\\n" | "\\r" | "\\t" | "\\v"
+Q_CHAR = [^'\\]
+S_ESCAPE = "\\" {Other}
 
 NL = \r|\n|\r\n
 SingleWS = {NL} | [ \t\f]
 WS = {SingleWS}+
-NormalID = {NONDIGIT} ({DIGIT}|{NONDIGIT})*
-ID = {NormalID} | {QIdent}
-Class = "block" | "class" | "connector" | "function" | "model" | "package" | "record" | "type"
 
 CommentCont = ([^*]* | "*" [^/])* 
 QIdentCont = ({Q_CHAR}|{S_ESCAPE})*
@@ -157,9 +150,10 @@ StringCont = ({S_CHAR}|{S_ESCAPE})*
 
 QIdent = "\'" {QIdentCont} "\'"
 String = "\"" {StringCont} "\""
-Comment = "/*" {CommentCont} "*"? "*/"
-AnnotationStart = "annotation" ( {SingleWS} | "(" )
+Comment = "/*" ~"*/" | "//" .* {NL}
+AnnotationStart = "annotation" {SingleWS}* "("
 
+NormalEnd = "\"" | "'" | "/*" | "//" | {AnnotationStart}
 Other = .|{NL}
 
 %state ANNOTATION, NORMAL, STRING, QIDENT, COMMENT, LINE_COMMENT
@@ -167,52 +161,48 @@ Other = .|{NL}
 %%
 
 <YYINITIAL> {
-  "\""				{ /* YYINITIAL: "\"" */ begin(STRING); }
-  "\'"				{ /* YYINITIAL: "\'" */ begin(QIDENT); }
-  "/*"				{ /* YYINITIAL: "/*" */ begin(COMMENT); }
-  "//" 				{ begin(LINE_COMMENT); }
-  {AnnotationStart}	{ /* YYINITIAL: "annotation" */ yypushback(1); saveOffset = yychar; return beginAnnotation(); }
-  {WS}				{ /* YYINITIAL: WS */ }
-  {Other}			{ /* YYINITIAL: Other */ begin(NORMAL); }
-  <<EOF>>			{ /* YYINITIAL: EOF */ offset = yychar; return Token.EOF; }
+  "\""				{ /* YYINITIAL: "\"" */         begin(STRING); }
+  "\'"				{ /* YYINITIAL: "\'" */         begin(QIDENT); }
+  "/*"				{ /* YYINITIAL: "/*" */         begin(COMMENT); }
+  "//" 				{ /* YYINITIAL: "//" */         begin(LINE_COMMENT); }
+  {AnnotationStart}	{ /* YYINITIAL: "annotation" */ beginAnnotation(); }
+  {WS}				{ /* YYINITIAL: WS */           }
+  {Other}			{ /* YYINITIAL: Other */        begin(NORMAL); }
+  <<EOF>>			{ /* YYINITIAL: EOF */          offset = yychar; return Token.EOF; }
 }
 
 <NORMAL> {
-  "\""				{ /* NORMAL: StringML */ return normalEnd(); }
-  "\'"				{ /* NORMAL: QIdentML */ return normalEnd(); }
-  "/*"				{ /* NORMAL: CommentML */ return normalEnd(); }
-  "//" 				{ begin(LINE_COMMENT); }
-  {AnnotationStart}	{ /* NORMAL: "annotation" */ yypushback(1); return beginAnnotation(); }
-  {Other}			{ /* NORMAL: Other */ }
-  <<EOF>>			{ /* NORMAL: EOF */ return normalEnd(); }
+  {NormalEnd}	    { /* NORMAL: NormalEnd */ return normalEnd(); }
+  {Other}			{ /* NORMAL: Other */     }
+  <<EOF>>			{ /* NORMAL: EOF */       return normalEnd(); }
 }
 
 <ANNOTATION> {
-  {String}			{ /* ANNOTATION: String */ }
-  {QIdent}			{ /* ANNOTATION: QIdent */ }
+  {String}			{ /* ANNOTATION: String */  }
+  {QIdent}			{ /* ANNOTATION: QIdent */  }
   {Comment}			{ /* ANNOTATION: Comment */ }
-  "("				{ /* ANNOTATION: "(" */ level++; }
-  ")" 				{ /* ANNOTATION: ")" */ if (--level == 0) return end(ANNOTATION_PARTITION); }
-  {Other}			{ /* ANNOTATION: Other */ }
-  <<EOF>>			{ /* ANNOTATION: EOF */ return end(ANNOTATION_PARTITION); }
+  "("				{ /* ANNOTATION: "(" */     level++; }
+  ")" 				{ /* ANNOTATION: ")" */     if (--level == 0) return end(ANNOTATION_PARTITION); }
+  {Other}			{ /* ANNOTATION: Other */   }
+  <<EOF>>			{ /* ANNOTATION: EOF */     return end(ANNOTATION_PARTITION); }
 }
 
 <STRING> {
+  "\""				{ /* STRING: StringEnd */  return end(STRING_PARTITION); }
   {StringCont}		{ /* STRING: StringCont */ }
-  "\""				{ /* STRING: StringEnd */ return end(STRING_PARTITION); }
-  <<EOF>>			{ /* STRING: EOF */ return end(STRING_PARTITION); }
+  <<EOF>>			{ /* STRING: EOF */        return end(STRING_PARTITION); }
 }
 
 <QIDENT> {
+  "'"				{ /* QIDENT: QIdentEnd */  return end(QIDENT_PARTITION); }
   {QIdentCont}		{ /* QIDENT: QIdentCont */ }
-  "\'"				{ /* QIDENT: QIdentEnd */ yybegin(YYINITIAL); return end(QIDENT_PARTITION); }
-  <<EOF>>			{ /* QIDENT: EOF */ return end(QIDENT_PARTITION); }
+  <<EOF>>			{ /* QIDENT: EOF */        return end(QIDENT_PARTITION); }
 }
 
 <COMMENT> {
-  {CommentCont}		{ /* COMMENT: CommentCont */ }
   "*/"				{ /* COMMENT: (end of comment) */ return end(COMMENT_PARTITION); }
-  <<EOF>>			{ /* COMMENT: EOF */ return end(COMMENT_PARTITION); }
+  {CommentCont}		{ /* COMMENT: CommentCont */      }
+  <<EOF>>			{ /* COMMENT: EOF */              return end(COMMENT_PARTITION); }
 }
 
 
@@ -220,5 +210,3 @@ Other = .|{NL}
 	.* 				{ return end(COMMENT_PARTITION); }
 	<<EOF>> 		{ return end(COMMENT_PARTITION); } 
 }
-
-[^]					{ return end(IDocument.DEFAULT_CONTENT_TYPE); }
