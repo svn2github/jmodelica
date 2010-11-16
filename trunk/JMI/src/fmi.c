@@ -97,6 +97,7 @@ fmiStatus fmi_set_debug_logging(fmiComponent c, fmiBoolean loggingOn) {
 /* Providing independent variables and re-initialization of caching */
 
 fmiStatus fmi_set_time(fmiComponent c, fmiReal time) {
+    *(jmi_get_t(((fmi_t *)c)->jmi)) = time;
     return fmiOK;
 }
 fmiStatus fmi_set_continuous_states(fmiComponent c, const fmiReal x[], size_t nx) {
