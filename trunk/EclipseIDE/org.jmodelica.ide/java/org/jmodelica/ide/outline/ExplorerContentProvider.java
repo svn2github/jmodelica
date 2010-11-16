@@ -38,7 +38,7 @@ import org.jastadd.plugin.compiler.ast.IOutlineNode;
 import org.jastadd.plugin.registry.ASTRegistry;
 import org.jastadd.plugin.registry.IASTRegistryListener;
 import org.jmodelica.ide.IDEConstants;
-import org.jmodelica.ide.ModelicaCompiler;
+import org.jmodelica.ide.compiler.ModelicaCompiler;
 import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.ClassDecl;
 import org.jmodelica.modelica.compiler.Element;

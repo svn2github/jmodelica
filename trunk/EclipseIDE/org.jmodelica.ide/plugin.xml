@@ -105,7 +105,7 @@
          name="JModelica Compiler"
          point="org.jastadd.plugin.compilers">
       <compiler
-            class="org.jmodelica.ide.ModelicaCompiler">
+            class="org.jmodelica.ide.compiler.ModelicaCompiler">
       </compiler>
    </extension>
    <extension
@@ -205,7 +205,7 @@
          name="Modelica Properties"
          point="org.eclipse.ui.propertyPages">
       <page
-            class="org.jmodelica.ide.ui.ProjectPropertyPage"
+            class="org.jmodelica.ide.preferences.ProjectPropertyPage"
             id="org.jmodelica.ide.property.modelica"
             name="JModelica">
          <enabledWhen>
@@ -321,7 +321,7 @@
    <extension
          point="org.eclipse.ui.preferencePages">
       <page
-            class="org.jmodelica.ide.ui.ModelicaPreferencePage"
+            class="org.jmodelica.ide.preferences.ModelicaPreferencePage"
             id="org.jmodelica.ide.preference.modelica"
             name="JModelica">
       </page>
@@ -329,7 +329,7 @@
    <extension
          point="org.eclipse.core.runtime.preferences">
       <initializer
-            class="org.jmodelica.ide.Preferences">
+            class="org.jmodelica.ide.preferences.Preferences">
       </initializer>
    </extension>
 </plugin>

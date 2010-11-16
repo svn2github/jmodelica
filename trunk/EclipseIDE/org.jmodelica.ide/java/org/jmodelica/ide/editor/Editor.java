@@ -51,7 +51,7 @@ import org.jmodelica.folding.CharacterProjectionSupport;
 import org.jmodelica.folding.CharacterProjectionViewer;
 import org.jmodelica.generated.scanners.Modelica32PartitionScanner;
 import org.jmodelica.ide.IDEConstants;
-import org.jmodelica.ide.ModelicaCompiler;
+import org.jmodelica.ide.compiler.ModelicaCompiler;
 import org.jmodelica.ide.editor.actions.CollapseAllAction;
 import org.jmodelica.ide.editor.actions.ErrorCheckAction;
 import org.jmodelica.ide.editor.actions.ExpandAllAction;

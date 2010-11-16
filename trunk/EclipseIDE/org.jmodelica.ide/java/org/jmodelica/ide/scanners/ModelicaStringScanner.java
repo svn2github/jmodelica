@@ -12,14 +12,13 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package org.jmodelica.ide.scanners;
-
 
 public class ModelicaStringScanner extends StupidScanner {
 
-public ModelicaStringScanner() {
-    super(STRING_BOUNDARY, STRING, STRING_BOUNDARY, "\"", "\"");
-}
+	public ModelicaStringScanner() {
+		super(STRING);
+	}
 
 }

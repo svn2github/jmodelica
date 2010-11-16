@@ -1,10 +1,12 @@
-package org.jmodelica.ide;
+package org.jmodelica.ide.compiler;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 
 import org.eclipse.core.resources.IProject;
+import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.helpers.Util;
+import org.jmodelica.ide.preferences.Preferences;
 import org.jmodelica.util.OptionRegistry;
 import org.xml.sax.SAXException;
 
@@ -24,7 +26,7 @@ public IDEOptions(IProject project) {
 		return;
     
     try {
-        String dir = Preferences.get(project, IDEConstants.PROPERTY_OPTIONS_PATH_ID);
+        String dir = Preferences.get(project, IDEConstants.PREFERENCE_OPTIONS_PATH_ID);
         if (dir != null) {
 			String path = dir + File.separator + "options.xml";
 			try {
@@ -34,7 +36,7 @@ public IDEOptions(IProject project) {
 			}
         }
 		
-	    String modelicaPath = Preferences.get(project, IDEConstants.PROPERTY_LIBRARIES_ID);
+	    String modelicaPath = Preferences.get(project, IDEConstants.PREFERENCE_LIBRARIES_ID);
 		setStringOption("MODELICAPATH", modelicaPath);
     } catch (Exception e) {
     	// TODO: Do something constructive. An error message or something.

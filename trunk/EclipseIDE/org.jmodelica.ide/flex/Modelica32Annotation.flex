@@ -36,7 +36,7 @@ import org.jmodelica.ide.scanners.HilightScanner;
 %apiprivate
 %type IToken
 %char
-%table
+%pack
 
 %{
     private int start;
@@ -64,78 +64,130 @@ import org.jmodelica.ide.scanners.HilightScanner;
 
     public void setRange(IDocument document, int offset, int length) {
         start = offset;
-        last_token = ANNOTATION_NORMAL;
     	reset(document, offset, length);	
     }
     
     protected void reset(Reader r) {
         yyreset(r);
     }
-    
-    protected IToken rtn(IToken token) {
-    	last_token = token;
-    	return token;
-    }
 %}
-							//note: below ID includes dot
-ID = {NONDIGIT} ({DIGIT}|{NONDIGIT}|".")* | {Q_IDENT}
+
 NONDIGIT = [a-zA-Z_]
+DIGIT = [0-9]
+INTEGER = {DIGIT} {DIGIT}*
 S_CHAR = [^\"\\]
-Q_IDENT = "\'" ( {Q_CHAR} | {S_ESCAPE} ) ( {Q_CHAR} | {S_ESCAPE} )* "\'"
-STRING = "\"" ({S_CHAR}|{S_ESCAPE})* "\""
 Q_CHAR = [^\'\\]
 S_ESCAPE = "\\\'" | "\\\"" | "\\?" | "\\\\" | "\\a" | "\\b" | "\\f" | "\\n" | "\\r" | "\\t" | "\\v"
-DIGIT = [0-9]
-UNSIGNED_INTEGER = {DIGIT} {DIGIT}*
-UNSIGNED_NUMBER = {DIGIT} {DIGIT}* ( "." ( {UNSIGNED_INTEGER} )? )? ( (e|E) ( "+" | "-" )? {UNSIGNED_INTEGER} )? | {DIGIT}* ( "." ( {UNSIGNED_INTEGER} )? )?
+
+Number = {INTEGER} ( "." ( {INTEGER} )? )? ( (e|E) ( "+" | "-" )? {INTEGER} )? | {DIGIT}* ( "." ( {INTEGER} )? )?
 
 LineTerminator = \r|\n|\r\n
-InputCharacter = [^\r\n]
+WhiteSpace = ({LineTerminator} | [ \t\f])+
 
-NNLWhiteSpace = [ \t\f]
-WhiteSpace = ({LineTerminator} | [ \t\f])
+// This is the table in section 2.3.3 in MLS v3.2
+// commented-out keywords are in other categories 
+Keyword = "algorithm"     | "discrete"   /* | "false"      */ | "model"         | "redeclare"     | 
+          "and"           | "each"          | "final"         | "not"           | "replaceable"   | 
+          "annotation"    | "else"          | "flow"          | "operator"      | "return"        | 
+          "assert"        | "elseif"        | "for"           | "or"            | "stream"        | 
+          "block"         | "elsewhen"      | "function"      | "outer"         | "then"          | 
+          "break"         | "encapsulated"  | "if"            | "output"     /* |  "true"      */ | 
+          "class"         | "end"           | "import"        | "package"       | "type"          | 
+          "connect"       | "enumeration"   | "in"            | "parameter"     | "when"          | 
+          "connector"     | "equation"      | "initial"       | "partial"       | "while"         | 
+          "constant"      | "expandable"    | "inner"         | "protected"     | "within"        | 
+          "constrainedby" | "extends"       | "input"         | "public"        | 
+          "der"           | "external"      | "loop"          | "record"
 
-Keyword = "each" | "final" | "replaceable" | "redeclare" | "and" | "or" | "not" | 
-          "true" | "false" | "if" | "then" | "else" | "elseif" | "end" | "for" | 
-          "flow" | "discrete" | "parameter" | "constant" | "input" | "output"
-          
-Operator = "(" | ")" | "{" | "}" | "[" | "]" | ";" | ":" | "." | "," | "+" | "-" | "*" | 
-           "/" | "=" | "^" | "<" | "<=" | ">" | ">=" | "==" | "<>"
-Normal = {ID} | {UNSIGNED_NUMBER}
+// Extra stuff we want to color as keywords.
+ExtraKeyword = "time" 
 
-TraditionalComment = "/*" ([^*]* | "*" [^/])* "*/"
-EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
+// Built-in functions (a.k.a. function-like operators)
+          // MSL 3.2, sect 3.7.1, p 20
+BuiltIn = "abs" | "sign" | "sqrt" | 
+          // MSL 3.2, sect 3.7.1.1, p 21
+          "div" | "mod" | "rem" | "ceil" | "floor" | "integer" | "Integer" | "String" | 
+          // MSL 3.2, sect 3.7.1.2, p 21-22
+          "sin" | "cos" | "tan" | "asin" | "acos" | "atan" | "atan2" | "sinh" | "cosh" | "tanh" | "exp" | "log" | "log10" | 
+          // MSL 3.2, sect 3.7.2, p 22-23
+          "delay" | "homotopy" | "semiLinear" | "Subtask.decouple" | 
+          // MSL 3.2, sect 3.7.3, p 26-27
+          "initial" | "terminal" | "noEvent" | "smooth" | "sample" | "pre" | "edge" | "change" | "reinit" | 
+          // MSL 3.2, sect 10.3.1, p 110
+          "ndims" | "size" | 
+          // MSL 3.2, sect 10.3.2, p 110
+          "scalar" | "vector" | "matrix" | 
+          // MSL 3.2, sect 10.3.3, p 110-111
+          "identity" | "diagonal" | "zeros" | "ones" | "fill" | "linspace" | 
+          // MSL 3.2, sect 10.3.4, p 111
+          "min" | "max" | "sum" | "product" | 
+          // MSL 3.2, sect 10.3.5, p 112
+          "transpose" | "outerProduct" | "symmetric" | "cross" | "skew" | 
+          // MSL 3.2, sect 16.6, p 185
+          "Subtask.activated", "Subtask.lastInterval"
+
+DeprBuiltIn = "cardinality"
+
+FuncParen = {WhiteSpace}? "("
+
+// Built-in types
+Type = "Real" | "Boolean" | "Integer" | "String"
+
+// All non-keyword non-function-like operators
+Operator = "(" | ")" | "{" | "}" | "[" | "]" | ";" | ":" | /* "." | */ "," |
+           "+" | "-" | "*" | "/" | ".^" | ".+" | ".-" | ".*" | "./" | ".^" | 
+           "=" | "<" | "<=" | ">" | ">=" | "==" | "<>"
+
+
+Boolean = "true" | "false"
+
+String = "\"" ({S_CHAR}|{S_ESCAPE})* "\""
+
+QID = "\'" ({Q_CHAR}|{S_ESCAPE})+ "\'"
+ID = {NONDIGIT} ({DIGIT}|{NONDIGIT})*
+
+OkIdInDotted = {BuiltIn} | {DeprBuiltIn} | {Type}
+
+TraditionalComment = "/*" ~"*/"
+EndOfLineComment = "//" [^\n\r]* {LineTerminator}?
 Comment = {TraditionalComment} | {EndOfLineComment} 
 
-%state COMMENTSTATE, COMMENT_ONE_LINE
+
+%state AFTER_ID, AFTER_DOT
 
 %%
 
 <YYINITIAL> {
-	{Keyword}                     { return rtn(ANNOTATION_KEYWORD); }
-	{LineTerminator}{WhiteSpace}* { return rtn(ANNOTATION_NORMAL); }
-	{NNLWhiteSpace}+              { return rtn(last_token); }
-	{ID} {WhiteSpace}* / "="	  { return rtn(ANNOTATION_LHS); }				  
-	{ID} {WhiteSpace}* / "("	  { return rtn(ANNOTATION_RHS); }				  
-	{Operator}+                   { return rtn(ANNOTATION_OPERATOR); }
-	{Normal}                      { return rtn(ANNOTATION_NORMAL); }
-	{STRING}                      { return rtn(ANNOTATION_STRING); }
-	"/*"                          { yybegin(COMMENTSTATE); return rtn(COMMENT_BOUNDARY); }
-	"//"                          { yybegin(COMMENT_ONE_LINE); return rtn(COMMENT_BOUNDARY); }
-	.                             { return rtn(ANNOTATION_NORMAL); }
+    {Keyword}       { return ANNO_KEYWORD; }
+    {ExtraKeyword}  { return ANNO_EXTRA_KEYWORD; }
+    {BuiltIn} / {FuncParen}     { return ANNO_BUILT_IN; }
+    {DeprBuiltIn} / {FuncParen} { return ANNO_DEPR_BUILT_IN; }
+    {Type}          { return ANNO_TYPE; }
+    {Operator}      { return ANNO_OPERATOR; }
+    {Boolean}       { return ANNO_BOOLEAN; }
+    {Number}        { return ANNO_NUMBER; }
+    {String}        { return ANNO_STRING; }
+    {ID}	        { yybegin(AFTER_ID); return ANNO_ID; }
+    {QID}	        { yybegin(AFTER_ID); return ANNO_QID; }
+    {Comment}       { return ANNO_COMMENT; }
+    {WhiteSpace}    { return ANNO_NORMAL; }
+    .               { return ANNO_NORMAL; }
 }
 
-<COMMENT_ONE_LINE> {
-	[^]*				    	  { yybegin(YYINITIAL); return rtn(COMMENT); }
+<AFTER_ID> {
+    {Comment}       { return ANNO_COMMENT; }
+    "."             { yybegin(AFTER_DOT); return ANNO_OPERATOR_DOT; }
+    {WhiteSpace}    { return ANNO_NORMAL; }
+    .               { yybegin(YYINITIAL); yypushback(1); }
 }
 
-<COMMENTSTATE> {
-	{LineTerminator}{WhiteSpace}* 
-				      			  { return rtn(ANNOTATION_NORMAL); }
-	"\\" .                        { return rtn(COMMENT); }
-	"*/"                          { yybegin(YYINITIAL); return rtn(COMMENT_BOUNDARY); }
-	[^\\*/\n\r]+                  { return rtn(COMMENT); }
-	[^]							  { return rtn(last_token); }
+<AFTER_DOT> {       
+    {Comment}       { return ANNO_COMMENT; }
+    {ID}	        { yybegin(AFTER_ID); return ANNO_ID; }
+    {OkIdInDotted}  { yybegin(AFTER_ID); return ANNO_ID; }
+    {QID}	        { yybegin(AFTER_ID); return ANNO_QID; }
+    {WhiteSpace}    { return ANNO_NORMAL; }
+    .               { yybegin(YYINITIAL); yypushback(1); }
 }
 
-<<EOF>>                           { return rtn(Token.EOF); }
+<<EOF>>             { return Token.EOF; }

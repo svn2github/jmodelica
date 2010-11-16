@@ -8,7 +8,7 @@ import java.util.TreeSet;
 import junit.framework.TestCase;
 import mock.MockEditor;
 
-import org.jmodelica.ide.ModelicaCompiler;
+import org.jmodelica.ide.compiler.ModelicaCompiler;
 import org.jmodelica.ide.helpers.Maybe;
 import org.jmodelica.ide.namecomplete.CompletionNode;
 import org.jmodelica.ide.namecomplete.CompletionProcessor;

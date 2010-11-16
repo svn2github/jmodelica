@@ -71,6 +71,8 @@ import org.jmodelica.ide.scanners.HilightScanner;
     }
 %}
 
+// TODO use %include "filename" to avoid copy-pase of this section to annotation scanner
+
 NONDIGIT = [a-zA-Z_]
 DIGIT = [0-9]
 INTEGER = {DIGIT} {DIGIT}*
@@ -128,7 +130,7 @@ FuncParen = {WhiteSpace}? "("
 // Built-in types
 Type = "Real" | "Boolean" | "Integer" | "String"
 
-// All non-keyword operators
+// All non-keyword non-function-like operators
 Operator = "(" | ")" | "{" | "}" | "[" | "]" | ";" | ":" | /* "." | */ "," |
            "+" | "-" | "*" | "/" | ".^" | ".+" | ".-" | ".*" | "./" | ".^" | 
            "=" | "<" | "<=" | ">" | ">=" | "==" | "<>"
@@ -136,12 +138,6 @@ Operator = "(" | ")" | "{" | "}" | "[" | "]" | ";" | ":" | /* "." | */ "," |
 
 Boolean = "true" | "false"
 
-NONDIGIT = [a-zA-Z_]
-DIGIT = [0-9]
-Q_CHAR = [^\'\\]
-S_ESCAPE = "\\\'" | "\\\"" | "\\?" | "\\\\" | "\\a" | "\\b" | "\\f" | "\\n" | "\\r" | "\\t" | "\\v"
-
-QID = "\'" ({Q_CHAR}|{S_ESCAPE})* "\'"
 ID = {NONDIGIT} ({DIGIT}|{NONDIGIT})*
 
 OkIdInDotted = {BuiltIn} | {DeprBuiltIn} | {Type}
@@ -165,7 +161,6 @@ OkIdInDotted = {BuiltIn} | {DeprBuiltIn} | {Type}
     {Boolean}       { return BOOLEAN; }
     {Number}        { return NUMBER; }
     {ID}	        { yybegin(AFTER_ID); return ID; }
-    {QID}	        { yybegin(AFTER_ID); return QID; }
     {WhiteSpace}    { return NORMAL; }
     .               { return NORMAL; }
 }
@@ -179,7 +174,6 @@ OkIdInDotted = {BuiltIn} | {DeprBuiltIn} | {Type}
 <AFTER_DOT> {       
     {ID}	        { yybegin(AFTER_ID); return ID; }
     {OkIdInDotted}  { yybegin(AFTER_ID); return ID; }
-    {QID}	        { yybegin(AFTER_ID); return QID; }
     {WhiteSpace}    { return NORMAL; }
     .               { yybegin(YYINITIAL); yypushback(1); }
 }

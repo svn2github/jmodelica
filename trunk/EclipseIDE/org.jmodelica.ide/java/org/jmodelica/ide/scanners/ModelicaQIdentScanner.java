@@ -12,16 +12,13 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package org.jmodelica.ide.scanners;
-
 
 public class ModelicaQIdentScanner extends StupidScanner {
 
-String s = "this is a string";
-
-public ModelicaQIdentScanner() {
-    super(Q_IDENT_BOUNDARY, NORMAL, Q_IDENT_BOUNDARY, "'", "'");
-} 
+	public ModelicaQIdentScanner() {
+		super(QID);
+	}
 
 }

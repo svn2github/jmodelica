@@ -5,8 +5,8 @@ import mock.MockProject;
 
 import org.eclipse.core.resources.IProject;
 import org.jastadd.plugin.registry.ASTRegistry;
-import org.jmodelica.ide.CompilationRoot;
 import org.jmodelica.ide.OffsetDocument;
+import org.jmodelica.ide.compiler.CompilationRoot;
 import org.jmodelica.ide.helpers.Maybe;
 import org.jmodelica.ide.helpers.Util;
 import org.jmodelica.ide.namecomplete.Lookup;

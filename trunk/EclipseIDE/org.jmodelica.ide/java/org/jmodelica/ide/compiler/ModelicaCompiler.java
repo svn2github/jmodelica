@@ -13,7 +13,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.jmodelica.ide;
+package org.jmodelica.ide.compiler;
 
 import java.io.File;
 import java.util.Arrays;
@@ -34,6 +34,7 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.reconciler.DirtyRegion;
 import org.jastadd.plugin.compiler.AbstractCompiler;
 import org.jastadd.plugin.compiler.ast.IASTNode;
+import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.helpers.DocumentReader;
 import org.jmodelica.ide.helpers.Maybe;
 import org.jmodelica.modelica.compiler.ASTNode;

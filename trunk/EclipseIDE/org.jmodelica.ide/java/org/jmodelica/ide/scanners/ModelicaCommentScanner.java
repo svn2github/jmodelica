@@ -12,13 +12,12 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package org.jmodelica.ide.scanners;
-
 
 public class ModelicaCommentScanner extends StupidScanner {
 
 	public ModelicaCommentScanner() {
-	    super(COMMENT_BOUNDARY, COMMENT, COMMENT_BOUNDARY, "/*", "*/");
+		super(COMMENT);
 	}
 }

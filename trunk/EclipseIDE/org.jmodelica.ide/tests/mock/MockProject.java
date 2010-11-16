@@ -303,9 +303,9 @@ public void build(int kind, IProgressMonitor monitor) throws CoreException {
     }
 
     public String getPersistentProperty(QualifiedName key) throws CoreException {
-    	if (key.equals(IDEConstants.PROPERTY_OPTIONS_PATH_ID))
+    	if (key.equals(IDEConstants.PREFERENCE_OPTIONS_PATH_ID))
     		return System.getenv("JMODELICA_HOME") + File.separator + "Options";
-    	else if (key.equals(IDEConstants.PROPERTY_LIBRARIES_ID)) 
+    	else if (key.equals(IDEConstants.PREFERENCE_LIBRARIES_ID)) 
     		return System.getenv("JMODELICA_SRC") + File.separator + "ThirdParty" + File.separator + "MSL";
     	else 
     		return null;

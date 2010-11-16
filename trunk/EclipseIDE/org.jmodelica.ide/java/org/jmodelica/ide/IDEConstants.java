@@ -53,14 +53,17 @@ public class IDEConstants {
 	public static final String GROUP_MODELICA_ID = GROUP_ID + ".modelica";
 	public static final String GROUP_ERROR_ID = GROUP_ID + ".error";
 	
+	// TODO: this doesn't seem to use new preference framework
 	public static final String PREFERENCE_ID = PLUGIN_ID + ".preference";
 	public static final String KEY_BRACE_MATCHING = PREFERENCE_ID + ".brace-match";
 	public static final String KEY_BRACE_MATCHING_COLOR = KEY_BRACE_MATCHING + ".color";
 
 	public static final RGB BRACE_MATCHING_COLOR = new RGB(128, 128, 128);
 	
-	public static final String PROPERTY_LIBRARIES_ID = "libraries";
-	public static final String PROPERTY_OPTIONS_PATH_ID = "options_path";
+	public static final String PREFERENCE_LIBRARIES_ID = "libraries";
+	public static final String PREFERENCE_OPTIONS_PATH_ID = "options_path";
+	public static final String PREFERENCE_COLOR_PREFIX = "syntax.color.";
+	public static final String PREFERENCE_ANNO_BG = PREFERENCE_COLOR_PREFIX + "default.anno.bg";
 
 	public static final String WIZARD_ID = PLUGIN_ID + ".wizard";
 	public static final String WIZARD_FILE_ID = WIZARD_ID + ".file";

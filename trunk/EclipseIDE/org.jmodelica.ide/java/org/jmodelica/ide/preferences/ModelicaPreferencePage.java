@@ -1,4 +1,4 @@
-package org.jmodelica.ide.ui;
+package org.jmodelica.ide.preferences;
 
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.QualifiedName;
@@ -13,13 +13,12 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.jmodelica.ide.Activator;
 import org.jmodelica.ide.IDEConstants;
-import org.jmodelica.ide.Preferences;
 import org.jmodelica.ide.helpers.Util;
 
 public class ModelicaPreferencePage extends PreferencePage  implements IWorkbenchPreferencePage {
 	
-	private static final String LIBRARIES_ID = IDEConstants.PROPERTY_LIBRARIES_ID;
-	private static final String OPTIONS_ID = IDEConstants.PROPERTY_OPTIONS_PATH_ID;
+	private static final String LIBRARIES_ID = IDEConstants.PREFERENCE_LIBRARIES_ID;
+	private static final String OPTIONS_ID = IDEConstants.PREFERENCE_OPTIONS_PATH_ID;
 	
 	private ModelicaSettingsControl settings;
 

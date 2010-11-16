@@ -13,7 +13,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.jmodelica.ide.ui;
+package org.jmodelica.ide.preferences;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -46,14 +46,13 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PropertyPage;
 import org.jmodelica.ide.IDEConstants;
-import org.jmodelica.ide.Preferences;
 import org.jmodelica.ide.helpers.Maybe;
 import org.jmodelica.ide.helpers.Util;
 
 public class ProjectPropertyPage extends PropertyPage {
 	
-	private static final String LIBRARIES_ID = IDEConstants.PROPERTY_LIBRARIES_ID;
-	private static final String OPTIONS_ID = IDEConstants.PROPERTY_OPTIONS_PATH_ID;
+	private static final String LIBRARIES_ID = IDEConstants.PREFERENCE_LIBRARIES_ID;
+	private static final String OPTIONS_ID = IDEConstants.PREFERENCE_OPTIONS_PATH_ID;
 	private ModelicaSettingsControl settings;
 
 	@Override

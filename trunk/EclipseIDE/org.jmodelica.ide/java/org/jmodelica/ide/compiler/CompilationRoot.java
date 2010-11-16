@@ -1,4 +1,4 @@
-package org.jmodelica.ide;
+package org.jmodelica.ide.compiler;
 
 import java.io.File;
 import java.io.FileReader;
@@ -9,6 +9,7 @@ import java.io.StringReader;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.error.CompileErrorReport;
 import org.jmodelica.ide.error.InstanceErrorHandler;
 import org.jmodelica.modelica.compiler.BadDefinition;

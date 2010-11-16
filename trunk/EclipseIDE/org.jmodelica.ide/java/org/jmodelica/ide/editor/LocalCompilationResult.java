@@ -4,7 +4,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
-import org.jmodelica.ide.ModelicaCompiler;
+import org.jmodelica.ide.compiler.ModelicaCompiler;
 
 
 public class LocalCompilationResult extends CompilationResult {

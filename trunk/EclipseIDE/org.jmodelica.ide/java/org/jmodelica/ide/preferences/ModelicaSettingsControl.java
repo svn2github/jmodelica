@@ -1,4 +1,4 @@
-package org.jmodelica.ide.ui;
+package org.jmodelica.ide.preferences;
 
 import java.io.File;
 import java.util.ArrayList;
