@@ -131,7 +131,7 @@ class TestKInitSolve:
         
         self.problem.set_constraints_usage(True,const)
         self.problem.set_constraints_usage(True)
-        nose.tools.assert_true(self.problem.constraints == None)
+        nose.tools.assert_true(self.problem.constraints != None)
         
         #test bad input
         nose.tools.assert_raises(JMUAlgebraic_Exception, self.problem.set_constraints_usage,2)

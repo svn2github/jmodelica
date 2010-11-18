@@ -108,8 +108,10 @@ class JMUAlgebraic(ProblemAlgebraic):
             self._x0[self._mark:self._neqF0] = self._model.real_w
         
         # Set constraints settings
-        self.constraints = constraints
-        self.use_constraints = use_constraints
+        self.constraints = None
+        self.use_constraints = False
+        self.set_constraints_usage(use_constraints,constraints)
+        
     
     def f(self,input):
         """
@@ -150,6 +152,47 @@ class JMUAlgebraic(ProblemAlgebraic):
         """
         self._x0 = x0
         
+    def get_heuristic_x0(self):
+        """
+        If present, return the initial guess with an heuristic applied:
+        All variables with initial guesses set to 0.0 and at the same time
+        has the constraint to be => zero are set to 1.0.
+        
+        Parameters:
+            None
+        """
+        if self.constraints != None:
+            x = N.zeros(self._neqF0)
+            for i in N.arange(0,self._neqF0):
+                if self._x0[i] == 0.0 and (self.constraints[i] == 1.0 or self.constraints[i] == 2.0):
+                    x[i] = 1.0
+                    self._print_var_info(i)
+                else:
+                    x[i] = self._x0[i]
+        
+            return x
+        else:
+            return self._x0
+        
+    def _print_var_info(self,i):
+        
+        dx_min = self._model._xmldoc.get_dx_min()
+        dx_names = self._model.get_dx_variable_names()
+        
+        x_min = self._model._xmldoc.get_x_min()
+        x_names = self._model.get_x_variable_names()
+        
+        w_min = self._model._xmldoc.get_w_min()
+        w_names = self._model.get_w_variable_names()
+        
+        
+        if i < self._dx_size:
+            print "der(state): ",dx_names[i][1]
+        elif i < self._mark:
+            print "state: ",x_names[i-self._dx_size][1]
+        else:
+            print "algebraic: ",w_names[i-self._mark][1]
+            
     def get_x0(self):
         """
         If present, return the initial guess
@@ -157,8 +200,8 @@ class JMUAlgebraic(ProblemAlgebraic):
         Parameters:
             None
         """
+        
         return self._x0
-
         
     def jac(self,input):
         """
@@ -246,13 +289,23 @@ class JMUAlgebraic(ProblemAlgebraic):
         if type(use_const).__name__ != 'bool':
             raise JMUAlgebraic_Exception(
                 "First argument sent to 'set_constraint_usage' must be a boolean.")
+            
+        self.use_constraints = use_const
+        
         if constraints != None:
             if type(constraints).__name__ != 'ndarray':
                 raise JMUAlgebraic_Exception(
                     "Constraints must be an numpy.ndarray")
+                
+            self.constraints = constraints
+        elif self.use_constraints:
+            # No constraints supplied but const == True, do the guess
+            self.constraints = self._guess_constraints()
+            
+        else:
+            self.constraints = None
         
-        self.use_constraints = use_const
-        self.constraints = constraints
+        
         
     def get_constraints(self):
         """
@@ -301,10 +354,11 @@ class JMUAlgebraic(ProblemAlgebraic):
             
             if min[1] != None and max[1] != None:
                 # Upper and lower bound
-                if max[1] <= 0.0:
-                    res[i] = -1.0
-                elif min[1] >= 0.0:
+                if min[1] >= 0.0:
                     res[i] = 1.0
+                elif max[1] <= 0.0:
+                    res[i] = -1.0
+                
             elif min[1] != None and (min[1] - 0.0) < 1e-10:
                 # lower bound
                 if min[1] == 0.0:
@@ -323,10 +377,10 @@ class JMUAlgebraic(ProblemAlgebraic):
         for i, min, max in zip(N.arange(self._dx_size,self._mark),x_min, x_max):
             if min[1] != None and max[1] != None:
                 # Upper and lower bound
-                if max[1] <= 0.0:
-                    res[i] = -1.0
-                elif min[1] >= 0.0:
+                if min[1] >= 0.0:
                     res[i] = 1.0
+                elif max[1] <= 0.0:
+                    res[i] = -1.0
             elif min[1] != None and min[1] >= 0.0:
                 # lower bound
                 if min[1] == 0.0:
@@ -345,10 +399,10 @@ class JMUAlgebraic(ProblemAlgebraic):
         for i, min, max in zip(N.arange(self._mark,self._neqF0),w_min, w_max):
             if min[1] != None and max[1] != None:
                 # Upper and lower bound
-                if max[1] <= 0.0:
-                    res[i] = -1.0
-                elif min[1] >= 0.0:
-                    res[i] = 1.0
+                if min[1] > 0.0:
+                    res[i] = 2.0
+                elif max[1] < 0.0:
+                    res[i] = -2.0
             elif min[1] != None and min[1] >= 0.0:
                 # lower bound
                 if min[1] == 0.0:
@@ -364,6 +418,92 @@ class JMUAlgebraic(ProblemAlgebraic):
 
         
         return res
+    
+    def check_constraints(self,to_check):
+        """
+        Method used to check if the array sent in to_check
+        does or does not break the constraints of the model.
+        """
+        dx_min = self._model._xmldoc.get_dx_min()
+        dx_max = self._model._xmldoc.get_dx_max()
+        dx_names = self._model.get_dx_variable_names()
+        
+        x_min = self._model._xmldoc.get_x_min()
+        x_max = self._model._xmldoc.get_x_max()
+        x_names = self._model.get_x_variable_names()
+        
+        w_min = self._model._xmldoc.get_w_min()
+        w_max = self._model._xmldoc.get_w_max()
+        w_names = self._model.get_w_variable_names()
+        
+        OK = True
+        minerrors = []
+        maxerrors = []
+        
+        # iterate through dx
+        for i, min, max in zip(N.arange(0,self._dx_size),dx_min, dx_max):
+            
+            if min[1] != None:
+                if to_check[i] < min[1]:
+                    OK = False
+                    minerrors.append((i,min))
+                    
+            if max[1] != None:
+                if to_check[i] > max[1]:
+                    OK = False
+                    maxerrors.append((i,max))
+
+   
+        # iterate through x
+        for i, min, max in zip(N.arange(self._dx_size,self._mark),x_min, x_max):
+            
+            if min[1] != None:
+                if to_check[i] < min[1]:
+                    OK = False
+                    minerrors.append((i,min))
+                    
+            if max[1] != None:
+                if to_check[i] > max[1]:
+                    OK = False
+                    maxerrors.append((i,max))
+
+                    
+        # iterate through w
+        for i, min, max in zip(N.arange(self._mark,self._neqF0),w_min, w_max):
+            
+            if min[1] != None:
+                if to_check[i] < min[1]:
+                    OK = False
+                    minerrors.append((i,min))
+                    
+            if max[1] != None:
+                if to_check[i] > max[1]:
+                    OK = False
+                    maxerrors.append((i,max))
+                    
+        if OK:
+            print "Result ok with model constraints"
+        else:
+            print "Result breaks model constraints!"
+            if minerrors != []:
+                print "min broken at: "
+                for err in minerrors:
+                    if err[0] < self._dx_size:
+                        print "der(state): ",dx_names[err[0]][1],":", to_check[err[0]], "<", err[1][1]
+                    elif err[0] < self._mark:
+                        print "state: ",x_names[err[0]-self._dx_size][1],":", to_check[err[0]], "<", err[1][1]
+                    else:
+                            print "algebraic: ",w_names[err[0]-self._mark][1],":", to_check[err[0]], "<", err[1][1]
+                
+            if maxerrors != []:
+                print "max broken at: "
+                for err in maxerrors:
+                    if err[0] < self._dx_size:
+                        print "der(state): ",dx_names[err[0]],":", to_check[err[0]], ">", err[1]
+                    elif err[0] < self._mark:
+                        print "state: ",x_names[err[0]-self._dx_size],":", to_check[err[0]], ">", err[1]
+                    else:
+                        print "algebraic: ",w_names[err[0]-self._mark],":", to_check[err[0]], ">", err[1]
         
 def write_resdata(problem, file_name='', format='txt'):
     """
