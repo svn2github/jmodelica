@@ -46,7 +46,6 @@ try:
     from jmodelica.initialization.assimulo_interface import write_resdata
     assimulo_present = True
 except:
-    print "Assimulo not found!!!!"
     logging.warning(
         'Could not load Assimulo module. Check jmodelica.check_packages()')
     assimulo_present = False
