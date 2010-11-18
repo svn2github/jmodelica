@@ -550,7 +550,8 @@ aspect FlatAPI {
 	to FClass.relExpInEquations() for myFClass();	
 		
 	public int FRelExp.relExpInEquationsIndex() {
-		return myFClass().relExpInEquations().indexOf(this);
+		return myFClass().relExpInEquations().
+			indexOf(this.originalFRelExp==null? this: this.originalFRelExp);
 	}
 	
 	syn int FClass.numInitialEquations() = initialEquations().size(); 
@@ -589,8 +590,9 @@ aspect FlatAPI {
  		this when inInitialEquationSection() && !inNoEventExp()
 	    to FClass.relExpInInitialEquations() for myFClass();	
 
-	public int FBoolBinExp.relExpInInitialEquationsIndex() {
-		return myFClass().relExpInInitialEquations().indexOf(this);
+	public int FRelExp.relExpInInitialEquationsIndex() {
+		return myFClass().relExpInInitialEquations().
+			indexOf(this.originalFRelExp==null? this: this.originalFRelExp);
 	}
  
 /*	

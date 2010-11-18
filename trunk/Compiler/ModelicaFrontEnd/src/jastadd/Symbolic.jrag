@@ -49,6 +49,8 @@ aspect EquationSolve {
 		for (FExp e : t) {
 			if (e!=theTerm) {
 				FExp ee = (FExp)e.fullCopy();
+				// Set references from the new tree to the original one
+				ee.traverseSymbolic(e); 
 				if (!e.isNegativeTerm()) {
 				  	ee = new FNegExp(ee);
 				}
@@ -153,5 +155,19 @@ aspect EquationSolve {
 	
 	eq FIdUseExp.nbrUses(String name) = name.equals(name())? 1: 0;
 	eq FDerExp.nbrUses(String name) = name.equals(name())? 1: 0;
+	
+	public FRelExp FRelExp.originalFRelExp = null;
+	public void ASTNode.traverseSymbolic(ASTNode e) {
+		for (int i=0;i<getNumChild();i++) {
+			getChild(i).traverseSymbolic(e.getChild(i));
+		}
+	}
+
+	public void FRelExp.traverseSymbolic(ASTNode e) {
+		originalFRelExp = (FRelExp)e;
+		for (int i=0;i<getNumChild();i++) {
+			getChild(i).traverseSymbolic(e.getChild(i));
+		}
+	}
 	
 }
