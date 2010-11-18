@@ -1028,7 +1028,7 @@ class AssimuloAlg(AlgorithmBase):
         
             The AssimuloSimResult object.
         """
-        write_data(self.simulator)
+        write_data(self.simulator,self.write_scaled_result)
         # result file name
         resultfile = self.model.get_name()+'_result.txt'
         # load result file
