@@ -241,6 +241,7 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
                     }
                 }
             }
+            ((fmi_t*)c) -> fmi_functions.freeMemory(b_mode);
             
         }else{ //No event functions, initialization is complete.
             initComplete = 1;
