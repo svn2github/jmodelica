@@ -352,72 +352,119 @@ class JMUAlgebraic(ProblemAlgebraic):
         # iterate through dx
         for i, min, max in zip(N.arange(0,self._dx_size),dx_min, dx_max):
             
-            if min[1] != None and max[1] != None:
-                # Upper and lower bound
-                if min[1] >= 0.0:
-                    res[i] = 1.0
-                elif max[1] <= 0.0:
-                    res[i] = -1.0
+            if min[1] != None:
+                if max[1] != None:
+                    # Max and min
+                    if min[1] >= 0.0:
+                        res[i] = 1.0
+                    elif max[1] <= 0.0:
+                        res[i] = -1,0
+                else:
+                    # only min
+                    if min[1] >= 0.0:
+                        res[i] = 1.0
                 
-            elif min[1] != None and (min[1] - 0.0) < 1e-10:
-                # lower bound
-                if min[1] == 0.0:
-                    res[i] = 1.0
-                else:
-                    res[i] = 2.0
-            elif max[1] != None and max[1] <= 0.0:
-                # upper bound
-                if max[1] == 0.0:
+            elif max[1] != None:
+                # only max
+                if max[1] <= 0.0:
                     res[i] = -1.0
-                else:
-                    res[i] = -2.0
 
                     
         # iterate through x
         for i, min, max in zip(N.arange(self._dx_size,self._mark),x_min, x_max):
-            if min[1] != None and max[1] != None:
-                # Upper and lower bound
-                if min[1] >= 0.0:
-                    res[i] = 1.0
-                elif max[1] <= 0.0:
-                    res[i] = -1.0
-            elif min[1] != None and min[1] >= 0.0:
-                # lower bound
-                if min[1] == 0.0:
-                    res[i] = 1.0
+            if min[1] != None:
+                if max[1] != None:
+                    # Max and min
+                    if min[1] >= 0.0:
+                        res[i] = 1.0
+                    elif max[1] <= 0.0:
+                        res[i] = -1,0
                 else:
-                    res[i] = 2.0
-            elif max[1] != None and max[1] <= 0.0:
-                # upper bound
-                if max[1] == 0.0:
+                    # only min
+                    if min[1] >= 0.0:
+                        res[i] = 1.0
+                
+            elif max[1] != None:
+                # only max
+                if max[1] <= 0.0:
                     res[i] = -1.0
-                else:
-                    res[i] = -2.0
 
                     
         # iterate through w
         for i, min, max in zip(N.arange(self._mark,self._neqF0),w_min, w_max):
-            if min[1] != None and max[1] != None:
-                # Upper and lower bound
-                if min[1] > 0.0:
-                    res[i] = 2.0
-                elif max[1] < 0.0:
-                    res[i] = -2.0
-            elif min[1] != None and min[1] >= 0.0:
-                # lower bound
-                if min[1] == 0.0:
-                    res[i] = 1.0
+            if min[1] != None:
+                if max[1] != None:
+                    # Max and min
+                    if min[1] >= 0.0:
+                        res[i] = 1.0
+                    elif max[1] <= 0.0:
+                        res[i] = -1,0
                 else:
-                    res[i] = 2.0
-            elif max[1] != None and max[1] <= 0.0:
-                # upper bound
-                if max[1] == 0.0:
+                    # only min
+                    if min[1] >= 0.0:
+                        res[i] = 1.0
+                
+            elif max[1] != None:
+                # only max
+                if max[1] <= 0.0:
                     res[i] = -1.0
-                else:
-                    res[i] = -2.0
 
         
         return res
+    
+    def print_var_info(self,i):
+        """
+        Method printing info on variable at position i
+        """
+        dx_min = self._model._xmldoc.get_dx_min()
+        dx_max = self._model._xmldoc.get_dx_max()
+        dx_names = self._model.get_dx_variable_names()
+        
+        x_min = self._model._xmldoc.get_x_min()
+        x_max = self._model._xmldoc.get_x_max()
+        x_names = self._model.get_x_variable_names()
+        
+        w_min = self._model._xmldoc.get_w_min()
+        w_max = self._model._xmldoc.get_w_max()
+        w_names = self._model.get_w_variable_names()
+        
+        if i < self._dx_size:
+            print "der(state): ",dx_names[i][1]
+            if dx_min[i][1] != None:
+                print "with min: ", dx_min[i][1]
+            if dx_max[i][1] != None:
+                print "with max: ", dx_max[i][1]
+            if self.constraints[i] < 0.0:
+                print "initially constrained to be negative"
+            elif self.constraints[i] > 0.0:
+                print "initially constrained to be positive"
+            else:
+                print "not constrained initially"
+        elif i < self._mark:
+            print "state: ",x_names[i-self._dx_size][1]
+            if x_min[i-self._dx_size][1] != None:
+                print "with min: ", x_min[i-self._dx_size][1]
+            if x_max[i-self._dx_size][1] != None:
+                print "with max: ", x_max[i-self._dx_size][1]
+            if self.constraints[i] < 0.0:
+                print "initially constrained to be negative"
+            elif self.constraints[i] > 0.0:
+                print "initially constrained to be positive"
+            else:
+                print "not constrained initially"
+        else:
+            print "algebraic: ",w_names[i-self._mark][1]
+            if w_min[i-self._mark][1] != None:
+                print "with min: ", w_min[i-self._mark][1]
+            if w_max[i-self._mark][1] != None:
+                print "with max: ", w_max[i-self._mark][1]
+            if self.constraints[i] < 0.0:
+                print "initially constrained to be negative"
+            elif self.constraints[i] > 0.0:
+                print "initially constrained to be positive"
+            else:
+                print "not constrained initially"
+            
     
     def check_constraints(self,to_check):
         """
