@@ -398,7 +398,7 @@ class JMUAlgebraic(ProblemAlgebraic):
                     if min[1] >= 0.0:
                         res[i] = 1.0
                     elif max[1] <= 0.0:
-                        res[i] = -1,0
+                        res[i] = -1.0
                 else:
                     # only min
                     if min[1] >= 0.0:
