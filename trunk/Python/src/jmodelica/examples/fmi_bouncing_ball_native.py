@@ -107,7 +107,7 @@ def run_demo(with_plots=True):
             
             #Event iteration
             while eInfo.iterationConverged == False:
-                bouncing_fmu.event_update('0') #Stops after each event iteration
+                bouncing_fmu.event_update(intermediateResult=True) #Stops after each event iteration
                 eInfo = bouncing_fmu.get_event_info()
 
                 #Retrieve solutions (if needed)

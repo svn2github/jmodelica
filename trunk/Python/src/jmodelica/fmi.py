@@ -755,19 +755,19 @@ class FMUModel(BaseModel):
         
         return [rtol, atol]
     
-    def event_update(self, intermediateResult='0'):
+    def event_update(self, intermediateResult=False):
         """
         Updates the event information at the current time-point. If 
-        intermediateResult is set to '1' the update_event will stop at each 
+        intermediateResult is set to True the update_event will stop at each 
         event iteration which would require to loop until 
         event_info.iterationConverged == fmiTrue.
         
         Parameters::
         
             intermediateResult -- 
-                If set to '1', the update_event will stop at each event 
+                If set to True, the update_event will stop at each event 
                 iteration.
-                Default: '0'.
+                Default: False.
                 
         Example::
         
@@ -775,8 +775,12 @@ class FMUModel(BaseModel):
         
         Calls the low-level FMI function: fmiEventUpdate
         """
-        status = self._fmiEventUpdate(
-            self._model, intermediateResult, C.byref(self._eventInfo))
+        if intermediateResult:
+            status = self._fmiEventUpdate(
+                self._model, self._fmiTrue, C.byref(self._eventInfo))
+        else:
+            status = self._fmiEventUpdate(
+                self._model, self._fmiFalse, C.byref(self._eventInfo))
         
         if status != 0:
             raise FMUException('Failed to update the events.')

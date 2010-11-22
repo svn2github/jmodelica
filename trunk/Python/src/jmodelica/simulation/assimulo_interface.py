@@ -347,12 +347,12 @@ class FMIODE(Explicit_Problem):
         eInfo.iterationConverged = False
 
         while eInfo.iterationConverged == False:
-            self._model.event_update('0')
+            self._model.event_update(intermediateResult=False)
+            
             eInfo = self._model.get_event_info()
-
             #Retrieve solutions (if needed)
-            if eInfo.iterationConverged == False:
-                pass
+            #if eInfo.iterationConverged == False:
+            #    pass
         
         #Check if the event affected the state values and if so sets them
         if eInfo.stateValuesChanged:
