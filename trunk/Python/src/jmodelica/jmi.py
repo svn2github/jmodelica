@@ -40,8 +40,7 @@ from jmodelica import xmlparser
 from jmodelica.core import BaseModel, unzip_unit, package_unit, get_unit_name
 from jmodelica.compiler import ModelicaCompiler
 from jmodelica.compiler import OptimicaCompiler
-from jmodelica.io import ResultDymolaTextual
-from jmodelica.io import VariableNotFoundError
+import jmodelica.io
 from jmodelica.core import TrajectoryLinearInterpolation
 
 int = N.int32
@@ -2050,7 +2049,7 @@ class JMUModel(BaseModel):
                     self.set(name,traj_li.eval(time))
                 else:
                     self.set(name,traj.x)
-            except VariableNotFoundError:
+            except io.VariableNotFoundError:
                 var_name = strip_der(name)
                 print var_name
                 found = False
@@ -2066,7 +2065,7 @@ class JMUModel(BaseModel):
                         else:
                             self.set(name,traj.x)
                             found = True
-                    except VariableNotFoundError:
+                    except io.VariableNotFoundError:
                         print "Did not find " + d_name
                 if not found:
                     print "Warning: Could not find trajectory for derivative variable " + name
