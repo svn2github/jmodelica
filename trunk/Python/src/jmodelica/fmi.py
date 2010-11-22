@@ -1280,25 +1280,9 @@ class FMUModel(BaseModel):
             
         Calls the low-level FMI function: fmiInitialize.
         """
-        
-        # NOT NESSECCARY, VALUES ALREADY IN MODEL
-        #Set the start attributes
-        if len(self._XMLStartRealValues) > 0:
-            self.set_real(self._XMLStartRealKeys, self._XMLStartRealValues)
-
-        if len(self._XMLStartIntegerValues) > 0:
-            self.set_integer(self._XMLStartIntegerKeys, self._XMLStartIntegerValues)
-
-        if len(self._XMLStartBooleanValues) > 0:
-            self.set_boolean(self._XMLStartBooleanKeys, self._XMLStartBooleanValues)
-
-        if len(self._XMLStartStringValues) > 0:
-            self.set_string(self._XMLStartStringKeys, self._XMLStartStringValues)
-
         #Trying to set the initial time from the xml file, else 0.0
         if self.time == None:
             self.time = self._XMLStartTime
-        
         
         if tolControlled:
             tolcontrolledC = self._fmiBoolean(self._fmiTrue)
@@ -1361,6 +1345,22 @@ class FMUModel(BaseModel):
         
         self._model = self._fmiInstantiateModel(
             instance,guid,self._modFunctions,logging)
+            
+            
+        # NOT NESSECCARY, VALUES ALREADY IN MODEL
+        #Set the start attributes
+        if len(self._XMLStartRealValues) > 0:
+            self.set_real(self._XMLStartRealKeys, self._XMLStartRealValues)
+
+        if len(self._XMLStartIntegerValues) > 0:
+            self.set_integer(self._XMLStartIntegerKeys, self._XMLStartIntegerValues)
+
+        if len(self._XMLStartBooleanValues) > 0:
+            self.set_boolean(self._XMLStartBooleanKeys, self._XMLStartBooleanValues)
+
+        if len(self._XMLStartStringValues) > 0:
+            self.set_string(self._XMLStartStringKeys, self._XMLStartStringValues)
+
         
     def fmiCallbackLogger(self,c, instanceName, status, category, message):
         """
