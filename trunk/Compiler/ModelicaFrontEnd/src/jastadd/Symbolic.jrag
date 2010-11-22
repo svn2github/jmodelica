@@ -35,14 +35,14 @@ aspect EquationSolve {
 		
 		FExp theTerm = null;
 		// Find term
-		System.out.println("Equation:\n" + prettyPrint(""));			
+		//System.out.println("Equation:\n" + prettyPrint(""));			
 		for (FExp e : t) {
-			System.out.println("Term" + (e.isNegativeTerm()? "(-): ": "(+): ") + e.prettyPrint(""));
+//			System.out.println("Term" + (e.isNegativeTerm()? "(-): ": "(+): ") + e.prettyPrint(""));
 			if (e.nbrUses(name)==1) {
 				theTerm = e;
 			}
 		}
-		System.out.println("Found term" + (theTerm.isNegativeTerm()? "(-): ": "(+): ") + theTerm.prettyPrint(""));	
+		//System.out.println("Found term" + (theTerm.isNegativeTerm()? "(-): ": "(+): ") + theTerm.prettyPrint(""));	
 		
 		FExp sol = null;
 		// Build new AST for the remaining terms

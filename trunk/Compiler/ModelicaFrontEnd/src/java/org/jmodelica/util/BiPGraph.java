@@ -287,13 +287,13 @@ public class BiPGraph {
 //        while (!activeEqns.empty()) {
  //           Equation eq = activeEqns.pop();
 
-            System.out.println("active: " + eqn);
+//            System.out.println("active: " + eqn);
 
             if (eqn.getTarjanNbr() == 0) {
                 eqn.setTarjanNbr(++nbr);
                 eqn.setTarjanLowLink(nbr);
 
-                System.out.println("push: " + eqn);
+                //System.out.println("push: " + eqn);
                 stack.push(eqn);
                 eStack.push(eqn);
 
@@ -302,15 +302,15 @@ public class BiPGraph {
                     Var var = eqn.getNextVariable();
 
                     if (var != null) {
-                        System.out.println("top: " + eqn + " - " + var);
+                        //System.out.println("top: " + eqn + " - " + var);
                         Eq eqn2 = var.getMatching();
-                        System.out.println("match: " + eqn2);
+                        //System.out.println("match: " + eqn2);
 
                         if (eqn2.getTarjanNbr() == 0) {
                             eqn2.setTarjanNbr(++nbr);
                             eqn2.setTarjanLowLink(nbr);
 
-                            System.out.println("push: " + eqn2);
+                            //System.out.println("push: " + eqn2);
 
                             stack.push(eqn2); // recurse
                             eStack.push(eqn2);
@@ -321,15 +321,15 @@ public class BiPGraph {
                             }
                         }
                     } else {
-                        System.out.println("top: " + eqn + 
-                            " - exhausted variables (estack = " + eStack.size() + ")");
+//                        System.out.println("top: " + eqn + 
+//                            " - exhausted variables (estack = " + eStack.size() + ")");
 
                         if (eqn.getTarjanLowLink() == eqn.getTarjanNbr()) {
-                        	System.out.println("Heppp---------------");
+//                        	System.out.println("Heppp---------------");
                             // 'eq' is the root of a strong component
                             if (!eStack.empty()) {
                                 // new strong component
-                                System.out.println("Strong component:");
+ //                               System.out.println("Strong component:");
                                 Eq eqn2 = eStack.peek();
 
 								/*
@@ -348,8 +348,8 @@ public class BiPGraph {
 
                                     comp.push(eqn2);
 									
-                                    System.out.println("In COMPONENT: (" + eqn2 + 
-                                                     ", " + eqn2.getMatching() + ")");
+//                                    System.out.println("In COMPONENT: (" + eqn2 + 
+//                                                     ", " + eqn2.getMatching() + ")");
 													 
 
                                     if (eStack.empty()) {
