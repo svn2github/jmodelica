@@ -12,6 +12,7 @@ to default values. Values can be overriden by a user startup script
 Required keys:
   'JMODELICA_HOME' : Path to JModelica.org installation directory
   'IPOPT_HOME' : Path to Ipopt installation directory
+  'SUNDIALS_HOME' : Path to Sundials installation directory
   'CPPAD_HOME' : Path to Cpp_AD installation directory
   'MINGW_HOME' : Path to mingw installation directory (only win32)
   'MC_JAR' : Path to ModelicaCompiler jar file
@@ -41,6 +42,7 @@ environ = {}
 environ['JMODELICA_HOME'] = _jm_home
 
 _defaults = [('IPOPT_HOME','',True),
+             ('SUNDIALS_HOME','',True),
              ('CPPAD_HOME',os.path.join(_jm_home,'ThirdParty','CppAD'),True),
              ('MC_JAR',os.path.join(_jm_home,'lib','OptimicaCompiler.jar'),True),
              ('OC_JAR',os.path.join(_jm_home,'lib','ModelicaCompiler.jar'),True),
@@ -106,7 +108,7 @@ for _e in _defaults:
         if _e[2] and not os.path.exists(environ[_e[0]]):
             if _e[0] == 'IPOPT_HOME':
                 logging.warning('%s=%s path does not exist. An IPOPT installation could not be found, some modules and examples will therefore not work properly.\0' % (_e[0],environ[_e[0]]))
+            elif _e[0] == 'SUNDIALS_HOME':
+                logging.warning('%s=%s path does not exist. An SUNDIALS installation could not be found, some modules and examples will therefore not work properly.\0' % (_e[0],environ[_e[0]]))
             else:
                 logging.warning('%s=%s path does not exist. Environment may be corrupt.' % (_e[0],environ[_e[0]]))
-        
-
