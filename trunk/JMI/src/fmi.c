@@ -184,7 +184,8 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
     }
     //----
 
-    jmi_real_t *switches; //Switches
+    jmi_real_t *switchesR;  //Switches
+    jmi_real_t *switchesR0; //Initial Switches
     ((fmi_t *)c) -> fmi_epsilon=0.0001*relativeTolerance; //Used in the event detection
     
     while (initComplete == 0){ //Loop during event iteration
@@ -198,13 +199,22 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
                 return fmiError;
             }
             
-            switches = jmi_get_sw_init(((fmi_t *)c)->jmi);
+            switchesR0 = jmi_get_sw_init(((fmi_t *)c)->jmi);
+            switchesR = jmi_get_sw(((fmi_t *)c)->jmi);
             
             for (i=0; i < nR0; i=i+1){
                 if (b_mode[i] > 0.0){
-                    switches[i] = 1.0;
+                    if (i >= nR){
+                        switchesR0[i-nR] = 1.0;
+                    }else{
+                        switchesR[i] = 1.0;
+                    }
                 }else{
-                    switches[i] = 0.0;
+                    if (i >= nR){
+                        switchesR0[i-nR] = 0.0;
+                    }else{
+                        switchesR[i] = 0.0;
+                    }
                 }
             }
             ((fmi_t*)c) -> fmi_functions.freeMemory(b_mode);
@@ -212,7 +222,7 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
 
         //Call the initialization algorithm
         retval = jmi_ode_initialize(((fmi_t *)c)->jmi);
-
+        
         if(retval != 0) { //Error check
             (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Initialization failed.");
             return fmiError;
@@ -229,15 +239,29 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
             
             initComplete = 1; //Assume the iteration is complete
             for (i=0; i < nR0; i=i+1){ //Loop over the event functions
-                if (switches[i] == 1.0){
-                    if (b_mode[i] <= ((fmi_t *)c)->fmi_epsilon){
-                        switches[i] = 0.0;
-                        initComplete = 0; //Iteration not complete
+                if (i >= nR){
+                    if (switchesR0[i-nR] == 1.0){
+                        if (b_mode[i] <= ((fmi_t *)c)->fmi_epsilon){
+                            switchesR0[i-nR] = 0.0;
+                            initComplete = 0; //Iteration not complete
+                        }
+                    }else{
+                        if (b_mode[i] >= ((fmi_t *)c)->fmi_epsilon){
+                            switchesR0[i-nR] = 1.0;
+                            initComplete = 0; //Iteration not complete
+                        }
                     }
                 }else{
-                    if (b_mode[i] >= ((fmi_t *)c)->fmi_epsilon){
-                        switches[i] = 1.0;
-                        initComplete = 0; //Iteration not complete
+                    if (switchesR[i] == 1.0){
+                        if (b_mode[i] <= ((fmi_t *)c)->fmi_epsilon){
+                            switchesR[i] = 0.0;
+                            initComplete = 0; //Iteration not complete
+                        }
+                    }else{
+                        if (b_mode[i] >= ((fmi_t *)c)->fmi_epsilon){
+                            switchesR[i] = 1.0;
+                            initComplete = 0; //Iteration not complete
+                        }
                     }
                 }
             }
@@ -247,7 +271,7 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
             initComplete = 1;
         }
     }
-
+    /*
     //Set the final switches (if any)
     if (nR > 0){
         jmi_real_t* a_mode =  ((fmi_t*)c) -> fmi_functions.allocateMemory(nR, sizeof(jmi_real_t));
@@ -266,9 +290,11 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
             }else{
                 switches[i] = 0.0;
             }
+            printf("Switches (after) %d, %f\n",i,switches[i]);
         }
         ((fmi_t*)c) -> fmi_functions.freeMemory(a_mode); //Free memory
     }
+    */
     
     return fmiOK;
 }
