@@ -1046,6 +1046,23 @@ aspect Scalarization {
 		}
 	}
 	
+	public void FWhenClauseE.scalarize(List<FAbstractEquation> eqns,
+			List<FVariable> vars, Map<String,FExp> indexMap) {
+		eqns.add(scalarize(vars, indexMap));
+	}
+	
+	public FWhenClauseE FWhenClauseE.scalarize(List<FVariable> vars, Map<String,FExp> indexMap) {
+		List<FAbstractEquation> eqns = new List<FAbstractEquation>();
+		for (FAbstractEquation eqn : getWhenEqnss())
+			eqn.scalarize(eqns, vars, indexMap);
+		Opt<FWhenClauseE> elseOpt = new Opt<FWhenClauseE>();
+		if (hasElse()) 
+			elseOpt = new Opt<FWhenClauseE>(getElse().scalarize(vars, indexMap));
+		FEquationType type = (FEquationType) getType().fullCopy();
+		FExp test = getWhenExp().reduceToScalarized(new FOrExp(), indexMap);
+		return new FWhenClauseE(type, test, eqns, elseOpt);
+	}
+	
 	public FFunctionCallLeft FFunctionCallLeft.scalarize(Map<String,FExp> indexMap) {
 		return new FFunctionCallLeft(hasFExp() ? new Opt(getFExp().scalarize(indexMap)) : new Opt());
 	}

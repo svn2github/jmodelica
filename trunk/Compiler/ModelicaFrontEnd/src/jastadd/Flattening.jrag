@@ -848,6 +848,17 @@ aspect FlatExpressions {
 		return new FForClauseE(forIndex, eqns);
 	}
 
+	public FWhenClauseE FWhenClauseE.flattenEqn(FQName prefix, FClass fc) {
+		List eqns = new List();
+		for (FAbstractEquation ae : getWhenEqnss())
+			eqns.add(ae.flattenEqn(prefix, fc));
+		Opt<FWhenClauseE> elseOpt = hasElse() ? 
+				new Opt<FWhenClauseE>(getElse().flattenEqn(prefix, fc)) : 
+				new Opt<FWhenClauseE>();
+		FEquationType type = (FEquationType) getType().fullCopy();
+		return new FWhenClauseE(type, getWhenExp().flatten(prefix), eqns, elseOpt);
+	}
+
 	public FAbstractEquation FConnectClause.flattenEqn(FQName prefix, FClass fc) {
 		if (!getConnector1().isDisabled() && !getConnector2().isDisabled()) {
 			InstAccess left  = getConnector1().getInstAccess();
@@ -1312,6 +1323,28 @@ aspect InstantiatedExpressions {
 				new FIdUseInstAccess(new FQName(), getConnector2().newInstAccess()));
 		c.setLocation(this);
 		return c;
+	}
+	
+	public FAbstractEquation WhenClauseE.instantiate() {
+		return copyLocationTo(instantiateWhen(getWhenEqnss(), getElseWhenClauseEs(), 
+				0, getWhenExp(), equationType()));
+	}
+	
+	public static FWhenClauseE WhenClauseE.instantiateWhen(
+			List<AbstractEquation> eqns, List<ElseWhenClauseE> elses, 
+			int elseIndex, Exp whenExp, FEquationType type) {
+		List<FAbstractEquation> eqList = new List<FAbstractEquation>();
+		for (AbstractEquation eqn : eqns)
+			eqList.add(eqn.instantiate());
+		int num = elses.getNumChild();
+		Opt<FWhenClauseE> elseOpt = new Opt<FWhenClauseE>();
+		if (num > elseIndex) {
+			ElseWhenClauseE ch = elses.getChild(elseIndex);
+			FWhenClauseE els = instantiateWhen(ch.getWhenEqnss(), elses, 
+					elseIndex+1, ch.getWhenExp(), (FEquationType) type.fullCopy());
+			elseOpt = new Opt<FWhenClauseE>(els);
+		}
+		return new FWhenClauseE(type, whenExp.instantiate(), eqList, elseOpt);
 	}
 	
 	public FFunctionCallEquation FunctionCallEquation.instantiate() {

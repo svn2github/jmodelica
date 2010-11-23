@@ -163,26 +163,6 @@ algorithm
 end WhenStmt_ComplErr;
 
 
-model WhenEqu_ComplErr
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ComplianceErrorTestCase(
-         name="WhenEqu_ComplErr",
-         description="Compliance error for when equations",
-         errorMessage="
-1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 146, column 2:
-  Unsupported equation type
-")})));
-
- Real x;
-equation
- when (time < 2) then
-  x = 5;
- end when;
-end WhenEqu_ComplErr;
-
-
 model UnsupportedBuiltins1_ComplErr
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.ComplianceErrorTestCase(

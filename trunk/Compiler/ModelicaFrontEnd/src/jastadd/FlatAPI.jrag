@@ -531,6 +531,7 @@ aspect FlatAPI {
 	}
 	
 	syn int FAbstractEquation.numScalarEquations() = 1;
+	eq FWhenClauseE.numScalarEquations()           = 0; // TODO: To disable sorting, etc
 	eq FFunctionCallEquation.numScalarEquations() {
 		 int res = 0;
 		 for (FFunctionCallLeft l : getLefts())
@@ -908,7 +909,7 @@ aspect Attributes {
 	
 	syn lazy FAttribute FVariable.findAttribute(String name)  = findMatching(getFAttributes(), name);
 	syn      FAttribute FAttribute.findAttribute(String name) = findMatching(getFAttributes(), name);
-	syn boolean FVariable.attributeSet(FAttribute a)   = (a != null) ? a.getAttributeSet() : false;
+	syn boolean FVariable.attributeSet(FAttribute a)   = (a != null) && a.getAttributeSet();
 	syn FExp    FVariable.attributeExp(FAttribute a)   = (a != null && a.hasValue()) ? a.getValue() : null;
 	syn boolean FVariable.attributeSet(String name)    = attributeSet(findAttribute(name));
 	syn FExp    FVariable.attributeExp(String name)    = attributeExp(findAttribute(name));

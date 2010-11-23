@@ -171,7 +171,7 @@ public class OptimicaXMLGenerator extends XMLGenerator {
 				//Constraints
 				genPrinter.println(indent+"<opt:Constraints>");
 				for(FConstraint c : optClass.constraints())
-					c.prettyPrint_XML(genPrinter,indent+"\t",c);	
+					c.prettyPrint_XML(genPrinter,indent+"\t");	
 				genPrinter.println(indent+"</opt:Constraints>");
 			}
 			genPrinter.println("\t</opt:Optimization>");

@@ -1805,6 +1805,15 @@ aspect GeneralHelpers {
 	syn boolean ClassDecl.isClass() = false;
 	eq BaseClassDecl.isClass() = getRestriction().isClass();
 	syn boolean InstClassDecl.isClass() = getClassDecl().isClass();
+	
+	/**
+     * Check if this when equation is the else part of another when equation.
+     */
+    inh boolean FWhenClauseE.isElse();
+    eq FWhenClauseE.getElse().isElse()       = true;
+    eq FAbstractEquation.getChild().isElse() = false;
+    eq FClass.getChild().isElse()            = false;
+    eq InstNode.getChild().isElse()          = false;
 
 	/**
 	 * \brief Round a number to 2 decimals if it is < 10, 1 decimal otherwise.

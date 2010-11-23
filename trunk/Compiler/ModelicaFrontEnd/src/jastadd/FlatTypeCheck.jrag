@@ -319,9 +319,13 @@ aspect FlatTypeCheck {
 	  if (!getTest().type().isUnknown()) {
 		  if (!getTest().type().isBoolean() || getTest().type().ndims() > 1) 
 			  error("Test expression of when statement isn't Boolean scalar or vector expression");
-		  // TODO: This will cause NullPointerException until FInstAccessExp.variability() is defined
-//		  if (!getTest().variability().lessOrEqual(fDiscrete()))
-//			  error("Test expression of when statement isn't discrete-time");
+	  }
+  }
+  
+  public void FWhenClauseE.typeCheck() {
+	  if (!getWhenExp().type().isUnknown()) {
+		  if (!getWhenExp().type().isBoolean() || getWhenExp().type().ndims() > 1) 
+			  error("Test expression of when equation isn't Boolean scalar or vector expression");
 	  }
   }
   

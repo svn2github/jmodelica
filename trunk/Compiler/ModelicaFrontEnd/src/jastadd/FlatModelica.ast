@@ -418,9 +418,14 @@ FConnectClause : FAbstractEquation ::= [FStringComment]
                                        Connector2:FIdUseInstAccess;
 
 /**
- * \brief For clause expression.
+ * \brief For equation clause.
  */
 FForClauseE : FAbstractEquation ::= FForIndex* FAbstractEquation*;
+
+/**
+ * When equation clause.
+ */
+FWhenClauseE : FAbstractEquation ::= WhenExp:FExp WhenEqns:FAbstractEquation* [Else:FWhenClauseE];
 
 /**
  * \brief A flattened algorithm clause.

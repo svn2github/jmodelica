@@ -1093,4 +1093,46 @@ Semantic error at line 1075, column 5:
 end RecursiveStructure3;
 
 
+
+model WhenType1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="WhenType1",
+         description="Using test expression of wrong type",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 1100, column 2:
+  Test expression of when equation isn't Boolean scalar or vector expression
+")})));
+
+	Real x = 1;
+equation
+	when 1 then
+		x = 2;
+	end when;
+end WhenType1;
+
+
+model WhenType2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="WhenType2",
+         description="Using test expression with too many dimensions",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 1120, column 2:
+  Test expression of when equation isn't Boolean scalar or vector expression
+")})));
+
+	Real x = 1;
+equation
+	when fill(false, 1, 1) then
+		x = 2;
+	end when;
+end WhenType2;
+
+
+
 end TypeTests;

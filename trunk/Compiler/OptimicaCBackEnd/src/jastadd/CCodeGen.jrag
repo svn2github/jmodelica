@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 aspect OptimicaCCodeGen {
 	
-	public void FTimedVariable.prettyPrint_C(Printer p, PrintStream str, String indent, Object o) {
+	public void FTimedVariable.prettyPrint_C(Printer p, PrintStream str, String indent) {
 		if (getName().myFV().isReal() && root().options.getBooleanOption("enable_variable_scaling") && !inFunction()) {
 			str.print("(");
 			str.print(getName().name_C()+"_p_(" + 

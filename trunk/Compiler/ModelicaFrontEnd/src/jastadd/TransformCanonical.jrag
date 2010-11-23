@@ -213,66 +213,58 @@ aspect TransformCanonical {
     }
 
 	private ArrayList<MatchingPair> FClass.daeMatching = null;
-	syn lazy ArrayList<MatchingPair> FClass.getDAEMatching() {
-		if (daeMatching==null) {
+	syn ArrayList<MatchingPair> FClass.getDAEMatching() {
+		if (daeMatching == null) 
 			computeMatchingsAndBLT();
-		}
 		return daeMatching;
 	}
 	
 	private ArrayList<MatchingPair> FClass.daeInitMatching = null;
-	syn lazy ArrayList<MatchingPair> FClass.getDAEInitMatching() { 
-		if (daeInitMatching==null) {
+	syn ArrayList<MatchingPair> FClass.getDAEInitMatching() { 
+		if (daeInitMatching == null) 
 			computeMatchingsAndBLT();
-		}
 		return daeInitMatching;
 	}	
 
 	private ArrayList<FAbstractEquation> FClass.daeUnmatchedEquations = null;
-	syn lazy ArrayList<FAbstractEquation> FClass.getDAEUnmatchedEquations() { 
-		if (daeUnmatchedEquations==null) {
+	syn ArrayList<FAbstractEquation> FClass.getDAEUnmatchedEquations() { 
+		if (daeUnmatchedEquations == null) 
 			computeMatchingsAndBLT();
-		}
 		return daeUnmatchedEquations;
 	}	
 
 	private ArrayList<FVariable> FClass.daeUnmatchedVariables = null;
-	syn lazy ArrayList<FVariable> FClass.getDAEUnmatchedVariables() { 
-		if (daeUnmatchedVariables==null) {
+	syn ArrayList<FVariable> FClass.getDAEUnmatchedVariables() { 
+		if (daeUnmatchedVariables == null) 
 			computeMatchingsAndBLT();
-		}
 		return daeUnmatchedVariables;
 	}	
 
 	private ArrayList<FAbstractEquation> FClass.daeInitUnmatchedEquations = null;
-	syn lazy ArrayList<FAbstractEquation> FClass.getDAEInitUnmatchedEquations() { 
-		if (daeInitUnmatchedEquations==null) {
+	syn ArrayList<FAbstractEquation> FClass.getDAEInitUnmatchedEquations() { 
+		if (daeInitUnmatchedEquations == null) 
 			computeMatchingsAndBLT();
-		}
 		return daeInitUnmatchedEquations;
 	}	
 
 	private ArrayList<FVariable> FClass.daeInitUnmatchedVariables = null;
-	syn lazy ArrayList<FVariable> FClass.getDAEInitUnmatchedVariables() { 
-		if (daeUnmatchedVariables==null) {
+	syn ArrayList<FVariable> FClass.getDAEInitUnmatchedVariables() { 
+		if (daeUnmatchedVariables == null) 
 			computeMatchingsAndBLT();
-		}
 		return daeInitUnmatchedVariables;
 	}	
 
 	private BLT FClass.daeBLT = null;
-	syn lazy BLT FClass.getDAEBLT() {
-		if (daeBLT==null) {
+	syn BLT FClass.getDAEBLT() {
+		if (daeBLT == null) 
 			computeMatchingsAndBLT();
-		}
 		return daeBLT;
 	}
 	
 	private BLT FClass.daeInitBLT = null;	
-	syn lazy BLT FClass.getDAEInitBLT() {
-		if (daeInitBLT==null) {
+	syn BLT FClass.getDAEInitBLT() {
+		if (daeInitBLT == null) 
 			computeMatchingsAndBLT();
-		}
 		return daeInitBLT;
 	}	
 		

@@ -1801,4 +1801,86 @@ end UnbalancedTest3_Err;
 
 
 
+// TODO: Someone who actually knows how to use when should make new tests
+model WhenEqu1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="WhenEqu1",
+         description="Basic test of when equations",
+         flatModel="
+fclass TransformCanonicalTests.WhenEqu1
+ Real x[3];
+equation
+ der(x[1:3]) = ( x[1:3] ) .* ( {0.1,0.2,0.3} );
+ when {x[i] > 2 for i in 1:3} then
+  x[1:3] = 1:3;
+ elsewhen {x[i] < 0 for i in 1:3} then
+  x[1:3] = 4:6;
+ elsewhen sum(x[1:3]) > 4.5 then
+  x[1:3] = 7:9;
+ end when;
+end TransformCanonicalTests.WhenEqu1;
+")})));
+
+	Real x[3];
+equation
+	der(x) = x .* { 0.1, 0.2, 0.3 };
+	when { x[i] > 2 for i in 1:3 } then
+		x = 1:3;
+	elsewhen { x[i] < 0 for i in 1:3 } then
+		x = 4:6;
+	elsewhen sum(x) > 4.5 then
+		x = 7:9;
+	end when;
+end WhenEqu1;
+
+
+model WhenEqu2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="WhenEqu2",
+         description="Basic test of when equations",
+         flatModel="
+fclass TransformCanonicalTests.WhenEqu2
+ Real x[1];
+ Real x[2];
+ Real x[3];
+initial equation 
+ x[1] = 0.0;
+ x[2] = 0.0;
+ x[3] = 0.0;
+equation
+ der(x[1]) = ( x[1] ) .* ( 0.1 );
+ der(x[2]) = ( x[2] ) .* ( 0.2 );
+ der(x[3]) = ( x[3] ) .* ( 0.3 );
+ when x[1] > 2 or x[2] > 2 or x[3] > 2 then
+  x[1] = 1;
+  x[2] = 2;
+  x[3] = 3;
+ elsewhen x[1] < 0 or x[2] < 0 or x[3] < 0 then
+  x[1] = 4;
+  x[2] = 5;
+  x[3] = 6;
+ elsewhen x[1] + x[2] + x[3] > 4.5 then
+  x[1] = 7;
+  x[2] = 8;
+  x[3] = 9;
+ end when;
+end TransformCanonicalTests.WhenEqu2;
+")})));
+
+	Real x[3];
+equation
+	der(x) = x .* { 0.1, 0.2, 0.3 };
+	when { x[i] > 2 for i in 1:3 } then
+		x = 1:3;
+	elsewhen { x[i] < 0 for i in 1:3 } then
+		x = 4:6;
+	elsewhen sum(x) > 4.5 then
+		x = 7:9;
+	end when;
+end WhenEqu2;
+
+
+
 end TransformCanonicalTests;
