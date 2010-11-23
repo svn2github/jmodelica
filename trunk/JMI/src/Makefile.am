@@ -48,9 +48,14 @@ libjmi_la_SOURCES = jmi.h \
                     jmi_newton_solvers.c \
                     jmi_opt_coll.h \
                     jmi_array_common.h \
-                    jmi_array_none.h
+                    jmi_array_none.h \
+                    $(abs_top_srcdir)/Assimulo/src/lib/kinpinv.c \
+                    $(abs_top_srcdir)/Assimulo/src/lib/kinpinv.h \
+                    $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.c \
+                    $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.h \
+                    $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod_impl.h 
 
-libjmi_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g
+libjmi_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g -I$(SUNDIALS_HOME)/include
 # Don't build shared libraries of libjmi and libjmicppad. This is not
 # really needed, and also (more importantly perhaps) I cannot force
 # static inclusion of the runtime libraries when creating model so:s.
@@ -72,7 +77,12 @@ libfmi_la_SOURCES = fmi.h \
                     fmiModelFunctions.h \
                     fmiModelTypes.h \
                     jmi.h \
-                    fmi.c
+                    fmi.c \
+                    $(abs_top_srcdir)/Assimulo/src/lib/kinpinv.c \
+                    $(abs_top_srcdir)/Assimulo/src/lib/kinpinv.h \
+                    $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.c \
+                    $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.h \
+                    $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod_impl.h 
 
 libfmi_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g
 # Don't build shared libraries of libjmi and libjmicppad. This is not
@@ -140,7 +150,10 @@ include_HEADERS = jmi.h \
                   jmi_opt_coll_radau.h \
                   jmi_array_common.h \
                   jmi_array_none.h \
-                  jmi_array_cppad.h
+                  jmi_array_cppad.h \
+                  $(abs_top_srcdir)/Assimulo/src/lib/kinpinv.h \
+                  $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.h \
+                  $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod_impl.h 
 
 if COMPILE_WITH_IPOPT
 include_HEADERS += jmi_opt_coll_ipopt.h
