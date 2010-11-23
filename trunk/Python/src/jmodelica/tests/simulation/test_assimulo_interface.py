@@ -24,6 +24,8 @@ import pylab as P
 from scipy.io.matlab.mio import loadmat
 from jmodelica.jmi import compile_jmu
 from jmodelica.jmi import JMUModel
+from jmodelica.fmi import compile_fmu
+from jmodelica.fmi import FMUModel
 import jmodelica.fmi as fmi
 from jmodelica.io import ResultDymolaTextual
 from jmodelica.tests import testattr
@@ -40,6 +42,7 @@ except NameError, ImportError:
     logging.warning('Could not load Assimulo module. Check jmodelica.check_packages()')
 
 path_to_fmus = os.path.join(get_files_path(), 'FMUs')
+path_to_mos  = os.path.join(get_files_path(), 'Modelica')
 
 class Test_JMI_ODE:
     """
@@ -740,7 +743,27 @@ class Test_FMI_ODE:
         #nose.tools.assert_almost_equal(x1_sim[-1], 0.290109468, 5)
         #nose.tools.assert_almost_equal(x2_sim[-1], -0.956993467, 5)
         
+    
+    @testattr(assimulo = True)
+    def test_event_iteration(self):
+        """
+        This tests an FMU with event iteration (JModelica.org).
+        """
+        fmu_name = compile_fmu('EventIter', os.path.join(path_to_mos,'EventIter.mo'))
+
+        model = FMUModel(fmu_name)
+
+        sim_res = model.simulate(final_time=10)
+
+        x = sim_res['x']
+        y = sim_res['y']
+        z = sim_res['z']
         
+        nose.tools.assert_almost_equal(x[0], 2.00000, 4)
+        nose.tools.assert_almost_equal(x[-1], 10.000000, 4)
+        nose.tools.assert_almost_equal(y[-1], 3.0000000, 4)
+        nose.tools.assert_almost_equal(z[-1], 2.0000000, 4)
+    
     @testattr(assimulo = True)
     def test_basic_simulation(self):
         """
