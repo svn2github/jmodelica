@@ -54,6 +54,10 @@ aspect ComplianceCheck {
 	eq FBuiltinExternalLanguage.supportedLanguage()   = true;
 	eq FUnknownExternalLanguage.supportedLanguage()   = true;  // Avoid duplicate errors
 
+	public void FWhenClauseE.collectErrors() {
+		compliance("When equations are currently not supported");
+	}
+
 	public void FUnsupportedEquation.collectErrors() {
 		compliance("Unsupported equation type");
 	}
