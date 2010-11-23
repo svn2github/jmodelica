@@ -84,7 +84,7 @@ libfmi_la_SOURCES = fmi.h \
                     $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.h \
                     $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod_impl.h 
 
-libfmi_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g
+libfmi_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g -I$(SUNDIALS_HOME)/include
 # Don't build shared libraries of libjmi and libjmicppad. This is not
 # really needed, and also (more importantly perhaps) I cannot force
 # static inclusion of the runtime libraries when creating model so:s.
