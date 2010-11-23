@@ -747,9 +747,9 @@ class Test_FMI_ODE:
     @testattr(assimulo = True)
     def test_event_iteration(self):
         """
-        This tests an FMU with event iteration (JModelica.org).
+        This tests FMUs with event iteration (JModelica.org).
         """
-        fmu_name = compile_fmu('EventIter', os.path.join(path_to_mos,'EventIter.mo'))
+        fmu_name = compile_fmu('EventIter.EventMiddleIter', os.path.join(path_to_mos,'EventIter.mo'))
 
         model = FMUModel(fmu_name)
 
@@ -763,6 +763,23 @@ class Test_FMI_ODE:
         nose.tools.assert_almost_equal(x[-1], 10.000000, 4)
         nose.tools.assert_almost_equal(y[-1], 3.0000000, 4)
         nose.tools.assert_almost_equal(z[-1], 2.0000000, 4)
+        
+        fmu_name = compile_fmu('EventIter.EventStartIter', os.path.join(path_to_mos,'EventIter.mo'))
+        
+        model = FMUModel(fmu_name)
+
+        sim_res = model.simulate(final_time=10)
+
+        x = sim_res['x']
+        y = sim_res['y']
+        z = sim_res['z']
+        
+        nose.tools.assert_almost_equal(x[0], 1.00000, 4)
+        nose.tools.assert_almost_equal(y[0], -1.00000, 4)
+        nose.tools.assert_almost_equal(z[0], 1.00000, 4)
+        nose.tools.assert_almost_equal(x[-1], -2.000000, 4)
+        nose.tools.assert_almost_equal(y[-1], -1.0000000, 4)
+        nose.tools.assert_almost_equal(z[-1], 4.0000000, 4)
     
     @testattr(assimulo = True)
     def test_basic_simulation(self):
