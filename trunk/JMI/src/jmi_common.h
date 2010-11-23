@@ -843,6 +843,8 @@ struct jmi_t{
 	jmi_ad_var_vec_p z;                  ///< This vector contains active AD objects in case of AD.
 	jmi_real_t** z_val;                  ///< This vector contains the actual values.
 
+	jmi_real_t* pre_z;                  ///< This vector contains the pre values.
+
 	jmi_real_t *variable_scaling_factors;        ///< Scaling factors. For convenience the vector has the same size as z but only scaling of reals are used.
 	int scaling_method;                 ///< Scaling method: JMI_SCALING_NONE, JMI_SCALING_VARIABLES
 	jmi_block_residual_t** dae_block_residuals; ///< A vector of function pointers to DAE equation blocks

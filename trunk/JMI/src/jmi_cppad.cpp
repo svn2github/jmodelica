@@ -159,6 +159,7 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 	jmi_->n_z = jmi_->n_p + jmi_->n_v + jmi_->n_q + jmi_->n_d + n_sw + n_sw_init;
 
 	jmi_->z = new jmi_ad_var_vec_t(jmi_->n_z);
+	jmi_->pre_z = (jmi_real_t*)calloc(jmi_->n_z,sizeof(jmi_real_t ));
 
 	jmi_->z_val = (jmi_real_t**)calloc(1,sizeof(jmi_real_t *));
 	*(jmi_->z_val) =  (jmi_real_t*)calloc(jmi_->n_z,sizeof(jmi_real_t));
@@ -870,6 +871,7 @@ int jmi_delete(jmi_t* jmi){
 	delete jmi->z;
 	free(*(jmi->z_val));
 	free(jmi->z_val);
+	free(jmi->pre_z);
 	free(jmi->tp);
 	free(jmi->variable_scaling_factors);
 	free(jmi);
