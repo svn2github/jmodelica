@@ -552,12 +552,15 @@ class JMIDAE(Implicit_Problem):
         self.algvar = [1.0]*len(self._model.real_x) + [0.0]*len(self._model.real_w) 
                 
         #Used for determine if there are discontinuities
-        [f_nbr, g_nbr] = self._model.jmimodel.dae_get_sizes() 
+        [f_nbr, g_nbr] = self._model.jmimodel.dae_get_sizes()
+        [f0_nbr, f1_nbr, fp_nbr, g0_nbr] = self._model.jmimodel.init_get_sizes()
 
         if g_nbr > 0:
             #Change the models values of the switches from ints to booleans
             self.switches0 = [bool(x) for x in self._model.sw] 
             self.state_events = self.g_adjust #Activates the event function
+        if g0_nbr > 0:
+            self.switches_init = [bool(x) for x in self._model.sw_init]
             
         #Sets default values
         self.max_eIter = 50 #Maximum number of event iterations allowed.
@@ -573,6 +576,7 @@ class JMIDAE(Implicit_Problem):
         self._log_information = [] #List that handles log information
         self._f_nbr = f_nbr #Number of equations
         self._g_nbr = g_nbr #Number of event indicatiors
+        self._g0_nbr = g0_nbr #Number of event indicators at initial time
         self._x_nbr = len(self._model.real_x) #Number of differentiated
         self._w_nbr = len(self._model.real_w) #Number of algebraic
         self._dx_nbr = len(self._model.real_dx) #Number of derivatives
@@ -680,6 +684,26 @@ class JMIDAE(Implicit_Problem):
         self._model.jmimodel.dae_R(eventInd)
         
         return eventInd
+        
+    def g_init(self,t,y,yd,sw):
+        """
+        The event indicator function for a DAE problem at initial time.
+        """
+        #Moving data to the model
+        self._model.t = t
+        self._model.real_x = y[0:self._x_nbr]
+        self._model.real_w = y[self._x_nbr:self._f_nbr]
+        self._model.real_dx = yd[0:self._dx_nbr]
+        
+        #Sets the inputs, if any
+        if self.input!=None:
+            self._model.set(self.input[0], self.input[1].eval(t)[0,:])
+        
+        #Evaluating the switching functions
+        eventInd = N.array([.0]*len(sw))
+        self._model.jmimodel.init_R0(eventInd)
+        
+        return eventInd
     
     def g_adjust(self, t, y, yd, sw):
         """
@@ -762,6 +786,8 @@ class JMIDAE(Implicit_Problem):
             #Check wheter or not it involves event functions
             if self._g_nbr > 0:
                 self._model.sw = [int(x) for x in solver.switches]
+            if self._g0_nbr > 0:
+                self._model.sw_init = [int(x) for x in solver.switches_init]
                 
             #Initiate using IPOPT
             init_nlp = NLPInitialization(self._model)
@@ -876,18 +902,56 @@ class JMIDAE(Implicit_Problem):
         """
         self._initiate_problem = True
         
-        if self._g_nbr > 0:
+        if self._g0_nbr > 0:
             
-            sw_val = N.array([.0]*len(self._model.sw))
-            self._model.jmimodel.dae_R(sw_val)
+            solver.switches_init = [True]*(self._g0_nbr-self._g_nbr)
+            #sw_val = N.array([.0]*len(self._model.sw))
+            sw_val = N.array([0.0]*(self._g0_nbr))
+            #self._model.jmimodel.dae_R(sw_val)
+            self._model.jmimodel.init_R0(sw_val)
             
-            for i in range(len(sw_val)):
+            for i in range(self._g_nbr):
                 if sw_val[i] >= 0.0:
                     solver.switches[i] = True
                 else:
                     solver.switches[i] = False
+            for i in range(self._g0_nbr-self._g_nbr):
+                if sw_val[self._g_nbr+i] >= 0.0:
+                    solver.switches_init[i] = True
+                else:
+                    solver.switches_init[i] = False
+                    
+            nbr_iteration = 0
+            while self.max_eIter > nbr_iteration: #Event Iteration
+                
+                b_mode = self.g_init(
+                    solver.t_cur, solver.y_cur, solver.yd_cur, solver.switches+solver.switches_init)
+                #Pass in the solver to the problem specified init_mode
+                self.init_mode(solver) 
+                
+                a_mode = self.g_init(
+                    solver.t_cur, solver.y_cur, solver.yd_cur, solver.switches+solver.switches_init)
+
+                [event_info, iter] = self.check_eIter(b_mode, a_mode)
+                    
+                if not iter: #Breaks the iteration loop
+                    break
+                    
+                for i in range(len(event_info)): #Loop across all event functions
+                    if i < self._g_nbr:
+                        if event_info[i] == -1:
+                            solver.switches[i] = False
+                        if event_info[i] == 1:
+                            solver.switches[i] = True
+                    else:
+                        if event_info[i] == -1:
+                            solver.switches_init[i-self._g_nbr] = False
+                        if event_info[i] == 1:
+                            solver.switches_init[i-self._g_nbr] = True
+            
+                nbr_iteration += 1
         
-            self.handle_event(solver, [[0],False])
+            #self.handle_event(solver, [[0],False])
         else:
             self.init_mode(solver)
         
