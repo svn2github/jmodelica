@@ -63,10 +63,10 @@ int jmi_opt_coll_get_interval_spec(jmi_opt_coll_t *jmi_opt_coll, jmi_real_t *sta
 }
 
 int jmi_opt_coll_get_bounds(jmi_opt_coll_t *jmi_opt_coll, jmi_real_t *x_lb, jmi_real_t *x_ub) {
+	int i;
 	if (jmi_opt_coll->jmi->opt == NULL) {
 		return -1;
 	}
-	int i;
 	for (i=0;i<jmi_opt_coll->n_x;i++) {
 		x_lb[i] = jmi_opt_coll->x_lb[i];
 		x_ub[i] = jmi_opt_coll->x_ub[i];
@@ -75,10 +75,10 @@ int jmi_opt_coll_get_bounds(jmi_opt_coll_t *jmi_opt_coll, jmi_real_t *x_lb, jmi_
 }
 
 int jmi_opt_coll_set_bounds(jmi_opt_coll_t *jmi_opt_coll, jmi_real_t *x_lb, jmi_real_t *x_ub) {
+	int i;
 	if (jmi_opt_coll->jmi->opt == NULL) {
 		return -1;
 	}
-	int i;
 	for (i=0;i<jmi_opt_coll->n_x;i++) {
 		jmi_opt_coll->x_lb[i] = x_lb[i];
 		jmi_opt_coll->x_ub[i] = x_ub[i];
@@ -87,10 +87,10 @@ int jmi_opt_coll_set_bounds(jmi_opt_coll_t *jmi_opt_coll, jmi_real_t *x_lb, jmi_
 }
 
 int jmi_opt_coll_get_initial(jmi_opt_coll_t *jmi_opt_coll, jmi_real_t *x_init) {
+	int i;
 	if (jmi_opt_coll->jmi->opt == NULL) {
 		return -1;
 	}
-	int i;
 	for (i=0;i<jmi_opt_coll->n_x;i++) {
 		x_init[i] = jmi_opt_coll->x_init[i];
 	}
@@ -99,10 +99,10 @@ int jmi_opt_coll_get_initial(jmi_opt_coll_t *jmi_opt_coll, jmi_real_t *x_init) {
 
 int jmi_opt_coll_set_initial(jmi_opt_coll_t *jmi_opt_coll,
 		jmi_real_t *x_init) {
+	int i;
 	if (jmi_opt_coll->jmi->opt == NULL) {
 		return -1;
 	}
-	int i;
 	for (i=0;i<jmi_opt_coll->n_x;i++) {
 		jmi_opt_coll->x_init[i] = x_init[i];
 	}

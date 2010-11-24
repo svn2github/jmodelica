@@ -128,23 +128,23 @@ int jmi_init_opt_get_initial(jmi_init_opt_t *jmi_init_opt, jmi_real_t *x_init);
  * the NLP, and variable vectors.
  */
 struct jmi_init_opt_t{
-	jmi_t *jmi;                      // jmi_t struct
-	jmi_real_t *x;                    // x vector.
-	jmi_real_t *x_lb;                 // Lower bounds for variables
-	jmi_real_t *x_ub;                 // Upper bound for variables
-	jmi_real_t *x_init;               // Initial starting point
-	int n_x;                          // Number of variables in the initialization problem
-	int n_p_free;                     // Number of parameters with fixed = false
-	int *p_free_indices;              // Indices of parameters with fixed = false
-	int n_h;                          // Number of equality constraints
+	jmi_t *jmi;                       /* jmi_t struct */
+	jmi_real_t *x;                    /* x vector. */
+	jmi_real_t *x_lb;                 /* Lower bounds for variables */
+	jmi_real_t *x_ub;                 /* Upper bound for variables */
+	jmi_real_t *x_init;               /* Initial starting point */
+	int n_x;                          /* Number of variables in the initialization problem */
+	int n_p_free;                     /* Number of parameters with fixed = false */
+	int *p_free_indices;              /* Indices of parameters with fixed = false */
+	int n_h;                          /* Number of equality constraints */
 	int dh_n_nz;
 	int *dh_irow;
 	int *dh_icol;
 	int dF0_n_nz;
 	int n_nonlinear_variables;
-	int *non_linear_variables_indices; // Stored Fortran style (first index = 1)
-	jmi_real_t *res_F1;                 // work vector
-	jmi_real_t *dF1_dv;                 // work vector
+	int *non_linear_variables_indices;  /* Stored Fortran style (first index = 1) */
+	jmi_real_t *res_F1;                 /* work vector */
+	jmi_real_t *dF1_dv;                 /* work vector */
 	int dF1_dv_n_nz;
 	int *dF1_dv_irow;
 	int *dF1_dv_icol;

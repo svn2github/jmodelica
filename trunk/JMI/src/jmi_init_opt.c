@@ -20,12 +20,12 @@
 
 #include "jmi_init_opt.h"
 
-// Forward declarations
+/* Forward declarations */
 static void print_problem_stats(jmi_init_opt_t *jmi_init_opt);
 
-// Copy free parameters
+/* Copy free parameters */
 static void copy_p(jmi_init_opt_t *jmi_init_opt) {
-	//jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim;
+	/*jmi_opt_sim_lp_t *nlp = (jmi_opt_sim_lp_t*)jmi_opt_sim; */
 	jmi_t *jmi = jmi_init_opt->jmi;
 	int i;
 
@@ -63,27 +63,32 @@ int jmi_init_opt_new(jmi_init_opt_t **jmi_init_opt_new, jmi_t *jmi,
 		int* p_opt_lin, int* p_free_lin, int* dx_lin, int* x_lin, int* w_lin,
 		int der_eval_alg, int stat) {
 
-	int retval,i,j;
-
-	// Create struct
+	int retval, i, j, ind;
+	jmi_real_t *merged_p_free_init;
+	jmi_real_t *merged_p_free_lb;
+	jmi_real_t *merged_p_free_ub;
+	
+	int dF1_dv_n_cols;
+	int dF1_dv_n_nz;
+	int dF0_dv_n_cols;
+	int dF0_dv_n_nz;
+	
+	/* Create struct */
 	jmi_init_opt_t* jmi_init_opt = (jmi_init_opt_t*)calloc(1,sizeof(jmi_init_opt_t));
 	*jmi_init_opt_new = (jmi_init_opt_t*)jmi_init_opt;
 
 	jmi_init_opt->jmi = jmi;
 
-	// Copy der_eval_alg field
+	/* Copy der_eval_alg field */
 	jmi_init_opt->der_eval_alg = der_eval_alg;
 
-	// Copy the stat field
+	/* Copy the stat field */
 	jmi_init_opt->stat = stat;
 
-	// If the static argument is 1, then merge free optimization parameters (as
-	// specified in Optimica) and free parameters in the initialization problem
-	// (as specified by the fixed=false attribute). These kind of parameters
-	// treated equally in the algorithm.
-	jmi_real_t *merged_p_free_init;
-	jmi_real_t *merged_p_free_lb;
-	jmi_real_t *merged_p_free_ub;
+	/* If the static argument is 1, then merge free optimization parameters (as
+	 specified in Optimica) and free parameters in the initialization problem
+	 (as specified by the fixed=false attribute). These kind of parameters
+	 treated equally in the algorithm. */
 	if (stat==1 && jmi->opt!=NULL) {
 		int tmp_n_p_free = jmi->opt->n_p_opt + n_p_free;
 		for (i=0;i<jmi->opt->n_p_opt;i++) {
@@ -107,7 +112,7 @@ int jmi_init_opt_new(jmi_init_opt_t **jmi_init_opt_new, jmi_t *jmi,
 			merged_p_free_ub[i] = p_opt_ub[i];
 		}
 
-		int ind = jmi->opt->n_p_opt;
+		ind = jmi->opt->n_p_opt;
 		for (j=0;j<n_p_free;j++) {
 			int skip = 0;
 			for (i=0;i<jmi->opt->n_p_opt;i++) {
@@ -124,40 +129,49 @@ int jmi_init_opt_new(jmi_init_opt_t **jmi_init_opt_new, jmi_t *jmi,
 			}
 		}
 
-		// Set number of equality constraints
+		/* Set number of equality constraints */
 		jmi_init_opt->n_h = jmi->init->F0->n_eq_F + jmi->opt->Ffdp->n_eq_F;
 
 		if (linearity_information_provided==1) {
+			/* declarations */
+			int n_nl_vars;
+			int n_nl_p_opt;
+			int n_nl_dx;
+			int n_nl_x;
+			int n_nl_w;
+			int ind;
+			int ind_x;
+			int k;
+			
+			/* Set linearity vector. */
+			n_nl_vars = 0;
 
-			// Set linearity vector.
-			int n_nl_vars = 0;
-
-			// Count the number of non linear optimization parameters
-			int n_nl_p_opt = 0;
+			/* Count the number of non linear optimization parameters */
+			n_nl_p_opt = 0;
 			for (i=0;i<jmi->opt->n_p_opt;i++) {
 				if (p_opt_lin[i]==0) {
 					n_nl_p_opt++;
 				}
 			}
 
-			// Count the number of non linear derivative variables
-			int n_nl_dx = 0;
+			/* Count the number of non linear derivative variables */
+			n_nl_dx = 0;
 			for (i=0;i<jmi->n_real_dx;i++) {
 				if (dx_lin[i]==0) {
 					n_nl_dx++;
 				}
 			}
 
-			// Count the number of non linear state variables
-			int n_nl_x = 0;
+			/* Count the number of non linear state variables */
+			n_nl_x = 0;
 			for (i=0;i<jmi->n_real_x;i++) {
 				if (x_lin[i]==0) {
 					n_nl_x++;
 				}
 			}
 
-			// Count the number of non linear algebraic variables
-			int n_nl_w = 0;
+			/* Count the number of non linear algebraic variables */
+			n_nl_w = 0;
 			for (i=0;i<jmi->n_real_w;i++) {
 				if (w_lin[i]==0) {
 					n_nl_w++;
@@ -170,22 +184,22 @@ int jmi_init_opt_new(jmi_init_opt_t **jmi_init_opt_new, jmi_t *jmi,
 			printf(">> %d\n",n_nl_x);
 			printf(">> %d\n",n_nl_w);
 */
-			// Compute the total number of non linear variables in the NLP x vector
+			/* Compute the total number of non linear variables in the NLP x vector */
 			n_nl_vars += n_nl_p_opt + n_nl_dx + n_nl_x + n_nl_w;
 
-	//		printf("--- %d\n",n_nl_vars);
+	/*		printf("--- %d\n",n_nl_vars); */
 
-			// Initialize the corresponding field in the struct
+			/* Initialize the corresponding field in the struct */
 			jmi_init_opt->n_nonlinear_variables = n_nl_vars;
 
-			// Allocate memory.
+			/* Allocate memory. */
 			jmi_init_opt->non_linear_variables_indices =
 				(int*)calloc(n_nl_vars,sizeof(int));
 
-			int ind = 0;   // Counter for the non_linear_variables_indices vector
-			int ind_x = 1; // Counter for the indices in the NLP x vector, Fortran style
+			ind = 0;   /* Counter for the non_linear_variables_indices vector */
+			ind_x = 1; /* Counter for the indices in the NLP x vector, Fortran style */
 
-			// Set non linear variable indices corresponding to optimization parameters
+			/* Set non linear variable indices corresponding to optimization parameters */
 			for (i=0;i<jmi->opt->n_p_opt;i++) {
 				if (p_opt_lin[i]==0) {
 					jmi_init_opt->non_linear_variables_indices[ind++] = ind_x;
@@ -193,23 +207,23 @@ int jmi_init_opt_new(jmi_init_opt_t **jmi_init_opt_new, jmi_t *jmi,
 				ind_x++;
 			}
 
-			int k = 0;
-			// Add non-linear entries for initial point
-			// Iterate over derivatives
+			k = 0;
+			/* Add non-linear entries for initial point */
+			/* Iterate over derivatives */
 			for (k=0;k<jmi->n_real_dx;k++) {
 				if (dx_lin[k]==0) {
 					jmi_init_opt->non_linear_variables_indices[ind++] = ind_x;
 				}
 				ind_x++;
 			}
-			// Iterate over states
+			/* Iterate over states */
 			for (k=0;k<jmi->n_real_x;k++) {
 				if (x_lin[k]==0) {
 					jmi_init_opt->non_linear_variables_indices[ind++] = ind_x;
 				}
 				ind_x++;
 			}
-			// Iterate over algebraic variables
+			/* Iterate over algebraic variables */
 			for (k=0;k<jmi->n_real_w;k++) {
 				if (w_lin[k]==0) {
 					jmi_init_opt->non_linear_variables_indices[ind++] = ind_x;
@@ -223,7 +237,7 @@ int jmi_init_opt_new(jmi_init_opt_t **jmi_init_opt_new, jmi_t *jmi,
 
 	} else {
 
-		// Copy information about free parameters
+		/* Copy information about free parameters */
 		jmi_init_opt->n_p_free = n_p_free;
 		jmi_init_opt->p_free_indices = (int*)calloc(n_p_free,sizeof(int));
 		merged_p_free_init = (jmi_real_t*)calloc(n_p_free,sizeof(jmi_real_t));
@@ -237,7 +251,7 @@ int jmi_init_opt_new(jmi_init_opt_t **jmi_init_opt_new, jmi_t *jmi,
 			merged_p_free_ub[i] = p_free_ub[i];
 		}
 
-		// Set number of equality constraints
+		/* Set number of equality constraints */
 		jmi_init_opt->n_h = jmi->init->F0->n_eq_F;
 
 		jmi_init_opt->n_nonlinear_variables = -1;
@@ -250,11 +264,11 @@ int jmi_init_opt_new(jmi_init_opt_t **jmi_init_opt_new, jmi_t *jmi,
 	}
 	 */
 
-	// Set size of optimization vector
+	/* Set size of optimization vector */
 	jmi_init_opt->n_x = jmi_init_opt->n_p_free + jmi->n_real_dx +
 		jmi->n_real_x +jmi->n_real_w;
 
-	// Create mask for evaluation of Jacobians
+	/* Create mask for evaluation of Jacobians */
 	jmi_init_opt->der_mask_v = (int*)calloc(jmi->n_z,sizeof(int));
 	for (i=0;i<jmi->n_z;i++) {
 		jmi_init_opt->der_mask_v[i] = 1;
@@ -274,54 +288,52 @@ int jmi_init_opt_new(jmi_init_opt_t **jmi_init_opt_new, jmi_t *jmi,
 	}
 */
 
-	// Initialize vectors
+	/* Initialize vectors */
 	jmi_init_opt->x = (jmi_real_t*)calloc(jmi_init_opt->n_x,sizeof(jmi_real_t));
 	jmi_init_opt->x_init = (jmi_real_t*)calloc(jmi_init_opt->n_x,sizeof(jmi_real_t));
 	jmi_init_opt->x_lb = (jmi_real_t*)calloc(jmi_init_opt->n_x,sizeof(jmi_real_t));
 	jmi_init_opt->x_ub = (jmi_real_t*)calloc(jmi_init_opt->n_x,sizeof(jmi_real_t));
 
 
-	// Copy values for free parameters
+	/* Copy values for free parameters */
 	for (i=0;i<jmi_init_opt->n_p_free;i++) {
 		jmi_init_opt->x_init[i] = merged_p_free_init[i];
 		jmi_init_opt->x_lb[i] = merged_p_free_lb[i];
 		jmi_init_opt->x_ub[i] = merged_p_free_ub[i];
 	}
 
-	// Copy values for derivatives
+	/* Copy values for derivatives */
 	for (i=0;i<jmi->n_real_dx;i++) {
 		jmi_init_opt->x_init[i + jmi_init_opt->n_p_free] = dx_init[i];
 		jmi_init_opt->x_lb[i + jmi_init_opt->n_p_free] = dx_lb[i];
 		jmi_init_opt->x_ub[i + jmi_init_opt->n_p_free] = dx_ub[i];
 	}
 
-	// Copy values for differentiated variables
+	/* Copy values for differentiated variables */
 	for (i=0;i<jmi->n_real_x;i++) {
 		jmi_init_opt->x_init[i + jmi_init_opt->n_p_free + jmi->n_real_dx] = x_init[i];
 		jmi_init_opt->x_lb[i + jmi_init_opt->n_p_free + jmi->n_real_dx] = x_lb[i];
 		jmi_init_opt->x_ub[i + jmi_init_opt->n_p_free + jmi->n_real_dx] = x_ub[i];
 	}
 
-	// Copy values for the algebraics
+	/* Copy values for the algebraics */
 	for (i=0;i<jmi->n_real_w;i++) {
 		jmi_init_opt->x_init[i + jmi_init_opt->n_p_free + jmi->n_real_dx + jmi->n_real_x] = w_init[i];
 		jmi_init_opt->x_lb[i + jmi_init_opt->n_p_free + jmi->n_real_dx + jmi->n_real_x] = w_lb[i];
 		jmi_init_opt->x_ub[i + jmi_init_opt->n_p_free + jmi->n_real_dx + jmi->n_real_x] = w_ub[i];
 	}
 
-	// Copy initial point to optimization vector
+	/* Copy initial point to optimization vector */
 	for (i=0;i<jmi_init_opt->n_x;i++) {
 		jmi_init_opt->x[i] = jmi_init_opt->x_init[i];
 	}
 
-	// Set non-linear variables: currently not supported TODO:
-	//jmi_init_opt->n_nonlinear_variables = 0;
+	/* Set non-linear variables: currently not supported TODO: */
+	/*jmi_init_opt->n_nonlinear_variables = 0; */
 
-	// Initialized work vectors
+	/* Initialized work vectors */
 	jmi_init_opt->res_F1 = (jmi_real_t*)calloc(jmi->init->F1->n_eq_F,sizeof(jmi_real_t));
 
-	int dF1_dv_n_cols;
-	int dF1_dv_n_nz;
 	retval = jmi_init_dF1_dim(jmi, jmi_init_opt->der_eval_alg, JMI_DER_SPARSE,
 				JMI_DER_PI | JMI_DER_PD | JMI_DER_DX | JMI_DER_X | JMI_DER_W,
 				jmi_init_opt->der_mask_v, &dF1_dv_n_cols, &dF1_dv_n_nz);
@@ -331,7 +343,7 @@ int jmi_init_opt_new(jmi_init_opt_t **jmi_init_opt_new, jmi_t *jmi,
 
 	jmi_init_opt->dF1_dv_n_nz = dF1_dv_n_nz;
 
-	// Allocate memory
+	/* Allocate memory */
 	jmi_init_opt->dF1_dv_icol = (int*)calloc(jmi_init_opt->dF1_dv_n_nz,sizeof(int));
 	jmi_init_opt->dF1_dv_irow = (int*)calloc(jmi_init_opt->dF1_dv_n_nz,sizeof(int));
 	jmi_init_opt->dF1_dv = (jmi_real_t*)calloc(jmi_init_opt->dF1_dv_n_nz,sizeof(jmi_real_t));
@@ -344,10 +356,8 @@ int jmi_init_opt_new(jmi_init_opt_t **jmi_init_opt_new, jmi_t *jmi,
 		return retval;
 	}
 
-	// Compute the number of non-zero entries in the equality constraint
-	// Jacobian
-	int dF0_dv_n_cols;
-	int dF0_dv_n_nz;
+	/* Compute the number of non-zero entries in the equality constraint
+	 Jacobian */
 	retval = jmi_init_dF0_dim(jmi, jmi_init_opt->der_eval_alg, JMI_DER_SPARSE,
 				JMI_DER_PI | JMI_DER_PD | JMI_DER_DX | JMI_DER_X | JMI_DER_W,
 				jmi_init_opt->der_mask_v, &dF0_dv_n_cols, &dF0_dv_n_nz);
@@ -355,7 +365,7 @@ int jmi_init_opt_new(jmi_init_opt_t **jmi_init_opt_new, jmi_t *jmi,
 		return retval;
 	}
 
-	//printf("*** %d, %d\n",dF0_dv_n_nz,dF0_dv_n_cols);
+	/*printf("*** %d, %d\n",dF0_dv_n_nz,dF0_dv_n_cols); */
 
 	jmi_init_opt->dh_n_nz = dF0_dv_n_nz;
 	jmi_init_opt->dF0_n_nz = dF0_dv_n_nz;
@@ -372,11 +382,11 @@ int jmi_init_opt_new(jmi_init_opt_t **jmi_init_opt_new, jmi_t *jmi,
 		jmi_init_opt->dh_n_nz += dFfdp_dv_n_nz;
 	}
 
-	// Allocate memory
+	/* Allocate memory */
 	jmi_init_opt->dh_icol = (int*)calloc(jmi_init_opt->dh_n_nz,sizeof(int));
 	jmi_init_opt->dh_irow = (int*)calloc(jmi_init_opt->dh_n_nz,sizeof(int));
 
-	// Compute the non-zero indices in equality constraint Jacobian
+	/* Compute the non-zero indices in equality constraint Jacobian */
 	retval = jmi_init_dF0_nz_indices(jmi,jmi_init_opt->der_eval_alg,
 			JMI_DER_PI | JMI_DER_PD | JMI_DER_DX | JMI_DER_X | JMI_DER_W,
 			jmi_init_opt->der_mask_v, jmi_init_opt->dh_irow,
@@ -408,7 +418,7 @@ int jmi_init_opt_new(jmi_init_opt_t **jmi_init_opt_new, jmi_t *jmi,
 		printf(">>> %d %d %d\n",i,jmi_init_opt->dh_irow[i],jmi_init_opt->dh_icol[i]);
 	}
 */
-	//print_problem_stats(jmi_init_opt);
+	/*print_problem_stats(jmi_init_opt); */
 
 	free(merged_p_free_init);
 	free(merged_p_free_lb);
@@ -457,10 +467,10 @@ jmi_real_t* jmi_init_opt_get_x(jmi_init_opt_t *jmi_init_opt) {
 }
 
 int jmi_init_opt_get_bounds(jmi_init_opt_t *jmi_init_opt, jmi_real_t *x_lb, jmi_real_t *x_ub) {
+	int i;
 	if (jmi_init_opt->jmi->opt == NULL) {
 		return -1;
 	}
-	int i;
 	for (i=0;i<jmi_init_opt->n_x;i++) {
 		x_lb[i] = jmi_init_opt->x_lb[i];
 		x_ub[i] = jmi_init_opt->x_ub[i];
@@ -469,10 +479,10 @@ int jmi_init_opt_get_bounds(jmi_init_opt_t *jmi_init_opt, jmi_real_t *x_lb, jmi_
 }
 
 int jmi_init_opt_set_bounds(jmi_init_opt_t *jmi_init_opt, jmi_real_t *x_lb, jmi_real_t *x_ub) {
+	int i;
 	if (jmi_init_opt->jmi->opt == NULL) {
 		return -1;
 	}
-	int i;
 	for (i=0;i<jmi_init_opt->n_x;i++) {
 		jmi_init_opt->x_lb[i] = x_lb[i];
 		jmi_init_opt->x_ub[i] = x_ub[i];
@@ -481,23 +491,23 @@ int jmi_init_opt_set_bounds(jmi_init_opt_t *jmi_init_opt, jmi_real_t *x_lb, jmi_
 }
 
 int jmi_init_opt_get_initial(jmi_init_opt_t *jmi_init_opt, jmi_real_t *x_init) {
+	int i;
 	if (jmi_init_opt->jmi->opt == NULL) {
 		return -1;
 	}
-	int i;
 	for (i=0;i<jmi_init_opt->n_x;i++) {
 		x_init[i] = jmi_init_opt->x_init[i];
-		//x_init[i] = jmi_init_opt->x[i];
+		/*x_init[i] = jmi_init_opt->x[i]; */
 	}
 	return 0;
 }
 
 int jmi_init_opt_set_initial(jmi_init_opt_t *jmi_init_opt,
 		jmi_real_t *x_init) {
+	int i;
 	if (jmi_init_opt->jmi->opt == NULL) {
 		return -1;
 	}
-	int i;
 	for (i=0;i<jmi_init_opt->n_x;i++) {
 		jmi_init_opt->x_init[i] = x_init[i];
 	}
@@ -506,29 +516,28 @@ int jmi_init_opt_set_initial(jmi_init_opt_t *jmi_init_opt,
 
 
 int jmi_init_opt_set_initial_from_model(jmi_init_opt_t *jmi_init_opt) {
-
 	int i;
 	jmi_real_t* pi = jmi_get_real_pi(jmi_init_opt->jmi);
 	jmi_real_t* dx = jmi_get_real_dx(jmi_init_opt->jmi);
 	jmi_real_t* x = jmi_get_real_x(jmi_init_opt->jmi);
 	jmi_real_t* w = jmi_get_real_w(jmi_init_opt->jmi);
 
-	// Copy values for free parameters
+	/* Copy values for free parameters */
 	for (i=0;i<jmi_init_opt->n_p_free;i++) {
 		jmi_init_opt->x[i] = pi[jmi_init_opt->p_free_indices[i]];
 	}
 
-	// Copy values for derivatives
+	/* Copy values for derivatives */
 	for (i=0;i<jmi_init_opt->jmi->n_real_dx;i++) {
 		jmi_init_opt->x[i + jmi_init_opt->n_p_free] = dx[i];
 	}
 
-	// Copy values for differentiated variables
+	/* Copy values for differentiated variables */
 	for (i=0;i<jmi_init_opt->jmi->n_real_x;i++) {
 		jmi_init_opt->x[i + jmi_init_opt->n_p_free + jmi_init_opt->jmi->n_real_dx] = x[i];
 	}
 
-	// Copy values for the algebraics
+	/* Copy values for the algebraics */
 	for (i=0;i<jmi_init_opt->jmi->n_real_w;i++) {
 		jmi_init_opt->x[i + jmi_init_opt->n_p_free + jmi_init_opt->jmi->n_real_dx + jmi_init_opt->jmi->n_real_x] = w[i];
 	}
@@ -538,20 +547,20 @@ int jmi_init_opt_set_initial_from_model(jmi_init_opt_t *jmi_init_opt) {
 }
 
 int jmi_init_opt_f(jmi_init_opt_t *jmi_init_opt, jmi_real_t *f) {
+	int i;
+	int retval;
+	
 	if (jmi_init_opt->jmi->init == NULL) {
 		return -1;
 	}
-	int i;
 
-	// Copy values into jmi->z
-    // Copy free paramters
+	/* Copy values into jmi->z */
+    /* Copy free paramters */
 	copy_p(jmi_init_opt);
-	// Copy variables
+	/* Copy variables */
 	copy_v(jmi_init_opt);
 
 	*f = 0.0;
-
-	int retval;
 
 	if (jmi_init_opt->stat==1) {
 		retval = jmi_opt_J(jmi_init_opt->jmi, f);
@@ -562,7 +571,7 @@ int jmi_init_opt_f(jmi_init_opt_t *jmi_init_opt, jmi_real_t *f) {
 			return retval;
 		}
 		for (i=0;i<jmi_init_opt->jmi->init->F1->n_eq_F;i++) {
-			// Call cost function evaluation
+			/* Call cost function evaluation */
 			*f += 0.5*jmi_init_opt->res_F1[i]*jmi_init_opt->res_F1[i];
 		}
 	}
@@ -571,24 +580,25 @@ int jmi_init_opt_f(jmi_init_opt_t *jmi_init_opt, jmi_real_t *f) {
 }
 
 int jmi_init_opt_df(jmi_init_opt_t *jmi_init_opt, jmi_real_t *df) {
+	int i;
+	int retval;
+	jmi_t* jmi;
+	
 	if (jmi_init_opt->jmi->init == NULL) {
 		return -1;
 	}
-	int i;
 
-	jmi_t *jmi = jmi_init_opt->jmi;
+	jmi = jmi_init_opt->jmi;
 
-	// Copy values into jmi->z
-    // Copy free paramters
+	/* Copy values into jmi->z */
+    /* Copy free paramters */
 	copy_p(jmi_init_opt);
-	// Copy variables
+	/* Copy variables */
 	copy_v(jmi_init_opt);
-
-	int retval;
 
     for (i=0;i<jmi_init_opt->n_x;i++) {
     	df[i] = 0;
-    	//printf("%f\n",jmi_init_opt->x[i]);
+    	/*printf("%f\n",jmi_init_opt->x[i]); */
     }
 
 	if (jmi_init_opt->stat==1) {
@@ -597,7 +607,7 @@ int jmi_init_opt_df(jmi_init_opt_t *jmi_init_opt, jmi_real_t *df) {
 
 	} else {
 
-		// Evaluate jacobian
+		/* Evaluate jacobian */
 		retval = jmi_init_dF1(jmi, jmi_init_opt->der_eval_alg,
 			JMI_DER_SPARSE, JMI_DER_PI | JMI_DER_PD | JMI_DER_DX | JMI_DER_X | JMI_DER_W,
 			jmi_init_opt->der_mask_v, jmi_init_opt->dF1_dv);
@@ -610,23 +620,23 @@ int jmi_init_opt_df(jmi_init_opt_t *jmi_init_opt, jmi_real_t *df) {
 	    	printf("%f\n",jmi_init_opt->dF1_dv[i]);
 	    }
 */
-		// Evaluate residual
+		/* Evaluate residual */
 		retval = jmi_init_F1(jmi, jmi_init_opt->res_F1);
 		if (retval<0) {
 			return retval;
 		}
 
-		// Initialize the gradient vector
+		/* Initialize the gradient vector */
 		for (i=0;i<jmi_init_opt->n_x;i++) {
 			df[i] = 0.;
 		}
 
-		// Compute gradient
+		/* Compute gradient */
 		for (i=0;i<jmi_init_opt->dF1_dv_n_nz;i++) {
 			df[jmi_init_opt->dF1_dv_icol[i]-1] +=
 				jmi_init_opt->dF1_dv[i]*
 				jmi_init_opt->res_F1[jmi_init_opt->dF1_dv_irow[i]-1];
-//			printf("** %d %d %d %f %f \n",i,jmi_init_opt->dF1_dv_irow[i],jmi_init_opt->dF1_dv_icol[i],jmi_init_opt->dF1_dv[i],jmi_init_opt->res_F1[jmi_init_opt->dF1_dv_irow[i]-1]);
+/*			printf("** %d %d %d %f %f \n",i,jmi_init_opt->dF1_dv_irow[i],jmi_init_opt->dF1_dv_icol[i],jmi_init_opt->dF1_dv[i],jmi_init_opt->res_F1[jmi_init_opt->dF1_dv_irow[i]-1]); */
 		}
 
 /*
@@ -640,22 +650,24 @@ int jmi_init_opt_df(jmi_init_opt_t *jmi_init_opt, jmi_real_t *df) {
 }
 
 int jmi_init_opt_h(jmi_init_opt_t *jmi_init_opt, jmi_real_t *res) {
+	int retval;
+	
 	if (jmi_init_opt->jmi->init == NULL || jmi_init_opt->jmi->dae == NULL)  {
 		return -1;
 	}
-	//int i;
+	/*int i; */
 
-	// Copy values into jmi->z
-    // Copy free paramters
+	/* Copy values into jmi->z */
+    /* Copy free paramters */
 	copy_p(jmi_init_opt);
-	// Copy variables
+	/* Copy variables */
 	copy_v(jmi_init_opt);
 /*
     for (i=0;i<jmi_init_opt->n_x;i++) {
     	printf("%f\n",jmi_init_opt->x[i]);
     }
 */
-	int retval = jmi_init_F0(jmi_init_opt->jmi, res);
+	retval = jmi_init_F0(jmi_init_opt->jmi, res);
 
 	if (jmi_init_opt->stat==1 && jmi_init_opt->jmi->opt->Ffdp->n_eq_F>0) {
 		retval = jmi_opt_Ffdp(jmi_init_opt->jmi, res+jmi_init_opt->jmi->init->F0->n_eq_F);
@@ -671,20 +683,23 @@ int jmi_init_opt_h(jmi_init_opt_t *jmi_init_opt, jmi_real_t *res) {
 }
 
 int jmi_init_opt_dh(jmi_init_opt_t *jmi_init_opt, jmi_real_t *jac) {
+	jmi_t* jmi;
+	int retval;
+	
 	if (jmi_init_opt->jmi->init == NULL || jmi_init_opt->jmi->dae == NULL)  {
 		return -1;
 	}
+	
+	jmi = jmi_init_opt->jmi;
 
-	jmi_t *jmi = jmi_init_opt->jmi;
-
-	// Copy values into jmi->z
-    // Copy free paramters
+	/* Copy values into jmi->z */
+    /* Copy free paramters */
 	copy_p(jmi_init_opt);
-	// Copy variables
+	/* Copy variables */
 	copy_v(jmi_init_opt);
 
-	// Evaluate jacobian
-	int retval = jmi_init_dF0 (jmi, jmi_init_opt->der_eval_alg,
+	/* Evaluate jacobian */
+	retval = jmi_init_dF0 (jmi, jmi_init_opt->der_eval_alg,
 			JMI_DER_SPARSE, JMI_DER_PI | JMI_DER_PD | JMI_DER_DX | JMI_DER_X | JMI_DER_W,
 			jmi_init_opt->der_mask_v, jac);
 
@@ -699,11 +714,11 @@ int jmi_init_opt_dh(jmi_init_opt_t *jmi_init_opt, jmi_real_t *jac) {
 }
 
 int jmi_init_opt_dh_nz_indices(jmi_init_opt_t *jmi_init_opt, int *irow, int *icol) {
+	int i;
+	
 	if (jmi_init_opt->jmi->init == NULL || jmi_init_opt->jmi->dae == NULL)  {
 		return -1;
 	}
-
-	int i;
 
 	for (i=0;i<jmi_init_opt->dh_n_nz;i++) {
 		irow[i] = jmi_init_opt->dh_irow[i];

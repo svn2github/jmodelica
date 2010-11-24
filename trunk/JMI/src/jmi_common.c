@@ -85,15 +85,15 @@ int jmi_func_delete(jmi_func_t *func) {
 	return 0;
 }
 
-// Convenience function to evaluate the Jacobian of the function contained in a
-// jmi_func_t.
+/* Convenience function to evaluate the Jacobian of the function contained in a
+ jmi_func_t. */
 int jmi_func_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
 		int independent_vars, int* mask, jmi_real_t* jac) {
+	int i;
 
 	if (func->dF==NULL) {
 		return -1;
 	}
-	int i;
 	for (i=0;i<jmi->n_z;i++) {
 		(*(jmi->z))[i] = (*(jmi->z_val))[i];
 	}
@@ -102,8 +102,8 @@ int jmi_func_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
 
 }
 
-// Convenience function for accessing the number of non-zeros in the (symbolic)
-// Jacobian.
+/* Convenience function for accessing the number of non-zeros in the (symbolic)
+ Jacobian. */
 int jmi_func_dF_n_nz(jmi_t *jmi, jmi_func_t *func, int* n_nz) {
 	if (func->dF==NULL) {
 		*n_nz = 0;
@@ -113,25 +113,26 @@ int jmi_func_dF_n_nz(jmi_t *jmi, jmi_func_t *func, int* n_nz) {
 	return 0;
 }
 
-// Convenience function of accessing the non-zeros in the Jacobian
+/* Convenience function of accessing the non-zeros in the Jacobian */
 int jmi_func_dF_nz_indices(jmi_t *jmi, jmi_func_t *func, int independent_vars,
                            int *mask,int *row, int *col) {
+	int i;
+	int index;
+	
 	if (func->dF==NULL) {
 		return -1;
 	}
 
-	int i;
+/*	int col_index = 0;*/           /* Column index of the new Jacobian*/
+/*	int col_index_old = 0;*/       /* Temporary variable to keep track of when to increase col_index*/
+	index = 0;                 /* Index in the row/col vectors of the new Jacobian */
 
-//	int col_index = 0;           // Column index of the new Jacobian
-//	int col_index_old = 0;       // Temporary variable to keep track of when to increase col_index
-	int index = 0;               // Index in the row/col vectors of the new Jacobian
-
-	// Iterate over all non-zero indices
+	/* Iterate over all non-zero indices */
 	for (i=0;i<func->dF_n_nz;i++) {
-//		printf("%d %d\n",i,jmi_check_Jacobian_column_index(jmi, independent_vars, mask, func->dF_col[i]-1));
-		// Check if this particular entry should be included
+/*		printf("%d %d\n",i,jmi_check_Jacobian_column_index(jmi, independent_vars, mask, func->dF_col[i]-1)); */
+		/* Check if this particular entry should be included */
 		if (jmi_check_Jacobian_column_index(jmi, independent_vars, mask, func->dF_col[i]-1) == 1 ) {
-			    // Copy indices
+			    /* Copy indices */
 				row[index] = func->dF_row[i];
 				col[index] = jmi_map_Jacobian_column_index(jmi,independent_vars,mask,func->dF_col[i]-1) + 1;
 				index++;
@@ -142,18 +143,17 @@ int jmi_func_dF_nz_indices(jmi_t *jmi, jmi_func_t *func, int independent_vars,
 
 }
 
-// Convenience function for computing the dimensions of the Jacobian.
+/* Convenience function for computing the dimensions of the Jacobian. */
 int jmi_func_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity, int independent_vars, int *mask,
 		int *dF_n_cols, int *dF_n_nz) {
-
+	int i;
+	
 	*dF_n_cols = 0;
 	*dF_n_nz = 0;
 
 	if (func->dF==NULL) {
 		return -1;
 	}
-
-	int i;
 
 	for (i=0;i<jmi->n_z;i++) {
 		if (jmi_check_Jacobian_column_index(jmi, independent_vars, mask, i) == 1 ) {
@@ -163,8 +163,8 @@ int jmi_func_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity, int independent_
 
 	if (sparsity == JMI_DER_SPARSE) {
 		for (i=0;i<func->dF_n_nz;i++) {
-//			printf(">>>>>>>>>>>>>>>>>>\n");
-			// Check if this particular entry should be included
+/*			printf(">>>>>>>>>>>>>>>>>>\n"); */
+			/* Check if this particular entry should be included */
 			if (jmi_check_Jacobian_column_index(jmi, independent_vars, mask, func->dF_col[i]-1) == 1 ) {
 				(*dF_n_nz)++;
 			}
@@ -278,16 +278,16 @@ int jmi_dae_init(jmi_t* jmi,
         jmi_generic_func_t ode_derivatives,
         jmi_generic_func_t ode_outputs,
         jmi_generic_func_t ode_initialize) {
-
-	// Create jmi_dae struct
+	jmi_func_t* jf_F;
+	jmi_func_t* jf_R;
+	
+	/* Create jmi_dae struct */
 	jmi_dae_t* dae = (jmi_dae_t*)calloc(1,sizeof(jmi_dae_t));
 	jmi->dae = dae;
 
-	jmi_func_t* jf_F;
 	jmi_func_new(&jf_F,F,n_eq_F,dF,dF_n_nz,dF_row, dF_col);
 	jmi->dae->F = jf_F;
 
-	jmi_func_t* jf_R;
 	jmi_func_new(&jf_R,R,n_eq_R,dR,dR_n_nz,dR_row, dR_col);
 	jmi->dae->R = jf_R;
 
@@ -342,26 +342,26 @@ int jmi_init_init(jmi_t* jmi, jmi_residual_func_t F0, int n_eq_F0,
 		jmi_residual_func_t R0, int n_eq_R0,
 		jmi_jacobian_func_t dR0,
 		int dR0_n_nz, int* dR0_row, int* dR0_col) {
-
-	// Create jmi_init struct
+	jmi_func_t* jf_F0;
+	jmi_func_t* jf_F1;
+	jmi_func_t* jf_Fp;
+	jmi_func_t* jf_R0;
+	
+	/* Create jmi_init struct */
 	jmi_init_t* init = (jmi_init_t*)calloc(1,sizeof(jmi_init_t));
 	jmi->init = init;
 
-	jmi_func_t* jf_F0;
 	jmi_func_new(&jf_F0,F0,n_eq_F0,dF0,dF0_n_nz,dF0_row, dF0_col);
 	jmi->init->F0 = jf_F0;
 
-	jmi_func_t* jf_F1;
 	jmi_func_new(&jf_F1,F1,n_eq_F1,dF1,dF1_n_nz,dF1_row, dF1_col);
 	jmi->init->F1 = jf_F1;
 
-	jmi_func_t* jf_Fp;
 	jmi_func_new(&jf_Fp,Fp,n_eq_Fp,dFp,dFp_n_nz,dFp_row, dFp_col);
 	jmi->init->Fp = jf_Fp;
 
 	jmi->init->eval_parameters = eval_parameters;
 
-	jmi_func_t* jf_R0;
 	jmi_func_new(&jf_R0,R0,n_eq_R0,dFp,dR0_n_nz,dR0_row, dR0_col);
 	jmi->init->R0 = jf_R0;
 
@@ -387,36 +387,37 @@ int jmi_opt_init(jmi_t* jmi, jmi_residual_func_t Ffdp,int n_eq_Fdp,
 		jmi_residual_func_t Hineq, int n_eq_Hineq,
 		jmi_jacobian_func_t dHineq,
 		int dHineq_n_nz, int* dHineq_row, int* dHineq_col) {
-
-	// Create opt_init_t struct
+	jmi_func_t* jf_Ffdp;
+	jmi_func_t* jf_J;
+	jmi_func_t* jf_L;
+	jmi_func_t* jf_Ceq;
+	jmi_func_t* jf_Cineq;
+	jmi_func_t* jf_Heq;
+	jmi_func_t* jf_Hineq;
+	
+	/* Create opt_init_t struct */
 	jmi_opt_t* opt = (jmi_opt_t*)calloc(1,sizeof(jmi_opt_t));
 	jmi->opt = opt;
 
-	jmi_func_t* jf_Ffdp;
+
 	jmi_func_new(&jf_Ffdp,Ffdp,n_eq_Fdp,dFfdp,dFfdp_n_nz,dFfdp_row, dFfdp_col);
 	jmi->opt->Ffdp = jf_Ffdp;
 
-	jmi_func_t* jf_J;
 	jmi_func_new(&jf_J,J,n_eq_J,dJ,dJ_n_nz,dJ_row, dJ_col);
 	jmi->opt->J = jf_J;
 
-	jmi_func_t* jf_L;
 	jmi_func_new(&jf_L,L,n_eq_L,dL,dL_n_nz,dL_row, dL_col);
 	jmi->opt->L = jf_L;
 
-	jmi_func_t* jf_Ceq;
 	jmi_func_new(&jf_Ceq,Ceq,n_eq_Ceq,dCeq,dCeq_n_nz,dCeq_row, dCeq_col);
 	jmi->opt->Ceq = jf_Ceq;
 
-	jmi_func_t* jf_Cineq;
 	jmi_func_new(&jf_Cineq,Cineq,n_eq_Cineq,dCineq,dCineq_n_nz,dCineq_row, dCineq_col);
 	jmi->opt->Cineq = jf_Cineq;
 
-	jmi_func_t* jf_Heq;
 	jmi_func_new(&jf_Heq,Heq,n_eq_Heq,dHeq,dHeq_n_nz,dHeq_row, dHeq_col);
 	jmi->opt->Heq = jf_Heq;
 
-	jmi_func_t* jf_Hineq;
 	jmi_func_new(&jf_Hineq,Hineq,n_eq_Hineq,dHineq,dHineq_n_nz,dHineq_row, dHineq_col);
 	jmi->opt->Hineq = jf_Hineq;
 
@@ -468,37 +469,37 @@ int jmi_variable_type(jmi_t *jmi, int col_index) {
 
 int jmi_check_Jacobian_column_index(jmi_t *jmi, int independent_vars, int *mask, int col_index) {
 
-	//printf("%d\n",jmi->n_z);
-	//printf("<<< %d %d\n", col_index, mask[col_index]);
-	//printf("<< %d %d\n", independent_vars, jmi_variable_type(jmi, col_index));
+	/*printf("%d\n",jmi->n_z);*/
+	/*printf("<<< %d %d\n", col_index, mask[col_index]);*/
+	/*printf("<< %d %d\n", independent_vars, jmi_variable_type(jmi, col_index));*/
 
 	if (mask[col_index] == 0) {
-		//printf("Hej\n");
+		/*printf("Hej\n");*/
 		return 0;
 	} else if (jmi_variable_type(jmi,col_index)!=-1 && (independent_vars & jmi_variable_type(jmi, col_index))) {
-		//printf("Hojj\n");
+		/*printf("Hojj\n");*/
 		return 1;
 	} else {
-		//printf("Hepp\n");
+		/*printf("Hepp\n");*/
 		return 0;
 	}
 }
 
 int jmi_map_Jacobian_column_index(jmi_t *jmi, int independent_vars, int *mask, int col_index) {
 
-//	printf("jmi_map_Jacobian_column_index start: %d\n",col_index);
+/*	printf("jmi_map_Jacobian_column_index start: %d\n",col_index);*/
 	int new_col_index = 0;
 	int i = 0;
 
 	for (i=0; i<col_index; i++) {
-//		printf("****************** 1 \n");
+/*		printf("****************** 1 \n");*/
 		if (jmi_check_Jacobian_column_index(jmi, independent_vars, mask, i)==1) {
 			new_col_index++;
 		}
-//		printf("****************** 2 \n");
+/*		printf("****************** 2 \n");*/
 	}
 
-//	printf("jmi_map_Jacobian_column_index end: %d\n",new_col_index);
+/*	printf("jmi_map_Jacobian_column_index end: %d\n",new_col_index);*/
 
 	return new_col_index;
 }
@@ -795,15 +796,15 @@ void jmi_lin_interpolate(jmi_real_t x, jmi_real_t *z , int n ,int m,
 	int i;
 	int el = 0;
 
-	// Check if before interval
+	/* Check if before interval */
 	if (x <= z[0]) {
 		for (i=0;i<m-1;i++) {
-//			printf("%d: %f\n",i+1,z[n*(i+1)]);
+/*			printf("%d: %f\n",i+1,z[n*(i+1)]);*/
 			y[i] = z[n*(i+1)];
 		}
 		return;
 	}
-	// Check after interval
+	/* Check after interval */
 	if (x >= z[n-1]) {
 		for (i=0;i<m-1;i++) {
 			y[i] = z[n*(i+2)-1];
@@ -811,15 +812,15 @@ void jmi_lin_interpolate(jmi_real_t x, jmi_real_t *z , int n ,int m,
 		return;
 	}
 
-	// Find correct element
+	/* Find correct element */
 	while(x >= z[el]) {
 		el++;
 	}
 	el--;
 
-//	printf(">> %d\n",el);
+/*	printf(">> %d\n",el);*/
 
-	// Compute interpolated values.
+	/* Compute interpolated values. */
 	for (i=0;i<m-1;i++) {
 		y[i] = (x-z[el])*(z[n*(i+1) + el + 1] - z[n*(i+1) + el])/(z[el+1]-z[el]) +
 		   z[n*(i+1) + el];

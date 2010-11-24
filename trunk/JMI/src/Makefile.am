@@ -55,7 +55,7 @@ libjmi_la_SOURCES = jmi.h \
                     $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.h \
                     $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod_impl.h 
 
-libjmi_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g -I$(SUNDIALS_HOME)/include
+libjmi_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g -I$(SUNDIALS_HOME)/include -std=c89 -pedantic
 # Don't build shared libraries of libjmi and libjmicppad. This is not
 # really needed, and also (more importantly perhaps) I cannot force
 # static inclusion of the runtime libraries when creating model so:s.
@@ -67,7 +67,7 @@ libjmi_algorithm_la_SOURCES = jmi_init_opt.h \
                               jmi_opt_coll.c \
                               jmi_opt_coll_radau.c
 
-libjmi_algorithm_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g
+libjmi_algorithm_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g -std=c89 -pedantic
 # Don't build shared libraries of libjmi and libjmicppad. This is not
 # really needed, and also (more importantly perhaps) I cannot force
 # static inclusion of the runtime libraries when creating model so:s.
@@ -84,7 +84,7 @@ libfmi_la_SOURCES = fmi.h \
                     $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.h \
                     $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod_impl.h 
 
-libfmi_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g -I$(SUNDIALS_HOME)/include
+libfmi_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g -I$(SUNDIALS_HOME)/include -std=c89 -pedantic
 # Don't build shared libraries of libjmi and libjmicppad. This is not
 # really needed, and also (more importantly perhaps) I cannot force
 # static inclusion of the runtime libraries when creating model so:s.
@@ -96,7 +96,7 @@ libjmi_solver_la_SOURCES = jmi_opt_coll_radau.c \
                            jmi_init_opt_ipopt.cpp \
                            jmi_init_opt_TNLP.cpp
 
-libjmi_solver_la_CFLAGS = -Wall -I$(IPOPT_INC) -DJMI_AD=JMI_AD_NONE -g
+libjmi_solver_la_CFLAGS = -Wall -I$(IPOPT_INC) -DJMI_AD=JMI_AD_NONE -g -std=c89 -pedantic
 libjmi_solver_la_CXXFLAGS = -Wall -I$(IPOPT_INC) -DJMI_AD=JMI_AD_NONE -g
 # Don't build shared libraries of libjmi and libjmicppad. This is not
 # really needed, and also (more importantly perhaps) I cannot force
@@ -112,7 +112,7 @@ libjmi_cppad_la_SOURCES = jmi.h \
                     jmi_array_common.h \
                     jmi_array_cppad.h
                    
-libjmi_cppad_la_CFLAGS = -Wall -x c++ -I$(CPPAD_HOME) -DJMI_AD=JMI_AD_CPPAD -g
+libjmi_cppad_la_CFLAGS = -Wall -x c++ -I$(CPPAD_HOME) -DJMI_AD=JMI_AD_CPPAD -g -std=c89 -pedantic
 libjmi_cppad_la_CXXFLAGS = -Wall -I$(CPPAD_HOME) -DJMI_AD=JMI_AD_CPPAD -g
 libjmi_cppad_la_LDFLAGS = -no-undefined -static-libtool-libs -g
 
@@ -122,7 +122,7 @@ libjmi_algorithm_cppad_la_SOURCES = jmi_init_opt.h \
                                     jmi_opt_coll.c \
                                     jmi_opt_coll_radau.c
                    
-libjmi_algorithm_cppad_la_CFLAGS = -Wall -x c++ -I$(CPPAD_HOME) -DJMI_AD=JMI_AD_CPPAD -g
+libjmi_algorithm_cppad_la_CFLAGS = -Wall -x c++ -I$(CPPAD_HOME) -DJMI_AD=JMI_AD_CPPAD -g -std=c89 -pedantic
 libjmi_algorithm_cppad_la_CXXFLAGS = -Wall -I$(CPPAD_HOME) -DJMI_AD=JMI_AD_CPPAD -g
 libjmi_algorithm_cppad_la_LDFLAGS = -no-undefined -static-libtool-libs -g
 #libjmi_cppad_la_LDFLAGS = -no-undefined 
@@ -133,7 +133,7 @@ libjmi_solver_cppad_la_SOURCES = jmi_opt_coll_ipopt.cpp \
                                  jmi_init_opt_TNLP.cpp
 
                    
-libjmi_solver_cppad_la_CFLAGS = -Wall -x c++ -I$(CPPAD_HOME) -I$(IPOPT_INC) -DJMI_AD=JMI_AD_CPPAD -g
+libjmi_solver_cppad_la_CFLAGS = -Wall -x c++ -I$(CPPAD_HOME) -I$(IPOPT_INC) -DJMI_AD=JMI_AD_CPPAD -g -std=c89 -pedantic
 libjmi_solver_cppad_la_CXXFLAGS = -Wall -I$(CPPAD_HOME) -I$(IPOPT_INC) -DJMI_AD=JMI_AD_CPPAD -g
 libjmi_solver_cppad_la_LDFLAGS = -no-undefined -static-libtool-libs -g
 #libjmi_cppad_la_LDFLAGS = -no-undefined 

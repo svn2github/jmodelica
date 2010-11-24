@@ -79,7 +79,7 @@ extern "C" {
 
 typedef struct jmi_opt_coll_t jmi_opt_coll_t;
 
-// Function typedefs
+/* Function typedefs */
 typedef int (*jmi_opt_coll_get_dimensions_t)(jmi_opt_coll_t *jmi_opt_coll, int *n_x, int *n_g, int *n_h,
 		int *dg_n_nz, int *dh_n_nz);
 
@@ -271,21 +271,21 @@ int jmi_opt_coll_set_initial_from_trajectory(
  * the NLP, and variable vectors.
  */
 struct jmi_opt_coll_t{
-	jmi_t *jmi;                      // jmi_t struct
-	int n_x;                         // Number of variables
-	int n_e;                         // Number of elements in mesh
-	jmi_real_t *hs;                    // Normalized element lengths in mesh (sum(h[i]=1)
-	int hs_free;                      // Free element lengths
-	int *tp_e;                         // Element indices for time points
-	jmi_real_t* tp_tau;                       // Taus for time points within elements
-	jmi_real_t *x;                    // x vector.
-	jmi_real_t *x_lb;                 // Lower bounds for variables
-	jmi_real_t *x_ub;                 // Upper bound for variables
-	jmi_real_t *x_init;               // Initial starting point
-	int *blocking_factors;             // Specification of blocking factors
-	int n_blocking_factors;            // Number of blocking factors
-	int n_blocking_factor_constraints; // Number of constraints resulting
-		                               // from blocking factors divided by the number of inputs
+	jmi_t *jmi;                        /* jmi_t struct */
+	int n_x;                           /* Number of variables */
+	int n_e;                           /* Number of elements in mesh */
+	jmi_real_t *hs;                    /* Normalized element lengths in mesh (sum(h[i]=1) */
+	int hs_free;                       /* Free element lengths */
+	int *tp_e;                         /* Element indices for time points */
+	jmi_real_t* tp_tau;                /* Taus for time points within elements */
+	jmi_real_t *x;                     /* x vector. */
+	jmi_real_t *x_lb;                  /* Lower bounds for variables */
+	jmi_real_t *x_ub;                  /* Upper bound for variables */
+	jmi_real_t *x_init;                /* Initial starting point */
+	int *blocking_factors;             /* Specification of blocking factors */
+	int n_blocking_factors;            /* Number of blocking factors */
+	int n_blocking_factor_constraints; /* Number of constraints resulting */
+		                               /* from blocking factors divided by the number of inputs */
 	int dg_n_nz;
 	int dh_n_nz;
 	int *dg_row;
@@ -293,7 +293,7 @@ struct jmi_opt_coll_t{
 	int *dh_row;
 	int *dh_col;
 	int n_nonlinear_variables;
-	int *non_linear_variables_indices; // Stored Fortran style (first index = 1)
+	int *non_linear_variables_indices; /* Stored Fortran style (first index = 1) */
 	jmi_opt_coll_get_dimensions_t get_dimensions;
 	jmi_opt_coll_get_interval_spec_t get_interval_spec;
 	jmi_opt_coll_f_t f;
@@ -302,8 +302,8 @@ struct jmi_opt_coll_t{
 	jmi_opt_coll_dh_t dh;
 	jmi_opt_coll_g_t g;
 	jmi_opt_coll_dg_t dg;
-	int n_g;                          // Number of inequality constraints
-	int n_h;                          // Number of equality constraints
+	int n_g;                          /* Number of inequality constraints */
+	int n_h;                          /* Number of equality constraints */
 	jmi_opt_coll_get_bounds_t get_bounds;
 	jmi_opt_coll_get_initial_t get_initial;
 	jmi_opt_coll_set_initial_from_trajectory_t set_initial_from_trajectory;

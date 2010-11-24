@@ -51,6 +51,9 @@ const char* fmi_get_version() {
 /* Creation and destruction of model instances and setting debug status */
 
 fmiComponent fmi_instantiate_model(fmiString instanceName, fmiString GUID, fmiCallbackFunctions functions, fmiBoolean loggingOn) {
+    fmi_t *component;
+    char* tmpname;
+    char* tmpguid;
     
     /* Create jmi struct*/
     jmi_t* jmi = (jmi_t *)functions.allocateMemory(1, sizeof(jmi_t));
@@ -60,14 +63,13 @@ fmiComponent fmi_instantiate_model(fmiString instanceName, fmiString GUID, fmiCa
         return NULL;
     }
     
-    fmi_t *component;
     component = (fmi_t *)functions.allocateMemory(1, sizeof(fmi_t));
     
-    char* tmpname = (char*)(fmi_t *)functions.allocateMemory(strlen(instanceName)+1, sizeof(char));
+    tmpname = (char*)(fmi_t *)functions.allocateMemory(strlen(instanceName)+1, sizeof(char));
     strcpy(tmpname, instanceName);
     component -> fmi_instance_name = tmpname;
 
-    char* tmpguid = (char*)(fmi_t *)functions.allocateMemory(strlen(GUID)+1, sizeof(char));
+    tmpguid = (char*)(fmi_t *)functions.allocateMemory(strlen(GUID)+1, sizeof(char));
     strcpy(tmpguid, GUID);
     component -> fmi_GUID = tmpguid;
     
@@ -165,13 +167,16 @@ fmiStatus fmi_set_string(fmiComponent c, const fmiValueReference vr[], size_t nv
 
 fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal relativeTolerance, fmiEventInfo* eventInfo) {
 	int retval;
-    int i; //Iteration variable
-    int nF0, nF1, nFp, nF; //Number of F-equations
-    int nR0, nR; //Number of R-equations
-    int initComplete = 0; //If the initialization are complete
+    int i;                   /* Iteration variable */
+    int nF0, nF1, nFp, nF;   /* Number of F-equations */
+    int nR0, nR;             /* Number of R-equations */
+    int initComplete = 0;    /* If the initialization are complete */
     
-    //Get Sizes
-    retval = jmi_init_get_sizes(((fmi_t *)c)->jmi,&nF0,&nF1,&nFp,&nR0); //Get the size of R0 and F0, (interested in R0)
+    jmi_real_t* switchesR;   /* Switches */
+    jmi_real_t* switchesR0;  /* Initial Switches */
+    
+    /* Get Sizes */
+    retval = jmi_init_get_sizes(((fmi_t *)c)->jmi,&nF0,&nF1,&nFp,&nR0); /* Get the size of R0 and F0, (interested in R0) */
     if(retval != 0) {
         (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Initialization failed when trying to retrieve the initial sizes.");
         return fmiError;
@@ -182,15 +187,13 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
         (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Initialization failed when trying to retrieve the actual sizes.");
         return fmiError;
     }
-    //----
-
-    jmi_real_t *switchesR;  //Switches
-    jmi_real_t *switchesR0; //Initial Switches
-    ((fmi_t *)c) -> fmi_epsilon=0.0001*relativeTolerance; //Used in the event detection
+    /* ---- */
     
-    while (initComplete == 0){ //Loop during event iteration
+    ((fmi_t *)c) -> fmi_epsilon=0.0001*relativeTolerance; /* Used in the event detection */
     
-        if (nR0 > 0){ //Specify the switches if any
+    while (initComplete == 0){                            /* Loop during event iteration */
+    
+        if (nR0 > 0){                                     /* Specify the switches if any */
             jmi_real_t* b_mode =  ((fmi_t*)c) -> fmi_functions.allocateMemory(nR0, sizeof(jmi_real_t));
             retval = jmi_init_R0(((fmi_t *)c)->jmi, b_mode);
 
@@ -218,56 +221,56 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
                 }
             }
             ((fmi_t*)c) -> fmi_functions.freeMemory(b_mode);
-        }//End specify switches
+        }/* End specify switches */
 
-        //Call the initialization algorithm
+        /* Call the initialization algorithm */
         retval = jmi_ode_initialize(((fmi_t *)c)->jmi);
         
-        if(retval != 0) { //Error check
+        if(retval != 0) { /* Error check */
             (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Initialization failed.");
             return fmiError;
         }
         
-        if (nR0 > 0){ //Event functions, check if there is an iteration.
+        if (nR0 > 0){ /* Event functions, check if there is an iteration. */
             jmi_real_t* b_mode =  ((fmi_t*)c) -> fmi_functions.allocateMemory(nR0, sizeof(jmi_real_t));
             retval = jmi_init_R0(((fmi_t *)c)->jmi, b_mode);
             
-            if(retval != 0) { //Error check
+            if(retval != 0) { /* Error check */
                 (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Initialization failed when trying to retrieve the event indicators.");
                 return fmiError;
             }
             
-            initComplete = 1; //Assume the iteration is complete
-            for (i=0; i < nR0; i=i+1){ //Loop over the event functions
+            initComplete = 1; /* Assume the iteration is complete */
+            for (i=0; i < nR0; i=i+1){ /* Loop over the event functions */
                 if (i >= nR){
                     if (switchesR0[i-nR] == 1.0){
                         if (b_mode[i] <= ((fmi_t *)c)->fmi_epsilon){
                             switchesR0[i-nR] = 0.0;
-                            initComplete = 0; //Iteration not complete
+                            initComplete = 0; /* Iteration not complete */
                         }
                     }else{
                         if (b_mode[i] >= ((fmi_t *)c)->fmi_epsilon){
                             switchesR0[i-nR] = 1.0;
-                            initComplete = 0; //Iteration not complete
+                            initComplete = 0; /* Iteration not complete */
                         }
                     }
                 }else{
                     if (switchesR[i] == 1.0){
                         if (b_mode[i] <= ((fmi_t *)c)->fmi_epsilon){
                             switchesR[i] = 0.0;
-                            initComplete = 0; //Iteration not complete
+                            initComplete = 0; /* Iteration not complete */
                         }
                     }else{
                         if (b_mode[i] >= ((fmi_t *)c)->fmi_epsilon){
                             switchesR[i] = 1.0;
-                            initComplete = 0; //Iteration not complete
+                            initComplete = 0; /* Iteration not complete */
                         }
                     }
                 }
             }
             ((fmi_t*)c) -> fmi_functions.freeMemory(b_mode);
             
-        }else{ //No event functions, initialization is complete.
+        }else{ /* No event functions, initialization is complete. */
             initComplete = 1;
         }
     }
@@ -310,18 +313,18 @@ fmiStatus fmi_get_derivatives(fmiComponent c, fmiReal derivatives[] , size_t nx)
 fmiStatus fmi_get_event_indicators(fmiComponent c, fmiReal eventIndicators[], size_t ni) {
     int retval = jmi_dae_R(((fmi_t *)c)->jmi,eventIndicators);
     jmi_real_t *switches = jmi_get_sw(((fmi_t *)c)->jmi);
-
+    int i;
+    
 	if(retval != 0) {
 		(((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the event indicators failed.");
 		return fmiError;
 	}
-    int i;
 
     for (i = 0; i < ni; i=i+1){
         if (switches[i] == 1.0){
-            eventIndicators[i] = eventIndicators[i]/1.0+((fmi_t *)c)->fmi_epsilon; //MISSING DIVIDING WITH NOMINAL
+            eventIndicators[i] = eventIndicators[i]/1.0+((fmi_t *)c)->fmi_epsilon; /* MISSING DIVIDING WITH NOMINAL */
         }else{
-            eventIndicators[i] = eventIndicators[i]/1.0-((fmi_t *)c)->fmi_epsilon; //MISSING DIVIDING WITH NOMINAL
+            eventIndicators[i] = eventIndicators[i]/1.0-((fmi_t *)c)->fmi_epsilon; /* MISSING DIVIDING WITH NOMINAL */
         }
     }
     return fmiOK;
@@ -382,31 +385,34 @@ fmiStatus fmi_get_string(fmiComponent c, const fmiValueReference vr[], size_t nv
 fmiStatus fmi_event_update(fmiComponent c, fmiBoolean intermediateResults, fmiEventInfo* eventInfo) {
     /* Handle an event */
     int retval;
-    int nF; //Number of F-equations
-    int nR; //Number of R-equations
-    retval = jmi_dae_get_sizes((((fmi_t *)c) ->jmi), &nF, &nR); //Get the size of R and F, (interested in R)
+    int nF; /* Number of F-equations */
+    int nR; /* Number of R-equations */
+    jmi_real_t* b_mode;
+    jmi_real_t* a_mode;
+    jmi_real_t *switches; /* Switches */
     
-    //Value of the event indicators prior to the initialization
-    jmi_real_t* b_mode =  ((fmi_t*)c) -> fmi_functions.allocateMemory(nR, sizeof(jmi_real_t));
-    //Value of the event indicators after the initialization
-    jmi_real_t* a_mode =  ((fmi_t*)c) -> fmi_functions.allocateMemory(nR, sizeof(jmi_real_t));
-
-    jmi_real_t *switches; //Switches
+    retval = jmi_dae_get_sizes((((fmi_t *)c) ->jmi), &nF, &nR); /* Get the size of R and F, (interested in R) */
     
-    //Update eventInfo
-    eventInfo->upcomingTimeEvent = fmiFalse; //No support for time events
-    eventInfo->nextEventTime = 0.0; //Not used
-    eventInfo->stateValueReferencesChanged = fmiFalse; //No support for dynamic state selection
-    eventInfo->terminateSimulation = fmiFalse; //Dont terminate the simulation
-    eventInfo->iterationConverged = fmiFalse; //The iteration have not converged
+    /* Value of the event indicators prior to the initialization */
+    b_mode =  ((fmi_t*)c) -> fmi_functions.allocateMemory(nR, sizeof(jmi_real_t));
+    /* Value of the event indicators after the initialization */
+    a_mode =  ((fmi_t*)c) -> fmi_functions.allocateMemory(nR, sizeof(jmi_real_t));
+    
+    /* Update eventInfo */
+    eventInfo->upcomingTimeEvent = fmiFalse;            /* No support for time events */
+    eventInfo->nextEventTime = 0.0;                     /* Not used */
+    eventInfo->stateValueReferencesChanged = fmiFalse;  /* No support for dynamic state selection */
+    eventInfo->terminateSimulation = fmiFalse;          /* Don't terminate the simulation */
+    eventInfo->iterationConverged = fmiFalse;           /* The iteration have not converged */
 
-    if (intermediateResults){ //Return after each event iteration loop
+    if (intermediateResults){ /* Return after each event iteration loop */
+        int j, i;
+        jmi_real_t* switches;
         
-        retval = jmi_dae_R(((fmi_t *)c)->jmi,b_mode); //The event indicators before the initialisation
+        retval = jmi_dae_R(((fmi_t *)c)->jmi,b_mode); /* The event indicators before the initialisation */
         
-        //Turn the switches
-        switches = jmi_get_sw(((fmi_t *)c)->jmi); //Get the switches
-        int j;
+        /* Turn the switches */
+        switches = jmi_get_sw(((fmi_t *)c)->jmi); /* Get the switches */
         for (j=0; j < nR; j=j+1){
             if (switches[j] == 1.0){
                 if (b_mode[j] <= ((fmi_t *)c)->fmi_epsilon){
@@ -419,55 +425,54 @@ fmiStatus fmi_event_update(fmiComponent c, fmiBoolean intermediateResults, fmiEv
             }
         }
         
-        //Turn the switches
-        jmi_real_t *switches = jmi_get_sw(((fmi_t *)c)->jmi); //Get the switches
+        /* Turn the switches */
+        switches = jmi_get_sw(((fmi_t *)c)->jmi); /* Get the switches */
             
-        retval = jmi_ode_derivatives(((fmi_t *)c)->jmi); //Initialise
+        retval = jmi_ode_derivatives(((fmi_t *)c)->jmi); /* Initialise */
         
         if(retval != 0) {
             (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Initialize during event iteration failed.");
             return fmiError;
         }
             
-        retval = jmi_dae_R(((fmi_t *)c)->jmi,a_mode); //Get the event indicators after the initialisation
+        retval = jmi_dae_R(((fmi_t *)c)->jmi,a_mode); /* Get the event indicators after the initialisation */
             
-        //Error check
+        /* Error check */
         if(retval != 0) {
             (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the event indicators failed.");
             return fmiError;
         }
         
-        //Compare the values of the event indicators before and after the event
-        eventInfo->iterationConverged = fmiTrue; //Assume the iteration converged
-        switches = jmi_get_sw(((fmi_t *)c)->jmi); //Get the switches
+        /* Compare the values of the event indicators before and after the event */
+        eventInfo->iterationConverged = fmiTrue; /* Assume the iteration converged */
+        switches = jmi_get_sw(((fmi_t *)c)->jmi); /* Get the switches */
         
-        int i;
         for (i=0; i < nR; i=i+1){
-            if (switches[i] == 1.0){ //Case when the switch are True
+            if (switches[i] == 1.0){ /* Case when the switch are True */
                 if (a_mode[i] <= ((fmi_t *)c)->fmi_epsilon){
-                    eventInfo->iterationConverged = fmiFalse; //Event iteration (not converged)
+                    eventInfo->iterationConverged = fmiFalse; /* Event iteration (not converged) */
                 }
-            }else{ //Case when the switch are False
+            }else{ /* Case when the switch are False */
                 if (a_mode[i] >= ((fmi_t *)c)->fmi_epsilon){
-                    eventInfo->iterationConverged = fmiFalse; //Event iteration (not converged)
+                    eventInfo->iterationConverged = fmiFalse; /* Event iteration (not converged) */
                 }
             }
         }
         
-    }else{ //Return once the iteration have converged
+    }else{ /* Return once the iteration have converged */
         while ((eventInfo->iterationConverged)==fmiFalse){
+            int j;
+            int i;
+            retval = jmi_dae_R(((fmi_t *)c)->jmi,b_mode); /* The event indicators before the initialisation */
             
-            retval = jmi_dae_R(((fmi_t *)c)->jmi,b_mode); //The event indicators before the initialisation
-            
-            //Error check
+            /* Error check */
             if(retval != 0) {
                 (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the event indicators failed.");
                 return fmiError;
             }
             
-            //Turn the switches
-            switches = jmi_get_sw(((fmi_t *)c)->jmi); //Get the switches
-            int j;
+            /* Turn the switches */
+            switches = jmi_get_sw(((fmi_t *)c)->jmi); /* Get the switches */
             for (j=0; j < nR; j=j+1){
                 if (switches[j] == 1.0){
                     if (b_mode[j] <= ((fmi_t *)c)->fmi_epsilon){
@@ -480,42 +485,41 @@ fmiStatus fmi_event_update(fmiComponent c, fmiBoolean intermediateResults, fmiEv
                 }
             }
             
-            retval = jmi_ode_derivatives(((fmi_t *)c)->jmi); //Initialise
+            retval = jmi_ode_derivatives(((fmi_t *)c)->jmi); /* Initialise */
         
             if(retval != 0) {
                 (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Initialize during event iteration failed.");
                 return fmiError;
             }
             
-            retval = jmi_dae_R(((fmi_t *)c)->jmi,a_mode); //Get the event indicators after the initialisation
+            retval = jmi_dae_R(((fmi_t *)c)->jmi,a_mode); /* Get the event indicators after the initialisation */
             
-            //Error check
+            /* Error check */
             if(retval != 0) {
                 (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the event indicators failed.");
                 return fmiError;
             }
             
-            //Compare the values of the event indicators before and after the event
-            eventInfo->iterationConverged = fmiTrue; //Assume the iteration converged
-            switches = jmi_get_sw(((fmi_t *)c)->jmi); //Get the switches
+            /* Compare the values of the event indicators before and after the event */
+            eventInfo->iterationConverged = fmiTrue; /* Assume the iteration converged */
+            switches = jmi_get_sw(((fmi_t *)c)->jmi); /* Get the switches */
             
-            int i;
             for (i=0; i < nR; i=i+1){
-                if (switches[i] == 1.0){ //Case when the switch are True
+                if (switches[i] == 1.0){ /* Case when the switch are True */
                     if (a_mode[i] <= ((fmi_t *)c)->fmi_epsilon){
-                        eventInfo->iterationConverged = fmiFalse; //Event iteration (not converged)
+                        eventInfo->iterationConverged = fmiFalse; /* Event iteration (not converged) */
                     }
-                }else{ //Case when the switch are False
+                }else{ /* Case when the switch are False */
                     if (a_mode[i] >= ((fmi_t *)c)->fmi_epsilon){
-                        eventInfo->iterationConverged = fmiFalse; //Event iteration (not converged)
+                        eventInfo->iterationConverged = fmiFalse; /* Event iteration (not converged) */
                     }
                 }
             }
         }
     }
     
-    ((fmi_t*)c) -> fmi_functions.freeMemory(a_mode); //Free memory
-    ((fmi_t*)c) -> fmi_functions.freeMemory(b_mode); //Free memory
+    ((fmi_t*)c) -> fmi_functions.freeMemory(a_mode); /* Free memory */
+    ((fmi_t*)c) -> fmi_functions.freeMemory(b_mode); /* Free memory */
     
     return fmiOK;
 }
@@ -524,7 +528,7 @@ fmiStatus fmi_get_continuous_states(fmiComponent c, fmiReal states[], size_t nx)
     return fmiOK;
 }
 fmiStatus fmi_get_nominal_continuous_states(fmiComponent c, fmiReal x_nominal[], size_t nx) {
-	fmiReal ones[nx];
+	fmiReal* ones = ((fmi_t*)c) -> fmi_functions.allocateMemory(nx, sizeof(fmiReal));
 	int i;
 	for(i = 0; i <nx; i = i + 1) {
 		ones[i]=1.0;
@@ -534,8 +538,9 @@ fmiStatus fmi_get_nominal_continuous_states(fmiComponent c, fmiReal x_nominal[],
 }
 fmiStatus fmi_get_state_value_references(fmiComponent c, fmiValueReference vrx[], size_t nx) {
 	int offset = ((fmi_t *)c)->jmi->offs_real_x;
-	fmiValueReference valrefs[nx];
+	fmiValueReference* valrefs = ((fmi_t*)c) -> fmi_functions.allocateMemory(nx, sizeof(fmiValueReference));
 	int i;
+    
 	for(i = 0; i<nx; i = i + 1) {
 		valrefs[i] = offset + i;
 	}

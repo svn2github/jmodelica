@@ -38,35 +38,35 @@ struct jmi_array_t {
     jmi_real_t* var;
 };
 
-// Linked list for saving pointers to be freed at return
+/* Linked list for saving pointers to be freed at return */
 typedef struct _jmi_dynamic_list jmi_dynamic_list;
 struct _jmi_dynamic_list {
 	void* data;
 	jmi_dynamic_list* next;
 };
 
-// Record array type declaration macro
+/* Record array type declaration macro */
 #define JMI_RECORD_ARRAY_TYPE(rec, arr) \
 	typedef struct _##arr {\
 		int* size;\
 		rec* var;\
 	} arr;
 
-// Array creation macro
+/* Array creation macro */
 #define JMI_ARRAY_STATIC(name, n, ...) \
 	int name##_size[] = { __VA_ARGS__ };\
 	jmi_real_t name##_var[n];\
 	jmi_array_t name##_obj = { name##_size, name##_var };\
 	jmi_array_t* name = &name##_obj;
 
-// Record array creation macro
+/* Record array creation macro */
 #define JMI_RECORD_ARRAY_STATIC(type, arr, name, n, ...) \
 	int name##_size[] = { __VA_ARGS__ };\
 	type name##_var[n];\
 	arr name##_arr = { name##_size, name##_var };\
 	arr* name = &name##_arr;
 
-// Dynamic array creation macro
+/* Dynamic array creation macro */
 #define JMI_ARRAY_DYNAMIC(name, n, ...) \
 	int name##_size[] = { __VA_ARGS__ };\
 	jmi_real_t* name##_var = (jmi_real_t*) malloc((n) * sizeof(jmi_real_t));\
@@ -74,7 +74,7 @@ struct _jmi_dynamic_list {
 	jmi_array_t name##_arr = { name##_size, name##_var };\
 	jmi_array_t* name = &name##_arr;
 
-// Dynamic record array creation macro
+/* Dynamic record array creation macro */
 #define JMI_RECORD_ARRAY_DYNAMIC(type, arr, name, n, ...) \
 	int name##_size[] = { __VA_ARGS__ };\
 	type* name##_var = (type*) malloc((n) * sizeof(type));\
@@ -82,18 +82,18 @@ struct _jmi_dynamic_list {
 	arr name##_rec = { name##_size, name##_var };\
 	arr* name = &name##_rec;
 
-// Macro for declaring dynamic list variable - should be called at beginning of function
+/* Macro for declaring dynamic list variable - should be called at beginning of function */
 #define JMI_DYNAMIC_INIT() \
 	jmi_dynamic_list* jmi_dynamic_first = (jmi_dynamic_list*)calloc(1, sizeof(jmi_dynamic_list));\
 	jmi_dynamic_list* jmi_dynamic_last = jmi_dynamic_first;
 
-// Macro for adding a pointer to dynamic list - only for use in other macros
+/* Macro for adding a pointer to dynamic list - only for use in other macros */
 #define JMI_DYNAMIC_ADD_POINTER(pointer) \
 	jmi_dynamic_last->next = (jmi_dynamic_list*)calloc(1, sizeof(jmi_dynamic_list));\
 	jmi_dynamic_last = jmi_dynamic_last->next;\
 	jmi_dynamic_last->data = pointer;
 
-// Dynamic deallocation of all dynamically allocated arrays and record arrays - should be called before return
+/* Dynamic deallocation of all dynamically allocated arrays and record arrays - should be called before return */
 #define JMI_DYNAMIC_FREE() \
 	jmi_dynamic_list* prev = jmi_dynamic_first;\
 	for (jmi_dynamic_list* cur = prev->next; cur; prev = cur, cur = cur->next) {\
@@ -102,7 +102,7 @@ struct _jmi_dynamic_list {
 	}\
 	free(prev);
 
-// Record array access macros
+/* Record array access macros */
 #define jmi_array_rec_1(arr, i1) (&((arr)->var[(int) _JMI_ARR_I_1(arr, i1)]))
 #define jmi_array_rec_2(arr, i1, i2) (&((arr)->var[(int) _JMI_ARR_I_2(arr, i1, i2)]))
 #define jmi_array_rec_3(arr, i1, i2, i3) (&((arr)->var[(int) _JMI_ARR_I_3(arr, i1, i2, i3)]))
@@ -129,7 +129,7 @@ struct _jmi_dynamic_list {
 #define jmi_array_rec_24(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22, i23, i24) (&((arr)->var[(int) _JMI_ARR_I_24(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22, i23, i24)]))
 #define jmi_array_rec_25(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22, i23, i24, i25) (&((arr)->var[(int) _JMI_ARR_I_25(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22, i23, i24, i25)]))
 
-// Access macros
+/* Access macros */
 #define jmi_array_val_1(arr, i1) (arr)->var[(int) _JMI_ARR_I_1(arr, i1)]
 #define jmi_array_val_2(arr, i1, i2) (arr)->var[(int) _JMI_ARR_I_2(arr, i1, i2)]
 #define jmi_array_val_3(arr, i1, i2, i3) (arr)->var[(int) _JMI_ARR_I_3(arr, i1, i2, i3)]
@@ -156,7 +156,7 @@ struct _jmi_dynamic_list {
 #define jmi_array_val_24(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22, i23, i24) (arr)->var[(int) _JMI_ARR_I_24(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22, i23, i24)]
 #define jmi_array_val_25(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22, i23, i24, i25) (arr)->var[(int) _JMI_ARR_I_25(arr, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22, i23, i24, i25)]
 
-// Reference macros
+/* Reference macros */
 #define jmi_array_ref_1  jmi_array_val_1
 #define jmi_array_ref_2  jmi_array_val_2
 #define jmi_array_ref_3  jmi_array_val_3

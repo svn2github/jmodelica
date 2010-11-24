@@ -1006,17 +1006,17 @@ extern "C" {
 
 typedef struct {
 	jmi_opt_coll_t jmi_opt_coll;
-    int n_cp;                      // Number of collocation points
-    jmi_real_t *cp;                // Collocation points for algebraic variables
-    jmi_real_t *w;                 // Quadrature weights
-    jmi_real_t *cpp;               // Collocation points for dynamic variables
-    jmi_real_t *Lp_coeffs;               // Lagrange polynomial coefficients based on the points in cp
-    jmi_real_t *Lpp_coeffs;              // Lagrange polynomial coefficients based on the points in cp plus one more point
-    jmi_real_t *Lp_dot_coeffs;               // Lagrange polynomial derivative coefficients based on the points in cp
-    jmi_real_t *Lpp_dot_coeffs;              // Lagrange polynomial derivative coefficients based on the points in cp plus one more point
-    jmi_real_t *Lp_dot_vals;        // Values of the derivative of the Lagrange polynomials at the points in cp
-    jmi_real_t *Lpp_dot_vals;       // Values of the derivative of the Lagrange polynomials at the points in cpp
-    int der_eval_alg;                   // Evaluation algorithm used for computation of derivatives
+    int n_cp;                       /* Number of collocation points */
+    jmi_real_t *cp;                 /* Collocation points for algebraic variables */
+    jmi_real_t *w;                  /* Quadrature weights */
+    jmi_real_t *cpp;                /* Collocation points for dynamic variables */
+    jmi_real_t *Lp_coeffs;          /* Lagrange polynomial coefficients based on the points in cp */
+    jmi_real_t *Lpp_coeffs;         /* Lagrange polynomial coefficients based on the points in cp plus one more point */
+    jmi_real_t *Lp_dot_coeffs;      /* Lagrange polynomial derivative coefficients based on the points in cp */
+    jmi_real_t *Lpp_dot_coeffs;     /* Lagrange polynomial derivative coefficients based on the points in cp plus one more point */
+    jmi_real_t *Lp_dot_vals;        /* Values of the derivative of the Lagrange polynomials at the points in cp */
+    jmi_real_t *Lpp_dot_vals;       /* Values of the derivative of the Lagrange polynomials at the points in cpp */
+    int der_eval_alg;               /* Evaluation algorithm used for computation of derivatives */
     int dFfdp_dp_n_nz;
     int dF0_n_nz;
     int dF_dp_n_nz;
@@ -1158,7 +1158,7 @@ int jmi_opt_coll_radau_new(jmi_opt_coll_t **jmi_opt_coll, jmi_t *jmi, int n_e,
  */
 int jmi_opt_coll_radau_delete(jmi_opt_coll_t *jmi_opt_coll);
 
-// Radau points
+/* Radau points */
 static jmi_real_t jmi_opt_coll_radau_p_1[1] = {1.0000000000000000e+00};
 
 static jmi_real_t jmi_opt_coll_radau_p_2[2] = {3.3333333333333337e-01,
@@ -1224,7 +1224,7 @@ static jmi_real_t jmi_opt_coll_radau_p_10[10] = {1.4412409648874247e-02,
                                               9.6374218711679271e-01,
                                               1.0000000000000000e+00};
 
-// Radau weights
+/* Radau weights */
 static jmi_real_t jmi_opt_coll_w_1[1] = {1.0000000000000000e+00};
 
 static jmi_real_t jmi_opt_coll_w_2[2] = {7.4999999999999989e-01,
@@ -1290,9 +1290,9 @@ static jmi_real_t jmi_opt_coll_w_10[10] = {3.6808502742733402e-02,
                                               6.0148335277774877e-02,
                                               1.0000000000000000e-02};
 
-// Lagrange polynomial coefficients. Lagrange polynomials based on
-// Radau points. The first index denotes polynomial
-// and the second index denotes coefficient.
+/* Lagrange polynomial coefficients. Lagrange polynomials based on */
+/* Radau points. The first index denotes polynomial */
+/* and the second index denotes coefficient. */
 static jmi_real_t jmi_opt_coll_radau_lp_coeffs_1[1][1] = {{1.0000000000000000e+00}};
 
 static jmi_real_t jmi_opt_coll_radau_lp_coeffs_2[2][2] = {{-1.5000000000000000e+00, 1.5000000000000000e+00},
@@ -1488,7 +1488,7 @@ static jmi_real_t jmi_opt_coll_radau_lp_dot_vals_10[10][10] = {{-3.4692325029698
                                                       {-1.1011152125248527e+01, 3.4622889236230350e+00, -2.1062630699520604e+00, 1.7353084415603881e+00, -1.7828633044187185e+00, 2.2657181682319418e+00, -3.7466986022650417e+00, 9.8044738701922789e+00, -5.1881095026405788e-01, -6.6403449078269887e+01},
                                                       {4.4051672164287723e+00, -1.3817098533379522e+00, 8.3632375838792150e-01, -6.8289425284501171e-01, 6.9059888780713763e-01, -8.5170397898239081e-01, 1.3182729875424304e+00, -2.8217928421078309e+00, 1.1455291776248121e+01, 4.9500000000037232e+01}};
 
-// Radau points plus starting point of interval (0)
+/* Radau points plus starting point of interval (0) */
 static jmi_real_t jmi_opt_coll_radau_pp_1[2] = {0.0000000000000000e+00,
                                               1.0000000000000000e+00};
 
@@ -1564,9 +1564,9 @@ static jmi_real_t jmi_opt_coll_radau_pp_10[11] = {0.0000000000000000e+00,
                                               9.6374218711679271e-01,
                                               1.0000000000000000e+00};
 
-// Lagrange polynomial coefficients. Lagrange polynomials based on
-// Radau points plus the beginning of the interval. The first index
-// denotes polynomial and the second index denotes coefficient.
+/* Lagrange polynomial coefficients. Lagrange polynomials based on */
+/* Radau points plus the beginning of the interval. The first index */
+/* denotes polynomial and the second index denotes coefficient. */
 static jmi_real_t jmi_opt_coll_radau_lpp_coeffs_1[2][2] = {{-1.0000000000000000e+00, 1.0000000000000000e+00},
                                                   {1.0000000000000000e+00, 0.0000000000000000e+00}};
 
@@ -1809,7 +1809,7 @@ static jmi_real_t jmi_opt_coll_radau_lpp_dot_vals_10[11][11] = {{-1.000000000000
  */
 jmi_real_t jmi_opt_coll_radau_eval_pol(jmi_real_t tau, int n, jmi_real_t* pol, int k);
 
-// Lagrange polynomial matrices are returned in column major format.
+/* Lagrange polynomial matrices are returned in column major format. */
 
 /**
  * \brief Get Lagrange polynomials of a specified order.

@@ -207,4 +207,4 @@
    DllExport fmiStatus fmiGetStateValueReferences   (fmiComponent c, fmiValueReference vrx[], size_t nx);
    DllExport fmiStatus fmiTerminate                 (fmiComponent c);
 
-#endif // fmiModelFunctions_h
+#endif /* fmiModelFunctions_h */

@@ -37,16 +37,18 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 		int n_string_d, int n_string_u, int n_sw, int n_sw_init,
 		int n_dae_blocks, int n_dae_init_blocks,
 		int scaling_method) {
-
-	// Create jmi struct
+	jmi_t* jmi_ ;
+	int i;
+	
+	/* Create jmi struct */
 	*jmi = (jmi_t*)calloc(1,sizeof(jmi_t));
-	jmi_t* jmi_ = *jmi;
-	// Set struct pointers in jmi
+	jmi_ = *jmi;
+	/* Set struct pointers in jmi */
 	jmi_->dae = NULL;
 	jmi_->init = NULL;
 	jmi_->opt = NULL;
 
-	// Set sizes of dae vectors
+	/* Set sizes of dae vectors */
 	jmi_->n_real_ci = n_real_ci;
 	jmi_->n_real_cd = n_real_cd;
 	jmi_->n_real_pi = n_real_pi;
@@ -150,7 +152,6 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 	jmi_->variable_scaling_factors = (jmi_real_t*)calloc(jmi_->n_z,sizeof(jmi_real_t));
 	jmi_->scaling_method = JMI_SCALING_NONE;
 
-	int i;
 	for (i=0;i<jmi_->n_z;i++) {
 		jmi_->variable_scaling_factors[i] = 1.0;
 		(*(jmi_->z))[i] = 0;
@@ -172,7 +173,7 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 }
 
 int jmi_ad_init(jmi_t* jmi) {
-  //return -1;
+  /*return -1;*/
   return 0;
 }
 
@@ -213,24 +214,26 @@ int jmi_func_F(jmi_t *jmi, jmi_func_t *func, jmi_real_t *res) {
 }
 
 int jmi_ode_f(jmi_t* jmi) {
-
-	if (jmi->n_real_w != 0) { // Check if not ODE
+	int i;
+	jmi_real_t* dx;
+	jmi_real_t* dx_res;
+	
+	if (jmi->n_real_w != 0) { /* Check if not ODE */
 		return -1;
 	}
 
-	int i;
 	for (i=0;i<jmi->n_z;i++) {
 		(*(jmi->z))[i] = (*(jmi->z_val))[i];
 	}
 
-	jmi_real_t* dx = jmi_get_real_dx(jmi);
+	dx = jmi_get_real_dx(jmi);
 	for(i=0;i<jmi->n_real_dx;i++) {
 		dx[i]=0;
 	}
 
-	jmi_real_t* dx_res = calloc(jmi->n_real_x,sizeof(jmi_real_t));
+	dx_res = calloc(jmi->n_real_x,sizeof(jmi_real_t));
 
-	//jmi->dae->F->F(jmi, &res);
+	/*jmi->dae->F->F(jmi, &res);*/
 	jmi_func_F(jmi,jmi->dae->F,dx_res);
 
 	for(i=0;i<jmi->n_real_dx;i++) {
@@ -244,7 +247,7 @@ int jmi_ode_f(jmi_t* jmi) {
 
 int jmi_ode_df(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int* mask, jmi_real_t* jac) {
 
-	if (jmi->n_real_w != 0) { // Check if not ODE
+	if (jmi->n_real_w != 0) { /* Check if not ODE */
 		return -1;
 	}
 
@@ -268,7 +271,9 @@ int jmi_ode_df(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int
 
 int jmi_ode_df_n_nz(jmi_t* jmi, int eval_alg, int* n_nz) {
 
-	if (jmi->n_real_w != 0) { // Check if not ODE
+	int ret_val;
+
+	if (jmi->n_real_w != 0) { /* Check if not ODE */
 		return -1;
 	}
 
@@ -279,7 +284,7 @@ int jmi_ode_df_n_nz(jmi_t* jmi, int eval_alg, int* n_nz) {
         for (i=0;i<jmi->n_z;i++) {
         	mask[i] = 1;
         }
-		int ret_val =  jmi_func_dF_dim(jmi, jmi->dae->F, JMI_DER_SPARSE,
+		ret_val =  jmi_func_dF_dim(jmi, jmi->dae->F, JMI_DER_SPARSE,
 			   JMI_DER_ALL & (~JMI_DER_DX), mask,
 				&df_n_cols, n_nz);
 		free(mask);
@@ -294,7 +299,7 @@ int jmi_ode_df_n_nz(jmi_t* jmi, int eval_alg, int* n_nz) {
 int jmi_ode_df_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
         int *mask, int* row, int* col) {
 
-	if (jmi->n_real_w != 0) { // Check if not ODE
+	if (jmi->n_real_w != 0) { /* Check if not ODE */
 		return -1;
 	}
 
@@ -314,7 +319,7 @@ int jmi_ode_df_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
 int jmi_ode_df_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
 		int *df_n_cols, int *df_n_nz) {
 
-	if (jmi->n_real_w != 0) { // Check if not ODE
+	if (jmi->n_real_w != 0) { /* Check if not ODE */
 		return -1;
 	}
 
@@ -338,7 +343,7 @@ int jmi_ode_derivatives(jmi_t* jmi) {
 
 	return_status = jmi->dae->ode_derivatives(jmi);
 
-	// Write back evaluation result
+	/* Write back evaluation result */
 	if (return_status==0) {
 		for (i=0;i<jmi->n_z;i++) {
 			(*(jmi->z_val))[i] = (*(jmi->z))[i];
@@ -357,7 +362,7 @@ int jmi_ode_outputs(jmi_t* jmi) {
 
 	return_status = jmi->dae->ode_outputs(jmi);
 
-	// Write back evaluation result
+	/* Write back evaluation result */
 	if (return_status==0) {
 		for (i=0;i<jmi->n_z;i++) {
 			(*(jmi->z_val))[i] = (*(jmi->z))[i];
@@ -376,7 +381,7 @@ int jmi_ode_initialize(jmi_t* jmi) {
 
 	return_status = jmi->dae->ode_initialize(jmi);
 
-	// Write back evaluation result
+	/* Write back evaluation result */
 	if (return_status==0) {
 		for (i=0;i<jmi->n_z;i++) {
 			(*(jmi->z_val))[i] = (*(jmi->z))[i];
@@ -393,7 +398,7 @@ int jmi_dae_F(jmi_t* jmi, jmi_real_t* res) {
 		(*(jmi->z))[i] = (*(jmi->z_val))[i];
 	}
 
-	//jmi->dae->F->F(jmi, &res);
+	/*jmi->dae->F->F(jmi, &res);*/
 	jmi_func_F(jmi,jmi->dae->F,res);
 
 	return 0;
@@ -463,7 +468,7 @@ int jmi_dae_R(jmi_t* jmi, jmi_real_t* res) {
 		(*(jmi->z))[i] = (*(jmi->z_val))[i];
 	}
 
-	//jmi->dae->F->F(jmi, &res);
+	/*jmi->dae->F->F(jmi, &res);*/
 	jmi_func_F(jmi,jmi->dae->R,res);
 
 	return 0;
@@ -680,7 +685,7 @@ int jmi_init_eval_parameters(jmi_t* jmi) {
 
 	return_status = jmi->init->eval_parameters(jmi);
 
-	// Write back evaluation result
+	/* Write back evaluation result */
 	if (return_status==0) {
 		for (i=0;i<jmi->n_z;i++) {
 			(*(jmi->z_val))[i] = (*(jmi->z))[i];
@@ -697,7 +702,7 @@ int jmi_init_R0(jmi_t* jmi, jmi_real_t* res) {
 		(*(jmi->z))[i] = (*(jmi->z_val))[i];
 	}
 
-	//jmi->dae->F->F(jmi, &res);
+	/*jmi->dae->F->F(jmi, &res);*/
 	jmi_func_F(jmi,jmi->init->R0,res);
 
 	return 0;

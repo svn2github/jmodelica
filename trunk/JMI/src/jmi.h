@@ -296,31 +296,31 @@ extern "C" {
  */
 /* @{ */
 
-#define JMI_INF 1e20; /**< \brief A Very Large Number denoting infinity.*/
+#define JMI_INF 1e20;               /**< \brief A Very Large Number denoting infinity.*/
 
-#define JMI_DER_SYMBOLIC 1 /**< \brief Use symbolic evaluation of derivatives (if available). */
-#define JMI_DER_CPPAD 2 /**< \brief Use automatic differentiation (CppAD) to evaluate derivatives. */
+#define JMI_DER_SYMBOLIC 1          /**< \brief Use symbolic evaluation of derivatives (if available). */
+#define JMI_DER_CPPAD 2             /**< \brief Use automatic differentiation (CppAD) to evaluate derivatives. */
 
-#define JMI_DER_SPARSE 1 /**< \brief Sparse evaluation of derivatives. */
-#define JMI_DER_DENSE_COL_MAJOR 2 /**<  \brief Dense evaluation (column major) of derivatives. */
-#define JMI_DER_DENSE_ROW_MAJOR 4 /**<  \brief Dense evaluation (row major) of derivatives. */
+#define JMI_DER_SPARSE 1            /**< \brief Sparse evaluation of derivatives. */
+#define JMI_DER_DENSE_COL_MAJOR 2   /**<  \brief Dense evaluation (column major) of derivatives. */
+#define JMI_DER_DENSE_ROW_MAJOR 4   /**<  \brief Dense evaluation (row major) of derivatives. */
 
-// Flags for evaluation of Jacobians w.r.t. parameters in the p vector
-#define JMI_DER_CI 1 /**<  \brief Evaluate derivatives w.r.t. real independent constants, \f$c_i\f$.*/
-#define JMI_DER_CD 2 /**<  \brief Evaluate derivatives w.r.t. real dependent constants, \f$c_d\f$.*/
-#define JMI_DER_PI 4 /**<  \brief Evaluate derivatives w.r.t. real independent parameters, \f$p_i\f$.*/
-#define JMI_DER_PD 8 /**<  \brief Evaluate derivatives w.r.t. real dependent constants, \f$p_d\f$.*/
-// Flags for evaluation of Jacobians w.r.t. variables in the v vector
-#define JMI_DER_DX 16 /**<  \brief Evaluate derivatives w.r.t. real derivatives, \f$\dot x\f$.*/
-#define JMI_DER_X 32 /**<  \brief Evaluate derivatives w.r.t. real differentiated variables, \f$x\f$.*/
-#define JMI_DER_U 64 /**<  \brief Evaluate derivatives w.r.t. real inputs, \f$u\f$.*/
-#define JMI_DER_W 128 /**<  \brief Evaluate derivatives w.r.t. real algebraic variables, \f$w\f$.*/
-#define JMI_DER_T 256 /**<  \brief Evaluate derivatives w.r.t. real time, \f$t\f$.*/
-// Flags for evaluation of Jacobians w.r.t. variables in the q vector
-#define JMI_DER_DX_P 512 /**<  \brief Evaluate derivatives w.r.t. real derivatives at time points, \f$\dot x_p\f$.*/
-#define JMI_DER_X_P 1024 /**<  \brief Evaluate derivatives w.r.t. real differentiated variables at time points, \f$x_p\f$.*/
-#define JMI_DER_U_P 2048 /**<  \brief Evaluate derivatives w.r.t. real inputs at time points, \f$u_p\f$.*/
-#define JMI_DER_W_P 4096 /**<  \brief Evaluate derivatives w.r.t. real algebraic variables at time points, \f$w_p\f$.*/
+/* Flags for evaluation of Jacobians w.r.t. parameters in the p vector */
+#define JMI_DER_CI 1               /**< \brief Evaluate derivatives w.r.t. real independent constants, \f$c_i\f$.*/
+#define JMI_DER_CD 2               /**< \brief Evaluate derivatives w.r.t. real dependent constants, \f$c_d\f$.*/
+#define JMI_DER_PI 4               /**< \brief Evaluate derivatives w.r.t. real independent parameters, \f$p_i\f$.*/
+#define JMI_DER_PD 8               /**< \brief Evaluate derivatives w.r.t. real dependent constants, \f$p_d\f$.*/
+/* Flags for evaluation of Jacobians w.r.t. variables in the v vector */
+#define JMI_DER_DX 16              /**< \brief Evaluate derivatives w.r.t. real derivatives, \f$\dot x\f$.*/
+#define JMI_DER_X 32               /**< \brief Evaluate derivatives w.r.t. real differentiated variables, \f$x\f$.*/
+#define JMI_DER_U 64               /**< \brief Evaluate derivatives w.r.t. real inputs, \f$u\f$.*/
+#define JMI_DER_W 128              /**< \brief Evaluate derivatives w.r.t. real algebraic variables, \f$w\f$.*/
+#define JMI_DER_T 256              /**< \brief Evaluate derivatives w.r.t. real time, \f$t\f$.*/
+/* Flags for evaluation of Jacobians w.r.t. variables in the q vector */
+#define JMI_DER_DX_P 512           /**< \brief Evaluate derivatives w.r.t. real derivatives at time points, \f$\dot x_p\f$.*/
+#define JMI_DER_X_P 1024           /**< \brief Evaluate derivatives w.r.t. real differentiated variables at time points, \f$x_p\f$.*/
+#define JMI_DER_U_P 2048           /**< \brief Evaluate derivatives w.r.t. real inputs at time points, \f$u_p\f$.*/
+#define JMI_DER_W_P 4096           /**< \brief Evaluate derivatives w.r.t. real algebraic variables at time points, \f$w_p\f$.*/
 
 /** \brief Evaluate derivatives w.r.t. all variables, \f$z\f$.*/
 #define JMI_DER_ALL (JMI_DER_CI | JMI_DER_CD | JMI_DER_PI | JMI_DER_PD |\
@@ -342,9 +342,8 @@ extern "C" {
 #define JMI_FALSE AD_WRAP_LITERAL(0.0)
 
 /** \brief */
-#define JMI_SCALING_NONE 1 /**<  \brief No scaling.*/
-#define JMI_SCALING_VARIABLES 2 /**<  \brief Scale real variables by multiplying
-	incoming variables in residual functions by the scaling factors in jmi_t->variable_scaling_factors */
+#define JMI_SCALING_NONE 1        /**< \brief No scaling.*/
+#define JMI_SCALING_VARIABLES 2   /**< \brief Scale real variables by multiplying incoming variables in residual functions by the scaling factors in jmi_t->variable_scaling_factors */
 
 /** \brief */
 #define JMI_BLOCK_INITIALIZE 0

@@ -25,7 +25,8 @@
 
 int jmi_simple_newton_solve(jmi_block_residual_t *block) {
 
-	int i, j;
+	int i, j, INCX, nbr_iter;
+	double err_norm;
 
 	int N = block->n;
 	int NRHS = 1;
@@ -33,24 +34,24 @@ int jmi_simple_newton_solve(jmi_block_residual_t *block) {
 	int LDB = block->n;
 	int INFO = 0;
 
-	// Initialize the work vector
+	/* Initialize the work vector */
 	block->F(block->jmi,block->x,block->res,JMI_BLOCK_INITIALIZE);
 
-	// Evaluate
+	/* Evaluate */
 	block->F(block->jmi,block->x,block->res,JMI_BLOCK_EVALUATE);
 
-//	for (i=0;i<block->n;i++) {
-//		printf(" %f, %f\n",block->x[i],block->res[i]);
-//	}
+/*	for (i=0;i<block->n;i++) {
+		printf(" %f, %f\n",block->x[i],block->res[i]);
+	} */
 
-	// Compute norm
-	int INCX = 1;
-	double err_norm = err_norm = dnrm2_(&N,block->res,&INCX);
+	/* Compute norm */
+	INCX = 1;
+	err_norm = dnrm2_(&N,block->res,&INCX);
 
-//	printf ("Initial norm error: %f\n",err_norm);
+/*	printf ("Initial norm error: %f\n",err_norm); */
 
-	// Iterate
-	int nbr_iter = 0;
+	/* Iterate */
+	nbr_iter = 0;
 	while (err_norm>=JMI_SIMPLE_NEWTON_TOL) {
 
 		if (nbr_iter>JMI_SIMPLE_NEWTON_MAX_ITER) {
@@ -65,7 +66,7 @@ int jmi_simple_newton_solve(jmi_block_residual_t *block) {
 		printf("-- x and res --\n");
 		 */
 
-		// Compute jacobian
+		/* Compute jacobian */
 		jmi_simple_newton_jac(block);
 
 		block->F(block->jmi,block->x,block->res,JMI_BLOCK_EVALUATE);
@@ -81,8 +82,8 @@ int jmi_simple_newton_solve(jmi_block_residual_t *block) {
 		printf("-- Jacobian --\n");
 		*/
 
-		// Solve linear system to get the step
-		// J_{k}*dx_{k} = F_{k}
+		/* Solve linear system to get the step */
+		/* J_{k}*dx_{k} = F_{k} */
 
 
 		/*
@@ -94,7 +95,7 @@ int jmi_simple_newton_solve(jmi_block_residual_t *block) {
 		dgesv_( &N, &NRHS, block->jac, &LDA, block->ipiv, block->res,
 				&LDB, &INFO );
 
-		//printf("Info: %d\n",INFO);
+		/*printf("Info: %d\n",INFO); */
 
 		/*
 		for (i=0;i<block->n;i++) {
@@ -102,20 +103,20 @@ int jmi_simple_newton_solve(jmi_block_residual_t *block) {
 		}
 		*/
 
-		// Compute new x
-		// x_{k+1} = x_{k} - dx_{k}
+		/* Compute new x */
+		/* x_{k+1} = x_{k} - dx_{k} */
 		for (i=0;i<block->n;i++) {
 			block->x[i] = block->x[i] - block->res[i];
 		}
 
-		// Evaluate residual with new x
+		/* Evaluate residual with new x */
 		block->F(block->jmi,block->x,block->res,JMI_BLOCK_EVALUATE);
 
-		// Compute norm of the residual
-		int INCX = 1;
+		/* Compute norm of the residual */
+		INCX = 1;
 		err_norm = dnrm2_(&N,block->res,&INCX);
 
-//		printf ("Norm error after iteration %d: %12.12f\n",nbr_iter,err_norm);
+/*		printf ("Norm error after iteration %d: %12.12f\n",nbr_iter,err_norm); */
 
 		nbr_iter++;
 
@@ -132,7 +133,7 @@ int jmi_simple_newton_jac(jmi_block_residual_t *block) {
 	for (i=0;i<block->n;i++) {
 		for (j=0;j<block->n;j++) {
 			block->jac[i*(block->n) + j] = block->res[j];
-//			printf(" - %12.12f\n",block->jac[i*(block->n) + j]);
+/*			printf(" - %12.12f\n",block->jac[i*(block->n) + j]); */
 		}
 	}
 
@@ -140,7 +141,7 @@ int jmi_simple_newton_jac(jmi_block_residual_t *block) {
 		block->x[i] += JMI_SIMPLE_NEWTON_FD_TOL;
 		block->F(block->jmi,block->x,block->res,JMI_BLOCK_EVALUATE);
 		for (j=0;j<block->n;j++) {
-//			printf(" * %12.12f\n",block->res[j]);
+/*			printf(" * %12.12f\n",block->res[j]); */
 			block->jac[i*(block->n) + j] = (block->res[j]-block->jac[i*(block->n) + j])/(JMI_SIMPLE_NEWTON_FD_TOL);
 		}
 		block->x[i] -= JMI_SIMPLE_NEWTON_FD_TOL;
