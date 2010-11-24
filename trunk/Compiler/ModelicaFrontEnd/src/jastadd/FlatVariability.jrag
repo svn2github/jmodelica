@@ -226,6 +226,8 @@ aspect FlatVariability {
 	eq FZeros.variability()      = fConstant();
 	eq FFillExp.variability()    = getFillExp().variability();
 	
+	eq FPreExp.variability()  = fDiscrete();
+	
 	syn int FTypePrefixVariability.combineLevel() = variabilityLevel() * 10;
 	
    	public FTypePrefixVariability FTypePrefixVariability.combine(FTypePrefixVariability other) {

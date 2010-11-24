@@ -219,9 +219,6 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 210, column 3:
   The sign() function-like operator is not supported
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Semantic error at line 211, column 3:
-  The class Integer is not a function
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Semantic error at line 212, column 3:
   The class String is not a function
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
@@ -249,7 +246,6 @@ Compliance error at line 219, column 3:
 
  equation
   sign(1);
-  Integer();
   String();
   div(1);
   mod();
@@ -297,13 +293,14 @@ Compliance error at line 288, column 3:
   The terminate() function-like operator is not supported
 ")})));
 
+  discrete Real x;
  equation
   semiLinear();
   initial(1);
   terminal();
   smooth(1);
   sample();
-  pre(1);
+  pre(x);
   edge();
   reinit(1);
   terminate();

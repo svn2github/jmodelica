@@ -2008,4 +2008,35 @@ end NoEventRecord1;
 
 
 
+model PreTest1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="PreTest1",
+         description="pre(): basic test",
+         flatModel="
+fclass ArrayBuiltins.PreTest1
+ discrete Integer x;
+ Real y;
+ discrete Integer x2[1];
+ discrete Integer x2[2];
+ Real y2[1];
+ Real y2[2];
+equation
+ x = 1;
+ y = pre(x);
+ x2[1] = 1;
+ x2[2] = 1;
+ y2[1] = pre(x2[1]);
+ y2[2] = pre(x2[2]);
+end ArrayBuiltins.PreTest1;
+")})));
+
+	discrete Integer x = 1;
+	Real y = pre(x);
+	discrete Integer x2[2] = ones(2);
+	Real y2[2] = pre(x2);
+end PreTest1;
+
+
+
 end ArrayBuiltins;

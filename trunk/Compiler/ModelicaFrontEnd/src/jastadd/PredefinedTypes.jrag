@@ -255,12 +255,15 @@ aspect PredefinedTypes {
 "function initial end initial;\n"
 +"function terminal end terminal;\n"
 +"function smooth end smooth;\n"
-+"function noEvent \n"
++"function noEvent\n"
 +"  input Real x;\n"      // Type not used
-+"  output Real y;\n" 
++"  output Real y;\n"     // Type not used
 +"end noEvent;\n"
 +"function sample end sample;\n"
-+"function pre end pre;\n"
++"function pre\n"
++"  input Real x;\n"      // Type not used
++"  output Real y;\n"     // Type not used
++"end pre;\n"
 +"function edge end edge;\n"
 +"function change end change;\n"
 +"function reinit end reinit;\n"

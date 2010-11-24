@@ -1469,6 +1469,7 @@ aspect FlattPrettyPrint {
 	eq FNdimsExp.builtInName()       = "ndims";
 	eq FSizeExp.builtInName()        = "size";
 	eq FNoEventExp.builtInName()     = "noEvent";
+	eq FPreExp.builtInName()         = "pre";
 	eq FIdentity.builtInName()       = "identity";
 	eq FOnes.builtInName()           = "ones";
 	eq FZeros.builtInName()          = "zeros";

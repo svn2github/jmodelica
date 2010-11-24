@@ -169,7 +169,7 @@ aspect FlatTypeAnalysis {
 	syn FType FDotAddExp.rawType() = getLeft().type().looseTypePromotion(getRight().type());
 	eq FAddExp.rawType()           = getLeft().type().typePromotion(getRight().type());
 	
-	eq FNoEventExp.type() = getFExp().type();
+	eq FUnaryBuiltIn.type() = getFExp().type();
 	
 	eq FDotDivExp.type() {
 		FType t = super.type();

@@ -979,6 +979,11 @@ abstract FUnaryBuiltIn : FBuiltInFunctionCall ::= FExp;
 FNoEventExp : FUnaryBuiltIn;
 
 /**
+ * Pre built-in function.
+ */
+FPreExp : FUnaryBuiltIn;
+
+/**
  * \brief Abs built-in function.
  */
 FAbsExp : FUnaryBuiltIn;

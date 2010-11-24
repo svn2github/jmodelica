@@ -190,6 +190,10 @@ aspect FlatTypeCheck {
 		  error("Argument of " + builtInName() + "() must be a stream variable");
   }
   
+  syn boolean FExp.isAccess()  = false;
+  eq FIdUseExp.isAccess()      = true;
+  eq FInstAccessExp.isAccess() = true;
+  
   syn boolean FExp.isAccessToStream()  = false;
   eq FIdUseExp.isAccessToStream()      = getFIdUse().isAccessToStream();
   eq FInstAccessExp.isAccessToStream() = getInstAccess().isAccessToStream();
@@ -391,9 +395,15 @@ aspect FlatTypeCheck {
   
   public void FEnumIntegerExp.typeCheck() {
 	  super.typeCheck();
+	  // We can't define the function Integer in PredefinedTypes.jrag - conflict with the type Integer
 	  int n = getNumOriginalArg();
 	  if (n != 1)
 		  error("Calling function Integer(): too " + (n > 1 ? "many" : "few") + " arguments");
+  }
+  
+  public void FPreExp.typeCheck() {
+      if (getFExp().isContinuousExp() || !getFExp().isAccess()) 
+          error("Calling function pre(): argument must be discrete-time variable");
   }
   
   syn boolean FBuiltInFunctionCall.builtInHasOutput() = true;
@@ -540,12 +550,13 @@ aspect FlatTypeCheck {
   eq FTranspose.getChild().argumentDefinedTypeValid()            = false;
   eq FMinMaxExp.getChild().argumentDefinedTypeValid()            = false;
   eq FSumExp.getChild().argumentDefinedTypeValid()               = false;
-  eq FNdimsExp.getOriginalArg(int i).argumentDefinedTypeValid()  = false;
+  eq FNdimsExp.getChild().argumentDefinedTypeValid()             = false;
   eq FSizeExp.getOriginalArg(int i).argumentDefinedTypeValid()   = i != 0;
   eq FInfArgsFunctionCall.getChild().argumentDefinedTypeValid()  = false;
   eq FStreamBuiltIn.getChild().argumentDefinedTypeValid()        = false;
   eq FEnumIntegerExp.getChild().argumentDefinedTypeValid()       = false;
   eq FNoEventExp.getChild().argumentDefinedTypeValid()           = false;
+  eq FPreExp.getChild().argumentDefinedTypeValid()               = false;
 
   /**
    * \brief Check if the type supplied is valid for this argument.
