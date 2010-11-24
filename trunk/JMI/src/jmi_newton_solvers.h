@@ -27,28 +27,11 @@
 #define _JMI_NEWTON_SOLVERS_H
 
 #include "jmi.h"
-#include <kinsol/kinsol.h>
-#include <kinsol/kinsol_dense.h>
-#include <nvector/nvector_serial.h>
-#include <sundials/sundials_types.h>
-#include <sundials/sundials_math.h>
 
 extern void dgesv_(int* N, int* NRHS, double* A, int* LDA, int* IPIV,
                 double* B, int* LDB, int* INFO );
 
 extern double dnrm2_(int* N, double* X, int* INCX);
-
-
-/**
- * \brief A function wrapper for Kinsol f.
- * 
- * @param y An N_Vector (input)
- * @param f An N_Vector (output)
- * @param problem_data A void pointer
- * @return Error code
- */
-int kin_f(N_Vector y, N_Vector f, void *problem_data);
-#define Ith(v,i)    NV_Ith_S(v,i)
 
 int jmi_simple_newton_solve(jmi_block_residual_t *block);
 
