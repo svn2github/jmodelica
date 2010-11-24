@@ -575,6 +575,24 @@ int jmi_dae_init(jmi_t* jmi, jmi_residual_func_t F, int n_eq_F,
 
 int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, int n, int index);
 
+/**
+ * \brief Allocates a jmi_block_residual struct.
+ * 
+ * @param jmi A jmi_t struct.
+ * @param F A jmi_block_residual_func_t function
+ * @param n Integer size of the block
+ * @return A jmi_block_residual_t
+ */
+jmi_block_residual_t *jmi_new_block_residual(jmi_t* jmi, jmi_block_residual_func_t F, int n);
+
+/**
+ * \brief Deletes a jmi_block_residual struct.
+ * 
+ * @param b A jmi_block_residual_t struct.
+ * @return Error code.
+ */
+int jmi_delete_block_residual(jmi_block_residual_t* b);
+
 int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, int n, int index);
 
 /**

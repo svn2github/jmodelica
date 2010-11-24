@@ -299,19 +299,16 @@ int jmi_dae_init(jmi_t* jmi,
 }
 
 int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, int n, int index) {
-	jmi_block_residual_t* b = (jmi_block_residual_t*)calloc(1,sizeof(jmi_block_residual_t));
-    b->jmi = jmi;
-	b->F = F;
-	b->n = n;
-	b->x = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
-	b->res = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
-	b->jac = (jmi_real_t*)calloc(n*n,sizeof(jmi_real_t));
-	b->ipiv = (int*)calloc(n,sizeof(int));
-	jmi->dae_block_residuals[index] = b;
+	jmi->dae_block_residuals[index] = jmi_new_block_residual(jmi,F,n);
 	return 0;
 }
 
 int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, int n, int index) {
+	jmi->dae_init_block_residuals[index] = jmi_new_block_residual(jmi,F,n);
+	return 0;
+}
+
+jmi_block_residual_t *jmi_new_block_residual(jmi_t* jmi, jmi_block_residual_func_t F, int n){
 	jmi_block_residual_t* b = (jmi_block_residual_t*)calloc(1,sizeof(jmi_block_residual_t));
 	b->jmi = jmi;
 	b->F = F;
@@ -320,7 +317,15 @@ int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, int
 	b->res = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
 	b->jac = (jmi_real_t*)calloc(n*n,sizeof(jmi_real_t));
 	b->ipiv = (int*)calloc(n,sizeof(int));
-	jmi->dae_init_block_residuals[index] = b;
+	return b;
+}
+
+int jmi_delete_block_residual(jmi_block_residual_t* b){
+	free(b->x);
+	free(b->res);
+	free(b->jac);
+	free(b->ipiv);
+	free(b);
 	return 0;
 }
 
