@@ -801,9 +801,9 @@ Annotation annotation =
 AbstractEquation abstract_equation =
   simple_expression.left EQUALS exp.right comment SEMICOLON
                                       {: return new Equation(new Opt(),comment,left,right); :}
-  | conditional_equation_e SEMICOLON  {: return conditional_equation_e; :}
+  | if_equation SEMICOLON             {: return if_equation; :}
   | for_clause_e SEMICOLON            {: return for_clause_e; :}
-  | when_clause_e SEMICOLON           {: return when_clause_e; :}
+  | when_equation SEMICOLON           {: return when_equation; :}
   | CONNECT LPAREN parse_access.a COMMA parse_access.b RPAREN comment SEMICOLON
                                       {: return new ConnectClause(new Opt(), comment,a,b); :}
   | LPAREN function_call_left_list RPAREN EQUALS function_call comment SEMICOLON
@@ -811,25 +811,6 @@ AbstractEquation abstract_equation =
   | function_call comment SEMICOLON   {: return new FunctionCallEquation(new Opt(),comment,new List(),function_call); :}
   | annotation SEMICOLON              {: return new EquationAnnotation(new Opt(),new Comment(new Opt(), new Opt()), annotation); :}
   ;
-
-ConditionalEquationE conditional_equation_e =
-  IF exp.ifexp THEN
-  abstract_equation*
-  else_if_clause_e*
-  else_equations
-  END_IF comment {: return new ConditionalEquationE(new Opt(), comment, ifexp,abstract_equation,else_if_clause_e,else_equations); :}
-  ;  
-
-ElseIfClauseE else_if_clause_e =
-  ELSEIF exp.eiexp THEN
-  abstract_equation* {: return new ElseIfClauseE(eiexp,abstract_equation); :}
-  ;
-
-List else_equations =
-   {: return new List(); :}
-  | ELSE
-    abstract_equation* {: return abstract_equation; :}
-    ;
 
 ForClauseE for_clause_e =
   FOR for_indices LOOP
@@ -872,18 +853,55 @@ Exp for_in_exp =
   IN exp.e {: return e; :}
   ;
 
-WhenClauseE when_clause_e =
-  WHEN exp.wexp THEN
+WhenEquation when_equation =
+  WHEN exp.test THEN
   abstract_equation*
-  else_when_clause_e*
-  END_WHEN comment {: return new WhenClauseE(new Opt(), comment, wexp,abstract_equation,else_when_clause_e); :}
+  else_when_equation?
+  END_WHEN comment     {: return new WhenEquation(new Opt(), 
+                                                  comment, 
+                                                  abstract_equation,
+                                                  test, 
+                                                  else_when_equation); 
+                       :}
   ;  
 
-ElseWhenClauseE else_when_clause_e =
-  ELSEWHEN exp.ewexp THEN
-  abstract_equation* {: return new ElseWhenClauseE(ewexp,abstract_equation); :}
+WhenEquation else_when_equation =
+  ELSEWHEN exp.test THEN
+  abstract_equation* 
+  else_when_equation?     {: return new WhenEquation(new Opt(), 
+                                                     new Comment(), 
+                                                     abstract_equation, 
+                                                     test, 
+                                                     else_when_equation); 
+                          :}
   ;
 
+IfEquation if_equation =
+  IF exp.test THEN
+  abstract_equation*
+  else_if_equation?
+  END_IF comment      {: return new IfEquation(new Opt(), 
+                                               comment, 
+                                               abstract_equation, 
+                                               test, 
+                                               else_if_equation); 
+                      :}
+  ;  
+
+IfWhenElseEquation else_if_equation =
+    ELSEIF exp.test THEN
+    abstract_equation* 
+    else_if_equation?        {: return new IfEquation(new Opt(), 
+                                                      new Comment(), 
+                                                      abstract_equation, 
+                                                      test, 
+                                                      else_if_equation); 
+                             :}
+  | ELSE abstract_equation*  {: return new ElseEquation(new Opt(), 
+                                                        new Comment(), 
+                                                        abstract_equation); 
+                             :}
+  ;
 
 
 Statement statement =

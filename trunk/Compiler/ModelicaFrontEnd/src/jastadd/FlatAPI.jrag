@@ -531,7 +531,7 @@ aspect FlatAPI {
 	}
 	
 	syn int FAbstractEquation.numScalarEquations() = 1;
-	eq FWhenClauseE.numScalarEquations()           = 0; // TODO: To disable sorting, etc
+	eq FIfWhenEquation.numScalarEquations()        = 0; // TODO: To disable sorting, etc - remove when ready to implement such
 	eq FFunctionCallEquation.numScalarEquations() {
 		 int res = 0;
 		 for (FFunctionCallLeft l : getLefts())

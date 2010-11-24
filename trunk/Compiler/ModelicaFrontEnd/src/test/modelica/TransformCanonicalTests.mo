@@ -1882,5 +1882,380 @@ equation
 end WhenEqu2;
 
 
+model IfEqu1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="IfEqu1",
+         description="If equations: flattening",
+         flatModel="
+fclass TransformCanonicalTests.IfEqu1
+ Real x[3];
+equation
+ if true then
+  x[1:3] = 1:3;
+ elseif true then
+  x[1:3] = 4:6;
+ else
+  x[1:3] = 7:9;
+ end if;
+end TransformCanonicalTests.IfEqu1;
+")})));
+
+	Real x[3];
+equation
+	if true then
+		x = 1:3;
+	elseif true then
+		x = 4:6;
+	else
+		x = 7:9;
+	end if;
+end IfEqu1;
+
+
+model IfEqu2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IfEqu2",
+         description="If equations: branch elimination",
+         flatModel="
+fclass TransformCanonicalTests.IfEqu2
+ Real x[1];
+ Real x[2];
+ Real x[3];
+equation
+ x[1] = 1;
+ x[2] = 2;
+ x[3] = 3;
+end TransformCanonicalTests.IfEqu2;
+")})));
+
+	Real x[3];
+equation
+	if true then
+		x = 1:3;
+	elseif true then
+		x = 4:6;
+	else
+		x = 7:9;
+	end if;
+end IfEqu2;
+
+
+model IfEqu3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IfEqu3",
+         description="If equations: branch elimination",
+         flatModel="
+fclass TransformCanonicalTests.IfEqu3
+ Real x[1];
+ Real x[2];
+ Real x[3];
+equation
+ x[1] = 4;
+ x[2] = 5;
+ x[3] = 6;
+end TransformCanonicalTests.IfEqu3;
+")})));
+
+	Real x[3];
+equation
+	if false then
+		x = 1:3;
+	elseif true then
+		x = 4:6;
+	else
+		x = 7:9;
+	end if;
+end IfEqu3;
+
+
+model IfEqu4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IfEqu4",
+         description="If equations: branch elimination",
+         flatModel="
+fclass TransformCanonicalTests.IfEqu4
+ Real x[1];
+ Real x[2];
+ Real x[3];
+equation
+ x[1] = 7;
+ x[2] = 8;
+ x[3] = 9;
+end TransformCanonicalTests.IfEqu4;
+")})));
+
+	Real x[3];
+equation
+	if false then
+		x = 1:3;
+	elseif false then
+		x = 4:6;
+	else
+		x = 7:9;
+	end if;
+end IfEqu4;
+
+
+model IfEqu5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IfEqu5",
+         description="If equations: branch elimination",
+         flatModel="
+fclass TransformCanonicalTests.IfEqu5
+ Real x[1];
+ Real x[2];
+ Real x[3];
+equation
+ x[1] = 7;
+ x[2] = 8;
+ x[3] = 9;
+end TransformCanonicalTests.IfEqu5;
+")})));
+
+	Real x[3] = 7:9;
+equation
+	if false then
+		x = 1:3;
+	elseif false then
+		x = 4:6;
+	end if;
+end IfEqu5;
+
+
+model IfEqu6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IfEqu6",
+         description="If equations: scalarization without elimination",
+         flatModel="
+fclass TransformCanonicalTests.IfEqu6
+ Real x[1];
+ Real x[2];
+ Real x[3];
+ Boolean y[1];
+ Boolean y[2];
+equation
+ if y[1] then
+  x[1] = 1;
+  x[2] = 2;
+  x[3] = 3;
+ elseif y[2] then
+  x[1] = 4;
+  x[2] = 5;
+  x[3] = 6;
+ else
+  x[1] = 7;
+  x[2] = 8;
+  x[3] = 9;
+ end if;
+ x[1] = 0;
+ x[2] = 0;
+ x[3] = 0;
+ y[1] = false;
+ y[2] = true;
+end TransformCanonicalTests.IfEqu6;
+")})));
+
+	Real x[3] = zeros(3);
+	Boolean y[2] = { false, true };
+equation
+	if y[1] then
+		x = 1:3;
+	elseif y[2] then
+		x = 4:6;
+	else
+		x = 7:9;
+	end if;
+end IfEqu6;
+
+
+model IfEqu7
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IfEqu7",
+         description="If equations: scalarization without elimination",
+         flatModel="
+fclass TransformCanonicalTests.IfEqu7
+ Real x[1];
+ Real x[2];
+ Real x[3];
+ Boolean y[1];
+ Boolean y[2];
+equation
+ if y[1] then
+  x[1] = 1;
+  x[2] = 2;
+  x[3] = 3;
+ elseif y[2] then
+  x[1] = 4;
+  x[2] = 5;
+  x[3] = 6;
+ end if;
+ x[1] = 0;
+ x[2] = 0;
+ x[3] = 0;
+ y[1] = false;
+ y[2] = true;
+end TransformCanonicalTests.IfEqu7;
+")})));
+
+	Real x[3]= zeros(3);
+	Boolean y[2] = { false, true };
+equation
+	if y[1] then
+		x = 1:3;
+	elseif y[2] then
+		x = 4:6;
+	end if;
+end IfEqu7;
+
+
+model IfEqu8
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IfEqu8",
+         description="If equations: branch elimination with parameter test expressions",
+         flatModel="
+fclass TransformCanonicalTests.IfEqu8
+ Real x[1];
+ Real x[2];
+ Real x[3];
+ parameter Boolean y[1] = false /* false */;
+ parameter Boolean y[2] = true /* true */;
+equation
+ x[1] = 4;
+ x[2] = 5;
+ x[3] = 6;
+end TransformCanonicalTests.IfEqu8;
+")})));
+
+	Real x[3];
+	parameter Boolean y[2] = { false, true };
+equation
+	if y[1] then
+		x = 1:3;
+	elseif y[2] then
+		x = 4:6;
+	else
+		x = 7:9;
+	end if;
+end IfEqu8;
+
+
+model IfEqu9
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IfEqu9",
+         description="If equations: branch elimination with one test non-parameter",
+         flatModel="
+fclass TransformCanonicalTests.IfEqu9
+ Real x[1];
+ Real x[2];
+ Boolean y;
+equation
+ if y then
+  x[1] = 3;
+  x[2] = 4;
+ else
+  x[1] = 7;
+  x[2] = 8;
+ end if;
+ x[1] = 0;
+ x[2] = 0;
+ y = true;
+end TransformCanonicalTests.IfEqu9;
+")})));
+
+	Real x[2] = zeros(2);
+	Boolean y = true;
+equation
+	if false then
+		x = 1:2;
+	elseif y then
+		x = 3:4;
+	elseif false then
+		x = 5:6;
+	else
+		x = 7:8;
+	end if;
+end IfEqu9;
+
+
+model IfEqu10
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IfEqu10",
+         description="If equations: branch elimination with one test non-parameter",
+         flatModel="
+fclass TransformCanonicalTests.IfEqu10
+ Real x[1];
+ Real x[2];
+ Boolean y;
+equation
+ if y then
+  x[1] = 3;
+  x[2] = 4;
+ else
+  x[1] = 5;
+  x[2] = 6;
+ end if;
+ x[1] = 0;
+ x[2] = 0;
+ y = true;
+end TransformCanonicalTests.IfEqu10;
+")})));
+
+	Real x[2] = zeros(2);
+	Boolean y = true;
+equation
+	if false then
+		x = 1:2;
+	elseif y then
+		x = 3:4;
+	elseif true then
+		x = 5:6;
+	else
+		x = 7:8;
+	end if;
+end IfEqu10;
+
+
+model IfEqu11
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IfEqu11",
+         description="If equations: branch elimination with one test non-parameter",
+         flatModel="
+fclass TransformCanonicalTests.IfEqu11
+ Real x[1];
+ Real x[2];
+ Boolean y;
+equation
+ x[1] = 1;
+ x[2] = 2;
+ y = true;
+end TransformCanonicalTests.IfEqu11;
+")})));
+
+	Real x[2];
+	Boolean y = true;
+equation
+	if true then
+		x = 1:2;
+	elseif y then
+		x = 3:4;
+	elseif false then
+		x = 5:6;
+	else
+		x = 7:8;
+	end if;
+end IfEqu11;
+
+
 
 end TransformCanonicalTests;

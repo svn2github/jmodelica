@@ -923,6 +923,7 @@ aspect FlattPrettyPrint {
 		}
 	}
 
+
 	public void FEquation.prettyPrint(Printer p, PrintStream str, String indent) {
 		str.print(indent);
     	p.print(getLeft(),str,indent);
@@ -930,19 +931,44 @@ aspect FlattPrettyPrint {
    		p.print(getRight(),str,indent);
 	}
 
-	public void FWhenClauseE.prettyPrint(Printer p, PrintStream str, String indent) {
+
+	public void FIfWhenElseEquation.prettyPrint(Printer p, PrintStream str, String indent) {
 		str.print(indent);
 		if (isElse())
    			str.print("else");
-   		str.print("when ");
-    	p.print(getWhenExp(), str, indent);
+   		prettyPrintHead(p, str, indent);
+   		getFAbstractEquations().prettyPrintWithFix(p, str, p.indent(indent), "", ";\n");
+   		prettyPrintTail(p, str, indent);
+	}
+
+	protected void FIfWhenElseEquation.prettyPrintHead(Printer p, PrintStream str, String indent) {
+   		str.print("\n");
+	}
+
+	protected void FIfWhenElseEquation.prettyPrintTail(Printer p, PrintStream str, String indent) {
+	}
+
+	protected void FIfWhenEquation.prettyPrintHead(Printer p, PrintStream str, String indent) {
+   		str.print(ifWhenType());
+   		str.print(" ");
+    	p.print(getTest(), str, indent);
    		str.print(" then\n");
-   		getWhenEqnss().prettyPrintWithFix(p, str, p.indent(indent), "", ";\n");
+	}
+
+	protected void FIfWhenEquation.prettyPrintTail(Printer p, PrintStream str, String indent) {
    		if (hasElse()) 
    			p.print(getElse(), str, indent);
-   		if (!isElse())
-   			str.print(indent + "end when");
+   		if (!isElse()) {
+   			str.print(indent);
+   			str.print("end ");
+    		str.print(ifWhenType());
+   		}
 	}
+	
+	syn String FIfWhenEquation.ifWhenType();
+	eq FIfEquation.ifWhenType()   = "if";
+	eq FWhenEquation.ifWhenType() = "when";
+	
 
 	public void FConnectClause.prettyPrint(Printer p, PrintStream str, String indent) {
 		str.print(indent);

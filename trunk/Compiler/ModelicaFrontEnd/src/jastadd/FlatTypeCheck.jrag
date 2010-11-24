@@ -322,9 +322,14 @@ aspect FlatTypeCheck {
 	  }
   }
   
-  public void FWhenClauseE.typeCheck() {
-	  if (!getWhenExp().type().isUnknown()) {
-		  if (!getWhenExp().type().isBoolean() || getWhenExp().type().ndims() > 1) 
+  public void FIfEquation.typeCheck() {
+	  if (!getTest().type().isUnknown() && !fBooleanScalarType().typeCompatible(getTest().type())) 
+		  error("Type of test expression of if equation is not Boolean");
+  }
+  
+  public void FWhenEquation.typeCheck() {
+	  if (!getTest().type().isUnknown()) {
+		  if (!getTest().type().isBoolean() || getTest().type().ndims() > 1) 
 			  error("Test expression of when equation isn't Boolean scalar or vector expression");
 	  }
   }

@@ -423,9 +423,29 @@ FConnectClause : FAbstractEquation ::= [FStringComment]
 FForClauseE : FAbstractEquation ::= FForIndex* FAbstractEquation*;
 
 /**
+ * Superclass for when equations, if equations and else clause of if equations.
+ */
+abstract FIfWhenElseEquation : FAbstractEquation ::= FAbstractEquation*;
+
+/**
+ * Superclass for when equations and if equations.
+ */
+abstract FIfWhenEquation : FIfWhenElseEquation ::= Test:FExp [Else:FIfWhenElseEquation];
+
+/**
  * When equation clause.
  */
-FWhenClauseE : FAbstractEquation ::= WhenExp:FExp WhenEqns:FAbstractEquation* [Else:FWhenClauseE];
+FWhenEquation : FIfWhenEquation;
+
+/**
+ * If equation clause.
+ */
+FIfEquation : FIfWhenEquation;
+
+/**
+ * Else clause of if equation clause.
+ */
+FElseEquation : FIfWhenElseEquation;
 
 /**
  * \brief A flattened algorithm clause.

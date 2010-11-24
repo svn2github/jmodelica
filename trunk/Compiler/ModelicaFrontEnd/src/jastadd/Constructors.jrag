@@ -675,6 +675,11 @@ aspect InheritedFactoryMethods {
 	public FIfClause   FIfClause.createEmptyNode()   { return new FIfClause(); }
 	public FWhenClause FWhenClause.createEmptyNode() { return new FWhenClause(); }
 	
+	public abstract FIfWhenElseEquation FIfWhenElseEquation.createEmptyNode();
+	public FIfEquation   FIfEquation.createEmptyNode()   { return new FIfEquation(); }
+	public FWhenEquation FWhenEquation.createEmptyNode() { return new FWhenEquation(); }
+	public FElseEquation FElseEquation.createEmptyNode() { return new FElseEquation(); }
+	
 	public abstract FIfWhenStmt FIfWhenStmt.createEmptyNode();
 	public FIfStmt   FIfStmt.createEmptyNode()   { return new FIfStmt(); }
 	public FWhenStmt FWhenStmt.createEmptyNode() { return new FWhenStmt(); }

@@ -38,7 +38,7 @@ public class TestSuite {
 		try {
 			sr = ph.parseFile(fileName);
 		} catch (Exception e) {
-			asserter.fail("Error when parsing file: " + fileName);
+			asserter.fail("Error when parsing file: " + fileName + "\n" + e);
 		}
 		
 		OptionRegistry or = new OptionRegistry();

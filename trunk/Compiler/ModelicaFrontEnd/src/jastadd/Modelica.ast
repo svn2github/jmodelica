@@ -300,18 +300,16 @@ abstract Exp : AbstractExp;
 
 abstract AbstractEquationModifier : BaseNode;
 abstract AbstractEquation         : BaseNode ::= [AbstractEquationModifier] Comment;
-Initial              : AbstractEquationModifier ::=;
+Initial              : AbstractEquationModifier;
 Equation             : AbstractEquation ::= Left:Exp Right:Exp;
 EquationAnnotation   : AbstractEquation ::= Annotation;
 ConnectClause        : AbstractEquation ::= Comment Connector1:Access Connector2:Access;
-ConditionalEquationE : AbstractEquation ::= IfExp:Exp IfEqns:AbstractEquation*
-                                            ElseIfClauseE*
-                                            ElseEqns:AbstractEquation*;
-ElseIfClauseE        : BaseNode         ::= IfExp:Exp IfEqns:AbstractEquation*;
+abstract IfWhenElseEquation       : AbstractEquation ::= AbstractEquation*;
+abstract IfWhenEquation           : IfWhenElseEquation ::= Test:Exp [Else:IfWhenElseEquation];
+IfEquation           : IfWhenEquation;
+WhenEquation         : IfWhenEquation; 
+ElseEquation         : IfWhenElseEquation;
 ForClauseE           : AbstractEquation ::= ForIndex* AbstractEquation*;
-WhenClauseE          : AbstractEquation ::= WhenExp:Exp WhenEqns:AbstractEquation*
-                                            ElseWhenClauseE*;
-ElseWhenClauseE      : BaseNode         ::= WhenExp:Exp WhenEqns:AbstractEquation*;         
 FunctionCallEquation : AbstractEquation ::= Left:FunctionCallLeft* Call:FunctionCall;
 
 FunctionCallLeft : BaseNode ::= [Access];

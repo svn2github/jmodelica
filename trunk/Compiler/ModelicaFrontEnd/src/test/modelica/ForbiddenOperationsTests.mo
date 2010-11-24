@@ -180,19 +180,23 @@ end ReturnOutsideFunction;
 
 model IfEquTest_ComplErr
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-      JModelica.UnitTesting.ComplianceErrorTestCase(name="IfEquTest_ComplErr",
-        description="If equation",
-                                               errorMessage=
-"
-Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Compliance error at line 1139, column 2:
-  Unsupported equation type
+     JModelica.UnitTesting.ComplianceErrorTestCase(
+         name="IfEquTest_ComplErr",
+         description="",
+         errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsTests.mo':
+Compliance error at line 194, column 10:
+  Boolean variables are not supported, only constants and parameters
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsTests.mo':
+Compliance error at line 196, column 2:
+  If equations are currently only supported with constant or parameter test expressions
 ")})));
 
-
  Real x;
+ Boolean y = true;
 equation
- if true then
+ if y then
    x=3;
  else
    x=5;

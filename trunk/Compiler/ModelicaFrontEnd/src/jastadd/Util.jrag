@@ -1638,6 +1638,13 @@ aspect ParserHelpers {
          public Problem getProblem() {
              return p;
          }
+         
+         /**
+          * Return String representation.
+          */
+         public String toString() {
+         	return getClass().getName() + ":\n" + p;
+         }
         
     }
     
@@ -1809,8 +1816,8 @@ aspect GeneralHelpers {
 	/**
      * Check if this when equation is the else part of another when equation.
      */
-    inh boolean FWhenClauseE.isElse();
-    eq FWhenClauseE.getElse().isElse()       = true;
+    inh boolean FIfWhenElseEquation.isElse();
+    eq FIfWhenEquation.getElse().isElse()    = true;
     eq FAbstractEquation.getChild().isElse() = false;
     eq FClass.getChild().isElse()            = false;
     eq InstNode.getChild().isElse()          = false;

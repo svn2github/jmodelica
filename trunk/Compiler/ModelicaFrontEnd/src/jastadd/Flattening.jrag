@@ -848,15 +848,20 @@ aspect FlatExpressions {
 		return new FForClauseE(forIndex, eqns);
 	}
 
-	public FWhenClauseE FWhenClauseE.flattenEqn(FQName prefix, FClass fc) {
-		List eqns = new List();
-		for (FAbstractEquation ae : getWhenEqnss())
-			eqns.add(ae.flattenEqn(prefix, fc));
-		Opt<FWhenClauseE> elseOpt = hasElse() ? 
-				new Opt<FWhenClauseE>(getElse().flattenEqn(prefix, fc)) : 
-				new Opt<FWhenClauseE>();
-		FEquationType type = (FEquationType) getType().fullCopy();
-		return new FWhenClauseE(type, getWhenExp().flatten(prefix), eqns, elseOpt);
+	public FIfWhenElseEquation FIfWhenElseEquation.flattenEqn(FQName prefix, FClass fc) {
+		FIfWhenElseEquation res = createEmptyNode();
+		res.setType((FEquationType) getType().fullCopy());
+		for (FAbstractEquation ae : getFAbstractEquations())
+			res.addFAbstractEquation(ae.flattenEqn(prefix, fc));
+		return res;
+	}
+
+	public FIfWhenEquation FIfWhenEquation.flattenEqn(FQName prefix, FClass fc) {
+		FIfWhenEquation res = (FIfWhenEquation) super.flattenEqn(prefix, fc);
+		if (hasElse())
+			res.setElse(getElse().flattenEqn(prefix, fc));
+		res.setTest(getTest().flatten(prefix));
+		return res;
 	}
 
 	public FAbstractEquation FConnectClause.flattenEqn(FQName prefix, FClass fc) {
@@ -1325,28 +1330,36 @@ aspect InstantiatedExpressions {
 		return c;
 	}
 	
-	public FAbstractEquation WhenClauseE.instantiate() {
-		return copyLocationTo(instantiateWhen(getWhenEqnss(), getElseWhenClauseEs(), 
-				0, getWhenExp(), equationType()));
+	protected FIfWhenElseEquation IfWhenElseEquation.instantiate(FIfWhenElseEquation res) {
+		res.setType(equationType());
+		for (AbstractEquation eqn : getAbstractEquations())
+			res.addFAbstractEquation(eqn.instantiate());
+		res.setLocation(this);
+		return res;
 	}
 	
-	public static FWhenClauseE WhenClauseE.instantiateWhen(
-			List<AbstractEquation> eqns, List<ElseWhenClauseE> elses, 
-			int elseIndex, Exp whenExp, FEquationType type) {
-		List<FAbstractEquation> eqList = new List<FAbstractEquation>();
-		for (AbstractEquation eqn : eqns)
-			eqList.add(eqn.instantiate());
-		int num = elses.getNumChild();
-		Opt<FWhenClauseE> elseOpt = new Opt<FWhenClauseE>();
-		if (num > elseIndex) {
-			ElseWhenClauseE ch = elses.getChild(elseIndex);
-			FWhenClauseE els = instantiateWhen(ch.getWhenEqnss(), elses, 
-					elseIndex+1, ch.getWhenExp(), (FEquationType) type.fullCopy());
-			elseOpt = new Opt<FWhenClauseE>(els);
-		}
-		return new FWhenClauseE(type, whenExp.instantiate(), eqList, elseOpt);
+	protected FIfWhenEquation IfWhenEquation.instantiate(FIfWhenEquation res) {
+		super.instantiate(res);
+		res.setTest(getTest().instantiate());
+		if (hasElse())
+			res.setElse(getElse().instantiate());
+		return res;
 	}
 	
+	public abstract FIfWhenElseEquation IfWhenElseEquation.instantiate();
+	
+	public FIfWhenElseEquation IfEquation.instantiate() {
+		return instantiate(new FIfEquation());
+	}
+	
+	public FIfWhenElseEquation WhenEquation.instantiate() {
+		return instantiate(new FWhenEquation());
+	}
+	
+	public FIfWhenElseEquation ElseEquation.instantiate() {
+		return instantiate(new FElseEquation());
+	}
+		
 	public FFunctionCallEquation FunctionCallEquation.instantiate() {
 		List<FFunctionCallLeft> l = new List<FFunctionCallLeft>();
 		for (FunctionCallLeft a : getLefts()) 
