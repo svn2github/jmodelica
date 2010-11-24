@@ -630,7 +630,7 @@ class ModelicaCompiler():
         jmodelica_h =' JMODELICA_HOME=' + self.jm_home
         cppad_h = ' CPPAD_HOME=' + jm.environ['CPPAD_HOME']
         ipopt_h = ' IPOPT_HOME=' + jm.environ['IPOPT_HOME']
-        
+        sundials_h = ' SUNDIALS_HOME=' + jm.environ['SUNDIALS_HOME']
         
         # external library directories
         platform_dir = _get_platform()
@@ -672,6 +672,7 @@ class ModelicaCompiler():
                   jmodelica_h + \
                   cppad_h + \
                   ipopt_h + \
+                  sundials_h + \
                   extlibdirs + \
                   extlibs + \
                   extincdir
@@ -684,6 +685,7 @@ class ModelicaCompiler():
                   jmodelica_h + \
                   cppad_h + \
                   ipopt_h + \
+                  sundials_h + \
                   extlibdirs + \
                   extlibs + \
                   extincdir
