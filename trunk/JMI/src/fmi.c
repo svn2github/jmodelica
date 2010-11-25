@@ -54,7 +54,9 @@ fmiComponent fmi_instantiate_model(fmiString instanceName, fmiString GUID, fmiCa
     fmi_t *component;
     char* tmpname;
     char* tmpguid;
-    
+    size_t inst_name_len;
+    size_t guid_len;
+
     /* Create jmi struct*/
     jmi_t* jmi = (jmi_t *)functions.allocateMemory(1, sizeof(jmi_t));
     int retval = jmi_new(&jmi);
@@ -65,12 +67,14 @@ fmiComponent fmi_instantiate_model(fmiString instanceName, fmiString GUID, fmiCa
     
     component = (fmi_t *)functions.allocateMemory(1, sizeof(fmi_t));
     
-    tmpname = (char*)(fmi_t *)functions.allocateMemory(strlen(instanceName)+1, sizeof(char));
-    strcpy(tmpname, instanceName);
+    inst_name_len = strlen(instanceName)+1;
+    tmpname = (char*)(fmi_t *)functions.allocateMemory(inst_name_len, sizeof(char));
+    strncpy(tmpname, instanceName, inst_name_len);
     component -> fmi_instance_name = tmpname;
 
-    tmpguid = (char*)(fmi_t *)functions.allocateMemory(strlen(GUID)+1, sizeof(char));
-    strcpy(tmpguid, GUID);
+    guid_len = strlen(GUID)+1;
+    tmpguid = (char*)(fmi_t *)functions.allocateMemory(guid_len, sizeof(char));
+    strncpy(tmpguid, GUID, guid_len);
     component -> fmi_GUID = tmpguid;
     
     component -> fmi_functions = functions;
@@ -113,7 +117,7 @@ fmiStatus fmi_set_real(fmiComponent c, const fmiValueReference vr[], size_t nvr,
     /* Get the z vector*/
     jmi_real_t* z = jmi_get_z(((fmi_t *)c)->jmi);
     
-    int i;
+    unsigned int i;
     unsigned int index;
     
     for (i = 0; i <nvr; i = i + 1) {
@@ -129,7 +133,7 @@ fmiStatus fmi_set_integer (fmiComponent c, const fmiValueReference vr[], size_t 
     /* Get the z vector*/
     jmi_real_t* z = jmi_get_z(((fmi_t *)c)->jmi);
     
-    int i;
+    unsigned int i;
     unsigned int index;
     
     for (i = 0; i <nvr; i = i + 1) {
@@ -145,7 +149,7 @@ fmiStatus fmi_set_boolean (fmiComponent c, const fmiValueReference vr[], size_t 
     /* Get the z vector*/
     jmi_real_t* z = jmi_get_z(((fmi_t *)c)->jmi);
     
-    int i;
+    unsigned int i;
     unsigned int index;
     
     for (i = 0; i <nvr; i = i + 1) {
@@ -313,7 +317,7 @@ fmiStatus fmi_get_derivatives(fmiComponent c, fmiReal derivatives[] , size_t nx)
 fmiStatus fmi_get_event_indicators(fmiComponent c, fmiReal eventIndicators[], size_t ni) {
     int retval = jmi_dae_R(((fmi_t *)c)->jmi,eventIndicators);
     jmi_real_t *switches = jmi_get_sw(((fmi_t *)c)->jmi);
-    int i;
+    unsigned int i;
     
 	if(retval != 0) {
 		(((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the event indicators failed.");
@@ -333,7 +337,7 @@ fmiStatus fmi_get_real(fmiComponent c, const fmiValueReference vr[], size_t nvr,
     /* Get the z vector*/
     jmi_real_t* z = jmi_get_z(((fmi_t *)c)->jmi);
     
-    int i;
+    unsigned int i;
     unsigned int index;
     
     for (i = 0; i <nvr; i = i + 1) {
@@ -349,7 +353,7 @@ fmiStatus fmi_get_integer(fmiComponent c, const fmiValueReference vr[], size_t n
     /* Get the z vector*/
     jmi_real_t* z = jmi_get_z(((fmi_t *)c)->jmi);
     
-    int i;
+    unsigned int i;
     unsigned int index;
     
     for (i = 0; i <nvr; i = i + 1) {
@@ -365,7 +369,7 @@ fmiStatus fmi_get_boolean(fmiComponent c, const fmiValueReference vr[], size_t n
     /* Get the z vector*/
     jmi_real_t* z = jmi_get_z(((fmi_t *)c)->jmi);
     
-    int i;
+    unsigned int i;
     unsigned int index;
     
     for (i = 0; i <nvr; i = i + 1) {
@@ -529,7 +533,7 @@ fmiStatus fmi_get_continuous_states(fmiComponent c, fmiReal states[], size_t nx)
 }
 fmiStatus fmi_get_nominal_continuous_states(fmiComponent c, fmiReal x_nominal[], size_t nx) {
 	fmiReal* ones = ((fmi_t*)c) -> fmi_functions.allocateMemory(nx, sizeof(fmiReal));
-	int i;
+	unsigned int i;
 	for(i = 0; i <nx; i = i + 1) {
 		ones[i]=1.0;
 	}
@@ -539,7 +543,7 @@ fmiStatus fmi_get_nominal_continuous_states(fmiComponent c, fmiReal x_nominal[],
 fmiStatus fmi_get_state_value_references(fmiComponent c, fmiValueReference vrx[], size_t nx) {
 	int offset = ((fmi_t *)c)->jmi->offs_real_x;
 	fmiValueReference* valrefs = ((fmi_t*)c) -> fmi_functions.allocateMemory(nx, sizeof(fmiValueReference));
-	int i;
+	unsigned int i;
     
 	for(i = 0; i<nx; i = i + 1) {
 		valrefs[i] = offset + i;
