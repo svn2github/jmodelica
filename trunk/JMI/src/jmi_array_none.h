@@ -84,6 +84,8 @@ struct _jmi_dynamic_list {
 
 /* Macro for declaring dynamic list variable - should be called at beginning of function */
 #define JMI_DYNAMIC_INIT() \
+	jmi_dynamic_list* jmi_dynamic_prev;\
+	jmi_dynamic_list* jmi_dynamic_cur;\
 	jmi_dynamic_list* jmi_dynamic_first = (jmi_dynamic_list*)calloc(1, sizeof(jmi_dynamic_list));\
 	jmi_dynamic_list* jmi_dynamic_last = jmi_dynamic_first;
 
@@ -95,12 +97,12 @@ struct _jmi_dynamic_list {
 
 /* Dynamic deallocation of all dynamically allocated arrays and record arrays - should be called before return */
 #define JMI_DYNAMIC_FREE() \
-	jmi_dynamic_list* prev = jmi_dynamic_first;\
-	for (jmi_dynamic_list* cur = prev->next; cur; prev = cur, cur = cur->next) {\
-		free(prev);\
-		free(cur->data);\
+	jmi_dynamic_prev = jmi_dynamic_first;\
+	for (jmi_dynamic_cur = jmi_dynamic_prev->next; jmi_dynamic_cur; jmi_dynamic_prev = jmi_dynamic_cur, jmi_dynamic_cur = jmi_dynamic_cur->next) {\
+		free(jmi_dynamic_prev);\
+		free(jmi_dynamic_cur->data);\
 	}\
-	free(prev);
+	free(jmi_dynamic_prev);
 
 /* Record array access macros */
 #define jmi_array_rec_1(arr, i1) (&((arr)->var[(int) _JMI_ARR_I_1(arr, i1)]))

@@ -163,7 +163,7 @@ $C_DAE_initial_guess_equation_residuals$
 }
 
 static int model_init_Fp(jmi_t* jmi, jmi_ad_var_vec_p res) {
-  // C_DAE_initial_dependent_parameter_residuals
+  /* C_DAE_initial_dependent_parameter_residuals */
 	return -1;
 }
 
@@ -224,12 +224,12 @@ int jmi_new(jmi_t** jmi) {
 	   N_dae_blocks,N_dae_init_blocks,
 	   Scaling_method);
 
-	// Initialize the DAE interface
+	/* Initialize the DAE interface */
 	jmi_dae_init(*jmi, *model_dae_F, N_eq_F, NULL, 0, NULL, NULL,
 		     *model_dae_R, N_eq_R, NULL, 0, NULL, NULL,*model_ode_derivatives,
                      *model_ode_outputs,*model_ode_initialize);
 
-	// Initialize the Init interface
+	/* Initialize the Init interface */
 	jmi_init_init(*jmi, *model_init_F0, N_eq_F0, NULL,
 		      0, NULL, NULL,
 		      *model_init_F1, N_eq_F1, NULL,
@@ -240,7 +240,7 @@ int jmi_new(jmi_t** jmi) {
 		      *model_init_R0, N_eq_R0, NULL,
 		      0, NULL, NULL);
 
-	// Initialize the Opt interface
+	/* Initialize the Opt interface */
 	jmi_opt_init(*jmi, *model_opt_Ffdp, N_eq_opt_Ffdp, NULL, 0, NULL, NULL,
 		     *model_opt_J, N_eq_J, NULL, 0, NULL, NULL,
 		     *model_opt_L, N_eq_L, NULL, 0, NULL, NULL,

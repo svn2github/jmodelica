@@ -112,7 +112,7 @@ libjmi_cppad_la_SOURCES = jmi.h \
                     jmi_array_common.h \
                     jmi_array_cppad.h
                    
-libjmi_cppad_la_CFLAGS = -Wall -x c++ -I$(CPPAD_HOME) -DJMI_AD=JMI_AD_CPPAD -g -std=c89 -pedantic
+libjmi_cppad_la_CFLAGS = -Wall -x c++ -I$(CPPAD_HOME) -DJMI_AD=JMI_AD_CPPAD -g
 libjmi_cppad_la_CXXFLAGS = -Wall -I$(CPPAD_HOME) -DJMI_AD=JMI_AD_CPPAD -g
 libjmi_cppad_la_LDFLAGS = -no-undefined -static-libtool-libs -g
 
@@ -122,7 +122,7 @@ libjmi_algorithm_cppad_la_SOURCES = jmi_init_opt.h \
                                     jmi_opt_coll.c \
                                     jmi_opt_coll_radau.c
                    
-libjmi_algorithm_cppad_la_CFLAGS = -Wall -x c++ -I$(CPPAD_HOME) -DJMI_AD=JMI_AD_CPPAD -g -std=c89 -pedantic
+libjmi_algorithm_cppad_la_CFLAGS = -Wall -x c++ -I$(CPPAD_HOME) -DJMI_AD=JMI_AD_CPPAD -g
 libjmi_algorithm_cppad_la_CXXFLAGS = -Wall -I$(CPPAD_HOME) -DJMI_AD=JMI_AD_CPPAD -g
 libjmi_algorithm_cppad_la_LDFLAGS = -no-undefined -static-libtool-libs -g
 #libjmi_cppad_la_LDFLAGS = -no-undefined 
@@ -133,7 +133,7 @@ libjmi_solver_cppad_la_SOURCES = jmi_opt_coll_ipopt.cpp \
                                  jmi_init_opt_TNLP.cpp
 
                    
-libjmi_solver_cppad_la_CFLAGS = -Wall -x c++ -I$(CPPAD_HOME) -I$(IPOPT_INC) -DJMI_AD=JMI_AD_CPPAD -g -std=c89 -pedantic
+libjmi_solver_cppad_la_CFLAGS = -Wall -x c++ -I$(CPPAD_HOME) -I$(IPOPT_INC) -DJMI_AD=JMI_AD_CPPAD -g
 libjmi_solver_cppad_la_CXXFLAGS = -Wall -I$(CPPAD_HOME) -I$(IPOPT_INC) -DJMI_AD=JMI_AD_CPPAD -g
 libjmi_solver_cppad_la_LDFLAGS = -no-undefined -static-libtool-libs -g
 #libjmi_cppad_la_LDFLAGS = -no-undefined 
@@ -144,7 +144,7 @@ include_HEADERS = jmi.h \
                   fmiModelTypes.h \
                   fmi.h \
                   jmi_common.h \
-		  jmi_newton_solvers.h \
+                  jmi_newton_solvers.h \
                   jmi_init_opt.h \
                   jmi_opt_coll.h \
                   jmi_opt_coll_radau.h \

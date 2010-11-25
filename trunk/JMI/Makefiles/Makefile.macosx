@@ -102,7 +102,7 @@ JMI_AD=JMI_AD_CPPAD
 CXXFLAGS = -g -O2 -DJMI_AD=${JMI_AD}
 
 # C Compiler options
-CFLAGS = -g -O2 -std=c99 -DJMI_AD=$(JMI_AD) -fPIC
+CFLAGS = -g -O2 -std=c89 -pedantic -DJMI_AD=$(JMI_AD) -fPIC
 
 SHARED_LDFLAGS = -dynamiclib
 
