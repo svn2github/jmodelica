@@ -110,11 +110,16 @@ libjmi_cppad_la_SOURCES = jmi.h \
                     jmi_cppad.cpp\
                     jmi_common.c \
                     jmi_array_common.h \
-                    jmi_array_cppad.h
+                    jmi_array_cppad.h \
+                    $(abs_top_srcdir)/Assimulo/src/lib/kinpinv.c \
+                    $(abs_top_srcdir)/Assimulo/src/lib/kinpinv.h \
+                    $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.c \
+                    $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.h \
+                    $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod_impl.h 
                    
-libjmi_cppad_la_CFLAGS = -Wall -x c++ -I$(CPPAD_HOME) -DJMI_AD=JMI_AD_CPPAD -g
-libjmi_cppad_la_CXXFLAGS = -Wall -I$(CPPAD_HOME) -DJMI_AD=JMI_AD_CPPAD -g
-libjmi_cppad_la_LDFLAGS = -no-undefined -static-libtool-libs -g
+libjmi_cppad_la_CFLAGS = -Wall -x c++ -I$(CPPAD_HOME) -DJMI_AD=JMI_AD_CPPAD -g -I$(SUNDIALS_HOME)/include
+libjmi_cppad_la_CXXFLAGS = -Wall -I$(CPPAD_HOME) -DJMI_AD=JMI_AD_CPPAD -g -I$(SUNDIALS_HOME)/include
+libjmi_cppad_la_LDFLAGS = -no-undefined -static-libtool-libs -g -I$(SUNDIALS_HOME)/include
 
 libjmi_algorithm_cppad_la_SOURCES = jmi_init_opt.h \
                                     jmi_init_opt.c \
@@ -132,7 +137,6 @@ libjmi_solver_cppad_la_SOURCES = jmi_opt_coll_ipopt.cpp \
                                  jmi_init_opt_ipopt.cpp \
                                  jmi_init_opt_TNLP.cpp
 
-                   
 libjmi_solver_cppad_la_CFLAGS = -Wall -x c++ -I$(CPPAD_HOME) -I$(IPOPT_INC) -DJMI_AD=JMI_AD_CPPAD -g
 libjmi_solver_cppad_la_CXXFLAGS = -Wall -I$(CPPAD_HOME) -I$(IPOPT_INC) -DJMI_AD=JMI_AD_CPPAD -g
 libjmi_solver_cppad_la_LDFLAGS = -no-undefined -static-libtool-libs -g
