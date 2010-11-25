@@ -30,6 +30,7 @@
 #                         IPOPT interface is built.
 #   IPOPT_HOME            (mandatory if BUILD_WITH_ALGORITHMS=true) An IPOPT build
 #                         directory.
+#   SUNDIALS_HOME         (mandatory) The directory of Sundials.
 #   EXT_LIB_DIRS          List of external library directories.
 #   EXT_LIBS              List of external libraries.
 #   EXT_INC_DIRS          List of external include directories.
@@ -114,12 +115,12 @@ SUNDIALS_INC_DIR = $(SUNDIALS_HOME)/include
 JMI_LIB_DIR = ${JMODELICA_HOME}/lib
 
 # Libraries necessary to link with jmi
-LIBS_CPPAD = -L$(JMI_LIB_DIR) -ljmi_cppad -lfmi
+LIBS_CPPAD = -L$(JMI_LIB_DIR) -ljmi_cppad -lfmi -L$(SUNDIALS_HOME)/lib -lsundials_kinsol -lsundials_nvecserial
 LIBS_NOCPPAD = -L${JMI_LIB_DIR} -ljmi -lfmi  -llapack -lblas -lgfortran -L$(SUNDIALS_HOME)/lib -lsundials_kinsol -lsundials_nvecserial
-LIBS_IPOPT = -L$(JMI_LIB_DIR) -ljmi_cppad -ljmi_algorithm_cppad -ljmi_solver_cppad -lfmi -L$(IPOPT_HOME)/lib -lipopt -llapack -lblas -lm -lgfortran -lpthread 
+LIBS_IPOPT = -L$(JMI_LIB_DIR) -ljmi_cppad -ljmi_algorithm_cppad -ljmi_solver_cppad -lfmi -L$(IPOPT_HOME)/lib -lipopt -llapack -lblas -lm -lgfortran -lpthread -L$(SUNDIALS_HOME)/lib -lsundials_kinsol -lsundials_nvecserial
 
 # Include paths for compilation
-INCL_CPPAD = -I$(JMI_INC_DIR) -I$(CPPAD_INC_DIR)
+INCL_CPPAD = -I$(JMI_INC_DIR) -I$(CPPAD_INC_DIR) -I$(SUNDIALS_INC_DIR)
 INCL_NOCPPAD = -I$(JMI_INC_DIR) $(EXTERNAL_INCLUDES) -I$(SUNDIALS_INC_DIR)
 
 # set variable to correct makefile (for recursive call in model_noad)
