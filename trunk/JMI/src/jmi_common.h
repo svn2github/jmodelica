@@ -133,6 +133,8 @@
  *  TODO: Error codes...
  *  Introduce #defines to denote different error codes
  */
+#include <nvector/nvector_serial.h>
+#include <kinsol/kinsol.h>
 
 #if JMI_AD == JMI_AD_CPPAD
 /* This must be done outside of 'extern "C"' */
@@ -471,6 +473,13 @@ struct jmi_block_residual_t {
     jmi_real_t* res;               /**< \brief Work vector for the block residual */
     jmi_real_t* jac;               /**< \brief Work vector for the block Jacobian */
     int* ipiv;                     /**< \brief Work vector needed for dgesv */
+    void* kin_mem;                 /**< \brief A pointer to the Kinsol solver */
+    int init;			   /**< \brief A flag for initialization */
+    N_Vector kin_y;                /**< \brief Work vector for Kinsol y */
+    N_Vector kin_y_scale;          /**< \brief Work vector for Kinsol scaling of y */
+    N_Vector kin_f_scale;          /**< \brief Work vector for Kinsol scaling of f */
+    realtype kin_ftol;		   /**< \brief Tolerance for F */
+    realtype kin_stol;		   /**< \brief Tolerance for Step-size */
 };
 
 /* @} */
@@ -576,12 +585,13 @@ int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, int n, i
 /**
  * \brief Allocates a jmi_block_residual struct.
  * 
+ * @param b A jmi_block_residual_t struct (Output)
  * @param jmi A jmi_t struct.
  * @param F A jmi_block_residual_func_t function
  * @param n Integer size of the block
- * @return A jmi_block_residual_t
+ * @return Error code.
  */
-jmi_block_residual_t *jmi_new_block_residual(jmi_t* jmi, jmi_block_residual_func_t F, int n);
+int jmi_new_block_residual(jmi_block_residual_t** b,jmi_t* jmi, jmi_block_residual_func_t F, int n);
 
 /**
  * \brief Deletes a jmi_block_residual struct.

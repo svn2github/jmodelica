@@ -27,11 +27,53 @@
 #define _JMI_NEWTON_SOLVERS_H
 
 #include "jmi.h"
+#include <kinsol/kinsol.h>
+#include <kinsol/kinsol_dense.h>
+#include <nvector/nvector_serial.h>
+#include <sundials/sundials_types.h>
+#include <sundials/sundials_math.h>
 
 extern void dgesv_(int* N, int* NRHS, double* A, int* LDA, int* IPIV,
                 double* B, int* LDB, int* INFO );
 
 extern double dnrm2_(int* N, double* X, int* INCX);
+
+/**
+ * \brief Error handling function for Kinsol.
+ * 
+ * @param flag An integer
+ * @return Error code
+ */
+int jmi_kinsol_error_handling(int flag);
+
+/**
+ * \brief A solve rutine for Kinsol.
+ * 
+ * @param block An jmi_block_residual_t struct
+ * @return Error code
+ */
+int jmi_kinsol_solve(jmi_block_residual_t * block);
+
+/**
+ * \brief A function wrapper for Kinsol f.
+ * 
+ * @param y An N_Vector (input)
+ * @param f An N_Vector (output)
+ * @param problem_data A void pointer
+ * @return Error code
+ */
+int kin_f(N_Vector y, N_Vector f, void *problem_data);
+
+/**
+ * \brief A function wrapper for Kinsol error handling.
+ * 
+ * @param err_code An Integer
+ * @param module A const char
+ * @param function A const char
+ * @param msg A const char
+ * @param eh_data A void pointer
+ */
+void kin_err(int err_code, const char *module, const char *function, char *msg, void *eh_data);
 
 int jmi_simple_newton_solve(jmi_block_residual_t *block);
 
