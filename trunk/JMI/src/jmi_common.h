@@ -818,7 +818,10 @@ struct jmi_t{
 	int n_d;                             /**< \brief Number of elements in \f$d\f$. */
 
 	int n_z;                             /**< \brief Number of elements in \f$z\f$. */
-
+	
+	int n_dae_blocks;                    /**< \brief Number of BLT blocks. */
+	int n_dae_init_blocks;		     /**< \brief Number of initial BLT blocks. */
+	
 	jmi_real_t *tp;                      /**< \brief Time point values in the normalized interval [0..1]. A value \f$\leq 0\f$ corresponds to the initial time and a value \f$\geq 1\f$ corresponds to the final time. */
 
 	/* Offset variables in the z vector, for convenience. */

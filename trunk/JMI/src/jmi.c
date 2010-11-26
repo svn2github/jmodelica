@@ -89,6 +89,9 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 
 	jmi_->n_sw = n_sw;
 	jmi_->n_sw_init = n_sw_init;
+	
+	jmi_->n_dae_blocks = n_dae_blocks;
+	jmi_->n_dae_init_blocks = n_dae_init_blocks;
 
 	jmi_->offs_real_ci = 0;
 	jmi_->offs_real_cd = jmi_->offs_real_ci + n_real_ci;
@@ -178,6 +181,7 @@ int jmi_ad_init(jmi_t* jmi) {
 }
 
 int jmi_delete(jmi_t* jmi){
+	int i;
 	if(jmi->dae != NULL) {
 		jmi_func_delete(jmi->dae->F);
 		free(jmi->dae);
@@ -196,6 +200,12 @@ int jmi_delete(jmi_t* jmi){
 		jmi_func_delete(jmi->opt->Heq);
 		jmi_func_delete(jmi->opt->Hineq);
 		free(jmi->opt);
+	}
+	for (i=0; i < jmi->n_dae_init_blocks;i=i+1){ /*Deallocate init BLT blocks.*/
+		jmi_delete_block_residual(jmi->dae_init_block_residuals[i]);
+	}
+	for (i=0; i < jmi->n_dae_blocks;i=i+1){ /*Deallocate BLT blocks.*/
+		jmi_delete_block_residual(jmi->dae_block_residuals[i]);
 	}
 	free(*(jmi->z));
 	free(*(jmi->z_val));

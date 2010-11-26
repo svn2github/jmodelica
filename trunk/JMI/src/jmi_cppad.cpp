@@ -813,7 +813,7 @@ int jmi_func_ad_delete(jmi_func_ad_t *jfa) {
 }
 
 int jmi_delete(jmi_t* jmi){
-
+	int i;
 	if(jmi->dae != NULL) {
 		if (jmi->dae->F->ad != NULL) {
 			jmi_func_ad_delete(jmi->dae->F->ad);
@@ -866,6 +866,12 @@ int jmi_delete(jmi_t* jmi){
 		jmi_func_delete(jmi->opt->Heq);
 		jmi_func_delete(jmi->opt->Hineq);
 		free(jmi->opt);
+	}
+	for (i=0; i < jmi->n_dae_init_blocks;i=i+1){ /*Deallocate init BLT blocks.*/
+		jmi_delete_block_residual(jmi->dae_init_block_residuals[i]);
+	}
+	for (i=0; i < jmi->n_dae_blocks;i=i+1){ /*Deallocate BLT blocks.*/
+		jmi_delete_block_residual(jmi->dae_block_residuals[i]);
 	}
 
 	delete jmi->z;
