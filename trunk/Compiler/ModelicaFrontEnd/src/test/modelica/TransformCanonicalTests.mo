@@ -1799,41 +1799,63 @@ equation
   x = 5;
 end UnbalancedTest3_Err;
 
-
-
-// TODO: Someone who actually knows how to use when should make new tests
 model WhenEqu1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.FlatteningTestCase(
+     JModelica.UnitTesting.TransformCanonicalTestCase(
          name="WhenEqu1",
          description="Basic test of when equations",
          flatModel="
 fclass TransformCanonicalTests.WhenEqu1
- Real x[3];
+ discrete Real x[1];
+ discrete Real x[2];
+ discrete Real x[3];
+ Real z[1];
+ Real z[2];
+ Real z[3];
+initial equation 
+ z[1] = 0.0;
+ z[2] = 0.0;
+ z[3] = 0.0;
 equation
- der(x[1:3]) = ( x[1:3] ) .* ( {0.1,0.2,0.3} );
- when {x[i] > 2 for i in 1:3} then
-  x[1:3] = 1:3;
- elsewhen {x[i] < 0 for i in 1:3} then
-  x[1:3] = 4:6;
- elsewhen sum(x[1:3]) > 4.5 then
-  x[1:3] = 7:9;
+ der(z[1]) = ( z[1] ) .* ( 0.1 );
+ der(z[2]) = ( z[2] ) .* ( 0.2 );
+ der(z[3]) = ( z[3] ) .* ( 0.3 );
+ when z[1] > 2 or z[2] > 2 or z[3] > 2 then
+  x[1] = 1;
+ elsewhen z[1] < 0 or z[2] < 0 or z[3] < 0 then
+  x[1] = 4;
+ elsewhen z[1] + z[2] + z[3] > 4.5 then
+  x[1] = 7;
+ end when;
+ when z[1] > 2 or z[2] > 2 or z[3] > 2 then
+  x[2] = 2;
+ elsewhen z[1] < 0 or z[2] < 0 or z[3] < 0 then
+  x[2] = 5;
+ elsewhen z[1] + z[2] + z[3] > 4.5 then
+  x[2] = 8;
+ end when;
+ when z[1] > 2 or z[2] > 2 or z[3] > 2 then
+  x[3] = 3;
+ elsewhen z[1] < 0 or z[2] < 0 or z[3] < 0 then
+  x[3] = 6;
+ elsewhen z[1] + z[2] + z[3] > 4.5 then
+  x[3] = 9;
  end when;
 end TransformCanonicalTests.WhenEqu1;
 ")})));
 
-	Real x[3];
+	discrete Real x[3];
+        Real z[3];
 equation
-	der(x) = x .* { 0.1, 0.2, 0.3 };
-	when { x[i] > 2 for i in 1:3 } then
+	der(z) = z .* { 0.1, 0.2, 0.3 };
+	when { z[i] > 2 for i in 1:3 } then
 		x = 1:3;
-	elsewhen { x[i] < 0 for i in 1:3 } then
+	elsewhen { z[i] < 0 for i in 1:3 } then
 		x = 4:6;
-	elsewhen sum(x) > 4.5 then
+	elsewhen sum(z) > 4.5 then
 		x = 7:9;
 	end when;
 end WhenEqu1;
-
 
 model WhenEqu2
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
@@ -1842,46 +1864,102 @@ model WhenEqu2
          description="Basic test of when equations",
          flatModel="
 fclass TransformCanonicalTests.WhenEqu2
- Real x[1];
- Real x[2];
- Real x[3];
-initial equation 
- x[1] = 0.0;
- x[2] = 0.0;
- x[3] = 0.0;
+ discrete Real x;
+ discrete Real y;
+ discrete Boolean w(start = true);
+ discrete Boolean v(start = true);
+ discrete Boolean z(start = true);
 equation
- der(x[1]) = ( x[1] ) .* ( 0.1 );
- der(x[2]) = ( x[2] ) .* ( 0.2 );
- der(x[3]) = ( x[3] ) .* ( 0.3 );
- when x[1] > 2 or x[2] > 2 or x[3] > 2 then
-  x[1] = 1;
-  x[2] = 2;
-  x[3] = 3;
- elsewhen x[1] < 0 or x[2] < 0 or x[3] < 0 then
-  x[1] = 4;
-  x[2] = 5;
-  x[3] = 6;
- elsewhen x[1] + x[2] + x[3] > 4.5 then
-  x[1] = 7;
-  x[2] = 8;
-  x[3] = 9;
+ when y > 2 and pre(z) then
+  w = false;
+ end when;
+ when y > 2 and z then
+  v = false;
+ end when;
+ when x > 2 then
+  z = false;
+ end when;
+ when time > 1 then
+  x = pre(x) + 1;
+ end when;
+ when time > 1 then
+  y = pre(y) + 1;
  end when;
 end TransformCanonicalTests.WhenEqu2;
 ")})));
 
-	Real x[3];
-equation
-	der(x) = x .* { 0.1, 0.2, 0.3 };
-	when { x[i] > 2 for i in 1:3 } then
-		x = 1:3;
-	elsewhen { x[i] < 0 for i in 1:3 } then
-		x = 4:6;
-	elsewhen sum(x) > 4.5 then
-		x = 7:9;
-	end when;
+discrete Real x; 
+discrete Real y; 
+discrete Boolean w(start=true); 
+discrete Boolean v(start=true); 
+discrete Boolean z(start=true); 
+equation 
+when y > 2 and pre(z) then 
+w = false; 
+end when; 
+when y > 2 and z then 
+v = false; 
+end when; 
+when x > 2 then 
+z = false; 
+end when; 
+when time>1 then 
+x = pre(x) + 1; 
+y = pre(y) + 1; 
+end when; 
 end WhenEqu2;
 
 
+model WhenEqu3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="WhenEqu3",
+         description="Basic test of when equations",
+         flatModel="
+fclass TransformCanonicalTests.WhenEqu3
+ discrete Real x;
+ discrete Real y;
+ discrete Real z;
+ discrete Real v;
+equation
+ when time > 3 then
+  x = 1;
+ elsewhen time > 4 then
+  x = 4;
+ end when;
+ when time > 3 then
+  y = 2;
+ elsewhen time > 4 then
+  y = 3;
+ end when;
+ when time > 3 then
+  z = 3;
+ elsewhen time > 4 then
+  z = 2;
+ end when;
+ when time > 3 then
+  v = 4;
+ elsewhen time > 4 then
+  v = 1;
+ end when;
+end TransformCanonicalTests.WhenEqu3;
+")})));
+  discrete Real x,y,z,v;
+equation
+  when time>3 then 
+    x = 1;
+    y = 2;
+    z = 3;
+    v = 4;
+  elsewhen time>4 then
+    v = 1;
+    z = 2;
+    y = 3;
+    x = 4;
+  end when;
+end WhenEqu3;
+
+/* // TODO: add these test when more support is implemented in the middle end
 model IfEqu1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.FlatteningTestCase(
@@ -2125,8 +2203,8 @@ fclass TransformCanonicalTests.IfEqu8
  Real x[1];
  Real x[2];
  Real x[3];
- parameter Boolean y[1] = false /* false */;
- parameter Boolean y[2] = true /* true */;
+ parameter Boolean y[1] = false ;
+ parameter Boolean y[2] = true ;
 equation
  x[1] = 4;
  x[2] = 5;
@@ -2256,6 +2334,6 @@ equation
 	end if;
 end IfEqu11;
 
-
+*/
 
 end TransformCanonicalTests;

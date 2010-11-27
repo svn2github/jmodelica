@@ -531,7 +531,14 @@ aspect FlatAPI {
 	}
 	
 	syn int FAbstractEquation.numScalarEquations() = 1;
-	eq FIfWhenEquation.numScalarEquations()        = 0; // TODO: To disable sorting, etc - remove when ready to implement such
+	eq FIfWhenEquation.numScalarEquations() {
+		int res = 0;
+		for (FAbstractEquation e : getFAbstractEquations()) {
+			res += e.numScalarEquations();
+		}
+		return res;
+	}
+	
 	eq FFunctionCallEquation.numScalarEquations() {
 		 int res = 0;
 		 for (FFunctionCallLeft l : getLefts())
@@ -547,7 +554,7 @@ aspect FlatAPI {
 	FRelExp contributes
     // Only include relational in the equation section which are 
     // not inside a noEvent operator
- 		this when inEquationSection() && !inNoEventExp()
+ 		this when inEquationSection() && !inNoEventExp() && originalFRelExp==null
 	to FClass.relExpInEquations() for myFClass();	
 		
 	public int FRelExp.relExpInEquationsIndex() {
@@ -588,7 +595,7 @@ aspect FlatAPI {
 	FRelExp contributes
 	    // Only include relational in the initial equation section which are 
 	    // not inside a noEvent operator
- 		this when inInitialEquationSection() && !inNoEventExp()
+ 		this when inInitialEquationSection() && !inNoEventExp() && originalFRelExp==null
 	    to FClass.relExpInInitialEquations() for myFClass();	
 
 	public int FRelExp.relExpInInitialEquationsIndex() {
@@ -644,7 +651,7 @@ aspect FlatAPI {
 	eq Root.getChild().inFEquation()=false;
 	
 	inh FAbstractEquation FExp.myFEquation();
-	eq FAbstractEquation.getChild().myFEquation()=this;
+	eq FAbstractEquation.getChild().myFEquation() = this;
 	eq Root.getChild().myFEquation()=null;
 	
 	inh FClass AbstractFVariable.myFClass();
@@ -1073,12 +1080,25 @@ aspect FVariableUses {
 	 * \brief Collection attribute returning all algebraic variables (FVariables)
 	 * referenced in an equation.
 	 */
-	coll LinkedHashSet<FVariable> FAbstractEquation.algebraicVariables() 
+	coll LinkedHashSet<FVariable> FAbstractEquation.retrieveAlgebraicVariables() 
 		[new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
 
 	FIdUseExp contributes (FVariable)myFV() when !myFV().isUnknown() && 
-		!(getParent() instanceof FDerExp) && ((FVariable)myFV()).isAlgebraicVariable() to 
-		FAbstractEquation.algebraicVariables() for myFEquation();
+		!(getParent() instanceof FDerExp) && !(getParent() instanceof FPreExp) && 
+		((FVariable)myFV()).isAlgebraicVariable() to 
+		FAbstractEquation.retrieveAlgebraicVariables() for myFEquation();
+
+	syn lazy LinkedHashSet<FVariable> FAbstractEquation.algebraicVariables() = 
+	    retrieveAlgebraicVariables();
+	
+	eq FWhenEquation.algebraicVariables()  {
+		LinkedHashSet<FVariable> s = new LinkedHashSet<FVariable>();
+		s.addAll(retrieveAlgebraicVariables());
+		for (FAbstractEquation e : getFAbstractEquations()) {
+			s.addAll(e.algebraicVariables());
+		}
+		return s;
+	}
 
 	/**
 	 * \brief Collection attribute returning all derivative variables (FDerivativeVariables)
@@ -1110,7 +1130,7 @@ aspect FVariableUses {
 		[new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
 
 	FIdUseExp contributes (FVariable)myFV() when !myFV().isUnknown() && 
-	    !(getParent() instanceof FDerExp) && ((FVariable)myFV()).isDiscreteVariable() to 
+	    !(getParent() instanceof FDerExp) && !(getParent() instanceof FPreExp) && ((FVariable)myFV()).isDiscreteVariable() to 
 		FAbstractEquation.discreteVariables() for myFEquation();
 	
 	/**
@@ -1487,7 +1507,6 @@ aspect FlatDiagnostics {
 				str.append(fv.name() + " ");
 			}
 			h = fe.algebraicVariables();
-			h.addAll(fe.discreteVariables());
 			for (FVariable fv : h) {
 				str.append(fv.name() + " ");
 			}

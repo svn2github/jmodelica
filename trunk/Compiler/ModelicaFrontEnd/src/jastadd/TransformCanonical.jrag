@@ -64,7 +64,12 @@ aspect TransformCanonical {
 	 *    <li> Sort dependent parameters.
 	 *  </ul>
 	 */
-	public void FClass.transformCanonical() {
+	 
+	 /**
+	  *  transformCanonicalBase contains all transformation that should be
+	  *  done by both the Modelica and the Optimica compilers.
+	  */
+	public void FClass.transformCanonicalBase() {
 		genBindingEquations();
 		genAlgorithmFunctions();
 		scalarize();
@@ -77,6 +82,8 @@ aspect TransformCanonical {
 			genAlias();
 			eliminateAliasVariables();
 		}
+		enableWhenEquationRewrite();
+		root().flushAllRecursive();
 //		log.debug(prettyPrint(""));
 		addFDerivativeVariables();
 		genInitialEquations();
@@ -85,19 +92,19 @@ aspect TransformCanonical {
 		if (root().options.getBooleanOption("index_reduction")) {
 			indexReduction();
 		}
+	
+	}
 
-	/*
-		if (root().options.getBooleanOption("equation_sorting")) {
-			indexReduction();
-			performDAEBLT();
-		}
-		*/
-/*
+	public void FClass.transformCanonical() {
+
+		transformCanonicalBase();
+
 		if (root().options.getBooleanOption("automatic_add_initial_equations")) {
-			addInitialEquations();
+			// Equations are added as part of this this method
+			computeMatchingsAndBLT();
 		}
-	*/	
-        root().flushAllRecursive();
+	    
+	    root().flushAllRecursive();
 		
 	}
 		
@@ -318,15 +325,16 @@ aspect TransformCanonical {
 			for (int i=0;i<n_eq;i++) {
 				eqn = g.addEquation("eq_"+k,e.prettyPrint(""),j);
 				k++;
+//				System.out.println(" ** " + e.prettyPrint(""));
 				for (FVariable y : e.algebraicVariables()) { 
-					log.debug("  Algebraic: " + y.name()); 
+//					System.out.println(" -- Algebraic: " + y.name()); 
 						 	 
 					v = g.getVariable(y.name());     
 					g.addEdge(eqn,v); 
 				} 
 
 				for (FDerivativeVariable dx : e.derivativeVariables()) { 
-					log.debug("  Diffed state: " + dx.name()); 
+//					System.out.println(" -- Diffed state: " + dx.name()); 
 
 					v = g.getVariable(dx.name());     
 					g.addEdge(eqn,v); 
@@ -373,17 +381,17 @@ aspect TransformCanonical {
 		
 			LinkedList<Stack<Eq>> blt = g.computeBLT();
 		
-//			System.out.println("BLT: " + blt.size() + " blocks");
+			log.info("BLT: " + blt.size() + " blocks");
 			for (Stack<Eq> bl : blt) {
-//				System.out.println("Block: " + bl.size() + "-----");
+				log.info("Block: " + bl.size() + "-----");
 				EquationBlock b = new EquationBlock();
 				daeBLT.add(b);
 				for (Eq bl_eqn : bl) {
 					v = bl_eqn.getMatching();
 					b.addMatchingPair(new MatchingPair(equations().get(bl_eqn.getId()),(FVariable)lookupFV(new FQName(v.getName()),false)));
-//					System.out.println(bl_eqn.getMatching() + ": " + bl_eqn.getDescription());
+					log.info(bl_eqn.getMatching() + ": " + bl_eqn.getDescription());
 				}
-//				System.out.println("-----------------");
+				log.info("-----------------");
 			}
 		}
 			
@@ -537,20 +545,20 @@ aspect TransformCanonical {
 			g.tarjanReset();
 			LinkedList<Stack<Eq>> blt = g.computeBLT();
 		
-//			System.out.println("BLT: " + blt.size() + " blocks");
+			log.info("BLT: " + blt.size() + " blocks");
 			for (Stack<Eq> bl : blt) {
-//				System.out.println("Block: " + bl.size() + "-----");
+				log.info("Block: " + bl.size() + "-----");
 				EquationBlock b = new EquationBlock();
 				daeInitBLT.add(b);
 				for (Eq bl_eqn : bl) {
 					v = bl_eqn.getMatching();
-//					System.out.println(">> " + bl_eqn.getId());
+					//log.info(">> " + bl_eqn.getId());
 					FAbstractEquation eee = bl_eqn.getId()<equations().size()?
 					    equations().get(bl_eqn.getId()): initialEquations().get(bl_eqn.getId()-equations().size());
 					b.addMatchingPair(new MatchingPair(eee,(FVariable)lookupFV(new FQName(v.getName()),false)));
-//					System.out.println(bl_eqn.getMatching() + ": " + bl_eqn.getDescription());
+					log.info(bl_eqn.getMatching() + ": " + bl_eqn.getDescription());
 				}
-//				System.out.println("-----------------");
+				log.info("-----------------");
 			}
 		}
 	}	
@@ -1240,6 +1248,135 @@ aspect TransformCanonical {
 		}
 	}
 
+}
+
+aspect MapWhenClauses{
+
+	public void ASTNode.enableWhenEquationRewrite() {
+		for (ASTNode n : this)
+			n.enableWhenEquationRewrite();
+	}
+	
+	public void FWhenEquation.enableWhenEquationRewrite() {
+		super.enableWhenEquationRewrite();
+		rewriteWhenEquation = true;
+		is$Final = false;
+	}
+	
+	boolean FWhenEquation.rewriteWhenEquation = false;
+
+	public abstract FIfWhenElseEquation FIfWhenElseEquation.createIfWhenElseEquation(List eqns, 
+	                         FExp guard, Opt elseClause);
+	
+	public FIfWhenElseEquation FWhenEquation.createIfWhenElseEquation(List eqns, 
+	                         FExp guard, Opt elseClause) {
+		return new FWhenEquation((FEquationType)getType().fullCopy(),eqns,guard,elseClause);
+	}
+
+	public FIfWhenElseEquation FIfEquation.createIfWhenElseEquation(List eqns, 
+	                         FExp guard, Opt elseClause) {
+		return new FIfEquation((FEquationType)getType().fullCopy(),eqns,guard,elseClause);
+	}
+
+	public FIfWhenElseEquation FElseEquation.createIfWhenElseEquation(List eqns, 
+	                         FExp guard, Opt elseClause) {
+		return new FElseEquation((FEquationType)getType().fullCopy(),eqns);
+	}
+
+
+	public FIfWhenElseEquation FIfWhenElseEquation.createSimpleIfWhenElseEquation(String varName, boolean copyGuard) {
+		return null; //Not handled yet
+	}
+
+	public FIfWhenElseEquation FIfWhenEquation.createSimpleIfWhenElseEquation(String varName, boolean copyGuard) {
+	
+		// Copy guard
+		FExp guard = null;
+		if (copyGuard) {
+			System.out.println("FIfWhenEquation.createSimpleIfWhenElseEquation - copy guard");
+			guard = (FExp)getTest().fullCopy();
+			guard.setParent(this);
+			guard.traverseSymbolic(getTest());
+		} else {
+			System.out.println("FIfWhenEquation.createSimpleIfWhenElseEquation - copy guard");
+			guard = getTest();
+		}
+		
+		// Find the right equation
+		FAbstractEquation eqn = null;
+		for (FAbstractEquation e : getFAbstractEquations()) {
+		 	if (e.isSimple()) {
+		 		for (FIdUseExp n : e.simpleLefts()) {
+					if (n.name().equals(varName)) {
+						eqn = e;
+						break;
+					}
+		 		}
+		 	}
+		}
+		
+		if (eqn==null) {
+			return null;
+		}
+		
+		List eqns = new List().add(eqn);
+		
+		Opt o = null;
+		// If there is an else when, split it
+		if (hasElse()) {
+			o = new Opt(getElse().createSimpleIfWhenElseEquation(varName,copyGuard));
+		} else {
+		    o = new Opt();
+		}
+		return createIfWhenElseEquation(eqns,guard,o);
+	}
+
+	public List FWhenEquation.splitWhenEquation() {
+		List l = new List();
+		int i = 0;
+		for (FAbstractEquation e : getFAbstractEquations()) {
+		 	if (e.isSimple()) {
+		 		for (FIdUseExp n : e.simpleLefts()) {
+		 			l.add(createSimpleIfWhenElseEquation(n.name(),i!=0));
+		 		}
+		 	}
+		 	i++;
+		}	
+		return l;
+	}
+
+	rewrite FWhenEquation in FEquationBlock.getFAbstractEquation() {
+		when (rewriteWhenEquation && getNumFAbstractEquation()>1) to List {
+			return splitWhenEquation();
+			/*
+			List l = new List();
+			l.setParent(this);
+			FExp guard = getTest();
+			// Create the first FWhenClause and use the original rel exp
+			l.add(new FWhenEquation(getType(),new List().add(getFAbstractEquation(0)),guard,new Opt()));
+			// Loop over the remaining and copy the guard and replace the guard exps
+			for (int i=1;i<getNumFAbstractEquation();i++) {
+				FExp guard_new = (FExp)guard.fullCopy();
+				l.add(new FWhenEquation((FEquationType)getType().fullCopy(),
+				          new List().add(getFAbstractEquation(i)),guard_new,new Opt()));
+				guard_new.traverseSymbolic(guard);
+			}
+			return l;	*/
+		}
+	}
+	
+	syn lazy boolean FAbstractEquation.isSimple() = false;
+	eq FEquation.isSimple() = (getLeft() instanceof FIdUseExp);
+	
+	syn lazy ArrayList<FIdUseExp> FAbstractEquation.simpleLefts() = new ArrayList<FIdUseExp>();
+	eq FEquation.simpleLefts() {
+		ArrayList<FIdUseExp> l = new ArrayList<FIdUseExp>();
+		if (isSimple()) {
+			l.add((FIdUseExp)getLeft());
+		} 
+		return l;
+	}
+	
 }
 
 aspect ParameterSorting {
