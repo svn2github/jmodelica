@@ -459,7 +459,7 @@ public class CGenerator extends GenericGenerator {
 						block.solution().prettyPrint_C(genPrinter,"");
 						genPrinter.print(";\n");
 					} else {
-						genPrinter.print("  jmi_simple_newton_solve(jmi->dae_block_residuals["+block_counter+"]);\n");
+						genPrinter.print("  jmi_kinsol_solve(jmi->dae_block_residuals["+block_counter+"]);\n");
 						block_counter++;	
 					}
 				}
@@ -486,7 +486,7 @@ public class CGenerator extends GenericGenerator {
 						block.solution().prettyPrint_C(genPrinter,"");
 						genPrinter.print(";\n");
 					} else {
-						genPrinter.print("  jmi_simple_newton_solve(jmi->dae_init_block_residuals["+block_counter+"]);\n");
+						genPrinter.print("  jmi_kinsol_solve(jmi->dae_init_block_residuals["+block_counter+"]);\n");
 						block_counter++;	
 					}
 				}
