@@ -27,6 +27,7 @@
 #define _JMI_NEWTON_SOLVERS_H
 
 #include "jmi.h"
+#include "kinpinv.h"
 #include <kinsol/kinsol.h>
 #include <kinsol/kinsol_dense.h>
 #include <nvector/nvector_serial.h>

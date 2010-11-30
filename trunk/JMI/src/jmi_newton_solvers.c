@@ -99,8 +99,16 @@ int jmi_kinsol_solve(jmi_block_residual_t * block){
 		flag = KINInit(block->kin_mem, kin_f, block->kin_y); /*Initialize Kinsol*/
 		error_return = jmi_kinsol_error_handling(flag);
 		
-		flag = KINDense(block->kin_mem, block->n);
+		/*Attack linear solver*/
+		/*Dense Kinsol solver*/
+		/*flag = KINDense(block->kin_mem, block->n);
+		 *error_return = jmi_kinsol_error_handling(flag);
+		 */
+		
+		/*Dense Kinsol using Penrose-Moore pseudoinverse*/
+		flag = KINPinv(block->kin_mem, block->n);
 		error_return = jmi_kinsol_error_handling(flag);
+		/*End linear solver*/
 		
 		/*Set problem data to Kinsol*/
 		flag = KINSetUserData(block->kin_mem, block);
