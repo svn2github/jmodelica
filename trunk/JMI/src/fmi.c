@@ -175,8 +175,8 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
     int nF0, nF1, nFp, nF;   /* Number of F-equations */
     int nR0, nR;             /* Number of R-equations */
     int initComplete = 0;    /* If the initialization are complete */
-    int safety_factor_events = 0.0001;
-    int safety_factor_newton = 0.01;
+    fmiReal safety_factor_events = 0.0001;
+    fmiReal safety_factor_newton = 0.01;
     
     jmi_real_t* switchesR;   /* Switches */
     jmi_real_t* switchesR0;  /* Initial Switches */
