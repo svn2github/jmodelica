@@ -64,6 +64,12 @@ void kin_err(int err_code, const char *module, const char *function, char *msg, 
 	printf("\n");
 }
 
+void kin_info(const char *module, const char *function, char *msg, void *eh_data){
+	printf("[KINSOL INFO] ");
+	printf(msg);
+	printf("\n");
+}
+
 
 int jmi_kinsol_error_handling(int flag){
 	if (flag < 0){
@@ -76,7 +82,7 @@ int jmi_kinsol_solve(jmi_block_residual_t * block){
 	int flag;
 	int error_return;
 	int i;
-	int verbosity = 0;
+	int verbosity = 1;
 
 	/*Check if the block is to be initialized.*/
 	if (block->init == 1){
@@ -128,6 +134,10 @@ int jmi_kinsol_solve(jmi_block_residual_t * block){
 		
 		/*Error function*/
 		flag = KINSetErrHandlerFn(block->kin_mem, kin_err, NULL);
+		error_return = jmi_kinsol_error_handling(flag);
+		
+		/*Info function*/
+		flag = KINSetInfoHandlerFn(block->kin_mem, kin_info, NULL);
 		error_return = jmi_kinsol_error_handling(flag);
 		
 		/*Solve the block*/
