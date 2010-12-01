@@ -26,16 +26,16 @@
 #define indexmask 0x0FFFFFFF
 #define typemask 0xF0000000
 
-static unsigned int get_index_from_value_ref(unsigned int valueref) {
+static fmiValueReference get_index_from_value_ref(fmiValueReference valueref) {
     /* Translate a ValueReference into variable index in z-vector. */
-    unsigned int index = valueref & indexmask;
+    fmiValueReference index = valueref & indexmask;
     
     return index;
 }
 
-static unsigned int get_type_from_value_ref(unsigned int valueref) {
+static fmiValueReference get_type_from_value_ref(fmiValueReference valueref) {
     /* Translate a ValueReference into variable type in z-vector. */
-    unsigned int type = valueref & typemask;
+    fmiValueReference type = valueref & typemask;
     
     return type;
 }
@@ -59,7 +59,7 @@ fmiComponent fmi_instantiate_model(fmiString instanceName, fmiString GUID, fmiCa
 
     /* Create jmi struct*/
     jmi_t* jmi = (jmi_t *)functions.allocateMemory(1, sizeof(jmi_t));
-    int retval = jmi_new(&jmi);
+    fmiInteger retval = jmi_new(&jmi);
     if(retval != 0) {
         /* creating jmi struct failed */
         return NULL;
@@ -117,8 +117,8 @@ fmiStatus fmi_set_real(fmiComponent c, const fmiValueReference vr[], size_t nvr,
     /* Get the z vector*/
     jmi_real_t* z = jmi_get_z(((fmi_t *)c)->jmi);
     
-    unsigned int i;
-    unsigned int index;
+    fmiValueReference i;
+    fmiValueReference index;
     
     for (i = 0; i <nvr; i = i + 1) {
         /* Get index in z vector from value reference. */ 
@@ -133,8 +133,8 @@ fmiStatus fmi_set_integer (fmiComponent c, const fmiValueReference vr[], size_t 
     /* Get the z vector*/
     jmi_real_t* z = jmi_get_z(((fmi_t *)c)->jmi);
     
-    unsigned int i;
-    unsigned int index;
+    fmiValueReference i;
+    fmiValueReference index;
     
     for (i = 0; i <nvr; i = i + 1) {
         /* Get index in z vector from value reference. */ 
@@ -149,8 +149,8 @@ fmiStatus fmi_set_boolean (fmiComponent c, const fmiValueReference vr[], size_t 
     /* Get the z vector*/
     jmi_real_t* z = jmi_get_z(((fmi_t *)c)->jmi);
     
-    unsigned int i;
-    unsigned int index;
+    fmiValueReference i;
+    fmiValueReference index;
     
     for (i = 0; i <nvr; i = i + 1) {
         /* Get index in z vector from value reference. */ 
@@ -170,11 +170,11 @@ fmiStatus fmi_set_string(fmiComponent c, const fmiValueReference vr[], size_t nv
 /* Evaluation of the model equations */
 
 fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal relativeTolerance, fmiEventInfo* eventInfo) {
-	int retval;
-    int i;                   /* Iteration variable */
-    int nF0, nF1, nFp, nF;   /* Number of F-equations */
-    int nR0, nR;             /* Number of R-equations */
-    int initComplete = 0;    /* If the initialization are complete */
+	fmiInteger retval;
+    fmiInteger i;                   /* Iteration variable */
+    fmiInteger nF0, nF1, nFp, nF;   /* Number of F-equations */
+    fmiInteger nR0, nR;             /* Number of R-equations */
+    fmiInteger initComplete = 0;    /* If the initialization are complete */
     fmiReal safety_factor_events = 0.0001;
     fmiReal safety_factor_newton = 0.01;
     
@@ -309,7 +309,7 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
     return fmiOK;
 }
 fmiStatus fmi_get_derivatives(fmiComponent c, fmiReal derivatives[] , size_t nx) {
-	int retval = jmi_ode_derivatives(((fmi_t *)c)->jmi);
+	fmiInteger retval = jmi_ode_derivatives(((fmi_t *)c)->jmi);
 	if(retval != 0) {
 		(((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the derivatives failed.");
 		return fmiError;
@@ -318,9 +318,9 @@ fmiStatus fmi_get_derivatives(fmiComponent c, fmiReal derivatives[] , size_t nx)
 	return fmiOK;
 }
 fmiStatus fmi_get_event_indicators(fmiComponent c, fmiReal eventIndicators[], size_t ni) {
-    int retval = jmi_dae_R(((fmi_t *)c)->jmi,eventIndicators);
+    fmiInteger retval = jmi_dae_R(((fmi_t *)c)->jmi,eventIndicators);
     jmi_real_t *switches = jmi_get_sw(((fmi_t *)c)->jmi);
-    unsigned int i;
+    fmiValueReference i;
     
 	if(retval != 0) {
 		(((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the event indicators failed.");
@@ -340,8 +340,8 @@ fmiStatus fmi_get_real(fmiComponent c, const fmiValueReference vr[], size_t nvr,
     /* Get the z vector*/
     jmi_real_t* z = jmi_get_z(((fmi_t *)c)->jmi);
     
-    unsigned int i;
-    unsigned int index;
+    fmiValueReference i;
+    fmiValueReference index;
     
     for (i = 0; i <nvr; i = i + 1) {
         /* Get index in z vector from value reference. */ 
@@ -356,8 +356,8 @@ fmiStatus fmi_get_integer(fmiComponent c, const fmiValueReference vr[], size_t n
     /* Get the z vector*/
     jmi_real_t* z = jmi_get_z(((fmi_t *)c)->jmi);
     
-    unsigned int i;
-    unsigned int index;
+    fmiValueReference i;
+    fmiValueReference index;
     
     for (i = 0; i <nvr; i = i + 1) {
         /* Get index in z vector from value reference. */ 
@@ -372,8 +372,8 @@ fmiStatus fmi_get_boolean(fmiComponent c, const fmiValueReference vr[], size_t n
     /* Get the z vector*/
     jmi_real_t* z = jmi_get_z(((fmi_t *)c)->jmi);
     
-    unsigned int i;
-    unsigned int index;
+    fmiValueReference i;
+    fmiValueReference index;
     
     for (i = 0; i <nvr; i = i + 1) {
         /* Get index in z vector from value reference. */ 
@@ -391,9 +391,9 @@ fmiStatus fmi_get_string(fmiComponent c, const fmiValueReference vr[], size_t nv
 }
 fmiStatus fmi_event_update(fmiComponent c, fmiBoolean intermediateResults, fmiEventInfo* eventInfo) {
     /* Handle an event */
-    int retval;
-    int nF; /* Number of F-equations */
-    int nR; /* Number of R-equations */
+    fmiInteger retval;
+    fmiInteger nF; /* Number of F-equations */
+    fmiInteger nR; /* Number of R-equations */
     jmi_real_t* b_mode;
     jmi_real_t* a_mode;
     jmi_real_t *switches; /* Switches */
@@ -413,7 +413,7 @@ fmiStatus fmi_event_update(fmiComponent c, fmiBoolean intermediateResults, fmiEv
     eventInfo->iterationConverged = fmiFalse;           /* The iteration have not converged */
 
     if (intermediateResults){ /* Return after each event iteration loop */
-        int j, i;
+        fmiInteger j, i;
         jmi_real_t* switches;
         
         retval = jmi_dae_R(((fmi_t *)c)->jmi,b_mode); /* The event indicators before the initialisation */
@@ -468,8 +468,8 @@ fmiStatus fmi_event_update(fmiComponent c, fmiBoolean intermediateResults, fmiEv
         
     }else{ /* Return once the iteration have converged */
         while ((eventInfo->iterationConverged)==fmiFalse){
-            int j;
-            int i;
+            fmiInteger j;
+            fmiInteger i;
             retval = jmi_dae_R(((fmi_t *)c)->jmi,b_mode); /* The event indicators before the initialisation */
             
             /* Error check */
@@ -536,7 +536,7 @@ fmiStatus fmi_get_continuous_states(fmiComponent c, fmiReal states[], size_t nx)
 }
 fmiStatus fmi_get_nominal_continuous_states(fmiComponent c, fmiReal x_nominal[], size_t nx) {
 	fmiReal* ones = ((fmi_t*)c) -> fmi_functions.allocateMemory(nx, sizeof(fmiReal));
-	unsigned int i;
+	fmiValueReference i;
 	for(i = 0; i <nx; i = i + 1) {
 		ones[i]=1.0;
 	}
@@ -544,9 +544,9 @@ fmiStatus fmi_get_nominal_continuous_states(fmiComponent c, fmiReal x_nominal[],
     return fmiOK;
 }
 fmiStatus fmi_get_state_value_references(fmiComponent c, fmiValueReference vrx[], size_t nx) {
-	int offset = ((fmi_t *)c)->jmi->offs_real_x;
+	fmiInteger offset = ((fmi_t *)c)->jmi->offs_real_x;
 	fmiValueReference* valrefs = ((fmi_t*)c) -> fmi_functions.allocateMemory(nx, sizeof(fmiValueReference));
-	unsigned int i;
+	fmiValueReference i;
     
 	for(i = 0; i<nx; i = i + 1) {
 		valrefs[i] = offset + i;
