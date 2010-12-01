@@ -1270,7 +1270,7 @@ class FMUModel(BaseModel):
         self._npoints = 0
         self._log = []
     
-    def initialize(self, tolControlled=True):
+    def initialize(self, tolControlled=True, relativeTolerance=None):
         """
         Initializes the model and computes initial values for all variables, 
         including setting the start values of variables defined with a the start 
@@ -1281,6 +1281,10 @@ class FMUModel(BaseModel):
             tolControlled -- 
                 If the model are going to be called by numerical solver using
                 step-size control. Boolean flag.
+            relativeTolerance --
+                If the model are controlled by a numerical solver using
+                step-size control, the same tolerance should be provided here.
+                Else the default tolerance from the XML-file are used.
             
         Calls the low-level FMI function: fmiInitialize.
         """
@@ -1290,7 +1294,10 @@ class FMUModel(BaseModel):
         
         if tolControlled:
             tolcontrolledC = self._fmiBoolean(self._fmiTrue)
-            tol = self._XMLTolerance
+            if relativeTolerance == None:
+                tol = self._XMLTolerance
+            else:
+                tol = relativeTolerance
         else:
             tolcontrolledC = self._fmiBoolean(self._fmiFalse)
             tol = self._fmiReal(0.0)

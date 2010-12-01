@@ -698,29 +698,34 @@ class AssimuloFMIAlg(AlgorithmBase):
             raise InvalidAlgorithmOptionException(
                 "The solver: "+solver+ " is unknown.")
         
-        # Initialize?
-        if self.options['initialize']:
-            self.model.initialize()
-        
         # solver options
         self.solver_options = self.options[solver+'_options']
+        
+        #Check relative tolerance
+        #If the tolerances are not set specifically, they are set 
+        #according to the 'DefaultExperiment' from the XML file.
+        try:
+            self.solver_options['rtol']
+        except KeyError:
+            rtol, atol = self.model.get_tolerances()
+            self.solver_options['rtol'] = rtol
+        
+        # Initialize?
+        if self.options['initialize']:
+            self.model.initialize(relativeTolerance=self.solver_options['rtol'])
+        
+        #Check absolute tolerance
+        try:
+            self.solver_options['atol']
+        except KeyError:
+            rtol, atol = self.model.get_tolerances()
+            self.solver_options['atol'] = atol
     
     def _set_solver_options(self):
         """ 
         Helper function that sets options for the solver.
         """
-        rtol, atol = self.model.get_tolerances()
         solver_options = self.solver_options.copy()
-        #If the tolerances are not set specifically, they are set 
-        #according to the 'DefaultExperiment' from the XML file.
-        try:
-            solver_options['atol']
-        except KeyError:
-            solver_options['atol'] = atol
-        try:
-            solver_options['rtol']
-        except KeyError:
-            solver_options['rtol'] = rtol
 
         #loop solver_args and set properties of solver
         for k, v in solver_options.iteritems():
