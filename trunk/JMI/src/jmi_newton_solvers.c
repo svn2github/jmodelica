@@ -71,16 +71,15 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
 }
 
 
-int jmi_kinsol_error_handling(int flag){
-	if (flag < 0){
+void jmi_kinsol_error_handling(int flag){
+	/*if (flag < 0){
 		printf("Kinsol failed with flag %d", flag); 
 	}
-	return 0;
+	return 0;*/
 }
 
 int jmi_kinsol_solve(jmi_block_residual_t * block){
 	int flag;
-	int error_return;
 	int i;
 	int verbosity = 1;
 
@@ -103,7 +102,7 @@ int jmi_kinsol_solve(jmi_block_residual_t * block){
 		}
 		
 		flag = KINInit(block->kin_mem, kin_f, block->kin_y); /*Initialize Kinsol*/
-		error_return = jmi_kinsol_error_handling(flag);
+		jmi_kinsol_error_handling(flag);
 		
 		/*Attack linear solver*/
 		/*Dense Kinsol solver*/
@@ -113,36 +112,36 @@ int jmi_kinsol_solve(jmi_block_residual_t * block){
 		
 		/*Dense Kinsol using Penrose-Moore pseudoinverse*/
 		flag = KINPinv(block->kin_mem, block->n);
-		error_return = jmi_kinsol_error_handling(flag);
+		jmi_kinsol_error_handling(flag);
 		/*End linear solver*/
 		
 		/*Set problem data to Kinsol*/
 		flag = KINSetUserData(block->kin_mem, block);
-		error_return = jmi_kinsol_error_handling(flag);
+		jmi_kinsol_error_handling(flag);
 		
 		/*Stopping tolerance of F*/
 		flag = KINSetFuncNormTol(block->kin_mem, block->kin_ftol); 
-		error_return = jmi_kinsol_error_handling(flag);
+		jmi_kinsol_error_handling(flag);
 		
 		/*Stepsize tolerance*/
 		flag = KINSetScaledStepTol(block->kin_mem, block->kin_stol); 
-		error_return = jmi_kinsol_error_handling(flag);
+		jmi_kinsol_error_handling(flag);
 		
 		/*Verbosity*/
 		flag = KINSetPrintLevel(block->kin_mem, verbosity);
-		error_return = jmi_kinsol_error_handling(flag);
+		jmi_kinsol_error_handling(flag);
 		
 		/*Error function*/
 		flag = KINSetErrHandlerFn(block->kin_mem, kin_err, NULL);
-		error_return = jmi_kinsol_error_handling(flag);
+		jmi_kinsol_error_handling(flag);
 		
 		/*Info function*/
 		flag = KINSetInfoHandlerFn(block->kin_mem, kin_info, NULL);
-		error_return = jmi_kinsol_error_handling(flag);
+		jmi_kinsol_error_handling(flag);
 		
 		/*Solve the block*/
 		flag = KINSol(block->kin_mem, block->kin_y, KIN_LINESEARCH, block->kin_y_scale, block->kin_f_scale);
-		error_return = jmi_kinsol_error_handling(flag);
+		jmi_kinsol_error_handling(flag);
 		
 		block->init = 0; /*The block is initialized*/
 	}else{
@@ -154,11 +153,11 @@ int jmi_kinsol_solve(jmi_block_residual_t * block){
 		
 		/*Do not initially update the jacobian*/
 		flag = KINSetNoInitSetup(block->kin_mem, 0);
-		error_return = jmi_kinsol_error_handling(flag);
+		jmi_kinsol_error_handling(flag);
 		
 		/*Solve the block*/
 		flag = KINSol(block->kin_mem, block->kin_y, KIN_LINESEARCH, block->kin_y_scale, block->kin_f_scale);
-		error_return = jmi_kinsol_error_handling(flag);
+		jmi_kinsol_error_handling(flag);
 	}
 	
 	return 0;

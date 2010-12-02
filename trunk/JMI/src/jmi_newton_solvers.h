@@ -43,9 +43,8 @@ extern double dnrm2_(int* N, double* X, int* INCX);
  * \brief Error handling function for Kinsol.
  * 
  * @param flag An integer
- * @return Error code
  */
-int jmi_kinsol_error_handling(int flag);
+void jmi_kinsol_error_handling(int flag);
 
 /**
  * \brief A solve rutine for Kinsol.
