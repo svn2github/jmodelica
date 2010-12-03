@@ -152,6 +152,7 @@ class Test_Compiler:
         sourceroot = mc.parse_model(self.fpath_mc)
         icd = mc.instantiate_model(sourceroot, self.cpath_mc)
         fclass = mc.flatten_model(icd)
+        mc.generate_code(fclass)
         mc.compile_binary(self.cpath_mc.replace('.','_',1))
 
     @testattr(stddist = True)
@@ -160,6 +161,7 @@ class Test_Compiler:
         sourceroot = oc.parse_model(self.fpath_oc)
         icd = oc.instantiate_model(sourceroot, self.cpath_oc)
         fclass = oc.flatten_model(icd)
+        oc.generate_code(fclass)
         oc.compile_binary(self.cpath_oc.replace('.','_',1))
 
     @testattr(stddist = True)
