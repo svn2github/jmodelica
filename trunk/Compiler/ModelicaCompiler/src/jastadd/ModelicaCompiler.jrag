@@ -383,7 +383,7 @@ public class ModelicaCompiler {
 				// build source tree
 				sr = parseModel(name);
 			}
-//			dumpMemoryUseFile(sr, "source");  // TODO: add comman-line arg for this
+//			dumpMemoryUseFile(sr, "source");  // TODO: add command-line arg for this
 			
 			// compute instance tree
 			InstClassDecl icl = instantiateModel(sr, cl);
@@ -399,6 +399,7 @@ public class ModelicaCompiler {
 				generateCode(fc);
 		} finally {
 			logCompilationInfo();
+			// The node count requires changeing ASTNode.java by hand - see dumpNodeCountFile()
 //			dumpNodeCountFile("node_count.txt");
 //			dumpMemoryUseFile(sr, "final source", "source2");
 		}

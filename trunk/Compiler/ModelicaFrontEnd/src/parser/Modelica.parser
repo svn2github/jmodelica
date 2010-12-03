@@ -799,7 +799,7 @@ Annotation annotation =
    
    
 AbstractEquation abstract_equation =
-  simple_expression.left EQUALS exp.right comment SEMICOLON
+  exp.left EQUALS exp.right comment SEMICOLON
                                       {: return new Equation(new Opt(),comment,left,right); :}
   | if_equation SEMICOLON             {: return if_equation; :}
   | for_clause_e SEMICOLON            {: return for_clause_e; :}

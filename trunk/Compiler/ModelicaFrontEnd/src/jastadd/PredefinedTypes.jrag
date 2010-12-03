@@ -259,7 +259,11 @@ aspect PredefinedTypes {
 +"  input Real x;\n"      // Type not used
 +"  output Real y;\n"     // Type not used
 +"end noEvent;\n"
-+"function sample end sample;\n"
++"function sample\n"
++"  input Real start;\n"
++"  input Real interval;\n"
++"  output Real y;\n"     // Type not used
++"end sample;\n"
 +"function pre\n"
 +"  input Real x;\n"      // Type not used
 +"  output Real y;\n"     // Type not used

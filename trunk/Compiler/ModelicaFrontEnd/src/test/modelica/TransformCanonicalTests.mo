@@ -2336,4 +2336,25 @@ end IfEqu11;
 
 */
 
+
+model IfExpLeft1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IfExpLeft1",
+         description="If expression as left side of equation",
+         flatModel="
+fclass TransformCanonicalTests.IfExpLeft1
+ Real x;
+equation
+ (if time >= 1 then 1 else 0) = x;
+end TransformCanonicalTests.IfExpLeft1;
+")})));
+
+	Real x;
+equation
+	if time>=1 then 1 else 0 = x;
+end IfExpLeft1;
+
+
+
 end TransformCanonicalTests;

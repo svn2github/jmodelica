@@ -427,10 +427,21 @@ aspect Connections {
 		boolean leftOutside  = isOutsideConnector();
 		boolean rightOutside = right.isOutsideConnector();
 		
-		InstComponentDecl leftComp  = myInstComponentDecl().findCell(leftName);
-		InstComponentDecl rightComp = right.myInstComponentDecl().findCell(rightName);
-		
-		leftComp.connectTo(leftOutside, leftName, rightComp, rightOutside, rightName, csm);
+		if (isArray()) {
+			Indices ind = indices();
+			for (Index i : ind) {
+				Index j = ind.translate(i);
+				FQName leftCellName = leftName.copyReplacingSubscripts(i);
+				FQName rightCellName = rightName.copyReplacingSubscripts(i);
+				InstComponentDecl leftComp  = myInstComponentDecl().findCell(j, 0);
+				InstComponentDecl rightComp = right.myInstComponentDecl().findCell(j, 0);
+				leftComp.connectTo(leftOutside, leftCellName, rightComp, rightOutside, rightCellName, csm);
+			}
+		} else {
+			InstComponentDecl leftComp  = myInstComponentDecl().findCell(leftName);
+			InstComponentDecl rightComp = right.myInstComponentDecl().findCell(rightName);
+			leftComp.connectTo(leftOutside, leftName, rightComp, rightOutside, rightName, csm);
+		}
 	}
 	
 	public void InstComponentDecl.connectTo(boolean leftOutside, FQName leftName, 

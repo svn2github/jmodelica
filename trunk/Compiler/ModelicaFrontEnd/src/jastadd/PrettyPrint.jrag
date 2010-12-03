@@ -1470,6 +1470,7 @@ aspect FlattPrettyPrint {
 	eq FSizeExp.builtInName()        = "size";
 	eq FNoEventExp.builtInName()     = "noEvent";
 	eq FPreExp.builtInName()         = "pre";
+	eq FSampleExp.builtInName()      = "sample";
 	eq FIdentity.builtInName()       = "identity";
 	eq FOnes.builtInName()           = "ones";
 	eq FZeros.builtInName()          = "zeros";

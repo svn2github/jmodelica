@@ -1018,6 +1018,25 @@ aspect FlatNames {
     }
     
     /**
+     * \brief Create a copy of this name with array subscripts replaced 
+     *        with indices from <code>i</code>.
+     */
+    public FQName FQName.copyReplacingSubscripts(Index i) {
+        FQName res = new FQName();
+        int j = 0;
+        for (FQNamePart part : getFQNameParts()) {
+        	FQNamePart newPart = new FQNamePart(part.getName(), new Opt());
+        	if (part.hasFArraySubscripts()) {
+        		int n = part.getFArraySubscripts().getNumFSubscript();
+        		newPart.setFArraySubscripts(new FArraySubscripts(i, j, n));
+        		j += n;
+        	}
+        	res.addFQNamePart(newPart);
+        }
+        return res;
+    }
+    
+    /**
      * \brief Create an FIdUseExp using a copy of this name.
      */
     public FIdUseExp FQName.createFIdUseExp() {

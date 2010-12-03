@@ -299,7 +299,7 @@ Compliance error at line 288, column 3:
   initial(1);
   terminal();
   smooth(1);
-  sample();
+  sample(1,1);
   pre(x);
   edge();
   reinit(1);

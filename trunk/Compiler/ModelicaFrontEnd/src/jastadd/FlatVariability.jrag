@@ -43,6 +43,10 @@ aspect FlatVariability {
 	syn boolean FTypePrefixVariability.lessOrEqual(FTypePrefixVariability other) = 
 		variabilityLevel() <= other.variabilityLevel();
 	
+	syn boolean FTypePrefixVariability.parameterOrLess()  = lessOrEqual(fParameter());
+	syn boolean FTypePrefixVariability.discreteOrLess()   = lessOrEqual(fDiscrete());
+	syn boolean FTypePrefixVariability.continuousOrLess() = lessOrEqual(fContinuous());
+	
 	/**
 	 * \brief An ordering of the variability types.
 	 * 
@@ -226,7 +230,8 @@ aspect FlatVariability {
 	eq FZeros.variability()      = fConstant();
 	eq FFillExp.variability()    = getFillExp().variability();
 	
-	eq FPreExp.variability()  = fDiscrete();
+	eq FPreExp.variability()     = fDiscrete();
+	eq FSampleExp.variability()  = fDiscrete();
 	
 	syn int FTypePrefixVariability.combineLevel() = variabilityLevel() * 10;
 	

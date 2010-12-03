@@ -1150,7 +1150,8 @@ aspect ConstantEvaluation {
   
   eq FNoEventExp.cevalCalc() = getFExp().ceval();
   
-  eq FPreExp.cevalCalc() = CValue.UNKNOWN;
+  eq FPreExp.cevalCalc()    = CValue.UNKNOWN;
+  eq FSampleExp.cevalCalc() = CValue.UNKNOWN;
   
   syn boolean FMinMaxExp.selectLesser();
   eq FMinExp.selectLesser() = true;

@@ -2038,5 +2038,22 @@ end ArrayBuiltins.PreTest1;
 end PreTest1;
 
 
+model SampleTest1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="SampleTest1",
+         description="sample(): basic test",
+         flatModel="
+fclass ArrayBuiltins.SampleTest1
+ Boolean x;
+equation
+ x = sample(0, 1);
+end ArrayBuiltins.SampleTest1;
+")})));
+
+	Boolean x = sample(0, 1);
+end SampleTest1;
+
+
 
 end ArrayBuiltins;

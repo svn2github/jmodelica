@@ -1621,6 +1621,8 @@ aspect Scalarization {
 	public FExp FLitExp.scalarizeExp(Map<String,FExp> indexMap) { return (FLitExp) fullCopy(); }
 	public FExp FDerExp.scalarizeExp(Map<String,FExp> indexMap) { return new FDerExp(getFIdUse().scalarize(indexMap)); }
 	
+	public FExp FSampleExp.scalarizeExp(Map<String,FExp> indexMap) { return new FSampleExp(getSample().scalarize(indexMap), getInterval().scalarize(indexMap)); }
+	
 	public FExp FFunctionCall.scalarizeExp(Map<String,FExp> indexMap) {
 		if (isComposite() && functionCallIsExp())
 			return new FIdUseExp(tempVarName());

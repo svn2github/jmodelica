@@ -333,6 +333,13 @@ aspect FlatTypeAnalysis {
 	// TODO: expand to handle boolean and enum index
 	eq FEndExp.type() = fIntegerScalarType();
 	
+	eq FSampleExp.type() {
+		for (FExp ch : childFExps())
+			if (!ch.variability().parameterOrLess())
+				return fUnknownType();
+		return fBooleanScalarType();
+	}
+	
 	/**
 	 * \brief Check if this FArray is on the form "{exp for i in exp}".
 	 */

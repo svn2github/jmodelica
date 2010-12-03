@@ -386,6 +386,16 @@ aspect Constructors {
 	}
 	
 	/**
+	 * \brief Create a new FArraySubscripts <code>n</code> literal subscripts from 
+	 *        <code>i</code>, starting at <code>j</code>.
+	 */
+	public FArraySubscripts.FArraySubscripts(Index i, int j, int n) {
+		this();
+		for (int k = j; k < n+j; k++)
+			addFSubscript(new FExpSubscript(i.get(k)));
+	}
+	
+	/**
 	 * \brief Create a new FArraySubscripts containing <code>n</code> {@link FColonSubscript}s.
 	 */
 	public static FArraySubscripts FArraySubscripts.createFColonSubscripts(int n) {
@@ -482,6 +492,7 @@ aspect InheritedFactoryMethods {
 	public FTimeExp        FTimeExp.createEmptyNode()        { return new FTimeExp();        }
 	public FNoEventExp     FNoEventExp.createEmptyNode()     { return new FNoEventExp();     }
 	public FPreExp         FPreExp.createEmptyNode()         { return new FPreExp();         }
+	public FSampleExp      FSampleExp.createEmptyNode()      { return new FSampleExp();      }
 	public FNoExp          FNoExp.createEmptyNode()          { return new FNoExp();          }
 	public FUnknownSizeExp FUnknownSizeExp.createEmptyNode() { return new FUnknownSizeExp(); }
 	

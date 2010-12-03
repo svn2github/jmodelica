@@ -283,15 +283,43 @@ end ConnectTest6;
 
 // TODO: this throws exception during flattening
 model ConnectTest7
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ConnectTest7",
+         description="Connecting arrays of connectors",
+         flatModel="
+fclass ConnectTests.ConnectTest7
+ Real a1[1].x;
+ Real a1[1].y;
+ Real a1[2].x;
+ Real a1[2].y;
+ Real a2[1].x;
+ Real a2[1].y;
+ Real a2[2].x;
+ Real a2[2].y;
+equation
+ a1[1:2].x = ones(2);
+ a1[1].x = a2[1].x;
+  - ( a1[1].y ) - ( a2[1].y ) = 0;
+ a1[2].x = a2[2].x;
+  - ( a1[2].y ) - ( a2[2].y ) = 0;
+ a1[1].y = 0;
+ a1[2].y = 0;
+ a2[1].y = 0;
+ a2[2].y = 0;
+end ConnectTests.ConnectTest7;
+")})));
+
     connector A
         Real x;
         flow Real y;
     end A;
     
-    A a1[3];
-    A a2[3];
+    A a1[2];
+    A a2[2];
 equation
     connect(a1, a2);
+    a1.x = ones(2);
 end ConnectTest7;
 
 
