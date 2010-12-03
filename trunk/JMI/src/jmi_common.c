@@ -298,6 +298,49 @@ int jmi_dae_init(jmi_t* jmi,
 	return 0;
 }
 
+int jmi_info_init(jmi_t* jmi, fmiString instance_name, fmiString guid, fmiBoolean logging_on){
+	fmiBoolean* tmpguid;
+	fmiBoolean* tmpname;
+	size_t name_len;
+	size_t guid_len;
+	
+	/* Create jmi_info struct */
+	jmi_info_t* info = (jmi_info_t*)calloc(1,sizeof(jmi_info_t));
+	jmi->info = info;
+	
+	/* Copy guid */
+	guid_len = strlen(guid)+1;
+    tmpguid = (fmiBoolean*)calloc(guid_len, sizeof(fmiBoolean));
+    strncpy(tmpguid, guid, guid_len);
+    jmi->info->guid = tmpguid;
+	
+	/* Copy instance name */
+	name_len = strlen(instance_name)+1;
+    tmpname = (fmiBoolean*)calloc(name_len, sizeof(fmiBoolean));
+    strncpy(tmpname, instance_name, name_len);
+    jmi->info->guid = tmpname;
+	
+	/* Set logging */
+	jmi->info->logging_on = logging_on;
+
+	return 0;
+}
+
+int jmi_sim_init(jmi_t* jmi, fmiReal relative_tolerance){
+	
+	/* Create jmi_sim struct */
+	jmi_sim_t* sim = (jmi_sim_t*)calloc(1, sizeof(jmi_sim_t));
+	jmi->sim = sim;
+	
+	jmi->sim->relative_tolerance = relative_tolerance;
+	jmi->sim->sfac_events = 0.0001; /* Safety factor from FMI specification. */
+	jmi->sim->sfac_newton = 0.01; /* This safety factor needs more investigation. */
+	jmi->sim->event_epsilon = jmi->sim->sfac_events*relative_tolerance;
+	jmi->sim->newton_tolerance = jmi->sim->sfac_newton*relative_tolerance;
+	
+	return 0;
+}
+
 int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, int n, int index) {
 	jmi_block_residual_t* b;
 	int flag;
