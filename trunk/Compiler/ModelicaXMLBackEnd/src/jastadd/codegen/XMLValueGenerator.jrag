@@ -74,7 +74,7 @@ public class XMLValueGenerator extends GenericGenerator{
 		
 		protected void printParameterList(Iterable<? extends FVariable> list, PrintStream genPrinter) {
 			for (FVariable fv : list) {
-				genPrinter.print("\t <" + fv.type() + "Parameter ");
+				genPrinter.print("\t <" + fv.type().getXMLType() + "Parameter ");
 				genPrinter.print("name=\"" + fv.name() + "\" ");
 				genPrinter.print("value=\"" + fv.ceval().valueXML() + "\"");
 				genPrinter.print("/>\n");
@@ -115,4 +115,7 @@ aspect XMLValueMethods {
 		return convertInteger();
 	}
 
+	syn String FType.getXMLType() = toString();
+	
+	eq FEnumType.getXMLType() = "Enum";
 }

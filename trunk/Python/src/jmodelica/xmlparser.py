@@ -4811,6 +4811,8 @@ class XMLValuesDoc(XMLBaseDoc):
                 iparam_values.append(vals[index]=="true")
             elif type_ == 'StringParameter':
                 iparam_values.append(str(vals[index]))
+            elif type_ == 'EnumParameter':
+                iparam_values.append(int(vals[index]))
             else:
                 pass
                 # enumeration not supported yet
