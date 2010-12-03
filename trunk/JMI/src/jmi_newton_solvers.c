@@ -30,23 +30,14 @@
 /*Kinsol function wrapper*/
 int kin_f(N_Vector yy, N_Vector ff, void *problem_data){
 	
-	int i; /*Iteration variable*/
 	realtype *y, *f;
 	jmi_block_residual_t *block = problem_data;
 
 	y = NV_DATA_S(yy); /*y is now a vector of realtype*/
 	f = NV_DATA_S(ff); /*f is now a vector of realtype*/
 
-	for(i=0; i<block->n;i=i+1){ /*Update the variables in the block*/
-		block->x[i]=y[i];
-	}
+	block->F(block->jmi,y,f,JMI_BLOCK_EVALUATE); /*Evaluate the residual*/
 
-	block->F(block->jmi,block->x,block->res,JMI_BLOCK_EVALUATE); /*Evaluate the residual*/
-	
-	for(i=0; i<block->n;i=i+1){ /*Set the result to ff*/
-		f[i] = block->res[i];
-	}
-	
 	return KIN_SUCCESS; /*Success*/
 	/*return 1;  //Recoverable error*/
 	/*return -1; //Unrecoverable error*/
