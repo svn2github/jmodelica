@@ -1021,6 +1021,56 @@ class ModelDescription:
                     nominals.append(None)
         return zip(tuple(self._vrefs_noAlias),tuple(nominals))
 
+    def get_variable_fixed_attributes(self, include_alias=True, 
+        ignore_cache=False):
+        """ 
+        Get the fixed attribute of the variables in the model.
+        
+        Parameters::
+        
+            include_alias --
+                If True, also include variables which are alias variables in the 
+                result. If False, only non-alias variables will be included in 
+                the result.
+                Default: True
+                
+            ignore_cache -- 
+                If False look for the value in the cache first, if True skip 
+                cache and derive value from data structure.
+                Default: False
+        
+        Returns::
+        
+            A list of tuples containing value reference and value of fixed 
+            attribute respectively.
+        """
+        if not ignore_cache:
+            return self.function_cache.get(self, 
+                'get_variable_fixed_attributes', include_alias)
+        
+        fixeds = []
+        scalarvariables = self.get_model_variables()
+        
+        if include_alias:
+            for sv in scalarvariables:
+                ftype = sv.get_fundamental_type()
+                if isinstance(ftype, Real):
+                    fixeds.append(ftype.get_fixed())
+                else:
+                    fixeds.append(None)
+            return zip(tuple(self._vrefs),tuple(fixeds))
+        
+        for sv in scalarvariables:
+            ftype = sv.get_fundamental_type()
+            if sv.get_alias() == NO_ALIAS:
+                if isinstance(ftype, Real):
+                    fixeds.append(ftype.get_fixed())
+                else:
+                    fixeds.append(None)
+        return zip(tuple(self._vrefs_noAlias),tuple(fixeds))
+
+
+
     def get_variable_start_attributes(self, include_alias=True, 
         ignore_cache=False):
         """ 
@@ -1630,6 +1680,186 @@ class ModelDescription:
                     start_attributes.append(sv.get_fundamental_type().get_start())
         return zip(tuple(vrefs), tuple(start_attributes))
 
+############################
+    def get_dx_fixed(self, include_alias=True, ignore_cache=False):
+        """ 
+        Get the fixed attributes of the derivatives 
+        (variable_category:derivative) in the model.
+        
+        Parameters::
+        
+            include_alias --
+                If True, also include variables which are alias variables in the 
+                result. If False, only non-alias variables will be included in 
+                the result.
+                Default: True
+            ignore_cache -- 
+                If False look for the value in the cache first, if True skip 
+                cache and derive value from data structure.
+                Default: False
+        
+        Returns::
+        
+            A list of tuples containing value reference and value of fixed 
+            attribute respectively.
+        """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_dx_fixed', include_alias)
+        
+        vrefs = []
+        fixed_attributes = []
+        scalarvariables = self.get_model_variables()
+        
+        if include_alias:
+            for sv in scalarvariables:
+                if sv.get_variable_category() == DERIVATIVE:
+                    vrefs.append(sv.get_value_reference())
+                    fixed_attributes.append(sv.get_fundamental_type().get_fixed())
+            return zip(tuple(vrefs), tuple(fixed_attributes))
+            
+        for sv in scalarvariables:
+            if sv.get_alias() == NO_ALIAS and \
+               sv.get_variable_category() == DERIVATIVE:
+                    vrefs.append(sv.get_value_reference())
+                    fixed_attributes.append(sv.get_fundamental_type().get_fixed())
+        return zip(tuple(vrefs), tuple(fixed_attributes))
+                    
+    def get_x_fixed(self, include_alias=True, ignore_cache=False):
+        """ 
+        Get the fixed attributes of the states (variable_category:state) in the 
+        model.
+        
+        Parameters::
+        
+            include_alias --
+                If True, also include variables which are alias variables in the 
+                result. If False, only non-alias variables will be included in 
+                the result.
+                Default: True
+            ignore_cache -- 
+                If False look for the value in the cache first, if True skip 
+                cache and derive value from data structure.
+                Default: False
+        
+        Returns::
+        
+            A list of tuples containing value reference and value of fixed 
+            attribute respectively.
+        """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_x_fixed', include_alias)
+        
+        vrefs = []
+        fixed_attributes = []
+        scalarvariables = self.get_model_variables()
+        
+        if include_alias:
+            for sv in scalarvariables:
+                if sv.get_variable_category() == STATE:
+                    vrefs.append(sv.get_value_reference())
+                    fixed_attributes.append(sv.get_fundamental_type().get_fixed())
+            return zip(tuple(vrefs), tuple(fixed_attributes))
+            
+        for sv in scalarvariables:
+            if sv.get_alias() == NO_ALIAS and \
+               sv.get_variable_category() == STATE:
+                    vrefs.append(sv.get_value_reference())
+                    fixed_attributes.append(sv.get_fundamental_type().get_fixed())
+        return zip(tuple(vrefs), tuple(fixed_attributes))
+                    
+    def get_u_fixed(self, include_alias=True, ignore_cache=False):
+        """ 
+        Get the fixed attributes of the inputs (variable_category:algebraic, 
+        causality: input) in the model.
+        
+        Parameters::
+        
+            include_alias --
+                If True, also include variables which are alias variables in the 
+                result. If False, only non-alias variables will be included in 
+                the result.
+                Default: True
+            ignore_cache -- 
+                If False look for the value in the cache first, if True skip 
+                cache and derive value from data structure.
+                Default: False
+        
+        Returns::
+        
+            A list of tuples containing value reference and value of fixed 
+            attribute respectively.
+        """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_u_fixed', include_alias)
+        
+        vrefs = []
+        fixed_attributes = []
+        scalarvariables = self.get_model_variables()
+        
+        if include_alias:
+            for sv in scalarvariables:
+                if sv.get_causality() == INPUT and \
+                sv.get_variable_category() == ALGEBRAIC:
+                    vrefs.append(sv.get_value_reference())
+                    fixed_attributes.append(sv.get_fundamental_type().get_fixed())
+            return zip(tuple(vrefs), tuple(fixed_attributes))
+            
+        for sv in scalarvariables:
+            if sv.get_alias() == NO_ALIAS and \
+               sv.get_causality() == INPUT and \
+               sv.get_variable_category() == ALGEBRAIC:
+                    vrefs.append(sv.get_value_reference())
+                    fixed_attributes.append(sv.get_fundamental_type().get_fixed())
+        return zip(tuple(vrefs), tuple(fixed_attributes))
+
+    def get_w_fixed(self, include_alias=True, ignore_cache=False):
+        """ 
+        Get the fixed attributes of the algebraic variables 
+        (variable_category:algebraic, causality: not input) in the model.
+        
+        Parameters::
+        
+            include_alias --
+                If True, also include variables which are alias variables in the 
+                result. If False, only non-alias variables will be included in 
+                the result.
+                Default: True
+            ignore_cache -- 
+                If False look for the value in the cache first, if True skip 
+                cache and derive value from data structure.
+                Default: False
+        
+        Returns::
+        
+            A list of tuples containing value reference and value of fixed 
+            attribute respectively.
+        """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_w_fixed', include_alias)
+        
+        vrefs = []
+        fixed_attributes = []
+        scalarvariables = self.get_model_variables()
+        
+        if include_alias:
+            for sv in scalarvariables:
+                if sv.get_causality() != INPUT and \
+                sv.get_variable_category() == ALGEBRAIC:
+                    vrefs.append(sv.get_value_reference())
+                    fixed_attributes.append(sv.get_fundamental_type().get_fixed())
+            return zip(tuple(vrefs), tuple(fixed_attributes))
+            
+        for sv in scalarvariables:
+            if sv.get_alias() == NO_ALIAS and \
+               sv.get_causality() != INPUT and \
+               sv.get_variable_category() == ALGEBRAIC:
+                    vrefs.append(sv.get_value_reference())
+                    fixed_attributes.append(sv.get_fundamental_type().get_fixed())
+        return zip(tuple(vrefs), tuple(fixed_attributes))
+
+
+
+#############################
     def get_p_opt_initial_guess(self, include_alias=True, ignore_cache=False):
         """ 
         Get value reference and initial guess attribute for all optimized 

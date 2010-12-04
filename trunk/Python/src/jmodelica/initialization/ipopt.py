@@ -266,6 +266,28 @@ class NLPInitialization(object):
 
         self._model._set_lin_values(_p_opt_lin, _dx_lin, _x_lin, _u_lin, _w_lin, 
                                     _dx_tp_lin, _x_tp_lin, _u_tp_lin, _w_tp_lin)
+
+        # Modify the linearity information in the case of initialization.
+        # All states and algebraics with fixed=false end up in the
+        # quadratic cost function in the initialization problem and
+        # are thus non-linear.
+
+        if stat==0:
+            # x: differentiated variables
+            fixeds = self._model._xmldoc.get_x_fixed(include_alias=False)
+            for fix in fixeds:
+                if fix[1] == False:
+                    (z_i, ptype) = jmi._translate_value_ref(fix[0])
+                    i_x = z_i - self._model._offs_real_x.value
+                    _x_lin[i_x] = 0
+                            
+            # w: algebraic
+            fixeds = self._model._xmldoc.get_w_fixed(include_alias=False)
+            for fix in fixeds:
+                if fix[1] == False:
+                    (z_i, ptype) = jmi._translate_value_ref(fix[0])
+                    i_w = z_i - self._model._offs_real_w.value
+                    _w_lin[i_w] = 0
         
         self._set_typedef_init_opt_new()
 #        try:       
