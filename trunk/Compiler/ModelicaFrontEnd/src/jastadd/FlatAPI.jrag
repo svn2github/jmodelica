@@ -695,10 +695,15 @@ aspect FlatAPI {
 	syn FExp FVariable.paramValueExp() = hasBindingExp() ? getBindingExp() : startAttributeExp();
 	
 	syn boolean FVariable.isVariable() = !isParameter() && !isConstant();
+	
+	syn boolean AbstractFVariable.isDifferentiatedVariable() = false;
 	syn lazy boolean FVariable.isDifferentiatedVariable() = 
 	  myFClass().differentiatedRealVariables().contains(this);
-	syn lazy boolean FVariable.isDerivativeVariable() = false;
+	  
+	syn boolean AbstractFVariable.isDerivativeVariable() = false;
 	eq FDerivativeVariable.isDerivativeVariable() = true;
+	
+	syn boolean AbstractFVariable.isAlgebraicVariable() = false;
 	syn lazy boolean FVariable.isAlgebraicVariable() = 
 		  myFClass().algebraicRealVariables().contains(this) ||
 		  myFClass().discreteRealVariables().contains(this) ||
@@ -706,6 +711,8 @@ aspect FlatAPI {
 		  myFClass().integerVariables().contains(this) || 
 		  myFClass().booleanVariables().contains(this) ||
 		  myFClass().stringVariables().contains(this);
+
+	syn boolean AbstractFVariable.isDiscreteVariable() = false;
 	syn lazy boolean FVariable.isDiscreteVariable() = 
 		  myFClass().discreteVariables().contains(this);
 
@@ -717,7 +724,7 @@ aspect FlatAPI {
 	coll ArrayList<FVariable> FVariable.referencedFVariablesInBindingExp() 
 	  [new ArrayList<FVariable>()] with add root FlatRoot;
 	FIdUseExp contributes
-		(FVariable)myFV() when !myFV().isUnknown()
+		(FVariable)myFV() when !myFV().isUnknown() && myFV() instanceof FVariable
 	to FVariable.referencedFVariablesInBindingExp() for inBindingExp();
 	
 	public static Set<FVariable> ASTNode.parametersInSet(Set<? extends AbstractFVariable> set) {
@@ -1061,7 +1068,7 @@ aspect FVariableUses {
 	
 	FIdUseExp contributes boundParameters() 
 		when !(getParent() instanceof FDerExp) && !myFV().isUnknown() && 
-		     ((FVariable) myFV()).isParameter()
+		     myFV().isParameter()
 		to AbstractFVariable.dependentParameters() for myFV();
 	
 	syn lazy ArrayList<FRealVariable> AbstractFVariable.dependentRealParameters() =
@@ -1085,7 +1092,7 @@ aspect FVariableUses {
 
 	FIdUseExp contributes (FVariable)myFV() when !myFV().isUnknown() && 
 		!(getParent() instanceof FDerExp) && !(getParent() instanceof FPreExp) && 
-		((FVariable)myFV()).isAlgebraicVariable() to 
+		myFV().isAlgebraicVariable() to 
 		FAbstractEquation.retrieveAlgebraicVariables() for myFEquation();
 
 	syn lazy LinkedHashSet<FVariable> FAbstractEquation.algebraicVariables() = 
@@ -1108,7 +1115,7 @@ aspect FVariableUses {
 		[new LinkedHashSet<FDerivativeVariable>()] with add root FAbstractEquation;
 
 	FDerExp contributes (FDerivativeVariable)myFV() when !myFV().isUnknown() && 
-		((FDerivativeVariable)myFV()).isDerivativeVariable() to 
+		myFV().isDerivativeVariable() to 
 		FAbstractEquation.derivativeVariables() for myFEquation();
 
 	/**
@@ -1119,7 +1126,7 @@ aspect FVariableUses {
 		[new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
 
 	FIdUseExp contributes (FVariable)myFV() when !myFV().isUnknown() && 
-	    !(getParent() instanceof FDerExp) && ((FVariable)myFV()).isDifferentiatedVariable() to 
+	    !(getParent() instanceof FDerExp) && myFV().isDifferentiatedVariable() to 
 		FAbstractEquation.differentiatedVariables() for myFEquation();
 
 	/**
@@ -1130,7 +1137,8 @@ aspect FVariableUses {
 		[new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
 
 	FIdUseExp contributes (FVariable)myFV() when !myFV().isUnknown() && 
-	    !(getParent() instanceof FDerExp) && !(getParent() instanceof FPreExp) && ((FVariable)myFV()).isDiscreteVariable() to 
+	    !(getParent() instanceof FDerExp) && !(getParent() instanceof FPreExp) && 
+	    myFV().isDiscreteVariable() to 
 		FAbstractEquation.discreteVariables() for myFEquation();
 	
 	/**
