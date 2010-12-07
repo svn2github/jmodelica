@@ -275,7 +275,65 @@ public class BiPGraph {
 		return l;
 	}
 	
-    public LinkedList<Stack<Eq>> computeBLT() {
+	private int index = 0;
+    private Stack<Eq> S;
+    private LinkedList<Stack<Eq>> components;
+		
+    /* This is an implementation of the recursive Tarjan's algorithm.
+     * Possibly it is less efficient than the non-recursive version, but
+     * it seems to work fine.
+     */
+	public LinkedList<Stack<Eq>> computeBLT() {
+		
+		index = 0;
+        S = new Stack<Eq>();
+        components = new LinkedList<Stack<Eq>>();
+        tarjanReset();
+        
+        for (Eq e : getEquations()) {
+        	if (!e.isVisited()) {
+        		tarjan(e);
+        	}
+        }
+				
+        return components;
+	}
+	
+	public void tarjan(Eq e) {
+		S.add(e);
+		e.setTarjanNbr(index);
+		e.setTarjanLowLink(index);
+		e.setVisited(true);
+		index++;
+		for (Var v : e.getVariables()) {
+			Eq ee = v.getMatching();
+			if (!(e==ee)) {
+				if (!ee.isVisited()) {
+					tarjan(ee);
+					e.setTarjanLowLink(Math.min(
+							e.getTarjanLowLink(),ee.getTarjanLowLink()));
+				} else if (S.contains(ee)) {
+					e.setTarjanLowLink(Math.min(
+							e.getTarjanLowLink(),ee.getTarjanNbr()));
+				}
+			}
+ 		}
+		if (e.getTarjanNbr()==e.getTarjanLowLink()) {
+			Stack<Eq> component = new Stack<Eq>();
+			boolean done = false;
+			while (!done) {
+				Eq ee = S.pop();
+				component.add(ee);
+				if (ee==e) {
+					done = true;
+				}
+			}
+			components.add(component);
+		}
+	}
+	
+	
+    public LinkedList<Stack<Eq>> _computeBLT() {
 
         int nbr = 0;
         Stack<Eq> stack = new Stack<Eq>();
@@ -287,30 +345,30 @@ public class BiPGraph {
 //        while (!activeEqns.empty()) {
  //           Equation eq = activeEqns.pop();
 
-//            System.out.println("active: " + eqn);
+            System.out.println("-------- tarjan start: " + eqn);
 
             if (eqn.getTarjanNbr() == 0) {
                 eqn.setTarjanNbr(++nbr);
                 eqn.setTarjanLowLink(nbr);
 
-                //System.out.println("push: " + eqn);
+//                System.out.println("push: " + eqn);
                 stack.push(eqn);
                 eStack.push(eqn);
 
                 while (!stack.empty()) {
                     eqn = stack.peek();
                     Var var = eqn.getNextVariable();
-
+                    
                     if (var != null) {
-                        //System.out.println("top: " + eqn + " - " + var);
+//                        System.out.println("top: " + eqn + " - " + var);
                         Eq eqn2 = var.getMatching();
-                        //System.out.println("match: " + eqn2);
-
-                        if (eqn2.getTarjanNbr() == 0) {
-                            eqn2.setTarjanNbr(++nbr);
+                        
+                        if (/*eqn!=eqn2 &&*/ eqn2.getTarjanNbr() == 0) {
+                        	System.out.println("***** tarjan start 2: " + eqn2);
+                        	eqn2.setTarjanNbr(++nbr);
                             eqn2.setTarjanLowLink(nbr);
-
-                            //System.out.println("push: " + eqn2);
+                            
+//                            System.out.println("push: " + eqn2);
 
                             stack.push(eqn2); // recurse
                             eStack.push(eqn2);
@@ -321,15 +379,19 @@ public class BiPGraph {
                             }
                         }
                     } else {
+                    	  System.out.println("tarjan stack: " + eqn);
+                    	  for (Eq ee : eStack) {
+                    		  System.out.println(ee + ".index: " + ee.getTarjanNbr() + " " + ee + ".lowlink: " + ee.getTarjanLowLink());
+                    	  }
 //                        System.out.println("top: " + eqn + 
 //                            " - exhausted variables (estack = " + eStack.size() + ")");
 
                         if (eqn.getTarjanLowLink() == eqn.getTarjanNbr()) {
-//                        	System.out.println("Heppp---------------");
+                        	System.out.println("Heppp---------------");
                             // 'eq' is the root of a strong component
                             if (!eStack.empty()) {
                                 // new strong component
- //                               System.out.println("Strong component:");
+                                System.out.println("Strong component:");
                                 Eq eqn2 = eStack.peek();
 
 								/*
@@ -348,8 +410,8 @@ public class BiPGraph {
 
                                     comp.push(eqn2);
 									
-//                                    System.out.println("In COMPONENT: (" + eqn2 + 
-//                                                     ", " + eqn2.getMatching() + ")");
+                                    System.out.println("In COMPONENT: (" + eqn2 + 
+                                                     ", " + eqn2.getMatching() + ")");
 													 
 
                                     if (eStack.empty()) {
@@ -357,9 +419,9 @@ public class BiPGraph {
                                     } else {
                                         eqn2 = eStack.peek();
 										/*
-                                        System.out.println("that: " + eq2 + " (" + 
-                                                   eq2.getTarjanNbr() + ", " + 
-                                                   eq2.getTarjanLink() + ")");
+                                        System.out.println("that: " + eqn2 + " (" + 
+                                                   eqn2.getTarjanNbr() + ", " + 
+                                                   eqn2.getTarjanLink() + ")");
 										*/
                                     }
                                 }
@@ -371,7 +433,7 @@ public class BiPGraph {
                         }
 
                         Eq eqn2 = stack.pop();
-                        //System.out.println("pop: " + eq2);
+                        System.out.println("pop: " + eqn2);
                         if (!stack.empty()) {
                             eqn.setTarjanLowLink(Math.min(eqn.getTarjanLowLink(), 
                                                       eqn2.getTarjanLowLink()));

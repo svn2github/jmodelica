@@ -25,4 +25,4 @@ __all__ = [
     'simulation_with_input', 'if_example_1', 'if_example_2', 'crane', 
     'RLC_linearization', 'index_reduction_example', 'blt_example', 
     'lagrange_cost', 'fmi_bouncing_ball_native', 'fmi_bouncing_ball', 
-    'robertson', 'qt_par_est', 'extfunctions', 'fmu_with_input','crystallizer']
+    'robertson', 'qt_par_est', 'extfunctions', 'fmu_with_input','crystallizer','distillation_fmu']

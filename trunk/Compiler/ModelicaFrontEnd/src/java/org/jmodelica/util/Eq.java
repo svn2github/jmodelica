@@ -60,6 +60,7 @@ public class Eq {
 		setTarjanLowLink(0);
 		setTarjanNbr(0);
 		resetVariableIterator();
+		setVisited(false);
 	}
 	
 	public String getName() {

@@ -88,8 +88,6 @@ package DISTLib
   annotation (uses(Modelica(version="2.2.1")));
   package Examples 
     model Simulation 
-      Binary_Dist binary_dist 
-        annotation (Placement(transformation(extent={{6,6},{26,26}})));
       Modelica.Blocks.Sources.Step step(
         startTime=60,
         height=-1,
@@ -100,10 +98,6 @@ package DISTLib
         annotation (Placement(transformation(extent={{8,-20},{28,0}})));
       
     equation 
-      connect(step.y, binary_dist.u1) annotation (Line(
-          points={{-39,38},{-16,38},{-16,20},{8,20}},
-          color={0,0,127},
-          smooth=Smooth.None));
       connect(step.y,binary_dist_initial.u1) annotation (Line(
           points={{10,-6},{-16,-6},{-16,38},{-39,38}},
           color={0,0,127},

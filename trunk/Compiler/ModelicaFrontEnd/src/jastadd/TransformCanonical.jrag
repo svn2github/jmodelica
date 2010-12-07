@@ -91,6 +91,7 @@ aspect TransformCanonical {
 
 		if (root().options.getBooleanOption("index_reduction")) {
 			indexReduction();
+			blt();
 		}
 	
 	}
@@ -156,6 +157,25 @@ aspect TransformCanonical {
         eqSys.dumpGraph();
 			
 	}
+
+       public void FClass.blt() { 
+ 		                 
+ 		                LinkedList<Stack<org.jmodelica.graphs.Equation>> blt_result = eqSys.blt(); 
+ 		 
+ 	                StringBuffer str = new StringBuffer(); 
+ 		                str.append("BLT:\n"); 
+ 		                LinkedList<Stack<org.jmodelica.graphs.Equation>> blt = eqSys.blt(); 
+ 	                int i = 0; 
+ 		                for (Stack<org.jmodelica.graphs.Equation> s : blt_result) { 
+ 	                        str.append("Block "+i+":\n"); 
+ 		                        for (org.jmodelica.graphs.Equation e : s) { 
+ 		                                str.append(e + " (" + e.getMatch()+")\n"); 
+ 		                        } 
+ 		                        i++; 
+ 		                } 
+ 		                System.out.println(str.toString()); 
+ 		        } 
+
 
 	public class BLT extends ArrayList<EquationBlock> {
 	

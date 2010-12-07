@@ -115,6 +115,11 @@ def test_extfunctions():
     """ Test of simulation with external functions. """
     extfunctions.run_demo(False)
 
+@testattr(assimulo = True)
+def test_distillation_fmu():
+    """ Test of simulation of the distillation column using the FMU export. """
+    distillation_fmu.run_demo(False)
+
 @testattr(ipopt = True)
 def test_qt_par_est():
     """ Run parameter estimation example """
