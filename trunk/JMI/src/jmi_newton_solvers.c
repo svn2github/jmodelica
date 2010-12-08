@@ -72,7 +72,7 @@ void jmi_kinsol_error_handling(int flag){
 int jmi_kinsol_solve(jmi_block_residual_t * block){
 	int flag;
 	int i;
-	int verbosity = 1;
+	int verbosity = 0;
 
 	/*Check if the block is to be initialized.*/
 	if (block->init == 1){
