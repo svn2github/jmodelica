@@ -74,9 +74,9 @@ class JMUAlgebraic(ProblemAlgebraic):
         self._u_size = self._model._n_real_u.value
         self._mark = self._dx_size + self._x_size
         
-        print "Analysis of initialization problem..."
-        print "neq: ", self._neqF0
-        print "nvar: ", self._x_size + self._w_size + self._dx_size
+        #print "Analysis of initialization problem..."
+        #print "neq: ", self._neqF0
+        #print "nvar: ", self._x_size + self._w_size + self._dx_size
         
         if self._neqF0 != (self._x_size + self._w_size + self._dx_size):
             raise JMUAlgebraic_Exception("Model error: nb eqs not equal to nb vars")
@@ -335,7 +335,6 @@ class JMUAlgebraic(ProblemAlgebraic):
         """
         Fct used to guess the constraints based on the min and max values of the model.
         """
-        print "Reading constraints from model..."
         # get min and maxes from the model
         dx_min = self._model._xmldoc.get_dx_min()
         dx_max = self._model._xmldoc.get_dx_max()
@@ -529,7 +528,7 @@ class JMUAlgebraic(ProblemAlgebraic):
                     maxerrors.append((i,max))
                     
         if OK:
-            print "Result ok with model constraints"
+            pass
         else:
             print "Result breaks model constraints!"
             if minerrors != []:
