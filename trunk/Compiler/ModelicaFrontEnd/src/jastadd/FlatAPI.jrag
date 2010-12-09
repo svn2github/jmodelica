@@ -1221,6 +1221,33 @@ aspect FlatDiagnostics {
 		StringBuilder str = new StringBuilder();
 		str.append("Diagnostics for flattened class " + name() + "\n");
 
+		str.append(modelDiagnostics());
+		
+		str.append("\n");
+		
+		str.append(variableDiagnostics());
+		
+		str.append("\n");  
+
+		str.append(aliasDiagnostics());
+		
+		str.append("\n");  
+		
+		str.append(incidence());
+
+//		str.append("\n");
+		
+//		str.append(dersAndDiffs());
+		
+		str.append("\n");  
+		
+		str.append(getConnectionSetManager().printConnectionSets());
+		
+		return str.toString();
+	}
+
+	public String FClass.modelDiagnostics() {
+		StringBuilder str = new StringBuilder();
 		str.append("Number of independent constants:              " + 
 				numIndependentConstants() + "\n");
 		str.append("  Number of Real independent constants:       " + 
@@ -1346,27 +1373,8 @@ aspect FlatDiagnostics {
 
 		str.append("Number of relational exps in init equations:  " + 
 				numRelExpInInitialEquations() + "\n");
-		
-		str.append("\n");
-		
-		str.append(variableDiagnostics());
-		
-		str.append("\n");  
 
-		str.append(aliasDiagnostics());
-		
-		str.append("\n");  
-		
-		str.append(incidence());
 
-//		str.append("\n");
-		
-//		str.append(dersAndDiffs());
-		
-		str.append("\n");  
-		
-		str.append(getConnectionSetManager().printConnectionSets());
-		
 		return str.toString();
 	}
 

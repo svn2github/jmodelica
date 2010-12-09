@@ -83,7 +83,9 @@ public class OptionRegistry {
 					"Initial equations are added for states that are not matched to an equation."), 
 			COMPL_WARN ("compliance_as_warning", false, 
 					"When this option is set to true (default is false), then compliance errors are treated " + 
-					"as warnings instead. This can lead to the compiler or solver crashing. Use with caution!");
+					"as warnings instead. This can lead to the compiler or solver crashing. Use with caution!"),
+			GEN_HTML_DIAG ("generate_html_diagnostics", false, 
+					"When this option is set to true (default is false) model diagnostics is generated in HTML format ");
 						
 			public String key;
 			public String desc;

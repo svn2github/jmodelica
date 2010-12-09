@@ -176,9 +176,18 @@ aspect TransformCanonical {
  		                System.out.println(str.toString()); 
  		        } 
 
-
 	public class BLT extends ArrayList<EquationBlock> {
 	
+		public ArrayList<Integer> unsolvedBlockSizes() {
+			ArrayList<Integer> blockSizes = new ArrayList<Integer>();
+			for (EquationBlock b : this) {
+				if (!b.isSolved()) {
+					blockSizes.add(new Integer(b.activeVariables().size()));
+				}		
+			}
+			return blockSizes;
+		}
+		
 	}
 
 	public class EquationBlock {
@@ -217,6 +226,30 @@ aspect TransformCanonical {
 			} else {
 			    return null;
 			}
+		}
+						
+		public String toString() {
+			StringBuffer str = new StringBuffer();
+			str.append(isSolved()? ("Solved block of " + activeVariables().size() + " variables:\n"): 
+				("Non-solved block of " + activeVariables().size() + " variables:\n"));
+			if (isSolved()) {
+				str.append("Unknown variables:\n");
+				for (FVariable fv : activeVariables()) {
+					str.append("  " + fv.name() + "\n");
+				}
+				str.append("Solution:\n");
+				str.append("  " + solution().prettyPrint("") + "\n");
+			} else {
+				str.append("Unknown variables:\n");
+				for (FVariable fv : activeVariables()) {
+					str.append("  " + fv.name() + "\n");
+				}
+				str.append("Equations:\n");
+				for (FAbstractEquation feq : equations()) {
+					str.append("  " + feq.prettyPrint("") + "\n");			
+				}
+			}
+			return str.toString();
 		}
 		
 	}

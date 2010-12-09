@@ -123,6 +123,7 @@ public class ModelicaCompiler {
 	protected String xmlValuesTpl=null;
 	protected String cTemplatefile=null;
 	private OptionRegistry options = null;
+	private DiagnosticsGenerator diagGenerator= null;
 	
 	public ModelicaCompiler(OptionRegistry options, String xmlTpl, String xmlValuesTpl, String cTemplatefile) {
 		staticBlocks();
@@ -166,6 +167,14 @@ public class ModelicaCompiler {
 	
 	public void setBooleanOption(String key, boolean value) throws UnknownOptionException {
 		options.setBooleanOption(key, value);
+	}
+
+	public void setDiagnosticsGenerator(DiagnosticsGenerator diagGenerator) {
+		this.diagGenerator = diagGenerator;
+	}
+
+	public DiagnosticsGenerator getDiagnosticsGenerator() {
+		return this.diagGenerator;
 	}
 	
 	public String getOptionDescription(String key) throws UnknownOptionException {
@@ -375,6 +384,7 @@ public class ModelicaCompiler {
 		
 		SourceRoot sr = null;
 		try {
+
 			if (name.length == 0) {
 				// empty list of files -> class is instantiated from libraries
 				sr = new SourceRoot(new Program());
@@ -384,7 +394,11 @@ public class ModelicaCompiler {
 				sr = parseModel(name);
 			}
 //			dumpMemoryUseFile(sr, "source");  // TODO: add command-line arg for this
-			
+
+			if (sr.options.getBooleanOption("generate_html_diagnostics")) {
+				setDiagnosticsGenerator(new DiagnosticsGenerator(cl));
+			}
+
 			// compute instance tree
 			InstClassDecl icl = instantiateModel(sr, cl);
 			//icl.dumpTree("");
@@ -403,6 +417,12 @@ public class ModelicaCompiler {
 //			dumpNodeCountFile("node_count.txt");
 //			dumpMemoryUseFile(sr, "final source", "source2");
 		}
+
+		if (sr.options.getBooleanOption("generate_html_diagnostics")) {
+			getDiagnosticsGenerator().finalize();
+			setDiagnosticsGenerator(null);
+		}
+
 		log.info("====== Model compiled successfully =======");
 	}
 
@@ -550,9 +570,14 @@ public class ModelicaCompiler {
 				warnings.add(p);
 		}
 		
+		if (this.options.getBooleanOption("generate_html_diagnostics") &&
+		    getDiagnosticsGenerator()!=null) {
+			getDiagnosticsGenerator().writeProblems(problems);
+		}
+		
 		if (errors.size() > 0 || (warnings.size() > 0 && options.getBooleanOption("halt_on_warning"))) {
 			// there are errors -> add errors and possible warnings and throw exception or
-			// there are only warnings but compiler option sais throw exception
+			// there are only warnings but compiler option sais throw exception			
 			
 			CompilerException ce = new CompilerException();
 			for (Problem e : errors) 
@@ -620,7 +645,12 @@ public class ModelicaCompiler {
 
 		log.info("Raw flattened model:");		
 		log.info(fc.prettyPrint(""));
-	   	
+
+		if (fc.root().options.getBooleanOption("generate_html_diagnostics") &&
+		    getDiagnosticsGenerator()!=null) {
+			getDiagnosticsGenerator().writeRawFlattenedModel(fc);
+		}
+		
 		fc.transformCanonical();
 				
 		log.debug("Creating transformed .mof file...");
@@ -635,7 +665,23 @@ public class ModelicaCompiler {
 		log.info("Transformed flattened model:");		
 		log.info(fc.prettyPrint(""));
 
+		if (fc.root().options.getBooleanOption("generate_html_diagnostics") &&
+		    getDiagnosticsGenerator()!=null) {
+			getDiagnosticsGenerator().writeTransformedFlattenedModel(fc);
+		}
+
 		Collection<Problem> problems = fc.errorCheck();
+
+		if (fc.root().options.getBooleanOption("generate_html_diagnostics") &&
+		    getDiagnosticsGenerator()!=null) {
+			getDiagnosticsGenerator().writeProblems(problems);
+		}
+
+		if (fc.root().options.getBooleanOption("generate_html_diagnostics") &&
+		    getDiagnosticsGenerator()!=null) {
+			getDiagnosticsGenerator().writeDiagnostics(fc);
+		}
+
 		if (problems.size() > 0) 
 			handleCompilerProblems(problems);
 
