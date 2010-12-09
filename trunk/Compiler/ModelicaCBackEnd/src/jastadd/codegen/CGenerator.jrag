@@ -262,6 +262,7 @@ public class CGenerator extends GenericGenerator {
 				for (EquationBlock block : fclass.getDAEBLT()) {
 				    if (!block.isSolved()) {
 						genPrinter.print("static int dae_block_"+block_counter+"(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {\n");
+						genPrinter.print("  jmi_real_t** res = &residual;\n");	
 						genPrinter.print("  if (init==JMI_BLOCK_INITIALIZE) {\n");
 						int var_counter = 0;
 						// Loop over all active variables and write their value to x	
@@ -277,7 +278,6 @@ public class CGenerator extends GenericGenerator {
 							var_counter++;
 						}
 						// Write the residual expressions
-						genPrinter.print("  jmi_real_t** res = &residual;\n");
 						int equation_counter = 0;
 						for (FAbstractEquation e : block.equations()) {
 							e.genResidual_C(equation_counter,INDENT,genPrinter);				
@@ -360,6 +360,7 @@ public class CGenerator extends GenericGenerator {
 				for (EquationBlock block : fclass.getDAEInitBLT()) {
 				    if (!block.isSolved()) {
 						genPrinter.print("static int dae_init_block_"+block_counter+"(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {\n");
+						genPrinter.print("  jmi_real_t** res = &residual;\n");
 						genPrinter.print("  if (init==JMI_BLOCK_INITIALIZE) {\n");
 						int var_counter = 0;
 						// Loop over all active variables and write their value to x	
@@ -375,7 +376,6 @@ public class CGenerator extends GenericGenerator {
 							var_counter++;
 						}
 						// Write the residual expressions
-						genPrinter.print("  jmi_real_t** res = &residual;\n");
 						int equation_counter = 0;
 						for (FAbstractEquation e : block.equations()) {
 							e.genResidual_C(equation_counter,INDENT,genPrinter);				
