@@ -19,6 +19,7 @@ Module for writing optimization and simulation results to file.
 """
 from operator import itemgetter
 import array
+import codecs
 
 import numpy as N
 import scipy.io
@@ -73,7 +74,7 @@ def export_result_dymola(model, data, file_name='', format='txt', scaled=False):
             file_name=model.get_name() + '_result.txt'
 
         # Open file
-        f = open(file_name,'w')
+        f = codecs.open(file_name,'w','utf-8')
 
         # Write header
         f.write('#1\n')
@@ -248,7 +249,7 @@ class ResultDymolaTextual:
             fname --
                 Name of file.
         """
-        fid = open(fname,'r')
+        fid = codecs.open(fname,'r','utf-8')
         
         result  = [];
      
@@ -728,7 +729,7 @@ class ResultWriterDymolaSensitivity(ResultWriter):
             file_name=model.get_name() + '_result.txt'
 
         # Open file
-        f = open(file_name,'w')
+        f = codecs.open(file_name,'w','utf-8')
         self._file_open = True
 
         # Write header
@@ -1016,7 +1017,7 @@ class ResultWriterDymola(ResultWriter):
             file_name=self.model.get_name() + '_result.txt'
 
         # Open file
-        f = open(file_name,'w')
+        f = codecs.open(file_name,'w','utf-8')
         self._file_open = True
         
         # Write header
