@@ -44,21 +44,25 @@ int kin_f(N_Vector yy, N_Vector ff, void *problem_data){
 }
 
 void kin_err(int err_code, const char *module, const char *function, char *msg, void *eh_data){
-	if (err_code > 0){ /*Warning*/
-		printf("[KINSOL WARNING] ");
+
+/*	if (err_code > 0){ /*Warning*/
+/*		printf("[KINSOL WARNING] ");
 	}else if (err_code < 0){ /*Error*/
-		printf("[KINSOL ERROR] ");
+/*		printf("[KINSOL ERROR] ");
 	}
 	printf(function);
 	printf(" ");
 	printf(msg);
 	printf("\n");
+	*/
 }
 
 void kin_info(const char *module, const char *function, char *msg, void *eh_data){
+
 	printf("[KINSOL INFO] ");
 	printf(msg);
 	printf("\n");
+
 }
 
 
