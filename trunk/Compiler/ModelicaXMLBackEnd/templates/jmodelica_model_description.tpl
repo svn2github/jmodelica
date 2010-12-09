@@ -13,7 +13,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
-
+<?xml version="1.0" encoding="UTF-8"?>
 <jmodelicaModelDescription $XML_namespaces$ 
 $XML_rootAttributes$>
 	$XML_unitDefinitions$

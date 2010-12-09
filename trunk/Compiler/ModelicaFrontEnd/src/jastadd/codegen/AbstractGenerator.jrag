@@ -138,7 +138,7 @@ public abstract class AbstractGenerator {
 	  throws FileNotFoundException {
 		try {
 			BufferedReader template = new BufferedReader(new FileReader(new File(templateFile)));
-			PrintStream output = new PrintStream(new File(outputFile));
+			PrintStream output = new PrintStream(new File(outputFile), "UTF-8");
 			generate(template, output);
 			template.close();
 			output.close();
