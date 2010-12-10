@@ -261,7 +261,7 @@ model UnsupportedBuiltins3_ComplErr
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.ComplianceErrorTestCase(
          name="UnsupportedBuiltins3_ComplErr",
-         description="",
+         description="Compliance error for unsupported builtins",
          errorMessage="
 9 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
@@ -296,7 +296,7 @@ Compliance error at line 288, column 3:
   discrete Real x;
  equation
   semiLinear();
-  initial(1);
+  initial();
   terminal();
   smooth(1);
   sample(1,1);

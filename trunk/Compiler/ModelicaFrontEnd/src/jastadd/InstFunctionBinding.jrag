@@ -246,6 +246,7 @@ aspect InstFunctionBinding {
 				map.put("noEvent",      new BuiltInCreator(false, new FNoEventExp(),     1));
 				map.put("pre",          new BuiltInCreator(false, new FPreExp(),         1));
 				map.put("sample",       new BuiltInCreator(false, new FSampleExp(),      2));
+				map.put("initial",      new BuiltInCreator(false, new FInitialExp(),     0));
 				map.put("identity",     new BuiltInCreator(false, new FIdentity(),       1));
 				map.put("sqrt",         new BuiltInCreator(false, new FSqrtExp(),        1));
 				map.put("transpose",    new BuiltInCreator(false, new FTranspose(),      1));
@@ -274,8 +275,7 @@ aspect InstFunctionBinding {
 						"scalar", "vector", "matrix", "diagonal", "product", "outerProduct", "symmetric", "skew", 
 						// Ticket 664: Support all function-like operators
 						"sign", "String", "div", "mod", "rem", "ceil", "floor", "delay", "cardinality", 
-						"semiLinear", "initial", "terminal", "smooth", "edge", "reinit", 
-						"terminate"
+						"semiLinear", "terminal", "smooth", "edge", "reinit", "terminate"
 					};
 				for (String name : unsupported)
 					if (!map.containsKey(name))

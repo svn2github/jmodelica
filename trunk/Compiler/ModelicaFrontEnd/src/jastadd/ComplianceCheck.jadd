@@ -84,6 +84,10 @@ aspect ComplianceCheck {
 		compliance("The sample() function-like operator is not supported");
 	}
 	
+	public void FInitialExp.complianceCheck() {
+		compliance("The initial() function-like operator is not supported");
+	}
+	
 	public void FIgnoredBuiltIn.complianceCheck() {
 		warning("The " + getName() + 
 				"() function-like operator is not supported, and is currently ignored");

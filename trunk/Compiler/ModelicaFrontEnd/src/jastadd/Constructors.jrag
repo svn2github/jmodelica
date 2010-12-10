@@ -493,6 +493,7 @@ aspect InheritedFactoryMethods {
 	public FNoEventExp     FNoEventExp.createEmptyNode()     { return new FNoEventExp();     }
 	public FPreExp         FPreExp.createEmptyNode()         { return new FPreExp();         }
 	public FSampleExp      FSampleExp.createEmptyNode()      { return new FSampleExp();      }
+	public FInitialExp     FInitialExp.createEmptyNode()     { return new FInitialExp();      }
 	public FNoExp          FNoExp.createEmptyNode()          { return new FNoExp();          }
 	public FUnknownSizeExp FUnknownSizeExp.createEmptyNode() { return new FUnknownSizeExp(); }
 	

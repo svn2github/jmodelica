@@ -340,6 +340,8 @@ aspect FlatTypeAnalysis {
 		return fBooleanScalarType();
 	}
 	
+	eq FInitialExp.type() = fBooleanScalarType();
+	
 	/**
 	 * \brief Check if this FArray is on the form "{exp for i in exp}".
 	 */

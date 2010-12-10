@@ -989,6 +989,11 @@ FPreExp : FUnaryBuiltIn;
 FSampleExp : FBuiltInFunctionCall ::= Sample:FExp Interval:FExp;
 
 /**
+ * Initial built-in function.
+ */
+FInitialExp : FBuiltInFunctionCall;
+
+/**
  * \brief Abs built-in function.
  */
 FAbsExp : FUnaryBuiltIn;
