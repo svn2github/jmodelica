@@ -430,7 +430,7 @@ class ModelicaCompiler():
             Java classes.
 
         """
-        if isinstance(model_file_name, str):
+        if isinstance(model_file_name, basestring):
             model_file_name = [model_file_name]
         try:
             self._compiler.compileModel(model_file_name, model_class_name)
@@ -482,7 +482,7 @@ class ModelicaCompiler():
             JError if there was a runtime exception thrown by the underlying 
             Java classes.
         """        
-        if isinstance(model_file_name, str):
+        if isinstance(model_file_name, basestring):
             model_file_name = [model_file_name]
         try:
             sr = self._compiler.parseModel(model_file_name)

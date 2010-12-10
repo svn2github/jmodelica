@@ -327,7 +327,7 @@ class Test_Compiler:
         mc.set_string_option(option, setvalue)
         nose.tools.assert_equal(mc.get_string_option(option), setvalue)
         # option should be of type str
-        assert isinstance(mc.get_string_option(option),str)
+        assert isinstance(mc.get_string_option(option),basestring)
         # reset to original value
         mc.set_string_option(option, value)
     

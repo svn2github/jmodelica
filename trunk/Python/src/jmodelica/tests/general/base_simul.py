@@ -342,7 +342,7 @@ def _set_ipopt_options(nlp, opts):
             nlp.opt_coll_ipopt_set_int_option(k, v)
         elif isinstance(v, float):
             nlp.opt_coll_ipopt_set_num_option(k, v)
-        elif isinstance(v, str):
+        elif isinstance(v, basestring):
             nlp.opt_coll_ipopt_set_string_option(k, v)
 
 
@@ -358,7 +358,7 @@ def _set_compiler_options(cmp, opts):
             cmp.set_integer_option(k, v)
         elif isinstance(v, float):
             cmp.set_real_option(k, v)
-        elif isinstance(v, str):
+        elif isinstance(v, basestring):
             cmp.set_string_option(k, v)
 
 

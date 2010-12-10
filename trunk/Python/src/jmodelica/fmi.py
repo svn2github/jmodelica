@@ -109,7 +109,7 @@ def compile_fmu(class_name, file_name=[], compiler='modelica', target='model_noa
     
         Name of the FMU which has been created.
     """
-    if isinstance(file_name, str):
+    if isinstance(file_name, basestring):
         file_name = [file_name]
         
     # Detect file suffix - otherwise use the default = modelica
@@ -129,7 +129,7 @@ def compile_fmu(class_name, file_name=[], compiler='modelica', target='model_noa
     for key, value in compiler_options.iteritems():
         if isinstance(value, bool):
             comp.set_boolean_option(key, value)
-        elif isinstance(value, str):
+        elif isinstance(value, basestring):
             comp.set_string_option(key,value)
         elif isinstance(value, int):
             comp.set_integer_option(key,value)

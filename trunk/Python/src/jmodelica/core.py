@@ -84,7 +84,7 @@ class BaseModel(object):
             (FMU/JMU)Model.set('damper.d', 1.1)
             (FMU/JMU)Model.set(['damper.d','gear.a'], [1.1, 10])
         """
-        if isinstance(variable_name, str):
+        if isinstance(variable_name, basestring):
             self._set(variable_name, value) #Scalar case
         else:
             for i in xrange(len(variable_name)): #A list of variables
@@ -111,7 +111,7 @@ class BaseModel(object):
             # Returns a list of the variables
             (FMU/JMU)Model.get(['damper.d','gear.a'])
         """
-        if isinstance(variable_name, str):
+        if isinstance(variable_name, basestring):
             return self._get(variable_name) #Scalar case
         else:
             ret = []
@@ -134,7 +134,7 @@ class BaseModel(object):
         algdrive = getattr(algdrive, 'algorithm_drivers')
         AlgorithmBase = getattr(algdrive, 'AlgorithmBase')
         
-        if isinstance(algorithm, str):
+        if isinstance(algorithm, basestring):
             algorithm = getattr(algdrive, algorithm)
         
         if not issubclass(algorithm, AlgorithmBase):
@@ -168,7 +168,7 @@ class BaseModel(object):
         algdrive = getattr(algdrive, 'algorithm_drivers')
         AlgorithmBase = getattr(algdrive, 'AlgorithmBase')
         
-        if isinstance(algorithm, str):
+        if isinstance(algorithm, basestring):
             algorithm = getattr(algdrive, algorithm)
         
         if not issubclass(algorithm, AlgorithmBase):

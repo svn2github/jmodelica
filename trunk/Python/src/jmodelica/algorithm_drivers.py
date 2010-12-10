@@ -496,7 +496,7 @@ class IpoptInitializationAlg(AlgorithmBase):
                 self.nlp_ipopt.init_opt_ipopt_set_int_option(k, v)
             elif isinstance(v, float):
                 self.nlp_ipopt.init_opt_ipopt_set_num_option(k, v)
-            elif isinstance(v, str):
+            elif isinstance(v, basestring):
                 self.nlp_ipopt.init_opt_ipopt_set_string_option(k, v)
                         
     def solve(self):
@@ -1302,7 +1302,7 @@ class CollocationLagrangePolynomialsAlg(AlgorithmBase):
                 self.nlp_ipopt.opt_coll_ipopt_set_int_option(k, v)
             elif isinstance(v, float):
                 self.nlp_ipopt.opt_coll_ipopt_set_num_option(k, v)
-            elif isinstance(v, str):
+            elif isinstance(v, basestring):
                 self.nlp_ipopt.opt_coll_ipopt_set_string_option(k, v)
                         
     def solve(self):
