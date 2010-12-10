@@ -20,8 +20,8 @@ import org.jmodelica.ide.editor.editingstrategies.AnnotationParenthesisAdder;
 import org.jmodelica.ide.editor.editingstrategies.BracketAdder;
 import org.jmodelica.ide.editor.editingstrategies.CommentAdder;
 import org.jmodelica.ide.editor.editingstrategies.EndOfBlockAdder;
+import org.jmodelica.ide.editor.editingstrategies.IndentationStrategy;
 import org.jmodelica.ide.editor.editingstrategies.KeywordAdder;
-import org.jmodelica.ide.indent.IndentingAutoEditStrategy;
 import org.jmodelica.ide.namecomplete.CompletionProcessor;
 import org.jmodelica.ide.scanners.ModelicaCommentScanner;
 import org.jmodelica.ide.scanners.ModelicaQIdentScanner;
@@ -30,10 +30,7 @@ import org.jmodelica.ide.scanners.ModelicaStringScanner;
 
 /**
  * Source viewer configuration which provides the projection viewer with a
- * presentation reconciler ...
- * 
- * @author emma
- * 
+ * presentation reconciler.
  */
 public class ViewerConfiguration extends SourceViewerConfiguration {
 
@@ -52,11 +49,11 @@ public IAutoEditStrategy[] getAutoEditStrategies(
     return new IAutoEditStrategy[] { 
             // IndentingAutoEditStrategy is first, so no other command
             // makes it believe it's receiving a pasted block. 
-            IndentingAutoEditStrategy.editStrategy,
-            EndOfBlockAdder.adder,
-            KeywordAdder.adder,
+            new IndentationStrategy(),
+            EndOfBlockAdder.instance,
+            KeywordAdder.instance,
             // annotation paren adder before normal paren adder
-            AnnotationParenthesisAdder.adder,
+            AnnotationParenthesisAdder.instance,
             new BracketAdder("(", ")"),
             new BracketAdder("[", "]"),
             new BracketAdder("{", "}"),

@@ -15,7 +15,7 @@ import org.jmodelica.ide.helpers.Util;
  */
 public class EndOfBlockAdder extends EndStatementAdder {
 
-public final static EndOfBlockAdder adder = new EndOfBlockAdder(); 
+public final static EndOfBlockAdder instance = new EndOfBlockAdder(); 
 
 final static String[] openBlockKeywords = { "block", "class",
         "connector", "function", "model", "package", "record", "type" };

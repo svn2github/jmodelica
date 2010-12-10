@@ -57,4 +57,9 @@ public class BackwardsDocumentReader extends DocumentReader {
 		pos = 0;
 	}
 
+	@Override
+	protected String readString(int length) throws BadLocationException {
+		return new StringBuilder(doc.get(off - pos - length + 1, length)).reverse().toString();
+	}
+
 }

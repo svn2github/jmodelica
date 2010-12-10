@@ -26,6 +26,7 @@ import org.jmodelica.ide.helpers.Util;
  * 
  * @author philip
  * 
+ * @deprecated Old indentation method, remove as possible.
  */
 public class IndentedSection {
 

@@ -16,7 +16,7 @@ import org.jmodelica.ide.indent.DocUtil;
 
 public class AnnotationParenthesisAdder implements IAutoEditStrategy {
 
-public final static AnnotationParenthesisAdder adder = 
+public final static AnnotationParenthesisAdder instance = 
     new AnnotationParenthesisAdder();
 
 public void customizeDocumentCommand(IDocument doc, DocumentCommand c) {

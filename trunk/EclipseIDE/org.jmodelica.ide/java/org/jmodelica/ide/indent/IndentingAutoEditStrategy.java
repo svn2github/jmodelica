@@ -12,6 +12,7 @@ import org.jmodelica.generated.scanners.IndentationHintScanner;
  * 
  * @author philip
  * 
+ * @deprecated Old indentation method, remove as possible.
  */
 public class IndentingAutoEditStrategy extends
         DefaultIndentLineAutoEditStrategy {

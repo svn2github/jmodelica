@@ -130,12 +130,9 @@ public class CompilationRoot {
 				list.add(annotatedDefinition(def, file));
 		} catch (Parser.Exception e) {
 			addBadDef(file);
-			e.printStackTrace();
 		} catch (ParserException e) {
-			e.printStackTrace();
 			addBadDef(file);
 		} catch (IOException e) {
-			e.printStackTrace();
 			addBadDef(file);
 		} finally {
 			errorReport.cleanUp();

@@ -71,15 +71,18 @@ public class DocumentReader extends Reader {
 	public int read(char[] cbuf, int offset, int length) throws IOException {
 		if (pos >= len || doc == null)
 			return -1;
-		int i = offset;
+		if (pos + length > len)
+			length = len - pos;
 		try {
-			while (pos < len && i < offset + length)
-				cbuf[i++] = nextChar();
+			String part = readString(length);
+			part.getChars(0, length, cbuf, offset);
+			pos += length;
 		} catch (BadLocationException e) {
+			return -1;
 		} catch (NullPointerException e) {
+			return -1;
 		}
-		int res = i - offset;
-		return res > 0 ? res : -1;
+		return length;
 	}
 
 	@Override
@@ -91,6 +94,10 @@ public class DocumentReader extends Reader {
 		} catch (NullPointerException e) {
 			return -1;
 		}
+	}
+
+	protected String readString(int length) throws BadLocationException {
+		return doc.get(off + pos, length);
 	}
 
 	protected char nextChar() throws BadLocationException {

@@ -14,7 +14,7 @@ import org.jmodelica.ide.indent.DocUtil;
 
 public class KeywordAdder extends EndStatementAdder{
 
-public final static KeywordAdder adder = new KeywordAdder();
+public final static KeywordAdder instance = new KeywordAdder();
 
 protected static final String[] KEYWORDS =
     {"for", "if", "while", "when"};

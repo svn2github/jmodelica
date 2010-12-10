@@ -18,6 +18,7 @@ package org.jmodelica.ide.indent;
  * 
  * @author philip
  * 
+ * @deprecated Old indentation method, remove as possible.
  */
 public interface AnchorList<E> {
 

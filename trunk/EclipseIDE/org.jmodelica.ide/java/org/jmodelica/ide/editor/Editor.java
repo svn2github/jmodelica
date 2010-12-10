@@ -316,11 +316,8 @@ protected void update() {
     
     setupDocumentPartitioner(document());
 
-    if (compResult.failed()) {
-        System.out.println("Compilation Failed: " + this.file.path());
-        System.out.println(compResult.root);
+    if (compResult.failed()) 
         return;
-    }
 
     // Update outline
     fSourceOutlinePage.updateAST(compResult.root());

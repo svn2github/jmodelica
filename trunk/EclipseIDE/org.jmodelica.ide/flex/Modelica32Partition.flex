@@ -150,7 +150,7 @@ StringCont = ({S_CHAR}|{S_ESCAPE})*
 
 QIdent = "\'" {QIdentCont} "\'"
 String = "\"" {StringCont} "\""
-Comment = "/*" ~"*/" | "//" .* {NL}
+Comment = ("/*" ~"*/") | ("//" .* {NL})
 AnnotationStart = "annotation" {SingleWS}* "("
 
 NormalEnd = "\"" | "'" | "/*" | "//" | {AnnotationStart}
