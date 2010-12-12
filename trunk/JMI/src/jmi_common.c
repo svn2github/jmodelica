@@ -182,7 +182,7 @@ int jmi_get_sizes(jmi_t* jmi, int* n_real_ci, int* n_real_cd, int* n_real_pi, in
 		int* n_boolean_ci, int* n_boolean_cd, int* n_boolean_pi, int* n_boolean_pd,
 		int* n_real_dx, int* n_real_x, int* n_real_u, int* n_real_w,int* n_tp,
 		int* n_real_d, int* n_integer_d, int* n_integer_u, int* n_boolean_d, int* n_boolean_u,
-		int* n_sw, int* n_sw_init, int* n_z) {
+		int* n_sw, int* n_sw_init, int* n_guards, int* n_guards_init, int* n_z) {
 
 	*n_real_ci = jmi->n_real_ci;
 	*n_real_cd = jmi->n_real_cd;
@@ -212,6 +212,9 @@ int jmi_get_sizes(jmi_t* jmi, int* n_real_ci, int* n_real_cd, int* n_real_pi, in
 
     *n_sw = jmi->n_sw;
     *n_sw_init = jmi->n_sw_init;
+    *n_guards = jmi->n_guards;
+    *n_guards_init = jmi->n_guards_init;
+
     *n_z = jmi->n_z;
 
 	return 0;
@@ -229,7 +232,14 @@ int jmi_get_offsets(jmi_t* jmi, int* offs_real_ci, int* offs_real_cd,
 		int* offs_real_u_p, int* offs_real_w_p,
 		int* offs_real_d, int* offs_integer_d, int* offs_integer_u,
 		int* offs_boolean_d, int* offs_boolean_u,
-		int* offs_sw, int* offs_sw_init) {
+		int* offs_sw, int* offs_sw_init,
+		int* offs_guards, int* offs_guards_init,
+		int* offs_pre_real_dx, int* offs_pre_real_x, int* offs_pre_real_u,
+		int* offs_pre_real_w,
+		int* offs_pre_real_d, int* offs_pre_integer_d, int* offs_pre_integer_u,
+		int* offs_pre_boolean_d, int* offs_pre_boolean_u,
+		int* offs_pre_sw, int* offs_pre_sw_init,
+		int* offs_pre_guards, int* offs_pre_guards_init) {
 
 	*offs_real_ci = jmi->offs_real_ci;
 	*offs_real_cd = jmi->offs_real_cd;
@@ -267,6 +277,41 @@ int jmi_get_offsets(jmi_t* jmi, int* offs_real_ci, int* offs_real_cd,
 	*offs_sw = jmi->offs_sw;
 	*offs_sw_init = jmi->offs_sw_init;
 
+	*offs_guards = jmi->offs_guards;
+	*offs_guards_init = jmi->offs_guards_init;
+
+	*offs_pre_real_dx = jmi->offs_pre_real_dx;
+	*offs_pre_real_x = jmi->offs_pre_real_x;
+	*offs_pre_real_u = jmi->offs_pre_real_u;
+	*offs_pre_real_w = jmi->offs_pre_real_w;
+
+	*offs_pre_real_d = jmi->offs_pre_real_d;
+
+	*offs_pre_integer_d = jmi->offs_pre_integer_d;
+	*offs_pre_integer_u = jmi->offs_pre_integer_u;
+
+	*offs_pre_boolean_d = jmi->offs_pre_boolean_d;
+	*offs_pre_boolean_u = jmi->offs_pre_boolean_u;
+
+	*offs_pre_sw = jmi->offs_pre_sw;
+	*offs_pre_sw_init = jmi->offs_pre_sw_init;
+
+	*offs_pre_guards = jmi->offs_pre_guards;
+	*offs_pre_guards_init = jmi->offs_pre_guards_init;
+
+	return 0;
+}
+
+int jmi_copy_pre_values(jmi_t *jmi) {
+	int i;
+	jmi_real_t* z;
+	z = jmi_get_z(jmi);
+	for (i=jmi->offs_real_dx;i<jmi->offs_t;i++) {
+		z[i - jmi->offs_real_dx + jmi->offs_pre_real_dx] = z[i];
+	}
+	for (i=jmi->offs_real_d;i<jmi->offs_pre_real_dx;i++) {
+		z[i - jmi->offs_real_d + jmi->offs_pre_real_d] = z[i];
+	}
 	return 0;
 }
 

@@ -80,7 +80,7 @@ fmiComponent fmi_instantiate_model(fmiString instanceName, fmiString GUID, fmiCa
     component -> fmi_functions = functions;
     component -> fmi_logging_on = loggingOn;
     component -> jmi = jmi;
-        
+
     return (fmiComponent)component;
 }
 
@@ -198,6 +198,9 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
     ((fmi_t *)c) -> fmi_epsilon=safety_factor_events*relativeTolerance; /* Used in the event detection */
     ((fmi_t *)c) -> fmi_newton_tolerance=safety_factor_newton*relativeTolerance; /* Used in the Newton iteration */
     
+    /* Write values to the pre vector*/
+    jmi_copy_pre_values(((fmi_t*)c)->jmi);
+
     while (initComplete == 0){                            /* Loop during event iteration */
     
         if (nR0 > 0){                                     /* Specify the switches if any */
@@ -281,6 +284,9 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
             initComplete = 1;
         }
     }
+
+    jmi_copy_pre_values(((fmi_t*)c)->jmi);
+
     /*
     //Set the final switches (if any)
     if (nR > 0){
@@ -389,6 +395,11 @@ fmiStatus fmi_get_string(fmiComponent c, const fmiValueReference vr[], size_t nv
     (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiWarning, "INFO", "Strings are not yet supported.");
     return fmiWarning;
 }
+
+jmi_t* fmi_get_jmi_t(fmiComponent c) {
+	return ((fmi_t*)c)->jmi;
+}
+
 fmiStatus fmi_event_update(fmiComponent c, fmiBoolean intermediateResults, fmiEventInfo* eventInfo) {
     /* Handle an event */
     fmiInteger retval;
@@ -527,7 +538,11 @@ fmiStatus fmi_event_update(fmiComponent c, fmiBoolean intermediateResults, fmiEv
     
     ((fmi_t*)c) -> fmi_functions.freeMemory(a_mode); /* Free memory */
     ((fmi_t*)c) -> fmi_functions.freeMemory(b_mode); /* Free memory */
-    
+
+    if ((eventInfo->iterationConverged)==fmiFalse) {
+        jmi_copy_pre_values(((fmi_t*)c)->jmi);
+    }
+
     return fmiOK;
 }
 fmiStatus fmi_get_continuous_states(fmiComponent c, fmiReal states[], size_t nx) {

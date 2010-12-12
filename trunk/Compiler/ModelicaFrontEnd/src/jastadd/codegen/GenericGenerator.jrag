@@ -392,6 +392,35 @@ public class GenericGenerator extends AbstractGenerator {
 		}
 	
 	}
+
+	class DAETag_numGuards extends DAETag {
+		
+		public DAETag_numGuards(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_guards","Number guards",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numGuardExpInEquations());
+		}
+
+	}
+
+	class DAETag_numInitialGuards extends DAETag {
+		
+		public DAETag_numInitialGuards(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_guards_init","Number guards in the initial equations",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numGuardExpInInitialEquations());
+		}
+	
+	}
+
 	
 	class DAETag_numAlgebraicRealVariables extends DAETag {
 		

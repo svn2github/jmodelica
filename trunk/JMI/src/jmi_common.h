@@ -538,6 +538,8 @@ struct jmi_block_residual_t {
  * @param n_string_u Number of string inputs.
  * @param n_sw Number of switching functions in DAE \$fF\$f.
  * @param n_sw_init Number of switching functions in DAE initialization system \$fF_0\$f.
+ * @param n_guards Number of guards in DAE \$fF\$f.
+ * @param n_guards_init Number of guards in DAE initialization system \$fF_0\$f.
  * @param n_dae_blocks Number of DAE blocks.
  * @param n_dae_init_blocks Number of DAE initialization blocks.
  * @param scaling_method Scaling method. Options are JMI_SCALING_NONE or JMI_SCALING_VARIABLES.
@@ -553,6 +555,7 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 		int n_integer_d, int n_integer_u,
 		int n_boolean_d, int n_boolean_u,
 		int n_string_d, int n_string_u, int n_sw, int n_sw_init,
+		int n_guards, int n_guards_init,
 		int n_dae_blocks, int n_dae_init_blocks,
 		int scaling_method);
 
@@ -820,6 +823,9 @@ struct jmi_t{
 	int n_sw;                            /**< \brief Number of switching functions in the DAE \f$F\f$. */
 	int n_sw_init;                       /**< \brief Number of switching functions in the DAE initialization system\f$F_0\f$. */
 
+	int n_guards;                        /**< \brief Number of guards in the DAE \f$F\f$. */
+	int n_guards_init;                     /**< \brief Number of guards in the DAE initialization system\f$F_0\f$. */
+
 	int n_p;                             /**< \brief Number of elements in \f$p\f$. */
 	int n_v;                             /**< \brief Number of elements in \f$v\f$. */
 	int n_q;                             /**< \brief Number of elements in \f$q\f$. */
@@ -869,6 +875,28 @@ struct jmi_t{
 	int offs_sw;                         /**< \brief  Offset of the first switching function in the DAE \f$F\f$ */
 	int offs_sw_init;                    /**< \brief  Offset of the first switching function in the DAE initialization system \f$F_0\f$ */
 
+	int offs_guards;                         /**< \brief  Offset of the first guard \f$F\f$ */
+	int offs_guards_init;                    /**< \brief  Offset of the first guard in the DAE initialization system \f$F_0\f$ */
+
+	int offs_pre_real_dx;                    /**< \brief  Offset of the pre derivative real vector in \f$z\f$. */
+	int offs_pre_real_x;                     /**< \brief  Offset of the pre differentiated real variable vector in \f$z\f$. */
+	int offs_pre_real_u;                     /**< \brief  Offset of the pre input real vector in \f$z\f$. */
+	int offs_pre_real_w;                     /**< \brief  Offset of the pre algebraic real variables vector in \f$z\f$. */
+
+	int offs_pre_real_d;                     /**< \brief  Offset of the pre discrete real variable vector in \f$z\f$. */
+
+	int offs_pre_integer_d;                  /**< \brief  Offset of the pre discrete integer variable vector in \f$z\f$. */
+	int offs_pre_integer_u;                  /**< \brief  Offset of the pre input integer vector in \f$z\f$. */
+
+	int offs_pre_boolean_d;                  /**< \brief  Offset of the pre discrete boolean variable vector in \f$z\f$. */
+	int offs_pre_boolean_u;                  /**< \brief  Offset of the pre input boolean vector in \f$z\f$. */
+
+	int offs_pre_sw;                         /**< \brief  Offset of the first pre switching function in the DAE \f$F\f$ */
+	int offs_pre_sw_init;                    /**< \brief  Offset of the first pre switching function in the DAE initialization system \f$F_0\f$ */
+
+	int offs_pre_guards;                         /**< \brief  Offset of the first pre guard \f$F\f$ */
+	int offs_pre_guards_init;                    /**< \brief  Offset of the first pre guard in the DAE initialization system \f$F_0\f$ */
+
 	int offs_p;                          /**< \brief  Offset of the \f$p\f$ vector in \f$z\f$. */
 	int offs_v;                          /**< \brief  Offset of the \f$v\f$ vector in \f$z\f$. */
 	int offs_q;                          /**< \brief  Offset of the \f$q\f$ vector in \f$z\f$. */
@@ -877,7 +905,7 @@ struct jmi_t{
 	jmi_ad_var_vec_p z;                  /**< \brief  This vector contains active AD objects in case of AD. */
 	jmi_real_t** z_val;                  /**< \brief  This vector contains the actual values. */
 
-	jmi_real_t* pre_z;                   /**< \brief This vector contains the pre values. */
+/*	jmi_real_t* pre_z;  */                 /**< \brief This vector contains the pre values. */
 
 	jmi_real_t *variable_scaling_factors;             /**< \brief Scaling factors. For convenience the vector has the same size as z but only scaling of reals are used. */
 	int scaling_method;                               /**< \brief Scaling method: JMI_SCALING_NONE, JMI_SCALING_VARIABLES */

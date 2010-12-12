@@ -304,6 +304,13 @@ fmiStatus fmi_get_boolean(fmiComponent c, const fmiValueReference vr[], size_t n
  */
 fmiStatus fmi_get_string(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiString  value[]);
 
+/**
+ * \brief Get a pointer to the internal jmi_t struct.
+ *
+ * @param c The FMU struct.
+ * @return A pointer to the internal jmi_t struct.
+ */
+jmi_t* fmi_get_jmi_t(fmiComponent c);
 
 /* @} */
 
@@ -344,7 +351,6 @@ fmiStatus fmi_set_debug_logging(fmiComponent c, fmiBoolean loggingOn);
 /* @} */
 
 /* @} */
-
 
 #ifdef __cplusplus
 }

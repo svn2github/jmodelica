@@ -317,7 +317,7 @@ public class DiagnosticsGenerator {
 				int ind = 0;
 				for (Integer bs : unsolvedDAEInitBlockSizes) {
 					out.print(bs.toString());
-					if (ind<unsolvedDAEInitBlockSizes.size()-2) {
+					if (ind<unsolvedDAEInitBlockSizes.size()-1) {
 						out.print(",");
 					}	
 					ind++;
@@ -328,7 +328,7 @@ public class DiagnosticsGenerator {
 				ind = 0;
 				for (Integer bs : unsolvedDAEBlockSizes) {
 					out.print(bs.toString());
-					if (ind<unsolvedDAEBlockSizes.size()-2) {
+					if (ind<unsolvedDAEBlockSizes.size()-1) {
 						out.print(",");
 					}	
 					ind++;

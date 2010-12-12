@@ -1346,12 +1346,10 @@ aspect MapWhenClauses{
 		// Copy guard
 		FExp guard = null;
 		if (copyGuard) {
-			System.out.println("FIfWhenEquation.createSimpleIfWhenElseEquation - copy guard");
 			guard = (FExp)getTest().fullCopy();
 			guard.setParent(this);
 			guard.traverseSymbolic(getTest());
 		} else {
-			System.out.println("FIfWhenEquation.createSimpleIfWhenElseEquation - copy guard");
 			guard = getTest();
 		}
 		
@@ -1401,20 +1399,6 @@ aspect MapWhenClauses{
 	rewrite FWhenEquation in FEquationBlock.getFAbstractEquation() {
 		when (rewriteWhenEquation && getNumFAbstractEquation()>1) to List {
 			return splitWhenEquation();
-			/*
-			List l = new List();
-			l.setParent(this);
-			FExp guard = getTest();
-			// Create the first FWhenClause and use the original rel exp
-			l.add(new FWhenEquation(getType(),new List().add(getFAbstractEquation(0)),guard,new Opt()));
-			// Loop over the remaining and copy the guard and replace the guard exps
-			for (int i=1;i<getNumFAbstractEquation();i++) {
-				FExp guard_new = (FExp)guard.fullCopy();
-				l.add(new FWhenEquation((FEquationType)getType().fullCopy(),
-				          new List().add(getFAbstractEquation(i)),guard_new,new Opt()));
-				guard_new.traverseSymbolic(guard);
-			}
-			return l;	*/
 		}
 	}
 	

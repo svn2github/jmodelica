@@ -292,6 +292,8 @@ class TestNLPInit:
         # self.init_nlp_ipopt.init_opt_ipopt_set_string_option("derivative_test","first-order")
         
         self.init_nlp_ipopt.init_opt_ipopt_solve()
+
+        print self.dae_init_test.z
     
         res_Z = N.array([5.,
                          -198.1585290151921,
@@ -302,7 +304,7 @@ class TestNLPInit:
                          2197.0,
                          5.0,
                          -0.92009689684513785,
-                         0.])
+                         0.,0,0,0,0,0,0,0,0])
     
         assert max(N.abs(res_Z-self.dae_init_test.z))<1e-3, \
                "test_jmi.py: test_init_opt: Wrong solution to initialization system." 

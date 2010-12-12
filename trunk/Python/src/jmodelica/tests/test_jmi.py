@@ -142,13 +142,14 @@ class TestModel_VDP:
     @testattr(stddist = True)   
     def test_get_sizes(self):
         """ Test jmi.JMUModel.get_sizes method."""
-        sizes = [0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 20]
+        sizes = [0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 27] 
         ntools.assert_equal(self.vdp.get_sizes(),sizes)
     
     @testattr(stddist = True)    
     def test_get_offsets(self):
         """ Test jmi.JMUModel.get_offsets method."""
-        offsets = [0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 8, 11, 12, 12, 13, 16, 19, 20, 20, 20, 20, 20, 20, 20, 20]
+        offsets = [0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 8, 11, 12, 12, 13, 16, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 23, 26, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27]
+        print self.vdp.get_offsets()
         ntools.assert_equal(self.vdp.get_offsets(),offsets)
     
     @testattr(stddist = True)
@@ -693,13 +694,15 @@ class TestJMIModel_VDP:
         n_boolean_u = ct.c_int()                
         n_sw = ct.c_int()
         n_sw_init = ct.c_int()
+        n_guards = ct.c_int()
+        n_guards_init = ct.c_int()
         n_z  = ct.c_int()
         self.vdp.jmimodel.get_sizes(n_real_ci, n_real_cd, n_real_pi, n_real_pd,
                                     n_integer_ci, n_integer_cd, n_integer_pi, n_integer_pd,
                                     n_boolean_ci, n_boolean_cd, n_boolean_pi, n_boolean_pd,
                                     n_real_dx, n_real_x, n_real_u, n_real_w, n_tp,
                                     n_real_d,n_integer_d,n_integer_u,n_boolean_d,n_boolean_u,
-                                    n_sw, n_sw_init, n_z)
+                                    n_sw, n_sw_init, n_guards, n_guards_init,n_z)
 
     @testattr(stddist = True)
     def test_get_offsets(self):
@@ -732,13 +735,36 @@ class TestJMIModel_VDP:
         offs_boolean_u = ct.c_int()
         offs_sw = ct.c_int()
         offs_sw_init = ct.c_int()   
+        offs_guards = ct.c_int()
+        offs_guards_init = ct.c_int()   
+        offs_pre_real_dx = ct.c_int()
+        offs_pre_real_x = ct.c_int()
+        offs_pre_real_u = ct.c_int()
+        offs_pre_real_w = ct.c_int()
+        offs_pre_real_d = ct.c_int()
+        offs_pre_integer_d = ct.c_int()
+        offs_pre_integer_u = ct.c_int()
+        offs_pre_boolean_d = ct.c_int()
+        offs_pre_boolean_u = ct.c_int()
+        offs_pre_sw = ct.c_int()
+        offs_pre_sw_init = ct.c_int()   
+        offs_pre_guards = ct.c_int()
+        offs_pre_guards_init = ct.c_int()   
+
+
         self.vdp.jmimodel.get_offsets(offs_real_ci, offs_real_cd, offs_real_pi,
                                       offs_real_pd, offs_integer_ci, offs_integer_cd, offs_integer_pi,
                                       offs_integer_pd,offs_boolean_ci, offs_boolean_cd, offs_boolean_pi,
                                       offs_boolean_pd, offs_real_dx, offs_real_x, offs_real_u, 
                                       offs_real_w, offs_t, offs_dx_p, offs_x_p, offs_u_p, offs_w_p,
                                       offs_real_d,offs_integer_d,offs_integer_u,offs_boolean_d,offs_boolean_u,
-                                      offs_sw, offs_sw_init)
+                                      offs_sw, offs_sw_init,offs_guards, offs_guards_init,
+                                      offs_pre_real_dx, offs_pre_real_x, offs_pre_real_u, 
+                                      offs_pre_real_w, 
+                                      offs_pre_real_d,offs_pre_integer_d,offs_pre_integer_u,offs_pre_boolean_d,offs_pre_boolean_u,
+                                      offs_pre_sw, offs_pre_sw_init,offs_pre_guards, offs_pre_guards_init
+
+                                      )
         
     @testattr(stddist = True)
     def test_get_n_tp(self):
@@ -1298,7 +1324,8 @@ class TestNegativeNominalScaling(object):
     @testattr(stddist = True)
     def test_scaling_factors(self):
        """Test positivity of scaling factors."""
-       res = [2., 1.]
+       res = [2., 1., 1.]
+       print self._model.variable_scaling_factors
        N.testing.assert_almost_equal(self._model.variable_scaling_factors,res)    
 
 class TestDependentParameterEvaluation:
@@ -1366,7 +1393,7 @@ class TestDependentParameterEvaluation:
     def test_dep_par_8(self):
         fpath = os.path.join(get_files_path(), 'Modelica', "DepParTests.mo")
         cpath = "DepParTests.DepPar8"
-        z = [ 2.,  1.,  3.,  0.,  1.,  1.,  0.,  0.,  0.,  1.,  1.,  1.,  0.]
+        z = [ 2.,  1.,  3.,  0.,  1.,  1.,  0.,  0.,  0.,  1.,  1.,  1.,  0., 0.,  0.,  0.,  0.,  0.,  0.]
         self.run(fpath,cpath,z)
 
     @testattr(stddist = True)

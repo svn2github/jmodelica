@@ -455,6 +455,8 @@ int jmi_delete(jmi_t* jmi);
  * @param n_boolean_u (Output) number of boolean inputs.
  * @param n_sw (output) number of switching functions in the DAE \f$F\f$.
  * @param n_sw_init (output) number of switching functions in the initialization system \f$F_0\f$.
+ * @param n_guards (output) number of guards in the DAE \f$F\f$.
+ * @param n_guards_init (output) number of guards in the initialization system \f$F_0\f$.
  * @param n_z (Output) total number of variables in the \f$z\f$ vector.
  * @return Error code.
  *
@@ -464,7 +466,7 @@ int jmi_get_sizes(jmi_t* jmi, int* n_real_ci, int* n_real_cd, int* n_real_pi, in
 		int* n_boolean_ci, int* n_boolean_cd, int* n_boolean_pi, int* n_boolean_pd,
 		int* n_real_dx, int* n_real_x, int* n_real_u, int* n_real_w, int* n_tp,
 		int* n_real_d, int* n_integer_d, int* n_integer_u, int* n_boolean_d, int* n_boolean_u,
-		int* n_sw, int* n_sw_init, int* n_z);
+		int* n_sw, int* n_sw_init, int* n_guards, int* n_guards_init, int* n_z);
 
 /**
  * \brief Get the offsets for the variable types in the \f$z\f$ vector.
@@ -498,6 +500,21 @@ int jmi_get_sizes(jmi_t* jmi, int* n_real_ci, int* n_real_cd, int* n_real_pi, in
  * @param offs_boolean_u (Output) offset of boolean input variables.
  * @param offs_sw (Output) offset of the first switching function in the DAE \f$F_0\f$.
  * @param offs_sw_init (Output) offset of the first switching function in the initialization system \f$F_0\f$.
+ * @param offs_guards (Output) offset of the first guard in the DAE \f$F_0\f$.
+ * @param offs_guards_init (Output) offset of the first pre in the initialization system \f$F_0\f$.
+ * @param offs_pre_real_dx (Output) offset of pre real derivatives.
+ * @param offs_pre_real_x (Output) offset of pre real differentiated variables.
+ * @param offs_pre_real_u (Output) offset of pre real inputs.
+ * @param offs_pre_real_w (Output) offset of pre real algebraic variables.
+ * @param offs_pre_real_d (Output) offset of pre real discrete variables.
+ * @param offs_pre_integer_d (Output) offset pre of integer discrete variables.
+ * @param offs_pre_integer_u (Output) offset pre of integer input variables.
+ * @param offs_pre_boolean_d (Output) offset pre of boolean discrete variables.
+ * @param offs_pre_boolean_u (Output) offset pre of boolean input variables.
+ * @param offs_pre_sw (Output) offset of the first pre switching function in the DAE \f$F_0\f$.
+ * @param offs_pre_sw_init (Output) offset of the first pre switching function in the initialization system \f$F_0\f$.
+ * @param offs_pre_guards (Output) offset of the first pre guard in the DAE \f$F_0\f$.
+ * @param offs_pre_guards_init (Output) offset of the first pre guard in the initialization system \f$F_0\f$.
  * @return Error code.
  */
 int jmi_get_offsets(jmi_t* jmi, int* offs_real_ci, int* offs_real_cd,
@@ -512,7 +529,22 @@ int jmi_get_offsets(jmi_t* jmi, int* offs_real_ci, int* offs_real_cd,
 		int* offs_real_u_p, int* offs_real_w_p,
 		int* offs_real_d, int* offs_integer_d, int* offs_integer_u,
 		int* offs_boolean_d, int* offs_boolean_u,
-		int* offs_sw, int* offs_sw_init);
+		int* offs_sw, int* offs_sw_init,
+		int* offs_guards_sw, int* offs_guards_init,
+		int* offs_pre_real_dx, int* offs_pre_real_x, int* offs_pre_real_u,
+		int* offs_pre_real_w,
+		int* offs_pre_real_d, int* offs_pre_integer_d, int* offs_pre_integer_u,
+		int* offs_pre_boolean_d, int* offs_pre_boolean_u,
+		int* offs_pre_sw, int* offs_pre_sw_init,
+		int* offs_pre_guards_sw, int* offs_pre_guards_init);
+
+/**
+ * \brief Copy variable values to the pre vector.
+ *
+ * @param jmi The jmi_t struct.
+ * @return Error code.
+ */
+int jmi_copy_pre_values(jmi_t *jmi);
 
 /**
  * \brief Get the number of time points.

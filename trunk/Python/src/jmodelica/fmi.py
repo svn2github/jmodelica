@@ -35,7 +35,6 @@ from jmodelica import xmlparser
 from jmodelica.core import BaseModel, unzip_unit, package_unit, get_unit_name
 from jmodelica.compiler import ModelicaCompiler, OptimicaCompiler
 
-
 def compile_fmu(class_name, file_name=[], compiler='modelica', target='model_noad', 
     compiler_options={}, compile_to='.'):
     """ 
@@ -243,6 +242,21 @@ class FMUModel(BaseModel):
         self._file_open = False
         self._npoints = 0
         self._log = []
+
+        #Create a JMIModel if a JModelica generated FMU is loaded
+        # This is convenient for debugging purposes
+        # Requires uncommenting of the alternative constructor
+        # in JMUModel
+#        try:
+#            self._fmiGetJMI = self._dll.__getattr__('fmiGetJMI')
+#            self._fmiInstantiateModel.restype = C.c_voidp()
+#            self._fmiGetJMI.argtypes = [self._fmiComponent]
+#            self._jmi = self._fmiGetJMI(self._model)
+#            self._jmimodel = jmodelica.jmi.JMIModel(self._dll,self._jmi)
+#        except:
+#            print "Could not create JMIModel"
+#            pass
+
     
     def _load_c(self):
         """
@@ -571,6 +585,7 @@ class FMUModel(BaseModel):
         #self._fmiGetString.argtypes = [self._fmiComponent, Nct.ndpointer(),C.c_size_t, Nct.ndpointer()]
         self._fmiGetString.argtypes = [self._fmiComponent, Nct.ndpointer(), 
             C.c_size_t, self._PfmiString]
+
         
         self._fmiSetReal = self._dll.__getattr__(self._modelname+'_fmiSetReal')
         self._fmiSetReal.restype = self._fmiStatus

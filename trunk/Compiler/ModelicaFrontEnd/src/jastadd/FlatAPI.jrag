@@ -48,6 +48,13 @@ aspect FlatAPI {
 			public void resetIndex() {
 				index = 0;
 			}
+
+			/**
+			 * Increase the index counter by one.
+			 */
+			public void incIndex() {
+				index++;
+			}
 			
 			/**
 			 * Set the value to use for the type bits.
@@ -111,6 +118,11 @@ aspect FlatAPI {
 		map.add(differentiatedRealVariables());
 		map.add(realInputs());
 		map.add(algebraicRealVariables());
+		
+		// Need to increase the index counter by one since the
+		// 'time' variable is stored in this position
+		map.incIndex();
+		
 		map.add(discreteRealVariables());
 		
 		map.setType(1);
@@ -546,6 +558,22 @@ aspect FlatAPI {
 		 return res;
 	}
 	
+	syn int FClass.numGuardExpInEquations() = 
+		guardExpInEquations().size();
+
+	coll ArrayList<FExp> FClass.guardExpInEquations() 
+	  [new ArrayList<FExp>()] with add root FlatRoot;
+	FWhenEquation contributes
+    // Only include relational in the equation section which are 
+    // not inside a noEvent operator
+ 		getTest() when getTest().inEquationSection() && !getTest().inNoEventExp()
+	to FClass.guardExpInEquations() for myFClass();	
+		
+	public int FExp.guardExpInEquationsIndex() {
+		return myFClass().guardExpInEquations().
+			indexOf(this);
+	}
+
 	syn int FClass.numEventIndicators() = numRelExpInEquations();
 	
     syn int FClass.numRelExpInEquations() = relExpInEquations().size();
@@ -603,6 +631,23 @@ aspect FlatAPI {
 			indexOf(this.originalFRelExp==null? this: this.originalFRelExp);
 	}
  
+ 	syn int FClass.numGuardExpInInitialEquations() = 
+		guardExpInInitialEquations().size();
+
+	coll ArrayList<FExp> FClass.guardExpInInitialEquations() 
+	  [new ArrayList<FExp>()] with add root FlatRoot;
+	FWhenEquation contributes
+    // Only include relational in the equation section which are 
+    // not inside a noEvent operator
+ 		getTest() when getTest().inInitialEquationSection() && !getTest().inNoEventExp()
+	to FClass.guardExpInInitialEquations() for myFClass();	
+		
+	public int FExp.guardExpInInitialEquationsIndex() {
+		return myFClass().guardExpInInitialEquations().
+			indexOf(this);
+	}
+ 
+ 
 /*	
 
 	coll ArrayList<FVariable> FClass.structuralParameters() [new ArrayList<FVariable>()] with add root FlatRoot;
@@ -659,6 +704,7 @@ aspect FlatAPI {
 	inh FClass FIdUse.myFClass();
 	inh FClass FQName.myFClass();
 	inh FClass FAlgorithmBlock.myFClass();
+	inh FClass FAbstractEquation.myFClass();	
 	inh lazy FClass FExternalStmt.myFClass();
 	eq FClass.getChild().myFClass() = this;
 	eq Root.getChild().myFClass() = null; 

@@ -89,6 +89,18 @@ aspect CCodeGen {
 			str.print(myFV().name_C());
 		}
 	}
+
+	public void FPreExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
+		if (myFV().isReal() && root().options.getBooleanOption("enable_variable_scaling") && !inFunction()) {
+			str.print("(");
+			str.print("pre" + myFV().name_C());
+			str.print("*sf(");
+			str.print(myFV().valueReference());
+			str.print("))");
+		} else {
+			str.print("pre" + myFV().name_C());
+		}
+	}
 	
 	public void FEnumIntegerExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
 		p.print(getFExp(), str, indent);
@@ -931,6 +943,68 @@ aspect CCodeGen {
 	
 	public void FRecordConstructor.genTempOutput_C(Printer p, PrintStream str, String indent) {
 		type().printDecl_C(p, str, indent, tempName_C(), this);
+	}
+	
+	public void EquationBlock.genBlock_C(int i, boolean inInitial, String indent, PrintStream str) {	
+		if (isSolved()) {
+			equations().get(0).genSolvedBlock_C(activeVariables().get(0),indent,str);
+			/*
+			str.print(indent + activeVariables().get(0).name_C() + " = ");
+			p.print(solution(),str,indent);
+			str.print(";\n");
+			*/	
+		} else {
+			equations().get(0).genBlock_C(i,inInitial,indent,str);
+		}
+	}
+
+	public void FAbstractEquation.genBlock_C(int i, boolean inInitial, String indent, PrintStream str) {}
+	
+	public void FEquation.genBlock_C(int i, boolean inInitial, String indent, PrintStream str) {
+		if (inInitial) {
+			str.print("  jmi_kinsol_solve(jmi->dae_init_block_residuals["+i+"]);\n");
+		} else {
+			str.print("  jmi_kinsol_solve(jmi->dae_block_residuals["+i+"]);\n");
+		}
+	}
+	
+	public void FWhenEquation.genBlock_C(int i, boolean inInitial, String indent, PrintStream str) {
+	
+	}
+
+	
+	public void FAbstractEquation.genSolvedBlock_C(FVariable v, String indent, PrintStream str) {}
+	
+	public void FEquation.genSolvedBlock_C(FVariable v, String indent, PrintStream str) {
+		str.print(indent + v.name_C() + " = ");
+		solution(v.name()).prettyPrint_C(str,indent);
+		str.print(";\n");		
+	}
+	
+	public void FWhenEquation.genSolvedBlock_C(FVariable v, String indent, PrintStream str) {
+		/* 
+		  if (_pre_b != b) {
+		  	_x = _pre_x + 1;
+		  }
+		*/
+		str.print("if(COND_EXP_EQ(_pre_guards(");
+		str.print(getTest().guardExpInEquationsIndex());
+		str.print("),_guards(");
+		str.print(getTest().guardExpInEquationsIndex());
+		str.print("),JMI_FALSE,JMI_TRUE)) {\n");
+		
+		for (FAbstractEquation fe : getFAbstractEquations()) {
+			fe.genSolvedBlock_C(v,indent,str);
+		}
+		str.print("  } else {\n");
+		str.print(indent);
+		str.print(v.name_C());
+		str.print(" = ");
+		str.print("pre");
+		str.print(v.name_C());
+		str.print(";\n");
+		str.print(indent);
+		str.print("}\n");
 	}
 	
 	

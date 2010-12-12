@@ -35,6 +35,7 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 		int n_integer_d, int n_integer_u,
 		int n_boolean_d, int n_boolean_u,
 		int n_string_d, int n_string_u, int n_sw, int n_sw_init,
+		int n_guards, int n_guards_init,
 		int n_dae_blocks, int n_dae_init_blocks,
 		int scaling_method) {
 	jmi_t* jmi_ ;
@@ -91,6 +92,9 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 
 	jmi_->n_sw = n_sw;
 	jmi_->n_sw_init = n_sw_init;
+
+	jmi_->n_guards = n_guards;
+	jmi_->n_guards_init = n_guards_init;
 	
 	jmi_->n_dae_blocks = n_dae_blocks;
 	jmi_->n_dae_init_blocks = n_dae_init_blocks;
@@ -132,6 +136,25 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 	jmi_->offs_sw = jmi_->offs_boolean_u + n_boolean_u;
 	jmi_->offs_sw_init = jmi_->offs_sw + n_sw;
 
+	jmi_->offs_guards = jmi_->offs_sw_init + n_sw_init;
+	jmi_->offs_guards_init = jmi_->offs_guards + n_guards;
+
+	jmi_->offs_pre_real_dx = jmi_->offs_guards_init + n_guards_init;
+	jmi_->offs_pre_real_x = jmi_->offs_pre_real_dx + n_real_dx;
+	jmi_->offs_pre_real_u = jmi_->offs_pre_real_x + n_real_x;
+	jmi_->offs_pre_real_w = jmi_->offs_pre_real_u + n_real_u;
+
+	jmi_->offs_pre_real_d = jmi_->offs_pre_real_w + n_real_w;
+	jmi_->offs_pre_integer_d = jmi_->offs_pre_real_d + n_real_d;
+	jmi_->offs_pre_integer_u = jmi_->offs_pre_integer_d + n_integer_d;
+
+	jmi_->offs_pre_boolean_d = jmi_->offs_pre_integer_u + n_integer_u;
+	jmi_->offs_pre_boolean_u = jmi_->offs_pre_boolean_d + n_boolean_d;
+	jmi_->offs_pre_sw = jmi_->offs_pre_boolean_u + n_boolean_u;
+	jmi_->offs_pre_sw_init = jmi_->offs_pre_sw + n_sw;
+	jmi_->offs_pre_guards = jmi_->offs_pre_sw_init + n_sw_init;
+	jmi_->offs_pre_guards_init = jmi_->offs_pre_guards + n_guards;
+
 	jmi_->offs_p = 0;
 	jmi_->offs_v = jmi_->offs_real_dx;
 	if (n_tp>0) {
@@ -146,11 +169,12 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 	jmi_->n_d = n_real_d + n_integer_d + n_integer_u + n_boolean_d +
 		n_boolean_u;
 
-	jmi_->n_z = jmi_->n_p + jmi_->n_v + jmi_->n_q + jmi_->n_d + n_sw + n_sw_init;
+	jmi_->n_z = jmi_->n_p + 2*(jmi_->n_v) - 1 + jmi_->n_q + 2*jmi_->n_d + 2*n_sw +
+			2*n_sw_init + 2*n_guards + 2*n_guards_init;
 
 	jmi_->z = (jmi_ad_var_vec_p)calloc(1,sizeof(jmi_ad_var_vec_t));
 	*(jmi_->z) = (jmi_ad_var_vec_t)calloc(jmi_->n_z,sizeof(jmi_ad_var_t));
-	jmi_->pre_z = (jmi_real_t*)calloc(jmi_->n_z,sizeof(jmi_real_t ));
+	/*jmi_->pre_z = (jmi_real_t*)calloc(jmi_->n_z,sizeof(jmi_real_t ));*/
 	jmi_->z_val = (jmi_real_vec_p)calloc(1, sizeof(jmi_real_t *));
 	*(jmi_->z_val) =  (jmi_real_vec_t)calloc(jmi_->n_z,sizeof(jmi_real_t));
 
@@ -220,7 +244,7 @@ int jmi_delete(jmi_t* jmi){
 	free(*(jmi->z));
 	free(*(jmi->z_val));
 	free(jmi->z);
-	free(jmi->pre_z);
+/*	free(jmi->pre_z);*/
 	free(jmi->z_val);
 	free(jmi->variable_scaling_factors);
 	free(jmi->tp);

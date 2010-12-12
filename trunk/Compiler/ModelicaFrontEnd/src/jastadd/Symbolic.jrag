@@ -24,6 +24,14 @@ aspect EquationSolve {
 		return new FNoExp();
 	}
 	
+	eq FWhenEquation.solution(String name) {
+		if (getNumFAbstractEquation()>1) {
+			return null;
+		} else {
+			return getFAbstractEquation(0).solution(name);
+		}
+	}
+	
 	eq FEquation.solution(String name) {
 		// Only handle this special case of the unknown occurring once
 		if (nbrUses(name)!=1) {
@@ -155,6 +163,7 @@ aspect EquationSolve {
 	
 	eq FIdUseExp.nbrUses(String name) = name.equals(name())? 1: 0;
 	eq FDerExp.nbrUses(String name) = name.equals(name())? 1: 0;
+	eq FPreExp.nbrUses(String name) = 0; // Pre variables are assumed to be known?
 	
 	public FRelExp FRelExp.originalFRelExp = null;
 	public void ASTNode.traverseSymbolic(ASTNode e) {

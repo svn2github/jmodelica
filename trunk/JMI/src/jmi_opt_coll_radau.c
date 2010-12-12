@@ -1896,14 +1896,15 @@ static int lp_set_initial_from_trajectory(
 	int n_real_ci, n_real_cd, n_real_pi, n_real_pd, n_integer_ci, n_integer_cd, n_integer_pi, n_integer_pd,
 		n_boolean_ci, n_boolean_cd, n_boolean_pi, n_boolean_pd,
 		n_real_dx, n_x, n_real_u, n_real_w, n_tp,
-		n_real_d,n_integer_d,n_integer_u,n_boolean_d,n_boolean_u,n_sw, n_sw_init, n_z;
+		n_real_d,n_integer_d,n_integer_u,n_boolean_d,n_boolean_u,n_sw, n_sw_init, n_z,
+		n_guards, n_guards_init;
 
 	jmi_get_sizes(jmi, &n_real_ci, &n_real_cd, &n_real_pi, &n_real_pd,
 			&n_integer_ci, &n_integer_cd, &n_integer_pi, &n_integer_pd,
 			&n_boolean_ci, &n_boolean_cd, &n_boolean_pi, &n_boolean_pd,
 			&n_real_dx, &n_x, &n_real_u, &n_real_w, &n_tp,
 			&n_real_d,&n_integer_d,&n_integer_u,&n_boolean_d,&n_boolean_u,
-			&n_sw, &n_sw_init, &n_z);
+			&n_sw, &n_sw_init, &n_guards, &n_guards_init, &n_z);
 
 	tp = (jmi_real_t*)calloc(n_tp,sizeof(jmi_real_t));
 	jmi_get_tp(jmi,tp);

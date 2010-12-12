@@ -1864,36 +1864,42 @@ model WhenEqu2
          description="Basic test of when equations",
          flatModel="
 fclass TransformCanonicalTests.WhenEqu2
- discrete Real x;
- discrete Real y;
- discrete Boolean w(start = true);
- discrete Boolean v(start = true);
- discrete Boolean z(start = true);
+Real xx(start = 2);
+discrete Real x;
+discrete Real y;
+discrete Boolean w(start = true);
+discrete Boolean v(start = true);
+discrete Boolean z(start = true);
+initial equation 
+xx = 2;
 equation
- when y > 2 and pre(z) then
-  w = false;
- end when;
- when y > 2 and z then
-  v = false;
- end when;
- when x > 2 then
-  z = false;
- end when;
- when time > 1 then
-  x = pre(x) + 1;
- end when;
- when time > 1 then
-  y = pre(y) + 1;
- end when;
+der(xx) = - ( x );
+when y > 2 and pre(z) then
+w = false;
+end when;
+when y > 2 and z then
+v = false;
+end when;
+when x > 2 then
+z = false;
+end when;
+when time > 1 then
+x = pre(x) + 1;
+end when;
+when time > 1 then
+y = pre(y) + 1;
+end when;
 end TransformCanonicalTests.WhenEqu2;
 ")})));
 
+Real xx(start=2);
 discrete Real x; 
 discrete Real y; 
 discrete Boolean w(start=true); 
 discrete Boolean v(start=true); 
 discrete Boolean z(start=true); 
-equation 
+equation
+der(xx) = -x; 
 when y > 2 and pre(z) then 
 w = false; 
 end when; 
@@ -1958,6 +1964,26 @@ equation
     x = 4;
   end when;
 end WhenEqu3;
+
+/*
+model WhenEqu4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="WhenEqu4",
+         description="Basic test of when equations",
+         flatModel="
+
+")})));
+ discrete Real x(start=3);
+equation
+ when time >3 then
+   x = 5;
+ end when;
+
+
+end WhenEqu4;
+*/
+
 
 /* // TODO: add these test when more support is implemented in the middle end
 model IfEqu1

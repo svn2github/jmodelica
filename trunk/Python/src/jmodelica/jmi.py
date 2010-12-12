@@ -414,6 +414,8 @@ class JMUModel(BaseModel):
         self._n_boolean_u = ct.c_int()
         self._n_sw = ct.c_int()
         self._n_sw_init = ct.c_int()
+        self._n_guards = ct.c_int()
+        self._n_guards_init = ct.c_int()
         self._n_z  = ct.c_int()
         
         self.get_sizes()
@@ -447,6 +449,21 @@ class JMUModel(BaseModel):
         self._offs_boolean_u = ct.c_int()        
         self._offs_sw = ct.c_int()
         self._offs_sw_init = ct.c_int()
+        self._offs_guards = ct.c_int()
+        self._offs_guards_init = ct.c_int()
+        self._offs_pre_real_dx = ct.c_int()
+        self._offs_pre_real_x  = ct.c_int()
+        self._offs_pre_real_u  = ct.c_int()
+        self._offs_pre_real_w  = ct.c_int()
+        self._offs_pre_real_d = ct.c_int()
+        self._offs_pre_integer_d = ct.c_int()
+        self._offs_pre_integer_u = ct.c_int()
+        self._offs_pre_boolean_d = ct.c_int()
+        self._offs_pre_boolean_u = ct.c_int()        
+        self._offs_pre_sw = ct.c_int()
+        self._offs_pre_sw_init = ct.c_int()
+        self._offs_pre_guards = ct.c_int()
+        self._offs_pre_guards_init = ct.c_int()
 
         self.get_offsets()
         
@@ -1317,12 +1334,14 @@ class JMUModel(BaseModel):
                                 self._n_real_w,
                                 self._n_tp,
                                 self._n_real_d,
-                                self._n_integer_u,
                                 self._n_integer_d,
-                                self._n_boolean_u,
+                                self._n_integer_u,
                                 self._n_boolean_d,
+                                self._n_boolean_u,
                                 self._n_sw,
                                 self._n_sw_init,
+                                self._n_guards,
+                                self._n_guards_init,
                                 self._n_z)
         
         l = [self._n_real_ci.value, self._n_real_cd.value, \
@@ -1337,7 +1356,8 @@ class JMUModel(BaseModel):
              self._n_integer_d.value, self._n_integer_u.value,\
              self._n_boolean_d.value, self._n_boolean_u.value,\
              self._n_tp.value, self._n_sw.value,
-             self._n_sw_init.value, self._n_z.value]
+             self._n_sw_init.value, self._n_guards.value,
+             self._n_guards_init.value,self._n_z.value]
         return l
     
     def get_offsets(self):
@@ -1371,12 +1391,27 @@ class JMUModel(BaseModel):
                                   self._offs_real_u_p,
                                   self._offs_real_w_p,
                                   self._offs_real_d,
-                                  self._offs_integer_u,
                                   self._offs_integer_d,
-                                  self._offs_boolean_u,
+                                  self._offs_integer_u,
                                   self._offs_boolean_d,
+                                  self._offs_boolean_u,
                                   self._offs_sw,
-                                  self._offs_sw_init)
+                                  self._offs_sw_init,
+                                  self._offs_guards,
+                                  self._offs_guards_init,
+                                  self._offs_pre_real_dx,
+                                  self._offs_pre_real_x,
+                                  self._offs_pre_real_u,
+                                  self._offs_pre_real_w,
+                                  self._offs_pre_real_d,
+                                  self._offs_pre_integer_d,
+                                  self._offs_pre_integer_u,
+                                  self._offs_pre_boolean_d,
+                                  self._offs_pre_boolean_u,
+                                  self._offs_pre_sw,
+                                  self._offs_pre_sw_init,
+                                  self._offs_pre_guards,
+                                  self._offs_pre_guards_init)
         
         l = [self._offs_real_ci.value, self._offs_real_cd.value, \
              self._offs_real_pi.value, self._offs_real_pd.value, \
@@ -1393,7 +1428,18 @@ class JMUModel(BaseModel):
              self._offs_integer_d.value, self._offs_integer_u.value,\
              self._offs_boolean_d.value, self._offs_boolean_u.value,\
              self._offs_sw.value,
-             self._offs_sw_init.value]
+             self._offs_sw_init.value,
+             self._offs_guards.value,
+             self._offs_guards_init.value,
+             self._offs_pre_real_dx.value, self._offs_pre_real_x.value, \
+             self._offs_pre_real_u.value, self._offs_pre_real_w.value, \
+             self._offs_pre_real_d.value, \
+             self._offs_pre_integer_d.value, self._offs_pre_integer_u.value,\
+             self._offs_pre_boolean_d.value, self._offs_pre_boolean_u.value,\
+             self._offs_pre_sw.value,
+             self._offs_pre_sw_init.value,
+             self._offs_pre_guards.value,
+             self._offs_pre_guards_init.value]
         return l
 
     def get_n_tp(self):
@@ -2670,6 +2716,47 @@ class JMIModel(object):
         self._variable_scaling_factors = self._dll.jmi_get_variable_scaling_factors(self._jmi)
         
         #self.initAD()
+
+      # Alternative constructor where a JMUModel is created from
+      # a dll and an instantiated jmi_t struct
+#     def __init__(self,dll,jmi):
+#         self._dll = dll
+#         self._jmi = jmi
+
+#         # set c-function type definitions used in JMIModel
+#         self._set_jmimodel_typedefs()
+      
+#         # The actual array. These must must not be reset (only changed)
+#         # as they are pointing to a shared memory space used by
+#         # both the JMI DLL and us. Therefore Python properties are used
+#         # to ensure that they aren't reset, only modified.
+#         self._real_ci = self._dll.jmi_get_real_ci(self._jmi)
+#         self._real_cd = self._dll.jmi_get_real_cd(self._jmi)
+#         self._real_pi = self._dll.jmi_get_real_pi(self._jmi)
+#         self._real_pd = self._dll.jmi_get_real_pd(self._jmi)
+#         self._integer_cd = self._dll.jmi_get_integer_cd(self._jmi)
+#         self._integer_ci = self._dll.jmi_get_integer_ci(self._jmi)
+#         self._integer_pd = self._dll.jmi_get_integer_pd(self._jmi)
+#         self._integer_pi = self._dll.jmi_get_integer_pi(self._jmi)        
+#         self._boolean_cd = self._dll.jmi_get_boolean_cd(self._jmi)
+#         self._boolean_ci = self._dll.jmi_get_boolean_ci(self._jmi)
+#         self._boolean_pd = self._dll.jmi_get_boolean_pd(self._jmi)
+#         self._boolean_pi = self._dll.jmi_get_boolean_pi(self._jmi)        
+#         self._real_dx = self._dll.jmi_get_real_dx(self._jmi)
+#         self._real_x = self._dll.jmi_get_real_x(self._jmi)
+#         self._real_u = self._dll.jmi_get_real_u(self._jmi)
+#         self._real_w = self._dll.jmi_get_real_w(self._jmi)
+#         self._t = self._dll.jmi_get_t(self._jmi)
+#         self._real_d = self._dll.jmi_get_real_d(self._jmi);
+#         self._integer_d = self._dll.jmi_get_integer_d(self._jmi);
+#         self._integer_u = self._dll.jmi_get_integer_u(self._jmi);
+#         self._boolean_d = self._dll.jmi_get_boolean_d(self._jmi);
+#         self._boolean_u = self._dll.jmi_get_boolean_u(self._jmi);        
+#         self._sw = self._dll.jmi_get_sw(self._jmi)
+#         self._sw_init = self._dll.jmi_get_sw_init(self._jmi)
+#         self._z = self._dll.jmi_get_z(self._jmi)
+#         self._variable_scaling_factors = self._dll.jmi_get_variable_scaling_factors(self._jmi)
+
         
     def _set_jmimodel_typedefs(self):
         """ 
@@ -2700,6 +2787,8 @@ class JMIModel(object):
         n_boolean_u  = ct.c_int()
         n_sw = ct.c_int()
         n_sw_init = ct.c_int()
+        n_guards = ct.c_int()
+        n_guards_init = ct.c_int()
         n_z  = ct.c_int()
         assert self._dll.jmi_get_sizes(self._jmi,
                                        byref(n_real_ci),
@@ -2726,6 +2815,8 @@ class JMIModel(object):
                                        byref(n_boolean_u),
                                        byref(n_sw),
                                        byref(n_sw_init),
+                                       byref(n_guards),
+                                       byref(n_guards_init),
                                        byref(n_z)) \
         is 0, \
                "getting sizes failed"
@@ -2800,6 +2891,8 @@ class JMIModel(object):
                                             ct.POINTER(ct.c_int),
                                             ct.POINTER(ct.c_int),
                                             ct.POINTER(ct.c_int),
+                                            ct.POINTER(ct.c_int),
+                                            ct.POINTER(ct.c_int),
                                             ct.POINTER(ct.c_int),                                            
                                             ct.POINTER(ct.c_int),
                                             ct.POINTER(ct.c_int),
@@ -2815,6 +2908,21 @@ class JMIModel(object):
                                             ct.POINTER(ct.c_int),
                                             ct.POINTER(ct.c_int)]   
         self._dll.jmi_get_offsets.argtypes = [ct.c_void_p,
+                                              ct.POINTER(ct.c_int),
+                                              ct.POINTER(ct.c_int),
+                                              ct.POINTER(ct.c_int),
+                                              ct.POINTER(ct.c_int),
+                                              ct.POINTER(ct.c_int),
+                                              ct.POINTER(ct.c_int),
+                                              ct.POINTER(ct.c_int),
+                                              ct.POINTER(ct.c_int),
+                                              ct.POINTER(ct.c_int),
+                                              ct.POINTER(ct.c_int),
+                                              ct.POINTER(ct.c_int),
+                                              ct.POINTER(ct.c_int),
+                                              ct.POINTER(ct.c_int),
+                                              ct.POINTER(ct.c_int),
+                                              ct.POINTER(ct.c_int),
                                               ct.POINTER(ct.c_int),
                                               ct.POINTER(ct.c_int),
                                               ct.POINTER(ct.c_int),
@@ -3484,7 +3592,7 @@ class JMIModel(object):
         n_integer_ci, n_integer_cd, n_integer_pi, n_integer_pd, n_boolean_ci, 
         n_boolean_cd, n_boolean_pi, n_boolean_pd, n_real_dx, n_real_x, n_real_u, 
         n_real_w, n_tp, n_real_d, n_integer_d, n_integer_u, n_boolean_d, 
-        n_boolean_u,n_sw, n_sw_init, n_z):
+        n_boolean_u,n_sw, n_sw_init, n_guards, n_guards_init, n_z):
         """ 
         Get the sizes of the variable vectors.
         
@@ -3518,6 +3626,8 @@ class JMIModel(object):
                                          byref(n_boolean_u),
                                          byref(n_sw),
                                          byref(n_sw_init),
+                                         byref(n_guards),
+                                         byref(n_guards_init),
                                          byref(n_z))
         if retval is not 0:
             raise JMIException("Getting sizes failed.")
@@ -3528,7 +3638,10 @@ class JMIModel(object):
         offs_boolean_pd, offs_real_dx, offs_real_x, offs_real_u, offs_real_w, 
         offs_t, offs_real_dx_p, offs_real_x_p, offs_real_u_p, offs_real_w_p, 
         offs_real_d,offs_integer_d,offs_integer_u, offs_boolean_d, 
-        offs_boolean_u, offs_sw, offs_sw_init):
+        offs_boolean_u, offs_sw, offs_sw_init, offs_guards, offs_guards_init,
+        offs_pre_real_dx, offs_pre_real_x, offs_pre_real_u, offs_pre_real_w, 
+        offs_pre_real_d,offs_pre_integer_d,offs_pre_integer_u, offs_pre_boolean_d, 
+        offs_pre_boolean_u, offs_pre_sw, offs_pre_sw_init, offs_pre_guards, offs_pre_guards_init):
         """ 
         Get the offsets for the variable types in the z vector.
         
@@ -3564,7 +3677,25 @@ class JMIModel(object):
                                            byref(offs_boolean_d),
                                            byref(offs_boolean_u),
                                            byref(offs_sw),
-                                           byref(offs_sw_init))
+                                           byref(offs_sw_init),
+                                           byref(offs_guards),
+                                           byref(offs_guards_init),
+                                           byref(offs_pre_real_dx),
+                                           byref(offs_pre_real_x),
+                                           byref(offs_pre_real_u),
+                                           byref(offs_pre_real_w),
+                                           byref(offs_pre_real_d),
+                                           byref(offs_pre_integer_d),
+                                           byref(offs_pre_integer_u),
+                                           byref(offs_pre_boolean_d),
+                                           byref(offs_pre_boolean_u),
+                                           byref(offs_pre_sw),
+                                           byref(offs_pre_sw_init),
+                                           byref(offs_pre_guards),
+                                           byref(offs_pre_guards_init))
+
+
+                                           
         if retval is not 0:
             raise JMIException("Getting offsets failed.")
             

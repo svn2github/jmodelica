@@ -68,12 +68,14 @@ static const int N_eq_R = $n_event_indicators$;
 
 static const int N_dae_blocks = $n_dae_blocks$;
 static const int N_dae_init_blocks = $n_dae_init_blocks$;
+static const int N_guards = $n_guards$;
 
 static const int N_eq_F0 = $n_equations$ + $n_initial_equations$;
 static const int N_eq_F1 = $n_initial_guess_equations$;
 static const int N_eq_Fp = 0;
 static const int N_eq_R0 = $n_event_indicators$ + $n_initial_event_indicators$;
 static const int N_sw_init = $n_initial_switches$;
+static const int N_guards_init = $n_guards_init$;
 
 static const int N_eq_J = 0;
 static const int N_eq_L = 0;
@@ -107,8 +109,32 @@ $C_variable_aliases$
   j*(jmi->n_real_dx + jmi->n_real_x + jmi->n_real_u + jmi->n_real_w) + i])
 #define _real_w_p(j,i) ((*(jmi->z))[jmi->offs_real_w_p + \
   j*(jmi->n_real_dx + jmi->n_real_x + jmi->n_real_u + jmi->n_real_w) + i])
+
+#define _real_d(i) ((*(jmi->z))[jmi->offs_real_d+i])
+#define _integer_d(i) ((*(jmi->z))[jmi->offs_integer_d+i])
+#define _integer_u(i) ((*(jmi->z))[jmi->offs_integer_u+i])
+#define _boolean_d(i) ((*(jmi->z))[jmi->offs_boolean_d+i])
+#define _boolean_u(i) ((*(jmi->z))[jmi->offs_boolean_u+i])
+
+#define _pre_real_dx(i) ((*(jmi->z))[jmi->offs_pre_real_dx+i])
+#define _pre_real_x(i) ((*(jmi->z))[jmi->offs_pre_real_x+i])
+#define _pre_real_u(i) ((*(jmi->z))[jmi->offs_pre_real_u+i])
+#define _pre_real_w(i) ((*(jmi->z))[jmi->offs_pre_real_w+i])
+
+#define _pre_real_d(i) ((*(jmi->z))[jmi->offs_pre_real_d+i])
+#define _pre_integer_d(i) ((*(jmi->z))[jmi->offs_pre_integer_d+i])
+#define _pre_integer_u(i) ((*(jmi->z))[jmi->offs_pre_integer_u+i])
+#define _pre_boolean_d(i) ((*(jmi->z))[jmi->offs_pre_boolean_d+i])
+#define _pre_boolean_u(i) ((*(jmi->z))[jmi->offs_pre_boolean_u+i])
+
 #define _sw(i) ((*(jmi->z))[jmi->offs_sw + i])
 #define _sw_init(i) ((*(jmi->z))[jmi->offs_sw_init + i])
+#define _pre_sw(i) ((*(jmi->z))[jmi->offs_pre_sw + i])
+#define _pre_sw_init(i) ((*(jmi->z))[jmi->offs_pre_sw_init + i])
+#define _guards(i) ((*(jmi->z))[jmi->offs_guards + i])
+#define _guards_init(i) ((*(jmi->z))[jmi->offs_guards_init + i])
+#define _pre_guards(i) ((*(jmi->z))[jmi->offs_pre_guards + i])
+#define _pre_guards_init(i) ((*(jmi->z))[jmi->offs_pre_guards_init + i])
 
 $C_dae_blocks_residual_functions$
 
@@ -120,6 +146,11 @@ $C_function_headers$
 
 $C_functions$
 
+static int model_ode_guards(jmi_t* jmi) {
+  $C_ode_guards$
+  return 0;
+}
+
 static int model_ode_derivatives(jmi_t* jmi) {
   $C_ode_derivatives$
   return 0;
@@ -127,6 +158,11 @@ static int model_ode_derivatives(jmi_t* jmi) {
 
 static int model_ode_outputs(jmi_t* jmi) {
   $C_ode_outputs$
+  return 0;
+}
+
+static int model_ode_guards_init(jmi_t* jmi) {
+  $C_ode_guards_init$
   return 0;
 }
 
@@ -217,7 +253,7 @@ int jmi_new(jmi_t** jmi) {
 	   N_string_ci, N_string_cd, N_string_pi, N_string_pd,
 	   N_real_dx,N_real_x, N_real_u, N_real_w,N_t_p,
 	   N_real_d,N_integer_d,N_integer_u,N_boolean_d,N_boolean_u,
-	   N_string_d,N_string_u,N_sw,N_sw_init,
+	   N_string_d,N_string_u,N_sw,N_sw_init,N_guards,N_guards_init,
 	   N_dae_blocks,N_dae_init_blocks,
 	   Scaling_method);
 
@@ -338,6 +374,10 @@ DllExport fmiStatus fmiGetBoolean(fmiComponent c, const fmiValueReference vr[], 
 
 DllExport fmiStatus fmiGetString(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiString  value[]) {
     return fmi_get_string(c, vr, nvr, value);
+}
+
+DllExport jmi_t* fmiGetJMI(fmiComponent c) {
+    return fmi_get_jmi_t(c);
 }
 
 DllExport fmiStatus fmiEventUpdate(fmiComponent c, fmiBoolean intermediateResults, fmiEventInfo* eventInfo) {
