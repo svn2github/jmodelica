@@ -21,32 +21,32 @@ DEFAULT_ARGS=""
 PYTHON_HOME=/opt/python/python2.5/
 
 # Variables set by configure script
-JMODELICA_HOME=@prefix@
-JMODELICA_SRC=@abs_top_srcdir@
-IPOPT_HOME=@IPOPT_HOME@
-SUNDIALS_HOME=@SUNDIALS_HOME@
-ECLIPSE_HOME=@ECLIPSE_HOME@
-BUILD=@abs_builddir@
+JMODELICA_HOME="@prefix@"
+JMODELICA_SRC="@abs_top_srcdir@"
+IPOPT_HOME="@IPOPT_HOME@"
+SUNDIALS_HOME="@SUNDIALS_HOME@"
+ECLIPSE_HOME="@ECLIPSE_HOME@"
+BUILD="@abs_builddir@"
 if [[ "${JAVA_HOME}" == "" ]]; then
-  JAVA_HOME=@_JAVA_HOME_@
+  JAVA_HOME="@_JAVA_HOME_@"
 fi
 
 # Variables that are relative to others
-CPPAD_HOME=${JMODELICA_HOME}/ThirdParty/CppAD/
-PYTHONPATH=${PYTHON_HOME}:${JMODELICA_HOME}/Python/
+CPPAD_HOME="${JMODELICA_HOME}/ThirdParty/CppAD/"
+PYTHONPATH="${PYTHON_HOME}:${JMODELICA_HOME}/Python/"
 
 # ====== End variables to set ======
 
 # Update library path
 if [[ "${IPOPT_HOME}" != "" ]]; then
-  LIB_PATH=${IPOPT_HOME}/lib
+  LIB_PATH="${IPOPT_HOME}/lib"
   if [[ "${SUNDIALS_HOME}" != "" ]]; then
-    LIB_PATH=${LIB_PATH}:${SUNDIALS_HOME}/lib
+    LIB_PATH="${LIB_PATH}:${SUNDIALS_HOME}/lib"
   fi
   if [[ "${LD_LIBRARY_PATH}" == "" ]]; then
-    LD_LIBRARY_PATH=/lib:${LIB_PATH}
+    LD_LIBRARY_PATH="/lib:${LIB_PATH}"
   else
-    LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${LIB_PATH}
+    LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${LIB_PATH}"
   fi
 fi
 
@@ -234,7 +234,7 @@ for a in ${tests}; do
     test[${i}]=0
     (( ${a}=i++ ))
 done
-export JAVA_HOME JMODELICA_HOME IPOPT_HOME CPPAD_HOME PYTHONPATH LD_LIBRARY_PATH ANT_OPTS
+export JAVA_HOME JMODELICA_HOME IPOPT_HOME CPPAD_HOME PYTHONPATH LD_LIBRARY_PATH ANT_OPTS SUNDIALS_HOME
 TIME=$(date +%s)
 
 TAGS=
