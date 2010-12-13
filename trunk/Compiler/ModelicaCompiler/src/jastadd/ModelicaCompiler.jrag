@@ -124,6 +124,7 @@ public class ModelicaCompiler {
 	protected String cTemplatefile=null;
 	private OptionRegistry options = null;
 	private DiagnosticsGenerator diagGenerator= null;
+	private CCompilerDelegator cCompiler;
 	
 	public ModelicaCompiler(OptionRegistry options, String xmlTpl, String xmlValuesTpl, String cTemplatefile) {
 		staticBlocks();
@@ -131,10 +132,19 @@ public class ModelicaCompiler {
 		this.xmlTpl = xmlTpl;
 		this.xmlValuesTpl = xmlValuesTpl;
 		this.cTemplatefile = cTemplatefile;
+		this.cCompiler = new GCCcompilerDelegator();
 	}
 	
 	protected ModelicaCompiler() {
 		staticBlocks();
+	}
+	
+	public CCompilerDelegator getCCompiler() {
+		return this.cCompiler;
+	}
+	
+	public void setCCompiler(CCompilerDelegator cCompiler) {
+		this.cCompiler = cCompiler;
 	}
 	
 	public String getStringOption(String key) throws UnknownOptionException {
@@ -350,7 +360,15 @@ public class ModelicaCompiler {
 			log.debug("ASTNode must inherit ProfilingNode for node type counting to work.");
 		}
 	}
-			
+	
+	public void compileJMU(String className, String fileName[], String target, String compileTo) {
+		System.out.println("COMPILE JMU");
+	}
+	
+	public void compileFMU(String className, String fileName[], String target, String compileTo) {
+		System.out.println("COMPILE FMU");
+	}
+	
 	/**
 	 * Compiles a Modelica model. A model file name and class must be provided.
 	 * Prints an error and returns without completion if, for example, a file 
@@ -1133,5 +1151,22 @@ public class JModelicaHomeNotFoundException extends Exception {
 		super(msg);
 	}
 }
+
+public interface CCompilerDelegator {
+	
+	public void compileCCode(String fileName, String target, String ext_libs[], String ext_lib_dirs[], String ext_incl_dirs[]);
+	
+}
+
+public class GCCcompilerDelegator implements CCompilerDelegator {
+	
+	public GCCcompilerDelegator() {
+	}
+	
+	public void compileCCode(String fileName, String target, String ext_libs[], String ext_lib_dirs[], String ext_incl_dirs[]) {
+		System.out.println("GCC compiling code");
+	}
+}
+
 
 }
