@@ -8,7 +8,7 @@ import java.util.TreeSet;
 import junit.framework.TestCase;
 import mock.MockEditor;
 
-import org.jmodelica.ide.compiler.ModelicaCompiler;
+import org.jmodelica.ide.compiler.ModelicaEclipseCompiler;
 import org.jmodelica.ide.helpers.Maybe;
 import org.jmodelica.ide.namecomplete.CompletionNode;
 import org.jmodelica.ide.namecomplete.CompletionProcessor;
@@ -29,9 +29,9 @@ public class NameCompleteTest extends TestCase {
 			m.document.offset++;
 		}
 
-		SourceRoot root = new ModelicaCompiler().compileDirectory(new File("test_data/test_project/"));
+		SourceRoot root = new ModelicaEclipseCompiler().compileDirectory(new File("test_data/test_project/"));
 
-		StoredDefinition testAST = new ModelicaCompiler().compileString(m.document.get());
+		StoredDefinition testAST = new ModelicaEclipseCompiler().compileString(m.document.get());
 
 		root.getProgram().addUnstructuredEntity(testAST);
 

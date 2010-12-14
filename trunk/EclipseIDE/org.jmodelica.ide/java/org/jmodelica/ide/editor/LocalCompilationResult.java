@@ -4,17 +4,17 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
-import org.jmodelica.ide.compiler.ModelicaCompiler;
+import org.jmodelica.ide.compiler.ModelicaEclipseCompiler;
 
 
 public class LocalCompilationResult extends CompilationResult {
 
 private final Editor editor;
-private final ModelicaCompiler compiler;
+private final ModelicaEclipseCompiler compiler;
 
 public LocalCompilationResult(EditorFile ef, Editor ed) {
 
-    compiler = new ModelicaCompiler();
+    compiler = new ModelicaEclipseCompiler();
     root = compiler.compileFile(ef.iFile());
     editor = ed;
     

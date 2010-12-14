@@ -12,7 +12,7 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 import org.jastadd.plugin.registry.ASTRegistry;
 import org.jmodelica.ide.OffsetDocument;
-import org.jmodelica.ide.compiler.ModelicaCompiler;
+import org.jmodelica.ide.compiler.ModelicaEclipseCompiler;
 import org.jmodelica.ide.editor.EditorWithFile;
 import org.jmodelica.ide.helpers.Maybe;
 import org.jmodelica.modelica.compiler.InstNode;
@@ -28,8 +28,8 @@ import org.jmodelica.modelica.compiler.StoredDefinition;
  */
 public class CompletionProcessor implements IContentAssistProcessor {
 
-public final static ModelicaCompiler compiler = 
-    new ModelicaCompiler();
+public final static ModelicaEclipseCompiler compiler = 
+    new ModelicaEclipseCompiler();
 
 public final EditorWithFile editor;
 

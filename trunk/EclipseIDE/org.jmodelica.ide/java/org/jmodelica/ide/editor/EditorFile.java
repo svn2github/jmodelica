@@ -1,9 +1,12 @@
 package org.jmodelica.ide.editor;
 
+import java.util.ArrayList;
+
 import mock.MockFile;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.Position;
 import org.eclipse.ui.IEditorInput;
@@ -77,12 +80,33 @@ public class EditorFile {
 	 * Returns true if file is in a project with a Modelica nature
 	 */
 	public boolean inModelicaProject() {
-		try {
-			IProject project = file.getProject();
-			return project != null && project.hasNature(IDEConstants.NATURE_ID);
-		} catch (CoreException e) {
-			return false;
+		if (file != null) {
+			try {
+				IProject project = file.getProject();
+				return project != null && project.hasNature(IDEConstants.NATURE_ID);
+			} catch (CoreException e) {
+			}
 		}
+		return false;
+	}
+	
+	/**
+	 * Returns path of all files in root of the project this file belongs to.
+	 * 
+	 * If this file does not belong to a Modelica project, only the path of this file is returned.
+	 */
+	public String[] getPaths() {
+		if (inModelicaProject()) {
+			try {
+				ArrayList<String> paths = new ArrayList<String>();
+				for (IResource res : file.getProject().members())
+					if (res.getType() == IResource.FILE && res.getName().endsWith(".mo"))
+						paths.add(res.getRawLocation().toOSString());
+				return paths.toArray(new String[paths.size()]);
+			} catch (CoreException e) {
+			}
+		}
+		return new String[] { path };
 	}
 
 	/**

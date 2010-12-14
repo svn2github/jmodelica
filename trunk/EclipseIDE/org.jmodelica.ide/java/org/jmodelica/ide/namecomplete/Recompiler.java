@@ -4,7 +4,7 @@ package org.jmodelica.ide.namecomplete;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.Document;
 import org.jmodelica.ide.OffsetDocument;
-import org.jmodelica.ide.compiler.ModelicaCompiler;
+import org.jmodelica.ide.compiler.ModelicaEclipseCompiler;
 import org.jmodelica.ide.helpers.Maybe;
 import org.jmodelica.ide.indent.DocUtil;
 import org.jmodelica.modelica.compiler.List;
@@ -14,8 +14,8 @@ import org.jmodelica.modelica.compiler.StoredDefinition;
 
 public class Recompiler {
 
-public final static ModelicaCompiler compiler =
-    new ModelicaCompiler();
+public final static ModelicaEclipseCompiler compiler =
+    new ModelicaEclipseCompiler();
 
 /**
  * Recompile active file and add new AST to project AST

@@ -39,6 +39,10 @@ public class ImageLoader {
 	public final static ImageDescriptor ERROR_CHECK_DESC = createImageDescriptor(ERROR_CHECK_IMAGE);
 	public final static String ERROR_CHECK_DIS_IMAGE = "buttons/error_check_dis.png";
 	public final static ImageDescriptor ERROR_CHECK_DIS_DESC = createImageDescriptor(ERROR_CHECK_DIS_IMAGE);
+	public final static String COMPILE_FMU_IMAGE = "buttons/compile_fmu.png";
+	public final static ImageDescriptor COMPILE_FMU_DESC = createImageDescriptor(COMPILE_FMU_IMAGE);
+	public final static String COMPILE_FMU_DIS_IMAGE = "buttons/compile_fmu_dis.png";
+	public final static ImageDescriptor COMPILE_FMU_DIS_DESC = createImageDescriptor(COMPILE_FMU_DIS_IMAGE);
 	public final static String ANNOTATION_IMAGE = "buttons/annotation.png";
 	public final static ImageDescriptor ANNOTATION_DESC = createImageDescriptor(ANNOTATION_IMAGE);
 	public final static String ANNOTATION_DIS_IMAGE = "buttons/annotation_dis.png";

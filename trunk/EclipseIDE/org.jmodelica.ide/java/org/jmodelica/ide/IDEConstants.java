@@ -37,10 +37,15 @@ public class IDEConstants {
 	public static final String[] ALL_FILE_EXTENSIONS = { FILE_EXT };
 	
 	public static final String ACTION_ID = PLUGIN_ID + ".action";
+	public static final String COMMAND_ID = PLUGIN_ID + ".command";
 	public static final String ACTION_EXPAND_ALL_ID = ACTION_ID + ".expand-all";
 	public static final String ACTION_COLLAPSE_ALL_ID = ACTION_ID + ".collapse-all";
 	public static final String ACTION_ERROR_CHECK_ID = ACTION_ID + ".error.check";
+	public static final String COMMAND_ERROR_CHECK_ID = "JModelicaIDE.ErrorCheckCommand";
 	public static final String ACTION_ERROR_CHECK_TEXT = "Check for &errors";
+	public static final String ACTION_COMPILE_FMU_ID = ACTION_ID + ".compile.fmu";
+	public static final String COMMAND_COMPILE_FMU_ID = COMMAND_ID + ".compile.fmu";
+	public static final String ACTION_COMPILE_FMU_TEXT = "Compile to FMU";
 	public static final String ACTION_TOGGLE_ANNOTATIONS_ID = ACTION_ID + ".annotation";
 	public static final String ACTION_TOGGLE_ANNOTATIONS_TEXT = "Show &annotations";
 	public static final String ACTION_FORMAT_REGION_ID = ACTION_ID + ".format-region";
@@ -49,9 +54,11 @@ public class IDEConstants {
     public static final String ACTION_TOGGLE_COMMENT_TEXT = "Toggle &Comment";
     public static final String ACTION_FOLLOW_REFERENCE_ID = ACTION_ID + ".gotodecl";
     public static final String ACTION_FOLLOW_REFERENCE_TEXT = "&Go to declaration";
+    
     public static final String GROUP_ID = ACTION_ID + ".group";
 	public static final String GROUP_MODELICA_ID = GROUP_ID + ".modelica";
-	public static final String GROUP_ERROR_ID = GROUP_ID + ".error";
+	public static final String GROUP_COMPILE_ID = GROUP_ID + ".compile";
+	public static final String GROUP_EDIT_ID = GROUP_ID + ".edit";
 	
 	// TODO: this doesn't seem to use new preference framework
 	public static final String PREFERENCE_ID = PLUGIN_ID + ".preference";

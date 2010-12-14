@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Display;
 import org.jmodelica.ide.Activator;
 import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.scanners.HilightScanner;
+import org.jmodelica.modelica.compiler.ModelicaCompiler;
 
 public class Preferences extends AbstractPreferenceInitializer {
 
@@ -96,13 +97,12 @@ public class Preferences extends AbstractPreferenceInitializer {
 		Activator plugin = Activator.getDefault();
 		
 		// Read default values from environment vars
-		String jmodelicaHome = System.getenv("JMODELICA_HOME");
+		String jmodelicaHome = ModelicaCompiler.getJModelicaHome();
 		String modelicaPath = System.getenv("MODELICAPATH");
 
 		// Calculate proper defaults from environment vars
 		if (modelicaPath == null && jmodelicaHome != null) {
-			modelicaPath = jmodelicaHome
-					+ "/ThirdParty/MSL".replace('/', File.separatorChar);
+			modelicaPath = jmodelicaHome + "/ThirdParty/MSL".replace('/', File.separatorChar);
 		}
 		String optionsPath = (jmodelicaHome != null) ? 
 				(jmodelicaHome + File.separator + "Options") : "";

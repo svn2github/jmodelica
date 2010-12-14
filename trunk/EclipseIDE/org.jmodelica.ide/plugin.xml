@@ -105,7 +105,7 @@
          name="JModelica Compiler"
          point="org.jastadd.plugin.compilers">
       <compiler
-            class="org.jmodelica.ide.compiler.ModelicaCompiler">
+            class="org.jmodelica.ide.compiler.ModelicaEclipseCompiler">
       </compiler>
    </extension>
    <extension
@@ -317,6 +317,12 @@
             keyConfigurationId="org.eclipse.ui.defaultAcceleratorConfiguration"
             keySequence="F3">
       </keyBinding>
+      <command
+            categoryId="JModelicaIDE.ModelicaCommandCategory"
+            description="Compile selected class to an FMU"
+            id="org.jmodelica.ide.command.compile.fmu"
+            name="Compile to FMU">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.preferencePages">

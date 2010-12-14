@@ -20,3 +20,4 @@ Require-Bundle: org.eclipse.jface.text,
  org.eclipse.ui.navigator.resources;bundle-version="3.4.201"
 Import-Package: junit.framework,
  org.eclipse.ui.navigator
+Export-Package: org.jmodelica.modelica.compiler

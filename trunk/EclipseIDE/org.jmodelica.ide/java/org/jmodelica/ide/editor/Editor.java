@@ -51,8 +51,10 @@ import org.jmodelica.folding.CharacterProjectionSupport;
 import org.jmodelica.folding.CharacterProjectionViewer;
 import org.jmodelica.generated.scanners.Modelica32PartitionScanner;
 import org.jmodelica.ide.IDEConstants;
-import org.jmodelica.ide.compiler.ModelicaCompiler;
+import org.jmodelica.ide.compiler.ModelicaEclipseCompiler;
 import org.jmodelica.ide.editor.actions.CollapseAllAction;
+import org.jmodelica.ide.editor.actions.CompileFMUAction;
+import org.jmodelica.ide.editor.actions.CurrentClassAction;
 import org.jmodelica.ide.editor.actions.ErrorCheckAction;
 import org.jmodelica.ide.editor.actions.ExpandAllAction;
 import org.jmodelica.ide.editor.actions.FormatRegionAction;
@@ -66,6 +68,7 @@ import org.jmodelica.ide.outline.InstanceOutlinePage;
 import org.jmodelica.ide.outline.OutlinePage;
 import org.jmodelica.ide.outline.SourceOutlinePage;
 import org.jmodelica.modelica.compiler.ASTNode;
+import org.jmodelica.modelica.compiler.BaseClassDecl;
 
 
 /**
@@ -85,6 +88,8 @@ private CompilationResult compResult;
 public  EditorFile file;
 
 private final ErrorCheckAction errorCheckAction;
+private final CompileFMUAction compileFMUAction;
+private final CurrentClassAction[] currentClassListeners;
 private final ToggleAnnotationsAction toggleAnnotationsAction;
 private final GoToDeclaration goToDeclaration;
 private final CompletionProcessor completions;
@@ -104,6 +109,9 @@ public Editor() {
         new GoToDeclaration(this);
     errorCheckAction = 
         new ErrorCheckAction();
+    compileFMUAction = 
+        new CompileFMUAction(this);
+    currentClassListeners = new CurrentClassAction[] { errorCheckAction, compileFMUAction };
     toggleAnnotationsAction = 
         new ToggleAnnotationsAction(this);
     fPartitioner = 
@@ -143,7 +151,7 @@ private void configureProjectionSupport(CharacterProjectionViewer viewer) {
 
     projectionSupport.setAnnotationPainterDrawingStrategy(annotationDrawer);
     projectionSupport
-            .addSummarizableAnnotationType(ModelicaCompiler.ERROR_MARKER_ID);
+            .addSummarizableAnnotationType(ModelicaEclipseCompiler.ERROR_MARKER_ID);
     projectionSupport.install();
 }
 
@@ -262,13 +270,13 @@ protected void createActions() {
     super.createActions();
     for (Action action : new Action[] { new ExpandAllAction(this),
             new CollapseAllAction(this), new FormatRegionAction(this),
-            new ToggleComment(this), errorCheckAction,
+            new ToggleComment(this), errorCheckAction, compileFMUAction, 
             toggleAnnotationsAction,
             goToDeclaration }) {
         super.setAction(action.getId(), action);
     }
 
-    updateErrorCheckAction();
+    updateCurrentClassListeners();
 }
 
 @Override
@@ -325,7 +333,7 @@ protected void update() {
     goToDeclaration.updateAST(compResult.root());
 
     updateProjectionAnnotations();
-    updateErrorCheckAction();
+    updateCurrentClassListeners();
 }
 
 private void setupDocumentPartitioner(IDocument document) {
@@ -380,11 +388,13 @@ private ProjectionAnnotationModel getAnnotationModel() {
 @Override
 protected void handleCursorPositionChanged() {
     super.handleCursorPositionChanged();
-    updateErrorCheckAction();
+    updateCurrentClassListeners();
 }
 
-private void updateErrorCheckAction() {
-    errorCheckAction.setCurrentClass(compResult.classContaining(selection()));
+private void updateCurrentClassListeners() {
+    BaseClassDecl containingClass = compResult.classContaining(selection());
+    for (CurrentClassAction listener : currentClassListeners)
+    	listener.setCurrentClass(containingClass);
 }
 
 /**

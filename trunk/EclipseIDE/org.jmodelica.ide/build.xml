@@ -52,7 +52,11 @@
 	<property name="bin_dir" value="bin" />
 	<property name="output_dir" value="site" />
 
-	<property name="jmodelica_dir" value="${jmodelica_root}/Compiler/ModelicaFrontEnd/src" />
+	<property name="compiler_dir" value="${jmodelica_root}/Compiler" />
+	<property name="modelica_frontend_dir" value="${compiler_dir}/ModelicaFrontEnd/src" />
+	<property name="modelica_compiler_dir" value="${compiler_dir}/ModelicaCompiler/src" />
+	<property name="modelica_cbackend_dir" value="${compiler_dir}/ModelicaCBackEnd/src" />
+	<property name="modelica_xmlbackend_dir" value="${compiler_dir}/ModelicaXMLBackEnd/src" />
 	<condition property="core_dir" value="../${jastadd.project}" else="${jastadd_dir}/org.jastadd.plugin">
 		<available file="../${jastadd.project}" type="dir" property="" />
 	</condition>
@@ -66,8 +70,8 @@
 	<property name="ast_package" value="${package}.modelica.compiler" />
 	<property name="package_dir" value="${java_dir}/org/jmodelica" />
 	<!--	
-	<property name="jmodelica_test_framework" value="${jmodelica_dir}/test/test-framework"/>
-	<property name="jmodelica_java" value="${jmodelica_dir}/java"/>
+	<property name="jmodelica_test_framework" value="${modelica_frontend_dir}/test/test-framework"/>
+	<property name="jmodelica_java" value="${modelica_frontend_dir}/java"/>
 	-->
 	<property name="scanner_dir" value="flex" />
 
@@ -82,11 +86,14 @@
 
 	<property name="parser_output" value="${package_dir}/modelica/parser" />
 	<!--<property name="parser_output" value="${package_dir}/modelica/parser"/>-->
-	<property name="parser_dir" value="${jmodelica_dir}/parser" />
+	<property name="parser_dir" value="${modelica_frontend_dir}/parser" />
 
 	<property name="ide_aspects" value="aspects" />
 	<property name="ide_core_aspects" value="${core_dir}/src" />
-	<property name="compiler_aspects" value="${jmodelica_dir}/jastadd" />
+	<property name="modelica_frontend_aspects" value="${modelica_frontend_dir}/jastadd" />
+	<property name="modelica_compiler_aspects" value="${modelica_compiler_dir}/jastadd" />
+	<property name="modelica_cbackend_aspects" value="${modelica_cbackend_dir}/jastadd" />
+	<property name="modelica_xmlbackend_aspects" value="${modelica_xmlbackend_dir}/jastadd" />
 
 	<!-- "jflex" is an ant task class for the scanner generator in JFlex.jar -->
 	<!-- "beaver" is an ant task class for the parser generator in beaver.jar -->
@@ -219,7 +226,22 @@
 	<!-- create AST node types and weave aspect modules -->
 	<target name="ast">
 		<jastadd package="${ast_package}" license="${ide_aspects}/licence.blurb" beaver="true" rewrite="true" outdir="${java_dir}" NoCacheCycle="false" ComponentCheck="true" visitcheck="false" LazyMaps="true" Deterministic="true" NoStatic="false" Debug="false">
-			<fileset dir="${compiler_aspects}">
+			<fileset dir="${modelica_frontend_aspects}">
+				<include name="**/*.ast" />
+				<include name="**/*.jrag" />
+				<include name="**/*.jadd" />
+			</fileset>
+			<fileset dir="${modelica_compiler_aspects}">
+				<include name="**/*.ast" />
+				<include name="**/*.jrag" />
+				<include name="**/*.jadd" />
+			</fileset>
+			<fileset dir="${modelica_cbackend_aspects}">
+				<include name="**/*.ast" />
+				<include name="**/*.jrag" />
+				<include name="**/*.jadd" />
+			</fileset>
+			<fileset dir="${modelica_xmlbackend_aspects}">
 				<include name="**/*.ast" />
 				<include name="**/*.jrag" />
 				<include name="**/*.jadd" />
@@ -240,7 +262,7 @@
 	<!-- Copy required files from JModelica -->
 	<target name="copy">
 		<copy todir="${java_dir}">
-			<fileset dir="${jmodelica_dir}/java">
+			<fileset dir="${modelica_frontend_dir}/java">
 				<include name="**/*" />
 			</fileset>
 		</copy>

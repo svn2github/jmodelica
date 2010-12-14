@@ -42,7 +42,7 @@ import org.jmodelica.modelica.compiler.LibNode;
 import org.jmodelica.modelica.compiler.SourceRoot;
 import org.jmodelica.modelica.compiler.StoredDefinition;
 
-public class ModelicaCompiler extends AbstractCompiler {
+public class ModelicaEclipseCompiler extends AbstractCompiler {
 
 	public static final String ERROR_MARKER_ID = IDEConstants.ERROR_MARKER_ID;
 

@@ -38,7 +38,7 @@ import org.jastadd.plugin.compiler.ast.IOutlineNode;
 import org.jastadd.plugin.registry.ASTRegistry;
 import org.jastadd.plugin.registry.IASTRegistryListener;
 import org.jmodelica.ide.IDEConstants;
-import org.jmodelica.ide.compiler.ModelicaCompiler;
+import org.jmodelica.ide.compiler.ModelicaEclipseCompiler;
 import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.ClassDecl;
 import org.jmodelica.modelica.compiler.Element;
@@ -50,12 +50,12 @@ import org.jmodelica.modelica.compiler.StoredDefinition;
 public class ExplorerContentProvider implements ITreeContentProvider, IResourceChangeListener, IResourceDeltaVisitor {
 
 	private ASTRegistry registry;
-	private ModelicaCompiler cmp;
+	private ModelicaEclipseCompiler cmp;
 	private StructuredViewer viewer;
 
 	public ExplorerContentProvider() {
 		registry = org.jastadd.plugin.Activator.getASTRegistry();
-		cmp = new ModelicaCompiler();
+		cmp = new ModelicaEclipseCompiler();
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(this, IResourceChangeEvent.POST_CHANGE);
 	}
 

@@ -41,14 +41,16 @@ import org.jmodelica.ide.ui.ImageLoader;
  */
 public class EditorContributor extends BasicTextEditorActionContributor {
 
-private static final String[] ACTIONS = { 
+private static final String[] ACTION_IDS = { 
     IDEConstants.ACTION_ERROR_CHECK_ID,
+    IDEConstants.ACTION_COMPILE_FMU_ID,
     IDEConstants.ACTION_TOGGLE_ANNOTATIONS_ID,
     IDEConstants.ACTION_FORMAT_REGION_ID, 
     IDEConstants.ACTION_FOLLOW_REFERENCE_ID, 
     IDEConstants.ACTION_TOGGLE_COMMENT_ID };
 
 private LabelRetargetAction errorCheckAction;
+private LabelRetargetAction compileFMUAction;
 private RetargetAction toggleAnnotationsAction;
 private LabelRetargetAction formatRegionAction;
 private LabelRetargetAction followReferenceAction;
@@ -60,15 +62,19 @@ public EditorContributor() {
     errorCheckAction = new LabelRetargetAction(IDEConstants.ACTION_ERROR_CHECK_ID,
             IDEConstants.ACTION_ERROR_CHECK_TEXT);
     errorCheckAction.setImageDescriptor(ImageLoader.ERROR_CHECK_DESC);
-    errorCheckAction
-            .setDisabledImageDescriptor(ImageLoader.ERROR_CHECK_DIS_DESC);
+    errorCheckAction.setDisabledImageDescriptor(ImageLoader.ERROR_CHECK_DIS_DESC);
+    
+    compileFMUAction = new LabelRetargetAction(IDEConstants.ACTION_COMPILE_FMU_ID,
+            IDEConstants.ACTION_COMPILE_FMU_TEXT);
+    compileFMUAction.setImageDescriptor(ImageLoader.COMPILE_FMU_DESC);
+    compileFMUAction.setDisabledImageDescriptor(ImageLoader.COMPILE_FMU_DIS_DESC);
+    
     toggleAnnotationsAction = new RetargetAction(
             IDEConstants.ACTION_TOGGLE_ANNOTATIONS_ID,
             IDEConstants.ACTION_TOGGLE_ANNOTATIONS_TEXT,
             RetargetAction.AS_CHECK_BOX);
     toggleAnnotationsAction.setImageDescriptor(ImageLoader.ANNOTATION_DESC);
-    toggleAnnotationsAction
-            .setDisabledImageDescriptor(ImageLoader.ANNOTATION_DIS_DESC);
+    toggleAnnotationsAction.setDisabledImageDescriptor(ImageLoader.ANNOTATION_DIS_DESC);
 
     formatRegionAction = new LabelRetargetAction(
             IDEConstants.ACTION_FORMAT_REGION_ID,
@@ -84,6 +90,7 @@ public EditorContributor() {
    
     retargetActions = new RetargetAction[] { 
             errorCheckAction,
+            compileFMUAction,
             toggleAnnotationsAction, 
             followReferenceAction,
             formatRegionAction,
@@ -110,25 +117,25 @@ public void setActiveEditor(IEditorPart part) {
 }
 
 private void doSetActiveEditor(IEditorPart part) {
-    ITextEditor editor = (part instanceof ITextEditor) ? (ITextEditor) part
-            : null;
+    ITextEditor editor = (part instanceof ITextEditor) ? (ITextEditor) part : null;
     IActionBars actionBars = getActionBars();
-    for (int i = 0; i < ACTIONS.length; i++)
-        actionBars.setGlobalActionHandler(ACTIONS[i], getAction(editor,
-                ACTIONS[i]));
+    for (int i = 0; i < ACTION_IDS.length; i++)
+        actionBars.setGlobalActionHandler(ACTION_IDS[i], getAction(editor, ACTION_IDS[i]));
 }
 
 @Override
 public void contributeToMenu(IMenuManager menu) {
     super.contributeToMenu(menu);
-    IMenuManager editMenu = menu
-            .findMenuUsingPath(IWorkbenchActionConstants.M_EDIT);
-    editMenu.add(new Separator(IDEConstants.GROUP_ERROR_ID));
-    editMenu.appendToGroup(IDEConstants.GROUP_ERROR_ID, errorCheckAction);
-    editMenu.appendToGroup(IDEConstants.GROUP_ERROR_ID, toggleAnnotationsAction);
-    editMenu.appendToGroup(IDEConstants.GROUP_ERROR_ID, formatRegionAction);
-    editMenu.appendToGroup(IDEConstants.GROUP_ERROR_ID, followReferenceAction);
-    editMenu.appendToGroup(IDEConstants.GROUP_ERROR_ID, toggleCommentAction);
+    IMenuManager fileMenu = menu.findMenuUsingPath(IWorkbenchActionConstants.M_FILE);
+    fileMenu.appendToGroup("additions", new Separator(IDEConstants.GROUP_COMPILE_ID));
+    fileMenu.appendToGroup(IDEConstants.GROUP_COMPILE_ID, errorCheckAction);
+    fileMenu.appendToGroup(IDEConstants.GROUP_COMPILE_ID, compileFMUAction);
+    IMenuManager editMenu = menu.findMenuUsingPath(IWorkbenchActionConstants.M_EDIT);
+    editMenu.appendToGroup("additions", new Separator(IDEConstants.GROUP_EDIT_ID));
+    editMenu.appendToGroup(IDEConstants.GROUP_EDIT_ID, toggleAnnotationsAction);
+    editMenu.appendToGroup(IDEConstants.GROUP_EDIT_ID, formatRegionAction);
+    editMenu.appendToGroup(IDEConstants.GROUP_EDIT_ID, followReferenceAction);
+    editMenu.appendToGroup(IDEConstants.GROUP_EDIT_ID, toggleCommentAction);
 }
 
 @Override
@@ -146,8 +153,8 @@ public void contributeToToolBar(IToolBarManager toolBarManager) {
 private void contributeToToolOrCoolBar(IContributionManager barManager) {
     barManager.add(new Separator(IDEConstants.GROUP_MODELICA_ID));
     barManager.appendToGroup(IDEConstants.GROUP_MODELICA_ID, errorCheckAction);
-    barManager.appendToGroup(IDEConstants.GROUP_MODELICA_ID,
-            toggleAnnotationsAction);
+    barManager.appendToGroup(IDEConstants.GROUP_MODELICA_ID, compileFMUAction);
+    barManager.appendToGroup(IDEConstants.GROUP_MODELICA_ID, toggleAnnotationsAction);
 }
 
 @Override
