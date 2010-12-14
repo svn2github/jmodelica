@@ -1125,20 +1125,9 @@ aspect Scalarization {
 			if (myElse != null)
 				res.setElse(myElse);
 		}
-		res.setTest(scalarizeTest(eqns, vars, indexMap));
+		getTest().createArrayTemporaries(eqns, vars, indexMap, true);
+		res.setTest(getTest().scalarize(indexMap));
 		return res;
-	}
-	
-	protected FExp FIfWhenEquation.scalarizeTest(
-			List<FAbstractEquation> eqns, List<FVariable> vars, Map<String,FExp> indexMap) {
-		getTest().createArrayTemporaries(eqns, vars, indexMap, true);
-		return getTest().scalarize(indexMap);
-	}
-	
-	protected FExp FWhenEquation.scalarizeTest(
-			List<FAbstractEquation> eqns, List<FVariable> vars, Map<String,FExp> indexMap) {
-		getTest().createArrayTemporaries(eqns, vars, indexMap, true);
-		return getTest().reduceToScalarized(new FOrExp(), indexMap);
 	}
 	
 	// TODO: probably shouldn't eliminate for testexp that is non-structural parameter

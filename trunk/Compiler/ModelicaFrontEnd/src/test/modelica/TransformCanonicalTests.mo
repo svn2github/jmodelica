@@ -1820,23 +1820,23 @@ equation
  der(z[1]) = ( z[1] ) .* ( 0.1 );
  der(z[2]) = ( z[2] ) .* ( 0.2 );
  der(z[3]) = ( z[3] ) .* ( 0.3 );
- when z[1] > 2 or z[2] > 2 or z[3] > 2 then
+ when {z[1] > 2,z[2] > 2,z[3] > 2} then
   x[1] = 1;
- elsewhen z[1] < 0 or z[2] < 0 or z[3] < 0 then
+ elsewhen {z[1] < 0,z[2] < 0,z[3] < 0} then
   x[1] = 4;
  elsewhen z[1] + z[2] + z[3] > 4.5 then
   x[1] = 7;
  end when;
- when z[1] > 2 or z[2] > 2 or z[3] > 2 then
+ when {z[1] > 2,z[2] > 2,z[3] > 2} then
   x[2] = 2;
- elsewhen z[1] < 0 or z[2] < 0 or z[3] < 0 then
+ elsewhen {z[1] < 0,z[2] < 0,z[3] < 0} then
   x[2] = 5;
  elsewhen z[1] + z[2] + z[3] > 4.5 then
   x[2] = 8;
  end when;
- when z[1] > 2 or z[2] > 2 or z[3] > 2 then
+ when {z[1] > 2,z[2] > 2,z[3] > 2} then
   x[3] = 3;
- elsewhen z[1] < 0 or z[2] < 0 or z[3] < 0 then
+ elsewhen {z[1] < 0,z[2] < 0,z[3] < 0} then
   x[3] = 6;
  elsewhen z[1] + z[2] + z[3] > 4.5 then
   x[3] = 9;
