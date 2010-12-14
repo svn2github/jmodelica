@@ -709,7 +709,7 @@ class ResultWriterDymolaSensitivity(ResultWriter):
         self._file_open = False
         self._npoints = 0
         
-    def write_header(self, file_name=''):
+    def write_header(self, file_name='', scaled=False):
         """
         Opens the file and writes the header. This includes the 
         information about the variables and a table determining the link 
@@ -817,6 +817,7 @@ class ResultWriterDymolaSensitivity(ResultWriter):
         # Write data meta information
         offs = model.get_offsets()
         n_parameters = offs[12] # offs[12] = offs_dx
+        self._n_parameters = n_parameters
         f.write('int dataInfo(%d,%d)\n' % (num_vars + 1, 4))
         f.write('0 1 0 -1 # time\n')
 
@@ -857,6 +858,7 @@ class ResultWriterDymolaSensitivity(ResultWriter):
         f.write('\n')
 
         sc = model.jmimodel.get_variable_scaling_factors()
+        self._sc = sc
         z = model.z
 
         # Write data
@@ -908,7 +910,8 @@ class ResultWriterDymolaSensitivity(ResultWriter):
         """
         f = self._file
         rescale = self._rescale
-
+        sc = self._sc
+        n_parameters = self._n_parameters
         #If data is none, store the current point from the model
         #if data==None:
         #    #Retrieves the time-point

@@ -147,7 +147,7 @@ def write_data(simulator,write_scaled_result=False):
             data = N.c_[data, p_data[i]]
 
         export = io.ResultWriterDymolaSensitivity(model)
-        export.write_header()
+        export.write_header(scaled=write_scaled_result)
         map(export.write_point,(row for row in data))
         export.write_finalize()
         
