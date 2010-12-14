@@ -435,6 +435,44 @@ int jmi_ode_initialize(jmi_t* jmi) {
 	return return_status;
 }
 
+int jmi_ode_guards(jmi_t* jmi) {
+
+	int i, return_status;
+	for (i=0;i<jmi->n_z;i++) {
+		(*(jmi->z))[i] = (*(jmi->z_val))[i];
+	}
+
+	return_status = jmi->dae->ode_guards(jmi);
+
+	/* Write back evaluation result */
+	if (return_status==0) {
+		for (i=0;i<jmi->n_z;i++) {
+			(*(jmi->z_val))[i] = (*(jmi->z))[i];
+		}
+		return 0;
+	}
+	return return_status;
+}
+
+int jmi_ode_guards_init(jmi_t* jmi) {
+
+	int i, return_status;
+	for (i=0;i<jmi->n_z;i++) {
+		(*(jmi->z))[i] = (*(jmi->z_val))[i];
+	}
+
+	return_status = jmi->dae->ode_guards_init(jmi);
+
+	/* Write back evaluation result */
+	if (return_status==0) {
+		for (i=0;i<jmi->n_z;i++) {
+			(*(jmi->z_val))[i] = (*(jmi->z))[i];
+		}
+		return 0;
+	}
+	return return_status;
+}
+
 int jmi_dae_F(jmi_t* jmi, jmi_real_t* res) {
 
 	int i;

@@ -1909,6 +1909,7 @@ end when;
 when x > 2 then 
 z = false; 
 end when; 
+//when (time>1 and time<1.1) or  (time>2 and time<2.1) then 
 when time>1 then 
 x = pre(x) + 1; 
 y = pre(y) + 1; 

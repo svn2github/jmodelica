@@ -578,6 +578,9 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
  * @param ode_derivatives A function pointer to the ODE RHS function.
  * @param ode_derivatives A function pointer to the ODE output function.
  * @param ode_derivatives A function pointer to the ODE initialization function.
+ * @param ode_guards A function pointer for evaluating the guard expressions
+ * @param ode_guards_init A function pointer for evaluating the guard expressions
+ *        in the initial equations.
  * @return Error code.
  */
 int jmi_dae_init(jmi_t* jmi, jmi_residual_func_t F, int n_eq_F,
@@ -586,7 +589,9 @@ int jmi_dae_init(jmi_t* jmi, jmi_residual_func_t F, int n_eq_F,
         jmi_jacobian_func_t dR, int dR_n_nz, int* dR_row, int* dR_col,
         jmi_generic_func_t ode_derivatives,
         jmi_generic_func_t ode_outputs,
-        jmi_generic_func_t ode_initialize);
+        jmi_generic_func_t ode_initialize,
+        jmi_generic_func_t ode_guards,
+        jmi_generic_func_t ode_guards_init);
 
 int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, int n, int index);
 
@@ -950,6 +955,8 @@ struct jmi_dae_t{
     jmi_generic_func_t ode_derivatives;  /**< \brief A function pointer to a function for evaluating the ODE derivatives. */
     jmi_generic_func_t ode_outputs;      /**< \brief A function pointer to a function for evaluating the ODE outputs. */
     jmi_generic_func_t ode_initialize;   /**< \brief A function pointer to a function for initializing the ODE. */
+    jmi_generic_func_t ode_guards;       /**< A function pointer for evaluating the guard expressions. */
+    jmi_generic_func_t ode_guards_init;  /**< A function pointer for evaluating the guard expressions in the initial equations. */
 };
 
 /**

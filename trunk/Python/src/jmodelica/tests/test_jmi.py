@@ -997,7 +997,32 @@ class TestJMIModel_VDP:
         size_F, size_R = self.vdp.jmimodel.dae_get_sizes()
         res = N.zeros(size_R)
         self.vdp.jmimodel.dae_R(res)
-    
+
+    @testattr(stddist = True)
+    def test_ode_derivatives(self):
+        """ Test JMIModel.ode_derivatives method. """
+        self.vdp.jmimodel.ode_derivatives()
+
+    @testattr(stddist = True)
+    def test_ode_outputs(self):
+        """ Test JMIModel.ode_outputs method. """
+        self.vdp.jmimodel.ode_outputs()
+
+    @testattr(stddist = True)
+    def test_ode_initialize(self):
+        """ Test JMIModel.ode_initialize method. """
+        self.vdp.jmimodel.ode_initialize()
+
+    @testattr(stddist = True)
+    def test_ode_guards(self):
+        """ Test JMIModel.ode_guards method. """
+        self.vdp.jmimodel.ode_guards()
+
+    @testattr(stddist = True)
+    def test_ode_guards_init(self):
+        """ Test JMIModel.ode_guards_init method. """
+        self.vdp.jmimodel.ode_guards_init()
+        
     @testattr(stddist = True)
     def test_init_get_sizes(self):
         """ Test JMIModel.init_get_sizes method. """

@@ -992,6 +992,22 @@ int jmi_ode_outputs(jmi_t* jmi);
  */
 int jmi_ode_initialize(jmi_t* jmi);
 
+/**
+ * \brief Evaluate the DAE guard expressions
+ *
+ * @param jmi A jmi_t struct.
+ * @return Error code.
+ */
+int jmi_ode_guards(jmi_t* jmi);
+
+/**
+ * \brief Evaluate the initial equation guard expressions
+ *
+ * @param jmi A jmi_t struct.
+ * @return Error code.
+ */
+int jmi_ode_guards_init(jmi_t* jmi);
+
 /* @} */
 
 /*********************************************

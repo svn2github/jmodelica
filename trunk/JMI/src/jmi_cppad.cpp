@@ -922,6 +922,14 @@ int jmi_ode_initialize(jmi_t* jmi) {
 	return 0;
 }
 
+int jmi_ode_guards(jmi_t* jmi) {
+	return 0;
+}
+
+int jmi_ode_guards_init(jmi_t* jmi) {
+	return 0;
+}
+
 int jmi_ode_f(jmi_t* jmi) {
 
 	if (jmi->n_real_w != 0) { // Check if not ODE

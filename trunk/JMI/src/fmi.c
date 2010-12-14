@@ -546,7 +546,7 @@ fmiStatus fmi_event_update(fmiComponent c, fmiBoolean intermediateResults, fmiEv
     ((fmi_t*)c) -> fmi_functions.freeMemory(a_mode); /* Free memory */
     ((fmi_t*)c) -> fmi_functions.freeMemory(b_mode); /* Free memory */
 
-    if ((eventInfo->iterationConverged)==fmiFalse) {
+    if ((eventInfo->iterationConverged)==fmiTrue) {
         jmi_copy_pre_values(((fmi_t*)c)->jmi);
     }
 

@@ -322,7 +322,9 @@ int jmi_dae_init(jmi_t* jmi,
 		int dR_n_nz, int* dR_row, int* dR_col,
         jmi_generic_func_t ode_derivatives,
         jmi_generic_func_t ode_outputs,
-        jmi_generic_func_t ode_initialize) {
+        jmi_generic_func_t ode_initialize,
+        jmi_generic_func_t ode_guards,
+        jmi_generic_func_t ode_guards_init) {
 	jmi_func_t* jf_F;
 	jmi_func_t* jf_R;
 	
@@ -339,7 +341,8 @@ int jmi_dae_init(jmi_t* jmi,
 	jmi->dae->ode_derivatives = ode_derivatives;
 	jmi->dae->ode_outputs = ode_outputs;
 	jmi->dae->ode_initialize = ode_initialize;
-
+    jmi->dae->ode_guards = ode_guards;
+    jmi->dae->ode_guards_init = ode_guards_init;
 	return 0;
 }
 

@@ -3038,6 +3038,8 @@ class JMIModel(object):
         self._dll.jmi_ode_derivatives.argtypes = [ct.c_void_p]
         self._dll.jmi_ode_outputs.argtypes = [ct.c_void_p]
         self._dll.jmi_ode_initialize.argtypes = [ct.c_void_p]
+        self._dll.jmi_ode_guards.argtypes = [ct.c_void_p]
+        self._dll.jmi_ode_guards_init.argtypes = [ct.c_void_p]
     
         # DAE interface
         self._dll.jmi_dae_get_sizes.argtypes = [ct.c_void_p,
@@ -4245,6 +4247,20 @@ class JMIModel(object):
         """
         if self._dll.jmi_ode_initialize(self._jmi) is not 0:
             raise JMIException("Initialization of the ODE failed")
+
+    def ode_guards(self):
+        """ 
+        Evaluate the guard expressions of the ODE.
+        """
+        if self._dll.jmi_ode_guards(self._jmi) is not 0:
+            raise JMIException("Evaluation of ODE guards failed")
+
+    def ode_guards_init(self):
+        """ 
+        Evaluate the guard expressions of the initial equations.
+        """
+        if self._dll.jmi_ode_guards_init(self._jmi) is not 0:
+            raise JMIException("Evaluation of guard expressions in the initial equations failed")
 
     def dae_get_sizes(self):
         """ 

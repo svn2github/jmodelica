@@ -155,6 +155,11 @@ static int model_ode_outputs(jmi_t* jmi) {
   return 0;
 }
 
+static int model_ode_guards_init(jmi_t* jmi) {
+  $C_ode_guards_init$
+  return 0;
+}
+
 static int model_ode_initialize(jmi_t* jmi) {
   $C_ode_initialization$
   return 0;
@@ -256,7 +261,7 @@ int jmi_new(jmi_t** jmi) {
 	/* Initialize the DAE interface */
 	jmi_dae_init(*jmi, *model_dae_F, N_eq_F, NULL, 0, NULL, NULL,
 		     *model_dae_R, N_eq_R, NULL, 0, NULL, NULL,*model_ode_derivatives,
-                     *model_ode_outputs,*model_ode_initialize);
+                     *model_ode_outputs,*model_ode_initialize,*model_ode_guards,*model_ode_guards_init);
 
 	/* Initialize the Init interface */
 	jmi_init_init(*jmi, *model_init_F0, N_eq_F0, NULL,
