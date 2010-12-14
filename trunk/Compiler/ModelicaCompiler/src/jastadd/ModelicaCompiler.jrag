@@ -107,14 +107,15 @@ public class ModelicaCompiler {
 	public static final String ERROR = "e";
 	public static final String INHERITED = "inh";
 	protected static final HashMap<String, Level> levels = new HashMap<String, Level>();
+	
 	// This should be two static blocks, but jastadd ignores those, so this is a workaround
 	private static void staticBlocks() {
-		ASTNode.log = log;
-		if (levels.isEmpty()) {
+		if (levels.isEmpty()) { // Using this as check if this is run already
 			levels.put(DEBUG,   Level.FINE);
 			levels.put(INFO,    Level.INFO);
 			levels.put(WARNING, Level.WARNING);
 			levels.put(ERROR,   Level.SEVERE);
+			ASTNode.log = log;
 		}
 	}
 	public static final String DEFAULT_LEVEL = ERROR;
@@ -126,7 +127,9 @@ public class ModelicaCompiler {
 	private OptionRegistry options = null;
 	private DiagnosticsGenerator diagGenerator = null;
 	
-	private static CCompilerDelegator cCompiler = new GCCcompilerDelegator();
+	protected static CCompilerDelegator cCompiler = new GCCcompilerDelegator();
+	
+	protected static String jmodelicaHome = System.getenv("JMODELICA_HOME");
 	
 	public ModelicaCompiler(OptionRegistry options, String xmlTpl, String xmlValuesTpl, String cTemplatefile) {
 		staticBlocks();
@@ -152,7 +155,7 @@ public class ModelicaCompiler {
 	}
 	
 	protected static File getTemplatesDir() {
-		return new File(System.getenv("JMODELICA_HOME"), "CodeGenTemplates");
+		return new File(jmodelicaHome, "CodeGenTemplates");
 	}
 	
 	public static CCompilerDelegator getCCompiler() {
@@ -161,6 +164,14 @@ public class ModelicaCompiler {
 	
 	public static void setCCompiler(CCompilerDelegator cCompiler) {
 		ModelicaCompiler.cCompiler = cCompiler;
+	}
+	
+	public static String getJModelicaHome() {
+		return jmodelicaHome;
+	}
+	
+	public static void setJModelicaHome(String jmHome) {
+		jmodelicaHome = jmHome;
 	}
 	
 	public String getStringOption(String key) throws UnknownOptionException {
@@ -894,7 +905,7 @@ public class ModelicaCompiler {
 		if (programarguments.get("optfile") != null) {
 			optionsfile = programarguments.get("optfile");
 		} else {
-			optionsfile = System.getenv("JMODELICA_HOME")+filesep+"Options"+filesep+"options.xml";
+			optionsfile = jmodelicaHome+filesep+"Options"+filesep+"options.xml";
 		}
 
 		try {
@@ -911,7 +922,7 @@ public class ModelicaCompiler {
 			if (System.getenv("MODELICAPATH") != null) { 
 				modelicapath=System.getenv("MODELICAPATH");
 			} else {
-				modelicapath=System.getenv("JMODELICA_HOME")+filesep+"ThirdParty"+filesep+"MSL";
+				modelicapath=jmodelicaHome+filesep+"ThirdParty"+filesep+"MSL";
 			}
 		}
 		options.addStringOption("MODELICAPATH", modelicapath);
@@ -920,7 +931,7 @@ public class ModelicaCompiler {
 	protected void setArguments(String compilerName, String[] args, Hashtable<String, String> programarguments) 
 		throws JModelicaHomeNotFoundException {
 		// check that JMODELICA_HOME exists
-		if (System.getenv("JMODELICA_HOME") == null) {
+		if (jmodelicaHome == null) {
 			throw new JModelicaHomeNotFoundException("The environment variable JMODELICA_HOME has not been set.");
 		}
 		
