@@ -119,11 +119,13 @@ public class ModelicaCompiler {
 	}
 	public static final String DEFAULT_LEVEL = ERROR;
 	
-	protected String xmlTpl=null;
-	protected String xmlValuesTpl=null;
-	protected String cTemplatefile=null;
+	protected String xmlTpl;
+	protected String xmlValuesTpl;
+	protected String cTemplatefile;
+	
 	private OptionRegistry options = null;
-	private DiagnosticsGenerator diagGenerator= null;
+	private DiagnosticsGenerator diagGenerator = null;
+	
 	private static CCompilerDelegator cCompiler = new GCCcompilerDelegator();
 	
 	public ModelicaCompiler(OptionRegistry options, String xmlTpl, String xmlValuesTpl, String cTemplatefile) {
@@ -134,16 +136,31 @@ public class ModelicaCompiler {
 		this.cTemplatefile = cTemplatefile;
 	}
 	
+	public ModelicaCompiler(OptionRegistry options) {
+		this();
+		this.options = options;
+	}
+	
 	protected ModelicaCompiler() {
 		staticBlocks();
+		
+		// give templates default values based on $JMODELICA_HOME
+		File dir = getTemplatesDir();
+		this.xmlTpl = new File(dir, "jmodelica_model_description.tpl").getPath();
+		this.xmlValuesTpl = new File(dir, "jmodelica_model_values.tpl").getPath();
+		this.cTemplatefile = new File(dir, "jmi_modelica_template.c").getPath();
+	}
+	
+	protected static File getTemplatesDir() {
+		return new File(System.getenv("JMODELICA_HOME"), "CodeGenTemplates");
 	}
 	
 	public static CCompilerDelegator getCCompiler() {
-		return this.cCompiler;
+		return cCompiler;
 	}
 	
 	public static void setCCompiler(CCompilerDelegator cCompiler) {
-		this.cCompiler = cCompiler;
+		ModelicaCompiler.cCompiler = cCompiler;
 	}
 	
 	public String getStringOption(String key) throws UnknownOptionException {
@@ -871,7 +888,7 @@ public class ModelicaCompiler {
 	}
 	
 	private void setOptions(Hashtable<String, String> programarguments, String modelicapath) {
-		String filesep = System.getProperty("file.separator");
+		String filesep = File.separator;
 		String optionsfile = null;
 		//look for options.xml in $JMODELICA_HOME/Options/ and program arguments
 		if (programarguments.get("optfile") != null) {
@@ -907,7 +924,7 @@ public class ModelicaCompiler {
 			throw new JModelicaHomeNotFoundException("The environment variable JMODELICA_HOME has not been set.");
 		}
 		
-		String filesep = System.getProperty("file.separator");
+		String filesep = File.separator;
 		if (args.length < 1) {
 			log.error(compilerName + " expects the command line arguments: \n" +
 					"[-options] <file name> <class name> [<xml model description template> <xml model values template> <c template>]\n" +
@@ -932,8 +949,7 @@ public class ModelicaCompiler {
 		
 		arg = programarguments.size();
 		if (args.length < arg+2) {
-			log.error(compilerName + " expects a file name and a class name as " +
-					"command line arguments.");
+			log.error(compilerName + " expects a file name and a class name as command line arguments.");
 			System.exit(1);
 		}
 		
@@ -942,13 +958,6 @@ public class ModelicaCompiler {
 			this.xmlTpl = args[arg+2];
 			this.xmlValuesTpl = args[arg+3];
 			this.cTemplatefile = args[arg+4];
-		} 
-		else {
-			// give templates default values based on $JMODELICA_HOME
-			String templatepath = System.getenv("JMODELICA_HOME")+filesep+"CodeGenTemplates"+filesep;
-			this.xmlTpl = templatepath+"jmodelica_model_description.tpl";
-			this.xmlValuesTpl = templatepath+"jmodelica_model_values.tpl";
-			this.cTemplatefile = templatepath+"jmi_modelica_template.c";
 		}
 		
 		// set options

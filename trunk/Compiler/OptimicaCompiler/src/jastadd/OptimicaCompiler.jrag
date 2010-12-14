@@ -15,6 +15,7 @@
 */
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -73,7 +74,7 @@ import org.jmodelica.util.OptionRegistry;
  */
 public class OptimicaCompiler extends ModelicaCompiler {
 	
-	private String optimicaCTemplatefile=null;
+	private String optimicaCTemplatefile;
 	
 	public OptimicaCompiler(OptionRegistry options, String xmlTpl, 
 			String xmlValuesTpl, String cTemplatefile, 
@@ -82,8 +83,18 @@ public class OptimicaCompiler extends ModelicaCompiler {
 		this.optimicaCTemplatefile = optimicaCTemplatefile;
 	}
 	
+	public OptimicaCompiler(OptionRegistry options) {
+		super(options);
+		defaultTemplate();
+	}
+	
 	protected OptimicaCompiler() {
 		super();
+		defaultTemplate();
+	}
+	
+	private void defaultTemplate() {
+		this.optimicaCTemplatefile = new File(getTemplatesDir(), "jmi_optimica_template.c").getPath();
 	}
 	
 	/**
@@ -91,7 +102,6 @@ public class OptimicaCompiler extends ModelicaCompiler {
 	 * @param icd A reference to a instance class - in compiler extensions
 	 * it may be useful to be able to extract the kind of class is being
 	 * instantiated: model, block etc.
-
 	 */
 	protected FClass createFClass(InstClassDecl icd) {
 		if (icd.isOptimizationClass()) {
@@ -163,14 +173,8 @@ public class OptimicaCompiler extends ModelicaCompiler {
 		throws JModelicaHomeNotFoundException {
 		super.setArguments(compilerName, args, programarguments);
 		int arg = programarguments.size();
-		if (args.length >= arg+6) {
+		if (args.length >= arg+6) 
 			this.optimicaCTemplatefile = args[arg+5];
-		} else {
-			// set default template
-			String filesep = System.getProperty("file.separator");
-			String templatepath = System.getenv("JMODELICA_HOME")+filesep+"CodeGenTemplates"+filesep;
-			this.optimicaCTemplatefile = templatepath+"jmi_optimica_template.c";
-		}		
 	}
 	
 	public static void main(String args[]) {		
