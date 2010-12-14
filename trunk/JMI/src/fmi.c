@@ -180,6 +180,13 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
     
     jmi_real_t* switchesR;   /* Switches */
     jmi_real_t* switchesR0;  /* Initial Switches */
+
+    /* Update eventInfo */
+    eventInfo->upcomingTimeEvent = fmiFalse;            /* No support for time events */
+    eventInfo->nextEventTime = 0.0;                     /* Not used */
+    eventInfo->stateValueReferencesChanged = fmiFalse;  /* No support for dynamic state selection */
+    eventInfo->terminateSimulation = fmiFalse;          /* Don't terminate the simulation */
+    eventInfo->iterationConverged = fmiTrue;            /* The iteration has converged */
     
     /* Get Sizes */
     retval = jmi_init_get_sizes(((fmi_t *)c)->jmi,&nF0,&nF1,&nFp,&nR0); /* Get the size of R0 and F0, (interested in R0) */
