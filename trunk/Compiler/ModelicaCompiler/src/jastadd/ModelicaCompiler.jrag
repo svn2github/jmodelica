@@ -124,7 +124,7 @@ public class ModelicaCompiler {
 	protected String cTemplatefile=null;
 	private OptionRegistry options = null;
 	private DiagnosticsGenerator diagGenerator= null;
-	private CCompilerDelegator cCompiler;
+	private static CCompilerDelegator cCompiler = new GCCcompilerDelegator();
 	
 	public ModelicaCompiler(OptionRegistry options, String xmlTpl, String xmlValuesTpl, String cTemplatefile) {
 		staticBlocks();
@@ -132,18 +132,17 @@ public class ModelicaCompiler {
 		this.xmlTpl = xmlTpl;
 		this.xmlValuesTpl = xmlValuesTpl;
 		this.cTemplatefile = cTemplatefile;
-		this.cCompiler = new GCCcompilerDelegator();
 	}
 	
 	protected ModelicaCompiler() {
 		staticBlocks();
 	}
 	
-	public CCompilerDelegator getCCompiler() {
+	public static CCompilerDelegator getCCompiler() {
 		return this.cCompiler;
 	}
 	
-	public void setCCompiler(CCompilerDelegator cCompiler) {
+	public static void setCCompiler(CCompilerDelegator cCompiler) {
 		this.cCompiler = cCompiler;
 	}
 	
