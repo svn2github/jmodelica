@@ -8,7 +8,7 @@ CLS=$1
 
 shift
 FILE=${SRC}/Compiler/ModelicaFrontEnd/src/java/${CLS//.//}.java
-TEMP=$(mktemp -dqt)
+TEMP=$(mktemp -dq)
 javac -d ${TEMP} ${FILE}
 java -cp ${TEMP} ${CLS} $@
 rm -rf ${TEMP}
