@@ -1,8 +1,11 @@
 package org.jmodelica.ide.editor.actions;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.MessageBox;
@@ -11,6 +14,8 @@ import org.eclipse.ui.PlatformUI;
 import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.editor.Editor;
 import org.jmodelica.modelica.compiler.BaseClassDecl;
+import org.jmodelica.modelica.compiler.CompilerException;
+import org.jmodelica.modelica.compiler.ModelicaClassNotFoundException;
 import org.jmodelica.modelica.compiler.ModelicaCompiler;
 import org.jmodelica.util.OptionRegistry;
 
@@ -55,8 +60,17 @@ public class CompileFMUAction extends CurrentClassAction {
 			OptionRegistry opt = currentClass.root().options;
 			String className = currentClass.qualifiedName();
 			String[] paths = editor.editorFile().getPaths();
-			ModelicaCompiler mc = new ModelicaCompiler(opt);
-			mc.compileFMU(className, paths, "model_noad", dir);
+			try {
+				ModelicaCompiler mc = new ModelicaCompiler(opt);
+				mc.defaultTemplatePathsFMU();
+				mc.compileFMU(className, paths, "model_noad", dir);
+			} catch (Exception e) {
+				String title = "Compiling " + className + " to FMU";
+				String msg = "Error compiling " + className + " to FMU";
+				if (e.getMessage() != null)
+					msg += ":\n" + e.getMessage();
+				MessageDialog.openError(outputDirDlg.getParent(), title, msg);
+			}
 		}
 	}
 
