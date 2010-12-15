@@ -150,13 +150,25 @@ public class ModelicaCompiler {
 	
 	protected ModelicaCompiler() {
 		staticBlocks();
-		
+		defaultTemplatePathsJMU();
+	}
+	
+	public void defaultTemplatePathsJMU() {
+		defaultTemplatePaths("jmodelica");
+	}
+	
+	public void defaultTemplatePathsFMU() {
+		defaultTemplatePaths("fmi");
+	}
+	
+	protected void defaultTemplatePaths(String prefix) {
 		// give templates default values based on $JMODELICA_HOME
 		File dir = getTemplatesDir();
-		this.xmlTpl = new File(dir, "jmodelica_model_description.tpl").getPath();
+		this.xmlTpl = new File(dir, prefix + "_model_description.tpl").getPath();
 		this.xmlValuesTpl = new File(dir, "jmodelica_model_values.tpl").getPath();
 		this.cTemplatefile = new File(dir, "jmi_modelica_template.c").getPath();
 	}
+
 	
 	protected static File getTemplatesDir() {
 		return new File(jmodelicaHome, "CodeGenTemplates");
@@ -1333,7 +1345,7 @@ public class GCCcompilerDelegator implements CCompilerDelegator {
 
 	
 	public void compileCCode(String fileName, String target, HashSet<String> ext_libs, HashSet<String> ext_lib_dirs, HashSet<String> ext_incl_dirs) {
-		String filesep = System.getProperty("file.separator");
+		String filesep = File.separator;
 		String jmodelicaHome = ModelicaCompiler.getJModelicaHome();
 		// make settings
 		String makefile = jmodelicaHome + filesep + "Makefiles" + filesep + "MakeFile";
@@ -1454,44 +1466,39 @@ public class GCCcompilerDelegator implements CCompilerDelegator {
 
 class StreamGobbler extends Thread
 {
-    InputStream is;
-    String type;
-    OutputStream os;
+    private InputStream is;
+    private String type;
+    private OutputStream os;
     
-    StreamGobbler(InputStream is, String type)
-    {
+    public StreamGobbler(InputStream is, String type) {
         this(is, type, null);
     }
-    StreamGobbler(InputStream is, String type, OutputStream redirect)
-    {
+    
+    public StreamGobbler(InputStream is, String type, OutputStream redirect){
         this.is = is;
         this.type = type;
         this.os = redirect;
     }
     
-    public void run()
-    {
-        try
-        {
+    public void run() {
+        try {
             PrintWriter pw = null;
             if (os != null)
                 pw = new PrintWriter(os);
                 
             InputStreamReader isr = new InputStreamReader(is);
             BufferedReader br = new BufferedReader(isr);
-            String line=null;
-            while ( (line = br.readLine()) != null)
-            {
+            String line = null;
+            while ((line = br.readLine()) != null) {
                 if (pw != null)
                     pw.println(line);
                 System.out.println(type + ">" + line);
             }
             if (pw != null)
                 pw.flush();
-        } catch (IOException ioe)
-            {
+        } catch (IOException ioe) {
             ioe.printStackTrace();  
-            }
+        }
     }
 }
 
