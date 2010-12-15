@@ -91,6 +91,7 @@ public class ModelicaSettingsControl  {
 	}
 	
 	public Control createControl(Composite parent) {
+		// TODO: shouldn't these be in a composite?
 		libraryGroup = createLibraryGroup(parent);
 		optionsGroup = createOptionsGroup(parent);
 		updateLibraryPaths();

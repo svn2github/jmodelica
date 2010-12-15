@@ -29,6 +29,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
+import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.preferences.Preferences;
 import org.jmodelica.ide.preferences.Preferences.NormalSyntaxColorPref;
 import org.jmodelica.ide.preferences.Preferences.ReferenceSyntaxColorPref;
@@ -130,6 +131,11 @@ public abstract class HilightScanner extends DocumentScanner implements ITokenSc
 		ANNO_QID            = Preferences.getColorToken("anno.qident");
 		ANNO_OPERATOR_DOT   = Preferences.getColorToken("anno.operator.dot");
 		ANNO_COMMENT        = Preferences.getColorToken("anno.comment");
+	}
+	
+	public HilightScanner() {
+		// Make sure preferences are initialized
+		Preferences.get(IDEConstants.PREFERENCE_OPTIONS_PATH_ID);
 	}
 
 }

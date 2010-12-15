@@ -35,12 +35,11 @@ public class ModelicaPreferencePage extends PreferencePage  implements IWorkbenc
 		return Preferences.get(key);
 	}
 
-	public void init(IWorkbench workbench) {
-		setPreferenceStore(Activator.getDefault().getPreferenceStore());
-	}
+	public void init(IWorkbench workbench) {}
 
 	@Override
 	protected void performDefaults() {
+		// TODO: Don't reset the values, just get default values and remember that they are set to default
 		settings.setLibraryPaths(defaults(LIBRARIES_ID));
 		settings.setOptionsPath(defaults(OPTIONS_ID));
 		super.performDefaults();
@@ -48,6 +47,7 @@ public class ModelicaPreferencePage extends PreferencePage  implements IWorkbenc
 
 	@Override
 	public boolean performOk() {
+		// TODO: for a value that is still default, do Preferences.clear() instead
 		Preferences.set(LIBRARIES_ID, settings.getLibraryPaths());
 		Preferences.update(OPTIONS_ID, settings.getOptionsPath());
 		// TODO Trigger rebuild of all Modelica projects

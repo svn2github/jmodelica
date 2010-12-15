@@ -70,7 +70,7 @@ public class IDEConstants {
 	public static final String PREFERENCE_LIBRARIES_ID = "libraries";
 	public static final String PREFERENCE_OPTIONS_PATH_ID = "options_path";
 	public static final String PREFERENCE_COLOR_PREFIX = "syntax.color.";
-	public static final String PREFERENCE_ANNO_BG = PREFERENCE_COLOR_PREFIX + "default.anno.bg";
+	public static final String PREFERENCE_ANNO_BG_ID = PREFERENCE_COLOR_PREFIX + "default.anno.bg";
 
 	public static final String WIZARD_ID = PLUGIN_ID + ".wizard";
 	public static final String WIZARD_FILE_ID = WIZARD_ID + ".file";

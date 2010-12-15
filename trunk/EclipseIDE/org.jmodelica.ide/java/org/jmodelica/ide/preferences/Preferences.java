@@ -61,7 +61,7 @@ public class Preferences extends AbstractPreferenceInitializer {
 	}
 
 	public static void update(String key, String value) {
-		if (value != null && !value.isEmpty())
+		if (value != null && !value.equals(""))
 			set(key, value);
 		else
 			clear(key);
@@ -94,8 +94,6 @@ public class Preferences extends AbstractPreferenceInitializer {
 
 	@Override
 	public void initializeDefaultPreferences() {
-		Activator plugin = Activator.getDefault();
-		
 		// Read default values from environment vars
 		String jmodelicaHome = ModelicaCompiler.getJModelicaHome();
 		String modelicaPath = System.getenv("MODELICAPATH");
@@ -122,7 +120,7 @@ public class Preferences extends AbstractPreferenceInitializer {
 		for (SyntaxColorPref pref : HilightScanner.COLOR_DEFS)
 			node.put(pref.getPrefId(), pref.toString());
 		Color annoBG = new Color(Display.getCurrent(), HilightScanner.DEFAULT_ANNO_BG);
-		node.put(IDEConstants.PREFERENCE_ANNO_BG, writeColor(annoBG));
+		node.put(IDEConstants.PREFERENCE_ANNO_BG_ID, writeColor(annoBG));
 		HilightScanner.readColors();
 	}
 
@@ -232,7 +230,7 @@ public class Preferences extends AbstractPreferenceInitializer {
 		public Token getToken() {
 			TextAttribute attr = isEnabled() ? getTextAttr(0) : new TextAttribute(null);
 			if ((flags & FLAG_USE_ANNO_BG) == FLAG_USE_ANNO_BG) {
-				Color bg = getColor(IDEConstants.PREFERENCE_ANNO_BG);
+				Color bg = getColor(IDEConstants.PREFERENCE_ANNO_BG_ID);
 				attr = new TextAttribute(attr.getForeground(), bg, attr.getStyle());
 			}
 			return new Token(attr);
