@@ -6101,12 +6101,15 @@ def compile_jmu(class_name, file_name=[], compiler='modelica', target='ipopt',
             raise JMIException("Unknown compiler option type for key: %s. \
             Should be of the following types: boolean, string, integer, \
             float or list" %key)
+            
+    # compile jmu in Java
+    comp.compile_JMU(class_name, file_name, target, compile_to)
                 
     #compile model
-    comp.compile_model(class_name, file_name, target=target)
+    #comp.compile_model(class_name, file_name, target=target)
     
     # pack JMU file
-    package_JMU(class_name, compile_to)
+    #package_JMU(class_name, compile_to)
     
     return os.path.join(compile_to, get_jmu_name(class_name))
 

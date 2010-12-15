@@ -26,6 +26,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringWriter;
+import java.lang.InterruptedException;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -36,6 +38,8 @@ import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
+import java.util.zip.ZipOutputStream;
+import java.util.zip.ZipEntry;
 import java.util.Set;
 import java.util.Iterator;
 
@@ -47,7 +51,7 @@ import org.jmodelica.util.OptionRegistry.UnknownOptionException;
 import org.xml.sax.SAXException;
 
 aspect ModelicaCompilerMain {
-
+ 
 /**
  * 
  * Main compiler class which bundles the tasks needed to compile a Modelica
@@ -388,14 +392,113 @@ public class ModelicaCompiler {
 		}
 	}
 	
-	public void compileJMU(String className, String fileName[], String target, String compileTo) {
-		System.out.println("COMPILE JMU");
+	public void compileJMU(String className, String fileName[], String target, String compileTo) 
+		throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, beaver.Parser.Exception {
+		log.info("START COMPILING JMU...");	
+		this.compileUnit(className, fileName, target, compileTo, "JMU");
+		log.info("...COMPILING JMU finished");
+	}
+
+	public void compileFMU(String className, String fileName[], String target, String compileTo) 
+		throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, beaver.Parser.Exception {
+		log.info("START COMPILING FMU...");
+		this.compileUnit(className, fileName, target, compileTo, "FMU");
+		log.info("...COMPILING FMU finished");
+	}
+
+	private void compileUnit(String className, String fileName[], String target, String compileTo, String unitType) 
+		throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, beaver.Parser.Exception {
+		// compile mo-file + generate code
+		FClass fc = compileModel(fileName, className);
+		
+		// compile c code
+		String cFileName = className.replace(".", "_");
+		this.getCCompiler().compileCCode(cFileName, target, fc.externalLibraries(), fc.externalLibraryDirectories(), fc.externalIncludeDirectories());
+		
+		// package JMU
+		this.packUnit(className, compileTo, unitType);		
 	}
 	
-	public void compileFMU(String className, String fileName[], String target, String compileTo) {
-		System.out.println("COMPILE FMU");
+	private void packUnit(String className, String path, String unitType) {
+		String filesep = File.separator;
+		File dirPath = new File(path);
+		if (!dirPath.isDirectory()) {
+			dirPath.mkdirs();
+		}
+		
+		String mName = className;
+		String mMangledName = className.replace(".", "_");
+		
+		// Look for operating system and architecture
+		String platform = getPlatform();
+		String suffix;
+		if (platform.startsWith("win")) {
+			suffix = ".dll";
+		} else if (platform.startsWith("darwin")) {
+			suffix = ".dylib";
+		} else {
+			suffix = ".so";
+		}
+		
+		// original files
+		String[] files = new String[6];
+		files[0] = mMangledName + ".xml";
+		files[1] = mMangledName + ".c";
+		files[2] = mName + ".mof";
+		files[3] = mName + "_transformed.mof";
+		files[4] = mMangledName + "_values.xml";
+		files[5] = mMangledName + suffix;
+		
+		// file destinations
+		String[] zipEntries = new String[6];
+		zipEntries[0] = "modelDescription.xml";
+		zipEntries[1] = "sources" + filesep + mMangledName + ".c";
+		zipEntries[2] = "resources" + filesep + mName + ".mof";
+		zipEntries[3] = "resources" + filesep + mName + "_transformed.mof";
+		zipEntries[4] = "resources" + filesep + mMangledName + "_values.xml";
+		zipEntries[5] = "binaries" + filesep + platform + filesep + mMangledName + suffix;
+		
+		// Create the new archive
+		int BUFFER = 2048;
+		try {
+			BufferedInputStream origin = null;
+			FileOutputStream dest = null;
+			if (unitType.toUpperCase() == "JMU") {
+				dest = new FileOutputStream(dirPath + filesep + mMangledName + ".jmu");
+			} else {
+				dest = new FileOutputStream(dirPath + filesep + mMangledName + ".fmu");
+			}
+			ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(dest));
+			out.setMethod(ZipOutputStream.DEFLATED);
+			
+			byte data[] = new byte[BUFFER];
+			
+			for (int i=0; i<files.length; i++) {
+				FileInputStream fi = new FileInputStream(files[i]);
+				origin = new BufferedInputStream(fi, BUFFER);
+				
+				ZipEntry entry = new ZipEntry(zipEntries[i]);
+				out.putNextEntry(entry);
+				
+				int count;
+	            while((count = origin.read(data, 0, BUFFER)) != -1) {
+	               out.write(data, 0, count);
+	            }
+	            origin.close();
+			}
+			out.close();	
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		// remove files
+		File f = null;
+		for (int i=0; i<files.length; i++) {
+			f = new File(files[i]);
+			f.delete();
+		}
 	}
-	
+		
 	/**
 	 * Compiles a Modelica model. A model file name and class must be provided.
 	 * Prints an error and returns without completion if, for example, a file 
@@ -422,12 +525,13 @@ public class ModelicaCompiler {
 	 *             found.
 	 * 
 	 */
-	public void compileModel(String name[], String cl)
+	public FClass compileModel(String name[], String cl)
 	  throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, beaver.Parser.Exception {
 		log.info("======= Compiling model =======");
 		resetCompilationInfo();
 		
 		SourceRoot sr = null;
+		FClass fc = null;
 		try {
 
 			if (name.length == 0) {
@@ -450,7 +554,7 @@ public class ModelicaCompiler {
 //			dumpMemoryUseFile(icl, "instance");
 			
 			// flattening
-			FClass fc = flattenModel(icl);
+			fc = flattenModel(icl);
 //			dumpMemoryUseFile(fc, "flat");
 
 			// Generate code?
@@ -469,6 +573,8 @@ public class ModelicaCompiler {
 		}
 
 		log.info("====== Model compiled successfully =======");
+		
+		return fc;
 	}
 
 	/**
@@ -1054,6 +1160,41 @@ public class ModelicaCompiler {
 	}
 
 	/**
+	 *     Helper function. Returns string describing the platform on which jmodelica 
+	 *     is run. 
+	 *     
+	 *     Possible return values::
+	 *     win32
+	 *     win64
+	 *     darwin32
+	 *     darwin64
+	 *     linux32
+	 *     linux64
+	 */
+	public static String getPlatform() {
+		String platform = "";
+		
+		String sunPltform = System.getProperty("os.name");
+		if (sunPltform.startsWith("Windows")) {
+			platform = "win";
+		} else if (sunPltform.startsWith("Mac")) {
+			platform = "darwin";
+		} else {
+			// assume linux
+			platform ="linux";
+		}
+		
+		String architecture = System.getProperty("os.arch");
+		if (architecture.endsWith("64")) {
+			platform = platform+"64";
+		} else {
+			platform = platform+"32";
+		}
+		
+		return platform;
+	}
+	
+	/**
 	 * Class which can be used to fetch static loggers with different purposes.
 	 * 
 	 * This is an attempt to have a general Logger class which contains loggers
@@ -1171,9 +1312,17 @@ public class JModelicaHomeNotFoundException extends Exception {
 	}
 }
 
+public class CcodeCompilationException extends RuntimeException {
+	public CcodeCompilationException () {
+	}
+	public CcodeCompilationException(String msg) {
+		super(msg);
+	}
+}
+
 public interface CCompilerDelegator {
 	
-	public void compileCCode(String fileName, String target, String ext_libs[], String ext_lib_dirs[], String ext_incl_dirs[]);
+	public void compileCCode(String fileName, String target, HashSet<String> ext_libs, HashSet<String> ext_lib_dirs, HashSet<String> ext_incl_dirs);
 	
 }
 
@@ -1181,10 +1330,169 @@ public class GCCcompilerDelegator implements CCompilerDelegator {
 	
 	public GCCcompilerDelegator() {
 	}
+
 	
-	public void compileCCode(String fileName, String target, String ext_libs[], String ext_lib_dirs[], String ext_incl_dirs[]) {
-		System.out.println("GCC compiling code");
+	public void compileCCode(String fileName, String target, HashSet<String> ext_libs, HashSet<String> ext_lib_dirs, HashSet<String> ext_incl_dirs) {
+		String filesep = System.getProperty("file.separator");
+		String jmodelicaHome = ModelicaCompiler.getJModelicaHome();
+		// make settings
+		String makefile = jmodelicaHome + filesep + "Makefiles" + filesep + "MakeFile";
+		
+		// make arguments
+		String file_name = "FILE_NAME=" + fileName;
+		String jmodelica_home = "JMODELICA_HOME=" + jmodelicaHome;
+		String cppad_home = "CPPAD_HOME=" + System.getenv("CPPAD_HOME");
+		String ipopt_home = "IPOPT_HOME=" + System.getenv("IPOPT_HOME");
+		String sundials_home = "SUNDIALS_HOME=" + System.getenv("SUNDIALS_HOME");
+		
+		String platformDir = ModelicaCompiler.getPlatform();
+		
+		// external library directories
+		String extLibDirs = "";
+		for (String libDir:ext_lib_dirs) {
+			File f = new File(libDir + filesep + platformDir);
+			if (f.isDirectory()) {
+				extLibDirs = extLibDirs + f.getPath();
+			} else {
+				extLibDirs = extLibDirs + libDir;
+			}
+			extLibDirs = extLibDirs + " ";
+		}
+		extLibDirs = "EXT_LIB_DIRS=\"" + extLibDirs.trim() + "\"";
+		
+		// external libraries
+		String extLibs = "";
+		for (String lib:ext_libs) {
+			extLibs = lib + " ";
+		}
+		extLibs = "EXT_LIBS=\"" + extLibs.trim() + "\"";
+		
+		// external include directories
+		String extInclDirs = "";
+		for (String libDir:ext_incl_dirs) {
+			extInclDirs = libDir + " ";
+		}
+		extInclDirs = "EXT_INC_DIRS=\"" + extInclDirs.trim() + "\"";
+		
+		// Generate make call
+		String[] cmd;
+		if (platformDir.startsWith("win")) {
+			cmd = new String[14];
+			
+			String mingw_bin = System.getenv("MINGW_HOME") + filesep + "bin";
+			String make = mingw_bin + filesep + "mingw32-make";
+			String compiler = "CXX=" + mingw_bin + filesep + "g++";
+			String ar = "AR=" + mingw_bin + filesep + "ar";
+			
+			cmd[0] = make;
+			cmd[1] = "-f";
+			cmd[2] = makefile;
+			cmd[3] = compiler;
+			cmd[4] = ar;
+			cmd[5] = target;
+			cmd[6] = file_name;
+			cmd[7] = jmodelica_home;
+			cmd[8] = cppad_home;
+			cmd[9] = ipopt_home;
+			cmd[10] = sundials_home;
+			cmd[11] = extLibDirs;
+			cmd[12] = extLibs;
+			cmd[13] = extInclDirs;
+			
+		} else {
+			cmd = new String[12];
+			
+			String make = "make";
+			
+			cmd[0] = make;
+			cmd[1] = "-f";
+			cmd[2] = makefile;
+			cmd[3] = target;
+			cmd[4] = file_name;
+			cmd[5] = jmodelica_home;
+			cmd[6] = cppad_home;
+			cmd[7] = ipopt_home;
+			cmd[8] = sundials_home;
+			cmd[9] = extLibDirs;
+			cmd[10] = extLibs;
+			cmd[11] = extInclDirs;
+		}
+				
+		// execute make
+		Runtime rt = Runtime.getRuntime();
+		
+		System.out.println("*** "+ Arrays.toString(cmd)+" ***");
+		try {
+			Process proc = rt.exec(cmd);
+			
+            // any error message?
+            StreamGobbler errorGobbler = new 
+                StreamGobbler(proc.getErrorStream(), "ERR");            
+            
+            // any output?
+            StreamGobbler outputGobbler = new 
+                StreamGobbler(proc.getInputStream(), "OUT");
+                
+            // kick them off
+            errorGobbler.start();
+            outputGobbler.start();
+                                    
+            // any error???
+            int retcode = proc.waitFor();
+		
+			if (retcode != 0) {
+				throw new CcodeCompilationException("Return code was: "+retcode);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} 
+		catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
+}
+
+class StreamGobbler extends Thread
+{
+    InputStream is;
+    String type;
+    OutputStream os;
+    
+    StreamGobbler(InputStream is, String type)
+    {
+        this(is, type, null);
+    }
+    StreamGobbler(InputStream is, String type, OutputStream redirect)
+    {
+        this.is = is;
+        this.type = type;
+        this.os = redirect;
+    }
+    
+    public void run()
+    {
+        try
+        {
+            PrintWriter pw = null;
+            if (os != null)
+                pw = new PrintWriter(os);
+                
+            InputStreamReader isr = new InputStreamReader(is);
+            BufferedReader br = new BufferedReader(isr);
+            String line=null;
+            while ( (line = br.readLine()) != null)
+            {
+                if (pw != null)
+                    pw.println(line);
+                System.out.println(type + ">" + line);
+            }
+            if (pw != null)
+                pw.flush();
+        } catch (IOException ioe)
+            {
+            ioe.printStackTrace();  
+            }
+    }
 }
 
 

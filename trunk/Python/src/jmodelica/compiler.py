@@ -382,6 +382,13 @@ class ModelicaCompiler():
                 The new c code template.
         """
         self._compiler.setCTemplate(template)
+        
+        
+    def compile_JMU(self, class_name, file_name, target, compile_to):
+        self._compiler.compileJMU(class_name, file_name, target, compile_to)
+        
+    def compile_FMU(self, class_name, file_name, target, compile_to):
+        self._compiler.compileFMU(class_name, file_name, target, compile_to)
 
     def compile_model(self,
                       model_class_name,

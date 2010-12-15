@@ -145,11 +145,14 @@ def compile_fmu(class_name, file_name=[], compiler='modelica', target='model_noa
     comp.set_boolean_option('generate_ode', True)
     comp.set_boolean_option('equation_sorting', True)
     
+    # compile FMU in java
+    comp.compile_FMU(class_name, file_name, target, compile_to)
+    
     #compile model
-    comp.compile_model(class_name, file_name, target=target)
+    #comp.compile_model(class_name, file_name, target=target)
     
     # pack FMU file
-    package_FMU(class_name, path=compile_to)
+    #package_FMU(class_name, path=compile_to)
     
     return os.path.join(compile_to, get_fmu_name(class_name))
     
