@@ -412,16 +412,27 @@ fmiStatus fmi_event_update(fmiComponent c, fmiBoolean intermediateResults, fmiEv
     fmiInteger retval;
     fmiInteger nF; /* Number of F-equations */
     fmiInteger nR; /* Number of R-equations */
+    fmiInteger nGuards; /* Number of guard expressions */
     jmi_real_t* b_mode;
     jmi_real_t* a_mode;
+    jmi_real_t* pre_iter_guards;
+    jmi_real_t* guards;
     jmi_real_t *switches; /* Switches */
-    
+    jmi_t* jmi;
+    jmi = ((fmi_t*)c)->jmi;
+
+    nGuards = jmi->n_guards;
     retval = jmi_dae_get_sizes((((fmi_t *)c) ->jmi), &nF, &nR); /* Get the size of R and F, (interested in R) */
+
+    guards = (*(jmi->z_val)) + jmi->offs_guards; /* Get the guards */
     
     /* Value of the event indicators prior to the initialization */
     b_mode =  ((fmi_t*)c) -> fmi_functions.allocateMemory(nR, sizeof(jmi_real_t));
     /* Value of the event indicators after the initialization */
     a_mode =  ((fmi_t*)c) -> fmi_functions.allocateMemory(nR, sizeof(jmi_real_t));
+
+    /* Value of the guards at the previous event iteration */
+    pre_iter_guards =  ((fmi_t*)c) -> fmi_functions.allocateMemory(nGuards, sizeof(jmi_real_t));
     
     /* Update eventInfo */
     eventInfo->upcomingTimeEvent = fmiFalse;            /* No support for time events */
@@ -488,6 +499,12 @@ fmiStatus fmi_event_update(fmiComponent c, fmiBoolean intermediateResults, fmiEv
         while ((eventInfo->iterationConverged)==fmiFalse){
             fmiInteger j;
             fmiInteger i;
+
+            /* Save the guards before the iteration */
+            for (i=0;i<nGuards;i++) {
+            	pre_iter_guards[i] = guards[i];
+            }
+
             retval = jmi_dae_R(((fmi_t *)c)->jmi,b_mode); /* The event indicators before the initialisation */
             
             /* Error check */
@@ -511,7 +528,7 @@ fmiStatus fmi_event_update(fmiComponent c, fmiBoolean intermediateResults, fmiEv
             }
             
             retval = jmi_ode_derivatives(((fmi_t *)c)->jmi); /* Initialise */
-        
+
             if(retval != 0) {
                 (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Initialize during event iteration failed.");
                 return fmiError;
@@ -536,15 +553,25 @@ fmiStatus fmi_event_update(fmiComponent c, fmiBoolean intermediateResults, fmiEv
                     }
                 }else{ /* Case when the switch are False */
                     if (a_mode[i] >= ((fmi_t *)c)->fmi_epsilon){
-                        eventInfo->iterationConverged = fmiFalse; /* Event iteration (not converged) */
+                    	eventInfo->iterationConverged = fmiFalse; /* Event iteration (not converged) */
                     }
                 }
+            }
+
+            /* Compare the values of the guards before and after the event */
+
+            for (i=0; i < nGuards; i=i+1){
+            	if (pre_iter_guards[i]!=guards[i]) {
+            		eventInfo->iterationConverged = fmiFalse; /* Event iteration (not converged) */
+            		break;
+            	}
             }
         }
     }
     
     ((fmi_t*)c) -> fmi_functions.freeMemory(a_mode); /* Free memory */
     ((fmi_t*)c) -> fmi_functions.freeMemory(b_mode); /* Free memory */
+    ((fmi_t*)c) -> fmi_functions.freeMemory(pre_iter_guards); /* Free memory */
 
     if ((eventInfo->iterationConverged)==fmiTrue) {
         jmi_copy_pre_values(((fmi_t*)c)->jmi);

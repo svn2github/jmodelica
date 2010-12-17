@@ -983,16 +983,29 @@ aspect CCodeGen {
 	
 	public void FWhenEquation.genSolvedBlock_C(FVariable v, String indent, PrintStream str) {
 		/* 
-		  if (_pre_b != b) {
+		  if (guard and !pre(guard)) {
 		  	_x = _pre_x + 1;
 		  }
 		*/
+		
+		str.print("_guards(");
+		str.print(getTest().guardExpInEquationsIndex());
+		str.print(") = ");
+		getTest().prettyPrint_C(str,"");
+		str.print(";\n");
+		str.print("if(COND_EXP_EQ(LOG_EXP_AND(_guards(");
+		str.print(getTest().guardExpInEquationsIndex());
+		str.print("),LOG_EXP_NOT(_pre_guards(");
+		str.print(getTest().guardExpInEquationsIndex());
+		str.print("))),JMI_TRUE,JMI_TRUE,JMI_FALSE)) {\n");
+				
+		/*
 		str.print("if(COND_EXP_EQ(_pre_guards(");
 		str.print(getTest().guardExpInEquationsIndex());
 		str.print("),_guards(");
 		str.print(getTest().guardExpInEquationsIndex());
 		str.print("),JMI_FALSE,JMI_TRUE)) {\n");
-		
+		*/
 		for (FAbstractEquation fe : getFAbstractEquations()) {
 			fe.genSolvedBlock_C(v,indent,str);
 		}

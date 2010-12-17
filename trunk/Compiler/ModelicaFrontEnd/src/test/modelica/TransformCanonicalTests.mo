@@ -1864,31 +1864,31 @@ model WhenEqu2
          description="Basic test of when equations",
          flatModel="
 fclass TransformCanonicalTests.WhenEqu2
-Real xx(start = 2);
-discrete Real x;
-discrete Real y;
-discrete Boolean w(start = true);
-discrete Boolean v(start = true);
-discrete Boolean z(start = true);
+ Real xx(start = 2);
+ discrete Real x;
+ discrete Real y;
+ discrete Boolean w(start = true);
+ discrete Boolean v(start = true);
+ discrete Boolean z(start = true);
 initial equation 
-xx = 2;
+ xx = 2;
 equation
-der(xx) = - ( x );
-when y > 2 and pre(z) then
-w = false;
-end when;
-when y > 2 and z then
-v = false;
-end when;
-when x > 2 then
-z = false;
-end when;
-when time > 1 then
-x = pre(x) + 1;
-end when;
-when time > 1 then
-y = pre(y) + 1;
-end when;
+ der(xx) =  - ( x );
+ when y > 2 and pre(z) then
+  w = false;
+ end when;
+ when y > 2 and z then
+  v = false;
+ end when;
+ when x > 2 then
+  z = false;
+ end when;
+ when time > 1 and time < 1.1 or time > 2 and time < 2.1 or time > 3 and time < 3.1 then
+  x = pre(x) + 1.1;
+ end when;
+ when time > 1 and time < 1.1 or time > 2 and time < 2.1 or time > 3 and time < 3.1 then
+  y = pre(y) + 1.1;
+ end when;
 end TransformCanonicalTests.WhenEqu2;
 ")})));
 
@@ -1909,13 +1909,11 @@ end when;
 when x > 2 then 
 z = false; 
 end when; 
-//when (time>1 and time<1.1) or  (time>2 and time<2.1) then 
-when time>1 then 
-x = pre(x) + 1; 
-y = pre(y) + 1; 
+when (time>1 and time<1.1) or  (time>2 and time<2.1) or  (time>3 and time<3.1) then 
+x = pre(x) + 1.1; 
+y = pre(y) + 1.1; 
 end when; 
 end WhenEqu2;
-
 
 model WhenEqu3
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
@@ -1924,6 +1922,69 @@ model WhenEqu3
          description="Basic test of when equations",
          flatModel="
 fclass TransformCanonicalTests.WhenEqu3
+ Real xx(start = 2);
+ discrete Real x;
+ discrete Real y;
+ discrete Boolean w(start = true);
+ discrete Boolean v(start = true);
+ discrete Boolean z(start = true);
+ discrete Boolean b1;
+initial equation 
+ xx = 2;
+equation
+ der(xx) =  - ( x );
+ when b1 and pre(z) then
+  w = false;
+ end when;
+ when b1 and z then
+  v = false;
+ end when;
+ when b1 then
+  z = false;
+ end when;
+ when time > 1 and time < 1.1 or time > 2 and time < 2.1 or time > 3 and time < 3.1 then
+  x = pre(x) + 1.1;
+ end when;
+ when time > 1 and time < 1.1 or time > 2 and time < 2.1 or time > 3 and time < 3.1 then
+  y = pre(y) + 1.1;
+ end when;
+ b1 = y > 2;
+end TransformCanonicalTests.WhenEqu3;
+")})));
+
+Real xx(start=2);
+discrete Real x; 
+discrete Real y; 
+discrete Boolean w(start=true); 
+discrete Boolean v(start=true); 
+discrete Boolean z(start=true);
+discrete Boolean b1; 
+equation
+der(xx) = -x; 
+when b1 and pre(z) then 
+w = false; 
+end when; 
+when b1 and z then 
+v = false; 
+end when; 
+when b1 then 
+z = false; 
+end when; 
+when (time>1 and time<1.1) or  (time>2 and time<2.1) or  (time>3 and time<3.1) then 
+x = pre(x) + 1.1; 
+y = pre(y) + 1.1; 
+end when; 
+b1 = y>2;
+end WhenEqu3;
+
+
+model WhenEqu4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="WhenEqu4",
+         description="Basic test of when equations",
+         flatModel="
+fclass TransformCanonicalTests.WhenEqu4
  discrete Real x;
  discrete Real y;
  discrete Real z;
@@ -1949,7 +2010,7 @@ equation
  elsewhen time > 4 then
   v = 1;
  end when;
-end TransformCanonicalTests.WhenEqu3;
+end TransformCanonicalTests.WhenEqu4;
 ")})));
   discrete Real x,y,z,v;
 equation
@@ -1964,7 +2025,39 @@ equation
     y = 3;
     x = 4;
   end when;
-end WhenEqu3;
+end WhenEqu4;
+
+/*
+model WhenEqu5 
+
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="WhenEqu5",
+         description="Basic test of when equations",
+         flatModel="
+
+")})));
+
+Real x(start = 1); 
+discrete Real a(start = 1.0); 
+discrete Boolean z(start = false); 
+discrete Boolean y(start = false); 
+discrete Boolean h1,h2; 
+equation 
+der(x) = a * x; 
+h1 = x >= 2; 
+h2 = der(x) >= 4; 
+when h1 then 
+y = true; 
+end when; 
+when y then 
+a = 2; 
+end when; 
+when h2 then 
+z = true; 
+end when; 
+end WhenEqu5; 
+*/
 
 /*
 model WhenEqu4

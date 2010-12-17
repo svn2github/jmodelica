@@ -578,8 +578,8 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
  * @param ode_derivatives A function pointer to the ODE RHS function.
  * @param ode_derivatives A function pointer to the ODE output function.
  * @param ode_derivatives A function pointer to the ODE initialization function.
- * @param ode_guards A function pointer for evaluating the guard expressions
- * @param ode_guards_init A function pointer for evaluating the guard expressions
+ * @param ode_guards A function pointer for evaluating the guard expressions.
+ * @param ode_guards_init A function pointer for evaluating the guard expressions.
  *        in the initial equations.
  * @return Error code.
  */
