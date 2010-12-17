@@ -1133,6 +1133,27 @@ equation
 	end when;
 end WhenType2;
 
+model PreTest1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="PreTest1",
+         description="Testing that continuous variables can be accessed in pre expressions inside when clauses.",
+         errorMessage="
+Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 1148, column 13:
+  Calling built-in operator pre() with a continuous variable access as an argument can only be done inside when cluases
+")})));
 
+	Real x (start=3);
+        Real y;
+        discrete Real z;
+equation
+        y = pre(x);
+	when time>1 then
+		z = pre(x);
+	elsewhen time>3 then
+                z = 2*pre(x);
+        end when;
+end PreTest1;
 
 end TypeTests;
