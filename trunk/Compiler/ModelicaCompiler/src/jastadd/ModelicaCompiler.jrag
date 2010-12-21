@@ -27,6 +27,7 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.lang.InterruptedException;
+import java.lang.StringBuilder;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -1360,31 +1361,31 @@ public class GCCcompilerDelegator implements CCompilerDelegator {
 		String platformDir = ModelicaCompiler.getPlatform();
 		
 		// external library directories
-		String extLibDirs = "";
+		StringBuilder extLibDirs_sb = new StringBuilder();
 		for (String libDir:ext_lib_dirs) {
 			File f = new File(libDir + filesep + platformDir);
 			if (f.isDirectory()) {
-				extLibDirs = extLibDirs + f.getPath();
+				extLibDirs_sb.append(f.getPath());
 			} else {
-				extLibDirs = extLibDirs + libDir;
+				extLibDirs_sb.append(libDir);
 			}
-			extLibDirs = extLibDirs + " ";
+			extLibDirs_sb.append(" ");
 		}
-		extLibDirs = "EXT_LIB_DIRS=\"" + extLibDirs.trim() + "\"";
+		String extLibDirs = "EXT_LIB_DIRS=\"" + extLibDirs_sb.toString().trim() + "\"";
 		
 		// external libraries
-		String extLibs = "";
+		StringBuilder extLibs_sb = new StringBuilder();
 		for (String lib:ext_libs) {
-			extLibs = lib + " ";
+			extLibs_sb.append(lib+" ");
 		}
-		extLibs = "EXT_LIBS=\"" + extLibs.trim() + "\"";
+		String extLibs = "EXT_LIBS=\"" + extLibs_sb.toString().trim() + "\"";
 		
 		// external include directories
-		String extInclDirs = "";
+		StringBuilder extInclDirs_sb = new StringBuilder();
 		for (String libDir:ext_incl_dirs) {
-			extInclDirs = libDir + " ";
+			extInclDirs_sb.append(libDir + " ");
 		}
-		extInclDirs = "EXT_INC_DIRS=\"" + extInclDirs.trim() + "\"";
+		String extInclDirs = "EXT_INC_DIRS=\"" + extInclDirs_sb.toString().trim() + "\"";
 		
 		// Generate make call
 		String[] cmd;
