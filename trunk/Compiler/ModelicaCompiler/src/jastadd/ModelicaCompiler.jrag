@@ -1371,22 +1371,32 @@ public class GCCcompilerDelegator implements CCompilerDelegator {
 			}
 			extLibDirs_sb.append(" ");
 		}
-		String extLibDirs = "EXT_LIB_DIRS=\"" + extLibDirs_sb.toString().trim() + "\"";
-		
+		String extLibDirs = "";
+		if (ext_lib_dirs.size()!=0) {
+			extLibDirs = "EXT_LIB_DIRS=\"" + extLibDirs_sb.toString().trim() + "\"";
+		}
+
 		// external libraries
 		StringBuilder extLibs_sb = new StringBuilder();
 		for (String lib:ext_libs) {
 			extLibs_sb.append(lib+" ");
 		}
-		String extLibs = "EXT_LIBS=\"" + extLibs_sb.toString().trim() + "\"";
-		
+
+		String extLibs = "";
+		if (ext_libs.size()!=0) {		
+			extLibs = "EXT_LIBS=\"" + extLibs_sb.toString().trim() + "\"";
+		}
+
 		// external include directories
 		StringBuilder extInclDirs_sb = new StringBuilder();
 		for (String libDir:ext_incl_dirs) {
 			extInclDirs_sb.append(libDir + " ");
 		}
-		String extInclDirs = "EXT_INC_DIRS=\"" + extInclDirs_sb.toString().trim() + "\"";
-		
+		String extInclDirs = "";
+		if (ext_incl_dirs.size()!=0) {
+			extInclDirs = "EXT_INC_DIRS=\"" + extInclDirs_sb.toString().trim() + "\"";
+		}
+
 		// Generate make call
 		String[] cmd;
 		if (platformDir.startsWith("win")) {
@@ -1434,9 +1444,16 @@ public class GCCcompilerDelegator implements CCompilerDelegator {
 		// execute make
 		Runtime rt = Runtime.getRuntime();
 		
-		System.out.println("*** "+ Arrays.toString(cmd)+" ***");
+		String cmd_str = "";
+		for (int i=0; i<cmd.length; i++) {
+			cmd_str += cmd[i];
+			cmd_str += " ";	
+		}
+
+//		System.out.println("*** "+ Arrays.toString(cmd)+" ***");
+		System.out.println("*** "+ cmd_str+" ***");
 		try {
-			Process proc = rt.exec(cmd);
+			Process proc = rt.exec(cmd_str);
 			
             // any error message?
             StreamGobbler errorGobbler = new 
