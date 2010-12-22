@@ -141,10 +141,6 @@ def compile_fmu(class_name, file_name=[], compiler='modelica', target='model_noa
             Should be of the following types: boolean, string, integer, \
             float or list" %key)
     
-    # always set this option
-    comp.set_boolean_option('generate_ode', True)
-    comp.set_boolean_option('equation_sorting', True)
-    
     # compile FMU in java
     comp.compile_FMU(class_name, file_name, target, compile_to)
     

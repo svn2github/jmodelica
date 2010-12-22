@@ -415,6 +415,9 @@ public class ModelicaCompiler {
 	public void compileFMU(String className, String fileName[], String target, String compileTo) 
 		throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, beaver.Parser.Exception {
 		log.info("START COMPILING FMU...");
+		// Always set these options when compiling an FMU
+		setBooleanOption("generate_ode", true);
+		setBooleanOption("equation_sorting", true);
 		this.compileUnit(className, fileName, target, compileTo, "FMU");
 		log.info("...COMPILING FMU finished");
 	}
