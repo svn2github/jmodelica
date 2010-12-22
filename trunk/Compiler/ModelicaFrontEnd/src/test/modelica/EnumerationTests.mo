@@ -325,7 +325,7 @@ Number of variables with binding expression:  0
   Number of Boolean variables binding exp:    0
   Number of String variables binding exp:     0
 Total number of equations:                    2
-Number of initial equations:                  0
+Number of initial equations:                  2
 Number of relational exps in equations:       0
 Number of relational exps in init equations:  0
 
@@ -350,8 +350,8 @@ Differentiated variables:
 Derivative variables: 
 
 Discrete variables: 
- av: number of uses: 1, isLinear: true, alias: no
- bv: number of uses: 1, isLinear: true, alias: no
+ av: number of uses: 2, isLinear: true, alias: no
+ bv: number of uses: 2, isLinear: true, alias: no
 
 Algebraic real variables: 
 

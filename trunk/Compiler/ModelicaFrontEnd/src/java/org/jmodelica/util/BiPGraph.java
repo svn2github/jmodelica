@@ -31,6 +31,7 @@ public class BiPGraph {
 	private ArrayList<Eq> equations = new ArrayList<Eq>();
 	private LinkedHashMap<String,Var> variableMap = new LinkedHashMap<String,Var>();
 	private LinkedHashMap<String,Eq> equationMap = new LinkedHashMap<String,Eq>();
+	private LinkedHashMap<Integer,ArrayList<Eq>> equationIndexMap = new LinkedHashMap<Integer,ArrayList<Eq>>();
 	
 	public BiPGraph(String name, String description) {
 		this.name = name;
@@ -41,14 +42,59 @@ public class BiPGraph {
 		return equationMap.get(name);
 	}
 	
+	public ArrayList<Eq> getEquations(int id) {
+		return equationIndexMap.get(new Integer(id));
+	}
+	
 	public Eq addEquation(String name, String description, int id) {
 		Eq e = equationMap.get(name);
 		if (e==null) {
 			e = new Eq(name,description,id);
 			equations.add(e);
 			equationMap.put(name,e);
+			insertIntoEquationIndexMap(id,e);
 		}
 		return e;
+	}
+	
+	public Eq replaceEquation(String name, String description, int id) {
+		Eq e = equationMap.get(name);
+		if (e==null) {
+			e = new Eq(name,description,id);
+			equations.add(e);
+			equationMap.put(name,e);
+			insertIntoEquationIndexMap(id,e);
+		} else {
+			// Remove the old equation
+			for (Var v : e.getVariables()) {
+				if (v.getMatching() == e) {
+					v.setMatching(null);
+				}
+			}
+			e.setMatching(null);
+			e.getVariables().clear();
+			// Insert the new equation
+			Eq ee = new Eq(name,description,id);
+			equations.set(equations.indexOf(e),ee);
+			equationMap.put(e.getName(),ee);
+			removeFromEquationIndexMap(e.getId(),e);
+			insertIntoEquationIndexMap(id,ee);
+			e = ee;
+		}
+		return e;
+	}
+
+	public void removeEquation(Eq e) {
+		for (Var v : e.getVariables()) {
+			if (v.getMatching() == e) {
+				v.setMatching(null);
+			}
+		}
+		e.setMatching(null);
+		e.getVariables().clear();
+		equations.remove(e);
+		equationMap.remove(e.getName());
+		removeFromEquationIndexMap(e.getId(),e);
 	}
 	
 	public Var addVariable(String name, String description) {
@@ -80,7 +126,7 @@ public class BiPGraph {
 	public boolean addEdge(Eq e, Var v) {
 		return addEdge(e.getName(),v.getName());
 	}
-	
+		
 	public void greedyMatching() {
 		for (Eq e : getEquations()) {
 			for (Var v : e.getVariables()) {
@@ -525,6 +571,22 @@ public class BiPGraph {
 		return equations;
 	}
 
+	public void insertIntoEquationIndexMap(int index, Eq e) {
+		ArrayList<Eq> l = equationIndexMap.get(new Integer(index));
+		if (l==null) {
+			l = new ArrayList<Eq>();
+			equationIndexMap.put(new Integer(index), l);
+		}
+		l.add(e);
+	}
+
+	public void removeFromEquationIndexMap(int index, Eq e) {
+		ArrayList<Eq> l = equationIndexMap.get(new Integer(index));
+		if (l!=null) {
+			l.remove(e);
+		}
+	}
+	
 	public String printMatching() {
 		StringBuffer str = new StringBuffer();
 		str.append("----------------------------------------\n");
@@ -562,6 +624,13 @@ public class BiPGraph {
 			str.append(getDescription());
 			str.append(")\n");
 		}
+		str.append("Variables: {");
+		for (String vName : variableMap.keySet()) {
+			Var v = variableMap.get(vName);
+			str.append(v.getName());
+			str.append(" ");
+		}
+		str.append("}\n");
 		for (Eq e : getEquations()) {
 			str.append(e.getName());
 			str.append(" : ");

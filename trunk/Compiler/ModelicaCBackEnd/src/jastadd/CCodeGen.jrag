@@ -93,12 +93,12 @@ aspect CCodeGen {
 	public void FPreExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
 		if (myFV().isReal() && root().options.getBooleanOption("enable_variable_scaling") && !inFunction()) {
 			str.print("(");
-			str.print("pre" + myFV().name_C());
+			str.print("pre" + ((FIdUseExp)getFExp()).myFV().name_C());
 			str.print("*sf(");
-			str.print(myFV().valueReference());
+			str.print(((FIdUseExp)getFExp()).myFV().valueReference());
 			str.print("))");
 		} else {
-			str.print("pre" + myFV().name_C());
+			str.print("pre" + ((FIdUseExp)getFExp()).myFV().name_C());
 		}
 	}
 	

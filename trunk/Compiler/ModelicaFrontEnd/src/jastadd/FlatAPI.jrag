@@ -336,21 +336,20 @@ aspect FlatAPI {
 	syn int FClass.numDiscreteStringVariables() = discreteStringVariables().size();
 	syn lazy ArrayList<FStringVariable> FClass.discreteStringVariables() =
       intersection(strings(), discreteVariables());
-	
-	
+		
     syn int FClass.numDifferentiatedRealVariables() = differentiatedRealVariables().size();
-  	syn lazy ArrayList<FVariable> FClass.differentiatedRealVariables() {
-  		ArrayList<FVariable> l = new ArrayList<FVariable>();
-  		for (FVariable fv : differentiatedRealVariablesSet()) {
+  	syn lazy ArrayList<FRealVariable> FClass.differentiatedRealVariables() {
+  		ArrayList<FRealVariable> l = new ArrayList<FRealVariable>();
+  		for (FRealVariable fv : differentiatedRealVariablesSet()) {
   			l.add(fv);
   		}
   		return l;
   	}
   	// The LinkedHashSet is used here to avoid duplicates.
-	coll LinkedHashSet<FVariable> FClass.differentiatedRealVariablesSet() 
-	  [new LinkedHashSet<FVariable>()] with add root FlatRoot;
+	coll LinkedHashSet<FRealVariable> FClass.differentiatedRealVariablesSet() 
+	  [new LinkedHashSet<FRealVariable>()] with add root FlatRoot;
 	FDerExp contributes
- 		(FVariable)getFIdUse().myFV() when !getFIdUse().myFV().isUnknown()
+ 		(FRealVariable)getFIdUse().myFV() when !getFIdUse().myFV().isUnknown()
 	to FClass.differentiatedRealVariablesSet() for myFClass();
 	syn int FVariable.differentiatedRealVariableIndex() =
 		myFClass().differentiatedRealVariables().indexOf(this);
@@ -366,27 +365,36 @@ aspect FlatAPI {
 	coll ArrayList<FVariable> FClass.variables() 
 	  [new ArrayList<FVariable>()] with add root FlatRoot;
 	FVariable contributes
- 		this when !isParameter() && !isConstant() && shouldContribute()
+ 		this when !isParameter() && !isConstant() && !isPreVariable() && shouldContribute()
 	to FClass.variables() for myFClass();
 
     syn int FClass.numDiscreteVariables() = discreteVariables().size();
 	coll ArrayList<FVariable> FClass.discreteVariables() 
 	  [new ArrayList<FVariable>()] with add root FlatRoot;
 	FRealVariable contributes
-		this when isDiscrete() && !isInput() && shouldContribute()
+		this when isDiscrete() && !isInput() && !isPreVariable() && shouldContribute()
 	to FClass.discreteVariables() for myFClass();	
 	FIntegerVariable contributes
-		this when !isParameter() && !isInput() && !isConstant() && shouldContribute()
+		this when !isParameter() && !isInput() && !isPreVariable() && !isConstant() && shouldContribute()
 	to FClass.discreteVariables() for myFClass();	
 	FEnumVariable contributes
-		this when !isParameter() && !isInput() && !isConstant() && shouldContribute()
+		this when !isParameter() && !isInput() && !isPreVariable() && !isConstant() && shouldContribute()
 	to FClass.discreteVariables() for myFClass();	
 	FBooleanVariable contributes
-		this when !isParameter() && !isInput() && !isConstant() && shouldContribute()
+		this when !isParameter() && !isInput() && !isPreVariable() && !isConstant() && shouldContribute()
 	to FClass.discreteVariables() for myFClass();	
 	FStringVariable contributes
-		this when !isParameter() && !isInput() && !isConstant() && shouldContribute()
+		this when !isParameter() && !isInput() && !isPreVariable() && !isConstant() && shouldContribute()
 	to FClass.discreteVariables() for myFClass();	
+
+	syn int FClass.numDiscretePreVariables() = discretePreVariables().size();
+	syn lazy ArrayList<FVariable> FClass.discretePreVariables() {
+		ArrayList<FVariable> l = new ArrayList<FVariable>();
+		for (FVariable fv : discreteVariables()) {
+			l.add((FVariable)lookupPreFV(fv.getFQName()));
+		}
+		return l;
+	}
 	
     syn int FClass.numAliasVariables() = aliasVariables().size();
 	coll ArrayList<FVariable> FClass.aliasVariables() 
@@ -428,8 +436,8 @@ aspect FlatAPI {
       intersection(strings(), variables());
 	
     syn int FClass.numAlgebraicRealVariables() = algebraicRealVariables().size();
-	syn lazy ArrayList<FVariable> FClass.algebraicRealVariables() { 
-	  ArrayList<FVariable> set = intersection(variables(), reals());
+	syn lazy ArrayList<FRealVariable> FClass.algebraicRealVariables() { 
+	  ArrayList<FRealVariable> set = intersection(reals(),variables());
   	  set.removeAll(differentiatedRealVariables());
   	  set.removeAll(derivativeVariables());
   	  set.removeAll(discreteVariables());
@@ -529,6 +537,13 @@ aspect FlatAPI {
     		res += e.numScalarEquations();
     	return res;
     }
+    syn lazy int FClass.numScalarEquationsAtInitialization() {
+    	int res = 0;
+    	for (FAbstractEquation e : equations())
+ 		   	res += e.numScalarEquations();
+    	return res;
+    }
+
     syn int FClass.numEquations() = equations().size();
 	syn lazy ArrayList<FAbstractEquation> FClass.equations() {
 		ArrayList<FAbstractEquation> l = new ArrayList<FAbstractEquation>();
@@ -723,6 +738,25 @@ aspect FlatAPI {
 	eq FClass.getFParameterEquation().isParameterEquation() = true;
 	eq Root.getChild().isParameterEquation() = false;
 	
+	syn boolean FAbstractEquation.activeAtInitialization() = true;
+	eq FWhenEquation.activeAtInitialization() {
+		// TODO: Return something more correct here, taking initial() into account
+		return false;
+	}	
+	
+	syn List FAbstractEquation.getInitialEquationList() = new List();
+	
+	eq FWhenEquation.getInitialEquationList() {
+		List<FEquation> l = new List<FEquation>();
+		for (FAbstractEquation e : getFAbstractEquations()) {
+			for (FIdUseExp id : e.simpleLefts()) {
+				l.add(new FEquation((FIdUseExp)id.fullCopy(),
+				   new FPreExp((FIdUseExp)id.fullCopy())));
+			}
+		}
+		return l;
+	}
+	
     /**
      * \brief Check if tree contains a function call returning an array or a record.
      */
@@ -748,15 +782,22 @@ aspect FlatAPI {
 	  
 	syn boolean AbstractFVariable.isDerivativeVariable() = false;
 	eq FDerivativeVariable.isDerivativeVariable() = true;
+
+	syn boolean AbstractFVariable.isPreVariable() = false;
+	eq FPreRealVariable.isPreVariable() = true;
+	eq FPreIntegerVariable.isPreVariable() = true;
+	eq FPreBooleanVariable.isPreVariable() = true;
+	eq FPreStringVariable.isPreVariable() = true;
+	eq FPreEnumVariable.isPreVariable() = true;
 	
 	syn boolean AbstractFVariable.isAlgebraicVariable() = false;
 	syn lazy boolean FVariable.isAlgebraicVariable() = 
 		  myFClass().algebraicRealVariables().contains(this) ||
 		  myFClass().discreteRealVariables().contains(this) ||
-		  myFClass().enumVariables().contains(this) ||
-		  myFClass().integerVariables().contains(this) || 
-		  myFClass().booleanVariables().contains(this) ||
-		  myFClass().stringVariables().contains(this);
+		  myFClass().discreteEnumVariables().contains(this) ||
+		  myFClass().discreteIntegerVariables().contains(this) || 
+		  myFClass().discreteBooleanVariables().contains(this) ||
+		  myFClass().discreteStringVariables().contains(this);
 
 	syn boolean AbstractFVariable.isDiscreteVariable() = false;
 	syn lazy boolean FVariable.isDiscreteVariable() = 
@@ -1186,7 +1227,18 @@ aspect FVariableUses {
 	    !(getParent() instanceof FDerExp) && !(getParent() instanceof FPreExp) && 
 	    myFV().isDiscreteVariable() to 
 		FAbstractEquation.discreteVariables() for myFEquation();
-	
+
+	/**
+	 * \brief Collection attribute returning all pre variables (FPreVariable)
+	 * referenced in an equation.
+	 */
+	coll LinkedHashSet<FVariable> FAbstractEquation.discretePreVariables() 
+		[new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
+
+	FPreExp contributes (FVariable)myFV() when !myFV().isUnknown() && 
+		myFV().isPreVariable() to 
+		FAbstractEquation.discretePreVariables() for myFEquation();
+
 	/**
 	 * \brief Get the differenetiated variabel (FVariable) corresponding to 
 	 * a derivative variable (FDerivativeVariable)

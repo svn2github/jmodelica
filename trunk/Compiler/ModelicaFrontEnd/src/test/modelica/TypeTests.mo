@@ -452,6 +452,8 @@ model IntegerExp1
 fclass TypeTests.IntegerExp1
  constant Integer x = integer(1.8);
  Integer y;
+initial equation  
+ pre(y) = 0;
 equation
  y = 1;
 end TypeTests.IntegerExp1;
@@ -471,6 +473,8 @@ model IntegerExp2
 fclass TypeTests.IntegerExp2
  Real x;
  Integer y;
+initial equation 
+ pre(y) = 0;
 equation
  x = 1.0;
  y = integer(x);
@@ -510,6 +514,9 @@ fclass TypeTests.ConstCmpEq
  constant Boolean b = 1 == 1;
  Boolean x;
  Boolean y;
+initial equation 
+ pre(x) = false;
+ pre(y) = false;
 equation
  x = false;
  y = true;
@@ -534,6 +541,9 @@ fclass TypeTests.ConstCmpNeq
  constant Boolean b = 1 <> 1;
  Boolean x;
  Boolean y;
+initial equation  
+ pre(x) = false;
+ pre(y) = false;
 equation
  x = true;
  y = false;
@@ -560,6 +570,10 @@ fclass TypeTests.ConstCmpLeq
  Boolean x;
  Boolean y;
  Boolean z;
+initial equation  
+ pre(x) = false;
+ pre(y) = false;
+ pre(z) = false;
 equation
  x = true;
  y = true;
@@ -589,6 +603,10 @@ fclass TypeTests.ConstCmpLt
  Boolean x;
  Boolean y;
  Boolean z;
+initial equation 
+ pre(x) = false;
+ pre(y) = false;
+ pre(z) = false;
 equation
  x = true;
  y = false;
@@ -618,6 +636,10 @@ fclass TypeTests.ConstCmpGeq
  Boolean x;
  Boolean y;
  Boolean z;
+initial equation 
+ pre(x) = false;
+ pre(y) = false;
+ pre(z) = false;
 equation
  x = false;
  y = true;
@@ -647,6 +669,10 @@ fclass TypeTests.ConstCmpGt
  Boolean x;
  Boolean y;
  Boolean z;
+initial equation 
+ pre(x) = false;
+ pre(y) = false;
+ pre(z) = false;
 equation
  x = false;
  y = false;

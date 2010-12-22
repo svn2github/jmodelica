@@ -27,12 +27,6 @@ aspect FlatNameBinding {
 	syn AbstractFVariable FIdUse.myFV() = lookupFV(getFQName());
 	syn lazy AbstractFVariable FIdUseExp.myFV() = getFIdUse().myFV();
 	eq FDerExp.myFV() = getFIdUse().lookupDerFV(getFIdUse().getFQName());
-	syn lazy AbstractFVariable FPreExp.myFV() {
-	    if (getFExp() instanceof FIdUseExp) {
-	 		return ((FIdUseExp)getFExp()).getFIdUse().myFV();
-	 	}
-	 	return unknownFVariable();
-    }
     
 	eq Root.getChild().lookupFV(FQName fqn)    = null;
 	eq Root.getChild().lookupDerFV(FQName fqn) = null;
@@ -366,6 +360,40 @@ aspect FlatEnumBinding {
 	*/
 }
 
+aspect FlatPreBinding {
+
+	inh AbstractFVariable FIdUse.lookupPreFV(FQName fqn);	
+	inh AbstractFVariable FExp.lookupPreFV(FQName fqn);	
+	syn AbstractFVariable FPreExp.myFV() {
+		if (getFExp() instanceof FIdUseExp) {
+		    //System.out.println("FPreExp.myFV(): " + name());
+			return ((FIdUseExp)getFExp()).lookupPreFV(((FIdUseExp)getFExp()).getFIdUse().getFQName());
+    	} else {
+    		return unknownFVariable();
+    	}
+    }
+    
+	eq Root.getChild().lookupPreFV(FQName fqn) = null;
+
+	eq FClass.getChild(int index).lookupPreFV(FQName fqn) = lookupPreFV(fqn);
+	
+	public AbstractFVariable FClass.lookupPreFV(FQName fqn) {
+		boolean scalar = fqn.scalarized;
+		fqn.scalarized = scalarized;
+		AbstractFVariable variable = lookupPreFVFromMap(fullyQualifiedVariablesMap(), fqn);
+		//System.out.println("FClass.lookupPreFV(): " + fqn.name());
+		fqn.scalarized = scalar;
+		return (variable == null) ? unknownFVariable() : variable;
+	}
+
+	public static AbstractFVariable ASTNode.lookupPreFVFromMap(
+		HashMap<String, ? extends AbstractFVariable> map, FQName fqn) {
+		AbstractFVariable variable = map.get(fqn.preName());
+		//System.out.println(map.toString());
+		return variable;
+	}
+
+}
 
 aspect UnknownFVariables {
 

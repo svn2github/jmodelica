@@ -45,7 +45,7 @@ aspect EquationSolve {
 		// Find term
 		//System.out.println("Equation:\n" + prettyPrint(""));			
 		for (FExp e : t) {
-//			System.out.println("Term" + (e.isNegativeTerm()? "(-): ": "(+): ") + e.prettyPrint(""));
+			//System.out.println("Term" + (e.isNegativeTerm()? "(-): ": "(+): ") + e.prettyPrint(""));
 			if (e.nbrUses(name)==1) {
 				theTerm = e;
 			}
@@ -69,8 +69,11 @@ aspect EquationSolve {
 				}
 			}
 		}
-	
-		if (theTerm.isIdentifier(name)) {
+		
+		// TODO: the handling of pre expressions will be made more consistent
+		// with derivative expressions - then this special handling will be
+		// simplified.
+		if (theTerm.isIdentifier(name) || (theTerm instanceof FPreExp)) {
 			if (theTerm.isNegativeTerm()) {
 				sol = new FNegExp(sol);
 			}
@@ -84,7 +87,7 @@ aspect EquationSolve {
 			// probably very hard, can't solve this.
 			sol = new FNoExp();
 	    }
-	
+		//System.out.println("** " + sol.prettyPrint(""));
 		return sol;
 	}
 	
@@ -163,7 +166,7 @@ aspect EquationSolve {
 	
 	eq FIdUseExp.nbrUses(String name) = name.equals(name())? 1: 0;
 	eq FDerExp.nbrUses(String name) = name.equals(name())? 1: 0;
-	eq FPreExp.nbrUses(String name) = 0; // Pre variables are assumed to be known?
+	eq FPreExp.nbrUses(String name) = name.equals(name())? 1: 0;
 	
 	public FRelExp FRelExp.originalFRelExp = null;
 	public void ASTNode.traverseSymbolic(ASTNode e) {

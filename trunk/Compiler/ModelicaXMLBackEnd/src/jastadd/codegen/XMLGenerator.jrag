@@ -317,109 +317,111 @@ public class XMLGenerator extends GenericGenerator {
 		 */
 		public void generate(PrintStream genPrinter) {		
 			for(FVariable variable:fclass.allVariables()) {	
-				genPrinter.print("\n\t\t<ScalarVariable ");
-				genPrinter.print("name=\""+variable.name()+"\" ");
-				genPrinter.print("valueReference=\""+variable.valueReference()+"\" ");
-				if(variable.hasFStringComment()) {
-					genPrinter.print("description=\"");
-					//genPrinter.print("![CDATA[" + variable.getFStringComment().getComment()+"]]"+"\" ");
-					genPrinter.print(replaceIllegalChars(variable.getFStringComment().getComment())+"\" ");
-				}
-				genPrinter.print("variability=\"");
-				if(variable.isConstant()) {
-					genPrinter.print("constant\" ");
-				} else if(variable.isParameter()) {
-					genPrinter.print("parameter\" ");
-				} else if(variable.isDiscrete()) {
-					genPrinter.print("discrete\" ");
-				} else {
-					//default
-					genPrinter.print("continuous\" ");
-				}
-				genPrinter.print("causality=\"");
-				if(variable.isInput()) {
-					genPrinter.print("input\" ");
-				} else if(variable.isOutput()) {
-					genPrinter.print("output\" ");
-				} else {
-					//default
-					genPrinter.print("internal\" ");
-				}
-                genPrinter.print("alias=\"");
-                if(variable.isAlias()) {
-                	if(variable.isNegated()) {
-                        genPrinter.print("negatedAlias\" ");
-                	} else {
-                    	genPrinter.print("alias\" ");
-                	}
-                } else {
-                	genPrinter.print("noAlias\"");
-                }
-                genPrinter.print(">");
-
-				if(variable.isReal()) {
-					// TODO: move this to a method on FVariable that is overridden in subclasses
-					genPrinter.print("\n\t\t\t<Real ");
-					addRealAttributes(genPrinter, (FRealVariable)variable);
-					genPrinter.print("/>");		
-				} else if(variable.isInteger()) {
-					genPrinter.print("\n\t\t\t<Integer ");
-					addIntegerAttributes(genPrinter, (FIntegerVariable)variable);
-					genPrinter.print("/>");
-				} else if(variable.isBoolean()) {
-					genPrinter.print("\n\t\t\t<Boolean ");
-					addBooleanAttributes(genPrinter, (FBooleanVariable)variable);
-					genPrinter.print("/>");
-				} else if(variable.isString()) {
-					genPrinter.print("\n\t\t\t<String ");
-					addStringAttributes(genPrinter, (FStringVariable)variable);
-					genPrinter.print("/>");
-				} else if(variable.isEnum()) {
-					genPrinter.print("\n\t\t\t<Enumeration ");
-					addEnumAttributes(genPrinter, (FEnumVariable)variable);
-					genPrinter.print("/>");
-				}
-				 else {
-					//TODO: errorhandling
-					System.err.println("Invalid or missing variable type definition");
-				}
-				
-				//direct dependency - not supported
-				Boolean generateEqu = fclass.root().options.getBooleanOption("generate_xml_equations");
-				if(generateEqu){
-					//qualified name
-					genPrinter.print("\n\t\t\t<QualifiedName>\n");
-					variable.getFQName().prettyPrint_XML(genPrinter,"\t\t\t");
-					genPrinter.print("\t\t\t</QualifiedName>");
-				}		
-				
-				Boolean generateFMI = fclass.root().options.getBooleanOption("generate_fmi_xml");
-				if(!generateFMI) {				
-					//is linear?
-					addLinearInfo(genPrinter, variable);
-				
-					//variable category
-					genPrinter.print("\n\t\t\t<VariableCategory>");
-					if(variable.isDerivativeVariable()) {
-						genPrinter.print("derivative");
-					} else if(variable.isDifferentiatedVariable()) {
-						genPrinter.print("state");
-					} else if(variable.isDependentConstant()) {
-						genPrinter.print("dependentConstant");
-					} else if(variable.isIndependentConstant()) {
-						genPrinter.print("independentConstant");
-					} else if(variable.isDependentParameter()) {
-						genPrinter.print("dependentParameter");
-					} else if(variable.isIndependentParameter()) {
-						genPrinter.print("independentParameter");
-					} else {
-						//default is algebraic
-						genPrinter.print("algebraic");
+				if (!variable.isPreVariable()) {
+					genPrinter.print("\n\t\t<ScalarVariable ");
+					genPrinter.print("name=\""+variable.name()+"\" ");
+					genPrinter.print("valueReference=\""+variable.valueReference()+"\" ");
+					if(variable.hasFStringComment()) {
+						genPrinter.print("description=\"");
+						//genPrinter.print("![CDATA[" + variable.getFStringComment().getComment()+"]]"+"\" ");
+						genPrinter.print(replaceIllegalChars(variable.getFStringComment().getComment())+"\" ");
 					}
-					genPrinter.print("</VariableCategory>");
-				}
+					genPrinter.print("variability=\"");
+					if(variable.isConstant()) {
+						genPrinter.print("constant\" ");
+					} else if(variable.isParameter()) {
+						genPrinter.print("parameter\" ");
+					} else if(variable.isDiscrete()) {
+						genPrinter.print("discrete\" ");
+					} else {
+						//default
+						genPrinter.print("continuous\" ");
+					}
+					genPrinter.print("causality=\"");
+					if(variable.isInput()) {
+						genPrinter.print("input\" ");
+					} else if(variable.isOutput()) {
+						genPrinter.print("output\" ");
+					} else {
+						//default
+						genPrinter.print("internal\" ");
+					}
+   		            genPrinter.print("alias=\"");
+   	   		        if(variable.isAlias()) {
+   	   	      	    	if(variable.isNegated()) {
+   	           	          genPrinter.print("negatedAlias\" ");
+   	       		      	} else {
+           		         	genPrinter.print("alias\" ");
+               		 	}
+            	    } else {
+                		genPrinter.print("noAlias\"");
+   		      	    }
+	           	    genPrinter.print(">");
+
+					if(variable.isReal()) {
+						// TODO: move this to a method on FVariable that is overridden in subclasses
+						genPrinter.print("\n\t\t\t<Real ");
+						addRealAttributes(genPrinter, (FRealVariable)variable);
+						genPrinter.print("/>");		
+					} else if(variable.isInteger()) {
+						genPrinter.print("\n\t\t\t<Integer ");
+						addIntegerAttributes(genPrinter, (FIntegerVariable)variable);
+						genPrinter.print("/>");
+					} else if(variable.isBoolean()) {
+						genPrinter.print("\n\t\t\t<Boolean ");
+						addBooleanAttributes(genPrinter, (FBooleanVariable)variable);
+						genPrinter.print("/>");
+					} else if(variable.isString()) {
+						genPrinter.print("\n\t\t\t<String ");
+						addStringAttributes(genPrinter, (FStringVariable)variable);
+						genPrinter.print("/>");
+					} else if(variable.isEnum()) {
+						genPrinter.print("\n\t\t\t<Enumeration ");
+						addEnumAttributes(genPrinter, (FEnumVariable)variable);
+						genPrinter.print("/>");
+					}
+					 else {
+						//TODO: errorhandling
+						System.err.println("Invalid or missing variable type definition");
+					}
+					
+					//direct dependency - not supported
+					Boolean generateEqu = fclass.root().options.getBooleanOption("generate_xml_equations");
+					if(generateEqu){
+						//qualified name
+						genPrinter.print("\n\t\t\t<QualifiedName>\n");
+						variable.getFQName().prettyPrint_XML(genPrinter,"\t\t\t");
+						genPrinter.print("\t\t\t</QualifiedName>");
+					}		
+					
+					Boolean generateFMI = fclass.root().options.getBooleanOption("generate_fmi_xml");
+					if(!generateFMI) {				
+						//is linear?
+						addLinearInfo(genPrinter, variable);
+					
+						//variable category
+						genPrinter.print("\n\t\t\t<VariableCategory>");
+						if(variable.isDerivativeVariable()) {
+							genPrinter.print("derivative");
+						} else if(variable.isDifferentiatedVariable()) {
+							genPrinter.print("state");
+						} else if(variable.isDependentConstant()) {
+							genPrinter.print("dependentConstant");
+						} else if(variable.isIndependentConstant()) {
+							genPrinter.print("independentConstant");
+						} else if(variable.isDependentParameter()) {
+							genPrinter.print("dependentParameter");
+						} else if(variable.isIndependentParameter()) {
+							genPrinter.print("independentParameter");
+						} else {
+							//default is algebraic
+							genPrinter.print("algebraic");
+						}
+						genPrinter.print("</VariableCategory>");
+					}
 				
-				genPrinter.print("\n\t\t</ScalarVariable>");
+					genPrinter.print("\n\t\t</ScalarVariable>");
+				}
 			}
 		}
 	}

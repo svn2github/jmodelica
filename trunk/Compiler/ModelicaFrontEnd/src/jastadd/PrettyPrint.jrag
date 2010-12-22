@@ -684,7 +684,7 @@ aspect FlattPrettyPrint {
 		String nextInd = p.indent(indent);
 		str.print(indent + "fclass " + name() + "\n");
 		for (FVariable fv : getFVariables()) {
-	  		if (!fv.isDerivativeVariable()) {
+	  		if (!fv.isDerivativeVariable() && !fv.isPreVariable()) {
 	  			p.print(fv, str, nextInd);
 	  			str.print(";\n");  
 	  		}
@@ -1376,6 +1376,10 @@ aspect FlattPrettyPrint {
 	}
 	
 	public void FDerExp.prettyPrint(Printer p, PrintStream str, String indent) {
+		str.print(name());
+	}
+
+	public void FPreExp.prettyPrint(Printer p, PrintStream str, String indent) {
 		str.print(name());
 	}
 	

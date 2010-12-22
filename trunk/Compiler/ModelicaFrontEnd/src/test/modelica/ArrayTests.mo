@@ -5215,6 +5215,9 @@ model ArrayAnd1
 fclass ArrayTests.ArrayAnd1
  Boolean x[1];
  Boolean x[2];
+initial equation 
+ pre(x[1]) = false;
+ pre(x[2]) = false;
 equation
  x[1] = true and true;
  x[2] = true and false;
@@ -5223,7 +5226,6 @@ end ArrayTests.ArrayAnd1;
 
  Boolean x[2] = { true, true } and { true, false };
 end ArrayAnd1;
-
 
 model ArrayAnd2
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
@@ -5236,6 +5238,11 @@ fclass ArrayTests.ArrayAnd2
  Boolean y[2];
  Boolean x[1];
  Boolean x[2];
+initial equation 
+ pre(y[1]) = false;
+ pre(y[2]) = false;
+ pre(x[1]) = false;
+ pre(x[2]) = false;
 equation
  y[1] = true;
  y[2] = false;
@@ -5361,6 +5368,10 @@ fclass ArrayTests.ArrayAnd9
  Boolean x[1];
  Boolean x[2];
  Boolean x[3];
+initial equation 
+ pre(x[1]) = false;
+ pre(x[2]) = false;
+ pre(x[3]) = false;
 equation
  x[1] = true;
  x[2] = false;
@@ -5383,6 +5394,9 @@ model ArrayOr1
 fclass ArrayTests.ArrayOr1
  Boolean x[1];
  Boolean x[2];
+initial equation 
+ pre(x[1]) = false;
+ pre(x[2]) = false;
 equation
  x[1] = true or true;
  x[2] = true or false;
@@ -5404,6 +5418,11 @@ fclass ArrayTests.ArrayOr2
  Boolean y[2];
  Boolean x[1];
  Boolean x[2];
+initial equation 
+ pre(y[1]) = false;
+ pre(y[2]) = false;
+ pre(x[1]) = false;
+ pre(x[2]) = false;
 equation
  y[1] = true;
  y[2] = false;
@@ -5529,6 +5548,10 @@ fclass ArrayTests.ArrayOr9
  Boolean x[1];
  Boolean x[2];
  Boolean x[3];
+initial equation 
+ pre(x[1]) = false;
+ pre(x[2]) = false;
+ pre(x[3]) = false;
 equation
  x[1] = true;
  x[2] = true;
@@ -5551,6 +5574,9 @@ model ArrayNot1
 fclass ArrayTests.ArrayNot1
  Boolean x[1];
  Boolean x[2];
+initial equation 
+ pre(x[1]) = false;
+ pre(x[2]) = false;
 equation
  x[1] = not true;
  x[2] = not false;
@@ -5572,6 +5598,11 @@ fclass ArrayTests.ArrayNot2
  Boolean x[2];
  Boolean y[1];
  Boolean y[2];
+initial equation 
+ pre(x[1]) = false;
+ pre(x[2]) = false;
+ pre(y[1]) = false;
+ pre(y[2]) = false;
 equation
  x[1] = not y[1];
  x[2] = not y[2];
@@ -5596,6 +5627,9 @@ fclass ArrayTests.ArrayNot3
  Boolean x[2];
  constant Boolean y[1] = not true;
  constant Boolean y[2] = not false;
+initial equation 
+ pre(x[1]) = false;
+ pre(x[2]) = false;
 equation
  x[1] = false;
  x[2] = true;
@@ -5651,6 +5685,10 @@ fclass ArrayTests.ArrayNeg1
  Integer x[1];
  Integer x[2];
  Integer x[3];
+initial equation 
+ pre(x[1]) = 0;
+ pre(x[2]) = 0;
+ pre(x[3]) = 0;
 equation
  x[1] =  - ( 1 );
  x[2] =  - ( 0 );
@@ -5676,6 +5714,13 @@ fclass ArrayTests.ArrayNeg2
  Integer y[1];
  Integer y[2];
  Integer y[3];
+initial equation  
+ pre(x[1]) = 0;
+ pre(x[2]) = 0;
+ pre(x[3]) = 0;
+ pre(y[1]) = 0;
+ pre(y[2]) = 0;
+ pre(y[3]) = 0;
 equation
  x[1] =  - ( y[1] );
  x[2] =  - ( y[2] );
@@ -5704,6 +5749,10 @@ fclass ArrayTests.ArrayNeg3
  constant Integer y[1] =  - ( 1 );
  constant Integer y[2] =  - ( 0 );
  constant Integer y[3] =  - (  - ( 1 ) );
+initial equation 
+ pre(x[1]) = 0;
+ pre(x[2]) = 0;
+ pre(x[3]) = 0;
 equation
  x[1] = -1;
  x[2] = 0;

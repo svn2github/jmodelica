@@ -147,7 +147,7 @@ public class Eq {
 
         return varIterator.next();
     }
-	
+	    
 	public String toString() {
 		return getName();
 	}

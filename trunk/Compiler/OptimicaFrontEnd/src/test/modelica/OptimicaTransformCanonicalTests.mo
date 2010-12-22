@@ -195,9 +195,9 @@ finalTime:
  Real der(x[2]);
  Real der(cost);
 initial equation 
- cost = 0;
  x[1] = 1;
  x[2] = 1;
+ cost = 0;
 equation 
  der(x[1]) = ( A[1,1] ) * ( x[1] ) + ( A[1,2] ) * ( x[2] ) + ( B[1] ) * ( u );
  der(x[2]) = ( A[2,1] ) * ( x[1] ) + ( A[2,2] ) * ( x[2] ) + ( B[2] ) * ( u );
@@ -261,9 +261,9 @@ optimization OptimicaTransformCanonicalTests.ArrayTest2(objective = cost(finalTi
  Real der(x[2]);
  Real der(cost);
 initial equation 
- cost = 0;
  x[1] = 1;
  x[2] = 1;
+ cost = 0;
 equation 
  der(x[1]) = ( A[1,1] ) * ( x[1] ) + ( A[1,2] ) * ( x[2] ) + ( B[1] ) * ( u );
  der(x[2]) = ( A[2,1] ) * ( x[1] ) + ( A[2,2] ) * ( x[2] ) + ( B[2] ) * ( u );

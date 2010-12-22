@@ -433,10 +433,13 @@ model MinExp3
 	 JModelica.UnitTesting.TransformCanonicalTestCase(
 		 name="MinExp3",
 		 description="Min operator: strings",
+
 		 flatModel="
 fclass ArrayBuiltins.MinExp3
  constant String x = min(\"foo\", \"bar\");
  String y;
+initial equation 
+ pre(y) = \"\";
 equation
  y = \"bar\";
 end ArrayBuiltins.MinExp3;
@@ -456,6 +459,8 @@ model MinExp4
 fclass ArrayBuiltins.MinExp4
  constant Boolean x = min(true, false);
  Boolean y;
+initial equation 
+ pre(y) = false;
 equation
  y = false;
 end ArrayBuiltins.MinExp4;
@@ -655,6 +660,8 @@ model MaxExp3
 fclass ArrayBuiltins.MaxExp3
  constant String x = max(\"foo\", \"bar\");
  String y;
+initial equation 
+ pre(y) = \"\";
 equation
  y = \"foo\";
 end ArrayBuiltins.MaxExp3;
@@ -674,6 +681,8 @@ model MaxExp4
 fclass ArrayBuiltins.MaxExp4
  constant Boolean x = max(true, false);
  Boolean y;
+initial equation 
+ pre(y) = false;
 equation
  y = true;
 end ArrayBuiltins.MaxExp4;
@@ -1019,6 +1028,15 @@ fclass ArrayBuiltins.Transpose4
  Integer x[2,1,2];
  Integer x[2,2,1];
  Integer x[2,2,2];
+initial equation 
+ pre(x[1,1,1]) = 0;
+ pre(x[1,1,2]) = 0;
+ pre(x[1,2,1]) = 0;
+ pre(x[1,2,2]) = 0;
+ pre(x[2,1,1]) = 0;
+ pre(x[2,1,2]) = 0;
+ pre(x[2,2,1]) = 0;
+ pre(x[2,2,2]) = 0;
 equation
  x[1,1,1] = 1;
  x[1,1,2] = 2;
@@ -1757,6 +1775,8 @@ model NdimsExp1
 fclass ArrayBuiltins.NdimsExp1
  constant Integer n = 2;
  Integer x;
+initial equation 
+ pre(x) = 0;
 equation
  x = ( 2 ) * ( 2 );
 end ArrayBuiltins.NdimsExp1;
@@ -2021,6 +2041,10 @@ fclass ArrayBuiltins.PreTest1
  discrete Integer x2[2];
  Real y2[1];
  Real y2[2];
+initial equation 
+ pre(x) = 0;
+ pre(x2[1]) = 0;
+ pre(x2[2]) = 0;
 equation
  x = 1;
  y = pre(x);
@@ -2035,6 +2059,11 @@ end ArrayBuiltins.PreTest1;
 	Real y = pre(x);
 	discrete Integer x2[2] = ones(2);
 	Real y2[2] = pre(x2);
+/*equation
+  when time>1 then
+    y = pre(x);
+    y2 = pre(x2);
+  end when;*/
 end PreTest1;
 
 
@@ -2046,6 +2075,8 @@ model SampleTest1
          flatModel="
 fclass ArrayBuiltins.SampleTest1
  Boolean x;
+initial equation 
+ pre(x) = false;
 equation
  x = sample(0, 1);
 end ArrayBuiltins.SampleTest1;

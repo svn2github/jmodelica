@@ -857,6 +857,7 @@ aspect FlatNames {
     syn String FIdUse.name() = getFQName().name();
     syn String FIdUseExp.name() = getFIdUse().name();
     eq FDerExp.name() = derName();
+    eq FPreExp.name() = preName();
     syn String FInstAccessExp.name() = getInstAccessNoTransform().name();
     syn String FIdUseInstAccess.name() = getInstAccessNoTransform().name();
     
@@ -904,6 +905,37 @@ aspect FlatNames {
         str.append(")");
         return str.toString();
     }
+
+    eq FPreRealVariable.name()  = getFQNameNoTransform().preName();
+    eq FPreIntegerVariable.name()  = getFQNameNoTransform().preName();	
+    eq FPreBooleanVariable.name()  = getFQNameNoTransform().preName();
+    eq FPreStringVariable.name()  = getFQNameNoTransform().preName();
+    eq FPreEnumVariable.name()  = getFQNameNoTransform().preName();
+    syn String FIdUse.preName()    = getFQNameNoTransform().preName();
+    syn String FPreExp.preName() {
+     	return ((FIdUseExp)getFExpNoTransform()).getFIdUse().preName();
+	}
+	
+    syn lazy String FQName.preName() {
+        StringBuilder str = new StringBuilder();
+        for (int i=0;i<getNumFQNamePart();i++) {
+            if (i==getNumFQNamePart()-1) {
+                str.append("pre(");
+            }
+            str.append(getFQNamePart(i).getName());
+            //if (i<getNumFQNamePart()-1 || isScalarized()) {
+                if (getFQNamePart(i).hasFArraySubscripts()) {
+                    str.append(getFQNamePart(i).getFArraySubscripts().prettyPrint(""));
+                }
+                if (i<getNumFQNamePart()-1) {
+                    str.append(".");
+                }
+            //}
+        }
+        str.append(")");
+        return str.toString();
+    }
+
     
     //syn String FIdUse.derName2() = getFQName().derName2();
     //syn String FIdUseExp.derName2() = getFIdUse().derName2();
@@ -949,7 +981,18 @@ aspect FlatNames {
     syn String FIdUse.funcNameUnderscore(String suffix) = getFQName().funcNameUnderscore(suffix);
 
     inh int FVariable.variableIndex();
-    eq FClass.getFVariable(int i).variableIndex()     = i;
+//    eq FClass.getFVariable(int i).variableIndex()     = i;
+    eq FClass.getFVariable(int i).variableIndex() {
+    	FVariable fv = getFVariable(i);
+    	if (!fv.isPreVariable()) {
+    		return i;
+    	} else {
+    		// Pre variables should have the same variable index as
+    		// their non-pre counterparts.
+    		return ((FVariable)lookupFV(fv.getFQName(),false)).variableIndex();
+    	}
+    }
+   
     eq FClass.getAliasVariable(int i).variableIndex() = getNumFVariable() + i;
     eq FForIndex.getFVariable().variableIndex()       = -1;
     eq FRecordDecl.getFVariable().variableIndex()     = -1;

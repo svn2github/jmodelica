@@ -183,6 +183,31 @@ FStringVariable : FVariable;
 FEnumVariable : FVariable ::= Enum:FQName /Type:FType/;
 
 /**
+ * \brief Pre FVariable of type Real.
+ */
+FPreRealVariable : FRealVariable;
+
+/**
+ * \brief FVariable of type Integer.
+ */
+FPreIntegerVariable : FIntegerVariable;
+
+/**
+ * \brief FVariable of type Boolean.
+ */
+FPreBooleanVariable : FBooleanVariable;
+
+/**
+ * \brief FVariable of type String.
+ */
+FPreStringVariable : FStringVariable;
+
+/**
+ * \brief FVariable of type Enumeration.
+ */
+FPreEnumVariable : FEnumVariable;
+
+/**
  * \brief FVariable of a record type.
  */
 FRecordVariable : FVariable ::= Record:FQName /Type:FType/;
@@ -377,8 +402,11 @@ FInitialEquation : FEquationType;
 
 /**
  * \brief Base class for flattened equations.
+ *
+ * The NTA InitialEquation is used to represent default initial equations for
+ * when equations that are not active during initialization.
  */
-abstract FAbstractEquation : BaseNode ::= Type:FEquationType;
+abstract FAbstractEquation : BaseNode ::= Type:FEquationType /InitialEquation:FEquation*/;
 
 /**
  * \brief Unsupported equation.
@@ -435,7 +463,7 @@ abstract FIfWhenEquation : FIfWhenElseEquation ::= Test:FExp [Else:FIfWhenElseEq
 /**
  * When equation clause.
  */
-FWhenEquation : FIfWhenEquation;
+FWhenEquation : FIfWhenEquation ::=;
 
 /**
  * If equation clause.
