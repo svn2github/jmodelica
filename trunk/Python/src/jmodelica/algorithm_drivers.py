@@ -567,6 +567,12 @@ class AssimuloFMIAlgOptions(OptionBase):
             then the variable scaling factors of the model are used to
             reproduced the unscaled variable values.
             Default: False
+            
+        result_file_name --
+            Specifies the name of the file where the simulation result is 
+            written. Setting this option to an empty string results in a default 
+            file name that is based on the name of the model class.
+            Default: Empty string
                  
     The different solvers provided by the Assimulo simulation package provides
     different options. These options are given in dictionaries with names
@@ -600,6 +606,7 @@ class AssimuloFMIAlgOptions(OptionBase):
             'ncp':0,
             'initialize':True,
             'write_scaled_result':False,
+            'result_file_name':'',
             'CVode_options':{'discr':'BDF','iter':'Newton'}
             }
         super(AssimuloFMIAlgOptions,self).__init__(_defaults)
@@ -669,13 +676,13 @@ class AssimuloFMIAlg(AlgorithmBase):
         self._set_options()
         
         if not self.input:
-            self.probl = FMIODE(self.model)
+            self.probl = FMIODE(self.model, result_file_name=self.result_file_name)
         else:
             self.probl = FMIODE(
                 self.model,
                 (self.input[0], 
                     TrajectoryLinearInterpolation(self.input[1][:,0], 
-                    self.input[1][:,1:])))
+                    self.input[1][:,1:])), result_file_name=self.result_file_name)
         
         # instantiate solver and set options
         self.simulator = self.solver(self.probl, t0=self.start_time)
@@ -689,6 +696,12 @@ class AssimuloFMIAlg(AlgorithmBase):
         self.ncp = self.options['ncp']
 
         self.write_scaled_result = self.options['write_scaled_result']
+        
+        # result file name
+        if self.options['result_file_name'] == '':
+            self.result_file_name = self.model.get_name()+'_result.txt'
+        else:
+            self.result_file_name = self.options['result_file_name']
         
         # solver
         solver = self.options['solver']
@@ -756,13 +769,11 @@ class AssimuloFMIAlg(AlgorithmBase):
             The AssimuloSimResult object.
         """
         if not self.probl.write_cont:
-            write_data(self.simulator,self.write_scaled_result)
-        # result file name
-        resultfile = self.model.get_name()+'_result.txt'
+            write_data(self.simulator,self.write_scaled_result, self.result_file_name)
         # load result file
-        res = ResultDymolaTextual(resultfile)
+        res = ResultDymolaTextual(self.result_file_name)
         # create and return result object
-        return AssimuloSimResult(self.model, resultfile, self.simulator, 
+        return AssimuloSimResult(self.model, self.result_file_name, self.simulator, 
             res, self.options)
         
     @classmethod
@@ -803,6 +814,12 @@ class AssimuloAlgOptions(OptionBase):
             the variable scaling factors of the model are used to reproduced the 
             unscaled variable values.
             Default: False
+            
+        result_file_name --
+            Specifies the name of the file where the simulation result is 
+            written. Setting this option to an empty string results in a default 
+            file name that is based on the name of the model class.
+            Default: Empty string
 
     The different solvers provided by the Assimulo simulation package provides
     different options. These options are given in dictionaries with names
@@ -853,6 +870,7 @@ class AssimuloAlgOptions(OptionBase):
             'ncp':0, 
             'initialize':True,
             'write_scaled_result':False,
+            'result_file_name':'',
             'IDA_options':{'atol':1.0e-6,'rtol':1.0e-6,
                            'maxord':5,'sensitivity':False},
             'CVode_options':{'discr':'BDF','iter':'Newton',
@@ -931,25 +949,28 @@ class AssimuloAlg(AlgorithmBase):
         if issubclass(self.solver, Implicit_ODE):
             if not self.input:
                 if not self.sensitivity:
-                    self.probl = JMIDAE(model)
+                    self.probl = JMIDAE(model,result_file_name=self.result_file_name)
                 else:
-                    self.probl = JMIDAESens(model)
+                    self.probl = JMIDAESens(model,result_file_name=self.result_file_name)
             else:
                 if not self.sensitivity:
                     self.probl = JMIDAE(model,(self.input[0],
                         TrajectoryLinearInterpolation(self.input[1][:,0], \
-                                                      self.input[1][:,1:])))
+                                                      self.input[1][:,1:])), \
+                                                      self.result_file_name)
                 else:
                     self.probl = JMIDAESens(model,(self.input[0],
                         TrajectoryLinearInterpolation(self.input[1][:,0], \
-                                                      self.input[1][:,1:])))
+                                                      self.input[1][:,1:])), \
+                                                      self.result_file_name)
         else:
             if not self.input:
-                self.probl = JMIODE(model)
+                self.probl = JMIODE(model,result_file_name=self.result_file_name)
             else:
                 self.probl = JMIODE(model,(self.input[0],
                     TrajectoryLinearInterpolation(self.input[1][:,0], \
-                                                  self.input[1][:,1:])))
+                                                  self.input[1][:,1:])), \
+                                                  self.result_file_name)
         # instantiate solver and set options
         self.simulator = self.solver(self.probl, t0=self.start_time)
         self._set_solver_options()
@@ -976,6 +997,12 @@ class AssimuloAlg(AlgorithmBase):
 
         # write scaled result?
         self.write_scaled_result = self.options['write_scaled_result']
+        
+        # result file name
+        if self.options['result_file_name'] == '':
+            self.result_file_name = self.model.get_name()+'_result.txt'
+        else:
+            self.result_file_name = self.options['result_file_name']
         
         # solver options
         self.solver_options = self.options[solver+'_options']
@@ -1033,14 +1060,12 @@ class AssimuloAlg(AlgorithmBase):
         
             The AssimuloSimResult object.
         """
-        write_data(self.simulator,self.write_scaled_result)
-        # result file name
-        resultfile = self.model.get_name()+'_result.txt'
+        write_data(self.simulator,self.write_scaled_result,self.result_file_name)
         # load result file
-        res = ResultDymolaTextual(resultfile)
+        res = ResultDymolaTextual(self.result_file_name)
         
         # create and return result object
-        return AssimuloSimResult(self.model, resultfile, self.simulator, res, 
+        return AssimuloSimResult(self.model, self.result_file_name, self.simulator, res, 
             self.options)
     
     @classmethod

@@ -72,6 +72,26 @@ class Test_JMI_ODE:
         self.ODE = JMIODE(self.m_ODE)
     
     @testattr(assimulo = True)
+    def test_result_name_file(self):
+        """
+        Tests user naming of result file (JMIODE).
+        """
+        res = self.m_ODE.simulate()
+        
+        #Default name
+        assert res.result_file == "VDP_pack_VDP_Opt_result.txt"
+        assert os.path.exists(res.result_file)
+        
+        self.m_ODE.reset()
+        
+        res = self.m_ODE.simulate(options={"result_file_name":
+                                    "VDP_pack_VDP_Opt_result_test.txt"})
+                                    
+        #User defined name
+        assert res.result_file == "VDP_pack_VDP_Opt_result_test.txt"
+        assert os.path.exists(res.result_file)
+    
+    @testattr(assimulo = True)
     def test_input(self):
         """
         Tests the input.
@@ -282,6 +302,25 @@ class Test_JMI_DAE:
         # Creates the solvers
         self.DAE = JMIDAE(self.m_DAE)
         self.DISC = JMIDAE(self.m_DISC)
+        
+    @testattr(assimulo = True)
+    def test_result_name_file(self):
+        """
+        Tests user naming of result file (JMIDAE).
+        """
+        res = self.m_DAE.simulate()
+        
+        #Default name
+        assert res.result_file == "Pendulum_pack_Pendulum_result.txt"
+        assert os.path.exists(res.result_file)
+        
+        res = self.m_DAE.simulate(options={"result_file_name":
+                                    "Pendulum_pack_Pendulum_result_test.txt"})
+                                    
+        #User defined name
+        assert res.result_file == "Pendulum_pack_Pendulum_result_test.txt"
+        assert os.path.exists(res.result_file)
+        
     
     @testattr(assimulo = True) 
     def test_eps(self):
@@ -634,7 +673,26 @@ class Test_FMI_ODE:
         self._dq.initialize()
         self._bounceSim = FMIODE(self._bounce)
         self._dqSim     = FMIODE(self._dq)
+    
+    @testattr(assimulo = True)
+    def test_result_name_file(self):
+        """
+        Tests user naming of result file (FMIODE).
+        """
+        res = self._dq.simulate(options={"initialize":False})
         
+        #Default name
+        assert res.result_file == "dq_result.txt"
+        assert os.path.exists(res.result_file)
+        
+        res = self._bounce.simulate(options={"result_file_name":
+                                    "bouncingBallt_result_test.txt",
+                                             "initialize":False})
+                                    
+        #User defined name
+        assert res.result_file == "bouncingBallt_result_test.txt"
+        assert os.path.exists(res.result_file)
+    
     @testattr(assimulo = True)
     def test_init(self):
         """
@@ -965,7 +1023,46 @@ class Test_JMI_DAE_Sens:
         # Creates the solvers
         self.DAE = JMIDAESens(self.m_DAE)
         self.SENS = JMIDAESens(self.m_SENS)
+    
+    @testattr(assimulo = True)
+    def test_result_name_file(self):
+        """
+        Tests user naming of result file (JMIDAESens).
+        """
+        path_result = os.path.join(get_files_path(), 'Results', 
+                                'qt_par_est_data.mat')
         
+        data = loadmat(path_result,appendmat=False)
+
+        # Extract data series  
+        t_meas = data['t'][6000::100,0]-60  
+        u1 = data['u1_d'][6000::100,0]
+        u2 = data['u2_d'][6000::100,0]
+                
+        # Build input trajectory matrix for use in simulation
+        u_data = N.transpose(N.vstack((t_meas,u1,u2)))
+
+        input_object = (['u1','u2'], u_data)
+        
+        opts = self.m_SENS.simulate_options()
+        opts['IDA_options']['sensitivity']=True
+        
+        res = self.m_SENS.simulate(options=opts)
+        
+        #Default name
+        assert res.result_file == "QuadTankSens_result.txt"
+        assert os.path.exists(res.result_file)
+        
+        self.m_SENS.reset()
+        
+        opts["result_file_name"] = "QuadTankSens_result_test.txt"
+        
+        res = self.m_SENS.simulate(options=opts)
+                                    
+        #User defined name
+        assert res.result_file == "QuadTankSens_result_test.txt"
+        assert os.path.exists(res.result_file)
+    
     @testattr(assimulo = True)
     def test_ordinary_dae(self):
         """

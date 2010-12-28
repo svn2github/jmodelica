@@ -310,6 +310,18 @@ res = model.simulate(final_time=10, input=input_model)
                 False, then the variable scaling factors of the model are used
                 to reproduced the unscaled variable values.</entry>
               </row>
+
+              <row>
+                <entry>result_file_name</entry>
+
+                <entry>Empty string (default generated file name will be
+                used)</entry>
+
+                <entry>Specifies the name of the file where the simulation
+                result is written. Setting this option to an empty string
+                results in a default file name that is based on the name of
+                the model class.</entry>
+              </row>
             </tbody>
           </tgroup>
         </table>
@@ -575,6 +587,18 @@ opts['ncp'] = 1000 #Changing the number of communication points.
                 without taking scaling into account. If the value of scaled is
                 False, then the variable scaling factors of the model are used
                 to reproduced the unscaled variable values.</entry>
+              </row>
+
+              <row>
+                <entry>result_file_name</entry>
+
+                <entry>Empty string (default generated file name will be
+                used)</entry>
+
+                <entry>Specifies the name of the file where the simulation
+                result is written. Setting this option to an empty string
+                results in a default file name that is based on the name of
+                the model class.</entry>
               </row>
             </tbody>
           </tgroup>

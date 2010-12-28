@@ -51,10 +51,14 @@ class FMIModel_Exception(Exception):
     """
     pass
 
-def write_data(simulator,write_scaled_result=False):
+def write_data(simulator,write_scaled_result=False, result_file_name=''):
     """
     Writes simulation data to a file. Takes as input a simulated model.
     """
+    #Determine the result file name
+    if result_file_name == '':
+        result_file_name=simulator._problem._model.get_name()+'_result.txt'
+    
     if isinstance(simulator._problem, JMIDAE):
         
         model = simulator._problem._model
@@ -84,7 +88,8 @@ def write_data(simulator,write_scaled_result=False):
         data = N.c_[data, y[
             :,len(model.real_x):len(model.real_x)+len(model.real_w)]]
 
-        io.export_result_dymola(model,data,scaled=write_scaled_result)
+        io.export_result_dymola(model,data,scaled=write_scaled_result, \
+                                file_name=result_file_name)
     elif isinstance(simulator._problem, JMIODE):
         model = simulator._problem._model
     
@@ -111,7 +116,8 @@ def write_data(simulator,write_scaled_result=False):
         data = N.c_[data, y]
         data = N.c_[data, u]
         
-        io.export_result_dymola(model,data,scaled=write_scaled_result)
+        io.export_result_dymola(model,data,scaled=write_scaled_result, \
+                                    file_name=result_file_name)
     elif isinstance(simulator._problem, JMIDAESens):
         
         model = simulator._problem._model
@@ -147,7 +153,8 @@ def write_data(simulator,write_scaled_result=False):
             data = N.c_[data, p_data[i]]
 
         export = io.ResultWriterDymolaSensitivity(model)
-        export.write_header(scaled=write_scaled_result)
+        export.write_header(scaled=write_scaled_result, \
+                            file_name=result_file_name)
         map(export.write_point,(row for row in data))
         export.write_finalize()
         
@@ -166,7 +173,7 @@ def write_data(simulator,write_scaled_result=False):
             data = N.c_[data,b]
 
         export = io.ResultWriterDymola(model)
-        export.write_header()
+        export.write_header(file_name=result_file_name)
         map(export.write_point,(row for row in data))
         export.write_finalize()
         #fmi.export_result_dymola(model, data)
@@ -196,7 +203,7 @@ class FMIODE(Explicit_Problem):
     """
     An Assimulo Explicit Model extended to FMI interface.
     """
-    def __init__(self, model, input=None):
+    def __init__(self, model, input=None, result_file_name=''):
         """
         Initialize the problem.
         """
@@ -215,6 +222,12 @@ class FMIODE(Explicit_Problem):
         if g_nbr > 0:
             self.state_events = self.g
         self.time_events = self.t
+        
+        #Determine the result file name
+        if result_file_name == '':
+            self.result_file_name = model.get_name()+'_result.txt'
+        else:
+            self.result_file_name = result_file_name
         
         #Default values
         self.write_cont = True #Continuous writing
@@ -314,7 +327,7 @@ class FMIODE(Explicit_Problem):
         if self.write_cont:
             if self._write_header:
                 self._write_header = False
-                self.export.write_header()
+                self.export.write_header(file_name=self.result_file_name)
             self.export.write_point()
         else:
             #Retrieves the time-point
@@ -426,7 +439,7 @@ class JMIODE(Explicit_Problem):
     http://www.jmodelica.org/page/10
     """
     
-    def __init__(self, model, input=None):
+    def __init__(self, model, input=None, result_file_name=''):
         """
         Sets the initial values.
         """
@@ -434,6 +447,12 @@ class JMIODE(Explicit_Problem):
         self.input = input
         
         self.y0 = self._model.real_x
+        
+        #Determine the result file name
+        if result_file_name == '':
+            self.result_file_name = model.get_name()+'_result.txt'
+        else:
+            self.result_file_name = result_file_name
         
         if len(self._model.real_w):
             raise JMIModel_Exception(
@@ -539,7 +558,7 @@ class JMIDAE(Implicit_Problem):
     """
     An Assimulo Implicit Model extended to JMI interface.
     """
-    def __init__(self, model, input=None):
+    def __init__(self, model, input=None, result_file_name=''):
         """
         Sets the initial values.
         """
@@ -561,7 +580,13 @@ class JMIDAE(Implicit_Problem):
             self.state_events = self.g_adjust #Activates the event function
         if g0_nbr > 0:
             self.switches_init = [bool(x) for x in self._model.sw_init]
-            
+        
+        #Determine the result file name
+        if result_file_name == '':
+            self.result_file_name = model.get_name()+'_result.txt'
+        else:
+            self.result_file_name = result_file_name
+        
         #Sets default values
         self.max_eIter = 50 #Maximum number of event iterations allowed.
         self.eps = 1e-9 #Epsilon for adjusting the event indicator.
@@ -999,7 +1024,7 @@ class JMIDAESens(Implicit_Problem):
     An Assimulo Implicit Model extended to JMI interface with support for 
     sensitivities.
     """
-    def __init__(self, model, input=None):
+    def __init__(self, model, input=None, result_file_name=''):
         """
         Sets the initial values.
         """
@@ -1016,6 +1041,12 @@ class JMIDAESens(Implicit_Problem):
         
         if self._model.has_cppad_derivatives():
             self.jac = self.j #Activates the jacobian
+        
+        #Determine the result file name
+        if result_file_name == '':
+            self.result_file_name = model.get_name()+'_result.txt'
+        else:
+            self.result_file_name = result_file_name
         
         #Internal values
         self._parameter_names = [
