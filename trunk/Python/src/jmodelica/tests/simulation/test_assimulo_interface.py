@@ -951,7 +951,7 @@ class Test_JMI_DAE_Sens:
             'QuadTankSens.mop')
         cpath_SENS = 'QuadTankSens'
         
-        fname_SENS = compile_jmu(cpath_SENS, fpath_SENS)
+        fname_SENS = compile_jmu(cpath_SENS, fpath_SENS, compiler_options={"enable_variable_scaling":True})
         
     def setUp(self):
         """Load the test model."""
