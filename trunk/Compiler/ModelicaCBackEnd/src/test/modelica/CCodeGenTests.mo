@@ -3560,5 +3560,141 @@ _r3_x_6 = ((_temp_1_x_5*sf(5)))/sf(6);
   parameter R r3 = FR(r2);
 end DependentParametersWithScalingTest1;
 
+model WhenTest1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="WhenTest1.",
+         description="Test of code generation of when clauses.",
+         generate_ode=true,
+         enable_equation_sorting=true,
+         template="$C_ode_derivatives$ 
+                   $C_ode_initialization$",
+         generatedCode=" 
+  _guards(3) = LOG_EXP_OR(LOG_EXP_OR(LOG_EXP_AND(_sw(3), _sw(4)), LOG_EXP_AND(_sw(5), _sw(6))), LOG_EXP_AND(_sw(7), _sw(8)));
+if(COND_EXP_EQ(LOG_EXP_AND(_guards(3),LOG_EXP_NOT(_pre_guards(3))),JMI_TRUE,JMI_TRUE,JMI_FALSE)) {
+  _x_1 = pre_x_1 + 1.1;
+  } else {
+  _x_1 = pre_x_1;
+  }
+  _der_xx_6 =  - ( _x_1 );
+_guards(4) = LOG_EXP_OR(LOG_EXP_OR(LOG_EXP_AND(_sw(3), _sw(4)), LOG_EXP_AND(_sw(5), _sw(6))), LOG_EXP_AND(_sw(7), _sw(8)));
+if(COND_EXP_EQ(LOG_EXP_AND(_guards(4),LOG_EXP_NOT(_pre_guards(4))),JMI_TRUE,JMI_TRUE,JMI_FALSE)) {
+  _y_2 = pre_y_2 + 1.1;
+  } else {
+  _y_2 = pre_y_2;
+  }
+_guards(0) = LOG_EXP_AND(_sw(0), pre_z_5);
+if(COND_EXP_EQ(LOG_EXP_AND(_guards(0),LOG_EXP_NOT(_pre_guards(0))),JMI_TRUE,JMI_TRUE,JMI_FALSE)) {
+  _w_3 = JMI_FALSE;
+  } else {
+  _w_3 = pre_w_3;
+  }
+_guards(2) = _sw(2);
+if(COND_EXP_EQ(LOG_EXP_AND(_guards(2),LOG_EXP_NOT(_pre_guards(2))),JMI_TRUE,JMI_TRUE,JMI_FALSE)) {
+  _z_5 = JMI_FALSE;
+  } else {
+  _z_5 = pre_z_5;
+  }
+_guards(1) = LOG_EXP_AND(_sw(1), _z_5);
+if(COND_EXP_EQ(LOG_EXP_AND(_guards(1),LOG_EXP_NOT(_pre_guards(1))),JMI_TRUE,JMI_TRUE,JMI_FALSE)) {
+  _v_4 = JMI_FALSE;
+  } else {
+  _v_4 = pre_v_4;
+  }
+
+  model_ode_guards(jmi);
+  pre_x_1 = 0.0;
+  _x_1 = pre_x_1;
+  _der_xx_6 =  - ( _x_1 );
+  pre_w_3 = JMI_TRUE;
+  _w_3 = pre_w_3;
+  pre_v_4 = JMI_TRUE;
+  _v_4 = pre_v_4;
+  pre_z_5 = JMI_TRUE;
+  _z_5 = pre_z_5;
+  pre_y_2 = 0.0;
+  _y_2 = pre_y_2;
+  _xx_0 = 2;
+
+")})));
+
+Real xx(start=2);
+discrete Real x; 
+discrete Real y; 
+discrete Boolean w(start=true); 
+discrete Boolean v(start=true); 
+discrete Boolean z(start=true); 
+equation
+der(xx) = -x; 
+when y > 2 and pre(z) then 
+w = false; 
+end when; 
+when y > 2 and z then 
+v = false; 
+end when; 
+when x > 2 then 
+z = false; 
+end when; 
+when (time>1 and time<1.1) or  (time>2 and time<2.1) or  (time>3 and time<3.1) then 
+x = pre(x) + 1.1; 
+y = pre(y) + 1.1; 
+end when; 
+
+end WhenTest1;
+
+model BlockTest1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="WhenTest1.",
+         description="Test of code generation of when clauses.",
+         generate_ode=true,
+         enable_equation_sorting=true,
+         template="$C_dae_blocks_residual_functions$
+                   $C_dae_init_blocks_residual_functions$
+                   $C_ode_derivatives$ 
+                   $C_ode_initialization$
+",
+         generatedCode=" 
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {
+  jmi_real_t** res = &residual;
+  if (init==JMI_BLOCK_INITIALIZE) {
+    x[0] = _y_1;
+    x[1] = _x_0;
+  } else if (init==JMI_BLOCK_EVALUATE) {
+    _y_1 = x[0];
+    _x_0 = x[1];
+    (*res)[0] = _x_0 + ( 3 ) * ( _y_1 ) - (5);
+    (*res)[1] = _x_0 - ( _y_1 ) - (3);
+  }
+  return 0;
+}
+
+static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {
+  jmi_real_t** res = &residual;
+  if (init==JMI_BLOCK_INITIALIZE) {
+    x[0] = _y_1;
+    x[1] = _x_0;
+  } else if (init==JMI_BLOCK_EVALUATE) {
+    _y_1 = x[0];
+    _x_0 = x[1];
+    (*res)[0] = _x_0 + ( 3 ) * ( _y_1 ) - (5);
+    (*res)[1] = _x_0 - ( _y_1 ) - (3);
+  }
+  return 0;
+}
+
+    jmi_kinsol_solve(jmi->dae_block_residuals[0]);
+  _z_2 = _x_0 + _y_1;
+
+  jmi_kinsol_solve(jmi->dae_init_block_residuals[0]);
+  _z_2 = _x_0 + _y_1;
+
+")})));
+  Real x, y, z;
+equation
+  z = x + y;
+  3 = x - y;
+  5 = x + 3*y;  
+end BlockTest1;
 
 end CCodeGenTests;

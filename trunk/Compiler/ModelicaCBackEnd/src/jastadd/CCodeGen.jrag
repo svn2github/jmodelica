@@ -391,6 +391,12 @@ aspect CCodeGen {
 	eq FVariable.name_C()         = isForIndex() ? 
 			                        nameUnderscore() + "_" + C_SUFFIX_INDEX :
 			                        '_' + nameUnderscore() + '_' + variableIndex();
+	eq FPreRealVariable.name_C() =  "pre_" + nameUnderscore() + '_' + variableIndex();
+	eq FPreBooleanVariable.name_C() =  "pre_" + nameUnderscore() + '_' + variableIndex();
+	eq FPreIntegerVariable.name_C() =  "pre_" + nameUnderscore() + '_' + variableIndex();
+	eq FPreStringVariable.name_C() =  "pre_" + nameUnderscore() + '_' + variableIndex();
+	eq FPreEnumVariable.name_C() =  "pre_" + nameUnderscore() + '_' + variableIndex();
+
 	eq FFunctionVariable.name_C() = nameUnderscore() + "_" + C_SUFFIX_VARIABLE;
 	eq FFunctionArray.name_C()    = nameUnderscore() + "_" + C_SUFFIX_ARRAY;
 	

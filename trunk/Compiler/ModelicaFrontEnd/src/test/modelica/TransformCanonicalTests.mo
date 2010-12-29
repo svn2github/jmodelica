@@ -2224,7 +2224,7 @@ equation
 
 end WhenEqu5;
 */
-/*
+
 model WhenEqu5 
 
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
@@ -2232,7 +2232,34 @@ model WhenEqu5
          name="WhenEqu5",
          description="Basic test of when equations",
          flatModel="
-
+fclass TransformCanonicalTests.WhenEqu5
+Real x(start = 1);
+discrete Real a(start = 1.0);
+discrete Boolean z(start = false);
+discrete Boolean y(start = false);
+discrete Boolean h1;
+discrete Boolean h2;
+initial equation 
+x = 1;
+pre(a) = 1.0;
+pre(z) = false;
+pre(y) = false;
+pre(h1) = false;
+pre(h2) = false;
+equation
+der(x) = ( a ) * ( x );
+h1 = x >= 2;
+h2 = der(x) >= 4;
+when h1 then
+y = true;
+end when;
+when y then
+a = 2;
+end when;
+when h2 then
+z = true;
+end when;
+end TransformCanonicalTests.WhenEqu5;
 ")})));
 
 Real x(start = 1); 
@@ -2254,6 +2281,27 @@ when h2 then
 z = true; 
 end when; 
 end WhenEqu5; 
+
+/*
+model WhenEqu6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="WhenEqu6",
+         description="Basic test of when equations",
+         flatModel="
+
+")})));
+ discrete Real x(start=0);
+ discrete Real nextTime(start=h);
+ parameter Real h = 0.2;
+ Real t;
+equation
+ der(t) = 0;
+ when time >nextTime then
+   nextTime = pre(nextTime) + h;
+   x = pre(x) + 1;
+ end when;
+end WhenEqu6;
 */
 
 /*
