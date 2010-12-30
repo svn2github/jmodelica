@@ -25,6 +25,8 @@ import numpy
 import logging
 from jmodelica.jmi import compile_jmu
 from jmodelica.jmi import JMUModel
+from jmodelica.fmi import compile_fmu
+from jmodelica.fmi import FMUModel
 import jmodelica.initialization.ipopt as ipopt_init
 from jmodelica.optimization import ipopt
 from jmodelica.io import ResultDymolaTextual
@@ -49,18 +51,25 @@ class _BaseSimOptTest:
     """
 
     @classmethod
-    def setup_class_base(cls, mo_file, class_name, options = {}):
+    def setup_class_base(cls, mo_file, class_name, options = {}, format='jmu'):
         """
         Set up a new test model. Compiles the model. 
         Call this with proper args from setUpClass(). 
           mo_file     - the relative path from the files dir to the .mo file to compile
           class_name  - the qualified name of the class to simulate
           options     - a dict of options to set in the compiler, defaults to no options
+          format      - either 'jmu' or 'fmu' depending on which format should be tested
         """
         global _model_name
         path = os.path.join(get_files_path(), 'Modelica', mo_file)
-        
-        _model_name = compile_jmu(class_name, path, compiler_options=options)
+
+        if format=='jmu':
+            _model_name = compile_jmu(class_name, path, compiler_options=options)
+        elif format=='fmu':
+            _model_name = compile_fmu(class_name, path, compiler_options=options)
+        else:
+            raise Exception("Format must be either 'jmu' or 'fmu'.")
+
 
     def setup_base(self, rel_tol, abs_tol):
         """ 
@@ -74,8 +83,12 @@ class _BaseSimOptTest:
         self.rel_tol = rel_tol
         self.abs_tol = abs_tol
         self.model_name = _model_name
-        self.model = JMUModel(self.model_name)
-
+        parts = _model_name.split('.')
+        self.format = parts[len(parts)-1]
+        if self.format=='jmu':
+            self.model = JMUModel(self.model_name)
+        else:
+            self.model = FMUModel(self.model_name)
 
     def run(self):
         """
@@ -230,23 +243,22 @@ class _BaseSimOptTest:
         assert (rel <= rel_tol or abs <= abs_tol), msg
 
 
-
 class SimulationTest(_BaseSimOptTest):
     """
     Base class for simulation tests.
     """
 
     @classmethod
-    def setup_class_base(cls, mo_file, class_name, options = {}):
+    def setup_class_base(cls, mo_file, class_name, options = {}, format = 'jmu'):
         """
         Set up a new test model. Compiles the model. 
         Call this with proper args from setUpClass(). 
           mo_file     - the relative path from the files dir to the .mo file to compile
           class_name  - the qualified name of the class to simulate
           options     - a dict of options to set in the compiler, defaults to no options
+          format      - either 'jmu' or 'fmu' depending on which format should be tested
         """
-        _BaseSimOptTest.setup_class_base(mo_file, class_name, options)
-
+        _BaseSimOptTest.setup_class_base(mo_file, class_name, options, format)
 
     def setup_base(self, rel_tol = 1.0e-4, abs_tol = 1.0e-6, 
         start_time=0.0, final_time=10.0, time_step=0.01):
@@ -258,26 +270,38 @@ class SimulationTest(_BaseSimOptTest):
         Any other named args are passed to sundials.
         """
         _BaseSimOptTest.setup_base(self, rel_tol, abs_tol)
-        self.mod_assimulo = JMIDAE(self.model)
+
+        self.start_time = start_time
         self.final_time = final_time
+        self.time_step = time_step
         self.ncp = int((final_time-start_time)/time_step)
 
-        self.sundials = IDA(self.mod_assimulo, t0=start_time)
-        self.sundials.rtol = self.rel_tol
-        self.sundials.atol = self.abs_tol
-        self.sundials.initiate()
+        if self.format=='jmu':
+            self.mod_assimulo = JMIDAE(self.model)
+            
+            self.sundials = IDA(self.mod_assimulo, t0=start_time)
+            self.sundials.rtol = self.rel_tol
+            self.sundials.atol = self.abs_tol
+            self.sundials.initiate()
+            
+            print self.ncp
+            print self.sundials.rtol
+            print self.sundials.atol
+        elif self.format=='fmu':
+            pass
         
-        print self.ncp
-        print self.sundials.rtol
-        print self.sundials.atol
-
     def _run_and_write_data(self):
         """
         Run optimization and write result to file.
         """
-        self.sundials.simulate(self.final_time,self.ncp)
-        write_data(self.sundials)
-
+        if self.format=='jmu':
+            self.sundials.simulate(self.final_time,self.ncp)
+            write_data(self.sundials)
+        elif self.format=='fmu':
+            self.model.simulate(start_time=self.start_time,
+                                final_time=self.final_time,
+                                options={'ncp':self.ncp,
+                                         'CVode_options':{'atol':self.abs_tol,'rtol':self.rel_tol}})
 
 class OptimizationTest(_BaseSimOptTest):
     """
@@ -285,16 +309,16 @@ class OptimizationTest(_BaseSimOptTest):
     """
 
     @classmethod
-    def setup_class_base(cls, mo_file, class_name, options = {}):
+    def setup_class_base(cls, mo_file, class_name, options = {}, format='jmu'):
         """
         Set up a new test model. Compiles the model. 
         Call this with proper args from setUpClass(). 
           mo_file     - the relative path from the files dir to the .mo file to compile
           class_name  - the qualified name of the class to simulate
           options     - a dict of options to set in the compiler, defaults to no options
+          format      - either 'jmu' or 'fmu' depending on which format should be tested
         """
-        _BaseSimOptTest.setup_class_base(mo_file, class_name, options)
-
+        _BaseSimOptTest.setup_class_base(mo_file, class_name, options,format)
 
     def setup_base(self, nlp_args = (), rel_tol = 1.0e-4, abs_tol = 1.0e-6, 
         options = {}, result_mesh='default', result_arguments = {}):
