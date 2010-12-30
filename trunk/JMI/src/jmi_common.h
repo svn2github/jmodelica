@@ -31,6 +31,7 @@
 #include <string.h>
 #include <fmiModelTypes.h>
 #include <fmiModelFunctions.h>
+#include <math.h>
 
 /**
  * \defgroup Jmi_internal Internal functions of the JMI Model \
@@ -229,6 +230,12 @@ typedef jmi_ad_tape_t *jmi_ad_tape_p;
 #define LOG_EXP_AND(op1,op2) ((op1)*(op2))           /**< \brief Macro for logical expression and <br> */
 #define LOG_EXP_NOT(op)      (JMI_TRUE-(op))         /**< \brief Macro for logical expression not <br> */
 
+#define ALMOST_ZERO(op) (jmi_abs(op)<=1e-6? JMI_TRUE: JMI_FALSE)
+#define ALMOST_LT_ZERO(op) (op<=1e-6? JMI_TRUE: JMI_FALSE)
+#define ALMOST_GT_ZERO(op) (op>=-1e-6? JMI_TRUE: JMI_FALSE)
+#define SURELY_LT_ZERO(op) (op<=-1e-6? JMI_TRUE: JMI_FALSE)
+#define SURELY_GT_ZERO(op) (op>=1e-6? JMI_TRUE: JMI_FALSE)
+
 /* Record creation macro */
 #define JMI_RECORD_STATIC(type, name) \
 	type name##_rec;\
@@ -257,6 +264,13 @@ jmi_ad_var_t jmi_min(jmi_ad_var_t x, jmi_ad_var_t y);
  */
 jmi_ad_var_t jmi_max(jmi_ad_var_t x, jmi_ad_var_t y);
 
+/**
+ * The sample operator. Returns true if time = offset + i*h, i>=0 during
+ * handling of an event. During continuous integration, false is returned.
+ *
+ */
+jmi_ad_var_t jmi_sample(jmi_t* jmi, jmi_real_t offset, jmi_real_t h);
+
 /* @} */
 
 /**
@@ -267,7 +281,22 @@ jmi_ad_var_t jmi_max(jmi_ad_var_t x, jmi_ad_var_t y);
 
 /* @{ */
 
+/**
+ * \brief A generic function signature that only takes a jmi_t struct as input.
+ *
+ * @param jmi A jmi_t struct.
+ * @return Error code.
+ */
 typedef int (*jmi_generic_func_t)(jmi_t* jmi);
+
+/**
+ * \brief A function signature for computation of the next time event.
+ *
+ * @param jmi A jmi_t struct.
+ * @param nextTime (Output) The time instant of the next time event.
+ * @return Error code.
+ */
+typedef int (*jmi_next_time_event_func_t)(jmi_t* jmi, jmi_real_t* nextTime);
 
 /**
  * \brief Function signature for evaluation of a residual function in
@@ -591,7 +620,8 @@ int jmi_dae_init(jmi_t* jmi, jmi_residual_func_t F, int n_eq_F,
         jmi_generic_func_t ode_outputs,
         jmi_generic_func_t ode_initialize,
         jmi_generic_func_t ode_guards,
-        jmi_generic_func_t ode_guards_init);
+        jmi_generic_func_t ode_guards_init,
+        jmi_next_time_event_func_t ode_next_time_event);
 
 int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, int n, int index);
 
@@ -910,12 +940,13 @@ struct jmi_t{
 	jmi_ad_var_vec_p z;                  /**< \brief  This vector contains active AD objects in case of AD. */
 	jmi_real_t** z_val;                  /**< \brief  This vector contains the actual values. */
 
-/*	jmi_real_t* pre_z;  */                 /**< \brief This vector contains the pre values. */
-
 	jmi_real_t *variable_scaling_factors;             /**< \brief Scaling factors. For convenience the vector has the same size as z but only scaling of reals are used. */
 	int scaling_method;                               /**< \brief Scaling method: JMI_SCALING_NONE, JMI_SCALING_VARIABLES */
 	jmi_block_residual_t** dae_block_residuals;       /**< \brief A vector of function pointers to DAE equation blocks */
 	jmi_block_residual_t** dae_init_block_residuals;  /**< \brief A vector of function pointers to DAE initialization equation blocks */
+
+	jmi_ad_var_t atEvent;                                      /** \brief A boolean variable indicating if the model equations are evaluated at an event.*/
+
 };
 
 /**
@@ -950,13 +981,14 @@ struct jmi_sim_t{
  * function.
  */
 struct jmi_dae_t{
-	jmi_func_t* F;                       /**< \brief  A jmi_func_t struct representing the DAE residual \f$F\f$. */
-	jmi_func_t* R;                       /**< \brief  A jmi_func_t struct representing the DAE event indicator function \f$R\f$. */
-    jmi_generic_func_t ode_derivatives;  /**< \brief A function pointer to a function for evaluating the ODE derivatives. */
-    jmi_generic_func_t ode_outputs;      /**< \brief A function pointer to a function for evaluating the ODE outputs. */
-    jmi_generic_func_t ode_initialize;   /**< \brief A function pointer to a function for initializing the ODE. */
-    jmi_generic_func_t ode_guards;       /**< A function pointer for evaluating the guard expressions. */
-    jmi_generic_func_t ode_guards_init;  /**< A function pointer for evaluating the guard expressions in the initial equations. */
+	jmi_func_t* F;                           /**< \brief  A jmi_func_t struct representing the DAE residual \f$F\f$. */
+	jmi_func_t* R;                           /**< \brief  A jmi_func_t struct representing the DAE event indicator function \f$R\f$. */
+    jmi_generic_func_t ode_derivatives;      /**< \brief A function pointer to a function for evaluating the ODE derivatives. */
+    jmi_generic_func_t ode_outputs;          /**< \brief A function pointer to a function for evaluating the ODE outputs. */
+    jmi_generic_func_t ode_initialize;       /**< \brief A function pointer to a function for initializing the ODE. */
+    jmi_generic_func_t ode_guards;           /**< A function pointer for evaluating the guard expressions. */
+    jmi_generic_func_t ode_guards_init;      /**< A function pointer for evaluating the guard expressions in the initial equations. */
+    jmi_next_time_event_func_t ode_next_time_event;  /**< A function pointer for computing the next time event instant. */
 };
 
 /**

@@ -1014,7 +1014,7 @@ FPreExp : FUnaryBuiltIn;
 /**
  * Sample built-in function.
  */
-FSampleExp : FBuiltInFunctionCall ::= Sample:FExp Interval:FExp;
+FSampleExp : FBuiltInFunctionCall ::= Offset:FExp Interval:FExp;
 
 /**
  * Initial built-in function.

@@ -148,6 +148,106 @@ class TestEnumerations(SimulationTest):
     def test_enumerations_2(self):
         self.model.set('y',2)
         self.check_init(9)
+
+class TestHybrid1(SimulationTest):
     
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            'HybridTests.mo', 'HybridTests.WhenEqu2',
+            options={'compliance_as_warning':True},format='fmu')
+
+    @testattr(assimulo = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=4, time_step = 0.01)
+        self.run()
+        self.load_expected_data(
+            'HybridTests_WhenEqu2_result.txt')
+
+    @testattr(assimulo = True)
+    def test_trajectories(self):
+        self.assert_all_trajectories(['x','y','z','w','v'], same_span=True, rel_tol=1e-3, abs_tol=1e-3)
+
+
+class TestHybrid2(SimulationTest):
+    
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            'HybridTests.mo', 'HybridTests.WhenEqu3',
+            options={'compliance_as_warning':True},format='fmu')
+
+    @testattr(assimulo = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=4, time_step = 0.01)
+        self.run()
+        self.load_expected_data(
+            'HybridTests_WhenEqu3_result.txt')
+
+    @testattr(assimulo = True)
+    def test_trajectories(self):
+        self.assert_all_trajectories(['b1','x','y','z','w','v'], same_span=True, rel_tol=1e-3, abs_tol=1e-3)
+
+
+class TestHybrid3(SimulationTest):
+  
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            'HybridTests.mo', 'HybridTests.WhenEqu5',
+            options={'compliance_as_warning':True},format='fmu')
+
+    @testattr(assimulo = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=2, time_step = 0.01,rel_tol=1e-6, abs_tol=1e-6)
+        self.run()
+        self.load_expected_data(
+            'HybridTests_WhenEqu5_result.txt')
+
+    @testattr(assimulo = True)
+    def test_trajectories(self):
+        self.assert_all_trajectories(['x','y','z','a','h1','h2'], same_span=True, rel_tol=1e-3, abs_tol=1e-3)
+
+
+class TestHybrid4(SimulationTest):
+    
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            'HybridTests.mo', 'HybridTests.WhenEqu8',
+            options={'compliance_as_warning':True},format='fmu')
+
+    @testattr(assimulo = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=10, time_step = 0.01)
+        self.run()
+        self.load_expected_data(
+            'HybridTests_WhenEqu8_result.txt')
+
+    @testattr(assimulo = True)
+    def test_trajectories(self):
+        self.assert_all_trajectories(['x','y'], same_span=True, rel_tol=1e-3, abs_tol=1e-3)
+
+
+class TestHybrid5(SimulationTest):
+    
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            'HybridTests.mo', 'HybridTests.WhenEqu9',
+            options={'compliance_as_warning':True},format='fmu')
+
+    @testattr(assimulo = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=10, time_step = 0.01)
+        self.run()
+        self.load_expected_data(
+            'HybridTests_WhenEqu9_result.txt')
+
+    @testattr(assimulo = True)
+    def test_trajectories(self):
+        self.assert_all_trajectories(['x','u','ref','I'], same_span=True, rel_tol=1e-3, abs_tol=1e-3)
+
+
     
 

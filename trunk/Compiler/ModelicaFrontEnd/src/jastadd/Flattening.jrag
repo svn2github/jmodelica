@@ -1190,7 +1190,7 @@ aspect FlatExpressions {
 	public FScalar FScalar.flatten(FQName prefix) { return null; }
 	
 	public FCross      FCross.flatten(FQName prefix)      { return new FCross(getX().flatten(prefix), getY().flatten(prefix)); }
-	public FSampleExp  FSampleExp.flatten(FQName prefix)  { return new FSampleExp(getSample().flatten(prefix), getInterval().flatten(prefix)); }
+	public FSampleExp  FSampleExp.flatten(FQName prefix)  { return new FSampleExp(getOffset().flatten(prefix), getInterval().flatten(prefix)); }
 	public FInitialExp FInitialExp.flatten(FQName prefix) { return new FInitialExp(); }
 	
 	public FMinMaxExp FMinMaxExp.flatten(FQName prefix) { 

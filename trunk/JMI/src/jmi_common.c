@@ -48,7 +48,6 @@ jmi_ad_var_t jmi_max(jmi_ad_var_t x, jmi_ad_var_t y) {
 	return COND_EXP_GT(x, y, x ,y);
 }
 
-
 int jmi_func_new(jmi_func_t** jmi_func, jmi_residual_func_t F, int n_eq_F, jmi_jacobian_func_t dF,
 		int dF_n_nz, int* dF_row, int* dF_col) {
 
@@ -324,7 +323,8 @@ int jmi_dae_init(jmi_t* jmi,
         jmi_generic_func_t ode_outputs,
         jmi_generic_func_t ode_initialize,
         jmi_generic_func_t ode_guards,
-        jmi_generic_func_t ode_guards_init) {
+        jmi_generic_func_t ode_guards_init,
+        jmi_next_time_event_func_t ode_next_time_event) {
 	jmi_func_t* jf_F;
 	jmi_func_t* jf_R;
 	
@@ -343,6 +343,7 @@ int jmi_dae_init(jmi_t* jmi,
 	jmi->dae->ode_initialize = ode_initialize;
     jmi->dae->ode_guards = ode_guards;
     jmi->dae->ode_guards_init = ode_guards_init;
+    jmi->dae->ode_next_time_event = ode_next_time_event;
 	return 0;
 }
 

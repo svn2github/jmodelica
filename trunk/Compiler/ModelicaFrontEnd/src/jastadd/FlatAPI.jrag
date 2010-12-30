@@ -572,6 +572,21 @@ aspect FlatAPI {
 			 res += l.numScalarVars();
 		 return res;
 	}
+
+	syn int FClass.numSamplers() = 
+		samplers().size();
+
+	coll ArrayList<FSampleExp> FClass.samplers() 
+	  [new ArrayList<FSampleExp>()] with add root FlatRoot;
+	
+	FSampleExp contributes
+ 		this when originalFSampleExp==null
+	to FClass.samplers() for myFClass();	
+		
+	public int FSampleExp.samplersIndex() {
+		return myFClass().samplers().
+			indexOf(this.originalFSampleExp==null? this: this.originalFSampleExp);
+	}
 	
 	syn int FClass.numGuardExpInEquations() = 
 		guardExpInEquations().size();

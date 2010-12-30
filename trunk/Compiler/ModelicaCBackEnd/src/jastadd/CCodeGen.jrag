@@ -102,6 +102,14 @@ aspect CCodeGen {
 		}
 	}
 	
+	public void FSampleExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
+		str.print("jmi_sample(jmi,");
+		p.print(getOffset(),str,"");
+		str.print(",");
+		p.print(getInterval(),str,"");
+		str.print(")");
+	}
+	
 	public void FEnumIntegerExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
 		p.print(getFExp(), str, indent);
 	}

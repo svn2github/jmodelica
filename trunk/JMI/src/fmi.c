@@ -175,6 +175,7 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
     fmiInteger nF0, nF1, nFp, nF;   /* Number of F-equations */
     fmiInteger nR0, nR;             /* Number of R-equations */
     fmiInteger initComplete = 0;    /* If the initialization are complete */
+    jmi_real_t nextTimeEvent;       /* Next time event instant */
     fmiReal safety_factor_events = 0.0001;
     fmiReal safety_factor_newton = 0.01;
     
@@ -182,8 +183,8 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
     jmi_real_t* switchesR0;  /* Initial Switches */
 
     /* Update eventInfo */
-    eventInfo->upcomingTimeEvent = fmiFalse;            /* No support for time events */
-    eventInfo->nextEventTime = 0.0;                     /* Not used */
+    eventInfo->upcomingTimeEvent = fmiFalse;            /* Next time event is computed after initialization */
+    eventInfo->nextEventTime = 0.0;                     /* Next time event is computed after initialization */
     eventInfo->stateValueReferencesChanged = fmiFalse;  /* No support for dynamic state selection */
     eventInfo->terminateSimulation = fmiFalse;          /* Don't terminate the simulation */
     eventInfo->iterationConverged = fmiTrue;            /* The iteration has converged */
@@ -205,6 +206,9 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
     ((fmi_t *)c) -> fmi_epsilon=safety_factor_events*relativeTolerance; /* Used in the event detection */
     ((fmi_t *)c) -> fmi_newton_tolerance=safety_factor_newton*relativeTolerance; /* Used in the Newton iteration */
     
+    /* We are at the initial event TODO: is this really necessary? */
+    ((fmi_t *)c)->jmi->atEvent = JMI_TRUE;
+
     /* Write values to the pre vector*/
     jmi_copy_pre_values(((fmi_t*)c)->jmi);
 
@@ -292,7 +296,44 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
         }
     }
 
+    /* Compute the next time event */
+    retval = jmi_ode_next_time_event(((fmi_t *)c)->jmi,&nextTimeEvent);
+
+    if(retval != 0) { /* Error check */
+    	(((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Computation of next time event failed.");
+        return fmiError;
+    }
+
+    if (!(nextTimeEvent==JMI_INF)) {
+        /* If there is an upcoming time event, then set the event information
+           accordingly. */
+    	eventInfo->upcomingTimeEvent = fmiTrue;
+        eventInfo->nextEventTime = nextTimeEvent;
+        /*printf("fmiInitialize: nextTimeEvent: %f\n",nextTimeEvent);*/
+    } else {
+    	eventInfo->upcomingTimeEvent = fmiFalse;
+    }
+
+    /* Reset atEvent flag */
+    ((fmi_t *)c)->jmi->atEvent = JMI_FALSE;
+
+    /* Evaluate the guards with the event flat set to false in order to */
+    /* reset guards depending on samplers before copying pre values.
+    /* If this is not done, then the corresponding pre values for these guards
+    /* will be true, and no event will be triggered at the next sample. */
+    retval = jmi_ode_guards(((fmi_t *)c)->jmi);
+
+    if(retval != 0) { /* Error check */
+    	(((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Computation of guard expressions failed.");
+        return fmiError;
+    }
+
     jmi_copy_pre_values(((fmi_t*)c)->jmi);
+
+    /* Initialization is now complete, but we also need to handle events
+     * at the start of the integration.
+     */
+    fmi_event_update(c, fmiFalse, eventInfo);
 
     /*
     //Set the final switches (if any)
@@ -417,6 +458,7 @@ fmiStatus fmi_event_update(fmiComponent c, fmiBoolean intermediateResults, fmiEv
     jmi_real_t* a_mode;
     jmi_real_t* pre_iter_guards;
     jmi_real_t* guards;
+    jmi_real_t nextTimeEvent;       /* Next time event instant */
     jmi_real_t *switches; /* Switches */
     jmi_t* jmi;
     jmi = ((fmi_t*)c)->jmi;
@@ -440,6 +482,9 @@ fmiStatus fmi_event_update(fmiComponent c, fmiBoolean intermediateResults, fmiEv
     eventInfo->stateValueReferencesChanged = fmiFalse;  /* No support for dynamic state selection */
     eventInfo->terminateSimulation = fmiFalse;          /* Don't terminate the simulation */
     eventInfo->iterationConverged = fmiFalse;           /* The iteration have not converged */
+
+    /* We are at an event */
+    ((fmi_t *)c)->jmi->atEvent = JMI_TRUE;
 
     if (intermediateResults){ /* Return after each event iteration loop */
         fmiInteger j, i;
@@ -572,6 +617,38 @@ fmiStatus fmi_event_update(fmiComponent c, fmiBoolean intermediateResults, fmiEv
     ((fmi_t*)c) -> fmi_functions.freeMemory(a_mode); /* Free memory */
     ((fmi_t*)c) -> fmi_functions.freeMemory(b_mode); /* Free memory */
     ((fmi_t*)c) -> fmi_functions.freeMemory(pre_iter_guards); /* Free memory */
+
+    /* Compute the next time event */
+    retval = jmi_ode_next_time_event(((fmi_t *)c)->jmi,&nextTimeEvent);
+
+    if(retval != 0) { /* Error check */
+    	(((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Computation of next time event failed.");
+        return fmiError;
+    }
+
+    if (!(nextTimeEvent==JMI_INF)) {
+        /* If there is an upcoming time event, then set the event information
+           accordingly. */
+    	eventInfo->upcomingTimeEvent = fmiTrue;
+        eventInfo->nextEventTime = nextTimeEvent;
+        /*printf("fmi_event_upate: nextTimeEvent: %f\n",nextTimeEvent);*/
+    } else {
+    	eventInfo->upcomingTimeEvent = fmiFalse;
+    }
+
+    /* Reset atEvent flag */
+    ((fmi_t *)c)->jmi->atEvent = JMI_FALSE;
+
+    /* Evaluate the guards with the event flat set to false in order to */
+    /* reset guards depending on samplers before copying pre values.
+    /* If this is not done, then the corresponding pre values for these guards
+    /* will be true, and no event will be triggered at the next sample. */
+    retval = jmi_ode_guards(((fmi_t *)c)->jmi);
+
+    if(retval != 0) { /* Error check */
+    	(((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Computation of guard expressions failed.");
+        return fmiError;
+    }
 
     if ((eventInfo->iterationConverged)==fmiTrue) {
         jmi_copy_pre_values(((fmi_t*)c)->jmi);

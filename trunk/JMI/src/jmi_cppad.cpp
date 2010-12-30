@@ -203,6 +203,8 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 
 	jmi_->scaling_method = scaling_method;
 
+	jmi_->atEvent = JMI_FALSE;
+
 	return 0;
 }
 
@@ -927,6 +929,21 @@ int jmi_ode_guards(jmi_t* jmi) {
 }
 
 int jmi_ode_guards_init(jmi_t* jmi) {
+	return 0;
+}
+
+int jmi_ode_next_time_event(jmi_t* jmi, jmi_real_t* nextTime) {
+	return 0;
+}
+
+jmi_ad_var_t jmi_sample(jmi_t* jmi, jmi_real_t offset, jmi_real_t h) {
+
+	/* TODO: JMI_FLOOR is yet to be defined. Once done, this function can be
+	         moved to jmi_common.c
+	printf("jmi_sample: %f\n",COND_EXP_EQ(LOG_EXP_OR(LOG_EXP_NOT(jmi->atEvent), SURELY_LT_ZERO(t-offset)),
+			          JMI_TRUE, JMI_FALSE,
+			          COND_EXP_EQ(ALMOST_ZERO(JMI_FLOOR((t-offset)/h)),JMI_TRUE,JMI_TRUE,JMI_FALSE)));
+	*/
 	return 0;
 }
 

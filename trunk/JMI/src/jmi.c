@@ -197,6 +197,8 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 	jmi_->dae_init_block_residuals = (jmi_block_residual_t**)calloc(n_dae_init_blocks,
 			sizeof(jmi_block_residual_t*));
 
+	jmi_->atEvent = JMI_FALSE;
+
 	return 0;
 
 }
@@ -471,6 +473,27 @@ int jmi_ode_guards_init(jmi_t* jmi) {
 		return 0;
 	}
 	return return_status;
+}
+
+int jmi_ode_next_time_event(jmi_t* jmi, jmi_real_t* nextTime) {
+
+	int i, return_status;
+	for (i=0;i<jmi->n_z;i++) {
+		(*(jmi->z))[i] = (*(jmi->z_val))[i];
+	}
+
+	return_status = jmi->dae->ode_next_time_event(jmi, nextTime);
+
+	return return_status;
+}
+
+jmi_ad_var_t jmi_sample(jmi_t* jmi, jmi_real_t offset, jmi_real_t h) {
+	jmi_real_t t = jmi_get_t(jmi)[0];
+	if (!jmi->atEvent || SURELY_LT_ZERO(t-offset)) {
+		return JMI_FALSE;
+	}
+
+	return ALMOST_ZERO(remainder((t-offset),h));
 }
 
 int jmi_dae_F(jmi_t* jmi, jmi_real_t* res) {

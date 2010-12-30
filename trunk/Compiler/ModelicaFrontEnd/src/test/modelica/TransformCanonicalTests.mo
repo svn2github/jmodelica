@@ -2282,47 +2282,122 @@ z = true;
 end when; 
 end WhenEqu5; 
 
-/*
-model WhenEqu6
+model WhenEqu7 
+
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="WhenEqu6",
+         name="WhenEqu7",
          description="Basic test of when equations",
          flatModel="
-
-")})));
- discrete Real x(start=0);
- discrete Real nextTime(start=h);
- parameter Real h = 0.2;
- Real t;
+fclass TransformCanonicalTests.WhenEqu7
+ discrete Real x(start = 0);
+ Real dummy;
+initial equation 
+ dummy = 0.0;
+ pre(x) = 0;
 equation
- der(t) = 0;
- when time >nextTime then
-   nextTime = pre(nextTime) + h;
+ der(dummy) = 0;
+ when dummy >  - ( 1 ) then
+  x = pre(x) + 1;
+ end when;
+end TransformCanonicalTests.WhenEqu7;
+")})));
+
+ discrete Real x(start=0);
+ Real dummy;
+equation
+ der(dummy) = 0;
+ when dummy>-1 then
    x = pre(x) + 1;
  end when;
-end WhenEqu6;
-*/
 
-/*
-model WhenEqu4
+end WhenEqu7; 
+
+model WhenEqu8 
+
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
-         name="WhenEqu4",
+         name="WhenEqu8",
          description="Basic test of when equations",
          flatModel="
-
-")})));
- discrete Real x(start=3);
+fclass TransformCanonicalTests.WhenEqu8
+ discrete Real x;
+ discrete Real y;
+ Real dummy;
+initial equation 
+ dummy = 0.0;
+ pre(x) = 0.0;
+ pre(y) = 0.0;
 equation
- when time >3 then
-   x = 5;
+ der(dummy) = 0;
+ when sample(0, ( 1 ) / ( 3 )) then
+  x = pre(x) + 1;
+ end when;
+ when sample(0, ( 2 ) / ( 3 )) then
+  y = pre(y) + 1;
+ end when;
+end TransformCanonicalTests.WhenEqu8;
+")})));
+
+ discrete Real x,y;
+ Real dummy;
+equation
+ der(dummy) = 0;
+ when sample(0,1/3) then
+   x = pre(x) + 1;
+ end when;
+ when sample(0,2/3) then
+   y = pre(y) + 1;
  end when;
 
+end WhenEqu8; 
 
-end WhenEqu4;
-*/
+model WhenEqu9 
 
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="WhenEqu9",
+         description="Basic test of when equations",
+         flatModel="
+fclass TransformCanonicalTests.WhenEqu9
+ Real x;
+ Real ref;
+ discrete Real I;
+ discrete Real u;
+ parameter Real K = 1 /* 1 */;
+ parameter Real Ti = 0.1 /* 0.1 */;
+ parameter Real h = 0.05 /* 0.05 */;
+initial equation 
+ x = 0.0;
+ pre(I) = 0.0;
+ pre(u) = 0.0;
+equation
+ der(x) =  - ( x ) + u;
+ when sample(0, h) then
+  I = pre(I) + ( h ) * ( ref - ( x ) );
+ end when;
+ when sample(0, h) then
+  u = ( K ) * ( ref - ( x ) ) + ( ( 1 ) / ( Ti ) ) * ( I );
+ end when;
+ ref = (if time < 1 then 0 else 1);
+end TransformCanonicalTests.WhenEqu9;
+")})));
+ Real x,ref;
+ discrete Real I;
+ discrete Real u;
+
+ parameter Real K = 1;
+ parameter Real Ti = 0.1;
+ parameter Real h = 0.05;
+
+equation
+ der(x) = -x + u;
+ when sample(0,h) then
+   I = pre(I) + h*(ref-x);
+   u = K*(ref-x) + 1/Ti*I;
+ end when;
+ ref = if time <1 then 0 else 1;
+end WhenEqu9; 
 
 /* // TODO: add these test when more support is implemented in the middle end
 model IfEqu1

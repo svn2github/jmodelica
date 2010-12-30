@@ -304,7 +304,7 @@ extern "C" {
  */
 /* @{ */
 
-#define JMI_INF 1e20;               /**< \brief A Very Large Number denoting infinity.*/
+#define JMI_INF 1e20                /**< \brief A Very Large Number denoting infinity.*/
 
 #define JMI_DER_SYMBOLIC 1          /**< \brief Use symbolic evaluation of derivatives (if available). */
 #define JMI_DER_CPPAD 2             /**< \brief Use automatic differentiation (CppAD) to evaluate derivatives. */
@@ -1007,6 +1007,16 @@ int jmi_ode_guards(jmi_t* jmi);
  * @return Error code.
  */
 int jmi_ode_guards_init(jmi_t* jmi);
+
+/**
+ * \brief Computes the next time event.
+ *
+ * @param jmi A jmi_t struct.
+ * @param nextTime (Output) The time instant of the next time event.
+ * @return Error code.
+ */
+int jmi_ode_next_time_event(jmi_t* jmi, jmi_real_t* nextTime);
+
 
 /* @} */
 

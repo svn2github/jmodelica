@@ -3563,7 +3563,7 @@ end DependentParametersWithScalingTest1;
 model WhenTest1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.CCodeGenTestCase(
-         name="WhenTest1.",
+         name="WhenTest1",
          description="Test of code generation of when clauses.",
          generate_ode=true,
          enable_equation_sorting=true,
@@ -3642,6 +3642,138 @@ end when;
 
 end WhenTest1;
 
+model WhenTest2 
+
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="WhenTest2",
+         description="Test that samplers are not duplicated in the function tha computes the next time event.",
+         generate_ode=true,
+         enable_equation_sorting=true,
+         template="$C_ode_time_events$" ,
+         generatedCode=" 
+  jmi_real_t nextTimeEvent;
+  jmi_real_t nextTimeEventTmp;
+  jmi_real_t nSamp;
+  jmi_real_t t;
+  nextTimeEvent = JMI_INF;
+  nextTimeEventTmp = 0;
+  nSamp = 0;
+  t = jmi_get_t(jmi)[0];
+  nextTimeEventTmp = JMI_INF;
+  if (SURELY_LT_ZERO(t - 0)) {
+    nextTimeEventTmp = 0;
+  }
+  if (ALMOST_GT_ZERO(remainder(t - 0,_h_6))) {
+    nSamp = round((t-0)/(_h_6));
+    nextTimeEventTmp = (nSamp+1)*_h_6 + 0;
+  }
+  if (nextTimeEventTmp<nextTimeEvent) {
+    nextTimeEvent = nextTimeEventTmp;
+  }
+  *nextTime = nextTimeEvent;
+
+")})));
+
+ Real x,ref;
+ discrete Real I;
+ discrete Real u;
+
+ parameter Real K = 1;
+ parameter Real Ti = 1;
+ parameter Real h = 0.1;
+
+equation
+ der(x) = -x + u;
+ when sample(0,h) then
+   I = pre(I) + h*(ref-x);
+   u = K*(ref-x) + 1/Ti*I;
+ end when;
+ ref = if time <1 then 0 else 1;
+end WhenTest2; 
+
+model WhenTest3 
+
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="WhenTest3",
+         description="Test code generation of samplers",
+         generate_ode=true,
+         enable_equation_sorting=true,
+         template="$C_ode_time_events$ 
+                   $C_ode_derivatives$ 
+                   $C_ode_initialize$", 
+         generatedCode=" 
+  jmi_real_t nextTimeEvent;
+  jmi_real_t nextTimeEventTmp;
+  jmi_real_t nSamp;
+  jmi_real_t t;
+  nextTimeEvent = JMI_INF;
+  nextTimeEventTmp = 0;
+  nSamp = 0;
+  t = jmi_get_t(jmi)[0];
+  nextTimeEventTmp = JMI_INF;
+  if (SURELY_LT_ZERO(t - 0)) {
+    nextTimeEventTmp = 0;
+  }
+  if (ALMOST_GT_ZERO(remainder(t - 0,jmi_divide(1,3,\"Divide by zero: ( 1 ) / ( 3 )\")))) {
+    nSamp = round((t-0)/(jmi_divide(1,3,\"Divide by zero: ( 1 ) / ( 3 )\")));
+    nextTimeEventTmp = (nSamp+1)*jmi_divide(1,3,\"Divide by zero: ( 1 ) / ( 3 )\") + 0;
+  }
+  if (nextTimeEventTmp<nextTimeEvent) {
+    nextTimeEvent = nextTimeEventTmp;
+  }
+  nextTimeEventTmp = JMI_INF;
+  if (SURELY_LT_ZERO(t - 0)) {
+    nextTimeEventTmp = 0;
+  }
+  if (ALMOST_GT_ZERO(remainder(t - 0,jmi_divide(2,3,\"Divide by zero: ( 2 ) / ( 3 )\")))) {
+    nSamp = round((t-0)/(jmi_divide(2,3,\"Divide by zero: ( 2 ) / ( 3 )\")));
+    nextTimeEventTmp = (nSamp+1)*jmi_divide(2,3,\"Divide by zero: ( 2 ) / ( 3 )\") + 0;
+  }
+  if (nextTimeEventTmp<nextTimeEvent) {
+    nextTimeEvent = nextTimeEventTmp;
+  }
+  *nextTime = nextTimeEvent;
+
+    _der_dummy_3 = 0;
+_guards(0) = jmi_sample(jmi,0,jmi_divide(1,3,\"Divide by zero: ( 1 ) / ( 3 )\"));
+if(COND_EXP_EQ(LOG_EXP_AND(_guards(0),LOG_EXP_NOT(_pre_guards(0))),JMI_TRUE,JMI_TRUE,JMI_FALSE)) {
+  _x_0 = pre_x_0 + 1;
+  } else {
+  _x_0 = pre_x_0;
+  }
+_guards(1) = jmi_sample(jmi,0,jmi_divide(2,3,\"Divide by zero: ( 2 ) / ( 3 )\"));
+if(COND_EXP_EQ(LOG_EXP_AND(_guards(1),LOG_EXP_NOT(_pre_guards(1))),JMI_TRUE,JMI_TRUE,JMI_FALSE)) {
+  _y_1 = pre_y_1 + 1;
+  } else {
+  _y_1 = pre_y_1;
+  }
+
+  model_ode_guards(jmi);
+  _der_dummy_3 = 0;
+  pre_x_0 = 0.0;
+  _x_0 = pre_x_0;
+  pre_y_1 = 0.0;
+  _y_1 = pre_y_1;
+  _dummy_2 = 0.0;
+
+
+")})));
+
+ discrete Real x,y;
+ Real dummy;
+equation
+ der(dummy) = 0;
+ when sample(0,1/3) then
+   x = pre(x) + 1;
+ end when;
+ when sample(0,2/3) then
+   y = pre(y) + 1;
+ end when;
+
+end WhenTest3; 
+
 model BlockTest1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.CCodeGenTestCase(
@@ -3652,8 +3784,7 @@ model BlockTest1
          template="$C_dae_blocks_residual_functions$
                    $C_dae_init_blocks_residual_functions$
                    $C_ode_derivatives$ 
-                   $C_ode_initialization$
-",
+                   $C_ode_initialization$",
          generatedCode=" 
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {
   jmi_real_t** res = &residual;

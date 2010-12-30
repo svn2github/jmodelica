@@ -169,6 +169,7 @@ aspect EquationSolve {
 	eq FPreExp.nbrUses(String name) = name.equals(name())? 1: 0;
 	
 	public FRelExp FRelExp.originalFRelExp = null;
+	public FSampleExp FSampleExp.originalFSampleExp = null;
 	public void ASTNode.traverseSymbolic(ASTNode e) {
 		for (int i=0;i<getNumChild();i++) {
 			getChild(i).traverseSymbolic(e.getChild(i));
@@ -177,6 +178,13 @@ aspect EquationSolve {
 
 	public void FRelExp.traverseSymbolic(ASTNode e) {
 		originalFRelExp = (FRelExp)e;
+		for (int i=0;i<getNumChild();i++) {
+			getChild(i).traverseSymbolic(e.getChild(i));
+		}
+	}
+
+	public void FSampleExp.traverseSymbolic(ASTNode e) {
+		originalFSampleExp = (FSampleExp)e;
 		for (int i=0;i<getNumChild();i++) {
 			getChild(i).traverseSymbolic(e.getChild(i));
 		}

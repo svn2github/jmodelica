@@ -517,6 +517,63 @@ public class CGenerator extends GenericGenerator {
 	}
 
 	/**
+	 * Generates code for computation of the nect time event.
+	 */
+	class DAETag_C_ode_time_events extends DAETag {
+		
+		public DAETag_C_ode_time_events(AbstractGenerator myGenerator, FClass fclass) {
+			super("C_ode_time_events","C: Compute the next time event.",
+			  myGenerator,fclass);
+		}
+
+		public void generate(PrintStream genPrinter) {
+			if (fclass.root().options.getBooleanOption("generate_ode")) {
+				genPrinter.print("  jmi_real_t nextTimeEvent;\n");
+				genPrinter.print("  jmi_real_t nextTimeEventTmp;\n");				
+				genPrinter.print("  jmi_real_t nSamp;\n");	
+				genPrinter.print("  jmi_real_t t;\n");	
+				genPrinter.print("  nextTimeEvent = JMI_INF;\n");
+				genPrinter.print("  nextTimeEventTmp = 0;\n");				
+				genPrinter.print("  nSamp = 0;\n");	
+				genPrinter.print("  t = jmi_get_t(jmi)[0];\n");	
+				
+				
+				//genPrinter.print("  printf(\"sample function called at time %f\n\",jmi->z[jmi->offs_real_t]);\n");	
+				for (FSampleExp s : fclass.samplers()) {
+					genPrinter.print("  nextTimeEventTmp = JMI_INF;\n");
+					genPrinter.print("  if (SURELY_LT_ZERO(t - ");
+					s.getOffset().prettyPrint_C(genPrinter,"");
+					genPrinter.print(")) {\n");
+					genPrinter.print("    nextTimeEventTmp = ");
+					s.getOffset().prettyPrint_C(genPrinter,"");
+					genPrinter.print(";\n");
+				    genPrinter.print("  }\n");				    					
+					genPrinter.print("  if (ALMOST_GT_ZERO(remainder(t - ");
+					s.getOffset().prettyPrint_C(genPrinter,"");
+					genPrinter.print(",");
+					s.getInterval().prettyPrint_C(genPrinter,"");
+					genPrinter.print("))) {\n");
+					genPrinter.print("    nSamp = round((t-");
+				    s.getOffset().prettyPrint_C(genPrinter,"");
+				    genPrinter.print(")/(");
+				    s.getInterval().prettyPrint_C(genPrinter,"");
+					genPrinter.print("));\n");
+					genPrinter.print("    nextTimeEventTmp = (nSamp+1)*");
+					s.getInterval().prettyPrint_C(genPrinter,"");
+					genPrinter.print(" + ");
+				    s.getOffset().prettyPrint_C(genPrinter,"");
+				    genPrinter.print(";\n");
+				    genPrinter.print("  }\n");				    					
+				    genPrinter.print("  if (nextTimeEventTmp<nextTimeEvent) {\n");
+				    genPrinter.print("    nextTimeEvent = nextTimeEventTmp;\n");
+				    genPrinter.print("  }\n");				    						
+				}
+				genPrinter.print("  *nextTime = nextTimeEvent;\n");
+			}
+		}
+	}
+
+	/**
 	 * Generates code for solving the BLT blocks
 	 */
 	class DAETag_C_ode_derivatives extends DAETag {
