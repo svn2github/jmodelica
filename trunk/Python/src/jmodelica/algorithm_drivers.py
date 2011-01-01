@@ -732,7 +732,11 @@ class AssimuloFMIAlg(AlgorithmBase):
             self.solver_options['atol']
         except KeyError:
             rtol, atol = self.model.get_tolerances()
-            self.solver_options['atol'] = atol
+            fnbr, gnbr = self.model.get_ode_sizes()
+            if fnbr == 0:
+                self.solver_options['atol'] = 0.01*rtol
+            else:
+                self.solver_options['atol'] = atol
     
     def _set_solver_options(self):
         """ 

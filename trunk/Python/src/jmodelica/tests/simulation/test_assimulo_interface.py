@@ -661,7 +661,10 @@ class Test_FMI_ODE:
         """
         Compile the test model.
         """
-        pass
+        file_name = os.path.join(get_files_path(), 'Modelica', 'noState.mo')
+
+        _ex1_name = compile_fmu("NoState.Example1", file_name)
+        _ex2_name = compile_fmu("NoState.Example2", file_name)
         
     def setUp(self):
         """
@@ -673,6 +676,40 @@ class Test_FMI_ODE:
         self._dq.initialize()
         self._bounceSim = FMIODE(self._bounce)
         self._dqSim     = FMIODE(self._dq)
+    
+    @testattr(assimulo = True)
+    def test_no_state1(self):
+        """
+        Tests simulation when there is no state in the model (Example1).
+        """
+        model = FMUModel("NoState_Example1.fmu")
+        
+        res = model.simulate(final_time=10)
+        
+        x = res['x']
+        y = res['y']
+        z = res['z']
+        
+        nose.tools.assert_almost_equal(x[0] ,1.000000000)
+        nose.tools.assert_almost_equal(x[-1],-2.000000000)
+        nose.tools.assert_almost_equal(y[0] ,-1.000000000)
+        nose.tools.assert_almost_equal(y[-1],-1.000000000)
+        nose.tools.assert_almost_equal(z[0] ,1.000000000)
+        nose.tools.assert_almost_equal(z[-1],4.000000000)
+        
+    @testattr(assimulo = True)
+    def test_no_state2(self):
+        """
+        Tests simulation when there is no state in the model (Example2).
+        """
+        model = FMUModel("NoState_Example2.fmu")
+        
+        res = model.simulate(final_time=10)
+        
+        x = res['x']
+        
+        nose.tools.assert_almost_equal(x[0] ,-1.000000000)
+        nose.tools.assert_almost_equal(x[-1],-1.000000000)
     
     @testattr(assimulo = True)
     def test_result_name_file(self):

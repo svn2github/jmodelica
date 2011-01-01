@@ -223,6 +223,11 @@ class FMIODE(Explicit_Problem):
             self.state_events = self.g
         self.time_events = self.t
         
+        #If there is no state in the model, add a dummy
+        #state der(y)=0
+        if f_nbr == 0:
+            self.y0 = N.array([0.0])
+        
         #Determine the result file name
         if result_file_name == '':
             self.result_file_name = model.get_name()+'_result.txt'
@@ -256,7 +261,9 @@ class FMIODE(Explicit_Problem):
         """
         #Moving data to the model
         self._model.time = t
-        self._model.continuous_states = y
+        #Check if there are any states
+        if self._f_nbr != 0:
+            self._model.continuous_states = y
         
         #Sets the inputs, if any
         if self.input!=None:
@@ -264,6 +271,10 @@ class FMIODE(Explicit_Problem):
         
         #Evaluating the rhs
         rhs = self._model.get_derivatives()
+        
+        #If there is no state, use the dummy
+        if self._f_nbr == 0:
+            rhs = N.array([0.0])
 
         return rhs
         
@@ -273,7 +284,9 @@ class FMIODE(Explicit_Problem):
         """
         #Moving data to the model
         self._model.time = t
-        self._model.continuous_states = y
+        #Check if there are any states
+        if self._f_nbr != 0:
+            self._model.continuous_states = y
         
         #Sets the inputs, if any
         if self.input!=None:
@@ -315,7 +328,9 @@ class FMIODE(Explicit_Problem):
         if t != self._model.time:
             #Moving data to the model
             self._model.time = t
-            self._model.continuous_states = y
+            #Check if there are any states
+            if self._f_nbr != 0:
+                self._model.continuous_states = y
             
             #Sets the inputs, if any
             if self.input!=None:
@@ -346,7 +361,9 @@ class FMIODE(Explicit_Problem):
         #Moving data to the model
         if solver.t_cur != self._model.time:
             self._model.time = solver.t_cur
-            self._model.continuous_states = solver.y_cur
+            #Check if there are any states
+            if self._f_nbr != 0:
+                self._model.continuous_states = solver.y_cur
             
             #Sets the inputs, if any
             if self.input!=None:
@@ -383,7 +400,9 @@ class FMIODE(Explicit_Problem):
         #Moving data to the model
         if solver.t_cur != self._model.time:
             self._model.time = solver.t_cur
-            self._model.continuous_states = solver.y_cur
+            #Check if there are any states
+            if self._f_nbr != 0:
+                self._model.continuous_states = solver.y_cur
             
             #Sets the inputs, if any
             if self.input!=None:
