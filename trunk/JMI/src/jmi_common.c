@@ -48,6 +48,16 @@ jmi_ad_var_t jmi_max(jmi_ad_var_t x, jmi_ad_var_t y) {
 	return COND_EXP_GT(x, y, x ,y);
 }
 
+jmi_real_t jmi_dround(jmi_real_t x) {
+        return (x >= 0)? floor(x + 0.5) : floor(x - 0.5);
+}
+
+jmi_real_t jmi_dremainder(jmi_real_t x, jmi_real_t y) {
+        jmi_real_t res = fmod(x,y);
+        return (jmi_abs(res-y)<JMI_SMALL)? res-y : res;
+}
+
+
 int jmi_func_new(jmi_func_t** jmi_func, jmi_residual_func_t F, int n_eq_F, jmi_jacobian_func_t dF,
 		int dF_n_nz, int* dF_row, int* dF_col) {
 

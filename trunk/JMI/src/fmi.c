@@ -317,7 +317,7 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
     /* Reset atEvent flag */
     ((fmi_t *)c)->jmi->atEvent = JMI_FALSE;
 
-    /* Evaluate the guards with the event flat set to false in order to */
+    /* Evaluate the guards with the event flag set to false in order to */
     /* reset guards depending on samplers before copying pre values.
     /* If this is not done, then the corresponding pre values for these guards
     /* will be true, and no event will be triggered at the next sample. */
@@ -631,7 +631,7 @@ fmiStatus fmi_event_update(fmiComponent c, fmiBoolean intermediateResults, fmiEv
            accordingly. */
     	eventInfo->upcomingTimeEvent = fmiTrue;
         eventInfo->nextEventTime = nextTimeEvent;
-        /*printf("fmi_event_upate: nextTimeEvent: %f\n",nextTimeEvent);*/
+        /*printf("fmi_event_upate: nextTimeEvent: %f\n",nextTimeEvent); */
     } else {
     	eventInfo->upcomingTimeEvent = fmiFalse;
     }

@@ -230,7 +230,8 @@ typedef jmi_ad_tape_t *jmi_ad_tape_p;
 #define LOG_EXP_AND(op1,op2) ((op1)*(op2))           /**< \brief Macro for logical expression and <br> */
 #define LOG_EXP_NOT(op)      (JMI_TRUE-(op))         /**< \brief Macro for logical expression not <br> */
 
-#define ALMOST_ZERO(op) (jmi_abs(op)<=1e-6? JMI_TRUE: JMI_FALSE)
+/*#define ALMOST_ZERO(op) (jmi_abs(op)<=1e-6? JMI_TRUE: JMI_FALSE)*/
+#define ALMOST_ZERO(op) LOG_EXP_AND(ALMOST_LT_ZERO(op),ALMOST_GT_ZERO(op))
 #define ALMOST_LT_ZERO(op) (op<=1e-6? JMI_TRUE: JMI_FALSE)
 #define ALMOST_GT_ZERO(op) (op>=-1e-6? JMI_TRUE: JMI_FALSE)
 #define SURELY_LT_ZERO(op) (op<=-1e-6? JMI_TRUE: JMI_FALSE)
@@ -270,6 +271,18 @@ jmi_ad_var_t jmi_max(jmi_ad_var_t x, jmi_ad_var_t y);
  *
  */
 jmi_ad_var_t jmi_sample(jmi_t* jmi, jmi_real_t offset, jmi_real_t h);
+
+/**
+ * The round function for double numbers. 
+ *
+ */
+jmi_real_t jmi_dround(jmi_real_t x);
+
+/**
+ * The remainder function for double numbers. 
+ *
+ */
+jmi_real_t jmi_dremainder(jmi_real_t x, jmi_real_t y);
 
 /* @} */
 

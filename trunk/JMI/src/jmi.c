@@ -490,10 +490,11 @@ int jmi_ode_next_time_event(jmi_t* jmi, jmi_real_t* nextTime) {
 jmi_ad_var_t jmi_sample(jmi_t* jmi, jmi_real_t offset, jmi_real_t h) {
 	jmi_real_t t = jmi_get_t(jmi)[0];
 	if (!jmi->atEvent || SURELY_LT_ZERO(t-offset)) {
+	  /*printf("jmi_sample1: %f %f %12.12f %12.12f\n",offset,fmod((t-offset),h),(t-offset));*/
 		return JMI_FALSE;
 	}
-
-	return ALMOST_ZERO(remainder((t-offset),h));
+	/*	printf("jmi_sample2: %f %f %12.12f %12.12f\n",offset,h,fmod((t-offset),h),(t-offset));*/
+	return ALMOST_ZERO(jmi_dremainder((t-offset),h));
 }
 
 int jmi_dae_F(jmi_t* jmi, jmi_real_t* res) {

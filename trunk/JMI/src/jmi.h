@@ -305,6 +305,7 @@ extern "C" {
 /* @{ */
 
 #define JMI_INF 1e20                /**< \brief A Very Large Number denoting infinity.*/
+#define JMI_SMALL 1e-6                /**< \brief A Quite Small Number. */
 
 #define JMI_DER_SYMBOLIC 1          /**< \brief Use symbolic evaluation of derivatives (if available). */
 #define JMI_DER_CPPAD 2             /**< \brief Use automatic differentiation (CppAD) to evaluate derivatives. */
