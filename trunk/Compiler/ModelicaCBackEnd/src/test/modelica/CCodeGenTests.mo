@@ -296,21 +296,20 @@ model CCodeGenTest11
  Real z = noEvent(if x <> y then 1.0 else 2.0);
 end CCodeGenTest11;
 
-model CCodeGenTest12
 
+model CCodeGenTest12
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.CCodeGenTestCase(
          name="CCodeGenTest12",
          description="C code generation: test that x^2 is represented by x*x in the generated code. ",
          template="$C_DAE_equation_residuals$",
          generatedCode="
-    (*res)[0] = pow(_x_0 - ( 0.3 ),0.3) + (1.0 * (_x_0 - ( 0.3 ))*(_x_0 - ( 0.3 ))*(_x_0 - ( 0.3 ))*(_x_0 - ( 0.3 ))*(_x_0 - ( 0.3 ))*(
-_x_0 - ( 0.3 ))*(_x_0 - ( 0.3 ))*(_x_0 - ( 0.3 ))*(_x_0 - ( 0.3 ))*(_x_0 - ( 0.3 ))) - (_der_x_1);
+    (*res)[0] = pow(_x_0 - ( 0.3 ),0.3) + (1.0 * (_x_0 - ( 0.3 )) * (_x_0 - ( 0.3 )) * (_x_0 - ( 0.3 ))) - (_der_x_1);
 ")})));
 
   Real x(start=1,fixed=true);
 equation
-  der(x) = (x-0.3)^0.3 + (x-0.3)^10;
+  der(x) = (x-0.3)^0.3 + (x-0.3)^3;
 end CCodeGenTest12;
 
 
@@ -3466,18 +3465,76 @@ end IfExpInParExp;
 
 
 
-model CIntegerExp
+model CIntegerExp1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.CCodeGenTestCase(
-         name="CIntegerExp",
-         description="",
+         name="CIntegerExp1",
+         description="Test that exponential expressions with integer exponents are properly transformed",
          template="$C_DAE_equation_residuals$",
          generatedCode="
     (*res)[0] = (1.0 * (10) * (10) * (10) * (10)) - (_x_0);
 ")})));
 
 	Real x = 10 ^ 4;
-end CIntegerExp;
+end CIntegerExp1;
+
+
+model CIntegerExp2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CIntegerExp2",
+         description="Test that exponential expressions with integer exponents are properly transformed",
+         template="$C_DAE_equation_residuals$",
+         generatedCode="
+    (*res)[0] = (1.0 / (10) / (10) / (10) / (10)) - (_x_0);
+")})));
+
+	Real x = 10 ^ (-4);
+end CIntegerExp2;
+
+
+model CIntegerExp3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CIntegerExp3",
+         description="Test that exponential expressions with integer exponents are properly transformed",
+         template="$C_DAE_equation_residuals$",
+         generatedCode="
+    (*res)[0] = (1.0) - (_x_0);
+")})));
+
+	Real x = 10 ^ 0;
+end CIntegerExp3;
+
+
+model CIntegerExp4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CIntegerExp4",
+         description="Test that exponential expressions with integer exponents are properly transformed",
+         template="$C_DAE_equation_residuals$",
+         generatedCode="
+    (*res)[0] = pow(10,10) - (_x_0);
+")})));
+
+	Real x = 10 ^ 10;
+end CIntegerExp4;
+
+
+model CIntegerExp5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CIntegerExp5",
+         description="Test that exponential expressions with integer exponents are properly transformed",
+         template="$C_DAE_equation_residuals$",
+         generatedCode="
+    (*res)[0] = pow(10, - ( 10 )) - (_x_0);
+")})));
+
+	Real x = 10 ^ (-10);
+end CIntegerExp5;
+
+
 
 model ModelIdentifierTest
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
