@@ -80,7 +80,7 @@ function python_tests() {
     mkdir ${TEST_DIR}
     TEST_DIR=${TEST_DIR:a}
   else
-    TEST_DIR=$(mktemp -dq)
+    TEST_DIR=$(mktemp -dq /tmp/jm_tests.XXXXXX)
   fi 
   PATTERN=----------------------------------------------------------------------
   if [[ "${TAGS_SET}" != "1" ]]; then
@@ -152,7 +152,7 @@ function print_name() {
 }
 
 function filter_python_separate() {
-  TMP=$(mktemp -q) 
+  TMP=$(mktemp -q /tmp/jm_tests.XXXXXX) 
   tee ${TMP} | egrep -v "(PASSED|TEST FAILED)"
   cat ${TMP} \
   | sed -n \
