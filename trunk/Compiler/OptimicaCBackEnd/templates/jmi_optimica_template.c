@@ -292,6 +292,11 @@ int jmi_new(jmi_t** jmi) {
 	return 0;
 }
 
+static int model_set_start_values(jmi_t* jmi) {
+$C_set_start_values$
+  return 0;
+}
+
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -1280,6 +1280,62 @@ aspect CCodeGen {
 		}
 	}
 	
+	public void FVariable.genStartValue_C(String indent, PrintStream str) {}
+	
+	public void FRealVariable.genStartValue_C(String indent, PrintStream str) {
+		str.print(indent);
+		str.print(name_C()+ " = ");
+		if (isIndependentParameter() || useBindingExpAsStart()) {
+			str.print(ceval().realValue());
+		} else {
+			str.print(startAttribute());
+		}
+		str.print(";\n");
+	}
+	
+	public void FIntegerVariable.genStartValue_C(String indent, PrintStream str) {
+		str.print(indent);
+		str.print(name_C()+ " = ");
+		if (isIndependentParameter() || useBindingExpAsStart()) {
+			str.print(ceval().intValue());
+		} else {
+			str.print(startAttribute());
+		}
+		str.print(";\n");
+	}
+	
+	public void FBooleanVariable.genStartValue_C(String indent, PrintStream str) {
+		str.print(indent);
+		str.print(name_C()+ " = ");
+		if (isIndependentParameter() || useBindingExpAsStart()) {
+			str.print(ceval().booleanValue() ? "JMI_TRUE" : "JMI_FALSE");
+		} else {
+			str.print(startAttribute() ? "JMI_TRUE" : "JMI_FALSE");
+		}
+		str.print(";\n");
+	}
+
+	public void FEnumVariable.genStartValue_C(String indent, PrintStream str) {
+		str.print(indent);
+		str.print(name_C()+ " = ");
+		if (isIndependentParameter() || useBindingExpAsStart()) {
+			str.print(ceval().intValue());
+		} else {
+			str.print(startAttribute());
+		}
+		str.print(";\n");
+	}
+	
+	public void FStringVariable.genStartValue_C(String indent, PrintStream str) {
+		str.print(indent);
+		str.print(name_C()+ " = ");
+		if (isIndependentParameter() || useBindingExpAsStart()) {
+			str.print(ceval().stringValue());
+		} else {
+			str.print(startAttribute());
+		}
+		str.print(";\n");
+	}
 }
 
 

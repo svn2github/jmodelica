@@ -3885,4 +3885,62 @@ equation
   5 = x + 3*y;  
 end BlockTest1;
 
+model StartValues1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="StartValues1",
+         description="",
+         template="$C_set_start_values$",
+         generatedCode="
+    _x_0 = 1.0;
+    _y_1 = 2.0;
+    _z_2 = 3.0;
+    _q_3 = 0.0;
+    _der_x_4 = 0.0;
+")})));
+
+  Real x(start=1);
+  parameter Real y = 2;
+  parameter Real z(start=3);
+  Real q;
+  
+equation
+  der(x) = x;
+  q = x + 1;
+
+end StartValues1;
+
+model StartValues2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="StartValues2",
+         description="",
+         template="$C_set_start_values$",
+         generatedCode="
+    _pr_0 = 1.5;
+    _pi_1 = 2;
+    _pb_2 = JMI_TRUE;
+    _r_3 = 5.5;
+    _i_4 = 10;
+    _b_5 = JMI_FALSE;
+    _der_r_6 = 0.0;
+    pre_i_4 = 10;
+    pre_b_5 = JMI_FALSE;
+")})));
+
+  parameter Real pr = 1.5;
+  parameter Integer pi = 2;
+  parameter Boolean pb = true;
+  
+  Real r(start=5.5);
+  Integer i(start=10); 
+  Boolean b(start=false);
+  
+equation
+  der(r) = -r;
+  i = r + 2;
+  b = false;
+  
+end StartValues2;
+
 end CCodeGenTests;

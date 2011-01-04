@@ -723,6 +723,22 @@ public class CGenerator extends GenericGenerator {
 		}
 	}
 
+	/**
+	 * Generates start values.
+	 */
+	class DAETag_C_set_start_values extends DAETag {
+		
+		public DAETag_C_set_start_values(AbstractGenerator myGenerator, FClass fclass) {
+			super("C_set_start_values","C: start values",
+			  myGenerator,fclass);
+		}
+
+		public void generate(PrintStream genPrinter) {
+			for(FVariable fv : fclass.getFVariables()) {
+				fv.genStartValue_C(INDENT, genPrinter);
+			}
+		}
+	}
 	
 	/**
 	 * \brief Returns the string denoting the beginning of the copyright blurb.
