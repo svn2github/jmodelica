@@ -15,7 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-
 import os.path
 
 import numpy as N
@@ -65,3 +64,5 @@ def run_demo(with_plots=True):
         plt.plot(Tc.t,Tc.x,'x-')
         plt.grid(True)
         plt.show()
+
+    return be_colloc

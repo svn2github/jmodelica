@@ -30,6 +30,10 @@ import codecs
 from operator import itemgetter
 import jmodelica.jmi
 
+from jmodelica.io import VariableNotFoundError
+
+import matplotlib.pyplot as plt
+
 # This function is needed since CasADi creates derivative names
 # differently than those present in the FMI XML files:
 # FMI: x.der(y)
@@ -519,6 +523,282 @@ class Collocator:
         else:
             raise Error('Export on binary Dymola result files not yet supported.')
 
+    def initialize(self,res):
+
+        xmldoc = self.get_xmlocp().xmldoc
+
+        # Obtain the names
+        names = xmldoc.get_dx_variable_names(include_alias=False)
+        dx_names=[]
+        for name in sorted(names):
+            dx_names.append(name[1])
+
+        names = xmldoc.get_x_variable_names(include_alias=False)
+        x_names=[]
+        for name in sorted(names):
+            x_names.append(name[1])
+
+        names = xmldoc.get_u_variable_names(include_alias=False)
+        u_names=[]
+        for name in sorted(names):
+            u_names.append(name[1])
+
+        names = xmldoc.get_w_variable_names(include_alias=False)
+        w_names=[]
+        for name in sorted(names):
+            w_names.append(name[1])
+
+        names = xmldoc.get_p_opt_variable_names(include_alias=False)
+        p_opt_names=[]
+        for name in sorted(names):
+            p_opt_names.append(name[1])
+        
+        # Obtain vector sizes
+        n_points = 0
+        num_name_hits = 0
+        if len(dx_names) > 0:
+            for name in dx_names:
+                print name
+                try:
+                    traj = res.get_variable_data(name)
+                    num_name_hits = num_name_hits + 1
+                    if N.size(traj.x)>2:
+                        break
+                except:
+                    pass
+
+        elif len(x_names) > 0:
+            for name in x_names:
+                try:
+                    traj = res.get_variable_data(name)
+                    num_name_hits = num_name_hits + 1
+                    if N.size(traj.x)>2:
+                        break
+                except:
+                    pass
+
+        elif len(u_names) > 0:
+            for name in u_names:
+                try:
+                    traj = res.get_variable_data(name)
+                    num_name_hits = num_name_hits + 1
+                    if N.size(traj.x)>2:
+                        break
+                except:
+                    pass
+
+        elif len(w_names) > 0:
+            for name in w_names:
+                try:
+                    traj = res.get_variable_data(name)
+                    num_name_hits = num_name_hits + 1
+                    if N.size(traj.x)>2:
+                        break
+                except:
+                    pass
+        else:
+            raise Exception(
+                "None of the model variables not found in result file.")
+
+        if num_name_hits==0:
+            raise Exception(
+                "None of the model variables not found in result file.")
+        
+        #print(traj.t)
+        
+        n_points = N.size(traj.t,0)
+        n_cols = 1+len(dx_names)+len(x_names)+len(u_names)+len(w_names)
+
+        var_data = N.zeros((n_points,n_cols))
+        # Initialize time vector
+        var_data[:,0] = res.get_variable_data('time').t
+
+#         p_opt_data = N.zeros(len(p_opt_names))
+
+#         sc = self._model.jmimodel.get_variable_scaling_factors()
+
+#         # Get the parameters
+#         n_p_opt = self._model.jmimodel.opt_get_n_p_opt()
+#         if n_p_opt > 0:
+#             p_opt_indices = N.zeros(n_p_opt, dtype=int)
+        
+#             self._model.jmimodel.opt_get_p_opt_indices(p_opt_indices)
+#             p_opt_indices = p_opt_indices.tolist()
+
+#             for name in p_opt_names:
+#                 try:
+#                     ref = self._model.get_value_reference(name)
+#                     (z_i, ptype) = jmi._translate_value_ref(ref)
+#                     i_pi = z_i - self._model._offs_real_pi.value
+#                     i_pi_opt = p_opt_indices.index(i_pi)
+#                     traj = res.get_variable_data(name)
+#                     if self._model.get_scaling_method() & jmi.JMI_SCALING_VARIABLES > 0:
+#                         p_opt_data[i_pi_opt] = traj.x[0]/sc[z_i]
+#                     else:
+#                         p_opt_data[i_pi_opt] = traj.x[0]
+#                 except VariableNotFoundError:
+#                     print "Warning: Could not find value for parameter " + name
+                    
+#         #print(N.size(var_data))
+
+#         # Initialize variable names
+#         # Loop over all the names
+
+#         sc_dx = self._model.jmimodel.get_variable_scaling_factors()[
+#             self._model._offs_real_dx.value:self._model._offs_real_x.value]
+#         sc_x = self._model.jmimodel.get_variable_scaling_factors()[
+#             self._model._offs_real_x.value:self._model._offs_real_u.value]
+#         sc_u = self._model.jmimodel.get_variable_scaling_factors()[
+#             self._model._offs_real_u.value:self._model._offs_real_w.value]
+#         sc_w = self._model.jmimodel.get_variable_scaling_factors()[
+#             self._model._offs_real_w.value:self._model._offs_t.value]
+
+        scaling = False
+
+        col_index = 1;
+        dx_index = 0;
+        x_index = 0;
+        u_index = 0;
+        w_index = 0;
+        for name in dx_names:
+            try:
+                #print(name)
+                #print(col_index)
+                traj = res.get_variable_data(name)
+                if scaling:
+                    var_data[:,col_index] = traj.x/sc_dx[dx_index]
+                else:
+                    var_data[:,col_index] = traj.x
+                dx_index = dx_index + 1
+                col_index = col_index + 1
+            except:
+                dx_index = dx_index + 1
+                col_index = col_index + 1
+                print "Warning: Could not find trajectory for derivative variable " + name
+        for name in x_names:
+            try:
+                #print(name)
+                #print(col_index)
+                traj = res.get_variable_data(name)
+                if scaling:
+                    var_data[:,col_index] = traj.x/sc_x[x_index]
+                else:
+                    var_data[:,col_index] = traj.x
+                x_index = x_index + 1
+                col_index = col_index + 1
+            except VariableNotFoundError:
+                x_index = x_index + 1
+                col_index = col_index + 1
+                print "Warning: Could not find trajectory for state variable " + name
+
+        for name in u_names:
+            try:
+                #print(name)
+                #print(col_index)
+                traj = res.get_variable_data(name)
+                if not res.is_variable(name):
+                    if scaling:
+                        var_data[:,col_index] = N.ones(n_points)*traj.x[0]/sc_u[u_index]
+                    else:
+                        var_data[:,col_index] = N.ones(n_points)*traj.x[0]
+                else:
+                    if scaling:
+                        var_data[:,col_index] = traj.x/sc_u[u_index]
+                    else:
+                        var_data[:,col_index] = traj.x
+                u_index = u_index + 1
+                col_index = col_index + 1
+            except VariableNotFoundError:
+                u_index = u_index + 1
+                col_index = col_index + 1
+                print "Warning: Could not find trajectory for input variable " + name
+
+        for name in w_names:
+            try:
+                #print(name)
+                #print(col_index)
+                traj = res.get_variable_data(name)
+                if not res.is_variable(name):
+                    if scaling:
+                        var_data[:,col_index] = N.ones(n_points)*traj.x[0]/sc_w[w_index]
+                    else:
+                        var_data[:,col_index] = N.ones(n_points)*traj.x[0]
+                else:
+                    if scaling:
+                        var_data[:,col_index] = traj.x/sc_w[w_index]
+                    else:
+                        var_data[:,col_index] = traj.x
+                w_index = w_index + 1
+                col_index = col_index + 1
+            except VariableNotFoundError:
+                w_index = w_index + 1
+                col_index = col_index + 1
+                print "Warning: Could not find trajectory for algebraic variable " + name
+
+        dx_init = N.zeros((len(self.get_time_points()),self.get_n_x()))
+        x_init = N.zeros((len(self.get_time_points()),self.get_n_x()))
+        w_init = N.zeros((len(self.get_time_points()),self.get_n_w()))
+        u_init = N.zeros((len(self.get_time_points()),self.get_n_u()))
+        
+        t_points = N.zeros(len(self.get_time_points()))
+
+        cnt = 0
+        for t,i,j in self.get_time_points():
+            t_points[cnt] = t
+            cnt = cnt + 1
+
+        # interpolate
+        for i in range(self.get_n_x()):
+            dx_init[:,i] = N.interp(t_points,var_data[:,0],var_data[:,1+i]);
+
+        for i in range(self.get_n_x()):
+            x_init[:,i] = N.interp(t_points,var_data[:,0],var_data[:,1 + self.get_n_x() +i]);
+
+        for i in range(self.get_n_u()):
+            u_init[:,i] = N.interp(t_points,var_data[:,0],var_data[:,1 + 2*self.get_n_x() + i]);
+
+        for i in range(self.get_n_w()):
+            w_init[:,i] = N.interp(t_points,var_data[:,0],var_data[:,1 + 2*self.get_n_x() + self.get_n_u() + i]);
+
+#         plt.figure(2)
+#         plt.clf()
+#         plt.subplot(4,1,1)
+#         plt.plot(var_data[:,0],var_data[:,1:1+self.get_n_x()],'g-x')
+#         plt.hold(True)
+#         plt.plot(t_points,dx_init,'b-x')
+#         plt.grid(True)
+
+#         plt.subplot(4,1,2)
+#         plt.plot(var_data[:,0],var_data[:,4:7],'g-x')
+#         plt.hold(True)
+#         plt.plot(t_points,x_init,'b-x')
+#         plt.grid(True)
+
+#         plt.subplot(4,1,3)
+#         plt.plot(var_data[:,0],var_data[:,7:8],'g-x')
+#         plt.hold(True)
+#         plt.plot(t_points,u_init,'b-x')
+#         plt.grid(True)
+
+#         plt.subplot(4,1,4)
+#         plt.plot(var_data[:,0],var_data[:,8:9],'g-x')
+#         plt.hold(True)
+#         plt.plot(t_points,w_init,'b-x')
+#         plt.grid(True)
+        
+#         plt.show()
+
+        cnt = 0
+        for t,i,j in self.get_time_points():
+            if (self.get_n_x()>0):
+                self.get_xx_init()[self.var_indices[i][j]['dx']] = dx_init[cnt,:]
+            if (self.get_n_x()>0):
+                self.get_xx_init()[self.var_indices[i][j]['x']] = x_init[cnt,:]
+            if (self.get_n_u()>0):
+                self.get_xx_init()[self.var_indices[i][j]['u']] = u_init[cnt,:]
+            if (self.get_n_w()>0):
+                self.get_xx_init()[self.var_indices[i][j]['w']] = w_init[cnt,:]
+            cnt = cnt + 1
 
 class BackwardEulerCollocator(Collocator):
 
