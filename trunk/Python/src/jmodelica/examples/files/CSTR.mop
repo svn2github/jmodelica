@@ -35,7 +35,7 @@ model CSTR_Init_Optimization
 
   CSTR cstr "CSTR component";
   Real cost(start=0,fixed=true);
-
+  Real u = Tc_ref;
   parameter Real c_ref = 500;
   parameter Real T_ref = 320;
   parameter Real Tc_ref = 350;
@@ -87,11 +87,10 @@ optimization CSTR_Opt2(objective=(cost(finalTime)),
   parameter Real q_c = 1;
   parameter Real q_T = 1;
   parameter Real q_Tc = 1;
-  Real q = 2*u;
-
+  //Real q = 2*u;
 equation
-  der(cost) = q_c*(c_ref-cstr.c)^2 + q_T*(T_ref-cstr.T)^2 + 
-                  q_Tc*(Tc_ref-cstr.Tc)^2;
+  der(cost) = 1e-4*(q_c*(c_ref-cstr.c)^2 + q_T*(T_ref-cstr.T)^2 + 
+                  q_Tc*(Tc_ref-cstr.Tc)^2);
 end CSTR_Opt2;
 
 

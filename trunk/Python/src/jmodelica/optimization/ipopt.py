@@ -966,10 +966,16 @@ class NLPCollocation(object):
                 #print(name)
                 #print(col_index)
                 traj = res.get_variable_data(name)
-                if self._model.get_scaling_method() & jmi.JMI_SCALING_VARIABLES > 0:
-                    var_data[:,col_index] = traj.x/sc_u[u_index]
+                if not res.is_variable(name):
+                    if self._model.get_scaling_method() & jmi.JMI_SCALING_VARIABLES > 0:
+                        var_data[:,col_index] = N.ones(n_points)*traj.x[0]/sc_u[u_index]
+                    else:
+                        var_data[:,col_index] = N.ones(n_points)*traj.x[0]
                 else:
-                    var_data[:,col_index] = traj.x
+                    if self._model.get_scaling_method() & jmi.JMI_SCALING_VARIABLES > 0:
+                        var_data[:,col_index] = traj.x/sc_u[u_index]
+                    else:
+                        var_data[:,col_index] = traj.x
                 u_index = u_index + 1
                 col_index = col_index + 1
             except VariableNotFoundError:
