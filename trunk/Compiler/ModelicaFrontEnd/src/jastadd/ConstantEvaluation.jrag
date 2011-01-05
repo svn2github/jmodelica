@@ -415,6 +415,12 @@ aspect ConstantEvaluation {
 	 * \brief Constant boolean value.
 	 */
     public class CValueBoolean extends CValue {
+    	/** A CValueBolean with the value <code>false</code>, for conveniance. */
+    	public static final CValueBoolean FALSE = new CValueBoolean(false);
+
+    	/** A CValueBolean with the value <code>true</code>, for conveniance. */
+    	public static final CValueBoolean TRUE  = new CValueBoolean(false);
+    	
         private boolean value;
 
         /**
@@ -1152,7 +1158,21 @@ aspect ConstantEvaluation {
   
   eq FPreExp.cevalCalc()     = CValue.UNKNOWN;
   eq FSampleExp.cevalCalc()  = CValue.UNKNOWN;
-  eq FInitialExp.cevalCalc() = CValue.UNKNOWN;
+  
+  /** Decides what initial() is currently evaluated to. */
+  private static CValue FInitialExp.evaluationValue = CValueBoolean.FALSE;
+  
+  /** Set the value for initial() to evaluate to. */
+  public static void FInitialExp.setIsInitial(boolean value) {
+  	  evaluationValue = new CValueBoolean(value);
+  }
+  
+  /** Set if constant evaluation should consider simulation to be during initialization or not. */
+  public void FClass.setIsInitial(boolean initial) {
+  	  FInitialExp.setIsInitial(initial);
+  }
+  
+  eq FInitialExp.cevalCalc() = evaluationValue;
   
   syn boolean FMinMaxExp.selectLesser();
   eq FMinExp.selectLesser() = true;

@@ -232,7 +232,8 @@ aspect FlatVariability {
 	
 	eq FPreExp.variability()     = fDiscrete();
 	eq FSampleExp.variability()  = fDiscrete();
-	eq FInitialExp.variability() = fDiscrete();
+	
+	eq FInitialExp.variability() = fParameter();
 	
 	syn int FTypePrefixVariability.combineLevel() = variabilityLevel() * 10;
 	
