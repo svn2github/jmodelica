@@ -1007,6 +1007,20 @@ class NLPCollocation(object):
 
         #print(var_data)
         #print(N.reshape(var_data,(n_cols*n_points,1),order='F')[:,0])
+
+        # If a normalized minimum time problem has been solved,
+        # then, the time vector should be rescaled
+        n=[names[1] for names in self._model.get_p_opt_variable_names()]
+        non_fixed_interval = ('finalTime' in n) or ('startTime' in n)            
+
+        if non_fixed_interval:
+            # A minimum time problem has been solved,
+            # interval is normalized to [0,1]
+            t0 = self._model.get('startTime')
+            tf = self._model.get('finalTime')
+            for i in range(N.size(var_data,0)):
+                var_data[i,0] = -t0/(tf-t0) + var_data[i,0]/(tf-t0)
+
             
         self.opt_coll_set_initial_from_trajectory(p_opt_data, 
             N.reshape(var_data,(n_cols*n_points,1),order='F')[:,0],N.size(var_data,0),

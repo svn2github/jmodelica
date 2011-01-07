@@ -28,6 +28,8 @@ from jmodelica.tests.general.base_simul import *
 from jmodelica.tests import testattr
 from jmodelica.tests import get_files_path
 
+
+
 class TestOptimization(OptimizationTest):
 
     @classmethod
@@ -746,4 +748,84 @@ class TestMinTimeProblem5(OptimizationTest):
         self.assert_all_trajectories(['sys.x1', 'sys.x2', 'u'])
 
 
+class TestMinTimeProblemInit:
+
+    @classmethod
+    def setUpClass(clf):
+        clf.curr_dir = os.path.dirname(os.path.abspath(__file__));
+        clf.jn = compile_jmu('MinTimeInit',clf.curr_dir + '/../files/Modelica/MinTimeInit.mop')
+        clf.m = JMUModel(clf.jn)
+
+
+    @testattr(ipopt = True)
+    def setUp(self):
+        self.res = self.m.optimize()
+
+        if False:
+            x = self.res['x']
+            v = self.res['v']
+            dx = self.res['der(x)']
+            dv = self.res['der(v)']
+            u = self.res['u']
+            t = self.res['time']
+            
+            plt.figure(1)
+            plt.clf()
+            plt.subplot(2,1,1)
+            plt.plot(t,x)
+            plt.hold(True)
+            plt.plot(t,v)
+            plt.plot(t,dx)
+            plt.plot(t,dv)
+            plt.grid(True)
+            plt.subplot(2,1,2)
+            plt.plot(t,u)
+            plt.grid(True)
+            plt.show()
+
+    @testattr(ipopt = True)
+    def test_init(self):
+
+        m = JMUModel(self.jn)
+
+        # Create a new collocation object
+        n_e = 30
+        coll = NLPCollocationLagrangePolynomials(m,n_e, N.ones(n_e)/n_e, 3)
+
+        # Initialize with optimization result
+        coll.set_initial_from_dymola(self.res.result_data,N.array([]),0,1)
+
+        # Write initial point to file
+        coll.export_result_dymola('Init_res.txt')
+
+        # Load result
+        res_init = ResultDymolaTextual('Init_res.txt')
+
+        # Load test fixture
+        res_init_fix = ResultDymolaTextual(self.curr_dir + '/../files/Results/MinTimeInit_init_fix.txt')
+
+        # Extract trajectories
+        x = res_init.get_variable_data('x')
+        v = res_init.get_variable_data('v')
+        u = res_init.get_variable_data('u')
+
+        x_fix = res_init_fix.get_variable_data('x')
+        v_fix = res_init_fix.get_variable_data('v')
+        u_fix = res_init_fix.get_variable_data('u')
+
+        # Comparison tests
+        N.testing.assert_array_almost_equal(x_fix.x,x.x)
+        N.testing.assert_array_almost_equal(v_fix.x,v.x)
+        N.testing.assert_array_almost_equal(u_fix.x,u.x)
+
+        if False:
+            plt.figure(1)
+            plt.subplot(2,1,1)
+            plt.plot(x.t,x.x,'r')
+            plt.hold(True)
+            plt.plot(v.t,v.x,'r')
+            plt.grid(True)
+            plt.subplot(2,1,2)
+            plt.plot(u.t,u.x,'r')
+            plt.grid(True)
 
