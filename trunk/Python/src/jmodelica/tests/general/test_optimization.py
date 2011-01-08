@@ -28,8 +28,6 @@ from jmodelica.tests.general.base_simul import *
 from jmodelica.tests import testattr
 from jmodelica.tests import get_files_path
 
-
-
 class TestOptimization(OptimizationTest):
 
     @classmethod
@@ -805,15 +803,21 @@ class TestMinTimeProblemInit:
         res_init_fix = ResultDymolaTextual(self.curr_dir + '/../files/Results/MinTimeInit_init_fix.txt')
 
         # Extract trajectories
+        dx = res_init.get_variable_data('der(x)')
+        dv = res_init.get_variable_data('der(v)')
         x = res_init.get_variable_data('x')
         v = res_init.get_variable_data('v')
         u = res_init.get_variable_data('u')
 
+        dx_fix = res_init_fix.get_variable_data('der(x)')
+        dv_fix = res_init_fix.get_variable_data('der(v)')
         x_fix = res_init_fix.get_variable_data('x')
         v_fix = res_init_fix.get_variable_data('v')
         u_fix = res_init_fix.get_variable_data('u')
 
         # Comparison tests
+        N.testing.assert_array_almost_equal(dx_fix.x,dx.x)
+        N.testing.assert_array_almost_equal(dv_fix.x,dv.x)
         N.testing.assert_array_almost_equal(x_fix.x,x.x)
         N.testing.assert_array_almost_equal(v_fix.x,v.x)
         N.testing.assert_array_almost_equal(u_fix.x,u.x)

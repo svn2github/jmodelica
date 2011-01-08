@@ -476,11 +476,27 @@ class NLPCollocation(object):
         
         # Get the result
         self.opt_coll_get_result(p_opt,t_,dx_,x_,u_,w_)
-
+        
         data = N.zeros((n_points,1+n_real_dx+n_real_x+n_real_u+n_real_w))
         data[:,0] = t_
+
+        # If a normalized minimum time problem has been solved,
+        # then, the time vector should be rescaled
+        n=[names[1] for names in self._model.get_p_opt_variable_names()]
+        non_fixed_interval = ('finalTime' in n) or ('startTime' in n)            
+
+        dx_factor = 1.0
+        if non_fixed_interval:
+            # A minimum time problem has been solved,
+            # interval is normalized to [0,1]
+            t0 = self._model.get('startTime')
+            tf = self._model.get('finalTime')
+            dx_factor = 1/(tf-t0)
+            for i in range(N.size(data,0)):
+                data[i,0] = t0 + data[i,0]*(tf-t0)
+
         for i in range(n_real_dx):
-            data[:,i+1] = dx_[i*n_points:(i+1)*n_points]
+            data[:,i+1] = dx_[i*n_points:(i+1)*n_points]*dx_factor
         for i in range(n_real_x):
             data[:,n_real_dx+i+1] = x_[i*n_points:(i+1)*n_points]
         for i in range(n_real_u):
@@ -488,19 +504,6 @@ class NLPCollocation(object):
         for i in range(n_real_w):
             data[:,n_real_dx+n_real_x+n_real_u+i+1] = w_[
                 i*n_points:(i+1)*n_points]
-
-        # If a normalized minimum time problem has been solved,
-        # then, the time vector should be rescaled
-        n=[names[1] for names in self._model.get_p_opt_variable_names()]
-        non_fixed_interval = ('finalTime' in n) or ('startTime' in n)            
-
-        if non_fixed_interval:
-            # A minimum time problem has been solved,
-            # interval is normalized to [0,1]
-            t0 = self._model.get('startTime')
-            tf = self._model.get('finalTime')
-            for i in range(N.size(data,0)):
-                data[i,0] = t0 + data[i,0]*(tf-t0)
 
         return p_opt, data
 
@@ -885,6 +888,22 @@ class NLPCollocation(object):
         # Initialize time vector
         var_data[:,0] = res.get_variable_data('time').t
 
+        # If a normalized minimum time problem has been solved,
+        # then, the time vector should be rescaled
+        n=[names[1] for names in self._model.get_p_opt_variable_names()]
+        non_fixed_interval = ('finalTime' in n) or ('startTime' in n)            
+
+        dx_factor = 1.0
+
+        if non_fixed_interval:
+            # A minimum time problem has been solved,
+            # interval is normalized to [0,1]
+            t0 = self._model.get('startTime')
+            tf = self._model.get('finalTime')
+            dx_factor = tf-t0
+            for i in range(N.size(var_data,0)):
+                var_data[i,0] = -t0/(tf-t0) + var_data[i,0]/(tf-t0)
+
         p_opt_data = N.zeros(len(p_opt_names))
 
         sc = self._model.jmimodel.get_variable_scaling_factors()
@@ -936,9 +955,9 @@ class NLPCollocation(object):
                 #print(col_index)
                 traj = res.get_variable_data(name)
                 if self._model.get_scaling_method() & jmi.JMI_SCALING_VARIABLES > 0:
-                    var_data[:,col_index] = traj.x/sc_dx[dx_index]
+                    var_data[:,col_index] = traj.x/sc_dx[dx_index]*dx_factor
                 else:
-                    var_data[:,col_index] = traj.x
+                    var_data[:,col_index] = traj.x*dx_factor
                 dx_index = dx_index + 1
                 col_index = col_index + 1
             except:
@@ -1007,20 +1026,6 @@ class NLPCollocation(object):
 
         #print(var_data)
         #print(N.reshape(var_data,(n_cols*n_points,1),order='F')[:,0])
-
-        # If a normalized minimum time problem has been solved,
-        # then, the time vector should be rescaled
-        n=[names[1] for names in self._model.get_p_opt_variable_names()]
-        non_fixed_interval = ('finalTime' in n) or ('startTime' in n)            
-
-        if non_fixed_interval:
-            # A minimum time problem has been solved,
-            # interval is normalized to [0,1]
-            t0 = self._model.get('startTime')
-            tf = self._model.get('finalTime')
-            for i in range(N.size(var_data,0)):
-                var_data[i,0] = -t0/(tf-t0) + var_data[i,0]/(tf-t0)
-
             
         self.opt_coll_set_initial_from_trajectory(p_opt_data, 
             N.reshape(var_data,(n_cols*n_points,1),order='F')[:,0],N.size(var_data,0),
