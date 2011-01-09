@@ -90,6 +90,12 @@ aspect TransformCanonical {
 		genInitialEquations();
 		sortDependentParameters();
 
+	/*
+		for (FAbstractEquation eqn : equations()) {
+			FEquation e = (FEquation)eqn;
+			System.out.println(e.getLeft().diff("time",1));		
+		}
+*/
 		if (root().options.getBooleanOption("index_reduction")) {
 			indexReduction();
 			blt();
