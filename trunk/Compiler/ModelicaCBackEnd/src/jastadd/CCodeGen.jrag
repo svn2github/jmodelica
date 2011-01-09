@@ -1006,25 +1006,33 @@ aspect CCodeGen {
 		  	_x = _pre_x + 1;
 		  }
 		*/
-		
-		str.print("_guards(");
-		str.print(getTest().guardExpInEquationsIndex());
-		str.print(") = ");
-		getTest().prettyPrint_C(str,"");
-		str.print(";\n");
-		str.print("if(COND_EXP_EQ(LOG_EXP_AND(_guards(");
-		str.print(getTest().guardExpInEquationsIndex());
-		str.print("),LOG_EXP_NOT(_pre_guards(");
-		str.print(getTest().guardExpInEquationsIndex());
-		str.print("))),JMI_TRUE,JMI_TRUE,JMI_FALSE)) {\n");
-				
-		/*
-		str.print("if(COND_EXP_EQ(_pre_guards(");
-		str.print(getTest().guardExpInEquationsIndex());
-		str.print("),_guards(");
-		str.print(getTest().guardExpInEquationsIndex());
-		str.print("),JMI_FALSE,JMI_TRUE)) {\n");
-		*/
+		for (FExp g : guards()) {		
+			str.print("_guards(");
+			str.print(g.guardExpInEquationsIndex());
+			str.print(") = ");
+			g.prettyPrint_C(str,"");
+			str.print(";\n");
+		}
+		int i = guards().size();
+		str.print("  if(");
+		for (FExp g : guards()) {
+			if (i>1) {
+				str.print("LOG_EXP_OR(");
+			}		
+			str.print("COND_EXP_EQ(LOG_EXP_AND(_guards(");
+			str.print(g.guardExpInEquationsIndex());
+			str.print("),LOG_EXP_NOT(_pre_guards(");
+			str.print(g.guardExpInEquationsIndex());
+			str.print("))),JMI_TRUE,JMI_TRUE,JMI_FALSE)");
+			if (i>1) {
+				str.print(",\n    ");
+			}		
+			i--;
+		}		
+		for (int j = 0;j<guards().size()-1;j++) {
+			str.print(")");
+		}
+		str.print(") {\n");
 		for (FAbstractEquation fe : getFAbstractEquations()) {
 			fe.genSolvedBlock_C(v,indent,str);
 		}

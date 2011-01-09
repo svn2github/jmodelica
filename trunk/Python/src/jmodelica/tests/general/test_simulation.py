@@ -248,6 +248,28 @@ class TestHybrid5(SimulationTest):
     def test_trajectories(self):
         self.assert_all_trajectories(['x','u','ref','I'], same_span=True, rel_tol=1e-3, abs_tol=1e-3)
 
+class TestHybrid6(SimulationTest):
+    
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            'HybridTests.mo', 'HybridTests.WhenEqu10',
+            options={'compliance_as_warning':True},format='fmu')
+
+    @testattr(assimulo = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=10, time_step = 0.01)
+        self.run()
+        self.load_expected_data(
+            'HybridTests_WhenEqu10_result.txt')
+
+    @testattr(assimulo = True)
+    def test_trajectories(self):
+        self.assert_all_trajectories(['x','y'], same_span=True, rel_tol=1e-3, abs_tol=1e-3)
+
 
     
+
+
+
 

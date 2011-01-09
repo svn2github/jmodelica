@@ -116,6 +116,22 @@ equation
  ref = if time <1 then 0 else 1;
 end WhenEqu9; 
 
+model WhenEqu10 
+
+ discrete Real x,y;
+ Real dummy;
+equation
+ der(dummy) = 0;
+ when {sample(0,1), sample(0.1,1)} then
+   x = pre(x) + 1;
+ end when;
+ when sample(0,2/3) then
+   y = pre(y) + 1;
+ end when;
+
+end WhenEqu10; 
+
+
 model ZeroOrderHold1
 
   Modelica.Blocks.Discrete.ZeroOrderHold sampler(samplePeriod=0.1);

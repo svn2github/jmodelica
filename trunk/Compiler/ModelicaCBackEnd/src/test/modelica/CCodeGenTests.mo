@@ -3712,20 +3712,18 @@ model WhenTest2
   jmi_real_t nextTimeEvent;
   jmi_real_t nextTimeEventTmp;
   jmi_real_t nSamp;
-  jmi_real_t t;
   nextTimeEvent = JMI_INF;
-  nextTimeEventTmp = 0;
-  nSamp = 0;
-  t = jmi_get_t(jmi)[0];
   nextTimeEventTmp = JMI_INF;
-  if (SURELY_LT_ZERO(t - 0)) {
+  if (SURELY_LT_ZERO(_t - 0)) {
     nextTimeEventTmp = 0;
+  }  else if (ALMOST_ZERO(jmi_dremainder(_t - 0,_h_6))) {
+    nSamp = jmi_dround((_t-0)/(_h_6));
+    nextTimeEventTmp = (nSamp + 1.0)*_h_6 + 0;
+  }  else if (SURELY_GT_ZERO(jmi_dremainder(_t - 0,_h_6))) {
+    nSamp = floor((_t-0)/(_h_6));
+    nextTimeEventTmp = (nSamp + 1.0)*_h_6 + 0;
   }
-  if (ALMOST_GT_ZERO(remainder(t - 0,_h_6))) {
-    nSamp = round((t-0)/(_h_6));
-    nextTimeEventTmp = (nSamp+1)*_h_6 + 0;
-  }
-  if (nextTimeEventTmp<nextTimeEvent) {
+   if (nextTimeEventTmp<nextTimeEvent) {
     nextTimeEvent = nextTimeEventTmp;
   }
   *nextTime = nextTimeEvent;
@@ -3764,31 +3762,32 @@ model WhenTest3
   jmi_real_t nextTimeEvent;
   jmi_real_t nextTimeEventTmp;
   jmi_real_t nSamp;
-  jmi_real_t t;
   nextTimeEvent = JMI_INF;
-  nextTimeEventTmp = 0;
-  nSamp = 0;
-  t = jmi_get_t(jmi)[0];
   nextTimeEventTmp = JMI_INF;
-  if (SURELY_LT_ZERO(t - 0)) {
+  if (SURELY_LT_ZERO(_t - 0)) {
     nextTimeEventTmp = 0;
+  }  else if (ALMOST_ZERO(jmi_dremainder(_t - 0,jmi_divide(1,3,\"Divide by zero: ( 1 ) / ( 3 )\")))) {
+    nSamp = jmi_dround((_t-0)/(jmi_divide(1,3,\"Divide by zero: ( 1 ) / ( 3 )\")));
+    nextTimeEventTmp = (nSamp + 1.0)*jmi_divide(1,3,\"Divide by zero: ( 1 ) / ( 3 )\") + 0;
+  }  else if (SURELY_GT_ZERO(jmi_dremainder(_t - 0,jmi_divide(1,3,\"Divide by zero: ( 1 ) / ( 3 )\")))) {
+    nSamp = floor((_t-0)/(jmi_divide(1,3,\"Divide by zero: ( 1 ) / ( 3 )\")));
+    nextTimeEventTmp = (nSamp + 1.0)*jmi_divide(1,3,\"Divide by zero: ( 1 ) / ( 3 )\") + 0;
+
   }
-  if (ALMOST_GT_ZERO(remainder(t - 0,jmi_divide(1,3,\"Divide by zero: ( 1 ) / ( 3 )\")))) {
-    nSamp = round((t-0)/(jmi_divide(1,3,\"Divide by zero: ( 1 ) / ( 3 )\")));
-    nextTimeEventTmp = (nSamp+1)*jmi_divide(1,3,\"Divide by zero: ( 1 ) / ( 3 )\") + 0;
-  }
-  if (nextTimeEventTmp<nextTimeEvent) {
+   if (nextTimeEventTmp<nextTimeEvent) {
     nextTimeEvent = nextTimeEventTmp;
   }
   nextTimeEventTmp = JMI_INF;
-  if (SURELY_LT_ZERO(t - 0)) {
+  if (SURELY_LT_ZERO(_t - 0)) {
     nextTimeEventTmp = 0;
+  }  else if (ALMOST_ZERO(jmi_dremainder(_t - 0,jmi_divide(2,3,\"Divide by zero: ( 2 ) / ( 3 )\")))) {
+    nSamp = jmi_dround((_t-0)/(jmi_divide(2,3,\"Divide by zero: ( 2 ) / ( 3 )\")));
+    nextTimeEventTmp = (nSamp + 1.0)*jmi_divide(2,3,\"Divide by zero: ( 2 ) / ( 3 )\") + 0;
+  }  else if (SURELY_GT_ZERO(jmi_dremainder(_t - 0,jmi_divide(2,3,\"Divide by zero: ( 2 ) / ( 3 )\")))) {
+    nSamp = floor((_t-0)/(jmi_divide(2,3,\"Divide by zero: ( 2 ) / ( 3 )\")));
+    nextTimeEventTmp = (nSamp + 1.0)*jmi_divide(2,3,\"Divide by zero: ( 2 ) / ( 3 )\") + 0;
   }
-  if (ALMOST_GT_ZERO(remainder(t - 0,jmi_divide(2,3,\"Divide by zero: ( 2 ) / ( 3 )\")))) {
-    nSamp = round((t-0)/(jmi_divide(2,3,\"Divide by zero: ( 2 ) / ( 3 )\")));
-    nextTimeEventTmp = (nSamp+1)*jmi_divide(2,3,\"Divide by zero: ( 2 ) / ( 3 )\") + 0;
-  }
-  if (nextTimeEventTmp<nextTimeEvent) {
+   if (nextTimeEventTmp<nextTimeEvent) {
     nextTimeEvent = nextTimeEventTmp;
   }
   *nextTime = nextTimeEvent;

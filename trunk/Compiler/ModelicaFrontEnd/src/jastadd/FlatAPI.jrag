@@ -592,12 +592,24 @@ aspect FlatAPI {
 		guardExpInEquations().size();
 
 	coll ArrayList<FExp> FClass.guardExpInEquations() 
-	  [new ArrayList<FExp>()] with add root FlatRoot;
+	  [new ArrayList<FExp>()] with addAll root FlatRoot;
 	FWhenEquation contributes
     // Only include relational in the equation section which are 
     // not inside a noEvent operator
- 		getTest() when getTest().inEquationSection() && !getTest().inNoEventExp()
+ 		guards() when getTest().inEquationSection()
 	to FClass.guardExpInEquations() for myFClass();	
+		
+	syn ArrayList<FExp> FWhenEquation.guards() {
+		ArrayList<FExp> l = new ArrayList<FExp>();
+		if (!getTest().isArray()) {
+			l.add(getTest());
+		} else {
+			for (FExp e : getTest().getArray().iterable()) {
+				l.add(e);
+			}
+		}
+		return l;
+	}
 		
 	public int FExp.guardExpInEquationsIndex() {
 		return myFClass().guardExpInEquations().
@@ -665,11 +677,11 @@ aspect FlatAPI {
 		guardExpInInitialEquations().size();
 
 	coll ArrayList<FExp> FClass.guardExpInInitialEquations() 
-	  [new ArrayList<FExp>()] with add root FlatRoot;
+	  [new ArrayList<FExp>()] with addAll root FlatRoot;
 	FWhenEquation contributes
     // Only include relational in the equation section which are 
     // not inside a noEvent operator
- 		getTest() when getTest().inInitialEquationSection() && !getTest().inNoEventExp()
+ 		guards() when getTest().inInitialEquationSection()
 	to FClass.guardExpInInitialEquations() for myFClass();	
 		
 	public int FExp.guardExpInInitialEquationsIndex() {
