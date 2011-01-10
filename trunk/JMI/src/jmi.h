@@ -1393,6 +1393,14 @@ int jmi_init_dFp_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_var
 int jmi_init_eval_parameters(jmi_t* jmi);
 
 /**
+ * \brief Helper function. Copies values in z to zval.
+ *
+ * @param jmi A jmi_t struct.
+ * @return Error code.
+ */
+int jmi_copy_z_to_zval(jmi_t* jmi);
+
+/**
  * \brief Evaluate DAE event indicator residuals for the initialization system.
  *
  * The user sets the input variables by writing to
@@ -2077,6 +2085,14 @@ void jmi_lin_interpolate(jmi_real_t x, jmi_real_t *z , int n ,int m,
  * @return 1 for CppAD support, 0 if no CppAD support.
  */
 int jmi_with_cppad_derivatives();
+
+
+/**
+ * \brief Set start values for all non alias variables.
+ *  
+ * @param jmi A jmi_t struct.
+ */
+int jmi_set_start_values(jmi_t *jmi);
 
 /* @} */
 

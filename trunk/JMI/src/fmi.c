@@ -80,7 +80,10 @@ fmiComponent fmi_instantiate_model(fmiString instanceName, fmiString GUID, fmiCa
     component -> fmi_functions = functions;
     component -> fmi_logging_on = loggingOn;
     component -> jmi = jmi;
-
+    
+    /* set start values*/
+    jmi_set_start_values(component -> jmi);
+     
     return (fmiComponent)component;
 }
 
@@ -95,6 +98,7 @@ void fmi_free_model_instance(fmiComponent c) {
         fmi_free(c);
     }
 }
+
 fmiStatus fmi_set_debug_logging(fmiComponent c, fmiBoolean loggingOn) {
     ((fmi_t*)c) -> fmi_logging_on = loggingOn;
     return fmiOK;
@@ -106,13 +110,16 @@ fmiStatus fmi_set_time(fmiComponent c, fmiReal time) {
     *(jmi_get_t(((fmi_t *)c)->jmi)) = time;
     return fmiOK;
 }
+
 fmiStatus fmi_set_continuous_states(fmiComponent c, const fmiReal x[], size_t nx) {
 	memcpy (jmi_get_real_x(((fmi_t *)c)->jmi), x, nx*sizeof(fmiReal));
     return fmiOK;
 }
+
 fmiStatus fmi_completed_integrator_step(fmiComponent c, fmiBoolean* callEventUpdate) {
     return fmiOK;
 }
+
 fmiStatus fmi_set_real(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiReal value[]) {
     /* Get the z vector*/
     jmi_real_t* z = jmi_get_z(((fmi_t *)c)->jmi);
@@ -129,6 +136,7 @@ fmiStatus fmi_set_real(fmiComponent c, const fmiValueReference vr[], size_t nvr,
     }
     return fmiOK;
 }
+
 fmiStatus fmi_set_integer (fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiInteger value[]) {
     /* Get the z vector*/
     jmi_real_t* z = jmi_get_z(((fmi_t *)c)->jmi);
@@ -145,6 +153,7 @@ fmiStatus fmi_set_integer (fmiComponent c, const fmiValueReference vr[], size_t 
     }
     return fmiOK;
 }
+
 fmiStatus fmi_set_boolean (fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiBoolean value[]) {
     /* Get the z vector*/
     jmi_real_t* z = jmi_get_z(((fmi_t *)c)->jmi);
@@ -161,6 +170,7 @@ fmiStatus fmi_set_boolean (fmiComponent c, const fmiValueReference vr[], size_t 
     }
     return fmiOK;
 }
+
 fmiStatus fmi_set_string(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiString value[]) {
     /* Strings not yet supported. */
     (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiWarning, "INFO", "Strings are not yet supported.");
@@ -317,10 +327,11 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
     /* Reset atEvent flag */
     ((fmi_t *)c)->jmi->atEvent = JMI_FALSE;
 
-    /* Evaluate the guards with the event flag set to false in order to */
-    /* reset guards depending on samplers before copying pre values.
-    /* If this is not done, then the corresponding pre values for these guards
-    /* will be true, and no event will be triggered at the next sample. */
+    /* Evaluate the guards with the event flag set to false in order to 
+     * reset guards depending on samplers before copying pre values.
+     * If this is not done, then the corresponding pre values for these guards
+     * will be true, and no event will be triggered at the next sample. 
+     */
     retval = jmi_ode_guards(((fmi_t *)c)->jmi);
 
     if(retval != 0) { /* Error check */
@@ -362,6 +373,7 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
     
     return fmiOK;
 }
+
 fmiStatus fmi_get_derivatives(fmiComponent c, fmiReal derivatives[] , size_t nx) {
 	fmiInteger retval = jmi_ode_derivatives(((fmi_t *)c)->jmi);
 	if(retval != 0) {
@@ -371,6 +383,7 @@ fmiStatus fmi_get_derivatives(fmiComponent c, fmiReal derivatives[] , size_t nx)
 	memcpy (derivatives, jmi_get_real_dx(((fmi_t *)c)->jmi), nx*sizeof(fmiReal));
 	return fmiOK;
 }
+
 fmiStatus fmi_get_event_indicators(fmiComponent c, fmiReal eventIndicators[], size_t ni) {
     fmiInteger retval = jmi_dae_R(((fmi_t *)c)->jmi,eventIndicators);
     jmi_real_t *switches = jmi_get_sw(((fmi_t *)c)->jmi);
@@ -390,6 +403,7 @@ fmiStatus fmi_get_event_indicators(fmiComponent c, fmiReal eventIndicators[], si
     }
     return fmiOK;
 }
+
 fmiStatus fmi_get_real(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiReal value[]) {
     /* Get the z vector*/
     jmi_real_t* z = jmi_get_z(((fmi_t *)c)->jmi);
@@ -406,6 +420,7 @@ fmiStatus fmi_get_real(fmiComponent c, const fmiValueReference vr[], size_t nvr,
     }
     return fmiOK;
 }
+
 fmiStatus fmi_get_integer(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiInteger value[]) {
     /* Get the z vector*/
     jmi_real_t* z = jmi_get_z(((fmi_t *)c)->jmi);
@@ -422,6 +437,7 @@ fmiStatus fmi_get_integer(fmiComponent c, const fmiValueReference vr[], size_t n
     }
     return fmiOK;
 }
+
 fmiStatus fmi_get_boolean(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiBoolean value[]) {
     /* Get the z vector*/
     jmi_real_t* z = jmi_get_z(((fmi_t *)c)->jmi);
@@ -438,6 +454,7 @@ fmiStatus fmi_get_boolean(fmiComponent c, const fmiValueReference vr[], size_t n
     }
     return fmiOK;
 }
+
 fmiStatus fmi_get_string(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiString  value[]) {
     /* Strings not yet supported. */
     (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiWarning, "INFO", "Strings are not yet supported.");
@@ -639,10 +656,11 @@ fmiStatus fmi_event_update(fmiComponent c, fmiBoolean intermediateResults, fmiEv
     /* Reset atEvent flag */
     ((fmi_t *)c)->jmi->atEvent = JMI_FALSE;
 
-    /* Evaluate the guards with the event flat set to false in order to */
-    /* reset guards depending on samplers before copying pre values.
-    /* If this is not done, then the corresponding pre values for these guards
-    /* will be true, and no event will be triggered at the next sample. */
+    /* Evaluate the guards with the event flat set to false in order to 
+     * reset guards depending on samplers before copying pre values.
+     * If this is not done, then the corresponding pre values for these guards
+     * will be true, and no event will be triggered at the next sample. 
+     */
     retval = jmi_ode_guards(((fmi_t *)c)->jmi);
 
     if(retval != 0) { /* Error check */
@@ -656,10 +674,12 @@ fmiStatus fmi_event_update(fmiComponent c, fmiBoolean intermediateResults, fmiEv
 
     return fmiOK;
 }
+
 fmiStatus fmi_get_continuous_states(fmiComponent c, fmiReal states[], size_t nx) {
 	memcpy (states, jmi_get_real_x(((fmi_t *)c)->jmi), nx*sizeof(fmiReal));
     return fmiOK;
 }
+
 fmiStatus fmi_get_nominal_continuous_states(fmiComponent c, fmiReal x_nominal[], size_t nx) {
 	fmiReal* ones = ((fmi_t*)c) -> fmi_functions.allocateMemory(nx, sizeof(fmiReal));
 	fmiValueReference i;
@@ -669,6 +689,7 @@ fmiStatus fmi_get_nominal_continuous_states(fmiComponent c, fmiReal x_nominal[],
 	memcpy (x_nominal, ones, nx*sizeof(fmiReal));
     return fmiOK;
 }
+
 fmiStatus fmi_get_state_value_references(fmiComponent c, fmiValueReference vrx[], size_t nx) {
 	fmiInteger offset = ((fmi_t *)c)->jmi->offs_real_x;
 	fmiValueReference* valrefs = ((fmi_t*)c) -> fmi_functions.allocateMemory(nx, sizeof(fmiValueReference));
@@ -680,6 +701,7 @@ fmiStatus fmi_get_state_value_references(fmiComponent c, fmiValueReference vrx[]
 	memcpy (vrx, valrefs, nx*sizeof(fmiReal));
     return fmiOK;
 }
+
 fmiStatus fmi_terminate(fmiComponent c) {
     /* Release all resources that have been allocated since fmi_initialize has been called. */
     return fmiOK;
