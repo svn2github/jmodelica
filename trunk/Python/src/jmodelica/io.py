@@ -747,17 +747,19 @@ class ResultWriterDymolaSensitivity(ResultWriter):
         sens_x = model.get_x_variable_names()
         sens_w = model.get_w_variable_names()
         
+        # sort in value reference order (must match order in data)
         sens_xw = sens_x+sens_w
+        sens_xw = sorted(sens_xw, key=itemgetter(0))
         
         sens_names = []
         sens_desc = []
         
         for j in range(len(sens_p)):
+            #(ref_param, type) = jmodelica.jmi._translate_value_ref(sens_p[j][0])
             for i in range(len(sens_xw)):
                 sens_names += ['d'+sens_xw[i][1]+'/d'+sens_p[j][1]]
                 sens_desc  += ['Sensitivity of '+sens_xw[i][1]+' with respect to '+sens_p[j][1]+'.']
-        
-        
+
         # sort in value reference order (must match order in data)
         names = sorted(md.get_variable_names(), key=itemgetter(0))
         aliases = sorted(md.get_variable_aliases(), key=itemgetter(0))
@@ -835,8 +837,6 @@ class ResultWriterDymolaSensitivity(ResultWriter):
                     f.write('1 %d 0 -1 # ' % cnt_1 + name[1]+'\n')
                 else: # negated alias
                     f.write('1 -%d 0 -1 # ' % cnt_1 + name[1] +'\n')
-                
-                
             else:
                 if aliases[i][1] == 0: # noalias
                     cnt_2 = cnt_2 + 1   
@@ -848,12 +848,36 @@ class ResultWriterDymolaSensitivity(ResultWriter):
         
         self._nvariables_without_sens = cnt_2
         
+        sens_param_res = []
+        
         #Write sensitivity variables into the table (No alias, no parameters)
         for i,name in enumerate(sens_names):
-            cnt_2 = cnt_2+1
-            f.write('2 %d 0 -1 # ' % cnt_2 + name + '\n')
+            name_split = name.split('/')
+            param = name_split[1][1:]
+            var   = name_split[0][1:]
+            (ref_param, type) = jmodelica.jmi._translate_value_ref(model.get_value_reference(param))
+            (ref_var  , type) = jmodelica.jmi._translate_value_ref(model.get_value_reference(var))
             
-        
+            if int(ref_var) < n_parameters: # Put parameters in data set
+                cnt_1 = cnt_1 + 1
+                f.write('1 %d 0 -1 # ' % cnt_1 + name +'\n')
+                
+                if ref_param == ref_var:
+                    if model.is_negated_alias(var):
+                        sens_param_res += [-1.0]
+                    else:
+                        sens_param_res += [1.0]
+                else:
+                    sens_param_res += [0.0]
+            else:
+                if not md.is_alias(var):
+                    cnt_2 = cnt_2+1
+                    f.write('2 %d 0 -1 # ' % cnt_2 + name + '\n')
+                elif md.is_negated_alias(var):
+                    f.write('2 -%d 0 -1 # ' % cnt_2 + name + '\n')
+                else:
+                    f.write('2 %d 0 -1 # ' % cnt_2 + name + '\n')
+
         self._nvariables_total = cnt_2 #Store the number of variables
         f.write('\n')
 
@@ -863,19 +887,18 @@ class ResultWriterDymolaSensitivity(ResultWriter):
 
         # Write data
         # Write data set 1
-        f.write('float data_1(%d,%d)\n' % (2, n_parameters + 1))
+        f.write('float data_1(%d,%d)\n' % (2, cnt_1))
         
         str_text = ''
         for ref in range(n_parameters):
-            #print ref
             if self._rescale:
-                #print z[ref]*sc[ref]
-                #print "hej"
                 str_text += " %12.12f" % (z[ref]*sc[ref])
             else:
-                #print z[ref]
-                #print "hopp"
                 str_text += " %12.12f" % (z[ref])
+        
+        # Write sensitivity data set 1
+        for i in range(cnt_1-1-n_parameters):
+            str_text += " %12.12f " % sens_param_res[i]
         
         #f.write("%12.12f" % data[0,0])
         self._point_first_t = f.tell()
@@ -912,12 +935,7 @@ class ResultWriterDymolaSensitivity(ResultWriter):
         rescale = self._rescale
         sc = self._sc
         n_parameters = self._n_parameters
-        #If data is none, store the current point from the model
-        #if data==None:
-        #    #Retrieves the time-point
-        #    [r,i,b] = self.model.save_time_point()
-        #    data = N.append(N.append(N.append(self.model.time,r),i),b)
-        #Store the start time
+
         if self._npoints == 0:
             self._tstart = data[0]
         

@@ -1230,3 +1230,36 @@ class Test_JMI_DAE_Sens:
         
         assert res.solver.usejac == True
         assert prob.j == prob.jac
+
+    @testattr(assimulo = True)
+    def test_alias_variables(self):
+        """
+        This tests a simulation when there are alias in the sensitivity parameters.
+        """
+        #DAE with sens
+        file_name = os.path.join(get_files_path(), 'Modelica', 
+            'SensitivityTests.mop')
+        model_name = 'SensitivityTests.SensTest1'
+        
+        jmu_name = compile_jmu(model_name, file_name)
+        
+        model = JMUModel(jmu_name)
+        
+        opts = model.simulate_options()
+        
+        opts['IDA_options']['sensitivity'] = True
+        
+        res = model.simulate(options=opts)
+        
+        x1 = res['dx1/da']
+        x2 = res['dx2/da']
+        x3 = res['dx3/da']
+        x4 = res['dx4/da']
+        x5 = res['dx5/da']
+        
+        nose.tools.assert_almost_equal(x2[-1], 0.000000, 4)
+        nose.tools.assert_almost_equal(x3[-1], 1.000000, 4)
+        nose.tools.assert_almost_equal(x4[-1], -1.000000,4)
+        nose.tools.assert_almost_equal(x1[-1], x5[-1], 4)
+        
+        

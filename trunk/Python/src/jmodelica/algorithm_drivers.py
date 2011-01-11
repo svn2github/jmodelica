@@ -30,6 +30,7 @@ from jmodelica.io import ResultDymolaTextual
 from jmodelica.optimization import ipopt
 from jmodelica.initialization.ipopt import NLPInitialization
 from jmodelica.initialization.ipopt import InitializationOptimizer
+from jmodelica.xmlparser import XMLException
 
 try:
     from jmodelica.simulation.assimulo_interface import JMIDAE, JMIODE, FMIODE
@@ -194,7 +195,15 @@ class JMResultBase(ResultBase):
         if self.is_variable(key):
             return val.x
         else:
-            variability = self.model.get_variability(key)
+            #When there is a sensitivity variable (dx/dp) in the result
+            #the variable does not exists in the XML file, so cache the
+            #error and set variability to 0. If the variable does not
+            #exists in the result file, an error is raised prior to this.
+            try:
+                variability = self.model.get_variability(key)
+            except XMLException:
+                variability = 0
+                
             if variability == 1 or variability == 2: 
             #Variable is a parameter or constant
                 return val.x[0]
