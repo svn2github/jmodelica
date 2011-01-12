@@ -117,6 +117,7 @@ fmiStatus fmi_set_continuous_states(fmiComponent c, const fmiReal x[], size_t nx
 }
 
 fmiStatus fmi_completed_integrator_step(fmiComponent c, fmiBoolean* callEventUpdate) {
+    *callEventUpdate = fmiFalse;
     return fmiOK;
 }
 
