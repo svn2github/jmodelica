@@ -176,8 +176,13 @@ class FMUModel(BaseModel):
     
     def __init__(self, fmu, path='.'):
         """
-        Contructor.
+        Constructor.
         """
+        
+        # Check that the file referenced by fmu has the correct file-ending
+        ext = os.path.splitext(fmu)[1]
+        if ext != ".fmu":
+            raise FMUException("FMUModel must be instantiated with an FMU (.fmu) file.")
                 
         #Detect Platform
         platform = ''

@@ -337,6 +337,14 @@ class Test_FMI:
         """
         assert isinstance(self._bounce.simulate_options(), ad.AssimuloFMIAlgOptions)
         
+    @testattr(fmi = True)
+    def test_instantiate_jmu(self):
+        """ 
+        Test that FMUModel can not be instantiated with a JMU file.
+        """
+        nose.tools.assert_raises(FMUException,FMUModel,'model.jmu')
+        
+        
 class Test_FMI_Compile:
     """
     This class tests jmodelica.fmi compilation functionality.
