@@ -65,7 +65,7 @@ class Test_Compiler:
         self.cpath_oc = "Pendulum_pack.Pendulum_Opt"
 
     @testattr(stddist = True)
-    def test_compile(self):
+    def test_compile_JMU(self):
         """
         Test that compilation is possible with compiler 
         and that all obligatory files are created. 
@@ -80,23 +80,14 @@ class Test_Compiler:
         else:
             suffix = '.so'
             
-        mc.compile_model(self.cpath_mc, self.fpath_mc)
+        mc.compile_JMU(self.cpath_mc, [self.fpath_mc], 'model', '.')
         
         fname = self.cpath_mc.replace('.','_',1)
-        assert os.access(fname+'.xml',os.F_OK) == True, \
-               fname+'.xml'+" was not created."
-        
-        assert os.access(fname+'_values.xml', os.F_OK) == True, \
-               fname+'_values.xml'+" was not created."
-        
-        assert os.access(fname+'.c', os.F_OK) == True, \
-               fname+'.c'+" was not created."        
-        
-        assert os.access(fname+suffix, os.F_OK) == True, \
-               fname+suffix+" was not created."
+        assert os.access(fname+'.jmu',os.F_OK) == True, \
+               fname+'.jmu'+" was not created."
 
     @testattr(stddist = True)
-    def test_optimica_compile(self):
+    def test_optimica_compile_JMU(self):
         """
         Test that compilation is possible with optimicacompiler
         and that all obligatory files are created. 
@@ -111,40 +102,31 @@ class Test_Compiler:
         else:
             suffix = '.so'
             
-        oc.compile_model(self.cpath_oc, self.fpath_oc)
+        oc.compile_JMU(self.cpath_oc, [self.fpath_oc], 'model', '.')
         
         fname = self.cpath_oc.replace('.','_',1)
-        assert os.access(fname+'.xml',os.F_OK) == True, \
-               fname+'.xml'+" was not created."
-        
-        assert os.access(fname+'_values.xml', os.F_OK) == True, \
-               fname+'_values.xml'+" was not created."
-            
-        assert os.access(fname+'.c', os.F_OK) == True, \
-               fname+'.c'+" was not created."        
-        
-        assert os.access(fname+suffix, os.F_OK) == True, \
-               fname+suffix+" was not created."
+        assert os.access(fname+'.jmu',os.F_OK) == True, \
+               fname+'.jmu'+" was not created."
                
     @testattr(stddist = True)
     def test_compile_wtarget_alg(self):
         """ Test that it is possible to compile (compiler.py) with target algorithms. """
-        mc.compile_model(self.cpath_mc, self.fpath_mc, target='algorithms')
+        mc.compile_JMU(self.cpath_mc, [self.fpath_mc], 'algorithms', '.')
     
     @testattr(stddist = True)
     def test_optimica_compile_wtarget_alg(self):
         """ Test that it is possible to compile (optimicacompiler.py) with target algorithms. """
-        oc.compile_model(self.cpath_oc, self.fpath_oc, target='algorithms')
+        oc.compile_JMU(self.cpath_oc, [self.fpath_oc], 'algorithms', '.')
 
     @testattr(ipopt = True)
     def test_compile_wtarget_ipopt(self):
         """ Test that it is possible to compile (compiler.py) with target ipopt. """
-        mc.compile_model(self.cpath_mc, self.fpath_mc, target='ipopt')
+        mc.compile_JMU(self.cpath_mc, [self.fpath_mc], 'ipopt', '.')
 
     @testattr(ipopt = True)
     def test_optimica_compile_wtarget_ipopt(self):
         """ Test that it is possible to compile (optimicacompiler.py) with target ipopt. """
-        oc.compile_model(self.cpath_oc, self.fpath_oc, target='ipopt')
+        oc.compile_JMU(self.cpath_oc, [self.fpath_oc], 'ipopt', '.')
 
     @testattr(stddist = True)
     def test_stepbystep(self):
@@ -153,7 +135,6 @@ class Test_Compiler:
         icd = mc.instantiate_model(sourceroot, self.cpath_mc)
         fclass = mc.flatten_model(icd)
         mc.generate_code(fclass)
-        mc.compile_binary(self.cpath_mc.replace('.','_',1))
 
     @testattr(stddist = True)
     def test_optimica_stepbystep(self):
@@ -162,29 +143,28 @@ class Test_Compiler:
         icd = oc.instantiate_model(sourceroot, self.cpath_oc)
         fclass = oc.flatten_model(icd)
         oc.generate_code(fclass)
-        oc.compile_binary(self.cpath_oc.replace('.','_',1))
 
     @testattr(stddist = True)
     def test_compiler_error(self):
         """ Test that a CompilerError is raised if compilation errors are found in the model."""
         path = os.path.join(get_files_path(), 'Modelica','CorruptCodeGenTests.mo')
         cl = 'CorruptCodeGenTests.CorruptTest1'
-        nose.tools.assert_raises(jm.compiler.CompilerError, mc.compile_model, cl, path)
-        nose.tools.assert_raises(jm.compiler.CompilerError, oc.compile_model, cl, path)
+        nose.tools.assert_raises(jm.compiler.CompilerError, mc.compile_JMU, cl, [path], 'model', '.')
+        nose.tools.assert_raises(jm.compiler.CompilerError, oc.compile_JMU, cl, [path], 'model', '.')
 
     @testattr(stddist = True)
     def test_class_not_found_error(self):
         """ Test that a ModelicaClassNotFoundError is raised if model class is not found. """
         errorcl = 'NonExisting.Class'
-        nose.tools.assert_raises(jm.compiler.ModelicaClassNotFoundError, mc.compile_model, errorcl, self.fpath_mc)
-        nose.tools.assert_raises(jm.compiler.OptimicaClassNotFoundError, oc.compile_model, errorcl, self.fpath_oc)
+        nose.tools.assert_raises(jm.compiler.ModelicaClassNotFoundError, mc.compile_JMU, errorcl, [self.fpath_mc], 'model', '.')
+        nose.tools.assert_raises(jm.compiler.OptimicaClassNotFoundError, oc.compile_JMU, errorcl, [self.fpath_oc], 'model', '.')
 
     @testattr(stddist = True)
     def test_IO_error(self):
-        """ Test that an IOError is raised if the model file is not found. """          
+        """ Test that an IOError is raised if the model file is not found. """
         errorpath = os.path.join(get_files_path(), 'Modelica','NonExistingModel.mo')
-        nose.tools.assert_raises(IOError, mc.compile_model, self.cpath_mc, errorpath)
-        nose.tools.assert_raises(IOError, oc.compile_model, self.cpath_oc, errorpath)
+        nose.tools.assert_raises(IOError, mc.compile_JMU, self.cpath_mc, [errorpath], 'model', '.')
+        nose.tools.assert_raises(IOError, oc.compile_JMU, self.cpath_oc, [errorpath], 'model', '.')
 
     @testattr(stddist = True)
     def test_setget_modelicapath(self):
@@ -249,7 +229,7 @@ class Test_Compiler:
         """ Test that it is possible to compile two model files. """
         lib = os.path.join(get_files_path(), 'Modelica','CSTRLib.mo')
         opt = os.path.join(get_files_path(), 'Modelica','CSTR2_Opt.mo')
-        oc.compile_model('CSTR2_Opt', [lib,opt])
+        oc.compile_JMU('CSTR2_Opt', [lib,opt], 'ipopt', '.')
 
     @testattr(stddist = True)
     def test_setget_boolean_option(self):
@@ -358,21 +338,12 @@ class Test_Compiler:
 
         # Turn off structural analysis since the problem is of high index
         mc.set_boolean_option("enable_structural_diagnosis",False)    
-        mc.compile_model(cpath, [])
+        mc.compile_JMU(cpath, [], 'model', '.')
         mc.set_boolean_option("enable_structural_diagnosis",True)    
         
         fname = cpath.replace('.','_')
-        assert os.access(fname+'.xml',os.F_OK) == True, \
-               fname+'.xml'+" was not created."
-        
-        assert os.access(fname+'_values.xml', os.F_OK) == True, \
-               fname+'_values.xml'+" was not created."
-        
-        assert os.access(fname+'.c', os.F_OK) == True, \
-               fname+'.c'+" was not created."        
-        
-        assert os.access(fname+suffix, os.F_OK) == True, \
-               fname+suffix+" was not created."
+        assert os.access(fname+'.jmu',os.F_OK) == True, \
+               fname+'.jmu'+" was not created."
 
     @testattr(ipopt = True)
     def TO_ADDtest_MODELICAPATH(self):

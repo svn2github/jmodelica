@@ -37,7 +37,7 @@ import atexit
 from lxml import etree
 
 from jmodelica import xmlparser
-from jmodelica.core import BaseModel, unzip_unit, package_unit, get_unit_name
+from jmodelica.core import BaseModel, unzip_unit, get_unit_name
 from jmodelica.compiler import ModelicaCompiler
 from jmodelica.compiler import OptimicaCompiler
 import jmodelica.io
@@ -5981,21 +5981,6 @@ def get_jmu_name(class_name):
         The JMU name (replaced dots with underscores).
     """
     return get_unit_name(class_name, unit_type='JMU')
-
-def package_JMU(class_name, path='.'):
-    """
-    Method that takes as input a class name and package all model related files 
-    into a JMU.
-    
-    Parameters::
-    
-        class_name --
-            The name of the model.
-            
-        path --
-            The directory to compile to. Created if does not exist.
-    """
-    package_unit(class_name, path=path, unit_type='JMU')
         
 def compile_jmu(class_name, file_name=[], compiler='modelica', target='ipopt', 
     compiler_options={}, compile_to='.'):
@@ -6061,7 +6046,7 @@ def compile_jmu(class_name, file_name=[], compiler='modelica', target='ipopt',
             Default: Empty dict.
             
         compile_to --
-            Specify location of the compiled jmu. Directory will be created if 
+            Specify location of the compiled JMU. Directory will be created if 
             it does not exist.
             Default: Current directory.
             
@@ -6104,12 +6089,6 @@ def compile_jmu(class_name, file_name=[], compiler='modelica', target='ipopt',
             
     # compile jmu in Java
     comp.compile_JMU(class_name, file_name, target, compile_to)
-                
-    #compile model
-    #comp.compile_model(class_name, file_name, target=target)
-    
-    # pack JMU file
-    #package_JMU(class_name, compile_to)
     
     return os.path.join(compile_to, get_jmu_name(class_name))
 

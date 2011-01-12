@@ -106,7 +106,7 @@ class ModelicaCompiler():
             self._compiler = self.ModelicaCompiler(options, 
                                                    self.jmodelica_tpl,
                                                    self.model_values_tpl,
-                                                   self.c_tpl_path)           
+                                                   self.c_tpl_path)
             
     @classmethod
     def set_log_level(self,level):
@@ -385,77 +385,65 @@ class ModelicaCompiler():
         
         
     def compile_JMU(self, class_name, file_name, target, compile_to):
-        self._compiler.compileJMU(class_name, file_name, target, compile_to)
+        """
+        Compiles a model (parsing, instantiating, flattening, code generation 
+        and binary file generation) and creates a JMU on the file system. Set 
+        target to specify the contents of the object file used to build the 
+        binary. The options are "model", "model_noad", "algorithms" and "ipopt". 
+        See makefile in install folder for details on the different targets.
         
-    def compile_FMU(self, class_name, file_name, target, compile_to):
-        self._compiler.compileFMU(class_name, file_name, target, compile_to)
-
-    def compile_model(self,
-                      model_class_name,
-                      model_file_name,
-                      target = "model"):
-    
-        """ 
-        Compile a model.
-
-        Perform all steps in the compilation of a model: parsing, instantiating, 
-        flattening, code generation and binary file generation. Outputs are 
-        object file, c-code file, xml file and binary file which are all written 
-        to the folder in which the compilation is performed. All files will get 
-        the default name <model_class_name>.<ext>. Set target to specify the 
-        contents of the object file used to build the binary. Default is"model". 
-        Other three options are "model_noad", "algorithms" and "ipopt". See 
-        makefile in install folder for details.
-
         Parameters::
         
-            model_class_name -- 
+            class_name --
                 Name of model class in the model file to compile.
-                
-            model_file_name -- 
+            
+            file_name --
                 Path to file or list of paths to files in which the model is 
                 contained.
                 
-            target -- 
+            target --
                 The build target. Valid options are 'model', 'model_noad', 
                 'algorithms' and 'ipopt'.
-                Default: 'model'
-
-        Raises::
-        
-            CompilerError if one or more error is found during compilation.
-            
-            ModelicaClassNotFoundError if the model class is not found.
-            
-            IOError if the model file is not found, can not be read or any other 
-            IO related error.
-            
-            Exception if there are general errors related to the parsing of the 
-            model.
-            
-            JError if there was a runtime exception thrown by the underlying 
-            Java classes.
-
+                
+            compile_to --
+                Specify location of the compiled JMU. Directory will be created 
+                if it does not exist.
         """
-        if isinstance(model_file_name, basestring):
-            model_file_name = [model_file_name]
         try:
-            self._compiler.compileModel(model_file_name, model_class_name)
-            c_file = model_class_name.replace('.','_')
+            self._compiler.compileJMU(class_name, file_name, target, compile_to)
+        except jpype.JavaException, ex:
+            self._handle_exception(ex)
+        
+    def compile_FMU(self, class_name, file_name, target, compile_to):
+        """
+        Compiles a model (parsing, instantiating, flattening, code generation 
+        and binary file generation) and creates an FMU on the file system. Set 
+        target to specify the contents of the object file used to build the 
+        binary. The options are "model", "model_noad", "algorithms" and "ipopt". 
+        See makefile in install folder for details on the different targets.
+        
+        Note: target must currently be set to 'model_noad'.
+        
+        Parameters::
+        
+            class_name --
+                Name of model class in the model file to compile.
             
-            # get external libs and include dirs from XML doc
-            xml_file=c_file+'.xml'
-            xmldoc = xmlparser.ModelDescription(xml_file)
-            ext_libs = xmldoc.get_external_libraries()
-            ext_lib_dirs = xmldoc.get_external_lib_dirs()
-            ext_incl_dirs = xmldoc.get_external_incl_dirs()
-            
-            if len(ext_libs) > 0:
-                self.compile_binary(c_file, target, ext_libs=ext_libs, 
-                    ext_lib_dirs=ext_lib_dirs, ext_incl_dirs=ext_incl_dirs)
-            else:
-                self.compile_binary(c_file, target)
-
+            file_name --
+                Path to file or list of paths to files in which the model is 
+                contained.
+                
+            target --
+                The build target. Valid options are 'model', 'model_noad', 
+                'algorithms' and 'ipopt'.
+                Note: Must currently be set to 'model_noad'.
+                
+            compile_to --
+                Specify location of the compiled FMU. Directory will be created 
+                if it does not exist.
+        """
+        try:
+            self._compiler.compileFMU(class_name, file_name, target, compile_to)
         except jpype.JavaException, ex:
             self._handle_exception(ex)
 
@@ -593,116 +581,6 @@ class ModelicaCompiler():
             self._compiler.generateCode(fclass)
         except jpype.JavaException, ex:
             self._handle_exception(ex)
-
-    def compile_binary(self, c_file_name, target="model", ext_libs=[], 
-            ext_lib_dirs=[], ext_incl_dirs=[]):
-        """ 
-        Compile a c code representation of a model.
-
-        Compile a c code representation of a model and output a binary file. 
-        Default output folder is the current folder from which this module is 
-        run. Needs a c-file which is generated with generate_code.
-        
-        If there are external functions in the model, the libaries, library 
-        directories and include directories should be passed in ext_libs, 
-        ext_lib_dirs and ext_incl_dirs lists respectively. External functions 
-        can currently only be combined with the target 'model_noad'.
-        
-        Parameters::
-        
-            c_file_name --
-                Name of c-file for which the binary file should be compiled 
-                without file extention.
-            
-            target --
-                Build target. Valid options are 'model', 'model_noad', 
-                'algorithm' and 'ipopt'.
-                Default: model
-            
-            ext_libs --
-                List of external libraries.
-                Default: Empty list.
-            
-            ext_lib_dirs --
-                List of external library directories.
-                Default: Empty list.
-            
-            ext_incl_dirs --
-                List of external include file directories.
-                Default: Empty list.
-        """
-        #make settings
-        make_file = os.path.join(self.jm_home, 'Makefiles', 'MakeFile')
-        file_name =' FILE_NAME=' + c_file_name
-        jmodelica_h =' JMODELICA_HOME=' + self.jm_home
-        cppad_h = ' CPPAD_HOME=' + jm.environ['CPPAD_HOME']
-        ipopt_h = ' IPOPT_HOME=' + jm.environ['IPOPT_HOME']
-        sundials_h = ' SUNDIALS_HOME=' + jm.environ['SUNDIALS_HOME']
-        
-        # external library directories
-        platform_dir = _get_platform()
-            
-        extlibdirs = ' EXT_LIB_DIRS=\"'
-        for libdir in ext_lib_dirs:
-            if os.path.exists(os.path.join(libdir, platform_dir)):
-                extlibdirs = extlibdirs + os.path.join(libdir, platform_dir)
-            else:
-                extlibdirs = extlibdirs + libdir
-        extlibdirs = extlibdirs+"\""
-        
-        # external libraries
-        extlibs = ' EXT_LIBS=\"'
-        s = ' '
-        libs = s.join(ext_libs)
-        extlibs = extlibs+libs+"\""
-
-        # external include directories
-        extincdir = ' EXT_INC_DIRS=\"'
-        s = ' '
-        incdir = s.join(ext_incl_dirs)
-        extincdir = extincdir+incdir+"\""
-
-        if sys.platform == 'win32':
-            make = os.path.join(
-                jm.environ['MINGW_HOME'],'bin','mingw32-make') + ' -f '
-            compiler = ' CXX=' + os.path.join(
-                jm.environ['MINGW_HOME'],'bin','g++')
-            ar = ' AR=' + os.path.join(os.environ['MINGW_HOME'],'bin','ar')
-
-            cmd = make + \
-                  make_file + \
-                  compiler + \
-                  ar + \
-                  ' ' + \
-                  target + \
-                  file_name + \
-                  jmodelica_h + \
-                  cppad_h + \
-                  ipopt_h + \
-                  sundials_h + \
-                  extlibdirs + \
-                  extlibs + \
-                  extincdir
-        else:
-            cmd = 'make -f' + \
-                  make_file + \
-                  ' ' + \
-                  target + \
-                  file_name + \
-                  jmodelica_h + \
-                  cppad_h + \
-                  ipopt_h + \
-                  sundials_h + \
-                  extlibdirs + \
-                  extlibs + \
-                  extincdir
-
-        #run make -> <model_class_name>.dll
-        retcode = subprocess.call(cmd, shell=True)
-        if retcode != 0:
-            raise CcodeCompilationError("Retcode was: "+str(retcode))
-        else:
-            print >>sys.stderr, "make returned", retcode
             
     def _handle_exception(self, ex):
         """ 

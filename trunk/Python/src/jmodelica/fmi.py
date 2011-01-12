@@ -32,7 +32,7 @@ from lxml import etree
 
 import jmodelica.jmi
 from jmodelica import xmlparser
-from jmodelica.core import BaseModel, unzip_unit, package_unit, get_unit_name
+from jmodelica.core import BaseModel, unzip_unit, get_unit_name
 from jmodelica.compiler import ModelicaCompiler, OptimicaCompiler
 
 def compile_fmu(class_name, file_name=[], compiler='modelica', target='model_noad', 
@@ -100,7 +100,7 @@ def compile_fmu(class_name, file_name=[], compiler='modelica', target='model_noa
             Default: Empty dict.
             
         compile_to --
-            Specify location of the compiled jmu. Directory will be created if 
+            Specify location of the compiled FMU. Directory will be created if 
             it does not exist.
             Default: Current directory.
             
@@ -144,12 +144,6 @@ def compile_fmu(class_name, file_name=[], compiler='modelica', target='model_noa
     # compile FMU in java
     comp.compile_FMU(class_name, file_name, target, compile_to)
     
-    #compile model
-    #comp.compile_model(class_name, file_name, target=target)
-    
-    # pack FMU file
-    #package_FMU(class_name, path=compile_to)
-    
     return os.path.join(compile_to, get_fmu_name(class_name))
     
     
@@ -167,21 +161,6 @@ def get_fmu_name(class_name):
         The FMU name (replaced dots with underscores).
     """
     return get_unit_name(class_name, unit_type='FMU')
-    
-def package_FMU(class_name, path='.'):
-    """
-    Method that takes as input a class name and package all model related files 
-    into a FMU.
-    
-    Parameters::
-    
-        class_name --
-            The name of the model.
-            
-        path --
-            The directory to compile to. Created if does not exist.
-    """
-    package_unit(class_name, path=path, unit_type='FMU')
 
 class FMUException(Exception):
     """
