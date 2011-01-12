@@ -405,6 +405,17 @@ public class ModelicaCompiler {
 		}
 	}
 	
+	/**
+	 * \brief Compiles a model and creates a JMU.
+	 * 
+	 * Compiles a model (parsing, instantiating, flattening, code generation and 
+	 * binary file compilation) and packs the result in a JMU.
+	 * 
+	 * @param className Name of model class in the model file to compile.
+	 * @param fileName Array of model file paths.
+	 * @param target The build target. Valid options are 'model', 'model_noad', 'algorithms' and 'ipopt'.
+	 * @param compileTo Specify location of the compiled JMU. Directory will be created if it does not exist.
+	 */
 	public void compileJMU(String className, String fileName[], String target, String compileTo) 
 		throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, beaver.Parser.Exception {
 		log.info("START COMPILING JMU...");	
@@ -412,6 +423,17 @@ public class ModelicaCompiler {
 		log.info("...COMPILING JMU finished");
 	}
 
+	/**
+	 * \brief Compiles a model and creates a FMU.
+	 * 
+	 * Compiles a model (parsing, instantiating, flattening, code generation and 
+	 * binary file compilation) and packs the result in a FMU.
+	 * 
+	 * @param className Name of model class in the model file to compile.
+	 * @param fileName Array of model file paths.
+	 * @param target The build target. Currently only "model_noad" is supported. 
+	 * @param compileTo Specify location of the compiled FMU. Directory will be created if it does not exist.
+	 */
 	public void compileFMU(String className, String fileName[], String target, String compileTo) 
 		throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, beaver.Parser.Exception {
 		log.info("START COMPILING FMU...");
@@ -422,6 +444,11 @@ public class ModelicaCompiler {
 		log.info("...COMPILING FMU finished");
 	}
 
+	/**
+	 * \brief Compiles a JMU or FMU (helper function for compileJMU and compileFMU).
+	 * 
+	 * @param unitType "JMU" or "FMU".
+	 */
 	private void compileUnit(String className, String fileName[], String target, String compileTo, String unitType) 
 		throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, beaver.Parser.Exception {
 		// compile mo-file + generate code
@@ -435,6 +462,13 @@ public class ModelicaCompiler {
 		this.packUnit(className, compileTo, unitType);		
 	}
 	
+	/**
+	 * \brief Packs either a JMU or FMU (helper function for compileUnit).
+	 * 
+	 * @param className Name of model class that was compiled (will determine file names).
+	 * @param path Location on file system where the packed file should be saved (created if does not exist).
+	 * @param unitType "JMU" or "FMU".
+	 */
 	private void packUnit(String className, String path, String unitType) {
 		String filesep = File.separator;
 		File dirPath = new File(path);
