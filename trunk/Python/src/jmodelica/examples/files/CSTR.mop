@@ -87,7 +87,7 @@ optimization CSTR_Opt2(objective=(cost(finalTime)),
   parameter Real q_c = 1;
   parameter Real q_T = 1;
   parameter Real q_Tc = 1;
-  //Real q = 2*u;
+  Real q = 2*u;
 equation
   der(cost) = 1e-4*(q_c*(c_ref-cstr.c)^2 + q_T*(T_ref-cstr.T)^2 + 
                   q_Tc*(Tc_ref-cstr.Tc)^2);

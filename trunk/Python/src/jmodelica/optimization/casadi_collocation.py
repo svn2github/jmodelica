@@ -34,25 +34,6 @@ from jmodelica.io import VariableNotFoundError
 
 import matplotlib.pyplot as plt
 
-# This function is needed since CasADi creates derivative names
-# differently than those present in the FMI XML files:
-# FMI: x.der(y)
-# CasADI: der(x.y)
-def convert_der_name(dx_name):
-    name = dx_name.split('(')
-    name = name[1].split(')')
-    name = name[0]
-    name_parts = name.split('.')
-    i = 0
-    final_name = ''
-    for n in name_parts:
-        if i==len(name_parts)-1:
-            final_name = final_name + 'der(' + n + ')'
-        else:
-            final_name = final_name + n + '.'
-            i = i+1
-    return final_name
-
 class XMLOCP:
 
     def __init__(self,fname):
@@ -67,47 +48,46 @@ class XMLOCP:
         self.ocp = self.parser.parse()
 
         # Sort the variables according to type
-        self.ocp.sortVariables()
+        self.var = casadi.OCPVariables(self.ocp.variables)
 
         # Make sure the variables appear in value reference order
-
-        var_dict = dict((convert_der_name(str(v)),v) for v in self.ocp.xdot)            
-        name_dict = dict((x[0],x[1]) for x in self.xmldoc.get_dx_variable_names(include_alias = False))        
-        i = 0;
-        for vr in sorted(name_dict.keys()):
-            self.ocp.xdot[i] = var_dict[name_dict[vr]]
-            i = i + 1
-
-        var_dict = dict((str(v),v) for v in self.ocp.x)            
+        var_dict = dict((repr(v),v) for v in self.var.x)            
         name_dict = dict((x[0],x[1]) for x in self.xmldoc.get_x_variable_names(include_alias = False))        
         i = 0;
         for vr in sorted(name_dict.keys()):
-            self.ocp.x[i] = var_dict[name_dict[vr]]
+            self.var.x[i] = var_dict[name_dict[vr]]
             i = i + 1
 
-        var_dict = dict((str(v),v) for v in self.ocp.u)            
+        var_dict = dict((repr(v),v) for v in self.var.u)            
         name_dict = dict((x[0],x[1]) for x in self.xmldoc.get_u_variable_names(include_alias = False))        
         i = 0;
         for vr in sorted(name_dict.keys()):
-            self.ocp.u[i] = var_dict[name_dict[vr]]
+            self.var.u[i] = var_dict[name_dict[vr]]
             i = i + 1
 
-        var_dict = dict((str(v),v) for v in self.ocp.xa)            
+        var_dict = dict((repr(v),v) for v in self.var.z)            
         name_dict = dict((x[0],x[1]) for x in self.xmldoc.get_w_variable_names(include_alias = False))        
         i = 0;
         for vr in sorted(name_dict.keys()):
-            self.ocp.xa[i] = var_dict[name_dict[vr]]
+            self.var.z[i] = var_dict[name_dict[vr]]
             i = i + 1
 
+        # Get the variables
+        self.xdot = casadi.der(self.var.x)
+        self.x = casadi.sx(self.var.x)
+        self.u = casadi.sx(self.var.u)
+        self.w = casadi.sx(self.var.z)
+        self.t = self.var.t.sx()
+
         self.ocp_inputs = []
-        self.ocp_inputs += self.ocp.xdot
-        self.ocp_inputs += self.ocp.x
-        self.ocp_inputs += self.ocp.u
-        self.ocp_inputs += self.ocp.xa
-        self.ocp_inputs += self.ocp.t
+        self.ocp_inputs += list(self.xdot)
+        self.ocp_inputs += list(self.x)
+        self.ocp_inputs += list(self.u)
+        self.ocp_inputs += list(self.w)
+        self.ocp_inputs += [self.t]
         
         # The DAE function
-        self.dae_F = casadi.SXFunction([self.ocp_inputs],[self.ocp.dyneq])
+        self.dae_F = casadi.SXFunction([self.ocp_inputs],[self.ocp.dae])
 
         self.dae_F.init()
         
@@ -117,9 +97,9 @@ class XMLOCP:
         # The Mayer cost function
         self.opt_J = casadi.SXFunction([self.ocp_inputs],[[self.ocp.mterm[0]]])
 
-        self.n_x = len(self.ocp.x)
-        self.n_u = len(self.ocp.u)
-        self.n_w = len(self.ocp.xa)
+        self.n_x = len(self.x)
+        self.n_u = len(self.u)
+        self.n_w = len(self.w)
 
     def dae_F(self): 
         return self.F
@@ -814,22 +794,22 @@ class BackwardEulerCollocator(Collocator):
         self.w_vr_map = {}
 
         i = 0;
-        for v in xmlocp.ocp.xdot:
-            self.dx_vr_map[xmlocp.xmldoc.get_value_reference(convert_der_name(str(v)))] = i
+        for v in xmlocp.xdot:
+            self.dx_vr_map[xmlocp.xmldoc.get_value_reference(str(v))] = i
             i = i + 1
 
         i = 0;
-        for v in xmlocp.ocp.x:
+        for v in xmlocp.x:
             self.x_vr_map[xmlocp.xmldoc.get_value_reference(str(v))] = i
             i = i + 1
 
         i = 0;
-        for v in xmlocp.ocp.u:
+        for v in xmlocp.u:
             self.u_vr_map[xmlocp.xmldoc.get_value_reference(str(v))] = i
             i = i + 1
 
         i = 0;
-        for v in xmlocp.ocp.xa:
+        for v in xmlocp.w:
             self.w_vr_map[xmlocp.xmldoc.get_value_reference(str(v))] = i
             i = i + 1
 
@@ -843,13 +823,13 @@ class BackwardEulerCollocator(Collocator):
             ui = []
             wi = []
             for j in range(xmlocp.n_x):
-                dxi.append(casadi.SX(str(self.xmlocp.ocp.xdot[j])+'_'+str(i)))
+                dxi.append(casadi.SX(str(self.xmlocp.xdot[j])+'_'+str(i)))
             for j in range(xmlocp.n_x):
-                xi.append(casadi.SX(str(self.xmlocp.ocp.x[j])+'_'+str(i)))
+                xi.append(casadi.SX(str(self.xmlocp.x[j])+'_'+str(i)))
             for j in range(xmlocp.n_u):
-                ui.append(casadi.SX(str(self.xmlocp.ocp.u[j])+'_'+str(i)))
+                ui.append(casadi.SX(str(self.xmlocp.u[j])+'_'+str(i)))
             for j in range(xmlocp.n_w):
-                wi.append(casadi.SX(str(self.xmlocp.ocp.xa[j])+'_'+str(i)))
+                wi.append(casadi.SX(str(self.xmlocp.w[j])+'_'+str(i)))
             if i==0:
                 self.vars[1] = {}
                 self.vars[1][0] = {}
@@ -921,7 +901,7 @@ class BackwardEulerCollocator(Collocator):
         z += self.vars[1][0]['x']
         z += self.vars[1][0]['u']
         z += self.vars[1][0]['w']
-        z += [xmlocp.ocp.t0]
+        z += [xmlocp.var.t.sx()]
         self.g += list(xmlocp.init_F0.eval([z])[0])
         self.g += list(xmlocp.dae_F.eval([z])[0])
         self.g += [self.vars[1][0]['u'][0]-self.vars[1][1]['u'][0]]
@@ -937,7 +917,7 @@ class BackwardEulerCollocator(Collocator):
             z += self.vars[i+1][1]['x']
             z += self.vars[i+1][1]['u']
             z += self.vars[i+1][1]['w']
-            z += [t]
+            z += [casadi.SX(t)]
             self.g += list(xmlocp.dae_F.eval([z])[0])
             if i==0:
                 for j in range(xmlocp.n_x):
@@ -965,7 +945,7 @@ class BackwardEulerCollocator(Collocator):
         z += self.vars[n_e][1]['x']
         z += self.vars[n_e][1]['u']
         z += self.vars[n_e][1]['w']
-        z += [xmlocp.ocp.tf]
+        z += [xmlocp.var.t.sx()]
         self.cost = list(xmlocp.opt_J.eval([z])[0])[0]
 
         # Objective function

@@ -22,11 +22,11 @@ import matplotlib.pyplot as plt
 
 from jmodelica.io import ResultDymolaTextual
 
-from jmodelica.compiler import OptimicaCompiler
-from jmodelica.compiler import ModelicaCompiler
-
 from jmodelica.optimization.casadi_collocation import XMLOCP
 from jmodelica.optimization.casadi_collocation import BackwardEulerCollocator
+
+from jmodelica.core import unzip_unit
+from jmodelica.jmi import compile_jmu
 
 def run_demo(with_plots=True):
     """
@@ -35,12 +35,10 @@ def run_demo(with_plots=True):
 
     curr_dir = os.path.dirname(os.path.abspath(__file__));
     
-    oc = OptimicaCompiler()
-    oc.set_boolean_option('generate_xml_equations',True)
-    #oc.set_boolean_option('eliminate_alias_variables',False)
+    jn = compile_jmu("CSTR.CSTR_Opt2", curr_dir+"/files/CSTR.mop",compiler_options={'generate_xml_equations':True})
 
-    oc.compile_model("CSTR.CSTR_Opt2", curr_dir+"/files/CSTR.mop")
-    xmlmodel = XMLOCP("CSTR_CSTR_Opt2.xml")
+    xml_file_name = unzip_unit(archive='./CSTR_CSTR_Opt2.jmu')[1]
+    xmlmodel = XMLOCP(xml_file_name)
     be_colloc = BackwardEulerCollocator(xmlmodel,100)
     be_colloc.solve()
     be_colloc.write_result()
