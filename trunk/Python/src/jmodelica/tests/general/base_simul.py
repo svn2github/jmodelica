@@ -275,28 +275,16 @@ class SimulationTest(_BaseSimOptTest):
         self.final_time = final_time
         self.time_step = time_step
         self.ncp = int((final_time-start_time)/time_step)
-
-        if self.format=='jmu':
-            self.mod_assimulo = JMIDAE(self.model)
-            
-            self.sundials = IDA(self.mod_assimulo, t0=start_time)
-            self.sundials.rtol = self.rel_tol
-            self.sundials.atol = self.abs_tol
-            self.sundials.initiate()
-            
-            print self.ncp
-            print self.sundials.rtol
-            print self.sundials.atol
-        elif self.format=='fmu':
-            pass
         
     def _run_and_write_data(self):
         """
         Run optimization and write result to file.
         """
         if self.format=='jmu':
-            self.sundials.simulate(self.final_time,self.ncp)
-            write_data(self.sundials)
+            self.model.simulate(start_time=self.start_time,
+                                final_time=self.final_time,
+                                options={'ncp':self.ncp,
+                                        'IDA_options':{'atol':self.abs_tol,'rtol':self.rel_tol}})
         elif self.format=='fmu':
             self.model.simulate(start_time=self.start_time,
                                 final_time=self.final_time,
