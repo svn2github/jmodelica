@@ -21,25 +21,14 @@ This file holds base classes for simulation and optimization tests.
 """
 
 import os
-import numpy
-import logging
+
 from jmodelica.jmi import compile_jmu
 from jmodelica.jmi import JMUModel
 from jmodelica.fmi import compile_fmu
 from jmodelica.fmi import FMUModel
-import jmodelica.initialization.ipopt as ipopt_init
-from jmodelica.optimization import ipopt
 from jmodelica.io import ResultDymolaTextual
 from jmodelica.tests import get_files_path
 
-try:
-    from jmodelica.simulation.assimulo_interface import JMIDAE, write_data
-    from assimulo.implicit_ode import IDA
-except:
-    logging.warning('Could not load Assimulo module. Check jmodelica.check_packages()')
-
-#_jm_home = os.environ.get('JMODELICA_HOME')
-#_tests_path = os.path.join(_jm_home, "Python", "jmodelica", "tests")
 _model_name = ''
 
 class _BaseSimOptTest:
@@ -308,38 +297,26 @@ class OptimizationTest(_BaseSimOptTest):
         """
         _BaseSimOptTest.setup_class_base(mo_file, class_name, options,format)
 
-    def setup_base(self, nlp_args = (), rel_tol = 1.0e-4, abs_tol = 1.0e-6, 
-        options = {}, result_mesh='default', result_arguments = {}):
+    def setup_base(self, rel_tol = 1.0e-4, abs_tol = 1.0e-6, opt_options = {}):
         """ 
         Set up a new test case. Creates and configures the optimization.
         Call this with proper args from setUp(). 
-          nlp_args  -  arguments to pass to the NLP constructor besides the model
           rel_tol -  the relative error tolerance when comparing values, default is 1.0e-4
           abs_tol -  the absolute error tolerance when comparing values, default is 1.0e-6
-          options   -  a dict of options to set in the optimizer, defaults to no options
+          opt_options   -  a dict of options to set in the optimizer, defaults to no options (default options will be set)
         """
         _BaseSimOptTest.setup_base(self, rel_tol, abs_tol)
-        self.nlp = ipopt.NLPCollocationLagrangePolynomials(self.model, *nlp_args)
-        self.ipopt = ipopt.CollocationOptimizer(self.nlp)
-        self._result_mesh = result_mesh
-        self._result_arguments = result_arguments
-        _set_ipopt_options(self.ipopt, options)
+        #self.nlp = ipopt.NLPCollocationLagrangePolynomials(self.model, *nlp_args)
+        #self.ipopt = ipopt.CollocationOptimizer(self.nlp)
+        self._opt_options = opt_options
+        #_set_ipopt_options(self.ipopt, options)
 
 
     def _run_and_write_data(self):
         """
         Run optimization and write result to file.
         """
-        self.ipopt.opt_coll_ipopt_solve()
-        if self._result_mesh=='element_interpolation':
-            print "hej"
-            self.nlp.export_result_dymola_element_interpolation(**self._result_arguments)
-        elif self._result_mesh=='mesh_interpolation':
-            print "hopp"
-            self.nlp.export_result_dymola_mesh_interpolation(**self._result_arguments)
-        else:
-            self.nlp.export_result_dymola()
-
+        self.model.optimize(options=self._opt_options)
 
 
 # =========== Helper functions =============

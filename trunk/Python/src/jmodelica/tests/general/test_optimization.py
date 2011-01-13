@@ -18,7 +18,8 @@ import matplotlib.pyplot as plt
 import numpy as N
 import os.path
 
-from jmodelica.initialization.ipopt import *
+from jmodelica.initialization.ipopt import InitializationOptimizer
+from jmodelica.initialization.ipopt import NLPInitialization
 from jmodelica.jmi import compile_jmu
 from jmodelica.jmi import JMUModel
 from jmodelica.io import ResultDymolaTextual
@@ -41,8 +42,10 @@ class TestOptimization(OptimizationTest):
         n_e = 50
         hs = N.ones(n_e)*1./n_e
         n_cp = 3
-        self.setup_base(nlp_args = (n_e, hs, n_cp), 
-            options = {'max_iter': 500})
+        self.setup_base(opt_options={'n_e':n_e, 
+                                     'hs':hs, 
+                                     'n_cp':n_cp,
+                                     'IPOPT_options':{'max_iter': 500}})
         self.run()
 
     @testattr(ipopt = True)
@@ -62,8 +65,10 @@ class TestIfExp(OptimizationTest):
         n_e = 50
         hs = N.ones(n_e)*1./n_e
         n_cp = 3
-        self.setup_base(nlp_args = (n_e, hs, n_cp), 
-            options = {'max_iter': 500})
+        self.setup_base(opt_options={'n_e':n_e, 
+                                     'hs':hs, 
+                                     'n_cp':n_cp,
+                                     'IPOPT_options':{'max_iter': 500}})
         self.run()
 
     @testattr(ipopt = True)
@@ -82,8 +87,10 @@ class TestFreeInitialConditions(OptimizationTest):
         n_e = 50
         hs = N.ones(n_e)*1./n_e
         n_cp = 3
-        self.setup_base(nlp_args = (n_e, hs, n_cp), 
-            options = {'max_iter': 500})
+        
+        self.setup_base(opt_options={'n_e':n_e,
+                                     'hs':hs,
+                                     'n_cp':n_cp})
         self.run()
 
     @testattr(ipopt = True)
@@ -103,8 +110,11 @@ class TestBlockingFactors(OptimizationTest):
         hs = N.ones(n_e)*1./n_e
         n_cp = 3
         blocking_factors = N.array([5,10,5,3])
-        self.setup_base(nlp_args = (n_e, hs, n_cp, blocking_factors), 
-            options = {'max_iter': 500})
+        self.setup_base(opt_options = {'n_e':n_e,
+                                       'hs':hs,
+                                       'n_cp':n_cp,
+                                       'blocking_factors':blocking_factors,
+                                       'IPOPT_options':{'max_iter': 500}})
         self.run()
         self.load_expected_data('BlockingTest_result.txt')
 
@@ -130,8 +140,11 @@ class TestBlockingFactors(OptimizationTest):
         hs = N.ones(n_e)*1./n_e
         n_cp = 3
         blocking_factors = N.array([5,10,5,3])
-        self.setup_base(nlp_args = (n_e, hs, n_cp, blocking_factors), 
-            options = {'max_iter': 500})
+        self.setup_base(opt_options = {'n_e':n_e,
+                                       'hs':hs,
+                                       'n_cp':n_cp,
+                                       'blocking_factors':blocking_factors,
+                                       'IPOPT_options':{'max_iter': 500}})
         self.run()
         self.load_expected_data('BlockingTest_result.txt')
 
@@ -156,8 +169,10 @@ class TestTerminalConstraintNominal(OptimizationTest):
         n_e = 50
         hs = N.ones(n_e)*1./n_e
         n_cp = 3
-        self.setup_base(nlp_args = (n_e, hs, n_cp), 
-            options = { 'max_iter': 500 })
+        self.setup_base(opt_options = {'n_e':n_e,
+                                       'hs':hs,
+                                       'n_cp':n_cp,
+                                       'IPOPT_options':{'max_iter': 500}})
         self.run()
         self.load_expected_data('TerminalConstraintTest_result.txt')
 
@@ -177,9 +192,12 @@ class TestMeshInterpolationResult(OptimizationTest):
         n_e = 8
         hs = N.ones(n_e)*1./n_e
         n_cp = 3
-        self.setup_base(nlp_args = (n_e, hs, n_cp), 
-            options = {'max_iter': 500}, result_mesh='mesh_interpolation', 
-            result_arguments={"mesh":N.linspace(-0.1,2.2,50)})
+        self.setup_base(opt_options = {'n_e':n_e,
+                                       'hs':hs,
+                                       'n_cp':n_cp,
+                                       'result_mode':'mesh_interpolation',
+                                       'result_mesh':N.linspace(-0.1,2.2,50),
+                                       'IPOPT_options':{'max_iter': 500}})
         self.run()
         self.load_expected_data('DI_opt_mesh_interpolation_result.txt')
 
@@ -199,8 +217,10 @@ class TestIntegersNBooleanParameters(OptimizationTest):
         n_e = 50
         hs = N.ones(n_e)*1./n_e
         n_cp = 3
-        self.setup_base(nlp_args = (n_e, hs, n_cp), 
-            options = {'max_iter': 500})
+        self.setup_base(opt_options = {'n_e':n_e,
+                                       'hs':hs,
+                                       'n_cp':n_cp,
+                                       'IPOPT_options':{'max_iter': 500}})
         self.run()
         self.load_expected_data('ArrayIntBoolPars_Opt_result.txt')
 
@@ -221,8 +241,10 @@ class TestNominal(OptimizationTest):
         n_e = 50
         hs = N.ones(n_e)*1./n_e
         n_cp = 3
-        self.setup_base(nlp_args = (n_e, hs, n_cp), 
-            options = {'max_iter': 500})
+        self.setup_base(opt_options = {'n_e':n_e,
+                                       'hs':hs,
+                                       'n_cp':n_cp,
+                                       'IPOPT_options':{'max_iter': 500}})
         self.run()
         self.load_expected_data('NominalTests_NominalOptTest2_result.txt')
 
@@ -234,8 +256,11 @@ class TestNominal(OptimizationTest):
     def test_initialization_from_data(self):
         n_e = 50
         hs = N.ones(n_e)*1./n_e
-        self.nlp.set_initial_from_dymola(self.expected,hs,0,1)
-        self.nlp.export_result_dymola()
+        n_cp = 3
+        
+        nlp = NLPCollocationLagrangePolynomials(self.model, n_e, hs, n_cp)
+        nlp.set_initial_from_dymola(self.expected,hs,0,1)
+        nlp.export_result_dymola()
         self.data = ResultDymolaTextual(
             "NominalTests_NominalOptTest2_result.txt")
         self.assert_all_trajectories(['x', 'der(x)', 'u'])
@@ -253,8 +278,12 @@ class TestFunction1(OptimizationTest):
         n_e = 50
         hs = N.ones(n_e)*1./n_e
         n_cp = 3
-        self.setup_base(nlp_args = (n_e, hs, n_cp), 
-            options = {'max_iter': 500}, rel_tol=1.0e-2, abs_tol=1.0e-2)
+        self.setup_base(rel_tol=1.0e-2, 
+                        abs_tol=1.0e-2,
+                        opt_options = {'n_e':n_e,
+                                       'hs':hs,
+                                       'n_cp':n_cp,
+                                       'IPOPT_options':{'max_iter': 500}})
         self.run()
         self.load_expected_data('UnknownArray.txt')
 
@@ -276,8 +305,11 @@ class TestFunction1(OptimizationTest):
         n_e = 50
         hs = N.ones(n_e)*1./n_e
         n_cp = 3
-        self.setup_base(nlp_args = (n_e, hs, n_cp), 
-            options = {'max_iter': 500}, rel_tol=1.0e-2)
+        self.setup_base(rel_tol=1.0e-2, 
+                        opt_options = {'n_e':n_e,
+                                       'hs':hs,
+                                       'n_cp':n_cp,
+                                       'IPOPT_options':{'max_iter': 500}})
         self.run()
         self.load_expected_data('FuncRecord.txt')
 
@@ -324,8 +356,8 @@ class TestOptInitBlockingFactors:
         m = compile_jmu("BlockingInitPack.M_init", mofile)
         cls.model = JMUModel(m)
         
-        m = jmi.compile_jmu("BlockingInitPack.M_Opt",mofile)
-        cls.opt_model = jmi.JMUModel(m)
+        m = compile_jmu("BlockingInitPack.M_Opt",mofile)
+        cls.opt_model = JMUModel(m)
         
     @testattr(ipopt = True)
     def setUp(self):
@@ -543,8 +575,10 @@ class TestLagrangeCost1(OptimizationTest):
         n_e = 50
         hs = N.ones(n_e)*1./n_e
         n_cp = 3
-        self.setup_base(nlp_args = (n_e, hs, n_cp), 
-            options = {'max_iter': 500})
+        self.setup_base(opt_options = {'n_e':n_e,
+                                       'hs':hs,
+                                       'n_cp':n_cp,
+                                       'IPOPT_options':{'max_iter': 500}})
         self.run()
         self.load_expected_data('LagrangeCost_OptTest1_result.txt')
 
@@ -565,8 +599,11 @@ class TestLagrangeCost2(OptimizationTest):
         hs = N.ones(n_e)*1./n_e
         n_cp = 3
         b_f = 3*N.ones(10)
-        self.setup_base(nlp_args = (n_e, hs, n_cp,b_f), 
-            options = {'max_iter': 500})
+        self.setup_base(opt_options = {'n_e':n_e,
+                                       'hs':hs,
+                                       'n_cp':n_cp,
+                                       'blocking_factors':b_f,
+                                       'IPOPT_options':{'max_iter': 500}})
         self.run()
         self.load_expected_data('LagrangeCost_OptTest1_bf_result.txt')
 
@@ -586,8 +623,10 @@ class TestLagrangeCost3(OptimizationTest):
         n_e = 50
         hs = N.ones(n_e)*1./n_e
         n_cp = 3
-        self.setup_base(nlp_args = (n_e, hs, n_cp), 
-            options = {'max_iter': 500})
+        self.setup_base(opt_options = {'n_e':n_e,
+                                       'hs':hs,
+                                       'n_cp':n_cp,
+                                       'IPOPT_options':{'max_iter': 500}})
         self.run()
         self.load_expected_data('LagrangeCost_OptTest4_result.txt')
 
@@ -608,8 +647,11 @@ class TestLagrangeCost4(OptimizationTest):
         hs = N.ones(n_e)*1./n_e
         n_cp = 3
         b_f = 3*N.ones(10)
-        self.setup_base(nlp_args = (n_e, hs, n_cp,b_f), 
-            options = {'max_iter': 500})
+        self.setup_base(opt_options = {'n_e':n_e,
+                                       'hs':hs,
+                                       'n_cp':n_cp,
+                                       'blocking_factors':b_f,
+                                       'IPOPT_options':{'max_iter': 500}})
         self.run()
         self.load_expected_data('LagrangeCost_OptTest4_bf_result.txt')
 
@@ -630,8 +672,12 @@ class TestDependentParametersInCollocation(OptimizationTest):
         hs = N.ones(n_e)*1./n_e
         n_cp = 3
         b_f = N.ones(n_e)
-        self.setup_base(nlp_args = (n_e, hs, n_cp,b_f), 
-            options = {'max_iter': 500})
+        self.setup_base(opt_options={'n_e':n_e,
+                                     'hs':hs,
+                                     'n_cp':n_cp,
+                                     'blocking_factors':b_f,
+                                     'IPOPT_options':{'max_iter': 500}})
+        
         self.run()
         self.load_expected_data('DependentParameterTest2_result.txt')
 
@@ -652,7 +698,10 @@ class TestMinTimeProblem1(OptimizationTest):
         hs = N.ones(n_e)*1./n_e
         n_cp = 3
         b_f = []
-        self.setup_base(nlp_args = (n_e, hs, n_cp, b_f))
+        self.setup_base(opt_options={'n_e':n_e,
+                                     'hs':hs,
+                                     'n_cp':n_cp,
+                                     'blocking_factors':b_f})
         self.run()
         self.load_expected_data('MinTimeProblems_MinTimeProblem1_result.txt')
 
@@ -673,7 +722,10 @@ class TestMinTimeProblem2(OptimizationTest):
         hs = N.ones(n_e)*1./n_e
         n_cp = 3
         b_f = []
-        self.setup_base(nlp_args = (n_e, hs, n_cp, b_f))
+        self.setup_base(opt_options={'n_e':n_e,
+                                     'hs':hs,
+                                     'n_cp':n_cp,
+                                     'blocking_factors':b_f})
         self.run()
         self.load_expected_data('MinTimeProblems_MinTimeProblem2_result.txt')
 
@@ -694,7 +746,10 @@ class TestMinTimeProblem3(OptimizationTest):
         hs = N.ones(n_e)*1./n_e
         n_cp = 3
         b_f = []
-        self.setup_base(nlp_args = (n_e, hs, n_cp, b_f))
+        self.setup_base(opt_options={'n_e':n_e,
+                                     'hs':hs,
+                                     'n_cp':n_cp,
+                                     'blocking_factors':b_f})
         self.run()
         self.load_expected_data('MinTimeProblems_MinTimeProblem3_result.txt')
 
@@ -715,7 +770,10 @@ class TestMinTimeProblem4(OptimizationTest):
         hs = N.ones(n_e)*1./n_e
         n_cp = 3
         b_f = []
-        self.setup_base(nlp_args = (n_e, hs, n_cp, b_f))
+        self.setup_base(opt_options={'n_e':n_e,
+                                     'hs':hs,
+                                     'n_cp':n_cp,
+                                     'blocking_factors':b_f})
         self.run()
         self.load_expected_data('MinTimeProblems_MinTimeProblem4_result.txt')
 
@@ -737,7 +795,10 @@ class TestMinTimeProblem5(OptimizationTest):
         hs = N.ones(n_e)*1./n_e
         n_cp = 3
         b_f = []
-        self.setup_base(nlp_args = (n_e, hs, n_cp, b_f))
+        self.setup_base(opt_options={'n_e':n_e,
+                                     'hs':hs,
+                                     'n_cp':n_cp,
+                                     'blocking_factors':b_f})
         self.run()
         self.load_expected_data('MinTimeProblems_MinTimeProblem5_result.txt')
 
