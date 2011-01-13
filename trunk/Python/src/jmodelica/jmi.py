@@ -5982,7 +5982,7 @@ def get_jmu_name(class_name):
     """
     return get_unit_name(class_name, unit_type='JMU')
         
-def compile_jmu(class_name, file_name=[], compiler='modelica', target='ipopt', 
+def compile_jmu(class_name, file_name=[], compiler='auto', target='ipopt', 
     compiler_options={}, compile_to='.'):
     """ 
     Compile a Modelica or Optimica model to a JMU.
@@ -5997,8 +5997,10 @@ def compile_jmu(class_name, file_name=[], compiler='modelica', target='ipopt',
     * class_name and file_name is passed:
         - file_name can be a single file as a string or a list of file_names 
           (strings).
-        - Default compiler is ModelicaCompiler but will switch to 
-          OptimicaCompiler if a .mop file is found in file_name.
+        - Default compiler setting is 'auto' which means that the appropriate 
+          compiler will be selected based on model file ending, i.e. 
+          ModelicaCompiler if .mo file and OptimicaCompiler if a .mop file is 
+          found in file_name list.
     
     Library directories can be added to MODELICAPATH by listing them in a 
     special compiler option 'extra_lib_dirs', for example:
@@ -6032,10 +6034,10 @@ def compile_jmu(class_name, file_name=[], compiler='modelica', target='ipopt',
             Default: Empty list.
             
         compiler -- 
-            'modelica' or 'optimica' depending on whether a ModelicaCompiler or 
-            OptimicaCompiler should be used. Set this argument if default 
-            behaviour should be overridden.
-            Default: Depends on argument file_name.
+            'auto' if a compiler should be selected automatically depending on 
+            file ending, 'modelica' if a ModelicaCompiler should be used or 
+            'optimica' if a OptimicaCompiler should be used.
+            Default: 'auto' (i.e. depends on argument file_name)
             
         target --
             Compiler target. 'model', 'algorithm', 'ipopt' or 'model_noad'.
@@ -6057,18 +6059,23 @@ def compile_jmu(class_name, file_name=[], compiler='modelica', target='ipopt',
     if isinstance(file_name, basestring):
         file_name = [file_name]
         
-    # Detect file suffix - otherwise use the default = modelica
-    for f in file_name:
-        basename, ext = os.path.splitext(f)
-        if ext == '.mop':
-            compiler = 'optimica'
-            break
-    
-    comp = None
-    if compiler.lower() == 'modelica':
+    # if compiler is 'auto' - detect file suffix
+    if compiler == 'auto':
         comp = ModelicaCompiler()
+        for f in file_name:
+            basename, ext = os.path.splitext(f)
+            if ext == '.mop':
+                comp = OptimicaCompiler()
+                break
     else:
-        comp = OptimicaCompiler()
+        if compiler.lower() == 'modelica':
+            comp = ModelicaCompiler()
+        elif compiler.lower() == 'optimica':
+            comp = OptimicaCompiler()
+        else:
+            logging.warning("Invalid compiler argument: "+str(compiler) + 
+                ". Using OptimicaCompiler instead.")
+            comp = OptimicaCompiler()
         
     # set compiler options
     for key, value in compiler_options.iteritems():
