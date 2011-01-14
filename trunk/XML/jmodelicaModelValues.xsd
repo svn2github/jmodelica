@@ -60,6 +60,12 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 						<xs:attribute name="value" type="xs:string" use="required"/>
 					</xs:complexType>
 				</xs:element>
+				<xs:element name="EnumParameter">
+					<xs:complexType>
+						<xs:attribute name="name" type="xs:string" use="required"/>
+						<xs:attribute name="value" type="xs:integer" use="required"/>
+					</xs:complexType>
+				</xs:element>
 			</xs:choice>
 		</xs:complexType>
 	</xs:element>
