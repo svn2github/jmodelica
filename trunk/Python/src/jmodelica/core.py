@@ -25,6 +25,10 @@ import os
 import sys
 import numpy as N
 
+# location for temporary JModelica files
+tmp_location = os.path.join(tempfile._get_default_tempdir(),'JModelica.org')
+
+
 class BaseModel(object):
     """ 
     Abstract base class for JMUModel and FMUModel.
@@ -285,6 +289,10 @@ def unzip_unit(archive, path='.'):
     #else: 
     #    suffix = '.dylib'
     
+    # create JModelica directory for temporary files (if not already created)
+    if not os.path.exists(tmp_location):
+        os.mkdir(tmp_location)
+    
     #Extracting the XML
     for file in archive.filelist:
         if 'modelDescription.xml' in file.filename:
@@ -292,7 +300,8 @@ def unzip_unit(archive, path='.'):
             data = archive.read(file) #Reading the file
             
             # Creating temp file
-            fhandle, tempxmlname = tempfile.mkstemp(suffix='.xml') 
+            fhandle, tempxmlname = tempfile.mkstemp(suffix='.xml', 
+                dir=tmp_location) 
             os.close(fhandle)
             # Writing to the temp file
             fout = open(tempxmlname, 'w') 
@@ -310,7 +319,8 @@ def unzip_unit(archive, path='.'):
             data = archive.read(file) #Reading the file
             
             # Creating temp file
-            fhandle, tempxmlvaluesname = tempfile.mkstemp(suffix='.xml') 
+            fhandle, tempxmlvaluesname = tempfile.mkstemp(suffix='.xml', 
+                dir=tmp_location) 
             os.close(fhandle)
             # Writing to the temp file
             fout = open(tempxmlvaluesname, 'w') 
@@ -337,7 +347,7 @@ def unzip_unit(archive, path='.'):
         
         modelname = found_files[0].filename.split('/')[-1][:-len(suffix)]
         
-        fhandle, tempdllname = tempfile.mkstemp(suffix=suffix)
+        fhandle, tempdllname = tempfile.mkstemp(suffix=suffix, dir=tmp_location)
         os.close(fhandle)
         fout = open(tempdllname, 'w+b')
         fout.write(data)
@@ -377,6 +387,9 @@ def get_unit_name(class_name, unit_type='JMU'):
         return class_name.replace('.','_')+'.fmu' 
     else:
         raise Exception("The unit type %s is unknown" %unit_type)
+        
+def get_temp_location():
+    return tmp_location
 
 class Trajectory:
     """

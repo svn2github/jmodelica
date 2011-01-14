@@ -37,7 +37,7 @@ import atexit
 from lxml import etree
 
 from jmodelica import xmlparser
-from jmodelica.core import BaseModel, unzip_unit, get_unit_name
+from jmodelica.core import BaseModel, unzip_unit, get_unit_name, get_temp_location
 from jmodelica.compiler import ModelicaCompiler
 from jmodelica.compiler import OptimicaCompiler
 import jmodelica.io
@@ -523,16 +523,16 @@ class JMUModel(BaseModel):
         etc.
         """
         # xml file has been unzipped from JMU and is located in the 
-        # tempdir
+        # tempdir specified by core.get_temp_location()
         self._set_XMLDoc(xmlparser.ModelDescription(os.path.join(
-            tempfile.gettempdir(),self._xml_name)))
+            get_temp_location(),self._xml_name)))
         
         self._set_scaling_factors()
         self._set_start_attributes()
 
         # set independent parameter values
         self._set_XMLValuesDoc(xmlparser.IndependentParameters(os.path.join(
-            tempfile.gettempdir(),self._xml_values_name)))
+            get_temp_location(),self._xml_values_name)))
         self._set_iparam_values()
 
         # set optimizataion interval, time points and optimization 
@@ -2423,7 +2423,7 @@ class JMUModel(BaseModel):
                 raise IOError("The file: "+filename+" could not be found.")
         else:
             self._set_XMLValuesDoc(xmlparser.IndependentParameters(
-                os.path.join(tempfile.gettempdir(),self._xml_values_name)))
+                os.path.join(get_temp_location(),self._xml_values_name)))
             
         self._set_iparam_values(self._get_XMLValuesDoc())
         
@@ -2447,7 +2447,7 @@ class JMUModel(BaseModel):
         
         # create temp XMLValuesDoc from the xml values file for writing 
         # the new parameters to
-        temp_doc = xmlparser.IndependentParameters(os.path.join(tempfile.gettempdir(),
+        temp_doc = xmlparser.IndependentParameters(os.path.join(get_temp_location(),
             self._xml_values_name))
         
         # get all parameters
@@ -2477,7 +2477,7 @@ class JMUModel(BaseModel):
                 os.mkdir(dir)
             temp_doc.write_to_file(filename)
         else:
-            temp_doc.write_to_file(os.path.join(tempfile.gettempdir(), 
+            temp_doc.write_to_file(os.path.join(get_temp_location(), 
                 self._xml_values_name))
             
     def get_aliases_for_variable(self, variable):
@@ -2649,7 +2649,7 @@ class JMIModel(object):
         """
 
         if is_jmu:
-            self._dll = load_DLL(libname, tempfile.gettempdir())
+            self._dll = load_DLL(libname, get_temp_location())
             self._tempfname = libname
         else:
             # detect platform specific shared library file extension
@@ -2662,14 +2662,15 @@ class JMIModel(object):
                 suffix = '.so'
     
             # create temp dll
-            fhandle,self._tempfname = tempfile.mkstemp(suffix=suffix)
+            fhandle,self._tempfname = tempfile.mkstemp(suffix=suffix, 
+                dir=get_temp_location())
             shutil.copyfile(path+os.sep+libname+suffix,self._tempfname)
             os.close(fhandle)
             fname = self._tempfname.split(os.sep)
             fname = fname[len(fname)-1]
             
             #load temp dll
-            self._dll = load_DLL(fname,tempfile.gettempdir())
+            self._dll = load_DLL(fname, get_temp_location())
 
         # save dll file name so that it can be deleted when python
         # exits if not before

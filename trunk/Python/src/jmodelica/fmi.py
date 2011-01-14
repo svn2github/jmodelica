@@ -22,7 +22,6 @@ import sys
 import os
 import logging
 from operator import itemgetter
-import tempfile
 
 import ctypes as C
 import numpy as N
@@ -32,7 +31,7 @@ from lxml import etree
 
 import jmodelica.jmi
 from jmodelica import xmlparser
-from jmodelica.core import BaseModel, unzip_unit, get_unit_name
+from jmodelica.core import BaseModel, unzip_unit, get_unit_name, get_temp_location
 from jmodelica.compiler import ModelicaCompiler, OptimicaCompiler
 
 def compile_fmu(class_name, file_name=[], compiler='auto', target='model_noad', 
@@ -207,7 +206,7 @@ class FMUModel(BaseModel):
         self._tempdll = self._tempnames[0]
         self._tempxml = self._tempnames[1]
         self._modelname = self._tempnames[2]
-        self._tempdir = tempfile.gettempdir()
+        self._tempdir = get_temp_location()
         
         #Retrieve and load the binary
         self._dll = jmodelica.jmi.load_DLL(
