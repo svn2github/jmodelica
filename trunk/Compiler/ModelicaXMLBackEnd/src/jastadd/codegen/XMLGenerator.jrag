@@ -626,8 +626,14 @@ public class XMLGenerator extends GenericGenerator {
 				}
 		
 				for(FVariable variable:fclass.dependentParameters()){
-					if(variable.hasBindingExp()){
-						FExp expression = variable.getBindingExp();
+					if(variable.hasBindingExp() || variable.hasParameterEquation()){
+						FExp expression = null;
+						if (variable.hasBindingExp()) {
+							expression = variable.getBindingExp();
+						} else {
+							expression = ((FEquation)variable.parameterEquation()).getRight();
+						}
+				
 						genPrinter.println("\t\t<equ:BindingEquation>");
 						genPrinter.print("\t\t\t<equ:Parameter>");
 						variable.getFQName().prettyPrint_XML(genPrinter,"\t\t\t");

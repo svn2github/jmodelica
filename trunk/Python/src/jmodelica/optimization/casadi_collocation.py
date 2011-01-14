@@ -263,6 +263,8 @@ class Collocator:
         # Create Solver
         self.solver = casadi.IpoptSolver(self.get_cost(),self.get_g(),self.get_hess_lag())
 
+        #self.solver.addMonitor("eval_g")
+
         # Set options
         # solver.setOption("tol",1e-10)
         #solver.setOption("derivative_test",'second-order')
