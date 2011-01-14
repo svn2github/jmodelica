@@ -3624,9 +3624,16 @@ model WhenTest1
          description="Test of code generation of when clauses.",
          generate_ode=true,
          enable_equation_sorting=true,
-         template="$C_ode_derivatives$ 
+         template="$C_ode_guards$
+                   $C_ode_derivatives$ 
                    $C_ode_initialization$",
          generatedCode=" 
+    _guards(0) = LOG_EXP_AND(_sw(0), pre_z_5);
+  _guards(1) = LOG_EXP_AND(_sw(1), _z_5);
+  _guards(2) = _sw(2);
+  _guards(3) = LOG_EXP_OR(LOG_EXP_OR(LOG_EXP_AND(_sw(3), _sw(4)), LOG_EXP_AND(_sw(5), _sw(6))), LOG_EXP_AND(_sw(7), _sw(8)));
+  _guards(4) = LOG_EXP_OR(LOG_EXP_OR(LOG_EXP_AND(_sw(3), _sw(4)), LOG_EXP_AND(_sw(5), _sw(6))), LOG_EXP_AND(_sw(7), _sw(8)));
+
   _guards(3) = LOG_EXP_OR(LOG_EXP_OR(LOG_EXP_AND(_sw(3), _sw(4)), LOG_EXP_AND(_sw(5), _sw(6))), LOG_EXP_AND(_sw(7), _sw(8)));
 if(COND_EXP_EQ(LOG_EXP_AND(_guards(3),LOG_EXP_NOT(_pre_guards(3))),JMI_TRUE,JMI_TRUE,JMI_FALSE)) {
   _x_1 = pre_x_1 + 1.1;
@@ -3707,8 +3714,12 @@ model WhenTest2
          description="Test that samplers are not duplicated in the function tha computes the next time event.",
          generate_ode=true,
          enable_equation_sorting=true,
-         template="$C_ode_time_events$" ,
-         generatedCode=" 
+         template="$C_ode_guards$
+                   $C_ode_time_events$" ,
+         generatedCode="
+    _guards(0) = jmi_sample(jmi,0,_h_6);
+  _guards(1) = jmi_sample(jmi,0,_h_6);
+ 
   jmi_real_t nextTimeEvent;
   jmi_real_t nextTimeEventTmp;
   jmi_real_t nSamp;
