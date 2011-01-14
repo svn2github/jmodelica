@@ -4869,11 +4869,302 @@ class Opt_TimePoint:
             The value attribute value as float.
         """
         return float(self._value)
-
+        
 
 #=======================================================================
 
+class IndependentParameters:
+    
+    def __init__(self, filename, schemaname=''):
+        """
+        Create an XML document object representation.
+        
+        Parse an XML document and create a full XML document object 
+        representation. Validate against XML schema before parsing if the 
+        parameter schemaname is set.
+        
+        Parameters::
+        
+            filename --
+                The name of the XML file to parse.
+                
+            schemaname --
+                The name of the XSD file to validate against.
+                Default: Empty string (no validation).
+        """
+        
+        # set up cache, parse XML file and obtain the root
+        self.function_cache = XMLFunctionCache()
+        self._element_tree = _parse_XML(filename, schemaname)
+        root = self._element_tree.getroot()
+        
+        # build internal data structure from XML file
+        self._parse_element_tree(root)
+        
+    def _parse_element_tree(self, root):
+        """ 
+        Helper function. Parse the XML element tree and build up internal data 
+        structure. 
+        
+        Parameters::
+        
+            root -- 
+                Reference to the root of the element tree.
+        """
+        self._fill_parameters(root)
 
+    def _fill_parameters(self, root):
+        """
+        Helper function. Fill the internal structure of parameters with values 
+        from the parsed XML file.
+        """
+        
+        self._indep_parameters = []
+        
+        reals = root.findall('RealParameter')
+        for r in reals:
+            self._indep_parameters.append(RealParameter(r))
+        
+        ints = root.findall('IntegerParameter')
+        for i in ints:
+            self._indep_parameters.append(IntegerParameter(i))
+            
+        bools = root.findall('BooleanParameter')
+        for b in bools:
+            self._indep_parameters.append(BooleanParameter(b))
+            
+        strings = root.findall('StringParameter')
+        for s in strings:
+            self._indep_parameters.append(StringParameter(s))
+            
+        enums = root.findall('EnumParameter')
+        for e in enums:
+            self._indep_parameters.append(EnumParameter(e))
+            
+    def get_iparam_values(self, ignore_cache=False):
+        """ 
+        Extract name and value for all independent parameters in the XML 
+        document.
+        
+        Returns::
+           
+            A dict with variable name as key and parameter as value.
+        """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_iparam_values', None)
+            
+        names = []
+        values = []
+        for ip in self._indep_parameters:
+            names.append(ip.get_name())
+            values.append(ip.get_value())
+            
+        return dict(zip(names, values))
+        
+    def get_all_parameters(self):
+        """
+        Get a list of all parameters in this XML representation.
+        
+        Returns::
+        
+            A list of all parameters.
+        """
+        return self._indep_parameters
+        
+    def write_to_file(self, filename):
+        """
+        Create a new XML file of the document representation.
+
+        Parameters::
+            
+            filename --
+                Full path of the file to create.
+        """
+        self._element_tree.write(filename)
+            
+
+class Parameter:
+    """
+    Class representing an independent parameter in a IndependentParameters XML 
+    document representation.
+    """
+    
+    def __init__(self, element):
+        """
+        Create a new parameter representation. (Abstract class)
+        """
+        self._attributes = {'name':'','value':None}
+        # update attribute dict with attributes from XML file
+        self._attributes.update(element.attrib)
+        self._element = element
+        
+    def get_name(self):
+        """
+        Get the name of the parameter.
+        
+        Returns::
+        
+            The name of the parameter.
+        """
+        return self._attributes['name']
+        
+    def get_value(self):
+        """
+        Get the value of the parameter.
+        
+        Abstract method - must be implemented by extending classes.
+        """
+        pass
+        
+    def set_value(self, value):
+        """
+        Set the value of the parameter.
+        
+        Abstract method - must be implemented by extending classes.
+        """
+        pass
+        
+class RealParameter(Parameter):
+    """
+    Class representing an independent real parameter in a IndependentParameters 
+    XML document representation.
+    """
+    
+    def get_value(self):
+        """
+        Get the value of the parameter.
+        
+        Returns::
+        
+            The value of the parameter as real.
+        """
+        return float(self._attributes['value'])
+        
+    def set_value(self, value):
+        """
+        Set the value of the parameter.
+        
+        Parameters::
+            
+            value --
+                The new value of the parameter.
+        """
+        self._attributes.update({'value':float(value)})
+        self._element.set('value',str(value))
+    
+class IntegerParameter(Parameter):
+    """
+    Class representing an independent integer parameter in a 
+    IndependentParameters XML document representation.
+    """
+    
+    def get_value(self):
+        """
+        Get the value of the parameter.
+        
+        Returns::
+        
+            The value of the parameter as integer.
+        """
+        return int(self._attributes['value'])
+        
+    def set_value(self, value):
+        """
+        Set the value of the parameter.
+        
+        Parameters::
+            
+            value --
+                The new value of the parameter.
+        """
+        self._attributes.update({'value':int(value)})
+        self._element.set('value',str(value))
+    
+class BooleanParameter(Parameter):
+    """
+    Class representing an independent boolean parameter in a 
+    IndependentParameters XML document representation.
+    """
+    
+    def get_value(self):
+        """
+        Get the value of the parameter.
+        
+        Returns::
+        
+            The value of the parameter as boolean.
+        """
+        return _translate_xmlbool(self._attributes['value'])
+        
+    def set_value(self, value):
+        """
+        Set the value of the parameter.
+        
+        Parameters::
+            
+            value --
+                The new value of the parameter.
+        """
+        self._attributes.update({'value':_translate_xmlbool(value)})
+        self._element.set('value',str(value))
+    
+class StringParameter(Parameter):
+    """
+    Class representing an independent string parameter in a 
+    IndependentParameters XML document representation.
+    """
+    
+    def get_value(self):
+        """
+        Get the value of the parameter.
+        
+        Returns::
+        
+            The value of the parameter as string.
+        """
+        return str(self._attributes['value'])
+
+    def set_value(self, value):
+        """
+        Set the value of the parameter.
+        
+        Parameters::
+            
+            value --
+                The new value of the parameter.
+        """
+        self._attributes.update({'value':str(value)})
+        self._element.set('value',str(value))
+    
+class EnumParameter(Parameter):
+    """
+    Class representing an independent enumeration parameter in a 
+    IndependentParameters XML document representation.
+    """
+    
+    def get_value(self):
+        """
+        Get the value of the parameter.
+        
+        Returns::
+        
+            The value of the parameter as integer.
+        """
+        return int(self._attributes['value'])
+        
+    def set_value(self, value):
+        """
+        Set the value of the parameter.
+        
+        Parameters::
+            
+            value --
+                The new value of the parameter.
+        """
+        self._attributes.update({'value':int(value)})
+        self._element.set('value',str(value))
+        
+#=======================================================================
 
 class XMLFunctionCache:
     """ 
@@ -4977,99 +5268,12 @@ class XMLFunctionCache:
                 return result
         # result was not found - add to cache
         return self.add(obj, function, key)
-        
-        
-class XMLBaseDoc:
-    """ 
-    Base class representing a parsed XML file.
-    """
-    
-    def __init__(self, filename, schemaname=''):
-        """ 
-        Create an XML document object representation and an XPath evaluator.
-        
-        Parse an XML document and create an XML document object representation. 
-        Validate against XML schema before parsing if the parameter schemaname 
-        is set. Instantiates an XPath evaluator object for the parsed XML which 
-        can be used to evaluate XPath expressions on the XML.
-         
-         Parameters::
-         
-            filename --
-                The name of the XML file.
-            schemaname --
-                The name of the XSD file to validate against.
-                Default: Empty string (no validation).
-         
-        """
-        self.function_cache = XMLFunctionCache()
-        self._doc = _parse_XML(filename, schemaname)
-        root = self._doc.getroot()
-        self._xpatheval = etree.XPathEvaluator(self._doc, namespaces=root.nsmap)
-            
-class XMLValuesDoc(XMLBaseDoc):
-    """ 
-    Class representing a parsed XML file containing values for all independent 
-    parameters. 
-    """
-                
-    def get_iparam_values(self):
-        """ 
-        Extract name and value for all independent parameters in the XML 
-        document.
-        
-        Returns::
-           
-            A dict with variable name as key and parameter as value.
-        """
-        keys = self._xpatheval("//*/@name")
-        vals = self._xpatheval("//*/@value")
-        if len(keys)!=len(vals):
-            raise Exception("Number of vals does not equal number of keys. \
-                Number of vals are: "+str(len(vals))+" and number of keys are: "\
-                +str(len(keys)))
-        names=[]
-        iparam_values=[]
-        for index, key in enumerate(keys):
-            names.append(str(key))
-            type_ = self.get_parameter_type(str(key))
-            if type_ == 'RealParameter':
-                iparam_values.append(float(vals[index]))
-            elif type_ == 'IntegerParameter':
-                iparam_values.append(int(vals[index]))
-            elif type_ == 'BooleanParameter':
-                iparam_values.append(vals[index]=="true")
-            elif type_ == 'StringParameter':
-                iparam_values.append(str(vals[index]))
-            elif type_ == 'EnumParameter':
-                iparam_values.append(int(vals[index]))
-            else:
-                pass
-                # enumeration not supported yet
-        return dict(zip(names, iparam_values))
-    
-    def get_parameter_type(self, variablename):
-        """ 
-        Get the parameter type for a specific variable.
-        
-        Parameters::
-        
-            variablename --
-                The name of the variable.
-                
-        Returns::
-        
-            The type of parameter, Real, Integer, Boolean or String.
-        """
-        type_ = self._xpatheval("//IndependentParameters/node()[@name=\""\
-            +str(variablename)+"\"]")
-        if len(type_) > 0:
-            return type_[0].tag
-        return None
-        
-             
+
+#=======================================================================
+
 class XMLException(Exception):
     """ 
     Class for all XML related errors that can occur in this module. 
     """
     pass
+    

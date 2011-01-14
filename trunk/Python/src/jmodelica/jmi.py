@@ -531,7 +531,7 @@ class JMUModel(BaseModel):
         self._set_start_attributes()
 
         # set independent parameter values
-        self._set_XMLValuesDoc(xmlparser.XMLValuesDoc(os.path.join(
+        self._set_XMLValuesDoc(xmlparser.IndependentParameters(os.path.join(
             tempfile.gettempdir(),self._xml_values_name)))
         self._set_iparam_values()
 
@@ -2418,11 +2418,11 @@ class JMUModel(BaseModel):
         """
         if filename:
             if os.path.exists(filename):
-                self._set_XMLValuesDoc(xmlparser.XMLValuesDoc(filename))
+                self._set_XMLValuesDoc(xmlparser.IndependentParameters(filename))
             else:
                 raise IOError("The file: "+filename+" could not be found.")
         else:
-            self._set_XMLValuesDoc(xmlparser.XMLValuesDoc(
+            self._set_XMLValuesDoc(xmlparser.IndependentParameters(
                 os.path.join(tempfile.gettempdir(),self._xml_values_name)))
             
         self._set_iparam_values(self._get_XMLValuesDoc())
@@ -2447,16 +2447,16 @@ class JMUModel(BaseModel):
         
         # create temp XMLValuesDoc from the xml values file for writing 
         # the new parameters to
-        temp_doc = xmlparser.XMLValuesDoc(os.path.join(tempfile.gettempdir(),
+        temp_doc = xmlparser.IndependentParameters(os.path.join(tempfile.gettempdir(),
             self._xml_values_name))
         
-        # get all parameter elements
-        root = temp_doc._doc.getroot()
-        parameters = root.getchildren()
+        # get all parameters
+        parameters = temp_doc.get_all_parameters()
         
         for p in parameters:
             #get value reference
-            name = p.get('name')
+            name = p.get_name()
+            
             #get index in z-vector
             index, type = _translate_value_ref(
                 xmldoc.get_value_reference(name)) 
@@ -2465,9 +2465,9 @@ class JMUModel(BaseModel):
             # to value from z-vector
             if type == 2:
                 #is boolean
-                p.set('value',str(bool(z[index])))
+                p.set_value((bool(z[index])))
             else:
-                p.set('value',str(z[index]))
+                p.set_value(z[index])
             
         # finally, write to file
         if filename:
@@ -2475,9 +2475,9 @@ class JMUModel(BaseModel):
             dir = os.path.dirname(filename)
             if dir and not os.path.exists(dir):
                 os.mkdir(dir)
-            temp_doc._doc.write(filename)
+            temp_doc.write_to_file(filename)
         else:
-            temp_doc._doc.write(os.path.join(tempfile.gettempdir(), 
+            temp_doc.write_to_file(os.path.join(tempfile.gettempdir(), 
                 self._xml_values_name))
             
     def get_aliases_for_variable(self, variable):
