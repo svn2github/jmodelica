@@ -36,7 +36,7 @@ import matplotlib.pyplot as plt
 
 class XMLOCP:
 
-    def __init__(self,fname):
+    def __init__(self,fname, enable_scaling=False):
 
         # Load model description
         self.xmldoc = ModelDescription(fname)
@@ -73,14 +73,41 @@ class XMLOCP:
             i = i + 1
 
         # Get the variables
-        self.xdot = casadi.der(self.var.x)
+        self.dx = casadi.der(self.var.x)
         self.x = casadi.sx(self.var.x)
         self.u = casadi.sx(self.var.u)
         self.w = casadi.sx(self.var.z)
         self.t = self.var.t.sx()
 
+        # Build maps mapping value references to indices in the
+        # variable vectors of casadi
+        self.dx_vr_map = {}
+        self.x_vr_map = {}
+        self.u_vr_map = {}
+        self.w_vr_map = {}
+
+        i = 0;
+        for v in self.dx:
+            self.dx_vr_map[self.xmldoc.get_value_reference(str(v))] = i
+            i = i + 1
+
+        i = 0;
+        for v in self.x:
+            self.x_vr_map[self.xmldoc.get_value_reference(str(v))] = i
+            i = i + 1
+
+        i = 0;
+        for v in self.u:
+            self.u_vr_map[self.xmldoc.get_value_reference(str(v))] = i
+            i = i + 1
+
+        i = 0;
+        for v in self.w:
+            self.w_vr_map[self.xmldoc.get_value_reference(str(v))] = i
+            i = i + 1
+
         self.ocp_inputs = []
-        self.ocp_inputs += list(self.xdot)
+        self.ocp_inputs += list(self.dx)
         self.ocp_inputs += list(self.x)
         self.ocp_inputs += list(self.u)
         self.ocp_inputs += list(self.w)
@@ -101,12 +128,78 @@ class XMLOCP:
         self.n_u = len(self.u)
         self.n_w = len(self.w)
 
-    def dae_F(self): 
-        return self.F
+        self.dx_sf = N.ones(self.n_x)
+        self.x_sf = N.ones(self.n_x)
+        self.u_sf = N.ones(self.n_u)
+        self.w_sf = N.ones(self.n_w)
 
-    def init_F0(self):
-        return self._initF0
+        if enable_scaling:
+            # Scale model
+            # Get nominal values for scaling
+            dx_nominal = self.xmldoc.get_x_nominal(include_alias = False)
+            x_nominal = self.xmldoc.get_x_nominal(include_alias = False)
+            u_nominal = self.xmldoc.get_u_nominal(include_alias = False)
+            w_nominal = self.xmldoc.get_w_nominal(include_alias = False)
 
+            for vr, val in x_nominal:
+                if val != None:
+                    self.dx_sf[self.x_vr_map[vr]] = N.abs(val)
+                    self.x_sf[self.x_vr_map[vr]] = N.abs(val)
+
+            for vr, val in u_nominal:
+                if val != None:
+                    self.u_sf[self.u_vr_map[vr]] = N.abs(val)
+
+            for vr, val in w_nominal:
+                if val != None:
+                    self.w_sf[self.w_vr_map[vr]] = N.abs(val)
+
+            # Create new, scaled variables
+            self.dx_scaled = self.x_sf*self.dx
+            self.x_scaled = self.x_sf*self.x
+            self.u_scaled = self.u_sf*self.u
+            self.w_scaled = self.w_sf*self.w
+
+            z_scaled = []
+            z_scaled += list(self.dx_scaled)
+            z_scaled += list(self.x_scaled)
+            z_scaled += list(self.u_scaled)
+            z_scaled += list(self.w_scaled)
+            z_scaled += [self.var.t.sx()]
+
+            # Substitue scaled variables
+            self.dae_F = list(self.dae_F.eval([z_scaled])[0])
+            self.init_F0 = list(self.init_F0.eval([z_scaled])[0])
+            self.opt_J = list(self.opt_J.eval([z_scaled])[0])
+
+            self.dae_F = casadi.SXFunction([self.ocp_inputs],[self.dae_F])
+            self.init_F0 = casadi.SXFunction([self.ocp_inputs],[self.init_F0])
+            self.opt_J = casadi.SXFunction([self.ocp_inputs],[self.opt_J])
+
+    def get_dx_sf(self):
+        return self.dx_sf
+
+    def get_x_sf(self):
+        return self.x_sf
+
+    def get_u_sf(self):
+        return self.u_sf
+
+    def get_w_sf(self):
+        return self.w_sf
+
+    def get_dx_vr_map(self):
+        return self.dx_vr_map
+
+    def get_x_vr_map(self):
+        return self.x_vr_map
+
+    def get_u_vr_map(self):
+        return self.u_vr_map
+
+    def get_w_vr_map(self):
+        return self.w_vr_map
+        
     def get_name(self):
         return self.xmldoc.get_model_name()
 
@@ -130,18 +223,6 @@ class Collocator:
         pass
 
     def get_n_w(self):
-        pass
-
-    def get_dx_vr_map(self):
-        pass
-
-    def get_x_vr_map(self):
-        pass
-
-    def get_u_vr_map(self):
-        pass
-
-    def get_w_vr_map(self):
         pass
 
     def get_time_points(self):
@@ -204,43 +285,43 @@ class Collocator:
 
         for vr, val in _dx_min:
             if val != None:
-                dx_min[self.get_dx_vr_map()[vr]] = val
+                dx_min[self.get_xmlocp().get_dx_vr_map()[vr]] = val/self.get_xmlocp().get_dx_sf()[self.get_xmlocp().get_dx_vr_map()[vr]]
         for vr, val in _dx_max:
             if val != None:
-                dx_max[self.get_dx_vr_map()[vr]] = val
+                dx_max[self.get_xmlocp().get_dx_vr_map()[vr]] = val/self.get_xmlocp().get_dx_sf()[self.get_xmlocp().get_dx_vr_map()[vr]]
         for vr, val in _dx_start:
             if val != None:
-                dx_start[self.get_dx_vr_map()[vr]] = val
+                dx_start[self.get_xmlocp().get_dx_vr_map()[vr]] = val/self.get_xmlocp().get_dx_sf()[self.get_xmlocp().get_dx_vr_map()[vr]]
 
         for vr, val in _x_min:
             if val != None:
-                x_min[self.get_x_vr_map()[vr]] = val
+                x_min[self.get_xmlocp().get_x_vr_map()[vr]] = val/self.get_xmlocp().get_x_sf()[self.get_xmlocp().get_x_vr_map()[vr]]
         for vr, val in _x_max:
             if val != None:
-                x_max[self.get_x_vr_map()[vr]] = val
+                x_max[self.get_xmlocp().get_x_vr_map()[vr]] = val/self.get_xmlocp().get_x_sf()[self.get_xmlocp().get_x_vr_map()[vr]]
         for vr, val in _x_start:
             if val != None:
-                x_start[self.get_x_vr_map()[vr]] = val
+                x_start[self.get_xmlocp().get_x_vr_map()[vr]] = val/self.get_xmlocp().get_x_sf()[self.get_xmlocp().get_x_vr_map()[vr]]
 
         for vr, val in _u_min:
             if val != None:
-                u_min[self.get_u_vr_map()[vr]] = val
+                u_min[self.get_xmlocp().get_u_vr_map()[vr]] = val/self.get_xmlocp().get_u_sf()[self.get_xmlocp().get_u_vr_map()[vr]]
         for vr, val in _u_max:
             if val != None:
-                u_max[self.get_u_vr_map()[vr]] = val
+                u_max[self.get_xmlocp().get_u_vr_map()[vr]] = val/self.get_xmlocp().get_u_sf()[self.get_xmlocp().get_u_vr_map()[vr]]
         for vr, val in _u_start:
             if val != None:
-                u_start[self.get_u_vr_map()[vr]] = val
+                u_start[self.get_xmlocp().get_u_vr_map()[vr]] = val/self.get_xmlocp().get_u_sf()[self.get_xmlocp().get_u_vr_map()[vr]]
 
         for vr, val in _w_min:
             if val != None:
-                w_min[self.get_w_vr_map()[vr]] = val
+                w_min[self.get_xmlocp().get_w_vr_map()[vr]] = val/self.get_xmlocp().get_w_sf()[self.get_xmlocp().get_w_vr_map()[vr]]
         for vr, val in _w_max:
             if val != None:
-                w_max[self.get_w_vr_map()[vr]] = val
+                w_max[self.get_xmlocp().get_w_vr_map()[vr]] = val/self.get_xmlocp().get_w_sf()[self.get_xmlocp().get_w_vr_map()[vr]]
         for vr, val in _w_start:
             if val != None:
-                w_start[self.get_w_vr_map()[vr]] = val
+                w_start[self.get_xmlocp().get_w_vr_map()[vr]] = val/self.get_xmlocp().get_w_sf()[self.get_xmlocp().get_w_vr_map()[vr]]
 
         for t,i,j in self.time_points:
             xx_lb[self.get_var_indices()[i][j]['dx']] = dx_min
@@ -268,7 +349,7 @@ class Collocator:
         # Set options
         # solver.setOption("tol",1e-10)
         #solver.setOption("derivative_test",'second-order')
-        self.solver.setOption("max_iter",300)
+        self.solver.setOption("max_iter",1000)
 
         # Initialize
         self.solver.init();
@@ -481,6 +562,8 @@ class Collocator:
             f.write(str_text)
             
             f.write('\n\n')
+
+            sc = N.hstack((N.array([1.0]),self.xmlocp.get_dx_sf(),self.xmlocp.get_x_sf(),self.xmlocp.get_u_sf(),self.xmlocp.get_w_sf()))
             
             # Write data set 2
             n_vars = len(data[0,:])
@@ -492,10 +575,7 @@ class Collocator:
                     if ref==0: # Don't scale time
                         str = str + (" %12.12f" % data[i,ref])
                     else:
-                        if rescale:
-                            str = str + (" %12.12f" % (data[i,ref]*sc[ref-1+n_parameters]))
-                        else:
-                            str = str + (" %12.12f" % data[i,ref])
+                        str = str + (" %12.12f" % (data[i,ref]*sc[ref]))
                 f.write(str+'\n')
 
             f.write('\n')
@@ -509,7 +589,7 @@ class Collocator:
 
         xmldoc = self.get_xmlocp().xmldoc
 
-        # Obtain the names
+        # Obtain the names and sort them in value reference order
         names = xmldoc.get_dx_variable_names(include_alias=False)
         dx_names=[]
         for name in sorted(names):
@@ -647,10 +727,7 @@ class Collocator:
                 #print(name)
                 #print(col_index)
                 traj = res.get_variable_data(name)
-                if scaling:
-                    var_data[:,col_index] = traj.x/sc_dx[dx_index]
-                else:
-                    var_data[:,col_index] = traj.x
+                var_data[:,col_index] = traj.x/self.get_xmlocp().get_dx_sf()[dx_index]
                 dx_index = dx_index + 1
                 col_index = col_index + 1
             except:
@@ -662,10 +739,7 @@ class Collocator:
                 #print(name)
                 #print(col_index)
                 traj = res.get_variable_data(name)
-                if scaling:
-                    var_data[:,col_index] = traj.x/sc_x[x_index]
-                else:
-                    var_data[:,col_index] = traj.x
+                var_data[:,col_index] = traj.x/self.get_xmlocp().get_x_sf()[x_index]
                 x_index = x_index + 1
                 col_index = col_index + 1
             except VariableNotFoundError:
@@ -679,15 +753,9 @@ class Collocator:
                 #print(col_index)
                 traj = res.get_variable_data(name)
                 if not res.is_variable(name):
-                    if scaling:
-                        var_data[:,col_index] = N.ones(n_points)*traj.x[0]/sc_u[u_index]
-                    else:
-                        var_data[:,col_index] = N.ones(n_points)*traj.x[0]
+                    var_data[:,col_index] = N.ones(n_points)*traj.x[0]/self.get_xmlocp().get_u_sf()[u_index]
                 else:
-                    if scaling:
-                        var_data[:,col_index] = traj.x/sc_u[u_index]
-                    else:
-                        var_data[:,col_index] = traj.x
+                    var_data[:,col_index] = traj.x/self.get_xmlocp().get_u_sf()[u_index]
                 u_index = u_index + 1
                 col_index = col_index + 1
             except VariableNotFoundError:
@@ -701,15 +769,9 @@ class Collocator:
                 #print(col_index)
                 traj = res.get_variable_data(name)
                 if not res.is_variable(name):
-                    if scaling:
-                        var_data[:,col_index] = N.ones(n_points)*traj.x[0]/sc_w[w_index]
-                    else:
-                        var_data[:,col_index] = N.ones(n_points)*traj.x[0]
+                    var_data[:,col_index] = N.ones(n_points)*traj.x[0]/self.get_xmlocp().get_w_sf()[w_index]
                 else:
-                    if scaling:
-                        var_data[:,col_index] = traj.x/sc_w[w_index]
-                    else:
-                        var_data[:,col_index] = traj.x
+                    var_data[:,col_index] = traj.x/self.get_xmlocp().get_w_sf()[w_index]
                 w_index = w_index + 1
                 col_index = col_index + 1
             except VariableNotFoundError:
@@ -729,6 +791,13 @@ class Collocator:
             t_points[cnt] = t
             cnt = cnt + 1
 
+        # make sure abscissa is increasing
+        d = var_data[0,0]
+        for i in range(len(var_data[:,0])-1):
+            if var_data[i+1,0]<=d:
+                var_data[i+1,0] = d + 1e-5
+            d = var_data[i+1,0]
+
         # interpolate
         for i in range(self.get_n_x()):
             dx_init[:,i] = N.interp(t_points,var_data[:,0],var_data[:,1+i]);
@@ -740,6 +809,8 @@ class Collocator:
             u_init[:,i] = N.interp(t_points,var_data[:,0],var_data[:,1 + 2*self.get_n_x() + i]);
 
         for i in range(self.get_n_w()):
+#            if N.isnan(N.interp(t_points,var_data[:,0],var_data[:,1 + 2*self.get_n_x() + self.get_n_u() + i])):
+#                asdf
             w_init[:,i] = N.interp(t_points,var_data[:,0],var_data[:,1 + 2*self.get_n_x() + self.get_n_u() + i]);
 
 #         plt.figure(2)
@@ -788,33 +859,6 @@ class BackwardEulerCollocator(Collocator):
         self.xmlocp = xmlocp
         self.n_e = n_e
 
-        # Build maps mapping value references to indices in the
-        # variable vectors of casadi
-        self.dx_vr_map = {}
-        self.x_vr_map = {}
-        self.u_vr_map = {}
-        self.w_vr_map = {}
-
-        i = 0;
-        for v in xmlocp.xdot:
-            self.dx_vr_map[xmlocp.xmldoc.get_value_reference(str(v))] = i
-            i = i + 1
-
-        i = 0;
-        for v in xmlocp.x:
-            self.x_vr_map[xmlocp.xmldoc.get_value_reference(str(v))] = i
-            i = i + 1
-
-        i = 0;
-        for v in xmlocp.u:
-            self.u_vr_map[xmlocp.xmldoc.get_value_reference(str(v))] = i
-            i = i + 1
-
-        i = 0;
-        for v in xmlocp.w:
-            self.w_vr_map[xmlocp.xmldoc.get_value_reference(str(v))] = i
-            i = i + 1
-
         # Group variables into elements
         self.vars = {}
 
@@ -825,7 +869,7 @@ class BackwardEulerCollocator(Collocator):
             ui = []
             wi = []
             for j in range(xmlocp.n_x):
-                dxi.append(casadi.SX(str(self.xmlocp.xdot[j])+'_'+str(i)))
+                dxi.append(casadi.SX(str(self.xmlocp.dx[j])+'_'+str(i)))
             for j in range(xmlocp.n_x):
                 xi.append(casadi.SX(str(self.xmlocp.x[j])+'_'+str(i)))
             for j in range(xmlocp.n_u):
@@ -979,18 +1023,6 @@ class BackwardEulerCollocator(Collocator):
 
     def get_n_w(self):
         return self.get_xmlocp().n_w
-
-    def get_dx_vr_map(self):
-        return self.dx_vr_map
-
-    def get_x_vr_map(self):
-        return self.x_vr_map
-
-    def get_u_vr_map(self):
-        return self.u_vr_map
-
-    def get_w_vr_map(self):
-        return self.w_vr_map
 
     def get_time_points(self):
         return self.time_points
