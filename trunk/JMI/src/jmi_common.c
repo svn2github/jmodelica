@@ -433,6 +433,8 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_r
 	b->kin_y = N_VNew_Serial(n);
 	b->kin_y_scale = N_VNew_Serial(n);
 	b->kin_f_scale = N_VNew_Serial(n);
+	b->kin_ftol = JMI_DEFAULT_KINSOL_TOL;
+	b->kin_stol = JMI_DEFAULT_KINSOL_TOL;
 	return 0;
 }
 

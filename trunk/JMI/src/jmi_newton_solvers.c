@@ -22,7 +22,6 @@
 #define JMI_SIMPLE_NEWTON_TOL 1e-8
 #define JMI_SIMPLE_NEWTON_MAX_ITER 100
 #define JMI_SIMPLE_NEWTON_FD_TOL 1e-4
-#define JMI_KINSOL_TOL RCONST(1.0e-8)
 #define ONE RCONST(1.0)
 #define Ith(v,i)    NV_Ith_S(v,i)
 
@@ -82,8 +81,6 @@ int jmi_kinsol_solve(jmi_block_residual_t * block){
 	if (block->init == 1){
 		
 		/*Initialize work vectors.*/
-		block->kin_ftol = JMI_KINSOL_TOL; /*To be changed.*/
-		block->kin_stol = JMI_KINSOL_TOL; /*To be changed.*/
 		
 		/*Sets the scaling vectors to ones.*/
 		/*To be changed. */
@@ -104,7 +101,7 @@ int jmi_kinsol_solve(jmi_block_residual_t * block){
 		/*flag = KINDense(block->kin_mem, block->n);
 		 *error_return = jmi_kinsol_error_handling(flag);
 		 */
-		
+		 
 		/*Dense Kinsol using Penrose-Moore pseudoinverse*/
 		flag = KINPinv(block->kin_mem, block->n);
 		jmi_kinsol_error_handling(flag);

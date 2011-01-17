@@ -242,6 +242,10 @@ typedef jmi_ad_tape_t *jmi_ad_tape_p;
 	type name##_rec;\
 	type* name = &name##_rec;
 
+/* Default Kinsol tolerance when solving BLT blocks */
+/* RCONST from SUNDIALS and defines a compatible type, usally double precision */
+#define JMI_DEFAULT_KINSOL_TOL RCONST(1.0e-8)
+
 /**
  * Function to wrap division and report errors.
  */

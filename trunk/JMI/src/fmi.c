@@ -200,6 +200,16 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
     eventInfo->terminateSimulation = fmiFalse;          /* Don't terminate the simulation */
     eventInfo->iterationConverged = fmiTrue;            /* The iteration has converged */
     
+    /* Set tolerance in the BLT blocks */
+    for (i=0; i < ((fmi_t *)c)->jmi->n_dae_init_blocks; i=i+1){
+        ((fmi_t *)c)->jmi->dae_init_block_residuals[i]->kin_ftol = relativeTolerance*safety_factor_newton;
+        ((fmi_t *)c)->jmi->dae_init_block_residuals[i]->kin_stol = relativeTolerance*safety_factor_newton;
+    }
+    for (i=0; i < ((fmi_t *)c)->jmi->n_dae_blocks; i=i+1){
+        ((fmi_t *)c)->jmi->dae_block_residuals[i]->kin_ftol = relativeTolerance*safety_factor_newton;
+        ((fmi_t *)c)->jmi->dae_block_residuals[i]->kin_stol = relativeTolerance*safety_factor_newton;
+    }
+    
     /* Get Sizes */
     retval = jmi_init_get_sizes(((fmi_t *)c)->jmi,&nF0,&nF1,&nFp,&nR0); /* Get the size of R0 and F0, (interested in R0) */
     if(retval != 0) {
