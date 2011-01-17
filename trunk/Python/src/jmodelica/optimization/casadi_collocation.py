@@ -243,6 +243,18 @@ class Collocator:
     def get_xx_init(self):
         pass
 
+    def get_initial_dae_constraints(self):
+        pass
+
+    def get_dae_constraints(self):
+        pass
+
+    def get_collocation_constraints(self):
+        pass
+
+    def get_continuity_constraints(self):
+        pass
+    
     def get_g(self):
         pass
 
@@ -942,6 +954,11 @@ class BackwardEulerCollocator(Collocator):
         # Equality constraints
         self.g = []
 
+        self.initial_dae_constraints = []
+        self.dae_constraints = []
+        self.collocation_constraints = []
+        self.continuity_constraints = []
+
         z = []
         z += self.vars[1][0]['dx']
         z += self.vars[1][0]['x']
@@ -951,6 +968,7 @@ class BackwardEulerCollocator(Collocator):
         self.g += list(xmlocp.init_F0.eval([z])[0])
         self.g += list(xmlocp.dae_F.eval([z])[0])
         self.g += [self.vars[1][0]['u'][0]-self.vars[1][1]['u'][0]]
+        self.initial_dae_constraints += self.g
         
         self.time_points.append((xmlocp.ocp.t0,1,0))
         
@@ -964,17 +982,22 @@ class BackwardEulerCollocator(Collocator):
             z += self.vars[i+1][1]['u']
             z += self.vars[i+1][1]['w']
             z += [casadi.SX(t)]
-            self.g += list(xmlocp.dae_F.eval([z])[0])
+            dae_constr = list(xmlocp.dae_F.eval([z])[0])
+            self.g += dae_constr
+            self.dae_constraints.append(dae_constr)
+            colloc_constr = []
             if i==0:
                 for j in range(xmlocp.n_x):
-                    self.g.append(self.vars[i+1][1]['dx'][j] -
-                                  (self.vars[i+1][1]['x'][j] -
-                                   self.vars[i+1][0]['x'][j])/((xmlocp.ocp.tf-xmlocp.ocp.t0)/n_e))
+                    colloc_constr.append(self.vars[i+1][1]['dx'][j] - \
+                        (self.vars[i+1][1]['x'][j] - \
+                        self.vars[i+1][0]['x'][j])/((xmlocp.ocp.tf-xmlocp.ocp.t0)/n_e))
             else:
                 for j in range(xmlocp.n_x):
-                    self.g.append(self.vars[i+1][1]['dx'][j] -
-                                  (self.vars[i+1][1]['x'][j] -
+                    colloc_constr.append(self.vars[i+1][1]['dx'][j] - \
+                                  (self.vars[i+1][1]['x'][j] - \
                                    self.vars[i][1]['x'][j])/((xmlocp.ocp.tf-xmlocp.ocp.t0)/n_e))
+            self.g += colloc_constr
+            self.collocation_constraints.append(list(colloc_constr))
 
         self.n_g_colloc = len(self.g)
 
