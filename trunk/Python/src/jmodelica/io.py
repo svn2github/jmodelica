@@ -83,16 +83,68 @@ def export_result_dymola(model, data, file_name='', format='txt', scaled=False):
         f.write('1.1\n')
         f.write('\n')
         
-        #xmlfile = model.get_name()+'.xml'
-        #md = xmlparser.ModelDescription(xmlfile)
         md = model._get_XMLDoc()
         
-        # sort in value reference order (must match order in data)
-        names = sorted(md.get_variable_names(), key=itemgetter(0))
-        aliases = sorted(md.get_variable_aliases(), key=itemgetter(0))
-        descriptions = sorted(md.get_variable_descriptions(), key=itemgetter(0))
-        variabilities = sorted(
-            md.get_variable_variabilities(), key=itemgetter(0))
+        # NOTE: it is essential that the lists 'names', 'aliases', 'descriptions' 
+        # and 'variabilities' are sorted in the same order and that this order 
+        # is: value reference order AND within the same value reference the 
+        # non-alias variable must be before its corresponding aliases. Otherwise 
+        # the header-writing algorithm further down will fail.
+        # Therefore the following code is needed...
+        
+        # all lists that we need for later
+        vrefs_alias = []
+        vrefs = []
+        names_alias = []
+        names = []
+        aliases_alias = []
+        aliases = []
+        descriptions_alias = []
+        descriptions = []
+        variabilities_alias = []
+        variabilities = []
+        
+        # go through all variables and split in non-alias/only-alias lists
+        for var in md.get_model_variables():
+            if var.get_alias() == xmlparser.NO_ALIAS:
+                vrefs.append(var.get_value_reference())
+                names.append(var.get_name())
+                aliases.append(var.get_alias())
+                descriptions.append(var.get_description())
+                variabilities.append(var.get_variability())
+            else:
+                vrefs_alias.append(var.get_value_reference())
+                names_alias.append(var.get_name())
+                aliases_alias.append(var.get_alias())
+                descriptions_alias.append(var.get_description())
+                variabilities_alias.append(var.get_variability())
+        
+        # extend non-alias lists with only-alias-lists
+        vrefs.extend(vrefs_alias)
+        names.extend(names_alias)
+        aliases.extend(aliases_alias)
+        descriptions.extend(descriptions_alias)
+        variabilities.extend(variabilities_alias)
+        
+        # zip to list of tuples and sort - non alias variables are now
+        # guaranteed to be first in list and all variables are in value reference 
+        # order
+        names = sorted(zip(
+            tuple(vrefs), 
+            tuple(names)), 
+            key=itemgetter(0))
+        aliases = sorted(zip(
+            tuple(vrefs), 
+            tuple(aliases)), 
+            key=itemgetter(0))
+        descriptions = sorted(zip(
+            tuple(vrefs), 
+            tuple(descriptions)), 
+            key=itemgetter(0))
+        variabilities = sorted(zip(
+            tuple(vrefs), 
+            tuple(variabilities)), 
+            key=itemgetter(0))
         
         num_vars = len(names)
         

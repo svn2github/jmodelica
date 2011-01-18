@@ -103,18 +103,18 @@ class TestModel_VDP:
     def test_get_variable_names(self):
         """ Test jmi.JMUModel.get_variable_names method."""
         names = self.vdp.get_variable_names()
-        ntools.assert_equal(names[0][1],'p1')
+        ntools.assert_equal(names[0][1],'cost')
         
     @testattr(stddist = True)
     def test_get_dx_variable_names(self):
         """ Test jmi.JMUModel.get_dx_variable_names method."""
-        names = [(5,'der(x1)'),(6,'der(x2)'),(7,'der(cost)')]
+        names = [(7,'der(cost)'),(5,'der(x1)'),(6,'der(x2)')]
         ntools.assert_equal(self.vdp.get_dx_variable_names(),names)
     
     @testattr(stddist = True)
     def test_get_x_variable_names(self):
         """ Test jmi.JMUModel.get_x_variable_names method."""
-        names = [(8,'x1'),(9,'x2'),(10,'cost')]
+        names = [(10,'cost'),(8,'x1'),(9,'x2')]
         ntools.assert_equal(self.vdp.get_x_variable_names(),names)
     
     @testattr(stddist = True)
@@ -603,7 +603,7 @@ class TestModel_RLC:
     def test_get_variable_descriptions(self):
         """Test jmi.JMUModel.get_variable_descriptions method."""
         descriptions = self.rlc.get_variable_descriptions()
-        ntools.assert_equal(descriptions[0][1],"Potential at the pin")
+        ntools.assert_equal(descriptions[0][1],"Capacitance")
 
     @testattr(stddist = True)
     def test_is_negated_alias(self):

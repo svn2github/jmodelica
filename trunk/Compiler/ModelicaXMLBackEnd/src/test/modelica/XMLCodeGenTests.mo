@@ -140,15 +140,15 @@ model XMLCodeGenTest2
          template="$XML_variables$",
          generatedCode="
 
-		<ScalarVariable name=\"p1\" valueReference=\"0\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
-			<Real relativeQuantity=\"false\" start=\"5.0\" />
+		<ScalarVariable name=\"b1\" valueReference=\"536870916\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Boolean start=\"true\" />
 			<isLinear>true</isLinear>
 			<VariableCategory>independentParameter</VariableCategory>
 		</ScalarVariable>
-		<ScalarVariable name=\"p2\" valueReference=\"1\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
-			<Real relativeQuantity=\"false\" start=\"9.0\" />
+		<ScalarVariable name=\"b2\" valueReference=\"536870917\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Boolean start=\"false\" />
 			<isLinear>true</isLinear>
-			<VariableCategory>dependentParameter</VariableCategory>
+			<VariableCategory>independentParameter</VariableCategory>
 		</ScalarVariable>
 		<ScalarVariable name=\"i1\" valueReference=\"268435458\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
 			<Integer start=\"1\" />
@@ -160,15 +160,15 @@ model XMLCodeGenTest2
 			<isLinear>true</isLinear>
 			<VariableCategory>dependentParameter</VariableCategory>
 		</ScalarVariable>
-		<ScalarVariable name=\"b1\" valueReference=\"536870916\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
-			<Boolean start=\"true\" />
+		<ScalarVariable name=\"p1\" valueReference=\"0\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"5.0\" />
 			<isLinear>true</isLinear>
 			<VariableCategory>independentParameter</VariableCategory>
 		</ScalarVariable>
-		<ScalarVariable name=\"b2\" valueReference=\"536870917\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
-			<Boolean start=\"false\" />
+		<ScalarVariable name=\"p2\" valueReference=\"1\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"9.0\" />
 			<isLinear>true</isLinear>
-			<VariableCategory>independentParameter</VariableCategory>
+			<VariableCategory>dependentParameter</VariableCategory>
 		</ScalarVariable>")})));
 
 	parameter Real p1 = 5;
@@ -336,7 +336,376 @@ end XMLCodeGenTest2;
 		//type DigitalCurrentChoices = enumeration(zero, one);
 		//type DigitalCurrent = DigitalCurrentChoices(quantity="Current",start = DigitalCurrentChoices.one, fixed = true);
 		//DigitalCurrent c(start = DigitalCurrent.one, fixed = true);
-		//DigitalCurrentChoices c(start = DigitalCurrentChoices.one, fixed = true);
+		//DigitalCurrentChoices c(start = DigitalCurrentChoices.one, fixed = true);
+
 	//end EnumerationTest5;
+	
+	model VariableSortingTest1	
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.XMLCodeGenTestCase(
+         name="VariableSortingTest1",
+         description="",
+         template="$XML_variables$",
+         generatedCode="
+
+		<ScalarVariable name=\"a\" valueReference=\"1\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"5.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>independentParameter</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"b\" valueReference=\"3\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"4.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>independentParameter</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"c\" valueReference=\"2\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"6.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>independentParameter</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"d\" valueReference=\"0\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"1.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>independentParameter</VariableCategory>
+		</ScalarVariable>")})));
+
+		parameter Real d = 1;
+		parameter Real a = 5;
+		parameter Real c = 6;
+		parameter Real b = 4;
+   	 equation
+		
+	end VariableSortingTest1;
+	
+	model VariableSortingTest2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.XMLCodeGenTestCase(
+         name="VariableSortingTest2",
+         description="",
+         template="$XML_variables$",
+         generatedCode="
+
+		<ScalarVariable name=\"a1\" valueReference=\"1\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"1.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>independentParameter</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"a2\" valueReference=\"2\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"2.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>independentParameter</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"a3\" valueReference=\"0\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"3.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>independentParameter</VariableCategory>
+		</ScalarVariable>")})));
+
+		parameter Real a3 = 3;
+		parameter Real a1 = 1;
+		parameter Real a2 = 2;
+		equation
+	end VariableSortingTest2;
+	
+	model VariableSortingTest3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.XMLCodeGenTestCase(
+         name="VariableSortingTest3",
+         description="",
+         template="$XML_variables$",
+         generatedCode="
+
+		<ScalarVariable name=\"a1\" valueReference=\"2\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"1.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>independentParameter</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"a11\" valueReference=\"0\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"2.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>independentParameter</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"a111\" valueReference=\"1\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"3.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>independentParameter</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"a1111\" valueReference=\"3\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"4.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>independentParameter</VariableCategory>
+		</ScalarVariable>")})));
+
+		parameter Real a11 = 2;
+		parameter Real a111 = 3;
+		parameter Real a1 = 1;
+		parameter Real a1111 = 4;
+		equation 
+	end VariableSortingTest3;
+	
+	model VariableSortingTest4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.XMLCodeGenTestCase(
+         name="VariableSortingTest4",
+         description="",
+         template="$XML_variables$",
+         generatedCode="
+
+		<ScalarVariable name=\"a.a\" valueReference=\"1\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"1.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>independentParameter</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"a.b\" valueReference=\"0\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"2.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>independentParameter</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"b.a\" valueReference=\"3\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"1.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>independentParameter</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"b.b\" valueReference=\"2\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"2.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>independentParameter</VariableCategory>
+		</ScalarVariable>")})));
+
+		model A
+			parameter Real b = 2;
+			parameter Real a = 1;
+			equation
+		end A;
+		
+		model B
+			parameter Real b = 2;
+			parameter Real a = 1;
+			equation
+		end B;
+		
+		A a;
+		B b;
+		
+	end VariableSortingTest4;
+	
+	model VariableSortingTest5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.XMLCodeGenTestCase(
+         name="VariableSortingTest5",
+         description="",
+         template="$XML_variables$",
+         generatedCode="
+
+		<ScalarVariable name=\"x[1]\" valueReference=\"0\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"0.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>algebraic</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"x[2]\" valueReference=\"1\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"0.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>algebraic</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"x[3]\" valueReference=\"2\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"0.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>algebraic</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"x[4]\" valueReference=\"3\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"0.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>algebraic</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"x[5]\" valueReference=\"4\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"0.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>algebraic</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"x[6]\" valueReference=\"5\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"0.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>algebraic</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"x[7]\" valueReference=\"6\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"0.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>algebraic</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"x[8]\" valueReference=\"7\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"0.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>algebraic</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"x[9]\" valueReference=\"8\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"0.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>algebraic</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"x[10]\" valueReference=\"9\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"0.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>algebraic</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"x[11]\" valueReference=\"10\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"0.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>algebraic</VariableCategory>
+		</ScalarVariable>")})));
+
+    	Real x[11] = fill(1, 11);
+  		equation
+    		
+	end VariableSortingTest5;
+	
+	model VariableSortingTest6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.XMLCodeGenTestCase(
+         name="VariableSortingTest6",
+         description="",
+         template="$XML_variables$",
+         generatedCode="
+
+		<ScalarVariable name=\"a\" valueReference=\"0\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"1.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>independentParameter</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"b\" valueReference=\"1\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"2.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>independentParameter</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"x[1]\" valueReference=\"8\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"0.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>state</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"der(x[1])\" valueReference=\"4\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"0.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>derivative</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"x[2]\" valueReference=\"9\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"0.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>state</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"der(x[2])\" valueReference=\"5\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"0.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>derivative</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"y[1]\" valueReference=\"10\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"0.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>state</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"der(y[1])\" valueReference=\"6\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"0.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>derivative</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"y[2]\" valueReference=\"7\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"0.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>state</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"der(y[2])\" valueReference=\"3\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"0.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>derivative</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"z\" valueReference=\"2\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"5.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>independentParameter</VariableCategory>
+		</ScalarVariable>")})));
+
+		parameter Real a = 1;
+		parameter Real b = 2;
+		parameter Real z = 5;
+	    Real x[2];
+	    Real y[2];
+  		equation
+  			der(y[2]) = 2;
+    		der(x[1]) = 3;
+    		der(x[2]) = 4;
+    		der(y[1]) = 1;
+	end VariableSortingTest6;
+	
+	model VariableSortingTest7
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.XMLCodeGenTestCase(
+         name="VariableSortingTest7",
+         description="",
+         template="$XML_variables$",
+         generatedCode="
+
+		<ScalarVariable name=\"a.b.c.y[1]\" valueReference=\"0\" variability=\"continuous\" causality=\"internal\" alias=\"alias\" >
+			<Real relativeQuantity=\"false\" start=\"0.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>algebraic</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"a.b.c.y[2]\" valueReference=\"1\" variability=\"continuous\" causality=\"internal\" alias=\"alias\" >
+			<Real relativeQuantity=\"false\" start=\"0.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>algebraic</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"a.b.x[1,1]\" valueReference=\"0\" variability=\"continuous\" causality=\"internal\" alias=\"alias\" >
+			<Real relativeQuantity=\"false\" start=\"0.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>algebraic</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"a.b.x[1,2]\" valueReference=\"2\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"0.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>algebraic</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"a.b.x[2,1]\" valueReference=\"1\" variability=\"continuous\" causality=\"internal\" alias=\"alias\" >
+			<Real relativeQuantity=\"false\" start=\"0.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>algebraic</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"a.b.x[2,2]\" valueReference=\"3\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"0.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>algebraic</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"a.r[1]\" valueReference=\"0\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"0.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>algebraic</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"a.r[2]\" valueReference=\"1\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"0.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>algebraic</VariableCategory>
+		</ScalarVariable>")})));
+
+		class A
+			Real r[2];
+ 			class B 
+ 				Real x[2,2];
+				class C
+		  			Real y[2];
+		  			equation
+		  				y[1]=2;
+		  				y[2]=3;
+				end C;
+		  		C c;
+ 			end B;
+ 			B b;
+ 			equation
+ 				b.x[1,1] = b.c.y[1];
+    			b.x[1,2] = 2;
+    			b.x[2,1] = b.c.y[2];
+    			b.x[2,2] = 4;
+		end A;
+		A a;
+		equation
+			a.r[1] = a.b.x[1,1];
+			a.r[2] = a.b.x[2,1];
+	end VariableSortingTest7;
 		
 end XMLCodeGenTests;

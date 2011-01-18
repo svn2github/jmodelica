@@ -30,6 +30,11 @@ model VectorMul
 			<isLinear>true</isLinear>
 			<VariableCategory>independentParameter</VariableCategory>
 		</ScalarVariable>
+		<ScalarVariable name=\"q\" valueReference=\"6\" variability=\"continuous\" causality=\"internal\" alias=\"alias\" >
+			<Real relativeQuantity=\"false\" start=\"0.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>algebraic</VariableCategory>
+		</ScalarVariable>
 		<ScalarVariable name=\"x[1]\" valueReference=\"0\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
 			<Real relativeQuantity=\"false\" start=\"1.0\" />
 			<isLinear>true</isLinear>
@@ -64,11 +69,6 @@ model VectorMul
 			<Real relativeQuantity=\"false\" start=\"10.0\" />
 			<isLinear>true</isLinear>
 			<VariableCategory>dependentParameter</VariableCategory>
-		</ScalarVariable>
-		<ScalarVariable name=\"q\" valueReference=\"6\" variability=\"continuous\" causality=\"internal\" alias=\"alias\" >
-			<Real relativeQuantity=\"false\" start=\"0.0\" />
-			<isLinear>true</isLinear>
-			<VariableCategory>algebraic</VariableCategory>
 		</ScalarVariable>
 ")})));
 
@@ -225,16 +225,6 @@ model FunctionEval6
          template="$XML_variables$",
          generatedCode="
 
-		<ScalarVariable name=\"x[1]\" valueReference=\"0\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
-			<Real relativeQuantity=\"false\" start=\"1.0\" />
-			<isLinear>true</isLinear>
-			<VariableCategory>independentParameter</VariableCategory>
-		</ScalarVariable>
-		<ScalarVariable name=\"x[2]\" valueReference=\"1\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
-			<Real relativeQuantity=\"false\" start=\"2.0\" />
-			<isLinear>true</isLinear>
-			<VariableCategory>independentParameter</VariableCategory>
-		</ScalarVariable>
 		<ScalarVariable name=\"temp_1[1]\" valueReference=\"2\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
 			<Real relativeQuantity=\"false\" start=\"1.0\" />
 			<isLinear>true</isLinear>
@@ -244,6 +234,16 @@ model FunctionEval6
 			<Real relativeQuantity=\"false\" start=\"2.0\" />
 			<isLinear>true</isLinear>
 			<VariableCategory>dependentParameter</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"x[1]\" valueReference=\"0\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"1.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>independentParameter</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"x[2]\" valueReference=\"1\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"2.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>independentParameter</VariableCategory>
 		</ScalarVariable>
 		<ScalarVariable name=\"y[1]\" valueReference=\"4\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
 			<Real relativeQuantity=\"false\" start=\"1.0\" />
@@ -276,16 +276,6 @@ model FunctionEval7
          template="$XML_variables$",
          generatedCode="
 
-		<ScalarVariable name=\"x[1]\" valueReference=\"0\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
-			<Real relativeQuantity=\"false\" start=\"1.0\" />
-			<isLinear>true</isLinear>
-			<VariableCategory>independentParameter</VariableCategory>
-		</ScalarVariable>
-		<ScalarVariable name=\"x[2]\" valueReference=\"1\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
-			<Real relativeQuantity=\"false\" start=\"2.0\" />
-			<isLinear>true</isLinear>
-			<VariableCategory>independentParameter</VariableCategory>
-		</ScalarVariable>
 		<ScalarVariable name=\"temp_1[1]\" valueReference=\"2\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
 			<Real relativeQuantity=\"false\" start=\"1.0\" />
 			<isLinear>true</isLinear>
@@ -295,6 +285,16 @@ model FunctionEval7
 			<Real relativeQuantity=\"false\" start=\"2.0\" />
 			<isLinear>true</isLinear>
 			<VariableCategory>dependentParameter</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"x[1]\" valueReference=\"0\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"1.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>independentParameter</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"x[2]\" valueReference=\"1\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"2.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>independentParameter</VariableCategory>
 		</ScalarVariable>
 		<ScalarVariable name=\"y[1]\" valueReference=\"4\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
 			<Real relativeQuantity=\"false\" start=\"1.0\" />

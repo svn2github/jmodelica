@@ -22,6 +22,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -73,7 +75,7 @@ public class XMLGenerator extends GenericGenerator {
 			// Todays date for now
 			SimpleDateFormat dateformat = new SimpleDateFormat(df);
 			genPrinter.print("generationDateAndTime=\""+dateformat.format(new Date())+"\" ");
-			genPrinter.print("variableNamingConvention=\"flat\" ");
+			genPrinter.print("variableNamingConvention=\"structured\" ");
 			genPrinter.print("numberOfContinuousStates=\""+fclass.numDifferentiatedRealVariables()+"\" ");
 			genPrinter.print("numberOfEventIndicators=\""+fclass.numEventIndicators()+"\"");
 		}
@@ -315,40 +317,45 @@ public class XMLGenerator extends GenericGenerator {
 		 * (non-Javadoc)
 		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
 		 */
-		public void generate(PrintStream genPrinter) {		
-			for(FVariable variable:fclass.allVariables()) {	
+		public void generate(PrintStream genPrinter) {
+			// get and sort all FVariables
+			ArrayList<FVariable> variables = (ArrayList<FVariable>) fclass.allVariables().clone();
+			VariableNameComparator comp = new VariableNameComparator();			
+			Collections.sort(variables, comp);
+			
+			for (FVariable variable : variables) {	
 				if (!variable.isPreVariable()) {
 					genPrinter.print("\n\t\t<ScalarVariable ");
 					genPrinter.print("name=\""+variable.name()+"\" ");
 					genPrinter.print("valueReference=\""+variable.valueReference()+"\" ");
-					if(variable.hasFStringComment()) {
+					if (variable.hasFStringComment()) {
 						genPrinter.print("description=\"");
 						//genPrinter.print("![CDATA[" + variable.getFStringComment().getComment()+"]]"+"\" ");
 						genPrinter.print(replaceIllegalChars(variable.getFStringComment().getComment())+"\" ");
 					}
 					genPrinter.print("variability=\"");
-					if(variable.isConstant()) {
+					if (variable.isConstant()) {
 						genPrinter.print("constant\" ");
-					} else if(variable.isParameter()) {
+					} else if (variable.isParameter()) {
 						genPrinter.print("parameter\" ");
-					} else if(variable.isDiscrete()) {
+					} else if (variable.isDiscrete()) {
 						genPrinter.print("discrete\" ");
 					} else {
 						//default
 						genPrinter.print("continuous\" ");
 					}
 					genPrinter.print("causality=\"");
-					if(variable.isInput()) {
+					if (variable.isInput()) {
 						genPrinter.print("input\" ");
-					} else if(variable.isOutput()) {
+					} else if (variable.isOutput()) {
 						genPrinter.print("output\" ");
 					} else {
 						//default
 						genPrinter.print("internal\" ");
 					}
    		            genPrinter.print("alias=\"");
-   	   		        if(variable.isAlias()) {
-   	   	      	    	if(variable.isNegated()) {
+   	   		        if (variable.isAlias()) {
+   	   	      	    	if (variable.isNegated()) {
    	           	          genPrinter.print("negatedAlias\" ");
    	       		      	} else {
            		         	genPrinter.print("alias\" ");
@@ -358,24 +365,24 @@ public class XMLGenerator extends GenericGenerator {
    		      	    }
 	           	    genPrinter.print(">");
 
-					if(variable.isReal()) {
+					if (variable.isReal()) {
 						// TODO: move this to a method on FVariable that is overridden in subclasses
 						genPrinter.print("\n\t\t\t<Real ");
 						addRealAttributes(genPrinter, (FRealVariable)variable);
 						genPrinter.print("/>");		
-					} else if(variable.isInteger()) {
+					} else if (variable.isInteger()) {
 						genPrinter.print("\n\t\t\t<Integer ");
 						addIntegerAttributes(genPrinter, (FIntegerVariable)variable);
 						genPrinter.print("/>");
-					} else if(variable.isBoolean()) {
+					} else if (variable.isBoolean()) {
 						genPrinter.print("\n\t\t\t<Boolean ");
 						addBooleanAttributes(genPrinter, (FBooleanVariable)variable);
 						genPrinter.print("/>");
-					} else if(variable.isString()) {
+					} else if (variable.isString()) {
 						genPrinter.print("\n\t\t\t<String ");
 						addStringAttributes(genPrinter, (FStringVariable)variable);
 						genPrinter.print("/>");
-					} else if(variable.isEnum()) {
+					} else if (variable.isEnum()) {
 						genPrinter.print("\n\t\t\t<Enumeration ");
 						addEnumAttributes(genPrinter, (FEnumVariable)variable);
 						genPrinter.print("/>");
@@ -387,7 +394,7 @@ public class XMLGenerator extends GenericGenerator {
 					
 					//direct dependency - not supported
 					Boolean generateEqu = fclass.root().options.getBooleanOption("generate_xml_equations");
-					if(generateEqu){
+					if (generateEqu){
 						//qualified name
 						genPrinter.print("\n\t\t\t<QualifiedName>\n");
 						variable.getFQName().prettyPrint_XML(genPrinter,"\t\t\t");
@@ -395,23 +402,23 @@ public class XMLGenerator extends GenericGenerator {
 					}		
 					
 					Boolean generateFMI = fclass.root().options.getBooleanOption("generate_fmi_xml");
-					if(!generateFMI) {				
+					if (!generateFMI) {				
 						//is linear?
 						addLinearInfo(genPrinter, variable);
 					
 						//variable category
 						genPrinter.print("\n\t\t\t<VariableCategory>");
-						if(variable.isDerivativeVariable()) {
+						if (variable.isDerivativeVariable()) {
 							genPrinter.print("derivative");
-						} else if(variable.isDifferentiatedVariable()) {
+						} else if (variable.isDifferentiatedVariable()) {
 							genPrinter.print("state");
-						} else if(variable.isDependentConstant()) {
+						} else if (variable.isDependentConstant()) {
 							genPrinter.print("dependentConstant");
-						} else if(variable.isIndependentConstant()) {
+						} else if (variable.isIndependentConstant()) {
 							genPrinter.print("independentConstant");
-						} else if(variable.isDependentParameter()) {
+						} else if (variable.isDependentParameter()) {
 							genPrinter.print("dependentParameter");
-						} else if(variable.isIndependentParameter()) {
+						} else if (variable.isIndependentParameter()) {
 							genPrinter.print("independentParameter");
 						} else {
 							//default is algebraic
@@ -785,6 +792,42 @@ public class XMLGenerator extends GenericGenerator {
 		illegalCharsSub.put("&","&amp");
 		illegalCharsSub.put("<","&lt;");
 		illegalCharsSub.put("\"", "&quot;");
+	}
+}
+
+class VariableNameComparator implements Comparator<FVariable> {
+	public int compare(FVariable variable1, FVariable variable2) {
+		String name1 = variable1.getFQNameNoTransform().name();
+		String name2 = variable2.getFQNameNoTransform().name();
+		String regex = "\\[|\\]";
+		String[] n1 = name1.split(regex);
+		String[] n2 = name2.split(regex);
+		
+		int nn = Math.min(n1.length, n2.length);
+		int res = 0;
+		
+		for (int i=0; i < nn && res == 0; i++) {
+			if (i%2 == 0) {			//even index -> name
+				res = n1[i].compareTo(n2[i]);
+			} else {				//odd index -> variable index
+				String[] i1 = n1[i].split(",");
+				String[] i2 = n2[i].split(",");
+				int ni = Math.min(i1.length, i2.length);
+				
+				for (int j = 0; j < ni && res == 0; j++) {
+					int ii1 = Integer.parseInt(i1[j]);
+					int ii2 = Integer.parseInt(i2[j]);
+					res = ii1 - ii2;
+				}
+				if (res == 0) {
+					res = i1.length - i2.length;
+				}
+			}
+		}
+		if (res == 0) {
+			res = n1.length - n2.length;
+		}
+		return res;
 	}
 }
 
