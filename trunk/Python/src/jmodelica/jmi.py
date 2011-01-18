@@ -3041,6 +3041,7 @@ class JMIModel(object):
         self._dll.jmi_ode_initialize.argtypes = [ct.c_void_p]
         self._dll.jmi_ode_guards.argtypes = [ct.c_void_p]
         self._dll.jmi_ode_guards_init.argtypes = [ct.c_void_p]
+        self._dll.jmi_ode_next_time_event.argtypes = [ct.c_void_p,ct.POINTER(c_jmi_real_t)]
     
         # DAE interface
         self._dll.jmi_dae_get_sizes.argtypes = [ct.c_void_p,
@@ -4262,6 +4263,15 @@ class JMIModel(object):
         """
         if self._dll.jmi_ode_guards_init(self._jmi) is not 0:
             raise JMIException("Evaluation of guard expressions in the initial equations failed")
+
+    def ode_next_time_event(self):
+        """ 
+        Compute the next time event.
+        """
+        n_t_ev = c_jmi_real_t()
+        if self._dll.jmi_ode_next_time_event(self._jmi,byref(n_t_ev)) is not 0:
+            raise JMIException("Evaluation of next time event failed")
+        return n_t_ev.value
 
     def dae_get_sizes(self):
         """ 
