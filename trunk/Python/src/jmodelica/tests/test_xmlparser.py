@@ -318,6 +318,26 @@ class TestXMLParser:
             zip(vrefs_noalias, vnom_noalias))
 
     @testattr(stddist = True)
+    def test_get_variable_fixed_attributes(self):
+        """
+        Test xmlparser.ModelDescription.get_variable_fixed_attributes method.
+        
+        """
+        vrefs = (26, 0, 0, 2, 3, 0, 5, 5, 7, 8)
+        vnom = (None, None, None, None, None, None, None, None, None, True)
+            
+        vrefs_noalias = (26, 0, 2, 3, 5, 7, 8)
+        vnom_noalias = (None, None, None, None, None, None, True)
+        
+        # with alias
+        nose.tools.assert_equal(self.md.get_variable_fixed_attributes(), zip(vrefs, vnom))
+        
+        # without alias
+        nose.tools.assert_equal(self.md.get_variable_fixed_attributes(include_alias=False), 
+            zip(vrefs_noalias, vnom_noalias))
+
+
+    @testattr(stddist = True)
     def test_get_variable_start_attributes(self):
         """
         Test xmlparser.ModelDescription.get_variable_start_attributes method.
@@ -526,6 +546,82 @@ class TestXMLParser:
         # without alias
         nose.tools.assert_equal(self.md.get_w_start(include_alias=False), 
             zip(vrefs_noalias, vstart_noalias))
+
+    @testattr(stddist = True)
+    def test_get_dx_fixed(self):
+        """
+        Test xmlparser.ModelDescription.get_dx_fixed method.
+        
+        """
+        vrefs = (8,)
+        vfixed = (True,)
+            
+        vrefs_noalias = (8,)
+        vfixed_noalias = (True,)
+        
+        # with alias
+        nose.tools.assert_equal(self.md.get_dx_fixed(), zip(vrefs, vfixed))
+        
+        # without alias
+        nose.tools.assert_equal(self.md.get_dx_fixed(include_alias=False), 
+            zip(vrefs_noalias, vfixed_noalias))
+
+    @testattr(stddist = True)
+    def test_get_x_fixed(self):
+        """
+        Test xmlparser.ModelDescription.get_x_fixed method.
+        
+        """
+        vrefs = (5,)
+        vfixed = (None,)
+            
+        vrefs_noalias = (5,)
+        vfixed_noalias = (None,)
+        
+        # with alias
+        nose.tools.assert_equal(self.md.get_x_fixed(), zip(vrefs, vfixed))
+        
+        # without alias
+        nose.tools.assert_equal(self.md.get_x_fixed(include_alias=False), 
+            zip(vrefs_noalias, vfixed_noalias))
+            
+    @testattr(stddist = True)
+    def test_get_u_fixed(self):
+        """
+        Test xmlparser.ModelDescription.get_u_fixed method.
+        
+        """
+        vrefs = (26,)
+        vfixed = (None,)
+            
+        vrefs_noalias = (26,)
+        vfixed_noalias = (None,)
+        
+        # with alias
+        nose.tools.assert_equal(self.md.get_u_fixed(), zip(vrefs, vfixed))
+        
+        # without alias
+        nose.tools.assert_equal(self.md.get_u_fixed(include_alias=False), 
+            zip(vrefs_noalias, vfixed_noalias))
+
+    @testattr(stddist = True)
+    def test_get_w_fixed(self):
+        """
+        Test xmlparser.ModelDescription.get_w_fixed method.
+        
+        """
+        vrefs = (2,)
+        vfixed = (None,)
+            
+        vrefs_noalias = (2,)
+        vfixed_noalias = (None,)
+        
+        # with alias
+        nose.tools.assert_equal(self.md.get_w_fixed(), zip(vrefs, vfixed))
+        
+        # without alias
+        nose.tools.assert_equal(self.md.get_w_fixed(include_alias=False), 
+            zip(vrefs_noalias, vfixed_noalias))
 
     @testattr(stddist = True)
     def test_get_p_opt_initial_guess(self):

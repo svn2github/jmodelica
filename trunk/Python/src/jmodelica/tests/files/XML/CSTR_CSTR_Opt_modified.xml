@@ -97,7 +97,7 @@ fmiVersion="1.0" modelName="CSTR.CSTR_Opt" modelIdentifier="CSTR_CSTR_Opt" guid=
 			 <VariableCategory>independentParameter</VariableCategory>
 		 </ScalarVariable>
 		 <ScalarVariable name="cstr.rho" valueReference="8" causality="internal" alias="noAlias">
-			 <Real relativeQuantity="false" start="0.0" free="false" initialGuess="0.0" nominal="5" max="500"/>
+			 <Real relativeQuantity="false" start="0.0" free="false" initialGuess="0.0" nominal="5" max="500" fixed="true"/>
 			 <isLinear>true</isLinear>
 			 <isLinearTimedVariables>
 				 <TimePoint index="0" isLinear="true"/>
