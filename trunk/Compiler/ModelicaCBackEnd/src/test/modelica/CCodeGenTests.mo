@@ -3841,6 +3841,27 @@ equation
 
 end WhenTest3; 
 
+model NoDAEGenerationTest1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="NoDAEGenerationTest1",
+         description="Test that no DAE is generated if the corresponding option is set to false.",
+         generate_dae=false,
+         template="$C_DAE_equation_residuals$
+                   $C_DAE_initial_equation_residuals$
+                   $C_DAE_initial_dependent_parameter_residuals$",
+         generatedCode=" 
+")})));
+  Real x, y, z;
+  parameter Real p = 1;
+  parameter Real p2 = p;
+equation
+  z = x + y;
+  3 = x - y;
+  5 = x + 3*y;  
+
+end NoDAEGenerationTest1;
+
 model BlockTest1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.CCodeGenTestCase(

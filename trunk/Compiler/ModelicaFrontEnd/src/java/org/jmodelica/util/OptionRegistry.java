@@ -41,6 +41,8 @@ import org.xml.sax.SAXException;
 public class OptionRegistry {
 	
 		private enum DefOpt {
+			GEN_DAE   ("generate_dae",            true, 
+			"If this option is set to true, code for solving DAEs are generated. "),
 			GEN_ODE   ("generate_ode",            false, 
 					"If this option is set to true, code for solving ODEs are generated. "),
 			EXTRA_LIB   ("extra_lib_dirs",            "", 

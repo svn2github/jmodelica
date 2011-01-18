@@ -439,6 +439,7 @@ public class ModelicaCompiler {
 		log.info("START COMPILING FMU...");
 		// Always set these options when compiling an FMU
 		setBooleanOption("generate_ode", true);
+		setBooleanOption("generate_dae", false);	
 		setBooleanOption("equation_sorting", true);
 		this.compileUnit(className, fileName, target, compileTo, "FMU");
 		log.info("...COMPILING FMU finished");
