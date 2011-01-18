@@ -624,6 +624,63 @@ class TestXMLParser:
             zip(vrefs_noalias, vfixed_noalias))
 
     @testattr(stddist = True)
+    def test_get_x_nominal(self):
+        """
+        Test xmlparser.ModelDescription.get_x_nominal method.
+        
+        """
+        vrefs = (5,)
+        vnominal = (None,)
+            
+        vrefs_noalias = (5,)
+        vnominal_noalias = (None,)
+        
+        # with alias
+        nose.tools.assert_equal(self.md.get_x_nominal(), zip(vrefs, vnominal))
+        
+        # without alias
+        nose.tools.assert_equal(self.md.get_x_nominal(include_alias=False), 
+            zip(vrefs_noalias, vnominal_noalias))
+            
+    @testattr(stddist = True)
+    def test_get_u_nominal(self):
+        """
+        Test xmlparser.ModelDescription.get_u_nominal method.
+        
+        """
+        vrefs = (26,)
+        vnominal = (3.14,)
+            
+        vrefs_noalias = (26,)
+        vnominal_noalias = (3.14,)
+        
+        # with alias
+        nose.tools.assert_equal(self.md.get_u_nominal(), zip(vrefs, vnominal))
+        
+        # without alias
+        nose.tools.assert_equal(self.md.get_u_nominal(include_alias=False), 
+            zip(vrefs_noalias, vnominal_noalias))
+
+    @testattr(stddist = True)
+    def test_get_w_nominal(self):
+        """
+        Test xmlparser.ModelDescription.get_w_nominal method.
+        
+        """
+        vrefs = (2,)
+        vnominal = (None,)
+            
+        vrefs_noalias = (2,)
+        vnominal_noalias = (None,)
+        
+        # with alias
+        nose.tools.assert_equal(self.md.get_w_nominal(), zip(vrefs, vnominal))
+        
+        # without alias
+        nose.tools.assert_equal(self.md.get_w_nominal(include_alias=False), 
+            zip(vrefs_noalias, vnominal_noalias))
+
+    @testattr(stddist = True)
     def test_get_p_opt_initial_guess(self):
         """
         Test xmlparser.ModelDescription.get_p_opt_initial_guess method.
