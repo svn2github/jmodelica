@@ -627,5 +627,23 @@ end OptimicaTransformCanonicalTests.DAETest1;
 	0 = -a[N]*x[N] + a[N]*u;
   end DAETest1;
 
+optimization DepParTest1 (objective=1,startTime=0,finalTime=1) 
+
+  	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FClassMethodTestCase(name="DepParTest1",
+      methodName="freeParametersDiagnostics",
+        description="Test linearity of variables.", methodResult=
+        "  
+Free independent parameters:
+p1
+Free dependent parameters:
+  ")})));
+
+  parameter Real p1(free=true) = 1;
+  parameter Real p2 = 5;
+  Real x;
+equation
+  x*p2 = p1;
+end DepParTest1;
 
 end OptimicaTransformCanonicalTests;
