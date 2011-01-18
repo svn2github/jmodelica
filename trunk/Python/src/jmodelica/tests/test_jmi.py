@@ -1027,8 +1027,7 @@ class TestJMIModel_VDP:
     def test_ode_next_time_event(self):
         """ Test JMIModel.ode_next_time_event method. """
         e = self.vdp.jmimodel.ode_next_time_event()
-        asdf
-        
+
     @testattr(stddist = True)
     def test_init_get_sizes(self):
         """ Test JMIModel.init_get_sizes method. """

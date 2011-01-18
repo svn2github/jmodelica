@@ -41,10 +41,13 @@ import org.xml.sax.SAXException;
 public class OptionRegistry {
 	
 		private enum DefOpt {
+			CONV_FREE_DEP_PAR_TO_ALGS   ("convert_free_dependent_parameters_to_algebraics", true, 
+			"If this option is set to true (default is true), free dependent parameters are" +
+			"converted to algebraic variables."),
 			GEN_DAE   ("generate_dae",            true, 
-			"If this option is set to true, code for solving DAEs are generated. "),
+			"If this option is set to true (default is true), code for solving DAEs are generated."),
 			GEN_ODE   ("generate_ode",            false, 
-					"If this option is set to true, code for solving ODEs are generated. "),
+					"If this option is set to true (default is false), code for solving ODEs are generated. "),
 			EXTRA_LIB   ("extra_lib_dirs",            "", 
 					"The value of this option is appended to the value of the MODELICAPATH environment " +
 					"variable for determining in what directories to search for libraries."),

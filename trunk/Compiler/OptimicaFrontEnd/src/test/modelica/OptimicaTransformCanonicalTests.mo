@@ -632,7 +632,7 @@ optimization DepParTest1 (objective=1,startTime=0,finalTime=1)
   	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.FClassMethodTestCase(name="DepParTest1",
       methodName="freeParametersDiagnostics",
-        description="Test linearity of variables.", methodResult=
+        description="Test that free dependent parameters are handled correctly", methodResult=
         "  
 Free independent parameters:
 p1
@@ -645,5 +645,78 @@ Free dependent parameters:
 equation
   x*p2 = p1;
 end DepParTest1;
+
+optimization DepParTest2 (objective=1,startTime=0,finalTime=1) 
+
+  	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FClassMethodTestCase(name="DepParTest2",
+      methodName="freeParametersDiagnostics",
+        description="Test that free dependent parameters are handled correctly.", methodResult=
+        "  
+Free independent parameters:
+p1
+Free dependent parameters:
+
+  ")})));
+
+  parameter Real p1(free=true) = 1;
+  parameter Real p2 = p1*2;
+  Real x;
+equation
+  x*p2 = p1;
+end DepParTest2;
+
+optimization DepParTest3 (objective=1,startTime=0,finalTime=1) 
+
+  	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FClassMethodTestCase(name="DepParTest3",
+      methodName="freeParametersDiagnostics",
+        description="Test that free dependent parameters are handled correctly.", methodResult=
+        "
+Free independent parameters:
+p2
+Free dependent parameters:
+  
+  ")})));
+
+  model M
+    parameter Real p1 = 1;
+    Real x = 2*p1;
+  end M;
+  
+  M m(p1=p2*3);
+  parameter Real p2(free=true) = 3;
+  Real x;
+equation
+  x*p2 = 4;
+end DepParTest3;
+
+optimization DepParTest4 (objective=1,startTime=0,finalTime=1) 
+
+  	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FClassMethodTestCase(name="DepParTest4",
+      convert_free_dependent_variables_to_algebraics = false,
+      methodName="freeParametersDiagnostics",
+        description="Test that free dependent parameters are handled correctly.", methodResult=
+        "
+Free independent parameters:
+p2
+Free dependent parameters:
+m.p1
+
+  ")})));
+
+  model M
+    parameter Real p1 = 1;
+    Real x = 2*p1;
+  end M;
+  
+  M m(p1=p2*3);
+  parameter Real p2(free=true) = 3;
+  Real x;
+equation
+  x*p2 = 4;
+end DepParTest4;
+
 
 end OptimicaTransformCanonicalTests;

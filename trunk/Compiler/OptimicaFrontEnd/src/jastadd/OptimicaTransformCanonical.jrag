@@ -30,6 +30,14 @@ aspect OptimicaTransformCanonical {
 			}
 		}
 		
+		if (root().options.getBooleanOption("convert_free_dependent_parameters_to_algebraics")) {
+			for (FVariable fv : freeDependentParameters()) {
+				fv.setFTypePrefixVariability(new FContinuous());
+			}
+		}		
+
+		root().flushAllRecursive();
+		
 		// Create a parameter for the startTime attribute
 		fv_startTime = new FRealVariable(new FPublicVisibilityType(), 
 				fParameter(), new Opt(), 
