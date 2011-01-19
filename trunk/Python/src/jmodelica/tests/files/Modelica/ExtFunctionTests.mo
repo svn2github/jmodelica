@@ -44,4 +44,19 @@ function add2
                          IncludeDirectory="file:///Incl/incl1");
 end add2;
 
+model ExtFunctionTest3
+ Real a(start=10);
+   
+ equation
+   testModelicaMessage();
+   der(a) = a;
+ 
+end ExtFunctionTest3;
+
+function testModelicaMessage
+    
+    external "C" annotation(Include="#include \"testModelicaUtilities.c\"");
+
+end testModelicaMessage;
+
 end ExtFunctionTests;

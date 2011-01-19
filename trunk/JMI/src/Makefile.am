@@ -25,7 +25,8 @@ AUTOMAKE_OPTIONS = foreign
 
 lib_LTLIBRARIES = libjmi.la \
                   libjmi_algorithm.la \
-                  libfmi.la
+                  libfmi.la \
+                  libmodelica_utilities.la
 
 if COMPILE_WITH_CPPAD
 lib_LTLIBRARIES += libjmi_cppad.la \
@@ -90,6 +91,15 @@ libfmi_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g -I$(SUNDIALS_HOME)/include -std
 # static inclusion of the runtime libraries when creating model so:s.
 libfmi_la_LDFLAGS = -no-undefined -static-libtool-libs
 
+libmodelica_utilities_la_SOURCES = ModelicaUtilities.h \
+                                   ModelicaUtilities.c
+
+libmodelica_utilities_la_CFLAGS = -Wall -g -std=c89 -pedantic
+# Don't build shared libraries of libjmi and libjmicppad. This is not
+# really needed, and also (more importantly perhaps) I cannot force
+# static inclusion of the runtime libraries when creating model so:s.
+libmodelica_utilities_la_LDFLAGS = -no-undefined -static-libtool-libs
+
 libjmi_solver_la_SOURCES = jmi_opt_coll_radau.c \
                            jmi_opt_coll_ipopt.cpp \
                            jmi_opt_coll_TNLP.cpp \
@@ -147,6 +157,7 @@ include_HEADERS = jmi.h \
                   fmiModelFunctions.h \
                   fmiModelTypes.h \
                   fmi.h \
+                  ModelicaUtilities.h \
                   jmi_common.h \
                   jmi_newton_solvers.h \
                   jmi_init_opt.h \
