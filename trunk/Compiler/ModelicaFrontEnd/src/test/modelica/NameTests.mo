@@ -1472,6 +1472,35 @@ end NameTests.ConstantLookup29;
 end ConstantLookup29;
 
 
+model ConstantLookup30
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="ConstantLookup30",
+         description="",
+         flatModel="
+fclass NameTests.ConstantLookup30
+ parameter Real p = 3.1 /* 3.1 */;
+ Real f(final quantity = \"Force\",final unit = \"N\");
+equation
+ f = 1;
+end NameTests.ConstantLookup30;
+")})));
+
+	package Constants
+		constant Real c = 3.1;
+	end Constants;
+	
+	model M1
+		import NameTests.ConstantLookup30.Constants.*;
+		import SI = Modelica.SIunits;
+		parameter Real p = c;
+		SI.Force f=1; 
+	end M1;
+	
+	extends M1;
+end ConstantLookup30;
+
+
 
 class ExtendsTest1
      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
