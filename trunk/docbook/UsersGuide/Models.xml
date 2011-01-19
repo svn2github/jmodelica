@@ -416,7 +416,7 @@ source_root = mc.parse_model('myPackage.mo')
 model_instance = mc.instantiate_model(source_root, 'myPackage.myModel')
 
 # Perform flattening and get a flat representation
-flat_rep = oc.flatten_model(model_instance)
+flat_rep = mc.flatten_model(model_instance)
 </programlisting></para>
       </section>
 
