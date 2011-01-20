@@ -88,6 +88,10 @@ aspect ComplianceCheck {
 		compliance("The initial() function-like operator is not supported");
 	}
 	
+	public void FIntegerExp.complianceCheck() {
+		compliance("The integer() function-like operator is not supported");
+	}
+	
 	public void FIgnoredBuiltIn.complianceCheck() {
 		warning("The " + getName() + 
 				"() function-like operator is not supported, and is currently ignored");

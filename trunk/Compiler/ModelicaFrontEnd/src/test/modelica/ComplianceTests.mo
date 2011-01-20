@@ -263,7 +263,7 @@ model UnsupportedBuiltins3_ComplErr
          name="UnsupportedBuiltins3_ComplErr",
          description="Compliance error for unsupported builtins",
          errorMessage="
-9 errors found:
+10 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 280, column 3:
   The semiLinear() function-like operator is not supported
@@ -291,6 +291,9 @@ Compliance error at line 287, column 3:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 288, column 3:
   The terminate() function-like operator is not supported
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 289, column 3:
+  The integer() function-like operator is not supported
 ")})));
 
   discrete Real x;
@@ -304,6 +307,7 @@ Compliance error at line 288, column 3:
   edge();
   reinit(1);
   terminate();
+  integer(1);
 end UnsupportedBuiltins3_ComplErr;
 
 
