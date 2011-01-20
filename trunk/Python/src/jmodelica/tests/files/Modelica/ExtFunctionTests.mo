@@ -48,15 +48,23 @@ model ExtFunctionTest3
  Real a(start=10);
    
  equation
-   testModelicaMessage();
+   testModelicaMessages();
+   testModelicaErrorMessages();
+   testModelicaAllocateStrings();
    der(a) = a;
  
 end ExtFunctionTest3;
 
-function testModelicaMessage
-    
+function testModelicaMessages
     external "C" annotation(Include="#include \"testModelicaUtilities.c\"");
+end testModelicaMessages;
 
-end testModelicaMessage;
+function testModelicaErrorMessages
+    external "C" annotation(Include="#include \"testModelicaUtilities.c\"");
+end testModelicaErrorMessages;
+
+function testModelicaAllocateStrings
+    external "C" annotation(Include="#include \"testModelicaUtilities.c\"");
+end testModelicaAllocateStrings;
 
 end ExtFunctionTests;

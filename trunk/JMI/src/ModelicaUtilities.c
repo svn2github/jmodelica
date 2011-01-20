@@ -18,52 +18,55 @@
 */
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include "ModelicaUtilities.h"
 
 
 void ModelicaMessage(const char* string) 
 {
-    printf("*** ModelicaMessage: %s ***\n", string);
+    printf("%s", string);
 }
 
 void ModelicaFormatMessage(const char* string,...) 
 {
-    printf("*** ModelicaFormatMessage ***\n");
+    va_list arg_ptr;
+    va_start(arg_ptr, string);
+    vprintf(string, arg_ptr);
+    va_end(arg_ptr);
 }
 
 void ModelicaVFormatMessage(const char* string, va_list arg_ptr) 
 {
-    printf("*** ModelicaVFormatMessage ***\n");
+    vprintf(string, arg_ptr);
 }
 
 void ModelicaError(const char* string)
 {
-    printf("*** ModelicaError ***\n");
+    fprintf(stderr, "%s", string);
 }
 
 void ModelicaFormatError(const char* string,...)
 {
-    printf("*** ModelicaFormatError ***\n");
+    va_list arg_ptr;
+    va_start(arg_ptr, string);
+    vfprintf(stderr, string, arg_ptr);
+    va_end(arg_ptr);
 }
 
 void ModelicaVFormatError(const char* string, va_list arg_ptr)
 {
-    printf("*** ModelicaVFormatError ***\n");
+    vfprintf(stderr, string, arg_ptr);
 }
 
 char* ModelicaAllocateString(size_t len) 
 {
-    char* retval = (char*) malloc(len * sizeof(char) );
-    printf("*** ModelicaAllocateString ***\n");
-    
-    return retval;
+    ModelicaError("Function not implemented. Strings are not yet supported\n");
+    return NULL;
 }
 
 char* ModelicaAllocateStringWithErrorReturn(size_t len) 
 {
-    char* retval = (char*) malloc(len * sizeof(char) );
-    printf("*** ModelicaAllocateStringWithErrorReturn ***\n");
-
-    return retval;
+    ModelicaError("Function not implemented. Strings are not yet supported\n");
+    return NULL;
 }
 

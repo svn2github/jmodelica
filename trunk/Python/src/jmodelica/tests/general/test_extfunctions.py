@@ -26,8 +26,12 @@ from jmodelica.tests import get_files_path
 
 @testattr(stddist = True)
 def test_ModelicaUtilities():
+    """ 
+    Test that it is possible to compile a model with external functions 
+    using the functions in ModelicaUtilities.
+    """
     fpath = os.path.join(get_files_path(), 'Modelica', "ExtFunctionTests.mo")
     cpath = "ExtFunctionTests.ExtFunctionTest3"
     jmu_name = compile_jmu(cpath, fpath, target='model_noad')
     model = JMUModel("ExtFunctionTests_ExtFunctionTest3.jmu")
-    model.simulate(final_time=0.001)
+    #model.simulate()
