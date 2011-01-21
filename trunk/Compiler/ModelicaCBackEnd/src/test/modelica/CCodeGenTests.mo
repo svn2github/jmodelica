@@ -3974,4 +3974,242 @@ equation
   
 end StartValues2;
 
+model externalArray1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="externalArray1",
+         description="",
+         template="
+$C_function_headers$
+$C_functions$
+",
+         generatedCode="
+void func_CCodeGenTests_externalArray1_f_def(jmi_array_t* a_a, jmi_ad_var_t* b_o);
+jmi_ad_var_t func_CCodeGenTests_externalArray1_f_exp(jmi_array_t* a_a);
+
+void func_CCodeGenTests_externalArray1_f_def(jmi_array_t* a_a, jmi_ad_var_t* b_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t b_v;
+    b_v = f(a_a->var, jmi_array_size(a_a, 0));
+    if (b_o != NULL) *b_o = b_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_externalArray1_f_exp(jmi_array_t* a_a) {
+    jmi_ad_var_t b_v;
+    func_CCodeGenTests_externalArray1_f_def(a_a, &b_v);
+    return b_v;
+}
+
+")})));
+
+	Real a_in[2]={1,1};
+	Real b_out;
+	function f
+		input Real a[2];
+		output Real b;
+		external;
+	end f;
+	equation
+		b_out = f(a_in);
+
+end externalArray1;
+
+model externalArray2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="externalArray2",
+         description="",
+         template="
+$C_function_headers$
+$C_functions$
+",
+         generatedCode="
+void func_CCodeGenTests_externalArray2_f_def(jmi_array_t* a_a, jmi_ad_var_t* b_o);
+jmi_ad_var_t func_CCodeGenTests_externalArray2_f_exp(jmi_array_t* a_a);
+
+void func_CCodeGenTests_externalArray2_f_def(jmi_array_t* a_a, jmi_ad_var_t* b_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t b_v;
+    b_v = f(a_a->var, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1));
+    if (b_o != NULL) *b_o = b_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_externalArray2_f_exp(jmi_array_t* a_a) {
+    jmi_ad_var_t b_v;
+    func_CCodeGenTests_externalArray2_f_def(a_a, &b_v);
+    return b_v;
+}
+
+")})));
+
+	Real a_in[2,2]={{1,1},{1,1}};
+	Real b_out;
+	function f
+		input Real a[2,2];
+		output Real b;
+		external;
+	end f;
+	equation
+		b_out = f(a_in);
+end externalArray2;
+
+model externalArray3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="externalArray3",
+         description="",
+         template="
+$C_function_headers$
+$C_functions$
+",
+         generatedCode="
+void func_CCodeGenTests_externalArray3_f_def(jmi_array_t* a_a, jmi_ad_var_t* b_o);
+jmi_ad_var_t func_CCodeGenTests_externalArray3_f_exp(jmi_array_t* a_a);
+
+void func_CCodeGenTests_externalArray3_f_def(jmi_array_t* a_a, jmi_ad_var_t* b_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t b_v;
+    b_v = f(a_a->var, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1));
+    if (b_o != NULL) *b_o = b_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_externalArray3_f_exp(jmi_array_t* a_a) {
+    jmi_ad_var_t b_v;
+    func_CCodeGenTests_externalArray3_f_def(a_a, &b_v);
+    return b_v;
+}
+
+")})));
+
+	Real a_in[2,2];
+	Real b_out;
+	function f
+		input Real a[:,:];
+		output Real b;
+		external;
+	end f;
+	equation
+		a_in = {{1,1},{2,2}};
+		b_out = f(a_in);
+end externalArray3;
+
+model externalArray4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="externalArray4",
+         description="",
+         template="
+$C_function_headers$
+$C_functions$
+",
+         generatedCode="
+void func_CCodeGenTests_externalArray4_f_def(jmi_array_t* a_a, jmi_array_t* b_a);
+
+void func_CCodeGenTests_externalArray4_f_def(jmi_array_t* a_a, jmi_array_t* b_a) {
+    JMI_DYNAMIC_INIT()
+    if (b_a == NULL) {
+        JMI_ARRAY_STATIC(b_an, 2, 2)
+        b_a = b_an;
+    }
+    f(a_a->var, jmi_array_size(a_a, 0), b_a->var, jmi_array_size(b_a, 0));
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+")})));
+
+
+	Real a_in[2];
+	Real b_out[2];
+	function f
+		input Real a[2];
+		output Real b[2];
+		external;
+	end f;
+	equation
+		a_in[1] = 1;
+		a_in[2] = 2;
+		b_out = f(a_in);
+end externalArray4;
+
+model externalArray5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="externalArray5",
+         description="",
+         template="
+$C_function_headers$
+$C_functions$
+",
+         generatedCode="
+void func_CCodeGenTests_externalArray5_f_def(jmi_array_t* a_a, jmi_array_t* b_a);
+
+void func_CCodeGenTests_externalArray5_f_def(jmi_array_t* a_a, jmi_array_t* b_a) {
+    JMI_DYNAMIC_INIT()
+    if (b_a == NULL) {
+        JMI_ARRAY_STATIC(b_an, 4, 2, 2)
+        b_a = b_an;
+    }
+    f(a_a->var, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1), b_a->var, jmi_array_size(b_a, 0), jmi_array_size(b_a, 1));
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+")})));
+
+	Real a_in[2,2];
+	Real b_out[2,2];
+	function f
+		input Real a[2,2];
+		output Real b[2,2];
+		external;
+	end f;
+	equation
+		a_in = {{1,1},{2,2}};
+		b_out = f(a_in);
+end externalArray5;
+
+model externalArray6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="externalArray6",
+         description="",
+         template="
+$C_function_headers$
+$C_functions$
+",
+         generatedCode="
+void func_CCodeGenTests_externalArray6_f_def(jmi_array_t* a_a, jmi_array_t* b_a);
+
+void func_CCodeGenTests_externalArray6_f_def(jmi_array_t* a_a, jmi_array_t* b_a) {
+    JMI_DYNAMIC_INIT()
+    if (b_a == NULL) {
+        JMI_ARRAY_DYNAMIC(b_an, ( jmi_array_size(a_a, 0) ) * ( jmi_array_size(a_a, 1) ), jmi_array_size(a_a, 0), jmi_array_size(a_a, 1))
+        b_a = b_an;
+    }
+    f(a_a->var, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1), b_a->var, jmi_array_size(b_a, 0), jmi_array_size(b_a, 1));
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+")})));
+
+	Real a_in[2,2];
+	Real b_out[2,2];
+	function f
+		input Real a[:,:];
+		output Real b[size(a,1),size(a,2)];
+		external;
+	end f;
+	equation
+		a_in = {{1,1},{2,2}};
+		b_out = f(a_in);
+end externalArray6;
+
 end CCodeGenTests;

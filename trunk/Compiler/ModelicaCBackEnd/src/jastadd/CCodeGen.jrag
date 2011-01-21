@@ -853,11 +853,14 @@ aspect CCodeGen {
 		for (FExp arg : getArgs()) {
 			str.print(prefix);
 			if (arg instanceof FIdUseExp && ((FIdUseExp)arg).myFV() instanceof FFunctionVariable) {
-				if(((FFunctionVariable)((FIdUseExp)arg).myFV()).isOutput()){
+				if (((FFunctionVariable)((FIdUseExp)arg).myFV()).isOutput() && !arg.isArray()) {
 					str.print("&");
 				}
 			}
 			p.print(arg, str, indent);
+			if (arg.isArray()) {
+				str.print("->var");
+			}
 			prefix = ", ";
 		}
 		str.print(");\n");
