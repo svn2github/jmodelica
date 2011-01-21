@@ -98,4 +98,26 @@ aspect ContentCheck {
 			error("Reduction-expressions are only allowed with sum(), min(), max() and product()");
 	}
 	
+	
+	/**
+     * Check if this equation is in a place that allows connect clauses.
+	 */
+	inh boolean FAbstractEquation.connectAllowed();
+	eq FAbstractEquation.getChild().connectAllowed() = mayContainConnect() && connectAllowed();
+	eq FClass.getChild().connectAllowed()            = true;
+	eq InstNode.getChild().connectAllowed()          = true;
+	
+	/**
+	 * Check if this equation may legally contain a conncect clause.
+	 */
+	syn boolean FAbstractEquation.mayContainConnect() = false;
+	eq InstForClauseE.mayContainConnect()             = true;
+	eq FIfEquation.mayContainConnect()                = 
+		getTest().variability().parameterOrLess() && getTest().canCeval();
+	
+	public void FConnectClause.contentCheck() {
+		if (!connectAllowed())
+			error("Connect clauses are not allowed in if equations with non-parameter conditions, or in when equations"); 
+	}
+	
 }

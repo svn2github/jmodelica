@@ -38,8 +38,10 @@ aspect OptimicaFlattening {
     refine Flattening void InstClassDecl.flattenInstClassDecl(FClass fc) {
 		fc.setFQName(new FQName(qualifiedName())); 
 		fc.addFEquationBlock(new FEquationBlock(new List()));			
+		FQName prefix = getFQName();
 		for (FAbstractEquation ae : getFAbstractEquations()) {
-		       ae.flatten(getFQName(),fc);
+		   ae.flatten(prefix, fc);
+		   ae.buildConnectionSets(prefix, fc.getConnectionSetManager());
 		}
 		getInstComponentDeclList().flatten(fc);
 		getInstExtendsList().flatten(fc);
@@ -72,11 +74,13 @@ aspect OptimicaFlattening {
     }
 	
 	refine Flattening public void InstNode.flatten(FClass fc) {
+		FQName prefix = getFQName();
 		for (FAbstractEquation ae : getFAbstractEquations()) {
-		   ae.flatten(getFQName(),fc);
+		   ae.flatten(prefix, fc);
+		   ae.buildConnectionSets(prefix, fc.getConnectionSetManager());
 		}
         for (FConstraint c : getFConstraints()) {
-           c.flatten(getFQName(),fc);
+           c.flatten(prefix, fc);
         }
 		getInstComponentDeclList().flatten(fc);
 		getInstExtendsList().flatten(fc);

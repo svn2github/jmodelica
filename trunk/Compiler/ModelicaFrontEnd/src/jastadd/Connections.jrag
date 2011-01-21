@@ -16,7 +16,9 @@
 
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.ArrayList ;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 
 aspect Connections {
 
@@ -268,10 +270,8 @@ aspect Connections {
 //		    System.out.println(namePrefix2.name()+" . "+var2.name() + " outside: " + outside2);
 		
 			// Don't add parameters or constants to connection set
-			if (var1.variability().lessOrEqual(var1.fParameter()) || 
-					var2.variability().lessOrEqual(var1.fParameter())) {
-					return;
-			}
+			if (var1.variability().parameterOrLess() || var2.variability().parameterOrLess()) 
+				return;
 			
 			ConnectionSetEntry cse1 = new ConnectionSetEntry(var1,outside1,namePrefix1);
 			ConnectionSetEntry cse2 = new ConnectionSetEntry(var2,outside2,namePrefix2);	
@@ -421,25 +421,31 @@ aspect Connections {
 	
 	
 	public void InstAccess.connectTo(InstAccess right, FQName prefix, ConnectionSetManager csm) {
-		FQName leftName  = flatten(prefix);
-		FQName rightName = right.flatten(prefix);
+		FQName leftName  = flattenAndResolveIndices(prefix);
+		FQName rightName = right.flattenAndResolveIndices(prefix);
 		
 		boolean leftOutside  = isOutsideConnector();
 		boolean rightOutside = right.isOutsideConnector();
 		
 		if (isArray()) {
-			Indices ind = indices();
-			for (Index i : ind) {
-				Index j = ind.translate(i);
-				FQName leftCellName = leftName.copyReplacingSubscripts(i);
-				FQName rightCellName = rightName.copyReplacingSubscripts(i);
-				InstComponentDecl leftComp  = myInstComponentDecl().findCell(j, 0);
-				InstComponentDecl rightComp = right.myInstComponentDecl().findCell(j, 0);
+			Indices leftInd = indices();
+			Indices rightInd = right.indices();
+			Iterator<Index> leftIter = leftInd.iterator();
+			Iterator<Index> rightIter = rightInd.iterator();
+			while (leftIter.hasNext()) {
+				Index leftI = leftInd.translate(leftIter.next());
+				Index rightI = rightInd.translate(rightIter.next());
+				FQName leftCellName = leftName.copyReplacingSubscripts(leftI);
+				FQName rightCellName = rightName.copyReplacingSubscripts(rightI);
+				InstComponentDecl leftComp  = lookupEvaluatingIndices();
+				InstComponentDecl rightComp = right.lookupEvaluatingIndices();
+				leftComp = leftComp.findCell(leftI, leftI.ndims() - leftComp.ndims());
+				rightComp = rightComp.findCell(rightI, rightI.ndims() - rightComp.ndims());
 				leftComp.connectTo(leftOutside, leftCellName, rightComp, rightOutside, rightCellName, csm);
 			}
 		} else {
-			InstComponentDecl leftComp  = myInstComponentDecl().findCell(leftName);
-			InstComponentDecl rightComp = right.myInstComponentDecl().findCell(rightName);
+			InstComponentDecl leftComp  = lookupEvaluatingIndices().findCell(leftName);
+			InstComponentDecl rightComp = right.lookupEvaluatingIndices().findCell(rightName);
 			leftComp.connectTo(leftOutside, leftName, rightComp, rightOutside, rightName, csm);
 		}
 	}
@@ -470,5 +476,39 @@ aspect Connections {
 	syn boolean InstAccess.isOutsideConnector() = getFirstInstAccess().myInstComponentDecl().isConnector();
 	
 	syn boolean InstComponentDecl.isConnector() = myInstClass().isConnector();
+	
+	
+	public void FAbstractEquation.buildConnectionSets(FQName prefix, ConnectionSetManager csm) { }
+	
+	public void FIfEquation.buildConnectionSets(FQName prefix, ConnectionSetManager csm) {
+		try {
+			if (getTest().ceval().booleanValue())
+				for (FAbstractEquation equ : getFAbstractEquations())
+				    equ.buildConnectionSets(prefix, csm);
+		} catch (ConstantEvaluationException e) {
+		}
+	}
+	
+	public void InstForClauseE.buildConnectionSets(FQName prefix, ConnectionSetManager csm) {
+		Indices indices = Indices.create(getInstForIndexs());
+		for (Index i : indices) {
+			int j = 0;
+			int[] ii = indices.translate(i).index();
+			for (InstForIndex fi : getInstForIndexs()) {
+				fi.getInstPrimitive().setEvaluationValue(new CValueInteger(ii[j]), null);
+				j++;
+			}
+			for (FAbstractEquation equ : getFAbstractEquations())
+			    equ.buildConnectionSets(prefix, csm);
+		}
+	}
+	
+	public void FConnectClause.buildConnectionSets(FQName prefix, ConnectionSetManager csm) {
+		if (!getConnector1().isDisabled() && !getConnector2().isDisabled()) {
+			InstAccess left  = getConnector1().getInstAccess();
+			InstAccess right = getConnector2().getInstAccess();
+			left.connectTo(right, prefix, csm);
+		}
+	}
 
 }

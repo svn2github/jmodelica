@@ -38,6 +38,7 @@ import java.util.Iterator;
  */
 aspect ConstantEvaluation {
 	
+	// TODO: shouldn't this inherit ModelicaException?
 	/**
 	 * \brief An exception denoting a failure in constant evaluation.
 	 */
@@ -1020,6 +1021,20 @@ aspect ConstantEvaluation {
 		  return cevalArray(i);
 	  return cevalCalc();
   }
+  
+  /**
+   * Check if this expression can be constant evaluated.
+   * 
+   * Calls ceval anch checks that no exception is thrown and that the result isn't unknown.
+   */
+  syn boolean FExp.canCeval() {
+  	  try {
+  	  	   return !ceval().isUnknown();
+  	  } catch (Exception e) {
+  	  	  return false;
+  	  }
+  }
+
   
   /**
    * \brief Constant evaluation for arrays.

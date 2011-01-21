@@ -14,6 +14,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import java.util.Map;
+import java.util.Collections;
+
 aspect Flattening {
     
 	/**
@@ -37,9 +40,11 @@ aspect Flattening {
     public void InstClassDecl.flattenInstClassDecl(FClass fc) {
 		fc.setFQName(new FQName(qualifiedName()));
 		fc.addFEquationBlock(new FEquationBlock(new List()));			
+		FQName prefix = getFQName();
 		for (FAbstractEquation ae : getFAbstractEquations()) {
-		    ae.flatten(getFQName(), fc);
-		}	
+		   ae.flatten(prefix, fc);
+		   ae.buildConnectionSets(prefix, fc.getConnectionSetManager());
+		}
 		getInstComponentDeclList().flatten(fc);
 		getInstExtendsList().flatten(fc);
 		flattenUsedFuncsAndEnums(fc);
@@ -344,8 +349,10 @@ aspect Flattening {
 	}
 	
 	public void InstNode.flatten(FClass fc) {
+		FQName prefix = getFQName();
 		for (FAbstractEquation ae : getFAbstractEquations()) {
-		   ae.flatten(getFQName(),fc);
+		   ae.flatten(prefix, fc);
+		   ae.buildConnectionSets(prefix, fc.getConnectionSetManager());
 		}
 		getInstComponentDeclList().flatten(fc);
 		getInstExtendsList().flatten(fc);
@@ -843,16 +850,22 @@ aspect FlatExpressions {
 		List eqns = new List();
 		for (InstForIndex ifi : getInstForIndexs()) 
 			forIndex.add(ifi.flatten(prefix));
-		for (FAbstractEquation ae : getFAbstractEquations())
-			eqns.add(ae.flattenEqn(prefix, fc));
+		for (FAbstractEquation ae : getFAbstractEquations()) {
+			FAbstractEquation feqn = ae.flattenEqn(prefix, fc);
+			if (feqn != null)
+				eqns.add(feqn);
+		}
 		return new FForClauseE(forIndex, eqns);
 	}
 
 	public FIfWhenElseEquation FIfWhenElseEquation.flattenEqn(FQName prefix, FClass fc) {
 		FIfWhenElseEquation res = createEmptyNode();
 		res.setType((FEquationType) getType().fullCopy());
-		for (FAbstractEquation ae : getFAbstractEquations())
-			res.addFAbstractEquation(ae.flattenEqn(prefix, fc));
+		for (FAbstractEquation ae : getFAbstractEquations()) {
+			FAbstractEquation feqn = ae.flattenEqn(prefix, fc);
+			if (feqn != null)
+				res.addFAbstractEquation(feqn);
+		}
 		return res;
 	}
 
@@ -865,11 +878,6 @@ aspect FlatExpressions {
 	}
 
 	public FAbstractEquation FConnectClause.flattenEqn(FQName prefix, FClass fc) {
-		if (!getConnector1().isDisabled() && !getConnector2().isDisabled()) {
-			InstAccess left  = getConnector1().getInstAccess();
-			InstAccess right = getConnector2().getInstAccess();
-			left.connectTo(right, prefix, fc.getConnectionSetManager());
-		}
 		return null;
 	}
 	
@@ -1004,7 +1012,7 @@ aspect FlatExpressions {
     }
 
 	public FExp FInstAccessExp.flatten(FQName prefix) {
-		// If the FInstAccess referes to a constant, then inline expression
+		// If the FInstAccess refers to a constant, then inline expression
 		// Checks in the instance tree ensures that constants always
 		// have binding expressions, however, array subscripts may need to be 
 		// flattened during error checks, when using qualifiedName()
@@ -1107,6 +1115,52 @@ aspect FlatExpressions {
 		return myName;
 	}
 	
+	/**
+     * Specialized flattening method for resolving loop indices during flattening.
+     * Intended for use when building connection sets. Do not use for accesses in functions or size 
+     * expressions.
+     *
+     * @param prefix    prefix to add to name
+     * @param indexMap  map from names of index variables to expressions to replace them with
+     */
+	public FQName InstAccess.flattenAndResolveIndices(FQName prefix) {
+		FQName myName = new FQName(prefix);
+		ArrayList<FArraySubscripts> fasl = allFArraySubscripts();
+		InstAccess cur = getFirstInstAccess();
+		int last = fasl.size() - 1;
+		for (int i = 0; i <= last; i++, cur = cur.getNextInstAccess()) {
+			FArraySubscripts fas = fasl.get(i);
+			Opt as;
+			if (fas.getNumFSubscript() == 0) {
+				as = new Opt();
+			} else {
+				FArraySubscripts ffas = new FArraySubscripts();
+				for (FSubscript fs : fas.getFSubscripts())
+					ffas.addFSubscript(fs.flattenAndResolveIndices(prefix));
+				as = new Opt(ffas);
+			}
+			myName.addFQNamePart(new FQNamePart(cur.name(), as));
+		}
+		return myName;
+	}
+	
+	/**
+     * Specialized flattening method for resolving loop indices during flattening.
+     * Intended for use when building connection sets. Do not use for accesses in functions or size 
+     * expressions.
+     *
+     * @param prefix    prefix to add to name
+     * @param indexMap  map from names of index variables to expressions to replace them with
+     */
+	public FSubscript FSubscript.flattenAndResolveIndices(FQName prefix) {
+		return flatten(prefix);
+	}
+	
+	public FSubscript FExpSubscript.flattenAndResolveIndices(FQName prefix) {
+		FExp exp = getFExp().ceval().buildLiteral();
+		return new FExpSubscript(exp);
+	}
+
 	inh boolean InstAccess.inSizeExp();
 	eq FSizeExp.getChild().inSizeExp() = true;
 	eq InstNode.getChild().inSizeExp() = false;

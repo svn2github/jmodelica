@@ -281,7 +281,6 @@ equation
 end ConnectTest6;
 
 
-// TODO: this throws exception during flattening
 model ConnectTest7
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.FlatteningTestCase(
@@ -323,8 +322,35 @@ equation
 end ConnectTest7;
 
 
-// TODO: this throws exception during flattening
 model ConnectTest8
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ConnectTest8",
+         description="Connect in for loop",
+         flatModel="
+fclass ConnectTests.ConnectTest8
+ Real a[1].x;
+ Real a[1].y;
+ Real a[2].x;
+ Real a[2].y;
+ Real a[3].x;
+ Real a[3].y;
+ Real a[4].x;
+ Real a[4].y;
+equation
+ for i in 1:3 loop
+ end for;
+ a[1].x = a[2].x;
+ a[2].x = a[3].x;
+ a[3].x = a[4].x;
+  - ( a[1].y ) - ( a[2].y ) - ( a[3].y ) - ( a[4].y ) = 0;
+ a[1].y = 0;
+ a[2].y = 0;
+ a[3].y = 0;
+ a[4].y = 0;
+end ConnectTests.ConnectTest8;
+")})));
+
     connector A
         Real x;
         flow Real y;
@@ -342,7 +368,7 @@ model ConnectTest9
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.FlatteningTestCase(
          name="ConnectTest9",
-         description="",
+         description="Connecting array elements",
          flatModel="
 fclass ConnectTests.ConnectTest9
  Real a[1].x;
@@ -406,7 +432,7 @@ model ConnectTest11
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.FlatteningTestCase(
          name="ConnectTest11",
-         description="",
+         description="Connecting nestled connectors",
          flatModel="
 fclass ConnectTests.ConnectTest11
  Real c1.b1.x;
@@ -444,6 +470,362 @@ end ConnectTests.ConnectTest11;
 equation
 	connect(c1, c2);
 end ConnectTest11;
+
+
+model ConnectTest12
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ConnectTest12",
+         description="Connect in for loop on nestles arrays of connectors",
+         flatModel="
+fclass ConnectTests.ConnectTest12
+ Real b[1,1].a[1].x;
+ Real b[1,1].a[1].y;
+ Real b[1,1].a[2].x;
+ Real b[1,1].a[2].y;
+ Real b[1,2].a[1].x;
+ Real b[1,2].a[1].y;
+ Real b[1,2].a[2].x;
+ Real b[1,2].a[2].y;
+ Real b[1,3].a[1].x;
+ Real b[1,3].a[1].y;
+ Real b[1,3].a[2].x;
+ Real b[1,3].a[2].y;
+ Real b[1,4].a[1].x;
+ Real b[1,4].a[1].y;
+ Real b[1,4].a[2].x;
+ Real b[1,4].a[2].y;
+ Real b[2,1].a[1].x;
+ Real b[2,1].a[1].y;
+ Real b[2,1].a[2].x;
+ Real b[2,1].a[2].y;
+ Real b[2,2].a[1].x;
+ Real b[2,2].a[1].y;
+ Real b[2,2].a[2].x;
+ Real b[2,2].a[2].y;
+ Real b[2,3].a[1].x;
+ Real b[2,3].a[1].y;
+ Real b[2,3].a[2].x;
+ Real b[2,3].a[2].y;
+ Real b[2,4].a[1].x;
+ Real b[2,4].a[1].y;
+ Real b[2,4].a[2].x;
+ Real b[2,4].a[2].y;
+ Real b[3,1].a[1].x;
+ Real b[3,1].a[1].y;
+ Real b[3,1].a[2].x;
+ Real b[3,1].a[2].y;
+ Real b[3,2].a[1].x;
+ Real b[3,2].a[1].y;
+ Real b[3,2].a[2].x;
+ Real b[3,2].a[2].y;
+ Real b[3,3].a[1].x;
+ Real b[3,3].a[1].y;
+ Real b[3,3].a[2].x;
+ Real b[3,3].a[2].y;
+ Real b[3,4].a[1].x;
+ Real b[3,4].a[1].y;
+ Real b[3,4].a[2].x;
+ Real b[3,4].a[2].y;
+equation
+ for i in 1:2, j in 1:3 loop
+ end for;
+ b[1,1].a[1].x = b[1,1].a[2].x;
+ b[1,1].a[2].x = b[1,2].a[1].x;
+ b[1,2].a[1].x = b[1,2].a[2].x;
+ b[1,2].a[2].x = b[1,3].a[1].x;
+ b[1,3].a[1].x = b[1,3].a[2].x;
+ b[1,3].a[2].x = b[1,4].a[1].x;
+ b[1,4].a[1].x = b[2,1].a[1].x;
+ b[2,1].a[1].x = b[2,1].a[2].x;
+ b[2,1].a[2].x = b[2,2].a[1].x;
+ b[2,2].a[1].x = b[2,2].a[2].x;
+ b[2,2].a[2].x = b[2,3].a[1].x;
+ b[2,3].a[1].x = b[2,3].a[2].x;
+ b[2,3].a[2].x = b[2,4].a[1].x;
+ b[2,4].a[1].x = b[3,1].a[2].x;
+ b[3,1].a[2].x = b[3,2].a[2].x;
+ b[3,2].a[2].x = b[3,3].a[2].x;
+  - ( b[1,1].a[1].y ) - ( b[1,1].a[2].y ) - ( b[1,2].a[1].y ) - ( b[1,2].a[2].y ) - ( b[1,3].a[1].y ) - ( b[1,3].a[2].y ) - ( b[1,4].a[1].y ) - ( b[2,1].a[1].y ) - ( b[2,1].a[2].y ) - ( b[2,2].a[1].y ) - ( b[2,2].a[2].y ) - ( b[2,3].a[1].y ) - ( b[2,3].a[2].y ) - ( b[2,4].a[1].y ) - ( b[3,1].a[2].y ) - ( b[3,2].a[2].y ) - ( b[3,3].a[2].y ) = 0;
+ b[1,1].a[1].y = 0;
+ b[1,1].a[2].y = 0;
+ b[1,2].a[1].y = 0;
+ b[1,2].a[2].y = 0;
+ b[1,3].a[1].y = 0;
+ b[1,3].a[2].y = 0;
+ b[1,4].a[1].y = 0;
+ b[1,4].a[2].y = 0;
+ b[2,1].a[1].y = 0;
+ b[2,1].a[2].y = 0;
+ b[2,2].a[1].y = 0;
+ b[2,2].a[2].y = 0;
+ b[2,3].a[1].y = 0;
+ b[2,3].a[2].y = 0;
+ b[2,4].a[1].y = 0;
+ b[2,4].a[2].y = 0;
+ b[3,1].a[1].y = 0;
+ b[3,1].a[2].y = 0;
+ b[3,2].a[1].y = 0;
+ b[3,2].a[2].y = 0;
+ b[3,3].a[1].y = 0;
+ b[3,3].a[2].y = 0;
+ b[3,4].a[1].y = 0;
+ b[3,4].a[2].y = 0;
+end ConnectTests.ConnectTest12;
+")})));
+
+	connector A
+		Real x;
+		flow Real y;
+	end A;
+	
+	connector B
+		A a[2];
+	end B;
+	
+	B b[3,4];
+equation
+	for i in 1:2, j in 1:3 loop
+		connect(b[i,j].a[1], b[i,j+1].a[1]);
+		connect(b[i,j].a[2], b[i+1,j].a[2]);
+		connect(b[i,j].a[1], b[i,j].a[2]);
+	end for;
+end ConnectTest12;
+
+
+model ConnectTest13
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ConnectTest13",
+         description="Connecting arrays of connectors in a for loop",
+         flatModel="
+fclass ConnectTests.ConnectTest13
+ Real b[1].a[1].x;
+ Real b[1].a[1].y;
+ Real b[1].a[2].x;
+ Real b[1].a[2].y;
+ Real b[2].a[1].x;
+ Real b[2].a[1].y;
+ Real b[2].a[2].x;
+ Real b[2].a[2].y;
+ Real b[3].a[1].x;
+ Real b[3].a[1].y;
+ Real b[3].a[2].x;
+ Real b[3].a[2].y;
+equation
+ for i in 1:2 loop
+ end for;
+ b[1].a[1].x = b[2].a[1].x;
+ b[2].a[1].x = b[3].a[1].x;
+  - ( b[1].a[1].y ) - ( b[2].a[1].y ) - ( b[3].a[1].y ) = 0;
+ b[1].a[2].x = b[2].a[2].x;
+ b[2].a[2].x = b[3].a[2].x;
+  - ( b[1].a[2].y ) - ( b[2].a[2].y ) - ( b[3].a[2].y ) = 0;
+ b[1].a[1].y = 0;
+ b[1].a[2].y = 0;
+ b[2].a[1].y = 0;
+ b[2].a[2].y = 0;
+ b[3].a[1].y = 0;
+ b[3].a[2].y = 0;
+end ConnectTests.ConnectTest13;
+")})));
+
+	connector A
+		Real x;
+		flow Real y;
+	end A;
+	
+	connector B
+		A a[2];
+	end B;
+	
+	B b[3];
+equation
+	for i in 1:2 loop
+		connect(b[i].a, b[i+1].a);
+	end for;
+end ConnectTest13;
+
+
+model ConnectTest14
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ConnectTest14",
+         description="Connecting nestled arrays of connectors",
+         flatModel="
+fclass ConnectTests.ConnectTest14
+ Real b1[1,1].a[1].x;
+ Real b1[1,1].a[1].y;
+ Real b1[1,1].a[2].x;
+ Real b1[1,1].a[2].y;
+ Real b1[1,2].a[1].x;
+ Real b1[1,2].a[1].y;
+ Real b1[1,2].a[2].x;
+ Real b1[1,2].a[2].y;
+ Real b1[2,1].a[1].x;
+ Real b1[2,1].a[1].y;
+ Real b1[2,1].a[2].x;
+ Real b1[2,1].a[2].y;
+ Real b1[2,2].a[1].x;
+ Real b1[2,2].a[1].y;
+ Real b1[2,2].a[2].x;
+ Real b1[2,2].a[2].y;
+ Real b2[1,1].a[1].x;
+ Real b2[1,1].a[1].y;
+ Real b2[1,1].a[2].x;
+ Real b2[1,1].a[2].y;
+ Real b2[1,2].a[1].x;
+ Real b2[1,2].a[1].y;
+ Real b2[1,2].a[2].x;
+ Real b2[1,2].a[2].y;
+ Real b2[2,1].a[1].x;
+ Real b2[2,1].a[1].y;
+ Real b2[2,1].a[2].x;
+ Real b2[2,1].a[2].y;
+ Real b2[2,2].a[1].x;
+ Real b2[2,2].a[1].y;
+ Real b2[2,2].a[2].x;
+ Real b2[2,2].a[2].y;
+equation
+ b1[1,1].a[1].x = b2[1,1].a[1].x;
+  - ( b1[1,1].a[1].y ) - ( b2[1,1].a[1].y ) = 0;
+ b1[1,1].a[2].x = b2[1,1].a[2].x;
+  - ( b1[1,1].a[2].y ) - ( b2[1,1].a[2].y ) = 0;
+ b1[1,2].a[1].x = b2[1,2].a[1].x;
+  - ( b1[1,2].a[1].y ) - ( b2[1,2].a[1].y ) = 0;
+ b1[1,2].a[2].x = b2[1,2].a[2].x;
+  - ( b1[1,2].a[2].y ) - ( b2[1,2].a[2].y ) = 0;
+ b1[2,1].a[1].x = b2[2,1].a[1].x;
+  - ( b1[2,1].a[1].y ) - ( b2[2,1].a[1].y ) = 0;
+ b1[2,1].a[2].x = b2[2,1].a[2].x;
+  - ( b1[2,1].a[2].y ) - ( b2[2,1].a[2].y ) = 0;
+ b1[2,2].a[1].x = b2[2,2].a[1].x;
+  - ( b1[2,2].a[1].y ) - ( b2[2,2].a[1].y ) = 0;
+ b1[2,2].a[2].x = b2[2,2].a[2].x;
+  - ( b1[2,2].a[2].y ) - ( b2[2,2].a[2].y ) = 0;
+ b1[1,1].a[1].y = 0;
+ b1[1,1].a[2].y = 0;
+ b1[1,2].a[1].y = 0;
+ b1[1,2].a[2].y = 0;
+ b1[2,1].a[1].y = 0;
+ b1[2,1].a[2].y = 0;
+ b1[2,2].a[1].y = 0;
+ b1[2,2].a[2].y = 0;
+ b2[1,1].a[1].y = 0;
+ b2[1,1].a[2].y = 0;
+ b2[1,2].a[1].y = 0;
+ b2[1,2].a[2].y = 0;
+ b2[2,1].a[1].y = 0;
+ b2[2,1].a[2].y = 0;
+ b2[2,2].a[1].y = 0;
+ b2[2,2].a[2].y = 0;
+end ConnectTests.ConnectTest14;
+")})));
+
+	connector A
+		Real x;
+		flow Real y;
+	end A;
+	
+	connector B
+		A a[2];
+	end B;
+	
+	B b1[2,2];
+	B b2[2,2];
+equation
+	connect(b1.a, b2.a);
+end ConnectTest14;
+
+
+model ConnectTest15
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ConnectTest15",
+         description="Connecting nestled arrays of connectors using simple slice operation",
+         flatModel="
+fclass ConnectTests.ConnectTest15
+ Real b[1,1,1].a[1].x;
+ Real b[1,1,1].a[1].y;
+ Real b[1,1,1].a[2].x;
+ Real b[1,1,1].a[2].y;
+ Real b[1,1,2].a[1].x;
+ Real b[1,1,2].a[1].y;
+ Real b[1,1,2].a[2].x;
+ Real b[1,1,2].a[2].y;
+ Real b[1,2,1].a[1].x;
+ Real b[1,2,1].a[1].y;
+ Real b[1,2,1].a[2].x;
+ Real b[1,2,1].a[2].y;
+ Real b[1,2,2].a[1].x;
+ Real b[1,2,2].a[1].y;
+ Real b[1,2,2].a[2].x;
+ Real b[1,2,2].a[2].y;
+ Real b[2,1,1].a[1].x;
+ Real b[2,1,1].a[1].y;
+ Real b[2,1,1].a[2].x;
+ Real b[2,1,1].a[2].y;
+ Real b[2,1,2].a[1].x;
+ Real b[2,1,2].a[1].y;
+ Real b[2,1,2].a[2].x;
+ Real b[2,1,2].a[2].y;
+ Real b[2,2,1].a[1].x;
+ Real b[2,2,1].a[1].y;
+ Real b[2,2,1].a[2].x;
+ Real b[2,2,1].a[2].y;
+ Real b[2,2,2].a[1].x;
+ Real b[2,2,2].a[1].y;
+ Real b[2,2,2].a[2].x;
+ Real b[2,2,2].a[2].y;
+equation
+ b[1,1,1].a[1].x = b[2,1,1].a[1].x;
+  - ( b[1,1,1].a[1].y ) - ( b[2,1,1].a[1].y ) = 0;
+ b[1,1,1].a[2].x = b[2,1,1].a[2].x;
+  - ( b[1,1,1].a[2].y ) - ( b[2,1,1].a[2].y ) = 0;
+ b[1,1,2].a[1].x = b[2,1,2].a[1].x;
+  - ( b[1,1,2].a[1].y ) - ( b[2,1,2].a[1].y ) = 0;
+ b[1,1,2].a[2].x = b[2,1,2].a[2].x;
+  - ( b[1,1,2].a[2].y ) - ( b[2,1,2].a[2].y ) = 0;
+ b[1,2,1].a[1].x = b[2,2,1].a[1].x;
+  - ( b[1,2,1].a[1].y ) - ( b[2,2,1].a[1].y ) = 0;
+ b[1,2,1].a[2].x = b[2,2,1].a[2].x;
+  - ( b[1,2,1].a[2].y ) - ( b[2,2,1].a[2].y ) = 0;
+ b[1,2,2].a[1].x = b[2,2,2].a[1].x;
+  - ( b[1,2,2].a[1].y ) - ( b[2,2,2].a[1].y ) = 0;
+ b[1,2,2].a[2].x = b[2,2,2].a[2].x;
+  - ( b[1,2,2].a[2].y ) - ( b[2,2,2].a[2].y ) = 0;
+ b[1,1,1].a[1].y = 0;
+ b[1,1,1].a[2].y = 0;
+ b[1,1,2].a[1].y = 0;
+ b[1,1,2].a[2].y = 0;
+ b[1,2,1].a[1].y = 0;
+ b[1,2,1].a[2].y = 0;
+ b[1,2,2].a[1].y = 0;
+ b[1,2,2].a[2].y = 0;
+ b[2,1,1].a[1].y = 0;
+ b[2,1,1].a[2].y = 0;
+ b[2,1,2].a[1].y = 0;
+ b[2,1,2].a[2].y = 0;
+ b[2,2,1].a[1].y = 0;
+ b[2,2,1].a[2].y = 0;
+ b[2,2,2].a[1].y = 0;
+ b[2,2,2].a[2].y = 0;
+end ConnectTests.ConnectTest15;
+")})));
+
+	connector A
+		Real x;
+		flow Real y;
+	end A;
+	
+	connector B
+		A a[2];
+	end B;
+	
+	B b[2,2,2];
+equation
+	connect(b[1,:,:].a, b[2,:,:].a);
+end ConnectTest15;
 
 
 
