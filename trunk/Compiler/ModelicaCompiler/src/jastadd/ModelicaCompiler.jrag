@@ -916,7 +916,7 @@ public class ModelicaCompiler {
 	 * Override for subclasses needing another subclass of CGenerator.
 	 */
 	protected CGenerator createCGenerator(FClass fc) {
-		return new CGenerator(new PrettyPrinter(), '$', fc);
+		return new CADGenerator(new PrettyPrinter(), '$', fc);
 	}
 
 	/**

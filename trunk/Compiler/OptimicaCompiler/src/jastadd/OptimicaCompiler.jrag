@@ -149,7 +149,7 @@ public class OptimicaCompiler extends ModelicaCompiler {
 		if (fc instanceof FOptClass) {
 			return new OptimicaCGenerator(new PrettyPrinter(), '$', (FOptClass) fc);
 		} else {
-			return new CGenerator(new PrettyPrinter(), '$', fc);
+			return new CADGenerator(new PrettyPrinter(), '$', fc);
 		}
 	}
 

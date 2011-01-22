@@ -27,7 +27,7 @@ import java.io.*;
  * include C code generation of Optimica quantities.
  *
  */
-public class OptimicaCGenerator extends CGenerator {
+public class OptimicaCGenerator extends CADGenerator {
 
 	protected static final String INDENT = "    ";
 	

@@ -1,0 +1,54 @@
+/*
+Copyright (C) 2009 Modelon AB
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+import java.io.PrintStream;
+import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
+
+aspect CCodeGenAD {
+	
+	class CADPrettyPrinter extends Printer {
+		
+		public CADPrettyPrinter() {
+			super("    ");
+		}
+		
+ 		public void print(ASTNode node, PrintStream str, String indent) { 
+ 			node.prettyPrint_CAD(this, str, indent); 
+ 		}
+  		
+  		public String op(FBinExp e) { return e.op_C(); }
+	}
+	
+	static CADPrettyPrinter ASTNode.printer_CAD = new CADPrettyPrinter();
+	
+	public String ASTNode.prettyPrint_CAD(String indent) {
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		PrintStream str = new PrintStream(os);
+		prettyPrint_CAD(str,indent);
+		return os.toString();
+	}
+
+	public void ASTNode.prettyPrint_CAD(PrintStream str, String indent) {
+ 		prettyPrint_CAD(printer_CAD, str, indent);
+	}
+
+	// Default implementation is to use the standard C printer
+	public void ASTNode.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
+ 		prettyPrint_C(p, str, indent);
+	}
+	
+}
