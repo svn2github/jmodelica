@@ -45,16 +45,29 @@ class TestKInitSolve:
     def setUpClass(cls):
         """Sets up the test class."""
         # Compile the stationary initialization model into a JMU
-        fpath = os.path.join(get_files_path(), 'Modelica', 'CSTRLib.mo')
-        compile_jmu("CSTRLib.Components.Two_CSTRs_stat_init", fpath)
+        fpath1 = os.path.join(get_files_path(), 'Modelica', 'CSTRLib.mo')
+        fpath2 = os.path.join(get_files_path(), 'Modelica', 'TestMinMax.mo')
+        compile_jmu("CSTRLib.Components.Two_CSTRs_stat_init", fpath1)
+        #compile_jmu("Tests.TestInvalidStart", fpath2)
+        compile_jmu("TestMinMax.TestGuess", fpath2)
+        
         
     
     def setUp(self):
         """Test setUp. Load the test model."""
-        # Load model
+        # Load models
         self.model = JMUModel("CSTRLib_Components_Two_CSTRs_stat_init.jmu")
         self.problem = JMUAlgebraic(self.model)
         self.solver = KINSOL(self.problem)
+        
+        """
+        self.model_test_start = JMUModel(self.invalidStart)
+        self.problem_test_start = JMUAlgebraic(self.model_test_start)
+        """
+        
+        self.model_test_minmax = JMUModel("TestMinMax_TestGuess.jmu")
+        self.problem_test_minmax = JMUAlgebraic(self.model_test_minmax)
+        
         
         # Set inputs for Stationary point A
         u1_0_A = 1
@@ -144,6 +157,78 @@ class TestKInitSolve:
         nose.tools.assert_raises(JMUAlgebraic_Exception, self.problem.set_constraints_usage,False,'a')
         nose.tools.assert_raises(JMUAlgebraic_Exception, self.problem.set_constraints_usage,False,True)
         nose.tools.assert_raises(JMUAlgebraic_Exception, self.problem.set_constraints_usage,False,[5.,6.])
+      
+    @testattr(assimulo = True)
+    def test_guess_constraints(self):
+        """
+        test if the guessing of constraints works
+        """
+        self.problem_test_minmax.set_constraints_usage(True)
+        constraints = self.problem_test_minmax.get_constraints()
+        print constraints
+        
+        nose.tools.assert_equals(constraints[9],0.0)
+        nose.tools.assert_equals(constraints[10],-1.0)
+        nose.tools.assert_equals(constraints[11],1.0)
+        nose.tools.assert_equals(constraints[12],-1.0)
+        nose.tools.assert_equals(constraints[13],1.0)
+        nose.tools.assert_equals(constraints[14],-1.0)
+        nose.tools.assert_equals(constraints[15],1.0)
+        nose.tools.assert_equals(constraints[16],1.0)
+        nose.tools.assert_equals(constraints[17],-1.0)
+        
+    @testattr(assimulo = True)
+    def test_heuristic(self):
+        """
+        test if heuristic works
+        """
+        self.problem_test_minmax.set_constraints_usage(True)
+        x0_1 = self.problem_test_minmax.get_x0()
+        x0_2 = self.problem_test_minmax.get_heuristic_x0()
+        x0_3 = self.problem_test_minmax.get_x0()
+        """
+        vars = self.model_test_minmax._xmldoc.get_all_real_variables()
+        rvars = []
+        for var in vars:
+            cat = var.get_variable_category()
+            type = var.get_fundamental_type()
+            min = type.get_min()
+            max = type.get_max()
+            print min,max
+            if cat == 0:
+                print "Algebraic"
+            elif cat == 1:
+                print "State"
+            elif cat ==6:
+                print "Derivative"
+            rvars.append((var.get_value_reference(),var.get_name()))
+        
+                    
+            
+        xvars = self.model_test_minmax._xmldoc.get_x_variable_names()
+        names = self.model_test_minmax.get_variable_names()
+        x_min = self.model_test_minmax._xmldoc.get_x_min()
+        x_max = self.model_test_minmax._xmldoc.get_x_max()
+        print rvars
+        print names
+        print x_min
+        print x_max
+        
+
+        for i in N.arange(18):
+            #self.problem_test_minmax.print_var_info(i)
+            print "1: ",x0_1[i], " 2: ",x0_2[i]," 3: ",x0_3[i]
+            print names[i]
+        """  
+            
+        
+        nose.tools.assert_equals(x0_1[16],0.0)
+        nose.tools.assert_equals(x0_1[17],0.0)
+        nose.tools.assert_equals(x0_2[16],1.0)
+        nose.tools.assert_equals(x0_2[17],-1.0)
+        nose.tools.assert_equals(x0_3[16],0.0)
+        nose.tools.assert_equals(x0_3[17],0.0)
+            
         
     @testattr(assimulo = True)
     def test_initialize(self):
@@ -185,7 +270,7 @@ class TestKInitSolve:
         
         # check the format of the sparse jacoban
         type_name = type(jac_sparse).__name__
-        nose.tools.assert_equals(type_name,'coo_matrix')
+        nose.tools.assert_equals(type_name,'csc_matrix')
         
         jac_sparse = N.array(jac_sparse.todense())
         """

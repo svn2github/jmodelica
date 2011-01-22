@@ -48,7 +48,7 @@ class JMUAlgebraic(ProblemAlgebraic):
     SUNDIALS package.
     """
     
-    def __init__(self,model,x0 = None,constraints=None,use_constraints=False):
+    def __init__(self,model,x0 = None):
         """
         Create an instance of the JMIInitProblem
         
@@ -65,6 +65,12 @@ class JMUAlgebraic(ProblemAlgebraic):
         # Read the model
         self._model = model
         self._jmi_model = model.jmimodel
+        
+        # get offsets to the initialization variables
+        offsets = self._model.get_offsets()
+        self.dx_offset = offsets[12]
+        self.x_offset = offsets[13]
+        self.w_offset = offsets[15]
         
         # find the sizes needed
         self._neqF0, self._neqF1, self._neqFp, self._neqr0 = self._jmi_model.init_get_sizes()
@@ -110,7 +116,7 @@ class JMUAlgebraic(ProblemAlgebraic):
         # Set constraints settings
         self.constraints = None
         self.use_constraints = False
-        self.set_constraints_usage(use_constraints,constraints)
+        self.set_constraints_usage(self.use_constraints,self.constraints)
         
     
     def f(self,input):
@@ -138,6 +144,8 @@ class JMUAlgebraic(ProblemAlgebraic):
         # get size of residual and return the result
         output = N.zeros(self._neqF0)
         self._jmi_model.init_F0(output)
+        #print "RHS in assimulo_interface:"
+        #print output
         return output
     
     def set_x0(self,x0):
@@ -166,6 +174,9 @@ class JMUAlgebraic(ProblemAlgebraic):
             for i in N.arange(0,self._neqF0):
                 if self._x0[i] == 0.0 and (self.constraints[i] == 1.0 or self.constraints[i] == 2.0):
                     x[i] = 1.0
+                    self._print_var_info(i)
+                elif self._x0[i] == 0.0 and (self.constraints[i] == -1.0 or self.constraints[i] == -2.0):
+                    x[i] = -1.0
                     self._print_var_info(i)
                 else:
                     x[i] = self._x0[i]
@@ -261,7 +272,7 @@ class JMUAlgebraic(ProblemAlgebraic):
         self._jmi_model.init_dF0(jmi.JMI_DER_CPPAD, jmi.JMI_DER_SPARSE, 
             self._ind_vars, self._mask, val)
         
-        return ss.coo_matrix((val,(self.rows-1,self.cols-1)),shape=(self.sparse_ncol,self.sparse_ncol))
+        return ss.coo_matrix((val,(self.rows-1,self.cols-1)),shape=(self.sparse_ncol,self.sparse_ncol)).tocsc()
 
     def set_constraints_usage(self,use_const,constraints = None):
         """ 
@@ -336,6 +347,7 @@ class JMUAlgebraic(ProblemAlgebraic):
         Fct used to guess the constraints based on the min and max values of the model.
         """
         # get min and maxes from the model
+        
         dx_min = self._model._xmldoc.get_dx_min()
         dx_max = self._model._xmldoc.get_dx_max()
         
@@ -345,69 +357,51 @@ class JMUAlgebraic(ProblemAlgebraic):
         w_min = self._model._xmldoc.get_w_min()
         w_max = self._model._xmldoc.get_w_max()
         
+        rvars = self._model._xmldoc.get_all_real_variables(include_alias = False)
+        w_off = self.w_offset - self._dx_size - self._x_size
+        x_off = self.x_offset - self._dx_size
+        dx_off = self.dx_offset
         # Create constraint vector with default being no constraint
         res = N.zeros(self._neqF0)
-        
-        # iterate through dx
-        for i, min, max in zip(N.arange(0,self._dx_size),dx_min, dx_max):
-            
-            if min[1] != None:
-                if max[1] != None:
-                    # Max and min
-                    if min[1] >= 0.0:
-                        res[i] = 1.0
-                    elif max[1] <= 0.0:
-                        res[i] = -1.0
-                else:
-                    # only min
-                    if min[1] >= 0.0:
-                        res[i] = 1.0
-                
-            elif max[1] != None:
-                # only max
-                if max[1] <= 0.0:
-                    res[i] = -1.0
 
+        for var in rvars:
+            cat = var.get_variable_category()
+            if (cat == 0) or (cat == 1) or (cat == 6):
+                if cat == 0:
+                    # algebraic variable
+                    offset = w_off
                     
-        # iterate through x
-        for i, min, max in zip(N.arange(self._dx_size,self._mark),x_min, x_max):
-            if min[1] != None:
-                if max[1] != None:
-                    # Max and min
-                    if min[1] >= 0.0:
-                        res[i] = 1.0
-                    elif max[1] <= 0.0:
-                        res[i] = -1.0
-                else:
-                    # only min
-                    if min[1] >= 0.0:
-                        res[i] = 1.0
-                
-            elif max[1] != None:
-                # only max
-                if max[1] <= 0.0:
-                    res[i] = -1.0
-
+                elif cat == 1:
+                    # state
+                    offset = x_off
                     
-        # iterate through w
-        for i, min, max in zip(N.arange(self._mark,self._neqF0),w_min, w_max):
-            if min[1] != None:
-                if max[1] != None:
-                    # Max and min
-                    if min[1] >= 0.0:
-                        res[i] = 1.0
-                    elif max[1] <= 0.0:
-                        res[i] = -1.0
-                else:
-                    # only min
-                    if min[1] >= 0.0:
-                        res[i] = 1.0
-                
-            elif max[1] != None:
-                # only max
-                if max[1] <= 0.0:
-                    res[i] = -1.0
+                elif cat == 6:
+                    # derivative
+                    offset = dx_off
 
+                
+                type = var.get_fundamental_type()
+                ref = var.get_value_reference()
+                min = type.get_min()
+                max = type.get_max()
+                #print "Ref: ",ref, "min: ", min, "max: ", max, "Name: ", var.get_name()
+                ref = ref - offset
+                if min != None:
+                    if max != None:
+                        # Max and min
+                        if min >= 0.0:
+                            res[ref] = 1.0
+                        if max <= 0.0:
+                            res[ref] = -1.0
+                    else:
+                        # only min
+                        if min >= 0.0:
+                            res[ref] = 1.0
+                
+                elif max != None:
+                    # only max
+                    if max <= 0.0:
+                        res[ref] = -1.0
         
         return res
     
@@ -472,61 +466,59 @@ class JMUAlgebraic(ProblemAlgebraic):
         """
         dx_min = self._model._xmldoc.get_dx_min()
         dx_max = self._model._xmldoc.get_dx_max()
-        dx_names = self._model.get_dx_variable_names()
         
         x_min = self._model._xmldoc.get_x_min()
         x_max = self._model._xmldoc.get_x_max()
-        x_names = self._model.get_x_variable_names()
         
         w_min = self._model._xmldoc.get_w_min()
         w_max = self._model._xmldoc.get_w_max()
-        w_names = self._model.get_w_variable_names()
+        
+        rvars = self._model._xmldoc.get_all_real_variables(include_alias = False)
+        w_off = self.w_offset - self._dx_size - self._x_size
+        x_off = self.x_offset - self._dx_size
+        dx_off = self.dx_offset
         
         OK = True
         minerrors = []
         maxerrors = []
         
-        # iterate through dx
-        for i, min, max in zip(N.arange(0,self._dx_size),dx_min, dx_max):
-            
-            if min[1] != None:
-                if to_check[i] < min[1]:
-                    OK = False
-                    minerrors.append((i,min))
+        # Check all variables
+        for var in rvars:
+            cat = var.get_variable_category()
+            if (cat == 0) or (cat == 1) or (cat == 6):
+                if cat == 0:
+                    # algebraic variable
+                    offset = w_off
                     
-            if max[1] != None:
-                if to_check[i] > max[1]:
-                    OK = False
-                    maxerrors.append((i,max))
+                elif cat == 1:
+                    # state
+                    offset = x_off
+                    
+                elif cat == 6:
+                    # derivative
+                    offset = dx_off
 
-   
-        # iterate through x
-        for i, min, max in zip(N.arange(self._dx_size,self._mark),x_min, x_max):
-            
-            if min[1] != None:
-                if to_check[i] < min[1]:
-                    OK = False
-                    minerrors.append((i,min))
+                
+                type = var.get_fundamental_type()
+                ref = var.get_value_reference()
+                min = type.get_min()
+                max = type.get_max()
+                name = var.get_name()
+                ref = ref - offset
+                #print "Value: ",to_check[ref], "min: ", min, "max: ", max, "Name: ", var.get_name()
+                
+                if min != None:
+                    if to_check[ref] < min:
+                        OK = False
+                        minerrors.append((ref,(min,name)))
                     
-            if max[1] != None:
-                if to_check[i] > max[1]:
-                    OK = False
-                    maxerrors.append((i,max))
-
+                if max != None:
+                    if to_check[ref] > max:
+                        OK = False
+                        maxerrors.append((ref,(max,name)))
                     
-        # iterate through w
-        for i, min, max in zip(N.arange(self._mark,self._neqF0),w_min, w_max):
-            
-            if min[1] != None:
-                if to_check[i] < min[1]:
-                    OK = False
-                    minerrors.append((i,min))
-                    
-            if max[1] != None:
-                if to_check[i] > max[1]:
-                    OK = False
-                    maxerrors.append((i,max))
-                    
+        
+        # Handle result
         if OK:
             pass
         else:
@@ -534,22 +526,14 @@ class JMUAlgebraic(ProblemAlgebraic):
             if minerrors != []:
                 print "min broken at: "
                 for err in minerrors:
-                    if err[0] < self._dx_size:
-                        print "der(state): ",dx_names[err[0]][1],":", to_check[err[0]], "<", err[1][1]
-                    elif err[0] < self._mark:
-                        print "state: ",x_names[err[0]-self._dx_size][1],":", to_check[err[0]], "<", err[1][1]
-                    else:
-                            print "algebraic: ",w_names[err[0]-self._mark][1],":", to_check[err[0]], "<", err[1][1]
+                    print "variable: ",err[1][1],":", to_check[err[0]], "<", err[1][0], "with min: ",err[1][0]
+                   
                 
             if maxerrors != []:
                 print "max broken at: "
                 for err in maxerrors:
-                    if err[0] < self._dx_size:
-                        print "der(state): ",dx_names[err[0]],":", to_check[err[0]], ">", err[1]
-                    elif err[0] < self._mark:
-                        print "state: ",x_names[err[0]-self._dx_size],":", to_check[err[0]], ">", err[1]
-                    else:
-                        print "algebraic: ",w_names[err[0]-self._mark],":", to_check[err[0]], ">", err[1]
+                    print "variable: ",err[1][1],":", to_check[err[0]], ">", err[1][0], "with max: ",err[1][0]
+                    
         
 def write_resdata(problem, file_name='', format='txt'):
     """
