@@ -16,6 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import os.path
+import os
 
 import numpy as N
 import matplotlib.pyplot as plt
@@ -24,6 +25,7 @@ from jmodelica.io import ResultDymolaTextual
 
 from jmodelica.optimization.casadi_collocation import XMLOCP
 from jmodelica.optimization.casadi_collocation import BackwardEulerCollocator
+from jmodelica.optimization.casadi_collocation import RadauCollocator
 
 from jmodelica.core import unzip_unit
 from jmodelica.jmi import compile_jmu
@@ -37,9 +39,10 @@ def run_demo(with_plots=True):
     
     jn = compile_jmu("CSTR.CSTR_Opt2", curr_dir+"/files/CSTR.mop",compiler_options={'generate_xml_equations':True})
 
-    xml_file_name = unzip_unit(archive='./CSTR_CSTR_Opt2.jmu')[1]
-    xmlmodel = XMLOCP(xml_file_name)
-    be_colloc = BackwardEulerCollocator(xmlmodel,100)
+    #xml_file_name = unzip_unit(archive='./CSTR_CSTR_Opt2.jmu')[1]
+    os.system("unzip ./CSTR_CSTR_Opt2.jmu")
+    xmlmodel = XMLOCP("modelDescription.xml")
+    be_colloc = RadauCollocator(xmlmodel,10,3)
     be_colloc.solve()
     be_colloc.write_result()
     res = ResultDymolaTextual('CSTR.CSTR_Opt2'+'_result.txt')
