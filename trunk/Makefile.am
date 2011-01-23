@@ -31,8 +31,16 @@ if HAVE_ANT
 	$(ANT_OPTS) $(ANT)
 endif
 if WITH_SUNDIALS
+if WITH_SUPERLU
+	cd $(abs_top_srcdir)/Assimulo; \
+	python setup_source.py install --sundials-home=$(SUNDIALS_HOME) --superlu-home=$(SUPERLU_HOME) --blas-home=$(abs_builddir)/ThirdParty/Blas/ --prefix=$(assimulo_install_dir)
+endif
+endif
+if WITH_SUNDIALS
+if !WITH_SUPERLU
 	cd $(abs_top_srcdir)/Assimulo; \
 	python setup_source.py install --sundials-home=$(SUNDIALS_HOME) --prefix=$(assimulo_install_dir)
+endif
 endif
 	$(abs_top_srcdir)/get_version.sh $(abs_top_srcdir) > $(abs_builddir)/version.txt
 	mkdir -p $(abs_builddir)/Options

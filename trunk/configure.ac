@@ -134,6 +134,21 @@ AM_CONDITIONAL([WITH_SUNDIALS],[test "x$with_sundials" != xno])
 AC_SUBST(SUNDIALS_HOME)
 SUNDIALS_HOME=$sundials
 
+AC_ARG_WITH([superlu],
+  [AS_HELP_STRING([--with-superlu],
+    [SuperLU installation directory @<:@default=check@:>@])],
+  [superlu=$withval],
+  [with_superlu=no])
+
+AS_IF([test "x$with_superlu" = xno],
+     [AC_MSG_RESULT([SuperLU installation not specified.])],
+     [AC_MSG_RESULT([SuperLU installation specified.])])
+
+AM_CONDITIONAL([WITH_SUPERLU],[test "x$with_superlu" != xno])
+
+AC_SUBST(SUPERLU_HOME)
+SUPERLU_HOME=$superlu
+
 AC_ARG_WITH([eclipse],
    [AS_HELP_STRING([--with-eclipse],
      [Eclipse installation directory @<:@default=no@:>@])],

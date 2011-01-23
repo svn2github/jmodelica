@@ -167,6 +167,7 @@ SHARED_LDFLAGS = @SHARED_LDFLAGS@
 SHELL = @SHELL@
 STRIP = @STRIP@
 SUNDIALS_HOME = @SUNDIALS_HOME@
+SUPERLU_HOME = @SUPERLU_HOME@
 VERSION = @VERSION@
 WITH_CPPAD = @WITH_CPPAD@
 WITH_IPOPT = @WITH_IPOPT@
@@ -705,8 +706,10 @@ all-local:
 @HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT)
 @HAVE_ANT_TRUE@	cd $(abs_top_srcdir)/Compiler/OptimicaCompiler; \
 @HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT)
-@WITH_SUNDIALS_TRUE@	cd $(abs_top_srcdir)/Assimulo; \
-@WITH_SUNDIALS_TRUE@	python setup_source.py install --sundials-home=$(SUNDIALS_HOME) --prefix=$(assimulo_install_dir)
+@WITH_SUNDIALS_TRUE@@WITH_SUPERLU_TRUE@	cd $(abs_top_srcdir)/Assimulo; \
+@WITH_SUNDIALS_TRUE@@WITH_SUPERLU_TRUE@	python setup_source.py install --sundials-home=$(SUNDIALS_HOME) --superlu-home=$(SUPERLU_HOME) --blas-home=$(abs_builddir)/ThirdParty/Blas/ --prefix=$(assimulo_install_dir)
+@WITH_SUNDIALS_TRUE@@WITH_SUPERLU_FALSE@	cd $(abs_top_srcdir)/Assimulo; \
+@WITH_SUNDIALS_TRUE@@WITH_SUPERLU_FALSE@	python setup_source.py install --sundials-home=$(SUNDIALS_HOME) --prefix=$(assimulo_install_dir)
 	$(abs_top_srcdir)/get_version.sh $(abs_top_srcdir) > $(abs_builddir)/version.txt
 	mkdir -p $(abs_builddir)/Options
 	$(abs_top_srcdir)/run_java.sh org.jmodelica.util.OptionRegistry $(abs_builddir)/Options/options.xml
@@ -883,7 +886,7 @@ docs:
 #	cd $(srcdir); doxygen doc/OptimicaFrontEnd/optimica_frontend_doxydoc.conf
 	cd $(srcdir); doxygen doc/ModelicaCompiler/modelica_compiler_doxydoc.conf
 	cd $(srcdir); doxygen doc/OptimicaCompiler/optimica_compiler_doxydoc.conf
-	make -C $(srcdir)/doc/PyJMI html
+	cd $(srcdir); doxygen doc/PyJMI/pyjmi_doxydoc.conf
 
 docbook-docs:
 	cd docbook/UsersGuide; $(MAKE) all
