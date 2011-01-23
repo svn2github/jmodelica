@@ -179,73 +179,6 @@ aspect TransformCanonical {
  		                System.out.println(str.toString()); 
  		        } 
 
-/*
-	public class ASTBiPGraph extends BiPGraph {
-		
-		public ASTBiPGraph(String name, String description) {
-			super(name, description);
-		}
-		
-		public ASTGraphEq addEquation(String name, String description, int id,
-		                      FAbstractEquation eqn) {
-			Eq e = equationMap.get(name);
-			if (e==null) {
-				e = new ASTGraphEq(name,description,id,eqn);
-				equations.add(e);
-				equationMap.put(name,e);
-				insertIntoEquationIndexMap(id,e);
-			}
-			return e;
-		}
-	
-		public ASTGraphVar addVariable(String name, String description, FVariable var) {
-			Var v = variableMap.get(name);
-			if (v==null) {
-				v = new ASTGraphVar(name,description,var);
-				variableMap.put(name,v);
-			}	
-			return v;
-		}
-	
-	}
-
-	public class ASTGraphEq extends Eq {
-	
-		private FAbstractEquation eqn;
-		
-		public ASTGraphEq(String name,String description,int id, FAbstractEquation eqn) {
-			super(name,description,id);
-			this.eqn = eqn;
-		}
-		
-		public FAbstractEquation getEquation() {
-			return eqn;
-		}
-		
-		public void setEquation(FAbstractEquation eqn) {
-			this.eqn = eqn;
-		}
-	}
-
-	public class ASTGraphVar extends Var {
-		private FVariable v;
-		
-		public ASTGraphVar(String name, String description, FVariable v) {
-			super(name,description);
-			this.v = v;
-		}
-		
-		public FVariable getVariable() {
-			return v;
-		}
-		
-		public void setVariable(FVariable v) {
-			this.v = v;
-		}
-	
-	}
-*/
-
 	public class BLT extends ArrayList<EquationBlock> {
 	
 		public ArrayList<Integer> unsolvedBlockSizes() {
@@ -257,7 +190,6 @@ aspect TransformCanonical {
 			}
 			return blockSizes;
 		}
-		
 	}
 
 	public class EquationBlock {
@@ -517,7 +449,6 @@ aspect TransformCanonical {
 				if (v!=null) {
 					daeMatching.add(new MatchingPair(e.getEquation(),v.getVariable()));
 				}
-				k++;
 			}
 		}		
 			
@@ -591,20 +522,17 @@ aspect TransformCanonical {
 			//k = e.extractStateIncidence(g,k);
 		}
 
-	    // Replace when equations not active during initialization with default
-	    // initialization equations	
+	    // Replace when equations	
 		ArrayList<FAbstractEquation> equationsToReplace = 
 			new ArrayList<FAbstractEquation>();
 		for (FAbstractEquation e : equations()) {
-			if (!e.activeAtInitialization()) {
+			if (e.replacedAtInitialization()) {
 				equationsToReplace.add(e);
 			}
 		}		
 		
 		// Loop over all equations to replace
 		for (FAbstractEquation equationToReplace : equationsToReplace) {
-			// Get the AST of the equation
-
 			//System.out.println(" **>>> " + equationToReplace.prettyPrint(""));
 			
 			// How many equations are there in this when clause?
@@ -754,6 +682,7 @@ aspect TransformCanonical {
 
 			g.maximumMatching(false);	
 			log.info("DAE initial after addition of initial equations");
+			log.info(g.toString());
 			log.info(g.printMatching());
 
 		}

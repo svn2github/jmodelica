@@ -763,6 +763,10 @@ aspect CCodeGen {
 	public void FNoEventExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
 		p.print(getFExp(),str,indent);
 	}
+
+	public void FInitialExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
+		str.print("_atInitial");
+	}
 	
 	public void FIntegerExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
 		str.print("jmi_real_to_integer(");

@@ -131,12 +131,10 @@ equation
 
 end WhenEqu10; 
 
-
 model ZeroOrderHold1
 
   Modelica.Blocks.Discrete.ZeroOrderHold sampler(samplePeriod=0.1);
   Modelica.Blocks.Sources.ExpSine expSine;
-
 equation
   connect(expSine.y,sampler.u);
 

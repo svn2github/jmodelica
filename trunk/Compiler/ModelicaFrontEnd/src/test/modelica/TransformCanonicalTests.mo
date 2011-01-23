@@ -2399,6 +2399,134 @@ equation
  ref = if time <1 then 0 else 1;
 end WhenEqu9; 
 
+model WhenEqu10
+
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="WhenEqu10",
+         description="Basic test of when equations",
+         flatModel="
+fclass TransformCanonicalTests.WhenEqu10
+ discrete Boolean sampleTrigger;
+ Real x_p(start = 1);
+ Real u_p;
+ discrete Real x_c;
+ discrete Real u_c;
+ parameter Real a_p =  - ( 1 ) /* -1 */;
+ parameter Real b_p = 1 /* 1 */;
+ parameter Real c_p = 1 /* 1 */;
+ parameter Real a_c = 0.8 /* 0.8 */;
+ parameter Real b_c = 1 /* 1 */;
+ parameter Real c_c = 1 /* 1 */;
+ parameter Real h = 0.1 /* 0.1 */;
+initial equation 
+ x_c = pre(x_c);
+ x_p = 1;
+ pre(sampleTrigger) = false;
+ pre(u_c) = 0.0;
+equation
+ der(x_p) = ( a_p ) * ( x_p ) + ( b_p ) * ( u_p );
+ u_p = ( c_c ) * ( x_c );
+ sampleTrigger = sample(0, h);
+ when {initial(),sampleTrigger} then
+  u_c = ( c_p ) * ( x_p );
+ end when;
+ when {initial(),sampleTrigger} then
+  x_c = ( a_c ) * ( pre(x_c) ) + ( b_c ) * ( u_c );
+ end when;
+end TransformCanonicalTests.WhenEqu10;
+")})));
+
+ discrete Boolean sampleTrigger;
+ Real x_p(start=1);
+ Real u_p;
+ discrete Real x_c;
+ discrete Real u_c;
+ parameter Real a_p = -1;
+ parameter Real b_p = 1;
+ parameter Real c_p = 1;
+ parameter Real a_c = 0.8;
+ parameter Real b_c = 1;
+ parameter Real c_c = 1;
+ parameter Real h = 0.1;
+initial equation
+ x_c = pre(x_c); 	
+equation
+ der(x_p) = a_p*x_p + b_p*u_p;
+ u_p = c_c*x_c;
+ sampleTrigger = sample(0,h);
+ when {initial(),sampleTrigger} then
+   u_c = c_p*x_p;
+   x_c = a_c*pre(x_c) + b_c*u_c;
+ end when;
+end WhenEqu10;
+
+model WhenEqu11
+
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="WhenEqu11",
+         description="Basic test of when equations",
+         flatModel="
+fclass TransformCanonicalTests.WhenEqu11
+ discrete Boolean sampleTrigger;
+ Real x_p(start = 1);
+ Real u_p;
+ discrete Real x_c;
+ discrete Real u_c;
+ parameter Real a_p =  - ( 1 ) /* -1 */;
+ parameter Real b_p = 1 /* 1 */;
+ parameter Real c_p = 1 /* 1 */;
+ parameter Real a_c = 0.8 /* 0.8 */;
+ parameter Real b_c = 1 /* 1 */;
+ parameter Real c_c = 1 /* 1 */;
+ parameter Real h = 0.1 /* 0.1 */;
+ discrete Boolean atInit;
+initial equation 
+ x_c = pre(x_c);
+ x_p = 1;
+ pre(sampleTrigger) = false;
+ pre(u_c) = 0.0;
+ pre(atInit) = false;
+equation
+ der(x_p) = ( a_p ) * ( x_p ) + ( b_p ) * ( u_p );
+ u_p = ( c_c ) * ( x_c );
+ sampleTrigger = sample(0, h);
+ when {atInit,sampleTrigger} then
+  u_c = ( c_p ) * ( x_p );
+ end when;
+ when {atInit,sampleTrigger} then
+  x_c = ( a_c ) * ( pre(x_c) ) + ( b_c ) * ( u_c );
+ end when;
+ atInit = true and initial();
+end TransformCanonicalTests.WhenEqu11;
+")})));
+
+ discrete Boolean sampleTrigger;
+ Real x_p(start=1);
+ Real u_p;
+ discrete Real x_c;
+ discrete Real u_c;
+ parameter Real a_p = -1;
+ parameter Real b_p = 1;
+ parameter Real c_p = 1;
+ parameter Real a_c = 0.8;
+ parameter Real b_c = 1;
+ parameter Real c_c = 1;
+ parameter Real h = 0.1;
+ discrete Boolean atInit = true and initial();
+initial equation
+ x_c = pre(x_c); 	
+equation
+ der(x_p) = a_p*x_p + b_p*u_p;
+ u_p = c_c*x_c;
+ sampleTrigger = sample(0,h);
+ when {atInit,sampleTrigger} then
+   u_c = c_p*x_p;
+   x_c = a_c*pre(x_c) + b_c*u_c;
+ end when;
+end WhenEqu11;
+
 /* // TODO: add these test when more support is implemented in the middle end
 model IfEqu1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={

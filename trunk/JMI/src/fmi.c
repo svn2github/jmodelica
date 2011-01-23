@@ -230,6 +230,8 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
     /* We are at the initial event TODO: is this really necessary? */
     ((fmi_t *)c)->jmi->atEvent = JMI_TRUE;
 
+    ((fmi_t *)c)->jmi->atInitial = JMI_TRUE;
+
     /* Write values to the pre vector*/
     jmi_copy_pre_values(((fmi_t*)c)->jmi);
 
@@ -337,6 +339,7 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
 
     /* Reset atEvent flag */
     ((fmi_t *)c)->jmi->atEvent = JMI_FALSE;
+    ((fmi_t *)c)->jmi->atInitial = JMI_FALSE;
 
     /* Evaluate the guards with the event flag set to false in order to 
      * reset guards depending on samplers before copying pre values.

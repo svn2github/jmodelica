@@ -534,8 +534,8 @@ from Blocks.Discrete.
       "Sample period of component";
       parameter SI.Time startTime=0 "First sample time instant";
   protected
-      output Boolean sampleTrigger "True, if sample time instant";
-      output Boolean firstTrigger "Rising edge signals first sample instant";
+      discrete output Boolean sampleTrigger "True, if sample time instant";
+      discrete output Boolean firstTrigger "Rising edge signals first sample instant";
     equation
       sampleTrigger = sample(startTime, samplePeriod);
       when sampleTrigger then

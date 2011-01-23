@@ -198,6 +198,7 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 			sizeof(jmi_block_residual_t*));
 
 	jmi_->atEvent = JMI_FALSE;
+	jmi_->atInitial = JMI_FALSE;
 
 	return 0;
 

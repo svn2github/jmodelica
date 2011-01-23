@@ -86,7 +86,7 @@ via parameter <b>samplePeriod</b>.
 
   block ZeroOrderHold "Zero order hold of a sampled-data system"
     extends Interfaces.DiscreteSISO;
-    output Real ySample(start=0, fixed=true);
+    discrete output Real ySample(start=0, fixed=true);
     annotation (
       Icon(coordinateSystem(
           preserveAspectRatio=true,

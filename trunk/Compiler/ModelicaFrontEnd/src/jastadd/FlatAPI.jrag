@@ -767,19 +767,42 @@ aspect FlatAPI {
 	
 	syn boolean FAbstractEquation.activeAtInitialization() = true;
 	eq FWhenEquation.activeAtInitialization() {
-		// TODO: Return something more correct here, taking initial() into account
+		for (FExp g: guards()) {
+			if (g.variability().parameterOrLess()) {
+				// Set initial() to false and evaluate
+				myFClass().setIsInitial(false);
+				Boolean before = g.ceval().booleanValue();
+				// Set initial() to false and evaluate
+				myFClass().setIsInitial(true);
+				Boolean after = g.ceval().booleanValue();
+				// The when clause is considered to be active at initialization
+				// if before is false and after is true.
+				if (!before && after) {
+					return true;
+				}
+			}
+		}
 		return false;
 	}	
+
+	syn boolean FAbstractEquation.replacedAtInitialization() = false;
+	eq FWhenEquation.replacedAtInitialization() = true;
 	
 	syn List FAbstractEquation.getInitialEquationList() = new List();
 	
 	eq FWhenEquation.getInitialEquationList() {
-		List<FEquation> l = new List<FEquation>();
-		for (FAbstractEquation e : getFAbstractEquations()) {
-			for (FIdUseExp id : e.simpleLefts()) {
-				l.add(new FEquation((FIdUseExp)id.fullCopy(),
-				   new FPreExp((FIdUseExp)id.fullCopy())));
+		List<FAbstractEquation> l = new List<FAbstractEquation>();
+		if (!activeAtInitialization()) {
+			for (FAbstractEquation e : getFAbstractEquations()) {
+				for (FIdUseExp id : e.simpleLefts()) {
+					l.add(new FEquation((FIdUseExp)id.fullCopy(),
+					   new FPreExp((FIdUseExp)id.fullCopy())));
+				}
 			}
+		} else {
+			for (FAbstractEquation e : getFAbstractEquations()) {
+				l.add(e);
+			}		
 		}
 		return l;
 	}
