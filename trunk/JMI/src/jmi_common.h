@@ -513,6 +513,10 @@ struct jmi_func_ad_t{
 	int dF_z_n_nz;                  /**< \brief Number of non-zeros in Jacobian. */
 	int* dF_z_row;                  /**< \brief Row indices of non-zeros in Jacobian. */
 	int* dF_z_col;                  /**< \brief Column indices of non-zeros in Jacobian. */
+	int* dF_z_col_start_index;        /**< \brief The index in the sparse Jacobian vector of the
+	                                            first element corresponding to a particular column. */
+	int* dF_z_col_n_nz;               /**< \brief The number of non-zeros of each column in the sparse
+	                                            Jacobian. */
 	jmi_real_vec_p z_work;          /**< \brief A work vector for \f$z\f$. */
 };
 

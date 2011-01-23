@@ -279,6 +279,8 @@ int jmi_func_ad_init(jmi_t *jmi, jmi_func_t *func) {
 
 	func->ad->dF_z_row = (int*)calloc(func->ad->dF_z_n_nz,sizeof(int));
 	func->ad->dF_z_col = (int*)calloc(func->ad->dF_z_n_nz,sizeof(int));
+	func->ad->dF_z_col_start_index = (int*)calloc(jmi->n_z,sizeof(int));
+	func->ad->dF_z_col_n_nz = (int*)calloc(jmi->n_z,sizeof(int));
 
 	int jac_ind = 0;
 	int col_ind = 0;
@@ -292,13 +294,25 @@ int jmi_func_ad_init(jmi_t *jmi, jmi_func_t *func) {
 	 */
 
 	for (j=0;j<jmi->n_z;j++) {
+		func->ad->dF_z_col_n_nz[j] = 0;
+	}
+
+	for (j=0;j<jmi->n_z;j++) {
 		for (i=0;i<m;i++) {
 			if (s_z[i*jmi->n_z + j]) {
 				func->ad->dF_z_col[jac_ind] = j + col_ind + 1;
 				func->ad->dF_z_row[jac_ind++] = i + 1;
+				func->ad->dF_z_col_n_nz[func->ad->dF_z_col[jac_ind-1]]++;
 			}
 		}
 	}
+
+	func->ad->dF_z_col_start_index[0] = 0;
+	for (j=1;j<jmi->n_z;j++) {
+		func->ad->dF_z_col_start_index[j] = func->ad->dF_z_col_start_index[j-1] + func->ad->dF_z_col_n_nz[j-1];
+	}
+
+
 /*
 	for(i=0;i<func->ad->dF_z_n_nz;i++) {
 
@@ -697,12 +711,22 @@ int jmi_func_ad_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
 			case JMI_DER_SPARSE:
 				// TODO: This may be a bit inefficient?
 				//printf("Jepp %d\n",func->ad->dF_z_n_nz);
+/*
+				for (j=func->ad->dF_z_col_start_index[i];
+				     j<func->ad->dF_z_col_start_index[i]+func->ad->dF_z_col_n_nz[i];
+				     j++) {
+					jac[jac_index++] = jac_[func->ad->dF_z_row[j]-1];
+				}
+*/
+
 				for(j=0;j<func->ad->dF_z_n_nz;j++) {
 					//printf("%d, %d\n",func->ad->dF_z_row[i],func->ad->dF_z_col[j]);
 					if (func->ad->dF_z_col[j]-1 == i) {
 						jac[jac_index++] = jac_[func->ad->dF_z_row[j]-1];
 					}
 				}
+
+
 			}
 		}
 	}
@@ -805,6 +829,8 @@ int jmi_func_ad_delete(jmi_func_ad_t *jfa) {
 
 	free(jfa->dF_z_row);
 	free(jfa->dF_z_col);
+	free(jfa->dF_z_col_start_index);
+	free(jfa->dF_z_col_n_nz);
 /*
 	free(jfa->dF_ci_row);
 	free(jfa->dF_ci_col);
