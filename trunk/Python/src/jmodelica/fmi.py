@@ -35,7 +35,7 @@ from jmodelica.core import BaseModel, unzip_unit, get_unit_name, get_temp_locati
 from jmodelica.compiler import ModelicaCompiler, OptimicaCompiler
 
 def compile_fmu(class_name, file_name=[], compiler='auto', target='model_noad', 
-    compiler_options={}, compile_to='.'):
+    compiler_options={}, compile_to='.', compiler_log_level='warning'):
     """ 
     Compile a Modelica or Optimica model to an FMU.
     
@@ -104,6 +104,11 @@ def compile_fmu(class_name, file_name=[], compiler='auto', target='model_noad',
             Specify location of the compiled FMU. Directory will be created if 
             it does not exist.
             Default: Current directory.
+
+        compiler_log_level --
+            Set the log level for the compiler. Valid options are 'warning'/'w', 
+            'error'/'e' or 'info'/'i'.
+            Default: 'warning'
             
     Returns::
     
@@ -146,6 +151,17 @@ def compile_fmu(class_name, file_name=[], compiler='auto', target='model_noad',
             raise JMIException("Unknown compiler option type for key: %s. \
             Should be of the following types: boolean, string, integer, \
             float or list" %key)
+    
+    # set compiler log level
+    if compiler_log_level.lower().startswith('w'):
+        comp.set_log_level(ModelicaCompiler.LOG_WARNING)
+    elif compiler_log_level.lower().startswith('e'):
+        comp.set_log_level(ModelicaCompiler.LOG_ERROR)
+    elif compiler_log_level.lower().startswith('i'):
+        comp.set_log_level(ModelicaCompiler.LOG_INFO)
+    else:
+        logging.warning("Invalid compiler_log_level: "+str(compiler_log_level) + 
+        " using level 'warning' instead.")
     
     # compile FMU in java
     comp.compile_FMU(class_name, file_name, target, compile_to)

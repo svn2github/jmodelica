@@ -5994,7 +5994,7 @@ def get_jmu_name(class_name):
     return get_unit_name(class_name, unit_type='JMU')
         
 def compile_jmu(class_name, file_name=[], compiler='auto', target='ipopt', 
-    compiler_options={}, compile_to='.'):
+    compiler_options={}, compile_to='.', compiler_log_level='warning'):
     """ 
     Compile a Modelica or Optimica model to a JMU.
     
@@ -6063,6 +6063,12 @@ def compile_jmu(class_name, file_name=[], compiler='auto', target='ipopt',
             it does not exist.
             Default: Current directory.
             
+        compiler_log_level --
+            Set the log level for the compiler. Valid options are 'warning'/'w', 
+            'error'/'e' or 'info'/'i'.
+            Default: 'warning'
+                
+            
     Returns::
     
         Name of the JMU which has been created.
@@ -6104,6 +6110,17 @@ def compile_jmu(class_name, file_name=[], compiler='auto', target='ipopt',
             raise JMIException("Unknown compiler option type for key: %s. \
             Should be of the following types: boolean, string, integer, \
             float or list" %key)
+            
+    # set compiler log level
+    if compiler_log_level.lower().startswith('w'):
+        comp.set_log_level(ModelicaCompiler.LOG_WARNING)
+    elif compiler_log_level.lower().startswith('e'):
+        comp.set_log_level(ModelicaCompiler.LOG_ERROR)
+    elif compiler_log_level.lower().startswith('i'):
+        comp.set_log_level(ModelicaCompiler.LOG_INFO)
+    else:
+        logging.warning("Invalid compiler_log_level: "+str(compiler_log_level) + 
+        " using level 'warning' instead.")
             
     # compile jmu in Java
     comp.compile_JMU(class_name, file_name, target, compile_to)
