@@ -114,6 +114,16 @@ def test_fmi_bouncing_ball():
 def test_extfunctions():
     """ Test of simulation with external functions. """
     extfunctions.run_demo(False)
+    
+@testattr(windows = True)
+def test_extfunctions_arrays():
+    """ Test of simulation with external functions using array input. """
+    extFunctions_arrays.run_demo(False)
+    
+@testattr(windows = True)
+def test_extfunctions_matrix():
+    """ Test of simulation with external functions using matrix input and output. """
+    extFunctions_matrix.run_demo(False)
 
 @testattr(assimulo = True)
 def test_distillation_fmu():

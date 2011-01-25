@@ -138,13 +138,13 @@ $C_variable_aliases$
 
 #define _atInitial (jmi->atEvent)
 
-$C_dae_blocks_residual_functions$
-
-$C_dae_init_blocks_residual_functions$
-
 $C_records$
 
 $C_function_headers$
+
+$C_dae_blocks_residual_functions$
+
+$C_dae_init_blocks_residual_functions$
 
 $C_functions$
 
