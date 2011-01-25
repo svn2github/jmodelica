@@ -257,5 +257,271 @@ y = init_result['y']
             The execution time.
 </programlisting>
     </section>
+
+    <section>
+      <title>Initilization using KInitSolveAlg</title>
+
+      <para>JModelica.org also provides a method for DAE initialization based
+      on the non-linear equaion solver KINSOL from the SUNDIALS suite. KINSOL
+      is currently comprised in the <link
+      xlink:href="http://www.jmodelica.org/page/199">Assimulo</link> package,
+      included when installing JModelica.org. KINSOL is based on Newtons
+      method for solving non-linear equations and is thus locally convergent.
+      Attempts are made to make KInitSolveAlg as robust as possible but the
+      possibility of finding a local minimum instead of the solution still
+      remains. If the solution found by KInitSolveAlg is a local minimum a
+      warning will be printed. The initial guesses passed to KINSOL are the
+      ones supplied as start attributes in the current Modelica model.</para>
+
+      <para>KInitSolveAlg also implements an improved linear solver connected
+      to KINSOL. This linear solver implements Tikhonov regularization to
+      handle the problems of singular Jacobiansas well as support for SuperLU,
+      an efficient sparse linear solver. </para>
+
+      <para>The options providable are summarized in <xref
+      linkend="tab_options" />.</para>
+
+      <table>
+        <title xml:id="tab_options">Options for KInitSolveAlg</title>
+
+        <tgroup cols="3" colsep="1">
+          <thead>
+            <row>
+              <entry align="center">Option</entry>
+
+              <entry align="center">Default</entry>
+
+              <entry align="center">Description</entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry><literal>use_constraints</literal></entry>
+
+              <entry>False</entry>
+
+              <entry>A flag indicating whether constraints are to be used
+              <emphasis>during</emphasis> initialization. Further explained in
+              <xref linkend="sec_const_usage" />. </entry>
+            </row>
+
+            <row>
+              <entry><literal>constraints</literal></entry>
+
+              <entry>None</entry>
+
+              <entry>A <literal>numpy.array</literal> containing floats that,
+              when supplied, defines the constraints on the variables. Further
+              explained in <xref linkend="sec_const_usage" />.</entry>
+            </row>
+
+            <row>
+              <entry><literal>result_format</literal></entry>
+
+              <entry>'txt'</entry>
+
+              <entry>Specifies in which format to write the result. Currently
+              only textual mode is supported.</entry>
+            </row>
+
+            <row>
+              <entry><literal>result_file_name</literal></entry>
+
+              <entry>Empty string (default generated file name will be
+              used)</entry>
+
+              <entry>Specifies the name of the file where the optimization
+              result is written. Setting this option to an empty string
+              results in a default file name that is based on the name of the
+              optimization class.</entry>
+            </row>
+
+            <row>
+              <entry><literal>KINSOL_options</literal></entry>
+
+              <entry>A dictionary with the defalt KINSOL options</entry>
+
+              <entry>These are the options sent to the KINSOL solver. These
+              are reviewed in detail in <xref
+              linkend="kinsol_options" />.</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+
+      <table xml:id="kinsol_options">
+        <title>Options for KINSOL contained in the
+        <literal>KINSOL_options</literal> dictionary</title>
+
+        <tgroup cols="3">
+          <thead>
+            <row>
+              <entry align="center">Options</entry>
+
+              <entry align="center">Default</entry>
+
+              <entry align="center">Descriptions</entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry><literal>use_jac</literal></entry>
+
+              <entry>True</entry>
+
+              <entry>Flag indicating whether or not KINSOL uses the jacobian
+              supplied by JModelica.org (True) or if KINSOL evaluates the
+              Jacobian through finite differences (False). Finite differences
+              is currently not available in sparse mode.</entry>
+            </row>
+
+            <row>
+              <entry>sparse</entry>
+
+              <entry>False</entry>
+
+              <entry>Flag indicating whether the problem should be treated as
+              sparse (True) or dense (False).</entry>
+            </row>
+
+            <row>
+              <entry>verbosity</entry>
+
+              <entry>0</entry>
+
+              <entry>An integer regulating the level of output from KINSOL.
+              Further explained in <xref linkend="sec_verbosity" />.</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+
+      <section xml:id="sec_const_usage">
+        <title>The use of constraints</title>
+
+        <para>KINSOL, and hence also KInitSolvAlg, only support simple
+        unilateral constraints, that is constraining a variable to being
+        positive or negative. If the option use_constraints is set to True,
+        constraints are use. What constraints that are used depends on whether
+        or not the user has supplied constraints with the
+        <literal>constraints</literal> option. If set, these will be used
+        otherwise constraints will be computed by reading the min and max
+        attributes from the Modelica file. How the constraint array is written
+        is summarized in <xref linkend="constraints_array" />.</para>
+
+        <table pgwide="0" xml:id="constraints_array">
+          <title>Values allowed in the <literal>constraints</literal>
+          array</title>
+
+          <tgroup cols="2">
+            <thead>
+              <row>
+                <entry align="center">Value</entry>
+
+                <entry align="center">Constraint</entry>
+              </row>
+            </thead>
+
+            <tbody>
+              <row>
+                <entry>0.0</entry>
+
+                <entry>Unconstrained.</entry>
+              </row>
+
+              <row>
+                <entry>1.0</entry>
+
+                <entry>Greater than, or equal to, zero.</entry>
+              </row>
+
+              <row>
+                <entry>2.0</entry>
+
+                <entry>Greater than zero.</entry>
+              </row>
+
+              <row>
+                <entry>-1.0</entry>
+
+                <entry>Less than, or equal to, zero.</entry>
+              </row>
+
+              <row>
+                <entry>-2.0</entry>
+
+                <entry>Less than zero.</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </table>
+
+        <para>When the constraints are read from the Modelica file the value
+        from <xref linkend="constraints_array" /> most fitting to the min and
+        max values is chosen. For example a variable with min set to 3.2 and
+        max set to 5.6 is constrained to be greater than zero. When the
+        algorithm is finished however the result will be compared with the min
+        and max values from the model testing if the solution fulfills the
+        constraints set by the Modelica file.</para>
+      </section>
+
+      <section>
+        <title xml:id="sec_verbosity">Verbosity of KINSOL</title>
+
+        <para>There are four different levels of verbosity in KINSOL with 0
+        being "silent" and 3 being the "loudest". What is output is reviewed
+        in <xref linkend="verbosity" />.</para>
+
+        <table xml:id="verbosity">
+          <title>Verbosity levels in KINSOL</title>
+
+          <tgroup cols="2">
+            <thead>
+              <row>
+                <entry align="center">Verbosity level</entry>
+
+                <entry align="center">Output</entry>
+              </row>
+            </thead>
+
+            <tbody>
+              <row>
+                <entry>0</entry>
+
+                <entry>No information displayed.</entry>
+              </row>
+
+              <row>
+                <entry>1</entry>
+
+                <entry>In each nonlinear iteration the following information
+                is displayed: the scaled Euclidean norm of the residual at the
+                current iterate, the scaled Euclidian norm of the Newton step
+                as well as the number of function evaluations performed so
+                far.</entry>
+              </row>
+
+              <row>
+                <entry>2</entry>
+
+                <entry>Level 1 output as well as the Euclidian and in finity
+                norm of the <emphasis>scaled</emphasis> residual at the
+                current iterate</entry>
+              </row>
+
+              <row>
+                <entry>3</entry>
+
+                <entry>Level 2 output plus additional values used by the
+                global strategy as well as statistical information from the
+                linear solver.</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </table>
+      </section>
+    </section>
   </section>
 </chapter>
