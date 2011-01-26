@@ -2095,7 +2095,7 @@ class JMUModel(BaseModel):
                     self.set(name,traj_li.eval(time))
                 else:
                     self.set(name,traj.x)
-            except io.VariableNotFoundError:
+            except jmodelica.io.VariableNotFoundError:
                 var_name = strip_der(name)
                 print var_name
                 found = False
@@ -2111,7 +2111,7 @@ class JMUModel(BaseModel):
                         else:
                             self.set(name,traj.x)
                             found = True
-                    except io.VariableNotFoundError:
+                    except jmodelica.io.VariableNotFoundError:
                         print "Did not find " + d_name
                 if not found:
                     print "Warning: Could not find trajectory for derivative variable " + name
