@@ -27,17 +27,19 @@
       <para>If you are running Windows, three different Python shells are
       available under the JModelica.org start menu.<itemizedlist>
           <listitem>
-            <para>Python - Normal command shell started with Python.</para>
+            <para><emphasis role="bold">Python</emphasis> - Normal command
+            shell started with Python.</para>
           </listitem>
 
           <listitem>
-            <para>IPython - Interactive shell for Python with, for example,
-            code highlighting and tab completion.</para>
+            <para><emphasis role="bold">IPython</emphasis> - Interactive shell
+            for Python with, for example, code highlighting and tab
+            completion.</para>
           </listitem>
 
           <listitem>
-            <para>pylab - IPython shell which also loads the package
-            pylab.</para>
+            <para><emphasis role="bold">pylab</emphasis> - IPython shell which
+            also loads the package pylab.</para>
           </listitem>
         </itemizedlist></para>
     </section>
@@ -56,14 +58,14 @@
   <section>
     <title>Run an example</title>
 
-    <para>There are several example scripts which compile, load and
-    simulate/optimize models in the <filename>examples</filename> folder under
-    the Python package in the JModelica.org installation. The models
-    themselves are located in the subdirectory <filename>files</filename>. The
-    following code demonstrates how to run such an example. First a Python
-    session must be started, see <xref
-    linkend="gs_sec_starting_a_python_session" />. The JModelica.org Python
-    interface is preferably run in a IPython shell with Pylab mode.
+    <para>There are several Python scripts in the
+    <filename>examples</filename> folder under the Python package in the
+    JModelica.org installation which run examples demonstrating compilation,
+    loading and simulating or optimizing of models. The models themselves are
+    located in the subdirectory <filename>files</filename>. The following code
+    demonstrates how to run such an example. First a Python session must be
+    started, see <xref linkend="gs_sec_starting_a_python_session" /> above.
+    The example scripts are preferably run in a IPython shell with pylab mode.
     <programlisting># import the VDP example
 from jmodelica.examples import vdp
 
@@ -79,7 +81,7 @@ vdp.run_demo()</programlisting></para>
     <para>The JModelica.org Python interface requires a few Python packages in
     order to run correctly. Use the function
     <literal>jmodelica.check_packages()</literal> to list the dependencies and
-    version located.<programlisting># import the function from jmodelica
+    version located on your computer.<programlisting># import the function from jmodelica
 from jmodelica import check_packages
 
 # run check_packages

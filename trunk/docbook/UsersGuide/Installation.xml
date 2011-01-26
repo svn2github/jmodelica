@@ -123,6 +123,10 @@
           </tbody>
         </tgroup>
       </table>
+
+      <para>The recommended version of a package is not always the same as the
+      latest version available. It is the package version that JModelica.org
+      has been tested and verified to work with.</para>
     </section>
   </section>
 
@@ -158,8 +162,8 @@
 
           <step>
             <para>Run the installer and follow the wizard. Choose to install
-            the additional Python packages when prompted, unless the are
-            already installed.</para>
+            the additional Python packages when prompted, unless they are
+            already installed on your computer.</para>
           </step>
         </procedure>
       </section>
@@ -184,9 +188,16 @@
     <title>Software Development Kit</title>
 
     <para>The JModelica.org Software Development Kit (SDK) is a bundle of
-    tools needed to build the JModelica.org sources on Windows. The
-    JModelica.org SDK windows installer sets up a complete pre-configured
-    environment with convenient start menu shortcuts.</para>
+    tools needed to build the JModelica.org sources on Windows. The SDK is
+    mainly intended for those of you who want to do some developement work on
+    the platform. Another reason to work with the SDK is if you want to be
+    able to build new versions with the latest code changes. For a well
+    documented, tested and stable version of JModelica.org, we refer to our
+    binary distribution which is built (for Windows) with every
+    release.</para>
+
+    <para>The JModelica.org SDK windows installer sets up a complete
+    pre-configured environment with convenient start menu shortcuts.</para>
 
     <section xml:id="inst_sec_sdk_prereq">
       <title>Prerequisites</title>
@@ -232,7 +243,7 @@
 
           <listitem>
             <para><link
-            xlink:href="http://www.coin-or.org/Ipopt">Ipopt</link></para>
+            xlink:href="https://projects.coin-or.org/Ipopt">Ipopt</link></para>
           </listitem>
 
           <listitem>
@@ -247,7 +258,7 @@
 
           <listitem>
             <para><link
-            xlink:href="http://somethingaboutorange.com/mrl/projects/nose/">nose</link></para>
+            xlink:href="http://somethingaboutorange.com/mrl/projects/nose/1.0.0/">nose</link></para>
           </listitem>
 
           <listitem>
@@ -262,7 +273,7 @@
 
           <listitem>
             <para><link
-            xlink:href="https://computation.llnl.gov/casc/sundials">SUNDIALS</link></para>
+            xlink:href="https://computation.llnl.gov/casc/sundials/main.html">SUNDIALS</link></para>
           </listitem>
 
           <listitem>
@@ -273,6 +284,11 @@
           <listitem>
             <para><link
             xlink:href="http://www.docbook.org/">DocBook</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            xlink:href="http://crd.lbl.gov/~xiaoye/SuperLU/">SuperLU</link></para>
           </listitem>
         </itemizedlist>
       </section>
@@ -288,7 +304,7 @@
             </listitem>
 
             <listitem>
-              <para>Run the file by double-clicking and selecting Run if
+              <para>Run the file by double-clicking and selecting "Run" if
               prompted with a security warning. This will launch an installer
               which should be self-explanatory. Select "Yes" at the end when
               asked if the source code should be checked out from
