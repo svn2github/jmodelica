@@ -1469,6 +1469,7 @@ class KInitSolveAlgOptions(OptionBase):
         sparse --
             Boolean set to True if the problem is to be treated as sparse and False
             otherwise. Only works with the KINSOL option use_jac = True!
+            Dafault: False
         
         verbosity --
             Integer regulationg the level of information
@@ -1485,12 +1486,6 @@ class KInitSolveAlgOptions(OptionBase):
                 3:  display level 2 output plus additional values used by the global strategy,
                     and statistical information for the linear solver.
             Default: 0
-            
-        reg_param --
-            The regularization parameter used in the Tikhonov regularization.
-            Must be a float larger than or equal to zero, if set to zero the
-            regularization parameter will be set by the solver.
-            Default: 0.0
                 
                       
 

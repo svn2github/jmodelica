@@ -24,6 +24,8 @@ import logging
 import numpy as N
 import scipy.sparse as ss
 
+import time
+
 import jmodelica.jmi as jmi
 import jmodelica.io as io
 
@@ -118,6 +120,11 @@ class JMUAlgebraic(ProblemAlgebraic):
         self.use_constraints = False
         self.set_constraints_usage(self.use_constraints,self.constraints)
         
+        # initialize timers
+        self.time_f = 0
+        self.time_jac_de = 0
+        self.time_jac_sp = 0
+        
     
     def f(self,input):
         """
@@ -129,6 +136,7 @@ class JMUAlgebraic(ProblemAlgebraic):
                 A numpy array, the vector input for which the residual will be
                 evaluated.
         """
+        start = time.clock()
         inp_size = input.shape[0]
     
         # assume that the first variables are w and the latter are x and dx, slice the input
@@ -146,6 +154,9 @@ class JMUAlgebraic(ProblemAlgebraic):
         self._jmi_model.init_F0(output)
         #print "RHS in assimulo_interface:"
         #print output
+        stop = time.clock()
+        
+        self.time_f += (stop-start)
         return output
     
     def set_x0(self,x0):
@@ -224,6 +235,8 @@ class JMUAlgebraic(ProblemAlgebraic):
                 A numpy array, the vector input for which the jacobian will be
                 evaluated.
         """
+        
+        start = time.clock()
         inp_size = input.shape[0]
     
         # slice the input
@@ -242,6 +255,9 @@ class JMUAlgebraic(ProblemAlgebraic):
             self._ind_vars, self._mask, jac)
     
         # return output from result 
+        stop = time.clock()
+        self.time_jac_de += (stop - start)
+        
         return N.reshape(jac,(self._nrow,self._ncol))
     
     def sparse_jac(self,input):
@@ -255,6 +271,8 @@ class JMUAlgebraic(ProblemAlgebraic):
                 A numpy array, the vector input for which the jacobian will be
                 evaluated.
         """
+        start = time.clock()
+        
         inp_size = input.shape[0]
     
         # slice the input
@@ -272,7 +290,10 @@ class JMUAlgebraic(ProblemAlgebraic):
         self._jmi_model.init_dF0(jmi.JMI_DER_CPPAD, jmi.JMI_DER_SPARSE, 
             self._ind_vars, self._mask, val)
         
-        return ss.coo_matrix((val,(self.rows-1,self.cols-1)),shape=(self.sparse_ncol,self.sparse_ncol)).tocsc()
+        res = ss.coo_matrix((val,(self.rows-1,self.cols-1)),shape=(self.sparse_ncol,self.sparse_ncol)).tocsc()
+        stop = time.clock()
+        self.time_jac_sp += (stop - start)
+        return res
 
     def set_constraints_usage(self,use_const,constraints = None):
         """ 
@@ -404,6 +425,16 @@ class JMUAlgebraic(ProblemAlgebraic):
                         res[ref] = -1.0
         
         return res
+    
+    def get_times(self):
+        """
+        Method returning the times spent evaluating
+        - the residual
+        - the Dense Jacobian
+        - the Sparse Jacobian
+        """
+        
+        return dict([("f",self.time_f),("J_d",self.time_jac_de),("J_s",self.time_jac_sp)])
     
     def print_var_info(self,i):
         """
