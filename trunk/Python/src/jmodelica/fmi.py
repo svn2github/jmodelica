@@ -63,17 +63,9 @@ def compile_fmu(class_name, file_name=[], compiler='auto', target='model_noad',
     Other options for the compiler should also be listed in the compiler_options 
     dict.
     
-    The compiler target is 'ipopt' by default which means that libraries for AD 
-    and optimization/initialization algortihms will be available as well as the 
-    JMI. The other targets are:
-    
-        'model' -- 
-            AD and JMI is included.
-        'algorithm' -- 
-            AD and algorithm but no Ipopt linking.
-        'model_noad' -- 
-            Only JMI, that is no AD interface. (Must currently be used when 
-            model includes external functions.)
+    The compiler target is 'model_noad' by default which means that libraries 
+    for AD and optimization/initialization algortihms will not be available. This 
+    is currently the only target that is possible to use.
     
     Parameters::
     
@@ -92,7 +84,7 @@ def compile_fmu(class_name, file_name=[], compiler='auto', target='model_noad',
             Default: 'auto' (i.e. depends on argument file_name)
             
         target --
-            Compiler target. 'model', 'algorithm', 'ipopt' or 'model_noad'.
+            Compiler target.
             Note: Needs to be 'model_noad' at the moment.
             Default: 'model_noad'
             
