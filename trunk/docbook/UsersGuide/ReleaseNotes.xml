@@ -9,6 +9,98 @@
   <title>Release notes</title>
 
   <section>
+    <title>Release notes for JModelica.org version 1.5</title>
+
+    <section>
+      <title>Highlights</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>FMU export</para>
+        </listitem>
+
+        <listitem>
+          <para>Improvements in compiler front-end</para>
+        </listitem>
+
+        <listitem>
+          <para>Equation sorting and BLT</para>
+        </listitem>
+
+        <listitem>
+          <para>Symbolic solution of simple equations</para>
+        </listitem>
+
+        <listitem>
+          <para>Improved simulation support for hybrid and sampled
+          systems</para>
+        </listitem>
+
+        <listitem>
+          <para>Improved initialization with Kinsol and SuperLU</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Compilers</title>
+
+      <section>
+        <title>When clauses</title>
+
+        <para>When clauses are supported in the Modelica compiler.</para>
+      </section>
+
+      <section>
+        <title>Equation sorting</title>
+
+        <para>Equations are sorted using Tarjan's algorithm and the resulting
+        BLT representation is used in the C code generation. </para>
+      </section>
+    </section>
+
+    <section>
+      <title>Simulation</title>
+
+      <para></para>
+    </section>
+
+    <section>
+      <title>Initialization</title>
+
+      <para></para>
+    </section>
+
+    <section>
+      <title>Contributors</title>
+
+      <para>Christian Andersson</para>
+
+      <para>Tove Bergdahl</para>
+
+      <para>Magnus Gäfvert</para>
+
+      <para>Jesper Mattsson</para>
+
+      <para>Johan Ylikiiskilä</para>
+
+      <para>Johan Åkesson</para>
+
+      <section>
+        <title>Previous contributors</title>
+
+        <para>Philip Nilsson</para>
+
+        <para>Roberto Parrotto</para>
+
+        <para>Jens Rantil</para>
+
+        <para>Philip Reuterswärd</para>
+      </section>
+    </section>
+  </section>
+
+  <section>
     <title>Release notes for JModelica.org version 1.4</title>
 
     <section>
