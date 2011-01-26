@@ -350,5 +350,42 @@ vdp.run_demo()</programlisting></para>
           </orderedlist></para>
       </section>
     </section>
+
+    <section>
+      <title>Changing Ipopt solver</title>
+
+      <para>The solver bundled in JModelica.org is Ipopt-MUMPS, however, it is
+      possible to use other Ipopt solvers. This requires a few changes in the
+      setup and that JModelica is rebuilt. The procedure would be:</para>
+
+      <orderedlist>
+        <listitem>
+          <para>Open the script file <filename>configure.sh</filename> located
+          in the SDK root folder.</para>
+        </listitem>
+
+        <listitem>
+          <para>Search for the line <emphasis>--with-ipopt</emphasis> and
+          exchange the default Ipopt solver path with the path to the solver
+          that you want to use. Save and close.</para>
+        </listitem>
+
+        <listitem>
+          <para>Do the whole installation procedure, that is: run configure,
+          make and make install.</para>
+        </listitem>
+
+        <listitem>
+          <para>Open the file <filename>setenv.bat</filename> which is also
+          found in the SDK root folder. </para>
+        </listitem>
+
+        <listitem>
+          <para>Look for the line which sets the <literal>IPOPT_HOME</literal>
+          environment variable and exchange the default path with the path to
+          your solver.</para>
+        </listitem>
+      </orderedlist>
+    </section>
   </section>
 </chapter>
