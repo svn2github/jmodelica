@@ -1,0 +1,59 @@
+/*
+Copyright (C) 2009 Modelon AB
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+/** \file CGenerator.java
+*  \brief CGenerator class.
+*/
+
+import java.io.*;
+
+public class CADGenerator extends CGenerator {
+
+	class DAETag_C_equationResidualDirectionalDerivative extends DAETag {
+		
+		public DAETag_C_equationResidualDirectionalDerivative(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("C_DAE_equation_directional_derivative","C: equation residuals",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			if (fclass.root().options.getBooleanOption("generate_dae")
+			     && fclass.root().options.getBooleanOption("generate_dae_jacobian")) {
+				int i=0;
+				for (FAbstractEquation e : fclass.equations()) {
+					e.genResidual_C(i,INDENT,genPrinter);				
+					i += e.numScalarEquations();
+				}
+			}
+		}
+	
+	}
+
+	/**
+	 * Constructor.
+	 * 
+	 * @param expPrinter Printer object used to generate code for expressions.
+	 * @param escapeCharacter Escape characters used to decode tags.
+	 * @param fclass An FClass object used as a basis for the code generation.
+	 */
+	public CADGenerator(Printer expPrinter, char escapeCharacter,
+			FClass fclass) {
+		super(expPrinter, escapeCharacter, fclass);
+	}
+
+}
+
