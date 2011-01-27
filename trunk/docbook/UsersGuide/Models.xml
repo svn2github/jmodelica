@@ -37,7 +37,7 @@
       <para>JMUs are created by compiling Modelica or Optimica models with
       JModelica.org. The JMU can then be loaded in a
       <literal>JMUModel</literal> object and used for simulation and
-      optimization (if Optimica) purposes. </para>
+      optimization (if Optimica) purposes.</para>
 
       <para>FMUs are created by compiling Modelica models with JModelica.org
       (or any other tool supporting FMU export). (Optimica models can thus not
@@ -54,7 +54,7 @@
     function from JModelica.org, specifying a model class and file location
     and performing the actual compilation. This will be demonstrated in <xref
     linkend="models_sec_simple_jmu_compilation" /> for the JMU and in <xref
-    linkend="models_sec_simple_fmu_compilation" /> for the FMU. </para>
+    linkend="models_sec_simple_fmu_compilation" /> for the FMU.</para>
 
     <para>For more advanced usage there are compiler options and parameters to
     the compiler functions which can be modified. This will be explained in
@@ -308,7 +308,8 @@ compile_fmu(class_name, file_name=[], compiler='modelica', target='model_noad',
             Default: Empty list.
             
         compiler -- 
-            The compiler used to compile the model (ModelicaCompiler).
+            The compiler used to compile the model. The only possible compiler 
+            that can be used currently is ModelicaCompiler.
             Default: 'modelica'
             
         target --
@@ -333,7 +334,6 @@ compile_fmu(class_name, file_name=[], compiler='modelica', target='model_noad',
     Returns::
     
         Name of the FMU which has been created.
-
 </programlisting>
       </section>
 
@@ -614,7 +614,7 @@ jmu_name = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_s
         libraries.</para>
 
         <para>For <literal>compile_fmu</literal>, the only possible target is
-        '<literal>model_noad</literal>'. </para>
+        '<literal>model_noad</literal>'.</para>
 
         <para>The target <literal>model_noad</literal> must also be used if
         the model contains external equations since external equations do not
@@ -717,7 +717,7 @@ mc.generate_code(flat_rep)
       <para>The FMU (Functional Mock-up Unit) is a compressed file which
       follows the FMI (Functional Mock-up Interface) standard. An FMU is
       created when compiling a Modelica model with
-      <literal>jmodelica.fmi.compile_fmu</literal>. </para>
+      <literal>jmodelica.fmi.compile_fmu</literal>.</para>
 
       <para>Read more about the FMI/FMU standard in <xref
       linkend="ch_fmi" />.</para>
