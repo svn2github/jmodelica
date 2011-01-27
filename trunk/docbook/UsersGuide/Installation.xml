@@ -126,7 +126,7 @@
 
       <para>The recommended version of a package is not always the same as the
       latest version available. It is the package version that JModelica.org
-      has been tested and verified to work with.</para>
+      has been tested and verified to be working with.</para>
     </section>
   </section>
 
@@ -356,12 +356,12 @@ vdp.run_demo()</programlisting></para>
 
       <para>The solver bundled in JModelica.org is Ipopt-MUMPS, however, it is
       possible to use other Ipopt solvers. This requires a few changes in the
-      setup and that JModelica is rebuilt. The procedure would be:</para>
+      setup and rebuilding JModelica. The procedure is:</para>
 
       <orderedlist>
         <listitem>
-          <para>Open the script file <filename>configure.sh</filename> located
-          in the SDK root folder.</para>
+          <para>Open the script file <filename>configure.sh,</filename>
+          located in the SDK root folder, in a text editor.</para>
         </listitem>
 
         <listitem>
@@ -376,8 +376,8 @@ vdp.run_demo()</programlisting></para>
         </listitem>
 
         <listitem>
-          <para>Open the file <filename>setenv.bat</filename> which is also
-          found in the SDK root folder. </para>
+          <para>Open the file <filename>setenv.bat,</filename> which is also
+          found in the SDK root folder, in a text editor.</para>
         </listitem>
 
         <listitem>

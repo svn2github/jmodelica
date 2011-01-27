@@ -39,6 +39,10 @@
         <listitem>
           <para>Improved initialization with Kinsol and SuperLU</para>
         </listitem>
+
+        <listitem>
+          <para>Improved support for external functions.</para>
+        </listitem>
       </itemizedlist>
     </section>
 
@@ -55,7 +59,7 @@
         <title>Equation sorting</title>
 
         <para>Equations are sorted using Tarjan's algorithm and the resulting
-        BLT representation is used in the C code generation. </para>
+        BLT representation is used in the C code generation.</para>
       </section>
     </section>
 
