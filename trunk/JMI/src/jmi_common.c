@@ -597,16 +597,16 @@ int jmi_check_Jacobian_column_index(jmi_t *jmi, int independent_vars, int *mask,
 	/*printf("%d\n",jmi->n_z);*/
 	/*printf("<<< %d %d\n", col_index, mask[col_index]);*/
 	/*printf("<< %d %d\n", independent_vars, jmi_variable_type(jmi, col_index));*/
-
+	int vt = 0;
 	if (mask[col_index] == 0) {
-		/*printf("Hej\n");*/
 		return 0;
-	} else if (jmi_variable_type(jmi,col_index)!=-1 && (independent_vars & jmi_variable_type(jmi, col_index))) {
-		/*printf("Hojj\n");*/
-		return 1;
 	} else {
-		/*printf("Hepp\n");*/
-		return 0;
+		vt = jmi_variable_type(jmi,col_index);
+		if (vt!=-1 && (independent_vars & vt)) {
+			return 1;
+		} else {
+			return 0;
+		}
 	}
 }
 

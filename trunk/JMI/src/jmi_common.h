@@ -518,6 +518,12 @@ struct jmi_func_ad_t{
 	int* dF_z_col_n_nz;               /**< \brief The number of non-zeros of each column in the sparse
 	                                            Jacobian. */
 	jmi_real_vec_p z_work;          /**< \brief A work vector for \f$z\f$. */
+	int exec_time;                  /**< \brief A variable that is used for measuring execution time. */
+	int n_groups;                   /**< \brief Number of groups in the CPR seeding. */
+	int n_cols_in_grouping;         /**< \brief Total number of columns used in CPR seeding computation. */
+	int* n_cols_in_group;           /**< \brief The number of column in each CPR group. */
+	int* group_cols;                /**< \brief An ordered array of column indices corresponding to CPR groups. */
+	int* group_start_index;         /**< \brief An array containing the start indices for each group in the array group_cols. */
 };
 
 struct jmi_block_residual_t {

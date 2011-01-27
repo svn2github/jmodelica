@@ -41,6 +41,9 @@
  */
 
 #include "jmi.h"
+#include <time.h>
+
+void compute_cpr_groups(jmi_t* jmi,jmi_func_t* func);
 
 int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 		int n_real_pd, int n_integer_ci, int n_integer_cd,
@@ -540,6 +543,14 @@ int jmi_func_ad_init(jmi_t *jmi, jmi_func_t *func) {
 */
 	func->ad->z_work = new jmi_real_vec_t(jmi->n_z);
 
+	func->ad->exec_time = 0;
+
+	func->ad->group_cols = (int*)calloc(jmi->n_z,sizeof(int));
+	func->ad->n_cols_in_group = (int*)calloc(jmi->n_z,sizeof(int));
+	func->ad->group_start_index = (int*)calloc(func->ad->dF_z_n_nz,sizeof(int));
+	func->ad->n_groups = 0;
+
+	compute_cpr_groups(jmi,func);
 
 	return 0;
 }
@@ -646,6 +657,10 @@ int jmi_func_ad_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity, int independe
 int jmi_func_ad_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
 		int independent_vars, int* mask, jmi_real_t* jac) {
 
+	clock_t start = clock();
+
+	int use_cpr_compression = 0;
+
 	if (func->ad==NULL) {
 		return -1;
 	}
@@ -654,7 +669,7 @@ int jmi_func_ad_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
 		return 0;
 	}
 
-	int i,j;
+	int i,j,k;
 
 	for (i=0;i<jmi->n_z;i++) {
 		(*(func->ad->z_work))[i] = (*(jmi->z_val))[i];
@@ -685,6 +700,44 @@ int jmi_func_ad_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
 			jac[i] = 0;
 		}
 	}
+
+	//printf("-- %d \n",independent_vars);
+	// Check if evaluation wrt dx, x, w and u - if so, use CPR seeding
+	if (independent_vars == (JMI_DER_DX | JMI_DER_X | JMI_DER_W | JMI_DER_U) && sparsity==JMI_DER_SPARSE) {
+		use_cpr_compression = 1;
+		//printf("Hepp\n");
+	}
+
+	if (use_cpr_compression==1) {
+		//printf("***********start***************\n");
+		// Loop over all groups
+		for (i=0;i<func->ad->n_groups;i++) {
+			//printf("-------------start %d --------------\n", i);
+			// Set the seed vector
+			for (j=0;j<func->ad->n_cols_in_group[i];j++) {
+				d_z[func->ad->group_cols[func->ad->group_start_index[i] + j]] = 1.;
+			}
+			/*
+			for (j=0;j<jmi->n_z;j++) {
+				printf(" * %d %f\n",j,d_z[j]);
+			}*/
+			// Evaluate directional derivative
+			jac_ = func->ad->F_z_tape->Forward(1,d_z);
+			// Extract Jacobian values
+			for (j=0;j<func->ad->n_cols_in_group[i];j++) {
+				for (k=func->ad->dF_z_col_start_index[func->ad->group_cols[func->ad->group_start_index[i] + j]];
+						k<func->ad->dF_z_col_start_index[func->ad->group_cols[func->ad->group_start_index[i] + j]]+func->ad->dF_z_col_n_nz[func->ad->group_cols[func->ad->group_start_index[i] + j]];
+						k++) {
+					jac[k-func->ad->dF_z_col_start_index[jmi->offs_real_dx]] = jac_[func->ad->dF_z_row[k]-1];
+				}
+			}
+			// Reset seed vector
+			for (j=0;j<func->ad->n_cols_in_group[i];j++) {
+				d_z[func->ad->group_cols[func->ad->group_start_index[i] + j]] = 0.;
+			}
+		}
+		//printf("-------------end------------\n");
+	} else {
 
 	// Iterate over all columns
 	int q;
@@ -720,6 +773,12 @@ int jmi_func_ad_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
 			}
 		}
 	}
+	}
+
+	clock_t end = clock();
+
+	func->ad->exec_time += (int)(end-start);
+	//printf("%d,%d, %d\n",(int)CLOCKS_PER_SEC,func->ad->exec_time,(int)(end-start));
 
 	return 0;
 }
@@ -821,6 +880,12 @@ int jmi_func_ad_delete(jmi_func_ad_t *jfa) {
 	free(jfa->dF_z_col);
 	free(jfa->dF_z_col_start_index);
 	free(jfa->dF_z_col_n_nz);
+	free(jfa->group_cols);
+	free(jfa->n_cols_in_group);
+	free(jfa->group_start_index);
+
+
+
 /*
 	free(jfa->dF_ci_row);
 	free(jfa->dF_ci_col);
@@ -1873,6 +1938,107 @@ int jmi_with_cppad_derivatives()
 	return JMI_AD_WITH_CPPAD;
 }
 
+void compute_cpr_groups(jmi_t* jmi,jmi_func_t* func) {
+
+	int i,j,k,l,compatible;
+
+	func->ad->n_cols_in_grouping = 2*jmi->n_real_dx + jmi->n_real_w + jmi->n_real_u;
+
+	int n_c_g = func->ad->n_cols_in_grouping;
+
+	int offs_c_g = jmi->offs_real_dx;
+
+	int* selected_groups = (int*)calloc(n_c_g,sizeof(int));
+	for (i=0;i<n_c_g;i++) {
+		selected_groups[i] = 0;
+	}
+
+	clock_t start = clock();
+
+	/*
+	printf("**********\n");
+	for (i=0;i<n_c_g;i++) {
+		for (j=0;j<func->ad->dF_z_col_n_nz[i+offs_c_g];j++) {
+			printf(" - %d %d\n", i+offs_c_g,func->ad->dF_z_row[func->ad->dF_z_col_start_index[i+offs_c_g]+j]);
+		}
+	}
+
+
+	printf("n_cols_in_grouping=%d\n",n_c_g);
+*/
+
+	func->ad->n_groups = 0;
+	int n_cols_in_group = 0; // Counter for the number of columns in a group
+	int n_selected_cols = 0; // Total number of columns added to groups
+	// Loop until all column have been added to a graph
+	while(n_selected_cols<n_c_g) {
+//		printf("Starting sweep, n_groups = %d\n",func->ad->n_groups);
+		// Reset group column counter
+		n_cols_in_group = 0;
+		// Loop over all colums and add the ones that are i) compatible
+		// and ii) have not been selected
+		for(i=0;i<n_c_g;i++) {
+//			printf("About to check, col = %d\n",i+offs_c_g);
+			// If the column has not been added to a group...
+			if (selected_groups[i]!=1) {
+//				printf("Col %d has not been selected\n",i+offs_c_g);
+				// ...make compatibility check
+				compatible = 1;
+				// Loop over all columns that have been added to group
+				for (j=func->ad->group_start_index[func->ad->n_groups];
+						j<func->ad->group_start_index[func->ad->n_groups] +
+						n_cols_in_group;j++) {
+					int* col_a_row_ind = &func->ad->dF_z_row[func->ad->dF_z_col_start_index[func->ad->group_cols[j]]];
+					int* col_b_row_ind = &func->ad->dF_z_row[func->ad->dF_z_col_start_index[i + offs_c_g]];
+					int col_a_n_nz = func->ad->dF_z_col_n_nz[func->ad->group_cols[j]];
+					int col_b_n_nz = func->ad->dF_z_col_n_nz[i+offs_c_g];
+
+//					printf("Checking col %d, n_nz=%d, against %d, n_n_z=%d (in group)\n",
+//							i+offs_c_g,col_b_n_nz,func->ad->group_cols[j],col_a_n_nz);
+
+					for (k=0;k<col_a_n_nz;k++) {
+						for (l=0;l<col_b_n_nz;l++) {
+//							printf(" ** %d %d\n",col_a_row_ind[k],col_b_row_ind[l]);
+							if (col_a_row_ind[k] == col_b_row_ind[l]) {
+								compatible = 0;
+								break;
+							}
+						}
+					}
+				}
+				if (compatible==1) {
+//					printf("Col %d added to group\n",i+offs_c_g);
+					selected_groups[i] = 1;
+					func->ad->group_cols[n_selected_cols] = i + offs_c_g;
+					n_selected_cols++;
+					n_cols_in_group++;
+				} else {
+//					printf("Col %d incompatible\n",i+offs_c_g);
+				}
+			} else {
+//				printf("Col %d has already been selected\n",i+offs_c_g);
+			}
+		}
+		func->ad->n_groups++;
+		func->ad->group_start_index[func->ad->n_groups] =
+				func->ad->group_start_index[func->ad->n_groups - 1] + n_cols_in_group;
+		func->ad->n_cols_in_group[func->ad->n_groups - 1] = n_cols_in_group;
+//		printf("End iteration over cols, col = %d, n_cols_in_group = %d\n",i,n_cols_in_group);
+	}
+
+	free(selected_groups);
+
+	/*
+	clock_t end = clock();
+	printf("Computed CPR groups: %d groups computed from %d columns\n",func->ad->n_groups,func->ad->n_cols_in_grouping);
+	for (i=0;i<func->ad->n_groups;i++) {
+		for (j=0;j<func->ad->n_cols_in_group[i];j++) {
+			printf(" >> %d %d\n",i,func->ad->group_cols[func->ad->group_start_index[i]+j]);
+		}
+	}
+	printf("Computed CPR groups: %dus\n",(int)(end-start));
+*/
+}
 
 // Array interface
 #include "jmi_array_cppad.h"
