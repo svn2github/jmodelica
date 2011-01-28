@@ -470,7 +470,7 @@ class Collocator:
         # Solve the problem
         self.solver.solve()
         
-        self.xx_opt = N.array(self.solver.getOutput(casadi.NLP_X_OPT))
+        self.xx_opt = N.array(self.solver.output(casadi.NLP_X_OPT))
 
     def get_result(self):
         dx_opt = N.zeros((len(self.get_time_points()),self.get_n_x()))

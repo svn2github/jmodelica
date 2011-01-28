@@ -42,7 +42,7 @@ def run_demo(with_plots=True):
     #xml_file_name = unzip_unit(archive='./CSTR_CSTR_Opt2.jmu')[1]
     os.system("unzip ./CSTR_CSTR_Opt2.jmu")
     xmlmodel = XMLOCP("modelDescription.xml")
-    be_colloc = RadauCollocator(xmlmodel,10,3)
+    be_colloc = RadauCollocator(xmlmodel,100,3)
     be_colloc.solve()
     be_colloc.write_result()
     res = ResultDymolaTextual('CSTR.CSTR_Opt2'+'_result.txt')
