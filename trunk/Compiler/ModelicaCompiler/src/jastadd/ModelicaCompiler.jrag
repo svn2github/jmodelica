@@ -441,6 +441,8 @@ public class ModelicaCompiler {
 		setBooleanOption("generate_ode", true);
 		setBooleanOption("generate_dae", false);	
 		setBooleanOption("equation_sorting", true);
+		// use fmi file templates
+		defaultTemplatePathsFMU();
 		this.compileUnit(className, fileName, target, compileTo, "FMU");
 		log.info("...COMPILING FMU finished");
 	}
