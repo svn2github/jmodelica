@@ -48,13 +48,16 @@ def run_demo(with_plots=True):
     be_colloc.write_result()
 
     res = ResultDymolaTextual('VDP_pack.VDP_Opt2'+'_result.txt')
-
+    
     # Extract variable profiles
     x1 = res.get_variable_data('x1')
     x2 = res.get_variable_data('x2')
-    u = res.get_variable_data('u')
+    #u = res.get_variable_data('cost')
+    uu= [res.data[1][i][7] for i in range(150)]
+    tt= [res.data[1][i][0] for i in range(150)]
+
     cost = res.get_variable_data('cost')
-    
+
     #assert N.abs(cost.x[-1] - 2.3469089e+01) < 1e-3, \
     #        "Wrong value of cost function in vdp.py"  
 
@@ -73,7 +76,7 @@ def run_demo(with_plots=True):
         plt.ylabel('x2')
         
         plt.subplot(313)
-        plt.plot(cost.t,cost.t)
+        plt.plot(tt,uu)
         plt.grid()
         plt.ylabel('u')
         plt.xlabel('time')
