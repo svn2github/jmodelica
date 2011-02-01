@@ -684,8 +684,8 @@ fclass RecordTests.RecordConstructor1
 
  record RecordTests.RecordConstructor1.A
   Real a;
-  Integer b;
-  String c;
+  discrete Integer b;
+  discrete String c;
  end RecordTests.RecordConstructor1.A;
 end RecordTests.RecordConstructor1;
 ")})));
@@ -711,8 +711,8 @@ fclass RecordTests.RecordConstructor2
 
  record RecordTests.RecordConstructor2.A
   Real a;
-  Integer b;
-  String c;
+  discrete Integer b;
+  discrete String c;
  end RecordTests.RecordConstructor2.A;
 end RecordTests.RecordConstructor2;
 ")})));
@@ -738,8 +738,8 @@ fclass RecordTests.RecordConstructor3
 
  record RecordTests.RecordConstructor3.A
   Real a;
-  Integer b = 0;
-  String c = \"foo\";
+  discrete Integer b = 0;
+  discrete String c = \"foo\";
  end RecordTests.RecordConstructor3.A;
 end RecordTests.RecordConstructor3;
 ")})));

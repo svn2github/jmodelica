@@ -5213,8 +5213,8 @@ model ArrayAnd1
          description="Scalarization of logical and: arrays of Booleans (literal)",
          flatModel="
 fclass ArrayTests.ArrayAnd1
- Boolean x[1];
- Boolean x[2];
+ discrete Boolean x[1];
+ discrete Boolean x[2];
 initial equation 
  pre(x[1]) = false;
  pre(x[2]) = false;
@@ -5234,10 +5234,10 @@ model ArrayAnd2
          description="Scalarization of logical and: arrays of Booleans (component)",
          flatModel="
 fclass ArrayTests.ArrayAnd2
- Boolean y[1];
- Boolean y[2];
- Boolean x[1];
- Boolean x[2];
+ discrete Boolean y[1];
+ discrete Boolean y[2];
+ discrete Boolean x[1];
+ discrete Boolean x[2];
 initial equation 
  pre(y[1]) = false;
  pre(y[2]) = false;
@@ -5365,9 +5365,9 @@ fclass ArrayTests.ArrayAnd9
  constant Boolean y[1] = true and true;
  constant Boolean y[2] = false and true;
  constant Boolean y[3] = false and false;
- Boolean x[1];
- Boolean x[2];
- Boolean x[3];
+ discrete Boolean x[1];
+ discrete Boolean x[2];
+ discrete Boolean x[3];
 initial equation 
  pre(x[1]) = false;
  pre(x[2]) = false;
@@ -5392,8 +5392,8 @@ model ArrayOr1
          description="Scalarization of logical or: arrays of Booleans (literal)",
          flatModel="
 fclass ArrayTests.ArrayOr1
- Boolean x[1];
- Boolean x[2];
+ discrete Boolean x[1];
+ discrete Boolean x[2];
 initial equation 
  pre(x[1]) = false;
  pre(x[2]) = false;
@@ -5414,10 +5414,10 @@ model ArrayOr2
          description="Scalarization of logical or: arrays of Booleans (component)",
          flatModel="
 fclass ArrayTests.ArrayOr2
- Boolean y[1];
- Boolean y[2];
- Boolean x[1];
- Boolean x[2];
+ discrete Boolean y[1];
+ discrete Boolean y[2];
+ discrete Boolean x[1];
+ discrete Boolean x[2];
 initial equation 
  pre(y[1]) = false;
  pre(y[2]) = false;
@@ -5545,9 +5545,9 @@ fclass ArrayTests.ArrayOr9
  constant Boolean y[1] = true or true;
  constant Boolean y[2] = true or false;
  constant Boolean y[3] = false or false;
- Boolean x[1];
- Boolean x[2];
- Boolean x[3];
+ discrete Boolean x[1];
+ discrete Boolean x[2];
+ discrete Boolean x[3];
 initial equation 
  pre(x[1]) = false;
  pre(x[2]) = false;
@@ -5572,8 +5572,8 @@ model ArrayNot1
          description="Scalarization of logical not: array of Boolean (literal)",
          flatModel="
 fclass ArrayTests.ArrayNot1
- Boolean x[1];
- Boolean x[2];
+ discrete Boolean x[1];
+ discrete Boolean x[2];
 initial equation 
  pre(x[1]) = false;
  pre(x[2]) = false;
@@ -5594,10 +5594,10 @@ model ArrayNot2
          description="Scalarization of logical not: array of Boolean (component)",
          flatModel="
 fclass ArrayTests.ArrayNot2
- Boolean x[1];
- Boolean x[2];
- Boolean y[1];
- Boolean y[2];
+ discrete Boolean x[1];
+ discrete Boolean x[2];
+ discrete Boolean y[1];
+ discrete Boolean y[2];
 initial equation 
  pre(x[1]) = false;
  pre(x[2]) = false;
@@ -5623,8 +5623,8 @@ model ArrayNot3
          description="Scalarization of logical not: constant evaluation",
          flatModel="
 fclass ArrayTests.ArrayNot3
- Boolean x[1];
- Boolean x[2];
+ discrete Boolean x[1];
+ discrete Boolean x[2];
  constant Boolean y[1] = not true;
  constant Boolean y[2] = not false;
 initial equation 
@@ -5682,9 +5682,9 @@ model ArrayNeg1
          description="Scalarization of negation: array of Integer (literal)",
          flatModel="
 fclass ArrayTests.ArrayNeg1
- Integer x[1];
- Integer x[2];
- Integer x[3];
+ discrete Integer x[1];
+ discrete Integer x[2];
+ discrete Integer x[3];
 initial equation 
  pre(x[1]) = 0;
  pre(x[2]) = 0;
@@ -5708,12 +5708,12 @@ model ArrayNeg2
 		 eliminate_alias_variables=false,
          flatModel="
 fclass ArrayTests.ArrayNeg2
- Integer x[1];
- Integer x[2];
- Integer x[3];
- Integer y[1];
- Integer y[2];
- Integer y[3];
+ discrete Integer x[1];
+ discrete Integer x[2];
+ discrete Integer x[3];
+ discrete Integer y[1];
+ discrete Integer y[2];
+ discrete Integer y[3];
 initial equation  
  pre(x[1]) = 0;
  pre(x[2]) = 0;
@@ -5743,9 +5743,9 @@ model ArrayNeg3
          description="Scalarization of negation: constant evaluation",
          flatModel="
 fclass ArrayTests.ArrayNeg3
- Integer x[1];
- Integer x[2];
- Integer x[3];
+ discrete Integer x[1];
+ discrete Integer x[2];
+ discrete Integer x[3];
  constant Integer y[1] =  - ( 1 );
  constant Integer y[2] =  - ( 0 );
  constant Integer y[3] =  - (  - ( 1 ) );

@@ -463,7 +463,7 @@ abstract FIfWhenEquation : FIfWhenElseEquation ::= Test:FExp [Else:FIfWhenElseEq
 /**
  * When equation clause.
  */
-FWhenEquation : FIfWhenEquation ::=;
+FWhenEquation : FIfWhenEquation;
 
 /**
  * If equation clause.

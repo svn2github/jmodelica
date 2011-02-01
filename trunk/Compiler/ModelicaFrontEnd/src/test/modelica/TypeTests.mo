@@ -140,12 +140,12 @@ model TypeRel1
          description="Type checks of relational operators: Real/Real (Integer for ==/<>)",
          flatModel="
 fclass TypeTests.TypeRel1
- Boolean eq = 1 == 2;
- Boolean ne = 1 <> 2;
- Boolean gt = 1.0 > 2.0;
- Boolean ge = 1.0 >= 2.0;
- Boolean lt = 1.0 < 2.0;
- Boolean le = 1.0 <= 2.0;
+ discrete Boolean eq = 1 == 2;
+ discrete Boolean ne = 1 <> 2;
+ discrete Boolean gt = 1.0 > 2.0;
+ discrete Boolean ge = 1.0 >= 2.0;
+ discrete Boolean lt = 1.0 < 2.0;
+ discrete Boolean le = 1.0 <= 2.0;
 end TypeTests.TypeRel1;
 ")})));
 
@@ -165,10 +165,10 @@ model TypeRel2
          description="Type checks of relational operators: Real/Integer",
          flatModel="
 fclass TypeTests.TypeRel2
- Boolean gt = 1 > 2.0;
- Boolean ge = 1 >= 2.0;
- Boolean lt = 1 < 2.0;
- Boolean le = 1 <= 2.0;
+ discrete Boolean gt = 1 > 2.0;
+ discrete Boolean ge = 1 >= 2.0;
+ discrete Boolean lt = 1 < 2.0;
+ discrete Boolean le = 1 <= 2.0;
 end TypeTests.TypeRel2;
 ")})));
 
@@ -186,12 +186,12 @@ model TypeRel3
          description="Type checks of relational operators: Boolean/Boolean",
          flatModel="
 fclass TypeTests.TypeRel3
- Boolean eq = true == false;
- Boolean ne = true <> false;
- Boolean gt = true > false;
- Boolean ge = true >= false;
- Boolean lt = true < false;
- Boolean le = true <= false;
+ discrete Boolean eq = true == false;
+ discrete Boolean ne = true <> false;
+ discrete Boolean gt = true > false;
+ discrete Boolean ge = true >= false;
+ discrete Boolean lt = true < false;
+ discrete Boolean le = true <= false;
 end TypeTests.TypeRel3;
 ")})));
 
@@ -211,12 +211,12 @@ model TypeRel4
          description="Type checks of relational operators: String/String",
          flatModel="
 fclass TypeTests.TypeRel4
- Boolean eq = \"1.0\" == \"2.0\";
- Boolean ne = \"1.0\" <> \"2.0\";
- Boolean gt = \"1.0\" > \"2.0\";
- Boolean ge = \"1.0\" >= \"2.0\";
- Boolean lt = \"1.0\" < \"2.0\";
- Boolean le = \"1.0\" <= \"2.0\";
+ discrete Boolean eq = \"1.0\" == \"2.0\";
+ discrete Boolean ne = \"1.0\" <> \"2.0\";
+ discrete Boolean gt = \"1.0\" > \"2.0\";
+ discrete Boolean ge = \"1.0\" >= \"2.0\";
+ discrete Boolean lt = \"1.0\" < \"2.0\";
+ discrete Boolean le = \"1.0\" <= \"2.0\";
 end TypeTests.TypeRel4;
 ")})));
 
@@ -347,8 +347,8 @@ model AbsType3
          description="abs() operator: Integer arg & result",
          flatModel="
 fclass TypeTests.AbsType3
- Integer x = abs(y);
- Integer y =  - ( 2 );
+ discrete Integer x = abs(y);
+ discrete Integer y =  - ( 2 );
 end TypeTests.AbsType3;
 ")})));
 
@@ -366,8 +366,8 @@ model AbsType4
 fclass TypeTests.AbsType4
  constant Integer x1 = abs( - ( 2 ));
  constant Integer x2 = abs(2);
- Integer y1 = 2;
- Integer y2 = 2;
+ discrete Integer y1 = 2;
+ discrete Integer y2 = 2;
 end TypeTests.AbsType4;
 ")})));
 
@@ -451,7 +451,7 @@ model IntegerExp1
          flatModel="
 fclass TypeTests.IntegerExp1
  constant Integer x = integer(1.8);
- Integer y;
+ discrete Integer y;
 initial equation  
  pre(y) = 0;
 equation
@@ -472,7 +472,7 @@ model IntegerExp2
          flatModel="
 fclass TypeTests.IntegerExp2
  Real x;
- Integer y;
+ discrete Integer y;
 initial equation 
  pre(y) = 0;
 equation
@@ -512,8 +512,8 @@ model ConstCmpEq
 fclass TypeTests.ConstCmpEq
  constant Boolean a = 1 == 2;
  constant Boolean b = 1 == 1;
- Boolean x;
- Boolean y;
+ discrete Boolean x;
+ discrete Boolean y;
 initial equation 
  pre(x) = false;
  pre(y) = false;
@@ -539,8 +539,8 @@ model ConstCmpNeq
 fclass TypeTests.ConstCmpNeq
  constant Boolean a = 1 <> 2;
  constant Boolean b = 1 <> 1;
- Boolean x;
- Boolean y;
+ discrete Boolean x;
+ discrete Boolean y;
 initial equation  
  pre(x) = false;
  pre(y) = false;
@@ -567,9 +567,9 @@ fclass TypeTests.ConstCmpLeq
  constant Boolean a = 1 <= 2;
  constant Boolean b = 1 <= 1;
  constant Boolean c = 2 <= 1;
- Boolean x;
- Boolean y;
- Boolean z;
+ discrete Boolean x;
+ discrete Boolean y;
+ discrete Boolean z;
 initial equation  
  pre(x) = false;
  pre(y) = false;
@@ -600,9 +600,9 @@ fclass TypeTests.ConstCmpLt
  constant Boolean a = 1 < 2;
  constant Boolean b = 1 < 1;
  constant Boolean c = 2 < 1;
- Boolean x;
- Boolean y;
- Boolean z;
+ discrete Boolean x;
+ discrete Boolean y;
+ discrete Boolean z;
 initial equation 
  pre(x) = false;
  pre(y) = false;
@@ -633,9 +633,9 @@ fclass TypeTests.ConstCmpGeq
  constant Boolean a = 1 >= 2;
  constant Boolean b = 1 >= 1;
  constant Boolean c = 2 >= 1;
- Boolean x;
- Boolean y;
- Boolean z;
+ discrete Boolean x;
+ discrete Boolean y;
+ discrete Boolean z;
 initial equation 
  pre(x) = false;
  pre(y) = false;
@@ -666,9 +666,9 @@ fclass TypeTests.ConstCmpGt
  constant Boolean a = 1 > 2;
  constant Boolean b = 1 > 1;
  constant Boolean c = 2 > 1;
- Boolean x;
- Boolean y;
- Boolean z;
+ discrete Boolean x;
+ discrete Boolean y;
+ discrete Boolean z;
 initial equation 
  pre(x) = false;
  pre(y) = false;
@@ -729,7 +729,7 @@ model RealEq3
          description="Equality comparisons for reals: == in function",
          flatModel="
 fclass TypeTests.RealEq3
- Boolean b = TypeTests.RealEq3.f();
+ discrete Boolean b = TypeTests.RealEq3.f();
 
  function TypeTests.RealEq3.f
   output Boolean a := 1.0 == 2;
@@ -755,7 +755,7 @@ model RealEq4
          description="Equality comparisons for reals: <> in function",
          flatModel="
 fclass TypeTests.RealEq4
- Boolean b = TypeTests.RealEq4.f();
+ discrete Boolean b = TypeTests.RealEq4.f();
 
  function TypeTests.RealEq4.f
   output Boolean a := 1.0 <> 2;

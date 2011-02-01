@@ -1358,8 +1358,7 @@ aspect LinearFVariables {
 				
 	// This definition is to avoid errors when isParameterExp is redefined
 	// to include free parameters in the Optimica extension.
-	syn boolean FExp.isLinearParameterExp() = 
-		variability().parameterVariability();
+	syn boolean FExp.isLinearParameterExp() = isParameterExp();
     
 }
 

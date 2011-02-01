@@ -205,4 +205,78 @@ equation
 end IfEquTest_ComplErr;
 
 
+
+model WhenContents1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="WhenContents1",
+         description="Check contents of when clauses",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsTests.mo':
+Semantic error at line 215, column 3:
+  Only assignment equations are allowed in when clauses.
+")})));
+
+	Real x;
+	Real y;
+equation
+	x = y + 1;
+	when time > 1 then
+		x + y = 3;
+	end when;
+end WhenContents1;
+
+
+model WhenContents2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="WhenContents2",
+         description="Check contents of when clauses",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsTests.mo':
+Semantic error at line 235, column 2:
+  Both branches in when equation must assign the same variables.
+")})));
+
+	Real x;
+	Real y;
+equation
+	when time > 1 then
+		x = 3;
+	elsewhen time > 2 then
+		x = 3;
+		y = 3;
+	end when;
+end WhenContents2;
+
+
+model WhenContents3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="WhenContents3",
+         description="Check contents of when clauses",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsTests.mo':
+Semantic error at line 262, column 3:
+  Both branches in if equation within when equation must assign the same variables.
+")})));
+
+	Real x;
+	Real y;
+equation
+	when time > 1 then
+		x = 3;
+	elsewhen time > 2 then
+		if y < 2 then
+			x = 3;
+		else
+			y = 3;
+		end if;
+	end when;
+end WhenContents3;
+
+
 end ForbiddenOperationsTests;

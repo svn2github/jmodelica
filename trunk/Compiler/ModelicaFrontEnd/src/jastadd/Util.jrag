@@ -1658,10 +1658,11 @@ aspect FlatExpressions {
     eq SourceRoot.getChild().inIfCondition() = false;
     eq FlatRoot.getChild().inIfCondition() = false;
 
+    inh boolean FAbstractEquation.inWhen();
     inh boolean FExp.inWhen();
-    eq FWhenEquation.getChild().inWhen() = true;
-    eq SourceRoot.getChild().inWhen() = false;
-    eq FlatRoot.getChild().inWhen() = false;
+    eq FWhenEquation.getFAbstractEquation().inWhen() = true;
+    eq InstNode.getChild().inWhen()                  = false;
+    eq FClass.getChild().inWhen()                    = false;
     
     /**
      * \brief Is this expression of a type that is valid for most uses?

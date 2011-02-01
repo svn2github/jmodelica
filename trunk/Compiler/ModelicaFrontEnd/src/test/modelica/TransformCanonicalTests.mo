@@ -1714,8 +1714,8 @@ end TransformCanonicalTests.InitialEqTest13;
          description="Test algorithm for adding additional initial equations.",
          flatModel="
 fclass TransformCanonicalTests.InitialEqTest14
- input Boolean ub1;
- input Integer ui1;
+ discrete input Boolean ub1;
+ discrete input Integer ui1;
  Real m.t(start = 0);
  discrete Real m.x1(start = 1,fixed = true);
  discrete Boolean m.b1(start = false,fixed = true);
@@ -2923,6 +2923,31 @@ equation
 	if time>=1 then 1 else 0 = x;
 end IfExpLeft1;
 
+
+
+model WhenVariability1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="WhenVariability1",
+         description="Variability of variable assigned in when clause",
+         flatModel="
+fclass TransformCanonicalTests.WhenVariability1
+ discrete Real x(start = 1);
+initial equation 
+ pre(x) = 1;
+equation
+ when time > 2 then
+  x = 2;
+ end when;
+end TransformCanonicalTests.WhenVariability1;
+")})));
+
+	Real x(start=1);
+equation
+	when time > 2 then
+		x = 2;
+	end when;
+end WhenVariability1;
 
 
 end TransformCanonicalTests;

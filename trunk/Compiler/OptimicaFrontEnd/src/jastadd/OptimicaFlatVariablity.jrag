@@ -15,17 +15,22 @@ aspect OptimicaFlatVariability {
 	eq FStartTimeExp.variability() = fParameter();
 	eq FFinalTimeExp.variability() = fParameter();
 	
-	public static final FTimed FTimed.singleton = new FTimed();	
+	public static final FTimed FTimed.instance = new FTimed();	
 
 	public static FTimed ASTNode.fTimed() {
-		return FTimed.singleton;
+		return FTimed.instance;
+	}
+		
+	public static final FOptParameter FOptParameter.instance = new FOptParameter();	
+	
+	public static FOptParameter ASTNode.fOptParameter() {
+		return FOptParameter.instance;
 	}
 	
 	syn boolean FTypePrefixVariability.optParameterVariability() = false;
 	eq FOptParameter.optParameterVariability() = true;	
+	eq FOptParameter.parameterVariability()    = true;	
 	syn boolean FExp.isOptParameterExp() = variability().optParameterVariability();
-		
-	public static final FOptParameter FOptParameter.singleton = new FOptParameter();	
 	
 	protected int FTimed.variabilityLevel()        { return VARIABILITY_LEVEL; }
 	protected int FOptParameter.variabilityLevel() { return VARIABILITY_LEVEL; }
@@ -37,32 +42,16 @@ aspect OptimicaFlatVariability {
 	// Notice that the attribute FVariable.isParameter is not redefined in order
 	// not to render a lot of attributes in FlatAPI to be redefined as a
 	// consequence.
-    syn boolean FVariable.isOptParameter() = 
-    	getFTypePrefixVariability().parameterVariability() &&
-    	freeAttribute();
+    syn boolean FVariable.isOptParameter() = variability().optParameterVariability();
 	
-	public static FOptParameter ASTNode.fOptParameter() {
-		return FOptParameter.singleton;
-	}
-	
+	// TODO: Change to be more in line with FlatVariability and more extensible
 	refine FlatVariability eq FVariable.variability() {
-   		if (!isContinuous()) {
-   			if (isOptParameter()) {
-   				return fOptParameter();
-   			}
-   			return getFTypePrefixVariability();
-   		} else if (isInteger() || isBoolean() || isString()) {
-   			return(fDiscrete());
-   		} else {
-   			return fContinuous();
-   		}
+		FTypePrefixVariability var = FlatVariability.FVariable.variability();
+		return (var.parameterVariability() && freeAttribute()) ? fOptParameter() : var;
 	}
 	
-	refine FlatVariability eq FExp.isParameterExp() {
-		//System.out.println(variability().getClass());
-		return variability().parameterVariability() || 
-		variability().optParameterVariability(); 
-	}
+	refine FlatVariability eq FExp.isParameterExp() = 
+		variability().parameterVariability() || variability().optParameterVariability(); 
 	
    	eq FTimed.toString() = "timed";
    	eq FOptParameter.toString() = "opt_parameter";

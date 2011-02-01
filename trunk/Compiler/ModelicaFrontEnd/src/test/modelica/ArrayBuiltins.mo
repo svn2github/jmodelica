@@ -437,7 +437,7 @@ model MinExp3
 		 flatModel="
 fclass ArrayBuiltins.MinExp3
  constant String x = min(\"foo\", \"bar\");
- String y;
+ discrete String y;
 initial equation 
  pre(y) = \"\";
 equation
@@ -458,7 +458,7 @@ model MinExp4
 		 flatModel="
 fclass ArrayBuiltins.MinExp4
  constant Boolean x = min(true, false);
- Boolean y;
+ discrete Boolean y;
 initial equation 
  pre(y) = false;
 equation
@@ -659,7 +659,7 @@ model MaxExp3
 		 flatModel="
 fclass ArrayBuiltins.MaxExp3
  constant String x = max(\"foo\", \"bar\");
- String y;
+ discrete String y;
 initial equation 
  pre(y) = \"\";
 equation
@@ -680,7 +680,7 @@ model MaxExp4
 		 flatModel="
 fclass ArrayBuiltins.MaxExp4
  constant Boolean x = max(true, false);
- Boolean y;
+ discrete Boolean y;
 initial equation 
  pre(y) = false;
 equation
@@ -1020,14 +1020,14 @@ model Transpose4
 		 description="Scalarization of transpose operator: Integer[2,2,2]",
 		 flatModel="
 fclass ArrayBuiltins.Transpose4
- Integer x[1,1,1];
- Integer x[1,1,2];
- Integer x[1,2,1];
- Integer x[1,2,2];
- Integer x[2,1,1];
- Integer x[2,1,2];
- Integer x[2,2,1];
- Integer x[2,2,2];
+ discrete Integer x[1,1,1];
+ discrete Integer x[1,1,2];
+ discrete Integer x[1,2,1];
+ discrete Integer x[1,2,2];
+ discrete Integer x[2,1,1];
+ discrete Integer x[2,1,2];
+ discrete Integer x[2,2,1];
+ discrete Integer x[2,2,2];
 initial equation 
  pre(x[1,1,1]) = 0;
  pre(x[1,1,2]) = 0;
@@ -1133,7 +1133,7 @@ model Cross2
 		 description="cross() operator: Integer result",
 		 flatModel="
 fclass ArrayBuiltins.Cross2
- Integer x[3] = cross({1,2,3}, {4,5,6});
+ discrete Integer x[3] = cross({1,2,3}, {4,5,6});
 end ArrayBuiltins.Cross2;
 ")})));
 
@@ -1311,7 +1311,7 @@ model ArrayCat3
 		 description="cat() operator: using strings",
 		 flatModel="
 fclass ArrayBuiltins.ArrayCat3
- String x[2,5] = cat(2, {{\"1\",\"2\"},{\"6\",\"7\"}}, {{\"3\"},{\"8\"}}, {{\"4\",\"5\"},{\"9\",\"0\"}});
+ discrete String x[2,5] = cat(2, {{\"1\",\"2\"},{\"6\",\"7\"}}, {{\"3\"},{\"8\"}}, {{\"4\",\"5\"},{\"9\",\"0\"}});
 end ArrayBuiltins.ArrayCat3;
 ")})));
 
@@ -1408,7 +1408,7 @@ model ArrayCat8
 		 flatModel="
 fclass ArrayBuiltins.ArrayCat8
  parameter Integer d = 1 /* 1 */;
- Integer x[4] = cat(d, {1,2}, {4,5});
+ discrete Integer x[4] = cat(d, {1,2}, {4,5});
 end ArrayBuiltins.ArrayCat8;
 ")})));
 
@@ -1774,7 +1774,7 @@ model NdimsExp1
 		 flatModel="
 fclass ArrayBuiltins.NdimsExp1
  constant Integer n = 2;
- Integer x;
+ discrete Integer x;
 initial equation 
  pre(x) = 0;
 equation
@@ -2074,7 +2074,7 @@ model SampleTest1
          description="sample(): basic test",
          flatModel="
 fclass ArrayBuiltins.SampleTest1
- Boolean x;
+ discrete Boolean x;
 initial equation 
  pre(x) = false;
 equation
