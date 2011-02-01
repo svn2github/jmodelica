@@ -61,6 +61,26 @@
         <para>Equations are sorted using Tarjan's algorithm and the resulting
         BLT representation is used in the C code generation.</para>
       </section>
+
+      <section>
+        <title>Connections</title>
+
+        <para>Added support for connecting arrays of components and for
+        connect equations in for clauses.</para>
+      </section>
+
+      <section>
+        <title>Eclipse IDE</title>
+
+        <para>The JModelica plugin for Eclipse has been updated to be more
+        stable and to syntax highlight Modelica 3.2 code properly.</para>
+      </section>
+
+      <section>
+        <title>Miscellaneous</title>
+
+        <para>Fixed several compiler bugs.</para>
+      </section>
     </section>
 
     <section>
@@ -475,41 +495,13 @@ yres = res['y']
           to encode Lagrange cost functions of the type</para>
 
           <informalequation>
-            <m:math display="block">
-              <m:mrow>
-                <m:munderover>
-                  <m:mo>∫</m:mo>
-
-                  <m:msub>
-                    <m:mi>t</m:mi>
-
-                    <m:mi>0</m:mi>
-                  </m:msub>
-
-                  <m:msub>
-                    <m:mi>t</m:mi>
-
-                    <m:mi>f</m:mi>
-                  </m:msub>
-                </m:munderover>
-
-                <m:mrow>
-                  <m:mrow>
-                    <m:mi>L</m:mi>
-
-                    <m:mo>⁡</m:mo>
-
-                    <m:mfenced>
-                      <m:mi>.</m:mi>
-                    </m:mfenced>
-                  </m:mrow>
-
-                  <m:mspace depth="0.5ex" height="0.5ex" width="1ex" />
-
-                  <m:mtext>dt</m:mtext>
-                </m:mrow>
-              </m:mrow>
-            </m:math>
+            <m:math display="block"><m:mrow> <m:munderover> <m:mo>∫</m:mo>
+            <m:msub> <m:mi>t</m:mi> <m:mi>0</m:mi> </m:msub> <m:msub>
+            <m:mi>t</m:mi> <m:mi>f</m:mi> </m:msub> </m:munderover> <m:mrow>
+            <m:mrow> <m:mi>L</m:mi> <m:mo>⁡</m:mo> <m:mfenced> <m:mi>.</m:mi>
+            </m:mfenced> </m:mrow> <m:mspace depth="0.5ex" height="0.5ex"
+            width="1ex"></m:mspace> <m:mtext>dt</m:mtext> </m:mrow>
+            </m:mrow></m:math>
           </informalequation>
 
           <para>the Optimica class attribute

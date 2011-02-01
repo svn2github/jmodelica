@@ -25,27 +25,19 @@
 
       <itemizedlist>
         <listitem>
-          <para>If expressions are supported, but not:</para>
-
-          <itemizedlist>
-            <listitem>
-              <para>When clauses</para>
-            </listitem>
-
-            <listitem>
-              <para>If equations</para>
-            </listitem>
-          </itemizedlist>
-        </listitem>
-
-        <listitem>
           <para>Parsing of full Modelica 3.2 (Modelica 3.0 is
           supported)</para>
         </listitem>
 
         <listitem>
-          <para>Integer, Boolean and enumeration variables (parameters and
-          constants are supported)</para>
+          <para>Integer, Boolean and enumeration variables for optimizations
+          (parameters and constants are supported, as are discrete variables
+          in simulations)</para>
+        </listitem>
+
+        <listitem>
+          <para>Only partial support for enumeration variables in FMUs
+          (parameters and constants are supported)</para>
         </listitem>
 
         <listitem>
@@ -54,6 +46,13 @@
 
         <listitem>
           <para>Arrays indexed with enumerations or Booleans</para>
+        </listitem>
+
+        <listitem>
+          <para>If equations are only supported with parameter or constant
+          test expressions, and recompilation is required for a change of a
+          parameter used in the test expression to take effect on the if
+          equation.</para>
         </listitem>
 
         <listitem>
@@ -99,7 +98,7 @@
               </tr>
 
               <tr>
-                <td>initial()</td>
+                <td>delay(...)</td>
 
                 <td>matrix(A)</td>
 
@@ -131,7 +130,7 @@
               </tr>
 
               <tr>
-                <td>pre(y)</td>
+                <td>edge(b)</td>
 
                 <td>symmetric(A)</td>
 
@@ -139,11 +138,7 @@
               </tr>
 
               <tr>
-                <td>edge(b)</td>
-
                 <td>skew(x)</td>
-
-                <td>delay(...)</td>
               </tr>
             </informaltable></para>
         </listitem>
