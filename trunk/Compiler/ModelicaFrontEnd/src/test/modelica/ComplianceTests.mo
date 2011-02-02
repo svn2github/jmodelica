@@ -443,5 +443,217 @@ Compliance error at line 0, column 0:
 end DuplicateVariables_ComplErr;
 
 
+model HybridNonFMU1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ComplianceErrorTestCase(
+         name="HybridNonFMU1",
+         description="Test that compliance warnings for hybrid elements are issued when not compiling FMU",
+         errorMessage="
+11 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 450, column 18:
+  Boolean variables are not supported when compiling JMUs, only constants and parameters
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 451, column 18:
+  Boolean variables are not supported when compiling JMUs, only constants and parameters
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 452, column 18:
+  Boolean variables are not supported when compiling JMUs, only constants and parameters
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 455, column 1:
+  When equations are currently only supported when compiling FMUs
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 455, column 16:
+  The pre() function-like operator is supported only when compiling FMUs
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 458, column 1:
+  When equations are currently only supported when compiling FMUs
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 461, column 1:
+  When equations are currently only supported when compiling FMUs
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 464, column 1:
+  When equations are currently only supported when compiling FMUs
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 464, column 6:
+  The sample() function-like operator is supported only when compiling FMUs
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 465, column 5:
+  The pre() function-like operator is supported only when compiling FMUs
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 466, column 5:
+  The pre() function-like operator is supported only when compiling FMUs
+")})));
+
+Real xx(start=2);
+discrete Real x; 
+discrete Real y; 
+discrete Boolean w(start=true); 
+discrete Boolean v(start=true); 
+discrete Boolean z(start=true); 
+equation
+der(xx) = -x; 
+when y > 2 and pre(z) then 
+w = false; 
+end when; 
+when y > 2 and z then 
+v = false; 
+end when; 
+when x > 2 then 
+z = false; 
+end when; 
+when sample(0,1) then 
+x = pre(x) + 1.1; 
+y = pre(y) + 1.1; 
+end when; 
+end HybridNonFMU1;
+
+
+model HybridFMU1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="HybridFMU1",
+         description="Test that compliance warnings for hybrid elements aren't issued when compiling FMU",
+         generate_ode=true,
+		 checkAll=true,
+         flatModel="
+fclass ComplianceTests.HybridFMU1
+ Real xx(start = 2);
+ discrete Real x;
+ discrete Real y;
+ discrete Boolean w(start = true);
+ discrete Boolean v(start = true);
+ discrete Boolean z(start = true);
+initial equation 
+ xx = 2;
+ pre(x) = 0.0;
+ pre(y) = 0.0;
+ pre(w) = true;
+ pre(v) = true;
+ pre(z) = true;
+equation
+ der(xx) =  - ( x );
+ when y > 2 and pre(z) then
+  w = false;
+ end when;
+ when y > 2 and z then
+  v = false;
+ end when;
+ when x > 2 then
+  z = false;
+ end when;
+ when sample(0, 1) then
+  x = pre(x) + 1.1;
+ end when;
+ when sample(0, 1) then
+  y = pre(y) + 1.1;
+ end when;
+end ComplianceTests.HybridFMU1;
+")})));
+
+Real xx(start=2);
+discrete Real x; 
+discrete Real y; 
+discrete Boolean w(start=true); 
+discrete Boolean v(start=true); 
+discrete Boolean z(start=true); 
+equation
+der(xx) = -x; 
+when y > 2 and pre(z) then 
+w = false; 
+end when; 
+when y > 2 and z then 
+v = false; 
+end when; 
+when x > 2 then 
+z = false; 
+end when; 
+when sample(0,1) then 
+x = pre(x) + 1.1; 
+y = pre(y) + 1.1; 
+end when; 
+end HybridFMU1;
+
+
+model HybridNonFMU2 
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ComplianceErrorTestCase(
+         name="HybridNonFMU2",
+         description="Test that compliance warnings for hybrid elements are issued when not compiling FMU",
+         errorMessage="
+6 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 583, column 2:
+  When equations are currently only supported when compiling FMUs
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 583, column 7:
+  The sample() function-like operator is supported only when compiling FMUs
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 584, column 8:
+  The pre() function-like operator is supported only when compiling FMUs
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 586, column 2:
+  When equations are currently only supported when compiling FMUs
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 586, column 7:
+  The initial() function-like operator supported only when compiling FMUs
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 587, column 8:
+  The pre() function-like operator is supported only when compiling FMUs
+")})));
+
+ discrete Real x,y;
+ Real dummy;
+equation
+ der(dummy) = 0;
+ when sample(0,1/3) then
+   x = pre(x) + 1;
+ end when;
+ when initial() then
+   y = pre(y) + 1;
+ end when;
+end HybridNonFMU2; 
+
+
+model HybridFMU2 
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="HybridFMU2",
+         description="Test that compliance warnings for hybrid elements aren't issued when compiling FMU",
+         generate_ode=true,
+		 checkAll=true,
+         flatModel="
+fclass ComplianceTests.HybridFMU2
+ discrete Real x;
+ discrete Real y;
+ Real dummy;
+initial equation 
+ dummy = 0.0;
+ pre(x) = 0.0;
+ pre(y) = 0.0;
+equation
+ der(dummy) = 0;
+ when sample(0, ( 1 ) / ( 3 )) then
+  x = pre(x) + 1;
+ end when;
+ when initial() then
+  y = pre(y) + 1;
+ end when;
+end ComplianceTests.HybridFMU2;
+")})));
+
+ discrete Real x,y;
+ Real dummy;
+equation
+ der(dummy) = 0;
+ when sample(0,1/3) then
+   x = pre(x) + 1;
+ end when;
+ when initial() then
+   y = pre(y) + 1;
+ end when;
+end HybridFMU2; 
+
+
 
 end ComplianceTests;

@@ -26,36 +26,31 @@ aspect ComplianceCheck {
 	
 	public void FIfWhenClause.complianceCheck() {
 		super.complianceCheck();
-		if (!getTest().variability().lessOrEqual(fParameter()))
-			warning("Using if statements is currently not supported when compiling with CppAD, and can give erroneous results");
+		if (!getTest().variability().lessOrEqual(fParameter()) && 
+				!root().options.getBooleanOption("generate_ode"))
+			compliance("Using if statements is currently only supported when compiling FMUs");
 	}
 	
 	public void FWhileStmt.complianceCheck() {
 		super.complianceCheck();
-		if (!getTest().variability().lessOrEqual(fParameter()))
-			warning("Using while statements is currently not supported when compiling with CppAD, and can give erroneous results");
+		if (!getTest().variability().lessOrEqual(fParameter()) && 
+				!root().options.getBooleanOption("generate_ode"))
+			compliance("Using while statements is currently only supported when compiling FMUs");
 	}
 	
 	public void InstAccess.complianceCheck() {
 		super.complianceCheck();
 		if (myInstComponentDecl().isRecord() && hasFArraySubscripts() && inFunction() && 
-				!getFArraySubscripts().variability().lessOrEqual(fParameter())) {
-			warning("Using arrays of records with indices of higher than parameter variability is currently not supported when compiling with CppAD");
+				!getFArraySubscripts().variability().lessOrEqual(fParameter()) && 
+				!root().options.getBooleanOption("generate_ode")) {
+			compliance("Using arrays of records with indices of higher than parameter variability is currently only supported when compiling FMUs");
 		}
 	}
-	
-/*	public void InstExternal.complianceCheck() {
-		super.complianceCheck();
-		if (!hasFExternalLanguage() || !getFExternalLanguage().supportedLanguage())
-			compliance("External functions are not supported");
-	}
-*/	
-	syn boolean FExternalLanguage.supportedLanguage() = false;
-	eq FBuiltinExternalLanguage.supportedLanguage()   = true;
-	eq FUnknownExternalLanguage.supportedLanguage()   = true;  // Avoid duplicate errors
 
 	public void FWhenEquation.complianceCheck() {
-		compliance("When equations are currently not supported");
+		if (!root().options.getBooleanOption("generate_ode")) {
+			compliance("When equations are currently only supported when compiling FMUs");
+		}
 	}
 
 	public void FIfEquation.complianceCheck() {
@@ -81,11 +76,21 @@ aspect ComplianceCheck {
 	}
 	
 	public void FSampleExp.complianceCheck() {
-		compliance("The sample() function-like operator is not supported");
+	    if (!root().options.getBooleanOption("generate_ode")) {
+			compliance("The sample() function-like operator is supported only when compiling FMUs");
+		}
+	}
+
+	public void FPreExp.complianceCheck() {
+	    if (!root().options.getBooleanOption("generate_ode")) {
+			compliance("The pre() function-like operator is supported only when compiling FMUs");
+		}
 	}
 	
 	public void FInitialExp.complianceCheck() {
-		compliance("The initial() function-like operator is not supported");
+		if (!root().options.getBooleanOption("generate_ode")) {	
+			compliance("The initial() function-like operator supported only when compiling FMUs");
+		}
 	}
 	
 	public void FIntegerExp.complianceCheck() {
@@ -113,16 +118,18 @@ aspect ComplianceCheck {
 		super.complianceCheck();
 		if (isString())
 			compliance("String variables are not supported");
-		if (isInteger() && !variability().lessOrEqual(fParameter()) && !inFunction())
-			compliance("Integer variables are not supported, only constants and parameters");
-		if (isBoolean() && !variability().lessOrEqual(fParameter()))
-			compliance("Boolean variables are not supported, only constants and parameters");
+		if (!root().options.getBooleanOption("generate_ode")) {
+			if (isInteger() && !variability().lessOrEqual(fParameter()) && !inFunction())
+				compliance("Integer variables are supported only when compiling FMUs (constants and parameters are always supported)");
+			if (isBoolean() && !variability().lessOrEqual(fParameter()))
+				compliance("Boolean variables are supported only when compiling FMUs (constants and parameters are always supported)");
+		}
 	}
 	
 	public void InstEnum.complianceCheck() {
 		super.complianceCheck();
-		if (!variability().lessOrEqual(fParameter()))
-			compliance("Enumeration variables are not supported, only constants and parameters");
+		if (!variability().lessOrEqual(fParameter()) && !root().options.getBooleanOption("generate_ode"))
+			compliance("Enumeration variables are supported only when compiling FMUs (constants and parameters are always supported)");
 	}
 	
 	public void InstNamedModification.complianceCheck() {

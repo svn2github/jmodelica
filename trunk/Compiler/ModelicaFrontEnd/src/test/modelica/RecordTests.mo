@@ -2663,7 +2663,7 @@ model RecordParBexp1
      JModelica.UnitTesting.TransformCanonicalTestCase(
          name="RecordParBexp1",
          description="Parameter with array-of-records type and literal binding expression",
-		 checkWarnings=true,
+		 checkAll=true,
          flatModel="
 fclass RecordTests.RecordParBexp1
  parameter Real r[1].x = 3 /* 3 */;

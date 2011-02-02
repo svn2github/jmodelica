@@ -69,10 +69,9 @@ aspect ContentCheck {
 	}
 	
 	public void FPreExp.contentCheck() {
-		if (inFunction()) 
+		if (inFunction()) { 
 			error("The pre() operator may not be used inside functions");
-		else
-			compliance("The pre() function-like operator is not supported");
+		}
 	}
 	
 	// TODO: check if this is a builtin function (with bad arguments), error otherwise
