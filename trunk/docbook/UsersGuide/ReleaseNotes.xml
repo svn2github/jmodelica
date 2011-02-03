@@ -59,7 +59,8 @@
         <title>Equation sorting</title>
 
         <para>Equations are sorted using Tarjan's algorithm and the resulting
-        BLT representation is used in the C code generation.</para>
+        BLT representation is used in the C code generation. Also, trivial
+        equations are solved and converted into assignment statements.</para>
       </section>
 
       <section>
@@ -86,13 +87,53 @@
     <section>
       <title>Simulation</title>
 
-      <para></para>
+      <section>
+        <title>FMU export </title>
+
+        <para>JModelica.org 1.5 supports export of Functional Mock-up
+        Interface (FMI) compliant models (FMUs). The exported models follows
+        the FMI standard and may be imported in other FMI compilant simulation
+        tools, or they may be simulated using JModelica.org using the FMU
+        import feature introduced in version 1.4. The exported FMUs contain an
+        XML file, containing model meta data such as variable names, a DLL,
+        containing the compiled C functions specified by FMI, and additional
+        files containing the flattened Modelica model useful for debugging
+        purposes.</para>
+      </section>
+
+      <section>
+        <title>Simulation of ODEs</title>
+
+        <para>A causalization approach to simulation of Modelica models has
+        been implemented. This means that the DAE resulting from flattening is
+        transformed into an ODE, and ODE solvers can be used to simulate the
+        model. This feature is a requirement for export of FMUs. This strategy
+        has required the symbolic algorithms and the C code generation module
+        to be adapted as described above. In addition, the simulation runtime
+        system has been extended to allow for trivial equations converted into
+        assignments and for implicit systems of equations. The latter are
+        solved using the Newton solver KINSOL, modified to support
+        regularization to handle singular Jacobian matrices. </para>
+      </section>
+
+      <section>
+        <title>Simulation of hybrid and sampled systems</title>
+
+        <para>When clauses are now supported, as well as the sample operator.
+        Accordingly, some classes of hybrid systems may be simulated as well
+        as sampled control systems. In addition, variables of type Integer and
+        Boolean are also supported. </para>
+      </section>
     </section>
 
     <section>
-      <title>Initialization</title>
+      <title>Initialization of DAEs</title>
 
-      <para></para>
+      <para>A novel initialization algorithm based on the Newton solver KINSOL
+      from the SUNDIALS suite is introduced. The KINSOL solver has been
+      improved by adding support for Jacobian regularization in order to
+      handle singular Jacobians and by interfacing the sparse linear solver
+      SuperLU in order to more efficiently handle large scale systems.</para>
     </section>
 
     <section>
@@ -495,13 +536,41 @@ yres = res['y']
           to encode Lagrange cost functions of the type</para>
 
           <informalequation>
-            <m:math display="block"><m:mrow> <m:munderover> <m:mo>∫</m:mo>
-            <m:msub> <m:mi>t</m:mi> <m:mi>0</m:mi> </m:msub> <m:msub>
-            <m:mi>t</m:mi> <m:mi>f</m:mi> </m:msub> </m:munderover> <m:mrow>
-            <m:mrow> <m:mi>L</m:mi> <m:mo>⁡</m:mo> <m:mfenced> <m:mi>.</m:mi>
-            </m:mfenced> </m:mrow> <m:mspace depth="0.5ex" height="0.5ex"
-            width="1ex"></m:mspace> <m:mtext>dt</m:mtext> </m:mrow>
-            </m:mrow></m:math>
+            <m:math display="block">
+              <m:mrow>
+                <m:munderover>
+                  <m:mo>∫</m:mo>
+
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mi>0</m:mi>
+                  </m:msub>
+
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mi>f</m:mi>
+                  </m:msub>
+                </m:munderover>
+
+                <m:mrow>
+                  <m:mrow>
+                    <m:mi>L</m:mi>
+
+                    <m:mo>⁡</m:mo>
+
+                    <m:mfenced>
+                      <m:mi>.</m:mi>
+                    </m:mfenced>
+                  </m:mrow>
+
+                  <m:mspace depth="0.5ex" height="0.5ex" width="1ex" />
+
+                  <m:mtext>dt</m:mtext>
+                </m:mrow>
+              </m:mrow>
+            </m:math>
           </informalequation>
 
           <para>the Optimica class attribute
