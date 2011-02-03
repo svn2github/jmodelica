@@ -140,5 +140,20 @@ equation
 
 end ZeroOrderHold1;
 
+model WhenFunction1
+  function F
+    input Real x[2];
+    output Real y[2];
+  algorithm
+    y := x*2;
+  end F;
+  Real x[2](start=0);
+equation
+  when sample(0,1) then
+    x = F({time, 2*time});
+  end when;
+
+end WhenFunction1;
+
 
 end HybridTests;

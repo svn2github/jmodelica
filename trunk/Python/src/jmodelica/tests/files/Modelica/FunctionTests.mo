@@ -213,7 +213,6 @@ equation
   (pi,tau,gpi,gtau) = g1pitau_v(pres,temp);
 end FunctionTest2;
 
-
 model IntegerArg1
 	function f
 		input Integer i;
@@ -225,6 +224,18 @@ model IntegerArg1
 	
 	Real x = f(2, {3, 4, 5});
 end IntegerArg1;
+
+model FuncTest1
+  function F
+    input Real x[2];
+    output Real y;
+  algorithm
+    y := x[1]+x[2];
+  end F;
+  Real x(start=0);
+equation
+  x = F({time,time*2});
+end FuncTest1;
 
   annotation (uses(Modelica(version="3.1")));
 end FunctionTests;
