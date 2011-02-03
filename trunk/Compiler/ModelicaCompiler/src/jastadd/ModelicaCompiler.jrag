@@ -437,13 +437,24 @@ public class ModelicaCompiler {
 	public void compileFMU(String className, String fileName[], String target, String compileTo) 
 		throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, beaver.Parser.Exception {
 		log.info("START COMPILING FMU...");
-		// Always set these options when compiling an FMU
+		
+		// Always set certain options when compiling an FMU
+		// First save these options in temp options registry to reset when compiling has finished
+		OptionRegistry tempOptions = new OptionRegistry();
+		tempOptions.copyAllOptions(options);
+		
 		setBooleanOption("generate_ode", true);
 		setBooleanOption("generate_dae", false);	
 		setBooleanOption("equation_sorting", true);
-		// use fmi file templates
+		// use fmi file templates and set the correct options so that XML file will be FMI compliant
 		defaultTemplatePathsFMU();
+		setBooleanOption("generate_fmi_xml", true);
+		setBooleanOption("generate_xml_equations", false);
 		this.compileUnit(className, fileName, target, compileTo, "FMU");
+		
+		// set back all options
+		options.copyAllOptions(tempOptions);
+		
 		log.info("...COMPILING FMU finished");
 	}
 
