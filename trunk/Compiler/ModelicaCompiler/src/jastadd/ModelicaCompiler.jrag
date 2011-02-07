@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.LinkedList;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
@@ -132,6 +133,8 @@ public class ModelicaCompiler {
 	private OptionRegistry options = null;
 	private DiagnosticsGenerator diagGenerator = null;
 	
+	protected LinkedList<CompilationHooks> hooksList = new LinkedList<CompilationHooks>();
+	
 	protected static CCompilerDelegator cCompiler = new GCCcompilerDelegator();
 	
 	protected static String jmodelicaHome = System.getenv("JMODELICA_HOME");
@@ -189,6 +192,91 @@ public class ModelicaCompiler {
 	
 	public static void setJModelicaHome(String jmHome) {
 		jmodelicaHome = jmHome;
+	}
+	
+	public void addCompilationHooks(CompilationHooks hooks) {
+		hooksList.add(hooks);
+	}
+	
+	public void removeCompilationHooks(CompilationHooks hooks) {
+		hooksList.remove(hooks);
+	}
+	/**
+	 * Throws a {@link CompilationAbortedException} if any hooks class signals an abort.
+	 */
+	public void hookCheckAbort() {
+		for (CompilationHooks hooks : hooksList) {
+			if (hooks.shouldAbort()) {
+				log.info("Compilation aborted.");
+				throw new CompilationAbortedException();
+			}
+		}
+	}
+	
+	/**
+	 * Calls the hook to be called after the supplied code files are parsed.
+	 */
+	public void hookFilesParsed(SourceRoot sr) {
+		for (CompilationHooks hooks : hooksList)
+			hooks.filesParsed(sr);
+	}
+	
+	/**
+	 * Calls the hook to be called after the error checks on the instantiated 
+	 * model are finished without errors.
+	 */
+	public void hookModelInstantiatied(InstClassDecl icd) {
+		for (CompilationHooks hooks : hooksList)
+			hooks.modelInstantiatied(icd);
+	}
+	
+	/**
+	 * Calls the hook to be called after the model is flattened.
+	 */
+	public void hookModelFlattened(FClass fc) {
+		for (CompilationHooks hooks : hooksList)
+			hooks.modelFlattened(fc);
+	}
+	
+	/**
+	 * Calls the hook to be called after transformations are applied to the model.
+	 */
+	public void hookModelTransformed(FClass fc) {
+		for (CompilationHooks hooks : hooksList)
+			hooks.modelTransformed(fc);
+	}
+	
+	/**
+	 * Calls the hook to be called after error checks of the flat model are 
+	 * finished without errors.
+	 */
+	public void hookFlatModelChecked(FClass fc) {
+		for (CompilationHooks hooks : hooksList)
+			hooks.flatModelChecked(fc);
+	}
+	
+	/**
+	 * Calls the hook to be called after output code is generated.
+	 */
+	public void hookCodeGenerated() {
+		for (CompilationHooks hooks : hooksList)
+			hooks.codeGenerated();
+	}
+	
+	/**
+	 * Calls the hook to be called after the generated C code is compiled.
+	 */
+	public void hookCodeCompiled() {
+		for (CompilationHooks hooks : hooksList)
+			hooks.codeCompiled();
+	}
+	
+	/**
+	 * Calls the hook to be called after the FMU is packed.
+	 */
+	public void hookFmuPacked(String path) {
+		for (CompilationHooks hooks : hooksList)
+			hooks.fmuPacked(path);
 	}
 	
 	public String getStringOption(String key) throws UnknownOptionException {
@@ -469,8 +557,10 @@ public class ModelicaCompiler {
 		FClass fc = compileModel(fileName, className);
 		
 		// compile c code
+		hookCheckAbort();
 		String cFileName = className.replace(".", "_");
 		this.getCCompiler().compileCCode(cFileName, target, fc.externalLibraries(), fc.externalLibraryDirectories(), fc.externalIncludeDirectories());
+		hookCodeCompiled();
 		
 		// package JMU
 		this.packUnit(className, compileTo, unitType);		
@@ -525,19 +615,17 @@ public class ModelicaCompiler {
 		// Create the new archive
 		int BUFFER = 2048;
 		try {
+			hookCheckAbort();
+
+			File unitFile = new File(dirPath, mMangledName + "." + unitType.toLowerCase());
 			BufferedInputStream origin = null;
-			FileOutputStream dest = null;
-			if (unitType.toUpperCase() == "JMU") {
-				dest = new FileOutputStream(dirPath + filesep + mMangledName + ".jmu");
-			} else {
-				dest = new FileOutputStream(dirPath + filesep + mMangledName + ".fmu");
-			}
+			FileOutputStream dest = new FileOutputStream(unitFile);
 			ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(dest));
 			out.setMethod(ZipOutputStream.DEFLATED);
 			
 			byte data[] = new byte[BUFFER];
 			
-			for (int i=0; i<files.length; i++) {
+			for (int i = 0; i < files.length; i++) {
 				FileInputStream fi = new FileInputStream(files[i]);
 				origin = new BufferedInputStream(fi, BUFFER);
 				
@@ -545,19 +633,22 @@ public class ModelicaCompiler {
 				out.putNextEntry(entry);
 				
 				int count;
-	            while((count = origin.read(data, 0, BUFFER)) != -1) {
+	            while ((count = origin.read(data, 0, BUFFER)) != -1) {
 	               out.write(data, 0, count);
 	            }
 	            origin.close();
 			}
-			out.close();	
+			
+			out.close();
+			hookFmuPacked(unitFile.getAbsolutePath());
+		} catch(CompilationAbortedException e) {
 		} catch(Exception e) {
-			e.printStackTrace();
+			handleException(e, "Error while packing " + unitType.toUpperCase());
 		}
 		
 		// remove files
 		File f = null;
-		for (int i=0; i<files.length; i++) {
+		for (int i = 0; i < files.length; i++) {
 			f = new File(files[i]);
 			f.delete();
 		}
@@ -598,14 +689,8 @@ public class ModelicaCompiler {
 		FClass fc = null;
 		try {
 
-			if (name.length == 0) {
-				// empty list of files -> class is instantiated from libraries
-				sr = new SourceRoot(new Program());
-				sr.options.copyAllOptions(this.options);
-			} else {
-				// build source tree
-				sr = parseModel(name);
-			}
+			// build source tree
+			sr = parseModel(name);
 //			dumpMemoryUseFile(sr, "source");  // TODO: add command-line arg for this
 
 			if (sr.options.getBooleanOption("generate_html_diagnostics")) {
@@ -718,20 +803,18 @@ public class ModelicaCompiler {
 	 */
 	public SourceRoot parseModel(String names[]) 
 	  throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException{
+		hookCheckAbort();
 		noteUsedMemory();
 		
-		SourceRoot sr = null;
+		SourceRoot sr = new SourceRoot(new Program());
+		sr.options.copyAllOptions(this.options);
 		for (String name : names) {
 			SourceRoot sr_tmp = parseModel(name);
-			//copy options from local optionregistry to sourceroot optionregistry
-			sr_tmp.options.copyAllOptions(options);
-			if (sr == null) 
-				sr = sr_tmp;
-			else 
-				for(StoredDefinition sd : sr_tmp.getProgram().getUnstructuredEntitys()) 
-					sr.getProgram().addUnstructuredEntity(sd);
+			for(StoredDefinition sd : sr_tmp.getProgram().getUnstructuredEntitys()) 
+				sr.getProgram().addUnstructuredEntity(sd);
 		}
 		
+		hookFilesParsed(sr);
 		noteUsedMemory();
 		
 		return sr;
@@ -755,7 +838,8 @@ public class ModelicaCompiler {
 	 *             If the Modelica class to instantiate is not found.
 	 */
 	public InstClassDecl instantiateModel(SourceRoot sr, String cl) 
-		throws ModelicaClassNotFoundException, CompilerException{
+		throws ModelicaClassNotFoundException, CompilerException {
+		hookCheckAbort();
 		noteUsedMemory();
 		
 		InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
@@ -770,9 +854,12 @@ public class ModelicaCompiler {
 			handleCompilerProblems(problems);
 		}
 		
+		InstClassDecl icd = ipr.simpleLookupInstClassDecl(cl);
+		
+		hookModelInstantiatied(icd);
 		noteUsedMemory();
 		
-		return ipr.simpleLookupInstClassDecl(cl);		
+		return icd;
 	}
 	
 	protected void handleCompilerProblems(Collection<Problem> problems) throws CompilerException{
@@ -839,6 +926,7 @@ public class ModelicaCompiler {
 	 */
 	public FClass flattenModel(InstClassDecl icl) 
 			throws CompilerException, ModelicaClassNotFoundException, IOException {
+		hookCheckAbort();
 		noteUsedMemory();
 		
 		FlatRoot flatRoot = new FlatRoot();
@@ -848,8 +936,11 @@ public class ModelicaCompiler {
 		flatRoot.options = new OptionRegistry(icl.root().options);
 		
 		log.info("Flattening model...");
-		
 		icl.flattenInstClassDecl(fc);
+		
+		hookModelFlattened(fc);
+		hookCheckAbort();
+		
 		//fc.dumpTree("");
 		// Output the untransformed flattened model
 		log.debug("Creating raw .mof file...");
@@ -867,6 +958,9 @@ public class ModelicaCompiler {
 		}
 		
 		fc.transformCanonical();
+		
+		hookModelTransformed(fc);
+		hookCheckAbort();
 				
 		log.debug("Creating transformed .mof file...");
 		out = new PrintStream(icl.qualifiedName() + "_transformed.mof");
@@ -900,6 +994,7 @@ public class ModelicaCompiler {
 		if (problems.size() > 0) 
 			handleCompilerProblems(problems);
 
+		hookFlatModelChecked(fc);
 		noteUsedMemory();
 
 		return fc;
@@ -979,6 +1074,7 @@ public class ModelicaCompiler {
 	 *             If either of the three template files can not be found.
 	 */
 	public void generateCode(FClass fc) throws FileNotFoundException {
+		hookCheckAbort();
 		log.info("Generating code...");
 		
 		XMLGenerator xmlgenerator = createXMLGenerator(fc);
@@ -993,6 +1089,7 @@ public class ModelicaCompiler {
 		output = fc.nameUnderscore() + ".c";
 		cgenerator.generate(getCTemplatefile(fc), output);
 
+		hookCodeGenerated();
 		log.debug("... code generated.");
 	}
 	
@@ -1368,8 +1465,73 @@ public class ModelicaCompiler {
 	}
 }
 
+}
+
+aspect CompilationHelpers {
+	
+/**
+ * Interface for hooking into the compilation process.
+ * 
+ * Trees passed as arguments may be altered, but implementer must take care 
+ * not to break compilation in this way.
+ */
+public interface CompilationHooks {
+	/**
+	 * Returns <code>true</code> if the compilation should be aborted.
+	 * 
+	 * May be called at any time, and is guaranteed to be called before each 
+	 * compilation step with a separate method in this interface.
+	 * 
+	 * If compilation is aborted before it is finished, a 
+	 * {@link CompilationAbortedException} is thrown.
+	 */
+	public boolean shouldAbort();
+	
+	/**
+	 * Called after the supplied code files are parsed.
+	 */
+	public void filesParsed(SourceRoot sr);
+	
+	/**
+	 * Called after the error checks on the instantiated model are finished without errors.
+	 * 
+	 * Since the instance tree is built lazily, this step can not be broken up.
+	 */
+	public void modelInstantiatied(InstClassDecl icd);
+	
+	/**
+	 * Called after the model is flattened.
+	 */
+	public void modelFlattened(FClass fc);
+	
+	/**
+	 * Called after transformations are applied to the flat model.
+	 */
+	public void modelTransformed(FClass fc);
+	
+	/**
+	 * Called after error checks of the flat model are finished without errors.
+	 */
+	public void flatModelChecked(FClass fc);
+	
+	/**
+	 * Called after output code is generated.
+	 */
+	public void codeGenerated();
+	
+	/**
+	 * Called after the generated C code is compiled.
+	 */
+	public void codeCompiled();
+	
+	/**
+	 * Called after the FMU is packed.
+	 */
+	public void fmuPacked(String path);
+}
+
 public class JModelicaHomeNotFoundException extends Exception {
-	public JModelicaHomeNotFoundException () {
+	public JModelicaHomeNotFoundException() {
 	}
 	public JModelicaHomeNotFoundException(String msg) {
 		super(msg);
@@ -1377,16 +1539,28 @@ public class JModelicaHomeNotFoundException extends Exception {
 }
 
 public class CcodeCompilationException extends RuntimeException {
-	public CcodeCompilationException () {
+	public CcodeCompilationException() {
 	}
 	public CcodeCompilationException(String msg) {
 		super(msg);
 	}
 }
 
+/**
+ * Thrown when a compilation is aborted through a CompilationHooks.
+ */
+public class CompilationAbortedException extends RuntimeException {
+	public CompilationAbortedException() {
+	}
+	public CompilationAbortedException(String msg) {
+		super(msg);
+	}
+}
+
 public interface CCompilerDelegator {
 	
-	public void compileCCode(String fileName, String target, HashSet<String> ext_libs, HashSet<String> ext_lib_dirs, HashSet<String> ext_incl_dirs);
+	public void compileCCode(String fileName, String target, HashSet<String> ext_libs, 
+			HashSet<String> ext_lib_dirs, HashSet<String> ext_incl_dirs);
 	
 }
 
@@ -1396,7 +1570,8 @@ public class GCCcompilerDelegator implements CCompilerDelegator {
 	}
 
 	
-	public void compileCCode(String fileName, String target, HashSet<String> ext_libs, HashSet<String> ext_lib_dirs, HashSet<String> ext_incl_dirs) {
+	public void compileCCode(String fileName, String target, HashSet<String> ext_libs, 
+			HashSet<String> ext_lib_dirs, HashSet<String> ext_incl_dirs) {
 		String filesep = File.separator;
 		String jmodelicaHome = ModelicaCompiler.getJModelicaHome();
 		// make settings
