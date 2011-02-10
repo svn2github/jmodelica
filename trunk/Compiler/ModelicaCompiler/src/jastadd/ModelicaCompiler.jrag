@@ -643,7 +643,7 @@ public class ModelicaCompiler {
 			hookFmuPacked(unitFile.getAbsolutePath());
 		} catch(CompilationAbortedException e) {
 		} catch(Exception e) {
-			handleException(e, "Error while packing " + unitType.toUpperCase());
+			// TODO: Make sure this is logged or reported properly
 		}
 		
 		// remove files
