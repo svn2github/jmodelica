@@ -36,6 +36,7 @@ typedef struct jmi_array_t jmi_array_t;
 struct jmi_array_t {
     int*        size;
     jmi_real_t* var;
+	int			num_elems;
 };
 
 /* Linked list for saving pointers to be freed at return */
@@ -56,7 +57,7 @@ struct _jmi_dynamic_list {
 #define JMI_ARRAY_STATIC(name, n, ...) \
 	int name##_size[] = { __VA_ARGS__ };\
 	jmi_real_t name##_var[n];\
-	jmi_array_t name##_obj = { name##_size, name##_var };\
+	jmi_array_t name##_obj = { name##_size, name##_var, n };\
 	jmi_array_t* name = &name##_obj;
 
 /* Record array creation macro */
@@ -71,7 +72,7 @@ struct _jmi_dynamic_list {
 	int name##_size[] = { __VA_ARGS__ };\
 	jmi_real_t* name##_var = (jmi_real_t*) malloc((n) * sizeof(jmi_real_t));\
 	JMI_DYNAMIC_ADD_POINTER(name##_var)\
-	jmi_array_t name##_arr = { name##_size, name##_var };\
+	jmi_array_t name##_arr = { name##_size, name##_var, n };\
 	jmi_array_t* name = &name##_arr;
 
 /* Dynamic record array creation macro */
@@ -184,5 +185,7 @@ struct _jmi_dynamic_list {
 #define jmi_array_ref_23 jmi_array_val_23
 #define jmi_array_ref_24 jmi_array_val_24
 #define jmi_array_ref_25 jmi_array_val_25
+
+void jmi_transpose_matrix(jmi_array_t* arr, jmi_ad_var_t* src, jmi_ad_var_t* dest);
 
 #endif /* _JMI_ARRAY_NONE_H */

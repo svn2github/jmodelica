@@ -161,6 +161,9 @@ typedef struct jmi_sim_t jmi_sim_t;                       /**< \brief Forward de
 typedef double jmi_real_t; /*< Typedef for the real number
 			   < representation used in the Runtime
 			   < Library. */
+typedef int jmi_int_t; /*< Typedef for the integer number
+			   < representation used in the Runtime
+			   < Library. */
 
 /* This section defines types in the case of no AD and
  in the case of CppAD.*/

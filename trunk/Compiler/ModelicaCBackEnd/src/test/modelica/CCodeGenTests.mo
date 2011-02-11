@@ -2996,6 +2996,7 @@ model ExtStmtInclude2
 		extFunc1();
 		extFunc2();
 end ExtStmtInclude2;
+
 model SimpleExternal1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.CCodeGenTestCase(
@@ -4381,5 +4382,706 @@ void func_CCodeGenTests_externalArray6_f_def(jmi_array_t* a_a, jmi_array_t* b_a)
 		a_in = {{1,1},{2,2}};
 		b_out = f(a_in);
 end externalArray6;
+
+model SimpleExternalFortran1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="SimpleExternalFortran1",
+         description="",
+         template="
+$C_function_headers$
+$C_functions$
+",
+         generatedCode="
+void func_CCodeGenTests_SimpleExternalFortran1_f_def(jmi_ad_var_t a_v, jmi_ad_var_t* b_o);
+jmi_ad_var_t func_CCodeGenTests_SimpleExternalFortran1_f_exp(jmi_ad_var_t a_v);
+
+void func_CCodeGenTests_SimpleExternalFortran1_f_def(jmi_ad_var_t a_v, jmi_ad_var_t* b_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t b_v;
+    extern jmi_ad_var_t f_(jmi_ad_var_t*);
+    b_v = f_(&a_v);
+    if (b_o != NULL) *b_o = b_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_SimpleExternalFortran1_f_exp(jmi_ad_var_t a_v) {
+    jmi_ad_var_t b_v;
+    func_CCodeGenTests_SimpleExternalFortran1_f_def(a_v, &b_v);
+    return b_v;
+}
+
+")})));
+
+
+	Real a_in=1;
+	Real b_out;
+	
+	function f
+		input Real a;
+		output Real b;
+		external "FORTRAN 77";
+	end f;
+	
+	equation
+		b_out = f(a_in);
+end SimpleExternalFortran1;
+
+model SimpleExternalFortran2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="SimpleExternalFortran2",
+         description="",
+         template="
+$C_function_headers$
+$C_functions$
+",
+         generatedCode="
+void func_CCodeGenTests_SimpleExternalFortran2_f_def(jmi_ad_var_t a_v, jmi_ad_var_t b_v, jmi_ad_var_t* c_o);
+jmi_ad_var_t func_CCodeGenTests_SimpleExternalFortran2_f_exp(jmi_ad_var_t a_v, jmi_ad_var_t b_v);
+
+void func_CCodeGenTests_SimpleExternalFortran2_f_def(jmi_ad_var_t a_v, jmi_ad_var_t b_v, jmi_ad_var_t* c_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t c_v;
+    extern jmi_ad_var_t f_(jmi_ad_var_t*, jmi_ad_var_t*);
+    c_v = f_(&a_v, &b_v);
+    if (c_o != NULL) *c_o = c_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_SimpleExternalFortran2_f_exp(jmi_ad_var_t a_v, jmi_ad_var_t b_v) {
+    jmi_ad_var_t c_v;
+    func_CCodeGenTests_SimpleExternalFortran2_f_def(a_v, b_v, &c_v);
+    return c_v;
+}
+
+")})));
+
+	Real a_in=1;
+	Real b_in=2;
+	Real c_out;
+	function f
+		input Real a;
+		input Real b;
+		output Real c;
+		external "FORTRAN 77";
+	end f;
+	equation
+		c_out = f(a_in, b_in);
+end SimpleExternalFortran2;
+
+model SimpleExternalFortran3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="SimpleExternalFortran3",
+         description="",
+         template="
+$C_function_headers$
+$C_functions$
+",
+         generatedCode="
+void func_CCodeGenTests_SimpleExternalFortran3_f_def(jmi_ad_var_t a_v, jmi_ad_var_t* b_o);
+jmi_ad_var_t func_CCodeGenTests_SimpleExternalFortran3_f_exp(jmi_ad_var_t a_v);
+
+void func_CCodeGenTests_SimpleExternalFortran3_f_def(jmi_ad_var_t a_v, jmi_ad_var_t* b_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t b_v;
+    extern jmi_ad_var_t my_f_(jmi_ad_var_t*);
+    b_v = my_f_(&a_v);
+    if (b_o != NULL) *b_o = b_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_SimpleExternalFortran3_f_exp(jmi_ad_var_t a_v) {
+    jmi_ad_var_t b_v;
+    func_CCodeGenTests_SimpleExternalFortran3_f_def(a_v, &b_v);
+    return b_v;
+}
+
+")})));
+
+	Real a_in=1;
+	Real b_out;
+	function f
+		input Real a;
+		output Real b;
+		external "FORTRAN 77" b = my_f(a);
+	end f;
+	equation
+		b_out = f(a_in);
+end SimpleExternalFortran3;
+
+model SimpleExternalFortran4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="SimpleExternalFortran4",
+         description="",
+         template="
+$C_function_headers$
+$C_functions$
+",
+         generatedCode="
+void func_CCodeGenTests_SimpleExternalFortran4_f_def(jmi_ad_var_t a_v, jmi_ad_var_t* b_o);
+jmi_ad_var_t func_CCodeGenTests_SimpleExternalFortran4_f_exp(jmi_ad_var_t a_v);
+
+void func_CCodeGenTests_SimpleExternalFortran4_f_def(jmi_ad_var_t a_v, jmi_ad_var_t* b_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t b_v;
+    extern void my_f_(jmi_ad_var_t*, jmi_ad_var_t*);
+    my_f_(&a_v, &b_v);
+    if (b_o != NULL) *b_o = b_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_SimpleExternalFortran4_f_exp(jmi_ad_var_t a_v) {
+    jmi_ad_var_t b_v;
+    func_CCodeGenTests_SimpleExternalFortran4_f_def(a_v, &b_v);
+    return b_v;
+}
+
+")})));
+
+	Real a_in=1;
+	Real b_out;
+	function f
+		input Real a;
+		output Real b;
+		external "FORTRAN 77" my_f(a, b);
+	end f;
+	equation
+		b_out = f(a_in);	
+end SimpleExternalFortran4;
+
+model SimpleExternalFortran5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="SimpleExternalFortran5",
+         description="",
+         template="
+$C_function_headers$
+$C_functions$
+",
+         generatedCode="
+void func_CCodeGenTests_SimpleExternalFortran5_f_def(jmi_ad_var_t a_v);
+
+void func_CCodeGenTests_SimpleExternalFortran5_f_def(jmi_ad_var_t a_v) {
+    JMI_DYNAMIC_INIT()
+    extern void f_(jmi_ad_var_t*);
+    f_(&a_v);
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+")})));
+
+	Real a_in=1;
+	function f
+		input Real a;
+		external "FORTRAN 77";
+	end f;
+	equation
+		f(a_in);
+		
+end SimpleExternalFortran5;
+
+model SimpleExternalFortran6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="SimpleExternalFortran6",
+         description="",
+         template="
+$C_function_headers$
+$C_functions$
+",
+         generatedCode="
+void func_CCodeGenTests_SimpleExternalFortran6_f_def(jmi_ad_var_t a_v);
+
+void func_CCodeGenTests_SimpleExternalFortran6_f_def(jmi_ad_var_t a_v) {
+    JMI_DYNAMIC_INIT()
+    extern void my_f_(jmi_ad_var_t*);
+    my_f_(&a_v);
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+")})));
+
+	Real a_in=1;
+	function f
+		input Real a;
+		external "FORTRAN 77" my_f(a);
+	end f;
+	equation
+		f(a_in);
+		
+end SimpleExternalFortran6;
+
+model SimpleExternalFortran7
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="SimpleExternalFortran7",
+         description="",
+         template="
+$C_function_headers$
+$C_functions$
+",
+         generatedCode="
+void func_CCodeGenTests_SimpleExternalFortran7_f_def(jmi_ad_var_t a_v, jmi_ad_var_t b_v, jmi_ad_var_t* c_o);
+jmi_ad_var_t func_CCodeGenTests_SimpleExternalFortran7_f_exp(jmi_ad_var_t a_v, jmi_ad_var_t b_v);
+
+void func_CCodeGenTests_SimpleExternalFortran7_f_def(jmi_ad_var_t a_v, jmi_ad_var_t b_v, jmi_ad_var_t* c_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t c_v;
+    extern void my_f_(jmi_ad_var_t*, jmi_ad_var_t*, jmi_ad_var_t*);
+    my_f_(&a_v, &c_v, &b_v);
+    if (c_o != NULL) *c_o = c_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_SimpleExternalFortran7_f_exp(jmi_ad_var_t a_v, jmi_ad_var_t b_v) {
+    jmi_ad_var_t c_v;
+    func_CCodeGenTests_SimpleExternalFortran7_f_def(a_v, b_v, &c_v);
+    return c_v;
+}
+
+")})));
+
+	Real a_in = 1;
+	Real b_in = 2;
+	Real c_out;
+	function f
+		input Real a;
+		input Real b;
+		output Real c;
+		external "FORTRAN 77" my_f(a,c,b);
+	end f;
+	equation
+		c_out = f(a_in, b_in);
+		
+end SimpleExternalFortran7;
+
+model SimpleExternalFortran8
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="SimpleExternalFortran8",
+         description="",
+         template="
+$C_function_headers$
+$C_functions$
+",
+         generatedCode="
+void func_CCodeGenTests_SimpleExternalFortran8_f_def(jmi_ad_var_t a_v, jmi_ad_var_t b_v, jmi_ad_var_t* c_o, jmi_ad_var_t* d_o);
+jmi_ad_var_t func_CCodeGenTests_SimpleExternalFortran8_f_exp(jmi_ad_var_t a_v, jmi_ad_var_t b_v);
+
+void func_CCodeGenTests_SimpleExternalFortran8_f_def(jmi_ad_var_t a_v, jmi_ad_var_t b_v, jmi_ad_var_t* c_o, jmi_ad_var_t* d_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t c_v;
+    jmi_ad_var_t d_v;
+    extern void my_f_(jmi_ad_var_t*, jmi_ad_var_t*, jmi_ad_var_t*, jmi_ad_var_t*);
+    my_f_(&a_v, &c_v, &b_v, &d_v);
+    if (c_o != NULL) *c_o = c_v;
+    if (d_o != NULL) *d_o = d_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_SimpleExternalFortran8_f_exp(jmi_ad_var_t a_v, jmi_ad_var_t b_v) {
+    jmi_ad_var_t c_v;
+    func_CCodeGenTests_SimpleExternalFortran8_f_def(a_v, b_v, &c_v, NULL);
+    return c_v;
+}
+
+")})));
+
+	Real a_in = 1;
+	Real b_in = 2;
+	Real c_out;
+	Real d_out;
+	function f
+		input Real a;
+		input Real b;
+		output Real c;
+		output Real d;
+		external "FORTRAN 77" my_f(a,c,b,d);
+	end f;
+	equation
+		(c_out, d_out) = f(a_in, b_in);
+		
+end SimpleExternalFortran8;
+
+model SimpleExternalFortran9
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="SimpleExternalFortran9",
+         description="",
+         template="
+$C_function_headers$
+$C_functions$
+",
+         generatedCode="
+void func_CCodeGenTests_SimpleExternalFortran9_f_def(jmi_ad_var_t a_v, jmi_ad_var_t b_v, jmi_ad_var_t* c_o, jmi_ad_var_t* d_o);
+jmi_ad_var_t func_CCodeGenTests_SimpleExternalFortran9_f_exp(jmi_ad_var_t a_v, jmi_ad_var_t b_v);
+
+void func_CCodeGenTests_SimpleExternalFortran9_f_def(jmi_ad_var_t a_v, jmi_ad_var_t b_v, jmi_ad_var_t* c_o, jmi_ad_var_t* d_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t c_v;
+    jmi_ad_var_t d_v;
+    extern jmi_ad_var_t my_f_(jmi_ad_var_t*, jmi_ad_var_t*, jmi_ad_var_t*);
+    d_v = my_f_(&a_v, &b_v, &c_v);
+    if (c_o != NULL) *c_o = c_v;
+    if (d_o != NULL) *d_o = d_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_SimpleExternalFortran9_f_exp(jmi_ad_var_t a_v, jmi_ad_var_t b_v) {
+    jmi_ad_var_t c_v;
+    func_CCodeGenTests_SimpleExternalFortran9_f_def(a_v, b_v, &c_v, NULL);
+    return c_v;
+}
+
+")})));
+
+	Real a_in = 1;
+	Real b_in = 2;
+	Real c_out;
+	Real d_out;
+	function f
+		input Real a;
+		input Real b;
+		output Real c;
+		output Real d;
+		external "FORTRAN 77" d = my_f(a,b,c);
+	end f;
+	equation
+		(c_out, d_out) = f(a_in, b_in);
+		
+end SimpleExternalFortran9;
+
+model SimpleExternalFortran10
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="SimpleExternalFortran10",
+         description="",
+         template="
+$C_function_headers$
+$C_functions$
+",
+         generatedCode="
+void func_CCodeGenTests_SimpleExternalFortran10_f_def(jmi_ad_var_t a_v, jmi_ad_var_t b_v, jmi_ad_var_t* c_o, jmi_ad_var_t* d_o, jmi_ad_var_t* e_o);
+jmi_ad_var_t func_CCodeGenTests_SimpleExternalFortran10_f_exp(jmi_ad_var_t a_v, jmi_ad_var_t b_v);
+
+void func_CCodeGenTests_SimpleExternalFortran10_f_def(jmi_ad_var_t a_v, jmi_ad_var_t b_v, jmi_ad_var_t* c_o, jmi_ad_var_t* d_o, jmi_ad_var_t* e_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t c_v;
+    jmi_ad_var_t d_v;
+    jmi_ad_var_t e_v;
+    extern jmi_ad_var_t my_f_(jmi_ad_var_t*, jmi_ad_var_t*, jmi_ad_var_t*, jmi_ad_var_t*);
+    d_v = my_f_(&a_v, &c_v, &b_v, &e_v);
+    if (c_o != NULL) *c_o = c_v;
+    if (d_o != NULL) *d_o = d_v;
+    if (e_o != NULL) *e_o = e_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_SimpleExternalFortran10_f_exp(jmi_ad_var_t a_v, jmi_ad_var_t b_v) {
+    jmi_ad_var_t c_v;
+    func_CCodeGenTests_SimpleExternalFortran10_f_def(a_v, b_v, &c_v, NULL, NULL);
+    return c_v;
+}
+
+")})));
+
+	Real a_in = 1;
+	Real b_in = 2;
+	Real c_out;
+	Real d_out;
+	Real e_out;
+	function f
+		input Real a;
+		input Real b;
+		output Real c;
+		output Real d;
+		output Real e;
+		external "FORTRAN 77" d = my_f(a,c,b,e);
+	end f;
+	equation
+		(c_out, d_out, e_out) = f(a_in, b_in);
+		
+end SimpleExternalFortran10;
+
+model externalArrayFortran1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="externalArrayFortran1",
+         description="",
+         template="
+$C_function_headers$
+$C_functions$
+",
+         generatedCode="
+void func_CCodeGenTests_externalArrayFortran1_f_def(jmi_array_t* a_a, jmi_ad_var_t* b_o);
+jmi_ad_var_t func_CCodeGenTests_externalArrayFortran1_f_exp(jmi_array_t* a_a);
+
+void func_CCodeGenTests_externalArrayFortran1_f_def(jmi_array_t* a_a, jmi_ad_var_t* b_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t b_v;
+    extern jmi_ad_var_t f_(jmi_ad_var_t*, jmi_int_t*);
+    b_v = f_(a_a->var, &jmi_array_size(a_a, 0));
+    if (b_o != NULL) *b_o = b_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_externalArrayFortran1_f_exp(jmi_array_t* a_a) {
+    jmi_ad_var_t b_v;
+    func_CCodeGenTests_externalArrayFortran1_f_def(a_a, &b_v);
+    return b_v;
+}
+
+")})));
+
+
+	Real a_in[2]={1,1};
+	Real b_out;
+	function f
+		input Real a[2];
+		output Real b;
+		external "FORTRAN 77";
+	end f;
+	equation
+		b_out = f(a_in);
+
+end externalArrayFortran1;
+
+model externalArrayFortran2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="externalArrayFortran2",
+         description="",
+         template="
+$C_function_headers$
+$C_functions$
+",
+         generatedCode="
+void func_CCodeGenTests_externalArrayFortran2_f_def(jmi_array_t* a_a, jmi_ad_var_t* b_o);
+jmi_ad_var_t func_CCodeGenTests_externalArrayFortran2_f_exp(jmi_array_t* a_a);
+
+void func_CCodeGenTests_externalArrayFortran2_f_def(jmi_array_t* a_a, jmi_ad_var_t* b_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t b_v;
+    extern jmi_ad_var_t f_(jmi_ad_var_t*, jmi_int_t*, jmi_int_t*);
+    JMI_ARRAY_STATIC(tmp_1, 4, 2, 2)
+    jmi_transpose_matrix(a_a, a_a->var, tmp_1->var);
+    b_v = f_(tmp_1->var, &jmi_array_size(a_a, 0), &jmi_array_size(a_a, 1));
+    if (b_o != NULL) *b_o = b_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_externalArrayFortran2_f_exp(jmi_array_t* a_a) {
+    jmi_ad_var_t b_v;
+    func_CCodeGenTests_externalArrayFortran2_f_def(a_a, &b_v);
+    return b_v;
+}
+
+")})));
+
+
+	Real a_in[2,2]={{1,1},{1,1}};
+	Real b_out;
+	function f
+		input Real a[2,2];
+		output Real b;
+		external "FORTRAN 77";
+	end f;
+	equation
+		b_out = f(a_in);
+		
+end externalArrayFortran2;
+
+model externalArrayFortran3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="externalArrayFortran3",
+         description="",
+         template="
+$C_function_headers$
+$C_functions$
+",
+         generatedCode="
+void func_CCodeGenTests_externalArrayFortran3_f_def(jmi_array_t* a_a, jmi_ad_var_t* b_o);
+jmi_ad_var_t func_CCodeGenTests_externalArrayFortran3_f_exp(jmi_array_t* a_a);
+
+void func_CCodeGenTests_externalArrayFortran3_f_def(jmi_array_t* a_a, jmi_ad_var_t* b_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t b_v;
+    extern jmi_ad_var_t f_(jmi_ad_var_t*, jmi_int_t*, jmi_int_t*);
+    JMI_ARRAY_DYNAMIC(tmp_1, ( : ) * ( : ), :, :)
+    jmi_transpose_matrix(a_a, a_a->var, tmp_1->var);
+    b_v = f_(tmp_1->var, &jmi_array_size(a_a, 0), &jmi_array_size(a_a, 1));
+    if (b_o != NULL) *b_o = b_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_externalArrayFortran3_f_exp(jmi_array_t* a_a) {
+    jmi_ad_var_t b_v;
+    func_CCodeGenTests_externalArrayFortran3_f_def(a_a, &b_v);
+    return b_v;
+}
+
+")})));
+
+
+	Real a_in[2,2];
+	Real b_out;
+	function f
+		input Real a[:,:];
+		output Real b;
+		external "FORTRAN 77";
+	end f;
+	equation
+		a_in = {{1,1},{2,2}};
+		b_out = f(a_in);
+		
+end externalArrayFortran3;
+
+model externalArrayFortran4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="externalArrayFortran4",
+         description="",
+         template="
+$C_function_headers$
+$C_functions$
+",
+         generatedCode="
+void func_CCodeGenTests_externalArrayFortran4_f_def(jmi_array_t* a_a, jmi_array_t* b_a);
+
+void func_CCodeGenTests_externalArrayFortran4_f_def(jmi_array_t* a_a, jmi_array_t* b_a) {
+    JMI_DYNAMIC_INIT()
+    if (b_a == NULL) {
+        JMI_ARRAY_STATIC(b_an, 2, 2)
+        b_a = b_an;
+    }
+    extern void f_(jmi_ad_var_t*, jmi_int_t*, jmi_ad_var_t*, jmi_int_t*);
+    f_(a_a->var, &jmi_array_size(a_a, 0), b_a->var, &jmi_array_size(b_a, 0));
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+")})));
+
+
+	Real a_in[2];
+	Real b_out[2];
+	function f
+		input Real a[2];
+		output Real b[2];
+		external "FORTRAN 77";
+	end f;
+	equation
+		a_in[1] = 1;
+		a_in[2] = 2;
+		b_out = f(a_in);
+		
+end externalArrayFortran4;
+
+model externalArrayFortran5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="externalArrayFortran5",
+         description="",
+         template="
+$C_function_headers$
+$C_functions$
+",
+         generatedCode="
+void func_CCodeGenTests_externalArrayFortran5_f_def(jmi_array_t* a_a, jmi_array_t* b_a);
+
+void func_CCodeGenTests_externalArrayFortran5_f_def(jmi_array_t* a_a, jmi_array_t* b_a) {
+    JMI_DYNAMIC_INIT()
+    if (b_a == NULL) {
+        JMI_ARRAY_STATIC(b_an, 4, 2, 2)
+        b_a = b_an;
+    }
+    extern void f_(jmi_ad_var_t*, jmi_int_t*, jmi_int_t*, jmi_ad_var_t*, jmi_int_t*, jmi_int_t*);
+    JMI_ARRAY_STATIC(tmp_1, 4, 2, 2)
+    jmi_transpose_matrix(a_a, a_a->var, tmp_1->var);
+    JMI_ARRAY_STATIC(tmp_2, 4, 2, 2)
+    f_(tmp_1->var, &jmi_array_size(a_a, 0), &jmi_array_size(a_a, 1), b_a->var, &jmi_array_size(b_a, 0), &jmi_array_size(b_a, 1));
+    jmi_transpose_matrix(b_a, b_a->var, tmp_2->var);
+    b_a->var = tmp_2->var;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+")})));
+
+
+	Real a_in[2,2];
+	Real b_out[2,2];
+	function f
+		input Real a[2,2];
+		output Real b[2,2];
+		external "FORTRAN 77";
+	end f;
+	equation
+		a_in = {{1,1},{2,2}};
+		b_out = f(a_in);
+		
+end externalArrayFortran5;
+
+model externalArrayFortran6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="externalArrayFortran6",
+         description="",
+         template="
+$C_function_headers$
+$C_functions$
+",
+         generatedCode="
+void func_CCodeGenTests_externalArrayFortran6_f_def(jmi_array_t* a_a, jmi_array_t* b_a);
+
+void func_CCodeGenTests_externalArrayFortran6_f_def(jmi_array_t* a_a, jmi_array_t* b_a) {
+    JMI_DYNAMIC_INIT()
+    if (b_a == NULL) {
+        JMI_ARRAY_DYNAMIC(b_an, ( jmi_array_size(a_a, 0) ) * ( jmi_array_size(a_a, 1) ), jmi_array_size(a_a, 0), jmi_array_size(a_a, 1))
+        b_a = b_an;
+    }
+    extern void f_(jmi_ad_var_t*, jmi_int_t*, jmi_int_t*, jmi_ad_var_t*, jmi_int_t*, jmi_int_t*);
+    JMI_ARRAY_DYNAMIC(tmp_1, ( : ) * ( : ), :, :)
+    jmi_transpose_matrix(a_a, a_a->var, tmp_1->var);
+    JMI_ARRAY_DYNAMIC(tmp_2, ( jmi_array_size(a_a, 0) ) * ( jmi_array_size(a_a, 1) ), jmi_array_size(a_a, 0), jmi_array_size(a_a, 1))
+    f_(tmp_1->var, &jmi_array_size(a_a, 0), &jmi_array_size(a_a, 1), b_a->var, &jmi_array_size(b_a, 0), &jmi_array_size(b_a, 1));
+    jmi_transpose_matrix(b_a, b_a->var, tmp_2->var);
+    b_a->var = tmp_2->var;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+")})));
+
+
+	Real a_in[2,2];
+	Real b_out[2,2];
+	function f
+		input Real a[:,:];
+		output Real b[size(a,1),size(a,2)];
+		external "FORTRAN 77";
+	end f;
+	equation
+		a_in = {{1,1},{2,2}};
+		b_out = f(a_in);
+		
+end externalArrayFortran6;
 
 end CCodeGenTests;

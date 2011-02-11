@@ -422,6 +422,10 @@ aspect CCodeGen {
 	
 	syn String FType.type_C() = isArray() ? arrayType_C() : scalarType_C();
 	
+	syn String FType.argType_C() = type_C();
+	syn String FPrimitiveType.argType_C() = "jmi_ad_var_t";
+	syn String FIntegerType.argType_C() = "jmi_int_t";
+	
 	syn String FType.scalarType_C() = "jmi_ad_var_t";
 	eq FRecordType.scalarType_C()   = name_C() + "*";
 	
@@ -845,26 +849,185 @@ aspect CCodeGen {
 	}
 	
 	public void FExternalStmt.prettyPrint_C(Printer p, PrintStream str, String indent) {
+		// Must generate extern function declaration for Fortran 77
+		getFExternalLanguage().genFuncDecl(p, str, indent, this);
+		
+		// Generate temp arrays for all array inputs and outputs
+		// and transpose array for if array is input (Fortran 77 only)
+		getFExternalLanguage().genPreFuncCall(p, str, indent, this);
+		
+		// return variable?
 		if(hasReturnVar()) {
 			String ret = getReturnVar().name_C();
 			str.print(indent);
 			str.print(ret+" = ");
 		} else {
 			str.print(indent);
+		}
+		
+		// print function call
+		getFExternalLanguage().genFuncCall(p, str, indent, this);
+		
+		// If there are any output arrays, transpose these before returning (Fortran 77 only)
+		getFExternalLanguage().genPostFuncCall(p, str, indent, this);
+	}
+	
+	public void FExternalLanguage.genPreFuncCall(Printer p, PrintStream str, String indent, FExternalStmt stmt){}
+	
+	public void FFortran77ExternalLanguage.genPreFuncCall(Printer p, PrintStream str, String indent, FExternalStmt stmt) {
+		// generate temp arrays if there are any array inputs or outputs with dim > 1
+		
+		for (FExp arg: stmt.getArgs()) {
+			// array and dim > 1 ?
+			if (arg.isArray() && arg.ndims() > 1) {
+				
+				// generate tempname
+				String tempName = arg.tempName_C();
+				FType type = arg.type();
+				// create static or dynamic temp array
+				type.printDecl_C(p, str, indent, tempName, arg);				
+				
+				// check if array is input
+				if (arg instanceof FIdUseExp && ((FIdUseExp)arg).myFV() instanceof FFunctionVariable) {
+					FIdUseExp fid = (FIdUseExp)arg;
+					FFunctionVariable ffv = (FFunctionVariable)fid.myFV();
+					
+					if (ffv.isInput()) {
+						// is input array...
+						// ...then perform transformation
+						str.print(indent + "jmi_transpose_matrix(");
+						p.print(arg, str, indent);
+						str.print(", ");
+						p.print(arg, str, indent);
+						str.print("->var");
+						str.print(", " + tempName + "->var");
+						str.print(");\n");
+					}
+				}
+			}			
+		}
+	}
+	
+	public void FExternalLanguage.genPostFuncCall(Printer p, PrintStream str, String indent, FExternalStmt stmt) {}
+	
+	public void FFortran77ExternalLanguage.genPostFuncCall(Printer p, PrintStream str, String indent, FExternalStmt stmt) {
+		for (FExp arg: stmt.getArgs()) {
+			// array and dim > 1 ?
+			if (arg.isArray() && arg.ndims() > 1) {			
+				
+				// check if array is output
+				if (arg instanceof FIdUseExp && ((FIdUseExp)arg).myFV() instanceof FFunctionVariable) {
+					FIdUseExp fid = (FIdUseExp)arg;
+					FFunctionVariable ffv = (FFunctionVariable)fid.myFV();
+					
+					if (ffv.isOutput()) {
+						String tempName = arg.tempName_C();
+						// is output array...
+						// ...then perform transformation
+						str.print(indent + "jmi_transpose_matrix(");
+						p.print(arg, str, indent);
+						str.print(", ");
+						p.print(arg, str, indent);
+						str.print("->var");
+						str.print(", " + tempName + "->var");
+						str.print(");\n");
+						
+						// copy result in temp array to output array
+						str.print(indent);
+						p.print(arg, str, indent);
+						str.print("->var = ");
+						str.print(tempName + "->var;\n");
+					}
+				}
+			}			
 		}		
-		str.print(getName()+"(");
+	}
+	
+	public void FExternalLanguage.genFuncCall(Printer p, PrintStream str, String indent, FExternalStmt stmt) {}
+	
+	public void FCExternalLanguage.genFuncCall(Printer p, PrintStream str, String indent, FExternalStmt stmt) {
+		str.print(stmt.getName()+"(");
 		String prefix = "";
-		for (FExp arg : getArgs()) {
+		
+		for (FExp arg : stmt.getArgs()) {
 			str.print(prefix);
+			
 			if (arg instanceof FIdUseExp && ((FIdUseExp)arg).myFV() instanceof FFunctionVariable) {
-				if (((FFunctionVariable)((FIdUseExp)arg).myFV()).isOutput() && !arg.isArray()) {
+				FIdUseExp fid = (FIdUseExp)arg;
+				FFunctionVariable ffv = (FFunctionVariable)fid.myFV();
+				
+				if (ffv.isOutput() && !arg.isArray()) {
 					str.print("&");
 				}
 			}
 			p.print(arg, str, indent);
+			
 			if (arg.isArray()) {
 				str.print("->var");
 			}
+			prefix = ", ";
+		}
+		
+		str.print(");\n");
+	}
+	
+	public void FFortran77ExternalLanguage.genFuncCall(Printer p, PrintStream str, String indent, FExternalStmt stmt) {
+		str.print(stmt.getName()+"_(");
+		String prefix = "";
+		
+		for (FExp arg : stmt.getArgs()) {
+			str.print(prefix);
+
+			if (arg.isArray()) {
+				// array
+				if (arg instanceof FIdUseExp && ((FIdUseExp)arg).myFV() instanceof FFunctionVariable) {
+					FIdUseExp fid = (FIdUseExp)arg;
+					FFunctionVariable ffv = (FFunctionVariable)fid.myFV();
+					
+					if (ffv.isInput() && arg.ndims() > 1) {
+						// if is input argument and dim > 1 - use temp array (which has been transposed)
+						str.print(arg.tempName_C() + "->var");
+						
+					} else {
+						// array has dim <= 1 or is output argument = use "real" array (perform the transpose after the function call)
+						p.print(arg, str, indent);
+						str.print("->var");
+					}
+				}
+				
+			} else {
+				// not array
+				str.print("&");	
+				p.print(arg, str, indent);
+			}
+			
+			prefix = ", ";
+		}
+		
+		str.print(");\n");		
+	}
+	
+	public void FExternalLanguage.genFuncDecl(Printer p, PrintStream str, String indent, FExternalStmt stmt) {}
+	
+	public void FFortran77ExternalLanguage.genFuncDecl(Printer p, PrintStream str, String indent, FExternalStmt stmt) {
+		str.print(indent);
+		str.print("extern ");
+		if (stmt.hasReturnVar()) {
+			FType type = stmt.getReturnVar().type();
+			String retType = type.type_C();
+			str.print(retType + " ");
+		} else {
+			str.print("void ");
+		}
+
+		str.print(stmt.getName()+"_(");
+		
+		String prefix = "";
+		for (FExp arg : stmt.getArgs()) {
+			str.print(prefix);
+			FType type = arg.type();
+			str.print(type.argType_C());			
+			str.print("*");
 			prefix = ", ";
 		}
 		str.print(");\n");

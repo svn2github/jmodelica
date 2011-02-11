@@ -37,6 +37,7 @@ typedef struct jmi_array_t jmi_array_t;
 struct jmi_array_t {
     int*                      size;
     CppAD::VecAD<jmi_real_t>* var;
+    int						  num_elems;
 };
 
 typedef CppAD::VecAD<jmi_real_t>::reference jmi_ad_array_ref_t;
@@ -79,7 +80,7 @@ private:
 #define JMI_ARRAY_STATIC(name, n, ...) \
 	int name##_size[] = { __VA_ARGS__ };\
     CppAD::VecAD<jmi_real_t> name##_var(n);\
-    jmi_array_t name##_arr = { name##_size, &name##_var };\
+    jmi_array_t name##_arr = { name##_size, &name##_var, n };\
     jmi_array_t* name = &name##_arr;
 
 // Record array creation macro
@@ -94,7 +95,7 @@ private:
 	int name##_size[] = { __VA_ARGS__ };\
 	CppAD::VecAD<jmi_real_t>* name##_var = new CppAD::VecAD<jmi_real_t>(n);\
 	JMI_DYNAMIC_ADD_POINTER(name##_var, jmi_dynamic_list_arr)\
-	jmi_array_t name##_arr = { name##_size, name##_var };\
+	jmi_array_t name##_arr = { name##_size, name##_var, n };\
 	jmi_array_t* name = &name##_arr;
 
 // Dynamic record array creation macro
