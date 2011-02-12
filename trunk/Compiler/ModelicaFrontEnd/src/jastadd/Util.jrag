@@ -882,6 +882,16 @@ aspect FlatNames {
     
 //  syn lazy String FQName.derName() = "der(" + name() + ")";
     
+    eq FHDerExp.name() {
+    	String[] str = derName().split("\\)");
+    	return str[0] + "," + getOrder() + ")";
+    }
+
+    eq FHDerivativeVariable.name() {
+    	String[] str = getFQNameNoTransform().derName().split("\\)");
+    	return str[0] + "," + getOrder() + ")";
+    }
+    
     eq FDerivativeVariable.name()  = getFQNameNoTransform().derName();
     syn String FIdUse.derName()    = getFQNameNoTransform().derName();
     syn String FIdUseExp.derName() = getFIdUseNoTransform().derName();

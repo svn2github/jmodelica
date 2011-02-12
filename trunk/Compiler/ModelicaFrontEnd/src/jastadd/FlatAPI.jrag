@@ -1289,6 +1289,15 @@ aspect FVariableUses {
 		myFV().isPreVariable() to 
 		FAbstractEquation.discretePreVariables() for myFEquation();
 
+	syn lazy LinkedHashSet<FVariable> FAbstractEquation.variables() {
+		LinkedHashSet<FVariable> l = new LinkedHashSet<FVariable>();
+		l.addAll(differentiatedVariables());
+		l.addAll(derivativeVariables());
+		l.addAll(algebraicVariables());
+		l.addAll(discreteVariables());
+		return l;
+	}
+
 	/**
 	 * \brief Get the differenetiated variabel (FVariable) corresponding to 
 	 * a derivative variable (FDerivativeVariable)

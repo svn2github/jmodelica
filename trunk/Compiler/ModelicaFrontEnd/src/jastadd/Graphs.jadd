@@ -128,6 +128,17 @@ public class BiPGraph {
 		}	
 		return v;
 	}
+
+	public void removeVariable(Var v) {
+		for (Eq e : getEquations()) {
+			if (e.getMatching() == v) {
+				e.setMatching(null);
+			}
+			e.getVariables().remove(v);
+		}
+		v.setMatching(null);
+		variableMap.remove(v.getName());
+	}
 	
 	public Var getVariable(String name) {
 		return variableMap.get(name);
@@ -260,7 +271,7 @@ public class BiPGraph {
 		//System.out.println(P);
 		return P;
 	}
-	
+		
 	public void reassign(ArrayList<ArrayList<Edge>> P) {
 		for (ArrayList<Edge> l : P) {
 			for (Edge ed : l) {
@@ -322,6 +333,170 @@ public class BiPGraph {
 */
 			
 		}
+	}
+	
+	public boolean augmentPath(Eq e, ArrayList<Eq> visitedEquations,
+	                                 ArrayList<Var> visitedVariables) {
+		e.setVisited(true);
+		visitedEquations.add(e);
+		for (Var v : e.getVariables()) {
+			if (v.getMatching()==null) {
+				v.setMatching(e);
+				e.setMatching(v);
+				return true;
+			} else if (!v.isVisited()) {
+				v.setVisited(true);
+				visitedVariables.add(v);
+				if (augmentPath(v.getMatching(),visitedEquations,visitedVariables)) {
+					v.setMatching(e);
+					e.setMatching(v);
+					return true;	
+				}
+			}
+		}
+		return false;
+	}	
+
+	public void reduceIndex(boolean resetMatching) {
+		if (resetMatching) {
+			reset();
+			//greedyMatching();
+		}
+			
+		//_maximumMatching(resetMatching);	
+				
+		ArrayList<Eq> visitedEquations;
+		ArrayList<Var> visitedVariables;		
+				
+				
+		LinkedHashSet<Eq> es = new LinkedHashSet<Eq>();
+		es.addAll(getEquations());
+		
+		Eq eqToMatch;
+		boolean pathFound = false;		
+				
+		// Algoritm step numbering from the original Pantelides paper		
+		// Loop over all equations (step 3)
+		for (Eq e : es) {
+			// If the equation is not matched
+			if (e.getMatching()==null) {
+				eqToMatch = e; // Step 3a
+				pathFound = false; // Step
+				while (!pathFound) { // Step 3b
+					// Since the states are not added to the graph,
+					// Step 3b-1 is skipped and is done at the end of 
+					// the iteration 
+					visitedEquations = new ArrayList<Eq>();
+					visitedVariables = new ArrayList<Var>();	
+					lightReset(); // Step 3b-2
+					pathFound = false; // Step 3b-3
+					// Find an augmenting path, step 3b-4
+					pathFound = augmentPath(eqToMatch, visitedEquations, visitedVariables); 
+					System.out.println("*************");
+					System.out.println("Looking for augmented path starting in equation: " + eqToMatch.toString());
+					if (pathFound) {
+						System.out.println("Path found!");
+					} else {	
+					 	System.out.println("Path not found!");
+					}
+					System.out.println("Visisted equations:");
+					for (Eq ee : visitedEquations) {
+						System.out.println("  " + ee.getDescription());
+					}
+					System.out.println("Visisted variables:");
+					for (Var vv : visitedVariables) {
+						System.out.println("  " + vv.toString());
+					}
+					
+					if (!pathFound) { // Step 3b-5
+						for (Var vv : visitedVariables) { // Loop over all visited variables, Step 3b-5i
+						    // Create a new differentiated variable
+							FVariable newVar = vv.getVariable().myFClass().addFDerivativeVariable(vv.getVariable());
+							// Add the differentiated variable to the graph 
+							Var vvv = addVariable(newVar.name(),"",newVar);
+							// Set the "A vector" in the paper: 
+							// a reference from the visited variable to its 
+							// differentiated counterpart
+							vv.setMeDifferentiated(vvv); 
+						}
+						for (Eq ee : visitedEquations) { // Step 3b-5ii
+							FAbstractEquation eee = ee.getEquation();
+							// Create a new differentiated equation
+							FAbstractEquation deee = eee.diff("time");
+							System.out.println("About to add equation: " + deee);
+							// Add the differentiated equation						
+							Eq eqn = addEquation("eq_" + (getEquations().size() + 1), 
+							             deee.prettyPrint(""), 
+								            getEquations().size() + 1, deee);
+							
+							// Add edges
+							for (FVariable fv : deee.variables()) {
+								Var vvv = variableMap.get(fv.name());
+								System.out.println("*** " + fv.name());
+								if (vvv!=null) {
+									addEdge(eqn,vvv);
+								}
+							}
+							// Set a reference from the visited equation to
+							// its differentiated counterpart
+							ee.setMeDifferentiated(eqn);
+						}
+						for (Var vv : visitedVariables) {
+							// Set matchings, Step 3b-5iii
+							Eq ee = vv.getMatching();
+							vv.getMeDifferentiated().setMatching(ee.getMeDifferentiated());
+							ee.getMeDifferentiated().setMatching(vv.getMeDifferentiated());
+							// Remove variables that have been differentiated, Step 3b-1
+							removeVariable(vv);
+						}
+						
+						// Set the next equation to start matching from, 
+						// Step 3b-5iv
+						eqToMatch = eqToMatch.getMeDifferentiated();
+						
+						System.out.println("Graph after addition of equations and variables:");
+						System.out.println(toString());
+					}	
+
+					System.out.println("Matching:");
+					System.out.println(printMatching());
+					System.out.println("*************");
+				
+				}	
+			}
+		}
+		//_maximumMatching(false);
+		// Remove equations that are not connected
+		ArrayList<Eq> eqToRemove = new ArrayList<Eq>();
+		for (Eq e : getEquations()) {
+			if (e.getVariables().size()==0) {
+				eqToRemove.add(e);
+			}
+		}
+		for (Eq e : eqToRemove) {
+			removeEquation(e);
+		}
+		System.out.println("Index reduction done!");
+		System.out.println("Matching:");
+		System.out.println(printMatching());
+		
+		LinkedList<Stack<Eq>> blt = computeBLT();
+		
+		System.out.println("BLT: " + blt.size() + " blocks");
+		for (Stack<Eq> bl : blt) {
+			System.out.println("Block: " + bl.size() + "-----");
+			//EquationBlock b = new EquationBlock();
+			//daeBLT.add(b);
+			// TODO: handle the case of multiple scalar equations in
+			// one block
+			for (Eq bl_eqn : bl) {
+				//v = bl_eqn.getMatching();
+				//b.addMatchingPair(new MatchingPair(bl_eqn.getEquation(),v.getVariable()));
+				System.out.println(bl_eqn.getMatching() + ": " + bl_eqn.getDescription());
+			}
+			System.out.println("-----------------");
+		}
+		
 	}
 	
 	public ArrayList<Eq> getUnmatchedEquations() {
@@ -400,7 +575,6 @@ public class BiPGraph {
 			components.add(component);
 		}
 	}
-	
 	
     public LinkedList<Stack<Eq>> _computeBLT() {
 
@@ -708,6 +882,7 @@ public class Eq {
     private String description;
     private int id = -1;
     private FAbstractEquation eqn;
+	private Eq meDifferentiated = null;
 
 	private int tarjanNbr = 0;
     private int tarjanLowLink = 0;
@@ -816,6 +991,14 @@ public class Eq {
 	public void setTarjanLowLink(int tarjanLowLink) {
 		this.tarjanLowLink = tarjanLowLink;
 	}
+
+	public void setMeDifferentiated(Eq e) {
+		this.meDifferentiated = e;
+	}
+	
+	public Eq getMeDifferentiated() {
+		return this.meDifferentiated;
+	}
 	
     public void resetVariableIterator() {
         varIterator = variables.iterator();
@@ -856,6 +1039,7 @@ public class Var {
 	private boolean visited = false;
 	private int layer = 1000000;
 	private FVariable v;
+	private Var meDifferentiated = null; // A reference to this variable differentiated once
 	
 	public Var(String name, String description) {
 		this.name = name;
@@ -922,10 +1106,17 @@ public class Var {
 		return v;
 	}
 		
-		public void setVariable(FVariable v) {
-			this.v = v;
-		}
+	public void setVariable(FVariable v) {
+		this.v = v;
+	}
 	
+	public void setMeDifferentiated(Var var) {
+		this.meDifferentiated = var;
+	}
+	
+	public Var getMeDifferentiated() {
+		return this.meDifferentiated;
+	}
 	
 	public String toString() {
 		return getName();

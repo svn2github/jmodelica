@@ -220,6 +220,8 @@ FRecordVariable : FVariable ::= Record:FQName /Type:FType/;
  */
 FDerivativeVariable : FRealVariable;
 
+FHDerivativeVariable : FDerivativeVariable ::= <Order:int>;
+
 /**
  * \brief Node representing the visibility of an FVariable object.
  */
@@ -406,7 +408,8 @@ FInitialEquation : FEquationType;
  * The NTA InitialEquation is used to represent default initial equations for
  * when equations that are not active during initialization.
  */
-abstract FAbstractEquation : BaseNode ::= Type:FEquationType /InitialEquation:FEquation*/;
+abstract FAbstractEquation : BaseNode ::= Type:FEquationType /InitialEquation:FEquation*/ 
+	/DynamicFAbstractEquation:FAbstractEquation*/; 
 
 /**
  * \brief Unsupported equation.
@@ -849,6 +852,11 @@ InstDerExp : FUnaryExp;
  * \brief The built-in function der.
  */
 FDerExp : FIdUseExp; 
+
+/**
+ * \brief Higher order derivatives occurring as a result of index reduction.
+ */
+FHDerExp : FDerExp ::= <Order:int>; 
 
 /**
  * \brief Identifier in the instance tree.

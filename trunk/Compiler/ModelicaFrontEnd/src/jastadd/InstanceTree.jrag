@@ -573,6 +573,7 @@ aspect InstanceTreeConstruction {
 	syn lazy List InstConstrainingComponent.getDynamicClassNameList() = new List();
 	syn lazy List InstForIndex.getDynamicClassNameList() = new List();
 	syn lazy List FExp.getDynamicFExpList() = new List();
+	syn lazy List FAbstractEquation.getDynamicFAbstractEquationList() = new List();	
 	syn lazy List InstValueModification.getDynamicInstModList() = new List();
 	
 	/**
@@ -619,8 +620,19 @@ aspect InstanceTreeConstruction {
 		getDynamicFExpList().add(exp);
 		return getDynamicFExp(getNumDynamicFExp() - 1);
 	}
-	
-	
+
+	/**
+	 * \brief Dynamically places an FAbstractEquation in the tree under this FAbstractEquation.
+	 * 
+	 * @returns  the final version of the dynamically placed node.
+	 */
+	public FAbstractEquation FAbstractEquation.dynamicFAbstractEquation(FAbstractEquation eqn) {
+		if (eqn == this)
+			return eqn;
+		getDynamicFAbstractEquationList().add(eqn);
+		return getDynamicFAbstractEquation(getNumDynamicFAbstractEquation() - 1);
+	}
+		
 	/**
 	 * \brief Dynamically places an InstModification in the tree under this InstValueModification.
 	 * 
