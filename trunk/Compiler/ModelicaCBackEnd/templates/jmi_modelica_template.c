@@ -194,7 +194,7 @@ $C_DAE_equation_residuals$
 	return 0;
 }
 
-static int model_dae_dF(jmi_t* jmi, jmi_ad_var_vec_p dF, jmi_ad_var_vec_p dz) {
+static int model_dae_dF(jmi_t* jmi, jmi_ad_var_vec_p res, jmi_ad_var_vec_p dF, jmi_ad_var_vec_p dz) {
 $C_DAE_equation_directional_derivative$
 	return 0;
 }

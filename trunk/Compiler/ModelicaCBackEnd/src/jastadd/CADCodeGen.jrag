@@ -18,7 +18,7 @@ import java.io.PrintStream;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 
-aspect CCodeGenAD {
+aspect CADCodeGen {
 	
 	class CADPrettyPrinter extends Printer {
 		
@@ -26,7 +26,7 @@ aspect CCodeGenAD {
 			super("    ");
 		}
 		
- 		public void print(ASTNode node, PrintStream str, String indent) { 
+ 		public void print(ASTNode node, PrintStream str, String indent) {
  			node.prettyPrint_CAD(this, str, indent); 
  		}
   		
@@ -50,5 +50,198 @@ aspect CCodeGenAD {
 	public void ASTNode.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
  		prettyPrint_C(p, str, indent);
 	}
+	
+	public void FIdUseExp.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
+			str.print("jmi_ad_var_t ");
+			str.print(this.adVarName());
+			str.print(" = ");
+			p.print(this.getFIdUse(),str,indent);
+			str.print(";\n");
+			
+			str.print("jmi_ad_var_t ");
+			str.print(this.adDerName());
+			str.print(" = (*dz)[");
+			str.print(this.myFV().valueReference());
+			str.print("-jmi->offs_real_dx];\n");
+	}
+	
+	public void FLitExp.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
+			str.print("jmi_ad_var_t ");
+			str.print(this.adVarName());
+			str.print(" = ");
+			this.prettyPrint_C(p, str, indent);
+			str.print(";\n");
+			
+			str.print("jmi_ad_var_t ");
+			str.print(this.adDerName());
+			str.print(" = 0;\n");
+			
+	}
+	
+	public void FSinExp.prettyPrint_CAD(Printer p, PrintStream str, String indent) {		
+			p.print(getFExp(),str,indent);
+			str.print("jmi_ad_var_t ");
+			str.print(this.adVarName());
+			str.print(" = sin(");
+			str.print(getFExp().adVarName());
+			str.print(");");
+			str.print("\n");
+			
+			str.print("jmi_ad_var_t ");
+			str.print(this.adDerName());
+			str.print(" = ");
+			str.print(getFExp().adDerName());
+			str.print(" * cos(");
+			str.print(getFExp().adVarName());
+			str.print(");\n");
+			
+	}
+	
+	public void FExpExp.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
+			p.print(getFExp(),str,indent);
+			str.print("jmi_ad_var_t ");
+			str.print(this.adVarName());
+			str.print(" = exp(");
+			str.print(getFExp().adVarName());
+			str.print(");\n");
+			
+			str.print("jmi_ad_var_t ");
+			str.print(this.adDerName());
+			str.print(" = ");
+			str.print(getFExp().adDerName());
+			str.print(" * exp(");
+			str.print(getFExp().adVarName());
+			str.print(");\n");
+	}
+	
+	public void FDivExp.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
+			p.print(getLeft(),str,indent);
+			p.print(getRight(),str,indent);
+			str.print("jmi_ad_var_t ");
+			str.print(this.adVarName());
+			str.print(" = ");
+			str.print(getLeft().adVarName());
+			str.print(" / ");
+			str.print(getRight().adVarName());
+			str.print(";\n");
+			
+			str.print("jmi_ad_var_t ");
+			str.print(this.adDerName());
+			str.print(" = (");
+			str.print(getLeft().adDerName());
+			str.print(" * ");
+			str.print(getRight().adVarName());
+			str.print(" - ");
+			str.print(getLeft().adVarName());
+			str.print(" * ");
+			str.print(getRight().adDerName());
+			str.print(" ) / ( ");
+			str.print(getRight().adVarName());
+			str.print(" * ");
+			str.print(getRight().adVarName());
+			str.print(");\n");
+			
+	}
+	
+	public void FMulExp.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
+			p.print(getLeft(),str,indent);
+			p.print(getRight(),str,indent);
+			str.print("jmi_ad_var_t ");
+			str.print(this.adVarName());
+			str.print(" = ");
+			str.print(getLeft().adVarName());
+			str.print(" * ");
+			str.print(getRight().adVarName());
+			str.print(";\n");
+			
+			str.print("jmi_ad_var_t ");
+			str.print(this.adDerName());
+			str.print(" = (");
+			str.print(getLeft().adDerName());
+			str.print(" * ");
+			str.print(getRight().adVarName());
+			str.print(" + ");
+			str.print(getLeft().adVarName());
+			str.print(" * ");
+			str.print(getRight().adDerName());
+			str.print(");\n");
+			
+	}
+	
+	public void FAddExp.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
+			p.print(getLeft(),str,indent);
+			p.print(getRight(),str,indent);
+			str.print("jmi_ad_var_t ");
+			str.print(this.adVarName());
+			str.print(" = ");
+			str.print(getLeft().adVarName());
+			str.print(" + ");
+			str.print(getRight().adVarName());
+			str.print(";\n");
+			
+			str.print("jmi_ad_var_t ");
+			str.print(this.adDerName());
+			str.print(" = ");
+			str.print(getLeft().adDerName());
+			str.print(" + ");
+			str.print(getRight().adDerName());
+			str.print(";\n");
+	}
+	
+	public void FSubExp.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
+			p.print(getLeft(),str,indent);
+			p.print(getRight(),str,indent);
+			str.print("jmi_ad_var_t ");
+			str.print(this.adVarName());
+			str.print(" = ");
+			str.print(getLeft().adVarName());
+			str.print(" - ");
+			str.print(getRight().adVarName());
+			str.print(";\n");
+			
+			str.print("jmi_ad_var_t ");
+			str.print(this.adDerName());
+			str.print(" = ");
+			str.print(getLeft().adDerName());
+			str.print(" - ");
+			str.print(getRight().adDerName());
+			str.print(";\n");
+	}	
+	
+	public void FAbstractEquation.genResidual_CAD(int i, String indent, PrintStream str) {}
+	
+	public void FEquation.genResidual_CAD(int i, String indent, PrintStream str) {
+		genTempVars_C(printer_C, str, indent);
+		getRight().prettyPrint_CAD(str,"    ");
+		getLeft().prettyPrint_CAD(str,"    ");
+		
+		str.print("(*res)[");
+		str.print(i);
+		str.print("] = ");
+		str.print(getRight().adVarName());
+		str.print(" - ");
+		str.print(getLeft().adVarName());
+		str.print(";\n");
+		
+		str.print("(*dF)[");
+		str.print(i);
+		str.print("] = ");
+		str.print(getRight().adDerName());
+		str.print(" - ");
+		str.print(getLeft().adDerName());
+		str.print(";\n");
+	}
+	
+	private int FClass.adIndex = 0;
+	
+	public int FClass.nextADIndex() {
+		return adIndex++;
+	}
+	
+	syn lazy int FExp.adIndex() = myFClass().nextADIndex();
+	
+	syn String FExp.adVarName() = "v_" + adIndex();
+	
+	syn String FExp.adDerName() = "d_" + adIndex();
 	
 }

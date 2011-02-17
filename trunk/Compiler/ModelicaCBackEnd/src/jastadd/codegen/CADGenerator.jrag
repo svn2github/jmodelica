@@ -35,7 +35,7 @@ public class CADGenerator extends CGenerator {
 			     && fclass.root().options.getBooleanOption("generate_dae_jacobian")) {
 				int i=0;
 				for (FAbstractEquation e : fclass.equations()) {
-					e.genResidual_C(i,INDENT,genPrinter);				
+					e.genResidual_CAD(i,INDENT,genPrinter);				
 					i += e.numScalarEquations();
 				}
 			}
