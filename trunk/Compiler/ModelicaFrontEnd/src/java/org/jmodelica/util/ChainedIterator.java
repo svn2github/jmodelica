@@ -16,21 +16,18 @@ public class ChainedIterator<E> implements Iterator<E> {
 		this(new Iterator[] { it1, it2 });
 	}
 
-	@Override
 	public boolean hasNext() {
 		while (i < its.length && !its[i].hasNext())
 			i++;
 		return i < its.length;
 	}
 
-	@Override
 	public E next() {
 		if (!hasNext())
 			throw new NoSuchElementException();
 		return its[i].next();
 	}
 
-	@Override
 	public void remove() {
 		throw new UnsupportedOperationException();
 	}
