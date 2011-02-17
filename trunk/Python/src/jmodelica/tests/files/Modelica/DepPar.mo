@@ -4,4 +4,4 @@ package DepPar
 	parameter Real p2 = 2*p1;
 	parameter Real p1 = 1;
   end DepPar1;
-end DepPar;
+end DepPar;

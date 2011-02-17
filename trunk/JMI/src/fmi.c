@@ -131,9 +131,14 @@ fmiStatus fmi_set_real(fmiComponent c, const fmiValueReference vr[], size_t nvr,
     for (i = 0; i <nvr; i = i + 1) {
         /* Get index in z vector from value reference. */ 
         index = get_index_from_value_ref(vr[i]);
-        
+
         /* Set value from the value array to z vector. */
         z[index] = value[i];
+
+        if (index<(((fmi_t *)c)->jmi)->offs_real_dx) {
+        	jmi_init_eval_parameters(((fmi_t *)c)->jmi);
+        }
+
     }
     return fmiOK;
 }
@@ -151,6 +156,11 @@ fmiStatus fmi_set_integer (fmiComponent c, const fmiValueReference vr[], size_t 
         
         /* Set value from the value array to z vector. */
         z[index] = value[i];
+
+        if (index<(((fmi_t *)c)->jmi)->offs_real_dx) {
+        	jmi_init_eval_parameters(((fmi_t *)c)->jmi);
+        }
+
     }
     return fmiOK;
 }
@@ -168,6 +178,11 @@ fmiStatus fmi_set_boolean (fmiComponent c, const fmiValueReference vr[], size_t 
         
         /* Set value from the value array to z vector. */
         z[index] = value[i];
+
+        if (index<(((fmi_t *)c)->jmi)->offs_real_dx) {
+        	jmi_init_eval_parameters(((fmi_t *)c)->jmi);
+        }
+
     }
     return fmiOK;
 }

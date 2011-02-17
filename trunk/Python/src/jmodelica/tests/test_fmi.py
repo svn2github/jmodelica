@@ -399,3 +399,32 @@ class TestDiscreteVariableRefs(object):
        nose.tools.assert_equal(self.model._XMLStartRealKeys[0],0)
        nose.tools.assert_equal(self.model._XMLStartRealKeys[1],2)
 
+class TestDependentParameters(object):
+    """
+    Test that dependent variables are recomputed when an independent varaible is set.
+    """
+
+    def __init__(self):
+        self._fpath = os.path.join(get_files_path(), 'Modelica', "DepPar.mo")
+        self._cpath = "DepPar.DepPar1"
+    
+    def setUp(self):
+        """
+        Sets up the test class.
+        """
+        self.fmu_name = compile_fmu(self._cpath, self._fpath)
+        self.model = FMUModel(self.fmu_name)
+        
+    @testattr(stddist = True)
+    def test_parameter_eval(self):
+       """
+       Test that the parameters are evaluated correctly.
+       """
+       self.model.set_real([0],2.0)
+
+       p2 = self.model.get_real([1])
+       p3 = self.model.get_real([2])
+
+       nose.tools.assert_almost_equal(p2,4)
+       nose.tools.assert_almost_equal(p3,12)
+
