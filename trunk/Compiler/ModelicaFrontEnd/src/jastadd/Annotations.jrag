@@ -158,14 +158,21 @@ aspect AnnotationAPI {
 		}
 		
 		/**
-		 * \brief Returns the value for a node that represents a vector of int values.
+		 * \brief Returns the value for a node that represents a real value.
+		 */
+		public double real() {
+			return 0.0;
+		}
+		
+		/**
+		 * \brief Returns the value for a node that represents a vector of real values.
 		 */
 		public double[] realVector() {
 			return null;
 		}
 		
 		/**
-		 * \brief Returns the value for a node that represents a matrix of int values.
+		 * \brief Returns the value for a node that represents a matrix of real values.
 		 */
 		public double[][] realMatrix() {
 			return null;
@@ -313,6 +320,10 @@ aspect AnnotationAPI {
 
 			public Iterator<AnnotationNode> iterator() {
 				return isValue() ? super.iterator() : new AnnotationIterator(exp().annotationList());
+			}
+			
+			public double real() {
+				return exp().avalueReal();
 			}
 			
 			public double[] realVector() {
