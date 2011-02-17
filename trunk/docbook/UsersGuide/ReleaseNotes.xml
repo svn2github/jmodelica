@@ -88,7 +88,7 @@
       <title>Simulation</title>
 
       <section>
-        <title>FMU export </title>
+        <title>FMU export</title>
 
         <para>JModelica.org 1.5 supports export of Functional Mock-up
         Interface (FMI) compliant models (FMUs). The exported models follows
@@ -113,7 +113,7 @@
         system has been extended to allow for trivial equations converted into
         assignments and for implicit systems of equations. The latter are
         solved using the Newton solver KINSOL, modified to support
-        regularization to handle singular Jacobian matrices. </para>
+        regularization to handle singular Jacobian matrices.</para>
       </section>
 
       <section>
@@ -122,7 +122,7 @@
         <para>When clauses are now supported, as well as the sample operator.
         Accordingly, some classes of hybrid systems may be simulated as well
         as sampled control systems. In addition, variables of type Integer and
-        Boolean are also supported. </para>
+        Boolean are also supported.</para>
       </section>
     </section>
 
@@ -134,6 +134,14 @@
       improved by adding support for Jacobian regularization in order to
       handle singular Jacobians and by interfacing the sparse linear solver
       SuperLU in order to more efficiently handle large scale systems.</para>
+    </section>
+
+    <section>
+      <title>Optimization</title>
+
+      <para>Curtis Powell Reid seeding has been implemented to speed up
+      computation of sparse Jacobians. When solving large optimization
+      problems, this can give a speed-up factor of up to 10-15.</para>
     </section>
 
     <section>
