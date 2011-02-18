@@ -42,13 +42,19 @@ aspect AnnotationAPI {
 	 */
 	syn AnnotationNode ASTNode.annotation(String path) = annotation().forPath(path);
 	
-	eq Opt.annotation() = (getNumChild() > 0) ? getChild(0).annotation() : AnnotationNode.NO_ANNOTATION;
+	eq Opt.annotation()  = (getNumChild() > 0) ? getChild(0).annotation() : AnnotationNode.NO_ANNOTATION;
+	eq List.annotation() = (getNumChild() > 0) ? getChild(0).annotation() : AnnotationNode.NO_ANNOTATION;
+	
+	eq Comment.annotation() = getAnnotationOpt().annotation();
 	
 	eq ExternalClause.annotation() = getAnnotation1Opt().annotation();
 	eq InstExternal.annotation()   = getExternalClause().annotation();
 	
-	eq FullClassDecl.annotation() = getAnnotation(0).annotation();
+	eq FullClassDecl.annotation() = getAnnotations().annotation();
 	eq InstClassDecl.annotation() = getClassDecl().annotation();
+	
+	eq ComponentDecl.annotation()     = getCCComment().annotation();
+	eq InstComponentDecl.annotation() = getComponentDecl().annotation();
 	
 	eq ParseAnnotation.annotation() = getClassModification().annotationNode();
 	
