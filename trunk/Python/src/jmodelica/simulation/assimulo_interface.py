@@ -35,6 +35,7 @@ try:
     from assimulo.problem import Implicit_Problem
     from assimulo.problem import Explicit_Problem
     from assimulo.sundials import Sundials_Exception
+    from assimulo.exception import *
 except ImportError:
     logging.warning(
         'Could not find Assimulo package. Check jmodelica.check_packages()')
@@ -391,7 +392,10 @@ class FMIODE(Explicit_Problem):
         #Get new nominal values.
         if eInfo.stateValueReferencesChanged:
             solver.atol = 0.01*solver.rtol*self._model.nominal_continuous_states
-        
+            
+        #Check if the simulation should be terminated
+        if eInfo.terminateSimulation:
+            raise TerminateSimulation #Exception from Assimulo
         
     def completed_step(self, solver):
         """
@@ -1119,7 +1123,7 @@ class JMIDAESens(Implicit_Problem):
 
         return residual
         
-    def j(self, c, t, y, yd, sw=None):
+    def j(self, c, t, y, yd, sw=None, p=None):
         """
         The jacobian function for an DAE problem.
         """
@@ -1128,6 +1132,11 @@ class JMIDAESens(Implicit_Problem):
         self._model.real_x = y[0:self._x_nbr]
         self._model.real_w = y[self._x_nbr:self._f_nbr]
         self._model.real_dx = yd[0:self._dx_nbr]
+        
+        #Set the free parameters
+        if not p==None:
+            for ind, val in enumerate(p):
+                self._model.set(self._parameter_names[ind],val)
         
         #Sets the inputs, if any
         if self.input!=None:
