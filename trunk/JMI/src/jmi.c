@@ -260,6 +260,11 @@ int jmi_func_F(jmi_t *jmi, jmi_func_t *func, jmi_real_t *res) {
 	return func->F(jmi,&res);
 }
 
+int jmi_func_directional_dF(jmi_t *jmi, jmi_func_t *func, jmi_real_t *res,
+			 jmi_real_t *dF, jmi_real_t* dz) {
+		return func->dir_dF(jmi, &res, &dF, &dz);
+}
+
 int jmi_ode_f(jmi_t* jmi) {
 	int i;
 	jmi_real_t* dx;
@@ -565,6 +570,16 @@ int jmi_dae_dF_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars,
 	} else {
 		return -1;
 	}
+
+}
+
+int jmi_dae_directional_dF(jmi_t* jmi, jmi_real_t* res, jmi_real_t* dF, jmi_real_t* dz) {
+	int i;
+	for (i=0;i<jmi->n_z;i++) {
+		(*(jmi->z))[i] = (*(jmi->z_val))[i];
+	}
+
+	return jmi_func_directional_dF(jmi,jmi->dae->F,res,dF,dz);
 
 }
 

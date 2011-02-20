@@ -1131,6 +1131,28 @@ int jmi_dae_dF_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars,
 		int *dF_n_cols, int *dF_n_nz);
 
 /**
+ * \brief Evaluate the directional derivative of the DAE residual function.
+ *
+ * The directional derivative is defined as
+ *
+ *   dF = dF/dz * dz
+ *
+ * where dF/dz is the Jacobian of the residual function F, dF
+ * is the directional derivative and dz is the seed vector.
+ *
+ * The user sets the input variables by writing to
+ * the vectors obtained from the functions ::jmi_get_dx, ::jmi_get_x etc.
+ *
+ * @param jmi A jmi_t struct.
+ * @param res (Output) The DAE residual vector.
+ * @param dF (Output) The directional derivative.
+ * @param dz Seed vector of size n_x + n_x + n_u + n_w.
+ * @return Error code.
+ *
+ */
+int jmi_dae_directional_dF(jmi_t* jmi, jmi_real_t* res, jmi_real_t* dF, jmi_real_t* dz);
+
+/**
  * \brief Evaluate DAE event indicator residuals.
  *
  * The user sets the input variables by writing to

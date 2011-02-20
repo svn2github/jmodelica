@@ -583,6 +583,13 @@ int jmi_func_F(jmi_t *jmi, jmi_func_t *func, jmi_real_t *res) {
 	return jmi_func_ad_F(jmi,func, res);
 }
 
+int jmi_func_directional_dF(jmi_t *jmi, jmi_func_t *func, jmi_real_t *res,
+			 jmi_real_t *dF, jmi_real_t* dz) {
+
+		return -1;
+
+}
+
 // Convenience function for accessing the number of non-zeros in the AD
 // Jacobian.
 int jmi_func_ad_dF_n_nz(jmi_t *jmi, jmi_func_t *func, int* n_nz) {
@@ -1231,6 +1238,11 @@ int jmi_dae_dF_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars,
 		return -1;
 	}
 }
+
+int jmi_dae_directional_dF(jmi_t* jmi, jmi_real_t* res, jmi_real_t* dF, jmi_real_t* dz) {
+	return -1;
+}
+
 
 int jmi_dae_R(jmi_t* jmi, jmi_real_t* res) {
     return jmi_func_F(jmi,jmi->dae->R, res);

@@ -335,6 +335,25 @@ typedef int (*jmi_next_time_event_func_t)(jmi_t* jmi, jmi_real_t* nextTime);
 typedef int (*jmi_residual_func_t)(jmi_t* jmi, jmi_ad_var_vec_p res);
 
 /**
+ * \brief Function signature for evaluation of a directional derivative function
+ * in the generated code.
+ *
+ * Notice that this function signature is used for all functions in
+ * the DAE, DAE initialization, and Optimization interfaces. Notice
+ * that this definition supports both C compilation and C++
+ * compilation with CppAD.
+ *
+ * @param jmi A jmi_t struct.
+ * @param res (Output) The residual value vector.
+ * @param dF (Output) The directional derivative of the residual function.
+ * @param dz the Seed vector of size n_x + n_x + n_u + n_w.
+ * @return Error code.
+ *
+ */
+typedef int (*jmi_directional_der_residual_func_t)(jmi_t* jmi, jmi_ad_var_vec_p res,
+		jmi_ad_var_vec_p dF, jmi_ad_var_vec_p dz);
+
+/**
  * \brief Function signature for evaluation of a equation block residual
  * function in the generated code.
  *
@@ -399,7 +418,8 @@ typedef int (*jmi_jacobian_func_t)(jmi_t* jmi, int sparsity,
  */
 int jmi_func_new(jmi_func_t** jmi_func, jmi_residual_func_t F,
                  int n_eq_F, jmi_jacobian_func_t dF,
-		 int dF_n_nz, int* dF_row, int* dF_col);
+		 int dF_n_nz, int* dF_row, int* dF_col,
+		 jmi_directional_der_residual_func_t dir_dF);
 
 /**
  * \brief Delete a jmi_func_t.
@@ -483,6 +503,20 @@ int jmi_func_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity,
 		    int *dF_n_cols, int *dF_n_nz);
 
 /**
+ * \brief Evaluate the directional derivative of the residual function of
+ * a jmi_func_t struct.
+ *
+ * @param jmi A jmi_t struct.
+ * @param func The jmi_func_t struct.
+ * @param res (Output) The DAE residual vector.
+ * @param dF (Output) The directional derivative.
+ * @param dz Seed vector of size n_x + n_x + n_u + n_w.
+ * @return Error code.
+ */
+int jmi_func_directional_dF(jmi_t *jmi, jmi_func_t *func, jmi_real_t *res,
+			 jmi_real_t *dF, jmi_real_t* dz);
+
+/**
  * \brief Data structure for representing a single function
  * \f$F(z)\f$.
  *
@@ -496,6 +530,7 @@ int jmi_func_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity,
 struct jmi_func_t{
 	jmi_residual_func_t F;  /**< \brief Pointer to a function for evaluation of \f$F(z)\f$. */
 	jmi_jacobian_func_t dF; /**< \brief Pointer to a function for evaluation of the Jacobian of \f$F(z)\f$. */
+	jmi_directional_der_residual_func_t dir_dF; /**< \brief Pointer to a function for evaluation of the directional derivative of the function */
 	int n_eq_F;             /**< \brief Size of the function. */
 	int dF_n_nz;            /**< \brief Number of non-zeros in the symbolic Jacobian of \f$F(z)\f$ (if available). */
 	int* dF_row;            /**< \brief Row indices of the non-zero elements in the symbolic Jacobian of \f$F(z)\f$ (if available). */
@@ -644,6 +679,7 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
  */
 int jmi_dae_init(jmi_t* jmi, jmi_residual_func_t F, int n_eq_F,
         jmi_jacobian_func_t dF, int dF_n_nz, int* dF_row, int* dF_col,
+        jmi_directional_der_residual_func_t dir_dF,
         jmi_residual_func_t R, int n_eq_R,
         jmi_jacobian_func_t dR, int dR_n_nz, int* dR_row, int* dR_col,
         jmi_generic_func_t ode_derivatives,

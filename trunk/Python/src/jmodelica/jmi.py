@@ -3096,6 +3096,16 @@ class JMIModel(object):
                                                            flags='C'),
                                             ct.POINTER(ct.c_int),
                                             ct.POINTER(ct.c_int)]   
+        self._dll.jmi_dae_directional_dF.argtypes = [ct.c_void_p,
+                                         Nct.ndpointer(dtype=c_jmi_real_t,
+                                                       ndim=1,
+                                                       flags='C'),
+                                         Nct.ndpointer(dtype=c_jmi_real_t,
+                                                       ndim=1,
+                                                       flags='C'),
+                                         Nct.ndpointer(dtype=c_jmi_real_t,
+                                                       ndim=1,
+                                                       flags='C')] 
         self._dll.jmi_dae_R.argtypes = [ct.c_void_p,
                                         Nct.ndpointer(dtype=c_jmi_real_t,
                                                       ndim=1,
@@ -4438,6 +4448,36 @@ class JMIModel(object):
             raise JMIException("Returning the number of columns and \
             non-zero elements failed.")        
         return int(dF_n_cols.value), int(dF_n_nz.value)
+
+    def dae_directional_dF(self, res, dF, dz):
+        """ 
+        Evaluate the directional derivative of the DAE residual function.
+
+        The directional derivative is defined as
+
+            dF = dF/dz * dz
+
+        where dF/dz is the Jacobian of the residual function F, dF
+        is the directional derivative and dz is the seed vector.
+        
+        
+        Parameters::
+        
+            res --
+                DAE residual vector. The size of res is equal to the number
+                of equations in the DAE residual. (Return variable)
+
+            dF --
+                The directional derivative of the DAE residual function.
+                The size of res is equal to the number of equations in the
+                DAE residual. (Return variable)
+
+            dz --
+                The seed vector. The size of dz is equal to 2*n_x + n_u + n_w.
+
+        """
+        if self._dll.jmi_dae_directional_dF(self._jmi, res, dF, dz) is not 0:
+            raise JMIException("Evaluating the directional derivative failed.")
 
     def dae_R(self, res):
         """ 

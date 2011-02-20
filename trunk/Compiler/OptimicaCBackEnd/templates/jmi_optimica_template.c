@@ -188,6 +188,11 @@ $C_DAE_equation_residuals$
 	return 0;
 }
 
+static int model_dae_dir_dF(jmi_t* jmi, jmi_ad_var_vec_p res, jmi_ad_var_vec_p dF, jmi_ad_var_vec_p dz) {
+$C_DAE_equation_directional_derivative$
+	return 0;
+}
+
 static int model_dae_R(jmi_t* jmi, jmi_ad_var_vec_p res) {
 $C_DAE_event_indicator_residuals$
 	return 0;
@@ -267,6 +272,7 @@ int jmi_new(jmi_t** jmi) {
 
 	/* Initialize the DAE interface */
 	jmi_dae_init(*jmi, *model_dae_F, N_eq_F, NULL, 0, NULL, NULL,
+		     *model_dae_dir_dF,
 		     *model_dae_R, N_eq_R, NULL, 0, NULL, NULL,*model_ode_derivatives,
                      *model_ode_outputs,*model_ode_initialize,*model_ode_guards,*model_ode_guards_init,
                      *model_ode_next_time_event);

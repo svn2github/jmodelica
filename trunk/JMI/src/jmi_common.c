@@ -59,7 +59,7 @@ jmi_real_t jmi_dremainder(jmi_real_t x, jmi_real_t y) {
 
 
 int jmi_func_new(jmi_func_t** jmi_func, jmi_residual_func_t F, int n_eq_F, jmi_jacobian_func_t dF,
-		int dF_n_nz, int* dF_row, int* dF_col) {
+		int dF_n_nz, int* dF_row, int* dF_col,jmi_directional_der_residual_func_t dir_dF) {
 
 	int i;
 
@@ -69,6 +69,7 @@ int jmi_func_new(jmi_func_t** jmi_func, jmi_residual_func_t F, int n_eq_F, jmi_j
 	func->n_eq_F = n_eq_F;
 	func->F = F;
 	func->dF = dF;
+	func->dir_dF = dir_dF;
 
 	func->dF_n_nz = dF_n_nz;
 	func->dF_row = (int*)calloc(dF_n_nz,sizeof(int));
@@ -327,6 +328,7 @@ int jmi_copy_pre_values(jmi_t *jmi) {
 int jmi_dae_init(jmi_t* jmi,
 		jmi_residual_func_t F, int n_eq_F, jmi_jacobian_func_t dF,
 		int dF_n_nz, int* dF_row, int* dF_col,
+		jmi_directional_der_residual_func_t dir_dF,
 		jmi_residual_func_t R, int n_eq_R, jmi_jacobian_func_t dR,
 		int dR_n_nz, int* dR_row, int* dR_col,
         jmi_generic_func_t ode_derivatives,
@@ -342,10 +344,10 @@ int jmi_dae_init(jmi_t* jmi,
 	jmi_dae_t* dae = (jmi_dae_t*)calloc(1,sizeof(jmi_dae_t));
 	jmi->dae = dae;
 
-	jmi_func_new(&jf_F,F,n_eq_F,dF,dF_n_nz,dF_row, dF_col);
+	jmi_func_new(&jf_F,F,n_eq_F,dF,dF_n_nz,dF_row, dF_col,dir_dF);
 	jmi->dae->F = jf_F;
 
-	jmi_func_new(&jf_R,R,n_eq_R,dR,dR_n_nz,dR_row, dR_col);
+	jmi_func_new(&jf_R,R,n_eq_R,dR,dR_n_nz,dR_row, dR_col,NULL);
 	jmi->dae->R = jf_R;
 
 	jmi->dae->ode_derivatives = ode_derivatives;
@@ -476,18 +478,18 @@ int jmi_init_init(jmi_t* jmi, jmi_residual_func_t F0, int n_eq_F0,
 	jmi_init_t* init = (jmi_init_t*)calloc(1,sizeof(jmi_init_t));
 	jmi->init = init;
 
-	jmi_func_new(&jf_F0,F0,n_eq_F0,dF0,dF0_n_nz,dF0_row, dF0_col);
+	jmi_func_new(&jf_F0,F0,n_eq_F0,dF0,dF0_n_nz,dF0_row, dF0_col, NULL);
 	jmi->init->F0 = jf_F0;
 
-	jmi_func_new(&jf_F1,F1,n_eq_F1,dF1,dF1_n_nz,dF1_row, dF1_col);
+	jmi_func_new(&jf_F1,F1,n_eq_F1,dF1,dF1_n_nz,dF1_row, dF1_col, NULL);
 	jmi->init->F1 = jf_F1;
 
-	jmi_func_new(&jf_Fp,Fp,n_eq_Fp,dFp,dFp_n_nz,dFp_row, dFp_col);
+	jmi_func_new(&jf_Fp,Fp,n_eq_Fp,dFp,dFp_n_nz,dFp_row, dFp_col, NULL);
 	jmi->init->Fp = jf_Fp;
 
 	jmi->init->eval_parameters = eval_parameters;
 
-	jmi_func_new(&jf_R0,R0,n_eq_R0,dFp,dR0_n_nz,dR0_row, dR0_col);
+	jmi_func_new(&jf_R0,R0,n_eq_R0,dFp,dR0_n_nz,dR0_row, dR0_col, NULL);
 	jmi->init->R0 = jf_R0;
 
 	return 0;
@@ -525,25 +527,25 @@ int jmi_opt_init(jmi_t* jmi, jmi_residual_func_t Ffdp,int n_eq_Fdp,
 	jmi->opt = opt;
 
 
-	jmi_func_new(&jf_Ffdp,Ffdp,n_eq_Fdp,dFfdp,dFfdp_n_nz,dFfdp_row, dFfdp_col);
+	jmi_func_new(&jf_Ffdp,Ffdp,n_eq_Fdp,dFfdp,dFfdp_n_nz,dFfdp_row, dFfdp_col, NULL);
 	jmi->opt->Ffdp = jf_Ffdp;
 
-	jmi_func_new(&jf_J,J,n_eq_J,dJ,dJ_n_nz,dJ_row, dJ_col);
+	jmi_func_new(&jf_J,J,n_eq_J,dJ,dJ_n_nz,dJ_row, dJ_col, NULL);
 	jmi->opt->J = jf_J;
 
-	jmi_func_new(&jf_L,L,n_eq_L,dL,dL_n_nz,dL_row, dL_col);
+	jmi_func_new(&jf_L,L,n_eq_L,dL,dL_n_nz,dL_row, dL_col, NULL);
 	jmi->opt->L = jf_L;
 
-	jmi_func_new(&jf_Ceq,Ceq,n_eq_Ceq,dCeq,dCeq_n_nz,dCeq_row, dCeq_col);
+	jmi_func_new(&jf_Ceq,Ceq,n_eq_Ceq,dCeq,dCeq_n_nz,dCeq_row, dCeq_col, NULL);
 	jmi->opt->Ceq = jf_Ceq;
 
-	jmi_func_new(&jf_Cineq,Cineq,n_eq_Cineq,dCineq,dCineq_n_nz,dCineq_row, dCineq_col);
+	jmi_func_new(&jf_Cineq,Cineq,n_eq_Cineq,dCineq,dCineq_n_nz,dCineq_row, dCineq_col, NULL);
 	jmi->opt->Cineq = jf_Cineq;
 
-	jmi_func_new(&jf_Heq,Heq,n_eq_Heq,dHeq,dHeq_n_nz,dHeq_row, dHeq_col);
+	jmi_func_new(&jf_Heq,Heq,n_eq_Heq,dHeq,dHeq_n_nz,dHeq_row, dHeq_col, NULL);
 	jmi->opt->Heq = jf_Heq;
 
-	jmi_func_new(&jf_Hineq,Hineq,n_eq_Hineq,dHineq,dHineq_n_nz,dHineq_row, dHineq_col);
+	jmi_func_new(&jf_Hineq,Hineq,n_eq_Hineq,dHineq,dHineq_n_nz,dHineq_row, dHineq_col, NULL);
 	jmi->opt->Hineq = jf_Hineq;
 
 	return 0;
