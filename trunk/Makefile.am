@@ -228,12 +228,12 @@ if HAVE_ANT
 endif
 
 docs:
-	cd $(srcdir); doxygen doc/JMI/jmi_doxydoc.conf
-#	cd $(srcdir); doxygen doc/ModelicaFrontEnd/modelica_frontend_doxydoc.conf
-#	cd $(srcdir); doxygen doc/OptimicaFrontEnd/optimica_frontend_doxydoc.conf
-	cd $(srcdir); doxygen doc/ModelicaCompiler/modelica_compiler_doxydoc.conf
-	cd $(srcdir); doxygen doc/OptimicaCompiler/optimica_compiler_doxydoc.conf
-	cd $(srcdir); doxygen doc/PyJMI/pyjmi_doxydoc.conf
+	cd $(abs_top_srcdir); doxygen doc/JMI/jmi_doxydoc.conf
+#	cd $(abs_top_srcdir); doxygen doc/ModelicaFrontEnd/modelica_frontend_doxydoc.conf
+#	cd $(abs_top_srcdir); doxygen doc/OptimicaFrontEnd/optimica_frontend_doxydoc.conf
+	cd $(abs_top_srcdir); doxygen doc/ModelicaCompiler/modelica_compiler_doxydoc.conf
+	cd $(abs_top_srcdir); doxygen doc/OptimicaCompiler/optimica_compiler_doxydoc.conf
+	cd $(abs_top_srcdir); doxygen doc/PyJMI/pyjmi_doxydoc.conf
 
 docbook-docs:
 	cd docbook/UsersGuide; $(MAKE) all
