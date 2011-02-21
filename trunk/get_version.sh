@@ -6,7 +6,7 @@ case ${TYPE} in
         echo ${DIR} | cut -d/ -f2
         ;;
     trunk)
-        svnversion $1 | sed -e 's/^.*://' -e 's/[^0-9]*//g' -e 's/^/r/'
+        svn info | sed -n -e 's/Revision: \(\|[0-9]*:\)\([0-9]*\)$/r\2/p'
         ;;
     *)
         echo unknown
