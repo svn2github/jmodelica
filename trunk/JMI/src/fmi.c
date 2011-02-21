@@ -506,6 +506,7 @@ fmiStatus fmi_event_update(fmiComponent c, fmiBoolean intermediateResults, fmiEv
     jmi_real_t* guards;
     jmi_real_t nextTimeEvent;       /* Next time event instant */
     jmi_real_t *switches; /* Switches */
+    jmi_real_t* t_temp;
     jmi_t* jmi;
     jmi = ((fmi_t*)c)->jmi;
 
@@ -542,11 +543,13 @@ fmiStatus fmi_event_update(fmiComponent c, fmiBoolean intermediateResults, fmiEv
         switches = jmi_get_sw(((fmi_t *)c)->jmi); /* Get the switches */
         for (j=0; j < nR; j=j+1){
             if (switches[j] == 1.0){
-                if (b_mode[j] <= ((fmi_t *)c)->fmi_epsilon){
+                /*if (b_mode[j] <= -1*((fmi_t *)c)->fmi_epsilon){ */
+                if (b_mode[j] <= 0.0){
                     switches[j] = 0.0;
                 }
             }else{
-                if (b_mode[j] >= ((fmi_t *)c)->fmi_epsilon){
+                /*if (b_mode[j] >= ((fmi_t *)c)->fmi_epsilon){ */
+                if (b_mode[j] > 0.0){
                     switches[j] = 1.0;
                 }
             }
@@ -576,7 +579,7 @@ fmiStatus fmi_event_update(fmiComponent c, fmiBoolean intermediateResults, fmiEv
         
         for (i=0; i < nR; i=i+1){
             if (switches[i] == 1.0){ /* Case when the switch are True */
-                if (a_mode[i] <= ((fmi_t *)c)->fmi_epsilon){
+                if (a_mode[i] <= -1*((fmi_t *)c)->fmi_epsilon){
                     eventInfo->iterationConverged = fmiFalse; /* Event iteration (not converged) */
                 }
             }else{ /* Case when the switch are False */
@@ -606,13 +609,22 @@ fmiStatus fmi_event_update(fmiComponent c, fmiBoolean intermediateResults, fmiEv
             
             /* Turn the switches */
             switches = jmi_get_sw(((fmi_t *)c)->jmi); /* Get the switches */
+            /*
+            t_temp = jmi_get_t(((fmi_t *)c)->jmi);
+            printf("Time %12.12f , c_event %12.20f switch %f \n", *t_temp, b_mode[0], switches[0]);
+            if (b_mode[0] <= 0.0){
+                printf("Event %1.20f \n",*t_temp);
+            }
+            */
             for (j=0; j < nR; j=j+1){
                 if (switches[j] == 1.0){
-                    if (b_mode[j] <= ((fmi_t *)c)->fmi_epsilon){
+                    /*if (b_mode[j] <= -1*((fmi_t *)c)->fmi_epsilon){*/
+                    if (b_mode[j] <= 0.0){
                         switches[j] = 0.0;
                     }
                 }else{
-                    if (b_mode[j] >= ((fmi_t *)c)->fmi_epsilon){
+                    /*if (b_mode[j] >= ((fmi_t *)c)->fmi_epsilon){*/
+                    if (b_mode[j] > 0.0){
                         switches[j] = 1.0;
                     }
                 }
@@ -639,7 +651,7 @@ fmiStatus fmi_event_update(fmiComponent c, fmiBoolean intermediateResults, fmiEv
             
             for (i=0; i < nR; i=i+1){
                 if (switches[i] == 1.0){ /* Case when the switch are True */
-                    if (a_mode[i] <= ((fmi_t *)c)->fmi_epsilon){
+                    if (a_mode[i] <= -1*((fmi_t *)c)->fmi_epsilon){
                         eventInfo->iterationConverged = fmiFalse; /* Event iteration (not converged) */
                     }
                 }else{ /* Case when the switch are False */
@@ -648,6 +660,8 @@ fmiStatus fmi_event_update(fmiComponent c, fmiBoolean intermediateResults, fmiEv
                     }
                 }
             }
+            
+            /*printf("ATime %12.12f , c_event %12.20f switch %f \n", *t_temp, a_mode[0], switches[0]); */
 
             /* Compare the values of the guards before and after the event */
 
