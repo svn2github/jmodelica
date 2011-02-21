@@ -233,7 +233,7 @@ docs:
 #	cd $(abs_top_srcdir); doxygen doc/OptimicaFrontEnd/optimica_frontend_doxydoc.conf
 	cd $(abs_top_srcdir); doxygen doc/ModelicaCompiler/modelica_compiler_doxydoc.conf
 	cd $(abs_top_srcdir); doxygen doc/OptimicaCompiler/optimica_compiler_doxydoc.conf
-	cd $(abs_top_srcdir); doxygen doc/PyJMI/pyjmi_doxydoc.conf
+	make -C $(abs_top_srcdir)/doc/PyJMI html
 
 docbook-docs:
 	cd docbook/UsersGuide; $(MAKE) all
