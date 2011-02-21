@@ -53,7 +53,7 @@ aspect AnnotationAPI {
 	eq FullClassDecl.annotation() = getAnnotations().annotation();
 	eq InstClassDecl.annotation() = getClassDecl().annotation();
 	
-	eq ComponentDecl.annotation()     = getCCComment().annotation();
+	eq ComponentDecl.annotation()     = getComment().annotation();
 	eq InstComponentDecl.annotation() = getComponentDecl().annotation();
 	
 	eq ParseAnnotation.annotation() = getClassModification().annotationNode();
