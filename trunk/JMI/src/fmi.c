@@ -215,6 +215,11 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
     eventInfo->terminateSimulation = fmiFalse;          /* Don't terminate the simulation */
     eventInfo->iterationConverged = fmiTrue;            /* The iteration has converged */
     
+    /* Sets the relative tolerance to a default value for use in Kinsol when tolerance controlled is false */
+    if (toleranceControlled == fmiFalse){
+        relativeTolerance = 1e-6;
+    }
+
     /* Set tolerance in the BLT blocks */
     for (i=0; i < ((fmi_t *)c)->jmi->n_dae_init_blocks; i=i+1){
         ((fmi_t *)c)->jmi->dae_init_block_residuals[i]->kin_ftol = relativeTolerance*safety_factor_newton;
