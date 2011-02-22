@@ -67,3 +67,6 @@ def run_demo(with_plots=True):
         plt.show()
 
     return be_colloc
+
+if __name__=="__main__":
+    run_demo()

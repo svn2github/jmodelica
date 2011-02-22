@@ -483,10 +483,10 @@ class Collocator:
         cnt = 0
         for t,i,j in self.get_time_points():
             t_opt[cnt] = t
-            dx_opt[cnt,:] = self.xx_opt[self.var_indices[i][j]['dx']]
-            x_opt[cnt,:] = self.xx_opt[self.var_indices[i][j]['x']]
-            u_opt[cnt,:] = self.xx_opt[self.var_indices[i][j]['u']]
-            w_opt[cnt,:] = self.xx_opt[self.var_indices[i][j]['w']]
+            dx_opt[cnt,:] = self.xx_opt[self.var_indices[i][j]['dx']][:,0]
+            x_opt[cnt,:]  = self.xx_opt[self.var_indices[i][j]['x']][:,0]
+            u_opt[cnt,:]  = self.xx_opt[self.var_indices[i][j]['u']][:,0]
+            w_opt[cnt,:]  = self.xx_opt[self.var_indices[i][j]['w']][:,0]
             cnt = cnt + 1
         return (t_opt,dx_opt,x_opt,u_opt,w_opt)
 
@@ -1202,7 +1202,6 @@ class RadauCollocator(Collocator):
                     self.vars[i][k]['dx'] = []
                     self.vars[i][k]['u'] = []
                     self.vars[i][k]['w'] = []
-
         # Group variables indices in the global
         # variable vector
         self.var_indices = {}
@@ -1239,11 +1238,13 @@ class RadauCollocator(Collocator):
         self.continuity_constraints = {}
 
         z = []
+        t = xmlocp.ocp.t0
         z += self.vars[1][0]['dx']
         z += self.vars[1][0]['x']
         z += self.vars[1][0]['u']
         z += self.vars[1][0]['w']
-        z += [xmlocp.var.t.sx()]
+        #z += [xmlocp.var.t.sx()]
+        z += [casadi.SX(t)]
         self.g += list(xmlocp.init_F0.eval([z])[0])
         self.g += list(xmlocp.dae_F.eval([z])[0])
 
@@ -1319,11 +1320,13 @@ class RadauCollocator(Collocator):
             
             # Assume Mayer cost
             z = []
+            t = xmlocp.ocp.tf
             z += self.vars[n_e][n_cp]['dx']
             z += self.vars[n_e][n_cp]['x']
             z += self.vars[n_e][n_cp]['u']
             z += self.vars[n_e][n_cp]['w']
-            z += [xmlocp.var.t.sx()]
+            #z += [xmlocp.var.t.sx()]
+            z += [casadi.SX(t)]
             self.cost_mayer = list(xmlocp.opt_J.eval([z])[0])[0]
             
 
