@@ -6,7 +6,7 @@ case ${TYPE} in
         echo ${DIR} | cut -d/ -f2
         ;;
     trunk)
-        svn info | sed -n -e 's/Revision: \(\|[0-9]*:\)\([0-9]*\)$/r\2/p'
+        svn info $1 | sed -n -e 's/Revision: \(\|[0-9]*:\)\([0-9]*\)$/r\2/p'
         ;;
     *)
         echo unknown
