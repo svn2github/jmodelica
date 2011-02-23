@@ -92,7 +92,7 @@ void fmi_free_model_instance(fmiComponent c) {
      * that have been allocated by the functions of the Model Exchange Interface for instance "c".*/
     if (c) {
         fmiCallbackFreeMemory fmi_free = ((fmi_t*)c) -> fmi_functions.freeMemory;
-        fmi_free(((fmi_t*)c) -> jmi);
+        free(((fmi_t*)c) -> jmi);
         fmi_free((void*)((fmi_t*)c) -> fmi_instance_name);
         fmi_free((void*)((fmi_t*)c) -> fmi_GUID);
         fmi_free(c);

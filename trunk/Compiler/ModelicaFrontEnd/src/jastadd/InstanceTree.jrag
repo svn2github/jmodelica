@@ -1456,13 +1456,27 @@ aspect SourceAST_API {
 	}
 
 	eq LibClassDecl.classes() {
-		ArrayList<ClassDecl> l = new ArrayList<ClassDecl>();
-		l.addAll(super.classes());
+		// Imposes ordering specified in LibClassDecl.order
+		Map<String,ClassDecl> map = new LinkedHashMap<String,ClassDecl>();
+		for (ClassDecl cd : super.classes())
+			map.put(cd.name(), cd);
 		for (LibNode ln : getLibNodes()) {
 		    for (Element e : ln.getStoredDefinition().getElements()) {
-				l.add((ClassDecl)e);
+		    	ClassDecl cd = (ClassDecl) e;
+				map.put(cd.name(), cd);
 			}
 		}
+		
+		ArrayList<ClassDecl> l = new ArrayList<ClassDecl>();
+		for (String name : order) {
+			ClassDecl cd = map.get(name);
+			if (cd != null) {
+				l.add(cd);
+				map.remove(name);
+			}
+		}
+		for (ClassDecl cd : map.values())
+			l.add(cd);
 		return l;
 	}
 

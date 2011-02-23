@@ -28,8 +28,10 @@ import java.io.PrintStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.MessageDigest;
-import java.security.DigestInputStream;
+import java.security.DigestOutputStream;
 import java.security.NoSuchAlgorithmException;
+
+import org.jmodelica.util.StreamGobbler;
 
 aspect FlatAPI {
 	
@@ -913,32 +915,15 @@ aspect FlatAPI {
 		
 	syn lazy String FClass.guid() {
 		try {
-			InputStream in = new PipedInputStream();
-			final PipedOutputStream out = new PipedOutputStream((PipedInputStream)in);
-			new Thread(
-					new Runnable() {
-						public void run(){
-							prettyPrint(new PrintStream(out),"");
-							try {
-								out.close();
-							} catch (IOException e) {
-								throw new RuntimeException(e);
-							}
-						}
-					}
-			).start();
+			PipedInputStream in = new PipedInputStream();
+			PipedOutputStream out = new PipedOutputStream(in);
 			
 			MessageDigest md5 = MessageDigest.getInstance("MD5");
+			new StreamGobbler(in).start();
+			prettyPrint(new PrintStream(new DigestOutputStream(out, md5)), "");
+			out.close();
 
-			try {
-				in = new DigestInputStream(in, md5);
-				byte[] b = new byte[512];
-				while(in.read(b) == b.length);
-			} finally {
-				in.close();
-			}
-			String signature = new BigInteger(1,md5.digest()).toString(16);
-			return signature;
+			return new BigInteger(1,md5.digest()).toString(16);
 			
 		} catch (IOException e) {
 			throw new RuntimeException(e);

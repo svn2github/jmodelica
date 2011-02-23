@@ -17,18 +17,17 @@
 
 import java.io.*;
 import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.Collections;
+
 import org.jmodelica.modelica.parser.*;
 
 aspect Library {
 	
 	syn lazy List InstProgramRoot.getInstLibClassDeclList() = new List();
-
-	public static boolean LibNode.packageMoPresentIn(File[] files) {
-	    for (File f : files)
-	        if (f.toString().endsWith("package.mo"))
-	            return true;
-	    return false;
-	}
+	
+	public static final String LibNode.PACKAGE_FILE = "package.mo";
+	public static final String LibNode.PACKAGE_ORDER_FILE = "package.order";
 	
 	syn lazy StoredDefinition LibNode.getStoredDefinition() {
 		
@@ -45,28 +44,21 @@ aspect Library {
 		*/
 	
 		//log.debug("LibNode.getStoredDefinition: "+ getName() + " enter");
-		/*
-		if (getName().equals("Utilities")) {
-			throw new RuntimeException("Wow");
-		}
-		*/
 	    
 	    
 		if (getStructured()) {
 			String dirName = getFileName();
+			File baseDir = new File(dirName);
+			File packageFile = new File(baseDir, PACKAGE_FILE);
 			try {
-				File baseDir = new File(dirName);
-				File[] allFiles = baseDir.listFiles();
-				if (allFiles==null) {
-					return createErrorStoredDefinition();
-				} 
 				
-				if (packageMoPresentIn(allFiles)) {
-				    log.info("Reading file: " + dirName+"/package.mo...");
+				if (packageFile.isFile()) {
+				    log.info("Reading file: " + packageFile);
 				    ParserHandler ph = new ParserHandler();
-				    SourceRoot sr = ph.parseFile(dirName+"/package.mo");
-				    FullClassDecl fcd = (FullClassDecl)sr.getProgram().getUnstructuredEntity(0).getElement(0);
-		   			sr.getProgram().getUnstructuredEntity(0).setFileName(dirName+"/package.mo");
+				    SourceRoot sr = ph.parseFile(packageFile.getPath());
+				    StoredDefinition entity = sr.getProgram().getUnstructuredEntity(0);
+				    FullClassDecl fcd = (FullClassDecl)entity.getElement(0);
+		   			entity.setFileName(packageFile.getPath());
 		   			LibClassDecl lcd = new LibClassDecl(fcd);
 		   				   				   			
 		   			/* Obtain a list of all files
@@ -78,47 +70,53 @@ aspect Library {
 	   				File[] filesUnStructured = baseDir.listFiles(new UnStructuredEntriesFilenameFilter());
 	   				log.debug("Scanning directory: " + dirName);
 	   				log.debug(" Unstructured entries: ");
-	   				for (int i=0;i<filesUnStructured.length;i++) {
-	   					log.debug("*** " + filesUnStructured[i].getName().substring(0,filesUnStructured[i].getName().length()-3));
-	   					log.debug("  "+filesUnStructured[i]);
-   						libnodes.add(new LibNode(filesUnStructured[i].toString(),
-	   				                         filesUnStructured[i].getName().substring(0,filesUnStructured[i].getName().length()-3),
-	   				                         false));	
-	   					
+	   				for (File file : filesUnStructured) {
+	   					log.debug("  " + file);
+	   					log.debug("*** " + fileBaseName(file));
+   						libnodes.add(new LibNode(file, false));	
 	   				}
+	   				
 	   				File[] dirs = baseDir.listFiles();
 	   				log.debug(" Structured entries: ");
-		   			for (int i=0;i<dirs.length;i++) {
-		   				if (dirs[i].isDirectory()){
-		   					log.debug("  " +dirs[i]);
-		   					log.debug("*** " + dirs[i].getName());
+		   			for (File dir : dirs) {
+		   				if (dir.isDirectory()){
+		   					log.debug("  " +dir);
+		   					log.debug("*** " + dir.getName());
 		   							   						   					
 	   						// Check if the directory contains a package.mo
 	   						// if not, do not add a LibNode
-	   						File baseDir_tmp = new File(dirs[i].getAbsolutePath());			
-							File[] allFiles_tmp = baseDir_tmp.listFiles();
+							File subPackageFile = new File(dir, PACKAGE_FILE);
 							
-	   						if (packageMoPresentIn(allFiles_tmp)) {
-		   						libnodes.add(new LibNode(dirs[i].toString(),
-		   				                         dirs[i].getName(),
-		   				                         true));
+	   						if (subPackageFile.isFile()) {
+		   						libnodes.add(new LibNode(dir, true));
 							} else {
-								log.debug("*** " + dirs[i].getName() + " Not added: no package.mo present");
+								log.debug("*** " + dir.getName() + " Not added: no package.mo present");
 							}
 						}
 	   			
 		   			}
 					lcd.setLibNodeList(libnodes);
-					sr.getProgram().getUnstructuredEntity(0).setElement(lcd,0);
+					
+					File orderFile = new File(baseDir, PACKAGE_ORDER_FILE);
+					if (orderFile.isFile()) {
+						BufferedReader in = new BufferedReader(new FileReader(orderFile));
+						java.util.List<String> order = new ArrayList<String>();
+						String line;
+						while ((line = in.readLine()) != null)
+							order.add(line);
+						lcd.setOrder(order);
+					}
+					
+					entity.setElement(lcd, 0);
 					//log.debug("LibNode.getStoredDefinition: "+ getName() + " exit1");
-	   				return sr.getProgram().getUnstructuredEntity(0);
+	   				return entity;
 	   			}
 			} catch (ParserException e) {
 				e.getProblem().setFileName(getFileName());
 				log.error(e.getProblem().toString());
 				return createErrorStoredDefinition();		        
 			} catch (Exception e) {
-				String msg = "Error when parsing file: '" + dirName + "/package.mo':\n" + 
+				String msg = "Error when parsing file: '" + packageFile + "':\n" + 
 						"   " + e.getClass().getName() + "\n";
 				if (e.getMessage() != null)
 					msg = msg + "   " + e.getMessage();
@@ -143,7 +141,7 @@ aspect Library {
 				return createErrorStoredDefinition();		        
 			} catch (Exception e) {
 				String msg = "Error when parsing file: '" + getFileName() + "':\n" + 
-				"   " + e.getClass().getName() + "\n";
+						"   " + e.getClass().getName() + "\n";
 				if (e.getMessage() != null)
 					msg = msg + "   " + e.getMessage();
 				log.error(msg);
@@ -152,6 +150,32 @@ aspect Library {
 			} 
 		}
 		return null;
+	}
+	
+	/**
+	 * Gets the name of the file, without file extension.
+	 */
+	public static String LibNode.fileBaseName(File f) {
+		String name = f.getName();
+		int p = name.lastIndexOf('.');
+		return (p > 0) ? name.substring(0, p) : name;
+	}
+	
+	/**
+	 * Check if a path points to a structured library.
+	 */
+	public static boolean LibNode.isStructuredLib(File f) {
+		return f.isDirectory() && new File(f, PACKAGE_FILE).isFile();
+	}
+	
+	public LibNode.LibNode(File loc, boolean structured) {
+		this(loc.getPath(), structured ? loc.getName() : fileBaseName(loc), structured);
+	}
+	
+	private java.util.List<String> LibClassDecl.order = Collections.emptyList();
+	
+	public void LibClassDecl.setOrder(java.util.List<String> order) {
+		this.order = order;
 	}
 	
 	private StoredDefinition LibNode.createErrorStoredDefinition() {
@@ -227,17 +251,13 @@ aspect Library {
                 File[] filesUnStructured = baseDir.listFiles(new UnStructuredEntriesFilenameFilter());
                 
                 for (File file : filesUnStructured){
-                    String name = file.getName().substring(0,file.getName().length()-3); 
-                    libnodes.add(new LibNode(file.toString(), name, false));            
+                    String name = LibNode.fileBaseName(file); 
+                    libnodes.add(new LibNode(file, false));            
                 }
                 
                 for (File dir : baseDir.listFiles()) {
-                    if (!dir.isDirectory())
-                        continue;
-                    
-                    File baseDir_tmp = new File(dir.getAbsolutePath());         
-                    if (LibNode.packageMoPresentIn(baseDir_tmp.listFiles()))
-                        libnodes.add(new LibNode(dir.toString(), dir.getName(), true));
+                    if (LibNode.isStructuredLib(dir))
+                    	libnodes.add(new LibNode(dir, true));
                 }
                 
             } catch (Exception e) {
@@ -254,7 +274,7 @@ aspect Library {
 			for (String pathElement : packagePath.split(File.pathSeparator)) {
 				if (!pathElement.equals("")) {
 					File dir = new File(pathElement);
-	                libnodes.add(new LibNode(dir.toString(), dir.getName(), true));
+	                libnodes.add(new LibNode(dir, true));
 				}
 			}
 		} catch (OptionRegistry.UnknownOptionException e1) {
@@ -269,7 +289,7 @@ aspect Library {
 	
 			public boolean accept(File dir, String name) {
 				
-				if (name.equals("package.mo"))
+				if (name.equals(LibNode.PACKAGE_FILE))
 					return false;
 				
 				return name.endsWith(".mo");
