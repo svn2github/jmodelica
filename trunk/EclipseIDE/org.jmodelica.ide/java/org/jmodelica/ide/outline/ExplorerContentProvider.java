@@ -16,6 +16,7 @@
 package org.jmodelica.ide.outline;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -69,8 +70,6 @@ public class ExplorerContentProvider implements ITreeContentProvider, IResourceC
 			return libList.hasChildren() ? new Object[] { libList } : null;
 		} else if (parentElement instanceof LibrariesList) {
 			return ((LibrariesList) parentElement).getChildren();
-		} else if (parentElement instanceof LibNode) {
-			return getClassesFromSD(((LibNode) parentElement).getStoredDefinition());
 		} else if (parentElement instanceof ClassDecl) {
 			return getVisible(((ClassDecl) parentElement).classes());
 		}
@@ -82,11 +81,9 @@ public class ExplorerContentProvider implements ITreeContentProvider, IResourceC
 			ASTNode<?> parent = getParentClass((ClassDecl) element);
 			if (parent instanceof StoredDefinition) {
 				if (parent.getParent() instanceof LibNode)
-					return parent.getParent();
+					return ((ClassDecl) element).getLibrariesList();
 				return ((StoredDefinition) parent).getFile();
 			}
-		} else if (element instanceof LibNode) {
-			return ((LibNode) element).getLibrariesList();
 		} else if (element instanceof LibrariesList) {
 			return ((LibrariesList) element).getParent();
 		} 
@@ -98,8 +95,6 @@ public class ExplorerContentProvider implements ITreeContentProvider, IResourceC
 			return true;
 		} else if (element instanceof LibrariesList) {
 			return ((LibrariesList) element).hasChildren();
-		} else if (element instanceof LibNode) {
-			return hasSDChildren(((LibNode) element).getStoredDefinition());
 		} else if (element instanceof ClassDecl) {
 			return ((ClassDecl) element).hasClasses();
 		}
@@ -120,29 +115,20 @@ public class ExplorerContentProvider implements ITreeContentProvider, IResourceC
 		return node;
 	}
 
-	private Object[] getClassesFromSD(ASTNode<?> node) {
+	private ASTNode[] getClassesFromSD(ASTNode<?> node) {
 		if (!(node instanceof StoredDefinition))
 			return null;
 		StoredDefinition sd = (StoredDefinition) node;
 		return getVisible(sd.getElements());
 	}
 
-	private Object[] getVisible(Iterable<?> objs) {
-		ArrayList<Object> list = new ArrayList<Object>();
-		for (Object e : objs) {
+	private ASTNode[] getVisible(Iterable<? extends ASTNode> objs) {
+		ArrayList<ASTNode> list = new ArrayList<ASTNode>();
+		for (ASTNode e : objs) {
 			if (e instanceof IOutlineNode && ((IOutlineNode) e).showInContentOutline())
 				list.add(e);
 		}
-		return list.toArray();
-	}
-
-	private boolean hasSDChildren(ASTNode<?> node) {
-		if (!(node instanceof StoredDefinition))
-			return false;
-		for (Element e : ((StoredDefinition) node).getElements())
-			if (e.showInContentOutline())
-				return true;
-		return false;
+		return list.toArray(new ASTNode[list.size()]);
 	}
 
 	public Object[] getElements(Object inputElement) {
@@ -200,7 +186,7 @@ public class ExplorerContentProvider implements ITreeContentProvider, IResourceC
 	
 	public class LibrariesList implements IASTRegistryListener {
 		
-		private LibNode[] libraries;
+		private ASTNode[] libraries;
 		private IProject project;
 		
 		public LibrariesList(IProject project) {
@@ -210,25 +196,31 @@ public class ExplorerContentProvider implements ITreeContentProvider, IResourceC
 		}
 
 		private void readLibraries() {
+			libraries = null;
+			
 			IASTNode ast = registry.lookupAST(null, project);
 			if (ast instanceof SourceRoot) {
-				
-			    List<LibNode> libNodes = 
-				    ((SourceRoot) ast).getProgram().getLibNodes();
-				
-			    int n = libNodes.getNumChild();
+			    List<LibNode> libNodes = ((SourceRoot) ast).getProgram().getLibNodes();
+			    int nl = libNodes.getNumChild();
+			    int n = 0;
+			    ASTNode[][] nodes = new ASTNode[nl][];
+			    for (int i = 0; i < nl; i++) {
+			    	nodes[i] = getClassesFromSD(libNodes.getChild(i).getStoredDefinition());
+			    	n += nodes[i].length;
+			    }
 				
 			    if (n > 0) {
-					libraries = new LibNode[n];
-					for (int i = 0; i < n; i++) {
-						libraries[i] = libNodes.getChild(i);
+					libraries = new ASTNode[n];
+					for (int i = 0, j = 0; i < n; j += nodes[i].length, i++) 
+						System.arraycopy(nodes[i], 0, libraries, j, nodes[i].length);
+				    for (int i = 0; i < n; i++) 
 						libraries[i].setLibrariesList(this);
-					}
+					
 				}
 			}
 		}
 		
-		public LibNode[] getChildren() {
+		public ASTNode[] getChildren() {
 			return libraries;
 		}
 		

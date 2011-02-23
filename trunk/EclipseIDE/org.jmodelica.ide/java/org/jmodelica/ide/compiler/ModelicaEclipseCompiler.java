@@ -65,7 +65,7 @@ public class ModelicaEclipseCompiler extends AbstractCompiler {
 				switch (resource.getType()) {
 				case IResource.FOLDER:
 					File dir = new File(resource.getRawLocation().toOSString());
-					if (dir.isDirectory() && LibNode.packageMoPresentIn(dir.listFiles())) 
+					if (LibNode.isStructuredLib(dir)) 
 						compilationRoot.addPackageDirectory(dir);
 					else
 						recursiveCompile(compilationRoot, (IFolder) resource, monitor);

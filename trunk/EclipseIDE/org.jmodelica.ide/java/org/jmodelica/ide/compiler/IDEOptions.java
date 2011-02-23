@@ -7,6 +7,7 @@ import org.eclipse.core.resources.IProject;
 import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.helpers.Util;
 import org.jmodelica.ide.preferences.Preferences;
+import org.jmodelica.modelica.compiler.ModelicaCompiler;
 import org.jmodelica.util.OptionRegistry;
 import org.xml.sax.SAXException;
 
@@ -38,6 +39,10 @@ public IDEOptions(IProject project) {
 		
 	    String modelicaPath = Preferences.get(project, IDEConstants.PREFERENCE_LIBRARIES_ID);
 		setStringOption("MODELICAPATH", modelicaPath);
+
+		// Set standard options for FMU
+        ModelicaCompiler mc = new ModelicaCompiler(this);
+        mc.defaultOptionsFMU();
     } catch (Exception e) {
     	// TODO: Do something constructive. An error message or something.
         e.printStackTrace();
