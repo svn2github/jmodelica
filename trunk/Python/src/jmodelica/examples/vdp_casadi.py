@@ -23,60 +23,47 @@ import numpy as N
 import matplotlib.pyplot as plt
 
 # Import the JModelica.org Python packages
-from jmodelica.jmi import compile_jmu
-
-from jmodelica.io import ResultDymolaTextual
-
-from jmodelica.optimization.casadi_collocation import XMLOCP
-from jmodelica.optimization.casadi_collocation import RadauCollocator
+from jmodelica.casadi_interface import compile_casadi, CasadiModel
 
 def run_demo(with_plots=True):
     """
     Demonstrate how to solve a dynamic optimization problem based on a Van der 
     Pol oscillator system.
     """
-
     curr_dir = os.path.dirname(os.path.abspath(__file__));
 
-    jn = compile_jmu("VDP_pack.VDP_Opt2", curr_dir+"/files/VDP.mop",compiler_options={'generate_xml_equations':True})
+    jn = compile_casadi("VDP_pack.VDP_Opt2", curr_dir+"/files/VDP.mop")
 
-    #xml_file_name = unzip_unit(archive='./CSTR_CSTR_Opt2.jmu')[1]
-    os.system("unzip ./VDP_pack_VDP_Opt2.jmu")
-    xmlmodel = XMLOCP("modelDescription.xml")
-    be_colloc = RadauCollocator(xmlmodel,50,3)
-    be_colloc.solve()
-    be_colloc.write_result()
+    model = CasadiModel(jn)
 
-    res = ResultDymolaTextual('VDP_pack.VDP_Opt2'+'_result.txt')
+    res = model.optimize()
     
     # Extract variable profiles
-    x1 = res.get_variable_data('x1')
-    x2 = res.get_variable_data('x2')
-    #u = res.get_variable_data('cost')
-    uu= [res.data[1][i][7] for i in range(150)]
-    tt= [res.data[1][i][0] for i in range(150)]
+    x1   = res['x1']
+    x2   = res['x2']
+    u    = res['u']
+    time = res['time']
+    cost = res['cost']
 
-    cost = res.get_variable_data('cost')
-
-    #assert N.abs(cost.x[-1] - 2.3469089e+01) < 1e-3, \
-    #        "Wrong value of cost function in vdp.py"  
+    assert N.abs(cost[-1] - 2.3469089e+01) < 1e-3, \
+            "Wrong value of cost function in vdp.py"  
 
     if with_plots:
         # Plot
         plt.figure(1)
         plt.clf()
         plt.subplot(311)
-        plt.plot(x1.t,x1.x)
+        plt.plot(time,x1)
         plt.grid()
         plt.ylabel('x1')
         
         plt.subplot(312)
-        plt.plot(x2.t,x2.x)
+        plt.plot(time,x2)
         plt.grid()
         plt.ylabel('x2')
         
         plt.subplot(313)
-        plt.plot(tt,uu)
+        plt.plot(time,u)
         plt.grid()
         plt.ylabel('u')
         plt.xlabel('time')
