@@ -39,6 +39,10 @@
         <listitem>
           <para>Improved initialization with Kinsol and SuperLU</para>
         </listitem>
+
+        <listitem>
+          <para>Improved support for external functions.</para>
+        </listitem>
       </itemizedlist>
     </section>
 
@@ -55,24 +59,90 @@
         <title>Equation sorting</title>
 
         <para>Equations are sorted using Tarjan's algorithm and the resulting
-        BLT representation is used in the C code generation.</para>
+        BLT representation is used in the C code generation. Also, trivial
+        equations are solved and converted into assignment statements.</para>
+      </section>
+
+      <section>
+        <title>Connections</title>
+
+        <para>Added support for connecting arrays of components and for
+        connect equations in for clauses.</para>
+      </section>
+
+      <section>
+        <title>Eclipse IDE</title>
+
+        <para>The JModelica plugin for Eclipse has been updated to be more
+        stable and to syntax highlight Modelica 3.2 code properly.</para>
+      </section>
+
+      <section>
+        <title>Miscellaneous</title>
+
+        <para>Fixed several compiler bugs.</para>
       </section>
     </section>
 
     <section>
       <title>Simulation</title>
 
-      <para></para>
+      <section>
+        <title>FMU export</title>
+
+        <para>JModelica.org 1.5 supports export of Functional Mock-up
+        Interface (FMI) compliant models (FMUs). The exported models follows
+        the FMI standard and may be imported in other FMI compilant simulation
+        tools, or they may be simulated using JModelica.org using the FMU
+        import feature introduced in version 1.4. The exported FMUs contain an
+        XML file, containing model meta data such as variable names, a DLL,
+        containing the compiled C functions specified by FMI, and additional
+        files containing the flattened Modelica model useful for debugging
+        purposes.</para>
+      </section>
+
+      <section>
+        <title>Simulation of ODEs</title>
+
+        <para>A causalization approach to simulation of Modelica models has
+        been implemented. This means that the DAE resulting from flattening is
+        transformed into an ODE, and ODE solvers can be used to simulate the
+        model. This feature is a requirement for export of FMUs. This strategy
+        has required the symbolic algorithms and the C code generation module
+        to be adapted as described above. In addition, the simulation runtime
+        system has been extended to allow for trivial equations converted into
+        assignments and for implicit systems of equations. The latter are
+        solved using the Newton solver KINSOL, modified to support
+        regularization to handle singular Jacobian matrices.</para>
+      </section>
+
+      <section>
+        <title>Simulation of hybrid and sampled systems</title>
+
+        <para>When clauses are now supported, as well as the sample operator.
+        Accordingly, some classes of hybrid systems may be simulated as well
+        as sampled control systems. In addition, variables of type Integer and
+        Boolean are also supported.</para>
+      </section>
     </section>
 
     <section>
-      <title>Initialization</title>
+      <title>Initialization of DAEs</title>
 
-      <para>A new initialization algorithm KInitSolveAlg is available. This
-      algorithm is based on KINSOL from the SUNDIALS suite and also adds the
-      possiblity to treat the problem as sparse by using SuperLU. A
-      regularization method is also implemented to handle singular
-      jacobians.</para>
+      <para>A novel initialization algorithm based on the Newton solver KINSOL
+      from the SUNDIALS suite is introduced. The KINSOL solver has been
+      improved by adding support for Jacobian regularization in order to
+      handle singular Jacobians and by interfacing the sparse linear solver
+      SuperLU in order to more efficiently handle large scale systems.</para>
+
+    </section>
+
+    <section>
+      <title>Optimization</title>
+
+      <para>Curtis Powell Reid seeding has been implemented to speed up
+      computation of sparse Jacobians. When solving large optimization
+      problems, this can give a speed-up factor of up to 10-15.</para>
     </section>
 
     <section>

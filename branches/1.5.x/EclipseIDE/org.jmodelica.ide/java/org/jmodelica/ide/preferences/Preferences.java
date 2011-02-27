@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -91,6 +92,22 @@ public class Preferences extends AbstractPreferenceInitializer {
 	public static void clear(IProject proj, String key) {
 		new ProjectScope(proj).getNode(IDEConstants.PLUGIN_ID).remove(key);
 	}
+	
+	public static void addListener(IPreferenceChangeListener listener) {
+		new InstanceScope().getNode(IDEConstants.PLUGIN_ID).addPreferenceChangeListener(listener);
+	}
+	
+	public static void addListener(IProject proj, IPreferenceChangeListener listener) {
+		new ProjectScope(proj).getNode(IDEConstants.PLUGIN_ID).addPreferenceChangeListener(listener);
+	}
+	
+	public static void removeListener(IPreferenceChangeListener listener) {
+		new InstanceScope().getNode(IDEConstants.PLUGIN_ID).removePreferenceChangeListener(listener);
+	}
+	
+	public static void removeListener(IProject proj, IPreferenceChangeListener listener) {
+		new ProjectScope(proj).getNode(IDEConstants.PLUGIN_ID).removePreferenceChangeListener(listener);
+	}
 
 	@Override
 	public void initializeDefaultPreferences() {
@@ -122,6 +139,9 @@ public class Preferences extends AbstractPreferenceInitializer {
 		Color annoBG = new Color(Display.getCurrent(), HilightScanner.DEFAULT_ANNO_BG);
 		node.put(IDEConstants.PREFERENCE_ANNO_BG_ID, writeColor(annoBG));
 		HilightScanner.readColors();
+		
+		// Store default class sort order
+		node.put(IDEConstants.PREFERENCE_EXPLORER_SORT_ORDER, IDEConstants.SORT_DECLARED);
 	}
 
 	protected String getExtractedMSLPath() {

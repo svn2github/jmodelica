@@ -195,6 +195,15 @@ aspect EquationSolve {
 
 aspect Derivatives {
 
+	public FAbstractEquation FAbstractEquation.diff(String name) {
+		return null;
+	}
+	
+	public FAbstractEquation FEquation.diff(String name) {
+		return dynamicFAbstractEquation(new FEquation(getLeft().diff(name),
+			getRight().diff(name)));
+	}
+
 	public FExp FExp.diff(String name, int n) {
 		FExp e = diff(name);
 			
@@ -234,6 +243,25 @@ aspect Derivatives {
 			new	FPowExp((FExp)getRight().fullCopy(),new FIntegerLitExp("2"))));
 	}
 
+	public FExp FPowExp.diff(String name) {
+		FExp exponent;
+		FExp e;
+		if (getRight().variability().constantVariability()) {
+			double exponentValue = getRight().ceval().realValue();
+			if (exponentValue==2.0) {
+				e = (FExp)getLeft().fullCopy();
+			} else {
+				exponent = new FRealLitExp((getRight().ceval().realValue()-1) + "");
+				e = new FPowExp((FExp)getLeft().fullCopy(),exponent);	
+			}
+		} else {
+			exponent = new FSubExp((FExp)getRight().fullCopy(),new FIntegerLitExp("1"));
+			e = new FPowExp((FExp)getLeft().fullCopy(),exponent);
+		}
+			
+		return dynamicFExp(new FMulExp(new FMulExp((FExp)getRight().fullCopy(),
+		                        e),getLeft().diff(name)));	
+	}
 
 	public FExp FSinExp.diff(String name) {
 		return dynamicFExp(new FMulExp(new FCosExp((FExp)getFExp().fullCopy()),
@@ -242,9 +270,29 @@ aspect Derivatives {
 
 	public FExp FIdUseExp.diff(String name) {	
 		if (variability().parameterOrLess()) {
-			return dynamicFExp(new FRealLitExp(""));		
+			return dynamicFExp(new FRealLitExp("0"));		
 		} else if (name.equals("time")) {
 			return dynamicFExp(new FDerExp((FIdUse)getFIdUse().fullCopy()));
+		} else if (name.equals(name())) {
+			return dynamicFExp(new FRealLitExp("1"));
+		} else {
+			return dynamicFExp(new FRealLitExp("0"));
+		}
+	}
+	
+	public FExp FDerExp.diff(String name) {	
+		if (name.equals("time")) {
+			return dynamicFExp(new FHDerExp((FIdUse)getFIdUse().fullCopy(),2));
+		} else if (name.equals(name())) {
+			return dynamicFExp(new FRealLitExp("1"));
+		} else {
+			return dynamicFExp(new FRealLitExp("0"));
+		}
+	}
+
+	public FExp FHDerExp.diff(String name) {	
+		if (name.equals("time")) {
+			return dynamicFExp(new FHDerExp((FIdUse)getFIdUse().fullCopy(),getOrder()+1));
 		} else if (name.equals(name())) {
 			return dynamicFExp(new FRealLitExp("1"));
 		} else {

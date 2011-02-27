@@ -309,12 +309,15 @@ extern "C" {
 
 #define JMI_DER_SYMBOLIC 1          /**< \brief Use symbolic evaluation of derivatives (if available). */
 #define JMI_DER_CPPAD 2             /**< \brief Use automatic differentiation (CppAD) to evaluate derivatives. */
+#define JMI_DER_CAD 4             /**< \brief Use automatic differentiation (generated C code) to evaluate derivatives. */
+#define JMI_DER_FD 8             /**< \brief Use finite differences to evaluate derivatives. */
 
 #define JMI_DER_SPARSE 1            /**< \brief Sparse evaluation of derivatives. */
 #define JMI_DER_DENSE_COL_MAJOR 2   /**<  \brief Dense evaluation (column major) of derivatives. */
 #define JMI_DER_DENSE_ROW_MAJOR 4   /**<  \brief Dense evaluation (row major) of derivatives. */
 
 /* Flags for evaluation of Jacobians w.r.t. parameters in the p vector */
+#define JMI_DER_P_OPT 0               /**< \brief Evaluate derivatives w.r.t. real free parameters, \f$p_{opt}\f$.*/
 #define JMI_DER_CI 1               /**< \brief Evaluate derivatives w.r.t. real independent constants, \f$c_i\f$.*/
 #define JMI_DER_CD 2               /**< \brief Evaluate derivatives w.r.t. real dependent constants, \f$c_d\f$.*/
 #define JMI_DER_PI 4               /**< \brief Evaluate derivatives w.r.t. real independent parameters, \f$p_i\f$.*/
@@ -1129,6 +1132,28 @@ int jmi_dae_dF_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
  */
 int jmi_dae_dF_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
 		int *dF_n_cols, int *dF_n_nz);
+
+/**
+ * \brief Evaluate the directional derivative of the DAE residual function.
+ *
+ * The directional derivative is defined as
+ *
+ *   dF = dF/dz * dz
+ *
+ * where dF/dz is the Jacobian of the residual function F, dF
+ * is the directional derivative and dz is the seed vector.
+ *
+ * The user sets the input variables by writing to
+ * the vectors obtained from the functions ::jmi_get_dx, ::jmi_get_x etc.
+ *
+ * @param jmi A jmi_t struct.
+ * @param res (Output) The DAE residual vector.
+ * @param dF (Output) The directional derivative.
+ * @param dz Seed vector of size n_x + n_x + n_u + n_w.
+ * @return Error code.
+ *
+ */
+int jmi_dae_directional_dF(jmi_t* jmi, jmi_real_t* res, jmi_real_t* dF, jmi_real_t* dz);
 
 /**
  * \brief Evaluate DAE event indicator residuals.

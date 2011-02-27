@@ -207,7 +207,7 @@
       <page
             class="org.jmodelica.ide.preferences.ProjectPropertyPage"
             id="org.jmodelica.ide.property.modelica"
-            name="JModelica">
+            name="Modelica">
          <enabledWhen>
             <instanceof
                   value="org.eclipse.core.resources.IProject">
@@ -323,13 +323,18 @@
             id="org.jmodelica.ide.command.compile.fmu"
             name="Compile to FMU">
       </command>
+      <command
+            defaultHandler="org.jmodelica.ide.commands.ClassOrderHandler"
+            id="org.jmodelica.ide.commands.sort.order"
+            name="Sort Alphabetically">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.preferencePages">
       <page
             class="org.jmodelica.ide.preferences.ModelicaPreferencePage"
             id="org.jmodelica.ide.preference.modelica"
-            name="JModelica">
+            name="Modelica">
       </page>
    </extension>
    <extension
@@ -337,5 +342,19 @@
       <initializer
             class="org.jmodelica.ide.preferences.Preferences">
       </initializer>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:org.eclipse.ui.views.ContentOutline">
+         <command
+               commandId="org.jmodelica.ide.commands.sort.order"
+               icon="resources/icons/dummy.png"
+               label="Sort Alphabetically"
+               mnemonic="A"
+               style="toggle">
+         </command>
+      </menuContribution>
    </extension>
 </plugin>

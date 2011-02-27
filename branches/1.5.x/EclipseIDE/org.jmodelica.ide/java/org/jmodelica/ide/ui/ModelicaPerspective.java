@@ -18,6 +18,7 @@ package org.jmodelica.ide.ui;
 import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
+import org.eclipse.ui.console.IConsoleConstants;
 import org.eclipse.ui.progress.IProgressConstants;
 import org.jmodelica.ide.IDEConstants;
 
@@ -45,7 +46,7 @@ public class ModelicaPerspective implements IPerspectiveFactory {
 		layout.addShowViewShortcut(IPageLayout.ID_TASK_LIST);
 		layout.addShowViewShortcut(IProgressConstants.PROGRESS_VIEW_ID);
 //		layout.addShowViewShortcut(NewSearchUI.SEARCH_VIEW_ID);     // Later?
-//		layout.addShowViewShortcut(IConsoleConstants.ID_CONSOLE_VIEW);     // Later?
+		layout.addShowViewShortcut(IConsoleConstants.ID_CONSOLE_VIEW);
 		
 		// Explorer view
 		IFolderLayout explorefolder = layout.createFolder("left", IPageLayout.LEFT, (float)0.25, edit);
@@ -57,7 +58,7 @@ public class ModelicaPerspective implements IPerspectiveFactory {
 		outputfolder.addPlaceholder(IPageLayout.ID_BOOKMARKS);
 		outputfolder.addPlaceholder(IPageLayout.ID_TASK_LIST);
 		outputfolder.addPlaceholder(IProgressConstants.PROGRESS_VIEW_ID);
-//		outputfolder.addPlaceholder(IConsoleConstants.ID_CONSOLE_VIEW);     // Later?
+		outputfolder.addPlaceholder(IConsoleConstants.ID_CONSOLE_VIEW);
 		
 		// Outline views
 		IFolderLayout outlinefolder = layout.createFolder("right", IPageLayout.RIGHT, (float)0.75, edit);

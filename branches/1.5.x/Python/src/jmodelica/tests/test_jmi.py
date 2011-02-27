@@ -1564,3 +1564,4 @@ class TestEmptyModelException(object):
        Test that an exception is raised.
        """
        nose.tools.assert_raises(JMIException,JMUModel,jmi.get_jmu_name(self._cpath))
+

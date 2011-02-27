@@ -28,8 +28,10 @@ import java.io.PrintStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.MessageDigest;
-import java.security.DigestInputStream;
+import java.security.DigestOutputStream;
 import java.security.NoSuchAlgorithmException;
+
+import org.jmodelica.util.StreamGobbler;
 
 aspect FlatAPI {
 	
@@ -171,6 +173,98 @@ aspect FlatAPI {
 	syn int FVariable.aliasValueReference() = alias()!=null? 
 		alias().valueReference(): -1;
 
+	syn int FVariable.indexInZ() = valueReference() & 0x0FFFFFFF;
+
+	syn int FClass.independentRealConstantsOffset() = 0;
+	syn int FClass.independentIntegerConstantsOffset() = 
+		numIndependentRealConstants();	
+	syn int FClass.independentBooleanConstantsOffset() = 
+		numIndependentRealConstants() + 
+		numIndependentIntegerConstants();	
+	syn int FClass.independentStringConstantsOffset() = 
+		numIndependentRealConstants() + 
+		numIndependentIntegerConstants()
+		+ numIndependentBooleanConstants();
+		
+	syn int FClass.dependentRealConstantsOffset() = 
+		independentStringConstantsOffset() + 
+		numIndependentStringConstants();
+	syn int FClass.dependentIntegerConstantsOffset() =
+		dependentRealConstantsOffset() + 	 
+		numDependentRealConstants();	
+	syn int FClass.dependentBooleanConstantsOffset() =
+		dependentIntegerConstantsOffset() + 	  
+		numDependentIntegerConstants();	
+	syn int FClass.dependentStringConstantsOffset() = 
+		dependentBooleanConstantsOffset() + 	  
+		+ numDependentBooleanConstants();
+
+	syn int FClass.independentRealParametersOffset() = 
+		dependentStringConstantsOffset() + 
+		numDependentStringConstants();
+	syn int FClass.independentIntegerParametersOffset() =
+		independentRealParametersOffset() + 	 
+		numIndependentRealParameters();	
+	syn int FClass.independentBooleanParametersOffset() =
+		independentIntegerParametersOffset() + 	  
+		numIndependentIntegerParameters();	
+	syn int FClass.independentStringParametersOffset() = 
+		independentBooleanParametersOffset() + 	  
+		+ numIndependentBooleanParameters();
+		
+	syn int FClass.dependentRealParametersOffset() = 
+		independentStringParametersOffset() + 
+		numIndependentStringParameters();
+	syn int FClass.dependentIntegerParametersOffset() =
+		dependentRealParametersOffset() + 	 
+		numDependentRealParameters();	
+	syn int FClass.dependentBooleanParametersOffset() =
+		dependentIntegerParametersOffset() + 	  
+		numDependentIntegerParameters();	
+	syn int FClass.dependentStringParametersOffset() = 
+		dependentBooleanParametersOffset() + 	  
+		+ numDependentBooleanParameters();
+
+	syn int FClass.derivativeVariablesOffset() = 
+		dependentStringParametersOffset() + 
+		numDependentStringParameters();
+	syn int FClass.differentiatedRealVariablesOffset() = 
+		derivativeVariablesOffset() + 
+		numDerivativeVariables();
+	syn int FClass.realInputsOffset() = 
+		differentiatedRealVariablesOffset() + 
+		numDifferentiatedRealVariables();
+	syn int FClass.algebraicRealVariablesOffset() = 
+		realInputsOffset() + 
+		numRealInputs();
+
+	syn int FClass.timeOffset() =
+	    algebraicRealVariablesOffset() + 
+	    numAlgebraicRealVariables();
+
+	syn int FClass.discreteRealVariablesOffset() = 
+		timeOffset() + 1;
+		
+	syn int FClass.discreteIntegerVariablesOffset() = 
+		discreteRealVariablesOffset() + 
+		numDiscreteRealVariables();
+	syn int FClass.discreteEnumVariablesOffset() = 
+		discreteIntegerVariablesOffset() + 
+		numDiscreteIntegerVariables();
+
+	syn int FClass.integerInputsOffset() = 
+		discreteEnumVariablesOffset() + 
+		numDiscreteEnumVariables();
+	syn int FClass.enumInputsOffset() = 
+		integerInputsOffset() + 
+		numIntegerInputs();
+
+	syn int FClass.discreteBooleanVariablesOffset() = 
+		enumInputsOffset() + 
+		numEnumInputs();
+	syn int FClass.booleanInputsOffset() = 
+		discreteBooleanVariablesOffset() + 
+		numDiscreteBooleanVariables();
 
 	syn boolean FVariable.shouldContribute() = !isAlias() && !inRecord() && !isForIndex();
 	
@@ -446,6 +540,13 @@ aspect FlatAPI {
 	}
 	syn int FVariable.algebraicRealVariableIndex() =
 		myFClass().algebraicRealVariables().indexOf(this);
+
+	// There are no free parameters in the Modelica compiler
+	// but these attributes are refined in the Optimica compiler
+	syn int FClass.numFreeParameters() {
+		return 0;
+ 	}
+
 
 	/*
     syn int FClass.numAlgebraicRealVariables() = algebraicRealVariables().size();
@@ -913,32 +1014,15 @@ aspect FlatAPI {
 		
 	syn lazy String FClass.guid() {
 		try {
-			InputStream in = new PipedInputStream();
-			final PipedOutputStream out = new PipedOutputStream((PipedInputStream)in);
-			new Thread(
-					new Runnable() {
-						public void run(){
-							prettyPrint(new PrintStream(out),"");
-							try {
-								out.close();
-							} catch (IOException e) {
-								throw new RuntimeException(e);
-							}
-						}
-					}
-			).start();
+			PipedInputStream in = new PipedInputStream();
+			PipedOutputStream out = new PipedOutputStream(in);
 			
 			MessageDigest md5 = MessageDigest.getInstance("MD5");
+			new StreamGobbler(in).start();
+			prettyPrint(new PrintStream(new DigestOutputStream(out, md5)), "");
+			out.close();
 
-			try {
-				in = new DigestInputStream(in, md5);
-				byte[] b = new byte[512];
-				while(in.read(b) == b.length);
-			} finally {
-				in.close();
-			}
-			String signature = new BigInteger(1,md5.digest()).toString(16);
-			return signature;
+			return new BigInteger(1,md5.digest()).toString(16);
 			
 		} catch (IOException e) {
 			throw new RuntimeException(e);
@@ -991,11 +1075,13 @@ aspect FlatCausality {
 	syn boolean FTypePrefixInputOutput.outputCausality() = false;
 	eq FOutput.outputCausality() = true;	
 	
-    syn boolean FVariable.isInput() = 
+	syn boolean AbstractFVariable.isInput() = false;
+    eq FVariable.isInput() = 
       hasFTypePrefixInputOutput()? getFTypePrefixInputOutput().inputCausality(): false;    
-    syn boolean FVariable.isOutput() = 
+    syn boolean AbstractFVariable.isOutput() = false;
+    eq FVariable.isOutput() = 
       hasFTypePrefixInputOutput()? getFTypePrefixInputOutput().outputCausality(): false;
-
+      
 }
 
 aspect FlatTypes {
@@ -1199,6 +1285,7 @@ aspect FVariableUses {
 	 * \brief Collection attribute returning all dependent parameters which
 	 * depends on the parameter.
 	 */
+	
 	coll HashSet<FVariable> AbstractFVariable.dependentParameters() 
 	  [new LinkedHashSet<FVariable>()] 
 		with addAll root FlatRoot;
@@ -1219,6 +1306,35 @@ aspect FVariableUses {
 
 	syn lazy ArrayList<FStringVariable> AbstractFVariable.dependentStringParameters() =
 	    FClass.intersection(myFClass().strings(), dependentParameters());
+
+	/**
+	 * \brief Collection attribute returning all input variables (FVariables)
+	 * referenced in an equation.
+	 */
+	 
+	coll LinkedHashSet<FVariable> FAbstractEquation.retrieveInputs() 
+		[new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
+
+	FIdUseExp contributes (FVariable)myFV() when !myFV().isUnknown() && 
+		!(getParent() instanceof FDerExp) && !(getParent() instanceof FPreExp) && 
+		myFV().isInput() to 
+		FAbstractEquation.retrieveInputs() for myFEquation();
+
+	syn lazy LinkedHashSet<FVariable> FAbstractEquation.inputs() = 
+	    retrieveInputs();
+	
+	eq FWhenEquation.inputs()  {
+		LinkedHashSet<FVariable> s = new LinkedHashSet<FVariable>();
+		s.addAll(retrieveInputs());
+		for (FAbstractEquation e : getFAbstractEquations()) {
+			s.addAll(e.inputs());
+		}
+		return s;
+	}
+
+	syn lazy LinkedHashSet<FVariable> FAbstractEquation.realInputs() = 
+		new LinkedHashSet<FVariable>(FClass.intersection(myFClass().realInputs(),inputs()));
+
 	
 	/**
 	 * \brief Collection attribute returning all algebraic variables (FVariables)
@@ -1243,6 +1359,9 @@ aspect FVariableUses {
 		}
 		return s;
 	}
+
+	syn lazy LinkedHashSet<FVariable> FAbstractEquation.algebraicRealVariables() = 
+		new LinkedHashSet<FVariable>(FClass.intersection(myFClass().algebraicRealVariables(),algebraicVariables()));
 
 	/**
 	 * \brief Collection attribute returning all derivative variables (FDerivativeVariables)
@@ -1288,6 +1407,15 @@ aspect FVariableUses {
 	FPreExp contributes (FVariable)myFV() when !myFV().isUnknown() && 
 		myFV().isPreVariable() to 
 		FAbstractEquation.discretePreVariables() for myFEquation();
+
+	syn lazy LinkedHashSet<FVariable> FAbstractEquation.variables() {
+		LinkedHashSet<FVariable> l = new LinkedHashSet<FVariable>();
+		l.addAll(differentiatedVariables());
+		l.addAll(derivativeVariables());
+		l.addAll(algebraicVariables());
+		l.addAll(discreteVariables());
+		return l;
+	}
 
 	/**
 	 * \brief Get the differenetiated variabel (FVariable) corresponding to 
@@ -1358,8 +1486,7 @@ aspect LinearFVariables {
 				
 	// This definition is to avoid errors when isParameterExp is redefined
 	// to include free parameters in the Optimica extension.
-	syn boolean FExp.isLinearParameterExp() = 
-		variability().parameterVariability();
+	syn boolean FExp.isLinearParameterExp() = isParameterExp();
     
 }
 
@@ -1887,4 +2014,170 @@ aspect FlatExternalFunctionAPI {
 		return null;
 	}
 	
+}
+
+aspect Sparsity {
+
+	// There are no free parameters in the Modelica compiler
+	// but these attributes are refined in the Optimica compiler
+	syn lazy int FClass.freeParametersEquationSparsity_n_nz() {
+		return 0;
+	}
+	
+	syn lazy ArrayList<Integer>[] FClass.freeParametersEquationSparsity() {
+		ArrayList<Integer>[] sp = (ArrayList<Integer>[]) new ArrayList[numFreeParameters()];
+		
+		for (int i=0; i<numFreeParameters(); i++) {
+			sp[i] = new ArrayList<Integer>();
+		}
+				
+		return sp;
+		
+	}
+
+	syn lazy int FClass.derivativeVariablesEquationSparsity_n_nz() {
+		int n_nz = 0;
+		ArrayList<Integer>[] sp = derivativeVariablesEquationSparsity();
+		for (int j=0; j<numDerivativeVariables(); j++) {
+			n_nz += sp[j].size();
+		}
+		return n_nz;		
+	}
+	
+	syn lazy ArrayList<Integer>[] FClass.derivativeVariablesEquationSparsity() {
+		
+		ArrayList<Integer>[] sp = (ArrayList<Integer>[]) new ArrayList[numDerivativeVariables()];
+		
+		for (int i=0; i<numDerivativeVariables(); i++) {
+			sp[i] = new ArrayList<Integer>();
+		}
+		
+		int i = 0;
+		for (FAbstractEquation fe : equations()) {
+			LinkedHashSet<FDerivativeVariable> vs = fe.derivativeVariables();
+			for (FVariable fv : vs) {
+				sp[fv.indexInZ()-derivativeVariablesOffset()].add(new Integer(i)); 
+			}
+			i++;
+		}
+	/*
+		for (int j=0; j<numDerivativeVariables(); j++) {
+			for (int k=0; k<sp[j].size(); k++) {
+				System.out.println("dx:[" + sp[j].get(k).intValue() + "," + j + "]");
+			}
+		}
+		*/
+		return sp;
+		
+	}
+
+	syn lazy int FClass.differentiatedRealVariablesEquationSparsity_n_nz() {
+		int n_nz = 0;
+		ArrayList<Integer>[] sp = differentiatedRealVariablesEquationSparsity();
+		for (int j=0; j<numDifferentiatedRealVariables(); j++) {
+			n_nz += sp[j].size();
+		}
+		return n_nz;		
+	}
+
+	syn lazy ArrayList<Integer>[] FClass.differentiatedRealVariablesEquationSparsity() {
+		
+		ArrayList<Integer>[] sp = (ArrayList<Integer>[]) new ArrayList[numDifferentiatedRealVariables()];
+		
+		for (int i=0; i<numDifferentiatedRealVariables(); i++) {
+			sp[i] = new ArrayList<Integer>();
+		}
+		
+		int i = 0;
+		for (FAbstractEquation fe : equations()) {
+			LinkedHashSet<FVariable> vs = fe.differentiatedVariables();
+			for (FVariable fv : vs) {
+				sp[fv.indexInZ()-differentiatedRealVariablesOffset()].add(new Integer(i)); 
+			}
+			i++;
+		}
+	/*
+		for (int j=0; j<numDifferentiatedRealVariables(); j++) {
+			for (int k=0; k<sp[j].size(); k++) {
+				System.out.println("x:[" + sp[j].get(k).intValue() + "," + j + "]");
+			}
+		}
+		*/
+		return sp;
+		
+	}
+
+	syn lazy int FClass.realInputsEquationSparsity_n_nz() {
+		int n_nz = 0;
+		ArrayList<Integer>[] sp = realInputsEquationSparsity();
+		for (int j=0; j<numRealInputs(); j++) {
+			n_nz += sp[j].size();
+		}
+		return n_nz;		
+	}
+
+	syn lazy ArrayList<Integer>[] FClass.realInputsEquationSparsity() {
+		
+		ArrayList<Integer>[] sp = (ArrayList<Integer>[]) new ArrayList[numRealInputs()];
+		
+		for (int i=0; i<numRealInputs(); i++) {
+			sp[i] = new ArrayList<Integer>();
+		}
+		
+		int i = 0;
+		for (FAbstractEquation fe : equations()) {
+			LinkedHashSet<FVariable> vs = fe.realInputs();
+			for (FVariable fv : vs) {
+				sp[fv.indexInZ()-realInputsOffset()].add(new Integer(i)); 
+			}
+			i++;
+		}
+	/*
+		for (int j=0; j<numRealInputs(); j++) {
+			for (int k=0; k<sp[j].size(); k++) {
+				System.out.println("u:[" + sp[j].get(k).intValue() + "," + j + "]");
+			}
+		}
+		*/
+		return sp;
+		
+	}
+
+	syn lazy int FClass.algebraicRealVariablesEquationSparsity_n_nz() {
+		int n_nz = 0;
+		ArrayList<Integer>[] sp = algebraicRealVariablesEquationSparsity();
+		for (int j=0; j<numAlgebraicRealVariables(); j++) {
+			n_nz += sp[j].size();
+		}
+		return n_nz;		
+	}
+
+	syn lazy ArrayList<Integer>[] FClass.algebraicRealVariablesEquationSparsity() {
+		
+		ArrayList<Integer>[] sp = (ArrayList<Integer>[]) new ArrayList[numAlgebraicRealVariables()];
+		
+		for (int i=0; i<numAlgebraicRealVariables(); i++) {
+			sp[i] = new ArrayList<Integer>();
+		}
+		
+		int i = 0;
+		for (FAbstractEquation fe : equations()) {
+			LinkedHashSet<FVariable> vs = fe.algebraicRealVariables();
+			for (FVariable fv : vs) {
+				sp[fv.indexInZ()-algebraicRealVariablesOffset()].add(new Integer(i)); 
+			}
+			i++;
+		}
+	/*
+		for (int j=0; j<numAlgebraicRealVariables(); j++) {
+			for (int k=0; k<sp[j].size(); k++) {
+				System.out.println("w:[" + sp[j].get(k).intValue() + "," + j + "]");
+			}
+		}
+		*/
+		return sp;
+		
+	}
+
+
 }

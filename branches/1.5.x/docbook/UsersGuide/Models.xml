@@ -23,39 +23,42 @@
     parameters.</para>
 
     <section>
-      <title>The JMU and FMU model objects</title>
+      <title>The JMUModel and FMUModel</title>
 
       <para>There are two different kinds of model objects that can be created
       with JModelica.org, the <literal>JMUModel</literal> and the
       <literal>FMUModel</literal>. The <literal>JMUModel</literal> is created
-      by loading a JMU, which is a compressed file with a JModelica.org
-      specific structure. The <literal>FMUModel</literal> is created by
-      loading an FMU (Functional Mock-up Unit), which is a compressed file
-      following the FMI (Functional Mock-up Interface) standard.</para>
+      by loading a <emphasis>JMU</emphasis>, which is a compressed file with a
+      JModelica.org specific structure. The <literal>FMUModel</literal> is
+      created by loading an <emphasis>FMU</emphasis> (Functional Mock-up
+      Unit), which is a compressed file following the FMI (Functional Mock-up
+      Interface) standard.</para>
 
-      <para>Both JMUs and FMUs can be compiled with JModelica.org, with the
-      restriction for FMUs that the model must not require an AD interface.
-      However, an FMU (compressed file that satisfies the FMI standard)
-      exported from any other tool can be imported in JModelica.org, i.e.
-      loaded in an <literal>FMUModel</literal>. </para>
+      <para>JMUs are created by compiling Modelica or Optimica models with
+      JModelica.org. The JMU can then be loaded in a
+      <literal>JMUModel</literal> object and used for simulation and
+      optimization (if Optimica) purposes.</para>
 
-      <para>The <literal>JMUModel</literal> can be used for both simulation
-      and optimization, the <literal>FMUModel</literal> can only be
-      simulated.</para>
+      <para>FMUs are created by compiling Modelica models with JModelica.org
+      (or any other tool supporting FMU export). (Optimica models can thus not
+      be compiled into FMUs.) The FMU can then be loaded in an
+      <literal>FMUModel</literal> object and used for simulation
+      purposes.</para>
     </section>
   </section>
 
   <section xml:id="models_sec_compilation">
     <title>Compilation</title>
 
-    <para>In its simplest form, compilation only requires a few lines of code;
-    importing a compiler function from JModelica.org and specifying a Modelica
-    or Optimica model and file location. This will be demonstrated in <xref
+    <para>Compiling a model is done in a few steps; importing a compiler
+    function from JModelica.org, specifying a model class and file location
+    and performing the actual compilation. This will be demonstrated in <xref
     linkend="models_sec_simple_jmu_compilation" /> for the JMU and in <xref
-    linkend="models_sec_simple_fmu_compilation" /> for the FMU. For more
-    advanced usage there are compiler options and parameters which can be
-    modified, this will be explained in <xref
-    linkend="models_sec_compiler_settings" />. The last section, <xref
+    linkend="models_sec_simple_fmu_compilation" /> for the FMU.</para>
+
+    <para>For more advanced usage there are compiler options and parameters to
+    the compiler functions which can be modified. This will be explained in
+    <xref linkend="models_sec_compiler_settings" />. The last section, <xref
     linkend="models_sec_compilation_in_more_detail" />, will go through some
     parts of the compilation process and how to perform these steps one by
     one.</para>
@@ -103,10 +106,10 @@ compile_jmu(model_name, mo_file)
       in <xref linkend="models_sec_loading_models" />.</para>
 
       <para>In the above example, compilation has been performed with default
-      parameters and options. The only parameters specified are model name and
-      file. <literal>compile_jmu</literal> has several other parameters which
-      can be modified. The different parameters, their default values and
-      interpretation will be explained in <xref
+      parameters and options. The only parameters specified are the model
+      class name and file. <literal>compile_jmu</literal> has several other
+      parameters which can be modified. The different parameters, their
+      default values and interpretation will be explained in <xref
       linkend="models_sec_compiler_settings" />.</para>
     </section>
 
@@ -130,9 +133,9 @@ compile_jmu(model_name, mo_file)
           </step>
         </procedure></para>
 
-      <para>The only difference is really the requirement on the model which
-      must not require an AD interface. The following code example
-      demonstrates how to compile an FMU.<programlisting language="python"># import the compiler function
+      <para>The only difference is really the requirement on the model, it
+      must be a pure Modelica model. The following code example demonstrates
+      how to compile an FMU.<programlisting language="python"># import the compiler function
 from jmodelica.fmi import compile_fmu
 
 # specify Modelica model and model file
@@ -160,11 +163,10 @@ compile_fmu(model_name, mo_file)
       interactive help in Python. The parameters are explained in the
       corresponding Python <emphasis>docstring</emphasis> which is visualized
       with the interactive help. This is demonstrated in the code examples
-      below. </para>
+      below.</para>
 
-      <para>The compiler target, set with the parameter
-      <literal>target</literal>, is further explained in <xref
-      linkend="models_sec_compiler_targets" />. </para>
+      <para>The parameter <literal>target</literal>, is further explained in
+      <xref linkend="models_sec_compiler_targets" />.</para>
 
       <section xml:id="models_sec_compile_jmu_parameters">
         <title>compile_jmu parameters</title>
@@ -175,7 +177,8 @@ from jmodelica.jmi import compile_jmu
 help(compile_jmu)
 Help on function compile_jmu in module jmodelica.jmi:
 
-compile_jmu(class_name, file_name=[], compiler='auto', target='ipopt', compiler_options={}, compile_to='.', compiler_log_level='warning')
+compile_jmu(class_name, file_name=[], compiler='auto', target='ipopt', compiler_options={}, 
+            compile_to='.', compiler_log_level='warning')
     Compile a Modelica or Optimica model to a JMU.
 
     A model class name must be passed, all other arguments have default values.
@@ -267,23 +270,19 @@ from jmodelica.fmi import compile_fmu
 help(compile_fmu)
 Help on function compile_fmu in module jmodelica.fmi:
 
-compile_fmu(class_name, file_name=[], compiler='auto', target='model_noad', compiler_options={}, compile_to='.', compiler_log_level='warning')
-    Compile a Modelica or Optimica model to an FMU.
+compile_fmu(class_name, file_name=[], compiler='modelica', target='model_noad', 
+            compiler_options={}, compile_to='.', compiler_log_level='warning')
+    Compile a Modelica model to an FMU.
     
     A model class name must be passed, all other arguments have default values. 
     The different scenarios are:
     
     * Only class_name is passed: 
-        - Default compiler is ModelicaCompiler.
         - Class is assumed to be in MODELICAPATH.
     
     * class_name and file_name is passed:
         - file_name can be a single file as a string or a list of file_names 
           (strings).
-        - Default compiler setting is 'auto' which means that the appropriate 
-          compiler will be selected based on model file ending, i.e. 
-          ModelicaCompiler if .mo file and OptimicaCompiler if a .mop file is 
-          found in file_name list.
     
     Library directories can be added to MODELICAPATH by listing them in a 
     special compiler option 'extra_lib_dirs', for example:
@@ -309,10 +308,9 @@ compile_fmu(class_name, file_name=[], compiler='auto', target='model_noad', comp
             Default: Empty list.
             
         compiler -- 
-            'auto' if a compiler should be selected automatically depending on 
-            file ending, 'modelica' if a ModelicaCompiler should be used or 
-            'optimica' if a OptimicaCompiler should be used.
-            Default: 'auto' (i.e. depends on argument file_name)
+            The compiler used to compile the model. The only possible compiler 
+            that can be used currently is ModelicaCompiler.
+            Default: 'modelica'
             
         target --
             Compiler target.
@@ -336,7 +334,6 @@ compile_fmu(class_name, file_name=[], compiler='auto', target='model_noad', comp
     Returns::
     
         Name of the FMU which has been created.
-
 </programlisting>
       </section>
 
@@ -352,7 +349,7 @@ compile_fmu(class_name, file_name=[], compiler='auto', target='model_noad', comp
         run. Options for a compiler instance can be modified by editing the
         XML file before compiling or interactively when compiling using the
         parameter <literal>compiler_options</literal>. The interactive way is
-        shown in an example compiling an Optimica model below. </para>
+        shown in an example compiling an Optimica model below.</para>
 
         <programlisting># compile with setting the compiler option 'enable_variable_scaling'
 
@@ -608,19 +605,20 @@ jmu_name = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_s
             </listitem>
           </itemizedlist></para>
 
-        <para>The <literal>compile_model</literal> parameter
-        <literal>target</literal> is '<literal>ipopt</literal>' by default for
-        <literal>compile_jmu</literal>, which will work for most cases.
-        However, if JModelica.org has been built without Ipopt libraries the
-        <literal>target</literal> parameter would have to be changed to any
-        other suitable target that does not include the Ipopt libraries.
-        </para>
+        <para>For <literal>compile_jmu</literal>, the
+        <literal>compile_model</literal> parameter <literal>target</literal>
+        is '<literal>ipopt</literal>' by default which will work for most
+        cases. However, if JModelica.org has been built without Ipopt
+        libraries the <literal>target</literal> parameter would have to be
+        changed to any other suitable target that does not include the Ipopt
+        libraries.</para>
 
-        <para>For <literal>compile_fmu</literal> the only possible target is
-        '<literal>model_noad</literal>'. The target
-        <literal>model_noad</literal> must also be used if the model contains
-        external equations since external equations do not work with the AD
-        interface at the moment.</para>
+        <para>For <literal>compile_fmu</literal>, the only possible target is
+        '<literal>model_noad</literal>'.</para>
+
+        <para>The target <literal>model_noad</literal> must also be used if
+        the model contains external equations since external equations do not
+        work with the AD interface at the moment.</para>
       </section>
     </section>
 
@@ -688,7 +686,7 @@ mc.generate_code(flat_rep)
     <literal>FMUModel</literal> class from the
     <literal>jmodelica.fmi</literal> module respectively. This will be
     demonstrated in <xref linkend="models_sec_loading_a_jmu" /> and <xref
-    linkend="models_sec_loading_an_fmu" />. </para>
+    linkend="models_sec_loading_an_fmu" />.</para>
 
     <para>The model classes contain many methods with which models can be
     manipulated after instantiation. Amongst the most important methods are
@@ -707,10 +705,22 @@ mc.generate_code(flat_rep)
       the shared object file, the XML files with model variable and parameter
       data and some other files created during compilation of the model. The
       JMU file format is a JModelica.org specific format but is designed to
-      follow the FMU file format from the FMI standard as much as possible.
-      The JMU file is created when compiling with
+      follow the FMU file format from the FMI standard as much as possible. A
+      JMU is created when compiling a Modelica or Optimica model with
       <literal>jmodelica.jmi.compile_jmu</literal>, see <xref
       linkend="models_sec_compilation" />.</para>
+    </section>
+
+    <section>
+      <title>The FMU</title>
+
+      <para>The FMU (Functional Mock-up Unit) is a compressed file which
+      follows the FMI (Functional Mock-up Interface) standard. An FMU is
+      created when compiling a Modelica model with
+      <literal>jmodelica.fmi.compile_fmu</literal>.</para>
+
+      <para>Read more about the FMI/FMU standard in <xref
+      linkend="ch_fmi" />.</para>
     </section>
 
     <section xml:id="models_sec_loading_a_jmu">
@@ -743,9 +753,7 @@ myModel = JMUModel(jmu_name)
     <section xml:id="models_sec_loading_an_fmu">
       <title>Loading an FMU</title>
 
-      <para>An FMU (Functional Mock-up Unit) is a compressed file which
-      follows the FMI (Functional Mock-up Interface) standard. The FMU file
-      can be loaded in JModelica.org with the class
+      <para>The FMU file can be loaded in JModelica.org with the class
       <literal>FMUModel</literal> in the <literal>jmodelica.fmi</literal>
       module. The following short example demonstrates how to do this in a
       Python shell or script.<programlisting># import FMUModel from jmodelica.fmi
@@ -753,11 +761,8 @@ from jmodelica.fmi import FMUModel
 myModel = FMUModel('myFMU.fmu')
 </programlisting></para>
 
-      <para>The FMUModel instance can then be used to set parameters and used
-      for simulations.</para>
-
-      <para><xref linkend="ch_fmi" /> contains more about the FMI and
-      FMU.</para>
+      <para>The <literal>FMUModel</literal> instance can then be used to set
+      parameters and used for simulations.</para>
     </section>
   </section>
 

@@ -1351,6 +1351,17 @@ aspect FlatExpressions {
 			fqn.setLastFArraySubscripts(expandedSubscripts());
 		return fqn;
 	}
+	
+	/**
+	 * Flatten variability specifier.
+     *
+	 * This is done during variability calculation to keep compatibility with FExp. 
+	 */
+	abstract public FTypePrefixVariability TypePrefixVariability.flatten();
+	public FTypePrefixVariability Continuous.flatten() { return new FContinuous(); }
+	public FTypePrefixVariability Discrete.flatten()   { return new FDiscrete();   }
+	public FTypePrefixVariability Parameter.flatten()  { return new FParameter();  }
+	public FTypePrefixVariability Constant.flatten()   { return new FConstant();   }
 
 }
 

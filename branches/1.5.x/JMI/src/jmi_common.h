@@ -161,6 +161,9 @@ typedef struct jmi_sim_t jmi_sim_t;                       /**< \brief Forward de
 typedef double jmi_real_t; /*< Typedef for the real number
 			   < representation used in the Runtime
 			   < Library. */
+typedef int jmi_int_t; /*< Typedef for the integer number
+			   < representation used in the Runtime
+			   < Library. */
 
 /* This section defines types in the case of no AD and
  in the case of CppAD.*/
@@ -332,6 +335,25 @@ typedef int (*jmi_next_time_event_func_t)(jmi_t* jmi, jmi_real_t* nextTime);
 typedef int (*jmi_residual_func_t)(jmi_t* jmi, jmi_ad_var_vec_p res);
 
 /**
+ * \brief Function signature for evaluation of a directional derivative function
+ * in the generated code.
+ *
+ * Notice that this function signature is used for all functions in
+ * the DAE, DAE initialization, and Optimization interfaces. Notice
+ * that this definition supports both C compilation and C++
+ * compilation with CppAD.
+ *
+ * @param jmi A jmi_t struct.
+ * @param res (Output) The residual value vector.
+ * @param dF (Output) The directional derivative of the residual function.
+ * @param dz the Seed vector of size n_x + n_x + n_u + n_w.
+ * @return Error code.
+ *
+ */
+typedef int (*jmi_directional_der_residual_func_t)(jmi_t* jmi, jmi_ad_var_vec_p res,
+		jmi_ad_var_vec_p dF, jmi_ad_var_vec_p dz);
+
+/**
  * \brief Function signature for evaluation of a equation block residual
  * function in the generated code.
  *
@@ -386,17 +408,24 @@ typedef int (*jmi_jacobian_func_t)(jmi_t* jmi, int sparsity,
  * @param jmi_func (Output) A double pointer to a jmi_func_t struct.
  * @param F A function pointer to the residual function.
  * @param n_eq_F The number of equations in the residual.
- * @param dF Function pointer to the symbolic Jacobian function.
- * @param dF_n_nz The number of non-zeros in the symbolic Jacobian.
- * @param dF_row Row indices of the non-zero elements in the symbolic Jacobian.
- * @param dF_col Column indices of the non-zero elements in the symbolic
+ * @param sym_dF Function pointer to the symbolic Jacobian function.
+ * @param sym_dF_n_nz The number of non-zeros in the symbolic Jacobian.
+ * @param sym_dF_row Row indices of the non-zero elements in the symbolic Jacobian.
+ * @param sym_dF_col Column indices of the non-zero elements in the symbolic
+ *        Jacobian.
+ * @param dir_dF A function pointer to the directional derivative function.
+ * @param dF_n_nz The number of non-zeros in the AD Jacobian.
+ * @param dF_row Row indices of the non-zero elements in the AD Jacobian.
+ * @param dF_col Column indices of the non-zero elements in the AD
  *        Jacobian.
  * @return Error code.
  *
  */
 int jmi_func_new(jmi_func_t** jmi_func, jmi_residual_func_t F,
-                 int n_eq_F, jmi_jacobian_func_t dF,
-		 int dF_n_nz, int* dF_row, int* dF_col);
+                 int n_eq_F, jmi_jacobian_func_t sym_dF,
+        		 int sym_dF_n_nz, int* sym_dF_row, int* sym_dF_col,
+        		 jmi_directional_der_residual_func_t cad_dir_dF,
+        		 int cad_dF_n_nz, int* cad_dF_row, int* cad_dF_col);
 
 /**
  * \brief Delete a jmi_func_t.
@@ -429,7 +458,7 @@ int jmi_func_F(jmi_t *jmi, jmi_func_t *func, jmi_real_t *res);
  * @param jac (Output) The Jacobian
  *
  */
-int jmi_func_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
+int jmi_func_sym_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
 		int independent_vars, int* mask, jmi_real_t* jac) ;
 
 /**
@@ -440,7 +469,7 @@ int jmi_func_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
  * @param n_nz (Output) The number of non-zero Jacobian entries.
  * @return Error code.
  */
-int jmi_func_dF_n_nz(jmi_t *jmi, jmi_func_t *func, int* n_nz);
+int jmi_func_sym_dF_n_nz(jmi_t *jmi, jmi_func_t *func, int* n_nz);
 
 /**
  * \brief Returns the row and column indices of the non-zero elements in the
@@ -457,7 +486,7 @@ int jmi_func_dF_n_nz(jmi_t *jmi, jmi_func_t *func, int* n_nz);
  * @return Error code.
  *
  */
-int jmi_func_dF_nz_indices(jmi_t *jmi, jmi_func_t *func,
+int jmi_func_sym_dF_nz_indices(jmi_t *jmi, jmi_func_t *func,
                            int independent_vars,
                            int *mask, int *row, int *col);
 
@@ -475,9 +504,163 @@ int jmi_func_dF_nz_indices(jmi_t *jmi, jmi_func_t *func,
  * @param dF_n_nz (Output) The number of non-zeros of the resulting Jacobian.
  *
  */
-int jmi_func_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity,
+int jmi_func_sym_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity,
                     int independent_vars, int *mask,
 		    int *dF_n_cols, int *dF_n_nz);
+
+/**
+ * \brief Evaluate the directional AD derivative of the residual function of
+ * a jmi_func_t struct.
+ *
+ * @param jmi A jmi_t struct.
+ * @param func The jmi_func_t struct.
+ * @param res (Output) The DAE residual vector.
+ * @param dF (Output) The directional derivative.
+ * @param dv Seed vector of size n_x + n_x + n_u + n_w.
+ * @return Error code.
+ */
+int jmi_func_cad_directional_dF(jmi_t *jmi, jmi_func_t *func, jmi_real_t *res,
+			 jmi_real_t *dF, jmi_real_t* dv);
+
+/**
+ * \brief Evaluation of the AD Jacobian of the
+ * residual function contained in a jmi_func_t.
+ *
+ * @param jmi The jmi_t struct.
+ * @param func The jmi_func_t struct.
+ * @param sparsity See ::jmi_dae_dF.
+ * @param independent_vars See ::jmi_dae_dF.
+ * @param mask See ::jmi_dae_dF.
+ * @param jac (Output) The Jacobian
+ *
+ */
+int jmi_func_cad_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
+		int independent_vars, int* mask, jmi_real_t* jac) ;
+
+/**
+ * \brief Returns the number of non-zeros in the AD Jacobian.
+ *
+ * @param jmi A jmi_t struct.
+ * @param func The jmi_func_t struct.
+ * @param n_nz (Output) The number of non-zero Jacobian entries.
+ * @return Error code.
+ */
+int jmi_func_cad_dF_n_nz(jmi_t *jmi, jmi_func_t *func, int* n_nz);
+
+/**
+ * \brief Returns the row and column indices of the non-zero elements in the
+ * AD residual Jacobian.
+ *
+ * @param jmi A jmi_t struct.
+ * @param func The jmi_func_t struct.
+ * @param independent_vars See ::jmi_dae_dF.
+ * @param mask See ::jmi_dae_dF.
+ * @param row (Output) The row indices of the non-zeros in the DAE residual
+ *            Jacobian.
+ * @param col (Output) The column indices of the non-zeros in the DAE residual
+ *            Jacobian.
+ * @return Error code.
+ *
+ */
+int jmi_func_cad_dF_nz_indices(jmi_t *jmi, jmi_func_t *func,
+                           int independent_vars,
+                           int *mask, int *row, int *col);
+
+/**
+ * \brief Computes the number of columns and the number of non-zero
+ * elements in the AD Jacobian of a jmi_func_t given a sparsity
+ * configuration.
+ *
+ * @param jmi A jmi_t struct.
+ * @param func The jmi_func_t struct.
+ * @param sparsity See ::jmi_dae_dF.
+ * @param independent_vars See ::jmi_dae_dF.
+ * @param mask See ::jmi_dae_dF.
+ * @param dF_n_cols (Output) The number of columns of the resulting Jacobian.
+ * @param dF_n_nz (Output) The number of non-zeros of the resulting Jacobian.
+ *
+ */
+int jmi_func_cad_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity,
+                    int independent_vars, int *mask,
+		    int *dF_n_cols, int *dF_n_nz);
+
+/**
+ * \brief Evaluate the directional finite difference derivative of the residual function of
+ * a jmi_func_t struct.
+ *
+ * @param jmi A jmi_t struct.
+ * @param func The jmi_func_t struct.
+ * @param res (Output) The DAE residual vector.
+ * @param dF (Output) The directional derivative.
+ * @param dv Seed vector of size n_x + n_x + n_u + n_w.
+ * @return Error code.
+ */
+int jmi_func_fd_directional_dF(jmi_t *jmi, jmi_func_t *func, jmi_real_t *res,
+			 jmi_real_t *dF, jmi_real_t* dv);
+
+/**
+ * \brief Evaluation of the finite difference Jacobian of the
+ * residual function contained in a jmi_func_t.
+ *
+ * @param jmi The jmi_t struct.
+ * @param func The jmi_func_t struct.
+ * @param sparsity See ::jmi_dae_dF.
+ * @param independent_vars See ::jmi_dae_dF.
+ * @param mask See ::jmi_dae_dF.
+ * @param jac (Output) The Jacobian
+ *
+ */
+int jmi_func_fd_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
+		int independent_vars, int* mask, jmi_real_t* jac) ;
+
+/**
+ * \brief Returns the number of non-zeros in the finite difference Jacobian.
+ *
+ * @param jmi A jmi_t struct.
+ * @param func The jmi_func_t struct.
+ * @param n_nz (Output) The number of non-zero Jacobian entries.
+ * @return Error code.
+ */
+int jmi_func_fd_dF_n_nz(jmi_t *jmi, jmi_func_t *func, int* n_nz);
+
+/**
+ * \brief Returns the row and column indices of the non-zero elements in the
+ * finite difference residual Jacobian.
+ *
+ * @param jmi A jmi_t struct.
+ * @param func The jmi_func_t struct.
+ * @param independent_vars See ::jmi_dae_dF.
+ * @param mask See ::jmi_dae_dF.
+ * @param row (Output) The row indices of the non-zeros in the DAE residual
+ *            Jacobian.
+ * @param col (Output) The column indices of the non-zeros in the DAE residual
+ *            Jacobian.
+ * @return Error code.
+ *
+ */
+int jmi_func_fd_dF_nz_indices(jmi_t *jmi, jmi_func_t *func,
+                           int independent_vars,
+                           int *mask, int *row, int *col);
+
+/**
+ * \brief Computes the number of columns and the number of non-zero
+ * elements in the finite difference Jacobian of a jmi_func_t given a sparsity
+ * configuration.
+ *
+ * @param jmi A jmi_t struct.
+ * @param func The jmi_func_t struct.
+ * @param sparsity See ::jmi_dae_dF.
+ * @param independent_vars See ::jmi_dae_dF.
+ * @param mask See ::jmi_dae_dF.
+ * @param dF_n_cols (Output) The number of columns of the resulting Jacobian.
+ * @param dF_n_nz (Output) The number of non-zeros of the resulting Jacobian.
+ *
+ */
+int jmi_func_fd_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity,
+                    int independent_vars, int *mask,
+		    int *dF_n_cols, int *dF_n_nz);
+
+
 
 /**
  * \brief Data structure for representing a single function
@@ -492,11 +675,15 @@ int jmi_func_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity,
  */
 struct jmi_func_t{
 	jmi_residual_func_t F;  /**< \brief Pointer to a function for evaluation of \f$F(z)\f$. */
-	jmi_jacobian_func_t dF; /**< \brief Pointer to a function for evaluation of the Jacobian of \f$F(z)\f$. */
+	jmi_jacobian_func_t sym_dF; /**< \brief Pointer to a function for evaluation of the symbolic Jacobian of \f$F(z)\f$. */
+	jmi_directional_der_residual_func_t cad_dir_dF; /**< \brief Pointer to a function for evaluation of the directional AD derivative of the function */
 	int n_eq_F;             /**< \brief Size of the function. */
-	int dF_n_nz;            /**< \brief Number of non-zeros in the symbolic Jacobian of \f$F(z)\f$ (if available). */
-	int* dF_row;            /**< \brief Row indices of the non-zero elements in the symbolic Jacobian of \f$F(z)\f$ (if available). */
-	int* dF_col;            /**< \brief Column indices of the non-zero elements in the symbolic Jacobian of \f$F(z)\f$ (if available). */
+	int sym_dF_n_nz;            /**< \brief Number of non-zeros in the symbolic Jacobian of \f$F(z)\f$ (if available). */
+	int* sym_dF_row;            /**< \brief Row indices of the non-zero elements in the symbolic Jacobian of \f$F(z)\f$ (if available). */
+	int* sym_dF_col;            /**< \brief Column indices of the non-zero elements in the symbolic Jacobian of \f$F(z)\f$ (if available). */
+	int cad_dF_n_nz;            /**< \brief Number of non-zeros in the AD Jacobian of \f$F(z)\f$ (if available). */
+	int* cad_dF_row;            /**< \brief Row indices of the non-zero elements in the AD Jacobian of \f$F(z)\f$ (if available). */
+	int* cad_dF_col;            /**< \brief Column indices of the non-zero elements in the AD Jacobian of \f$F(z)\f$ (if available). */
 	jmi_func_ad_t* ad;      /**< \brief Pointer to a jmi_func_ad_t struct containing AD information (if compiled with AD support). */
 };
 
@@ -518,6 +705,12 @@ struct jmi_func_ad_t{
 	int* dF_z_col_n_nz;               /**< \brief The number of non-zeros of each column in the sparse
 	                                            Jacobian. */
 	jmi_real_vec_p z_work;          /**< \brief A work vector for \f$z\f$. */
+	int exec_time;                  /**< \brief A variable that is used for measuring execution time. */
+	int n_groups;                   /**< \brief Number of groups in the CPR seeding. */
+	int n_cols_in_grouping;         /**< \brief Total number of columns used in CPR seeding computation. */
+	int* n_cols_in_group;           /**< \brief The number of column in each CPR group. */
+	int* group_cols;                /**< \brief An ordered array of column indices corresponding to CPR groups. */
+	int* group_start_index;         /**< \brief An array containing the start indices for each group in the array group_cols. */
 };
 
 struct jmi_block_residual_t {
@@ -615,10 +808,15 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
  * @param jmi A jmi_t struct.
  * @param F A function pointer to the DAE residual function.
  * @param n_eq_F Number of equations in the DAE residual.
- * @param dF Function pointer to the symbolic Jacobian function.
- * @param dF_n_nz Number of non-zeros in the symbolic jacobian.
- * @param dF_row Row indices of the non-zeros in the symbolic Jacobain.
- * @param dF_col Column indices of the non-zeros in the symbolic Jacobain.
+ * @param sym_dF Function pointer to the symbolic Jacobian function.
+ * @param sym_dF_n_nz Number of non-zeros in the symbolic jacobian.
+ * @param sym_dF_row Row indices of the non-zeros in the symbolic Jacobain.
+ * @param sym_dF_col Column indices of the non-zeros in the symbolic Jacobain.
+ * @param cad_dir_dF A function pointer for evaluation of the AD generated directional
+ *               derivative for the DAE residual function.
+ * @param cad_dF_n_nz Number of non-zeros in the AD jacobian.
+ * @param cad_dF_row Row indices of the non-zeros in the AD Jacobain.
+ * @param cad_dF_col Column indices of the non-zeros in the AD Jacobain.
  * @param R A function pointer to the DAE event indicator residual function.
  * @param n_eq_R Number of equations in the event indicator function.
  * @param dR Function pointer to the symbolic Jacobian function.
@@ -634,7 +832,9 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
  * @return Error code.
  */
 int jmi_dae_init(jmi_t* jmi, jmi_residual_func_t F, int n_eq_F,
-        jmi_jacobian_func_t dF, int dF_n_nz, int* dF_row, int* dF_col,
+        jmi_jacobian_func_t sym_dF, int sym_dF_n_nz, int* sym_dF_row, int* sym_dF_col,
+        jmi_directional_der_residual_func_t cad_dir_dF,
+        int cad_dF_n_nz, int* cad_dF_row, int* cad_dF_col,
         jmi_residual_func_t R, int n_eq_R,
         jmi_jacobian_func_t dR, int dR_n_nz, int* dR_row, int* dR_col,
         jmi_generic_func_t ode_derivatives,

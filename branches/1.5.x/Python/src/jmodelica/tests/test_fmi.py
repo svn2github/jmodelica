@@ -374,3 +374,57 @@ class Test_FMI_Compile:
         """ Test the model types platform property. """
         nose.tools.assert_equal(self._model.model_types_platform, "standard32")
     
+
+class TestDiscreteVariableRefs(object):
+    """
+    Test that variable references for discrete variables are computed correctly
+    """
+
+    def __init__(self):
+        self._fpath = os.path.join(get_files_path(), 'Modelica', "DiscreteVar.mo")
+        self._cpath = "DiscreteVar"
+    
+    def setUp(self):
+        """
+        Sets up the test class.
+        """
+        self.fmu_name = compile_fmu(self._cpath, self._fpath,compiler_options={'compliance_as_warning':True})
+        self.model = FMUModel(self.fmu_name)
+        
+    @testattr(stddist = True)
+    def test_vars_model(self):
+       """
+       Test that the value references are correct
+       """
+       nose.tools.assert_equal(self.model._XMLStartRealKeys[0],0)
+       nose.tools.assert_equal(self.model._XMLStartRealKeys[1],2)
+
+class TestDependentParameters(object):
+    """
+    Test that dependent variables are recomputed when an independent varaible is set.
+    """
+
+    def __init__(self):
+        self._fpath = os.path.join(get_files_path(), 'Modelica', "DepPar.mo")
+        self._cpath = "DepPar.DepPar1"
+    
+    def setUp(self):
+        """
+        Sets up the test class.
+        """
+        self.fmu_name = compile_fmu(self._cpath, self._fpath)
+        self.model = FMUModel(self.fmu_name)
+        
+    @testattr(stddist = True)
+    def test_parameter_eval(self):
+       """
+       Test that the parameters are evaluated correctly.
+       """
+       self.model.set_real([0],2.0)
+
+       p2 = self.model.get_real([1])
+       p3 = self.model.get_real([2])
+
+       nose.tools.assert_almost_equal(p2,4)
+       nose.tools.assert_almost_equal(p3,12)
+

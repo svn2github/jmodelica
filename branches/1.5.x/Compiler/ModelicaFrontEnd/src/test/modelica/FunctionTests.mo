@@ -1111,7 +1111,7 @@ model FunctionType9
           description="Function type checks: String literal arg, String input",
           flatModel="
 fclass FunctionTests.FunctionType9
- String x = FunctionTests.TestFunctionString(\"test\");
+ discrete String x = FunctionTests.TestFunctionString(\"test\");
 
  function FunctionTests.TestFunctionString
   input String i1;
@@ -1132,7 +1132,7 @@ model FunctionType10
           flatModel="
 fclass FunctionTests.FunctionType10
  parameter String a = \"test\" /* test */;
- String x = FunctionTests.TestFunctionString(a);
+ discrete String x = FunctionTests.TestFunctionString(a);
 
  function FunctionTests.TestFunctionString
   input String i1;
@@ -1471,8 +1471,8 @@ model AlgorithmFlatten3
                                                description="Flattening algorithms: if stmts",
                                                flatModel="
 fclass FunctionTests.AlgorithmFlatten3
- Integer x;
- Integer y;
+ discrete Integer x;
+ discrete Integer y;
 algorithm
  if x == 4 then
   x := 1;
@@ -1512,8 +1512,8 @@ model AlgorithmFlatten4
                                                description="Flattening algorithms: when stmts",
                                                flatModel="
 fclass FunctionTests.AlgorithmFlatten4
- Integer x;
- Integer y;
+ discrete Integer x;
+ discrete Integer y;
 algorithm
  when x == 4 then
   x := 1;

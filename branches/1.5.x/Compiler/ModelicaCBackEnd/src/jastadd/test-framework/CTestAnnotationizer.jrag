@@ -50,6 +50,36 @@ abstract public class TestAnnotationizerHelper {
 		}
 		
 	}
+	
+	public static class CADCodeGenTestCase extends CodeGenTestCase {
+
+		/**
+		 * \brief Constructor for CAD code generation test.
+		 * 
+		 * Delegates to super class.
+		 */
+		public CADCodeGenTestCase(String filePath, String className, String description, String opts, String data) throws Exception {
+			super(filePath, className, description, opts, data);
+		}
+		
+		/**
+		 * \brief Prints a usage message for this test case type.
+		 */
+		public static void usage(String cl, String extra) {
+			TestAnnotationizerHelper.usage(cl, "CAD code template");
+		}
+
+		/**
+		 * \brief Create the code generator to use.
+		 * 
+		 * Creates a CADGenerator.
+		 */
+		@Override
+		public AbstractGenerator createGenerator(FClass fc) {
+			return new CADGenerator(new PrettyPrinter(), '$', fc);
+		}
+		
+	}
 
 }
 

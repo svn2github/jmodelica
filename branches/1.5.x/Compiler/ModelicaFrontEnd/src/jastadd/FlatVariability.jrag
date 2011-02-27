@@ -14,6 +14,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Collections;
+
 aspect FlatVariability {
 	
 	syn boolean FTypePrefixVariability.constantVariability() = false;
@@ -90,31 +94,130 @@ aspect FlatVariability {
     syn boolean AbstractFVariable.isDiscrete()   = false;
     syn boolean AbstractFVariable.isContinuous() = false;
 	
-	eq FVariable.isConstant()   = getFTypePrefixVariability().constantVariability();
-    eq FVariable.isParameter()  = getFTypePrefixVariability().parameterVariability();
-    eq FVariable.isDiscrete()   = getFTypePrefixVariability().discreteVariability();
-    eq FVariable.isContinuous() = getFTypePrefixVariability().continuousVariability();
+	eq FVariable.isConstant()   = variability().constantVariability();
+    eq FVariable.isParameter()  = variability().parameterVariability();
+    eq FVariable.isDiscrete()   = variability().discreteVariability();
+    eq FVariable.isContinuous() = variability().continuousVariability();
     
-    protected static final Continuous InstComponentDecl.CONTINUOUS_VARIABILITY = new Continuous();
     
-    syn TypePrefixVariability InstComponentDecl.findVariability() {
+    syn lazy TypePrefixVariability InstComponentDecl.definedVariability() {
     	ComponentDecl cd = getComponentDecl();
     	TypePrefixVariability var = cd.hasTypePrefixVariability() ? 
-    			cd.getTypePrefixVariability() : CONTINUOUS_VARIABILITY;
+    			cd.getTypePrefixVariability() : continuous();
     	return overrideVariability(var);
     }
     
     inh TypePrefixVariability InstComponentDecl.overrideVariability(TypePrefixVariability var);
     eq InstNode.getChild().overrideVariability(TypePrefixVariability var)      = var;
     eq InstPrimitive.getChild().overrideVariability(TypePrefixVariability var) = var;
-    // TODO: or should InstPrimitive use InstComponentDecl version?
     eq InstComponentDecl.getInstComponentDecl().overrideVariability(TypePrefixVariability var) =
-    	var.combineDown(findVariability());
+    	var.combineDown(definedVariability());
     
-	syn boolean InstComponentDecl.isConstant()   = findVariability().constantVariability();
-	syn boolean InstComponentDecl.isParameter()  = findVariability().parameterVariability();
-	syn boolean InstComponentDecl.isDiscrete()   = findVariability().discreteVariability();
-	syn boolean InstComponentDecl.isContinuous() = findVariability().continuousVariability();
+    /* Using combinedVariability() for constant & parameter to avoid circular dependency.
+     * It can only differ from variability() when combinedVariability() gives continuous. */
+	syn boolean InstComponentDecl.isConstant()   = combinedVariability().constantVariability();
+	syn boolean InstComponentDecl.isParameter()  = combinedVariability().parameterVariability();
+	syn boolean InstComponentDecl.isDiscrete()   = variability().discreteVariability();
+	syn boolean InstComponentDecl.isContinuous() = variability().continuousVariability();
+	
+	syn FTypePrefixVariability InstComponentDecl.combinedVariability() = 
+		definedVariability().flatten().combineDown(defaultVariability());
+	
+	syn lazy FTypePrefixVariability InstComponentDecl.variability() {
+		FTypePrefixVariability var = combinedVariability();
+		if (isAssignedInWhen())
+			var = var.combineDown(fDiscrete());
+		return var;
+	}
+	eq InstEnumLiteral.variability() = fConstant();
+	
+	syn FTypePrefixVariability InstComponentDecl.defaultVariability() = fConstant();
+	eq InstPrimitive.defaultVariability() = isReal() ? fContinuous() : fDiscrete();
+	eq InstRecord.defaultVariability() {
+		InstComponentDecl rec = isArray() ? getInstComponentDecl(0) : this;
+		FTypePrefixVariability var = fConstant();
+		for (InstComponentDecl icd : rec.getInstComponentDecls()) 
+			var = var.combine(icd.variability());
+		return var;
+	}
+	
+	
+	syn boolean InstComponentDecl.isAssignedInWhen() = retrieveAssignedInWhenSet().contains(this);
+	
+	inh Set<InstComponentDecl> InstComponentDecl.retrieveAssignedInWhenSet();
+	eq InstClassDecl.getChild().retrieveAssignedInWhenSet() = assignedInWhenSet();
+	eq Root.getChild().retrieveAssignedInWhenSet()          = Collections.emptySet();
+	
+	syn lazy Set<InstComponentDecl> InstNode.assignedInWhenSet() {
+		Set<InstComponentDecl> res = new HashSet<InstComponentDecl>();
+		for (InstComponentDecl icd : getInstComponentDecls())
+			res.addAll(icd.assignedInWhenSet());
+		for (FAbstractEquation eqn : getFAbstractEquations())
+			if (eqn instanceof FWhenEquation)
+				res.addAll(eqn.assignedSet());
+		return res;
+	}
+	
+	protected static Set<InstComponentDecl> FAbstractEquation.assignedSetFromEqns(List<FAbstractEquation> eqns) {
+		Set<InstComponentDecl> res = new HashSet<InstComponentDecl>();
+		for (FAbstractEquation eqn : eqns)
+			res.addAll(eqn.assignedSet());
+		return res;
+	}
+	
+	/**
+	 * Gives the set of components assigned in this equation.
+	 * 
+	 * Only works in instance tree.
+	 * For if and when equations, only the first branch is considered.
+	 */
+	syn lazy Set<InstComponentDecl> FAbstractEquation.assignedSet() = Collections.emptySet();
+	eq InstForClauseE.assignedSet()      = assignedSetFromEqns(getFAbstractEquations());
+	eq FIfWhenElseEquation.assignedSet() = assignedSetFromEqns(getFAbstractEquations());
+	eq FEquation.assignedSet() {
+		Set<InstComponentDecl> res = new HashSet<InstComponentDecl>();
+		getLeft().addAccessedVar(res);
+		return res;
+	}
+	eq FFunctionCallEquation.assignedSet() {
+		Set<InstComponentDecl> res = new HashSet<InstComponentDecl>();
+		for (FFunctionCallLeft left : getLefts())
+			if (left.hasFExp())
+				left.getFExp().addAccessedVar(res);
+		return res;
+	}
+	
+	/**
+	 * If this is an instance tree access, add accessed variable to set.
+	 */
+	public void FExp.addAccessedVar(Set<InstComponentDecl> set) {}
+	
+	public void FInstAccessExp.addAccessedVar(Set<InstComponentDecl> set) {
+		getInstAccess().addAccessedVar(set);
+	}
+	
+	public void FIdUseExp.addAccessedVar(Set<InstComponentDecl> set) {
+		getFIdUse().addAccessedVar(set);
+	}
+	
+	/**
+	 * If this is an instance tree access, add accessed variable to set.
+	 */
+	public void FIdUse.addAccessedVar(Set<InstComponentDecl> set) {}
+	
+	public void FIdUseInstAccess.addAccessedVar(Set<InstComponentDecl> set) {
+		getInstAccess().addAccessedVar(set);
+	}
+	
+	/**
+	 * Add accessed variable to set.
+	 */
+	public void InstAccess.addAccessedVar(Set<InstComponentDecl> set) {
+		set.add(myInstComponentDecl());
+	}
+	
+	
+	syn FTypePrefixVariability FVariable.variability() = getFTypePrefixVariability();
 		
 		
 	syn boolean FExp.isConstantExp()   = variability().constantVariability();
@@ -125,24 +228,26 @@ aspect FlatVariability {
 	syn boolean FSubscript.isConstant() = true;
 	eq FExpSubscript.isConstant() = getFExp().isConstantExp();
 	
-	syn lazy FTypePrefixVariability FExp.variability() = combineFExpListVariability(childFExps());
+	inh boolean FExp.inDiscreteLocation();
+	eq FFunctionDecl.getChild().inDiscreteLocation()             = true;
+	eq FWhenEquation.getFAbstractEquation().inDiscreteLocation() = true;
+	eq FWhenClause.getFStatement().inDiscreteLocation()          = true;
+	eq FClass.getChild().inDiscreteLocation()                    = false;
+	eq InstNode.getChild().inDiscreteLocation()                  = false;
 	
-	// TODO this must be fixed.
+	syn lazy FTypePrefixVariability FExp.variability() = 
+		inDiscreteLocation() ? expVariability().combineDown(fDiscrete()) : expVariability();
+	
+	syn FTypePrefixVariability FExp.expVariability() = combineFExpListVariability(childFExps());
+	
+	syn FTypePrefixVariability FExp.variabilityInNoEventExp() = 
+		variabilityInNoEventExp(combineFExpListVariability(childFExps()));
+	syn FTypePrefixVariability FExp.variabilityInNoEventExp(FTypePrefixVariability var) =
+		inNoEventExp() ? var : var.combineDown(fDiscrete());
+	
 	eq FInstAccessExp.variability() = getInstAccess().myInstComponentDecl().variability();
-	eq FUnsupportedExp.variability() = null;
 	
-	syn lazy FTypePrefixVariability FVariable.variability() {
-   		if (!isContinuous()) {
-   			return getFTypePrefixVariability();
-   		} else if (isInteger() || isBoolean() || isString()) {
-   			/* TODO: Can this really occur?
-   			 * This seems to cover the exact same cases as the first if.
-   			 */
-   			return(fDiscrete());
-   		} else {
-   			return fContinuous();
-   		}
-	}
+	eq FUnsupportedExp.expVariability() = fContinuous(); // Only here to avoid null pointer 
 	
 	public static FTypePrefixVariability FExp.combineFExpListVariability(Iterable<? extends FExp> exps) {
 		Iterator<? extends FExp> it = exps.iterator();
@@ -152,36 +257,20 @@ aspect FlatVariability {
 		return total;
 	}
 	
-	syn lazy FTypePrefixVariability InstComponentDecl.variability() = fConstant();
-	eq InstPrimitive.variability() {
-		if (isContinuous())
-			return fContinuous();
-		if (isDiscrete())
-			return fDiscrete();
-		if (isParameter())
-			return fParameter();
-		return fConstant();
-	}
-	eq InstRecord.variability() {
-		InstComponentDecl rec = isArray() ? getInstComponentDecl(0) : this;
-		FTypePrefixVariability total = fConstant();
-		for (InstComponentDecl icd : rec.getInstComponentDecls()) 
-			total = total.combine(icd.variability());
-		return total;
-	}
-	eq InstEnumLiteral.variability() = fConstant();
+	eq FLitExp.expVariability()   = fConstant();
+	eq FNoExp.expVariability()    = fConstant();
+	eq FNdimsExp.expVariability() = fConstant();
+	eq FEndExp.expVariability()   = fParameter();
+	eq FTimeExp.expVariability()  = fContinuous();
 	
-	eq FLitExp.variability()   = fConstant();
-	eq FNoExp.variability()    = fConstant();
-	eq FNdimsExp.variability() = fConstant();
-	eq FEndExp.variability()   = fParameter();
-	eq FTimeExp.variability()  = fContinuous();
+	eq FAbsExp.expVariability() = variabilityInNoEventExp();
+	eq FRelExp.expVariability() = variabilityInNoEventExp();
 
-	eq FSizeExp.variability() = hasDim() ? getDim().variability() : fParameter();
+	eq FSizeExp.expVariability() = hasDim() ? getDim().variability() : fParameter();
 	
-	eq FIntegerExp.variability() = getFExp().variability().combineDown(fDiscrete());
+	eq FIntegerExp.expVariability() = getFExp().variability().combineDown(fDiscrete());
 	
-	eq FIterExp.variability() {
+	eq FIterExp.expVariability() {
 		FTypePrefixVariability total = getArray().iteratorFExp().next().variability();
 		for (CommonForIndex ind : getForIndexList())
 			if (ind.hasFExp())
@@ -189,14 +278,14 @@ aspect FlatVariability {
 		return total;
 	}
 
-	eq InstFunctionCall.variability() {
+	eq InstFunctionCall.expVariability() {
 		FTypePrefixVariability total = fConstant();
 		for (InstFunctionArgument arg : getArgs()) 
 			total = total.combine(arg.getFExp().variability());
 		return total;
 	}
 	
-	eq FIdUseExp.variability() = getFIdUse().variability();
+	eq FIdUseExp.expVariability() = getFIdUse().variability();
 	
 	syn FTypePrefixVariability FIdUse.variability() {
 		AbstractFVariable variable = myFV();
@@ -221,19 +310,19 @@ aspect FlatVariability {
 		return total;
 	}
 	
-	eq FLinspace.variability() = getStartExp().variability().combine(getStopExp().variability());
+	eq FLinspace.expVariability() = getStartExp().variability().combine(getStopExp().variability());
 	
-	eq FSubscriptedExp.variability()  = combineFExpListVariability(getArray().iterable());
+	eq FSubscriptedExp.expVariability()  = combineFExpListVariability(getArray().iterable());
 	
-	eq FIdentity.variability()   = fConstant();
-	eq FOnes.variability()       = fConstant();
-	eq FZeros.variability()      = fConstant();
-	eq FFillExp.variability()    = getFillExp().variability();
+	eq FIdentity.expVariability()   = fConstant();
+	eq FOnes.expVariability()       = fConstant();
+	eq FZeros.expVariability()      = fConstant();
+	eq FFillExp.expVariability()    = getFillExp().variability();
 	
-	eq FPreExp.variability()     = fDiscrete();
-	eq FSampleExp.variability()  = fDiscrete();
+	eq FPreExp.expVariability()     = fDiscrete();
+	eq FSampleExp.expVariability()  = fDiscrete();
 	
-	eq FInitialExp.variability() = fParameter();
+	eq FInitialExp.expVariability() = fParameter();
 	
 	syn int FTypePrefixVariability.combineLevel() = variabilityLevel() * 10;
 	
@@ -259,25 +348,46 @@ aspect FlatVariability {
 
 aspect VariabilitySingletons {
 	
-	public static final FContinuous FContinuous.singleton = new FContinuous();	
-	public static final FDiscrete FDiscrete.singleton = new FDiscrete();	
-	public static final FParameter FParameter.singleton = new FParameter();
-	public static final FConstant FConstant.singleton = new FConstant();	
+	public static final Continuous Continuous.instance = new Continuous();	
+	public static final Discrete   Discrete.instance   = new Discrete();	
+	public static final Parameter  Parameter.instance  = new Parameter();
+	public static final Constant   Constant.instance   = new Constant();	
+	
+	public static final FContinuous FContinuous.instance = new FContinuous();	
+	public static final FDiscrete   FDiscrete.instance   = new FDiscrete();	
+	public static final FParameter  FParameter.instance  = new FParameter();
+	public static final FConstant   FConstant.instance   = new FConstant();	
+	
+	public static Continuous ASTNode.continuous() {
+		return Continuous.instance;
+	}
+
+	public static Discrete ASTNode.discrete() {
+		return Discrete.instance;
+	}	
+
+	public static Parameter ASTNode.parameter() {
+		return Parameter.instance;
+	}
+	
+	public static Constant ASTNode.constant() {
+		return Constant.instance;
+	}
 	
 	public static FContinuous ASTNode.fContinuous() {
-		return FContinuous.singleton;
+		return FContinuous.instance;
 	}
 
 	public static FDiscrete ASTNode.fDiscrete() {
-		return FDiscrete.singleton;
+		return FDiscrete.instance;
 	}	
 
 	public static FParameter ASTNode.fParameter() {
-		return FParameter.singleton;
+		return FParameter.instance;
 	}
 	
 	public static FConstant ASTNode.fConstant() {
-		return FConstant.singleton;
+		return FConstant.instance;
 	}
 }
 

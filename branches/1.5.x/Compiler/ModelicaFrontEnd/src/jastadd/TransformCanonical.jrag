@@ -1146,6 +1146,47 @@ aspect TransformCanonical {
 				root().flushAllRecursive();
 	}
 
+	public FVariable FClass.addFDerivativeVariable(FVariable fv) {
+		FVariable ffv = fv.createFDerivativeVariable();
+		addFVariable(ffv);
+		root().flushAllRecursive();
+		return ffv;
+	}
+
+	public FVariable FVariable.createFDerivativeVariable() {
+		return null;
+	}
+
+	public FVariable FRealVariable.createFDerivativeVariable() {
+		return new FDerivativeVariable((FVisibilityType)getFVisibilityType().fullCopy(),
+					(FTypePrefixVariability)getFTypePrefixVariability().fullCopy(),
+					new Opt(),
+					new List(),
+					new Opt(),
+					new Opt(),
+					getFQName().fullCopy());
+	}
+
+	public FVariable FDerivativeVariable.createFDerivativeVariable() {
+		return new FHDerivativeVariable((FVisibilityType)getFVisibilityType().fullCopy(),
+					(FTypePrefixVariability)getFTypePrefixVariability().fullCopy(),
+					new Opt(),
+					new List(),
+					new Opt(),
+					new Opt(),
+					getFQName().fullCopy(),2);
+	}
+
+	public FVariable FHDerivativeVariable.createFDerivativeVariable() {
+		return new FHDerivativeVariable((FVisibilityType)getFVisibilityType().fullCopy(),
+					(FTypePrefixVariability)getFTypePrefixVariability().fullCopy(),
+					new Opt(),
+					new List(),
+					new Opt(),
+					new Opt(),
+					getFQName().fullCopy(),getOrder()+1);
+	}
+
 	/**
 	 * \brief Add pre variables to the list of FVariables, one for each
 	 * discrete variable.

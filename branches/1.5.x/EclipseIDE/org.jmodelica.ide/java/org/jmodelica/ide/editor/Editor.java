@@ -412,8 +412,8 @@ public boolean selectNode(ASTNode<?> node) {
     if (matchesInput) {
 
         ASTNode<?> sel = node.getSelectionNode();
-        if (sel.getOffset() >= 0 && sel.getLength() >= 0)
-            selectAndReveal(sel.getOffset(), sel.getLength());
+        if (sel.offset() >= 0 && sel.length() >= 0)
+            selectAndReveal(sel.offset(), sel.length());
     }
 
     return matchesInput;

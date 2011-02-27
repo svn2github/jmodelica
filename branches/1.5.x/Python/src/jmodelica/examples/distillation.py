@@ -111,9 +111,16 @@ def run_demo(with_plots=True,with_blocking_factors = False):
     if with_blocking_factors:
         # Blocking factors for control parametrization
         blocking_factors=4*N.ones(n_e/4,dtype=N.int)
+
+        opt_opts = model.optimize_options()
+
+        opt_opts['n_e'] = n_e
+        opt_opts['n_cp'] = n_cp
+        opt_opts['hs'] = hs
+        opt_opts['blocking_factors'] = blocking_factors
+        #opt_opts['IPOPT_options']['derivative_test'] = 'first-order'
         
-        opt_res = model.optimize(options={'n_e':n_e, 'n_cp':n_cp,'hs':hs,
-            'blocking_factors': blocking_factors})
+        opt_res = model.optimize(options=opt_opts)
     else:
         opt_res = model.optimize(options={'n_e':n_e, 'n_cp':n_cp, 'hs':hs})
 

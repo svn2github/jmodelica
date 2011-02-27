@@ -179,6 +179,8 @@ def run_demo(with_plots=True):
     opt_opts['n_e'] = n_e
     opt_opts['init_traj'] = res.result_data
 
+    #opt_opts['IPOPT_options']['derivative_test'] = 'first-order'
+    
     res = cstr.optimize(options=opt_opts)
 
     # Extract variable profiles

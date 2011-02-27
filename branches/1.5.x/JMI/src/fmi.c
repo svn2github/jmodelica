@@ -92,7 +92,7 @@ void fmi_free_model_instance(fmiComponent c) {
      * that have been allocated by the functions of the Model Exchange Interface for instance "c".*/
     if (c) {
         fmiCallbackFreeMemory fmi_free = ((fmi_t*)c) -> fmi_functions.freeMemory;
-        fmi_free(((fmi_t*)c) -> jmi);
+        free(((fmi_t*)c) -> jmi);
         fmi_free((void*)((fmi_t*)c) -> fmi_instance_name);
         fmi_free((void*)((fmi_t*)c) -> fmi_GUID);
         fmi_free(c);
@@ -131,9 +131,14 @@ fmiStatus fmi_set_real(fmiComponent c, const fmiValueReference vr[], size_t nvr,
     for (i = 0; i <nvr; i = i + 1) {
         /* Get index in z vector from value reference. */ 
         index = get_index_from_value_ref(vr[i]);
-        
+
         /* Set value from the value array to z vector. */
         z[index] = value[i];
+
+        if (index<(((fmi_t *)c)->jmi)->offs_real_dx) {
+        	jmi_init_eval_parameters(((fmi_t *)c)->jmi);
+        }
+
     }
     return fmiOK;
 }
@@ -151,6 +156,11 @@ fmiStatus fmi_set_integer (fmiComponent c, const fmiValueReference vr[], size_t 
         
         /* Set value from the value array to z vector. */
         z[index] = value[i];
+
+        if (index<(((fmi_t *)c)->jmi)->offs_real_dx) {
+        	jmi_init_eval_parameters(((fmi_t *)c)->jmi);
+        }
+
     }
     return fmiOK;
 }
@@ -168,6 +178,11 @@ fmiStatus fmi_set_boolean (fmiComponent c, const fmiValueReference vr[], size_t 
         
         /* Set value from the value array to z vector. */
         z[index] = value[i];
+
+        if (index<(((fmi_t *)c)->jmi)->offs_real_dx) {
+        	jmi_init_eval_parameters(((fmi_t *)c)->jmi);
+        }
+
     }
     return fmiOK;
 }
@@ -200,6 +215,11 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
     eventInfo->terminateSimulation = fmiFalse;          /* Don't terminate the simulation */
     eventInfo->iterationConverged = fmiTrue;            /* The iteration has converged */
     
+    /* Sets the relative tolerance to a default value for use in Kinsol when tolerance controlled is false */
+    if (toleranceControlled == fmiFalse){
+        relativeTolerance = 1e-6;
+    }
+
     /* Set tolerance in the BLT blocks */
     for (i=0; i < ((fmi_t *)c)->jmi->n_dae_init_blocks; i=i+1){
         ((fmi_t *)c)->jmi->dae_init_block_residuals[i]->kin_ftol = relativeTolerance*safety_factor_newton;
@@ -491,6 +511,7 @@ fmiStatus fmi_event_update(fmiComponent c, fmiBoolean intermediateResults, fmiEv
     jmi_real_t* guards;
     jmi_real_t nextTimeEvent;       /* Next time event instant */
     jmi_real_t *switches; /* Switches */
+    jmi_real_t* t_temp;
     jmi_t* jmi;
     jmi = ((fmi_t*)c)->jmi;
 
@@ -527,11 +548,13 @@ fmiStatus fmi_event_update(fmiComponent c, fmiBoolean intermediateResults, fmiEv
         switches = jmi_get_sw(((fmi_t *)c)->jmi); /* Get the switches */
         for (j=0; j < nR; j=j+1){
             if (switches[j] == 1.0){
-                if (b_mode[j] <= ((fmi_t *)c)->fmi_epsilon){
+                /*if (b_mode[j] <= -1*((fmi_t *)c)->fmi_epsilon){ */
+                if (b_mode[j] <= 0.0){
                     switches[j] = 0.0;
                 }
             }else{
-                if (b_mode[j] >= ((fmi_t *)c)->fmi_epsilon){
+                /*if (b_mode[j] >= ((fmi_t *)c)->fmi_epsilon){ */
+                if (b_mode[j] > 0.0){
                     switches[j] = 1.0;
                 }
             }
@@ -561,7 +584,7 @@ fmiStatus fmi_event_update(fmiComponent c, fmiBoolean intermediateResults, fmiEv
         
         for (i=0; i < nR; i=i+1){
             if (switches[i] == 1.0){ /* Case when the switch are True */
-                if (a_mode[i] <= ((fmi_t *)c)->fmi_epsilon){
+                if (a_mode[i] <= -1*((fmi_t *)c)->fmi_epsilon){
                     eventInfo->iterationConverged = fmiFalse; /* Event iteration (not converged) */
                 }
             }else{ /* Case when the switch are False */
@@ -591,13 +614,22 @@ fmiStatus fmi_event_update(fmiComponent c, fmiBoolean intermediateResults, fmiEv
             
             /* Turn the switches */
             switches = jmi_get_sw(((fmi_t *)c)->jmi); /* Get the switches */
+            /*
+            t_temp = jmi_get_t(((fmi_t *)c)->jmi);
+            printf("Time %12.12f , c_event %12.20f switch %f \n", *t_temp, b_mode[0], switches[0]);
+            if (b_mode[0] <= 0.0){
+                printf("Event %1.20f \n",*t_temp);
+            }
+            */
             for (j=0; j < nR; j=j+1){
                 if (switches[j] == 1.0){
-                    if (b_mode[j] <= ((fmi_t *)c)->fmi_epsilon){
+                    /*if (b_mode[j] <= -1*((fmi_t *)c)->fmi_epsilon){*/
+                    if (b_mode[j] <= 0.0){
                         switches[j] = 0.0;
                     }
                 }else{
-                    if (b_mode[j] >= ((fmi_t *)c)->fmi_epsilon){
+                    /*if (b_mode[j] >= ((fmi_t *)c)->fmi_epsilon){*/
+                    if (b_mode[j] > 0.0){
                         switches[j] = 1.0;
                     }
                 }
@@ -624,7 +656,7 @@ fmiStatus fmi_event_update(fmiComponent c, fmiBoolean intermediateResults, fmiEv
             
             for (i=0; i < nR; i=i+1){
                 if (switches[i] == 1.0){ /* Case when the switch are True */
-                    if (a_mode[i] <= ((fmi_t *)c)->fmi_epsilon){
+                    if (a_mode[i] <= -1*((fmi_t *)c)->fmi_epsilon){
                         eventInfo->iterationConverged = fmiFalse; /* Event iteration (not converged) */
                     }
                 }else{ /* Case when the switch are False */
@@ -633,6 +665,8 @@ fmiStatus fmi_event_update(fmiComponent c, fmiBoolean intermediateResults, fmiEv
                     }
                 }
             }
+            
+            /*printf("ATime %12.12f , c_event %12.20f switch %f \n", *t_temp, a_mode[0], switches[0]); */
 
             /* Compare the values of the guards before and after the event */
 

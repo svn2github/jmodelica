@@ -15,14 +15,35 @@
 */
 package org.jmodelica.ide.outline;
 
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
+import org.jmodelica.ide.IDEConstants;
+import org.jmodelica.ide.preferences.Preferences;
 import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.BaseClassDecl;
 import org.jmodelica.modelica.compiler.InstClassDecl;
 
-public class OutlineItemComparator extends ViewerSorter {
-	@Override
+public class OutlineItemComparator extends ViewerSorter implements IPreferenceChangeListener {
+
+	private static Map<String,ViewerSorter> COMPARATORS = new HashMap<String,ViewerSorter>();
+	static {
+		COMPARATORS.put(IDEConstants.SORT_ALPHA, new CompAlpha());
+		COMPARATORS.put(IDEConstants.SORT_DECLARED, new CompDeclared());
+	}
+	
+	private ViewerSorter cmp;
+	
+	public OutlineItemComparator() {
+		updateComparator();
+		Preferences.addListener(this);
+	}
+	
 	public int category(Object element) {
 		if (element instanceof ASTNode<?>)
 			return ((ASTNode<?>) element).outlineCategory();
@@ -32,17 +53,45 @@ public class OutlineItemComparator extends ViewerSorter {
 	}
 
 	@SuppressWarnings("unchecked")
-    @Override
 	public int compare(Viewer viewer, Object e1, Object e2) {
-		if (e1 instanceof InstClassDecl)
-			e1 = ((InstClassDecl) e1).getClassDecl();
-		if (e2 instanceof InstClassDecl)
-			e2 = ((InstClassDecl) e2).getClassDecl();
-		if (e1 instanceof BaseClassDecl && e2 instanceof BaseClassDecl) {
-			String id1 = ((BaseClassDecl) e1).getName().getID();
-			String id2 = ((BaseClassDecl) e2).getName().getID();
-			return getComparator().compare(id1, id2);
-		}
-		return super.compare(viewer, e1, e2);
+		return cmp.compare(viewer, e1, e2);
 	}
+
+	public void preferenceChange(PreferenceChangeEvent event) {
+		if (event.getKey().equals(IDEConstants.PREFERENCE_EXPLORER_SORT_ORDER))
+			updateComparator();
+	}
+
+	public void updateComparator() {
+		cmp = COMPARATORS.get(Preferences.get(IDEConstants.PREFERENCE_EXPLORER_SORT_ORDER));
+	}
+
+	public static class CompAlpha extends ViewerSorter {
+
+		public int compare(Viewer viewer, Object e1, Object e2) {
+			// TODO: Move to an attribute
+			if (e1 instanceof InstClassDecl)
+				e1 = ((InstClassDecl) e1).getClassDecl();
+			if (e2 instanceof InstClassDecl)
+				e2 = ((InstClassDecl) e2).getClassDecl();
+			if (e1 instanceof BaseClassDecl && e2 instanceof BaseClassDecl) {
+				String id1 = ((BaseClassDecl) e1).getName().getID();
+				String id2 = ((BaseClassDecl) e2).getName().getID();
+				return getComparator().compare(id1, id2);
+			}
+			return super.compare(viewer, e1, e2);
+		}
+
+	}
+	
+	public static class CompDeclared extends ViewerSorter {
+
+		public int compare(Viewer viewer, Object e1, Object e2) {
+			if (e1 instanceof ASTNode && e2 instanceof ASTNode) 
+				return ((ASTNode) e1).declareOrder() - ((ASTNode) e2).declareOrder();
+			return super.compare(viewer, e1, e2);
+		}
+
+	}
+	
 }

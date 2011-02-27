@@ -1079,7 +1079,7 @@ static int lp_radau_dh(jmi_opt_coll_t *jmi_opt_coll, jmi_real_t *jac) {
 			if (jmi->opt->final_time_free == 0 &&
 					jmi->opt->start_time_free == 0 &&
 					jmi_opt_coll->hs_free ==0) {
-				el_length = jmi_opt_coll->hs[0]*(jmi->opt->final_time - jmi->opt->start_time);
+				el_length = jmi_opt_coll->hs[i]*(jmi->opt->final_time - jmi->opt->start_time);
 			} else { /* TODO: Take care of the other cases */
 				el_length=0;
 			}

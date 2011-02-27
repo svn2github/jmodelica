@@ -50,6 +50,8 @@ libjmi_la_SOURCES = jmi.h \
                     jmi_opt_coll.h \
                     jmi_array_common.h \
                     jmi_array_none.h \
+                    jmi_util.h \
+                    jmi_util.c \
                     $(abs_top_srcdir)/Assimulo/src/lib/kinpinv.c \
                     $(abs_top_srcdir)/Assimulo/src/lib/kinpinv.h \
                     $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.c \
@@ -121,6 +123,8 @@ libjmi_cppad_la_SOURCES = jmi.h \
                     jmi_common.c \
                     jmi_array_common.h \
                     jmi_array_cppad.h \
+                    jmi_util.h \
+                    jmi_util.c \
                     $(abs_top_srcdir)/Assimulo/src/lib/kinpinv.c \
                     $(abs_top_srcdir)/Assimulo/src/lib/kinpinv.h \
                     $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.c \
@@ -166,6 +170,7 @@ include_HEADERS = jmi.h \
                   jmi_array_common.h \
                   jmi_array_none.h \
                   jmi_array_cppad.h \
+                  jmi_util.h \
                   $(abs_top_srcdir)/Assimulo/src/lib/kinpinv.h \
                   $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.h \
                   $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod_impl.h 

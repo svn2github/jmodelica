@@ -34,25 +34,21 @@ from jmodelica import xmlparser
 from jmodelica.core import BaseModel, unzip_unit, get_unit_name, get_temp_location
 from jmodelica.compiler import ModelicaCompiler, OptimicaCompiler
 
-def compile_fmu(class_name, file_name=[], compiler='auto', target='model_noad', 
-    compiler_options={}, compile_to='.', compiler_log_level='warning'):
+def compile_fmu(class_name, file_name=[], compiler='modelica', 
+    target='model_noad', compiler_options={}, compile_to='.', 
+    compiler_log_level='warning'):
     """ 
-    Compile a Modelica or Optimica model to an FMU.
+    Compile a Modelica model to an FMU.
     
     A model class name must be passed, all other arguments have default values. 
     The different scenarios are:
     
     * Only class_name is passed: 
-        - Default compiler is ModelicaCompiler.
         - Class is assumed to be in MODELICAPATH.
     
     * class_name and file_name is passed:
         - file_name can be a single file as a string or a list of file_names 
           (strings).
-        - Default compiler setting is 'auto' which means that the appropriate 
-          compiler will be selected based on model file ending, i.e. 
-          ModelicaCompiler if .mo file and OptimicaCompiler if a .mop file is 
-          found in file_name list.
     
     Library directories can be added to MODELICAPATH by listing them in a 
     special compiler option 'extra_lib_dirs', for example:
@@ -78,10 +74,9 @@ def compile_fmu(class_name, file_name=[], compiler='auto', target='model_noad',
             Default: Empty list.
             
         compiler -- 
-            'auto' if a compiler should be selected automatically depending on 
-            file ending, 'modelica' if a ModelicaCompiler should be used or 
-            'optimica' if a OptimicaCompiler should be used.
-            Default: 'auto' (i.e. depends on argument file_name)
+            The compiler used to compile the model. The only possible compiler 
+            that can be used currently is ModelicaCompiler.
+            Default: 'modelica'
             
         target --
             Compiler target.

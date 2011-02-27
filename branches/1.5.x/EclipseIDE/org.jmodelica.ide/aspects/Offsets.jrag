@@ -49,16 +49,16 @@ aspect Offset {
 	}
 	
 	syn int ASTNode.getValidStart() = start == 0 ? getParent().getValidStart() : start;
-	syn int ASTNode.getValidEnd() =   end == 0 ? getParent().getValidEnd() : end;
-	eq Root.getValidStart() =         start;
-	eq Root.getValidEnd() =           end;
+	syn int ASTNode.getValidEnd()   = end == 0 ? getParent().getValidEnd() : end;
+	eq Root.getValidStart()         = start;
+	eq Root.getValidEnd()           = end;
 	
-	syn int ASTNode.getBeginOffset() =     createOffset(getValidStart());
-	syn int ASTNode.getEndOffset() =       createOffset(getValidEnd());
+	syn int ASTNode.getBeginOffset()     = createOffset(getValidStart());
+	syn int ASTNode.getEndOffset()       = createOffset(getValidEnd());
 	 
 	syn int ASTNode.getBeginLineOffset() = createLineOffset(getValidStart(), 0);
-	syn int ASTNode.getEndLineOffset() =   createLineOffset(getValidEnd(), 1);
+	syn int ASTNode.getEndLineOffset()   = createLineOffset(getValidEnd(), 1);
 	
-	syn int ASTNode.getOffset() =          getBeginOffset();
-	syn int ASTNode.getLength() =          getEndOffset() - getBeginOffset() + 1;	
+	syn int ASTNode.offset()             = getBeginOffset();
+	syn int ASTNode.length()             = getEndOffset() - getBeginOffset() + 1;	
 }

@@ -11,9 +11,9 @@
   <title>Getting started</title>
 
   <para>This chapter is intended to give a brief introduction to using the
-  JModelica.org Python interface and will not go into any details. Please
-  refer to the other chapters of this manual for more information on each
-  specific topic.</para>
+  JModelica.org Python interface and will therefore not go into any details.
+  Please refer to the other chapters of this manual for more information on
+  each specific topic.</para>
 
   <section xml:id="gs_sec_starting_a_python_session">
     <title>Starting a Python session</title>
@@ -72,16 +72,21 @@ from jmodelica.examples import vdp
 # run the example
 vdp.run_demo()</programlisting></para>
 
-    <para>This code will run the example and plot some results.</para>
+    <para>This code will run the example and plot some results. Open
+    <filename>vdp.py</filename> in an editor and look at the Python code to
+    see what happens when the script is run.</para>
   </section>
 
   <section>
     <title>Check your installation</title>
 
-    <para>The JModelica.org Python interface requires a few Python packages in
+    <para>The JModelica.org Python interface requires some Python packages in
     order to run correctly. Use the function
-    <literal>jmodelica.check_packages()</literal> to list the dependencies and
-    version located on your computer.<programlisting># import the function from jmodelica
+    <literal>jmodelica.check_packages()</literal> to list which Python
+    packages that are found on your computer. Missing or having the wrong
+    version of a package can be a source of errors. Therefore it can be useful
+    to run <literal>jmodelica.check_packages()</literal> after installation or
+    when trouble-shooting.<programlisting># import the function from jmodelica
 from jmodelica import check_packages
 
 # run check_packages
@@ -111,11 +116,6 @@ assimulo...................... --                             Ok
 pyreadline.................... 1.5                            Ok
 
 </programlisting></para>
-
-    <para>Missing or having the wrong version of a package can be a source of
-    errors. Therefore it can be useful to run
-    <literal>jmodelica.check_packages()</literal> after installation or when
-    trouble-shooting.</para>
   </section>
 
   <section>

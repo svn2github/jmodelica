@@ -26,4 +26,4 @@ __all__ = [
     'RLC_linearization', 'index_reduction_example', 'blt_example', 
     'lagrange_cost', 'fmi_bouncing_ball_native', 'fmi_bouncing_ball', 
     'robertson', 'qt_par_est', 'extfunctions', 'fmu_with_input','crystallizer',
-    'distillation_fmu','cstr_casadi','extFunctions_arrays','extFunctions_matrix']
+    'distillation_fmu','cstr_casadi','extFunctions_arrays','extFunctions_matrix','vdp_casadi']

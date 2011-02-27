@@ -395,6 +395,37 @@ aspect FlatPreBinding {
 
 }
 
+aspect FlatHDerBinding {
+
+	inh AbstractFVariable FIdUse.lookupHDerFV(FQName fqn, int order);	
+	inh AbstractFVariable FExp.lookupHDerFV(FQName fqn, int order);	
+	syn AbstractFVariable FHDerExp.myFV() {
+		return getFIdUse().lookupHDerFV(getFIdUse().getFQName(),getOrder());
+    }
+    
+	eq Root.getChild().lookupHDerFV(FQName fqn, int order) = null;
+
+	eq FClass.getChild(int index).lookupHDerFV(FQName fqn, int order) = lookupHDerFV(fqn, order);
+	
+	public AbstractFVariable FClass.lookupHDerFV(FQName fqn, int order) {
+		boolean scalar = fqn.scalarized;
+		fqn.scalarized = scalarized;
+		AbstractFVariable variable = lookupHDerFVFromMap(fullyQualifiedVariablesMap(), fqn, order);
+		//System.out.println("FClass.lookupPreFV(): " + fqn.name());
+		fqn.scalarized = scalar;
+		return (variable == null) ? unknownFVariable() : variable;
+	}
+
+	public static AbstractFVariable ASTNode.lookupHDerFVFromMap(
+		HashMap<String, ? extends AbstractFVariable> map, FQName fqn, int order) {
+		String[] str = fqn.derName().split("\\)");
+		AbstractFVariable variable = map.get(str[0] + "," + order + ")");
+		//System.out.println(map.toString());
+		return variable;
+	}
+
+}
+
 aspect UnknownFVariables {
 
 	syn UnknownFVariable FClass.getUnknownFVariable() = new UnknownFVariable();

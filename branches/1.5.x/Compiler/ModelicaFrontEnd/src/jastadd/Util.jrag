@@ -26,6 +26,8 @@ import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.jmodelica.util.ModelicaLogger;
+
 aspect RootAccess {
     
     syn String SourceRoot.language() = "Modelica";
@@ -115,55 +117,6 @@ aspect RootAccess {
 }
 
 aspect Logging {
-
-    /**
-     * \brief Base class for logging messages from the tree.
-     * 
-     * This implementation discards all messages.
-     */
-    public class ModelicaLogger {
-        /**
-         * \brief Log <code>message</code> on log level <code>level</code>.
-         * 
-         * This implementation discards all messages.
-         * 
-         * Override this method to provide log facilities.
-         */
-        public void log(Level level, String message) {}
-        
-        /**
-         * \brief Get the current log level.
-         * 
-         * This implementation returns null.
-         * 
-         * Override this method to provide log facilities.
-         */
-        public Level getLevel() { return null; }
-        
-        /**
-         * \brief Set the current log level.
-         * 
-         * This implementation does nothing.
-         * 
-         * Override this method to provide log facilities.
-         */
-        public void setLevel(Level lv) { }
-
-        public void debug(String message)   { log(Level.FINE,    message); }
-        public void info(String message)    { log(Level.INFO,    message); }
-        public void warning(String message) { log(Level.WARNING, message); }
-        public void error(String message)   { log(Level.SEVERE,  message); }
-        
-        /**
-         * Log stack trace of exception on debug log level.
-         */
-        public void stackTrace(Throwable e) {
-    		StringWriter str = new StringWriter();
-    		PrintWriter print = new PrintWriter(str);
-    		e.printStackTrace(print);
-    		debug(str.toString());
-        }
-    }
 
     public static ModelicaLogger ASTNode.log = new ModelicaLogger();
     
@@ -881,6 +834,16 @@ aspect FlatNames {
     syn String FEnumLiteral.name() = getName().name();
     
 //  syn lazy String FQName.derName() = "der(" + name() + ")";
+    
+    eq FHDerExp.name() {
+    	String[] str = derName().split("\\)");
+    	return str[0] + "," + getOrder() + ")";
+    }
+
+    eq FHDerivativeVariable.name() {
+    	String[] str = getFQNameNoTransform().derName().split("\\)");
+    	return str[0] + "," + getOrder() + ")";
+    }
     
     eq FDerivativeVariable.name()  = getFQNameNoTransform().derName();
     syn String FIdUse.derName()    = getFQNameNoTransform().derName();
@@ -1658,10 +1621,11 @@ aspect FlatExpressions {
     eq SourceRoot.getChild().inIfCondition() = false;
     eq FlatRoot.getChild().inIfCondition() = false;
 
+    inh boolean FAbstractEquation.inWhen();
     inh boolean FExp.inWhen();
-    eq FWhenEquation.getChild().inWhen() = true;
-    eq SourceRoot.getChild().inWhen() = false;
-    eq FlatRoot.getChild().inWhen() = false;
+    eq FWhenEquation.getFAbstractEquation().inWhen() = true;
+    eq InstNode.getChild().inWhen()                  = false;
+    eq FClass.getChild().inWhen()                    = false;
     
     /**
      * \brief Is this expression of a type that is valid for most uses?

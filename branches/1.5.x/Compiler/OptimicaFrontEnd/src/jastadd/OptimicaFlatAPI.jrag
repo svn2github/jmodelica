@@ -789,6 +789,8 @@ aspect OptimicaLinearVariables {
 		return true;
 	}
 	
+	refine LinearFVariables eq FExp.isLinearParameterExp() = isParameterExp() && !isOptParameterExp();
+	
 	/**
 	 * \brief Linearity of timed variables.
 	 * 
@@ -947,48 +949,48 @@ aspect OptimicaFlatAPIDiagnostics {
 
 aspect OptimicaFreeParameters {
 	
-	syn boolean FVariable.isFreeParameter() = 
-		myFOptClass().freeParameters().contains(this);
+	syn boolean AbstractFVariable.isFreeParameter() = 
+		myFClass().freeParameters().contains(this);
 	
-	syn int FOptClass.numFreeParameters() = freeParameters().size();
-	syn lazy ArrayList<FVariable> FOptClass.freeParameters() {
+	refine FlatAPI eq FClass.numFreeParameters() = freeParameters().size();
+	syn lazy ArrayList<FVariable> FClass.freeParameters() {
 		ArrayList<FVariable> l = new ArrayList<FVariable>();
 		l.addAll(freeIndependentParameters());
 		l.addAll(freeDependentParameters());
 		return l;
 	}
 	
-    syn int FOptClass.numFreeIndependentParameters() = 
+    syn int FClass.numFreeIndependentParameters() = 
     	freeIndependentParameters().size();
-	coll ArrayList<FVariable> FOptClass.freeIndependentParameters() 
+	coll ArrayList<FVariable> FClass.freeIndependentParameters() 
 	  [new ArrayList<FVariable>()] with add root FlatRoot;
 	FVariable contributes
  		this when freeAttribute() && isIndependentParameter() && shouldContribute()
-	to FOptClass.freeIndependentParameters() for myFOptClass();
+	to FClass.freeIndependentParameters() for myFClass();
 	
-	syn int FOptClass.numFreeIndependentRealParameters() = 
+	syn int FClass.numFreeIndependentRealParameters() = 
 		freeIndependentRealParameters().size();
-	syn lazy ArrayList<FRealVariable> FOptClass.freeIndependentRealParameters() =
+	syn lazy ArrayList<FRealVariable> FClass.freeIndependentRealParameters() =
       intersection(reals(), freeIndependentParameters());
 
-	syn int FOptClass.numFreeIndependentIntegerParameters() = freeIndependentIntegerParameters().size();
-	syn lazy ArrayList<FIntegerVariable> FOptClass.freeIndependentIntegerParameters() =
+	syn int FClass.numFreeIndependentIntegerParameters() = freeIndependentIntegerParameters().size();
+	syn lazy ArrayList<FIntegerVariable> FClass.freeIndependentIntegerParameters() =
       intersection(integers(), freeIndependentParameters());
 
-	syn int FOptClass.numFreeIndependentEnumParameters() = freeIndependentEnumParameters().size();
-	syn lazy ArrayList<FEnumVariable> FOptClass.freeIndependentEnumParameters() =
+	syn int FClass.numFreeIndependentEnumParameters() = freeIndependentEnumParameters().size();
+	syn lazy ArrayList<FEnumVariable> FClass.freeIndependentEnumParameters() =
       intersection(enums(), freeIndependentParameters());
 
-	syn int FOptClass.numFreeIndependentBooleanParameters() = freeIndependentBooleanParameters().size();
-	syn lazy ArrayList<FBooleanVariable> FOptClass.freeIndependentBooleanParameters() =
+	syn int FClass.numFreeIndependentBooleanParameters() = freeIndependentBooleanParameters().size();
+	syn lazy ArrayList<FBooleanVariable> FClass.freeIndependentBooleanParameters() =
       intersection(booleans(), freeIndependentParameters());
 	
 	/**
 	 * \brief Get a list of all dependent parameters that depends on
 	 * free parameters.
 	 */
-	syn int FOptClass.numFreeDependentParameters() = freeDependentParameters().size();
-	syn lazy LinkedHashSet<FVariable> FOptClass.freeDependentParameters() {
+	syn int FClass.numFreeDependentParameters() = freeDependentParameters().size();
+	syn lazy LinkedHashSet<FVariable> FClass.freeDependentParameters() {
 		LinkedHashSet<FVariable> s = new LinkedHashSet<FVariable>();
 		// Retrieve the dependent parameters that depends directly on
 		// free independent parameters.
@@ -1009,8 +1011,8 @@ aspect OptimicaFreeParameters {
 	}
 	
 	syn boolean AbstractFVariable.isFreeDependentParameter() {
-		if (myFOptClass()!=null) {
-			return myFOptClass().freeDependentParameters().contains(this);
+		if (myFClass()!=null) {
+			return myFClass().freeDependentParameters().contains(this);
 		} else {
 			return false;
 		}
@@ -1019,7 +1021,7 @@ aspect OptimicaFreeParameters {
 	/**
 	 * \brief Get a list of the equations of all dependent parameters that depends on free parameters.
 	 */
-	syn lazy LinkedHashSet<FAbstractEquation> FOptClass.freeDependentParameterEquations() {
+	syn lazy LinkedHashSet<FAbstractEquation> FClass.freeDependentParameterEquations() {
 		LinkedHashSet<FAbstractEquation> s = new LinkedHashSet<FAbstractEquation>();
 		for (FVariable v : freeDependentParameters()) {
 			s.add(v.parameterEquation());
@@ -1027,12 +1029,82 @@ aspect OptimicaFreeParameters {
 		return s;
 	}
 	
-	syn int FOptClass.numFreeDependentRealParameters() = freeDependentRealParameters().size();
-	syn lazy LinkedHashSet<FRealVariable> FOptClass.freeDependentRealParameters() {
+	syn int FClass.numFreeDependentRealParameters() = freeDependentRealParameters().size();
+	syn lazy LinkedHashSet<FRealVariable> FClass.freeDependentRealParameters() {
 		LinkedHashSet<FRealVariable> s = new LinkedHashSet<FRealVariable>();
 		s.addAll(reals());
 		s.retainAll(freeDependentParameters());
 		return s;
 	}
 	
+	coll LinkedHashSet<FVariable> FAbstractEquation.retrieveFreeParameters() 
+		[new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
+
+	FIdUseExp contributes (FVariable)myFV() when !myFV().isUnknown() && 
+		!(getParent() instanceof FDerExp) && !(getParent() instanceof FPreExp) && 
+		myFV().isFreeParameter() to 
+		FAbstractEquation.retrieveFreeParameters() for myFEquation();
+
+	syn lazy LinkedHashSet<FVariable> FAbstractEquation.freeParameters() = 
+	    retrieveFreeParameters();
+	
+	eq FWhenEquation.freeParameters()  {
+		LinkedHashSet<FVariable> s = new LinkedHashSet<FVariable>();
+		s.addAll(retrieveFreeParameters());
+		for (FAbstractEquation e : getFAbstractEquations()) {
+			s.addAll(e.freeParameters());
+		}
+		return s;
+	}
+
+	syn lazy LinkedHashSet<FVariable> FAbstractEquation.realFreeParameters() = 
+		new LinkedHashSet<FVariable>(FClass.intersection(myFClass().reals(),freeParameters()));
+	
+}
+
+aspect OptimicaSparsity {
+
+	refine Sparsity eq FClass.freeParametersEquationSparsity_n_nz() {
+		int n_nz = 0;
+		ArrayList<Integer>[] sp = freeParametersEquationSparsity();
+		for (int j=0; j<numFreeParameters(); j++) {
+			n_nz += sp[j].size();
+		}
+		return n_nz;		
+	}
+	
+	refine Sparsity eq FClass.freeParametersEquationSparsity() {
+		ArrayList<Integer>[] sp = (ArrayList<Integer>[]) new ArrayList[numFreeParameters()];
+		
+		for (int i=0; i<numFreeParameters(); i++) {
+			sp[i] = new ArrayList<Integer>();
+		}
+		
+		// Create map between free parameters and index
+		HashMap<FVariable,Integer> h = new HashMap<FVariable,Integer>();
+		int i = 0;
+		for (FVariable fv : freeParameters()) {
+			h.put(fv,new Integer(i));
+			i++;	
+		}
+		
+		i = 0;
+		for (FAbstractEquation fe : equations()) {
+			LinkedHashSet<FVariable> vs = fe.realFreeParameters();
+			for (FVariable fv : vs) {
+				sp[h.get(fv).intValue()].add(new Integer(i)); 
+			}
+			i++;
+		}
+/*	
+		for (int j=0; j<numFreeParameters(); j++) {
+			for (int k=0; k<sp[j].size(); k++) {
+				System.out.println("p_opt:[" + sp[j].get(k).intValue() + "," + j + "]");
+			}
+		}
+	*/	
+		return sp;
+		
+	}
+
 }

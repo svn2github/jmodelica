@@ -875,7 +875,18 @@ class Test_FMI_ODE:
         nose.tools.assert_almost_equal(x2_sim[0], 0.000000, 4)
         #nose.tools.assert_almost_equal(x1_sim[-1], 0.290109468, 5)
         #nose.tools.assert_almost_equal(x2_sim[-1], -0.956993467, 5)
+    
+    @testattr(windows = True)
+    def test_terminate_simulation(self):
+        """
+        This tests a simulation with an event of terminate simulation.
+        """
+        model = fmi.FMUModel('Robot.fmu', path_to_fmus)
         
+        res = model.simulate(final_time=2.0)
+        solver = res.solver
+        
+        nose.tools.assert_almost_equal(solver.t_cur, 1.856045, places=3)
     
     @testattr(assimulo = True)
     def test_event_iteration(self):

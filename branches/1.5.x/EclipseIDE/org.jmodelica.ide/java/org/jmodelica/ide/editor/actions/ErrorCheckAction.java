@@ -34,7 +34,7 @@ public class ErrorCheckAction extends CurrentClassAction {
 			Collection<InstanceError> err = errorHandler.getLostErrors();
 			StringBuilder buf = new StringBuilder("Errors found in files outside workspace:\n");
 			if (err.size() > MAX_ERRORS_SHOWN)
-				buf.append(String.format("(First %d of %d errors shown.)",
+				buf.append(String.format("(First %d of %d errors shown.)\n",
 						MAX_ERRORS_SHOWN, err.size()));
 			int i = 0;
 			for (InstanceError e : err)
@@ -44,7 +44,7 @@ public class ErrorCheckAction extends CurrentClassAction {
 		} else {
 			int num = errorHandler.getNumErrors();
 			if (num == 0)
-				msg = "No errors found.";
+				msg = "No new errors found.";
 			else
 				msg = num + " errors found.";
 		}

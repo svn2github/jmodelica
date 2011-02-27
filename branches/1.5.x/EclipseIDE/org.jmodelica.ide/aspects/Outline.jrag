@@ -108,13 +108,37 @@ aspect Outline {
 	eq InstClassDecl.outlineCategory() = -1;
 	
 	/*
+     * To be able to sort nodes by declared order. We only need this for nodes that are shown in an outline.
+     */
+    syn int ASTNode.declareOrder() = 0;
+    eq InstNode.declareOrder()  = myIndex();
+    eq LibNode.declareOrder()   = myIndex();
+    eq ClassDecl.declareOrder() = myIndex();
+    
+    // TODO: Define for more cases
+    inh int InstNode.myIndex();
+    inh int LibNode.myIndex();
+    inh int ClassDecl.myIndex();
+    eq InstNode.getInstClassDecl(int i).myIndex() = i;
+    eq InstNode.getInstComponentDecl(int i).myIndex() = i;
+    eq Program.getLibNode(int i).myIndex() = i;
+    eq LibClassDecl.getLibNode(int i).myIndex() = i;
+    eq FullClassDecl.getClassDecl(int i).myIndex() = i;
+    eq BaseNode.getChild().myIndex() = 0;
+	
+	/*
 	 * We need a connection to the "Loaded Libraries" node in the Project Explorer
 	 */
-	private org.jmodelica.ide.outline.ExplorerContentProvider.LibrariesList LibNode.librariesList;
-	public org.jmodelica.ide.outline.ExplorerContentProvider.LibrariesList LibNode.getLibrariesList() {
+	private org.jmodelica.ide.outline.ExplorerContentProvider.LibrariesList ClassDecl.librariesList;
+	public org.jmodelica.ide.outline.ExplorerContentProvider.LibrariesList ASTNode.getLibrariesList() {
+		return null;
+	}
+	public org.jmodelica.ide.outline.ExplorerContentProvider.LibrariesList ClassDecl.getLibrariesList() {
 		return librariesList;
 	}
-	public void LibNode.setLibrariesList(org.jmodelica.ide.outline.ExplorerContentProvider.LibrariesList librariesList) {
+	public void ASTNode.setLibrariesList(org.jmodelica.ide.outline.ExplorerContentProvider.LibrariesList librariesList) {
+	}
+	public void ClassDecl.setLibrariesList(org.jmodelica.ide.outline.ExplorerContentProvider.LibrariesList librariesList) {
 		this.librariesList = librariesList;
 	}
 	

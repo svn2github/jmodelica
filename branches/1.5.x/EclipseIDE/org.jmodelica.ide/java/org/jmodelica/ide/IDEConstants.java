@@ -71,6 +71,11 @@ public class IDEConstants {
 	public static final String PREFERENCE_OPTIONS_PATH_ID = "options_path";
 	public static final String PREFERENCE_COLOR_PREFIX = "syntax.color.";
 	public static final String PREFERENCE_ANNO_BG_ID = PREFERENCE_COLOR_PREFIX + "default.anno.bg";
+	public static final String PREFERENCE_EXPLORER_SORT_ORDER = "explorer.sort_order";
+
+	public static final String SORT_ALPHA    = "Alphabetical";
+	public static final String SORT_DECLARED = "As declared";
+	public static final String[] ALLOWED_SORT_ORDERS = new String[] { SORT_ALPHA, SORT_DECLARED };
 
 	public static final String WIZARD_ID = PLUGIN_ID + ".wizard";
 	public static final String WIZARD_FILE_ID = WIZARD_ID + ".file";
