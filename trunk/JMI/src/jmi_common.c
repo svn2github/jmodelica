@@ -200,32 +200,55 @@ int jmi_func_sym_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity, int independ
 
 }
 
-/* Convenience function to evaluate the Jacobian of the function contained in a
- jmi_func_t. */
 int jmi_func_cad_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
 		int independent_vars, int* mask, jmi_real_t* jac) {
 	/* TODO: implement this function */
 	return 0;
 }
 
-/* Convenience function for accessing the number of non-zeros in the (symbolic)
- Jacobian. */
 int jmi_func_cad_dF_n_nz(jmi_t *jmi, jmi_func_t *func, int* n_nz) {
 	/* TODO: implement this function */
 	return 0;
 }
 
-/* Convenience function of accessing the non-zeros in the Jacobian */
 int jmi_func_cad_dF_nz_indices(jmi_t *jmi, jmi_func_t *func, int independent_vars,
                            int *mask,int *row, int *col) {
 	/* TODO: implement this function */
 	return 0;
 }
 
-/* Convenience function for computing the dimensions of the Jacobian. */
 int jmi_func_cad_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity, int independent_vars, int *mask,
 		int *dF_n_cols, int *dF_n_nz) {
 	/* TODO: implement this function */
+	return 0;
+}
+
+int jmi_func_fd_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
+		int independent_vars, int* mask, jmi_real_t* jac) {
+	/* TODO: implement this function */
+	return 0;
+}
+
+int jmi_func_fd_dF_n_nz(jmi_t *jmi, jmi_func_t *func, int* n_nz) {
+	/* TODO: implement this function */
+	return 0;
+}
+
+int jmi_func_fd_dF_nz_indices(jmi_t *jmi, jmi_func_t *func, int independent_vars,
+                           int *mask,int *row, int *col) {
+	/* TODO: implement this function */
+	return 0;
+}
+
+int jmi_func_fd_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity, int independent_vars, int *mask,
+		int *dF_n_cols, int *dF_n_nz) {
+	/* TODO: implement this function */
+	return 0;
+}
+
+int jmi_func_fd_directional_dF(jmi_t *jmi, jmi_func_t *func, jmi_real_t *res,
+			 jmi_real_t *dF, jmi_real_t* dv) {
+	/* TODO: add code here */
 	return 0;
 }
 

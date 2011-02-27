@@ -525,6 +525,9 @@ int jmi_dae_dF(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int
 	} else if (eval_alg & JMI_DER_CAD) {
 		/* TODO: Add code here */
 		return 0;
+	} else if (eval_alg & JMI_DER_FD) {
+		/* TODO: Add code here */
+		return 0;
 	} else if (eval_alg & JMI_DER_CPPAD) {
 		return -1;
 	} else {

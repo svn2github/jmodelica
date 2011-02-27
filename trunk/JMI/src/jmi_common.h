@@ -568,7 +568,7 @@ int jmi_func_cad_dF_nz_indices(jmi_t *jmi, jmi_func_t *func,
 
 /**
  * \brief Computes the number of columns and the number of non-zero
- * elements in the symbolic Jacobian of a jmi_func_t given a sparsity
+ * elements in the AD Jacobian of a jmi_func_t given a sparsity
  * configuration.
  *
  * @param jmi A jmi_t struct.
@@ -580,9 +580,87 @@ int jmi_func_cad_dF_nz_indices(jmi_t *jmi, jmi_func_t *func,
  * @param dF_n_nz (Output) The number of non-zeros of the resulting Jacobian.
  *
  */
-int jmi_func_sym_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity,
+int jmi_func_cad_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity,
                     int independent_vars, int *mask,
 		    int *dF_n_cols, int *dF_n_nz);
+
+/**
+ * \brief Evaluate the directional finite difference derivative of the residual function of
+ * a jmi_func_t struct.
+ *
+ * @param jmi A jmi_t struct.
+ * @param func The jmi_func_t struct.
+ * @param res (Output) The DAE residual vector.
+ * @param dF (Output) The directional derivative.
+ * @param dv Seed vector of size n_x + n_x + n_u + n_w.
+ * @return Error code.
+ */
+int jmi_func_fd_directional_dF(jmi_t *jmi, jmi_func_t *func, jmi_real_t *res,
+			 jmi_real_t *dF, jmi_real_t* dv);
+
+/**
+ * \brief Evaluation of the finite difference Jacobian of the
+ * residual function contained in a jmi_func_t.
+ *
+ * @param jmi The jmi_t struct.
+ * @param func The jmi_func_t struct.
+ * @param sparsity See ::jmi_dae_dF.
+ * @param independent_vars See ::jmi_dae_dF.
+ * @param mask See ::jmi_dae_dF.
+ * @param jac (Output) The Jacobian
+ *
+ */
+int jmi_func_fd_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
+		int independent_vars, int* mask, jmi_real_t* jac) ;
+
+/**
+ * \brief Returns the number of non-zeros in the finite difference Jacobian.
+ *
+ * @param jmi A jmi_t struct.
+ * @param func The jmi_func_t struct.
+ * @param n_nz (Output) The number of non-zero Jacobian entries.
+ * @return Error code.
+ */
+int jmi_func_fd_dF_n_nz(jmi_t *jmi, jmi_func_t *func, int* n_nz);
+
+/**
+ * \brief Returns the row and column indices of the non-zero elements in the
+ * finite difference residual Jacobian.
+ *
+ * @param jmi A jmi_t struct.
+ * @param func The jmi_func_t struct.
+ * @param independent_vars See ::jmi_dae_dF.
+ * @param mask See ::jmi_dae_dF.
+ * @param row (Output) The row indices of the non-zeros in the DAE residual
+ *            Jacobian.
+ * @param col (Output) The column indices of the non-zeros in the DAE residual
+ *            Jacobian.
+ * @return Error code.
+ *
+ */
+int jmi_func_fd_dF_nz_indices(jmi_t *jmi, jmi_func_t *func,
+                           int independent_vars,
+                           int *mask, int *row, int *col);
+
+/**
+ * \brief Computes the number of columns and the number of non-zero
+ * elements in the finite difference Jacobian of a jmi_func_t given a sparsity
+ * configuration.
+ *
+ * @param jmi A jmi_t struct.
+ * @param func The jmi_func_t struct.
+ * @param sparsity See ::jmi_dae_dF.
+ * @param independent_vars See ::jmi_dae_dF.
+ * @param mask See ::jmi_dae_dF.
+ * @param dF_n_cols (Output) The number of columns of the resulting Jacobian.
+ * @param dF_n_nz (Output) The number of non-zeros of the resulting Jacobian.
+ *
+ */
+int jmi_func_fd_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity,
+                    int independent_vars, int *mask,
+		    int *dF_n_cols, int *dF_n_nz);
+
+
 
 /**
  * \brief Data structure for representing a single function

@@ -1183,7 +1183,12 @@ int jmi_dae_dF(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int
 
 		return jmi_func_sym_dF(jmi, jmi->dae->F, sparsity,
 				independent_vars, mask, jac) ;
-
+	} else if (eval_alg & JMI_DER_CAD) {
+		/* TODO: Add code here */
+		return 0;
+	} else if (eval_alg & JMI_DER_FD) {
+		/* TODO: Add code here */
+		return 0;
 	} else if (eval_alg & JMI_DER_CPPAD) {
 
 		return jmi_func_ad_dF(jmi,jmi->dae->F, sparsity, independent_vars, mask, jac);

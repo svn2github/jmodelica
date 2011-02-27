@@ -309,13 +309,15 @@ extern "C" {
 
 #define JMI_DER_SYMBOLIC 1          /**< \brief Use symbolic evaluation of derivatives (if available). */
 #define JMI_DER_CPPAD 2             /**< \brief Use automatic differentiation (CppAD) to evaluate derivatives. */
-#define JMI_DER_CAD 3             /**< \brief Use automatic differentiation (generated C code) to evaluate derivatives. */
+#define JMI_DER_CAD 4             /**< \brief Use automatic differentiation (generated C code) to evaluate derivatives. */
+#define JMI_DER_FD 8             /**< \brief Use finite differences to evaluate derivatives. */
 
 #define JMI_DER_SPARSE 1            /**< \brief Sparse evaluation of derivatives. */
 #define JMI_DER_DENSE_COL_MAJOR 2   /**<  \brief Dense evaluation (column major) of derivatives. */
 #define JMI_DER_DENSE_ROW_MAJOR 4   /**<  \brief Dense evaluation (row major) of derivatives. */
 
 /* Flags for evaluation of Jacobians w.r.t. parameters in the p vector */
+#define JMI_DER_P_OPT 0               /**< \brief Evaluate derivatives w.r.t. real free parameters, \f$p_{opt}\f$.*/
 #define JMI_DER_CI 1               /**< \brief Evaluate derivatives w.r.t. real independent constants, \f$c_i\f$.*/
 #define JMI_DER_CD 2               /**< \brief Evaluate derivatives w.r.t. real dependent constants, \f$c_d\f$.*/
 #define JMI_DER_PI 4               /**< \brief Evaluate derivatives w.r.t. real independent parameters, \f$p_i\f$.*/
