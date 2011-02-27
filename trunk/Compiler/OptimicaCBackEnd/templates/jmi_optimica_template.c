@@ -87,6 +87,8 @@ static const int Scaling_method = $C_DAE_scaling_method$;
 
 #define sf(i) (jmi->variable_scaling_factors[i])
 
+$C_DAE_equation_sparsity$
+
 $C_variable_aliases$
 
 $C_point_variable_aliases$
@@ -273,6 +275,7 @@ int jmi_new(jmi_t** jmi) {
 	/* Initialize the DAE interface */
 	jmi_dae_init(*jmi, *model_dae_F, N_eq_F, NULL, 0, NULL, NULL,
 		     *model_dae_dir_dF,
+		     CAD_dae_n_nz,(int (*))CAD_dae_nz_rows,(int (*))CAD_dae_nz_cols,
 		     *model_dae_R, N_eq_R, NULL, 0, NULL, NULL,*model_ode_derivatives,
                      *model_ode_outputs,*model_ode_initialize,*model_ode_guards,*model_ode_guards_init,
                      *model_ode_next_time_event);

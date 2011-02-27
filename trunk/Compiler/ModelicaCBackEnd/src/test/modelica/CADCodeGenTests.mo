@@ -689,4 +689,40 @@ equation
 	x1 = -1;
 end CADabs;
 
+model SparseJacTest1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CADCodeGenTestCase(
+         name="SparseJacTest1",
+         description="Test that sparsity information is generated correctly",
+	 generate_dae_jacobian=true,
+         template="
+$C_DAE_equation_sparsity$
+",
+         generatedCode="
+static const int CAD_dae_real_p_opt_n_nz = 0;
+static const int CAD_dae_real_dx_n_nz = 5;
+static const int CAD_dae_real_x_n_nz = 5;
+static const int CAD_dae_real_u_n_nz = 5;
+static const int CAD_dae_real_w_n_nz = 7;
+static int CAD_dae_n_nz = 22;
+static const int CAD_dae_nz_rows[22] = {0,1,2,3,4,0,1,2,3,4,2,3,4,8,8,2,5,3,6,4,7,8};
+static const int CAD_dae_nz_cols[22] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,15,16,16,17,17,18};
+")})));
+
+ parameter Real p1=2;
+ parameter Integer p2 = 1;
+ parameter Boolean p3 = false;
+ Real x[3]; 
+ Real x2[2];
+ Real y[3];
+ Real y2;
+ input Real u[3];
+ input Real u2[2];
+equation
+ der(x2) = -x2;
+ der(x) = x + y + u;
+ y = {1,2,3};
+ y2 = sum(u2);
+end SparseJacTest1;
+
 end CADCodeGenTests;
