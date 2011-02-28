@@ -59,6 +59,7 @@ except:
 try:
     import casadi
     from jmodelica.optimization.casadi_collocation import *
+    from jmodelica.optimization.casadi_polynomial import *
     casadi_present = True
 except:
     casadi_present = False
@@ -1756,6 +1757,125 @@ class CasadiLPM(AlgorithmBase):
         values. (Class method.)
         """
         return CasadiLPMOptions()
+        
+class CasadiGPM(AlgorithmBase):
+    """
+    The algorithm is based on orthogonal collocation and relies on the solver 
+    IPOPT for solving a non-linear programming problem. 
+    """
+    
+    def __init__(self, 
+                 model, 
+                 options):
+        """
+        Create a CasadiGPM algorithm.
+        
+        Parameters::
+              
+            model -- 
+                jmodelica.jmi.casadiModel model object
+
+            options -- 
+                The options that should be used by the algorithm. For 
+                details on the options, see:
+                
+                * model.optimize_options('CasadiGPM')
+                
+                or look at the docstring with help:
+                
+                * help(jmodelica.algorithm_drivers.CasadiGPM)
+                
+                Valid values are: 
+                - A dict that overrides some or all of the default values
+                  provided by CasadiGPMOptions. An empty
+                  dict will thus give all options with default values.
+                - A CasadiGPMOptions object.
+        """
+        self.model = model
+        
+        # handle options argument
+        if isinstance(options, dict) and not \
+            isinstance(options, CasadiGPMOptions):
+            # user has passed dict with options or empty dict = default
+            self.options = CasadiGPMOptions(options)
+        elif isinstance(options, CasadiGPMOptions):
+            # user has passed CasadiLPMOptions instance
+            self.options = options
+        else:
+            raise InvalidAlgorithmOptionException(options)
+
+        # set options
+        self._set_options()
+            
+        if not casadi_present:
+            raise Exception(
+                'Could not find CasADi. Check jmodelica.check_packages()')
+        
+        self.nlp = GaussPseudoSpectralMethod(model, self.options)
+            
+        # set solver options
+        self._set_solver_options()
+        
+    def _set_options(self):
+        """ 
+        Helper function that sets options for the CasadiGPM 
+        algorithm.
+        """
+        self.n_e=self.options['n_e']
+        self.n_cp=self.options['n_cp']
+
+        self.result_args = dict(
+            file_name=self.options['result_file_name'], 
+            format=self.options['result_format'],
+            write_scaled_result=self.options['write_scaled_result'])
+
+        # solver options
+        self.solver_options = self.options['IPOPT_options']
+        
+    def _set_solver_options(self):
+        """ 
+        Helper function that sets options for the solver.
+        """
+        for k, v in self.solver_options.iteritems():
+            self.nlp.set_ipopt_option(k, v)
+            
+    def solve(self):
+        """ 
+        Solve the optimization problem using ipopt solver. 
+        """
+        self.nlp.ipopt_solve()
+        
+    def get_result(self):
+        """ 
+        Write result to file, load result data and create an 
+        CasadiGPMResult object.
+        
+        Returns::
+        
+            The CasadiGPMResult object.
+        """
+        self.nlp.export_result_dymola(**self.result_args)
+            
+        # result file name
+        resultfile = self.result_args['file_name']
+        if not resultfile:
+            resultfile=self.model.get_name()+'_result.txt'
+        
+        # load result file
+        res = ResultDymolaTextual(resultfile)
+
+        # create and return result object
+        return CasadiGPMResult(self.model, 
+            resultfile, self.nlp, res, self.options)
+        
+    @classmethod
+    def get_default_options(cls):
+        """ 
+        Get an instance of the options class for the 
+        CasadiGPM algorithm, prefilled with default 
+        values. (Class method.)
+        """
+        return CasadiGPMOptions()
 
 class CasadiLPMOptions(OptionBase):
     """
@@ -1861,9 +1981,100 @@ class CasadiLPMOptions(OptionBase):
         # with the new values
         self._update_keep_dict_defaults(*args, **kw)
 
+class CasadiGPMOptions(OptionBase):
+    """
+    Options for optimizing JMU models using a collocation algorithm. 
+
+    Collocation algorithm options::
+    
+        n_e --
+            Number of phases of the finite element mesh.
+            Default: 1
+            
+        n_cp --
+            Number of collocation points in each element.
+            Default: 20
+            
+        link_options --
+            (state variable name, include in Mayer as ^2, ...) 
+            Default: []
+        
+        free_phases --
+            Specifies if the location of the phases should be allowed to be
+            changed by the optimizer.
+            Default: False
+        
+        free_phases_bounds --
+            Specifies the initial, lower and upper bounds of the free phases.
+            Default: None
+            
+        n_interpolation_points --
+            Specifies the number of interpolation points.
+            Default: None
+        
+        result_file_name --
+            Specifies the name of the file where the optimization result is 
+            written. Setting this option to an empty string results in a default 
+            file name that is based on the name of the optimization class.
+            Default: Empty string
+            
+        result_format --
+            Specifies in which format to write the result. Currently
+            only textual mode is supported.
+            Default: 'txt'
+
+        write_scaled_result --
+            Write the scaled optimization result if set to true. This option is 
+            only applicable when automatic variable scaling is enabled. Only for 
+            debugging use.
+            Default: False.
+
+    Options are set by using the syntax for dictionaries::
+
+        >>> opts = my_model.optimize_options()
+        >>> opts['n_e'] = 100
+        
+    In addition, IPOPT options can be provided in the option IPOPT_options. For 
+    a complete list of IPOPT options, please consult the IPOPT documentation 
+    available at http://www.coin-or.org/Ipopt/documentation/).
+
+    Some commonly used IPOPT options are provided by default::
+
+        max_iter --
+           Maximum number of iterations.
+           Default: 3000
+                      
+        derivative_test --
+           Check the correctness of the NLP derivatives. Valid values are 
+           'none', 'first-order', 'second-order', 'only-second-order'.
+           Default: 'none'
+
+    IPOPT options are set using the syntax for dictionaries::
+
+        >>> opts['IPOPT_options']['max_iter'] = 200
+
+    """
+    def __init__(self, *args, **kw):
+        _defaults= {
+            'n_e':1, 
+            'n_cp':20,
+            'link_options':[],
+            'free_phases':False,
+            'free_phases_bounds':None,
+            'n_interpolation_points': None,
+            'result_file_name':'', 
+            'result_format':'txt',
+            'write_scaled_result':False,
+            'IPOPT_options':{'max_iter':1000,
+                             'derivative_test':'none'}
+            }
+        super(CasadiGPMOptions,self).__init__(_defaults)
+        self._update_keep_dict_defaults(*args, **kw)
+
 class CasadiLPMResult(JMResultBase):
     pass
-
+class CasadiGPMResult(JMResultBase):
+    pass
 class CasadiRadauResult(JMResultBase):
     pass
 

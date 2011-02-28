@@ -89,6 +89,71 @@ class RadauPol3(RadauPol):
                         [-1.3821427331607485e+00, 1.1678400846904053e+00, 7.7525512860840973e-01, -7.5319726474218065e+00],
                         [3.3333333333333337e-01, -2.5319726474218085e-01, 1.0531972647421810e+00, 5.0000000000000000e+00]])
 
+class LegendreGauss:
+    """
+    Class containing the LG points which lie on the interval t=(-1,1).
+    
+    WARNING! This implementation is unstable for K>30 (for scipy 0.7.0). Stable
+    for K < 100 for scipy 0.9.0.
+    """
+    def __init__(self, K):
+        Pn = SP.legendre(K)
+        dPn = Pn.deriv()
+        ddPn = dPn.deriv()
+        
+        self.Pn = Pn
+        self.dPn = dPn
+        self.ddPn = ddPn
+        self.roots = Pn.weights[:,0].real
+        self.weights = Pn.weights[:,2].real
+        self.matrix = N.zeros((K,K+1))
+
+        kk = self.roots
+        ii = N.append(-1.0, kk)
+
+        #Create the differentiation matrix
+        for k in range(len(kk)):
+            for i in range(len(ii)):
+                tk = kk[k]
+                ti = ii[i]
+                if i != k+1:
+                    self.matrix[k,i] = ( (1.0+tk)*dPn(tk) + Pn(tk) ) / ( (tk-ti)*( (1.0+ti)*dPn(ti) + Pn(ti) ) )
+                else:
+                    self.matrix[k,i] = ( (1.0+ti)*ddPn(ti) + 2.0*dPn(ti) ) / ( 2.0*( (1.0+ti)*dPn(ti) + Pn(ti) )  )
+                #print k,i,tk,ti,self.matrix[k,i]
+        
+    def get_roots(self):
+        """
+        These are the collocation points which all lie in the interval (-1,1)
+        """
+        return self.roots
+        
+    def get_discretization_points(self):
+        """
+        The discretization points includes both t0 = -1.0 and tf = 1.0.
+        """
+        return N.append(N.append(-1.0, self.roots), 1.0)
+        
+    def get_approximation_polynomials(self):
+        """
+        The approximation is based on K+1 Lagrange polynomials. The roots of
+        a K order Legendre polynomial plus t0=-1.0.
+        """
+        roots = N.append(-1.0, self.roots)
+        return LagrangePol(roots)
+    
+    def get_legendre_pol(self):
+        return self.Pn
+        
+    def get_lagrange_pol(self):
+        return LagrangePol(self.get_roots())
+        
+    def get_weights(self):
+        return self.weights
+    
+    def get_matrix(self):
+        return self.matrix
+
 class LegendreGaussLobatto:
     """
     Class containing the LGL points which lie on the interval t=[-1,1].

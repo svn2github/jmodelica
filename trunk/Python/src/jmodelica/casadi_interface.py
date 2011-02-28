@@ -240,9 +240,7 @@ class CasadiModel(object):
         return self.opt_L
         
     def _convert_to_ode(self):
-        # The ODE function
-        # TODO
-        """
+
         self.ocp.makeExplicit()
         
         self.ocp_ode_inputs = []
@@ -250,11 +248,43 @@ class CasadiModel(object):
         self.ocp_ode_inputs += list(self.u)
         self.ocp_ode_inputs += [self.t]
         
+        self.ocp_ode_init_inputs = []
+        self.ocp_ode_init_inputs += list(self.x)
+        self.ocp_ode_init_inputs += [self.t]
+        
         self.F = casadi.der(self.var.x)
         
         self.ode_F = casadi.SXFunction([self.ocp_ode_inputs], [self.F])
-        """
-        pass
+        
+        # The initial equations
+        self.ode_F0 = casadi.SXFunction([self.ocp_ode_init_inputs],[self.ocp.initeq])
+        
+        # The Lagrange cost function
+        if len(self.ocp.lterm)>0:
+            self.opt_ode_L = casadi.SXFunction([self.ocp_ode_inputs],[[self.ocp.lterm[0]]])
+        else:
+            self.opt_ode_L = None
+        
+        # The Mayer cost function
+        if len(self.ocp.mterm)>0:
+            self.ocp_ode_mterm_inputs = []
+            self.ocp_ode_mterm_inputs += list(self.x)
+            self.ocp_ode_mterm_inputs += [self.t]
+            self.opt_ode_J = casadi.SXFunction([self.ocp_ode_mterm_inputs],[[self.ocp.mterm[0]]])
+        else:
+            self.opt_ode_J = None
+
+    def get_opt_ode_L(self):
+        return self.opt_ode_L
+
+    def get_opt_ode_J(self):
+        return self.opt_ode_J    
+    
+    def get_ode_F(self):
+        return self.ode_F
+        
+    def get_ode_F0(self):
+        return self.ode_F0
         
     def _load_xml_to_casadi(self, xml, enable_scaling=False):
         # Store scaling option

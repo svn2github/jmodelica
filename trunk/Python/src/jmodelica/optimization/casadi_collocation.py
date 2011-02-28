@@ -25,7 +25,7 @@ try:
 except:
     pass
 
-from casadi_polynomial import *
+from jmodelica.optimization.casadi_polynomial import *
 from jmodelica import xmlparser
 
 class CasadiCollocator(object):
@@ -383,6 +383,19 @@ class CasadiCollocator(object):
         self.solver.setInput(self.gllb,casadi.NLP_LBG)
         self.solver.setInput(self.glub,casadi.NLP_UBG)
         
+        """
+        print "Optimal control problem: "
+        print self.ocp
+        
+        print "NLP X: ", len(self.get_xx()), self.get_xx()
+        print "NLP X UB: ", len(self.get_xx_ub()), self.get_xx_ub()
+        print "NLP X LB: ", len(self.get_xx_lb()), self.get_xx_lb()
+        
+        print "Equality constraints: ", len(h), h
+        print "Inequality constraints: ", len(g), g
+        
+        print "Cost functional: ", self.get_cost()
+        """
         # Solve the problem
         self.solver.solve()
         
@@ -714,6 +727,368 @@ class RadauCollocator(CasadiCollocator):
     def get_hessian(self):
         return self.H_fcn
         
+class GaussPseudoSpectralMethod(CasadiCollocator):
+    """
+    This class implementes the Gauss PseudoSpectral method described in:
+    
+        * A Gauss pseudospectral transcription for optimal control.
+            -> http://dspace.mit.edu/handle/1721.1/28919
+        * Advancement and analysis of Gauss pseudospectral transcription for optimal control problems.
+            -> http://dspace.mit.edu/handle/1721.1/42180
+        * Algorithm 902: GPOPS, A MATLAB software for solving multiple-phase optimal control problems using the gauss pseudospectral method.
+            -> http://portal.acm.org/citation.cfm?doid=1731022.1731032
+    """
+    def __init__(self, model, options):
+        #Make problem explicit
+        model._convert_to_ode()
+        
+        self.model = model
+        self.options = options
+        self.ocp = model.get_casadi_ocp()
+        
+        self.P = options['n_e']
+        self.K = options['n_cp']
+        
+        self.LG = LegendreGauss(self.K)
+        self.LGr = self.LG.get_roots()
+        self.LGm = self.LG.get_matrix()
+        self.LGw = self.LG.get_weights()
+        self.LGd = self.LG.get_discretization_points()
+        self.LGl = self.LG.get_lagrange_pol().get_lagrange_polynomials()
+        
+        self._create_nlp_variables()
+        self._create_collocation_constraints()
+        self._create_bolza_functional()
+        
+        # Necessary!
+        super(GaussPseudoSpectralMethod,self).__init__(model)
+        
+        self._modify_init()
+    
+    def _modify_init(self):
+        if self.options['free_phases'] and self.P > 1:
+            xx_init = self.get_xx_init()
+            xx_lb = self.get_xx_lb()
+            xx_ub = self.get_xx_ub()
+            if self.options['free_phases_bounds'] != None:
+                for i,x in enumerate(self.options['free_phases_bounds']):
+                    xx_init[-self.P+1+i]=x[0]
+                    xx_lb[-self.P+1+i] = x[1]
+                    xx_ub[-self.P+1+i] = x[2]
+            else:
+                xx_init[-self.P+1:] = [x*(self.ocp.tf-self.ocp.t0)/self.P for x in range(1,self.P)]
+                xx_lb[-self.P+1:] = [self.ocp.t0]*(self.P-1)
+                xx_ub[-self.P+1:] = [self.ocp.tf]*(self.P-1)
+    
+    def _compute_bounds_and_init(self):
+        # Create lower and upper bounds
+        nlp_lb = -1e20*N.ones(len(self.get_xx()))
+        nlp_ub = 1e20*N.ones(len(self.get_xx()))
+        nlp_init = N.zeros(len(self.get_xx()))
+        
+        md = self.get_model_description()
+        
+        _x_max = md.get_x_max(include_alias = False)
+        _u_max = md.get_u_max(include_alias = False)
+        _x_min = md.get_x_min(include_alias = False)
+        _u_min = md.get_u_min(include_alias = False)
+        _x_start = md.get_x_start(include_alias = False)
+        _u_start = md.get_u_start(include_alias = False)
+        
+        x_max = 1e20*N.ones(len(_x_max))
+        u_max = 1e20*N.ones(len(_u_max))
+        x_min = -1e20*N.ones(len(_x_min))
+        u_min = -1e20*N.ones(len(_u_min))
+        x_start = -1e20*N.ones(len(_x_start))
+        u_start = -1e20*N.ones(len(_u_start))
+
+        for vr, val in _x_min:
+            if val != None:
+                x_min[self.model.get_x_vr_map()[vr]] = val/self.model.get_x_sf()[self.model.get_x_vr_map()[vr]]
+        for vr, val in _x_max:
+            if val != None:
+                x_max[self.model.get_x_vr_map()[vr]] = val/self.model.get_x_sf()[self.model.get_x_vr_map()[vr]]
+        for vr, val in _x_start:
+            if val != None:
+                x_start[self.model.get_x_vr_map()[vr]] = val/self.model.get_x_sf()[self.model.get_x_vr_map()[vr]]
+
+        for vr, val in _u_min:
+            if val != None:
+                u_min[self.model.get_u_vr_map()[vr]] = val/self.model.get_u_sf()[self.model.get_u_vr_map()[vr]]
+        for vr, val in _u_max:
+            if val != None:
+                u_max[self.model.get_u_vr_map()[vr]] = val/self.model.get_u_sf()[self.model.get_u_vr_map()[vr]]
+        for vr, val in _u_start:
+            if val != None:
+                u_start[self.model.get_u_vr_map()[vr]] = val/self.model.get_u_sf()[self.model.get_u_vr_map()[vr]]
+
+        for t,i,j in self.get_time_points():
+            nlp_lb[self.get_var_indices()[i][j]['x']] = x_min
+            nlp_ub[self.get_var_indices()[i][j]['x']] = x_max
+            nlp_init[self.get_var_indices()[i][j]['x']] = x_start
+            if j!= 0 and j!=self.K+1:
+                nlp_lb[self.get_var_indices()[i][j]['u']] = u_min
+                nlp_ub[self.get_var_indices()[i][j]['u']] = u_max
+                nlp_init[self.get_var_indices()[i][j]['u']] = u_start
+
+        self.xx_lb = nlp_lb
+        self.xx_ub = nlp_ub
+        self.xx_init = nlp_init
+
+        return (nlp_lb,nlp_ub,nlp_init)
+    
+    def _create_nlp_variables(self):
+        # Group variables into elements
+        self.vars = {}
+        # Extended vars
+        self.ext_vars = {}
+        
+        for i in range(self.P): #Phases
+            for j in range(self.K+2): #Points
+                xi = [casadi.SX(str(x)+'_'+str(i)+','+str(j)) for x in self.model.get_x()]
+                ui = [casadi.SX(str(x)+'_'+str(i)+','+str(j)) for x in self.model.get_u()]
+                
+                if j==0:
+                    self.vars[i] = {}
+                self.vars[i][j] = {}
+                self.vars[i][j]['x'] = xi
+                if j!=0 and j!=self.K+1:
+                    self.vars[i][j]['u'] = ui
+        
+        # Group variables indices in the global
+        # variable vector
+        self.var_indices = {}
+        self.xx = []
+        
+        for i in range(self.P):
+            self.var_indices[i] = {}
+            for j in range(self.K+2):
+                self.var_indices[i][j] = {}
+                pre_len = len(self.xx)
+                self.xx += self.vars[i][j]['x']
+                self.var_indices[i][j]['x'] = N.arange(pre_len,len(self.xx),dtype=int)
+                if j!=0 and j!=self.K+1:
+                    pre_len = len(self.xx)
+                    self.xx += self.vars[i][j]['u']
+                    self.var_indices[i][j]['u'] = N.arange(pre_len,len(self.xx),dtype=int)
+        
+        #Create vector allowing or disallowing discontinuous state
+        xvars = self.model.get_x()
+        for i in range(self.P-1):
+            self.ext_vars[i] = {}
+            self.ext_vars[i]['link_x'] = [casadi.SX(0.0) for x in self.model.get_x()]
+            for j in self.options['link_options']:
+                for l,k in enumerate(self.model.get_x()):
+                    if j[0] == str(k):
+                        self.ext_vars[i]['link_x'][l] = casadi.SX('link_'+str(k)+'_'+str(i))
+                        self.xx += [self.ext_vars[i]['link_x'][l]]
+                        
+        #Create vector of time points
+        for i in range(self.P+1):
+            try:
+                self.ext_vars[i]
+            except KeyError:
+                self.ext_vars[i] = {}
+            if i == 0:
+                self.ext_vars[i]['t'] = casadi.SX(self.ocp.t0)
+            elif i==self.P:
+                self.ext_vars[i]['t'] = casadi.SX(self.ocp.tf)
+            else:
+                if self.options['free_phases']:
+                    self.ext_vars[i]['t'] = casadi.SX('t_'+str(i))
+                    self.xx += [self.ext_vars[i]['t']]
+                else:
+                    self.ext_vars[i]['t'] = casadi.SX(i*(self.ocp.tf-self.ocp.t0)/self.P)
+        
+    def get_result(self):
+        dx_opt = N.zeros((self.P*(self.K+2), self.model.get_n_x()))
+        x_opt = N.zeros((self.P*(self.K+2), self.model.get_n_x()))
+        u_opt = N.zeros((self.P*(self.K+2), self.model.get_n_u()))
+        w_opt = N.zeros((self.P*(self.K+2), 0))
+        t_opt = N.zeros(len(self.get_time_points()))
+
+        cnt = 0
+        for t,i,j in self.get_time_points():
+            t_opt[cnt] = t
+            x_opt[cnt,:]  = self.nlp_opt[self.get_var_indices()[i][j]['x']][:,0]
+            
+            if j!=0 and j!=self.K+1:
+                u_opt[cnt,:]  = self.nlp_opt[self.get_var_indices()[i][j]['u']][:,0]
+            elif j==0:
+                for k in range(self.model.get_n_u()):
+                    u_opt[cnt,k] = sum([self.LGl[l](-1.0)*self.nlp_opt[self.get_var_indices()[i][l+1]['u']][k,0] for l in range(self.K)])
+            else:
+                for k in range(self.model.get_n_u()):
+                    u_opt[cnt,k] = sum([self.LGl[l](1.0)*self.nlp_opt[self.get_var_indices()[i][l+1]['u']][k,0] for l in range(self.K)])
+            cnt = cnt + 1
+
+        t_points = self.get_time_points()
+        
+        if self.options['free_phases'] and self.P > 1:
+            ts = [i[0] for i in t_points]
+            input_t = []
+            for i in range(1,self.P):
+                input_t += [self.ext_vars[i]['t']]
+
+            self._tfcn = casadi.SXFunction([input_t],[ts])
+            self._tfcn.init()
+            self._tfcn.setInput(self.nlp_opt[-self.P+1:].flatten())
+            self._tfcn.evaluate()
+            
+            self._t = self._tfcn.output()
+        else:
+            ts = [i[0] for i in t_points]
+            self._tfcn = casadi.SXFunction([[]],[ts])
+            self._tfcn.init()
+            self._tfcn.evaluate()
+            
+            self._t = self._tfcn.output()
+        """
+        ts = [i[0] for i in t_points]
+        self._tfcn = casadi.SXFunction([[]],[ts])
+        self._tfcn.init()
+        self._tfcn.evaluate()
+            
+        self._t = self._tfcn.output()
+        """
+        self._result = (self._t,dx_opt,x_opt,u_opt,w_opt)
+
+        return (self._t,dx_opt,x_opt,u_opt,w_opt)
+        
+    def _create_collocation_constraints(self):
+        
+        self.h = [] #Equality constraints
+        self.g = [] #Inequality constraints
+        self.time_points = []
+        
+        #print "Creating collocation constraints"
+        
+        #Create initial constraints
+        t = self.ext_vars[0]['t']
+        z = []
+        z += self.vars[0][0]['x']
+        z += [t]
+        init_constr = list(self.model.get_ode_F0().eval([z])[0])
+        self.h += init_constr
+        
+        #print "Initial Constraints ", init_constr
+        
+        #Create collocation constraints
+        for i in range(self.P):
+            self.time_points += [(self.ext_vars[i]['t'],i,0)]
+            for j in range(1,self.K+1):
+                dx = []
+                for k in range(self.model.get_n_x()):
+                    dx += [sum([self.LGm[j-1,l]*self.vars[i][l]['x'][k] for l in range(self.K+1)])]
+                    
+                t = (self.ext_vars[i+1]['t']-self.ext_vars[i]['t'])*0.5*(self.LGd[j]+(self.ext_vars[i+1]['t']+self.ext_vars[i]['t'])/(self.ext_vars[i+1]['t']-self.ext_vars[i]['t']))
+                z = []
+                z += self.vars[i][j]['x']
+                z += self.vars[i][j]['u']
+                z += [t]
+                dynamic_constr = list((self.ext_vars[i+1]['t']-self.ext_vars[i]['t'])*0.5*self.model.get_ode_F().eval([z])[0])
+                for k in range(self.model.get_n_x()):
+                    self.h += [dx[k] - dynamic_constr[k]]
+
+                self.time_points += [(t,i,j)]
+            self.time_points += [(self.ext_vars[i+1]['t'],i,self.K+1)]
+        
+        #Create linking constraints
+        for i in range(self.P-1):
+            z = []
+            for x in range(self.model.get_n_x()):
+                z += [self.vars[i][self.K+1]['x'][x] - self.vars[i+1][0]['x'][x] + self.ext_vars[i]['link_x'][x]]
+            self.h += z
+        
+        #print self.h
+        
+        #Create constraints on the final x
+        final_constr = []
+        for j in range(self.P):
+            for x in range(self.model.get_n_x()):
+                temp = []
+                for i in range(self.K+1):
+                    for k in range(self.K):
+                        temp += [self.LGw[k]*self.LGm[k,i]*self.vars[j][i]['x'][x]]
+                    
+                final_constr += [self.vars[j][self.K+1]['x'][x] - self.vars[j][0]['x'][x] - sum(temp)]
+            
+        self.h += final_constr
+        
+        #print "Final constraints ", final_constr
+        
+        #Create inequality constraint
+        if self.options['free_phases']:
+            for i in range(1,self.P):
+                self.g += [self.ext_vars[i-1]['t']-self.ext_vars[i]['t']]
+        #print self.g
+    
+    def _create_bolza_functional(self):
+         # Generate cost function
+        self.cost_mayer = 0
+        self.cost_lagrange = 0
+    
+        if self.model.get_opt_J() != None:
+            # Assume Mayer cost
+            z = []
+            t = self.ext_vars[self.P]['t']
+            z += self.vars[self.P-1][self.K+1]['x']
+            #z += self.vars[P-1][N+1]['u']
+            z += [t]
+            self.cost_mayer = list(self.model.get_opt_ode_J().eval([z])[0])[0]
+        
+        #Add linking options to the Mayer functional
+        for i in range(self.P-1):
+            for j in self.options['link_options']:
+                for l,k in enumerate(self.model.get_x()):
+                    if j[0] == str(k) and j[1]==True:
+                        self.cost_mayer += self.ext_vars[i]['link_x'][l]*self.ext_vars[i]['link_x'][l]
+        
+
+        # Take care of Lagrange cost
+        if self.model.get_opt_L() != None:
+            for i in range(self.P):
+                for j in range(1,self.K+1):
+                    t = (self.ext_vars[i+1]['t']-self.ext_vars[i]['t'])*0.5*(self.LGr[j-1]+(self.ext_vars[i+1]['t']+self.ext_vars[i]['t'])/(self.ext_vars[i+1]['t']-self.ext_vars[i]['t']))
+                    z = []
+                    z += self.vars[i][j]['x']
+                    z += self.vars[i][j]['u']
+                    z += [t]
+                    self.cost_lagrange += (self.ext_vars[i+1]['t']-self.ext_vars[i]['t'])/2.0*self.model.get_opt_ode_L().eval([z])[0][0]*self.LGw[j-1]
+          
+        self.cost = self.cost_mayer + self.cost_lagrange
+
+        # Objective function
+        self.cost_fcn = casadi.SXFunction([self.xx], [[self.cost]])  
+        
+        # Hessian
+        self.sigma = casadi.SX('sigma')
+        
+        self.lam = []
+        self.Lag = self.sigma*self.cost
+        for i in range(len(self.h)):
+            self.lam.append(casadi.SX('lambda_' + str(i)))
+            self.Lag = self.Lag + self.h[i]*self.lam[i]
+        for i in range(len(self.g)):
+            self.lam.append(casadi.SX('lambda_' + str(i+len(self.h))))
+            self.Lag = self.Lag + self.g[i]*self.lam[i+len(self.h)]
+            
+        self.Lag_fcn = casadi.SXFunction([self.xx, self.lam, [self.sigma]],[[self.Lag]])
+
+        self.H_fcn = self.Lag_fcn.hessian(0,0)
+        
+    def get_equality_constraint(self):
+        return self.h
+    
+    def get_inequality_constraint(self):
+        return self.g
+
+    def get_cost(self):
+        return self.cost_fcn
+
+    def get_hessian(self):
+        return self.H_fcn
+        
 class LegendrePseudoSpectralMethod(CasadiCollocator):
     def __init__(self, model, options):
         
@@ -881,7 +1256,7 @@ class LegendrePseudoSpectralMethod(CasadiCollocator):
 
         # Objective function
         self.cost_fcn = casadi.SXFunction([self.xx], [[self.cost]])  
-        
+
         # Hessian
         self.sigma = casadi.SX('sigma')
         
