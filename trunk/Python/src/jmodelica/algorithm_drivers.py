@@ -1812,6 +1812,9 @@ class CasadiGPM(AlgorithmBase):
                 'Could not find CasADi. Check jmodelica.check_packages()')
         
         self.nlp = GaussPseudoSpectralMethod(model, self.options)
+        
+        if self.init_traj:
+            self.nlp.set_initial_from_file(self.init_traj) 
             
         # set solver options
         self._set_solver_options()
@@ -1823,6 +1826,7 @@ class CasadiGPM(AlgorithmBase):
         """
         self.n_e=self.options['n_e']
         self.n_cp=self.options['n_cp']
+        self.init_traj=self.options['init_traj']
 
         self.result_args = dict(
             file_name=self.options['result_file_name'], 
@@ -2011,6 +2015,12 @@ class CasadiGPMOptions(OptionBase):
         n_interpolation_points --
             Specifies the number of interpolation points.
             Default: None
+            
+        init_traj --
+            Variable trajectory data used for initialization of the optimization 
+            problem. The data is represented by an object of the type 
+            jmodelica.io.DymolaResultTextual.
+            Default: None
         
         result_file_name --
             Specifies the name of the file where the optimization result is 
@@ -2062,6 +2072,7 @@ class CasadiGPMOptions(OptionBase):
             'free_phases':False,
             'free_phases_bounds':None,
             'n_interpolation_points': None,
+            'init_traj':None,
             'result_file_name':'', 
             'result_format':'txt',
             'write_scaled_result':False,

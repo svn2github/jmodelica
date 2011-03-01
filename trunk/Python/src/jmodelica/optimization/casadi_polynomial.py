@@ -21,6 +21,12 @@ Module containing the polynomials for the Casadi collocation algorithms.
 import numpy as N
 import scipy.special as SP
 
+try:
+    import legendre_polynomials
+    legendre_present = True
+except:
+    legendre_present = False
+
 class RadauPol:
 
     def eval_lp(self,i,x):
@@ -97,31 +103,67 @@ class LegendreGauss:
     for K < 100 for scipy 0.9.0.
     """
     def __init__(self, K):
-        Pn = SP.legendre(K)
-        dPn = Pn.deriv()
-        ddPn = dPn.deriv()
         
-        self.Pn = Pn
-        self.dPn = dPn
-        self.ddPn = ddPn
-        self.roots = Pn.weights[:,0].real
-        self.weights = Pn.weights[:,2].real
-        self.matrix = N.zeros((K,K+1))
-
-        kk = self.roots
-        ii = N.append(-1.0, kk)
-
-        #Create the differentiation matrix
-        for k in range(len(kk)):
-            for i in range(len(ii)):
+        if legendre_present:
+            self.roots = N.zeros((K))
+            self.weights = N.zeros((K))
+            legendre_polynomials.legzo(self.roots, self.weights, K)
+            
+            self.roots.sort()
+            
+            kk = self.roots
+            ii = N.append(-1.0, kk)
+            
+            Pn_k   = N.array([0.0])
+            dPn_k  = N.array([0.0])
+            ddPn_k = N.array([0.0])
+            Pn_i   = N.array([0.0])
+            dPn_i  = N.array([0.0])
+            ddPn_i = N.array([0.0])
+            self.matrix = N.zeros((K,K+1))
+            
+            #Create the differentiation matrix
+            for k in range(len(kk)):
                 tk = kk[k]
-                ti = ii[i]
-                if i != k+1:
-                    self.matrix[k,i] = ( (1.0+tk)*dPn(tk) + Pn(tk) ) / ( (tk-ti)*( (1.0+ti)*dPn(ti) + Pn(ti) ) )
-                else:
-                    self.matrix[k,i] = ( (1.0+ti)*ddPn(ti) + 2.0*dPn(ti) ) / ( 2.0*( (1.0+ti)*dPn(ti) + Pn(ti) )  )
-                #print k,i,tk,ti,self.matrix[k,i]
-        
+                legendre_polynomials.lpn(K,tk,Pn_k, dPn_k, ddPn_k)
+                for i in range(len(ii)):
+                    ti = ii[i]
+                    legendre_polynomials.lpn(K,ti,Pn_i, dPn_i, ddPn_i)
+                    if i != k+1:
+                        self.matrix[k,i] = ( (1.0+tk)*dPn_k + Pn_k ) / ( (tk-ti)*( (1.0+ti)*dPn_i + Pn_i ) )
+                    else:
+                        self.matrix[k,i] = ( (1.0+ti)*ddPn_i + 2.0*dPn_i ) / ( 2.0*( (1.0+ti)*dPn_i + Pn_i )  )
+                    #print k,i,tk,ti,self.matrix[k,i]
+            
+        else:
+            Pn = SP.legendre(K)
+            dPn = Pn.deriv()
+            ddPn = dPn.deriv()
+            
+            #dPn = 1.0/2.0*(K+1)*SP.jacobi(K-1,1,1)
+            #ddPn = 1.0/4.0*(K+1)*(K+2)*SP.jacobi(K-2,2,2)
+            
+            self.Pn = Pn
+            self.dPn = dPn
+            self.ddPn = ddPn
+            self.roots = Pn.weights[:,0].real
+            self.weights = Pn.weights[:,2].real
+            self.matrix = N.zeros((K,K+1))
+
+            kk = self.roots
+            ii = N.append(-1.0, kk)
+
+            #Create the differentiation matrix
+            for k in range(len(kk)):
+                for i in range(len(ii)):
+                    tk = kk[k]
+                    ti = ii[i]
+                    if i != k+1:
+                        self.matrix[k,i] = ( (1.0+tk)*dPn(tk) + Pn(tk) ) / ( (tk-ti)*( (1.0+ti)*dPn(ti) + Pn(ti) ) )
+                    else:
+                        self.matrix[k,i] = ( (1.0+ti)*ddPn(ti) + 2.0*dPn(ti) ) / ( 2.0*( (1.0+ti)*dPn(ti) + Pn(ti) )  )
+                    #print k,i,tk,ti,self.matrix[k,i]
+            
     def get_roots(self):
         """
         These are the collocation points which all lie in the interval (-1,1)

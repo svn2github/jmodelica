@@ -19,6 +19,7 @@ Module containing the Casadi interface Python wrappers.
 """
 import codecs
 from operator import itemgetter
+import pylab as P
 
 try:
     import casadi
@@ -27,6 +28,7 @@ except:
 
 from jmodelica.optimization.casadi_polynomial import *
 from jmodelica import xmlparser
+from jmodelica.io import VariableNotFoundError
 
 class CasadiCollocator(object):
     
@@ -744,6 +746,7 @@ class GaussPseudoSpectralMethod(CasadiCollocator):
         
         self.model = model
         self.options = options
+        self.md  = model.get_model_description()
         self.ocp = model.get_casadi_ocp()
         
         self.P = options['n_e']
@@ -764,22 +767,217 @@ class GaussPseudoSpectralMethod(CasadiCollocator):
         super(GaussPseudoSpectralMethod,self).__init__(model)
         
         self._modify_init()
+        
+    def set_initial_from_file(self,res):
+        """ 
+        Initialize the optimization vector from an object of either 
+        ResultDymolaTextual or ResultDymolaBinary.
+
+        Parameters::
+        
+            res --
+                A reference to an object of type ResultDymolaTextual or
+                ResultDymolaBinary.
+        """
+        names = self.md.get_x_variable_names(include_alias=False)
+        x_names=[]
+        for name in sorted(names):
+            x_names.append(name[1])
+
+        names = self.md.get_u_variable_names(include_alias=False)
+        u_names=[]
+        for name in sorted(names):
+            u_names.append(name[1])
+            
+        names = self.md.get_p_opt_variable_names(include_alias=False)
+        p_opt_names=[]
+        for name in sorted(names):
+            p_opt_names.append(name[1])
+        
+        # Obtain vector sizes
+        n_points = 0
+        num_name_hits = 0
+        if len(x_names) > 0:
+            for name in x_names:
+                try:
+                    traj = res.get_variable_data(name)
+                    num_name_hits = num_name_hits + 1
+                    if N.size(traj.x)>2:
+                        break
+                except:
+                    pass
+
+        elif len(u_names) > 0:
+            for name in u_names:
+                try:
+                    traj = res.get_variable_data(name)
+                    num_name_hits = num_name_hits + 1
+                    if N.size(traj.x)>2:
+                        break
+                except:
+                    pass
+        else:
+            raise Exception(
+                "None of the model variables not found in result file.")
+
+        if num_name_hits==0:
+            raise Exception(
+                "None of the model variables not found in result file.")
+
+        n_points = N.size(traj.t,0)
+        n_cols = 1+len(x_names)+len(u_names)
+
+        var_data = N.zeros((n_points,n_cols))
+        # Initialize time vector
+        var_data[:,0] = res.get_variable_data('time').t
+
+        # If a normalized minimum time problem has been solved,
+        # then, the time vector should be rescaled
+        n=[names[1] for names in self.md.get_p_opt_variable_names()]
+        non_fixed_interval = ('finalTime' in n) or ('startTime' in n)            
+
+        dx_factor = 1.0
+        """
+        if non_fixed_interval:
+            # A minimum time problem has been solved,
+            # interval is normalized to [-1,1]
+            t0 = self.ocp.t0
+            tf = self.ocp.tf
+            dx_factor = tf-t0
+            for i in range(N.size(var_data,0)):
+                var_data[i,0] = 2.0*var_data[i,0]/(tf-t0)-(tf+t0)/(tf-t0)
+                #var_data[i,0] = -t0/(tf-t0) + var_data[i,0]/(tf-t0)
+        """
+        """
+        p_opt_data = N.zeros(len(p_opt_names))
+        # Get the parameters
+        n_p_opt = len(self.md.get_p_opt_variable_names())
+        if n_p_opt > 0:
+            p_opt_indices = N.zeros(n_p_opt, dtype=int)
+        
+            self._model.jmimodel.opt_get_p_opt_indices(p_opt_indices)
+            p_opt_indices = p_opt_indices.tolist()
+
+            for name in p_opt_names:
+                try:
+                    ref = self.md.get_value_reference(name)
+                    (z_i, ptype) = jmi._translate_value_ref(ref)
+                    i_pi = z_i - self._model._offs_real_pi.value
+                    i_pi_opt = p_opt_indices.index(i_pi)
+                    traj = res.get_variable_data(name)
+                    if self._model.get_scaling_method() & jmi.JMI_SCALING_VARIABLES > 0:
+                        p_opt_data[i_pi_opt] = traj.x[0]/sc[z_i]
+                    else:
+                        p_opt_data[i_pi_opt] = traj.x[0]
+                except VariableNotFoundError:
+                    print "Warning: Could not find value for parameter " + name
+        """
+        # Initialize variable names
+        # Loop over all the names
+
+        sc_x = self.model.get_x_sf()
+        sc_u = self.model.get_u_sf()
+
+        col_index = 1;
+        x_index = 0;
+        u_index = 0;
+        for name in x_names:
+            try:
+                traj = res.get_variable_data(name)
+                var_data[:,col_index] = traj.x/sc_x[x_index]
+                x_index = x_index + 1
+                col_index = col_index + 1
+            except VariableNotFoundError:
+                x_index = x_index + 1
+                col_index = col_index + 1
+                print "Warning: Could not find trajectory for state variable " + name
+        for name in u_names:
+            try:
+                traj = res.get_variable_data(name)
+                if not res.is_variable(name):
+                    var_data[:,col_index] = N.ones(n_points)*traj.x[0]/sc_u[u_index]
+                else:
+                    var_data[:,col_index] = traj.x/sc_u[u_index]
+                u_index = u_index + 1
+                col_index = col_index + 1
+            except VariableNotFoundError:
+                u_index = u_index + 1
+                col_index = col_index + 1
+                print "Warning: Could not find trajectory for input variable " + name
+                
+        self.var_data = var_data
+        
+        self._set_initial_from_file(var_data)
+    
+    def _set_initial_from_file(self, var_data):
+        xx_init = self.get_xx_init()
+        t_points = self.get_time_points()
+        ts = [i[0] for i in t_points]
+
+        tfcn_in = []
+        for i in range(1,self.P):
+            tfcn_in += [self.ext_vars[i]['t']]
+        if self.md.get_opt_finaltime_free():
+            tfcn_in += [self.ext_vars[self.P]['t']]
+        
+        tfcn = casadi.SXFunction([tfcn_in],[ts])
+        tfcn.init()
+        input = []
+        if (self.options['free_phases'] or self.md.get_opt_finaltime_free()) and self.P > 1:
+            for i in range(1,self.P):
+                input += [xx_init[self.ext_var_indices['t'+str(i)]]]
+            input += [xx_init[self.ext_var_indices['tf']]]
+            tfcn.setInput(input)
+        tfcn.evaluate()
+        t = tfcn.output()
+
+        x_init = N.zeros((len(t), self.model.get_n_x()))
+        u_init = N.zeros((len(t)-2, self.model.get_n_u()))
+        
+        for i in range(self.model.get_n_x()):
+            x_init[:,i] = N.interp(t, var_data[:,0], var_data[:,i+1]).transpose()
+        for i in range(self.model.get_n_u()):
+            u_init[:,i] = N.interp(t[1:-1], var_data[:,0], var_data[:,1+self.model.get_n_x()+i]).transpose()
+        
+        cnt_x = 0
+        cnt_u = 0
+        for t_false,i,j in self.get_time_points():
+            xx_init[self.get_var_indices()[i][j]['x']] = x_init[cnt_x,:]
+            cnt_x += 1
+            if j!= 0 and j!=self.K+1:
+                xx_init[self.get_var_indices()[i][j]['u']] = u_init[cnt_u,:]
+                cnt_u += 1
     
     def _modify_init(self):
-        if self.options['free_phases'] and self.P > 1:
-            xx_init = self.get_xx_init()
-            xx_lb = self.get_xx_lb()
-            xx_ub = self.get_xx_ub()
+        xx_init = self.get_xx_init()
+        xx_lb = self.get_xx_lb()
+        xx_ub = self.get_xx_ub()
+        if (self.options['free_phases'] or self.md.get_opt_finaltime_free()) and self.P > 1:
             if self.options['free_phases_bounds'] != None:
                 for i,x in enumerate(self.options['free_phases_bounds']):
-                    xx_init[-self.P+1+i]=x[0]
-                    xx_lb[-self.P+1+i] = x[1]
-                    xx_ub[-self.P+1+i] = x[2]
+                    xx_init[self.ext_var_indices['t'+str(i+1)]]=x[0]
+                    xx_lb[self.ext_var_indices['t'+str(i+1)]] = x[1]
+                    xx_ub[self.ext_var_indices['t'+str(i+1)]] = x[2]
             else:
-                xx_init[-self.P+1:] = [x*(self.ocp.tf-self.ocp.t0)/self.P for x in range(1,self.P)]
-                xx_lb[-self.P+1:] = [self.ocp.t0]*(self.P-1)
-                xx_ub[-self.P+1:] = [self.ocp.tf]*(self.P-1)
-    
+                for i in range(1,self.P):
+                    xx_init[self.ext_var_indices['t'+str(i)]] = i*(self.ocp.tf-self.ocp.t0)/self.P
+                    xx_lb[self.ext_var_indices['t'+str(i)]] = self.ocp.t0
+                    xx_ub[self.ext_var_indices['t'+str(i)]] = self.ocp.tf
+
+        if self.md.get_opt_finaltime_free():#self.ocp.tf_free:
+            val_ref = self.md.get_value_reference("finalTime")
+            init = self.md.get_p_opt_initial_guess()
+            lb   = self.md.get_p_opt_min()
+            ub   = self.md.get_p_opt_max()
+            for i,x in enumerate(init):
+                if x[0] == val_ref:
+                    if init[i][1] != None:
+                        xx_init[self.ext_var_indices['tf']] = init[i][1]
+                    if lb[i][1] != None:
+                        xx_lb[self.ext_var_indices['tf']] = lb[i][1]
+                    if ub[i][1] != None:
+                        xx_ub[self.ext_var_indices['tf']] = ub[i][1]
+                    
     def _compute_bounds_and_init(self):
         # Create lower and upper bounds
         nlp_lb = -1e20*N.ones(len(self.get_xx()))
@@ -874,7 +1072,7 @@ class GaussPseudoSpectralMethod(CasadiCollocator):
         
         #Create vector allowing or disallowing discontinuous state
         xvars = self.model.get_x()
-        for i in range(self.P-1):
+        for i in range(self.P):
             self.ext_vars[i] = {}
             self.ext_vars[i]['link_x'] = [casadi.SX(0.0) for x in self.model.get_x()]
             for j in self.options['link_options']:
@@ -882,7 +1080,8 @@ class GaussPseudoSpectralMethod(CasadiCollocator):
                     if j[0] == str(k):
                         self.ext_vars[i]['link_x'][l] = casadi.SX('link_'+str(k)+'_'+str(i))
                         self.xx += [self.ext_vars[i]['link_x'][l]]
-                        
+        
+        self.ext_var_indices = {}
         #Create vector of time points
         for i in range(self.P+1):
             try:
@@ -892,14 +1091,20 @@ class GaussPseudoSpectralMethod(CasadiCollocator):
             if i == 0:
                 self.ext_vars[i]['t'] = casadi.SX(self.ocp.t0)
             elif i==self.P:
-                self.ext_vars[i]['t'] = casadi.SX(self.ocp.tf)
+                if self.md.get_opt_finaltime_free():#self.ocp.tf_free:
+                    self.ext_vars[i]['t'] = casadi.SX('tf')
+                    self.xx += [self.ext_vars[i]['t']]
+                    self.ext_var_indices['tf'] = len(self.xx)-1
+                else:
+                    self.ext_vars[i]['t'] = casadi.SX(self.ocp.tf)
             else:
-                if self.options['free_phases']:
+                if self.options['free_phases'] or self.md.get_opt_finaltime_free():
                     self.ext_vars[i]['t'] = casadi.SX('t_'+str(i))
                     self.xx += [self.ext_vars[i]['t']]
+                    self.ext_var_indices['t'+str(i)] = len(self.xx)-1
                 else:
                     self.ext_vars[i]['t'] = casadi.SX(i*(self.ocp.tf-self.ocp.t0)/self.P)
-        
+                    
     def get_result(self):
         dx_opt = N.zeros((self.P*(self.K+2), self.model.get_n_x()))
         x_opt = N.zeros((self.P*(self.K+2), self.model.get_n_x()))
@@ -1018,8 +1223,8 @@ class GaussPseudoSpectralMethod(CasadiCollocator):
         #print "Final constraints ", final_constr
         
         #Create inequality constraint
-        if self.options['free_phases']:
-            for i in range(1,self.P):
+        if self.options['free_phases'] or self.md.get_opt_finaltime_free():
+            for i in range(1,self.P+1):
                 self.g += [self.ext_vars[i-1]['t']-self.ext_vars[i]['t']]
         #print self.g
     
