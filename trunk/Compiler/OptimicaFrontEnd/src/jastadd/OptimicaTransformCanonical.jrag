@@ -37,7 +37,7 @@ aspect OptimicaTransformCanonical {
 		}		
 
 		root().flushAllRecursive();
-		
+	
 		// Create a parameter for the startTime attribute
 		fv_startTime = new FRealVariable(new FPublicVisibilityType(), 
 				fParameter(), new Opt(), 
@@ -149,9 +149,9 @@ aspect OptimicaTransformCanonical {
 			}
 			// Flush to reset cashes
 			root().flushAllRecursive();
-			super.transformCanonicalBase();	
 		}
-		
+		super.transformCanonicalBase();		
+
 	}
 	
 	// Don't add initial equations for optimization problems
@@ -291,8 +291,9 @@ aspect NormalizeFinalTimeProblems {
 	}
 	
 	boolean FDerExp.rewritten = false;
+	
 	rewrite FDerExp {when (rewriteStartAndFinalTime && !rewritten) to FExp {
-		    /*System.out.println("hej");*/
+		    //System.out.println("hej");
 			FDivExp e = new FDivExp(this,new FSubExp(new FIdUseExp(new FIdUse("finalTime")),
 					new FIdUseExp(new FIdUse("startTime"))));
 			rewritten = true;
