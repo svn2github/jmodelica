@@ -1030,6 +1030,44 @@ aspect FlatAPI {
 			throw new RuntimeException(e);
 		}
 	}
+	
+	private FAbstractEquation FAbstractEquation.meDifferentiated = null;
+	private FAbstractEquation FAbstractEquation.meIntegrated = null;
+	private FVariable FVariable.meDifferentiated = null;
+	private FVariable FVariable.meIntegrated = null;
+
+	public void FAbstractEquation.setMeDifferentiated(FAbstractEquation e) {
+		this.meDifferentiated = e;
+	}
+	
+	public FAbstractEquation FAbstractEquation.getMeDifferentiated() {
+		return this.meDifferentiated;
+	}
+
+	public void FVariable.setMeDifferentiated(FVariable var) {
+		this.meDifferentiated = var;
+	}
+	
+	public FVariable FVariable.getMeDifferentiated() {
+		return this.meDifferentiated;
+	}
+
+	public void FAbstractEquation.setMeIntegrated(FAbstractEquation e) {
+		this.meIntegrated = e;
+	}
+	
+	public FAbstractEquation FAbstractEquation.getMeIntegrated() {
+		return this.meIntegrated;
+	}
+
+	public void FVariable.setMeIntegrated(FVariable var) {
+		this.meIntegrated = var;
+	}
+	
+	public FVariable FVariable.getMeIntegrated() {
+		return this.meIntegrated;
+	}
+	
 }
 
 aspect FlatEnumerations {

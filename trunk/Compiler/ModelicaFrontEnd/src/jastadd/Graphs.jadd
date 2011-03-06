@@ -418,6 +418,7 @@ public class BiPGraph {
 							// a reference from the visited variable to its 
 							// differentiated counterpart
 							vv.setMeDifferentiated(vvv); 
+							vvv.setMeIntegrated(vv);
 						}
 						for (Eq ee : visitedEquations) { // Step 3b-5ii
 							FAbstractEquation eee = ee.getEquation();
@@ -440,6 +441,7 @@ public class BiPGraph {
 							// Set a reference from the visited equation to
 							// its differentiated counterpart
 							ee.setMeDifferentiated(eqn);
+							eqn.setMeIntegrated(ee);
 						}
 						for (Var vv : visitedVariables) {
 							// Set matchings, Step 3b-5iii
@@ -480,21 +482,147 @@ public class BiPGraph {
 		System.out.println("Matching:");
 		System.out.println(printMatching());
 		
-		LinkedList<Stack<Eq>> blt = computeBLT();
+		// Selection of dummy derivatives
+		BLT blt = computeBLT();
+	
+		System.out.println(blt.toString());
+
+		ArrayList<ArrayList<FAbstractEquation>> g = 
+		   new ArrayList<ArrayList<FAbstractEquation>>();
 		
-		System.out.println("BLT: " + blt.size() + " blocks");
-		for (Stack<Eq> bl : blt) {
-			System.out.println("Block: " + bl.size() + "-----");
-			//EquationBlock b = new EquationBlock();
-			//daeBLT.add(b);
-			// TODO: handle the case of multiple scalar equations in
-			// one block
-			for (Eq bl_eqn : bl) {
-				//v = bl_eqn.getMatching();
-				//b.addMatchingPair(new MatchingPair(bl_eqn.getEquation(),v.getVariable()));
-				System.out.println(bl_eqn.getMatching() + ": " + bl_eqn.getDescription());
+		ArrayList<ArrayList<FAbstractEquation>> h = 
+		   new ArrayList<ArrayList<FAbstractEquation>>();
+
+		ArrayList<ArrayList<FVariable>> z = 
+		   new ArrayList<ArrayList<FVariable>>();
+
+		ArrayList<ArrayList<FVariable>> zHat = 
+		   new ArrayList<ArrayList<FVariable>>();
+		
+		for (EquationBlock eb : blt) {
+
+			ArrayList<FAbstractEquation> diffedEqns = eb.differentiatedEquations();
+			if (diffedEqns.size()>0) {
+				System.out.println(" ********* Found block containing diffed equations ***********");
+				System.out.println(eb.toString());
+
+				// Step 1: Initialize
+				ArrayList<FAbstractEquation> gg = new ArrayList<FAbstractEquation>();
+				gg.addAll(eb.equations());
+				g.add(gg);
+				
+				ArrayList<FVariable> zz = new ArrayList<FVariable>();
+				zz.addAll(eb.activeVariables());
+				z.add(zz);				
+
+				boolean remainingDifferentiatedEquations = false;
+				for (FAbstractEquation fe : gg) {
+					if (fe.getMeIntegrated()!=null) {
+						remainingDifferentiatedEquations = true;
+					}
+				}
+
+				while (remainingDifferentiatedEquations) {
+				    System.out.println("----------------");
+					// Step 3: Extract differentiated equations from block
+					ArrayList<FAbstractEquation> hh = new ArrayList<FAbstractEquation>();
+					for (FAbstractEquation fe : gg) {
+						if (fe.getMeIntegrated()!=null) {
+							hh.add(fe);
+						}
+					}
+					h.add(hh);
+									
+					// Step 4: Select independent columns: simple matching in this case
+					BiPGraph gd = new BiPGraph("","");
+					
+					for (FVariable fv : zz) {
+						gd.addVariable(fv.name(),"",fv);     
+					}
+				
+					int k = 1;
+					int j = 1;	
+					Eq eqn = null;
+					Var v = null;
+					for (FAbstractEquation e : hh) {
+			
+						int n_eq = e.numScalarEquations();
+				
+						for (int i=0;i<n_eq;i++) {
+							System.out.println("*** " + e.prettyPrint(""));
+							eqn = gd.addEquation("eq_"+k,e.prettyPrint(""),j,e);
+							k++;
+				
+							for (FVariable y : e.variables()) { 
+								System.out.println(" ** " + y.prettyPrint("") + " " + zz.contains(y));
+								if (zz.contains(y)) {
+									v = gd.getVariable(y.name()); 
+									gd.addEdge(eqn,v);
+								} 
+							} 
+						}
+						j++;
+					}
+					
+					System.out.println(gd.toString());
+					gd.maximumMatching(true);	
+					System.out.println(gd.printMatching());
+					
+					ArrayList<FVariable> zzHat = new ArrayList<FVariable>();
+					for (Var vv : gd.getMatchedVariables()) {
+						zzHat.add(vv.getVariable());
+					}
+					zHat.add(zzHat);
+					
+					// Step 5: prepare for next iteration
+									// Step 1: Initialize
+					gg = new ArrayList<FAbstractEquation>();
+					for (FAbstractEquation ee : hh) {
+						gg.add(ee.getMeIntegrated());
+					}
+					g.add(gg);		
+							
+					zz = new ArrayList<FVariable>();
+					for (FVariable fv : zzHat) {
+						zz.add(fv.getMeIntegrated());
+					}
+					z.add(zz);
+				
+					for (FVariable fv : zz) {
+						System.out.println(" --- " + fv.prettyPrint(""));
+					}
+				
+					remainingDifferentiatedEquations = false;
+					for (FAbstractEquation fe : gg) {
+						if (fe.getMeIntegrated()!=null) {
+							remainingDifferentiatedEquations = true;
+						}
+					}
+					
+				}
+		
+				System.out.println(" --- Reduced System --- ");
+				System.out.println(" Equations: ");
+				for (ArrayList<FAbstractEquation> l : g) {
+					for (FAbstractEquation fe : l) {
+						System.out.println(fe.prettyPrint("   "));
+					}
+					System.out.println("");
+				}
+
+				System.out.println(" Dummy derivatives: ");
+				for (ArrayList<FVariable> l : zHat) {
+					for (FVariable fv : l) {
+						System.out.println(fv.prettyPrint("   "));
+					}
+					System.out.println("");
+				}
+
+
+				System.out.println(" --- *** --- ");
+
 			}
-			System.out.println("-----------------");
+				
 		}
 		
 	}
@@ -518,6 +646,26 @@ public class BiPGraph {
 		}
 		return l;
 	}
+
+	public ArrayList<Eq> getMatchedEquations() {
+		ArrayList<Eq> l = new ArrayList<Eq>();
+		for (Eq e : equations) {
+			if (e.getMatching()!=null) {
+				l.add(e);
+			}
+		}
+		return l;
+	}
+
+	public ArrayList<Var> getMatchedVariables() {
+		ArrayList<Var> l = new ArrayList<Var>();
+		for (Var v : variableMap.values()) {
+			if (v.getMatching()!=null) {
+				l.add(v);
+			}
+		}
+		return l;
+	}
 	
 	private int index = 0;
     private Stack<Eq> S;
@@ -527,7 +675,7 @@ public class BiPGraph {
      * Possibly it is less efficient than the non-recursive version, but
      * it seems to work fine.
      */
-	public LinkedList<Stack<Eq>> computeBLT() {
+	public BLT computeBLT() {
 		
 		index = 0;
         S = new Stack<Eq>();
@@ -540,7 +688,36 @@ public class BiPGraph {
         	}
         }
 				
-        return components;
+        BLT blt = new BLT();
+        
+        Var v = null;
+		for (Stack<Eq> bl : components) {
+			EquationBlock b = new EquationBlock();
+			blt.add(b);
+			// TODO: handle the case of multiple scalar equations in
+			// one block
+			for (Eq bl_eqn : bl) {
+				v = bl_eqn.getMatching();
+				MatchingPair mp = new MatchingPair(bl_eqn.getEquation(),v.getVariable());
+				b.addMatchingPair(mp);
+			}
+		}
+		return blt;
+	}
+	
+	public LinkedList<Stack<Eq>> computeRawBLT() {
+		index = 0;
+        S = new Stack<Eq>();
+        components = new LinkedList<Stack<Eq>>();
+        tarjanReset();
+        
+        for (Eq e : getEquations()) {
+        	if (!e.isVisited()) {
+        		tarjan(e);
+        	}
+        }
+        
+        return components;	
 	}
 	
 	public void tarjan(Eq e) {
@@ -883,6 +1060,7 @@ public class Eq {
     private int id = -1;
     private FAbstractEquation eqn;
 	private Eq meDifferentiated = null;
+	private Eq meIntegrated = null;
 
 	private int tarjanNbr = 0;
     private int tarjanLowLink = 0;
@@ -994,10 +1172,20 @@ public class Eq {
 
 	public void setMeDifferentiated(Eq e) {
 		this.meDifferentiated = e;
+		this.getEquation().setMeDifferentiated(e.getEquation());
 	}
 	
 	public Eq getMeDifferentiated() {
 		return this.meDifferentiated;
+	}
+
+	public void setMeIntegrated(Eq e) {
+		this.meIntegrated = e;
+		this.getEquation().setMeIntegrated(e.getEquation());
+	}
+	
+	public Eq getMeIntegrated() {
+		return this.meIntegrated;
 	}
 	
     public void resetVariableIterator() {
@@ -1040,6 +1228,7 @@ public class Var {
 	private int layer = 1000000;
 	private FVariable v;
 	private Var meDifferentiated = null; // A reference to this variable differentiated once
+	private Var meIntegrated = null;
 	
 	public Var(String name, String description) {
 		this.name = name;
@@ -1112,10 +1301,20 @@ public class Var {
 	
 	public void setMeDifferentiated(Var var) {
 		this.meDifferentiated = var;
+		this.getVariable().setMeDifferentiated(var.getVariable());
 	}
 	
 	public Var getMeDifferentiated() {
 		return this.meDifferentiated;
+	}
+
+	public void setMeIntegrated(Var var) {
+		this.meIntegrated = var;
+		this.getVariable().setMeIntegrated(var.getVariable());
+	}
+	
+	public Var getMeIntegrated() {
+		return this.meIntegrated;
 	}
 	
 	public String toString() {

@@ -190,6 +190,17 @@ aspect TransformCanonical {
 			}
 			return blockSizes;
 		}
+
+		public String toString() {
+			StringBuffer str = new StringBuffer();
+			str.append("-------------------------------\n");
+			for (EquationBlock eb : this) {
+				str.append(eb.toString());
+				str.append("-------------------------------\n");
+			}
+			return str.toString();
+		}
+		
 	}
 
 	public class EquationBlock {
@@ -230,6 +241,18 @@ aspect TransformCanonical {
 			}
 		}
 						
+		public ArrayList<FAbstractEquation> differentiatedEquations() {
+			ArrayList<FAbstractEquation> diffedEq = new ArrayList<FAbstractEquation>();
+			for (FAbstractEquation e : equations()) {
+//			    System.out.println(e.prettyPrint("") + " " + e.getMeIntegrated());
+//				System.out.println(e.prettyPrint("") + " " + e.getMeDifferentiated());
+				if (e.getMeIntegrated()!=null) {
+					diffedEq.add(e);
+				}
+			}
+			return diffedEq;
+		}
+						
 		public String toString() {
 			StringBuffer str = new StringBuffer();
 			str.append(isSolved()? ("Solved block of " + activeVariables().size() + " variables:\n"): 
@@ -259,7 +282,6 @@ aspect TransformCanonical {
     public class MatchingPair {
     	private FAbstractEquation eqn;
     	private FVariable fv;
-    	
     	public MatchingPair(FAbstractEquation eqn, FVariable fv) {
     		this.eqn = eqn;
     		this.fv = fv;
@@ -462,28 +484,16 @@ aspect TransformCanonical {
 	
 		// TODO: If no complete matching found, then try index reduction
 		if (g.getUnmatchedVariables().size()>0 || g.getUnmatchedEquations().size()>0) {
+			//g.reduceIndex(true);
 			return;
 		}
 	
 		// Perform BLT
 		if (root().options.getBooleanOption("equation_sorting") && g.getUnmatchedVariables().size()==0 && g.getUnmatchedEquations().size()==0) {	
 		
-			LinkedList<Stack<Eq>> blt = g.computeBLT();
+			daeBLT = g.computeBLT();			
+			log.info(daeBLT.toString());
 		
-			log.info("BLT: " + blt.size() + " blocks");
-			for (Stack<Eq> bl : blt) {
-				log.info("Block: " + bl.size() + "-----");
-				EquationBlock b = new EquationBlock();
-				daeBLT.add(b);
-				// TODO: handle the case of multiple scalar equations in
-				// one block
-				for (Eq bl_eqn : bl) {
-					v = bl_eqn.getMatching();
-					b.addMatchingPair(new MatchingPair(bl_eqn.getEquation(),v.getVariable()));
-					log.info(bl_eqn.getMatching() + ": " + bl_eqn.getDescription());
-				}
-				log.info("-----------------");
-			}
 		}
 			
 		// Find matching for the initialization system	
@@ -718,23 +728,9 @@ aspect TransformCanonical {
 			g.getUnmatchedEquations().size()==0) {
 		
 			g.tarjanReset();
-			LinkedList<Stack<Eq>> blt = g.computeBLT();
-		
-			log.info("BLT: " + blt.size() + " blocks");
-			for (Stack<Eq> bl : blt) {
-				log.info("Block: " + bl.size() + "-----");
-				EquationBlock b = new EquationBlock();
-				daeInitBLT.add(b);
-				// TODO: handle the case of multiple scalar equations in
-				// one block
-				for (Eq bl_eqn : bl) {
-					v = bl_eqn.getMatching();
-					//log.info(">> " + bl_eqn.getId());
-					b.addMatchingPair(new MatchingPair(bl_eqn.getEquation(),v.getVariable()));
-					log.info(bl_eqn.getMatching() + ": " + bl_eqn.getEquation().prettyPrint(""));
-				}
-				log.info("-----------------");
-			}
+			
+			daeInitBLT = g.computeBLT();
+			log.info(daeInitBLT.toString());
 		}
 	}	
 	
@@ -1131,13 +1127,16 @@ aspect TransformCanonical {
 	public void FClass.addFDerivativeVariables() {
 		ArrayList<FDerivativeVariable> l = new ArrayList<FDerivativeVariable>();
 		for (FVariable fv : differentiatedRealVariables()) {
-			l.add(new FDerivativeVariable((FVisibilityType)fv.getFVisibilityType().fullCopy(),
+		    FDerivativeVariable fdv = new FDerivativeVariable((FVisibilityType)fv.getFVisibilityType().fullCopy(),
 					(FTypePrefixVariability)fv.getFTypePrefixVariability().fullCopy(),
 					new Opt(),
 					new List(),
 					new Opt(),
 					new Opt(),
-					fv.getFQName().fullCopy()));
+					fv.getFQName().fullCopy());
+			fdv.setMeIntegrated(fv);
+			fv.setMeDifferentiated(fdv);
+			l.add(fdv);
 		}
 		for (FVariable fv : l) {
 			addFVariable(fv);
