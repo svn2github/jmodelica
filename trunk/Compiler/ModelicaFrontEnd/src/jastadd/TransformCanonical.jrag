@@ -406,73 +406,19 @@ aspect TransformCanonical {
 		BiPGraph g = new BiPGraph(name(),"");
 		
 		Eq eqn = null;
-		Var v = null;
-		
-		// Add all derivatives
-		for (FVariable fv : derivativeVariables()) {
-			g.addVariable(fv.name(),"",fv);     
-		}
-		
-		// Add all algebraics
-		for (FVariable fv : algebraicRealVariables()) {
-			g.addVariable(fv.name(),"",fv);     
-		}
-		for (FVariable fv : discreteRealVariables()) {
-			g.addVariable(fv.name(),"",fv);     
-		}
-		for (FVariable fv : discreteIntegerVariables()) {
-			g.addVariable(fv.name(),"",fv);     
-		}
-		for (FVariable fv : discreteBooleanVariables()) {
-			g.addVariable(fv.name(),"",fv);     
-		}
-		for (FVariable fv : discreteStringVariables()) {
-			g.addVariable(fv.name(),"",fv);     
-		}
-		for (FVariable fv : discreteEnumVariables()) {
-			g.addVariable(fv.name(),"",fv);     
-		}
+		Var v = null;		
 		
 		int k = 1;
-		int j = 0;
-		for (FAbstractEquation e : equations()) {
-			//k = e.extractDerAlgIncidence(g,k);
-			int n_eq = e.numScalarEquations();
-			
-			for (int i=0;i<n_eq;i++) {
-				eqn = g.addEquation("eq_"+k,e.prettyPrint(""),j,e);
-				k++;
-				//System.out.println(" ** " + e.prettyPrint(""));
-				for (FVariable y : e.algebraicVariables()) { 
-					//System.out.println(" -- Algebraic: " + y.name());  	 
-					v = g.getVariable(y.name()); 
-					g.addEdge(eqn,v); 
-				} 
-
-				for (FDerivativeVariable dx : e.derivativeVariables()) { 
-					//System.out.println(" -- Diffed state: " + dx.name());
-					v = g.getVariable(dx.name());     
-					g.addEdge(eqn,v); 
-				} 
-			}
-			j++;
-		}
+		
+		g.addVariables(this, BiPGraph.DERIVATIVE_VARIABLES | BiPGraph.ALGEBRAIC_VARIABLES);
+		g.addEquations(equations(), BiPGraph.DERIVATIVE_VARIABLES | BiPGraph.ALGEBRAIC_VARIABLES,"eq_",1);
 		
 		log.info(g.toString());
 		g.maximumMatching(true);	
 		log.info("DAE system ");
 		log.info(g.printMatching());
-	
-		for (Eq e : g.getEquations()) {				
-			int n_eq = e.getEquation().numScalarEquations();
 			
-			for (int i=0;i<n_eq;i++) {
-				v = e.getMatching();
-				if (v!=null) {
-					daeMatching.add(new MatchingPair(e.getEquation(),v.getVariable()));
-				}
-			}
-		}		
+		daeMatching = g.getMatching();
 			
 		for (Var var : g.getUnmatchedVariables()) {
 			daeUnmatchedVariables.add(var.getVariable());
@@ -485,6 +431,12 @@ aspect TransformCanonical {
 		// TODO: If no complete matching found, then try index reduction
 		if (g.getUnmatchedVariables().size()>0 || g.getUnmatchedEquations().size()>0) {
 			//g.reduceIndex(true);
+			
+			// Add the new equations
+			// Replace selected dummy derivatives with algebraics
+			// Enable rewrite of identifiers? (not necessary?)
+			
+
 			return;
 		}
 	
@@ -497,40 +449,10 @@ aspect TransformCanonical {
 		}
 			
 		// Find matching for the initialization system	
-		
-		// Add all differentiated variables and pre variables
-		for (FVariable fv : differentiatedRealVariables()) {
-			g.addVariable(fv.name(),"",fv);     
-		}
-		// Add discrete pre variables
-		for (FVariable fv : discretePreVariables()) {
-			//System.out.println(" ----------- " + fv.name());
-			g.addVariable(fv.name(),"",fv);     
-		}
 
-		k = 1;
-		j = 0;
-		for (FAbstractEquation e : equations()) {
-			int n_eq = e.numScalarEquations();
-			//System.out.println(" >>> " + e.prettyPrint(""));
-			for (int i=0;i<n_eq;i++) {
-				eqn = g.addEquation("eq_"+k,e.prettyPrint(""),j,e);
-				k++;
+		g.addVariables(this, BiPGraph.DIFFERENTIATED_VARIABLES | BiPGraph.DISCRETE_PRE_VARIABLES);
+		g.addEquations(equations(), BiPGraph.DIFFERENTIATED_VARIABLES | BiPGraph.DISCRETE_PRE_VARIABLES, "eq_",1);
 
-				for (FVariable x : e.differentiatedVariables()) { 
-					//System.out.println("  State: " + x.name()); 					 	 
-					v = g.getVariable(x.name());     
-					g.addEdge(eqn,v); 
-				} 			
-				for (FVariable x : e.discretePreVariables()) { 
-					//System.out.println("  Pre variable: " + x.name()); 
-					v = g.getVariable(x.name());     
-					g.addEdge(eqn,v);
-				} 			
-			}
-			j++;
-			//k = e.extractStateIncidence(g,k);
-		}
 
 	    // Replace when equations	
 		ArrayList<FAbstractEquation> equationsToReplace = 
@@ -550,7 +472,7 @@ aspect TransformCanonical {
 
 			// Get all the scalar (graph) equations corresponding to 
 			// the AST equation
-			ArrayList<Eq> eq_list = g.getEquations(equations().indexOf(equationToReplace));
+			ArrayList<Eq> eq_list = g.getEquations(equationToReplace);
 			
 			// The number of simple and scalar (graph) equations should
 			// be the same
@@ -562,7 +484,7 @@ aspect TransformCanonical {
 				Eq ee = eq_list.get(i);
 				//FAbstractEquation e = newEquations.get(i);
 				i++;
-				eqn = g.replaceEquation(ee.getName(),e.prettyPrint(""),e,ee.getId());
+				eqn = g.replaceEquation(ee.getName(),e.prettyPrint(""),e);
 			
 				//System.out.println(" ** " + e.prettyPrint(""));
 				for (FVariable y : e.algebraicVariables()) { 
@@ -593,43 +515,12 @@ aspect TransformCanonical {
 	
 		log.info(g.toString());
 		
-		j = equations().size();
-		for (FAbstractEquation e : initialEquations()) {
 
-			//k = e.extractIncidence(g,k);
-			//System.out.println(" ** " + e.prettyPrint(""));
-			int n_eq = e.numScalarEquations();
-			
-			for (int i=0;i<n_eq;i++) {
-				eqn = g.addEquation("eq_"+k,e.prettyPrint(""),j,e);
-				k++;
-				// System.out.println(" ** " + e.prettyPrint(""));
-				for (FVariable y : e.algebraicVariables()) { 
-					//System.out.println("  Algebraic: " + y.name()); 	 	 
-					v = g.getVariable(y.name());     
-					g.addEdge(eqn,v); 
-				} 
-					
-				for (FVariable x : e.differentiatedVariables()) { 
-					//System.out.println("  State: " + x.name()); 	 
-					v = g.getVariable(x.name());     
-					g.addEdge(eqn,v); 
-				} 
-				 	
-				for (FDerivativeVariable dx : e.derivativeVariables()) { 
-					//System.out.println("  Diffed state: " + dx.name()); 
-					v = g.getVariable(dx.name());     
-					g.addEdge(eqn,v); 
-				} 
-
-				for (FVariable pv : e.discretePreVariables()) { 
-					//System.out.println("   pre variable: " + pv.name()); 
-					v = g.getVariable(pv.name());     
-					g.addEdge(eqn,v); 
-				} 
-			}
-			j++;
-		}
+		g.addEquations(initialEquations(), BiPGraph.DERIVATIVE_VARIABLES | 
+		                                   BiPGraph.ALGEBRAIC_VARIABLES | 
+		                                   BiPGraph.DIFFERENTIATED_VARIABLES | 
+		                                   BiPGraph.DISCRETE_PRE_VARIABLES, "eq_",
+		                                   g.getEquations().size() + 1);
 
 		log.info(g.toString());
 		g.maximumMatching(false);	
@@ -680,11 +571,11 @@ aspect TransformCanonical {
 				}
 				l.add(fe);
 				
-				eqn = g.addEquation("eq_"+k,fe.prettyPrint(""),j,fe);
+				eqn = g.addEquation("eq_"+k,fe.prettyPrint(""),fe);
 				v = g.getVariable(var.getName());     
 				g.addEdge(eqn,v); 
 				k++;
-				j++;
+				//j++;
 			}
 	
 			setFInitialEquationList(l);	
@@ -705,18 +596,7 @@ aspect TransformCanonical {
 			daeInitUnmatchedEquations.add(ee.getEquation());
 		}
 
-		// Create the matching for the initialization system 
-		for (Eq e : g.getEquations()) {				
-			int n_eq = e.getEquation().numScalarEquations();
-			
-			for (int i=0;i<n_eq;i++) {
-				v = e.getMatching();
-				if (v!=null) {
-					daeInitMatching.add(new MatchingPair(e.getEquation(),v.getVariable()));
-				}
-				k++;
-			}
-		}		
+		daeInitMatching = g.getMatching();
 
 		// TODO: If no complete matching found, then try index reduction
 		if (g.getUnmatchedVariables().size()>0 || g.getUnmatchedEquations().size()>0) {
