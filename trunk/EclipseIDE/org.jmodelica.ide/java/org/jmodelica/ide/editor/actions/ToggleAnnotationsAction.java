@@ -3,7 +3,7 @@ package org.jmodelica.ide.editor.actions;
 
 import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.source.ISourceViewer;
-import org.jmodelica.folding.CharacterProjectionViewer;
+import org.eclipse.jface.text.source.projection.ProjectionViewer;
 import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.editor.Editor;
 
@@ -28,9 +28,9 @@ public boolean isVisible() {
 @Override
 public void run() {
     update(!visible);
-    int action = visible 
-        ? CharacterProjectionViewer.EXPAND_ANNOTATIONS 
-        : CharacterProjectionViewer.COLLAPSE_ANNOTATIONS;
+    int action = visible ? ProjectionViewer.EXPAND_ALL : ProjectionViewer.COLLAPSE_ALL;
+//        ? CharacterProjectionViewer.EXPAND_ANNOTATIONS 
+//        : CharacterProjectionViewer.COLLAPSE_ANNOTATIONS;
     
     ISourceViewer sourceViewer = editor.sourceViewer();
     if (sourceViewer instanceof ITextOperationTarget) {

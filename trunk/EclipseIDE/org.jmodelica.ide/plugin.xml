@@ -343,18 +343,4 @@
             class="org.jmodelica.ide.preferences.Preferences">
       </initializer>
    </extension>
-   <extension
-         point="org.eclipse.ui.menus">
-      <menuContribution
-            allPopups="false"
-            locationURI="toolbar:org.eclipse.ui.views.ContentOutline">
-         <command
-               commandId="org.jmodelica.ide.commands.sort.order"
-               icon="resources/icons/dummy.png"
-               label="Sort Alphabetically"
-               mnemonic="A"
-               style="toggle">
-         </command>
-      </menuContribution>
-   </extension>
 </plugin>

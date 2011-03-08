@@ -1,7 +1,9 @@
 package org.jmodelica.ide.editor;
 
+import org.eclipse.jface.text.DefaultTextHover;
 import org.eclipse.jface.text.IAutoEditStrategy;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
@@ -27,111 +29,100 @@ import org.jmodelica.ide.scanners.ModelicaCommentScanner;
 import org.jmodelica.ide.scanners.ModelicaQIdentScanner;
 import org.jmodelica.ide.scanners.ModelicaStringScanner;
 
-
 /**
  * Source viewer configuration which provides the projection viewer with a
  * presentation reconciler.
  */
 public class ViewerConfiguration extends SourceViewerConfiguration {
 
-final Editor editor;
-final CompletionProcessor completions;
+	final Editor editor;
+	final CompletionProcessor completions;
 
-public ViewerConfiguration(Editor editor) {
-    this.editor = editor;
-    this.completions = editor.completions();
-}
+	public ViewerConfiguration(Editor editor) {
+		this.editor = editor;
+		this.completions = editor.completions();
+	}
 
-@Override
-public IAutoEditStrategy[] getAutoEditStrategies(
-        ISourceViewer sourceViewer, String contentType) {
-    // note: order significant here
-    return new IAutoEditStrategy[] { 
-            // IndentingAutoEditStrategy is first, so no other command
-            // makes it believe it's receiving a pasted block. 
-            new IndentationStrategy(),
-            EndOfBlockAdder.instance,
-            KeywordAdder.instance,
-            // annotation paren adder before normal paren adder
-            AnnotationParenthesisAdder.instance,
-            new BracketAdder("(", ")"),
-            new BracketAdder("[", "]"),
-            new BracketAdder("{", "}"),
-            new BracketAdder("\"", "\""),
-            new BracketAdder("'", "'"),
-            CommentAdder.adder,
-        };
-}
+	@Override
+	public IAutoEditStrategy[] getAutoEditStrategies(ISourceViewer sourceViewer, String contentType) {
+		// note: order significant here
+		return new IAutoEditStrategy[] {
+				// IndentingAutoEditStrategy is first, so no other command
+				// makes it believe it's receiving a pasted block.
+				new IndentationStrategy(),
+				EndOfBlockAdder.instance,
+				KeywordAdder.instance,
+				// annotation paren adder before normal paren adder
+				AnnotationParenthesisAdder.instance,
+				new BracketAdder("(", ")"), new BracketAdder("[", "]"),
+				new BracketAdder("{", "}"), new BracketAdder("\"", "\""),
+				new BracketAdder("'", "'"), CommentAdder.adder, };
+	}
 
-@Override
-public String[] getDefaultPrefixes(ISourceViewer sourceViewer,
-        String contentType) {
-    return new String[] { "//" };
-}
+	@Override
+	public String[] getDefaultPrefixes(ISourceViewer sourceViewer,
+			String contentType) {
+		return new String[] { "//" };
+	}
 
-@Override
-public String[] getConfiguredContentTypes(ISourceViewer sourceViewer) {
-    return IDEConstants.CONFIGURED_CONTENT_TYPES;
-}
+	@Override
+	public String[] getConfiguredContentTypes(ISourceViewer sourceViewer) {
+		return IDEConstants.CONFIGURED_CONTENT_TYPES;
+	}
 
-// Override methods in the super class to get a specialised hover,
-// content assist etc.
-@Override
-public IPresentationReconciler getPresentationReconciler(ISourceViewer sourceViewer) {
-    // The scanner is set via the PresentationReconciler and a
-    // DamageRepairer
-    PresentationReconciler reconciler = new PresentationReconciler();
-    addScanner(reconciler, 
-            new Modelica32NormalScanner(), 
-            false,
-            Modelica32PartitionScanner.NORMAL_PARTITION);
-    addScanner(reconciler, 
-            new ModelicaStringScanner(), 
-            false,
-            Modelica32PartitionScanner.STRING_PARTITION);
-    addScanner(reconciler, 
-            new ModelicaQIdentScanner(), 
-            false,
-            Modelica32PartitionScanner.QIDENT_PARTITION);
-    addScanner(reconciler, 
-            new ModelicaCommentScanner(), 
-            false,
-            Modelica32PartitionScanner.COMMENT_PARTITION);
-    addScanner(reconciler, 
-            new Modelica32AnnotationScanner(), 
-            true,
-            Modelica32PartitionScanner.ANNOTATION_PARTITION);
-  return reconciler;
-}
+	@Override
+	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType) {
+		return new DefaultTextHover(sourceViewer);
+	}
 
-private void addScanner(PresentationReconciler reconciler,
-        ITokenScanner scanner, boolean doRestart, String type) {
-    
-    DefaultDamagerRepairer dr;
-    dr = doRestart
-        ? new RestartDamagerRepairer(scanner)
-        : new DefaultDamagerRepairer(scanner);
-    
-    reconciler.setDamager(dr, type);
-    reconciler.setRepairer(dr, type);
-}
+	// Override methods in the super class to get a specialised hover,
+	// content assist etc.
+	@Override
+	public IPresentationReconciler getPresentationReconciler(
+			ISourceViewer sourceViewer) {
+		// The scanner is set via the PresentationReconciler and a
+		// DamageRepairer
+		PresentationReconciler reconciler = new PresentationReconciler();
+		addScanner(reconciler, new Modelica32NormalScanner(), false,
+				Modelica32PartitionScanner.NORMAL_PARTITION);
+		addScanner(reconciler, new ModelicaStringScanner(), false,
+				Modelica32PartitionScanner.STRING_PARTITION);
+		addScanner(reconciler, new ModelicaQIdentScanner(), false,
+				Modelica32PartitionScanner.QIDENT_PARTITION);
+		addScanner(reconciler, new ModelicaCommentScanner(), false,
+				Modelica32PartitionScanner.COMMENT_PARTITION);
+		addScanner(reconciler, new Modelica32AnnotationScanner(), true,
+				Modelica32PartitionScanner.ANNOTATION_PARTITION);
+		return reconciler;
+	}
 
-@Override 
-public IReconciler getReconciler(ISourceViewer sourceViewer) {
-    return new MonoReconciler(
-            editor.strategy(),
-            false);
-}
+	private void addScanner(PresentationReconciler reconciler,
+			ITokenScanner scanner, boolean doRestart, String type) {
 
-@Override
-public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
-    
-    ContentAssistant assist = new ContentAssistant();
-    
-    assist.setContentAssistProcessor(completions, IDocument.DEFAULT_CONTENT_TYPE);
-    assist.setContentAssistProcessor(completions, Modelica32PartitionScanner.NORMAL_PARTITION);
-     
-    return assist;
-}
+		DefaultDamagerRepairer dr;
+		dr = doRestart ? new RestartDamagerRepairer(scanner)
+				: new DefaultDamagerRepairer(scanner);
+
+		reconciler.setDamager(dr, type);
+		reconciler.setRepairer(dr, type);
+	}
+
+	@Override
+	public IReconciler getReconciler(ISourceViewer sourceViewer) {
+		return new MonoReconciler(editor.strategy(), false);
+	}
+
+	@Override
+	public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
+
+		ContentAssistant assist = new ContentAssistant();
+
+		assist.setContentAssistProcessor(completions,
+				IDocument.DEFAULT_CONTENT_TYPE);
+		assist.setContentAssistProcessor(completions,
+				Modelica32PartitionScanner.NORMAL_PARTITION);
+
+		return assist;
+	}
 
 }

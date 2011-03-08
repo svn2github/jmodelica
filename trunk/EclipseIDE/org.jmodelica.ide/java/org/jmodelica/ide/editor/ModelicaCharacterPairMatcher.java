@@ -25,7 +25,7 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.ICharacterPairMatcher;
 import org.eclipse.jface.text.source.projection.ProjectionAnnotation;
 import org.eclipse.jface.text.source.projection.ProjectionAnnotationModel;
-import org.jmodelica.folding.CharacterProjectionViewer;
+import org.eclipse.jface.text.source.projection.ProjectionViewer;
 import org.jmodelica.generated.scanners.AnnotationNormalStateScanner;
 import org.jmodelica.generated.scanners.BackwardBraceScanner;
 import org.jmodelica.generated.scanners.ForwardBraceScanner;
@@ -37,9 +37,9 @@ public class ModelicaCharacterPairMatcher implements ICharacterPairMatcher {
 	private ForwardBraceScanner forward;
 	private int anchor;
 	private AnnotationNormalStateScanner normalStateScanner;
-	private CharacterProjectionViewer projectionViewer;
+	private ProjectionViewer projectionViewer;
 
-	public ModelicaCharacterPairMatcher(CharacterProjectionViewer viewer) {
+	public ModelicaCharacterPairMatcher(ProjectionViewer viewer) {
 		this.projectionViewer = viewer;
 	}
 

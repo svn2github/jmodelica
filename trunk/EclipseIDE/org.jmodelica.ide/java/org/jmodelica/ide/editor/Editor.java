@@ -15,40 +15,54 @@
  */
 package org.jmodelica.ide.editor;
 
-import static org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE;
-import static org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE_COLOR;
+//import static org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE;
+//import static org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE_COLOR;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
+import org.eclipse.jface.text.IDocumentPartitioningListener;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
 import org.eclipse.jface.text.rules.FastPartitioner;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
+import org.eclipse.jface.text.source.projection.ProjectionAnnotation;
 import org.eclipse.jface.text.source.projection.ProjectionAnnotationModel;
-import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.swt.graphics.Color;
+import org.eclipse.jface.text.source.projection.ProjectionSupport;
+import org.eclipse.jface.text.source.projection.ProjectionViewer;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.progress.UIJob;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditor;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import org.jastadd.plugin.registry.IASTRegistryListener;
-import org.jmodelica.folding.CharacterProjectionSupport;
-import org.jmodelica.folding.CharacterProjectionViewer;
 import org.jmodelica.generated.scanners.Modelica32PartitionScanner;
 import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.compiler.ModelicaEclipseCompiler;
@@ -61,7 +75,6 @@ import org.jmodelica.ide.editor.actions.FormatRegionAction;
 import org.jmodelica.ide.editor.actions.GoToDeclaration;
 import org.jmodelica.ide.editor.actions.ToggleAnnotationsAction;
 import org.jmodelica.ide.editor.actions.ToggleComment;
-import org.jmodelica.ide.folding.AnnotationDrawer;
 import org.jmodelica.ide.helpers.Util;
 import org.jmodelica.ide.namecomplete.CompletionProcessor;
 import org.jmodelica.ide.outline.InstanceOutlinePage;
@@ -82,7 +95,7 @@ private final InstanceOutlinePage fInstanceOutlinePage;
 
 private IDocumentPartitioner fPartitioner;
 
-private AnnotationDrawer annotationDrawer; // For folding
+//private AnnotationDrawer annotationDrawer; // For folding
 
 private CompilationResult compResult;
 public  EditorFile file;
@@ -93,6 +106,7 @@ private final CurrentClassAction[] currentClassListeners;
 private final ToggleAnnotationsAction toggleAnnotationsAction;
 private final GoToDeclaration goToDeclaration;
 private final CompletionProcessor completions;
+private AnnotationFoldUpdater annotationFolds;
 
 /**
  * Standard constructor.
@@ -132,7 +146,7 @@ protected ISourceViewer createSourceViewer(Composite parent,
     fAnnotationAccess = getAnnotationAccess();
     fOverviewRuler = createOverviewRuler(getSharedColors());
 
-    CharacterProjectionViewer viewer = new CharacterProjectionViewer(parent,
+    ProjectionViewer viewer = new ProjectionViewer(parent,
             ruler, getOverviewRuler(), isOverviewRulerVisible(), styles);
 
     configureProjectionSupport(viewer);
@@ -141,21 +155,20 @@ protected ISourceViewer createSourceViewer(Composite parent,
     return viewer;
 }
 
-private void configureProjectionSupport(CharacterProjectionViewer viewer) {
-    CharacterProjectionSupport projectionSupport = new CharacterProjectionSupport(
+private void configureProjectionSupport(ProjectionViewer viewer) {
+    ProjectionSupport projectionSupport = new ProjectionSupport(
             viewer, getAnnotationAccess(), getSharedColors());
 
-    annotationDrawer = new AnnotationDrawer(projectionSupport
-            .getAnnotationPainterDrawingStrategy());
-    annotationDrawer.setCursorLineBackground(getCursorLineBackground());
+//    annotationDrawer = new AnnotationDrawer(projectionSupport
+//            .getAnnotationPainterDrawingStrategy());
+//    annotationDrawer.setCursorLineBackground(getCursorLineBackground());
 
-    projectionSupport.setAnnotationPainterDrawingStrategy(annotationDrawer);
-    projectionSupport
-            .addSummarizableAnnotationType(ModelicaEclipseCompiler.ERROR_MARKER_ID);
+//    projectionSupport.setAnnotationPainterDrawingStrategy(annotationDrawer);
+    projectionSupport.addSummarizableAnnotationType(ModelicaEclipseCompiler.ERROR_MARKER_ID);
     projectionSupport.install();
 }
 
-private void configureDecorationSupport(CharacterProjectionViewer viewer) {
+private void configureDecorationSupport(ProjectionViewer viewer) {
 
 	// TODO: This should probably be updated to the new Preference API, not sure how, though
     // Set default values for brace matching.
@@ -174,24 +187,24 @@ private void configureDecorationSupport(CharacterProjectionViewer viewer) {
             IDEConstants.KEY_BRACE_MATCHING_COLOR);
 }
 
-@Override
-protected void handlePreferenceStoreChanged(PropertyChangeEvent event) {
-    if (Util.is(event.getProperty()).among(EDITOR_CURRENT_LINE,
-            EDITOR_CURRENT_LINE_COLOR)) {
-        annotationDrawer.setCursorLineBackground(getCursorLineBackground());
-    }
-    super.handlePreferenceStoreChanged(event);
-}
-
-private Color getCursorLineBackground() {
-
-	// TODO: This should probably be updated to the new Preference API, not sure how, though
-    if (!getPreferenceStore().getBoolean(EDITOR_CURRENT_LINE))
-        return null;
-
-    return new Color(Display.getCurrent(), PreferenceConverter.getColor(
-            getPreferenceStore(), EDITOR_CURRENT_LINE_COLOR));
-}
+//@Override
+//protected void handlePreferenceStoreChanged(PropertyChangeEvent event) {
+//    if (Util.is(event.getProperty()).among(EDITOR_CURRENT_LINE,
+//            EDITOR_CURRENT_LINE_COLOR)) {
+//        annotationDrawer.setCursorLineBackground(getCursorLineBackground());
+//    }
+//    super.handlePreferenceStoreChanged(event);
+//}
+//
+//private Color getCursorLineBackground() {
+//
+//	// TODO: This should probably be updated to the new Preference API, not sure how, though
+//    if (!getPreferenceStore().getBoolean(EDITOR_CURRENT_LINE))
+//        return null;
+//
+//    return new Color(Display.getCurrent(), PreferenceConverter.getColor(
+//            getPreferenceStore(), EDITOR_CURRENT_LINE_COLOR));
+//}
 
 /**
  * Sets source viewer configuration to a {@link ViewerConfiguration} and creates
@@ -332,13 +345,16 @@ protected void update() {
     fInstanceOutlinePage.updateAST(compResult.root());
     goToDeclaration.updateAST(compResult.root());
 
-    updateProjectionAnnotations();
+//    updateProjectionAnnotations();
     updateCurrentClassListeners();
 }
 
 private void setupDocumentPartitioner(IDocument document) {
-
     try {
+    	if (annotationFolds != null)
+    		annotationFolds.dispose();
+        annotationFolds = new AnnotationFoldUpdater(document);
+        
         IDocumentPartitioner wanted = fPartitioner;
         IDocumentPartitioner current = document.getDocumentPartitioner();
         if (wanted != current) {
@@ -347,40 +363,42 @@ private void setupDocumentPartitioner(IDocument document) {
             wanted.connect(document);
             document.setDocumentPartitioner(wanted);
         }
-    } catch (Error e) {
-        e.printStackTrace();
+    } catch (Error e) { // The scanner can throw an Error if it fails
     }
+}
+
+public void dispose() {
+	annotationFolds.dispose();
+	super.dispose();
 }
 
 /**
  * Update projection annotations
  */
-@SuppressWarnings("unchecked")
-private void updateProjectionAnnotations() {
-
-    ProjectionAnnotationModel model = 
-        getAnnotationModel();
-    
-    if (model == null)
-        return;
-
-    Collection<Annotation> oldAnnotations = 
-        Util.fromIterator(
-            model.getAnnotationIterator());
-
-    HashMap<Annotation, Position> newAnnotations =
-        new EditorAnnotationMap(
-            compResult.root().foldingPositions(document()),
-            this);
-
-    model.modifyAnnotations(
-        oldAnnotations.toArray(new Annotation[] {}),
-        newAnnotations,
-        null);
-}
+//@SuppressWarnings("unchecked")
+//private void updateProjectionAnnotations() {
+//
+//    ProjectionAnnotationModel model = getAnnotationModel();
+//    if (model == null)
+//        return;
+//
+//    Collection<Annotation> oldAnnotations = 
+//        Util.listFromIterator(
+//            model.getAnnotationIterator());
+//
+//    HashMap<Annotation, Position> newAnnotations =
+//        new EditorAnnotationMap(
+//            compResult.root().foldingPositions(document()),
+//            this);
+//
+//    model.modifyAnnotations(
+//        oldAnnotations.toArray(new Annotation[] {}),
+//        newAnnotations,
+//        null);
+//}
 
 private ProjectionAnnotationModel getAnnotationModel() {
-    CharacterProjectionViewer viewer = (CharacterProjectionViewer) getSourceViewer();
+    ProjectionViewer viewer = (ProjectionViewer) getSourceViewer();
     viewer.enableProjection();
     return viewer.getProjectionAnnotationModel();
 }
@@ -420,10 +438,7 @@ public boolean selectNode(ASTNode<?> node) {
 }
 
 public IDocument document() {
-    return
-        getSourceViewer() == null
-        ? null
-        : getSourceViewer().getDocument();
+	return (getSourceViewer() == null) ? null : getSourceViewer().getDocument();
 }
 
 public ISourceViewer sourceViewer() {
@@ -448,6 +463,161 @@ public EditorFile editorFile() {
 
 public boolean annotationsVisible() {
     return toggleAnnotationsAction.isVisible();
+}
+
+private class AnnotationFoldUpdater implements IDocumentPartitioningListener {
+	// TODO: Perhaps move this to a separate file?
+	
+	private IDocument doc;
+
+	public AnnotationFoldUpdater(IDocument document) {
+		doc = document;
+		doc.addDocumentPartitioningListener(this);
+	}
+	
+	public void dispose() {
+		doc.removeDocumentPartitioningListener(this);
+	}
+
+	public void documentPartitioningChanged(IDocument document) {
+		new UpdateJob().schedule();
+	}
+	
+	private class RedrawJob extends UIJob {
+		private static final String TITLE = "Redrawing editor";
+
+		public RedrawJob() {
+			super(TITLE);
+			setPriority(INTERACTIVE);
+			setSystem(true);
+		}
+
+		public IStatus runInUIThread(IProgressMonitor monitor) {
+			StyledText widget = getSourceViewer().getTextWidget();
+			widget.redraw();
+			widget.update();
+			return Status.OK_STATUS;
+		}
+		
+	}
+	
+	private class UpdateJob extends UIJob {
+		private static final String TITLE = "Updating annotations";
+
+		public UpdateJob() {
+			super(TITLE);
+			setPriority(INTERACTIVE);
+			setSystem(true);
+		}
+
+		public IStatus runInUIThread(IProgressMonitor monitor) {
+		    ProjectionAnnotationModel model = getAnnotationModel();
+		    if (model == null)
+		        return Status.OK_STATUS;
+	
+		    Collection<ITypedRegion> parts = getPartitions(doc, Modelica32PartitionScanner.ANNOTATION_PARTITION);
+		    List<Annotation> old = Util.listFromIterator(model.getAnnotationIterator());
+		    Collections.sort(old, new PositionSorter(model));
+			Iterator<Annotation> oldIt = old.iterator();
+			
+			Map<Annotation, Position> added = new HashMap<Annotation, Position>();
+			ArrayList<Annotation> removed = new ArrayList<Annotation>();
+			
+			ITextSelection sel = selection();
+			boolean hideAnno = !annotationsVisible();
+			
+			Position annoPos = new Position(0);
+			annoPos.offset = -1;
+			Annotation curAnno = null;
+			for (ITypedRegion part : parts) {
+				Position partPos = createPosition(part.getOffset(), part.getLength());
+				if (partPos != null) {
+					
+					// Remove all old that are before partition
+					while (annoPos.offset < partPos.offset) {
+						if (curAnno != null)
+							removed.add(curAnno);
+						if (oldIt.hasNext()) {
+							curAnno = oldIt.next();
+							annoPos = model.getPosition(curAnno);
+						} else {
+							curAnno = null;
+							annoPos = new Position(doc.getLength() + 1);
+						}
+					}
+					
+					// Should we add partition?
+					if (!annoPos.equals(partPos)) {
+						boolean collapsed = hideAnno && !partPos.overlapsWith(sel.getOffset(), sel.getLength());
+						added.put(new ProjectionAnnotation(collapsed), partPos);
+					} else { 
+						// Don't remove this annotation
+						curAnno = null;
+					}
+				}
+			}
+			
+			// Remove remaining annotations
+			if (curAnno != null)
+				removed.add(curAnno);
+			while (oldIt.hasNext())
+				removed.add(oldIt.next());
+			
+			
+			Annotation[] removedArr = removed.toArray(new Annotation[removed.size()]);
+			model.modifyAnnotations(removedArr, added, null);
+			
+			new RedrawJob().schedule();
+			
+	        return Status.OK_STATUS;
+		}
+	
+		private Position createPosition(int offset, int length) {
+			try {
+				int startLine = doc.getLineOfOffset(offset);
+				int endLine = doc.getLineOfOffset(offset + length);
+				if (startLine == endLine)
+					return null;
+				int lineOffset = doc.getLineOffset(startLine);
+				int endOffset = (endLine < doc.getNumberOfLines()) ? 
+						doc.getLineOffset(endLine + 1) : doc.getLength();
+				offset = lineOffset;
+				length = endOffset - lineOffset;
+			} catch (BadLocationException e) {
+			}
+			return new Position(offset, length);
+		}
+	
+		private Collection<ITypedRegion> getPartitions(IDocument document, String type) {
+			ArrayList<ITypedRegion> res = new ArrayList<ITypedRegion>();
+			try {
+				int len = document.getLength();
+				ITypedRegion cur = null;
+				for (int p = 0; p < len; p = cur.getLength() + cur.getOffset() + 1) {
+					cur = document.getPartition(p);
+					if (cur.getType().equals(type))
+						res.add(cur);
+				}
+			} catch (BadLocationException e) {
+			}
+			return res;
+		}
+	
+		public class PositionSorter implements Comparator<Annotation> {
+	
+			private ProjectionAnnotationModel model;
+	
+			public PositionSorter(ProjectionAnnotationModel model) {
+				this.model = model;
+			}
+	
+			public int compare(Annotation a1, Annotation a2) {
+				return model.getPosition(a1).offset - model.getPosition(a2).offset;
+			}
+	
+		}
+	}
+	
 }
 
 }

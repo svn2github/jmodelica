@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -171,13 +172,16 @@ public class ExplorerContentProvider implements ITreeContentProvider, IResourceC
 		case IResource.FILE:
 			final IFile file = (IFile) source;
 			if (file.getFileExtension().equals(IDEConstants.FILE_EXT)) {
-				new UIJob("Update Source tree in Project Explorer") {
+				UIJob job = new UIJob("Update Source tree in Project Explorer") {
 					public IStatus runInUIThread(IProgressMonitor monitor) {
 						if (viewer != null && !viewer.getControl().isDisposed())
 							viewer.refresh(file);
 						return Status.OK_STATUS;						
 					}
-				}.schedule();
+				};
+				job.setSystem(true);
+				job.setPriority(Job.SHORT);
+				job.schedule();
 			}
 			return false;
 		}
@@ -188,17 +192,28 @@ public class ExplorerContentProvider implements ITreeContentProvider, IResourceC
 		
 		private ASTNode[] libraries;
 		private IProject project;
+		private boolean loaded;
+		private boolean checkedHas;
+		private boolean hasLibraries;
+		private boolean gettingAST;
 		
 		public LibrariesList(IProject project) {
 			this.project = project;
-			readLibraries();
+			gettingAST = false;
+			resetLibraries();
 			registry.addListener(this, project, null);
+		}
+
+		public void resetLibraries() {
+			libraries = null;
+			loaded = false;
+			checkedHas = false;
 		}
 
 		private void readLibraries() {
 			libraries = null;
 			
-			IASTNode ast = registry.lookupAST(null, project);
+			IASTNode ast = getAST();
 			if (ast instanceof SourceRoot) {
 			    List<LibNode> libNodes = ((SourceRoot) ast).getProgram().getLibNodes();
 			    int nl = libNodes.getNumChild();
@@ -211,23 +226,49 @@ public class ExplorerContentProvider implements ITreeContentProvider, IResourceC
 				
 			    if (n > 0) {
 					libraries = new ASTNode[n];
-					for (int i = 0, j = 0; i < n; j += nodes[i].length, i++) 
+					for (int i = 0, j = 0; i < nl; j += nodes[i].length, i++) 
 						System.arraycopy(nodes[i], 0, libraries, j, nodes[i].length);
 				    for (int i = 0; i < n; i++) 
 						libraries[i].setLibrariesList(this);
 					
 				}
 			}
+			loaded = true;
+			hasLibraries = libraries != null;
+			checkedHas = true;
+		}
+
+		public IASTNode getAST() {
+			gettingAST = true;
+			IASTNode ast = registry.lookupAST(null, project);
+			gettingAST = false;
+			return ast;
+		}
+		
+		private boolean checkHasLibraries() {
+			if (checkedHas)
+				return hasLibraries;
+			
+		    checkedHas = true;
+		    hasLibraries = false;
+		    IASTNode ast = getAST();
+			if (ast instanceof SourceRoot) {
+			    List<LibNode> libNodes = ((SourceRoot) ast).getProgram().getLibNodes();
+			    hasLibraries = libNodes.getNumChild() > 0;
+			}
+			return hasLibraries;
 		}
 		
 		public ASTNode[] getChildren() {
+			if (!loaded)
+				readLibraries();
 			return libraries;
 		}
 		
 		public boolean hasChildren() {
-			return libraries != null;
+			return libraries != null || checkHasLibraries();
 		}
-		
+
 		public IProject getParent() {
 			return project;
 		}
@@ -241,10 +282,12 @@ public class ExplorerContentProvider implements ITreeContentProvider, IResourceC
 		}
 
 		public void projectASTChanged(IProject project) {
+			if (this.project != project || gettingAST)
+				return;
 			boolean hadChildren = hasChildren();
-			readLibraries();
+			resetLibraries();
 			boolean updProj = hadChildren != hasChildren();
-			viewer.refresh(updProj ? project : this);
+			viewer.refresh(updProj ? this.project : this);
 		}
 	}
 }

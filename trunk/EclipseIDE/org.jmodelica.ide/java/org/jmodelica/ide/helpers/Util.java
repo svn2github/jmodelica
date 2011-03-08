@@ -200,12 +200,12 @@ public class Util {
 	    return new Among<E>(e);
 	}
 	
-	public static <E> List<E> fromIterable(Iterable<E> iterable) {
-	    return fromIterator(iterable.iterator());
+	public static <E> List<E> listFromIterable(Iterable<E> iterable) {
+	    return listFromIterator(iterable.iterator());
 	}
 	
-	public static <E> List<E> fromIterator(Iterator<E> iterator) {
-	    List<E> list = new LinkedList<E>();
+	public static <E> List<E> listFromIterator(Iterator<E> iterator) {
+	    List<E> list = new ArrayList<E>();
 	    while(iterator.hasNext())
 	        list.add(iterator.next());
 	    return list;

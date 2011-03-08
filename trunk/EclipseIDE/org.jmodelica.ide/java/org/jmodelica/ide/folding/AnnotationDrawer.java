@@ -16,7 +16,6 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Display;
-import org.jmodelica.folding.CharacterProjectionAnnotation;
 
 public class AnnotationDrawer implements IDrawingStrategy {
 	private Font lastFont;
@@ -33,7 +32,7 @@ public class AnnotationDrawer implements IDrawingStrategy {
 	 */
 	public void draw(Annotation annotation, GC gc, StyledText textWidget, int offset, int length, Color color) {
 		if (annotation instanceof ProjectionAnnotation) {
-			if (annotation instanceof CharacterProjectionAnnotation) {
+			if (false /*annotation instanceof CharacterProjectionAnnotation*/) {
 				ProjectionAnnotation projectionAnnotation= (ProjectionAnnotation) annotation;
 				if (projectionAnnotation.isCollapsed()) {
 

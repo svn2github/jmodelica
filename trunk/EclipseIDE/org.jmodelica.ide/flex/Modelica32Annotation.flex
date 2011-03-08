@@ -103,27 +103,27 @@ Keyword = "algorithm"     | "discrete"   /* | "false"      */ | "model"         
 ExtraKeyword = "time" 
 
 // Built-in functions (a.k.a. function-like operators)
-          // MSL 3.2, sect 3.7.1, p 20
+          // MLS 3.2, sect 3.7.1, p 20
 BuiltIn = "abs" | "sign" | "sqrt" | 
-          // MSL 3.2, sect 3.7.1.1, p 21
+          // MLS 3.2, sect 3.7.1.1, p 21
           "div" | "mod" | "rem" | "ceil" | "floor" | "integer" | "Integer" | "String" | 
-          // MSL 3.2, sect 3.7.1.2, p 21-22
+          // MLS 3.2, sect 3.7.1.2, p 21-22
           "sin" | "cos" | "tan" | "asin" | "acos" | "atan" | "atan2" | "sinh" | "cosh" | "tanh" | "exp" | "log" | "log10" | 
-          // MSL 3.2, sect 3.7.2, p 22-23
+          // MLS 3.2, sect 3.7.2, p 22-23
           "delay" | "homotopy" | "semiLinear" | "Subtask.decouple" | 
-          // MSL 3.2, sect 3.7.3, p 26-27
+          // MLS 3.2, sect 3.7.3, p 26-27
           "initial" | "terminal" | "noEvent" | "smooth" | "sample" | "pre" | "edge" | "change" | "reinit" | 
-          // MSL 3.2, sect 10.3.1, p 110
+          // MLS 3.2, sect 10.3.1, p 110
           "ndims" | "size" | 
-          // MSL 3.2, sect 10.3.2, p 110
+          // MLS 3.2, sect 10.3.2, p 110
           "scalar" | "vector" | "matrix" | 
-          // MSL 3.2, sect 10.3.3, p 110-111
+          // MLS 3.2, sect 10.3.3, p 110-111
           "identity" | "diagonal" | "zeros" | "ones" | "fill" | "linspace" | 
-          // MSL 3.2, sect 10.3.4, p 111
+          // MLS 3.2, sect 10.3.4, p 111
           "min" | "max" | "sum" | "product" | 
-          // MSL 3.2, sect 10.3.5, p 112
+          // MLS 3.2, sect 10.3.5, p 112
           "transpose" | "outerProduct" | "symmetric" | "cross" | "skew" | 
-          // MSL 3.2, sect 16.6, p 185
+          // MLS 3.2, sect 16.6, p 185
           "Subtask.activated", "Subtask.lastInterval"
 
 DeprBuiltIn = "cardinality"
@@ -152,6 +152,8 @@ TraditionalComment = "/*" ~"*/"
 EndOfLineComment = "//" [^\n\r]* {LineTerminator}?
 Comment = {TraditionalComment} | {EndOfLineComment} 
 
+ANY = . | {LineTerminator}
+
 
 %state INSIDE, AFTER_ID, AFTER_DOT
 
@@ -160,7 +162,8 @@ Comment = {TraditionalComment} | {EndOfLineComment}
 <YYINITIAL> {
     "annotation"    { return KEYWORD; }
     "("             { yybegin(INSIDE); return ANNO_OPERATOR; }
-    .               { return NORMAL; }
+    {Comment}       { return COMMENT; }
+    {ANY}           { return NORMAL; }
 }
 
 <INSIDE> {
