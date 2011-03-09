@@ -20,5 +20,8 @@ Require-Bundle: org.eclipse.jface.text,
  org.eclipse.ui.console
 Import-Package: junit.framework,
  org.eclipse.ui.navigator
-Export-Package: org.jmodelica.modelica.compiler,
+Export-Package: org.jmodelica.ide.helpers,
+ org.jmodelica.ide.ui,
+ org.jmodelica.modelica.compiler,
+ org.jmodelica.modelica.parser,
  org.jmodelica.util

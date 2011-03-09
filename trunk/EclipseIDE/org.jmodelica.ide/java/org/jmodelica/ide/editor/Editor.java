@@ -18,6 +18,7 @@ package org.jmodelica.ide.editor;
 //import static org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE;
 //import static org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE_COLOR;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -105,7 +106,8 @@ private final CompileFMUAction compileFMUAction;
 private final CurrentClassAction[] currentClassListeners;
 private final ToggleAnnotationsAction toggleAnnotationsAction;
 private final GoToDeclaration goToDeclaration;
-private final CompletionProcessor completions;
+//Commented out to disable name completion
+//private final CompletionProcessor completions;
 private AnnotationFoldUpdater annotationFolds;
 
 /**
@@ -117,8 +119,9 @@ public Editor() {
         new SourceOutlinePage(this);
     fInstanceOutlinePage = 
         new InstanceOutlinePage(this);
-    completions = 
-        new CompletionProcessor(this);
+ // Commented out to disable name completion
+//    completions = 
+//        new CompletionProcessor(this);
     goToDeclaration = 
         new GoToDeclaration(this);
     errorCheckAction = 
@@ -425,7 +428,9 @@ private void updateCurrentClassListeners() {
  */
 public boolean selectNode(ASTNode<?> node) {
 
-    boolean matchesInput = file.path().equals(node.containingFileName());
+    File nodeFile = new File(node.containingFileName());
+	File editorFile = new File(file.path());
+	boolean matchesInput = editorFile.equals(nodeFile);
 
     if (matchesInput) {
 
@@ -453,9 +458,10 @@ public IReconcilingStrategy strategy() {
     return compResult.compilationStrategy();
 }
 
-public CompletionProcessor completions() {
-    return completions;
-}
+//Commented out to disable name completion
+//public CompletionProcessor completions() {
+//    return completions;
+//}
 
 public EditorFile editorFile() {
     return file;

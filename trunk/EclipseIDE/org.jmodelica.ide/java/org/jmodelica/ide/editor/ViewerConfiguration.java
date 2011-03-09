@@ -36,11 +36,13 @@ import org.jmodelica.ide.scanners.ModelicaStringScanner;
 public class ViewerConfiguration extends SourceViewerConfiguration {
 
 	final Editor editor;
-	final CompletionProcessor completions;
+	// Commented out to disable name completion
+//	final CompletionProcessor completions;
 
 	public ViewerConfiguration(Editor editor) {
 		this.editor = editor;
-		this.completions = editor.completions();
+		// Commented out to disable name completion
+//		this.completions = editor.completions();
 	}
 
 	@Override
@@ -112,17 +114,16 @@ public class ViewerConfiguration extends SourceViewerConfiguration {
 		return new MonoReconciler(editor.strategy(), false);
 	}
 
-	@Override
-	public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
-
-		ContentAssistant assist = new ContentAssistant();
-
-		assist.setContentAssistProcessor(completions,
-				IDocument.DEFAULT_CONTENT_TYPE);
-		assist.setContentAssistProcessor(completions,
-				Modelica32PartitionScanner.NORMAL_PARTITION);
-
-		return assist;
-	}
+	// Commented out to disable name completion
+//	@Override
+//	public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
+//
+//		ContentAssistant assist = new ContentAssistant();
+//
+//		assist.setContentAssistProcessor(completions, IDocument.DEFAULT_CONTENT_TYPE);
+//		assist.setContentAssistProcessor(completions, Modelica32PartitionScanner.NORMAL_PARTITION);
+//
+//		return assist;
+//	}
 
 }

@@ -167,7 +167,7 @@ public class CompileFMUAction extends CurrentClassAction implements IJobChangeLi
 			IStatus status = Status.OK_STATUS;
 			OutputStream out = newConsoleStream();
 			ModelicaCompiler.setStreamLogger(out);
-			ModelicaCompiler.setLogLevel(ModelicaCompiler.DEBUG);
+			ModelicaCompiler.setLogLevel(ModelicaCompiler.INFO);
 			try {
 				ModelicaCompiler mc = new ModelicaCompiler(opt);
 				mc.addCompilationHooks(this);

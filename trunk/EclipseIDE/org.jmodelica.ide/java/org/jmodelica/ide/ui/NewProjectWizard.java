@@ -52,6 +52,7 @@ import org.eclipse.ui.part.ISetSelectionTarget;
 
 import org.jastadd.plugin.Builder;
 import org.jmodelica.ide.Nature;
+import org.jmodelica.ide.helpers.Util;
 
 public class NewProjectWizard extends Wizard implements INewWizard, IExecutableExtension {
 
@@ -64,7 +65,6 @@ public class NewProjectWizard extends Wizard implements INewWizard, IExecutableE
 	protected WizardNewProjectCreationPage mainPage;
 	
 	private IProject newProject;
-	
 	
 	@Override
 	public boolean performFinish() {

@@ -5,18 +5,17 @@ import java.io.File;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorDescriptor;
+import org.eclipse.ui.INewWizard;
+import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
 import org.jmodelica.ide.editor.Editor;
 
-/**
- * Some things in Eclipse that are ridiculously verbose.
- * 
- * @author philip
- * 
- */
 public class EclipseUtil {
 
 	public static Maybe<Editor> getModelicaEditorForFile(IFile file) {
@@ -60,6 +59,20 @@ public class EclipseUtil {
 		// We need to select one in some way, and the first is as good as any.
 		return candidates.length > 0 ? Maybe.Just(candidates[0]) : Maybe
 				.<IFile> Nothing();
+	}
+
+	public static void openNewWizard(INewWizard wizard) {
+		IWorkbench workbench = PlatformUI.getWorkbench();
+		Shell shell = workbench.getDisplay().getActiveShell();
+		wizard.init(workbench, null);
+		WizardDialog wd = new WizardDialog(shell, wizard);
+		wd.setTitle(wizard.getWindowTitle());
+		wd.open();
+	}
+
+	public static boolean askUser(String title, String question) {
+		Shell shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
+		return MessageDialog.openQuestion(null, title, question);
 	}
 
 }
