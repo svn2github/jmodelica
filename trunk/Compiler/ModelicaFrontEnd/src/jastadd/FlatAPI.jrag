@@ -452,7 +452,7 @@ aspect FlatAPI {
 	coll ArrayList<FDerivativeVariable> FClass.derivativeVariables() 
 	  [new ArrayList<FDerivativeVariable>()] with add root FlatRoot;
 	FDerivativeVariable contributes
-		this when shouldContribute()
+		this when (shouldContribute())
 	to FClass.derivativeVariables() for myFClass();
 	
     syn int FClass.numVariables() = variables().size();
@@ -933,6 +933,9 @@ aspect FlatAPI {
 	  
 	syn boolean AbstractFVariable.isDerivativeVariable() = false;
 	eq FDerivativeVariable.isDerivativeVariable() = true;
+
+	syn boolean AbstractFVariable.isDummyDerivativeVariable() = false;
+	eq FDummyDerivativeVariable.isDummyDerivativeVariable() = true;
 
 	syn boolean AbstractFVariable.isPreVariable() = false;
 	eq FPreRealVariable.isPreVariable() = true;

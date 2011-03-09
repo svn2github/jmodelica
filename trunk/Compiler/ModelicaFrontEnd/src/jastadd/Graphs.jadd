@@ -457,17 +457,17 @@ public class BiPGraph {
 		return false;
 	}	
 
-	public void reduceIndex(boolean resetMatching) {
+	public IndexReductionResult reduceIndex(boolean resetMatching) {
 		if (resetMatching) {
 			reset();
 			//greedyMatching();
 		}
 			
 		//_maximumMatching(resetMatching);	
+		IndexReductionResult result = new IndexReductionResult();		
 				
 		ArrayList<Eq> visitedEquations;
 		ArrayList<Var> visitedVariables;		
-				
 				
 		LinkedHashSet<Eq> es = new LinkedHashSet<Eq>();
 		es.addAll(getEquations());
@@ -524,6 +524,7 @@ public class BiPGraph {
 							FAbstractEquation eee = ee.getEquation();
 							// Create a new differentiated equation
 							FAbstractEquation deee = eee.diff("time");
+							result.addEquation(deee);
 							System.out.println("About to add equation: " + deee);
 							// Add the differentiated equation						
 							Eq eqn = addEquation("eq_" + (getEquations().size() + 1), 
@@ -611,7 +612,16 @@ public class BiPGraph {
 				g.add(gg);
 				
 				ArrayList<FVariable> zz = new ArrayList<FVariable>();
-				zz.addAll(eb.activeVariables());
+				for (FVariable fv : eb.activeVariables()) {
+					if (fv.isDerivativeVariable()) {
+						FRealVariable frv = (FRealVariable)((FDerivativeVariable)fv).lookupFV(fv.getFQName());
+						if (frv.stateSelectAttribute()!=FRealVariable.StateSelect.ALWAYS) {
+							zz.add(fv);
+						}
+					} else {
+						zz.add(fv);
+					}
+				}
 				z.add(zz);				
 
 				boolean remainingDifferentiatedEquations = false;
@@ -706,6 +716,7 @@ public class BiPGraph {
 				System.out.println(" Dummy derivatives: ");
 				for (ArrayList<FVariable> l : zHat) {
 					for (FVariable fv : l) {
+						result.addDummyDerivative(fv);
 						System.out.println(fv.prettyPrint("   "));
 					}
 					System.out.println("");
@@ -717,7 +728,7 @@ public class BiPGraph {
 			}
 				
 		}
-		
+		return result;
 	}
 	
 	public ArrayList<Eq> getUnmatchedEquations() {
@@ -1404,5 +1415,32 @@ public class Var {
 	
 }
 
+public class IndexReductionResult {
+
+	private ArrayList<FAbstractEquation> addedEquations;
+	private ArrayList<FVariable> dummyDerivatives;
+
+	public IndexReductionResult() {
+		addedEquations = new ArrayList<FAbstractEquation>();
+		dummyDerivatives = new ArrayList<FVariable>();
+	}
+	
+	public void addEquation(FAbstractEquation fe) {
+		addedEquations.add(fe);	
+	}
+
+	public void addDummyDerivative(FVariable fv) {
+		dummyDerivatives.add(fv);	
+	}
+
+	public ArrayList<FAbstractEquation> getEquations() {
+		return addedEquations;
+	}
+
+	public ArrayList<FVariable> getDummyDerivatives() {
+		return dummyDerivatives;
+	}
+
+}
 
 }

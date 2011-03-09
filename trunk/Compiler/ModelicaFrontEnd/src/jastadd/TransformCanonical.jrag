@@ -430,14 +430,129 @@ aspect TransformCanonical {
 	
 		// TODO: If no complete matching found, then try index reduction
 		if (g.getUnmatchedVariables().size()>0 || g.getUnmatchedEquations().size()>0) {
-			//g.reduceIndex(true);
+			if (root().options.getBooleanOption("index_reduction")) {
+				IndexReductionResult result = g.reduceIndex(true);
 			
-			// Add the new equations
-			// Replace selected dummy derivatives with algebraics
-			// Enable rewrite of identifiers? (not necessary?)
-			
+				// Add the new equations
+				// Replace selected dummy derivatives with algebraics
+				// Enable rewrite of identifiers? (not necessary?)
+				for (FAbstractEquation fe : result.getEquations()) {
+					addFEquation((FAbstractEquation)fe.fullCopy());
+				}
+				
+				List<FVariable> l = new List<FVariable>();
+				
+				for (FVariable fv : getFVariables()) {
+					if (result.getDummyDerivatives().contains(fv)) {
+						if (fv instanceof FHDerivativeVariable) {
+							FHDummyDerivativeVariable fdv = new FHDummyDerivativeVariable((FVisibilityType)fv.getFVisibilityType().fullCopy(),
+								(FTypePrefixVariability)fv.getFTypePrefixVariability().fullCopy(),
+								new Opt(),
+								new List(),
+								new Opt(),
+								new Opt(),
+								fv.getFQName().fullCopy(),
+								((FHDerivativeVariable)fv).getOrder());
+							l.add(fdv);
+						} else if (fv instanceof FDerivativeVariable) {
+							FDummyDerivativeVariable fdv = new FDummyDerivativeVariable((FVisibilityType)fv.getFVisibilityType().fullCopy(),
+								(FTypePrefixVariability)fv.getFTypePrefixVariability().fullCopy(),
+								new Opt(),
+								new List(),
+								new Opt(),
+								new Opt(),
+								fv.getFQName().fullCopy());
+							l.add(fdv);					
+						} else {
+							l.add(fv);
+						}
+					} else if (fv instanceof FHDerivativeVariable) {
+					    // Convert higher order derivative variables into
+					    // first order derivatives
+					    FHDerivativeVariable fhdv = (FHDerivativeVariable)fv;
+						for (int i=0;i<fhdv.getOrder()-1;i++) {
+							StringBuffer str = new StringBuffer();
+							StringBuffer str2 = new StringBuffer();
+							for (int j=0;j<i+1;j++) {
+								str.append("_der");
+								if (j<i) {
+									str2.append("_der");
+								}
+							}
+							str.append("_");
+							if (i>0) {
+								str2.append("_");
+							}
+							FQName fqn = fhdv.getFQName();
+							FQName fqn2 = (FQName)fv.getFQName().fullCopy();
+							str.append(fqn.getFQNamePart(fqn.getNumFQNamePart()-1).name());
+							fqn.setFQNamePart(new FQNamePart(str.toString(),fqn.getFQNamePart(fqn.getNumFQNamePart()-1).getFArraySubscriptsOpt()),fqn.getNumFQNamePart()-1);
+							l.add(new FRealVariable((FVisibilityType)fv.getFVisibilityType().fullCopy(),
+								(FTypePrefixVariability)fv.getFTypePrefixVariability().fullCopy(),
+								new Opt(),
+								new List(),
+								new Opt(),
+								new Opt(),
+							fqn));
+							l.add(new FDerivativeVariable((FVisibilityType)fv.getFVisibilityType().fullCopy(),
+								(FTypePrefixVariability)fv.getFTypePrefixVariability().fullCopy(),
+								new Opt(),
+								new List(),
+								new Opt(),
+								new Opt(),
+								(FQName)fqn.fullCopy()));
+							str2.append(fqn2.getFQNamePart(fqn2.getNumFQNamePart()-1).name());
+							fqn2.setFQNamePart(new FQNamePart(str2.toString(),fqn2.getFQNamePart(fqn2.getNumFQNamePart()-1).getFArraySubscriptsOpt()),fqn2.getNumFQNamePart()-1);
+							// Add equations for the new variables
+							addFEquation(new FEquation(new FIdUseExp(new FIdUse((FQName)fqn.fullCopy())),new FDerExp(new FIdUse(fqn2))));
+						}		
+					} else {
+						l.add(fv);
+					}
+				}	
 
-			return;
+				setFVariableList(l);		
+
+				enableFHDerRewrite();
+
+				// flushAllRecursiveClearFinal must be used here in order to
+				// trigger rewrites of FDerExp -> FDummyDerExp
+				root().flushAllRecursiveClearFinal();
+
+				//System.out.println(prettyPrint(""));
+
+				//dumpTree("");
+
+				BiPGraph oldG = g;	
+
+				g = new BiPGraph(name(),"");
+		
+				g.addVariables(this, BiPGraph.DERIVATIVE_VARIABLES | BiPGraph.ALGEBRAIC_VARIABLES);
+				g.addEquations(equations(), BiPGraph.DERIVATIVE_VARIABLES | BiPGraph.ALGEBRAIC_VARIABLES,"eq_",1);
+		
+				log.info(g.toString());
+				g.maximumMatching(true);	
+				log.info("DAE system ");
+				log.info(g.printMatching());
+			
+				daeMatching = g.getMatching();
+			
+				daeUnmatchedVariables.clear();
+				for (Var var : g.getUnmatchedVariables()) {
+					daeUnmatchedVariables.add(var.getVariable());
+				}
+
+				daeUnmatchedEquations.clear();
+				for (Eq ee : g.getUnmatchedEquations()) {
+					daeUnmatchedEquations.add(ee.getEquation());
+				}
+
+				if (g.getUnmatchedVariables().size()>0 || g.getUnmatchedEquations().size()>0) {
+					return;
+				}
+			} else {
+				return;
+			}
 		}
 	
 		// Perform BLT
@@ -1763,6 +1878,67 @@ aspect ParameterSorting {
 	public void FEquation.revertToBindingExp() {
 		FVariable fv = (FVariable) ((FIdUseExp) getLeft()).getFIdUse().myFV();
 		fv.setBindingExp(getRight());
+	}
+
+}
+
+aspect DummyDerivatives {
+
+	rewrite FDerExp {
+		when (myFV().isDummyDer()) to FDummyDerExp {
+			return new FDummyDerExp(getFIdUse());
+		}
+	}
+
+	rewrite FHDerExp {
+		when (myFV().isDummyDer()) to FHDummyDerExp {
+			return new FHDummyDerExp(getFIdUse(),getOrder());
+		}
+	}
+	
+	syn boolean AbstractFVariable.isDummyDer() {
+		return false;
+	}
+	
+	eq FDummyDerivativeVariable.isDummyDer() {
+		return true;
+	}
+	
+	eq FHDummyDerivativeVariable.isDummyDer() {
+		return true;	
+	}
+
+	public void ASTNode.enableFHDerRewrite() {
+		for (ASTNode n : this)
+			n.enableFHDerRewrite();
+	}
+	
+	public void FHDerExp.enableFHDerRewrite() {
+		rewriteFHDer = true;
+		is$Final = false;
+	}
+	
+	boolean FHDerExp.rewriteFHDer = false;
+
+	public void FHDerivativeVariable.enableFHDerRewrite() {
+		rewriteFHDer = true;
+		is$Final = false;
+	}
+	
+	boolean FHDerivativeVariable.rewriteFHDer = false;
+
+	rewrite FHDerExp {
+		when (rewriteFHDer) to FDerExp {
+			StringBuffer str = new StringBuffer();
+			for (int i=0;i<getOrder()-1;i++) {
+				str.append("_der");
+			}
+			str.append("_");
+			FQName fqn = getFIdUse().getFQName();
+			str.append(fqn.getFQNamePart(fqn.getNumFQNamePart()-1).name());
+			fqn.setFQNamePart(new FQNamePart(str.toString(),fqn.getFQNamePart(fqn.getNumFQNamePart()-1).getFArraySubscriptsOpt()),fqn.getNumFQNamePart()-1);
+			return new FDerExp(new FIdUse(fqn));
+		} 
 	}
 
 }

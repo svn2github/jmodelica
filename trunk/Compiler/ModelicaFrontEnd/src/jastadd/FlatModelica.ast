@@ -220,7 +220,11 @@ FRecordVariable : FVariable ::= Record:FQName /Type:FType/;
  */
 FDerivativeVariable : FRealVariable;
 
+FDummyDerivativeVariable : FRealVariable;
+
 FHDerivativeVariable : FDerivativeVariable ::= <Order:int>;
+
+FHDummyDerivativeVariable : FDummyDerivativeVariable ::= <Order:int>;
 
 /**
  * \brief Node representing the visibility of an FVariable object.
@@ -854,9 +858,20 @@ InstDerExp : FUnaryExp;
 FDerExp : FIdUseExp; 
 
 /**
+ * \brief The built-in function der converted into a dummy derivative.
+ */
+FDummyDerExp : FIdUseExp; 
+
+/**
  * \brief Higher order derivatives occurring as a result of index reduction.
  */
 FHDerExp : FDerExp ::= <Order:int>; 
+
+/**
+ * \brief Higher order derivatives occurring as a result of index reduction, 
+ * converted into a dummy derivative.
+ */
+FHDummyDerExp : FDummyDerExp ::= <Order:int>; 
 
 /**
  * \brief Identifier in the instance tree.

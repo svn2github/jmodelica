@@ -810,6 +810,7 @@ aspect FlatNames {
     syn String FIdUse.name() = getFQName().name();
     syn String FIdUseExp.name() = getFIdUse().name();
     eq FDerExp.name() = derName();
+    eq FDummyDerExp.name() = derName();
     eq FPreExp.name() = preName();
     syn String FInstAccessExp.name() = getInstAccessNoTransform().name();
     syn String FIdUseInstAccess.name() = getInstAccessNoTransform().name();
@@ -840,12 +841,23 @@ aspect FlatNames {
     	return str[0] + "," + getOrder() + ")";
     }
 
+    eq FHDummyDerExp.name() {
+    	String[] str = derName().split("\\)");
+    	return str[0] + "," + getOrder() + ")";
+    }
+
     eq FHDerivativeVariable.name() {
+    	String[] str = getFQNameNoTransform().derName().split("\\)");
+    	return str[0] + "," + getOrder() + ")";
+    }
+
+    eq FHDummyDerivativeVariable.name() {
     	String[] str = getFQNameNoTransform().derName().split("\\)");
     	return str[0] + "," + getOrder() + ")";
     }
     
     eq FDerivativeVariable.name()  = getFQNameNoTransform().derName();
+    eq FDummyDerivativeVariable.name()  = getFQNameNoTransform().derName();
     syn String FIdUse.derName()    = getFQNameNoTransform().derName();
     syn String FIdUseExp.derName() = getFIdUseNoTransform().derName();
 
@@ -928,6 +940,8 @@ aspect FlatNames {
     syn String FIdUse.nameUnderscore() = getFQName().nameUnderscore();
     syn String FIdUseExp.nameUnderscore() = getFIdUse().nameUnderscore();
     eq FDerExp.nameUnderscore() = "der_" + getFIdUse().nameUnderscore();
+    eq FDummyDerExp.nameUnderscore() = "der_" + getFIdUse().nameUnderscore();
+    eq FHDummyDerExp.nameUnderscore() = "der_" + getOrder() + "_" + getFIdUse().nameUnderscore();
     //syn String FInstAccessExp.nameUnderscore() = getInstAccess().nameUnderscore();
     //syn String FIdUseInstAccess.nameUnderscore() = getInstAccess().nameUnderscore();
     
@@ -938,6 +952,8 @@ aspect FlatNames {
     syn String AbstractFVariable.nameUnderscore() = null;
     eq FVariable.nameUnderscore()           = getFQName().nameUnderscore();
     eq FDerivativeVariable.nameUnderscore() = "der_" + getFQName().nameUnderscore();
+    eq FDummyDerivativeVariable.nameUnderscore() = "der_" + getFQName().nameUnderscore();
+    eq FHDummyDerivativeVariable.nameUnderscore() = "der_" + getOrder() + "_" + getFQName().nameUnderscore();
     eq FFunctionVariable.nameUnderscore()   = getFQName().nameUnderscore();
     
     syn String FQName.funcNameUnderscore(String suffix) = "func_" + nameUnderscore() + "_" + suffix;

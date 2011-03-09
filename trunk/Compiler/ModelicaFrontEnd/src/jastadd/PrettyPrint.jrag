@@ -684,7 +684,7 @@ aspect FlattPrettyPrint {
 		String nextInd = p.indent(indent);
 		str.print(indent + "fclass " + name() + "\n");
 		for (FVariable fv : getFVariables()) {
-	  		if (!fv.isDerivativeVariable() && !fv.isPreVariable()) {
+	  		if (!fv.isDerivativeVariable() && !fv.isDummyDerivativeVariable() && !fv.isPreVariable()) {
 	  			p.print(fv, str, nextInd);
 	  			str.print(";\n");  
 	  		}
@@ -781,7 +781,18 @@ aspect FlattPrettyPrint {
 		str.print(" ");
 		str.print(name());		
 	}
-	
+
+	public void FDummyDerivativeVariable.prettyPrint(Printer p, PrintStream str, String indent) {
+		str.print(indent);
+		if (isProtected()) {
+			str.print("protected ");
+		}
+				
+		str.print(type());
+		str.print(" ");
+		str.print(name());		
+	}
+
 	public void List.prettyPrintFAttributeList(PrintStream str, Printer p) {
 	
 	    boolean attrSet = false;
@@ -1376,6 +1387,14 @@ aspect FlattPrettyPrint {
 	}
 	
 	public void FDerExp.prettyPrint(Printer p, PrintStream str, String indent) {
+		str.print(name());
+	}
+
+	public void FDummyDerExp.prettyPrint(Printer p, PrintStream str, String indent) {
+		str.print(name());
+	}
+
+	public void FHDummyDerExp.prettyPrint(Printer p, PrintStream str, String indent) {
 		str.print(name());
 	}
 
