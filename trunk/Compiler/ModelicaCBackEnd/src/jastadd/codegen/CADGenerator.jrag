@@ -176,9 +176,9 @@ public class CADGenerator extends CGenerator {
 				genPrinter.print(str_col.toString());				
 				
 			} else {
-			 	genPrinter.print("static int CAD_dae_n_nz = 0;\n");
-				genPrinter.print("static const int CAD_dae_nz_rows[0] = {};\n");
-				genPrinter.print("static const int CAD_dae_nz_cols[0] = {};\n");
+			 	genPrinter.print("static int CAD_dae_n_nz = 1;\n");
+				genPrinter.print("static const int CAD_dae_nz_rows[1] = {-1};\n");
+				genPrinter.print("static const int CAD_dae_nz_cols[1] = {-1};\n");
 			}
 		}
 	
