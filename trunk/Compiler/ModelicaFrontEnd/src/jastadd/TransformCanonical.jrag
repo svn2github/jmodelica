@@ -686,7 +686,7 @@ aspect TransformCanonical {
 				}
 				l.add(fe);
 				
-				eqn = g.addEquation("eq_"+k,fe.prettyPrint(""),fe);
+				eqn = g.addEquation("eq_"+(g.getEquations().size() + 1),fe.prettyPrint(""),fe);
 				v = g.getVariable(var.getName());     
 				g.addEdge(eqn,v); 
 				k++;

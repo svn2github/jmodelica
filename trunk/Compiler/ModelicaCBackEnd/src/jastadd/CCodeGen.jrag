@@ -1,6 +1,5 @@
 /*
 Copyright (C) 2009 Modelon AB
-
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, version 3 of the License.
@@ -84,6 +83,18 @@ aspect CCodeGen {
 	}
 		
 	public void FDerExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
+		if (root().options.getBooleanOption("enable_variable_scaling") && !inFunction()) {
+			str.print("(");
+			str.print(myFV().name_C());
+			str.print("*sf(");
+			str.print(myFV().valueReference());
+			str.print("))");
+		} else {
+			str.print(myFV().name_C());
+		}
+	}
+
+	public void FDummyDerExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
 		if (root().options.getBooleanOption("enable_variable_scaling") && !inFunction()) {
 			str.print("(");
 			str.print(myFV().name_C());
