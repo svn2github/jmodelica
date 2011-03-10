@@ -8,6 +8,7 @@ import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.error.InstanceError;
 import org.jmodelica.ide.error.InstanceErrorHandler;
 import org.jmodelica.modelica.compiler.BaseClassDecl;
+import org.jmodelica.modelica.compiler.InstClassDecl;
 import org.jmodelica.modelica.compiler.InstProgramRoot;
 import org.jmodelica.modelica.compiler.SourceRoot;
 
@@ -28,7 +29,9 @@ public class ErrorCheckAction extends CurrentClassAction {
 		InstanceErrorHandler errorHandler = (InstanceErrorHandler) root.getErrorHandler();
 		errorHandler.resetCounter();
 		String name = currentClass.qualifiedName();
-		ipr.simpleLookupInstClassDecl(name).collectErrors();
+		InstClassDecl icd = ipr.simpleLookupInstClassDecl(name);
+		icd.resetCollectErrors();
+		icd.collectErrors();
 		String msg;
 		if (errorHandler.hasLostErrors()) {
 			Collection<InstanceError> err = errorHandler.getLostErrors();

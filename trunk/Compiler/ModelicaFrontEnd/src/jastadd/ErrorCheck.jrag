@@ -420,9 +420,18 @@ aspect InstanceErrorCheck {
 			return icd.errorCheck();
 	}
 
-	boolean InstNode.errorChecked = false;
-	boolean InstModification.errorChecked = false;
+	protected boolean BaseNode.errorChecked = false;
 
+	public void ASTNode.resetCollectErrors() {
+		int n = getNumChildNoTransform();
+		for (int i = 0; i < n; i++)
+			getChildNoTransform(i).resetCollectErrors();
+	}
+	
+	public void BaseNode.resetCollectErrors() {
+		errorChecked = false;
+		super.resetCollectErrors();
+	}
 
   public void InstNode.collectErrors() {
     if (!errorChecked) {
@@ -462,8 +471,8 @@ aspect InstanceErrorCheck {
 
   	public void InstBaseClassDecl.collectErrors() {
     	if (!errorChecked) {
-//    	errorChecked = true;
-        super.collectErrors();
+	        super.collectErrors();
+	    	errorChecked = true;
  //       for (InstClassDecl icd : instClassDecls())
  //       	icd.collectErrors();
  /*
@@ -472,10 +481,10 @@ aspect InstanceErrorCheck {
         for (InstExtends ie : instExtends())
         	ie.collectErrors();	
 */        	
-        for (InstImport ii : getInstImports())
-        	ii.collectErrors();		
-		if (hasInstConstraining())
-			getInstConstraining().collectErrors();
+	        for (InstImport ii : getInstImports())
+	        	ii.collectErrors();		
+			if (hasInstConstraining())
+				getInstConstraining().collectErrors();
 //        for (FAbstractEquation e : getFAbstractEquations())
 //        	e.collectErrors();
 //    	getEquationList().collectErrors();
@@ -496,6 +505,7 @@ aspect InstanceErrorCheck {
   	public void InstFullClassDecl.collectErrors() {
     	if (!errorChecked) {
             super.collectErrors();
+    		errorChecked = true;
             getInstExternalOpt().collectErrors();
     	}
   	}
@@ -504,7 +514,6 @@ aspect InstanceErrorCheck {
 //  		// TODO: Error checking of enumeration declarations
 //  	}
   	
-	boolean InstImport.errorChecked = false;
     public void InstImport.collectErrors() {
     	if (!errorChecked) {
     		errorChecked = true;
@@ -519,6 +528,7 @@ aspect InstanceErrorCheck {
 	    		error("Recursive class structure");
 	    	} else {
 	    		super.collectErrors();
+  		  		errorChecked = true;
 	    		getClassName().collectErrors();
 	    		if (hasInstModification())
 	    			getInstModification().collectErrors();
@@ -557,6 +567,7 @@ aspect InstanceErrorCheck {
 		//log.debug(toString());
         if (!errorChecked) {
         	super.collectErrors();
+    		errorChecked = true;
 	
 			// Check binding expression
 			if (isParameter() || isConstant()) {
@@ -593,8 +604,9 @@ aspect InstanceErrorCheck {
 	
 	public void InstArrayComponentDecl.collectErrors() {
 	    if (!errorChecked) {
-	  	  for(InstNode n : getInstComponentDecls()) 
-			  n.collectErrors();
+    		errorChecked = true;
+	  	  	for(InstNode n : getInstComponentDecls()) 
+			  	n.collectErrors();
 		}
 	}
 	
@@ -602,8 +614,10 @@ aspect InstanceErrorCheck {
 	    if (!errorChecked) {
 	    	if (isRecursed()) {
 	    		error("Recursive class structure");
+	    		errorChecked = true;
 	    	} else {
 				super.collectErrors();
+    			errorChecked = true;
 				getClassName().collectErrors();
 				if (hasInstClassModification())
 					getInstClassModification().collectErrors();
@@ -646,6 +660,7 @@ aspect InstanceErrorCheck {
 	      }
 	      
 		  super.collectErrors();
+    	  errorChecked = true;
 		  // The localInstModifications should only be checked if
 		  // the node is not a InstReplacingShortClassDecl. This
 		  // is accomplished by the method collectInstModificationErrors.
@@ -664,6 +679,7 @@ aspect InstanceErrorCheck {
 	public void InstReplacingShortClassDecl.collectErrors() {
 	    if (!errorChecked) {
 		  super.collectErrors();
+    	  errorChecked = true;
 		  getOriginalInstClass().collectErrors();
 		}
 		
@@ -672,6 +688,7 @@ aspect InstanceErrorCheck {
 	public void InstReplacingFullClassDecl.collectErrors() {
 	    if (!errorChecked) {
 		  super.collectErrors();
+    	  errorChecked = true;
 		  getOriginalInstClass().collectErrors();
 		}
 		
@@ -694,7 +711,6 @@ aspect InstanceErrorCheck {
 		getFExp().collectErrors();
 	}
 
-	boolean InstAccess.errorChecked = false;
 	public void InstDot.collectErrors() {
 	    if (!errorChecked) {	
 			errorChecked = true;
@@ -708,8 +724,8 @@ aspect InstanceErrorCheck {
 	public void InstClassAccess.collectErrors() {
 	    if (!errorChecked) {
 		    //super.collectErrors();
-		    nameCheck();
 		    errorChecked = true;
+		    nameCheck();
 			// If the class access is to be checked, then the corresponding
 			// InstClassDecl is checked as well, since it is being accessed at
 			// some point... ...But it is probably too drastic since it means
@@ -758,7 +774,6 @@ aspect InstanceErrorCheck {
 		return n;
 	}
 	
-	protected boolean FAbstractFunctionCall.errorChecked = false;
 	public void InstFunctionCall.collectErrors() {
 	    if (!errorChecked) {
 	    	errorChecked = true;
@@ -813,10 +828,10 @@ aspect InstanceErrorCheck {
 	
 	public void FBuiltInFunctionCall.collectErrors() {
 	    if (!errorChecked) {
+	    	super.collectErrors();
 	    	errorChecked = true;
 	    	getOriginalArgs().collectErrors();
 	    }
-    	super.collectErrors();
 	}
 	
 	public void FUnsupportedBuiltIn.collectErrors() {
@@ -824,7 +839,6 @@ aspect InstanceErrorCheck {
 		allChecks();
 	}
  
-	protected boolean InstNamedArgument.errorChecked = false;
 	public void InstNamedArgument.collectErrors() {
 		// TODO: This way, the FExp for each argument to a built-in function is checked twice - fix that
 	    if (!errorChecked) {

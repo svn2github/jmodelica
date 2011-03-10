@@ -19,38 +19,21 @@ package org.jmodelica.ide.editor;
 //import static org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE_COLOR;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
-import org.eclipse.jface.text.IDocumentPartitioningListener;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextSelection;
-import org.eclipse.jface.text.ITypedRegion;
-import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
 import org.eclipse.jface.text.rules.FastPartitioner;
-import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
-import org.eclipse.jface.text.source.projection.ProjectionAnnotation;
 import org.eclipse.jface.text.source.projection.ProjectionAnnotationModel;
 import org.eclipse.jface.text.source.projection.ProjectionSupport;
 import org.eclipse.jface.text.source.projection.ProjectionViewer;
@@ -58,7 +41,6 @@ import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.progress.UIJob;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditor;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
@@ -76,7 +58,6 @@ import org.jmodelica.ide.editor.actions.FormatRegionAction;
 import org.jmodelica.ide.editor.actions.GoToDeclaration;
 import org.jmodelica.ide.editor.actions.ToggleAnnotationsAction;
 import org.jmodelica.ide.editor.actions.ToggleComment;
-import org.jmodelica.ide.helpers.Util;
 import org.jmodelica.ide.namecomplete.CompletionProcessor;
 import org.jmodelica.ide.outline.InstanceOutlinePage;
 import org.jmodelica.ide.outline.OutlinePage;
@@ -356,7 +337,7 @@ private void setupDocumentPartitioner(IDocument document) {
     try {
     	if (annotationFolds != null)
     		annotationFolds.dispose();
-        annotationFolds = new AnnotationFoldUpdater(document);
+        annotationFolds = new AnnotationFoldUpdater(document, this);
         
         IDocumentPartitioner wanted = fPartitioner;
         IDocumentPartitioner current = document.getDocumentPartitioner();
@@ -373,6 +354,12 @@ private void setupDocumentPartitioner(IDocument document) {
 public void dispose() {
 	annotationFolds.dispose();
 	super.dispose();
+}
+
+public void redraw() {
+	StyledText widget = getSourceViewer().getTextWidget();
+	widget.redraw();
+	widget.update();
 }
 
 /**
@@ -400,7 +387,7 @@ public void dispose() {
 //        null);
 //}
 
-private ProjectionAnnotationModel getAnnotationModel() {
+public ProjectionAnnotationModel getAnnotationModel() {
     ProjectionViewer viewer = (ProjectionViewer) getSourceViewer();
     viewer.enableProjection();
     return viewer.getProjectionAnnotationModel();
@@ -469,161 +456,6 @@ public EditorFile editorFile() {
 
 public boolean annotationsVisible() {
     return toggleAnnotationsAction.isVisible();
-}
-
-private class AnnotationFoldUpdater implements IDocumentPartitioningListener {
-	// TODO: Perhaps move this to a separate file?
-	
-	private IDocument doc;
-
-	public AnnotationFoldUpdater(IDocument document) {
-		doc = document;
-		doc.addDocumentPartitioningListener(this);
-	}
-	
-	public void dispose() {
-		doc.removeDocumentPartitioningListener(this);
-	}
-
-	public void documentPartitioningChanged(IDocument document) {
-		new UpdateJob().schedule();
-	}
-	
-	private class RedrawJob extends UIJob {
-		private static final String TITLE = "Redrawing editor";
-
-		public RedrawJob() {
-			super(TITLE);
-			setPriority(INTERACTIVE);
-			setSystem(true);
-		}
-
-		public IStatus runInUIThread(IProgressMonitor monitor) {
-			StyledText widget = getSourceViewer().getTextWidget();
-			widget.redraw();
-			widget.update();
-			return Status.OK_STATUS;
-		}
-		
-	}
-	
-	private class UpdateJob extends UIJob {
-		private static final String TITLE = "Updating annotations";
-
-		public UpdateJob() {
-			super(TITLE);
-			setPriority(INTERACTIVE);
-			setSystem(true);
-		}
-
-		public IStatus runInUIThread(IProgressMonitor monitor) {
-		    ProjectionAnnotationModel model = getAnnotationModel();
-		    if (model == null)
-		        return Status.OK_STATUS;
-	
-		    Collection<ITypedRegion> parts = getPartitions(doc, Modelica32PartitionScanner.ANNOTATION_PARTITION);
-		    List<Annotation> old = Util.listFromIterator(model.getAnnotationIterator());
-		    Collections.sort(old, new PositionSorter(model));
-			Iterator<Annotation> oldIt = old.iterator();
-			
-			Map<Annotation, Position> added = new HashMap<Annotation, Position>();
-			ArrayList<Annotation> removed = new ArrayList<Annotation>();
-			
-			ITextSelection sel = selection();
-			boolean hideAnno = !annotationsVisible();
-			
-			Position annoPos = new Position(0);
-			annoPos.offset = -1;
-			Annotation curAnno = null;
-			for (ITypedRegion part : parts) {
-				Position partPos = createPosition(part.getOffset(), part.getLength());
-				if (partPos != null) {
-					
-					// Remove all old that are before partition
-					while (annoPos.offset < partPos.offset) {
-						if (curAnno != null)
-							removed.add(curAnno);
-						if (oldIt.hasNext()) {
-							curAnno = oldIt.next();
-							annoPos = model.getPosition(curAnno);
-						} else {
-							curAnno = null;
-							annoPos = new Position(doc.getLength() + 1);
-						}
-					}
-					
-					// Should we add partition?
-					if (!annoPos.equals(partPos)) {
-						boolean collapsed = hideAnno && !partPos.overlapsWith(sel.getOffset(), sel.getLength());
-						added.put(new ProjectionAnnotation(collapsed), partPos);
-					} else { 
-						// Don't remove this annotation
-						curAnno = null;
-					}
-				}
-			}
-			
-			// Remove remaining annotations
-			if (curAnno != null)
-				removed.add(curAnno);
-			while (oldIt.hasNext())
-				removed.add(oldIt.next());
-			
-			
-			Annotation[] removedArr = removed.toArray(new Annotation[removed.size()]);
-			model.modifyAnnotations(removedArr, added, null);
-			
-			new RedrawJob().schedule();
-			
-	        return Status.OK_STATUS;
-		}
-	
-		private Position createPosition(int offset, int length) {
-			try {
-				int startLine = doc.getLineOfOffset(offset);
-				int endLine = doc.getLineOfOffset(offset + length);
-				if (startLine == endLine)
-					return null;
-				int lineOffset = doc.getLineOffset(startLine);
-				int endOffset = (endLine < doc.getNumberOfLines()) ? 
-						doc.getLineOffset(endLine + 1) : doc.getLength();
-				offset = lineOffset;
-				length = endOffset - lineOffset;
-			} catch (BadLocationException e) {
-			}
-			return new Position(offset, length);
-		}
-	
-		private Collection<ITypedRegion> getPartitions(IDocument document, String type) {
-			ArrayList<ITypedRegion> res = new ArrayList<ITypedRegion>();
-			try {
-				int len = document.getLength();
-				ITypedRegion cur = null;
-				for (int p = 0; p < len; p = cur.getLength() + cur.getOffset() + 1) {
-					cur = document.getPartition(p);
-					if (cur.getType().equals(type))
-						res.add(cur);
-				}
-			} catch (BadLocationException e) {
-			}
-			return res;
-		}
-	
-		public class PositionSorter implements Comparator<Annotation> {
-	
-			private ProjectionAnnotationModel model;
-	
-			public PositionSorter(ProjectionAnnotationModel model) {
-				this.model = model;
-			}
-	
-			public int compare(Annotation a1, Annotation a2) {
-				return model.getPosition(a1).offset - model.getPosition(a2).offset;
-			}
-	
-		}
-	}
-	
 }
 
 }
