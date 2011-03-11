@@ -1255,7 +1255,7 @@ aspect Attributes {
 	// start attribute
 	// TODO: What about independent parameters?
 	syn boolean FVariable.useBindingExpAsStart()  = 
-		(isDependentParameter() && !startAttributeSet()) || isIndependentConstant();
+/*		(isDependentParameter() && !startAttributeSet()) || */ isIndependentConstant();
 	
 	syn boolean FVariable.startAttributeSet()     = attributeSet(FAttribute.START);
 	syn FExp    FVariable.startAttributeExp()     = attributeExp(FAttribute.START);

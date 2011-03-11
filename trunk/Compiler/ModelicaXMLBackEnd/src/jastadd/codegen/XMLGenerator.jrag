@@ -489,7 +489,7 @@ public class XMLGenerator extends GenericGenerator {
 		//start
 		if (realvariable.isIndependentParameter() || realvariable.useBindingExpAsStart()) {
 			genPrinter.print("start=\""+realvariable.ceval().realValue()+"\" ");
-		} else {
+		} else if (realvariable.startAttributeSet()) {
 			genPrinter.print("start=\""+realvariable.startAttribute()+"\" ");
 		}
 		// fixed
@@ -519,7 +519,7 @@ public class XMLGenerator extends GenericGenerator {
 		//start
 		if (integervariable.isIndependentParameter() || integervariable.useBindingExpAsStart()) {
 			genPrinter.print("start=\"" +integervariable.ceval().intValue() +"\" ");
-		} else {
+		} else if (integervariable.startAttributeSet()) {
 			genPrinter.print("start=\"" +integervariable.startAttribute()+"\" ");
 		}
 		// fixed
@@ -550,7 +550,7 @@ public class XMLGenerator extends GenericGenerator {
 		//start
 		if (enumvariable.isIndependentParameter() || enumvariable.useBindingExpAsStart()) {
 			genPrinter.print("start=\"" +enumvariable.ceval().intValue() +"\" ");
-		} else {
+		} else if (enumvariable.startAttributeSet()){
 			genPrinter.print("start=\"" +enumvariable.startAttribute()+"\" ");
 		}
 		// fixed
@@ -569,7 +569,7 @@ public class XMLGenerator extends GenericGenerator {
 		//start attribute
 		if (booleanvariable.isIndependentParameter() || booleanvariable.useBindingExpAsStart()) {
 			genPrinter.print("start=\"" +booleanvariable.ceval().booleanValue() + "\" ");
-		} else {
+		} else if (booleanvariable.startAttributeSet()) {
 			genPrinter.print("start=\"" +booleanvariable.startAttribute()+"\" ");
 		}
 		// fixed

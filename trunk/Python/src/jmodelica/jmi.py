@@ -494,6 +494,8 @@ class JMUModel(BaseModel):
         Calling this function is equivalent to reopening the model.
         """
         self._setDefaultValuesFromMetadata()
+        self._set_iparam_values
+        self._set_dependent_parameters
         
     def _reset_jmimodel_typedefs(self):
         """ 
@@ -2189,6 +2191,10 @@ class JMUModel(BaseModel):
         #Real variables vector
         z = self.z
         sc = self.variable_scaling_factors
+
+        # First reset the start values
+        for i in range(len(z)):
+            z[i] = 0
         
         for attr in start_attr:
             (i, ptype) = _translate_value_ref(attr[0])
