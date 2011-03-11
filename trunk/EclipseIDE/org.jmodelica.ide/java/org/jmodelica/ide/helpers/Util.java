@@ -97,7 +97,7 @@ public class Util {
 			} catch (PartInitException e) {
 			}
 			if (editor instanceof Editor) 
-				((Editor) editor).selectNode(node);
+				((Editor) editor).selectNode(node, true);
 		}
 	}
 

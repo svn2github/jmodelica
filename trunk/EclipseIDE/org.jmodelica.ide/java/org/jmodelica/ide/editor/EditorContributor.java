@@ -35,9 +35,6 @@ import org.jmodelica.ide.ui.ImageLoader;
 
 /**
  * Needed by Editor, used to add editor actions.
- * 
- * @author emma
- * 
  */
 public class EditorContributor extends BasicTextEditorActionContributor {
 
@@ -59,17 +56,17 @@ private LabelRetargetAction toggleCommentAction;
 private RetargetAction[] retargetActions;
 
 public EditorContributor() {
-    errorCheckAction = new LabelRetargetAction(IDEConstants.ACTION_ERROR_CHECK_ID,
+    errorCheckAction = new EditorLabelRetargetAction(IDEConstants.ACTION_ERROR_CHECK_ID,
             IDEConstants.ACTION_ERROR_CHECK_TEXT);
     errorCheckAction.setImageDescriptor(ImageLoader.ERROR_CHECK_DESC);
     errorCheckAction.setDisabledImageDescriptor(ImageLoader.ERROR_CHECK_DIS_DESC);
     
-    compileFMUAction = new LabelRetargetAction(IDEConstants.ACTION_COMPILE_FMU_ID,
+    compileFMUAction = new EditorLabelRetargetAction(IDEConstants.ACTION_COMPILE_FMU_ID,
             IDEConstants.ACTION_COMPILE_FMU_TEXT);
     compileFMUAction.setImageDescriptor(ImageLoader.COMPILE_FMU_DESC);
     compileFMUAction.setDisabledImageDescriptor(ImageLoader.COMPILE_FMU_DIS_DESC);
     
-    toggleAnnotationsAction = new RetargetAction(
+    toggleAnnotationsAction = new EditorRetargetAction(
             IDEConstants.ACTION_TOGGLE_ANNOTATIONS_ID,
             IDEConstants.ACTION_TOGGLE_ANNOTATIONS_TEXT,
             RetargetAction.AS_CHECK_BOX);
@@ -164,6 +161,56 @@ public void dispose() {
         a.dispose();
     }
     super.dispose();
+}
+
+// Temporary hack to make the retarget actions ignore other views than editors
+// TODO: Find a solution with commands instead
+
+public class EditorRetargetAction extends RetargetAction {
+	
+	private IEditorPart last;
+
+	public EditorRetargetAction(String actionID, String text, int style) {
+		super(actionID, text, style);
+		last = null;
+	}
+
+	public void partActivated(IWorkbenchPart part) {
+		if (part instanceof IEditorPart) {
+			if (last != null)
+				super.partDeactivated(part);
+			last = (IEditorPart) part;
+			super.partActivated(part);
+		}
+	}
+
+	public void partDeactivated(IWorkbenchPart part) {
+		super.partDeactivated(part);
+	}
+	
+}
+
+public class EditorLabelRetargetAction extends LabelRetargetAction {
+	
+	private IEditorPart last;
+
+	public EditorLabelRetargetAction(String actionID, String text) {
+		super(actionID, text);
+	}
+
+	public void partActivated(IWorkbenchPart part) {
+		if (part instanceof IEditorPart) {
+			if (last != null)
+				super.partDeactivated(part);
+			last = (IEditorPart) part;
+			super.partActivated(part);
+		}
+	}
+
+	public void partDeactivated(IWorkbenchPart part) {
+		super.partDeactivated(part);
+	}
+	
 }
 
 }

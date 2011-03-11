@@ -125,6 +125,13 @@ aspect Outline {
     eq LibClassDecl.getLibNode(int i).myIndex() = i;
     eq FullClassDecl.getClassDecl(int i).myIndex() = i;
     eq BaseNode.getChild().myIndex() = 0;
+    
+    // To compare nodes for opening paths and setting selections
+    syn String ASTNode.outlineId()   = Integer.toHexString(hashCode());
+    eq BaseClassDecl.outlineId()     = name();
+    eq ComponentDecl.outlineId()     = name();
+    eq InstClassDecl.outlineId()     = name();
+    eq InstComponentDecl.outlineId() = name();
 	
 	/*
 	 * We need a connection to the "Loaded Libraries" node in the Project Explorer

@@ -273,7 +273,7 @@ protected void createActions() {
         super.setAction(action.getId(), action);
     }
 
-    updateCurrentClassListeners();
+    selectNode(null, true);
 }
 
 @Override
@@ -330,7 +330,6 @@ protected void update() {
     goToDeclaration.updateAST(compResult.root());
 
 //    updateProjectionAnnotations();
-    updateCurrentClassListeners();
 }
 
 private void setupDocumentPartitioner(IDocument document) {
@@ -393,38 +392,37 @@ public ProjectionAnnotationModel getAnnotationModel() {
     return viewer.getProjectionAnnotationModel();
 }
 
-@Override
-protected void handleCursorPositionChanged() {
-    super.handleCursorPositionChanged();
-    updateCurrentClassListeners();
-}
-
-private void updateCurrentClassListeners() {
-    BaseClassDecl containingClass = compResult.classContaining(selection());
+private void updateCurrentClassListeners(BaseClassDecl selected) {
     for (CurrentClassAction listener : currentClassListeners)
-    	listener.setCurrentClass(containingClass);
+    	listener.setCurrentClass(selected);
 }
 
 /**
- * Selects the <code> node </code> in the editor contains file <code>
-     *  node </code> is
- * from.
+ * Selects <code>node</code> in the editor if valid.
  * 
- * @param node node to select
- * @return whether file <code> node </code> is from matches file in editor
+ * @param node       node to select
+ * @param propagate  if true, propagate to source outline
+ * @return  whether file <code>node</code> is from matches file in editor
  */
-public boolean selectNode(ASTNode<?> node) {
+public boolean selectNode(ASTNode<?> node, boolean propagate) {
 
-    File nodeFile = new File(node.containingFileName());
-	File editorFile = new File(file.path());
-	boolean matchesInput = editorFile.equals(nodeFile);
-
-    if (matchesInput) {
-
-        ASTNode<?> sel = node.getSelectionNode();
-        if (sel.offset() >= 0 && sel.length() >= 0)
-            selectAndReveal(sel.offset(), sel.length());
-    }
+	boolean matchesInput = false;
+	if (node != null) {
+	    File nodeFile = new File(node.containingFileName());
+		File editorFile = new File(file.path());
+		matchesInput = editorFile.equals(nodeFile);
+	
+	    if (matchesInput) {
+	        ASTNode<?> sel = node.getSelectionNode();
+	        if (sel.offset() >= 0 && sel.length() >= 0)
+	            selectAndReveal(sel.offset(), sel.length());
+	    }
+		
+		if (propagate)
+			fSourceOutlinePage.select(node);
+	}
+    
+    updateCurrentClassListeners((node instanceof BaseClassDecl) ? (BaseClassDecl) node : null);
 
     return matchesInput;
 }
