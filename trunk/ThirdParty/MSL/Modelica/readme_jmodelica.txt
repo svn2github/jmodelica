@@ -1,0 +1,1 @@
+This directory contains a limited version of the Modelica Standard Library 3.1 distributed with JModelica.org
