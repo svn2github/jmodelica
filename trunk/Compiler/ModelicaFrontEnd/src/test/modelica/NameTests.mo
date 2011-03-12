@@ -1800,22 +1800,34 @@ model ImportTest8
 		 description="Test name lookup in a structured library.",
 												flatModel=
  "
- fclass NameTests.ImportTest8
-  parameter Real r.R(start = 1,final quantity = \"Resistance\",final unit = \"Ohm\") \"Resistance\";
-  Real r.v(final quantity = \"ElectricPotential\",final unit = \"V\") \"Voltage drop between the two pins (= p.v - n.v)\";
-  Real r.i(final quantity = \"ElectricCurrent\",final unit = \"A\") \"Current flowing from pin p to pin n\";
-  Real r.p.v(final quantity = \"ElectricPotential\",final unit = \"V\") \"Potential at the pin\";
-  Real r.p.i(final quantity = \"ElectricCurrent\",final unit = \"A\") \"Current flowing into the pin\";
-  Real r.n.v(final quantity = \"ElectricPotential\",final unit = \"V\") \"Potential at the pin\";
-  Real r.n.i(final quantity = \"ElectricCurrent\",final unit = \"A\") \"Current flowing into the pin\";
- equation 
-  ( r.R ) * ( r.i ) = r.v;
-  r.v = r.p.v - ( r.n.v );
-  0 = r.p.i + r.n.i;
-  r.i = r.p.i; 
- r.p.i = 0;
- r.n.i = 0;
- end NameTests.ImportTest8;
+fclass NameTests.ImportTest8
+parameter Real r.R(start = 1,final quantity = \"Resistance\",final unit = \"Ohm\") \"Resistance at temperature T_ref\";
+parameter Real r.T_ref(final quantity = \"ThermodynamicTemperature\",final unit = \"K\",min = 0,displayUnit = \"degC\") = 300.15 \"Reference temperature\" /* 300.15 */;
+parameter Real r.alpha(final quantity = \"LinearTemperatureCoefficient\",final unit = \"1/K\") = 0 \"Temperature coefficient of resistance (R_actual = R*(1 + alpha*(T_heatPort - T_ref))\" /* 0 */;
+Real r.R_actual(final quantity = \"Resistance\",final unit = \"Ohm\") \"Actual resistance = R*(1 + alpha*(T_heatPort - T_ref))\";
+Real r.v(final quantity = \"ElectricPotential\",final unit = \"V\") \"Voltage drop between the two pins (= p.v - n.v)\";
+Real r.i(final quantity = \"ElectricCurrent\",final unit = \"A\") \"Current flowing from pin p to pin n\";
+Real r.p.v(final quantity = \"ElectricPotential\",final unit = \"V\") \"Potential at the pin\";
+Real r.p.i(final quantity = \"ElectricCurrent\",final unit = \"A\") \"Current flowing into the pin\";
+Real r.n.v(final quantity = \"ElectricPotential\",final unit = \"V\") \"Potential at the pin\";
+Real r.n.i(final quantity = \"ElectricCurrent\",final unit = \"A\") \"Current flowing into the pin\";
+parameter Boolean r.useHeatPort = false \"=true, if HeatPort is enabled\" /* false */;
+parameter Real r.T(final quantity = \"ThermodynamicTemperature\",final unit = \"K\",min = 0,displayUnit = \"degC\") = r.T_ref \"Fixed device temperature if useHeatPort = false\";
+Real r.LossPower(final quantity = \"Power\",final unit = \"W\") \"Loss power leaving component via HeatPort\";
+Real r.T_heatPort(final quantity = \"ThermodynamicTemperature\",final unit = \"K\",min = 0,displayUnit = \"degC\") \"Temperature of HeatPort\";
+equation
+r.R_actual = ( r.R ) * ( 1 + ( r.alpha ) * ( r.T_heatPort - ( r.T_ref ) ) );
+r.v = ( r.R_actual ) * ( r.i );
+r.LossPower = ( r.v ) * ( r.i );
+r.v = r.p.v - ( r.n.v );
+0 = r.p.i + r.n.i;
+r.i = r.p.i;
+if not r.useHeatPort then
+r.T_heatPort = r.T;
+end if;
+r.p.i = 0;
+r.n.i = 0;
+end NameTests.ImportTest8;
  ")})));
 
   Modelica.Electrical.Analog.Basic.Resistor r;
