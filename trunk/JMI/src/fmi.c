@@ -447,10 +447,30 @@ fmiStatus fmi_get_real(fmiComponent c, const fmiValueReference vr[], size_t nvr,
     
     fmiValueReference i;
     fmiValueReference index;
-    
+	
+	/* Make the derivative consistent if a derivative is output */
+	fmiValueReference derIndexMin;
+	fmiValueReference derIndexMax;
+	fmiBoolean updateDerivatives=fmiTrue;
+	fmiInteger retval;
+	derIndexMin=((fmi_t *)c)->jmi->offs_real_dx;
+	derIndexMax=((fmi_t *)c)->jmi->offs_real_dx+((fmi_t *)c)->jmi->n_real_dx-1;
+
     for (i = 0; i <nvr; i = i + 1) {
         /* Get index in z vector from value reference. */ 
         index = get_index_from_value_ref(vr[i]);
+
+		/* Update the derivatives if an index is a derivative */		
+		if (derIndexMax<=index && derIndexMin>=index) {
+			if (updateDerivatives) {
+				updateDerivatives=fmiFalse;
+				retval = jmi_ode_derivatives(((fmi_t *)c)->jmi);
+				if(retval != 0) {
+					(((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the derivatives failed in fmiGetReal.");
+					return fmiError;
+				}				
+			}
+		}		
         
         /* Set value from z vector to return value array*/
         value[i] = z[index];
