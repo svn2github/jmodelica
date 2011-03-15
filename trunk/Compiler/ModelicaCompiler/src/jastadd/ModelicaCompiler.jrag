@@ -140,8 +140,8 @@ public class ModelicaCompiler {
 	private DiagnosticsGenerator diagGenerator = null;
 	
 	protected LinkedList<CompilationHooks> hooksList = new LinkedList<CompilationHooks>();
-	
 	protected static CCompilerDelegator cCompiler = new GCCcompilerDelegator();
+	protected IErrorHandler errorHandler = null;
 	
 	protected static String jmodelicaHome = System.getenv("JMODELICA_HOME");
 	
@@ -224,10 +224,23 @@ public class ModelicaCompiler {
 	public void removeCompilationHooks(CompilationHooks hooks) {
 		hooksList.remove(hooks);
 	}
+	
+	public IErrorHandler getErrorHandler() {
+		return errorHandler;
+	}
+	
+	/**
+	 * Set the error handler to use for collection errors.
+	 * Passing <code>null</code> resets to default.
+	 */
+	public void setErrorHandler(IErrorHandler eh) {
+		errorHandler = eh;
+	}
+	
 	/**
 	 * Throws a {@link CompilationAbortedException} if any hooks class signals an abort.
 	 */
-	public void hookCheckAbort() {
+	protected void hookCheckAbort() {
 		for (CompilationHooks hooks : hooksList) {
 			if (hooks.shouldAbort()) {
 				log.info("Compilation aborted.");
@@ -239,7 +252,7 @@ public class ModelicaCompiler {
 	/**
 	 * Calls the hook to be called after the supplied code files are parsed.
 	 */
-	public void hookFilesParsed(SourceRoot sr) {
+	protected void hookFilesParsed(SourceRoot sr) {
 		for (CompilationHooks hooks : hooksList)
 			hooks.filesParsed(sr);
 	}
@@ -248,7 +261,7 @@ public class ModelicaCompiler {
 	 * Calls the hook to be called after the error checks on the instantiated 
 	 * model are finished without errors.
 	 */
-	public void hookModelInstantiatied(InstClassDecl icd) {
+	protected void hookModelInstantiatied(InstClassDecl icd) {
 		for (CompilationHooks hooks : hooksList)
 			hooks.modelInstantiatied(icd);
 	}
@@ -256,7 +269,7 @@ public class ModelicaCompiler {
 	/**
 	 * Calls the hook to be called after the model is flattened.
 	 */
-	public void hookModelFlattened(FClass fc) {
+	protected void hookModelFlattened(FClass fc) {
 		for (CompilationHooks hooks : hooksList)
 			hooks.modelFlattened(fc);
 	}
@@ -264,7 +277,7 @@ public class ModelicaCompiler {
 	/**
 	 * Calls the hook to be called after transformations are applied to the model.
 	 */
-	public void hookModelTransformed(FClass fc) {
+	protected void hookModelTransformed(FClass fc) {
 		for (CompilationHooks hooks : hooksList)
 			hooks.modelTransformed(fc);
 	}
@@ -273,7 +286,7 @@ public class ModelicaCompiler {
 	 * Calls the hook to be called after error checks of the flat model are 
 	 * finished without errors.
 	 */
-	public void hookFlatModelChecked(FClass fc) {
+	protected void hookFlatModelChecked(FClass fc) {
 		for (CompilationHooks hooks : hooksList)
 			hooks.flatModelChecked(fc);
 	}
@@ -281,7 +294,7 @@ public class ModelicaCompiler {
 	/**
 	 * Calls the hook to be called after output code is generated.
 	 */
-	public void hookCodeGenerated() {
+	protected void hookCodeGenerated() {
 		for (CompilationHooks hooks : hooksList)
 			hooks.codeGenerated();
 	}
@@ -289,7 +302,7 @@ public class ModelicaCompiler {
 	/**
 	 * Calls the hook to be called after the generated C code is compiled.
 	 */
-	public void hookCodeCompiled() {
+	protected void hookCodeCompiled() {
 		for (CompilationHooks hooks : hooksList)
 			hooks.codeCompiled();
 	}
@@ -297,7 +310,7 @@ public class ModelicaCompiler {
 	/**
 	 * Calls the hook to be called after the FMU is packed.
 	 */
-	public void hookFmuPacked(String path) {
+	protected void hookFmuPacked(String path) {
 		for (CompilationHooks hooks : hooksList)
 			hooks.fmuPacked(path);
 	}
@@ -784,6 +797,8 @@ public class ModelicaCompiler {
 		try {
 //			sr = (SourceRoot) parser.parse(scanner);
 			sr = ph.parseFile(name);
+			if (errorHandler != null)
+				sr.setErrorHandler(errorHandler);
 		} catch (ParserException e) {
 			e.getProblem().setFileName(name);
 			CompilerException ce = new CompilerException();
@@ -862,7 +877,7 @@ public class ModelicaCompiler {
 		ipr.options = new OptionRegistry(sr.options);
 		
 		if (sr.options.getBooleanOption("compliance_as_warning"))
-			sr.setErrorHandler(new ComplianceWarnErrorHandler(sr));
+			sr.setErrorHandler(new ComplianceWarnErrorHandler(sr.getErrorHandler()));
 		
 		log.info("Checking for errors...");
 		Collection<Problem> problems = ipr.checkErrorsInInstClass(cl);
@@ -915,14 +930,28 @@ public class ModelicaCompiler {
 	/**
 	 * \brief Create a new FClass object.
 	 * 
-	 * @param icd A reference to a instance class - in compiler extensions
-	 * it may be useful to be able to extract the kind of class is being
-	 * instantiated: model, block etc.
-	 * 
 	 * Override for subclasses needing a subclass of FClass.
+	 * 
+	 * @param icd  the instance class to be flattened, for use by subclasses
 	 */
 	protected FClass createFClass(InstClassDecl icd) {
 		return new FClass();
+	}
+	
+	/**
+	 * Create a flat tree with an empty FClass and return the FClass.
+	 * 
+	 * @param icl       the instance class to be flattened
+	 * @param flatFile  path to the file to report any errors on
+	 */
+	public FClass createFlatTree(InstClassDecl icl, String flatFile) {
+		FlatRoot flatRoot = new FlatRoot();
+		flatRoot.setFileName(flatFile);
+		FClass fc = createFClass(icl);
+		flatRoot.setFClass(fc);
+		flatRoot.options = new OptionRegistry(icl.root().options);
+		flatRoot.setErrorHandler(icl.root().getErrorHandler());
+		return fc;
 	}
 	
 	/**
@@ -946,11 +975,7 @@ public class ModelicaCompiler {
 		noteUsedMemory();
 		
 		File flatFile = new File(tempDir, icl.qualifiedName() + ".mof");
-		FlatRoot flatRoot = new FlatRoot();
-		flatRoot.setFileName(flatFile.getPath());
-		FClass fc = createFClass(icl);
-		flatRoot.setFClass(fc);
-		flatRoot.options = new OptionRegistry(icl.root().options);
+		FClass fc = createFlatTree(icl, flatFile.getPath());
 		
 		log.info("Flattening model...");
 		icl.flattenInstClassDecl(fc);

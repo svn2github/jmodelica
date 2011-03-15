@@ -260,23 +260,46 @@ import java.util.ArrayList;
   
   /**
    * \brief Error handler that generates warnings for compliance errors, 
-   *        but otherwise works as {@link DefaultErrorHandler}.
+   *        delegating to another error handler.
    */
-  public class ComplianceWarnErrorHandler extends DefaultErrorHandler {
+  public class ComplianceWarnErrorHandler implements IErrorHandler {
+  	
+  	  private IErrorHandler delegate;
 
-	  public ComplianceWarnErrorHandler(Root root) {
-		  super(root);
+	  public ComplianceWarnErrorHandler(IErrorHandler delegate) {
+	  	  if (delegate instanceof ComplianceWarnErrorHandler)
+	  		  delegate = ((ComplianceWarnErrorHandler) delegate).delegate;
+		  this.delegate = delegate;
 	  }
 
 	  /**
-	   * \brief Creates a new {@link Problem} with kind COMPLIANCE 
-	   *        and adds it to root.warnings, ignoring duplicates.
+	   * \brief Delegates to wrapped error handler.
+	   * 
+	   * @param s	error message.
+	   * @param n	the node the error originated from.
+	   */
+	  public void error(String s, ASTNode n) {
+		  delegate.error(s, n);
+	  }
+
+	  /**
+	   * \brief Delegates to warning() in wrapped error handler.
+	   * 
+	   * @param s	error message.
+	   * @param n	the node the error originated from.
+	   */
+	  public void compliance(String s, ASTNode n) {
+		  delegate.warning(s, n);
+	  }
+
+	  /**
+	   * \brief Delegates to wrapped error handler.
 	   * 
 	   * @param s	warning message.
 	   * @param n	the node the warning originated from.
 	   */
-	  public void compliance(String s, ASTNode n) {
-		  problem(s, n, root.warnings, Problem.Severity.WARNING, Problem.Kind.COMPLIANCE);
+	  public void warning(String s, ASTNode n) {
+		  delegate.warning(s, n);
 	  }
 	  
   }
