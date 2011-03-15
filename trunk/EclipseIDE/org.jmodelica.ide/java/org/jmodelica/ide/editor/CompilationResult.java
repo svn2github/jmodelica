@@ -52,7 +52,7 @@ public boolean failed() {
  * Remove listeners etc.
  * @param editor editor containing concerned file 
  */
-public abstract void destruct(Editor editor);
+public abstract void dispose(Editor editor);
 
 /**
  * Recompile locally, not looking at other resources in the workspace. 

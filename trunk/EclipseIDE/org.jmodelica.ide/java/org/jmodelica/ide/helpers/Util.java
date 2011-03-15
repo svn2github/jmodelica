@@ -128,7 +128,7 @@ public class Util {
 			if (line < 0)
 				line = 1;
 			marker.setAttribute(IMarker.LINE_NUMBER, line);
-			if (startOffset > 0 && endOffset > 0 && endOffset > startOffset) {
+			if (startOffset >= 0 && endOffset > startOffset) {
 				marker.setAttribute(IMarker.CHAR_START, startOffset);
 				marker.setAttribute(IMarker.CHAR_END, endOffset);
 			}

@@ -18,28 +18,44 @@ package org.jmodelica.ide.error;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 
 import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.IErrorHandler;
 
 public class InstanceErrorHandler implements IErrorHandler {
 	
-	private HashSet<InstanceError> foundErrors = new HashSet<InstanceError>();
-	private HashSet<InstanceError> countedErrors = new HashSet<InstanceError>();
+	private Set<InstanceProblem> found = new HashSet<InstanceProblem>();
+	private Set<InstanceProblem> countedErrors = new HashSet<InstanceProblem>();
+	private Set<InstanceProblem> countedWarnings = new HashSet<InstanceProblem>();
 	private boolean lostErrors;
+	
+	private static final int MAX_ERRORS_SHOWN = 10;
+	private static final String[] MSG_FORMATS = new String[] {
+		"No errors found.", "%d warning%s found.", "%d error%s found.", "%d error%s and %d warning%s found."
+	};
+	private static final int MSG_FORMAT_ERR = 2;
+	private static final int MSG_FORMAT_WARN = 1;
+
+	protected void problem(InstanceProblem p) {
+		if (!found.contains(p)) {
+			// TODO: if file/document isn't available, find them or attach later
+			if (!p.attachToFile() && p.isError())
+				lostErrors = true;
+			found.add(p);
+		}
+		count(p);
+	}
+
+	public void count(InstanceProblem p) {
+		Set<InstanceProblem> counted = p.isError() ? countedErrors : countedWarnings;
+		if (!counted.contains(p)) 
+			counted.add(p);
+	}
 
 	@SuppressWarnings("unchecked")
 	public void error(String s, ASTNode n) {
-		InstanceError error = new InstanceError(s, n);
-		if (!foundErrors.contains(error)) {
-			// TODO: if file/document isn't available, find them or attach later
-			if (!error.attachToFile())
-				lostErrors = true;
-			foundErrors.add(error);
-		}
-		if (!countedErrors.contains(error)) {
-			countedErrors.add(error);
-		}
+		problem(new InstanceError(s, n));
 	}
 
 	public void compliance(String s, ASTNode n) {
@@ -48,16 +64,24 @@ public class InstanceErrorHandler implements IErrorHandler {
 
 	@SuppressWarnings("unchecked")
     public void warning(String s, ASTNode n) {
-		// TODO: We should probably handle these now
+		problem(new InstanceWarning(s, n));
 	}
 	
 	public void reset() {
-		foundErrors.clear();
+		found.clear();
 		resetCounter();
 	}
 	
 	public int getNumErrors() {
 		return countedErrors.size();
+	}
+	
+	public int getNumWarnings() {
+		return countedWarnings.size();
+	}
+
+	public boolean hasErrors() {
+		return getNumErrors() > 0;
 	}
 
 	public void resetCounter() {
@@ -69,11 +93,35 @@ public class InstanceErrorHandler implements IErrorHandler {
 		return lostErrors;
 	}
 
-	public Collection<InstanceError> getLostErrors() {
-		Collection<InstanceError> res = new ArrayList<InstanceError>(foundErrors.size());
-		for (InstanceError e : foundErrors)
-			if (!e.hasFile())
+	public Collection<InstanceProblem> getLostErrors() {
+		Collection<InstanceProblem> res = new ArrayList<InstanceProblem>(found.size());
+		for (InstanceProblem e : found)
+			if (!e.hasFile() && e.isError())
 				res.add(e);
 		return res;
+	}
+
+	public String resultMessage() {
+		String msg;
+		if (hasLostErrors()) {
+			Collection<InstanceProblem> err = getLostErrors();
+			StringBuilder buf = new StringBuilder("Errors found in files outside workspace:\n");
+			if (err.size() > MAX_ERRORS_SHOWN)
+				buf.append(String.format("(First %d of %d errors shown.)\n",
+						MAX_ERRORS_SHOWN, err.size()));
+			int i = 0;
+			for (InstanceProblem e : err)
+				if (i++ < MAX_ERRORS_SHOWN)
+					buf.append(e);
+			msg = buf.toString();
+		} else {
+			int numE = getNumErrors();
+			int numW = getNumWarnings();
+			String f = MSG_FORMATS[(numE > 0 ? MSG_FORMAT_ERR : 0) + (numW > 0 ? MSG_FORMAT_WARN : 0)];
+			if (numE == 0)
+				numE = numW;
+			msg = String.format(f, numE, (numE > 1 ? "s" : ""), numW, (numW > 1 ? "s" : ""));
+		}
+		return msg;
 	}
 }

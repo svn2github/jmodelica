@@ -42,17 +42,21 @@ public class IDEConstants {
 	public static final String ACTION_COLLAPSE_ALL_ID = ACTION_ID + ".collapse-all";
 	public static final String ACTION_ERROR_CHECK_ID = ACTION_ID + ".error.check";
 	public static final String COMMAND_ERROR_CHECK_ID = "JModelicaIDE.ErrorCheckCommand";
-	public static final String ACTION_ERROR_CHECK_TEXT = "Check for &errors";
 	public static final String ACTION_COMPILE_FMU_ID = ACTION_ID + ".compile.fmu";
 	public static final String COMMAND_COMPILE_FMU_ID = COMMAND_ID + ".compile.fmu";
-	public static final String ACTION_COMPILE_FMU_TEXT = "Compile to FMU";
 	public static final String ACTION_TOGGLE_ANNOTATIONS_ID = ACTION_ID + ".annotation";
-	public static final String ACTION_TOGGLE_ANNOTATIONS_TEXT = "Show &annotations";
 	public static final String ACTION_FORMAT_REGION_ID = ACTION_ID + ".format-region";
-    public static final String ACTION_FORMAT_REGION_TEXT = "&Format region";
     public static final String ACTION_TOGGLE_COMMENT_ID = ACTION_ID + ".toggle-comment";
-    public static final String ACTION_TOGGLE_COMMENT_TEXT = "Toggle &Comment";
     public static final String ACTION_FOLLOW_REFERENCE_ID = ACTION_ID + ".gotodecl";
+	
+	public static final String ACTION_CLASS_TEXT = "%s\n(Select a class to %s in the Outline view.)";
+	public static final String ACTION_ERROR_CHECK_TEXT = 
+		String.format(ACTION_CLASS_TEXT, "Check for &errors", "check");
+	public static final String ACTION_COMPILE_FMU_TEXT = 
+		String.format(ACTION_CLASS_TEXT, "&Compile to FMU", "compile");
+	public static final String ACTION_TOGGLE_ANNOTATIONS_TEXT = "Show &annotations";
+    public static final String ACTION_FORMAT_REGION_TEXT = "&Format region";
+    public static final String ACTION_TOGGLE_COMMENT_TEXT = "Toggle &Comment";
     public static final String ACTION_FOLLOW_REFERENCE_TEXT = "&Go to declaration";
     
     public static final String GROUP_ID = ACTION_ID + ".group";

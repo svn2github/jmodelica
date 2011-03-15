@@ -1,20 +1,25 @@
 package org.jmodelica.ide.editor.actions;
 
-import java.util.Collection;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
 import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.error.InstanceError;
 import org.jmodelica.ide.error.InstanceErrorHandler;
 import org.jmodelica.modelica.compiler.BaseClassDecl;
+import org.jmodelica.modelica.compiler.CompilationHooks;
+import org.jmodelica.modelica.compiler.FClass;
 import org.jmodelica.modelica.compiler.InstClassDecl;
 import org.jmodelica.modelica.compiler.InstProgramRoot;
+import org.jmodelica.modelica.compiler.ModelicaCompiler;
 import org.jmodelica.modelica.compiler.SourceRoot;
 
 public class ErrorCheckAction extends CurrentClassAction {
-	private static final int MAX_ERRORS_SHOWN = 10;
-
+	
 	public ErrorCheckAction() {
 		super();
 		super.setActionDefinitionId(IDEConstants.COMMAND_ERROR_CHECK_ID);
@@ -23,34 +28,26 @@ public class ErrorCheckAction extends CurrentClassAction {
 
 	@Override
 	public void run() {
-		// performSave(true, null);
 		SourceRoot root = (SourceRoot) currentClass.root();
 		InstProgramRoot ipr = root.getProgram().getInstProgramRoot();
-		InstanceErrorHandler errorHandler = (InstanceErrorHandler) root.getErrorHandler();
+		InstanceErrorHandler errorHandler = new InstanceErrorHandler();
+		root.setErrorHandler(errorHandler);
 		errorHandler.resetCounter();
 		String name = currentClass.qualifiedName();
 		InstClassDecl icd = ipr.simpleLookupInstClassDecl(name);
 		icd.resetCollectErrors();
 		icd.collectErrors();
-		String msg;
-		if (errorHandler.hasLostErrors()) {
-			Collection<InstanceError> err = errorHandler.getLostErrors();
-			StringBuilder buf = new StringBuilder("Errors found in files outside workspace:\n");
-			if (err.size() > MAX_ERRORS_SHOWN)
-				buf.append(String.format("(First %d of %d errors shown.)\n",
-						MAX_ERRORS_SHOWN, err.size()));
-			int i = 0;
-			for (InstanceError e : err)
-				if (i++ < MAX_ERRORS_SHOWN)
-					buf.append(e);
-			msg = buf.toString();
-		} else {
-			int num = errorHandler.getNumErrors();
-			if (num == 0)
-				msg = "No new errors found.";
-			else
-				msg = num + " errors found.";
+		if (!errorHandler.hasErrors()) {
+			ModelicaCompiler mc = new ModelicaCompiler(icd.root().options);
+			FClass fc = mc.createFlatTree(icd, icd.fileName());
+			icd.flattenInstClassDecl(fc);
+			fc.setLocation(icd.getSelectionNode());
+			fc.setDefinition(icd.getDefinition());
+			fc.transformCanonical();
+			fc.collectErrors();
 		}
+		
+		String msg = errorHandler.resultMessage();
 		String title = "Checking " + currentClass.getName().getID()	+ " for errors:";
 		MessageDialog.openInformation(new Shell(), title, msg);
 	}
@@ -62,4 +59,18 @@ public class ErrorCheckAction extends CurrentClassAction {
         else
         	return IDEConstants.ACTION_ERROR_CHECK_TEXT;
 	}
+
+	protected static class ErrorCheckJob extends Job {
+
+		public ErrorCheckJob(String name) {
+			super(name);
+			// TODO Auto-generated constructor stub
+		}
+
+		protected IStatus run(IProgressMonitor monitor) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+	}
+	
 }

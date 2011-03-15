@@ -40,7 +40,6 @@ public class CompilationRoot {
 
 	private final SourceRoot root;
 	private final List<StoredDefinition> list;
-	private final InstanceErrorHandler handler;
 
 	/**
 	 * Create an empty CompilationRoot
@@ -48,10 +47,8 @@ public class CompilationRoot {
 	public CompilationRoot(IProject project) {
 		this.list = new List<StoredDefinition>();
 		this.root = new SourceRoot(new Program(list));
-		this.handler = new InstanceErrorHandler();
 
 		parser.setReport(errorReport);
-		root.setErrorHandler(handler);
 
 		root.options = new IDEOptions(project);
 		root.getProgram().getInstProgramRoot().options = root.options;

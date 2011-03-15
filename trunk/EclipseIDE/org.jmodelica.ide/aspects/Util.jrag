@@ -24,6 +24,15 @@ aspect Util {
 			getInstClassDecl(index).getClassDecl().getDefinition();
 	eq InstNode.getInstComponentDecl(int index).getDefinition() = 
 			getInstComponentDecl(index).getComponentDecl().getDefinition();
+	eq FlatRoot.getFClass().getDefinition() = getFClass().storedDefinition();
+	
+	private StoredDefinition FClass.definition;
+	public void FClass.setDefinition(StoredDefinition sd) {
+		definition = sd;
+	}
+	public StoredDefinition FClass.storedDefinition() {
+		return definition;
+	}
 
    public Object List.getLast() {
        if (getNumChild() > 0)

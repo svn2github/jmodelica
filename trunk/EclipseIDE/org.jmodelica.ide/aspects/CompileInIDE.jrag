@@ -32,7 +32,7 @@ aspect CompileInIDE {
 	public String ASTNode.getFileName() { return null; }
 	
 	/*
-	 * A link between a Component node and IFile is useful in, e.g., error collection
+	 * A link between an AST node and an IFile is useful in e.g. error collection
 	 */
 	private IFile StoredDefinition.file = null;
 	public void StoredDefinition.setFile(IFile file) {

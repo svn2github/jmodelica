@@ -39,7 +39,7 @@ public void update(IProject projChanged) {
     this.update(projChanged, key);
 }
 
-public void destruct(Editor editor) {
+public void dispose(Editor editor) {
     registry.removeListener(editor);
 }
 

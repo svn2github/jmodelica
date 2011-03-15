@@ -27,6 +27,7 @@ import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
 import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.editor.Editor;
+import org.jmodelica.ide.error.InstanceErrorHandler;
 import org.jmodelica.modelica.compiler.BaseClassDecl;
 import org.jmodelica.modelica.compiler.CompilationAbortedException;
 import org.jmodelica.modelica.compiler.CompilationHooks;
@@ -161,6 +162,9 @@ public class CompileFMUAction extends CurrentClassAction implements IJobChangeLi
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
+			if (!PlatformUI.getWorkbench().saveAllEditors(true))
+				return Status.CANCEL_STATUS;
+			
 			mon = monitor;
 			mon.beginTask("Compiling to FMU", WORK_TOTAL);
 			mon.subTask("Parsing...");

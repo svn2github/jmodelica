@@ -249,7 +249,7 @@ protected void doSetInput(IEditorInput input) throws CoreException {
     super.doSetInput(input);
 
     if (compResult != null)
-        compResult.destruct(this);
+        compResult.dispose(this);
 
     file = new EditorFile(input);
 
@@ -260,6 +260,9 @@ protected void doSetInput(IEditorInput input) throws CoreException {
 
     if (getSourceViewer() != null)
         update();
+    
+    if (getPartName().equals("package.mo")) 
+    	setPartName(file.iFile().getParent().getName() + "/package.mo");
 }
 
 @Override

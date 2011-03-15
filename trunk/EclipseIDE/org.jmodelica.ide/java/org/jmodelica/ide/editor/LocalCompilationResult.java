@@ -22,7 +22,7 @@ public LocalCompilationResult(EditorFile ef, Editor ed) {
 
 public void update(IProject projChanged, String keyChanged) { }
 public void update(IProject projChanged) { }
-public void destruct(Editor editor) { }
+public void dispose(Editor editor) { }
 
 public void recompileLocal(IDocument doc, IFile file) {
     root = compiler.recompile(doc, file).defaultTo(root);

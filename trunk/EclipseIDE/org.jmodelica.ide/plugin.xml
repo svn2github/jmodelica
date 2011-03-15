@@ -41,16 +41,6 @@
       </image>
    </extension>
    <extension
-         point="org.eclipse.core.runtime.contentTypes">
-      <content-type
-            base-type="org.eclipse.core.runtime.text"
-            file-extensions="mo"
-            id="org.jmodelica.ide.content"
-            name="Modelica Content"
-            priority="normal">
-      </content-type>
-   </extension>
-   <extension
          point="org.eclipse.ui.newWizards">
       <category
             id="org.jmodelica.ide.category"
