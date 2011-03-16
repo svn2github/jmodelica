@@ -18,7 +18,6 @@ import org.jmodelica.ide.helpers.Util;
 public class ModelicaPreferencePage extends PreferencePage  implements IWorkbenchPreferencePage {
 	
 	private static final String LIBRARIES_ID = IDEConstants.PREFERENCE_LIBRARIES_ID;
-	private static final String OPTIONS_ID = IDEConstants.PREFERENCE_OPTIONS_PATH_ID;
 	
 	private ModelicaSettingsControl settings;
 
@@ -26,7 +25,6 @@ public class ModelicaPreferencePage extends PreferencePage  implements IWorkbenc
 	protected Control createContents(Composite parent) {
 		settings = new ModelicaSettingsControl();
 		settings.setLibraryPaths(Preferences.get(LIBRARIES_ID));
-		settings.setOptionsPath(Preferences.get(OPTIONS_ID));
 		return settings.createControl(parent);
 	}
 
@@ -41,7 +39,6 @@ public class ModelicaPreferencePage extends PreferencePage  implements IWorkbenc
 	protected void performDefaults() {
 		// TODO: Don't reset the values, just get default values and remember that they are set to default
 		settings.setLibraryPaths(defaults(LIBRARIES_ID));
-		settings.setOptionsPath(defaults(OPTIONS_ID));
 		super.performDefaults();
 	}
 
@@ -49,7 +46,6 @@ public class ModelicaPreferencePage extends PreferencePage  implements IWorkbenc
 	public boolean performOk() {
 		// TODO: for a value that is still default, do Preferences.clear() instead
 		Preferences.set(LIBRARIES_ID, settings.getLibraryPaths());
-		Preferences.update(OPTIONS_ID, settings.getOptionsPath());
 		// TODO Trigger rebuild of all Modelica projects
 		return super.performOk();
 	}

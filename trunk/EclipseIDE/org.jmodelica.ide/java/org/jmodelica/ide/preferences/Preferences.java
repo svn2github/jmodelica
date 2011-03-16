@@ -119,8 +119,6 @@ public class Preferences extends AbstractPreferenceInitializer {
 		if (modelicaPath == null && jmodelicaHome != null) {
 			modelicaPath = jmodelicaHome + "/ThirdParty/MSL".replace('/', File.separatorChar);
 		}
-		String optionsPath = (jmodelicaHome != null) ? 
-				(jmodelicaHome + File.separator + "Options") : "";
 		
 		// If no MODELICAPATH can be calculated, try to extract MSL from plugin
 		if (modelicaPath == null) 
@@ -131,7 +129,6 @@ public class Preferences extends AbstractPreferenceInitializer {
 		// Store calculated values
 		IEclipsePreferences node = new DefaultScope().getNode(IDEConstants.PLUGIN_ID);
 		node.put(IDEConstants.PREFERENCE_LIBRARIES_ID, modelicaPath);
-		node.put(IDEConstants.PREFERENCE_OPTIONS_PATH_ID, optionsPath);
 		
 		// Store default colors
 		for (SyntaxColorPref pref : HilightScanner.COLOR_DEFS)

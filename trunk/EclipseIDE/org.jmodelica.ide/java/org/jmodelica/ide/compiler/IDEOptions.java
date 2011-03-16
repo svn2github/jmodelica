@@ -27,16 +27,6 @@ public IDEOptions(IProject project) {
 		return;
     
     try {
-        String dir = Preferences.get(project, IDEConstants.PREFERENCE_OPTIONS_PATH_ID);
-        if (dir != null) {
-			String path = dir + File.separator + "options.xml";
-			try {
-				copyAllOptions(new OptionRegistry(path));
-			} catch (FileNotFoundException e) {
-			} catch (SAXException e) {
-			}
-        }
-		
 	    String modelicaPath = Preferences.get(project, IDEConstants.PREFERENCE_LIBRARIES_ID);
 		setStringOption("MODELICAPATH", modelicaPath);
 

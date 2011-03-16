@@ -72,7 +72,6 @@ public class IDEConstants {
 	public static final RGB BRACE_MATCHING_COLOR = new RGB(128, 128, 128);
 	
 	public static final String PREFERENCE_LIBRARIES_ID = "libraries";
-	public static final String PREFERENCE_OPTIONS_PATH_ID = "options_path";
 	public static final String PREFERENCE_COLOR_PREFIX = "syntax.color.";
 	public static final String PREFERENCE_ANNO_BG_ID = PREFERENCE_COLOR_PREFIX + "default.anno.bg";
 	public static final String PREFERENCE_EXPLORER_SORT_ORDER = "explorer.sort_order";

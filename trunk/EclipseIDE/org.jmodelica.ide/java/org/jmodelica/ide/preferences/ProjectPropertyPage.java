@@ -52,7 +52,6 @@ import org.jmodelica.ide.helpers.Util;
 public class ProjectPropertyPage extends PropertyPage {
 	
 	private static final String LIBRARIES_ID = IDEConstants.PREFERENCE_LIBRARIES_ID;
-	private static final String OPTIONS_ID = IDEConstants.PREFERENCE_OPTIONS_PATH_ID;
 	private ModelicaSettingsControl settings;
 
 	@Override
@@ -60,7 +59,6 @@ public class ProjectPropertyPage extends PropertyPage {
 		settings = new ModelicaSettingsControl();
 		IProject proj = getProject();
 		settings.setLibraryPaths(Preferences.get(proj, LIBRARIES_ID));
-		settings.setOptionsPath(Preferences.get(proj, OPTIONS_ID));
 		return settings.createControl(parent);
 	}
 
@@ -73,7 +71,6 @@ public class ProjectPropertyPage extends PropertyPage {
 		IProject proj = getProject();
 		try {
 			Preferences.set(proj, LIBRARIES_ID, settings.getLibraryPaths());
-			Preferences.update(proj, OPTIONS_ID, settings.getOptionsPath());
 			proj.build(IncrementalProjectBuilder.FULL_BUILD, null);
 		} catch (CoreException e) {
 		}
@@ -84,7 +81,6 @@ public class ProjectPropertyPage extends PropertyPage {
 	protected void performDefaults() {
 		// TODO: We should remember default status, and save by removing the property for this project - will cause preference to be used
 		settings.setLibraryPaths(Preferences.get(LIBRARIES_ID));
-		settings.setOptionsPath(Preferences.get(OPTIONS_ID));
 		super.performDefaults();
 	}
 

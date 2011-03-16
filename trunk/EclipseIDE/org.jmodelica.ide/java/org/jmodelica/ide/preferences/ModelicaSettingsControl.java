@@ -28,45 +28,21 @@ import org.jmodelica.ide.helpers.Util;
 public class ModelicaSettingsControl  {
 
 	private List<String> libraryPaths;
-	private String optionsPath;
 
 	private Button delLibraryButton;
 	private Button addLibraryButton;
 	private Table libraryTable;
 	private Group libraryGroup;
-	
-	private Button optionsBrowse;
-	private Text optionsText;
-	private Group optionsGroup;
 
 	private MessageBox error;
 	private DirectoryDialog libraryDlg;
-	private DirectoryDialog optionsDlg;
 
 	public ModelicaSettingsControl() {
 		Shell shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
 		libraryDlg = createDlg(shell, "to load libraries from");
-		optionsDlg = createDlg(shell, "containing options.xml");
 		error = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
 
 		libraryPaths = new ArrayList<String>();
-		optionsPath = "";
-	}
-
-	public String getOptionsPath() {
-		return (optionsText == null) ? optionsPath : optionsText.getText();
-	}
-
-	public void setOptionsPath(String optionsPath) {
-		this.optionsPath = optionsPath;
-		updateOptionsPath();
-	}
-
-	private void updateOptionsPath() {
-		if (optionsText != null) {
-			optionsText.setText(optionsPath == null ? "" : optionsPath);
-			optionsGroup.pack();
-		}
 	}
 
 	public String getLibraryPaths() {
@@ -91,11 +67,8 @@ public class ModelicaSettingsControl  {
 	}
 	
 	public Control createControl(Composite parent) {
-		// TODO: shouldn't these be in a composite?
 		libraryGroup = createLibraryGroup(parent);
-		optionsGroup = createOptionsGroup(parent);
 		updateLibraryPaths();
-		updateOptionsPath();
 		return libraryGroup;
 	}
 
@@ -112,25 +85,6 @@ public class ModelicaSettingsControl  {
 		grp.setLayout(new GridLayout(1, false));
 		createLibrariesComposite(grp);
 		return grp;
-	}
-
-	private Group createOptionsGroup(Composite parent) {
-		Group grp = new Group(parent, SWT.NONE);
-		grp.setText("Options.xml path");
-		grp.setLayout(new GridLayout(1, false));
-		createOptionsSelection(grp);
-		return grp;
-	}
-
-	private Composite createOptionsSelection(Composite parent) {
-		Composite container = createContainer(parent, 3);
-
-		optionsText = new org.eclipse.swt.widgets.Text(container, SWT.NONE);
-
-		optionsBrowse = createButton(container, "Browse");
-		optionsBrowse.addSelectionListener(new OptionsListener());
-
-		return container;
 	}
 
 	private void createLibrariesComposite(Composite parent) {
@@ -198,31 +152,6 @@ public class ModelicaSettingsControl  {
 		new TableItem(libraryTable, SWT.NONE).setText(0, library);
 	}
 
-
-	public class OptionsListener implements SelectionListener {
-
-		public void widgetDefaultSelected(SelectionEvent e) {
-		}
-
-		public void widgetSelected(SelectionEvent e) {
-			String path = optionsDlg.open();
-			if (path == null)
-				return;
-
-			if (path.endsWith("options.xml"))
-				path = path.substring(0, path.length() - "options.xml".length());
-
-			String[] files = new File(path).list();
-			if (files == null || !Arrays.asList(files).contains("options.xml")) {
-				error.setMessage("No options.xml found in folder");
-				error.open();
-			}
-
-			optionsText.setText(path);
-			optionsGroup.pack();
-		}
-
-	}
 
 	public class AddListener implements SelectionListener {
 

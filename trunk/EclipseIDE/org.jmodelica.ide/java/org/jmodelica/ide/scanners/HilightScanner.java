@@ -135,7 +135,7 @@ public abstract class HilightScanner extends DocumentScanner implements ITokenSc
 	
 	public HilightScanner() {
 		// Make sure preferences are initialized
-		Preferences.get(IDEConstants.PREFERENCE_OPTIONS_PATH_ID);
+		Preferences.get(IDEConstants.PREFERENCE_ANNO_BG_ID);
 	}
 
 }
