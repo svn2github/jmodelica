@@ -5,6 +5,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -42,10 +47,6 @@ import org.jmodelica.util.OptionRegistry;
 
 public class CompileFMUAction extends CurrentClassAction implements IJobChangeListener {
 	
-	// TODO: Open a console and run compilation there
-	// TODO: Add preference for default output dir
-	// TODO: Take "current class" from outline instead of editor
-	
 	protected Editor editor;
 	protected DirectoryDialog outputDirDlg;
 	
@@ -76,13 +77,22 @@ public class CompileFMUAction extends CurrentClassAction implements IJobChangeLi
 
 	@Override
 	public void run() {
-		String dir = askForDir();
+		IFile file = editor.editorFile().iFile();
+		IProject proj;
+		String dir;
+		if (file != null) {
+			proj = file.getProject();
+			dir = proj.getLocation().toOSString();
+		} else {
+			proj = null;
+			dir = askForDir();
+		}
 		if (dir != null) {
 			showConsole();
 			OptionRegistry opt = new OptionRegistry(currentClass.root().options);
 			String className = currentClass.qualifiedName();
 			String[] paths = editor.editorFile().getPaths();
-			Job job = new CompileJob(className, paths, dir, opt);
+			Job job = new CompileJob(className, paths, dir, proj, opt);
 			job.setUser(true);
 			job.addJobChangeListener(this);
 			job.schedule();
@@ -151,13 +161,15 @@ public class CompileFMUAction extends CurrentClassAction implements IJobChangeLi
 		private String dir;
 		private OptionRegistry opt;
 		private MessageConsole messageConsole;
+		private IProject proj;
 
-		public CompileJob(String className, String[] paths, String dir, OptionRegistry opt) {
+		public CompileJob(String className, String[] paths, String dir, IProject proj, OptionRegistry opt) {
 			super("Compiling " + className + " to FMU");
 			this.className = className;
 			this.paths = paths;
 			this.dir = dir;
 			this.opt = opt;
+			this.proj = proj;
 		}
 
 		@Override
@@ -187,6 +199,12 @@ public class CompileFMUAction extends CurrentClassAction implements IJobChangeLi
 			}
 			ModelicaCompiler.setDefaultLogger();
 			ModelicaCompiler.closeStreamLogger();
+			if (proj != null) {
+				try {
+					proj.refreshLocal(IResource.DEPTH_ONE, null);
+				} catch (CoreException e) {
+				}
+			}
 			mon.done();
 			return status;
 		}
