@@ -41,9 +41,12 @@ public abstract class OutlinePage extends AbstractBaseContentOutlinePage {
 	private OutlineItemComparator comparator;
 	private IElementComparer comparer;
 	private boolean selecting;
+	private boolean fromEditor;
 
 	public OutlinePage(AbstractTextEditor editor) {
 		super(editor);
+		selecting = false;
+		fromEditor = false;
 	}
 
 	@Override
@@ -54,13 +57,13 @@ public abstract class OutlinePage extends AbstractBaseContentOutlinePage {
 
 	@Override
 	public void highlightNodeInEditor(IJastAddNode node) {
-		if (selecting)
+		if (fromEditor)
 			return;
 		IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		IWorkbenchPage page = window.getActivePage();
 		IEditorPart editor = page.getActiveEditor();
 		if (editor instanceof Editor && node instanceof ASTNode<?>) 
-			((Editor) editor).selectNode((ASTNode<?>) node, false);
+			((Editor) editor).selectNode((ASTNode<?>) node, !selecting, false);
 	}
 
 	@Override
@@ -111,18 +114,26 @@ public abstract class OutlinePage extends AbstractBaseContentOutlinePage {
 	protected abstract void rootChanged(TreeViewer viewer);
 
 	public void select(ASTNode<?> node) {
-		TreeSelection sel = (node != null) ? 
-				new TreeSelection(pathFromNode(node)) : 
-				new TreeSelection();
-        select(sel);
+		try {
+			fromEditor = true;
+			TreeSelection sel = (node != null) ? 
+					new TreeSelection(pathFromNode(node)) : 
+					new TreeSelection();
+			select(sel);
+		} finally {
+			fromEditor = false;
+		}
 	}
 
 	private void select(ISelection sel) {
 		TreeViewer viewer = getTreeViewer();
 		if (viewer != null) {
-			selecting = true;
-			viewer.setSelection(sel, true);
-			selecting = false;
+			try {
+				selecting = true;
+				viewer.setSelection(sel, true);
+			} finally {
+				selecting = false;
+			}
 		}
 	}
 

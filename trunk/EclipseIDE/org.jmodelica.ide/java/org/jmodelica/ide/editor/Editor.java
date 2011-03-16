@@ -276,7 +276,7 @@ protected void createActions() {
         super.setAction(action.getId(), action);
     }
 
-    selectNode(null, true);
+    selectNode(null, true, true);
 }
 
 @Override
@@ -404,10 +404,11 @@ private void updateCurrentClassListeners(BaseClassDecl selected) {
  * Selects <code>node</code> in the editor if valid.
  * 
  * @param node       node to select
- * @param propagate  if true, propagate to source outline
+ * @param inOutline  if true, propagate to source outline
+ * @param inText 	 if true, select node in text
  * @return  whether file <code>node</code> is from matches file in editor
  */
-public boolean selectNode(ASTNode<?> node, boolean propagate) {
+public boolean selectNode(ASTNode<?> node, boolean inText, boolean inOutline) {
 
 	boolean matchesInput = false;
 	if (node != null) {
@@ -415,13 +416,13 @@ public boolean selectNode(ASTNode<?> node, boolean propagate) {
 		File editorFile = new File(file.path());
 		matchesInput = editorFile.equals(nodeFile);
 	
-	    if (matchesInput) {
+	    if (matchesInput && inText) {
 	        ASTNode<?> sel = node.getSelectionNode();
 	        if (sel.offset() >= 0 && sel.length() >= 0)
 	            selectAndReveal(sel.offset(), sel.length());
 	    }
 		
-		if (propagate)
+		if (inOutline)
 			fSourceOutlinePage.select(node);
 	}
     

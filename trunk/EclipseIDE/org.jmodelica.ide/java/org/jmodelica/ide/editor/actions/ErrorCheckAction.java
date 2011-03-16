@@ -49,7 +49,8 @@ public class ErrorCheckAction extends CurrentClassAction {
 		
 		String msg = errorHandler.resultMessage();
 		String title = "Checking " + currentClass.getName().getID()	+ " for errors:";
-		MessageDialog.openInformation(new Shell(), title, msg);
+		Shell shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
+		MessageDialog.openInformation(shell, title, msg);
 	}
 
 	@Override

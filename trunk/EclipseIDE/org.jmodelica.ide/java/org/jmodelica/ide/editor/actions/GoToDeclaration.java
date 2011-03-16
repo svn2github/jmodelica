@@ -51,7 +51,7 @@ public void run() {
                     .getFileForPath(pathToDecl)
                     .value())
             .value();
-        ed.selectNode(iNode.value(), true);
+        ed.selectNode(iNode.value(), true, true);
 
     } catch (Exception e) { 
         e.printStackTrace(); 

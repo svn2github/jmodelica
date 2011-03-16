@@ -25,3 +25,4 @@ Export-Package: org.jmodelica.ide.helpers,
  org.jmodelica.modelica.compiler,
  org.jmodelica.modelica.parser,
  org.jmodelica.util
+Bundle-Vendor: JModelica.org
