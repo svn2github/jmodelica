@@ -8,6 +8,7 @@ from matplotlib.font_manager import fontManager, FontProperties
 from jmodelica.fmi import compile_fmu
 from jmodelica.fmi import FMUModel
 from jmodelica.optimization import dfo
+from jmodelica.optimization import quadratic_error as qe
 
 def run_demo(with_plots=True):
 	"""
@@ -77,7 +78,7 @@ def run_demo(with_plots=True):
 
 	# compile FMU
 	fmu_name = compile_fmu('QuadTankPack.Sim_QuadTank', 
-        curr_dir+'/files/QuadTankPack.mop')
+        curr_dir+'/files/QuadTankPack.mo')
 
 	# Load model
 	model = FMUModel(fmu_name)
@@ -129,12 +130,10 @@ def run_demo(with_plots=True):
 		x2_sim = res['qt.x2']
 		t_sim  = res['time']
 		
-		# Interpolate to get the simulated values in the measurement points
-		X1_sim = N.interp(t_meas,t_sim,x1_sim)
-		X2_sim = N.interp(t_meas,t_sim,x2_sim)
-		
 		# Evaluate the objective function
-		obj = sum((X1_sim-y1_meas)**2 + (X2_sim-y2_meas)**2)
+		y_meas = [y1_meas,y2_meas]
+		y_sim = [x1_sim,x2_sim]
+		obj = qe.quad_err(t_meas,y_meas,t_sim,y_sim)
 		
 		return obj
 
@@ -221,14 +220,10 @@ def run_demo(with_plots=True):
 		x4_sim = res['qt.x4']
 		t_sim  = res['time']
 		
-		# Interpolate to get the simulated values in the measurement points
-		X1_sim = N.interp(t_meas,t_sim,x1_sim)
-		X2_sim = N.interp(t_meas,t_sim,x2_sim)
-		X3_sim = N.interp(t_meas,t_sim,x3_sim)
-		X4_sim = N.interp(t_meas,t_sim,x4_sim)
-		
 		# Evaluate the objective function
-		obj = sum((X1_sim-y1_meas)**2 + (X2_sim-y2_meas)**2 + (X3_sim-y3_meas)**2 + (X4_sim-y4_meas)**2)
+		y_meas = [y1_meas,y2_meas,y3_meas,y4_meas]
+		y_sim = [x1_sim,x2_sim,x3_sim,x4_sim]
+		obj = qe.quad_err(t_meas,y_meas,t_sim,y_sim)
 		
 		return obj
 

@@ -8,7 +8,11 @@ import scipy as S
 import scipy.linalg
 import matplotlib.pyplot as plt
 import time
-#from openopt import GLP
+
+try:
+    from openopt import NLP
+except ImportError:
+    print "Could not load OpenOpt package."
 
 def nelme(f,xstart,lb=None,ub=None,h=0.3,plot_con=False,plot_sim=False,
 		  x_tol=1e-3,f_tol=1e-6,max_iters=500,max_fevals=5000,disp=True):
