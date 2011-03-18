@@ -49,7 +49,7 @@ public class IDEConstants {
     public static final String ACTION_TOGGLE_COMMENT_ID = ACTION_ID + ".toggle-comment";
     public static final String ACTION_FOLLOW_REFERENCE_ID = ACTION_ID + ".gotodecl";
 	
-	public static final String ACTION_CLASS_TEXT = "%s\n(Select a class to %s in the Outline view.)";
+	public static final String ACTION_CLASS_TEXT = "%s \n(Select a class to %s in the Outline view.)";
 	public static final String ACTION_ERROR_CHECK_TEXT = 
 		String.format(ACTION_CLASS_TEXT, "Check for &errors", "check");
 	public static final String ACTION_COMPILE_FMU_TEXT = 

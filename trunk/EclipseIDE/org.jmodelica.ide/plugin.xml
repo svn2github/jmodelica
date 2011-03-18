@@ -333,4 +333,31 @@
             class="org.jmodelica.ide.preferences.Preferences">
       </initializer>
    </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.jmodelica.ide.customNewMenu?after=additions">
+         <command
+               commandId="org.eclipse.ui.newWizard"
+               icon="resources/icons/outline/modelica_file.png"
+               label="Modelica File"
+               style="push">
+            <parameter
+                  name="newWizardId"
+                  value="org.jmodelica.ide.wizard.file">
+            </parameter>
+         </command>
+         <command
+               commandId="org.eclipse.ui.newWizard"
+               icon="resources/icons/modelica_project_new.png"
+               label="Modelica Project"
+               style="push">
+            <parameter
+                  name="newWizardId"
+                  value="org.jmodelica.ide.wizard.project">
+            </parameter>
+         </command>
+      </menuContribution>
+   </extension>
 </plugin>

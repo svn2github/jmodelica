@@ -123,10 +123,10 @@ private void doSetActiveEditor(IEditorPart part) {
 @Override
 public void contributeToMenu(IMenuManager menu) {
     super.contributeToMenu(menu);
-    IMenuManager fileMenu = menu.findMenuUsingPath(IWorkbenchActionConstants.M_FILE);
-    fileMenu.appendToGroup("additions", new Separator(IDEConstants.GROUP_COMPILE_ID));
-    fileMenu.appendToGroup(IDEConstants.GROUP_COMPILE_ID, errorCheckAction);
-    fileMenu.appendToGroup(IDEConstants.GROUP_COMPILE_ID, compileFMUAction);
+//    IMenuManager fileMenu = menu.findMenuUsingPath(IWorkbenchActionConstants.M_FILE);
+//    fileMenu.appendToGroup("additions", new Separator(IDEConstants.GROUP_COMPILE_ID));
+//    fileMenu.appendToGroup(IDEConstants.GROUP_COMPILE_ID, errorCheckAction);
+//    fileMenu.appendToGroup(IDEConstants.GROUP_COMPILE_ID, compileFMUAction);
     IMenuManager editMenu = menu.findMenuUsingPath(IWorkbenchActionConstants.M_EDIT);
     editMenu.appendToGroup("additions", new Separator(IDEConstants.GROUP_EDIT_ID));
     editMenu.appendToGroup(IDEConstants.GROUP_EDIT_ID, toggleAnnotationsAction);
