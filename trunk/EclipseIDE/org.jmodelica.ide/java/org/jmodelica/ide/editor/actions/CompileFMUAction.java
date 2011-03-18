@@ -88,6 +88,9 @@ public class CompileFMUAction extends CurrentClassAction implements IJobChangeLi
 			dir = askForDir();
 		}
 		if (dir != null) {
+			if (!PlatformUI.getWorkbench().saveAllEditors(true))
+				return;
+			
 			showConsole();
 			OptionRegistry opt = new OptionRegistry(currentClass.root().options);
 			String className = currentClass.qualifiedName();
@@ -174,9 +177,6 @@ public class CompileFMUAction extends CurrentClassAction implements IJobChangeLi
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			if (!PlatformUI.getWorkbench().saveAllEditors(true))
-				return Status.CANCEL_STATUS;
-			
 			mon = monitor;
 			mon.beginTask("Compiling to FMU", WORK_TOTAL);
 			mon.subTask("Parsing...");
