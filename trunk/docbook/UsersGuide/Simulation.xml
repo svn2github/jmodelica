@@ -57,9 +57,9 @@
     <para>Next, create a Python script file and write or (copy paste) the
     commands for compiling and loading a model:</para>
 
-    <programlisting language="python"># Import the function for compilation of models and the JMUModel class
-from jmodelica.jmi import compile_jmu
-from jmodelica.jmi import JMUModel
+    <programlisting language="python"># Import the function for compilation of models and the FMUModel class
+from jmodelica.fmi import compile_fmu
+from jmodelica.fmi import FMUModel
 
 # Import the plotting library
 import matplotlib.pyplot as plt
@@ -68,17 +68,17 @@ import matplotlib.pyplot as plt
     <para>Next, we compile and load the model:</para>
 
     <programlisting language="python"># Compile model
-jmu_name = compile_jmu("VDP","VDP.mo")
+fmu_name = compile_fmu("VDP","VDP.mo")
 
 # Load model
-vdp = JMUModel(jmu_name)
+vdp = FMUModel(fmu_name)
 </programlisting>
 
-    <para>The function <literal>compile_jmu</literal> compiles the model into
+    <para>The function <literal>compile_fmu</literal> compiles the model into
     a binary, which is then loaded when the <literal>vdp</literal> object is
-    created. This object represents the compiled model and is used to invoke
-    the simulation algorithm (for more information about model creations and
-    options, see <xref linkend="ch_models" />):</para>
+    created. This object represents the compiled model, an FMU, and is used to
+    invoke the simulation algorithm (for more information about model
+    creations and options, see <xref linkend="ch_models" />):</para>
 
     <programlisting language="python">res = vdp.simulate(final_time=10)
 </programlisting>
@@ -146,28 +146,27 @@ plt.show()
     <para>The simulation method is the preferred method for simulation of
     models and which by default is connected to the Assimulo simulation
     package but can also be connected to other simulation platforms. The
-    simulation method for <literal>JMUModel</literal> is defined as:</para>
+    simulation method for <literal>FMUModel</literal> is defined as:</para>
 
-    <programlisting language="python">class JMUModel(...)
+    <programlisting language="python">class FMUModel(...)
     ...
     def simulate(self,
              start_time=0.0,
              final_time=1.0,
              input=(),
-             algorithm='AssimuloAlg', 
+             algorithm='AssimuloFMIAlg', 
              options={}):
 </programlisting>
 
     <para>And used in the following way:</para>
 
-    <programlisting language="python">res = JMUModel.simulate() #Using default values
+    <programlisting language="python">res = FMUModel.simulate() #Using default values
 </programlisting>
 
     <para>The only difference between the simulation method in
-    <literal>FMUModel</literal> compared to <literal>JMUModel</literal> is
-    that the algorithm is <literal>AssimuloFMIAlg</literal>. They are although
-    both connected to the Assimulo package and able to use its solvers with
-    the limitation that the FMI standard only support ODEs.</para>
+    <literal>JMUModel</literal> compared to <literal>FMUModel</literal> is
+    that the algorithm is <literal>AssimuloAlg</literal>. They are although
+    both connected to the Assimulo package and able to use its solvers.</para>
 
     <section>
       <title>Arguments</title>
@@ -1004,128 +1003,6 @@ plt.show()
     </section>
 
     <section>
-      <title>Simulation of an ODE</title>
-
-      <para>Simulation of ODEs in JModelica.org is currently limited to models
-      written explicitly on the form:</para>
-
-      <equation>
-        <m:math display="block">
-          <m:mrow>
-            <m:mover>
-              <m:mi>y</m:mi>
-
-              <m:mo>.</m:mo>
-            </m:mover>
-
-            <m:mo>=</m:mo>
-
-            <m:mi>f(t,y)</m:mi>
-          </m:mrow>
-        </m:math>
-      </equation>
-
-      <para>There is also a limitation that events are currently not
-      handled.</para>
-
-      <para>An example is the Van der Pol oscillator described in <xref
-      linkend="sim_sec_first" />. In the code below it is shown again for
-      convenience.</para>
-
-      <programlisting language="modelica" xml:id="sim_list_vdp2">model VDP
-    // State start values
-    parameter Real x1_0 = 0;
-    parameter Real x2_0 = 1;
-
-    // The states
-    Real x1(start = x1_0);
-    Real x2(start = x2_0);
-
-    // The control signal
-    input Real u;
-
-  equation
-    der(x1) = (1 - x2^2) * x1 - x2 + u;
-    der(x2) = x1;
-end VDP;
-</programlisting>
-
-      <para>We see here that the state derivatives are written on the left
-      hand side while the equations are written on the right hand side.</para>
-
-      <para>Lets begin with the the example, copy and paste the Modelica code
-      and save it into <literal>VDP.mo</literal> and open a python script
-      file. We start by importing the necessary objects:</para>
-
-      <programlisting language="python"># Import the function for compilation of models and the JMUModel class
-from jmodelica.jmi import compile_jmu
-from jmodelica.jmi import JMUModel
-
-# Import the plotting library
-import matplotlib.pyplot as plt
-</programlisting>
-
-      <para>Next, we compile and load the model:</para>
-
-      <programlisting language="python"># Compile model
-jmu_name = compile_jmu("VDP","VDP.mo")
-
-# Load model
-vdp = JMUModel(jmu_name)
-</programlisting>
-
-      <para>Now we would like to change the default solver IDA to the ODE
-      solver CVode and also change the relative tolerance to 0.0001. First we
-      retrieve the default options and then change the option:</para>
-
-      <programlisting language="python">opts = vdp.simulate_options() #Retrieve the default options
-
-opts['solver'] = 'CVode' #Change the solver to CVode
-opts['CVode_options']['rtol'] = 0.0001 #Change the relative tolerance for CVode
-</programlisting>
-
-      <para>Now lets provide the options to the simulate method and simulate
-      the problem ten seconds:</para>
-
-      <programlisting language="python">res = vdp.simulate(final_time=10, options=opts)
-</programlisting>
-
-      <para>The result is retrieved by accessing the <literal>res</literal>
-      variable as a dictionary with the variable name as key:</para>
-
-      <programlisting language="python">x1 = res['x1']
-x2 = res['x2']
-t  = res['time']
-</programlisting>
-
-      <para>The variable trajectories are returned as numpy arrays and can be
-      used for further analysis of the simulation result or for
-      visualization:</para>
-
-      <programlisting language="python">plt.figure(1)
-plt.plot(t, x1, t, x2)
-plt.legend(('x1','x2'))
-plt.title('Van der Pol oscillator.')
-plt.ylabel('Angle (rad)')
-plt.xlabel('Time (s)')
-plt.show()
-</programlisting>
-
-      <para>In <xref linkend="sim_fig_cvode_vdp" /> the simulation result is
-      shown.</para>
-
-      <figure xml:id="sim_fig_cvode_vdp">
-        <title>Simulation result of the Van der Pol oscillator.</title>
-
-        <mediaobject>
-          <imageobject>
-            <imagedata fileref="images/vdp_cvode.svg" scale="70"></imagedata>
-          </imageobject>
-        </mediaobject>
-      </figure>
-    </section>
-
-    <section>
       <title>Simulation of a discontinuous system</title>
 
       <para>The model which is to be simulated is an electric circuit. The
@@ -1248,7 +1125,7 @@ plt.show()
 
       <programlisting language="python">import numpy as N
 import pylab as P
-from jmodelica.jmi import compile_jmu, JMUModel
+from jmodelica.fmi import compile_fmu, FMUModel
 </programlisting>
 
       <para>into the Python file. Compile and load the model:</para>
@@ -1258,10 +1135,10 @@ model_name = 'VDP'
 mofile = 'VDP.mo'
 
 # Compile model
-jmu_name = compile_jmu(model_name,mofile)
+fmu_name = compile_fmu(model_name,mofile)
 
 # Load model
-vdp = JMUModel(jmu_name)
+vdp = FMUModel(fmu_name)
 </programlisting>
 
       <para>Next, we define the initial conditions for which the parameter
@@ -1369,8 +1246,9 @@ jmu_name = compile_jmu("Robertson","Robertson.mop")
 model = JMUModel(jmu_name)
 </programlisting>
 
-      <para>Now that the model is loaded, we have to change the option to
-      activate the sensitivity calculations and also the absolute
+      <para>Notice that sensitivity computations are only supported for
+      JMUModels currently. Now that the model is loaded, we have to change the
+      option to activate the sensitivity calculations and also the absolute
       tolerances:</para>
 
       <programlisting># Get and set the options
