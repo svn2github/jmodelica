@@ -838,8 +838,8 @@ x1 = res['x1']
 
       <para>The functions and classes used in the tutorial script need to be
       imported into the Python script. This is done by the following Python
-      commands. Copy them and past them either directly into you Python shell
-      or, preferably, into your Python script file.</para>
+      commands. Copy them and paste them either directly into your Python
+      shell or, preferably, into your Python script file.</para>
 
       <programlisting language="python">import numpy as N
 import matplotlib.pyplot as plt
@@ -905,7 +905,7 @@ print('T = %f' % T_0_A)
       the initialization result can be accessed. The
       <literal>initialize</literal> method relies on the algorithm IPOPT for
       computing the solution of the initialization problem. The values of the
-      states corresponding to grade A can then be extracted from the result
+      states corresponding to point A can then be extracted from the result
       object. Look carefully at the printouts in the Python shell to see a
       printout of the stationary values. Display the help text for the
       <literal>initialize</literal> method and take a moment to look through
@@ -1371,7 +1371,7 @@ u = Tc_res
 u_traj = N.transpose(N.vstack((t,u)))
 
 # Compile the Modelica model to a JMU
-jmu_name = compile_jmu("CSTR.CSTR", curr_dir+"/files/CSTR.mop")
+jmu_name = compile_jmu("CSTR.CSTR", "CSTR.mop")
 
 # Load model
 sim_model = JMUModel(jmu_name)
