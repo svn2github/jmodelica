@@ -251,6 +251,11 @@ class NLPInitialization(object):
                 _p_opt_start, _dx_start, _x_start, _u_start, _w_start)
         self._model._set_lb_values(_p_opt_lb, _dx_lb, _x_lb, _u_lb, _w_lb)
         self._model._set_ub_values(_p_opt_ub, _dx_ub, _x_ub, _u_ub, _w_ub)
+
+        # Overwrite input values with the ones set in the model: the
+        # user may have set these. Should be done for all variables?
+        for i in range(len(_u_start)):
+            _u_start[i] = self._model.jmimodel.get_real_u()[i]
                     
         _linearity_information_provided = 1;
         _p_opt_lin = N.ones(model._n_p_opt,dtype=int)

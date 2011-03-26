@@ -286,9 +286,22 @@ class TestHybrid7(SimulationTest):
     def test_trajectories(self):
         self.assert_all_trajectories(['expSine.y','sampler.y'], same_span=True, rel_tol=1e-3, abs_tol=1e-3)
 
-
+class TestInputInitializationFMU(SimulationTest):
     
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            'InputInitialization.mo', 'InputInitialization',format='fmu')
 
+    @testattr(assimulo = True)
+    def setUp(self):
+        u = ('u',N.array([[0., 1],[10.,2]]))
+        self.setup_base(start_time=0.0, final_time=10, time_step = 0.01,input=u)
+        self.run()
+        self.load_expected_data(
+            'InputInitialization_result.txt')
 
-
+    @testattr(assimulo = True)
+    def test_trajectories(self):
+        self.assert_all_trajectories(['x','u'], same_span=True, rel_tol=1e-5, abs_tol=1e-5)
 

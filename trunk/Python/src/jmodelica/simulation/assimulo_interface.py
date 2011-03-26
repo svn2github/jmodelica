@@ -836,7 +836,7 @@ class JMIDAE(Implicit_Problem):
                 self._model.sw = [int(x) for x in solver.switches]
             if self._g0_nbr > 0:
                 self._model.sw_init = [int(x) for x in solver.switches_init]
-                
+
             #Initiate using IPOPT
             init_nlp = NLPInitialization(self._model)
             init_nlp_ipopt = InitializationOptimizer(init_nlp)

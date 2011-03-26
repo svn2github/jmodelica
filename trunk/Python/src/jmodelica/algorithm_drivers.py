@@ -691,15 +691,24 @@ class AssimuloFMIAlg(AlgorithmBase):
     
         # set options
         self._set_options()
-        
+
+        input_traj = None
+        if self.input:
+            input_traj=(self.input[0], 
+                        TrajectoryLinearInterpolation(self.input[1][:,0], 
+                                                      self.input[1][:,1:]))
+            #Sets the inputs, if any
+            self.model.set(input_traj[0], input_traj[1].eval(self.start_time)[0,:])
+
+        # Initialize?
+        if self.options['initialize']:
+            self.model.initialize(relativeTolerance=self.solver_options['rtol'])
+
         if not self.input:
             self.probl = FMIODE(self.model, result_file_name=self.result_file_name)
         else:
             self.probl = FMIODE(
-                self.model,
-                (self.input[0], 
-                    TrajectoryLinearInterpolation(self.input[1][:,0], 
-                    self.input[1][:,1:])), result_file_name=self.result_file_name)
+                self.model, input_traj, result_file_name=self.result_file_name)
         
         # instantiate solver and set options
         self.simulator = self.solver(self.probl, t0=self.start_time)
@@ -739,11 +748,7 @@ class AssimuloFMIAlg(AlgorithmBase):
         except KeyError:
             rtol, atol = self.model.get_tolerances()
             self.solver_options['rtol'] = rtol
-        
-        # Initialize?
-        if self.options['initialize']:
-            self.model.initialize(relativeTolerance=self.solver_options['rtol'])
-        
+                
         #Check absolute tolerance
         try:
             self.solver_options['atol']
@@ -966,6 +971,16 @@ class AssimuloAlg(AlgorithmBase):
             
         # set options
         self._set_options()
+
+        input_traj = None
+        if self.input:
+            input_traj=(self.input[0], 
+                        TrajectoryLinearInterpolation(self.input[1][:,0], 
+                                                      self.input[1][:,1:]))
+            #Sets the inputs, if any
+            self.model.set(input_traj[0], input_traj[1].eval(self.start_time)[0,:])
+
+        print model.jmimodel.get_z()
         
         if issubclass(self.solver, Implicit_ODE):
             if not self.input:
