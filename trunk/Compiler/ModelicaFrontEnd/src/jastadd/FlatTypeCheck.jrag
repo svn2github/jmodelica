@@ -32,7 +32,7 @@ aspect FlatTypeCheck {
      		} else {
 				FType expectedBT = bindingType();
 				FType actualBT = bexp.type();
-    			if (!expectedBT.typeCompatible(actualBT, func)) {
+    			if (!expectedBT.typeCompatible(actualBT, func) && !expectedBT.isUnknown()) {
     				if (!myBindingExpHasEach() && type().typeCompatible(actualBT, func)) {
 						warning("Assuming 'each' for the binding expression to the variable " + name());
     				} else if (!expectedBT.scalarType().typeCompatible(actualBT.scalarType())) {
@@ -147,6 +147,10 @@ aspect FlatTypeCheck {
   
   protected void InstDot.typeError(InstAccess top) {
 	  getRight().typeError(top);
+  }
+  
+  protected void InstGlobalAccess.typeError(InstAccess top) {
+	  getInstAccess().typeError(top);
   }
   
   protected void InstComponentAccess.typeError(InstAccess top) {

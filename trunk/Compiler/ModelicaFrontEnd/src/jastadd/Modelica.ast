@@ -388,6 +388,7 @@ Dot             : Access ::= Left:Access Right:Access;
 ArrayAccess     : Access ::= [ArraySubscripts];
 ParseAccess     : ArrayAccess;
 ClassAccess     : Access;
+GlobalAccess    : Access ::= Access;
 AmbiguousAccess : ArrayAccess;
 ComponentAccess : ArrayAccess;
 

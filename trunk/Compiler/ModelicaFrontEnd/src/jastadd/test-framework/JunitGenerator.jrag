@@ -61,8 +61,8 @@ public class JunitGenerator {
 		 */
 		String sep = System.getProperty("file.separator");
 		String fileName = args[0];
-		String className = fileName.substring(fileName.lastIndexOf(sep) + 1, fileName.lastIndexOf('.'));
-		JunitGenerator jg = new JunitGenerator(fileName, className);
+		String className = new File(fileName).getName().replaceFirst("\\.[^.]*$", "");
+ 		JunitGenerator jg = new JunitGenerator(fileName, className);
 		StringBuilder str = new StringBuilder();
 		//jg.ts.printTests(str);
 		jg.ts.dumpJunit(fileName, args[1]);

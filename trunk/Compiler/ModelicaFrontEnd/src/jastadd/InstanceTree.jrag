@@ -1081,6 +1081,12 @@ aspect InstanceTreeConstruction {
 		return ia;
 	}	
 
+	public InstAccess GlobalAccess.newInstAccess() {
+		InstAccess ia = new InstGlobalAccess(getAccess().newInstAccess());
+		ia.setLocation(this);
+		return ia;
+	}	
+
 
 	syn lazy InstProgramRoot Program.getInstProgramRoot() {
 		return new InstProgramRoot(this);

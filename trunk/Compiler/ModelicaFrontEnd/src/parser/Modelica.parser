@@ -531,16 +531,16 @@ PN_ExtendsClause extends_clause =
 
 ImportClause import_clause = 
   IMPORT 
-  parse_access_simple 
-  comment {: return new ImportClauseQualified(parse_access_simple,comment); :}
+  qualified_import_access 
+  comment {: return new ImportClauseQualified(qualified_import_access,comment); :}
   | IMPORT 
-  parse_access_unqualified_simple
-  comment {: return new ImportClauseUnqualified(parse_access_unqualified_simple,comment); :}
+  unqualified_import_access
+  comment {: return new ImportClauseUnqualified(unqualified_import_access,comment); :}
   | IMPORT 
   id_decl.alias 
   EQUALS 
-  parse_access_simple 
-  comment {: return new ImportClauseRename(parse_access_simple,comment,alias); :}
+  qualified_import_access 
+  comment {: return new ImportClauseRename(qualified_import_access,comment,alias); :}
   ;
 
 
@@ -1121,8 +1121,7 @@ MatrixRow matrix_row =
   
 List arg_list = 
                         {: return new List(); :}
-  |exp                   {: //System.out.println("arg_list at line " + exp.beginLine());
-                           return new List().add(exp); :}
+  | exp                 {: return new List().add(exp); :}
   | arg_list COMMA exp  {: arg_list.add(exp); 
                            return arg_list; :}
   ;
@@ -1145,50 +1144,78 @@ StringComment string_comment =
  
  IdDecl id_decl = 
    ID.id   {: return new IdDecl(id); :}
-//   | BREAK {: return new IdDecl("break"); // This is insane, but is needed to parse
-//                                          // Modelica.exp in the standard library 2.2 :}
-   ;
+ ;
 
  AccessExp access_expression =
    parse_access {: return new AccessExp(parse_access); :}
-   ;
+ ;
 
  DerExp der_expression = 
    DER LPAREN exp RPAREN  {: return new DerExp(exp); :}
-   ;
+ ;
 
  Access parse_access = 
+   parse_access_loc        {: return parse_access_loc; :}
+ | DOT first_class_access  {: return new GlobalAccess(first_class_access); :}
+ ;
+ 
+ Access parse_access_loc = 
    parse_access_single   {: return parse_access_single; :}
-   | parse_access_single DOT parse_access {: return new Dot(parse_access_single.getID(),parse_access_single,parse_access); :}
-   ;
+ | parse_access_single DOT parse_access_loc 
+   			             {: return new Dot(parse_access_single, parse_access_loc); :}
+ ;
+ 
+ Access first_class_access =
+   class_access_single  {: return class_access_single; :}
+ | class_access_single DOT parse_access_loc  
+ 						{: return new Dot(class_access_single, parse_access_loc); :}
+ ;
  
  ParseAccess parse_access_single = 
-   ID.id  array_subscripts? {: return new ParseAccess(id,array_subscripts); :}
-   ;   
-   
- Access parse_access_simple = 
-   parse_access_single_simple  {: return parse_access_single_simple; :}
-   | parse_access_single_simple DOT parse_access_simple {: return new Dot(parse_access_single_simple.getID(),parse_access_single_simple,parse_access_simple); :}
-   ;
+   ID.id  array_subscripts? {: return new ParseAccess(id, array_subscripts); :}
+ ;   
  
  ParseAccess parse_access_single_simple = 
-   ID.id  {: return new ParseAccess(id,new Opt()); :}
-   ;      
+   ID.id  {: return new ParseAccess(id, new Opt()); :}
+ ;      
+
+   
+ Access qualified_import_access = 
+   qualified_import_access_loc      {: return qualified_import_access_loc; :}
+ | DOT qualified_import_access_loc  {: return new GlobalAccess(qualified_import_access_loc); :}
+ ;
  
- Access parse_access_unqualified_simple = 
-   parse_access_single_simple DOTMULT  
-            {: return parse_access_single_simple; :} 
- | parse_access_single_simple DOT parse_access_unqualified_simple 
-            {: return new Dot("",parse_access_single_simple,parse_access_unqualified_simple); :}
-   ;    
+ Access qualified_import_access_loc = 
+   qualified_import_access_rec
+            {: return qualified_import_access_rec; :}
+ | class_access_single
+            {: return class_access_single; :}
+ ;
+ 
+ Access qualified_import_access_rec = 
+   class_access_single DOT parse_access_single_simple  
+   			{: return new Dot(class_access_single, parse_access_single_simple); :}
+ | class_access_single DOT qualified_import_access_rec 
+   			{: return new Dot(class_access_single, qualified_import_access_rec); :}
+ ;
+
+ 
+ Access unqualified_import_access =
+   class_access DOTMULT   {: return class_access; :}
+ ;
  
  
  Access class_access = 
-   class_access_single   {: return class_access_single; :}
-   | class_access_single DOT class_access {: return new Dot("",class_access_single,class_access); :}
-   ;    
+   class_access_loc      {: return class_access_loc; :}
+ | DOT class_access_loc  {: return new GlobalAccess(class_access_loc); :}
+ ;
+ 
+ Access class_access_loc = 
+   class_access_single                      {: return class_access_single; :}
+ | class_access_single DOT class_access_loc {: return new Dot(class_access_single, class_access_loc); :}
+ ;    
   
  ClassAccess class_access_single = 
    ID.id  {: return new ClassAccess(id); :}
-   ;
+ ;
    

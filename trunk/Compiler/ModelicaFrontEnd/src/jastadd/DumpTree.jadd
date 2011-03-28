@@ -70,6 +70,11 @@ aspect DumpTree {
   	getRight().dumpTree(indent+" ");
   }
  
+  public void GlobalAccess.dumpTree(String indent) {
+  	super.dumpTree(indent);
+  	getAccess().dumpTree(indent+" ");
+  }
+ 
   
  /*
  public void AmbiguousAccess.dumpTree(String indent) {
@@ -172,6 +177,11 @@ aspect InstDumpTree {
   	getLeft().dumpTree(indent+" ");
   	getRight().dumpTree(indent+" ");
   }
+ 
+  public void InstGlobalAccess.dumpTree(String indent) {
+  	super.dumpTree(indent);
+  	getInstAccess().dumpTree(indent+" ");
+  }
 
 
 }
@@ -196,6 +206,11 @@ aspect DumpTreeBasic {
   }
   
   public void Dot.dumpTreeBasic(String indent) {
+  	for(int i = 0; i < getNumChild(); i++)
+      getChild(i).dumpTreeBasic(indent + "  ");
+  }
+  
+  public void GlobalAccess.dumpTreeBasic(String indent) {
   	for(int i = 0; i < getNumChild(); i++)
       getChild(i).dumpTreeBasic(indent + "  ");
   }

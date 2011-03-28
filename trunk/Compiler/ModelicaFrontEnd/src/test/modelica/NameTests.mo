@@ -1501,12 +1501,38 @@ end NameTests.ConstantLookup30;
 end ConstantLookup30;
 
 
+package ConstantLookup31
+	constant Integer c = 1;
+	package NameTests
+		package ConstantLookup31
+			constant Integer c = 2;
+			model ConstantLookup31_m
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ConstantLookup31_m",
+         description="Lookup of names starting with .",
+         flatModel="
+fclass NameTests.ConstantLookup31.NameTests.ConstantLookup31.ConstantLookup31_m
+ constant Integer a = 1;
+ constant Integer b = 2;
+end NameTests.ConstantLookup31.NameTests.ConstantLookup31.ConstantLookup31_m;
+")})));
+
+				constant Integer a = .NameTests.ConstantLookup31.c;
+				constant Integer b = NameTests.ConstantLookup31.c;
+			end ConstantLookup31_m;
+		end ConstantLookup31;
+	end NameTests;
+	
+end ConstantLookup31;
+
+
 
 class ExtendsTest1
      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.FlatteningTestCase(name="ExtendsTest1",
         description="Simple use of extends",
-                                               flatModel=
+        flatModel=
 "
  fclass NameTests.ExtendsTest1
  Real c2.c3.x;

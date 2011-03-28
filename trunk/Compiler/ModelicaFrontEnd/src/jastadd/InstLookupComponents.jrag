@@ -42,6 +42,7 @@ aspect InstLookupComponents {
 	eq InstDot.getRight().lookupInstComponent(String name)                    = getLeft().qualifiedLookupInstComponent(name);
 	eq InstArrayAccess.getFArraySubscripts().lookupInstComponent(String name) = getTopInstAccess().lookupInstComponent(name);
 	eq InstAccess.getExpandedSubscripts().lookupInstComponent(String name)    = getTopInstAccess().lookupInstComponent(name);
+	eq InstGlobalAccess.getInstAccess().lookupInstComponent(String name)      = emptyHashSet();
 	
 	syn HashSet InstAccess.qualifiedLookupInstComponent(String name) = emptyHashSet();
 	eq InstClassAccess.qualifiedLookupInstComponent(String name)     = myInstClassDecl().memberInstComponent(name);
@@ -248,10 +249,8 @@ aspect InstLookupComponents {
 	
 	syn lazy InstComponentDecl InstAccess.myInstComponentDecl() = unknownInstComponentDecl();
 	eq InstComponentAccess.myInstComponentDecl()                = componentFromSet(lookupInstComponent(name()));
-	
-	eq InstDot.myInstComponentDecl() {
-		return getRight().myInstComponentDecl();
-	}
+	eq InstDot.myInstComponentDecl()                            = getRight().myInstComponentDecl();
+	eq InstGlobalAccess.myInstComponentDecl()                   = getInstAccess().myInstComponentDecl();
 	
 }
 

@@ -306,6 +306,7 @@ aspect Arrays {
 		res.addAll(right);
 		return res;
 	}
+	eq InstGlobalAccess.allFArraySubscripts() = getInstAccess().allFArraySubscripts();
 	
 	/**
 	 * \brief Get the expanded FArraySubscripts of each part of this access.
@@ -816,7 +817,8 @@ aspect Arrays {
 	/**
 	 * \brief Get the array sizes. 
 	 */
-	eq InstDot.size() = getRight().size().expand(getLeft().size());
+	eq InstDot.size()          = getRight().size().expand(getLeft().size());
+	eq InstGlobalAccess.size() = getInstAccess().size();
 	
 	/**
 	 * \brief Get the array sizes. 
@@ -1518,7 +1520,7 @@ aspect Arrays {
 	}
 
 	/**
-	 * \brief Sets the FArraySubscripts of each part to match the Index.
+	 * \brief Create a copy with the FArraySubscripts of each part set to match the Index.
 	 * 
 	 * @param i    the Index specifying what array subscripts to use
 	 * @param dim  the next dimension in <code>i</code> to use, 
@@ -1530,6 +1532,10 @@ aspect Arrays {
 
 	protected InstDot InstDot.specifyEach(Index i, int[] dim) {
 		return new InstDot(getLeft().specifyEach(i, dim), getRight().specifyEach(i, dim));
+	}
+
+	protected InstGlobalAccess InstGlobalAccess.specifyEach(Index i, int[] dim) {
+		return new InstGlobalAccess(getInstAccess().specifyEach(i, dim));
 	}
 
 	protected InstArrayAccess InstArrayAccess.specifyEach(Index i, int[] dim) {

@@ -117,6 +117,7 @@ InstDot : InstAccess ::= Left:InstAccess Right:InstAccess;
 InstArrayAccess     : InstAccess ::= [FArraySubscripts];
 InstParseAccess     : InstArrayAccess;
 InstClassAccess     : InstAccess;
+InstGlobalAccess    : InstAccess ::= InstAccess;
 InstAmbiguousAccess : InstArrayAccess;
 InstComponentAccess : InstArrayAccess;
 

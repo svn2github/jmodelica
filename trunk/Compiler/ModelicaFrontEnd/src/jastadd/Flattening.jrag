@@ -661,6 +661,8 @@ aspect Flattening {
 		}
 		return access;
 	}
+	eq InstGlobalAccess.splitArrayAccess(int index) = 
+		new InstGlobalAccess(getInstAccess().splitArrayAccess(index));
 	
 	public void FArraySubscripts.specifyNext(int index) {
 		for (int i = 0; i < getNumFSubscript(); i++) {

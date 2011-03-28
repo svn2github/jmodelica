@@ -207,6 +207,27 @@ aspect Constructors {
 	}
 	
 	/**
+	 * \brief Constructs a Dot with an empty ID.
+	 */
+	public Dot.Dot(Access left, Access right) {
+		this("", left, right);
+	}
+	
+	/**
+	 * \brief Constructs an InstGlobalAccess with an empty ID.
+	 */
+	public InstGlobalAccess.InstGlobalAccess(InstAccess access) {
+		this("", access);
+	}
+	
+	/**
+	 * \brief Constructs a GlobalAccess with an empty ID.
+	 */
+	public GlobalAccess.GlobalAccess(Access access) {
+		this("", access);
+	}
+	
+	/**
 	 * \brief Constructs an FForIndex with a temporary index variable and a 
 	 *        range expression starting at 1 as the in expression.
 	 * 

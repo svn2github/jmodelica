@@ -19,7 +19,8 @@ import java.util.HashSet;
 aspect InstLookupClasses {
 
 	syn lazy HashSet InstAccess.lookupInstClass() circular [emptyHashSet()] = lookupInstClass(name());
-	eq InstDot.lookupInstClass() = getRight().lookupInstClass();
+	eq InstDot.lookupInstClass()           = getRight().lookupInstClass();
+	eq InstGlobalAccess.lookupInstClass() = getInstAccess().lookupInstClass();
 
 	inh HashSet InstAccess.lookupInstClass(String name) circular [emptyHashSet()];
 	inh HashSet InstNode.lookupInstClass(String name);
@@ -89,6 +90,10 @@ aspect InstLookupClasses {
 	
 	syn HashSet InstClassDecl.superLookupInstClassFromChain(String name)      = superLookupInstClass(name);
 	eq InstReplacingShortClassDecl.superLookupInstClassFromChain(String name) = getInstExtends(0).lookupInstClass(name);
+	
+	inh HashSet InstAccess.lookupInstClassFromTop(String name);
+	eq InstRoot.getChild().lookupInstClassFromTop(String name) = genericLookupInstClass(name);
+	eq Root.getChild().lookupInstClassFromTop(String name)     = emptyHashSet();
 
 	syn boolean InstClassDecl.isRedeclared() = false;
 	eq InstReplacingShortClassDecl.isRedeclared() = true;
@@ -285,6 +290,7 @@ aspect InstLookupClasses {
 	}
 	
 	eq InstDot.getRight().lookupInstClass(String name)                    = getLeft().qualifiedLookupInstClass(name);
+	eq InstGlobalAccess.getInstAccess().lookupInstClass(String name)      = lookupInstClassFromTop(name);
 	eq InstArrayAccess.getFArraySubscripts().lookupInstClass(String name) = getTopInstAccess().lookupInstClass(name);
 	eq InstAccess.getExpandedSubscripts().lookupInstClass(String name)    = getTopInstAccess().lookupInstClass(name);
 	
@@ -501,7 +507,8 @@ aspect InstLookupClasses {
 		else
 			return unknownInstClassDecl();
 	}
-	eq InstDot.myInstClassDecl() = getRight().myInstClassDecl();
+	eq InstDot.myInstClassDecl()          = getRight().myInstClassDecl();
+	eq InstGlobalAccess.myInstClassDecl() = getInstAccess().myInstClassDecl();
 	
 	syn InstClassDecl InstNode.myInstClass()  = unknownInstClassDecl(); 
 	eq InstComponentDecl.myInstClass()        = getClassName().myInstClassDecl();

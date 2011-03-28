@@ -76,9 +76,7 @@ aspect InstNameClassification {
 	eq InstRoot.getChild().kind() = Kind.AMBIGUOUS_ACCESS;
 	eq FlatRoot.getChild().kind() = Kind.AMBIGUOUS_ACCESS;
 
-	eq InstDot.getLeft().kind() {
-	 	return getRightNoTransform().predKind();
-	}
+	eq InstDot.getLeft().kind() = getRightNoTransform().predKind();
 
 	eq InstExtends.getClassName().kind() = Kind.CLASS_ACCESS;
 	eq InstImport.getPackageName().kind() = Kind.LAST_AMBIGUOUS_ACCESS;
@@ -101,12 +99,8 @@ aspect InstNameClassification {
 	 * The attribute predKind defines the kind for the previous part of a 
 	 * qualified name.
 	 */
-	syn Kind InstAccess.predKind() {
-		return kind().predKind();
-	}
-	eq InstDot.predKind() {
-		return getLeftNoTransform().predKind();
-	}
+	syn Kind InstAccess.predKind() = kind().predKind();
+	eq InstDot.predKind()          = getLeftNoTransform().predKind();
 
 }
 aspect InstResolveAmbiguousNames {
@@ -116,7 +110,7 @@ aspect InstResolveAmbiguousNames {
 	 */
 	boolean InstAmbiguousAccess.rewritten = false;
 	rewrite InstAmbiguousAccess {
-	    when(!rewritten) 
+	    when (!rewritten) 
 	    to InstAccess {
 	    	//log.debug("rewrite InstAmbiguousAccess begin " + name());
 	  		if (!lookupInstComponent(name()).isEmpty()) {

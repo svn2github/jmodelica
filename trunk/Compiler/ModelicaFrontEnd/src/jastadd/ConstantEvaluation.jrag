@@ -1280,6 +1280,7 @@ aspect ConstantEvaluation {
   
   syn CValue InstAccess.ceval() = CValue.UNKNOWN;
   eq InstDot.ceval()            = getRight().ceval();
+  eq InstGlobalAccess.ceval()   = getInstAccess().ceval();
   eq InstComponentAccess.ceval() {
 	  CValue res = CValue.UNKNOWN;
 	  if (myInstComponentDecl().isAssignable()) {

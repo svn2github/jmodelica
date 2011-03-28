@@ -580,6 +580,11 @@ aspect PrettyPrint {
 		str.print(".");
 		p.print(getRight(),str,indent);	
 	}
+		
+	public void GlobalAccess.prettyPrint(Printer p, PrintStream str, String indent) {
+		str.print(".");
+		p.print(getAccess(),str,indent);	
+	}
 	
 	public void ComponentAccess.prettyPrint(Printer p, PrintStream str, String indent) {
 		str.print(getID());
@@ -1384,6 +1389,11 @@ aspect FlattPrettyPrint {
 		p.print(getLeft(), str, indent);
 		str.print(".");
 		p.print(getRight(), str, indent);
+	}
+	
+	public void InstGlobalAccess.prettyPrint(Printer p, PrintStream str, String indent) {
+		str.print(".");
+		p.print(getInstAccess(), str, indent);
 	}
 	
 	public void FDerExp.prettyPrint(Printer p, PrintStream str, String indent) {

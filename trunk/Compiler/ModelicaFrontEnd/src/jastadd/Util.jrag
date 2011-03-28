@@ -369,29 +369,38 @@ aspect FileNames {
     
 aspect Names {
   // simple names
-  syn String Access.name()          = getID();
-  syn String ParseAccess.name()     = getID();
-  syn String ClassAccess.name()     = getID();
-  syn String AmbiguousAccess.name() = getID();
-  syn String ComponentAccess.name() = getID();
-  syn String IdDecl.name()          = getID();
-  syn String Dot.name() = getLeftNoTransform().name() + "." + getRightNoTransform().name();
+  syn String IdDecl.name()  = getID();
+  syn String Access.name()  = getID();
+  eq ParseAccess.name()     = getID();
+  eq ClassAccess.name()     = getID();
+  eq AmbiguousAccess.name() = getID();
+  eq ComponentAccess.name() = getID();
+  syn lazy String GlobalAccess.name() = "." + getAccessNoTransform().name();
+  syn lazy String Dot.name()          = 
+  	getLeftNoTransform().name() + "." + getRightNoTransform().name();
   
    // simple names of InstAccess:es
-  syn String InstAccess.name()          = getID();
-  syn String InstParseAccess.name()     = getID();
-  syn String InstClassAccess.name()     = getID();
-  syn String InstAmbiguousAccess.name() = getID();
-  syn String InstComponentAccess.name() = getID();
-  syn String InstDot.name() = getLeftNoTransform().name() + "." + getRightNoTransform().name(); 
+  syn String InstAccess.name()  = getID();
+  eq InstParseAccess.name()     = getID();
+  eq InstClassAccess.name()     = getID();
+  eq InstAmbiguousAccess.name() = getID();
+  eq InstComponentAccess.name() = getID();
+  syn lazy String InstGlobalAccess.name() = "." + getInstAccessNoTransform().name();
+  syn lazy String InstDot.name()          = 
+  	getLeftNoTransform().name() + "." + getRightNoTransform().name();
   
   syn String InstNamedModification.name() = getNameNoTransform().name();
   
-  syn String Access.qualifiedName()   = getID();
-  syn lazy String Dot.qualifiedName() = getLeft().qualifiedName() + "." + getRight().qualifiedName();
+  syn String Access.qualifiedName()            = getID();
+  syn lazy String Dot.qualifiedName()          = 
+  	getLeft().qualifiedName() + "." + getRight().qualifiedName();
+  syn lazy String GlobalAccess.qualifiedName() = "." + getAccess().qualifiedName();
   
-  syn String InstAccess.qualifiedName()   = getID();
-  syn lazy String InstDot.qualifiedName() = getLeft().qualifiedName() + "." + getRight().qualifiedName();
+  syn String InstAccess.qualifiedName()            = getID();
+  syn lazy String InstDot.qualifiedName()          = 
+  	getLeft().qualifiedName() + "." + getRight().qualifiedName();
+  syn lazy String InstGlobalAccess.qualifiedName() = 
+  	"." + getInstAccess().qualifiedName();
   
   syn String ClassDecl.name();
   eq BaseClassDecl.name()    = getNameNoTransform().getID();
@@ -409,10 +418,12 @@ aspect Names {
   eq InstImportUnqualified.name() = "*";    // To avoid returning null
   
   syn String Access.lastName() = name();
-  eq Dot.lastName() = getRightNoTransform().lastName();
+  eq Dot.lastName()            = getRightNoTransform().lastName();
+  eq GlobalAccess.lastName()   = getAccessNoTransform().lastName();
   
   syn String InstAccess.lastName() = name();
-  eq InstDot.lastName() = getRightNoTransform().lastName();
+  eq InstDot.lastName()            = getRightNoTransform().lastName();
+  eq InstGlobalAccess.lastName()   = getInstAccessNoTransform().lastName();
   
   syn String ClassDecl.qualifiedName();
   eq BaseClassDecl.qualifiedName() = combineName(classNamePrefix(), name());
@@ -456,7 +467,8 @@ aspect Names {
   syn String FForIndex.name()    = getFVariableNoTransform().name();
  
   syn String InstAccess.enclosingName() = "";
-  eq InstDot.enclosingName() = name().substring(0, name().lastIndexOf('.'));
+  eq InstDot.enclosingName()           = name().substring(0, name().lastIndexOf('.'));
+  eq InstGlobalAccess.enclosingName()  = name().substring(0, name().lastIndexOf('.'));
   
   
   inh String InstExternal.packageName();
@@ -498,17 +510,20 @@ aspect Names {
      * unqualified name.
      */ 
     syn Access Access.getLastAccess() = this;
-    eq Dot.getLastAccess() = getRight().getLastAccess();
+    eq Dot.getLastAccess()            = getRight().getLastAccess();
+    eq GlobalAccess.getLastAccess()   = getAccess().getLastAccess();
     
     syn InstAccess InstAccess.getLastInstAccess() = this;
-    eq InstDot.getLastInstAccess() = getRight().getLastInstAccess();
+    eq InstDot.getLastInstAccess()                = getRight().getLastInstAccess();
+    eq InstGlobalAccess.getLastInstAccess()       = getInstAccess().getLastInstAccess();
     
     /**
      * Access method for the first Access of a qualified or
      * unqualified name.
      */
     syn Access Access.getFirstAccess() = this;
-    eq Dot.getFirstAccess() = getLeft().getFirstAccess();
+    eq Dot.getFirstAccess()            = getLeft().getFirstAccess();
+    eq GlobalAccess.getFirstAccess()   = getAccess().getFirstAccess();
 
     // For proxy
     public Access SourceRoot.computeNextAccess() {
@@ -525,7 +540,8 @@ aspect Names {
      * unqualified name.
      */
     syn InstAccess InstAccess.getFirstInstAccess() = this;
-    eq InstDot.getFirstInstAccess() = getLeft().getFirstInstAccess();
+    eq InstDot.getFirstInstAccess()                = getLeft().getFirstInstAccess();
+    eq InstGlobalAccess.getFirstInstAccess()       = getInstAccess().getFirstInstAccess();
    
     inh InstAccess InstAccess.getNextInstAccess();
     eq InstDot.getLeft().getNextInstAccess()  = getRight().getFirstInstAccess();
@@ -542,13 +558,18 @@ aspect Names {
     }
     
     public Access Dot.stripFirstAccess() {
-        // A right skewed Dot three is stipped by
-        //getRight().myDecl();
-        return (Access)getRight().fullCopy();
+        Access right = (Access) getRight().fullCopy();
+        Access left = getLeft().stripFirstAccess();
+        return (left == null) ? right : new Dot(left, right);
+    }
+    
+    public Access GlobalAccess.stripFirstAccess() {
+    	return getAccess().stripFirstAccess();
     }
     
     syn boolean Access.isQualified() = false;
-    eq Dot.isQualified() = true;
+    eq Dot.isQualified()             = true;
+    eq GlobalAccess.isQualified()    = getAccess().isQualified();
     
     /**
      * \brief Get the top node in an access (possibly qualified).
@@ -556,8 +577,9 @@ aspect Names {
     syn Access Access.getTopAccess() = retrieveTopAccess(this);
     
     inh Access Access.retrieveTopAccess(Access pre);
-    eq ASTNode.getChild().retrieveTopAccess(Access pre) = pre;
-    eq Dot.getChild().retrieveTopAccess(Access pre)     = retrieveTopAccess(this);
+    eq ASTNode.getChild().retrieveTopAccess(Access pre)      = pre;
+    eq Dot.getChild().retrieveTopAccess(Access pre)          = retrieveTopAccess(this);
+    eq GlobalAccess.getChild().retrieveTopAccess(Access pre) = retrieveTopAccess(this);
     
     /**
      * \brief Get the top node in an access (possibly qualified).
@@ -565,8 +587,9 @@ aspect Names {
     syn InstAccess InstAccess.getTopInstAccess() = retrieveTopInstAccess(this);
     
     inh InstAccess InstAccess.retrieveTopInstAccess(InstAccess pre);
-    eq ASTNode.getChild().retrieveTopInstAccess(InstAccess pre) = pre;
-    eq InstDot.getChild().retrieveTopInstAccess(InstAccess pre) = retrieveTopInstAccess(this);
+    eq ASTNode.getChild().retrieveTopInstAccess(InstAccess pre)          = pre;
+    eq InstDot.getChild().retrieveTopInstAccess(InstAccess pre)          = retrieveTopInstAccess(this);
+    eq InstGlobalAccess.getChild().retrieveTopInstAccess(InstAccess pre) = retrieveTopInstAccess(this);
     
     /**
      * \brief Get the array subscripts of the last name part.
