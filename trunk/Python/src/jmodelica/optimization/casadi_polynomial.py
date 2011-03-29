@@ -22,12 +22,6 @@ import numpy as N
 import numpy.linalg
 import scipy.special as SP
 
-try:
-    import legendre_polynomials
-    legendre_present = True
-except:
-    legendre_present = False
-
 class RadauPol:
 
     def eval_lp(self,i,x):
@@ -95,206 +89,47 @@ class RadauPol3(RadauPol):
                         [1.0048809399827414e+01, 3.2247448713915885e+00, -3.5678400846904061e+00, 5.5319726474218047e+00],
                         [-1.3821427331607485e+00, 1.1678400846904053e+00, 7.7525512860840973e-01, -7.5319726474218065e+00],
                         [3.3333333333333337e-01, -2.5319726474218085e-01, 1.0531972647421810e+00, 5.0000000000000000e+00]])
-
-class LegendreGaussRadau:
-    """
-    Class containing the LGR points which lie on the interval t=(-1,1].
-    """
-    pass
-
-class LegendreGauss:
-    """
-    Class containing the LG points which lie on the interval t=(-1,1).
-    
-    WARNING! This implementation is unstable for K>30 (for scipy 0.7.0). Stable
-    for K < 100 for scipy 0.9.0.
-    """
-    def __init__(self, K):
         
-        if legendre_present:
-            self.roots = N.zeros((K))
-            self.weights = N.zeros((K))
-            legendre_polynomials.legzo(self.roots, self.weights, K)
+def lagrange(R):
+    """
+    Creates K Lagrange Polynomials given R roots. Returns a vector of Poly1D 
+    polynomial.
+    
+            L_i(t) = PROD_{j=0,j!=i}( (t-t_j) / (t_i - t_j ) )
             
-            self.roots.sort()
-            
-            kk = self.roots
-            ii = N.append(-1.0, kk)
-            
-            Pn_k   = N.array([0.0])
-            dPn_k  = N.array([0.0])
-            ddPn_k = N.array([0.0])
-            Pn_i   = N.array([0.0])
-            dPn_i  = N.array([0.0])
-            ddPn_i = N.array([0.0])
-            self.matrix = N.zeros((K,K+1))
-            
-            #Create the differentiation matrix
-            for k in range(len(kk)):
-                tk = kk[k]
-                legendre_polynomials.lpn(K,tk,Pn_k, dPn_k, ddPn_k)
-                for i in range(len(ii)):
-                    ti = ii[i]
-                    legendre_polynomials.lpn(K,ti,Pn_i, dPn_i, ddPn_i)
-                    if i != k+1:
-                        self.matrix[k,i] = ( (1.0+tk)*dPn_k + Pn_k ) / ( (tk-ti)*( (1.0+ti)*dPn_i + Pn_i ) )
-                    else:
-                        self.matrix[k,i] = ( (1.0+ti)*ddPn_i + 2.0*dPn_i ) / ( 2.0*( (1.0+ti)*dPn_i + Pn_i )  )
-                    #print k,i,tk,ti,self.matrix[k,i]
-            
+    WARNING: Numerically highly unstable. Consider using "lagrange_eval"
+    """
+    K = len(R)
+    L = []
+    
+    for i in range(K):
+        p = 1.0
+        for j in range(K):
+            if i==j:
+                continue
+            else:
+                p = p*SP.poly1d([1.0, -R[j]])/(R[i]-R[j])
+        L += [p]
+    return L
+
+def lagrange_eval(R, i, x):
+    """
+    Evaluates the i:th Lagrange polynomial based on the roots, R at point x.
+    
+        L_i(t) = PROD_{j=0,j!=i}( (x-t_j) / (t_i - t_j ) )
+    """
+    val = N.array(1.0)
+    
+    K = len(R)
+    
+    for j in range(K):
+        if j==i:
+            continue
         else:
-            Pn = SP.legendre(K)
-            dPn = Pn.deriv()
-            ddPn = dPn.deriv()
-            
-            #dPn = 1.0/2.0*(K+1)*SP.jacobi(K-1,1,1)
-            #ddPn = 1.0/4.0*(K+1)*(K+2)*SP.jacobi(K-2,2,2)
-            
-            self.Pn = Pn
-            self.dPn = dPn
-            self.ddPn = ddPn
-            self.roots = Pn.weights[:,0].real
-            self.weights = Pn.weights[:,2].real
-            self.matrix = N.zeros((K,K+1))
+            val *= (x-R[j])/(R[i]-R[j])
+    return val
 
-            kk = self.roots
-            ii = N.append(-1.0, kk)
-
-            #Create the differentiation matrix
-            for k in range(len(kk)):
-                for i in range(len(ii)):
-                    tk = kk[k]
-                    ti = ii[i]
-                    if i != k+1:
-                        self.matrix[k,i] = ( (1.0+tk)*dPn(tk) + Pn(tk) ) / ( (tk-ti)*( (1.0+ti)*dPn(ti) + Pn(ti) ) )
-                    else:
-                        self.matrix[k,i] = ( (1.0+ti)*ddPn(ti) + 2.0*dPn(ti) ) / ( 2.0*( (1.0+ti)*dPn(ti) + Pn(ti) )  )
-                    #print k,i,tk,ti,self.matrix[k,i]
-            
-    def get_roots(self):
-        """
-        These are the collocation points which all lie in the interval (-1,1)
-        """
-        return self.roots
-        
-    def get_discretization_points(self):
-        """
-        The discretization points includes both t0 = -1.0 and tf = 1.0.
-        """
-        return N.append(N.append(-1.0, self.roots), 1.0)
-        
-    def get_approximation_polynomials(self):
-        """
-        The approximation is based on K+1 Lagrange polynomials. The roots of
-        a K order Legendre polynomial plus t0=-1.0.
-        """
-        roots = N.append(-1.0, self.roots)
-        return LagrangePol(roots)
-    
-    def get_legendre_pol(self):
-        return self.Pn
-        
-    def get_lagrange_pol(self):
-        return LagrangePol(self.get_roots())
-        
-    def get_weights(self):
-        return self.weights
-    
-    def get_matrix(self):
-        return self.matrix
-
-class LegendreGaussLobatto:
-    """
-    Class containing the LGL points which lie on the interval t=[-1,1].
-    
-    WARNING! This implementation is unstable for K>30 (for scipy 0.7.0). Stable
-    for K < 100 for scipy 0.9.0.
-    """
-    def __init__(self, K):
-        Pn = SP.legendre(K-1)
-        Jn = SP.jacobi(K-2, 1, 1)
-        dPn = Pn.deriv()
-        
-        self.Pn = Pn
-        self.Jn = Jn
-        self.K = K
-        
-        self.roots = N.append(N.append(-1.0, Jn.weights[:,0]), 1.0).real
-        """
-        roots = N.roots(dPn)
-        roots.sort()
-        self.roots = N.append(N.append(-1.0, roots), 1.0)
-        """
-        self.pol = dPn*SP.poly1d([-1.0,0.0,1.0])*1.0/((K-1)*K)
-        """
-        weights = []
-        for i in range(K):
-            weights += [2.0/(K*(K-1.0))*1.0/(self.Pn(self.roots[i])**2)]
-        self.weights = weights
-        """
-        weights = []
-        weights += [2.0/(K*(K-1.0))*1.0/(self.Pn(-1.000000)**2)]
-        weights += Jn.weights[:,2].real.tolist()
-        weights += [2.0/(K*(K-1.0))*1.0/(self.Pn(1.000000)**2)]
-        #for i in range(K):
-        #    weights += [2.0/(K*(K-1.0))*1.0/(self.Pn(self.roots[i])**2)]
-        self.weights = weights
-        
-        #print self.roots
-        #print self.weights
-        
-        matrix = N.zeros((K,K))
-        for k in range(K):
-            for i in range(K):
-                if k!=i:
-                    matrix[k,i] = Pn(self.roots[k])/Pn(self.roots[i])*1.0/(self.roots[k]-self.roots[i])
-                elif k==0 and i==0:
-                    matrix[k,i] = -(K-1)*K/4.0
-                elif k==K-1 and i==K-1:
-                    matrix[k,i] = (K-1)*K/4.0
-                else:
-                    matrix[k,i] = 0.0
-        self.matrix = matrix
-        
-    def get_roots(self):
-        return self.roots
-    
-    def get_pol(self):
-        #self.poly = []
-        #for i in range(self.K):
-        #    self.poly += self.pol*(1.0/self.Pn(self.roots[i]))*(1.0/)
-        return self.pol
-        
-    def get_lagrange_pol(self):
-        return LagrangePol(self.get_roots())
-        
-    def get_weights(self):
-        return self.weights
-    
-    def get_matrix(self):
-        return self.matrix
-
-class LagrangePol:
-    def __init__(self, roots):
-        self.roots = roots
-        self.K = len(self.roots)
-        self._create_pol()
-        
-    def _create_pol(self):
-        self.L = []
-        for i in range(self.K):
-            p = 1.0
-            for j in range(self.K):
-                if i==j:
-                    continue
-                else:
-                    p = p*SP.poly1d([1.0, -self.roots[j]])/(self.roots[i]-self.roots[j])
-            self.L += [p]
-    
-    def get_lagrange_polynomials(self):
-        return self.L
-        
-def LegendrePn(K, x):
+def legendre_Pn(K, x):
     """
     Calculates the Legendre polynomial of degree K at point x, P_n(x) using
     the recurrence relation:
@@ -303,12 +138,12 @@ def LegendrePn(K, x):
         
     Reference: http://mathworld.wolfram.com/LegendrePolynomial.html (eq:43)
     """
-    p0 = 1.0
-    p1 = x
+    p0 = N.array(1.0)
+    p1 = N.array(x)
     
-    if N==0:
+    if K==0:
         return p0
-    elif N==1:
+    elif K==1:
         return p1
     else:
         for n in range(2,K+1):
@@ -317,7 +152,7 @@ def LegendrePn(K, x):
             p1 = pn
         return pn
 
-def LegendredPn(K, x):
+def legendre_dPn(K, x):
     """
     Calculates the derivative of the Legendre polynomial of degree K
     at point x, P_n'(x) using the relation:
@@ -329,12 +164,12 @@ def LegendredPn(K, x):
         P_n'(x) = x^(n+1)*n*(n+1)/2.0
 
     where P_(n-1) and P_n are the Legendre polynomials of degree K-1 and
-    N.
+    K.
     
     Reference: http://mathworld.wolfram.com/LegendrePolynomial.html (eq:44)
     """
-    p0 = LegendrePn(K-1, x)
-    p1 = LegendrePn(K, x)
+    p0 = legendre_Pn(K-1, x)
+    p1 = legendre_Pn(K, x)
     
     if N.abs(x)==1.0:
         pn = x**(K+1)*K*(K+1)/2.0
@@ -343,7 +178,7 @@ def LegendredPn(K, x):
     
     return pn
     
-def LegendreddPn(K, x):
+def legendre_ddPn(K, x):
     """
     Calculates the second derivative of the Legendre polynomial of degree K
     at point x, P_n''(x) using the relation:
@@ -357,33 +192,34 @@ def LegendreddPn(K, x):
     
     Reference: http://mathworld.wolfram.com/JacobiPolynomial.html (eq:12, eq:14)
     """
-    p0 = 0.0
-    p1 = 0.0
+    p0 = N.array(0.0)
+    p1 = N.array(0.0)
     
     if K==0:
         return p0
     elif K==1:
         return p1
     else:
-        p0 = 1.0
-        p1 = 3.0*x
+        p0 = N.array(1.0)
+        p1 = N.array(3.0*x)
         if K==2:
             pn=p0
         elif K==3:
             pn=p1
         else:
             for n in range(2, K-1):
-                pn = 1.0/(2.0*n*(n+4)*(2*n+2))*((2.0*n+2)*(2.0*n+3.0)*(2.0*n+4.0)*x*p1-2.0*(n+1.0)**2.0*(2.0*n+4.0)*p0)
+                pn = 1.0/(2.0*n*(n+4.0)*(2.0*n+2.0))*((2.0*n+2.0)*(2.0*n+3.0)*(2.0*n+4.0)*x*p1-2.0*(n+1.0)**2.0*(2.0*n+4.0)*p0)
                 p0 = p1
                 p1 = pn
+                
     return pn*1.0/4.0*(K+1.0)*(K+2.0)
     
-def LegendrePnRoots(K):
+def legendre_Pn_roots(K):
     """
     Calculates the K roots of the K degree Legendre polynomial by first
     generating the Jacobi matrix.
     
-    For Legendre polynomials the Jacobi matrix is:  
+    For a degree 4 Legendre polynomial the Jacobi matrix is:  
     
             [    0     1/sqrt(3)      0           0    ]
             [1/sqrt(3)     0      2/sqrt(15)      0    ]
@@ -400,11 +236,10 @@ def LegendrePnRoots(K):
     r.sort()
     return r
     
-def LegendredPnRoots(K):
+def legendre_dPn_roots(K):
     """
     Calculates K-1 roots of the derivative of the K degree Legendre Polynomial.
     The calculations are performed via generation of a Jacobi Matrix.
-    
     
             A(n+1,n) = sqrt( n*(n+2) / ( (2n+1)*(2n+3) )
             A(n,n+1) = sqrt( n*(n+2) / ( (2n+1)*(2n+3) )
@@ -418,26 +253,178 @@ def LegendredPnRoots(K):
     r = N.linalg.eig(A)[0]
     r.sort()
     return r
+
+def jacobi_a1_b0_roots(K):
+    """
+    Calculates the K roots of the K degree Jacobi (a=1,b=0) Polynomial. The
+    calculations are performed via generation of a Jacobi Matrix.
     
-def GaussQuadratureWeights(type, K):
+            A(n+1,n) = sqrt( n*(n+1) )/ ( (2n+1) )
+            A(n,n+1) = sqrt( n*(n+1) )/ ( (2n+1) )
+            B(n,n)   = -1 / ( (2n+1)*(2n+3)  )
+    
+    Reference: http://mathworld.wolfram.com/JacobiPolynomial.html (eq:11, 12) 
+    """
+    A = [1.0/(2.0*i+1.0)*N.sqrt(i*(i+1.0)) for i in range(1,K)]
+    B = [-1.0/((2.0*i+1.0)*(2.0*i+3.0)) for i in range(0,K)]
+     
+    M = N.diag(A, 1)+N.diag(A, -1)+N.diag(B)
+    r = N.linalg.eig(M)[0]
+    r.sort()
+    return r
+
+def differentiation_matrix(type, K):
+    """
+    Calculates the differentiation matrix for the given type of collocation
+    points. 
+    
+        D_ki = d/dt L_i(t_k) where k=1,..,K and i=1,...,M
+        
+    where K are the collocation points and M are the number of points used
+    in the approximation of the states. L are lagrange polynomials.
+    
+    The type can either be:
+    
+        type = "Gauss", generates the differentiation matrix for the Gauss
+                        Pseudospectral method. M = K + 1
+                        
+            D_ki = { i!=k   ( (1+t_k) * dP_K(t_k) + P_K(t_k) ) / 
+                            ( (t_k-t_i) * ( (1+t_i) * dP_K(t_i) + P_K(t_i) ) )
+                     
+                   { i==k   ( (1+t_i) * ddP_K(t_i) + 2 * dP_K(t_i) ) /
+                            ( 2 * ( (1+t_i)*dP_K(t_i) + P_K(t_i) ) )
+                            
+        type = "Legendre", generates the differentiation matrix for the Legendre
+                           Pseudospectral method. M = K
+                           
+            D_ki = { i!=k      P_(K-1)(t_k)/P_(K-1)(t_i) * 1 / (t_k - t_i)
+                   
+                   { k==i==1   - (K-1) * K / 4
+                   
+                   { k==i==K     (K-1) * K / 4
+                   
+                   { else        0.0
+                   
+        type = "Radau", generates the differentiation matrix for the Radau 
+                        Pseudospectral method (flipped LGR points). M = K+1
+                        
+            D_ki = { i!=k  ( (1+t_k) * ( dP_K(t_k) - dP_{K-1}(t_k) ) + P_K(t_k) - P_{K-1}(t_k) ) / 
+                           ( (t_k-t_i) * ( (1+t_i) * ( dP_K(t_i) - dP_{K-1}(t_i) ) + P_K(t_i) - P_{K-1}(t_k) ) )
+                           
+                   { i==k  ( (1+t_i) * ( ddP_K(t_i) - ddP_{K-1}(t_i) ) + 2 * dP_K(t_i) - 2 * dP_{K-1}(t_i) ) /
+                           ( 2 * ( (1+t_i) * ( dP_K(t_i) - dP_{K-1}(t_i) ) + P_K(t_i) - P_{K-1}(t_k) ) )
+    """
+    if type == "Gauss":
+        M = K+1
+        D = N.zeros((K,M))
+        
+        kk = legendre_Pn_roots(K)
+        ii = N.append(-1.0, kk)
+        
+        Pn_k   = [legendre_Pn(K, x) for x in ii]
+        dPn_k  = [legendre_dPn(K, x) for x in ii]
+        ddPn_k = [legendre_ddPn(K, x) for x in ii]
+        
+        for k in range(K):
+            tk = kk[k]
+            for i in range(M):
+                ti = ii[i]
+                if i != k+1:
+                    D[k,i] = ( (1.0+tk)*dPn_k[k+1] + Pn_k[k+1] ) / ( (tk-ti)*( (1.0+ti)*dPn_k[i] + Pn_k[i] ) )
+                else:
+                    D[k,i] = ( (1.0+ti)*ddPn_k[i] + 2.0*dPn_k[i] ) / ( 2.0*( (1.0+ti)*dPn_k[i] + Pn_k[i] )  )
+    
+    elif type == "Legendre":
+        M = K
+        D = N.zeros((K,M))
+        
+        kk = N.append(N.append(-1.0, legendre_dPn_roots(K-1)), 1.0)
+        ii = kk
+        
+        Pn_k   = [legendre_Pn(K-1, x) for x in ii]
+        
+        for k in range(K):
+            tk = kk[k]
+            for i in range(M):
+                ti = ii[i]
+                if i != k:
+                    D[k,i] = Pn_k[k]/Pn_k[i] * 1.0 / (tk-ti)
+                elif k==0 and i==0:
+                    D[k,i] = -(K-1)*K / 4.0
+                elif k+1==K and i+1 ==K:
+                    D[k,i] =  (K-1)*K / 4.0
+                else:
+                    D[k,i] = 0.0
+    
+    elif type == "Radau":
+        M = K+1
+        D = N.zeros((K,M))
+        
+        kk = N.append(jacobi_a1_b0_roots(K-1), 1.0)
+        ii = N.append(-1.0, kk)
+        
+        Pn_k   = [legendre_Pn(K, x)-legendre_Pn(K-1, x) for x in ii]
+        dPn_k  = [legendre_dPn(K, x)-legendre_dPn(K-1, x) for x in ii]
+        ddPn_k = [legendre_ddPn(K, x)-legendre_ddPn(K-1, x) for x in ii]
+        
+        for k in range(K):
+            tk = kk[k]
+            for i in range(M):
+                ti = ii[i]
+                if i != k+1:
+                    D[k,i] = ( (1.0+tk)*dPn_k[k+1] + Pn_k[k+1] ) / ( (tk-ti)*( (1.0+ti)*dPn_k[i] + Pn_k[i] ) )
+                else:
+                    D[k,i] = ( (1.0+ti)*ddPn_k[i] + 2.0*dPn_k[i] ) / ( 2.0*( (1.0+ti)*dPn_k[i] + Pn_k[i] )  )
+    
+    else:
+        raise Exception("Unknown option to differentiation_matrix.")
+        
+    return D
+    
+def gauss_quadrature_weights(type, K):
     """
     Calculates the K Gauss quadrature weights for a given type of points. The
     type can either be:
     
         type = "LG" , corresponding to Legendre-Gauss points
+            
+            - Weights are calculated for the K Legendre-Gauss points as:
+                
+                w_i = 2 / ( (1-ti^2)*dP_n(ti)^2 ), [i=1,...,K]
+                
         type = "LGL", corresponding to Legendre-Gauss-Lobatto points
-        type = "LGR", corresponding to Legendre-Gauss-Radau points
+        
+            - Weights are calculated for the K Legendre-Gauss-Lobatto points
+              as:
+              
+                w_i = 2 / ( K (K-1) ) * 1 / ( P_(n-1)(ti)^2 ), [i=1,...,K]
+              
+        type = "LGR", corresponding to (flipped) Legendre-Gauss-Radau points,
+                      i.e the end point 1 is included instead of -1.
+                      
+            - Weights are calculated for the K Legendre-Gauss-Radau points as:
+                
+                w_i = 1 / ( (1-ti)*dP_n(ti)^2 ), [i=1,..,K-1]
+                w_K = 2 / K^2
     """
     w = N.zeros(K)
     
     if type == "LG":
-        ti = LegendreRoots(K)
-        dPn_ti = [LegendredPn(K,x) for x in ti]
+        ti = legendre_Pn_roots(K)
+        dPn_ti = [legendre_dPn(K,x) for x in ti]
         w = [2.0/((1.0-ti[i]**2)*x**2) for i,x in enumerate(dPn_ti)]
+        
     elif type == "LGL":
-        pass 
+        ti = N.append(N.append(-1.0, legendre_dPn_roots(K-1)), 1.0)
+        Pn_ti = [legendre_Pn(K-1, x) for x in ti]
+        w = [2.0/(K*(K-1))*1.0/x**2 for x in Pn_ti]
+        
     elif type == "LGR":
-        pass
+        ti = jacobi_a1_b0_roots(K-1)
+        dPn_ti = [legendre_dPn(K-1, x) for x in ti]
+        w = [1.0/((1.0+ti[i])*x**2) for i,x in enumerate(dPn_ti)]
+        w += [N.array(2.0/K**2)]
+        
     else:
         raise Exception("Unknown option to Gauss Quadrature.")
                         

@@ -37,6 +37,7 @@ def compile_casadi(class_name, file_name=[], compiler='auto', target='ipopt',
     CasADi.
     """
     compiler_options['generate_xml_equations']=True
+    compiler_options['normalize_minimum_time_problems']=False
     
     return compile_jmu(class_name, file_name, compiler, target, compiler_options,
                        compile_to, compiler_log_level)
@@ -172,9 +173,15 @@ class CasadiModel(object):
     
     def get_casadi_ocp(self):
         return self.ocp
+        
+    def get_casadi_variables(self):
+        return self.var
 
     def get_n_x(self):
         return self.n_x
+    
+    def get_n_p(self):
+        return self.n_p
 
     def get_n_u(self):
         return self.n_u
@@ -193,6 +200,9 @@ class CasadiModel(object):
         
     def get_u(self):
         return self.u
+    
+    def get_p(self):
+        return self.p
         
     def get_w(self):
         return self.w
@@ -205,6 +215,9 @@ class CasadiModel(object):
 
     def get_u_sf(self):
         return self.u_sf
+        
+    def get_p_sf(self):
+        return self.p_sf
 
     def get_w_sf(self):
         return self.w_sf
@@ -214,6 +227,9 @@ class CasadiModel(object):
 
     def get_x_vr_map(self):
         return self.x_vr_map
+        
+    def get_p_vr_map(self):
+        return self.p_vr_map
 
     def get_u_vr_map(self):
         return self.u_vr_map
@@ -239,16 +255,18 @@ class CasadiModel(object):
         """
         return self.opt_L
         
-    def _convert_to_ode(self):
+    def _convert_to_ode(self, enable_scaling=False):
 
         self.ocp.makeExplicit()
         
         self.ocp_ode_inputs = []
+        self.ocp_ode_inputs += list(self.p)
         self.ocp_ode_inputs += list(self.x)
         self.ocp_ode_inputs += list(self.u)
         self.ocp_ode_inputs += [self.t]
         
         self.ocp_ode_init_inputs = []
+        self.ocp_ode_init_inputs += list(self.p)
         self.ocp_ode_init_inputs += list(self.x)
         self.ocp_ode_init_inputs += [self.t]
         
@@ -268,12 +286,35 @@ class CasadiModel(object):
         # The Mayer cost function
         if len(self.ocp.mterm)>0:
             self.ocp_ode_mterm_inputs = []
-            self.ocp_ode_mterm_inputs += list(self.x)
+            self.ocp_ode_mterm_inputs += list(self.p)
+            self.ocp_ode_mterm_inputs += [x.atTime(self.ocp.tf,True) for x in self.var.x]
             self.ocp_ode_mterm_inputs += [self.t]
             self.opt_ode_J = casadi.SXFunction([self.ocp_ode_mterm_inputs],[[self.ocp.mterm[0]]])
         else:
             self.opt_ode_J = None
-
+        
+        # Boundary Constraints
+        
+        # Modify equality constraints to be on type g(x)=0
+        lb = N.array(self.ocp.cfcn_lb, dtype=N.float)
+        ub = N.array(self.ocp.cfcn_ub, dtype=N.float)
+        for i in range(len(ub)):
+            if lb[i] == ub[i]:
+                self.ocp.cfcn[i] = self.ocp.cfcn[i]-self.ocp.cfcn_ub[i]
+                self.ocp.cfcn_ub[i] = casadi.SX(0.0)
+                self.ocp.cfcn_lb[i] = casadi.SX(0.0)
+        
+        self.ocp_ode_boundary_inputs = []
+        self.ocp_ode_boundary_inputs += list(self.p)
+        self.ocp_ode_boundary_inputs += [x.atTime(self.ocp.t0,True) for x in self.var.x]
+        self.ocp_ode_boundary_inputs += [self.t]
+        self.ocp_ode_boundary_inputs += [x.atTime(self.ocp.tf,True) for x in self.var.x]
+        self.ocp_ode_boundary_inputs += [self.t]
+        self.opt_ode_C = casadi.SXFunction([self.ocp_ode_boundary_inputs],[self.ocp.cfcn])
+    
+        if enable_scaling:
+            pass
+    
     def get_opt_ode_L(self):
         return self.opt_ode_L
 
@@ -320,13 +361,24 @@ class CasadiModel(object):
         for vr in sorted(name_dict.keys()):
             self.var.z[i] = var_dict[name_dict[vr]]
             i = i + 1
+        
+        var_dict = dict((repr(v),v) for v in self.var.p)            
+        name_dict = dict((x[0],x[1]) for x in self.xmldoc.get_p_opt_variable_names(include_alias = False))        
+        i = 0;
 
+        for vr in sorted(name_dict.keys()):
+            if name_dict[vr] == "finalTime":
+                continue
+            self.var.p[i] = var_dict[name_dict[vr]]
+            i = i + 1
+        
         # Get the variables
         self.dx = casadi.der(self.var.x)
         self.x = casadi.sx(self.var.x)
         self.u = casadi.sx(self.var.u)
         self.w = casadi.sx(self.var.z)
         self.t = self.var.t.sx()
+        self.p = casadi.sx(self.var.p)
 
         # Build maps mapping value references to indices in the
         # variable vectors of casadi
@@ -334,6 +386,7 @@ class CasadiModel(object):
         self.x_vr_map = {}
         self.u_vr_map = {}
         self.w_vr_map = {}
+        self.p_vr_map = {}
 
         i = 0;
         for v in self.dx:
@@ -353,6 +406,11 @@ class CasadiModel(object):
         i = 0;
         for v in self.w:
             self.w_vr_map[self.xmldoc.get_value_reference(str(v))] = i
+            i = i + 1
+            
+        i = 0;
+        for v in self.p:
+            self.p_vr_map[self.xmldoc.get_value_reference(str(v))] = i
             i = i + 1
 
         self.ocp_inputs = []
@@ -385,11 +443,13 @@ class CasadiModel(object):
         self.n_x = len(self.x)
         self.n_u = len(self.u)
         self.n_w = len(self.w)
+        self.n_p = len(self.p)
 
         self.dx_sf = N.ones(self.n_x)
         self.x_sf = N.ones(self.n_x)
         self.u_sf = N.ones(self.n_u)
         self.w_sf = N.ones(self.n_w)
+        self.p_sf = N.ones(self.n_p)
 
         if enable_scaling:
             # Scale model
@@ -439,3 +499,4 @@ class CasadiModel(object):
                 self.opt_J = casadi.SXFunction([self.ocp_inputs],[self.opt_J])
             if self.opt_L!=None:
                 self.opt_L = casadi.SXFunction([self.ocp_inputs],[self.opt_L])
+        

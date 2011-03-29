@@ -140,9 +140,9 @@ class CasadiCollocator(object):
             Currently only textual format is supported.
         """
 
-        (t,dx_opt,x_opt,u_opt,w_opt) = self.get_result() 
-        #print (t,dx_opt,x_opt,u_opt,w_opt)
-        data = N.hstack((N.transpose(N.array([t])),dx_opt,x_opt,u_opt,w_opt))
+        (t,dx_opt,x_opt,u_opt,w_opt) = self.get_result()
+        #data = N.hstack((N.transpose(N.array([t])),dx_opt,x_opt,u_opt,w_opt))
+        data = N.hstack((t,dx_opt,x_opt,u_opt,w_opt))
         
         if (format=='txt'):
 
@@ -729,16 +729,23 @@ class RadauCollocator(CasadiCollocator):
     def get_hessian(self):
         return self.H_fcn
         
-class GaussPseudoSpectralMethod(CasadiCollocator):
+class PseudoSpectral(CasadiCollocator):
     """
-    This class implementes the Gauss PseudoSpectral method described in:
+    This class implementes PseudoSpectral methods with different 
+    discretizations. The available discretizations options are:
     
-        * A Gauss pseudospectral transcription for optimal control.
-            -> http://dspace.mit.edu/handle/1721.1/28919
-        * Advancement and analysis of Gauss pseudospectral transcription for optimal control problems.
-            -> http://dspace.mit.edu/handle/1721.1/42180
-        * Algorithm 902: GPOPS, A MATLAB software for solving multiple-phase optimal control problems using the gauss pseudospectral method.
-            -> http://portal.acm.org/citation.cfm?doid=1731022.1731032
+        LG:
+        
+            This option corresponds to the Guass Pseudospectral method described
+            in:
+                * A Gauss pseudospectral transcription for optimal control.
+                    -> http://dspace.mit.edu/handle/1721.1/28919
+                * Advancement and analysis of Gauss pseudospectral transcription for optimal control problems.
+                    -> http://dspace.mit.edu/handle/1721.1/42180
+                * Algorithm 902: GPOPS, A MATLAB software for solving multiple-phase optimal control problems using the gauss pseudospectral method.
+                    -> http://portal.acm.org/citation.cfm?doid=1731022.1731032
+        LGR:
+        LGL:
     """
     def __init__(self, model, options):
         #Make problem explicit
@@ -748,26 +755,548 @@ class GaussPseudoSpectralMethod(CasadiCollocator):
         self.options = options
         self.md  = model.get_model_description()
         self.ocp = model.get_casadi_ocp()
+        self.var = model.get_casadi_variables()
         
-        self.P = options['n_e']
-        self.K = options['n_cp']
-        
-        self.LG = LegendreGauss(self.K)
-        self.LGr = self.LG.get_roots()
-        self.LGm = self.LG.get_matrix()
-        self.LGw = self.LG.get_weights()
-        self.LGd = self.LG.get_discretization_points()
-        self.LGl = self.LG.get_lagrange_pol().get_lagrange_polynomials()
+        #Create the necessary vectors for a corresponding set of points
+        if options['discr'] == "LG":
+            self._Collocation    = range(1,options['n_cp']+1)
+            self._Discretization = range(0,options['n_cp']+2)
+            self._Approximation  = range(0,options['n_cp']+1)
+            self._Weights    = gauss_quadrature_weights("LG", options['n_cp'])
+            self._DiffMatrix = differentiation_matrix("Gauss", options['n_cp'])
+            self._Roots      = legendre_Pn_roots(options['n_cp'])
+            self._WeightsTDiffMatrix = N.dot(self._Weights, self._DiffMatrix).flatten()
+            self._WeightsTDiffMatrix[0] = N.array(0.0)#Using analytical results for W*D
+        elif options['discr'] == "LGR":
+            self._Collocation    = range(1,options['n_cp']+1)
+            self._Discretization = range(0,options['n_cp']+1)
+            self._Approximation  = range(0,options['n_cp']+1)
+            self._Weights    = gauss_quadrature_weights("LGR", options['n_cp'])
+            self._DiffMatrix = differentiation_matrix("Radau", options['n_cp'])
+            self._Roots      = N.append(jacobi_a1_b0_roots(options['n_cp']-1), 1.0)
+            #self._WeightsTDiffMatrix = N.dot(self._Weights, self._DiffMatrix).flatten()
+            self._WeightsTDiffMatrix     = N.zeros(options['n_cp']+1)#Using analytical results for W*D
+            self._WeightsTDiffMatrix[0]  = N.array(-1.0)
+            self._WeightsTDiffMatrix[-1] = N.array(1.0)
+        elif options['discr'] == "LGL":
+            self._Collocation    = range(0,options['n_cp'])
+            self._Discretization = range(0,options['n_cp'])
+            self._Approximation  = range(0,options['n_cp'])
+            self._Weights    = gauss_quadrature_weights("LGL", options['n_cp'])
+            self._DiffMatrix = differentiation_matrix("Legendre", options['n_cp'])
+            self._Roots      = N.append(N.append(-1.0, legendre_dPn_roots(options['n_cp']-1)), 1.0)
+            #self._WeightsTDiffMatrix = N.dot(self._Weights, self._DiffMatrix).flatten()
+            self._WeightsTDiffMatrix     = N.zeros(options['n_cp']) #Using analytical results for W*D
+            self._WeightsTDiffMatrix[0]  = N.array(-1.0)
+            self._WeightsTDiffMatrix[-1] = N.array(1.0)
+        else:
+            raise Exception("Unknown discretization option. Valid options: LG,LGL,LGR")
+            
+        self._Phases   = range(1,options['n_e']+1)
         
         self._create_nlp_variables()
         self._create_collocation_constraints()
         self._create_bolza_functional()
         
         # Necessary!
-        super(GaussPseudoSpectralMethod,self).__init__(model)
+        super(PseudoSpectral,self).__init__(model)
         
         self._modify_init()
+    
+    def _modify_init(self):
+        PHASE = self._Phases
+        DISCR = self._Discretization
         
+        xx_init = self.get_xx_init()
+        xx_lb = self.get_xx_lb()
+        xx_ub = self.get_xx_ub()
+        
+        #Handle free final time
+        if self.md.get_opt_finaltime_free():
+            val_ref = self.md.get_value_reference("finalTime")
+            init = self.md.get_p_opt_initial_guess()
+            lb   = self.md.get_p_opt_min()
+            ub   = self.md.get_p_opt_max()
+            for i,p in enumerate(init):
+                if p[0] == val_ref:
+                    xx_init[self.get_var_indices()[PHASE[-1]][DISCR[-1]]['t']] = init[i][1] if init[i][1] != None else N.array(0.0)
+                    xx_lb[self.get_var_indices()[PHASE[-1]][DISCR[-1]]['t']] = lb[i][1] if lb[i][1] != None else N.array(-1e20)
+                    xx_ub[self.get_var_indices()[PHASE[-1]][DISCR[-1]]['t']] = ub[i][1] if ub[i][1] != None else N.array(1e20)
+        
+        #Handle free start time
+        if self.md.get_opt_starttime_free():
+            val_ref = self.md.get_value_reference("startTime")
+            init = self.md.get_p_opt_initial_guess()
+            lb   = self.md.get_p_opt_min()
+            ub   = self.md.get_p_opt_max()
+            for i,p in enumerate(init):
+                if p[0] == val_ref:
+                    xx_init[self.get_var_indices()[0][DISCR[0]]['t']] = init[i][1] if init[i][1] != None else N.array(0.0)
+                    xx_lb[self.get_var_indices()[0][DISCR[0]]['t']] = lb[i][1] if lb[i][1] != None else N.array(-1e20)
+                    xx_ub[self.get_var_indices()[0][DISCR[0]]['t']] = ub[i][1] if ub[i][1] != None else N.array(1e20)
+        
+        #Handle free phases
+        if self.options['free_phases'] and len(PHASE) > 1:
+            if self.options['phase_bounds'] != None:
+                for i,x in enumerate(self.options['phase_bounds']):
+                    xx_init[self.get_var_indices()[i+1][DISCR[-1]]['t']]=x[0]
+                    xx_lb[self.get_var_indices()[i+1][DISCR[-1]]['t']] = x[1]
+                    xx_ub[self.get_var_indices()[i+1][DISCR[-1]]['t']] = x[2]
+            else:
+                for i in PHASE[:-1]:
+                    xx_init[self.get_var_indices()[i][DISCR[-1]]['t']] = i*(self.ocp.tf-self.ocp.t0)/len(PHASE)
+                    xx_lb[self.get_var_indices()[i][DISCR[-1]]['t']] = N.array(-1e20)
+                    xx_ub[self.get_var_indices()[i][DISCR[-1]]['t']] = N.array(1e20)
+        
+        #Handle links
+        if self.options['link_options'] != []:
+            for j,x in enumerate(self.options['link_bounds']):
+                for i in PHASE[:-1]:
+                    xx_init[self.get_var_indices()[i][0]['link_x'][j]]=x[0]
+                    xx_lb[self.get_var_indices()[i][0]['link_x'][j]] = x[1]
+                    xx_ub[self.get_var_indices()[i][0]['link_x'][j]] = x[2]
+        
+    def _create_collocation_constraints(self):
+        
+        PHASE = self._Phases
+        COLLO = self._Collocation
+        DISCR = self._Discretization
+        APPRO = self._Approximation
+        WEIGH = self._Weights
+        DIFFM = self._DiffMatrix
+        ROOTS = self._Roots
+        WTD   = self._WeightsTDiffMatrix
+        
+        self.h = [] #Equality constraints
+        self.g = [] #Inequality constraints
+        self.time_points = []
+        
+        #Create initial constraints
+        t = self.vars[0]['t']
+        z = []
+        z += self.vars[0]['p']
+        z += self.vars[PHASE[0]][DISCR[0]]['x']
+        z += [t]
+        init_constr = list(self.model.get_ode_F0().eval([z])[0])
+        self.h += init_constr
+        
+        #Create collocation constraints
+        for i in PHASE:
+            if DISCR[0] != COLLO[0]:
+                self.time_points += [(self.vars[i-1]['t'],i,DISCR[0])]
+            for ind,j in enumerate(COLLO):
+                dx = []
+                for k in range(self.model.get_n_x()):
+                    dx += [sum([DIFFM[ind,l]*self.vars[i][l]['x'][k] for l in APPRO])]
+                    
+                t = (self.vars[i]['t']-self.vars[i-1]['t'])*0.5*(ROOTS[ind]+(self.vars[i]['t']+self.vars[i-1]['t'])/(self.vars[i]['t']-self.vars[i-1]['t']))
+                z = []
+                z += self.vars[0]['p']
+                z += self.vars[i][j]['x']
+                z += self.vars[i][j]['u']
+                z += [t]
+                dynamic_constr = list((self.vars[i]['t']-self.vars[i-1]['t'])*0.5*self.model.get_ode_F().eval([z])[0])
+                for k in range(self.model.get_n_x()):
+                    self.h += [dx[k] - dynamic_constr[k]]
+
+                self.time_points += [(t,i,j)]
+            if DISCR[-1] != COLLO[-1]:
+                self.time_points += [(self.vars[i]['t'],i,DISCR[-1])]
+        
+        #Create linking constraints
+        for i in PHASE[:-1]:
+            z = []
+            #u = []
+            for x in range(self.model.get_n_x()):
+                z += [self.vars[i][DISCR[-1]]['x'][x] - self.vars[i+1][DISCR[0]]['x'][x] + self.vars[i]['link_x'][x]]
+            #for x in range(self.model.get_n_u()):
+            #    u += [sum([lagrange_eval(ROOTS,ind,1.0)*self.vars[i][l]['u'][x] for ind,l in enumerate(COLLO)])-sum([lagrange_eval(ROOTS,ind,-1.0)*self.vars[i+1][l]['u'][x] for ind,l in enumerate(COLLO)])]
+            #self.h += u    
+            self.h += z
+        
+        #Create constraints on the final x (Linear Equation)
+        if self.options["discr"]=="LG":
+            final_constr = []
+            for j in PHASE:
+                for x in range(self.model.get_n_x()):
+                    temp = []
+                    for i in APPRO:
+                        #for ind,k in enumerate(COLLO):
+                        #    temp += [WEIGH[ind]*DIFFM[ind,i]*self.vars[j][i]['x'][x]]
+                        temp += [WTD[i]*self.vars[j][i]['x'][x]]
+                    final_constr += [self.vars[j][DISCR[-1]]['x'][x] - self.vars[j][DISCR[0]]['x'][x] - sum(temp)]
+            self.h += final_constr
+        #Create constraints on the final x (NonLinear Equation)
+        
+        """
+        final_constr = []
+        for i in PHASE:
+            dynamic_constr = []
+            for ind,j in enumerate(COLLO):
+                t = (self.vars[i]['t']-self.vars[i-1]['t'])*0.5*(ROOTS[ind]+(self.vars[i]['t']+self.vars[i-1]['t'])/(self.vars[i]['t']-self.vars[i-1]['t']))
+                z = []
+                z += self.vars[0]['p']
+                z += self.vars[i][j]['x']
+                z += self.vars[i][j]['u']
+                z += [t]
+                dynamic_constr += list((self.vars[i]['t']-self.vars[i-1]['t'])*0.5*float(WEIGH[ind])*self.model.get_ode_F().eval([z])[0])
+            sums = []
+            for j in range(self.model.get_n_x()):
+                sums += [-1.0*sum(dynamic_constr[j::self.model.get_n_x()])]
+            for j in range(self.model.get_n_x()):
+                final_constr += [self.vars[i][DISCR[-1]]['x'][j] - self.vars[i][DISCR[0]]['x'][j] + sums[j]]
+        self.h += final_constr
+        """
+
+        #Create boundary constraints
+        boundary_constr = []
+        z = []
+        z += self.vars[0]['p']
+        z += self.vars[PHASE[0]][DISCR[0]]['x']
+        z += [self.vars[0]['t']]
+        z += self.vars[PHASE[-1]][DISCR[-1]]['x']
+        z += [self.vars[PHASE[-1]]['t']]
+        boundary_constr = list(self.model.opt_ode_C.eval([z])[0])
+        self.h += boundary_constr
+        
+        #Create inequality constraint
+        if self.options['free_phases']:
+            for i in PHASE:
+                self.g += [self.vars[i-1]['t']-self.vars[i]['t']]
+    
+    def _create_bolza_functional(self):
+        
+        PHASE = self._Phases
+        APPRO = self._Approximation
+        COLLO = self._Collocation
+        DISCR = self._Discretization
+        WEIGH = self._Weights
+        DIFFM = self._DiffMatrix
+        ROOTS = self._Roots
+        
+        # Generate cost function
+        self.cost_mayer = 0
+        self.cost_lagrange = 0
+    
+        if self.model.get_opt_J() != None:
+            # Assume Mayer cost
+            z = []
+            t = self.vars[PHASE[-1]]['t']
+            z += self.vars[0]['p']
+            z += self.vars[PHASE[-1]][DISCR[-1]]['x']
+            z += [t]
+            self.cost_mayer = list(self.model.get_opt_ode_J().eval([z])[0])[0]
+        
+        #Add linking options to the Mayer functional
+        for i in PHASE[:-1]:
+            temp = 0.0
+            for j in self.options['link_options']:
+                for l,k in enumerate(self.model.get_x()):
+                    if j[0] == str(k) and j[1]==True:
+                        temp += self.vars[i]['link_x'][l]*self.vars[i]['link_x'][l]
+            self.cost_mayer += N.sqrt(temp)
+        #NOTE TEMPORARY!!!!
+        #self.cost_mayer=self.vars[PHASE[-1]]['t']
+        # Take care of Lagrange cost
+        if self.model.get_opt_L() != None:
+            for i in PHASE:
+                for ind,j in enumerate(COLLO):
+                    t = (self.vars[i]['t']-self.vars[i-1]['t'])*0.5*(ROOTS[ind]+(self.vars[i]['t']+self.vars[i-1]['t'])/(self.vars[i]['t']-self.vars[i-1]['t']))
+                    z = []
+                    z += self.vars[0]['p']
+                    z += self.vars[i][j]['x']
+                    z += self.vars[i][j]['u']
+                    z += [t]
+                    self.cost_lagrange += (self.vars[i]['t']-self.vars[i-1]['t'])/2.0*self.model.get_opt_ode_L().eval([z])[0][0]*WEIGH[ind]
+          
+        self.cost = self.cost_mayer + self.cost_lagrange
+
+        # Objective function
+        self.cost_fcn = casadi.SXFunction([self.xx], [[self.cost]])  
+        
+        # Hessian
+        self.sigma = casadi.SX('sigma')
+        
+        self.lam = []
+        self.Lag = self.sigma*self.cost
+        for i in range(len(self.h)):
+            self.lam.append(casadi.SX('lambda_' + str(i)))
+            self.Lag = self.Lag + self.h[i]*self.lam[i]
+        for i in range(len(self.g)):
+            self.lam.append(casadi.SX('lambda_' + str(i+len(self.h))))
+            self.Lag = self.Lag + self.g[i]*self.lam[i+len(self.h)]
+            
+        self.Lag_fcn = casadi.SXFunction([self.xx, self.lam, [self.sigma]],[[self.Lag]])
+
+        self.H_fcn = self.Lag_fcn.hessian(0,0)
+    
+    def _create_nlp_variables(self):
+        
+        PHASE = self._Phases
+        COLLO = self._Collocation
+        DISCR = self._Discretization
+        
+        # Group variables into elements
+        self.vars = {}
+        # Extended vars
+        self.ext_vars = {}
+        
+        t0 = self.ocp.t0
+        tf = self.ocp.tf
+        
+        if self.md.get_opt_finaltime_free():
+            tf = casadi.SX("tf")
+        if self.md.get_opt_starttime_free():
+            t0 = casadi.SX("t0")
+        
+        self.vars[0] = {}
+        for i in PHASE: #Phases
+            for j in DISCR: #Discretization
+                xi = [casadi.SX(str(x)+'_'+str(i)+','+str(j)) for x in self.model.get_x()]
+                if j==0:
+                    self.vars[i] = {}
+                self.vars[i][j] = {}
+                self.vars[i][j]['x'] = xi
+                    
+            for j in COLLO: #Collocation
+                ui = [casadi.SX(str(x)+'_'+str(i)+','+str(j)) for x in self.model.get_u()]
+                self.vars[i][j]['u'] = ui
+            
+            if i != PHASE[-1]:
+                if self.options['free_phases']:
+                    self.vars[i]['t'] = casadi.SX("t"+str(i))
+                else:
+                    #self.vars[i]['t'] = casadi.SX(i*(tf-t0)/len(PHASE))
+                    self.vars[i]['t'] = i*(tf-t0)/len(PHASE)
+
+        pi = [casadi.SX(str(x)) for x in self.model.get_p()]
+        self.vars[0]['p'] = pi
+        
+        self.vars[PHASE[-1]]['t'] = tf
+        self.vars[0]['t']         = t0
+        
+        # Group variables indices in the global
+        # variable vector
+        self.var_indices = {0:{0:{}}}
+        self.xx = []
+        
+        for i in PHASE: #Phases
+            self.var_indices[i] = {}
+            
+            for j in DISCR: #Discretization
+                self.var_indices[i][j] = {}
+                pre_len = len(self.xx)
+                self.xx += self.vars[i][j]['x']
+                self.var_indices[i][j]['x'] = N.arange(pre_len,len(self.xx),dtype=int)
+                
+            for j in COLLO: #Collocation
+                pre_len = len(self.xx)
+                self.xx += self.vars[i][j]['u']
+                self.var_indices[i][j]['u'] = N.arange(pre_len,len(self.xx),dtype=int)
+        
+        pre_len = len(self.xx)
+        self.xx += self.vars[0]['p']
+        self.var_indices[0][0]['p'] = N.arange(pre_len,len(self.xx),dtype=int)
+        
+        if self.md.get_opt_finaltime_free(): #Handle free finaltime
+            pre_len = len(self.xx)
+            self.xx += [self.vars[PHASE[-1]]['t']]
+            self.var_indices[PHASE[-1]][DISCR[-1]]['t'] = N.arange(pre_len,len(self.xx),dtype=int)
+        if self.md.get_opt_starttime_free(): #Handle free starttime
+            pre_len = len(self.xx)
+            self.xx += [self.vars[0]['t']]
+            self.var_indices[0][0]['t'] = N.arange(pre_len,len(self.xx),dtype=int)
+        if self.options['free_phases'] and len(PHASE) > 1: #Handle free phases
+            for i in PHASE[:-1]:
+                pre_len = len(self.xx)
+                self.xx += [self.vars[i]['t']]
+                self.var_indices[i][DISCR[-1]]['t'] = N.arange(pre_len,len(self.xx),dtype=int)
+        
+        #Create vector allowing or disallowing discontinuous state
+        for i in PHASE[:-1]: #Phases
+            self.vars[i]['link_x'] = [casadi.SX(0.0) for x in self.model.get_x()]
+            links = []
+            for j in self.options['link_options']:
+                for l,k in enumerate(self.model.get_x()):
+                    if j[0] == str(k):
+                        self.vars[i]['link_x'][l] = casadi.SX('link_'+str(k)+'_'+str(i))
+                        links += [self.vars[i]['link_x'][l]]
+            pre_len = len(self.xx)
+            #self.xx += [self.vars[i]['link_x'][l]]
+            self.xx += links
+            self.var_indices[i][0]['link_x'] = N.arange(pre_len,len(self.xx),dtype=int)
+    
+    def get_equality_constraint(self):
+        return self.h
+    
+    def get_inequality_constraint(self):
+        return self.g
+
+    def get_cost(self):
+        return self.cost_fcn
+
+    def get_hessian(self):
+        return self.H_fcn
+    
+    def _compute_bounds_and_init(self):
+        PHASE = self._Phases
+        COLLO = self._Collocation
+        DISCR = self._Discretization
+        APPRO = self._Approximation
+        WEIGH = self._Weights
+        DIFFM = self._DiffMatrix
+        ROOTS = self._Roots
+        
+        # Create lower and upper bounds
+        nlp_lb = -1e20*N.ones(len(self.get_xx()))
+        nlp_ub = 1e20*N.ones(len(self.get_xx()))
+        nlp_init = N.zeros(len(self.get_xx()))
+        
+        md = self.get_model_description()
+        var = self.var
+        
+        _x_max = md.get_x_max(include_alias = False)
+        _u_max = md.get_u_max(include_alias = False)
+        _p_max = [(p.getValueReference(), p.getMax()) for p in var.p]
+        _x_min = md.get_x_min(include_alias = False)
+        _u_min = md.get_u_min(include_alias = False)
+        _p_min = [(p.getValueReference(), p.getMin()) for p in var.p]
+        _x_start = md.get_x_start(include_alias = False)
+        #_u_start = md.get_u_start(include_alias = False)
+        _u_start = md.get_u_initial_guess(include_alias = False)
+        _p_start = []
+        for p in var.p: #NOTE SHOULD BE CHANGED
+            for p_ori in md.get_p_opt_initial_guess():
+                if p.getValueReference() == p_ori[0]:
+                    _p_start += [p_ori] 
+        #_p_start = [(p.getValueReference(), p.getStart()) for p in var.p]
+        
+        x_max = 1e20*N.ones(len(_x_max))
+        u_max = 1e20*N.ones(len(_u_max))
+        p_max = 1e20*N.ones(len(_p_max))
+        x_min = -1e20*N.ones(len(_x_min))
+        u_min = -1e20*N.ones(len(_u_min))
+        p_min = -1e20*N.ones(len(_p_min))
+        x_start = -1e20*N.ones(len(_x_start))
+        u_start = -1e20*N.ones(len(_u_start))
+        p_start = -1e20*N.ones(len(_p_start))
+        
+        for vr, val in _x_min:
+            if val != None:
+                x_min[self.model.get_x_vr_map()[vr]] = val/self.model.get_x_sf()[self.model.get_x_vr_map()[vr]]
+        for vr, val in _x_max:
+            if val != None:
+                x_max[self.model.get_x_vr_map()[vr]] = val/self.model.get_x_sf()[self.model.get_x_vr_map()[vr]]
+        for vr, val in _x_start:
+            if val != None:
+                x_start[self.model.get_x_vr_map()[vr]] = val/self.model.get_x_sf()[self.model.get_x_vr_map()[vr]]
+
+        for vr, val in _u_min:
+            if val != None:
+                u_min[self.model.get_u_vr_map()[vr]] = val/self.model.get_u_sf()[self.model.get_u_vr_map()[vr]]
+        for vr, val in _u_max:
+            if val != None:
+                u_max[self.model.get_u_vr_map()[vr]] = val/self.model.get_u_sf()[self.model.get_u_vr_map()[vr]]
+        for vr, val in _u_start:
+            if val != None:
+                u_start[self.model.get_u_vr_map()[vr]] = val/self.model.get_u_sf()[self.model.get_u_vr_map()[vr]]
+        
+        for vr, val in _p_min:
+            if val != None:
+                p_min[self.model.get_p_vr_map()[vr]] = val/self.model.get_p_sf()[self.model.get_p_vr_map()[vr]]
+        for vr, val in _p_max:
+            if val != None:
+                p_max[self.model.get_p_vr_map()[vr]] = val/self.model.get_p_sf()[self.model.get_p_vr_map()[vr]]
+        for vr, val in _p_start:
+            if val != None:
+                p_start[self.model.get_p_vr_map()[vr]] = val/self.model.get_p_sf()[self.model.get_p_vr_map()[vr]]
+        
+        for t,i,j in self.get_time_points():
+            nlp_lb[self.get_var_indices()[i][j]['x']] = x_min
+            nlp_ub[self.get_var_indices()[i][j]['x']] = x_max
+            nlp_init[self.get_var_indices()[i][j]['x']] = x_start
+            if j==0 and DISCR[0] != COLLO[0]:
+                continue
+            if j==DISCR[-1] and DISCR[-1] != COLLO[-1]:
+                continue
+            nlp_lb[self.get_var_indices()[i][j]['u']] = u_min
+            nlp_ub[self.get_var_indices()[i][j]['u']] = u_max
+            nlp_init[self.get_var_indices()[i][j]['u']] = u_start
+        
+        #Add the parameters options
+        nlp_lb[self.get_var_indices()[0][0]['p']] = p_min
+        nlp_ub[self.get_var_indices()[0][0]['p']] = p_max
+        nlp_init[self.get_var_indices()[0][0]['p']] = p_start
+
+        self.xx_lb = nlp_lb
+        self.xx_ub = nlp_ub
+        self.xx_init = nlp_init
+
+        return (nlp_lb,nlp_ub,nlp_init)
+    
+    def get_result(self):
+        
+        PHASE = self._Phases
+        COLLO = self._Collocation
+        DISCR = self._Discretization
+        WEIGH = self._Weights
+        DIFFM = self._DiffMatrix
+        ROOTS = self._Roots
+        
+        dx_opt = N.zeros((len(PHASE)*len(DISCR), self.model.get_n_x()))
+        x_opt  = N.zeros((len(PHASE)*len(DISCR), self.model.get_n_x()))
+        u_opt  = N.zeros((len(PHASE)*len(DISCR), self.model.get_n_u()))
+        w_opt  = N.zeros((len(PHASE)*len(DISCR), 0))
+        t_opt  = N.zeros(len(self.get_time_points()))
+        p_opt  = N.zeros(self.model.get_n_p())
+
+        cnt = 0
+        for t,i,j in self.get_time_points():
+            t_opt[cnt] = t
+            x_opt[cnt,:]  = self.nlp_opt[self.get_var_indices()[i][j]['x']][:,0]
+            
+            if j==0 and DISCR[0] != COLLO[0]:
+                u_opt[cnt,:] = [sum([lagrange_eval(ROOTS,ind,-1.0)*self.nlp_opt[self.get_var_indices()[i][l]['u']][k,0] for ind,l in enumerate(COLLO)]) for k in range(self.model.get_n_u())]
+                cnt = cnt + 1
+                continue
+            if j==DISCR[-1] and DISCR[-1] != COLLO[-1]:
+                u_opt[cnt,:] = [sum([lagrange_eval(ROOTS,ind,1.0)*self.nlp_opt[self.get_var_indices()[i][l]['u']][k,0] for ind,l in enumerate(COLLO)]) for k in range(self.model.get_n_u())]
+                cnt = cnt + 1
+                continue
+            
+            u_opt[cnt,:]  = self.nlp_opt[self.get_var_indices()[i][j]['u']][:,0]
+            cnt = cnt + 1
+
+        ts = [i[0] for i in self.get_time_points()]
+
+        if (self.options['free_phases'] and len(PHASE) > 1) and self.md.get_opt_finaltime_free():
+            input_t = [self.vars[i]['t'] for i in PHASE]
+            tfcn = casadi.SXFunction([input_t],[ts])
+            tfcn.init()
+            input_res = [self.nlp_opt[self.var_indices[i][DISCR[-1]]['t']][0] for i in PHASE]
+            tfcn.setInput(N.array(input_res).flatten())
+        elif (self.options['free_phases'] and len(PHASE) > 1):
+            input_t = [self.vars[i]['t'] for i in PHASE[:-1]]
+            tfcn = casadi.SXFunction([input_t],[ts])
+            tfcn.init()
+            input_res = [self.nlp_opt[self.var_indices[i][DISCR[-1]]['t']][0] for i in PHASE[:-1]]
+            tfcn.setInput(N.array(input_res).flatten())
+        elif self.md.get_opt_finaltime_free():
+            input_t = self.vars[PHASE[-1]]['t']
+            tfcn = casadi.SXFunction([[input_t]],[ts])
+            tfcn.init()
+            tfcn.setInput(self.nlp_opt[self.var_indices[PHASE[-1]][DISCR[-1]]['t']])
+        else:
+            tfcn = casadi.SXFunction([[]],[ts])
+            tfcn.init()
+            
+        tfcn.evaluate()
+        t = N.transpose(N.array([tfcn.output()]))
+
+        return (t,dx_opt,x_opt,u_opt,w_opt)
+        
+class GaussPseudoSpectralMethod(CasadiCollocator):
+    
     def set_initial_from_file(self,res):
         """ 
         Initialize the optimization vector from an object of either 
@@ -924,9 +1453,8 @@ class GaussPseudoSpectralMethod(CasadiCollocator):
         tfcn.init()
         input = []
         if (self.options['free_phases'] or self.md.get_opt_finaltime_free()) and self.P > 1:
-            for i in range(1,self.P):
+            for i in range(1,self.P+1):
                 input += [xx_init[self.ext_var_indices['t'+str(i)]]]
-            input += [xx_init[self.ext_var_indices['tf']]]
             tfcn.setInput(input)
         tfcn.evaluate()
         t = tfcn.output()
@@ -947,662 +1475,3 @@ class GaussPseudoSpectralMethod(CasadiCollocator):
             if j!= 0 and j!=self.K+1:
                 xx_init[self.get_var_indices()[i][j]['u']] = u_init[cnt_u,:]
                 cnt_u += 1
-    
-    def _modify_init(self):
-        xx_init = self.get_xx_init()
-        xx_lb = self.get_xx_lb()
-        xx_ub = self.get_xx_ub()
-        if (self.options['free_phases'] or self.md.get_opt_finaltime_free()) and self.P > 1:
-            if self.options['free_phases_bounds'] != None:
-                for i,x in enumerate(self.options['free_phases_bounds']):
-                    xx_init[self.ext_var_indices['t'+str(i+1)]]=x[0]
-                    xx_lb[self.ext_var_indices['t'+str(i+1)]] = x[1]
-                    xx_ub[self.ext_var_indices['t'+str(i+1)]] = x[2]
-            else:
-                for i in range(1,self.P):
-                    xx_init[self.ext_var_indices['t'+str(i)]] = i*(self.ocp.tf-self.ocp.t0)/self.P
-                    xx_lb[self.ext_var_indices['t'+str(i)]] = self.ocp.t0
-                    xx_ub[self.ext_var_indices['t'+str(i)]] = self.ocp.tf
-
-        if self.md.get_opt_finaltime_free():#self.ocp.tf_free:
-            val_ref = self.md.get_value_reference("finalTime")
-            init = self.md.get_p_opt_initial_guess()
-            lb   = self.md.get_p_opt_min()
-            ub   = self.md.get_p_opt_max()
-            for i,x in enumerate(init):
-                if x[0] == val_ref:
-                    if init[i][1] != None:
-                        xx_init[self.ext_var_indices['tf']] = init[i][1]
-                    if lb[i][1] != None:
-                        xx_lb[self.ext_var_indices['tf']] = lb[i][1]
-                    if ub[i][1] != None:
-                        xx_ub[self.ext_var_indices['tf']] = ub[i][1]
-                    
-    def _compute_bounds_and_init(self):
-        # Create lower and upper bounds
-        nlp_lb = -1e20*N.ones(len(self.get_xx()))
-        nlp_ub = 1e20*N.ones(len(self.get_xx()))
-        nlp_init = N.zeros(len(self.get_xx()))
-        
-        md = self.get_model_description()
-        
-        _x_max = md.get_x_max(include_alias = False)
-        _u_max = md.get_u_max(include_alias = False)
-        _x_min = md.get_x_min(include_alias = False)
-        _u_min = md.get_u_min(include_alias = False)
-        _x_start = md.get_x_start(include_alias = False)
-        _u_start = md.get_u_start(include_alias = False)
-        
-        x_max = 1e20*N.ones(len(_x_max))
-        u_max = 1e20*N.ones(len(_u_max))
-        x_min = -1e20*N.ones(len(_x_min))
-        u_min = -1e20*N.ones(len(_u_min))
-        x_start = -1e20*N.ones(len(_x_start))
-        u_start = -1e20*N.ones(len(_u_start))
-
-        for vr, val in _x_min:
-            if val != None:
-                x_min[self.model.get_x_vr_map()[vr]] = val/self.model.get_x_sf()[self.model.get_x_vr_map()[vr]]
-        for vr, val in _x_max:
-            if val != None:
-                x_max[self.model.get_x_vr_map()[vr]] = val/self.model.get_x_sf()[self.model.get_x_vr_map()[vr]]
-        for vr, val in _x_start:
-            if val != None:
-                x_start[self.model.get_x_vr_map()[vr]] = val/self.model.get_x_sf()[self.model.get_x_vr_map()[vr]]
-
-        for vr, val in _u_min:
-            if val != None:
-                u_min[self.model.get_u_vr_map()[vr]] = val/self.model.get_u_sf()[self.model.get_u_vr_map()[vr]]
-        for vr, val in _u_max:
-            if val != None:
-                u_max[self.model.get_u_vr_map()[vr]] = val/self.model.get_u_sf()[self.model.get_u_vr_map()[vr]]
-        for vr, val in _u_start:
-            if val != None:
-                u_start[self.model.get_u_vr_map()[vr]] = val/self.model.get_u_sf()[self.model.get_u_vr_map()[vr]]
-
-        for t,i,j in self.get_time_points():
-            nlp_lb[self.get_var_indices()[i][j]['x']] = x_min
-            nlp_ub[self.get_var_indices()[i][j]['x']] = x_max
-            nlp_init[self.get_var_indices()[i][j]['x']] = x_start
-            if j!= 0 and j!=self.K+1:
-                nlp_lb[self.get_var_indices()[i][j]['u']] = u_min
-                nlp_ub[self.get_var_indices()[i][j]['u']] = u_max
-                nlp_init[self.get_var_indices()[i][j]['u']] = u_start
-
-        self.xx_lb = nlp_lb
-        self.xx_ub = nlp_ub
-        self.xx_init = nlp_init
-
-        return (nlp_lb,nlp_ub,nlp_init)
-    
-    def _create_nlp_variables(self):
-        # Group variables into elements
-        self.vars = {}
-        # Extended vars
-        self.ext_vars = {}
-        
-        for i in range(self.P): #Phases
-            for j in range(self.K+2): #Points
-                xi = [casadi.SX(str(x)+'_'+str(i)+','+str(j)) for x in self.model.get_x()]
-                ui = [casadi.SX(str(x)+'_'+str(i)+','+str(j)) for x in self.model.get_u()]
-                
-                if j==0:
-                    self.vars[i] = {}
-                self.vars[i][j] = {}
-                self.vars[i][j]['x'] = xi
-                if j!=0 and j!=self.K+1:
-                    self.vars[i][j]['u'] = ui
-        
-        # Group variables indices in the global
-        # variable vector
-        self.var_indices = {}
-        self.xx = []
-        
-        for i in range(self.P):
-            self.var_indices[i] = {}
-            for j in range(self.K+2):
-                self.var_indices[i][j] = {}
-                pre_len = len(self.xx)
-                self.xx += self.vars[i][j]['x']
-                self.var_indices[i][j]['x'] = N.arange(pre_len,len(self.xx),dtype=int)
-                if j!=0 and j!=self.K+1:
-                    pre_len = len(self.xx)
-                    self.xx += self.vars[i][j]['u']
-                    self.var_indices[i][j]['u'] = N.arange(pre_len,len(self.xx),dtype=int)
-        
-        #Create vector allowing or disallowing discontinuous state
-        xvars = self.model.get_x()
-        for i in range(self.P):
-            self.ext_vars[i] = {}
-            self.ext_vars[i]['link_x'] = [casadi.SX(0.0) for x in self.model.get_x()]
-            for j in self.options['link_options']:
-                for l,k in enumerate(self.model.get_x()):
-                    if j[0] == str(k):
-                        self.ext_vars[i]['link_x'][l] = casadi.SX('link_'+str(k)+'_'+str(i))
-                        self.xx += [self.ext_vars[i]['link_x'][l]]
-        
-        self.ext_var_indices = {}
-        #Create vector of time points
-        for i in range(self.P+1):
-            try:
-                self.ext_vars[i]
-            except KeyError:
-                self.ext_vars[i] = {}
-            if i == 0:
-                self.ext_vars[i]['t'] = casadi.SX(self.ocp.t0)
-            elif i==self.P:
-                if self.md.get_opt_finaltime_free():#self.ocp.tf_free:
-                    self.ext_vars[i]['t'] = casadi.SX('tf')
-                    self.xx += [self.ext_vars[i]['t']]
-                    self.ext_var_indices['tf'] = len(self.xx)-1
-                else:
-                    self.ext_vars[i]['t'] = casadi.SX(self.ocp.tf)
-            else:
-                if self.options['free_phases'] or self.md.get_opt_finaltime_free():
-                    self.ext_vars[i]['t'] = casadi.SX('t_'+str(i))
-                    self.xx += [self.ext_vars[i]['t']]
-                    self.ext_var_indices['t'+str(i)] = len(self.xx)-1
-                else:
-                    self.ext_vars[i]['t'] = casadi.SX(i*(self.ocp.tf-self.ocp.t0)/self.P)
-                    
-    def get_result(self):
-        dx_opt = N.zeros((self.P*(self.K+2), self.model.get_n_x()))
-        x_opt = N.zeros((self.P*(self.K+2), self.model.get_n_x()))
-        u_opt = N.zeros((self.P*(self.K+2), self.model.get_n_u()))
-        w_opt = N.zeros((self.P*(self.K+2), 0))
-        t_opt = N.zeros(len(self.get_time_points()))
-
-        cnt = 0
-        for t,i,j in self.get_time_points():
-            t_opt[cnt] = t
-            x_opt[cnt,:]  = self.nlp_opt[self.get_var_indices()[i][j]['x']][:,0]
-            
-            if j!=0 and j!=self.K+1:
-                u_opt[cnt,:]  = self.nlp_opt[self.get_var_indices()[i][j]['u']][:,0]
-            elif j==0:
-                for k in range(self.model.get_n_u()):
-                    u_opt[cnt,k] = sum([self.LGl[l](-1.0)*self.nlp_opt[self.get_var_indices()[i][l+1]['u']][k,0] for l in range(self.K)])
-            else:
-                for k in range(self.model.get_n_u()):
-                    u_opt[cnt,k] = sum([self.LGl[l](1.0)*self.nlp_opt[self.get_var_indices()[i][l+1]['u']][k,0] for l in range(self.K)])
-            cnt = cnt + 1
-
-        t_points = self.get_time_points()
-        
-        if self.options['free_phases'] and self.P > 1:
-            ts = [i[0] for i in t_points]
-            input_t = []
-            for i in range(1,self.P):
-                input_t += [self.ext_vars[i]['t']]
-
-            self._tfcn = casadi.SXFunction([input_t],[ts])
-            self._tfcn.init()
-            self._tfcn.setInput(self.nlp_opt[-self.P+1:].flatten())
-            self._tfcn.evaluate()
-            
-            self._t = self._tfcn.output()
-        else:
-            ts = [i[0] for i in t_points]
-            self._tfcn = casadi.SXFunction([[]],[ts])
-            self._tfcn.init()
-            self._tfcn.evaluate()
-            
-            self._t = self._tfcn.output()
-        """
-        ts = [i[0] for i in t_points]
-        self._tfcn = casadi.SXFunction([[]],[ts])
-        self._tfcn.init()
-        self._tfcn.evaluate()
-            
-        self._t = self._tfcn.output()
-        """
-        self._result = (self._t,dx_opt,x_opt,u_opt,w_opt)
-
-        return (self._t,dx_opt,x_opt,u_opt,w_opt)
-        
-    def _create_collocation_constraints(self):
-        
-        self.h = [] #Equality constraints
-        self.g = [] #Inequality constraints
-        self.time_points = []
-        
-        #print "Creating collocation constraints"
-        
-        #Create initial constraints
-        t = self.ext_vars[0]['t']
-        z = []
-        z += self.vars[0][0]['x']
-        z += [t]
-        init_constr = list(self.model.get_ode_F0().eval([z])[0])
-        self.h += init_constr
-        
-        #print "Initial Constraints ", init_constr
-        
-        #Create collocation constraints
-        for i in range(self.P):
-            self.time_points += [(self.ext_vars[i]['t'],i,0)]
-            for j in range(1,self.K+1):
-                dx = []
-                for k in range(self.model.get_n_x()):
-                    dx += [sum([self.LGm[j-1,l]*self.vars[i][l]['x'][k] for l in range(self.K+1)])]
-                    
-                t = (self.ext_vars[i+1]['t']-self.ext_vars[i]['t'])*0.5*(self.LGd[j]+(self.ext_vars[i+1]['t']+self.ext_vars[i]['t'])/(self.ext_vars[i+1]['t']-self.ext_vars[i]['t']))
-                z = []
-                z += self.vars[i][j]['x']
-                z += self.vars[i][j]['u']
-                z += [t]
-                dynamic_constr = list((self.ext_vars[i+1]['t']-self.ext_vars[i]['t'])*0.5*self.model.get_ode_F().eval([z])[0])
-                for k in range(self.model.get_n_x()):
-                    self.h += [dx[k] - dynamic_constr[k]]
-
-                self.time_points += [(t,i,j)]
-            self.time_points += [(self.ext_vars[i+1]['t'],i,self.K+1)]
-        
-        #Create linking constraints
-        for i in range(self.P-1):
-            z = []
-            for x in range(self.model.get_n_x()):
-                z += [self.vars[i][self.K+1]['x'][x] - self.vars[i+1][0]['x'][x] + self.ext_vars[i]['link_x'][x]]
-            self.h += z
-        
-        #print self.h
-        
-        #Create constraints on the final x
-        final_constr = []
-        for j in range(self.P):
-            for x in range(self.model.get_n_x()):
-                temp = []
-                for i in range(self.K+1):
-                    for k in range(self.K):
-                        temp += [self.LGw[k]*self.LGm[k,i]*self.vars[j][i]['x'][x]]
-                    
-                final_constr += [self.vars[j][self.K+1]['x'][x] - self.vars[j][0]['x'][x] - sum(temp)]
-            
-        self.h += final_constr
-        
-        #print "Final constraints ", final_constr
-        
-        #Create inequality constraint
-        if self.options['free_phases'] or self.md.get_opt_finaltime_free():
-            for i in range(1,self.P+1):
-                self.g += [self.ext_vars[i-1]['t']-self.ext_vars[i]['t']]
-        #print self.g
-    
-    def _create_bolza_functional(self):
-         # Generate cost function
-        self.cost_mayer = 0
-        self.cost_lagrange = 0
-    
-        if self.model.get_opt_J() != None:
-            # Assume Mayer cost
-            z = []
-            t = self.ext_vars[self.P]['t']
-            z += self.vars[self.P-1][self.K+1]['x']
-            #z += self.vars[P-1][N+1]['u']
-            z += [t]
-            self.cost_mayer = list(self.model.get_opt_ode_J().eval([z])[0])[0]
-        
-        #Add linking options to the Mayer functional
-        for i in range(self.P-1):
-            for j in self.options['link_options']:
-                for l,k in enumerate(self.model.get_x()):
-                    if j[0] == str(k) and j[1]==True:
-                        self.cost_mayer += self.ext_vars[i]['link_x'][l]*self.ext_vars[i]['link_x'][l]
-        
-
-        # Take care of Lagrange cost
-        if self.model.get_opt_L() != None:
-            for i in range(self.P):
-                for j in range(1,self.K+1):
-                    t = (self.ext_vars[i+1]['t']-self.ext_vars[i]['t'])*0.5*(self.LGr[j-1]+(self.ext_vars[i+1]['t']+self.ext_vars[i]['t'])/(self.ext_vars[i+1]['t']-self.ext_vars[i]['t']))
-                    z = []
-                    z += self.vars[i][j]['x']
-                    z += self.vars[i][j]['u']
-                    z += [t]
-                    self.cost_lagrange += (self.ext_vars[i+1]['t']-self.ext_vars[i]['t'])/2.0*self.model.get_opt_ode_L().eval([z])[0][0]*self.LGw[j-1]
-          
-        self.cost = self.cost_mayer + self.cost_lagrange
-
-        # Objective function
-        self.cost_fcn = casadi.SXFunction([self.xx], [[self.cost]])  
-        
-        # Hessian
-        self.sigma = casadi.SX('sigma')
-        
-        self.lam = []
-        self.Lag = self.sigma*self.cost
-        for i in range(len(self.h)):
-            self.lam.append(casadi.SX('lambda_' + str(i)))
-            self.Lag = self.Lag + self.h[i]*self.lam[i]
-        for i in range(len(self.g)):
-            self.lam.append(casadi.SX('lambda_' + str(i+len(self.h))))
-            self.Lag = self.Lag + self.g[i]*self.lam[i+len(self.h)]
-            
-        self.Lag_fcn = casadi.SXFunction([self.xx, self.lam, [self.sigma]],[[self.Lag]])
-
-        self.H_fcn = self.Lag_fcn.hessian(0,0)
-        
-    def get_equality_constraint(self):
-        return self.h
-    
-    def get_inequality_constraint(self):
-        return self.g
-
-    def get_cost(self):
-        return self.cost_fcn
-
-    def get_hessian(self):
-        return self.H_fcn
-        
-class LegendrePseudoSpectralMethod(CasadiCollocator):
-    def __init__(self, model, options):
-        
-        self.model = model
-        self.options = options
-        self.ocp = model.get_casadi_ocp()
-        
-        self._P = options['n_e']
-        self._K = options['n_cp']
-        self._disc_state = options['disc_state']
-        
-        
-        self._LGL = LegendreGaussLobatto(self._K)
-        self._LGLr = self._LGL.get_roots()
-        self._LGLw = self._LGL.get_weights()
-        self._LGLl = self._LGL.get_lagrange_pol().L
-        self._LGLm = self._LGL.get_matrix()
-        
-        self._create_nlp_variables()
-        self._create_collocation_constraints()
-        self._create_bolza_functional()
-        
-        # Necessary!
-        super(LegendrePseudoSpectralMethod,self).__init__(model)
-        
-        self._modify_init()
-        
-    def _modify_init(self):
-        P = self.options['n_e']
-        
-        if self.options['n_e_free'] and P > 1:
-            xx_init = self.get_xx_init()
-            xx_lb = self.get_xx_lb()
-            xx_ub = self.get_xx_ub()
-            if self.options['n_e_bounds'] != None:
-                for i,x in enumerate(self.options['n_e_bounds']):
-                    xx_init[-P+1+i]=x[0]
-                    xx_lb[-P+1+i] = x[1]
-                    xx_ub[-P+1+i] = x[2]
-            else:
-                xx_init[-P+1:] = [x*(self.ocp.tf-self.ocp.t0)/P for x in range(1,P)]
-                xx_lb[-P+1:] = [self.ocp.t0]*(P-1)
-                xx_ub[-P+1:] = [self.ocp.tf]*(P-1)
-        
-    def _create_collocation_constraints(self):
-        P = self._P
-        K = self._K
- 
-        self.h = []
-        
-        # Create vector of time points in the collocation problem, and associated
-        # variables
-        self.time_points = []
-        
-        #Create initial constraints
-        z = []
-        #t = self.ocp.t0
-        t = self.ext_vars[0]['t']
-        #z += [x*2.0/(self.ocp.tf-self.ocp.t0) for x in self.vars[0][0]['dx']]
-        #z += [x*2.0/(self.ts[1]-self.ocp.t0) for x in self.vars[0][0]['dx']]
-        z += [x*2.0/(self.ext_vars[1]['t']-self.ext_vars[0]['t']) for x in self.vars[0][0]['dx']]
-        z += self.vars[0][0]['x']
-        z += self.vars[0][0]['u']
-        z += self.vars[0][0]['w']
-        #z += [casadi.SX(t)]
-        z += [t]
-        self.h += list(self.model.get_init_F0().eval([z])[0])
-        self.h += list(self.model.get_dae_F().eval([z])[0])
-        
-        
-        #Create collocation constraints
-        for i in range(P):
-            for j in range(K):
-                z = []
-                #t = (self.ocp.tf-self.ocp.t0)*0.5*(self._LGLr[j]+(self.ocp.tf+self.ocp.t0)/(self.ocp.tf-self.ocp.t0))
-                #t = (self.ts[i+1]-self.ts[i])*0.5*(self._LGLr[j]+(self.ts[i+1]+self.ts[i])/(self.ts[i+1]-self.ts[i]))
-                t = (self.ext_vars[i+1]['t']-self.ext_vars[i]['t'])*0.5*(self._LGLr[j]+(self.ext_vars[i+1]['t']+self.ext_vars[i]['t'])/(self.ext_vars[i+1]['t']-self.ext_vars[i]['t']))
-                self.time_points.append((t,i,j))
-                #z += [x*2.0/(self.ocp.tf-self.ocp.t0) for x in self.vars[i][j]['dx']]
-                #z += [x*2.0/(self.ts[i+1]-self.ts[i]) for x in self.vars[i][j]['dx']]
-                z += [x*2.0/(self.ext_vars[i+1]['t']-self.ext_vars[i]['t']) for x in self.vars[i][j]['dx']]
-                z += self.vars[i][j]['x']
-                z += self.vars[i][j]['u']
-                z += self.vars[i][j]['w']
-                #z += [casadi.SX(t)]
-                #z += [t]
-                z += [t]
-                dae_constr = list(self.model.get_dae_F().eval([z])[0])
-                self.h += dae_constr
-        
-        #Create constraints on x and dx
-        for i in range(P):
-            for j in range(K):
-                for k in range(self.model.get_n_x()):
-                    temp = [self._LGLm[j,l]*self.vars[i][l]['x'][k] for l in range(K)]
-                    coll_constr = self.vars[i][j]['dx'][k] - sum(temp)
-                    self.h += [coll_constr]
-                    
-        #Create phase constraints
-        continuity_constr = []
-        if P > 1:
-            for i in range(P-1):
-                for k in range(self.model.get_n_x()):
-                    continuity_constr += [self.vars[i][K-1]['x'][k]-self.vars[i+1][0]['x'][k]+self.ext_vars[i]['delta_x'][k]]
-                for k in range(self.model.get_n_u()):
-                    continuity_constr += [self.vars[i][K-1]['u'][k]-self.vars[i+1][0]['u'][k]]
-            self.h += continuity_constr
-        self.continuity_constr = continuity_constr
-        
-        ## Equality constraint residual
-        #self.g_fcn = casadi.SXFunction([self.nlp_x],[self.g])
-        self.g = []
-        #Create inequality constraint
-        if self.options['n_e_free']:
-            #for i in range(P-2):
-            #    self.g += [self.vars[0][0]['t'][i+1]-self.vars[0][0]['t'][i]]
-            for i in range(1,P):
-                self.g += [self.ext_vars[i-1]['t']-self.ext_vars[i]['t']]
-        #print self.g
-        
-    def _create_bolza_functional(self):
-         # Generate cost function
-        self.cost_mayer = 0
-        self.cost_lagrange = 0
-        
-        P = self._P
-        K = self._K
-        
-        if self.model.get_opt_J() != None:
-            # Assume Mayer cost
-            z = []
-            #t = self.ocp.tf
-            #z += [x*2.0/(self.ocp.tf-self.ocp.t0) for x in self.vars[P-1][K-1]['dx']]
-            #z += [x*2.0/(self.ocp.tf-self.ts[-1]) for x in self.vars[P-1][K-1]['dx']]
-            t = self.ext_vars[P]['t']
-            z += [x*2.0/(self.ext_vars[P]['t']-self.ext_vars[P-1]['t']) for x in self.vars[P-1][K-1]['dx']]
-            z += self.vars[P-1][K-1]['x']
-            z += self.vars[P-1][K-1]['u']
-            z += self.vars[P-1][K-1]['w']
-            #z += [casadi.SX(t)]
-            z += [t]
-            self.cost_mayer = list(self.model.get_opt_J().eval([z])[0])[0]
-
-        # Take care of Lagrange cost
-        if self.model.get_opt_L() != None:
-            for i in range(P):
-                for j in range(K):
-                    #t = (self.ocp.tf-self.ocp.t0)*0.5*(self._LGLr[j]+(self.ocp.tf+self.ocp.t0)/(self.ocp.tf-self.ocp.t0))
-                    #t = (self.ts[i+1]-self.ts[i])*0.5*(self._LGLr[j]+(self.ts[i+1]+self.ts[i])/(self.ts[i+1]-self.ts[i]))
-                    t = (self.ext_vars[i+1]['t']-self.ext_vars[i]['t'])*0.5*(self._LGLr[j]+(self.ext_vars[i+1]['t']+self.ext_vars[i]['t'])/(self.ext_vars[i+1]['t']-self.ext_vars[i]['t']))
-                    z = []
-                    #z += [x*2.0/(self.ocp.tf-self.ocp.t0) for x in self.vars[i][j]['dx']]
-                    #z += [x*2.0/(self.ts[i+1]-self.ts[i]) for x in self.vars[i][j]['dx']]
-                    z += [x*2.0/(self.ext_vars[i+1]['t']-self.ext_vars[i]['t']) for x in self.vars[i][j]['dx']]
-                    z += self.vars[i][j]['x']
-                    z += self.vars[i][j]['u']
-                    z += self.vars[i][j]['w']
-                    #z += [casadi.SX(t)]
-                    z += [t]
-                    #self.cost_lagrange += (self.ocp.tf-self.ocp.t0)/2.0*self.model.get_opt_L().eval([z])[0][0]*self._LGLw[j]
-                    #self.cost_lagrange += (self.ts[i+1]-self.ts[i])/2.0*self.model.get_opt_L().eval([z])[0][0]*self._LGLw[j]
-                    self.cost_lagrange += (self.ext_vars[i+1]['t']-self.ext_vars[i]['t'])/2.0*self.model.get_opt_L().eval([z])[0][0]*self._LGLw[j]
-                    
-        self.cost = self.cost_mayer + self.cost_lagrange
-
-        # Objective function
-        self.cost_fcn = casadi.SXFunction([self.xx], [[self.cost]])  
-
-        # Hessian
-        self.sigma = casadi.SX('sigma')
-        
-        self.lam = []
-        self.Lag = self.sigma*self.cost
-        for i in range(len(self.h)):
-            self.lam.append(casadi.SX('lambda_' + str(i)))
-            self.Lag = self.Lag + self.h[i]*self.lam[i]
-            
-        self.Lag_fcn = casadi.SXFunction([self.xx, self.lam, [self.sigma]],[[self.Lag]])
-
-        self.H_fcn = self.Lag_fcn.hessian(0,0)
-    
-    def _create_nlp_variables(self):
-        
-        P = self._P
-        K = self._K
-        
-        # Group variables into elements
-        self.vars = {}
-        # Extended vars
-        self.ext_vars = {}
-        
-        for i in range(P): #Phases
-            for j in range(K): #Points
-                dxi = [casadi.SX(str(x)+'_'+str(i)+','+str(j)) for x in self.model.get_dx()]
-                xi = [casadi.SX(str(x)+'_'+str(i)+','+str(j)) for x in self.model.get_x()]
-                ui = [casadi.SX(str(x)+'_'+str(i)+','+str(j)) for x in self.model.get_u()]
-                wi = [casadi.SX(str(x)+'_'+str(i)+','+str(j)) for x in self.model.get_w()]
-                
-                if j==0:
-                    self.vars[i] = {}
-                self.vars[i][j] = {}
-                self.vars[i][j]['dx'] = dxi
-                self.vars[i][j]['x'] = xi
-                self.vars[i][j]['u'] = ui
-                self.vars[i][j]['w'] = wi
-        
-        # Group variables indices in the global
-        # variable vector
-        self.var_indices = {}
-        self.xx = []
-
-        for i in range(P):
-            self.var_indices[i] = {}
-            for j in range(K):
-                self.var_indices[i][j] = {}
-                pre_len = len(self.xx)
-                self.xx += self.vars[i][j]['dx']
-                self.var_indices[i][j]['dx'] = N.arange(pre_len,len(self.xx),dtype=int)
-                pre_len = len(self.xx)
-                self.xx += self.vars[i][j]['x']
-                self.var_indices[i][j]['x'] = N.arange(pre_len,len(self.xx),dtype=int)
-                pre_len = len(self.xx)
-                self.xx += self.vars[i][j]['u']
-                self.var_indices[i][j]['u'] = N.arange(pre_len,len(self.xx),dtype=int)
-                pre_len = len(self.xx)
-                self.xx += self.vars[i][j]['w']
-                self.var_indices[i][j]['w'] = N.arange(pre_len,len(self.xx),dtype=int)
-    
-        #Create vector allowing or disallowing discontinuous state
-        for i in range(P-1):
-            self.ext_vars[i] = {}
-            if self.options['disc_state']:
-                self.ext_vars[i]['delta_x'] = [casadi.SX('delta_'+str(x)+'_'+str(i)) for x in self.model.get_x()]
-                self.xx += self.ext_vars[i]['delta_x']
-            else:
-                self.ext_vars[i]['delta_x'] = [casadi.SX(0.0) for x in self.model.get_x()]
-                
-        #Create vector of time points
-        for i in range(self._P+1):
-            try:
-                self.ext_vars[i]
-            except KeyError:
-                self.ext_vars[i] = {}
-            if i == 0:
-                self.ext_vars[i]['t'] = casadi.SX(self.ocp.t0)
-            elif i==P:
-                self.ext_vars[i]['t'] = casadi.SX(self.ocp.tf)
-            else:
-                if self.options['n_e_free']:
-                    self.ext_vars[i]['t'] = casadi.SX('t_'+str(i))
-                    self.xx += [self.ext_vars[i]['t']]
-                else:
-                    self.ext_vars[i]['t'] = casadi.SX(i*(self.ocp.tf-self.ocp.t0)/self._P)
-        #print self.xx
-        #print self.ext_vars
-        #if self._free_elements:
-        #    if P > 1:
-        #        ti = [casadi.SX('t_'+str(x)) for x in range(P-1)]
-        #        self.vars[0][0]['t'] = ti
-        #        self.xx += self.vars[0][0]['t']
-        
-        #self.ts = [(x)*(self.ocp.tf-self.ocp.t0)/self._P for x in range(self._P+1)]
-        #for x in range(len(self.ts)):
-        #    self.ts[x] = casadi.SX(self.ts[x])
-        
-        #if self._free_elements and self._P > 1:
-        #    for i in range(self._P-1):
-        #        self.ts[i+1] = self.vars[0][0]['t'][i]
-        
-    def get_result(self):
-        (t_wrong,dx_opt,x_opt,u_opt,w_opt) = super(LegendrePseudoSpectralMethod,self).get_result()
-        t_points = self.get_time_points()
-        P = self.options['n_e']
-        
-        if self.options['n_e_free'] and P > 1:
-            ts = [i[0] for i in t_points]
-            input_t = []
-            for i in range(1,P):
-                input_t += [self.ext_vars[i]['t']]
-
-            self._tfcn = casadi.SXFunction([input_t],[ts])
-            self._tfcn.init()
-            self._tfcn.setInput(self.nlp_opt[-P+1:].flatten())
-            self._tfcn.evaluate()
-            
-            self._t = self._tfcn.output()
-        else:
-            ts = [i[0] for i in t_points]
-            self._tfcn = casadi.SXFunction([[]],[ts])
-            self._tfcn.init()
-            self._tfcn.evaluate()
-            
-            self._t = self._tfcn.output()
-        
-        self._result = (self._t,dx_opt,x_opt,u_opt,w_opt)
-        
-        if self.options['n_interpolation_points'] == None:
-            return (self._t,dx_opt,x_opt,u_opt,w_opt)
-        else:
-            raise NotImplementedError
-    
-    def get_equality_constraint(self):
-        return self.h
-    
-    def get_inequality_constraint(self):
-        return self.g
-
-    def get_cost(self):
-        return self.cost_fcn
-
-    def get_hessian(self):
-        return self.H_fcn

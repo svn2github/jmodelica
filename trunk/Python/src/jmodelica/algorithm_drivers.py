@@ -715,7 +715,7 @@ class AssimuloFMIAlg(AlgorithmBase):
         self._set_solver_options()
     
     def _set_options(self):
-        """ 
+        """
         Helper function that sets options for AssimuloFMI algorithm.
         """
         # no of communication points
@@ -1644,7 +1644,7 @@ class UnrecognizedOptionError(Exception): pass
 
 
 
-class CasadiLPM(AlgorithmBase):
+class CasadiPseudoSpectral(AlgorithmBase):
     """
     The algorithm is based on orthogonal collocation and relies on the solver 
     IPOPT for solving a non-linear programming problem. 
@@ -1654,7 +1654,7 @@ class CasadiLPM(AlgorithmBase):
                  model, 
                  options):
         """
-        Create a CasadiLPM algorithm.
+        Create a CasadiPseudoSpectral algorithm.
         
         Parameters::
               
@@ -1665,27 +1665,27 @@ class CasadiLPM(AlgorithmBase):
                 The options that should be used by the algorithm. For 
                 details on the options, see:
                 
-                * model.optimize_options('CasadiLPM')
+                * model.optimize_options('CasadiPseudoSpectral')
                 
                 or look at the docstring with help:
                 
-                * help(jmodelica.algorithm_drivers.CasadiLP)
+                * help(jmodelica.algorithm_drivers.CasadiPseudoSpectral)
                 
                 Valid values are: 
                 - A dict that overrides some or all of the default values
-                  provided by CasadiLPMOptions. An empty
+                  provided by CasadiPseudoSpectralOptions. An empty
                   dict will thus give all options with default values.
-                - A CasadiLPMOptions object.
+                - A CasadiPseudoSpectralOptions object.
         """
         self.model = model
         
         # handle options argument
         if isinstance(options, dict) and not \
-            isinstance(options, CasadiLPMOptions):
+            isinstance(options, CasadiPseudoSpectralOptions):
             # user has passed dict with options or empty dict = default
-            self.options = CasadiLPMOptions(options)
-        elif isinstance(options, CasadiLPMOptions):
-            # user has passed CasadiLPMOptions instance
+            self.options = CasadiPseudoSpectralOptions(options)
+        elif isinstance(options, CasadiPseudoSpectralOptions):
+            # user has passed CasadiPseudoSpectralOptions instance
             self.options = options
         else:
             raise InvalidAlgorithmOptionException(options)
@@ -1697,7 +1697,7 @@ class CasadiLPM(AlgorithmBase):
             raise Exception(
                 'Could not find CasADi. Check jmodelica.check_packages()')
         
-        self.nlp = LegendrePseudoSpectralMethod(model, self.options)
+        self.nlp = PseudoSpectral(model, self.options)
         
         if self.init_traj:
             self.nlp.set_initial_from_dymola(self.init_traj) 
@@ -1707,7 +1707,7 @@ class CasadiLPM(AlgorithmBase):
         
     def _set_options(self):
         """ 
-        Helper function that sets options for the CollocationLagrangePolynomials 
+        Helper function that sets options for the CasadiPseudoSpectral 
         algorithm.
         """
         self.n_e=self.options['n_e']
@@ -1741,11 +1741,11 @@ class CasadiLPM(AlgorithmBase):
     def get_result(self):
         """ 
         Write result to file, load result data and create an 
-        CollocationLagrangePolynomialsResult object.
+        CasadiPseudoSpectralResult object.
         
         Returns::
         
-            The CollocationLagrangePolynomialsResult object.
+            The CasadiPseudoSpectralResult object.
         """
         if self.result_mode=='default':
             self.nlp.export_result_dymola(**self.result_args)
@@ -1761,7 +1761,7 @@ class CasadiLPM(AlgorithmBase):
         res = ResultDymolaTextual(resultfile)
         
         # create and return result object
-        return CasadiLPMResult(self.model, 
+        return CasadiPseudoSpectralResult(self.model, 
             resultfile, self.nlp, res, self.options)
         
     @classmethod
@@ -1771,132 +1771,9 @@ class CasadiLPM(AlgorithmBase):
         CollocationLagrangePolynomialsAlg algorithm, prefilled with default 
         values. (Class method.)
         """
-        return CasadiLPMOptions()
-        
-class CasadiGPM(AlgorithmBase):
-    """
-    The algorithm is based on orthogonal collocation and relies on the solver 
-    IPOPT for solving a non-linear programming problem. 
-    """
-    
-    def __init__(self, 
-                 model, 
-                 options):
-        """
-        Create a CasadiGPM algorithm.
-        
-        Parameters::
-              
-            model -- 
-                jmodelica.jmi.casadiModel model object
+        return CasadiPseudoSpectralOptions()
 
-            options -- 
-                The options that should be used by the algorithm. For 
-                details on the options, see:
-                
-                * model.optimize_options('CasadiGPM')
-                
-                or look at the docstring with help:
-                
-                * help(jmodelica.algorithm_drivers.CasadiGPM)
-                
-                Valid values are: 
-                - A dict that overrides some or all of the default values
-                  provided by CasadiGPMOptions. An empty
-                  dict will thus give all options with default values.
-                - A CasadiGPMOptions object.
-        """
-        self.model = model
-        
-        # handle options argument
-        if isinstance(options, dict) and not \
-            isinstance(options, CasadiGPMOptions):
-            # user has passed dict with options or empty dict = default
-            self.options = CasadiGPMOptions(options)
-        elif isinstance(options, CasadiGPMOptions):
-            # user has passed CasadiLPMOptions instance
-            self.options = options
-        else:
-            raise InvalidAlgorithmOptionException(options)
-
-        # set options
-        self._set_options()
-            
-        if not casadi_present:
-            raise Exception(
-                'Could not find CasADi. Check jmodelica.check_packages()')
-        
-        self.nlp = GaussPseudoSpectralMethod(model, self.options)
-        
-        if self.init_traj:
-            self.nlp.set_initial_from_file(self.init_traj) 
-            
-        # set solver options
-        self._set_solver_options()
-        
-    def _set_options(self):
-        """ 
-        Helper function that sets options for the CasadiGPM 
-        algorithm.
-        """
-        self.n_e=self.options['n_e']
-        self.n_cp=self.options['n_cp']
-        self.init_traj=self.options['init_traj']
-
-        self.result_args = dict(
-            file_name=self.options['result_file_name'], 
-            format=self.options['result_format'],
-            write_scaled_result=self.options['write_scaled_result'])
-
-        # solver options
-        self.solver_options = self.options['IPOPT_options']
-        
-    def _set_solver_options(self):
-        """ 
-        Helper function that sets options for the solver.
-        """
-        for k, v in self.solver_options.iteritems():
-            self.nlp.set_ipopt_option(k, v)
-            
-    def solve(self):
-        """ 
-        Solve the optimization problem using ipopt solver. 
-        """
-        self.nlp.ipopt_solve()
-        
-    def get_result(self):
-        """ 
-        Write result to file, load result data and create an 
-        CasadiGPMResult object.
-        
-        Returns::
-        
-            The CasadiGPMResult object.
-        """
-        self.nlp.export_result_dymola(**self.result_args)
-            
-        # result file name
-        resultfile = self.result_args['file_name']
-        if not resultfile:
-            resultfile=self.model.get_name()+'_result.txt'
-        
-        # load result file
-        res = ResultDymolaTextual(resultfile)
-
-        # create and return result object
-        return CasadiGPMResult(self.model, 
-            resultfile, self.nlp, res, self.options)
-        
-    @classmethod
-    def get_default_options(cls):
-        """ 
-        Get an instance of the options class for the 
-        CasadiGPM algorithm, prefilled with default 
-        values. (Class method.)
-        """
-        return CasadiGPMOptions()
-
-class CasadiLPMOptions(OptionBase):
+class CasadiPseudoSpectralOptions(OptionBase):
     """
     Options for optimizing JMU models using a collocation algorithm. 
 
@@ -1910,15 +1787,28 @@ class CasadiLPMOptions(OptionBase):
             Number of collocation points in each element.
             Default: 20
         
-        free_elements --
-            Determines if the position of the elements should be included
-            in the optimization.
-            Default: False
+        discr --
+            Determines the discretization of the problem. Could be either
+            LG (Legendre-Gauss), LGR (Legendre-Gauss-Radau), LGL (Legendre-
+            Gauss-Lobatto)
+            Default: "LG"
+        
+        link_options --
+            (state variable name, include in Mayer as ^2, ...) 
+            Default: []
             
-        disc_state --
-            Determines if the states should be allowed to be discontinious
-            between the elements.
+        link_bounds --
+            Specifies the initial, lower and upper bounds of the links.
+            Default: []
+        
+        free_phases --
+            Specifies if the location of the phases should be allowed to be
+            changed by the optimizer.
             Default: False
+        
+        phase_bounds --
+            Specifies the initial, lower and upper bounds of the free phases.
+            Default: None
             
         n_interpolation_points --
             Number of interpolation points in each finite element.
@@ -1981,10 +1871,12 @@ class CasadiLPMOptions(OptionBase):
     def __init__(self, *args, **kw):
         _defaults= {
             'n_e':1, 
-            'n_cp':20,  
-            'n_e_free':False,
-            'n_e_bounds':None,
-            'disc_state':False,
+            'n_cp':20,
+            'discr': "LG",
+            'free_phases':False,
+            'phase_bounds':None,
+            'link_bounds':[],
+            'link_options':[],
             'n_interpolation_points':None,
             'init_traj':None,
             'result_mode':'default', 
@@ -1994,112 +1886,13 @@ class CasadiLPMOptions(OptionBase):
             'IPOPT_options':{'max_iter':1000,
                              'derivative_test':'none'}
             }
-        super(CasadiLPMOptions,self).__init__(_defaults)
+        super(CasadiPseudoSpectralOptions,self).__init__(_defaults)
         # for those key-value-sets where the value is a dict, don't 
         # overwrite the whole dict but instead update the default dict 
         # with the new values
         self._update_keep_dict_defaults(*args, **kw)
 
-class CasadiGPMOptions(OptionBase):
-    """
-    Options for optimizing JMU models using a collocation algorithm. 
-
-    Collocation algorithm options::
-    
-        n_e --
-            Number of phases of the finite element mesh.
-            Default: 1
-            
-        n_cp --
-            Number of collocation points in each element.
-            Default: 20
-            
-        link_options --
-            (state variable name, include in Mayer as ^2, ...) 
-            Default: []
-        
-        free_phases --
-            Specifies if the location of the phases should be allowed to be
-            changed by the optimizer.
-            Default: False
-        
-        free_phases_bounds --
-            Specifies the initial, lower and upper bounds of the free phases.
-            Default: None
-            
-        n_interpolation_points --
-            Specifies the number of interpolation points.
-            Default: None
-            
-        init_traj --
-            Variable trajectory data used for initialization of the optimization 
-            problem. The data is represented by an object of the type 
-            jmodelica.io.DymolaResultTextual.
-            Default: None
-        
-        result_file_name --
-            Specifies the name of the file where the optimization result is 
-            written. Setting this option to an empty string results in a default 
-            file name that is based on the name of the optimization class.
-            Default: Empty string
-            
-        result_format --
-            Specifies in which format to write the result. Currently
-            only textual mode is supported.
-            Default: 'txt'
-
-        write_scaled_result --
-            Write the scaled optimization result if set to true. This option is 
-            only applicable when automatic variable scaling is enabled. Only for 
-            debugging use.
-            Default: False.
-
-    Options are set by using the syntax for dictionaries::
-
-        >>> opts = my_model.optimize_options()
-        >>> opts['n_e'] = 100
-        
-    In addition, IPOPT options can be provided in the option IPOPT_options. For 
-    a complete list of IPOPT options, please consult the IPOPT documentation 
-    available at http://www.coin-or.org/Ipopt/documentation/).
-
-    Some commonly used IPOPT options are provided by default::
-
-        max_iter --
-           Maximum number of iterations.
-           Default: 3000
-                      
-        derivative_test --
-           Check the correctness of the NLP derivatives. Valid values are 
-           'none', 'first-order', 'second-order', 'only-second-order'.
-           Default: 'none'
-
-    IPOPT options are set using the syntax for dictionaries::
-
-        >>> opts['IPOPT_options']['max_iter'] = 200
-
-    """
-    def __init__(self, *args, **kw):
-        _defaults= {
-            'n_e':1, 
-            'n_cp':20,
-            'link_options':[],
-            'free_phases':False,
-            'free_phases_bounds':None,
-            'n_interpolation_points': None,
-            'init_traj':None,
-            'result_file_name':'', 
-            'result_format':'txt',
-            'write_scaled_result':False,
-            'IPOPT_options':{'max_iter':1000,
-                             'derivative_test':'none'}
-            }
-        super(CasadiGPMOptions,self).__init__(_defaults)
-        self._update_keep_dict_defaults(*args, **kw)
-
-class CasadiLPMResult(JMResultBase):
-    pass
-class CasadiGPMResult(JMResultBase):
+class CasadiPseudoSpectralResult(JMResultBase):
     pass
 class CasadiRadauResult(JMResultBase):
     pass
