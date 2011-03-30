@@ -614,8 +614,9 @@ public class BiPGraph {
 				ArrayList<FVariable> zz = new ArrayList<FVariable>();
 				for (FVariable fv : eb.activeVariables()) {
 					if (fv.isDerivativeVariable()) {
-						FRealVariable frv = (FRealVariable)((FDerivativeVariable)fv).lookupFV(fv.getFQName());
-						if (frv.stateSelectAttribute()!=FRealVariable.StateSelect.ALWAYS) {
+						//FRealVariable frv = (FRealVariable)((FDerivativeVariable)fv).lookupFV(fv.getFQName());
+						FRealVariable frv = (FRealVariable)fv.getMeIntegrated();
+						if (frv!=null && frv.stateSelectAttribute()!=FRealVariable.StateSelect.ALWAYS) {
 							zz.add(fv);
 						}
 					} else {
@@ -691,7 +692,15 @@ public class BiPGraph {
 							
 					zz = new ArrayList<FVariable>();
 					for (FVariable fv : zzHat) {
-						zz.add(fv.getMeIntegrated());
+						FVariable zz_test = fv.getMeIntegrated();
+						if (zz_test.isDerivativeVariable()) {
+							FRealVariable frv = (FRealVariable)zz_test.getMeIntegrated();
+							if (frv!=null && frv.stateSelectAttribute()!=FRealVariable.StateSelect.ALWAYS) {
+								zz.add(zz_test);
+							}
+						} else {
+							zz.add(zz_test);
+						}
 					}
 					z.add(zz);
 								

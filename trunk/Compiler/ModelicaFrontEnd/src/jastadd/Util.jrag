@@ -880,7 +880,7 @@ aspect FlatNames {
     }
     
     eq FDerivativeVariable.name()  = getFQNameNoTransform().derName();
-    eq FDummyDerivativeVariable.name()  = getFQNameNoTransform().derName();
+    eq FDummyDerivativeVariable.name()  =getFQNameNoTransform().derName();
     syn String FIdUse.derName()    = getFQNameNoTransform().derName();
     syn String FIdUseExp.derName() = getFIdUseNoTransform().derName();
 
@@ -965,6 +965,7 @@ aspect FlatNames {
     eq FDerExp.nameUnderscore() = "der_" + getFIdUse().nameUnderscore();
     eq FDummyDerExp.nameUnderscore() = "der_" + getFIdUse().nameUnderscore();
     eq FHDummyDerExp.nameUnderscore() = "der_" + getOrder() + "_" + getFIdUse().nameUnderscore();
+    
     //syn String FInstAccessExp.nameUnderscore() = getInstAccess().nameUnderscore();
     //syn String FIdUseInstAccess.nameUnderscore() = getInstAccess().nameUnderscore();
     

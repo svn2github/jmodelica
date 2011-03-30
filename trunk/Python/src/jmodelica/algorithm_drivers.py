@@ -979,8 +979,6 @@ class AssimuloAlg(AlgorithmBase):
                                                       self.input[1][:,1:]))
             #Sets the inputs, if any
             self.model.set(input_traj[0], input_traj[1].eval(self.start_time)[0,:])
-
-        print model.jmimodel.get_z()
         
         if issubclass(self.solver, Implicit_ODE):
             if not self.input:

@@ -92,11 +92,12 @@ aspect TransformCanonical {
 			System.out.println(e.getLeft().diff("time",1));		
 		}
 */
+/*
 		if (root().options.getBooleanOption("index_reduction")) {
 			indexReduction();
 			blt();
 		}
-	
+	*/
 	}
 
 	public void FClass.transformCanonical() {
@@ -403,6 +404,8 @@ aspect TransformCanonical {
 		daeInitUnmatchedEquations = new ArrayList<FAbstractEquation>();		
 		daeInitUnmatchedVariables = new ArrayList<FVariable>();			
 			
+		//System.out.println(prettyPrint(""));	
+			
 		BiPGraph g = new BiPGraph(name(),"");
 		
 		Eq eqn = null;
@@ -522,6 +525,11 @@ aspect TransformCanonical {
 				//System.out.println(prettyPrint(""));
 
 				//dumpTree("");
+
+				log.info("States:");
+				for (FVariable fv : differentiatedRealVariables()) {
+					log.info(fv.prettyPrint("  "));
+				}
 
 				BiPGraph oldG = g;	
 

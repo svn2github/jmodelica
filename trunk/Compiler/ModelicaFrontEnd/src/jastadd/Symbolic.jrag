@@ -304,3 +304,14 @@ aspect Derivatives {
 		return dynamicFExp(new FRealLitExp("0"));
 	}
 }
+/*
+ aspect ExpressionSimplification {
+ 
+ 	rewrite FMulExp {
+		when (getLeft().variability().lessOrEqual(fConstant()) && getLeft().ceval().realValue()==0.) to FExp {
+				return getRight();
+			}
+	}
+ 
+ }
+ */
