@@ -886,8 +886,20 @@ class Test_FMI_ODE:
         res = model.simulate(final_time=2.0)
         solver = res.solver
         
-        nose.tools.assert_almost_equal(solver.t_cur, 1.856045, places=3)
-    
+        nose.tools.assert_almost_equal(solver.t_cur, 1.856045, places=3)    
+        
+    @testattr(windows = True)
+    def test_typeDefinitions_simulation(self):
+        """
+        This tests a FMU with typeDefinitions including StringType and BooleanType
+        """
+        model = fmi.FMUModel('Robot_Dym74FD01.fmu', path_to_fmus)
+        
+        res = model.simulate(final_time=2.0)
+        solver = res.solver
+        
+        nose.tools.assert_almost_equal(solver.t_cur, 1.856045, places=3)        
+
     @testattr(assimulo = True)
     def test_event_iteration(self):
         """
