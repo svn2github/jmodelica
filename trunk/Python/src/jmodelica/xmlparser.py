@@ -3815,14 +3815,18 @@ class BooleanType:
     Class defining data structure based on the XML element BooleanType. Is empty 
     since XML element contains no attributes or other elements.
     """
-    pass
+    def __init__(self, element):
+        pass
+
 
 class StringType:
     """ 
     Class defining data structure based on the XML element StringType. Is empty 
     since XML element contains no attributes or other elements.
     """
-    pass
+    def __init__(self, element):
+        pass
+
     
 class EnumerationType:
     """ 
