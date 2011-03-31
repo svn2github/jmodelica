@@ -61,13 +61,13 @@ def quad_err(t_meas,y_meas,t_sim,y_sim):
 		m2 = N.size(y_sim,0)
 		n2 = N.size(y_sim,1)
 	
-	if len(t_meas) is not n1:
+	if len(t_meas) != n1:
 		raise ValueError, 't_meas and y_meas must have the same length.'
 	
-	if len(t_sim) is not n2:
+	if len(t_sim) != n2:
 		raise ValueError, 't_sim and y_sim must have the same length.'
 	
-	if m1 is not m2:
+	if m1 != m2:
 		raise ValueError, 'y_meas and y_sim must have the same number of rows.'
 	
 	if not N.all(N.diff(t_sim) >= 0):
