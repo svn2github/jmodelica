@@ -987,7 +987,7 @@ public class ModelicaCompiler {
 		// Output the untransformed flattened model
 		log.debug("Creating raw .mof file...");
 		PrintStream out = new PrintStream(flatFile);
-		fc.prettyPrint(out, "");
+		fc.prettyPrint_MC(out, "");
 	   	out.close();
 	   	log.debug("... raw .mof file created.");
 
@@ -1006,7 +1006,7 @@ public class ModelicaCompiler {
 				
 		log.debug("Creating transformed .mof file...");
 		out = new PrintStream(new File(tempDir, icl.qualifiedName() + "_transformed.mof"));
-	   	fc.prettyPrint(out, "");
+	   	fc.prettyPrint_MC(out, "");
 	   	out.close();
 	   	log.debug("... transformed .mof file created.");
 	    

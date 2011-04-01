@@ -1606,3 +1606,173 @@ aspect FlattPrettyPrint {
     syn String Access.toString() = prettyPrint("");
     syn String Modification.toString() = prettyPrint("");
 }
+
+aspect PrettyPrint_MC {
+	
+	class MCPrettyPrinter extends Printer {
+		
+		public MCPrettyPrinter() {
+			super("    ");
+		}
+		
+ 		public void print(ASTNode node, PrintStream str, String indent) { 
+ 			node.prettyPrint(this, str, indent); 
+ 		}
+  		
+	}
+	
+	static MCPrettyPrinter ASTNode.printer_MC = new MCPrettyPrinter();
+	
+	public String ASTNode.prettyPrint_MC(String indent) {
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		PrintStream str = new PrintStream(os);
+		prettyPrint(str,indent);
+		return os.toString();
+	}
+
+	public void List.prettyPrintFAttributeList_MC(PrintStream str, Printer p) {
+	
+	    boolean attrSet = false;
+	    	boolean firstAttr = true;
+	    	
+	    	for (int i=0;i<getNumChild();i++) {
+	    		if (((FAttribute)getChild(i)).getAttributeSet() && !((FAttribute)getChild(i)).getName().name().equals("fixed")) {
+					attrSet=true;
+					break;
+	 		   	}
+	    	}
+	    
+	    	if (attrSet){
+	    		str.print("(");
+	    		for (int i=0;i<getNumChild();i++) {
+	    
+	    			if (((FAttribute)getChild(i)).getAttributeSet() && !((FAttribute)getChild(i)).getName().name().equals("fixed")) {
+	
+						if (!firstAttr)	
+							str.print(",");
+						p.print(((FAttribute)getChild(i)),str,"");
+						
+						firstAttr = false;
+	 		   		}
+	    		}
+	    		str.print(")");
+	   		}
+	}
+
+	public void FVariable.prettyPrint_MC(Printer p, PrintStream str, String indent) {
+			str.print(indent);
+			
+			str.print(getFTypePrefixVariability());
+						
+			if (hasFTypePrefixInputOutput()) {
+				str.print(getFTypePrefixInputOutput());
+				str.print(" ");
+			}
+			
+			str.print(type().scalarType());
+			str.print(" ");
+			str.print(nameUnderscore());
+//			p.print(getFQName(),str,"");
+		
+	    	getFAttributeList().prettyPrintFAttributeList_MC(str,p);
+	    	
+	   if (hasBindingExp()) {
+				str.print(" = ");
+				FExp bindingExp = getBindingExp();
+				p.print(bindingExp,str,indent);		
+		} else if (hasParameterEquation()) {
+				str.print(" = ");
+				FExp bindingExp = ((FEquation)parameterEquation()).getRight();
+				p.print(bindingExp,str,indent);				
+		}
+	    	
+	    if (hasFStringComment()) {
+	    	str.print(" \"");
+	    	str.print(getFStringComment().getComment());
+	    	str.print("\"");
+	    }
+
+	    if (isIndependentParameter() && hasBindingExp()) {
+	    	str.print(" /* ");
+	    	try {
+				str.print(getBindingExp().ceval());
+			} catch (ConstantEvaluationException e){
+				str.print("evalutation error");
+			}
+	    	str.print(" */");
+	    }
+	}
+
+
+	public void FClass.prettyPrint_MC(Printer p, PrintStream str, String indent) {
+		String nextInd = p.indent(indent);
+	
+	    p.print(getFFunctionDecls(), str, nextInd);
+    	p.print(getFRecordDecls(), str, nextInd);
+    	p.print(getFEnumDecls(), str, nextInd);
+	
+		str.print(indent + "model " + nameUnderscore() + "\n");
+		for (FVariable fv : getFVariables()) {
+	  		if (!fv.isDerivativeVariable() && !fv.isPreVariable()) {
+	  			p.print(fv, str, nextInd);
+	  			str.print(";\n");  
+	  		}
+		}
+
+		if (getNumFInitialEquation()>0)
+			str.print(indent + "initial equation \n");
+		getFInitialEquations().prettyPrintWithFix(p, str, nextInd, "", ";\n");
+
+	/*
+		if (getNumFParameterEquation()>0)
+			str.print(indent + "parameter equation\n");
+		getFParameterEquations().prettyPrintWithFix(p, str, nextInd, "", ";\n");
+	*/
+		int block_index = 0;
+	    boolean wroteEquation = false;
+	    for (FEquationBlock b : getFEquationBlocks()) {
+	    	for (FAbstractEquation e : b.getFAbstractEquations()) {
+	    		if (e instanceof FAlgorithmBlock) {
+	    			p.print(e, str, indent);
+	    			wroteEquation = false;
+	    		} else {
+	    			if (!e.isIgnored()) {
+		    			if (!wroteEquation) {
+		    				str.print(indent);
+		    				str.print("equation\n");
+		    				wroteEquation = true;
+		    			}
+		    			p.print(e, str, nextInd);
+			    		str.print(";\n");
+	    			}
+	    		}
+	    	}
+	    	block_index++;
+	    }
+	        	
+  		str.print(indent);
+  		str.print("end ");
+  		str.print(nameUnderscore());
+  		str.print(";\n");
+	}
+
+
+	public void ASTNode.prettyPrint_MC(PrintStream str, String indent) {
+ 		prettyPrint_MC(printer_MC, str, indent);
+	}
+
+	public void ASTNode.prettyPrint_MC(Printer p, PrintStream str, String indent) {
+ 		prettyPrint(p, str, indent);
+	}
+	
+	public void FIdUseExp.prettyPrint_MC(Printer p, PrintStream str, String indent) {
+		str.print(nameUnderscore());
+	}
+	
+	public void FDerExp.prettyPrint_MC(Printer p, PrintStream str, String indent) {
+		str.print("der(");
+		str.print(getFIdUse().nameUnderscore());
+		str.print(")");
+	}
+
+}
