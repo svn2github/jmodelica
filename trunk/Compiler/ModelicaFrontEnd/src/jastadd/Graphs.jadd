@@ -583,160 +583,179 @@ public class BiPGraph {
 		System.out.println(printMatching());
 		
 		// Selection of dummy derivatives
+		/*
+			The algorithm is implemented differently than in the original paper
+			by Mattsson and Sšderlind. In the paper, each block is treated
+			individually by selecting all dummy derivatives of one block
+			before proceeding to the next block. This approach, however, makes
+			it hard to handle user preferences for state selection as defined
+			by the stateSelect attribute. This is because selection of
+			dummy derivatives in one block may restrict the choices in 
+			following blocks, even though a global analysis would yield that
+			it would indeed be possible to satisfy user selection.
+			
+			Therefore, all equations in blocks containing differentiated
+			equations are treated in one block.
+		*/
+		
 		BLT blt = computeBLT();
 	
 		System.out.println(blt.toString());
 
-		ArrayList<ArrayList<FAbstractEquation>> g = 
-		   new ArrayList<ArrayList<FAbstractEquation>>();
+		// Lists of equations and variables, notation is the same as in the 
+		// paper
+		ArrayList<FAbstractEquation> g = 
+		   new ArrayList<FAbstractEquation>();
 		
-		ArrayList<ArrayList<FAbstractEquation>> h = 
-		   new ArrayList<ArrayList<FAbstractEquation>>();
+		ArrayList<FAbstractEquation> h = 
+		   new ArrayList<FAbstractEquation>();
 
-		ArrayList<ArrayList<FVariable>> z = 
-		   new ArrayList<ArrayList<FVariable>>();
+		ArrayList<FVariable> z = 
+		   new ArrayList<FVariable>();
 
-		ArrayList<ArrayList<FVariable>> zHat = 
-		   new ArrayList<ArrayList<FVariable>>();
+		ArrayList<FVariable> zHat = 
+		   new ArrayList<FVariable>();
+
 		
+		// Collect all blocks that contain differentiated equations
 		for (EquationBlock eb : blt) {
-
 			ArrayList<FAbstractEquation> diffedEqns = eb.differentiatedEquations();
 			if (diffedEqns.size()>0) {
 				System.out.println(" ********* Found block containing diffed equations ***********");
 				System.out.println(eb.toString());
-
-				// Step 1: Initialize
-				ArrayList<FAbstractEquation> gg = new ArrayList<FAbstractEquation>();
-				gg.addAll(eb.equations());
-				g.add(gg);
+		
+				// Step 1: Initialize, add all equations in blocks
+				// having differentiated equations
+				g.addAll(eb.equations());
 				
-				ArrayList<FVariable> zz = new ArrayList<FVariable>();
+				// Step 2: Extract all active variables, i.e., highest order 
+				// derivatives for each variable
 				for (FVariable fv : eb.activeVariables()) {
 					if (fv.isDerivativeVariable()) {
-						//FRealVariable frv = (FRealVariable)((FDerivativeVariable)fv).lookupFV(fv.getFQName());
+						// If the stateSelect attribute equals StateSelect.always,
+						// then don't add the variable so that it cannot be
+						// selected as dummy derivative.
 						FRealVariable frv = (FRealVariable)fv.getMeIntegrated();
 						if (frv!=null && frv.stateSelectAttribute()!=FRealVariable.StateSelect.ALWAYS) {
-							zz.add(fv);
+							z.add(fv);
 						}
 					} else {
-						zz.add(fv);
+						z.add(fv);
 					}
 				}
-				z.add(zz);				
-
-				boolean remainingDifferentiatedEquations = false;
-				for (FAbstractEquation fe : gg) {
-					if (fe.getMeIntegrated()!=null) {
-						remainingDifferentiatedEquations = true;
-					}
-				}
-
-				while (remainingDifferentiatedEquations) {
-				    System.out.println("----------------");
-					// Step 3: Extract differentiated equations from block
-					ArrayList<FAbstractEquation> hh = new ArrayList<FAbstractEquation>();
-					for (FAbstractEquation fe : gg) {
-						if (fe.getMeIntegrated()!=null) {
-							hh.add(fe);
-						}
-					}
-					h.add(hh);
-									
-					// Step 4: Select independent columns: simple matching in this case
-					BiPGraph gd = new BiPGraph("","");
-					
-					for (FVariable fv : zz) {
-						gd.addVariable(fv.name(),"",fv);     
-					}
-				
-					int k = 1;
-					Eq eqn = null;
-					Var v = null;
-					for (FAbstractEquation e : hh) {
-			
-						int n_eq = e.numScalarEquations();
-				
-						for (int i=0;i<n_eq;i++) {
-							System.out.println("*** " + e.prettyPrint(""));
-							eqn = gd.addEquation("eq_"+k,e.prettyPrint(""),e);
-							k++;
-				
-							for (FVariable y : e.variables()) { 
-								System.out.println(" ** " + y.prettyPrint("") + " " + zz.contains(y));
-								if (zz.contains(y)) {
-									v = gd.getVariable(y.name()); 
-									gd.addEdge(eqn,v);
-								} 
-							} 
-						}
-					}
-					
-					System.out.println(gd.toString());
-					gd.maximumMatching(true);	
-					System.out.println(gd.printMatching());
-					
-					ArrayList<FVariable> zzHat = new ArrayList<FVariable>();
-					for (Var vv : gd.getMatchedVariables()) {
-						zzHat.add(vv.getVariable());
-					}
-					zHat.add(zzHat);
-					
-					// Step 5: prepare for next iteration
-									// Step 1: Initialize
-					gg = new ArrayList<FAbstractEquation>();
-					for (FAbstractEquation ee : hh) {
-						gg.add(ee.getMeIntegrated());
-					}
-					g.add(gg);		
-							
-					zz = new ArrayList<FVariable>();
-					for (FVariable fv : zzHat) {
-						FVariable zz_test = fv.getMeIntegrated();
-						if (zz_test.isDerivativeVariable()) {
-							FRealVariable frv = (FRealVariable)zz_test.getMeIntegrated();
-							if (frv!=null && frv.stateSelectAttribute()!=FRealVariable.StateSelect.ALWAYS) {
-								zz.add(zz_test);
-							}
-						} else {
-							zz.add(zz_test);
-						}
-					}
-					z.add(zz);
-								
-					remainingDifferentiatedEquations = false;
-					for (FAbstractEquation fe : gg) {
-						if (fe.getMeIntegrated()!=null) {
-							remainingDifferentiatedEquations = true;
-						}
-					}
-					
-				}
+			}
+		}
 		
-				System.out.println(" --- Reduced System --- ");
-				System.out.println(" Equations: ");
-				for (ArrayList<FAbstractEquation> l : g) {
-					for (FAbstractEquation fe : l) {
-						System.out.println(fe.prettyPrint("   "));
-					}
-					System.out.println("");
+		// Initialize variable to keep track of there are still 
+		// differentiated equations
+		boolean remainingDifferentiatedEquations = true;
+		
+		// Iterate
+		while (remainingDifferentiatedEquations) {
+		   System.out.println("----------------");
+			// Step 3: Extract differentiated equations 
+			h = new ArrayList<FAbstractEquation>();
+			for (FAbstractEquation fe : g) {
+				if (fe.getMeIntegrated()!=null) {
+					h.add(fe);
 				}
-
-				System.out.println(" Dummy derivatives: ");
-				for (ArrayList<FVariable> l : zHat) {
-					for (FVariable fv : l) {
-						result.addDummyDerivative(fv);
-						System.out.println(fv.prettyPrint("   "));
-					}
-					System.out.println("");
-				}
-
-
-				System.out.println(" --- *** --- ");
-
+			}
+									
+			// Step 4: Select independent columns: simple matching will do for 
+			// now
+			BiPGraph gd = new BiPGraph("","");
+					
+			// Add variables to the graph
+			for (FVariable fv : z) {
+				gd.addVariable(fv.name(),"",fv);     
 			}
 				
+			int k = 1;
+			Eq eqn = null;
+			Var v = null;
+			// Add the equations to the graph
+			for (FAbstractEquation e : h) {
+			
+				int n_eq = e.numScalarEquations();
+				
+				for (int i=0;i<n_eq;i++) {
+					System.out.println("*** " + e.prettyPrint(""));
+					eqn = gd.addEquation("eq_"+k,e.prettyPrint(""),e);
+					k++;
+				
+					for (FVariable y : e.variables()) { 
+						System.out.println(" ** " + y.prettyPrint("") + " " + z.contains(y));
+						if (z.contains(y)) {
+							v = gd.getVariable(y.name()); 
+							gd.addEdge(eqn,v);
+						} 
+					} 
+				}
+			}
+					
+			System.out.println(gd.toString());
+			// Run matching
+			gd.maximumMatching(true);	
+			System.out.println(gd.printMatching());
+					
+			// The matched variables are selected as dummy derivatives
+			for (Var vv : gd.getMatchedVariables()) {
+				zHat.add(vv.getVariable());
+			}
+
+					
+			// Step 5: prepare for next iteration
+			// Get the "integrated" equations
+			g = new ArrayList<FAbstractEquation>();
+			for (FAbstractEquation ee : h) {
+				g.add(ee.getMeIntegrated());
+			}
+							
+			// Get the "integrated" variables 
+			z = new ArrayList<FVariable>();
+			for (FVariable fv : zHat) {
+				FVariable z_test = fv.getMeIntegrated();
+				if (z_test.isDerivativeVariable()) {
+					// Take into account user defined state selection
+					FRealVariable frv = (FRealVariable)z_test.getMeIntegrated();
+					if (frv!=null && frv.stateSelectAttribute()!=FRealVariable.StateSelect.ALWAYS) {
+						z.add(z_test);
+					}
+				} else {
+					z.add(z_test);
+				}
+			}
+
+			// Check if there are remaining differentiated equations								
+			remainingDifferentiatedEquations = false;
+			for (FAbstractEquation fe : g) {
+				if (fe.getMeIntegrated()!=null) {
+					remainingDifferentiatedEquations = true;
+				}
+			}
+			
+			System.out.println(" --- Equations in iteration: --- ");
+			System.out.println(" Equations: ");
+			for (FAbstractEquation fe : g) {
+				System.out.println(fe.prettyPrint("   "));
+			}
+
+			System.out.println(" Dummy derivatives selected in iteration: ");
+			for (FVariable fv : zHat) {
+				result.addDummyDerivative(fv);
+				System.out.println(fv.prettyPrint("   "));
+			}
+			System.out.println("");
+				
 		}
+		
+		System.out.println(" Dummy derivatives: ");
+		for (FVariable fv : zHat) {
+			result.addDummyDerivative(fv);
+			System.out.println(fv.prettyPrint("   "));
+		}
+		System.out.println("");
+		
 		return result;
 	}
 	
