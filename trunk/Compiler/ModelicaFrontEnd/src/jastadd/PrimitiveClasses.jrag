@@ -66,10 +66,12 @@ aspect UnknownDeclarations {
 	}		                            
 	
 	syn UnknownClassDecl ASTNode.unknownClassDecl() = root().unknownClassDecl();
-	eq SourceRoot.unknownClassDecl() = getProgram().getUnknownClassDecl();
+	eq SourceRoot.unknownClassDecl()                = getProgram().getUnknownClassDecl();
+	eq UnknownClassDecl.unknownClassDecl()          = this;
 
 	syn UnknownComponentDecl ASTNode.unknownComponentDecl() = root().unknownComponentDecl();
-	eq SourceRoot.unknownComponentDecl() = getProgram().getUnknownComponentDecl();
+	eq SourceRoot.unknownComponentDecl()                    = getProgram().getUnknownComponentDecl();
+	eq UnknownComponentDecl.unknownComponentDecl()          = this;
 	
 	syn boolean ClassDecl.isUnknown() = false;
 	eq UnknownClassDecl.isUnknown() = true;

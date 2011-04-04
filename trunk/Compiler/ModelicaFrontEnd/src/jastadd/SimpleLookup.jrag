@@ -1,0 +1,148 @@
+/*
+    Copyright (C) 2011 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+aspect SimpleClassLookup {
+	
+	/*
+	 * Warning: The methods below are only a prototype and are currently not tested.
+	 *          Use with care.
+	 */
+
+
+	syn ClassDecl ExtendsClause.findClassDecl()     = getSuper().findClassDecl();
+	syn ClassDecl BaseComponentDecl.findClassDecl() = getClassName().findClassDecl();
+	syn ClassDecl ImportClause.findClassDecl()      = getPackageName().findClassDecl();
+	
+	syn lazy ClassDecl Access.findClassDecl() = simpleLookupClass(getID());
+	eq Dot.findClassDecl()                    = getRight().findClassDecl();
+	eq GlobalAccess.findClassDecl()           = getAccess().findClassDecl();
+	
+	
+	inh ClassDecl Access.simpleLookupClass(String name);
+	inh ClassDecl FullClassDecl.simpleLookupClass(String name);
+	eq Dot.getRight().simpleLookupClass(String name)           = 
+		getLeft().findClassDecl().simpleLookupClassMemberScope(name);
+	eq GlobalAccess.getAccess().simpleLookupClass(String name) = simpleLookupClassGlobalScope(name);
+	eq FullClassDecl.getChild().simpleLookupClass(String name) = simpleLookupClassDefaultScope(name);
+	eq Program.getChild().simpleLookupClass(String name)       = simpleLookupClassDefaultScope(name);
+	
+	
+	inh ClassDecl Access.simpleLookupClassGlobalScope(String name);
+	eq Program.getChild().simpleLookupClassGlobalScope(String name) = simpleLookupClassDefaultScope(name);
+	
+	
+	syn lazy ClassDecl FullClassDecl.simpleLookupClassDefaultScope(String name) {
+		ClassDecl res = simpleLookupClassMemberScope(name);
+		if (!res.isUnknown())
+			return res;
+		
+		for (ImportClause imp : getImports()) {
+			res = imp.simpleLookupClassInImport(name);
+			if (!res.isUnknown())
+				return res;
+		}
+		
+		return simpleLookupClass(name);
+	}
+	
+	syn lazy ClassDecl Program.simpleLookupClassDefaultScope(String name) {
+		ClassDecl res = simpleLookupInClassList(getPredefinedTypes(), name);
+		if (res != null)
+			return res;
+			
+		res = simpleLookupInClassList(getBuiltInTypes(), name);
+		if (res != null)
+			return res;
+			
+		res = simpleLookupInClassList(getBuiltInFunctions(), name);
+		if (res != null)
+			return res;
+		
+		res = simpleLookupInLibNodeList(getLibNodes(), name);
+		return (res != null) ? res : getUnknownClassDecl();
+	}
+	
+	
+	syn ClassDecl ClassDecl.simpleLookupClassMemberScope(String name) = unknownClassDecl();
+	eq UnknownClassDecl.simpleLookupClassMemberScope(String name)     = unknownClassDecl();
+	
+	syn lazy ClassDecl FullClassDecl.simpleLookupClassMemberScope(String name) {
+		ClassDecl res = simpleLookupInClassList(getClassDecls(), name);
+		if (res != null)
+			return res;
+		
+		for (ExtendsClause sup : getSupers()) {
+			res = sup.findClassDecl().simpleLookupClassMemberScope(name);
+			if (!res.isUnknown())
+				return res;
+		}
+		
+		return unknownClassDecl();
+	}
+	
+	eq LibClassDecl.simpleLookupClassMemberScope(String name) {
+		ClassDecl res = super.simpleLookupClassMemberScope(name);
+		if (res.isUnknown()) {
+			ClassDecl libRes = simpleLookupInLibNodeList(getLibNodes(), name);
+			if (libRes != null)
+				return libRes;
+		}
+		return res;
+	}
+	
+	eq ShortClassDecl.simpleLookupClassMemberScope(String name) = 
+		getExtendsClauseShortClass().findClassDecl().simpleLookupClassMemberScope(name);
+	
+	
+	syn ClassDecl ImportClause.simpleLookupClassInImport(String name) = 
+		matches(name) ? findClassDecl() : unknownClassDecl();
+	eq ImportClauseUnqualified.simpleLookupClassInImport(String name) = 
+		findClassDecl().simpleLookupClassMemberScope(name);
+	
+	
+	/**
+	 * Convenience method for looking up a class in a List of ClassDecls.
+	 *
+	 * Unlike the other lookup methods, this one returns null when the class isn't found.
+	 */
+	public static ClassDecl ASTNode.simpleLookupInClassList(List<? extends ClassDecl> list, String name) {
+		for (ClassDecl cd : list)
+			if (cd.matches(name))
+				return cd;
+		return null;
+	}
+	
+	
+	/**
+	 * Convenience method for looking up a class in a List of ClassDecls.
+	 *
+	 * Unlike the other lookup methods, this one returns null when the class isn't found.
+	 */
+	public static ClassDecl ASTNode.simpleLookupInLibNodeList(List<LibNode> list, String name) {
+		for (LibNode ln : list)
+			if (ln.getName().equals(name))
+				return (ClassDecl) ln.getStoredDefinition().getElement(0);
+		return null;
+	}
+	
+	
+	eq IdDecl.matches(String str)                = getID().equals(str);
+	eq BaseClassDecl.matches(String str)         = getName().matches(str);
+	eq ImportClauseRename.matches(String str)    = getIdDecl().matches(str);
+	eq ImportClauseQualified.matches(String str) = 
+		getPackageName().getLastAccess().getID().equals(str);
+
+}

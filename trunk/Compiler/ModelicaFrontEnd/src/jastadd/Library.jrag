@@ -217,7 +217,8 @@ aspect Library {
 		setComponentDeclList(fcd.getComponentDeclList());
 		setAnnotationList(fcd.getAnnotationList());
 		setExternalClauseOpt(fcd.getExternalClauseOpt());
-		setEndName(fcd.getEndName());		                     
+		setEndName(fcd.getEndName());
+		setLocation(fcd);
 	}
 	
 	eq LibClassDecl.getLibNode().enclosingClassDecl() = this; 	

@@ -93,28 +93,14 @@ aspect PredefinedTypes {
         builtInDef += " differentiated). \","; 
         builtInDef += " always \"Do use it as a state.\""; 
         builtInDef += ");\n"; 
-        /*        
-        // Since we don't support Enumerations, this is a workaround
-        builtInDef += "package StateSelect\n"; 
-        builtInDef += "constant Integer never = 0;\n";
-        builtInDef += "constant Integer avoid = 1;\n";
-        builtInDef += "constant Integer default = 2;\n";
-        builtInDef += "constant Integer prefer = 3;\n";
-        builtInDef += "constant Integer always = 4;\n";
-        builtInDef += "end StateSelect;\n";
-        */
-//          java.io.StringReader builtInDefReader = new java.io.StringReader(builtInDef);
-//      ModelicaParser parser = new ModelicaParser();
+
         PrimitiveClassDecl pcd=null;
   
         try {
         
- //             ModelicaScanner scanner = new ModelicaScanner(builtInDefReader);
- //             SourceRoot sr = (SourceRoot)parser.parse(scanner);
             ParserHandler ph = new ParserHandler();
             SourceRoot sr = ph.parseString(builtInDef,"");
             Program p = sr.getProgram();
- //             builtInDefReader.close();
             
             for (int i=0;i<p.getUnstructuredEntity(0).getNumElement();i++) {
             //log.debug("Program.getPredefinedTypeList(): Hepp!: " + i);
@@ -424,16 +410,10 @@ aspect PredefinedTypes {
 +"  output Real y;\n"
 +"end log10;\n";
 
- //            java.io.StringReader reader = new java.io.StringReader(builtInFunc);
-            //Reader reader = new FileReader("builtin/builtin_functions.mo");
-//              ModelicaScanner scanner = new ModelicaScanner(reader);
-
             ParserHandler ph = new ParserHandler();
             SourceRoot sr = ph.parseString(builtInFunc,"");
 
-//              SourceRoot sr = (SourceRoot)parser.parse(scanner);
             Program p = sr.getProgram();
- //             reader.close();
             
             ExternalClause builtin = new ExternalClause(new Opt(new ExternalLanguage("builtin")), new Opt(), new Opt(), new Opt());
             for (Element e : p.getUnstructuredEntity(0).getElements()) {
@@ -481,19 +461,7 @@ aspect PredefinedTypes {
     eq SourceRoot.getProgram().lookupBuiltInFunction(String name) = doLookupBuiltInFunction(name);
     eq Root.getChild().lookupBuiltInFunction(String name) = null;
     
-    /*
-    rewrite FunctionCall {
-        when (getName().myClassDecl() == lookupBuiltInFunction("size") && 
-              hasFunctionArguments() &&
-              getFunctionArguments().getNumExp()==2)
-            to SizeExp {
-                return new SizeExp((Access)getFunctionArguments().getExp(0),
-                                   getFunctionArguments().getExp(1));
-            }       
-    }
-    */
-  
-    
+
     boolean PrimitiveClassDecl.rewritten = false;
     rewrite PrimitiveClassDecl {
         when (getName().getID().equals("Real") && !rewritten)
