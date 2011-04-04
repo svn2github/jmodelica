@@ -950,7 +950,11 @@ public class ModelicaCompiler {
 		FClass fc = createFClass(icl);
 		flatRoot.setFClass(fc);
 		flatRoot.options = new OptionRegistry(icl.root().options);
-		flatRoot.setErrorHandler(icl.root().getErrorHandler());
+		// TODO: We should change how the checkErrors() method works, 
+		//       since it relies on the behaviour of DefaultErrorHandler
+		IErrorHandler eh = icl.root().getErrorHandler();
+		if (!(eh instanceof DefaultErrorHandler))
+			flatRoot.setErrorHandler(eh);
 		return fc;
 	}
 	
