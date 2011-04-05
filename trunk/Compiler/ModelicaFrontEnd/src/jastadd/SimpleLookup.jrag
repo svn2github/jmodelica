@@ -121,6 +121,7 @@ aspect SimpleClassLookup {
 		
 
 	protected ClassDecl FullClassDecl.simpleLookupClassInImports(String name) {
+		ClassDecl res;
 		for (ImportClause imp : getImports()) {
 			res = imp.simpleLookupClassInImport(name);
 			if (!res.isUnknown())
@@ -131,6 +132,7 @@ aspect SimpleClassLookup {
 	}
 
 	protected ClassDecl FullClassDecl.simpleLookupClassInExtends(String name) {
+		ClassDecl res;
 		for (ExtendsClause sup : getSupers()) {
 			res = sup.findClassDecl().simpleLookupClassMemberScope(name);
 			if (!res.isUnknown())
