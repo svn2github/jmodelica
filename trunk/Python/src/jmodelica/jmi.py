@@ -471,8 +471,8 @@ class JMUModel(BaseModel):
         self._n_p_opt=0
         
         self._setDefaultValuesFromMetadata()
-        self.jmimodel.initAD()
         self._set_dependent_parameters()
+        self.jmimodel.initAD()
 
         if self._n_z.value <= 1: # The time variable is always present
             raise JMIException("Model contains no variables.")
