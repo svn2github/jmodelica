@@ -36,6 +36,7 @@ aspect SimpleClassLookup {
 	eq Dot.getRight().simpleLookupClass(String name)           = 
 		getLeft().findClassDecl().simpleLookupClassMemberScope(name);
 	eq GlobalAccess.getAccess().simpleLookupClass(String name) = simpleLookupClassGlobalScope(name);
+	eq FullClassDecl.getSuper().simpleLookupClass(String name) = simpleLookupClassLocalScope(name);
 	eq FullClassDecl.getChild().simpleLookupClass(String name) = simpleLookupClassDefaultScope(name);
 	eq Program.getChild().simpleLookupClass(String name)       = simpleLookupClassDefaultScope(name);
 	
@@ -43,20 +44,6 @@ aspect SimpleClassLookup {
 	inh ClassDecl Access.simpleLookupClassGlobalScope(String name);
 	eq Program.getChild().simpleLookupClassGlobalScope(String name) = simpleLookupClassDefaultScope(name);
 	
-	
-	syn lazy ClassDecl FullClassDecl.simpleLookupClassDefaultScope(String name) {
-		ClassDecl res = simpleLookupClassMemberScope(name);
-		if (!res.isUnknown())
-			return res;
-		
-		for (ImportClause imp : getImports()) {
-			res = imp.simpleLookupClassInImport(name);
-			if (!res.isUnknown())
-				return res;
-		}
-		
-		return simpleLookupClass(name);
-	}
 	
 	syn lazy ClassDecl Program.simpleLookupClassDefaultScope(String name) {
 		ClassDecl res = simpleLookupInClassList(getPredefinedTypes(), name);
@@ -75,22 +62,42 @@ aspect SimpleClassLookup {
 		return (res != null) ? res : getUnknownClassDecl();
 	}
 	
+	/**
+	 * Lookup in contained classes, extended classes, imports and surrounding classes.
+	 */
+	syn lazy ClassDecl FullClassDecl.simpleLookupClassDefaultScope(String name) {
+		ClassDecl res = simpleLookupClassMemberScope(name);
+		if (res.isUnknown())
+			res = simpleLookupClassInImports(name);
+		
+		return res.isUnknown() ? simpleLookupClass(name) : res;
+	}
+
 	
+	/**
+	 * Lookup in contained classes, imports and surrounding classes.
+	 */
+	syn lazy ClassDecl FullClassDecl.simpleLookupClassLocalScope(String name) {
+		ClassDecl res = simpleLookupInClassList(getClassDecls(), name);
+		if (res == null)
+			res = simpleLookupClassInImports(name);
+		
+		return res.isUnknown() ? simpleLookupClass(name) : res;
+	}
+	
+	
+	/**
+	 * Lookup in contained classes and extended classes.
+	 */
 	syn ClassDecl ClassDecl.simpleLookupClassMemberScope(String name) = unknownClassDecl();
 	eq UnknownClassDecl.simpleLookupClassMemberScope(String name)     = unknownClassDecl();
 	
 	syn lazy ClassDecl FullClassDecl.simpleLookupClassMemberScope(String name) {
 		ClassDecl res = simpleLookupInClassList(getClassDecls(), name);
-		if (res != null)
-			return res;
+		if (res == null)
+			res = simpleLookupClassInExtends(name);
 		
-		for (ExtendsClause sup : getSupers()) {
-			res = sup.findClassDecl().simpleLookupClassMemberScope(name);
-			if (!res.isUnknown())
-				return res;
-		}
-		
-		return unknownClassDecl();
+		return res;
 	}
 	
 	eq LibClassDecl.simpleLookupClassMemberScope(String name) {
@@ -111,6 +118,27 @@ aspect SimpleClassLookup {
 		matches(name) ? findClassDecl() : unknownClassDecl();
 	eq ImportClauseUnqualified.simpleLookupClassInImport(String name) = 
 		findClassDecl().simpleLookupClassMemberScope(name);
+		
+
+	protected ClassDecl FullClassDecl.simpleLookupClassInImports(String name) {
+		for (ImportClause imp : getImports()) {
+			res = imp.simpleLookupClassInImport(name);
+			if (!res.isUnknown())
+				return res;
+		}
+		
+		return unknownClassDecl();
+	}
+
+	protected ClassDecl FullClassDecl.simpleLookupClassInExtends(String name) {
+		for (ExtendsClause sup : getSupers()) {
+			res = sup.findClassDecl().simpleLookupClassMemberScope(name);
+			if (!res.isUnknown())
+				return res;
+		}
+		
+		return unknownClassDecl();
+	}
 	
 	
 	/**
