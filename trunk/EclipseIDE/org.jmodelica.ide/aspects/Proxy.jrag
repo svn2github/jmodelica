@@ -2,26 +2,32 @@
 aspect Proxy {
 
     // InitialTransformations.jrag
-    eq Proxy.getChild(int i).visibility() =
+    eq Proxy.getChild().visibility() =
         getSourceRoot().computeVisibility();
 
     // Util.jrag
-    eq Proxy.getChild(int i).classNamePrefix() = 
+    eq Proxy.getChild().classNamePrefix() = 
         getSourceRoot().computeClassNamePrefix();
     
     // Util.jrag
-    eq Proxy.getChild(int i).getNextAccess() = 
+    eq Proxy.getChild().getNextAccess() = 
         getSourceRoot().computeNextAccess();
     
     // PredefinedTypes.jrag
-    eq Proxy.getChild(int i).getPredefinedType() =
+    eq Proxy.getChild().getPredefinedType() =
         getSourceRoot().computePredefinedType();
 
     // PredefinedTypes.jrag    
-    eq Proxy.getChild(int i).lookupBuiltInFunction(String name) = 
+    eq Proxy.getChild().lookupBuiltInFunction(String name) = 
         getSourceRoot().doLookupBuiltInFunction(name);
 
     // Util.jrag (R29)
-    eq Proxy.getChild(int i).retrieveRoot() =
+    eq Proxy.getChild().retrieveRoot() =
         getSourceRoot();
+        
+    // SimpleLookup.jrag
+    eq Proxy.getChild().simpleLookupClass(String name) = 
+    	getSourceRoot().getProgram().simpleLookupClassDefaultScope(name);
+    eq Proxy.getChild().simpleLookupClassGlobalScope(String name) = 
+    	getSourceRoot().getProgram().simpleLookupClassDefaultScope(name);
 }
