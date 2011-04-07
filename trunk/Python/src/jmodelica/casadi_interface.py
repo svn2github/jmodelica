@@ -203,7 +203,17 @@ class CasadiModel(object):
     
     def get_p(self):
         return self.p
-        
+    
+    def get_pd_val(self):
+        pd = []
+        for p in self.var.d:
+            pFunc = casadi.SXFunction([[]],[[p.getBindingEquation()]])
+            pFunc.init()
+            pFunc.evaluate()
+            
+            pd += [(p.getName(),p.getValueReference(),N.array([pFunc.output()]).flatten())]
+        return pd
+    
     def get_w(self):
         return self.w
     
@@ -294,15 +304,24 @@ class CasadiModel(object):
             self.opt_ode_J = None
         
         # Boundary Constraints
-        
-        # Modify equality constraints to be on type g(x)=0
+        self.opt_ode_Cineq = [] #Inequality
+        self.opt_ode_C = [] #Equality
+        # Modify equality constraints to be on type g(x)=0 (instead of g(x)=a)
         lb = N.array(self.ocp.cfcn_lb, dtype=N.float)
         ub = N.array(self.ocp.cfcn_ub, dtype=N.float)
         for i in range(len(ub)):
-            if lb[i] == ub[i]:
-                self.ocp.cfcn[i] = self.ocp.cfcn[i]-self.ocp.cfcn_ub[i]
-                self.ocp.cfcn_ub[i] = casadi.SX(0.0)
-                self.ocp.cfcn_lb[i] = casadi.SX(0.0)
+            if lb[i] == ub[i]: #The constraint is an equality
+                self.opt_ode_C += [self.ocp.cfcn[i]-self.ocp.cfcn_ub[i]]
+                #self.ocp.cfcn_ub[i] = casadi.SX(0.0)
+                #self.ocp.cfcn_lb[i] = casadi.SX(0.0)
+            else: #The constraint is an inequality
+                if   lb[i] == -N.inf:
+                    self.opt_ode_Cineq += [(1.0)*self.ocp.cfcn[i]-self.ocp.cfcn_ub[i]]
+                elif ub[i] == N.inf:
+                    self.opt_ode_Cineq += [(-1.0)*self.ocp.cfcn[i]+self.ocp.cfcn_lb[i]]
+                else:
+                    self.opt_ode_Cineq += [(1.0)*self.ocp.cfcn[i]-self.ocp.cfcn_ub[i]]
+                    self.opt_ode_Cineq += [(-1.0)*self.ocp.cfcn[i]+self.ocp.cfcn_lb[i]]
         
         self.ocp_ode_boundary_inputs = []
         self.ocp_ode_boundary_inputs += list(self.p)
@@ -310,10 +329,58 @@ class CasadiModel(object):
         self.ocp_ode_boundary_inputs += [self.t]
         self.ocp_ode_boundary_inputs += [x.atTime(self.ocp.tf,True) for x in self.var.x]
         self.ocp_ode_boundary_inputs += [self.t]
-        self.opt_ode_C = casadi.SXFunction([self.ocp_ode_boundary_inputs],[self.ocp.cfcn])
+        self.opt_ode_C     = casadi.SXFunction([self.ocp_ode_boundary_inputs],[self.opt_ode_C])
+        self.opt_ode_Cineq = casadi.SXFunction([self.ocp_ode_boundary_inputs],[self.opt_ode_Cineq])
     
         if enable_scaling:
-            pass
+            # Scale model
+            # Get nominal values for scaling
+            x_nominal = self.xmldoc.get_x_nominal(include_alias = False)
+            u_nominal = self.xmldoc.get_u_nominal(include_alias = False)
+            
+            for vr, val in x_nominal:
+                if val != None:
+                    self.x_sf[self.x_vr_map[vr]] = N.abs(val)
+
+            for vr, val in u_nominal:
+                if val != None:
+                    self.u_sf[self.u_vr_map[vr]] = N.abs(val)
+
+            # Create new, scaled variables
+            self.x_scaled = self.x_sf*self.x
+            self.u_scaled = self.u_sf*self.u
+            
+            self.ocp_ode_inputs_scaled = []
+            self.ocp_ode_inputs_scaled += list(self.p)
+            self.ocp_ode_inputs_scaled += list(self.x_scaled)
+            self.ocp_ode_inputs_scaled += list(self.u_scaled)
+            self.ocp_ode_inputs_scaled += [self.t]
+            
+            self.ocp_ode_init_inputs_scaled = []
+            self.ocp_ode_init_inputs_scaled += list(self.p)
+            self.ocp_ode_init_inputs_scaled += list(self.x_scaled)
+            self.ocp_ode_init_inputs_scaled += [self.t]
+            
+            self.ocp_ode_mterm_inputs_scaled = []
+            self.ocp_ode_mterm_inputs_scaled += list(self.p)
+            self.ocp_ode_mterm_inputs_scaled += [self.x_sf[ind]*x.atTime(self.ocp.tf,True) for ind,x in enumerate(self.var.x)]
+            self.ocp_ode_mterm_inputs_scaled += [self.t]
+
+            # Substitute scaled variables
+            self.ode_F = list(self.ode_F.eval([self.ocp_ode_inputs_scaled])[0])
+            self.ode_F0 = list(self.ode_F0.eval([self.ocp_ode_init_inputs_scaled])[0])
+            if self.opt_ode_J != None:
+                self.opt_ode_J = list(self.opt_ode_J.eval([self.ocp_ode_mterm_inputs_scaled])[0])
+            if self.opt_L!=None:
+                self.opt_ode_L = list(self.opt_ode_L.eval([self.ocp_ode_inputs_scaled])[0])
+
+            self.ode_F = casadi.SXFunction([self.ocp_ode_inputs], [self.ode_F])
+            self.ode_F0 = casadi.SXFunction([self.ocp_ode_init_inputs],[self.ode_F0])
+        
+            if self.opt_ode_J != None:
+                self.opt_ode_J = casadi.SXFunction([self.ocp_ode_mterm_inputs],[[self.opt_ode_J]])
+            if self.opt_ode_J != None:
+                self.opt_ode_L = casadi.SXFunction([self.ocp_ode_inputs],[[self.opt_ode_L]])
     
     def get_opt_ode_L(self):
         return self.opt_ode_L
@@ -450,7 +517,7 @@ class CasadiModel(object):
         self.u_sf = N.ones(self.n_u)
         self.w_sf = N.ones(self.n_w)
         self.p_sf = N.ones(self.n_p)
-
+        
         if enable_scaling:
             # Scale model
             # Get nominal values for scaling
@@ -499,4 +566,3 @@ class CasadiModel(object):
                 self.opt_J = casadi.SXFunction([self.ocp_inputs],[self.opt_J])
             if self.opt_L!=None:
                 self.opt_L = casadi.SXFunction([self.ocp_inputs],[self.opt_L])
-        

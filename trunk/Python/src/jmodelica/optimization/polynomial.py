@@ -14,8 +14,8 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-"""
-Module containing the polynomials for the Casadi collocation algorithms.
+""" 
+Module containing polynomial evaluations, weight calculations etc. .
 """
 
 import numpy as N
@@ -93,11 +93,21 @@ class RadauPol3(RadauPol):
 def lagrange(R):
     """
     Creates K Lagrange Polynomials given R roots. Returns a vector of Poly1D 
-    polynomial.
+    polynomials.
     
-            L_i(t) = PROD_{j=0,j!=i}( (t-t_j) / (t_i - t_j ) )
-            
-    WARNING: Numerically highly unstable. Consider using "lagrange_eval"
+    .. math::
+    
+        L_i(t) = \prod_{j=0,j \\neq i}^N \\frac{t-t_j}{t_i - t_j}
+        
+    Parameters::
+    
+        R   --
+            The roots for which lagrange polynomials should be created. Array.
+    
+    .. warning::
+    
+        Numerically highly unstable. Consider using "lagrange_eval"
+    
     """
     K = len(R)
     L = []
@@ -112,13 +122,29 @@ def lagrange(R):
         L += [p]
     return L
 
-def lagrange_eval(R, i, x):
+def lagrange_eval(R, i, t):
     """
-    Evaluates the i:th Lagrange polynomial based on the roots, R at point x.
+    Evaluates the i:th Lagrange polynomial based on the roots, R at point t.
     
-        L_i(t) = PROD_{j=0,j!=i}( (x-t_j) / (t_i - t_j ) )
+    .. math::
+    
+        L_i(t) = \prod_{j=0,j \\neq i}^N \\frac{t-t_j}{t_i - t_j}
+        
+    Parameters::
+    
+        R   --
+            The roots for which lagrange polynomials should be created. Array.
+            
+        i   --
+            The index of the lagrange polynomial. Integer.
+            
+        t   --
+            The point at which the polynomial should be evaluated. Double.
+    
     """
     val = N.array(1.0)
+    x   = N.array(t)
+    R   = N.array(R)
     
     K = len(R)
     
@@ -129,14 +155,71 @@ def lagrange_eval(R, i, x):
             val *= (x-R[j])/(R[i]-R[j])
     return val
 
+def lagrange_derivative_eval(R, i, t):
+    """
+    Evaluates the derivative of the i:th Lagrange polynomial based on the roots,
+    R at point t.
+    
+    .. math::
+    
+        \\frac{dL_i(t)}{dt} = \\frac{d}{dt} \prod_{j=0,j \\neq i}^N \\frac{t-t_j}{t_i - t_j}
+        
+    Parameters::
+    
+        R   --
+            The roots for which lagrange polynomials should be created. Array.
+            
+        i   --
+            The index of the lagrange polynomial. Integer.
+            
+        t   --
+            The point at which the polynomial should be evaluated. Double.
+    
+    """
+    val = N.array(0.0)
+    x   = N.array(t)
+    R   = N.array(R)
+    
+    K = len(R)
+    
+    for l in range(K):
+        if l==i:
+            continue
+        lval = N.array(1.0)
+        for j in range(K):
+            if j==i:
+                continue
+            elif j==l:
+                lval *= N.array(1.0)/(R[i]-R[j])
+            else:
+                lval *= (x-R[j])/(R[i]-R[j])
+        val += lval
+    return val
+
 def legendre_Pn(K, x):
     """
-    Calculates the Legendre polynomial of degree K at point x, P_n(x) using
+    Calculates the Legendre polynomial of degree K at point x, :math:`P_n(x)` using
     the recurrence relation:
     
-        P_l(x) = (2l-1)/l*x*P_(l-1)(x)-(l-1)/l*P_(l-2)(x)
+    .. math::
+    
+        P_l(x) = \\frac{2l-1}{l} \cdot x \cdot P_{l-1}(x)- \\frac{l-1}{l} \cdot P_{l-2}(x), \quad l=2,...,K
         
-    Reference: http://mathworld.wolfram.com/LegendrePolynomial.html (eq:43)
+        P_0(x) = 1.0
+        
+        P_1(x) = x
+    
+    Parameters::
+    
+        K   --
+            The degree of the polynomial. Integer.
+            
+        x   --
+            The point at which the polynomial should be evaluated. Double.
+    
+    .. note::
+        
+        A reference can be found at, http://mathworld.wolfram.com/LegendrePolynomial.html (eq:43)
     """
     p0 = N.array(1.0)
     p1 = N.array(x)
@@ -155,18 +238,33 @@ def legendre_Pn(K, x):
 def legendre_dPn(K, x):
     """
     Calculates the derivative of the Legendre polynomial of degree K
-    at point x, P_n'(x) using the relation:
+    at point x, :math:`P_K'(x)` using the relation:
     
-        P_n'(x) = (n*P_(n-1)(x)-n*x*P_n)/(1-x^2)
+    .. math::
     
-    the end points P_n'(-1.0) and P_n'(1.0) are given by:
+        P_K'(x) = \\frac{K \cdot P_{K-1}(x)-K \cdot x \cdot P_K(x)}{1-x^2} 
     
-        P_n'(x) = x^(n+1)*n*(n+1)/2.0
+    the end points :math:`P_K'(-1)` and :math:`P_K'(1)` are given by:
+    
+    .. math::
+    
+        P_K'(x) = \\frac{x^{K+1} \cdot K \cdot (K+1)}{2.0}
 
-    where P_(n-1) and P_n are the Legendre polynomials of degree K-1 and
+    where :math:`P_{K-1}` and :math:`P_K` are the Legendre polynomials of degree K-1 and
     K.
     
-    Reference: http://mathworld.wolfram.com/LegendrePolynomial.html (eq:44)
+    Parameters::
+    
+        K   --
+            The degree of the Legendre polynomial. Integer.
+            
+        x   --
+            The point at which the derived polynomial should be evaluated. Double.
+    
+    .. note::
+    
+        A reference can be found at, http://mathworld.wolfram.com/LegendrePolynomial.html (eq:44)
+    
     """
     p0 = legendre_Pn(K-1, x)
     p1 = legendre_Pn(K, x)
@@ -181,16 +279,39 @@ def legendre_dPn(K, x):
 def legendre_ddPn(K, x):
     """
     Calculates the second derivative of the Legendre polynomial of degree K
-    at point x, P_n''(x) using the relation:
-
-        P_n''(x) = 1/4*(n+1)*(n+2)*P_(n-2)^(2,2)(x)
+    at point x, :math:`P_K''(x)` using the relation:
+    
+    .. math::
+    
+        P_l''(x) = \\frac{1}{4} \cdot (l+1) \cdot (l+2) \cdot P_{l-2}^{2,2}(x), \quad l=2,...,K
         
-    where P_(n-2)^(2,2)(x) is the K-2 degree Jacobi polynomial with a=2 and
+        P_0''(x) = 0
+        
+        P_1''(x) = 0
+        
+    where :math:`P_{l-2}^{2,2}(x)` is the l-2 degree Jacobi polynomial with a=2 and
     b=2. The Jacobi polynomial is solved using the recurrence relation:
     
-        2l(l+4)(2l+2)*P_l^(2,2)(x) = (2l+2)_3*x*P_(l-1)^(2,2)(x)-2(l+1)^2*(2l+4)P_(l-2)^(2,2)(x)
+    .. math::
     
-    Reference: http://mathworld.wolfram.com/JacobiPolynomial.html (eq:12, eq:14)
+        2l \cdot (l+4) \cdot (2l+2) \cdot P_l^{2,2}(x) = (2l+2)_3 \cdot x \cdot P_{l-1}^{2,2}(x)-2(l+1)^2 \cdot (2l+4) \cdot P_{l-2}^{2,2}(x), \quad l=2,...,K
+    
+        P_0^{2,2}(x) = 1
+        
+        P_1^{2,2}(x) = 3x
+        
+    Parameters::
+    
+        K   --
+            The degree of the Legendre polynomial. Integer.
+            
+        x   --
+            The point at which the derived polynomial should be evaluated. Double.
+    
+    .. note::
+    
+        A reference can be found at, http://mathworld.wolfram.com/JacobiPolynomial.html (eq:12, eq:14)
+    
     """
     p0 = N.array(0.0)
     p1 = N.array(0.0)
@@ -217,17 +338,33 @@ def legendre_ddPn(K, x):
 def legendre_Pn_roots(K):
     """
     Calculates the K roots of the K degree Legendre polynomial by first
-    generating the Jacobi matrix.
+    generating the Jacobi matrix. The Jacobi matrix is a :math:`K \\times K` 
+    where the only non-zero elements are on the superdiagonal and subdiagonal 
+    as,
     
-    For a degree 4 Legendre polynomial the Jacobi matrix is:  
+    .. math::
     
-            [    0     1/sqrt(3)      0           0    ]
-            [1/sqrt(3)     0      2/sqrt(15)      0    ]
-            [    0     2/sqrt(15)     0      3/sqrt(35)]
-            [    0         0      3/sqrt(35)      0    ]
+        A(l+1, l) = \\frac{l}{\sqrt{4l^2-1}} , \quad l=1,...,K-1
+        
+        A(l, l+1) = \\frac{l}{\sqrt{4l^2-1}} , \quad l=1,...,K-1
     
-           A(n+1,n) = n/sqrt(4*n^2-1)
-           A(n,n+1) = n/sqrt(4*n^2-1)
+    For a degree 4 Legendre polynomial, the Jacobi matrix is:  
+    
+    .. math::
+
+        \\begin{pmatrix}
+            0          &   \\frac{1}{\sqrt{3}}   &   0           &    0    \\\\
+            \\frac{1}{\sqrt{3}}  &   0           &   \\frac{2}{\sqrt{15}} &    0   \\\\
+            0          &   \\frac{2}{\sqrt{15}}  &   0           &    \\frac{3}{\sqrt{35}} \\\\
+            0          &   0           &   \\frac{3}{\sqrt{35}}  &    0    
+        \end{pmatrix}
+
+    Parameters::
+    
+        K   --
+            Specifies the order of the Legendre polynomial for which roots are 
+            to be calculated. Integer.
+           
     """
     supdiag = [i/N.sqrt(4.0*i*i-1) for i in range(1,K)]
 
@@ -239,12 +376,27 @@ def legendre_Pn_roots(K):
 def legendre_dPn_roots(K):
     """
     Calculates K-1 roots of the derivative of the K degree Legendre Polynomial.
-    The calculations are performed via generation of a Jacobi Matrix.
+    The calculations are performed via generation of a Jacobi Matrix. The Jacobi 
+    matrix is a :math:`(K-1) \\times (K-1)` where the only non-zero elements are on the 
+    superdiagonal and subdiagonal as,
     
-            A(n+1,n) = sqrt( n*(n+2) / ( (2n+1)*(2n+3) )
-            A(n,n+1) = sqrt( n*(n+2) / ( (2n+1)*(2n+3) )
-            
-    Reference: http://mathworld.wolfram.com/JacobiPolynomial.html (eq:11, 12)
+    .. math::
+    
+        A(l+1, l) = \sqrt{ \\frac{l \cdot (l+2)}{(2l+1) \cdot (2l+3)}} , \quad l=1,...,K-2
+        
+        A(l, l+1) = \sqrt{ \\frac{l \cdot (l+2)}{(2l+1) \cdot (2l+3)}} , \quad l=1,...,K-2
+    
+    Parameters::
+    
+        K   --
+            Specifies the order of the underlying Legendre polynomial for which 
+            roots of the derivative are to be calculated. Integer.
+    
+    
+    .. note::
+    
+        A reference can be found at, 
+        http://mathworld.wolfram.com/JacobiPolynomial.html (eq:11, 12)
     """
     K = K-1
     supdiag = [N.sqrt(i*(i+2.0)/((2.0*i+1.0)*(2.0*i+3.0))) for i in range(1,K)]
@@ -257,13 +409,29 @@ def legendre_dPn_roots(K):
 def jacobi_a1_b0_roots(K):
     """
     Calculates the K roots of the K degree Jacobi (a=1,b=0) Polynomial. The
-    calculations are performed via generation of a Jacobi Matrix.
+    calculations are performed via generation of a Jacobi Matrix. The Jacobi 
+    matrix is a :math:`K \\times K` where the only non-zero elements are on the 
+    diagonal, superdiagonal and subdiagonal as,
     
-            A(n+1,n) = sqrt( n*(n+1) )/ ( (2n+1) )
-            A(n,n+1) = sqrt( n*(n+1) )/ ( (2n+1) )
-            B(n,n)   = -1 / ( (2n+1)*(2n+3)  )
+    .. math::
     
-    Reference: http://mathworld.wolfram.com/JacobiPolynomial.html (eq:11, 12) 
+            A(l+1,l) = \sqrt{\\frac{n \cdot (n+1)}{2n+1} } , \quad l=1,...,K-1
+            
+            A(l,l+1) = \sqrt{\\frac{n \cdot (n+1)}{2n+1} } , \quad l=1,...,K-1
+            
+            B(l,l)   = \\frac{-1}{(2n+1) \cdot (2n+3) }, \quad l=0,...,K-1
+    
+    Parameters::
+    
+        K   --
+            Specifies the order of the Jacobi (a=1,b=0) polynomial for which 
+            roots are to be calculated. Integer.
+    
+    .. note::
+    
+        A reference can be found at, 
+        http://mathworld.wolfram.com/JacobiPolynomial.html (eq:11, 12) 
+    
     """
     A = [1.0/(2.0*i+1.0)*N.sqrt(i*(i+1.0)) for i in range(1,K)]
     B = [-1.0/((2.0*i+1.0)*(2.0*i+3.0)) for i in range(0,K)]
@@ -278,41 +446,51 @@ def differentiation_matrix(type, K):
     Calculates the differentiation matrix for the given type of collocation
     points. 
     
-        D_ki = d/dt L_i(t_k) where k=1,..,K and i=1,...,M
+    .. math::
+    
+        D_{ki} = \\frac{dL_i(t_k)}{dt}, \quad k=1,..,K , \quad i=1,...,M
         
     where K are the collocation points and M are the number of points used
-    in the approximation of the states. L are lagrange polynomials.
+    in the approximation of the states. M is determined by the choice of points.
+    L are lagrange polynomials.
     
-    The type can either be:
+    Parameters::
     
-        type = "Gauss", generates the differentiation matrix for the Gauss
-                        Pseudospectral method. M = K + 1
-                        
-            D_ki = { i!=k   ( (1+t_k) * dP_K(t_k) + P_K(t_k) ) / 
-                            ( (t_k-t_i) * ( (1+t_i) * dP_K(t_i) + P_K(t_i) ) )
-                     
-                   { i==k   ( (1+t_i) * ddP_K(t_i) + 2 * dP_K(t_i) ) /
-                            ( 2 * ( (1+t_i)*dP_K(t_i) + P_K(t_i) ) )
+        type    --
+                Determines the pseudospectral type for which the differentiation
+                matrix should be calculated. Allowed options, "Gauss", 
+                "Legendre", "Radau".
+    
+    type = "Gauss", generates the differentiation matrix for the 
+    Gauss-Pseudospectral method. M = K + 1.
+    
+    .. math::
+        
+            D_{ki} = \\frac{(1+t_k) \cdot P_K'(t_k) + P_K(t_k)}{(t_k-t_i) \cdot ( (1+t_i) \cdot P_K'(t_i) + P_K(t_i) )} , \quad \\text{if} \quad i \\neq k
+
+            \\frac{(1+t_i) \cdot P_K''(t_i) + 2 \cdot P_K'(t_i)}{ 2 \cdot ( (1+t_i) \cdot P_K'(t_i) + P_K(t_i) )} , \quad \\text{if} \quad i=k
                             
-        type = "Legendre", generates the differentiation matrix for the Legendre
-                           Pseudospectral method. M = K
-                           
-            D_ki = { i!=k      P_(K-1)(t_k)/P_(K-1)(t_i) * 1 / (t_k - t_i)
+    type="Legendre", generates the differentiation matrix for the 
+    Legendre-Pseudospectral method. M = K.
+    
+    .. math::
+    
+            D_{ki} =  \\frac{P_{K-1}(t_k)}{P_{K-1}(t_i)} \cdot \\frac{1}{t_k - t_i} , \quad \\text{if} \quad i \\neq k
+    
+            \\frac{- (K-1) \cdot K}{4} , \quad \\text{if} \quad i=k=1
+    
+            \\frac{(K-1) \cdot K}{4} , \quad \\text{if} \quad i=k=K
+    
+            0.0 , \quad \\text{otherwise}
                    
-                   { k==i==1   - (K-1) * K / 4
-                   
-                   { k==i==K     (K-1) * K / 4
-                   
-                   { else        0.0
-                   
-        type = "Radau", generates the differentiation matrix for the Radau 
-                        Pseudospectral method (flipped LGR points). M = K+1
-                        
-            D_ki = { i!=k  ( (1+t_k) * ( dP_K(t_k) - dP_{K-1}(t_k) ) + P_K(t_k) - P_{K-1}(t_k) ) / 
-                           ( (t_k-t_i) * ( (1+t_i) * ( dP_K(t_i) - dP_{K-1}(t_i) ) + P_K(t_i) - P_{K-1}(t_k) ) )
-                           
-                   { i==k  ( (1+t_i) * ( ddP_K(t_i) - ddP_{K-1}(t_i) ) + 2 * dP_K(t_i) - 2 * dP_{K-1}(t_i) ) /
-                           ( 2 * ( (1+t_i) * ( dP_K(t_i) - dP_{K-1}(t_i) ) + P_K(t_i) - P_{K-1}(t_k) ) )
+    type = "Radau", generates the differentiation matrix for the 
+    Radau-Pseudospectral method (flipped LGR points). M = K+1.
+    
+    .. math::
+    
+            D_{ki} =  \\frac{ (1+t_k) \cdot ( P_K'(t_k) - P_{K-1}'(t_k) ) + P_K(t_k) - P_{K-1}(t_k) }{ (t_k-t_i) \cdot ( (1+t_i) \cdot ( P_K'(t_i) - P_{K-1}'(t_i) ) + P_K(t_i) - P_{K-1}(t_k) ) } , \quad \\text{if} \quad i \\neq k
+    
+            \\frac{ (1+t_i) \cdot ( P_K''(t_i) - P_{K-1}''(t_i) ) + 2 \cdot P_K'(t_i) - 2 \cdot P_{K-1}'(t_i) }{ 2 \cdot ( (1+t_i) \cdot ( P_K'(t_i) - P_{K-1}'(t_i) ) + P_K(t_i) - P_{K-1}(t_k) ) } , \quad \\text{if} \quad i=k
     """
     if type == "Gauss":
         M = K+1
@@ -383,29 +561,40 @@ def differentiation_matrix(type, K):
     
 def gauss_quadrature_weights(type, K):
     """
-    Calculates the K Gauss quadrature weights for a given type of points. The
-    type can either be:
+    Calculates the K Gauss quadrature weights for a given type of points.
     
-        type = "LG" , corresponding to Legendre-Gauss points
-            
-            - Weights are calculated for the K Legendre-Gauss points as:
+    Parameters::
+    
+        type    --
+                Determines the type of points which the weights should be 
+                calculated for. Allowed options, "LG", "LGR", "LGL".
+    
+    "LG" , corresponding to Legendre-Gauss points. Weights are calculated for 
+    the K Legendre-Gauss points as:
+    
+    .. math::
                 
-                w_i = 2 / ( (1-ti^2)*dP_n(ti)^2 ), [i=1,...,K]
+        w_i = \\frac{2}{(1-t_i^2) \cdot P_n'(t_i)^2}, \quad i=1,...,K
                 
-        type = "LGL", corresponding to Legendre-Gauss-Lobatto points
+    "LGL", corresponding to Legendre-Gauss-Lobatto points. Weights are 
+    calculated for the K Legendre-Gauss-Lobatto points as:
+    
+    .. math::
+    
+        w_i = \\frac{2}{ K \cdot (K-1) } \cdot \\frac{1}{P_{n-1}(t_i)^2}, \quad i=1,...,K
+              
+    "LGR", corresponding to (flipped) Legendre-Gauss-Radau points, i.e the end 
+    point 1 is included instead of -1. Weights are calculated for the K 
+    Legendre-Gauss-Radau points as:
+    
+    .. math::
+    
+        w_i = \\frac{1}{(1-t_i) \cdot P_n'(t_i)^2}, \quad i=1,..,K-1
         
-            - Weights are calculated for the K Legendre-Gauss-Lobatto points
-              as:
-              
-                w_i = 2 / ( K (K-1) ) * 1 / ( P_(n-1)(ti)^2 ), [i=1,...,K]
-              
-        type = "LGR", corresponding to (flipped) Legendre-Gauss-Radau points,
-                      i.e the end point 1 is included instead of -1.
-                      
-            - Weights are calculated for the K Legendre-Gauss-Radau points as:
-                
-                w_i = 1 / ( (1-ti)*dP_n(ti)^2 ), [i=1,..,K-1]
-                w_K = 2 / K^2
+    .. math::
+    
+        w_K = \\frac{2}{K^2}
+        
     """
     w = N.zeros(K)
     

@@ -25,6 +25,7 @@ import pylab as P
 
 from jmodelica.tests import testattr
 from jmodelica.tests import get_files_path
+from jmodelica.io import ResultDymolaTextual
 
 try:
     from jmodelica.optimization.casadi_collocation import *
@@ -82,7 +83,62 @@ class TestPseudoSpectral:
         nose.tools.assert_almost_equal(y1[-1], 0.5000000000, places=5)
         nose.tools.assert_almost_equal(y2[-1], 1.124170946790, places=5)
         nose.tools.assert_almost_equal(u[-1], 0.498341205247, places=5)
+    
+    @testattr(casadi = True)
+    def test_ps_twostate_inittraj(self):
+        """
+        Tests that the option init_traj is functional.
         
+        NOTE: SHOULD ALSO TEST THAT THE NUMBER OF ITERATIONS SHOULD BE SMALLER.
+        """
+        
+        jn = compile_casadi("TwoState", os.path.join(path_to_mos,"TwoState.mop"))
+        vdp = CasadiModel(jn)
+        
+        opts = vdp.optimize_options("CasadiPseudoSpectral")
+        opts['n_e'] = 1
+        opts['n_cp'] = 30
+        opts['discr'] = "LG"
+        res = vdp.optimize(algorithm="CasadiPseudoSpectral", options=opts)
+        
+        vdp = CasadiModel(jn)
+
+        #Test LG points
+        opts['discr'] = "LG"
+        opts['init_traj'] = ResultDymolaTextual("TwoState_result.txt")
+        res = vdp.optimize(algorithm="CasadiPseudoSpectral", options=opts)
+        y1 = res["y1"]
+        y2 = res["y2"]
+        u = res["u"]
+        time = res["time"]
+        nose.tools.assert_almost_equal(y1[-1], 0.5000000000, places=5)
+        nose.tools.assert_almost_equal(y2[-1], 1.124170946790, places=5)
+        nose.tools.assert_almost_equal(u[-1], 0.498341205247, places=5)
+        
+        #Test LGL points
+        opts['discr'] = "LGL"
+        opts['init_traj'] = ResultDymolaTextual("TwoState_result.txt")
+        res = vdp.optimize(algorithm="CasadiPseudoSpectral", options=opts)
+        y1 = res["y1"]
+        y2 = res["y2"]
+        u = res["u"]
+        time = res["time"]
+        nose.tools.assert_almost_equal(y1[-1], 0.5000000000, places=5)
+        nose.tools.assert_almost_equal(y2[-1], 1.124170946790, places=5)
+        nose.tools.assert_almost_equal(u[-1], 0.498341205247, places=5)
+        
+        #Test LGR points
+        opts['discr'] = "LGR"
+        opts['init_traj'] = ResultDymolaTextual("TwoState_result.txt")
+        res = vdp.optimize(algorithm="CasadiPseudoSpectral", options=opts)
+        y1 = res["y1"]
+        y2 = res["y2"]
+        u = res["u"]
+        time = res["time"]
+        nose.tools.assert_almost_equal(y1[-1], 0.5000000000, places=5)
+        nose.tools.assert_almost_equal(y2[-1], 1.124170946790, places=5)
+        nose.tools.assert_almost_equal(u[-1], 0.498341205247, places=5)
+    
     @testattr(casadi = True)
     def test_ps_doubleintegrator(self):
         """Tests the different discretization on the DoubleIntegrator example."""

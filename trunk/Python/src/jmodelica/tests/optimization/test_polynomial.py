@@ -23,12 +23,12 @@ import nose
 import numpy as N
 
 from jmodelica.tests import testattr
-from jmodelica.optimization.casadi_polynomial import *
+from jmodelica.optimization.polynomial import *
 
 class TestPolynomialMethods:
     """ This tests the evaluation of various polynomial methods. """
 
-    @testattr(casadi = True)
+    @testattr(stddist = True)
     def test_legendre_pn(self):
         """Compare the Legendre_Pn evaluation against explicit expressions. """
         
@@ -52,7 +52,7 @@ class TestPolynomialMethods:
         nose.tools.assert_almost_equal(P_5, legendre_Pn(5, x), places=14)
         nose.tools.assert_almost_equal(P_6, legendre_Pn(6, x), places=14)
         
-    @testattr(casadi = True)
+    @testattr(stddist = True)
     def test_legendre_dpn(self):
         """Compare the Legendre_dPn evaluation against explicit expressions. """
         
@@ -73,7 +73,7 @@ class TestPolynomialMethods:
         nose.tools.assert_almost_equal(P_5, legendre_dPn(5, x), places=14)
         nose.tools.assert_almost_equal(P_6, legendre_dPn(6, x), places=14)
     
-    @testattr(casadi = True)
+    @testattr(stddist = True)
     def test_legendre_ddpn(self):
         """
             Compare the Legendre_ddPn evaluation against explicit expressions. 
@@ -97,7 +97,7 @@ class TestPolynomialMethods:
         nose.tools.assert_almost_equal(P_6, legendre_ddPn(6, x), places=14)
         
     
-    @testattr(casadi = True)
+    @testattr(stddist = True)
     def test_jacobi_a1_b0_roots(self):
         """ Compare the roots of the Jacobi (a=1,b=0) polynonmial against 
             explicit expressions. 
@@ -112,7 +112,7 @@ class TestPolynomialMethods:
         nose.tools.assert_almost_equal(pn_r[0], roots2[0], places=14)
         nose.tools.assert_almost_equal(pn_r[1], roots2[1], places=14)
     
-    @testattr(casadi = True)
+    @testattr(stddist = True)
     def test_differentiation_matrix(self):
         """
             Tests the generation of the differentiation matrix for the different
@@ -139,7 +139,7 @@ class TestPolynomialMethods:
         for i in range(1,10):
             nose.tools.assert_almost_equal(WTD[i], 0.0, places=12)
     
-    @testattr(casadi = True)
+    @testattr(stddist = True)
     def test_legendre_pn_roots(self):
         """ 
             Compare the roots of the Legendre_Pn polynomial against explicit 
@@ -180,7 +180,7 @@ class TestPolynomialMethods:
         nose.tools.assert_almost_equal(pn_r[3], roots5[3], places=14)
         nose.tools.assert_almost_equal(pn_r[4], roots5[4], places=14)
     
-    @testattr(casadi = True)
+    @testattr(stddist = True)
     def test_gauss_legendre_radau_weights(self):
         """ Compare the weights of the Legendre-Gauss-Radau points against
             explicit values. """
@@ -206,7 +206,7 @@ class TestPolynomialMethods:
         pn_w = gauss_quadrature_weights("LGR", 61)
         nose.tools.assert_almost_equal(N.sum(pn_w), 2.0, places=11)
     
-    @testattr(casadi = True)
+    @testattr(stddist = True)
     def test_gauss_legendre_lobatto_weights(self):
         """ Compare the weights of the Legendre-Gauss-Lobatto points against
             explicit values. """
@@ -223,7 +223,7 @@ class TestPolynomialMethods:
         pn_w = gauss_quadrature_weights("LGL", 61)
         nose.tools.assert_almost_equal(N.sum(pn_w), 2.0, places=12)
         
-    @testattr(casadi = True)
+    @testattr(stddist = True)
     def test_gauss_legendre_weights(self):
         """ 
             Compare the weights of Legendre-Gauss points against explicit 

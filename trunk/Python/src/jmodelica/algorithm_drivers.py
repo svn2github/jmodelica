@@ -1698,7 +1698,7 @@ class CasadiPseudoSpectral(AlgorithmBase):
         self.nlp = PseudoSpectral(model, self.options)
         
         if self.init_traj:
-            self.nlp.set_initial_from_dymola(self.init_traj) 
+            self.nlp.set_initial_from_file(self.init_traj) 
             
         # set solver options
         self._set_solver_options()
@@ -1782,7 +1782,7 @@ class CasadiPseudoSpectralOptions(OptionBase):
             Default: 1
             
         n_cp --
-            Number of collocation points in each element.
+            Number of collocation points in each phase (element).
             Default: 20
         
         discr --
@@ -1792,7 +1792,14 @@ class CasadiPseudoSpectralOptions(OptionBase):
             Default: "LG"
         
         link_options --
-            (state variable name, include in Mayer as ^2, ...) 
+            This option allows users to specify states that are allowed to be
+            discontinious between phases (elements). There is also an option
+            to include the discontinuities into the optimization problem, such
+            that the optimizer tries to minimize the discontinuities. If they
+            are included, they are included as the L2-Norm for each phase 
+            boundary. Example, [("x",True),("y",True)]. "x" and "y" are allowed
+            to be discontinious and they are included into the Mayer cost for
+            each phase boundary as (dx^2+dy^2)^0.5.
             Default: []
             
         link_bounds --

@@ -26,11 +26,16 @@ try:
 except:
     pass
 
-from jmodelica.optimization.casadi_polynomial import *
+from jmodelica.optimization.polynomial import *
 from jmodelica import xmlparser
 from jmodelica.io import VariableNotFoundError
 
 class CasadiCollocator(object):
+    # Parameters
+    #UPPER = 1e20
+    #LOWER = -1e20
+    UPPER = N.inf
+    LOWER = -N.inf
     
     def __init__(self, model):
         # Store model (casadiModel)
@@ -140,7 +145,7 @@ class CasadiCollocator(object):
             Currently only textual format is supported.
         """
 
-        (t,dx_opt,x_opt,u_opt,w_opt) = self.get_result()
+        (t,dx_opt,x_opt,u_opt,w_opt,p_opt) = self.get_result()
         #data = N.hstack((N.transpose(N.array([t])),dx_opt,x_opt,u_opt,w_opt))
         data = N.hstack((t,dx_opt,x_opt,u_opt,w_opt))
         
@@ -207,7 +212,20 @@ class CasadiCollocator(object):
             # start values (used in parameter writing)
             start = md.get_variable_start_attributes()
             start_values = dict([(start[i][0],start[i][1]) for i in range(len(start))])
-
+            
+            # if some parameters where optimized, store that value.
+            for key in self.model.get_p_vr_map().items():
+                try:
+                    start_values[key[0]] = p_opt[key[1]]
+                except KeyError:
+                    pass
+            # add and calculate the dependent parameters
+            for key in self.model.get_pd_val():
+                try:
+                    start_values[key[1]] = key[2]
+                except KeyError:
+                    pass
+            
             # zip to list of tuples and sort - non alias variables are now
             # guaranteed to be first in list and all variables are in value reference 
             # order
@@ -349,7 +367,7 @@ class CasadiCollocator(object):
         x_opt = N.zeros((len(self.get_time_points()),self.model.get_n_x()))
         w_opt = N.zeros((len(self.get_time_points()),self.model.get_n_w()))
         u_opt = N.zeros((len(self.get_time_points()),self.model.get_n_u()))
-        
+        p_opt  = N.zeros(self.model.get_n_p())
         t_opt = N.zeros(len(self.get_time_points()))
 
         cnt = 0
@@ -360,7 +378,7 @@ class CasadiCollocator(object):
             u_opt[cnt,:]  = self.nlp_opt[self.get_var_indices()[i][j]['u']][:,0]
             w_opt[cnt,:]  = self.nlp_opt[self.get_var_indices()[i][j]['w']][:,0]
             cnt = cnt + 1
-        return (t_opt,dx_opt,x_opt,u_opt,w_opt)
+        return (t_opt,dx_opt,x_opt,u_opt,w_opt,p_opt)
     
     def ipopt_solve(self):
         # Initialize
@@ -378,7 +396,7 @@ class CasadiCollocator(object):
         hublb = len(h)*[0]
         g = self.get_inequality_constraint()
         gub = len(g)*[0]
-        glb = len(g)*[-1e20]
+        glb = len(g)*[self.LOWER]
         self.glub = hublb+gub
         self.gllb = hublb+glb
         
@@ -406,8 +424,8 @@ class CasadiCollocator(object):
     
     def _compute_bounds_and_init(self):
         # Create lower and upper bounds
-        nlp_lb = -1e20*N.ones(len(self.get_xx()))
-        nlp_ub = 1e20*N.ones(len(self.get_xx()))
+        nlp_lb = self.LOWER*N.ones(len(self.get_xx()))
+        nlp_ub = self.UPPER*N.ones(len(self.get_xx()))
         nlp_init = N.zeros(len(self.get_xx()))
         
         md = self.get_model_description()
@@ -425,18 +443,18 @@ class CasadiCollocator(object):
         _u_start = md.get_u_start(include_alias = False)
         _w_start = md.get_w_start(include_alias = False)
 
-        dx_max = 1e20*N.ones(len(_dx_max))
-        x_max = 1e20*N.ones(len(_x_max))
-        u_max = 1e20*N.ones(len(_u_max))
-        w_max = 1e20*N.ones(len(_w_max))
-        dx_min = -1e20*N.ones(len(_dx_min))
-        x_min = -1e20*N.ones(len(_x_min))
-        u_min = -1e20*N.ones(len(_u_min))
-        w_min = -1e20*N.ones(len(_w_min))
-        dx_start = -1e20*N.ones(len(_dx_start))
-        x_start = -1e20*N.ones(len(_x_start))
-        u_start = -1e20*N.ones(len(_u_start))
-        w_start = -1e20*N.ones(len(_w_start))
+        dx_max = self.UPPER*N.ones(len(_dx_max))
+        x_max = self.UPPER*N.ones(len(_x_max))
+        u_max = self.UPPER*N.ones(len(_u_max))
+        w_max = self.UPPER*N.ones(len(_w_max))
+        dx_min = self.LOWER*N.ones(len(_dx_min))
+        x_min = self.LOWER*N.ones(len(_x_min))
+        u_min = self.LOWER*N.ones(len(_u_min))
+        w_min = self.LOWER*N.ones(len(_w_min))
+        dx_start = self.LOWER*N.ones(len(_dx_start))
+        x_start = self.LOWER*N.ones(len(_x_start))
+        u_start = self.LOWER*N.ones(len(_u_start))
+        w_start = self.LOWER*N.ones(len(_w_start))
 
         for vr, val in _dx_min:
             if val != None:
@@ -731,21 +749,145 @@ class RadauCollocator(CasadiCollocator):
         
 class PseudoSpectral(CasadiCollocator):
     """
-    This class implementes PseudoSpectral methods with different 
-    discretizations. The available discretizations options are:
+    This class discretize and solves optimization problem of the general kind,
     
-        LG:
+    .. math::
+    
+        min J = \Phi (x(t_0),t_0, x(t_f),t_f;q) + \int_{t_0}^{t_f} \Theta (x(t),u(t),t;q)dt
         
-            This option corresponds to the Guass Pseudospectral method described
-            in:
-                * A Gauss pseudospectral transcription for optimal control.
-                    -> http://dspace.mit.edu/handle/1721.1/28919
-                * Advancement and analysis of Gauss pseudospectral transcription for optimal control problems.
-                    -> http://dspace.mit.edu/handle/1721.1/42180
-                * Algorithm 902: GPOPS, A MATLAB software for solving multiple-phase optimal control problems using the gauss pseudospectral method.
-                    -> http://portal.acm.org/citation.cfm?doid=1731022.1731032
-        LGR:
-        LGL:
+    subject to the dynamics,
+    
+    .. math::
+    
+        \dot{x} = f(x,u,t;q)
+        
+    and the constraints,
+    
+    .. math::
+    
+        \phi_{min} \leq \phi (x(t_0),t_0,x(t_f),t_f;q) \leq \phi_{max}
+    
+        C_{min} \leq C(x(t),u(t),t;q) \leq C_{max}.
+    
+    This class gives the option to discretize the optimization problem and 
+    perform the collocation at three different set of points, Legendre-Gauss 
+    (LG), Legendre-Gauss-Radau (LGR) and Legendre-Gauss-Lobatto (LGL). The 
+    points are calculated from the roots of different variations and/or 
+    combinations of Legendre polynomials. For LG, the collocation points are 
+    calculated as the roots of :math:`P_N(x)`. For LGR, roots of 
+    :math:`P_N(x)-P_{N-1}(x)`. For LGL, roots of 
+    :math:`(1-x^2) \cdot P_{N-1}'(x)`. Here, :math:`P_N(x)` is a Legendre 
+    polynomial of degree :math:`N`.
+    
+    The points all lie in/on the interval :math:`(-1,1)`. A
+    transformation of the optimization interval to the interval :math:`(-1,1)`
+    is performed as (still allowing free start and/or final time),
+    
+    .. math::
+    
+        t = \\frac{t_f-t_0}{2} \\tau + \\frac{t_f-t_0}{2}.
+        
+    The state(s) and control(s) are approximated with Lagrange polynomials. For 
+    LG and LGR points the state(s) are approximated with :math:`N+1` polynomials
+    and for LGL points, :math:`N` polynomials. In all cases the control(s) is 
+    approximated using :math:`N` Lagrange polynomials. Example (LG), 
+    
+    .. math::
+    
+        x(\\tau) \\approx X(\\tau) = \sum_{i=0}^N X(\\tau _i) L_i(\\tau) ,\quad
+        u(\\tau) \\approx U(\\tau) = \sum_{i=1}^N U(\\tau _i) L_i(\\tau). 
+    
+    Differentiation of the state(s) approximation gives the approximation for
+    the state(s) derivatives,
+    
+    .. math::
+    
+        \dot{x}(\\tau) \\approx \\frac{dX(\\tau)}{d\\tau} =  
+        \sum_{i=0}^N X(\\tau _i) \\frac{dL_i(\\tau)}{d\\tau}, \quad D=\dot{L}.
+    
+    This implementation gives the options to use either discretization as a
+    global collocation method, i.e. the number of phases (elements) are set to
+    one or to use it as a local method, number of phases are greater than one. 
+    If the number of phases are greater than one, the phases needs to be linked
+    together as,
+    
+    .. math::
+    
+        x_N^p = x_0^{p+1} + dx^{p+1}
+        
+    where :math:`x_N^p` is the end point in the :math:`p` phase, 
+    :math:`x_0^{p+1}` is the start point in the :math:`p+1` phase and 
+    :math:`dx^{p+1}` can be specified to allow discontinuous changes in the 
+    state(s). :math:`dx^{p+1}` defaults to zero.
+    
+    Using the above described method leads to, for each phase (LG),
+    
+    .. math::
+        
+        \sum_{i=0}^N D_{ki}X_i - \\frac{t_f-t_0}{2}f(X_k,U_k,\\tau_k;q) = 0, 
+        \quad k=1,...,N \quad \\text{(Eq. 1)}
+        
+        X_{N+1} - X_0 - \sum_{i=0}^N \sum_{k=1}^N \omega_k D_{ki}X_i = 0 \quad 
+        \\text{(Eq. 2)}
+        
+        \phi_{min} \leq \phi (X_0,t_0,X_{N+1},t_f;q) \leq \phi_{max} \quad 
+        \\text{(Eq. 3)}
+    
+        C_{min} \leq C(X_k,U_k,\\tau_k;q) \leq C_{max}, \quad k=1,...,N \quad 
+        \\text{(Eq. 4)}
+    
+    together with,
+    
+    .. math::
+    
+        x_{N+1}^p = x_0^{p+1} + dx^{p+1}, \quad p=1,...,P-1
+    
+        J = \Phi (X_0^1,t_0^1, X_{N+1}^P,t_f^P;q) + \sum_{p=1}^P 
+        \\frac{t_f^p-t_0^p}{2} \sum_{k=1}^N \omega_k \Theta (X_k^p,U_k^p,
+        \\tau_k^p;q)
+    
+    gives our NLP which is solved using IPOPT. The changes needed when using 
+    LGR points is that the final point is instead :math:`X_N`, because the final
+    point is included in the collocation. This removes the need for Equation 2. 
+    For LGL points, both the start and final time is included in the collocation 
+    so that the start point is :math:`X_1` and the final point :math:`X_N`. This 
+    also removes the need for Equation 2.
+    
+    .. warning::
+    
+        Path constraints are currently not supported, as is not optimization 
+        problems with free start or final time. However, variable bounds are 
+        supported.
+    
+    .. note::
+    
+        In the result file, the control(s) at the end points for the LG points
+        have been extrapolated from the approximated Lagrange polynomials. For
+        the LGR points, the start points for the controls have been extrapolated
+        in the same way.
+        
+        The same procedure have been performed for the state derivative(s) in the
+        case for LG and LGR points.
+    
+    .. note::
+        
+        A reference of an implementation of Gauss-Pseudospectral method can be
+        found in, `Algorithm 902: GPOPS, A MATLAB software for solving 
+        multiple-phase optimal control problems using the gauss pseudospectral 
+        method <http://portal.acm.org/citation.cfm?doid=1731022.1731032>`_. 
+        
+        Other references include,
+        
+            - `A unified framework for the numerical solution of optimal control
+              problems using pseudospectral methods. 
+              <http://portal.acm.org/citation.cfm?id=1872787>`_
+        
+            - `A Gauss pseudospectral transcription for optimal control. 
+              <http://dspace.mit.edu/handle/1721.1/28919>`_
+            
+            - `Advancement and analysis of Gauss pseudospectral transcription 
+              for optimal control problems. 
+              <http://dspace.mit.edu/handle/1721.1/42180>`_
     """
     def __init__(self, model, options):
         #Make problem explicit
@@ -765,6 +907,7 @@ class PseudoSpectral(CasadiCollocator):
             self._Weights    = gauss_quadrature_weights("LG", options['n_cp'])
             self._DiffMatrix = differentiation_matrix("Gauss", options['n_cp'])
             self._Roots      = legendre_Pn_roots(options['n_cp'])
+            self._ApproximationRoots = N.append(-1.0, self._Roots)
             self._WeightsTDiffMatrix = N.dot(self._Weights, self._DiffMatrix).flatten()
             self._WeightsTDiffMatrix[0] = N.array(0.0)#Using analytical results for W*D
         elif options['discr'] == "LGR":
@@ -774,6 +917,7 @@ class PseudoSpectral(CasadiCollocator):
             self._Weights    = gauss_quadrature_weights("LGR", options['n_cp'])
             self._DiffMatrix = differentiation_matrix("Radau", options['n_cp'])
             self._Roots      = N.append(jacobi_a1_b0_roots(options['n_cp']-1), 1.0)
+            self._ApproximationRoots = N.append(-1.0, self._Roots)
             #self._WeightsTDiffMatrix = N.dot(self._Weights, self._DiffMatrix).flatten()
             self._WeightsTDiffMatrix     = N.zeros(options['n_cp']+1)#Using analytical results for W*D
             self._WeightsTDiffMatrix[0]  = N.array(-1.0)
@@ -785,6 +929,7 @@ class PseudoSpectral(CasadiCollocator):
             self._Weights    = gauss_quadrature_weights("LGL", options['n_cp'])
             self._DiffMatrix = differentiation_matrix("Legendre", options['n_cp'])
             self._Roots      = N.append(N.append(-1.0, legendre_dPn_roots(options['n_cp']-1)), 1.0)
+            self._ApproximationRoots = self._Roots
             #self._WeightsTDiffMatrix = N.dot(self._Weights, self._DiffMatrix).flatten()
             self._WeightsTDiffMatrix     = N.zeros(options['n_cp']) #Using analytical results for W*D
             self._WeightsTDiffMatrix[0]  = N.array(-1.0)
@@ -948,7 +1093,7 @@ class PseudoSpectral(CasadiCollocator):
         self.h += final_constr
         """
 
-        #Create boundary constraints
+        #Create boundary constraints (equality)
         boundary_constr = []
         z = []
         z += self.vars[0]['p']
@@ -958,6 +1103,17 @@ class PseudoSpectral(CasadiCollocator):
         z += [self.vars[PHASE[-1]]['t']]
         boundary_constr = list(self.model.opt_ode_C.eval([z])[0])
         self.h += boundary_constr
+        
+        #Create boundary constraints (inequality)
+        boundary_constr_ineq = []
+        z = []
+        z += self.vars[0]['p']
+        z += self.vars[PHASE[0]][DISCR[0]]['x']
+        z += [self.vars[0]['t']]
+        z += self.vars[PHASE[-1]][DISCR[-1]]['x']
+        z += [self.vars[PHASE[-1]]['t']]
+        boundary_constr_ineq = list(self.model.opt_ode_Cineq.eval([z])[0])
+        self.g += boundary_constr_ineq
         
         #Create inequality constraint
         if self.options['free_phases']:
@@ -1027,7 +1183,8 @@ class PseudoSpectral(CasadiCollocator):
             self.Lag = self.Lag + self.g[i]*self.lam[i+len(self.h)]
             
         self.Lag_fcn = casadi.SXFunction([self.xx, self.lam, [self.sigma]],[[self.Lag]])
-
+        
+        #self.H_fcn = None
         self.H_fcn = self.Lag_fcn.hessian(0,0)
     
     def _create_nlp_variables(self):
@@ -1148,8 +1305,8 @@ class PseudoSpectral(CasadiCollocator):
         ROOTS = self._Roots
         
         # Create lower and upper bounds
-        nlp_lb = -1e20*N.ones(len(self.get_xx()))
-        nlp_ub = 1e20*N.ones(len(self.get_xx()))
+        nlp_lb = self.LOWER*N.ones(len(self.get_xx()))
+        nlp_ub = self.UPPER*N.ones(len(self.get_xx()))
         nlp_init = N.zeros(len(self.get_xx()))
         
         md = self.get_model_description()
@@ -1171,15 +1328,15 @@ class PseudoSpectral(CasadiCollocator):
                     _p_start += [p_ori] 
         #_p_start = [(p.getValueReference(), p.getStart()) for p in var.p]
         
-        x_max = 1e20*N.ones(len(_x_max))
-        u_max = 1e20*N.ones(len(_u_max))
-        p_max = 1e20*N.ones(len(_p_max))
-        x_min = -1e20*N.ones(len(_x_min))
-        u_min = -1e20*N.ones(len(_u_min))
-        p_min = -1e20*N.ones(len(_p_min))
-        x_start = -1e20*N.ones(len(_x_start))
-        u_start = -1e20*N.ones(len(_u_start))
-        p_start = -1e20*N.ones(len(_p_start))
+        x_max = self.UPPER*N.ones(len(_x_max))
+        u_max = self.UPPER*N.ones(len(_u_max))
+        p_max = self.UPPER*N.ones(len(_p_max))
+        x_min = self.LOWER*N.ones(len(_x_min))
+        u_min = self.LOWER*N.ones(len(_u_min))
+        p_min = self.LOWER*N.ones(len(_p_min))
+        x_start = self.LOWER*N.ones(len(_x_start))
+        u_start = self.LOWER*N.ones(len(_u_start))
+        p_start = self.LOWER*N.ones(len(_p_start))
         
         for vr, val in _x_min:
             if val != None:
@@ -1242,6 +1399,8 @@ class PseudoSpectral(CasadiCollocator):
         WEIGH = self._Weights
         DIFFM = self._DiffMatrix
         ROOTS = self._Roots
+        APPRO = self._Approximation
+        AROOT = self._ApproximationRoots
         
         dx_opt = N.zeros((len(PHASE)*len(DISCR), self.model.get_n_x()))
         x_opt  = N.zeros((len(PHASE)*len(DISCR), self.model.get_n_x()))
@@ -1249,24 +1408,7 @@ class PseudoSpectral(CasadiCollocator):
         w_opt  = N.zeros((len(PHASE)*len(DISCR), 0))
         t_opt  = N.zeros(len(self.get_time_points()))
         p_opt  = N.zeros(self.model.get_n_p())
-
-        cnt = 0
-        for t,i,j in self.get_time_points():
-            t_opt[cnt] = t
-            x_opt[cnt,:]  = self.nlp_opt[self.get_var_indices()[i][j]['x']][:,0]
-            
-            if j==0 and DISCR[0] != COLLO[0]:
-                u_opt[cnt,:] = [sum([lagrange_eval(ROOTS,ind,-1.0)*self.nlp_opt[self.get_var_indices()[i][l]['u']][k,0] for ind,l in enumerate(COLLO)]) for k in range(self.model.get_n_u())]
-                cnt = cnt + 1
-                continue
-            if j==DISCR[-1] and DISCR[-1] != COLLO[-1]:
-                u_opt[cnt,:] = [sum([lagrange_eval(ROOTS,ind,1.0)*self.nlp_opt[self.get_var_indices()[i][l]['u']][k,0] for ind,l in enumerate(COLLO)]) for k in range(self.model.get_n_u())]
-                cnt = cnt + 1
-                continue
-            
-            u_opt[cnt,:]  = self.nlp_opt[self.get_var_indices()[i][j]['u']][:,0]
-            cnt = cnt + 1
-
+        
         ts = [i[0] for i in self.get_time_points()]
 
         if (self.options['free_phases'] and len(PHASE) > 1) and self.md.get_opt_finaltime_free():
@@ -1292,11 +1434,32 @@ class PseudoSpectral(CasadiCollocator):
             
         tfcn.evaluate()
         t = N.transpose(N.array([tfcn.output()]))
-
-        return (t,dx_opt,x_opt,u_opt,w_opt)
+        t_opt = t.flatten()
         
-class GaussPseudoSpectralMethod(CasadiCollocator):
-    
+        cnt = 0
+        for time,i,j in self.get_time_points():
+            #t_opt[cnt] = t
+            x_opt[cnt,:]  = self.nlp_opt[self.get_var_indices()[i][j]['x']][:,0]
+            
+            if j==0 and DISCR[0] != COLLO[0]:
+                u_opt[cnt,:] = [sum([lagrange_eval(ROOTS,ind,-1.0)*self.nlp_opt[self.get_var_indices()[i][l]['u']][k,0] for ind,l in enumerate(COLLO)]) for k in range(self.model.get_n_u())]
+                dx_opt[cnt,:] = [N.array(2.0)/(t_opt[(i)*len(DISCR)-1]-t_opt[(i-1)*len(DISCR)])*sum([lagrange_derivative_eval(AROOT,ind,-1.0)*self.nlp_opt[self.get_var_indices()[i][l]['x']][k,0] for ind,l in enumerate(APPRO)]) for k in range(self.model.get_n_x())]
+                cnt = cnt + 1
+                continue
+            if j==DISCR[-1] and DISCR[-1] != COLLO[-1]:
+                u_opt[cnt,:] = [sum([lagrange_eval(ROOTS,ind,1.0)*self.nlp_opt[self.get_var_indices()[i][l]['u']][k,0] for ind,l in enumerate(COLLO)]) for k in range(self.model.get_n_u())]
+                dx_opt[cnt,:] = [N.array(2.0)/(t_opt[(i)*len(DISCR)-1]-t_opt[(i-1)*len(DISCR)])*sum([lagrange_derivative_eval(AROOT,ind,1.0)*self.nlp_opt[self.get_var_indices()[i][l]['x']][k,0] for ind,l in enumerate(APPRO)]) for k in range(self.model.get_n_x())]
+                cnt = cnt + 1
+                continue
+            
+            u_opt[cnt,:]  = self.nlp_opt[self.get_var_indices()[i][j]['u']][:,0]
+            dx_opt[cnt,:] = [N.array(2.0)/(t_opt[(i)*len(DISCR)-1]-t_opt[(i-1)*len(DISCR)])*sum([DIFFM[j-COLLO[0],l]*self.nlp_opt[self.get_var_indices()[i][l]['x']][k,0] for l in APPRO]) for k in range(self.model.get_n_x())]
+            cnt = cnt + 1
+            
+        p_opt[:] = self.nlp_opt[self.get_var_indices()[0][0]['p']][:,0]
+
+        return (t,dx_opt,x_opt,u_opt,w_opt,p_opt)
+        
     def set_initial_from_file(self,res):
         """ 
         Initialize the optimization vector from an object of either 
@@ -1321,6 +1484,8 @@ class GaussPseudoSpectralMethod(CasadiCollocator):
         names = self.md.get_p_opt_variable_names(include_alias=False)
         p_opt_names=[]
         for name in sorted(names):
+            if name == "finalTime" or name == "startTime":
+                continue
             p_opt_names.append(name[1])
         
         # Obtain vector sizes
@@ -1362,10 +1527,10 @@ class GaussPseudoSpectralMethod(CasadiCollocator):
 
         # If a normalized minimum time problem has been solved,
         # then, the time vector should be rescaled
-        n=[names[1] for names in self.md.get_p_opt_variable_names()]
-        non_fixed_interval = ('finalTime' in n) or ('startTime' in n)            
+        #n=[names[1] for names in self.md.get_p_opt_variable_names()]
+        #non_fixed_interval = ('finalTime' in n) or ('startTime' in n)            
 
-        dx_factor = 1.0
+        #dx_factor = 1.0
         """
         if non_fixed_interval:
             # A minimum time problem has been solved,
@@ -1377,30 +1542,25 @@ class GaussPseudoSpectralMethod(CasadiCollocator):
                 var_data[i,0] = 2.0*var_data[i,0]/(tf-t0)-(tf+t0)/(tf-t0)
                 #var_data[i,0] = -t0/(tf-t0) + var_data[i,0]/(tf-t0)
         """
-        """
+        
         p_opt_data = N.zeros(len(p_opt_names))
         # Get the parameters
-        n_p_opt = len(self.md.get_p_opt_variable_names())
+        n_p_opt = len(p_opt_names)
         if n_p_opt > 0:
-            p_opt_indices = N.zeros(n_p_opt, dtype=int)
-        
-            self._model.jmimodel.opt_get_p_opt_indices(p_opt_indices)
-            p_opt_indices = p_opt_indices.tolist()
-
-            for name in p_opt_names:
+            for i,name in enumerate(p_opt_names):
                 try:
-                    ref = self.md.get_value_reference(name)
-                    (z_i, ptype) = jmi._translate_value_ref(ref)
-                    i_pi = z_i - self._model._offs_real_pi.value
-                    i_pi_opt = p_opt_indices.index(i_pi)
-                    traj = res.get_variable_data(name)
-                    if self._model.get_scaling_method() & jmi.JMI_SCALING_VARIABLES > 0:
-                        p_opt_data[i_pi_opt] = traj.x[0]/sc[z_i]
-                    else:
-                        p_opt_data[i_pi_opt] = traj.x[0]
+                    #ref = self.md.get_value_reference(name)
+                    #(z_i, ptype) = jmi._translate_value_ref(ref)
+                    #i_pi = z_i - self._model._offs_real_pi.value
+                    #i_pi_opt = p_opt_indices.index(i_pi)
+                    #traj = res.get_variable_data(name)
+                    #if self._model.get_scaling_method() & jmi.JMI_SCALING_VARIABLES > 0:
+                    #    p_opt_data[i_pi_opt] = traj.x[0]/sc[z_i]
+                    #else:
+                    p_opt_data[i] = traj.x[0]
                 except VariableNotFoundError:
                     print "Warning: Could not find value for parameter " + name
-        """
+        
         # Initialize variable names
         # Loop over all the names
 
@@ -1435,43 +1595,80 @@ class GaussPseudoSpectralMethod(CasadiCollocator):
                 print "Warning: Could not find trajectory for input variable " + name
                 
         self.var_data = var_data
+        self.par_data = p_opt_data 
         
-        self._set_initial_from_file(var_data)
-    
-    def _set_initial_from_file(self, var_data):
-        xx_init = self.get_xx_init()
-        t_points = self.get_time_points()
-        ts = [i[0] for i in t_points]
+        self._set_initial_from_file(var_data,p_opt_data)
+        
+    def _set_initial_from_file(self, var_data, par_data):
+        PHASE = self._Phases
+        COLLO = self._Collocation
+        DISCR = self._Discretization
+        APPRO = self._Approximation
+        WEIGH = self._Weights
+        DIFFM = self._DiffMatrix
+        ROOTS = self._Roots
+        
+        ts = [i[0] for i in self.get_time_points()]
 
-        tfcn_in = []
-        for i in range(1,self.P):
-            tfcn_in += [self.ext_vars[i]['t']]
-        if self.md.get_opt_finaltime_free():
-            tfcn_in += [self.ext_vars[self.P]['t']]
-        
-        tfcn = casadi.SXFunction([tfcn_in],[ts])
-        tfcn.init()
-        input = []
-        if (self.options['free_phases'] or self.md.get_opt_finaltime_free()) and self.P > 1:
-            for i in range(1,self.P+1):
-                input += [xx_init[self.ext_var_indices['t'+str(i)]]]
-            tfcn.setInput(input)
+        if (self.options['free_phases'] and len(PHASE) > 1) and self.md.get_opt_finaltime_free():
+            input_t = [self.vars[i]['t'] for i in PHASE]
+            tfcn = casadi.SXFunction([input_t],[ts])
+            tfcn.init()
+            input_res = [self.nlp_opt[self.var_indices[i][DISCR[-1]]['t']][0] for i in PHASE]
+            tfcn.setInput(N.array(input_res).flatten())
+        elif (self.options['free_phases'] and len(PHASE) > 1):
+            input_t = [self.vars[i]['t'] for i in PHASE[:-1]]
+            tfcn = casadi.SXFunction([input_t],[ts])
+            tfcn.init()
+            input_res = [self.nlp_opt[self.var_indices[i][DISCR[-1]]['t']][0] for i in PHASE[:-1]]
+            tfcn.setInput(N.array(input_res).flatten())
+        elif self.md.get_opt_finaltime_free():
+            input_t = self.vars[PHASE[-1]]['t']
+            tfcn = casadi.SXFunction([[input_t]],[ts])
+            tfcn.init()
+            tfcn.setInput(self.nlp_opt[self.var_indices[PHASE[-1]][DISCR[-1]]['t']])
+        else:
+            tfcn = casadi.SXFunction([[]],[ts])
+            tfcn.init()
+            
         tfcn.evaluate()
-        t = tfcn.output()
+        t = N.transpose(N.array([tfcn.output()]))
+        t_opt = t.flatten()
+        
+        xx_init = self.get_xx_init()
 
         x_init = N.zeros((len(t), self.model.get_n_x()))
-        u_init = N.zeros((len(t)-2, self.model.get_n_u()))
+        u_init = N.zeros((len(t)-len(DISCR)+len(COLLO), self.model.get_n_u()))
         
         for i in range(self.model.get_n_x()):
-            x_init[:,i] = N.interp(t, var_data[:,0], var_data[:,i+1]).transpose()
+            x_init[:,i] = N.interp(t_opt, var_data[:,0], var_data[:,i+1]).transpose()
         for i in range(self.model.get_n_u()):
-            u_init[:,i] = N.interp(t[1:-1], var_data[:,0], var_data[:,1+self.model.get_n_x()+i]).transpose()
+            if DISCR[0] != COLLO[0]:
+                start = 1
+            else:
+                start = 0
+            if DISCR[-1] != COLLO[-1]:
+                end = -1
+            else:
+                end = len(t_opt)
+            u_init[:,i] = N.interp(t_opt[start:end], var_data[:,0], var_data[:,1+self.model.get_n_x()+i]).transpose()
         
         cnt_x = 0
         cnt_u = 0
-        for t_false,i,j in self.get_time_points():
+        
+        #Add the initials of the states and controls
+        for time,i,j in self.get_time_points():
             xx_init[self.get_var_indices()[i][j]['x']] = x_init[cnt_x,:]
             cnt_x += 1
-            if j!= 0 and j!=self.K+1:
-                xx_init[self.get_var_indices()[i][j]['u']] = u_init[cnt_u,:]
-                cnt_u += 1
+            if j==0 and DISCR[0] != COLLO[0]:
+                continue
+            if j==DISCR[-1] and DISCR[-1] != COLLO[-1]:
+                continue
+            xx_init[self.get_var_indices()[i][j]['u']] = u_init[cnt_u,:]
+            cnt_u += 1
+        
+        #Add the initial of the parameters
+        if len(par_data) > 0:
+            xx_init[self.get_var_indices()[0][0]['p']] = par_data
+
+        self.xx_init = xx_init
