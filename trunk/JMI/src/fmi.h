@@ -333,6 +333,14 @@ jmi_t* fmi_get_jmi_t(fmiComponent c);
 const char* fmi_get_model_types_platform();
 
 /**
+ * \brief Extracts info from nl-solver to logger.
+ * 
+ * @return fmiStatus - succeed or not.
+ */
+fmiStatus fmi_extract_debug_info(fmiComponent c);
+  /*DLLExport fmiStatus fmiExtractDebugInfo(fmiComponent c);*/
+
+/**
  * \brief Returns the version of the header file.
  * 
  * @return The version of fmiModelFunctions.h.

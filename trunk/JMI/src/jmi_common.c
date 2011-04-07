@@ -17,12 +17,12 @@
     <http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
 */
 
-
 /*
  * jmi_common.c contains all functions that is possible to factor out from jmi.c
  * and jmi_cppad.c. In effect, this code can be compiled either with C or a C++
  * compiler.
  */
+
 
 #include "jmi.h"
 
@@ -474,7 +474,7 @@ int jmi_sim_init(jmi_t* jmi, fmiReal relative_tolerance){
 int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, int n, int index) {
 	jmi_block_residual_t* b;
 	int flag;
-	flag = jmi_new_block_residual(&b,jmi,F,n);
+	flag = jmi_new_block_residual(&b,jmi,F,n,index);
 	jmi->dae_block_residuals[index] = b;
 	return 0;
 }
@@ -482,18 +482,19 @@ int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, int n, i
 int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, int n, int index) {
 	jmi_block_residual_t* b;
 	int flag;
-	flag = jmi_new_block_residual(&b,jmi,F,n);
+	flag = jmi_new_block_residual(&b,jmi,F,n,index);
 	jmi->dae_init_block_residuals[index] = b;
 	return 0;
 }
 
-int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_residual_func_t F, int n){
+int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_residual_func_t F, int n,int index){
 	jmi_block_residual_t* b = (jmi_block_residual_t*)calloc(1,sizeof(jmi_block_residual_t));
 	*block = b;
 	
 	b->jmi = jmi;
 	b->F = F;
 	b->n = n;
+	b->index = index ;
 	b->x = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
 	b->res = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
 	b->jac = (jmi_real_t*)calloc(n*n,sizeof(jmi_real_t));

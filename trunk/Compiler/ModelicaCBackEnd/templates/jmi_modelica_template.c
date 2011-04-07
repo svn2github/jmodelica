@@ -422,6 +422,10 @@ DllExport fmiStatus fmiTerminate(fmiComponent c) {
     return fmi_terminate(c);
 }
 
+DllExport fmiStatus fmiExtractDebugInfo(fmiComponent c) {
+    return fmi_extract_debug_info(c);
+}
+
 #ifdef __cplusplus
 }
 #endif

@@ -17,7 +17,11 @@
     <http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
 */
 
+
 #include "jmi_newton_solvers.h"
+#include "kinsol_jmod_impl.h"
+#include <kinsol/kinsol_impl.h>
+#include <time.h>
 
 #define JMI_SIMPLE_NEWTON_TOL 1e-8
 #define JMI_SIMPLE_NEWTON_MAX_ITER 100
@@ -31,12 +35,29 @@ int kin_f(N_Vector yy, N_Vector ff, void *problem_data){
 	
 	realtype *y, *f;
 	jmi_block_residual_t *block = problem_data;
+	int i,n;
 
 	y = NV_DATA_S(yy); /*y is now a vector of realtype*/
 	f = NV_DATA_S(ff); /*f is now a vector of realtype*/
 
-	block->F(block->jmi,y,f,JMI_BLOCK_EVALUATE); /*Evaluate the residual*/
 
+	/* Test if input is OK (no -1.#IND) */
+	n = NV_LENGTH_S(yy);
+	for (i=0;i<n;i++) {
+	  /* Unrecoverable error*/
+	  if (Ith(ff,i)- Ith(ff,i) != 0) return -1;
+	}
+
+	/*Evaluate the residual*/
+	block->F(block->jmi,y,f,JMI_BLOCK_EVALUATE);
+	
+	/* Test if output is OK (no -1.#IND) */
+	n = NV_LENGTH_S(ff);
+	for (i=0;i<n;i++) {
+	  /* Recoverable error*/
+	  if (Ith(ff,i)- Ith(ff,i) != 0) return 1;
+	}
+	
 	return KIN_SUCCESS; /*Success*/
 	/*return 1;  //Recoverable error*/
 	/*return -1; //Unrecoverable error*/
@@ -44,16 +65,16 @@ int kin_f(N_Vector yy, N_Vector ff, void *problem_data){
 
 void kin_err(int err_code, const char *module, const char *function, char *msg, void *eh_data){
 
-/*	if (err_code > 0){ /*Warning*/
-/*		printf("[KINSOL WARNING] ");
+	if (err_code > 0){ /*Warning*/
+		printf("[KINSOL WARNING] ");
 	}else if (err_code < 0){ /*Error*/
-/*		printf("[KINSOL ERROR] ");
+		printf("[KINSOL ERROR] ");
 	}
 	printf(function);
 	printf(" ");
 	printf(msg);
 	printf("\n");
-	*/
+	
 }
 
 void kin_info(const char *module, const char *function, char *msg, void *eh_data){
@@ -66,10 +87,9 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
 
 
 void jmi_kinsol_error_handling(int flag){
-	/*if (flag < 0){
-		printf("Kinsol failed with flag %d", flag); 
-	}
-	return 0;*/
+  /*if (flag != 0){
+		printf("Kinsol failed with flag %d \n", flag); 
+		}*/
 }
 
 int jmi_kinsol_solve(jmi_block_residual_t * block){
@@ -77,11 +97,15 @@ int jmi_kinsol_solve(jmi_block_residual_t * block){
 	int i;
 	int verbosity = 0;
 
-	/*Check if the block is to be initialized.*/
+	long int nniters = 0, njevals = 0;
+	clock_t c0,c1; /*timers*/
+
+
+	c0 = clock();
+	
 	if (block->init == 1){
-		
 		/*Initialize work vectors.*/
-		
+
 		/*Sets the scaling vectors to ones.*/
 		/*To be changed. */
 		N_VConst_Serial(ONE,block->kin_y_scale);
@@ -89,6 +113,8 @@ int jmi_kinsol_solve(jmi_block_residual_t * block){
 		
 		/* Initialize the work vector */
 		block->F(block->jmi,block->x,block->res,JMI_BLOCK_INITIALIZE);
+		/*N_VSetArrayPointer(block->x,block->kin_y);*/
+		
 		for(i=0;i<block->n;i=i+1){
 			Ith(block->kin_y,i)=block->x[i];
 		}
@@ -96,13 +122,13 @@ int jmi_kinsol_solve(jmi_block_residual_t * block){
 		flag = KINInit(block->kin_mem, kin_f, block->kin_y); /*Initialize Kinsol*/
 		jmi_kinsol_error_handling(flag);
 		
-		/*Attack linear solver*/
+		/*Attach linear solver*/
 		/*Dense Kinsol solver*/
 		/*flag = KINDense(block->kin_mem, block->n);
-		 *error_return = jmi_kinsol_error_handling(flag);
-		 */
+		  jmi_kinsol_error_handling(flag);*/
 		 
-		/*Dense Kinsol using Penrose-Moore pseudoinverse*/
+		 
+		/*Dense Kinsol using regularization*/
 		flag = KINPinv(block->kin_mem, block->n);
 		jmi_kinsol_error_handling(flag);
 		/*End linear solver*/
@@ -116,9 +142,17 @@ int jmi_kinsol_solve(jmi_block_residual_t * block){
 		jmi_kinsol_error_handling(flag);
 		
 		/*Stepsize tolerance*/
-		flag = KINSetScaledStepTol(block->kin_mem, block->kin_stol); 
+		flag = KINSetScaledStepTol(block->kin_mem, 0.001*(block->kin_stol)); 
 		jmi_kinsol_error_handling(flag);
 		
+		/* Allow long steps */
+		flag = KINSetMaxNewtonStep(block->kin_mem, 1e30);
+		jmi_kinsol_error_handling(flag);
+		
+		/* Disable residual monitoring */
+		flag = KINSetNoResMon(block->kin_mem,1);
+		jmi_kinsol_error_handling(flag);
+  
 		/*Verbosity*/
 		flag = KINSetPrintLevel(block->kin_mem, verbosity);
 		jmi_kinsol_error_handling(flag);
@@ -136,21 +170,51 @@ int jmi_kinsol_solve(jmi_block_residual_t * block){
 		jmi_kinsol_error_handling(flag);
 		
 		block->init = 0; /*The block is initialized*/
+
 	}else{
 		/* Initialize the work vector */
 		block->F(block->jmi,block->x,block->res,JMI_BLOCK_INITIALIZE);
+		/*N_VSetArrayPointer(block->x,block->kin_y);*/
+
 		for(i=0;i<block->n;i=i+1){
-			Ith(block->kin_y,i)=block->x[i];
+		  Ith(block->kin_y,i)=block->x[i];
 		}
-		
+	
+
 		/*Do not initially update the jacobian*/
+		
+		/* 
+		 * Currently not working, setting the "noinitsetup" flag 
+		 * results in a segmentation fault. This must be fixed!
+		 */
+		
 		flag = KINSetNoInitSetup(block->kin_mem, 0);
 		jmi_kinsol_error_handling(flag);
-		
-		/*Solve the block*/
+
 		flag = KINSol(block->kin_mem, block->kin_y, KIN_LINESEARCH, block->kin_y_scale, block->kin_f_scale);
+
 		jmi_kinsol_error_handling(flag);
+
 	}
+	c1 = clock();
+	
+	
+	/* Make information available for logger */
+	block->time_spent += ((realtype) ((long)(c1-c0))/(CLOCKS_PER_SEC));
+
+	/* Get debug information */
+	nniters = 0;
+	flag = KINGetNumNonlinSolvIters(block->kin_mem, &nniters);
+	jmi_kinsol_error_handling(flag);
+
+	njevals = 0;
+	flag = KINPinvGetNumFuncEvals(block->kin_mem, &njevals);
+	jmi_kinsol_error_handling(flag);
+
+	/* Store debug information */
+	block->nb_calls++;
+	block->nb_iters += nniters;
+	block->nb_jevals += njevals ;
 	
 	return 0;
 }

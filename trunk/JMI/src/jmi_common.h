@@ -718,6 +718,7 @@ struct jmi_block_residual_t {
 	jmi_block_residual_func_t F;   /**< \brief A function pointer to the block residual function */
 	int n;                         /**< \brief The number of unknowns in the equation system */
 	jmi_real_t* x;                 /**< \brief Work vector for the iteration variables */
+        int index ;
     jmi_real_t* res;               /**< \brief Work vector for the block residual */
     jmi_real_t* jac;               /**< \brief Work vector for the block Jacobian */
     int* ipiv;                     /**< \brief Work vector needed for dgesv */
@@ -728,6 +729,10 @@ struct jmi_block_residual_t {
     N_Vector kin_f_scale;          /**< \brief Work vector for Kinsol scaling of f */
     realtype kin_ftol;		   /**< \brief Tolerance for F */
     realtype kin_stol;		   /**< \brief Tolerance for Step-size */
+  int nb_calls;                    /**< \brief Nb of times the block has been solved */
+  int nb_iters;                     /**< \breif Total nb if iterations of non-linear solver */
+  int nb_jevals ;
+  realtype time_spent;             /**< \brief Total time spent in non-linear solver */
 };
 
 /* @} */
@@ -853,9 +858,10 @@ int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, int n, i
  * @param jmi A jmi_t struct.
  * @param F A jmi_block_residual_func_t function
  * @param n Integer size of the block
+ * @param index Integer ID nbr of the block
  * @return Error code.
  */
-int jmi_new_block_residual(jmi_block_residual_t** b,jmi_t* jmi, jmi_block_residual_func_t F, int n);
+int jmi_new_block_residual(jmi_block_residual_t** b,jmi_t* jmi, jmi_block_residual_func_t F, int n,int index);
 
 /**
  * \brief Deletes a jmi_block_residual struct.

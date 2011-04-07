@@ -622,6 +622,17 @@ class FMUModel(BaseModel):
         self._fmiGetStateValueReferences.restype = self._fmiStatus
         self._fmiGetStateValueReferences.argtypes = [self._fmiComponent, 
             Nct.ndpointer(), C.c_size_t]
+            
+        #self._fmiExtractDebugInfo = self._dll.__getattr__(
+        #self._modelname+'_fmiExtractDebugInfo')      
+        try:
+            self._fmiExtractDebugInfo = self._dll.__getattr__(
+                'fmiExtractDebugInfo')
+            self._fmiExtractDebugInfo.restype = self._fmiStatus
+            self._fmiExtractDebugInfo.argtypes = [self._fmiComponent]
+            self._compiled_with_debug_fct = True
+        except AttributeError:
+            self._compiled_with_debug_fct = False
        
     def _get_time(self):
         return self.__t
@@ -1395,6 +1406,16 @@ class FMUModel(BaseModel):
         
             log - A list of lists.
         """
+        
+        # Temporary fix to make the fmi write to logger - remove when 
+        # permanent solution is found!
+        if self._compiled_with_debug_fct:
+            self._fmiExtractDebugInfo(self._model)
+        else:
+            print "FMU not compiled with JModelica.org compliant debug functions"
+            print "Debug info from non-linear solver currently not accessible."
+        
+        
         return self._log 
     
     def simulate(self,

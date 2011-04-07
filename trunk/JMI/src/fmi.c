@@ -16,6 +16,7 @@
     see <http://www.gnu.org/licenses/> or
     <http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
 */
+
 #include <stdio.h>
 #include <string.h>
 #include "fmi.h"
@@ -60,6 +61,8 @@ fmiComponent fmi_instantiate_model(fmiString instanceName, fmiString GUID, fmiCa
     /* Create jmi struct*/
     jmi_t* jmi = (jmi_t *)functions.allocateMemory(1, sizeof(jmi_t));
     fmiInteger retval = jmi_new(&jmi);
+
+
     if(retval != 0) {
         /* creating jmi struct failed */
         return NULL;
@@ -83,7 +86,7 @@ fmiComponent fmi_instantiate_model(fmiString instanceName, fmiString GUID, fmiCa
     
     /* set start values*/
     jmi_set_start_values(component -> jmi);
-     
+    
     return (fmiComponent)component;
 }
 
@@ -92,6 +95,7 @@ void fmi_free_model_instance(fmiComponent c) {
      * that have been allocated by the functions of the Model Exchange Interface for instance "c".*/
     if (c) {
         fmiCallbackFreeMemory fmi_free = ((fmi_t*)c) -> fmi_functions.freeMemory;
+
         free(((fmi_t*)c) -> jmi);
         fmi_free((void*)((fmi_t*)c) -> fmi_instance_name);
         fmi_free((void*)((fmi_t*)c) -> fmi_GUID);
@@ -209,6 +213,7 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
     jmi_real_t* switchesR0;  /* Initial Switches */
 
     /* Update eventInfo */
+
     eventInfo->upcomingTimeEvent = fmiFalse;            /* Next time event is computed after initialization */
     eventInfo->nextEventTime = 0.0;                     /* Next time event is computed after initialization */
     eventInfo->stateValueReferencesChanged = fmiFalse;  /* No support for dynamic state selection */
@@ -222,7 +227,6 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
     if (toleranceControlled == fmiFalse){
         relativeTolerance = 1e-6;
     }
-
     /* Set tolerance in the BLT blocks */
     for (i=0; i < ((fmi_t *)c)->jmi->n_dae_init_blocks; i=i+1){
         ((fmi_t *)c)->jmi->dae_init_block_residuals[i]->kin_ftol = relativeTolerance*safety_factor_newton;
@@ -232,14 +236,13 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
         ((fmi_t *)c)->jmi->dae_block_residuals[i]->kin_ftol = relativeTolerance*safety_factor_newton;
         ((fmi_t *)c)->jmi->dae_block_residuals[i]->kin_stol = relativeTolerance*safety_factor_newton;
     }
-    
     /* Get Sizes */
     retval = jmi_init_get_sizes(((fmi_t *)c)->jmi,&nF0,&nF1,&nFp,&nR0); /* Get the size of R0 and F0, (interested in R0) */
     if(retval != 0) {
         (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Initialization failed when trying to retrieve the initial sizes.");
         return fmiError;
     }
-    
+
     retval = jmi_dae_get_sizes(((fmi_t *)c)->jmi,&nF,&nR);
     if(retval != 0) {
         (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Initialization failed when trying to retrieve the actual sizes.");
@@ -292,7 +295,7 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
 
         /* Call the initialization algorithm */
         retval = jmi_ode_initialize(((fmi_t *)c)->jmi);
-        
+
         if(retval != 0) { /* Error check */
             (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Initialization failed.");
             return fmiError;
@@ -776,4 +779,59 @@ fmiStatus fmi_get_state_value_references(fmiComponent c, fmiValueReference vrx[]
 fmiStatus fmi_terminate(fmiComponent c) {
     /* Release all resources that have been allocated since fmi_initialize has been called. */
     return fmiOK;
+}
+
+fmiStatus fmi_extract_debug_info(fmiComponent c) {
+  fmiInteger block, nbcalls,n,i,nniters,njevals;
+  fmiReal avg_nniters, time_spent;
+    char buf[100];
+    /* Extract debug information from initialization*/
+    for (i=0; i < ((fmi_t*)c)->jmi->n_dae_init_blocks;i=i+1){
+        nniters = (((fmi_t*)c)->jmi->dae_init_block_residuals[i])->nb_iters;
+
+	/* Test if block is solved by KINSOL */
+	if (nniters > 0) {
+	    /* Extract additional debug information */
+	    block = (((fmi_t*)c)->jmi->dae_init_block_residuals[i])->index;
+	    nbcalls = (((fmi_t*)c)->jmi->dae_init_block_residuals[i])->nb_calls;
+	    njevals = (((fmi_t*)c)->jmi->dae_init_block_residuals[i])->nb_jevals;
+	    n = (((fmi_t*)c)->jmi->dae_init_block_residuals[i])->n;
+	    
+	    /* Output to logger */
+	    sprintf(buf,"INIT Block %d ; size: %d nniters: %d nbcalls: %d njevals: %d index %d",block,n,nniters,nbcalls,njevals);
+	    (((fmi_t *)c)->fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiOK,"DEBUG",buf);
+
+	    time_spent = (((fmi_t*)c)->jmi->dae_init_block_residuals[i])->time_spent;
+	    sprintf(buf,"INIT Block %d ; time: %f",block,time_spent);
+	    (((fmi_t *)c)->fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiOK,"TIMING",buf);
+	}
+    }
+
+    /* Extract debug information from DAE blocks */
+    for (i=0; i < ((fmi_t*)c)->jmi->n_dae_blocks;i=i+1){
+        nniters = (((fmi_t*)c)->jmi->dae_block_residuals[i])->nb_iters;
+
+	/* Test if block is solved by KINSOL */
+	if (nniters > 0) {
+	    /* Extract additional debug information */
+	    block = (((fmi_t*)c)->jmi->dae_init_block_residuals[i])->index;
+	    nbcalls = (((fmi_t*)c)->jmi->dae_block_residuals[i])->nb_calls;
+	    njevals = (((fmi_t*)c)->jmi->dae_block_residuals[i])->nb_jevals;
+	    n = (((fmi_t*)c)->jmi->dae_block_residuals[i])->n;
+	    
+	    /* Output to logger */
+	    sprintf(buf,"SIM Block %d ; size: %d nniters: %d nbcalls: %d njevals: %d",block,n,nniters,nbcalls,njevals);
+	    (((fmi_t *)c)->fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiOK,"DEBUG",buf);
+
+	    time_spent = (((fmi_t*)c)->jmi->dae_block_residuals[i])->time_spent;
+	    sprintf(buf,"INIT Block %d ; time: %f",block,time_spent);
+	    (((fmi_t *)c)->fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiOK,"TIMING",buf);
+
+	    
+	}
+    }
+    /*
+	for (i=0; i < jmi->n_dae_blocks;i=i+1){
+	    jmi_delete_block_residual(jmi->dae_block_residuals[i]);
+    }*/
 }
