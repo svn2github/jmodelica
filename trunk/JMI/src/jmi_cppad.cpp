@@ -1244,7 +1244,7 @@ int jmi_dae_dF_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars,
 	}
 }
 
-int jmi_dae_directional_dF(jmi_t* jmi, jmi_real_t* res, jmi_real_t* dF, jmi_real_t* dz) {
+int jmi_dae_directional_dF(jmi_t* jmi, int eval_alg, jmi_real_t* res, jmi_real_t* dF, jmi_real_t* dz) {
 	return -1;
 }
 

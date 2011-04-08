@@ -54,6 +54,11 @@ N.int = N.int32
 JMI_DER_SYMBOLIC = 1
 """Use automatic differentiation (CppAD) to evaluate derivatives."""
 JMI_DER_CPPAD = 2
+"""Use automatic differentiation (CAD) to evaluate derivatives."""
+JMI_DER_CAD = 4
+"""Use finite differentiation (FD) to evaluate derivatives."""
+JMI_DER_FD = 8
+
 
 """Sparse evaluation of derivatives."""
 JMI_DER_SPARSE = 1
@@ -61,6 +66,11 @@ JMI_DER_SPARSE = 1
 JMI_DER_DENSE_COL_MAJOR = 2
 """Dense evaluation (row major) of derivatives."""
 JMI_DER_DENSE_ROW_MAJOR = 4
+
+"""Print evaluation errors on screen"""
+JMI_DER_CHECK_SCREEN_ON = 1
+"""Interrupt when evaluation error is found""" 
+JMI_DER_CHECK_SCREEN_OFF = 2
 
 """Flags for evaluation of Jacobians w.r.t. parameters in the p vector
 """
@@ -3103,6 +3113,7 @@ class JMIModel(object):
                                             ct.POINTER(ct.c_int),
                                             ct.POINTER(ct.c_int)]   
         self._dll.jmi_dae_directional_dF.argtypes = [ct.c_void_p,
+        											ct.c_int,
                                          Nct.ndpointer(dtype=c_jmi_real_t,
                                                        ndim=1,
                                                        flags='C'),
@@ -3111,7 +3122,15 @@ class JMIModel(object):
                                                        flags='C'),
                                          Nct.ndpointer(dtype=c_jmi_real_t,
                                                        ndim=1,
-                                                       flags='C')] 
+                                                       flags='C')]
+        self._dll.jmi_dae_derivative_checker.argtypes = [ct.c_void_p,
+                                                         ct.c_int,
+                                                         ct.c_int,
+                                                         ct.c_int,
+                                                         Nct.ndpointer(dtype=ct.c_int,
+                                                                  ndim=1,
+                                                                  shape=n_z.value,
+                                                                  flags='C')]
         self._dll.jmi_dae_R.argtypes = [ct.c_void_p,
                                         Nct.ndpointer(dtype=c_jmi_real_t,
                                                       ndim=1,
@@ -4455,7 +4474,7 @@ class JMIModel(object):
             non-zero elements failed.")        
         return int(dF_n_cols.value), int(dF_n_nz.value)
 
-    def dae_directional_dF(self, res, dF, dz):
+    def dae_directional_dF(self, eval_alg, res, dF, dz):
         """ 
         Evaluate the directional derivative of the DAE residual function.
 
@@ -4468,6 +4487,11 @@ class JMIModel(object):
         
         
         Parameters::
+        	eval_alg --
+        		JMI_DER_SYMBOLIC to evaluate a symbolic Jacobian or 
+                JMI_DER_CPPAD to evaluate the Jacobian by means of CppAD.
+                JMI_DER_CAD to evaluate the Jacobian using CAD
+                JMI_DER_FD to evaluate using finite differences
         
             res --
                 DAE residual vector. The size of res is equal to the number
@@ -4482,8 +4506,31 @@ class JMIModel(object):
                 The seed vector. The size of dz is equal to 2*n_x + n_u + n_w.
 
         """
-        if self._dll.jmi_dae_directional_dF(self._jmi, res, dF, dz) is not 0:
+        if self._dll.jmi_dae_directional_dF(self._jmi, eval_alg, res, dF, dz) is not 0:
             raise JMIException("Evaluating the directional derivative failed.")
+
+    def dae_derivative_checker(self, sparsity, independent_vars, screen_use, mask):
+        """
+		Compare the evaluated CAD derivative with the FD evaluation
+		
+		Parameters::
+			sparsity --
+            	Compare the result with different jacobian formats: JMI_DER_SPARSE, 
+                JMI_DER_DENSE_COL_MAJOR, or JMI_DER_DENS_ROW_MAJOR.
+			independent_vars -- 
+                Indicates which columns of the full Jacobian should be evaluated 
+                (for example JMI_DER_DX or JMI_DER_X).
+                
+                Can either be a list of columns or a bitmask of the columns 
+                or:ed (|) together. Using a list is prefered as it is more 
+                Pythonesque.
+		"""
+        try:
+            independent_vars = reduce(lambda x,y: x | y, independent_vars)
+        except TypeError:
+            pass
+        if self._dll.jmi_dae_derivative_checker(self._jmi, sparsity, independent_vars, screen_use, mask) is not 0:
+            raise JMIException("Comparing the jacobians failed")
 
     def dae_R(self, res):
         """ 

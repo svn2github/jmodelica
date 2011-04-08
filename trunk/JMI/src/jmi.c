@@ -262,7 +262,7 @@ int jmi_func_F(jmi_t *jmi, jmi_func_t *func, jmi_real_t *res) {
 
 int jmi_func_cad_directional_dF(jmi_t *jmi, jmi_func_t *func, jmi_real_t *res,
 			 jmi_real_t *dF, jmi_real_t* dv) {
-		return func->cad_dir_dF(jmi, &res, &dF, &dv);
+		return func->cad_dir_dF(jmi, &res, &dF, &dv);	
 }
 
 int jmi_ode_f(jmi_t* jmi) {
@@ -518,16 +518,14 @@ int jmi_dae_F(jmi_t* jmi, jmi_real_t* res) {
 
 int jmi_dae_dF(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int* mask, jmi_real_t* jac) {
 	if (eval_alg & JMI_DER_SYMBOLIC) {
-
 		return jmi_func_sym_dF(jmi, jmi->dae->F, sparsity,
 				independent_vars, mask, jac) ;
-
 	} else if (eval_alg & JMI_DER_CAD) {
-		/* TODO: Add code here */
-		return 0;
+		return  jmi_func_cad_dF(jmi, jmi->dae->F, sparsity,
+				independent_vars, mask, jac);
 	} else if (eval_alg & JMI_DER_FD) {
-		/* TODO: Add code here */
-		return 0;
+		return jmi_func_fd_dF(jmi, jmi->dae->F, sparsity,
+				independent_vars, mask, jac);
 	} else if (eval_alg & JMI_DER_CPPAD) {
 		return -1;
 	} else {
@@ -536,13 +534,12 @@ int jmi_dae_dF(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int
 }
 
 int jmi_dae_dF_n_nz(jmi_t* jmi, int eval_alg, int* n_nz) {
-
 	if (eval_alg & JMI_DER_SYMBOLIC) {
-
 		return jmi_func_sym_dF_n_nz(jmi, jmi->dae->F, n_nz);
 	} else if (eval_alg & JMI_DER_CAD) {
-		/* TODO: Add code here */
-		return 0;
+		return jmi_func_cad_dF_n_nz(jmi, jmi->dae->F, n_nz);
+	} else if(eval_alg & JMI_DER_FD) {
+		return jmi_func_fd_dF_n_nz(jmi, jmi->dae->F, n_nz);
 	} else if (eval_alg & JMI_DER_CPPAD) {
 		return -1;
 	} else {
@@ -554,11 +551,11 @@ int jmi_dae_dF_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
         int *mask, int* row, int* col) {
 
 	if (eval_alg & JMI_DER_SYMBOLIC) {
-
 		return jmi_func_sym_dF_nz_indices(jmi, jmi->dae->F, independent_vars, mask, row, col);
 	} else if (eval_alg & JMI_DER_CAD) {
-		/* TODO: Add code here */
-		return 0;
+		return jmi_func_cad_dF_nz_indices(jmi, jmi->dae->F, independent_vars, mask, row, col);
+	} else if (eval_alg & JMI_DER_FD) {
+		return jmi_func_fd_dF_nz_indices(jmi, jmi->dae->F, independent_vars, mask, row, col);
 	} else if (eval_alg & JMI_DER_CPPAD) {
 		return -1;
 	} else {
@@ -574,8 +571,11 @@ int jmi_dae_dF_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars,
 		return jmi_func_sym_dF_dim(jmi, jmi->dae->F, sparsity, independent_vars, mask,
 				dF_n_cols, dF_n_nz);
 	} else if (eval_alg & JMI_DER_CAD) {
-		/* TODO: Add code here */
-		return 0;
+		return jmi_func_cad_dF_dim(jmi, jmi->dae->F, sparsity, independent_vars, mask,
+				dF_n_cols, dF_n_nz);
+	} else if (eval_alg & JMI_DER_FD) {
+		return jmi_func_fd_dF_dim(jmi, jmi->dae->F, sparsity, independent_vars, mask,
+				dF_n_cols, dF_n_nz);
 	} else if (eval_alg & JMI_DER_CPPAD) {
 		return -1;
 	} else {
@@ -584,14 +584,24 @@ int jmi_dae_dF_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars,
 
 }
 
-int jmi_dae_directional_dF(jmi_t* jmi, jmi_real_t* res, jmi_real_t* dF, jmi_real_t* dz) {
+int jmi_dae_directional_dF(jmi_t* jmi, int eval_alg, jmi_real_t* res, jmi_real_t* dF, jmi_real_t* dz) {
 	int i;
 	for (i=0;i<jmi->n_z;i++) {
 		(*(jmi->z))[i] = (*(jmi->z_val))[i];
 	}
-
-	return jmi_func_cad_directional_dF(jmi,jmi->dae->F,res,dF,dz);
-
+	
+	
+	if (eval_alg & JMI_DER_SYMBOLIC) {
+		return jmi_func_sym_directional_dF(jmi, jmi->dae->F, res, dF, dz);
+	} else if (eval_alg & JMI_DER_CAD) {
+		return jmi_func_cad_directional_dF(jmi, jmi->dae->F, res, dF, dz);
+	} else if (eval_alg & JMI_DER_FD) {
+		return jmi_func_fd_directional_dF(jmi, jmi->dae->F, res, dF, dz);
+	} else if (eval_alg & JMI_DER_CPPAD){
+		return -1;
+	} else{
+		return -1;
+	}
 }
 
 int jmi_dae_R(jmi_t* jmi, jmi_real_t* res) {

@@ -291,6 +291,7 @@
 #define _JMI_H
 
 #include "jmi_common.h"
+#include "jmi_util.h"
 
 /* @{ */
 
@@ -312,12 +313,15 @@ extern "C" {
 #define JMI_DER_CAD 4             /**< \brief Use automatic differentiation (generated C code) to evaluate derivatives. */
 #define JMI_DER_FD 8             /**< \brief Use finite differences to evaluate derivatives. */
 
+#define JMI_DER_CHECK_SCREEN_ON 1 /**< \brief Prints all evaluation errors on the screen, returns 0. */
+#define JMI_DER_CHECK_SCREEN_OFF 2 /**< \brief Return -1 if an evaluation error occur. */
+
 #define JMI_DER_SPARSE 1            /**< \brief Sparse evaluation of derivatives. */
 #define JMI_DER_DENSE_COL_MAJOR 2   /**<  \brief Dense evaluation (column major) of derivatives. */
 #define JMI_DER_DENSE_ROW_MAJOR 4   /**<  \brief Dense evaluation (row major) of derivatives. */
 
 /* Flags for evaluation of Jacobians w.r.t. parameters in the p vector */
-#define JMI_DER_P_OPT 0               /**< \brief Evaluate derivatives w.r.t. real free parameters, \f$p_{opt}\f$.*/
+#define JMI_DER_P_OPT 8192               /**< \brief Evaluate derivatives w.r.t. real free parameters, \f$p_{opt}\f$.*/
 #define JMI_DER_CI 1               /**< \brief Evaluate derivatives w.r.t. real independent constants, \f$c_i\f$.*/
 #define JMI_DER_CD 2               /**< \brief Evaluate derivatives w.r.t. real dependent constants, \f$c_d\f$.*/
 #define JMI_DER_PI 4               /**< \brief Evaluate derivatives w.r.t. real independent parameters, \f$p_i\f$.*/
@@ -1093,7 +1097,7 @@ int jmi_dae_dF(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int
  *
  * @param jmi A jmi_t struct.
  * @param eval_alg Indicates which for which Jacobian the number of non-zero elements should be returned:
- *                 Symbolic (JMI_DER_SYMBOLIC) or CppAD (JMI_DER_CPPAD).
+ *                 Symbolic (JMI_DER_SYMBOLIC), CAD (JMI_DER_CAD), CppAD (JMI_DER_CPPAD) or finite differences (JMI_DER_FD).
  * @param n_nz (Output) The number of non-zero Jacobian entries.
  * @return Error code.
  */
@@ -1147,13 +1151,14 @@ int jmi_dae_dF_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars,
  * the vectors obtained from the functions ::jmi_get_dx, ::jmi_get_x etc.
  *
  * @param jmi A jmi_t struct.
+ * @param eval_alg int
  * @param res (Output) The DAE residual vector.
  * @param dF (Output) The directional derivative.
  * @param dz Seed vector of size n_x + n_x + n_u + n_w.
  * @return Error code.
  *
  */
-int jmi_dae_directional_dF(jmi_t* jmi, jmi_real_t* res, jmi_real_t* dF, jmi_real_t* dz);
+int jmi_dae_directional_dF(jmi_t* jmi, int eval_alg, jmi_real_t* res, jmi_real_t* dF, jmi_real_t* dz);
 
 /**
  * \brief Evaluate DAE event indicator residuals.
@@ -1167,6 +1172,25 @@ int jmi_dae_directional_dF(jmi_t* jmi, jmi_real_t* res, jmi_real_t* dF, jmi_real
  *
  */
 int jmi_dae_R(jmi_t* jmi, jmi_real_t* res);
+
+/**
+ * \brief Compare the evaluated CAD derivative with the FD evaluation
+ *
+ * @param jmi A jmi_t struct.
+ * @param sparsity Set to JMI_DER_SPARSE, JMI_DER_DENSE_COL_MAJOR, or JMI_DER_DENS_ROW_MAJOR
+ *                to indicate the output format of the Jacobian.
+ * @param independent_vars Used to indicate which columns of the full Jacobian should
+ *                         be evaluated. The constants JMI_DER_DX, JMI_DER_X etc are used
+ *                         to set this argument.
+ * @param screen_use Set the flag to JMI_DER_CHECK_SCREEN_ON to print the result of the comparasion on the screen
+ *		       or JMI_DER_CHECK_SCREEN_OFF to return -1 if the comparasion failes. 
+ * @param mask This argument is a vector containing ones for the Jacobian columns that
+ *             should be included in the Jacobian and zeros for those which should not.
+ *             The size of this vector is the same as the z vector.
+ * @return Error code.
+ *
+ */
+int jmi_dae_derivative_checker(jmi_t* jmi, int sparsity, int independent_vars, int screen_use, int *mask);
 
 /* @} */
 

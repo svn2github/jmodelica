@@ -507,10 +507,25 @@ int jmi_func_sym_dF_nz_indices(jmi_t *jmi, jmi_func_t *func,
 int jmi_func_sym_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity,
                     int independent_vars, int *mask,
 		    int *dF_n_cols, int *dF_n_nz);
+		    
+/**
+ * \brief Evaluate the directional AD derivative of the residual function of
+ * a jmi_func_t struct, using symbolic differentiation.
+ *
+ * @param jmi A jmi_t struct.
+ * @param func The jmi_func_t struct.
+ * @param res (Output) The DAE residual vector.
+ * @param dF (Output) The directional derivative.
+ * @param dv Seed vector of size n_x + n_x + n_u + n_w.
+ * @return Error code.
+ */
+
+int jmi_func_sym_directional_dF(jmi_t *jmi, jmi_func_t *func, jmi_real_t *res,
+			 jmi_real_t *dF, jmi_real_t* dv);
 
 /**
  * \brief Evaluate the directional AD derivative of the residual function of
- * a jmi_func_t struct.
+ * a jmi_func_t struct, using the CAD technique.
  *
  * @param jmi A jmi_t struct.
  * @param func The jmi_func_t struct.
@@ -565,6 +580,7 @@ int jmi_func_cad_dF_n_nz(jmi_t *jmi, jmi_func_t *func, int* n_nz);
 int jmi_func_cad_dF_nz_indices(jmi_t *jmi, jmi_func_t *func,
                            int independent_vars,
                            int *mask, int *row, int *col);
+                           
 
 /**
  * \brief Computes the number of columns and the number of non-zero

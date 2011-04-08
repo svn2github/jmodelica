@@ -51,18 +51,34 @@ aspect CADCodeGen {
  		prettyPrint_C(p, str, indent);
 	}
 	
+	public void FTimeExp.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
+			str.print("jmi_ad_var_t ");
+			str.print(this.adVarName());
+			str.print(" = time;\n");
+			
+			str.print("jmi_ad_var_t ");
+			str.print(this.adDerName());
+			str.print(" = 0;\n");
+	}
+	
 	public void FIdUseExp.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
 			str.print("jmi_ad_var_t ");
 			str.print(this.adVarName());
 			str.print(" = ");
-			p.print(this.getFIdUse(),str,indent);
+			this.prettyPrint_C(p,str,indent);
 			str.print(";\n");
 			
-			str.print("jmi_ad_var_t ");
-			str.print(this.adDerName());
-			str.print(" = (*dz)[");
-			str.print(this.myFV().valueReference());
-			str.print("-jmi->offs_real_dx];\n");
+			if (variability().lessOrEqual(fParameter())){
+			 	str.print("jmi_ad_var_t ");
+				str.print(this.adDerName());
+				str.print(" = 0;\n");
+			} else{	
+				str.print("jmi_ad_var_t ");
+				str.print(this.adDerName());
+				str.print(" = (*dz)[");
+				str.print(this.myFV().valueReference());
+				str.print("-jmi->offs_real_dx];\n");
+			}
 	}
 	
 	public void FLitExp.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
@@ -355,16 +371,15 @@ aspect CADCodeGen {
 			str.print(this.adVarName());
 			str.print(" * (");
 			str.print(getRight().adDerName());
-			str.print(" * log(");
+			str.print(" * log(fabs(");
 			str.print(getLeft().adVarName());
-			str.print(") + ");
+			str.print(")) + ");
 			str.print(getRight().adVarName());
 			str.print(" * ");
 			str.print(getLeft().adDerName());
 			str.print(" / ");
 			str.print(getLeft().adVarName());
 			str.print(");\n");
-			
 	}
 	
 	public void FSqrtExp.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
