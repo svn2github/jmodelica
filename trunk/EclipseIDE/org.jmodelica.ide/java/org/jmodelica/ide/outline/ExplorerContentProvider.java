@@ -38,15 +38,12 @@ import org.eclipse.ui.progress.UIJob;
 import org.jastadd.plugin.compiler.ast.IASTNode;
 import org.jastadd.plugin.compiler.ast.IOutlineNode;
 import org.jastadd.plugin.registry.ASTRegistry;
-import org.jastadd.plugin.registry.IASTRegistryListener;
 import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.compiler.ModelicaEclipseCompiler;
 import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.ClassDecl;
 import org.jmodelica.modelica.compiler.Element;
 import org.jmodelica.modelica.compiler.LibNode;
-import org.jmodelica.modelica.compiler.List;
-import org.jmodelica.modelica.compiler.SourceRoot;
 import org.jmodelica.modelica.compiler.StoredDefinition;
 
 public class ExplorerContentProvider implements ITreeContentProvider, IResourceChangeListener, IResourceDeltaVisitor {
@@ -63,12 +60,11 @@ public class ExplorerContentProvider implements ITreeContentProvider, IResourceC
 
 	public Object[] getChildren(Object parentElement) {
 		if (parentElement instanceof IFile) {
-			parentElement = getRoot((IFile) parentElement);
-			return getClassesFromSD((ASTNode<?>) parentElement);
-		} 
-		if (parentElement instanceof IProject) {
-			LibrariesList libList = new LibrariesList((IProject) parentElement);
-			return libList.hasChildren() ? new Object[] { libList } : null;
+			IOutlineNode root = (IOutlineNode) getRoot((IFile) parentElement);
+			return root.outlineChildren().toArray();
+//		} else if (parentElement instanceof IProject) {
+//			LibrariesList libList = new LibrariesList((IProject) parentElement, viewer);
+//			return libList.hasChildren() ? new Object[] { libList } : null;
 		} else if (parentElement instanceof LibrariesList) {
 			return ((LibrariesList) parentElement).getChildren();
 		} else if (parentElement instanceof ClassDecl) {
@@ -114,13 +110,6 @@ public class ExplorerContentProvider implements ITreeContentProvider, IResourceC
 		while (!(node instanceof ClassDecl || node instanceof StoredDefinition))
 			node = node.getParent();
 		return node;
-	}
-
-	private ASTNode[] getClassesFromSD(ASTNode<?> node) {
-		if (!(node instanceof StoredDefinition))
-			return null;
-		StoredDefinition sd = (StoredDefinition) node;
-		return getVisible(sd.getElements());
 	}
 
 	private ASTNode[] getVisible(Iterable<? extends ASTNode> objs) {
@@ -186,108 +175,5 @@ public class ExplorerContentProvider implements ITreeContentProvider, IResourceC
 			return false;
 		}
 		return false;
-	} 
-	
-	public class LibrariesList implements IASTRegistryListener {
-		
-		private ASTNode[] libraries;
-		private IProject project;
-		private boolean loaded;
-		private boolean checkedHas;
-		private boolean hasLibraries;
-		private boolean gettingAST;
-		
-		public LibrariesList(IProject project) {
-			this.project = project;
-			gettingAST = false;
-			resetLibraries();
-			registry.addListener(this, project, null);
-		}
-
-		public void resetLibraries() {
-			libraries = null;
-			loaded = false;
-			checkedHas = false;
-		}
-
-		private void readLibraries() {
-			libraries = null;
-			
-			IASTNode ast = getAST();
-			if (ast instanceof SourceRoot) {
-			    List<LibNode> libNodes = ((SourceRoot) ast).getProgram().getLibNodes();
-			    int nl = libNodes.getNumChild();
-			    int n = 0;
-			    ASTNode[][] nodes = new ASTNode[nl][];
-			    for (int i = 0; i < nl; i++) {
-			    	nodes[i] = getClassesFromSD(libNodes.getChild(i).getStoredDefinition());
-			    	n += nodes[i].length;
-			    }
-				
-			    if (n > 0) {
-					libraries = new ASTNode[n];
-					for (int i = 0, j = 0; i < nl; j += nodes[i].length, i++) 
-						System.arraycopy(nodes[i], 0, libraries, j, nodes[i].length);
-				    for (int i = 0; i < n; i++) 
-						libraries[i].setLibrariesList(this);
-					
-				}
-			}
-			loaded = true;
-			hasLibraries = libraries != null;
-			checkedHas = true;
-		}
-
-		public IASTNode getAST() {
-			gettingAST = true;
-			IASTNode ast = registry.lookupAST(null, project);
-			gettingAST = false;
-			return ast;
-		}
-		
-		private boolean checkHasLibraries() {
-			if (checkedHas)
-				return hasLibraries;
-			
-		    checkedHas = true;
-		    hasLibraries = false;
-		    IASTNode ast = getAST();
-			if (ast instanceof SourceRoot) {
-			    List<LibNode> libNodes = ((SourceRoot) ast).getProgram().getLibNodes();
-			    hasLibraries = libNodes.getNumChild() > 0;
-			}
-			return hasLibraries;
-		}
-		
-		public ASTNode[] getChildren() {
-			if (!loaded)
-				readLibraries();
-			return libraries;
-		}
-		
-		public boolean hasChildren() {
-			return libraries != null || checkHasLibraries();
-		}
-
-		public IProject getParent() {
-			return project;
-		}
-		
-		@Override
-		public String toString() {
-			return "Loaded Libraries";
-		}
-
-		public void childASTChanged(IProject project, String key) {
-		}
-
-		public void projectASTChanged(IProject project) {
-			if (this.project != project || gettingAST)
-				return;
-			boolean hadChildren = hasChildren();
-			resetLibraries();
-			boolean updProj = hadChildren != hasChildren();
-			viewer.refresh(updProj ? this.project : this);
-		}
 	}
 }

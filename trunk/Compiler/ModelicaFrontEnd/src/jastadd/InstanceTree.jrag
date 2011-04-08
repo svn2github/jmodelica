@@ -1452,12 +1452,14 @@ aspect SourceAST_API {
 			l.add(cd);
 		return l;
 	}
+	
 
 	syn lazy ArrayList<ClassDecl> ClassDecl.classes() = new ArrayList<ClassDecl>();
 	eq FullClassDecl.classes() {
 		ArrayList<ClassDecl> l = new ArrayList<ClassDecl>();
 		for (ClassDecl cd : getClassDecls())
 			l.add(cd);
+		saveClassesIndex(l);
 		return l;
 	}
 
@@ -1483,6 +1485,8 @@ aspect SourceAST_API {
 		}
 		for (ClassDecl cd : map.values())
 			l.add(cd);
+
+		saveClassesIndex(l);
 		return l;
 	}
 
@@ -1504,6 +1508,21 @@ aspect SourceAST_API {
     	*/
     	return l;
     } 
+    
+    private int ClassDecl.classesIndex = -1;
+    public int ClassDecl.classesIndex() {
+    	return classesIndex;
+    }
+    public void ClassDecl.setClassesIndex(int i) {
+    	classesIndex = i;
+    }
+    
+    protected static void FullClassDecl.saveClassesIndex(ArrayList<ClassDecl> list) {
+    	int i = 0;
+    	for (ClassDecl cd : list)
+    		cd.setClassesIndex(i++);
+    }
+
 
 	syn lazy ArrayList<ImportClause> ClassDecl.imports() = new ArrayList<ImportClause>();
 	eq FullClassDecl.imports() {

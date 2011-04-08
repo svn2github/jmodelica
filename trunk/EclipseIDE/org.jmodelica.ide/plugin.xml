@@ -235,6 +235,16 @@
             Shows an outline of the instance trees for all classes in the current file.
          </description>
       </view>
+      <view
+            category="org.jmodelica.ide.view.category"
+            class="org.jmodelica.ide.outline.ClassOutlineView"
+            icon="resources/icons/class_outline.gif"
+            id="org.jmodelica.ide.view.outline.class"
+            name="Class Outline">
+         <description>
+            Shows an outline of the class hierarchy in the current project.
+         </description>
+      </view>
    </extension>
    <extension
          point="org.eclipse.ui.perspectives">

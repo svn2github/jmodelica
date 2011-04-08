@@ -30,4 +30,8 @@ aspect Proxy {
     	getSourceRoot().getProgram().simpleLookupClassDefaultScope(name);
     eq Proxy.getChild().simpleLookupClassGlobalScope(String name) = 
     	getSourceRoot().getProgram().simpleLookupClassDefaultScope(name);
+    	
+    // Outline.jrag
+   eq Proxy.getChild().declaredIndex(ClassDecl cd) = 0;
+    
 }

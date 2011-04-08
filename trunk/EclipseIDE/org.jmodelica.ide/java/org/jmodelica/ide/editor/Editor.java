@@ -262,7 +262,7 @@ protected void doSetInput(IEditorInput input) throws CoreException {
         update();
     
     if (getPartName().equals("package.mo")) 
-    	setPartName(file.iFile().getParent().getName() + "/package.mo");
+    	setPartName(file.getDirName() + "/package.mo");
 }
 
 @Override

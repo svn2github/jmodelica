@@ -289,7 +289,7 @@
 			<sequential>
 				<java classname="org.jmodelica.optimica.compiler.JunitGenerator" 
 						classpath=".:bin/OptimicaCompiler.jar:bin/util.jar:bin/graphs.jar:${beaver_dir}/lib/beaver.jar:bin/util.jar:../ModelicaCompiler/bin/ModelicaCompiler.jar" 
-						fork="true" failonerror="true" dir="." maxmemory="512M">
+						fork="true" failonerror="true" dir="." maxmemory="768M">
 					<arg value="@{gen-test.path}" />
 					<arg value="${test_junit-gen_dir}/org/jmodelica/test/junitgenerated" />
 				</java>

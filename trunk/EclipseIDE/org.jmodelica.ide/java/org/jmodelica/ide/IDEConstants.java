@@ -85,7 +85,9 @@ public class IDEConstants {
 	public static final String WIZARD_PROJECT_ID = WIZARD_ID + ".project";
 	
 	public static final String VIEW_ID = PLUGIN_ID + ".view";
-	public static final String INSTANCE_OUTLINE_VIEW_ID = VIEW_ID + ".outline.instance";
+	public static final String OUTLINE_ID = VIEW_ID + ".outline";
+	public static final String INSTANCE_OUTLINE_VIEW_ID = OUTLINE_ID + ".instance";
+	public static final String CLASS_OUTLINE_VIEW_ID = OUTLINE_ID + ".class";
 
 	public static final String[] CONFIGURED_CONTENT_TYPES;
 	

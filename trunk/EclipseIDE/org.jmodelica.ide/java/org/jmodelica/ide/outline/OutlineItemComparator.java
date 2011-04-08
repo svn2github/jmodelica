@@ -47,14 +47,19 @@ public class OutlineItemComparator extends ViewerSorter implements IPreferenceCh
 	public int category(Object element) {
 		if (element instanceof ASTNode<?>)
 			return ((ASTNode<?>) element).outlineCategory();
-		if (element instanceof ExplorerContentProvider.LibrariesList) 
-			return -2;
+		if (element instanceof LibrariesList) 
+			return -5;
 		return super.category(element);
 	}
 
 	@SuppressWarnings("unchecked")
 	public int compare(Viewer viewer, Object e1, Object e2) {
-		return cmp.compare(viewer, e1, e2);
+		int cat1 = category(e1);
+        int cat2 = category(e2);
+        if (cat1 != cat2) 
+			return cat1 - cat2;
+        else
+        	return cmp.compare(viewer, e1, e2);
 	}
 
 	public void preferenceChange(PreferenceChangeEvent event) {

@@ -14,6 +14,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 import org.jmodelica.ide.ui.ImageLoader;
+import java.util.Arrays;
+import org.jmodelica.ide.outline.LibrariesList;
 
 aspect Outline {
 	/*
@@ -103,28 +105,39 @@ aspect Outline {
 	/*
 	 * Lets us reorder nodes in outline. Higher category means show node later in tree.
 	 */
-	syn int ASTNode.outlineCategory() = 0;
+	syn int ASTNode.outlineCategory()  = 0;
 	eq BaseClassDecl.outlineCategory() = -1;
 	eq InstClassDecl.outlineCategory() = -1;
+	eq LibClassDecl.outlineCategory()  = name().equals("Modelica") && isTopLevel() ? -2 : -1;
 	
 	/*
      * To be able to sort nodes by declared order. We only need this for nodes that are shown in an outline.
      */
-    syn int ASTNode.declareOrder() = 0;
-    eq InstNode.declareOrder()  = myIndex();
-    eq LibNode.declareOrder()   = myIndex();
-    eq ClassDecl.declareOrder() = myIndex();
+    syn int ASTNode.declareOrder()      = 0;
+    eq ComponentDecl.declareOrder()     = myDeclaredIndex();
+    eq InstComponentDecl.declareOrder() = myDeclaredIndex();
+    eq InstClassDecl.declareOrder()     = myDeclaredIndex();
+    eq ClassDecl.declareOrder()         = declaredIndex(this);
     
-    // TODO: Define for more cases
-    inh int InstNode.myIndex();
-    inh int LibNode.myIndex();
-    inh int ClassDecl.myIndex();
-    eq InstNode.getInstClassDecl(int i).myIndex() = i;
-    eq InstNode.getInstComponentDecl(int i).myIndex() = i;
-    eq Program.getLibNode(int i).myIndex() = i;
-    eq LibClassDecl.getLibNode(int i).myIndex() = i;
-    eq FullClassDecl.getClassDecl(int i).myIndex() = i;
-    eq BaseNode.getChild().myIndex() = 0;
+    inh int ClassDecl.declaredIndex(ClassDecl cd);
+    eq FullClassDecl.getChild().declaredIndex(ClassDecl cd) {
+    	if (cd.classesIndex() < 0)
+    		classes();
+    	return cd.classesIndex();
+    }
+    eq Program.getLibNode(int i).declaredIndex(ClassDecl cd)            = i;
+    eq Program.getUnstructuredEntity(int i).declaredIndex(ClassDecl cd) = i + getNumLibNode();
+    eq Program.getChild().declaredIndex(ClassDecl cd)                   = 0;
+    eq BadDefinition.getChild().declaredIndex(ClassDecl cd)             = 0;
+
+    inh int InstNode.myDeclaredIndex();
+    inh int ClassDecl.myDeclaredIndex();
+    inh int ComponentDecl.myDeclaredIndex();
+    eq InstRoot.getInstClassDecl(int i).myDeclaredIndex()      = i;
+    eq InstNode.getInstClassDecl(int i).myDeclaredIndex()      = i;
+    eq InstNode.getInstComponentDecl(int i).myDeclaredIndex()  = i;
+    eq FullClassDecl.getComponentDecl(int i).myDeclaredIndex() = i;
+    eq BaseNode.getChild().myDeclaredIndex()                   = 0;
     
     // To compare nodes for opening paths and setting selections
     syn String ASTNode.outlineId()   = Integer.toHexString(hashCode());
@@ -132,27 +145,43 @@ aspect Outline {
     eq ComponentDecl.outlineId()     = name();
     eq InstClassDecl.outlineId()     = name();
     eq InstComponentDecl.outlineId() = name();
+
+	syn lazy org.jmodelica.ide.outline.LibrariesList SourceRoot.librariesList() = 
+		new org.jmodelica.ide.outline.LibrariesList(this);
 	
-	/*
-	 * We need a connection to the "Loaded Libraries" node in the Project Explorer
-	 */
-	private org.jmodelica.ide.outline.ExplorerContentProvider.LibrariesList ClassDecl.librariesList;
-	public org.jmodelica.ide.outline.ExplorerContentProvider.LibrariesList ASTNode.getLibrariesList() {
+	private org.jmodelica.ide.outline.LibrariesList ClassDecl.librariesList;
+	public org.jmodelica.ide.outline.LibrariesList ASTNode.getLibrariesList() {
 		return null;
 	}
-	public org.jmodelica.ide.outline.ExplorerContentProvider.LibrariesList ClassDecl.getLibrariesList() {
+	public org.jmodelica.ide.outline.LibrariesList ClassDecl.getLibrariesList() {
 		return librariesList;
 	}
-	public void ASTNode.setLibrariesList(org.jmodelica.ide.outline.ExplorerContentProvider.LibrariesList librariesList) {
+	public void ASTNode.setLibrariesList(org.jmodelica.ide.outline.LibrariesList librariesList) {
 	}
-	public void ClassDecl.setLibrariesList(org.jmodelica.ide.outline.ExplorerContentProvider.LibrariesList librariesList) {
+	public void ClassDecl.setLibrariesList(org.jmodelica.ide.outline.LibrariesList librariesList) {
 		this.librariesList = librariesList;
 	}
 	
-	/*
-	 * InstNodes doesn't have their classes as children... why? 
-	 * Anyway we need new hasVisibleChildren() & outlineChildren().
-	 */
+	eq SourceRoot.hasVisibleChildren() {
+		for (StoredDefinition file : getProgram().getUnstructuredEntitys()) 
+			if (file.getElements().getNumChild() > 0)
+				return true;
+		return librariesList().hasFiltered();
+	}
+	eq SourceRoot.outlineChildren() {
+    	ArrayList list = new ArrayList();
+    	org.jmodelica.ide.outline.LibrariesList libs = librariesList();
+    	list.add(libs);
+    	list.addAll(getProgram().getUnstructuredEntitys().outlineChildren());
+    	if (libs.hasFiltered())
+    		list.addAll(Arrays.asList(libs.getFiltered()));
+     	return list;
+	}
+	
+	eq LibNode.hasVisibleChildren() = getStoredDefinition().getNumElement() > 0;
+	
+	eq LibClassDecl.outlineChildren() = classes();
+	
    	eq InstNode.hasVisibleChildren() {
    		/* Don't descend into error nodes. */
    		if (isError())

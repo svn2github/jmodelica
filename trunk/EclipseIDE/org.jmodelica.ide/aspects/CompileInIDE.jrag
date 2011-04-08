@@ -14,6 +14,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import java.net.URI;
@@ -41,15 +42,47 @@ aspect CompileInIDE {
 			setFileName(file.getRawLocation().toOSString());
 	}
 	public IFile StoredDefinition.getFile() {
-		String path = fileName();
-		IWorkspaceRoot workspace = ResourcesPlugin.getWorkspace().getRoot();
-		if (path.startsWith(workspace.getRawLocation().toOSString())) {
-			URI uri = new File(path).toURI();
-			IFile files[] = workspace.findFilesForLocationURI(uri);
-			if (files.length > 0)
-				file = files[0];
+		if (file == null) {
+			String path = fileName();
+			IWorkspaceRoot workspace = ResourcesPlugin.getWorkspace().getRoot();
+			if (path.startsWith(workspace.getRawLocation().toOSString())) {
+				URI uri = new File(path).toURI();
+				IFile files[] = workspace.findFilesForLocationURI(uri);
+				if (files.length > 0)
+					file = files[0];
+			}
 		}
 		return file;
+	}
+	
+	/*
+	 * Connects each SourceRoot to the project it is associated with.
+	 */
+	private IProject SourceRoot.project = null;
+	public void SourceRoot.setProject(IProject proj) {
+		project = proj;
+	}
+	public IProject SourceRoot.getProject() {
+		return project;
+	}
+	
+	public void ASTNode.forceRewrites() {
+		for (ASTNode child : this)
+			child.forceRewrites();
+	}
+	
+	/*
+	 * Workaround for bug where a node replaced in the ast by recompilation is an NTA.
+	 * The base replaceWith() fails in this case.
+	 */
+	public void StoredDefinition.replaceWith(IASTNode node) {
+		ASTNode parent = getParent();
+		if (parent instanceof LibNode) {
+			LibNode ln = (LibNode) parent;
+			ln.setChild((ASTNode) node, ln.getStoredDefinitionChildPosition());
+		} else {
+			super.replaceWith(node);
+		}
 	}
 
 	/*

@@ -33,10 +33,15 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.jastadd.plugin.compiler.ast.IJastAddNode;
 import org.jastadd.plugin.ui.view.AbstractBaseContentOutlinePage;
+import org.jastadd.plugin.ui.view.JastAddContentProvider;
+import org.jastadd.plugin.ui.view.JastAddLabelProvider;
 import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.ide.editor.Editor;
 
 public abstract class OutlinePage extends AbstractBaseContentOutlinePage {
+	
+	public static final JastAddLabelProvider JASTADD_LABEL = new JastAddLabelProvider();
+	public static final JastAddContentProvider JASTADD_CONTENT = new JastAddContentProvider();
 
 	private OutlineItemComparator comparator;
 	private IElementComparer comparer;

@@ -18,7 +18,8 @@ import org.jmodelica.ide.helpers.Util;
 
 aspect Util {
 	
-	inh lazy StoredDefinition ASTNode.getDefinition();
+	syn StoredDefinition ASTNode.getDefinition() = null;
+	inh lazy StoredDefinition BaseNode.getDefinition();
 	eq StoredDefinition.getChild(int index).getDefinition() = this;
 	eq InstNode.getInstClassDecl(int index).getDefinition() = 
 			getInstClassDecl(index).getClassDecl().getDefinition();
@@ -38,7 +39,12 @@ aspect Util {
        if (getNumChild() > 0)
            return getChild(getNumChild() - 1);
        return null; 
-   } 
+   }
+   
+   inh boolean ClassDecl.isTopLevel();
+   eq ClassDecl.getChild().isTopLevel()  = false;
+   eq SourceRoot.getChild().isTopLevel() = true;
+   eq Proxy.getChild().isTopLevel()      = true;
    
 	//I hate double negating things :p
 	public boolean InstClassDecl.isKnown() {

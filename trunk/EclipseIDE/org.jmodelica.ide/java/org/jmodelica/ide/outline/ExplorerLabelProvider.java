@@ -12,21 +12,17 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package org.jmodelica.ide.outline;
 
 import org.eclipse.swt.graphics.Image;
 import org.jastadd.plugin.ui.view.JastAddLabelProvider;
-import org.jmodelica.ide.outline.ExplorerContentProvider.LibrariesList;
 import org.jmodelica.ide.ui.ImageLoader;
 
-public class ExplorerLabelProvider extends JastAddLabelProvider {
-
-	@Override
-	public Image getImage(Object element) {
-		if (element instanceof LibrariesList)
-			return ImageLoader.getImage(ImageLoader.LIBRARY_IMAGE);
-		return super.getImage(element);
+public class ExplorerLabelProvider extends OutlineAwareLabelProvider {
+	
+	public ExplorerLabelProvider() {
+		super(OutlinePage.JASTADD_LABEL);
 	}
 
 }

@@ -47,14 +47,21 @@ public abstract class OutlineView extends PageBookView implements ISelectionProv
 
 	@Override
 	protected PageRec doCreatePage(IWorkbenchPart part) {
+		IContentOutlinePage page = setupOutlinePage(part);
+		if (page != null) 
+			return new PageRec(part, page);
+        // There is no content outline
+        return null;
+	}
+	
+	protected IContentOutlinePage setupOutlinePage(IWorkbenchPart part) {
 		if (part instanceof Editor) {
 			IContentOutlinePage page = getOutlinePage((Editor) part);
 			if (page instanceof IPageBookViewPage) 
 				initPage((IPageBookViewPage) page);
 			page.createControl(getPageBook());
-			return new PageRec(part, page);
+			return page;
 		}
-        // There is no content outline
         return null;
 	}
 

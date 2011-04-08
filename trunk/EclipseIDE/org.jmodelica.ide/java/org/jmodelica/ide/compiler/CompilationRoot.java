@@ -40,19 +40,23 @@ public class CompilationRoot {
 
 	private final SourceRoot root;
 	private final List<StoredDefinition> list;
+	
+	private boolean rewritten;
 
 	/**
 	 * Create an empty CompilationRoot
 	 */
 	public CompilationRoot(IProject project) {
-		this.list = new List<StoredDefinition>();
-		this.root = new SourceRoot(new Program(list));
+		list = new List<StoredDefinition>();
+		root = new SourceRoot(new Program(list));
 
 		parser.setReport(errorReport);
 
 		root.options = new IDEOptions(project);
 		root.getProgram().getInstProgramRoot().options = root.options;
+		root.setProject(project);
 
+		rewritten = false;
 	}
 
 	/**
@@ -63,10 +67,16 @@ public class CompilationRoot {
 	 *         successful compilation has been performed.
 	 */
 	public StoredDefinition getStoredDefinition() {
-
 		assert list.getNumChild() > 0;
 
+		forceRewrites();
 		return list.getNumChild() > 0 ? list.getChild(0) : null;
+	}
+	
+	protected void forceRewrites() {
+		if (!rewritten)
+			root.forceRewrites();
+		rewritten = true;
 	}
 
 	protected StoredDefinition annotatedDefinition(StoredDefinition def, IFile file) {
@@ -81,6 +91,7 @@ public class CompilationRoot {
 	 * Returns internal SourceRoot.
 	 */
 	public SourceRoot root() {
+		forceRewrites();
 		return root;
 	}
 
@@ -133,11 +144,11 @@ public class CompilationRoot {
 			addBadDef(file);
 		} finally {
 			errorReport.cleanUp();
+			rewritten = false;
 
 			try {
 				reader.close();
 			} catch (IOException e) {
-				e.printStackTrace();
 			}
 		}
 	}
@@ -154,6 +165,7 @@ public class CompilationRoot {
 
 	private void addBadDef(IFile file) {
 		list.add(annotatedDefinition(new BadDefinition(), file));
+		rewritten = false;
 	}
 
 }

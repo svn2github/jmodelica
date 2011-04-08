@@ -149,4 +149,14 @@ public class EditorFile {
 				.getRawLocation().toOSString();
 	}
 
+	/**
+	 * Returns the name of the directory containing the file.
+	 */
+	public String getDirName() {
+		if (file != null)
+			return file.getParent().getName();
+		String[] parts = path.split("[\\/]");
+		return parts[parts.length - 2];
+	}
+
 }
