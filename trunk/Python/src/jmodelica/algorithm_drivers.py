@@ -864,7 +864,9 @@ class AssimuloAlgOptions(OptionBase):
             Default: 1.0e-6
         
         maxord  --
-            The maximum order of the solver. Can range between 1 to 5.
+            The maximum order of the solver. Can range between 1 to 5. Note,
+            when simulating sensitivities the maximum order is limited to 4.
+            This is a temporary restriction.
             Default: 5
             
         sensitivity --
@@ -1051,6 +1053,11 @@ class AssimuloAlg(AlgorithmBase):
                 self.solver_options['store_cont']
             except KeyError:
                 self.solver_options['store_cont'] = True
+                
+        if self.sensitivity and self.solver_options['maxord']==5:
+            logging.warning("Maximum order when using IDA for simulating "
+                    "sensitivities is currently limited to 4.")
+            self.solver_options['maxord']=4
         
     def _set_solver_options(self):
         """ 

@@ -1522,7 +1522,7 @@ class TestInitializeModelFromData(object):
         self.model = JMUModel(jmi.get_jmu_name(self._cpath))
         self.res = self.model.simulate(0,10)
 
-    @testattr(stddist = True)
+    @testattr(ipopt = True)
     def test_initialize_from_data1(self):
        """
        Test that the initalization is performed correctly.
@@ -1533,7 +1533,7 @@ class TestInitializeModelFromData(object):
        N.testing.assert_almost_equal(res_true,res)    
 
 
-    @testattr(stddist = True)
+    @testattr(ipopt = True)
     def test_initialize_from_data2(self):
        """
        Test that the initalization is performed correctly.
