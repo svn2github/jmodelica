@@ -41,6 +41,7 @@ def run_demo(with_plots=True):
     opts = model.simulate_options()
     opts['IDA_options']['atol'] = [1.0e-8, 1.0e-14, 1.0e-6]
     opts['IDA_options']['sensitivity'] = True
+    opts['IDA_options']['write_cont'] = False
     opts['ncp'] = 400
 
     #Simulate

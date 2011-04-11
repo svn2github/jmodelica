@@ -873,6 +873,11 @@ class AssimuloAlgOptions(OptionBase):
             If set to True, sensitivities for the states with respect to 
             parameters set to free in the model will be calculated.
             Default: False
+            
+        write_cont --
+            Continuous writing of the result file instead. Currently only
+            supported when "sensitivity" is set to True.
+            Default: False
     
     Options for CVode::
     
@@ -900,7 +905,8 @@ class AssimuloAlgOptions(OptionBase):
             'write_scaled_result':False,
             'result_file_name':'',
             'IDA_options':{'atol':1.0e-6,'rtol':1.0e-6,
-                           'maxord':5,'sensitivity':False},
+                           'maxord':5,'sensitivity':False,
+                           'write_cont':False},
             'CVode_options':{'discr':'BDF','iter':'Newton',
                              'atol':1.0e-6,'rtol':1.0e-6}
             }
@@ -1101,7 +1107,9 @@ class AssimuloAlg(AlgorithmBase):
         
             The AssimuloSimResult object.
         """
-        write_data(self.simulator,self.write_scaled_result,self.result_file_name)
+        if not self.probl.write_cont:
+            write_data(self.simulator,self.write_scaled_result, self.result_file_name)
+        #write_data(self.simulator,self.write_scaled_result,self.result_file_name)
         # load result file
         res = ResultDymolaTextual(self.result_file_name)
         

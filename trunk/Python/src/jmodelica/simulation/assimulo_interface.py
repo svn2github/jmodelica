@@ -481,6 +481,8 @@ class JMIODE(Explicit_Problem):
             raise JMIModel_Exception(
                 'There can be no algebraic variables when using an ODE solver.')
         
+        self.write_cont = False #Continuous writing false (True not supported)
+        
         #Used for determine if there are discontinuities
         [f_nbr, g_nbr] = self._model.jmimodel.dae_get_sizes() 
         
@@ -575,6 +577,21 @@ class JMIODE(Explicit_Problem):
         self._model.t = self.t0 #Set time to the default value
         
         self.y0 = self._model.real_x
+        
+    def _set_write_cont(self, cont):
+        if cont == True:
+            raise JMIModel_Exception("Continuous writing of the result file is "
+                                     "currently not supported for this option.")
+        self.__write_cont = cont
+        
+    def _get_write_cont(self):
+        return self.__write_cont
+    
+    write_cont = property(_get_write_cont, _set_write_cont, doc = 
+    """
+    Property for accessing the values should be written to the file continuously 
+    during the simulation.
+    """)
  
     
 class JMIDAE(Implicit_Problem):
@@ -614,6 +631,7 @@ class JMIDAE(Implicit_Problem):
         self.max_eIter = 50 #Maximum number of event iterations allowed.
         self.eps = 1e-9 #Epsilon for adjusting the event indicator.
         self.log_events = False #Are we to log the events?
+        self.write_cont = False #Continuous writing false (True not supported)
         
         if self._model.has_cppad_derivatives():
             self.jac = self.j #Activates the jacobian
@@ -943,7 +961,22 @@ class JMIDAE(Implicit_Problem):
     """
     Property for accessing the epsilon used for adjusting the event indicators.
     """)
-
+    
+    def _set_write_cont(self, cont):
+        if cont == True:
+            raise JMIModel_Exception("Continuous writing of the result file is "
+                                    "currently not supported for this option.")
+        self.__write_cont = cont
+        
+    def _get_write_cont(self):
+        return self.__write_cont
+    
+    write_cont = property(_get_write_cont, _set_write_cont, doc = 
+    """
+    Property for accessing the values should be written to the file continuously 
+    during the simulation.
+    """)
+    
     def initiate(self,solver):
         """
         Initiates the problem.
@@ -1065,6 +1098,10 @@ class JMIDAESens(Implicit_Problem):
         if self._model.has_cppad_derivatives():
             self.jac = self.j #Activates the jacobian
         
+        #Default values
+        self.write_cont = False #Continuous writing
+        self.export = io.ResultWriterDymolaSensitivity(model)
+        
         #Determine the result file name
         if result_file_name == '':
             self.result_file_name = model.get_name()+'_result.txt'
@@ -1080,6 +1117,7 @@ class JMIDAESens(Implicit_Problem):
         self._x_nbr = len(self._model.real_x) #Number of differentiated
         self._w_nbr = len(self._model.real_w) #Number of algebraic
         self._dx_nbr = len(self._model.real_dx) #Number of derivatives
+        self._write_header = True
         
         #Used for logging
         self._logLevel = logging.CRITICAL
@@ -1176,14 +1214,51 @@ class JMIDAESens(Implicit_Problem):
         """
         Post processing (stores the time points and the sensitivity result).
         """
-        solver.t  += [t]
-        solver.y  += [y]
-        solver.yd += [yd]
+        if self.write_cont:
+            if self._write_header:
+                self._write_header = False
+                self.export.write_header(file_name=self.result_file_name)
+                
+            p_data = []
+            for i in range(self._p_nbr):
+                p_data += [solver.interpolate_sensitivity(t, 0, i)]
+            
+            # extends the time array with the states columnwise
+            data = N.append(t,yd[0:len(self._model.real_dx)])
+            data = N.append(data, y[0:len(self._model.real_x)])
+            if self.input!=None:
+                data = N.append(data, self.input[1].eval(t)[0,:])
+            data = N.append(data, y[len(self._model.real_x):len(self._model.real_x)+len(self._model.real_w)])
+            
+            for i in range(len(p_data)):
+                data = N.append(data, p_data[i])
+            
+            self.export.write_point(data)
+        else:
+            solver.t  += [t]
+            solver.y  += [y]
+            solver.yd += [yd]
+            
+            #Store the sensitivity matrix
+            for i in range(self._p_nbr):
+                self._sens_matrix[i] += [solver.interpolate_sensitivity(t, 0, i)]
+    
+    def finalize(self, solver):
+        if self.write_cont:
+            self.export.write_finalize()
+    
+    def _set_write_cont(self, cont):
+        self.__write_cont = cont
         
-        #Store the sensitivity matrix
-        for i in range(self._p_nbr):
-            self._sens_matrix[i] += [solver.interpolate_sensitivity(t, 0, i)]
+    def _get_write_cont(self):
+        return self.__write_cont
         
+    write_cont = property(_get_write_cont, _set_write_cont, doc = 
+    """
+    Property for accessing the values should be written to the file continuously 
+    during the simulation.
+    """)
+    
     def get_sens_result(self):
         """
         Returns the sensitivity results together with the names.

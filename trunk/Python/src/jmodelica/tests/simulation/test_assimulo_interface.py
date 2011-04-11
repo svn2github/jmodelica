@@ -1223,7 +1223,7 @@ class Test_JMI_DAE_Sens:
         
         ##Store data continuous during the simulation, important when solving a 
         ##problem with sensitivites. FIXED INTERNALLY
-        #opts['IDA_options']['store_cont']=True
+        opts['IDA_options']['write_cont']=True
         
         res = model.simulate(final_time=60, input=input_object, options=opts)
 
@@ -1271,6 +1271,30 @@ class Test_JMI_DAE_Sens:
         opts = model.simulate_options()
         
         opts['IDA_options']['sensitivity'] = True
+        
+        res = model.simulate(options=opts)
+        
+        x1 = res['dx1/da']
+        x2 = res['dx2/da']
+        x3 = res['dx3/da']
+        x4 = res['dx4/da']
+        x5 = res['dx5/da']
+        
+        nose.tools.assert_almost_equal(x2[-1], 0.000000, 4)
+        nose.tools.assert_almost_equal(x3[-1], 1.000000, 4)
+        nose.tools.assert_almost_equal(x4[-1], -1.000000,4)
+        nose.tools.assert_almost_equal(x1[-1], x5[-1], 4)
+        
+        #The same test using continuous writing
+        
+        jmu_name = 'SensitivityTests_SensTest1.jmu'
+        
+        model = JMUModel(jmu_name)
+        
+        opts = model.simulate_options()
+        
+        opts['IDA_options']['sensitivity'] = True
+        opts['IDA_options']['write_cont'] = True
         
         res = model.simulate(options=opts)
         
