@@ -109,6 +109,13 @@ aspect TransformCanonical {
 			computeMatchingsAndBLT();
 		}
 	    
+	   	root().flushAllRecursive();	
+	    
+	    if (root().options.getBooleanOption("enable_tearing")) {
+			// Equations are added as part of this this method
+			computeTearings();
+		}
+	    
 	    root().flushAllRecursive();
 		
 	}
@@ -735,6 +742,10 @@ aspect TransformCanonical {
 			daeInitBLT = g.computeBLT();
 			log.info(daeInitBLT.toString());
 		}
+	}	
+	
+	public void FClass.computeTearings() {
+		System.out.println("About to do tearing!")
 	}	
 	
 	syn lazy ArrayList<String> FClass.structuralErrors() {
