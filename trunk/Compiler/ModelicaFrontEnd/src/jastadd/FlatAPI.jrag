@@ -178,9 +178,17 @@ aspect FlatAPI {
 	syn int FClass.independentRealConstantsOffset() = 0;
 	syn int FClass.independentIntegerConstantsOffset() = 
 		numIndependentRealConstants();	
+	syn int FClass.independentEnumConstantsOffset() =
+		independentIntegerConstantsOffset() + 	  
+		numIndependentIntegerConstants();	
+	syn int FClass.IndependentBooleanConstantsOffset() =
+		independentEnumConstantsOffset() + 	  
+		numIndependentEnumConstants();	
+		/*
 	syn int FClass.independentBooleanConstantsOffset() = 
 		numIndependentRealConstants() + 
 		numIndependentIntegerConstants();	
+		*/
 	syn int FClass.independentStringConstantsOffset() = 
 		numIndependentRealConstants() + 
 		numIndependentIntegerConstants()
@@ -192,9 +200,17 @@ aspect FlatAPI {
 	syn int FClass.dependentIntegerConstantsOffset() =
 		dependentRealConstantsOffset() + 	 
 		numDependentRealConstants();	
+	syn int FClass.dependentEnumConstantsOffset() =
+		dependentIntegerConstantsOffset() + 	  
+		numDependentIntegerConstants();	
+	syn int FClass.dependentBooleanConstantsOffset() =
+		dependentEnumConstantsOffset() + 	  
+		numDependentEnumConstants();	
+/*
 	syn int FClass.dependentBooleanConstantsOffset() =
 		dependentIntegerConstantsOffset() + 	  
 		numDependentIntegerConstants();	
+		*/
 	syn int FClass.dependentStringConstantsOffset() = 
 		dependentBooleanConstantsOffset() + 	  
 		+ numDependentBooleanConstants();
@@ -205,9 +221,18 @@ aspect FlatAPI {
 	syn int FClass.independentIntegerParametersOffset() =
 		independentRealParametersOffset() + 	 
 		numIndependentRealParameters();	
+	syn int FClass.independentEnumParametersOffset() =
+		independentIntegerParametersOffset() + 	  
+		numIndependentIntegerParameters();	
+	syn int FClass.independentBooleanParametersOffset() =
+		independentEnumParametersOffset() + 	  
+		numIndependentEnumParameters();	
+
+		/*
 	syn int FClass.independentBooleanParametersOffset() =
 		independentIntegerParametersOffset() + 	  
 		numIndependentIntegerParameters();	
+		*/
 	syn int FClass.independentStringParametersOffset() = 
 		independentBooleanParametersOffset() + 	  
 		+ numIndependentBooleanParameters();
@@ -218,9 +243,18 @@ aspect FlatAPI {
 	syn int FClass.dependentIntegerParametersOffset() =
 		dependentRealParametersOffset() + 	 
 		numDependentRealParameters();	
+
+	syn int FClass.dependentEnumParametersOffset() =
+		dependentIntegerParametersOffset() + 	  
+		numDependentIntegerParameters();	
+	syn int FClass.dependentBooleanParametersOffset() =
+		dependentEnumParametersOffset() + 	  
+		numDependentEnumParameters();	
+		/*
 	syn int FClass.dependentBooleanParametersOffset() =
 		dependentIntegerParametersOffset() + 	  
 		numDependentIntegerParameters();	
+		*/
 	syn int FClass.dependentStringParametersOffset() = 
 		dependentBooleanParametersOffset() + 	  
 		+ numDependentBooleanParameters();
@@ -2097,6 +2131,7 @@ aspect Sparsity {
 		for (FAbstractEquation fe : equations()) {
 			LinkedHashSet<FDerivativeVariable> vs = fe.derivativeVariables();
 			for (FVariable fv : vs) {
+				//System.out.println("*** " + fv.name() + " " + fv.indexInZ() + " " + derivativeVariablesOffset());
 				sp[fv.indexInZ()-derivativeVariablesOffset()].add(new Integer(i)); 
 			}
 			i++;

@@ -41,6 +41,9 @@ import org.xml.sax.SAXException;
 public class OptionRegistry {
 	
 		private enum DefOpt {
+			ENABLE_TEARING   ("enable_tearing", false, 
+					"If this option is set to true (default is true), tearing of equation systems is enabled." +
+					"converted to algebraic variables."),
 			CONV_FREE_DEP_PAR_TO_ALGS   ("convert_free_dependent_parameters_to_algebraics", true, 
 					"If this option is set to true (default is true), free dependent parameters are" +
 					"converted to algebraic variables."),

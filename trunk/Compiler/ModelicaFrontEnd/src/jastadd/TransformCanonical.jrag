@@ -745,7 +745,7 @@ aspect TransformCanonical {
 	}	
 	
 	public void FClass.computeTearings() {
-		System.out.println("About to do tearing!")
+		System.out.println("About to do tearing!");
 	}	
 	
 	syn lazy ArrayList<String> FClass.structuralErrors() {
