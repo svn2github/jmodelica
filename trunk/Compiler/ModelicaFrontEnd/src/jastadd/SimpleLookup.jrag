@@ -17,10 +17,11 @@
 aspect SimpleClassLookup {
 	
 	/*
-	 * Warning: The methods below are only a prototype and are currently not tested.
+	 * Warning: This is only a prototype and is currently not tested.
 	 *          Use with care.
 	 */
 
+	// TODO: Add javadoc
 
 	syn ClassDecl ExtendsClause.findClassDecl()     = getSuper().findClassDecl();
 	syn ClassDecl BaseComponentDecl.findClassDecl() = getClassName().findClassDecl();
@@ -35,13 +36,14 @@ aspect SimpleClassLookup {
 	inh ClassDecl FullClassDecl.simpleLookupClass(String name);
 	eq Dot.getRight().simpleLookupClass(String name)           = 
 		getLeft().findClassDecl().simpleLookupClassMemberScope(name);
-	eq GlobalAccess.getAccess().simpleLookupClass(String name) = simpleLookupClassGlobalScope(name);
-	eq FullClassDecl.getSuper().simpleLookupClass(String name) = simpleLookupClassLocalScope(name);
-	eq FullClassDecl.getChild().simpleLookupClass(String name) = simpleLookupClassDefaultScope(name);
-	eq Program.getChild().simpleLookupClass(String name)       = simpleLookupClassDefaultScope(name);
-	
+	eq GlobalAccess.getAccess().simpleLookupClass(String name)      = simpleLookupClassGlobalScope(name);
+	eq ImportClause.getPackageName().simpleLookupClass(String name) = simpleLookupClassGlobalScope(name);
+	eq FullClassDecl.getSuper().simpleLookupClass(String name)      = simpleLookupClassLocalScope(name);
+	eq FullClassDecl.getChild().simpleLookupClass(String name)      = simpleLookupClassDefaultScope(name);
+	eq Program.getChild().simpleLookupClass(String name)            = simpleLookupClassDefaultScope(name);
 	
 	inh ClassDecl Access.simpleLookupClassGlobalScope(String name);
+	inh ClassDecl ImportClause.simpleLookupClassGlobalScope(String name);
 	eq Program.getChild().simpleLookupClassGlobalScope(String name) = simpleLookupClassDefaultScope(name);
 	
 	
