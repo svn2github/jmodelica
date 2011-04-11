@@ -529,6 +529,11 @@ class RadauCollocator(CasadiCollocator):
         self.n_e = options['n_e']
         self.n_cp = options['n_cp']
         self.h = N.ones(self.n_e)/self.n_e;
+
+        self.initial_dae_constraints = []
+        self.dae_constraints = {}
+        self.collocation_constraints = {}
+        self.continuity_constraints = {}
         
         # Create the NLP problem
         self._create_nlp_variables()
@@ -605,11 +610,6 @@ class RadauCollocator(CasadiCollocator):
 
         # Equality constraints
         self.g = []
-
-        self.initial_dae_constraints = []
-        self.dae_constraints = {}
-        self.collocation_constraints = {}
-        self.continuity_constraints = {}
 
         z = []
         t = self.ocp.t0
