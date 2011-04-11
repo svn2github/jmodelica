@@ -59,7 +59,7 @@ except:
 try:
     import casadi
     from jmodelica.optimization.casadi_collocation import *
-    from jmodelica.optimization.casadi_polynomial import *
+    from jmodelica.optimization.polynomial import *
     casadi_present = True
 except:
     casadi_present = False
