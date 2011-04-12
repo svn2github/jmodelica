@@ -1253,7 +1253,43 @@ class Test_JMI_DAE_Sens:
         
         assert res.solver.usejac == True
         assert prob.j == prob.jac
+    
+    @testattr(assimulo = True)
+    def test_scaling(self):
+        """
+        This tests a simulation when scaling is ON and OFF.
+        """
+        jmu_name = compile_jmu("Englezos652", os.path.join(get_files_path()
+                        ,"Modelica","Englezos652.mop"),
+                        compiler_options={"enable_variable_scaling":False})
 
+        # Load a model instance into Python
+        model = JMUModel(jmu_name)
+
+        # Get and set the options
+        opts = model.simulate_options()
+        opts['IDA_options']['atol'] = 1.0e-9
+        opts['IDA_options']['rtol'] = 1.0e-9
+        opts['IDA_options']['sensitivity'] = True
+        opts['ncp'] = 400
+        
+        res_no_scale = model.simulate(final_time=1697000, options=opts)
+        
+        jmu_name = compile_jmu("Englezos652", os.path.join(get_files_path()
+                        ,"Modelica","Englezos652.mop"),
+                        compiler_options={"enable_variable_scaling":True})
+
+        # Load a model instance into Python
+        model = JMUModel(jmu_name)
+        
+        res_with_scale = model.simulate(final_time=1697000, options=opts)
+        
+        nose.tools.assert_almost_equal(res_with_scale['x1'][-1], 
+                                       res_no_scale['x1'][-1], 4)
+        
+        nose.tools.assert_almost_equal(res_with_scale['dx1/dk1'][-1], 
+                                       res_no_scale['dx1/dk1'][-1], 1)
+        
     @testattr(assimulo = True)
     def test_alias_variables(self):
         """

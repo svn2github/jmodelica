@@ -900,7 +900,13 @@ class ResultWriterDymolaSensitivity(ResultWriter):
         
         self._nvariables_without_sens = cnt_2
         
+        
+        sc = model.jmimodel.get_variable_scaling_factors()
+        self._sc = sc
+        z = model.z
+        
         sens_param_res = []
+        self._sens_sc = [] #Sensitivity scaling factors
         
         #Write sensitivity variables into the table (No alias, no parameters)
         for i,name in enumerate(sens_names):
@@ -924,6 +930,7 @@ class ResultWriterDymolaSensitivity(ResultWriter):
             else:
                 if not md.is_alias(var):
                     cnt_2 = cnt_2+1
+                    self._sens_sc += [self._sc[ref_var]/self._sc[ref_param]]
                     f.write('2 %d 0 -1 # ' % cnt_2 + name + '\n')
                 elif md.is_negated_alias(var):
                     f.write('2 -%d 0 -1 # ' % cnt_2 + name + '\n')
@@ -933,9 +940,6 @@ class ResultWriterDymolaSensitivity(ResultWriter):
         self._nvariables_total = cnt_2 #Store the number of variables
         f.write('\n')
 
-        sc = model.jmimodel.get_variable_scaling_factors()
-        self._sc = sc
-        z = model.z
 
         # Write data
         # Write data set 1
@@ -986,6 +990,7 @@ class ResultWriterDymolaSensitivity(ResultWriter):
         f = self._file
         rescale = self._rescale
         sc = self._sc
+        sens_sc = self._sens_sc
         n_parameters = self._n_parameters
 
         if self._npoints == 0:
@@ -1000,8 +1005,10 @@ class ResultWriterDymolaSensitivity(ResultWriter):
                 str_text = str_text + (" %12.12f" % data[1+j])
 
         for j in xrange(self._nvariables_total-self._nvariables_without_sens):
-            str_text = str_text + (" %12.12f" % data[j+self._nvariables_without_sens])
-        
+            if rescale:
+                str_text = str_text + (" %12.12f" %(data[j+self._nvariables_without_sens]*sens_sc[j]))
+            else:
+                str_text = str_text + (" %12.12f" % data[j+self._nvariables_without_sens])
         f.write(str_text+'\n')
         
         #Update number of points

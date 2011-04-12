@@ -1614,19 +1614,19 @@ class PseudoSpectral(CasadiCollocator):
             input_t = [self.vars[i]['t'] for i in PHASE]
             tfcn = casadi.SXFunction([input_t],[ts])
             tfcn.init()
-            input_res = [self.nlp_opt[self.var_indices[i][DISCR[-1]]['t']][0] for i in PHASE]
+            input_res = [self.xx_init[self.var_indices[i][DISCR[-1]]['t']][0] for i in PHASE]
             tfcn.setInput(N.array(input_res).flatten())
         elif (self.options['free_phases'] and len(PHASE) > 1):
             input_t = [self.vars[i]['t'] for i in PHASE[:-1]]
             tfcn = casadi.SXFunction([input_t],[ts])
             tfcn.init()
-            input_res = [self.nlp_opt[self.var_indices[i][DISCR[-1]]['t']][0] for i in PHASE[:-1]]
+            input_res = [self.xx_init[self.var_indices[i][DISCR[-1]]['t']][0] for i in PHASE[:-1]]
             tfcn.setInput(N.array(input_res).flatten())
         elif self.md.get_opt_finaltime_free():
             input_t = self.vars[PHASE[-1]]['t']
             tfcn = casadi.SXFunction([[input_t]],[ts])
             tfcn.init()
-            tfcn.setInput(self.nlp_opt[self.var_indices[PHASE[-1]][DISCR[-1]]['t']])
+            tfcn.setInput(self.xx_init[self.var_indices[PHASE[-1]][DISCR[-1]]['t']])
         else:
             tfcn = casadi.SXFunction([[]],[ts])
             tfcn.init()

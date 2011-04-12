@@ -204,6 +204,26 @@ class CasadiModel(object):
     def get_p(self):
         return self.p
     
+    def get_variability(self, variablename):
+        """ 
+        Get variability of variable. 
+            
+        Parameters::
+            
+            variablename --
+                The name of the variable.
+                    
+        Returns::
+        
+            The variability of the variable, CONTINUOUS(0), CONSTANT(1), 
+            PARAMETER(2) or DISCRETE(3).
+
+        Raises::
+        
+            XMLException if variable was not found.
+        """
+        return self.xmldoc.get_variability(variablename)
+    
     def get_pd_val(self):
         pd = []
         for p in self.var.d:

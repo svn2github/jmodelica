@@ -1111,6 +1111,9 @@ class JMIDAESens(Implicit_Problem):
         #Internal values
         self._parameter_names = [
             name[1] for name in self._model.get_p_opt_variable_names()]
+        self._parameter_valref = [
+            name[0] for name in self._model.get_p_opt_variable_names()]
+        self._parameter_pos = [jmi._translate_value_ref(x)[0] for x in self._parameter_valref]
         self._sens_matrix = [] #Sensitivity matrix
         self._f_nbr = f_nbr #Number of equations
         self._g_nbr = g_nbr #Number of event indicatiors
@@ -1126,14 +1129,14 @@ class JMIDAESens(Implicit_Problem):
         #Set the start values to the parameters.
         if self._parameter_names:
             self.p0 = N.array([])
-            for n in self._parameter_names:
-                self.p0 = N.append(self.p0, self._model.get(n))
+            for i,n in enumerate(self._parameter_names):
+                self.p0 = N.append(self.p0, self._model.z[self._parameter_pos[i]])
                 self._sens_matrix += [[]] 
         
             self._p_nbr = len(self.p0) #Number of parameters
         else:
             self._p_nbr = 0
-            
+
         self._log.debug('Number of parameters: ' +str(self._p_nbr))
         
     def f(self, t, y, yd, p=None):
@@ -1149,7 +1152,7 @@ class JMIDAESens(Implicit_Problem):
         #Set the free parameters
         if not p==None:
             for ind, val in enumerate(p):
-                self._model.set(self._parameter_names[ind],val)
+                self._model.z[self._parameter_pos[ind]] = val
             
         #Sets the inputs, if any
         if self.input!=None:
@@ -1174,7 +1177,7 @@ class JMIDAESens(Implicit_Problem):
         #Set the free parameters
         if not p==None:
             for ind, val in enumerate(p):
-                self._model.set(self._parameter_names[ind],val)
+                self._model.z[self._parameter_pos[ind]] = val
         
         #Sets the inputs, if any
         if self.input!=None:
