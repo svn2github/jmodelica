@@ -549,6 +549,7 @@ int jmi_func_cad_directional_dF(jmi_t *jmi, jmi_func_t *func, jmi_real_t *res,
  * @param jac (Output) The Jacobian
  *
  */
+
 int jmi_func_cad_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
 		int independent_vars, int* mask, jmi_real_t* jac) ;
 
@@ -560,6 +561,7 @@ int jmi_func_cad_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
  * @param n_nz (Output) The number of non-zero Jacobian entries.
  * @return Error code.
  */
+
 int jmi_func_cad_dF_n_nz(jmi_t *jmi, jmi_func_t *func, int* n_nz);
 
 /**
@@ -577,10 +579,11 @@ int jmi_func_cad_dF_n_nz(jmi_t *jmi, jmi_func_t *func, int* n_nz);
  * @return Error code.
  *
  */
+ 
 int jmi_func_cad_dF_nz_indices(jmi_t *jmi, jmi_func_t *func,
                            int independent_vars,
                            int *mask, int *row, int *col);
-                           
+                          
 
 /**
  * \brief Computes the number of columns and the number of non-zero
@@ -596,6 +599,7 @@ int jmi_func_cad_dF_nz_indices(jmi_t *jmi, jmi_func_t *func,
  * @param dF_n_nz (Output) The number of non-zeros of the resulting Jacobian.
  *
  */
+
 int jmi_func_cad_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity,
                     int independent_vars, int *mask,
 		    int *dF_n_cols, int *dF_n_nz);
@@ -611,6 +615,7 @@ int jmi_func_cad_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity,
  * @param dv Seed vector of size n_x + n_x + n_u + n_w.
  * @return Error code.
  */
+
 int jmi_func_fd_directional_dF(jmi_t *jmi, jmi_func_t *func, jmi_real_t *res,
 			 jmi_real_t *dF, jmi_real_t* dv);
 
@@ -626,6 +631,7 @@ int jmi_func_fd_directional_dF(jmi_t *jmi, jmi_func_t *func, jmi_real_t *res,
  * @param jac (Output) The Jacobian
  *
  */
+
 int jmi_func_fd_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
 		int independent_vars, int* mask, jmi_real_t* jac) ;
 
@@ -637,6 +643,7 @@ int jmi_func_fd_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
  * @param n_nz (Output) The number of non-zero Jacobian entries.
  * @return Error code.
  */
+
 int jmi_func_fd_dF_n_nz(jmi_t *jmi, jmi_func_t *func, int* n_nz);
 
 /**
@@ -654,6 +661,7 @@ int jmi_func_fd_dF_n_nz(jmi_t *jmi, jmi_func_t *func, int* n_nz);
  * @return Error code.
  *
  */
+
 int jmi_func_fd_dF_nz_indices(jmi_t *jmi, jmi_func_t *func,
                            int independent_vars,
                            int *mask, int *row, int *col);
@@ -672,6 +680,7 @@ int jmi_func_fd_dF_nz_indices(jmi_t *jmi, jmi_func_t *func,
  * @param dF_n_nz (Output) The number of non-zeros of the resulting Jacobian.
  *
  */
+
 int jmi_func_fd_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity,
                     int independent_vars, int *mask,
 		    int *dF_n_cols, int *dF_n_nz);

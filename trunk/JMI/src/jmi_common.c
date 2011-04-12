@@ -205,6 +205,7 @@ int jmi_func_sym_directional_dF(jmi_t *jmi, jmi_func_t *func, jmi_real_t *res,
 		return -1;	
 }
 
+
 int jmi_func_cad_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
 		int independent_vars, int* mask, jmi_real_t* jac) {
 	
@@ -217,14 +218,29 @@ int jmi_func_cad_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
 	int dF_n_nz;
 	int n_colors;
 	int dF_n_eq = 0;
-	int max_columns  = func->cad_dF_col[func->cad_dF_n_nz-1]+1;
+	
+	int max_columns;
+	int *row_offs;
+	int *dF_row;
+	int *dF_col;
+	int *dF_col_independent_ind;
+	int *offs;
+	int *sparse_repr;
+	int *map_info;
+	int *map_off;
+	jmi_real_t *res;
+	jmi_real_t *dF;
+	jmi_real_t *dv;
+
+
+	max_columns  = func->cad_dF_col[func->cad_dF_n_nz-1]+1;
 	
 	jmi_func_cad_dF_dim(jmi, func, sparsity, independent_vars, mask, &dF_n_cols, &dF_n_nz);
 
-	int *row_offs = (int*)calloc(dF_n_cols, sizeof(int));
-	int *dF_row = (int*)calloc(dF_n_nz, sizeof(int));
-	int *dF_col = (int*)calloc(dF_n_nz, sizeof(int));
-	int *dF_col_independent_ind = (int*)calloc(dF_n_nz,sizeof(int));
+	row_offs = (int*)calloc(dF_n_cols, sizeof(int));
+	dF_row = (int*)calloc(dF_n_nz, sizeof(int));
+	dF_col = (int*)calloc(dF_n_nz, sizeof(int));
+	dF_col_independent_ind = (int*)calloc(dF_n_nz,sizeof(int));
 	
 	jmi_func_cad_dF_nz_indices(jmi, func, independent_vars, mask, dF_row, dF_col);
 	jmi_func_cad_dF_get_independent_ind(jmi, func, independent_vars, dF_col_independent_ind); 
@@ -237,10 +253,10 @@ int jmi_func_cad_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
 		}
 	}
 	
-	int *offs = (int*)calloc(dF_n_cols, sizeof(int));
-	int *sparse_repr = (int*)calloc(dF_n_cols, sizeof(int));
-	int *map_info = (int*)calloc(dF_n_nz, sizeof(int));
-	int *map_off = (int*)calloc(dF_n_cols, sizeof(int));
+	offs = (int*)calloc(dF_n_cols, sizeof(int));
+	sparse_repr = (int*)calloc(dF_n_cols, sizeof(int));
+	map_info = (int*)calloc(dF_n_nz, sizeof(int));
+	map_off = (int*)calloc(dF_n_cols, sizeof(int));
 	
 	jmi_dae_cad_color_graph(jmi, func, dF_n_cols, dF_n_nz, &dF_row[0], &dF_col[0], sparse_repr, offs, &n_colors, map_info, map_off);
 	
@@ -251,9 +267,9 @@ int jmi_func_cad_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
 	}
 	dF_n_eq++;
 	
-	jmi_real_t *res = (jmi_real_t*)calloc(dF_n_eq, sizeof(jmi_real_t));
-	jmi_real_t *dF = (jmi_real_t*)calloc(dF_n_eq, sizeof(jmi_real_t));
-	jmi_real_t *dv = (jmi_real_t*)calloc(max_columns, sizeof(jmi_real_t));
+	res = (jmi_real_t*)calloc(dF_n_eq, sizeof(jmi_real_t));
+	dF = (jmi_real_t*)calloc(dF_n_eq, sizeof(jmi_real_t));
+	dv = (jmi_real_t*)calloc(max_columns, sizeof(jmi_real_t));
 	for(i = 0; i < max_columns;i++){
 		dv[i] = 0;
 	}
@@ -338,6 +354,7 @@ int jmi_func_cad_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
 	return 0;
 }
 
+
 int jmi_func_cad_dF_n_nz(jmi_t *jmi, jmi_func_t *func, int* n_nz) {
 	*n_nz = func->cad_dF_n_nz;
 	return 0;
@@ -352,9 +369,7 @@ int jmi_func_cad_dF_nz_indices(jmi_t *jmi, jmi_func_t *func, int independent_var
 	int n_u = jmi->n_real_u;
 	int n_w = jmi->n_real_w;
 	int n_t = 0;
-	if(JMI_DER_T & independent_vars){
-		n_t = 1;
-	}
+
 	int max_n_nz = func->cad_dF_n_nz;
 	
 	int aim = 0;
@@ -363,6 +378,10 @@ int jmi_func_cad_dF_nz_indices(jmi_t *jmi, jmi_func_t *func, int independent_var
 	int j = 0;
 	
 	i = 0;
+
+	if(JMI_DER_T & independent_vars){
+		n_t = 1;
+	}
 	
 	aim+=n_p_opt;
 	while(func->cad_dF_col[i]<aim && aim != 0 && i < max_n_nz){
@@ -476,9 +495,7 @@ int jmi_func_cad_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity, int independ
 	int n_u = jmi->n_real_u;
 	int n_w = jmi->n_real_w;
 	int n_t = 0;
-	if(JMI_DER_T & independent_vars){
-		n_t = 1;
-	}
+
 	int n_cols = 0;
 	
 	int max_n_nz = func->cad_dF_n_nz;
@@ -486,6 +503,10 @@ int jmi_func_cad_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity, int independ
 	int aim = 0;
 	int i = 0;
 	int j = 0;
+
+	if(JMI_DER_T & independent_vars){
+		n_t = 1;
+	}
 	
 	aim+=n_p_opt;
 	while(func->cad_dF_col[i]<aim && aim != 0 && i < max_n_nz){
@@ -577,7 +598,6 @@ int jmi_func_cad_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity, int independ
 	return 0;
 }
 
-
 int jmi_func_fd_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
 		int independent_vars, int* mask, jmi_real_t* jac) {
 	int i;
@@ -588,13 +608,18 @@ int jmi_func_fd_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
 	int dF_n_nz;
 	int dF_n_eq = 0;
 	int max_columns = func->cad_dF_col[func->cad_dF_n_nz-1]+1;
-	jmi_func_cad_dF_dim(jmi, func, sparsity, independent_vars, mask, &dF_n_cols, &dF_n_nz);
+	
 	
 	int *row_offs = (int*)calloc(dF_n_cols, sizeof(int));
 	int *dF_row = (int*)calloc(dF_n_nz, sizeof(int));
 	int *dF_col = (int*)calloc(dF_n_nz, sizeof(int));
 	int *dF_col_independent_ind = (int*)calloc(dF_n_nz,sizeof(int));
-	
+
+	jmi_real_t *res;
+	jmi_real_t *dF;
+	jmi_real_t *dv;
+
+	jmi_func_cad_dF_dim(jmi, func, sparsity, independent_vars, mask, &dF_n_cols, &dF_n_nz);	
 	jmi_func_cad_dF_nz_indices(jmi, func, independent_vars, mask, dF_row, dF_col);
 	jmi_func_cad_dF_get_independent_ind(jmi, func, independent_vars, dF_col_independent_ind); 
 	j = 0;
@@ -611,9 +636,9 @@ int jmi_func_fd_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
 	}
 	dF_n_eq++;
 	
-	jmi_real_t *res = (jmi_real_t*)calloc(dF_n_eq, sizeof(jmi_real_t));
-	jmi_real_t *dF = (jmi_real_t*)calloc(dF_n_eq, sizeof(jmi_real_t));
-	jmi_real_t *dv = (jmi_real_t*)calloc(max_columns, sizeof(jmi_real_t));
+	res = (jmi_real_t*)calloc(dF_n_eq, sizeof(jmi_real_t));
+	dF = (jmi_real_t*)calloc(dF_n_eq, sizeof(jmi_real_t));
+	dv = (jmi_real_t*)calloc(max_columns, sizeof(jmi_real_t));
 	for(i = 0; i < max_columns;i++){
 		dv[i] = 0;
 	}
@@ -692,6 +717,7 @@ int jmi_func_fd_directional_dF(jmi_t *jmi, jmi_func_t *func, jmi_real_t *res,
 	jmi_dae_directional_FD_dF(jmi, func, res, dF, dv);
 	return 0;
 }
+
 
 int jmi_get_sizes(jmi_t* jmi, int* n_real_ci, int* n_real_cd, int* n_real_pi, int* n_real_pd,
 		int* n_integer_ci, int* n_integer_cd, int* n_integer_pi, int* n_integer_pd,
