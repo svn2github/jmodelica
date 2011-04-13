@@ -938,6 +938,22 @@ class Test_FMI_ODE:
         nose.tools.assert_almost_equal(z[-1], 4.0000000, 4)
     
     @testattr(assimulo = True)
+    def test_changed_starttime(self):
+        """
+        This tests a simulation with different start time.
+        """
+        bounce = fmi.FMUModel('bouncingBall.fmu', path_to_fmus)
+        #bounce.initialize()
+        res = bounce.simulate(start_time=2.,final_time=5.)
+        height = res['h']
+        time = res['time']
+
+        nose.tools.assert_almost_equal(height[0],1.000000,5)
+        nose.tools.assert_almost_equal(height[-1],-0.98048862,4)
+        nose.tools.assert_almost_equal(time[-1],5.000000,5)
+        
+    
+    @testattr(assimulo = True)
     def test_basic_simulation(self):
         """
         This tests the basic simulation and writing.
@@ -948,7 +964,7 @@ class Test_FMI_ODE:
         res = bounce.simulate(final_time=3.)
         height = res['h']
         time = res['time']
-
+        
         nose.tools.assert_almost_equal(height[0],1.000000,5)
         nose.tools.assert_almost_equal(height[-1],-0.9804523,5)
         nose.tools.assert_almost_equal(time[-1],3.000000,5)
