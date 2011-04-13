@@ -200,7 +200,7 @@
     <para>There is also a one-to-one map to the C-functions, meaning that
     there is an option to use the low-level C-functions as they are specified
     in the standard instead of using our wrapping of the functions. These
-    functions are also located in <literal>FMIModel</literal> and is named
+    functions are also located in <literal>FMUModel</literal> and is named
     with a leading underscore together with the same name as specified in the
     standard.</para>
   </section>
@@ -269,13 +269,13 @@
 
         <programlisting language="python">        import numpy as N 
         import pylab as P #Used for plotting
-        from jmodelica.fmi import FMIModel #The FMI Interface
+        from jmodelica.fmi import FMUModel #The FMI Interface
 </programlisting>
 
         <para>Next, the FMU is to be loaded and initialized,</para>
 
         <programlisting language="python">        #Load the FMU by specifying the fmu together with the path.
-        bouncing_fmu = FMIModel('/path/to/FMU/bouncingBall.fmu')
+        bouncing_fmu = FMUModel('/path/to/FMU/bouncingBall.fmu')
 
         Tstart = 0.5 #The start time.
         Tend   = 3.0 #The final simulation time.
@@ -294,7 +294,7 @@
         must be done before the simulation is started.</para>
 
         <para>Note that if the start time is not specified,
-        <literal>FMIModel</literal> tries to find the starting time in the
+        <literal>FMUModel</literal> tries to find the starting time in the
         XML-file structure 'default experiment' and if successful starts the
         simulation from that time. Also if the XML-file does not contain any
         information about the default experiment the simulation is started

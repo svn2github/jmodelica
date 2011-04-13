@@ -418,7 +418,7 @@ x1 = res['x1']
                 <entry>Variable trajectory data used for initialization of the
                 optimization problem. The data is represented by an object of
                 the type
-                <literal>jmodelica.io.DymolaResultTextual.</literal></entry>
+                <literal>jmodelica.io.ResultDymolaTextual.</literal></entry>
               </row>
 
               <row>
