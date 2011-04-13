@@ -80,6 +80,14 @@ class TestModel_VDP:
         self.vdp = JMUModel("VDP_pack_VDP_Opt.jmu")
         
     @testattr(stddist = True)
+    def test_same_dll(self):
+        """ Test that we can load the model multiple times with reload_dll = False. """
+        i = 0
+        while i < 50:
+            i = i + 1
+            model = JMUModel("VDP_pack_VDP_Opt.jmu", reload_dll=False)
+        
+    @testattr(stddist = True)
     def test_has_cppad_derivatives(self):
         """ Test jmi.JMUModel.has_cppad_derivatives function."""
         nose.tools.assert_equal(self.vdp.has_cppad_derivatives(), True)

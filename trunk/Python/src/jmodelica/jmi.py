@@ -376,7 +376,7 @@ class JMUModel(BaseModel):
     High-level interface to a JMIModel. 
     """
     
-    def __init__(self, jmu_name):
+    def __init__(self, jmu_name, reload_dll=True):
         """ 
         Create a jmi.JMUModel. 
         
@@ -391,7 +391,7 @@ class JMUModel(BaseModel):
         """
         # extract files from JMU
         path, jmu_name = os.path.split(jmu_name)
-        jmu_files = unzip_unit(jmu_name, path)
+        jmu_files = unzip_unit(jmu_name, path, random_name=reload_dll)
         lib_name = jmu_files[0]
         self._xml_name = jmu_files[1]
         self._model_name = jmu_files[2]

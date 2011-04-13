@@ -255,7 +255,7 @@ class BaseModel(object):
         algorithm = getattr(algdrive, algorithm)
         return algorithm.get_default_options()
     
-def unzip_unit(archive, path='.'):
+def unzip_unit(archive, path='.', random_name=True):
     """
     Unzip the FMU/JMU.
     """
@@ -342,16 +342,27 @@ def unzip_unit(archive, path='.'):
             found_files.append(file)
     
     if found_files:
-        #Unzip
-        data = archive.read(found_files[0]) #Reading the first found dll
+        # Find where dll should be
+        dllname = found_files[0].filename.split('/')[-1]
+        modelname = dllname[:-len(suffix)]
         
-        modelname = found_files[0].filename.split('/')[-1][:-len(suffix)]
+        extract_dll = True
+        if random_name: 
+            fhandle, tempdllname = tempfile.mkstemp(suffix=suffix, dir=tmp_location)
+            os.close(fhandle)
+        else:
+            tempdllname = os.path.join(tmp_location, dllname)
+            if os.path.isfile(tempdllname):
+                extract_dll = False
+                print 'Re-using already extracted binary at ' + tempdllname
         
-        fhandle, tempdllname = tempfile.mkstemp(suffix=suffix, dir=tmp_location)
-        os.close(fhandle)
-        fout = open(tempdllname, 'w+b')
-        fout.write(data)
-        fout.close()
+        # Unzip
+        if extract_dll:
+            data = archive.read(found_files[0]) #Reading the first found dll
+        
+            fout = open(tempdllname, 'w+b')
+            fout.write(data)
+            fout.close()
         
         if is_jmu:
             return [tempdllname.split(os.sep)[-1], \

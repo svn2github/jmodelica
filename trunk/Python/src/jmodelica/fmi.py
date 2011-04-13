@@ -183,7 +183,7 @@ class FMUModel(BaseModel):
     A JMI Model loaded from a DLL.
     """
     
-    def __init__(self, fmu, path='.'):
+    def __init__(self, fmu, path='.', reload_dll=True):
         """
         Constructor.
         """
@@ -205,7 +205,7 @@ class FMUModel(BaseModel):
 
             
         #Create temp binary
-        self._tempnames = unzip_unit(archive=fmu, path=path)
+        self._tempnames = unzip_unit(archive=fmu, path=path, random_name=reload_dll)
         self._tempdll = self._tempnames[0]
         self._tempxml = self._tempnames[1]
         self._modelname = self._tempnames[2]
