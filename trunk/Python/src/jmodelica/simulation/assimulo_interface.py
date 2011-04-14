@@ -1085,7 +1085,7 @@ class JMIDAESens(Implicit_Problem):
         Sets the initial values.
         """
         if input != None and not isinstance(input[0],list):
-            input[0] = [self.input[0]]
+            input = ([input[0]], input[1])
         
         self._model = model
         self.input = input
