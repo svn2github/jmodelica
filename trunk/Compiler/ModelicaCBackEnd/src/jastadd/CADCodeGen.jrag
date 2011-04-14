@@ -363,15 +363,22 @@ aspect CADCodeGen {
 			str.print(getLeft().adVarName());
 			str.print(" , ");
 			str.print(getRight().adVarName());
-			str.print(");\n");
 			
-			str.print("jmi_ad_var_t ");
+			str.print(");\njmi_ad_var_t ");
+			str.print(this.adDerName());
+			
+			str.print(";\nif(");
+			str.print(getLeft().adVarName());
+			str.print("== 0){\n");
+			str.print(this.adDerName());
+			str.print("=0;\n} else{\n");
+	
 			str.print(this.adDerName());
 			str.print(" = ");
 			str.print(this.adVarName());
 			str.print(" * (");
 			str.print(getRight().adDerName());
-			str.print(" * log(fabs(");
+			str.print(" * log(jmi_abs(");
 			str.print(getLeft().adVarName());
 			str.print(")) + ");
 			str.print(getRight().adVarName());
@@ -379,7 +386,7 @@ aspect CADCodeGen {
 			str.print(getLeft().adDerName());
 			str.print(" / ");
 			str.print(getLeft().adVarName());
-			str.print(");\n");
+			str.print(");\n}\n");
 	}
 	
 	public void FSqrtExp.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
@@ -497,7 +504,7 @@ aspect CADCodeGen {
 			p.print(getFExp(),str,indent);
 			str.print("jmi_ad_var_t ");
 			str.print(this.adVarName());
-			str.print(" = abs(");
+			str.print(" = jmi_abs(");
 			str.print(getFExp().adVarName());
 			str.print(");\n");
 			

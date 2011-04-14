@@ -623,7 +623,12 @@ jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx];
 jmi_ad_var_t v_1 = _x2_2;
 jmi_ad_var_t d_1 = (*dz)[2-jmi->offs_real_dx];
 jmi_ad_var_t v_2 = pow(v_0 , v_1);
-jmi_ad_var_t d_2 = v_2 * (d_1 * log(fabs(v_0)) + v_1 * d_0 / v_0);
+jmi_ad_var_t d_2;
+if(v_0== 0){
+d_2=0;
+} else{
+d_2 = v_2 * (d_1 * log(jmi_abs(v_0)) + v_1 * d_0 / v_0);
+}
 jmi_ad_var_t v_3 = _y_0;
 jmi_ad_var_t d_3 = (*dz)[0-jmi->offs_real_dx];
 (*res)[0] = v_2 - v_3;
@@ -661,7 +666,7 @@ model CADabs
          generatedCode="
 jmi_ad_var_t v_0 = _x1_1;
 jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx];
-jmi_ad_var_t v_1 = abs(v_0);
+jmi_ad_var_t v_1 = jmi_abs(v_0);
 jmi_ad_var_t d_1;
 if(v_0 < 0){
     d_1 = -d_0;
