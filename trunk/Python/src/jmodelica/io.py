@@ -530,8 +530,19 @@ class ResultDymolaTextual:
             The result data matrix.
         """
         return self.data[1]
-        
-        
+
+    def shift_time(self,time_shift):
+        """
+        Shift the time vector using a fixed offset.
+
+        Parameters::
+            time_shift --
+                The time shift offset.
+        """
+        for i in range(len(self.data)):
+            for j in range(N.shape(self.data[i])[0]):
+                self.data[i][j,0] = self.data[i][j,0] + time_shift
+
 class ResultDymolaBinary:
     """ 
     Class representing a simulation or optimization result loaded from a Dymola 
