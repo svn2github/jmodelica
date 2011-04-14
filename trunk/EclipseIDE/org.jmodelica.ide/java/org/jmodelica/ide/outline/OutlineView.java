@@ -93,10 +93,10 @@ public abstract class OutlineView extends PageBookView implements ISelectionProv
 		return getSelectionProvider().getSelection();
 	}
 
-	@Override
-	public void partBroughtToTop(IWorkbenchPart part) {
-		partActivated(part);
-	}
+//	@Override
+//	public void partBroughtToTop(IWorkbenchPart part) {
+//		partActivated(part);
+//	}
 
 	public void removeSelectionChangedListener(
 			ISelectionChangedListener listener) {

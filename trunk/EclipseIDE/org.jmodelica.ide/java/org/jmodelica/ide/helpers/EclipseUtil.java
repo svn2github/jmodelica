@@ -3,8 +3,10 @@ package org.jmodelica.ide.helpers;
 import java.io.File;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
@@ -14,6 +16,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
+import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.editor.Editor;
 
 public class EclipseUtil {
@@ -73,6 +76,14 @@ public class EclipseUtil {
 	public static boolean askUser(String title, String question) {
 		Shell shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
 		return MessageDialog.openQuestion(null, title, question);
+	}
+
+	public static boolean isModelicaProject(IProject project) {
+		try {
+			return project != null && project.hasNature(IDEConstants.NATURE_ID);
+		} catch (CoreException e) {
+			return false;
+		}
 	}
 
 }

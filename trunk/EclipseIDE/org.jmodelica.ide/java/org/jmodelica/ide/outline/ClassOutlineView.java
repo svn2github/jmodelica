@@ -18,31 +18,29 @@ package org.jmodelica.ide.outline;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.part.IPageBookViewPage;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import org.jmodelica.ide.editor.Editor;
+import org.jmodelica.ide.helpers.EclipseUtil;
 
 public class ClassOutlineView extends OutlineView {
 	
-	private Map<IProject, ClassOutlinePage> map = new HashMap<IProject, ClassOutlinePage>();
+	private Map<IProject, ClassOutlinePage> mapProjToPage = new HashMap<IProject, ClassOutlinePage>();
 	
 	protected IContentOutlinePage setupOutlinePage(IWorkbenchPart part) {
-		// TODO: try to remove dependency on AbstractTextEditor, replace with IEditorPart
 		if (part instanceof AbstractTextEditor) {
 			AbstractTextEditor editor = (AbstractTextEditor) part;
-			IEditorInput input = editor.getEditorInput();
-			if (input instanceof IFileEditorInput) {
-				IProject project = ((IFileEditorInput) input).getFile().getProject();
-				ClassOutlinePage page = map.get(project);
-				if (page == null) {
+			IProject project = getProjectOfEditor(editor);
+			if (project != null) {
+				ClassOutlinePage page = mapProjToPage.get(project);
+				if (page == null && EclipseUtil.isModelicaProject(project)) {
 					page = new ClassOutlinePage(project, editor);
-					map.put(project, page);
+					mapProjToPage.put(project, page);
 					initPage(page);
 					page.createControl(getPageBook());
 				}
@@ -52,8 +50,40 @@ public class ClassOutlineView extends OutlineView {
 		return null;
 	}
 
+	protected void doDestroyPage(IWorkbenchPart part, PageRec rec) {
+		if (part instanceof AbstractTextEditor) 
+			mapProjToPage.remove(getProjectOfEditor((AbstractTextEditor) part));
+		super.doDestroyPage(part, rec);
+	}
+	
+	/**
+	 * Get the project connected to the given text editor's opened file, if any.
+	 */
+	protected IProject getProjectOfEditor(AbstractTextEditor editor) {
+		IEditorInput input = editor.getEditorInput();
+		if (input instanceof IFileEditorInput) {
+			IFile file = ((IFileEditorInput) input).getFile();
+			if (file != null)
+				return file.getProject();
+		}
+		return null;
+	}
+
 	protected boolean isImportant(IWorkbenchPart part) {
-		return part instanceof AbstractTextEditor;
+		if (part instanceof AbstractTextEditor) {
+			IProject project = getProjectOfEditor((AbstractTextEditor) part);
+			return EclipseUtil.isModelicaProject(project);
+		} else {
+			return false;
+		}
+	}
+
+	public void partActivated(IWorkbenchPart part) {
+		if (isImportant(part))
+			super.partActivated(part);
+	}
+
+	protected void partHidden(IWorkbenchPart part) {
 	}
 
 	protected IContentOutlinePage getOutlinePage(Editor part) {
