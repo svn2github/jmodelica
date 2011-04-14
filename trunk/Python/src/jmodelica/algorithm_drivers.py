@@ -1808,19 +1808,15 @@ class CasadiPseudoSpectralOptions(OptionBase):
         
         link_options --
             This option allows users to specify states that are allowed to be
-            discontinious between phases (elements). There is also an option
-            to include the discontinuities into the optimization problem, such
-            that the optimizer tries to minimize the discontinuities. If they
-            are included, they are included as the L2-Norm for each phase 
-            boundary. Example, [("x",True),("y",True)]. "x" and "y" are allowed
-            to be discontinious and they are included into the Mayer cost for
-            each phase boundary as (dx^2+dy^2)^0.5.
+            discontinuous between phases (elements) and to connect the 
+            transition with a model parameter. Example, [(1,"x1","dx1")], this
+            allowes the variable x1 to be discontinuous between phase 1 and 2
+            with the parameter dx1. The generating constraint becomes, 
+            x1_N^1 - x1_0^2 - dx1 = 0. There is no limit that the same 
+            parameter can be used in multiple transition such as, 
+            [(1,"x1","dx1"), (1,"x2","dx1"), (2,"x1","dx1")]
             Default: []
-            
-        link_bounds --
-            Specifies the initial, lower and upper bounds of the links.
-            Default: []
-        
+
         free_phases --
             Specifies if the location of the phases should be allowed to be
             changed by the optimizer.
@@ -1895,7 +1891,6 @@ class CasadiPseudoSpectralOptions(OptionBase):
             'discr': "LG",
             'free_phases':False,
             'phase_bounds':None,
-            'link_bounds':[],
             'link_options':[],
             'n_interpolation_points':None,
             'init_traj':None,

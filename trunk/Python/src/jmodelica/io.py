@@ -1000,7 +1000,7 @@ class ResultWriterDymolaSensitivity(ResultWriter):
         str_text = (" %12.12f" % data[0])
         for j in xrange(self._nvariables_without_sens-1):
             if rescale:
-                str_text = str_text + (" %12.12f" %(data[1+j]*sc[j-1+n_parameters]))
+                str_text = str_text + (" %12.12f" %(data[1+j]*sc[j+n_parameters]))
             else:
                 str_text = str_text + (" %12.12f" % data[1+j])
 

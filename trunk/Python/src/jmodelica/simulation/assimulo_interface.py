@@ -1084,6 +1084,9 @@ class JMIDAESens(Implicit_Problem):
         """
         Sets the initial values.
         """
+        if input != None and not isinstance(input[0],list):
+            input[0] = [self.input[0]]
+        
         self._model = model
         self.input = input
         
@@ -1121,6 +1124,7 @@ class JMIDAESens(Implicit_Problem):
         self._w_nbr = len(self._model.real_w) #Number of algebraic
         self._dx_nbr = len(self._model.real_dx) #Number of derivatives
         self._write_header = True
+        self._input_names = [k[1] for k in model.get_u_variable_names()]
         
         #Used for logging
         self._logLevel = logging.CRITICAL
@@ -1230,7 +1234,13 @@ class JMIDAESens(Implicit_Problem):
             data = N.append(t,yd[0:len(self._model.real_dx)])
             data = N.append(data, y[0:len(self._model.real_x)])
             if self.input!=None:
-                data = N.append(data, self.input[1].eval(t)[0,:])
+                input_data = N.ones(len(self._input_names))*self._model.real_u
+                input_eval = self.input[1].eval(float(t))[0,:]
+                for i,n in enumerate(self.input[0]):
+                    input_data[self._input_names.index(n)] = input_eval[i]
+                data = N.append(data, input_data)
+            else:
+                data = N.append(data,N.ones(len(self._model.real_u))*self._model.real_u)
             data = N.append(data, y[len(self._model.real_x):len(self._model.real_x)+len(self._model.real_w)])
             
             for i in range(len(p_data)):

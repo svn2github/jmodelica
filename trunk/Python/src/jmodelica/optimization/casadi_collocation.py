@@ -30,6 +30,12 @@ from jmodelica.optimization.polynomial import *
 from jmodelica import xmlparser
 from jmodelica.io import VariableNotFoundError
 
+class CasadiCollocatorException(Exception):
+    """
+    An CasadiCollocator Exception.
+    """
+    pass
+
 class CasadiCollocator(object):
     # Parameters
     #UPPER = 1e20
@@ -323,18 +329,18 @@ class CasadiCollocator(object):
             # Write data
             # Write data set 1
             f.write('float data_1(%d,%d)\n' % (2, n_parameters + 1))
-            f.write("%12.12f" % data[0,0])
+            f.write("%E" % data[0,0])
             str_text = ''
             for i in params:
                 if rescale:
-                    #str_text += " %12.12f" % (z[ref]*sc[ref])
+                    #str_text += " %E" % (z[ref]*sc[ref])
                     raise NotImplementedError
                 else:
-                    str_text += " %12.12f" % (start_values[i[0]])#(0.0)#(z[ref])
+                    str_text += " %E" % (start_values[i[0]])#(0.0)#(z[ref])
                     
             f.write(str_text)
             f.write('\n')
-            f.write("%12.12f" % data[-1,0])
+            f.write("%E" % data[-1,0])
             f.write(str_text)
 
             f.write('\n\n')
@@ -347,12 +353,12 @@ class CasadiCollocator(object):
                 str = ''
                 for ref in range(n_vars):
                     if ref==0: # Don't scale time
-                        str = str + (" %12.12f" % data[i,ref])
+                        str = str + (" %E" % data[i,ref])
                     else:
                         if rescale:
-                            str = str + (" %12.12f" % (data[i,ref]*sc[ref]))
+                            str = str + (" %E" % (data[i,ref]*sc[ref]))
                         else:
-                            str = str + (" %12.12f" % data[i,ref])
+                            str = str + (" %E" % data[i,ref])
                 f.write(str+'\n')
 
             f.write('\n')
@@ -994,12 +1000,14 @@ class PseudoSpectral(CasadiCollocator):
                     xx_ub[self.get_var_indices()[i][DISCR[-1]]['t']] = N.array(1e20)
         
         #Handle links
+        """
         if self.options['link_options'] != []:
             for j,x in enumerate(self.options['link_bounds']):
                 for i in PHASE[:-1]:
                     xx_init[self.get_var_indices()[i][0]['link_x'][j]]=x[0]
                     xx_lb[self.get_var_indices()[i][0]['link_x'][j]] = x[1]
                     xx_ub[self.get_var_indices()[i][0]['link_x'][j]] = x[2]
+        """
         
     def _create_collocation_constraints(self):
         
@@ -1047,7 +1055,7 @@ class PseudoSpectral(CasadiCollocator):
                 self.time_points += [(t,i,j)]
             if DISCR[-1] != COLLO[-1]:
                 self.time_points += [(self.vars[i]['t'],i,DISCR[-1])]
-        
+        """
         #Create linking constraints
         for i in PHASE[:-1]:
             z = []
@@ -1058,6 +1066,22 @@ class PseudoSpectral(CasadiCollocator):
             #    u += [sum([lagrange_eval(ROOTS,ind,1.0)*self.vars[i][l]['u'][x] for ind,l in enumerate(COLLO)])-sum([lagrange_eval(ROOTS,ind,-1.0)*self.vars[i+1][l]['u'][x] for ind,l in enumerate(COLLO)])]
             #self.h += u    
             self.h += z
+        """
+        self.linkning_constraints = []
+        #Create linkning constraints
+        for i in PHASE[:-1]:
+            z = []
+            for x in range(self.model.get_n_x()):
+                z += [self.vars[i][DISCR[-1]]['x'][x] - self.vars[i+1][DISCR[0]]['x'][x]]
+            self.linkning_constraints += z
+            
+        for opt in self.link:
+            i = opt[0] #Phase
+            x_ind = opt[1] #Variable
+            p_ind = opt[2] #Parameter
+            z = self.vars[i][DISCR[-1]]['x'][x_ind] - self.vars[i+1][DISCR[0]]['x'][x_ind] + self.vars[0]['p'][p_ind]
+            self.linkning_constraints[(i-1)*self.model.get_n_x()+x_ind] = z
+        self.h += self.linkning_constraints
         
         #Create constraints on the final x (Linear Equation)
         if self.options["discr"]=="LG":
@@ -1269,6 +1293,27 @@ class PseudoSpectral(CasadiCollocator):
                 self.xx += [self.vars[i]['t']]
                 self.var_indices[i][DISCR[-1]]['t'] = N.arange(pre_len,len(self.xx),dtype=int)
         
+        
+        self.link = [] 
+        for all in self.options['link_options']:
+            xlink = -1
+            plink = -1
+            for ind, x in enumerate(self.model.get_x()):
+                if all[1] == str(x):
+                    xlink = ind
+                    break
+            for ind, p in enumerate(self.model.get_p()):
+                if all[2] == str(p):
+                    plink = ind
+                    break
+            
+            if xlink == -1:
+                raise CasadiCollocatorException("Could not find the linking variable, ",all[1], ".")
+            if plink == -1:
+                raise CasadiCollocatorException("Could not find the linking parameter, ",all[2], ".")
+            self.link += [(all[0],xlink,plink)]
+        
+        """
         #Create vector allowing or disallowing discontinuous state
         for i in PHASE[:-1]: #Phases
             self.vars[i]['link_x'] = [casadi.SX(0.0) for x in self.model.get_x()]
@@ -1282,6 +1327,7 @@ class PseudoSpectral(CasadiCollocator):
             #self.xx += [self.vars[i]['link_x'][l]]
             self.xx += links
             self.var_indices[i][0]['link_x'] = N.arange(pre_len,len(self.xx),dtype=int)
+        """
     
     def get_equality_constraint(self):
         return self.h

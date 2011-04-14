@@ -1214,6 +1214,49 @@ class Test_JMI_DAE_Sens:
         nose.tools.assert_almost_equal(dx1da2.x[-1], 0.00000, 4)
 
     @testattr(assimulo = True)
+    def test_input_simulation_high_level_switched_input(self):
+        """
+        This tests that input simulation works when using high-level methods
+        and the inputs are not in JModelica order.
+        """
+        model = self.m_SENS
+        path_result = os.path.join(get_files_path(), 'Results', 
+                                'qt_par_est_data.mat')
+        
+        data = loadmat(path_result,appendmat=False)
+
+        # Extract data series  
+        t_meas = data['t'][6000::100,0]-60  
+        u1 = data['u1_d'][6000::100,0]
+        u2 = data['u2_d'][6000::100,0]
+                
+        # Build input trajectory matrix for use in simulation
+        u_data = N.transpose(N.vstack((t_meas,u2,u1)))
+
+        input_object = (['u2','u1'], u_data)
+        
+        opts = model.simulate_options()
+        opts['IDA_options']['sensitivity']=True
+        
+        ##Store data continuous during the simulation, important when solving a 
+        ##problem with sensitivites. FIXED INTERNALLY
+        opts['IDA_options']['write_cont']=True
+        
+        res = model.simulate(final_time=60, input=input_object, options=opts)
+
+        #Value used when IDA estimates the tolerances on the parameters
+        #qt_sim.pbar = qt_mod.p0 
+
+        dx1da1 = res['dx1/da1']
+        dx1da2 = res['dx1/da2']
+        dx4da1 = res['dx4/da1']
+
+        nose.tools.assert_almost_equal(dx1da2[0], 0.000000, 4)
+        nose.tools.assert_almost_equal(dx1da2[-1], 0.00000, 4)
+        nose.tools.assert_almost_equal(res["u1"][-1], u1[-1], 4)
+        nose.tools.assert_almost_equal(res["u2"][-1], u2[-1], 4)
+
+    @testattr(assimulo = True)
     def test_input_simulation_high_level(self):
         """
         This tests that input simulation works using high-level methods.
@@ -1249,9 +1292,11 @@ class Test_JMI_DAE_Sens:
         dx1da1 = res['dx1/da1']
         dx1da2 = res['dx1/da2']
         dx4da1 = res['dx4/da1']
-        
+
         nose.tools.assert_almost_equal(dx1da2[0], 0.000000, 4)
         nose.tools.assert_almost_equal(dx1da2[-1], 0.00000, 4)
+        nose.tools.assert_almost_equal(res["u1"][-1], u1[-1], 4)
+        nose.tools.assert_almost_equal(res["u2"][-1], u2[-1], 4)
         
     @testattr(assimulo = True)
     def test_jac(self):
@@ -1269,6 +1314,36 @@ class Test_JMI_DAE_Sens:
         
         assert res.solver.usejac == True
         assert prob.j == prob.jac
+    
+    @testattr(assimulo = True)
+    def test_scaling_test_2(self):
+        """
+        This tests a simulation when scaling is ON and there are input variables
+        that are not used.
+        """
+        jmu_name = compile_jmu("Englezos652_with_input", os.path.join(get_files_path()
+                        ,"Modelica","Englezos652.mop"),
+                        compiler_options={"enable_variable_scaling":False})
+
+        # Load a model instance into Python
+        model = JMUModel(jmu_name)
+
+        # Get and set the options
+        opts = model.simulate_options()
+        opts['IDA_options']['atol'] = 1.0e-6
+        opts['IDA_options']['rtol'] = 1.0e-6
+        opts['IDA_options']['sensitivity'] = True
+        opts['ncp'] = 400
+        
+        res = model.simulate(0,1697000/3, options=opts)
+        
+        x1 = res["x1"][-1]
+        r1 = res["r1"][-1]
+        u1 = res["u1"][-1]
+
+        nose.tools.assert_almost_equal(x1, 0.45537058, 3)
+        nose.tools.assert_almost_equal(r1, 5.3287e-8, 2)
+        nose.tools.assert_almost_equal(u1, 0.00000, 3)
     
     @testattr(assimulo = True)
     def test_scaling(self):
