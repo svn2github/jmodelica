@@ -268,7 +268,7 @@ class FMIODE(Explicit_Problem):
         
         #Sets the inputs, if any
         if self.input!=None:
-            self._model.set(self.input[0], self.input[1].eval(t)[0,:])
+            self._model.set(self.input[0], self.input[1].eval(t)[0,:],scaled=True)
         
         #Evaluating the rhs
         rhs = self._model.get_derivatives()
@@ -291,7 +291,7 @@ class FMIODE(Explicit_Problem):
         
         #Sets the inputs, if any
         if self.input!=None:
-            self._model.set(self.input[0], self.input[1].eval(t)[0,:])
+            self._model.set(self.input[0], self.input[1].eval(t)[0,:],scaled=True)
         
         #Evaluating the event indicators
         eventInd = self._model.get_event_indicators()
@@ -335,7 +335,7 @@ class FMIODE(Explicit_Problem):
             
             #Sets the inputs, if any
             if self.input!=None:
-                self._model.set(self.input[0], self.input[1].eval(t)[0,:])
+                self._model.set(self.input[0], self.input[1].eval(t)[0,:],scaled=True)
             
             #Evaluating the rhs (Have to evaluate the values in the model)
             rhs = self._model.get_derivatives()
@@ -369,7 +369,7 @@ class FMIODE(Explicit_Problem):
             #Sets the inputs, if any
             if self.input!=None:
                 self._model.set(self.input[0], 
-                    self.input[1].eval(N.array([solver.t_cur]))[0,:])
+                    self.input[1].eval(N.array([solver.t_cur]))[0,:],scaled=True)
             
             #Evaluating the rhs (Have to evaluate the values in the model)
             rhs = self._model.get_derivatives()
@@ -411,7 +411,7 @@ class FMIODE(Explicit_Problem):
             #Sets the inputs, if any
             if self.input!=None:
                 self._model.set(self.input[0], 
-                    self.input[1].eval(N.array([solver.t_cur]))[0,:])
+                    self.input[1].eval(N.array([solver.t_cur]))[0,:],scaled=True)
             
             #Evaluating the rhs (Have to evaluate the values in the model)
             rhs = self._model.get_derivatives()
@@ -503,7 +503,7 @@ class JMIODE(Explicit_Problem):
         
         #Sets the inputs, if any
         if self.input!=None:
-            self._model.set(self.input[0], self.input[1].eval(t)[0,:])
+            self._model.set(self.input[0], self.input[1].eval(t)[0,:],scaled=True)
         
         #Evaluating the rhs
         self._model.eval_ode_f()
@@ -521,7 +521,7 @@ class JMIODE(Explicit_Problem):
         
         #Sets the inputs, if any
         if self.input!=None:
-            self._model.set(self.input[0], self.input[1].eval(t)[0,:])
+            self._model.set(self.input[0], self.input[1].eval(t)[0,:],scaled=True)
         
         #Evaluating the jacobian
         #-Setting options
@@ -679,7 +679,7 @@ class JMIDAE(Implicit_Problem):
         
         #Sets the inputs, if any
         if self.input!=None:
-            self._model.set(self.input[0], self.input[1].eval(t)[0,:])
+            self._model.set(self.input[0], self.input[1].eval(t)[0,:],scaled=True)
 
         #Evaluating the residual function
         residual = N.array([.0]*self._f_nbr)
@@ -699,7 +699,7 @@ class JMIDAE(Implicit_Problem):
         
         #Sets the inputs, if any
         if self.input!=None:
-            self._model.set(self.input[0], self.input[1].eval(t)[0,:])
+            self._model.set(self.input[0], self.input[1].eval(t)[0,:],scaled=True)
         
         #Evaluating the jacobian
         #-Setting options
@@ -743,7 +743,7 @@ class JMIDAE(Implicit_Problem):
         
         #Sets the inputs, if any
         if self.input!=None:
-            self._model.set(self.input[0], self.input[1].eval(t)[0,:])
+            self._model.set(self.input[0], self.input[1].eval(t)[0,:],scaled=True)
         
         #Evaluating the switching functions
         eventInd = N.array([.0]*len(sw))
@@ -763,7 +763,7 @@ class JMIDAE(Implicit_Problem):
         
         #Sets the inputs, if any
         if self.input!=None:
-            self._model.set(self.input[0], self.input[1].eval(t)[0,:])
+            self._model.set(self.input[0], self.input[1].eval(t)[0,:],scaled=True)
         
         #Evaluating the switching functions
         eventInd = N.array([.0]*len(sw))
@@ -1160,7 +1160,7 @@ class JMIDAESens(Implicit_Problem):
             
         #Sets the inputs, if any
         if self.input!=None:
-            self._model.set(self.input[0], self.input[1].eval(t)[0,:])
+            self._model.set(self.input[0], self.input[1].eval(t)[0,:],scaled=True)
         
         #Evaluating the residual function
         residual = N.array([.0]*self._f_nbr)
@@ -1185,7 +1185,7 @@ class JMIDAESens(Implicit_Problem):
         
         #Sets the inputs, if any
         if self.input!=None:
-            self._model.set(self.input[0], self.input[1].eval(t)[0,:])
+            self._model.set(self.input[0], self.input[1].eval(t)[0,:],scaled=True)
         
         #Evaluating the jacobian
         #-Setting options

@@ -593,7 +593,44 @@ class Test_JMI_DAE:
         #assert solver.switches[0] == True
         #assert solver.switches[1] == True
         pass
+    
+    @testattr(assimulo = True)
+    def test_scaled_input(self):
+        """
+        This tests simulation with scaled input.
+        """
+        fpath = os.path.join(get_files_path(), 'Modelica', 'VDP.mop')
+        cpath = 'VDP_pack.VDP_scaled_input'
         
+        # compile VDP
+        jmu_name = compile_jmu(cpath, fpath, 
+                    compiler_options={'enable_variable_scaling':True})
+
+        # Load the dynamic library and XML data
+        vdp = JMUModel(jmu_name)
+        
+        t = N.linspace(0.,10.,100) 
+        u1 = N.cos(t)/10.0
+        u_traj = N.transpose(N.vstack((t,u1)))
+        
+        res_scaled = vdp.simulate(final_time=10, input=(['u'],u_traj))
+        
+        # compile VDP
+        jmu_name = compile_jmu(cpath, fpath, 
+                    compiler_options={'enable_variable_scaling':False})
+
+        # Load the dynamic library and XML data
+        vdp = JMUModel(jmu_name)
+        
+        t = N.linspace(0.,10.,100) 
+        u1 = N.cos(t)
+        u_traj = N.transpose(N.vstack((t,u1)))
+        
+        res = vdp.simulate(final_time=10, input=(['u'],u_traj))
+        
+        nose.tools.assert_almost_equal(res["u"][0], res_scaled["u"][0], 3)
+        nose.tools.assert_almost_equal(res["u"][-1], res_scaled["u"][-1], 3)
+    
     @testattr(assimulo = True)
     def test_double_input(self):
         """

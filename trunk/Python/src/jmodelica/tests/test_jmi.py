@@ -72,13 +72,45 @@ class TestModel_VDP:
         cpath_vdp = "VDP_pack.VDP_Opt"
         fname_vdp = compile_jmu(cpath_vdp, fpath_vdp, 
                     compiler_options={'state_start_values_fixed':True})
+        fpath = os.path.join(get_files_path(), 'Modelica', 'VDP.mop')
+        cpath = 'VDP_pack.VDP_scaled_input'
+        
+        # compile VDP
+        jmu_name = compile_jmu(cpath, fpath, 
+                    compiler_options={'enable_variable_scaling':True})
     
     def setUp(self):
         """
         Sets up the test case.
         """
         self.vdp = JMUModel("VDP_pack_VDP_Opt.jmu")
+        self.vdp_scaled = JMUModel("VDP_pack_VDP_scaled_input.jmu")
+    
+    @testattr(stddist = True)
+    def test_scaled_get_set(self):
+        """
+        This tests that scaled get / set method works.
+        """
+        u = self.vdp_scaled.get("u")
+        nose.tools.assert_almost_equal(u, 0.00000, 4)
         
+        u = self.vdp_scaled.get("u", scaled=True)
+        nose.tools.assert_almost_equal(u, 0.00000, 4)
+        
+        self.vdp_scaled.set("u", 10)
+        u = self.vdp_scaled.get("u")
+        nose.tools.assert_almost_equal(u, 10.00000, 4)
+        
+        u = self.vdp_scaled.get("u", scaled=True)
+        nose.tools.assert_almost_equal(u, 1.00000, 4)
+        
+        self.vdp_scaled.set("u", 10, scaled=True)
+        u = self.vdp_scaled.get("u")
+        nose.tools.assert_almost_equal(u, 100.00000, 4)
+        
+        u = self.vdp_scaled.get("u", scaled=True)
+        nose.tools.assert_almost_equal(u, 10.00000, 4)
+    
     @testattr(stddist = True)
     def test_same_dll(self):
         """ Test that we can load the model multiple times with reload_dll = False. """

@@ -2323,7 +2323,7 @@ class JMUModel(BaseModel):
         """
         return self._model_name
 
-    def _get(self, name):
+    def _get(self, name, scaled):
         """
         Helper method to model.get. Get the value of a variable or parameter 
         given the name.
@@ -2345,13 +2345,13 @@ class JMUModel(BaseModel):
         if valref != None:
             (z_i, ptype) = _translate_value_ref(valref)
             if xmldoc.is_negated_alias(name):
-                if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0 and \
+                if not scaled and self.get_scaling_method() & JMI_SCALING_VARIABLES > 0 and \
                     ptype==0: 
                     value = -(self.z[z_i])*sc[z_i]
                 else:
                     value = -self.z[z_i]
             else:
-                if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0 and \
+                if not scaled and self.get_scaling_method() & JMI_SCALING_VARIABLES > 0 and \
                     ptype==0: 
                     value = (self.z[z_i])*sc[z_i]
                 else:
@@ -2361,7 +2361,7 @@ class JMUModel(BaseModel):
              found in model.")
         return value
         
-    def _set(self, name, value, recompute_dependent_parameters=True):
+    def _set(self, name, value, scaled, recompute_dependent_parameters=True):
         """ 
         Set the value of a parameter or variable given a name. If an independent 
         parameter is set, the dependent parameters are recomputed if 
@@ -2395,13 +2395,13 @@ class JMUModel(BaseModel):
                 "%s is a constant, it can not be modified." %name)
             (z_i, ptype) = _translate_value_ref(valref)
             if xmldoc.is_negated_alias(name):
-                if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0 and \
+                if not scaled and self.get_scaling_method() & JMI_SCALING_VARIABLES > 0 and \
                     ptype==0: 
                     self.z[z_i] = -(value)/sc[z_i]
                 else:
                     self.z[z_i] = -(value)
             else:
-                if self.get_scaling_method() & JMI_SCALING_VARIABLES > 0 and \
+                if not scaled and self.get_scaling_method() & JMI_SCALING_VARIABLES > 0 and \
                     ptype==0: 
                     self.z[z_i] = (value)/sc[z_i]
                 else:

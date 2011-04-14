@@ -1504,7 +1504,7 @@ class FMUModel(BaseModel):
         """
         return self._default_options(algorithm)
     
-    def _set(self, variable_name, value):
+    def _set(self, variable_name, value, scaled):
         """
         Helper method to set, see docstring on set.
         """
@@ -1523,7 +1523,7 @@ class FMUModel(BaseModel):
             raise FMUException('Type not supported.')
         
     
-    def _get(self, variable_name):
+    def _get(self, variable_name, scaled):
         """
         Helper method to get, see docstring on get.
         """

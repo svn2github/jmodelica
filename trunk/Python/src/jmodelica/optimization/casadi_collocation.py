@@ -329,18 +329,18 @@ class CasadiCollocator(object):
             # Write data
             # Write data set 1
             f.write('float data_1(%d,%d)\n' % (2, n_parameters + 1))
-            f.write("%E" % data[0,0])
+            f.write("%.12E" % data[0,0])
             str_text = ''
             for i in params:
                 if rescale:
-                    #str_text += " %E" % (z[ref]*sc[ref])
+                    #str_text += " %.12E" % (z[ref]*sc[ref])
                     raise NotImplementedError
                 else:
-                    str_text += " %E" % (start_values[i[0]])#(0.0)#(z[ref])
+                    str_text += " %.14E" % (start_values[i[0]])#(0.0)#(z[ref])
                     
             f.write(str_text)
             f.write('\n')
-            f.write("%E" % data[-1,0])
+            f.write("%.12E" % data[-1,0])
             f.write(str_text)
 
             f.write('\n\n')
@@ -353,12 +353,12 @@ class CasadiCollocator(object):
                 str = ''
                 for ref in range(n_vars):
                     if ref==0: # Don't scale time
-                        str = str + (" %E" % data[i,ref])
+                        str = str + (" %.12E" % data[i,ref])
                     else:
                         if rescale:
-                            str = str + (" %E" % (data[i,ref]*sc[ref]))
+                            str = str + (" %.12E" % (data[i,ref]*sc[ref]))
                         else:
-                            str = str + (" %E" % data[i,ref])
+                            str = str + (" %.12E" % data[i,ref])
                 f.write(str+'\n')
 
             f.write('\n')
