@@ -1098,6 +1098,9 @@ class JMIDAESens(Implicit_Problem):
         #Used for determine if there are discontinuities
         [f_nbr, g_nbr] = self._model.jmimodel.dae_get_sizes() 
         
+        if g_nbr > 0:
+            raise JMIModel_Exception("Hybrid models with event functions are currently not supported.")
+        
         if self._model.has_cppad_derivatives():
             self.jac = self.j #Activates the jacobian
         

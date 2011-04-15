@@ -1110,6 +1110,13 @@ class Test_JMI_DAE_Sens:
         """
         Compile the test model.
         """
+        #DAE with disc
+        fpath_DISC = os.path.join(get_files_path(), 'Modelica', 
+            'IfExpExamples.mo')
+        cpath_DISC = 'IfExpExamples.IfExpExample2'
+        
+        fname_DISC = compile_jmu(cpath_DISC, fpath_DISC)
+        
         #DAE test model
         fpath_DAE = os.path.join(get_files_path(), 'Modelica', 
             'Pendulum_pack_no_opt.mo')
@@ -1128,14 +1135,23 @@ class Test_JMI_DAE_Sens:
         """Load the test model."""
         package_DAE = 'Pendulum_pack_Pendulum.jmu'
         package_SENS = 'QuadTankSens.jmu'
+        package_DISC = 'IfExpExamples_IfExpExample2.jmu'
 
         # Load the dynamic library and XML data
         self.m_DAE = JMUModel(package_DAE)
         self.m_SENS = JMUModel(package_SENS)
+        self.m_DISC = JMUModel(package_DISC)
 
         # Creates the solvers
         self.DAE = JMIDAESens(self.m_DAE)
         self.SENS = JMIDAESens(self.m_SENS)
+    
+    @testattr(assimulo = True)
+    def test_no_events(self):
+        """
+        Tests that models containing events cannot be simulated with JMIDAESens.
+        """
+        nose.tools.assert_raises(JMIModel_Exception,self.m_DISC.simulate)
     
     @testattr(assimulo = True)
     def test_result_name_file(self):
