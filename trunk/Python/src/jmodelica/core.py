@@ -70,7 +70,7 @@ class BaseModel(object):
     def get_string(self, valueref):
         raise NotImplementedError('This method is currently not supported.')
     
-    def set(self, variable_name, value, scaled=False):
+    def set(self, variable_name, value):
         """
         Sets the given value(s) to the specified variable name(s) into the 
         model. The method both accept a single variable and a list of variables.
@@ -82,23 +82,19 @@ class BaseModel(object):
                 
             value -- 
                 The value(s) to set.
-                
-            scaled --
-                If the values should be set as scaled or not.
-                Default: False
-            
+
         Example::
         
             (FMU/JMU)Model.set('damper.d', 1.1)
             (FMU/JMU)Model.set(['damper.d','gear.a'], [1.1, 10])
         """
         if isinstance(variable_name, basestring):
-            self._set(variable_name, value, scaled) #Scalar case
+            self._set(variable_name, value) #Scalar case
         else:
             for i in xrange(len(variable_name)): #A list of variables
-                self._set(variable_name[i], value[i], scaled)
+                self._set(variable_name[i], value[i])
     
-    def get(self, variable_name, scaled=False):
+    def get(self, variable_name):
         """
         Returns the value(s) of the specified variable(s). The method both 
         accept a single variable and a list of variables.
@@ -107,10 +103,6 @@ class BaseModel(object):
         
             variable_name -- 
                 The name of the variable(s) as string/list.
-            
-            scaled --
-                If the values should be returned as scaled or not.
-                Default: False
                 
         Returns::
         
@@ -124,11 +116,11 @@ class BaseModel(object):
             (FMU/JMU)Model.get(['damper.d','gear.a'])
         """
         if isinstance(variable_name, basestring):
-            return self._get(variable_name, scaled) #Scalar case
+            return self._get(variable_name) #Scalar case
         else:
             ret = []
             for i in xrange(len(variable_name)): #A list of variables
-                ret += [self._get(variable_name[i], scaled)]
+                ret += [self._get(variable_name[i])]
             return ret
     
     def _exec_algorithm(self, algorithm, options):

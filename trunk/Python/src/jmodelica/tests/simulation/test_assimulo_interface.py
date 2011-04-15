@@ -593,12 +593,10 @@ class Test_JMI_DAE:
         #assert solver.switches[0] == True
         #assert solver.switches[1] == True
         pass
-    
+    """
     @testattr(assimulo = True)
     def test_scaled_input(self):
-        """
-        This tests simulation with scaled input.
-        """
+        #This tests simulation with scaled input.
         fpath = os.path.join(get_files_path(), 'Modelica', 'VDP.mop')
         cpath = 'VDP_pack.VDP_scaled_input'
         
@@ -630,7 +628,7 @@ class Test_JMI_DAE:
         
         nose.tools.assert_almost_equal(res["u"][0], res_scaled["u"][0], 3)
         nose.tools.assert_almost_equal(res["u"][-1], res_scaled["u"][-1], 3)
-    
+    """
     @testattr(assimulo = True)
     def test_double_input(self):
         """
@@ -1151,7 +1149,9 @@ class Test_JMI_DAE_Sens:
         """
         Tests that models containing events cannot be simulated with JMIDAESens.
         """
-        nose.tools.assert_raises(JMIModel_Exception,self.m_DISC.simulate)
+        opts = self.m_DISC.simulate_options()
+        opts["IDA_options"]["sensitivity"] = True
+        nose.tools.assert_raises(JMIModel_Exception,self.m_DISC.simulate, 0, 1,None,"AssimuloAlg", opts)
     
     @testattr(assimulo = True)
     def test_result_name_file(self):
