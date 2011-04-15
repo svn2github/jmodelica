@@ -28,6 +28,9 @@ from jmodelica.jmi import JMUModel
 from jmodelica.tests import testattr
 from jmodelica.tests import get_files_path
 
+int = N.int32
+N.int = N.int32
+
 class Test_cad_std:
     """ Class which contains std tests for the cad module. """
     
