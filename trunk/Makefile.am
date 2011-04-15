@@ -88,7 +88,7 @@ endif
 	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy LICENSE file" || cp $(abs_top_srcdir)/Python/LICENSE $(DESTDIR)$(prefix)/Python
 	cd $(abs_top_srcdir)/Python/src/; find jmodelica -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python
 if WITH_SUNDIALS
-	for pkgdir in lib/python2.5 lib/python2.6  lib64/python2.5 lib64/python2.6 Lib; do \
+	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib64/python2.5 lib64/python2.6 Lib; do \
 	if [ -e $(assimulo_install_dir)/$${pkgdir}/site-packages/ ]; \
 	then \
 	cd $(assimulo_install_dir)/$${pkgdir}/site-packages/; \
