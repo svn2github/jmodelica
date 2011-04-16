@@ -1166,7 +1166,7 @@ class PseudoSpectral(CasadiCollocator):
             z += self.vars[PHASE[-1]][DISCR[-1]]['x']
             z += [t]
             self.cost_mayer = list(self.model.get_opt_ode_J().eval([z])[0])[0]
-        
+            
         #Add linking options to the Mayer functional
         for i in PHASE[:-1]:
             temp = 0.0

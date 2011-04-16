@@ -2006,7 +2006,7 @@ class CasadiRadau(AlgorithmBase):
             # user has passed dict with options or empty dict = default
             self.options = CasadiRadauOptions(options)
         elif isinstance(options, CasadiRadauOptions):
-            # user has passed CasadiLPMOptions instance
+            # user has passed CasadiPseudoSpectralOptions instance
             self.options = options
         else:
             raise InvalidAlgorithmOptionException(options)

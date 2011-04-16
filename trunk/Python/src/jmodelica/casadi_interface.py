@@ -88,7 +88,7 @@ class CasadiModel(object):
         
             algorithm --
                 The algorithm for which the options class should be returned. 
-                Possible values are: 'CasadiRadau', 'CasadiLPM'
+                Possible values are: 'CasadiRadau', 'CasadiPseudoSpectral'
                 Default: 'CasadiRadau'
                 
         Returns::
@@ -117,14 +117,14 @@ class CasadiModel(object):
                 - 'CasadiRadau'. This algorithm is based 
                   on direct collocation on finite elements and the algorithm 
                   IPOPT is used to obtain a numerical solution to the problem.
-                - 'CasadiLPM'
+                - 'CasadiPseudoSpectral'
                 Default: 'CasadiRadau'
                 
             options -- 
                 The options that should be used in the algorithm. The options
                 documentation can be retrieved from an options object:
                 
-                    >>> myModel = JMUModel(...)
+                    >>> myModel = CasadiModel(...)
                     >>> opts = myModel.optimize_options()
                     >>> opts?
 
