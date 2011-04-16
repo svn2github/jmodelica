@@ -1049,6 +1049,7 @@ typedef struct {
     int offs_t0;
     int offs_tf;
     int *der_mask;
+    jmi_real_t *du_weights;
 } jmi_opt_coll_radau_t;
 
 /**

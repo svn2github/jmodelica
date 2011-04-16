@@ -512,6 +512,18 @@ static int lp_radau_f(jmi_opt_coll_t *jmi_opt_coll, jmi_real_t *f) {
 		}
 	}
 
+	/* Add cost term for penalizing the delta u:s */
+
+	if (jmi_opt_coll->n_blocking_factors>0) {
+		for (i=0;i<jmi_opt_coll->n_e-1;i++) {
+			for (j=0;j<jmi_opt_coll->jmi->n_real_u;j++) {
+				*f += nlp->du_weights[j]/jmi_opt_coll->hs[i]/
+						(jmi_opt_coll->jmi->opt->final_time-jmi_opt_coll->jmi->opt->start_time)*
+						(u_coll(jmi_opt_coll,i+1,1,j) - u_coll(jmi_opt_coll,i,1,j))*
+						(u_coll(jmi_opt_coll,i+1,1,j) - u_coll(jmi_opt_coll,i,1,j));
+			}
+		}
+	}
 	return 0;
 }
 
@@ -636,6 +648,27 @@ static int lp_radau_df(jmi_opt_coll_t *jmi_opt_coll, jmi_real_t *df) {
 			}
 		}
 		free(dp);
+	}
+
+	/* Add cost term for penalizing the delta u:s */
+	if (jmi_opt_coll->n_blocking_factors>0) {
+		for (i=0;i<jmi_opt_coll->n_e;i++) {
+			for (j=0;j<jmi_opt_coll->jmi->n_real_u;j++) {
+				if (i>0) {
+					df[offs_u_coll(jmi_opt_coll,i,1,j)] +=
+							2*nlp->du_weights[j]/jmi_opt_coll->hs[i]/
+							(jmi_opt_coll->jmi->opt->final_time-jmi_opt_coll->jmi->opt->start_time)*
+							(u_coll(jmi_opt_coll,i,1,j) - u_coll(jmi_opt_coll,i-1,1,j));
+				}
+
+				if (i<jmi_opt_coll->n_e-1) {
+					df[offs_u_coll(jmi_opt_coll,i,1,j)] +=
+							- 2*nlp->du_weights[j]/jmi_opt_coll->hs[i]/
+							(jmi_opt_coll->jmi->opt->final_time-jmi_opt_coll->jmi->opt->start_time)*
+							(u_coll(jmi_opt_coll,i+1,1,j) - u_coll(jmi_opt_coll,i,1,j));
+				}
+			}
+		}
 	}
 
 	/*
@@ -2098,6 +2131,13 @@ int jmi_opt_coll_radau_new(jmi_opt_coll_t **jmi_opt_coll, jmi_t *jmi, int n_e,
 	*jmi_opt_coll = (jmi_opt_coll_t*)opt;
 
 	(*jmi_opt_coll)->jmi = jmi;
+
+	/* Allocate memory for the du_weights */
+	opt->du_weights = (jmi_real_t*)calloc(jmi->n_real_u,sizeof(jmi_real_t));
+
+	for (i=0;i<jmi->n_real_u;i++) {
+		opt->du_weights[i] = 0.;
+	}
 
 	/* Compute elements and taus of time points */
 	(*jmi_opt_coll)->tp_e = (int*)calloc(jmi->n_tp,sizeof(int));
