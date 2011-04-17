@@ -1,5 +1,5 @@
-#ifndef fmiPlatformTypes_h
-#define fmiPlatformTypes_h
+#ifndef fmiCSPlatformTypes_h
+#define fmiCSPlatformTypes_h
 
 /* Standard header file to define the argument types of the
    functions of the Model Execution Interface.
@@ -70,4 +70,4 @@
 /* Undefined value for fmiValueReference (largest unsigned int value) */
 #define fmiUndefinedValueReference (fmiValueReference)(-1)
 
-#endif
+#endif /* fmiCSPlatformTypes_h */

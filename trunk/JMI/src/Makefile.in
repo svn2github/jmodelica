@@ -102,6 +102,13 @@ libfmi_la_OBJECTS = $(am_libfmi_la_OBJECTS)
 libfmi_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(libfmi_la_CFLAGS) \
 	$(CFLAGS) $(libfmi_la_LDFLAGS) $(LDFLAGS) -o $@
+libfmi_cs_la_LIBADD =
+am_libfmi_cs_la_OBJECTS = libfmi_cs_la-fmi_cs.lo \
+	libfmi_cs_la-kinpinv.lo libfmi_cs_la-kinsol_jmod.lo
+libfmi_cs_la_OBJECTS = $(am_libfmi_cs_la_OBJECTS)
+libfmi_cs_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(libfmi_cs_la_CFLAGS) \
+	$(CFLAGS) $(libfmi_cs_la_LDFLAGS) $(LDFLAGS) -o $@
 libjmi_la_LIBADD =
 am_libjmi_la_OBJECTS = libjmi_la-jmi.lo libjmi_la-jmi_common.lo \
 	libjmi_la-jmi_newton_solvers.lo libjmi_la-jmi_util.lo \
@@ -200,20 +207,21 @@ CXXLD = $(CXX)
 CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(libfmi_la_SOURCES) $(libjmi_la_SOURCES) \
-	$(libjmi_algorithm_la_SOURCES) \
+SOURCES = $(libfmi_la_SOURCES) $(libfmi_cs_la_SOURCES) \
+	$(libjmi_la_SOURCES) $(libjmi_algorithm_la_SOURCES) \
 	$(libjmi_algorithm_cppad_la_SOURCES) \
 	$(libjmi_cppad_la_SOURCES) $(libjmi_solver_la_SOURCES) \
 	$(libjmi_solver_cppad_la_SOURCES) \
 	$(libmodelica_utilities_la_SOURCES)
-DIST_SOURCES = $(libfmi_la_SOURCES) $(libjmi_la_SOURCES) \
-	$(libjmi_algorithm_la_SOURCES) \
+DIST_SOURCES = $(libfmi_la_SOURCES) $(libfmi_cs_la_SOURCES) \
+	$(libjmi_la_SOURCES) $(libjmi_algorithm_la_SOURCES) \
 	$(libjmi_algorithm_cppad_la_SOURCES) \
 	$(libjmi_cppad_la_SOURCES) $(libjmi_solver_la_SOURCES) \
 	$(libjmi_solver_cppad_la_SOURCES) \
 	$(libmodelica_utilities_la_SOURCES)
 am__include_HEADERS_DIST = jmi.h fmiModelFunctions.h fmiModelTypes.h \
-	fmi.h ModelicaUtilities.h jmi_common.h jmi_newton_solvers.h \
+	fmiCSFunctions.h fmiCSPlatformTypes.h fmi.h \
+	ModelicaUtilities.h jmi_common.h jmi_newton_solvers.h \
 	jmi_init_opt.h jmi_opt_coll.h jmi_opt_coll_radau.h \
 	jmi_array_common.h jmi_array_none.h jmi_array_cppad.h \
 	jmi_util.h $(abs_top_srcdir)/Assimulo/src/lib/kinpinv.h \
@@ -290,6 +298,7 @@ PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
 PACKAGE_NAME = @PACKAGE_NAME@
 PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
+PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 RANLIB = @RANLIB@
@@ -366,12 +375,14 @@ AUTOMAKE_OPTIONS = foreign
 
 #lib_LTLIBRARIES = libjmi.la \
 #                  libjmi_cppad.la
-lib_LTLIBRARIES = libjmi.la libjmi_algorithm.la libfmi.la \
+lib_LTLIBRARIES = libjmi.la libjmi_algorithm.la libfmi.la libfmi_cs.la \
 	libmodelica_utilities.la $(am__append_1) $(am__append_2) \
 	$(am__append_3)
 libjmi_la_SOURCES = jmi.h \
                     fmiModelFunctions.h \
                     fmiModelTypes.h \
+                    fmiCSFunctions.h \
+                    fmiCSPlatformTypes.h \
                     jmi_common.h \
                     jmi.c \
                     jmi_common.c \
@@ -414,11 +425,21 @@ libfmi_la_SOURCES = fmi.h \
                     $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.h \
                     $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod_impl.h 
 
+libfmi_cs_la_SOURCES = fmi_cs.h \
+                    fmiCSModelFunctions.h \
+                    fmiCSPlatformTypes.h \
+                    jmi.h \
+                    fmi_cs.c \
+                    $(abs_top_srcdir)/Assimulo/src/lib/kinpinv.c \
+                    $(abs_top_srcdir)/Assimulo/src/lib/kinpinv.h \
+                    $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.c \
+                    $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.h \
+                    $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod_impl.h 
+
 libfmi_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g -I$(SUNDIALS_HOME)/include -std=c89 -pedantic
-# Don't build shared libraries of libjmi and libjmicppad. This is not
-# really needed, and also (more importantly perhaps) I cannot force
-# static inclusion of the runtime libraries when creating model so:s.
 libfmi_la_LDFLAGS = -no-undefined -static-libtool-libs
+libfmi_cs_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g -I$(SUNDIALS_HOME)/include -std=c89 -pedantic
+libfmi_cs_la_LDFLAGS = -no-undefined -static-libtool-libs
 libmodelica_utilities_la_SOURCES = ModelicaUtilities.h \
                                    ModelicaUtilities.c
 
@@ -440,8 +461,6 @@ libjmi_solver_la_CXXFLAGS = -Wall -I$(IPOPT_INC) -DJMI_AD=JMI_AD_NONE -g -I$(SUN
 # static inclusion of the runtime libraries when creating model so:s.
 libjmi_solver_la_LDFLAGS = -no-undefined -static-libtool-libs
 libjmi_cppad_la_SOURCES = jmi.h \
-                    fmiModelFunctions.h \
-                    fmiModelTypes.h \
                     jmi_common.c \
                     jmi_cppad.cpp\
                     jmi_common.c \
@@ -477,7 +496,8 @@ libjmi_solver_cppad_la_CFLAGS = -Wall -x c++ -I$(CPPAD_HOME) -I$(IPOPT_INC) -DJM
 libjmi_solver_cppad_la_CXXFLAGS = -Wall -I$(CPPAD_HOME) -I$(IPOPT_INC) -DJMI_AD=JMI_AD_CPPAD -g -I$(SUNDIALS_HOME)/include
 libjmi_solver_cppad_la_LDFLAGS = -no-undefined -static-libtool-libs -g -I$(SUNDIALS_HOME)/include
 #libjmi_cppad_la_LDFLAGS = -no-undefined 
-include_HEADERS = jmi.h fmiModelFunctions.h fmiModelTypes.h fmi.h \
+include_HEADERS = jmi.h fmiModelFunctions.h fmiModelTypes.h \
+	fmiCSFunctions.h fmiCSPlatformTypes.h fmi.h \
 	ModelicaUtilities.h jmi_common.h jmi_newton_solvers.h \
 	jmi_init_opt.h jmi_opt_coll.h jmi_opt_coll_radau.h \
 	jmi_array_common.h jmi_array_none.h jmi_array_cppad.h \
@@ -552,6 +572,8 @@ clean-libLTLIBRARIES:
 	done
 libfmi.la: $(libfmi_la_OBJECTS) $(libfmi_la_DEPENDENCIES) 
 	$(libfmi_la_LINK) -rpath $(libdir) $(libfmi_la_OBJECTS) $(libfmi_la_LIBADD) $(LIBS)
+libfmi_cs.la: $(libfmi_cs_la_OBJECTS) $(libfmi_cs_la_DEPENDENCIES) 
+	$(libfmi_cs_la_LINK) -rpath $(libdir) $(libfmi_cs_la_OBJECTS) $(libfmi_cs_la_LIBADD) $(LIBS)
 libjmi.la: $(libjmi_la_OBJECTS) $(libjmi_la_DEPENDENCIES) 
 	$(libjmi_la_LINK) -rpath $(libdir) $(libjmi_la_OBJECTS) $(libjmi_la_LIBADD) $(LIBS)
 libjmi_algorithm.la: $(libjmi_algorithm_la_OBJECTS) $(libjmi_algorithm_la_DEPENDENCIES) 
@@ -573,6 +595,9 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfmi_cs_la-fmi_cs.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfmi_cs_la-kinpinv.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfmi_cs_la-kinsol_jmod.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfmi_la-fmi.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfmi_la-kinpinv.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfmi_la-kinsol_jmod.Plo@am__quote@
@@ -645,6 +670,27 @@ libfmi_la-kinsol_jmod.lo: $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.c' object='libfmi_la-kinsol_jmod.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfmi_la_CFLAGS) $(CFLAGS) -c -o libfmi_la-kinsol_jmod.lo `test -f '$(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.c
+
+libfmi_cs_la-fmi_cs.lo: fmi_cs.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfmi_cs_la_CFLAGS) $(CFLAGS) -MT libfmi_cs_la-fmi_cs.lo -MD -MP -MF $(DEPDIR)/libfmi_cs_la-fmi_cs.Tpo -c -o libfmi_cs_la-fmi_cs.lo `test -f 'fmi_cs.c' || echo '$(srcdir)/'`fmi_cs.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libfmi_cs_la-fmi_cs.Tpo $(DEPDIR)/libfmi_cs_la-fmi_cs.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='fmi_cs.c' object='libfmi_cs_la-fmi_cs.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfmi_cs_la_CFLAGS) $(CFLAGS) -c -o libfmi_cs_la-fmi_cs.lo `test -f 'fmi_cs.c' || echo '$(srcdir)/'`fmi_cs.c
+
+libfmi_cs_la-kinpinv.lo: $(abs_top_srcdir)/Assimulo/src/lib/kinpinv.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfmi_cs_la_CFLAGS) $(CFLAGS) -MT libfmi_cs_la-kinpinv.lo -MD -MP -MF $(DEPDIR)/libfmi_cs_la-kinpinv.Tpo -c -o libfmi_cs_la-kinpinv.lo `test -f '$(abs_top_srcdir)/Assimulo/src/lib/kinpinv.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/Assimulo/src/lib/kinpinv.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libfmi_cs_la-kinpinv.Tpo $(DEPDIR)/libfmi_cs_la-kinpinv.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(abs_top_srcdir)/Assimulo/src/lib/kinpinv.c' object='libfmi_cs_la-kinpinv.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfmi_cs_la_CFLAGS) $(CFLAGS) -c -o libfmi_cs_la-kinpinv.lo `test -f '$(abs_top_srcdir)/Assimulo/src/lib/kinpinv.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/Assimulo/src/lib/kinpinv.c
+
+libfmi_cs_la-kinsol_jmod.lo: $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfmi_cs_la_CFLAGS) $(CFLAGS) -MT libfmi_cs_la-kinsol_jmod.lo -MD -MP -MF $(DEPDIR)/libfmi_cs_la-kinsol_jmod.Tpo -c -o libfmi_cs_la-kinsol_jmod.lo `test -f '$(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libfmi_cs_la-kinsol_jmod.Tpo $(DEPDIR)/libfmi_cs_la-kinsol_jmod.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.c' object='libfmi_cs_la-kinsol_jmod.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfmi_cs_la_CFLAGS) $(CFLAGS) -c -o libfmi_cs_la-kinsol_jmod.lo `test -f '$(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.c
 
 libjmi_la-jmi.lo: jmi.c
 @am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_la_CFLAGS) $(CFLAGS) -MT libjmi_la-jmi.lo -MD -MP -MF $(DEPDIR)/libjmi_la-jmi.Tpo -c -o libjmi_la-jmi.lo `test -f 'jmi.c' || echo '$(srcdir)/'`jmi.c

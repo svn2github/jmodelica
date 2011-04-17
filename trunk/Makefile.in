@@ -194,6 +194,7 @@ PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
 PACKAGE_NAME = @PACKAGE_NAME@
 PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
+PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 RANLIB = @RANLIB@
@@ -866,6 +867,8 @@ install-exec-local:
 	mkdir -p $(DESTDIR)$(prefix)/CodeGenTemplates
 	cp $(abs_top_srcdir)/JMI/LICENSE_GPL $(DESTDIR)$(prefix)/CodeGenTemplates/LICENSE
 	cp  $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/templates/jmi_modelica_template.c $(DESTDIR)$(prefix)/CodeGenTemplates
+	cp  $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/templates/fmi_me_modelica_template.c $(DESTDIR)$(prefix)/CodeGenTemplates
+	cp  $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/templates/fmi_cs_modelica_template.c $(DESTDIR)$(prefix)/CodeGenTemplates
 	cp  $(abs_top_srcdir)/Compiler/OptimicaCBackEnd/templates/jmi_optimica_template.c $(DESTDIR)$(prefix)/CodeGenTemplates
 	cp  $(abs_top_srcdir)/Compiler/ModelicaXMLBackEnd/templates/fmi_model_description.tpl $(DESTDIR)$(prefix)/CodeGenTemplates
 	cp  $(abs_top_srcdir)/Compiler/ModelicaXMLBackEnd/templates/fmi_extended_model_description.tpl $(DESTDIR)$(prefix)/CodeGenTemplates

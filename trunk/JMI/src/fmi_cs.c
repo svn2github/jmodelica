@@ -27,7 +27,7 @@ fmiStatus fmi_cs_do_step(fmiComponent c,
 						 fmiReal currentCommunicationPoint,
                          fmiReal communicationStepSize,
                          fmiBoolean   newStep) {
-// Add implementation
+  /* Add implementation */
 	return fmiOK;
 
 }

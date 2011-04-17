@@ -25,7 +25,7 @@
 #define fmi_cs_h
 
 #include "fmiCSFunctions.h"
-#include "jmi.h"
+/* #include "jmi.h" */
 
 /**
  * \defgroup fmi_cs_public Public functions of the Functional Mock-up Interface for co-simulation.

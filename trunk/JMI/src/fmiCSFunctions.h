@@ -1,5 +1,5 @@
-#ifndef fmiFunctions_h
-#define fmiFunctions_h
+#ifndef fmiCSFunctions_h
+#define fmiCSFunctions_h
 
 /* This header file must be utilized when compiling a FMU.
    It defines all functions of Co-Simulation Interface.
@@ -228,4 +228,4 @@ Functions for FMI for Co-Simulation
    DllExport fmiStatus fmiGetStringStatus (fmiComponent c, const fmiStatusKind s, fmiString*  value);
 
 
-#endif // fmiFunctions_h
+#endif /* fmiCSFunctions_h */

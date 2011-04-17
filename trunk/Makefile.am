@@ -117,6 +117,8 @@ endif
 	mkdir -p $(DESTDIR)$(prefix)/CodeGenTemplates
 	cp $(abs_top_srcdir)/JMI/LICENSE_GPL $(DESTDIR)$(prefix)/CodeGenTemplates/LICENSE
 	cp  $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/templates/jmi_modelica_template.c $(DESTDIR)$(prefix)/CodeGenTemplates
+	cp  $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/templates/fmi_me_modelica_template.c $(DESTDIR)$(prefix)/CodeGenTemplates
+	cp  $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/templates/fmi_cs_modelica_template.c $(DESTDIR)$(prefix)/CodeGenTemplates
 	cp  $(abs_top_srcdir)/Compiler/OptimicaCBackEnd/templates/jmi_optimica_template.c $(DESTDIR)$(prefix)/CodeGenTemplates
 	cp  $(abs_top_srcdir)/Compiler/ModelicaXMLBackEnd/templates/fmi_model_description.tpl $(DESTDIR)$(prefix)/CodeGenTemplates
 	cp  $(abs_top_srcdir)/Compiler/ModelicaXMLBackEnd/templates/fmi_extended_model_description.tpl $(DESTDIR)$(prefix)/CodeGenTemplates

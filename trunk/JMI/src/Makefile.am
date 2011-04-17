@@ -26,6 +26,7 @@ AUTOMAKE_OPTIONS = foreign
 lib_LTLIBRARIES = libjmi.la \
                   libjmi_algorithm.la \
                   libfmi.la \
+                  libfmi_cs.la \
                   libmodelica_utilities.la
 
 if COMPILE_WITH_CPPAD
@@ -43,6 +44,8 @@ endif
 libjmi_la_SOURCES = jmi.h \
                     fmiModelFunctions.h \
                     fmiModelTypes.h \
+                    fmiCSFunctions.h \
+                    fmiCSPlatformTypes.h \
                     jmi_common.h \
                     jmi.c \
                     jmi_common.c \
@@ -87,11 +90,24 @@ libfmi_la_SOURCES = fmi.h \
                     $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.h \
                     $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod_impl.h 
 
+libfmi_cs_la_SOURCES = fmi_cs.h \
+                    fmiCSModelFunctions.h \
+                    fmiCSPlatformTypes.h \
+                    jmi.h \
+                    fmi_cs.c \
+                    $(abs_top_srcdir)/Assimulo/src/lib/kinpinv.c \
+                    $(abs_top_srcdir)/Assimulo/src/lib/kinpinv.h \
+                    $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.c \
+                    $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod.h \
+                    $(abs_top_srcdir)/Assimulo/src/lib/kinsol_jmod_impl.h 
+
+
 libfmi_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g -I$(SUNDIALS_HOME)/include -std=c89 -pedantic
-# Don't build shared libraries of libjmi and libjmicppad. This is not
-# really needed, and also (more importantly perhaps) I cannot force
-# static inclusion of the runtime libraries when creating model so:s.
 libfmi_la_LDFLAGS = -no-undefined -static-libtool-libs
+
+libfmi_cs_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g -I$(SUNDIALS_HOME)/include -std=c89 -pedantic
+libfmi_cs_la_LDFLAGS = -no-undefined -static-libtool-libs
+
 
 libmodelica_utilities_la_SOURCES = ModelicaUtilities.h \
                                    ModelicaUtilities.c
@@ -116,8 +132,6 @@ libjmi_solver_la_CXXFLAGS = -Wall -I$(IPOPT_INC) -DJMI_AD=JMI_AD_NONE -g -I$(SUN
 libjmi_solver_la_LDFLAGS = -no-undefined -static-libtool-libs
 
 libjmi_cppad_la_SOURCES = jmi.h \
-                    fmiModelFunctions.h \
-                    fmiModelTypes.h \
                     jmi_common.c \
                     jmi_cppad.cpp\
                     jmi_common.c \
@@ -156,10 +170,11 @@ libjmi_solver_cppad_la_CXXFLAGS = -Wall -I$(CPPAD_HOME) -I$(IPOPT_INC) -DJMI_AD=
 libjmi_solver_cppad_la_LDFLAGS = -no-undefined -static-libtool-libs -g -I$(SUNDIALS_HOME)/include
 #libjmi_cppad_la_LDFLAGS = -no-undefined 
 
-
 include_HEADERS = jmi.h \
                   fmiModelFunctions.h \
                   fmiModelTypes.h \
+                  fmiCSFunctions.h \
+                  fmiCSPlatformTypes.h \
                   fmi.h \
                   ModelicaUtilities.h \
                   jmi_common.h \
