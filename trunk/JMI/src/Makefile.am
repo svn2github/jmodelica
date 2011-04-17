@@ -176,6 +176,7 @@ include_HEADERS = jmi.h \
                   fmiCSFunctions.h \
                   fmiCSPlatformTypes.h \
                   fmi.h \
+                  fmi_cs.h\
                   ModelicaUtilities.h \
                   jmi_common.h \
                   jmi_newton_solvers.h \

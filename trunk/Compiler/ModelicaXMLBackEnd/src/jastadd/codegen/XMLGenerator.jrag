@@ -401,7 +401,7 @@ public class XMLGenerator extends GenericGenerator {
 						genPrinter.print("\t\t\t</QualifiedName>");
 					}		
 					
-					Boolean generateFMI = fclass.root().options.getBooleanOption("generate_fmi_xml");
+					Boolean generateFMI = fclass.root().options.getBooleanOption("generate_fmi_me_xml");
 					if (!generateFMI) {				
 						//is linear?
 						addLinearInfo(genPrinter, variable);

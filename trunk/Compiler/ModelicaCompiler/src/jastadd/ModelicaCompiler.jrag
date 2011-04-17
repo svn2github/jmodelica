@@ -165,11 +165,21 @@ public class ModelicaCompiler {
 		defaultTemplatePathsJMU();
 	}
 
-	public void defaultOptionsFMU() {
+	public void defaultOptionsFMUME() {
 		setBooleanOption("generate_ode", true);
 		setBooleanOption("generate_dae", false);	
 		setBooleanOption("equation_sorting", true);
-		setBooleanOption("generate_fmi_xml", true);
+		setBooleanOption("generate_fmi_me_xml", true);
+		setBooleanOption("generate_fmi_cs_xml", false);
+		setBooleanOption("generate_xml_equations", false);
+	}
+
+	public void defaultOptionsFMUCS() {
+		setBooleanOption("generate_ode", true);
+		setBooleanOption("generate_dae", false);	
+		setBooleanOption("equation_sorting", true);
+		setBooleanOption("generate_fmi_me_xml", true);
+		setBooleanOption("generate_fmi_cs_xml", true);
 		setBooleanOption("generate_xml_equations", false);
 	}
 	
@@ -177,16 +187,30 @@ public class ModelicaCompiler {
 		defaultTemplatePaths("jmodelica");
 	}
 	
-	public void defaultTemplatePathsFMU() {
-		defaultTemplatePaths("fmi");
+	public void defaultTemplatePathsFMUME() {
+		defaultTemplatePaths("fmi_me");
+	}
+
+	public void defaultTemplatePathsFMUCS() {
+		defaultTemplatePaths("fmi_cs");
 	}
 	
 	protected void defaultTemplatePaths(String prefix) {
 		// give templates default values based on $JMODELICA_HOME
 		File dir = getTemplatesDir();
-		this.xmlTpl = new File(dir, prefix + "_model_description.tpl").getPath();
-		this.xmlValuesTpl = new File(dir, "jmodelica_model_values.tpl").getPath();
-		this.cTemplatefile = new File(dir, "jmi_modelica_template.c").getPath();
+		if (prefix.equals("jmodelica")) {
+			this.xmlTpl = new File(dir, prefix + "_model_description.tpl").getPath();
+			this.xmlValuesTpl = new File(dir, "jmodelica_model_values.tpl").getPath();
+			this.cTemplatefile = new File(dir, "jmi_modelica_template.c").getPath();
+		} else if (prefix.equals("fmi_me")) {
+			this.xmlTpl = new File(dir, "fmi_model_description.tpl").getPath();
+			this.xmlValuesTpl = new File(dir, "jmodelica_model_values.tpl").getPath();
+			this.cTemplatefile = new File(dir, "fmi_me_modelica_template.c").getPath();
+		} else if (prefix.equals("fmi_cs")) {
+			this.xmlTpl = new File(dir, "fmi_model_description.tpl").getPath();
+			this.xmlValuesTpl = new File(dir, "jmodelica_model_values.tpl").getPath();
+			this.cTemplatefile = new File(dir, "fmi_cs_modelica_template.c").getPath();
+		}  
 	}
 
 	/**
@@ -563,10 +587,15 @@ public class ModelicaCompiler {
 		OptionRegistry tempOptions = new OptionRegistry(options);
 		
 		// use fmi file templates and set the correct options so that XML file will be FMI compliant
-		defaultOptionsFMU();
-		defaultTemplatePathsFMU();
-		
-		this.compileUnit(className, fileName, target, compileTo, "FMU");
+		if (target.equals("model_noad") || target.equals("model_fmume")) {
+			defaultOptionsFMUME();
+			defaultTemplatePathsFMUME();	
+			this.compileUnit(className, fileName, target, compileTo, "FMUME");
+		} else 	if (target.equals("model_fmucs")) {
+			defaultOptionsFMUCS();
+			defaultTemplatePathsFMUCS();	
+			this.compileUnit(className, fileName, target, compileTo, "FMUCS");
+		}		
 		
 		// set back all options
 		options.copyAllOptions(tempOptions);
@@ -575,7 +604,7 @@ public class ModelicaCompiler {
 	/**
 	 * \brief Compiles a JMU or FMU (helper function for compileJMU and compileFMU).
 	 * 
-	 * @param unitType "JMU" or "FMU".
+	 * @param unitType "JMU", "FMUME" or "FMUCS".
 	 */
 	private void compileUnit(String className, String fileName[], String target, String compileTo, String unitType) 
 		throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, beaver.Parser.Exception {
@@ -648,8 +677,11 @@ public class ModelicaCompiler {
 		int BUFFER = 2048;
 		try {
 			hookCheckAbort();
-
-			File unitFile = new File(dirPath, mMangledName + "." + unitType.toLowerCase());
+                        String mu_suffix = "jmu";
+			if (unitType.equals("FMUCS") | unitType.equals("FMUME")) {
+				mu_suffix = "fmu";
+			}
+			File unitFile = new File(dirPath, mMangledName + "." + mu_suffix);
 			BufferedInputStream origin = null;
 			FileOutputStream dest = new FileOutputStream(unitFile);
 			ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(dest));
@@ -1842,7 +1874,7 @@ public class GCCcompilerDelegator implements CCompilerDelegator {
 			if (!c.equals(""))
 				cmdList.add(c);
 		cmd = cmdList.toArray(new String[cmdList.size()]);
-				
+	
 		// execute make
 		if (ModelicaCompiler.loggedProcess(cmd, null, workDir) != 0)
 			throw new CcodeCompilationException("Compilation of generated C code failed.");

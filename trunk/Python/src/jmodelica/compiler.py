@@ -75,8 +75,12 @@ class ModelicaCompiler():
         'jmodelica_model_description.tpl')
     model_values_tpl = os.path.join(jm_home, 'CodeGenTemplates', 
         'jmodelica_model_values.tpl')
-    c_tpl_path = os.path.join(jm_home, 'CodeGenTemplates', 
+    jmi_c_tpl_path = os.path.join(jm_home, 'CodeGenTemplates', 
         'jmi_modelica_template.c')    
+    fmi_me_c_tpl_path = os.path.join(jm_home, 'CodeGenTemplates', 
+        'fmi_me_modelica_template.c')    
+    fmi_cs_c_tpl_path = os.path.join(jm_home, 'CodeGenTemplates', 
+        'fmi_cs_modelica_template.c')    
     options_file_path = os.path.join(jm_home, 'Options','options.xml')
 
     def __init__(self):
@@ -90,23 +94,23 @@ class ModelicaCompiler():
             self._handle_exception(ex)
             
         options.addStringOption('MODELICAPATH',jm.environ['MODELICAPATH'])
-        fmi = options.getBooleanOption('generate_fmi_xml')
+        fmi = options.getBooleanOption('generate_fmi_me_xml')
         equ = options.getBooleanOption('generate_xml_equations')
         if fmi and not equ:
             self._compiler = self.ModelicaCompiler(options, 
                                                    self.fmi_tpl,
                                                    self.model_values_tpl,
-                                                   self.c_tpl_path)
+                                                   self.jmi_c_tpl_path)
         elif fmi and equ:
             self._compiler = self.ModelicaCompiler(options, 
                                                    self.fmi_ext_tpl,
                                                    self.model_values_tpl,
-                                                   self.c_tpl_path)
+                                                   self.jmi_c_tpl_path)
         else:
             self._compiler = self.ModelicaCompiler(options, 
                                                    self.jmodelica_tpl,
                                                    self.model_values_tpl,
-                                                   self.c_tpl_path)
+                                                   self.jmi_c_tpl_path)
             
     @classmethod
     def set_log_level(self,level):
@@ -192,9 +196,9 @@ class ModelicaCompiler():
         try:
             self._compiler.setBooleanOption(key, value)
             
-            if key.strip() == 'generate_fmi_xml' or \
+            if key.strip() == 'generate_fmi_me_xml' or \
                 key.strip() == 'generate_xml_equations':
-                fmi = self.get_boolean_option('generate_fmi_xml')
+                fmi = self.get_boolean_option('generate_fmi_me_xml')
                 equ = self.get_boolean_option('generate_xml_equations')
                 if fmi and not equ:
                     self.set_XML_tpl(self.fmi_tpl)
@@ -684,18 +688,18 @@ class OptimicaCompiler(ModelicaCompiler):
             
         options.addStringOption('MODELICAPATH',jm.environ['MODELICAPATH'])
         
-        fmi = options.getBooleanOption('generate_fmi_xml')
+        fmi = options.getBooleanOption('generate_fmi_me_xml')
         if fmi:
             self._compiler = self.OptimicaCompiler(options, 
                                                    self.fmi_ext_tpl,
                                                    self.model_values_tpl,
-                                                   self.c_tpl_path,
+                                                   self.jmi_c_tpl_path,
                                                    self.optimica_c_tpl_path)
         else:
             self._compiler = self.OptimicaCompiler(options, 
                                                    self.jmodelica_tpl,
                                                    self.model_values_tpl,
-                                                   self.c_tpl_path,
+                                                   self.jmi_c_tpl_path,
                                                    self.optimica_c_tpl_path)
     @classmethod
     def set_log_level(self,level):
@@ -745,8 +749,8 @@ class OptimicaCompiler(ModelicaCompiler):
         try:
             self._compiler.setBooleanOption(key, value)
             
-            if key.strip() == 'generate_fmi_xml':
-                fmi = self.get_boolean_option('generate_fmi_xml')
+            if key.strip() == 'generate_fmi_me_xml':
+                fmi = self.get_boolean_option('generate_fmi_me_xml')
                 if fmi:
                     self.set_XML_tpl(self.fmi_ext_tpl)
                 else:
