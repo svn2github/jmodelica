@@ -1,9 +1,10 @@
 package org.jmodelica.ide.editor.actions;
 
 import org.jmodelica.ide.IDEConstants;
+import org.jmodelica.ide.editor.ICurrentClassListener;
 import org.jmodelica.modelica.compiler.BaseClassDecl;
 
-public abstract class CurrentClassAction extends ConnectedTextsAction {
+public abstract class CurrentClassAction extends ConnectedTextsAction implements ICurrentClassListener {
 
 	protected BaseClassDecl currentClass;
 

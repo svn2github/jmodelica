@@ -45,13 +45,9 @@ public abstract class OutlinePage extends AbstractBaseContentOutlinePage {
 
 	private OutlineItemComparator comparator;
 	private IElementComparer comparer;
-	private boolean selecting;
-	private boolean fromEditor;
 
 	public OutlinePage(AbstractTextEditor editor) {
 		super(editor);
-		selecting = false;
-		fromEditor = false;
 	}
 
 	@Override
@@ -62,13 +58,11 @@ public abstract class OutlinePage extends AbstractBaseContentOutlinePage {
 
 	@Override
 	public void highlightNodeInEditor(IJastAddNode node) {
-		if (fromEditor)
-			return;
 		IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		IWorkbenchPage page = window.getActivePage();
 		IEditorPart editor = page.getActiveEditor();
 		if (editor instanceof Editor && node instanceof ASTNode<?>) 
-			((Editor) editor).selectNode((ASTNode<?>) node, !selecting, false);
+			((Editor) editor).selectNode((ASTNode) node);
 	}
 
 	@Override
@@ -101,7 +95,6 @@ public abstract class OutlinePage extends AbstractBaseContentOutlinePage {
 			Control control= viewer.getControl();
 			if (control != null && !control.isDisposed()) {
 				control.setRedraw(false);
-				// TODO: This should work for restoring open paths - why doesn't it? need comparator?
 				ISelection selection = viewer.getSelection();
 				TreePath[] paths = viewer.getExpandedTreePaths();
 				
@@ -119,27 +112,16 @@ public abstract class OutlinePage extends AbstractBaseContentOutlinePage {
 	protected abstract void rootChanged(TreeViewer viewer);
 
 	public void select(ASTNode<?> node) {
-		try {
-			fromEditor = true;
-			TreeSelection sel = (node != null) ? 
-					new TreeSelection(pathFromNode(node)) : 
-					new TreeSelection();
-			select(sel);
-		} finally {
-			fromEditor = false;
-		}
+		TreeSelection sel = (node != null) ? 
+				new TreeSelection(pathFromNode(node)) : 
+				new TreeSelection();
+		select(sel);
 	}
 
 	private void select(ISelection sel) {
 		TreeViewer viewer = getTreeViewer();
-		if (viewer != null) {
-			try {
-				selecting = true;
-				viewer.setSelection(sel, true);
-			} finally {
-				selecting = false;
-			}
-		}
+		if (viewer != null) 
+			viewer.setSelection(sel, true);
 	}
 
 	private TreePath pathFromNode(Object node) {

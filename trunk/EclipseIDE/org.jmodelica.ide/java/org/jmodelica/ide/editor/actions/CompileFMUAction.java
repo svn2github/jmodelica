@@ -33,6 +33,7 @@ import org.eclipse.ui.console.MessageConsoleStream;
 import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.editor.Editor;
 import org.jmodelica.ide.error.InstanceErrorHandler;
+import org.jmodelica.ide.helpers.ShowMessageJob;
 import org.jmodelica.modelica.compiler.BaseClassDecl;
 import org.jmodelica.modelica.compiler.CompilationAbortedException;
 import org.jmodelica.modelica.compiler.CompilationHooks;
@@ -116,15 +117,16 @@ public class CompileFMUAction extends CurrentClassAction implements IJobChangeLi
 			outputDirDlg = new DirectoryDialog(shell);
 			outputDirDlg.setMessage("Select output directory for FMU");
 			outputDirDlg.setText("Select output directory");
-		}		
+		}
 		return outputDirDlg.open();
 	}
 
 	public void done(IJobChangeEvent event) {
-		if (event.getResult().getSeverity() == IStatus.ERROR) {
-			Shell shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
+		if (event.getResult().getSeverity() == IStatus.INFO) {
 			String title = event.getJob().getName();
-			MessageDialog.openError(shell, title, event.getResult().getMessage());
+			String message = event.getResult().getMessage();
+			int kind = MessageDialog.ERROR;
+			new ShowMessageJob(title, message, kind).schedule();
 		}
 	}
 
@@ -195,7 +197,7 @@ public class CompileFMUAction extends CurrentClassAction implements IJobChangeLi
 				String msg = "Error compiling " + className + " to FMU";
 				if (e.getMessage() != null)
 					msg += ":\n" + e.getMessage();
-				status = new Status(IStatus.ERROR, IDEConstants.PLUGIN_ID, msg, e); 
+				status = new Status(IStatus.INFO, IDEConstants.PLUGIN_ID, msg, e); 
 			}
 			ModelicaCompiler.setDefaultLogger();
 			ModelicaCompiler.closeStreamLogger();

@@ -20,12 +20,14 @@ import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import org.jmodelica.ide.editor.Editor;
+import org.jmodelica.ide.editor.ICurrentClassListener;
 import org.jmodelica.ide.helpers.EclipseUtil;
 
 public class ClassOutlineView extends OutlineView {
@@ -44,6 +46,8 @@ public class ClassOutlineView extends OutlineView {
 					initPage(page);
 					page.createControl(getPageBook());
 				}
+				if (editor instanceof ICurrentClassListener) 
+					page.addCurrentClassListener((ICurrentClassListener) editor);
 				return page;
 			}
 		}
@@ -56,6 +60,17 @@ public class ClassOutlineView extends OutlineView {
 		super.doDestroyPage(part, rec);
 	}
 	
+	public void partClosed(IWorkbenchPart part) {
+		if (part instanceof ICurrentClassListener) {
+			PageRec rec = getPageRec(part);
+			if (rec != null && rec.page instanceof ClassOutlinePage) {
+				ClassOutlinePage page = (ClassOutlinePage) rec.page;
+				page.removeCurrentClassListener((ICurrentClassListener) part);
+			}
+		}
+		super.partClosed(part);
+	}
+
 	/**
 	 * Get the project connected to the given text editor's opened file, if any.
 	 */

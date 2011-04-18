@@ -15,27 +15,37 @@
 */
 package org.jmodelica.ide.outline;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.jastadd.plugin.registry.ASTRegistry;
 import org.jastadd.plugin.registry.IASTRegistryListener;
+import org.jmodelica.ide.editor.ICurrentClassListener;
 import org.jmodelica.ide.helpers.Util;
+import org.jmodelica.modelica.compiler.BaseClassDecl;
 
 public class ClassOutlinePage extends OutlinePage implements IDoubleClickListener, IASTRegistryListener {
 
 	private ASTRegistry registry;
 	private ClassOutlineContentProvider content;
 	private IProject project;
+	private Set<ICurrentClassListener> currentClassListeners;
 
 	public ClassOutlinePage(IProject project, AbstractTextEditor editor) {
 		super(editor);
 		this.project = project;
+		currentClassListeners = new HashSet<ICurrentClassListener>();
 	}
 
 	@Override
@@ -54,6 +64,7 @@ public class ClassOutlinePage extends OutlinePage implements IDoubleClickListene
 	public void dispose() {
 		super.dispose();
 		registry.removeListener(this);
+		currentClassListeners.clear();
 	}
 
 	@Override
@@ -69,7 +80,7 @@ public class ClassOutlinePage extends OutlinePage implements IDoubleClickListene
 
 	public void doubleClick(DoubleClickEvent event) {
 		Object elem = Util.getSelected(event.getSelection());
-		Util.openAndSelect(getSite().getPage(), elem);
+		Util.openAndSelect(getSite().getPage(), elem, true);
 	}
 
 	public void projectASTChanged(IProject project) {
@@ -80,4 +91,28 @@ public class ClassOutlinePage extends OutlinePage implements IDoubleClickListene
 		// TODO Auto-generated method stub
 		
 	}
+
+	public void selectionChanged(SelectionChangedEvent event) {
+		BaseClassDecl node = getSelectedNode(event.getSelection());
+		for (ICurrentClassListener listener : currentClassListeners)
+			listener.setCurrentClass(node);
+		super.selectionChanged(event);
+	}
+
+	public BaseClassDecl getSelectedNode(ISelection selection) {
+		Object selected = null;
+		if (selection instanceof IStructuredSelection) 
+			selected = ((IStructuredSelection) selection).getFirstElement();
+		return (selected instanceof BaseClassDecl) ? (BaseClassDecl) selected : null;
+	}
+	
+	public void addCurrentClassListener(ICurrentClassListener listener) {
+		currentClassListeners.add(listener);
+		listener.setCurrentClass(getSelectedNode(getSelection()));
+	}
+	
+	public void removeCurrentClassListener(ICurrentClassListener listener) {
+		currentClassListeners.remove(listener);
+	}
+	
 }

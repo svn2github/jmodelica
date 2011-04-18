@@ -47,7 +47,7 @@ public class InstanceErrorHandler implements IErrorHandler {
 		count(p);
 	}
 
-	public void count(InstanceProblem p) {
+	protected void count(InstanceProblem p) {
 		Set<InstanceProblem> counted = p.isError() ? countedErrors : countedWarnings;
 		if (!counted.contains(p)) 
 			counted.add(p);

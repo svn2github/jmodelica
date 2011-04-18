@@ -37,6 +37,10 @@ import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.projection.ProjectionAnnotationModel;
 import org.eclipse.jface.text.source.projection.ProjectionSupport;
 import org.eclipse.jface.text.source.projection.ProjectionViewer;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -59,6 +63,7 @@ import org.jmodelica.ide.editor.actions.GoToDeclaration;
 import org.jmodelica.ide.editor.actions.ToggleAnnotationsAction;
 import org.jmodelica.ide.editor.actions.ToggleComment;
 import org.jmodelica.ide.namecomplete.CompletionProcessor;
+import org.jmodelica.ide.outline.ClassOutlinePage;
 import org.jmodelica.ide.outline.InstanceOutlinePage;
 import org.jmodelica.ide.outline.OutlinePage;
 import org.jmodelica.ide.outline.SourceOutlinePage;
@@ -70,7 +75,7 @@ import org.jmodelica.modelica.compiler.BaseClassDecl;
  * Modelica source editor.
  */
 public class Editor extends AbstractDecoratedTextEditor implements
-        IASTRegistryListener, EditorWithFile {
+        IASTRegistryListener, EditorWithFile, ICurrentClassListener {
 
 private final OutlinePage fSourceOutlinePage;
 private final InstanceOutlinePage fInstanceOutlinePage;
@@ -84,7 +89,7 @@ public  EditorFile file;
 
 private final ErrorCheckAction errorCheckAction;
 private final CompileFMUAction compileFMUAction;
-private final CurrentClassAction[] currentClassListeners;
+private final ICurrentClassListener[] currentClassListeners;
 private final ToggleAnnotationsAction toggleAnnotationsAction;
 private final GoToDeclaration goToDeclaration;
 //Commented out to disable name completion
@@ -109,7 +114,7 @@ public Editor() {
         new ErrorCheckAction();
     compileFMUAction = 
         new CompileFMUAction(this);
-    currentClassListeners = new CurrentClassAction[] { errorCheckAction, compileFMUAction };
+    currentClassListeners = new ICurrentClassListener[] { errorCheckAction, compileFMUAction };
     toggleAnnotationsAction = 
         new ToggleAnnotationsAction(this);
     fPartitioner = 
@@ -276,7 +281,7 @@ protected void createActions() {
         super.setAction(action.getId(), action);
     }
 
-    selectNode(null, true, true);
+    selectNode(null);
 }
 
 @Override
@@ -395,20 +400,18 @@ public ProjectionAnnotationModel getAnnotationModel() {
     return viewer.getProjectionAnnotationModel();
 }
 
-private void updateCurrentClassListeners(BaseClassDecl selected) {
-    for (CurrentClassAction listener : currentClassListeners)
+public void setCurrentClass(BaseClassDecl selected) {
+    for (ICurrentClassListener listener : currentClassListeners)
     	listener.setCurrentClass(selected);
 }
 
 /**
  * Selects <code>node</code> in the editor if valid.
  * 
- * @param node       node to select
- * @param inOutline  if true, propagate to source outline
- * @param inText 	 if true, select node in text
+ * @param node           node to select
  * @return  whether file <code>node</code> is from matches file in editor
  */
-public boolean selectNode(ASTNode<?> node, boolean inText, boolean inOutline) {
+public boolean selectNode(ASTNode<?> node) {
 
 	boolean matchesInput = false;
 	if (node != null) {
@@ -416,17 +419,12 @@ public boolean selectNode(ASTNode<?> node, boolean inText, boolean inOutline) {
 		File editorFile = new File(file.path());
 		matchesInput = editorFile.equals(nodeFile);
 	
-	    if (matchesInput && inText) {
+	    if (matchesInput) {
 	        ASTNode<?> sel = node.getSelectionNode();
 	        if (sel.offset() >= 0 && sel.length() >= 0)
 	            selectAndReveal(sel.offset(), sel.length());
 	    }
-		
-		if (inOutline)
-			fSourceOutlinePage.select(node);
 	}
-    
-    updateCurrentClassListeners((node instanceof BaseClassDecl) ? (BaseClassDecl) node : null);
 
     return matchesInput;
 }

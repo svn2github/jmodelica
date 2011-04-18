@@ -38,7 +38,7 @@ aspect Outline {
 	/*
 	 * Set labels of interesting nodes
 	 */
-	eq BaseClassDecl.contentOutlineLabel() = getRestriction().toString() + " " + getName().getID();
+	eq BaseClassDecl.contentOutlineLabel() = getName().getID();
 	eq ComponentDecl.contentOutlineLabel() = getName().getID() + " : " + getClassName().typeString() + typePrefixes();
 	eq BadDefinition.contentOutlineLabel() = "";
 	eq LibNode.contentOutlineLabel() = getName();

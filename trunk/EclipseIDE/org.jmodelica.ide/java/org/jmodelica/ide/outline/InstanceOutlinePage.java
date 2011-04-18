@@ -46,6 +46,6 @@ public class InstanceOutlinePage extends OutlinePage implements IDoubleClickList
 
 	public void doubleClick(DoubleClickEvent event) {
 		Object elem = Util.getSelected(event.getSelection());
-		Util.openAndSelect(getSite().getPage(), elem);
+		Util.openAndSelect(getSite().getPage(), elem, false);
 	}
 }

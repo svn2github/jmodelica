@@ -87,7 +87,7 @@ public class Util {
 		return elem;
 	}
 
-	public static void openAndSelect(IWorkbenchPage page, Object elem) {
+	public static void openAndSelect(IWorkbenchPage page, Object elem, boolean updateCurrent) {
 		if (elem instanceof ASTNode<?>) {
 			ASTNode<?> node = (ASTNode<?>) elem;
 			IEditorPart editor = null;
@@ -97,7 +97,7 @@ public class Util {
 			} catch (PartInitException e) {
 			}
 			if (editor instanceof Editor) 
-				((Editor) editor).selectNode(node, true, true);
+				((Editor) editor).selectNode(node);
 		}
 	}
 

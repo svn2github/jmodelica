@@ -55,6 +55,7 @@ public class CompilationRoot {
 		root.options = new IDEOptions(project);
 		root.getProgram().getInstProgramRoot().options = root.options;
 		root.setProject(project);
+		root.setErrorHandler(new InstanceErrorHandler());
 
 		rewritten = false;
 	}
