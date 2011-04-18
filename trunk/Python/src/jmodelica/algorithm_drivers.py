@@ -1816,15 +1816,18 @@ class CasadiPseudoSpectralOptions(OptionBase):
             parameter can be used in multiple transition such as, 
             [(1,"x1","dx1"), (1,"x2","dx1"), (2,"x1","dx1")]
             Default: []
-
+        
+        phase_options --
+            This options allows users to connect parameters to phase boundaries
+            (time). Example, in a three phase problem the parameters t1 and t2
+            can be specified to be the boundaries of the phases such as,
+            ["t1", "t2"], the option free_phases have also be set to true.
+            Default: None
+        
         free_phases --
             Specifies if the location of the phases should be allowed to be
             changed by the optimizer.
             Default: False
-        
-        phase_bounds --
-            Specifies the initial, lower and upper bounds of the free phases.
-            Default: None
             
         n_interpolation_points --
             Number of interpolation points in each finite element.
@@ -1890,8 +1893,8 @@ class CasadiPseudoSpectralOptions(OptionBase):
             'n_cp':20,
             'discr': "LG",
             'free_phases':False,
-            'phase_bounds':None,
             'link_options':[],
+            'phase_options':None,
             'n_interpolation_points':None,
             'init_traj':None,
             'result_mode':'default', 

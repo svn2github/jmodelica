@@ -329,18 +329,18 @@ class CasadiCollocator(object):
             # Write data
             # Write data set 1
             f.write('float data_1(%d,%d)\n' % (2, n_parameters + 1))
-            f.write("%.12E" % data[0,0])
+            f.write("%.14E" % data[0,0])
             str_text = ''
             for i in params:
                 if rescale:
-                    #str_text += " %.12E" % (z[ref]*sc[ref])
+                    #str_text += " %.14E" % (z[ref]*sc[ref])
                     raise NotImplementedError
                 else:
                     str_text += " %.14E" % (start_values[i[0]])#(0.0)#(z[ref])
                     
             f.write(str_text)
             f.write('\n')
-            f.write("%.12E" % data[-1,0])
+            f.write("%.14E" % data[-1,0])
             f.write(str_text)
 
             f.write('\n\n')
@@ -353,12 +353,12 @@ class CasadiCollocator(object):
                 str = ''
                 for ref in range(n_vars):
                     if ref==0: # Don't scale time
-                        str = str + (" %.12E" % data[i,ref])
+                        str = str + (" %.14E" % data[i,ref])
                     else:
                         if rescale:
-                            str = str + (" %.12E" % (data[i,ref]*sc[ref]))
+                            str = str + (" %.14E" % (data[i,ref]*sc[ref]))
                         else:
-                            str = str + (" %.12E" % data[i,ref])
+                            str = str + (" %.14E" % data[i,ref])
                 f.write(str+'\n')
 
             f.write('\n')
@@ -987,17 +987,17 @@ class PseudoSpectral(CasadiCollocator):
                     xx_ub[self.get_var_indices()[0][DISCR[0]]['t']] = ub[i][1] if ub[i][1] != None else N.array(1e20)
         
         #Handle free phases
-        if self.options['free_phases'] and len(PHASE) > 1:
-            if self.options['phase_bounds'] != None:
-                for i,x in enumerate(self.options['phase_bounds']):
-                    xx_init[self.get_var_indices()[i+1][DISCR[-1]]['t']]=x[0]
-                    xx_lb[self.get_var_indices()[i+1][DISCR[-1]]['t']] = x[1]
-                    xx_ub[self.get_var_indices()[i+1][DISCR[-1]]['t']] = x[2]
-            else:
-                for i in PHASE[:-1]:
-                    xx_init[self.get_var_indices()[i][DISCR[-1]]['t']] = i*(self.ocp.tf-self.ocp.t0)/len(PHASE)
-                    xx_lb[self.get_var_indices()[i][DISCR[-1]]['t']] = N.array(-1e20)
-                    xx_ub[self.get_var_indices()[i][DISCR[-1]]['t']] = N.array(1e20)
+        if self.options['free_phases'] and len(PHASE) > 1 and not self.options['phase_options']:
+            #if self.options['phase_bounds'] != None:
+            #    for i,x in enumerate(self.options['phase_bounds']):
+            #        xx_init[self.get_var_indices()[i+1][DISCR[-1]]['t']]=x[0]
+            #        xx_lb[self.get_var_indices()[i+1][DISCR[-1]]['t']] = x[1]
+            #        xx_ub[self.get_var_indices()[i+1][DISCR[-1]]['t']] = x[2]
+            #else:
+            for i in PHASE[:-1]:
+                xx_init[self.get_var_indices()[i][DISCR[-1]]['t']] = i*(self.ocp.tf-self.ocp.t0)/len(PHASE)
+                xx_lb[self.get_var_indices()[i][DISCR[-1]]['t']] = N.array(-1e20)
+                xx_ub[self.get_var_indices()[i][DISCR[-1]]['t']] = N.array(1e20)
         
         #Handle links
         """
@@ -1242,17 +1242,26 @@ class PseudoSpectral(CasadiCollocator):
             for j in COLLO: #Collocation
                 ui = [casadi.SX(str(x)+'_'+str(i)+','+str(j)) for x in self.model.get_u()]
                 self.vars[i][j]['u'] = ui
-            
-            if i != PHASE[-1]:
-                if self.options['free_phases']:
-                    self.vars[i]['t'] = casadi.SX("t"+str(i))
-                else:
-                    #self.vars[i]['t'] = casadi.SX(i*(tf-t0)/len(PHASE))
-                    self.vars[i]['t'] = i*(tf-t0)/len(PHASE)
-
+        
+        
         pi = [casadi.SX(str(x)) for x in self.model.get_p()]
         self.vars[0]['p'] = pi
         
+        
+        for i in PHASE[:-1]:
+            if self.options['free_phases']:
+                if self.options['phase_options']:
+                    for ind, p in enumerate(self.model.get_p()):
+                        if self.options['phase_options'][i-1] == str(p):    
+                            self.vars[i]['t'] = self.vars[0]['p'][ind]
+                            break
+                    else:
+                        raise CasadiCollocator("Could not find the parameter for the phase bound.")
+                else:
+                    self.vars[i]['t'] = casadi.SX("t"+str(i))
+            else:
+                self.vars[i]['t'] = i*(tf-t0)/len(PHASE)
+
         self.vars[PHASE[-1]]['t'] = tf
         self.vars[0]['t']         = t0
         
@@ -1289,9 +1298,13 @@ class PseudoSpectral(CasadiCollocator):
             self.var_indices[0][0]['t'] = N.arange(pre_len,len(self.xx),dtype=int)
         if self.options['free_phases'] and len(PHASE) > 1: #Handle free phases
             for i in PHASE[:-1]:
-                pre_len = len(self.xx)
-                self.xx += [self.vars[i]['t']]
-                self.var_indices[i][DISCR[-1]]['t'] = N.arange(pre_len,len(self.xx),dtype=int)
+                if self.options['phase_options']:
+                    self.var_indices[i][DISCR[-1]]['t'] = self.var_indices[0][0]['p'][i-1]
+                    pass
+                else:
+                    pre_len = len(self.xx)
+                    self.xx += [self.vars[i]['t']]
+                    self.var_indices[i][DISCR[-1]]['t'] = N.arange(pre_len,len(self.xx),dtype=int)
         
         
         self.link = [] 
@@ -1489,12 +1502,16 @@ class PseudoSpectral(CasadiCollocator):
             
             if j==0 and DISCR[0] != COLLO[0]:
                 u_opt[cnt,:] = [sum([lagrange_eval(ROOTS,ind,-1.0)*self.nlp_opt[self.get_var_indices()[i][l]['u']][k,0] for ind,l in enumerate(COLLO)]) for k in range(self.model.get_n_u())]
-                dx_opt[cnt,:] = [N.array(2.0)/(t_opt[(i)*len(DISCR)-1]-t_opt[(i-1)*len(DISCR)])*sum([lagrange_derivative_eval(AROOT,ind,-1.0)*self.nlp_opt[self.get_var_indices()[i][l]['x']][k,0] for ind,l in enumerate(APPRO)]) for k in range(self.model.get_n_x())]
+                dx_coeff = [lagrange_derivative_eval(AROOT,ind,-1.0) for ind in range(len(APPRO))]
+                dx_opt[cnt,:] = [N.array(2.0)/(t_opt[(i)*len(DISCR)-1]-t_opt[(i-1)*len(DISCR)])*sum([dx_coeff[ind]*self.nlp_opt[self.get_var_indices()[i][l]['x']][k,0] for ind,l in enumerate(APPRO)]) for k in range(self.model.get_n_x())]
+                #dx_opt[cnt,:] = [N.array(2.0)/(t_opt[(i)*len(DISCR)-1]-t_opt[(i-1)*len(DISCR)])*sum([lagrange_derivative_eval(AROOT,ind,-1.0)*self.nlp_opt[self.get_var_indices()[i][l]['x']][k,0] for ind,l in enumerate(APPRO)]) for k in range(self.model.get_n_x())]
                 cnt = cnt + 1
                 continue
             if j==DISCR[-1] and DISCR[-1] != COLLO[-1]:
                 u_opt[cnt,:] = [sum([lagrange_eval(ROOTS,ind,1.0)*self.nlp_opt[self.get_var_indices()[i][l]['u']][k,0] for ind,l in enumerate(COLLO)]) for k in range(self.model.get_n_u())]
-                dx_opt[cnt,:] = [N.array(2.0)/(t_opt[(i)*len(DISCR)-1]-t_opt[(i-1)*len(DISCR)])*sum([lagrange_derivative_eval(AROOT,ind,1.0)*self.nlp_opt[self.get_var_indices()[i][l]['x']][k,0] for ind,l in enumerate(APPRO)]) for k in range(self.model.get_n_x())]
+                dx_coeff = [lagrange_derivative_eval(AROOT,ind,1.0) for ind in range(len(APPRO))]
+                dx_opt[cnt,:] = [N.array(2.0)/(t_opt[(i)*len(DISCR)-1]-t_opt[(i-1)*len(DISCR)])*sum([dx_coeff[ind]*self.nlp_opt[self.get_var_indices()[i][l]['x']][k,0] for ind,l in enumerate(APPRO)]) for k in range(self.model.get_n_x())]
+                #dx_opt[cnt,:] = [N.array(2.0)/(t_opt[(i)*len(DISCR)-1]-t_opt[(i-1)*len(DISCR)])*sum([lagrange_derivative_eval(AROOT,ind,1.0)*self.nlp_opt[self.get_var_indices()[i][l]['x']][k,0] for ind,l in enumerate(APPRO)]) for k in range(self.model.get_n_x())]
                 cnt = cnt + 1
                 continue
             
