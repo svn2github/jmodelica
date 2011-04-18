@@ -14,9 +14,10 @@ public abstract class InstanceProblem implements IError {
 	protected int end;
 	protected int line;
 	protected int col;
-	private IResource file;
 	protected ASTNode<?> node;
+	private IResource file;
 	private boolean hasFile;
+	private int hashCode;
 
 	public InstanceProblem(String msg, ASTNode<?> n) {
 		this.msg = msg;
@@ -46,6 +47,10 @@ public abstract class InstanceProblem implements IError {
 			return true;
 		}
 		return false;
+	}
+	
+	public boolean isLostError() {
+		return isError() && !hasFile();
 	}
 	
 	public abstract boolean isError();
@@ -78,14 +83,16 @@ public abstract class InstanceProblem implements IError {
 
 	@Override
 	public int hashCode() {
-		return fileName.hashCode() + line + (col << 16) + msg.hashCode();
+		if (hashCode == 0)
+			hashCode = fileName.hashCode() + line + (col << 16) + msg.hashCode();
+		return hashCode;
 	}
 
 	@Override
 	public boolean equals(Object o) {
-		if (o instanceof InstanceError) {
-			InstanceError e = (InstanceError) o;
-			return line == e.line && col == e.col && fileName.equals(e.fileName) && msg.equals(msg);
+		if (o instanceof InstanceProblem) {
+			InstanceProblem p = (InstanceProblem) o;
+			return line == p.line && col == p.col && fileName.equals(p.fileName) && msg.equals(p.msg);
 		}
 		return false;
 	}

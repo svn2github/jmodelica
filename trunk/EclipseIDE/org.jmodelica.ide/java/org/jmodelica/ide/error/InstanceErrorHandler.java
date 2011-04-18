@@ -40,10 +40,11 @@ public class InstanceErrorHandler implements IErrorHandler {
 	protected void problem(InstanceProblem p) {
 		if (!found.contains(p)) {
 			// TODO: if file/document isn't available, find them or attach later
-			if (!p.attachToFile() && p.isError())
-				lostErrors = true;
+			p.attachToFile();
 			found.add(p);
 		}
+		if (p.isLostError())
+			lostErrors = true;
 		count(p);
 	}
 
@@ -86,6 +87,7 @@ public class InstanceErrorHandler implements IErrorHandler {
 
 	public void resetCounter() {
 		countedErrors.clear();
+		countedWarnings.clear();
 		lostErrors = false;
 	}
 	
