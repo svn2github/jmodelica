@@ -519,18 +519,15 @@ class CasadiModel(object):
         if len(self.ocp.mterm)>0:
 
             self.ocp_mterm_inputs = []
-            self.ocp_mterm_inputs += list(self.p)
+            #self.ocp_mterm_inputs += list(self.p)
+            self.ocp_mterm_inputs += list(self.dx)
             self.ocp_mterm_inputs += [x.atTime(self.ocp.tf,True) for x in self.var.x]
+            self.ocp_mterm_inputs += [x.atTime(self.ocp.tf,True) for x in self.var.u]
+            self.ocp_mterm_inputs += [x.atTime(self.ocp.tf,True) for x in self.var.z]
             self.ocp_mterm_inputs += [self.t]
             self.opt_J = casadi.SXFunction([self.ocp_mterm_inputs],[[self.ocp.mterm[0]]])
         else:
             self.opt_J = None
-
-
-            
-#            self.opt_J = casadi.SXFunction([self.ocp_inputs],[[self.ocp.mterm[0]]])
-#        else:
-#            self.opt_J = None
 
         # The Lagrange cost function
         if len(self.ocp.lterm)>0:

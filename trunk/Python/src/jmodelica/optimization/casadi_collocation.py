@@ -374,11 +374,11 @@ class CasadiCollocator(object):
         w_opt = N.zeros((len(self.get_time_points()),self.model.get_n_w()))
         u_opt = N.zeros((len(self.get_time_points()),self.model.get_n_u()))
         p_opt  = N.zeros(self.model.get_n_p())
-        t_opt = N.zeros(len(self.get_time_points()))
+        t_opt = N.zeros((len(self.get_time_points()),1))
 
         cnt = 0
         for t,i,j in self.get_time_points():
-            t_opt[cnt] = t
+            t_opt[cnt,0] = t
             dx_opt[cnt,:] = self.nlp_opt[self.get_var_indices()[i][j]['dx']][:,0]
             x_opt[cnt,:]  = self.nlp_opt[self.get_var_indices()[i][j]['x']][:,0]
             u_opt[cnt,:]  = self.nlp_opt[self.get_var_indices()[i][j]['u']][:,0]
@@ -444,10 +444,10 @@ class CasadiCollocator(object):
         _x_min = md.get_x_min(include_alias = False)
         _u_min = md.get_u_min(include_alias = False)
         _w_min = md.get_w_min(include_alias = False)
-        _dx_start = md.get_dx_start(include_alias = False)
-        _x_start = md.get_x_start(include_alias = False)
-        _u_start = md.get_u_start(include_alias = False)
-        _w_start = md.get_w_start(include_alias = False)
+        _dx_start = md.get_dx_initial_guess(include_alias = False)
+        _x_start = md.get_x_initial_guess(include_alias = False)
+        _u_start = md.get_u_initial_guess(include_alias = False)
+        _w_start = md.get_w_initial_guess(include_alias = False)
 
         dx_max = self.UPPER*N.ones(len(_dx_max))
         x_max = self.UPPER*N.ones(len(_x_max))
@@ -706,7 +706,7 @@ class RadauCollocator(CasadiCollocator):
             # Assume Mayer cost
             z = []
             t = self.ocp.tf
-#            z += self.vars[n_e][n_cp]['dx']
+            z += self.vars[n_e][n_cp]['dx']
             z += self.vars[n_e][n_cp]['x']
             z += self.vars[n_e][n_cp]['u']
             z += self.vars[n_e][n_cp]['w']
@@ -1167,14 +1167,6 @@ class PseudoSpectral(CasadiCollocator):
             z += self.vars[PHASE[-1]][DISCR[-1]]['x']
             z += [t]
             self.cost_mayer = list(self.model.get_opt_ode_J().eval([z])[0])[0]
-        #Add linking options to the Mayer functional
-        for i in PHASE[:-1]:
-            temp = 0.0
-            for j in self.options['link_options']:
-                for l,k in enumerate(self.model.get_x()):
-                    if j[0] == str(k) and j[1]==True:
-                        temp += self.vars[i]['link_x'][l]*self.vars[i]['link_x'][l]
-            self.cost_mayer += N.sqrt(temp)
         #NOTE TEMPORARY!!!!
         #self.cost_mayer=self.vars[PHASE[-1]]['t']
         # Take care of Lagrange cost
@@ -1256,7 +1248,7 @@ class PseudoSpectral(CasadiCollocator):
                             self.vars[i]['t'] = self.vars[0]['p'][ind]
                             break
                     else:
-                        raise CasadiCollocator("Could not find the parameter for the phase bound.")
+                        raise CasadiCollocatorException("Could not find the parameter for the phase bound.")
                 else:
                     self.vars[i]['t'] = casadi.SX("t"+str(i))
             else:
@@ -1299,8 +1291,10 @@ class PseudoSpectral(CasadiCollocator):
         if self.options['free_phases'] and len(PHASE) > 1: #Handle free phases
             for i in PHASE[:-1]:
                 if self.options['phase_options']:
-                    self.var_indices[i][DISCR[-1]]['t'] = self.var_indices[0][0]['p'][i-1]
-                    pass
+                    for ind, p in enumerate(self.model.get_p()):
+                        if self.options['phase_options'][i-1] == str(p):
+                            self.var_indices[i][DISCR[-1]]['t'] = self.var_indices[0][0]['p'][ind]
+                            break
                 else:
                     pre_len = len(self.xx)
                     self.xx += [self.vars[i]['t']]
@@ -1677,13 +1671,13 @@ class PseudoSpectral(CasadiCollocator):
             input_t = [self.vars[i]['t'] for i in PHASE]
             tfcn = casadi.SXFunction([input_t],[ts])
             tfcn.init()
-            input_res = [self.xx_init[self.var_indices[i][DISCR[-1]]['t']][0] for i in PHASE]
+            input_res = [self.xx_init[self.var_indices[i][DISCR[-1]]['t']] for i in PHASE]
             tfcn.setInput(N.array(input_res).flatten())
         elif (self.options['free_phases'] and len(PHASE) > 1):
             input_t = [self.vars[i]['t'] for i in PHASE[:-1]]
             tfcn = casadi.SXFunction([input_t],[ts])
             tfcn.init()
-            input_res = [self.xx_init[self.var_indices[i][DISCR[-1]]['t']][0] for i in PHASE[:-1]]
+            input_res = [self.xx_init[self.var_indices[i][DISCR[-1]]['t']] for i in PHASE[:-1]]
             tfcn.setInput(N.array(input_res).flatten())
         elif self.md.get_opt_finaltime_free():
             input_t = self.vars[PHASE[-1]]['t']
