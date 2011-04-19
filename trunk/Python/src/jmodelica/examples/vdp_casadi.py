@@ -36,7 +36,11 @@ def run_demo(with_plots=True):
 
     model = CasadiModel(jn)
 
-    res = model.optimize()
+    opts = model.optimize_options()
+    opts['IPOPT_options']['derivative_test'] = 'second-order'
+    opts['n_e'] = 10
+
+    res = model.optimize(options=opts)
     
     # Extract variable profiles
     x1   = res['x1']

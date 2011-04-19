@@ -706,12 +706,13 @@ class RadauCollocator(CasadiCollocator):
             # Assume Mayer cost
             z = []
             t = self.ocp.tf
-            z += self.vars[n_e][n_cp]['dx']
+#            z += self.vars[n_e][n_cp]['dx']
             z += self.vars[n_e][n_cp]['x']
             z += self.vars[n_e][n_cp]['u']
             z += self.vars[n_e][n_cp]['w']
             z += [casadi.SX(t)]
             self.cost_mayer = list(self.model.get_opt_J().eval([z])[0])[0]
+            
 
         # Take care of Lagrange cost
         if self.model.get_opt_L() != None:
@@ -1166,7 +1167,6 @@ class PseudoSpectral(CasadiCollocator):
             z += self.vars[PHASE[-1]][DISCR[-1]]['x']
             z += [t]
             self.cost_mayer = list(self.model.get_opt_ode_J().eval([z])[0])[0]
-            
         #Add linking options to the Mayer functional
         for i in PHASE[:-1]:
             temp = 0.0
