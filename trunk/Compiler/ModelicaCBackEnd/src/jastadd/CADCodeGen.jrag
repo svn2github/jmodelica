@@ -541,6 +541,122 @@ aspect CADCodeGen {
 			str.print(getFExp().adDerName());
 			str.print(";\n");
 	}
+	
+	public void FNoEventExp.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
+		FIfExp fif = (FIfExp)this.getFExp();
+		str.print("jmi_ad_var_t temp_v_");
+		str.print(adIndex());
+		str.print(";\njmi_ad_var_t temp_d_");
+		str.print(adIndex());
+		str.print(";\n");
+		str.print("if(");
+		fif.getIfExp().prettyPrint_C(str,indent);
+		str.print("){\n");
+		p.print(fif.getThenExp(),str,indent);
+		str.print("temp_v_");
+		str.print(adIndex());
+		str.print(" = v_");
+		str.print(fif.getIfExp().adIndex()-1);
+		str.print(";\ntemp_d_");
+		str.print(adIndex());
+		str.print(" = d_");
+		str.print(fif.getIfExp().adIndex()-1);
+		str.print(";\n}\n");
+		for (FElseIfExp el_if : fif.getFElseIfExps()) {
+		
+			str.print("else if(");
+			el_if.getIfExp().prettyPrint_C(str,indent);
+			str.print("){\n");
+			p.print(el_if.getThenExp(),str,indent);
+			str.print("temp_v_");
+			str.print(adIndex());
+			str.print(" = v_");
+			str.print(el_if.adIndex()-1);
+			str.print(";\ntemp_d_");
+			str.print(adIndex());
+			str.print(" = d_");
+			str.print(el_if.adIndex()-1);
+			str.print(";\n}\n");	
+		}
+		str.print("else{\n");
+		p.print(fif.getElseExp(),str,indent);
+		str.print("temp_v_");
+		str.print(adIndex());
+		str.print(" = v_");
+		str.print(fif.getElseExp().adIndex());
+		str.print(";\ntemp_d_");
+		str.print(adIndex());
+		str.print(" = d_");
+		str.print(fif.getElseExp().adIndex());
+		str.print(";\n}\n");
+		str.print("jmi_ad_var_t ");
+		str.print(adVarName());
+		str.print(" = temp_v_");
+		str.print(adIndex());
+		str.print(";\njmi_ad_var_t ");
+		str.print(adDerName());
+		str.print(" = temp_d_");
+		str.print(adIndex());
+		str.print(";\n");
+	}
+	
+	
+	public void FIfExp.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
+		str.print("jmi_ad_var_t temp_v_");
+		str.print(this.adIndex());
+		str.print(";\njmi_ad_var_t temp_d_");
+		str.print(this.adIndex());
+		str.print(";\n");
+		str.print("if(");
+		getIfExp().prettyPrint_C(str,indent);
+		str.print("){\n");
+		p.print(getThenExp(),str,indent);
+		str.print("temp_v_");
+		str.print(adIndex());
+		str.print(" = v_");
+		str.print(getIfExp().adIndex()-1);
+		str.print(";\ntemp_d_");
+		str.print(adIndex());
+		str.print(" = d_");
+		str.print(getIfExp().adIndex()-1);
+		str.print(";\n}\n");
+		for (FElseIfExp el_if : getFElseIfExps()) {
+		
+			str.print("else if(");
+			el_if.getIfExp().prettyPrint_C(str,indent);
+			str.print("){\n");
+			p.print(el_if.getThenExp(),str,indent);
+			str.print("temp_v_");
+			str.print(adIndex());
+			str.print(" = v_");
+			str.print(el_if.adIndex()-1);
+			str.print(";\ntemp_d_");
+			str.print(adIndex());
+			str.print(" = d_");
+			str.print(el_if.adIndex()-1);
+			str.print(";\n}\n");	
+		}
+		str.print("else{\n");
+		p.print(getElseExp(),str,indent);
+		str.print("temp_v_");
+		str.print(adIndex());
+		str.print(" = v_");
+		str.print(getElseExp().adIndex());
+		str.print(";\ntemp_d_");
+		str.print(adIndex());
+		str.print(" = d_");
+		str.print(getElseExp().adIndex());
+		str.print(";\n}\n");
+		str.print("jmi_ad_var_t ");
+		str.print(adVarName());
+		str.print(" = temp_v_");
+		str.print(adIndex());
+		str.print(";\njmi_ad_var_t ");
+		str.print(adDerName());
+		str.print(" = temp_d_");
+		str.print(adIndex());
+		str.print(";\n");
+	}
 			
 	public void FAbstractEquation.genResidual_CAD(int i, String indent, PrintStream str) {}
 	
