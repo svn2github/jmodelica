@@ -32,7 +32,7 @@ public IDEOptions(IProject project) {
 
 		// Set standard options for FMU
         ModelicaCompiler mc = new ModelicaCompiler(this);
-        mc.defaultOptionsFMU();
+        mc.defaultOptionsFMUME();
     } catch (Exception e) {
     	// TODO: Do something constructive. An error message or something.
         e.printStackTrace();
