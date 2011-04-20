@@ -382,7 +382,9 @@ aspect Flattening {
 			fc.addFVariable(createFVariable());
 			if (isFlow()) {
 				// TODO: Add expanded array subscripts
-				fc.getConnectionSetManager().addInsideFlowVar(this,getFQNamePrefix().append(name()));
+				// TODO: Can we use getFQName() here instead?
+				FQName name = getFQNamePrefix().copyAndAppend(name());
+				fc.getConnectionSetManager().addInsideFlowVar(this, name);
 			}
 		}
 	}

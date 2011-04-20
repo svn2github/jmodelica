@@ -451,9 +451,24 @@ aspect InstanceErrorCheck {
 			getChildNoTransform(i).resetCollectErrors();
 	}
 	
+	public static void ASTNode.resetCollectErrorsOn(ASTNode n) {
+		if (n != null)
+			n.resetCollectErrors();
+	}
+	
 	public void BaseNode.resetCollectErrors() {
 		errorChecked = false;
 		super.resetCollectErrors();
+	}
+	
+	public void InstNode.resetCollectErrors() {
+		super.resetCollectErrors();
+		resetCollectErrorsOn(getInstComponentDeclListNoTransform());
+		resetCollectErrorsOn(getInstClassDeclListNoTransform());
+		resetCollectErrorsOn(getInstExtendsListNoTransform());
+		resetCollectErrorsOn(getInstImportListNoTransform());
+		resetCollectErrorsOn(getRedeclaredInstClassDeclListNoTransform());
+		resetCollectErrorsOn(getFAbstractEquationListNoTransform());
 	}
 
   public void InstNode.collectErrors() {
