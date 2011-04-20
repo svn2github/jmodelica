@@ -48,6 +48,11 @@ aspect SimpleClassLookup {
 	
 	
 	syn lazy ClassDecl Program.simpleLookupClassDefaultScope(String name) {
+		for (StoredDefinition sd : getUnstructuredEntitys())
+			for (Element e : sd.getElements())
+				if (e instanceof ClassDecl && e.matches(name))
+					return (ClassDecl) e;
+		
 		ClassDecl res = simpleLookupInClassList(getPredefinedTypes(), name);
 		if (res != null)
 			return res;
