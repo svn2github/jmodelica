@@ -704,53 +704,77 @@ model IfExpExample1
          generatedCode="
 jmi_ad_var_t temp_v_0;
 jmi_ad_var_t temp_d_0;
+if(_sw(0)){
+jmi_ad_var_t temp_v_1;
+jmi_ad_var_t temp_d_1;
 if(COND_EXP_LE(time, jmi_divide(AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"Divide by zero: ( 3.141592653589793 ) / ( 2 )\"), JMI_TRUE, JMI_FALSE)){
-jmi_ad_var_t v_1 = time;
-jmi_ad_var_t d_1 = 0;
-jmi_ad_var_t v_2 = sin(v_1);
-jmi_ad_var_t d_2 = d_1 * cos(v_1);
-temp_v_0 = v_2;
-temp_d_0 = d_2;
+jmi_ad_var_t v_2 = time;
+jmi_ad_var_t d_2 = 0;
+jmi_ad_var_t v_3 = sin(v_2);
+jmi_ad_var_t d_3 = d_2 * cos(v_2);
+temp_v_1 = v_3;
+temp_d_1 = d_3;
 }
 else if(COND_EXP_LE(time, AD_WRAP_LITERAL(3.141592653589793), JMI_TRUE, JMI_FALSE)){
-jmi_ad_var_t v_4 = AD_WRAP_LITERAL(1);
-jmi_ad_var_t d_4 = 0;
-temp_v_0 = v_4;
-temp_d_0 = d_4;
+jmi_ad_var_t v_5 = AD_WRAP_LITERAL(1);
+jmi_ad_var_t d_5 = 0;
+temp_v_1 = v_5;
+temp_d_1 = d_5;
 }
 else{
-jmi_ad_var_t v_6 = time;
-jmi_ad_var_t d_6 = 0;
-jmi_ad_var_t v_7 = AD_WRAP_LITERAL(3.141592653589793);
+jmi_ad_var_t v_7 = time;
 jmi_ad_var_t d_7 = 0;
-jmi_ad_var_t v_8 = AD_WRAP_LITERAL(2);
+jmi_ad_var_t v_8 = AD_WRAP_LITERAL(3.141592653589793);
 jmi_ad_var_t d_8 = 0;
-jmi_ad_var_t v_9 = v_7 / v_8;
-jmi_ad_var_t d_9 = (d_7 * v_8 - v_7 * d_8 ) / ( v_8 * v_8);
-jmi_ad_var_t v_10 = v_6 - v_9;
-jmi_ad_var_t d_10 = d_6 - d_9;
-jmi_ad_var_t v_11 = sin(v_10);
-jmi_ad_var_t d_11 = d_10 * cos(v_10);
-temp_v_0 = v_11;
-temp_d_0 = d_11;
+jmi_ad_var_t v_9 = AD_WRAP_LITERAL(2);
+jmi_ad_var_t d_9 = 0;
+jmi_ad_var_t v_10 = v_8 / v_9;
+jmi_ad_var_t d_10 = (d_8 * v_9 - v_8 * d_9 ) / ( v_9 * v_9);
+jmi_ad_var_t v_11 = v_7 - v_10;
+jmi_ad_var_t d_11 = d_7 - d_10;
+jmi_ad_var_t v_12 = sin(v_11);
+jmi_ad_var_t d_12 = d_11 * cos(v_11);
+temp_v_1 = v_12;
+temp_d_1 = d_12;
+}
+jmi_ad_var_t v_1 = temp_v_1;
+jmi_ad_var_t d_1 = temp_d_1;
+jmi_ad_var_t v_13 = v_1;
+jmi_ad_var_t d_13 = d_1;
+temp_v_0 = v_13;
+temp_d_0 = d_13;
+}
+else{
+jmi_ad_var_t v_15 = AD_WRAP_LITERAL(3);
+jmi_ad_var_t d_15 = 0;
+jmi_ad_var_t v_16 = _x_0;
+jmi_ad_var_t d_16 = (*dz)[1-jmi->offs_real_dx];
+jmi_ad_var_t v_17 = v_15 * v_16;
+jmi_ad_var_t d_17 = (d_15 * v_16 + v_15 * d_16);
+jmi_ad_var_t v_18 = sin(v_17);
+jmi_ad_var_t d_18 = d_17 * cos(v_17);
+jmi_ad_var_t v_19 = v_18;
+jmi_ad_var_t d_19 = d_18;
+temp_v_0 = v_19;
+temp_d_0 = d_19;
 }
 jmi_ad_var_t v_0 = temp_v_0;
 jmi_ad_var_t d_0 = temp_d_0;
-jmi_ad_var_t v_12 = _u_1;
-jmi_ad_var_t d_12 = (*dz)[2-jmi->offs_real_dx];
-(*res)[0] = v_0 - v_12;
-(*dF)[0] = d_0 - d_12;
-jmi_ad_var_t v_13 = _u_1;
-jmi_ad_var_t d_13 = (*dz)[2-jmi->offs_real_dx];
-jmi_ad_var_t v_14 = _der_x_2;
-jmi_ad_var_t d_14 = (*dz)[0-jmi->offs_real_dx];
-(*res)[1] = v_13 - v_14;
-(*dF)[1] = d_13 - d_14;   
+jmi_ad_var_t v_20 = _u_1;
+jmi_ad_var_t d_20 = (*dz)[2-jmi->offs_real_dx];
+(*res)[0] = v_0 - v_20;
+(*dF)[0] = d_0 - d_20;
+jmi_ad_var_t v_21 = _u_1;
+jmi_ad_var_t d_21 = (*dz)[2-jmi->offs_real_dx];
+jmi_ad_var_t v_22 = _der_x_2;
+jmi_ad_var_t d_22 = (*dz)[0-jmi->offs_real_dx];
+(*res)[1] = v_21 - v_22;
+(*dF)[1] = d_21 - d_22;
 ")})));   
     Real x,u;
-equation
-    u = noEvent(if time<=Modelica.Constants.pi/2 then sin(time) elseif 
-              time<=Modelica.Constants.pi then 1 else sin(time-Modelica.Constants.pi/2));
+  equation
+    u = if(x > 3) then noEvent(if time<=Modelica.Constants.pi/2 then sin(time) elseif 
+              noEvent(time<=Modelica.Constants.pi) then 1 else sin(time-Modelica.Constants.pi/2)) else noEvent(sin(3*x));
     der(x) = u;
 end IfExpExample1;
 
