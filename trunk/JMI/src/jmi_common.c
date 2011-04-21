@@ -604,19 +604,28 @@ int jmi_func_fd_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
 	
 	int dF_n_cols;
 	int dF_n_nz;
-	int dF_n_eq = 0;
-	int max_columns = func->cad_dF_col[func->cad_dF_n_nz-1]+1;
+	int dF_n_eq;
+	int max_columns;
 	
-	jmi_func_cad_dF_dim(jmi, func, sparsity, independent_vars, mask, &dF_n_cols, &dF_n_nz);
-	
-	int *row_offs = (int*)calloc(dF_n_cols, sizeof(int));
-	int *dF_row = (int*)calloc(dF_n_nz, sizeof(int));
-	int *dF_col = (int*)calloc(dF_n_nz, sizeof(int));
-	int *dF_col_independent_ind = (int*)calloc(dF_n_nz,sizeof(int));
+	int *row_offs;
+	int *dF_row;
+	int *dF_col;
+	int *dF_col_independent_ind;
 
 	jmi_real_t *res;
 	jmi_real_t *dF;
 	jmi_real_t *dv;
+
+
+	dF_n_eq = 0;
+	max_columns = func->cad_dF_col[func->cad_dF_n_nz-1]+1;
+	
+	jmi_func_cad_dF_dim(jmi, func, sparsity, independent_vars, mask, &dF_n_cols, &dF_n_nz);
+	
+	row_offs = (int*)calloc(dF_n_cols, sizeof(int));
+	dF_row = (int*)calloc(dF_n_nz, sizeof(int));
+	dF_col = (int*)calloc(dF_n_nz, sizeof(int));
+	dF_col_independent_ind = (int*)calloc(dF_n_nz,sizeof(int));
 
 	jmi_func_cad_dF_nz_indices(jmi, func, independent_vars, mask, dF_row, dF_col);
 	jmi_func_cad_dF_get_independent_ind(jmi, func, independent_vars, dF_col_independent_ind); 
