@@ -1190,7 +1190,7 @@ class JMIDAESens(Implicit_Problem):
             for i,n in enumerate(self._parameter_names):
                 self.p0 = N.append(self.p0, self._model.z[self._parameter_pos[i]])
                 self._sens_matrix += [[]] 
-        
+            self.pbar = N.array([N.abs(x) if N.abs(x) > 0 else 1.0 for x in self.p0])
             self._p_nbr = len(self.p0) #Number of parameters
         else:
             self._p_nbr = 0
