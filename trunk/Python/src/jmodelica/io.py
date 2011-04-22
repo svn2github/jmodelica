@@ -1435,4 +1435,4 @@ def robust_float(value):
         elif value.startswith("1.#QNAN") or value.startswith("-1.#IND"):
             return float(N.nan)
         else:
-             raise ValueError
+            raise ValueError
