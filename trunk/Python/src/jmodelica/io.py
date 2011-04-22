@@ -384,7 +384,10 @@ class ResultDymolaTextual:
                 while len(info) < nCols:
                     l = fid.readline()
                     info.extend(l.split())
-                data.append(map(float,info[0:nCols]))
+                try:
+                    data.append(map(float,info[0:nCols]))
+                except ValueError: #Handle 1.#INF's and such
+                    data.append(map(robust_float,info[0:nCols]))
                 del(info)
             self.data.append(N.array(data))
 
@@ -1417,3 +1420,19 @@ class VariableNotTimeVarying(JIOError):
     Exception that is thrown when a column is asked for a parameter/constant.
     """
     pass 
+    
+def robust_float(value):
+    """
+    Function for robust handling of float values such as INF and NAN.
+    """
+    try:
+        return float(value)
+    except ValueError:
+        if value.startswith("1.#INF"):
+            return float(N.inf)
+        elif value.startswith("-1.#INF"):
+            return float(-N.inf)
+        elif value.startswith("1.#QNAN") or value.startswith("-1.#IND"):
+            return float(N.nan)
+        else:
+             raise ValueError
