@@ -1610,7 +1610,7 @@ class PseudoSpectral(CasadiCollocator):
                     #(z_i, ptype) = jmi._translate_value_ref(ref)
                     #i_pi = z_i - self._model._offs_real_pi.value
                     #i_pi_opt = p_opt_indices.index(i_pi)
-                    #traj = res.get_variable_data(name)
+                    traj = res.get_variable_data(name)
                     #if self._model.get_scaling_method() & jmi.JMI_SCALING_VARIABLES > 0:
                     #    p_opt_data[i_pi_opt] = traj.x[0]/sc[z_i]
                     #else:

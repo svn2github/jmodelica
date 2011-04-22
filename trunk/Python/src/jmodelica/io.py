@@ -223,22 +223,22 @@ def export_result_dymola(model, data, file_name='', format='txt', scaled=False):
         # Write data
         # Write data set 1
         f.write('float data_1(%d,%d)\n' % (2, n_parameters + 1))
-        f.write("%12.12f" % data[0,0])
+        f.write("%.14E" % data[0,0])
         str_text = ''
         for ref in range(n_parameters):
             #print ref
             if rescale:
                 #print z[ref]*sc[ref]
                 #print "hej"
-                str_text += " %12.12f" % (z[ref]*sc[ref])
+                str_text += " %.14E" % (z[ref]*sc[ref])
             else:
                 #print z[ref]
                 #print "hopp"
-                str_text += " %12.12f" % (z[ref])
+                str_text += " %.14E" % (z[ref])
                 
         f.write(str_text)
         f.write('\n')
-        f.write("%12.12f" % data[-1,0])
+        f.write("%.14E" % data[-1,0])
         f.write(str_text)
 
         f.write('\n\n')
@@ -251,12 +251,12 @@ def export_result_dymola(model, data, file_name='', format='txt', scaled=False):
             str = ''
             for ref in range(n_vars):
                 if ref==0: # Don't scale time
-                    str = str + (" %12.12f" % data[i,ref])
+                    str = str + (" %.14E" % data[i,ref])
                 else:
                     if rescale:
-                        str = str + (" %12.12f" % (data[i,ref]*sc[ref-1+n_parameters]))
+                        str = str + (" %.14E" % (data[i,ref]*sc[ref-1+n_parameters]))
                     else:
-                        str = str + (" %12.12f" % data[i,ref])
+                        str = str + (" %.14E" % data[i,ref])
             f.write(str+'\n')
 
         f.write('\n')
@@ -959,15 +959,15 @@ class ResultWriterDymolaSensitivity(ResultWriter):
         str_text = ''
         for ref in range(n_parameters):
             if self._rescale:
-                str_text += " %12.12f" % (z[ref]*sc[ref])
+                str_text += " %.14E" % (z[ref]*sc[ref])
             else:
-                str_text += " %12.12f" % (z[ref])
+                str_text += " %.14E" % (z[ref])
         
         # Write sensitivity data set 1
         for i in range(cnt_1-1-n_parameters):
-            str_text += " %12.12f " % sens_param_res[i]
+            str_text += " %.14E " % sens_param_res[i]
         
-        #f.write("%12.12f" % data[0,0])
+        #f.write("%.14E" % data[0,0])
         self._point_first_t = f.tell()
         f.write("%s" % ' '*28)
         f.write(str_text)
@@ -1008,18 +1008,18 @@ class ResultWriterDymolaSensitivity(ResultWriter):
             self._tstart = data[0]
         
         #Write the point
-        str_text = (" %12.12f" % data[0])
+        str_text = (" %.14E" % data[0])
         for j in xrange(self._nvariables_without_sens-1):
             if rescale:
-                str_text = str_text + (" %12.12f" %(data[1+j]*sc[j+n_parameters]))
+                str_text = str_text + (" %.14E" %(data[1+j]*sc[j+n_parameters]))
             else:
-                str_text = str_text + (" %12.12f" % data[1+j])
+                str_text = str_text + (" %.14E" % data[1+j])
 
         for j in xrange(self._nvariables_total-self._nvariables_without_sens):
             if rescale:
-                str_text = str_text + (" %12.12f" %(data[j+self._nvariables_without_sens]*sens_sc[j]))
+                str_text = str_text + (" %.14E" %(data[j+self._nvariables_without_sens]*sens_sc[j]))
             else:
-                str_text = str_text + (" %12.12f" % data[j+self._nvariables_without_sens])
+                str_text = str_text + (" %.14E" % data[j+self._nvariables_without_sens])
         f.write(str_text+'\n')
         
         #Update number of points
@@ -1038,11 +1038,11 @@ class ResultWriterDymolaSensitivity(ResultWriter):
             
             f.seek(self._point_first_t)
             
-            f.write('%12.12f'%self._tstart)
+            f.write('%.14E'%self._tstart)
             
             f.seek(self._point_last_t)
             
-            f.write('%12.12f'%self.model.t)
+            f.write('%.14E'%self.model.t)
             
             f.seek(self._point_npoints)
             f.write('%d,%d)' % (self._npoints, self._nvariables_total))
@@ -1284,7 +1284,7 @@ class ResultWriterDymola(ResultWriter):
         # Write data
         # Write data set 1
         f.write('float data_1(%d,%d)\n' % (2, n_parameters + 1))
-        f.write("%12.12f" % self.model.time)
+        f.write("%.14E" % self.model.time)
         str_text = ''
         
         # write constants and parameters
@@ -1293,13 +1293,13 @@ class ResultWriterDymola(ResultWriter):
                 variabilities_noalias[i][1] == xmlparser.PARAMETER:
                     if types_noalias[i] == xmlparser.REAL:
                         str_text = str_text + (
-                            " %12.12f" % (self.model.get_real([name[0]])))
+                            " %.14E" % (self.model.get_real([name[0]])))
                     elif types_noalias[i] == xmlparser.INTEGER:
                         str_text = str_text + (
-                            " %12.12f" % (self.model.get_integer([name[0]])))
+                            " %.14E" % (self.model.get_integer([name[0]])))
                     elif types_noalias[i] == xmlparser.BOOLEAN:
                         str_text = str_text + (
-                            " %12.12f" % (float(
+                            " %.14E" % (float(
                                 self.model.get_boolean([name[0]])[0])))
                         
         f.write(str_text)
@@ -1347,9 +1347,9 @@ class ResultWriterDymola(ResultWriter):
             data = N.append(N.append(N.append(self.model.time,r),i),b)
 
         #Write the point
-        str_text = (" %12.12f" % data[0])
+        str_text = (" %.14E" % data[0])
         for j in xrange(self._nvariables-1):
-            str_text = str_text + (" %12.12f" % (data[1+data_order[j]]))
+            str_text = str_text + (" %.14E" % (data[1+data_order[j]]))
         f.write(str_text+'\n')
         
         #Update number of points
@@ -1368,7 +1368,7 @@ class ResultWriterDymola(ResultWriter):
             
             f.seek(self._point_last_t)
             
-            f.write('%12.12f'%self.model.time)
+            f.write('%.14E'%self.model.time)
             
             f.seek(self._point_npoints)
             f.write('%d,%d)' % (self._npoints, self._nvariables))
