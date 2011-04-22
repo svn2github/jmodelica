@@ -63,13 +63,15 @@ def write_data(simulator,write_scaled_result=False, result_file_name=''):
     if isinstance(simulator._problem, JMIDAE):
         
         model = simulator._problem._model
+        problem = simulator._problem
         
         t = N.array(simulator.t)
         y = N.array(simulator.y)
         yd = N.array(simulator.yd)
         if simulator._problem.input:
             u_name = [k[1] for k in model.get_u_variable_names()]
-            u = N.zeros((len(t), len(u_name)))
+            #u = N.zeros((len(t), len(u_name)))
+            u = N.ones((len(t), len(u_name)))*model.real_u
             u_mat = simulator._problem.input[1].eval(t)
             
             if not isinstance(simulator._problem.input[0],list):
@@ -78,7 +80,7 @@ def write_data(simulator,write_scaled_result=False, result_file_name=''):
                 u_input_name = simulator._problem.input[0]
             
             for i,n in enumerate(u_input_name):
-                u[:,u_name.index(n)] = u_mat[:,i]
+                u[:,u_name.index(n)] = u_mat[:,i]/problem._input_nominal[i]
         else:
             u = N.ones((len(t),len(model.real_u)))*model.real_u
         
@@ -93,12 +95,14 @@ def write_data(simulator,write_scaled_result=False, result_file_name=''):
                                 file_name=result_file_name)
     elif isinstance(simulator._problem, JMIODE):
         model = simulator._problem._model
+        problem = simulator._problem
     
         t = N.array(simulator.t)
         y = N.array(simulator.y)
         if simulator._problem.input:
             u_name = [k[1] for k in model.get_u_variable_names()]
-            u = N.zeros((len(t), len(u_name)))
+            #u = N.zeros((len(t), len(u_name)))
+            u = N.ones((len(t), len(u_name)))*model.real_u
             u_mat = simulator._problem.input[1].eval(t)
             
             if not isinstance(simulator._problem.input[0],list):
@@ -107,7 +111,7 @@ def write_data(simulator,write_scaled_result=False, result_file_name=''):
                 u_input_name = simulator._problem.input[0]
             
             for i,n in enumerate(u_input_name):
-                u[:,u_name.index(n)] = u_mat[:,i]
+                u[:,u_name.index(n)] = u_mat[:,i]/problem._input_nominal[i]
         else:
             u = N.ones((len(t),len(model.real_u)))*model.real_u
         yd = N.array(map(simulator.f,t,y))
@@ -122,13 +126,15 @@ def write_data(simulator,write_scaled_result=False, result_file_name=''):
     elif isinstance(simulator._problem, JMIDAESens):
         
         model = simulator._problem._model
+        problem = simulator._problem
         
         t = N.array(simulator.t)
         y = N.array(simulator.y)
         yd = N.array(simulator.yd)
         if simulator._problem.input:
             u_name = [k[1] for k in model.get_u_variable_names()]
-            u = N.zeros((len(t), len(u_name)))
+            #u = N.zeros((len(t), len(u_name)))
+            u = N.ones((len(t), len(u_name)))*model.real_u
             u_mat = simulator._problem.input[1].eval(t)
             
             if not isinstance(simulator._problem.input[0],list):
@@ -137,7 +143,7 @@ def write_data(simulator,write_scaled_result=False, result_file_name=''):
                 u_input_name = simulator._problem.input[0]
             
             for i,n in enumerate(u_input_name):
-                u[:,u_name.index(n)] = u_mat[:,i]
+                u[:,u_name.index(n)] = u_mat[:,i]/problem._input_nominal[i]
         else:
             u = N.ones((len(t),len(model.real_u)))*model.real_u
         
@@ -466,6 +472,9 @@ class JMIODE(Explicit_Problem):
         """
         Sets the initial values.
         """
+        if input != None and not isinstance(input[0],list):
+            input = ([input[0]], input[1])
+        
         self._model = model
         self.input = input
         
@@ -485,6 +494,19 @@ class JMIODE(Explicit_Problem):
         
         #Used for determine if there are discontinuities
         [f_nbr, g_nbr] = self._model.jmimodel.dae_get_sizes() 
+        
+        #Construct the input nominal vector
+        if self.input != None:
+            self._input_nominal = N.array([1.0]*len(self.input[0]))
+            if (self._model.get_scaling_method() == jmi.JMI_SCALING_VARIABLES):
+                for i in range(len(self.input[0])):
+                    val_ref = self._model._xmldoc.get_value_reference(self.input[0][i])
+                    for j, nom in enumerate(self._model._xmldoc.get_u_nominal()):
+                        if val_ref == nom[0]:
+                            if nom[1] == None:
+                                self._input_nominal[i] = 1.0
+                            else:
+                                self._input_nominal[i] = nom[1]
         
         if g_nbr > 0:
             raise JMIModel_Exception(
@@ -602,6 +624,9 @@ class JMIDAE(Implicit_Problem):
         """
         Sets the initial values.
         """
+        if input != None and not isinstance(input[0],list):
+            input = ([input[0]], input[1])
+        
         self._model = model
         self.input = input
         
@@ -621,6 +646,19 @@ class JMIDAE(Implicit_Problem):
         if g0_nbr > 0:
             self.switches_init = [bool(x) for x in self._model.sw_init]
         
+        #Construct the input nominal vector
+        if self.input != None:
+            self._input_nominal = N.array([1.0]*len(self.input[0]))
+            if (self._model.get_scaling_method() == jmi.JMI_SCALING_VARIABLES):
+                for i in range(len(self.input[0])):
+                    val_ref = self._model._xmldoc.get_value_reference(self.input[0][i])
+                    for j, nom in enumerate(self._model._xmldoc.get_u_nominal()):
+                        if val_ref == nom[0]:
+                            if nom[1] == None:
+                                self._input_nominal[i] = 1.0
+                            else:
+                                self._input_nominal[i] = nom[1]
+
         #Determine the result file name
         if result_file_name == '':
             self.result_file_name = model.get_name()+'_result.txt'
@@ -1101,6 +1139,19 @@ class JMIDAESens(Implicit_Problem):
         if g_nbr > 0:
             raise JMIModel_Exception("Hybrid models with event functions are currently not supported.")
         
+        #Construct the input nominal vector
+        if self.input != None:
+            self._input_nominal = N.array([1.0]*len(self.input[0]))
+            if (self._model.get_scaling_method() == jmi.JMI_SCALING_VARIABLES):
+                for i in range(len(self.input[0])):
+                    val_ref = self._model._xmldoc.get_value_reference(self.input[0][i])
+                    for j, nom in enumerate(self._model._xmldoc.get_u_nominal()):
+                        if val_ref == nom[0]:
+                            if nom[1] == None:
+                                self._input_nominal[i] = 1.0
+                            else:
+                                self._input_nominal[i] = nom[1]
+        
         if self._model.has_cppad_derivatives():
             self.jac = self.j #Activates the jacobian
         
@@ -1240,7 +1291,7 @@ class JMIDAESens(Implicit_Problem):
                 input_data = N.ones(len(self._input_names))*self._model.real_u
                 input_eval = self.input[1].eval(float(t))[0,:]
                 for i,n in enumerate(self.input[0]):
-                    input_data[self._input_names.index(n)] = input_eval[i]
+                    input_data[self._input_names.index(n)] = input_eval[i]/self._input_nominal[i]
                 data = N.append(data, input_data)
             else:
                 data = N.append(data,N.ones(len(self._model.real_u))*self._model.real_u)

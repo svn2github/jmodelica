@@ -61,12 +61,19 @@ class Test_JMI_ODE:
         fname_ODE = compile_jmu(cpath_ODE, fpath_ODE, 
                     compiler_options={'state_start_values_fixed':True})
         
+        fpath = os.path.join(get_files_path(), 'Modelica', 'DoubleInput.mo')
+        cpath = 'DoubleInput_Nominal'
+        fname = compile_jmu(cpath, fpath, 
+                    compiler_options={"enable_variable_scaling":True})
+        
     def setUp(self):
         """Load the test model."""
         package_ODE = 'VDP_pack_VDP_Opt.jmu'
+        package_INPUT = 'DoubleInput_Nominal.jmu'
 
         # Load the dynamic library and XML data
         self.m_ODE = JMUModel(package_ODE)
+        self.m_INPUT = JMUModel(package_INPUT)
         
         # Creates the solvers
         self.ODE = JMIODE(self.m_ODE)
@@ -100,9 +107,9 @@ class Test_JMI_ODE:
         u = (0.75)*N.ones(N.size(t,0))
         u_traj = TrajectoryLinearInterpolation(t,u.reshape(100,1))
         
-        self.ODE.input = ('u',u_traj)
+        ODE =  JMIODE(self.m_ODE, ('u',u_traj))
         
-        vdp_sim = CVode(self.ODE)
+        vdp_sim = CVode(ODE)
 
         vdp_sim(10,100)
     
@@ -118,7 +125,34 @@ class Test_JMI_ODE:
         assert u.x[-1] == 0.75
         nose.tools.assert_almost_equal(x1.x[-1], -0.54108518, 5)
         nose.tools.assert_almost_equal(x2.x[-1], -0.81364915, 5)
-
+    
+    @testattr(assimulo = True)
+    def test_scaled_input(self):
+        """
+        Tests that simulation of scaled input works.
+        """
+        t = N.linspace(0.,10.,100) 
+        u1 = N.cos(t)
+        u2 = N.sin(t)
+        u_traj = N.transpose(N.vstack((t,u1,u2)))
+        
+        opts = self.m_INPUT.simulate_options()
+        opts["solver"] = "CVode"
+        
+        res = self.m_INPUT.simulate(final_time=10, input=(['u1','u2'],u_traj),
+                                    options=opts)
+        
+        r1=res['u1']
+        r2=res['u2']
+        t1=res['time']
+        
+        #P.plot(t1,r1,t1,r2)
+        #P.show()
+        nose.tools.assert_almost_equal(r1[0], 1.000000000, 3)
+        nose.tools.assert_almost_equal(r2[0], 0.000000000, 3)
+        nose.tools.assert_almost_equal(r1[-1], -0.839071529, 3)
+        nose.tools.assert_almost_equal(r2[-1], -0.544021110, 3)
+    
     @testattr(assimulo = True) 
     def test_init(self):
         """
@@ -271,7 +305,6 @@ class Test_JMI_DAE:
     """
     This class tests jmodelica.simulation.assimulo.JMIDAE
     """
-    
     @classmethod
     def setUpClass(cls):
         """
@@ -290,14 +323,21 @@ class Test_JMI_DAE:
         
         fname_DISC = compile_jmu(cpath_DISC, fpath_DISC)
         
+        fpath = os.path.join(get_files_path(), 'Modelica', 'DoubleInput.mo')
+        cpath = 'DoubleInput_Nominal'
+        fname = compile_jmu(cpath, fpath, 
+                    compiler_options={"enable_variable_scaling":True})
+        
     def setUp(self):
         """Load the test model."""
         package_DAE = 'Pendulum_pack_Pendulum.jmu'
         package_DISC = 'IfExpExamples_IfExpExample2.jmu'
+        package_INPUT = 'DoubleInput_Nominal.jmu'
 
         # Load the dynamic library and XML data
         self.m_DAE = JMUModel(package_DAE)
         self.m_DISC = JMUModel(package_DISC)
+        self.m_INPUT = JMUModel(package_INPUT)
         
         # Creates the solvers
         self.DAE = JMIDAE(self.m_DAE)
@@ -378,6 +418,30 @@ class Test_JMI_DAE:
         assert eIter[0] == 0
         assert eIter[1] == 0
         assert eIter[2] == 0
+    
+    @testattr(assimulo = True)
+    def test_scaled_input(self):
+        """
+        Tests that simulation of scaled input works.
+        """
+        t = N.linspace(0.,10.,100) 
+        u1 = N.cos(t)
+        u2 = N.sin(t)
+        u_traj = N.transpose(N.vstack((t,u1,u2)))
+        
+        res = self.m_INPUT.simulate(final_time=10, input=(['u1','u2'],u_traj))
+        
+        r1=res['u1']
+        r2=res['u2']
+        t1=res['time']
+        
+        #P.plot(t1,r1,t1,r2)
+        #P.show()
+        nose.tools.assert_almost_equal(r1[0], 1.000000000, 3)
+        nose.tools.assert_almost_equal(r2[0], 0.000000000, 3)
+        nose.tools.assert_almost_equal(r1[-1], -0.839071529, 3)
+        nose.tools.assert_almost_equal(r2[-1], -0.544021110, 3)
+        
     
     @testattr(assimulo = True) 
     def test_event_switch(self):
@@ -1129,16 +1193,23 @@ class Test_JMI_DAE_Sens:
         
         fname_SENS = compile_jmu(cpath_SENS, fpath_SENS, compiler_options={"enable_variable_scaling":True})
         
+        fpath = os.path.join(get_files_path(), 'Modelica', 'DoubleInput.mo')
+        cpath = 'DoubleInput_Nominal'
+        fname = compile_jmu(cpath, fpath, 
+                    compiler_options={"enable_variable_scaling":True})
+        
     def setUp(self):
         """Load the test model."""
         package_DAE = 'Pendulum_pack_Pendulum.jmu'
         package_SENS = 'QuadTankSens.jmu'
         package_DISC = 'IfExpExamples_IfExpExample2.jmu'
+        package_INPUT = 'DoubleInput_Nominal.jmu'
 
         # Load the dynamic library and XML data
         self.m_DAE = JMUModel(package_DAE)
         self.m_SENS = JMUModel(package_SENS)
         self.m_DISC = JMUModel(package_DISC)
+        self.m_INPUT = JMUModel(package_INPUT)
 
         # Creates the solvers
         self.DAE = JMIDAESens(self.m_DAE)
@@ -1397,6 +1468,72 @@ class Test_JMI_DAE_Sens:
         nose.tools.assert_almost_equal(x1, 0.45537058, 3)
         nose.tools.assert_almost_equal(r1, 5.3287e-8, 2)
         nose.tools.assert_almost_equal(u1, 0.00000, 3)
+    
+    @testattr(assimulo = True)
+    def test_scaled_input(self):
+        """
+        Tests that simulation of scaled input works.
+        """
+        t = N.linspace(0.,10.,100) 
+        u1 = N.cos(t)
+        u2 = N.sin(t)
+        u_traj = N.transpose(N.vstack((t,u1,u2)))
+        
+        opts = self.m_INPUT.simulate_options()
+        opts['IDA_options']['atol'] = 1.0e-6
+        opts['IDA_options']['rtol'] = 1.0e-6
+        opts['IDA_options']['sensitivity'] = True
+        opts['ncp'] = 0
+        
+        res = self.m_INPUT.simulate(final_time=10, input=(['u1','u2'],u_traj),
+                                    options=opts)
+        
+        r1=res['u1']
+        r2=res['u2']
+        t1=res['time']
+        
+        #P.plot(t1,r1,t1,r2)
+        #P.show()
+        nose.tools.assert_almost_equal(r1[0], 1.000000000, 3)
+        nose.tools.assert_almost_equal(r2[0], 0.000000000, 3)
+        nose.tools.assert_almost_equal(r1[-1], -0.839071529, 3)
+        nose.tools.assert_almost_equal(r2[-1], -0.544021110, 3)
+        
+        
+    @testattr(assimulo = True)
+    def test_scaled_input_continuous(self):
+        """
+        Tests that simulation of scaled input works for writing continuous.
+        """
+        t = N.linspace(0.,10.,100) 
+        u1 = N.cos(t)
+        u2 = N.sin(t)
+        u_traj = N.transpose(N.vstack((t,u1,u2)))
+        
+        opts = self.m_INPUT.simulate_options()
+        opts['IDA_options']['atol'] = 1.0e-6
+        opts['IDA_options']['rtol'] = 1.0e-6
+        opts['IDA_options']['sensitivity'] = True
+        opts['IDA_options']['write_cont'] = True
+        opts['ncp'] = 0
+        
+        res = self.m_INPUT.simulate(final_time=10, input=(['u1','u2'],u_traj),
+                                    options=opts)
+        
+        r1=res['u1']
+        r2=res['u2']
+        t1=res['time']
+        
+        #P.plot(t1,r1,t1,r2)
+        #P.show()
+        nose.tools.assert_almost_equal(r1[0], 1.000000000, 3)
+        nose.tools.assert_almost_equal(r2[0], 0.000000000, 3)
+        nose.tools.assert_almost_equal(r1[-1], -0.839071529, 3)
+        nose.tools.assert_almost_equal(r2[-1], -0.544021110, 3)
+        
+        
+        
+    
     
     @testattr(assimulo = True)
     def test_scaling(self):
