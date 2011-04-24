@@ -139,3 +139,18 @@ def test_qt_par_est():
 def test_fmu_with_input():
     """ Run FMU with input example. """
     fmu_with_input.run_demo(False)
+
+@testattr(assimulo = True)
+def test_planar_pendulum():
+    """ Run planar pendulum example """
+    planar_pendulum.run_demo(False)
+
+@testattr(assimulo = True)
+def test_mechanics_rotational_examples_first():
+    """ Run mechanics high index example from MSL """
+    mechanical_rotational_examples_first.run_demo(False)
+
+@testattr(assimulo = True)
+def test_crane():
+    """ Run the PyMBS example """
+    crane.run_demo(False)

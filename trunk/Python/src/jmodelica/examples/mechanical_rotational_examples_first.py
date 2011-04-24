@@ -15,57 +15,47 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import os
-import logging
+# Import library for path manipulations
+import os.path
 
 import numpy as N
-import pylab as p
 import matplotlib.pyplot as plt
 
 from jmodelica.fmi import compile_fmu, FMUModel
 
 def run_demo(with_plots=True):
+    """ 
+    Example demonstrating simulation of a mechanical system from the
+    Modelica standard library.
     """
-    An example on how to simulate a model using the DAE simulator. Also writes 
-    information to a file.
-
-    NOTICE: The script does not run since the compiler does not support all 
-    constructs needed.
-    """
-
-    curr_dir = os.path.dirname(os.path.abspath(__file__));
 
     # Compile model
-    fmu_name = compile_fmu("PyMBSModels.CraneCrab_recursive_der_state_Test", 
-        curr_dir + "/files/PyMBSModels.mo")
+    fmu_name = compile_fmu("Modelica.Mechanics.Rotational.Examples.First",())
 
     # Load model
     model = FMUModel(fmu_name)
 
     # Load result file
-    res = model.simulate(final_time=10.)
+    res = model.simulate(final_time=3.)
 
-    q1 = res['crane.q[1]']
-    q2 = res['crane.q[2]']
-    qd1 = res['crane.qd[1]']
-    qd2 = res['crane.qd[2]']
+    w1 = res['inertia1.w']
+    w2 = res['inertia2.w']
+    w3 = res['inertia3.w']
+    tau = res['torque.tau']
     t = res['time']
 
-    assert N.abs(q1[-1] - 0.99373831) < 1e-3, \
+    assert N.abs(w3[-1] - (-2.77127815e-01)) < 1e-3, \
            "Wrong value in simulation result."  
 
     if with_plots:
         plt.figure(1)
         plt.subplot(2,1,1)
-        plt.plot(t,q1,t,q2)
+        plt.plot(t,w1,t,w2,t,w3)
         plt.grid(True)
-        plt.legend(['q[1]','q[2]'])
+        plt.legend(['inertia1.w','inertia2.w','inertia3.w'])
         plt.subplot(2,1,2)
-        plt.plot(t,qd1,t,qd2)
+        plt.plot(t,tau)
         plt.grid(True)
-        plt.legend(['qd[1]','qd[2]'])
+        plt.legend(['tau'])
         plt.xlabel('time [s]')
         plt.show()
-
-if __name__=="__main__":
-    run_demo()

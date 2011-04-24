@@ -487,6 +487,7 @@ model CCodeGenUniqueNames
      JModelica.UnitTesting.CCodeGenTestCase(
          name="CCodeGenUniqueNames",
          enable_structural_diagnosis=false,
+         index_reduction=false,
          description="Test that unique names are generated for each variable",
          template="
 $C_variable_aliases$

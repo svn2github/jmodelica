@@ -42,8 +42,7 @@ public class OptionRegistry {
 	
 		private enum DefOpt {
 			ENABLE_TEARING   ("enable_tearing", false, 
-					"If this option is set to true (default is true), tearing of equation systems is enabled." +
-					"converted to algebraic variables."),
+					"If this option is set to true (default is false), tearing of equation systems is enabled."),
 			CONV_FREE_DEP_PAR_TO_ALGS   ("convert_free_dependent_parameters_to_algebraics", true, 
 					"If this option is set to true (default is true), free dependent parameters are" +
 					"converted to algebraic variables."),
@@ -70,8 +69,8 @@ public class OptionRegistry {
 			XML_EQU     ("generate_xml_equations",    false, 
 					"If this option is true, then model equations are generated in XML format. " + 
 					"Default is false."),
-			INDEX_RED   ("index_reduction",           false, // NB: this description used in a Python test 
-					"If this option is true (default is false), index reduction is performed."),
+			INDEX_RED   ("index_reduction",           true, // NB: this description used in a Python test 
+					"If this option is true (default is true), index reduction is performed."),
 			EQU_SORT    ("equation_sorting",          false, 
 					"If this option is true (default is false), equations are sorted using the BLT algorithm."),
 			XML_FMI_ME     ("generate_fmi_me_xml",          false, 

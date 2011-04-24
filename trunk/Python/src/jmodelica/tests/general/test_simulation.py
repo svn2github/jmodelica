@@ -305,3 +305,38 @@ class TestInputInitializationFMU(SimulationTest):
     def test_trajectories(self):
         self.assert_all_trajectories(['x','u'], same_span=True, rel_tol=1e-5, abs_tol=1e-5)
 
+class TestIndexReduction1FMU(SimulationTest):
+    
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            'Pendulum_pack_no_opt.mo', 'Pendulum_pack.PlanarPendulum',format='fmu')
+
+    @testattr(assimulo = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=10)
+        self.run()
+        self.load_expected_data(
+            'Pendulum_pack_PlanarPendulum_result.txt')
+
+    @testattr(assimulo = True)
+    def test_trajectories(self):
+        self.assert_all_trajectories(['x','y'], same_span=True, rel_tol=1e-4, abs_tol=1e-4)
+
+class TestIndexReduction2FMU(SimulationTest):
+    
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            'IndexReductionTests.mo', 'IndexReductionTests.Mechanical1',format='fmu')
+
+    @testattr(assimulo = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=3, time_step=0.01)
+        self.run()
+        self.load_expected_data(
+            'IndexReductionTests_Mechanical1_result.txt')
+
+    @testattr(assimulo = True)
+    def test_trajectories(self):
+        self.assert_all_trajectories(['inertia1.w','inertia3.w'], same_span=True, rel_tol=1e-4, abs_tol=1e-4)

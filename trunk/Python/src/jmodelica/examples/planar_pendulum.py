@@ -21,15 +21,43 @@ import os.path
 import numpy as N
 import matplotlib.pyplot as plt
 
-from jmodelica.jmi import compile_jmu
+from jmodelica.fmi import compile_fmu, FMUModel
 
 def run_demo(with_plots=True):
     """ 
-    Example demonstrating how to use BLT.
+    Example demonstrating how to use index reduction.
     """
 
     curr_dir = os.path.dirname(os.path.abspath(__file__));
 
     # Compile model
-    jmu_name = compile_jmu("BLT_Example", curr_dir+"/files/BLT_Example.mo", 
-        compiler_options={"equation_sorting":True})
+    fmu_name = compile_fmu("Pendulum_pack.PlanarPendulum", 
+        curr_dir+"/files/Pendulum_pack.mop",compiler='optimica')
+
+    # Load model
+    model = FMUModel(fmu_name)
+
+    # Load result file
+    res = model.simulate(final_time=10.)
+
+    x = res['x']
+    y = res['y']
+    vx = res['vx']
+    vy = res['vy']
+    t = res['time']
+
+    assert N.abs(x[-1] - 3.87669270e-01) < 1e-3, \
+           "Wrong value in simulation result."  
+
+    if with_plots:
+        plt.figure(1)
+        plt.subplot(2,1,1)
+        plt.plot(t,x,t,y)
+        plt.grid(True)
+        plt.legend(['x','y'])
+        plt.subplot(2,1,2)
+        plt.plot(t,vx,t,vy)
+        plt.grid(True)
+        plt.legend(['vx','vy'])
+        plt.xlabel('time [s]')
+        plt.show()

@@ -1091,6 +1091,92 @@ plt.show()
     </section>
 
     <section>
+      <title>Simulation of a high-index model</title>
+
+      <para>Mechanical component-based models often result in high-index DAEs.
+      In order to efficiently integrate such models, Modelica tools typically
+      employs an index reduction scheme, where some equations are
+      differentiated, and dummy derivatives are selected. In order to
+      demonstrate this feature, we consider the model
+      Modelica.Mechanics.Rotational.Examples.First from the Modelica Standard
+      library, see Figure <xref linkend="rotational_first_diagram" />. The
+      model is of high index since there are two rotating inertias connected
+      with a rigid gear.</para>
+
+      <figure xml:id="rotational_first_diagram">
+        <title>Modelica.Mechanics.Rotational.First connection diagram</title>
+
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="images/rotational_first_diagram.png"
+                       scalefit="1" width="60%"></imagedata>
+          </imageobject>
+        </mediaobject>
+      </figure>
+
+      <para>First create a Python script file and enter the usual
+      imports:</para>
+
+      <programlisting language="python">import matplotlib.pyplot as plt
+from jmodelica.fmi import compile_fmu, FMUModel
+</programlisting>
+
+      <para>Next, the model is compiled and loaded:</para>
+
+      <programlisting language="python"># Compile model
+fmu_name = compile_fmu("Modelica.Mechanics.Rotational.Examples.First",())
+
+# Load model
+model = FMUModel(fmu_name)
+</programlisting>
+
+      <para>Notice that no file name, just an empty tuple, is provided to the
+      function <literal>compile_fmu</literal>, since in this case the model
+      that is compiled resides in the Modelica standard library. In the
+      compilation process, the index reduction algorithm is invoked. Next, the
+      model is simulated for 3 seconds:</para>
+
+      <programlisting language="python"># Load result file
+res = model.simulate(final_time=3.)
+</programlisting>
+
+      <para>Finally, the simulation results are retrieved and plotted:</para>
+
+      <programlisting language="python">w1 = res['inertia1.w']
+w2 = res['inertia2.w']
+w3 = res['inertia3.w']
+tau = res['torque.tau']
+t = res['time']
+
+plt.figure(1)
+plt.subplot(2,1,1)
+plt.plot(t,w1,t,w2,t,w3)
+plt.grid(True)
+plt.legend(['inertia1.w','inertia2.w','inertia3.w'])
+plt.subplot(2,1,2)
+plt.plot(t,tau)
+plt.grid(True)
+plt.legend(['tau'])
+plt.xlabel('time [s]')
+plt.show()
+</programlisting>
+
+      <para>You should now see a plot as shown below.</para>
+
+      <figure xml:id="rotational_first">
+        <title>Simulation result for
+        Mecahnics.Rotational.Examples.First</title>
+
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="images/rotational_first.svg" scalefit="1"
+                       width="60%"></imagedata>
+          </imageobject>
+        </mediaobject>
+      </figure>
+    </section>
+
+    <section>
       <title>Simulation and parameter sweeps</title>
 
       <para>This example demonstrates how to run multiple simulations with
@@ -1189,7 +1275,7 @@ P.show()
 
         <mediaobject>
           <imageobject>
-            <imagedata fileref="images/vdp_pp.png" scalefit="1" width="60%"></imagedata>
+            <imagedata fileref="images/vdp_pp.svg" scalefit="1" width="60%"></imagedata>
           </imageobject>
         </mediaobject>
       </figure>

@@ -32,6 +32,8 @@ public class BiPGraph {
 	public static int ALGEBRAIC_VARIABLES = 4;
 	public static int DISCRETE_PRE_VARIABLES = 8;
 
+	public static int MAX_N_EQ_DIFFS = 10;
+
 	private String name;
 	private String description;
 	
@@ -462,7 +464,7 @@ public class BiPGraph {
 			reset();
 			//greedyMatching();
 		}
-			
+				
 		//_maximumMatching(resetMatching);	
 		IndexReductionResult result = new IndexReductionResult();		
 				
@@ -471,10 +473,13 @@ public class BiPGraph {
 				
 		LinkedHashSet<Eq> es = new LinkedHashSet<Eq>();
 		es.addAll(getEquations());
+		FClass fc = es.iterator().next().getEquation().myFClass();	
 		
 		Eq eqToMatch;
+		
 		boolean pathFound = false;		
-				
+		int n_eq_diffs = 0; // Number of times a single equation has been differentiated	
+		ArrayList<FVariable> newDiffedVars = new ArrayList<FVariable>();	
 		// Algoritm step numbering from the original Pantelides paper		
 		// Loop over all equations (step 3)
 		for (Eq e : es) {
@@ -482,6 +487,7 @@ public class BiPGraph {
 			if (e.getMatching()==null) {
 				eqToMatch = e; // Step 3a
 				pathFound = false; // Step
+				n_eq_diffs = 0;
 				while (!pathFound) { // Step 3b
 					// Since the states are not added to the graph,
 					// Step 3b-1 is skipped and is done at the end of 
@@ -492,26 +498,38 @@ public class BiPGraph {
 					pathFound = false; // Step 3b-3
 					// Find an augmenting path, step 3b-4
 					pathFound = augmentPath(eqToMatch, visitedEquations, visitedVariables); 
-					System.out.println("*************");
-					System.out.println("Looking for augmented path starting in equation: " + eqToMatch.toString());
+					fc.log.info("*************");
+					fc.log.info("Looking for augmented path starting in equation: " + eqToMatch.toString());
 					if (pathFound) {
-						System.out.println("Path found!");
+						fc.log.info("Path found!");
 					} else {	
-					 	System.out.println("Path not found!");
+					 	fc.log.info("Path not found!");
 					}
-					System.out.println("Visisted equations:");
+					fc.log.info("Visisted equations:");
 					for (Eq ee : visitedEquations) {
-						System.out.println("  " + ee.getDescription());
+						fc.log.info("  " + ee.getDescription());
 					}
-					System.out.println("Visisted variables:");
+					fc.log.info("Visisted variables:");
 					for (Var vv : visitedVariables) {
-						System.out.println("  " + vv.toString());
+						fc.log.info("  " + vv.toString());
 					}
 					
 					if (!pathFound) { // Step 3b-5
+						n_eq_diffs++;
+						if (n_eq_diffs > MAX_N_EQ_DIFFS) { // Reached maximum number of differentiations of a single equation?
+							// Remove variables that were added
+							for (FVariable v : newDiffedVars) {
+								int ind = v.myFClass().getFVariableList().getIndexOfChild(v);
+								if (ind>=0) {
+									v.myFClass().getFVariableList().removeChild(ind);
+								}
+							}
+							return null;
+						}
 						for (Var vv : visitedVariables) { // Loop over all visited variables, Step 3b-5i
 						    // Create a new differentiated variable
 							FVariable newVar = vv.getVariable().myFClass().addFDerivativeVariable(vv.getVariable());
+							newDiffedVars.add(newVar);
 							// Add the differentiated variable to the graph 
 							Var vvv = addVariable(newVar.name(),"",newVar);
 							// Set the "A vector" in the paper: 
@@ -525,7 +543,7 @@ public class BiPGraph {
 							// Create a new differentiated equation
 							FAbstractEquation deee = eee.diff("time");
 							result.addEquation(deee);
-							System.out.println("About to add equation: " + deee);
+							fc.log.info("About to add equation: " + deee);
 							// Add the differentiated equation						
 							Eq eqn = addEquation("eq_" + (getEquations().size() + 1), 
 							             deee.prettyPrint(""), deee);
@@ -533,7 +551,7 @@ public class BiPGraph {
 							// Add edges
 							for (FVariable fv : deee.variables()) {
 								Var vvv = variableMap.get(fv.name());
-								System.out.println("*** " + fv.name());
+								fc.log.info("*** " + fv.name());
 								if (vvv!=null) {
 									addEdge(eqn,vvv);
 								}
@@ -556,13 +574,13 @@ public class BiPGraph {
 						// Step 3b-5iv
 						eqToMatch = eqToMatch.getMeDifferentiated();
 						
-						System.out.println("Graph after addition of equations and variables:");
-						System.out.println(toString());
+						fc.log.info("Graph after addition of equations and variables:");
+						fc.log.info(toString());
 					}	
 
-					System.out.println("Matching:");
-					System.out.println(printMatching());
-					System.out.println("*************");
+					fc.log.info("Matching:");
+					fc.log.info(printMatching());
+					fc.log.info("*************");
 				
 				}	
 			}
@@ -578,9 +596,9 @@ public class BiPGraph {
 		for (Eq e : eqToRemove) {
 			removeEquation(e);
 		}
-		System.out.println("Index reduction done!");
-		System.out.println("Matching:");
-		System.out.println(printMatching());
+		fc.log.info("Index reduction done!");
+		fc.log.info("Matching:");
+		fc.log.info(printMatching());
 		
 		// Selection of dummy derivatives
 		/*
@@ -600,7 +618,7 @@ public class BiPGraph {
 		
 		BLT blt = computeBLT();
 	
-		System.out.println(blt.toString());
+		fc.log.info(blt.toString());
 
 		// Lists of equations and variables, notation is the same as in the 
 		// paper
@@ -621,8 +639,8 @@ public class BiPGraph {
 		for (EquationBlock eb : blt) {
 			ArrayList<FAbstractEquation> diffedEqns = eb.differentiatedEquations();
 			if (diffedEqns.size()>0) {
-				System.out.println(" ********* Found block containing diffed equations ***********");
-				System.out.println(eb.toString());
+				fc.log.info(" ********* Found block containing diffed equations ***********");
+				fc.log.info(eb.toString());
 		
 				// Step 1: Initialize, add all equations in blocks
 				// having differentiated equations
@@ -652,7 +670,7 @@ public class BiPGraph {
 		
 		// Iterate
 		while (remainingDifferentiatedEquations) {
-		   System.out.println("----------------");
+		   fc.log.info("----------------");
 			// Step 3: Extract differentiated equations 
 			h = new ArrayList<FAbstractEquation>();
 			for (FAbstractEquation fe : g) {
@@ -679,12 +697,12 @@ public class BiPGraph {
 				int n_eq = e.numScalarEquations();
 				
 				for (int i=0;i<n_eq;i++) {
-					System.out.println("*** " + e.prettyPrint(""));
+					fc.log.info("*** " + e.prettyPrint(""));
 					eqn = gd.addEquation("eq_"+k,e.prettyPrint(""),e);
 					k++;
 				
 					for (FVariable y : e.variables()) { 
-						System.out.println(" ** " + y.prettyPrint("") + " " + z.contains(y));
+						fc.log.info(" ** " + y.prettyPrint("") + " " + z.contains(y));
 						if (z.contains(y)) {
 							v = gd.getVariable(y.name()); 
 							gd.addEdge(eqn,v);
@@ -693,10 +711,10 @@ public class BiPGraph {
 				}
 			}
 					
-			System.out.println(gd.toString());
+			fc.log.info(gd.toString());
 			// Run matching
 			gd.maximumMatching(true);	
-			System.out.println(gd.printMatching());
+			fc.log.info(gd.printMatching());
 					
 			// The matched variables are selected as dummy derivatives
 			for (Var vv : gd.getMatchedVariables()) {
@@ -734,27 +752,27 @@ public class BiPGraph {
 				}
 			}
 			
-			System.out.println(" --- Equations in iteration: --- ");
-			System.out.println(" Equations: ");
+			fc.log.info(" --- Equations in iteration: --- ");
+			fc.log.info(" Equations: ");
 			for (FAbstractEquation fe : g) {
-				System.out.println(fe.prettyPrint("   "));
+				fc.log.info(fe.prettyPrint("   "));
 			}
 
-			System.out.println(" Dummy derivatives selected in iteration: ");
+			fc.log.info(" Dummy derivatives selected in iteration: ");
 			for (FVariable fv : zHat) {
 				result.addDummyDerivative(fv);
-				System.out.println(fv.prettyPrint("   "));
+				fc.log.info(fv.prettyPrint("   "));
 			}
-			System.out.println("");
+			fc.log.info("");
 				
 		}
 		
-		System.out.println(" Dummy derivatives: ");
+		fc.log.info(" Dummy derivatives: ");
 		for (FVariable fv : zHat) {
 			result.addDummyDerivative(fv);
-			System.out.println(fv.prettyPrint("   "));
+			fc.log.info(fv.prettyPrint("   "));
 		}
-		System.out.println("");
+		fc.log.info("");
 		
 		return result;
 	}
@@ -903,7 +921,7 @@ public class BiPGraph {
                 eqn.setTarjanNbr(++nbr);
                 eqn.setTarjanLowLink(nbr);
 
-//                System.out.println("push: " + eqn);
+//                fc.log.info("push: " + eqn);
                 stack.push(eqn);
                 eStack.push(eqn);
 
@@ -912,7 +930,7 @@ public class BiPGraph {
                     Var var = eqn.getNextVariable();
                     
                     if (var != null) {
-//                        System.out.println("top: " + eqn + " - " + var);
+//                        fc.log.info("top: " + eqn + " - " + var);
                         Eq eqn2 = var.getMatching();
                         
                         if (/*eqn!=eqn2 &&*/ eqn2.getTarjanNbr() == 0) {

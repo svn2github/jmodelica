@@ -37,9 +37,9 @@ package Pendulum_pack
     parameter Real L = 1 "Pendulum length";
     parameter Real g =9.81 "Acceleration due to gravity";
     Real x "Cartesian x coordinate";
-    Real y "Cartesian x coordinate";
+    Real y(start=-0.4,stateSelect=StateSelect.always) "Cartesian y coordinate";
     Real vx "Velocity in x coordinate";
-    Real vy "Velocity in y coordinate";
+    Real vy(stateSelect=StateSelect.always) "Velocity in y coordinate";
     Real lambda "Lagrange multiplier";
   equation
     der(x) = vx;
