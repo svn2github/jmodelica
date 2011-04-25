@@ -435,27 +435,53 @@ public class BiPGraph {
 			}
 		}		
 		return l;
-	}
+	}	
+	
+	/*
+	public String buildIndent(int n) {
+		String s = "";
+		for (int i=0;i<n;i++){
+			s += " ";
+		}
+		return s;
+	}	
+	
+	public int n_ind = 0;
+	*/
 	
 	public boolean augmentPath(Eq e, ArrayList<Eq> visitedEquations,
 	                                 ArrayList<Var> visitedVariables) {
 		e.setVisited(true);
 		visitedEquations.add(e);
+		//System.out.println(n_ind + buildIndent(n_ind) + " augmentPath start: " + e.getEquation().prettyPrint(""));	
+		//for (Var v : e.getVariables()) {
+		//	System.out.println(n_ind + buildIndent(n_ind) + " ** " + v.getVariable().name());	
+		//}
 		for (Var v : e.getVariables()) {
+			//System.out.println(n_ind + buildIndent(n_ind) + " augmentPath: " + e.getEquation().prettyPrint("") + " about to visit: " + v.getVariable().name());		
 			if (v.getMatching()==null) {
+				//System.out.println(n_ind + buildIndent(n_ind) + " augmentPath: " + e.getEquation().prettyPrint("") + " unmatched: " + v.getVariable().name());		
 				v.setMatching(e);
 				e.setMatching(v);
 				return true;
 			} else if (!v.isVisited()) {
+				//System.out.println(n_ind + buildIndent(n_ind) + " augmentPath: " + e.getEquation().prettyPrint("") + " matched and unvisited: " + v.getVariable().name());		
 				v.setVisited(true);
 				visitedVariables.add(v);
+				//n_ind++;
 				if (augmentPath(v.getMatching(),visitedEquations,visitedVariables)) {
+					//n_ind--;
+					//System.out.println(n_ind + buildIndent(n_ind) + " augmentPath: " + e.getEquation().prettyPrint("") + " matched and unvisited path found!: " + v.getVariable().name());		
 					v.setMatching(e);
 					e.setMatching(v);
 					return true;	
+				} else {
+					//n_ind--;
+					//System.out.println(n_ind + buildIndent(n_ind) + " augmentPath: " + e.getEquation().prettyPrint("") + " matched and unvisited path not found!: " + v.getVariable().name());				
 				}
 			}
 		}
+		//System.out.println(n_ind + buildIndent(n_ind) + "augmentPath end: " + e.getEquation().prettyPrint(""));	
 		return false;
 	}	
 
@@ -464,7 +490,7 @@ public class BiPGraph {
 			reset();
 			//greedyMatching();
 		}
-				
+						
 		//_maximumMatching(resetMatching);	
 		IndexReductionResult result = new IndexReductionResult();		
 				
@@ -484,7 +510,7 @@ public class BiPGraph {
 		// Loop over all equations (step 3)
 		for (Eq e : es) {
 			// If the equation is not matched
-			if (e.getMatching()==null) {
+			if (e.getMatching()==null && e.getMeDifferentiated()==null) {
 				eqToMatch = e; // Step 3a
 				pathFound = false; // Step
 				n_eq_diffs = 0;
@@ -497,6 +523,7 @@ public class BiPGraph {
 					lightReset(); // Step 3b-2
 					pathFound = false; // Step 3b-3
 					// Find an augmenting path, step 3b-4
+					//n_ind = 0;
 					pathFound = augmentPath(eqToMatch, visitedEquations, visitedVariables); 
 					fc.log.info("*************");
 					fc.log.info("Looking for augmented path starting in equation: " + eqToMatch.toString());

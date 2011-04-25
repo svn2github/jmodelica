@@ -441,7 +441,8 @@ aspect TransformCanonical {
 		// TODO: If no complete matching found, then try index reduction
 		if (g.getUnmatchedVariables().size()>0 || g.getUnmatchedEquations().size()>0) {
 			if (root().options.getBooleanOption("index_reduction")) {
-				IndexReductionResult result = g.reduceIndex(true);
+				//System.out.println(prettyPrint(""));
+				IndexReductionResult result = g.reduceIndex(false);
 			
 				if (result != null) {
 				// Add the new equations
