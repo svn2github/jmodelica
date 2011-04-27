@@ -45,9 +45,11 @@ public abstract class OutlinePage extends AbstractBaseContentOutlinePage {
 
 	private OutlineItemComparator comparator;
 	private IElementComparer comparer;
+	protected boolean selecting;
 
 	public OutlinePage(AbstractTextEditor editor) {
 		super(editor);
+		selecting = false;
 	}
 
 	@Override
@@ -58,11 +60,13 @@ public abstract class OutlinePage extends AbstractBaseContentOutlinePage {
 
 	@Override
 	public void highlightNodeInEditor(IJastAddNode node) {
-		IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-		IWorkbenchPage page = window.getActivePage();
-		IEditorPart editor = page.getActiveEditor();
-		if (editor instanceof Editor && node instanceof ASTNode<?>) 
-			((Editor) editor).selectNode((ASTNode) node);
+		if (!selecting) {
+			IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+			IWorkbenchPage page = window.getActivePage();
+			IEditorPart editor = page.getActiveEditor();
+			if (editor instanceof Editor && node instanceof ASTNode<?>) 
+				((Editor) editor).selectNode((ASTNode) node);
+		}
 	}
 
 	@Override
@@ -119,9 +123,11 @@ public abstract class OutlinePage extends AbstractBaseContentOutlinePage {
 	}
 
 	private void select(ISelection sel) {
+		selecting = true;
 		TreeViewer viewer = getTreeViewer();
 		if (viewer != null) 
 			viewer.setSelection(sel, true);
+		selecting = false;
 	}
 
 	private TreePath pathFromNode(Object node) {
