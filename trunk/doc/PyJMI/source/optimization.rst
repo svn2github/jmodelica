@@ -11,5 +11,19 @@ The :mod:`ipopt` Module
     :undoc-members:
     :show-inheritance:
 
+The :mod:`casadi_collocation` Module
+-----------------------------------------
 
+.. automodule:: jmodelica.optimization.casadi_collocation
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+The :mod:`polynomial` Module
+-----------------------------------------
+
+.. automodule:: jmodelica.optimization.polynomial
+    :members:
+    :undoc-members:
+    :show-inheritance:
 

@@ -15,6 +15,7 @@
    initialization
    io
    jmi
+   casadi_interface
    linearization
    optimization
    simulation
