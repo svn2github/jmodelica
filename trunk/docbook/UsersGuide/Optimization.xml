@@ -3008,4 +3008,338 @@ print "a4: " + str(sens_res['a4']) + ", standard deviation: " + str(sigma_a4)
     <literal>optimize</literal> methods of <literal>JMUModel</literal> for
     this purpose.</para>
   </section>
+
+  <section>
+    <title>Optimization using IPOPT and CasADi</title>
+
+    <para>New collocation algorithms have been implemented using the automatic
+    differentiation tool CasADi connected to IPOPT. The collocation algorithms
+    are the Gauss Pseudospectral-, the Legendre Pseudospectral- and the Radau
+    Pseudospectral-method. These methods can be used either as a local method
+    or a global method where in the local case the time horizon is discretized
+    into elements and each element are approximated with a polynomial. In the
+    global case, a polynomial is used over the complete time horizon. For a
+    mathematic overview of the methods, see the Python API documentation, for
+    the class <literal>PseudoSpectral</literal>.</para>
+
+    <para>The implementation resides in the module
+    <literal>casadi_interface</literal> and contains a model class,
+    <literal>CasadiModel</literal> together with a compile method,
+    <literal>compile_casadi</literal>. Usage of the methods is consistent with
+    the work flow for optimization of <literal>JMUModels</literal>. Shown
+    below is a Python code example describing how to invoke the optimization
+    method.</para>
+
+    <programlisting>from jmodelica.casadi_interface import compile_casadi
+from jmodelica.casadi_interface import CasadiModel
+
+casadi_name = compile_casadi("MyModel", "MyModels.mop")
+model = CasadiModel(casadi_name)
+
+res = model.optimize(algorithm="CasadiPseudoSpectral")
+
+#Plot...
+</programlisting>
+
+    <para>As can be seen from the above code example the real difference from
+    the native optimization method is that here we use a different model class
+    and a different compilation class, except from that, it can be used in
+    similar fashion.</para>
+
+    <section>
+      <title>CasADi</title>
+
+      <para>CasADi is a "minimalistic computer algebra system implementing
+      automatic differentiation". It is used here to discretize the problem
+      and to provide the necessary derivations, while also provide a direct
+      connection to IPOPT. CasADi can be found here, <link linkend="???"><link
+      linkend="www.casadi.org">http://www.casadi.org</link></link> and is
+      required in order to use these optimization methods.</para>
+    </section>
+
+    <section>
+      <title>Options</title>
+
+      <para>Options can be viewed and set via the options dictionary which can
+      then be passed to the optimize call. The option dictionary can be
+      retrieved with the below code example where <literal>model</literal> is
+      a <literal>CasadiModel</literal> instance. It is also shown how to use
+      the interactive help.</para>
+
+      <programlisting>opts = model.optimize_options(algorithm="CasadiPseudoSpectral")
+
+opts? #View the help text</programlisting>
+
+      <para>To provide the options to the optimize call, use the options
+      attribute.</para>
+
+      <programlisting>res = model.optimize(algorithm="CasadiPseudoSpectral", options=opts)</programlisting>
+
+      <para>In Table <xref linkend="opt-tab-pseudo" /> the options for the
+      PseudoSpectral methods are shown.<table xml:id="opt-tab-pseudo">
+          <title>Options for the Pseudospectral optimization
+          algorithms.</title>
+
+          <tgroup cols="3">
+            <colspec align="left" colname="col–opt" colwidth="1*" />
+
+            <colspec align="left" colname="col–desc" colwidth="1*" />
+
+            <colspec align="left" colname="col–def" colwidth="2*" />
+
+            <thead>
+              <row>
+                <entry align="center">Option</entry>
+
+                <entry align="center">Default</entry>
+
+                <entry align="center">Description</entry>
+              </row>
+            </thead>
+
+            <tbody>
+              <row>
+                <entry><literal>n_e</literal></entry>
+
+                <entry>1</entry>
+
+                <entry>Number of elements of the finite element mesh.</entry>
+              </row>
+
+              <row>
+                <entry><literal>n_cp</literal></entry>
+
+                <entry>20</entry>
+
+                <entry>Number of collocation points in each element. Values
+                between 1 and 80 are supported.</entry>
+              </row>
+
+              <row>
+                <entry><literal>discr</literal></entry>
+
+                <entry>"LG"</entry>
+
+                <entry>Determines the discretization of the problem. Can be
+                either "LG" (Legendre-Gauss), LGR (Legendre-Gauss-Radau), LGL
+                (Legendre-Gauss-Lobatto).</entry>
+              </row>
+
+              <row>
+                <entry><literal>link_options</literal></entry>
+
+                <entry>[] (not used)</entry>
+
+                <entry>This option allows users to specify states that are
+                allowed to be discontinuous between phases (elements) and to
+                connect the transition with a model parameter. Example,
+                [(1,"x1","dx1")], this allowes the variable x1 to be
+                discontinuous between phase 1 and 2 with the parameter dx1.
+                The generating constraint becomes, x1_N^1 - x1_0^2 - dx1 = 0.
+                There is no limit that the same parameter can be used in
+                multiple transition such as, [(1,"x1","dx1"), (1,"x2","dx1"),
+                (2,"x1","dx1")]</entry>
+              </row>
+
+              <row>
+                <entry>phase_options</entry>
+
+                <entry>None (not used)</entry>
+
+                <entry>This options allows users to connect parameters to
+                phase boundaries (time). Example, in a three phase problem the
+                parameters t1 and t2 can be specified to be the boundaries of
+                the phases such as, ["t1", "t2"], the option free_phases have
+                also be set to true. Default: None</entry>
+              </row>
+
+              <row>
+                <entry>free_phases</entry>
+
+                <entry>False</entry>
+
+                <entry>Specifies if the location of the phases should be
+                allowed to be changed by the optimizer. Default: False</entry>
+              </row>
+
+              <row>
+                <entry><literal>init_traj</literal></entry>
+
+                <entry>None (i.e. not used, set this argument to activate
+                initialization)</entry>
+
+                <entry>Variable trajectory data used for initialization of the
+                optimization problem. The data is represented by an object of
+                the type
+                <literal>jmodelica.io.ResultDymolaTextual.</literal></entry>
+              </row>
+
+              <row>
+                <entry><literal>result_file_name</literal></entry>
+
+                <entry>Empty string (default generated file name will be
+                used)</entry>
+
+                <entry>Specifies the name of the file where the optimization
+                result is written. Setting this option to an empty string
+                results in a default file name that is based on the name of
+                the optimization class.</entry>
+              </row>
+
+              <row>
+                <entry><literal>result_format</literal></entry>
+
+                <entry>'txt'</entry>
+
+                <entry>Specifies in which format to write the result.
+                Currently only textual mode is supported.</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </table></para>
+
+      <para>Options that need a little more attention are the free_phases,
+      link_options and phase_options. These options allows a user to setup a
+      problem involving discontinuities. As an example, say that in a model a
+      state is allowed to be changed discontinuous at an arbitrary time point,
+      <literal>tp</literal>, with the parameter <literal>dv</literal>. See
+      Figure <xref linkend="opt-fig-disc" />.</para>
+
+      <figure xml:id="opt-fig-disc">
+        <title>Handling of discontinuities. </title>
+
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="images/phase.png"></imagedata>
+          </imageobject>
+        </mediaobject>
+      </figure>
+
+      <para>In this case we set up the solver to use two elements (phases) and
+      at the phase boundary we impose an extra constraint that our state in
+      phase one plus the discontinuity should be equal to our state in phase
+      two. </para>
+
+      <programlisting>opts = model.optimize_options(algorithm="CasadiPseudoSpectral")
+
+opts["n_e"]=2 #Two elements
+opts["link_options"] = [(1,"v","dv")] #The parameter dv should be connected
+                                      #between phase 1 and 2 to variable v
+opts["phase_options"] = ["t1"] #The parameter t1 connects phase 1 and 2
+opts["free_phases"] = True #The phase boundary is allowed to be changed.
+</programlisting>
+
+      <para>Note that the parameters <literal>dv</literal> and
+      <literal>t1</literal> should be defined in the model and should be set
+      to free.</para>
+    </section>
+
+    <section>
+      <title>Examples</title>
+
+      <para>In the following subsections it will be shown how to use the
+      PseudoSpectral methods on <literal>Optimica</literal> models.</para>
+
+      <section>
+        <title>Van der Pol oscillator</title>
+
+        <para>This example shows the well known Van der Pol (VDP) oscillator
+        being optimized as an optimal control problem. The formulation is
+        somewhat different than in previous example of the VDP problem, as
+        here there is no extra <literal>cost</literal> state, instead the cost
+        function have been directly defined in the Lagrange term
+        (objectiveIntegrand). There is also no bounds on <literal>u</literal>.
+        Below, the <literal>Optimica</literal> for the example is
+        shown.</para>
+
+        <programlisting>optimization VDP_Opt (objectiveIntegrand = (x1^2 + x2^2 + u^2),
+                         startTime = 0,
+                         finalTime = 20)
+
+    // State start values
+    parameter Real x1_0 = 0;
+    parameter Real x2_0 = 1;
+
+    // The states
+    Real x1(start = x1_0, fixed=true);
+    Real x2(start = x2_0, fixed=true);
+
+    // The control signal
+    input Real u;
+
+  equation
+    der(x1) = (1 - x2^2) * x1 - x2 + u;
+    der(x2) = x1;
+  end VDP_Opt;</programlisting>
+
+        <para>To compile and load the VDP model into JModelica we first import
+        the necessary Python modules. Then we call the compiler method and we
+        load it into our model class. Finally the optimization is performed by
+        a call to the optimize method. An extra note in this example is that
+        we change the number of collocation points from the default 20 to 40
+        via the options dictionary.</para>
+
+        <programlisting>from jmodelica.casadi_interface import compile_casadi
+from jmodelica.casadi_interface import CasadiModel
+
+casadi_name = compile_casadi("VDP_Opt", "VDP.mop")
+model = CasadiModel(casadi_name)
+
+#Get the options dictionary
+opts = model.optimize_options(algorithm="CasadiPseudoSpectral")
+opts["n_cp"] = 40 #Number of collocation points
+
+res = model.optimize(algorithm="CasadiPseudoSpectral", options=opts)
+
+#Plot...</programlisting>
+
+        <para>The result can then be used to visualize the result and a
+        resulting figure is shown in Figure <xref
+        linkend="opt-fig-vdp-casadi" />.</para>
+
+        <figure xml:id="opt-fig-vdp-casadi">
+          <title>The Van der Pol oscillator optimized using Gauss
+          PseudoSpectral method.</title>
+
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref="images/vdp_casadi.svg" scale="70"></imagedata>
+            </imageobject>
+          </mediaobject>
+        </figure>
+      </section>
+    </section>
+
+    <section>
+      <title>Limitations</title>
+
+      <para>Current limitations for the PseudoSpectral methods include,</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>Final time or start time cannot be explicitly in the cost
+          function. Although states of final time /start time can be
+          used.</para>
+        </listitem>
+
+        <listitem>
+          <para>No path constraints. However variable bounds can be
+          used.</para>
+        </listitem>
+
+        <listitem>
+          <para>Only explicit ordinary differential equations.</para>
+        </listitem>
+
+        <listitem>
+          <para>Still under development and not extensively tested, consider
+          using <literal>JMUModel.optimize</literal> as a first choice.</para>
+        </listitem>
+
+        <listitem>
+          <para>No support for scaling.</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+  </section>
 </chapter>
