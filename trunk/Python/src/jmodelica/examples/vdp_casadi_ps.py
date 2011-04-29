@@ -38,7 +38,7 @@ def run_demo(with_plots=True):
 
     opts = model.optimize_options(algorithm='CasadiPseudoSpectral')
     opts['n_cp'] = 50
-    opts['IPOPT_options']['hessian_approximation'] = 'limited-memory'
+    #opts['IPOPT_options']['hessian_approximation'] = 'limited-memory'
 
     res = model.optimize(algorithm='CasadiPseudoSpectral',options=opts)
     
@@ -47,10 +47,6 @@ def run_demo(with_plots=True):
     x2   = res['x2']
     u    = res['u']
     time = res['time']
-    cost = res['cost']
-
-    #assert N.abs(cost[-1] - 2.3469089e+01) < 1e-3, \
-    #        "Wrong value of cost function in vdp.py"  
 
     if with_plots:
         # Plot
