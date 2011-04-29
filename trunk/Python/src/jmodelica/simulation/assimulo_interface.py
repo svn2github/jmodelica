@@ -22,6 +22,7 @@ required by Assimulo.
 import logging
 
 import numpy as N
+import numpy.linalg as LIN
 import pylab as P
 
 import jmodelica.io as io
@@ -1135,6 +1136,7 @@ class JMIDAESens(Implicit_Problem):
         
         #Used for determine if there are discontinuities
         [f_nbr, g_nbr] = self._model.jmimodel.dae_get_sizes() 
+        [f0_nbr, f1_nbr, fp_nbr, g0_nbr] = self._model.jmimodel.init_get_sizes()
         
         if g_nbr > 0:
             raise JMIModel_Exception("Hybrid models with event functions are currently not supported.")
@@ -1173,10 +1175,12 @@ class JMIDAESens(Implicit_Problem):
         self._parameter_pos = [jmi._translate_value_ref(x)[0] for x in self._parameter_valref]
         self._sens_matrix = [] #Sensitivity matrix
         self._f_nbr = f_nbr #Number of equations
+        self._f0_nbr = f0_nbr #Number of initial equations
         self._g_nbr = g_nbr #Number of event indicatiors
         self._x_nbr = len(self._model.real_x) #Number of differentiated
         self._w_nbr = len(self._model.real_w) #Number of algebraic
         self._dx_nbr = len(self._model.real_dx) #Number of derivatives
+        self._p_nbr = len(self._parameter_names) #Number of parameters
         self._write_header = True
         self._input_names = [k[1] for k in model.get_u_variable_names()]
         
@@ -1194,9 +1198,69 @@ class JMIDAESens(Implicit_Problem):
             self._p_nbr = len(self.p0) #Number of parameters
         else:
             self._p_nbr = 0
+            
+        #Initial values for sensitivity
+        if self._p_nbr > 0:
+            self.yS0 = self._sens_init()
 
         self._log.debug('Number of parameters: ' +str(self._p_nbr))
+    
+    def _sens_init(self):
+        """
+        Calculates the initial values of the sensitivity.
+        """
+        yS0 = N.zeros((self._p_nbr,self._f_nbr))
         
+        if self._f0_nbr != self._f_nbr:
+            #Evaluating the jacobian
+            #-Setting options
+            #Used to give independent_vars full control
+            z_l = N.array([1]*len(self._model.z),dtype=N.int32) 
+            #Derivation with respect to these variables
+            independent_vars = [jmi.JMI_DER_DX, jmi.JMI_DER_X, jmi.JMI_DER_W, 
+                                jmi.JMI_DER_PI, jmi.JMI_DER_PD] 
+            sparsity = jmi.JMI_DER_DENSE_ROW_MAJOR
+            evaluation_options = jmi.JMI_DER_CPPAD#jmi.JMI_DER_SYMBOLIC
+            
+            #-Evaluating
+            #Matrix that hold information about dx and dw
+            dFdxw = N.zeros(self._f0_nbr*(self._x_nbr+self._w_nbr)) 
+            #Output x+w
+            self._model.jmimodel.init_dF0(
+                evaluation_options, sparsity, independent_vars[1:3], z_l, dFdxw) 
+            
+            #Matrix that hold information about dx'
+            dFddx = N.zeros(self._x_nbr*self._f0_nbr) 
+            #Output dx'
+            self._model.jmimodel.init_dF0(
+                evaluation_options, sparsity, independent_vars[0], z_l, dFddx) 
+            
+            #Matrix that hold information about dp
+            dFdp = N.zeros(self._p_nbr*self._f0_nbr) 
+            #Output dp
+            z_l = N.array([0]*len(self._model.z),dtype=N.int32) 
+            for i in self._parameter_pos:
+                z_l[i] = 1
+            self._model.jmimodel.init_dF0(
+                evaluation_options, sparsity, independent_vars[3:], z_l, dFdp) 
+            
+            #-Vector manipulation
+            dFdxw = dFdxw.reshape(self._f0_nbr,self._x_nbr+self._w_nbr)[self._f_nbr:,:]
+            dFddx = dFddx.reshape(self._f0_nbr,self._dx_nbr)[self._f_nbr:,:]
+            dFdp  = dFdp.reshape(self._f0_nbr,self._p_nbr)[self._f_nbr:,:]
+
+            p_order = N.zeros(len(self._parameter_pos),dtype=int)
+            p_sort = N.sort(self._parameter_pos)
+            for ind,val in enumerate(p_sort):
+                p_order[self._parameter_pos.index(val)]=ind
+            
+            #print "Param order, ", self._model.get_p_opt_variable_names(), p_order
+            dFdp = N.transpose(N.transpose(dFdp)[p_order])
+
+            yS0= N.transpose(N.linalg.lstsq(dFdxw,-dFdp)[0])
+        
+        return yS0
+    
     def f(self, t, y, yd, p=None):
         """
         The residual function for an DAE problem.

@@ -154,3 +154,8 @@ def test_mechanics_rotational_examples_first():
 def test_crane():
     """ Run the PyMBS example """
     crane.run_demo(False)
+    
+@testattr(assimulo = True)
+def test_leadtransport():
+    """ Run the Lead example """
+    leadtransport.run_demo(False)
