@@ -113,7 +113,7 @@ n_initial_equations: 0")})));
     Integer i1(start=1);
     Integer i2=3;
   	Integer i3=4;
-	input Integer r4;
+	input Integer i4;
 
   	parameter Boolean bp1=true;
   	parameter Boolean bp2=bp1;

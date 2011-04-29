@@ -138,16 +138,11 @@ aspect ComplianceCheck {
 	}
 	
 	public void FClass.checkDuplicateVariables() {
-		HashSet<String> h = new HashSet<String>();
-		for (FVariable fv : getFVariables()) {
-			if (h.contains(fv.name())) {
-				compliance("The variable " + fv.name() + " is declared multiple times. "+
-						"Possibly, the model is still legal, but the JModelica.org compiler "+
-						"does currently not merge indentical components.");
-			} else {
-				h.add(fv.name());
-			}	
+		for (String name : nonUniqueVars.keySet()) {
+			compliance("The variable " + name + " is declared multiple times and is not " +
+			            "identical to other declaration(s) with the same name.");
 		}
+
 	}
 	
 	public void FClass.checkUnsupportedStreamConnections() {

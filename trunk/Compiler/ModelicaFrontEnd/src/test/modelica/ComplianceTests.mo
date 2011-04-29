@@ -432,16 +432,17 @@ model DuplicateVariables_ComplErr
          enable_structural_diagnosis=false,
          description="Compliance error test checking for duplicate variables",
          errorMessage="
-1 Errors found:
-Compliance error at line 0, column 0:
-  The variable x is declared multiple times. Possibly, the model is still legal, but the JModelica.org compiler does currently not merge indentical components.
+0 error(s), 1 compliance error(s) and 0 warning(s) found:
 
+Error: in file 'ComplianceTests.DuplicateVariables_ComplErr.mof':
+Compliance error at line 0, column 0:
+  The variable x is declared multiple times and is not identical to other declaration(s) with the same name.
 ")})));
-  Real x = 1;
+
+  Real x(start=1) = 1;
   Real x = 1;
 
 end DuplicateVariables_ComplErr;
-
 
 model HybridNonFMU1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={

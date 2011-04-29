@@ -3125,4 +3125,26 @@ end TransformCanonicalTests.IndexReduction2_Mechanical;
 
   end IndexReduction2_Mechanical;
 
+model DuplicateVariables1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="DuplicateVariables1",
+         description="Test that identical variables in base classes are handled correctly.",
+         flatModel="
+fclass TransformCanonicalTests.DuplicateVariables1
+ Real x(start = 1,min = 2);
+equation
+ x = 3;
+end TransformCanonicalTests.DuplicateVariables1;
+")})));
+
+  model A
+    Real x(start=1, min=2) = 3;
+  end A;
+  Real x(start=1, min=2) = 3;
+  extends A;
+
+end DuplicateVariables1;
+
+
 end TransformCanonicalTests;

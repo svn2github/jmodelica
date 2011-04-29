@@ -379,7 +379,7 @@ aspect Flattening {
 	
 	public void InstPrimitive.flatten(FClass fc) {
 		if (!isDisabled()) {
-			fc.addFVariable(createFVariable());
+			fc.addUniqueFVariable(createFVariable());
 			if (isFlow()) {
 				// TODO: Add expanded array subscripts
 				// TODO: Can we use getFQName() here instead?
@@ -817,6 +817,21 @@ aspect InstNodeInterface {
 		getComponentDecl().arraySubscripts()!=null?
 			getComponentDecl().arraySubscripts(): null;
 
+}
+
+aspect UniqueVariables {
+
+	public HashMap<String,FVariable> FClass.uniqueVars = new HashMap<String,FVariable>();
+	public HashMap<String,FVariable> FClass.nonUniqueVars = new HashMap<String,FVariable>();	
+	
+	public void FClass.addUniqueFVariable(FVariable fv) {
+		if (!uniqueVars.containsKey(fv.name())) {
+			uniqueVars.put(fv.name(),fv);
+			addFVariable(fv);
+		} else if (!uniqueVars.get(fv.name()).prettyPrint("").equals(fv.prettyPrint(""))) {
+			nonUniqueVars.put(fv.name(),fv);
+		}
+	}
 }
 
 aspect FlatExpressions {
