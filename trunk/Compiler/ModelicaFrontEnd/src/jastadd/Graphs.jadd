@@ -106,6 +106,7 @@ public class BiPGraph {
 
 	public void removeEquation(Eq e) {
 		for (Var v : e.getVariables()) {
+			v.removeOccurrence();
 			if (v.getMatching() == e) {
 				v.setMatching(null);
 			}
@@ -1394,6 +1395,7 @@ public class Var {
 	private FVariable v;
 	private Var meDifferentiated = null; // A reference to this variable differentiated once
 	private Var meIntegrated = null;
+	private int occurrences;
 	
 	public Var(String name, String description) {
 		this.name = name;
@@ -1403,6 +1405,7 @@ public class Var {
 	public Var(String name, String description, FVariable v) {
 		this(name,description);
 		this.v = v;
+		this.occurrences=0;
 	}
 		
 	public void reset() {
@@ -1480,6 +1483,18 @@ public class Var {
 	
 	public Var getMeIntegrated() {
 		return this.meIntegrated;
+	}
+	
+	public void occurrence(){
+		this.occurrences++;
+	}
+	
+	public void removeOccurrence(){
+		this.occurrences--;
+	}
+	
+	public int getOccurrences(){
+		return occurrences;
 	}
 	
 	public String toString() {

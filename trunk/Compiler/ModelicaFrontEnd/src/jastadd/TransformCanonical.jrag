@@ -748,10 +748,207 @@ aspect TransformCanonical {
 			log.info(daeInitBLT.toString());
 		}
 	}	
-	
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	public void FClass.computeTearings() {
-		System.out.println("About to do tearing!");
-	}	
+		log.debug(" ----======************ Tearing started ************======----");
+			//Build up Global Graph, with all variables, equations and edges between them		
+			BiPGraph graph = new BiPGraph(name(),"");
+			graph.addVariables(this, BiPGraph.DERIVATIVE_VARIABLES | BiPGraph.ALGEBRAIC_VARIABLES);
+			graph.addEquations(equations(), BiPGraph.DERIVATIVE_VARIABLES | BiPGraph.ALGEBRAIC_VARIABLES,"eq_",1);
+			graph.maximumMatching(true);	
+			//Compute the algebraic-loops and return them as Stacks
+			LinkedList<Stack<Eq>> blt = graph.computeRawBLT();	
+			//Loop over all algebraic-loops bigger than 1.
+			for(Stack<Eq> alg : blt){
+				ArrayList<Eq> algLoop = new ArrayList<Eq>(alg);
+				if (algLoop.size()>1){		
+					//If a loop, call Tear method
+					log.debug("Original Block sizes: " + algLoop.size());
+					ArrayList<TearingPair> tearingPairs = Tear(algLoop);
+					System.out.println(" \n==== TearingPairs for block of size: "+ algLoop.size() +" ====");
+					int i=1;
+					for(TearingPair tp : tearingPairs){
+						System.out.println("TearingPair " + i);
+						System.out.println("   residual equation: "+ tp.getRes());
+						System.out.println("   tearing variable:  "+ tp.getTear());
+						i++;				
+						graph.removeEquation(graph.getEquation(tp.getRes()));
+						graph.removeVariable(graph.getVariable(tp.getTear()));
+					}
+					System.out.println(" ================================ ");
+				}
+			}
+			//structure check
+			graph.maximumMatching(true);
+			if(graph.getUnmatchedVariables().size() >0 || graph.getUnmatchedEquations().size() > 0){
+				System.out.println("Torn apart!");
+			}else{
+				System.out.println("Matching exist after removal of residuals and tears :)");
+				LinkedList<Stack<Eq>> ErrBlt = graph.computeRawBLT();
+				int j=0;
+				System.out.println("BlockSizes (all ought to be 1): ");
+				for(Stack<Eq> alg : ErrBlt){
+					ArrayList<Eq> algLoop = new ArrayList<Eq>(alg);
+						System.out.print(algLoop.size());
+						j++;
+				}
+				System.out.println("\nNbr of Blocks: "+j);
+			}
+			log.debug(" ----======************ Tearing ended ************======----\n");
+	}
+	
+	public class TearingPair{
+		// Will be modified later on, for now only the names are needed, eg. for the structure check
+		private String res;
+		private String tear;
+		
+		public TearingPair(String res, String tear) {
+    		this.res = res;
+    		this.tear = tear;
+    	}
+    
+    	public String getRes() {
+			return res;    	
+    	}
+    	
+    	public String getTear() {
+    		return tear;
+    	}
+		
+	}
+	
+	public ArrayList<TearingPair> FClass.Tear(ArrayList<Eq> algLoop){
+		log.debug("### New recursion in tearing ###");
+		//For linear systems, recursively selectes residual equations and tearing variables and returns a List with these pairs
+		ArrayList<TearingPair> tp = new ArrayList<TearingPair>();
+		//New graph only contains eqn,var and edges active in the algebraic loop. (plus matching)
+		BiPGraph g = buildLocalGraph(algLoop);  	
+		// Choose as residual eqation the equation that contains most variables. 
+		int maxVars = 0;
+		ArrayList<Eq> resList = new ArrayList<Eq>();
+		for(Eq e : algLoop){
+			//Comment most of this part to test ALL equations instead of only those with max variables
+			int nbrVars = g.getEquation(e.getName()).getVariables().size(); 
+			if(nbrVars > maxVars){
+				resList.clear();
+				resList.add(g.getEquation(e.getName()));
+				maxVars = nbrVars;
+			}else if(nbrVars==maxVars){
+				resList.add(g.getEquation(e.getName()));
+			}
+		}
+		int maxTorn = 0;
+		Var theTear=null;
+		Eq theRes=null;
+		for(Eq res: resList){
+			//Comment most of this part to test ALL variables instead of only those with max occurrence
+			int maxOcc=0;
+			ArrayList<Var> tearList = new ArrayList<Var>();
+			for(Var v : res.getVariables()){ 
+				int occ = v.getOccurrences();
+				if(occ > maxOcc){
+					tearList.clear();
+					tearList.add(v);
+					maxOcc = occ;
+				}else if(occ==maxOcc){
+					tearList.add(v);
+				}
+			}
+			log.debug(" *** Testing Residual ***");
+			log.debug(res.getName());
+			log.debug("nbr of variables in res: " + tearList.size());
+			
+			for(Var tear: tearList){		
+				log.debug("Tearing variable: " + tear.getName());
+				//When the structure for the non-linear part is decided I will add methods like
+				//reinsertRes() and reinsertTear() in class BiPGraph, instead of creating a new graph for every test 
+				if(tear.getName().equals(res.getMatching().getName())){
+					log.debug("Tearing variable is the matched variable");
+					BiPGraph matchingGraph = buildLocalGraph(algLoop);
+					matchingGraph.removeEquation(matchingGraph.getEquation(res.getName()));
+					matchingGraph.removeVariable(matchingGraph.getVariable(tear.getName()));
+					LinkedList<Stack<Eq>> matchingBlt = matchingGraph.computeRawBLT();
+					int indepBlocks = 0; 
+					for(Stack<Eq> localAlg : matchingBlt){
+						indepBlocks++; 										 		
+					}
+					log.debug("Number of causalized equations:" + indepBlocks);
+					if(indepBlocks > maxTorn){
+						maxTorn=indepBlocks;
+						theRes = res;
+						theTear = tear;
+					}
+				}else{
+					BiPGraph matchingGraph = buildLocalGraph(algLoop);
+					Eq unmatchedEquation = matchingGraph.getVariable(tear.getName()).getMatching();
+					matchingGraph.removeEquation(matchingGraph.getEquation(res.getName()));
+					matchingGraph.removeVariable(matchingGraph.getVariable(tear.getName()));
+					boolean hasPath = false;
+					hasPath = matchingGraph.augmentPath(unmatchedEquation, new ArrayList<Eq>(), new ArrayList<Var>());
+					if(!hasPath){// Never occurs in my examples!(?)  
+						log.debug("tearing variable implies structural singularity ! ! %#¤#");	
+					}else{
+						log.debug("matching exist after chosen tearing varible!");
+						LinkedList<Stack<Eq>> matchingBlt = matchingGraph.computeRawBLT();
+						int indepBlocks = 0;
+						for(Stack<Eq> localAlg : matchingBlt){
+							indepBlocks++;
+						}
+						log.debug("Number of causalized equations:" + indepBlocks);
+						if(indepBlocks > maxTorn){
+							maxTorn=indepBlocks;
+							theRes = res;
+							theTear = tear;
+						}
+					}
+				}
+			}
+			log.debug(" *** Done with this residual *** \n");
+		}
+		if(theTear==null || theRes==null){
+			log.debug("Couldnt find any tearing pairs!");
+			// Shouldnt be possible... and never happend in my tests
+		}
+		tp.add(new TearingPair(theRes.getName(), theTear.getName()));
+		g.removeEquation(theRes);
+		g.removeVariable(theTear);
+		g.maximumMatching(true);
+		// Find algebraic loops in the new reduced system of equations
+		LinkedList<Stack<Eq>> localBlt = g.computeRawBLT();
+		for(Stack<Eq> localAlg : localBlt){
+			ArrayList<Eq> localAlgLoop = new ArrayList<Eq>(localAlg);
+			if (localAlgLoop.size()>1){
+				tp.addAll(Tear(localAlgLoop));
+			}	
+		}
+		return tp;	
+	}
+			
+	public BiPGraph FClass.buildLocalGraph(ArrayList<Eq> al){
+		BiPGraph gr = new BiPGraph("","");
+		// Add active variables and "empty" equations to the new local graph
+		for(Eq e : al){
+			Var varAdd = gr.addVariable(e.getMatching().getName(),"",e.getMatching().getVariable());
+			Eq eqAdd = gr.addEquation(e.getName(),"",e.getEquation());
+			//System.out.println(varAdd.getName());
+			//System.out.println(eqAdd.getName());
+			eqAdd.setMatching(varAdd);
+			varAdd.setMatching(eqAdd);
+		}
+		// Add edges between the active variables and equations
+		for(Eq e : al){
+			for(Var v : e.getVariables()){
+				Var grVar = gr.getVariable(v.getName());
+				if(grVar!=null){
+					grVar.occurrence();
+					gr.getEquation(e.getName()).addVariable(grVar);
+				}
+			}
+		}
+		return gr;
+	}
+		
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////			
 	
 	syn lazy ArrayList<String> FClass.structuralErrors() {
 		ArrayList<String> structuralErrors = new ArrayList<String>();
@@ -2103,3 +2300,9 @@ aspect FlushFClass {
 	}
 	
 }
+
+aspect Tearing{
+	
+	
+}
+
