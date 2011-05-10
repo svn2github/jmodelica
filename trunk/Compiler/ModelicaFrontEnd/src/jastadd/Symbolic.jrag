@@ -33,61 +33,114 @@ aspect EquationSolve {
 	}
 	
 	eq FEquation.solution(String name) {
-		// Only handle this special case of the unknown occurring once
-		if (nbrUses(name)!=1) {
-			return new FNoExp();
-		}
 		
 		// Get terms
 		ArrayList<FExp> t = terms();
 		
-		FExp theTerm = null;
-		// Find term
+		ArrayList<FExp> activeTerms = new ArrayList<FExp>();
+		ArrayList<FExp> inactiveTerms = new ArrayList<FExp>();
+		// Find terms
 		//System.out.println("Equation:\n" + prettyPrint(""));			
 		for (FExp e : t) {
 			//System.out.println("Term" + (e.isNegativeTerm()? "(-): ": "(+): ") + e.prettyPrint(""));
 			if (e.nbrUses(name)==1) {
-				theTerm = e;
+			    //System.out.println(" - active");
+				activeTerms.add(e);
+			} else if (e.nbrUses(name)==0) {
+				//System.out.println(" - inactive");
+			    inactiveTerms.add(e);
+			} else {
+			    return new FNoExp();
 			}
 		}
 		//System.out.println("Found term" + (theTerm.isNegativeTerm()? "(-): ": "(+): ") + theTerm.prettyPrint(""));	
 		
 		FExp sol = null;
-		// Build new AST for the remaining terms
-		for (FExp e : t) {
-			if (e!=theTerm) {
-				FExp ee = (FExp)e.fullCopy();
-				// Set references from the new tree to the original one
-				ee.traverseSymbolic(e); 
-				if (!e.isNegativeTerm()) {
-				  	ee = new FNegExp(ee);
-				}
-				if (sol==null) {
-					sol = ee;
-				} else {
-				    sol = new FAddExp(sol,ee);				  	
-				}
+		// Build new AST for the inactive terms
+		for (FExp e : inactiveTerms) {
+			FExp ee = (FExp)e.fullCopy();
+			// Set references from the new tree to the original one
+			ee.traverseSymbolic(e); 
+			if (!e.isNegativeTerm()) {
+			  	ee = new FNegExp(ee);
+			}
+			if (sol==null) {
+				sol = ee;
+			} else {
+			    sol = new FAddExp(sol,ee);				  	
 			}
 		}
 		
-		// TODO: the handling of pre expressions will be made more consistent
-		// with derivative expressions - then this special handling will be
-		// simplified.
-		if (theTerm.isIdentifier(name) || (theTerm instanceof FPreExp)) {
-			if (theTerm.isNegativeTerm()) {
-				sol = new FNegExp(sol);
+		FExp mulCoeff = null;
+		// Build new AST for the active terms
+		for (FExp e : activeTerms) {
+			ArrayList<FExp> fac = e.factors();
+			// There is only one reference to the active variable in each
+			// term - this is checked above.			
+			ArrayList<FExp> activeFactors = new ArrayList<FExp>();
+			ArrayList<FExp> inactiveFactors = new ArrayList<FExp>();
+			// Find terms
+			//System.out.println("Equation:\n" + prettyPrint(""));
+			boolean negatedFactor = false;			
+			for (FExp ee : fac) {
+				//System.out.println("Factor" + (ee.isNegativeTerm()? "(-): ": "(+): ") + ee.prettyPrint(""));
+				if (ee.nbrUses(name)==1 && !ee.isInvertedFactor() && 
+				    (ee.isIdentifier(name) || // Identifier 
+				    (ee instanceof FPreExp))) { // pre expression 
+					//System.out.println(" - active"); 
+					activeFactors.add(ee);
+				} else if (ee.nbrUses(name)==1 && !ee.isInvertedFactor() && 
+				    ((ee instanceof FNegExp) && ((FNegExp)ee).getFExp().isIdentifier(name))) {
+					//System.out.println(" - active"); 
+					activeFactors.add(((FNegExp)ee).getFExp());
+					negatedFactor = true;
+				} else if (ee.nbrUses(name)==0) {
+					//System.out.println(" - inactive"); 
+				    inactiveFactors.add(ee);
+				} else {
+					// This equation cannot be solved
+				    return new FNoExp();
+				}
 			}
-		} else if (theTerm.isMulTerm(name)>0) {
-			// not so hard
-			sol = new FNoExp();
-		} else if (theTerm.isDivTerm(name)) {
-			// actually not so hard either...
-			sol = new FNoExp();
-		} else {
-			// probably very hard, can't solve this.
-			sol = new FNoExp();
+			FExp coeff = null;
+			for (FExp eee : inactiveFactors) {			
+				FExp eeee = (FExp)eee.fullCopy();
+				// Set references from the new tree to the original one
+				eeee.traverseSymbolic(eee); 
+				if (eee.isInvertedFactor()) {
+				  	eeee = new FDivExp(new FRealLitExp("1"),eeee);
+				}
+				if (coeff==null) {
+					coeff = eeee;
+				} else {
+				    coeff = new FMulExp(coeff,eeee);				  	
+				}
+			}
+			if (coeff==null) {
+				coeff = new FRealLitExp("1");
+			}
+			if (coeff!=null) {
+				if (mulCoeff==null) {
+					if (e.isNegativeTerm() || negatedFactor) {
+						mulCoeff = new FNegExp(coeff);
+					} else {
+					    mulCoeff = coeff;
+					}
+				} else {
+					if (e.isNegativeTerm() || negatedFactor) {
+						mulCoeff = new FSubExp(mulCoeff,coeff);				  
+					} else {
+					    mulCoeff = new FAddExp(mulCoeff,coeff);				  
+					}	
+				}					
+			}	
+		}
+	    
+	    if (mulCoeff!=null && 
+	        !((mulCoeff instanceof FRealLitExp) && mulCoeff.ceval().realValue()==1)) {
+	    	sol = new FDivExp(sol,mulCoeff);
 	    }
-		//System.out.println("** " + sol.prettyPrint(""));
+
 		return sol;
 	}
 	
@@ -118,12 +171,41 @@ aspect EquationSolve {
 		t.addAll(getRight().terms());
 		return t;
 	}
+
+	// Get factors	
+	syn ArrayList<FExp> FExp.factors() {
+		ArrayList<FExp> t = new ArrayList<FExp>();
+		t.add(this);
+		return t;
+	}
 	
+	eq FDotMulExp.factors() {
+		ArrayList<FExp> t = new ArrayList<FExp>();
+		t.addAll(getLeft().factors());
+		t.addAll(getRight().factors());
+		return t;
+	}
+
+	eq FDotDivExp.factors() {
+		ArrayList<FExp> t = new ArrayList<FExp>();
+		t.addAll(getLeft().factors());
+		t.addAll(getRight().factors());
+		return t;
+	}
+
+	// Negated terms	
 	inh boolean FExp.isNegativeTerm();
 	eq FDotSubExp.getRight().isNegativeTerm() = !isNegativeTerm();
+	eq FNegExp.getFExp().isNegativeTerm() = !isNegativeTerm();
 	eq FEquation.getRight().isNegativeTerm() = true;
 	eq FEquation.getLeft().isNegativeTerm() = false;
 	eq Root.getChild().isNegativeTerm() = false;
+
+	// Inverted factors
+	inh boolean FExp.isInvertedFactor();
+	eq FDotDivExp.getRight().isInvertedFactor() = !isInvertedFactor();
+	eq FEquation.getChild().isInvertedFactor() = false;
+	eq Root.getChild().isInvertedFactor() = false;
 	
 	// Classification of terms
 	syn boolean FExp.isIdentifier(String name) = false;

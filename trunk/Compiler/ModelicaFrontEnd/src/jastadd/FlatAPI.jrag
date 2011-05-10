@@ -1904,6 +1904,14 @@ aspect FlatDiagnostics {
 		
 	}
 	
+  public String FClass.printDAEBLT() {
+  	return getDAEBLT().toString();
+  }	
+
+  public String FClass.printDAEInitBLT() {
+  	return getDAEInitBLT().toString();
+  }	
+	
 }
 
 aspect FlatAlgorithmAPI {

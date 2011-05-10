@@ -3146,5 +3146,255 @@ end TransformCanonicalTests.DuplicateVariables1;
 
 end DuplicateVariables1;
 
+  model SolveEqTest1
+	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FClassMethodTestCase(name="SolveEqTest1",
+      methodName="printDAEBLT",
+	equation_sorting = true,         
+        description="Test solution of equations", methodResult=
+        "
+-------------------------------
+Solved block of 1 variables:
+Unknown variables:
+  x
+Solution:
+  1
+-------------------------------
+Solved block of 1 variables:
+Unknown variables:
+  y
+Solution:
+  x + 3
+-------------------------------
+Solved block of 1 variables:
+Unknown variables:
+  z
+Solution:
+  x - ( y )
+-------------------------------
+")})));
+
+    Real x, y, z;
+  equation
+    x = 1;
+    y = x + 3;
+    z = x - y ;
+  end SolveEqTest1;
+
+  model SolveEqTest2
+	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FClassMethodTestCase(name="SolveEqTest2",
+      methodName="printDAEBLT",
+	equation_sorting = true,         
+        description="Test solution of equations", methodResult=
+        "
+-------------------------------
+Solved block of 1 variables:
+Unknown variables:
+  x
+Solution:
+  1
+-------------------------------
+Solved block of 1 variables:
+Unknown variables:
+  y
+Solution:
+  ( x + 3 ) / (  - ( 1 ) )
+-------------------------------
+Solved block of 1 variables:
+Unknown variables:
+  z
+Solution:
+  ( x - ( y ) ) / (  - ( 1 ) )
+-------------------------------
+")})));
+
+
+    Real x, y, z;
+  equation
+    x = 1;
+    - y = x + 3;
+    - z = x - y ;
+  end SolveEqTest2;
+
+  model SolveEqTest3
+	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FClassMethodTestCase(name="SolveEqTest3",
+      methodName="printDAEBLT",
+	equation_sorting = true,         
+        description="Test solution of equations", methodResult=
+        "
+-------------------------------
+Solved block of 1 variables:
+Unknown variables:
+  x
+Solution:
+  1
+-------------------------------
+Solved block of 1 variables:
+Unknown variables:
+  y
+Solution:
+  ( x + 3 ) / ( 2 )
+-------------------------------
+Solved block of 1 variables:
+Unknown variables:
+  z
+Solution:
+  ( x - ( y ) ) / ( x )
+-------------------------------
+")})));
+
+    Real x, y, z;
+  equation
+    x = 1;
+    2*y = x + 3;
+    x*z = x - y ;
+  end SolveEqTest3;
+
+  model SolveEqTest4
+	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FClassMethodTestCase(name="SolveEqTest4",
+      methodName="printDAEBLT",
+	equation_sorting = true,         
+        description="Test solution of equations", methodResult=
+        "
+-------------------------------
+Solved block of 1 variables:
+Unknown variables:
+  x
+Solution:
+  1
+-------------------------------
+Solved block of 1 variables:
+Unknown variables:
+  y
+Solution:
+  ( x + 3 ) / ( ( 1 ) / ( 2 ) )
+-------------------------------
+Solved block of 1 variables:
+Unknown variables:
+  z
+Solution:
+  ( x - ( y ) ) / ( ( 1 ) / ( x ) )
+-------------------------------
+")})));
+
+
+    Real x, y, z;
+  equation
+    x = 1;
+    y/2 = x + 3;
+    z/x = x - y ;
+  end SolveEqTest4;
+
+  model SolveEqTest5
+	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FClassMethodTestCase(name="SolveEqTest5",
+      methodName="printDAEBLT",
+	equation_sorting = true,         
+        description="Test solution of equations", methodResult=
+"
+-------------------------------
+Solved block of 1 variables:
+Unknown variables:
+  x
+Solution:
+  1
+-------------------------------
+Solved block of 1 variables:
+Unknown variables:
+  y
+Solution:
+  ( x + 3 ) / ( 1 - ( 3 ) )
+-------------------------------
+Solved block of 1 variables:
+Unknown variables:
+  z
+Solution:
+  ( x - ( y ) ) / ( 1 - ( x + 3 ) )
+-------------------------------      
+")})));
+
+    Real x, y, z;
+  equation
+    x = 1;
+    y = x + 3 + 3*y;
+    z = x - y + (x+3)*z ;
+  end SolveEqTest5;
+
+  model SolveEqTest6
+	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FClassMethodTestCase(name="SolveEqTest6",
+      methodName="printDAEBLT",
+	equation_sorting = true,         
+        description="Test solution of equations", methodResult=
+        "
+-------------------------------
+Solved block of 1 variables:
+Unknown variables:
+  x
+Solution:
+  1
+-------------------------------
+Non-solved block of 1 variables:
+Unknown variables:
+  y
+Equations:
+  ( 2 ) / ( y ) = x + 3
+-------------------------------
+Non-solved block of 1 variables:
+Unknown variables:
+  z
+Equations:
+  ( x ) / ( z ) = x - ( y )
+-------------------------------
+")})));
+
+
+    Real x, y, z;
+  equation
+    x = 1;
+    2/y = x + 3;
+    x/z = x - y ;
+  end SolveEqTest6;
+
+  model SolveEqTest7
+	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FClassMethodTestCase(name="SolveEqTest7",
+      methodName="printDAEBLT",
+	equation_sorting = true,         
+        description="Test solution of equations", methodResult=
+        "
+-------------------------------
+Solved block of 1 variables:
+Unknown variables:
+  x
+Solution:
+  1
+-------------------------------
+Solved block of 1 variables:
+Unknown variables:
+  y
+Solution:
+  ( x + 3 ) / (  - ( 1 ) + 1 - ( 4 ) )
+-------------------------------
+Solved block of 1 variables:
+Unknown variables:
+  z
+Solution:
+  ( x - ( y ) ) / (  - ( 1 ) + 1 + 5 )
+-------------------------------
+")})));
+
+
+    Real x, y, z;
+  equation
+    x = 1;
+    - y = x + 3 - y + 4*y;
+    - z = x - y -z - 5*z;
+  end SolveEqTest7;
+
+
 
 end TransformCanonicalTests;
