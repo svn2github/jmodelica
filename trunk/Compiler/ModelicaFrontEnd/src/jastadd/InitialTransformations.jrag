@@ -151,7 +151,7 @@
         	
         	// TODO: Copy min, max and start
         	
-        	// TODO: Add components for the enumeration literals
+        	// TODO: Add components for the enumeration literals - todo? isn't this done?
         	for (ComponentDecl d : getEnumSpecification().enumComponents()) {
         		ecd.addComponentDecl(d);
         	}
@@ -177,28 +177,50 @@
      * \brief Extract elements from Composition and add to a FullClassDecl.
      */
     public void Composition.extractElementsTo(FullClassDecl fcd) {
-        for (Clause cl : getClauses()) {
-            if (cl instanceof ComponentDecl) {
-                fcd.addComponentDecl((ComponentDecl) cl);
-            } else if (cl instanceof EquationClause) {
-                EquationClause ec = (EquationClause) cl;
-                for (AbstractEquation equ : ec.getAbstractEquations()) 
-                    fcd.addEquation(equ);
-            } else if (cl instanceof Algorithm) {
-            	fcd.addAlgorithm((Algorithm) cl);
-            } else if (cl instanceof ExtendsClause) {
-            	fcd.addSuper((ExtendsClause) cl);
-            } else if (cl instanceof ClassDecl) {
-            	fcd.addClassDecl((ClassDecl) cl);
-            } else if (cl instanceof ImportClause) {
-            	fcd.addImport((ImportClause) cl);
-            } else if (cl instanceof ElementAnnotation) {
-            	fcd.addAnnotation(((ElementAnnotation) cl).getAnnotation());
-            }
-        }
+        for (Clause cl : getClauses()) 
+			cl.addToFullClassDecl(fcd);
         
         if (hasExternalClause())
         	fcd.setExternalClause(getExternalClause());
+    }
+    
+    public void Clause.addToFullClassDecl(FullClassDecl fcd) {}
+    
+    public void ComponentDecl.addToFullClassDecl(FullClassDecl fcd) {
+    	fcd.addComponentDecl(this);
+    }
+    
+    public void Algorithm.addToFullClassDecl(FullClassDecl fcd) {
+    	fcd.addAlgorithm(this);
+    }
+    
+    public void ExtendsClause.addToFullClassDecl(FullClassDecl fcd) {
+    	fcd.addSuper(this);
+    }
+    
+    public void ClassDecl.addToFullClassDecl(FullClassDecl fcd) {
+    	fcd.addClassDecl(this);
+    }
+    
+    public void ImportClause.addToFullClassDecl(FullClassDecl fcd) {
+        fcd.addImport(this);
+    }
+    
+    public void ElementAnnotation.addToFullClassDecl(FullClassDecl fcd) {
+    	fcd.addAnnotation(getAnnotation());
+    }
+    
+    public void EquationClause.addToFullClassDecl(FullClassDecl fcd) {
+        for (AbstractEquation equ : getAbstractEquations()) 
+        	equ.addToFullClassDecl(fcd);
+    }
+    
+    public void AbstractEquation.addToFullClassDecl(FullClassDecl fcd) {
+        fcd.addEquation(this);
+    }
+    
+    public void EquationAnnotation.addToFullClassDecl(FullClassDecl fcd) {
+        fcd.addAnnotation(getAnnotation());
     }
     
     /**

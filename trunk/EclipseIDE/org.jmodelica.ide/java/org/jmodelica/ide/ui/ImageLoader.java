@@ -48,6 +48,7 @@ public class ImageLoader {
 	public final static String ANNOTATION_DIS_IMAGE = "buttons/annotation_dis.png";
 	public final static ImageDescriptor ANNOTATION_DIS_DESC = createImageDescriptor(ANNOTATION_DIS_IMAGE);
 	public final static String LIBRARY_IMAGE = "outline/library.png";
+	
 	public final static ImageDescriptor LIBRARY_DESC = createImageDescriptor(LIBRARY_IMAGE);
 	public final static String COMPONENT_IMAGE = "outline/component_generic.png";
 	public final static ImageDescriptor COMPONENT_DESC = createImageDescriptor(COMPONENT_IMAGE);

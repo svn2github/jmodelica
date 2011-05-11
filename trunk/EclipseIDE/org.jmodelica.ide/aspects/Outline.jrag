@@ -74,15 +74,16 @@ aspect Outline {
 	eq ComponentDecl.getSelectionNode() = getName();
 	eq InstClassDecl.getSelectionNode() = getClassDecl().getSelectionNode();
 	eq InstComponentDecl.getSelectionNode() = getComponentDecl().getSelectionNode();
-	
-	/**
-	 * Return the image to show for this node in outline.
-	 * @jastadd.client-api
-	 */
-	eq ClassDecl.contentOutlineImage() = ImageLoader.getClassImage(getClassIconName(), false, false);
-	eq InstClassDecl.contentOutlineImage() = ImageLoader.getClassImage(getClassIconName(), false, true);
-	eq InstComponentDecl.contentOutlineImage() = ImageLoader.getClassImage(getClassIconName(), true, true);
-	eq ComponentDecl.contentOutlineImage() = ImageLoader.getFrequentImage(ImageLoader.COMPONENT_IMAGE);
+
+// This has been moved to ModelicaIcons.jrag	
+//	/**
+//	 * Return the image to show for this node in outline.
+//	 * @jastadd.client-api
+//	 */
+//	eq ClassDecl.contentOutlineImage() = ImageLoader.getClassImage(getClassIconName(), false, false);
+//	eq InstClassDecl.contentOutlineImage() = ImageLoader.getClassImage(getClassIconName(), false, true);
+//	eq InstComponentDecl.contentOutlineImage() = ImageLoader.getClassImage(getClassIconName(), true, true);
+//	eq ComponentDecl.contentOutlineImage() = ImageLoader.getFrequentImage(ImageLoader.COMPONENT_IMAGE);
 	
 	/**
 	 * Return the class type for the node as defined by <pre>ImageLoader.*_CLASS</pre>, if applicable.

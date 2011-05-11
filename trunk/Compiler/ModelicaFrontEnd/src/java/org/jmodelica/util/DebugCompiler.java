@@ -7,11 +7,13 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.logging.Level;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -23,17 +25,26 @@ import org.jmodelica.modelica.compiler.ModelicaCompiler;
 public class DebugCompiler extends JFrame {
 
 	private JTextArea code;
+	private OutputHandler out;
 	private JTextField className;
+	
 	private ModelicaCompiler mc;
 	private File tempDir;
+	private boolean deleteAll;
 
 	public DebugCompiler() {
 		super("Compile Modelica code snippet");
 		Box page = new Box(BoxLayout.Y_AXIS);
 		add(page);
 		
+		page.add(new JLabel("Code:"));
 		code = new JTextArea("model Test\n\nend Test;", 15, 40);
 		page.add(new JScrollPane(code));
+		
+		page.add(new JLabel("Output:"));
+		JTextArea outText = new JTextArea("", 15, 40);
+		page.add(new JScrollPane(outText));
+		out = new OutputHandler(outText);
 		
 		JPanel bottom = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 		page.add(bottom);
@@ -51,7 +62,6 @@ public class DebugCompiler extends JFrame {
 		mc = new ModelicaCompiler(new OptionRegistry());
 		tempDir = getTempDir();
 		mc.setTempFileDir(tempDir);
-		tempDir.deleteOnExit();
 	}
 	
 	public File getTempDir() {
@@ -60,11 +70,13 @@ public class DebugCompiler extends JFrame {
 			tempDir.delete();
 			if (tempDir.mkdir()) {
 				tempDir.deleteOnExit();
+				deleteAll = true;
 				return tempDir;
 			}
 		} catch (IOException e) {
 		} catch (SecurityException e) {
 		}
+		deleteAll = false;
 		return new File(System.getProperty("java.io.tmpdir"));
 	}
 	
@@ -78,22 +90,46 @@ public class DebugCompiler extends JFrame {
 			String name = className.getText();
 			File file = new File(tempDir, name  + ".mo");
 			try {
-				PrintStream out = new PrintStream(file);
-				out.println(code.getText());
-				out.close();
+				PrintStream fs = new PrintStream(file);
+				fs.println(code.getText());
+				fs.close();
 				
+				out.reset();
+				ModelicaCompiler.setLogger(out);
 				mc.compileModel(new String[] { file.getAbsolutePath() }, name);
 				
-				for (File f : tempDir.listFiles())
-					f.delete();
+				if (deleteAll)
+					for (File f : tempDir.listFiles())
+						f.delete();
+				else
+					file.delete();
 			} catch (Exception ex) {
+				// TODO: Show in output area instead.
 				JOptionPane.showMessageDialog(DebugCompiler.this, ex, "Exception thrown", JOptionPane.ERROR_MESSAGE);
 				ex.printStackTrace();
 				return;
 			}
-			JOptionPane.showMessageDialog(DebugCompiler.this, "Model compiled sucessfully", "Model compiled", JOptionPane.PLAIN_MESSAGE);
+			out.log(Level.SEVERE, "*** Compilation sucessful. ***");
 		}
 
+	}
+	
+	public class OutputHandler extends ModelicaLogger {
+		
+		private JTextArea target;
+
+		public OutputHandler(JTextArea target) {
+			this.target = target;
+		}
+
+		public void reset() {
+			target.setText("");
+		}
+
+		public void log(Level level, String message) {
+			target.append(message + "\n");
+		}
+		
 	}
 
 }

@@ -27,9 +27,21 @@ aspect SimpleClassLookup {
 	syn ClassDecl BaseComponentDecl.findClassDecl() = getClassName().findClassDecl();
 	syn ClassDecl ImportClause.findClassDecl()      = getPackageName().findClassDecl();
 	
-	syn lazy ClassDecl Access.findClassDecl() = simpleLookupClass(getID());
-	eq Dot.findClassDecl()                    = getRight().findClassDecl();
-	eq GlobalAccess.findClassDecl()           = getAccess().findClassDecl();
+	// Used to prevent circular lookups without the repetitions imposed by declaring attributes circular.
+	protected boolean Access.duringFindClassDecl = false;
+	
+	syn lazy ClassDecl Access.findClassDecl() {
+		if (duringFindClassDecl)
+			return unknownClassDecl();
+		duringFindClassDecl = true;
+		try {
+			return simpleLookupClass(getID());
+		} finally {
+			duringFindClassDecl = false;
+		}
+	}
+	eq Dot.findClassDecl()          = getRight().findClassDecl();
+	eq GlobalAccess.findClassDecl() = getAccess().findClassDecl();
 	
 	
 	inh ClassDecl Access.simpleLookupClass(String name);
