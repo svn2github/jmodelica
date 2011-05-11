@@ -546,6 +546,21 @@ class ResultDymolaTextual:
             for j in range(N.shape(self.data[i])[0]):
                 self.data[i][j,0] = self.data[i][j,0] + time_shift
 
+    def append(self, res):
+        """
+        Append another simulation result. The time vector of the appended
+        trajectories is shifted so that the appended trajectories appears
+        after the original result trajectories.
+
+        Parameters::
+            res --
+                A simulation result object of type DymolaResultTextual.
+        """
+        n_points = N.size(res.data[1],0)
+        time_shift = self.data[1][-1,0]
+        self.data[1] = N.vstack((self.data[1],res.data[1]))
+        self.data[1][n_points:,0] = self.data[1][n_points:,0] + time_shift 
+
 class ResultDymolaBinary:
     """ 
     Class representing a simulation or optimization result loaded from a Dymola 
