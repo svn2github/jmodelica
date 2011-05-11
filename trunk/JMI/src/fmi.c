@@ -782,56 +782,58 @@ fmiStatus fmi_terminate(fmiComponent c) {
 }
 
 fmiStatus fmi_extract_debug_info(fmiComponent c) {
-  fmiInteger block, nbcalls,n,i,nniters,njevals;
-  fmiReal avg_nniters, time_spent;
+    fmiInteger nniters;
+    fmiReal avg_nniters;
     char buf[100];
+    fmi_t* fmi;
+    jmi_t* jmi;
+    fmiCallbackLogger logger;
+    fmiString instance_name;
+    jmi_block_residual_t* block;
+    int i;
+    
+    fmi = ((fmi_t*)c);
+    jmi = fmi->jmi;
+    logger = fmi->fmi_functions.logger;
+    instance_name = fmi->fmi_instance_name;
+    
     /* Extract debug information from initialization*/
-    for (i=0; i < ((fmi_t*)c)->jmi->n_dae_init_blocks;i=i+1){
-        nniters = (((fmi_t*)c)->jmi->dae_init_block_residuals[i])->nb_iters;
+    for (i = 0; i < jmi->n_dae_init_blocks; i++) {
+        block = jmi->dae_init_block_residuals[i];
+        nniters = block->nb_iters;
 
-	/* Test if block is solved by KINSOL */
-	if (nniters > 0) {
-	    /* Extract additional debug information */
-	    block = (((fmi_t*)c)->jmi->dae_init_block_residuals[i])->index;
-	    nbcalls = (((fmi_t*)c)->jmi->dae_init_block_residuals[i])->nb_calls;
-	    njevals = (((fmi_t*)c)->jmi->dae_init_block_residuals[i])->nb_jevals;
-	    n = (((fmi_t*)c)->jmi->dae_init_block_residuals[i])->n;
-	    
-	    /* Output to logger */
-	    sprintf(buf,"INIT Block %d ; size: %d nniters: %d nbcalls: %d njevals: %d index %d",block,n,nniters,nbcalls,njevals);
-	    (((fmi_t *)c)->fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiOK,"DEBUG",buf);
+        /* Test if block is solved by KINSOL */
+        if (nniters > 0) {
+            /* Output to logger */
+            sprintf(buf, "INIT Block %d ; size: %d nniters: %d nbcalls: %d njevals: %d", 
+                    block->index, block->n, nniters, block->nb_calls, block->nb_jevals);
+            logger(c, instance_name, fmiOK, "DEBUG", buf);
 
-	    time_spent = (((fmi_t*)c)->jmi->dae_init_block_residuals[i])->time_spent;
-	    sprintf(buf,"INIT Block %d ; time: %f",block,time_spent);
-	    (((fmi_t *)c)->fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiOK,"TIMING",buf);
-	}
+            sprintf(buf, "INIT Block %d ; time: %f", block->index, block->time_spent);
+            logger(c, instance_name, fmiOK, "TIMING", buf);
+        }
     }
 
     /* Extract debug information from DAE blocks */
-    for (i=0; i < ((fmi_t*)c)->jmi->n_dae_blocks;i=i+1){
-        nniters = (((fmi_t*)c)->jmi->dae_block_residuals[i])->nb_iters;
+    for (i = 0; i < jmi->n_dae_blocks; i++) {
+        block = jmi->dae_block_residuals[i];
+        nniters = block->nb_iters;
 
-	/* Test if block is solved by KINSOL */
-	if (nniters > 0) {
-	    /* Extract additional debug information */
-	    block = (((fmi_t*)c)->jmi->dae_init_block_residuals[i])->index;
-	    nbcalls = (((fmi_t*)c)->jmi->dae_block_residuals[i])->nb_calls;
-	    njevals = (((fmi_t*)c)->jmi->dae_block_residuals[i])->nb_jevals;
-	    n = (((fmi_t*)c)->jmi->dae_block_residuals[i])->n;
-	    
-	    /* Output to logger */
-	    sprintf(buf,"SIM Block %d ; size: %d nniters: %d nbcalls: %d njevals: %d",block,n,nniters,nbcalls,njevals);
-	    (((fmi_t *)c)->fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiOK,"DEBUG",buf);
+        /* Test if block is solved by KINSOL */
+        if (nniters > 0) {
+            /* Output to logger */
+            sprintf(buf, "SIM Block %d ; size: %d nniters: %d nbcalls: %d njevals: %d", 
+                    block->index, block->n, nniters, block->nb_calls, block->nb_jevals);
+            logger(c, instance_name, fmiOK, "DEBUG", buf);
 
-	    time_spent = (((fmi_t*)c)->jmi->dae_block_residuals[i])->time_spent;
-	    sprintf(buf,"INIT Block %d ; time: %f",block,time_spent);
-	    (((fmi_t *)c)->fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiOK,"TIMING",buf);
+            sprintf(buf,"INIT Block %d ; time: %f", block->index, block->time_spent);
+            logger(c, instance_name, fmiOK, "TIMING", buf);
 
-	    
-	}
+            
+        }
     }
     /*
-	for (i=0; i < jmi->n_dae_blocks;i=i+1){
-	    jmi_delete_block_residual(jmi->dae_block_residuals[i]);
+        for (i=0; i < jmi->n_dae_blocks;i=i+1){
+            jmi_delete_block_residual(jmi->dae_block_residuals[i]);
     }*/
 }
