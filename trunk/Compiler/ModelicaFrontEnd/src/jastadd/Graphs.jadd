@@ -882,6 +882,69 @@ public class BiPGraph {
 		}
 		return blt;
 	}
+
+    /* This version of Tarjan's algorithm computes, separetely the ODE blocks
+     * and the output blocks.
+     */
+	public ODEBLT computeODEBLT() {
+		
+		index = 0;
+        S = new Stack<Eq>();
+        tarjanReset();
+
+        ODEBLT blt = new ODEBLT();
+ 
+        Var v = null;
+               
+ 		// Order the equations so that the ones matched to derivatives comes
+ 		// first
+ 		ArrayList<Eq> orderedEq = new ArrayList<Eq>();              
+ 		
+ 		for (Eq e : getEquations()) {
+        	if (e.getMatching().getVariable().isDerivativeVariable()) {
+        		orderedEq.add(e);
+        	}
+        }
+
+ 		for (Eq e : getEquations()) {
+        	if (!e.getMatching().getVariable().isDerivativeVariable()) {
+        		orderedEq.add(e);
+        	}
+        }
+               
+        for (Eq e : orderedEq) {
+        	if (!e.isVisited()) {
+        	    components = new LinkedList<Stack<Eq>>();
+        		tarjan(e);
+        		ArrayList<EquationBlock> odeBlocks = new ArrayList<EquationBlock>();
+        		ArrayList<EquationBlock> outputBlocks = new ArrayList<EquationBlock>();	
+				for (Stack<Eq> bl : components) {
+					EquationBlock b = new EquationBlock();
+					blt.add(b);
+					// TODO: handle the case of multiple scalar equations in
+					// one block
+					for (Eq bl_eqn : bl) {
+						v = bl_eqn.getMatching();
+						MatchingPair mp = new MatchingPair(bl_eqn.getEquation(),v.getVariable());
+						b.addMatchingPair(mp);
+					}
+					if (e.getMatching().getVariable().isDerivativeVariable()) {
+						odeBlocks.add(b);
+					} else {
+						outputBlocks.add(b);
+					}
+				}
+				if (odeBlocks.size()>0) {
+					blt.odeBLT.add(odeBlocks);
+				}
+				if (outputBlocks.size()>0) {
+					blt.outputBLT.add(outputBlocks);	
+				}
+        	}
+        }
+ 
+		return blt;
+	}
 	
 	public LinkedList<Stack<Eq>> computeRawBLT() {
 		index = 0;

@@ -3153,6 +3153,10 @@ end DuplicateVariables1;
 	equation_sorting = true,         
         description="Test solution of equations", methodResult=
         "
+========== ODE BLT ============
+*******************************
+========= OUTPUT BLT ==========
+*******************************
 -------------------------------
 Solved block of 1 variables:
 Unknown variables:
@@ -3160,11 +3164,15 @@ Unknown variables:
 Solution:
   1
 -------------------------------
+*******************************
+-------------------------------
 Solved block of 1 variables:
 Unknown variables:
   y
 Solution:
   x + 3
+-------------------------------
+*******************************
 -------------------------------
 Solved block of 1 variables:
 Unknown variables:
@@ -3172,6 +3180,8 @@ Unknown variables:
 Solution:
   x - ( y )
 -------------------------------
+*******************************
+===============================
 ")})));
 
     Real x, y, z;
@@ -3188,6 +3198,10 @@ Solution:
 	equation_sorting = true,         
         description="Test solution of equations", methodResult=
         "
+========== ODE BLT ============
+*******************************
+========= OUTPUT BLT ==========
+*******************************
 -------------------------------
 Solved block of 1 variables:
 Unknown variables:
@@ -3195,11 +3209,15 @@ Unknown variables:
 Solution:
   1
 -------------------------------
+*******************************
+-------------------------------
 Solved block of 1 variables:
 Unknown variables:
   y
 Solution:
   ( x + 3 ) / (  - ( 1 ) )
+-------------------------------
+*******************************
 -------------------------------
 Solved block of 1 variables:
 Unknown variables:
@@ -3207,6 +3225,8 @@ Unknown variables:
 Solution:
   ( x - ( y ) ) / (  - ( 1 ) )
 -------------------------------
+*******************************
+===============================
 ")})));
 
 
@@ -3224,6 +3244,10 @@ Solution:
 	equation_sorting = true,         
         description="Test solution of equations", methodResult=
         "
+========== ODE BLT ============
+*******************************
+========= OUTPUT BLT ==========
+*******************************
 -------------------------------
 Solved block of 1 variables:
 Unknown variables:
@@ -3231,11 +3255,15 @@ Unknown variables:
 Solution:
   1
 -------------------------------
+*******************************
+-------------------------------
 Solved block of 1 variables:
 Unknown variables:
   y
 Solution:
   ( x + 3 ) / ( 2 )
+-------------------------------
+*******************************
 -------------------------------
 Solved block of 1 variables:
 Unknown variables:
@@ -3243,6 +3271,8 @@ Unknown variables:
 Solution:
   ( x - ( y ) ) / ( x )
 -------------------------------
+*******************************
+===============================
 ")})));
 
     Real x, y, z;
@@ -3259,6 +3289,10 @@ Solution:
 	equation_sorting = true,         
         description="Test solution of equations", methodResult=
         "
+========== ODE BLT ============
+*******************************
+========= OUTPUT BLT ==========
+*******************************
 -------------------------------
 Solved block of 1 variables:
 Unknown variables:
@@ -3266,11 +3300,15 @@ Unknown variables:
 Solution:
   1
 -------------------------------
+*******************************
+-------------------------------
 Solved block of 1 variables:
 Unknown variables:
   y
 Solution:
   ( x + 3 ) / ( ( 1 ) / ( 2 ) )
+-------------------------------
+*******************************
 -------------------------------
 Solved block of 1 variables:
 Unknown variables:
@@ -3278,8 +3316,9 @@ Unknown variables:
 Solution:
   ( x - ( y ) ) / ( ( 1 ) / ( x ) )
 -------------------------------
+*******************************
+===============================
 ")})));
-
 
     Real x, y, z;
   equation
@@ -3295,6 +3334,10 @@ Solution:
 	equation_sorting = true,         
         description="Test solution of equations", methodResult=
 "
+========== ODE BLT ============
+*******************************
+========= OUTPUT BLT ==========
+*******************************
 -------------------------------
 Solved block of 1 variables:
 Unknown variables:
@@ -3302,18 +3345,24 @@ Unknown variables:
 Solution:
   1
 -------------------------------
+*******************************
+-------------------------------
 Solved block of 1 variables:
 Unknown variables:
   y
 Solution:
   ( x + 3 ) / ( 1 - ( 3 ) )
 -------------------------------
+*******************************
+-------------------------------
 Solved block of 1 variables:
 Unknown variables:
   z
 Solution:
   ( x - ( y ) ) / ( 1 - ( x + 3 ) )
--------------------------------      
+-------------------------------
+*******************************
+===============================
 ")})));
 
     Real x, y, z;
@@ -3330,6 +3379,10 @@ Solution:
 	equation_sorting = true,         
         description="Test solution of equations", methodResult=
         "
+========== ODE BLT ============
+*******************************
+========= OUTPUT BLT ==========
+*******************************
 -------------------------------
 Solved block of 1 variables:
 Unknown variables:
@@ -3337,11 +3390,15 @@ Unknown variables:
 Solution:
   1
 -------------------------------
+*******************************
+-------------------------------
 Non-solved block of 1 variables:
 Unknown variables:
   y
 Equations:
   ( 2 ) / ( y ) = x + 3
+-------------------------------
+*******************************
 -------------------------------
 Non-solved block of 1 variables:
 Unknown variables:
@@ -3349,6 +3406,8 @@ Unknown variables:
 Equations:
   ( x ) / ( z ) = x - ( y )
 -------------------------------
+*******************************
+===============================
 ")})));
 
 
@@ -3366,6 +3425,10 @@ Equations:
 	equation_sorting = true,         
         description="Test solution of equations", methodResult=
         "
+========== ODE BLT ============
+*******************************
+========= OUTPUT BLT ==========
+*******************************
 -------------------------------
 Solved block of 1 variables:
 Unknown variables:
@@ -3373,11 +3436,15 @@ Unknown variables:
 Solution:
   1
 -------------------------------
+*******************************
+-------------------------------
 Solved block of 1 variables:
 Unknown variables:
   y
 Solution:
   ( x + 3 ) / (  - ( 1 ) + 1 - ( 4 ) )
+-------------------------------
+*******************************
 -------------------------------
 Solved block of 1 variables:
 Unknown variables:
@@ -3385,6 +3452,8 @@ Unknown variables:
 Solution:
   ( x - ( y ) ) / (  - ( 1 ) + 1 + 5 )
 -------------------------------
+*******************************
+===============================
 ")})));
 
 
@@ -3394,7 +3463,5 @@ Solution:
     - y = x + 3 - y + 4*y;
     - z = x - y -z - 5*z;
   end SolveEqTest7;
-
-
 
 end TransformCanonicalTests;

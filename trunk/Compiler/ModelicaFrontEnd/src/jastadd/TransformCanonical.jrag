@@ -211,6 +211,40 @@ aspect TransformCanonical {
 		
 	}
 
+	public class ODEBLT extends BLT {
+		ArrayList<ArrayList<EquationBlock>> odeBLT = 
+			new ArrayList<ArrayList<EquationBlock>>();
+		ArrayList<ArrayList<EquationBlock>> outputBLT = 
+			new ArrayList<ArrayList<EquationBlock>>();	
+
+		public String toString() {
+			StringBuffer str = new StringBuffer();
+			str.append("========== ODE BLT ============\n");
+	     		str.append("*******************************\n");	
+				for (ArrayList<EquationBlock> l : odeBLT) {
+					str.append("-------------------------------\n");
+					for (EquationBlock eb : l) {
+						str.append(eb.toString());
+						str.append("-------------------------------\n");
+					}
+					str.append("*******************************\n");	
+			    } 
+			str.append("========= OUTPUT BLT ==========\n");
+	     		str.append("*******************************\n");	
+				for (ArrayList<EquationBlock> l : outputBLT) {
+					str.append("-------------------------------\n");
+					for (EquationBlock eb : l) {
+						str.append(eb.toString());
+						str.append("-------------------------------\n");
+					}
+					str.append("*******************************\n");	
+			    } 						
+			str.append("===============================\n");
+			return str.toString();
+		}
+
+	}
+
 	public class EquationBlock {
 		private ArrayList<MatchingPair> mps = new ArrayList<MatchingPair>();
 		
@@ -260,6 +294,15 @@ aspect TransformCanonical {
 			}
 			return diffedEq;
 		}
+						
+		public boolean containsDerivative() {
+			for (FVariable fv : activeVariables()) {
+				if (fv.isDerivativeVariable()) {
+					return true;
+				}
+			}
+			return false;
+		}				
 						
 		public String toString() {
 			StringBuffer str = new StringBuffer();
@@ -578,7 +621,7 @@ aspect TransformCanonical {
 		// Perform BLT
 		if (root().options.getBooleanOption("equation_sorting") && g.getUnmatchedVariables().size()==0 && g.getUnmatchedEquations().size()==0) {	
 		
-			daeBLT = g.computeBLT();			
+			daeBLT = g.computeODEBLT();			
 			log.info(daeBLT.toString());
 		
 		}
