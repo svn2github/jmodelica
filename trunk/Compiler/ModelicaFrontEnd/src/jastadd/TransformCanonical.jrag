@@ -246,38 +246,47 @@ aspect TransformCanonical {
 	}
 
 	public class EquationBlock {
-		private ArrayList<MatchingPair> mps = new ArrayList<MatchingPair>();
+		private ArrayList<MatchingPair> unsolvedPairs = new ArrayList<MatchingPair>();
+		private ArrayList<MatchingPair> solvedPairs = new ArrayList<MatchingPair>();
 		
 		public EquationBlock() {
 		}
 		
-		public void addMatchingPair(MatchingPair m) {
-			mps.add(m);
+		public void addSolvedMatchingPair(MatchingPair m) {
+			solvedPairs.add(m);
 		}	
-		
-		public ArrayList<FAbstractEquation> equations() {
+
+		public void addUnsolvedMatchingPair(MatchingPair m) {
+			unsolvedPairs.add(m);
+		}	
+
+		public ArrayList<FAbstractEquation> unsolvedEquations() {
 			ArrayList<FAbstractEquation> s = new ArrayList<FAbstractEquation>();
-			for (MatchingPair mp : mps) {
+			for (MatchingPair mp : unsolvedPairs) {
 				s.add(mp.getEquation());
 			}
 			return s;
 		}
 
+		public ArrayList<MatchingPair> getSolvedPairs() {
+			return solvedPairs;
+		}
+		
 		public ArrayList<FVariable> activeVariables() {
 			ArrayList<FVariable> s = new ArrayList<FVariable>();
-			for (MatchingPair mp : mps) {
+			for (MatchingPair mp : unsolvedPairs) {
 				s.add(mp.getFVariable());
 			}
 			return s;
 		}		
 		
 		public boolean isSolved() {
-			return equations().size()==1 && equations().get(0).isSolved(activeVariables().get(0).name());
+			return unsolvedEquations().size()==1 && unsolvedEquations().get(0).isSolved(activeVariables().get(0).name());
 		}
 		
 		public FExp solution() {
 			if (isSolved()) {
-				return equations().get(0).solution(activeVariables().get(0).name());
+				return unsolvedEquations().get(0).solution(activeVariables().get(0).name());
 			} else {
 			    return null;
 			}
@@ -285,7 +294,7 @@ aspect TransformCanonical {
 						
 		public ArrayList<FAbstractEquation> differentiatedEquations() {
 			ArrayList<FAbstractEquation> diffedEq = new ArrayList<FAbstractEquation>();
-			for (FAbstractEquation e : equations()) {
+			for (FAbstractEquation e : unsolvedEquations()) {
 //			    System.out.println(e.prettyPrint("") + " " + e.getMeIntegrated());
 //				System.out.println(e.prettyPrint("") + " " + e.getMeDifferentiated());
 				if (e.getMeIntegrated()!=null) {
@@ -321,7 +330,7 @@ aspect TransformCanonical {
 					str.append("  " + fv.name() + "\n");
 				}
 				str.append("Equations:\n");
-				for (FAbstractEquation feq : equations()) {
+				for (FAbstractEquation feq : unsolvedEquations()) {
 					str.append("  " + feq.prettyPrint("") + "\n");			
 				}
 			}
@@ -793,202 +802,276 @@ aspect TransformCanonical {
 	}	
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	public void FClass.computeTearings() {
-		log.debug(" ----======************ Tearing started ************======----");
-			//Build up Global Graph, with all variables, equations and edges between them		
+		System.out.println(" ----======************ Tearing started ************======----");		
 			BiPGraph graph = new BiPGraph(name(),"");
 			graph.addVariables(this, BiPGraph.DERIVATIVE_VARIABLES | BiPGraph.ALGEBRAIC_VARIABLES);
 			graph.addEquations(equations(), BiPGraph.DERIVATIVE_VARIABLES | BiPGraph.ALGEBRAIC_VARIABLES,"eq_",1);
 			graph.maximumMatching(true);	
-			//Compute the algebraic-loops and return them as Stacks
-			LinkedList<Stack<Eq>> blt = graph.computeRawBLT();	
-			//Loop over all algebraic-loops bigger than 1.
-			for(Stack<Eq> alg : blt){
-				ArrayList<Eq> algLoop = new ArrayList<Eq>(alg);
-				if (algLoop.size()>1){		
-					//If a loop, call Tear method
-					log.debug("Original Block sizes: " + algLoop.size());
-					ArrayList<TearingPair> tearingPairs = Tear(algLoop);
-					System.out.println(" \n==== TearingPairs for block of size: "+ algLoop.size() +" ====");
+			LinkedList<Stack<Eq>> blt = graph.computeRawBLT();
+			BLT tearBLT = new BLT();
+			for(Stack<Eq> block : blt){
+				EquationBlock eb = new EquationBlock();
+				Eq tmp = block.pop();
+				if (!block.isEmpty()){		
+					int size=1;
+					for(Eq e: block){
+						size++;
+					}
+					//Calls function Tear
+					block.push(tmp);
+					ArrayList<MatchingPair> tearingPairs = Tear(block);
+					//rebuild graph to get sequential order of solved equations
+					// which after the removal of tearingPairs should be an Index-0 graph
+					// (this will be rewritten when the global structure for the blt is decided) 
+					BiPGraph solvedGraph = new BiPGraph("","");
+					for(Eq e : block){
+						boolean isRes=false;
+						boolean isTear=false;
+						for(MatchingPair tp: tearingPairs){
+							if(tp.getEquation().equals(e.getEquation())){
+								isRes=true;
+							}
+							if(tp.getFVariable().equals(e.getMatching().getVariable())){
+								isTear=true;
+							}
+						}
+						if(!isRes){
+							Eq gEq = solvedGraph.addEquation(e.getName(),"",e.getEquation());
+						}
+						if(!isTear){
+							Var gVar = solvedGraph.addVariable(e.getMatching().getName(),"",e.getMatching().getVariable());
+						}
+					}
+					for(Eq e : block){
+						Eq gEq = solvedGraph.getEquation(e.getName());
+						if(gEq!=null){
+							for(Var v : e.getVariables()){
+								Var gVar = solvedGraph.getVariable(v.getName());
+								if(gVar!=null){
+									gEq.addVariable(gVar);
+								}
+							}	
+						}
+					}
+					//Only one Perfect Matching should exist, (since Index-0)
+					solvedGraph.maximumMatching(true);
+					System.out.print(solvedGraph.printMatching());
+					LinkedList<Stack<Eq>> components = solvedGraph.computeRawBLT();
+					for (Stack<Eq> bl : components) {
+						ArrayList<Eq> ar = new ArrayList<Eq>(bl);
+						System.out.print("\n");
+						System.out.print("Size after tearing (all should be zero): " + ar.size());
+						if (ar.size()>1) {
+							System.out.println("No sequential order was obtained after tearing!");
+						}else{
+							Var v = ar.get(0).getMatching();
+							MatchingPair mp = new MatchingPair(ar.get(0).getEquation(),v.getVariable());
+							eb.addSolvedMatchingPair(mp);
+						}
+					}
+					System.out.println(" \n==== TearingPairs for block of size: "+ size +" ====");
 					int i=1;
-					for(TearingPair tp : tearingPairs){
+					for(MatchingPair tp: tearingPairs){
+						eb.addUnsolvedMatchingPair(tp);
 						System.out.println("TearingPair " + i);
-						System.out.println("   residual equation: "+ tp.getRes());
-						System.out.println("   tearing variable:  "+ tp.getTear());
-						i++;				
-						graph.removeEquation(graph.getEquation(tp.getRes()));
-						graph.removeVariable(graph.getVariable(tp.getTear()));
+						System.out.println("   residual equation: "+ tp.getEquation().prettyPrint(""));
+						System.out.println("   tearing variable:  "+ tp.getFVariable().name());
+						i++;	
 					}
 					System.out.println(" ================================ ");
+				} else {
+					eb.addUnsolvedMatchingPair(new MatchingPair(tmp.getEquation(),tmp.getMatching().getVariable()));
 				}
+				tearBLT.add(eb);
 			}
-			//structure check
-			graph.maximumMatching(true);
-			if(graph.getUnmatchedVariables().size() >0 || graph.getUnmatchedEquations().size() > 0){
-				System.out.println("Torn apart!");
-			}else{
-				System.out.println("Matching exist after removal of residuals and tears :)");
-				LinkedList<Stack<Eq>> ErrBlt = graph.computeRawBLT();
-				int j=0;
-				System.out.println("BlockSizes (all ought to be 1): ");
-				for(Stack<Eq> alg : ErrBlt){
-					ArrayList<Eq> algLoop = new ArrayList<Eq>(alg);
-						System.out.print(algLoop.size());
-						j++;
-				}
-				System.out.println("\nNbr of Blocks: "+j);
-			}
-			log.debug(" ----======************ Tearing ended ************======----\n");
-	}
+			daeBLT = tearBLT;
+	}	
 	
-	public class TearingPair{
-		// Will be modified later on, for now only the names are needed, eg. for the structure check
-		private String res;
-		private String tear;
-		
-		public TearingPair(String res, String tear) {
-    		this.res = res;
-    		this.tear = tear;
-    	}
-    
-    	public String getRes() {
-			return res;    	
-    	}
-    	
-    	public String getTear() {
-    		return tear;
-    	}
-		
-	}
 	
-	public ArrayList<TearingPair> FClass.Tear(ArrayList<Eq> algLoop){
-		log.debug("### New recursion in tearing ###");
-		//For linear systems, recursively selectes residual equations and tearing variables and returns a List with these pairs
-		ArrayList<TearingPair> tp = new ArrayList<TearingPair>();
-		//New graph only contains eqn,var and edges active in the algebraic loop. (plus matching)
-		BiPGraph g = buildLocalGraph(algLoop);  	
-		// Choose as residual eqation the equation that contains most variables. 
-		int maxVars = 0;
-		ArrayList<Eq> resList = new ArrayList<Eq>();
-		for(Eq e : algLoop){
-			//Comment most of this part to test ALL equations instead of only those with max variables
-			int nbrVars = g.getEquation(e.getName()).getVariables().size(); 
-			if(nbrVars > maxVars){
-				resList.clear();
-				resList.add(g.getEquation(e.getName()));
-				maxVars = nbrVars;
-			}else if(nbrVars==maxVars){
-				resList.add(g.getEquation(e.getName()));
-			}
-		}
-		int maxTorn = 0;
-		Var theTear=null;
-		Eq theRes=null;
-		for(Eq res: resList){
-			//Comment most of this part to test ALL variables instead of only those with max occurrence
-			int maxOcc=0;
-			ArrayList<Var> tearList = new ArrayList<Var>();
-			for(Var v : res.getVariables()){ 
-				int occ = v.getOccurrences();
-				if(occ > maxOcc){
-					tearList.clear();
-					tearList.add(v);
-					maxOcc = occ;
-				}else if(occ==maxOcc){
-					tearList.add(v);
-				}
-			}
-			log.debug(" *** Testing Residual ***");
-			log.debug(res.getName());
-			log.debug("nbr of variables in res: " + tearList.size());
-			
-			for(Var tear: tearList){		
-				log.debug("Tearing variable: " + tear.getName());
-				//When the structure for the non-linear part is decided I will add methods like
-				//reinsertRes() and reinsertTear() in class BiPGraph, instead of creating a new graph for every test 
-				if(tear.getName().equals(res.getMatching().getName())){
-					log.debug("Tearing variable is the matched variable");
-					BiPGraph matchingGraph = buildLocalGraph(algLoop);
-					matchingGraph.removeEquation(matchingGraph.getEquation(res.getName()));
-					matchingGraph.removeVariable(matchingGraph.getVariable(tear.getName()));
-					LinkedList<Stack<Eq>> matchingBlt = matchingGraph.computeRawBLT();
-					int indepBlocks = 0; 
-					for(Stack<Eq> localAlg : matchingBlt){
-						indepBlocks++; 										 		
-					}
-					log.debug("Number of causalized equations:" + indepBlocks);
-					if(indepBlocks > maxTorn){
-						maxTorn=indepBlocks;
-						theRes = res;
-						theTear = tear;
-					}
-				}else{
-					BiPGraph matchingGraph = buildLocalGraph(algLoop);
-					Eq unmatchedEquation = matchingGraph.getVariable(tear.getName()).getMatching();
-					matchingGraph.removeEquation(matchingGraph.getEquation(res.getName()));
-					matchingGraph.removeVariable(matchingGraph.getVariable(tear.getName()));
-					boolean hasPath = false;
-					hasPath = matchingGraph.augmentPath(unmatchedEquation, new ArrayList<Eq>(), new ArrayList<Var>());
-					if(!hasPath){// Never occurs in my examples!(?)  
-						log.debug("tearing variable implies structural singularity ! ! %#¤#");	
-					}else{
-						log.debug("matching exist after chosen tearing varible!");
-						LinkedList<Stack<Eq>> matchingBlt = matchingGraph.computeRawBLT();
-						int indepBlocks = 0;
-						for(Stack<Eq> localAlg : matchingBlt){
-							indepBlocks++;
-						}
-						log.debug("Number of causalized equations:" + indepBlocks);
-						if(indepBlocks > maxTorn){
-							maxTorn=indepBlocks;
-							theRes = res;
-							theTear = tear;
-						}
-					}
-				}
-			}
-			log.debug(" *** Done with this residual *** \n");
-		}
-		if(theTear==null || theRes==null){
-			log.debug("Couldnt find any tearing pairs!");
-			// Shouldnt be possible... and never happend in my tests
-		}
-		tp.add(new TearingPair(theRes.getName(), theTear.getName()));
-		g.removeEquation(theRes);
-		g.removeVariable(theTear);
-		g.maximumMatching(true);
-		// Find algebraic loops in the new reduced system of equations
-		LinkedList<Stack<Eq>> localBlt = g.computeRawBLT();
-		for(Stack<Eq> localAlg : localBlt){
-			ArrayList<Eq> localAlgLoop = new ArrayList<Eq>(localAlg);
-			if (localAlgLoop.size()>1){
-				tp.addAll(Tear(localAlgLoop));
-			}	
-		}
-		return tp;	
-	}
-			
-	public BiPGraph FClass.buildLocalGraph(ArrayList<Eq> al){
-		BiPGraph gr = new BiPGraph("","");
-		// Add active variables and "empty" equations to the new local graph
-		for(Eq e : al){
-			Var varAdd = gr.addVariable(e.getMatching().getName(),"",e.getMatching().getVariable());
-			Eq eqAdd = gr.addEquation(e.getName(),"",e.getEquation());
+	public ArrayList<MatchingPair> FClass.Tear(Stack<Eq> Block){
+		System.out.println("### New recursion in tearing ###");
+		ArrayList<MatchingPair> tp = new ArrayList<MatchingPair>();
+		BiPGraph g = new BiPGraph("","");
+		Stack<Eq> solvableUnmatched = new Stack<Eq>();
+		boolean forceChoice=false;
+		// ---------------------- Graph setup -----------------------------------
+		for(Eq e : Block){
+			Var gVar = g.addVariable(e.getMatching().getName(),"",e.getMatching().getVariable());
+			Eq gEq = g.addEquation(e.getName(),"",e.getEquation());
 			//System.out.println(varAdd.getName());
 			//System.out.println(eqAdd.getName());
-			eqAdd.setMatching(varAdd);
-			varAdd.setMatching(eqAdd);
+			gEq.setMatching(gVar);
+			gVar.setMatching(gEq);
+			if(gEq.getEquation().isSolved(gVar.getName())){
+				gEq.setSolvableMatching(gVar);
+				gVar.setSolvableMatching(gEq);
+			}else{
+				solvableUnmatched.push(gEq);
+			}
 		}
 		// Add edges between the active variables and equations
-		for(Eq e : al){
+		for(Eq e : Block){
+			boolean hasSolvable = false;
+			Eq gEq = g.getEquation(e.getName());
 			for(Var v : e.getVariables()){
-				Var grVar = gr.getVariable(v.getName());
-				if(grVar!=null){
-					grVar.occurrence();
-					gr.getEquation(e.getName()).addVariable(grVar);
+				Var gVar = g.getVariable(v.getName());
+				if(gVar!=null){
+					gVar.occurrence();
+					gEq.addVariable(gVar);
+					if(gEq.getEquation().isSolved(gVar.getName())){
+						gEq.addSolvableVariable(gVar);
+						hasSolvable = true;
+					}else{
+		//				System.out.println(gVar.getName() + " is not solvable in  " + gEq.getName());
+					}
+				}
+			}
+			// If the equation doesnt contain any solvables at all, it MUST be chosen as residual
+			// For now its treated the same as equations that are solvableUnmatched
+			//if(!hasSolvable){
+			//	System.out.println("Equation with no solvables at all found!");
+			//	solvableUnmatched.remove(gEq);
+			//	g.removeRes(gEq);
+			//	g.removeTear(gEq.getMatching());
+			//	tp.add(new MatchingPair(gEq.getEquation(),gEq.getMatching().getFVariable()));
+			//	forceChoice = true;
+			//}
+		}
+		// --------------------- end of graph set up ------------------------
+		if(solvableUnmatched.size()>0){
+			for(Eq e: solvableUnmatched){
+				g.lightReset();
+				if(!g.solvableAugmentPath(e, new ArrayList<Eq>(), new ArrayList<Var>())){
+					System.out.println("Contains solvableUnmatcheable equations!");
+					g.removeRes(e);
+					g.removeTear(e.getMatching());
+					tp.add(new MatchingPair(e.getEquation(),e.getMatching().getVariable()));
+					forceChoice = true;
 				}
 			}
 		}
-		return gr;
+		if(forceChoice){
+			
+			LinkedList<Stack<Eq>> tornBlt = g.computeRawBLT();
+			for(Stack<Eq> tornBlock : tornBlt){
+				Eq tmp = tornBlock.pop();
+				if (!tornBlock.isEmpty()){
+					tornBlock.push(tmp);
+					tp.addAll(Tear(tornBlock));
+				}	
+			}
+		// Below from here all equations and variables left have solvableMatchings	
+		} else {
+			// Choose as residual eqation the equation that contains most variables. 
+			ArrayList<Eq> resList = new ArrayList<Eq>();
+			//int maxVars = 0;
+			for(Eq e : g.returnEquations()){
+				//Comment most of this part to test ALL equations instead of only those with max variables
+			//	int nbrVars = e.getVariables().size(); 
+			//	if(nbrVars > maxVars){
+			//		resList.clear();
+			//		resList.add(e);
+			//		maxVars = nbrVars;
+			//	}else if(nbrVars==maxVars){
+					resList.add(e);
+			//	}
+			}
+			int maxTorn = 0;
+			Var theTear=null;
+			Eq theRes=null;
+			for(Eq res: resList){
+				//Comment most of this part to test ALL variables instead of only those with max occurrence
+				ArrayList<Var> tearList = new ArrayList<Var>();
+				//int maxOcc=0;
+				for(Var v : res.getVariables()){ 
+				//	int occ = v.getOccurrences();
+				//	if(occ > maxOcc){
+				//		tearList.clear();
+						tearList.add(v);
+				//		maxOcc = occ;
+				//	}else if(occ==maxOcc){
+				//		tearList.add(v);
+				//	}
+				}
+				System.out.println(" *** Testing Residual ***");
+				System.out.println(res.getEquation().prettyPrint(""));
+				//System.out.println("nbr of variables in res: " + tearList.size());
+				for(Var tear: tearList){	
+					g.removeRes(res);
+					ArrayList<Eq> alteredEquations = g.removeTear(tear);
+					System.out.println("Tearing variable: " + tear.getName());
+					boolean hasPath;
+					if(tear.getName().equals(res.getSolvableMatching().getName())){
+						System.out.println("is matched with the residual");
+						hasPath = true;
+					}else{
+						g.lightReset();
+						hasPath = g.solvableAugmentPath(tear.getSolvableMatching(), new ArrayList<Eq>(), new ArrayList<Var>());
+					}
+					if(!hasPath){  
+						System.out.println("Tearing variable implies that NO solvable matching exist!");	
+						g.reinsertTear(tear, alteredEquations);
+						g.reinsertRes(res);
+						tear.getMatching().setMatching(tear);
+						tear.getSolvableMatching().setSolvableMatching(tear);
+						res.getMatching().setMatching(res);
+						res.getSolvableMatching().setSolvableMatching(res);
+					
+					}else{
+						System.out.println("Solvable matching exist after chosen tearing varible!");							
+						LinkedList<Stack<Eq>> testBlt = g.computeRawBLT();
+						int causalized = 0; 
+						for(Stack<Eq> block : testBlt){
+							block.pop();
+							if(block.isEmpty()){
+								causalized++; 		
+							}
+						}
+						System.out.println("Number of causalized eq: " + causalized);
+						if(causalized >= maxTorn){
+							maxTorn=causalized;
+							theRes = res;
+							theTear = tear;
+							System.out.println("choose new tearingpair..");
+						}
+						g.reinsertTear(tear, alteredEquations);
+						g.reinsertRes(res);
+						res.setMatching(tear);
+						res.setSolvableMatching(tear);
+						tear.setMatching(res);
+						tear.setSolvableMatching(res);
+					}
+				}
+				System.out.println(" *** Done with residual *** \n");
+			}
+			if(theTear==null || theRes==null){
+				//System.out.println("Couldnt find any tearing pairs!");
+				// Shouldnt be possible... 
+			}
+			tp.add(new MatchingPair(theRes.getEquation(), theTear.getVariable()));
+			System.out.println(g.printMatching());
+			g.removeRes(theRes);
+			g.removeTear(theTear);
+			//if(!theTear.getName().equals(theRes.getMatching().getName())){				
+				g.lightReset();
+				g.solvableAugmentPath(theTear.getSolvableMatching(), new ArrayList<Eq>(), new ArrayList<Var>());
+			//}
+			
+			// Tear new blocks in the recently torn block
+			System.out.println("About to fail...");
+			System.out.println(g.printMatching());
+			LinkedList<Stack<Eq>> tornBlt = g.computeRawBLT();
+			System.out.println("Didnt fail...");
+			for(Stack<Eq> tornBlock : tornBlt){
+				Eq tmp = tornBlock.pop();
+				if (!tornBlock.isEmpty()){
+					tornBlock.push(tmp);
+					tp.addAll(Tear(tornBlock));
+				}	
+			}
+			return tp;	
+		}
+		return tp;
 	}
 		
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////			

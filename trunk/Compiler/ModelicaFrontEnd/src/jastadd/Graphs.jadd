@@ -106,7 +106,6 @@ public class BiPGraph {
 
 	public void removeEquation(Eq e) {
 		for (Var v : e.getVariables()) {
-			v.removeOccurrence();
 			if (v.getMatching() == e) {
 				v.setMatching(null);
 			}
@@ -117,6 +116,8 @@ public class BiPGraph {
 		equationMap.remove(e.getName());
 		removeFromEquationIndexMap(e.getEquation(),e);
 	}
+	
+	
 	
 	public Var addVariable(String name, String description) {
 		Var v = variableMap.get(name);
@@ -484,8 +485,34 @@ public class BiPGraph {
 		}
 		//System.out.println(n_ind + buildIndent(n_ind) + "augmentPath end: " + e.getEquation().prettyPrint(""));	
 		return false;
+	}
+	
+	public boolean solvableAugmentPath(Eq e, ArrayList<Eq> visitedEquations, ArrayList<Var> visitedVariables) {
+		e.setVisited(true);
+		visitedEquations.add(e);
+		for (Var v : e.getSolvableVariables()) {
+			if (v.getSolvableMatching()==null) {
+				v.setSolvableMatching(e);
+				e.setSolvableMatching(v);
+				v.setMatching(e);
+				e.setMatching(v);
+				return true;
+			} else if (!v.isVisited()) {
+				v.setVisited(true);
+				visitedVariables.add(v);
+				if (solvableAugmentPath(v.getSolvableMatching(),visitedEquations,visitedVariables)) {
+					v.setSolvableMatching(e);
+					e.setSolvableMatching(v);
+					v.setMatching(e);
+					e.setMatching(v);
+					return true;	
+				} 
+			}
+		}
+		return false;
 	}	
-
+	
+	
 	public IndexReductionResult reduceIndex(boolean resetMatching) {
 		if (resetMatching) {
 			reset();
@@ -672,7 +699,7 @@ public class BiPGraph {
 		
 				// Step 1: Initialize, add all equations in blocks
 				// having differentiated equations
-				g.addAll(eb.equations());
+				g.addAll(eb.unsolvedEquations());
 				
 				// Step 2: Extract all active variables, i.e., highest order 
 				// derivatives for each variable
@@ -845,6 +872,60 @@ public class BiPGraph {
 		return l;
 	}
 	
+	public void removeRes(Eq res){
+		Var match = res.getMatching();
+		Var solvableMatch = res.getSolvableMatching();
+		if(match!=null){
+			match.setMatching(null);
+		}
+		if(solvableMatch!=null){
+			solvableMatch.setSolvableMatching(null);
+		}
+		equations.remove(res);
+		equationMap.remove(res.getName());
+		removeFromEquationIndexMap(res.getEquation(),res);
+	}
+	
+	public void reinsertRes(Eq res){
+		equations.add(res);
+		equationMap.put(res.getName(),res);
+		insertIntoEquationIndexMap(res.getEquation(),res);
+	}
+	
+	public ArrayList<Eq> removeTear(Var tear){
+		ArrayList<Eq> alteredEquations = new ArrayList<Eq>();
+		Eq match = tear.getMatching();
+		Eq solvableMatch = tear.getSolvableMatching();
+		if(match!=null){
+			match.setMatching(null);
+		}
+		if(solvableMatch!=null){
+			solvableMatch.setSolvableMatching(null);
+		}
+		for (Eq e : returnEquations()) {
+			if(e.getVariables().remove(tear)){
+				alteredEquations.add(e);
+				e.getSolvableVariables().remove(tear);
+			}
+		}
+		variableMap.remove(tear.getName());	
+		return alteredEquations;
+	}
+	
+	public void reinsertTear(Var tear, ArrayList<Eq> eqn){
+		variableMap.put(tear.getName(),tear);
+		for(Eq e: eqn){
+			e.addVariable(tear);
+			if(e.getEquation().isSolved(tear.getName())){
+				e.addSolvableVariable(tear);
+			}
+		}
+	}
+	
+	public ArrayList<Eq> returnEquations(){
+		return equations;
+	}
+	
 	private int index = 0;
     private Stack<Eq> S;
     private LinkedList<Stack<Eq>> components;
@@ -877,7 +958,7 @@ public class BiPGraph {
 			for (Eq bl_eqn : bl) {
 				v = bl_eqn.getMatching();
 				MatchingPair mp = new MatchingPair(bl_eqn.getEquation(),v.getVariable());
-				b.addMatchingPair(mp);
+				b.addUnsolvedMatchingPair(mp);
 			}
 		}
 		return blt;
@@ -926,7 +1007,7 @@ public class BiPGraph {
 					for (Eq bl_eqn : bl) {
 						v = bl_eqn.getMatching();
 						MatchingPair mp = new MatchingPair(bl_eqn.getEquation(),v.getVariable());
-						b.addMatchingPair(mp);
+						b.addUnsolvedMatchingPair(mp);
 					}
 					if (e.getMatching().getVariable().isDerivativeVariable()) {
 						odeBlocks.add(b);
@@ -1295,8 +1376,10 @@ public class Eq {
 
 	private String name;
 	private ArrayList<Var> variables = new ArrayList<Var>();
+	private ArrayList<Var> solvableVariables = new ArrayList<Var>();
 	private Iterator<Var> varIterator;
 	private Var matching = null;
+	private Var solvableMatching;
     private boolean visited = false;
     private int layer = 1000000;
     private String description;
@@ -1320,6 +1403,7 @@ public class Eq {
 	public void addVariable(Var v) {
 		variables.add(v);
 	}
+	
 
 	public void reset() {
 		setMatching(null);
@@ -1358,7 +1442,7 @@ public class Eq {
 	public void setMatching(Var matching) {
 		this.matching = matching;
 	}
-
+	
 	public boolean isVisited() {
 		return visited;
 	}
@@ -1444,6 +1528,22 @@ public class Eq {
 	public void setEquation(FAbstractEquation eqn) {
 		this.eqn = eqn;
 	}
+	
+	public void addSolvableVariable(Var v) {
+		solvableVariables.add(v);
+	}
+	
+	public ArrayList<Var> getSolvableVariables() {
+		return solvableVariables;
+	}
+	
+	public Var getSolvableMatching() {
+		return solvableMatching;
+	}
+
+	public void setSolvableMatching(Var v) {
+		this.solvableMatching = v;
+	}
 
 
 }
@@ -1453,6 +1553,7 @@ public class Var {
 	private String name;
 	private String description;
 	private Eq matching = null;
+	private Eq solvableMatching = null;
 	private boolean visited = false;
 	private int layer = 1000000;
 	private FVariable v;
@@ -1560,6 +1661,14 @@ public class Var {
 		return occurrences;
 	}
 	
+	public Eq getSolvableMatching() {
+		return solvableMatching;
+	}
+
+	public void setSolvableMatching(Eq eqn) {
+		this.solvableMatching = eqn;
+	}
+		
 	public String toString() {
 		return getName();
 	}

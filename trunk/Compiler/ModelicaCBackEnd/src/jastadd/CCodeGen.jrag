@@ -1147,14 +1147,14 @@ aspect CCodeGen {
 	
 	public void EquationBlock.genBlock_C(int i, boolean inInitial, String indent, PrintStream str) {	
 		if (isSolved()) {
-			equations().get(0).genSolvedBlock_C(activeVariables().get(0),indent,str);
+			unsolvedEquations().get(0).genSolvedBlock_C(activeVariables().get(0),indent,str);
 			/*
 			str.print(indent + activeVariables().get(0).name_C() + " = ");
 			p.print(solution(),str,indent);
 			str.print(";\n");
 			*/	
 		} else {
-			equations().get(0).genBlock_C(i,inInitial,indent,str);
+			unsolvedEquations().get(0).genBlock_C(i,inInitial,indent,str);
 		}
 	}
 

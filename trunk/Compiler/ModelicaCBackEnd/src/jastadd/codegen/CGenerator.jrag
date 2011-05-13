@@ -296,31 +296,65 @@ public class CGenerator extends GenericGenerator {
 				int block_counter = 0;
 				for (EquationBlock block : fclass.getDAEBLT()) {
 				    if (!block.isSolved()) {
-						genPrinter.print("static int dae_block_"+block_counter+"(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {\n");
-						genPrinter.print("  jmi_real_t** res = &residual;\n");	
-						genPrinter.print("  if (init==JMI_BLOCK_INITIALIZE) {\n");
-						int var_counter = 0;
-						// Loop over all active variables and write their value to x	
-						for (FVariable fv : block.activeVariables()) {
-							genPrinter.print("    x["+var_counter+"] = " + fv.name_C() + ";\n");
-							var_counter++;
-						}
-						genPrinter.print("  } else if (init==JMI_BLOCK_EVALUATE) {\n");
-						// Loop over all active variables and write the values in x to the z vector
-						var_counter = 0;
-						for (FVariable fv : block.activeVariables()) {
-							genPrinter.print("    " + fv.name_C() + " = x["+var_counter+"];\n");
-							var_counter++;
-						}
-						// Write the residual expressions
-						int equation_counter = 0;
-						for (FAbstractEquation e : block.equations()) {
-							e.genResidual_C(equation_counter,INDENT,genPrinter);				
-							equation_counter += e.numScalarEquations();
-						}
-						genPrinter.print("  }\n");
-						genPrinter.print("  return 0;\n}\n\n");
-						block_counter++;	
+				    	if (!fclass.root().options.getBooleanOption("enable_tearing")) {
+				    		genPrinter.print("static int dae_block_"+block_counter+"(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {\n");
+				    		genPrinter.print("  jmi_real_t** res = &residual;\n");	
+				    		genPrinter.print("  if (init==JMI_BLOCK_INITIALIZE) {\n");
+				    		int var_counter = 0;
+				    		// Loop over all active variables and write their value to x	
+				    		for (FVariable fv : block.activeVariables()) {
+				    			genPrinter.print("    x["+var_counter+"] = " + fv.name_C() + ";\n");
+				    			var_counter++;
+				    		}
+				    		genPrinter.print("  } else if (init==JMI_BLOCK_EVALUATE) {\n");
+				    		// Loop over all active variables and write the values in x to the z vector
+				    		var_counter = 0;
+				    		for (FVariable fv : block.activeVariables()) {
+				    			genPrinter.print("    " + fv.name_C() + " = x["+var_counter+"];\n");
+				    			var_counter++;
+				    		}
+				    		// Write the residual expressions
+				    		int equation_counter = 0;
+				    		for (FAbstractEquation e : block.unsolvedEquations()) {
+				    			e.genResidual_C(equation_counter,INDENT,genPrinter);				
+				    			equation_counter += e.numScalarEquations();
+				    		}
+				    		genPrinter.print("  }\n");
+				    		genPrinter.print("  return 0;\n}\n\n");
+				    		block_counter++;	
+				    	} else { // Generate code for a Teared block
+				    		genPrinter.print("static int dae_block_"+block_counter+"(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {\n");
+				    		genPrinter.print("  jmi_real_t** res = &residual;\n");	
+				    		genPrinter.print("  if (init==JMI_BLOCK_INITIALIZE) {\n");
+				    		int var_counter = 0;
+				    		// Loop over all tearing variables and write their value to x	
+				    		for (FVariable fv : block.activeVariables()) {
+				    			genPrinter.print("    x["+var_counter+"] = " + fv.name_C() + ";\n");
+				    			var_counter++;
+				    		}
+				    		genPrinter.print("  } else if (init==JMI_BLOCK_EVALUATE) {\n");
+				    		// Loop over all tearing variables and write the values in x to the z vector
+				    		var_counter = 0;
+				    		for (FVariable fv : block.activeVariables()) {
+				    			genPrinter.print("    " + fv.name_C() + " = x["+var_counter+"];\n");
+				    			var_counter++;
+				    		}
+				    		// Loop over all solved equations and write the expressions  
+				    		for (MatchingPair mp: block.getSolvedPairs()){
+				    			mp.getEquation().genSolvedBlock_C(mp.getFVariable(), INDENT, genPrinter);	
+				       		}
+				    		
+				    		// Write the residual expressions
+				    		int equation_counter = 0;
+				    		for (FAbstractEquation e : block.unsolvedEquations()) {
+				    			e.genResidual_C(equation_counter,INDENT,genPrinter);				
+				    			equation_counter += e.numScalarEquations();
+				    		}
+				    		genPrinter.print("  }\n");
+				    		genPrinter.print("  return 0;\n}\n\n");
+				    		block_counter++;	
+				    		
+				    	}
 					}
 				}
 			}
@@ -412,7 +446,7 @@ public class CGenerator extends GenericGenerator {
 						}
 						// Write the residual expressions
 						int equation_counter = 0;
-						for (FAbstractEquation e : block.equations()) {
+						for (FAbstractEquation e : block.unsolvedEquations()) {
 							e.genResidual_C(equation_counter,INDENT,genPrinter);				
 							equation_counter += e.numScalarEquations();
 						}
