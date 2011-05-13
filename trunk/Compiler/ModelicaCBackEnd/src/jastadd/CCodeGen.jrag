@@ -1145,34 +1145,90 @@ aspect CCodeGen {
 		type().printDecl_C(p, str, indent, tempName_C(), this);
 	}
 	
-	public void EquationBlock.genBlock_C(int i, boolean inInitial, String indent, PrintStream str) {	
-		if (isSolved()) {
-			unsolvedEquations().get(0).genSolvedBlock_C(activeVariables().get(0),indent,str);
-			/*
-			str.print(indent + activeVariables().get(0).name_C() + " = ");
-			p.print(solution(),str,indent);
-			str.print(";\n");
-			*/	
-		} else {
-			unsolvedEquations().get(0).genBlock_C(i,inInitial,indent,str);
+	public void AbstractEquationBlock.genBlockResidualFunction_C(int block_counter, boolean inInit, String indent, PrintStream str) {
+	} 
+
+	public void EquationBlock.genBlockResidualFunction_C(int block_counter, boolean inInit, String indent, PrintStream str) {
+		str.print("static int dae_" + (inInit? "init_": "") + "block_"+block_counter+"(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {\n");
+		str.print("  jmi_real_t** res = &residual;\n");	
+		str.print("  if (init==JMI_BLOCK_INITIALIZE) {\n");
+		int var_counter = 0;
+		// Loop over all active variables and write their value to x	
+		for (FVariable fv : activeVariables()) {
+			str.print("    x["+var_counter+"] = " + fv.name_C() + ";\n");
+			var_counter++;
 		}
+		str.print("  } else if (init==JMI_BLOCK_EVALUATE) {\n");
+		// Loop over all active variables and write the values in x to the z vector
+		var_counter = 0;
+		for (FVariable fv : activeVariables()) {
+			str.print("    " + fv.name_C() + " = x["+var_counter+"];\n");
+			var_counter++;
+		}
+		// Write the residual expressions
+		int equation_counter = 0;
+		for (FAbstractEquation e : equations()) {
+			e.genResidual_C(equation_counter,indent,str);				
+			equation_counter += e.numScalarEquations();
+		}
+		str.print("  }\n");
+		str.print("  return 0;\n}\n\n");
 	}
 
-	public void FAbstractEquation.genBlock_C(int i, boolean inInitial, String indent, PrintStream str) {}
+	public void TearedEquationBlock.genBlockResidualFunction_C(int block_counter, boolean inInit, String indent, PrintStream str) {
+		str.print("static int dae_" + (inInit? "init_": "") + "block_"+block_counter+"(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {\n");
+		str.print("  jmi_real_t** res = &residual;\n");	
+		str.print("  if (init==JMI_BLOCK_INITIALIZE) {\n");
+		int var_counter = 0;
+		// Loop over all tearing variables and write their value to x	
+		for (FVariable fv : activeVariables()) {
+			str.print("    x["+var_counter+"] = " + fv.name_C() + ";\n");
+			var_counter++;
+		}
+		str.print("  } else if (init==JMI_BLOCK_EVALUATE) {\n");
+		// Loop over all tearing variables and write the values in x to the z vector
+		var_counter = 0;
+		for (FVariable fv : activeVariables()) {
+			str.print("    " + fv.name_C() + " = x["+var_counter+"];\n");
+			var_counter++;
+		}
+		// Loop over all solved equations and write the expressions  
+		for (MatchingPair mp: getSolvedPairs()){
+			mp.getEquation().genSolvedBlock_C(mp.getFVariable(), indent, str);	
+        }
+				    		
+		// Write the residual expressions
+		int equation_counter = 0;
+		for (FAbstractEquation e : unsolvedEquations()) {
+			e.genResidual_C(equation_counter,indent,str);				
+			equation_counter += e.numScalarEquations();
+		}
+		str.print("  }\n");
+		str.print("  return 0;\n}\n\n");
+	}
 	
-	public void FEquation.genBlock_C(int i, boolean inInitial, String indent, PrintStream str) {
+	public abstract void AbstractEquationBlock.genBlock_C(int i, boolean inInitial, String indent, PrintStream str);
+	
+	public void EquationBlock.genBlock_C(int i, boolean inInitial, String indent, PrintStream str) {	
 		if (inInitial) {
 			str.print("  jmi_kinsol_solve(jmi->dae_init_block_residuals["+i+"]);\n");
 		} else {
 			str.print("  jmi_kinsol_solve(jmi->dae_block_residuals["+i+"]);\n");
-		}
-	}
-	
-	public void FWhenEquation.genBlock_C(int i, boolean inInitial, String indent, PrintStream str) {
-	
+		}	
 	}
 
-	
+	public void TearedEquationBlock.genBlock_C(int i, boolean inInitial, String indent, PrintStream str) {	
+		if (inInitial) {
+			str.print("  jmi_kinsol_solve(jmi->dae_init_block_residuals["+i+"]);\n");
+		} else {
+			str.print("  jmi_kinsol_solve(jmi->dae_block_residuals["+i+"]);\n");
+		}	
+	}
+
+	public void SolvedScalarBlock.genBlock_C(int i, boolean inInitial, String indent, PrintStream str) {	
+			equations().get(0).genSolvedBlock_C(activeVariables().get(0),indent,str);
+	}
+
 	public void FAbstractEquation.genSolvedBlock_C(FVariable v, String indent, PrintStream str) {}
 	
 	public void FEquation.genSolvedBlock_C(FVariable v, String indent, PrintStream str) {

@@ -691,7 +691,7 @@ public class BiPGraph {
 
 		
 		// Collect all blocks that contain differentiated equations
-		for (EquationBlock eb : blt) {
+		for (AbstractEquationBlock eb : blt) {
 			ArrayList<FAbstractEquation> diffedEqns = eb.differentiatedEquations();
 			if (diffedEqns.size()>0) {
 				fc.log.info(" ********* Found block containing diffed equations ***********");
@@ -699,7 +699,7 @@ public class BiPGraph {
 		
 				// Step 1: Initialize, add all equations in blocks
 				// having differentiated equations
-				g.addAll(eb.unsolvedEquations());
+				g.addAll(eb.equations());
 				
 				// Step 2: Extract all active variables, i.e., highest order 
 				// derivatives for each variable
@@ -952,13 +952,17 @@ public class BiPGraph {
         Var v = null;
 		for (Stack<Eq> bl : components) {
 			EquationBlock b = new EquationBlock();
-			blt.add(b);
 			// TODO: handle the case of multiple scalar equations in
 			// one block
 			for (Eq bl_eqn : bl) {
 				v = bl_eqn.getMatching();
 				MatchingPair mp = new MatchingPair(bl_eqn.getEquation(),v.getVariable());
-				b.addUnsolvedMatchingPair(mp);
+				b.addMatchingPair(mp);
+			}
+			if (b.isSolvable()) {
+				blt.add(b.createSolvedEquationBlock());
+			} else {
+				blt.add(b);
 			}
 		}
 		return blt;
@@ -997,22 +1001,28 @@ public class BiPGraph {
         	if (!e.isVisited()) {
         	    components = new LinkedList<Stack<Eq>>();
         		tarjan(e);
-        		ArrayList<EquationBlock> odeBlocks = new ArrayList<EquationBlock>();
-        		ArrayList<EquationBlock> outputBlocks = new ArrayList<EquationBlock>();	
+        		ArrayList<AbstractEquationBlock> odeBlocks = new ArrayList<AbstractEquationBlock>();
+        		ArrayList<AbstractEquationBlock> outputBlocks = new ArrayList<AbstractEquationBlock>();	
 				for (Stack<Eq> bl : components) {
 					EquationBlock b = new EquationBlock();
-					blt.add(b);
 					// TODO: handle the case of multiple scalar equations in
 					// one block
 					for (Eq bl_eqn : bl) {
 						v = bl_eqn.getMatching();
 						MatchingPair mp = new MatchingPair(bl_eqn.getEquation(),v.getVariable());
-						b.addUnsolvedMatchingPair(mp);
+						b.addMatchingPair(mp);
 					}
-					if (e.getMatching().getVariable().isDerivativeVariable()) {
-						odeBlocks.add(b);
+					AbstractEquationBlock ab = null;
+					if (b.isSolvable()) {
+						ab = b.createSolvedEquationBlock();
 					} else {
-						outputBlocks.add(b);
+						ab = b;
+					}
+					blt.add(ab);
+					if (e.getMatching().getVariable().isDerivativeVariable()) {
+						odeBlocks.add(ab);
+					} else {
+						outputBlocks.add(ab);
 					}
 				}
 				if (odeBlocks.size()>0) {

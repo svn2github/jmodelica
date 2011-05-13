@@ -168,7 +168,7 @@ public class DiagnosticsGenerator {
 			if (fc.root().options.getBooleanOption("equation_sorting")) {
 				int ind = 0;
 				out.print("<h2>BLT for initialization system </h2>\n");
-				for (EquationBlock eb : fc.getDAEInitBLT()) {
+				for (AbstractEquationBlock eb : fc.getDAEInitBLT()) {
 					out.print("<pre>\n");
 					out.print("--- Block " + ind++ + "---\n");
 					out.print(eb.toString()+"\n");
@@ -176,7 +176,7 @@ public class DiagnosticsGenerator {
 				}
 				ind = 0;
 				out.print("<h2>BLT for DAE system </h2>\n");	
-				for (EquationBlock eb : fc.getDAEBLT()) {
+				for (AbstractEquationBlock eb : fc.getDAEBLT()) {
 					out.print("<pre>\n");
 					out.print("--- Block " + ind++ + "---\n");
 					out.print(eb.toString()+"\n");

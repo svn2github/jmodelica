@@ -3159,29 +3159,30 @@ end DuplicateVariables1;
 *******************************
 -------------------------------
 Solved block of 1 variables:
-Unknown variables:
-  x
+Computed variable:
+x
 Solution:
-  1
+1
 -------------------------------
 *******************************
 -------------------------------
 Solved block of 1 variables:
-Unknown variables:
-  y
+Computed variable:
+y
 Solution:
-  x + 3
+x + 3
 -------------------------------
 *******************************
 -------------------------------
 Solved block of 1 variables:
-Unknown variables:
-  z
+Computed variable:
+z
 Solution:
-  x - ( y )
+x - ( y )
 -------------------------------
 *******************************
 ===============================
+
 ")})));
 
     Real x, y, z;
@@ -3204,31 +3205,30 @@ Solution:
 *******************************
 -------------------------------
 Solved block of 1 variables:
-Unknown variables:
-  x
+Computed variable:
+x
 Solution:
-  1
+1
 -------------------------------
 *******************************
 -------------------------------
 Solved block of 1 variables:
-Unknown variables:
-  y
+Computed variable:
+y
 Solution:
-  ( x + 3 ) / (  - ( 1 ) )
+( x + 3 ) / ( - ( 1 ) )
 -------------------------------
 *******************************
 -------------------------------
 Solved block of 1 variables:
-Unknown variables:
-  z
+Computed variable:
+z
 Solution:
-  ( x - ( y ) ) / (  - ( 1 ) )
+( x - ( y ) ) / ( - ( 1 ) )
 -------------------------------
 *******************************
 ===============================
 ")})));
-
 
     Real x, y, z;
   equation
@@ -3250,26 +3250,26 @@ Solution:
 *******************************
 -------------------------------
 Solved block of 1 variables:
-Unknown variables:
-  x
+Computed variable:
+x
 Solution:
-  1
+1
 -------------------------------
 *******************************
 -------------------------------
 Solved block of 1 variables:
-Unknown variables:
-  y
+Computed variable:
+y
 Solution:
-  ( x + 3 ) / ( 2 )
+( x + 3 ) / ( 2 )
 -------------------------------
 *******************************
 -------------------------------
 Solved block of 1 variables:
-Unknown variables:
-  z
+Computed variable:
+z
 Solution:
-  ( x - ( y ) ) / ( x )
+( x - ( y ) ) / ( x )
 -------------------------------
 *******************************
 ===============================
@@ -3295,26 +3295,26 @@ Solution:
 *******************************
 -------------------------------
 Solved block of 1 variables:
-Unknown variables:
-  x
+Computed variable:
+x
 Solution:
-  1
+1
 -------------------------------
 *******************************
 -------------------------------
 Solved block of 1 variables:
-Unknown variables:
-  y
+Computed variable:
+y
 Solution:
-  ( x + 3 ) / ( ( 1 ) / ( 2 ) )
+( x + 3 ) / ( ( 1 ) / ( 2 ) )
 -------------------------------
 *******************************
 -------------------------------
 Solved block of 1 variables:
-Unknown variables:
-  z
+Computed variable:
+z
 Solution:
-  ( x - ( y ) ) / ( ( 1 ) / ( x ) )
+( x - ( y ) ) / ( ( 1 ) / ( x ) )
 -------------------------------
 *******************************
 ===============================
@@ -3340,26 +3340,26 @@ Solution:
 *******************************
 -------------------------------
 Solved block of 1 variables:
-Unknown variables:
-  x
+Computed variable:
+x
 Solution:
-  1
+1
 -------------------------------
 *******************************
 -------------------------------
 Solved block of 1 variables:
-Unknown variables:
-  y
+Computed variable:
+y
 Solution:
-  ( x + 3 ) / ( 1 - ( 3 ) )
+( x + 3 ) / ( 1 - ( 3 ) )
 -------------------------------
 *******************************
 -------------------------------
 Solved block of 1 variables:
-Unknown variables:
-  z
+Computed variable:
+z
 Solution:
-  ( x - ( y ) ) / ( 1 - ( x + 3 ) )
+( x - ( y ) ) / ( 1 - ( x + 3 ) )
 -------------------------------
 *******************************
 ===============================
@@ -3385,26 +3385,26 @@ Solution:
 *******************************
 -------------------------------
 Solved block of 1 variables:
-Unknown variables:
-  x
+Computed variable:
+x
 Solution:
-  1
+1
 -------------------------------
 *******************************
 -------------------------------
 Non-solved block of 1 variables:
 Unknown variables:
-  y
+y
 Equations:
-  ( 2 ) / ( y ) = x + 3
+( 2 ) / ( y ) = x + 3
 -------------------------------
 *******************************
 -------------------------------
 Non-solved block of 1 variables:
 Unknown variables:
-  z
+z
 Equations:
-  ( x ) / ( z ) = x - ( y )
+( x ) / ( z ) = x - ( y )
 -------------------------------
 *******************************
 ===============================
@@ -3431,26 +3431,26 @@ Equations:
 *******************************
 -------------------------------
 Solved block of 1 variables:
-Unknown variables:
-  x
+Computed variable:
+x
 Solution:
-  1
+1
 -------------------------------
 *******************************
 -------------------------------
 Solved block of 1 variables:
-Unknown variables:
-  y
+Computed variable:
+y
 Solution:
-  ( x + 3 ) / (  - ( 1 ) + 1 - ( 4 ) )
+( x + 3 ) / ( - ( 1 ) + 1 - ( 4 ) )
 -------------------------------
 *******************************
 -------------------------------
 Solved block of 1 variables:
-Unknown variables:
-  z
+Computed variable:
+z
 Solution:
-  ( x - ( y ) ) / (  - ( 1 ) + 1 + 5 )
+( x - ( y ) ) / ( - ( 1 ) + 1 + 5 )
 -------------------------------
 *******************************
 ===============================

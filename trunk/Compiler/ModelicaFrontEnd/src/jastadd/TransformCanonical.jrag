@@ -187,12 +187,12 @@ aspect TransformCanonical {
  		                System.out.println(str.toString()); 
  		        } 
 
-	public class BLT extends ArrayList<EquationBlock> {
+	public class BLT extends ArrayList<AbstractEquationBlock> {
 	
 		public ArrayList<Integer> unsolvedBlockSizes() {
 			ArrayList<Integer> blockSizes = new ArrayList<Integer>();
-			for (EquationBlock b : this) {
-				if (!b.isSolved()) {
+			for (AbstractEquationBlock b : this) {
+				if (!b.isSolvable()) {
 					blockSizes.add(new Integer(b.activeVariables().size()));
 				}		
 			}
@@ -202,7 +202,7 @@ aspect TransformCanonical {
 		public String toString() {
 			StringBuffer str = new StringBuffer();
 			str.append("-------------------------------\n");
-			for (EquationBlock eb : this) {
+			for (AbstractEquationBlock eb : this) {
 				str.append(eb.toString());
 				str.append("-------------------------------\n");
 			}
@@ -212,18 +212,18 @@ aspect TransformCanonical {
 	}
 
 	public class ODEBLT extends BLT {
-		ArrayList<ArrayList<EquationBlock>> odeBLT = 
-			new ArrayList<ArrayList<EquationBlock>>();
-		ArrayList<ArrayList<EquationBlock>> outputBLT = 
-			new ArrayList<ArrayList<EquationBlock>>();	
+		ArrayList<ArrayList<AbstractEquationBlock>> odeBLT = 
+			new ArrayList<ArrayList<AbstractEquationBlock>>();
+		ArrayList<ArrayList<AbstractEquationBlock>> outputBLT = 
+			new ArrayList<ArrayList<AbstractEquationBlock>>();	
 
 		public String toString() {
 			StringBuffer str = new StringBuffer();
 			str.append("========== ODE BLT ============\n");
 	     		str.append("*******************************\n");	
-				for (ArrayList<EquationBlock> l : odeBLT) {
+				for (ArrayList<AbstractEquationBlock> l : odeBLT) {
 					str.append("-------------------------------\n");
-					for (EquationBlock eb : l) {
+					for (AbstractEquationBlock eb : l) {
 						str.append(eb.toString());
 						str.append("-------------------------------\n");
 					}
@@ -231,9 +231,9 @@ aspect TransformCanonical {
 			    } 
 			str.append("========= OUTPUT BLT ==========\n");
 	     		str.append("*******************************\n");	
-				for (ArrayList<EquationBlock> l : outputBLT) {
+				for (ArrayList<AbstractEquationBlock> l : outputBLT) {
 					str.append("-------------------------------\n");
-					for (EquationBlock eb : l) {
+					for (AbstractEquationBlock eb : l) {
 						str.append(eb.toString());
 						str.append("-------------------------------\n");
 					}
@@ -245,6 +245,209 @@ aspect TransformCanonical {
 
 	}
 
+	/**
+	 * Abstract class for equation blocks resulting from the BLT transformation
+	 */
+	public abstract class AbstractEquationBlock {
+	
+		public abstract ArrayList<FAbstractEquation> equations();
+		
+		public abstract ArrayList<FVariable> activeVariables();
+		
+		public abstract boolean isSolvable();
+		
+		public ArrayList<FAbstractEquation> differentiatedEquations() {
+			ArrayList<FAbstractEquation> diffedEq = new ArrayList<FAbstractEquation>();
+			for (FAbstractEquation e : equations()) {
+				if (e.getMeIntegrated()!=null) {
+					diffedEq.add(e);
+				}
+			}
+			return diffedEq;
+		}
+		
+		
+		public abstract String toString();
+	
+	}
+
+	/**
+	 * EquationBlock is a general block that may contain one or more
+	 * solved or non-solved equations.
+	 */
+	public class EquationBlock extends AbstractEquationBlock {
+		private ArrayList<MatchingPair> matchingPairs = new ArrayList<MatchingPair>();
+				
+		public void addMatchingPair(MatchingPair m) {
+			matchingPairs.add(m);
+		}	
+		
+		public ArrayList<FVariable> activeVariables() {
+			ArrayList<FVariable> s = new ArrayList<FVariable>();
+			for (MatchingPair mp : matchingPairs) {
+				s.add(mp.getFVariable());
+			}
+			return s;
+		}		
+
+		public ArrayList<FAbstractEquation> equations() {
+			ArrayList<FAbstractEquation> s = new ArrayList<FAbstractEquation>();
+			for (MatchingPair mp : matchingPairs) {
+				s.add(mp.getEquation());
+			}
+			return s;
+		}
+		
+		public boolean isSolvable() {
+		    // TODO: extend to handle solvable non scalar blocks, e.g., linear blocks
+			return equations().size()==1 && equations().get(0).isSolved(activeVariables().get(0).name());
+		}
+		
+		public AbstractEquationBlock createSolvedEquationBlock() {
+			if (isSolvable()) {
+				return new SolvedScalarBlock(matchingPairs.get(0));
+			} else {
+				return null;
+			}
+		}
+												
+		public boolean containsDerivative() {
+			for (FVariable fv : activeVariables()) {
+				if (fv.isDerivativeVariable()) {
+					return true;
+				}
+			}
+			return false;
+		}				
+						
+		public String toString() {
+			StringBuffer str = new StringBuffer();
+			str.append("Non-solved block of " + activeVariables().size() + " variables:\n");
+			str.append("Unknown variables:\n");
+			for (FVariable fv : activeVariables()) {
+				str.append("  " + fv.name() + "\n");
+			}
+			str.append("Equations:\n");
+			for (FAbstractEquation feq : equations()) {
+				str.append("  " + feq.prettyPrint("") + "\n");			
+			}
+			return str.toString();
+		}
+	
+	}
+
+	/**
+	 * SolvedScalarBlock represents a scalar solved equation.
+	 */
+	public class SolvedScalarBlock extends AbstractEquationBlock {
+		private MatchingPair mp;
+		
+		SolvedScalarBlock(MatchingPair mp) {
+			this.mp = mp;
+		}
+		
+		public ArrayList<FAbstractEquation> equations() {
+			ArrayList<FAbstractEquation> s = new ArrayList<FAbstractEquation>();
+			s.add(mp.getEquation());
+			return s;
+		}
+		
+		public ArrayList<FVariable> activeVariables() {
+			ArrayList<FVariable> s = new ArrayList<FVariable>();
+			s.add(mp.getFVariable());
+			return s;
+		}
+		
+		public FExp solution() {
+			return mp.getEquation().solution(mp.getFVariable().name());
+		}
+
+		public boolean isSolvable() {
+			return true;
+		}
+
+		public String toString() {
+			StringBuffer str = new StringBuffer();
+			str.append("Solved block of " + activeVariables().size() + " variables:\n"); 
+			str.append("Computed variable:\n");
+			for (FVariable fv : activeVariables()) {
+				str.append("  " + fv.name() + "\n");
+			}
+			str.append("Solution:\n");
+			str.append("  " + solution().prettyPrint("") + "\n");
+			return str.toString();
+		}
+				
+	}
+
+	/**
+	 * TearedEquationBlock represents an equation block resulting from tearing.
+	 */
+	public class TearedEquationBlock extends AbstractEquationBlock {
+		private ArrayList<MatchingPair> unsolvedPairs = new ArrayList<MatchingPair>();
+		private ArrayList<MatchingPair> solvedPairs = new ArrayList<MatchingPair>();
+		
+		public TearedEquationBlock() {
+		}
+		
+		public void addSolvedMatchingPair(MatchingPair m) {
+			solvedPairs.add(m);
+		}	
+
+		public void addUnsolvedMatchingPair(MatchingPair m) {
+			unsolvedPairs.add(m);
+		}	
+
+		public ArrayList<FAbstractEquation> unsolvedEquations() {
+			ArrayList<FAbstractEquation> s = new ArrayList<FAbstractEquation>();
+			for (MatchingPair mp : unsolvedPairs) {
+				s.add(mp.getEquation());
+			}
+			return s;
+		}
+
+		public ArrayList<FAbstractEquation> solvedEquations() {
+			ArrayList<FAbstractEquation> s = new ArrayList<FAbstractEquation>();
+			for (MatchingPair mp : solvedPairs) {
+				s.add(mp.getEquation());
+			}
+			return s;
+		}
+
+		public ArrayList<FAbstractEquation> equations() {
+			ArrayList<FAbstractEquation> s = new ArrayList<FAbstractEquation>();
+			s.addAll(solvedEquations());
+			s.addAll(unsolvedEquations());
+			return s;
+		}
+
+		public ArrayList<MatchingPair> getSolvedPairs() {
+			return solvedPairs;
+		}
+
+		public ArrayList<MatchingPair> getUnsolvedPairs() {
+			return unsolvedPairs;
+		}
+		
+		public ArrayList<FVariable> activeVariables() {
+			ArrayList<FVariable> s = new ArrayList<FVariable>();
+			for (MatchingPair mp : unsolvedPairs) {
+				s.add(mp.getFVariable());
+			}
+			return s;
+		}		
+			
+		public boolean isSolvable() {
+			return false;
+		}			
+		
+		public String toString() {
+			return "Teared block";	
+		}
+	
+	}
+
+/*
 	public class EquationBlock {
 		private ArrayList<MatchingPair> unsolvedPairs = new ArrayList<MatchingPair>();
 		private ArrayList<MatchingPair> solvedPairs = new ArrayList<MatchingPair>();
@@ -338,7 +541,7 @@ aspect TransformCanonical {
 		}
 		
 	}
-
+*/
     public class MatchingPair {
     	private FAbstractEquation eqn;
     	private FVariable fv;
@@ -802,6 +1005,7 @@ aspect TransformCanonical {
 	}	
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	public void FClass.computeTearings() {
+	/*
 		System.out.println(" ----======************ Tearing started ************======----");		
 			BiPGraph graph = new BiPGraph(name(),"");
 			graph.addVariables(this, BiPGraph.DERIVATIVE_VARIABLES | BiPGraph.ALGEBRAIC_VARIABLES);
@@ -885,6 +1089,7 @@ aspect TransformCanonical {
 				tearBLT.add(eb);
 			}
 			daeBLT = tearBLT;
+			*/
 	}	
 	
 	
