@@ -314,13 +314,13 @@ aspect TransformCanonical {
 	}
 
 	/**
-	 * TearedEquationBlock represents an equation block resulting from tearing.
+	 * TornEquationBlock represents an equation block resulting from tearing.
 	 */
-	public class TearedEquationBlock extends AbstractEquationBlock {
+	public class TornEquationBlock extends AbstractEquationBlock {
 		private ArrayList<MatchingPair> unsolvedPairs = new ArrayList<MatchingPair>();
 		private ArrayList<MatchingPair> solvedPairs = new ArrayList<MatchingPair>();
 		
-		public TearedEquationBlock() {
+		public TornEquationBlock() {
 		}
 		
 		public void addSolvedMatchingPair(MatchingPair m) {
@@ -375,7 +375,7 @@ aspect TransformCanonical {
 		}			
 		
 		public String toString() {
-			return "Teared block";	
+			return "Torn block";	
 		}
 	
 	}

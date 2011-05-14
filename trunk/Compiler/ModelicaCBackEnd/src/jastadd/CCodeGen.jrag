@@ -1175,7 +1175,7 @@ aspect CCodeGen {
 		str.print("  return 0;\n}\n\n");
 	}
 
-	public void TearedEquationBlock.genBlockResidualFunction_C(int block_counter, boolean inInit, String indent, PrintStream str) {
+	public void TornEquationBlock.genBlockResidualFunction_C(int block_counter, boolean inInit, String indent, PrintStream str) {
 		str.print("static int dae_" + (inInit? "init_": "") + "block_"+block_counter+"(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {\n");
 		str.print("  jmi_real_t** res = &residual;\n");	
 		str.print("  if (init==JMI_BLOCK_INITIALIZE) {\n");
@@ -1217,7 +1217,7 @@ aspect CCodeGen {
 		}	
 	}
 
-	public void TearedEquationBlock.genBlock_C(int i, boolean inInitial, String indent, PrintStream str) {	
+	public void TornEquationBlock.genBlock_C(int i, boolean inInitial, String indent, PrintStream str) {	
 		if (inInitial) {
 			str.print("  jmi_kinsol_solve(jmi->dae_init_block_residuals["+i+"]);\n");
 		} else {
