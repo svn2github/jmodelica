@@ -851,6 +851,26 @@ public class BiPGraph {
 		}
 		return l;
 	}
+	
+	public ArrayList<Eq> getSolvableUnmatchedEquations() {
+		ArrayList<Eq> l = new ArrayList<Eq>();
+		for (Eq e : equations) {
+			if (e.getSolvableMatching()==null) {
+				l.add(e);
+			}
+		}
+		return l;
+	}
+
+	public ArrayList<Var> getSolvableUnmatchedVariables() {
+		ArrayList<Var> l = new ArrayList<Var>();
+		for (Var v : variableMap.values()) {
+			if (v.getSolvableMatching()==null) {
+				l.add(v);
+			}
+		}
+		return l;
+	}
 
 	public ArrayList<Eq> getMatchedEquations() {
 		ArrayList<Eq> l = new ArrayList<Eq>();
@@ -872,59 +892,58 @@ public class BiPGraph {
 		return l;
 	}
 	
-	public void removeRes(Eq res){
-		Var match = res.getMatching();
-		Var solvableMatch = res.getSolvableMatching();
-		if(match!=null){
-			match.setMatching(null);
-		}
-		if(solvableMatch!=null){
-			solvableMatch.setSolvableMatching(null);
-		}
+	public ArrayList<Eq> removeTearingPair(Eq res, Var tear, boolean unmatch){
+		ArrayList<Eq> alteredEquations = new ArrayList<Eq>();
 		equations.remove(res);
 		equationMap.remove(res.getName());
 		removeFromEquationIndexMap(res.getEquation(),res);
-	}
-	
-	public void reinsertRes(Eq res){
-		equations.add(res);
-		equationMap.put(res.getName(),res);
-		insertIntoEquationIndexMap(res.getEquation(),res);
-	}
-	
-	public ArrayList<Eq> removeTear(Var tear){
-		ArrayList<Eq> alteredEquations = new ArrayList<Eq>();
-		Eq match = tear.getMatching();
-		Eq solvableMatch = tear.getSolvableMatching();
-		if(match!=null){
-			match.setMatching(null);
+		variableMap.remove(tear.getName());	
+		if(unmatch){
+			// Set the matching to null for the newly unmatched equation and variable
+			// (these were matched with tear and res before)
+			res.getMatching().setMatching(null);
+			res.getSolvableMatching().setSolvableMatching(null);
+			tear.getMatching().setMatching(null);
+			tear.getSolvableMatching().setSolvableMatching(null);
 		}
-		if(solvableMatch!=null){
-			solvableMatch.setSolvableMatching(null);
-		}
-		for (Eq e : returnEquations()) {
+		// Remove tear from the remaining equations
+		for (Eq e : getEquations()) {
 			if(e.getVariables().remove(tear)){
 				alteredEquations.add(e);
 				e.getSolvableVariables().remove(tear);
 			}
 		}
-		variableMap.remove(tear.getName());	
 		return alteredEquations;
 	}
 	
-	public void reinsertTear(Var tear, ArrayList<Eq> eqn){
+	public void reinsertTearingPair(Eq res, Var tear, ArrayList<Eq> alteredEquations, boolean match){
 		variableMap.put(tear.getName(),tear);
-		for(Eq e: eqn){
+		equations.add(res);
+		equationMap.put(res.getName(),res);
+		insertIntoEquationIndexMap(res.getEquation(),res);
+		for(Eq e: alteredEquations){
 			e.addVariable(tear);
 			if(e.getEquation().isSolved(tear.getName())){
 				e.addSolvableVariable(tear);
 			}
 		}
+		if(match){
+			// If an augmentPath was found, the matchings has been altered and a new one must be found.
+			tear.setMatching(null);
+			tear.setSolvableMatching(null);
+			res.setMatching(null);
+			res.setSolvableMatching(null);
+			lightReset();
+			solvableAugmentPath(res, new ArrayList<Eq>(), new ArrayList<Var>());
+		} else {
+			// Set matching as it was before the removal of the tearing pair. 
+			res.getMatching().setMatching(res);
+			res.getSolvableMatching().setSolvableMatching(res);
+			tear.getMatching().setMatching(tear);
+			tear.getSolvableMatching().setSolvableMatching(tear);
+		}
 	}
 	
-	public ArrayList<Eq> returnEquations(){
-		return equations;
-	}
 	
 	private int index = 0;
     private Stack<Eq> S;
@@ -1203,6 +1222,35 @@ public class BiPGraph {
 
 		str.append("Unmatched variables: {");
 		for (Var v : getUnmatchedVariables()) {
+			str.append(v.getName() + " ");
+		}
+		str.append("}\n");
+
+		str.append("----------------------------------------\n");
+		return str.toString();
+	}
+	
+	public String printSolvableMatching() {
+		StringBuffer str = new StringBuffer();
+		str.append("----------------------------------------\n");
+		str.append("BiPGraph " + getName() + " SolvableMatching:\n");
+		for (Eq e : getEquations()) {
+			if (e.getSolvableMatching()!=null) {
+				str.append(e.getName());
+//				str.append(e.getName() + "(" + e.getDescription() + ")");
+				str.append(" : ");
+				str.append(e.getSolvableMatching().getName());
+				str.append("\n");
+			}
+		}		
+		str.append("solvableUnmatched equations: {");
+		for (Eq e : getSolvableUnmatchedEquations()) {
+			str.append(e.getName() + " ");
+		}
+		str.append("}\n");
+
+		str.append("solvableUnmatched variables: {");
+		for (Var v : getSolvableUnmatchedVariables()) {
 			str.append(v.getName() + " ");
 		}
 		str.append("}\n");
