@@ -111,18 +111,14 @@ public class AWTIconDrawer implements GraphicsInterface {
 	 * @param outlineIcon setting outlineIcon to true scale the bufferImage object to fit IDE outline size.
 	 */
 
-	public void createBufferedImage(Icon icon) {
-		
-//		Lägger till en konstant till imageWidth och imageHeight för att ikonen inte
-//		ska beskäras. Göra om till en konstant och placera i IconConstants.
-//		Beror den på någon parameter? nej endast 1 pixel behövs för att bilden inte ska 
-//		beskäras oavsett ikonoutlinesize 
+	/** Creates an object for making BufferedImages from a ClassIcon.
+	 * @param  icon ClassIcon to make a BufferedImage of. 
+	 * @param iconView setting iconView to true generates an icon representation of the component. 
+	 * Setting iconView to false generates a diagram representation of the component.   
+	 * @param outlineIcon setting outlineIcon to true scale the bufferImage object to fit IDE outline size.
+	 */
 
-		
-//		float imageWidth = IconConstants.IMAGE_SIZE;
-//		float imageHeight = IconConstants.IMAGE_SIZE;
-//		float iconWidth;
-//		float iconHeight;
+	public void createBufferedImage(Icon icon) {
 		
 		int imageWidth = IconConstants.IMAGE_SIZE;
 		int imageHeight = IconConstants.IMAGE_SIZE;
@@ -132,18 +128,10 @@ public class AWTIconDrawer implements GraphicsInterface {
 		
 		iconExtent = icon.getExtent();
 		if(iconExtent.equals(Extent.NO_EXTENT)) {
-/* 
- * 	Gör return här och returnera en dummybild i SWTImage om aman vill ha en dummybild
-  	istället för en tom ikon för ikoner som inte har något layer. 			
- */
 //			return;
 			iconWidth = IconConstants.DEFAULT_ICON_WIDTH + IconConstants.COMPENSATE;
 			iconHeight = IconConstants.DEFAULT_ICON_HEIGHT + IconConstants.COMPENSATE;
 		} else {
-//			Extent iconExtent = icon.getBounds();
-//			iconExtent = icon.getBounds(iconExtent);
-//			iconWidth = (float)iconExtent.getWidth()+ IconConstants.COMPENSATE;
-//    		iconHeight = (float)iconExtent.getHeight()+ IconConstants.COMPENSATE;
     		iconExtent = icon.getBounds(iconExtent);
     		iconWidth = iconExtent.getWidth()+ IconConstants.COMPENSATE;
     		iconHeight = iconExtent.getHeight()+ IconConstants.COMPENSATE;
@@ -153,17 +141,12 @@ public class AWTIconDrawer implements GraphicsInterface {
 	    		imageWidth=IconConstants.OUTLINE_IMAGE_SIZE-1;
 	    		imageHeight=IconConstants.OUTLINE_IMAGE_SIZE-1;	
 		}
-//		float scaleWidth = (float)(1.0f * imageWidth/(iconWidth + IconConstants.SCALE));
-//		float scaleHeight = (float)(1.0f * imageHeight/(iconHeight + IconConstants.SCALE));
 		
+		double width = (imageWidth*1.0)/2;
+		double height = (imageHeight*1.0)/2;
 		
-//		double scaleWidth = imageWidth/iconWidth;
-//		double scaleHeight = imageHeight/iconHeight;
-//		
-//		scaleWidth *= 0.97;
-//		scaleHeight *= 0.97;
-		
-
+		double scaleWidth = imageWidth/(iconWidth+1);
+		double scaleHeight = imageHeight/(iconHeight+1);
 		
 	    image = new BufferedImage(
         		imageWidth, 
@@ -186,14 +169,12 @@ public class AWTIconDrawer implements GraphicsInterface {
         AffineTransform transform = new AffineTransform(); 
         
         transform.translate(
-        		image.getWidth()/2,
-        		image.getHeight()/2		
+        		width,
+        		height		
         );
-        transform.scale(
-        		0.97*(imageWidth/(iconWidth+1)), 
-        		0.97*(imageHeight/(iconHeight+1))
-        );
-//        transform.scale(scaleWidth, scaleHeight);
+
+
+       transform.scale(scaleWidth, scaleHeight);
         g.transform(transform);
         
         icon.draw(this);
@@ -705,18 +686,6 @@ public class AWTIconDrawer implements GraphicsInterface {
 			//throw new FailedConstructionException("SWTImage");
 		}
 		
-//		try { 
-//	    	ImageIO.write(
-//	    			image, 
-//	    			"png", 
-//	    			new File(
-//	    					"C:/tmp/images/" + this.hashCode() + ".png"
-//	    			)
-//	    	);
-//		} catch (IOException e) {
-//			System.out.println(e);
-//		}
-		
 	    if (image.getColorModel() instanceof DirectColorModel) {
 	        DirectColorModel colorModel
 	                = (DirectColorModel) image.getColorModel();
@@ -728,10 +697,6 @@ public class AWTIconDrawer implements GraphicsInterface {
 	        		IconConstants.OUTLINE_IMAGE_SIZE, colorModel.getPixelSize(),
 	                palette);
 	   
-	    	
-//	        int transparentPixel = palette.getPixel(new RGB(0, 200, 0));
-//	        imagedata.transparentPixel = transparentPixel; 
-	        // lämna tom kant nere och till vänster
 	        for (int y = 0; y < imagedata.height; y++) {
 	        	int x = 0;
 	        	imagedata.setAlpha(x, y, 0);    
@@ -741,8 +706,6 @@ public class AWTIconDrawer implements GraphicsInterface {
         		int y = imagedata.height-1;
         		imagedata.setAlpha(x, y, 0);
         	}
-	    	 
-	        
 	        WritableRaster raster = image.getRaster();
 	        int[] pixelArray = new int[3];
 	        for (int y = 0; y < image.getHeight(); y++) {
@@ -753,7 +716,6 @@ public class AWTIconDrawer implements GraphicsInterface {
 	                        pixelArray[1], 
 	                        pixelArray[2]
 	                ));
-	                //lämna tom kant nere och till vänster
 	                imagedata.setPixel(x+1, y, pixel);
 	                imagedata.setAlpha(x+1, y, 255);
 	            }
