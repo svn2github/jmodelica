@@ -236,7 +236,7 @@ public class IconImage {
     		gi.saveTransformation();
     		//AffineTransform oldTransform = g.getTransform();
     		if (!compIcon.getLayer().equals(Layer.NO_LAYER)) {
-    			gi.setTransformation(comp);
+    			gi.setTransformation(comp, this.icon.getLayer().getCoordinateSystem().getExtent());
     		}
 			drawIcon(compIcon);
 			gi.resetTransformation();
