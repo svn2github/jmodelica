@@ -20,7 +20,7 @@ public class Icon {
 	
 	private String componentName;
 	private String className;
-	private final Layer layer;
+	private Layer layer;
 	private final ArrayList<Icon> superclasses;
 	private final ArrayList<Component> subcomponents;
 	private final Context context;
@@ -48,10 +48,9 @@ public class Icon {
 		this.superclasses = null;
 		this.subcomponents = null; 
 	}
-	
 	public void draw(GraphicsInterface gi) {
 		
-		drawClass(gi);
+		drawClass(gi);	
 		drawComponents(gi);
 	}
 
@@ -89,6 +88,7 @@ public class Icon {
 		// Rita superklassernas komponenter.
     	for (Icon superIcon : getSuperclasses()) {
     		superIcon.drawComponents(gi);
+
     	}
 
     	// Hitta komponenter. 
@@ -97,7 +97,8 @@ public class Icon {
     	for (Component comp : getSubcomponents()) {
     		Icon compIcon = comp.getIcon();
     		gi.saveTransformation();
-    		gi.setTransformation(comp);
+    		Extent extent = this.layer.getCoordinateSystem().getExtent();
+    		gi.setTransformation(comp, extent);
 			compIcon.drawClass(gi);
 			compIcon.drawComponents(gi);
 			gi.resetTransformation();
@@ -129,9 +130,14 @@ public class Icon {
 	}
 
 	public void addSubcomponent(Component component) {
-		subcomponents.add(component);
+		if(subcomponents.isEmpty() && layer.equals(Layer.NO_LAYER)) {
+			if(subcomponents.add(component)) {
+				layer = new Layer(CoordinateSystem.DEFAULT_COORDINATE_SYSTEM);
+			} 
+		} else {
+			subcomponents.add(component);
+		}
 	}
-	
 	public ArrayList<Icon> getSuperclasses() {
 		return superclasses;
 	}
@@ -173,7 +179,6 @@ public class Icon {
 	public Extent getBounds(Extent bounds) {
 		if (!layer.equals(Layer.NO_LAYER)) {
 			ArrayList<GraphicItem> items = layer.getGraphics();
-//			System.out.println(this.className + " " + items.size());
 			for (GraphicItem item : items) {
 				if (!(item instanceof Text)) {
 					bounds = bounds.contain(item.getBounds());
@@ -192,7 +197,6 @@ public class Icon {
 		for (Icon icon : superclasses) {
 			bounds = icon.getBounds(bounds);
 		}
-//		System.out.println(this.className + " extentBounds: " + bounds.toString() );
 		return bounds;
 	}
 	
