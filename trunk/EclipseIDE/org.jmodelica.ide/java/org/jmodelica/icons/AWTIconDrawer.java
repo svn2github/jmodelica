@@ -42,9 +42,9 @@ import org.eclipse.swt.widgets.Display;
 import org.jmodelica.icons.exceptions.CreateShapeFailedException;
 import org.jmodelica.icons.exceptions.FailedConstructionException;
 import org.jmodelica.icons.mls.Component;
-import org.jmodelica.icons.mls.CoordinateSystem;
 import org.jmodelica.icons.mls.Icon;
 import org.jmodelica.icons.mls.Placement;
+import org.jmodelica.icons.mls.Transformation;
 import org.jmodelica.icons.mls.Types;
 import org.jmodelica.icons.mls.Types.FillPattern;
 import org.jmodelica.icons.mls.Types.LinePattern;
@@ -82,6 +82,7 @@ public class AWTIconDrawer implements GraphicsInterface {
 	private BufferedImage image;
 	
 	private Graphics2D g;
+	private AffineTransform transform;
 	
 	private Stack<AffineTransform> savedTransformations;
 	
@@ -96,7 +97,6 @@ public class AWTIconDrawer implements GraphicsInterface {
 	public AWTIconDrawer(Icon icon) {
 		savedTransformations = new Stack<AffineTransform>();
 		outline = true;
-		//createBufferedImage(icon, 0, 0);
 		createBufferedImage(icon);
 	}
 	public AWTIconDrawer(Icon icon, boolean outline) {
@@ -110,99 +110,73 @@ public class AWTIconDrawer implements GraphicsInterface {
 	 * Setting iconView to false generates a diagram representation of the component.   
 	 * @param outlineIcon setting outlineIcon to true scale the bufferImage object to fit IDE outline size.
 	 */
-/*
-	public void createBufferedImage(Icon icon, int preferredWidth, int preferredHeight) {
-		
-		
-	    float finalImageWidth;
-	    float finalImageHeight;
-//		skulle kunna kolla här om icon.getExtent() returnerar NO_EXTENT och i så fall inte skapa någon bild.	    
-	    float imageWidth;
-	    float imageHeight;
-	    
-	    Extent iconBounds = icon.getBounds(icon.getExtent());
-	    if(iconBounds.equals(Extent.NO_EXTENT)) {
-	    	return;
-	    } else {
-	    
-	    	imageWidth = (float)iconBounds.getWidth() + 10;
-	    	imageHeight = (float)iconBounds.getHeight() + 20;
-	    }
-		if(outline)
-	    {	
-	    	finalImageWidth=IconConstants.OUTLINE_IMAGE_SIZE-1;
-	    		finalImageHeight=IconConstants.OUTLINE_IMAGE_SIZE-1;
-		} else {
-			
-			finalImageWidth = preferredWidth-1;
-			finalImageHeight = preferredHeight-1;	
-		}
-	    float scaleWidth = (float)(1.0f * finalImageWidth/imageWidth);
-		float scaleHeight = (float)(1.0f * finalImageHeight/imageHeight);
-		
-		
-	    image = new BufferedImage(
-        		(int)finalImageWidth, 
-        		(int)finalImageHeight, 
-        		BufferedImage.TYPE_INT_RGB
-        );
-         
-        // Create a graphics context on the buffered image
-        g = image.createGraphics();
-        
-        setBackgroundColor(Color.WHITE);
-        
-        // Clear the image.
-        g.clearRect(0, 0, image.getWidth(), image.getHeight());
-        
-        AffineTransform transform = new AffineTransform(); 
-        
-        transform.translate(
-        		image.getWidth()/2,		
-        		image.getHeight()/2		
-        );
-        
-        transform.scale(scaleWidth, scaleHeight);
-        
-        g.transform(transform);
-    }
-*/    
+
 	public void createBufferedImage(Icon icon) {
 		
-		float imageWidth = IconConstants.IMAGE_SIZE-1;
-		float imageHeight = IconConstants.IMAGE_SIZE-1;
-		float iconWidth;
-		float iconHeight;
+//		Lägger till en konstant till imageWidth och imageHeight för att ikonen inte
+//		ska beskäras. Göra om till en konstant och placera i IconConstants.
+//		Beror den på någon parameter? nej endast 1 pixel behövs för att bilden inte ska 
+//		beskäras oavsett ikonoutlinesize 
+
+		
+//		float imageWidth = IconConstants.IMAGE_SIZE;
+//		float imageHeight = IconConstants.IMAGE_SIZE;
+//		float iconWidth;
+//		float iconHeight;
+		
+		int imageWidth = IconConstants.IMAGE_SIZE;
+		int imageHeight = IconConstants.IMAGE_SIZE;
+		double iconWidth;
+		double iconHeight;
+		
 		
 		iconExtent = icon.getExtent();
-		if (iconExtent.equals(Extent.NO_EXTENT)) {
+		if(iconExtent.equals(Extent.NO_EXTENT)) {
 /* 
  * 	Gör return här och returnera en dummybild i SWTImage om aman vill ha en dummybild
   	istället för en tom ikon för ikoner som inte har något layer. 			
  */
-			//return;
-			iconWidth = IconConstants.DEFAULT_ICON_WIDTH;
-			iconHeight = IconConstants.DEFAULT_ICON_HEIGHT;
+//			return;
+			iconWidth = IconConstants.DEFAULT_ICON_WIDTH + IconConstants.COMPENSATE;
+			iconHeight = IconConstants.DEFAULT_ICON_HEIGHT + IconConstants.COMPENSATE;
 		} else {
-			iconExtent = icon.getBounds(iconExtent); 
-			iconWidth = (float)iconExtent.getWidth() + 10;
-    		iconHeight = (float)iconExtent.getHeight() + 10;
+//			Extent iconExtent = icon.getBounds();
+//			iconExtent = icon.getBounds(iconExtent);
+//			iconWidth = (float)iconExtent.getWidth()+ IconConstants.COMPENSATE;
+//    		iconHeight = (float)iconExtent.getHeight()+ IconConstants.COMPENSATE;
+    		iconExtent = icon.getBounds(iconExtent);
+    		iconWidth = iconExtent.getWidth()+ IconConstants.COMPENSATE;
+    		iconHeight = iconExtent.getHeight()+ IconConstants.COMPENSATE;
     		
 		}
 		if(outline) {
-    		imageWidth=IconConstants.OUTLINE_IMAGE_SIZE-1;
-    		imageHeight=IconConstants.OUTLINE_IMAGE_SIZE-1;	
-    	}
-		float scaleWidth = (float)(1.0f * imageWidth/iconWidth);
-		float scaleHeight = (float)(1.0f * imageHeight/iconHeight);
+	    		imageWidth=IconConstants.OUTLINE_IMAGE_SIZE-1;
+	    		imageHeight=IconConstants.OUTLINE_IMAGE_SIZE-1;	
+		}
+//		float scaleWidth = (float)(1.0f * imageWidth/(iconWidth + IconConstants.SCALE));
+//		float scaleHeight = (float)(1.0f * imageHeight/(iconHeight + IconConstants.SCALE));
+		
+		
+//		double scaleWidth = imageWidth/iconWidth;
+//		double scaleHeight = imageHeight/iconHeight;
+//		
+//		scaleWidth *= 0.97;
+//		scaleHeight *= 0.97;
+		
+
+		
 	    image = new BufferedImage(
-        		(int)imageWidth, 
-        		(int)imageHeight, 
+        		imageWidth, 
+        		imageHeight, 
         		BufferedImage.TYPE_INT_RGB
         );
          
         // Create a graphics context on the buffered image
         g = image.createGraphics();
+//        g.setRenderingHint(
+//        		RenderingHints.KEY_ANTIALIASING,
+//				RenderingHints.VALUE_ANTIALIAS_ON
+//        );
         
         setBackgroundColor(Color.WHITE);
         
@@ -233,12 +207,27 @@ public class AWTIconDrawer implements GraphicsInterface {
 		return image;
 	}
 	
-	private double getCurrentScaleFactor() {
-		return Math.abs(Math.min(
-				g.getTransform().getScaleX(), 
-				g.getTransform().getScaleY()
-		));
+	private double getAvgCurrentScaleFactor() {
+		return (
+				Math.abs(g.getTransform().getScaleX()) +
+				Math.abs(g.getTransform().getScaleX())
+		)/2.0;
 	}
+	
+	private double getMinCurrentScaleFactor() {
+		return Math.min(
+				Math.abs(g.getTransform().getScaleX()), 
+				Math.abs(g.getTransform().getScaleY())
+		);
+	}
+	
+	private double getMaxCurrentScaleFactor() {
+		return Math.max(
+				Math.abs(g.getTransform().getScaleX()), 
+				Math.abs(g.getTransform().getScaleY())
+		);
+	}
+
 	
 	/**
 	 * Draws the specified Text primitive in this object's Graphics2D
@@ -287,7 +276,7 @@ public class AWTIconDrawer implements GraphicsInterface {
 		}
 		
 		// Check if the text is large enough to be drawn.
-		double currentScaleFactor = getCurrentScaleFactor();
+		double currentScaleFactor = getMinCurrentScaleFactor();
 		double actualFontSize = currentScaleFactor*(double)(g.getFont().getSize());
 		boolean largeEnough = actualFontSize >= MINIMUM_FONT_SIZE;
 		
@@ -511,56 +500,37 @@ public class AWTIconDrawer implements GraphicsInterface {
 	 * specification.
 	 * @param component
 	 */
-	public void setTransformation(Component comp)
-	{	
-		Placement placement = comp.getPlacement();
-		Icon icon = comp.getIcon();
+	public void setTransformation(Component comp, Extent enclosingClassExtent) {	
+		
 		AffineTransform transform = g.getTransform();
 		
-		Extent iconTransExtent = placement.getTransformation().getExtent();
-		CoordinateSystem coordinateSystem = icon.getLayer().getCoordinateSystem();
-		if (coordinateSystem == null)
-			return;
+		Transformation compTransformation = comp.getPlacement().getTransformation();
+		Extent transformationExtent = compTransformation.getExtent();
+		Extent componentExtent = comp.getIcon().getLayer().getCoordinateSystem().getExtent();
 		
-		Extent iconCordExtent = coordinateSystem.getExtent(); // TODO får Nullpointer här för instansträdet.
+		double originX = 
+						compTransformation.getOrigin().getX() + 
+						transformationExtent.getMiddle().getX() +
+						enclosingClassExtent.getMiddle().getX(); 
+						
 		
+		double originY = 
+						compTransformation.getOrigin().getY() + 
+						transformationExtent.getMiddle().getY() +
+						enclosingClassExtent.getMiddle().getY(); 
 		
-		//System.out.println("Sätter transformation för " + icon.getClassName());
-		//System.out.println("iconTransExtent = " + iconTransExtent);
-		//System.out.println("iconCordExtent = " + iconCordExtent);
-		
-		double iconTransExtHeight = iconTransExtent.getHeight();
-		double iconTransExtWidth = iconTransExtent.getWidth();
-			
-		double iconCordExtHeight = iconCordExtent.getHeight();	
-		double iconCordExtWidth = iconCordExtent.getWidth();
-	
-		//System.out.println("Skalar bredd med faktor = " + iconTransExtWidth/iconCordExtWidth);
-		//System.out.println("Skalar höjd med faktor = " + iconTransExtHeight/iconCordExtHeight);
-		
-		double originX = placement.getTransformation().getOrigin().getX() + iconTransExtent.getMiddle().getX(); 
-		double originY = placement.getTransformation().getOrigin().getY() + iconTransExtent.getMiddle().getY();	
-		
-
 		transform.translate(originX, -originY);
-		// transform flipping
-		//horizontally
-		if(iconTransExtent.getP2().getX() < iconTransExtent.getP1().getX())
-		{
-			
+		
+		if(transformationExtent.getP2().getX() < transformationExtent.getP1().getX()) {
 			transform.scale(-1.0, 1.0);
-			
 		}
-		//vertically
-		if(iconTransExtent.getP2().getY() < iconTransExtent.getP1().getY())
-		{
-			
+		if(transformationExtent.getP2().getY() < transformationExtent.getP1().getY()) {
 			transform.scale(1.0, -1.0);
 		}
+		transform.scale(transformationExtent.getWidth()/componentExtent.getWidth(), 
+				transformationExtent.getHeight()/componentExtent.getHeight());
 		
-		transform.scale(iconTransExtWidth/iconCordExtWidth, iconTransExtHeight/iconCordExtHeight);
-		// invert rotation to compensate java 
-		transform.rotate(-placement.getTransformation().getRotation() * Math.PI/180);
+		transform.rotate(-compTransformation.getRotation() * Math.PI/180);
 		g.setTransform(transform);
 	}
 	public void saveTransformation() {
@@ -759,25 +729,33 @@ public class AWTIconDrawer implements GraphicsInterface {
 	                palette);
 	   
 	    	
-	        
-	        
+//	        int transparentPixel = palette.getPixel(new RGB(0, 200, 0));
+//	        imagedata.transparentPixel = transparentPixel; 
+	        // lämna tom kant nere och till vänster
 	        for (int y = 0; y < imagedata.height; y++) {
-	            for (int x = 0; x < imagedata.width; x++) {
-	                int pixel = palette.getPixel(new RGB(255, 255, 255));
-	                //lämna tom kant nere och till vänster
-	                imagedata.setPixel(x, y, pixel);
-	            }
+	        	int x = 0;
+	        	imagedata.setAlpha(x, y, 0);    
 	        }
-	      
+	         
+        	for (int x = 0; x < imagedata.width; x++) {
+        		int y = imagedata.height-1;
+        		imagedata.setAlpha(x, y, 0);
+        	}
+	    	 
+	        
 	        WritableRaster raster = image.getRaster();
 	        int[] pixelArray = new int[3];
 	        for (int y = 0; y < image.getHeight(); y++) {
 	            for (int x = 0; x < image.getWidth(); x++) {
 	                raster.getPixel(x, y, pixelArray);
-	                int pixel = palette.getPixel(new RGB(pixelArray[0],
-	                        pixelArray[1], pixelArray[2]));
+	                int pixel = palette.getPixel(new RGB(
+	                		pixelArray[0],
+	                        pixelArray[1], 
+	                        pixelArray[2]
+	                ));
 	                //lämna tom kant nere och till vänster
 	                imagedata.setPixel(x+1, y, pixel);
+	                imagedata.setAlpha(x+1, y, 255);
 	            }
 	        }
 	    }
@@ -894,7 +872,7 @@ public class AWTIconDrawer implements GraphicsInterface {
 		}
 	}
 	public Stroke getLineStroke(LinePattern linepattern, double thicknessInMM) {
-		double compensatedThicknessInMM = thicknessInMM/getCurrentScaleFactor();
+		double compensatedThicknessInMM = thicknessInMM/getMaxCurrentScaleFactor();
 		float thicknessInPixles = (float)(compensatedThicknessInMM*IconConstants.PIXLES_PER_MM);
 		return new BasicStroke(thicknessInPixles, BasicStroke.CAP_BUTT,
 				BasicStroke.JOIN_MITER, 10.0f, linepattern.getDash(), 0.0f);
