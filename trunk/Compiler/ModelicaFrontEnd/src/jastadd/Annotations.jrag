@@ -16,6 +16,7 @@
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.NoSuchElementException;
@@ -317,7 +318,7 @@ aspect AnnotationAPI {
 			}
 
 			public boolean isValue() {
-				return !exp().isFunctionCallList();
+				return !exp().isAnnotationExp();
 			}
 			
 			public ArrayList<String> stringList() {
@@ -449,12 +450,14 @@ aspect AnnotationAPI {
 	syn boolean Exp.isFunctionCall() = false;
 	eq FunctionCall.isFunctionCall() = true;
 	
-	syn boolean Exp.isFunctionCallList()     = false;
-	eq ArrayConstructor.isFunctionCallList() = 
+	syn boolean Exp.isAnnotationExp()     = false;
+	eq FunctionCall.isAnnotationExp()     = true;
+	eq ArrayConstructor.isAnnotationExp() = 
 		getFunctionArguments().getNumExp() > 0 && getFunctionArguments().getExp(0).isFunctionCall();
 		
 	syn Iterable<? extends ASTNode> Exp.annotationList() = new ArrayList<ASTNode>(0);
 	eq ArrayConstructor.annotationList()                 = getFunctionArguments().getExps();
+	eq FunctionCall.annotationList()                     = Collections.singletonList(this);
 	
 }
 
