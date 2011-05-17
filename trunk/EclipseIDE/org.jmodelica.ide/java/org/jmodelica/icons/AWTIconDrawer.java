@@ -834,8 +834,7 @@ public class AWTIconDrawer implements GraphicsInterface {
 		}
 	}
 	public Stroke getLineStroke(LinePattern linepattern, double thicknessInMM) {
-		double compensatedThicknessInMM = thicknessInMM/getMaxCurrentScaleFactor();
-		float thicknessInPixles = (float)(compensatedThicknessInMM*IconConstants.PIXLES_PER_MM);
+		float thicknessInPixles = (float)(thicknessInMM*IconConstants.PIXLES_PER_MM);
 		return new BasicStroke(thicknessInPixles, BasicStroke.CAP_BUTT,
 				BasicStroke.JOIN_MITER, 10.0f, linepattern.getDash(), 0.0f);
 	}
