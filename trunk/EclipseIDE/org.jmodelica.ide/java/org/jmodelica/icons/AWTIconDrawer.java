@@ -259,35 +259,8 @@ public class AWTIconDrawer implements GraphicsInterface {
 		// Check if the text is large enough to be drawn.
 		double currentScaleFactor = getMinCurrentScaleFactor();
 		double actualFontSize = currentScaleFactor*(double)(g.getFont().getSize());
-		boolean largeEnough = actualFontSize >= MINIMUM_FONT_SIZE;
-		
-		// Check if the text consists of only one character.
-		boolean oneChar = text.length() == 1;
-		
-		// Abort if the text should not be drawn.
-		if (!largeEnough  && !oneChar) {
+		if (actualFontSize < MINIMUM_FONT_SIZE) {
 			return;
-		}
-		
-		// If the text consists of only one character, enlarge it. 
-		if (oneChar) {
-			double oldActualFontSize = actualFontSize;
-			double oldActualTextWidth = 
-				g.getFontMetrics().stringWidth(text)*currentScaleFactor;
-			double fontSize = g.getFont().getSize2D(); 
-			while (actualFontSize < MINIMUM_FONT_SIZE) {
-				fontSize++;
-				actualFontSize = currentScaleFactor*fontSize;
-			}
-			g.setFont(g.getFont().deriveFont((float)fontSize));
-			double actualFontSizeDiff = actualFontSize-oldActualFontSize;
-			double newActualTextWidth = 
-				g.getFontMetrics().stringWidth(text)*currentScaleFactor;
-			double actualTextWidthDiff = newActualTextWidth-oldActualTextWidth;
-			double dx = (int)Math.round((actualTextWidthDiff/2.0)/currentScaleFactor);
-			double dy = (int)Math.round((actualFontSizeDiff/2.0)/currentScaleFactor);
-			x -= dx;
-			y += dy;
 		}
 		
 		// Draw the text string.
@@ -297,9 +270,6 @@ public class AWTIconDrawer implements GraphicsInterface {
 				g.draw(createShape(t));
 			} catch(Exception e){}
 		}
-//		if (t.getFillPattern() != FillPattern.NONE) {
-//			drawShape(t);
-//		}
 		g.drawString(text, x, y);
 	}
 		
