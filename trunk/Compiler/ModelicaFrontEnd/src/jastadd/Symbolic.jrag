@@ -385,6 +385,11 @@ aspect Derivatives {
 	public FExp FLitExp.diff(String name) {
 		return dynamicFExp(new FRealLitExp("0"));
 	}
+	
+	public FExp FTimeExp.diff(String name) {			
+			return dynamicFExp(new FRealLitExp("1"));		
+	}
+	
 }
 /*
  aspect ExpressionSimplification {

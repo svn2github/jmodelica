@@ -3125,6 +3125,74 @@ end TransformCanonicalTests.IndexReduction2_Mechanical;
 
   end IndexReduction2_Mechanical;
 
+  model IndexReduction3_Electrical
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IndexReduction3_Electrical",
+         description="Test of index reduction",
+         flatModel="
+fclass TransformCanonicalTests.IndexReduction3_Electrical
+parameter Real omega = 100 /* 100 */;
+parameter Real R[1] = 10 /* 10 */;
+parameter Real R[2] = 5 /* 5 */;
+parameter Real L = 1 /* 1 */;
+parameter Real C = 0.05 /* 0.05 */;
+Real iL(start = 1);
+Real uC(start = 1);
+Real u0;
+Real u1;
+Real uL;
+Real i0;
+Real i1;
+Real i2;
+Real iC;
+Real der_uC;
+Real der_u1;
+Real der_i1;
+Real der_i2;
+Real der_uL;
+Real der_u0;
+initial equation 
+iL = 1;
+equation
+u0 = ( 220 ) * ( sin(( time ) * ( omega )) );
+u1 = ( R[1] ) * ( i1 );
+uL = ( R[2] ) * ( i2 );
+uL = ( L ) * ( der(iL) );
+iC = ( C ) * ( der_uC );
+u0 = u1 + uL;
+uC = u1 + uL;
+i0 = i1 + iC;
+i1 = i2 + iL;
+der_uC = der_u1 + der_uL;
+der_u1 = ( R[1] ) * ( der_i1 ) + ( 0 ) * ( i1 );
+der_i1 = der_i2 + der(iL);
+der_uL = ( R[2] ) * ( der_i2 ) + ( 0 ) * ( i2 );
+der_u0 = der_u1 + der_uL;
+der_u0 = ( 220 ) * ( ( cos(( time ) * ( omega )) ) * ( ( time ) * ( 0 ) + ( 1 ) * ( omega ) ) ) + ( 0 ) * ( sin(( time ) * ( omega )) );
+end TransformCanonicalTests.IndexReduction3_Electrical;
+")})));
+  parameter Real omega=100;
+  parameter Real R[2]={10,5};
+  parameter Real L=1;
+  parameter Real C=0.05;
+  Real iL (start=1);
+  Real uC (start=1);
+  Real u0,u1,u2,uL;
+  Real i0,i1,i2,iC;
+equation
+  u0=220*sin(time*omega);
+  u1=R[1]*i1;
+  u2=R[2]*i2;
+  uL=L*der(iL);
+  iC=C*der(uC);
+  u0= u1+uL;
+  uC=u1+u2;
+  uL=u2;
+  i0=i1+iC;
+  i1=i2+iL;
+  end IndexReduction3_Electrical;
+
 model DuplicateVariables1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
