@@ -748,19 +748,24 @@ aspect AnnotationParsing {
 	* @return
 	* @throws FailedConstructionException if no values were given.
 	*/
-	private ArrayList<Point> AnnotationNode.points() 
-			throws FailedConstructionException {
+	private ArrayList<Point> points() 
+		throws FailedConstructionException {
 		ArrayList<Point> points = new ArrayList<Point>();
 		double[][] matrix = realMatrix();
-		for (int i = 0; i < matrix.length; i++) {
-			if(matrix[i].length > 1) {
-				points.add(new Point(
-					matrix[i][0], 
-					matrix[i][1]
-				));
-			}else {
-				throw new NotEnoughParametersException("points");
+		if(matrix != null) { 
+			for (int i = 0; i < matrix.length; i++) {
+				if(matrix[i] == null) {	
+					continue;
+				} 
+				if(matrix[i].length > 1) {
+					points.add(new Point(
+						matrix[i][0], 
+						matrix[i][1]
+					));
+				} 
 			}
+		} else {
+			throw new NotEnoughParametersException("points");
 		}
 		return points;
 	}
@@ -782,7 +787,7 @@ aspect AnnotationParsing {
 	private ArrayList<Point> AnnotationNode.constructPoints() 
 		throws FailedConstructionException {
 		ArrayList<Point> points = points();
-		if (points.size() == 0) {
+		if (points.size() < 2 ) {
 			throw new FailedConstructionException("points");
 		}
 		return points;
