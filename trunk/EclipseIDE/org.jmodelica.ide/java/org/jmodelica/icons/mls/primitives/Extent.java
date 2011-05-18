@@ -36,7 +36,8 @@ public class Extent {
 		);
 	}
 	/**
-	 * Returns a version of the given extent where extent.p1 < extent.p2.
+	 * Returns an extent representing the same area as this extent but with points
+	 * p1 and p2 such that p1 <= p2.
 	 * 
 	 * @param extent
 	 * @return
