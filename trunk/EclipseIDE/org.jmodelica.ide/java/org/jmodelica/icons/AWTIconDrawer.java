@@ -657,7 +657,7 @@ public class AWTIconDrawer implements GraphicsInterface {
 		}
 		
 	    if (image.getColorModel() instanceof DirectColorModel) {
-	        DirectColorModel colorModel
+	    	DirectColorModel colorModel
 	                = (DirectColorModel) image.getColorModel();
 	        PaletteData palette = new PaletteData(colorModel.getRedMask(),
 	                colorModel.getGreenMask(), colorModel.getBlueMask());
@@ -667,13 +667,17 @@ public class AWTIconDrawer implements GraphicsInterface {
 	        		IconConstants.OUTLINE_IMAGE_SIZE, colorModel.getPixelSize(),
 	                palette);
 	   
+	        imagedata.transparentPixel = palette.getPixel(new RGB(255, 0, 0));
+	        
 	        for (int y = 0; y < imagedata.height; y++) {
 	        	int x = 0;
-	        	imagedata.setAlpha(x, y, 0);    
+	        	imagedata.setPixel(x, y, imagedata.transparentPixel);
+	        	imagedata.setAlpha(x, y, 0);
 	        }
 	         
         	for (int x = 0; x < imagedata.width; x++) {
         		int y = imagedata.height-1;
+	        	imagedata.setPixel(x, y, imagedata.transparentPixel);
         		imagedata.setAlpha(x, y, 0);
         	}
 	        WritableRaster raster = image.getRaster();
