@@ -128,7 +128,12 @@ aspect ModelicaIcons
 		public void updateCachedIcon() {
 			if (myCachedIcon == null)
 				myCachedIcon = new CachedIcon();
-			myCachedIcon.icon = renderIcon(icon());
+			try {
+				myCachedIcon.icon = renderIcon(icon());
+			} catch (Exception e) {
+				// Can't really do anything constructive here
+				e.printStackTrace();
+			}
 			myCachedIcon.calculated = true;
 		}
 
