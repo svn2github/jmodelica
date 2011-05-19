@@ -397,7 +397,7 @@ aspect AnnotationAPI {
 			
 			private Exp e;
 			
-			public NAAnnotationNode(Exp exp) {
+			public EAnnotationNode(Exp exp) {
 				e = exp;
 			}
 			
