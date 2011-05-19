@@ -143,23 +143,6 @@ public class AWTIconDrawer implements GraphicsInterface {
        transform.scale(scaleWidth, scaleHeight);
        g.transform(transform); 
        icon.draw(this);
-       
-       if (!iconExtent.equals(Extent.NO_EXTENT)) {
-       	Point2D pMin = new Point2D.Double(
-       			iconExtent.getP1().getX(), 
-       			iconExtent.getP1().getY()
-       	);
-       	Point2D pMinTransformed = new Point2D.Double();
-       	Point2D pMax = new Point2D.Double(
-       			iconExtent.getP2().getX(), 
-       			iconExtent.getP2().getY()
-       	);
-       	Point2D pMaxTransformed = new Point2D.Double();
-       	transform.transform(pMin, pMinTransformed);
-       	transform.transform(pMax, pMaxTransformed);
-       	System.out.println("pMin = " + pMin + ", pMinTransformed = " + pMinTransformed);
-       	System.out.println("pMax = " + pMax + ", pMaxTransformed = " + pMaxTransformed);
-       }
     }
 
 	/**	
