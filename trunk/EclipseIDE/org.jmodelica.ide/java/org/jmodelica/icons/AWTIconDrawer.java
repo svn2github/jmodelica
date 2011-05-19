@@ -237,51 +237,51 @@ public class AWTIconDrawer implements GraphicsInterface {
 		}
 		g.drawString(text, x, y);
 	}
-		
+	
 	public void drawBitmap(Bitmap b) {
-		BufferedImage bitmapImage = null;
-//		System.out.println("drawing bitmap. filename = " + b.getFileName());
-		if (b.getFileName() != null) {
-			try {
-				bitmapImage = ImageIO.read(new File(b.getFileName()));
-			} 
-			catch (MalformedURLException e) {
-//				System.out.println(e.getClass().getName() + ", " + e.getMessage());
-			} 
-			catch (IOException e) {
-//				System.out.println(e.getClass().getName() + ", " + e.getMessage());
-			}
-		} else if (b.getImageSource() != null) {
-			try {
-				byte decodedBytes[] = 
-					new sun.misc.BASE64Decoder().decodeBuffer(b.getImageSource());
-				InputStream in = new ByteArrayInputStream(decodedBytes);  
-				bitmapImage = ImageIO.read(in);
-			} catch (IOException e) {
-				System.out.println(e.getMessage());
-			}
+		try {
+			doDrawBitmap(b);
+		} catch(MalformedURLException e) {
+//			System.out.println("Failed to draw bitmap primitive: " + e.getMessage());
+		} catch(IOException e) {
+//			System.out.println("Failed to draw bitmap primitive: " + e.getMessage());
 		}
-		Extent extent = b.getExtent().fix();
-		g.setRenderingHint(
-				RenderingHints.KEY_ANTIALIASING,
-				RenderingHints.VALUE_ANTIALIAS_ON
-		);
-		g.drawImage(
-				bitmapImage, 
-				(int)extent.getP1().getX(), 
-				(int)extent.getP1().getY(), 
-				(int)extent.getP2().getX(), 
-				(int)extent.getP2().getY(),
-				0,
-				0,
-				bitmapImage.getWidth(),
-				bitmapImage.getHeight(),
-				null
-		);
-		g.setRenderingHint(
-				RenderingHints.KEY_ANTIALIASING,
-				RenderingHints.VALUE_ANTIALIAS_OFF
-		);
+	}
+		
+	private void doDrawBitmap(Bitmap b) 
+			throws MalformedURLException, IOException {
+		BufferedImage bitmapImage = null;
+		if (b.getFileName() != null) {
+			bitmapImage = ImageIO.read(new File(b.getFileName()));
+		} else if (b.getImageSource() != null) {
+			byte decodedBytes[] = 
+				new sun.misc.BASE64Decoder().decodeBuffer(b.getImageSource());
+			InputStream in = new ByteArrayInputStream(decodedBytes);  
+			bitmapImage = ImageIO.read(in);
+		} 
+		if (bitmapImage != null) {
+			Extent extent = b.getExtent().fix();
+			g.setRenderingHint(
+					RenderingHints.KEY_ANTIALIASING,
+					RenderingHints.VALUE_ANTIALIAS_ON
+			);
+			g.drawImage(
+					bitmapImage, 
+					(int)extent.getP1().getX(), 
+					(int)extent.getP1().getY(), 
+					(int)extent.getP2().getX(), 
+					(int)extent.getP2().getY(),
+					0,
+					0,
+					bitmapImage.getWidth(),
+					bitmapImage.getHeight(),
+					null
+			);
+			g.setRenderingHint(
+					RenderingHints.KEY_ANTIALIASING,
+					RenderingHints.VALUE_ANTIALIAS_OFF
+			);
+		}
 	}
 	
 	/**
