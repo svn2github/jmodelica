@@ -16,6 +16,7 @@ import java.awt.font.TextAttribute;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
+import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -134,14 +135,31 @@ public class AWTIconDrawer implements GraphicsInterface {
         AffineTransform transform = new AffineTransform(); 
         
         transform.translate(
-        		(imageWidth/2)-0.5,
-        		(imageHeight/2)-0.5		
+        		(imageWidth/2),
+        		(imageHeight/2)
         );
 
 
        transform.scale(scaleWidth, scaleHeight);
        g.transform(transform); 
        icon.draw(this);
+       
+       if (!iconExtent.equals(Extent.NO_EXTENT)) {
+       	Point2D pMin = new Point2D.Double(
+       			iconExtent.getP1().getX(), 
+       			iconExtent.getP1().getY()
+       	);
+       	Point2D pMinTransformed = new Point2D.Double();
+       	Point2D pMax = new Point2D.Double(
+       			iconExtent.getP2().getX(), 
+       			iconExtent.getP2().getY()
+       	);
+       	Point2D pMaxTransformed = new Point2D.Double();
+       	transform.transform(pMin, pMinTransformed);
+       	transform.transform(pMax, pMaxTransformed);
+       	System.out.println("pMin = " + pMin + ", pMinTransformed = " + pMinTransformed);
+       	System.out.println("pMax = " + pMax + ", pMaxTransformed = " + pMaxTransformed);
+       }
     }
 
 	/**	
@@ -292,7 +310,7 @@ public class AWTIconDrawer implements GraphicsInterface {
 		ArrayList<Point> points = l.getPoints();
 		if(points.size() > 2 && l.getSmooth().equals(Types.Smooth.BEZIER)) {
 			this.drawBezier(l);
-		} else {	
+		} else {
 			setColor(l.getColor());
 			Stroke newStroke = this.getLineStroke(l.getLinePattern(), l.getThickness());
 			g.setStroke(newStroke);
@@ -320,6 +338,32 @@ public class AWTIconDrawer implements GraphicsInterface {
 			return;
 		}
 		
+		// Transform each of the points in the shape using the current
+		// AffineTransform of the Graphics2D object. 
+		ArrayList<Point> xformedPts = new ArrayList<Point>();
+		double[] coords = new double[6];
+		PathIterator pathIterator = shape.getPathIterator(g.getTransform());
+		while (!pathIterator.isDone()) {
+			int segmentType = pathIterator.currentSegment(coords);
+			if (segmentType == PathIterator.SEG_LINETO) {
+				xformedPts.add(new Point(coords[0], coords[1]));
+			}
+			pathIterator.next();
+		}
+		
+		// Round the coordinates by casting to int.
+		int nPts = xformedPts.size();
+		int[] intXCoords = new int[nPts];
+		int[] intYCoords = new int[nPts]; 
+		for (int i = 0; i < nPts; i++) {
+			intXCoords[i] = (int)xformedPts.get(i).getX();
+			intYCoords[i] = (int)xformedPts.get(i).getY();
+		}
+		
+		// Create a new shape from the rounded coordinates. 
+		java.awt.Polygon intShape = new java.awt.Polygon(intXCoords, intYCoords, nPts);
+		
+		// Fill the shape.
 		Types.FillPattern fillPattern = s.getFillPattern();
 		if (!fillPattern.equals(FillPattern.NONE)) {
 			Paint oldPaint = g.getPaint();
@@ -333,10 +377,14 @@ public class AWTIconDrawer implements GraphicsInterface {
 //					System.out.println(e);
 				}
 			}
-			g.fill(shape);
+			AffineTransform oldTransform = g.getTransform();
+			g.setTransform(new AffineTransform());
+			g.fill(intShape);
+			g.setTransform(oldTransform);
 			g.setPaint(oldPaint);
 		}
 
+		// Draw the shape.
 		boolean gradient = (s.getFillPattern() == FillPattern.HORIZONTALCYLINDER ||
 							s.getFillPattern() == FillPattern.VERTICALCYLINDER ||
 							s.getFillPattern() == FillPattern.SPHERE);
@@ -344,7 +392,10 @@ public class AWTIconDrawer implements GraphicsInterface {
 			Stroke newStroke = getLineStroke(s.getLinePattern(), s.getLineThickness()); 
 			g.setStroke(newStroke);
 			setColor(s.getLineColor());
-			g.draw(shape);
+			AffineTransform oldTransform = g.getTransform();
+			g.setTransform(new AffineTransform());
+			g.draw(intShape);
+			g.setTransform(oldTransform);
 		}
 		
 		//TODO testa stroke till borderPattern
