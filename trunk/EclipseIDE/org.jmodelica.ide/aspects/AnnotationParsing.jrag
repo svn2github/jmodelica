@@ -232,20 +232,20 @@ aspect AnnotationParsing {
 	* @return
 	* @throws FailedConstructionException if the construction of one of its prarameters fails.
 	*/
-	private GraphicItem AnnotationNode.constructGraphicItem(GraphicItem graphicItem)
-			throws FailedConstructionException {
+	private GraphicItem AnnotationNode.constructGraphicItem(GraphicItem graphicItem) {
 		for (AnnotationNode a : this) {
 			if (a.name().equals("visible")) {
 				graphicItem.setVisible(a.bool());
 			} else if (a.name().equals("origin")) {
-				graphicItem.setOrigin(a.constructOrigin());
+				try {
+					graphicItem.setOrigin(a.constructOrigin());
+				}catch (FailedConstructionException e) {}
 			} else if (a.name().equals("rotation")) {
 				graphicItem.setRotation(a.constructRotation());
 			}
 		}
 		return graphicItem;
 	}
-	
 	private FilledShape AnnotationNode.constructFilledRectShape(FilledRectShape filledRectShape) 
 			throws FailedConstructionException, NotEnoughParametersException {
 		
@@ -748,7 +748,7 @@ aspect AnnotationParsing {
 	* @return
 	* @throws FailedConstructionException if no values were given.
 	*/
-	private ArrayList<Point> points() 
+	private ArrayList<Point> AnnotationNode.points() 
 		throws FailedConstructionException {
 		ArrayList<Point> points = new ArrayList<Point>();
 		double[][] matrix = realMatrix();
