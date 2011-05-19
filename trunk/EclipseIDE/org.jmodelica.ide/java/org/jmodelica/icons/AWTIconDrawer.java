@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ByteArrayInputStream;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Stack;
@@ -38,12 +37,10 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.RGB;
-import org.eclipse.swt.widgets.Display;
 import org.jmodelica.icons.exceptions.CreateShapeFailedException;
 import org.jmodelica.icons.exceptions.FailedConstructionException;
 import org.jmodelica.icons.mls.Component;
 import org.jmodelica.icons.mls.Icon;
-import org.jmodelica.icons.mls.Placement;
 import org.jmodelica.icons.mls.Transformation;
 import org.jmodelica.icons.mls.Types;
 import org.jmodelica.icons.mls.Types.FillPattern;
@@ -60,7 +57,6 @@ import org.jmodelica.icons.mls.primitives.Point;
 import org.jmodelica.icons.mls.primitives.Polygon;
 import org.jmodelica.icons.mls.primitives.Rectangle;
 import org.jmodelica.icons.mls.primitives.Text;
-import org.jmodelica.ide.ui.ImageLoader;
 
 public class AWTIconDrawer implements GraphicsInterface {
 	
@@ -82,12 +78,9 @@ public class AWTIconDrawer implements GraphicsInterface {
 	private BufferedImage image;
 	
 	private Graphics2D g;
-	private AffineTransform transform;
-	
 	private Stack<AffineTransform> savedTransformations;
 	
-	private Extent iconExtent;
-	
+	private Extent iconExtent;	
 	
 	public AWTIconDrawer() {
 		savedTransformations = new Stack<AffineTransform>();
@@ -104,63 +97,35 @@ public class AWTIconDrawer implements GraphicsInterface {
 		this.outline = outline;
 		createBufferedImage(icon);
 	}
-	/** Creates an object for making BufferedImages from a ClassIcon.
-	 * @param  icon ClassIcon to make a BufferedImage of. 
-	 * @param iconView setting iconView to true generates an icon representation of the component. 
-	 * Setting iconView to false generates a diagram representation of the component.   
-	 * @param outlineIcon setting outlineIcon to true scale the bufferImage object to fit IDE outline size.
-	 */
-
-	/** Creates an object for making BufferedImages from a ClassIcon.
-	 * @param  icon ClassIcon to make a BufferedImage of. 
-	 * @param iconView setting iconView to true generates an icon representation of the component. 
-	 * Setting iconView to false generates a diagram representation of the component.   
-	 * @param outlineIcon setting outlineIcon to true scale the bufferImage object to fit IDE outline size.
-	 */
-
 	public void createBufferedImage(Icon icon) {
 		
-		int imageWidth = IconConstants.IMAGE_SIZE;
-		int imageHeight = IconConstants.IMAGE_SIZE;
-		double iconWidth;
-		double iconHeight;
-		
+		double imageWidth,imageHeight,iconWidth,iconHeight;
 		
 		iconExtent = icon.getExtent();
-		if(iconExtent.equals(Extent.NO_EXTENT)) {
-//			return;
-			iconWidth = IconConstants.DEFAULT_ICON_WIDTH + IconConstants.COMPENSATE;
-			iconHeight = IconConstants.DEFAULT_ICON_HEIGHT + IconConstants.COMPENSATE;
+		if(iconExtent.equals(Extent.NO_EXTENT)) {			
+			return;
 		} else {
     		iconExtent = icon.getBounds(iconExtent);
-    		iconWidth = iconExtent.getWidth()+ IconConstants.COMPENSATE;
-    		iconHeight = iconExtent.getHeight()+ IconConstants.COMPENSATE;
-    		
+    		iconWidth = iconExtent.getWidth()+ 1.0;
+    		iconHeight = iconExtent.getHeight()+ 1.0;
 		}
 		if(outline) {
 	    		imageWidth=IconConstants.OUTLINE_IMAGE_SIZE-1;
 	    		imageHeight=IconConstants.OUTLINE_IMAGE_SIZE-1;	
+		}else {
+			return;
 		}
-		
-		double width = (imageWidth*1.0)/2;
-		double height = (imageHeight*1.0)/2;
-		
-		double scaleWidth = imageWidth/(iconWidth+1);
-		double scaleHeight = imageHeight/(iconHeight+1);
+		double scaleWidth = imageWidth/iconWidth;
+		double scaleHeight = imageHeight/iconHeight;
 		
 	    image = new BufferedImage(
-        		imageWidth, 
-        		imageHeight, 
+        		(int)imageWidth, 
+        		(int)imageHeight, 
         		BufferedImage.TYPE_INT_RGB
         );
          
         // Create a graphics context on the buffered image
         g = image.createGraphics();
-//        g.setRenderingHint(
-//        		RenderingHints.KEY_ANTIALIASING,
-//				RenderingHints.VALUE_ANTIALIAS_ON
-//        );
-        
         setBackgroundColor(Color.WHITE);
         
         // Clear the image.
@@ -169,15 +134,14 @@ public class AWTIconDrawer implements GraphicsInterface {
         AffineTransform transform = new AffineTransform(); 
         
         transform.translate(
-        		width,
-        		height		
+        		(imageWidth/2)-0.5,
+        		(imageHeight/2)-0.5		
         );
 
 
        transform.scale(scaleWidth, scaleHeight);
-        g.transform(transform);
-        
-        icon.draw(this);
+       g.transform(transform); 
+       icon.draw(this);
     }
 
 	/**	
@@ -646,22 +610,16 @@ public class AWTIconDrawer implements GraphicsInterface {
 				)
 		);
 	}
-	
 	public Image getImage() /*throws FailedConstructionException*/ {
-
-	    ImageData imagedata = null;
-		if(image == null)
-		{
-			return ImageLoader.getImage("dummy.png");
-			//throw new FailedConstructionException("SWTImage");
+		ImageData imagedata = null;
+		if(image == null){
+			return null; 
 		}
-		
-	    if (image.getColorModel() instanceof DirectColorModel) {
+	    if(image.getColorModel() instanceof DirectColorModel) {
 	    	DirectColorModel colorModel
 	                = (DirectColorModel) image.getColorModel();
 	        PaletteData palette = new PaletteData(colorModel.getRedMask(),
 	                colorModel.getGreenMask(), colorModel.getBlueMask());
-	        
 	        	        
 	        imagedata = new ImageData(IconConstants.OUTLINE_IMAGE_SIZE,
 	        		IconConstants.OUTLINE_IMAGE_SIZE, colorModel.getPixelSize(),
@@ -695,10 +653,8 @@ public class AWTIconDrawer implements GraphicsInterface {
 	            }
 	        }
 	    }
-	    else
-	    {	
-	    	//throw new FailedConstructionException("SWTImage");
-	    	
+	    else {	
+	    	return null;
 	    }
 		ImageDescriptor desc = ImageDescriptor.createFromImageData(imagedata);
 		return desc.createImage(); 
