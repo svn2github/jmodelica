@@ -15,7 +15,7 @@ import org.jmodelica.icons.mls.primitives.Bitmap;
 import org.jmodelica.icons.AWTIconDrawer;
 
 public class Icon {
-	
+
 	public static Icon NULL_ICON = new NullIcon();
 	
 	private String componentName;
@@ -40,7 +40,7 @@ public class Icon {
 		this.subcomponents = new ArrayList<Component>();
 	}
 	
-	public Icon() {
+	private Icon() {
 		this.componentName = "";
 		this.className = "";
 		this.context = null;
@@ -219,10 +219,8 @@ public class Icon {
 	public Context getContext() {
 		return context;
 	}
-
+	
 	public static class NullIcon extends Icon {
-		public NullIcon() {
-			super();
-		}
 	}
+	
 }

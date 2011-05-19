@@ -59,18 +59,19 @@ public class ExplorerContentProvider implements ITreeContentProvider, IResourceC
 	}
 
 	public Object[] getChildren(Object parentElement) {
+		Object[] children = null;
 		if (parentElement instanceof IFile) {
 			IOutlineNode root = (IOutlineNode) getRoot((IFile) parentElement);
-			return root.outlineChildren().toArray();
+			children = root.outlineChildren().toArray();
 //		} else if (parentElement instanceof IProject) {
 //			LibrariesList libList = new LibrariesList((IProject) parentElement, viewer);
 //			return libList.hasChildren() ? new Object[] { libList } : null;
 		} else if (parentElement instanceof LibrariesList) {
-			return ((LibrariesList) parentElement).getChildren();
+			children = ((LibrariesList) parentElement).getChildren();
 		} else if (parentElement instanceof ClassDecl) {
-			return getVisible(((ClassDecl) parentElement).classes());
+			children = getVisible(((ClassDecl) parentElement).classes());
 		}
-		return null;
+		return IconRenderingWorker.addIcons(viewer, children);
 	}
 
 	public Object getParent(Object element) {
@@ -103,7 +104,11 @@ public class ExplorerContentProvider implements ITreeContentProvider, IResourceC
 		String path = file.getRawLocation().toOSString();
 		IASTNode ast = registry.lookupAST(path, project);
 		// TODO: Need to save in registry even if we have to build ourselves
-		return ast == null ? cmp.compileFile(file) : ast;
+		if (ast == null) 
+			ast = cmp.compileFile(file);
+		if (ast instanceof ASTNode)
+			IconRenderingWorker.addIcon(viewer, (ASTNode) ast);
+		return ast;
 	}
 	
 	private ASTNode<?> getParentClass(ASTNode<?> node) {

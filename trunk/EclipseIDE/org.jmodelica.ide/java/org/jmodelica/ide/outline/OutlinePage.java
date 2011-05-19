@@ -17,6 +17,7 @@ package org.jmodelica.ide.outline;
 
 import java.util.ArrayList;
 
+import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.IElementComparer;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -46,6 +47,8 @@ public abstract class OutlinePage extends AbstractBaseContentOutlinePage {
 	private OutlineItemComparator comparator;
 	private IElementComparer comparer;
 	protected boolean selecting;
+	private IBaseLabelProvider labelProvider;
+	private UpdatingContentProvider contentProvider;
 
 	public OutlinePage(AbstractTextEditor editor) {
 		super(editor);
@@ -88,6 +91,26 @@ public abstract class OutlinePage extends AbstractBaseContentOutlinePage {
 		if (comparator == null)
 			comparator = new OutlineItemComparator();
 		return comparator;
+	}
+
+	protected IBaseLabelProvider getLabelProvider() {
+		if (labelProvider == null)
+			labelProvider = createLabelProvider();
+		return labelProvider;
+	}
+
+	protected IBaseLabelProvider createLabelProvider() {
+		return JASTADD_LABEL;
+	}
+
+	protected ITreeContentProvider getContentProvider() {
+		if (contentProvider == null)
+			contentProvider = new UpdatingContentProvider(createContentProvider());
+		return contentProvider;
+	}
+
+	protected ITreeContentProvider createContentProvider() {
+		return JASTADD_CONTENT;
 	}
 	
 	/**

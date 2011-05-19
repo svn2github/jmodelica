@@ -68,10 +68,8 @@ public class ClassOutlinePage extends OutlinePage implements IDoubleClickListene
 	}
 
 	@Override
-	protected ClassOutlineContentProvider getContentProvider() {
-		if (content == null)
-			content = new ClassOutlineContentProvider();
-		return content;
+	protected ClassOutlineContentProvider createContentProvider() {
+		return new ClassOutlineContentProvider();
 	}
 
 	protected IBaseLabelProvider getLabelProvider() {

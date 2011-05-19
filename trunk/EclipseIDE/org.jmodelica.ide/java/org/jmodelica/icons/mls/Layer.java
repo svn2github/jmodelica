@@ -1,7 +1,6 @@
 package org.jmodelica.icons.mls;
 import java.util.ArrayList;
 
-import org.jmodelica.icons.mls.Icon.NullIcon;
 import org.jmodelica.icons.mls.primitives.Extent;
 import org.jmodelica.icons.mls.primitives.GraphicItem;
 import org.jmodelica.icons.mls.primitives.Point;
@@ -12,7 +11,7 @@ public class Layer {
 	private CoordinateSystem coordinateSystem;
 	private ArrayList<GraphicItem> graphics;
 	
-	public static Layer NO_LAYER = new NO_LAYER();
+	public static Layer NO_LAYER = new NoLayer();
 		
 	/**
 	 * 
@@ -28,10 +27,12 @@ public class Layer {
 		this.graphics = new ArrayList<GraphicItem>();
 		this.coordinateSystem = coordinateSystem;
 	}
-	public Layer() {
+	
+	private Layer() {
 		this.coordinateSystem = null;
 		this.graphics = null;
 	}
+	
 	public CoordinateSystem getCoordinateSystem() {
 		return coordinateSystem;
 	}
@@ -45,10 +46,7 @@ public class Layer {
 	}
 	
 	public String toString() {
-		String s = "";
-		s += "coordinateSystem = " + coordinateSystem;
-		s += "\ngraphics: ";
-		s += graphics;
+		String s = "coordinateSystem = " + coordinateSystem + "\ngraphics: " + graphics;
 //		int index = 0;
 //		for (GraphicItem item : graphics) {
 //			s += "\nitem " + index + " = " + item.toString();
@@ -56,10 +54,8 @@ public class Layer {
 //		}
 		return s;
 	}
-	public static class NO_LAYER extends Layer {
-		public NO_LAYER() {
-			super();
-		}
+	
+	public static class NoLayer extends Layer {
 		public String toString() {
 			return "No layer.";
 		}

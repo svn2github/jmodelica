@@ -34,7 +34,7 @@ public class InstanceOutlinePage extends OutlinePage implements IDoubleClickList
 	}
 
 	@Override
-	protected ITreeContentProvider getContentProvider() {
+	protected ITreeContentProvider createContentProvider() {
 		return new InstanceOutlineContentProvider();
 	}
 

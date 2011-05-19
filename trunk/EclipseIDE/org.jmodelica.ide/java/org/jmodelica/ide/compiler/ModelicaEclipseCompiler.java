@@ -32,8 +32,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.reconciler.DirtyRegion;
+import org.jastadd.plugin.Activator;
 import org.jastadd.plugin.compiler.AbstractCompiler;
 import org.jastadd.plugin.compiler.ast.IASTNode;
+import org.jastadd.plugin.registry.ASTRegistry;
 import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.helpers.DocumentReader;
 import org.jmodelica.ide.helpers.Maybe;
@@ -144,6 +146,20 @@ public class ModelicaEclipseCompiler extends AbstractCompiler {
 	public StoredDefinition compileString(String content) {
 		return new CompilationRoot(new MockProject()).parseDoc(content, new MockFile())
 				.getStoredDefinition();
+	}
+
+	// Overridden to add synchronization
+	public void compile(IDocument document, DirtyRegion dirtyRegion, IRegion region, IFile file) {
+		ASTNode node = (ASTNode) compileToAST(document, dirtyRegion, region, file);
+		ASTRegistry reg = Activator.getASTRegistry();
+		if (reg != null && node != null && node.hasLookupKey()) {
+			Object root = reg.lookupAST(null, file.getProject());
+			if (root == null)
+				root = new Object();
+			synchronized (root) {
+				reg.updateAST(node, node.lookupKey(), file);
+			}
+		}
 	}
 
 	@Override

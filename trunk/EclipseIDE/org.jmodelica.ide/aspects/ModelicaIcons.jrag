@@ -98,83 +98,44 @@ aspect ModelicaIcons
 		return icon;
 	}
 	
-	eq ClassDecl.contentOutlineImage() {
-		Icon icon = icon();
-		if (icon.equals(Icon.NULL_ICON)) {
-			return ImageLoader.getImage("dummy.png");
-		}
-		return (new AWTIconDrawer(icon)).getImage();
+	public Image BaseNode.renderIcon(Icon icon) {
+		if (icon == Icon.NULL_ICON) 
+			return null;
+		else
+			return new AWTIconDrawer(icon).getImage();
 	}
+
+	eq ClassDecl.contentOutlineImage()         = cachedIcon();
+	eq ComponentDecl.contentOutlineImage()     = cachedIcon();
+	eq InstClassDecl.contentOutlineImage()     = cachedIcon();
+	eq InstComponentDecl.contentOutlineImage() = cachedIcon();
 	
-	eq ComponentDecl.contentOutlineImage() {
-		Icon icon = icon();
-		if (icon.equals(Icon.NULL_ICON)) {
-			return ImageLoader.getImage("dummy.png");
+	syn boolean ASTNode.contentOutlineImageCalculated() = true;
+	eq BaseNode.contentOutlineImageCalculated()         = myCachedIcon != null && myCachedIcon.calculated;
+	
+	public void ASTNode.updateCachedIcon() {}
+	
+	public class BaseNode {
+		
+		private CachedIcon myCachedIcon = null;
+		
+		public Image cachedIcon() {
+			if (myCachedIcon == null)
+				myCachedIcon = new CachedIcon();
+			return myCachedIcon.icon;
 		}
-		return (new AWTIconDrawer(icon)).getImage();
-	}
-	
-//	eq ClassDecl.contentOutlineImage() {
-//		//System.out.println("innan " + qualifiedName());
-//		Image image;
-//		Icon icon = Icon.NULL_ICON;
-//		if (IconStatus.hasFinishedIcon(this)) {
-//			icon = icon();
-//		} else if (!IconStatus.hasStartedIcon(this)) {
-//			(new CreateIconJob(
-//					"Creating icon for class " + qualifiedName(),
-//					this, 
-//					IconStatus.getSourceOutline()
-//			)).schedule();
-//			IconStatus.setHasStartedIcon(this);
-//		}
-//		if (icon.equals(Icon.NULL_ICON)) {
-//			image = ImageLoader.getImage("dummy.png");
-//		} else { 
-//			image = icon.draw(new AWTIconDrawer(icon));
-//		}
-//		//System.out.println("efter " + qualifiedName());
-//		return image;
-//	}
-//	
-//	eq ComponentDecl.contentOutlineImage() {
-//		//System.out.println("innan " + name());
-//		Image image;
-//		Icon icon = Icon.NULL_ICON;
-//		ClassDecl myDecl = findClassDecl(); 
-//		if (IconStatus.hasFinishedIcon(myDecl)) {
-//			icon = icon();
-//		} else if (!IconStatus.hasStartedIcon(myDecl)) {
-//			(new CreateIconJob(
-//					"Creating icon for class " + myDecl.qualifiedName(),
-//					myDecl, 
-//					IconStatus.getSourceOutline()
-//			)).schedule();
-//			IconStatus.setHasStartedIcon(myDecl);
-//		}
-//		if (icon.equals(Icon.NULL_ICON)) {
-//			image = ImageLoader.getImage("dummy.png");
-//		} else {
-//			image = icon.draw(new AWTIconDrawer(icon));
-//		}
-//		//System.out.println("efter " + name());
-//		return image;
-//	}
-	
-	eq InstClassDecl.contentOutlineImage() {
-		Icon icon = icon();
-		if (icon.equals(Icon.NULL_ICON)) {
-			return ImageLoader.getImage("dummy.png");
+		
+		public void updateCachedIcon() {
+			if (myCachedIcon == null)
+				myCachedIcon = new CachedIcon();
+			myCachedIcon.icon = renderIcon(icon());
+			myCachedIcon.calculated = true;
 		}
-		return (new AWTIconDrawer(icon)).getImage();
-	}
-	
-	eq InstComponentDecl.contentOutlineImage() {
-		Icon icon = icon();
-		if (icon.equals(Icon.NULL_ICON)) {
-			return ImageLoader.getImage("dummy.png");
+
+		private static class CachedIcon {
+			public Image icon = null;
+			public boolean calculated = false;
 		}
-		return (new AWTIconDrawer(icon)).getImage();
 	}
 	
 	private Icon ClassDecl.addSuperClasses(Icon icon) {	

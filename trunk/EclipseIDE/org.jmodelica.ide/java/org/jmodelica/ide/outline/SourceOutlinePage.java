@@ -28,10 +28,8 @@ public class SourceOutlinePage extends OutlinePage {
 	}
 
 	@Override
-	protected ITreeContentProvider getContentProvider() {
-		if (contentProvider == null)
-			contentProvider = new SourceOutlineContentProvider();
-		return contentProvider;
+	protected ITreeContentProvider createContentProvider() {
+		return new SourceOutlineContentProvider();
 	}
 
 	@Override
