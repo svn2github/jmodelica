@@ -182,13 +182,14 @@ aspect SimpleClassLookup {
 	 */
 	public static ClassDecl ASTNode.simpleLookupInLibNodeList(List<LibNode> list, String name) {
 		for (LibNode ln : list)
-			if (ln.getName().equals(name))
+			if (ln.matches(name))
 				return (ClassDecl) ln.getStoredDefinition().getElement(0);
 		return null;
 	}
 	
 	
 	eq IdDecl.matches(String str)                = getID().equals(str);
+	eq LibNode.matches(String str)               = getName().equals(str);
 	eq BaseClassDecl.matches(String str)         = getName().matches(str);
 	eq ImportClauseRename.matches(String str)    = getIdDecl().matches(str);
 	eq ImportClauseQualified.matches(String str) = 

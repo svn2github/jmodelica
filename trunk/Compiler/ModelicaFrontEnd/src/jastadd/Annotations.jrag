@@ -70,7 +70,8 @@ aspect AnnotationAPI {
 	eq CompleteModification.annotationNode()               = getClassModification().annotationNode();
 	eq ComponentModification.annotationNode()              = 
 		hasModification() ? getModification().annotationNode() : AnnotationNode.NO_ANNOTATION;
-	syn lazy AnnotationNode FunctionCall.annotationNode()  = new AnnotationNode.FCAnnotationNode(this);
+	syn lazy AnnotationNode Exp.annotationNode()           = new AnnotationNode.EAnnotationNode(this);
+	eq FunctionCall.annotationNode()                       = new AnnotationNode.FCAnnotationNode(this);
 	syn lazy AnnotationNode NamedArgument.annotationNode() = new AnnotationNode.NAAnnotationNode(this);
 	
 	/**
@@ -385,6 +386,23 @@ aspect AnnotationAPI {
 			
 			public String name() {
 				return arg.getName().name();
+			}
+			
+		}
+		
+		/**
+		 * \brief Represents an annotation that is represented in the source tree by an Exp.
+		 */
+		public static class EAnnotationNode extends ExpAnnotationNode {
+			
+			private Exp e;
+			
+			public NAAnnotationNode(Exp exp) {
+				e = exp;
+			}
+			
+			protected Exp exp() {
+				return e;
 			}
 			
 		}
