@@ -846,11 +846,11 @@ aspect AnnotationParsing {
 	* @return
 	* @throws FailedConstructionException if no values were given.
 	*/
-	private ArrayList<Point> AnnotationNode.points() 
+	private ArrayList<Point> AnnotationNode.constructPoints() 
 		throws FailedConstructionException {
 		for (AnnotationNode a : this) {
 			if (a.name().equals("DynamicSelect")) {
-				return a.iterator().next().points();
+				return a.iterator().next().constructPoints();
 			}
 		}
 		ArrayList<Point> points = new ArrayList<Point>();
@@ -885,23 +885,11 @@ aspect AnnotationParsing {
 				return a.iterator().next().constructExtent();
 			}
 		}
-		ArrayList<Point> points = points();
+		ArrayList<Point> points = constructPoints();
 		if (points.size() < 2) {
 			throw new NotEnoughParametersException("extent");
 		}
 		return new Extent(points.get(0), points.get(1));
 	}
-	private ArrayList<Point> AnnotationNode.constructPoints() 
-		throws FailedConstructionException {
-		for (AnnotationNode a : this) {
-			if (a.name().equals("DynamicSelect")) {
-				return a.iterator().next().constructPoints();
-			}
-		}
-		ArrayList<Point> points = points();
-		if (points.size() < 2 ) {
-			throw new FailedConstructionException("points");
-		}
-		return points;
-	}
+	
 }
