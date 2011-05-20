@@ -28,8 +28,6 @@ import org.jmodelica.icons.exceptions.NotEnoughParametersException;
 import java.lang.IllegalArgumentException;
 
 aspect AnnotationParsing {
-	// Funkar inte! Varför? 
-	//syn lazy Layer AnnotationNode.iconLayer() = Layer.NO_LAYER;
 	
 	public Layer AnnotationNode.iconLayer(String path) {
 		Layer layer;
@@ -334,13 +332,18 @@ aspect AnnotationParsing {
 	}
 
 	/**
-	* Returns the MLSPoint object that is represented by this AnnotationNode.
+	* Returns the Point object that is represented by this AnnotationNode.
 	* @param pointAnnotation
 	* @return
 	* @throws FailedConstructionException if the provided data is anything else than 2 real numbers.
 	*/
 	private Point AnnotationNode.constructPoint() 
 			throws FailedConstructionException {
+		for (AnnotationNode a : this) {
+			if (a.name().equals("DynamicSelect")) {
+				return a.iterator().next().constructPoint();
+			}
+		}
 		double[] vector = realVector();
 		if (vector == null) {
 			throw new FailedConstructionException("Point");
@@ -358,6 +361,11 @@ aspect AnnotationParsing {
 	*/
 	private Point AnnotationNode.constructOrigin() 
 			throws FailedConstructionException {
+		for (AnnotationNode a : this) {
+			if (a.name().equals("DynamicSelect")) {
+				return a.iterator().next().constructOrigin();
+			}
+		}
 		try {
 			return constructPoint();
 		} catch(FailedConstructionException e) {
@@ -374,6 +382,11 @@ aspect AnnotationParsing {
 	*/
 	private Arrow[] AnnotationNode.constructArrow() 
 			throws FailedConstructionException {
+		for (AnnotationNode a : this) {
+			if (a.name().equals("DynamicSelect")) {
+				return a.iterator().next().constructArrow();
+			}
+		}
 		ArrayList<String> strings = stringList();
 		if (strings == null) {
 			throw new FailedConstructionException("Arrow");
@@ -394,11 +407,21 @@ aspect AnnotationParsing {
 	}
 	
 	private double AnnotationNode.constructRotation() {
+		for (AnnotationNode a : this) {
+			if (a.name().equals("DynamicSelect")) {
+				return a.iterator().next().constructRotation();
+			}
+		}
 		return real();
 	}
 	
 	private double AnnotationNode.constructThickness() 
 			throws FailedConstructionException {
+		for (AnnotationNode a : this) {
+			if (a.name().equals("DynamicSelect")) {
+				return a.iterator().next().constructThickness();
+			}
+		}
 		double thickness = real();
 		if (thickness >= 0) {
 			return thickness;
@@ -407,11 +430,21 @@ aspect AnnotationParsing {
 	
 	private double AnnotationNode.constructLineThickness() 
 			throws FailedConstructionException {
+		for (AnnotationNode a : this) {
+			if (a.name().equals("DynamicSelect")) {
+				return a.iterator().next().constructLineThickness();
+			}
+		}
 		return constructThickness();
 	}
 	
 	private double AnnotationNode.constructArrowSize() 
 			throws FailedConstructionException {
+		for (AnnotationNode a : this) {
+			if (a.name().equals("DynamicSelect")) {
+				return a.iterator().next().constructArrowSize();
+			}
+		}
 		double size = real();
 		if (size >= 0) {
 			return size;
@@ -419,18 +452,34 @@ aspect AnnotationParsing {
 	}	
 	
 	private double AnnotationNode.constructRadius() 
-		throws FailedConstructionException {
+			throws FailedConstructionException {
+		for (AnnotationNode a : this) {
+			if (a.name().equals("DynamicSelect")) {
+				return a.iterator().next().constructRadius();
+			}
+		}
 		double radius = real();
 		if (radius >= 0) {
 			return radius;
 		}
 		throw new IllegalArgumentException("Illegal value radius");
 	}
+	
 	private double AnnotationNode.constructStartAngle() { 
+		for (AnnotationNode a : this) {
+			if (a.name().equals("DynamicSelect")) {
+				return a.iterator().next().constructStartAngle();
+			}
+		}
 		return real();
 	}
 	
 	private double AnnotationNode.constructEndAngle() { 
+		for (AnnotationNode a : this) {
+			if (a.name().equals("DynamicSelect")) {
+				return a.iterator().next().constructEndAngle();
+			}
+		}
 		return real();
 	}
 	
@@ -475,7 +524,7 @@ aspect AnnotationParsing {
 	*/
 	//TODO fånga exceptions
 	private Text AnnotationNode.constructText()
-			throws FailedConstructionException, NotEnoughParametersException {	
+			throws FailedConstructionException, NotEnoughParametersException {
 		Text text = new Text();
 		text = (Text)constructFilledRectShape(text);
 		boolean textStringSet = false;
@@ -517,6 +566,11 @@ aspect AnnotationParsing {
 	*/
 	private Polygon AnnotationNode.constructPolygon()
 			throws FailedConstructionException, NotEnoughParametersException {
+		for (AnnotationNode a : this) {
+			if (a.name().equals("DynamicSelect")) {
+				return a.iterator().next().constructPolygon();
+			}
+		}
 		Polygon polygon = new Polygon();
 		polygon = (Polygon)constructFilledShape(polygon);
 		boolean pointsSet = false;
@@ -542,6 +596,11 @@ aspect AnnotationParsing {
 	*/
 	private TextAlignment AnnotationNode.constructHorizontalAlignment() 
 			throws FailedConstructionException {
+		for (AnnotationNode a : this) {
+			if (a.name().equals("DynamicSelect")) {
+				return a.iterator().next().constructHorizontalAlignment();
+			}
+		}
 		String alignmentStr = string();
 		if (alignmentStr == null) {
 			throw new FailedConstructionException("TextAlignment");
@@ -569,6 +628,11 @@ aspect AnnotationParsing {
 	*/
 	private FillPattern AnnotationNode.constructFillPattern()
 			throws FailedConstructionException {
+		for (AnnotationNode a : this) {
+			if (a.name().equals("DynamicSelect")) {
+				return a.iterator().next().constructFillPattern();
+			}
+		}
 		String patternStr = string();
 		if (patternStr == null) {
 			throw new FailedConstructionException("FillPattern");
@@ -596,6 +660,11 @@ aspect AnnotationParsing {
 	*/
 	private LinePattern AnnotationNode.constructLinePattern()
 			throws FailedConstructionException {
+		for (AnnotationNode a : this) {
+			if (a.name().equals("DynamicSelect")) {
+				return a.iterator().next().constructLinePattern();
+			}
+		}
 		String patternStr = string();
 		if (patternStr == null) {
 			throw new FailedConstructionException("LinePattern");
@@ -623,6 +692,11 @@ aspect AnnotationParsing {
 	*/
 	private BorderPattern AnnotationNode.constructBorderPattern()
 			throws FailedConstructionException {
+		for (AnnotationNode a : this) {
+			if (a.name().equals("DynamicSelect")) {
+				return a.iterator().next().constructBorderPattern();
+			}
+		}
 		String patternStr = string();
 		if (patternStr == null) {
 			throw new FailedConstructionException("BorderPattern");
@@ -651,6 +725,11 @@ aspect AnnotationParsing {
 	*/
 	private Smooth AnnotationNode.constructSmooth()
 			throws FailedConstructionException {
+		for (AnnotationNode a : this) {
+			if (a.name().equals("DynamicSelect")) {
+				return a.iterator().next().constructSmooth();
+			}
+		}
 		String smoothStr = string();
 		if (smoothStr == null) {
 			throw new FailedConstructionException("Smooth");
@@ -678,6 +757,11 @@ aspect AnnotationParsing {
 	*/
 	private ArrayList<Types.TextStyle> AnnotationNode.constructTextStyle()
 			throws FailedConstructionException {
+		for (AnnotationNode a : this) {
+			if (a.name().equals("DynamicSelect")) {
+				return a.iterator().next().constructTextStyle();
+			}
+		}
 		ArrayList<Types.TextStyle> textStyle = new ArrayList<Types.TextStyle>();
 		ArrayList<String> stringList = stringList();
 		if(stringList == null)
@@ -704,7 +788,11 @@ aspect AnnotationParsing {
 	*/
 	private String AnnotationNode.constructFontName()
 	{	
-		/* do not need to handle unexpected fontname */
+		for (AnnotationNode a : this) {
+			if (a.name().equals("DynamicSelect")) {
+				return a.iterator().next().constructFontName();
+			}
+		}
 		return string();
 	}
 	
@@ -716,6 +804,11 @@ aspect AnnotationParsing {
 	*/
 	private int AnnotationNode.constructFontSize()
 			throws FailedConstructionException {
+		for (AnnotationNode a : this) {
+			if (a.name().equals("DynamicSelect")) {
+				return a.iterator().next().constructFontSize();
+			}
+		}
 		int fontSize = (int)real();
 		if (fontSize >= 0) {
 			return fontSize;
@@ -731,6 +824,11 @@ aspect AnnotationParsing {
 	*/
 	private Color AnnotationNode.constructColor() 
 			throws FailedConstructionException {
+		for (AnnotationNode a : this) {
+			if (a.name().equals("DynamicSelect")) {
+				return a.iterator().next().constructColor();
+			}
+		}
 		double[] vector = realVector();
 		if (vector != null) {
 			if (vector.length != 3) {
@@ -750,6 +848,11 @@ aspect AnnotationParsing {
 	*/
 	private ArrayList<Point> AnnotationNode.points() 
 		throws FailedConstructionException {
+		for (AnnotationNode a : this) {
+			if (a.name().equals("DynamicSelect")) {
+				return a.iterator().next().points();
+			}
+		}
 		ArrayList<Point> points = new ArrayList<Point>();
 		double[][] matrix = realMatrix();
 		if(matrix != null) { 
@@ -777,7 +880,11 @@ aspect AnnotationParsing {
 
 	private Extent AnnotationNode.constructExtent() 
 		throws FailedConstructionException, NotEnoughParametersException {
-		
+		for (AnnotationNode a : this) {
+			if (a.name().equals("DynamicSelect")) {
+				return a.iterator().next().constructExtent();
+			}
+		}
 		ArrayList<Point> points = points();
 		if (points.size() < 2) {
 			throw new NotEnoughParametersException("extent");
@@ -786,6 +893,11 @@ aspect AnnotationParsing {
 	}
 	private ArrayList<Point> AnnotationNode.constructPoints() 
 		throws FailedConstructionException {
+		for (AnnotationNode a : this) {
+			if (a.name().equals("DynamicSelect")) {
+				return a.iterator().next().constructPoints();
+			}
+		}
 		ArrayList<Point> points = points();
 		if (points.size() < 2 ) {
 			throw new FailedConstructionException("points");
