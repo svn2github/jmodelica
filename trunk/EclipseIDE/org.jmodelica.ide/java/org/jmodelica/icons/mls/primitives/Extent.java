@@ -7,11 +7,11 @@ public class Extent {
 	
 	public static Extent DEFAULT_EXTENT = new Extent(new Point(-100, -100), new Point(100, 100));
 
-	public static Extent NO_EXTENT = new NO_EXTENT();
+	public static Extent NO_EXTENT = new Extent();
 	
-	public Extent() {
-		p1 = Extent.DEFAULT_EXTENT.p1;
-		p2 = Extent.DEFAULT_EXTENT.p2;
+	private Extent() {
+		p1 = null;
+		p2 = null;
 	}
 	
 	public Extent(Point p1, Point p2) {
@@ -156,13 +156,5 @@ public class Extent {
 	}
 	public String toString() {
 		return "P1 = " + getP1() + ", P2 = " + getP2() + ", width = " + getWidth() + ", height = " + getHeight();
-	}
-	public static class NO_EXTENT extends Extent {
-		public NO_EXTENT() {
-			super(null, null);
-		}
-		public String toString() {
-			return "No extent.";
-		}
 	}
 }

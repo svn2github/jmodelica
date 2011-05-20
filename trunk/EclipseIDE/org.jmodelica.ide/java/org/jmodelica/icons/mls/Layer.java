@@ -11,7 +11,7 @@ public class Layer {
 	private CoordinateSystem coordinateSystem;
 	private ArrayList<GraphicItem> graphics;
 	
-	public static Layer NO_LAYER = new NoLayer();
+	public static Layer NO_LAYER = new Layer();
 		
 	/**
 	 * 
@@ -53,11 +53,5 @@ public class Layer {
 //			index++;
 //		}
 		return s;
-	}
-	
-	public static class NoLayer extends Layer {
-		public String toString() {
-			return "No layer.";
-		}
 	}
 }

@@ -13,7 +13,7 @@ import org.jmodelica.icons.mls.primitives.Bitmap;
 
 public class Icon {
 
-	public static Icon NULL_ICON = new NullIcon();
+	public static Icon NULL_ICON = new Icon();
 	
 	private String componentName;
 	private String className;
