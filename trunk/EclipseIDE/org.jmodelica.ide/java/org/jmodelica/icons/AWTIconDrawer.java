@@ -325,7 +325,7 @@ public class AWTIconDrawer implements GraphicsInterface {
 		// AffineTransform of the Graphics2D object. 
 		ArrayList<Point> xformedPts = new ArrayList<Point>();
 		double[] coords = new double[6];
-		PathIterator pathIterator = shape.getPathIterator(g.getTransform());
+		PathIterator pathIterator = shape.getPathIterator(g.getTransform(), 1.0);
 		while (!pathIterator.isDone()) {
 			int segmentType = pathIterator.currentSegment(coords);
 			if (segmentType == PathIterator.SEG_LINETO) {
