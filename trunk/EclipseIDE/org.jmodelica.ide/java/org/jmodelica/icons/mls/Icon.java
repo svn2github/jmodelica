@@ -1,8 +1,6 @@
 package org.jmodelica.icons.mls;
 
 import java.util.ArrayList;
-
-import org.eclipse.swt.graphics.Image;
 import org.jmodelica.icons.GraphicsInterface;
 import org.jmodelica.icons.mls.Types.Context;
 import org.jmodelica.icons.mls.primitives.Extent;
@@ -12,7 +10,6 @@ import org.jmodelica.icons.mls.primitives.Line;
 import org.jmodelica.icons.mls.primitives.Point;
 import org.jmodelica.icons.mls.primitives.Text;
 import org.jmodelica.icons.mls.primitives.Bitmap;
-import org.jmodelica.icons.AWTIconDrawer;
 
 public class Icon {
 
@@ -55,17 +52,13 @@ public class Icon {
 	}
 
 	private void drawClass(GraphicsInterface gi) {
-        // Hitta superklasser och rita dem.
     	for (Icon superIcon : getSuperclasses()) {
     		superIcon.drawClass(gi);
     	}
-		
-		// Rita den här klassen.
 		if (!layer.equals(Layer.NO_LAYER)) {
 			ArrayList<GraphicItem> items = layer.getGraphics();
 			if (items != null) {
 		        for (GraphicItem item : items) {
-//		        	System.out.println(this.className + " " + item.toString());
 		        	if (item instanceof Line) {
 		        		gi.drawLine((Line)item);
 		        	} else if (item instanceof Bitmap) {
@@ -84,18 +77,14 @@ public class Icon {
 	}
 	
 	private void drawComponents(GraphicsInterface gi) {
-		
-		// Rita superklassernas komponenter.
     	for (Icon superIcon : getSuperclasses()) {
     		superIcon.drawComponents(gi);
-
     	}
-
-    	// Hitta komponenter. 
-    	// För varje komponent:  
-    	// applicera dess placement, och rita ut den.
     	for (Component comp : getSubcomponents()) {
     		Icon compIcon = comp.getIcon();
+    		if(compIcon.layer == Layer.NO_LAYER) {
+    			continue;
+    		}
     		gi.saveTransformation();
     		Extent extent = this.layer.getCoordinateSystem().getExtent();
     		gi.setTransformation(comp, extent);
@@ -104,7 +93,6 @@ public class Icon {
 			gi.resetTransformation();
     	}	
 	}
-	
 	public String getComponentName() {
 		return componentName;
 	}
