@@ -43,8 +43,7 @@ public class CADGenerator extends CGenerator {
 		}
 	
 		public void generate(PrintStream genPrinter) {
-			if (fclass.root().options.getBooleanOption("generate_dae")
-			     && fclass.root().options.getBooleanOption("generate_dae_jacobian")) {
+			if (fclass.root().options.getBooleanOption("generate_dae_jacobian")) {
 				int i=0;
 				for (FAbstractEquation e : fclass.equations()) {
 					e.genResidual_CAD(i,INDENT,genPrinter);				
@@ -63,8 +62,7 @@ public class CADGenerator extends CGenerator {
 		}
 	
 		public void generate(PrintStream genPrinter) {
-			if (fclass.root().options.getBooleanOption("generate_dae")
-			     && fclass.root().options.getBooleanOption("generate_dae_jacobian")) {
+			if (fclass.root().options.getBooleanOption("generate_dae_jacobian")) {
 			    
 			    int dae_n_nz = fclass.freeParametersEquationSparsity_n_nz()+
 			        fclass.derivativeVariablesEquationSparsity_n_nz() + 
