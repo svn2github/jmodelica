@@ -325,7 +325,7 @@ public class AWTIconDrawer implements GraphicsInterface {
 		// AffineTransform of the Graphics2D object. 
 		ArrayList<Point> xformedPts = new ArrayList<Point>();
 		double[] coords = new double[6];
-		PathIterator pathIterator = shape.getPathIterator(g.getTransform(), 1.0);
+		PathIterator pathIterator = shape.getPathIterator(g.getTransform(), 0.1);
 		while (!pathIterator.isDone()) {
 			int segmentType = pathIterator.currentSegment(coords);
 			if (segmentType == PathIterator.SEG_LINETO) {
@@ -577,13 +577,10 @@ public class AWTIconDrawer implements GraphicsInterface {
 	 */
 	private Paint getTextureFillPaint(FilledShape s) {
         
-        double currentScaleX = g.getTransform().getScaleX();
-        double currentScaleY = g.getTransform().getScaleY();
-        double minScale = Math.min(currentScaleX, currentScaleY);
-		int baseTextureSize = 7;
-		int textureSize = (int)(1.0*baseTextureSize/minScale);
-        int anchorWidth = (int)(1.0*baseTextureSize/currentScaleX);
-        int anchorHeight = (int)(1.0*baseTextureSize/currentScaleY);
+		int textureSize = 7;
+		float lineThickness = 1.0f;
+		int anchorWidth = 7;
+		int anchorHeight = 7;
 		
 		BufferedImage img = new BufferedImage(
 				textureSize, 
@@ -600,7 +597,7 @@ public class AWTIconDrawer implements GraphicsInterface {
 		
 		graphics.setStroke(
 				new BasicStroke(
-						(float)(2.0f/(currentScaleX+currentScaleY)),
+						lineThickness,
 						BasicStroke.CAP_BUTT, 
 						BasicStroke.JOIN_MITER, 
 						10.0f, 
@@ -610,25 +607,15 @@ public class AWTIconDrawer implements GraphicsInterface {
 		);
 		if (s.getFillPattern().equals(FillPattern.BACKWARD)) {
 			graphics.drawLine(0, 0, textureSize, textureSize);
-			graphics.drawLine(0, textureSize-1, 1, textureSize);
-			graphics.drawLine(textureSize-1, 0, textureSize, 1);
 		} else if (s.getFillPattern().equals(FillPattern.FORWARD)) {
 			graphics.drawLine(textureSize, 0, 0, textureSize);
-			graphics.drawLine(1, 0, 0, 1);
-			graphics.drawLine(textureSize-1, textureSize, textureSize, textureSize-1);
 		} else if (s.getFillPattern().equals(FillPattern.CROSSDIAG)) {
 			graphics.drawLine(0, 0, textureSize, textureSize);
 			graphics.drawLine(textureSize, 0, 0, textureSize);
-			graphics.drawLine(0, textureSize-1, 1, textureSize);
-			graphics.drawLine(textureSize-1, 0, textureSize, 1);
-			graphics.drawLine(textureSize, 0, 0, textureSize);
-			graphics.drawLine(1, 0, 0, 1);			
 		} else if (s.getFillPattern().equals(FillPattern.HORIZONTAL)) {
 			graphics.drawLine(0, textureSize/2, textureSize, textureSize/2);
-		
 		} else if (s.getFillPattern().equals(FillPattern.VERTICAL)) {
-			graphics.drawLine(textureSize/2, 0, textureSize/2, textureSize);
-		
+			graphics.drawLine(textureSize/2, 0, textureSize/2, textureSize);		
 		} else if (s.getFillPattern().equals(FillPattern.CROSS)) {
 			graphics.drawLine(0, textureSize/2, textureSize, textureSize/2);
 			graphics.drawLine(textureSize/2, 0, textureSize/2, textureSize);
