@@ -372,7 +372,8 @@ public class AWTIconDrawer implements GraphicsInterface {
 							s.getFillPattern() == FillPattern.VERTICALCYLINDER ||
 							s.getFillPattern() == FillPattern.SPHERE);
 		if (s.getLinePattern() != LinePattern.NONE && !gradient) {
-			Stroke newStroke = getLineStroke(s.getLinePattern(), s.getLineThickness()); 
+			double thickness = s.getLineThickness()*getAvgCurrentScaleFactor();
+			Stroke newStroke = getLineStroke(s.getLinePattern(), thickness); 
 			g.setStroke(newStroke);
 			setColor(s.getLineColor());
 			AffineTransform oldTransform = g.getTransform();
