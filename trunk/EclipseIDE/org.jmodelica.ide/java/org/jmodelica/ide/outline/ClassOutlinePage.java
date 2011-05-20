@@ -24,15 +24,16 @@ import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
+import org.jastadd.plugin.compiler.ast.IASTNode;
 import org.jastadd.plugin.registry.ASTRegistry;
 import org.jastadd.plugin.registry.IASTRegistryListener;
 import org.jmodelica.ide.editor.ICurrentClassListener;
 import org.jmodelica.ide.helpers.Util;
+import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.BaseClassDecl;
 
 public class ClassOutlinePage extends OutlinePage implements IDoubleClickListener, IASTRegistryListener {
@@ -86,8 +87,9 @@ public class ClassOutlinePage extends OutlinePage implements IDoubleClickListene
 	}
 
 	public void childASTChanged(IProject project, String key) {
-		// TODO Auto-generated method stub
-		
+		ASTNode node = (ASTNode) registry.lookupAST(key, project);
+		if (!node.isError())
+			update(getContentProvider().getParent(node));
 	}
 
 	public void selectionChanged(SelectionChangedEvent event) {

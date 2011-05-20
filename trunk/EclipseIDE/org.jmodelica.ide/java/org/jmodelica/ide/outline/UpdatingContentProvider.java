@@ -25,11 +25,15 @@ public class UpdatingContentProvider implements ITreeContentProvider {
 	}
 
 	public Object[] getElements(Object inputElement) {
-		return IconRenderingWorker.addIcons(viewer, parent.getElements(inputElement));
+		if (inputElement instanceof ASTNode)
+			OutlineUpdateWorker.addChildren(viewer, (ASTNode) inputElement);
+		return OutlineUpdateWorker.addIcons(viewer, parent.getElements(inputElement));
 	}
 
 	public Object[] getChildren(Object parentElement) {
-		return IconRenderingWorker.addIcons(viewer, parent.getChildren(parentElement));
+		if (parentElement instanceof ASTNode)
+			OutlineUpdateWorker.addChildren(viewer, (ASTNode) parentElement);
+		return OutlineUpdateWorker.addIcons(viewer, parent.getChildren(parentElement));
 	}
 
 	public Object getParent(Object element) {

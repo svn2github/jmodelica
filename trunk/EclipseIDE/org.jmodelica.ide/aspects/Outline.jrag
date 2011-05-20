@@ -13,8 +13,9 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-import org.jmodelica.ide.ui.ImageLoader;
 import java.util.Arrays;
+import java.util.Collections;
+import org.jmodelica.ide.ui.ImageLoader;
 import org.jmodelica.ide.outline.LibrariesList;
 
 aspect Outline {
@@ -27,6 +28,7 @@ aspect Outline {
 	eq InstClassDecl.showInContentOutline() = true;
 	eq InstComponentDecl.showInContentOutline() = true;
 	
+	
 	/*
 	 * Don't traverse into error nodes.
 	 */
@@ -34,6 +36,7 @@ aspect Outline {
 	eq BadClassDecl.hasVisibleChildren() = false;
 	eq BadElement.hasVisibleChildren() = false;
 	eq BadArgument.hasVisibleChildren() = false;
+	
 	
 	/*
 	 * Set labels of interesting nodes
@@ -64,6 +67,7 @@ aspect Outline {
 		return buf.toString();
 	}
 	
+	
 	/**
 	 * Return the node that corresponds to the part of the code that we want to 
 	 * select when selecting this node in the outline.
@@ -75,6 +79,7 @@ aspect Outline {
 	eq InstClassDecl.getSelectionNode() = getClassDecl().getSelectionNode();
 	eq InstComponentDecl.getSelectionNode() = getComponentDecl().getSelectionNode();
 
+	
 // This has been moved to ModelicaIcons.jrag	
 //	/**
 //	 * Return the image to show for this node in outline.
@@ -84,6 +89,7 @@ aspect Outline {
 //	eq InstClassDecl.contentOutlineImage() = ImageLoader.getClassImage(getClassIconName(), false, true);
 //	eq InstComponentDecl.contentOutlineImage() = ImageLoader.getClassImage(getClassIconName(), true, true);
 //	eq ComponentDecl.contentOutlineImage() = ImageLoader.getFrequentImage(ImageLoader.COMPONENT_IMAGE);
+	
 	
 	/**
 	 * Return the class type for the node as defined by <pre>ImageLoader.*_CLASS</pre>, if applicable.
@@ -103,6 +109,7 @@ aspect Outline {
 	eq Record.getClassIconName() = ImageLoader.RECORD_CLASS;
 	eq MType.getClassIconName() = ImageLoader.TYPE_CLASS;
 
+	
 	/*
 	 * Lets us reorder nodes in outline. Higher category means show node later in tree.
 	 */
@@ -110,6 +117,7 @@ aspect Outline {
 	eq BaseClassDecl.outlineCategory() = -1;
 	eq InstClassDecl.outlineCategory() = -1;
 	eq LibClassDecl.outlineCategory()  = name().equals("Modelica") && isTopLevel() ? -2 : -1;
+	
 	
 	/*
      * To be able to sort nodes by declared order. We only need this for nodes that are shown in an outline.
@@ -140,6 +148,7 @@ aspect Outline {
     eq FullClassDecl.getComponentDecl(int i).myDeclaredIndex() = i;
     eq BaseNode.getChild().myDeclaredIndex()                   = 0;
     
+    
     // To compare nodes for opening paths and setting selections
     syn String ASTNode.outlineId()   = Integer.toHexString(hashCode());
     eq BaseClassDecl.outlineId()     = name();
@@ -147,6 +156,7 @@ aspect Outline {
     eq InstClassDecl.outlineId()     = name();
     eq InstComponentDecl.outlineId() = name();
 
+    
 	syn lazy org.jmodelica.ide.outline.LibrariesList SourceRoot.librariesList() = 
 		new org.jmodelica.ide.outline.LibrariesList(this);
 	
@@ -162,6 +172,9 @@ aspect Outline {
 	public void ClassDecl.setLibrariesList(org.jmodelica.ide.outline.LibrariesList librariesList) {
 		this.librariesList = librariesList;
 	}
+	
+	
+	syn lazy boolean BaseNode.hasVisibleChildren() = super.hasVisibleChildren();
 	
 	eq SourceRoot.hasVisibleChildren() {
 		for (StoredDefinition file : getProgram().getUnstructuredEntitys()) 
@@ -182,6 +195,7 @@ aspect Outline {
 	eq LibNode.hasVisibleChildren() = getStoredDefinition().getNumElement() > 0;
 	
 	eq LibClassDecl.outlineChildren() = classes();
+	eq LibClassDecl.hasVisibleChildren() = true;
 	
    	eq InstNode.hasVisibleChildren() {
    		/* Don't descend into error nodes. */
@@ -197,7 +211,122 @@ aspect Outline {
     	list.addAll(getInstComponentDecls().outlineChildren());
      	return list;
    	}
+
+
+	public Object[] ASTNode.cachedOutlineChildren() {
+		return outlineChildren().toArray();
+	}
+
+	public void ASTNode.updateOutlineCachedChildren() {}
 	
+	public boolean ASTNode.cachedOutlineChildrenIsCurrent() {
+		return true;
+	}
+   	
+   	// Add caching with delayed calculation for outline children
+	public class BaseNode {
+		
+		private CachedOutlineChildren myCachedOutlineChildren = null;
+		
+		private CachedOutlineChildren myCachedOutlineChildren() {
+			if (myCachedOutlineChildren == null)
+				myCachedOutlineChildren = new CachedOutlineChildren();
+			return myCachedOutlineChildren;
+		}
+		
+		protected void copyCachedOutline(Object[] src, Object[] dst) {
+			for (int s = 0, d = 0; s < src.length && d < dst.length; s++) {
+				if (src[s] instanceof BaseNode) {
+					BaseNode dn = null, sn = (BaseNode) src[s];
+					boolean found = false;
+					for (int i = d; !found && i < dst.length; i++) {
+						if (dst[i] instanceof BaseNode) {
+							dn = (BaseNode) dst[i];
+							if (sn == dn || sn.outlineId().equals(dn.outlineId())) {
+								d = i + 1;
+								dn.copyCachedOutlineFrom(sn);
+								found = true;
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		public void copyCachedOutlineFrom(BaseNode old) {
+			if (this != old) {
+				if (old.myCachedOutlineChildren != null && !myCachedOutlineChildren().iscurrent) 
+					myCachedOutlineChildren.children = old.myCachedOutlineChildren.children;
+				if (old.myCachedIcon != null && !myCachedIcon().iscurrent) 
+					myCachedIcon.icon = old.myCachedIcon.icon;
+			}
+		}
+		
+		public Object[] cachedOutlineChildren() {
+			return myCachedOutlineChildren().children;
+		}
+		
+		public void updateOutlineCachedChildren() {
+			myCachedOutlineChildren();
+			try {
+				Object[] children = outlineChildren().toArray();
+				copyCachedOutline(myCachedOutlineChildren.children, children);
+				myCachedOutlineChildren.children = children;
+				for (Object ch : myCachedOutlineChildren.children) 
+					if (ch instanceof BaseNode)
+						((BaseNode) ch).hasVisibleChildren();
+			} catch (Exception e) {
+				// Can't really do anything constructive here
+				e.printStackTrace();
+			}
+			myCachedOutlineChildren.iscurrent = true;
+		}
+		
+		public boolean cachedOutlineChildrenIsCurrent() {
+			return myCachedOutlineChildren != null && myCachedOutlineChildren.iscurrent;
+		}
+		
+		public void flushAttributes() {
+			super.flushAttributes();
+			if (myCachedOutlineChildren != null)
+				myCachedOutlineChildren.iscurrent = false;
+		}
+
+		private static class CachedOutlineChildren {
+			public static final Object[] DEFAULT = new Object[] { "..." }; 
+			
+			public Object[] children = DEFAULT;
+			public boolean iscurrent = false;
+		}
+	}
+	
+	private org.jmodelica.ide.outline.LibrariesList SourceRoot.oldLibrariesList;
+	public void SourceRoot.setOldLibrariesList(org.jmodelica.ide.outline.LibrariesList oldLibrariesList) {
+		this.oldLibrariesList = oldLibrariesList;
+	}
+	
+	public void SourceRoot.updateOutlineCachedChildren() {
+		if (oldLibrariesList != null) 
+			copyCachedOutline(oldLibrariesList.getChildren(), librariesList().getChildren());
+		else
+			librariesList().hasChildren();
+		oldLibrariesList = null;
+		super.updateOutlineCachedChildren();
+	}
+	
+	public void SourceRoot.copyCachedOutlineFrom(BaseNode old) {
+		if (this != old && old instanceof SourceRoot) 
+			setOldLibrariesList(((SourceRoot) old).librariesList());
+		super.copyCachedOutlineFrom(old);
+	}
+	
+	public void SourceRoot.flushAttributes() {
+		if (oldLibrariesList == null)
+			setOldLibrariesList(librariesList());
+		super.flushAttributes();
+	}
+	
+   	
 	/*
 	 * Explorer needs separate hasVisibleChildren, since it may need to load libraries.
 	 */
@@ -213,12 +342,14 @@ aspect Outline {
 		return false;
 	}
 	
+	
 	/*
 	 * For opening files from instance tree.
 	 */
 	syn String ASTNode.containingFileName() = fileName();
 	eq InstClassDecl.containingFileName() = getClassDecl().fileName();
 	eq InstComponentDecl.containingFileName() = getComponentDecl().fileName();
+	
 	
 	/*
 	 * Prune uninteresting parts of tree.

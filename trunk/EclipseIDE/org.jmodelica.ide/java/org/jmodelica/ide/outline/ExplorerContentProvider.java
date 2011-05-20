@@ -71,7 +71,7 @@ public class ExplorerContentProvider implements ITreeContentProvider, IResourceC
 		} else if (parentElement instanceof ClassDecl) {
 			children = getVisible(((ClassDecl) parentElement).classes());
 		}
-		return IconRenderingWorker.addIcons(viewer, children);
+		return OutlineUpdateWorker.addIcons(viewer, children);
 	}
 
 	public Object getParent(Object element) {
@@ -107,7 +107,7 @@ public class ExplorerContentProvider implements ITreeContentProvider, IResourceC
 		if (ast == null) 
 			ast = cmp.compileFile(file);
 		if (ast instanceof ASTNode)
-			IconRenderingWorker.addIcon(viewer, (ASTNode) ast);
+			OutlineUpdateWorker.addIcon(viewer, (ASTNode) ast);
 		return ast;
 	}
 	

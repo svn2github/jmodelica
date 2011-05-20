@@ -16,13 +16,27 @@
 package org.jmodelica.ide.outline;
 
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
 import org.jastadd.plugin.ui.view.JastAddLabelProvider;
 import org.jmodelica.ide.ui.ImageLoader;
 
 public class ExplorerLabelProvider extends OutlineAwareLabelProvider {
 	
+	private static final int SIZE = 16;
+
 	public ExplorerLabelProvider() {
 		super(OutlinePage.JASTADD_LABEL);
+	}
+
+	public Image getImage(Object element) {
+		Image image = super.getImage(element);
+		if (image != null && image.getBounds().width != SIZE) {
+			// Alternate method that might be faster exists, 
+			// see http://www.eclipse.org/articles/Article-SWT-images/graphics-resources.html
+			ImageData data = image.getImageData().scaledTo(SIZE, SIZE);
+			image = new Image(image.getDevice(), data);
+		}
+		return image;
 	}
 
 }

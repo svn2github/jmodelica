@@ -111,35 +111,40 @@ aspect ModelicaIcons
 	eq InstComponentDecl.contentOutlineImage() = cachedIcon();
 	
 	syn boolean ASTNode.contentOutlineImageCalculated() = true;
-	eq BaseNode.contentOutlineImageCalculated()         = myCachedIcon != null && myCachedIcon.calculated;
+	eq BaseNode.contentOutlineImageCalculated()         = myCachedIcon != null && myCachedIcon.iscurrent;
 	
 	public void ASTNode.updateCachedIcon() {}
 	
+	
+   	// Add caching with delayed calculation for icons
 	public class BaseNode {
 		
 		private CachedIcon myCachedIcon = null;
 		
-		public Image cachedIcon() {
+		private CachedIcon myCachedIcon() {
 			if (myCachedIcon == null)
 				myCachedIcon = new CachedIcon();
-			return myCachedIcon.icon;
+			return myCachedIcon;
+		}
+		
+		public Image cachedIcon() {
+			return myCachedIcon().icon;
 		}
 		
 		public void updateCachedIcon() {
-			if (myCachedIcon == null)
-				myCachedIcon = new CachedIcon();
+			myCachedIcon();
 			try {
 				myCachedIcon.icon = renderIcon(icon());
 			} catch (Exception e) {
 				// Can't really do anything constructive here
 				e.printStackTrace();
 			}
-			myCachedIcon.calculated = true;
+			myCachedIcon.iscurrent = true;
 		}
 
 		private static class CachedIcon {
 			public Image icon = null;
-			public boolean calculated = false;
+			public boolean iscurrent = false;
 		}
 	}
 	

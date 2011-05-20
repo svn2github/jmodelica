@@ -32,17 +32,19 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
+import org.jastadd.plugin.compiler.ast.IASTNode;
 import org.jastadd.plugin.compiler.ast.IJastAddNode;
 import org.jastadd.plugin.ui.view.AbstractBaseContentOutlinePage;
-import org.jastadd.plugin.ui.view.JastAddContentProvider;
 import org.jastadd.plugin.ui.view.JastAddLabelProvider;
-import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.ide.editor.Editor;
+import org.jmodelica.modelica.compiler.ASTNode;
+import org.jmodelica.modelica.compiler.BaseNode;
+import org.jmodelica.modelica.compiler.SourceRoot;
 
 public abstract class OutlinePage extends AbstractBaseContentOutlinePage {
 	
 	public static final JastAddLabelProvider JASTADD_LABEL = new JastAddLabelProvider();
-	public static final JastAddContentProvider JASTADD_CONTENT = new JastAddContentProvider();
+	public static final ASTContentProvider JASTADD_CONTENT = new ASTContentProvider();
 
 	private OutlineItemComparator comparator;
 	private IElementComparer comparer;
@@ -112,11 +114,20 @@ public abstract class OutlinePage extends AbstractBaseContentOutlinePage {
 	protected ITreeContentProvider createContentProvider() {
 		return JASTADD_CONTENT;
 	}
-	
+
 	/**
-	 * Redraws the tree view 
+	 * Updates the entire tree, keeping selection and open branches.
 	 */
 	public void update() {
+		update(null);
+	}
+
+	/**
+	 * Updates a part of the tree, keeping selection and open branches.
+	 * 
+	 * @param node  the node to update, or <code>null</code> to update entire tree
+	 */
+	public void update(Object node) {
         TreeViewer viewer = getTreeViewer();
 		if (viewer != null) {
 			Control control= viewer.getControl();
@@ -125,8 +136,12 @@ public abstract class OutlinePage extends AbstractBaseContentOutlinePage {
 				ISelection selection = viewer.getSelection();
 				TreePath[] paths = viewer.getExpandedTreePaths();
 				
-				viewer.setInput(fRoot); 
-				rootChanged(viewer);
+				if (node == null) {
+					viewer.setInput(fRoot); 
+					rootChanged(viewer);
+				} else {
+					viewer.refresh(node);
+				}
 				
 				if (paths.length > 0)
 					viewer.setExpandedTreePaths(paths);
@@ -136,6 +151,13 @@ public abstract class OutlinePage extends AbstractBaseContentOutlinePage {
 		}
 	}
 	
+	public void updateAST(IASTNode ast) {
+		// Copy cached outline children to new root
+		if (ast instanceof BaseNode && fRoot instanceof BaseNode)
+			((BaseNode) ast).copyCachedOutlineFrom((BaseNode) fRoot);
+		super.updateAST(ast);
+	}
+
 	protected abstract void rootChanged(TreeViewer viewer);
 
 	public void select(ASTNode<?> node) {
