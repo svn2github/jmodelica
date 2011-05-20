@@ -659,18 +659,16 @@ public class AWTIconDrawer implements GraphicsInterface {
 	        		IconConstants.OUTLINE_IMAGE_SIZE, colorModel.getPixelSize(),
 	                palette);
 	   
-	        imagedata.transparentPixel = palette.getPixel(new RGB(255, 0, 0));
+	        imagedata.transparentPixel = palette.getPixel(new RGB(255, 255, 255));
 	        
 	        for (int y = 0; y < imagedata.height; y++) {
 	        	int x = 0;
 	        	imagedata.setPixel(x, y, imagedata.transparentPixel);
-	        	imagedata.setAlpha(x, y, 0);
 	        }
 	         
         	for (int x = 0; x < imagedata.width; x++) {
         		int y = imagedata.height-1;
 	        	imagedata.setPixel(x, y, imagedata.transparentPixel);
-        		imagedata.setAlpha(x, y, 0);
         	}
 	        WritableRaster raster = image.getRaster();
 	        int[] pixelArray = new int[3];
@@ -683,7 +681,6 @@ public class AWTIconDrawer implements GraphicsInterface {
 	                        pixelArray[2]
 	                ));
 	                imagedata.setPixel(x+1, y, pixel);
-	                imagedata.setAlpha(x+1, y, 255);
 	            }
 	        }
 	    }
@@ -812,6 +809,7 @@ public class AWTIconDrawer implements GraphicsInterface {
 	}	
 	
 	private java.awt.Color translateColor(Color color) {
-		return new java.awt.Color(color.getR(), color.getG(), color.getB());
+		java.awt.Color c = new java.awt.Color(color.getR(), color.getG(), color.getB());
+		return c;
 	}
 }
