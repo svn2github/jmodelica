@@ -55,7 +55,7 @@ public class Icon {
     	for (Icon superIcon : getSuperclasses()) {
     		superIcon.drawClass(gi);
     	}
-		if (!layer.equals(Layer.NO_LAYER)) {
+		if (layer != Layer.NO_LAYER) {
 			ArrayList<GraphicItem> items = layer.getGraphics();
 			if (items != null) {
 		        for (GraphicItem item : items) {
@@ -118,7 +118,7 @@ public class Icon {
 	}
 
 	public void addSubcomponent(Component component) {
-		if(subcomponents.isEmpty() && layer.equals(Layer.NO_LAYER)) {
+		if(subcomponents.isEmpty() && layer == Layer.NO_LAYER) {
 			if(subcomponents.add(component)) {
 				layer = new Layer(CoordinateSystem.DEFAULT_COORDINATE_SYSTEM);
 			} 
@@ -138,18 +138,18 @@ public class Icon {
 	 * super classes or the sub components doesnt have a layer. 
 	 */
 	public Extent getExtent() {
-		if(!layer.equals(Layer.NO_LAYER)) {
+		if(layer != Layer.NO_LAYER) {
 			return layer.getCoordinateSystem().getExtent();
 		}		
 		for(Component comp : this.subcomponents) {
 	    	Icon compIcon = comp.getIcon(); 
-	    	if(!compIcon.layer.equals(Layer.NO_LAYER)) {
+	    	if(compIcon.layer != Layer.NO_LAYER) {
 				return compIcon.layer.getCoordinateSystem().getExtent();	
 			}
 		}
 		for (Icon icon : superclasses) {
 			Extent extent = icon.getExtent();
-			if(!extent.equals(Extent.NO_EXTENT)) {
+			if(extent != Extent.NO_EXTENT) {
 				return extent;
 			}
 		}	
@@ -165,7 +165,7 @@ public class Icon {
 	 */
 	//anropas från det grafiska användargränssnittet
 	public Extent getBounds(Extent bounds) {
-		if (!layer.equals(Layer.NO_LAYER)) {
+		if (layer != Layer.NO_LAYER) {
 			ArrayList<GraphicItem> items = layer.getGraphics();
 			for (GraphicItem item : items) {
 				if (!(item instanceof Text)) {

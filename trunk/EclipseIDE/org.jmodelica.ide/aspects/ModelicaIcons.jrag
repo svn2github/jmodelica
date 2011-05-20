@@ -53,7 +53,7 @@ aspect ModelicaIcons
 		}
 		icon = new Icon(qualifiedName(), layer, Context.ICON);
 		Icon superIcon = getExtendsClauseShortClass().findClassDecl().icon();
-		if (!superIcon.equals(Icon.NULL_ICON)) {
+		if (superIcon != Icon.NULL_ICON) {
 			icon.addSuperclass(superIcon);
 		}
 		visitingDuringIconRendering = false;
@@ -155,7 +155,7 @@ aspect ModelicaIcons
 			} else {
 				superIcon = superClass.diagram();
 			}
-			if(!superIcon.equals(Icon.NULL_ICON)) {
+			if(superIcon != Icon.NULL_ICON) {
 				icon.addSuperclass(superIcon);
 			}
 		}
@@ -188,7 +188,7 @@ aspect ModelicaIcons
 								subIcon = subDecl.icon();
 							}
 						}
-						if(!subIcon.equals(Icon.NULL_ICON)) {
+						if(subIcon != Icon.NULL_ICON) {
 							icon.addSubcomponent(
 									new Component(subIcon, placement)
 							);
@@ -212,7 +212,7 @@ aspect ModelicaIcons
 			} else {
 				superIcon = superDecl.diagram();
 			}
-			if(!superIcon.equals(Icon.NULL_ICON)) {
+			if (superIcon != Icon.NULL_ICON) {
 				icon.addSuperclass(superIcon);
 			}
 	 	}

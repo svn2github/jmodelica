@@ -103,7 +103,7 @@ public class AWTIconDrawer implements GraphicsInterface {
 		double imageWidth,imageHeight,iconWidth,iconHeight;
 		
 		iconExtent = icon.getExtent();
-		if(iconExtent.equals(Extent.NO_EXTENT)) {			
+		if(iconExtent == Extent.NO_EXTENT) {			
 			return;
 		} else {
     		iconExtent = icon.getBounds(iconExtent);
@@ -730,7 +730,7 @@ public class AWTIconDrawer implements GraphicsInterface {
 	
 	private Shape createShape(Text t) throws CreateShapeFailedException {
 		Extent extent = t.getExtent();
-		if (extent.equals(Extent.NO_EXTENT)) {
+		if (extent == Extent.NO_EXTENT) {
 			throw new CreateShapeFailedException("MLSText");
 		}
 		return new java.awt.Rectangle(
@@ -743,7 +743,7 @@ public class AWTIconDrawer implements GraphicsInterface {
 
 	private Shape createShape(Rectangle r) throws CreateShapeFailedException {
 		Extent extent = r.getExtent();
-		if (extent.equals(Extent.NO_EXTENT)) {
+		if (extent == Extent.NO_EXTENT) {
 			throw new CreateShapeFailedException("MLSRectangle");
 		}
 		return new java.awt.Rectangle(
@@ -775,7 +775,7 @@ public class AWTIconDrawer implements GraphicsInterface {
 	
 	private Shape createShape(Ellipse e) throws CreateShapeFailedException {
 		Extent extent = e.getExtent();
-		if (extent.equals(Extent.NO_EXTENT)) {
+		if (extent == Extent.NO_EXTENT) {
 			throw new CreateShapeFailedException("MLSEllipse");
 		}
 		return new Ellipse2D.Double(

@@ -68,12 +68,6 @@ public class Extent {
 	 * expanding it symmetric if necessary.
 	 */
 	public Extent contain(Extent e) {
-//		if(this.equals(NO_EXTENT)) {
-//			return new Extent(
-//					new Point(e.p1.getX(), e.p1.getY()), 
-//					new Point(e.p2.getX(), e.p2.getY())
-//			);
-//		}
 		Extent res = new Extent(
 				new Point(p1.getX(), p1.getY()), 
 				new Point(p2.getX(), p2.getY())
