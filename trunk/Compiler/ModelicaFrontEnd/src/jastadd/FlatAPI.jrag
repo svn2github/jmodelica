@@ -1585,7 +1585,11 @@ aspect FlatDiagnostics {
 		
 		str.append(incidence());
 
-//		str.append("\n");
+		str.append("\n");  
+		
+		str.append(dependencyDiagonstics());
+
+    	str.append("\n");
 		
 //		str.append(dersAndDiffs());
 		
@@ -1855,6 +1859,42 @@ aspect FlatDiagnostics {
 
 		return str.toString();
 		
+	}
+
+	public String FClass.dependencyDiagonstics() {
+		
+		StringBuilder str = new StringBuilder();
+			
+		if (root().options.getBooleanOption("equation_sorting")) {
+			
+			str.append("Variable dependencies:\n");
+			
+			str.append("Derivative variables: \n");
+			for (FVariable fv : derivativeVariables()) {
+				str.append(" " + fv.name() + "\n");
+				for (FVariable d : fv.dependsOn()) {
+					str.append("    " + d.name() + "\n");
+				}
+			}
+			str.append("\n");
+			str.append("Differentiated variables: \n");
+			for (FVariable fv : differentiatedRealVariables()) {
+				str.append(" " + fv.name() + "\n");
+				for (FVariable d : fv.dependsOn()) {
+					str.append("    " + d.name() + "\n");
+				}
+			}
+			str.append("\n");
+			str.append("Algebraic real variables: \n");
+			for (FVariable fv : algebraicRealVariables()) {
+				str.append(" " + fv.name() + "\n");
+				for (FVariable d : fv.dependsOn()) {
+					str.append("    " + d.name() + "\n");
+				}
+			}
+			str.append("\n");
+		}
+		return str.toString();
 	}
 
 	public String FClass.incidence() {

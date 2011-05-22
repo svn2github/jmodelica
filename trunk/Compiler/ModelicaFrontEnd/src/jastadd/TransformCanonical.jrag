@@ -143,6 +143,50 @@ aspect TransformCanonical {
 		}
 		
 	}
+	
+	public class StructuredBLT extends BLT {
+		private ArrayList<AbstractEquationBlock> topEquationBlocks = new ArrayList<AbstractEquationBlock>();
+		
+		public StructuredBLT() {
+		
+		}
+		
+		public StructuredBLT(BLT blt) {
+			for (AbstractEquationBlock eb : blt) {
+				this.add(eb);
+				eb.setDAEPredecessors();
+				if (eb.getPredecessors().size() == 0) {
+					topEquationBlocks.add(eb);
+				}
+			}
+		}
+		
+		public String toString() {
+			StringBuffer str = new StringBuffer();
+			str.append("************* Structured BLT*********\n");			
+			for (AbstractEquationBlock eb : this) {
+				str.append("**** Block ****\n");
+				str.append(eb.toString());
+				str.append("**** Depends on ****\n");
+				for (FVariable fv : eb.dependsOn()) {
+					str.append(fv.prettyPrint("") + "\n");
+				} 
+				str.append("**** Predecessors ****\n");
+				for (AbstractEquationBlock ebb : eb.getPredecessors()) {
+					str.append(ebb.toString());
+					str.append("---------\n");
+				}
+				str.append("**** Successors ****\n");
+				for (AbstractEquationBlock ebb : eb.getSuccessors()) {
+					str.append(ebb.toString());
+					str.append("---------\n");
+				}
+				str.append("**** Block ends ****\n");
+			}
+			str.append("************* Structured BLT ends *********\n");				
+			return str.toString();
+		}
+	}
 
 	public class ODEBLT extends BLT {
 		ArrayList<ArrayList<AbstractEquationBlock>> odeBLT = 
@@ -183,9 +227,57 @@ aspect TransformCanonical {
 	 */
 	public abstract class AbstractEquationBlock {
 	
+		private LinkedHashSet<AbstractEquationBlock> predecessors = new LinkedHashSet<AbstractEquationBlock>();
+		private LinkedHashSet<AbstractEquationBlock> successors = new LinkedHashSet<AbstractEquationBlock>();
+		private LinkedHashSet<FVariable> dependsOnVariables = null; 
+	
+		private boolean predecessorsSet = false;
+	
 		public abstract ArrayList<FAbstractEquation> equations();
 		
 		public abstract ArrayList<FVariable> activeVariables();
+		
+		public ArrayList<FVariable> inactiveVariables() {
+			ArrayList<FVariable> s = new ArrayList<FVariable>();
+			for (FAbstractEquation e : equations()) {
+				s.addAll(e.algebraicVariables());
+				s.addAll(e.derivativeVariables());	
+			}
+			s.removeAll(activeVariables());
+			return s;	
+		}		
+
+		public ArrayList<FVariable> independentVariables() {
+			ArrayList<FVariable> s = new ArrayList<FVariable>();
+			for (FAbstractEquation e : equations()) {
+				s.addAll(e.inputs());
+				s.addAll(e.differentiatedVariables());	
+				s.addAll(e.discretePreVariables());	
+			}
+			return s;
+		}		
+		
+		public void setDAEPredecessors() {
+			if (!predecessorsSet) {
+				for (FVariable fv : inactiveVariables()) {
+					predecessors.add(fv.myDAEEquationBlock());
+					fv.myDAEEquationBlock().getSuccessors().add(this);
+					fv.myDAEEquationBlock().setDAEPredecessors();
+				}
+				predecessorsSet = true;
+			}		
+		}
+		
+		public LinkedHashSet<FVariable> dependsOn() {
+			if (this.dependsOnVariables==null) {
+				dependsOnVariables = new LinkedHashSet<FVariable>();
+				dependsOnVariables.addAll(independentVariables());
+				for (AbstractEquationBlock eb : getPredecessors()) {
+					dependsOnVariables.addAll(eb.dependsOn());
+				}
+			}
+			return dependsOnVariables;
+		}
 		
 		public abstract boolean isSolvable();
 		
@@ -199,6 +291,17 @@ aspect TransformCanonical {
 			return diffedEq;
 		}
 		
+		public LinkedHashSet<AbstractEquationBlock> getPredecessors() {
+			return predecessors;
+		}	
+
+		public LinkedHashSet<AbstractEquationBlock> getSuccessors() {
+			return successors;
+		}	
+		
+		public boolean isPredecessorsSet() {
+			return predecessorsSet;
+		}
 		
 		public abstract String toString();
 	
@@ -369,7 +472,7 @@ aspect TransformCanonical {
 			}
 			return s;
 		}		
-			
+						
 		public boolean isSolvable() {
 			return false;
 		}			
@@ -397,101 +500,6 @@ aspect TransformCanonical {
 	
 	}
 
-/*
-	public class EquationBlock {
-		private ArrayList<MatchingPair> unsolvedPairs = new ArrayList<MatchingPair>();
-		private ArrayList<MatchingPair> solvedPairs = new ArrayList<MatchingPair>();
-		
-		public EquationBlock() {
-		}
-		
-		public void addSolvedMatchingPair(MatchingPair m) {
-			solvedPairs.add(m);
-		}	
-
-		public void addUnsolvedMatchingPair(MatchingPair m) {
-			unsolvedPairs.add(m);
-		}	
-
-		public ArrayList<FAbstractEquation> unsolvedEquations() {
-			ArrayList<FAbstractEquation> s = new ArrayList<FAbstractEquation>();
-			for (MatchingPair mp : unsolvedPairs) {
-				s.add(mp.getEquation());
-			}
-			return s;
-		}
-
-		public ArrayList<MatchingPair> getSolvedPairs() {
-			return solvedPairs;
-		}
-		
-		public ArrayList<FVariable> activeVariables() {
-			ArrayList<FVariable> s = new ArrayList<FVariable>();
-			for (MatchingPair mp : unsolvedPairs) {
-				s.add(mp.getFVariable());
-			}
-			return s;
-		}		
-		
-		public boolean isSolved() {
-			return unsolvedEquations().size()==1 && unsolvedEquations().get(0).isSolved(activeVariables().get(0).name());
-		}
-		
-		public FExp solution() {
-			if (isSolved()) {
-				return unsolvedEquations().get(0).solution(activeVariables().get(0).name());
-			} else {
-			    return null;
-			}
-		}
-						
-		public ArrayList<FAbstractEquation> differentiatedEquations() {
-			ArrayList<FAbstractEquation> diffedEq = new ArrayList<FAbstractEquation>();
-			for (FAbstractEquation e : unsolvedEquations()) {
-//			    System.out.println(e.prettyPrint("") + " " + e.getMeIntegrated());
-//				System.out.println(e.prettyPrint("") + " " + e.getMeDifferentiated());
-				if (e.getMeIntegrated()!=null) {
-					diffedEq.add(e);
-				}
-			}
-			return diffedEq;
-		}
-						
-		public boolean containsDerivative() {
-			for (FVariable fv : activeVariables()) {
-				if (fv.isDerivativeVariable()) {
-					return true;
-				}
-			}
-			return false;
-		}				
-						
-		public String toString() {
-			StringBuffer str = new StringBuffer();
-			str.append(isSolved()? ("Solved block of " + activeVariables().size() + " variables:\n"): 
-				("Non-solved block of " + activeVariables().size() + " variables:\n"));
-			if (isSolved()) {
-				str.append("Unknown variables:\n");
-				for (FVariable fv : activeVariables()) {
-					str.append("  " + fv.name() + "\n");
-				}
-				str.append("Solution:\n");
-				str.append("  " + solution().prettyPrint("") + "\n");
-			} else {
-				str.append("Unknown variables:\n");
-				for (FVariable fv : activeVariables()) {
-					str.append("  " + fv.name() + "\n");
-				}
-				str.append("Equations:\n");
-				for (FAbstractEquation feq : unsolvedEquations()) {
-					str.append("  " + feq.prettyPrint("") + "\n");			
-				}
-			}
-			return str.toString();
-		}
-		
-	}
-*/
     public class MatchingPair {
     	private FAbstractEquation eqn;
     	private FVariable fv;
@@ -508,6 +516,34 @@ aspect TransformCanonical {
     		return fv;
     	}
     }
+
+	syn lazy LinkedHashSet<FVariable> FVariable.dependsOn() {
+		if (myDAEEquationBlock() != null) {
+			return myDAEEquationBlock().dependsOn();
+		} else {
+			return new LinkedHashSet<FVariable>();
+		}
+	}
+
+	syn lazy AbstractEquationBlock FVariable.myDAEEquationBlock() = 
+		myFClass().getDAEFVariableEquationBlockMap().get(this);
+
+	private HashMap<FVariable,AbstractEquationBlock> FClass.daeFVariableEquationBlockMap = null;
+	syn HashMap<FVariable,AbstractEquationBlock> FClass.getDAEFVariableEquationBlockMap() {
+		if (daeFVariableEquationBlockMap == null) 
+			computeMatchingsAndBLT();
+		return daeFVariableEquationBlockMap;
+	}
+
+	syn lazy AbstractEquationBlock FVariable.myDAEInitEquationBlock() = 
+		myFClass().getDAEInitFVariableEquationBlockMap().get(this);
+	
+	private HashMap<FVariable,AbstractEquationBlock> FClass.daeInitFVariableEquationBlockMap = null;	
+	syn HashMap<FVariable,AbstractEquationBlock> FClass.getDAEInitFVariableEquationBlockMap() {
+		if (daeInitFVariableEquationBlockMap == null) 
+			computeMatchingsAndBLT();
+		return daeInitFVariableEquationBlockMap;
+	}
 
 	private ArrayList<MatchingPair> FClass.daeMatching = null;
 	syn ArrayList<MatchingPair> FClass.getDAEMatching() {
@@ -556,6 +592,13 @@ aspect TransformCanonical {
 		if (daeBLT == null) 
 			computeMatchingsAndBLT();
 		return daeBLT;
+	}
+
+	private StructuredBLT FClass.daeStructuredBLT = null;
+	syn StructuredBLT FClass.getDAEStructuredBLT() {
+		if (daeStructuredBLT == null) 
+			computeMatchingsAndBLT();
+		return daeStructuredBLT;
 	}
 	
 	private BLT FClass.daeInitBLT = null;	
@@ -610,13 +653,14 @@ aspect TransformCanonical {
 		daeMatching = new ArrayList<MatchingPair>();
 		daeInitMatching = new ArrayList<MatchingPair>();		
 	    daeBLT = new BLT();
+	    daeStructuredBLT = new StructuredBLT();
 	   	daeInitBLT = new BLT();		
 		daeUnmatchedEquations = new ArrayList<FAbstractEquation>();		
 		daeUnmatchedVariables = new ArrayList<FVariable>();			
 		daeInitUnmatchedEquations = new ArrayList<FAbstractEquation>();		
 		daeInitUnmatchedVariables = new ArrayList<FVariable>();			
-			
-		//System.out.println(prettyPrint(""));	
+		daeFVariableEquationBlockMap = new HashMap<FVariable,AbstractEquationBlock>();	
+		daeInitFVariableEquationBlockMap = new HashMap<FVariable,AbstractEquationBlock>();	
 			
 		BiPGraph g = new BiPGraph(name(),"");
 		
@@ -786,8 +830,17 @@ aspect TransformCanonical {
 			daeBLT = g.computeODEBLT();			
 			log.info(daeBLT.toString());
 		
-		}
+			for (AbstractEquationBlock eb : daeBLT) {
+				for (FVariable fv : eb.activeVariables()) {
+					daeFVariableEquationBlockMap.put(fv,eb);
+				}
+			}	
 			
+			daeStructuredBLT = new StructuredBLT(daeBLT);
+			log.info(daeStructuredBLT.toString());
+			
+		}
+						
 		// Find matching for the initialization system	
 
 		g.addVariables(this, BiPGraph.DIFFERENTIATED_VARIABLES | BiPGraph.DISCRETE_PRE_VARIABLES);
@@ -951,6 +1004,13 @@ aspect TransformCanonical {
 			
 			daeInitBLT = g.computeBLT();
 			log.info(daeInitBLT.toString());
+			for (AbstractEquationBlock eb : daeInitBLT) {
+				for (FVariable fv : eb.activeVariables()) {
+					daeInitFVariableEquationBlockMap.put(fv,eb);
+				}
+			}		
+			
+			
 		}
 	}	
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

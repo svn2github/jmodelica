@@ -3532,4 +3532,123 @@ Solution:
     - z = x - y -z - 5*z;
   end SolveEqTest7;
 
+model VarDependencyTest1
+	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FClassMethodTestCase(name="VarDependencyTest1",
+      methodName="dependencyDiagnostics",
+	equation_sorting = true,        
+        eliminate_alias_variables = false, 
+        description="Test computation of direct dependencies", methodResult=
+        "
+Variable dependencies:
+Derivative variables: 
+
+Differentiated variables: 
+
+Algebraic real variables: 
+ x[1]
+    u[1]
+ x[2]
+    u[2]
+ x[3]
+    u[3]
+ x[4]
+    u[4]
+ x[5]
+    u[1]
+ x[6]
+    u[1]
+    u[2]
+ x[7]
+    u[3]
+ x[8]
+    u[3]
+ x[9]
+    u[4]
+ x[10]
+    u[1]
+ x[11]
+    u[1]
+ x[12]
+    u[1]
+    u[2]
+ x[13]
+    u[3]
+ x[14]
+    u[3]
+    u[4]
+ x[15]
+    u[1]
+    u[2]
+    u[3]
+")})));
+  Real x[15];
+  input Real u[4];
+equation
+  x[1] = u[1];
+  x[2] = u[2];
+  x[3] = u[3];
+  x[4] = u[4];
+  x[5] = x[1];
+  x[6] = x[1] + x[2];
+  x[7] = x[3];
+  x[8] = x[3];
+  x[9] = x[4];
+  x[10] = x[5];
+  x[11] = x[5];
+  x[12] = x[1] + x[6];
+  x[13] = x[7] + x[8];
+  x[14] = x[8] + x[9];
+  x[15] = x[12] + x[3];
+
+end VarDependencyTest1;
+
+model VarDependencyTest2
+	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.FClassMethodTestCase(name="VarDependencyTest2",
+      methodName="dependencyDiagnostics",
+	equation_sorting = true,         
+        eliminate_alias_variables = false, 
+        description="Test computation of direct dependencies", methodResult=
+        "
+Variable dependencies:
+Derivative variables: 
+ der(x[1])
+    u[1]
+    x[1]
+    x[2]
+ der(x[2])
+    u[2]
+    u[3]
+    x[2]
+
+Differentiated variables: 
+ x[1]
+ x[2]
+
+Algebraic real variables: 
+ y[1]
+    u[1]
+    x[2]
+ y[2]
+    u[2]
+    u[3]
+    x[1]
+    x[2]
+ y[3]
+    u[1]
+    u[3]
+    x[1]
+")})));
+  Real x[2](each start=2);
+  input Real u[3];
+  Real y[3];
+equation
+  der(x[1]) = x[1] + x[2] + u[1];
+  der(x[2]) = x[2] + u[2] + u[3];
+  y[1] = x[2] + u[1];
+  y[2] = x[1] + x[2] + u[2] + u[3];
+  y[3] = x[1] + u[1] + u[3];
+end VarDependencyTest2;
+
 end TransformCanonicalTests;
