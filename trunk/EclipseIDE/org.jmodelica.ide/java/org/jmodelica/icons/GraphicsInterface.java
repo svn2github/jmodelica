@@ -2,10 +2,8 @@ package org.jmodelica.icons;
 
 import org.jmodelica.icons.mls.Bitmap;
 import org.jmodelica.icons.mls.Color;
-import org.jmodelica.icons.mls.Component;
 import org.jmodelica.icons.mls.Extent;
 import org.jmodelica.icons.mls.FilledShape;
-import org.jmodelica.icons.mls.Icon;
 import org.jmodelica.icons.mls.Line;
 import org.jmodelica.icons.mls.Text;
 

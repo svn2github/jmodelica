@@ -8,7 +8,7 @@ import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Display;
 import org.jastadd.plugin.ui.view.AbstractBaseContentOutlinePage;
-import org.jmodelica.icons.mls.Icon;
+import org.jmodelica.icons.Icon;
 import org.jmodelica.modelica.compiler.ClassDecl;
 import org.jmodelica.ide.outline.OutlinePage;
 /*
