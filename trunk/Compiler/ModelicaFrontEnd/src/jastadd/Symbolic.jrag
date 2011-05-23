@@ -349,12 +349,12 @@ aspect Derivatives {
 		return dynamicFExp(new FMulExp(new FCosExp((FExp)getFExp().fullCopy()),
 			getFExp().diff(name)));
 	}
-	
+	/*
 	public FExp FCosExp.diff(String name) {
 		return dynamicFExp(new FMulExp(new FSinExp((FExp)getFExp().fullCopy()),
 			getFExp().diff(name)));
 	}
-
+	*/
 	public FExp FIdUseExp.diff(String name) {	
 		if (variability().parameterOrLess()) {
 			return dynamicFExp(new FRealLitExp("0"));		
