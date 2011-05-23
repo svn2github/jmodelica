@@ -1,7 +1,5 @@
 package org.jmodelica.icons.mls;
 
-import org.jmodelica.icons.mls.primitives.Extent;
-import org.jmodelica.icons.mls.primitives.Point;
 
 public class Transformation {
 	private Point origin;

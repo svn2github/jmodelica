@@ -22,17 +22,17 @@ import javax.imageio.ImageIO;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.jmodelica.icons.exceptions.FailedConstructionException;
+import org.jmodelica.icons.mls.Extent;
+import org.jmodelica.icons.mls.FilledRectShape;
+import org.jmodelica.icons.mls.FilledShape;
+import org.jmodelica.icons.mls.Line;
+import org.jmodelica.icons.mls.Point;
+import org.jmodelica.icons.mls.Polygon;
+import org.jmodelica.icons.mls.Rectangle;
+import org.jmodelica.icons.mls.Text;
 import org.jmodelica.icons.mls.Types;
 import org.jmodelica.icons.mls.Types.FillPattern;
 import org.jmodelica.icons.mls.Types.LinePattern;
-import org.jmodelica.icons.mls.primitives.Extent;
-import org.jmodelica.icons.mls.primitives.FilledRectShape;
-import org.jmodelica.icons.mls.primitives.FilledShape;
-import org.jmodelica.icons.mls.primitives.Line;
-import org.jmodelica.icons.mls.primitives.Point;
-import org.jmodelica.icons.mls.primitives.Polygon;
-import org.jmodelica.icons.mls.primitives.Rectangle;
-import org.jmodelica.icons.mls.primitives.Text;
 import org.jmodelica.ide.Activator;
 //import org.jmodelica.icons.enums.LinePattern;
 

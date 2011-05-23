@@ -1,9 +1,6 @@
 package org.jmodelica.icons.mls;
 import java.util.ArrayList;
 
-import org.jmodelica.icons.mls.primitives.Extent;
-import org.jmodelica.icons.mls.primitives.GraphicItem;
-import org.jmodelica.icons.mls.primitives.Point;
 
 
 public class Layer {

@@ -1,9 +1,8 @@
 
-package org.jmodelica.icons.mls.primitives;
+package org.jmodelica.icons.mls;
 
 import java.util.ArrayList;
 
-import org.jmodelica.icons.mls.Types;
 
 public class Text extends FilledRectShape {
 	

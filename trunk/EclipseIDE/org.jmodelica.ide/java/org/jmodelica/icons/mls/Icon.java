@@ -3,13 +3,6 @@ package org.jmodelica.icons.mls;
 import java.util.ArrayList;
 import org.jmodelica.icons.GraphicsInterface;
 import org.jmodelica.icons.IconConstants.Context;
-import org.jmodelica.icons.mls.primitives.Extent;
-import org.jmodelica.icons.mls.primitives.FilledShape;
-import org.jmodelica.icons.mls.primitives.GraphicItem;
-import org.jmodelica.icons.mls.primitives.Line;
-import org.jmodelica.icons.mls.primitives.Point;
-import org.jmodelica.icons.mls.primitives.Text;
-import org.jmodelica.icons.mls.primitives.Bitmap;
 
 public class Icon {
 

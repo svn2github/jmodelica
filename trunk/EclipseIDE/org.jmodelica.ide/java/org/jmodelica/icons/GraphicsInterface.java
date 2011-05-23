@@ -1,13 +1,13 @@
 package org.jmodelica.icons;
 
+import org.jmodelica.icons.mls.Bitmap;
+import org.jmodelica.icons.mls.Color;
 import org.jmodelica.icons.mls.Component;
+import org.jmodelica.icons.mls.Extent;
+import org.jmodelica.icons.mls.FilledShape;
 import org.jmodelica.icons.mls.Icon;
-import org.jmodelica.icons.mls.primitives.Bitmap;
-import org.jmodelica.icons.mls.primitives.Color;
-import org.jmodelica.icons.mls.primitives.FilledShape;
-import org.jmodelica.icons.mls.primitives.Line;
-import org.jmodelica.icons.mls.primitives.Text;
-import org.jmodelica.icons.mls.primitives.Extent;
+import org.jmodelica.icons.mls.Line;
+import org.jmodelica.icons.mls.Text;
 
 public interface GraphicsInterface {
 	public abstract void drawLine(Line l);

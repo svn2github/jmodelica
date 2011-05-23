@@ -23,22 +23,22 @@ import org.jmodelica.icons.exceptions.CreateShapeFailedException;
 import org.jmodelica.icons.exceptions.FailedConstructionException;
 import org.jmodelica.icons.mls.Component;
 import org.jmodelica.icons.mls.CoordinateSystem;
+import org.jmodelica.icons.mls.Extent;
+import org.jmodelica.icons.mls.FilledRectShape;
+import org.jmodelica.icons.mls.FilledShape;
+import org.jmodelica.icons.mls.GraphicItem;
 import org.jmodelica.icons.mls.Icon;
 import org.jmodelica.icons.mls.Layer;
+import org.jmodelica.icons.mls.Line;
 import org.jmodelica.icons.mls.Placement;
+import org.jmodelica.icons.mls.Point;
+import org.jmodelica.icons.mls.Polygon;
+import org.jmodelica.icons.mls.Rectangle;
+import org.jmodelica.icons.mls.Text;
 import org.jmodelica.icons.mls.Types;
 import org.jmodelica.icons.mls.Types.FillPattern;
 import org.jmodelica.icons.mls.Types.LinePattern;
 import org.jmodelica.icons.mls.Types.TextAlignment;
-import org.jmodelica.icons.mls.primitives.Extent;
-import org.jmodelica.icons.mls.primitives.FilledRectShape;
-import org.jmodelica.icons.mls.primitives.FilledShape;
-import org.jmodelica.icons.mls.primitives.GraphicItem;
-import org.jmodelica.icons.mls.primitives.Line;
-import org.jmodelica.icons.mls.primitives.Point;
-import org.jmodelica.icons.mls.primitives.Polygon;
-import org.jmodelica.icons.mls.primitives.Rectangle;
-import org.jmodelica.icons.mls.primitives.Text;
 
 public class IconImage {
 	

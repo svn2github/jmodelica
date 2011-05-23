@@ -1,11 +1,10 @@
-package org.jmodelica.icons.mls.primitives;
+package org.jmodelica.icons.mls;
 
 import java.util.ArrayList;
 
-import org.jmodelica.icons.mls.Types;
+import org.jmodelica.icons.mls.Color;
 import org.jmodelica.icons.mls.Types.Arrow;
 import org.jmodelica.icons.mls.Types.FillPattern;
-import org.jmodelica.icons.mls.primitives.Color;
 import org.jmodelica.icons.IconConstants;
 
 /* TODO fixa så att punkter hamnar rätt i kordinatsystemet */

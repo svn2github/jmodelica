@@ -1,4 +1,4 @@
-package org.jmodelica.icons.mls.primitives;
+package org.jmodelica.icons.mls;
 
 public class Bitmap extends GraphicItem {
 
