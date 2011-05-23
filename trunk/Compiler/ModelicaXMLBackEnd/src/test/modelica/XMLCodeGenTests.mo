@@ -707,5 +707,131 @@ end XMLCodeGenTest2;
 			a.r[1] = a.b.x[1,1];
 			a.r[2] = a.b.x[2,1];
 	end VariableSortingTest7;
+
+	model DirectDependencyTest1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.XMLCodeGenTestCase(
+         name="DirectDependencyTest1",
+         description="",
+         equation_sorting=true,
+         elimiate_alias_variables=false,
+         template="$XML_variables$",
+         generatedCode="
+		<ScalarVariable name=\"u[1]\" valueReference=\"6\" variability=\"continuous\" causality=\"input\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" />
+		</ScalarVariable>
+		<ScalarVariable name=\"u[2]\" valueReference=\"7\" variability=\"continuous\" causality=\"input\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" />
+		</ScalarVariable>
+		<ScalarVariable name=\"u[3]\" valueReference=\"8\" variability=\"continuous\" causality=\"input\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" />
+		</ScalarVariable>
+		<ScalarVariable name=\"u[4]\" valueReference=\"9\" variability=\"continuous\" causality=\"input\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" />
+		</ScalarVariable>
+		<ScalarVariable name=\"x[1]\" valueReference=\"10\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" />
+		</ScalarVariable>
+		<ScalarVariable name=\"x[2]\" valueReference=\"11\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" />
+		</ScalarVariable>
+		<ScalarVariable name=\"x[3]\" valueReference=\"12\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" />
+		</ScalarVariable>
+		<ScalarVariable name=\"x[4]\" valueReference=\"13\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" />
+		</ScalarVariable>
+		<ScalarVariable name=\"x[5]\" valueReference=\"14\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" />
+		</ScalarVariable>
+		<ScalarVariable name=\"x[6]\" valueReference=\"15\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" />
+		</ScalarVariable>
+		<ScalarVariable name=\"x[7]\" valueReference=\"16\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" />
+		</ScalarVariable>
+		<ScalarVariable name=\"x[8]\" valueReference=\"17\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" />
+		</ScalarVariable>
+		<ScalarVariable name=\"x[9]\" valueReference=\"18\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" />
+		</ScalarVariable>
+		<ScalarVariable name=\"x[10]\" valueReference=\"19\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" />
+		</ScalarVariable>
+		<ScalarVariable name=\"x[11]\" valueReference=\"20\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" />
+		</ScalarVariable>
+		<ScalarVariable name=\"x[12]\" valueReference=\"21\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" />
+		</ScalarVariable>
+		<ScalarVariable name=\"x[13]\" valueReference=\"22\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" />
+		</ScalarVariable>
+		<ScalarVariable name=\"x[14]\" valueReference=\"23\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" />
+		</ScalarVariable>
+		<ScalarVariable name=\"x[15]\" valueReference=\"24\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" />
+		</ScalarVariable>
+		<ScalarVariable name=\"y1\" valueReference=\"25\" variability=\"continuous\" causality=\"output\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" />
+			<DirectDependency>
+				<Name>u[1]</Name>
+				<Name>u[2]</Name>
+				<Name>u[3]</Name>
+			</DirectDependency>
+		</ScalarVariable>
+		<ScalarVariable name=\"y2\" valueReference=\"26\" variability=\"continuous\" causality=\"output\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" />
+			<DirectDependency>
+				<Name>u[4]</Name>
+			</DirectDependency>
+		</ScalarVariable>
+		<ScalarVariable name=\"z[1]\" valueReference=\"3\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" />
+		</ScalarVariable>
+		<ScalarVariable name=\"der(z[1])\" valueReference=\"0\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" />
+		</ScalarVariable>
+		<ScalarVariable name=\"z[2]\" valueReference=\"4\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" />
+		</ScalarVariable>
+		<ScalarVariable name=\"der(z[2])\" valueReference=\"1\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" />
+		</ScalarVariable>
+		<ScalarVariable name=\"z[3]\" valueReference=\"5\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" />
+		</ScalarVariable>
+		<ScalarVariable name=\"der(z[3])\" valueReference=\"2\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" />
+		</ScalarVariable>
+")})));
+  Real x[15];
+  Real z[3];
+  input Real u[4];
+  output Real y1;
+  output Real y2;
+equation
+  der(z) = -z;
+  x[1] = u[1];
+  x[2] = u[2];
+  x[3] = u[3];
+  x[4] = u[4];
+  x[5] = x[1];
+  x[6] = x[1] + x[2];
+  x[7] = x[3];
+  x[8] = x[3];
+  x[9] = x[4];
+  x[10] = x[5];
+  x[11] = x[5];
+  x[12] = x[1] + x[6];
+  x[13] = x[7] + x[8];
+  x[14] = x[8] + x[9];
+  x[15] = x[12] + x[3];
+  y1 = x[15] + x[1] + z[1];
+  y2 = x[4] + sum(z);
+	end DirectDependencyTest1;
+
 		
 end XMLCodeGenTests;

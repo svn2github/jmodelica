@@ -393,6 +393,18 @@ public class XMLGenerator extends GenericGenerator {
 					}
 					
 					//direct dependency - not supported
+					if (variable.isOutput() && variable.isReal()) {
+						genPrinter.print("\n\t\t\t<DirectDependency>");
+						for (FVariable dv : variable.dependsOn()) {
+							if (dv.isInput()) {
+								genPrinter.print("\n\t\t\t\t<Name>");
+								genPrinter.print(dv.name());
+								genPrinter.print("</Name>");
+							}
+						}
+						genPrinter.print("\n\t\t\t</DirectDependency>");
+					}
+					
 					Boolean generateEqu = fclass.root().options.getBooleanOption("generate_xml_equations");
 					if (generateEqu){
 						//qualified name
