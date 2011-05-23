@@ -2,7 +2,7 @@ package org.jmodelica.icons.mls;
 
 import java.util.ArrayList;
 import org.jmodelica.icons.GraphicsInterface;
-import org.jmodelica.icons.mls.Types.Context;
+import org.jmodelica.icons.IconConstants.Context;
 import org.jmodelica.icons.mls.primitives.Extent;
 import org.jmodelica.icons.mls.primitives.FilledShape;
 import org.jmodelica.icons.mls.primitives.GraphicItem;

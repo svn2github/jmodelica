@@ -1,7 +1,7 @@
 import org.jmodelica.icons.mls.Icon;
 import org.jmodelica.icons.mls.Component;
 import org.jmodelica.icons.exceptions.FailedConstructionException;
-import org.jmodelica.icons.mls.Types.Context;
+import org.jmodelica.icons.IconConstants.Context;
 import org.jmodelica.icons.test.IconStatus;
 import org.jmodelica.icons.test.CreateIconJob;
 import java.awt.image.BufferedImage;

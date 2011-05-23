@@ -66,8 +66,4 @@ public class Types {
 		CENTER,
 		RIGHT
 	}
-	public static enum Context {
-		ICON,
-		DIAGRAM
-	}
 }

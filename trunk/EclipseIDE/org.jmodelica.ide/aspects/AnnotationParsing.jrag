@@ -9,7 +9,7 @@ import org.jmodelica.icons.mls.Types.Smooth;
 import org.jmodelica.icons.mls.Types.Arrow;
 import org.jmodelica.icons.mls.Types.TextStyle;
 import org.jmodelica.icons.mls.Types.TextAlignment;
-import org.jmodelica.icons.mls.Types.Context;
+import org.jmodelica.icons.IconConstants.Context;
 import org.jmodelica.icons.mls.Layer;
 import org.jmodelica.icons.mls.primitives.Extent;
 import org.jmodelica.icons.mls.primitives.FilledRectShape;

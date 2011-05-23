@@ -9,4 +9,8 @@ public class IconConstants {
 	public static final String IMAGE_FILE_PATH = "./Resources/";
 	public static final double TEXTURE_PATTERN_DISTANCE = 10.0;
 	
+	public static enum Context {
+		ICON,
+		DIAGRAM
+	}
 }
