@@ -15,7 +15,7 @@
 */
 import java.util.Arrays;
 import java.util.Collections;
-import org.jmodelica.ide.ui.ImageLoader;
+//import org.jmodelica.ide.ui.ImageLoader;
 import org.jmodelica.ide.outline.LibrariesList;
 
 aspect Outline {
@@ -23,10 +23,13 @@ aspect Outline {
 	 * Show interesting nodes
 	 */
 	eq Element.showInContentOutline() = !isError();
+	eq ComponentDecl.showInContentOutline() = false;
 	eq ExtendsClause.showInContentOutline() = false;
 	eq ImportClause.showInContentOutline() = false;
 	eq InstClassDecl.showInContentOutline() = true;
 	eq InstComponentDecl.showInContentOutline() = true;
+	
+	// TODO: show components and extends in the content outline and the project explorer?
 	
 	
 	/*
@@ -173,7 +176,18 @@ aspect Outline {
 		this.librariesList = librariesList;
 	}
 	
+
+	refine ContentOutline eq ASTNode.hasVisibleChildren() {
+		for (ASTNode child : this) 
+			if (child.showInContentOutline())
+				return true;
+		for (ASTNode child : this) 
+			if (child.hasVisibleChildren())
+				return true;
+		return false;
+	}
 	
+	// TODO: move laziness to interesting nodes?
 	syn lazy boolean BaseNode.hasVisibleChildren() = super.hasVisibleChildren();
 	
 	eq SourceRoot.hasVisibleChildren() {
@@ -201,8 +215,6 @@ aspect Outline {
    		/* Don't descend into error nodes. */
    		if (isError())
    			return false;
-    	if (showInContentOutline()) 
-       		return true;
     	return getInstClassDecls().hasVisibleChildren() || getInstComponentDecls().hasVisibleChildren();
    	}
    	eq InstNode.outlineChildren() {

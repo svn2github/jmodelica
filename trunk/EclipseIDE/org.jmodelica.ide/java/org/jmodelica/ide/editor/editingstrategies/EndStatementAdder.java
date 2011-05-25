@@ -6,7 +6,7 @@ import java.util.List;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IAutoEditStrategy;
 import org.eclipse.jface.text.IDocument;
-import org.jmodelica.ide.editor.actions.ToggleComment;
+import org.jmodelica.ide.actions.ToggleComment;
 import org.jmodelica.ide.indent.DocUtil;
 import org.jmodelica.ide.indent.IndentedSection;
 

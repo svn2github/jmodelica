@@ -23,6 +23,8 @@ import org.jmodelica.ide.ui.ImageLoader;
 public class ExplorerLabelProvider extends OutlineAwareLabelProvider {
 	
 	private static final int SIZE = 16;
+	private final Image DEFAULT_LARGE = ImageLoader.getFrequentImage(ImageLoader.GENERIC_CLASS_IMAGE);
+	private final Image DEFAULT_SMALL = ImageLoader.getFrequentImage(ImageLoader.GENERIC_CLASS_SMALL_IMAGE);
 
 	public ExplorerLabelProvider() {
 		super(OutlinePage.JASTADD_LABEL);
@@ -30,7 +32,9 @@ public class ExplorerLabelProvider extends OutlineAwareLabelProvider {
 
 	public Image getImage(Object element) {
 		Image image = super.getImage(element);
-		if (image != null && image.getBounds().width != SIZE) {
+		if (image == DEFAULT_LARGE) {
+			image = DEFAULT_SMALL;
+		} else if (image != null && image.getBounds().width != SIZE) {
 			// Alternate method that might be faster exists, 
 			// see http://www.eclipse.org/articles/Article-SWT-images/graphics-resources.html
 			ImageData data = image.getImageData().scaledTo(SIZE, SIZE);

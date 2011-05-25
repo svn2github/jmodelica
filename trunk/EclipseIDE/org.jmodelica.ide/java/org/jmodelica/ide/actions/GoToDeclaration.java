@@ -1,4 +1,4 @@
-package org.jmodelica.ide.editor.actions;
+package org.jmodelica.ide.actions;
 
 import org.eclipse.jface.action.Action;
 import org.jmodelica.ide.IDEConstants;

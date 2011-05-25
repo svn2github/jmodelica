@@ -23,7 +23,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.jmodelica.ide.helpers.Util;
 
-public class InstanceOutlinePage extends OutlinePage implements IDoubleClickListener {
+public class InstanceOutlinePage extends OutlinePage {
 
 	public InstanceOutlinePage(AbstractTextEditor editor) {
 		super(editor);
@@ -41,11 +41,6 @@ public class InstanceOutlinePage extends OutlinePage implements IDoubleClickList
 	@Override
 	public void createControl(Composite parent) {
 		super.createControl(parent);
-		getTreeViewer().addDoubleClickListener(this);
-	}
-
-	public void doubleClick(DoubleClickEvent event) {
-		Object elem = Util.getSelected(event.getSelection());
-		Util.openAndSelect(getSite().getPage(), elem, false);
+	    setDoubleClickHandling(true);
 	}
 }

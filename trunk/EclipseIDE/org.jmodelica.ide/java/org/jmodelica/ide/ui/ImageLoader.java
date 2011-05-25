@@ -47,11 +47,15 @@ public class ImageLoader {
 	public final static ImageDescriptor ANNOTATION_DESC = createImageDescriptor(ANNOTATION_IMAGE);
 	public final static String ANNOTATION_DIS_IMAGE = "buttons/annotation_dis.png";
 	public final static ImageDescriptor ANNOTATION_DIS_DESC = createImageDescriptor(ANNOTATION_DIS_IMAGE);
+
 	public final static String LIBRARY_IMAGE = "outline/library.png";
-	
 	public final static ImageDescriptor LIBRARY_DESC = createImageDescriptor(LIBRARY_IMAGE);
 	public final static String COMPONENT_IMAGE = "outline/component_generic.png";
 	public final static ImageDescriptor COMPONENT_DESC = createImageDescriptor(COMPONENT_IMAGE);
+	public final static String GENERIC_CLASS_IMAGE = "outline/class_generic.png";
+	public final static ImageDescriptor GENERIC_CLASS_DESC = createImageDescriptor(GENERIC_CLASS_IMAGE);
+	public final static String GENERIC_CLASS_SMALL_IMAGE = "outline/class_generic_small.png";
+	public final static ImageDescriptor GENERIC_CLASS_SMALL_DESC = createImageDescriptor(GENERIC_CLASS_SMALL_IMAGE);
 	
 	public final static String BLOCK_CLASS = "block";
 	public final static String CLASS_CLASS = "class";
@@ -76,19 +80,21 @@ public class ImageLoader {
 		ImageRegistry reg = Activator.getDefault().getImageRegistry();
 		reg.put(DUMMY_IMAGE, DUMMY_DESC);
 		reg.put(COMPONENT_IMAGE, COMPONENT_DESC);
+		reg.put(GENERIC_CLASS_IMAGE, GENERIC_CLASS_DESC);
+		reg.put(GENERIC_CLASS_SMALL_IMAGE, GENERIC_CLASS_SMALL_DESC);
 		
-		for (String c : CLASS_ICONS) {
-			String name = makeClassIconPath(c, false, false);
-			reg.put(name, createImageDescriptor(name));
-			name = makeClassIconPath(c, false, true);
-			reg.put(name, createImageDescriptor(name));
-		}
-		for (String c : CLASS_COMPS) {
-			String name = makeClassIconPath(c, true, false);
-			reg.put(name, createImageDescriptor(name));
-			name = makeClassIconPath(c, true, true);
-			reg.put(name, createImageDescriptor(name));
-		}
+//		for (String c : CLASS_ICONS) {
+//			String name = makeClassIconPath(c, false, false);
+//			reg.put(name, createImageDescriptor(name));
+//			name = makeClassIconPath(c, false, true);
+//			reg.put(name, createImageDescriptor(name));
+//		}
+//		for (String c : CLASS_COMPS) {
+//			String name = makeClassIconPath(c, true, false);
+//			reg.put(name, createImageDescriptor(name));
+//			name = makeClassIconPath(c, true, true);
+//			reg.put(name, createImageDescriptor(name));
+//		}
 	}
 	
 	

@@ -110,11 +110,11 @@ public class ModelicaEclipseCompiler extends AbstractCompiler {
 
 	public StoredDefinition recompile(String doc, IFile file) {
 		file = defaultToMock(file);
-		CompilationRoot lasr = new CompilationRoot(file.getProject());
+		CompilationRoot root = new CompilationRoot(file.getProject());
 
-		lasr.parseDoc(doc, file);
+		root.parseDoc(doc, file);
 
-		return lasr.getStoredDefinition();
+		return root.getStoredDefinition();
 	}
 
 	@Override

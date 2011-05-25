@@ -1,4 +1,4 @@
-package org.jmodelica.ide.editor.actions;
+package org.jmodelica.ide.actions;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -30,6 +30,7 @@ import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleConstants;
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
+import org.eclipse.ui.progress.IProgressConstants2;
 import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.editor.Editor;
 import org.jmodelica.ide.error.InstanceErrorHandler;
@@ -175,6 +176,7 @@ public class CompileFMUAction extends CurrentClassAction implements IJobChangeLi
 			this.dir = dir;
 			this.opt = opt;
 			this.proj = proj;
+			setProperty(IProgressConstants2.SHOW_IN_TASKBAR_ICON_PROPERTY, true);
 		}
 
 		@Override

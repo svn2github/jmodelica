@@ -17,31 +17,42 @@ package org.jmodelica.ide.outline;
 
 import java.util.ArrayList;
 
+import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IElementComparer;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.ViewerComparator;
+import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.TextTransfer;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.jastadd.plugin.compiler.ast.IASTNode;
 import org.jastadd.plugin.compiler.ast.IJastAddNode;
 import org.jastadd.plugin.ui.view.AbstractBaseContentOutlinePage;
 import org.jastadd.plugin.ui.view.JastAddLabelProvider;
+import org.jmodelica.ide.actions.CopyClassAction;
 import org.jmodelica.ide.editor.Editor;
+import org.jmodelica.ide.helpers.Util;
 import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.BaseNode;
-import org.jmodelica.modelica.compiler.SourceRoot;
+import org.jmodelica.modelica.compiler.ClassDecl;
 
-public abstract class OutlinePage extends AbstractBaseContentOutlinePage {
+public abstract class OutlinePage extends AbstractBaseContentOutlinePage implements IDoubleClickListener {
 	
 	public static final JastAddLabelProvider JASTADD_LABEL = new JastAddLabelProvider();
 	public static final ASTContentProvider JASTADD_CONTENT = new ASTContentProvider();
@@ -51,10 +62,12 @@ public abstract class OutlinePage extends AbstractBaseContentOutlinePage {
 	protected boolean selecting;
 	private IBaseLabelProvider labelProvider;
 	private UpdatingContentProvider contentProvider;
+	private boolean handleDoubleClick;
 
 	public OutlinePage(AbstractTextEditor editor) {
 		super(editor);
 		selecting = false;
+		handleDoubleClick = false;
 	}
 
 	@Override
@@ -80,7 +93,36 @@ public abstract class OutlinePage extends AbstractBaseContentOutlinePage {
 		TreeViewer viewer = getTreeViewer();
 		viewer.setComparator(getComparator());
 		viewer.setComparer(getComparer());
+		
+		// Set up drag & drop
+		ClassCopySource copySource = new ClassCopySource(viewer);
+		int ops = DND.DROP_COPY | DND.DROP_MOVE;
+		Transfer[] transfers = new Transfer[] { TextTransfer.getInstance() };
+		viewer.addDragSupport(ops, transfers, new ClassDragListener(copySource));
+		
+		// Set up copy/paste
+	    Clipboard clipboard = new Clipboard(getSite().getShell().getDisplay());
+	    IActionBars bars = getSite().getActionBars();
+	    bars.setGlobalActionHandler(
+	    		ActionFactory.COPY.getId(), 
+	    		new CopyClassAction(copySource, clipboard));
 		update();
+	}
+	
+	protected void setDoubleClickHandling(boolean active) {
+		handleDoubleClick = active;
+		if (active)
+			getTreeViewer().addDoubleClickListener(this);
+		else
+			getTreeViewer().removeDoubleClickListener(this);
+	}
+	
+	public void doubleClick(DoubleClickEvent event) {
+		if (handleDoubleClick) {
+			Object elem = Util.getSelected(event.getSelection());
+			Util.openAndSelect(getSite().getPage(), elem, true);
+			setFocus();
+		}
 	}
 
 	private IElementComparer getComparer() {

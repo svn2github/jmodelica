@@ -1,4 +1,4 @@
-package org.jmodelica.ide.editor.actions;
+package org.jmodelica.ide.actions;
 
 
 import org.eclipse.core.runtime.IProgressMonitor;

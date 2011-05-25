@@ -1,6 +1,6 @@
 package testcases;
 
-import org.jmodelica.ide.editor.actions.ToggleComment;
+import org.jmodelica.ide.actions.ToggleComment;
 
 import junit.framework.TestCase;
 

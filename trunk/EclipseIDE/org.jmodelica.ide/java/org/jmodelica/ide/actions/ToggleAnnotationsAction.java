@@ -1,5 +1,5 @@
 
-package org.jmodelica.ide.editor.actions;
+package org.jmodelica.ide.actions;
 
 import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.source.ISourceViewer;

@@ -39,14 +39,23 @@ public class Icon {
 		this.subcomponents = new ArrayList<Component>();
 	}
 	
+	
 	private Icon() {
-		this.componentName = "";
-		this.className = "";
-		this.context = null;
-		this.layer = null;
-		this.superclasses = null;
-		this.subcomponents = null; 
+		this("", Layer.NO_LAYER, null);
 	}
+	
+	public boolean isEmpty() {
+		if (layer != Layer.NO_LAYER)
+			return false;
+		for (Icon sup : superclasses) 
+			if (!sup.isEmpty())
+				return false;
+		for (Component comp : subcomponents) 
+			if (!comp.getIcon().isEmpty())
+				return false;
+		return true;
+	}
+
 	public void draw(GraphicsInterface gi) {
 		
 		drawClass(gi);	

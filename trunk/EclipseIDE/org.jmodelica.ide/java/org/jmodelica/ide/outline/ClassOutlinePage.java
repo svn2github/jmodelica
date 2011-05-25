@@ -52,10 +52,10 @@ public class ClassOutlinePage extends OutlinePage implements IDoubleClickListene
 	@Override
 	public void createControl(Composite parent) {
 		super.createControl(parent);
-		getTreeViewer().addDoubleClickListener(this);
 	    registry = org.jastadd.plugin.Activator.getASTRegistry();
 	    registry.addListener(this, project, null);
 	    projectASTChanged(project);
+	    setDoubleClickHandling(true);
 	}
 
 	@Override
@@ -75,11 +75,6 @@ public class ClassOutlinePage extends OutlinePage implements IDoubleClickListene
 
 	protected IBaseLabelProvider getLabelProvider() {
 		return new OutlineAwareLabelProvider(JASTADD_LABEL);
-	}
-
-	public void doubleClick(DoubleClickEvent event) {
-		Object elem = Util.getSelected(event.getSelection());
-		Util.openAndSelect(getSite().getPage(), elem, true);
 	}
 
 	public void projectASTChanged(IProject project) {

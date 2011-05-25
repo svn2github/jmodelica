@@ -75,10 +75,12 @@ public abstract class AbstractCompiler implements ICompiler {
 	 */
 	public void compile(IProject project, Collection<IFile> changedFiles, IProgressMonitor monitor) {
 		ASTRegistry reg = Activator.getASTRegistry();
+		Collection<String> extensions = acceptedFileExtensions();
 		for (IFile file : changedFiles) {
-			IASTNode node = compileToAST(file);
-			if (reg != null && node != null && node.hasLookupKey()) {
-				reg.updateAST(node, node.lookupKey(), file);
+			if (extensions.contains(file.getFileExtension())) {
+				IASTNode node = compileToAST(file);
+				if (reg != null && node != null && node.hasLookupKey()) 
+					reg.updateAST(node, node.lookupKey(), file);
 			}
 		}
 	}
