@@ -180,8 +180,14 @@
         for (Clause cl : getClauses()) 
 			cl.addToFullClassDecl(fcd);
         
-        if (hasExternalClause())
-        	fcd.setExternalClause(getExternalClause());
+        if (hasExternalClause()) {
+        	ExternalClause ext = getExternalClause();
+        	fcd.setExternalClause(ext);
+        	if (ext.hasAnnotation2()) {
+        		fcd.addAnnotation(ext.getAnnotation2());
+        		ext.setAnnotation2Opt(new Opt());
+        	}
+        }
     }
     
     public void Clause.addToFullClassDecl(FullClassDecl fcd) {}

@@ -402,7 +402,10 @@ ExternalClause external_clause =
 	SEMICOLON
 	annotation_sc.a2?  {:  return new ExternalClause(external_language, external_function_call, a1, a2); :}
 	;
-		
+/* TODO: When we change the allowed possition of class annotations to be at the end of the class as MLS 3.2 speecifies, 
+ *       we will need to remove the second annotation here. It shouldn't be there anyway, but both changes need to be 
+ *       done at the same time. */
+
 	
 ExternalLanguage external_language =
 	STRING.s {: return new ExternalLanguage(s); :}
