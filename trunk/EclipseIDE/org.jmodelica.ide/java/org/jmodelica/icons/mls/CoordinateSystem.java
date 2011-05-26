@@ -24,9 +24,8 @@ public class CoordinateSystem {
 	}
 	
 	public CoordinateSystem() {
-		this(Extent.DEFAULT_EXTENT, DEFAULT_PRESERVE_ASPECT_RATIO, DEFAULT_INITIAL_SCALE, DEFAULT_GRID);
+		this(new Extent(new Point(-100, -100), new Point(100, 100)), DEFAULT_PRESERVE_ASPECT_RATIO, DEFAULT_INITIAL_SCALE, DEFAULT_GRID);
 	}
-	
 	public CoordinateSystem(Extent extent) {
 		this(extent, DEFAULT_PRESERVE_ASPECT_RATIO, DEFAULT_INITIAL_SCALE, DEFAULT_GRID);
 	}

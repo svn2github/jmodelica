@@ -27,7 +27,9 @@ import org.jmodelica.icons.exceptions.FailedConstructionException;
 import org.jmodelica.icons.exceptions.NotEnoughParametersException;
 import java.lang.IllegalArgumentException;
 
+
 aspect AnnotationParsing {
+	
 	public class AnnotationNode {
 		public Layer createIconLayer(String path) {
 			Layer layer;
@@ -54,9 +56,6 @@ aspect AnnotationParsing {
 			}
 			return layer;
 		}
-	//	TODO
-	//	vi borde kolla context innan man anropar 
-	//	diagramTransformation/iconTransformation
 		public Placement createPlacement(Context context) 
 				throws FailedConstructionException, NotEnoughParametersException {
 			AnnotationNode placementAnnotation = forPath("Placement");
@@ -93,11 +92,9 @@ aspect AnnotationParsing {
 		public boolean hasPlacement() {
 			return forPath("Placement").exists();
 		}
-		//TODO vill man ha defaultextent i transformation??
-		//nu skapas ej transformation om extent inte finns eller är fel
 		private Transformation createTransformation() 
 			throws FailedConstructionException, NotEnoughParametersException {
-			Transformation transformation = new Transformation(null);
+			Transformation transformation = new Transformation();
 			boolean extentSet = false;
 			for (AnnotationNode a : this) {
 				try {
@@ -110,7 +107,6 @@ aspect AnnotationParsing {
 						transformation.setRotation(a.createRotation());
 					}
 				} catch(FailedConstructionException e) {
-					System.out.println(e.getMessage());
 				}
 			}
 			if (!extentSet) {
@@ -131,21 +127,16 @@ aspect AnnotationParsing {
 					}else if (c.name().equals("extent")) {
 						co.setExtent(c.createExtent());
 					}else if (c.name().equals("grid")) {
-						//TODO hur ska vi använda Grid?
 						co.setGrid(c.createGrid());	
 					} else if (c.name().equals("initialScale")) {
-						//TODO läs initialScale
 						//co.setInitialScale(c.real());
 					}
 				} catch (FailedConstructionException e) {
-					System.out.println(e.getMessage());
 				}catch(IllegalArgumentException ie) {
-					System.out.println(ie.getMessage());
 				}
 			}
 			return co;
 		}
-	//	TODO fixa färdig när vi vet hur grid ska användas
 		private double[] createGrid() 
 			throws FailedConstructionException, NotEnoughParametersException, IllegalArgumentException {
 			if(realVector() != null) {
@@ -185,7 +176,6 @@ aspect AnnotationParsing {
 						items.add(a.createBitmap(path));
 					}
 				} catch (FailedConstructionException e) {
-					System.out.println(e);
 				}
 			}
 			return items;
@@ -217,7 +207,6 @@ aspect AnnotationParsing {
 						filledShape.setLineThickness(a.createLineThickness());
 					}
 				} catch (FailedConstructionException e){
-					System.out.println(e.getMessage());
 				}
 			}
 			return (FilledShape)createGraphicItem(filledShape);
@@ -502,9 +491,7 @@ aspect AnnotationParsing {
 						rect.setRadius(a.createRadius());
 					}
 				}catch(FailedConstructionException e) {
-					System.out.println(e.getMessage());
 				}catch(IllegalArgumentException ia) {
-					System.out.println(ia.getMessage());
 				}
 			}
 			return rect;
@@ -544,7 +531,6 @@ aspect AnnotationParsing {
 					}
 				}
 				catch(FailedConstructionException e) {
-					System.out.println(e.getMessage());
 				}
 			}
 			if (!textStringSet) {
@@ -707,7 +693,6 @@ aspect AnnotationParsing {
 					).toUpperCase()
 				); 
 			} catch (IllegalArgumentException e) {
-				System.out.println("Illegalargumnet borderPattern");
 				throw new FailedConstructionException("BorderPattern");
 			}
 			return pattern; 

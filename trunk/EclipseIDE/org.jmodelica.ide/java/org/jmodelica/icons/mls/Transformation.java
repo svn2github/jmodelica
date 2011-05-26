@@ -14,7 +14,9 @@ public class Transformation {
 		this.origin = origin;
 		this.rotation = rotation;
 	}
-	
+	public Transformation() {
+		this(Extent.NO_EXTENT, DEFAULT_ORIGIN, DEFAULT_ROTATION);
+	}
 	public Transformation(Extent extent) {
 		this(extent, DEFAULT_ORIGIN, DEFAULT_ROTATION);
 	}
@@ -32,7 +34,6 @@ public class Transformation {
 	}
 	
 	public void setOrigin(Point origin) {
-		//System.out.println("Sätter origin.");
 		this.origin = origin;
 	}
 	
@@ -41,7 +42,6 @@ public class Transformation {
 	}
 	
 	public void setExtent(Extent extent) {
-		//System.out.println("Sätter extent.");
 		this.extent = extent;
 	}
 	
@@ -50,7 +50,6 @@ public class Transformation {
 	}
 	
 	public void setRotation(double rotation) {
-		//System.out.println("Sätter rotation.");
 		this.rotation = rotation;
 	}
 	

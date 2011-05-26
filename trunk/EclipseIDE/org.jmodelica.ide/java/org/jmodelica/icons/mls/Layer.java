@@ -44,11 +44,6 @@ public class Layer {
 	
 	public String toString() {
 		String s = "coordinateSystem = " + coordinateSystem + "\ngraphics: " + graphics;
-//		int index = 0;
-//		for (GraphicItem item : graphics) {
-//			s += "\nitem " + index + " = " + item.toString();
-//			index++;
-//		}
 		return s;
 	}
 }

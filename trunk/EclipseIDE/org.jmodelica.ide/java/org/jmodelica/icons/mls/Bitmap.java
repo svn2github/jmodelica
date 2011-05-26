@@ -8,6 +8,8 @@ public class Bitmap extends GraphicItem {
 	
 	public Bitmap() {
 		super();
+		this.extent = Extent.NO_EXTENT;
+		
 	}
 	
 	public Extent getExtent() {

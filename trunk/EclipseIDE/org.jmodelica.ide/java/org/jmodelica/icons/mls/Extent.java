@@ -5,8 +5,6 @@ public class Extent {
 	private Point p1;
 	private Point p2;
 	
-	public static Extent DEFAULT_EXTENT = new Extent(new Point(-100, -100), new Point(100, 100));
-
 	public static Extent NO_EXTENT = new Extent();
 	
 	private Extent() {
@@ -82,8 +80,6 @@ public class Extent {
 			res.p1.setX(e.p1.getX());
 			res.p2.setX(res.p2.getX() + diff);
 			
-			 
-			//öka y proportionellt
 			newHeight = (prop*res.getWidth());
 			diff =  (newHeight - res.getHeight())/2;
 			res.p1.setY(res.p1.getY() - diff);
@@ -95,8 +91,6 @@ public class Extent {
 			res.p1.setY(e.p1.getY());
 			res.p2.setY(res.p2.getY() + diff);
 			
-			
-			//öka x proportionellt
 			newWidth = res.getHeight()/prop;
 			diff = (newWidth - res.getWidth())/2; 
 			res.p1.setX(res.p1.getX() - diff);
@@ -108,14 +102,10 @@ public class Extent {
 			res.p2.setX(e.p2.getX());
 			res.p1.setX(res.p1.getX()-diff);
 			
-						
-			//öka y proportionellt
 			newHeight = (prop*res.getWidth());
 			diff =  (newHeight - res.getHeight())/2;
 			res.p1.setY(res.p1.getY() - diff);
 			res.p2.setY(res.p2.getY() + diff);
-			
-			
 		}
 		if (e.p2.getY() > res.p2.getY()) {
 			diff = e.p2.getY() - res.p2.getY();
@@ -123,12 +113,10 @@ public class Extent {
 			res.p2.setY(e.p2.getY());
 			res.p1.setY(res.p1.getY() - diff);
 			
-			//öka x proportionellt
 			newWidth = res.getHeight()/prop;
 			diff = (newWidth - res.getWidth())/2; 
 			res.p1.setX(res.p1.getX() - diff);
 			res.p2.setX(res.p2.getX() + diff);
-		
 		}
 		return res;
 	}

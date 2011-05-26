@@ -89,8 +89,7 @@ public class Line extends GraphicItem {
 		arrowPolygons = new Polygon[2];
 		
 		if (arrow[0] != Arrow.NONE) {
-			
-			// First 2 points.
+		
 			Point p1 = points.get(1);
 			Point p2 = points.get(0);
 			arrowPolygons[0] = createArrowPolygon(p1, p2);
@@ -101,8 +100,7 @@ public class Line extends GraphicItem {
 			arrowPolygons[0] = null;
 		}
 		if (arrow[1] != Arrow.NONE) {
-			
-			// Last 2 points.
+		
 			Point p1 = points.get(points.size()-2);
 			Point p2 = points.get(points.size()-1);
 			arrowPolygons[1] = createArrowPolygon(p1, p2);
@@ -121,35 +119,27 @@ public class Line extends GraphicItem {
     	double x2 = p2.getX();
     	double y2 = p2.getY();
 
-    	// hittar vinkelrät linje...
-    	// deklarerar linjen som en vektor
     	double vector1x = x2-x1;
     	double vector1y = y2-y1;
   
-    	// räknar ut absolutbelopp
     	double vector1abs = Math.sqrt(vector1x*vector1x+vector1y*vector1y);
     	
-    	// hittar den normerade vektorn
     	double vector1normx = vector1x/vector1abs;
     	double vector1normy = vector1y/vector1abs;
     	
-      	// hittar vinkelrät vektor
     	double vector2normx = -vector1normy;
     	double vector2normy = vector1normx;
     	
-    	// "backar" från slutet av linjen
     	Point p3 = new Point(
     			x2-arrowSizePixles*vector1normx,
     			y2-arrowSizePixles*vector1normy
     	);
     	
-    	// hittar pilens ena hörn
     	Point p4 = new Point(
     			p3.getX()+0.5*arrowSizePixles*vector2normx, 
     			p3.getY()+0.5*arrowSizePixles*vector2normy
     	);
 
-    	// hittar pilens andra hörn
     	Point p5 = new Point(
     			p3.getX()-0.5*arrowSizePixles*vector2normx, 
     			p3.getY()-0.5*arrowSizePixles*vector2normy
@@ -161,8 +151,7 @@ public class Line extends GraphicItem {
     	arrowpoints.add(p4);
     	arrowpoints.add(p5);
     	
-    	Polygon arrowPolygon = new Polygon(arrowpoints);
-    	
+    	Polygon arrowPolygon = new Polygon(arrowpoints);    	
     	return arrowPolygon;
 	}
 	

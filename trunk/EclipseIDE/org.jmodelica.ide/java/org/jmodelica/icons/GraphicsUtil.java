@@ -38,36 +38,9 @@ import org.jmodelica.ide.Activator;
 
 public class GraphicsUtil {
 
-//	public static final double PIXLES_PER_MM = 2.0;
 	public static final String IMAGE_FILE_PATH = "./Resources/";
 	public static final double TEXTURE_PATTERN_DISTANCE = 10.0;
 
-
-	/**
-	 * Creates a Paint object that matches the shape's colors and fill pattern.
-	 * 
-	 * @param shape
-	 * @return
-	 */
-
-	/**
-	 * Creates and returns a Stroke object that matches the specified line
-	 * pattern and thickness.
-	 * 
-	 * @param pattern
-	 * @param thickness
-	 * @return
-	 */
-	
-	
-	/**
-	 * Changes the specified Font object to match the font of the provided Text
-	 * primitive. The changed Font object is then returned.
-	 * 
-	 * @param font
-	 * @param text
-	 * @return
-	 */
 	
 	/**
 	 * Returns a list of points that can be used for drawing the border pattern

@@ -93,15 +93,14 @@ public class Icon {
     	}
     	for (Component comp : getSubcomponents()) {
     		Icon compIcon = comp.getIcon();
-    		if(compIcon.layer == Layer.NO_LAYER) {
-    			continue;
+    		if(compIcon.layer != Layer.NO_LAYER) {
+	    		gi.saveTransformation();
+	    		Extent extent = this.layer.getCoordinateSystem().getExtent();
+	    		gi.setTransformation(comp, extent);
+				compIcon.drawClass(gi);
+				compIcon.drawComponents(gi);
+				gi.resetTransformation();
     		}
-    		gi.saveTransformation();
-    		Extent extent = this.layer.getCoordinateSystem().getExtent();
-    		gi.setTransformation(comp, extent);
-			compIcon.drawClass(gi);
-			compIcon.drawComponents(gi);
-			gi.resetTransformation();
     	}	
 	}
 	public String getComponentName() {
@@ -198,7 +197,6 @@ public class Icon {
 		}
 		return bounds;
 	}
-	
 	public String toString() {
 		String s = "";
 		s += "\nclassName = " + className;
