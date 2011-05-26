@@ -36,7 +36,7 @@ aspect ModelicaIcons
 		Layer layer = Layer.NO_LAYER;
 		AnnotationNode annotation = annotation();
 		if (annotation.exists()) {
-			layer = annotation.iconLayer(dirName());
+			layer = annotation.createIconLayer(dirName());
 		}
 		icon = new Icon(qualifiedName(), layer, Context.ICON); 
 		icon = addSuperClasses(icon);
@@ -50,7 +50,7 @@ aspect ModelicaIcons
 		Layer layer = Layer.NO_LAYER;
 		AnnotationNode annotation = annotation();
 		if (annotation.exists()) {
-			layer = annotation.iconLayer(dirName());
+			layer = annotation.createIconLayer(dirName());
 		}
 		icon = new Icon(qualifiedName(), layer, Context.ICON);
 		Icon superIcon = getExtendsClauseShortClass().findClassDecl().icon();
@@ -65,7 +65,7 @@ aspect ModelicaIcons
 		Layer layer = Layer.NO_LAYER;
 		AnnotationNode annotation = annotation();
 		if (annotation.exists()) {
-			layer = annotation.diagramLayer(dirName());
+			layer = annotation.createDiagramLayer(dirName());
 		}	
 		icon = new Icon(qualifiedName(), layer, Context.DIAGRAM); 
 		icon = addSuperClasses(icon);
@@ -78,7 +78,7 @@ aspect ModelicaIcons
 		Layer layer = Layer.NO_LAYER;
 		AnnotationNode annotation = annotation();
 		if (annotation.exists()) {
-			layer = annotation.iconLayer(dirName());
+			layer = annotation.createIconLayer(dirName());
 		}
 		icon = new Icon(qualifiedName(), layer, Context.ICON);
 		icon = addSuperClasses(icon);
@@ -91,7 +91,7 @@ aspect ModelicaIcons
 		Layer layer = Layer.NO_LAYER;
 		AnnotationNode annotation = annotation();
 		if (annotation.exists()) {
-			layer = annotation.diagramLayer(dirName());
+			layer = annotation.createDiagramLayer(dirName());
 		}
 		icon = new Icon(qualifiedName(), layer, Context.DIAGRAM);
 		icon = addSuperClasses(icon);
@@ -182,7 +182,7 @@ aspect ModelicaIcons
 			if(compAnnotation.hasPlacement()) {
 				try {
 					if (subDecl instanceof BaseClassDecl) {
-						Placement placement = compAnnotation.constructPlacement(icon.getContext());
+						Placement placement = compAnnotation.createPlacement(icon.getContext());
 						boolean isProtected = componentDecl.isProtected();
 						boolean isConnector = ((BaseClassDecl)subDecl).getRestriction() instanceof Connector;
 						Icon subIcon = Icon.NULL_ICON;
@@ -238,7 +238,7 @@ aspect ModelicaIcons
 //			AnnotationNode placementAnnotation = componentDecl.annotation();
 //			if(placementAnnotation.hasPlacement()) {	
 //				try {
-//					Placement placement = placementAnnotation.constructPlacement(icon.getContext());
+//					Placement placement = placementAnnotation.createPlacement(icon.getContext());
 //					if (subDecl instanceof InstBaseClassDecl) {
 //						boolean isProtected = componentDecl.getComponentDecl().isProtected();
 //						boolean isConnector = ((InstBaseClassDecl)subDecl).isConnector();
