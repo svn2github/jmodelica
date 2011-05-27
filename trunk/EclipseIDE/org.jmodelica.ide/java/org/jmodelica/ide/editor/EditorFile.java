@@ -40,13 +40,13 @@ public class EditorFile {
 
 			IFileEditorInput i = (IFileEditorInput) input;
 			file = i.getFile();
-			path = file.getRawLocation().toOSString();
+			path = file.getLocation().toOSString();
 
 		} else if (input instanceof IURIEditorInput) {
 
 			IURIEditorInput i = (IURIEditorInput) input;
 
-			path = i.getURI().getRawPath();
+			path = i.getURI().getPath();
 			file = EclipseUtil.getFileForPath(path).value();
 
 		} else {
