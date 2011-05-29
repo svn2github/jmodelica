@@ -527,6 +527,12 @@ public class BiPGraph {
 				
 		LinkedHashSet<Eq> es = new LinkedHashSet<Eq>();
 		es.addAll(getEquations());
+		
+		// If there are no equations, we cannot do index reduction.
+		if (es.size()==0) {
+			return null;
+		}
+		
 		FClass fc = es.iterator().next().getEquation().myFClass();	
 		
 		Eq eqToMatch;

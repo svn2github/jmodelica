@@ -1901,6 +1901,28 @@ equation
   x = 5;
 end UnbalancedTest3_Err;
 
+model UnbalancedTest4_Err
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="UnbalancedTest4_Err",
+        description="Test error messages for unbalanced systems.",
+                                               errorMessage=
+"
+2 error(s), 0 compliance error(s) and 0 warning(s) found:
+
+Error: in file 'TransformCanonicalTests.UnbalancedTest4_Err.mof':
+Semantic error at line 0, column 0:
+  The DAE system has 0 equations and 1 free variables.
+
+Error: in file 'TransformCanonicalTests.UnbalancedTest4_Err.mof':
+Semantic error at line 0, column 0:
+  The system is structurally singuar. The following varible(s) could not be matched to any equation:
+   x
+")})));
+
+  Real x;
+equation
+end UnbalancedTest4_Err;
+
 model WhenEqu15
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.FlatteningTestCase(
