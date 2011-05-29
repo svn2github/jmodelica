@@ -3270,6 +3270,30 @@ equation
   (x1,x2) = F(x2); 
 end IndexReduction5_Err;
 
+  model IndexReduction6_Cos
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IndexReduction6_Cos",
+         description="Test of index reduction",
+         flatModel="
+fclass TransformCanonicalTests.IndexReduction6_Cos
+ Real x1;
+ Real x2;
+ Real der_x1;
+initial equation 
+ x2 = 0.0;
+equation
+ der_x1 + der(x2) = 1;
+ x1 + cos(x2) = 0;
+ der_x1 - ( ( sin(x2) ) * ( der(x2) ) ) = 0;
+end TransformCanonicalTests.IndexReduction6_Cos;
+")})));
+  Real x1,x2;
+equation
+  der(x1) + der(x2) = 1;
+  x1 + cos(x2) = 0;
+  end IndexReduction6_Cos;
+
 model DuplicateVariables1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
