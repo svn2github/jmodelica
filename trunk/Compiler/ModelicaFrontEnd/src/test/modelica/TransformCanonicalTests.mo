@@ -3193,6 +3193,83 @@ equation
   i1=i2+iL;
   end IndexReduction3_Electrical;
 
+model IndexReduction4_Err
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="IndexReduction4_Err",
+        description="Test error messages for unbalanced systems.",
+                                               errorMessage=
+"
+2 error(s), 0 compliance error(s) and 0 warning(s) found:
+
+Error: in file 'TransformCanonicalTests.IndexReduction4_Err.mof':
+Semantic error at line 0, column 0:
+  Cannot differentiate the expression 'TransformCanonicalTests.IndexReduction4_Err.F(x2)' in equation: 
+   x1 + TransformCanonicalTests.IndexReduction4_Err.F(x2) = 1
+
+Error: in file 'TransformCanonicalTests.IndexReduction4_Err.mof':
+Semantic error at line 0, column 0:
+  The system is structurally singuar. The following varible(s) could not be matched to any equation:
+   der(x2)
+
+  The follwowing equation(s) could not be matched to any variable:
+   x1 + TransformCanonicalTests.IndexReduction4_Err.F(x2) = 1
+")})));
+
+  function F
+    input Real x;
+    output Real y;
+  algorithm
+    y := sin(x);
+  end F;
+  Real x1;
+  Real x2;
+equation
+  der(x1) + der(x2) = 1;
+  x1 + F(x2) = 1; 
+end IndexReduction4_Err;
+
+model IndexReduction5_Err
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="IndexReduction5_Err",
+        description="Test error messages for unbalanced systems.",
+                                               errorMessage=
+"
+3 error(s), 0 compliance error(s) and 0 warning(s) found:
+
+Error: in file 'TransformCanonicalTests.IndexReduction5_Err.mof':
+Semantic error at line 0, column 0:
+  Cannot differentate the equation 
+   (x1, x2) = TransformCanonicalTests.IndexReduction5_Err.F(x2)
+
+Error: in file 'TransformCanonicalTests.IndexReduction5_Err.mof':
+Semantic error at line 0, column 0:
+  The DAE system has 3 equations and 2 free variables.
+
+Error: in file 'TransformCanonicalTests.IndexReduction5_Err.mof':
+Semantic error at line 0, column 0:
+  The system is structurally singuar. The following varible(s) could not be matched to any equation:
+   der(x2)
+
+  The follwowing equation(s) could not be matched to any variable:
+   (x1, x2) = TransformCanonicalTests.IndexReduction5_Err.F(x2)
+   (x1, x2) = TransformCanonicalTests.IndexReduction5_Err.F(x2)
+")})));
+
+  function F
+    input Real x;
+    output Real y1;
+    output Real y2;
+  algorithm
+    y1 := sin(x);
+    y1 := cos(x);
+  end F;
+  Real x1;
+  Real x2;
+equation
+  der(x1) + der(x2) = 1;
+  (x1,x2) = F(x2); 
+end IndexReduction5_Err;
+
 model DuplicateVariables1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(

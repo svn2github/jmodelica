@@ -277,13 +277,40 @@ aspect EquationSolve {
 
 aspect Derivatives {
 
+    public class EquationDifferentiationException extends RuntimeException {
+    
+    	public FAbstractEquation equation;
+    	
+    	public EquationDifferentiationException(FAbstractEquation e, String message) {
+    		super(message);
+    		this.equation = e;
+    	}
+    
+    }
+
+    public class ExpressionDifferentiationException extends RuntimeException {
+    
+    	public FExp fexp;
+    	
+    	public ExpressionDifferentiationException(FExp e) {
+    		this.fexp = e;
+    	}
+    
+    }
+
 	public FAbstractEquation FAbstractEquation.diff(String name) {
-		return null;
+		throw new EquationDifferentiationException(this, "Cannot differentate the equation \n   " + prettyPrint(""));
 	}
 	
 	public FAbstractEquation FEquation.diff(String name) {
-		return dynamicFAbstractEquation(new FEquation(getLeft().diff(name),
-			getRight().diff(name)));
+		try {
+			return dynamicFAbstractEquation(new FEquation(getLeft().diff(name),
+				getRight().diff(name)));
+		} catch (ExpressionDifferentiationException e) {
+			throw new EquationDifferentiationException(this,
+			    "Cannot differentiate the expression '" + e.fexp.prettyPrint("") + 
+			    "' in equation: \n   " + prettyPrint(""));
+		}
 	}
 
 	public FExp FExp.diff(String name, int n) {
@@ -299,7 +326,7 @@ aspect Derivatives {
 	}
 
 	public FExp FExp.diff(String name) {
-		return dynamicFExp(new FNoExp());
+		throw new ExpressionDifferentiationException(this);
 	}
 	
 	public FExp FAddExp.diff(String name) {

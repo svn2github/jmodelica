@@ -607,6 +607,9 @@ aspect TransformCanonical {
 			computeMatchingsAndBLT();
 		return daeInitBLT;
 	}	
+	
+	public ArrayList<String> FClass.indexReductionErrors = new ArrayList<String>();
+	
 	/**
 	 * The symbolic equation sorting and canonicalization proceeds in the
 	 * following steps:
@@ -691,8 +694,15 @@ aspect TransformCanonical {
 		if (g.getUnmatchedVariables().size()>0 || g.getUnmatchedEquations().size()>0) {
 			if (root().options.getBooleanOption("index_reduction")) {
 				//System.out.println(prettyPrint(""));
-				IndexReductionResult result = g.reduceIndex(false);
-			
+				
+				IndexReductionResult result = null;
+				try {
+					result = g.reduceIndex(false);
+				} catch (EquationDifferentiationException e) {
+					indexReductionErrors.add(e.getMessage());
+					return; 
+				}
+				
 				if (result != null) {
 				// Add the new equations
 				// Replace selected dummy derivatives with algebraics
@@ -2577,6 +2587,9 @@ aspect TransformCanonicalErrorCheck {
 			error(getAliasManager().getAliasErrorMessage());
 		}
 		for (String str : aliasErrors) {
+			error(str);
+		}
+		for (String str : indexReductionErrors) {
 			error(str);
 		}
 		checkDuplicateVariables();
