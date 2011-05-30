@@ -59,6 +59,8 @@ import org.jmodelica.icons.mls.Types.TextAlignment;
 
 public class AWTIconDrawer implements GraphicsInterface {
 	
+	private static final int BORDER_PATTERN_WIDTH = 2;
+	
 	public static final double MINIMUM_FONT_SIZE = 9.0;
 	
 	public static final BasicStroke DEFAULT_LINE_STROKE = 
@@ -69,7 +71,6 @@ public class AWTIconDrawer implements GraphicsInterface {
 		new BasicStroke((float)(FilledShape.DEFAULT_LINE_THICKNESS/IconConstants.PIXLES_PER_MM), 
 			BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, null, 0.0f);
 	
-
 	private static final int DEFAULT_FONT_STYLE = Font.PLAIN;
 	private static final int DEFAULT_FONT_SIZE = 12;
 	
@@ -391,9 +392,8 @@ public class AWTIconDrawer implements GraphicsInterface {
 	
 	private void drawBorderPattern(Rectangle r) {
 		Types.BorderPattern borderPattern = r.getBorderPattern();
-		int d = 2;
 		Extent outerExtent = r.getExtent().fix();
-		if (outerExtent.getWidth() > 2*d+1 && outerExtent.getHeight() > 2*d+1 ) {
+		if (outerExtent.getWidth() > 2*BORDER_PATTERN_WIDTH+1 && outerExtent.getHeight() > 2*BORDER_PATTERN_WIDTH+1 ) {
 			
 			Point2D untransformedOuterP1 = new Point2D.Double(
 					outerExtent.getP1().getX(), 
@@ -412,18 +412,18 @@ public class AWTIconDrawer implements GraphicsInterface {
 							(int)outerP1.getX()+1, 
 							(int)outerP1.getX()+1, 
 							(int)outerP2.getX(), 
-							(int)outerP2.getX()-d, 
-							(int)outerP1.getX()+1+d, 
-							(int)outerP1.getX()+1+d, 
+							(int)outerP2.getX()-BORDER_PATTERN_WIDTH, 
+							(int)outerP1.getX()+1+BORDER_PATTERN_WIDTH, 
+							(int)outerP1.getX()+1+BORDER_PATTERN_WIDTH, 
 							(int)outerP1.getX()+1
 					}, 
 					new int[]{
 							(int)outerP2.getY(), 
 							(int)outerP1.getY()+1, 
 							(int)outerP1.getY()+1, 
-							(int)outerP1.getY()+1+d, 
-							(int)outerP1.getY()+1+d, 
-							(int)outerP2.getY()-d, 
+							(int)outerP1.getY()+1+BORDER_PATTERN_WIDTH, 
+							(int)outerP1.getY()+1+BORDER_PATTERN_WIDTH, 
+							(int)outerP2.getY()-BORDER_PATTERN_WIDTH, 
 							(int)outerP2.getY()
 					}, 
 					7
@@ -433,18 +433,18 @@ public class AWTIconDrawer implements GraphicsInterface {
 							(int)outerP1.getX()+1, 
 							(int)outerP2.getX(), 
 							(int)outerP2.getX(), 
-							(int)outerP2.getX()-d, 
-							(int)outerP2.getX()-d, 
-							(int)outerP1.getX()+1+d, 
+							(int)outerP2.getX()-BORDER_PATTERN_WIDTH, 
+							(int)outerP2.getX()-BORDER_PATTERN_WIDTH, 
+							(int)outerP1.getX()+1+BORDER_PATTERN_WIDTH, 
 							(int)outerP1.getX()+1
 					}, 
 					new int[]{
 							(int)outerP2.getY(), 
 							(int)outerP2.getY(), 
 							(int)outerP1.getY()+1, 
-							(int)outerP1.getY()+1+d, 
-							(int)outerP2.getY()-d, 
-							(int)outerP2.getY()-d, 
+							(int)outerP1.getY()+1+BORDER_PATTERN_WIDTH, 
+							(int)outerP2.getY()-BORDER_PATTERN_WIDTH, 
+							(int)outerP2.getY()-BORDER_PATTERN_WIDTH, 
 							(int)outerP2.getY()
 					}, 
 					7
