@@ -40,39 +40,6 @@ public class GraphicsUtil {
 
 	public static final String IMAGE_FILE_PATH = "./Resources/";
 	public static final double TEXTURE_PATTERN_DISTANCE = 10.0;
-	private static final int COLOR_INCREMENT = 50;
-	
-	public static Color getBrighter(Color c) {
-		int r = c.getR()+COLOR_INCREMENT;
-		int g = c.getG()+COLOR_INCREMENT;
-		int b = c.getB()+COLOR_INCREMENT;
-		if (r > 255) {
-			r = 255;
-		}
-		if (g > 255) {
-			g = 255;
-		}
-		if (b > 255) {
-			b = 255;
-		}
-		return new Color(r, g, b);
-	}
-
-	public static Color getDarker(Color c) {
-		int r = c.getR()-COLOR_INCREMENT;
-		int g = c.getG()-COLOR_INCREMENT;
-		int b = c.getB()-COLOR_INCREMENT;
-		if (r < 0) {
-			r = 0;
-		}
-		if (g < 0) {
-			g = 0;
-		}
-		if (b < 0) {
-			b = 0;
-		}
-		return new Color(r, g, b);
-	}
 	
 	/**
 	 * Returns a list of points that can be used for drawing the border pattern

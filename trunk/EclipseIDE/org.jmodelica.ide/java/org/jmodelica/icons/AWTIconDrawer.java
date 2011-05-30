@@ -451,12 +451,8 @@ public class AWTIconDrawer implements GraphicsInterface {
 			);
 			java.awt.Color upLeftColor = null;
 			java.awt.Color downRightColor = null;
-			java.awt.Color brighterColor = translateColor(
-					GraphicsUtil.getBrighter(r.getFillColor())
-			);
-			java.awt.Color darkerColor = translateColor(
-					GraphicsUtil.getDarker(r.getFillColor())
-			);
+			java.awt.Color brighterColor = translateColor(r.getFillColor().brighter());
+			java.awt.Color darkerColor = translateColor(r.getFillColor()).darker();
 			if (borderPattern == Types.BorderPattern.RAISED) {
 				upLeftColor = brighterColor;
 				downRightColor = darkerColor;
