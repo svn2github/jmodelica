@@ -56,7 +56,7 @@ public class LibrariesList implements IOutlineAware {
 		loaded = true;
 	}
 	
-	protected boolean filter(ASTNode node) {
+	public boolean filter(ASTNode node) {
 		if (node instanceof ClassDecl) {
 			ClassDecl cd = (ClassDecl) node;
 //			if (cd.name().equals("Modelica"))

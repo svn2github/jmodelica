@@ -176,7 +176,18 @@ aspect Outline {
 		this.librariesList = librariesList;
 	}
 	
+	
+	syn boolean ASTNode.isInLibrary() = checkIsInLibrary();
+	eq Root.isInLibrary()			  = false;
+	eq InstClassDecl.isInLibrary()    = getClassDecl().isInLibrary();
+	eq ClassDecl.isInLibrary()        = 
+		(librariesList != null) ? !librariesList.filter(this) : checkIsInLibrary();
+	inh boolean ASTNode.checkIsInLibrary();
+	
+	eq ClassDecl.getChild().checkIsInLibrary() = isInLibrary();
+	eq Root.getChild().checkIsInLibrary()      = false;
 
+	
 	refine ContentOutline eq ASTNode.hasVisibleChildren() {
 		for (ASTNode child : this) 
 			if (child.showInContentOutline())

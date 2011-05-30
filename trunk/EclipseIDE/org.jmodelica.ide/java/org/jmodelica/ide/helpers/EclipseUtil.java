@@ -78,7 +78,7 @@ public class EclipseUtil {
 
 	public static boolean askUser(String title, String question) {
 		Shell shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
-		return MessageDialog.openQuestion(null, title, question);
+		return MessageDialog.openQuestion(shell, title, question);
 	}
 
 	public static boolean isModelicaProject(IProject project) {

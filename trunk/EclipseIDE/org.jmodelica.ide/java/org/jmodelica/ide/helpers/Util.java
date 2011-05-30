@@ -87,13 +87,15 @@ public class Util {
 		return elem;
 	}
 
-	public static void openAndSelect(IWorkbenchPage page, Object elem, boolean updateCurrent) {
+	public static void openAndSelect(IWorkbenchPage page, Object elem) {
 		if (elem instanceof ASTNode<?>) {
 			ASTNode<?> node = (ASTNode<?>) elem;
 			IEditorPart editor = null;
 			try {
 				URI uri = new File(node.containingFileName()).toURI();
+				Editor.nextReadOnly(node.isInLibrary());
 				editor = IDE.openEditor(page, uri, IDEConstants.EDITOR_ID, true);
+				Editor.nextReadOnly(false);
 			} catch (PartInitException e) {
 			}
 			if (editor instanceof Editor) 

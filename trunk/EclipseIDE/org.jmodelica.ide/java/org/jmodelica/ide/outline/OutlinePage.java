@@ -120,7 +120,7 @@ public abstract class OutlinePage extends AbstractBaseContentOutlinePage impleme
 	public void doubleClick(DoubleClickEvent event) {
 		if (handleDoubleClick) {
 			Object elem = Util.getSelected(event.getSelection());
-			Util.openAndSelect(getSite().getPage(), elem, true);
+			Util.openAndSelect(getSite().getPage(), elem);
 			setFocus();
 		}
 	}

@@ -87,6 +87,9 @@ private IDocumentPartitioner fPartitioner;
 private CompilationResult compResult;
 public  EditorFile file;
 
+private boolean editable;
+private static boolean nextEditable = true;
+
 private final ErrorCheckAction errorCheckAction;
 private final CompileFMUAction compileFMUAction;
 private final ICurrentClassListener[] currentClassListeners;
@@ -121,6 +124,12 @@ public Editor() {
         new FastPartitioner(
             new Modelica32PartitionScanner(),
             Modelica32PartitionScanner.LEGAL_PARTITIONS);
+    editable = nextEditable;
+    nextEditable = true;
+}
+
+public static void nextReadOnly(boolean readOnly) {
+	nextEditable = !readOnly;
 }
 
 /**
@@ -268,6 +277,22 @@ protected void doSetInput(IEditorInput input) throws CoreException {
     
     if (getPartName().equals("package.mo")) 
     	setPartName(file.getDirName() + "/package.mo");
+}
+
+public boolean isEditable() {
+	return editable && super.isEditable();
+}
+
+public boolean isDirty() {
+	return editable && super.isDirty();
+}
+
+public boolean isEditorInputReadOnly() {
+	return !editable || super.isEditorInputReadOnly();
+}
+
+public boolean isEditorInputModifiable() {
+	return editable && super.isEditorInputModifiable();
 }
 
 @Override

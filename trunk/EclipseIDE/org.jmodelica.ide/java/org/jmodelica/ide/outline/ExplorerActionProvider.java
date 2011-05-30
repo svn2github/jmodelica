@@ -76,7 +76,7 @@ public class ExplorerActionProvider extends CommonActionProvider {
 		@Override
 		public void run() {
 			Object elem = Util.getSelected(provider.getSelection());
-			Util.openAndSelect(page, elem, false);
+			Util.openAndSelect(page, elem);
 		}
 	}
 }
