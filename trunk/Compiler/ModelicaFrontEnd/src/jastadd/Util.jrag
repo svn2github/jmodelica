@@ -230,15 +230,37 @@ aspect NodeMethods {
         return dump() + ": '" + getComponentDecl().getClassName().qualifiedName() + " " + getComponentDecl().getName().getID() + "'";
     }
     
-    /**
-     * \brief Creates a new ArrayList containing all the elements in this list, in the same order.
-     */
-    public ArrayList<T> List.toArrayList() {
-        ArrayList<T> l = new ArrayList<T>(getNumChild());
-        for (T e : this)
-            l.add(e);
-        return l;
+    
+   	public class List {
+   		
+	    /**
+	     * \brief Creates a new ArrayList containing all the elements in this list, in the same order.
+	     */
+	    public ArrayList<T> toArrayList() {
+	        ArrayList<T> l = new ArrayList<T>(getNumChild());
+	        for (T e : this)
+	            l.add(e);
+	        return l;
+	    }
+	    
+	    /**
+	     * Adds all nodes in an iterable to the list.
+	     */
+	    public void addAll(Iterable<? extends T> list) {
+	        for (T e : list)
+	            add(e);
+	    }
+	    
+	    /**
+	     * Adds all nodes in an array to the list.
+	     */
+	     public <S extends T> void addAll(S[] list) {
+	         for (S e : list)
+	             add(e);
+	    }
+	    
     }
+
     
     /**
      * \brief Replace <code>from</code> with <code>to</code>.
@@ -428,7 +450,8 @@ aspect Names {
   syn String ClassDecl.qualifiedName();
   eq BaseClassDecl.qualifiedName() = combineName(classNamePrefix(), name());
   inh String BaseClassDecl.classNamePrefix();
-  eq FullClassDecl.getClassDecl().classNamePrefix() = combineName(classNamePrefix(), name());
+  inh String ComponentDecl.classNamePrefix();
+  eq FullClassDecl.getChild().classNamePrefix() = combineName(classNamePrefix(), name());
   eq BuiltInClassDecl.qualifiedName() = getName().getID();
   
   // For proxy

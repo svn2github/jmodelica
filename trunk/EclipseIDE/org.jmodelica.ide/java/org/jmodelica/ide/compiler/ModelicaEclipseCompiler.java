@@ -75,7 +75,7 @@ public class ModelicaEclipseCompiler extends AbstractCompiler {
 					
 				case IResource.FILE:
 					IFile file = (IFile) resource;
-					if (IDEConstants.FILE_EXT.equals(file.getFileExtension()))
+					if (file.getFileExtension().equals(IDEConstants.MODELICA_FILE_EXT))
 						compilationRoot.parseFile(file);
 					break;
 				}
@@ -153,10 +153,8 @@ public class ModelicaEclipseCompiler extends AbstractCompiler {
 		ASTNode node = (ASTNode) compileToAST(document, dirtyRegion, region, file);
 		ASTRegistry reg = Activator.getASTRegistry();
 		if (reg != null && node != null && node.hasLookupKey()) {
-			Object root = reg.lookupAST(null, file.getProject());
-			if (root == null)
-				root = new Object();
-			synchronized (root) {
+			synchronized (node.state()) {
+				// Depends on ASTNode.state being static (if it isn't, use an object that is unique to the tree) 
 				reg.updateAST(node, node.lookupKey(), file);
 			}
 		}

@@ -27,8 +27,14 @@
       <content-type
             base-type="org.eclipse.core.runtime.text"
             file-extensions="mo"
-            id="org.jmodelica.ide.content"
+            id="org.jmodelica.ide.content.modelica"
             name="Modelica File"
+            priority="normal">
+      </content-type>
+      <content-type
+            file-extensions="fmu"
+            id="org.jmodelica.ide.content.fmu"
+            name="Functional Mockup Unit"
             priority="normal">
       </content-type>
    </extension>
@@ -86,7 +92,17 @@
             id="org.jmodelica.ide.editor"
             name="Modelica Editor">
          <contentTypeBinding
-               contentTypeId="org.jmodelica.ide.content">
+               contentTypeId="org.jmodelica.ide.content.modelica">
+         </contentTypeBinding>
+      </editor>
+      <editor
+            default="false"
+            extensions="fmu"
+            id="org.jmodelica.ide.editor.redirect"
+            launcher="org.jmodelica.ide.ui.RedirectLauncher"
+            name="Redirect to System Editor (if any)">
+         <contentTypeBinding
+               contentTypeId="org.jmodelica.ide.content.fmu">
          </contentTypeBinding>
       </editor>
    </extension>

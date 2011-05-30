@@ -154,7 +154,7 @@ public class AWTIconDrawer implements GraphicsInterface {
 	private double getAvgCurrentScaleFactor() {
 		return (
 				Math.abs(g.getTransform().getScaleX()) +
-				Math.abs(g.getTransform().getScaleX())
+				Math.abs(g.getTransform().getScaleY())
 		)/2.0;
 	}
 	

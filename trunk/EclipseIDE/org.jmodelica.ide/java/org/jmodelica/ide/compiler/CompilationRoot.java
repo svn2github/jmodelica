@@ -12,6 +12,7 @@ import org.eclipse.core.resources.IResource;
 import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.error.CompileErrorReport;
 import org.jmodelica.ide.error.InstanceErrorHandler;
+import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.BadDefinition;
 import org.jmodelica.modelica.compiler.LibNode;
 import org.jmodelica.modelica.compiler.List;
@@ -48,14 +49,17 @@ public class CompilationRoot {
 	 */
 	public CompilationRoot(IProject project) {
 		list = new List<StoredDefinition>();
-		root = new SourceRoot(new Program(list));
+		Program prog = new Program(list);
+		root = new SourceRoot(prog);
 
 		parser.setReport(errorReport);
 
 		root.options = new IDEOptions(project);
-		root.getProgram().getInstProgramRoot().options = root.options;
 		root.setProject(project);
 		root.setErrorHandler(new InstanceErrorHandler());
+		
+		prog.setLibraryList(new IDELibraryList(root.options, project));
+		prog.getInstProgramRoot().options = root.options;
 
 		rewritten = false;
 	}
@@ -75,8 +79,12 @@ public class CompilationRoot {
 	}
 	
 	protected void forceRewrites() {
-		if (!rewritten)
-			root.forceRewrites();
+		if (!rewritten) {
+			synchronized (root.state()) {
+				// Depends on ASTNode.state being static (if it isn't, this probably doesn't need synchronization) 
+				root.forceRewrites();
+			}
+		}
 		rewritten = true;
 	}
 

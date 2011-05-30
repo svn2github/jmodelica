@@ -28,13 +28,13 @@ public class IDEConstants {
 	public static final String PLUGIN_ID = "org.jmodelica.ide";
 	public static final String NATURE_ID = PLUGIN_ID + ".nature";
 	public static final String EDITOR_ID = PLUGIN_ID + ".editor";
-	public static final String CONTENT_TYPE_ID = PLUGIN_ID + ".content";
+	public static final String CONTENT_TYPE_ID = PLUGIN_ID + ".content.modelica";
 	public static final String PERSPECTIVE_ID = PLUGIN_ID + ".perspective";
 
 	public static final String ERROR_MARKER_ID = PLUGIN_ID + ".marker.error";
 
-	public static final String FILE_EXT = "mo";
-	public static final String[] ALL_FILE_EXTENSIONS = { FILE_EXT };
+	public static final String MODELICA_FILE_EXT = "mo";
+	public static final String[] ALL_FILE_EXTENSIONS = { MODELICA_FILE_EXT };
 	
 	public static final String ACTION_ID = PLUGIN_ID + ".action";
 	public static final String COMMAND_ID = PLUGIN_ID + ".command";
@@ -71,6 +71,7 @@ public class IDEConstants {
 
 	public static final RGB BRACE_MATCHING_COLOR = new RGB(128, 128, 128);
 	
+	public static final String PREFERENCE_MODELICAPATH_ID = "modelicapath";
 	public static final String PREFERENCE_LIBRARIES_ID = "libraries";
 	public static final String PREFERENCE_COLOR_PREFIX = "syntax.color.";
 	public static final String PREFERENCE_ANNO_BG_ID = PREFERENCE_COLOR_PREFIX + "default.anno.bg";
@@ -111,5 +112,8 @@ public class IDEConstants {
 	public static final String PACKAGE_FILE = "package.mo";
 	public static final String PACKAGES_IN_WORKSPACE_OPTION = "PACKAGEPATHS";
 	public static final String PATH_SEP = File.pathSeparator;
+	
+	public static final String COMPILER_OPTIONS_FILE = "compiler_options.xml";
+	public static final String MODELICAPATH = "MODELICAPATH";
 	
 }

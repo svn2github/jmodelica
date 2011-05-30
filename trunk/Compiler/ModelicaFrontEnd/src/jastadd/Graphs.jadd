@@ -559,20 +559,20 @@ public class BiPGraph {
 					// Find an augmenting path, step 3b-4
 					//n_ind = 0;
 					pathFound = augmentPath(eqToMatch, visitedEquations, visitedVariables); 
-					fc.log.info("*************");
-					fc.log.info("Looking for augmented path starting in equation: " + eqToMatch.toString());
+					ASTNode.log.info("*************");
+					ASTNode.log.info("Looking for augmented path starting in equation: " + eqToMatch.toString());
 					if (pathFound) {
-						fc.log.info("Path found!");
+						ASTNode.log.info("Path found!");
 					} else {	
-					 	fc.log.info("Path not found!");
+					 	ASTNode.log.info("Path not found!");
 					}
-					fc.log.info("Visisted equations:");
+					ASTNode.log.info("Visisted equations:");
 					for (Eq ee : visitedEquations) {
-						fc.log.info("  " + ee.getDescription());
+						ASTNode.log.info("  " + ee.getDescription());
 					}
-					fc.log.info("Visisted variables:");
+					ASTNode.log.info("Visisted variables:");
 					for (Var vv : visitedVariables) {
-						fc.log.info("  " + vv.toString());
+						ASTNode.log.info("  " + vv.toString());
 					}
 					
 					if (!pathFound) { // Step 3b-5
@@ -604,7 +604,7 @@ public class BiPGraph {
 							// Create a new differentiated equation
 							FAbstractEquation deee = eee.diff("time");
 							result.addEquation(deee);
-							fc.log.info("About to add equation: " + deee);
+							ASTNode.log.info("About to add equation: " + deee);
 							// Add the differentiated equation						
 							Eq eqn = addEquation("eq_" + (getEquations().size() + 1), 
 							             deee.prettyPrint(""), deee);
@@ -612,7 +612,7 @@ public class BiPGraph {
 							// Add edges
 							for (FVariable fv : deee.variables()) {
 								Var vvv = variableMap.get(fv.name());
-								fc.log.info("*** " + fv.name());
+								ASTNode.log.info("*** " + fv.name());
 								if (vvv!=null) {
 									addEdge(eqn,vvv);
 								}
@@ -635,13 +635,13 @@ public class BiPGraph {
 						// Step 3b-5iv
 						eqToMatch = eqToMatch.getMeDifferentiated();
 						
-						fc.log.info("Graph after addition of equations and variables:");
-						fc.log.info(toString());
+						ASTNode.log.info("Graph after addition of equations and variables:");
+						ASTNode.log.info(toString());
 					}	
 
-					fc.log.info("Matching:");
-					fc.log.info(printMatching());
-					fc.log.info("*************");
+					ASTNode.log.info("Matching:");
+					ASTNode.log.info(printMatching());
+					ASTNode.log.info("*************");
 				
 				}	
 			}
@@ -657,14 +657,14 @@ public class BiPGraph {
 		for (Eq e : eqToRemove) {
 			removeEquation(e);
 		}
-		fc.log.info("Index reduction done!");
-		fc.log.info("Matching:");
-		fc.log.info(printMatching());
+		ASTNode.log.info("Index reduction done!");
+		ASTNode.log.info("Matching:");
+		ASTNode.log.info(printMatching());
 		
 		// Selection of dummy derivatives
 		/*
 			The algorithm is implemented differently than in the original paper
-			by Mattsson and Sšderlind. In the paper, each block is treated
+			by Mattsson and Sï¿½derlind. In the paper, each block is treated
 			individually by selecting all dummy derivatives of one block
 			before proceeding to the next block. This approach, however, makes
 			it hard to handle user preferences for state selection as defined
@@ -679,7 +679,7 @@ public class BiPGraph {
 		
 		BLT blt = computeBLT();
 	
-		fc.log.info(blt.toString());
+		ASTNode.log.info(blt.toString());
 
 		// Lists of equations and variables, notation is the same as in the 
 		// paper
@@ -700,8 +700,8 @@ public class BiPGraph {
 		for (AbstractEquationBlock eb : blt) {
 			ArrayList<FAbstractEquation> diffedEqns = eb.differentiatedEquations();
 			if (diffedEqns.size()>0) {
-				fc.log.info(" ********* Found block containing diffed equations ***********");
-				fc.log.info(eb.toString());
+				ASTNode.log.info(" ********* Found block containing diffed equations ***********");
+				ASTNode.log.info(eb.toString());
 		
 				// Step 1: Initialize, add all equations in blocks
 				// having differentiated equations
@@ -731,7 +731,7 @@ public class BiPGraph {
 		
 		// Iterate
 		while (remainingDifferentiatedEquations) {
-		   fc.log.info("----------------");
+		   ASTNode.log.info("----------------");
 			// Step 3: Extract differentiated equations 
 			h = new ArrayList<FAbstractEquation>();
 			for (FAbstractEquation fe : g) {
@@ -758,12 +758,12 @@ public class BiPGraph {
 				int n_eq = e.numScalarEquations();
 				
 				for (int i=0;i<n_eq;i++) {
-					fc.log.info("*** " + e.prettyPrint(""));
+					ASTNode.log.info("*** " + e.prettyPrint(""));
 					eqn = gd.addEquation("eq_"+k,e.prettyPrint(""),e);
 					k++;
 				
 					for (FVariable y : e.variables()) { 
-						fc.log.info(" ** " + y.prettyPrint("") + " " + z.contains(y));
+						ASTNode.log.info(" ** " + y.prettyPrint("") + " " + z.contains(y));
 						if (z.contains(y)) {
 							v = gd.getVariable(y.name()); 
 							gd.addEdge(eqn,v);
@@ -772,10 +772,10 @@ public class BiPGraph {
 				}
 			}
 					
-			fc.log.info(gd.toString());
+			ASTNode.log.info(gd.toString());
 			// Run matching
 			gd.maximumMatching(true);	
-			fc.log.info(gd.printMatching());
+			ASTNode.log.info(gd.printMatching());
 					
 			// The matched variables are selected as dummy derivatives
 			for (Var vv : gd.getMatchedVariables()) {
@@ -813,27 +813,27 @@ public class BiPGraph {
 				}
 			}
 			
-			fc.log.info(" --- Equations in iteration: --- ");
-			fc.log.info(" Equations: ");
+			ASTNode.log.info(" --- Equations in iteration: --- ");
+			ASTNode.log.info(" Equations: ");
 			for (FAbstractEquation fe : g) {
-				fc.log.info(fe.prettyPrint("   "));
+				ASTNode.log.info(fe.prettyPrint("   "));
 			}
 
-			fc.log.info(" Dummy derivatives selected in iteration: ");
+			ASTNode.log.info(" Dummy derivatives selected in iteration: ");
 			for (FVariable fv : zHat) {
 				result.addDummyDerivative(fv);
-				fc.log.info(fv.prettyPrint("   "));
+				ASTNode.log.info(fv.prettyPrint("   "));
 			}
-			fc.log.info("");
+			ASTNode.log.info("");
 				
 		}
 		
-		fc.log.info(" Dummy derivatives: ");
+		ASTNode.log.info(" Dummy derivatives: ");
 		for (FVariable fv : zHat) {
 			result.addDummyDerivative(fv);
-			fc.log.info(fv.prettyPrint("   "));
+			ASTNode.log.info(fv.prettyPrint("   "));
 		}
-		fc.log.info("");
+		ASTNode.log.info("");
 		
 		return result;
 	}

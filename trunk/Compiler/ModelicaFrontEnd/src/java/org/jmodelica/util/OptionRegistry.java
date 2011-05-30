@@ -141,7 +141,7 @@ public class OptionRegistry {
 			loadOptions(filepath);
 		}
 		
-	 	private void loadOptions(String filepath) throws ParserConfigurationException, IOException, SAXException, XPathExpressionException {
+	 	protected void loadOptions(String filepath) throws ParserConfigurationException, IOException, SAXException, XPathExpressionException {
 			//logger.info("Loading options...");
 			org.w3c.dom.Document doc = parseAndGetDOM(filepath);
 			

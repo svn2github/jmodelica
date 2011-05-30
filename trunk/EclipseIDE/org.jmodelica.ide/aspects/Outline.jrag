@@ -154,10 +154,10 @@ aspect Outline {
     
     // To compare nodes for opening paths and setting selections
     syn String ASTNode.outlineId()   = Integer.toHexString(hashCode());
-    eq BaseClassDecl.outlineId()     = name();
-    eq ComponentDecl.outlineId()     = name();
-    eq InstClassDecl.outlineId()     = name();
-    eq InstComponentDecl.outlineId() = name();
+    eq BaseClassDecl.outlineId()     = qualifiedName();
+    eq ComponentDecl.outlineId()     = combineName(classNamePrefix(), name());
+    eq InstClassDecl.outlineId()     = qualifiedName();
+    eq InstComponentDecl.outlineId() = qualifiedName();
 
     
 	syn lazy org.jmodelica.ide.outline.LibrariesList SourceRoot.librariesList() = 
@@ -247,17 +247,19 @@ aspect Outline {
 		}
 		
 		protected void copyCachedOutline(Object[] src, Object[] dst) {
-			for (int s = 0, d = 0; s < src.length && d < dst.length; s++) {
-				if (src[s] instanceof BaseNode) {
-					BaseNode dn = null, sn = (BaseNode) src[s];
-					boolean found = false;
-					for (int i = d; !found && i < dst.length; i++) {
-						if (dst[i] instanceof BaseNode) {
-							dn = (BaseNode) dst[i];
-							if (sn == dn || sn.outlineId().equals(dn.outlineId())) {
-								d = i + 1;
-								dn.copyCachedOutlineFrom(sn);
-								found = true;
+			if (src != null && dst != null) {
+				for (int s = 0, d = 0; s < src.length && d < dst.length; s++) {
+					if (src[s] instanceof BaseNode) {
+						BaseNode dn = null, sn = (BaseNode) src[s];
+						boolean found = false;
+						for (int i = d; !found && i < dst.length; i++) {
+							if (dst[i] instanceof BaseNode) {
+								dn = (BaseNode) dst[i];
+								if (sn == dn || sn.outlineId().equals(dn.outlineId())) {
+									d = i + 1;
+									dn.copyCachedOutlineFrom(sn);
+									found = true;
+								}
 							}
 						}
 					}

@@ -43,7 +43,7 @@ public class NewFileWizard extends Wizard implements INewWizard {
 	private static final String WINDOW_TITLE = "New Modelica File";
 	private static final String TITLE = "New Modelica File";
 	private static final String DESCRIPTION = "Creates a new Modelica File";
-	private static final String FILE_EXTENSION = IDEConstants.FILE_EXT;
+	private static final String FILE_EXTENSION = IDEConstants.MODELICA_FILE_EXT;
 
 	private IWorkbench workbench;
 	private IStructuredSelection selection;

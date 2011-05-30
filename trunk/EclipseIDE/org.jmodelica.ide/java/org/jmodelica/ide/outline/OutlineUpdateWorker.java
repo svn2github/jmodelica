@@ -158,7 +158,8 @@ public class OutlineUpdateWorker {
 
 		public void run() {
 			if (!node.contentOutlineImageCalculated()) {
-				synchronized (node.root()) {
+				synchronized (node.state()) { 
+					// Depends on ASTNode.state being static (if it isn't, use an object that is unique to the tree) 
 					node.updateCachedIcon();
 				}
 				new IconUpdateJob(this).schedule();
@@ -175,7 +176,8 @@ public class OutlineUpdateWorker {
 		}
 
 		public void run() {
-			synchronized (node.root()) {
+			synchronized (node.state()) {
+				// Depends on ASTNode.state being static (if it isn't, use an object that is unique to the tree) 
 				node.updateOutlineCachedChildren();
 			}
 			new ChildrenUpdateJob(this).schedule();

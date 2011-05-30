@@ -709,7 +709,7 @@ public class ModelicaCompiler {
 		// compile c code
 		hookCheckAbort();
 		String cFileName = className.replace(".", "_");
-		this.getCCompiler().compileCCode(cFileName, target, tempDir, fc.externalLibraries(), fc.externalLibraryDirectories(), fc.externalIncludeDirectories());
+		getCCompiler().compileCCode(cFileName, target, tempDir, fc.externalLibraries(), fc.externalLibraryDirectories(), fc.externalIncludeDirectories());
 		hookCodeCompiled();
 		
 		// package JMU

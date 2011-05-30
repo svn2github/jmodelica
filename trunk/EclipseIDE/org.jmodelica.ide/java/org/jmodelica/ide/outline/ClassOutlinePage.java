@@ -83,7 +83,7 @@ public class ClassOutlinePage extends OutlinePage implements IDoubleClickListene
 
 	public void childASTChanged(IProject project, String key) {
 		ASTNode node = (ASTNode) registry.lookupAST(key, project);
-		if (!node.isError())
+		if (node != null && !node.isError())
 			update(getContentProvider().getParent(node));
 	}
 
