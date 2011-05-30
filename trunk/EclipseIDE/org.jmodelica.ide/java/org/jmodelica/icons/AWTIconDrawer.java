@@ -380,33 +380,97 @@ public class AWTIconDrawer implements GraphicsInterface {
 			g.setTransform(oldTransform);
 		}
 		
-		//TODO testa stroke till borderPattern
-		// + skapa en ny rektangel utanför orginalrektangeln
-		if(s instanceof Rectangle)
-		{
+		if(s instanceof Rectangle) {
 			Rectangle r = (Rectangle) s;
 			Types.BorderPattern borderPattern = r.getBorderPattern(); 
-			if(borderPattern != Types.BorderPattern.NONE)
-			{
-				ArrayList<Point> points; 
-				try
-				{
-					points = GraphicsUtil.getBorderPatternPoints(r, borderPattern);
-				}catch(FailedConstructionException e)
-				{
-//					System.out.println("BorderPattern " + borderPattern + " is not implemented yet" );
-					return;
-				}
-				setColor(Color.BLACK);
-				//returnerar default linestroke
-				Stroke newStroke = getLineStroke(Types.LinePattern.SOLID, IconConstants.BORDER_PATTERN_THICKNESS); 
-				g.setStroke(newStroke);
-				g.drawPolyline(
-						GraphicsUtil.getXLinePoints(points),
-						GraphicsUtil.getYLinePoints(points), 
-						points.size()
-				);
+			if(borderPattern != Types.BorderPattern.NONE) {
+				drawBorderPattern(r);
 			}
+		}
+	}
+	
+	private void drawBorderPattern(Rectangle r) {
+		Types.BorderPattern borderPattern = r.getBorderPattern();
+		int d = 2;
+		Extent outerExtent = r.getExtent().fix();
+		if (outerExtent.getWidth() > 2*d+1 && outerExtent.getHeight() > 2*d+1 ) {
+			
+			Point2D untransformedOuterP1 = new Point2D.Double(
+					outerExtent.getP1().getX(), 
+					outerExtent.getP1().getY()
+			);
+			Point2D untransformedOuterP2 = new Point2D.Double(
+					outerExtent.getP2().getX(), 
+					outerExtent.getP2().getY()
+			);
+			Point2D outerP1 = new Point2D.Double();
+			Point2D outerP2 = new Point2D.Double();
+			g.getTransform().transform(untransformedOuterP1, outerP1);
+			g.getTransform().transform(untransformedOuterP2, outerP2);
+			java.awt.Polygon upLeft = new java.awt.Polygon(
+					new int[]{
+							(int)outerP1.getX()+1, 
+							(int)outerP1.getX()+1, 
+							(int)outerP2.getX(), 
+							(int)outerP2.getX()-d, 
+							(int)outerP1.getX()+1+d, 
+							(int)outerP1.getX()+1+d, 
+							(int)outerP1.getX()+1
+					}, 
+					new int[]{
+							(int)outerP2.getY(), 
+							(int)outerP1.getY()+1, 
+							(int)outerP1.getY()+1, 
+							(int)outerP1.getY()+1+d, 
+							(int)outerP1.getY()+1+d, 
+							(int)outerP2.getY()-d, 
+							(int)outerP2.getY()
+					}, 
+					7
+			);
+			java.awt.Polygon downRight = new java.awt.Polygon(
+					new int[]{
+							(int)outerP1.getX()+1, 
+							(int)outerP2.getX(), 
+							(int)outerP2.getX(), 
+							(int)outerP2.getX()-d, 
+							(int)outerP2.getX()-d, 
+							(int)outerP1.getX()+1+d, 
+							(int)outerP1.getX()+1
+					}, 
+					new int[]{
+							(int)outerP2.getY(), 
+							(int)outerP2.getY(), 
+							(int)outerP1.getY()+1, 
+							(int)outerP1.getY()+1+d, 
+							(int)outerP2.getY()-d, 
+							(int)outerP2.getY()-d, 
+							(int)outerP2.getY()
+					}, 
+					7
+			);
+			java.awt.Color upLeftColor = null;
+			java.awt.Color downRightColor = null;
+			java.awt.Color brighterColor = translateColor(
+					GraphicsUtil.getBrighter(r.getFillColor())
+			);
+			java.awt.Color darkerColor = translateColor(
+					GraphicsUtil.getDarker(r.getFillColor())
+			);
+			if (borderPattern == Types.BorderPattern.RAISED) {
+				upLeftColor = brighterColor;
+				downRightColor = darkerColor;
+			} else if (borderPattern == Types.BorderPattern.SUNKEN) {
+				upLeftColor = darkerColor;
+				downRightColor = brighterColor;
+			}
+			AffineTransform oldTransform = g.getTransform();
+			g.setTransform(new AffineTransform());
+			g.setColor(upLeftColor);
+			g.fill(upLeft);
+			g.setColor(downRightColor);
+			g.fill(downRight);
+			g.setTransform(oldTransform);
 		}
 	}
 	
