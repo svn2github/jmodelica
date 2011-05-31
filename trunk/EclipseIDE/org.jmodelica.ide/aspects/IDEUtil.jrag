@@ -16,7 +16,7 @@
 
 import org.jmodelica.ide.helpers.Util;
 
-aspect Util {
+aspect IDEUtil {
 	
 	syn StoredDefinition ASTNode.getDefinition() = null;
 	inh lazy StoredDefinition BaseNode.getDefinition();
@@ -26,6 +26,8 @@ aspect Util {
 	eq InstNode.getInstComponentDecl(int index).getDefinition() = 
 			getInstComponentDecl(index).getComponentDecl().getDefinition();
 	eq FlatRoot.getFClass().getDefinition() = getFClass().storedDefinition();
+	eq InstProgramRoot.getInstLibClassDecl(int index).getDefinition() = 
+		getInstLibClassDecl(index).getClassDecl().getDefinition();
 	
 	private StoredDefinition FClass.definition;
 	public void FClass.setDefinition(StoredDefinition sd) {
