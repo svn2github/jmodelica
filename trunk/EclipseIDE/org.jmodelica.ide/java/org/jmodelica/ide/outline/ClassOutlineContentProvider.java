@@ -39,7 +39,7 @@ public class ClassOutlineContentProvider extends OutlineAwareContentProvider {
 
 	public Object getParent(Object element) {
 		if (element instanceof ASTNode) {
-			LibrariesList libs = ((ASTNode) element).getLibrariesList();
+			LoadedLibraries libs = ((ASTNode) element).getLoadedLibraries();
 			if (libs != null)
 				return libs;
 		}

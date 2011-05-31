@@ -16,7 +16,6 @@
 import java.util.Arrays;
 import java.util.Collections;
 //import org.jmodelica.ide.ui.ImageLoader;
-import org.jmodelica.ide.outline.LibrariesList;
 
 aspect Outline {
 	/*
@@ -160,20 +159,20 @@ aspect Outline {
     eq InstComponentDecl.outlineId() = qualifiedName();
 
     
-	syn lazy org.jmodelica.ide.outline.LibrariesList SourceRoot.librariesList() = 
-		new org.jmodelica.ide.outline.LibrariesList(this);
+	syn lazy org.jmodelica.ide.outline.LoadedLibraries SourceRoot.loadedLibraries() = 
+		new org.jmodelica.ide.outline.LoadedLibraries(this);
 	
-	private org.jmodelica.ide.outline.LibrariesList ClassDecl.librariesList;
-	public org.jmodelica.ide.outline.LibrariesList ASTNode.getLibrariesList() {
+	private org.jmodelica.ide.outline.LoadedLibraries ClassDecl.loadedLibraries;
+	public org.jmodelica.ide.outline.LoadedLibraries ASTNode.getLoadedLibraries() {
 		return null;
 	}
-	public org.jmodelica.ide.outline.LibrariesList ClassDecl.getLibrariesList() {
-		return librariesList;
+	public org.jmodelica.ide.outline.LoadedLibraries ClassDecl.getLoadedLibraries() {
+		return loadedLibraries;
 	}
-	public void ASTNode.setLibrariesList(org.jmodelica.ide.outline.LibrariesList librariesList) {
+	public void ASTNode.setLoadedLibraries(org.jmodelica.ide.outline.LoadedLibraries loadedLibraries) {
 	}
-	public void ClassDecl.setLibrariesList(org.jmodelica.ide.outline.LibrariesList librariesList) {
-		this.librariesList = librariesList;
+	public void ClassDecl.setLoadedLibraries(org.jmodelica.ide.outline.LoadedLibraries loadedLibraries) {
+		this.loadedLibraries = loadedLibraries;
 	}
 	
 	
@@ -181,7 +180,7 @@ aspect Outline {
 	eq Root.isInLibrary()			  = false;
 	eq InstClassDecl.isInLibrary()    = getClassDecl().isInLibrary();
 	eq ClassDecl.isInLibrary()        = 
-		(librariesList != null) ? !librariesList.filter(this) : checkIsInLibrary();
+		(loadedLibraries != null) ? !loadedLibraries.filter(this) : checkIsInLibrary();
 	inh boolean ASTNode.checkIsInLibrary();
 	
 	eq ClassDecl.getChild().checkIsInLibrary() = isInLibrary();
@@ -205,11 +204,11 @@ aspect Outline {
 		for (StoredDefinition file : getProgram().getUnstructuredEntitys()) 
 			if (file.getElements().getNumChild() > 0)
 				return true;
-		return librariesList().hasFiltered();
+		return loadedLibraries().hasFiltered();
 	}
 	eq SourceRoot.outlineChildren() {
     	ArrayList list = new ArrayList();
-    	org.jmodelica.ide.outline.LibrariesList libs = librariesList();
+    	org.jmodelica.ide.outline.LoadedLibraries libs = loadedLibraries();
     	list.add(libs);
     	list.addAll(getProgram().getUnstructuredEntitys().outlineChildren());
     	if (libs.hasFiltered())
@@ -219,8 +218,14 @@ aspect Outline {
 	
 	eq LibNode.hasVisibleChildren() = getStoredDefinition().getNumElement() > 0;
 	
-	eq LibClassDecl.outlineChildren() = classes();
 	eq LibClassDecl.hasVisibleChildren() = true;
+	eq LibClassDecl.outlineChildren() {
+		ArrayList<ASTNode> res = new ArrayList<ASTNode>();
+		for (ClassDecl cd : classes())
+			if (cd.showInContentOutline())
+				res.add(cd);
+		return res;
+	}
 	
    	eq InstNode.hasVisibleChildren() {
    		/* Don't descend into error nodes. */
@@ -325,29 +330,29 @@ aspect Outline {
 		}
 	}
 	
-	private org.jmodelica.ide.outline.LibrariesList SourceRoot.oldLibrariesList;
-	public void SourceRoot.setOldLibrariesList(org.jmodelica.ide.outline.LibrariesList oldLibrariesList) {
-		this.oldLibrariesList = oldLibrariesList;
+	private org.jmodelica.ide.outline.LoadedLibraries SourceRoot.oldLoadedLibraries;
+	public void SourceRoot.setOldLoadedLibraries(org.jmodelica.ide.outline.LoadedLibraries oldLoadedLibraries) {
+		this.oldLoadedLibraries = oldLoadedLibraries;
 	}
 	
 	public void SourceRoot.updateOutlineCachedChildren() {
-		if (oldLibrariesList != null) 
-			copyCachedOutline(oldLibrariesList.getChildren(), librariesList().getChildren());
+		if (oldLoadedLibraries != null) 
+			copyCachedOutline(oldLoadedLibraries.getChildren(), loadedLibraries().getChildren());
 		else
-			librariesList().hasChildren();
-		oldLibrariesList = null;
+			loadedLibraries().hasChildren();
+		oldLoadedLibraries = null;
 		super.updateOutlineCachedChildren();
 	}
 	
 	public void SourceRoot.copyCachedOutlineFrom(BaseNode old) {
 		if (this != old && old instanceof SourceRoot) 
-			setOldLibrariesList(((SourceRoot) old).librariesList());
+			setOldLoadedLibraries(((SourceRoot) old).loadedLibraries());
 		super.copyCachedOutlineFrom(old);
 	}
 	
 	public void SourceRoot.flushAttributes() {
-		if (oldLibrariesList == null)
-			setOldLibrariesList(librariesList());
+		if (oldLoadedLibraries == null)
+			setOldLoadedLibraries(loadedLibraries());
 		super.flushAttributes();
 	}
 	

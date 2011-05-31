@@ -47,7 +47,7 @@ public class OutlineItemComparator extends ViewerSorter implements IPreferenceCh
 	public int category(Object element) {
 		if (element instanceof ASTNode<?>)
 			return ((ASTNode<?>) element).outlineCategory();
-		if (element instanceof LibrariesList) 
+		if (element instanceof LoadedLibraries) 
 			return -5;
 		return super.category(element);
 	}

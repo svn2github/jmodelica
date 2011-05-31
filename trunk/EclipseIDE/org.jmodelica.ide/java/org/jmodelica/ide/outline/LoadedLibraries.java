@@ -19,14 +19,14 @@ import org.jmodelica.modelica.compiler.LibNode;
 import org.jmodelica.modelica.compiler.List;
 import org.jmodelica.modelica.compiler.SourceRoot;
 
-public class LibrariesList implements IOutlineAware {
+public class LoadedLibraries implements IOutlineAware {
 
 	protected ASTNode[] libraries;
 	protected ASTNode[] filtered;
 	protected boolean loaded;
 	protected SourceRoot parent;
 	
-	public LibrariesList(SourceRoot root) {
+	public LoadedLibraries(SourceRoot root) {
 		parent = root;
 		resetLibraries();
 	}
@@ -49,7 +49,7 @@ public class LibrariesList implements IOutlineAware {
 	    	}
 	    }
 	    for (ASTNode n : libList)
-	    	n.setLibrariesList(this);
+	    	n.setLoadedLibraries(this);
 	    libraries = libList.isEmpty() ? null : libList.toArray(new ASTNode[libList.size()]);
 	    filtered = filtList.isEmpty() ? null : filtList.toArray(new ASTNode[filtList.size()]);
 

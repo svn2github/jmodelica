@@ -66,8 +66,6 @@ public class ExplorerContentProvider implements ITreeContentProvider, IResourceC
 //		} else if (parentElement instanceof IProject) {
 //			LibrariesList libList = new LibrariesList((IProject) parentElement, viewer);
 //			return libList.hasChildren() ? new Object[] { libList } : null;
-		} else if (parentElement instanceof LibrariesList) {
-			children = ((LibrariesList) parentElement).getChildren();
 		} else if (parentElement instanceof ClassDecl) {
 			children = getVisible(((ClassDecl) parentElement).classes());
 		}
@@ -77,13 +75,10 @@ public class ExplorerContentProvider implements ITreeContentProvider, IResourceC
 	public Object getParent(Object element) {
 		if (element instanceof ClassDecl) {
 			ASTNode<?> parent = getParentClass((ClassDecl) element);
-			if (parent instanceof StoredDefinition) {
-				if (parent.getParent() instanceof LibNode)
-					return ((ClassDecl) element).getLibrariesList();
+			if (parent instanceof StoredDefinition) 
 				return ((StoredDefinition) parent).getFile();
-			}
-		} else if (element instanceof LibrariesList) {
-			return ((LibrariesList) element).getParent();
+		} else if (element instanceof LoadedLibraries) {
+			return ((LoadedLibraries) element).getParent();
 		} 
 		return null;
 	}
@@ -91,8 +86,8 @@ public class ExplorerContentProvider implements ITreeContentProvider, IResourceC
 	public boolean hasChildren(Object element) {
 		if (element instanceof IFile) {
 			return true;
-		} else if (element instanceof LibrariesList) {
-			return ((LibrariesList) element).hasChildren();
+		} else if (element instanceof LoadedLibraries) {
+			return ((LoadedLibraries) element).hasChildren();
 		} else if (element instanceof ClassDecl) {
 			return ((ClassDecl) element).hasClasses();
 		}

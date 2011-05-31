@@ -64,7 +64,7 @@ aspect Library {
 		   			entity.setFileName(packageFile.getPath());
 		   			LibClassDecl lcd = new LibClassDecl(fcd);
 		   				   				   			
-		   			LibraryList ll = new LibraryList(null);
+		   			LibraryList ll = new LibraryList();
 		   			ll.add(dirName, true);
 					lcd.setLibNodeList(ll.createLibNodeList());
 					
@@ -204,7 +204,7 @@ aspect Library {
 	
 	public LibraryList Program.getLibraryList() {
 		if (libraryList == null)
-			libraryList = new LibraryList(root().options);
+			libraryList = new DefaultLibraryList(root().options);
 		return libraryList;
 	}
 	
@@ -215,16 +215,15 @@ aspect Library {
 	syn lazy List Program.getLibNodeList() = getLibraryList().createLibNodeList();
 	
 	public class LibraryList {
-		
-		protected OptionRegistry options;
+
 		protected Set<LibraryDef> set;
 		
-		public static final String[] LIBRARY_OPTIONS = 
-			new String[] { "MODELICAPATH", "extra_lib_dirs" };
-		
-		public LibraryList(OptionRegistry options) {
-			this.options = options;
+		public LibraryList() {
 			set = new HashSet<LibraryDef>();
+		}
+		
+		public void reset() {
+			set.clear();
 		}
 		
 		public Set<LibraryDef> loadedLibraries() {
@@ -232,12 +231,7 @@ aspect Library {
 		}
 		
 		public Set<LibraryDef> availableLibraries() {
-			search();
 			return set;
-		}
-		
-		public void reset() {
-			set.clear();
 		}
 		
 		public List<LibNode> createLibNodeList() {
@@ -250,20 +244,6 @@ aspect Library {
 			return res;
 		}
 		
-		protected void search() {
-			if (set.isEmpty())
-				for (String opt : LIBRARY_OPTIONS)
-					addFromOption(opt, true);
-		}
-	
-		
-		protected void addFromOption(String name, boolean directories) {
-			try {
-		        String paths = options.getStringOption(name);
-		        ASTNode.log.info(name + " = " + paths);
-		        addAll(paths.split(File.pathSeparator), directories);
-			} catch (OptionRegistry.UnknownOptionException e) {}
-		}
 		
 		public void addAll(String[] paths, boolean directories) {
 			for (String path : paths)
@@ -346,6 +326,47 @@ aspect Library {
 			
 		}
 		
+	}
+	
+	public class DefaultLibraryList extends LibraryList {
+		
+		protected OptionRegistry options;
+		protected boolean calculated;
+		
+		public static final String[] LIBRARY_OPTIONS = 
+			new String[] { "MODELICAPATH", "extra_lib_dirs" };
+		
+		public DefaultLibraryList(OptionRegistry options) {
+			this.options = options;
+			calculated = false;
+		}
+		
+		public Set<LibraryDef> availableLibraries() {
+			search();
+			return set;
+		}
+		
+		public void reset() {
+			super.reset();
+			calculated = false;
+		}
+		
+		protected void search() {
+			if (!calculated) {
+				for (String opt : LIBRARY_OPTIONS)
+					addFromOption(opt, true);
+				calculated = true;
+			}
+		}
+	
+		protected void addFromOption(String name, boolean directories) {
+			try {
+		        String paths = options.getStringOption(name);
+		        ASTNode.log.info(name + " = " + paths);
+		        addAll(paths.split(File.pathSeparator), directories);
+			} catch (OptionRegistry.UnknownOptionException e) {}
+		}
+
 	}
 	
 }

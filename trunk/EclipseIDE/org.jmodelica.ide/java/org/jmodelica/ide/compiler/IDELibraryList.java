@@ -7,12 +7,11 @@ import java.util.Set;
 import org.eclipse.core.resources.IProject;
 import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.preferences.Preferences;
-import org.jmodelica.modelica.compiler.LibraryList;
-import org.jmodelica.modelica.compiler.LibraryList.LibraryDef;
+import org.jmodelica.modelica.compiler.DefaultLibraryList;
 import org.jmodelica.util.ModelicaLogger;
 import org.jmodelica.util.OptionRegistry;
 
-public class IDELibraryList extends LibraryList {
+public class IDELibraryList extends DefaultLibraryList {
 
 	private Set<LibraryDef> loadedSet;
 	private boolean loadAll;
