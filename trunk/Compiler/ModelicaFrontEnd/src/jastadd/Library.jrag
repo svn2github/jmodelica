@@ -64,41 +64,9 @@ aspect Library {
 		   			entity.setFileName(packageFile.getPath());
 		   			LibClassDecl lcd = new LibClassDecl(fcd);
 		   				   				   			
-		   			/* Obtain a list of all files
-	   				   get the corresponding package for each file
-	   				   and add to list of TypeDefs */
-	   			
-	   				List libnodes = new List();
-	   			
-	   				File[] filesUnStructured = baseDir.listFiles(new UnStructuredEntriesFilenameFilter());
-	   				log.debug("Scanning directory: " + dirName);
-	   				log.debug(" Unstructured entries: ");
-	   				for (File file : filesUnStructured) {
-	   					log.debug("  " + file);
-	   					log.debug("*** " + fileBaseName(file));
-   						libnodes.add(new LibNode(file, false));	
-	   				}
-	   				
-	   				File[] dirs = baseDir.listFiles();
-	   				log.debug(" Structured entries: ");
-		   			for (File dir : dirs) {
-		   				if (dir.isDirectory()){
-		   					log.debug("  " +dir);
-		   					log.debug("*** " + dir.getName());
-		   							   						   					
-	   						// Check if the directory contains a package.mo
-	   						// if not, do not add a LibNode
-							File subPackageFile = new File(dir, PACKAGE_FILE);
-							
-	   						if (subPackageFile.isFile()) {
-		   						libnodes.add(new LibNode(dir, true));
-							} else {
-								log.debug("*** " + dir.getName() + " Not added: no package.mo present");
-							}
-						}
-	   			
-		   			}
-					lcd.setLibNodeList(libnodes);
+		   			LibraryList ll = new LibraryList(null);
+		   			ll.add(dirName, true);
+					lcd.setLibNodeList(ll.createLibNodeList());
 					
 					File orderFile = new File(baseDir, PACKAGE_ORDER_FILE);
 					if (orderFile.isFile()) {
@@ -251,6 +219,9 @@ aspect Library {
 		protected OptionRegistry options;
 		protected Set<LibraryDef> set;
 		
+		public static final String[] LIBRARY_OPTIONS = 
+			new String[] { "MODELICAPATH", "extra_lib_dirs" };
+		
 		public LibraryList(OptionRegistry options) {
 			this.options = options;
 			set = new HashSet<LibraryDef>();
@@ -280,10 +251,9 @@ aspect Library {
 		}
 		
 		protected void search() {
-			if (set.isEmpty()) {
-				addFromOption("MODELICAPATH", true);
-				addFromOption("extra_lib_dirs", true);
-			}
+			if (set.isEmpty())
+				for (String opt : LIBRARY_OPTIONS)
+					addFromOption(opt, true);
 		}
 	
 		
@@ -295,12 +265,12 @@ aspect Library {
 			} catch (OptionRegistry.UnknownOptionException e) {}
 		}
 		
-		protected void addAll(String[] paths, boolean directories) {
+		public void addAll(String[] paths, boolean directories) {
 			for (String path : paths)
 				add(path, directories);
 		}
 		
-		protected void add(String path, boolean directory) {
+		public void add(String path, boolean directory) {
 			File base = new File(path);
 			if (directory) {
 				try {
@@ -336,7 +306,8 @@ aspect Library {
 			public boolean structured;
 			
 			public static LibraryDef create(File path) {
-				if (path.getName().endsWith(".mo") && path.isFile())
+				String name = path.getName();
+				if (name.endsWith(".mo") && path.isFile() && !name.equals(LibNode.PACKAGE_FILE))
 					return new LibraryDef(path, false);
 				else if (LibNode.isStructuredLib(path))
 					return new LibraryDef(path, true);
