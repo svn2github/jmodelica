@@ -5,6 +5,8 @@ public class Color {
 	public static final Color BLACK = new Color(0, 0, 0);
 	public static final Color WHITE = new Color(255, 255, 255);
 	
+	public static final Color TRANSPARENT = new Color(254, 254, 254);
+	
 	private static final int INCREMENT = 50;
 	
 	private int r;

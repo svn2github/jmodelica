@@ -126,7 +126,7 @@ public class AWTIconDrawer implements GraphicsInterface {
          
         // Create a graphics context on the buffered image
         g = image.createGraphics();
-        setBackgroundColor(Color.WHITE);
+        setBackgroundColor(Color.TRANSPARENT);
         
         // Clear the image.
         g.clearRect(0, 0, image.getWidth(), image.getHeight());
@@ -690,7 +690,6 @@ public class AWTIconDrawer implements GraphicsInterface {
 				)
 		);
 	}
-// uses imagedata.transparentPixel = palette.getPixel(new RGB(254, 254, 254));
 	public Image getImage() {
 		ImageData imagedata = null;
 		if(image == null){
@@ -706,7 +705,13 @@ public class AWTIconDrawer implements GraphicsInterface {
 	        		IconConstants.OUTLINE_IMAGE_SIZE, colorModel.getPixelSize(),
 	                palette);
 	   
-	        imagedata.transparentPixel = palette.getPixel(new RGB(254, 254, 254));
+	        imagedata.transparentPixel = palette.getPixel(
+	        								new RGB(
+	        									Color.TRANSPARENT.getR(), 
+	        									Color.TRANSPARENT.getG(), 
+	        									Color.TRANSPARENT.getB()
+	        									)
+	        								);
 	        
 	        for (int y = 0; y < imagedata.height; y++) {
 	        	int x = 0;
@@ -736,50 +741,7 @@ public class AWTIconDrawer implements GraphicsInterface {
 		ImageDescriptor desc = ImageDescriptor.createFromImageData(imagedata);
 		return desc.createImage(); 
 	}	
-	
-// uses imadata.setAlphaPixel 
-//	public Image getImage() {
-//		ImageData imagedata = null;
-//		if(image == null){
-//			return null; 
-//		}
-//	    if(image.getColorModel() instanceof DirectColorModel) {
-//	    	DirectColorModel colorModel
-//	                = (DirectColorModel) image.getColorModel();
-//	        PaletteData palette = new PaletteData(colorModel.getRedMask(),
-//	                colorModel.getGreenMask(), colorModel.getBlueMask());
-//	        	        
-//	        imagedata = new ImageData(IconConstants.OUTLINE_IMAGE_SIZE,
-//	        		IconConstants.OUTLINE_IMAGE_SIZE, colorModel.getPixelSize(),
-//	                palette);
-//
-//	        for (int y = 0; y < imagedata.height; y++) {
-//				imagedata.setAlpha(0, y, 0); 
-//	        }
-//        	for (int x = 0; x < imagedata.width; x++) {
-//				imagedata.setAlpha(x, imagedata.height-1, 0); 
-//        	}
-//	        WritableRaster raster = image.getRaster();
-//	        int[] pixelArray = new int[3];
-//	        for (int y = 0; y < image.getHeight(); y++) {
-//	            for (int x = 0; x < image.getWidth(); x++) {
-//	                raster.getPixel(x, y, pixelArray);
-//	                int pixel = palette.getPixel(new RGB(
-//	                		pixelArray[0],
-//	                        pixelArray[1], 
-//	                        pixelArray[2]
-//	                ));
-//	                imagedata.setPixel(x+1, y, pixel);
-//					imagedata.setAlpha(x+1, y, 255); 
-//	            }
-//	        }
-//	    }
-//	    else {	
-//	    	return null;
-//	    }
-//		ImageDescriptor desc = ImageDescriptor.createFromImageData(imagedata);
-//		return desc.createImage(); 
-//	}	
+
 	public Font setFont(Text text) {
 		
 		Font font = new Font(text.getFontName(), DEFAULT_FONT_STYLE, DEFAULT_FONT_SIZE);
@@ -897,7 +859,7 @@ public class AWTIconDrawer implements GraphicsInterface {
 	public void setBackgroundColor(Color color) {
 		g.setBackground(translateColor(color));
 	}	
-	
+
 	private java.awt.Color translateColor(Color color) {
 		java.awt.Color c = new java.awt.Color(color.getR(), color.getG(), color.getB());
 		return c;
