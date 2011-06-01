@@ -919,7 +919,7 @@ public class AWTIconDrawer implements GraphicsInterface {
 		if (thicknessInMM > FilledShape.DEFAULT_LINE_THICKNESS) {
 			thicknessInMM = FilledShape.DEFAULT_LINE_THICKNESS;
 		}
-		float thicknessInPixles = (float)(thicknessInMM*IconConstants.PIXLES_PER_MM*IconConstants.tweeky);
+		float thicknessInPixles = (float)(thicknessInMM*IconConstants.PIXLES_PER_MM*IconConstants.DEFAULT_LINE_THICKNESS_IN_PIXLES);
 		return new BasicStroke(thicknessInPixles, BasicStroke.CAP_BUTT,
 				BasicStroke.JOIN_MITER, 10.0f, linepattern.getDash(), 0.0f);
 	}
@@ -928,7 +928,7 @@ public class AWTIconDrawer implements GraphicsInterface {
 		if (thicknessInMM > 2*Line.DEFAULT_THICKNESS) {
 			thicknessInMM = 2*Line.DEFAULT_THICKNESS;
 		}
-		float thicknessInPixles = (float)(thicknessInMM*IconConstants.PIXLES_PER_MM*IconConstants.tweeky);
+		float thicknessInPixles = (float)(thicknessInMM*IconConstants.PIXLES_PER_MM*IconConstants.DEFAULT_LINE_THICKNESS_IN_PIXLES);
 		return new BasicStroke((float)(thicknessInPixles/getAvgCurrentScaleFactor()), BasicStroke.CAP_BUTT,
 				BasicStroke.JOIN_MITER, 10.0f, linepattern.getDash(), 0.0f);
 	}
