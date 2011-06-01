@@ -85,7 +85,8 @@ public class ExplorerContentProvider implements ITreeContentProvider, IResourceC
 
 	public boolean hasChildren(Object element) {
 		if (element instanceof IFile) {
-			return true;
+			IOutlineNode root = (IOutlineNode) getRoot((IFile) element);
+			return (root != null) && root.hasVisibleChildren();
 		} else if (element instanceof LoadedLibraries) {
 			return ((LoadedLibraries) element).hasChildren();
 		} else if (element instanceof ClassDecl) {
@@ -101,8 +102,6 @@ public class ExplorerContentProvider implements ITreeContentProvider, IResourceC
 		// TODO: Need to save in registry even if we have to build ourselves
 		if (ast == null) 
 			ast = cmp.compileFile(file);
-		if (ast instanceof ASTNode)
-			OutlineUpdateWorker.addIcon(viewer, (ASTNode) ast);
 		return ast;
 	}
 	
