@@ -289,15 +289,35 @@ public class AWTIconDrawer implements GraphicsInterface {
 	 * @param t
 	 */
 	public void drawLine(Line l) {
-		ArrayList<Point> points = l.getPoints();
-		if(points.size() > 2 && l.getSmooth().equals(Types.Smooth.BEZIER)) {
+		if(l.getPoints().size() > 2 && l.getSmooth().equals(Types.Smooth.BEZIER)) {
 			this.drawBezier(l);
-		} else {
+		} else if (l.getPoints().size() >= 2) {
+
+			// Tranform the points, after inverting their y-coordinate.
+			ArrayList<Point> xformedPts = new ArrayList<Point>();
+			for (Point p : l.getPoints()) {
+				xformedPts.add(transform(new Point(p.getX(), -p.getY())));
+			}
+			
+			// Round the coordinates by casting to int.
+			int nPts = xformedPts.size();
+			int[] intXCoords = new int[nPts];
+			int[] intYCoords = new int[nPts]; 
+			for (int i = 0; i < nPts; i++) {
+				intXCoords[i] = (int)xformedPts.get(i).getX();
+				intYCoords[i] = (int)xformedPts.get(i).getY();
+			}
+			
+			// Set up the Graphics object and draw the transformed points.
 			setColor(l.getColor());
 			Stroke newStroke = this.getLineStroke(l.getLinePattern(), l.getThickness());
 			g.setStroke(newStroke);
-			g.drawPolyline(GraphicsUtil.getXLinePoints(points),
-					GraphicsUtil.getYLinePoints(points), points.size());
+			AffineTransform oldTransform = g.getTransform();
+			g.setTransform(new AffineTransform());
+			g.drawPolyline(intXCoords, intYCoords, nPts);
+			g.setTransform(oldTransform);
+			
+			// If the Line has arrows, draw them.
 			Polygon[] arrows = l.getArrowPolygons();
 			for (int i = 0; i < arrows.length; i++) {
 				if (arrows[i] != null) {
@@ -903,5 +923,17 @@ public class AWTIconDrawer implements GraphicsInterface {
 	private java.awt.Color translateColor(Color color) {
 		java.awt.Color c = new java.awt.Color(color.getR(), color.getG(), color.getB());
 		return c;
+	}
+	
+	/**
+	 * Returns the given point transformed by this object's current 
+	 * transformation.
+	 * @param p The Point to transform.
+	 * @return The transformed Point.
+	 */
+	private Point transform(Point p) {
+		Point2D.Double p2d = new Point2D.Double(p.getX(), p.getY());
+		g.getTransform().transform(p2d, p2d);
+		return new Point(p2d.getX(), p2d.getY());
 	}
 }
