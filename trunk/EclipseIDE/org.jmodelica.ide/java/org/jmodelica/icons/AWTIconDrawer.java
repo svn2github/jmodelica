@@ -66,11 +66,11 @@ public class AWTIconDrawer implements GraphicsInterface {
 	public static final double MINIMUM_FONT_SIZE = 9.0;
 	
 	public static final BasicStroke DEFAULT_LINE_STROKE = 
-		new BasicStroke((float)(Line.DEFAULT_THICKNESS/IconConstants.PIXLES_PER_MM),
+		new BasicStroke((float)(Line.DEFAULT_THICKNESS*IconConstants.PIXLES_PER_MM),
 			BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, null, 0.0f);
 	
 	public static final BasicStroke DEFAULT_SHAPE_STROKE = 
-		new BasicStroke((float)(FilledShape.DEFAULT_LINE_THICKNESS/IconConstants.PIXLES_PER_MM), 
+		new BasicStroke((float)(FilledShape.DEFAULT_LINE_THICKNESS*IconConstants.PIXLES_PER_MM), 
 			BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, null, 0.0f);
 	
 	private static final int DEFAULT_FONT_STYLE = Font.PLAIN;
@@ -120,16 +120,16 @@ public class AWTIconDrawer implements GraphicsInterface {
 		double scaleWidth = imageWidth/iconWidth;
 		double scaleHeight = imageHeight/iconHeight;
 		
-	    image = new BufferedImage(
-        		(int)imageWidth, 
-        		(int)imageHeight, 
-        		BufferedImage.TYPE_INT_ARGB
-        );
-         
-        // Create a graphics context on the buffered image
-        g = image.createGraphics();
-        g.setBackground(new java.awt.Color(255,255,255,0));
-        g.clearRect(0, 0, image.getWidth(), image.getHeight());
+		image = new BufferedImage(
+				(int)imageWidth, 
+				(int)imageHeight, 
+				BufferedImage.TYPE_INT_ARGB
+		);
+		
+		// Create a graphics context on the buffered image
+		g = image.createGraphics();
+		g.setBackground(new java.awt.Color(255,255,255,0));
+		g.clearRect(0, 0, image.getWidth(), image.getHeight());
         
         AffineTransform transform = new AffineTransform(); 
         
@@ -138,10 +138,10 @@ public class AWTIconDrawer implements GraphicsInterface {
         		(imageHeight/2)
         );
 
-
-       transform.scale(scaleWidth, scaleHeight);
-       g.transform(transform); 
-       icon.draw(this);
+		transform.scale(scaleWidth, scaleHeight);
+		g.transform(transform); 
+		   
+		icon.draw(this);
     }
 
 	/**	
@@ -310,7 +310,7 @@ public class AWTIconDrawer implements GraphicsInterface {
 			
 			// Set up the Graphics object and draw the transformed points.
 			setColor(l.getColor());
-			Stroke newStroke = this.getLineStroke(l.getLinePattern(), l.getThickness());
+			Stroke newStroke = getLineStroke(l.getLinePattern(), l.getThickness());
 			g.setStroke(newStroke);
 			AffineTransform oldTransform = g.getTransform();
 			g.setTransform(new AffineTransform());
@@ -344,7 +344,7 @@ public class AWTIconDrawer implements GraphicsInterface {
 		// AffineTransform of the Graphics2D object. 
 		ArrayList<Point> xformedPts = new ArrayList<Point>();
 		double[] coords = new double[6];
-		PathIterator pathIterator = shape.getPathIterator(g.getTransform(), 0.1);
+		PathIterator pathIterator = shape.getPathIterator(g.getTransform(), 0.05);
 		while (!pathIterator.isDone()) {
 			int segmentType = pathIterator.currentSegment(coords);
 			if (segmentType == PathIterator.SEG_LINETO) {
@@ -391,13 +391,21 @@ public class AWTIconDrawer implements GraphicsInterface {
 							s.getFillPattern() == FillPattern.VERTICALCYLINDER ||
 							s.getFillPattern() == FillPattern.SPHERE);
 		if (s.getLinePattern() != LinePattern.NONE && !gradient) {
-			double thickness = s.getLineThickness()*getAvgCurrentScaleFactor();
-			Stroke newStroke = getLineStroke(s.getLinePattern(), thickness); 
+//			double thickness = s.getLineThickness()*getAvgCurrentScaleFactor();
+			Stroke newStroke = getShapeStroke(s.getLinePattern(), s.getLineThickness()); 
 			g.setStroke(newStroke);
 			setColor(s.getLineColor());
 			AffineTransform oldTransform = g.getTransform();
 			g.setTransform(new AffineTransform());
+			g.setRenderingHint(
+					RenderingHints.KEY_ANTIALIASING, 
+					RenderingHints.VALUE_ANTIALIAS_ON
+			);
 			g.draw(intShape);
+			g.setRenderingHint(
+					RenderingHints.KEY_ANTIALIASING, 
+					RenderingHints.VALUE_ANTIALIAS_OFF
+			);
 			g.setTransform(oldTransform);
 		}
 		
@@ -906,9 +914,22 @@ public class AWTIconDrawer implements GraphicsInterface {
 			return createShape((Text)s);
 		}
 	}
-	public Stroke getLineStroke(LinePattern linepattern, double thicknessInMM) {
-		float thicknessInPixles = (float)(thicknessInMM*IconConstants.PIXLES_PER_MM);
+	
+	public Stroke getShapeStroke(LinePattern linepattern, double thicknessInMM) {
+		if (thicknessInMM > FilledShape.DEFAULT_LINE_THICKNESS) {
+			thicknessInMM = FilledShape.DEFAULT_LINE_THICKNESS;
+		}
+		float thicknessInPixles = (float)(thicknessInMM*IconConstants.PIXLES_PER_MM*IconConstants.tweeky);
 		return new BasicStroke(thicknessInPixles, BasicStroke.CAP_BUTT,
+				BasicStroke.JOIN_MITER, 10.0f, linepattern.getDash(), 0.0f);
+	}
+	
+	public Stroke getLineStroke(LinePattern linepattern, double thicknessInMM) {
+		if (thicknessInMM > 2*Line.DEFAULT_THICKNESS) {
+			thicknessInMM = 2*Line.DEFAULT_THICKNESS;
+		}
+		float thicknessInPixles = (float)(thicknessInMM*IconConstants.PIXLES_PER_MM*IconConstants.tweeky);
+		return new BasicStroke((float)(thicknessInPixles/getAvgCurrentScaleFactor()), BasicStroke.CAP_BUTT,
 				BasicStroke.JOIN_MITER, 10.0f, linepattern.getDash(), 0.0f);
 	}
 	
