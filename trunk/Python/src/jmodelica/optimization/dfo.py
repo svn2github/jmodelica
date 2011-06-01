@@ -9,6 +9,8 @@ import scipy.linalg
 import matplotlib.pyplot as plt
 import time
 
+import thread_feval as tf
+
 try:
     from openopt import NLP
 except ImportError:
