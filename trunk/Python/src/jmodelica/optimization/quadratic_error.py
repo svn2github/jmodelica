@@ -1,6 +1,6 @@
 import numpy as N
 
-def quad_err(t_meas,y_meas,t_sim,y_sim):
+def quad_err(t_meas,y_meas,t_sim,y_sim,w=None):
 	"""
 	Compute the quadratic error sum for the difference between 
 	measurements and simulation results. The measurements and the 
@@ -31,7 +31,20 @@ def quad_err(t_meas,y_meas,t_sim,y_sim):
 			corresponds to the number of physical quantities simulated.
 			NB: Must have same length as t_sim and same number of 
 				rows as y_meas.
-	
+				
+		w --
+			scalar or ndarray (of 1 dimension)
+			Scaling factor(s). If y_meas and y_sim are 1-dimensional, then
+			w must be a scalar. Otherwise, w must be a 1-dimensional array
+			with the same number of elements as the number of rows in y_meas 
+			and y_sim. 			
+			Example: If w = [w1 w2 w2], then the first row in y_meas and 
+			y_sim is multiplied with w1, the second with w2 and the third 
+			with w3.
+			If w is not supplied, then it is set to 1 or a 1-dimensional 
+			array of ones.
+			Default: None 
+			
 	Returns::
 	
 		err --
@@ -73,6 +86,21 @@ def quad_err(t_meas,y_meas,t_sim,y_sim):
 	if not N.all(N.diff(t_sim) >= 0):
 		raise ValueError, 't_sim must be increasing.'
 	
+	if w is None:
+		if dim1 == 1:
+			w = 1
+		else:
+			w = N.ones(m1)
+	else:
+		if dim1 == 1:
+			if N.ndim(w) != 0:
+				raise ValueError, 'w must be a scalar since y_meas and y_sim only have one dimension.'
+		else:
+			if N.ndim(w) != 1:
+				raise ValueError, 'w must be a 1-dimensional array since y_meas and y_sim are 2-dimensional.'
+			if (len(w) != m1):
+				raise ValueError, 'w must have the same length as the number of rows in y_meas and y_sim.'
+			
 	# The number of measurement points
 	n = n1
 	
@@ -102,11 +130,12 @@ def quad_err(t_meas,y_meas,t_sim,y_sim):
 				vec = N.sum(y_sim_val,1)*1.0/N.size(y_sim_val,1)
 				for j in range(m):
 					Y_sim[j,ind2] = vec[j]
-		
-	# Evaluate the error
-	err = sum((Y_sim - y_meas)**2,0)
 	
+	# Evaluate the error
+	X = Y_sim - y_meas
 	if m == 1:
-		return err
+		err = w*sum(X**2,0)
 	else:
-		return sum(err)
+		qX2 = N.dot(w,X**2)
+		err = sum(qX2)
+	return err

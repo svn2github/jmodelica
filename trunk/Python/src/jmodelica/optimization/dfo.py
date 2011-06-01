@@ -14,18 +14,26 @@ try:
 except ImportError:
     print "Could not load OpenOpt package."
 
-def nelme(f,xstart,lb=None,ub=None,h=0.3,plot_con=False,plot_sim=False,
-		  x_tol=1e-3,f_tol=1e-6,max_iters=500,max_fevals=5000,disp=True):
+def nelme(func,xstart,lb=None,ub=None,h=0.3,plot_con=False,plot_sim=False,
+		  x_tol=1e-3,f_tol=1e-6,max_iters=500,max_fevals=5000,disp=True,nbr_cores=None):
 	"""
 	Minimize a function of one or more variables using the 
-	Nelder-Mead simplex method. Handles box bound constraints but not 
-	very well.
+	Nelder-Mead simplex method. Handles box bound constraints but it 
+	cannot be guaranteed that it works well for all situations.
+	
+	If desired, all function evaluations in the algorithm can be performed 
+	in separate processes to save memory. This feature is applied if the 
+	user provides the objective function(func) as a file name (of a file 
+	containing the definition of the function) instead of a function.
 	
 	Parameters::
 	
-		f -- 
-			callable f(x)
-			The objective function to be minimized.
+		func -- 
+			callable func(x) or string
+			The objective function OR the name of a python file 
+			containing the definition of the objective function. In case 
+			of a file name, the objective function in the file must 
+			have the same name as the file itself (without ".py").  
 			
 		xstart -- 
 			ndarray or scalar
@@ -42,7 +50,7 @@ def nelme(f,xstart,lb=None,ub=None,h=0.3,plot_con=False,plot_sim=False,
 			Default: None
 		
 		h -- 
-			int
+			float
 			The side length of the initial simplex.
 			NB: 0 < h < 1 should be fulfilled.
 			Default: 0.3	
@@ -64,7 +72,7 @@ def nelme(f,xstart,lb=None,ub=None,h=0.3,plot_con=False,plot_sim=False,
 		x_tol --
 			float
 			The tolerance for the termination criteria for x. 
-			Termination when all side lengths in the simplex have 
+			Termination when at least one side length in the simplex have 
 			reached this value.
 			NB: x_tol < h must be fulfilled.
 			Default: 1e-3
@@ -72,8 +80,8 @@ def nelme(f,xstart,lb=None,ub=None,h=0.3,plot_con=False,plot_sim=False,
 		f_tol --
 			float
 			The tolerance for the termination criteria for the objective 
-			function. Termination when all vertix function values in the
-			simplex are this close to each other.
+			function. Termination when at least two vertix function values 
+			in the simplex are this close to each other.
 			Default: 1e-6
 		
 		max_iters --
@@ -83,13 +91,19 @@ def nelme(f,xstart,lb=None,ub=None,h=0.3,plot_con=False,plot_sim=False,
 			
 		max_fevals --
 			int
-			The maximum number of function evaluations allowed.
+			The maximum number of function evaluations allowed. 
 			Default: 5000
 			
 		disp --
 			bool
 			Set to True to print convergence messages.
 			Default: True
+			
+		nbr_cores --
+			int
+			The number of processor cores used. This is only needed if the 
+			function evaluations should be performed in separate processes.
+			Default: None
 			
 	Returns::
 	
@@ -107,7 +121,8 @@ def nelme(f,xstart,lb=None,ub=None,h=0.3,plot_con=False,plot_sim=False,
 		
 		nbr_fevals --
 			int
-			The number of function evaluations made.	
+			The number of function evaluations made. Evaluations due to 
+			generation of contour plot are not included.	
 		
 		solve_time --
 			float
@@ -128,6 +143,11 @@ def nelme(f,xstart,lb=None,ub=None,h=0.3,plot_con=False,plot_sim=False,
 		if N.any(xstart >= ub):
 			raise ValueError, 'xstart must be smaller than ub.'
 	
+	# Check that nbr of cores is provided if multithreading is to be used
+	if type(func).__name__ != 'function':
+		if nbr_cores is None:
+			raise ValueError, 'The number of processor cores used must be provided.'
+	
 	# Convert xstart to float type array and flatten it so that 
 	# len(xstart) can be used even if xstart is a scalar
 	xstart = N.asfarray(xstart).flatten()	
@@ -145,9 +165,6 @@ def nelme(f,xstart,lb=None,ub=None,h=0.3,plot_con=False,plot_sim=False,
 	if n != 2:
 		plot_con = False
 		plot_sim = False
-	
-	# Number of function evaluations
-	nbr_fevals = 0
 	
 	if plot_con:
 		
@@ -168,21 +185,31 @@ def nelme(f,xstart,lb=None,ub=None,h=0.3,plot_con=False,plot_sim=False,
 		y_vec = N.linspace(y_min,y_max,10)
 		x_grid,y_grid = N.meshgrid(x_vec,y_vec)
 		
-		# Compute the contour lines for f
+		# Compute the contour lines for the objective function
 		l = len(x_vec)
 		z = N.zeros((l,l))
-		for i in range(l):
-			for j in range(l):
-				point = N.array([x_grid[i,j],y_grid[i,j]])
-				z[i,j] = f(point)
-				nbr_fevals += 1
-		
-		# Plot the contour lines for f
+		if type(func).__name__ == 'function':
+			for i in range(l):
+				for j in range(l):
+					point = N.array([x_grid[i,j],y_grid[i,j]])
+					z[i,j] = func(point)
+		else:
+			# Generate points in which to evaluate the function
+			points = []
+			for i in range(l):
+				for j in range(l):
+					points.append(N.array([x_grid[i,j],y_grid[i,j]]))
+			# Evaluate function in these points		
+			f_values = tf.feval(func,points)
+			for i in range(l):
+				z[i] = f_values[i*l:(i+1)*l]
+	
+		# Plot the contour lines for the function
 		plt.figure()
 		plt.grid()
 		plt.axis('equal')
 		plt.contour(x_grid,y_grid,z) 
-		plt.title('Contour lines for the objective function f')
+		plt.title('Contour lines for the objective function')
 		plt.show()
 		
 		# Plot lower bounds
@@ -224,41 +251,71 @@ def nelme(f,xstart,lb=None,ub=None,h=0.3,plot_con=False,plot_sim=False,
 		if plot_sim:
 			# Plot the new initial simplex
 			plt.plot(N.hstack((X[:,0],X[0,0])),N.hstack((X[:,1],X[0,1])))
-		
+	
+	# Number of function evaluations
+	nbr_fevals = 0
+	
 	# Start iterations
 	k = 0
+	F_val = []
+	Shiftfv = []
+	Ssize = []
 	while k < max_iters and nbr_fevals < max_fevals:
 		
+		print ' '
+		print 'Number of function evaluations: ' + str(nbr_fevals)
+		print 'Number of iterations: ' + str(k)
+		t_temp = time.clock()
+		t_now = t_temp - t0
+		print 'Current time: ' + str(t_now)
+		print ' '
+		
 		# Function values at the vertices of the current simplex
-		f_val = N.zeros(n+1)
-		for i in range(n+1):
-			f_val[i] = f(X[i])
-			nbr_fevals += 1
+		if type(func).__name__ == 'function':
+			f_val = N.zeros(n+1)
+			for i in range(n+1):
+				f_val[i] = func(X[i])
+				nbr_fevals += 1
+		else:
+			f_val = tf.feval(func,X)
+			nbr_fevals += (n+1)
 		
 		# Order all vertices s.t f(x0) <= f(x1) <= ... <= f(xn)
 		ind = N.argsort(f_val)
 		X = X[ind]
 		f_val = f_val[ind]
+		
+		# Save vertex function values for each iteration
+		F_val.append(f_val)
+		
+		print ' '
+		print 'Current x: ' + str(X[0])
+		print 'Current f-value: ' + str(f_val[0])
+		print ' '
 			
 		if plot_sim:
 			# Plot the current simplex
 			plt.plot(N.hstack((X[:,0],X[0,0])),N.hstack((X[:,1],X[0,1])))
 			plt.draw()
-	
+		
 		# CONVERGENCE TESTS
 		
 		# Domain convergence test
-		X_diff = N.diff(X,axis=0)
-		sides = N.vstack((X_diff,X[0]-X[n]))
-		side_lengths = N.zeros(n+1)
-		for i in range(n+1):
-			side_lengths[i] = S.linalg.norm(sides[i,:]) 
-		term_x = N.all(side_lengths <= x_tol)
+		lengths = N.zeros(n)
+		for i in range(n):
+			lengths[i] = S.linalg.norm(X[0]-X[i+1])
+		ssize = N.max(lengths)
+		Ssize.append(ssize)
+		term_x = ssize < x_tol
+		
+		print 'ssize = ' + str(ssize)
 		
 		# Function value convergence test
-		f_diff = N.diff(f_val)
-		F_diff = N.absolute(N.hstack((f_diff,f_val[0]-f_val[n])))
-		term_f = N.all(F_diff <= f_tol)	
+		shiftfv = N.abs(f_val[0]-f_val[n])
+		Shiftfv.append(shiftfv)
+		term_f = shiftfv < f_tol
+		
+		print 'shiftfv = ' + str(shiftfv)
 		
 		if term_x or term_f:
 			break
@@ -272,43 +329,83 @@ def nelme(f,xstart,lb=None,ub=None,h=0.3,plot_con=False,plot_sim=False,
 		gamma = 2	# 1 < gamma
 		delta = 0.5	# 0 < delta < 1
 		
-		# Reflection
+		# Reflection-, Expansion- and Contraction points
 		xr = c + alfa*(c-X[n])
+		xe = c + gamma*(xr-c)
+		xc1 = c + beta*(xr-c)
+		xc2 = c - beta*(xr-c)
 		
-		# If the reflection point ends up outside the feasible region we
-		# must move it to the inside of the region
+		# If any point ends up outside the feasible region we must move 
+		# it inside of the region (xc2 cannot end up outside)
 		if ub is not None:
 			if N.any(xr >= ub):
 				ind = xr >= ub
 				xr[ind] = ub[ind] - 1e-6
+			if N.any(xe >= ub):
+				ind = xe >= ub
+				xe[ind] = ub[ind] - 1e-6
+			if N.any(xc1 >= ub):
+				ind = xc1 >= ub
+				xc1[ind] = ub[ind] - 1e-6
 		if lb is not None:
 			if N.any(xr <= lb):
 				ind = xr <= lb
 				xr[ind] = lb[ind] + 1e-6
-				
-		fr = f(xr)
-		nbr_fevals += 1
+			if N.any(xe <= lb):
+				ind = xe <= lb
+				xe[ind] = lb[ind] + 1e-6
+			if N.any(xc1 <= lb):
+				ind = xc1 <= lb
+				xc1[ind] = lb[ind] + 1e-6
+		
+		# Evaluate function in the four ponits		
+		if type(func).__name__ == 'function':
+			fr = func(xr)
+			fe = func(xe)
+			fc1 = func(xc1)
+			fc2 = func(xc2)
+			nbr_fevals += 4
+		else:
+			if nbr_cores >= 4:
+				x_values = N.vstack([xr,xe,xc1,xc2])
+				f_values = tf.feval(func,x_values)
+				fr = f_values[0]
+				fe = f_values[1]
+				fc1 = f_values[2]
+				fc2 = f_values[3]
+				nbr_fevals += 4
+			elif nbr_cores == 3:
+				x_values = N.vstack([xr,xe,xc1])
+				f_values = tf.feval(func,x_values)
+				fr = f_values[0]
+				fe = f_values[1]
+				fc1 = f_values[2]
+				nbr_fevals += 3
+			elif nbr_cores == 2:
+				x_values = N.vstack([xr,xe])
+				f_values = tf.feval(func,x_values)
+				fr = f_values[0]
+				fe = f_values[1]
+				nbr_fevals += 2
+			elif nbr_cores == 1:
+				# This is completely unnecessary but we must compute the
+				# function value in a separate process to avoid memory problems
+				fr = tf.feval(func,xr)
+				nbr_fevals += 1
+		
+		# Reflection
 		if f_val[0] <= fr and fr < f_val[n-1]:
 			X[n] = xr
 			# Go to next iteration
 			k += 1
 			continue
-			
+		
 		# Expansion	
 		elif fr < f_val[0]:
-			xe = c + gamma*(xr-c)
-			# If the expansion point ends up outside the feasible region we
-			# must move it to the inside of the region
-			if ub is not None:
-				if N.any(xe >= ub):
-					ind = xe >= ub
-					xe[ind] = ub[ind] - 1e-6
-			if lb is not None:
-				if N.any(xe <= lb):
-					ind = xe <= lb
-					xe[ind] = lb[ind] + 1e-6
-			fe = f(xe)
-			nbr_fevals += 1
+			if type(func).__name__ != 'function':
+				if nbr_cores == 1:
+					fe = tf.feval(func,xe)
+					nbr_fevals += 1
 			if fe < fr:
 				X[n] = xe
 				# Go to next iteration
@@ -324,21 +421,23 @@ def nelme(f,xstart,lb=None,ub=None,h=0.3,plot_con=False,plot_sim=False,
 		elif f_val[n-1] <= fr:
 			# Outside contraction
 			if fr < f_val[n]:
-				xc = c + beta*(xr-c)
-				fc = f(xc)
-				nbr_fevals += 1
-				if fc <= fr:
-					X[n] = xc
+				if type(func).__name__ != 'function':
+					if nbr_cores == 1 or nbr_cores == 2:
+						fc1 = tf.feval(func,xc1)
+						nbr_fevals += 1
+				if fc1 <= fr:
+					X[n] = xc1
 					# Go to next iteration
 					k += 1
 					continue
 			# Inside contraction
 			else:
-				xc = c + beta*(X[n]-c)
-				fc = f(xc) 
-				nbr_fevals += 1
-				if fc < f_val[n]:
-					X[n] = xc
+				if type(func).__name__ != 'function':
+					if nbr_cores == 1 or nbr_cores == 2 or nbr_cores == 3:
+						fc2 = tf.feval(func,xc2)
+						nbr_fevals += 1
+				if fc2 < f_val[n]:
+					X[n] = xc2
 					# Go to next iteration
 					k += 1
 					continue
@@ -349,7 +448,10 @@ def nelme(f,xstart,lb=None,ub=None,h=0.3,plot_con=False,plot_sim=False,
 			
 	# Optimal point and objective function value		
 	x_opt = X[0]
-	f_opt = f(x_opt)
+	if type(func).__name__ == 'function':
+			f_opt = func(x_opt)
+	else:
+		f_opt = tf.feval(func,x_opt)
 	nbr_fevals += 1
 	
 	# Number of iterations
@@ -357,7 +459,7 @@ def nelme(f,xstart,lb=None,ub=None,h=0.3,plot_con=False,plot_sim=False,
 
 	t1 = time.clock()
 	solve_time = t1 - t0
-
+	
 	# Print convergence results
 	if disp:
 		print ' '
@@ -792,13 +894,13 @@ def de(f,lb,ub,plot=False,x_tol=1e-6,f_tol=1e-6,max_iters=1000,
 	# Return results
 	return x_opt, f_opt, nbr_iters, nbr_fevals, solve_time
 
-def fmin(f,xstart=None,lb=None,ub=None,alg=None,plot=False,x_tol=1e-6,
-		 f_tol=1e-6,max_iters=1000,max_fevals=10000,disp=True):
+def fmin(func,xstart=None,lb=None,ub=None,alg=None,plot=False,x_tol=1e-6,
+		 f_tol=1e-6,max_iters=1000,max_fevals=10000,disp=True,nbr_cores=None):
 	"""
 	Minimize a function of one or more variables using a derivative-free 
 	method which can be chosen from the following alternatives: 
 		1. The Nelder-Mead simplex method. Handles box bound constraints 
-		   but not very well.
+		   but it cannot be guaranteed that it works well for all situations.
 		2. A sequential barrier function method which uses the 
 		   Nelder-Mead simplex method. Handles box bound constraints. 
 		   Can only be chosen if some bound (lb or ub or both) is 
@@ -806,12 +908,21 @@ def fmin(f,xstart=None,lb=None,ub=None,alg=None,plot=False,x_tol=1e-6,
 		3. The OpenOpt solver 'de' which is a GLP solver based on the
 		   Differential Evolution method. Handles box bound constraints. 
 		   Can only be chosen if bounds (both lb and ub) are provided.
+		   
+	If the Nelder-Mead method is chosen, then all function evaluations in 
+	the algorithm can be performed in separate processes to save memory. 
+	This feature is applied if the user provides the objective function
+	(func) as a file name (of a file containing the definition of the function) 
+	instead of a function.
 	
 	Parameters::
 	
-		f --
-			callable f(x)
-			The objective function to be minimized.
+		func --
+			callable func(x) or string
+			The objective function OR the name of a python file 
+			containing the definition of the objective function. In case 
+			of a file name, the objective function in the file must 
+			have the same name as the file itself (without ".py").  
 		
 		xstart --
 			ndarray or scalar
@@ -833,16 +944,11 @@ def fmin(f,xstart=None,lb=None,ub=None,alg=None,plot=False,x_tol=1e-6,
 		alg --
 			int
 			The number of the desired optimization method to be used:
-				1 = The Nelder-Mead simplex method. Handles box bound
-					constraints but not very well.
+				1 = The Nelder-Mead simplex method. 
 				2 = A sequential barrier function method which uses 
-					the Nelder-Mead simplex method. Handles box bound 
-					constraints. Can only be chosen if some bound (lb or 
-					ub or both) is provided.
+					the Nelder-Mead simplex method. 
 				3 = The OpenOpt solver 'de' which is a GLP solver based 
-					on the Differential Evolution method. Handles box 
-					bound constraints. Can only be chosen if bounds 
-					(both lb and ub) are provided.
+					on the Differential Evolution method.
 			Default: None
 		
 		plot --
@@ -890,6 +996,12 @@ def fmin(f,xstart=None,lb=None,ub=None,alg=None,plot=False,x_tol=1e-6,
 			bool
 			Set to True to print convergence messages.
 			Default: True
+		
+		nbr_cores --
+			int
+			The number of processor cores used. This is only needed if the 
+			function evaluations should be performed in separate processes.
+			Default: None
 	
 	Returns::
 	
@@ -929,33 +1041,37 @@ def fmin(f,xstart=None,lb=None,ub=None,alg=None,plot=False,x_tol=1e-6,
 			raise ValueError, 'Method 3 can only be chosen if bounds are provided.'
 	elif lb is None or ub is None:
 		if alg == 3:
-			raise ValueError, 'Method 3 can only be chosen if both upper and lower bounds are provided'
+			raise ValueError, 'Method 3 can only be chosen if both upper and lower bounds are provided.'
 							  
 	# Check that xstart is given if alg = 1 or 2						  
 	if alg == 1 or alg == 2:
 		if xstart is None:
 			raise ValueError, 'Methods 1 and 2 require a starting point.'
 	
+	if type(func).__name__ != 'function':
+		if alg != 1:
+			raise ValueError, 'If other than the Nelder-Mead method is chosen, func must be of function type.'
+	
 	# Solve the problem
 	if alg == 1:
-		x_opt,f_opt,nbr_iters,nbr_fevals,solve_time = nelme(f,xstart,lb=lb,ub=ub,
-															plot_con=plot,plot_sim=plot,
-															x_tol=x_tol,f_tol=f_tol,
-															max_iters=max_iters,
-															max_fevals=max_fevals,
-															disp=disp)
+		x_opt,f_opt,nbr_iters,nbr_fevals,solve_time = nelme(func,xstart,lb=lb,ub=ub,
+															   plot_con=plot,plot_sim=plot,
+															   x_tol=x_tol,f_tol=f_tol,
+															   max_iters=max_iters,
+															   max_fevals=max_fevals,
+															   disp=disp,nbr_cores=nbr_cores)
 	elif alg == 2:
-		x_opt,f_opt,nbr_iters,nbr_fevals,solve_time = seqbar(f,xstart,lb=lb,ub=ub,
-															 plot=plot,x_tol=x_tol,
-															 q_tol=f_tol,
-															 max_iters=max_iters,
-															 max_fevals=max_fevals,
-															 disp=disp)
+		x_opt,f_opt,nbr_iters,nbr_fevals,solve_time = seqbar(func,xstart,lb=lb,ub=ub,
+																plot=plot,x_tol=x_tol,
+																q_tol=f_tol,
+																max_iters=max_iters,
+																max_fevals=max_fevals,
+																disp=disp)
 	
 	else:
-		x_opt,f_opt,nbr_iters,nbr_fevals,solve_time = de(f,lb,ub,plot=plot,x_tol=x_tol,
-													     f_tol=f_tol,max_iters=max_iters,
-														 max_fevals=max_fevals,disp=disp)
+		x_opt,f_opt,nbr_iters,nbr_fevals,solve_time = de(func,lb,ub,plot=plot,x_tol=x_tol,
+															f_tol=f_tol,max_iters=max_iters,
+															max_fevals=max_fevals,disp=disp)
 	
 	# Return results
 	return x_opt, f_opt, nbr_iters, nbr_fevals, solve_time
