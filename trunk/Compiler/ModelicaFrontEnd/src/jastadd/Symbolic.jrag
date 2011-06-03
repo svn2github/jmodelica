@@ -15,16 +15,24 @@
 */
 
 aspect EquationSolve {
-	
+
 	syn boolean FAbstractEquation.isSolved(String name) {
-		return !(solution(name) instanceof FNoExp);
+		return !(solution(name, false) instanceof FNoExp);
 	}
 	
 	syn nta FExp FAbstractEquation.solution(String name) {
+		return solution(name, false);
+	}
+	
+	syn boolean FAbstractEquation.isSolved(String name, boolean duringTearing) {
+		return !(solution(name, duringTearing) instanceof FNoExp);
+	}
+	
+	syn nta FExp FAbstractEquation.solution(String name, boolean duringTearing) {
 		return new FNoExp();
 	}
 	
-	eq FWhenEquation.solution(String name) {
+	eq FWhenEquation.solution(String name, boolean duringTearing) {
 		if (getNumFAbstractEquation()>1) {
 			return null;
 		} else {
@@ -32,7 +40,7 @@ aspect EquationSolve {
 		}
 	}
 	
-	eq FEquation.solution(String name) {
+	eq FEquation.solution(String name, boolean duringTearing) {
 		
 		// Get terms
 		ArrayList<FExp> t = terms();
@@ -72,6 +80,7 @@ aspect EquationSolve {
 		}
 		
 		FExp mulCoeff = null;
+		FTypePrefixVariability mulCoeffVar = fConstant(); // Keep track of variability
 		// Build new AST for the active terms
 		for (FExp e : activeTerms) {
 			ArrayList<FExp> fac = e.factors();
@@ -103,7 +112,8 @@ aspect EquationSolve {
 				}
 			}
 			FExp coeff = null;
-			for (FExp eee : inactiveFactors) {			
+			for (FExp eee : inactiveFactors) {
+			    mulCoeffVar = mulCoeffVar.combine(eee.variability());			
 				FExp eeee = (FExp)eee.fullCopy();
 				// Set references from the new tree to the original one
 				eeee.traverseSymbolic(eee); 
@@ -134,6 +144,12 @@ aspect EquationSolve {
 					}	
 				}					
 			}	
+		}
+	    	
+	    if (duringTearing && !root().options.getBooleanOption("divide_by_vars_in_tearing")) { 	   
+		    if (!mulCoeffVar.lessOrEqual(fConstant())) {
+		    	return new FNoExp();
+		    }
 		}
 	    
 	    if (mulCoeff!=null && 

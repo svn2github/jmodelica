@@ -41,6 +41,10 @@ import org.xml.sax.SAXException;
 public class OptionRegistry {
 	
 		private enum DefOpt {
+			DIVIDE_BY_PARS_IN_TEARING  ("divide_by_vars_in_tearing", false, 
+			"If this option is set to true (default is false), a less restrictive strategy is used for solving equations " +
+			"in the tearing algorithm. Specifically, division by parameters and variables is permitted, by default no" +
+			"such divisions are made during tearing."),
 			ENABLE_TEARING   ("enable_tearing", false, 
 					"If this option is set to true (default is false), tearing of equation systems is enabled."),
 			CONV_FREE_DEP_PAR_TO_ALGS   ("convert_free_dependent_parameters_to_algebraics", true, 
