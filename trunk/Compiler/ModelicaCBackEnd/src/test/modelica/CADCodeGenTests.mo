@@ -874,4 +874,161 @@ equation
  y2 = sum(u2);
 end SparseJacTest1;
 
+model SparseJacTest2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CADCodeGenTestCase(
+         name="SparseJacTest2",
+         description="Test that sparsity information is generated correctly",
+	 generate_dae_jacobian=true,
+         template="
+$C_DAE_equation_sparsity$
+",
+         generatedCode="
+static const int CAD_dae_real_p_opt_n_nz = 0;
+static const int CAD_dae_real_dx_n_nz = 0;
+static const int CAD_dae_real_x_n_nz = 0;
+static const int CAD_dae_real_u_n_nz = 0;
+static const int CAD_dae_real_w_n_nz = 4;
+static int CAD_dae_n_nz = 4;
+static const int CAD_dae_nz_rows[4] = {1,2,3,0};
+static const int CAD_dae_nz_cols[4] = {0,1,2,3};
+")})));
+    function F1
+      input Real x1[3];
+      input Real x2;
+      input Real x3;
+      output Real y1;
+      output Real y2[3];
+    algorithm
+      y1 := x1[1]+x2;
+      y2 := {x1[1],x2,x3} + x1;
+    end F1;
+    Real y[3](start={1,2,3});
+    Real a(start = 3);
+    parameter Real x[3](start={3,2,2});
+    parameter Real z(start=1);
+    parameter Real w(start =3);
+equation
+    (a,y) = F1(x,z,w);
+
+end SparseJacTest2;
+
+model SparseJacTest3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CADCodeGenTestCase(
+         name="SparseJacTest3",
+         description="Test that sparsity information is generated correctly",
+	 generate_dae_jacobian=true,
+         template="
+$C_DAE_equation_sparsity$
+",
+         generatedCode="
+static const int CAD_dae_real_p_opt_n_nz = 0;
+static const int CAD_dae_real_dx_n_nz = 0;
+static const int CAD_dae_real_x_n_nz = 0;
+static const int CAD_dae_real_u_n_nz = 0;
+static const int CAD_dae_real_w_n_nz = 12;
+static int CAD_dae_n_nz = 12;
+static const int CAD_dae_nz_rows[12] = {1,2,3,0,1,2,3,0,1,2,3,4};
+static const int CAD_dae_nz_cols[12] = {0,1,2,3,3,3,3,4,4,4,4,4};
+")})));
+    function F1
+      input Real x1[3];
+      input Real x2;
+      input Real x3;
+      output Real y1;
+      output Real y2[3];
+    algorithm
+      y1 := x1[1]+x2;
+      y2 := {x1[1],x2,x3} + x1;
+    end F1;
+    Real y[3](start={1,2,3});
+    Real a(start = 3);
+    Real q = 3;
+    parameter Real x[3](start={3,2,2});
+    parameter Real z(start=1);
+    parameter Real w(start =3);
+equation
+    (a,y) = F1(x,q,a);
+
+end SparseJacTest3;
+
+model SparseJacTest4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CADCodeGenTestCase(
+         name="SparseJacTest4",
+         description="Test that sparsity information is generated correctly",
+	 generate_dae_jacobian=true,
+         template="
+$C_DAE_equation_sparsity$
+",
+         generatedCode="
+static const int CAD_dae_real_p_opt_n_nz = 0;
+static const int CAD_dae_real_dx_n_nz = 0;
+static const int CAD_dae_real_x_n_nz = 0;
+static const int CAD_dae_real_u_n_nz = 12;
+static const int CAD_dae_real_w_n_nz = 12;
+static int CAD_dae_n_nz = 24;
+static const int CAD_dae_nz_rows[24] = {0,1,2,3,0,1,2,3,0,1,2,3,1,2,3,0,1,2,3,0,1,2,3,4};
+static const int CAD_dae_nz_cols[24] = {0,0,0,0,1,1,1,1,2,2,2,2,3,4,5,6,6,6,6,7,7,7,7,7};
+")})));
+    function F1
+      input Real x1[3];
+      input Real x2;
+      input Real x3;
+      output Real y1;
+      output Real y2[3];
+    algorithm
+      y1 := x1[1]+x2;
+      y2 := {x1[1],x2,x3} + x1;
+    end F1;
+    Real y[3](start={1,2,3});
+    Real a(start = 3);
+    Real q = 3;
+    input Real x[3](start={3,2,2});
+equation
+    (a,y) = F1(x,q,a);
+
+end SparseJacTest4;
+
+model SparseJacTest5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CADCodeGenTestCase(
+         name="SparseJacTest5",
+         description="Test that sparsity information is generated correctly",
+	 generate_dae_jacobian=true,
+         template="
+$C_DAE_equation_sparsity$
+",
+         generatedCode="
+static const int CAD_dae_real_p_opt_n_nz = 0;
+static const int CAD_dae_real_dx_n_nz = 15;
+static const int CAD_dae_real_x_n_nz = 15;
+static const int CAD_dae_real_u_n_nz = 0;
+static const int CAD_dae_real_w_n_nz = 12;
+static int CAD_dae_n_nz = 42;
+static const int CAD_dae_nz_rows[42] = {0,1,2,3,4,0,1,2,3,5,0,1,2,3,6,0,1,2,3,4,0,1,2,3,5,0,1,2,3,6,1,2,3,0,1,2,3,0,1,2,3,7};
+static const int CAD_dae_nz_cols[42] = {0,0,0,0,0,1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,4,4,4,4,4,5,5,5,5,5,6,7,8,9,9,9,9,10,10,10,10,10};
+
+")})));
+    function F1
+      input Real x1[3];
+      input Real x2;
+      input Real x3;
+      output Real y1;
+      output Real y2[3];
+    algorithm
+      y1 := x1[1]+x2;
+      y2 := {x1[1],x2,x3} + x1;
+    end F1;
+    Real y[3](start={1,2,3});
+    Real a(start = 3);
+    Real q = 3;
+    Real x[3](start={3,2,2});
+equation
+    (a,y) = F1(der(x)+x,q,a);
+    der(x) = -x;
+end SparseJacTest5;
+
+
 end CADCodeGenTests;

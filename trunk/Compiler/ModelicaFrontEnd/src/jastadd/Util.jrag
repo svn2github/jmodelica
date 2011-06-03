@@ -1407,6 +1407,54 @@ aspect FlatFunctionUtils {
              n += e.numScalarVars();
          return n;
      }
+
+     /**
+      * \brief Get the scalar variables assigned by this FFunctionCallLeft.
+      * 
+      * Only valid after scalarization.
+      */
+     syn lazy LinkedHashSet<FVariable> FFunctionCallLeft.scalarVars() {
+     	LinkedHashSet<FVariable> s = new LinkedHashSet<FVariable>();
+     	for (FExp e : scalarExps()) {
+     		s.add((FVariable)((FIdUseExp)e).myFV());
+     	}
+     	return s;
+     }
+
+     /**
+      * \brief Get the scalar variables (as expressions) assigned by this FFunctionCallLeft.
+      * 
+      * Only valid after scalarization.
+      */
+     syn lazy LinkedHashSet<FExp> FFunctionCallLeft.scalarExps() = (hasFExp() ? getFExp().scalarExps() : new LinkedHashSet<FExp>());
+     
+     /**
+      * \brief Get the scalar variables assigned by this a FFunctionCallLeft with this 
+      *        FExp as its expression.
+      * 
+      * Only valid after scalarization.
+      */
+     syn lazy LinkedHashSet<FExp> FExp.scalarExps() {
+     	LinkedHashSet<FExp> s = new LinkedHashSet<FExp>();
+     	s.add(this);
+     	return s;
+     }
+     
+     eq FArray.scalarExps() {
+     	 LinkedHashSet<FExp> s = new LinkedHashSet<FExp>();
+     	 for (FExp e : getFExps()) {
+     	 	s.addAll(e.scalarExps());
+     	 }
+     	 return s;
+     }
+     
+     eq FRecordConstructor.scalarExps() {
+    	 LinkedHashSet<FExp> s = new LinkedHashSet<FExp>();
+     	 for (FExp e : getArgs()) {
+     	 	s.addAll(e.scalarExps());
+     	 }
+     	 return s;     
+     }
      
      inh lazy InstComponentDecl FFunctionCallLeft.myOutput();
      eq FFunctionCallEquation.getLeft(int i).myOutput() = getCall().findOutput(i);

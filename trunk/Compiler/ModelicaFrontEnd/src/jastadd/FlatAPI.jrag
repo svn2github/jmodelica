@@ -1492,6 +1492,24 @@ aspect FVariableUses {
 		return l;
 	}
 
+	/* This is a pretty ugly traversal - how to solve this with collection
+	   attributes? */
+	syn lazy LinkedHashSet<FVariable> ASTNode.referencedFVariables() {
+		LinkedHashSet<FVariable> s = new LinkedHashSet<FVariable>();
+		for (int i=0;i<getNumChild();i++) {
+			s.addAll(getChild(i).referencedFVariables());
+		}
+		return s;
+	}
+
+	syn lazy LinkedHashSet<FVariable> FIdUseExp.referencedFVariables() {
+		LinkedHashSet<FVariable> s = new LinkedHashSet<FVariable>();
+		if (!myFV().isUnknown()) {
+			s.add((FVariable)myFV());
+		}
+		return s;
+	}
+
 	/**
 	 * \brief Get the differenetiated variabel (FVariable) corresponding to 
 	 * a derivative variable (FDerivativeVariable)
@@ -2166,7 +2184,7 @@ aspect Sparsity {
 		}
 		return n_nz;		
 	}
-	
+
 	syn lazy ArrayList<Integer>[] FClass.derivativeVariablesEquationSparsity() {
 		
 		ArrayList<Integer>[] sp = (ArrayList<Integer>[]) new ArrayList[numDerivativeVariables()];
@@ -2177,22 +2195,39 @@ aspect Sparsity {
 		
 		int i = 0;
 		for (FAbstractEquation fe : equations()) {
-			LinkedHashSet<FDerivativeVariable> vs = fe.derivativeVariables();
+			fe.derivativeVariablesEquationSparsity(sp,i);
+			i += fe.numScalarEquations();
+		}
+		return sp;		
+	}
+
+	public void FAbstractEquation.derivativeVariablesEquationSparsity(ArrayList<Integer>[]sp,int i) {
+		for (int j=0;j<numScalarEquations();j++) {
+			LinkedHashSet<FDerivativeVariable> vs = derivativeVariables();
 			for (FVariable fv : vs) {
-				//System.out.println("*** " + fv.name() + " " + fv.indexInZ() + " " + derivativeVariablesOffset());
-				sp[fv.indexInZ()-derivativeVariablesOffset()].add(new Integer(i)); 
+				sp[fv.indexInZ()-myFClass().derivativeVariablesOffset()].add(new Integer(i)); 
 			}
 			i++;
 		}
-	/*
-		for (int j=0; j<numDerivativeVariables(); j++) {
-			for (int k=0; k<sp[j].size(); k++) {
-				System.out.println("dx:[" + sp[j].get(k).intValue() + "," + j + "]");
-			}
-		}
-		*/
-		return sp;
+	}
+
+	public void FFunctionCallEquation.derivativeVariablesEquationSparsity(ArrayList<Integer>[]sp,int i) {
+		ArrayList<FVariable> arg_vars = new ArrayList<FVariable>(((FFunctionCall)getCall()).getArgs().referencedFVariables());
+		arg_vars = myFClass().intersection(arg_vars,derivativeVariables());
 		
+		for (FFunctionCallLeft l : getLefts()) {
+			 for (FVariable fv : l.scalarVars()) {
+				if (fv.isDerivativeVariable()) {
+					sp[fv.indexInZ()-myFClass().derivativeVariablesOffset()].add(new Integer(i)); 
+				}
+				for (FVariable ffv : arg_vars) {
+					if (!(ffv==fv)) {
+						sp[ffv.indexInZ()-myFClass().derivativeVariablesOffset()].add(new Integer(i)); 
+					}
+				}
+				i++;	 
+			 }
+		}
 	}
 
 	syn lazy int FClass.differentiatedRealVariablesEquationSparsity_n_nz() {
@@ -2214,23 +2249,41 @@ aspect Sparsity {
 		
 		int i = 0;
 		for (FAbstractEquation fe : equations()) {
-			LinkedHashSet<FVariable> vs = fe.differentiatedVariables();
+			fe.differentiatedRealVariablesEquationSparsity(sp,i);
+			i += fe.numScalarEquations();
+		}
+		return sp;		
+	}
+
+	public void FAbstractEquation.differentiatedRealVariablesEquationSparsity(ArrayList<Integer>[]sp,int i) {
+		for (int j=0;j<numScalarEquations();j++) {
+			LinkedHashSet<FVariable> vs = differentiatedVariables();
 			for (FVariable fv : vs) {
-				sp[fv.indexInZ()-differentiatedRealVariablesOffset()].add(new Integer(i)); 
+				sp[fv.indexInZ()-myFClass().differentiatedRealVariablesOffset()].add(new Integer(i)); 
 			}
 			i++;
 		}
-	/*
-		for (int j=0; j<numDifferentiatedRealVariables(); j++) {
-			for (int k=0; k<sp[j].size(); k++) {
-				System.out.println("x:[" + sp[j].get(k).intValue() + "," + j + "]");
-			}
-		}
-		*/
-		return sp;
-		
 	}
 
+	public void FFunctionCallEquation.differentiatedRealVariablesEquationSparsity(ArrayList<Integer>[]sp,int i) {
+		ArrayList<FVariable> arg_vars = new ArrayList<FVariable>(((FFunctionCall)getCall()).getArgs().referencedFVariables());
+		arg_vars = myFClass().intersection(arg_vars,differentiatedVariables());
+		
+		for (FFunctionCallLeft l : getLefts()) {
+			 for (FVariable fv : l.scalarVars()) {
+				if (fv.isDifferentiatedVariable()) {
+					sp[fv.indexInZ()-myFClass().differentiatedRealVariablesOffset()].add(new Integer(i)); 
+				}
+				for (FVariable ffv : arg_vars) {
+					if (!(ffv==fv)) {
+						sp[ffv.indexInZ()-myFClass().differentiatedRealVariablesOffset()].add(new Integer(i)); 
+					}
+				}
+				i++;	 
+			 }
+		}
+	}
+	
 	syn lazy int FClass.realInputsEquationSparsity_n_nz() {
 		int n_nz = 0;
 		ArrayList<Integer>[] sp = realInputsEquationSparsity();
@@ -2250,23 +2303,41 @@ aspect Sparsity {
 		
 		int i = 0;
 		for (FAbstractEquation fe : equations()) {
-			LinkedHashSet<FVariable> vs = fe.realInputs();
+			fe.realInputsEquationSparsity(sp,i);
+			i += fe.numScalarEquations();
+		}
+		return sp;		
+	}
+
+	public void FAbstractEquation.realInputsEquationSparsity(ArrayList<Integer>[]sp,int i) {
+		for (int j=0;j<numScalarEquations();j++) {
+			LinkedHashSet<FVariable> vs = realInputs();
 			for (FVariable fv : vs) {
-				sp[fv.indexInZ()-realInputsOffset()].add(new Integer(i)); 
+				sp[fv.indexInZ()-myFClass().realInputsOffset()].add(new Integer(i)); 
 			}
 			i++;
 		}
-	/*
-		for (int j=0; j<numRealInputs(); j++) {
-			for (int k=0; k<sp[j].size(); k++) {
-				System.out.println("u:[" + sp[j].get(k).intValue() + "," + j + "]");
-			}
-		}
-		*/
-		return sp;
-		
 	}
 
+	public void FFunctionCallEquation.realInputsEquationSparsity(ArrayList<Integer>[]sp,int i) {
+		ArrayList<FVariable> arg_vars = new ArrayList<FVariable>(((FFunctionCall)getCall()).getArgs().referencedFVariables());
+		arg_vars = myFClass().intersection(arg_vars,realInputs());
+		
+		for (FFunctionCallLeft l : getLefts()) {
+			 for (FVariable fv : l.scalarVars()) {
+				if (fv.isInput() && fv.isReal()) {
+					sp[fv.indexInZ()-myFClass().realInputsOffset()].add(new Integer(i)); 
+				}
+				for (FVariable ffv : arg_vars) {
+					if (!(ffv==fv)) {
+						sp[ffv.indexInZ()-myFClass().realInputsOffset()].add(new Integer(i)); 
+					}
+				}
+				i++;	 
+			 }
+		}
+	}
+	
 	syn lazy int FClass.algebraicRealVariablesEquationSparsity_n_nz() {
 		int n_nz = 0;
 		ArrayList<Integer>[] sp = algebraicRealVariablesEquationSparsity();
@@ -2286,22 +2357,38 @@ aspect Sparsity {
 		
 		int i = 0;
 		for (FAbstractEquation fe : equations()) {
-			LinkedHashSet<FVariable> vs = fe.algebraicRealVariables();
+			fe.algebraicRealVariablesEquationSparsity(sp,i);
+			i += fe.numScalarEquations();
+		}
+		return sp;		
+	}
+
+	public void FAbstractEquation.algebraicRealVariablesEquationSparsity(ArrayList<Integer>[]sp,int i) {
+		for (int j=0;j<numScalarEquations();j++) {
+			LinkedHashSet<FVariable> vs = algebraicRealVariables();
 			for (FVariable fv : vs) {
-				sp[fv.indexInZ()-algebraicRealVariablesOffset()].add(new Integer(i)); 
+				sp[fv.indexInZ()-myFClass().algebraicRealVariablesOffset()].add(new Integer(i)); 
 			}
 			i++;
 		}
-	/*
-		for (int j=0; j<numAlgebraicRealVariables(); j++) {
-			for (int k=0; k<sp[j].size(); k++) {
-				System.out.println("w:[" + sp[j].get(k).intValue() + "," + j + "]");
-			}
-		}
-		*/
-		return sp;
-		
 	}
 
-
+	public void FFunctionCallEquation.algebraicRealVariablesEquationSparsity(ArrayList<Integer>[]sp,int i) {
+		ArrayList<FVariable> arg_vars = new ArrayList<FVariable>(((FFunctionCall)getCall()).getArgs().referencedFVariables());
+		arg_vars = myFClass().intersection(arg_vars,algebraicRealVariables());
+		
+		for (FFunctionCallLeft l : getLefts()) {
+			 for (FVariable fv : l.scalarVars()) {
+				if (fv.isAlgebraicVariable() && fv.isReal()) {
+					sp[fv.indexInZ()-myFClass().algebraicRealVariablesOffset()].add(new Integer(i)); 
+				}
+				for (FVariable ffv : arg_vars) {
+					if (!(ffv==fv)) {
+						sp[ffv.indexInZ()-myFClass().algebraicRealVariablesOffset()].add(new Integer(i)); 
+					}
+				}
+				i++;	 
+			 }
+		}
+	}
 }
