@@ -3316,6 +3316,407 @@ equation
   x1 + cos(x2) = 0;
   end IndexReduction6_Cos;
 
+  model IndexReduction7_Sin
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IndexReduction7_Sin",
+         description="Test of index reduction",
+         flatModel="
+fclass TransformCanonicalTests.IndexReduction7_Sin
+ Real x1;
+ Real x2;
+ Real der_x1;
+initial equation 
+ x2 = 0.0;
+equation
+ der_x1 + der(x2) = 1;
+ x1 + sin(x2) = 0;
+ der_x1 + ( cos(x2) ) * ( der(x2) ) = 0;
+end TransformCanonicalTests.IndexReduction7_Sin;
+")})));
+  Real x1,x2;
+equation
+  der(x1) + der(x2) = 1;
+  x1 + sin(x2) = 0;
+  end IndexReduction7_Sin;
+
+  model IndexReduction8_Neg
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IndexReduction8_Neg",
+         description="Test of index reduction",
+         flatModel="
+fclass TransformCanonicalTests.IndexReduction8_Neg
+ Real x1;
+ Real x2;
+ Real der_x1;
+initial equation 
+ x2 = 0.0;
+equation
+ der_x1 + der(x2) = 1;
+  - ( x1 ) + ( 2 ) * ( x2 ) = 0;
+  - ( der_x1 ) + ( 2 ) * ( der(x2) ) + ( 0 ) * ( x2 ) = 0;
+end TransformCanonicalTests.IndexReduction8_Neg;
+")})));
+  Real x1,x2;
+equation
+  der(x1) + der(x2) = 1;
+- x1 + 2*x2 = 0;
+  end IndexReduction8_Neg;
+
+  model IndexReduction9_Exp
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IndexReduction9_Exp",
+         description="Test of index reduction",
+         flatModel="
+fclass TransformCanonicalTests.IndexReduction9_Exp
+ Real x1;
+ Real x2;
+ parameter Real p = 2 /* 2 */;
+ Real der_x1;
+initial equation 
+ x2 = 0.0;
+equation
+ der_x1 + der(x2) = 1;
+ x1 + exp(( ( x2 ) * ( p ) ) * ( time )) = 0;
+ der_x1 + ( exp(( ( x2 ) * ( p ) ) * ( time )) ) * ( ( ( x2 ) * ( p ) ) * ( 1 ) + ( ( x2 ) * ( 0 ) + ( der(x2) ) * ( p ) ) * ( time ) ) = 0;
+end TransformCanonicalTests.IndexReduction9_Exp;
+")})));
+  Real x1,x2;
+  parameter Real p = 2;
+equation
+  der(x1) + der(x2) = 1;
+ x1 + exp(x2*p*time) = 0;
+  end IndexReduction9_Exp;
+
+  model IndexReduction10_Tan
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IndexReduction10_Tan",
+         description="Test of index reduction",
+         flatModel="
+fclass TransformCanonicalTests.IndexReduction10_Tan
+ Real x1;
+ Real x2;
+ parameter Real p = 2 /* 2 */;
+ Real der_x1;
+initial equation 
+ x2 = 0.0;
+equation
+ der_x1 + der(x2) = 1;
+ x1 + tan(x2) = 0;
+ der_x1 + ( der(x2) ) / ( ( cos(x2) ) ^ 2 ) = 0;
+end TransformCanonicalTests.IndexReduction10_Tan;
+")})));
+  Real x1,x2;
+  parameter Real p = 2;
+equation
+  der(x1) + der(x2) = 1;
+ x1 + tan(x2) = 0;
+  end IndexReduction10_Tan;
+
+  model IndexReduction11_Asin
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IndexReduction11_Asin",
+         description="Test of index reduction",
+         flatModel="
+fclass TransformCanonicalTests.IndexReduction11_Asin
+ Real x1;
+ Real x2;
+ parameter Real p = 2 /* 2 */;
+ Real der_x1;
+initial equation 
+ x2 = 0.0;
+equation
+ der_x1 + der(x2) = 1;
+ x1 + asin(x2) = 0;
+ der_x1 + ( der(x2) ) / ( sqrt(1 - ( x2 ^ 2 )) ) = 0;
+end TransformCanonicalTests.IndexReduction11_Asin;
+")})));
+  Real x1,x2;
+  parameter Real p = 2;
+equation
+  der(x1) + der(x2) = 1;
+ x1 + asin(x2) = 0;
+  end IndexReduction11_Asin;
+
+  model IndexReduction12_Acos
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IndexReduction12_Acos",
+         description="Test of index reduction",
+         flatModel="
+fclass TransformCanonicalTests.IndexReduction12_Acos
+ Real x1;
+ Real x2;
+ parameter Real p = 2 /* 2 */;
+ Real der_x1;
+initial equation 
+ x2 = 0.0;
+equation
+ der_x1 + der(x2) = 1;
+ x1 + acos(x2) = 0;
+ der_x1 + (  - ( der(x2) ) ) / ( sqrt(1 - ( x2 ^ 2 )) ) = 0;
+end TransformCanonicalTests.IndexReduction12_Acos;
+")})));
+  Real x1,x2;
+  parameter Real p = 2;
+equation
+  der(x1) + der(x2) = 1;
+ x1 + acos(x2) = 0;
+  end IndexReduction12_Acos;
+
+  model IndexReduction13_Atan
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IndexReduction13_Atan",
+         description="Test of index reduction",
+         flatModel="
+fclass TransformCanonicalTests.IndexReduction13_Atan
+ Real x1;
+ Real x2;
+ parameter Real p = 2 /* 2 */;
+ Real der_x1;
+initial equation 
+ x2 = 0.0;
+equation
+ der_x1 + der(x2) = 1;
+ x1 + atan(x2) = 0;
+ der_x1 + ( der(x2) ) / ( 1 + x2 ^ 2 ) = 0;
+end TransformCanonicalTests.IndexReduction13_Atan;
+")})));
+  Real x1,x2;
+  parameter Real p = 2;
+equation
+  der(x1) + der(x2) = 1;
+ x1 + atan(x2) = 0;
+  end IndexReduction13_Atan;
+/*
+  model IndexReduction14_Atan2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IndexReduction14_Atan2",
+         description="Test of index reduction",
+         flatModel="
+")})));
+  Real x1,x2,x3;
+  parameter Real p = 2;
+equation
+  der(x1) + der(x2) = 1;
+ x1 + atan2(x2,x3) = 0;
+  
+  end IndexReduction14_Atan2;
+*/
+  model IndexReduction15_Sinh
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IndexReduction15_Sinh",
+         description="Test of index reduction",
+         flatModel="
+fclass TransformCanonicalTests.IndexReduction15_Sinh
+ Real x1;
+ Real x2;
+ parameter Real p = 2 /* 2 */;
+ Real der_x1;
+initial equation 
+ x2 = 0.0;
+equation
+ der_x1 + der(x2) = 1;
+ x1 + sinh(x2) = 0;
+ der_x1 + ( cosh(x2) ) * ( der(x2) ) = 0;
+end TransformCanonicalTests.IndexReduction15_Sinh;
+")})));
+  Real x1,x2;
+  parameter Real p = 2;
+equation
+  der(x1) + der(x2) = 1;
+ x1 + sinh(x2) = 0;
+  end IndexReduction15_Sinh;
+
+  model IndexReduction16_Cosh
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IndexReduction16_Cosh",
+         description="Test of index reduction",
+         flatModel="
+fclass TransformCanonicalTests.IndexReduction16_Cosh
+ Real x1;
+ Real x2;
+ parameter Real p = 2 /* 2 */;
+ Real der_x1;
+initial equation 
+ x2 = 0.0;
+equation
+ der_x1 + der(x2) = 1;
+ x1 + cosh(x2) = 0;
+ der_x1 + ( sinh(x2) ) * ( der(x2) ) = 0;
+end TransformCanonicalTests.IndexReduction16_Cosh;
+")})));
+  Real x1,x2;
+  parameter Real p = 2;
+equation
+  der(x1) + der(x2) = 1;
+ x1 + cosh(x2) = 0;
+  end IndexReduction16_Cosh;
+
+  model IndexReduction17_Tanh
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IndexReduction17_Tanh",
+         description="Test of index reduction",
+         flatModel="
+fclass TransformCanonicalTests.IndexReduction17_Tanh
+ Real x1;
+ Real x2;
+ parameter Real p = 2 /* 2 */;
+ Real der_x1;
+initial equation 
+ x2 = 0.0;
+equation
+ der_x1 + der(x2) = 1;
+ x1 + tanh(x2) = 0;
+ der_x1 + ( der(x2) ) / ( ( cosh(x2) ) ^ 2 ) = 0;
+end TransformCanonicalTests.IndexReduction17_Tanh;
+")})));
+  Real x1,x2;
+  parameter Real p = 2;
+equation
+  der(x1) + der(x2) = 1;
+ x1 + tanh(x2) = 0;
+  end IndexReduction17_Tanh;
+
+  model IndexReduction18_Log
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IndexReduction18_Log",
+         description="Test of index reduction",
+         flatModel="
+fclass TransformCanonicalTests.IndexReduction18_Log
+ Real x1;
+ Real x2;
+ parameter Real p = 2 /* 2 */;
+ Real der_x1;
+initial equation 
+ x2 = 0.0;
+equation
+ der_x1 + der(x2) = 1;
+ x1 + log(x2) = 0;
+ der_x1 + ( der(x2) ) / ( x2 ) = 0;
+end TransformCanonicalTests.IndexReduction18_Log;
+")})));
+  Real x1,x2;
+  parameter Real p = 2;
+equation
+  der(x1) + der(x2) = 1;
+ x1 + log(x2) = 0;
+  end IndexReduction18_Log;
+
+  model IndexReduction19_Log10
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IndexReduction19_Log10",
+         description="Test of index reduction",
+         flatModel="
+fclass TransformCanonicalTests.IndexReduction19_Log10
+ Real x1;
+ Real x2;
+ parameter Real p = 2 /* 2 */;
+ Real der_x1;
+initial equation 
+ x2 = 0.0;
+equation
+ der_x1 + der(x2) = 1;
+ x1 + log10(x2) = 0;
+ der_x1 + ( der(x2) ) / ( ( x2 ) * ( log(10) ) ) = 0;
+end TransformCanonicalTests.IndexReduction19_Log10;
+")})));
+  Real x1,x2;
+  parameter Real p = 2;
+equation
+  der(x1) + der(x2) = 1;
+ x1 + log10(x2) = 0;
+  end IndexReduction19_Log10;
+
+  model IndexReduction20_Sqrt
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IndexReduction20_Sqrt",
+         description="Test of index reduction",
+         flatModel="
+fclass TransformCanonicalTests.IndexReduction20_Sqrt
+ Real x1;
+ Real x2;
+ parameter Real p = 2 /* 2 */;
+ Real der_x1;
+initial equation 
+ x2 = 0.0;
+equation
+ der_x1 + der(x2) = 1;
+ x1 + sqrt(x2) = 0;
+ der_x1 + ( der(x2) ) / ( ( 2 ) * ( sqrt(x2) ) ) = 0;
+end TransformCanonicalTests.IndexReduction20_Sqrt;
+")})));
+  Real x1,x2;
+  parameter Real p = 2;
+equation
+  der(x1) + der(x2) = 1;
+ x1 + sqrt(x2) = 0;
+  end IndexReduction20_Sqrt;
+
+  model IndexReduction21_If
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IndexReduction21_If",
+         description="Test of index reduction",
+         flatModel="
+fclass TransformCanonicalTests.IndexReduction21_If
+ Real x1;
+ Real x2;
+ parameter Real p = 2 /* 2 */;
+ Real der_x1;
+initial equation 
+ x2 = 0.0;
+equation
+ der_x1 + der(x2) = 1;
+ x1 + (if p > 3 then ( 3 ) * ( x2 ) elseif p <= 3 then sin(x2) else ( 2 ) * ( x2 )) = 0;
+ der_x1 + (if p > 3 then ( 3 ) * ( der(x2) ) + ( 0 ) * ( x2 ) elseif p <= 3 then ( cos(x2) ) * ( der(x2) ) else ( 2 ) * ( der(x2) ) + ( 0 ) * ( x2 )) = 0;
+end TransformCanonicalTests.IndexReduction21_If;
+")})));
+  Real x1,x2;
+  parameter Real p = 2;
+equation
+  der(x1) + der(x2) = 1;
+ x1 + (if p>3 then 3*x2 else if p<=3 then sin(x2) else 2*x2) = 0;
+  end IndexReduction21_If;
+
+  model IndexReduction22_Pow
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="IndexReduction22_Pow",
+         description="Test of index reduction",
+         flatModel="
+fclass TransformCanonicalTests.IndexReduction22_Pow
+ Real x1;
+ Real x2;
+ parameter Real p = 2 /* 2 */;
+ Real der_x1;
+initial equation 
+ x2 = 0.0;
+equation
+ der_x1 + der(x2) = 1;
+ x1 + x2 ^ p + x2 ^ 1.4 = 0;
+ der_x1 + ( ( p ) * ( x2 ^ ( p - ( 1 ) ) ) ) * ( der(x2) ) + ( ( 1.4 ) * ( x2 ^ 0.3999999999999999 ) ) * ( der(x2) ) = 0;
+end TransformCanonicalTests.IndexReduction22_Pow;
+")})));
+  Real x1,x2;
+  parameter Real p = 2;
+equation
+  der(x1) + der(x2) = 1;
+ x1 + x2^p + x2^1.4 = 0;
+  end IndexReduction22_Pow;
+
 model DuplicateVariables1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
