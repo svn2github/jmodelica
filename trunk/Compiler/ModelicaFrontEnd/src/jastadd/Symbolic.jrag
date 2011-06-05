@@ -275,14 +275,16 @@ aspect EquationSolve {
 	}
 
 	public void FRelExp.traverseSymbolic(ASTNode e) {
-		originalFRelExp = (FRelExp)e;
+		FRelExp re = (FRelExp)e;
+		originalFRelExp = re.originalFRelExp==null? re: re.originalFRelExp;
 		for (int i=0;i<getNumChild();i++) {
 			getChild(i).traverseSymbolic(e.getChild(i));
 		}
 	}
 
 	public void FSampleExp.traverseSymbolic(ASTNode e) {
-		originalFSampleExp = (FSampleExp)e;
+		FSampleExp se = (FSampleExp)e;
+		originalFSampleExp = se.originalFSampleExp==null? se: se.originalFSampleExp;
 		for (int i=0;i<getNumChild();i++) {
 			getChild(i).traverseSymbolic(e.getChild(i));
 		}
