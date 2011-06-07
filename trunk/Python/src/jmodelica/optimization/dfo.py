@@ -1,3 +1,20 @@
+#!/usr/bin/env python 
+# -*- coding: utf-8 -*-
+
+# Copyright (C) 2010 Modelon AB
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+
 """
 This file contains code for performing derivative-free optimization of
 a function.
@@ -14,7 +31,8 @@ import thread_feval as tf
 try:
     from openopt import NLP
 except ImportError:
-    print "Could not load OpenOpt package."
+    pass
+    #print "Could not load OpenOpt package."
 
 
 def nelme(func,xstart,lb=None,ub=None,h=0.3,plot_con=False,plot_sim=False,
@@ -36,7 +54,7 @@ def nelme(func,xstart,lb=None,ub=None,h=0.3,plot_con=False,plot_sim=False,
 			The objective function OR the name of a python file 
 			containing the definition of the objective function. In case 
 			of a file name, the objective function in the file must 
-			have the same name as the file itself (without ".py").  
+			have the same name as the file itself (without '.py').  
 			
 		xstart -- 
 			ndarray or scalar
