@@ -2312,10 +2312,10 @@ aspect ParameterSorting {
 		
 		// For each equation
 		for (FAbstractEquation eqn : eqns) {
-			// Retreive all variables referenced in right hand side
-			Set<AbstractFVariable> deps = eqn.referencedFVariablesInRHS();
+			// Retrieve all variables referenced in right hand side
+			Set<FVariable> deps = eqn.referencedFVariablesInRHS();
 			// Build the actual adjacency graph.
-			for (AbstractFVariable fv : deps) {
+			for (FVariable fv : deps) {
 				FAbstractEquation depEqn = fv.parameterEquation();
 				if (depEqn != null && depEqn.sortingIndex >= 0) {
 					toNodes.get(depEqn.sortingIndex).add(eqn);		

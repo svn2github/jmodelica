@@ -303,10 +303,18 @@ aspect FlatAPI {
 	syn boolean FVariable.shouldContribute() = !isAlias() && !inRecord() && !isForIndex();
 	
 	public class FClass {
-		public static <T extends FVariable> ArrayList<T> intersection(ArrayList<T> a, Collection<? extends FVariable> b) {
-			ArrayList<T> res = (ArrayList<T>) a.clone();
-			res.retainAll(b);
-			return res;
+		public static <T extends FVariable, C extends Collection<T>> C intersection(
+				C a, Collection<? extends FVariable> b) {
+			try {
+				// To avoid having to have different versions for different collections
+				C res = (C) a.getClass().newInstance();
+				res.addAll(a);
+				res.retainAll(b);
+				return res;
+			} catch (IllegalAccessException e) {
+			} catch (InstantiationException e) {
+			}
+			throw new IllegalArgumentException("First argument must be of class with public default constructor.");
 		}
 	}
 
@@ -862,7 +870,7 @@ aspect FlatAPI {
 		
 	eq FFunctionCallEquation.getCall().boundParameters() { 
 		if (isParameterEquation()) { 
-			return referencedParametersInLefts(); 
+			return referencedParametersInLHS(); 
 		} else {
 			return Collections.emptySet();
 		}
@@ -906,10 +914,10 @@ aspect FlatAPI {
 			if (g.variability().parameterOrLess()) {
 				// Set initial() to false and evaluate
 				myFClass().setIsInitial(false);
-				Boolean before = g.ceval().booleanValue();
+				boolean before = g.ceval().booleanValue();
 				// Set initial() to false and evaluate
 				myFClass().setIsInitial(true);
-				Boolean after = g.ceval().booleanValue();
+				boolean after = g.ceval().booleanValue();
 				// The when clause is considered to be active at initialization
 				// if before is false and after is true.
 				if (!before && after) {
@@ -1002,51 +1010,47 @@ aspect FlatAPI {
 		(FVariable)myFV() when !myFV().isUnknown() && myFV() instanceof FVariable
 	to FVariable.referencedFVariablesInBindingExp() for inBindingExp();
 	
-	public static Set<FVariable> ASTNode.parametersInSet(Set<? extends AbstractFVariable> set) {
-		Set<FVariable> res = new HashSet<FVariable>();
-		for (AbstractFVariable fv : set)
-			if (fv instanceof FVariable && ((FVariable) fv).isParameter())
-				res.add((FVariable) fv);
+	public static Set<FVariable> ASTNode.parametersInSet(Set<? extends FVariable> set) {
+		Set<FVariable> res = new LinkedHashSet<FVariable>();
+		for (FVariable fv : set)
+			if (fv.isParameter())
+				res.add(fv);
 		return res;
 	}
 	
-	public Set<FVariable> FFunctionCallEquation.referencedParametersInLefts() {
-		Set<AbstractFVariable> res = new HashSet<AbstractFVariable>();
-		getLefts().findReferencedFVariablesInTree(res);
-		return parametersInSet(res);
-	}
+	syn Set<FVariable> FFunctionCallEquation.referencedParametersInLHS() =
+		 parametersInSet(referencedFVariablesInLHS());
 	
-	public Set<FVariable> FExp.referencedParametersInFExp() {
-		return parametersInSet(referencedFVariablesInFExp());
-	}
+	syn Set<FVariable> FExp.referencedParametersInFExp() =
+		parametersInSet(referencedFVariablesInFExp());
 	
-	public Set<AbstractFVariable> FExp.referencedFVariablesInFExp() {
-		Set<AbstractFVariable> res = new HashSet<AbstractFVariable>();
+	syn lazy Set<FVariable> FExp.referencedFVariablesInFExp() {
+		Set<FVariable> res = new LinkedHashSet<FVariable>();
 		findReferencedFVariablesInTree(res);
 		return res;
 	}
 	
-	public void ASTNode.findReferencedFVariablesInTree(Set<AbstractFVariable> set) {
+	public void ASTNode.findReferencedFVariablesInTree(Set<FVariable> set) {
 		for (ASTNode n : this)
 			n.findReferencedFVariablesInTree(set);
 	}
 	
-	public void FIdUseExp.findReferencedFVariablesInTree(Set<AbstractFVariable> set) {
-		if (!myFV().isUnknown())
-			set.add(myFV());
+	public void FIdUseExp.findReferencedFVariablesInTree(Set<FVariable> set) {
+		if (myFV() instanceof FVariable)
+			set.add((FVariable) myFV());
 		super.findReferencedFVariablesInTree(set);
 	}
 	
-	public Set<AbstractFVariable> FAbstractEquation.referencedFVariablesInRHS() {
-		return Collections.emptySet();
-	}
+	syn Set<FVariable> FAbstractEquation.referencedFVariablesInRHS() = Collections.emptySet();
+	eq FEquation.referencedFVariablesInRHS()             = getRight().referencedFVariablesInFExp();
+	eq FFunctionCallEquation.referencedFVariablesInRHS() = getCall().referencedFVariablesInFExp();
 	
-	public Set<AbstractFVariable> FEquation.referencedFVariablesInRHS() {
-		return getRight().referencedFVariablesInFExp();
-	}
-	
-	public Set<AbstractFVariable> FFunctionCallEquation.referencedFVariablesInRHS() {
-		return getCall().referencedFVariablesInFExp();
+	syn Set<FVariable> FAbstractEquation.referencedFVariablesInLHS() = Collections.emptySet();
+	eq FEquation.referencedFVariablesInLHS()             = getLeft().referencedFVariablesInFExp();
+	syn lazy Set<FVariable> FFunctionCallEquation.referencedFVariablesInLHS() {
+		Set<FVariable> res = new LinkedHashSet<FVariable>();
+		getLefts().findReferencedFVariablesInTree(res);
+		return res;
 	}
 		
 	syn lazy String FClass.guid() {
@@ -1490,24 +1494,6 @@ aspect FVariableUses {
 		l.addAll(algebraicVariables());
 		l.addAll(discreteVariables());
 		return l;
-	}
-
-	/* This is a pretty ugly traversal - how to solve this with collection
-	   attributes? */
-	syn lazy LinkedHashSet<FVariable> ASTNode.referencedFVariables() {
-		LinkedHashSet<FVariable> s = new LinkedHashSet<FVariable>();
-		for (int i=0;i<getNumChild();i++) {
-			s.addAll(getChild(i).referencedFVariables());
-		}
-		return s;
-	}
-
-	syn lazy LinkedHashSet<FVariable> FIdUseExp.referencedFVariables() {
-		LinkedHashSet<FVariable> s = new LinkedHashSet<FVariable>();
-		if (!myFV().isUnknown()) {
-			s.add((FVariable)myFV());
-		}
-		return s;
 	}
 
 	/**
@@ -2176,6 +2162,33 @@ aspect Sparsity {
 		
 	}
 
+	public void FAbstractEquation.calculateEquationSparsity(
+			ArrayList<Integer>[] sp, int i, Set<? extends FVariable> vars, int offset) {
+		for (int j = 0; j < numScalarEquations(); j++) {
+			for (FVariable fv : vars) {
+				sp[fv.indexInZ() - offset].add(new Integer(i)); 
+			}
+			i++;
+		}
+	}
+
+	public void FFunctionCallEquation.calculateEquationSparsity(
+			ArrayList<Integer>[] sp, int i, Set<? extends FVariable> vars, int offset) {
+		Set<FVariable> rv = FClass.intersection(referencedFVariablesInRHS(), vars);
+		Set<FVariable> lv = referencedFVariablesInLHS();
+		
+		for (FVariable fv : lv) {
+			if (vars.contains(fv))
+				sp[fv.indexInZ() - offset].add(new Integer(i)); 
+			for (FVariable ffv : rv) {
+				if (ffv != fv) {
+					sp[ffv.indexInZ() - offset].add(new Integer(i)); 
+				}
+			}
+			i++;	 
+		}
+	}
+
 	syn lazy int FClass.derivativeVariablesEquationSparsity_n_nz() {
 		int n_nz = 0;
 		ArrayList<Integer>[] sp = derivativeVariablesEquationSparsity();
@@ -2201,33 +2214,8 @@ aspect Sparsity {
 		return sp;		
 	}
 
-	public void FAbstractEquation.derivativeVariablesEquationSparsity(ArrayList<Integer>[]sp,int i) {
-		for (int j=0;j<numScalarEquations();j++) {
-			LinkedHashSet<FDerivativeVariable> vs = derivativeVariables();
-			for (FVariable fv : vs) {
-				sp[fv.indexInZ()-myFClass().derivativeVariablesOffset()].add(new Integer(i)); 
-			}
-			i++;
-		}
-	}
-
-	public void FFunctionCallEquation.derivativeVariablesEquationSparsity(ArrayList<Integer>[]sp,int i) {
-		ArrayList<FVariable> arg_vars = new ArrayList<FVariable>(((FFunctionCall)getCall()).getArgs().referencedFVariables());
-		arg_vars = myFClass().intersection(arg_vars,derivativeVariables());
-		
-		for (FFunctionCallLeft l : getLefts()) {
-			 for (FVariable fv : l.scalarVars()) {
-				if (fv.isDerivativeVariable()) {
-					sp[fv.indexInZ()-myFClass().derivativeVariablesOffset()].add(new Integer(i)); 
-				}
-				for (FVariable ffv : arg_vars) {
-					if (!(ffv==fv)) {
-						sp[ffv.indexInZ()-myFClass().derivativeVariablesOffset()].add(new Integer(i)); 
-					}
-				}
-				i++;	 
-			 }
-		}
+	public void FAbstractEquation.derivativeVariablesEquationSparsity(ArrayList<Integer>[] sp, int i) {
+		calculateEquationSparsity(sp, i, derivativeVariables(), myFClass().derivativeVariablesOffset());
 	}
 
 	syn lazy int FClass.differentiatedRealVariablesEquationSparsity_n_nz() {
@@ -2255,33 +2243,8 @@ aspect Sparsity {
 		return sp;		
 	}
 
-	public void FAbstractEquation.differentiatedRealVariablesEquationSparsity(ArrayList<Integer>[]sp,int i) {
-		for (int j=0;j<numScalarEquations();j++) {
-			LinkedHashSet<FVariable> vs = differentiatedVariables();
-			for (FVariable fv : vs) {
-				sp[fv.indexInZ()-myFClass().differentiatedRealVariablesOffset()].add(new Integer(i)); 
-			}
-			i++;
-		}
-	}
-
-	public void FFunctionCallEquation.differentiatedRealVariablesEquationSparsity(ArrayList<Integer>[]sp,int i) {
-		ArrayList<FVariable> arg_vars = new ArrayList<FVariable>(((FFunctionCall)getCall()).getArgs().referencedFVariables());
-		arg_vars = myFClass().intersection(arg_vars,differentiatedVariables());
-		
-		for (FFunctionCallLeft l : getLefts()) {
-			 for (FVariable fv : l.scalarVars()) {
-				if (fv.isDifferentiatedVariable()) {
-					sp[fv.indexInZ()-myFClass().differentiatedRealVariablesOffset()].add(new Integer(i)); 
-				}
-				for (FVariable ffv : arg_vars) {
-					if (!(ffv==fv)) {
-						sp[ffv.indexInZ()-myFClass().differentiatedRealVariablesOffset()].add(new Integer(i)); 
-					}
-				}
-				i++;	 
-			 }
-		}
+	public void FAbstractEquation.differentiatedRealVariablesEquationSparsity(ArrayList<Integer>[] sp, int i) {
+		calculateEquationSparsity(sp, i, differentiatedVariables(), myFClass().differentiatedRealVariablesOffset());
 	}
 	
 	syn lazy int FClass.realInputsEquationSparsity_n_nz() {
@@ -2309,33 +2272,8 @@ aspect Sparsity {
 		return sp;		
 	}
 
-	public void FAbstractEquation.realInputsEquationSparsity(ArrayList<Integer>[]sp,int i) {
-		for (int j=0;j<numScalarEquations();j++) {
-			LinkedHashSet<FVariable> vs = realInputs();
-			for (FVariable fv : vs) {
-				sp[fv.indexInZ()-myFClass().realInputsOffset()].add(new Integer(i)); 
-			}
-			i++;
-		}
-	}
-
-	public void FFunctionCallEquation.realInputsEquationSparsity(ArrayList<Integer>[]sp,int i) {
-		ArrayList<FVariable> arg_vars = new ArrayList<FVariable>(((FFunctionCall)getCall()).getArgs().referencedFVariables());
-		arg_vars = myFClass().intersection(arg_vars,realInputs());
-		
-		for (FFunctionCallLeft l : getLefts()) {
-			 for (FVariable fv : l.scalarVars()) {
-				if (fv.isInput() && fv.isReal()) {
-					sp[fv.indexInZ()-myFClass().realInputsOffset()].add(new Integer(i)); 
-				}
-				for (FVariable ffv : arg_vars) {
-					if (!(ffv==fv)) {
-						sp[ffv.indexInZ()-myFClass().realInputsOffset()].add(new Integer(i)); 
-					}
-				}
-				i++;	 
-			 }
-		}
+	public void FAbstractEquation.realInputsEquationSparsity(ArrayList<Integer>[] sp, int i) {
+		calculateEquationSparsity(sp, i, realInputs(), myFClass().realInputsOffset());
 	}
 	
 	syn lazy int FClass.algebraicRealVariablesEquationSparsity_n_nz() {
@@ -2363,32 +2301,8 @@ aspect Sparsity {
 		return sp;		
 	}
 
-	public void FAbstractEquation.algebraicRealVariablesEquationSparsity(ArrayList<Integer>[]sp,int i) {
-		for (int j=0;j<numScalarEquations();j++) {
-			LinkedHashSet<FVariable> vs = algebraicRealVariables();
-			for (FVariable fv : vs) {
-				sp[fv.indexInZ()-myFClass().algebraicRealVariablesOffset()].add(new Integer(i)); 
-			}
-			i++;
-		}
+	public void FAbstractEquation.algebraicRealVariablesEquationSparsity(ArrayList<Integer>[] sp, int i) {
+		calculateEquationSparsity(sp, i, algebraicRealVariables(), myFClass().algebraicRealVariablesOffset());
 	}
 
-	public void FFunctionCallEquation.algebraicRealVariablesEquationSparsity(ArrayList<Integer>[]sp,int i) {
-		ArrayList<FVariable> arg_vars = new ArrayList<FVariable>(((FFunctionCall)getCall()).getArgs().referencedFVariables());
-		arg_vars = myFClass().intersection(arg_vars,algebraicRealVariables());
-		
-		for (FFunctionCallLeft l : getLefts()) {
-			 for (FVariable fv : l.scalarVars()) {
-				if (fv.isAlgebraicVariable() && fv.isReal()) {
-					sp[fv.indexInZ()-myFClass().algebraicRealVariablesOffset()].add(new Integer(i)); 
-				}
-				for (FVariable ffv : arg_vars) {
-					if (!(ffv==fv)) {
-						sp[ffv.indexInZ()-myFClass().algebraicRealVariablesOffset()].add(new Integer(i)); 
-					}
-				}
-				i++;	 
-			 }
-		}
-	}
 }
