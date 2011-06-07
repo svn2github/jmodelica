@@ -99,9 +99,13 @@ def run_demo(with_plots=True):
 
 	# Load model
 	model = FMUModel(fmu_name)
+	
+	# Create options object and set verbosity to zero to disable printouts
+	opts = model.simulate_options()
+	opts['CVode_options']['verbosity'] = 0
 
 	# Simulate model response with nominal parameters
-	res = model.simulate(input=(['u1','u2'],u),start_time=0.,final_time=60)
+	res = model.simulate(input=(['u1','u2'],u),start_time=0.,final_time=60,options=opts)
 
 	# Load simulation result
 	x1_sim = res['qt.x1']
@@ -139,8 +143,12 @@ def run_demo(with_plots=True):
 		model.set('qt.a1',a1)
 		model.set('qt.a2',a2)
 		
+		# Create options object and set verbosity to zero to disable printouts
+		opts = model.simulate_options()
+		opts['CVode_options']['verbosity'] = 0
+		
 		# Simulate model response with new parameters a1 and a2
-		res = model.simulate(input=(['u1','u2'],u),start_time=0.,final_time=60)
+		res = model.simulate(input=(['u1','u2'],u),start_time=0.,final_time=60,options=opts)
 		
 		# Load simulation result
 		x1_sim = res['qt.x1']
@@ -182,9 +190,13 @@ def run_demo(with_plots=True):
 	# Set optimal values for a1 and a2 into the model
 	model.set('qt.a1',a1_opt)
 	model.set('qt.a2',a2_opt)
+	
+	# Create options object and set verbosity to zero to disable printouts
+	opts = model.simulate_options()
+	opts['CVode_options']['verbosity'] = 0
 
 	# Simulate model response with optimal parameters a1 and a2
-	res = model.simulate(input=(['u1','u2'],u),start_time=0.,final_time=60)
+	res = model.simulate(input=(['u1','u2'],u),start_time=0.,final_time=60,options=opts)
 
 	# Load optimal simulation result
 	x1_opt = res['qt.x1']
@@ -227,8 +239,12 @@ def run_demo(with_plots=True):
 		model.set('qt.a3',a3)
 		model.set('qt.a4',a4)
 		
+		# Create options object and set verbosity to zero to disable printouts
+		opts = model.simulate_options()
+		opts['CVode_options']['verbosity'] = 0
+		
 		# Simulate model response with the new parameters
-		res = model.simulate(input=(['u1','u2'],u),start_time=0.,final_time=60)
+		res = model.simulate(input=(['u1','u2'],u),start_time=0.,final_time=60,options=opts)
 		
 		# Load simulation result
 		x1_sim = res['qt.x1']
@@ -272,9 +288,13 @@ def run_demo(with_plots=True):
 	model.set('qt.a2',a2_opt)
 	model.set('qt.a3',a3_opt)
 	model.set('qt.a4',a4_opt)
+	
+	# Create options object and set verbosity to zero to disable printouts
+	opts = model.simulate_options()
+	opts['CVode_options']['verbosity'] = 0
 
 	# Simulate model response with the optimal parameters
-	res = model.simulate(input=(['u1','u2'],u),start_time=0.,final_time=60)
+	res = model.simulate(input=(['u1','u2'],u),start_time=0.,final_time=60,options=opts)
 
 	# Load optimal simulation result
 	x1_opt = res['qt.x1']
