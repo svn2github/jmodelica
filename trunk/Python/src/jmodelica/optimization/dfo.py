@@ -283,14 +283,6 @@ def nelme(func,xstart,lb=None,ub=None,h=0.3,plot_con=False,plot_sim=False,
 	Ssize = []
 	while k < max_iters and nbr_fevals < max_fevals:
 		
-		print ' '
-		print 'Number of function evaluations: ' + str(nbr_fevals)
-		print 'Number of iterations: ' + str(k)
-		t_temp = time.clock()
-		t_now = t_temp - t0
-		print 'Current time: ' + str(t_now)
-		print ' '
-		
 		# Function values at the vertices of the current simplex
 		if type(func).__name__ == 'function':
 			f_val = N.zeros(n+1)
@@ -309,9 +301,15 @@ def nelme(func,xstart,lb=None,ub=None,h=0.3,plot_con=False,plot_sim=False,
 		# Save vertex function values for each iteration
 		F_val.append(f_val)
 		
+		t_temp = time.clock()
+		t_now = t_temp - t0
 		print ' '
-		print 'Current x: ' + str(X[0])
-		print 'Current f-value: ' + str(f_val[0])
+		print 'Number of iterations: ' + str(k)
+		print 'Number of function evaluations: ' + str(nbr_fevals)
+		print 'Current time: ' + str(t_now) + ' s'
+		print ' '
+		print 'Current x value: ' + str(X[0])
+		print 'Current function value: ' + str(f_val[0])
 		print ' '
 			
 		if plot_sim:
@@ -329,14 +327,14 @@ def nelme(func,xstart,lb=None,ub=None,h=0.3,plot_con=False,plot_sim=False,
 		Ssize.append(ssize)
 		term_x = ssize < x_tol
 		
-		print 'ssize = ' + str(ssize)
-		
 		# Function value convergence test
 		shiftfv = N.abs(f_val[0]-f_val[n])
 		Shiftfv.append(shiftfv)
 		term_f = shiftfv < f_tol
 		
-		print 'shiftfv = ' + str(shiftfv)
+		print 'Termination criterion for x: ' + str(ssize)
+		print 'Termination criterion for the objective function: ' + str(shiftfv)
+		print ' '
 		
 		if term_x or term_f:
 			break
@@ -497,10 +495,9 @@ def nelme(func,xstart,lb=None,ub=None,h=0.3,plot_con=False,plot_sim=False,
 			else:
 				print 'Terminated due to sufficiently close function values at the vertices of the simplex.'
 		print ' '
-		print 'Number of iterations: ' + str(nbr_iters)
-		print 'Number of function evaluations: ' + str(nbr_fevals)
-		print ' '
-		print 'Execution time: ' + str(solve_time) + ' s'
+		print 'Total number of iterations: ' + str(nbr_iters)
+		print 'Total number of function evaluations: ' + str(nbr_fevals)
+		print 'Total execution time: ' + str(solve_time) + ' s'
 		print ' '
 
 	# Return results
