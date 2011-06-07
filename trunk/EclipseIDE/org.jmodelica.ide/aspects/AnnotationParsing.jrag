@@ -754,7 +754,12 @@ aspect AnnotationParsing {
 			try {
 				for(String s : stringList)
 				{
-					textStyle.add(i,Types.TextStyle.valueOf(s.toUpperCase()));
+					textStyle.add(i,Types.TextStyle.valueOf(
+							s.substring(
+									s.indexOf(".")+1,
+									s.length()
+							).toUpperCase()
+					));
 					i++;
 				}
 			} catch (IllegalArgumentException e) {
