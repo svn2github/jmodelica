@@ -327,6 +327,73 @@ public class AWTIconDrawer implements GraphicsInterface {
 		}
 	}
 
+//	/**
+//	 * Draws the specified MSLLine primitive in this object's Graphics2D
+//	 * context.
+//	 * @param t
+//	 */
+//	public void drawLine(Line l) {
+//		if(l.getPoints().size() > 2 && l.getSmooth().equals(Types.Smooth.BEZIER)) {
+//			this.drawBezier(l);
+//		} else if (l.getPoints().size() >= 2) {
+//
+//			// Tranform the points, after inverting their y-coordinate.
+////			ArrayList<Point> xformedPts = new ArrayList<Point>();
+////			for (Point p : l.getPoints()) {
+////				xformedPts.add(transform(new Point(p.getX(), -p.getY())));
+////			}
+//			
+//			// Round the coordinates by casting to int.
+////			int nPts = xformedPts.size();
+////			int[] intXCoords = new int[nPts];
+////			int[] intYCoords = new int[nPts]; 
+////			for (int i = 0; i < nPts; i++) {
+////				intXCoords[i] = (int)xformedPts.get(i).getX();
+////				intYCoords[i] = (int)xformedPts.get(i).getY();
+////			}
+//			
+//			ArrayList<Point> points = l.getPoints();
+//			
+//			// Set up the Graphics object and draw the transformed points.
+//			setColor(l.getColor());
+//			Stroke newStroke = getLineStroke(l.getLinePattern(), l.getThickness());
+//			g.setStroke(newStroke);
+////			AffineTransform oldTransform = g.getTransform();
+////			g.setTransform(new AffineTransform());
+////			g.setRenderingHint(
+////					RenderingHints.KEY_STROKE_CONTROL, 
+////					RenderingHints.VALUE_STROKE_PURE
+////			);
+//			g.setRenderingHint(
+//					RenderingHints.KEY_ANTIALIASING, 
+//					RenderingHints.VALUE_ANTIALIAS_ON
+//			);
+////			g.drawPolyline(intXCoords, intYCoords, nPts);
+//			g.drawPolyline(
+//					GraphicsUtil.getXLinePoints(points), 
+//					GraphicsUtil.getYLinePoints(points),
+//					points.size()
+//			);
+//			g.setRenderingHint(
+//					RenderingHints.KEY_ANTIALIASING, 
+//					RenderingHints.VALUE_ANTIALIAS_OFF
+//			);
+////			g.setRenderingHint(
+////					RenderingHints.KEY_STROKE_CONTROL, 
+////					RenderingHints.VALUE_STROKE_DEFAULT
+////			);
+////			g.setTransform(oldTransform);
+//			
+//			// If the Line has arrows, draw them.
+//			Polygon[] arrows = l.getArrowPolygons();
+//			for (int i = 0; i < arrows.length; i++) {
+//				if (arrows[i] != null) {
+//					drawShape(arrows[i]);
+//				}
+//			}
+//		}
+//	}
+	
 	/**
 	 * Draws the specified shape in this object's Graphics2D context.
 	 * @param t
@@ -929,7 +996,7 @@ public class AWTIconDrawer implements GraphicsInterface {
 			thicknessInMM = 2*Line.DEFAULT_THICKNESS;
 		}
 		float thicknessInPixles = (float)(thicknessInMM*IconConstants.PIXLES_PER_MM*IconConstants.DEFAULT_LINE_THICKNESS_IN_PIXLES);
-		return new BasicStroke((float)(thicknessInPixles/getAvgCurrentScaleFactor()), BasicStroke.CAP_BUTT,
+		return new BasicStroke((float)(thicknessInPixles), BasicStroke.CAP_BUTT,
 				BasicStroke.JOIN_MITER, 10.0f, linepattern.getDash(), 0.0f);
 	}
 	
