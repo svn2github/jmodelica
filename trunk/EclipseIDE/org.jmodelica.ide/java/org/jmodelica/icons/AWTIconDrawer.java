@@ -190,6 +190,7 @@ public class AWTIconDrawer implements GraphicsInterface {
 		int extentHeight = (int)t.getExtent().getHeight();
 		int extentWidth = (int)t.getExtent().getWidth();
 		
+		
 		g.setFont(this.setFont(t));
 		String text = t.getTextString();
 			
@@ -235,7 +236,15 @@ public class AWTIconDrawer implements GraphicsInterface {
 				g.draw(createShape(t));
 			} catch(Exception e){}
 		}
+		g.setRenderingHint(
+				RenderingHints.KEY_ANTIALIASING,
+				RenderingHints.VALUE_ANTIALIAS_ON
+		);
 		g.drawString(text, x, y);
+		g.setRenderingHint(
+				RenderingHints.KEY_ANTIALIASING,
+				RenderingHints.VALUE_ANTIALIAS_OFF
+		);
 	}
 	
 	public void drawBitmap(Bitmap b) {
@@ -778,57 +787,6 @@ public class AWTIconDrawer implements GraphicsInterface {
 		ImageDescriptor desc = ImageDescriptor.createFromImageData(imagedata);
 		return desc.createImage(); 
 	}	
-//	public Image getImage() {
-//		ImageData imagedata = null;
-//		if(image == null){
-//			return null; 
-//		}
-//	    if(image.getColorModel() instanceof DirectColorModel) {
-//	    	DirectColorModel colorModel
-//	                = (DirectColorModel) image.getColorModel();
-//	        PaletteData palette = new PaletteData(colorModel.getRedMask(),
-//	                colorModel.getGreenMask(), colorModel.getBlueMask());
-//	        	        
-//	        imagedata = new ImageData(IconConstants.OUTLINE_IMAGE_SIZE,
-//	        		IconConstants.OUTLINE_IMAGE_SIZE, colorModel.getPixelSize(),
-//	                palette);
-//	   
-//	        imagedata.transparentPixel = palette.getPixel(
-//	        								new RGB(
-//	        									Color.TRANSPARENT.getR(), 
-//	        									Color.TRANSPARENT.getG(), 
-//	        									Color.TRANSPARENT.getB()
-//	        									)
-//	        								);
-//	        
-//	        for (int y = 0; y < imagedata.height; y++) {
-//	        	int x = 0;
-//	        	imagedata.setPixel(x, y, imagedata.transparentPixel);
-//	        }
-//        	for (int x = 0; x < imagedata.width; x++) {
-//        		int y = imagedata.height-1;
-//	        	imagedata.setPixel(x, y, imagedata.transparentPixel);
-//        	}
-//	        WritableRaster raster = image.getRaster();
-//	        int[] pixelArray = new int[3];
-//	        for (int y = 0; y < image.getHeight(); y++) {
-//	            for (int x = 0; x < image.getWidth(); x++) {
-//	                raster.getPixel(x, y, pixelArray);
-//	                int pixel = palette.getPixel(new RGB(
-//	                		pixelArray[0],
-//	                        pixelArray[1], 
-//	                        pixelArray[2]
-//	                ));
-//	                imagedata.setPixel(x+1, y, pixel);
-//	            }
-//	        }
-//	    }
-//	    else {	
-//	    	return null;
-//	    }
-//		ImageDescriptor desc = ImageDescriptor.createFromImageData(imagedata);
-//		return desc.createImage(); 
-//	}	
 
 	public Font setFont(Text text) {
 		
