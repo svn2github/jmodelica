@@ -16,6 +16,7 @@ import java.awt.font.TextAttribute;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
+import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -108,8 +109,8 @@ public class AWTIconDrawer implements GraphicsInterface {
 			return;
 		} else {
     		iconExtent = icon.getBounds(iconExtent);
-    		iconWidth = iconExtent.getWidth()+ 1.0;
-    		iconHeight = iconExtent.getHeight()+ 1.0;
+    		iconWidth = iconExtent.getWidth();
+    		iconHeight = iconExtent.getHeight();
 		}
 		if(outline) {
 	    		imageWidth=IconConstants.OUTLINE_IMAGE_SIZE-1;
@@ -117,8 +118,8 @@ public class AWTIconDrawer implements GraphicsInterface {
 		}else {
 			return;
 		}
-		double scaleWidth = imageWidth/iconWidth;
-		double scaleHeight = imageHeight/iconHeight;
+		double scaleWidth = (imageWidth-1)/iconWidth;
+		double scaleHeight = (imageHeight-1)/iconHeight;
 		
 		image = new BufferedImage(
 				(int)imageWidth, 
@@ -299,23 +300,38 @@ public class AWTIconDrawer implements GraphicsInterface {
 				xformedPts.add(transform(new Point(p.getX(), -p.getY())));
 			}
 			
-			// Round the coordinates by casting to int.
-			int nPts = xformedPts.size();
-			int[] intXCoords = new int[nPts];
-			int[] intYCoords = new int[nPts]; 
-			for (int i = 0; i < nPts; i++) {
-				intXCoords[i] = (int)xformedPts.get(i).getX();
-				intYCoords[i] = (int)xformedPts.get(i).getY();
+			// Create a new line from the transformed points.
+			java.awt.geom.Path2D.Double xformedLine = new java.awt.geom.Path2D.Double();
+			xformedLine.moveTo(xformedPts.get(0).getX(), xformedPts.get(0).getY());
+			for (int i = 1; i < xformedPts.size(); i++) {
+				Point point = xformedPts.get(i);
+				xformedLine.lineTo(point.getX(), point.getY());
 			}
 			
-			// Set up the Graphics object and draw the transformed points.
+			// Set up the Graphics object and draw the transformed line.
 			setColor(l.getColor());
 			Stroke newStroke = getLineStroke(l.getLinePattern(), l.getThickness());
 			g.setStroke(newStroke);
 			AffineTransform oldTransform = g.getTransform();
 			g.setTransform(new AffineTransform());
-			g.drawPolyline(intXCoords, intYCoords, nPts);
+			g.setRenderingHint(
+					RenderingHints.KEY_ANTIALIASING, 
+					RenderingHints.VALUE_ANTIALIAS_ON
+			);
+			g.setRenderingHint(
+					RenderingHints.KEY_STROKE_CONTROL, 
+					RenderingHints.VALUE_STROKE_PURE
+			);
+			g.draw(xformedLine);
 			g.setTransform(oldTransform);
+			g.setRenderingHint(
+					RenderingHints.KEY_STROKE_CONTROL, 
+					RenderingHints.VALUE_STROKE_DEFAULT
+			);
+			g.setRenderingHint(
+					RenderingHints.KEY_ANTIALIASING, 
+					RenderingHints.VALUE_ANTIALIAS_OFF
+			);
 			
 			// If the Line has arrows, draw them.
 			Polygon[] arrows = l.getArrowPolygons();
@@ -326,73 +342,6 @@ public class AWTIconDrawer implements GraphicsInterface {
 			}
 		}
 	}
-
-//	/**
-//	 * Draws the specified MSLLine primitive in this object's Graphics2D
-//	 * context.
-//	 * @param t
-//	 */
-//	public void drawLine(Line l) {
-//		if(l.getPoints().size() > 2 && l.getSmooth().equals(Types.Smooth.BEZIER)) {
-//			this.drawBezier(l);
-//		} else if (l.getPoints().size() >= 2) {
-//
-//			// Tranform the points, after inverting their y-coordinate.
-////			ArrayList<Point> xformedPts = new ArrayList<Point>();
-////			for (Point p : l.getPoints()) {
-////				xformedPts.add(transform(new Point(p.getX(), -p.getY())));
-////			}
-//			
-//			// Round the coordinates by casting to int.
-////			int nPts = xformedPts.size();
-////			int[] intXCoords = new int[nPts];
-////			int[] intYCoords = new int[nPts]; 
-////			for (int i = 0; i < nPts; i++) {
-////				intXCoords[i] = (int)xformedPts.get(i).getX();
-////				intYCoords[i] = (int)xformedPts.get(i).getY();
-////			}
-//			
-//			ArrayList<Point> points = l.getPoints();
-//			
-//			// Set up the Graphics object and draw the transformed points.
-//			setColor(l.getColor());
-//			Stroke newStroke = getLineStroke(l.getLinePattern(), l.getThickness());
-//			g.setStroke(newStroke);
-////			AffineTransform oldTransform = g.getTransform();
-////			g.setTransform(new AffineTransform());
-////			g.setRenderingHint(
-////					RenderingHints.KEY_STROKE_CONTROL, 
-////					RenderingHints.VALUE_STROKE_PURE
-////			);
-//			g.setRenderingHint(
-//					RenderingHints.KEY_ANTIALIASING, 
-//					RenderingHints.VALUE_ANTIALIAS_ON
-//			);
-////			g.drawPolyline(intXCoords, intYCoords, nPts);
-//			g.drawPolyline(
-//					GraphicsUtil.getXLinePoints(points), 
-//					GraphicsUtil.getYLinePoints(points),
-//					points.size()
-//			);
-//			g.setRenderingHint(
-//					RenderingHints.KEY_ANTIALIASING, 
-//					RenderingHints.VALUE_ANTIALIAS_OFF
-//			);
-////			g.setRenderingHint(
-////					RenderingHints.KEY_STROKE_CONTROL, 
-////					RenderingHints.VALUE_STROKE_DEFAULT
-////			);
-////			g.setTransform(oldTransform);
-//			
-//			// If the Line has arrows, draw them.
-//			Polygon[] arrows = l.getArrowPolygons();
-//			for (int i = 0; i < arrows.length; i++) {
-//				if (arrows[i] != null) {
-//					drawShape(arrows[i]);
-//				}
-//			}
-//		}
-//	}
 	
 	/**
 	 * Draws the specified shape in this object's Graphics2D context.
@@ -419,18 +368,15 @@ public class AWTIconDrawer implements GraphicsInterface {
 			}
 			pathIterator.next();
 		}
-		
-		// Round the coordinates by casting to int.
-		int nPts = xformedPts.size();
-		int[] intXCoords = new int[nPts];
-		int[] intYCoords = new int[nPts]; 
-		for (int i = 0; i < nPts; i++) {
-			intXCoords[i] = (int)xformedPts.get(i).getX();
-			intYCoords[i] = (int)xformedPts.get(i).getY();
+
+		// Create a new shape from the transformed coordinates. 		
+		java.awt.geom.Path2D.Double xformedShape = new java.awt.geom.Path2D.Double();
+		xformedShape.moveTo(xformedPts.get(0).getX(), xformedPts.get(0).getY());
+		for (int i = 1; i < xformedPts.size(); i++) {
+			Point point = xformedPts.get(i);
+			xformedShape.lineTo(point.getX(), point.getY());
 		}
-		
-		// Create a new shape from the rounded coordinates. 
-		java.awt.Polygon intShape = new java.awt.Polygon(intXCoords, intYCoords, nPts);
+		xformedShape.lineTo(xformedPts.get(0).getX(), xformedPts.get(0).getY());
 		
 		// Fill the shape.
 		Types.FillPattern fillPattern = s.getFillPattern();
@@ -448,7 +394,15 @@ public class AWTIconDrawer implements GraphicsInterface {
 			}
 			AffineTransform oldTransform = g.getTransform();
 			g.setTransform(new AffineTransform());
-			g.fill(intShape);
+			g.setRenderingHint(
+					RenderingHints.KEY_ANTIALIASING, 
+					RenderingHints.VALUE_ANTIALIAS_ON
+			);
+			g.fill(xformedShape);
+			g.setRenderingHint(
+					RenderingHints.KEY_ANTIALIASING, 
+					RenderingHints.VALUE_ANTIALIAS_OFF
+			);
 			g.setTransform(oldTransform);
 			g.setPaint(oldPaint);
 		}
@@ -458,7 +412,6 @@ public class AWTIconDrawer implements GraphicsInterface {
 							s.getFillPattern() == FillPattern.VERTICALCYLINDER ||
 							s.getFillPattern() == FillPattern.SPHERE);
 		if (s.getLinePattern() != LinePattern.NONE && !gradient) {
-//			double thickness = s.getLineThickness()*getAvgCurrentScaleFactor();
 			Stroke newStroke = getShapeStroke(s.getLinePattern(), s.getLineThickness()); 
 			g.setStroke(newStroke);
 			setColor(s.getLineColor());
@@ -468,7 +421,7 @@ public class AWTIconDrawer implements GraphicsInterface {
 					RenderingHints.KEY_ANTIALIASING, 
 					RenderingHints.VALUE_ANTIALIAS_ON
 			);
-			g.draw(intShape);
+			g.draw(xformedShape);
 			g.setRenderingHint(
 					RenderingHints.KEY_ANTIALIASING, 
 					RenderingHints.VALUE_ANTIALIAS_OFF
@@ -814,8 +767,8 @@ public class AWTIconDrawer implements GraphicsInterface {
 	            for (int x = 0; x < image.getWidth(); x++) {
 	            	int rgb = image.getRGB(x, y);
 	            	int pixel = palette.getPixel(new RGB((rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, rgb & 0xFF));
-	            	imagedata.setPixel(x, y, pixel);
-	            	imagedata.setAlpha(x, y, (rgb >> 24) & 0xFF);
+	            	imagedata.setPixel(x+1, y, pixel);
+	            	imagedata.setAlpha(x+1, y, (rgb >> 24) & 0xFF);
 	            }
 	        }
 	    }
@@ -913,54 +866,41 @@ public class AWTIconDrawer implements GraphicsInterface {
 	}
 	
 	private Shape createShape(Text t) throws CreateShapeFailedException {
-		Extent extent = t.getExtent();
-		if (extent == Extent.NO_EXTENT) {
-			throw new CreateShapeFailedException("MLSText");
-		}
-		return new java.awt.Rectangle(
-			(int)(extent.getP1().getX()),
-			-(int)(extent.getP2().getY()),
-			(int)(extent.getP2().getX()-extent.getP1().getX()),
-			(int)(extent.getP2().getY()-extent.getP1().getY())
-		);
+		return createRectShape(t.getExtent());
 	}
 
 	private Shape createShape(Rectangle r) throws CreateShapeFailedException {
-		Extent extent = r.getExtent();
+		return createRectShape(r.getExtent());
+	}
+	
+	private Shape createRectShape(Extent extent) throws CreateShapeFailedException {
 		if (extent == Extent.NO_EXTENT) {
 			throw new CreateShapeFailedException("MLSRectangle");
 		}
-		return new java.awt.Rectangle(
-			(int)(extent.getP1().getX()),
-			-(int)(extent.getP2().getY()),
-			(int)(extent.getP2().getX()-extent.getP1().getX()),
-			(int)(extent.getP2().getY()-extent.getP1().getY())
-		);
+		return new java.awt.geom.Rectangle2D.Double(
+			(extent.getP1().getX()),
+			-(extent.getP2().getY()),
+			(extent.getP2().getX()-extent.getP1().getX()),
+			(extent.getP2().getY()-extent.getP1().getY())
+		);		
 	}
 	
 	private Shape createShape(Polygon p) throws CreateShapeFailedException {
 		ArrayList<Point> points = p.getPoints();
-		if (points.isEmpty()) {
-			throw new CreateShapeFailedException("MLSPolygon");
+		Path2D.Double path = new Path2D.Double();
+		path.moveTo(points.get(0).getX(), -points.get(0).getY());
+		for (int i = 1; i < points.size(); i++) {
+			Point point = points.get(i);
+			path.lineTo(point.getX(), -point.getY());
 		}
-		int npoints = points.size();
-		int [] xpoints = new int [npoints];
-		int [] ypoints = new int [npoints];
-		for(int i = 0; i < npoints; i++)
-		{
-			xpoints[i] = (int)points.get(i).getX();
-		}
-		for(int i = 0; i < npoints; i++)
-		{
-			ypoints[i] = -((int)points.get(i).getY());
-		}
-		return new java.awt.Polygon(xpoints, ypoints, npoints);
+		path.lineTo(points.get(0).getX(), -points.get(0).getY());
+		return path;
 	}
 	
 	private Shape createShape(Ellipse e) throws CreateShapeFailedException {
 		Extent extent = e.getExtent();
 		if (extent == Extent.NO_EXTENT) {
-			throw new CreateShapeFailedException("MLSEllipse");
+			throw new CreateShapeFailedException("Ellipse");
 		}
 		return new Ellipse2D.Double(
 				extent.getP1().getX(),
