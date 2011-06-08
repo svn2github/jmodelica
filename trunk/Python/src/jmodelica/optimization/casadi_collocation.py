@@ -320,10 +320,7 @@ class CasadiCollocator(object):
                     
             f.write('\n')
 
-            #sc = model.jmimodel.get_variable_scaling_factors()
-            #z = model.z
             sc = N.hstack((N.array([1.0]),self.model.get_dx_sf(),self.model.get_x_sf(),self.model.get_u_sf(),self.model.get_w_sf()))            
-
             rescale = self.model.enable_scaling
 
             # Write data
@@ -334,7 +331,8 @@ class CasadiCollocator(object):
             for i in params:
                 if rescale:
                     #str_text += " %.14E" % (z[ref]*sc[ref])
-                    raise NotImplementedError
+                    str_text += " %.14E" % (start_values[i[0]])
+                    #raise NotImplementedError
                 else:
                     str_text += " %.14E" % (start_values[i[0]])#(0.0)#(z[ref])
                     
@@ -898,7 +896,7 @@ class RadauCollocator(CasadiCollocator):
 #         sc_w = self._model.jmimodel.get_variable_scaling_factors()[
 #             self._model._offs_real_w.value:self._model._offs_t.value]
 
-        scaling = False
+        #scaling = False
 
         col_index = 1;
         dx_index = 0;
@@ -908,6 +906,7 @@ class RadauCollocator(CasadiCollocator):
         for name in dx_names:
             try:
                 #print(name)
+                #print(self.model.get_dx_sf()[dx_index])
                 #print(col_index)
                 traj = res.get_variable_data(name)
                 var_data[:,col_index] = traj.x/self.model.get_dx_sf()[dx_index]
@@ -920,6 +919,7 @@ class RadauCollocator(CasadiCollocator):
         for name in x_names:
             try:
                 #print(name)
+                #print(self.model.get_x_sf()[x_index])
                 #print(col_index)
                 traj = res.get_variable_data(name)
                 var_data[:,col_index] = traj.x/self.model.get_x_sf()[x_index]

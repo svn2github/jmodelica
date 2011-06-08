@@ -51,7 +51,7 @@ def compile_casadi(class_name, file_name=[], compiler='auto', target='ipopt',
                        compile_to, compiler_log_level)
 
 class CasadiModel(object):
-    def __init__(self, name, path='.'):
+    def __init__(self, name, path='.', enable_scaling = False):
         
         #Create temp binary
         self._tempnames = unzip_unit(archive=name, path=".")
@@ -64,7 +64,7 @@ class CasadiModel(object):
         self.xmldoc = xmlparser.ModelDescription(os.path.join(self._tempdir,self._tempxml))
         
         #Load CasADi interface
-        self._load_xml_to_casadi(os.path.join(self._tempdir,self._tempxml))
+        self._load_xml_to_casadi(os.path.join(self._tempdir,self._tempxml), enable_scaling)
     
     def get_model_description(self):
         return self.xmldoc
@@ -303,7 +303,9 @@ class CasadiModel(object):
         """
         return self.opt_L
         
-    def _convert_to_ode(self, enable_scaling=False):
+    def _convert_to_ode(self):
+
+        self.ocp.sortBLT()
 
         self.ocp.makeExplicit()
         
@@ -370,7 +372,7 @@ class CasadiModel(object):
         self.opt_ode_C     = casadi.SXFunction([self.ocp_ode_boundary_inputs],[self.opt_ode_C])
         self.opt_ode_Cineq = casadi.SXFunction([self.ocp_ode_boundary_inputs],[self.opt_ode_Cineq])
     
-        if enable_scaling:
+        if self.enable_scaling:
             # Scale model
             # Get nominal values for scaling
             x_nominal = self.xmldoc.get_x_nominal(include_alias = False)
@@ -443,15 +445,15 @@ class CasadiModel(object):
         self.ocp = self.parser.parse()
 
         # Scale the variables
-        # Joel: Consider using this
-        #self.ocp.scaleVariables()
+        if enable_scaling:
+            self.ocp.scaleVariables()
 
         # Eliminate the dependent variables
         self.ocp.eliminateDependent()
 
         # Scale the equations
-        # Joel: Consider using this
-        #self.ocp.scaleEquations()
+        if enable_scaling:
+            self.ocp.scaleEquations()
 
         # Create functions the DAE right hand side
         # Joel: Use this if making collocation using MX graphs
@@ -576,7 +578,6 @@ class CasadiModel(object):
         self.w_sf = N.ones(self.n_w)
         self.p_sf = N.ones(self.n_p)
         
-        # Joel: you can remove this and just use the scaleVariables function above, which does the same thing - scaling using the nominal attribute
         if enable_scaling:
             # Scale model
             # Get nominal values for scaling
@@ -598,30 +599,5 @@ class CasadiModel(object):
                 if val != None:
                     self.w_sf[self.w_vr_map[vr]] = N.abs(val)
 
-            # Create new, scaled variables
-            self.dx_scaled = self.x_sf*self.dx
-            self.x_scaled = self.x_sf*self.x
-            self.u_scaled = self.u_sf*self.u
-            self.w_scaled = self.w_sf*self.w
 
-            z_scaled = []
-            z_scaled += list(self.dx_scaled)
-            z_scaled += list(self.x_scaled)
-            z_scaled += list(self.u_scaled)
-            z_scaled += list(self.w_scaled)
-            z_scaled += [self.var.t]
 
-            # Substitue scaled variables
-            self.dae_F = list(self.dae_F.eval([z_scaled])[0])
-            self.init_F0 = list(self.init_F0.eval([z_scaled])[0])
-            if self.opt_J!=None:
-                self.opt_J = list(self.opt_J.eval([z_scaled])[0])
-            if self.opt_L!=None:
-                self.opt_L = list(self.opt_L.eval([z_scaled])[0])
-
-            self.dae_F = casadi.SXFunction([self.ocp_inputs],[self.dae_F])
-            self.init_F0 = casadi.SXFunction([self.ocp_inputs],[self.init_F0])
-            if self.opt_J!=None:
-                self.opt_J = casadi.SXFunction([self.ocp_inputs],[self.opt_J])
-            if self.opt_L!=None:
-                self.opt_L = casadi.SXFunction([self.ocp_inputs],[self.opt_L])
