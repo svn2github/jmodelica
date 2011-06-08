@@ -51,7 +51,7 @@ except:
     logging.warning(
         'Could not load Assimulo module. Check jmodelica.check_packages()')
     assimulo_present = False
-
+from jmodelica.optimization.casadi_collocation import *
 try:
     ipopt_present = jmodelica.environ['IPOPT_HOME']
 except:
@@ -1672,7 +1672,7 @@ class CasadiPseudoSpectral(AlgorithmBase):
         Parameters::
               
             model -- 
-                jmodelica.jmi.casadiModel model object
+                jmodelica.jmi.CasadiModel model object
 
             options -- 
                 The options that should be used by the algorithm. For 
@@ -1929,6 +1929,12 @@ class CasadiRadauOptions(OptionBase):
             Number of collocation points in each element.
             Default: 3
 
+        init_traj --
+            Variable trajectory data used for initialization of the optimization 
+            problem. The data is represented by an object of the type 
+            jmodelica.io.DymolaResultTextual.
+            Default: None
+
     Options are set by using the syntax for dictionaries::
 
         >>> opts = my_model.optimize_options()
@@ -1957,7 +1963,8 @@ class CasadiRadauOptions(OptionBase):
     def __init__(self, *args, **kw):
         _defaults= {
             'n_e':50, 
-            'n_cp':3, 
+            'n_cp':3,
+            'init_traj':None,
             'IPOPT_options':{'max_iter':1000,
                              'derivative_test':'none'}
             }
@@ -2025,14 +2032,18 @@ class CasadiRadau(AlgorithmBase):
             
         # set solver options
         self._set_solver_options()
+
+        if self.init_traj!=None:
+            self.nlp.set_initial_from_file(self.init_traj) 
         
     def _set_options(self):
         """ 
         Helper function that sets options for the CasadiRadau 
         algorithm.
         """
-        self.n_e=self.options['n_e']
-        self.n_cp=self.options['n_cp']
+        self.n_e = self.options['n_e']
+        self.n_cp = self.options['n_cp']
+        self.init_traj = self.options['init_traj']
         
         # solver options
         self.solver_options = self.options['IPOPT_options']

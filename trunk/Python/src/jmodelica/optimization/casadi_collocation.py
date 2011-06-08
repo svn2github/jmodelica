@@ -625,8 +625,11 @@ class RadauCollocator(CasadiCollocator):
         z += self.vars[1][0]['w']
         #z += [xmlocp.var.t.sx()]
         z += [casadi.SX(t)]
-        self.g += list(self.model.get_init_F0().eval([z])[0])
-        self.g += list(self.model.get_dae_F().eval([z])[0])
+                
+        [tmp] = self.model.get_init_F0().eval([z])
+        self.g += list(tmp.data())
+        [tmp] = self.model.get_dae_F().eval([z])
+        self.g += list(tmp.data())
 
         pol = RadauPol3()
         self.pol = pol
@@ -640,7 +643,7 @@ class RadauCollocator(CasadiCollocator):
         self.initial_dae_constraints += self.g
         
         self.time_points.append((self.ocp.t0,1,0))
-        
+                
         # DAE residual and collocation equations
         for i in range(1,n_e+1):
             for k in range(1,n_cp+1):
@@ -652,7 +655,8 @@ class RadauCollocator(CasadiCollocator):
                 z += self.vars[i][k]['u']
                 z += self.vars[i][k]['w']
                 z += [casadi.SX(t)]
-                dae_constr = list(self.model.get_dae_F().eval([z])[0])
+                [tmp] = self.model.get_dae_F().eval([z])
+                dae_constr = list(tmp.data())
                 self.g += dae_constr
                 if k==1:
                     self.dae_constraints[i] = {}
@@ -753,6 +757,260 @@ class RadauCollocator(CasadiCollocator):
 
     def get_hessian(self):
         return self.H_fcn
+
+    def set_initial_from_file(self,res):
+        """ 
+        Initialize the optimization vector from an object of either 
+        ResultDymolaTextual or ResultDymolaBinary.
+
+        Parameters::
+        
+            res --
+                A reference to an object of type ResultDymolaTextual or
+                ResultDymolaBinary.
+        """
+        
+        xmldoc = self.model.get_model_description()
+
+        # Obtain the names and sort them in value reference order
+        names = xmldoc.get_dx_variable_names(include_alias=False)
+        dx_names=[]
+        for name in sorted(names):
+            dx_names.append(name[1])
+
+        names = xmldoc.get_x_variable_names(include_alias=False)
+        x_names=[]
+        for name in sorted(names):
+            x_names.append(name[1])
+
+        names = xmldoc.get_u_variable_names(include_alias=False)
+        u_names=[]
+        for name in sorted(names):
+            u_names.append(name[1])
+
+        names = xmldoc.get_w_variable_names(include_alias=False)
+        w_names=[]
+        for name in sorted(names):
+            w_names.append(name[1])
+
+        names = xmldoc.get_p_opt_variable_names(include_alias=False)
+        p_opt_names=[]
+        for name in sorted(names):
+            p_opt_names.append(name[1])
+        
+        # Obtain vector sizes
+        n_points = 0
+        num_name_hits = 0
+        if len(dx_names) > 0:
+            for name in dx_names:
+                print name
+                try:
+                    traj = res.get_variable_data(name)
+                    num_name_hits = num_name_hits + 1
+                    if N.size(traj.x)>2:
+                        break
+                except:
+                    pass
+
+        elif len(x_names) > 0:
+            for name in x_names:
+                try:
+                    traj = res.get_variable_data(name)
+                    num_name_hits = num_name_hits + 1
+                    if N.size(traj.x)>2:
+                        break
+                except:
+                    pass
+
+        elif len(u_names) > 0:
+            for name in u_names:
+                try:
+                    traj = res.get_variable_data(name)
+                    num_name_hits = num_name_hits + 1
+                    if N.size(traj.x)>2:
+                        break
+                except:
+                    pass
+
+        elif len(w_names) > 0:
+            for name in w_names:
+                try:
+                    traj = res.get_variable_data(name)
+                    num_name_hits = num_name_hits + 1
+                    if N.size(traj.x)>2:
+                        break
+                except:
+                    pass
+        else:
+            raise Exception(
+                "None of the model variables not found in result file.")
+
+        if num_name_hits==0:
+            raise Exception(
+                "None of the model variables not found in result file.")
+        
+        #print(traj.t)
+        
+        n_points = N.size(traj.t,0)
+        n_cols = 1+len(dx_names)+len(x_names)+len(u_names)+len(w_names)
+
+        var_data = N.zeros((n_points,n_cols))
+        # Initialize time vector
+        var_data[:,0] = res.get_variable_data('time').t
+
+#         p_opt_data = N.zeros(len(p_opt_names))
+
+#         sc = self._model.jmimodel.get_variable_scaling_factors()
+
+#         # Get the parameters
+#         n_p_opt = self._model.jmimodel.opt_get_n_p_opt()
+#         if n_p_opt > 0:
+#             p_opt_indices = N.zeros(n_p_opt, dtype=int)
+        
+#             self._model.jmimodel.opt_get_p_opt_indices(p_opt_indices)
+#             p_opt_indices = p_opt_indices.tolist()
+
+#             for name in p_opt_names:
+#                 try:
+#                     ref = self._model.get_value_reference(name)
+#                     (z_i, ptype) = jmi._translate_value_ref(ref)
+#                     i_pi = z_i - self._model._offs_real_pi.value
+#                     i_pi_opt = p_opt_indices.index(i_pi)
+#                     traj = res.get_variable_data(name)
+#                     if self._model.get_scaling_method() & jmi.JMI_SCALING_VARIABLES > 0:
+#                         p_opt_data[i_pi_opt] = traj.x[0]/sc[z_i]
+#                     else:
+#                         p_opt_data[i_pi_opt] = traj.x[0]
+#                 except VariableNotFoundError:
+#                     print "Warning: Could not find value for parameter " + name
+                    
+#         #print(N.size(var_data))
+
+#         # Initialize variable names
+#         # Loop over all the names
+
+#         sc_dx = self._model.jmimodel.get_variable_scaling_factors()[
+#             self._model._offs_real_dx.value:self._model._offs_real_x.value]
+#         sc_x = self._model.jmimodel.get_variable_scaling_factors()[
+#             self._model._offs_real_x.value:self._model._offs_real_u.value]
+#         sc_u = self._model.jmimodel.get_variable_scaling_factors()[
+#             self._model._offs_real_u.value:self._model._offs_real_w.value]
+#         sc_w = self._model.jmimodel.get_variable_scaling_factors()[
+#             self._model._offs_real_w.value:self._model._offs_t.value]
+
+        scaling = False
+
+        col_index = 1;
+        dx_index = 0;
+        x_index = 0;
+        u_index = 0;
+        w_index = 0;
+        for name in dx_names:
+            try:
+                #print(name)
+                #print(col_index)
+                traj = res.get_variable_data(name)
+                var_data[:,col_index] = traj.x/self.model.get_dx_sf()[dx_index]
+                dx_index = dx_index + 1
+                col_index = col_index + 1
+            except:
+                dx_index = dx_index + 1
+                col_index = col_index + 1
+                print "Warning: Could not find trajectory for derivative variable " + name
+        for name in x_names:
+            try:
+                #print(name)
+                #print(col_index)
+                traj = res.get_variable_data(name)
+                var_data[:,col_index] = traj.x/self.model.get_x_sf()[x_index]
+                x_index = x_index + 1
+                col_index = col_index + 1
+            except VariableNotFoundError:
+                x_index = x_index + 1
+                col_index = col_index + 1
+                print "Warning: Could not find trajectory for state variable " + name
+
+        for name in u_names:
+            try:
+                #print(name)
+                #print(col_index)
+                traj = res.get_variable_data(name)
+                if not res.is_variable(name):
+                    var_data[:,col_index] = N.ones(n_points)*traj.x[0]/self.model.get_u_sf()[u_index]
+                else:
+                    var_data[:,col_index] = traj.x/self.model.get_u_sf()[u_index]
+                u_index = u_index + 1
+                col_index = col_index + 1
+            except VariableNotFoundError:
+                u_index = u_index + 1
+                col_index = col_index + 1
+                print "Warning: Could not find trajectory for input variable " + name
+
+        for name in w_names:
+            try:
+                #print(name)
+                #print(col_index)
+                traj = res.get_variable_data(name)
+                if not res.is_variable(name):
+                    var_data[:,col_index] = N.ones(n_points)*traj.x[0]/self.model.get_w_sf()[w_index]
+                else:
+                    var_data[:,col_index] = traj.x/self.model.get_w_sf()[w_index]
+                w_index = w_index + 1
+                col_index = col_index + 1
+            except VariableNotFoundError:
+                w_index = w_index + 1
+                col_index = col_index + 1
+                print "Warning: Could not find trajectory for algebraic variable " + name
+
+        dx_init = N.zeros((len(self.get_time_points()),self.model.get_n_x()))
+        x_init = N.zeros((len(self.get_time_points()),self.model.get_n_x()))
+        w_init = N.zeros((len(self.get_time_points()),self.model.get_n_w()))
+        u_init = N.zeros((len(self.get_time_points()),self.model.get_n_u()))
+        
+        t_points = N.zeros(len(self.get_time_points()))
+
+        cnt = 0
+        for t,i,j in self.get_time_points():
+            t_points[cnt] = t
+            cnt = cnt + 1
+
+        # make sure abscissa is increasing
+        d = var_data[0,0]
+        for i in range(len(var_data[:,0])-1):
+            if var_data[i+1,0]<=d:
+                var_data[i+1,0] = d + 1e-5
+            d = var_data[i+1,0]
+
+        # interpolate
+        for i in range(self.model.get_n_x()):
+            dx_init[:,i] = N.interp(t_points,var_data[:,0],var_data[:,1+i]);
+
+        for i in range(self.model.get_n_x()):
+            x_init[:,i] = N.interp(t_points,var_data[:,0],var_data[:,1 + self.model.get_n_x() +i]);
+
+        for i in range(self.model.get_n_u()):
+            u_init[:,i] = N.interp(t_points,var_data[:,0],var_data[:,1 + 2*self.model.get_n_x() + i]);
+
+        for i in range(self.model.get_n_w()):
+            w_init[:,i] = N.interp(t_points,var_data[:,0],var_data[:,1 + 2*self.model.get_n_x() + self.model.get_n_u() + i]);
+
+        cnt = 0
+        for t,i,j in self.get_time_points():
+            if (self.model.get_n_x()>0):
+                self.get_xx_init()[self.var_indices[i][j]['dx']] = dx_init[cnt,:]
+            if (self.model.get_n_x()>0):
+                self.get_xx_init()[self.var_indices[i][j]['x']] = x_init[cnt,:]
+                if i>1: # Initialize element junction states TODO: this is not quite correct, could be improved
+                    try:
+                        self.get_xx_init()[self.var_indices[i][0]['x']] = x_init[cnt,:]
+                    except:
+                        pass
+            if (self.model.get_n_u()>0):
+                self.get_xx_init()[self.var_indices[i][j]['u']] = u_init[cnt,:]
+            if (self.model.get_n_w()>0):
+                self.get_xx_init()[self.var_indices[i][j]['w']] = w_init[cnt,:]
+            cnt = cnt + 1
+
         
 class PseudoSpectral(CasadiCollocator):
     """

@@ -37,6 +37,9 @@ def run_demo(with_plots=True):
     jmu_name = compile_jmu("VDP_pack.VDP_Opt", curr_dir+"/files/VDP.mop")
     vdp = JMUModel(jmu_name)
     
+    opts=vdp.optimize_options()
+    opts['IPOPT_options']['linear_solver'] = 'ma57'
+
     res = vdp.optimize()
 
     # Extract variable profiles
@@ -48,6 +51,11 @@ def run_demo(with_plots=True):
     
     assert N.abs(cost[-1] - 2.3469089e+01) < 1e-3, \
             "Wrong value of cost function in vdp.py"  
+
+    print "t = ", repr(N.array(t))
+    print "x1 = ", repr(N.array(x1))
+    print "x2 = ", repr(N.array(x2))
+    print "u = ", repr(N.array(u))
 
     if with_plots:
         # Plot

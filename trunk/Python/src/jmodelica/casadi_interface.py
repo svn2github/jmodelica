@@ -29,6 +29,14 @@ from jmodelica.jmi import compile_jmu
 from jmodelica.core import unzip_unit, get_unit_name, get_temp_location
 from jmodelica import xmlparser
 
+def convert_casadi_der_name(name):
+    n = name.split('der_')[1]
+    qnames = n.split('.')
+    n = ''
+    for i in range(len(qnames)-1):
+        n = n + qnames[i] + '.'
+    return n + 'der(' + qnames[len(qnames)-1] + ')' 
+
 def compile_casadi(class_name, file_name=[], compiler='auto', target='ipopt', 
     compiler_options={}, compile_to='.', compiler_log_level='warning'):
     """
@@ -223,15 +231,25 @@ class CasadiModel(object):
             XMLException if variable was not found.
         """
         return self.xmldoc.get_variability(variablename)
-    
+
     def get_pd_val(self):
+        # Get the dependent variables
+        d = casadi.var(self.ocp.d_)
+        
+        # Substitute for the expressions
+        d_exp = casadi.substitute(casadi.SXMatrix(d),casadi.SXMatrix(self.ocp.explicit_var_),casadi.SXMatrix(self.ocp.explicit_fcn_))
+        
+        # Evaluate the expression to get the numerical values
+        pFunc = casadi.SXFunction([[]],[d_exp])
+        pFunc.init()
+        pFunc.evaluate()
+        res = pFunc.output()
+      
         pd = []
-        for p in self.var.d:
-            pFunc = casadi.SXFunction([[]],[[p.getBindingEquation()]])
-            pFunc.init()
-            pFunc.evaluate()
-            
-            pd += [(p.getName(),p.getValueReference(),N.array([pFunc.output()]).flatten())]
+        i=0
+        for p in self.ocp.d_:
+            pd += [(p.getName(),p.getValueReference(),N.array([res[i]]))]
+            i = i+1
         return pd
     
     def get_w(self):
@@ -424,48 +442,61 @@ class CasadiModel(object):
         # Obtain the symbolic representation of the OCP
         self.ocp = self.parser.parse()
 
-        # Sort the variables according to type
-        self.var = casadi.OCPVariables(self.ocp.variables)
-        
+        # Scale the variables
+        # Joel: Consider using this
+        #self.ocp.scaleVariables()
+
+        # Eliminate the dependent variables
+        self.ocp.eliminateDependent()
+
+        # Scale the equations
+        # Joel: Consider using this
+        #self.ocp.scaleEquations()
+
+        # Create functions the DAE right hand side
+        # Joel: Use this if making collocation using MX graphs
+        #self.createFunctions(True, False, True)
+
         # Make sure the variables appear in value reference order
-        var_dict = dict((repr(v),v) for v in self.var.x)            
+        var_dict = dict((repr(v),v) for v in self.ocp.x_)
         name_dict = dict((x[0],x[1]) for x in self.xmldoc.get_x_variable_names(include_alias = False))        
         i = 0;
+        
         for vr in sorted(name_dict.keys()):
-            self.var.x[i] = var_dict[name_dict[vr]]
+            self.ocp.x_[i] = var_dict[name_dict[vr]]
             i = i + 1
 
-        var_dict = dict((repr(v),v) for v in self.var.u)            
+        var_dict = dict((repr(v),v) for v in self.ocp.u_)            
         name_dict = dict((x[0],x[1]) for x in self.xmldoc.get_u_variable_names(include_alias = False))        
         i = 0;
         for vr in sorted(name_dict.keys()):
-            self.var.u[i] = var_dict[name_dict[vr]]
+            self.ocp.u_[i] = var_dict[name_dict[vr]]
             i = i + 1
 
-        var_dict = dict((repr(v),v) for v in self.var.z)            
+        var_dict = dict((repr(v),v) for v in self.ocp.z_)            
         name_dict = dict((x[0],x[1]) for x in self.xmldoc.get_w_variable_names(include_alias = False))        
         i = 0;
         for vr in sorted(name_dict.keys()):
-            self.var.z[i] = var_dict[name_dict[vr]]
+            self.ocp.z_[i] = var_dict[name_dict[vr]]
             i = i + 1
         
-        var_dict = dict((repr(v),v) for v in self.var.p)            
+        var_dict = dict((repr(v),v) for v in self.ocp.p_)            
         name_dict = dict((x[0],x[1]) for x in self.xmldoc.get_p_opt_variable_names(include_alias = False))        
         i = 0;
 
         for vr in sorted(name_dict.keys()):
             if name_dict[vr] == "finalTime":
                 continue
-            self.var.p[i] = var_dict[name_dict[vr]]
+            self.ocp.p_[i] = var_dict[name_dict[vr]]
             i = i + 1
         
         # Get the variables
-        self.dx = casadi.der(self.var.x)
-        self.x = casadi.sx(self.var.x)
-        self.u = casadi.sx(self.var.u)
-        self.w = casadi.sx(self.var.z)
-        self.t = self.var.t.sx()
-        self.p = casadi.sx(self.var.p)
+        self.dx = casadi.der(self.ocp.x_)
+        self.x = casadi.var(self.ocp.x_)
+        self.u = casadi.var(self.ocp.u_)
+        self.w = casadi.var(self.ocp.z_)
+        self.t = self.ocp.t_
+        self.p = casadi.var(self.ocp.p_)
 
         # Build maps mapping value references to indices in the
         # variable vectors of casadi
@@ -477,7 +508,7 @@ class CasadiModel(object):
 
         i = 0;
         for v in self.dx:
-            self.dx_vr_map[self.xmldoc.get_value_reference(str(v))] = i
+            self.dx_vr_map[self.xmldoc.get_value_reference(convert_casadi_der_name(str(v)))] = i
             i = i + 1
 
         i = 0;
@@ -508,12 +539,11 @@ class CasadiModel(object):
         self.ocp_inputs += [self.t]
         
         # The DAE function
-        self.dae_F = casadi.SXFunction([self.ocp_inputs],[self.ocp.dae])
-
+        self.dae_F = casadi.SXFunction([self.ocp_inputs],[self.ocp.implicit_fcn_])
         self.dae_F.init()
         
         # The initial equations
-        self.init_F0 = casadi.SXFunction([self.ocp_inputs],[self.ocp.initeq])
+        self.init_F0 = casadi.SXFunction([self.ocp_inputs],[self.ocp.initial_eq_])
         
         # The Mayer cost function
         if len(self.ocp.mterm)>0:
@@ -521,9 +551,9 @@ class CasadiModel(object):
             self.ocp_mterm_inputs = []
             #self.ocp_mterm_inputs += list(self.p)
             self.ocp_mterm_inputs += list(self.dx)
-            self.ocp_mterm_inputs += [x.atTime(self.ocp.tf,True) for x in self.var.x]
-            self.ocp_mterm_inputs += [x.atTime(self.ocp.tf,True) for x in self.var.u]
-            self.ocp_mterm_inputs += [x.atTime(self.ocp.tf,True) for x in self.var.z]
+            self.ocp_mterm_inputs += [x.atTime(self.ocp.tf,True) for x in self.ocp.x_]
+            self.ocp_mterm_inputs += [x.atTime(self.ocp.tf,True) for x in self.ocp.u_]
+            self.ocp_mterm_inputs += [x.atTime(self.ocp.tf,True) for x in self.ocp.z_]
             self.ocp_mterm_inputs += [self.t]
             self.opt_J = casadi.SXFunction([self.ocp_mterm_inputs],[[self.ocp.mterm[0]]])
         else:
@@ -546,6 +576,7 @@ class CasadiModel(object):
         self.w_sf = N.ones(self.n_w)
         self.p_sf = N.ones(self.n_p)
         
+        # Joel: you can remove this and just use the scaleVariables function above, which does the same thing - scaling using the nominal attribute
         if enable_scaling:
             # Scale model
             # Get nominal values for scaling
@@ -578,7 +609,7 @@ class CasadiModel(object):
             z_scaled += list(self.x_scaled)
             z_scaled += list(self.u_scaled)
             z_scaled += list(self.w_scaled)
-            z_scaled += [self.var.t.sx()]
+            z_scaled += [self.var.t]
 
             # Substitue scaled variables
             self.dae_F = list(self.dae_F.eval([z_scaled])[0])
