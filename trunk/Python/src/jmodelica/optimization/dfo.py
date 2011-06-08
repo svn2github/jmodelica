@@ -633,7 +633,7 @@ def seqbar(f,xstart,lb=None,ub=None,mu=0.1,plot=False,x_tol=1e-3,
 			if lb is None:
 				b = - N.sum(N.log(ub-x))
 			elif ub is None:
-				b = - N.sum(N.log(x-b))
+				b = - N.sum(N.log(x-lb))
 			else:
 				b = - N.sum(N.log(ub-x)) - N.sum(N.log(x-lb))
 			out = f(x) + mu*b
