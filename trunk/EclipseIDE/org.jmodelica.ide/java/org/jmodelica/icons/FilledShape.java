@@ -1,9 +1,9 @@
-package org.jmodelica.icons.mls;
+package org.jmodelica.icons;
 
 
-import org.jmodelica.icons.mls.Color;
-import org.jmodelica.icons.mls.Types.FillPattern;
-import org.jmodelica.icons.mls.Types.LinePattern;
+import org.jmodelica.icons.Color;
+import org.jmodelica.icons.Types.FillPattern;
+import org.jmodelica.icons.Types.LinePattern;
 
 public abstract class FilledShape extends GraphicItem {
 	

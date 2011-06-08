@@ -1,6 +1,5 @@
 package org.jmodelica.icons;
 
-import org.jmodelica.icons.mls.Placement;
 
 public class Component {
 	private final Icon icon;

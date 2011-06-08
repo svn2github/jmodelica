@@ -1,6 +1,5 @@
-package org.jmodelica.icons;
+package org.jmodelica.icons.drawing;
 
-import org.jmodelica.icons.mls.FilledShape;
 
 
 public class IconConstants {

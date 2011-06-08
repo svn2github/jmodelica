@@ -1,9 +1,9 @@
 import org.jmodelica.icons.Icon;
 import org.jmodelica.icons.Component;
 import org.jmodelica.icons.exceptions.FailedConstructionException;
-import org.jmodelica.icons.IconConstants.Context;
+import org.jmodelica.icons.drawing.IconConstants.Context;
 import org.jmodelica.ide.ui.ImageLoader;
-import org.jmodelica.icons.AWTIconDrawer;
+import org.jmodelica.icons.drawing.AWTIconDrawer;
 
 aspect ModelicaIcons
 {

@@ -1,4 +1,4 @@
-package org.jmodelica.icons.mls;
+package org.jmodelica.icons;
 
 public abstract class GraphicItem {
 	

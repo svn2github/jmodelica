@@ -1,5 +1,5 @@
 
-package org.jmodelica.icons.mls;
+package org.jmodelica.icons;
 
 
 public class Rectangle extends FilledRectShape {

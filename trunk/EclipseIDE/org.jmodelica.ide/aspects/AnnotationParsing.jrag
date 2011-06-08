@@ -1,28 +1,28 @@
-import org.jmodelica.icons.mls.CoordinateSystem;
-import org.jmodelica.icons.mls.Placement;
-import org.jmodelica.icons.mls.Transformation;
-import org.jmodelica.icons.mls.Types;
-import org.jmodelica.icons.mls.Types.LinePattern;
-import org.jmodelica.icons.mls.Types.FillPattern;
-import org.jmodelica.icons.mls.Types.BorderPattern;
-import org.jmodelica.icons.mls.Types.Smooth;
-import org.jmodelica.icons.mls.Types.Arrow;
-import org.jmodelica.icons.mls.Types.TextStyle;
-import org.jmodelica.icons.mls.Types.TextAlignment;
-import org.jmodelica.icons.IconConstants.Context;
-import org.jmodelica.icons.mls.Layer;
-import org.jmodelica.icons.mls.Extent;
-import org.jmodelica.icons.mls.FilledRectShape;
-import org.jmodelica.icons.mls.FilledShape;
-import org.jmodelica.icons.mls.GraphicItem;
-import org.jmodelica.icons.mls.Ellipse;
-import org.jmodelica.icons.mls.Line;
-import org.jmodelica.icons.mls.Point;
-import org.jmodelica.icons.mls.Text;
-import org.jmodelica.icons.mls.Rectangle;
-import org.jmodelica.icons.mls.Polygon;
-import org.jmodelica.icons.mls.Color;
-import org.jmodelica.icons.mls.Bitmap;
+import org.jmodelica.icons.CoordinateSystem;
+import org.jmodelica.icons.Placement;
+import org.jmodelica.icons.Transformation;
+import org.jmodelica.icons.Types;
+import org.jmodelica.icons.Types.LinePattern;
+import org.jmodelica.icons.Types.FillPattern;
+import org.jmodelica.icons.Types.BorderPattern;
+import org.jmodelica.icons.Types.Smooth;
+import org.jmodelica.icons.Types.Arrow;
+import org.jmodelica.icons.Types.TextStyle;
+import org.jmodelica.icons.Types.TextAlignment;
+import org.jmodelica.icons.drawing.IconConstants.Context;
+import org.jmodelica.icons.Layer;
+import org.jmodelica.icons.Extent;
+import org.jmodelica.icons.FilledRectShape;
+import org.jmodelica.icons.FilledShape;
+import org.jmodelica.icons.GraphicItem;
+import org.jmodelica.icons.Ellipse;
+import org.jmodelica.icons.Line;
+import org.jmodelica.icons.Point;
+import org.jmodelica.icons.Text;
+import org.jmodelica.icons.Rectangle;
+import org.jmodelica.icons.Polygon;
+import org.jmodelica.icons.Color;
+import org.jmodelica.icons.Bitmap;
 import org.jmodelica.icons.exceptions.FailedConstructionException;
 import org.jmodelica.icons.exceptions.NotEnoughParametersException;
 import java.lang.IllegalArgumentException;
@@ -31,6 +31,11 @@ import java.lang.IllegalArgumentException;
 aspect AnnotationParsing {
 	
 	public class AnnotationNode {
+		/**
+		* Creates and return the icon layer for this AnnotationNode.
+		* @param path direcory path for the BaseNode creating icon layer for 
+		* @return icon layer if annotationNode exist else a NO_LAYER 
+		*/
 		public Layer createIconLayer(String path) {
 			Layer layer;
 			if (forPath("Icon").exists()) {
@@ -43,7 +48,11 @@ aspect AnnotationParsing {
 			}
 			return layer;
 		}
-	
+		/**
+		* Creates and return the diagram layer for this AnnotationNode.
+		* @param path direcory path for the BaseNode creating diagram layer for 
+		* @return diagram layer if annotationNode exist else a NO_LAYER 
+		*/
 		public Layer createDiagramLayer(String path) {
 			Layer layer;
 			if (forPath("Diagram").exists()) {
@@ -56,6 +65,13 @@ aspect AnnotationParsing {
 			}
 			return layer;
 		}
+		/**
+		* Creates and return placement for this AnnotationNode.
+		* @param context for which layer transformation is set   
+		* @return placement
+		* @throws NotEnoughParametersException if too few parameters are provided for palcement.
+		* @throws NotEnoughParametersException if too few parameters are provided for one of its primitives. 
+		*/
 		public Placement createPlacement(Context context) 
 				throws FailedConstructionException, NotEnoughParametersException {
 			AnnotationNode placementAnnotation = forPath("Placement");

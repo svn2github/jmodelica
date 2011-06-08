@@ -1,4 +1,4 @@
-package org.jmodelica.icons;
+package org.jmodelica.icons.drawing;
 
 import java.awt.BasicStroke;
 import java.awt.GradientPaint;
@@ -20,19 +20,19 @@ import java.util.ArrayList;
 import javax.imageio.ImageIO;
 
 import org.eclipse.core.runtime.FileLocator;
+import org.jmodelica.icons.Color;
+import org.jmodelica.icons.Extent;
+import org.jmodelica.icons.FilledRectShape;
+import org.jmodelica.icons.FilledShape;
+import org.jmodelica.icons.Line;
+import org.jmodelica.icons.Point;
+import org.jmodelica.icons.Polygon;
+import org.jmodelica.icons.Rectangle;
+import org.jmodelica.icons.Text;
+import org.jmodelica.icons.Types;
+import org.jmodelica.icons.Types.FillPattern;
+import org.jmodelica.icons.Types.LinePattern;
 import org.jmodelica.icons.exceptions.FailedConstructionException;
-import org.jmodelica.icons.mls.Color;
-import org.jmodelica.icons.mls.Extent;
-import org.jmodelica.icons.mls.FilledRectShape;
-import org.jmodelica.icons.mls.FilledShape;
-import org.jmodelica.icons.mls.Line;
-import org.jmodelica.icons.mls.Point;
-import org.jmodelica.icons.mls.Polygon;
-import org.jmodelica.icons.mls.Rectangle;
-import org.jmodelica.icons.mls.Text;
-import org.jmodelica.icons.mls.Types;
-import org.jmodelica.icons.mls.Types.FillPattern;
-import org.jmodelica.icons.mls.Types.LinePattern;
 import org.jmodelica.ide.Activator;
 //import org.jmodelica.icons.enums.LinePattern;
 
