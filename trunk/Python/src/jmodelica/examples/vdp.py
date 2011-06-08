@@ -37,9 +37,6 @@ def run_demo(with_plots=True):
     jmu_name = compile_jmu("VDP_pack.VDP_Opt", curr_dir+"/files/VDP.mop")
     vdp = JMUModel(jmu_name)
     
-    opts=vdp.optimize_options()
-    opts['IPOPT_options']['linear_solver'] = 'ma57'
-
     res = vdp.optimize()
 
     # Extract variable profiles
