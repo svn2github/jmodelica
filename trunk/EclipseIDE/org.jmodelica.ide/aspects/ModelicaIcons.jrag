@@ -2,10 +2,7 @@ import org.jmodelica.icons.Icon;
 import org.jmodelica.icons.Component;
 import org.jmodelica.icons.exceptions.FailedConstructionException;
 import org.jmodelica.icons.IconConstants.Context;
-import org.jmodelica.icons.test.IconStatus;
-import org.jmodelica.icons.test.CreateIconJob;
 import org.jmodelica.ide.ui.ImageLoader;
-import java.awt.image.BufferedImage;
 import org.jmodelica.icons.AWTIconDrawer;
 
 aspect ModelicaIcons
