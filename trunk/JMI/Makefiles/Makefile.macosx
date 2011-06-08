@@ -24,6 +24,9 @@
 #   JModelica compilers. The following arguments are supported:
 #   
 #   FILE_NAME             (mandatory) The name of the C file.
+#   PLATFORM              (mandatory) The platform we are compiling for, 
+#                         currently only used to decide where to place binary.
+#                         Should be linux32 or linux64.
 #   JMODELICA_HOME        (mandatory) The directory where JModelica has been built,
 #                         or equivalently, the directory of a binary JModelica
 #                         distribution.
@@ -61,6 +64,9 @@
 # Name of shared library
 FILE_NAME = 
 
+# Platform name - controls what sub-directory the binary is placed in
+PLATFORM = 
+
 # JModelica home
 JMODELICA_HOME = 
 
@@ -88,7 +94,10 @@ EXTERNAL_INCLUDES = $(EXT_INC_DIRS:%=-I%)
 # Build with algorithms (requires IPOPT)
 BUILD_WITH_ALGORITHMS = false
 
-SHARED = $(FILE_NAME).dylib
+# Directory to place binary in
+BINARY_DIR = binaries/$(PLATFORM)
+
+SHARED = $(BINARY_DIR)/$(FILE_NAME).dylib
 
 # Object files to be included in the shared library
 OBJS = $(FILE_NAME).o
@@ -135,10 +144,12 @@ MAKEFILE = $(lastword $(MAKEFILE_LIST))
 
 ifeq ($(JMI_AD),JMI_AD_CPPAD)
 model: $(OBJS)
+	mkdir -p $(BINARY_DIR)
 	$(CXX) $(SHARED_LDFLAGS) $(CXXLINKFLAGS) $(CXXFLAGS) -o $(SHARED) $(OBJS) $(LIBS_CPPAD)
 	$(RM) $(OBJS)
 else
 model: $(OBJS)
+	mkdir -p $(BINARY_DIR)
 	$(CC) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) $(LIBS_NOCPPAD) $(EXTERNAL_DIRS) $(EXTERNAL_LIBS)
 	$(RM) $(OBJS)
 endif
@@ -150,6 +161,7 @@ model_fmume:
 	$(MAKE) -f $(MAKEFILE) JMI_AD=JMI_AD_NONE model_fmume_
 
 model_fmume_: $(OBJS)
+	mkdir -p $(BINARY_DIR)
 	$(CC) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) $(LIBS_FMUME) $(EXTERNAL_DIRS) $(EXTERNAL_LIBS)
 	$(RM) $(OBJS)
 
@@ -157,6 +169,7 @@ model_fmucs:
 	$(MAKE) -f $(MAKEFILE) JMI_AD=JMI_AD_NONE model_fmucs_
 
 model_fmucs_: $(OBJS)
+	mkdir -p $(BINARY_DIR)
 	$(CC) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) $(LIBS_FMICS) $(EXTERNAL_DIRS) $(EXTERNAL_LIBS)
 	$(RM) $(OBJS)
 
@@ -166,6 +179,7 @@ algorithms: $(OBJS)
 ifeq "$(wildcard .jmi_objs )" ""
 	mkdir .jmi_objs
 endif
+	mkdir -p $(BINARY_DIR)
 	cd .jmi_objs && $(AR) -x $(JMODELICA_HOME)/lib/libjmi_algorithm_cppad.a   
 	$(CXX) $(SHARED_LDFLAGS) $(CXXLINKFLAGS) $(CXXFLAGS) -o $(SHARED) $(OBJS) ./.jmi_objs/*.o $(LIBS_CPPAD)
 	$(RM) .jmi_objs/*
@@ -178,6 +192,7 @@ ipopt: $(OBJS)
 ifeq "$(wildcard .jmi_objs )" ""
 	mkdir .jmi_objs
 endif
+	mkdir -p $(BINARY_DIR)
 	cd .jmi_objs && $(AR) -x $(JMODELICA_HOME)/lib/libjmi_algorithm_cppad.a  && $(AR) -x $(JMODELICA_HOME)/lib/libjmi_solver_cppad.a  
 	$(CXX) $(SHARED_LDFLAGS) $(CXXLINKFLAGS) $(CXXFLAGS) -o $(SHARED) $(OBJS) ./.jmi_objs/*.o $(LIBS_IPOPT)
 	$(RM) .jmi_objs/*
@@ -185,14 +200,14 @@ endif
 	$(RM) $(OBJS)
 
 # Compile
-.cpp.o:
+%.o: sources/%.cpp
 ifeq ($(JMI_AD),JMI_AD_CPPAD)
 	$(CXX) $(CXXFLAGS) $(INCL_CPPAD) -c -o $@ $<
 else
 	$(CXX) $(CXXFLAGS) $(INCL_NOCPPAD) -c -o $@ $<
 endif
 
-.c.o:
+%.o: sources/%.c
 ifeq ($(JMI_AD),JMI_AD_CPPAD)
 	$(CXX) $(CXXFLAGS) $(INCL_CPPAD) -c -o $@ $<
 else

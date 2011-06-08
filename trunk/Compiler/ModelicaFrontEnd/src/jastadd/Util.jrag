@@ -963,20 +963,19 @@ aspect FlatNames {
     
     syn lazy String FQName.nameUnderscore() {
         StringBuilder str = new StringBuilder();
-        for (int i=0;i<getNumFQNamePart();i++) {
-            str.append(getFQNamePart(i).getName());
-            if (i<getNumFQNamePart()-1 || isScalarized()) {
-                if (getFQNamePart(i).hasFArraySubscripts()) {
-                    for (FSubscript fs : 
-                        getFQNamePart(i).getFArraySubscripts().getFSubscripts()) {
-                        str.append("_");
-                        str.append(fs.prettyPrint(""));
-                    }
-                }
-                if (i<getNumFQNamePart()-1) {
+        int i = 0;
+        int last = getNumFQNamePart() - 1;
+        String sep = "";
+        for (FQNamePart part : getFQNameParts()) {
+        	str.append(sep);
+        	sep = "_";
+        	str.append(part.getName());
+        	if ((i < last || isScalarized()) && part.hasFArraySubscripts()) {
+        		for (FSubscript fs : part.getFArraySubscripts().getFSubscripts()) {
                     str.append("_");
-                }
-            }
+                    str.append(fs.prettyPrint(""));
+        		}
+        	}
         }
         return str.toString();
     }
@@ -995,6 +994,10 @@ aspect FlatNames {
     syn String FIdDecl.nameUnderscore() = getFQName().nameUnderscore();
 
     syn String FClass.nameUnderscore() = getFQName().nameUnderscore();
+    
+    public static String FClass.convertClassNameToUnderscore(String name) {
+    	return name.replace(".", "_");
+    }
     
     syn String AbstractFVariable.nameUnderscore() = null;
     eq FVariable.nameUnderscore()           = getFQName().nameUnderscore();

@@ -19,6 +19,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -146,6 +147,9 @@ public class ModelicaCompiler {
 	protected static String jmodelicaHome = System.getenv("JMODELICA_HOME");
 	
 	protected File tempDir = null;
+	protected File outDir = null;
+	protected File sourceDir = null;
+	protected File resourceDir = null;
 	
 	public ModelicaCompiler(OptionRegistry options, String xmlTpl, String xmlValuesTpl, String cTemplatefile) {
 		staticBlocks();
@@ -219,6 +223,47 @@ public class ModelicaCompiler {
 	 */
 	public void setTempFileDir(File temp) {
 		tempDir = temp;
+	}
+	
+	public void setOutDir(File out) {
+		outDir = out;
+		sourceDir = new File(outDir, "sources");
+		resourceDir = new File(outDir, "resources");
+		sourceDir.mkdirs();
+		resourceDir.mkdir();
+	}
+	
+	public void setSubOutDir(String out) {
+		setOutDir(new File(tempDir, out));
+	}
+	
+	public void setRandomOutDir() {
+		try {
+			File out = File.createTempFile("jmc", "out", tempDir);
+			out.delete();
+			setOutDir(out);
+		} catch (IOException e) {
+			// TODO: this should result in an error message about not being able to write to output dir
+			e.printStackTrace();
+		}
+	}
+	
+	public void deleteOutDir() {
+		if (outDir != null)
+			recursiveDelete(outDir);
+		outDir = null;
+		sourceDir = null;
+		resourceDir = null;
+	}
+	
+	protected void recursiveDelete(File dir) {
+		for (File f : dir.listFiles()) {
+			if (f.isDirectory())
+				recursiveDelete(f);
+			else
+				f.delete();
+		}
+		dir.delete();
 	}
 	
 	protected static File getTemplatesDir() {
@@ -703,17 +748,22 @@ public class ModelicaCompiler {
 	 */
 	private void compileUnit(String className, String fileName[], String target, String compileTo, String unitType) 
 		throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, beaver.Parser.Exception {
+		// Set output dir
+		if (outDir == null)
+			setRandomOutDir();
+		
 		// compile mo-file + generate code
 		FClass fc = compileModel(fileName, className);
 		
 		// compile c code
 		hookCheckAbort();
-		String cFileName = className.replace(".", "_");
-		getCCompiler().compileCCode(cFileName, target, tempDir, fc.externalLibraries(), fc.externalLibraryDirectories(), fc.externalIncludeDirectories());
+		String cFileName = FClass.convertClassNameToUnderscore(className);
+		getCCompiler().compileCCode(cFileName, target, outDir, fc.externalLibraries(), fc.externalLibraryDirectories(), fc.externalIncludeDirectories());
 		hookCodeCompiled();
 		
 		// package JMU
-		this.packUnit(className, compileTo, unitType);		
+		packUnit(className, compileTo, unitType);
+		deleteOutDir();
 	}
 	
 	/**
@@ -723,87 +773,86 @@ public class ModelicaCompiler {
 	 * @param path Location on file system where the packed file should be saved (created if does not exist).
 	 * @param unitType "JMU" or "FMU".
 	 */
-	private void packUnit(String className, String path, String unitType) {
-		String filesep = File.separator;
+	protected void packUnit(String className, String path, String unitType) {
 		File dirPath = new File(path);
-		if (!dirPath.isDirectory()) {
+		if (!dirPath.isDirectory()) 
 			dirPath.mkdirs();
-		}
 		
-		String mName = className;
-		String mMangledName = className.replace(".", "_");
-		
-		// Look for operating system and architecture
-		String platform = getPlatform();
-		String suffix;
-		if (platform.startsWith("win")) {
-			suffix = ".dll";
-		} else if (platform.startsWith("darwin")) {
-			suffix = ".dylib";
-		} else {
-			suffix = ".so";
-		}
-		
-		// original files
-		String[] fileNames = new String[] {
-			mMangledName + ".xml",
-			mMangledName + ".c",
-			mName + ".mof",
-			mName + "_transformed.mof",
-			mMangledName + "_values.xml",
-			mMangledName + suffix
-		};
-		
-		// file destinations
-		String[] zipEntries = new String[] {
-			"modelDescription.xml",
-			"sources" + filesep + mMangledName + ".c",
-			"resources" + filesep + mName + ".mof",
-			"resources" + filesep + mName + "_transformed.mof",
-			"resources" + filesep + mMangledName + "_values.xml",
-			"binaries" + filesep + platform + filesep + mMangledName + suffix
-		};
-		
-		File[] files = new File[fileNames.length];
-		for (int i = 0; i < files.length; i++)
-			files[i] = new File(tempDir, fileNames[i]);
+		String mMangledName = FClass.convertClassNameToUnderscore(className);
 		
 		// Create the new archive
-		int BUFFER = 2048;
+		int BUFFER_SIZE = 2048;
 		try {
 			hookCheckAbort();
 			File unitFile = new File(dirPath, mMangledName + "." + getUnitSuffix(unitType));
-			BufferedInputStream origin = null;
 			FileOutputStream dest = new FileOutputStream(unitFile);
 			ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(dest));
 			out.setMethod(ZipOutputStream.DEFLATED);
-			
-			byte data[] = new byte[BUFFER];
-			
-			for (int i = 0; i < files.length; i++) {
-				FileInputStream fi = new FileInputStream(files[i]);
-				origin = new BufferedInputStream(fi, BUFFER);
-				
-				ZipEntry entry = new ZipEntry(zipEntries[i]);
-				out.putNextEntry(entry);
-				
-				int count;
-	            while ((count = origin.read(data, 0, BUFFER)) != -1) {
-	               out.write(data, 0, count);
-	            }
-	            origin.close();
-			}
-			
+			zipDir(outDir, out);
 			out.close();
 			hookFmuPacked(unitFile.getAbsolutePath());
 		} catch(CompilationAbortedException e) {
+			deleteOutDir();
+			throw e;
 		} catch(Exception e) {
 			// TODO: Make sure this is logged or reported properly
 		}
 		
 		// remove files
-		for (int i = 0; i < files.length; i++) 
-			files[i].delete();
+		deleteOutDir();
+	}
+
+	private static final int ZIP_BUFFER_SIZE = 2048;
+
+	/**
+	 * Write all files in a directory and its subdirectories to a zip stream.
+	 * 
+	 * @param dir     directory to zip
+	 * @param out     zip stream to write to
+	 */
+	protected void zipDir(File dir, ZipOutputStream out) {
+		zipDir(dir, out, null);
+	}
+
+	/**
+	 * Write all files in a directory and its subdirectories to a zip stream.
+	 * 
+	 * @param dir     directory to zip
+	 * @param out     zip stream to write to
+	 * @param zipDir  directory within the zip file to write to, or <code>null</code> for the root
+	 */
+	protected void zipDir(File dir, ZipOutputStream out, File zipDir) {
+		zipDir(dir, out, zipDir, new byte[ZIP_BUFFER_SIZE]);
+	}
+	
+	/**
+	 * Write all files in a directory and its subdirectories to a zip stream.
+	 * 
+	 * @param dir     directory to zip
+	 * @param out     zip stream to write to
+	 * @param zipDir  directory within the zip file to write to, or <code>null</code> for the root
+	 * @param buffer  buffer to use when writing files
+	 */
+	private void zipDir(File dir, ZipOutputStream out, File zipDir, byte[] buffer) {
+		for (File f : dir.listFiles()) {
+			File fz = new File(zipDir, f.getName());
+			if (f.isDirectory()) {
+				zipDir(f, out, fz, buffer);
+			} else {
+				try {
+					FileInputStream in = new FileInputStream(f);
+					out.putNextEntry(new ZipEntry(fz.getPath()));
+					for (int n; (n = in.read(buffer, 0, buffer.length)) != -1; ) 
+					   out.write(buffer, 0, n);
+					in.close();
+				} catch (FileNotFoundException e) {
+					// Should only occur in weird cases - ignore and skip this file
+				} catch (IOException e) {
+					// TODO: this should result in an error message about failing to zip file
+					e.printStackTrace();
+				}
+	        }
+		}
 	}
 	
 	/**
@@ -1111,7 +1160,7 @@ public class ModelicaCompiler {
 		hookCheckAbort();
 		noteUsedMemory();
 		
-		File flatFile = new File(tempDir, icl.qualifiedName() + ".mof");
+		File flatFile = new File(resourceDir, icl.qualifiedName() + ".mof");
 		FClass fc = createFlatTree(icl, flatFile.getPath());
 		
 		log.info("Flattening model...");
@@ -1142,7 +1191,7 @@ public class ModelicaCompiler {
 		hookCheckAbort();
 				
 		log.debug("Creating transformed .mof file...");
-		out = new PrintStream(new File(tempDir, icl.qualifiedName() + "_transformed.mof"));
+		out = new PrintStream(new File(resourceDir, icl.qualifiedName() + "_transformed.mof"));
 	   	fc.prettyPrint_MC(out, "");
 	   	out.close();
 	   	log.debug("... transformed .mof file created.");
@@ -1258,15 +1307,15 @@ public class ModelicaCompiler {
 		String name = fc.nameUnderscore();
 		
 		XMLGenerator xmlgenerator = createXMLGenerator(fc);
-		String output = new File(tempDir, name + ".xml").getPath();
+		String output = new File(outDir, "modelDescription.xml").getPath();
 		xmlgenerator.generate(getXmlTpl(fc), output);
 
 		XMLValueGenerator valuegenerator = createXMLValueGenerator(fc);
-		output = new File(tempDir, name + "_values.xml").getPath();
+		output = new File(resourceDir, name + "_values.xml").getPath();
 		valuegenerator.generate(getXmlValuesTpl(fc), output);
 		
 		CGenerator cgenerator = createCGenerator(fc);
-		output = new File(tempDir, name + ".c").getPath();
+		output = new File(sourceDir, name + ".c").getPath();
 		cgenerator.generate(getCTemplatefile(fc), output);
 
 		hookCodeGenerated();
@@ -1882,8 +1931,8 @@ public class GCCcompilerDelegator implements CCompilerDelegator {
 			HashSet<String> ext_libs, HashSet<String> ext_lib_dirs, HashSet<String> ext_incl_dirs) {
 		String filesep = File.separator;
 		String jmodelicaHome = ModelicaCompiler.getJModelicaHome();
-		// make settings
 		String makefile = jmodelicaHome + filesep + "Makefiles" + filesep + "MakeFile";
+		String platformDir = ModelicaCompiler.getPlatform();
 		
 		// make arguments
 		String file_name = "FILE_NAME=" + fileName;
@@ -1891,8 +1940,7 @@ public class GCCcompilerDelegator implements CCompilerDelegator {
 		String cppad_home = "CPPAD_HOME=" + System.getenv("CPPAD_HOME");
 		String ipopt_home = "IPOPT_HOME=" + System.getenv("IPOPT_HOME");
 		String sundials_home = "SUNDIALS_HOME=" + System.getenv("SUNDIALS_HOME");
-		
-		String platformDir = ModelicaCompiler.getPlatform();
+		String platform = "PLATFORM=" + platformDir;
 		
 		// external library directories
 		StringBuilder extLibDirs_sb = new StringBuilder();
@@ -1905,7 +1953,7 @@ public class GCCcompilerDelegator implements CCompilerDelegator {
 			}
 			extLibDirs_sb.append(" ");
 		}
-		String extLibDirs = "";
+		String extLibDirs = null;
 		if (ext_lib_dirs.size()!=0) {
 			extLibDirs = "EXT_LIB_DIRS=\"" + extLibDirs_sb.toString().trim() + "\"";
 		}
@@ -1916,7 +1964,7 @@ public class GCCcompilerDelegator implements CCompilerDelegator {
 			extLibs_sb.append(lib+" ");
 		}
 
-		String extLibs = "";
+		String extLibs = null;
 		if (ext_libs.size()!=0) {		
 			extLibs = "EXT_LIBS=\"" + extLibs_sb.toString().trim() + "\"";
 		}
@@ -1926,58 +1974,29 @@ public class GCCcompilerDelegator implements CCompilerDelegator {
 		for (String libDir:ext_incl_dirs) {
 			extInclDirs_sb.append(libDir + " ");
 		}
-		String extInclDirs = "";
+		String extInclDirs = null;
 		if (ext_incl_dirs.size()!=0) {
 			extInclDirs = "EXT_INC_DIRS=\"" + extInclDirs_sb.toString().trim() + "\"";
 		}
-
-		// Generate make call
-		String[] cmd;
-		if (platformDir.startsWith("win")) {
-			cmd = new String[14];
-			
-			String mingw_bin = System.getenv("MINGW_HOME") + filesep + "bin";
-			String make = mingw_bin + filesep + "mingw32-make";
-			String compiler = "CXX=" + mingw_bin + filesep + "g++";
-			String ar = "AR=" + mingw_bin + filesep + "ar";
-			
-			cmd[0] = make;
-			cmd[1] = "-f";
-			cmd[2] = makefile;
-			cmd[3] = compiler;
-			cmd[4] = ar;
-			cmd[5] = target;
-			cmd[6] = file_name;
-			cmd[7] = jmodelica_home;
-			cmd[8] = cppad_home;
-			cmd[9] = ipopt_home;
-			cmd[10] = sundials_home;
-			cmd[11] = extLibDirs;
-			cmd[12] = extLibs;
-			cmd[13] = extInclDirs;
-			
-		} else {
-			cmd = new String[12];
-			
-			String make = "make";
-			
-			cmd[0] = make;
-			cmd[1] = "-f";
-			cmd[2] = makefile;
-			cmd[3] = target;
-			cmd[4] = file_name;
-			cmd[5] = jmodelica_home;
-			cmd[6] = cppad_home;
-			cmd[7] = ipopt_home;
-			cmd[8] = sundials_home;
-			cmd[9] = extLibDirs;
-			cmd[10] = extLibs;
-			cmd[11] = extInclDirs;
-		}
 		
-		ArrayList<String> cmdList = new ArrayList<String>();
+		// Generate make call
+		String make = "make";
+		String compiler = null;
+		String ar = null;
+		if (platformDir.startsWith("win")) {
+			String mingw_bin = System.getenv("MINGW_HOME") + filesep + "bin";
+			make = mingw_bin + filesep + "mingw32-make";
+			compiler = "CXX=" + mingw_bin + filesep + "g++";
+			ar = "AR=" + mingw_bin + filesep + "ar";
+		}
+			
+		String[] cmd = new String[] {
+			make, "-f", makefile, compiler, ar, target, file_name, platform, jmodelica_home, 
+			cppad_home, ipopt_home, sundials_home, extLibDirs, extLibs, extInclDirs 
+		};
+		ArrayList<String> cmdList = new ArrayList<String>(cmd.length);
 		for (String c : cmd)
-			if (!c.equals(""))
+			if (c != null)
 				cmdList.add(c);
 		cmd = cmdList.toArray(new String[cmdList.size()]);
 	
