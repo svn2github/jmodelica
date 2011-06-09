@@ -33,7 +33,7 @@ aspect ModelicaIcons
 		Layer layer = Layer.NO_LAYER;
 		AnnotationNode annotation = annotation();
 		if (annotation.exists()) {
-			layer = annotation.createIconLayer(dirName());
+			layer = annotation.createIconLayer();
 		}
 		icon = new Icon(qualifiedName(), layer, Context.ICON); 
 		icon = addSuperClasses(icon);
@@ -47,7 +47,7 @@ aspect ModelicaIcons
 		Layer layer = Layer.NO_LAYER;
 		AnnotationNode annotation = annotation();
 		if (annotation.exists()) {
-			layer = annotation.createIconLayer(dirName());
+			layer = annotation.createIconLayer();
 		}
 		icon = new Icon(qualifiedName(), layer, Context.ICON);
 		Icon superIcon = getExtendsClauseShortClass().findClassDecl().icon();
@@ -62,7 +62,7 @@ aspect ModelicaIcons
 		Layer layer = Layer.NO_LAYER;
 		AnnotationNode annotation = annotation();
 		if (annotation.exists()) {
-			layer = annotation.createDiagramLayer(dirName());
+			layer = annotation.createDiagramLayer();
 		}	
 		icon = new Icon(qualifiedName(), layer, Context.DIAGRAM); 
 		icon = addSuperClasses(icon);
@@ -75,7 +75,7 @@ aspect ModelicaIcons
 		Layer layer = Layer.NO_LAYER;
 		AnnotationNode annotation = annotation();
 		if (annotation.exists()) {
-			layer = annotation.createIconLayer(dirName());
+			layer = annotation.createIconLayer();
 		}
 		icon = new Icon(qualifiedName(), layer, Context.ICON);
 		icon = addSuperClasses(icon);
@@ -88,7 +88,7 @@ aspect ModelicaIcons
 		Layer layer = Layer.NO_LAYER;
 		AnnotationNode annotation = annotation();
 		if (annotation.exists()) {
-			layer = annotation.createDiagramLayer(dirName());
+			layer = annotation.createDiagramLayer();
 		}
 		icon = new Icon(qualifiedName(), layer, Context.DIAGRAM);
 		icon = addSuperClasses(icon);

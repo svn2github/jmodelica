@@ -32,16 +32,15 @@ aspect AnnotationParsing {
 	
 	public class AnnotationNode {
 		/**
-		* Creates and return the icon layer for this AnnotationNode.
-		* @param path direcory path for the BaseNode creating icon layer for 
+		* Creates and return the icon layer for this AnnotationNode. 
 		* @return icon layer if annotationNode exist else a NO_LAYER 
 		*/
-		public Layer createIconLayer(String path) {
+		public Layer createIconLayer() {
 			Layer layer;
 			if (forPath("Icon").exists()) {
 				layer = new Layer(
 						forPath("Icon/coordinateSystem").createCoordinateSystem(), 
-						forPath("Icon/graphics").createGraphics(path)
+						forPath("Icon/graphics").createGraphics()
 				); 
 			}else {
 				layer = Layer.NO_LAYER;
@@ -53,12 +52,12 @@ aspect AnnotationParsing {
 		* @param path direcory path for the BaseNode creating diagram layer for 
 		* @return diagram layer if annotationNode exist else a NO_LAYER 
 		*/
-		public Layer createDiagramLayer(String path) {
+		public Layer createDiagramLayer() {
 			Layer layer;
 			if (forPath("Diagram").exists()) {
 				layer =  new Layer(
 						forPath("Diagram/coordinateSystem").createCoordinateSystem(), 
-						forPath("Diagram/graphics").createGraphics(path)
+						forPath("Diagram/graphics").createGraphics()
 				);
 			} else {
 				layer = Layer.NO_LAYER;
@@ -169,7 +168,7 @@ aspect AnnotationParsing {
 		* @throws FailedConstructionException if the construction of one of its primitives fails.
 		* @throws NotEnoughParametersException if too few parameters are provided for one of its primitives.
 		*/
-		private ArrayList<GraphicItem> createGraphics(String path) {
+		private ArrayList<GraphicItem> createGraphics() {
 			ArrayList<GraphicItem> items = new ArrayList<GraphicItem>();
 			for (AnnotationNode a : this) {
 				try {
@@ -189,7 +188,7 @@ aspect AnnotationParsing {
 						items.add(a.createText());
 					} 
 					else if (a.name().equals("Bitmap")) {
-						items.add(a.createBitmap(path));
+						items.add(a.createBitmap());
 					}
 				} catch (FailedConstructionException e) {
 				}
@@ -282,7 +281,7 @@ aspect AnnotationParsing {
 			return ellipse;
 		}
 	
-		private Bitmap createBitmap(String path) 
+		private Bitmap createBitmap() 
 				throws FailedConstructionException, NotEnoughParametersException {
 			Bitmap bitmap = new Bitmap();
 			bitmap = (Bitmap)createGraphicItem(bitmap);
@@ -294,7 +293,7 @@ aspect AnnotationParsing {
 					bitmap.setExtent(a.createExtent());
 					extentSet = true;
 				} else if (a.name().equals("fileName")) {
-					bitmap.setFileName(a.string(), path);
+					bitmap.setFileName(a.string());
 					fileNameSet = true;
 				} else if (a.name().equals("imageSource")) {
 					bitmap.setImageSource(a.string());

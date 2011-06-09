@@ -33,7 +33,12 @@ public class Bitmap extends GraphicItem {
 		return imageSource;
 	}
 
-	public void setFileName(String fileName, String path) {
+	/**
+	 * Sets the file name of the Bitmap primitive. 
+	 * @param fileName
+	 * @param path
+	 */
+	public void setFileName(String fileName) {
 		// File URI scheme:
 		if (fileName.toLowerCase().startsWith("file:///")) {
 			this.fileName = fileName.substring(7);
@@ -41,14 +46,6 @@ public class Bitmap extends GraphicItem {
 		// TODO: Modelica URI scheme:
 		} else if (fileName.toLowerCase().startsWith("modelica://")) {  
 			
-		// The format used in  Modelica.Mechanics.Examples.Systems.RobotR3.fullRobot:
-		} else {
-			fileName = fileName.replace('/', '\\');
-			while (fileName.startsWith("..\\")) {
-				fileName = fileName.substring(fileName.indexOf("\\")+1);
-				path = path.substring(0, path.lastIndexOf("\\"));
-			}
-			this.fileName = path.concat("\\".concat(fileName));
 		}
 	}
 

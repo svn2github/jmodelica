@@ -128,6 +128,7 @@ public class Icon {
 			subcomponents.add(component);
 		}
 	}
+	
 	public ArrayList<Icon> getSuperclasses() {
 		return superclasses;
 	}
@@ -135,6 +136,7 @@ public class Icon {
 	public ArrayList<Component> getSubcomponents() {
 		return subcomponents;
 	}
+	
 	/*
 	 * Returns the extent of the icon. Returns an empty extent if the icon or the 
 	 * super classes or the sub components doesnt have a layer. 
