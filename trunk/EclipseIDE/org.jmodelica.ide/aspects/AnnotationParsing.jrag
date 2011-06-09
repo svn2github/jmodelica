@@ -324,7 +324,9 @@ aspect AnnotationParsing {
 				} else if (a.name().equals("smooth")) {
 					line.setSmooth(a.createSmooth());
 				} else if (a.name().equals("arrow")) {
-					line.setArrow(a.createArrow());
+					try {
+						line.setArrow(a.createArrow());
+					} catch (IllegalArgumentException e) {}
 				} else if (a.name().equals("arrowSize")) {
 					line.setArrowSize(a.createArrowSize());
 				}
