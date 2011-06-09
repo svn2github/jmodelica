@@ -187,6 +187,9 @@ public class Line extends GraphicItem {
 	}
 	
 	public Extent getBounds() {
+		if (points == null || points.size() == 0) {
+			return null;
+		}
 		Point p = points.get(0);
 		Point min = new Point(p.getX(), p.getY());
 		Point max = new Point(p.getX(), p.getY());

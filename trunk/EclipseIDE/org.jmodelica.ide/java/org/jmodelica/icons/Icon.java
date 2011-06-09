@@ -21,7 +21,6 @@ public class Icon {
 	 * @param iconLayer The component's graphical representation in the icon layer.
 	 * @param diagramLayer The component's graphical representation in the diagram layer.
 	 */
-	
 	public Icon(String className, Layer layer, Context context) {
 		this.componentName = "";
 		this.className = className;
@@ -167,13 +166,15 @@ public class Icon {
 	 * as an argument.
 	 * @return
 	 */
-	//anropas från det grafiska användargränssnittet
 	public Extent getBounds(Extent bounds) {
 		if (layer != Layer.NO_LAYER) {
 			ArrayList<GraphicItem> items = layer.getGraphics();
 			for (GraphicItem item : items) {
 				if (!(item instanceof Text)) {
-					bounds = bounds.contain(item.getBounds());
+					Extent itemBounds = item.getBounds();
+					if (itemBounds != null) {
+						bounds = bounds.contain(itemBounds);
+					}
 				}
 			}
 		}
