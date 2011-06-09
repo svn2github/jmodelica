@@ -883,8 +883,8 @@ public class AWTIconDrawer implements GraphicsInterface {
 	}
 	
 	public Stroke getShapeStroke(LinePattern linepattern, double thicknessInMM) {
-		if (thicknessInMM > FilledShape.DEFAULT_LINE_THICKNESS) {
-			thicknessInMM = FilledShape.DEFAULT_LINE_THICKNESS;
+		if (thicknessInMM > IconConstants.MAX_SHAPE_THICKNESS) {
+			thicknessInMM = IconConstants.MAX_SHAPE_THICKNESS;
 		}
 		float thicknessInPixles = (float)(thicknessInMM*IconConstants.PIXLES_PER_MM*IconConstants.DEFAULT_LINE_THICKNESS_IN_PIXLES);
 		return new BasicStroke(thicknessInPixles, BasicStroke.CAP_BUTT,
@@ -892,8 +892,8 @@ public class AWTIconDrawer implements GraphicsInterface {
 	}
 	
 	public Stroke getLineStroke(LinePattern linepattern, double thicknessInMM) {
-		if (thicknessInMM > 2*Line.DEFAULT_THICKNESS) {
-			thicknessInMM = 2*Line.DEFAULT_THICKNESS;
+		if (thicknessInMM > IconConstants.MAX_LINE_THICKNESS) {
+			thicknessInMM = IconConstants.MAX_LINE_THICKNESS;
 		}
 		float thicknessInPixles = (float)(thicknessInMM*IconConstants.PIXLES_PER_MM*IconConstants.DEFAULT_LINE_THICKNESS_IN_PIXLES);
 		return new BasicStroke((float)(thicknessInPixles), BasicStroke.CAP_BUTT,
