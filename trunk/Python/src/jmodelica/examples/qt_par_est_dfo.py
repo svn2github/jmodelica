@@ -25,7 +25,6 @@ from matplotlib.font_manager import fontManager, FontProperties
 from jmodelica.fmi import compile_fmu
 from jmodelica.fmi import FMUModel
 from jmodelica.optimization import dfo
-from jmodelica.optimization import quadratic_error as qe
 
 def run_demo(with_plots=True):
 	"""
