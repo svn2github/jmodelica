@@ -17,8 +17,6 @@ aspect ModelicaIcons
 
 	eq ComponentDecl.icon() 		= 	findClassDecl().icon();
 	eq ComponentDecl.diagram() 		= 	findClassDecl().diagram();
-	//eq ShortClassDecl.icon()		= 	getExtendsClauseShortClass().findClassDecl().icon();
-	eq ShortClassDecl.diagram()		= 	getExtendsClauseShortClass().findClassDecl().diagram();
 	eq InstComponentDecl.icon() 	= 	myInstClass().icon();
 	eq InstComponentDecl.diagram() 	= 	myInstClass().diagram();
 	eq InstShortClassDecl.icon()	= 	getInstExtends(0).myInstClass().icon();
@@ -69,7 +67,22 @@ aspect ModelicaIcons
 		icon = addSubComponents(icon);
 		return icon;
 	}
-	
+	eq ShortClassDecl.diagram() {
+		visitingDuringIconRendering = true;
+		Icon icon;
+		Layer layer = Layer.NO_LAYER;
+		AnnotationNode annotation = annotation();
+		if (annotation.exists()) {
+			layer = annotation.createIconLayer();
+		}
+		icon = new Icon(qualifiedName(), layer, Context.DIAGRAM);
+		Icon superIcon = getExtendsClauseShortClass().findClassDecl().diagram();
+		if (superIcon != Icon.NULL_ICON) {
+			icon.addSuperclass(superIcon);
+		}
+		visitingDuringIconRendering = false;
+		return icon;
+	}
 	eq InstClassDecl.icon() {
 		Icon icon;
 		Layer layer = Layer.NO_LAYER;
