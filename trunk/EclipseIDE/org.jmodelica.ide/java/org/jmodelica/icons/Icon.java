@@ -75,7 +75,7 @@ public class Icon {
 		        	}
 		        }
 			}
-		}		
+		}
 	}
 	
 	private void drawComponents(GraphicsInterface gi) {
@@ -88,8 +88,7 @@ public class Icon {
 	    		gi.saveTransformation();
 	    		Extent extent = this.layer.getCoordinateSystem().getExtent();
 	    		gi.setTransformation(comp, extent);
-				compIcon.drawClass(gi);
-				compIcon.drawComponents(gi);
+				compIcon.draw(gi);
 				gi.resetTransformation();
     		}
     	}	
