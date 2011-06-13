@@ -532,6 +532,7 @@ class CasadiModel(object):
             i = i + 1
 
         self.ocp_inputs = []
+        self.ocp_inputs += list(self.p)
         self.ocp_inputs += list(self.dx)
         self.ocp_inputs += list(self.x)
         self.ocp_inputs += list(self.u)

@@ -375,6 +375,8 @@ class CasadiCollocator(object):
         p_opt  = N.zeros(self.model.get_n_p())
         t_opt = N.zeros((len(self.get_time_points()),1))
 
+        p_opt[:] = self.nlp_opt[self.get_var_indices()['p_opt']][:,0]
+
         cnt = 0
         for t,i,j in self.get_time_points():
             t_opt[cnt,0] = t
@@ -434,32 +436,48 @@ class CasadiCollocator(object):
         nlp_init = N.zeros(len(self.get_xx()))
         
         md = self.get_model_description()
-        
+
+        _p_opt_max = md.get_p_opt_max(include_alias = False)
         _dx_max = md.get_dx_max(include_alias = False)
         _x_max = md.get_x_max(include_alias = False)
         _u_max = md.get_u_max(include_alias = False)
         _w_max = md.get_w_max(include_alias = False)
+        _p_opt_min = md.get_p_opt_min(include_alias = False)
         _dx_min = md.get_dx_min(include_alias = False)
         _x_min = md.get_x_min(include_alias = False)
         _u_min = md.get_u_min(include_alias = False)
         _w_min = md.get_w_min(include_alias = False)
+        _p_opt_start = md.get_p_opt_initial_guess(include_alias = False)
         _dx_start = md.get_dx_initial_guess(include_alias = False)
         _x_start = md.get_x_initial_guess(include_alias = False)
         _u_start = md.get_u_initial_guess(include_alias = False)
         _w_start = md.get_w_initial_guess(include_alias = False)
 
+        p_opt_max = self.UPPER*N.ones(len(_p_opt_max))
         dx_max = self.UPPER*N.ones(len(_dx_max))
         x_max = self.UPPER*N.ones(len(_x_max))
         u_max = self.UPPER*N.ones(len(_u_max))
         w_max = self.UPPER*N.ones(len(_w_max))
+        p_opt_min = self.UPPER*N.ones(len(_p_opt_min))
         dx_min = self.LOWER*N.ones(len(_dx_min))
         x_min = self.LOWER*N.ones(len(_x_min))
         u_min = self.LOWER*N.ones(len(_u_min))
         w_min = self.LOWER*N.ones(len(_w_min))
+        p_opt_start = self.UPPER*N.ones(len(_p_opt_start))
         dx_start = self.LOWER*N.ones(len(_dx_start))
         x_start = self.LOWER*N.ones(len(_x_start))
         u_start = self.LOWER*N.ones(len(_u_start))
         w_start = self.LOWER*N.ones(len(_w_start))
+
+        for vr, val in _p_opt_min:
+            if val != None:
+                p_opt_min[self.model.get_p_vr_map()[vr]] = val
+        for vr, val in _p_opt_max:
+            if val != None:
+                p_opt_max[self.model.get_p_vr_map()[vr]] = val
+        for vr, val in _p_opt_start:
+            if val != None:
+                p_opt_start[self.model.get_p_vr_map()[vr]] = val
 
         for vr, val in _dx_min:
             if val != None:
@@ -501,6 +519,10 @@ class CasadiCollocator(object):
             if val != None:
                 w_start[self.model.get_w_vr_map()[vr]] = val/self.model.get_w_sf()[self.model.get_w_vr_map()[vr]]
 
+        nlp_lb[self.get_var_indices()['p_opt']] = p_opt_min
+        nlp_ub[self.get_var_indices()['p_opt']] = p_opt_max
+        nlp_init[self.get_var_indices()['p_opt']] = p_opt_start
+
         for t,i,j in self.get_time_points():
             nlp_lb[self.get_var_indices()[i][j]['dx']] = dx_min
             nlp_ub[self.get_var_indices()[i][j]['dx']] = dx_max
@@ -521,6 +543,13 @@ class CasadiCollocator(object):
 
         return (nlp_lb,nlp_ub,nlp_init)
 
+class ParameterEstimationData:
+
+    def __init__(self,Q,measured_variables,element_indices,data):
+        self.Q = Q
+        self.measured_variables = measured_variables
+        self.element_indices = element_indices
+        self.data = data
 
 class RadauCollocator(CasadiCollocator):
 
@@ -531,6 +560,7 @@ class RadauCollocator(CasadiCollocator):
         self.ocp = model.get_casadi_ocp()
         
         # Get the options
+        self.parameter_estimation_data = options['parameter_estimation_data']
         self.n_e = options['n_e']
         self.n_cp = options['n_cp']
         self.h = N.ones(self.n_e)/self.n_e;
@@ -552,6 +582,12 @@ class RadauCollocator(CasadiCollocator):
     def _create_nlp_variables(self):
         # Group variables into elements
         self.vars = {}
+
+        p_opt = []
+        for j in range(self.model.get_n_p()):
+            p_opt.append(casadi.SX(str(self.model.get_p()[j])))
+
+        self.vars['p_opt'] = p_opt
 
         # Create variables for the collocation points
         for i in range(1,self.n_e+1):
@@ -584,6 +620,9 @@ class RadauCollocator(CasadiCollocator):
         # variable vector
         self.var_indices = {}
         self.xx = []
+        pre_len = len(self.xx)
+        self.xx += self.vars['p_opt']
+        self.var_indices['p_opt'] = N.arange(pre_len,len(self.xx),dtype=int)
 
         for i in range(1,self.n_e+1):
             for k in range(self.n_cp+1):
@@ -618,6 +657,7 @@ class RadauCollocator(CasadiCollocator):
 
         z = []
         t = self.ocp.t0
+        z += self.vars['p_opt']
         z += self.vars[1][0]['dx']
         z += self.vars[1][0]['x']
         z += self.vars[1][0]['u']
@@ -649,6 +689,7 @@ class RadauCollocator(CasadiCollocator):
                 t = self.ocp.t0 + (self.ocp.tf - self.ocp.t0)*(N.sum(self.h[0:i-1]) + self.h[i-1]*pol.p()[k-1])
                 self.time_points.append((t,i,k))
                 z = []
+                z += self.vars['p_opt']
                 z += self.vars[i][k]['dx']
                 z += self.vars[i][k]['x']
                 z += self.vars[i][k]['u']
@@ -703,34 +744,64 @@ class RadauCollocator(CasadiCollocator):
         
         n_e = self.n_e
         n_cp = self.n_cp
+
+        if self.parameter_estimation_data == None:
         
-        if self.model.get_opt_J() != None:
+            if self.model.get_opt_J() != None:
             
-            # Assume Mayer cost
-            z = []
-            t = self.ocp.tf
-            z += self.vars[n_e][n_cp]['dx']
-            z += self.vars[n_e][n_cp]['x']
-            z += self.vars[n_e][n_cp]['u']
-            z += self.vars[n_e][n_cp]['w']
-            z += [casadi.SX(t)]
-            self.cost_mayer = list(self.model.get_opt_J().eval([z])[0])[0]
+                # Assume Mayer cost
+                z = []
+                t = self.ocp.tf
+                z += self.vars['p_opt']
+                z += self.vars[n_e][n_cp]['dx']
+                z += self.vars[n_e][n_cp]['x']
+                z += self.vars[n_e][n_cp]['u']
+                z += self.vars[n_e][n_cp]['w']
+                z += [casadi.SX(t)]
+                self.cost_mayer = list(self.model.get_opt_J().eval([z])[0])[0]
             
+            # Take care of Lagrange cost
+            if self.model.get_opt_L() != None:
+                for i in range(1,n_e+1):
+                    for k in range(1,n_cp+1):
+                        t = self.ocp.t0 + (self.ocp.tf - self.ocp.t0)*(N.sum(self.h[0:i-1]) + self.h[i-1]*self.pol.p()[k-1])
+                        z = []
+                        z += self.vars['p_opt']
+                        z += self.vars[i][k]['dx']
+                        z += self.vars[i][k]['x']
+                        z += self.vars[i][k]['u']
+                        z += self.vars[i][k]['w']
+                        z += [casadi.SX(t)]
+                        self.cost_lagrange += (self.h[i-1]*(self.ocp.tf-self.ocp.t0))*self.model.get_opt_L().eval([z])[0][0]*self.pol.w()[k-1];
+                        
+            self.cost = self.cost_mayer + self.cost_lagrange
 
-        # Take care of Lagrange cost
-        if self.model.get_opt_L() != None:
-            for i in range(1,n_e+1):
-                for k in range(1,n_cp+1):
-                    t = self.ocp.t0 + (self.ocp.tf - self.ocp.t0)*(N.sum(self.h[0:i-1]) + self.h[i-1]*self.pol.p()[k-1])
-                    z = []
-                    z += self.vars[i][k]['dx']
-                    z += self.vars[i][k]['x']
-                    z += self.vars[i][k]['u']
-                    z += self.vars[i][k]['w']
-                    z += [casadi.SX(t)]
-                    self.cost_lagrange += (self.h[i-1]*(self.ocp.tf-self.ocp.t0))*self.model.get_opt_L().eval([z])[0][0]*self.pol.w()[k-1];
+        else:
+            self.cost = 0
+            ind = 0
+            for i in self.parameter_estimation_data.element_indices:
+                y_meas = self.parameter_estimation_data.data[ind,:]
+                err = []
+                j = 0
+                for n in self.parameter_estimation_data.measured_variables:
+                    if i==0:
+                        el_ind = 1
+                        cp_ind = 0
+                    else:
+                        el_ind = i
+                        cp_ind = n_cp
+                    try:
+                        err.append(self.vars[el_ind][cp_ind]['x'][self.model.get_x_vr_map()[self.model.xmldoc.get_value_reference(str(n))]]-y_meas[j])
+                    except:
+                        err.append(self.vars[el_ind][cp_ind]['w'][self.model.get_w_vr_map()[self.model.xmldoc.get_value_reference(str(n))]]-y_meas[j])
+                    j = j + 1
+                
+                err = N.array(err)
 
-        self.cost = self.cost_mayer + self.cost_lagrange
+                Q = self.parameter_estimation_data.Q
+                self.cost = self.cost + N.dot(N.dot(err,Q),err)
+                #self.cost = self.cost + (y-y_meas)**2
+                ind = ind + 1
 
         # Objective function
         self.cost_fcn = casadi.SXFunction([self.xx], [[self.cost]])        

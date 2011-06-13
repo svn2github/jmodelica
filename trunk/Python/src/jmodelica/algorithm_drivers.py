@@ -1965,6 +1965,7 @@ class CasadiRadauOptions(OptionBase):
             'n_e':50, 
             'n_cp':3,
             'init_traj':None,
+            'parameter_estimation_data':None,
             'IPOPT_options':{'max_iter':1000,
                              'derivative_test':'none'}
             }
@@ -2044,6 +2045,7 @@ class CasadiRadau(AlgorithmBase):
         self.n_e = self.options['n_e']
         self.n_cp = self.options['n_cp']
         self.init_traj = self.options['init_traj']
+        self.parameter_estimation_data = self.options['parameter_estimation_data']
         
         # solver options
         self.solver_options = self.options['IPOPT_options']
