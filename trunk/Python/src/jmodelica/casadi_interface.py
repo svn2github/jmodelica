@@ -182,9 +182,6 @@ class CasadiModel(object):
     def get_casadi_ocp(self):
         return self.ocp
         
-    def get_casadi_variables(self):
-        return self.var
-
     def get_n_x(self):
         return self.n_x
     
@@ -320,12 +317,13 @@ class CasadiModel(object):
         self.ocp_ode_init_inputs += list(self.x)
         self.ocp_ode_init_inputs += [self.t]
         
-        self.F = casadi.der(self.var.x)
+#        self.F = casadi.der(self.ocp.x_)
+        self.F = self.ocp.explicit_fcn_[5:7]
         
         self.ode_F = casadi.SXFunction([self.ocp_ode_inputs], [self.F])
         
         # The initial equations
-        self.ode_F0 = casadi.SXFunction([self.ocp_ode_init_inputs],[self.ocp.initeq])
+        self.ode_F0 = casadi.SXFunction([self.ocp_ode_init_inputs],[self.ocp.initial_eq_])
         
         # The Lagrange cost function
         if len(self.ocp.lterm)>0:
@@ -337,7 +335,7 @@ class CasadiModel(object):
         if len(self.ocp.mterm)>0:
             self.ocp_ode_mterm_inputs = []
             self.ocp_ode_mterm_inputs += list(self.p)
-            self.ocp_ode_mterm_inputs += [x.atTime(self.ocp.tf,True) for x in self.var.x]
+            self.ocp_ode_mterm_inputs += [x.atTime(self.ocp.tf,True) for x in self.ocp.x_]
             self.ocp_ode_mterm_inputs += [self.t]
             self.opt_ode_J = casadi.SXFunction([self.ocp_ode_mterm_inputs],[[self.ocp.mterm[0]]])
         else:
@@ -347,27 +345,27 @@ class CasadiModel(object):
         self.opt_ode_Cineq = [] #Inequality
         self.opt_ode_C = [] #Equality
         # Modify equality constraints to be on type g(x)=0 (instead of g(x)=a)
-        lb = N.array(self.ocp.cfcn_lb, dtype=N.float)
-        ub = N.array(self.ocp.cfcn_ub, dtype=N.float)
+        lb = N.array(self.ocp.path_min_, dtype=N.float)
+        ub = N.array(self.ocp.path_max_, dtype=N.float)
         for i in range(len(ub)):
             if lb[i] == ub[i]: #The constraint is an equality
-                self.opt_ode_C += [self.ocp.cfcn[i]-self.ocp.cfcn_ub[i]]
+                self.opt_ode_C += [self.ocp.path_fcn_[i]-self.ocp.path_max_[i]]
                 #self.ocp.cfcn_ub[i] = casadi.SX(0.0)
                 #self.ocp.cfcn_lb[i] = casadi.SX(0.0)
             else: #The constraint is an inequality
                 if   lb[i] == -N.inf:
-                    self.opt_ode_Cineq += [(1.0)*self.ocp.cfcn[i]-self.ocp.cfcn_ub[i]]
+                    self.opt_ode_Cineq += [(1.0)*self.ocp.path_fcn_[i]-self.ocp.path_max_[i]]
                 elif ub[i] == N.inf:
-                    self.opt_ode_Cineq += [(-1.0)*self.ocp.cfcn[i]+self.ocp.cfcn_lb[i]]
+                    self.opt_ode_Cineq += [(-1.0)*self.ocp.path_fcn_[i]+self.ocp.path_min_[i]]
                 else:
-                    self.opt_ode_Cineq += [(1.0)*self.ocp.cfcn[i]-self.ocp.cfcn_ub[i]]
-                    self.opt_ode_Cineq += [(-1.0)*self.ocp.cfcn[i]+self.ocp.cfcn_lb[i]]
+                    self.opt_ode_Cineq += [(1.0)*self.ocp.path_fcn_[i]-self.ocp.path_max_[i]]
+                    self.opt_ode_Cineq += [(-1.0)*self.ocp.path_fcn_[i]+self.ocp.path_min_[i]]
         
         self.ocp_ode_boundary_inputs = []
         self.ocp_ode_boundary_inputs += list(self.p)
-        self.ocp_ode_boundary_inputs += [x.atTime(self.ocp.t0,True) for x in self.var.x]
+        self.ocp_ode_boundary_inputs += [x.atTime(self.ocp.t0,True) for x in self.ocp.x_]
         self.ocp_ode_boundary_inputs += [self.t]
-        self.ocp_ode_boundary_inputs += [x.atTime(self.ocp.tf,True) for x in self.var.x]
+        self.ocp_ode_boundary_inputs += [x.atTime(self.ocp.tf,True) for x in self.ocp.x_]
         self.ocp_ode_boundary_inputs += [self.t]
         self.opt_ode_C     = casadi.SXFunction([self.ocp_ode_boundary_inputs],[self.opt_ode_C])
         self.opt_ode_Cineq = casadi.SXFunction([self.ocp_ode_boundary_inputs],[self.opt_ode_Cineq])
@@ -403,7 +401,7 @@ class CasadiModel(object):
             
             self.ocp_ode_mterm_inputs_scaled = []
             self.ocp_ode_mterm_inputs_scaled += list(self.p)
-            self.ocp_ode_mterm_inputs_scaled += [self.x_sf[ind]*x.atTime(self.ocp.tf,True) for ind,x in enumerate(self.var.x)]
+            self.ocp_ode_mterm_inputs_scaled += [self.x_sf[ind]*x.atTime(self.ocp.tf,True) for ind,x in enumerate(self.ocp.x_)]
             self.ocp_ode_mterm_inputs_scaled += [self.t]
 
             # Substitute scaled variables

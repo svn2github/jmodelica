@@ -53,6 +53,7 @@ class CasadiCollocator(object):
         # Create Solver
         self.c = self.get_equality_constraint()+self.get_inequality_constraint()
         self.c_fcn = casadi.SXFunction([self.get_xx()],[self.c])
+        self.c_fcn.setOption("name","NLP constraint function")
         
         if self.get_hessian() == None:
             self.solver = casadi.IpoptSolver(self.get_cost(),self.c_fcn)
@@ -1162,7 +1163,6 @@ class PseudoSpectral(CasadiCollocator):
         self.options = options
         self.md  = model.get_model_description()
         self.ocp = model.get_casadi_ocp()
-        self.var = model.get_casadi_variables()
         
         #Create the necessary vectors for a corresponding set of points
         if options['discr'] == "LG":
@@ -1289,7 +1289,8 @@ class PseudoSpectral(CasadiCollocator):
         z += self.vars[0]['p']
         z += self.vars[PHASE[0]][DISCR[0]]['x']
         z += [t]
-        init_constr = list(self.model.get_ode_F0().eval([z])[0])
+        [init_constr] = self.model.get_ode_F0().eval([z])
+        init_constr = list(init_constr.data())
         self.h += init_constr
         
         #Create collocation constraints
@@ -1307,7 +1308,9 @@ class PseudoSpectral(CasadiCollocator):
                 z += self.vars[i][j]['x']
                 z += self.vars[i][j]['u']
                 z += [t]
-                dynamic_constr = list((self.vars[i]['t']-self.vars[i-1]['t'])*0.5*self.model.get_ode_F().eval([z])[0])
+                [Fz] = self.model.get_ode_F().eval([z])
+                dynamic_constr = (self.vars[i]['t']-self.vars[i-1]['t'])*0.5*Fz
+                dynamic_constr = list(dynamic_constr.data())
                 for k in range(self.model.get_n_x()):
                     self.h += [dx[k] - dynamic_constr[k]]
 
@@ -1384,7 +1387,8 @@ class PseudoSpectral(CasadiCollocator):
         z += [self.vars[0]['t']]
         z += self.vars[PHASE[-1]][DISCR[-1]]['x']
         z += [self.vars[PHASE[-1]]['t']]
-        boundary_constr = list(self.model.opt_ode_C.eval([z])[0])
+        [boundary_constr] = self.model.opt_ode_C.eval([z])
+        boundary_constr = list(boundary_constr.data())
         self.h += boundary_constr
         
         #Create boundary constraints (inequality)
@@ -1395,7 +1399,8 @@ class PseudoSpectral(CasadiCollocator):
         z += [self.vars[0]['t']]
         z += self.vars[PHASE[-1]][DISCR[-1]]['x']
         z += [self.vars[PHASE[-1]]['t']]
-        boundary_constr_ineq = list(self.model.opt_ode_Cineq.eval([z])[0])
+        [boundary_constr_ineq] = self.model.opt_ode_Cineq.eval([z])
+        boundary_constr_ineq = list(boundary_constr_ineq.data())
         self.g += boundary_constr_ineq
         
         #Create inequality constraint
@@ -1424,7 +1429,8 @@ class PseudoSpectral(CasadiCollocator):
             z += self.vars[0]['p']
             z += self.vars[PHASE[-1]][DISCR[-1]]['x']
             z += [t]
-            self.cost_mayer = list(self.model.get_opt_ode_J().eval([z])[0])[0]
+            [self.cost_mayer] = self.model.get_opt_ode_J().eval([z])[0]
+            self.cost_mayer = list(self.cost_mayer.data())
         #NOTE TEMPORARY!!!!
         #self.cost_mayer=self.vars[PHASE[-1]]['t']
         # Take care of Lagrange cost
@@ -1621,23 +1627,23 @@ class PseudoSpectral(CasadiCollocator):
         nlp_init = N.zeros(len(self.get_xx()))
         
         md = self.get_model_description()
-        var = self.var
+        ocp = self.ocp
         
         _x_max = md.get_x_max(include_alias = False)
         _u_max = md.get_u_max(include_alias = False)
-        _p_max = [(p.getValueReference(), p.getMax()) for p in var.p]
+        _p_max = [(p.getValueReference(), p.getMax()) for p in ocp.p_]
         _x_min = md.get_x_min(include_alias = False)
         _u_min = md.get_u_min(include_alias = False)
-        _p_min = [(p.getValueReference(), p.getMin()) for p in var.p]
+        _p_min = [(p.getValueReference(), p.getMin()) for p in ocp.p_]
         _x_start = md.get_x_start(include_alias = False)
         #_u_start = md.get_u_start(include_alias = False)
         _u_start = md.get_u_initial_guess(include_alias = False)
         _p_start = []
-        for p in var.p: #NOTE SHOULD BE CHANGED
+        for p in ocp.p_: #NOTE SHOULD BE CHANGED
             for p_ori in md.get_p_opt_initial_guess():
                 if p.getValueReference() == p_ori[0]:
                     _p_start += [p_ori] 
-        #_p_start = [(p.getValueReference(), p.getStart()) for p in var.p]
+        #_p_start = [(p.getValueReference(), p.getStart()) for p in ocp.p_]
         
         x_max = self.UPPER*N.ones(len(_x_max))
         u_max = self.UPPER*N.ones(len(_u_max))
@@ -1744,7 +1750,7 @@ class PseudoSpectral(CasadiCollocator):
             tfcn.init()
             
         tfcn.evaluate()
-        t = N.transpose(N.array([tfcn.output()]))
+        t = N.transpose(N.array([tfcn.output().data()]))
         t_opt = t.flatten()
         
         cnt = 0
