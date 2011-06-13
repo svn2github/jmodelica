@@ -144,6 +144,11 @@ public class AWTIconDrawer implements GraphicsInterface {
 		transform.scale(scaleWidth, scaleHeight);
 		g.transform(transform); 
 		   
+		g.setRenderingHint(
+				RenderingHints.KEY_ANTIALIASING, 
+				RenderingHints.VALUE_ANTIALIAS_ON
+		);
+		
 		icon.draw(this);
     }
 
@@ -238,15 +243,7 @@ public class AWTIconDrawer implements GraphicsInterface {
 				g.draw(createShape(t));
 			} catch(Exception e){}
 		}
-		g.setRenderingHint(
-				RenderingHints.KEY_ANTIALIASING,
-				RenderingHints.VALUE_ANTIALIAS_ON
-		);
 		g.drawString(text, x, y);
-		g.setRenderingHint(
-				RenderingHints.KEY_ANTIALIASING,
-				RenderingHints.VALUE_ANTIALIAS_OFF
-		);
 	}
 	
 	public void drawBitmap(Bitmap b) {
@@ -272,10 +269,6 @@ public class AWTIconDrawer implements GraphicsInterface {
 		} 
 		if (bitmapImage != null) {
 			Extent extent = b.getExtent().fix();
-			g.setRenderingHint(
-					RenderingHints.KEY_ANTIALIASING,
-					RenderingHints.VALUE_ANTIALIAS_ON
-			);
 			g.drawImage(
 					bitmapImage, 
 					(int)extent.getP1().getX(), 
@@ -287,10 +280,6 @@ public class AWTIconDrawer implements GraphicsInterface {
 					bitmapImage.getWidth(),
 					bitmapImage.getHeight(),
 					null
-			);
-			g.setRenderingHint(
-					RenderingHints.KEY_ANTIALIASING,
-					RenderingHints.VALUE_ANTIALIAS_OFF
 			);
 		}
 	}
@@ -326,10 +315,6 @@ public class AWTIconDrawer implements GraphicsInterface {
 			AffineTransform oldTransform = g.getTransform();
 			g.setTransform(new AffineTransform());
 			g.setRenderingHint(
-					RenderingHints.KEY_ANTIALIASING, 
-					RenderingHints.VALUE_ANTIALIAS_ON
-			);
-			g.setRenderingHint(
 					RenderingHints.KEY_STROKE_CONTROL, 
 					RenderingHints.VALUE_STROKE_PURE
 			);
@@ -338,10 +323,6 @@ public class AWTIconDrawer implements GraphicsInterface {
 			g.setRenderingHint(
 					RenderingHints.KEY_STROKE_CONTROL, 
 					RenderingHints.VALUE_STROKE_DEFAULT
-			);
-			g.setRenderingHint(
-					RenderingHints.KEY_ANTIALIASING, 
-					RenderingHints.VALUE_ANTIALIAS_OFF
 			);
 			
 			// If the Line has arrows, draw them.
@@ -405,15 +386,7 @@ public class AWTIconDrawer implements GraphicsInterface {
 			}
 			AffineTransform oldTransform = g.getTransform();
 			g.setTransform(new AffineTransform());
-			g.setRenderingHint(
-					RenderingHints.KEY_ANTIALIASING, 
-					RenderingHints.VALUE_ANTIALIAS_ON
-			);
 			g.fill(xformedShape);
-			g.setRenderingHint(
-					RenderingHints.KEY_ANTIALIASING, 
-					RenderingHints.VALUE_ANTIALIAS_OFF
-			);
 			g.setTransform(oldTransform);
 			g.setPaint(oldPaint);
 		}
@@ -428,15 +401,7 @@ public class AWTIconDrawer implements GraphicsInterface {
 			setColor(s.getLineColor());
 			AffineTransform oldTransform = g.getTransform();
 			g.setTransform(new AffineTransform());
-			g.setRenderingHint(
-					RenderingHints.KEY_ANTIALIASING, 
-					RenderingHints.VALUE_ANTIALIAS_ON
-			);
 			g.draw(xformedShape);
-			g.setRenderingHint(
-					RenderingHints.KEY_ANTIALIASING, 
-					RenderingHints.VALUE_ANTIALIAS_OFF
-			);
 			g.setTransform(oldTransform);
 		}
 		
