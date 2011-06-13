@@ -26,7 +26,7 @@
 #   FILE_NAME             (mandatory) The name of the C file.
 #   PLATFORM              (mandatory) The platform we are compiling for, 
 #                         currently only used to decide where to place binary.
-#                         Should be linux32 or linux64.
+#                         Should be darwin32 or darwin64.
 #   JMODELICA_HOME        (mandatory) The directory where JModelica has been built,
 #                         or equivalently, the directory of a binary JModelica
 #                         distribution.
