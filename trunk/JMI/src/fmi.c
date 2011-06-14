@@ -836,4 +836,5 @@ fmiStatus fmi_extract_debug_info(fmiComponent c) {
         for (i=0; i < jmi->n_dae_blocks;i=i+1){
             jmi_delete_block_residual(jmi->dae_block_residuals[i]);
     }*/
+    return fmiOK;
 }
