@@ -210,8 +210,4 @@ public class Icon {
 	public Context getContext() {
 		return context;
 	}
-	
-	public static class NullIcon extends Icon {
-	}
-	
 }
