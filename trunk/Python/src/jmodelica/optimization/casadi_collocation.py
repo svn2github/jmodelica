@@ -458,7 +458,7 @@ class CasadiCollocator(object):
         x_max = self.UPPER*N.ones(len(_x_max))
         u_max = self.UPPER*N.ones(len(_u_max))
         w_max = self.UPPER*N.ones(len(_w_max))
-        p_opt_min = self.UPPER*N.ones(len(_p_opt_min))
+        p_opt_min = self.LOWER*N.ones(len(_p_opt_min))
         dx_min = self.LOWER*N.ones(len(_dx_min))
         x_min = self.LOWER*N.ones(len(_x_min))
         u_min = self.LOWER*N.ones(len(_u_min))
