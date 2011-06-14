@@ -29,6 +29,7 @@ except:
 from jmodelica.optimization.polynomial import *
 from jmodelica import xmlparser
 from jmodelica.io import VariableNotFoundError
+from jmodelica.core import TrajectoryLinearInterpolation
 
 class CasadiCollocatorException(Exception):
     """
@@ -545,10 +546,9 @@ class CasadiCollocator(object):
 
 class ParameterEstimationData:
 
-    def __init__(self,Q,measured_variables,element_indices,data):
+    def __init__(self,Q,measured_variables,data):
         self.Q = Q
         self.measured_variables = measured_variables
-        self.element_indices = element_indices
         self.data = data
 
 class RadauCollocator(CasadiCollocator):
@@ -777,31 +777,33 @@ class RadauCollocator(CasadiCollocator):
             self.cost = self.cost_mayer + self.cost_lagrange
 
         else:
-            self.cost = 0
-            ind = 0
-            for i in self.parameter_estimation_data.element_indices:
-                y_meas = self.parameter_estimation_data.data[ind,:]
-                err = []
-                j = 0
-                for n in self.parameter_estimation_data.measured_variables:
-                    if i==0:
-                        el_ind = 1
-                        cp_ind = 0
-                    else:
-                        el_ind = i
-                        cp_ind = n_cp
-                    try:
-                        err.append(self.vars[el_ind][cp_ind]['x'][self.model.get_x_vr_map()[self.model.xmldoc.get_value_reference(str(n))]]-y_meas[j])
-                    except:
-                        err.append(self.vars[el_ind][cp_ind]['w'][self.model.get_w_vr_map()[self.model.xmldoc.get_value_reference(str(n))]]-y_meas[j])
-                    j = j + 1
-                
-                err = N.array(err)
 
-                Q = self.parameter_estimation_data.Q
-                self.cost = self.cost + N.dot(N.dot(err,Q),err)
-                #self.cost = self.cost + (y-y_meas)**2
-                ind = ind + 1
+            data = TrajectoryLinearInterpolation(self.parameter_estimation_data.data[:,0], 
+                                                 self.parameter_estimation_data.data[:,1:])
+            self.cost = 0
+            for i in range(1,n_e+1):
+                for k in range(1,n_cp+1):
+                    t = self.ocp.t0 + (self.ocp.tf - self.ocp.t0)*(N.sum(self.h[0:i-1]) + self.h[i-1]*self.pol.p()[k-1])
+                    # Compute interpolated measurement data
+                    y_meas = data.eval(t)[0,:]
+                    j = 0
+                    err = []
+                    for n in self.parameter_estimation_data.measured_variables:
+                        try:
+                            err.append(self.vars[i][k]['x'][self.model.get_x_vr_map()[self.model.xmldoc.get_value_reference(str(n))]]-y_meas[j])
+                        except KeyError:
+                            try:
+                                err.append(self.vars[i][k]['w'][self.model.get_w_vr_map()[self.model.xmldoc.get_value_reference(str(n))]]-y_meas[j])
+                            except KeyError:
+                                err.append(self.vars[i][k]['u'][self.model.get_u_vr_map()[self.model.xmldoc.get_value_reference(str(n))]]-y_meas[j])
+                        j = j + 1
+
+                    err = N.array(err)
+
+                    Q = self.parameter_estimation_data.Q
+                    cost_term = N.dot(N.dot(err,Q),err)
+
+                    self.cost += (self.h[i-1]*(self.ocp.tf-self.ocp.t0))*cost_term*self.pol.w()[k-1];
 
         # Objective function
         self.cost_fcn = casadi.SXFunction([self.xx], [[self.cost]])        

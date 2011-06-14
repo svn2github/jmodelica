@@ -70,7 +70,6 @@ def run_demo(with_plots=True):
         plt.title('x2')
         plt.xlabel('t[s]')
         plt.grid()
-        plt.show()
 
         plt.figure(2)
         plt.clf()
@@ -85,7 +84,6 @@ def run_demo(with_plots=True):
         plt.xlabel('t[s]')
         plt.hold(True)
         plt.grid()
-        plt.show()
 
     # Build input trajectory matrix for use in simulation
     u = N.transpose(N.vstack((t_meas,u1,u2)))
@@ -121,14 +119,12 @@ def run_demo(with_plots=True):
         plt.plot(t_sim,x1_sim)
         plt.subplot(2,2,4)
         plt.plot(t_sim,x2_sim)
-        plt.show()
 
         plt.figure(2)
         plt.subplot(2,1,1)
         plt.plot(t_sim,u1_sim,'r')
         plt.subplot(2,1,2)
         plt.plot(t_sim,u2_sim,'r')
-        plt.show()
 
     # Compile parameter optimization model
     jmu_name = compile_jmu("QuadTankPack.QuadTank_ParEst",
@@ -187,7 +183,6 @@ def run_demo(with_plots=True):
         plt.plot(t_opt,x1_opt,'k')
         plt.subplot(2,2,4)
         plt.plot(t_opt,x2_opt,'k')
-        plt.show()
 
     # Compile second parameter estimation model
     jmu_name = compile_jmu("QuadTankPack.QuadTank_ParEst2", 
@@ -248,7 +243,6 @@ def run_demo(with_plots=True):
         plt.subplot(2,2,4)
         plt.plot(t_opt2,x2_opt2,'r')
         plt.show()
-
 
     # Compute parameter standard deviations for case 1
     # compile JMU

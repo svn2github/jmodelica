@@ -37,7 +37,7 @@ def run_demo(with_plots=True):
 
     curr_dir = os.path.dirname(os.path.abspath(__file__));
 
-    # Compile the Optimica model to a JMU
+    # Compile the Optimica model to an XML file
     model_name = compile_casadi("ParEst.ParEstCasADi",
         curr_dir+"/files/ParameterEstimation_1.mop")
     
@@ -110,10 +110,9 @@ def run_demo(with_plots=True):
 
     Q = N.array([[1.]])
     measured_variables=['sys.y']
-    data = N.transpose(N.array([xx_meas[:,0]]))
-    element_indices = range(int(t0),int(N_points_meas))
+    data = N.hstack((N.transpose(N.array([t_meas])),N.transpose(N.array([xx_meas[:,0]]))))
 
-    par_est_data = ParameterEstimationData(Q,measured_variables,element_indices,data)
+    par_est_data = ParameterEstimationData(Q,measured_variables,data)
 
     opts = model_casadi.optimize_options()
 

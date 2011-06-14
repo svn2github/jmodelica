@@ -59,7 +59,7 @@ initial equation
   model QuadTank
     // Process parameters
 	parameter Modelica.SIunits.Area A1=4.9e-4, A2=4.9e-4, A3=4.9e-4, A4=4.9e-4;
-	parameter Modelica.SIunits.Area a1=0.03e-4, a2=0.03e-4, a3=0.03e-4, a4=0.03e-4;
+	parameter Modelica.SIunits.Area a1(start=0.03e-4), a2(start=0.03e-4), a3=0.03e-4, a4=0.03e-4;
 	parameter Modelica.SIunits.Acceleration g=9.81;
 	parameter Real k1_nmp(unit="m3^/s/V") = 0.56e-6, k2_nmp(unit="m^3/s/V") = 0.56e-6;
 	parameter Real g1_nmp=0.30, g2_nmp=0.30;
@@ -182,6 +182,27 @@ equation
     connect(prbs1.y,qt.u1);
     connect(prbs2.y,qt.u2);
 end QuadTank_ParEst;
+
+optimization QuadTank_ParEstCasADi (objective=1,
+                                             startTime=0,finalTime=60)
+    
+    // Initial tank levels
+	parameter Modelica.SIunits.Length x1_0 = 0.06255;
+	parameter Modelica.SIunits.Length x2_0 = 0.06045;
+	parameter Modelica.SIunits.Length x3_0 = 0.02395;
+	parameter Modelica.SIunits.Length x4_0 = 0.02325;
+
+   QuadTank qt(x1(fixed=true),x1_0=x1_0,
+    	             x2(fixed=true),x2_0=x2_0,
+                     x3(fixed=true),x3_0=x3_0,
+                     x4(fixed=true),x4_0=x4_0,
+                     a1(free=true,initialGuess = 0.03e-4,min=0,max=0.1e-4),
+                     a2(free=true,initialGuess = 0.03e-4,min=0,max=0.1e-4));
+
+    input Real u1 = qt.u1;
+    input Real u2 = qt.u2;
+
+end QuadTank_ParEstCasADi;
 
 optimization QuadTank_ParEst2 (objective=sum((y1_meas[i] - qt.x1(t_meas[i]))^2 + 
                                             (y2_meas[i] - qt.x2(t_meas[i]))^2 +
