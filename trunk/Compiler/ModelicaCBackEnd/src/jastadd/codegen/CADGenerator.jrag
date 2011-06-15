@@ -52,6 +52,44 @@ public class CADGenerator extends CGenerator {
 			}
 		}	
 	}
+	
+	/**
+	 * Generates CAD headers for Modelica functions.
+	 */
+	class DAETag_CAD_function_headers extends DAETag {
+		
+		public DAETag_CAD_function_headers(AbstractGenerator myGenerator, FClass fclass) {
+			super("CAD_function_headers","C: CAD function headers representing Modelica functions",
+			  myGenerator,fclass);
+		}
+
+		public void generate(PrintStream genPrinter) {
+			if (fclass.root().options.getBooleanOption("generate_dae_jacobian")){
+				for (FFunctionDecl func : fclass.getFFunctionDecls()){
+					func.genHeader_CAD(genPrinter, "");
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Generates definitions for Modelica functions.
+	 */
+	class DAETag_CAD_functions extends DAETag {
+		
+		public DAETag_CAD_functions(AbstractGenerator myGenerator, FClass fclass) {
+			super("CAD_functions","C: CAD functions representing Modelica functions",
+			  myGenerator,fclass);
+		}
+
+		public void generate(PrintStream genPrinter) {
+			if (fclass.root().options.getBooleanOption("generate_dae_jacobian")){
+				for (FFunctionDecl func : fclass.getFFunctionDecls()){
+					func.prettyPrint_CAD(genPrinter, "");
+				}
+			}
+		}
+	}
 
 	class DAETag_C_equationSparsity extends DAETag {
 		

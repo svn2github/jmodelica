@@ -85,6 +85,8 @@ JMI_DER_PD = 8
 
 """Flags for evaluation of Jacobians w.r.t. variables in the v vector
 """
+"""Evaluate derivatives w.r.t. derivatives, \f$\p_opt\f$."""
+JMI_DER_P_OPT = 8192
 """Evaluate derivatives w.r.t. derivatives, \f$\dot x\f$."""
 JMI_DER_DX = 16
 """Evaluate derivatives w.r.t. differentiated variables, \f$x\f$."""

@@ -58,18 +58,36 @@ aspect CADCodeGen {
 			
 			str.print("jmi_ad_var_t ");
 			str.print(this.adDerName());
-			str.print(" = 0;\n");
+			str.print(" = (*dz)[jmi->offs_t];\n");
 	}
 	
+	syn String FIdUseExp.adVarName() = 
+		inFunction() ? getFIdUse().toString_var_CAD(printer_C) : this.prettyPrint_C("");
+	
+	syn String FIdUseExp.adDerName() =
+		inFunction() ? getFIdUse().toString_der_CAD(printer_C) : variability().lessOrEqual(fParameter()) ? "0" : "(*dz)[" + this.myFV().valueReference() + "-jmi->offs_real_dx]";
+		
+	//functions.. modified and added
 	public void FIdUseExp.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
+		/*if (inFunction()) {
+			str.print("jmi_ad_var_t ");
+			str.print(this.adVarName());
+			str.print(" = ");
+			str.print(getFIdUse().toString_var_CAD(p));
+			str.print(";\n");
+			str.print("jmi_ad_var_t ");
+			str.print(this.adDerName());
+			str.print(" = ");
+			str.print(getFIdUse().toString_der_CAD(p));
+			str.print(";\n");
+		} else {
 			str.print("jmi_ad_var_t ");
 			str.print(this.adVarName());
 			str.print(" = ");
 			this.prettyPrint_C(p,str,indent);
 			str.print(";\n");
-			
 			if (variability().lessOrEqual(fParameter())){
-			 	str.print("jmi_ad_var_t ");
+				str.print("jmi_ad_var_t ");
 				str.print(this.adDerName());
 				str.print(" = 0;\n");
 			} else{	
@@ -78,11 +96,94 @@ aspect CADCodeGen {
 				str.print(" = (*dz)[");
 				str.print(this.myFV().valueReference());
 				str.print("-jmi->offs_real_dx];\n");
+		
 			}
+		}*/
 	}
 	
+	syn String FIdUse.name_var_CAD() = toString_var_CAD(printer_C);
+	
+	syn String FIdUse.name_der_CAD() = toString_der_CAD(printer_C);
+	
+	syn String FIdUse.toString_var_CAD(Printer p) {
+		String type = myFV().funcArrayType(isAssignUse());
+		if (myFV().inRecord() && inFunction()) {
+			return myRecordFV().genRecordUse_C(p, getFQName(), type);
+		} else{
+			return myFV().genUse_var_CAD(p, getFQName().getLastFArraySubscripts(), type);
+		}
+	}
+	
+	syn String FIdUse.toString_der_CAD(Printer p) {
+		String type = myFV().funcArrayType(isAssignUse());
+		if (myFV().inRecord() && inFunction()) {
+			return myRecordFV().genRecordUse_C(p, getFQName(), type);
+		} else{
+			return myFV().genUse_der_CAD(p, getFQName().getLastFArraySubscripts(), type);
+		}
+	}
+	
+	public String AbstractFVariable.genUse_var_CAD(Printer p, FArraySubscripts fas, String type) {
+		return name_var_CAD();
+	}
+	
+	public String AbstractFVariable.genUse_der_CAD(Printer p, FArraySubscripts fas, String type) {
+		return name_der_CAD();
+		
+	}
+	
+	public String FFunctionArray.genUse_var_CAD(Printer p, FArraySubscripts fas, String type) {
+		if (fas == null)
+			return name_C();
+		else
+			return fas.genFunctionArrayUse_var_CAD(p, name_var_CAD(), type);
+	}
+	
+	public String FFunctionArray.genUse_der_CAD(Printer p, FArraySubscripts fas, String type) {
+		if (fas == null)
+			return name_C();
+		else
+			return fas.genFunctionArrayUse_der_CAD(p, name_der_CAD(), type);
+	}
+	
+	public String FArraySubscripts.genFunctionArrayUse_var_CAD(Printer p, String name, String type) {
+		ByteArrayOutputStream os = new ByteArrayOutputStream();	
+		PrintStream str = new PrintStream(os);
+		str.print("jmi_array_");
+		str.print(type);
+		str.print("_");
+		str.print(getNumFSubscript());
+		str.print("(");
+		str.print(name);
+		str.print(", ");
+		getFSubscripts().prettyPrint_CAD(p, str, "");
+		str.print(")");
+		return os.toString();
+	}
+	
+	public void FSubscript.prettyPrint_CAD(Printer p, PrintStream str, String indent){
+		this.getChild(0).prettyPrint_C(p,str,indent);
+	}
+	
+	public String FArraySubscripts.genFunctionArrayUse_der_CAD(Printer p, String name, String type) {
+		ByteArrayOutputStream os = new ByteArrayOutputStream();	
+		PrintStream str = new PrintStream(os);
+		str.print("jmi_array_");
+		str.print(type);
+		str.print("_");
+		str.print(getNumFSubscript());
+		str.print("(");
+		str.print(name);
+		str.print(", ");
+		getFSubscripts().prettyPrint_CAD(p, str, "");
+		str.print(")");
+		return os.toString();
+	}
+	
+	//End function added
+	
 	public void FLitExp.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
-			str.print("jmi_ad_var_t ");
+			/*str.print("jmi_ad_var_t ");
 			str.print(this.adVarName());
 			str.print(" = ");
 			this.prettyPrint_C(p, str, indent);
@@ -91,9 +192,10 @@ aspect CADCodeGen {
 			str.print("jmi_ad_var_t ");
 			str.print(this.adDerName());
 			str.print(" = 0;\n");
-			
+			*/
 	}
 	
+	//Elementary functions
 	public void FSinExp.prettyPrint_CAD(Printer p, PrintStream str, String indent) {		
 			p.print(getFExp(),str,indent);
 			str.print("jmi_ad_var_t ");
@@ -565,42 +667,22 @@ aspect CADCodeGen {
 		getIfExp().prettyPrint_C(str,indent);
 		str.print("){\n");
 		p.print(getThenExp(),str,indent);
-		str.print("temp_v_");
-		str.print(adIndex());
-		str.print(" = v_");
-		str.print(getIfExp().adIndex()-1);
-		str.print(";\ntemp_d_");
-		str.print(adIndex());
-		str.print(" = d_");
-		str.print(getIfExp().adIndex()-1);
-		str.print(";\n}\n");
+		str.print("temp_v_" + adIndex() + "=" + getThenExp().adVarName() + ";\n");
+		str.print("temp_d_" + adIndex() + "=" + getThenExp().adDerName() + ";\n}\n");
 		for (FElseIfExp el_if : getFElseIfExps()) {
 		
 			str.print("else if(");
 			el_if.getIfExp().prettyPrint_C(str,indent);
 			str.print("){\n");
 			p.print(el_if.getThenExp(),str,indent);
-			str.print("temp_v_");
-			str.print(adIndex());
-			str.print(" = v_");
-			str.print(el_if.adIndex()-1);
-			str.print(";\ntemp_d_");
-			str.print(adIndex());
-			str.print(" = d_");
-			str.print(el_if.adIndex()-1);
-			str.print(";\n}\n");	
+			str.print("temp_v_" + adIndex() + "=" + el_if.getThenExp().adVarName() + ";\n");
+			str.print("temp_d_" + adIndex() + "=" + el_if.getThenExp().adDerName() + ";\n}\n");
 		}
 		str.print("else{\n");
 		p.print(getElseExp(),str,indent);
-		str.print("temp_v_");
-		str.print(adIndex());
-		str.print(" = v_");
-		str.print(getElseExp().adIndex());
-		str.print(";\ntemp_d_");
-		str.print(adIndex());
-		str.print(" = d_");
-		str.print(getElseExp().adIndex());
-		str.print(";\n}\n");
+		str.print("temp_v_" + adIndex() + "=" + getElseExp().adVarName() + ";\n");
+		str.print("temp_d_" + adIndex() + "=" + getElseExp().adDerName() + ";\n}\n");
+
 		str.print("jmi_ad_var_t ");
 		str.print(adVarName());
 		str.print(" = temp_v_");
@@ -636,16 +718,692 @@ aspect CADCodeGen {
 		str.print(";\n");
 	}
 	
+	//Methods to handle function calls starts here
+	
+	public void FFunctionCallEquation.genResidual_CAD(int i, String indent, PrintStream str) {
+		if (!getCall().isIgnored()) {
+			genTempVars_CAD(printer_C, str, indent);
+			for (FFunctionCallLeft l : getLefts()) {
+				l.setBaseIndex(i);
+				l.genTempVar_var_CAD(indent, str);
+				l.genTempVar_der_CAD(indent,str);
+			}
+			getCall().prettyPrint_CAD(str, indent);
+			str.print(";\n");
+			for (FFunctionCallLeft l : getLefts()){
+				l.genWriteBack_CAD(str, indent);
+			}
+		}
+	}
+	
+	public void ASTNode.genTempVars_CAD(Printer p, PrintStream str, String indent) {
+		for (ASTNode node : this){
+			node.genTempVars_CAD(p, str, indent);
+	
+		}
+	}
+	
+	public void FFunctionCall.genTempVars_CAD(Printer p, PrintStream str, String indent) {
+		getArgs().genTempVars_CAD(p, str, indent);
+		for (FExp arg : getArgs()){ 
+			if (!arg.keepAsArray()){ 
+				arg.genTempInput_var_CAD(p, str, indent);
+				arg.genTempInput_der_CAD(p,str,indent);
+			}
+		}
+	}
+	
+	
+	public void FExp.genTempVars_CAD(Printer p, PrintStream str, String indent) {
+		if (isArray() && !size().isUnknown()){
+			getArray().genTempVars_CAD(p, str, indent);
+		} else{
+			super.genTempVars_C(p, str, indent);
+		}
+	}
+	
+	public void FFunctionCallLeft.genTempVars_CAD(Printer p, PrintStream str, String indent) {
+		if (hasFExp()){
+			getFExp().genTempOutput_var_CAD(p, str, indent);
+			getFExp().genTempOutput_der_CAD(p, str, indent);
+		}
+	}
+	
+	public void FExp.genTempOutput_var_CAD(Printer p, PrintStream str, String indent) {}
+
+	public void FExp.genTempOutput_der_CAD(Printer p, PrintStream str, String indent) {}
+	
+	public void FArray.genTempOutput_var_CAD(Printer p, PrintStream str, String indent) {
+		type().printDecl_C(p, str, indent, tempName_var_CAD(), this);
+	}
+	public void FArray.genTempOutput_der_CAD(Printer p, PrintStream str, String indent) {
+		type().printDecl_C(p, str, indent, tempName_der_CAD(), this);
+	}
+	
+	syn lazy String FExp.tempName_var_CAD() {
+		return "tmp_var_a_" + nextTempNbr_var_CAD();
+	}
+	
+	syn lazy String FExp.tempName_der_CAD() {
+		return "tmp_der_a_" + nextTempNbr_der_CAD();
+	}
+	
+	private int FClass.tmpNbr_var = 0;
+	
+	public int FClass.nextTempNbr_var_CAD() {
+		return tmpNbr_var++;
+	}
+	
+	syn lazy int FExp.nextTempNbr_var_CAD() = myFClass().nextTempNbr_var_CAD();
+	
+	private int FClass.tmpNbr_der = 0;
+	
+	public int FClass.nextTempNbr_der_CAD() {
+		return tmpNbr_der++;
+	}
+	
+	syn lazy int FExp.nextTempNbr_der_CAD() = myFClass().nextTempNbr_der_CAD();
+	
+	public void FExp.genTempInput_var_CAD(Printer p, PrintStream str, String indent) {
+		if (isComposite()) {
+			String name = tempName_var_CAD();
+			type().printDecl_C(p, str, indent, name, this);
+			type().genTempInputAssigns_var_CAD(p, str, indent, name, this);
+		}
+	}
+	
+	public void FExp.genTempInput_der_CAD(Printer p, PrintStream str, String indent) {
+		if (isComposite()) {
+			String name = tempName_der_CAD();
+			type().printDecl_C(p, str, indent, name, this);
+			type().genTempInputAssigns_der_CAD(p, str, indent, name, this);
+		}
+	}
+	
+	public void FType.genTempInputAssigns_var_CAD(
+			Printer p, PrintStream str, String indent, String name, FExp exp) {
+		if (isArray()) {
+			String type = isRecord() ? C_ARRAY_RECORD : C_ARRAY_REFERENCE;
+			String pre = "jmi_array_" + type + "_" + ndims() + "(" + name + ", ";
+			Array arr = exp.getArray();
+			for (Index i : arr.indices()) {
+				String cellName = pre + i.toUnclosedString() + ")";
+				genTempInputCellAssigns_var_CAD(p, str, indent, cellName, arr.get(i));
+			}
+		} else {
+			genTempInputCellAssigns_var_CAD(p, str, indent, name, exp);
+		}
+	}
+	
+	public void FType.genTempInputCellAssigns_var_CAD(
+			Printer p, PrintStream str, String indent, String name, FExp exp) {
+		printer_CAD.print(exp, str, indent);
+		str.print(indent + name + " = " + exp.adVarName() + ";\n");
+	}
+	
+	public void FType.genTempInputAssigns_der_CAD(
+			Printer p, PrintStream str, String indent, String name, FExp exp) {
+		if (isArray()) {
+			String type = isRecord() ? C_ARRAY_RECORD : C_ARRAY_REFERENCE;
+			String pre = "jmi_array_" + type + "_" + ndims() + "(" + name + ", ";
+			Array arr = exp.getArray();
+			for (Index i : arr.indices()) {
+				String cellName = pre + i.toUnclosedString() + ")";
+				genTempInputCellAssigns_der_CAD(p, str, indent, cellName, arr.get(i));
+			}
+		} else {
+			genTempInputCellAssigns_der_CAD(p, str, indent, name, exp);
+		}
+	}
+	
+	public void FType.genTempInputCellAssigns_der_CAD(
+			Printer p, PrintStream str, String indent, String name, FExp exp) {
+		str.print(indent + name + " = ");
+		str.print(exp.adDerName() + ";\n");
+	}
+	
+	syn String FFunctionCallLeft.name_var_CAD() {
+		// TODO: use getFExp().tempName_C() instead of first case as well?
+		if (equationIndex >= 0 && !getFExp().isComposite()) {
+			StringBuilder b = new StringBuilder();
+			b.append("tmp_var_");
+			b.append(equationIndex);
+			return b.toString();
+		} else if (equationIndex < 0 || getFExp().keepAsArray()) {
+			return ((FIdUseExp) getFExp()).getFIdUse().name_var_CAD();
+		} else {
+			return getFExp().tempName_var_CAD();
+		}
+	}
+	
+	public void FFunctionCallLeft.genTempVar_var_CAD(String indent, PrintStream str) {
+		if (hasFExp() && !getFExp().isComposite()) {
+			str.print(indent);
+			str.print(type_C());
+			str.print(" ");
+			str.print(name_var_CAD());
+			str.print(";\n");
+		}
+	}
+	
+	syn String FFunctionCallLeft.name_der_CAD() {
+		// TODO: use getFExp().tempName_C() instead of first case as well?
+		if (equationIndex >= 0 && !getFExp().isComposite()) {
+			StringBuilder b = new StringBuilder();
+			b.append("tmp_der_");
+			b.append(equationIndex);
+			return b.toString();
+		} else if (equationIndex < 0 || getFExp().keepAsArray()) {
+			return ((FIdUseExp) getFExp()).getFIdUse().name_der_CAD();
+		} else {
+			return getFExp().tempName_der_CAD();
+		}
+	}
+	
+	public void FFunctionCallLeft.genTempVar_der_CAD(String indent, PrintStream str) {
+		if (hasFExp() && !getFExp().isComposite()) {
+			str.print(indent);
+			str.print(type_C());
+			str.print(" ");
+			str.print(name_der_CAD());
+			str.print(";\n");
+		}
+	}
+	
+	public void FFunctionCall.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
+		boolean exp = functionCallIsExp();
+		if(exp){
+			str.print("jmi_ad_var_t " + this.adVarName() + ";\n");
+			str.print("jmi_ad_var_t " + this.adDerName() + ";\n");
+		}
+		str.print(getName().funcNameUnderscore("der_AD"));
+		str.print("(");
+		String sep = "";
+		for (FExp arg : getArgs()) {
+			str.print(sep);
+			arg.genArgument_var_CAD(p, str, indent);
+			sep = ", ";
+		}
+		for (FExp arg : getArgs()) {
+			str.print(sep);
+			arg.genArgument_der_CAD(p, str, indent);
+			sep = ", ";
+		}
+		if (!exp){
+			int tot = myOutputs().size();
+			int lefts = myLefts().size();
+			for (int i = 0; i < tot; i++) {
+				str.print(sep);
+				if (i < lefts)
+					myLefts().get(i).genArgument_var_CAD(str);
+				else
+					str.print("NULL");
+				sep = ", ";
+			}
+			for (int i = 0; i < tot; i++) {
+				str.print(sep);
+				if (i < lefts)
+					myLefts().get(i).genArgument_der_CAD(str);
+				else
+					str.print("NULL");
+				sep = ", ";
+			}
+			str.print(")");
+		} else{
+			str.print(",&" + this.adVarName() + ", &" + this.adDerName() + ");\n");
+		}
+	}
+	
+	public void FFunctionCallLeft.genArgument_var_CAD(PrintStream str) {
+		if (hasFExp()) {
+			if (!getFExp().isComposite())
+				str.print("&");
+			str.print(name_var_CAD());
+		} else {
+			str.print("NULL");
+		}
+	}
+	
+	public void FFunctionCallLeft.genArgument_der_CAD(PrintStream str) {
+		if (hasFExp()) {
+			if (!getFExp().isComposite())
+				str.print("&");
+			str.print(name_der_CAD());
+		} else {
+			str.print("NULL");
+		}
+	}
+	
+	public void FExp.genArgument_var_CAD(Printer p, PrintStream str, String indent) {
+		if (isComposite() && !keepAsArray()){
+			str.print(tempName_var_CAD());
+		} else{
+			this.prettyPrint_C(p, str, indent);
+		}
+	}
+	
+	public void FExp.genArgument_der_CAD(Printer p, PrintStream str, String indent) {
+		if (isComposite() && !keepAsArray()){
+			str.print(tempName_der_CAD());
+		} else{
+			FIdUseExp e = (FIdUseExp)this;
+			str.print(e.adDerName());
+		}
+	}
+	
+	public void FFunctionCallLeft.genWriteBack_CAD(PrintStream str, String indent) {
+		if (hasFExp()) 
+			getFExp().type().genWriteBack_var_CAD(str, indent, name_var_CAD(), getFExp(), equationIndex);
+			getFExp().type().genWriteBack_der_CAD(str, indent, name_der_CAD(), getFExp(), equationIndex);
+	}
+	
+	public void FType.genWriteBack_var_CAD(PrintStream str, String indent, String name, FExp exp, int index) {
+		if (isArray()) {
+			String type = isRecord() ? C_ARRAY_RECORD : C_ARRAY_VALUE;
+			String pre = String.format("jmi_array_%s_%d(%s, ", type, ndims(), name);
+			Array arr = exp.getArray();
+			for (Index i : arr.indices()) {
+				String cellName = pre + i.toUnclosedString() + ")";
+				genCellWriteBack_var_CAD(str, indent, cellName, arr.get(i), index++);
+			}
+		} else {
+			genCellWriteBack_var_CAD(str, indent, name, exp, index);
+		}
+	}
+	
+	public void FType.genWriteBack_der_CAD(PrintStream str, String indent, String name, FExp exp, int index) {
+		if (isArray()) {
+			String type = isRecord() ? C_ARRAY_RECORD : C_ARRAY_VALUE;
+			String pre = String.format("jmi_array_%s_%d(%s, ", type, ndims(), name);
+			Array arr = exp.getArray();
+			for (Index i : arr.indices()) {
+				String cellName = pre + i.toUnclosedString() + ")";
+				genCellWriteBack_der_CAD(str, indent, cellName, arr.get(i), index++);
+			}
+		} else {
+			genCellWriteBack_der_CAD(str, indent, name, exp, index);
+		}
+	}
+	
+	public void FType.genCellWriteBack_var_CAD(PrintStream str, String indent, String name, FExp exp, int index) {
+		exp.genWriteBack_var_CAD(str, indent, name, index);
+	}
+	
+	public void FType.genCellWriteBack_der_CAD(PrintStream str, String indent, String name, FExp exp, int index) {
+		exp.genWriteBack_der_CAD(str, indent, name, index);
+	}
+	
+	public void FExp.genWriteBack_var_CAD(PrintStream str, String indent, String name, int index) {
+		str.print(indent);
+		str.print("(*res)[");
+		str.print(index);
+		str.print("] = ");
+		str.print(name);
+		str.print(" - (");
+		str.print(adVarName());
+		str.print(");\n");
+	}
+	
+	
+	public void FExp.genWriteBack_der_CAD(PrintStream str, String indent, String name, int index) {
+		str.print(indent);
+		str.print("(*dF)[");
+		str.print(index);
+		str.print("] = ");
+		str.print(name);
+		str.print(" - (");
+		str.print(adDerName());
+		str.print(");\n");
+	}
+	
+	
+	//Methods to handle function calls ends here
+	
+	//Methods to handle If clauses starts here
+	
+	public void FIfWhenStmt.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
+		for (FIfWhenClause clause : getFIfWhenClauses())
+			clause.getTest().genTempVars_C(p, str, indent);
+		str.print(indent);
+		getFIfWhenClauses().prettyPrintWithSep(p, str, indent, indent + "} else ");
+		prettyPrintElse_CAD(p, str, indent);
+		str.print(indent);
+		str.print("}\n");
+	}
+	
+	protected void FIfWhenStmt.prettyPrintElse_CAD(Printer p, PrintStream str, String indent) {}
+	
+	protected void FIfStmt.prettyPrintElse_CAD(Printer p, PrintStream str, String indent) {
+		if (getNumElseStmt() > 0) {
+			str.print(indent);
+			str.print("} else {\n");
+			p.print(getElseStmts(), str, p.indent(indent));
+		}
+	}
+	
+	public void FIfWhenClause.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
+		str.print("if (");
+		p.print(getTest(), str, indent);
+		str.print(") {\n");
+		p.print(getFStatements(), str, p.indent(indent));
+	}
+	
+	
+	//Methods to handle while loops starts here
+	
+	public void FWhileStmt.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
+		getTest().genTempVars_C(p, str, indent);
+		str.print(indent);
+		str.print("while (");
+		getTest().prettyPrint_CAD(p,str,indent);
+		str.print(") {\n");
+		p.print(getWhileStmts(), str, p.indent(indent));
+		str.print("}\n");		
+	}
+	
+	public void FRelExp.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
+		if (inNoEventExp()) {
+			str.print(macro_C()+"(");
+			str.print(getLeft().adVarName());
+			str.print(", ");
+			str.print(getRight().adVarName());
+			str.print(relIsInverted_C() ? ", JMI_FALSE, JMI_TRUE)" : ", JMI_TRUE, JMI_FALSE)");
+		} else {
+			if (inEquationSection()) {
+				str.print("_sw");
+				str.print("(" + relExpInEquationsIndex() + ")");
+			} else {
+				str.print("_sw_init");
+				str.print("(" + relExpInInitialEquationsIndex() + ")");
+			}
+		}
+	}
+	
+	//Methods to handle for-loops in functions starts here
+	
+	public void FForStmt.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
+		getIndex().genTempVars_C(p, str, indent);
+		getIndex().printForArrayDecl_CAD(p, str, indent);
+		str.print(indent);
+		str.print("for (");
+		p.print(getIndex(), str, indent);
+		str.print(") {\n");
+		getIndex().printForArrayNext_C(p, str, p.indent(indent));
+		p.print(getForStmts(), str, p.indent(indent));
+		str.print(indent);		
+		str.print("}\n");		
+	}
+	
+	public void FForIndex.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
+		if (hasFExp()) 
+			getFExp().printForIndex_CAD(p, str, indent, getFVariable().name_C());
+	}
+	
+	public void FForIndex.printForArrayDecl_CAD(Printer p, PrintStream str, String indent) {
+		if (needsForArray()) {
+			str.print(indent);
+			str.print("jmi_ad_var_t ");
+			str.print(getFVariable().name_C());
+			str.print("a[] = { ");
+			getFExp().getArray().getFExps().prettyPrintWithSep(p, str, indent, ", ");
+			str.print(" };\n");
+		}
+	}
+	
+	public void FForIndex.printForArrayNext_CAD(Printer p, PrintStream str, String indent) {
+		if (needsForArray()) {
+			String name = getFVariable().name_C();
+			str.print(indent);
+			str.print("jmi_ad_var_t ");
+			str.print(name);
+			str.print(" = ");
+			str.print(name);
+			str.print("a[");
+			str.print(name);
+			str.print("i];\n");
+		}
+	}
+	
+	public void FRangeExp.printForIndex_CAD(Printer p, PrintStream str, String indent, String name) {
+		boolean hasStep = getNumFExp() > 2;
+		str.print("jmi_ad_var_t ");
+		str.print(name);
+		str.print(" = ");
+		getFExp(0).prettyPrint_C(p,str,indent);
+		str.print("; ");
+		str.print(name);
+		str.print(" <= ");
+		getFExp(hasStep ? 2 : 1).prettyPrint_C(p,str,indent);
+		str.print("; ");
+		str.print(name);
+		str.print(" += ");
+		if (hasStep) 
+			getFExp(1).prettyPrint_C(p,str,indent);
+		else
+			str.print("1");
+	}
+	
+	public void FExp.printForIndex_CAD(Printer p, PrintStream str, String indent, String name) {
+		str.print("int ");
+		str.print(name);
+		str.print("i = 0; ");
+		str.print(name);
+		str.print("i < ");
+		str.print(size().numElements());
+		str.print("; ");
+		str.print(name);
+		str.print("i++");
+	}
+	
+	// Methods to handle for-loops in functions ends here.
+	
+	//Methods to handle functions starts here.
+	
+	public void FReturnStmt.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
+		str.print("\n");
+	}
+	
+	public void FAlgorithmBlock.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
+		p.print(getFStatements(), str, indent);
+	}
+	
+	public void FAssignStmt.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
+		genTempVars_C(p, str, indent);
+		p.print(getRight(), str, indent);
+		
+		str.print(getLeft().toString_var_CAD(p));
+		str.print(" = ");
+		str.print(getRight().adVarName());
+		str.print(";\n");
+		
+		str.print(getLeft().toString_der_CAD(p));
+		str.print(" = ");
+		str.print(getRight().adDerName());
+		str.print(";\n");
+	}
+	
+	public void FFunctionDecl.genHeader_CAD(PrintStream str, String indent) {
+		prettyPrintHead_CAD(printer_C, str, indent, "void", "der_AD", true);
+		str.print(";\n");
+	}
+	
+	public void FFunctionDecl.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
+		String next = p.indent(indent);
+		// Print definition
+		prettyPrintHead_CAD(p, str, indent, "void", "der_AD", true);
+		str.print(" {\n");
+		str.print(next + "JMI_DYNAMIC_INIT()\n");
+		for (FFunctionVariable ffv : myNonInputs())
+			ffv.printNullNonInputReplacement_CAD(p, str, indent);
+		for (FFunctionVariable ffv : myOutputs())
+			ffv.printNullOutputReplacement_CAD(p, str, next);
+    	p.print(getFAlgorithmBlock(), str, next);
+    	str.print(indent);
+    	returnDefinition().printReturnWrite_CAD(str, indent);
+		// TODO: Check if there are any dynamic declarations first
+		str.print(indent + "JMI_DYNAMIC_FREE()\n");
+		str.print(indent + "return;\n");
+    	str.print("}\n\n");
+	}
+	
+	//Null handeling
+	
+	public void  FFunctionVariable.printNullNonInputReplacement_CAD(Printer p, PrintStream str, String indent) {
+		str.print("jmi_ad_var_t ");
+		str.print(name_var_CAD());
+		str.print(";\n");
+		
+		str.print("jmi_ad_var_t ");
+		str.print(name_der_CAD());
+		str.print(";\n");
+	}
+	
+	public void FFunctionArray.printNullNonInputReplacement_CAD(Printer p, PrintStream str, String indent) {}
+	
+	public void FFunctionVariable.printNullOutputReplacement_CAD(Printer p, PrintStream str, String indent) {
+		if (isComposite()) {
+			String name_var_CAD = name_var_CAD();
+			String name_var_r = name_var_CAD + C_SUFFIX_NULL;
+			String next = p.indent(indent);
+			str.print(indent + "if (" + name_var_CAD + " == NULL) {\n");
+			printDecl_C(p, str, next, name_var_r);
+			str.print(next + name_var_CAD + " = " + name_var_r + ";\n");
+			str.print(indent + "}\n");
+			
+			String name_der_CAD = name_der_CAD();
+			String name_der_r = name_der_CAD + C_SUFFIX_NULL;
+			str.print(indent + "if (" + name_der_CAD + " == NULL) {\n");
+			printDecl_C(p, str, next, name_der_r);
+			str.print(next + name_der_CAD + " = " + name_der_r + ";\n");
+			str.print(indent + "}\n");
+		}
+	}
+	
+	
+	//Return from functions
+	
+	public void FunctionReturnDefinition.printReturnWrite_CAD(PrintStream str, String indent) {
+		for (FFunctionVariable v : outputs) 
+			v.printReturnWrite_CAD(str, indent);
+	}
+	
+	public void FFunctionVariable.printReturnWrite_CAD(PrintStream str, String indent) {
+		if (!isRecord()) {
+			str.print(indent);
+			str.print("if (");
+			str.print(nameReturn_var_CAD());
+			str.print(" != NULL) *");
+			str.print(nameReturn_var_CAD());
+			str.print(" = ");
+			str.print(name_var_CAD());
+			str.print(";\n");
+			str.print(indent);
+			str.print("if (");
+			str.print(nameReturn_der_CAD());
+			str.print(" != NULL) *");
+			str.print(nameReturn_der_CAD());
+			str.print(" = ");
+			str.print(name_der_CAD());
+			str.print(";\n");
+		}
+	}
+	
+	public void FFunctionArray.printReturnWrite_CAD(PrintStream str, String indent) {}
+	
+	//end returns from functions
+	
+	//Function declarations and headers
+	private void FFunctionDecl.prettyPrintHead_CAD(Printer p, PrintStream str, String indent, 
+			String type, String suffix, boolean returnArgs) {
+		str.print(indent);
+		str.print(type);
+		str.print(" ");
+		str.print(getFQName().funcNameUnderscore(suffix));
+		str.print("(");
+		String sep = "";
+		for (FFunctionVariable v : myInputs()) {
+			str.print(sep);
+			v.printArgument_var_CAD(str);
+			sep = ", ";
+		}
+		for (FFunctionVariable v : myInputs()) {
+			str.print(sep);
+			v.printArgument_der_CAD(str);
+			sep = ", ";
+		}
+		if (returnArgs) {
+			for (FFunctionVariable v : myOutputs()) {
+				str.print(sep);
+				v.printReturnArgument_var_CAD(str);
+				sep = ", ";
+			}
+		}
+		if (returnArgs) {
+			for (FFunctionVariable v : myOutputs()) {
+				str.print(sep);
+				v.printReturnArgument_der_CAD(str);
+				sep = ", ";
+			}
+		}
+		str.print(")");
+	}
+	
+	public void FFunctionVariable.printArgument_var_CAD(PrintStream str) {
+		str.print(type_C());
+		str.print(" ");
+		str.print(name_var_CAD());
+	}
+	
+	public void FFunctionVariable.printArgument_der_CAD(PrintStream str) {
+		str.print(type_C());
+		str.print(" ");
+		str.print(name_der_CAD());
+	}
+	
+	public void FFunctionVariable.printReturnArgument_var_CAD(PrintStream str) {
+		str.print(typeReturn_C());
+		str.print(" ");
+		str.print(nameReturn_var_CAD());
+	}
+	
+	public void FFunctionVariable.printReturnArgument_der_CAD(PrintStream str) {
+		str.print(typeReturn_C());
+		str.print(" ");
+		str.print(nameReturn_der_CAD());
+	}
+	
+	syn lazy String AbstractFVariable.name_var_CAD() = name_C();
+	syn lazy String AbstractFVariable.name_der_CAD() = "0";
+	eq FFunctionVariable.name_var_CAD() = nameUnderscore() + "_var_" + C_SUFFIX_VARIABLE;
+	eq FFunctionArray.name_var_CAD()    = nameUnderscore() + "_var_" + C_SUFFIX_ARRAY;
+	eq FFunctionVariable.name_der_CAD() = nameUnderscore() + "_der_" + C_SUFFIX_VARIABLE;
+	eq FFunctionArray.name_der_CAD()    = nameUnderscore() + "_der_" + C_SUFFIX_ARRAY;
+	
+	syn String FFunctionVariable.nameReturn_var_CAD() = 
+		isRecord() ? name_var_CAD() : (getFQName().nameUnderscore() + "_var_" + C_SUFFIX_RETURN);
+	syn String FFunctionArray.nameReturn_var_CAD()    = name_var_CAD();
+	
+	syn String FFunctionVariable.nameReturn_der_CAD() = 
+		isRecord() ? name_der_CAD() : (getFQName().nameUnderscore() + "_der_" + C_SUFFIX_RETURN);
+	syn String FFunctionArray.nameReturn_der_CAD()    = name_der_CAD();
+	
+	//end functions
+	
 	private int FClass.adIndex = 0;
 	
 	public int FClass.nextADIndex() {
 		return adIndex++;
 	}
 	
+	
 	syn lazy int FExp.adIndex() = myFClass().nextADIndex();
 	
 	syn String FExp.adVarName() = "v_" + adIndex();
 	
 	syn String FExp.adDerName() = "d_" + adIndex();
+	
+	syn String FLitExp.adVarName() = this.prettyPrint_C("");
+	
+	syn String FLitExp.adDerName() = "0";
 	
 }

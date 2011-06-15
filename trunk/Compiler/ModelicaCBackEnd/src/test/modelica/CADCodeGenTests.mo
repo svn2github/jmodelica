@@ -8,20 +8,12 @@ model CADsin
          generate_dae_jacobian=true,
          template="$C_DAE_equation_directional_derivative$",
          generatedCode="
-jmi_ad_var_t v_0 = _x1_1;
-jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx];
-jmi_ad_var_t v_1 = sin(v_0);
-jmi_ad_var_t d_1 = d_0 * cos(v_0);
-jmi_ad_var_t v_2 = _y_0;
-jmi_ad_var_t d_2 = (*dz)[0-jmi->offs_real_dx];
-(*res)[0] = v_1 - v_2;
-(*dF)[0] = d_1 - d_2;
-jmi_ad_var_t v_3 = 1;
-jmi_ad_var_t d_3 = 0;
-jmi_ad_var_t v_4 = _x1_1;
-jmi_ad_var_t d_4 = (*dz)[1-jmi->offs_real_dx];
-(*res)[1] = v_3 - v_4;
-(*dF)[1] = d_3 - d_4;
+jmi_ad_var_t v_0 = sin(_x1_1);
+jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx] * cos(_x1_1);
+(*res)[0] = v_0 - _y_0;
+(*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
+(*res)[1] = 1 - _x1_1;
+(*dF)[1] = 0 - (*dz)[1-jmi->offs_real_dx];
 ")})));
 
 	Real y;
@@ -39,20 +31,12 @@ model CADcos
          generate_dae_jacobian=true,
          template="$C_DAE_equation_directional_derivative$",
          generatedCode="
-jmi_ad_var_t v_0 = _x1_1;
-jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx];
-jmi_ad_var_t v_1 = cos(v_0);
-jmi_ad_var_t d_1 = d_0 * -sin(v_0);
-jmi_ad_var_t v_2 = _y_0;
-jmi_ad_var_t d_2 = (*dz)[0-jmi->offs_real_dx];
-(*res)[0] = v_1 - v_2;
-(*dF)[0] = d_1 - d_2;
-jmi_ad_var_t v_3 = 1;
-jmi_ad_var_t d_3 = 0;
-jmi_ad_var_t v_4 = _x1_1;
-jmi_ad_var_t d_4 = (*dz)[1-jmi->offs_real_dx];
-(*res)[1] = v_3 - v_4;
-(*dF)[1] = d_3 - d_4;
+jmi_ad_var_t v_0 = cos(_x1_1);
+jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx] * -sin(_x1_1);
+(*res)[0] = v_0 - _y_0;
+(*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
+(*res)[1] = 1 - _x1_1;
+(*dF)[1] = 0 - (*dz)[1-jmi->offs_real_dx];
 ")})));
 
   Real y;
@@ -70,21 +54,14 @@ model CADtan
          generate_dae_jacobian=true,
          template="$C_DAE_equation_directional_derivative$",
          generatedCode="
-jmi_ad_var_t v_0 = _x1_1;
-jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx];
-jmi_ad_var_t v_1 = tan(v_0);
-jmi_ad_var_t d_1 = d_0 * 1/(cos(v_0)*cos(v_0));
-jmi_ad_var_t v_2 = _y_0;
-jmi_ad_var_t d_2 = (*dz)[0-jmi->offs_real_dx];
-(*res)[0] = v_1 - v_2;
-(*dF)[0] = d_1 - d_2;
-jmi_ad_var_t v_3 = 1;
-jmi_ad_var_t d_3 = 0;
-jmi_ad_var_t v_4 = _x1_1;
-jmi_ad_var_t d_4 = (*dz)[1-jmi->offs_real_dx];
-(*res)[1] = v_3 - v_4;
-(*dF)[1] = d_3 - d_4;
+jmi_ad_var_t v_0 = tan(_x1_1);
+jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx] * 1/(cos(_x1_1)*cos(_x1_1));
+(*res)[0] = v_0 - _y_0;
+(*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
+(*res)[1] = 1 - _x1_1;
+(*dF)[1] = 0 - (*dz)[1-jmi->offs_real_dx];
 ")})));
+
 
 	Real y;
 	Real x1(start=1.5);
@@ -101,21 +78,14 @@ model CADasin
          generate_dae_jacobian=true,
          template="$C_DAE_equation_directional_derivative$",
          generatedCode="
-jmi_ad_var_t v_0 = _x1_1;
-jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx];
-jmi_ad_var_t v_1 = asin(v_0);
-jmi_ad_var_t d_1 = d_0 * 1/(sqrt(1 -v_0*v_0));
-jmi_ad_var_t v_2 = _y_0;
-jmi_ad_var_t d_2 = (*dz)[0-jmi->offs_real_dx];
-(*res)[0] = v_1 - v_2;
-(*dF)[0] = d_1 - d_2;
-jmi_ad_var_t v_3 = 1;
-jmi_ad_var_t d_3 = 0;
-jmi_ad_var_t v_4 = _x1_1;
-jmi_ad_var_t d_4 = (*dz)[1-jmi->offs_real_dx];
-(*res)[1] = v_3 - v_4;
-(*dF)[1] = d_3 - d_4;
+jmi_ad_var_t v_0 = asin(_x1_1);
+jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx] * 1/(sqrt(1 -_x1_1*_x1_1));
+(*res)[0] = v_0 - _y_0;
+(*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
+(*res)[1] = 1 - _x1_1;
+(*dF)[1] = 0 - (*dz)[1-jmi->offs_real_dx];
 ")})));
+
 
 	Real y;
 	Real x1(start=1.5);
@@ -132,21 +102,14 @@ model CADacos
          generate_dae_jacobian=true,
          template="$C_DAE_equation_directional_derivative$",
          generatedCode="
-jmi_ad_var_t v_0 = _x1_1;
-jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx];
-jmi_ad_var_t v_1 = acos(v_0);
-jmi_ad_var_t d_1 = -d_0 * 1/(sqrt(1 -v_0*v_0));
-jmi_ad_var_t v_2 = _y_0;
-jmi_ad_var_t d_2 = (*dz)[0-jmi->offs_real_dx];
-(*res)[0] = v_1 - v_2;
-(*dF)[0] = d_1 - d_2;
-jmi_ad_var_t v_3 = 1;
-jmi_ad_var_t d_3 = 0;
-jmi_ad_var_t v_4 = _x1_1;
-jmi_ad_var_t d_4 = (*dz)[1-jmi->offs_real_dx];
-(*res)[1] = v_3 - v_4;
-(*dF)[1] = d_3 - d_4;
+jmi_ad_var_t v_0 = acos(_x1_1);
+jmi_ad_var_t d_0 = -(*dz)[1-jmi->offs_real_dx] * 1/(sqrt(1 -_x1_1*_x1_1));
+(*res)[0] = v_0 - _y_0;
+(*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
+(*res)[1] = 1 - _x1_1;
+(*dF)[1] = 0 - (*dz)[1-jmi->offs_real_dx];
 ")})));
+
 
 	Real y;
 	Real x1(start=1.5);
@@ -163,22 +126,15 @@ model CADatan
          generate_dae_jacobian=true,
          template="$C_DAE_equation_directional_derivative$",
          generatedCode="
-jmi_ad_var_t v_0 = _x1_1;
-jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx];
-jmi_ad_var_t v_1 = atan(v_0);
-jmi_ad_var_t d_1 = d_0 * 1/(1 +v_0*v_0);
-jmi_ad_var_t v_2 = _y_0;
-jmi_ad_var_t d_2 = (*dz)[0-jmi->offs_real_dx];
-(*res)[0] = v_1 - v_2;
-(*dF)[0] = d_1 - d_2;
-jmi_ad_var_t v_3 = 1;
-jmi_ad_var_t d_3 = 0;
-jmi_ad_var_t v_4 = _x1_1;
-jmi_ad_var_t d_4 = (*dz)[1-jmi->offs_real_dx];
-(*res)[1] = v_3 - v_4;
-(*dF)[1] = d_3 - d_4;
+jmi_ad_var_t v_0 = atan(_x1_1);
+jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx] * 1/(1 +_x1_1*_x1_1);
+(*res)[0] = v_0 - _y_0;
+(*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
+(*res)[1] = 1 - _x1_1;
+(*dF)[1] = 0 - (*dz)[1-jmi->offs_real_dx];
 ")})));
 
+ 
 	Real y;
 	Real x1(start=1.5);
 equation
@@ -194,31 +150,18 @@ model CADatan2
          generate_dae_jacobian=true,
          template="$C_DAE_equation_directional_derivative$",
          generatedCode="
-jmi_ad_var_t v_0 = _x1_1;
-jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx];
-jmi_ad_var_t v_1 = _x2_2;
-jmi_ad_var_t d_1 = (*dz)[2-jmi->offs_real_dx];
-jmi_ad_var_t v_2 = atan2(v_0,v_1);
-jmi_ad_var_t d_2 = (d_0 * v_1 - v_0 * d_1 ) / ( v_1*v_1 + v_0*v_0);
-jmi_ad_var_t v_3 = _y_0;
-jmi_ad_var_t d_3 = (*dz)[0-jmi->offs_real_dx];
-(*res)[0] = v_2 - v_3;
-(*dF)[0] = d_2 - d_3;
-jmi_ad_var_t v_4 = 1;
-jmi_ad_var_t d_4 = 0;
-jmi_ad_var_t v_5 = _x1_1;
-jmi_ad_var_t d_5 = (*dz)[1-jmi->offs_real_dx];
-(*res)[1] = v_4 - v_5;
-(*dF)[1] = d_4 - d_5;
-jmi_ad_var_t v_6 = 1.5;
-jmi_ad_var_t d_6 = 0;
-jmi_ad_var_t v_7 = -v_6;
-jmi_ad_var_t d_7 = -d_6;
-jmi_ad_var_t v_8 = _x2_2;
-jmi_ad_var_t d_8 = (*dz)[2-jmi->offs_real_dx];
-(*res)[2] = v_7 - v_8;
-(*dF)[2] = d_7 - d_8;
+jmi_ad_var_t v_0 = atan2(_x1_1,_x2_2);
+jmi_ad_var_t d_0 = ((*dz)[1-jmi->offs_real_dx] * _x2_2 - _x1_1 * (*dz)[2-jmi->offs_real_dx] ) / ( _x2_2*_x2_2 + _x1_1*_x1_1);
+(*res)[0] = v_0 - _y_0;
+(*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
+(*res)[1] = 1 - _x1_1;
+(*dF)[1] = 0 - (*dz)[1-jmi->offs_real_dx];
+jmi_ad_var_t v_1 = -1.5;
+jmi_ad_var_t d_1 = -0;
+(*res)[2] = v_1 - _x2_2;
+(*dF)[2] = d_1 - (*dz)[2-jmi->offs_real_dx];
 ")})));
+
 
 	Real y;
 	Real x1(start=1.5);
@@ -237,21 +180,14 @@ model CADsinh
          generate_dae_jacobian=true,
          template="$C_DAE_equation_directional_derivative$",
          generatedCode="
-jmi_ad_var_t v_0 = _x1_1;
-jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx];
-jmi_ad_var_t v_1 = sinh(v_0);
-jmi_ad_var_t d_1 = d_0 * cosh(v_0);
-jmi_ad_var_t v_2 = _y_0;
-jmi_ad_var_t d_2 = (*dz)[0-jmi->offs_real_dx];
-(*res)[0] = v_1 - v_2;
-(*dF)[0] = d_1 - d_2;
-jmi_ad_var_t v_3 = 1;
-jmi_ad_var_t d_3 = 0;
-jmi_ad_var_t v_4 = _x1_1;
-jmi_ad_var_t d_4 = (*dz)[1-jmi->offs_real_dx];
-(*res)[1] = v_3 - v_4;
-(*dF)[1] = d_3 - d_4;
+jmi_ad_var_t v_0 = sinh(_x1_1);
+jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx] * cosh(_x1_1);
+(*res)[0] = v_0 - _y_0;
+(*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
+(*res)[1] = 1 - _x1_1;
+(*dF)[1] = 0 - (*dz)[1-jmi->offs_real_dx];
 ")})));
+
 
 	Real y;
 	Real x1(start=1.5);
@@ -268,21 +204,14 @@ model CADcosh
          generate_dae_jacobian=true,
          template="$C_DAE_equation_directional_derivative$",
          generatedCode="
-jmi_ad_var_t v_0 = _x1_1;
-jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx];
-jmi_ad_var_t v_1 = cosh(v_0);
-jmi_ad_var_t d_1 = d_0 * sinh(v_0);
-jmi_ad_var_t v_2 = _y_0;
-jmi_ad_var_t d_2 = (*dz)[0-jmi->offs_real_dx];
-(*res)[0] = v_1 - v_2;
-(*dF)[0] = d_1 - d_2;
-jmi_ad_var_t v_3 = 1;
-jmi_ad_var_t d_3 = 0;
-jmi_ad_var_t v_4 = _x1_1;
-jmi_ad_var_t d_4 = (*dz)[1-jmi->offs_real_dx];
-(*res)[1] = v_3 - v_4;
-(*dF)[1] = d_3 - d_4;
+jmi_ad_var_t v_0 = cosh(_x1_1);
+jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx] * sinh(_x1_1);
+(*res)[0] = v_0 - _y_0;
+(*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
+(*res)[1] = 1 - _x1_1;
+(*dF)[1] = 0 - (*dz)[1-jmi->offs_real_dx];
 ")})));
+
 
 	Real y;
 	Real x1(start=1.5);
@@ -299,21 +228,14 @@ model CADtanh
          generate_dae_jacobian=true,
          template="$C_DAE_equation_directional_derivative$",
          generatedCode="
-jmi_ad_var_t v_0 = _x1_1;
-jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx];
-jmi_ad_var_t v_1 = tanh(v_0);
-jmi_ad_var_t d_1 = d_0 * (1 - tanh(v_0) * tanh(v_0));
-jmi_ad_var_t v_2 = _y_0;
-jmi_ad_var_t d_2 = (*dz)[0-jmi->offs_real_dx];
-(*res)[0] = v_1 - v_2;
-(*dF)[0] = d_1 - d_2;
-jmi_ad_var_t v_3 = 1;
-jmi_ad_var_t d_3 = 0;
-jmi_ad_var_t v_4 = _x1_1;
-jmi_ad_var_t d_4 = (*dz)[1-jmi->offs_real_dx];
-(*res)[1] = v_3 - v_4;
-(*dF)[1] = d_3 - d_4;
+jmi_ad_var_t v_0 = tanh(_x1_1);
+jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx] * (1 - tanh(_x1_1) * tanh(_x1_1));
+(*res)[0] = v_0 - _y_0;
+(*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
+(*res)[1] = 1 - _x1_1;
+(*dF)[1] = 0 - (*dz)[1-jmi->offs_real_dx];
 ")})));
+
 
 	Real y;
 	Real x1(start=1.5);
@@ -330,21 +252,14 @@ model CADexp
          generate_dae_jacobian=true,
          template="$C_DAE_equation_directional_derivative$",
          generatedCode="
-jmi_ad_var_t v_0 = _x1_1;
-jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx];
-jmi_ad_var_t v_1 = exp(v_0);
-jmi_ad_var_t d_1 = d_0 * exp(v_0);
-jmi_ad_var_t v_2 = _y_0;
-jmi_ad_var_t d_2 = (*dz)[0-jmi->offs_real_dx];
-(*res)[0] = v_1 - v_2;
-(*dF)[0] = d_1 - d_2;
-jmi_ad_var_t v_3 = 1;
-jmi_ad_var_t d_3 = 0;
-jmi_ad_var_t v_4 = _x1_1;
-jmi_ad_var_t d_4 = (*dz)[1-jmi->offs_real_dx];
-(*res)[1] = v_3 - v_4;
-(*dF)[1] = d_3 - d_4;
+jmi_ad_var_t v_0 = exp(_x1_1);
+jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx] * exp(_x1_1);
+(*res)[0] = v_0 - _y_0;
+(*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
+(*res)[1] = 1 - _x1_1;
+(*dF)[1] = 0 - (*dz)[1-jmi->offs_real_dx];
 ")})));
+
 
 	Real y;
 	Real x1(start=1.5);
@@ -361,21 +276,14 @@ model CADlog
          generate_dae_jacobian=true,
          template="$C_DAE_equation_directional_derivative$",
          generatedCode="
-jmi_ad_var_t v_0 = _x1_1;
-jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx];
-jmi_ad_var_t v_1 = log(v_0);
-jmi_ad_var_t d_1 = d_0 * 1/(v_0);
-jmi_ad_var_t v_2 = _y_0;
-jmi_ad_var_t d_2 = (*dz)[0-jmi->offs_real_dx];
-(*res)[0] = v_1 - v_2;
-(*dF)[0] = d_1 - d_2;
-jmi_ad_var_t v_3 = 2;
-jmi_ad_var_t d_3 = 0;
-jmi_ad_var_t v_4 = _x1_1;
-jmi_ad_var_t d_4 = (*dz)[1-jmi->offs_real_dx];
-(*res)[1] = v_3 - v_4;
-(*dF)[1] = d_3 - d_4;
+jmi_ad_var_t v_0 = log(_x1_1);
+jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx] * 1/(_x1_1);
+(*res)[0] = v_0 - _y_0;
+(*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
+(*res)[1] = 2 - _x1_1;
+(*dF)[1] = 0 - (*dz)[1-jmi->offs_real_dx];
 ")})));
+
 
 	Real y;
 	Real x1(start=1.5);
@@ -392,21 +300,14 @@ model CADlog10
          generate_dae_jacobian=true,
          template="$C_DAE_equation_directional_derivative$",
          generatedCode="
-jmi_ad_var_t v_0 = _x1_1;
-jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx];
-jmi_ad_var_t v_1 = log10(v_0);
-jmi_ad_var_t d_1 = d_0 * log10(exp(1))*1/(v_0);
-jmi_ad_var_t v_2 = _y_0;
-jmi_ad_var_t d_2 = (*dz)[0-jmi->offs_real_dx];
-(*res)[0] = v_1 - v_2;
-(*dF)[0] = d_1 - d_2;
-jmi_ad_var_t v_3 = 1;
-jmi_ad_var_t d_3 = 0;
-jmi_ad_var_t v_4 = _x1_1;
-jmi_ad_var_t d_4 = (*dz)[1-jmi->offs_real_dx];
-(*res)[1] = v_3 - v_4;
-(*dF)[1] = d_3 - d_4;
+jmi_ad_var_t v_0 = log10(_x1_1);
+jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx] * log10(exp(1))*1/(_x1_1);
+(*res)[0] = v_0 - _y_0;
+(*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
+(*res)[1] = 1 - _x1_1;
+(*dF)[1] = 0 - (*dz)[1-jmi->offs_real_dx];
 ")})));
+
 
 	Real y;
 	Real x1(start=1.5);
@@ -423,21 +324,14 @@ model CADsqrt
          generate_dae_jacobian=true,
          template="$C_DAE_equation_directional_derivative$",
          generatedCode="
-jmi_ad_var_t v_0 = _x1_1;
-jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx];
-jmi_ad_var_t v_1 = sqrt(v_0);
-jmi_ad_var_t d_1 = d_0 * 1/(2*sqrt(v_0));
-jmi_ad_var_t v_2 = _y_0;
-jmi_ad_var_t d_2 = (*dz)[0-jmi->offs_real_dx];
-(*res)[0] = v_1 - v_2;
-(*dF)[0] = d_1 - d_2;
-jmi_ad_var_t v_3 = 2;
-jmi_ad_var_t d_3 = 0;
-jmi_ad_var_t v_4 = _x1_1;
-jmi_ad_var_t d_4 = (*dz)[1-jmi->offs_real_dx];
-(*res)[1] = v_3 - v_4;
-(*dF)[1] = d_3 - d_4;
+jmi_ad_var_t v_0 = sqrt(_x1_1);
+jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx] * 1/(2*sqrt(_x1_1));
+(*res)[0] = v_0 - _y_0;
+(*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
+(*res)[1] = 2 - _x1_1;
+(*dF)[1] = 0 - (*dz)[1-jmi->offs_real_dx];
 ")})));
+
 
  	Real y;
 	Real x1(start=1.5);
@@ -454,29 +348,16 @@ model CADadd
          generate_dae_jacobian=true,
          template="$C_DAE_equation_directional_derivative$",
          generatedCode="
-jmi_ad_var_t v_0 = _x1_1;
-jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx];
-jmi_ad_var_t v_1 = _x2_2;
-jmi_ad_var_t d_1 = (*dz)[2-jmi->offs_real_dx];
-jmi_ad_var_t v_2 = v_0 + v_1;
-jmi_ad_var_t d_2 = d_0 + d_1;
-jmi_ad_var_t v_3 = _y_0;
-jmi_ad_var_t d_3 = (*dz)[0-jmi->offs_real_dx];
-(*res)[0] = v_2 - v_3;
-(*dF)[0] = d_2 - d_3;
-jmi_ad_var_t v_4 = 1;
-jmi_ad_var_t d_4 = 0;
-jmi_ad_var_t v_5 = _x1_1;
-jmi_ad_var_t d_5 = (*dz)[1-jmi->offs_real_dx];
-(*res)[1] = v_4 - v_5;
-(*dF)[1] = d_4 - d_5;
-jmi_ad_var_t v_6 = 3;
-jmi_ad_var_t d_6 = 0;
-jmi_ad_var_t v_7 = _x2_2;
-jmi_ad_var_t d_7 = (*dz)[2-jmi->offs_real_dx];
-(*res)[2] = v_6 - v_7;
-(*dF)[2] = d_6 - d_7;
+jmi_ad_var_t v_0 = _x1_1 + _x2_2;
+jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx] + (*dz)[2-jmi->offs_real_dx];
+(*res)[0] = v_0 - _y_0;
+(*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
+(*res)[1] = 1 - _x1_1;
+(*dF)[1] = 0 - (*dz)[1-jmi->offs_real_dx];
+(*res)[2] = 3 - _x2_2;
+(*dF)[2] = 0 - (*dz)[2-jmi->offs_real_dx];
 ")})));
+
 
 	Real y;
 	Real x1(start=1.5);
@@ -495,29 +376,16 @@ model CADsub
          generate_dae_jacobian=true,
          template="$C_DAE_equation_directional_derivative$",
          generatedCode="
-jmi_ad_var_t v_0 = _x1_1;
-jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx];
-jmi_ad_var_t v_1 = _x2_2;
-jmi_ad_var_t d_1 = (*dz)[2-jmi->offs_real_dx];
-jmi_ad_var_t v_2 = v_0 - v_1;
-jmi_ad_var_t d_2 = d_0 - d_1;
-jmi_ad_var_t v_3 = _y_0;
-jmi_ad_var_t d_3 = (*dz)[0-jmi->offs_real_dx];
-(*res)[0] = v_2 - v_3;
-(*dF)[0] = d_2 - d_3;
-jmi_ad_var_t v_4 = 1;
-jmi_ad_var_t d_4 = 0;
-jmi_ad_var_t v_5 = _x1_1;
-jmi_ad_var_t d_5 = (*dz)[1-jmi->offs_real_dx];
-(*res)[1] = v_4 - v_5;
-(*dF)[1] = d_4 - d_5;
-jmi_ad_var_t v_6 = 3;
-jmi_ad_var_t d_6 = 0;
-jmi_ad_var_t v_7 = _x2_2;
-jmi_ad_var_t d_7 = (*dz)[2-jmi->offs_real_dx];
-(*res)[2] = v_6 - v_7;
-(*dF)[2] = d_6 - d_7;
+jmi_ad_var_t v_0 = _x1_1 - _x2_2;
+jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx] - (*dz)[2-jmi->offs_real_dx];
+(*res)[0] = v_0 - _y_0;
+(*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
+(*res)[1] = 1 - _x1_1;
+(*dF)[1] = 0 - (*dz)[1-jmi->offs_real_dx];
+(*res)[2] = 3 - _x2_2;
+(*dF)[2] = 0 - (*dz)[2-jmi->offs_real_dx];
 ")})));
+
 
 	Real y;
 	Real x1(start=1.5);
@@ -536,29 +404,16 @@ model CADmul
          generate_dae_jacobian=true,
          template="$C_DAE_equation_directional_derivative$",
          generatedCode="
-jmi_ad_var_t v_0 = _x1_1;
-jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx];
-jmi_ad_var_t v_1 = _x2_2;
-jmi_ad_var_t d_1 = (*dz)[2-jmi->offs_real_dx];
-jmi_ad_var_t v_2 = v_0 * v_1;
-jmi_ad_var_t d_2 = (d_0 * v_1 + v_0 * d_1);
-jmi_ad_var_t v_3 = _y_0;
-jmi_ad_var_t d_3 = (*dz)[0-jmi->offs_real_dx];
-(*res)[0] = v_2 - v_3;
-(*dF)[0] = d_2 - d_3;
-jmi_ad_var_t v_4 = 1;
-jmi_ad_var_t d_4 = 0;
-jmi_ad_var_t v_5 = _x1_1;
-jmi_ad_var_t d_5 = (*dz)[1-jmi->offs_real_dx];
-(*res)[1] = v_4 - v_5;
-(*dF)[1] = d_4 - d_5;
-jmi_ad_var_t v_6 = 3;
-jmi_ad_var_t d_6 = 0;
-jmi_ad_var_t v_7 = _x2_2;
-jmi_ad_var_t d_7 = (*dz)[2-jmi->offs_real_dx];
-(*res)[2] = v_6 - v_7;
-(*dF)[2] = d_6 - d_7;
+jmi_ad_var_t v_0 = _x1_1 * _x2_2;
+jmi_ad_var_t d_0 = ((*dz)[1-jmi->offs_real_dx] * _x2_2 + _x1_1 * (*dz)[2-jmi->offs_real_dx]);
+(*res)[0] = v_0 - _y_0;
+(*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
+(*res)[1] = 1 - _x1_1;
+(*dF)[1] = 0 - (*dz)[1-jmi->offs_real_dx];
+(*res)[2] = 3 - _x2_2;
+(*dF)[2] = 0 - (*dz)[2-jmi->offs_real_dx];
 ")})));
+
 
 	Real y;
 	Real x1(start=1.5);
@@ -577,28 +432,14 @@ model CADdiv
          generate_dae_jacobian=true,
          template="$C_DAE_equation_directional_derivative$",
          generatedCode="
-jmi_ad_var_t v_0 = _x1_1;
-jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx];
-jmi_ad_var_t v_1 = _x2_2;
-jmi_ad_var_t d_1 = (*dz)[2-jmi->offs_real_dx];
-jmi_ad_var_t v_2 = v_0 / v_1;
-jmi_ad_var_t d_2 = (d_0 * v_1 - v_0 * d_1 ) / ( v_1 * v_1);
-jmi_ad_var_t v_3 = _y_0;
-jmi_ad_var_t d_3 = (*dz)[0-jmi->offs_real_dx];
-(*res)[0] = v_2 - v_3;
-(*dF)[0] = d_2 - d_3;
-jmi_ad_var_t v_4 = 1;
-jmi_ad_var_t d_4 = 0;
-jmi_ad_var_t v_5 = _x1_1;
-jmi_ad_var_t d_5 = (*dz)[1-jmi->offs_real_dx];
-(*res)[1] = v_4 - v_5;
-(*dF)[1] = d_4 - d_5;
-jmi_ad_var_t v_6 = 3;
-jmi_ad_var_t d_6 = 0;
-jmi_ad_var_t v_7 = _x2_2;
-jmi_ad_var_t d_7 = (*dz)[2-jmi->offs_real_dx];
-(*res)[2] = v_6 - v_7;
-(*dF)[2] = d_6 - d_7;
+jmi_ad_var_t v_0 = _x1_1 / _x2_2;
+jmi_ad_var_t d_0 = ((*dz)[1-jmi->offs_real_dx] * _x2_2 - _x1_1 * (*dz)[2-jmi->offs_real_dx] ) / ( _x2_2 * _x2_2);
+(*res)[0] = v_0 - _y_0;
+(*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
+(*res)[1] = 1 - _x1_1;
+(*dF)[1] = 0 - (*dz)[1-jmi->offs_real_dx];
+(*res)[2] = 3 - _x2_2;
+(*dF)[2] = 0 - (*dz)[2-jmi->offs_real_dx];
 ")})));
 
 	Real y;
@@ -618,34 +459,21 @@ model CADpow
          generate_dae_jacobian=true,
          template="$C_DAE_equation_directional_derivative$",
          generatedCode="
-jmi_ad_var_t v_0 = _x1_1;
-jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx];
-jmi_ad_var_t v_1 = _x2_2;
-jmi_ad_var_t d_1 = (*dz)[2-jmi->offs_real_dx];
-jmi_ad_var_t v_2 = pow(v_0 , v_1);
-jmi_ad_var_t d_2;
-if(v_0== 0){
-d_2=0;
+jmi_ad_var_t v_0 = pow(_x1_1 , _x2_2);
+jmi_ad_var_t d_0;
+if(_x1_1== 0){
+d_0=0;
 } else{
-d_2 = v_2 * (d_1 * log(jmi_abs(v_0)) + v_1 * d_0 / v_0);
+d_0 = v_0 * ((*dz)[2-jmi->offs_real_dx] * log(jmi_abs(_x1_1)) + _x2_2 * (*dz)[1-jmi->offs_real_dx] / _x1_1);
 }
-jmi_ad_var_t v_3 = _y_0;
-jmi_ad_var_t d_3 = (*dz)[0-jmi->offs_real_dx];
-(*res)[0] = v_2 - v_3;
-(*dF)[0] = d_2 - d_3;
-jmi_ad_var_t v_4 = 2;
-jmi_ad_var_t d_4 = 0;
-jmi_ad_var_t v_5 = _x1_1;
-jmi_ad_var_t d_5 = (*dz)[1-jmi->offs_real_dx];
-(*res)[1] = v_4 - v_5;
-(*dF)[1] = d_4 - d_5;
-jmi_ad_var_t v_6 = 3;
-jmi_ad_var_t d_6 = 0;
-jmi_ad_var_t v_7 = _x2_2;
-jmi_ad_var_t d_7 = (*dz)[2-jmi->offs_real_dx];
-(*res)[2] = v_6 - v_7;
-(*dF)[2] = d_6 - d_7;
+(*res)[0] = v_0 - _y_0;
+(*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
+(*res)[1] = 2 - _x1_1;
+(*dF)[1] = 0 - (*dz)[1-jmi->offs_real_dx];
+(*res)[2] = 3 - _x2_2;
+(*dF)[2] = 0 - (*dz)[2-jmi->offs_real_dx];
 ")})));
+
 
 	Real y;
 	Real x1(start=1.5);
@@ -664,28 +492,21 @@ model CADabs
          generate_dae_jacobian=true,
          template="$C_DAE_equation_directional_derivative$",
          generatedCode="
-jmi_ad_var_t v_0 = _x1_1;
-jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx];
-jmi_ad_var_t v_1 = jmi_abs(v_0);
-jmi_ad_var_t d_1;
-if(v_0 < 0){
-    d_1 = -d_0;
+jmi_ad_var_t v_0 = jmi_abs(_x1_1);
+jmi_ad_var_t d_0;
+if(_x1_1 < 0){
+    d_0 = -(*dz)[1-jmi->offs_real_dx];
 }else {
-    d_1 = d_0;
+    d_0 = (*dz)[1-jmi->offs_real_dx];
 }
-jmi_ad_var_t v_2 = _y_0;
-jmi_ad_var_t d_2 = (*dz)[0-jmi->offs_real_dx];
-(*res)[0] = v_1 - v_2;
-(*dF)[0] = d_1 - d_2;
-jmi_ad_var_t v_3 = 1;
-jmi_ad_var_t d_3 = 0;
-jmi_ad_var_t v_4 = -v_3;
-jmi_ad_var_t d_4 = -d_3;
-jmi_ad_var_t v_5 = _x1_1;
-jmi_ad_var_t d_5 = (*dz)[1-jmi->offs_real_dx];
-(*res)[1] = v_4 - v_5;
-(*dF)[1] = d_4 - d_5;
+(*res)[0] = v_0 - _y_0;
+(*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
+jmi_ad_var_t v_1 = -1;
+jmi_ad_var_t d_1 = -0;
+(*res)[1] = v_1 - _x1_1;
+(*dF)[1] = d_1 - (*dz)[1-jmi->offs_real_dx];
 ")})));
+
 
 	Real y;
 	Real x1(start=1.5);
@@ -695,7 +516,7 @@ equation
 end CADabs;
 
 model IfExpExample1
-  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.CADCodeGenTestCase(
          name="IfExpExample1",
          description="",
@@ -709,77 +530,65 @@ jmi_ad_var_t temp_v_1;
 jmi_ad_var_t temp_d_1;
 if(COND_EXP_LE(time, jmi_divide(AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"Divide by zero: ( 3.141592653589793 ) / ( 2 )\"), JMI_TRUE, JMI_FALSE)){
 jmi_ad_var_t v_2 = time;
-jmi_ad_var_t d_2 = 0;
+jmi_ad_var_t d_2 = (*dz)[jmi->offs_t];
 jmi_ad_var_t v_3 = sin(v_2);
 jmi_ad_var_t d_3 = d_2 * cos(v_2);
-temp_v_1 = v_3;
-temp_d_1 = d_3;
+temp_v_1=v_3;
+temp_d_1=d_3;
 }
 else if(COND_EXP_LE(time, AD_WRAP_LITERAL(3.141592653589793), JMI_TRUE, JMI_FALSE)){
-jmi_ad_var_t v_5 = AD_WRAP_LITERAL(1);
-jmi_ad_var_t d_5 = 0;
-temp_v_1 = v_5;
-temp_d_1 = d_5;
+temp_v_1=AD_WRAP_LITERAL(1);
+temp_d_1=0;
 }
 else{
-jmi_ad_var_t v_7 = time;
-jmi_ad_var_t d_7 = 0;
-jmi_ad_var_t v_8 = AD_WRAP_LITERAL(3.141592653589793);
-jmi_ad_var_t d_8 = 0;
-jmi_ad_var_t v_9 = AD_WRAP_LITERAL(2);
-jmi_ad_var_t d_9 = 0;
-jmi_ad_var_t v_10 = v_8 / v_9;
-jmi_ad_var_t d_10 = (d_8 * v_9 - v_8 * d_9 ) / ( v_9 * v_9);
-jmi_ad_var_t v_11 = v_7 - v_10;
-jmi_ad_var_t d_11 = d_7 - d_10;
-jmi_ad_var_t v_12 = sin(v_11);
-jmi_ad_var_t d_12 = d_11 * cos(v_11);
-temp_v_1 = v_12;
-temp_d_1 = d_12;
+jmi_ad_var_t v_4 = time;
+jmi_ad_var_t d_4 = (*dz)[jmi->offs_t];
+jmi_ad_var_t v_5 = AD_WRAP_LITERAL(3.141592653589793) / AD_WRAP_LITERAL(2);
+jmi_ad_var_t d_5 = (0 * AD_WRAP_LITERAL(2) - AD_WRAP_LITERAL(3.141592653589793) * 0 ) / ( AD_WRAP_LITERAL(2) * AD_WRAP_LITERAL(2));
+jmi_ad_var_t v_6 = v_4 - v_5;
+jmi_ad_var_t d_6 = d_4 - d_5;
+jmi_ad_var_t v_7 = sin(v_6);
+jmi_ad_var_t d_7 = d_6 * cos(v_6);
+temp_v_1=v_7;
+temp_d_1=d_7;
 }
 jmi_ad_var_t v_1 = temp_v_1;
 jmi_ad_var_t d_1 = temp_d_1;
-jmi_ad_var_t v_13 = v_1;
-jmi_ad_var_t d_13 = d_1;
-temp_v_0 = v_13;
-temp_d_0 = d_13;
+jmi_ad_var_t v_8 = v_1;
+jmi_ad_var_t d_8 = d_1;
+temp_v_0=v_8;
+temp_d_0=d_8;
 }
 else{
-jmi_ad_var_t v_15 = AD_WRAP_LITERAL(3);
-jmi_ad_var_t d_15 = 0;
-jmi_ad_var_t v_16 = _x_0;
-jmi_ad_var_t d_16 = (*dz)[1-jmi->offs_real_dx];
-jmi_ad_var_t v_17 = v_15 * v_16;
-jmi_ad_var_t d_17 = (d_15 * v_16 + v_15 * d_16);
-jmi_ad_var_t v_18 = sin(v_17);
-jmi_ad_var_t d_18 = d_17 * cos(v_17);
-jmi_ad_var_t v_19 = v_18;
-jmi_ad_var_t d_19 = d_18;
-temp_v_0 = v_19;
-temp_d_0 = d_19;
+jmi_ad_var_t v_9 = AD_WRAP_LITERAL(3) * _x_0;
+jmi_ad_var_t d_9 = (0 * _x_0 + AD_WRAP_LITERAL(3) * (*dz)[1-jmi->offs_real_dx]);
+jmi_ad_var_t v_10 = sin(v_9);
+jmi_ad_var_t d_10 = d_9 * cos(v_9);
+jmi_ad_var_t v_11 = v_10;
+jmi_ad_var_t d_11 = d_10;
+temp_v_0=v_11;
+temp_d_0=d_11;
 }
 jmi_ad_var_t v_0 = temp_v_0;
 jmi_ad_var_t d_0 = temp_d_0;
-jmi_ad_var_t v_20 = _u_1;
-jmi_ad_var_t d_20 = (*dz)[2-jmi->offs_real_dx];
-(*res)[0] = v_0 - v_20;
-(*dF)[0] = d_0 - d_20;
-jmi_ad_var_t v_21 = _u_1;
-jmi_ad_var_t d_21 = (*dz)[2-jmi->offs_real_dx];
-jmi_ad_var_t v_22 = _der_x_2;
-jmi_ad_var_t d_22 = (*dz)[0-jmi->offs_real_dx];
-(*res)[1] = v_21 - v_22;
-(*dF)[1] = d_21 - d_22;
-")})));   
+(*res)[0] = v_0 - _u_1;
+(*dF)[0] = d_0 - (*dz)[2-jmi->offs_real_dx];
+(*res)[1] = _u_1 - _der_x_2;
+(*dF)[1] = (*dz)[2-jmi->offs_real_dx] - (*dz)[0-jmi->offs_real_dx];
+")})));
+
+ 
+
+   
     Real x,u;
-  equation
+equation
     u = if(x > 3) then noEvent(if time<=Modelica.Constants.pi/2 then sin(time) elseif 
               noEvent(time<=Modelica.Constants.pi) then 1 else sin(time-Modelica.Constants.pi/2)) else noEvent(sin(3*x));
     der(x) = u;
 end IfExpExample1;
 
 model IfExpExample2
-  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.CADCodeGenTestCase(
          name="IfExpExample2",
          description="",
@@ -790,47 +599,39 @@ jmi_ad_var_t temp_v_0;
 jmi_ad_var_t temp_d_0;
 if(_sw(0)){
 jmi_ad_var_t v_1 = time;
-jmi_ad_var_t d_1 = 0;
+jmi_ad_var_t d_1 = (*dz)[jmi->offs_t];
 jmi_ad_var_t v_2 = sin(v_1);
 jmi_ad_var_t d_2 = d_1 * cos(v_1);
-temp_v_0 = v_2;
-temp_d_0 = d_2;
+temp_v_0=v_2;
+temp_d_0=d_2;
 }
 else if(_sw(1)){
-jmi_ad_var_t v_4 = AD_WRAP_LITERAL(1);
-jmi_ad_var_t d_4 = 0;
-temp_v_0 = v_4;
-temp_d_0 = d_4;
+temp_v_0=AD_WRAP_LITERAL(1);
+temp_d_0=0;
 }
 else{
-jmi_ad_var_t v_6 = time;
-jmi_ad_var_t d_6 = 0;
-jmi_ad_var_t v_7 = AD_WRAP_LITERAL(3.141592653589793);
-jmi_ad_var_t d_7 = 0;
-jmi_ad_var_t v_8 = AD_WRAP_LITERAL(2);
-jmi_ad_var_t d_8 = 0;
-jmi_ad_var_t v_9 = v_7 / v_8;
-jmi_ad_var_t d_9 = (d_7 * v_8 - v_7 * d_8 ) / ( v_8 * v_8);
-jmi_ad_var_t v_10 = v_6 - v_9;
-jmi_ad_var_t d_10 = d_6 - d_9;
-jmi_ad_var_t v_11 = sin(v_10);
-jmi_ad_var_t d_11 = d_10 * cos(v_10);
-temp_v_0 = v_11;
-temp_d_0 = d_11;
+jmi_ad_var_t v_3 = time;
+jmi_ad_var_t d_3 = (*dz)[jmi->offs_t];
+jmi_ad_var_t v_4 = AD_WRAP_LITERAL(3.141592653589793) / AD_WRAP_LITERAL(2);
+jmi_ad_var_t d_4 = (0 * AD_WRAP_LITERAL(2) - AD_WRAP_LITERAL(3.141592653589793) * 0 ) / ( AD_WRAP_LITERAL(2) * AD_WRAP_LITERAL(2));
+jmi_ad_var_t v_5 = v_3 - v_4;
+jmi_ad_var_t d_5 = d_3 - d_4;
+jmi_ad_var_t v_6 = sin(v_5);
+jmi_ad_var_t d_6 = d_5 * cos(v_5);
+temp_v_0=v_6;
+temp_d_0=d_6;
 }
 jmi_ad_var_t v_0 = temp_v_0;
 jmi_ad_var_t d_0 = temp_d_0;
-jmi_ad_var_t v_12 = _u_1;
-jmi_ad_var_t d_12 = (*dz)[2-jmi->offs_real_dx];
-(*res)[0] = v_0 - v_12;
-(*dF)[0] = d_0 - d_12;
-jmi_ad_var_t v_13 = _u_1;
-jmi_ad_var_t d_13 = (*dz)[2-jmi->offs_real_dx];
-jmi_ad_var_t v_14 = _der_x_2;
-jmi_ad_var_t d_14 = (*dz)[0-jmi->offs_real_dx];
-(*res)[1] = v_13 - v_14;
-(*dF)[1] = d_13 - d_14;
+(*res)[0] = v_0 - _u_1;
+(*dF)[0] = d_0 - (*dz)[2-jmi->offs_real_dx];
+(*res)[1] = _u_1 - _der_x_2;
+(*dF)[1] = (*dz)[2-jmi->offs_real_dx] - (*dz)[0-jmi->offs_real_dx];
 ")})));
+
+ 
+
+  
 Real x,u;
 equation
     u = if time<=Modelica.Constants.pi/2 then sin(time) elseif 
