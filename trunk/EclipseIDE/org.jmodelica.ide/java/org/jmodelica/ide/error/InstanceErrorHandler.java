@@ -30,7 +30,7 @@ public class InstanceErrorHandler implements IErrorHandler {
 	private Set<InstanceProblem> countedWarnings = new HashSet<InstanceProblem>();
 	private boolean lostErrors;
 	
-	private static final int MAX_ERRORS_SHOWN = 10;
+	private static final int MAX_ERRORS_SHOWN = 20;
 	private static final String[] MSG_FORMATS = new String[] {
 		"No errors found.", "%d warning%s found.", "%d error%s found.", "%d error%s and %d warning%s found."
 	};
@@ -112,9 +112,12 @@ public class InstanceErrorHandler implements IErrorHandler {
 				buf.append(String.format("(First %d of %d errors shown.)\n",
 						MAX_ERRORS_SHOWN, err.size()));
 			int i = 0;
-			for (InstanceProblem e : err)
-				if (i++ < MAX_ERRORS_SHOWN)
+			for (InstanceProblem e : err) {
+				if (i++ < MAX_ERRORS_SHOWN) {
+					buf.append('\n');
 					buf.append(e);
+				}
+			}
 			msg = buf.toString();
 		} else {
 			int numE = getNumErrors();

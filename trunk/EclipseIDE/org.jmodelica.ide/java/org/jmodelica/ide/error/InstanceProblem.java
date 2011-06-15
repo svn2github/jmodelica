@@ -8,6 +8,8 @@ import org.jmodelica.modelica.compiler.ASTNode;
 
 public abstract class InstanceProblem implements IError {
 
+	private static final String FORMAT_STRING = "%s: in file '%s':\nSemantic error at line %d, column %d:\n %s\n";
+	
 	protected String msg;
 	protected String fileName;
 	protected int start;
@@ -69,6 +71,8 @@ public abstract class InstanceProblem implements IError {
 
 	public abstract int getSeverity();
 
+	public abstract String getSeverityString();
+
 	public int getStartOffset() {
 		return start;
 	}
@@ -99,7 +103,7 @@ public abstract class InstanceProblem implements IError {
 
 	@Override
 	public String toString() {
-		return String.format("%s, line %d, col %d:\n%s\n", fileName, line, col, msg);
+		return String.format(FORMAT_STRING, getSeverityString(), fileName, line, col, msg);
 	}
 
 }

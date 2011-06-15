@@ -46,8 +46,10 @@ public class ErrorCheckAction extends CurrentClassAction implements IJobChangeLi
 	public void done(IJobChangeEvent event) {
 		String title = event.getJob().getName();
 		String message = event.getResult().getMessage();
-		int kind = (event.getResult().getSeverity() == IStatus.INFO) ? MessageDialog.ERROR : MessageDialog.INFORMATION;
-		new ShowMessageJob(title, message, kind).schedule();
+		int severity = event.getResult().getSeverity();
+		int kind = (severity == IStatus.OK) ? MessageDialog.INFORMATION : MessageDialog.ERROR;
+		boolean expanded = severity == IStatus.WARNING;
+		new ShowMessageJob(title, message, kind, expanded).schedule();
 	}
 
 	public void aboutToRun(IJobChangeEvent event) {
@@ -92,7 +94,12 @@ public class ErrorCheckAction extends CurrentClassAction implements IJobChangeLi
 				fc.transformCanonical();
 				fc.collectErrors();
 			}
-			int status = errorHandler.hasErrors() ? IStatus.INFO : IStatus.OK;
+			// We use the severity to tell what kind of message is passed
+			int status = IStatus.OK;      // No errors
+			if (errorHandler.hasErrors()) 
+				status = IStatus.INFO;    // Only error that we created markers for
+			if (errorHandler.hasLostErrors()) 
+				status = IStatus.WARNING; // Some errors that no markers were created for
 			return new Status(status, IDEConstants.PLUGIN_ID, errorHandler.resultMessage());
 		}
 

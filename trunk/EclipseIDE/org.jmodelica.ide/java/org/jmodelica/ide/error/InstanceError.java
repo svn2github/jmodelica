@@ -32,4 +32,8 @@ public class InstanceError extends InstanceProblem {
 		return true;
 	}
 
+	public String getSeverityString() {
+		return "Error";
+	}
+
 }

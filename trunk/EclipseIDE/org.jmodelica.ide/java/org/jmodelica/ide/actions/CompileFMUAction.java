@@ -123,11 +123,13 @@ public class CompileFMUAction extends CurrentClassAction implements IJobChangeLi
 	}
 
 	public void done(IJobChangeEvent event) {
-		if (event.getResult().getSeverity() == IStatus.INFO) {
+		int severity = event.getResult().getSeverity();
+		if (severity != IStatus.OK) {
 			String title = event.getJob().getName();
 			String message = event.getResult().getMessage();
 			int kind = MessageDialog.ERROR;
-			new ShowMessageJob(title, message, kind).schedule();
+			boolean expanded = severity == IStatus.WARNING;
+			new ShowMessageJob(title, message, kind, expanded).schedule();
 		}
 	}
 
@@ -196,10 +198,17 @@ public class CompileFMUAction extends CurrentClassAction implements IJobChangeLi
 			} catch (CompilationAbortedException e) {
 				status = Status.CANCEL_STATUS;
 			} catch (Exception e) {
-				String msg = "Error compiling " + className + " to FMU";
-				if (e.getMessage() != null)
-					msg += ":\n" + e.getMessage();
-				status = new Status(IStatus.INFO, IDEConstants.PLUGIN_ID, msg, e); 
+				int sev = IStatus.INFO;
+				StringBuilder msg = new StringBuilder("Error compiling ");
+				msg.append(className);
+				msg.append(" to FMU");
+				if (e.getMessage() != null) {
+					msg.append(":\n");
+					if (e.getMessage().contains("\n\n")) 
+						sev = IStatus.WARNING;
+					msg.append(e.getMessage());
+				}
+				status = new Status(sev, IDEConstants.PLUGIN_ID, msg.toString(), e); 
 			}
 			ModelicaCompiler.setDefaultLogger();
 			ModelicaCompiler.closeStreamLogger();

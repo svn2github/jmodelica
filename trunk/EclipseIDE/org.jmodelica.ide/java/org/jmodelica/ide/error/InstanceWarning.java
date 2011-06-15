@@ -17,4 +17,8 @@ public class InstanceWarning extends InstanceProblem {
 		return false;
 	}
 
+	public String getSeverityString() {
+		return "String";
+	}
+
 }
