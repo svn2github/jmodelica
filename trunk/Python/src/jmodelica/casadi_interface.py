@@ -317,8 +317,8 @@ class CasadiModel(object):
         self.ocp_ode_init_inputs += list(self.x)
         self.ocp_ode_init_inputs += [self.t]
         
-#        self.F = casadi.der(self.ocp.x_)
-        self.F = self.ocp.explicit_fcn_[5:7]
+        dx = casadi.der(self.ocp.x_)
+        self.F = casadi.substitute(casadi.SXMatrix(dx),casadi.SXMatrix(self.ocp.explicit_var_),casadi.SXMatrix(self.ocp.explicit_fcn_))
         
         self.ode_F = casadi.SXFunction([self.ocp_ode_inputs], [self.F])
         
