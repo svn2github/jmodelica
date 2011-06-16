@@ -192,7 +192,7 @@ aspect ModelicaIcons
 			if(compAnnotation.hasPlacement()) {
 				try {
 					if (subDecl instanceof BaseClassDecl) {
-						Placement placement = compAnnotation.createPlacement(icon.getContext());
+						Context componentContext = Context.ICON;
 						boolean isProtected = componentDecl.isProtected();
 						boolean isConnector = ((BaseClassDecl)subDecl).getRestriction() instanceof Connector;
 						Icon subIcon = Icon.NULL_ICON;
@@ -203,11 +203,14 @@ aspect ModelicaIcons
 						} else {
 							if (isConnector) {
 								subIcon = subDecl.diagram();
+								componentContext = Context.DIAGRAM;
+								
 							} else {
 								subIcon = subDecl.icon();
 							}
 						}
 						if(subIcon != Icon.NULL_ICON) {
+							Placement placement = compAnnotation.createPlacement(componentContext);
 							icon.addSubcomponent(
 									new Component(subIcon, placement)
 							);

@@ -31,8 +31,9 @@ import java.lang.IllegalArgumentException;
 aspect AnnotationParsing {
 	
 	public class AnnotationNode {
+		
 		/**
-		* Creates and return the icon layer for this AnnotationNode. 
+		* Creates the icon layer represented by this AnnotationNode. 
 		* @return icon layer if annotationNode exist else a NO_LAYER 
 		*/
 		public Layer createIconLayer() {
@@ -48,8 +49,7 @@ aspect AnnotationParsing {
 			return layer;
 		}
 		/**
-		* Creates and return the diagram layer for this AnnotationNode.
-		* @param path direcory path for the BaseNode creating diagram layer for 
+		* Creates the diagram layer represented by this AnnotationNode.
 		* @return diagram layer if annotationNode exist else a NO_LAYER 
 		*/
 		public Layer createDiagramLayer() {
@@ -65,11 +65,11 @@ aspect AnnotationParsing {
 			return layer;
 		}
 		/**
-		* Creates and return placement for this AnnotationNode.
-		* @param context for which layer transformation is set   
+		* Creates a Placement represented by this AnnotationNode.
+		* @param context for which layer transformation is to be set for the component.   
 		* @return placement
 		* @throws NotEnoughParametersException if too few parameters are provided for palcement.
-		* @throws NotEnoughParametersException if too few parameters are provided for one of its primitives. 
+		* @throws FailedConstructionExceptionException if placement annotatioNode does not exist. 
 		*/
 		public Placement createPlacement(Context context) 
 				throws FailedConstructionException, NotEnoughParametersException {
@@ -107,6 +107,12 @@ aspect AnnotationParsing {
 		public boolean hasPlacement() {
 			return forPath("Placement").exists();
 		}
+		/**
+		* Creates a Transformation represented by this AnnotationNode.
+		* @return the created transformation.
+		* @throws NotEnoughParametersException if the extent parameter was not given.
+		* @throws FailedConstructionExceptionException if transformation annotatioNode does not exist. 
+		*/
 		private Transformation createTransformation() 
 			throws FailedConstructionException, NotEnoughParametersException {
 			Transformation transformation = new Transformation();
@@ -129,7 +135,11 @@ aspect AnnotationParsing {
 			}
 			return transformation;
 		}
-	
+		/**
+		* Creates a Coordinatesystem represented by this AnnotationNode.
+		* @return the created CoordinateSystem if the annotationNode exists else a 
+		* deafult Coordinatesystem according to MLS. 
+		*/
 		private CoordinateSystem createCoordinateSystem() {
 			if (!exists()) {
 				return CoordinateSystem.DEFAULT_COORDINATE_SYSTEM;
@@ -152,6 +162,11 @@ aspect AnnotationParsing {
 			}
 			return co;
 		}
+		/**
+		* Return the grid attribute represented by this AnnotationNode.
+		* @return a grid vector.
+		* @throws FailedConstructionException if grid vector was null.	
+		* */
 		private double[] createGrid() 
 			throws FailedConstructionException, NotEnoughParametersException, IllegalArgumentException {
 			if(realVector() != null) {
@@ -162,12 +177,9 @@ aspect AnnotationParsing {
 		}
 		
 		/**
-		* Returns the graphics attribute represented by the given AnnotationNode.
-		* @param graphicsAnnotation
-		* @return
-		* @throws FailedConstructionException if the construction of one of its primitives fails.
-		* @throws NotEnoughParametersException if too few parameters are provided for one of its primitives.
-		*/
+		* Creates a list with the graphics attribute represented by this AnnotationNode.
+		* @return the created list.		
+		* */
 		private ArrayList<GraphicItem> createGraphics() {
 			ArrayList<GraphicItem> items = new ArrayList<GraphicItem>();
 			for (AnnotationNode a : this) {
@@ -197,14 +209,11 @@ aspect AnnotationParsing {
 		}
 	
 		/**
-		* Returns the FilledShape object that is represented by the given AnnotationNode.
-		* @param filledRectShapeAnnotation
-		* @param filledRectShape The FilledRectShape object to store the values in.
-		* @return
-		* @throws FailedConstructionException if the construction of one of its primitives fails.
+		* Create a FilledShape that is represented by this AnnotationNode uses 
+		* 	default values for the attributes if the attributes are not set.
+		* @return the created FilledShape
 		*/
-		private FilledShape createFilledShape(FilledShape filledShape) 
-				throws FailedConstructionException {
+		private FilledShape createFilledShape(FilledShape filledShape) {
 			for (AnnotationNode a : this) {
 				try {
 					if (a.name().equals("lineColor")) {
@@ -218,21 +227,21 @@ aspect AnnotationParsing {
 					}
 					else if (a.name().equals("fillPattern")) {
 						filledShape.setFillPattern(a.createFillPattern());
-					} else if (a.name().equals("lineThickness")) {
+					} 
+					else if (a.name().equals("lineThickness")) {
 						filledShape.setLineThickness(a.createLineThickness());
 					}
 				} catch (FailedConstructionException e){
+					
 				}
 			}
 			return (FilledShape)createGraphicItem(filledShape);
 		}
 		
 		/**
-		* Rerurns the GraphicItem object that is represented by this AnnotationNode.
-		* @param graphicItemAnnotation
+		* Create a GraphicItem object that is represented by this AnnotationNode.
 		* @param graphicItem
-		* @return
-		* @throws FailedConstructionException if the construction of one of its prarameters fails.
+		* @return the created Graphic item
 		*/
 		private GraphicItem createGraphicItem(GraphicItem graphicItem) {
 			for (AnnotationNode a : this) {
@@ -248,6 +257,12 @@ aspect AnnotationParsing {
 			}
 			return graphicItem;
 		}
+		/**
+		* Create a FilledShape that is represented by this AnnotationNode. 
+		* @param FilledRectShape
+		* @return the created FilledShape
+		* @throws NotEnoughParametersException if the extent parameter was not given.
+		*/
 		private FilledShape createFilledRectShape(FilledRectShape filledRectShape) 
 				throws FailedConstructionException, NotEnoughParametersException {
 			
@@ -261,10 +276,8 @@ aspect AnnotationParsing {
 		}
 	
 		/**
-		* Returns the Ellipse primitive that is represented by the given AnnotationNode.
-		* @param ellipseAnnotation
-		* @return
-		* @throws FailedConstructionException if the construction of one of its primitives fails.
+		* Create an Ellipse primitive that is represented by this AnnotationNode. 
+		* @return the created Ellipse primitive
 		* @throws NotEnoughParametersException if the extent parameter was not given.
 		*/
 		private Ellipse createEllipse()
@@ -280,9 +293,14 @@ aspect AnnotationParsing {
 			}
 			return ellipse;
 		}
-	
+		/**
+		* Create a Bitmap primitive that is represented by this AnnotationNode uses 
+		* @return the created Bitmap primitive
+		* @throws NotEnoughParametersException if the extent, file name or image source 
+		* 	parameters were not given.
+		*/
 		private Bitmap createBitmap() 
-				throws FailedConstructionException, NotEnoughParametersException {
+		throws FailedConstructionException, NotEnoughParametersException {
 			Bitmap bitmap = new Bitmap();
 			bitmap = (Bitmap)createGraphicItem(bitmap);
 			boolean extentSet = false;
@@ -305,7 +323,13 @@ aspect AnnotationParsing {
 			}
 			return bitmap;
 		}
-		
+
+		/**
+		* Create a Line primitive that is represented by this AnnotationNode uses 
+		* 	default values for the attributes if the attributes are not set.
+		* @return the created Line primitive
+		* @throws NotEnoughParametersException if two points were not given.
+		*/
 		private Line createLine() 
 				throws FailedConstructionException, NotEnoughParametersException {
 			Line line = new Line();
@@ -316,19 +340,29 @@ aspect AnnotationParsing {
 					line.setPoints(a.createPoints());
 					pointsSet = true;
 				} else if (a.name().equals("color")) {
-					line.setColor(a.createColor());
+					try {
+						line.setColor(a.createColor());
+					} catch(FailedConstructionException e) {}
 				} else if (a.name().equals("thickness")) {
-					line.setThickness(a.createThickness());
+					try {
+						line.setThickness(a.createThickness());
+					} catch(FailedConstructionException e) {}
 				} else if (a.name().equals("pattern")) {
-					line.setLinePattern(a.createLinePattern());
+					try {
+						line.setLinePattern(a.createLinePattern());
+					} catch(FailedConstructionException e) {}
 				} else if (a.name().equals("smooth")) {
-					line.setSmooth(a.createSmooth());
+					try {
+						line.setSmooth(a.createSmooth());
+					} catch(FailedConstructionException e) {}
 				} else if (a.name().equals("arrow")) {
 					try {
 						line.setArrow(a.createArrow());
-					} catch (IllegalArgumentException e) {}
+					} catch(FailedConstructionException e) {}
 				} else if (a.name().equals("arrowSize")) {
-					line.setArrowSize(a.createArrowSize());
+					try {
+						line.setArrowSize(a.createArrowSize());
+					} catch(FailedConstructionException e) {}
 				}
 			}
 			if (!pointsSet) {
@@ -338,9 +372,8 @@ aspect AnnotationParsing {
 		}
 	
 		/**
-		* Returns the Point object that is represented by this AnnotationNode.
-		* @param pointAnnotation
-		* @return
+		* Create the Point object represented by this AnnotationNode.
+		* @return the created Point
 		* @throws FailedConstructionException if the provided data is anything else than 2 real numbers.
 		*/
 		private Point createPoint() 
@@ -360,10 +393,9 @@ aspect AnnotationParsing {
 		}
 	
 		/**
-		* Returns the origin parameter that is represented by this AnnotationNode.
-		* @param originAnnotation
-		* @return
-		* @throws FailedConstructionException if the construction of the MLSPoint object fails.
+		* Creates a origin represented by this AnnotationNode.
+		* @return the created origin.
+		* @throws FailedConstructionException if the creating Point object fails.
 		*/
 		private Point createOrigin() 
 				throws FailedConstructionException {
@@ -380,9 +412,8 @@ aspect AnnotationParsing {
 		}
 		
 		/**
-		* Returns the arrow parameter that is represented by the given AnnotationNode.
-		* @param arrowAnnotation
-		* @return
+		* Create the arrow parameter represented by this AnnotationNode.
+		* @return the created arrow.
 		* @throws FailedConstructionException if the data provided is anything else than 2 
 		* String objects, or if one of the String objects doesn't match a legal Arrow value. 
 		*/
@@ -411,7 +442,10 @@ aspect AnnotationParsing {
 			}
 			return arrow;
 		}
-		
+		/**
+		* Return rotaion value for this AnnotationNode.
+		* @return rotation
+		*/
 		private double createRotation() {
 			for (AnnotationNode a : this) {
 				if (a.name().equals("DynamicSelect")) {
@@ -420,7 +454,11 @@ aspect AnnotationParsing {
 			}
 			return real();
 		}
-		
+		/**
+		* Return thickness value for this AnnotationNode.
+		* @return thickness
+		* @throws FailedConstructionException if thickness < 0.
+		*/
 		private double createThickness() 
 				throws FailedConstructionException {
 			for (AnnotationNode a : this) {
@@ -433,7 +471,11 @@ aspect AnnotationParsing {
 				return thickness;
 			} else throw new FailedConstructionException("Thickness");
 		}
-		
+		/**
+		* Return line thickness value for this AnnotationNode.
+		* @return line thickness
+		* @throws FailedConstructionException if line thickness < 0.
+		*/
 		private double createLineThickness() 
 				throws FailedConstructionException {
 			for (AnnotationNode a : this) {
@@ -443,7 +485,11 @@ aspect AnnotationParsing {
 			}
 			return createThickness();
 		}
-		
+		/**
+		* Return arrow size value for this AnnotationNode.
+		* @return arrow size
+		* @throws FailedConstructionException if size < 0.
+		*/
 		private double createArrowSize() 
 				throws FailedConstructionException {
 			for (AnnotationNode a : this) {
@@ -456,7 +502,11 @@ aspect AnnotationParsing {
 				return size;
 			} else throw new FailedConstructionException("Arrow size");
 		}	
-		
+		/**
+		* Return radius value for this AnnotationNode.
+		* @return radius
+		* @throws FailedConstructionException if radius < 0.
+		*/
 		private double createRadius() 
 				throws FailedConstructionException {
 			for (AnnotationNode a : this) {
@@ -470,7 +520,10 @@ aspect AnnotationParsing {
 			}
 			throw new IllegalArgumentException("Illegal value radius");
 		}
-		
+		/**
+		* Return start angle value for this AnnotationNode.
+		* @return start angle
+		*/
 		private double createStartAngle() { 
 			for (AnnotationNode a : this) {
 				if (a.name().equals("DynamicSelect")) {
@@ -479,7 +532,10 @@ aspect AnnotationParsing {
 			}
 			return real();
 		}
-		
+		/**
+		* Return end angle value for this AnnotationNode.
+		* @return end angle
+		*/
 		private double createEndAngle() { 
 			for (AnnotationNode a : this) {
 				if (a.name().equals("DynamicSelect")) {
@@ -490,9 +546,8 @@ aspect AnnotationParsing {
 		}
 		
 		/**
-		* Returns the Rectangle primitive represented by the given AnnotationNode.
-		* @param rectangleAnnotation
-		* @return
+		* Creates the Rectangle primitive represented by this AnnotationNode.
+		* @return the created Rectangle.
 		* @throws FailedConstructionException if the construction of one of its component fails.
 		* @throws NotEnoughParametersException if the extent parameter is not provided.
 		*/
@@ -516,15 +571,13 @@ aspect AnnotationParsing {
 		
 		
 		/**
-		* Returns the Text primitive that is represented by the given AnnotationNode.
-		* @param textAnnotation
-		* @return
+		* Returns the Text primitive represented by this AnnotationNode.
+		* @return the created Text primitive.
 		* @throws FailedConstructionException if the construction of one of its parameters
 		* fails.
 		* @throws NotEnoughParametersException if either the extent or the textString
 		* parameter was not provided.
 		*/
-		//TODO fånga exceptions
 		private Text createText()
 				throws FailedConstructionException, NotEnoughParametersException {
 			Text text = new Text();
@@ -557,12 +610,10 @@ aspect AnnotationParsing {
 		}
 		
 		/**
-		* Returns the Polygon primitive that is represented by this AnnotationNode.
-		* @param polygonAnnotation
-		* @return
-		* @throws FailedConstructionException if the construction of one of its primitives and
-		* parameters fails.
+		* Returns the Polygon primitive represented by this AnnotationNode.
+		* @return the created Polygon
 		* @throws NotEnoughParametersException if no points parameter was given.
+		* @throws FailedConstructionException if construction of points failes.
 		*/
 		private Polygon createPolygon()
 				throws FailedConstructionException, NotEnoughParametersException {
@@ -579,7 +630,9 @@ aspect AnnotationParsing {
 					polygon.setPoints(a.createPoints());
 					pointsSet = true;
 				} else if (a.name().equals("smooth")) {
-					polygon.setSmooth(a.createSmooth());
+					try {
+						polygon.setSmooth(a.createSmooth());
+					} catch (FailedConstructionException e) {}
 				}
 			}
 			if (!pointsSet) {
@@ -589,9 +642,8 @@ aspect AnnotationParsing {
 		}
 		
 		/**
-		* Returns the horizontalAlignment parameter represented by this AnnotationNode.
-		* @param horizontalAlignmentAnnotation
-		* @return
+		* Returns the horizontalAlignment value represented by this AnnotationNode.
+		* @return TextAlignment
 		* @throws FailedConstructionException if an illegal TextAlignment value was found.
 		*/
 		private TextAlignment createHorizontalAlignment() 
@@ -620,9 +672,8 @@ aspect AnnotationParsing {
 		}
 		
 		/**
-		* Returns the fillPattern parameter represented by the given AnnotationNode.
-		* @param fillPatternAnnotation
-		* @return
+		* Returns the fillPattern value represented by this AnnotationNode.
+		* @return fillpattern
 		* @throws FailedConstructionException if no String value was given or
 		* if an illegal fillPattern value was given. 
 		*/
@@ -652,9 +703,8 @@ aspect AnnotationParsing {
 		}
 		
 		/**
-		* Returns the linePattern parameter represented by the given AnnotationNode.
-		* @param linePatternAnnotation
-		* @return
+		* Returns the linePattern value represented by the given AnnotationNode.
+		* @return pattern
 		* @throws FailedConstructionException if no String value was given or
 		* if an illegal linePattern value was given. 
 		*/
@@ -684,9 +734,8 @@ aspect AnnotationParsing {
 		}
 		
 		/**
-		* Returns the borderPattern parameter represented by the given AnnotationNode.
-		* @param borderPatternAnnotation
-		* @return
+		* Returns the borderPattern value represented by this AnnotationNode.
+		* @return borderpattern
 		* @throws FailedConstructionException if no String value was given or
 		* if an illegal borderPattern value was given. 
 		*/
@@ -716,9 +765,8 @@ aspect AnnotationParsing {
 		}
 		
 		/**
-		* Returns the smooth parameter represented by the given AnnotationNode.
-		* @param smoothAnnotation
-		* @return
+		* Returns the smooth value represented by this AnnotationNode.
+		* @return smooth value
 		* @throws FailedConstructionException if no String value was given or
 		* if an illegal smooth value was given. 
 		*/
@@ -748,9 +796,8 @@ aspect AnnotationParsing {
 		}
 		
 		/**
-		* Returns the textStyle parameter that is represented by this AnnotationNode.
-		* @param textStyleAnnotation
-		* @return
+		* Returns the textStyle value represented by this AnnotationNode.
+		* @return textstyle
 		* @throws FailedConstructionException If too many modifications are found or if
 		* any of the string values doesn't match a legal TextStyle.
 		*/
@@ -787,8 +834,7 @@ aspect AnnotationParsing {
 		
 		/**
 		* Returns the fontName parameter that is represented by this AnnotationNode.
-		* @param fontName
-		* @return
+		* @return fontname
 		*/
 		private String createFontName()
 		{	
@@ -801,10 +847,9 @@ aspect AnnotationParsing {
 		}
 		
 		/**
-		* Returns the fontSize parameter that is represented by this AnnotationNode.
-		* @param fontSizeAnnotation
-		* @return
-		* @throws FailedConstructionException If the font size is less than zero.
+		* Returns the fontSize value represented by this AnnotationNode.
+		* @return font size
+		* @throws FailedConstructionException if the font size is less than zero.
 		*/
 		private int createFontSize()
 				throws FailedConstructionException {
@@ -821,13 +866,13 @@ aspect AnnotationParsing {
 		}
 		
 		/**
-		* Returns the color parameter represented by the given AnnotationNode.
-		* @param colorAnnotation
-		* @return
-		* @throws FailedConstructionException if anything else than 3 values were given.
+		* Create color represented by this AnnotationNode.
+		* @return Color
+		* @throws FailedConstructionException if anything else than 3 values were given 
+		* 	or if each value in the vector is value < 0 or value > 255.
 		*/
 		private Color createColor() 
-				throws FailedConstructionException {
+			throws FailedConstructionException {
 			for (AnnotationNode a : this) {
 				if (a.name().equals("DynamicSelect")) {
 					return a.iterator().next().createColor();
@@ -837,6 +882,12 @@ aspect AnnotationParsing {
 			if (vector != null) {
 				if (vector.length != 3) {
 					throw new FailedConstructionException("Color");
+				} else {
+					for(int i = 0; i < 3; i++) {
+						if(vector[i] < 0 || vector[i]> 255) { 
+							throw new FailedConstructionException("Color");
+						}
+					}
 				}
 			} else {
 				throw new FailedConstructionException("Color");
@@ -845,9 +896,8 @@ aspect AnnotationParsing {
 		}
 		
 		/**
-		* Returns the points parameter represented by the given AnnotationNode.
-		* @param pointsAnnotation
-		* @return
+		* Creates a list of points represented by this AnnotationNode.
+		* @return the created list of points
 		* @throws FailedConstructionException if no values were given.
 		*/
 		private ArrayList<Point> createPoints() 
@@ -878,7 +928,7 @@ aspect AnnotationParsing {
 		}
 		
 		/**
-		* Returns the extent parameter represented by the given AnnotationNode.
+		* Returns the extent represented by this AnnotationNode.
 		* @throws FailedConstructionException if too few or too many values are given. 
 		*/
 	
