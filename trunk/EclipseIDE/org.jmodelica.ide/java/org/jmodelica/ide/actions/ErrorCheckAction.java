@@ -1,6 +1,9 @@
 package org.jmodelica.ide.actions;
 
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -10,8 +13,8 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.error.InstanceErrorHandler;
-import org.jmodelica.ide.helpers.EclipseUtil;
 import org.jmodelica.ide.helpers.ShowMessageJob;
+import org.jmodelica.ide.helpers.hooks.IErrorCheckHook;
 import org.jmodelica.modelica.compiler.BaseClassDecl;
 import org.jmodelica.modelica.compiler.FClass;
 import org.jmodelica.modelica.compiler.IErrorHandler;
@@ -21,6 +24,16 @@ import org.jmodelica.modelica.compiler.ModelicaCompiler;
 import org.jmodelica.modelica.compiler.SourceRoot;
 
 public class ErrorCheckAction extends CurrentClassAction implements IJobChangeListener {
+
+	private static Set<IErrorCheckHook> hooks = new HashSet<IErrorCheckHook>();
+	
+	public static void addErrorCheckHook(IErrorCheckHook hook) {
+		hooks.add(hook);
+	}
+	
+	public static void removeErrorCheckHook(IErrorCheckHook hook) {
+		hooks.remove(hook);
+	}
 	
 	public ErrorCheckAction() {
 		super();
@@ -30,6 +43,8 @@ public class ErrorCheckAction extends CurrentClassAction implements IJobChangeLi
 
 	@Override
 	public void run() {
+		for (IErrorCheckHook hook : hooks)
+			hook.beforeCheck();
 		ErrorCheckJob job = new ErrorCheckJob(currentClass);
 		job.addJobChangeListener(this);
 		job.schedule();
