@@ -590,6 +590,8 @@ public class AWTIconDrawer implements GraphicsInterface {
 		}
 		Paint paint;
 		Extent extent; 		
+		
+		// Fetch the extent.
 		if (shape instanceof FilledRectShape) {
 			extent = ((FilledRectShape) shape).getExtent();
 		} else if (shape instanceof Polygon) {
@@ -597,6 +599,11 @@ public class AWTIconDrawer implements GraphicsInterface {
 		} else {
 			throw new IllegalArgumentException("getFillPaint");
 		}
+		
+		// Transform the extent with the current transformation.
+		extent = transform(extent);
+		
+		// Create the Paint object.
 		double width = extent.getWidth();
 		double height = extent.getHeight();
 		if (shape.getFillPattern() == FillPattern.VERTICALCYLINDER
@@ -630,15 +637,14 @@ public class AWTIconDrawer implements GraphicsInterface {
 					translateColor(shape.getFillColor()), 
 					translateColor(shape.getLineColor()) 
 			};
-			double ymin = iconExtent.getP1().getY();
-			double ymax = iconExtent.getP2().getY();
-			double x = extent.getP1().getX();
-			double y2 = extent.getP2().getY();
-			double y = ymin+Math.abs(ymax-y2);
+			double midx = extent.getMiddle().getX();
+			double midy = extent.getMiddle().getY();
+			double x = midx-width;
+			double y = midy-height;
 			paint = new RadialGradientPaint(
 					new Rectangle2D.Double(
-							x-width/2.0, 
-							y-height/2.0, 
+							x, 
+							y, 
 							2*width, 
 							2*height
 					),
@@ -888,5 +894,18 @@ public class AWTIconDrawer implements GraphicsInterface {
 		Point2D.Double p2d = new Point2D.Double(p.getX(), p.getY());
 		g.getTransform().transform(p2d, p2d);
 		return new Point(p2d.getX(), p2d.getY());
+	}
+	
+	/**
+	 * Returns the given extent transformed by this object's current 
+	 * transformation.
+	 * @param e The Extent to transform.
+	 * @return The transformed Extent.
+	 */
+	private Extent transform(Extent e) {
+		return new Extent(
+			transform(e.getP1()),
+			transform(e.getP2())
+		);
 	}
 }
