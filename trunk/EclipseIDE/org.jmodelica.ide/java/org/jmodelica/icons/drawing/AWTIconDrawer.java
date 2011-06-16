@@ -290,6 +290,8 @@ public class AWTIconDrawer implements GraphicsInterface {
 	 * @param t
 	 */
 	public void drawLine(Line l) {
+		Stroke oldStroke = g.getStroke();
+		g.setStroke(getLineStroke(l.getLinePattern(), l.getThickness()));
 		if(l.getPoints().size() > 2 && l.getSmooth().equals(Types.Smooth.BEZIER)) {
 			this.drawBezier(l);
 		} else if (l.getPoints().size() >= 2) {
@@ -310,8 +312,6 @@ public class AWTIconDrawer implements GraphicsInterface {
 			
 			// Set up the Graphics object and draw the transformed line.
 			setColor(l.getColor());
-			Stroke newStroke = getLineStroke(l.getLinePattern(), l.getThickness());
-			g.setStroke(newStroke);
 			AffineTransform oldTransform = g.getTransform();
 			g.setTransform(new AffineTransform());
 			g.setRenderingHint(
@@ -333,6 +333,7 @@ public class AWTIconDrawer implements GraphicsInterface {
 				}
 			}
 		}
+		g.setStroke(oldStroke);
 	}
 	
 	/**
@@ -510,22 +511,35 @@ public class AWTIconDrawer implements GraphicsInterface {
 			bezierPoints.add(new Point(x, y));
 		}
 		GeneralPath gp = new GeneralPath();
-		gp.moveTo(linePoints.get(0).getX(), linePoints.get(0).getY());
-		gp.lineTo(bezierPoints.get(0).getX(), bezierPoints.get(0).getY());
+		gp.moveTo(
+				transform(linePoints.get(0)).getX(), 
+				transform(linePoints.get(0)).getY()
+		);
+		gp.lineTo(
+				transform(bezierPoints.get(0)).getX(), 
+				transform(bezierPoints.get(0)).getY()
+		);
 		for(int i = 1; i < bezierPoints.size(); i++)
 		{
-			gp.quadTo(linePoints.get(i).getX(), linePoints.get(i).getY(), 
-					bezierPoints.get(i).getX(), bezierPoints.get(i).getY());
+			gp.quadTo(
+					transform(linePoints.get(i)).getX(), 
+					transform(linePoints.get(i)).getY(), 
+					transform(bezierPoints.get(i)).getX(), 
+					transform(bezierPoints.get(i)).getY()
+			);
 		}
-		gp.lineTo(linePoints.get(linePoints.size()-1).getX(), 
-				linePoints.get(linePoints.size()-1).getY());
+		gp.lineTo(
+				transform(linePoints.get(linePoints.size()-1)).getX(), 
+				transform(linePoints.get(linePoints.size()-1)).getY()
+		);
 		
 		setColor(l.getColor());
-		Stroke newStroke = getLineStroke(l.getLinePattern(), l.getThickness()); 
-		if (newStroke != null) {
-			g.setStroke(newStroke);
-		}
+		
+		AffineTransform oldTransform = g.getTransform();
+		g.setTransform(new AffineTransform());
 		g.draw(gp);
+		g.setTransform(oldTransform);
+		
 	}
 	/**
 	 * Applies the transformation of the specified component's icon layer 
@@ -667,7 +681,7 @@ public class AWTIconDrawer implements GraphicsInterface {
 	private Paint getTextureFillPaint(FilledShape s) {
         
 		int textureSize = 7;
-		float lineThickness = 1.0f;
+		float lineThickness = 0.9f;
 		int anchorWidth = 7;
 		int anchorHeight = 7;
 		
@@ -695,9 +709,9 @@ public class AWTIconDrawer implements GraphicsInterface {
 				)
 		);
 		if (s.getFillPattern().equals(FillPattern.BACKWARD)) {
-			graphics.drawLine(0, 0, textureSize, textureSize);
+			graphics.drawLine(0, 0, textureSize-1, textureSize-1);
 		} else if (s.getFillPattern().equals(FillPattern.FORWARD)) {
-			graphics.drawLine(textureSize, 0, 0, textureSize);
+			graphics.drawLine(textureSize-1, 0, 0, textureSize-1);
 		} else if (s.getFillPattern().equals(FillPattern.CROSSDIAG)) {
 			graphics.drawLine(0, 0, textureSize, textureSize);
 			graphics.drawLine(textureSize, 0, 0, textureSize);
@@ -708,6 +722,13 @@ public class AWTIconDrawer implements GraphicsInterface {
 		} else if (s.getFillPattern().equals(FillPattern.CROSS)) {
 			graphics.drawLine(0, textureSize/2, textureSize, textureSize/2);
 			graphics.drawLine(textureSize/2, 0, textureSize/2, textureSize);
+		}
+		
+		try {
+			ImageIO.write(img, "PNG", new File("c:/tmp/texturepaint.png"));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		
 		return new TexturePaint(
