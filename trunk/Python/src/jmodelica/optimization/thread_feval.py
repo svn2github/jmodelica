@@ -2,23 +2,34 @@ import threading
 import os
 import numpy as N
 
-class fevalThread(threading.Thread):
-	def __init__(self,x,func_file_name,dir_name):
+class FevalThread(threading.Thread):
+	def __init__(self,x,func_file_name,dir_name,debug):
 		self.x = x
 		self.func_file_name = func_file_name
 		self.dir_name = dir_name
+		self.debug = debug
 		threading.Thread.__init__(self)
 	def run(self):
+		curr_dir = os.path.dirname(os.path.abspath(__file__))
 		l = list()
 		for val in self.x:
 			l.append(str(val))
 		x_string = ' '.join(l)
-		cmd = ' '.join(['func_eval.py',x_string,self.func_file_name,self.dir_name])
+		if self.debug:
+			outfile = 'out_file_' + self.dir_name + '.txt'
+			errfile = 'err_file_' + self.dir_name + '.txt'
+			cmd = ' '.join([curr_dir+'/func_eval.py',x_string,self.func_file_name,
+							self.dir_name,'>',outfile,'2>',errfile])
+		else:
+			cmd = ' '.join([curr_dir+'/func_eval.py',x_string,self.func_file_name,
+							self.dir_name])
 		self.retval = os.system(cmd)
 
-def feval(func_file_name,x):
+def feval(func_file_name,x,debug):
 	"""
-	Evaluate a function in a separate process.
+	Evaluate a function in x in a separate process. If x contains multiple
+	points (rows) then the function evaluation in each point is performed 
+	in a separate process.
 	
 	Parameters::
 	
@@ -31,6 +42,11 @@ def feval(func_file_name,x):
 		x --
 			ndarray (1 or 2 dimensions)
 			The point(s) in which to evaluate the function.
+			
+		debug --
+			bool
+			Set to True to get separate error and output files for each
+			separate process.
 		
 	Returns::
 	
@@ -42,7 +58,7 @@ def feval(func_file_name,x):
 	# Evaluation in one point only
 	if N.ndim(x) == 1:
 		dir_name = 'dir'
-		th = fevalThread(x,func_file_name,dir_name)
+		th = FevalThread(x,func_file_name,dir_name,debug)
 		th.start()
 		th.join()
 		retval = th.retval
@@ -59,7 +75,7 @@ def feval(func_file_name,x):
 		threads = []
 		for i in range(m):
 			dir_name = 'dir_'+str(i+1)
-			th = fevalThread(x[i],func_file_name,dir_name)
+			th = FevalThread(x[i],func_file_name,dir_name,debug)
 			th.start()
 			threads.append(th)	
 		# Wait for all threads to complete

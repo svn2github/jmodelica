@@ -2,7 +2,7 @@
 This script creates a sub-directory to the current one, evaluates a function 
 in a certain point in the sub-directory and writes the result to a file.
 The script is executed with the os.system() command in the function run() 
-in the thread class fevalThread in thread_feval.py which is used for function
+in the thread class FevalThread in thread_feval.py which is used for function
 evaluations in separate processes. The os.system() command is given four 
 input arguments: 
 1. 'func_eval.py' - the file to be executed
