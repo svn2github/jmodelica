@@ -288,11 +288,11 @@ public class ModelicaCompiler {
 	}
 	
 	public static void addGlobalCompilationHooks(CompilationHooks hooks) {
-		hooksGlobalList.add(hooks);
+		globalHooksList.add(hooks);
 	}
 	
 	public static void removeGlobalCompilationHooks(CompilationHooks hooks) {
-		hooksGlobalList.remove(hooks);
+		globalHooksList.remove(hooks);
 	}
 	
 	public void addCompilationHooks(CompilationHooks hooks) {
