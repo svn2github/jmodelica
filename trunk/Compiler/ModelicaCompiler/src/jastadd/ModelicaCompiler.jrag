@@ -140,7 +140,8 @@ public class ModelicaCompiler {
 	private OptionRegistry options = null;
 	private DiagnosticsGenerator diagGenerator = null;
 	
-	protected LinkedList<CompilationHooks> hooksList = new LinkedList<CompilationHooks>();
+	protected static LinkedList<CompilationHooks> globalHooksList = new LinkedList<CompilationHooks>();
+	protected LinkedList<CompilationHooks> hooksList = new LinkedList<CompilationHooks>(globalHooksList);
 	protected static CCompilerDelegator cCompiler = new GCCcompilerDelegator();
 	protected IErrorHandler errorHandler = null;
 	
@@ -284,6 +285,14 @@ public class ModelicaCompiler {
 	
 	public static void setJModelicaHome(String jmHome) {
 		jmodelicaHome = jmHome;
+	}
+	
+	public static void addGlobalCompilationHooks(CompilationHooks hooks) {
+		hooksGlobalList.add(hooks);
+	}
+	
+	public static void removeGlobalCompilationHooks(CompilationHooks hooks) {
+		hooksGlobalList.remove(hooks);
 	}
 	
 	public void addCompilationHooks(CompilationHooks hooks) {
