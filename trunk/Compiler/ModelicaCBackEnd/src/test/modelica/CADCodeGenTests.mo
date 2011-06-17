@@ -528,20 +528,20 @@ jmi_ad_var_t temp_d_0;
 if(_sw(0)){
 jmi_ad_var_t temp_v_1;
 jmi_ad_var_t temp_d_1;
-if(COND_EXP_LE(time, jmi_divide(AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"Divide by zero: ( 3.141592653589793 ) / ( 2 )\"), JMI_TRUE, JMI_FALSE)){
-jmi_ad_var_t v_2 = time;
+if(COND_EXP_LE(_time, jmi_divide(AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"Divide by zero: ( 3.141592653589793 ) / ( 2 )\"), JMI_TRUE, JMI_FALSE)){
+jmi_ad_var_t v_2 = _time;
 jmi_ad_var_t d_2 = (*dz)[jmi->offs_t];
 jmi_ad_var_t v_3 = sin(v_2);
 jmi_ad_var_t d_3 = d_2 * cos(v_2);
 temp_v_1=v_3;
 temp_d_1=d_3;
 }
-else if(COND_EXP_LE(time, AD_WRAP_LITERAL(3.141592653589793), JMI_TRUE, JMI_FALSE)){
+else if(COND_EXP_LE(_time, AD_WRAP_LITERAL(3.141592653589793), JMI_TRUE, JMI_FALSE)){
 temp_v_1=AD_WRAP_LITERAL(1);
 temp_d_1=0;
 }
 else{
-jmi_ad_var_t v_4 = time;
+jmi_ad_var_t v_4 = _time;
 jmi_ad_var_t d_4 = (*dz)[jmi->offs_t];
 jmi_ad_var_t v_5 = AD_WRAP_LITERAL(3.141592653589793) / AD_WRAP_LITERAL(2);
 jmi_ad_var_t d_5 = (0 * AD_WRAP_LITERAL(2) - AD_WRAP_LITERAL(3.141592653589793) * 0 ) / ( AD_WRAP_LITERAL(2) * AD_WRAP_LITERAL(2));
@@ -598,7 +598,7 @@ model IfExpExample2
 jmi_ad_var_t temp_v_0;
 jmi_ad_var_t temp_d_0;
 if(_sw(0)){
-jmi_ad_var_t v_1 = time;
+jmi_ad_var_t v_1 = _time;
 jmi_ad_var_t d_1 = (*dz)[jmi->offs_t];
 jmi_ad_var_t v_2 = sin(v_1);
 jmi_ad_var_t d_2 = d_1 * cos(v_1);
@@ -610,7 +610,7 @@ temp_v_0=AD_WRAP_LITERAL(1);
 temp_d_0=0;
 }
 else{
-jmi_ad_var_t v_3 = time;
+jmi_ad_var_t v_3 = _time;
 jmi_ad_var_t d_3 = (*dz)[jmi->offs_t];
 jmi_ad_var_t v_4 = AD_WRAP_LITERAL(3.141592653589793) / AD_WRAP_LITERAL(2);
 jmi_ad_var_t d_4 = (0 * AD_WRAP_LITERAL(2) - AD_WRAP_LITERAL(3.141592653589793) * 0 ) / ( AD_WRAP_LITERAL(2) * AD_WRAP_LITERAL(2));

@@ -54,7 +54,7 @@ aspect CADCodeGen {
 	public void FTimeExp.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
 			str.print("jmi_ad_var_t ");
 			str.print(this.adVarName());
-			str.print(" = time;\n");
+			str.print(" = _time;\n");
 			
 			str.print("jmi_ad_var_t ");
 			str.print(this.adDerName());

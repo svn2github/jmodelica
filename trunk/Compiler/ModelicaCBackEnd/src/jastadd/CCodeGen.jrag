@@ -126,6 +126,10 @@ aspect CCodeGen {
 		str.print(")");
 	}
 	
+	public void FTimeExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
+		str.print("_time");
+	}
+	
 	public void FEnumIntegerExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
 		p.print(getFExp(), str, indent);
 	}

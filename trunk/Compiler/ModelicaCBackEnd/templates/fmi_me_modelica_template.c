@@ -18,7 +18,7 @@
 #include <math.h>
 #include <jmi.h>
 #include <jmi_newton_solvers.h>
-#include "fmi.h"
+#include <fmi.h>
 
 $external_func_includes$
 
@@ -327,6 +327,7 @@ DllExport const char* fmiGetVersion() {
 
 /* Creation and destruction of model instances and setting debug status */
 DllExport fmiComponent fmiInstantiateModel(fmiString instanceName, fmiString GUID, fmiCallbackFunctions functions, fmiBoolean loggingOn) {
+$HOOK__C_FMI_instantiate$
     return fmi_instantiate_model(instanceName, GUID, functions, loggingOn);
 }
 

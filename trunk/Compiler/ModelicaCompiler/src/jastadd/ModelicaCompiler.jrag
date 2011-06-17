@@ -370,6 +370,14 @@ public class ModelicaCompiler {
 	}
 	
 	/**
+	 * Calls the hook to be called after a code generator is created.
+	 */
+	protected void hookCodeGeneratorCreated(AbstractGenerator gen) {
+		for (CompilationHooks hooks : hooksList)
+			hooks.codeGeneratorCreated(gen);
+	}
+	
+	/**
 	 * Calls the hook to be called after output code is generated.
 	 */
 	protected void hookCodeGenerated() {
@@ -1316,14 +1324,21 @@ public class ModelicaCompiler {
 		String name = fc.nameUnderscore();
 		
 		XMLGenerator xmlgenerator = createXMLGenerator(fc);
+		hookCodeGeneratorCreated(xmlgenerator);
+		
+		XMLValueGenerator valuegenerator = createXMLValueGenerator(fc);
+		hookCodeGeneratorCreated(valuegenerator);
+		
+		CGenerator cgenerator = createCGenerator(fc);
+		hookCodeGeneratorCreated(cgenerator);
+		
+		hookCheckAbort();
 		String output = new File(outDir, "modelDescription.xml").getPath();
 		xmlgenerator.generate(getXmlTpl(fc), output);
-
-		XMLValueGenerator valuegenerator = createXMLValueGenerator(fc);
+		
 		output = new File(resourceDir, name + "_values.xml").getPath();
 		valuegenerator.generate(getXmlValuesTpl(fc), output);
 		
-		CGenerator cgenerator = createCGenerator(fc);
 		output = new File(sourceDir, name + ".c").getPath();
 		cgenerator.generate(getCTemplatefile(fc), output);
 
@@ -1879,6 +1894,13 @@ public interface CompilationHooks {
 	 * Called after error checks of the flat model are finished without errors.
 	 */
 	public void flatModelChecked(FClass fc);
+	
+	/**
+	 * Called after a code generator is created.
+	 * 
+	 * Normally called three times.
+	 */
+	public void codeGeneratorCreated(AbstractGenerator gen);
 	
 	/**
 	 * Called after output code is generated.

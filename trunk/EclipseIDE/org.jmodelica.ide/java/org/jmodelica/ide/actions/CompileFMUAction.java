@@ -35,6 +35,7 @@ import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.editor.Editor;
 import org.jmodelica.ide.error.InstanceErrorHandler;
 import org.jmodelica.ide.helpers.ShowMessageJob;
+import org.jmodelica.modelica.compiler.AbstractGenerator;
 import org.jmodelica.modelica.compiler.BaseClassDecl;
 import org.jmodelica.modelica.compiler.CompilationAbortedException;
 import org.jmodelica.modelica.compiler.CompilationHooks;
@@ -277,6 +278,9 @@ public class CompileFMUAction extends CurrentClassAction implements IJobChangeLi
 		public void flatModelChecked(FClass fc) {
 			mon.worked(WORK_FLAT_CHECK);
 			mon.subTask("Generating code...");
+		}
+
+		public void codeGeneratorCreated(AbstractGenerator gen) {
 		}
 
 		@Override

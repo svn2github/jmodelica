@@ -21,6 +21,7 @@ Require-Bundle: org.eclipse.jface.text,
 Import-Package: junit.framework,
  org.eclipse.ui.navigator
 Export-Package: org.jmodelica.ide.helpers,
+ org.jmodelica.ide.helpers.hooks,
  org.jmodelica.ide.ui,
  org.jmodelica.modelica.compiler,
  org.jmodelica.modelica.parser,

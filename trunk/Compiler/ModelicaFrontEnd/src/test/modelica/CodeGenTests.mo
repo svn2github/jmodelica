@@ -212,6 +212,19 @@ n_enum_pd: 2
 		parameter A adp = aip;
 		parameter B bdp = bip;
 	end CodeGenTest5;
+	
+	
+	
+	model HookCodeGenTest1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.GenericCodeGenTestCase(
+         name="HookCodeGenTest1",
+         description="Test that undefined hook tags don't generate errors",
+         template="$HOOK__not_defined$",
+         generatedCode="")})));
+
+		Real x = 1;
+	end HookCodeGenTest1;
 
 
 

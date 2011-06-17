@@ -304,7 +304,7 @@ def load_DLL(libname, path):
     See also http://docs.python.org/library/ct.html
     """
 
-    # Don't catch this exception since it hides the acutal source
+    # Don't catch this exception since it hides the actual source
     # of the error.
     dll = Nct.load_library(libname, path)
     return dll

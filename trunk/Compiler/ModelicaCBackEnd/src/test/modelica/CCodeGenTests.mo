@@ -34,7 +34,7 @@ $C_DAE_equation_residuals$
 #define _x2_1 ((*(jmi->z))[jmi->offs_real_x+1])
 #define _u_2 ((*(jmi->z))[jmi->offs_real_u+0])
 #define _w_4 ((*(jmi->z))[jmi->offs_real_w+0])
-#define time ((*(jmi->z))[jmi->offs_t])
+#define _time ((*(jmi->z))[jmi->offs_t])
 
     (*res)[0] = ( 1 - ( (1.0 * (_x2_1) * (_x2_1)) ) ) * ( _x1_0 ) - ( _x2_1 ) + ( _p_3 ) * ( _u_2 ) - (_der_x1_5);
     (*res)[1] = _x1_0 - (_der_x2_6);
@@ -71,7 +71,7 @@ $C_DAE_initial_guess_equation_residuals$
 #define _v_3 ((*(jmi->z))[jmi->offs_real_x+1])
 #define _y_1 ((*(jmi->z))[jmi->offs_real_w+0])
 #define _w_2 ((*(jmi->z))[jmi->offs_real_w+1])
-#define time ((*(jmi->z))[jmi->offs_t])
+#define _time ((*(jmi->z))[jmi->offs_t])
 
     (*res)[0] =  - ( _x_0 ) - (_der_x_4);
     (*res)[1] = 4 - (_der_v_5);
@@ -124,7 +124,7 @@ model CCodeGenTest4
          template="$C_DAE_equation_residuals$",
          generatedCode="
     (*res)[0] = _y_1 - (_der_x_2);
-    (*res)[1] = (COND_EXP_EQ(COND_EXP_LE(time,jmi_divide(AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"Divide by zero: ( 3.141592653589793 ) / ( 2 )\"),JMI_TRUE,JMI_FALSE),JMI_TRUE,sin(time),_x_0)) - (_y_1);
+    (*res)[1] = (COND_EXP_EQ(COND_EXP_LE(_time,jmi_divide(AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"Divide by zero: ( 3.141592653589793 ) / ( 2 )\"),JMI_TRUE,JMI_FALSE),JMI_TRUE,sin(_time),_x_0)) - (_y_1);
 ")})));
 
   Real x(start=0);
@@ -142,7 +142,7 @@ model CCodeGenTest5
          template="$C_DAE_equation_residuals$",
          generatedCode="
     (*res)[0] = _y_3 - (_der_x_4);
-    (*res)[1] = (COND_EXP_EQ(COND_EXP_LE(time,_one_0,JMI_TRUE,JMI_FALSE),JMI_TRUE,_x_2,(COND_EXP_EQ(COND_EXP_LE(time,_two_1,JMI_TRUE,JMI_FALSE),JMI_TRUE,(  - ( AD_WRAP_LITERAL(2) ) ) * ( _x_2 ),( AD_WRAP_LITERAL(3) ) * ( _x_2 ))))) - (_y_3);
+    (*res)[1] = (COND_EXP_EQ(COND_EXP_LE(_time,_one_0,JMI_TRUE,JMI_FALSE),JMI_TRUE,_x_2,(COND_EXP_EQ(COND_EXP_LE(_time,_two_1,JMI_TRUE,JMI_FALSE),JMI_TRUE,(  - ( AD_WRAP_LITERAL(2) ) ) * ( _x_2 ),( AD_WRAP_LITERAL(3) ) * ( _x_2 ))))) - (_y_3);
 ")})));
 
   parameter Real one = 1;
@@ -163,11 +163,11 @@ $C_DAE_event_indicator_residuals$
 $C_DAE_initial_event_indicator_residuals$
 ",
          generatedCode="
-    (*res)[0] = _one_1 - (time);
-    (*res)[1] = _two_2 - (time);
+    (*res)[0] = _one_1 - (_time);
+    (*res)[1] = _two_2 - (_time);
 
-    (*res)[0] = _one_1 - (time);
-    (*res)[1] = _two_2 - (time);
+    (*res)[0] = _one_1 - (_time);
+    (*res)[1] = _two_2 - (_time);
     (*res)[2] = _p_0 - (_one_1);
 ")})));
 
@@ -243,7 +243,7 @@ $C_DAE_initial_event_indicator_residuals$",
     (*res)[0] =  - ( _x_0 ) - (_der_x_3);
     (*res)[1] =  - ( _y_1 ) - (_der_y_4);
     (*res)[2] =  - ( _z_2 ) - (_der_z_5);
-    (*res)[3] = (COND_EXP_EQ(COND_EXP_GE(time,AD_WRAP_LITERAL(1),JMI_TRUE,JMI_FALSE),JMI_TRUE, - ( AD_WRAP_LITERAL(1) ) + _y_1, - 
+    (*res)[3] = (COND_EXP_EQ(COND_EXP_GE(_time,AD_WRAP_LITERAL(1),JMI_TRUE,JMI_FALSE),JMI_TRUE, - ( AD_WRAP_LITERAL(1) ) + _y_1, - 
 ( _y_1 ))) - (_x_0);
     (*res)[4] = _z_2 + _x_0 + (COND_EXP_EQ(COND_EXP_GE(_z_2, - ( AD_WRAP_LITERAL(1.5) ),JMI_TRUE,JMI_FALSE),JMI_TRUE, - ( AD_WRAP_
 LITERAL(3) ),AD_WRAP_LITERAL(3))) - (_y_1);
@@ -278,7 +278,7 @@ $C_DAE_initial_event_indicator_residuals$",
     (*res)[3] = (COND_EXP_EQ(_sw_init(0),JMI_TRUE, - ( AD_WRAP_LITERAL(1) ) + _y_1, - ( _y_1 ))) - (_x_0);
     (*res)[4] = _z_2 + _x_0 + (COND_EXP_EQ(_sw_init(1),JMI_TRUE, - ( AD_WRAP_LITERAL(3) ),AD_WRAP_LITERAL(3))) - (_y_1);
     (*res)[5] =  - ( _y_1 ) - ( _x_0 ) + (COND_EXP_EQ(_sw_init(2),JMI_TRUE, - ( AD_WRAP_LITERAL(1) ),AD_WRAP_LITERAL(1))) - (_z_2);
-    (*res)[0] = time - (AD_WRAP_LITERAL(1));
+    (*res)[0] = _time - (AD_WRAP_LITERAL(1));
     (*res)[1] = _z_2 - ( - ( AD_WRAP_LITERAL(1.5) ));
     (*res)[2] = _y_1 - (AD_WRAP_LITERAL(0.5));
 ")})));
@@ -345,7 +345,7 @@ model CCodeGenTest13
 #define _bip_5 ((*(jmi->z))[jmi->offs_integer_pi+1])
 #define _adp_6 ((*(jmi->z))[jmi->offs_integer_pd+0])
 #define _bdp_7 ((*(jmi->z))[jmi->offs_integer_pd+1])
-#define time ((*(jmi->z))[jmi->offs_t])
+#define _time ((*(jmi->z))[jmi->offs_t])
 ")})));
 
 	type A = enumeration(a, b, c);
@@ -442,7 +442,7 @@ $C_DAE_equation_residuals$
 #define _der_x_17 ((*(jmi->z))[jmi->offs_real_dx+0])
 #define _x_5 ((*(jmi->z))[jmi->offs_real_x+0])
 #define _w_6 ((*(jmi->z))[jmi->offs_real_w+0])
-#define time ((*(jmi->z))[jmi->offs_t])
+#define _time ((*(jmi->z))[jmi->offs_t])
 #define _rd2_4 ((*(jmi->z))[jmi->offs_real_d+0])
 #define _rid2_11 ((*(jmi->z))[jmi->offs_integer_d+0])
 #define _rbd2_16 ((*(jmi->z))[jmi->offs_boolean_d+0])
@@ -498,7 +498,7 @@ $C_DAE_equation_residuals$
 #define _x_y_0 ((*(jmi->z))[jmi->offs_real_x+0])
 #define _x_y_1 ((*(jmi->z))[jmi->offs_real_w+0])
 #define _der_x_y_2 ((*(jmi->z))[jmi->offs_real_w+1])
-#define time ((*(jmi->z))[jmi->offs_t])
+#define _time ((*(jmi->z))[jmi->offs_t])
 
     (*res)[0] = 1 - (_x_y_0);
     (*res)[1] = _x_y_0 + 2 - (_x_y_1);

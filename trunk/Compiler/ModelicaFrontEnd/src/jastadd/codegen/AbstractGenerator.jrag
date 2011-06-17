@@ -22,7 +22,10 @@
  * A package offering a basic code generation framework.
  */
 
+import java.util.Map;
+import java.util.Set;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.io.*;
 import java.lang.reflect.Constructor;
 
@@ -49,6 +52,16 @@ import java.lang.reflect.Constructor;
  * essentially its name (the string enclosed by an escape character, $ in the 
  * example above), and a method for generating the corresponding code.
  * 
+ * Tags in the template file that start with "HOOK__" are treated differently:
+ * <ul>
+ * <li>Their names are the part after "HOOK__".</li>
+ * <li>Their tag objects are added through {@link #addHookTag(AbstractTag)}. </li>
+ * <li>There can be several tag objects for a single hook tag, they are then 
+ *     executed in sequence. </li>
+ * <li>If there is no tag object for a hook tag found in the template, then it 
+ *     is simply ignored. </li>
+ * </ul>
+ * 
  * A subclass need only define Tag classes as inner classes for them to be 
  * instantiated and added to the list of Tags.
  * 
@@ -59,9 +72,14 @@ import java.lang.reflect.Constructor;
  */
 
 public abstract class AbstractGenerator {
+	
+	/** The prefix for hook tags. */
+	public static final String HOOK_PREFIX = "HOOK__";
     
-	/** \brief A HasMap containing all tags */
-	protected HashMap<String,AbstractTag> tagMap;
+	/** \brief A map containing all normal tags */
+	protected Map<String,AbstractTag> tagMap;
+	/** Map of the hook tags. */
+	protected Map<String,Set<AbstractTag>> hookTagMap;
 	/** \brief A Printer object used to generated code for expressions */
 	protected Printer expPrinter;
 	/** \brief A character used as escape character when decoding tags during
@@ -83,30 +101,60 @@ public abstract class AbstractGenerator {
 		this.expPrinter = expPrinter;
 		this.escapeCharacter = (int)escapeCharacter;
 		tagMap = new HashMap<String,AbstractTag>();
-		instantiateTags(getClass(), fclass);
+		hookTagMap = new HashMap<String,Set<AbstractTag>>();
+		instantiateTags(fclass);
 	}
 	
 	/**
-	 * \brief Recursive method to instantiate all inner classes inheriting AbstractTag.
+	 * Instantiates all inner classes inheriting AbstractTag and adds them to the tag map.
 	 * 
-	 * Recursion is needed to instantiate classes from a superclass before classes from a subclass. 
-	 * This ensures that subclasses can override tags added by superclasses.
-	 * 
-	 * @param cur The class to search for classes in.
 	 * @param fclass An FClass object used as a basis for the code generation.
 	 */
-	private void instantiateTags(Class<?> cur, FClass fclass) {
-		if (cur.equals(AbstractGenerator.class)) return;
-		instantiateTags(cur.getSuperclass(), fclass);
-		for (Class<?> inner : cur.getDeclaredClasses()) {
-			for (Constructor<?> con : inner.getConstructors()) {
-				try {
-					AbstractTag tag = (AbstractTag) con.newInstance(this, this, fclass);
-					tagMap.put(tag.getName(), tag);
-				} catch (Exception e) {
-					e.printStackTrace();
+	private void instantiateTags(FClass fclass) {
+		Class<?> cur = getClass();
+		while (!cur.equals(AbstractGenerator.class)) {
+			for (Class<?> inner : cur.getDeclaredClasses()) {
+				for (Constructor<?> con : inner.getConstructors()) {
+					try {
+						AbstractTag tag = (AbstractTag) con.newInstance(this, this, fclass);
+						if (!tagMap.containsKey(tag.getName()))
+							tagMap.put(tag.getName(), tag);
+					} catch (Exception e) {
+					}
 				}
 			}
+			cur = cur.getSuperclass();
+		}
+	}
+	
+	/**
+	 * Add a hook tag handler.
+	 * 
+	 * If it is already added, nothing happends.
+	 */
+	public void addHookTag(AbstractTag tag) {
+		String name = tag.getName();
+		Set<AbstractTag> set = hookTagMap.get(name);
+		if (set == null) {
+			set = new LinkedHashSet<AbstractTag>();
+			hookTagMap.put(name, set);
+		}
+		if (!set.contains(tag))
+			set.add(tag);
+	}
+	
+	/**
+	 * Remove a hook tag handler.
+	 * 
+	 * If it is not added, nothing happends.
+	 */
+	public void removeHookTag(AbstractTag tag) {
+		String name = tag.getName();
+		Set<AbstractTag> set = hookTagMap.get(name);
+		if (set != null) {
+			set.remove(tag);
+			if (set.isEmpty())
+				hookTagMap.remove(set);
 		}
 	}
 
@@ -197,7 +245,6 @@ public abstract class AbstractGenerator {
 		int i = 0;
 		boolean read = true;
 		try {
-			AbstractTag tag = null;
 			int c = templateReader.read();
 			while (c != -1) {
 				switch (mode) {
@@ -214,11 +261,19 @@ public abstract class AbstractGenerator {
 					if (c == escapeCharacter) {
 					    mode = Mode.NORMAL;
 					    String name = tag_name.toString();
-						tag = tagMap.get(name);
-						if (tag != null)
-							tag.generate(genPrinter);
-						else // TODO: introduce specific exception type
-							throw new RuntimeException("Unknown tag: " + name);
+					    if (name.startsWith(HOOK_PREFIX)) {
+					    	name = name.substring(HOOK_PREFIX.length());
+					    	Set<AbstractTag> set = hookTagMap.get(name);
+					    	if (set != null)
+					    		for (AbstractTag tag : set)
+					    			tag.generate(genPrinter);
+					    } else {
+							AbstractTag tag = tagMap.get(name);
+							if (tag != null)
+								tag.generate(genPrinter);
+							else // TODO: introduce specific exception type
+								throw new RuntimeException("Unknown tag: " + name);
+					    }
 					} else {
 						tag_name.append((char) c);
 					}

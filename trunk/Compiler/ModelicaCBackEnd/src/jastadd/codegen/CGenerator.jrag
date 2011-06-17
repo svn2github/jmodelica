@@ -256,7 +256,7 @@ public class CGenerator extends GenericGenerator {
 			generateVarList(genPrinter, fclass.differentiatedRealVariables(),  "real_x");
 			generateVarList(genPrinter, fclass.realInputs(),                   "real_u");
 			generateVarList(genPrinter, fclass.algebraicRealVariables(),       "real_w");
-			genPrinter.print("#define time ((*(jmi->z))[jmi->offs_t])\n"); 
+			genPrinter.print("#define _time ((*(jmi->z))[jmi->offs_t])\n"); 
 			generateVarList(genPrinter, fclass.discreteRealVariables(),        "real_d");
 			generateVarList(genPrinter, fclass.discreteIntegerVariables(),     "integer_d");
 			generateVarList(genPrinter, fclass.discreteEnumVariables(),        "integer_d");

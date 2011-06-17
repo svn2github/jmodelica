@@ -2175,9 +2175,11 @@ aspect Sparsity {
 	public void FFunctionCallEquation.calculateEquationSparsity(
 			ArrayList<Integer>[] sp, int i, Set<? extends FVariable> vars, int offset) {
 		Set<FVariable> rv = FClass.intersection(referencedFVariablesInRHS(), vars);
+//		Set<FVariable> lv = FClass.intersection(referencedFVariablesInLHS(), vars);
 		Set<FVariable> lv = referencedFVariablesInLHS();
 		
 		for (FVariable fv : lv) {
+//			sp[fv.indexInZ() - offset].add(new Integer(i)); 
 			if (vars.contains(fv))
 				sp[fv.indexInZ() - offset].add(new Integer(i)); 
 			for (FVariable ffv : rv) {
