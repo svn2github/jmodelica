@@ -190,8 +190,8 @@ public class CompileFMUAction extends CurrentClassAction implements IJobChangeLi
 			OutputStream out = newConsoleStream();
 			ModelicaCompiler.setStreamLogger(out);
 			ModelicaCompiler.setLogLevel(ModelicaCompiler.INFO);
+			ModelicaCompiler mc = new ModelicaCompiler(opt);
 			try {
-				ModelicaCompiler mc = new ModelicaCompiler(opt);
 				mc.addCompilationHooks(this);
 				mc.setTempFileDir(getTempDir());
 				mc.compileFMU(className, paths, "model_noad", dir);
@@ -209,6 +209,8 @@ public class CompileFMUAction extends CurrentClassAction implements IJobChangeLi
 					msg.append(e.getMessage());
 				}
 				status = new Status(sev, IDEConstants.PLUGIN_ID, msg.toString(), e); 
+			} finally {
+				mc.removeCompilationHooks(this);
 			}
 			ModelicaCompiler.setDefaultLogger();
 			ModelicaCompiler.closeStreamLogger();
