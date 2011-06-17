@@ -12,12 +12,6 @@ public class Text extends FilledRectShape {
 	private ArrayList<Types.TextStyle> textStyle;  
 	private Types.TextAlignment horizontalAlignment;
 	
-	/**
-	 * This is needed in order to be able to replace the "%name" string
-	 * with the name of the component that the text belongs to.
-	 */
-	private boolean isNameText;
-	
 	private static final String DEFAULT_TEXT_STRING = "";
 	private static final String DEFAULT_FONT_NAME = "";
 	private static final double DEFAULT_FONT_SIZE = 0;
@@ -38,17 +32,6 @@ public class Text extends FilledRectShape {
 		fontName = DEFAULT_FONT_NAME;
 		horizontalAlignment = DEFAULT_HORIZONTAL_ALIGNMENT;
 		textStyle = new ArrayList<Types.TextStyle>();
-	}
-	/**
-	 * This is only called once: when the MSLText created from an annotation.
-	 * @param isNameText
-	 */
-	public void setIsNameText(boolean isNameText) {
-		this.isNameText = isNameText;
-	}
-	
-	public boolean isNameText() {
-		return isNameText;
 	}
 	
 	public void setTextString(String textString) {
