@@ -43,14 +43,14 @@ private static final String[] ACTION_IDS = {
     IDEConstants.ACTION_COMPILE_FMU_ID,
     IDEConstants.ACTION_TOGGLE_ANNOTATIONS_ID,
     IDEConstants.ACTION_FORMAT_REGION_ID, 
-    IDEConstants.ACTION_FOLLOW_REFERENCE_ID, 
+//    IDEConstants.ACTION_FOLLOW_REFERENCE_ID, 
     IDEConstants.ACTION_TOGGLE_COMMENT_ID };
 
 private LabelRetargetAction errorCheckAction;
 private LabelRetargetAction compileFMUAction;
 private RetargetAction toggleAnnotationsAction;
 private LabelRetargetAction formatRegionAction;
-private LabelRetargetAction followReferenceAction;
+//private LabelRetargetAction followReferenceAction;
 private LabelRetargetAction toggleCommentAction;
 
 private RetargetAction[] retargetActions;
@@ -81,15 +81,15 @@ public EditorContributor() {
             IDEConstants.ACTION_TOGGLE_COMMENT_ID,
             IDEConstants.ACTION_TOGGLE_COMMENT_TEXT);
     
-    followReferenceAction = new LabelRetargetAction(
-            IDEConstants.ACTION_FOLLOW_REFERENCE_ID,
-            IDEConstants.ACTION_FOLLOW_REFERENCE_TEXT);
+//    followReferenceAction = new LabelRetargetAction(
+//            IDEConstants.ACTION_FOLLOW_REFERENCE_ID,
+//            IDEConstants.ACTION_FOLLOW_REFERENCE_TEXT);
    
     retargetActions = new RetargetAction[] { 
             errorCheckAction,
             compileFMUAction,
             toggleAnnotationsAction, 
-            followReferenceAction,
+//            followReferenceAction,
             formatRegionAction,
             toggleCommentAction };
 }
@@ -123,15 +123,11 @@ private void doSetActiveEditor(IEditorPart part) {
 @Override
 public void contributeToMenu(IMenuManager menu) {
     super.contributeToMenu(menu);
-//    IMenuManager fileMenu = menu.findMenuUsingPath(IWorkbenchActionConstants.M_FILE);
-//    fileMenu.appendToGroup("additions", new Separator(IDEConstants.GROUP_COMPILE_ID));
-//    fileMenu.appendToGroup(IDEConstants.GROUP_COMPILE_ID, errorCheckAction);
-//    fileMenu.appendToGroup(IDEConstants.GROUP_COMPILE_ID, compileFMUAction);
     IMenuManager editMenu = menu.findMenuUsingPath(IWorkbenchActionConstants.M_EDIT);
     editMenu.appendToGroup("additions", new Separator(IDEConstants.GROUP_EDIT_ID));
     editMenu.appendToGroup(IDEConstants.GROUP_EDIT_ID, toggleAnnotationsAction);
     editMenu.appendToGroup(IDEConstants.GROUP_EDIT_ID, formatRegionAction);
-    editMenu.appendToGroup(IDEConstants.GROUP_EDIT_ID, followReferenceAction);
+//    editMenu.appendToGroup(IDEConstants.GROUP_EDIT_ID, followReferenceAction);
     editMenu.appendToGroup(IDEConstants.GROUP_EDIT_ID, toggleCommentAction);
 }
 
