@@ -4,6 +4,10 @@ package org.jmodelica.ide.actions;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -11,6 +15,9 @@ import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
 import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.error.InstanceErrorHandler;
 import org.jmodelica.ide.helpers.ShowMessageJob;
@@ -25,6 +32,8 @@ import org.jmodelica.modelica.compiler.SourceRoot;
 
 public class ErrorCheckAction extends CurrentClassAction implements IJobChangeListener {
 
+	private static final String SYNTAX_ERROR_MESSAGE = "Project contains files with syntax errors.\nError check might give erroneous results.";
+	private static final String SYNTAX_ERROR_TITLE = "Syntax errors in project";
 	private static Set<IErrorCheckHook> hooks = new HashSet<IErrorCheckHook>();
 	
 	public static void addErrorCheckHook(IErrorCheckHook hook) {
@@ -45,9 +54,26 @@ public class ErrorCheckAction extends CurrentClassAction implements IJobChangeLi
 	public void run() {
 		for (IErrorCheckHook hook : hooks)
 			hook.beforeCheck();
+		checkForSyntaxErrors();
 		ErrorCheckJob job = new ErrorCheckJob(currentClass);
 		job.addJobChangeListener(this);
 		job.schedule();
+	}
+
+	public void checkForSyntaxErrors() {
+		IFile file = currentClass.getDefinition().getFile();
+		if (file != null) {
+			try {
+				String type = IDEConstants.ERROR_MARKER_SYNTACTIC_ID;
+				int depth = IResource.DEPTH_INFINITE;
+				int sev = file.getProject().findMaxProblemSeverity(type, false, depth);
+				if (sev >= IMarker.SEVERITY_ERROR) {
+					Shell shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
+					MessageDialog.openWarning(shell, SYNTAX_ERROR_TITLE, SYNTAX_ERROR_MESSAGE);
+				}
+			} catch (CoreException e) {
+			}
+		}
 	}
 
 	@Override
