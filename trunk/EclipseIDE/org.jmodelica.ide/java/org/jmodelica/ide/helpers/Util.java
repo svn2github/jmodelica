@@ -103,18 +103,24 @@ public class Util {
 		}
 	}
 
-	public static final String ERROR_MARKER_ID = IDEConstants.ERROR_MARKER_ID;
-
-	public static void deleteErrorMarkers(IResource res) {
+	public static void deleteErrorMarkers(IResource res, boolean clearSemantic) {
 		try {
-			res.deleteMarkers(ERROR_MARKER_ID, false, IResource.DEPTH_ONE);
+			if (clearSemantic)
+				res.deleteMarkers(IDEConstants.ERROR_MARKER_ID, true, IResource.DEPTH_ONE);
+			else
+				res.deleteMarkers(IDEConstants.ERROR_MARKER_SYNTACTIC_ID, false, IResource.DEPTH_ONE);
 		} catch (CoreException e) {
 		}
 	}
 	
 	public static void addErrorMarker(IResource resource, IError error) {
 		try {
-			IMarker marker = resource.createMarker(ERROR_MARKER_ID);
+			String type = IDEConstants.ERROR_MARKER_SYNTACTIC_ID;
+			if (error.getKind() == IError.SEMANTIC)  
+				type = IDEConstants.ERROR_MARKER_SEMANTIC_ID;
+			if (error.getSeverity() == IMarker.SEVERITY_WARNING)
+				type = IDEConstants.ERROR_MARKER_WARNING_ID;
+			IMarker marker = resource.createMarker(type);
 			
 			if (marker == null)
 			    return;

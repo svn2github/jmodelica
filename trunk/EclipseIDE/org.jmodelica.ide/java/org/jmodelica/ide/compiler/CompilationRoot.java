@@ -115,7 +115,7 @@ public class CompilationRoot {
 	 * @return this
 	 */
 	public CompilationRoot parseDoc(String doc, IFile file) {
-		parseFile(new StringReader(doc), file);
+		parseFile(new StringReader(doc), file, true);
 		return this;
 	}
 
@@ -129,16 +129,16 @@ public class CompilationRoot {
 	 */
 	public CompilationRoot parseFile(IFile file) {
 		try {
-			parseFile(new FileReader(file.getRawLocation().toOSString()), file);
+			parseFile(new FileReader(file.getRawLocation().toOSString()), file, true);
 		} catch (IOException e) {
 			addBadDef(file);
 		}
 		return this;
 	}
 
-	public void parseFile(Reader reader, IFile file) {
+	public void parseFile(Reader reader, IFile file, boolean clearSemantic) {
 
-		errorReport.setFile(file);
+		errorReport.setFile(file, clearSemantic);
 		scanner.reset(reader);
 
 		try {

@@ -162,7 +162,8 @@ private void configureProjectionSupport(ProjectionViewer viewer) {
 //    annotationDrawer.setCursorLineBackground(getCursorLineBackground());
 
 //    projectionSupport.setAnnotationPainterDrawingStrategy(annotationDrawer);
-    projectionSupport.addSummarizableAnnotationType(ModelicaEclipseCompiler.ERROR_MARKER_ID);
+    projectionSupport.addSummarizableAnnotationType(IDEConstants.ERROR_MARKER_SYNTACTIC_ID);
+    projectionSupport.addSummarizableAnnotationType(IDEConstants.ERROR_MARKER_SEMANTIC_ID);
     projectionSupport.install();
 }
 

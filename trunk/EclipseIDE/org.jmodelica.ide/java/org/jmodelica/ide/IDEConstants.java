@@ -17,6 +17,7 @@ package org.jmodelica.ide;
 
 import java.io.File;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.swt.graphics.RGB;
@@ -32,6 +33,9 @@ public class IDEConstants {
 	public static final String PERSPECTIVE_ID = PLUGIN_ID + ".perspective";
 
 	public static final String ERROR_MARKER_ID = PLUGIN_ID + ".marker.error";
+	public static final String ERROR_MARKER_SYNTACTIC_ID = ERROR_MARKER_ID + ".syntactic";
+	public static final String ERROR_MARKER_SEMANTIC_ID = ERROR_MARKER_ID + ".semantic";
+	public static final String ERROR_MARKER_WARNING_ID = ERROR_MARKER_ID + ".warning";
 
 	public static final String MODELICA_FILE_EXT = "mo";
 	public static final String[] ALL_FILE_EXTENSIONS = { MODELICA_FILE_EXT };
@@ -115,5 +119,10 @@ public class IDEConstants {
 	
 	public static final String COMPILER_OPTIONS_FILE = "compiler_options.xml";
 	public static final String MODELICAPATH = "MODELICAPATH";
+	
+	
+	public static boolean isModelicaFile(IFile file) {
+		return MODELICA_FILE_EXT.equals(file.getFileExtension());
+	}
 	
 }

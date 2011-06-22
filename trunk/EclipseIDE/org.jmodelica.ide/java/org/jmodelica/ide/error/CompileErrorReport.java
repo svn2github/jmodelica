@@ -73,10 +73,10 @@ public class CompileErrorReport extends Events {
 	private ModelicaScanner.Symbol lastSyntaxError;
 	private IFile file;
 	
-	public void setFile(IFile file) {
+	public void setFile(IFile file, boolean clearSemantic) {
 		this.file = file;
 		if (file != null)
-			Util.deleteErrorMarkers(file);
+			Util.deleteErrorMarkers(file, clearSemantic);
 		lastSyntaxError = null;
 	}
 	

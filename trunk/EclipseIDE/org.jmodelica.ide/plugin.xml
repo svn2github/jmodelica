@@ -23,6 +23,30 @@
       </super>
    </extension>
    <extension
+         id="org.jmodelica.ide.marker.error.syntactic"
+         name="Syntactic error"
+         point="org.eclipse.core.resources.markers">
+      <super
+            type="org.jmodelica.ide.marker.error">
+      </super>
+   </extension>
+   <extension
+         id="org.jmodelica.ide.marker.error.semantic"
+         name="Semantic error"
+         point="org.eclipse.core.resources.markers">
+      <super
+            type="org.jmodelica.ide.marker.error">
+      </super>
+   </extension>
+   <extension
+         id="org.jmodelica.ide.marker.error.warning"
+         name="Warning"
+         point="org.eclipse.core.resources.markers">
+      <super
+            type="org.jmodelica.ide.marker.error.semantic">
+      </super>
+   </extension>
+   <extension
          point="org.eclipse.core.contenttype.contentTypes">
       <content-type
             base-type="org.eclipse.core.runtime.text"

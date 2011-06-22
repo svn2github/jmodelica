@@ -42,14 +42,14 @@ private static final String[] ACTION_IDS = {
     IDEConstants.ACTION_ERROR_CHECK_ID,
     IDEConstants.ACTION_COMPILE_FMU_ID,
     IDEConstants.ACTION_TOGGLE_ANNOTATIONS_ID,
-    IDEConstants.ACTION_FORMAT_REGION_ID, 
+//    IDEConstants.ACTION_FORMAT_REGION_ID, 
 //    IDEConstants.ACTION_FOLLOW_REFERENCE_ID, 
     IDEConstants.ACTION_TOGGLE_COMMENT_ID };
 
 private LabelRetargetAction errorCheckAction;
 private LabelRetargetAction compileFMUAction;
 private RetargetAction toggleAnnotationsAction;
-private LabelRetargetAction formatRegionAction;
+//private LabelRetargetAction formatRegionAction;
 //private LabelRetargetAction followReferenceAction;
 private LabelRetargetAction toggleCommentAction;
 
@@ -73,9 +73,9 @@ public EditorContributor() {
     toggleAnnotationsAction.setImageDescriptor(ImageLoader.ANNOTATION_DESC);
     toggleAnnotationsAction.setDisabledImageDescriptor(ImageLoader.ANNOTATION_DIS_DESC);
 
-    formatRegionAction = new LabelRetargetAction(
-            IDEConstants.ACTION_FORMAT_REGION_ID,
-            IDEConstants.ACTION_FORMAT_REGION_TEXT);
+//    formatRegionAction = new LabelRetargetAction(
+//            IDEConstants.ACTION_FORMAT_REGION_ID,
+//            IDEConstants.ACTION_FORMAT_REGION_TEXT);
 
     toggleCommentAction = new LabelRetargetAction(
             IDEConstants.ACTION_TOGGLE_COMMENT_ID,
@@ -90,7 +90,7 @@ public EditorContributor() {
             compileFMUAction,
             toggleAnnotationsAction, 
 //            followReferenceAction,
-            formatRegionAction,
+//            formatRegionAction,
             toggleCommentAction };
 }
 
@@ -126,7 +126,7 @@ public void contributeToMenu(IMenuManager menu) {
     IMenuManager editMenu = menu.findMenuUsingPath(IWorkbenchActionConstants.M_EDIT);
     editMenu.appendToGroup("additions", new Separator(IDEConstants.GROUP_EDIT_ID));
     editMenu.appendToGroup(IDEConstants.GROUP_EDIT_ID, toggleAnnotationsAction);
-    editMenu.appendToGroup(IDEConstants.GROUP_EDIT_ID, formatRegionAction);
+//    editMenu.appendToGroup(IDEConstants.GROUP_EDIT_ID, formatRegionAction);
 //    editMenu.appendToGroup(IDEConstants.GROUP_EDIT_ID, followReferenceAction);
     editMenu.appendToGroup(IDEConstants.GROUP_EDIT_ID, toggleCommentAction);
 }

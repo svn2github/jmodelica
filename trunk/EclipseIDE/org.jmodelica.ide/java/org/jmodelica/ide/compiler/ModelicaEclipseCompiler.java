@@ -46,8 +46,6 @@ import org.jmodelica.modelica.compiler.StoredDefinition;
 
 public class ModelicaEclipseCompiler extends AbstractCompiler {
 
-	public static final String ERROR_MARKER_ID = IDEConstants.ERROR_MARKER_ID;
-
 	@Override
 	public IASTNode compileToProjectAST(IProject project, IProgressMonitor monitor) {
 		return recursiveCompile(new CompilationRoot(project), project, monitor).root();
@@ -56,31 +54,30 @@ public class ModelicaEclipseCompiler extends AbstractCompiler {
 	private CompilationRoot recursiveCompile(CompilationRoot compilationRoot, IContainer parent,
 			IProgressMonitor monitor) {
 		try {
-
 			IResource[] resources = parent.members();
-
 			for (IResource resource : resources) {
-
 				if (monitor.isCanceled())
 					break;
 
 				switch (resource.getType()) {
 				case IResource.FOLDER:
 					File dir = new File(resource.getRawLocation().toOSString());
-					if (LibNode.isStructuredLib(dir)) 
+					if (LibNode.isStructuredLib(dir)) {
 						compilationRoot.addPackageDirectory(dir);
-					else
+						monitor.worked(1);
+					} else {
 						recursiveCompile(compilationRoot, (IFolder) resource, monitor);
+					}
 					break;
-					
+
 				case IResource.FILE:
 					IFile file = (IFile) resource;
-					if (file.getFileExtension().equals(IDEConstants.MODELICA_FILE_EXT))
+					if (IDEConstants.isModelicaFile(file)) {
 						compilationRoot.parseFile(file);
+						monitor.worked(1);
+					}
 					break;
 				}
-
-				monitor.worked(1);
 			}
 
 		} catch (CoreException e) {
@@ -99,7 +96,7 @@ public class ModelicaEclipseCompiler extends AbstractCompiler {
 			IFile file) {
 		file = defaultToMock(file);
 		CompilationRoot compilationRoot = new CompilationRoot(file.getProject());
-		compilationRoot.parseFile(new DocumentReader(document), file);
+		compilationRoot.parseFile(new DocumentReader(document), file, false);
 		return compilationRoot.getStoredDefinition();
 	}
 

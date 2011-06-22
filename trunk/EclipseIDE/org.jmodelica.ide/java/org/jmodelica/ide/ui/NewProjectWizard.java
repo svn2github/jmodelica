@@ -56,9 +56,9 @@ import org.jmodelica.ide.helpers.Util;
 
 public class NewProjectWizard extends Wizard implements INewWizard, IExecutableExtension {
 
-	private static final String window_title = "New Modelica Project";
-	private static final String title = "New Modelica Project";
-	private static final String description = "Creates a new Modelica Project";
+	private static final String WINDOW_TITLE = "New Modelica Project";
+	private static final String TITLE = "New Modelica Project";
+	private static final String DESCRIPTION = "Creates a new Modelica Project";
 
     protected IWorkbench workbench;
     protected IStructuredSelection selection;
@@ -88,17 +88,17 @@ public class NewProjectWizard extends Wizard implements INewWizard, IExecutableE
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 		this.workbench = workbench;
 		this.selection = selection;
+		setWindowTitle(WINDOW_TITLE);
 	}
 	
 	@Override
 	public void addPages() {
 		super.addPages();
 		mainPage = new WizardNewProjectCreationPage("basicNewProjectPage");
-		mainPage.setTitle(title);
-		mainPage.setDescription(description);
+		mainPage.setTitle(TITLE);
+		mainPage.setDescription(DESCRIPTION);
 		this.addPage(mainPage);
 	}
-
 
 	protected IStructuredSelection getSelection() {
 		return selection;
@@ -129,7 +129,7 @@ public class NewProjectWizard extends Wizard implements INewWizard, IExecutableE
 			public void run(IProgressMonitor monitor)
 					throws InvocationTargetException {
 				CreateProjectOperation op = new CreateProjectOperation(
-						description, window_title);
+						description, WINDOW_TITLE);
 				try {
 					PlatformUI.getWorkbench().getOperationSupport()
 							.getOperationHistory().execute(

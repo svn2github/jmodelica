@@ -78,6 +78,7 @@ public class NewFileWizard extends Wizard implements INewWizard {
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 		this.workbench = workbench;
 		this.selection = selection;
+		setWindowTitle(WINDOW_TITLE);
 	}
 
 	protected IStructuredSelection getSelection() {

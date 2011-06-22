@@ -15,10 +15,15 @@ public class Color {
 	}
 	
 	public Color(int r, int g, int b) {
-		this.r = r;
-		this.g = g; 
-		this.b = b;
+		this.r = constrain(r);
+		this.g = constrain(g); 
+		this.b = constrain(b);
 	}
+	
+	private static int constrain(int v) {
+		return (v >= 0 && v <= 255) ? v : (v < 0 ? 0 : 255);
+	}
+
 	public int getR() {
 		return r;
 	}
@@ -52,19 +57,10 @@ public class Color {
 	}
 	
 	private Color increment(int inc) {
-		int r = this.r+inc;
-		int g = this.g+inc;
-		int b = this.b+inc;
-		r = r < 0 	? 0 	: r;
-		r = r > 255 ? 255 	: r;
-		g = g < 0 	? 0 	: g;
-		g = g > 255 ? 255 	: g;
-		b = b < 0 	? 0 	: b;
-		b = b > 255 ? 255 	: b;
-		return new Color(r, g, b);
+		return new Color(r + inc, g + inc, b + inc);
 	}
 	
 	public String toString() {
-		return "r = " + r + ", g = " + g + ", b = " + b;
+		return String.format("(%d, %d, %d)", r, g, b);
 	}
 }
