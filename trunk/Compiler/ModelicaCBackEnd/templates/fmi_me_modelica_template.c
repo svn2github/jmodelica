@@ -144,11 +144,15 @@ $C_records$
 
 $C_function_headers$
 
+$CAD_function_headers$
+
 $C_dae_blocks_residual_functions$
 
 $C_dae_init_blocks_residual_functions$
 
 $C_functions$
+
+$CAD_functions$
 
 static int model_ode_guards(jmi_t* jmi) {
   $C_ode_guards$

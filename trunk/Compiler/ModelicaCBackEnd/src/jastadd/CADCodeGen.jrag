@@ -65,7 +65,7 @@ aspect CADCodeGen {
 		inFunction() ? getFIdUse().toString_var_CAD(printer_C) : this.prettyPrint_C("");
 	
 	syn String FIdUseExp.adDerName() =
-		inFunction() ? getFIdUse().toString_der_CAD(printer_C) : variability().lessOrEqual(fParameter()) ? "0" : "(*dz)[" + this.myFV().valueReference() + "-jmi->offs_real_dx]";
+		inFunction() ? getFIdUse().toString_der_CAD(printer_C) : variability().lessOrEqual(fParameter()) ? "AD_WRAP_LITERAL(0)" : "(*dz)[" + this.myFV().valueReference() + "-jmi->offs_real_dx]";
 		
 	//functions.. modified and added
 	public void FIdUseExp.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
@@ -658,6 +658,7 @@ aspect CADCodeGen {
 	}
 	
 	public void FIfExp.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
+		/*
 		str.print("jmi_ad_var_t temp_v_");
 		str.print(this.adIndex());
 		str.print(";\njmi_ad_var_t temp_d_");
@@ -691,6 +692,44 @@ aspect CADCodeGen {
 		str.print(adDerName());
 		str.print(" = temp_d_");
 		str.print(adIndex());
+		str.print(";\n");*/
+		
+		p.print(getThenExp(),str,indent);
+		for (FElseIfExp el_if : getFElseIfExps()) {
+			p.print(el_if.getThenExp(),str,indent);
+		}
+		p.print(getElseExp(),str,indent);
+		
+		int end_parenthesis = 1;
+		str.print("jmi_ad_var_t " + this.adVarName() + "= (COND_EXP_EQ(");
+		getIfExp().prettyPrint_C(str,indent);
+		str.print(",JMI_TRUE," + getThenExp().adVarName() + ",");
+		for (FElseIfExp el_if : getFElseIfExps()) {
+			end_parenthesis++;
+			str.print("(COND_EXP_EQ(");
+			el_if.getIfExp().prettyPrint_C(str,indent);
+			str.print(",JMI_TRUE," + el_if.getThenExp().adVarName() + ",");
+		}
+		str.print(getElseExp().adVarName());
+		for (int i=0;i<end_parenthesis*2;i++) {
+			str.print(")");
+		}
+		str.print(";\n");
+		
+		end_parenthesis = 1;
+		str.print("jmi_ad_var_t " + this.adDerName() + "= (COND_EXP_EQ(");
+		getIfExp().prettyPrint_C(str,indent);
+		str.print(",JMI_TRUE," + getThenExp().adDerName() + ",");
+		for (FElseIfExp el_if : getFElseIfExps()) {
+			end_parenthesis++;
+			str.print("(COND_EXP_EQ(");
+			el_if.getIfExp().prettyPrint_C(str,indent);
+			str.print(",JMI_TRUE," + el_if.getThenExp().adDerName() + ",");
+		}
+		str.print(getElseExp().adDerName());
+		for (int i=0;i<end_parenthesis*2;i++) {
+			str.print(")");
+		}
 		str.print(";\n");
 	}
 			
@@ -1258,7 +1297,14 @@ aspect CADCodeGen {
 		str.print(";\n");
 	}
 	
-	public void FFunctionArray.printNullNonInputReplacement_CAD(Printer p, PrintStream str, String indent) {}
+	public void FFunctionArray.printNullNonInputReplacement_CAD(Printer p, PrintStream str, String indent) {
+		if(!isOutput()){
+			String name_var = name_var_CAD();
+			String name_der = name_der_CAD();
+			printDecl_C(p, str, indent,name_var);
+			printDecl_C(p,str,indent,name_der);
+		}
+	}
 	
 	public void FFunctionVariable.printNullOutputReplacement_CAD(Printer p, PrintStream str, String indent) {
 		if (isComposite()) {
@@ -1404,6 +1450,6 @@ aspect CADCodeGen {
 	
 	syn String FLitExp.adVarName() = this.prettyPrint_C("");
 	
-	syn String FLitExp.adDerName() = "0";
+	syn String FLitExp.adDerName() = "AD_WRAP_LITERAL(0)";
 	
 }

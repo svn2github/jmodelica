@@ -13,7 +13,7 @@ jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx] * cos(_x1_1);
 (*res)[0] = v_0 - _y_0;
 (*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
 (*res)[1] = 1 - _x1_1;
-(*dF)[1] = 0 - (*dz)[1-jmi->offs_real_dx];
+(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[1-jmi->offs_real_dx];
 ")})));
 
 	Real y;
@@ -36,8 +36,9 @@ jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx] * -sin(_x1_1);
 (*res)[0] = v_0 - _y_0;
 (*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
 (*res)[1] = 1 - _x1_1;
-(*dF)[1] = 0 - (*dz)[1-jmi->offs_real_dx];
+(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[1-jmi->offs_real_dx];
 ")})));
+
 
   Real y;
   Real x1(start=1.5); 
@@ -59,11 +60,10 @@ jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx] * 1/(cos(_x1_1)*cos(_x1_1));
 (*res)[0] = v_0 - _y_0;
 (*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
 (*res)[1] = 1 - _x1_1;
-(*dF)[1] = 0 - (*dz)[1-jmi->offs_real_dx];
+(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[1-jmi->offs_real_dx];
 ")})));
 
-
-	Real y;
+ 	Real y;
 	Real x1(start=1.5);
 equation
 	y = tan(x1);
@@ -83,7 +83,7 @@ jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx] * 1/(sqrt(1 -_x1_1*_x1_1));
 (*res)[0] = v_0 - _y_0;
 (*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
 (*res)[1] = 1 - _x1_1;
-(*dF)[1] = 0 - (*dz)[1-jmi->offs_real_dx];
+(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[1-jmi->offs_real_dx];
 ")})));
 
 
@@ -107,7 +107,7 @@ jmi_ad_var_t d_0 = -(*dz)[1-jmi->offs_real_dx] * 1/(sqrt(1 -_x1_1*_x1_1));
 (*res)[0] = v_0 - _y_0;
 (*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
 (*res)[1] = 1 - _x1_1;
-(*dF)[1] = 0 - (*dz)[1-jmi->offs_real_dx];
+(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[1-jmi->offs_real_dx];
 ")})));
 
 
@@ -131,10 +131,10 @@ jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx] * 1/(1 +_x1_1*_x1_1);
 (*res)[0] = v_0 - _y_0;
 (*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
 (*res)[1] = 1 - _x1_1;
-(*dF)[1] = 0 - (*dz)[1-jmi->offs_real_dx];
+(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[1-jmi->offs_real_dx];
 ")})));
 
- 
+
 	Real y;
 	Real x1(start=1.5);
 equation
@@ -155,9 +155,9 @@ jmi_ad_var_t d_0 = ((*dz)[1-jmi->offs_real_dx] * _x2_2 - _x1_1 * (*dz)[2-jmi->of
 (*res)[0] = v_0 - _y_0;
 (*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
 (*res)[1] = 1 - _x1_1;
-(*dF)[1] = 0 - (*dz)[1-jmi->offs_real_dx];
+(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[1-jmi->offs_real_dx];
 jmi_ad_var_t v_1 = -1.5;
-jmi_ad_var_t d_1 = -0;
+jmi_ad_var_t d_1 = -AD_WRAP_LITERAL(0);
 (*res)[2] = v_1 - _x2_2;
 (*dF)[2] = d_1 - (*dz)[2-jmi->offs_real_dx];
 ")})));
@@ -185,7 +185,7 @@ jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx] * cosh(_x1_1);
 (*res)[0] = v_0 - _y_0;
 (*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
 (*res)[1] = 1 - _x1_1;
-(*dF)[1] = 0 - (*dz)[1-jmi->offs_real_dx];
+(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[1-jmi->offs_real_dx];
 ")})));
 
 
@@ -209,7 +209,7 @@ jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx] * sinh(_x1_1);
 (*res)[0] = v_0 - _y_0;
 (*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
 (*res)[1] = 1 - _x1_1;
-(*dF)[1] = 0 - (*dz)[1-jmi->offs_real_dx];
+(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[1-jmi->offs_real_dx];
 ")})));
 
 
@@ -233,7 +233,7 @@ jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx] * (1 - tanh(_x1_1) * tanh(_x1_1));
 (*res)[0] = v_0 - _y_0;
 (*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
 (*res)[1] = 1 - _x1_1;
-(*dF)[1] = 0 - (*dz)[1-jmi->offs_real_dx];
+(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[1-jmi->offs_real_dx];
 ")})));
 
 
@@ -257,7 +257,7 @@ jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx] * exp(_x1_1);
 (*res)[0] = v_0 - _y_0;
 (*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
 (*res)[1] = 1 - _x1_1;
-(*dF)[1] = 0 - (*dz)[1-jmi->offs_real_dx];
+(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[1-jmi->offs_real_dx];
 ")})));
 
 
@@ -281,7 +281,7 @@ jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx] * 1/(_x1_1);
 (*res)[0] = v_0 - _y_0;
 (*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
 (*res)[1] = 2 - _x1_1;
-(*dF)[1] = 0 - (*dz)[1-jmi->offs_real_dx];
+(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[1-jmi->offs_real_dx];
 ")})));
 
 
@@ -305,7 +305,7 @@ jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx] * log10(exp(1))*1/(_x1_1);
 (*res)[0] = v_0 - _y_0;
 (*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
 (*res)[1] = 1 - _x1_1;
-(*dF)[1] = 0 - (*dz)[1-jmi->offs_real_dx];
+(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[1-jmi->offs_real_dx];
 ")})));
 
 
@@ -329,7 +329,7 @@ jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx] * 1/(2*sqrt(_x1_1));
 (*res)[0] = v_0 - _y_0;
 (*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
 (*res)[1] = 2 - _x1_1;
-(*dF)[1] = 0 - (*dz)[1-jmi->offs_real_dx];
+(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[1-jmi->offs_real_dx];
 ")})));
 
 
@@ -353,9 +353,9 @@ jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx] + (*dz)[2-jmi->offs_real_dx];
 (*res)[0] = v_0 - _y_0;
 (*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
 (*res)[1] = 1 - _x1_1;
-(*dF)[1] = 0 - (*dz)[1-jmi->offs_real_dx];
+(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[1-jmi->offs_real_dx];
 (*res)[2] = 3 - _x2_2;
-(*dF)[2] = 0 - (*dz)[2-jmi->offs_real_dx];
+(*dF)[2] = AD_WRAP_LITERAL(0) - (*dz)[2-jmi->offs_real_dx];
 ")})));
 
 
@@ -381,9 +381,9 @@ jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx] - (*dz)[2-jmi->offs_real_dx];
 (*res)[0] = v_0 - _y_0;
 (*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
 (*res)[1] = 1 - _x1_1;
-(*dF)[1] = 0 - (*dz)[1-jmi->offs_real_dx];
+(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[1-jmi->offs_real_dx];
 (*res)[2] = 3 - _x2_2;
-(*dF)[2] = 0 - (*dz)[2-jmi->offs_real_dx];
+(*dF)[2] = AD_WRAP_LITERAL(0) - (*dz)[2-jmi->offs_real_dx];
 ")})));
 
 
@@ -409,9 +409,9 @@ jmi_ad_var_t d_0 = ((*dz)[1-jmi->offs_real_dx] * _x2_2 + _x1_1 * (*dz)[2-jmi->of
 (*res)[0] = v_0 - _y_0;
 (*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
 (*res)[1] = 1 - _x1_1;
-(*dF)[1] = 0 - (*dz)[1-jmi->offs_real_dx];
+(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[1-jmi->offs_real_dx];
 (*res)[2] = 3 - _x2_2;
-(*dF)[2] = 0 - (*dz)[2-jmi->offs_real_dx];
+(*dF)[2] = AD_WRAP_LITERAL(0) - (*dz)[2-jmi->offs_real_dx];
 ")})));
 
 
@@ -437,10 +437,11 @@ jmi_ad_var_t d_0 = ((*dz)[1-jmi->offs_real_dx] * _x2_2 - _x1_1 * (*dz)[2-jmi->of
 (*res)[0] = v_0 - _y_0;
 (*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
 (*res)[1] = 1 - _x1_1;
-(*dF)[1] = 0 - (*dz)[1-jmi->offs_real_dx];
+(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[1-jmi->offs_real_dx];
 (*res)[2] = 3 - _x2_2;
-(*dF)[2] = 0 - (*dz)[2-jmi->offs_real_dx];
+(*dF)[2] = AD_WRAP_LITERAL(0) - (*dz)[2-jmi->offs_real_dx];
 ")})));
+
 
 	Real y;
 	Real x1(start=1.5);
@@ -469,9 +470,9 @@ d_0 = v_0 * ((*dz)[2-jmi->offs_real_dx] * log(jmi_abs(_x1_1)) + _x2_2 * (*dz)[1-
 (*res)[0] = v_0 - _y_0;
 (*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
 (*res)[1] = 2 - _x1_1;
-(*dF)[1] = 0 - (*dz)[1-jmi->offs_real_dx];
+(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[1-jmi->offs_real_dx];
 (*res)[2] = 3 - _x2_2;
-(*dF)[2] = 0 - (*dz)[2-jmi->offs_real_dx];
+(*dF)[2] = AD_WRAP_LITERAL(0) - (*dz)[2-jmi->offs_real_dx];
 ")})));
 
 
@@ -502,7 +503,7 @@ if(_x1_1 < 0){
 (*res)[0] = v_0 - _y_0;
 (*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
 jmi_ad_var_t v_1 = -1;
-jmi_ad_var_t d_1 = -0;
+jmi_ad_var_t d_1 = -AD_WRAP_LITERAL(0);
 (*res)[1] = v_1 - _x1_1;
 (*dF)[1] = d_1 - (*dz)[1-jmi->offs_real_dx];
 ")})));
@@ -523,61 +524,36 @@ model IfExpExample1
          generate_dae_jacobian=true,
          template="$C_DAE_equation_directional_derivative$",
          generatedCode="
-jmi_ad_var_t temp_v_0;
-jmi_ad_var_t temp_d_0;
-if(_sw(0)){
-jmi_ad_var_t temp_v_1;
-jmi_ad_var_t temp_d_1;
-if(COND_EXP_LE(_time, jmi_divide(AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"Divide by zero: ( 3.141592653589793 ) / ( 2 )\"), JMI_TRUE, JMI_FALSE)){
+jmi_ad_var_t v_0 = _time;
+jmi_ad_var_t d_0 = (*dz)[jmi->offs_t];
+jmi_ad_var_t v_1 = sin(v_0);
+jmi_ad_var_t d_1 = d_0 * cos(v_0);
 jmi_ad_var_t v_2 = _time;
 jmi_ad_var_t d_2 = (*dz)[jmi->offs_t];
-jmi_ad_var_t v_3 = sin(v_2);
-jmi_ad_var_t d_3 = d_2 * cos(v_2);
-temp_v_1=v_3;
-temp_d_1=d_3;
-}
-else if(COND_EXP_LE(_time, AD_WRAP_LITERAL(3.141592653589793), JMI_TRUE, JMI_FALSE)){
-temp_v_1=AD_WRAP_LITERAL(1);
-temp_d_1=0;
-}
-else{
-jmi_ad_var_t v_4 = _time;
-jmi_ad_var_t d_4 = (*dz)[jmi->offs_t];
-jmi_ad_var_t v_5 = AD_WRAP_LITERAL(3.141592653589793) / AD_WRAP_LITERAL(2);
-jmi_ad_var_t d_5 = (0 * AD_WRAP_LITERAL(2) - AD_WRAP_LITERAL(3.141592653589793) * 0 ) / ( AD_WRAP_LITERAL(2) * AD_WRAP_LITERAL(2));
-jmi_ad_var_t v_6 = v_4 - v_5;
-jmi_ad_var_t d_6 = d_4 - d_5;
-jmi_ad_var_t v_7 = sin(v_6);
-jmi_ad_var_t d_7 = d_6 * cos(v_6);
-temp_v_1=v_7;
-temp_d_1=d_7;
-}
-jmi_ad_var_t v_1 = temp_v_1;
-jmi_ad_var_t d_1 = temp_d_1;
-jmi_ad_var_t v_8 = v_1;
-jmi_ad_var_t d_8 = d_1;
-temp_v_0=v_8;
-temp_d_0=d_8;
-}
-else{
-jmi_ad_var_t v_9 = AD_WRAP_LITERAL(3) * _x_0;
-jmi_ad_var_t d_9 = (0 * _x_0 + AD_WRAP_LITERAL(3) * (*dz)[1-jmi->offs_real_dx]);
-jmi_ad_var_t v_10 = sin(v_9);
-jmi_ad_var_t d_10 = d_9 * cos(v_9);
-jmi_ad_var_t v_11 = v_10;
-jmi_ad_var_t d_11 = d_10;
-temp_v_0=v_11;
-temp_d_0=d_11;
-}
-jmi_ad_var_t v_0 = temp_v_0;
-jmi_ad_var_t d_0 = temp_d_0;
-(*res)[0] = v_0 - _u_1;
-(*dF)[0] = d_0 - (*dz)[2-jmi->offs_real_dx];
+jmi_ad_var_t v_3 = AD_WRAP_LITERAL(3.141592653589793) / AD_WRAP_LITERAL(2);
+jmi_ad_var_t d_3 = (AD_WRAP_LITERAL(0) * AD_WRAP_LITERAL(2) - AD_WRAP_LITERAL(3.141592653589793) * AD_WRAP_LITERAL(0) ) / ( AD_WRAP_LITERAL(2) * AD_WRAP_LITERAL(2));
+jmi_ad_var_t v_4 = v_2 - v_3;
+jmi_ad_var_t d_4 = d_2 - d_3;
+jmi_ad_var_t v_5 = sin(v_4);
+jmi_ad_var_t d_5 = d_4 * cos(v_4);
+jmi_ad_var_t v_6= (COND_EXP_EQ(COND_EXP_LE(_time, jmi_divide(AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"Divide by zero: ( 3.141592653589793 ) / ( 2 )\"), JMI_TRUE, JMI_FALSE),JMI_TRUE,v_1,(COND_EXP_EQ(COND_EXP_LE(_time, AD_WRAP_LITERAL(3.141592653589793), JMI_TRUE, JMI_FALSE),JMI_TRUE,AD_WRAP_LITERAL(1),v_5))));
+jmi_ad_var_t d_6= (COND_EXP_EQ(COND_EXP_LE(_time, jmi_divide(AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"Divide by zero: ( 3.141592653589793 ) / ( 2 )\"), JMI_TRUE, JMI_FALSE),JMI_TRUE,d_1,(COND_EXP_EQ(COND_EXP_LE(_time, AD_WRAP_LITERAL(3.141592653589793), JMI_TRUE, JMI_FALSE),JMI_TRUE,AD_WRAP_LITERAL(0),d_5))));
+jmi_ad_var_t v_7 = v_6;
+jmi_ad_var_t d_7 = d_6;
+jmi_ad_var_t v_8 = AD_WRAP_LITERAL(3) * _x_0;
+jmi_ad_var_t d_8 = (AD_WRAP_LITERAL(0) * _x_0 + AD_WRAP_LITERAL(3) * (*dz)[1-jmi->offs_real_dx]);
+jmi_ad_var_t v_9 = sin(v_8);
+jmi_ad_var_t d_9 = d_8 * cos(v_8);
+jmi_ad_var_t v_10 = v_9;
+jmi_ad_var_t d_10 = d_9;
+jmi_ad_var_t v_11= (COND_EXP_EQ(_sw(0),JMI_TRUE,v_7,v_10));
+jmi_ad_var_t d_11= (COND_EXP_EQ(_sw(0),JMI_TRUE,d_7,d_10));
+(*res)[0] = v_11 - _u_1;
+(*dF)[0] = d_11 - (*dz)[2-jmi->offs_real_dx];
 (*res)[1] = _u_1 - _der_x_2;
 (*dF)[1] = (*dz)[2-jmi->offs_real_dx] - (*dz)[0-jmi->offs_real_dx];
 ")})));
 
- 
 
    
     Real x,u;
@@ -595,43 +571,26 @@ model IfExpExample2
          generate_dae_jacobian=true,
          template="$C_DAE_equation_directional_derivative$",
          generatedCode="
-jmi_ad_var_t temp_v_0;
-jmi_ad_var_t temp_d_0;
-if(_sw(0)){
-jmi_ad_var_t v_1 = _time;
-jmi_ad_var_t d_1 = (*dz)[jmi->offs_t];
-jmi_ad_var_t v_2 = sin(v_1);
-jmi_ad_var_t d_2 = d_1 * cos(v_1);
-temp_v_0=v_2;
-temp_d_0=d_2;
-}
-else if(_sw(1)){
-temp_v_0=AD_WRAP_LITERAL(1);
-temp_d_0=0;
-}
-else{
-jmi_ad_var_t v_3 = _time;
-jmi_ad_var_t d_3 = (*dz)[jmi->offs_t];
-jmi_ad_var_t v_4 = AD_WRAP_LITERAL(3.141592653589793) / AD_WRAP_LITERAL(2);
-jmi_ad_var_t d_4 = (0 * AD_WRAP_LITERAL(2) - AD_WRAP_LITERAL(3.141592653589793) * 0 ) / ( AD_WRAP_LITERAL(2) * AD_WRAP_LITERAL(2));
-jmi_ad_var_t v_5 = v_3 - v_4;
-jmi_ad_var_t d_5 = d_3 - d_4;
-jmi_ad_var_t v_6 = sin(v_5);
-jmi_ad_var_t d_6 = d_5 * cos(v_5);
-temp_v_0=v_6;
-temp_d_0=d_6;
-}
-jmi_ad_var_t v_0 = temp_v_0;
-jmi_ad_var_t d_0 = temp_d_0;
-(*res)[0] = v_0 - _u_1;
-(*dF)[0] = d_0 - (*dz)[2-jmi->offs_real_dx];
+jmi_ad_var_t v_0 = _time;
+jmi_ad_var_t d_0 = (*dz)[jmi->offs_t];
+jmi_ad_var_t v_1 = sin(v_0);
+jmi_ad_var_t d_1 = d_0 * cos(v_0);
+jmi_ad_var_t v_2 = _time;
+jmi_ad_var_t d_2 = (*dz)[jmi->offs_t];
+jmi_ad_var_t v_3 = AD_WRAP_LITERAL(3.141592653589793) / AD_WRAP_LITERAL(2);
+jmi_ad_var_t d_3 = (AD_WRAP_LITERAL(0) * AD_WRAP_LITERAL(2) - AD_WRAP_LITERAL(3.141592653589793) * AD_WRAP_LITERAL(0) ) / ( AD_WRAP_LITERAL(2) * AD_WRAP_LITERAL(2));
+jmi_ad_var_t v_4 = v_2 - v_3;
+jmi_ad_var_t d_4 = d_2 - d_3;
+jmi_ad_var_t v_5 = sin(v_4);
+jmi_ad_var_t d_5 = d_4 * cos(v_4);
+jmi_ad_var_t v_6= (COND_EXP_EQ(_sw(0),JMI_TRUE,v_1,(COND_EXP_EQ(_sw(1),JMI_TRUE,AD_WRAP_LITERAL(1),v_5))));
+jmi_ad_var_t d_6= (COND_EXP_EQ(_sw(0),JMI_TRUE,d_1,(COND_EXP_EQ(_sw(1),JMI_TRUE,AD_WRAP_LITERAL(0),d_5))));
+(*res)[0] = v_6 - _u_1;
+(*dF)[0] = d_6 - (*dz)[2-jmi->offs_real_dx];
 (*res)[1] = _u_1 - _der_x_2;
 (*dF)[1] = (*dz)[2-jmi->offs_real_dx] - (*dz)[0-jmi->offs_real_dx];
 ")})));
 
- 
-
-  
 Real x,u;
 equation
     u = if time<=Modelica.Constants.pi/2 then sin(time) elseif 

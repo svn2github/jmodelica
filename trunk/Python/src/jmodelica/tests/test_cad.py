@@ -78,7 +78,7 @@ class Test_cad_std:
         assert (model.jmimodel.dae_derivative_checker(jmi.JMI_DER_SPARSE, FLAG, jmi.JMI_DER_CHECK_SCREEN_OFF, N.ones(n_var,dtype=int))) != 0, 'FD and CAD evaluation of the Jacobians differs'
     
     @testattr(stddist = True)    
-    def test_dependent_parameters(self):
+    def test_cad_functions(self):
         """ Test evaluation of CAD for models with internal functions. """
         path = os.path.join(get_files_path(), 'Modelica', 'JacTest.mo')
         jmu_name = compile_jmu('JacFuncTests.sparseFunc1', path, compiler_options={"generate_dae_jacobian":True},target='model_noad')
@@ -96,8 +96,14 @@ class Test_cad_std:
         FLAG = (jmi.JMI_DER_DX, jmi.JMI_DER_X, jmi.JMI_DER_U, jmi.JMI_DER_W)
         n_var = len(model.jmimodel.get_z())
         assert (model.jmimodel.dae_derivative_checker(jmi.JMI_DER_SPARSE, FLAG, jmi.JMI_DER_CHECK_SCREEN_OFF, N.ones(n_var,dtype=int))) != 0, 'FD and CAD evaluation of the Jacobians differs'
-
-
-
-
-
+        path = os.path.join(get_files_path(), 'Modelica', 'FunctionTests.mo')
+        jmu_name = compile_jmu('FunctionTests.FunctionTest1', path, compiler_options={"generate_dae_jacobian":True},target='model_noad')
+        model = JMUModel(jmu_name)   
+        FLAG = (jmi.JMI_DER_DX, jmi.JMI_DER_X, jmi.JMI_DER_U, jmi.JMI_DER_W)
+        n_var = len(model.jmimodel.get_z())
+        assert (model.jmimodel.dae_derivative_checker(jmi.JMI_DER_SPARSE, FLAG, jmi.JMI_DER_CHECK_SCREEN_OFF, N.ones(n_var,dtype=int))) != 0, 'FD and CAD evaluation of the Jacobians differs'
+        jmu_name = compile_jmu('FunctionTests.FunctionTest2', path, compiler_options={"generate_dae_jacobian":True},target='model_noad')
+        model = JMUModel(jmu_name)   
+        FLAG = (jmi.JMI_DER_DX, jmi.JMI_DER_X, jmi.JMI_DER_U, jmi.JMI_DER_W)
+        n_var = len(model.jmimodel.get_z())
+        assert (model.jmimodel.dae_derivative_checker(jmi.JMI_DER_SPARSE, FLAG, jmi.JMI_DER_CHECK_SCREEN_OFF, N.ones(n_var,dtype=int))) != 0, 'FD and CAD evaluation of the Jacobians differs'
