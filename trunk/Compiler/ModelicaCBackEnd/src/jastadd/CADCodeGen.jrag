@@ -757,6 +757,40 @@ aspect CADCodeGen {
 		str.print(";\n");
 	}
 	
+	//Methods to handle blocks starts here
+	
+	public void AbstractEquationBlock.genBlockResidualFunction_CAD(int block_counter, boolean inInit, String indent, PrintStream str) {
+	} 
+
+	public void EquationBlock.genBlockResidualFunction_CAD(int block_counter, boolean inInit, String indent, PrintStream str) {
+		str.print("static int dae_" + (inInit? "init_": "") + "block_dir_der_"+block_counter+"(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int init) {\n");
+		str.print("  jmi_real_t** res = &residual;\n");
+		str.print("  jmi_real_t** dF = &dRes;\n");
+		str.print("  jmi_real_t** dz = &dx;\n");
+		str.print("  if (init==JMI_BLOCK_INITIALIZE) {\n");
+		int var_counter = 0;
+		// Loop over all active variables and write their value to x	
+		for (FVariable fv : activeVariables()) {
+			str.print("    x["+var_counter+"] = " + fv.name_C() + ";\n");
+			var_counter++;
+		}
+		str.print("  } else if (init==JMI_BLOCK_EVALUATE) {\n");
+		// Loop over all active variables and write the values in x to the z vector
+		var_counter = 0;
+		for (FVariable fv : activeVariables()) {
+			str.print("    " + fv.name_C() + " = x["+var_counter+"];\n");
+			var_counter++;
+		}
+		// Write AD-code
+		int equation_counter = 0;
+		for (FAbstractEquation e : equations()) {
+			e.genResidual_CAD(equation_counter,indent,str);				
+			equation_counter += e.numScalarEquations();
+		}
+		str.print("  } else{\nreturn -1;\n}\n");
+		str.print("  return 0;\n}\n\n");
+	}
+	
 	//Methods to handle function calls starts here
 	
 	public void FFunctionCallEquation.genResidual_CAD(int i, String indent, PrintStream str) {

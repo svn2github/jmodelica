@@ -150,6 +150,10 @@ $C_dae_blocks_residual_functions$
 
 $C_dae_init_blocks_residual_functions$
 
+$CAD_dae_blocks_residual_functions$
+
+$CAD_dae_init_blocks_residual_functions$
+
 $C_functions$
 
 $CAD_functions$
@@ -278,6 +282,10 @@ int jmi_new(jmi_t** jmi) {
   $C_dae_add_blocks_residual_functions$
 
   $C_dae_init_add_blocks_residual_functions$
+
+  $CAD_dae_add_blocks_residual_functions$
+
+  $CAD_dae_init_add_blocks_residual_functions$
 
 	/* Initialize the DAE interface */
 	jmi_dae_init(*jmi, *model_dae_F, N_eq_F, NULL, 0, NULL, NULL,
