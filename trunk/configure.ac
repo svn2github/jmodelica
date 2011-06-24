@@ -111,10 +111,33 @@ IPOPT_INC=$ipopt/include/coin
 IPOPT_LIB=$ipopt/lib
 IPOPT_HOME=$ipopt
 
-AC_SUBST(WITH_IPOPT)
+AC_SUBST(WITH_CASADI)
+AS_IF([test "x$with_casadi" != xno],
+      [WITH_CASADI="true"],
+      [WITH_CASADI="false"]) 
+
+AC_ARG_WITH([casadi],
+   [AS_HELP_STRING([--with-casadi],
+     [CasADI Python-interface installation directory @<:@default=check@:>@])],
+   [casadi=$withval],
+   [with_casadi=no])
+
+AS_IF([test "x$with_casadi" = xno],
+      [AC_MSG_RESULT([CasADi installation not specified.])],
+      [AC_CHECK_FILE($casadi/casadi/casadi.py,
+                     [],
+                     [AC_MSG_FAILURE([CasADi installation specifed, but seems to be corrupt!])])])
+
+# Set output variables to be exported to the Makefiles
+AC_SUBST(CASADI_HOME)
+
+CASADI_HOME=$casadi
+
+AC_SUBST(WITH_CASADI)
 AS_IF([test "x$with_ipopt" != xno],
-      [WITH_IPOPT="true"],
-      [WITH_IPOPT="false"]) 
+      [WITH_CASADI="true"],
+      [WITH_CASADI="false"]) 
+
 
 # Checks for libraries.
 AC_ARG_WITH([sundials],
