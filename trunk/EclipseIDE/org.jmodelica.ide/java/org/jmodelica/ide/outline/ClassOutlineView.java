@@ -98,6 +98,10 @@ public class ClassOutlineView extends OutlineView {
 			super.partActivated(part);
 	}
 
+	public void partBroughtToTop(IWorkbenchPart part) {
+		partActivated(part);
+	}
+
 	protected void partHidden(IWorkbenchPart part) {
 	}
 
