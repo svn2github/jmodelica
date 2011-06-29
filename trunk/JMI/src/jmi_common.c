@@ -947,63 +947,24 @@ int jmi_sim_init(jmi_t* jmi, fmiReal relative_tolerance){
 	return 0;
 }
 
-int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, int n, int index) {
+int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int index) {
 	jmi_block_residual_t* b;
 	int flag;
-	flag = jmi_new_block_residual(&b,jmi,F,n,index);
+	flag = jmi_new_block_residual(&b,jmi,F,dF,n,index);
 	jmi->dae_block_residuals[index] = b;
 	return 0;
 }
 
-int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, int n, int index) {
+int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int index) {
 	jmi_block_residual_t* b;
 	int flag;
-	flag = jmi_new_block_residual(&b,jmi,F,n,index);
+	flag = jmi_new_block_residual(&b,jmi,F,dF,n,index);
 	jmi->dae_init_block_residuals[index] = b;
 	return 0;
 }
 
-int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_residual_func_t F, int n,int index){
+int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n,int index){
 	jmi_block_residual_t* b = (jmi_block_residual_t*)calloc(1,sizeof(jmi_block_residual_t));
-	*block = b;
-	
-	b->jmi = jmi;
-	b->F = F;
-	b->n = n;
-	b->index = index ;
-	b->x = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
-	b->res = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
-	b->jac = (jmi_real_t*)calloc(n*n,sizeof(jmi_real_t));
-	b->ipiv = (int*)calloc(n,sizeof(int));
-	b->init = 1;
-	/*Initialize Kinsol.*/
-	b->kin_mem = KINCreate();
-	b->kin_y = N_VNew_Serial(n);
-	b->kin_y_scale = N_VNew_Serial(n);
-	b->kin_f_scale = N_VNew_Serial(n);
-	b->kin_ftol = JMI_DEFAULT_KINSOL_TOL;
-	b->kin_stol = JMI_DEFAULT_KINSOL_TOL;
-	return 0;
-}
-
-int jmi_dae_add_equation_block_dir_der(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int index) {
-	jmi_block_dir_der_t* b;
-	int flag;
-	flag = jmi_new_block_dir_der(&b,jmi,F,dF,n,index);
-	jmi->dae_block_dir_ders[index] = b;
-	return 0;
-}
-
-int jmi_dae_init_add_equation_block_dir_der(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int index) {
-	jmi_block_dir_der_t* b;
-	int flag;
-	flag = jmi_new_block_dir_der(&b,jmi,F, dF,n,index);
-	jmi->dae_init_block_dir_ders[index] = b;
-	return 0;
-}
-
-int jmi_new_block_dir_der(jmi_block_dir_der_t** block, jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n,int index){
-	jmi_block_dir_der_t* b = (jmi_block_dir_der_t*)calloc(1,sizeof(jmi_block_dir_der_t));
 	*block = b;
 	
 	b->jmi = jmi;
@@ -1012,7 +973,9 @@ int jmi_new_block_dir_der(jmi_block_dir_der_t** block, jmi_t* jmi, jmi_block_res
 	b->n = n;
 	b->index = index ;
 	b->x = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
+	b->dx = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
 	b->res = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
+	b->dres = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
 	b->jac = (jmi_real_t*)calloc(n*n,sizeof(jmi_real_t));
 	b->ipiv = (int*)calloc(n,sizeof(int));
 	b->init = 1;
@@ -1026,9 +989,12 @@ int jmi_new_block_dir_der(jmi_block_dir_der_t** block, jmi_t* jmi, jmi_block_res
 	return 0;
 }
 
+
 int jmi_delete_block_residual(jmi_block_residual_t* b){
 	free(b->x);
+	free(b->dx);
 	free(b->res);
+	free(b->dres);
 	free(b->jac);
 	free(b->ipiv);
 	/*Deallocate Kinsol work vectors.*/

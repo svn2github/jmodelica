@@ -64,6 +64,8 @@ int jmi_kinsol_solve(jmi_block_residual_t * block);
  */
 int kin_f(N_Vector y, N_Vector f, void *problem_data);
 
+int kin_df(int N, N_Vector u, N_Vector fu, DlsMat J, void *user_data, N_Vector tmp1, N_Vector tmp2);
+
 /**
  * \brief A function wrapper for Kinsol error handling.
  * 

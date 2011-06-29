@@ -154,7 +154,6 @@ typedef struct jmi_opt_t jmi_opt_t;                       /**< \brief Forward de
 typedef struct jmi_func_t jmi_func_t;                     /**< \brief Forward declaration of struct. */
 typedef struct jmi_func_ad_t jmi_func_ad_t;               /**< \brief Forward declaration of struct. */
 typedef struct jmi_block_residual_t jmi_block_residual_t; /**< \brief Forward declaration of struct. */
-typedef struct jmi_block_dir_der_t jmi_block_dir_der_t; /**< \brief Forward declaration of struct. */
 typedef struct jmi_info_t jmi_info_t;                     /**< \brief Forward declaration of struct. */
 typedef struct jmi_sim_t jmi_sim_t;                       /**< \brief Forward declaration of struct. */
 
@@ -761,10 +760,13 @@ struct jmi_func_ad_t{
 struct jmi_block_residual_t {
 	jmi_t *jmi;                    /**< \brief A pointer to the corresponding jmi_t struct */
 	jmi_block_residual_func_t F;   /**< \brief A function pointer to the block residual function */
+	jmi_block_dir_der_func_t dF;   /**< \brief A function pointer to the block AD-function */
 	int n;                         /**< \brief The number of unknowns in the equation system */
 	jmi_real_t* x;                 /**< \brief Work vector for the iteration variables */
+	jmi_real_t* dx;				/**< \brief Work vector for the seed vector */
         int index ;
     jmi_real_t* res;               /**< \brief Work vector for the block residual */
+    jmi_real_t* dres;			   /**< \brief Work vector for the directional derivative that corresponds to dx */
     jmi_real_t* jac;               /**< \brief Work vector for the block Jacobian */
     int* ipiv;                     /**< \brief Work vector needed for dgesv */
     void* kin_mem;                 /**< \brief A pointer to the Kinsol solver */
@@ -780,28 +782,6 @@ struct jmi_block_residual_t {
   realtype time_spent;             /**< \brief Total time spent in non-linear solver */
 };
 
-struct jmi_block_dir_der_t {
-	jmi_t *jmi;                    /**< \brief A pointer to the corresponding jmi_t struct */
-	jmi_block_residual_func_t F;   /**< \brief A function pointer to the block residual function */
-	jmi_block_dir_der_func_t dF;   /**< \brief A function pointer to the block AD-function */
-	int n;                         /**< \brief The number of unknowns in the equation system */
-	jmi_real_t* x;                 /**< \brief Work vector for the iteration variables */
-        int index ;
-    jmi_real_t* res;               /**< \brief Work vector for the block residual */
-    jmi_real_t* jac;               /**< \brief Work vector for the block Jacobian */
-    int* ipiv;                     /**< \brief Work vector needed for dgesv */
-    void* kin_mem;                 /**< \brief A pointer to the Kinsol solver */
-    int init;			   /**< \brief A flag for initialization */
-    N_Vector kin_y;                /**< \brief Work vector for Kinsol y */
-    N_Vector kin_y_scale;          /**< \brief Work vector for Kinsol scaling of y */
-    N_Vector kin_f_scale;          /**< \brief Work vector for Kinsol scaling of f */
-    realtype kin_ftol;		   /**< \brief Tolerance for F */
-    realtype kin_stol;		   /**< \brief Tolerance for Step-size */
-  int nb_calls;                    /**< \brief Nb of times the block has been solved */
-  int nb_iters;                     /**< \breif Total nb if iterations of non-linear solver */
-  int nb_jevals ;
-  realtype time_spent;             /**< \brief Total time spent in non-linear solver */
-};
 
 /* @} */
 
@@ -917,9 +897,7 @@ int jmi_dae_init(jmi_t* jmi, jmi_residual_func_t F, int n_eq_F,
         jmi_generic_func_t ode_guards_init,
         jmi_next_time_event_func_t ode_next_time_event);
 
-int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, int n, int index);
-
-int jmi_dae_add_equation_block_dir_der(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int index);
+int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int index);
 
 /**
  * \brief Allocates a jmi_block_residual struct.
@@ -927,13 +905,13 @@ int jmi_dae_add_equation_block_dir_der(jmi_t* jmi, jmi_block_residual_func_t F, 
  * @param b A jmi_block_residual_t struct (Output)
  * @param jmi A jmi_t struct.
  * @param F A jmi_block_residual_func_t function
+ * @param dF A jmi_block_dir_der_func_t function 
  * @param n Integer size of the block
  * @param index Integer ID nbr of the block
  * @return Error code.
  */
-int jmi_new_block_residual(jmi_block_residual_t** b,jmi_t* jmi, jmi_block_residual_func_t F, int n,int index);
+int jmi_new_block_residual(jmi_block_residual_t** b,jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n,int index);
 
-int jmi_new_block_dir_der(jmi_block_dir_der_t** b,jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n,int index);
 
 /**
  * \brief Deletes a jmi_block_residual struct.
@@ -943,9 +921,8 @@ int jmi_new_block_dir_der(jmi_block_dir_der_t** b,jmi_t* jmi, jmi_block_residual
  */
 int jmi_delete_block_residual(jmi_block_residual_t* b);
 
-int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, int n, int index);
+int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int index);
 
-int jmi_dae_init_add_equation_block_dir_der(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int index);
 
 /**
  * \brief Allocates a jmi_init_t struct.
@@ -1245,8 +1222,6 @@ struct jmi_t{
 	int scaling_method;                               /**< \brief Scaling method: JMI_SCALING_NONE, JMI_SCALING_VARIABLES */
 	jmi_block_residual_t** dae_block_residuals;       /**< \brief A vector of function pointers to DAE equation blocks */
 	jmi_block_residual_t** dae_init_block_residuals;  /**< \brief A vector of function pointers to DAE initialization equation blocks */
-	jmi_block_dir_der_t** dae_block_dir_ders;		  /**< \brief A vector of function pointers to DAE AD-equation blocks */
-	jmi_block_dir_der_t** dae_init_block_dir_ders;	  /**< \brief A vector of function pointers to DAE initialization AD-equation blocks */
 
 	jmi_ad_var_t atEvent;                                      /** \brief A boolean variable indicating if the model equations are evaluated at an event.*/
 	jmi_ad_var_t atInitial;                                    /** \brief A boolean variable indicating if the model equations are evaluated at the initial time */
