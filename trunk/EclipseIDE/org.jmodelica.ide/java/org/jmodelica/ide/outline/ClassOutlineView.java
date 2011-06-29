@@ -24,6 +24,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.part.IPage;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import org.jmodelica.ide.editor.Editor;
@@ -33,6 +34,8 @@ import org.jmodelica.ide.helpers.EclipseUtil;
 public class ClassOutlineView extends OutlineView {
 	
 	private Map<IProject, ClassOutlinePage> mapProjToPage = new HashMap<IProject, ClassOutlinePage>();
+	private ICurrentClassListener tempPagePart = null;
+	private ClassOutlinePage tempPage = null;
 	
 	protected IContentOutlinePage setupOutlinePage(IWorkbenchPart part) {
 		if (part instanceof AbstractTextEditor) {
@@ -96,6 +99,26 @@ public class ClassOutlineView extends OutlineView {
 	public void partActivated(IWorkbenchPart part) {
 		if (isImportant(part))
 			super.partActivated(part);
+		else if (part instanceof ICurrentClassListener)
+			connectTempPage((ICurrentClassListener) part);
+	}
+
+	private void connectTempPage(ICurrentClassListener part) {
+		IPage page = getCurrentPage();
+		if (page instanceof ClassOutlinePage) {
+			disconnectTempPage();
+			((ClassOutlinePage) page).addCurrentClassListener(part);
+			tempPagePart = part;
+			tempPage = ((ClassOutlinePage) page);
+		}
+	}
+
+	private void disconnectTempPage() {
+		if (tempPage != null) {
+			tempPage.removeCurrentClassListener(tempPagePart);
+			tempPage = null;
+			tempPagePart = null;
+		}
 	}
 
 	public void partBroughtToTop(IWorkbenchPart part) {
@@ -103,6 +126,7 @@ public class ClassOutlineView extends OutlineView {
 	}
 
 	protected void partHidden(IWorkbenchPart part) {
+		disconnectTempPage();
 	}
 
 	protected IContentOutlinePage getOutlinePage(Editor part) {

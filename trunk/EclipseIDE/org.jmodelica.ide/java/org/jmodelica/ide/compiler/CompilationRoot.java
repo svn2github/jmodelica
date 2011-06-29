@@ -1,20 +1,17 @@
 package org.jmodelica.ide.compiler;
 
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.error.CompileErrorReport;
 import org.jmodelica.ide.error.InstanceErrorHandler;
-import org.jmodelica.modelica.compiler.ASTNode;
+import org.jmodelica.ide.helpers.Util;
 import org.jmodelica.modelica.compiler.BadDefinition;
-import org.jmodelica.modelica.compiler.LibNode;
 import org.jmodelica.modelica.compiler.List;
 import org.jmodelica.modelica.compiler.ParserException;
 import org.jmodelica.modelica.compiler.Program;
@@ -129,7 +126,7 @@ public class CompilationRoot {
 	 */
 	public CompilationRoot parseFile(IFile file) {
 		try {
-			parseFile(new FileReader(file.getRawLocation().toOSString()), file, true);
+			parseFile(Util.fileReader(file), file, true);
 		} catch (IOException e) {
 			addBadDef(file);
 		}

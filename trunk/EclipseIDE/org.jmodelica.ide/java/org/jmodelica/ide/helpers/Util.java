@@ -16,6 +16,11 @@
 package org.jmodelica.ide.helpers;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,6 +30,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
@@ -175,6 +181,16 @@ public class Util {
 		while (isLibrary(parent.getParent())) 
 			parent = parent.getParent();
 		return parent.findMember(IDEConstants.PACKAGE_FILE).getLocation().toOSString();
+	}
+	
+	public static Reader fileReader(IFile file) throws FileNotFoundException {
+		FileInputStream stream = new FileInputStream(file.getRawLocation().toOSString());
+		try {
+			return new InputStreamReader(stream, file.getCharset());
+		} catch (UnsupportedEncodingException e) {
+		} catch (CoreException e) {
+		}
+		return new InputStreamReader(stream);
 	}
 	
 	/**

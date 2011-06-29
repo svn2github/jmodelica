@@ -42,7 +42,7 @@ aspect OptimicaRootAccess {
 	refine RootAccess SourceRoot ParserHandler.parseModelicaFile(String fileName) 
 	   throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException{
 		SourceRoot sr = null;
-		Reader reader = new FileReader(fileName);
+		Reader reader = fileReader(fileName);
 		org.jmodelica.optimica.parser.ModelicaScanner scanner = 
 			new org.jmodelica.optimica.parser.ModelicaScanner(new BufferedReader(reader));
 		org.jmodelica.optimica.parser.ModelicaParser parser = new org.jmodelica.optimica.parser.ModelicaParser();

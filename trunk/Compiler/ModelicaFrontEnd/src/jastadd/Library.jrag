@@ -70,7 +70,7 @@ aspect Library {
 					
 					File orderFile = new File(baseDir, PACKAGE_ORDER_FILE);
 					if (orderFile.isFile()) {
-						BufferedReader in = new BufferedReader(new FileReader(orderFile));
+						BufferedReader in = new BufferedReader(ParserHandler.fileReader(orderFile));
 						java.util.List<String> order = new ArrayList<String>();
 						String line;
 						while ((line = in.readLine()) != null)

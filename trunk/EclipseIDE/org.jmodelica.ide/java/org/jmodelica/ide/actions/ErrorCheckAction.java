@@ -138,7 +138,7 @@ public class ErrorCheckAction extends CurrentClassAction implements IJobChangeLi
 			// We use the severity to tell what kind of message is passed
 			int status = IStatus.OK;      // No errors
 			if (errorHandler.hasErrors()) 
-				status = IStatus.INFO;    // Only error that we created markers for
+				status = IStatus.INFO;    // Only errors that we created markers for
 			if (errorHandler.hasLostErrors()) 
 				status = IStatus.WARNING; // Some errors that no markers were created for
 			return new Status(status, IDEConstants.PLUGIN_ID, errorHandler.resultMessage());
