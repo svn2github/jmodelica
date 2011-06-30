@@ -2087,4 +2087,55 @@ end SampleTest1;
 
 
 
+model VectorizedAbsTest
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="VectorizedAbsTest",
+         description="Test of vectorized abs()",
+         flatModel="
+fclass ArrayBuiltins.VectorizedAbsTest
+ constant Real c[1,1] =  - ( 1 );
+ constant Real c[1,2] = 2;
+ constant Real c[2,1] = 3;
+ constant Real c[2,2] =  - ( 4 );
+ constant Real d[1,1] = abs(-1.0);
+ constant Real d[1,2] = abs(2.0);
+ constant Real d[2,1] = abs(3.0);
+ constant Real d[2,2] = abs(-4.0);
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+ Real z[1,1];
+ Real z[1,2];
+ Real z[2,1];
+ Real z[2,2];
+equation
+ x[1,1] = -1.0;
+ x[1,2] = 2.0;
+ x[2,1] = 3.0;
+ x[2,2] = -4.0;
+ y[1,1] = 1.0;
+ y[1,2] = 2.0;
+ y[2,1] = 3.0;
+ y[2,2] = 4.0;
+ z[1,1] = abs(x[1,1]);
+ z[1,2] = abs(x[1,2]);
+ z[2,1] = abs(x[2,1]);
+ z[2,2] = abs(x[2,2]);
+end ArrayBuiltins.VectorizedAbsTest;
+")})));
+
+    constant Real[2,2] c = {{-1, 2}, {3, -4}};
+    constant Real[2,2] d = abs(c);
+    Real[2,2] x = c;
+    Real[2,2] y = d;
+    Real[2,2] z = abs(x);
+end VectorizedAbsTest;
+
+
 end ArrayBuiltins;

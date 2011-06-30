@@ -396,14 +396,13 @@ end AbsType5;
 
 model AbsType6
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
+     JModelica.UnitTesting.FlatteningTestCase(
          name="AbsType6",
          description="abs() operator: array arg",
-         errorMessage="
-1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 343, column 18:
-  Calling function abs(): types of positional argument 1 and input v are not compatible
+         flatModel="
+fclass TypeTests.AbsType6
+ Real x[2] = abs({1, - ( 1 )});
+end TypeTests.AbsType6;
 ")})));
 
  Real x[2] = abs({1,-1});

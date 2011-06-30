@@ -1391,7 +1391,7 @@ aspect Scalarization {
 	 * \brief Create an FArray containing scalarized subexpressions.
 	 */
 	public FExp Array.buildScalarized(Map<String,FExp> indexMap, FExp context) {
-    	return buildFArray(iteratorFExp(), new ScalarizedBuilder(indexMap, context), 1);
+    	return buildFArray(new ScalarizedBuilder(indexMap, context));
     }
     
 	public static class Array {

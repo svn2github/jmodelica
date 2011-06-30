@@ -1025,9 +1025,16 @@ abstract FBuiltInFunctionCall : FAbstractFunctionCall ::= /OriginalArg:InstFunct
 abstract FUnaryBuiltIn : FBuiltInFunctionCall ::= FExp;
 
 /**
+ * Base class for calls to vectorizeable unary functions.
+ *
+ * Methods on this class assumes that subclasses adhere to MLS v3.2 section 12.4.6.
+ */
+abstract FVectUnaryBuiltIn : FUnaryBuiltIn;
+
+/**
  * \brief noEvent built-in function.
  */
-FNoEventExp : FUnaryBuiltIn;
+FNoEventExp : FVectUnaryBuiltIn;
 
 /**
  * Pre built-in function.
@@ -1047,7 +1054,7 @@ FInitialExp : FBuiltInFunctionCall;
 /**
  * \brief Abs built-in function.
  */
-FAbsExp : FUnaryBuiltIn;
+FAbsExp : FVectUnaryBuiltIn;
 
 /**
  * \brief Base class for calls to built-in mathematical functions.
@@ -1212,7 +1219,7 @@ FSumExp : FUnaryBuiltIn;
 /**
  * \brief Common base class for FInStream & FActualStream
  */
-abstract FStreamBuiltIn : FUnaryBuiltIn;
+abstract FStreamBuiltIn : FVectUnaryBuiltIn;
 
 /**
  * \brief InStream built-in function.

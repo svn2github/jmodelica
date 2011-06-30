@@ -240,8 +240,7 @@ aspect Arrays {
 	eq FIfExp.ndims()     = getThenExp().ndims();
 	eq FElseIfExp.ndims() = getThenExp().ndims();
 	
-	// TODO: Expand to cover vectorization of all scalar built-in functions (see #528)
-	eq FStreamBuiltIn.ndims() = getFExp().ndims();
+	eq FVectUnaryBuiltIn.ndims() = getFExp().ndims();
 	
 	/**
 	 * \brief Check if multiplication is equivalent with an element-wise multiplication.
@@ -719,10 +718,8 @@ aspect Arrays {
 	eq FSizeExp.size()  = hasDim() ? Size.SCALAR : new Size(getFExp().ndims());
 	eq FNdimsExp.size() = Size.SCALAR;
 	
-	eq FUnaryBuiltIn.size() = getFExp().size();
-	
-	// TODO: Expand to cover vectorization of all scalar built-in functions (see #528)
-	eq FStreamBuiltIn.size() = getFExp().size();
+	eq FUnaryBuiltIn.size()     = getFExp().size();
+	eq FVectUnaryBuiltIn.size() = getFExp().size().contractRight(ndims());
 	
 	eq FInfArgsFunctionCall.size() {
 		if (!isArray())
@@ -1305,11 +1302,11 @@ aspect Arrays {
 		return arr;
 	}
 	
-	// TODO: Expand to cover vectorization of all scalar built-in functions (see #528)
-	eq FStreamBuiltIn.getArray() {
+	eq FVectUnaryBuiltIn.getArray() {
 		if (!isArray())
 			return super.getArray();
 		
+		// TODO: This only supports scalar -> scalar functions, see #528
 		Array arr = new Array(indices());
 		Array inner = getFExp().getArray();
 		for (Index i : arr.indices())
@@ -2114,7 +2111,46 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Creates a new Size that is a copy of this one, but with one more dimension.
+		 * Creates a new Size that is a copy of this one, but with dimensions removed 
+		 * from each side. If nothing is changed, <code>this</code> is returned. 
+		 * 
+		 * @param left   the number of dimensions to remove from the left side
+		 * @param right  the number of dimensions to remove from the right side
+		 */
+		public Size contract(int left, int right) {
+			int ndims = size.length - left - right;
+			if (ndims == size.length)
+				return this;
+			if (ndims == 0)
+				return Size.SCALAR;
+			int[] ns = new int[ndims];
+			System.arraycopy(size, left, ns, 0, ndims);
+			return new Size(ns);
+		}
+		
+		/**
+		 * Creates a new Size that is a copy of this one, but with dimensions removed 
+		 * from the left side. If nothing is changed, <code>this</code> is returned. 
+		 * 
+		 * @param n   the number of dimensions of the new size
+		 */
+		public Size contractLeft(int n) {
+			return contract(size.length - n, 0);
+		}
+		
+		/**
+		 * Creates a new Size that is a copy of this one, but with dimensions removed 
+		 * from the right side. If nothing is changed, <code>this</code> is returned. 
+		 * 
+		 * @param n   the number of dimensions of the new size
+		 */
+		public Size contractRight(int n) {
+			return contract(0, size.length - n);
+		}
+		
+		/**
+		 * Creates a new Size that is a copy of this one, but with one more dimension 
+		 * on the left side.
 		 * 
 		 * @param s  the length of the new dimension
 		 */
@@ -2126,7 +2162,9 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Creates a new Size that is a concatenation of <code>s</code> and this size.
+		 * Creates a new Size that is a concatenation of <code>s</code> and this size.
+		 * 
+		 * <code>s</code> is added on the left side.
 		 */
 		public Size expand(Size s) {
 			int ndims = size.length + s.size.length;
@@ -2409,7 +2447,25 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Creates a new Size that is a copy of this one, but with one more dimension.
+		 * Creates a new Size that is a copy of this one, but with dimensions removed 
+		 * from each side.
+		 * 
+		 * @param left   the number of dimensions to remove from the left side
+		 * @param right  the number of dimensions to remove from the right side
+		 */
+		public Size contract(int left, int right) {
+			int ndims = size.length - left - right;
+			if (ndims == 0)
+				return Size.SCALAR;
+			MutableSize ns = new MutableSize(ndims);
+			System.arraycopy(size, left, ns.size, 0, ndims);
+			System.arraycopy(exps, left, ns.exps, 0, ndims);
+			return ns;
+		}
+		
+		/**
+		 * Creates a new Size that is a copy of this one, but with one more dimension 
+		 * on the left side.
 		 * 
 		 * @param s  the length of the new dimension
 		 */
@@ -2423,7 +2479,9 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Creates a new Size that is a concatenation of <code>s</code> and this size.
+		 * Creates a new Size that is a concatenation of <code>s</code> and this size.
+		 * 
+		 * <code>s</code> is added on the left side.
 		 */
 		public Size expand(Size s) {
 			int ndims = size.length + s.size.length;
@@ -2685,15 +2743,15 @@ aspect ArrayHelpers {
 	     *  
 	     * @param it       the iterator returned by a call to {@link #iteratorFExp()}
 	     * @param builder  helper object that processes each subexpression
-	     * @param dim      the dimension to process, always use 1
+	     * @param dim      the dimension to start at, use 0 to process entire array
 	     * 
 	     * @see #buildLiteral(boolean)
 	     * @see #buildScalarized(java.util.HashMap<String,FExp>)
 	     */
 	    protected FExp buildFArray(Iterator<FExp> it, ElementBuilder builder, int dim) {
 	    	FArray arr = new FArray(new List<FExp>());
-	    	int n = size().get(dim - 1);
-	    	if (dim < ndims()) {
+	    	int n = size().get(dim);
+	    	if (dim < ndims() - 1) {
 	    		for (int i = 0; i < n; i++)
 	    			arr.addFExp(buildFArray(it, builder, dim + 1));
 	    	} else {
@@ -2701,6 +2759,20 @@ aspect ArrayHelpers {
 	    			arr.addFExp((FExp) builder.build(it.next()).unboundCopy());
 	    	}
 	    	return arr;
+	    }
+		
+	    /**
+	     * \brief Build an FArray describing this Array.
+	     *        For use by methods creating specific types of FArrays.
+	     *  
+	     * @param builder  helper object that processes each subexpression
+	     * 
+	     * @see #buildLiteral(boolean)
+	     * @see #buildScalarized(java.util.HashMap<String,FExp>)
+	     * @see #buildFArray(Iterator<FExp>,ElementBuilder,int)
+	     */
+	    protected FExp buildFArray(ElementBuilder builder) {
+	    	return buildFArray(iteratorFExp(), builder, 0);
 	    }
 		
 	    /**

@@ -562,9 +562,8 @@ aspect FlatTypeCheck {
   eq FNdimsExp.getChild().argumentDefinedTypeValid()             = false;
   eq FSizeExp.getOriginalArg(int i).argumentDefinedTypeValid()   = i != 0;
   eq FInfArgsFunctionCall.getChild().argumentDefinedTypeValid()  = false;
-  eq FStreamBuiltIn.getChild().argumentDefinedTypeValid()        = false;
   eq FEnumIntegerExp.getChild().argumentDefinedTypeValid()       = false;
-  eq FNoEventExp.getChild().argumentDefinedTypeValid()           = false;
+  eq FVectUnaryBuiltIn.getChild().argumentDefinedTypeValid()     = false;
   eq FPreExp.getChild().argumentDefinedTypeValid()               = false;
 
   /**
@@ -578,6 +577,7 @@ aspect FlatTypeCheck {
   eq FSumExp.getChild().argumentTypeValid(FType type)               = type.ndims() > 0 && type.hasAdd();
   eq FEnumIntegerExp.getChild().argumentTypeValid(FType type)       = type.isEnumScalar();
   eq FNoEventExp.getChild().argumentTypeValid(FType type)           = true;
+  eq FAbsExp.getChild().argumentTypeValid(FType type)               = type.isNumeric();
   eq FMinMaxExp.getOriginalArg(int i).argumentTypeValid(FType type) = 
 	  hasY() != getOriginalArg(i).getFExp().isArray() && type.isPrimitive();
   

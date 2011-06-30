@@ -239,8 +239,6 @@ aspect FlatTypeAnalysis {
 	
 	eq FCross.type() = getX().type().numericPromotion(getY().type());
 	
-	eq FAbsExp.type() = getFExp().type();
-	
 	eq FNdimsExp.type() = fIntegerScalarType();
 	
 	eq FSizeExp.type() {
@@ -328,7 +326,14 @@ aspect FlatTypeAnalysis {
 	eq FTimeExp.type() = fRealScalarType();
 	eq FDerExp.type() = fRealScalarType();
 	
-	eq FStreamBuiltIn.type() = getFExp().type();
+	eq FVectUnaryBuiltIn.type() = scalarType().sizedType(size());
+	
+	/**
+	 * The scalar type of the expression.
+	 * 
+	 * Base implementation assumes same as argument.
+	 */
+	syn FType FVectUnaryBuiltIn.scalarType() = getFExp().type().scalarType();
 
 	// TODO: expand to handle boolean and enum index
 	eq FEndExp.type() = fIntegerScalarType();

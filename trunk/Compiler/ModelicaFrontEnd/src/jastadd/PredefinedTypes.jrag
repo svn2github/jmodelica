@@ -260,8 +260,8 @@ aspect PredefinedTypes {
 +"function assert end assert;\n"
 +"function terminate end terminate;\n"
 +"function abs\n"
-+"  input Real v;\n"
-+"  output Real y;\n" 
++"  input Real v;\n"      // Type not used
++"  output Real y;\n"     // Type not used
 +"end abs;\n"
 +"function sign end sign;\n"
 +"function sqrt\n"

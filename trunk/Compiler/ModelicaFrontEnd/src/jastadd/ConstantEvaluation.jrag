@@ -952,7 +952,7 @@ aspect ConstantEvaluation {
      * @param toReal  if <code>true</code>, convert all values to real.
      */
     public FExp Array.buildLiteral(boolean toReal) {
-    	return buildFArray(iteratorFExp(), new LiteralBuilder(toReal), 1);
+    	return buildFArray(new LiteralBuilder(toReal));
     }
     
     public class Array {
