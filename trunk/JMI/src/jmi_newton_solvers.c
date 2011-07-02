@@ -96,6 +96,9 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, void *user_data, N_Vector t
 	jmi_block_residual_t *block = user_data;
 	int i;
 	int j;
+	for(i = 0; i < N; i++){ 
+ 	    block->x[i] = Ith(u,i); 
+	} 
 	for(i = 0; i < N; i++){
 		block->dx[i] = 1;
 		block->dF(block->jmi,block->x,block->dx,block->res,block->dres,JMI_BLOCK_EVALUATE);
