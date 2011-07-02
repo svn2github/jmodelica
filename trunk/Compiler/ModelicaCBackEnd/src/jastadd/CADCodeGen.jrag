@@ -766,7 +766,12 @@ aspect CADCodeGen {
 		str.print("static int dae_" + (inInit? "init_": "") + "block_dir_der_"+block_counter+"(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int init) {\n");
 		str.print("  jmi_real_t** res = &residual;\n");
 		str.print("  jmi_real_t** dF = &dRes;\n");
-		str.print("  jmi_real_t** dz = &dx;\n");
+		str.print("  jmi_real_t** dz;\n");
+		str.print("  jmi_real_t* temp;\n");
+		str.print("  int size;\n");
+		str.print("  size = N_real_dx + N_real_x + N_real_u + N_real_w;\n");
+		str.print("  temp = (jmi_real_t*)calloc(size,sizeof(jmi_real_t));\n");
+		str.print("   dz = &temp;\n");
 		str.print("  if (init==JMI_BLOCK_INITIALIZE) {\n");
 		int var_counter = 0;
 		// Loop over all active variables and write their value to x	
@@ -779,6 +784,7 @@ aspect CADCodeGen {
 		var_counter = 0;
 		for (FVariable fv : activeVariables()) {
 			str.print("    " + fv.name_C() + " = x["+var_counter+"];\n");
+			str.print("    (*dz)[" + fv.valueReference() + "-jmi->offs_real_dx] = dx[" + var_counter + "];\n");
 			var_counter++;
 		}
 		// Write AD-code
@@ -788,6 +794,7 @@ aspect CADCodeGen {
 			equation_counter += e.numScalarEquations();
 		}
 		str.print("  } else{\nreturn -1;\n}\n");
+		str.print("  free(*dz);\n");
 		str.print("  return 0;\n}\n\n");
 	}
 	
