@@ -237,7 +237,7 @@ int jmi_kinsol_solve(jmi_block_residual_t * block){
 	jmi_kinsol_error_handling(flag);
 
 	njevals = 0;
-	flag = KINPinvGetNumFuncEvals(block->kin_mem, &njevals);
+	flag = KINPinvGetNumJacEvals(block->kin_mem, &njevals);
 	jmi_kinsol_error_handling(flag);
 
 	/* Store debug information */
