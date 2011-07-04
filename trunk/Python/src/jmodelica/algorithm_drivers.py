@@ -1569,7 +1569,7 @@ class KInitSolveAlg(AlgorithmBase):
                 - KInitSolveAlgOptions object.
         """
         self.model = model
-        self.problem = JMUAlgebraic(model)
+
         
         # handle options argument
         if isinstance(options, dict) and not \
@@ -1581,6 +1581,10 @@ class KInitSolveAlg(AlgorithmBase):
             self.options = options
         else:
             raise InvalidAlgorithmOptionException(options)
+        
+        # instantiate problem    
+        self.problem = JMUAlgebraic(model,use_jac = self.options['KINSOL_options']['use_jac'])
+        
         # set options
         self._set_options()
         
@@ -1603,7 +1607,6 @@ class KInitSolveAlg(AlgorithmBase):
         """
         Helper function that sets options for the KINSOL solver.
         """
-        
         self.solver.set_jac_usage(self.solver_options['use_jac'])
         self.solver.set_verbosity(self.solver_options['verbosity'])
         self.solver.set_sparsity(self.solver_options['sparse'])

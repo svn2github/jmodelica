@@ -50,7 +50,7 @@ class JMUAlgebraic(ProblemAlgebraic):
     SUNDIALS package.
     """
     
-    def __init__(self,model,x0 = None):
+    def __init__(self,model,x0 = None,use_jac=True):
         """
         Create an instance of the JMIInitProblem
         
@@ -67,6 +67,7 @@ class JMUAlgebraic(ProblemAlgebraic):
         # Read the model
         self._model = model
         self._jmi_model = model.jmimodel
+        self._use_jac = use_jac
         
         # get offsets to the initialization variables
         offsets = self._model.get_offsets()
@@ -89,20 +90,23 @@ class JMUAlgebraic(ProblemAlgebraic):
         if self._neqF0 != (self._x_size + self._w_size + self._dx_size):
             raise JMUAlgebraic_Exception("Model error: nb eqs not equal to nb vars")
         
-        # get the data needed for evaluating the jacobian
-        self._mask = N.ones(self._model.z.size, dtype=N.int32)
-        self._ind_vars = [jmi.JMI_DER_W, jmi.JMI_DER_X, jmi.JMI_DER_DX]
-        self._ncol, self._nonzeros = self._jmi_model.init_dF0_dim(
-            jmi.JMI_DER_CPPAD, jmi.JMI_DER_DENSE_COL_MAJOR, self._ind_vars, self._mask)
-        self._nrow = self._nonzeros / self._ncol
+        # This makes sure that the jmi interface is not called if the user has specified
+        # that a numerical Jacobian is to be used, 
+        if self._use_jac :
+            # get the data needed for evaluating the jacobian
+            self._mask = N.ones(self._model.z.size, dtype=N.int32)
+            self._ind_vars = [jmi.JMI_DER_W, jmi.JMI_DER_X, jmi.JMI_DER_DX]
+            self._ncol, self._nonzeros = self._jmi_model.init_dF0_dim(
+                jmi.JMI_DER_CPPAD, jmi.JMI_DER_DENSE_COL_MAJOR, self._ind_vars, self._mask)
+            self._nrow = self._nonzeros / self._ncol
         
-        # get sparse data
-        self.sparse_ncol, self.sparse_nonzeros = self._jmi_model.init_dF0_dim(
-            jmi.JMI_DER_CPPAD, jmi.JMI_DER_SPARSE, self._ind_vars, self._mask)
+            # get sparse data
+            self.sparse_ncol, self.sparse_nonzeros = self._jmi_model.init_dF0_dim(
+                jmi.JMI_DER_CPPAD, jmi.JMI_DER_SPARSE, self._ind_vars, self._mask)
 
-        self.rows = N.zeros(self.sparse_nonzeros,dtype = N.int32)
-        self.cols = N.zeros(self.sparse_nonzeros,dtype = N.int32)
-        self._jmi_model.init_dF0_nz_indices(jmi.JMI_DER_CPPAD, self._ind_vars, self._mask, self.rows, self.cols)
+            self.rows = N.zeros(self.sparse_nonzeros,dtype = N.int32)
+            self.cols = N.zeros(self.sparse_nonzeros,dtype = N.int32)
+            self._jmi_model.init_dF0_nz_indices(jmi.JMI_DER_CPPAD, self._ind_vars, self._mask, self.rows, self.cols)
         
         
         # Get initial guess if supplied, otherwise get it from the model
@@ -157,6 +161,7 @@ class JMUAlgebraic(ProblemAlgebraic):
         stop = time.clock()
         
         self.time_f += (stop-start)
+        #print output
         return output
     
     def set_x0(self,x0):
@@ -235,7 +240,9 @@ class JMUAlgebraic(ProblemAlgebraic):
                 A numpy array, the vector input for which the jacobian will be
                 evaluated.
         """
-        
+        if not self._use_jac:
+			raise JMUAlgebraic_Exception("JMI jacobian functions called although the KINSOL option use_jac is set to false, aborting initialization.")
+			
         start = time.clock()
         inp_size = input.shape[0]
     
@@ -271,6 +278,8 @@ class JMUAlgebraic(ProblemAlgebraic):
                 A numpy array, the vector input for which the jacobian will be
                 evaluated.
         """
+        if not self._use_jac:
+			raise JMUAlgebraic_Exception("JMI jacobian functions called although the KINSOL option use_jac is set to false, aborting initialization.")
         start = time.clock()
         
         inp_size = input.shape[0]
