@@ -499,6 +499,16 @@ class JMUModel(BaseModel):
         """
         return bool(self.jmimodel.with_cppad_derivatives())
 
+    def has_cad_derivatives(self):
+        """ 
+        Check if there is support for CAD derivatives.
+        
+        Returns::
+        
+            True if there is support for CAD derivatives, otherwise False.
+        """
+        return bool(self.jmimodel.with_cad_derivatives())
+
     def reset(self):
         """ 
         Reset the internal states of the DLL.
@@ -3584,6 +3594,9 @@ class JMIModel(object):
                                                                flags='C'),
                                                  ct.POINTER(ct.c_int),
                                                  ct.POINTER(ct.c_int)]   
+
+        self._dll.jmi_with_cad_derivatives.argtypes = [ct.c_void_p]   
+
                  
     def initAD(self):
         """ 
@@ -3605,6 +3618,16 @@ class JMIModel(object):
             1 if there is CppAD support, 0 otherwise.
         """
         return self._dll.jmi_with_cppad_derivatives()
+
+    def with_cad_derivatives(self):
+        """ 
+        Check if there is support for CAD derivatives or not.
+        
+        Returns::
+        
+            1 if there is CAD support, 0 otherwise.
+        """
+        return self._dll.jmi_with_cad_derivatives(self._jmi)
                
     def __del__(self):
         """ 

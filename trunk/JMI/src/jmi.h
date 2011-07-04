@@ -2135,6 +2135,17 @@ void jmi_lin_interpolate(jmi_real_t x, jmi_real_t *z , int n ,int m,
  */
 int jmi_with_cppad_derivatives();
 
+/**
+ * \brief Check if there is support for CAD derivatives or not.
+ *
+ * If the return value is 1 then there is support for CAD derivatives,
+ * if return value is 0 there is no CAD support.
+ *
+ * @param jmi A jmi_t struct.
+ * 
+ * @return 1 for CAD support, 0 if no CAD support.
+ */
+int jmi_with_cad_derivatives(jmi_t* jmi);
 
 /**
  * \brief Set start values for all non alias variables.

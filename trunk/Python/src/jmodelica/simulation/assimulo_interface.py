@@ -672,7 +672,7 @@ class JMIDAE(Implicit_Problem):
         self.log_events = False #Are we to log the events?
         self.write_cont = False #Continuous writing false (True not supported)
         
-        if self._model.has_cppad_derivatives():
+        if self._model.has_cppad_derivatives() or self._model.has_cad_derivatives():
             self.jac = self.j #Activates the jacobian
         
         #Sets internal options
@@ -747,8 +747,11 @@ class JMIDAE(Implicit_Problem):
         #Derivation with respect to these variables
         independent_vars = [jmi.JMI_DER_DX, jmi.JMI_DER_X, jmi.JMI_DER_W] 
         sparsity = jmi.JMI_DER_DENSE_ROW_MAJOR
-        evaluation_options = jmi.JMI_DER_CPPAD#jmi.JMI_DER_SYMBOLIC
-        
+        if self._model.has_cppad_derivatives():
+            evaluation_options = jmi.JMI_DER_CPPAD
+        else: 
+            evaluation_options = jmi.JMI_DER_CAD
+            
         #-Evaluating
         #Matrix that hold information about dx and dw
         Jac = N.zeros(self._f_nbr**2) 

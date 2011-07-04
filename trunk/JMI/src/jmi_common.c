@@ -1511,4 +1511,8 @@ int jmi_dae_derivative_checker(jmi_t* jmi, int sparsity, int independent_vars, i
 	return jmi_util_dae_derivative_checker(jmi, jmi->dae->F, sparsity, independent_vars, screen_use, mask);
 }
 
+int jmi_with_cad_derivatives(jmi_t* jmi)
+{
+  return (jmi->dae->F->cad_dF_row[0]==-1)? 0: 1;
+}
 
