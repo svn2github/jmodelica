@@ -164,7 +164,6 @@ int jmi_dae_directional_FD_dF(jmi_t* jmi, jmi_func_t *func, jmi_real_t *res, jmi
 }
 
 int jmi_dae_cad_color_graph(jmi_t *jmi, jmi_func_t *func, int n_col, int n_nz, int *row, int *col, int *sparse_repr, int *offs, int *n_colors, int *map_info, int *map_off){
-		
 	int i;
 	int j;
 	int n_color = 0;
@@ -176,6 +175,9 @@ int jmi_dae_cad_color_graph(jmi_t *jmi, jmi_func_t *func, int n_col, int n_nz, i
 	int **incidence_v;
 	
 	jmi_dae_cad_get_connection_length(n_col ,n_nz,row,col, inc_length);
+	
+	func->coloring_counter++;
+	/*printf("Running graph coloring: %d\n", func->coloring_counter);*/
 	
 	incidence_v = (int**)calloc(n_col, sizeof(int*));
 	for(i = 0; i<n_col; i++){

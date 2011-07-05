@@ -63,7 +63,8 @@ int jmi_func_new(jmi_func_t** jmi_func, jmi_residual_func_t F, int n_eq_F, jmi_j
 		int cad_dF_n_nz, int* cad_dF_row, int* cad_dF_col) {
 
 	int i;
-
+	/*jmi_color_info* c_i_temp;*/
+	
 	jmi_func_t* func = (jmi_func_t*)calloc(1,sizeof(jmi_func_t));
 	*jmi_func = func;
 
@@ -90,7 +91,16 @@ int jmi_func_new(jmi_func_t** jmi_func, jmi_residual_func_t F, int n_eq_F, jmi_j
 		func->cad_dF_col[i] = cad_dF_col[i];
 		/* printf("* %d %d \n",func->cad_dF_row[i], func->cad_dF_col[i]);*/
 	}
-
+	
+	func->coloring_counter = 0;
+	func->coloring_done = (int*)calloc(64, sizeof(int));
+	func->c_info = (jmi_color_info**)calloc(64, sizeof(jmi_color_info*));
+	
+	for(i = 0; i < 64; i++){
+		func->coloring_done[i] = 0;
+		func->c_info[i] = (jmi_color_info*)malloc(sizeof(jmi_color_info));
+	}
+	
 	func->ad = NULL;
 
 	return 0;
@@ -100,10 +110,20 @@ int jmi_func_delete(jmi_func_t *func) {
 	if (func->ad!=NULL) {
 		return -1;
 	}
+	int i;
+	int flag;
 	free(func->sym_dF_row);
 	free(func->sym_dF_col);
 	free(func->cad_dF_row);
 	free(func->cad_dF_col);
+	for(i = 0; i < 64; i++){
+		if(func->coloring_done[i] == 1){
+			flag = jmi_delete_color_info(func->c_info[i]);
+		}
+		free(func->c_info[i]);
+	}
+	free(func->c_info);
+	free(func->coloring_done);
 	free(func);
 	return 0;
 }
@@ -213,6 +233,8 @@ int jmi_func_cad_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
 	int j;
 	int k;
 	int l;
+	int flag;
+	int c_index;
 	
 	int dF_n_cols;
 	int dF_n_nz;
@@ -231,6 +253,7 @@ int jmi_func_cad_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
 	jmi_real_t *res;
 	jmi_real_t *dF;
 	jmi_real_t *dv;
+	jmi_color_info* c_i;
 
 
 	max_columns  = func->cad_dF_col[func->cad_dF_n_nz-1]+1;
@@ -253,13 +276,33 @@ int jmi_func_cad_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
 		}
 	}
 	
-	offs = (int*)calloc(dF_n_cols, sizeof(int));
+	/*offs = (int*)calloc(dF_n_cols, sizeof(int));
 	sparse_repr = (int*)calloc(dF_n_cols, sizeof(int));
 	map_info = (int*)calloc(dF_n_nz, sizeof(int));
-	map_off = (int*)calloc(dF_n_cols, sizeof(int));
+	map_off = (int*)calloc(dF_n_cols, sizeof(int));*/
 	
-	jmi_dae_cad_color_graph(jmi, func, dF_n_cols, dF_n_nz, &dF_row[0], &dF_col[0], sparse_repr, offs, &n_colors, map_info, map_off);
+	c_index = 0;
+	if(independent_vars & JMI_DER_P_OPT){
+		c_index+=32;
+	}
+	c_index+=independent_vars>>4;
 	
+	if(func->coloring_done[c_index] != 1){
+		func->coloring_done[c_index] = 1;
+		flag = jmi_new_color_info(&c_i, dF_n_cols, dF_n_nz);
+		jmi_dae_cad_color_graph(jmi, func, dF_n_cols, dF_n_nz, &dF_row[0], &dF_col[0], c_i->sparse_repr, c_i->offs, &n_colors, c_i->map_info, c_i->map_off);
+		c_i->n_colors = n_colors;
+		func->c_info[c_index] = c_i;
+	} else{
+		c_i = func->c_info[c_index];
+	}
+
+	sparse_repr = c_i->sparse_repr;
+	offs = c_i->offs;
+	map_info = c_i->map_info;
+	map_off = c_i->map_off;
+	n_colors = c_i->n_colors;
+
 	for(i = 0; i < func->cad_dF_n_nz;i++){
 		if(func->cad_dF_row[i] > dF_n_eq){
 			dF_n_eq = func->cad_dF_row[i];
@@ -340,10 +383,10 @@ int jmi_func_cad_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
 		}
 	}
 	
-	free(map_off);
+	/*free(map_off);
 	free(map_info);
 	free(sparse_repr);
-	free(offs);
+	free(offs);*/
 	free(res);
 	free(dF);
 	free(dv);
@@ -879,14 +922,14 @@ int jmi_dae_init(jmi_t* jmi,
         jmi_generic_func_t ode_guards,
         jmi_generic_func_t ode_guards_init,
         jmi_next_time_event_func_t ode_next_time_event) {
-
+	
 	jmi_func_t* jf_F;
 	jmi_func_t* jf_R;
 	
 	/* Create jmi_dae struct */
 	jmi_dae_t* dae = (jmi_dae_t*)calloc(1,sizeof(jmi_dae_t));
 	jmi->dae = dae;
-
+	
 	jmi_func_new(&jf_F,F,n_eq_F,sym_dF,sym_dF_n_nz,sym_dF_row, sym_dF_col,cad_dir_dF,
 			cad_dF_n_nz, cad_dF_row, cad_dF_col);
 
@@ -894,6 +937,7 @@ int jmi_dae_init(jmi_t* jmi,
 
 	jmi_func_new(&jf_R,R,n_eq_R,dR,dR_n_nz,dR_row, dR_col,NULL, 0, NULL, NULL);
 	jmi->dae->R = jf_R;
+	
 
 	jmi->dae->ode_derivatives = ode_derivatives;
 	jmi->dae->ode_outputs = ode_outputs;
@@ -1005,6 +1049,24 @@ int jmi_delete_block_residual(jmi_block_residual_t* b){
 	KINFree(&(b->kin_mem));
 	/*Deallocate struct */
 	free(b);
+	return 0;
+}
+
+int jmi_new_color_info(jmi_color_info** c_info, int dF_n_cols, int dF_n_nz){
+	jmi_color_info* c_i_temp = (jmi_color_info*)calloc(1,sizeof(jmi_color_info));
+	(*c_info) = c_i_temp;
+	c_i_temp->offs = (int*)calloc(dF_n_cols, sizeof(int));
+	c_i_temp->sparse_repr = (int*)calloc(dF_n_cols, sizeof(int));
+	c_i_temp->map_info = (int*)calloc(dF_n_nz, sizeof(int));
+	c_i_temp->map_off = (int*)calloc(dF_n_cols, sizeof(int));
+	return 0;
+}
+
+int jmi_delete_color_info(jmi_color_info *c_i){
+	free(c_i->offs);
+	free(c_i->sparse_repr);
+	free(c_i->map_info);
+	free(c_i->map_off);
 	return 0;
 }
 

@@ -156,6 +156,7 @@ typedef struct jmi_func_ad_t jmi_func_ad_t;               /**< \brief Forward de
 typedef struct jmi_block_residual_t jmi_block_residual_t; /**< \brief Forward declaration of struct. */
 typedef struct jmi_info_t jmi_info_t;                     /**< \brief Forward declaration of struct. */
 typedef struct jmi_sim_t jmi_sim_t;                       /**< \brief Forward declaration of struct. */
+typedef struct jmi_color_info jmi_color_info;
 
 /* Typedef for the doubles used in the interface. */
 typedef double jmi_real_t; /*< Typedef for the real number
@@ -729,6 +730,21 @@ struct jmi_func_t{
 	int* cad_dF_row;            /**< \brief Row indices of the non-zero elements in the AD Jacobian of \f$F(z)\f$ (if available). */
 	int* cad_dF_col;            /**< \brief Column indices of the non-zero elements in the AD Jacobian of \f$F(z)\f$ (if available). */
 	jmi_func_ad_t* ad;      /**< \brief Pointer to a jmi_func_ad_t struct containing AD information (if compiled with AD support). */
+	int coloring_counter;	/**< \brief Number of times that the graph coloring algorithm  has been performed. */
+	int* coloring_done;		/**< \brief Contains info of which independent_vars that the graph_coloring algorithm has been done. */
+	jmi_color_info** c_info;  /**< \brief Vector of jmi_graph_coloring struct, contains graph coloring results for every independent_vars that has been performed  */
+	
+};
+
+/**
+ * \brief Contains result of a graph coloring.
+ */
+struct jmi_color_info{
+	int* sparse_repr;
+	int* offs;
+	int n_colors;
+	int* map_info;
+	int* map_off;
 };
 
 /**
@@ -923,6 +939,24 @@ int jmi_delete_block_residual(jmi_block_residual_t* b);
 
 int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int index);
 
+/**
+ * \brief Allocates memory for the contents of a jmi_color_info struct
+ *
+ * @param c_info A jmi_color_info struct
+ * @param dF_n_cols, number of columns
+ * @param dF_n_nz, number of non-zeros
+ *
+ * @return Error code
+ */
+int jmi_new_color_info(jmi_color_info** c_info, int dF_n_cols, int dF_n_nz);
+
+/**
+ * \brief Deletes the contents of a jmi_color_info struct
+ *
+ * @param c_i A jmi_color_info struct
+ * @return Error code
+ */
+int jmi_delete_color_info(jmi_color_info *c_i);
 
 /**
  * \brief Allocates a jmi_init_t struct.
@@ -1217,7 +1251,8 @@ struct jmi_t{
 
 	jmi_ad_var_vec_p z;                  /**< \brief  This vector contains active AD objects in case of AD. */
 	jmi_real_t** z_val;                  /**< \brief  This vector contains the actual values. */
-
+	jmi_real_t **dz;					 /**< \brief  This vector is used to store seed-values */
+	
 	jmi_real_t *variable_scaling_factors;             /**< \brief Scaling factors. For convenience the vector has the same size as z but only scaling of reals are used. */
 	int scaling_method;                               /**< \brief Scaling method: JMI_SCALING_NONE, JMI_SCALING_VARIABLES */
 	jmi_block_residual_t** dae_block_residuals;       /**< \brief A vector of function pointers to DAE equation blocks */
