@@ -46,6 +46,7 @@ int kin_f(N_Vector yy, N_Vector ff, void *problem_data){
 	for (i=0;i<n;i++) {
 	  /* Unrecoverable error*/
 	  if (Ith(ff,i)- Ith(ff,i) != 0) return -1;
+	  
 	}
 
 	/*Evaluate the residual*/
@@ -70,18 +71,16 @@ void kin_err(int err_code, const char *module, const char *function, char *msg, 
 	}else if (err_code < 0){ /*Error*/
 		printf("[KINSOL ERROR] ");
 	}
-	printf(function);
+	printf("%s",function);
 	printf(" ");
-	printf(msg);
-	printf("\n");
+	printf("%s\n",msg);
 	
 }
 
 void kin_info(const char *module, const char *function, char *msg, void *eh_data){
 
 	printf("[KINSOL INFO] ");
-	printf(msg);
-	printf("\n");
+	printf("%s\n",msg);
 
 }
 
@@ -196,33 +195,28 @@ int jmi_kinsol_solve(jmi_block_residual_t * block){
 		block->init = 0; /*The block is initialized*/
 
 	}else{
-		/* Initialize the work vector */
-		block->F(block->jmi,block->x,block->res,JMI_BLOCK_INITIALIZE);
-		/*N_VSetArrayPointer(block->x,block->kin_y);*/
 
 		for(i=0;i<block->n;i=i+1){
 		  Ith(block->kin_y,i)=block->x[i];
 		}
 	
-
-		/*Do not initially update the jacobian*/
-		
-		/* 
-		 * Currently not working, setting the "noinitsetup" flag 
-		 * results in a segmentation fault. This must be fixed!
-		 */
-		
-		flag = KINSetNoInitSetup(block->kin_mem, 0);
-		jmi_kinsol_error_handling(flag);
-
 		if(block->dF != NULL){
 			flag = KINDlsSetDenseJacFn(block->kin_mem, kin_dF);
 			jmi_kinsol_error_handling(flag);
 		}
-
+		
+		/* Call Kinsol solver routine */
 		flag = KINSol(block->kin_mem, block->kin_y, KIN_LINESEARCH, block->kin_y_scale, block->kin_f_scale);
-
-		jmi_kinsol_error_handling(flag);
+		
+		/* In the case when the initial guess is a solution (flag ==1) 
+		   it seems as if the  Jacobian has to be reevaluated */
+		if (flag ==1) {
+		  flag = KINSetNoInitSetup(block->kin_mem, 0);
+		  jmi_kinsol_error_handling(flag);
+		} else {
+		  flag = KINSetNoInitSetup(block->kin_mem, 1);
+		  jmi_kinsol_error_handling(flag);
+		}
 
 	}
 	c1 = clock();
