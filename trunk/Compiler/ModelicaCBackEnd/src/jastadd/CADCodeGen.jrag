@@ -795,7 +795,7 @@ aspect CADCodeGen {
 		}
 		str.print("  return 0;\n}\n\n");
 	}
-	
+	/*
 	public void TornEquationBlock.genBlockResidualFunction_CAD(int block_counter, boolean inInit, String indent, PrintStream str) {
 		str.print("static int dae_" + (inInit? "init_": "") + "block_dir_der_"+block_counter+"(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int init) {\n");
 		str.print("  jmi_real_t** res = &residual;\n");
@@ -841,7 +841,7 @@ aspect CADCodeGen {
 		}
 		str.print("  return 0;\n}\n\n");
 	}
-	
+	*/
 	//Methods to handle function calls starts here
 	
 	public void FFunctionCallEquation.genResidual_CAD(int i, String indent, PrintStream str) {
