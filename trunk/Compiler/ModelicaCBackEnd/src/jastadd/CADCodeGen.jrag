@@ -796,6 +796,52 @@ aspect CADCodeGen {
 		str.print("  return 0;\n}\n\n");
 	}
 	
+	public void TornEquationBlock.genBlockResidualFunction_CAD(int block_counter, boolean inInit, String indent, PrintStream str) {
+		str.print("static int dae_" + (inInit? "init_": "") + "block_dir_der_"+block_counter+"(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int init) {\n");
+		str.print("  jmi_real_t** res = &residual;\n");
+		str.print("  jmi_real_t** dF = &dRes;\n");
+		str.print("  jmi_real_t** dz = jmi->dz;\n");
+		str.print("  if (init==JMI_BLOCK_INITIALIZE) {\n");
+		int var_counter = 0;
+		// Loop over all tearing variables and write their value to x	
+		for (FVariable fv : activeVariables()) {
+			str.print("    x["+var_counter+"] = " + fv.name_C() + ";\n");
+			var_counter++;
+		}
+		str.print("  } else if (init==JMI_BLOCK_EVALUATE) {\n");
+		// Loop over all tearing variables and write the values of x to the z vector
+		var_counter = 0;
+		for (FVariable fv : activeVariables()) {
+			str.print("    " + fv.name_C() + " = x["+var_counter+"];\n");
+			str.print("    (*dz)[" + fv.valueReference() + "-jmi->offs_real_dx] = dx[" + var_counter + "];\n");
+			var_counter++;
+		}
+		// m-solved variables, k-tearing (active) variables 
+		
+		//Residual part
+			// Generate explicit assignments y_i=f(y_1,...,y_i-1,t_1,...,t_k)
+			// by looping over all solved equations and write the assignment  
+		for (MatchingPair mp: getSolvedPairs()){
+			mp.getEquation().solution(mp.getFVariable().name(),true).prettyPrint_CAD(str, indent);
+			str.print("    (*dz)[" + mp.getFVariable().valueReference() + "-jmi->offs_real_dx] = ");
+			str.print(mp.getEquation().solution(mp.getFVariable().name(),true).adDerName() + ";\n");
+			str.print(indent + mp.getFVariable().name_C() + " = ");
+			str.print(mp.getEquation().solution(mp.getFVariable().name(),true).adVarName() + ";\n");
+        }
+		
+		int equation_counter = 0;
+		for (FAbstractEquation e : unsolvedEquations()) {
+			e.genResidual_CAD(equation_counter,indent,str);				
+			equation_counter += e.numScalarEquations();
+		}
+		str.print("  } else{\nreturn -1;\n}\n");
+		for (FVariable fv : variables()) {
+			str.print("    (*dz)[" + fv.valueReference() + "-jmi->offs_real_dx] = 0;\n");
+			var_counter++;
+		}
+		str.print("  return 0;\n}\n\n");
+	}
+	
 	//Methods to handle function calls starts here
 	
 	public void FFunctionCallEquation.genResidual_CAD(int i, String indent, PrintStream str) {
