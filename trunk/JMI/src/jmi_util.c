@@ -19,6 +19,17 @@
 
 #include "jmi.h"
 
+int jmi_get_index_from_value_ref(int vref) {
+    /* Translate a ValueReference into variable index in z-vector. */
+    return vref & VREF_INDEX_MASK;
+}
+
+int jmi_get_type_from_value_ref(int vref) {
+    /* Translate a ValueReference into variable type in z-vector. */
+    return vref & VREF_TYPE_MASK;
+}
+
+
 int jmi_dae_directional_FD_dF(jmi_t* jmi, jmi_func_t *func, jmi_real_t *res, jmi_real_t* dF, jmi_real_t* dv) {
 	jmi_real_t h = 0.0001;
 	

@@ -20,6 +20,25 @@
 #ifndef _JMI_UTIL_H
 #define _JMI_UTIL_H
 
+#define VREF_INDEX_MASK 0x0FFFFFFF
+#define VREF_TYPE_MASK 0xF0000000
+
+/**
+ * \brief Translates a value reference into the corresponding index in the z vector.
+ *
+ * @param vref A value reference.
+ * @return Index in z vector.
+ */
+int jmi_get_index_from_value_ref(int vref);
+
+/**
+ * \brief Translates a value reference into the corresponding primitive type.
+ *
+ * @param vref A value reference.
+ * @return Type.
+ */
+int jmi_get_type_from_value_ref(int vref);
+
 /**
  * \brief Evaluates the directional derivative with the Finite Difference method.
  *
