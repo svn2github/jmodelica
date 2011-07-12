@@ -125,6 +125,8 @@
 #define fmiGetStateValueReferences    fmiFullName(_fmiGetStateValueReferences)
 #define fmiTerminate                  fmiFullName(_fmiTerminate)
 
+#define fmiGetJacobian        		  fmiFullName(_fmiGetJacobian)
+#define fmiGetDirectionalDerivative   fmiFullName(_fmiGetDirectionalDerivative)
 
 /* Version number */
 #define fmiVersion "1.0"
@@ -206,5 +208,16 @@
    DllExport fmiStatus fmiGetNominalContinuousStates(fmiComponent c, fmiReal x_nominal[], size_t nx);
    DllExport fmiStatus fmiGetStateValueReferences   (fmiComponent c, fmiValueReference vrx[], size_t nx);
    DllExport fmiStatus fmiTerminate                 (fmiComponent c);
+
+
+/* Experimental functions for evaluation of Jacobians */
+#define FMI_STATES 1
+#define FMI_INPUTS 2
+#define FMI_DERIVATIVES 1
+#define FMI_OUTPUTS 2
+
+   DllExport fmiStatus fmiGetJacobian(fmiComponent c, int independents, int dependents, fmiReal jac[], size_t njac);
+
+   DllExport fmiStatus fmiGetDirectionalDerivative(fmiComponent c, const fmiValueReference z_vref[], size_t nzvr, const fmiValueReference v_vref[], size_t nvvr, fmiReal dz[], const fmiReal dv[]);
 
 #endif /* fmiModelFunctions_h */

@@ -444,6 +444,25 @@ fmiStatus fmi_get_event_indicators(fmiComponent c, fmiReal eventIndicators[], si
     return fmiOK;
 }
 
+fmiStatus fmi_get_jacobian(fmiComponent c, int independents, int dependents, fmiReal jac[], size_t njac) {
+	int i = 0;
+	/* Dummy implementation */
+	for (i=0;i<njac;i++) {
+		jac[i] = i;
+	}
+	return fmiOK;
+}
+
+fmiStatus fmi_get_directional_derivative(fmiComponent c, const fmiValueReference z_vref[], size_t nzvr, const fmiValueReference v_vref[], size_t nvvr, fmiReal dz[], const fmiReal dv[]) {
+	int i = 0;
+	/* Dummy implementation */
+	for (i=0;i<nzvr;i++) {
+		dz[i] = i;
+	}
+	return fmiOK;
+}
+
+
 fmiStatus fmi_get_real(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiReal value[]) {
     /* Get the z vector*/
     jmi_real_t* z = jmi_get_z(((fmi_t *)c)->jmi);

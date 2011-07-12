@@ -622,6 +622,25 @@ class FMUModel(BaseModel):
         self._fmiGetStateValueReferences.restype = self._fmiStatus
         self._fmiGetStateValueReferences.argtypes = [self._fmiComponent, 
             Nct.ndpointer(), C.c_size_t]
+
+        # Experimental Jacobian interface
+        try:
+            self._fmiGetJacobian = self._dll.__getattr__(
+                self._modelname+'_fmiGetJacobian')
+            self._fmiGetJacobian.restype = self._fmiStatus
+            self._fmiGetJacobian.argtypes = [self._fmiComponent, self._fmiInteger,
+                                             self._fmiInteger, Nct.ndpointer(),
+                                             C.c_size_t]
+            self._fmiGetDirectionalDerivative = self._dll.__getattr__(
+                self._modelname+'_fmiGetDirectionalDerivative')
+            self._fmiGetDirectionalDerivative.restype = self._fmiStatus
+            self._fmiGetDirectionalDerivative.argtypes = [self._fmiComponent,
+                                                          Nct.ndpointer(), C.c_size_t,
+                                                          Nct.ndpointer(), C.c_size_t,
+                                                          Nct.ndpointer(), Nct.ndpointer()]
+        except:
+            print "Hepp"
+            pass
             
         #self._fmiExtractDebugInfo = self._dll.__getattr__(
         #self._modelname+'_fmiExtractDebugInfo')      
@@ -895,6 +914,81 @@ class FMUModel(BaseModel):
                 'Failed to get the continuous state reference values.')
             
         return values
+
+
+    def get_jacobian(self, independents, dependents, jac):
+        """
+        Evaluate Jacobian(s) of the ODE.
+
+        This function evaluates one or several of the A, B, C, D Jacobian matrices in the
+        linearized ODE:
+        
+          dx = A*x + B*u
+          y = C*x + D*u
+        
+        where dx are the derivatives, u are the inputs, y are the top level outputs and
+        x are the states. The arguments 'independents' and 'dependents' are used to
+        specify which Jacobian(s) to compute: independents=FMI_STATES and
+        dependents=FMI_DERIVATIVES gives the A matrix, and
+        independents=FMI_STATES|FMI_INPUTS and dependents=FMI_DERIVATIVES|FMI_OUTPUTS
+        gives the A, B, C and D matrices in block matrix form:
+        
+          A  |  B
+          -------
+          C  |  D
+
+        Parameters::
+
+            independents --
+                Should be FMI_STATES and/or FMI_INPUTS.
+
+            dependents --
+                Should be be FMI_DERIVATIVES and/or FMI_OUTPUTS.
+
+            jac --
+                A vector representing a matrix on column major format.
+
+        Example::
+        
+            jac = model.get_jacobian(jmodelica.fmi.FMI_STATES,
+                                     jmodelica.fmi.FMI_DERIVATIVES, jac)
+                
+        Calls the low-level FMI function: fmiGetJacobian
+        """
+        status = self._fmiGetJacobian(
+            self._model, independents, dependents, jac, len(jac))
+        
+        if status != 0:
+            raise FMUException('Failed to evaluate the Jacobian.')
+
+    def get_directional_derivative(self, z_vref, v_vref, dz, dv):
+        """
+        Evaluate directional derivative of the ODE.
+
+        Paramters::
+
+            z_vref --
+                Value references of the directional derivative result vector dz.
+                These are defined by a subset of the derivative and output variable
+                value references.
+
+            v_ref --
+                Value reference of the input seed vector dv. These are defined by a
+                subset of the state and input variable value references.
+
+            dz --
+                Output argument containing the directional derivative vector.
+
+            dv -- Input argument containing the input seed vector.
+                
+        Calls the low-level FMI function: fmiGetDirectionalDerivative
+        """
+        status = self._fmiGetDirectionalDerivative(
+            self._model, z_vref, len(z_vref), v_vref, len(v_vref), dz, dv)
+        
+        if status != 0:
+            raise FMUException('Failed to evaluate the directional derivative.')
+
     
     def _get_version(self):
         """

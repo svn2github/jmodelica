@@ -208,6 +208,60 @@ fmiStatus fmi_event_update(fmiComponent c, fmiBoolean intermediateResults, fmiEv
 /* @} */
 
 /**
+ * \defgroup fmi_jacobians Evaluate FMI Jacobians - experimental
+ */
+
+/* @{ */
+
+/**
+ * \brief Evaluate Jacobian(s) of the ODE.
+ *
+ * This function evaluates one or several of the A, B, C, D Jacobian matrices in the
+ * linearized ODE:
+ *
+ * dx = A*x + B*u
+ * y = C*x + D*u
+ *
+ * where dx are the derivatives, u are the inputs, y are the top level outputs and
+ * x are the states. The arguments 'independents' and 'dependents' are used to
+ * specify which Jacobian(s) to compute: independents=FMI_STATES and
+ * dependents=FMI_DERIVATIVES gives the A matrix, and
+ * independents=FMI_STATES|FMI_INPUTS and dependents=FMI_DERIVATIVES|FMI_OUTPUTS
+ * gives the A, B, C and D matrices in block matrix form:
+ *
+ *    A  |  B
+ *    -------
+ *    C  |  D
+ *
+ * @param c The FMU struct.
+ * @param independents Should be FMI_STATES and/or FMI_INPUTS.
+ * @param dependents Should be be FMI_DERIVATIVES and/or FMI_OUTPUTS.
+ * @param jac A vector representing a matrix on column major format.
+ * @param njac Number of elements in jac.
+ * @return Error code.
+ */
+fmiStatus fmi_get_jacobian(fmiComponent c, const int independents, const int dependents, fmiReal jac[], size_t njac);
+
+/**
+ * \brief Evaluate directional derivative of ODE.
+ *
+ * @param c An FMU instance.
+ * @param z_vref Value references of the directional derivative result vector dz.
+ *               These are defined by a subset of the derivative and output variable
+ *               value references.
+ * @param nzvr Size of z_vref vector.
+ * @param v_ref Value reference of the input seed vector dv. These are defined by a
+ *              subset of the state and input variable value references.
+ * @param nvvr Size of v_vref vector.
+ * @param dz Output argument containing the directional derivative vector.
+ * @param dv Input argument containing the input seed vector.
+ * @return Error code.
+ */
+fmiStatus fmi_get_directional_derivative(fmiComponent c, const fmiValueReference z_vref[], size_t nzvr, const fmiValueReference v_vref[], size_t nvvr, fmiReal dz[], const fmiReal dv[]);
+
+/* @} */
+
+/**
  * \defgroup fmi_access Access variable values.
  *
  * \brief Values are accessed using the value-reference as key through variable type
@@ -313,6 +367,8 @@ fmiStatus fmi_get_string(fmiComponent c, const fmiValueReference vr[], size_t nv
 jmi_t* fmi_get_jmi_t(fmiComponent c);
 
 /* @} */
+
+
 
 /**
  * \defgroup fmi_debug Debugging.
