@@ -780,6 +780,7 @@ struct jmi_block_residual_t {
 	int n;                         /**< \brief The number of unknowns in the equation system */
 	jmi_real_t* x;                 /**< \brief Work vector for the iteration variables */
 	jmi_real_t* dx;				/**< \brief Work vector for the seed vector */
+	jmi_real_t* dv;					/**< \brief Work vector for (dF/dv)*dv */
         int index ;
     jmi_real_t* res;               /**< \brief Work vector for the block residual */
     jmi_real_t* dres;			   /**< \brief Work vector for the directional derivative that corresponds to dx */
@@ -1252,6 +1253,8 @@ struct jmi_t{
 	jmi_ad_var_vec_p z;                  /**< \brief  This vector contains active AD objects in case of AD. */
 	jmi_real_t** z_val;                  /**< \brief  This vector contains the actual values. */
 	jmi_real_t **dz;					 /**< \brief  This vector is used to store seed-values */
+	jmi_real_t **dv;					 /**< \brief  This vector is used to store calculated or known dv */
+	int dv_flag;						  /**< \brief  If 0, calculate jacobian, if 1 calculate (dF/dv)*dv */
 	
 	jmi_real_t *variable_scaling_factors;             /**< \brief Scaling factors. For convenience the vector has the same size as z but only scaling of reals are used. */
 	int scaling_method;                               /**< \brief Scaling method: JMI_SCALING_NONE, JMI_SCALING_VARIABLES */

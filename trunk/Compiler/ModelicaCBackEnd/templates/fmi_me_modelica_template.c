@@ -173,6 +173,11 @@ static int model_ode_derivatives(jmi_t* jmi) {
   return 0;
 }
 
+static int model_ode_derivatives_dir_der(jmi_t* jmi, jmi_ad_var_vec_p df, jmi_ad_var_vec_p dv) {
+  $CAD_ode_derivatives$
+  return 0;
+}
+
 static int model_ode_outputs(jmi_t* jmi) {
   $C_ode_outputs$
   return 0;
@@ -185,6 +190,11 @@ static int model_ode_guards_init(jmi_t* jmi) {
 
 static int model_ode_initialize(jmi_t* jmi) {
   $C_ode_initialization$
+  return 0;
+}
+
+static int model_ode_initialize_dir_der(jmi_t* jmi,  jmi_ad_var_vec_p df, jmi_ad_var_vec_p dv) {
+  $CAD_ode_initialization$
   return 0;
 }
 

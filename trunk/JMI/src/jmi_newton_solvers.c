@@ -155,10 +155,10 @@ int jmi_kinsol_solve(jmi_block_residual_t * block){
 		flag = KINSetUserData(block->kin_mem, block);
 		jmi_kinsol_error_handling(flag);
 		
-		/*if(block->dF != NULL){
+		if(block->dF != NULL){
 			flag = KINDlsSetDenseJacFn(block->kin_mem, kin_dF);
 			jmi_kinsol_error_handling(flag);
-		}*/
+		}
 		
 		/*Stopping tolerance of F*/
 		flag = KINSetFuncNormTol(block->kin_mem, block->kin_ftol); 

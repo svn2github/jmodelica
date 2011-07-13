@@ -9,11 +9,11 @@ model CADsin
          template="$C_DAE_equation_directional_derivative$",
          generatedCode="
 jmi_ad_var_t v_0 = sin(_x1_1);
-jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx] * cos(_x1_1);
+jmi_ad_var_t d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * cos(_x1_1);
 (*res)[0] = v_0 - _y_0;
-(*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
+(*dF)[0] = d_0 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
 (*res)[1] = 1 - _x1_1;
-(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[1-jmi->offs_real_dx];
+(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
 ")})));
 
 	Real y;
@@ -32,13 +32,12 @@ model CADcos
          template="$C_DAE_equation_directional_derivative$",
          generatedCode="
 jmi_ad_var_t v_0 = cos(_x1_1);
-jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx] * -sin(_x1_1);
+jmi_ad_var_t d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * -sin(_x1_1);
 (*res)[0] = v_0 - _y_0;
-(*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
+(*dF)[0] = d_0 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
 (*res)[1] = 1 - _x1_1;
-(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[1-jmi->offs_real_dx];
+(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
 ")})));
-
 
   Real y;
   Real x1(start=1.5); 
@@ -56,14 +55,14 @@ model CADtan
          template="$C_DAE_equation_directional_derivative$",
          generatedCode="
 jmi_ad_var_t v_0 = tan(_x1_1);
-jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx] * 1/(cos(_x1_1)*cos(_x1_1));
+jmi_ad_var_t d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * 1/(cos(_x1_1)*cos(_x1_1));
 (*res)[0] = v_0 - _y_0;
-(*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
+(*dF)[0] = d_0 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
 (*res)[1] = 1 - _x1_1;
-(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[1-jmi->offs_real_dx];
+(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
 ")})));
 
- 	Real y;
+	Real y;
 	Real x1(start=1.5);
 equation
 	y = tan(x1);
@@ -79,11 +78,11 @@ model CADasin
          template="$C_DAE_equation_directional_derivative$",
          generatedCode="
 jmi_ad_var_t v_0 = asin(_x1_1);
-jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx] * 1/(sqrt(1 -_x1_1*_x1_1));
+jmi_ad_var_t d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * 1/(sqrt(1 -_x1_1*_x1_1));
 (*res)[0] = v_0 - _y_0;
-(*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
+(*dF)[0] = d_0 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
 (*res)[1] = 1 - _x1_1;
-(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[1-jmi->offs_real_dx];
+(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
 ")})));
 
 
@@ -103,11 +102,11 @@ model CADacos
          template="$C_DAE_equation_directional_derivative$",
          generatedCode="
 jmi_ad_var_t v_0 = acos(_x1_1);
-jmi_ad_var_t d_0 = -(*dz)[1-jmi->offs_real_dx] * 1/(sqrt(1 -_x1_1*_x1_1));
+jmi_ad_var_t d_0 = -(*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * 1/(sqrt(1 -_x1_1*_x1_1));
 (*res)[0] = v_0 - _y_0;
-(*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
+(*dF)[0] = d_0 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
 (*res)[1] = 1 - _x1_1;
-(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[1-jmi->offs_real_dx];
+(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
 ")})));
 
 
@@ -127,11 +126,11 @@ model CADatan
          template="$C_DAE_equation_directional_derivative$",
          generatedCode="
 jmi_ad_var_t v_0 = atan(_x1_1);
-jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx] * 1/(1 +_x1_1*_x1_1);
+jmi_ad_var_t d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * 1/(1 +_x1_1*_x1_1);
 (*res)[0] = v_0 - _y_0;
-(*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
+(*dF)[0] = d_0 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
 (*res)[1] = 1 - _x1_1;
-(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[1-jmi->offs_real_dx];
+(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
 ")})));
 
 
@@ -151,15 +150,15 @@ model CADatan2
          template="$C_DAE_equation_directional_derivative$",
          generatedCode="
 jmi_ad_var_t v_0 = atan2(_x1_1,_x2_2);
-jmi_ad_var_t d_0 = ((*dz)[1-jmi->offs_real_dx] * _x2_2 - _x1_1 * (*dz)[2-jmi->offs_real_dx] ) / ( _x2_2*_x2_2 + _x1_1*_x1_1);
+jmi_ad_var_t d_0 = ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * _x2_2 - _x1_1 * (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] ) / ( _x2_2*_x2_2 + _x1_1*_x1_1);
 (*res)[0] = v_0 - _y_0;
-(*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
+(*dF)[0] = d_0 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
 (*res)[1] = 1 - _x1_1;
-(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[1-jmi->offs_real_dx];
+(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
 jmi_ad_var_t v_1 = -1.5;
 jmi_ad_var_t d_1 = -AD_WRAP_LITERAL(0);
 (*res)[2] = v_1 - _x2_2;
-(*dF)[2] = d_1 - (*dz)[2-jmi->offs_real_dx];
+(*dF)[2] = d_1 - (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
 ")})));
 
 
@@ -181,11 +180,11 @@ model CADsinh
          template="$C_DAE_equation_directional_derivative$",
          generatedCode="
 jmi_ad_var_t v_0 = sinh(_x1_1);
-jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx] * cosh(_x1_1);
+jmi_ad_var_t d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * cosh(_x1_1);
 (*res)[0] = v_0 - _y_0;
-(*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
+(*dF)[0] = d_0 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
 (*res)[1] = 1 - _x1_1;
-(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[1-jmi->offs_real_dx];
+(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
 ")})));
 
 
@@ -205,11 +204,11 @@ model CADcosh
          template="$C_DAE_equation_directional_derivative$",
          generatedCode="
 jmi_ad_var_t v_0 = cosh(_x1_1);
-jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx] * sinh(_x1_1);
+jmi_ad_var_t d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * sinh(_x1_1);
 (*res)[0] = v_0 - _y_0;
-(*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
+(*dF)[0] = d_0 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
 (*res)[1] = 1 - _x1_1;
-(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[1-jmi->offs_real_dx];
+(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
 ")})));
 
 
@@ -229,12 +228,13 @@ model CADtanh
          template="$C_DAE_equation_directional_derivative$",
          generatedCode="
 jmi_ad_var_t v_0 = tanh(_x1_1);
-jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx] * (1 - tanh(_x1_1) * tanh(_x1_1));
+jmi_ad_var_t d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * (1 - tanh(_x1_1) * tanh(_x1_1));
 (*res)[0] = v_0 - _y_0;
-(*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
+(*dF)[0] = d_0 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
 (*res)[1] = 1 - _x1_1;
-(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[1-jmi->offs_real_dx];
+(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
 ")})));
+
 
 
 	Real y;
@@ -253,12 +253,13 @@ model CADexp
          template="$C_DAE_equation_directional_derivative$",
          generatedCode="
 jmi_ad_var_t v_0 = exp(_x1_1);
-jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx] * exp(_x1_1);
+jmi_ad_var_t d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * exp(_x1_1);
 (*res)[0] = v_0 - _y_0;
-(*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
+(*dF)[0] = d_0 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
 (*res)[1] = 1 - _x1_1;
-(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[1-jmi->offs_real_dx];
+(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
 ")})));
+
 
 
 	Real y;
@@ -277,12 +278,13 @@ model CADlog
          template="$C_DAE_equation_directional_derivative$",
          generatedCode="
 jmi_ad_var_t v_0 = log(_x1_1);
-jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx] * 1/(_x1_1);
+jmi_ad_var_t d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * 1/(_x1_1);
 (*res)[0] = v_0 - _y_0;
-(*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
+(*dF)[0] = d_0 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
 (*res)[1] = 2 - _x1_1;
-(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[1-jmi->offs_real_dx];
+(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
 ")})));
+
 
 
 	Real y;
@@ -301,12 +303,13 @@ model CADlog10
          template="$C_DAE_equation_directional_derivative$",
          generatedCode="
 jmi_ad_var_t v_0 = log10(_x1_1);
-jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx] * log10(exp(1))*1/(_x1_1);
+jmi_ad_var_t d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * log10(exp(1))*1/(_x1_1);
 (*res)[0] = v_0 - _y_0;
-(*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
+(*dF)[0] = d_0 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
 (*res)[1] = 1 - _x1_1;
-(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[1-jmi->offs_real_dx];
+(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
 ")})));
+
 
 
 	Real y;
@@ -325,12 +328,13 @@ model CADsqrt
          template="$C_DAE_equation_directional_derivative$",
          generatedCode="
 jmi_ad_var_t v_0 = sqrt(_x1_1);
-jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx] * 1/(2*sqrt(_x1_1));
+jmi_ad_var_t d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * 1/(2*sqrt(_x1_1));
 (*res)[0] = v_0 - _y_0;
-(*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
+(*dF)[0] = d_0 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
 (*res)[1] = 2 - _x1_1;
-(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[1-jmi->offs_real_dx];
+(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
 ")})));
+
 
 
  	Real y;
@@ -349,14 +353,16 @@ model CADadd
          template="$C_DAE_equation_directional_derivative$",
          generatedCode="
 jmi_ad_var_t v_0 = _x1_1 + _x2_2;
-jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx] + (*dz)[2-jmi->offs_real_dx];
+jmi_ad_var_t d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] + (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
 (*res)[0] = v_0 - _y_0;
-(*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
+(*dF)[0] = d_0 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
 (*res)[1] = 1 - _x1_1;
-(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[1-jmi->offs_real_dx];
+(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
 (*res)[2] = 3 - _x2_2;
-(*dF)[2] = AD_WRAP_LITERAL(0) - (*dz)[2-jmi->offs_real_dx];
+(*dF)[2] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
 ")})));
+
+
 
 
 	Real y;
@@ -377,14 +383,16 @@ model CADsub
          template="$C_DAE_equation_directional_derivative$",
          generatedCode="
 jmi_ad_var_t v_0 = _x1_1 - _x2_2;
-jmi_ad_var_t d_0 = (*dz)[1-jmi->offs_real_dx] - (*dz)[2-jmi->offs_real_dx];
+jmi_ad_var_t d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] - (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
 (*res)[0] = v_0 - _y_0;
-(*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
+(*dF)[0] = d_0 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
 (*res)[1] = 1 - _x1_1;
-(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[1-jmi->offs_real_dx];
+(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
 (*res)[2] = 3 - _x2_2;
-(*dF)[2] = AD_WRAP_LITERAL(0) - (*dz)[2-jmi->offs_real_dx];
+(*dF)[2] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
 ")})));
+
+
 
 
 	Real y;
@@ -405,14 +413,16 @@ model CADmul
          template="$C_DAE_equation_directional_derivative$",
          generatedCode="
 jmi_ad_var_t v_0 = _x1_1 * _x2_2;
-jmi_ad_var_t d_0 = ((*dz)[1-jmi->offs_real_dx] * _x2_2 + _x1_1 * (*dz)[2-jmi->offs_real_dx]);
+jmi_ad_var_t d_0 = ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * _x2_2 + _x1_1 * (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx]);
 (*res)[0] = v_0 - _y_0;
-(*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
+(*dF)[0] = d_0 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
 (*res)[1] = 1 - _x1_1;
-(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[1-jmi->offs_real_dx];
+(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
 (*res)[2] = 3 - _x2_2;
-(*dF)[2] = AD_WRAP_LITERAL(0) - (*dz)[2-jmi->offs_real_dx];
+(*dF)[2] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
 ")})));
+
+
 
 
 	Real y;
@@ -433,14 +443,16 @@ model CADdiv
          template="$C_DAE_equation_directional_derivative$",
          generatedCode="
 jmi_ad_var_t v_0 = _x1_1 / _x2_2;
-jmi_ad_var_t d_0 = ((*dz)[1-jmi->offs_real_dx] * _x2_2 - _x1_1 * (*dz)[2-jmi->offs_real_dx] ) / ( _x2_2 * _x2_2);
+jmi_ad_var_t d_0 = ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * _x2_2 - _x1_1 * (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] ) / ( _x2_2 * _x2_2);
 (*res)[0] = v_0 - _y_0;
-(*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
+(*dF)[0] = d_0 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
 (*res)[1] = 1 - _x1_1;
-(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[1-jmi->offs_real_dx];
+(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
 (*res)[2] = 3 - _x2_2;
-(*dF)[2] = AD_WRAP_LITERAL(0) - (*dz)[2-jmi->offs_real_dx];
+(*dF)[2] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
 ")})));
+
+
 
 
 	Real y;
@@ -465,15 +477,17 @@ jmi_ad_var_t d_0;
 if(_x1_1== 0){
 d_0=0;
 } else{
-d_0 = v_0 * ((*dz)[2-jmi->offs_real_dx] * log(jmi_abs(_x1_1)) + _x2_2 * (*dz)[1-jmi->offs_real_dx] / _x1_1);
+d_0 = v_0 * ((*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] * log(jmi_abs(_x1_1)) + _x2_2 * (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] / _x1_1);
 }
 (*res)[0] = v_0 - _y_0;
-(*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
+(*dF)[0] = d_0 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
 (*res)[1] = 2 - _x1_1;
-(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[1-jmi->offs_real_dx];
+(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
 (*res)[2] = 3 - _x2_2;
-(*dF)[2] = AD_WRAP_LITERAL(0) - (*dz)[2-jmi->offs_real_dx];
+(*dF)[2] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
 ")})));
+
+
 
 
 	Real y;
@@ -496,17 +510,19 @@ model CADabs
 jmi_ad_var_t v_0 = jmi_abs(_x1_1);
 jmi_ad_var_t d_0;
 if(_x1_1 < 0){
-    d_0 = -(*dz)[1-jmi->offs_real_dx];
+    d_0 = -(*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
 }else {
-    d_0 = (*dz)[1-jmi->offs_real_dx];
+    d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
 }
 (*res)[0] = v_0 - _y_0;
-(*dF)[0] = d_0 - (*dz)[0-jmi->offs_real_dx];
+(*dF)[0] = d_0 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
 jmi_ad_var_t v_1 = -1;
 jmi_ad_var_t d_1 = -AD_WRAP_LITERAL(0);
 (*res)[1] = v_1 - _x1_1;
-(*dF)[1] = d_1 - (*dz)[1-jmi->offs_real_dx];
+(*dF)[1] = d_1 - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
 ")})));
+
+
 
 
 	Real y;
@@ -541,7 +557,7 @@ jmi_ad_var_t d_6= (COND_EXP_EQ(COND_EXP_LE(_time, jmi_divide(AD_WRAP_LITERAL(3.1
 jmi_ad_var_t v_7 = v_6;
 jmi_ad_var_t d_7 = d_6;
 jmi_ad_var_t v_8 = AD_WRAP_LITERAL(3) * _x_0;
-jmi_ad_var_t d_8 = (AD_WRAP_LITERAL(0) * _x_0 + AD_WRAP_LITERAL(3) * (*dz)[1-jmi->offs_real_dx]);
+jmi_ad_var_t d_8 = (AD_WRAP_LITERAL(0) * _x_0 + AD_WRAP_LITERAL(3) * (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
 jmi_ad_var_t v_9 = sin(v_8);
 jmi_ad_var_t d_9 = d_8 * cos(v_8);
 jmi_ad_var_t v_10 = v_9;
@@ -549,9 +565,9 @@ jmi_ad_var_t d_10 = d_9;
 jmi_ad_var_t v_11= (COND_EXP_EQ(_sw(0),JMI_TRUE,v_7,v_10));
 jmi_ad_var_t d_11= (COND_EXP_EQ(_sw(0),JMI_TRUE,d_7,d_10));
 (*res)[0] = v_11 - _u_1;
-(*dF)[0] = d_11 - (*dz)[2-jmi->offs_real_dx];
+(*dF)[0] = d_11 - (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
 (*res)[1] = _u_1 - _der_x_2;
-(*dF)[1] = (*dz)[2-jmi->offs_real_dx] - (*dz)[0-jmi->offs_real_dx];
+(*dF)[1] = (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
 ")})));
 
 
@@ -586,9 +602,9 @@ jmi_ad_var_t d_5 = d_4 * cos(v_4);
 jmi_ad_var_t v_6= (COND_EXP_EQ(_sw(0),JMI_TRUE,v_1,(COND_EXP_EQ(_sw(1),JMI_TRUE,AD_WRAP_LITERAL(1),v_5))));
 jmi_ad_var_t d_6= (COND_EXP_EQ(_sw(0),JMI_TRUE,d_1,(COND_EXP_EQ(_sw(1),JMI_TRUE,AD_WRAP_LITERAL(0),d_5))));
 (*res)[0] = v_6 - _u_1;
-(*dF)[0] = d_6 - (*dz)[2-jmi->offs_real_dx];
+(*dF)[0] = d_6 - (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
 (*res)[1] = _u_1 - _der_x_2;
-(*dF)[1] = (*dz)[2-jmi->offs_real_dx] - (*dz)[0-jmi->offs_real_dx];
+(*dF)[1] = (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
 ")})));
 
 Real x,u;

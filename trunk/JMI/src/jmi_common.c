@@ -1018,6 +1018,7 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_r
 	b->index = index ;
 	b->x = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
 	b->dx = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
+	b->dv = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
 	b->res = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
 	b->dres = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
 	b->jac = (jmi_real_t*)calloc(n*n,sizeof(jmi_real_t));
@@ -1037,6 +1038,7 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_r
 int jmi_delete_block_residual(jmi_block_residual_t* b){
 	free(b->x);
 	free(b->dx);
+	free(b->dv);
 	free(b->res);
 	free(b->dres);
 	free(b->jac);

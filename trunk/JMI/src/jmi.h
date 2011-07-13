@@ -364,6 +364,8 @@ extern "C" {
 /** \brief */
 #define JMI_BLOCK_INITIALIZE 0
 #define JMI_BLOCK_EVALUATE 1
+#define JMI_BLOCK_EVALUATE_INACTIVE 2
+#define JMI_BLOCK_WRITE_BACK 4
 
 /* @} */
 
