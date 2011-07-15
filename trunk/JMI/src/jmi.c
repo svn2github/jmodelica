@@ -417,6 +417,18 @@ int jmi_ode_derivatives(jmi_t* jmi) {
 	return return_status;
 }
 
+int jmi_ode_derivatives_dir_der(jmi_t* jmi, jmi_real_t* dv) {
+
+	int i, return_status;
+	for (i=0;i<jmi->n_z;i++) {
+		(*(jmi->z))[i] = (*(jmi->z_val))[i];
+	}
+
+	return_status = jmi->dae->ode_derivatives_dir_der(jmi, dv);
+
+	return return_status;
+}
+
 int jmi_ode_outputs(jmi_t* jmi) {
 
 	int i, return_status;

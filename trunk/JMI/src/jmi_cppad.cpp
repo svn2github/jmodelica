@@ -1004,6 +1004,10 @@ int jmi_ode_derivatives(jmi_t* jmi) {
 	return 0;
 }
 
+int jmi_ode_derivatives_dir_der(jmi_t* jmi, jmi_real_t* dv) {
+	return 0;
+}
+
 int jmi_ode_outputs(jmi_t* jmi) {
 	return 0;
 }

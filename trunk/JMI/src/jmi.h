@@ -987,6 +987,15 @@ int jmi_ode_df_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars,
 int jmi_ode_derivatives(jmi_t* jmi);
 
 /**
+ * \brief Evaluate the ODE directional derivatives.
+ *
+ * @param jmi A jmi_t struct.
+ * @param dv The seed vector.
+ * @return Error code.
+ */
+int jmi_ode_derivatives_dir_der(jmi_t* jmi, jmi_real_t* dv);
+
+/**
  * \brief Evaluate the ODE outputs.
  *
  * @param jmi A jmi_t struct.

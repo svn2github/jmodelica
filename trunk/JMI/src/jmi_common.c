@@ -917,6 +917,7 @@ int jmi_dae_init(jmi_t* jmi,
 		jmi_residual_func_t R, int n_eq_R, jmi_jacobian_func_t dR,
 		int dR_n_nz, int* dR_row, int* dR_col,
         jmi_generic_func_t ode_derivatives,
+        jmi_ode_derivatives_dir_der_func_t ode_derivatives_dir_der,
         jmi_generic_func_t ode_outputs,
         jmi_generic_func_t ode_initialize,
         jmi_generic_func_t ode_guards,
@@ -940,6 +941,7 @@ int jmi_dae_init(jmi_t* jmi,
 	
 
 	jmi->dae->ode_derivatives = ode_derivatives;
+	jmi->dae->ode_derivatives_dir_der = ode_derivatives_dir_der;
 	jmi->dae->ode_outputs = ode_outputs;
 	jmi->dae->ode_initialize = ode_initialize;
     jmi->dae->ode_guards = ode_guards;

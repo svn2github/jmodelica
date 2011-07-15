@@ -391,6 +391,16 @@ typedef int (*jmi_block_dir_der_func_t)(jmi_t* jmi, jmi_real_t* x,
 		 jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int init);
 
 /**
+ * \brief Function signature for evaluation of a directional derivatives for a
+ * block function in the generated code.
+ *
+ * @param jmi A jmi_t struct.
+ * *** DOCUMENT ***
+ * @return Error code.
+ */
+typedef int (*jmi_ode_derivatives_dir_der_func_t)(jmi_t* jmi, jmi_ad_var_vec_p dv);
+
+/**
  * \brief Evaluation of symbolic jacobian of a residual function in
  * generated code.
  *
@@ -894,8 +904,9 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
  * @param dR_row Row indices of the non-zeros in the symbolic Jacobain.
  * @param dR_col Column indices of the non-zeros in the symbolic Jacobain.
  * @param ode_derivatives A function pointer to the ODE RHS function.
- * @param ode_derivatives A function pointer to the ODE output function.
- * @param ode_derivatives A function pointer to the ODE initialization function.
+ * @param ode_derivatives_dir_der A function pointer to the ODE directional derivative function.
+ * @param ode_outputs A function pointer to the ODE output function.
+ * @param ode_initialize A function pointer to the ODE initialization function.
  * @param ode_guards A function pointer for evaluating the guard expressions.
  * @param ode_guards_init A function pointer for evaluating the guard expressions.
  *        in the initial equations.
@@ -908,6 +919,7 @@ int jmi_dae_init(jmi_t* jmi, jmi_residual_func_t F, int n_eq_F,
         jmi_residual_func_t R, int n_eq_R,
         jmi_jacobian_func_t dR, int dR_n_nz, int* dR_row, int* dR_col,
         jmi_generic_func_t ode_derivatives,
+        jmi_ode_derivatives_dir_der_func_t ode_derivatives_dir_der,
         jmi_generic_func_t ode_outputs,
         jmi_generic_func_t ode_initialize,
         jmi_generic_func_t ode_guards,
@@ -1301,6 +1313,7 @@ struct jmi_dae_t{
 	jmi_func_t* F;                           /**< \brief  A jmi_func_t struct representing the DAE residual \f$F\f$. */
 	jmi_func_t* R;                           /**< \brief  A jmi_func_t struct representing the DAE event indicator function \f$R\f$. */
     jmi_generic_func_t ode_derivatives;      /**< \brief A function pointer to a function for evaluating the ODE derivatives. */
+    jmi_ode_derivatives_dir_der_func_t ode_derivatives_dir_der;      /**< \brief A function pointer to a function for evaluating the ODE directional derivative. */
     jmi_generic_func_t ode_outputs;          /**< \brief A function pointer to a function for evaluating the ODE outputs. */
     jmi_generic_func_t ode_initialize;       /**< \brief A function pointer to a function for initializing the ODE. */
     jmi_generic_func_t ode_guards;           /**< A function pointer for evaluating the guard expressions. */

@@ -3065,6 +3065,10 @@ class JMIModel(object):
                                             ct.POINTER(ct.c_int)]    
 
         self._dll.jmi_ode_derivatives.argtypes = [ct.c_void_p]
+        self._dll.jmi_ode_derivatives_dir_der.argtypes = [ct.c_void_p,
+                                                  Nct.ndpointer(dtype=c_jmi_real_t,
+                                                           ndim=1,
+                                                           flags='C')]
         self._dll.jmi_ode_outputs.argtypes = [ct.c_void_p]
         self._dll.jmi_ode_initialize.argtypes = [ct.c_void_p]
         self._dll.jmi_ode_guards.argtypes = [ct.c_void_p]
@@ -4295,6 +4299,18 @@ class JMIModel(object):
         """
         if self._dll.jmi_ode_derivatives(self._jmi) is not 0:
             raise JMIException("Evaluation of ODE derivatives failed")
+
+    def ode_derivatives_dir_der(self, dv):
+        """ 
+        Compute the directional derivative of the ODE.
+
+        Parameters::
+        
+            dv --
+                The seed vector
+        """
+        if self._dll.jmi_ode_derivatives_dir_der(self._jmi, dv) is not 0:
+            raise JMIException("Evaluation of the ODE directional derivatives failed")
 
     def ode_outputs(self):
         """ 

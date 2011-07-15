@@ -173,7 +173,7 @@ static int model_ode_derivatives(jmi_t* jmi) {
   return 0;
 }
 
-static int model_ode_derivatives_dir_der(jmi_t* jmi, jmi_ad_var_vec_p df, jmi_ad_var_vec_p dv) {
+static int model_ode_derivatives_dir_der(jmi_t* jmi, jmi_ad_var_vec_p dv) {
   $CAD_ode_derivatives$
   return 0;
 }
@@ -193,7 +193,7 @@ static int model_ode_initialize(jmi_t* jmi) {
   return 0;
 }
 
-static int model_ode_initialize_dir_der(jmi_t* jmi,  jmi_ad_var_vec_p df, jmi_ad_var_vec_p dv) {
+static int model_ode_initialize_dir_der(jmi_t* jmi,  jmi_ad_var_vec_p dv) {
   $CAD_ode_initialization$
   return 0;
 }
@@ -302,6 +302,7 @@ int jmi_new(jmi_t** jmi) {
                      *model_dae_dir_dF,
 		     CAD_dae_n_nz,(int (*))CAD_dae_nz_rows,(int (*))CAD_dae_nz_cols,
 		     *model_dae_R, N_eq_R, NULL, 0, NULL, NULL,*model_ode_derivatives,
+		     	 *model_ode_derivatives_dir_der,
                      *model_ode_outputs,*model_ode_initialize,*model_ode_guards,
                      *model_ode_guards_init,*model_ode_next_time_event);
 
