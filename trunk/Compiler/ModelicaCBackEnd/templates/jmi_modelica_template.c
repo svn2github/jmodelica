@@ -169,7 +169,7 @@ static int model_ode_derivatives(jmi_t* jmi) {
   return 0;
 }
 
-static int model_ode_derivatives_dir_der(jmi_t* jmi, jmi_ad_var_vec_p dv) {
+static int model_ode_derivatives_dir_der(jmi_t* jmi) {
   $CAD_ode_derivatives$
   return 0;
 }

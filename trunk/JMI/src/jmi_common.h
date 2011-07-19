@@ -398,7 +398,7 @@ typedef int (*jmi_block_dir_der_func_t)(jmi_t* jmi, jmi_real_t* x,
  * *** DOCUMENT ***
  * @return Error code.
  */
-typedef int (*jmi_ode_derivatives_dir_der_func_t)(jmi_t* jmi, jmi_ad_var_vec_p dv);
+typedef int (*jmi_ode_derivatives_dir_der_func_t)(jmi_t* jmi);
 
 /**
  * \brief Evaluation of symbolic jacobian of a residual function in
@@ -1264,9 +1264,9 @@ struct jmi_t{
 
 	jmi_ad_var_vec_p z;                  /**< \brief  This vector contains active AD objects in case of AD. */
 	jmi_real_t** z_val;                  /**< \brief  This vector contains the actual values. */
-	jmi_real_t **dz;					 /**< \brief  This vector is used to store seed-values */
-	jmi_real_t **dv;					 /**< \brief  This vector is used to store calculated or known dv */
-	int dv_flag;						  /**< \brief  If 0, calculate jacobian, if 1 calculate (dF/dv)*dv */
+	jmi_real_t **dz;					 /**< \brief  This vector is used to store calculated directional derivatives */
+	jmi_real_t **dz_seed;				 /**< \brief  This vector is used to store seed-values for unknown block jacobians */
+	jmi_real_t **dv;					 /**< \brief  This vector is used to store seed-values for known equations */
 	
 	jmi_real_t *variable_scaling_factors;             /**< \brief Scaling factors. For convenience the vector has the same size as z but only scaling of reals are used. */
 	int scaling_method;                               /**< \brief Scaling method: JMI_SCALING_NONE, JMI_SCALING_VARIABLES */
