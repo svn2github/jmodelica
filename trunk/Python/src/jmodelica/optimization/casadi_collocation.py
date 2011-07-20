@@ -51,15 +51,35 @@ class CasadiCollocator(object):
         # Compute bounds
         self._compute_bounds_and_init()
         
-        # Create Solver
-        self.c = self.get_equality_constraint()+self.get_inequality_constraint()
-        self.c_fcn = casadi.SXFunction([self.get_xx()],[self.c])
-        self.c_fcn.setOption("name","NLP constraint function")
+        # Get constraints
+        c_e = self.get_equality_constraint()
+        if c_e.numel() == 0:
+            c_e = []
+        c_i = self.get_inequality_constraint()
+        if c_i.numel() == 0:
+            c_i = []
         
-        if self.get_hessian() == None:
-            self.solver = casadi.IpoptSolver(self.get_cost(),self.c_fcn)
+        # Create constraint function
+        c = casadi.vertcat([c_e, c_i])
+        if self.graph == 'MX' or self.graph == 'expanded_MX':
+            self.c_fcn = casadi.MXFunction([self.get_xx()], [c])
+        elif self.graph == 'SX':
+            self.c_fcn = casadi.SXFunction([self.get_xx()], [c])
         else:
-            self.solver = casadi.IpoptSolver(self.get_cost(),self.c_fcn, self.get_hessian())
+            raise ValueError('Unknown CasADi graph %s.' % self.graph)
+        self.c_fcn.setOption("name", "NLP constraint function")
+        self.c_fcn.init()
+        
+        # Expand constraint function
+        if self.graph == 'expanded_MX':
+            self.c_fcn.expand()
+        
+        # Create Solver
+        if self.get_hessian() == None:
+            self.solver = casadi.IpoptSolver(self.get_cost(), self.c_fcn)
+        else:
+            self.solver = casadi.IpoptSolver(self.get_cost(), self.c_fcn,
+                                             self.get_hessian())
         
     def get_model(self):
         return self.model
@@ -79,6 +99,9 @@ class CasadiCollocator(object):
     def get_xx(self):
         return self.xx
         
+    def get_n_xx(self):
+        return self.n_xx
+        
     def get_xx_lb(self):
         return self.xx_lb
         
@@ -95,7 +118,12 @@ class CasadiCollocator(object):
         """
         Get the inequality constraint g(x) <= 0.0
         """
-        return []
+        if self.graph == 'MX' or self.graph == 'expanded_MX':
+            return casadi.MX(0, 0) # Change this to casadi.MX() once https://sourceforge.net/apps/trac/casadi/ticket/180 is finished
+        elif self.graph == 'SX':
+            return casadi.SXMatrix()
+        else:
+            raise ValueError('Unknown CasADi graph %s.' % self.graph)
         
     def get_constraint_fcn(self):
         """
@@ -107,7 +135,12 @@ class CasadiCollocator(object):
         """
         Get the equality constraint h(x) = 0.0
         """
-        return []
+        if self.graph == 'MX' or self.graph == 'expanded_MX':
+            return casadi.MX(0, 0) # Change this to casadi.MX() once https://sourceforge.net/apps/trac/casadi/ticket/180 is finished
+        elif self.graph == 'SX':
+            return casadi.SXMatrix()
+        else:
+            raise ValueError('Unknown CasADi graph %s.' % self.graph)
         
     def set_ipopt_option(self, k, v):
         """
@@ -400,13 +433,13 @@ class CasadiCollocator(object):
         self.solver.setInput(self.get_xx_ub(),casadi.NLP_UBX)
         
         # Bounds on the constraints
-        h = self.get_equality_constraint()
-        hublb = len(h)*[0]
-        g = self.get_inequality_constraint()
-        gub = len(g)*[0]
-        glb = len(g)*[self.LOWER]
-        self.glub = hublb+gub
-        self.gllb = hublb+glb
+        n_h = self.get_equality_constraint().numel()
+        hublb = n_h * [0]
+        n_g = self.get_inequality_constraint().numel()
+        gub = n_g * [0]
+        glb = n_g * [self.LOWER]
+        self.glub = hublb + gub
+        self.gllb = hublb + glb
         
         self.solver.setInput(self.gllb,casadi.NLP_LBG)
         self.solver.setInput(self.glub,casadi.NLP_UBG)
@@ -432,9 +465,9 @@ class CasadiCollocator(object):
     
     def _compute_bounds_and_init(self):
         # Create lower and upper bounds
-        nlp_lb = self.LOWER*N.ones(len(self.get_xx()))
-        nlp_ub = self.UPPER*N.ones(len(self.get_xx()))
-        nlp_init = N.zeros(len(self.get_xx()))
+        nlp_lb = self.LOWER * N.ones(self.get_n_xx())
+        nlp_ub = self.UPPER * N.ones(self.get_n_xx())
+        nlp_init = N.zeros(self.get_n_xx())
         
         md = self.get_model_description()
 
@@ -563,6 +596,7 @@ class RadauCollocator(CasadiCollocator):
         self.parameter_estimation_data = options['parameter_estimation_data']
         self.n_e = options['n_e']
         self.n_cp = options['n_cp']
+        self.graph = options['graph']
         self.h = N.ones(self.n_e)/self.n_e;
 
         self.initial_dae_constraints = []
@@ -642,6 +676,7 @@ class RadauCollocator(CasadiCollocator):
                 self.xx += self.vars[i][k]['w']
                 self.var_indices[i][k]['w'] = N.arange(pre_len,len(self.xx),dtype=int)
         
+        self.n_xx = len(self.xx)
         
     def _create_collocation_constraints(self):
         
@@ -664,7 +699,7 @@ class RadauCollocator(CasadiCollocator):
         z += self.vars[1][0]['w']
         #z += [xmlocp.var.t.sx()]
         z += [casadi.SX(t)]
-                
+        
         [tmp] = self.model.get_init_F0().eval([z])
         self.g += list(tmp.data())
         [tmp] = self.model.get_dae_F().eval([z])
@@ -822,7 +857,7 @@ class RadauCollocator(CasadiCollocator):
         self.H_fcn = self.Lag_fcn.hessian(0,0)
         
     def get_equality_constraint(self):
-        return self.g
+        return casadi.SXMatrix(self.g)
 
     def get_cost(self):
         return self.cost_fcn
@@ -1085,6 +1120,600 @@ class RadauCollocator(CasadiCollocator):
                 self.get_xx_init()[self.var_indices[i][j]['w']] = w_init[cnt,:]
             cnt = cnt + 1
 
+class Radau2Collocator(CasadiCollocator):
+    """
+    Discretizes and solves an optimal control problem using Radau direct
+    collocation.
+    """
+    def __init__(self, model, options):
+        # Store the model
+        self.model = model
+        self.ocp = model.get_casadi_ocp()
+        
+        # Get the options
+        self.__dict__.update(options)
+        
+        # Define element lengths
+        self.h = {}
+        for i in xrange(1, self.n_e + 1):
+            self.h[i] = (self.ocp.tf - self.ocp.t0) / self.n_e
+        
+        # Create the NLP problem
+        self._create_nlp_variables()
+        self._create_collocation_constraints()
+        self._create_cost_function()
+        
+        super(Radau2Collocator, self).__init__(model)
+        
+        
+    def _create_nlp_variables(self):
+        """
+        Creates the NLP variables and stores them in a nested dictionary.
+        """
+        # Get model info
+        n_var = {'dx': self.model.get_n_x(), 'x': self.model.get_n_x(),
+                 'u': self.model.get_n_u(), 'w': self.model.get_n_w()}
+        get_var = {'dx': self.model.get_dx, 'x': self.model.get_x,
+                   'u': self.model.get_u, 'w': self.model.get_w}
+        
+        # Create NLP variables
+        n_xx = self.model.get_n_p()
+        n_xx += (1 + self.n_e * self.n_cp) * N.sum(n_var.values())
+        if self.graph == "MX" or self.graph == 'expanded_MX':
+            xx = casadi.MX("xx", n_xx)
+        elif self.graph == "SX":
+            xx = casadi.symbolic("xx", n_xx)
+        else:
+            raise ValueError("Unknown CasADi graph %s." % self.graph)
+        
+        # Create objects for variable indexing
+        var = {}
+        var_indices = {}
+        index = 0
+        
+        # Index the parameters
+        new_index = index + self.model.get_n_p()
+        var_indices['p_opt'] = range(index, new_index)
+        index = new_index
+        var['p_opt'] = xx[var_indices['p_opt']]
+        
+        # Index the variables at the collocation points
+        for i in xrange(1, self.n_e + 1):
+            var_indices[i] = {}
+            var[i] = {}
+            for k in xrange(1, self.n_cp + 1):
+                var_indices[i][k] = {}
+                var[i][k] = {}
+                for var_type in n_var.keys():
+                    new_index = index + n_var[var_type]
+                    var_indices[i][k][var_type] = range(index, new_index)
+                    index = new_index
+                    var[i][k][var_type] = xx[var_indices[i][k][var_type]]
+                    
+        # Index the variables for the initial values
+        var[1][0] = {}
+        var_indices[1][0] = {}
+        for var_type in n_var.keys():
+            new_index = index + n_var[var_type]
+            var_indices[1][0][var_type] = range(index, new_index)
+            index = new_index
+            var[1][0][var_type] = xx[var_indices[1][0][var_type]]
+            
+        # Assert that variables were indexed correctly
+        assert(new_index == n_xx)
+        
+        # Save variables and indices as class attributes
+        self.xx = xx
+        self.n_xx = n_xx
+        self.var = var
+        self.var_indices = var_indices
+        
+    def _calc_t(self, i, k):
+        """
+        Calculates the time at a given element and collocation point.
+         
+        Parameters::
+        
+            i --
+                Element index.
+                Type: int
+                 
+            k --
+                Collocation point.
+                Type: int
+                 
+        Returns::
+        
+            t --
+                Time.
+                Type: SX
+        """ 
+        t = self.ocp.t0 + N.sum(self.h.values()) + self.h[i] * k
+        return t
+    
+    def _get_z(self, time_point):
+        """
+        Creates a CasADi matrix of the type appropriate for the graph, which
+        contains all the NLP variables at a given time point.
+        
+        Parameters::
+        
+            time_point --
+                Time point (t, i, k), where t is the time, i is the element and
+                k is the collocation point.
+                Type: tuple
+                
+        Returns::
+        
+            z --
+                NLP variable matrix.
+                Type: MX or SXMatrix
+        """
+        (t, i, k) = time_point
+        z = casadi.vertcat([self.var['p_opt'],
+                            self.var[i][k]['dx'],
+                            self.var[i][k]['x'],
+                            self.var[i][k]['u'],
+                            self.var[i][k]['w'],
+                            t])
+        return z
+        
+    def _create_collocation_constraints(self):
+        """
+        Creates the collocation constraints and time points.
+        """
+        # Get a local reference to variables
+        var = self.var
+        
+        # Create list for storage of time points
+        # Must be completely redone for K > 1!
+        time_points = []
+        
+        # Define DAE function evaluation method based on graph
+        if self.graph == 'MX' or self.graph == 'expanded_MX':
+            dae_F_eval = self.model.get_dae_F().call
+        elif self.graph == 'SX':
+            dae_F_eval = self.model.get_dae_F().eval
+        else:
+            raise ValueError('Unknown CasADi graph %s.' % graph)
+        
+        # Boundary conditions
+        time_points += [(self.ocp.t0, 1, 0)]
+        z = self._get_z(time_points[-1])
+        if self.graph == 'MX' or self.graph == 'expanded_MX':
+            [g] = self.model.get_init_F0().call([z])
+        elif self.graph == 'SX':
+            [g] = self.model.get_init_F0().eval([z])
+        else:
+            raise ValueError('Unknown CasADi graph %s.' % graph)
+        g = casadi.vertcat([g, dae_F_eval([z])[0]])
+
+        # Collocated variables for first element
+        dx_1_1 = var[1][1]['dx']
+        x_1_0 = var[1][0]['x']
+        x_1_1 = var[1][1]['x']
+        h_1 = self.h[1]
+        
+        # Collocation constraint for first element, backward Euler
+        colloc_constr = x_1_1 - x_1_0 - h_1 * dx_1_1
+        g = casadi.vertcat([g, colloc_constr])
+        
+        # DAE constraints for first element
+        t = time_points[-1][0] + self.h[1]
+        for k in xrange(1, self.n_cp + 1):
+            time_points += [(t, 1, k)]
+            z = self._get_z(time_points[-1])
+            [dae_constr] = dae_F_eval([z])
+            g = casadi.vertcat([g, dae_constr])
+        
+        # Constraints for succeeding elements
+        for i in xrange(2, self.n_e + 1):
+            # Collocated variables
+            dx_i_1 = var[i][1]['dx']
+            x_im1_1 = var[i - 1][1]['x']
+            x_i_1 = var[i][1]['x']
+            h_i = self.h[i]
+            
+            # Collocation constraint, backward Euler
+            colloc_constr = x_i_1 - x_im1_1 - h_i * dx_i_1
+            g = casadi.vertcat([g, colloc_constr])
+            
+            # DAE constraints
+            t = time_points[-1][0] + self.h[i]
+            for k in xrange(1, self.n_cp + 1):
+                time_points += [(t, i, k)]
+                z = self._get_z(time_points[-1])
+                [dae_constr] = dae_F_eval([z])
+                g = casadi.vertcat([g, dae_constr])
+                
+        # Store constraints and time points as class attributes
+        self.g = g
+        self.time_points = time_points
+        
+    def _create_cost_function(self):
+        """
+        Creates the cost function, either as a Bolza functional or based on
+        parameter estimation data.
+        """
+        # Create base cost functions
+        self.cost_mayer = 0
+        self.cost_lagrange = 0
+        
+        if self.parameter_estimation_data == None:
+            # Get cost functions
+            J = self.model.get_opt_J()
+            L = self.model.get_opt_L()
+            
+            # Mayer cost
+            if J != None:
+                i = self.n_e
+                k = self.n_cp
+                t = self._calc_t(i, k)
+                z = self._get_z((t, i, k))
+                
+                # Use appropriate function evaluation based on graph
+                if self.graph == "MX" or self.graph == 'expanded_MX':
+                    [self.cost_mayer] = J.call([z])
+                elif self.graph == "SX":
+                    [self.cost_mayer] = J.eval([z])
+                else:
+                    raise ValueError("Unknown CasADi graph %s." % self.graph)
+            
+            # Lagrange cost
+            if L != None:
+                # Define function evaluation method based on graph
+                if self.graph == "MX" or self.graph == 'expanded_MX':
+                    L_eval = L.call
+                elif self.graph == "SX":
+                    L_eval = L.eval
+                else:
+                    raise ValueError("Unknown CasADi graph %s." % self.graph)
+                
+                # Evaluate Lagrange cost function on each element
+                for i in xrange(1, self.n_e + 1):
+                    t = self._calc_t(i, 1)
+                    z = self._get_z((t, i, 1))
+                    self.cost_lagrange += self.h[i] * L_eval([z])[0]
+            
+            # Sum up the two cost terms
+            self.cost = self.cost_mayer + self.cost_lagrange
+        else:
+            # Interpolate the parameter estimation data
+            data = TrajectoryLinearInterpolation(
+                    self.parameter_estimation_data.data[:, 0], 
+                    self.parameter_estimation_data.data[:, 1:])
+                    
+            # Create base cost function
+            self.cost = 0
+            
+            # Calculate cost contribution from each collocation point
+            for i in range(1, self.n_e + 1):
+                for k in range(1, self.n_cp + 1):
+                    t = self._calc_t(i, k)
+                    
+                    # Variable reference values
+                    y_ref = data.eval(t)[0, :]
+                    
+                    # List of errors for each measure variable
+                    err = []
+                    
+                    # Variable reference maps
+                    x_vr = self.model.get_x_vr_map()
+                    w_vr = self.model.get_w_vr_map()
+                    u_vr = self.model.get_u_vr_map()
+                    
+                    # Calculate errors for each measure variable
+                    # This loop is ugly! And inefficient! See https://trac.modelon.se/P420-JModelica-CasadiCollocation/ticket/13
+                    measured_variables = \
+                            self.parameter_estimation_data.measured_variables
+                    for j in xrange(len(measured_variables)):
+                        v = str(measured_variables[j])
+                        val_ref = self.model.xmldoc.get_value_reference(v)
+                        if val_ref in x_vr.keys():
+                            err.append(self.var[i][k]['x'][x_vr[val_ref]] - 
+                                       y_ref[j])
+                        elif val_ref in w_vr.keys():
+                            err.append(self.var[i][k]['w'][w_vr[val_ref]] - 
+                                       y_ref[j])
+                        elif val_ref in u_vr.keys():
+                            err.append(self.var[i][k]['u'][u_vr[val_ref]] - 
+                                       y_ref[j])
+                        else:
+                            raise ValueError("Unknown value reference %s." %
+                                             val_ref)
+                    
+                    # Calculate cost given errors
+                    err = N.array(err)
+                    Q = self.parameter_estimation_data.Q
+                    cost_term = N.dot(N.dot(err, Q), err)
+                    self.cost += self.h[i] * cost_term
+
+        # Define NLP objective function based on graph
+        if self.graph == "MX":
+            cost_fcn = casadi.MXFunction([self.xx], [self.cost])
+        elif self.graph == 'expanded_MX':
+            cost_fcn = casadi.MXFunction([self.xx], [self.cost])
+        elif self.graph == "SX":
+            cost_fcn = casadi.SXFunction([self.xx], [self.cost])
+            
+        else:
+            raise ValueError("Unknown CasADi graph %s." % graph)
+        cost_fcn.init()
+        cost_fcn.setOption("name", "NLP objective function")
+        
+        # Expand objective function
+        if self.graph == 'expanded_MX':
+            cost_fcn.expand()
+        
+        # Apparently this is a good place to calculate the Hessian.
+        # But I don't want to. Yet.
+        
+        # Save cost function as class attribute
+        self.cost_fcn = cost_fcn
+        
+    def get_equality_constraint(self):
+        return self.g
+
+    def get_cost(self):
+        return self.cost_fcn
+
+    def get_hessian(self):
+        return None
+
+    def set_initial_from_file(self,res):
+        """ 
+        Initialize the optimization vector from an object of either 
+        ResultDymolaTextual or ResultDymolaBinary.
+
+        Parameters::
+        
+            res --
+                A reference to an object of type ResultDymolaTextual or
+                ResultDymolaBinary.
+        """
+        
+        xmldoc = self.model.get_model_description()
+
+        # Obtain the names and sort them in value reference order
+        names = xmldoc.get_dx_variable_names(include_alias=False)
+        dx_names=[]
+        for name in sorted(names):
+            dx_names.append(name[1])
+
+        names = xmldoc.get_x_variable_names(include_alias=False)
+        x_names=[]
+        for name in sorted(names):
+            x_names.append(name[1])
+
+        names = xmldoc.get_u_variable_names(include_alias=False)
+        u_names=[]
+        for name in sorted(names):
+            u_names.append(name[1])
+
+        names = xmldoc.get_w_variable_names(include_alias=False)
+        w_names=[]
+        for name in sorted(names):
+            w_names.append(name[1])
+
+        names = xmldoc.get_p_opt_variable_names(include_alias=False)
+        p_opt_names=[]
+        for name in sorted(names):
+            p_opt_names.append(name[1])
+        
+        # Obtain vector sizes
+        n_points = 0
+        num_name_hits = 0
+        if len(dx_names) > 0:
+            for name in dx_names:
+                print name
+                try:
+                    traj = res.get_variable_data(name)
+                    num_name_hits = num_name_hits + 1
+                    if N.size(traj.x)>2:
+                        break
+                except:
+                    pass
+
+        elif len(x_names) > 0:
+            for name in x_names:
+                try:
+                    traj = res.get_variable_data(name)
+                    num_name_hits = num_name_hits + 1
+                    if N.size(traj.x)>2:
+                        break
+                except:
+                    pass
+
+        elif len(u_names) > 0:
+            for name in u_names:
+                try:
+                    traj = res.get_variable_data(name)
+                    num_name_hits = num_name_hits + 1
+                    if N.size(traj.x)>2:
+                        break
+                except:
+                    pass
+
+        elif len(w_names) > 0:
+            for name in w_names:
+                try:
+                    traj = res.get_variable_data(name)
+                    num_name_hits = num_name_hits + 1
+                    if N.size(traj.x)>2:
+                        break
+                except:
+                    pass
+        else:
+            raise Exception(
+                "None of the model variables not found in result file.")
+
+        if num_name_hits==0:
+            raise Exception(
+                "None of the model variables not found in result file.")
+        
+        #print(traj.t)
+        
+        n_points = N.size(traj.t,0)
+        n_cols = 1+len(dx_names)+len(x_names)+len(u_names)+len(w_names)
+
+        var_data = N.zeros((n_points,n_cols))
+        # Initialize time vector
+        var_data[:,0] = res.get_variable_data('time').t
+
+#         p_opt_data = N.zeros(len(p_opt_names))
+
+#         sc = self._model.jmimodel.get_variable_scaling_factors()
+
+#         # Get the parameters
+#         n_p_opt = self._model.jmimodel.opt_get_n_p_opt()
+#         if n_p_opt > 0:
+#             p_opt_indices = N.zeros(n_p_opt, dtype=int)
+        
+#             self._model.jmimodel.opt_get_p_opt_indices(p_opt_indices)
+#             p_opt_indices = p_opt_indices.tolist()
+
+#             for name in p_opt_names:
+#                 try:
+#                     ref = self._model.get_value_reference(name)
+#                     (z_i, ptype) = jmi._translate_value_ref(ref)
+#                     i_pi = z_i - self._model._offs_real_pi.value
+#                     i_pi_opt = p_opt_indices.index(i_pi)
+#                     traj = res.get_variable_data(name)
+#                     if self._model.get_scaling_method() & jmi.JMI_SCALING_VARIABLES > 0:
+#                         p_opt_data[i_pi_opt] = traj.x[0]/sc[z_i]
+#                     else:
+#                         p_opt_data[i_pi_opt] = traj.x[0]
+#                 except VariableNotFoundError:
+#                     print "Warning: Could not find value for parameter " + name
+                    
+#         #print(N.size(var_data))
+
+#         # Initialize variable names
+#         # Loop over all the names
+
+#         sc_dx = self._model.jmimodel.get_variable_scaling_factors()[
+#             self._model._offs_real_dx.value:self._model._offs_real_x.value]
+#         sc_x = self._model.jmimodel.get_variable_scaling_factors()[
+#             self._model._offs_real_x.value:self._model._offs_real_u.value]
+#         sc_u = self._model.jmimodel.get_variable_scaling_factors()[
+#             self._model._offs_real_u.value:self._model._offs_real_w.value]
+#         sc_w = self._model.jmimodel.get_variable_scaling_factors()[
+#             self._model._offs_real_w.value:self._model._offs_t.value]
+
+        #scaling = False
+
+        col_index = 1;
+        dx_index = 0;
+        x_index = 0;
+        u_index = 0;
+        w_index = 0;
+        for name in dx_names:
+            try:
+                #print(name)
+                #print(self.model.get_dx_sf()[dx_index])
+                #print(col_index)
+                traj = res.get_variable_data(name)
+                var_data[:,col_index] = traj.x/self.model.get_dx_sf()[dx_index]
+                dx_index = dx_index + 1
+                col_index = col_index + 1
+            except:
+                dx_index = dx_index + 1
+                col_index = col_index + 1
+                print "Warning: Could not find trajectory for derivative variable " + name
+        for name in x_names:
+            try:
+                #print(name)
+                #print(self.model.get_x_sf()[x_index])
+                #print(col_index)
+                traj = res.get_variable_data(name)
+                var_data[:,col_index] = traj.x/self.model.get_x_sf()[x_index]
+                x_index = x_index + 1
+                col_index = col_index + 1
+            except VariableNotFoundError:
+                x_index = x_index + 1
+                col_index = col_index + 1
+                print "Warning: Could not find trajectory for state variable " + name
+
+        for name in u_names:
+            try:
+                #print(name)
+                #print(col_index)
+                traj = res.get_variable_data(name)
+                if not res.is_variable(name):
+                    var_data[:,col_index] = N.ones(n_points)*traj.x[0]/self.model.get_u_sf()[u_index]
+                else:
+                    var_data[:,col_index] = traj.x/self.model.get_u_sf()[u_index]
+                u_index = u_index + 1
+                col_index = col_index + 1
+            except VariableNotFoundError:
+                u_index = u_index + 1
+                col_index = col_index + 1
+                print "Warning: Could not find trajectory for input variable " + name
+
+        for name in w_names:
+            try:
+                #print(name)
+                #print(col_index)
+                traj = res.get_variable_data(name)
+                if not res.is_variable(name):
+                    var_data[:,col_index] = N.ones(n_points)*traj.x[0]/self.model.get_w_sf()[w_index]
+                else:
+                    var_data[:,col_index] = traj.x/self.model.get_w_sf()[w_index]
+                w_index = w_index + 1
+                col_index = col_index + 1
+            except VariableNotFoundError:
+                w_index = w_index + 1
+                col_index = col_index + 1
+                print "Warning: Could not find trajectory for algebraic variable " + name
+
+        dx_init = N.zeros((len(self.get_time_points()),self.model.get_n_x()))
+        x_init = N.zeros((len(self.get_time_points()),self.model.get_n_x()))
+        w_init = N.zeros((len(self.get_time_points()),self.model.get_n_w()))
+        u_init = N.zeros((len(self.get_time_points()),self.model.get_n_u()))
+        
+        t_points = N.zeros(len(self.get_time_points()))
+
+        cnt = 0
+        for t,i,j in self.get_time_points():
+            t_points[cnt] = t
+            cnt = cnt + 1
+
+        # make sure abscissa is increasing
+        d = var_data[0,0]
+        for i in range(len(var_data[:,0])-1):
+            if var_data[i+1,0]<=d:
+                var_data[i+1,0] = d + 1e-5
+            d = var_data[i+1,0]
+
+        # interpolate
+        for i in range(self.model.get_n_x()):
+            dx_init[:,i] = N.interp(t_points,var_data[:,0],var_data[:,1+i]);
+
+        for i in range(self.model.get_n_x()):
+            x_init[:,i] = N.interp(t_points,var_data[:,0],var_data[:,1 + self.model.get_n_x() +i]);
+
+        for i in range(self.model.get_n_u()):
+            u_init[:,i] = N.interp(t_points,var_data[:,0],var_data[:,1 + 2*self.model.get_n_x() + i]);
+
+        for i in range(self.model.get_n_w()):
+            w_init[:,i] = N.interp(t_points,var_data[:,0],var_data[:,1 + 2*self.model.get_n_x() + self.model.get_n_u() + i]);
+
+        cnt = 0
+        for t,i,j in self.get_time_points():
+            if (self.model.get_n_x()>0):
+                self.get_xx_init()[self.var_indices[i][j]['dx']] = dx_init[cnt,:]
+            if (self.model.get_n_x()>0):
+                self.get_xx_init()[self.var_indices[i][j]['x']] = x_init[cnt,:]
+                if i>1: # Initialize element junction states TODO: this is not quite correct, could be improved
+                    try:
+                        self.get_xx_init()[self.var_indices[i][0]['x']] = x_init[cnt,:]
+                    except:
+                        pass
+            if (self.model.get_n_u()>0):
+                self.get_xx_init()[self.var_indices[i][j]['u']] = u_init[cnt,:]
+            if (self.model.get_n_w()>0):
+                self.get_xx_init()[self.var_indices[i][j]['w']] = w_init[cnt,:]
+            cnt = cnt + 1
         
 class PseudoSpectral(CasadiCollocator):
     """
@@ -1234,6 +1863,7 @@ class PseudoSpectral(CasadiCollocator):
         
         self.model = model
         self.options = options
+        self.graph = options['graph']
         self.md  = model.get_model_description()
         self.ocp = model.get_casadi_ocp()
         
@@ -1672,12 +2302,14 @@ class PseudoSpectral(CasadiCollocator):
             self.xx += links
             self.var_indices[i][0]['link_x'] = N.arange(pre_len,len(self.xx),dtype=int)
         """
+        
+        self.n_xx = len(self.xx)
     
     def get_equality_constraint(self):
-        return self.h
+        return casadi.SXMatrix(self.h)
     
     def get_inequality_constraint(self):
-        return self.g
+        return casadi.SXMatrix(self.g)
 
     def get_cost(self):
         return self.cost_fcn

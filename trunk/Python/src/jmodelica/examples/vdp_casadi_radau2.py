@@ -1,7 +1,7 @@
 #!/usr/bin/env python 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2010 Modelon AB
+# Copyright (C) 2011 Modelon AB
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,22 +31,20 @@ def run_demo(with_plots=True, graph="SX"):
     Pol oscillator system.
     """
     curr_dir = os.path.dirname(os.path.abspath(__file__));
-
     jn = compile_casadi("VDP_pack.VDP_Opt2", curr_dir+"/files/VDP.mop")
-
     model = CasadiModel(jn)
 
-    opts = model.optimize_options()
-    #opts['IPOPT_options']['derivative_test'] = 'second-order'
+    opts = model.optimize_options(algorithm="CasadiRadau2")
     opts['n_e'] = 50
+    opts['n_cp'] = 1
     opts['graph'] = graph
 
-    res = model.optimize(options=opts)
+    res = model.optimize(algorithm="CasadiRadau2", options=opts)
     
     # Extract variable profiles
-    x1   = res['x1']
-    x2   = res['x2']
-    u    = res['u']
+    x1 = res['x1']
+    x2 = res['x2']
+    u = res['u']
     time = res['time']
     
     if with_plots:
@@ -72,4 +70,3 @@ def run_demo(with_plots=True, graph="SX"):
 
 if __name__ == "__main__":
     run_demo()
-

@@ -1728,6 +1728,11 @@ class CasadiPseudoSpectral(AlgorithmBase):
         """
         self.n_e=self.options['n_e']
         self.n_cp=self.options['n_cp']
+        self.graph = self.options['graph']
+        if self.graph != 'SX':
+            raise NotImplementedError("CasadiPseudoSpectral currently " + \
+                    "only supports SX graphs.")
+                    
         self.init_traj=self.options['init_traj']
         self.result_mode = self.options['result_mode']
         if self.result_mode == 'default':
@@ -1894,6 +1899,7 @@ class CasadiPseudoSpectralOptions(OptionBase):
         _defaults= {
             'n_e':1, 
             'n_cp':20,
+            'graph':'SX',
             'discr': "LG",
             'free_phases':False,
             'link_options':[],
@@ -1967,6 +1973,7 @@ class CasadiRadauOptions(OptionBase):
         _defaults= {
             'n_e':50, 
             'n_cp':3,
+            'graph':'SX',
             'init_traj':None,
             'parameter_estimation_data':None,
             'IPOPT_options':{'max_iter':1000,
@@ -2047,6 +2054,15 @@ class CasadiRadau(AlgorithmBase):
         """
         self.n_e = self.options['n_e']
         self.n_cp = self.options['n_cp']
+        if self.n_cp != 3:
+            raise NotImplementedError("CasadiRadau currently only " + \
+                    "supports 3 collocation points.")
+        
+        self.graph = self.options['graph']
+        if self.graph != 'SX':
+            raise NotImplementedError("CasadiRadau currently only " + \
+                    "supports SX graphs.")
+                    
         self.init_traj = self.options['init_traj']
         self.parameter_estimation_data = self.options['parameter_estimation_data']
         
@@ -2097,3 +2113,181 @@ class CasadiRadau(AlgorithmBase):
         values. (Class method.)
         """
         return CasadiRadauOptions()
+
+class CasadiRadau2(AlgorithmBase):
+    """
+    The algorithm is based on orthogonal collocation and relies on the solver 
+    IPOPT for solving a non-linear programming problem.
+    
+    Limitations::
+    
+        Only first order Radau (implicit Euler) is currently supported.
+    """
+    def __init__(self, model, options):
+        """
+        Create a CasadiRadau2 algorithm.
+        
+        Parameters::
+              
+            model -- 
+                jmodelica.jmi.casadiModel model object
+
+            options -- 
+                The options that should be used by the algorithm. For 
+                details on the options, see:
+                
+                * model.optimize_options('CasadiRadau2Options')
+                
+                or look at the docstring with help:
+                
+                * help(jmodelica.algorithm_drivers.CasadiRadau2Options)
+                
+                Valid values are: 
+                - A dict that overrides some or all of the default values
+                  provided by CasadiRadauOptions. An empty
+                  dict will thus give all options with default values.
+                - A CasadiRadau2Options object.
+        """
+        self.model = model
+        
+        # handle options argument
+        if isinstance(options, dict):
+            # user has passed dict with options or empty dict = default
+            self.options = CasadiRadau2Options(options)
+        elif isinstance(options, CasadiRadau2Options):
+            # user has passed CasadiPseudoSpectralOptions instance
+            self.options = options
+        else:
+            raise InvalidAlgorithmOptionException(options)
+
+        # set options
+        self._set_options()
+            
+        if not casadi_present:
+            raise Exception(
+                    'Could not find CasADi. Check jmodelica.check_packages()')
+        
+        self.nlp = Radau2Collocator(model, self.options)
+            
+        # set solver options
+        self._set_solver_options()
+
+        if self.init_traj != None:
+            self.nlp.set_initial_from_file(self.init_traj) 
+        
+    def _set_options(self):
+        """ 
+        Helper function that sets options for the CasadiRadau2 algorithm.
+        """
+        self.n_e = self.options['n_e']
+        self.n_cp = self.options['n_cp']
+        if self.n_cp != 1:
+            raise NotImplementedError("CasadiRadau2 currently only " + \
+                    "supports 1 collocation point.")
+        
+        self.graph = self.options['graph']
+        self.init_traj = self.options['init_traj']
+        self.parameter_estimation_data = \
+                self.options['parameter_estimation_data']
+        
+        # solver options
+        self.solver_options = self.options['IPOPT_options']
+        
+    def _set_solver_options(self):
+        """ 
+        Helper function that sets options for the solver.
+        """
+        for (k, v) in self.solver_options.iteritems():
+            self.nlp.set_ipopt_option(k, v)
+            
+    def solve(self):
+        """ 
+        Solve the optimization problem using ipopt solver. 
+        """
+        self.nlp.ipopt_solve()
+        
+    def get_result(self):
+        """ 
+        Write result to file, load result data and create a 
+        CollocationLagrangePolynomialsResult object.
+        
+        Returns::
+        
+            The CasadiRadau2Result object.
+        """
+        self.nlp.export_result_dymola()
+            
+        # result file name
+        # resultfile = self.result_args['file_name']
+        # if not resultfile:
+        resultfile = self.model.get_name() + '_result.txt'
+        
+        # load result file
+        res = ResultDymolaTextual(resultfile)
+        
+        # create and return result object
+        return CasadiRadau2Result(self.model, resultfile, self.nlp, res,
+                                  self.options)
+        
+    @classmethod
+    def get_default_options(cls):
+        """ 
+        Get an instance of the options class for the 
+        CollocationLagrangePolynomialsAlg algorithm, prefilled with default 
+        values. (Class method.)
+        """
+        return CasadiRadau2Options()
+    
+class CasadiRadau2Options(OptionBase):
+    """
+    Options for optimizing JMU models using a collocation algorithm. 
+
+    Collocation algorithm options::
+    
+        n_e --
+            Number of phases of the finite element mesh.
+            Default: 50
+
+    Options are set by using the syntax for dictionaries::
+
+        >>> opts = my_model.optimize_options()
+        >>> opts['n_e'] = 100
+        
+    In addition, IPOPT options can be provided in the option IPOPT_options. For 
+    a complete list of IPOPT options, please consult the IPOPT documentation 
+    available at http://www.coin-or.org/Ipopt/documentation/).
+
+    Some commonly used IPOPT options are provided by default::
+
+        max_iter --
+           Maximum number of iterations.
+           Default: 3000
+                      
+        derivative_test --
+           Check the correctness of the NLP derivatives. Valid values are 
+           'none', 'first-order', 'second-order', 'only-second-order'.
+           Default: 'none'
+
+    IPOPT options are set using the syntax for dictionaries::
+
+        >>> opts['IPOPT_options']['max_iter'] = 200
+    """
+    def __init__(self, *args, **kw):
+        _defaults= {
+                'n_e': 50, 
+                'n_cp': 1,
+                'init_traj': None,
+                'parameter_estimation_data': None,
+                'graph': 'SX',
+                'IPOPT_options':{
+                        'max_iter': 1000,
+                        'derivative_test': 'none'}}
+        
+        super(CasadiRadau2Options, self).__init__(_defaults)
+        # for those key-value-sets where the value is a dict, don't 
+        # overwrite the whole dict but instead update the default dict 
+        # with the new values
+        self._update_keep_dict_defaults(*args, **kw)
+
+class CasadiRadau2Result(JMResultBase):
+    pass

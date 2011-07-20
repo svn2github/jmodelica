@@ -545,6 +545,7 @@ class CasadiModel(object):
         
         # The initial equations
         self.init_F0 = casadi.SXFunction([self.ocp_inputs],[self.ocp.initial_eq_])
+        self.init_F0.init()
         
         # The Mayer cost function
         if len(self.ocp.mterm)>0:
@@ -557,12 +558,14 @@ class CasadiModel(object):
             self.ocp_mterm_inputs += [x.atTime(self.ocp.tf,True) for x in self.ocp.z_]
             self.ocp_mterm_inputs += [self.t]
             self.opt_J = casadi.SXFunction([self.ocp_mterm_inputs],[[self.ocp.mterm[0]]])
+            self.opt_J.init()
         else:
             self.opt_J = None
 
         # The Lagrange cost function
         if len(self.ocp.lterm)>0:
-            self.opt_L = casadi.SXFunction([self.ocp_inputs],[[self.ocp.lterm[0]]])
+            self.opt_L = casadi.SXFunction([self.ocp_inputs],[self.ocp.lterm[0]])
+            self.opt_L.init()
         else:
             self.opt_L = None
 

@@ -25,7 +25,7 @@ import matplotlib.pyplot as plt
 # Import the JModelica.org Python packages
 from jmodelica.casadi_interface import compile_casadi, CasadiModel
 
-def run_demo(with_plots=True):
+def run_demo(with_plots=True, graph="SX"):
     """
     Demonstrate how the CasADi collocation algorithm can be used.
     """
@@ -35,7 +35,11 @@ def run_demo(with_plots=True):
 
     model = CasadiModel(jn)
     
-    res = model.optimize()
+    opts = model.optimize_options()
+    #opts['IPOPT_options']['derivative_test'] = 'second-order'
+    opts['graph'] = graph
+    
+    res = model.optimize(options=opts)
     
     c = res['cstr.c']
     T = res['cstr.T']
