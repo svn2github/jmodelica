@@ -26,16 +26,13 @@ import matplotlib.pyplot as plt
 from jmodelica.casadi_interface import compile_casadi, CasadiModel
 
 def run_demo(with_plots=True, graph="SX"):
-    """
-    Demonstrate how to solve a dynamic optimization problem based on a Van der 
-    Pol oscillator system.
-    """
+    """Demonstrate how to optimize a Van der Pol oscillator."""
     curr_dir = os.path.dirname(os.path.abspath(__file__));
-    jn = compile_casadi("VDP_pack.VDP_Opt2", curr_dir+"/files/VDP.mop")
+    jn = compile_casadi("VDP_pack.VDP_Opt2", curr_dir + "/files/VDP.mop")
     model = CasadiModel(jn)
 
     opts = model.optimize_options(algorithm="CasadiRadau2")
-    opts['n_e'] = 50
+    opts['n_e'] = 80
     opts['n_cp'] = 1
     opts['graph'] = graph
 
@@ -62,7 +59,7 @@ def run_demo(with_plots=True, graph="SX"):
         plt.ylabel('x2')
         
         plt.subplot(313)
-        plt.plot(time,u)
+        plt.plot(time[1:],u[1:])
         plt.grid()
         plt.ylabel('u')
         plt.xlabel('time')

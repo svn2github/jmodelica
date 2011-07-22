@@ -27,7 +27,7 @@ from jmodelica.casadi_interface import compile_casadi, CasadiModel
 
 def run_demo(with_plots=True, graph="SX"):
     """
-    Demonstrate how the CasADi collocation algorithm can be used.
+    Demonstrate how the CasADi collocation algorithm CasadiRadau2 can be used.
     """
     curr_dir = os.path.dirname(os.path.abspath(__file__));
     

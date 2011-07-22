@@ -32,7 +32,7 @@ try:
     from jmodelica.optimization.casadi_collocation import *
     from jmodelica.casadi_interface import compile_casadi, CasadiModel
 except NameError, ImportError:
-    pass 
+    pass
     #logging.warning('Could not load Casadi collocation. Check jmodelica.check_packages()')
 
 path_to_mos = os.path.join(get_files_path(), 'Modelica')
@@ -55,9 +55,10 @@ class TestRadau:
         res = vdp.optimize(algorithm="CasadiRadau", options=opts)
         
         cost = res["cost"][-1]
-        u_norm = N.linalg.norm(res["u"])
+        u = res["u"]
+        u_norm = N.linalg.norm(u) / N.sqrt(len(u))
         nose.tools.assert_almost_equal(cost, 2.3469089e1, places=3)
-        nose.tools.assert_almost_equal(u_norm, 3.52964523472e0, places=3)
+        nose.tools.assert_almost_equal(u_norm, 2.872384555575e-1, places=3)
     
     @testattr(casadi = True)
     def test_radau_cstr_example(self):
@@ -88,15 +89,17 @@ class TestRadau2:
         vdp = CasadiModel(jn)
         
         opts = vdp.optimize_options(algorithm="CasadiRadau2")
-        opts['n_e'] = 50
+        opts['n_e'] = 75
         opts['n_cp'] = 1
         opts['graph'] = "SX"
+        opts['IPOPT_options']['max_iter'] = 1500
         res = vdp.optimize(algorithm="CasadiRadau2", options=opts)
         
         cost = res["cost"][-1]
-        u_norm = N.linalg.norm(res["u"])
-        nose.tools.assert_almost_equal(cost, 1.57784229e1, places=3)
-        nose.tools.assert_almost_equal(u_norm, 3.1198013385e0, places=3)
+        u = res["u"][1:]
+        u_norm = N.linalg.norm(u) / N.sqrt(len(u))
+        nose.tools.assert_almost_equal(cost, 1.7886611023e1, places=3)
+        nose.tools.assert_almost_equal(u_norm, 2.4938916260e-1, places=3)
     
     @testattr(casadi = True)
     def test_radau2_cstr_example(self):

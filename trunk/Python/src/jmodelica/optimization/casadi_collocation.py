@@ -1207,9 +1207,6 @@ class Radau2Collocator(CasadiCollocator):
             var_indices[1][0][var_type] = range(index, new_index)
             index = new_index
             var[1][0][var_type] = xx[var_indices[1][0][var_type]]
-            
-        # Assert that variables were indexed correctly
-        assert(new_index == n_xx)
         
         # Save variables and indices as data attributes
         self.xx = xx
@@ -1431,7 +1428,6 @@ class Radau2Collocator(CasadiCollocator):
             cost_fcn = casadi.MXFunction([self.xx], [self.cost])
         elif self.graph == "SX":
             cost_fcn = casadi.SXFunction([self.xx], [self.cost])
-            
         else:
             raise ValueError("Unknown CasADi graph %s." % graph)
         cost_fcn.init()
@@ -1441,8 +1437,30 @@ class Radau2Collocator(CasadiCollocator):
         if self.graph == 'expanded_MX':
             cost_fcn.expand()
         
-        # Apparently this is a good place to calculate the Hessian.
-        # But I don't want to. Yet.
+        # Calculate exact Hessian of NLP Lagrangian
+        # Currently only supported for SXFunctions by CasADi, see
+        # https://sourceforge.net/apps/trac/casadi/ticket/164
+        
+        # Note: Possible to make it work for expanded MX, but since the
+        # solution would later (hopefully soon) become obsolete, I won't bother
+        # with it for now.
+        if self.graph == "SX":
+            # Lagrange multipliers and objective function scaling
+            lam = casadi.symbolic("lambda", self.g.numel())
+            sigma = casadi.symbolic("sigma")
+            
+            # Lagrangian
+            lagrangian_exp = sigma * self.cost + casadi.inner_prod(lam, self.g)
+            lagrangian = casadi.SXFunction([self.xx, lam, [sigma]],
+                                           [lagrangian_exp])
+            lagrangian.init()
+        
+            # Hessian of the Lagrangian
+            self.H_fcn = lagrangian.hessian()
+            self.H_fcn.setOption("name", "Exact Hessian of NLP Lagrangian")
+            self.H_fcn.init()
+        else:
+            self.H_fcn = None
         
         # Save cost function as data attribute
         self.cost_fcn = cost_fcn
@@ -1454,7 +1472,7 @@ class Radau2Collocator(CasadiCollocator):
         return self.cost_fcn
 
     def get_hessian(self):
-        return None
+        return self.H_fcn
 
     # Inherit "set_initial_from_file" from RadauCollocator
     set_initial_from_file = RadauCollocator.__dict__["set_initial_from_file"]
