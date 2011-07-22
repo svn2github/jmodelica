@@ -934,24 +934,24 @@ int jmi_delete(jmi_t* jmi){
 			jmi_func_ad_delete(jmi->dae->F->ad);
 		}
 		jmi_func_delete(jmi->dae->F);
-		free(jmi->dae);
+                jmi_func_delete(jmi->dae->R);
+                free(jmi->dae);
+                jmi->dae = 0;
 	}
-	if(jmi->init != NULL) {
-		if (jmi->init->F0->ad != NULL) {
-			jmi_func_ad_delete(jmi->init->F0->ad);
-		}
-		if (jmi->init->F1->ad != NULL) {
-			jmi_func_ad_delete(jmi->init->F1->ad);
-		}
-		if (jmi->init->Fp->ad != NULL) {
-			jmi_func_ad_delete(jmi->init->Fp->ad);
-		}
-		jmi_func_delete(jmi->init->F0);
-		jmi_func_delete(jmi->init->F1);
-		jmi_func_delete(jmi->init->Fp);
-		free(jmi->init);
-	}
-	if(jmi->opt != NULL) {
+        if(jmi->init != NULL) {
+                if (jmi->init->F0->ad != NULL) {
+                        jmi_func_ad_delete(jmi->init->F0->ad);
+                }
+                if (jmi->init->F1->ad != NULL) {
+                        jmi_func_ad_delete(jmi->init->F1->ad);
+                }
+                if (jmi->init->Fp->ad != NULL) {
+                        jmi_func_ad_delete(jmi->init->Fp->ad);
+                }
+                jmi_delete_init(&(jmi->init));
+        }
+
+        if(jmi->opt != NULL) {
 		if (jmi->opt->Ffdp->ad != NULL) {
 			jmi_func_ad_delete(jmi->opt->Ffdp->ad);
 		}

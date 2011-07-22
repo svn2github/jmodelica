@@ -1026,8 +1026,9 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_r
 	b->jac = (jmi_real_t*)calloc(n*n,sizeof(jmi_real_t));
 	b->ipiv = (int*)calloc(n,sizeof(int));
 	b->init = 1;
-	/*Initialize Kinsol.*/
-	b->kin_mem = KINCreate();
+        /*Initialize Kinsol. -> moved to jmi_newton_solvers.c
+        b->kin_mem = KINCreate();  */
+        b->kin_mem = 0;
 	b->kin_y = N_VNew_Serial(n);
 	b->kin_y_scale = N_VNew_Serial(n);
 	b->kin_f_scale = N_VNew_Serial(n);
@@ -1050,7 +1051,7 @@ int jmi_delete_block_residual(jmi_block_residual_t* b){
 	N_VDestroy_Serial(b->kin_y_scale);
 	N_VDestroy_Serial(b->kin_f_scale);
 	/*Deallocate Kinsol */
-	KINFree(&(b->kin_mem));
+        if(b->kin_mem) KINFree(&(b->kin_mem));
 	/*Deallocate struct */
 	free(b);
 	return 0;
@@ -1112,6 +1113,23 @@ int jmi_init_init(jmi_t* jmi, jmi_residual_func_t F0, int n_eq_F0,
 
 	return 0;
 }
+
+void jmi_delete_init(jmi_init_t** pinit) {
+        jmi_init_t* init = *pinit;
+
+        jmi_func_delete(init->F0);
+
+        jmi_func_delete(init->F1);
+
+        jmi_func_delete(init->Fp);
+
+        jmi_func_delete(init->R0);
+
+        free(init);
+
+        *pinit = 0;
+}
+
 
 int jmi_opt_init(jmi_t* jmi, jmi_residual_func_t Ffdp,int n_eq_Fdp,
 		 jmi_jacobian_func_t dFfdp,

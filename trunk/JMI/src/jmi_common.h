@@ -1029,6 +1029,13 @@ int jmi_init_init(jmi_t* jmi, jmi_residual_func_t F0, int n_eq_F0,
 		  int dR0_n_nz, int* dR0_row, int* dR0_col);
 
 /**
+ * \brief Frees memory from jmi_init_t struct.
+ *
+ * @param init is the pointer to init field in jmi. It's set to NULL on return.
+ */
+void jmi_delete_init(jmi_init_t** pinit);
+
+/**
  * \brief Allocates a jmi_opt_t struct.
  *
  * @param jmi A jmi_t struct.

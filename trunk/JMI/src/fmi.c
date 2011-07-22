@@ -52,16 +52,17 @@ const char* fmi_get_version() {
 /* Creation and destruction of model instances and setting debug status */
 
 fmiComponent fmi_instantiate_model(fmiString instanceName, fmiString GUID, fmiCallbackFunctions functions, fmiBoolean loggingOn) {
+
     fmi_t *component;
     char* tmpname;
     char* tmpguid;
     size_t inst_name_len;
     size_t guid_len;
 
-    /* Create jmi struct*/
-    jmi_t* jmi = (jmi_t *)functions.allocateMemory(1, sizeof(jmi_t));
+    /* Create jmi struct -> No need  since jmi_init allocates it
+     jmi_t* jmi = (jmi_t *)functions.allocateMemory(1, sizeof(jmi_t)); */
+    jmi_t* jmi = 0;
     fmiInteger retval = jmi_new(&jmi);
-
 
     if(retval != 0) {
         /* creating jmi struct failed */
@@ -94,12 +95,13 @@ void fmi_free_model_instance(fmiComponent c) {
     /* Dispose the given model instance and deallocated all the allocated memory and other resources 
      * that have been allocated by the functions of the Model Exchange Interface for instance "c".*/
     if (c) {
-        fmiCallbackFreeMemory fmi_free = ((fmi_t*)c) -> fmi_functions.freeMemory;
-
-        free(((fmi_t*)c) -> jmi);
-        fmi_free((void*)((fmi_t*)c) -> fmi_instance_name);
-        fmi_free((void*)((fmi_t*)c) -> fmi_GUID);
-        fmi_free(c);
+        fmi_t* component = (fmi_t*)c;
+        fmiCallbackFreeMemory fmi_free = component -> fmi_functions.freeMemory;
+        jmi_delete(component->jmi);
+        component->jmi = 0;
+        fmi_free((void*)component -> fmi_instance_name);
+        fmi_free((void*)component -> fmi_GUID);
+        fmi_free(component);
     }
 }
 

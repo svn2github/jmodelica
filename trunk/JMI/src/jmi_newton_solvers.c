@@ -51,14 +51,13 @@ int kin_f(N_Vector yy, N_Vector ff, void *problem_data){
 
 	/*Evaluate the residual*/
 	block->F(block->jmi,y,f,JMI_BLOCK_EVALUATE);
-	
+
 	/* Test if output is OK (no -1.#IND) */
 	n = NV_LENGTH_S(ff);
 	for (i=0;i<n;i++) {
 	  /* Recoverable error*/
 	  if (Ith(ff,i)- Ith(ff,i) != 0) return 1;
 	}
-	
 	return KIN_SUCCESS; /*Success*/
 	/*return 1;  //Recoverable error*/
 	/*return -1; //Unrecoverable error*/
@@ -136,7 +135,8 @@ int jmi_kinsol_solve(jmi_block_residual_t * block){
 		for(i=0;i<block->n;i=i+1){
 			Ith(block->kin_y,i)=block->x[i];
 		}
-		
+
+                block->kin_mem = KINCreate();
 		flag = KINInit(block->kin_mem, kin_f, block->kin_y); /*Initialize Kinsol*/
 		jmi_kinsol_error_handling(flag);
 		
