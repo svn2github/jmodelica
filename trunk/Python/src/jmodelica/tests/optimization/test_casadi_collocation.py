@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-""" Tests the casadi_collocation module. """
+"""Tests the casadi_collocation module."""
 
 import os
 import nose
@@ -26,6 +26,7 @@ import pylab as P
 from jmodelica.tests import testattr
 from jmodelica.tests import get_files_path
 from jmodelica.io import ResultDymolaTextual
+from jmodelica.examples import *
 
 try:
     from jmodelica.optimization.casadi_collocation import *
@@ -34,11 +35,91 @@ except NameError, ImportError:
     pass 
     #logging.warning('Could not load Casadi collocation. Check jmodelica.check_packages()')
 
-path_to_mos  = os.path.join(get_files_path(), 'Modelica')
+path_to_mos = os.path.join(get_files_path(), 'Modelica')
+
+class TestRadau:
+    
+    """This class tests the class CasadiRadau."""
+    
+    @testattr(casadi = True)
+    def test_radau_vdp(self):
+        """Test optimizing the VDP."""
+        jn = compile_casadi("VDP_pack.VDP_Opt2",
+                            os.path.join(path_to_mos, "VDP.mop"))
+        print(os.path.join(path_to_mos, "VDP.mop"))
+        vdp = CasadiModel(jn)
+        
+        opts = vdp.optimize_options(algorithm="CasadiRadau")
+        opts['n_e'] = 50
+        opts['n_cp'] = 3
+        res = vdp.optimize(algorithm="CasadiRadau", options=opts)
+        
+        cost = res["cost"][-1]
+        u_norm = N.linalg.norm(res["u"])
+        nose.tools.assert_almost_equal(cost, 2.3469089e1, places=3)
+        nose.tools.assert_almost_equal(u_norm, 3.52964523472e0, places=3)
+    
+    @testattr(casadi = True)
+    def test_radau_cstr_example(self):
+        """Test the cstr_casadi example."""
+        cstr_casadi.run_demo(with_plots=False, graph="SX")
+        
+    @testattr(casadi = True)
+    def test_radau_vdp_example(self):
+        """Test the vdp_casadi example."""
+        vdp_casadi.run_demo(with_plots=False, graph="SX")
+    
+    @testattr(casadi = True)
+    def test_radau_pe_example(self):
+        """Test the parameter_estimation_1_casadi example."""
+        parameter_estimation_1_casadi.run_demo(with_plots=False,
+                                               algorithm="CasadiRadau",
+                                               graph="SX")
+
+class TestRadau2:
+    
+    """This class tests the class CasadiRadau2."""
+    
+    @testattr(casadi = True)
+    def test_radau2_vdp(self):
+        """Test optimizing the VDP."""
+        jn = compile_casadi("VDP_pack.VDP_Opt2",
+                            os.path.join(path_to_mos, "VDP.mop"))
+        vdp = CasadiModel(jn)
+        
+        opts = vdp.optimize_options(algorithm="CasadiRadau2")
+        opts['n_e'] = 50
+        opts['n_cp'] = 1
+        opts['graph'] = "SX"
+        res = vdp.optimize(algorithm="CasadiRadau2", options=opts)
+        
+        cost = res["cost"][-1]
+        u_norm = N.linalg.norm(res["u"])
+        nose.tools.assert_almost_equal(cost, 1.57784229e1, places=3)
+        nose.tools.assert_almost_equal(u_norm, 3.1198013385e0, places=3)
+    
+    @testattr(casadi = True)
+    def test_radau2_cstr_example(self):
+        """Test the cstr_casadi example."""
+        cstr_casadi_radau2.run_demo(with_plots=False, graph="SX")
+        
+    @testattr(casadi = True)
+    def test_radau2_vdp_example(self):
+        """Test the vdp_casadi example using all 3 graph types."""
+        vdp_casadi_radau2.run_demo(with_plots=False, graph="SX")
+        vdp_casadi_radau2.run_demo(with_plots=False, graph="MX")
+        vdp_casadi_radau2.run_demo(with_plots=False, graph="expanded_MX")
+    
+    @testattr(casadi = True)
+    def test_radau2_pe_example(self):
+        """Test the parameter_estimation_1_casadi example."""
+        parameter_estimation_1_casadi.run_demo(with_plots=False,
+                                               algorithm="CasadiRadau2",
+                                               graph="SX")
 
 class TestPseudoSpectral:
-    """ This class tests the class PseudoSpectral."""
-    pass
+    
+    """This class tests the class CasadiPseudoSpectral."""
     
     @testattr(casadi = True)
     def test_ps_twostate(self):
