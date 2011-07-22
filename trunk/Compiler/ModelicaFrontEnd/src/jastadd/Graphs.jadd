@@ -268,8 +268,6 @@ public class BiPGraph {
 			Eq e = itr.next();
 			for (Var v : e.getSolvableVariables()) {
 				if (v.getSolvableMatching()==null) {
-					v.setMatching(e);
-					e.setMatching(v);
 					v.setSolvableMatching(e);
 					e.setSolvableMatching(v);
 					itr.remove();
@@ -507,42 +505,19 @@ public class BiPGraph {
 		//System.out.println(n_ind + buildIndent(n_ind) + "augmentPath end: " + e.getEquation().prettyPrint(""));	
 		return false;
 	}
-	
-	public boolean hasAP(Eq e, ArrayList<Eq> visitedEquations, ArrayList<Var> visitedVariables) {
+
+	public boolean SAP(Eq e) {
 		e.setVisited(true);
-		visitedEquations.add(e);
-		for (Var v : e.getVariables()) {
-			if (v.getMatching()==null) {
-				return true;
-			} else if (!v.isVisited()) {
-				v.setVisited(true);
-				visitedVariables.add(v);
-				if (hasAP(v.getSolvableMatching(),visitedEquations,visitedVariables)) {
-					return true;	
-				} 
-			}
-		}
-		return false;
-	}	
-	
-	public boolean SAP(Eq e, ArrayList<Eq> visitedEquations, ArrayList<Var> visitedVariables) {
-		e.setVisited(true);
-		visitedEquations.add(e);
 		for (Var v : e.getSolvableVariables()) {
 			if (v.getSolvableMatching()==null) {
 				v.setSolvableMatching(e);
 				e.setSolvableMatching(v);
-				v.setMatching(e);
-				e.setMatching(v);
 				return true;
 			} else if (!v.isVisited()) {
 				v.setVisited(true);
-				visitedVariables.add(v);
-				if (SAP(v.getSolvableMatching(),visitedEquations,visitedVariables)) {
+				if (SAP(v.getSolvableMatching())) {
 					v.setSolvableMatching(e);
 					e.setSolvableMatching(v);
-					v.setMatching(e);
-					e.setMatching(v);
 					return true;	
 				} 
 			}
@@ -550,173 +525,31 @@ public class BiPGraph {
 		return false;
 	}
 	
-	public void resetAP(){
-		for (Eq e : getEquations()) {
-			e.setVisited(false);
-			e.setDepth(0);
-		}		
-	}
-	
-	public boolean initAP(Eq e){
-		Var match = e.getMatching();
-		e.setMatching(null);
-		match.setMatching(null);
-		e.isUsed(true);
-		resetAP();
-		for(Var v: e.getSolvableVariables()){
-			if(v.getSolvableMatching()==null){
-				System.out.println("START FROM DEPTH 2");
-				if(AP(v.getSolvableMatching(),2)){
-					v.setSolvableMatching(e);
-					e.setSolvableMatching(v);
-					v.setMatching(e);
-					e.setMatching(v);
-					return true;
-				}
-			}else{
-				System.out.println("START FROM DEPTH 1");
-				if(AP(v.getSolvableMatching(),1)){
-					v.setSolvableMatching(e);
-					e.setSolvableMatching(v);
-					v.setMatching(e);
-					e.setMatching(v);
-					return true;
-				}
-			}
-		}
-		match.setMatching(e);
-		e.setMatching(match);
-		return false;	
-	}
-	
-	public boolean AP(Eq e, int d){
-		if(e.isVisited()){
-			System.out.println("This should not be possible anymore....");
-			return false;
-		}
-		if(e.getDepth()>=d){
-			//System.out.println("This equation has been visited in a deeper depth.");
-			return false;
-		}
+	public int collectResiduals(Eq e, int maxVars, int minSVars) {
 		e.setVisited(true);
-		if(d>e.getDepth()){
-			e.setDepth(d);
-			//System.out.println("Equation " + e.getName()+ " now has depth: " +d);
-		}
-		for(Var v: e.getVariables()){
-			if(e.getEquation().isSolved(v.getName(),true)){
-				if(v.getMatching()== null){
-					//System.out.println("Found unmatched and Solvable matched it!");
-					v.setSolvableMatching(e);
-					e.setSolvableMatching(v);
-					v.setMatching(e);
-					e.setMatching(v);
-					return true;
-				}else if(v.getSolvableMatching()==null && !v.getMatching().isVisited()){
-					int newD=d+1;
-					//System.out.println("Looking for path at depth S->US: " + newD);
-					//System.out.print(e.getName()+ " -> " + v.getMatching().getName());
-					//System.out.println(" via " + v.getName());
-					if(AP(v.getMatching(),newD)){
-						v.setSolvableMatching(e);
-						e.setSolvableMatching(v);
-						v.setMatching(e);
-						e.setMatching(v);
-						return true;
-					}
-				}else if(!v.getMatching().isVisited()){
-					//System.out.println("Looking for path at depth S->S: " +d);
-					//System.out.println(e.getName()+ " -> " + v.getSolvableMatching().getName());
-					if(AP(v.getSolvableMatching(),d)){
-						v.setSolvableMatching(e);
-						e.setSolvableMatching(v);
-						v.setMatching(e);
-						e.setMatching(v);
-						return true;
-					}
-				}
-			}else if(d>1){ // (if not solvable)
-				if(v.getMatching()== null){
-					//System.out.println("Found unmatched and matched it");
-					v.setMatching(e);
-					e.setMatching(v);
-					v.setSolvableMatching(null);
-					e.setSolvableMatching(null);
-					e.isUsed(false);
-					return true;
-				}else if(v.getSolvableMatching()==null && !v.getMatching().isVisited()){
-					//System.out.println("Looking for path at depth US->US: " + d);
-					//System.out.println(e.getName()+ " -> " + v.getMatching().getName());
-					if(AP(v.getMatching(),d)){
-						v.setMatching(e);
-						e.setMatching(v);
-						v.setSolvableMatching(null);
-						e.setSolvableMatching(null);
-						e.isUsed(false);
-						return true;
-					}
-				}else if(!v.getMatching().isVisited()){
-					int newD = d-1;
-					//System.out.println("Looking for path at depth US->S: " + newD);
-					//System.out.println(e.getName()+ " -> " + v.getSolvableMatching().getName());
-					if(AP(v.getSolvableMatching(),newD)){
-						v.setMatching(e);
-						e.setMatching(v);
-						v.setSolvableMatching(null);
-						e.setSolvableMatching(null);
-						e.isUsed(false);
-						return true;
-					}
-				}
-			}
-		}
-		e.setVisited(false);
-		return false;
-	}
-	
-	public boolean SAPBuild(Eq e, ArrayList<Eq> visitedEquations, ArrayList<Var> visitedVariables) {
-		e.setVisited(true);
-		visitedEquations.add(e);
 		for (Var v : e.getSolvableVariables()) {
-			if (v.getSolvableMatching()==null) {
-				if(v.getMatching()==null){
-					v.setSolvableMatching(e);
-					e.setSolvableMatching(v);
-					v.setMatching(e);
-					e.setMatching(v);
+			if(!v.isVisited()){
+				Eq ee = v.getSolvableMatching();
+				if(!ee.isVisited()){
+					int vars = ee.getVariables().size();
+					for(Var vv: ee.getSolvableVariables()){
+						if(vv.isTear()){
+							vars = vars-1;
+						}
+					}
+					int sVars = ee.getSolvableVariables().size();
+					if(vars>maxVars || (vars==maxVars && sVars < minSVars)){
+						maxVars = vars;
+						minSVars = minSVars;
+						ee.isRes(true);
+						
+					}
+			
 				}
-			} else if (!v.isVisited()) {
-				v.setVisited(true);
-				visitedVariables.add(v);
-				if (SAPBuild(v.getSolvableMatching(),visitedEquations,visitedVariables)) {
-					v.setSolvableMatching(e);
-					e.setSolvableMatching(v);
-					v.setMatching(e);
-					e.setMatching(v);
-					return true;	
-				} 
 			}
 		}
-		return false;
+		return 0;
 	}
-	
-	public boolean hasSAP(Eq e, ArrayList<Eq> visitedEquations, ArrayList<Var> visitedVariables) {
-		e.setVisited(true);
-		visitedEquations.add(e);
-		for (Var v : e.getSolvableVariables()) {
-			if (v.getSolvableMatching()==null) {
-				return true;
-			} else if (!v.isVisited()) {
-				v.setVisited(true);
-				visitedVariables.add(v);
-				if (hasAP(v.getSolvableMatching(),visitedEquations,visitedVariables)) {
-					return true;	
-				} 
-			}
-		}
-		return false;
-	}	
-	
 	
 	public IndexReductionResult reduceIndex(boolean resetMatching) {
 		if (resetMatching) {
@@ -1077,6 +910,7 @@ public class BiPGraph {
 		ArrayList<Var> l = new ArrayList<Var>();
 		for (Var v : variableMap.values()) {
 			if (v.getSolvableMatching()==null) {
+				v.isTear(true);
 				l.add(v);
 			}
 		}
@@ -1102,67 +936,6 @@ public class BiPGraph {
 		}
 		return l;
 	}
-	
-	public ArrayList<Eq> removeTearingPair(Eq res, Var tear, boolean unmatch){
-		ArrayList<Eq> alteredEquations = new ArrayList<Eq>();
-		equations.remove(res);
-		equationMap.remove(res.getName());
-		removeFromEquationIndexMap(res.getEquation(),res);
-		variableMap.remove(tear.getName());	
-		if(unmatch){
-			// Set the matching to null for the newly unmatched equation and variable
-			// (these were matched with tear and res before)
-			res.getMatching().setMatching(null);
-			if(res.getSolvableMatching()!=null){
-				res.getSolvableMatching().setSolvableMatching(null);
-			}
-			tear.getMatching().setMatching(null);
-			if(tear.getSolvableMatching()!=null){
-				tear.getSolvableMatching().setSolvableMatching(null);
-			}
-		}
-		// Remove tear from the remaining equations
-		for (Eq e : getEquations()) {
-			if(e.getVariables().remove(tear)){
-				alteredEquations.add(e);
-				e.getSolvableVariables().remove(tear);
-			}
-		}
-		return alteredEquations;
-	}
-	
-	public void reinsertTearingPair(Eq res, Var tear, ArrayList<Eq> alteredEquations, boolean match){
-		variableMap.put(tear.getName(),tear);
-		equations.add(res);
-		equationMap.put(res.getName(),res);
-		insertIntoEquationIndexMap(res.getEquation(),res);
-		for(Eq e: alteredEquations){
-			e.addVariable(tear);
-			if(e.getEquation().isSolved(tear.getName())){
-				e.addSolvableVariable(tear);
-			}
-		}
-		if(match){
-			// If an augmentPath was found, the matchings has been altered and a new one must be found.
-			tear.setMatching(null);
-			tear.setSolvableMatching(null);
-			res.setMatching(null);
-			res.setSolvableMatching(null);
-			lightReset();
-			SAP(res, new ArrayList<Eq>(), new ArrayList<Var>());
-		} else {
-			// Set matching as it was before the removal of the tearing pair. 
-			res.getMatching().setMatching(res);
-			if(res.getSolvableMatching()!=null){
-				res.getSolvableMatching().setSolvableMatching(res);
-			}
-			tear.getMatching().setMatching(tear);
-			if(tear.getSolvableMatching()!=null){
-				tear.getSolvableMatching().setSolvableMatching(tear);
-			}
-		}
-	}
-	
 	
 	private int index = 0;
     private Stack<Eq> S;
@@ -1323,6 +1096,54 @@ public class BiPGraph {
 		}
 	}
 	
+	public LinkedList<Stack<Eq>> computeTearBlocks() {
+		index = 0;
+        S = new Stack<Eq>();
+        components = new LinkedList<Stack<Eq>>();
+        tarjanReset();
+        
+        for (Eq e : getEquations()) {
+        	if (!e.isVisited() && !e.isRes()) {
+        		tarjanTear(e);
+        	}
+        }
+        return components;	
+	}
+	
+	public void tarjanTear(Eq e) {
+		S.add(e);
+		e.setTarjanNbr(index);
+		e.setTarjanLowLink(index);
+		e.setVisited(true);
+		index++;
+		for (Var v : e.getVariables()) {
+			if(!v.isTear()){
+				Eq ee = v.getSolvableMatching();
+				if (!(e==ee)) {
+					if (!ee.isVisited()) {
+						tarjanTear(ee);
+						e.setTarjanLowLink(Math.min(
+								e.getTarjanLowLink(),ee.getTarjanLowLink()));
+					} else if (S.contains(ee)) {
+						e.setTarjanLowLink(Math.min(
+								e.getTarjanLowLink(),ee.getTarjanNbr()));
+					}
+				}
+			}
+ 		}
+		if (e.getTarjanNbr()==e.getTarjanLowLink()) {
+			Stack<Eq> component = new Stack<Eq>();
+			boolean done = false;
+			while (!done) {
+				Eq ee = S.pop();
+				component.add(ee);
+				if (ee==e) {
+					done = true;
+				}
+			}
+			components.add(component);
+		}
+	}
 	
 	/*
 	public void randomTest(int n_eq, int n_var, int n_ed) {
@@ -1504,6 +1325,280 @@ public class BiPGraph {
 		return str.toString();
 	}
 	
+	/*
+	public boolean hasAP(Eq e, ArrayList<Eq> visitedEquations, ArrayList<Var> visitedVariables) {
+		e.setVisited(true);
+		visitedEquations.add(e);
+		for (Var v : e.getVariables()) {
+			if (v.getMatching()==null) {
+				return true;
+			} else if (!v.isVisited()) {
+				v.setVisited(true);
+				visitedVariables.add(v);
+				if (hasAP(v.getSolvableMatching(),visitedEquations,visitedVariables)) {
+					return true;	
+				} 
+			}
+		}
+		return false;
+	}	
+	
+	public boolean SAP(Eq e, ArrayList<Eq> visitedEquations, ArrayList<Var> visitedVariables) {
+		e.setVisited(true);
+		visitedEquations.add(e);
+		for (Var v : e.getSolvableVariables()) {
+			if (v.getSolvableMatching()==null) {
+				v.setSolvableMatching(e);
+				e.setSolvableMatching(v);
+				v.setMatching(e);
+				e.setMatching(v);
+				return true;
+			} else if (!v.isVisited()) {
+				v.setVisited(true);
+				visitedVariables.add(v);
+				if (SAP(v.getSolvableMatching(),visitedEquations,visitedVariables)) {
+					v.setSolvableMatching(e);
+					e.setSolvableMatching(v);
+					v.setMatching(e);
+					e.setMatching(v);
+					return true;	
+				} 
+			}
+		}
+		return false;
+	}
+
+	public void resetAP(){
+		for (Eq e : getEquations()) {
+			e.setVisited(false);
+			e.setDepth(0);
+		}		
+	}
+	
+	public boolean initAP(Eq e){
+		Var match = e.getMatching();
+		e.setMatching(null);
+		match.setMatching(null);
+		e.isUsed(true);
+		resetAP();
+		for(Var v: e.getSolvableVariables()){
+			if(v.getSolvableMatching()==null){
+				System.out.println("START FROM DEPTH 2");
+				if(AP(v.getSolvableMatching(),2)){
+					v.setSolvableMatching(e);
+					e.setSolvableMatching(v);
+					v.setMatching(e);
+					e.setMatching(v);
+					return true;
+				}
+			}else{
+				System.out.println("START FROM DEPTH 1");
+				if(AP(v.getSolvableMatching(),1)){
+					v.setSolvableMatching(e);
+					e.setSolvableMatching(v);
+					v.setMatching(e);
+					e.setMatching(v);
+					return true;
+				}
+			}
+		}
+		match.setMatching(e);
+		e.setMatching(match);
+		return false;	
+	}
+	
+	public boolean AP(Eq e, int d){
+		if(e.isVisited()){
+			System.out.println("This should not be possible anymore....");
+			return false;
+		}
+		if(e.getDepth()>=d){
+			//System.out.println("This equation has been visited in a deeper depth.");
+			return false;
+		}
+		e.setVisited(true);
+		if(d>e.getDepth()){
+			e.setDepth(d);
+			//System.out.println("Equation " + e.getName()+ " now has depth: " +d);
+		}
+		for(Var v: e.getVariables()){
+			if(e.getEquation().isSolved(v.getName(),true)){
+				if(v.getMatching()== null){
+					//System.out.println("Found unmatched and Solvable matched it!");
+					v.setSolvableMatching(e);
+					e.setSolvableMatching(v);
+					v.setMatching(e);
+					e.setMatching(v);
+					return true;
+				}else if(v.getSolvableMatching()==null && !v.getMatching().isVisited()){
+					int newD=d+1;
+					//System.out.println("Looking for path at depth S->US: " + newD);
+					//System.out.print(e.getName()+ " -> " + v.getMatching().getName());
+					//System.out.println(" via " + v.getName());
+					if(AP(v.getMatching(),newD)){
+						v.setSolvableMatching(e);
+						e.setSolvableMatching(v);
+						v.setMatching(e);
+						e.setMatching(v);
+						return true;
+					}
+				}else if(!v.getMatching().isVisited()){
+					//System.out.println("Looking for path at depth S->S: " +d);
+					//System.out.println(e.getName()+ " -> " + v.getSolvableMatching().getName());
+					if(AP(v.getSolvableMatching(),d)){
+						v.setSolvableMatching(e);
+						e.setSolvableMatching(v);
+						v.setMatching(e);
+						e.setMatching(v);
+						return true;
+					}
+				}
+			}else if(d>1){ // (if not solvable)
+				if(v.getMatching()== null){
+					//System.out.println("Found unmatched and matched it");
+					v.setMatching(e);
+					e.setMatching(v);
+					v.setSolvableMatching(null);
+					e.setSolvableMatching(null);
+					e.isUsed(false);
+					return true;
+				}else if(v.getSolvableMatching()==null && !v.getMatching().isVisited()){
+					//System.out.println("Looking for path at depth US->US: " + d);
+					//System.out.println(e.getName()+ " -> " + v.getMatching().getName());
+					if(AP(v.getMatching(),d)){
+						v.setMatching(e);
+						e.setMatching(v);
+						v.setSolvableMatching(null);
+						e.setSolvableMatching(null);
+						e.isUsed(false);
+						return true;
+					}
+				}else if(!v.getMatching().isVisited()){
+					int newD = d-1;
+					//System.out.println("Looking for path at depth US->S: " + newD);
+					//System.out.println(e.getName()+ " -> " + v.getSolvableMatching().getName());
+					if(AP(v.getSolvableMatching(),newD)){
+						v.setMatching(e);
+						e.setMatching(v);
+						v.setSolvableMatching(null);
+						e.setSolvableMatching(null);
+						e.isUsed(false);
+						return true;
+					}
+				}
+			}
+		}
+		e.setVisited(false);
+		return false;
+	}
+
+	public boolean SAPBuild(Eq e, ArrayList<Eq> visitedEquations, ArrayList<Var> visitedVariables) {
+		e.setVisited(true);
+		visitedEquations.add(e);
+		for (Var v : e.getSolvableVariables()) {
+			if (v.getSolvableMatching()==null) {
+				if(v.getMatching()==null){
+					v.setSolvableMatching(e);
+					e.setSolvableMatching(v);
+					v.setMatching(e);
+					e.setMatching(v);
+				}
+			} else if (!v.isVisited()) {
+				v.setVisited(true);
+				visitedVariables.add(v);
+				if (SAPBuild(v.getSolvableMatching(),visitedEquations,visitedVariables)) {
+					v.setSolvableMatching(e);
+					e.setSolvableMatching(v);
+					v.setMatching(e);
+					e.setMatching(v);
+					return true;	
+				} 
+			}
+		}
+		return false;
+	}
+	
+	public boolean hasSAP(Eq e, ArrayList<Eq> visitedEquations, ArrayList<Var> visitedVariables) {
+		e.setVisited(true);
+		visitedEquations.add(e);
+		for (Var v : e.getSolvableVariables()) {
+			if (v.getSolvableMatching()==null) {
+				return true;
+			} else if (!v.isVisited()) {
+				v.setVisited(true);
+				visitedVariables.add(v);
+				if (hasAP(v.getSolvableMatching(),visitedEquations,visitedVariables)) {
+					return true;	
+				} 
+			}
+		}
+		return false;
+	}	
+
+	public ArrayList<Eq> removeTearingPair(Eq res, Var tear, boolean unmatch){
+		ArrayList<Eq> alteredEquations = new ArrayList<Eq>();
+		equations.remove(res);
+		equationMap.remove(res.getName());
+		removeFromEquationIndexMap(res.getEquation(),res);
+		variableMap.remove(tear.getName());	
+		if(unmatch){
+			// Set the matching to null for the newly unmatched equation and variable
+			// (these were matched with tear and res before)
+			res.getMatching().setMatching(null);
+			if(res.getSolvableMatching()!=null){
+				res.getSolvableMatching().setSolvableMatching(null);
+			}
+			tear.getMatching().setMatching(null);
+			if(tear.getSolvableMatching()!=null){
+				tear.getSolvableMatching().setSolvableMatching(null);
+			}
+		}
+		// Remove tear from the remaining equations
+		for (Eq e : getEquations()) {
+			if(e.getVariables().remove(tear)){
+				alteredEquations.add(e);
+				e.getSolvableVariables().remove(tear);
+			}
+		}
+		return alteredEquations;
+	}
+	
+	public void reinsertTearingPair(Eq res, Var tear, ArrayList<Eq> alteredEquations, boolean match){
+		variableMap.put(tear.getName(),tear);
+		equations.add(res);
+		equationMap.put(res.getName(),res);
+		insertIntoEquationIndexMap(res.getEquation(),res);
+		for(Eq e: alteredEquations){
+			e.addVariable(tear);
+			if(e.getEquation().isSolved(tear.getName())){
+				e.addSolvableVariable(tear);
+			}
+		}
+		if(match){
+			// If an augmentPath was found, the matchings has been altered and a new one must be found.
+			tear.setMatching(null);
+			tear.setSolvableMatching(null);
+			res.setMatching(null);
+			res.setSolvableMatching(null);
+			lightReset();
+			SAP(res, new ArrayList<Eq>(), new ArrayList<Var>());
+		} else {
+			// Set matching as it was before the removal of the tearing pair. 
+			res.getMatching().setMatching(res);
+			if(res.getSolvableMatching()!=null){
+				res.getSolvableMatching().setSolvableMatching(res);
+			}
+			tear.getMatching().setMatching(tear);
+			if(tear.getSolvableMatching()!=null){
+				tear.getSolvableMatching().setSolvableMatching(tear);
+			}
+		}
+	}
+	*/
+	
+	
+	
+	
     class Edge {
     	private Var variable;
     	private Eq equation;
@@ -1550,7 +1645,7 @@ public class Eq {
     private FAbstractEquation eqn;
 	private Eq meDifferentiated = null;
 	private Eq meIntegrated = null;
-	private boolean isUsed = false;
+	private boolean isRes = false;
 	private int tarjanNbr = 0;
     private int tarjanLowLink = 0;
     private int depth = 1;
@@ -1710,12 +1805,12 @@ public class Eq {
 		this.solvableMatching = v;
 	}
 	
-	public void isUsed(boolean bol){
-		this.isUsed=bol;
+	public void isRes(boolean bol){
+		this.isRes=bol;
 	}
 	
-	public boolean isUsed(){
-		return this.isUsed;
+	public boolean isRes(){
+		return this.isRes;
 	}
 	
 	public int getDepth(){
@@ -1739,7 +1834,8 @@ public class Var {
 	private Var meDifferentiated = null; // A reference to this variable differentiated once
 	private Var meIntegrated = null;
 	private int nbrV = 0;
-	private boolean isUsed;
+	private int nbrSV = 0;
+	private boolean isTear=false;
 	
 	public Var(String name, String description) {
 		this.name = name;
@@ -1832,8 +1928,16 @@ public class Var {
 		this.nbrV++;
 	}
 	
+	public void solvableOccurrence(){
+		this.nbrSV++;
+	}
+	
 	public int getNbrV(){
 		return nbrV;
+	}
+	
+	public int getNbrSV(){
+		return nbrSV;
 	}
 	
 	public Eq getSolvableMatching() {
@@ -1848,12 +1952,12 @@ public class Var {
 		return getName();
 	}
 	
-	public void isUsed(boolean bol){
-		this.isUsed=bol;
+	public void isTear(boolean bol){
+		this.isTear=bol;
 	}
 	
-	public boolean isUsed(){
-		return this.isUsed;
+	public boolean isTear(){
+		return this.isTear;
 	}
 	
 }

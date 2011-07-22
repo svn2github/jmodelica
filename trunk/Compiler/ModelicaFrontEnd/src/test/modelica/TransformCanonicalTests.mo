@@ -899,6 +899,87 @@ equation
  y = x + 1;
 end AliasTest28;
 
+model AliasTest29
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="AliasTest29",
+         description="",
+         flatModel="
+fclass TransformCanonicalTests.AliasTest29
+ Real pml1;
+ Real pml3;
+ Real mpl1;
+ Real mpl3;
+ Real mml1;
+ Real mml3;
+ Real pmr1;
+ Real pmr3;
+ Real mpr1;
+ Real mpr3;
+ Real mmr1;
+ Real mmr3;
+equation
+ pml3 + ( pml1 ) * ( pml1 ) = 0;
+ cos(pml1) + ( pml3 ) * ( pml3 ) = 0;
+ mpl3 + ( mpl1 ) * ( mpl1 ) = 0;
+ cos(mpl1) + ( mpl3 ) * ( mpl3 ) = 0;
+ mml3 + (  - ( mml1 ) ) * (  - ( mml1 ) ) = 0;
+ cos(mml1) + ( mml3 ) * ( mml3 ) = 0;
+ pmr3 + ( pmr1 ) * ( pmr1 ) = 0;
+ cos(pmr1) + ( pmr3 ) * ( pmr3 ) = 0;
+ mpr3 + ( mpr1 ) * ( mpr1 ) = 0;
+ cos(mpr1) + ( mpr3 ) * ( mpr3 ) = 0;
+ mmr3 + (  - ( mmr1 ) ) * (  - ( mmr1 ) ) = 0;
+ cos(mmr1) + ( mmr3 ) * ( mmr3 ) = 0;
+end TransformCanonicalTests.AliasTest29;
+")})));
+
+ Real pml1;
+ Real pml2;
+ Real pml3;
+ Real mpl1;
+ Real mpl2;
+ Real mpl3;
+ Real mml1;
+ Real mml2;
+ Real mml3;
+ Real pmr1;
+ Real pmr2;
+ Real pmr3;
+ Real mpr1;
+ Real mpr2;
+ Real mpr3;
+ Real mmr1;
+ Real mmr2;
+ Real mmr3;
+equation
+ pml1-pml2=0;
+ pml3+pml2*pml2=0;
+ cos(pml1)+pml3*pml3=0;
+
+ -mpl1+mpl2=0;
+ mpl3+mpl2*mpl2=0;
+ cos(mpl1)+mpl3*mpl3=0;
+
+ -mml1-mml2=0;
+ mml3+mml2*mml2=0;
+ cos(mml1)+mml3*mml3=0;
+
+ 0=pmr1-pmr2;
+ pmr3+pmr2*pmr2=0;
+ cos(pmr1)+pmr3*pmr3=0;
+
+ 0=-mpr1+mpr2;
+ mpr3+mpr2*mpr2=0;
+ cos(mpr1)+mpr3*mpr3=0;
+
+ 0=-mmr1-mmr2;
+ mmr3+mmr2*mmr2=0;
+  cos(mmr1)+mmr3*mmr3=0;
+end AliasTest29;
+
+
+
 model ParameterBindingExpTest1_Err
      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.ErrorTestCase(name="ParameterBindingExpTest1_Err",
