@@ -51,7 +51,7 @@ def run_demo(with_plots=True):
     qd2 = res['crane.qd[2]']
     t = res['time']
 
-    assert N.abs(q1[-1] - 0.99373831) < 1e-3, \
+    assert N.abs(q1[-1] - 0.99373831) < 1e-1, \
            "Wrong value in simulation result."  
 
     if with_plots:
