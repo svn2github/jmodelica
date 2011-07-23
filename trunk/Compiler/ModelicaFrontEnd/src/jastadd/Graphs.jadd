@@ -33,7 +33,7 @@ public class BiPGraph {
 	public static int ALGEBRAIC_VARIABLES = 4;
 	public static int DISCRETE_PRE_VARIABLES = 8;
 
-	public static int MAX_N_EQ_DIFFS = 10;
+	public static int MAX_N_EQ_DIFFS = 5;
 
 	private String name;
 	private String description;
@@ -576,7 +576,6 @@ public class BiPGraph {
 		Eq eqToMatch;
 		
 		boolean pathFound = false;		
-		int n_eq_diffs = 0; // Number of times a single equation has been differentiated	
 		ArrayList<FVariable> newDiffedVars = new ArrayList<FVariable>();	
 		// Algoritm step numbering from the original Pantelides paper		
 		// Loop over all equations (step 3)
@@ -585,7 +584,6 @@ public class BiPGraph {
 			if (e.getMatching()==null && e.getMeDifferentiated()==null) {
 				eqToMatch = e; // Step 3a
 				pathFound = false; // Step
-				n_eq_diffs = 0;
 				while (!pathFound) { // Step 3b
 					// Since the states are not added to the graph,
 					// Step 3b-1 is skipped and is done at the end of 
@@ -614,17 +612,6 @@ public class BiPGraph {
 					}
 					
 					if (!pathFound) { // Step 3b-5
-						n_eq_diffs++;
-						if (n_eq_diffs > MAX_N_EQ_DIFFS) { // Reached maximum number of differentiations of a single equation?
-							// Remove variables that were added
-							for (FVariable v : newDiffedVars) {
-								int ind = v.myFClass().getFVariableList().getIndexOfChild(v);
-								if (ind>=0) {
-									v.myFClass().getFVariableList().removeChild(ind);
-								}
-							}
-							return null;
-						}
 						for (Var vv : visitedVariables) { // Loop over all visited variables, Step 3b-5i
 						    // Create a new differentiated variable
 							FVariable newVar = vv.getVariable().myFClass().addFDerivativeVariable(vv.getVariable());
@@ -639,6 +626,15 @@ public class BiPGraph {
 						}
 						for (Eq ee : visitedEquations) { // Step 3b-5ii
 							FAbstractEquation eee = ee.getEquation();
+							if (ee.numDifferentiations() > MAX_N_EQ_DIFFS) {
+								for (FVariable v : newDiffedVars) {
+									int ind = v.myFClass().getFVariableList().getIndexOfChild(v);
+									if (ind>=0) {
+										v.myFClass().getFVariableList().removeChild(ind);
+									}
+								}
+								return null;
+							}
 							// Create a new differentiated equation
 							FAbstractEquation deee = eee.diff("time");
 							result.addEquation(deee);
@@ -1741,6 +1737,10 @@ public class Eq {
 
 	public void setTarjanLowLink(int tarjanLowLink) {
 		this.tarjanLowLink = tarjanLowLink;
+	}
+
+	public int numDifferentiations() {
+		return getMeIntegrated()==null? 0: getMeIntegrated().numDifferentiations() + 1;	
 	}
 
 	public void setMeDifferentiated(Eq e) {

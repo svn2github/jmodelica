@@ -3798,6 +3798,69 @@ equation
  x1 + x2^p + x2^1.4 = 0;
   end IndexReduction22_Pow;
 
+  model IndexReduction23_BasicVolume_Err
+   annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+      JModelica.UnitTesting.ErrorTestCase(name="IndexReduction23_BasicVolume_Err",
+        description="Test error messages for unbalanced systems.",
+                                               errorMessage=
+"2 error(s), 0 compliance error(s) and 0 warning(s) found:
+
+Error: in file '/var/folders/vr/vrYe4eKOEZa+6nbQYkr8vU++-ZQ/-Tmp-/jmc2815301804134878885out/resources/BasicVolume.mof':
+Semantic error at line 0, column 0:
+  The DAE system has 12 equations and 11 free variables.
+
+Error: in file '/var/folders/vr/vrYe4eKOEZa+6nbQYkr8vU++-ZQ/-Tmp-/jmc2815301804134878885out/resources/BasicVolume.mof':
+Semantic error at line 0, column 0:
+  The system is structurally singuar. The following equation(s) could not be matched to any variable:
+   u = u_0 + ( c_v ) * ( T - ( T_0 ) )
+")})));
+
+import Modelica.SIunits.*;
+parameter SpecificInternalEnergy u_0 = 209058;
+parameter SpecificHeatCapacity c_v = 717;
+parameter Temperature T_0 = 293;
+parameter Mass m_0 = 0.00119;
+parameter SpecificHeatCapacity R = 287;
+Pressure P;
+Volume V;
+Mass m(start=m_0);
+Temperature T;
+MassFlowRate mdot_in;
+MassFlowRate mdot_out;
+SpecificEnthalpy h_in, h_out;
+SpecificEnthalpy h;
+Enthalpy H;
+SpecificInternalEnergy u;
+InternalEnergy U(start=u_0*m_0);
+equation
+
+// Boundary equations
+V=1e-3;
+T=293;
+mdot_in=0.1e-3;
+mdot_out=0.01e-3;
+h_in = 300190;
+h_out = h;
+
+// Conservation of mass
+der(m) = mdot_in-mdot_out;
+
+// Conservation of energy
+der(U) = h_in*mdot_in - h_out*mdot_out;
+
+// Specific internal energy (ideal gas)
+u = U/m;
+u = u_0+c_v*(T-T_0);
+
+// Specific enthalpy
+H = U+P*V;
+h = H/m;
+
+// Equation of state (ideal gas)
+P*V=m*R*T;  
+  end IndexReduction23_BasicVolume_Err;
+
+
 model DuplicateVariables1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
