@@ -21,22 +21,80 @@ Module containing polynomial evaluations, weight calculations etc. .
 import numpy as N
 import numpy.linalg
 import scipy.special as SP
+        
+class RadauPol(object):
+    
+    """
+    Represents a Lagrange polynomial used for Radau collocation.
+    
+    Data attributes::
+    
+        n --
+            Degree.
+            Type: int
+    
+        p --
+            Roots.
+            Type: rank 1 ndarray
+            
+        w --
+            Quadrature weights.
+            Type: rank 1 ndarray
+            
+        der_vals --
+            Derivative values for each basis polynomial at the roots.
+            der_vals[j, k] contains the derivative of basis polynomial j
+            evaluated at root k.
+            Type: rank 2 ndarray
+    """
+    
+    def __init__(self, n):
+        """
+        Parameters::
+        
+            n --
+            Degree.
+            Type: int
+        """
+        self.n = n
+        self._calc_p()
+        self._calc_w()
+        self._calc_der_vals()
+        
+    def _calc_p(self):
+        # Calculate the roots for the non-shifted Gauss-Radau polynomial
+        r = jacobi_a1_b0_roots(self.n - 1)
+        
+        # Shift the roots
+        p = (r + 1) / 2
+        
+        # Add roots for tau = 0 and tau = 1
+        p = N.hstack([0., (r + 1) / 2, 1.])
+        
+        # Store roots as data attribute
+        self.p = p
+        
+    def _calc_w(self):
+        # Calculate the weights for the non-shifted Gauss-Radau polynomial
+        w = gauss_quadrature_weights("LGR", self.n)
+        
+        # Shift the weights
+        w /= 2
+        
+        # Store weights as data attribute
+        self.w = w
+    
+    def _calc_der_vals(self):
+        # Evaluate derivatives
+        der_vals = N.empty([self.n + 1, self.n + 1])
+        for j in xrange(self.n + 1):
+            for k in xrange(self.n + 1):
+                der_vals[j, k] = lagrange_derivative_eval(self.p, j, self.p[k])
+        
+        # Store derivative values as data attribute
+        self.der_vals = der_vals
 
-class RadauPol:
-
-    def eval_lp(self,i,x):
-        val = 0
-        for j in range(self.n):
-            val += self.lp_coeffs()[i,j]*(x**(self.n-j-1))
-        return val
-
-    def eval_lpp(self,i,x):
-        val = 0
-        for j in range(self.n+1):
-            val += self.lp_coeffs()[i,j]*(x**(self.n-j))
-        return val
-
-class RadauPol3(RadauPol):
+class RadauPol3(object):
 
     def __init__(self):
         self.n = 3
@@ -89,6 +147,18 @@ class RadauPol3(RadauPol):
                         [1.0048809399827414e+01, 3.2247448713915885e+00, -3.5678400846904061e+00, 5.5319726474218047e+00],
                         [-1.3821427331607485e+00, 1.1678400846904053e+00, 7.7525512860840973e-01, -7.5319726474218065e+00],
                         [3.3333333333333337e-01, -2.5319726474218085e-01, 1.0531972647421810e+00, 5.0000000000000000e+00]])
+                        
+    def eval_lp(self,i,x):
+        val = 0
+        for j in range(self.n):
+            val += self.lp_coeffs()[i,j]*(x**(self.n-j-1))
+        return val
+
+    def eval_lpp(self,i,x):
+        val = 0
+        for j in range(self.n+1):
+            val += self.lp_coeffs()[i,j]*(x**(self.n-j))
+        return val
         
 def lagrange(R):
     """
@@ -433,6 +503,8 @@ def jacobi_a1_b0_roots(K):
         http://mathworld.wolfram.com/JacobiPolynomial.html (eq:11, 12) 
     
     """
+    if K == 0:
+        return N.array([])
     A = [1.0/(2.0*i+1.0)*N.sqrt(i*(i+1.0)) for i in range(1,K)]
     B = [-1.0/((2.0*i+1.0)*(2.0*i+3.0)) for i in range(0,K)]
      

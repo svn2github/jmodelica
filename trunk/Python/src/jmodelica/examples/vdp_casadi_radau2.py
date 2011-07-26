@@ -32,8 +32,8 @@ def run_demo(with_plots=True, graph="SX"):
     model = CasadiModel(jn)
 
     opts = model.optimize_options(algorithm="CasadiRadau2")
-    opts['n_e'] = 80
-    opts['n_cp'] = 1
+    opts['n_e'] = 50
+    opts['n_cp'] = 3
     opts['graph'] = graph
 
     res = model.optimize(algorithm="CasadiRadau2", options=opts)

@@ -117,6 +117,7 @@ def run_demo(with_plots=True, algorithm="CasadiRadau", graph="SX"):
     opts = model_casadi.optimize_options(algorithm=algorithm)
 
     opts['n_e'] = 15
+    opts['n_cp'] = 3
     opts['graph'] = graph
 
     opts['parameter_estimation_data'] = par_est_data

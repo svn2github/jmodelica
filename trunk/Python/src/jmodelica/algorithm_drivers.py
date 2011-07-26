@@ -1807,6 +1807,10 @@ class CasadiPseudoSpectralOptions(OptionBase):
         n_cp --
             Number of collocation points in each phase (element).
             Default: 20
+            
+        graph --
+            CasADi graph type. Currently the only supported graph is "SX".
+            Default: "SX"
         
         discr --
             Determines the discretization of the problem. Could be either
@@ -1937,6 +1941,10 @@ class CasadiRadauOptions(OptionBase):
         n_cp --
             Number of collocation points in each element.
             Default: 3
+            
+        graph --
+            CasADi graph type. Currently the only supported graph is "SX".
+            Default: "SX"
 
         init_traj --
             Variable trajectory data used for initialization of the optimization 
@@ -2118,10 +2126,6 @@ class CasadiRadau2(AlgorithmBase):
     """
     The algorithm is based on orthogonal collocation and relies on the solver 
     IPOPT for solving a non-linear programming problem.
-    
-    Limitations::
-    
-        Only first order Radau (implicit Euler) is currently supported.
     """
     def __init__(self, model, options):
         """
@@ -2179,16 +2183,7 @@ class CasadiRadau2(AlgorithmBase):
         """ 
         Helper function that sets options for the CasadiRadau2 algorithm.
         """
-        self.n_e = self.options['n_e']
-        self.n_cp = self.options['n_cp']
-        if self.n_cp != 1:
-            raise NotImplementedError("CasadiRadau2 currently only " + \
-                    "supports 1 collocation point.")
-        
-        self.graph = self.options['graph']
-        self.init_traj = self.options['init_traj']
-        self.parameter_estimation_data = \
-                self.options['parameter_estimation_data']
+        self.__dict__.update(self.options)
         
         # solver options
         self.solver_options = self.options['IPOPT_options']
@@ -2245,8 +2240,23 @@ class CasadiRadau2Options(OptionBase):
     Collocation algorithm options::
     
         n_e --
-            Number of phases of the finite element mesh.
+            Number of finite elements.
             Default: 50
+            
+        n_cp --
+            Number of collocation points in each element.
+            Default: 3
+            
+        graph --
+            CasADi graph type. Possible values are "SX", "MX" and
+            "expanded_MX".
+            Default: "SX"
+
+        init_traj --
+            Variable trajectory data used for initialization of the
+            optimization problem. The data is represented by an object of the
+            type jmodelica.io.DymolaResultTextual.
+            Default: None
 
     Options are set by using the syntax for dictionaries::
 
@@ -2275,10 +2285,10 @@ class CasadiRadau2Options(OptionBase):
     def __init__(self, *args, **kw):
         _defaults= {
                 'n_e': 50, 
-                'n_cp': 1,
+                'n_cp': 3,
+                'graph': 'SX',
                 'init_traj': None,
                 'parameter_estimation_data': None,
-                'graph': 'SX',
                 'IPOPT_options':{
                         'max_iter': 1000,
                         'derivative_test': 'none'}}

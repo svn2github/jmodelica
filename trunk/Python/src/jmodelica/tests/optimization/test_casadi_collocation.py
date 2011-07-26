@@ -83,23 +83,46 @@ class TestRadau2:
     
     @testattr(casadi = True)
     def test_radau2_vdp(self):
-        """Test optimizing the VDP."""
+        """Test optimizing the VDP with varying n_e and n_cp."""
         jn = compile_casadi("VDP_pack.VDP_Opt2",
                             os.path.join(path_to_mos, "VDP.mop"))
         vdp = CasadiModel(jn)
         
         opts = vdp.optimize_options(algorithm="CasadiRadau2")
-        opts['n_e'] = 75
-        opts['n_cp'] = 1
         opts['graph'] = "SX"
-        opts['IPOPT_options']['max_iter'] = 1500
+        
+        # n_cp = 1
+        opts['n_e'] = 100
+        opts['n_cp'] = 1
         res = vdp.optimize(algorithm="CasadiRadau2", options=opts)
         
         cost = res["cost"][-1]
         u = res["u"][1:]
         u_norm = N.linalg.norm(u) / N.sqrt(len(u))
-        nose.tools.assert_almost_equal(cost, 1.7886611023e1, places=3)
-        nose.tools.assert_almost_equal(u_norm, 2.4938916260e-1, places=3)
+        nose.tools.assert_almost_equal(cost, 1.906718422888e1, places=3)
+        nose.tools.assert_almost_equal(u_norm, 2.576417883844e-1, places=3)
+        
+        # n_cp = 3
+        opts['n_e'] = 50
+        opts['n_cp'] = 3
+        res = vdp.optimize(algorithm="CasadiRadau2", options=opts)
+        
+        cost = res["cost"][-1]
+        u = res["u"][1:]
+        u_norm = N.linalg.norm(u) / N.sqrt(len(u))
+        nose.tools.assert_almost_equal(cost, 2.3469088662e1, places=3)
+        nose.tools.assert_almost_equal(u_norm, 2.851435918954e-1, places=3)
+        
+        # n_cp = 8
+        opts['n_e'] = 20
+        opts['n_cp'] = 8
+        res = vdp.optimize(algorithm="CasadiRadau2", options=opts)
+        
+        cost = res["cost"][-1]
+        u = res["u"][1:]
+        u_norm = N.linalg.norm(u) / N.sqrt(len(u))
+        nose.tools.assert_almost_equal(cost, 2.3469088662e1, places=3)
+        nose.tools.assert_almost_equal(u_norm, 2.7989115974e-1, places=3)
     
     @testattr(casadi = True)
     def test_radau2_cstr_example(self):

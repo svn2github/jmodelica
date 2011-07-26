@@ -1148,6 +1148,9 @@ class Radau2Collocator(CasadiCollocator):
         for i in xrange(1, self.n_e + 1):
             self.h[i] = (self.ocp.tf - self.ocp.t0) / self.n_e
         
+        # Define polynomial for representation of solutions
+        self.pol = RadauPol(self.n_cp)
+        
         # Create the NLP problem
         self._create_nlp_variables()
         self._create_collocation_constraints()
@@ -1258,7 +1261,6 @@ class Radau2Collocator(CasadiCollocator):
             raise ValueError('Unknown CasADi graph %s.' % graph)
             
         # Create dict and list for storage of time points
-        # Must be redone for n_cp > 1!
         self.time_points = {}
         time = []
         
@@ -1277,46 +1279,51 @@ class Radau2Collocator(CasadiCollocator):
         else:
             raise ValueError('Unknown CasADi graph %s.' % graph)
         g = casadi.vertcat([g, dae_F_eval([z])[0]])
-
-        # Collocated variables for first element
-        dx_1_1 = var[1][1]['dx']
-        x_1_0 = var[1][0]['x']
-        x_1_1 = var[1][1]['x']
-        h_1 = self.h[1]
         
-        # Collocation constraint for first element, backward Euler
-        colloc_constr = x_1_1 - x_1_0 - h_1 * dx_1_1
-        g = casadi.vertcat([g, colloc_constr])
+        # u_1_0 should be interpolated here, fix later
         
-        # DAE constraints for first element
-        t = time[-1] + self.h[1]
-        self.time_points[1][1] = t
-        time += [t]
+        # Create list where element k is x_i_k
+        x_i = [var[1][k]['x'] for k in xrange(self.n_cp + 1)]
+        
+        # Constraints for first element
         for k in xrange(1, self.n_cp + 1):
+            # Calculate and store time point
+            t = self.time_points[1][0] + self.h[1] * self.pol.p[k]
+            self.time_points[1][k] = t
+            time += [t]
+            
+            # Collocation constraint
+            colloc_constr = (N.sum(x_i * self.pol.der_vals[:, k]) - 
+                             self.h[1] * var[1][k]['dx'])
+            g = casadi.vertcat([g, colloc_constr])
+            
+            # DAE constraint
             z = self._get_z(1, k)
             [dae_constr] = dae_F_eval([z])
             g = casadi.vertcat([g, dae_constr])
         
         # Constraints for succeeding elements
         for i in xrange(2, self.n_e + 1):
-            # Collocated variables
-            dx_i_1 = var[i][1]['dx']
-            x_im1_1 = var[i - 1][1]['x']
-            x_i_1 = var[i][1]['x']
-            h_i = self.h[i]
-            
-            # Collocation constraint, backward Euler
-            colloc_constr = x_i_1 - x_im1_1 - h_i * dx_i_1
-            g = casadi.vertcat([g, colloc_constr])
-            
-            # Calculate and store current time
             self.time_points[i] = {}
-            t = time[-1] + self.h[i]
-            self.time_points[i][1] = t
-            time += [t]
             
-            # DAE constraints
+            # Create list where element k is x_i_k
+            # Without continuity constraints; x_i_0 = x_{i-1}_{n_cp}
+            x_i = [var[i - 1][self.n_cp]['x']]
+            x_i += [var[i][k]['x'] for k in xrange(1, self.n_cp + 1)]
+            
             for k in xrange(1, self.n_cp + 1):
+                # Calculate and store time point
+                t = (self.time_points[i - 1][self.n_cp] + 
+                     self.h[i] * self.pol.p[k])
+                self.time_points[i][k] = t
+                time += [t]
+                
+                # Collocation constraint
+                colloc_constr = (N.sum(x_i * self.pol.der_vals[:, k]) - 
+                                 self.h[i] * var[i][k]['dx'])
+                g = casadi.vertcat([g, colloc_constr])
+                
+                # DAE constraint
                 z = self._get_z(i, k)
                 [dae_constr] = dae_F_eval([z])
                 g = casadi.vertcat([g, dae_constr])
@@ -1363,12 +1370,13 @@ class Radau2Collocator(CasadiCollocator):
                 else:
                     raise ValueError("Unknown CasADi graph %s." % self.graph)
                 
-                # Evaluate Lagrange cost function on each element
-                # Must be redone for n_cp > 1
+                # Evaluate Lagrange cost function on each collocation point
                 for i in xrange(1, self.n_e + 1):
-                    t = self.time_points[i][1]
-                    z = self._get_z(i, 1)
-                    self.cost_lagrange += self.h[i] * L_eval([z])[0]
+                    for k in xrange(1, self.n_cp + 1):
+                        t = self.time_points[i][k]
+                        z = self._get_z(i, k)
+                        self.cost_lagrange += (self.h[i] * L_eval([z])[0] * 
+                                               self.pol.w[k - 1])
             
             # Sum up the two cost terms
             self.cost = self.cost_mayer + self.cost_lagrange
@@ -1419,7 +1427,7 @@ class Radau2Collocator(CasadiCollocator):
                     err = N.array(err)
                     Q = self.parameter_estimation_data.Q
                     cost_term = N.dot(N.dot(err, Q), err)
-                    self.cost += self.h[i] * cost_term
+                    self.cost += self.h[i] * cost_term * self.pol.w[k - 1]
 
         # Define NLP objective function based on graph
         if self.graph == "MX":
