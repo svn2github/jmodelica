@@ -25,16 +25,16 @@ import scipy.special as SP
 class RadauPol(object):
     
     """
-    Represents a Lagrange polynomial used for Radau collocation.
+    Handles Lagrange polynomials used for Radau collocation.
     
     Data attributes::
     
         n --
-            Degree.
+            Number of collocation points per element.
             Type: int
     
         p --
-            Roots.
+            Interpolation (collocation) points, including tau = 0.
             Type: rank 1 ndarray
             
         w --
@@ -42,9 +42,9 @@ class RadauPol(object):
             Type: rank 1 ndarray
             
         der_vals --
-            Derivative values for each basis polynomial at the roots.
-            der_vals[j, k] contains the derivative of basis polynomial j
-            evaluated at root k.
+            Derivative values for each basis polynomial at the interpolation
+            points. der_vals[j, k] contains the derivative of basis polynomial
+            j evaluated at interpolation point k.
             Type: rank 2 ndarray
     """
     
@@ -53,7 +53,7 @@ class RadauPol(object):
         Parameters::
         
             n --
-            Degree.
+            Number of collocation points per element.
             Type: int
         """
         self.n = n
@@ -68,10 +68,10 @@ class RadauPol(object):
         # Shift the roots
         p = (r + 1) / 2
         
-        # Add roots for tau = 0 and tau = 1
+        # Add interpolation points for tau = 0 and tau = 1
         p = N.hstack([0., (r + 1) / 2, 1.])
         
-        # Store roots as data attribute
+        # Store interpolation points as data attribute
         self.p = p
         
     def _calc_w(self):
@@ -93,6 +93,14 @@ class RadauPol(object):
         
         # Store derivative values as data attribute
         self.der_vals = der_vals
+        
+    def eval_basis(self, i, tau):
+        """
+        Evaluate Lagrange basis polynomial.
+        
+        Does not use the interpolation point at tau = 0.
+        """
+        return lagrange_eval(self.p[1:], i, tau)
 
 class RadauPol3(object):
 
@@ -212,7 +220,7 @@ def lagrange_eval(R, i, t):
             The point at which the polynomial should be evaluated. Double.
     
     """
-    val = N.array(1.0)
+    val = 1.0
     x   = N.array(t)
     R   = N.array(R)
     

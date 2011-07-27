@@ -25,7 +25,7 @@ import matplotlib.pyplot as plt
 # Import the JModelica.org Python packages
 from jmodelica.casadi_interface import compile_casadi, CasadiModel
 
-def run_demo(with_plots=True, graph="SX"):
+def run_demo(with_plots=True):
     """
     Demonstrate how the CasADi collocation algorithm CasadiRadau2 can be used.
     """
@@ -36,7 +36,7 @@ def run_demo(with_plots=True, graph="SX"):
     model = CasadiModel(jn)
     
     opts = model.optimize_options(algorithm="CasadiRadau2")
-    opts['graph'] = graph
+    opts['graph'] = "SX"
     
     res = model.optimize(algorithm="CasadiRadau2", options=opts)
     
@@ -56,7 +56,7 @@ def run_demo(with_plots=True, graph="SX"):
         plt.plot(time,T)
         plt.grid(True)
         plt.subplot(3,1,3)
-        plt.plot(time[1:],Tc[1:])
+        plt.plot(time,Tc)
         plt.grid(True)
         plt.show()
 

@@ -25,7 +25,7 @@ import matplotlib.pyplot as plt
 # Import the JModelica.org Python packages
 from jmodelica.casadi_interface import compile_casadi, CasadiModel
 
-def run_demo(with_plots=True, graph="SX"):
+def run_demo(with_plots=True):
     """
     Demonstrate how to solve a dynamic optimization problem based on a Van der 
     Pol oscillator system.
@@ -38,7 +38,6 @@ def run_demo(with_plots=True, graph="SX"):
 
     opts = model.optimize_options(algorithm='CasadiPseudoSpectral')
     opts['n_cp'] = 50
-    opts['graph'] = graph
     #opts['IPOPT_options']['hessian_approximation'] = 'limited-memory'
 
     res = model.optimize(algorithm='CasadiPseudoSpectral',options=opts)

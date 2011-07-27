@@ -30,7 +30,7 @@ from jmodelica.optimization.casadi_collocation import RadauCollocator, Parameter
 
 import scipy.integrate as integr
 
-def run_demo(with_plots=True, algorithm="CasadiRadau", graph="SX"):
+def run_demo(with_plots=True, algorithm="CasadiRadau"):
     """
     Demonstrate how to solve a simple parameter estimation problem.
     """
@@ -118,7 +118,6 @@ def run_demo(with_plots=True, algorithm="CasadiRadau", graph="SX"):
 
     opts['n_e'] = 15
     opts['n_cp'] = 3
-    opts['graph'] = graph
 
     opts['parameter_estimation_data'] = par_est_data
     #opts['IPOPT_options']['derivative_test'] = 'second-order'

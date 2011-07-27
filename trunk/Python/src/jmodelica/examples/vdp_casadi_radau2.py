@@ -25,7 +25,7 @@ import matplotlib.pyplot as plt
 # Import the JModelica.org Python packages
 from jmodelica.casadi_interface import compile_casadi, CasadiModel
 
-def run_demo(with_plots=True, graph="SX"):
+def run_demo(with_plots=True):
     """Demonstrate how to optimize a Van der Pol oscillator."""
     curr_dir = os.path.dirname(os.path.abspath(__file__));
     jn = compile_casadi("VDP_pack.VDP_Opt2", curr_dir + "/files/VDP.mop")
@@ -34,7 +34,6 @@ def run_demo(with_plots=True, graph="SX"):
     opts = model.optimize_options(algorithm="CasadiRadau2")
     opts['n_e'] = 50
     opts['n_cp'] = 3
-    opts['graph'] = graph
 
     res = model.optimize(algorithm="CasadiRadau2", options=opts)
     
@@ -59,7 +58,7 @@ def run_demo(with_plots=True, graph="SX"):
         plt.ylabel('x2')
         
         plt.subplot(313)
-        plt.plot(time[1:],u[1:])
+        plt.plot(time,u)
         plt.grid()
         plt.ylabel('u')
         plt.xlabel('time')

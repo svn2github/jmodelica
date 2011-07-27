@@ -922,7 +922,6 @@ class RadauCollocator(CasadiCollocator):
         num_name_hits = 0
         if len(dx_names) > 0:
             for name in dx_names:
-                print name
                 try:
                     traj = res.get_variable_data(name)
                     num_name_hits = num_name_hits + 1
@@ -1153,7 +1152,7 @@ class Radau2Collocator(CasadiCollocator):
         
         # Create the NLP problem
         self._create_nlp_variables()
-        self._create_collocation_constraints()
+        self._create_constraints()
         self._create_cost_function()
         
         super(Radau2Collocator, self).__init__(model)
@@ -1245,9 +1244,9 @@ class Radau2Collocator(CasadiCollocator):
                             self.time_points[i][k]])
         return z
         
-    def _create_collocation_constraints(self):
+    def _create_constraints(self):
         """
-        Create the collocation constraints and time points.
+        Create the constraints and time points.
         """
         # Get a local reference to variables
         var = self.var
@@ -1280,7 +1279,13 @@ class Radau2Collocator(CasadiCollocator):
             raise ValueError('Unknown CasADi graph %s.' % graph)
         g = casadi.vertcat([g, dae_F_eval([z])[0]])
         
-        # u_1_0 should be interpolated here, fix later
+        # Evaluate u_1_0 based on polynomial u^1
+        u_1_0 = 0
+        for k in xrange(1, self.n_cp + 1):
+            u_1_0 += var[1][k]['u'] * self.pol.eval_basis(k - 1, 0)
+            
+        # Add residual for u_1_0 as constraint
+        g = casadi.vertcat([g, var[1][0]['u'] - u_1_0])
         
         # Create list where element k is x_i_k
         x_i = [var[1][k]['x'] for k in xrange(self.n_cp + 1)]
