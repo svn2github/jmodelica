@@ -161,36 +161,36 @@ def test_leadtransport():
     leadtransport.run_demo(False)
     
 @testattr(casadi = True)
-def test_cstr_casadi(self):
+def test_cstr_casadi():
     """Run the CSTR CasADi example."""
     cstr_casadi.run_demo(False)
     
 @testattr(casadi = True)
-def test_cstr_casadi(self):
+def test_cstr_casadi():
     """Run the VDP CasADi example."""
     vdp_casadi.run_demo(False)
     
 @testattr(casadi = True)
-def test_parameter_estimation_1_casadi(self):
+def test_parameter_estimation_1_casadi():
     """Run the Parameter Estimation CasADi example."""
     parameter_estimation_1_casadi.run_demo(False, algorithm="CasadiRadau")
     
 @testattr(casadi = True)
-def test_cstr_casadi_radau2(self):
+def test_cstr_casadi_radau2():
     """Run the CSTR CasADi example using CasadiRadau2."""
     cstr_casadi_radau2.run_demo(False)
     
 @testattr(casadi = True)
-def test_vdp_casadi_radau2(self):
+def test_vdp_casadi_radau2():
     """Run the VDP CasADi example using CasadiRadau2."""
     vdp_casadi_radau2.run_demo(False)
 
 @testattr(casadi = True)
-def test_parameter_estimation_1_casadi_radau2(self):
+def test_parameter_estimation_1_casadi_radau2():
     """Run the Parameter Estimation CasADi example using CasadiRadau2."""
     parameter_estimation_1_casadi.run_demo(False, algorithm="CasadiRadau2")
     
 @testattr(casadi = True)
-def test_vdp_casadi_ps(self):
+def test_vdp_casadi_ps():
     """Run the VDP CasADi example using CasadiPseudoSpectral."""
     vdp_casadi_ps.run_demo(False)
