@@ -159,3 +159,38 @@ def test_crane():
 def test_leadtransport():
     """ Run the Lead example """
     leadtransport.run_demo(False)
+    
+@testattr(casadi = True)
+def test_cstr_casadi(self):
+    """Run the CSTR CasADi example."""
+    cstr_casadi.run_demo(False)
+    
+@testattr(casadi = True)
+def test_cstr_casadi(self):
+    """Run the VDP CasADi example."""
+    vdp_casadi.run_demo(False)
+    
+@testattr(casadi = True)
+def test_parameter_estimation_1_casadi(self):
+    """Run the Parameter Estimation CasADi example."""
+    parameter_estimation_1_casadi.run_demo(False, algorithm="CasadiRadau")
+    
+@testattr(casadi = True)
+def test_cstr_casadi_radau2(self):
+    """Run the CSTR CasADi example using CasadiRadau2."""
+    cstr_casadi_radau2.run_demo(False)
+    
+@testattr(casadi = True)
+def test_vdp_casadi_radau2(self):
+    """Run the VDP CasADi example using CasadiRadau2."""
+    vdp_casadi_radau2.run_demo(False)
+
+@testattr(casadi = True)
+def test_parameter_estimation_1_casadi_radau2(self):
+    """Run the Parameter Estimation CasADi example using CasadiRadau2."""
+    parameter_estimation_1_casadi.run_demo(False, algorithm="CasadiRadau2")
+    
+@testattr(casadi = True)
+def test_vdp_casadi_ps(self):
+    """Run the VDP CasADi example using CasadiPseudoSpectral."""
+    vdp_casadi_ps.run_demo(False)

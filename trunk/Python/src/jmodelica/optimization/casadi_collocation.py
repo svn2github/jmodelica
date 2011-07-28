@@ -1170,6 +1170,8 @@ class Radau2Collocator(CasadiCollocator):
         # Create NLP variables
         n_xx = self.model.get_n_p()
         n_xx += (1 + self.n_e * self.n_cp) * N.sum(n_var.values())
+        if self.state_cont_var:
+            n_xx += (self.n_e - 1) * n_var['x']
         if self.graph == "MX" or self.graph == 'expanded_MX':
             xx = casadi.MX("xx", n_xx)
         elif self.graph == "SX":
@@ -1201,6 +1203,17 @@ class Radau2Collocator(CasadiCollocator):
                     index = new_index
                     var[i][k][var_type] = xx[var_indices[i][k][var_type]]
                     
+        # Index state continuity variables
+        if self.state_cont_var:
+            for i in xrange(2, self.n_e + 1):
+                var[i][0] = {}
+                var_indices[i][0] = {}
+                
+                new_index = index + n_var['x']
+                var_indices[i][0]['x'] = range(index, new_index)
+                index = new_index
+                var[i][0]['x'] = xx[var_indices[i][0]['x']]
+        
         # Index the variables for the initial values
         var[1][0] = {}
         var_indices[1][0] = {}
@@ -1287,10 +1300,20 @@ class Radau2Collocator(CasadiCollocator):
         # Add residual for u_1_0 as constraint
         g = casadi.vertcat([g, var[1][0]['u'] - u_1_0])
         
-        # Create list where element k is x_i_k
-        x_i = [var[1][k]['x'] for k in xrange(self.n_cp + 1)]
+        # Create nested list of states
+        x_list = [[]]
+        x_list += [[var[1][k]['x'] for k in xrange(self.n_cp + 1)]]
+        if self.state_cont_var:
+            for i in xrange(2, self.n_e + 1):
+                x_i = [[var[i][k]['x'] for k in xrange(self.n_cp + 1)]]
+                x_list += [x_i]
+        else:
+            for i in xrange(2, self.n_e + 1):
+                x_i = [var[i - 1][self.n_cp]['x']]
+                x_i += [var[i][k]['x'] for k in xrange(1, self.n_cp + 1)]
+                x_list += [x_i]
         
-        # Constraints for first element
+        # Collocation and DAE constraints for first element
         for k in xrange(1, self.n_cp + 1):
             # Calculate and store time point
             t = self.time_points[1][0] + self.h[1] * self.pol.p[k]
@@ -1298,7 +1321,7 @@ class Radau2Collocator(CasadiCollocator):
             time += [t]
             
             # Collocation constraint
-            colloc_constr = (N.sum(x_i * self.pol.der_vals[:, k]) - 
+            colloc_constr = (N.sum(x_list[1] * self.pol.der_vals[:, k]) - 
                              self.h[1] * var[1][k]['dx'])
             g = casadi.vertcat([g, colloc_constr])
             
@@ -1307,15 +1330,9 @@ class Radau2Collocator(CasadiCollocator):
             [dae_constr] = dae_F_eval([z])
             g = casadi.vertcat([g, dae_constr])
         
-        # Constraints for succeeding elements
+        # Collocation and DAE constraints for succeeding elements
         for i in xrange(2, self.n_e + 1):
             self.time_points[i] = {}
-            
-            # Create list where element k is x_i_k
-            # Without continuity constraints; x_i_0 = x_{i-1}_{n_cp}
-            x_i = [var[i - 1][self.n_cp]['x']]
-            x_i += [var[i][k]['x'] for k in xrange(1, self.n_cp + 1)]
-            
             for k in xrange(1, self.n_cp + 1):
                 # Calculate and store time point
                 t = (self.time_points[i - 1][self.n_cp] + 
@@ -1324,7 +1341,7 @@ class Radau2Collocator(CasadiCollocator):
                 time += [t]
                 
                 # Collocation constraint
-                colloc_constr = (N.sum(x_i * self.pol.der_vals[:, k]) - 
+                colloc_constr = (N.sum(x_list[i] * self.pol.der_vals[:, k]) - 
                                  self.h[i] * var[i][k]['dx'])
                 g = casadi.vertcat([g, colloc_constr])
                 
@@ -1333,6 +1350,12 @@ class Radau2Collocator(CasadiCollocator):
                 [dae_constr] = dae_F_eval([z])
                 g = casadi.vertcat([g, dae_constr])
                 
+        # Continuity constraints
+        if self.state_cont_var:
+            for i in xrange(1, self.n_e):
+                cont_constr = var[i][self.n_cp]['x'] - var[i + 1][0]['x']
+                g = casadi.vertcat([g, cont_constr])
+        
         # Store constraints and time as data attributes
         self.g = g
         self.time = N.array(time)

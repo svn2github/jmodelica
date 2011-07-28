@@ -2241,16 +2241,29 @@ class CasadiRadau2Options(OptionBase):
     
         n_e --
             Number of finite elements.
+            Type: int
             Default: 50
             
         n_cp --
             Number of collocation points in each element.
+            Type: int
             Default: 3
             
         graph --
             CasADi graph type. Possible values are "SX", "MX" and
             "expanded_MX".
+            Type: str
             Default: "SX"
+            
+        state_cont_var --
+            If True: Create extra variables for the states at the start of each
+            element and then constrain them to be equal to the corresponding 
+            variable at the end of the previous element for continuity.
+            If False: Let the same variables represent both the values of the
+            states at the start of each element and the end of the previous
+            element.
+            Type: bool
+            Default: True
 
         init_traj --
             Variable trajectory data used for initialization of the
@@ -2287,6 +2300,7 @@ class CasadiRadau2Options(OptionBase):
                 'n_e': 50, 
                 'n_cp': 3,
                 'graph': 'SX',
+                'state_cont_var': True,
                 'init_traj': None,
                 'parameter_estimation_data': None,
                 'IPOPT_options':{

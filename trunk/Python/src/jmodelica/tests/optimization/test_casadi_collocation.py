@@ -35,26 +35,33 @@ except NameError, ImportError:
     pass
     #logging.warning('Could not load Casadi collocation. Check jmodelica.check_packages()')
 
-# Create CasADi models used for all tests
 path_to_mos = os.path.join(get_files_path(), 'Modelica')
-
-jn = compile_casadi("VDP_pack.VDP_Opt2", os.path.join(path_to_mos, "VDP.mop"))
-vdp = CasadiModel(jn)
-
-jn = compile_casadi("TwoState", os.path.join(path_to_mos, "TwoState.mop"))
-two_state = CasadiModel(jn)
 
 class TestRadau:
     
-    """This class tests the class CasadiRadau."""
+    """
+    Tests jmodelica.optimization.casadi_collocation.RadauCollocator.
+    """
+    
+    @classmethod
+    def setUpClass(cls):
+        """Compile the test models."""
+        file_path = os.path.join(get_files_path(), 'Modelica', 'VDP.mop')
+        class_path = "VDP_pack.VDP_Opt2"
+        compile_casadi(class_path, file_path)
+        
+    def setUp(self):
+        """Load the test models."""
+        jmu_vdp = 'VDP_pack_VDP_Opt2.jmu'
+        self.model_vdp = CasadiModel(jmu_vdp)
     
     @testattr(casadi = True)
-    def test_radau_vdp(self):
+    def test_vdp(self):
         """Test optimizing the VDP."""
-        opts = vdp.optimize_options(algorithm="CasadiRadau")
+        opts = self.model_vdp.optimize_options(algorithm="CasadiRadau")
         opts['n_e'] = 50
         opts['n_cp'] = 3
-        res = vdp.optimize(algorithm="CasadiRadau", options=opts)
+        res = self.model_vdp.optimize(algorithm="CasadiRadau", options=opts)
         
         cost = res["cost"][-1]
         u = res["u"]
@@ -63,52 +70,91 @@ class TestRadau:
         nose.tools.assert_almost_equal(u_norm, 2.872384555575e-1, places=5)
         
     @testattr(casadi = True)
-    def test_radau_vdp_init_traj(self):
+    def test_init_traj(self):
         """Test optimizing the VDP based on an existing optimization reult."""
-        opts = vdp.optimize_options(algorithm="CasadiRadau")
+        opts = self.model_vdp.optimize_options(algorithm="CasadiRadau")
         opts['n_e'] = 30
         opts['n_cp'] = 3
-        res = vdp.optimize(algorithm="CasadiRadau", options=opts)
+        res = self.model_vdp.optimize(algorithm="CasadiRadau", options=opts)
         
         opts['n_e'] = 100
         opts['init_traj'] = ResultDymolaTextual("VDP_pack_VDP_Opt2_result.txt")
-        res = vdp.optimize(algorithm="CasadiRadau", options=opts)
-    
-    @testattr(casadi = True)
-    def test_radau_cstr_example(self):
-        """Test the cstr_casadi example."""
-        cstr_casadi.run_demo(with_plots=False)
-        
-    @testattr(casadi = True)
-    def test_radau_vdp_example(self):
-        """Test the vdp_casadi example."""
-        vdp_casadi.run_demo(with_plots=False)
-    
-    @testattr(casadi = True)
-    def test_radau_pe_example(self):
-        """Test the parameter_estimation_1_casadi example."""
-        parameter_estimation_1_casadi.run_demo(with_plots=False,
-                                               algorithm="CasadiRadau")
+        res = self.model_vdp.optimize(algorithm="CasadiRadau", options=opts)
 
 class TestRadau2:
     
-    """This class tests the class CasadiRadau2."""
+    """
+    Tests jmodelica.optimization.casadi_collocation.Radau2Collocator.
+    """
+    
+    @classmethod
+    def setUpClass(cls):
+        """Compile the test models."""
+        file_path = os.path.join(get_files_path(), 'Modelica', 'VDP.mop')
+        class_path = "VDP_pack.VDP_Opt2"
+        compile_casadi(class_path, file_path)
+        
+    def setUp(self):
+        """Load the test models."""
+        jmu_vdp = 'VDP_pack_VDP_Opt2.jmu'
+        self.model_vdp = CasadiModel(jmu_vdp)
     
     @testattr(casadi = True)
-    def test_radau2_n_cp(self):
+    def test_init_traj(self):
+        """Test optimizing the VDP based on an existing optimization reult."""
+        opts = self.model_vdp.optimize_options(algorithm="CasadiRadau2")
+        opts['n_e'] = 40
+        opts['n_cp'] = 2
+        res = self.model_vdp.optimize(algorithm="CasadiRadau2", options=opts)
+        
+        opts['n_e'] = 75
+        opts['n_cp'] = 4
+        opts['init_traj'] = ResultDymolaTextual("VDP_pack_VDP_Opt2_result.txt")
+        res = self.model_vdp.optimize(algorithm="CasadiRadau2", options=opts)
+    
+    @testattr(casadi = True)
+    def test_state_cont_var(self):
+        """
+        Test that results are consistent regardless of state_cont_var.
+        
+        This test uses the result from the first optimization to initialize the
+        next one.
+        """
+        opts = self.model_vdp.optimize_options(algorithm="CasadiRadau2")
+        
+        # With state continuity variables
+        opts["state_cont_var"] = True
+        res = self.model_vdp.optimize(algorithm="CasadiRadau2", options=opts)
+        cost_with = res["cost"][-1]
+        u = res["u"]
+        u_norm_with = N.linalg.norm(u) / N.sqrt(len(u))
+        nose.tools.assert_almost_equal(cost_with, 2.3469088662e1, places=4)
+        nose.tools.assert_almost_equal(u_norm_with, 2.8723846121e-1, places=5)
+        
+        # Without state continuity variables
+        opts["state_cont_var"] = False
+        opts['init_traj'] = ResultDymolaTextual("VDP_pack_VDP_Opt2_result.txt")
+        res = self.model_vdp.optimize(algorithm="CasadiRadau2", options=opts)
+        cost_without = res["cost"][-1]
+        u = res["u"]
+        u_norm_without = N.linalg.norm(u) / N.sqrt(len(u))
+        nose.tools.assert_almost_equal(cost_without, cost_with, places=4)
+        nose.tools.assert_almost_equal(u_norm_without, u_norm_with, places=5)
+    
+    @testattr(casadi = True)
+    def test_n_cp(self):
         """
         Test optimizing the VDP with varying n_e and n_cp.
         
         This test uses the result from one optimization to initialize the next
         one.
         """
-        opts = vdp.optimize_options(algorithm="CasadiRadau2")
-        opts['graph'] = "SX"
+        opts = self.model_vdp.optimize_options(algorithm="CasadiRadau2")
         
         # n_cp = 1
         opts['n_e'] = 100
         opts['n_cp'] = 1
-        res = vdp.optimize(algorithm="CasadiRadau2", options=opts)
+        res = self.model_vdp.optimize(algorithm="CasadiRadau2", options=opts)
         
         cost = res["cost"][-1]
         u = res["u"]
@@ -120,7 +166,7 @@ class TestRadau2:
         opts['n_e'] = 50
         opts['n_cp'] = 3
         opts['init_traj'] = ResultDymolaTextual("VDP_pack_VDP_Opt2_result.txt")
-        res = vdp.optimize(algorithm="CasadiRadau2", options=opts)
+        res = self.model_vdp.optimize(algorithm="CasadiRadau2", options=opts)
         
         cost = res["cost"][-1]
         u = res["u"]
@@ -132,7 +178,7 @@ class TestRadau2:
         opts['n_e'] = 20
         opts['n_cp'] = 8
         opts['init_traj'] = ResultDymolaTextual("VDP_pack_VDP_Opt2_result.txt")
-        res = vdp.optimize(algorithm="CasadiRadau2", options=opts)
+        res = self.model_vdp.optimize(algorithm="CasadiRadau2", options=opts)
         
         cost = res["cost"][-1]
         u = res["u"]
@@ -140,20 +186,7 @@ class TestRadau2:
         nose.tools.assert_almost_equal(cost, 2.3469088662e1, places=4)
         nose.tools.assert_almost_equal(u_norm, 2.803233e-1, places=5)
         
-    @testattr(casadi = True)
-    def test_radau2_init_traj(self):
-        """Test optimizing the VDP based on an existing optimization reult."""
-        opts = vdp.optimize_options(algorithm="CasadiRadau2")
-        opts['n_e'] = 40
-        opts['n_cp'] = 2
-        res = vdp.optimize(algorithm="CasadiRadau2", options=opts)
-        
-        opts['n_e'] = 75
-        opts['n_cp'] = 4
-        opts['init_traj'] = ResultDymolaTextual("VDP_pack_VDP_Opt2_result.txt")
-        res = vdp.optimize(algorithm="CasadiRadau2", options=opts)
-        
-    def test_radau2_graphs(self):
+    def test_graphs(self):
         """
         Test optimizing the VDP with all three graph types.
         
@@ -165,11 +198,11 @@ class TestRadau2:
         to vary the test cases.
         """
         # SX
-        opts = vdp.optimize_options(algorithm="CasadiRadau2")
+        opts = self.model_vdp.optimize_options(algorithm="CasadiRadau2")
         opts['n_e'] = 30
         opts['n_cp'] = 2
         opts['graph'] = "SX"
-        res = vdp.optimize(algorithm="CasadiRadau2", options=opts)
+        res = self.model_vdp.optimize(algorithm="CasadiRadau2", options=opts)
         
         cost_SX = res["cost"][-1]
         u = res["u"]
@@ -180,7 +213,7 @@ class TestRadau2:
         # expanded_MX
         opts['graph'] = "expanded_MX"
         opts['init_traj'] = ResultDymolaTextual("VDP_pack_VDP_Opt2_result.txt")
-        res = vdp.optimize(algorithm="CasadiRadau2", options=opts)
+        res = self.model_vdp.optimize(algorithm="CasadiRadau2", options=opts)
         
         cost_exp_MX = res["cost"][-1]
         u = res["u"]
@@ -191,44 +224,50 @@ class TestRadau2:
         # MX
         opts['graph'] = "MX"
         opts['init_traj'] = ResultDymolaTextual("VDP_pack_VDP_Opt2_result.txt")
-        res = vdp.optimize(algorithm="CasadiRadau2", options=opts)
+        res = self.model_vdp.optimize(algorithm="CasadiRadau2", options=opts)
         
         cost_MX = res["cost"][-1]
         u = res["u"]
         u_norm_MX = N.linalg.norm(u) / N.sqrt(len(u))
         nose.tools.assert_almost_equal(cost_MX, cost_SX, places=6)
         nose.tools.assert_almost_equal(u_norm_MX, u_norm_SX, places=7)
-    
-    @testattr(casadi = True)
-    def test_radau2_cstr_example(self):
-        """Test the cstr_casadi example."""
-        cstr_casadi_radau2.run_demo(with_plots=False)
-        
-    @testattr(casadi = True)
-    def test_radau2_vdp_example(self):
-        """Test the vdp_casadi example."""
-        vdp_casadi_radau2.run_demo(with_plots=False)
-    
-    @testattr(casadi = True)
-    def test_radau2_pe_example(self):
-        """Test the parameter_estimation_1_casadi example."""
-        parameter_estimation_1_casadi.run_demo(with_plots=False,
-                                               algorithm="CasadiRadau2")
 
 class TestPseudoSpectral:
     
-    """This class tests the class CasadiPseudoSpectral."""
+    """
+    Tests jmodelica.optimization.casadi_collocation.PseudoSpectral.
+    """
+    
+    @classmethod
+    def setUpClass(cls):
+        """Compile the test models."""
+        file_path = os.path.join(get_files_path(), 'Modelica', 'VDP.mop')
+        class_path = "VDP_pack.VDP_Opt2"
+        compile_casadi(class_path, file_path)
+        
+        file_path = os.path.join(get_files_path(), 'Modelica', 'TwoState.mop')
+        class_path = "TwoState"
+        compile_casadi(class_path, file_path)
+    
+    def setUp(self):
+        """Load the test models."""
+        jmu_vdp = 'VDP_pack_VDP_Opt2.jmu'
+        self.model_vdp = CasadiModel(jmu_vdp)
+        
+        jmu_two_state = 'TwoState.jmu'
+        self.model_two_state = CasadiModel(jmu_two_state)
     
     @testattr(casadi = True)
-    def test_ps_twostate(self):
+    def test_two_state(self):
         """Tests the different discretization on the TwoState example."""
-        opts = two_state.optimize_options("CasadiPseudoSpectral")
+        opts = self.model_two_state.optimize_options("CasadiPseudoSpectral")
         opts['n_e'] = 1
         opts['n_cp'] = 30
                 
         #Test LG points
         opts['discr'] = "LG"
-        res = two_state.optimize(algorithm="CasadiPseudoSpectral", options=opts)
+        res = self.model_two_state.optimize(algorithm="CasadiPseudoSpectral",
+                                            options=opts)
         y1 = res["y1"]
         y2 = res["y2"]
         u = res["u"]
@@ -239,7 +278,8 @@ class TestPseudoSpectral:
         
         #Test LGR points
         opts['discr'] = "LGR"
-        res = two_state.optimize(algorithm="CasadiPseudoSpectral", options=opts)
+        res = self.model_two_state.optimize(algorithm="CasadiPseudoSpectral",
+                                            options=opts)
         y1 = res["y1"]
         y2 = res["y2"]
         u = res["u"]
@@ -250,7 +290,8 @@ class TestPseudoSpectral:
         
         #Test LGL points
         opts['discr'] = "LGL"
-        res = two_state.optimize(algorithm="CasadiPseudoSpectral", options=opts)
+        res = self.model_two_state.optimize(algorithm="CasadiPseudoSpectral",
+                                            options=opts)
         y1 = res["y1"]
         y2 = res["y2"]
         u = res["u"]
@@ -260,22 +301,24 @@ class TestPseudoSpectral:
         nose.tools.assert_almost_equal(u[-1], 0.498341205247, places=5)
     
     @testattr(casadi = True)
-    def test_ps_twostate_inittraj(self):
+    def test_two_state_init_traj(self):
         """
         Tests that the option init_traj is functional.
         
         NOTE: SHOULD ALSO TEST THAT THE NUMBER OF ITERATIONS SHOULD BE SMALLER.
         """
-        opts = two_state.optimize_options("CasadiPseudoSpectral")
+        opts = self.model_two_state.optimize_options("CasadiPseudoSpectral")
         opts['n_e'] = 1
         opts['n_cp'] = 30
         opts['discr'] = "LG"
-        res = two_state.optimize(algorithm="CasadiPseudoSpectral", options=opts)
+        res = self.model_two_state.optimize(algorithm="CasadiPseudoSpectral",
+                                            options=opts)
 
         #Test LG points
         opts['discr'] = "LG"
         opts['init_traj'] = ResultDymolaTextual("TwoState_result.txt")
-        res = two_state.optimize(algorithm="CasadiPseudoSpectral", options=opts)
+        res = self.model_two_state.optimize(algorithm="CasadiPseudoSpectral",
+                                            options=opts)
         y1 = res["y1"]
         y2 = res["y2"]
         u = res["u"]
@@ -287,7 +330,8 @@ class TestPseudoSpectral:
         #Test LGL points
         opts['discr'] = "LGL"
         opts['init_traj'] = ResultDymolaTextual("TwoState_result.txt")
-        res = two_state.optimize(algorithm="CasadiPseudoSpectral", options=opts)
+        res = self.model_two_state.optimize(algorithm="CasadiPseudoSpectral",
+                                            options=opts)
         y1 = res["y1"]
         y2 = res["y2"]
         u = res["u"]
@@ -299,7 +343,8 @@ class TestPseudoSpectral:
         #Test LGR points
         opts['discr'] = "LGR"
         opts['init_traj'] = ResultDymolaTextual("TwoState_result.txt")
-        res = two_state.optimize(algorithm="CasadiPseudoSpectral", options=opts)
+        res = self.model_two_state.optimize(algorithm="CasadiPseudoSpectral",
+                                            options=opts)
         y1 = res["y1"]
         y2 = res["y2"]
         u = res["u"]
@@ -309,7 +354,7 @@ class TestPseudoSpectral:
         nose.tools.assert_almost_equal(u[-1], 0.498341205247, places=5)
     
     @testattr(casadi = True)
-    def test_ps_doubleintegrator(self):
+    def test_doubleintegrator(self):
         """Tests the different discretization on the DoubleIntegrator example."""
         
         """
@@ -357,27 +402,30 @@ class TestPseudoSpectral:
         """
         
     @testattr(casadi = True)
-    def test_ps_vdp(self):
+    def test_vdp(self):
         """Tests the different discretization options on a modified VDP."""
-        opts = vdp.optimize_options("CasadiPseudoSpectral")
+        opts = self.model_vdp.optimize_options("CasadiPseudoSpectral")
         opts['n_e'] = 1
         opts['n_cp'] = 60
         
         #Test LG points
         opts['discr'] = "LG"
-        res = vdp.optimize(algorithm="CasadiPseudoSpectral", options=opts)
+        res = self.model_vdp.optimize(algorithm="CasadiPseudoSpectral",
+                                      options=opts)
         cost = res["cost"]
         nose.tools.assert_almost_equal(cost[-1], 2.3463724e1, places=1)
         
         #Test LGR points
         opts['discr'] = "LGR"
-        res = vdp.optimize(algorithm="CasadiPseudoSpectral", options=opts)
+        res = self.model_vdp.optimize(algorithm="CasadiPseudoSpectral",
+                                      options=opts)
         cost = res["cost"]
         nose.tools.assert_almost_equal(cost[-1], 2.3463724e1, places=1)
         
         #Test LGL points
         opts['discr'] = "LGL"
-        res = vdp.optimize(algorithm="CasadiPseudoSpectral", options=opts)
+        res = self.model_vdp.optimize(algorithm="CasadiPseudoSpectral",
+                                      options=opts)
         cost = res["cost"]
         nose.tools.assert_almost_equal(cost[-1], 2.3463724e1, places=1)
         """
@@ -402,8 +450,3 @@ class TestPseudoSpectral:
         cost = res["cost"]
         nose.tools.assert_almost_equal(cost[-1], 2.3463724e1, places=1)
         """
-        
-    @testattr(casadi = True)
-    def test_ps_vdp_example(self):
-        """Test the vdp_casadi_ps example."""
-        vdp_casadi_ps.run_demo(with_plots=False)

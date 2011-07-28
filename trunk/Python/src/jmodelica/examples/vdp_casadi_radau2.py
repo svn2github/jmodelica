@@ -26,15 +26,19 @@ import matplotlib.pyplot as plt
 from jmodelica.casadi_interface import compile_casadi, CasadiModel
 
 def run_demo(with_plots=True):
-    """Demonstrate how to optimize a Van der Pol oscillator."""
+    """
+    Demonstrate how to optimize a Van der Pol oscillator using CasadiRadau2.
+    """
+    # Compile and load model
     curr_dir = os.path.dirname(os.path.abspath(__file__));
     jn = compile_casadi("VDP_pack.VDP_Opt2", curr_dir + "/files/VDP.mop")
     model = CasadiModel(jn)
-
+    
+    # Set algorithm options
     opts = model.optimize_options(algorithm="CasadiRadau2")
-    opts['n_e'] = 50
-    opts['n_cp'] = 3
-
+    opts['graph'] = "SX"
+    
+    # Optimize
     res = model.optimize(algorithm="CasadiRadau2", options=opts)
     
     # Extract variable profiles
@@ -43,22 +47,22 @@ def run_demo(with_plots=True):
     u = res['u']
     time = res['time']
     
+    # Plot
     if with_plots:
-        # Plot
         plt.figure(1)
         plt.clf()
-        plt.subplot(311)
-        plt.plot(time,x1)
+        plt.subplot(3, 1, 1)
+        plt.plot(time, x1)
         plt.grid()
         plt.ylabel('x1')
         
-        plt.subplot(312)
-        plt.plot(time,x2)
+        plt.subplot(3, 1, 2)
+        plt.plot(time, x2)
         plt.grid()
         plt.ylabel('x2')
         
-        plt.subplot(313)
-        plt.plot(time,u)
+        plt.subplot(3, 1, 3)
+        plt.plot(time, u)
         plt.grid()
         plt.ylabel('u')
         plt.xlabel('time')
