@@ -37,7 +37,6 @@ def run_demo(with_plots=True):
     # Set algorithm options
     opts = model.optimize_options(algorithm="CasadiRadau2")
     opts['graph'] = "SX"
-    opts['state_cont_var'] = False
     
     # Optimize
     res = model.optimize(algorithm="CasadiRadau2", options=opts)

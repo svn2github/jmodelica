@@ -1142,6 +1142,12 @@ class Radau2Collocator(CasadiCollocator):
         # Get the options
         self.__dict__.update(options)
         
+        # Check the validity of blocking_factors
+        if (self.blocking_factors != None and 
+            N.sum(self.blocking_factors) != self.n_e):
+            raise ValueError("The sum of all elements in blocking factors " +
+                             "must be the same as the number of elements.")
+        
         # Define element lengths
         self.h = {}
         for i in xrange(1, self.n_e + 1):
@@ -1159,19 +1165,26 @@ class Radau2Collocator(CasadiCollocator):
         
     def _create_nlp_variables(self):
         """
-        Creates the NLP variables and stores them in a nested dictionary.
+        Create the NLP variables and store them in a nested dictionary.
         """
         # Get model info
         n_var = {'dx': self.model.get_n_x(), 'x': self.model.get_n_x(),
-                 'u': self.model.get_n_u(), 'w': self.model.get_n_w()}
+                 'w': self.model.get_n_w()}
         get_var = {'dx': self.model.get_dx, 'x': self.model.get_x,
                    'u': self.model.get_u, 'w': self.model.get_w}
+                   
+        if self.blocking_factors == None:
+            n_var['u'] = self.model.get_n_u()
         
-        # Create NLP variables
+        # Count NLP variables
         n_xx = self.model.get_n_p()
         n_xx += (1 + self.n_e * self.n_cp) * N.sum(n_var.values())
+        if self.blocking_factors != None:
+            n_xx += len(self.blocking_factors) * self.model.get_n_u()
         if self.state_cont_var:
             n_xx += (self.n_e - 1) * n_var['x']
+            
+        # Create NLP variables
         if self.graph == "MX" or self.graph == 'expanded_MX':
             xx = casadi.MX("xx", n_xx)
         elif self.graph == "SX":
@@ -1202,7 +1215,20 @@ class Radau2Collocator(CasadiCollocator):
                     var_indices[i][k][var_type] = range(index, new_index)
                     index = new_index
                     var[i][k][var_type] = xx[var_indices[i][k][var_type]]
-                    
+        
+        # Index controls separately if blocking_factors != None
+        if self.blocking_factors != None:
+            element = 1
+            for factor in self.blocking_factors:
+                new_index = index + n_var[var_type]
+                indices = xrange(index, new_index)
+                for i in xrange(element, element + factor):
+                    for k in xrange(1, self.n_cp + 1):
+                        var_indices[i][k]['u'] = indices
+                        var[i][k]['u'] = xx[var_indices[i][k]['u']]
+                index = new_index
+                element += factor
+        
         # Index state continuity variables
         if self.state_cont_var:
             for i in xrange(2, self.n_e + 1):
@@ -1222,6 +1248,8 @@ class Radau2Collocator(CasadiCollocator):
             var_indices[1][0][var_type] = range(index, new_index)
             index = new_index
             var[1][0][var_type] = xx[var_indices[1][0][var_type]]
+        
+        assert(index == n_xx)
         
         # Save variables and indices as data attributes
         self.xx = xx

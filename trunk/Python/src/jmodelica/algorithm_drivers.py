@@ -2255,6 +2255,17 @@ class CasadiRadau2Options(OptionBase):
             Type: str
             Default: "SX"
             
+        blocking_factors --
+            The list of blocking factors, where each element corresponds to the
+            number of elements for which the control profile should be
+            constant. For example, if blocking_factor == [2, 1, 5], then
+            u_0 = u_1 and u_3 = u_4 = u_5 = u_6 = u_7. The sum of all elements
+            in the list must be the same as the number of elements. If
+            blocking_facotrs == None, then Lagrange polynomials are instead
+            used to represent the control.
+            Type: None or list of int
+            Default: None
+            
         state_cont_var --
             If True: Create extra variables for the states at the start of each
             element and then constrain them to be equal to the corresponding 
@@ -2300,6 +2311,7 @@ class CasadiRadau2Options(OptionBase):
                 'n_e': 50, 
                 'n_cp': 3,
                 'graph': 'SX',
+                'blocking_factors': None,
                 'state_cont_var': True,
                 'init_traj': None,
                 'parameter_estimation_data': None,

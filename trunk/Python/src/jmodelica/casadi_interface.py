@@ -321,9 +321,11 @@ class CasadiModel(object):
         self.F = casadi.substitute(casadi.SXMatrix(dx),casadi.SXMatrix(self.ocp.explicit_var_),casadi.SXMatrix(self.ocp.explicit_fcn_))
         
         self.ode_F = casadi.SXFunction([self.ocp_ode_inputs], [self.F])
+        self.ode_F.init()
         
         # The initial equations
         self.ode_F0 = casadi.SXFunction([self.ocp_ode_init_inputs],[self.ocp.initial_eq_])
+        self.ode_F0.init()
         
         # The Lagrange cost function
         if len(self.ocp.lterm)>0:
