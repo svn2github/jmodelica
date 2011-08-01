@@ -330,6 +330,7 @@ class CasadiModel(object):
         # The Lagrange cost function
         if len(self.ocp.lterm)>0:
             self.opt_ode_L = casadi.SXFunction([self.ocp_ode_inputs],[[self.ocp.lterm[0]]])
+            self.opt_ode_L.init()
         else:
             self.opt_ode_L = None
         
@@ -340,6 +341,7 @@ class CasadiModel(object):
             self.ocp_ode_mterm_inputs += [x.atTime(self.ocp.tf,True) for x in self.ocp.x_]
             self.ocp_ode_mterm_inputs += [self.t]
             self.opt_ode_J = casadi.SXFunction([self.ocp_ode_mterm_inputs],[[self.ocp.mterm[0]]])
+            self.opt_ode_J.init()
         else:
             self.opt_ode_J = None
         
@@ -370,8 +372,10 @@ class CasadiModel(object):
         self.ocp_ode_boundary_inputs += [x.atTime(self.ocp.tf,True) for x in self.ocp.x_]
         self.ocp_ode_boundary_inputs += [self.t]
         self.opt_ode_C     = casadi.SXFunction([self.ocp_ode_boundary_inputs],[self.opt_ode_C])
+        self.opt_ode_C.init()
         self.opt_ode_Cineq = casadi.SXFunction([self.ocp_ode_boundary_inputs],[self.opt_ode_Cineq])
-    
+        self.opt_ode_Cineq.init()
+        
         if self.enable_scaling:
             # Scale model
             # Get nominal values for scaling

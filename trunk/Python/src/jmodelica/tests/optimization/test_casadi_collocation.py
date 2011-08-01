@@ -118,20 +118,18 @@ class TestRadau2:
     @testattr(casadi = True)
     def test_blocking_factors(self):
         """Test optimizing the VDP using blocking factors."""
-        nose.tools.assert_true(False, "Does not work")
         opts = self.model_vdp.optimize_options(algorithm="CasadiRadau2")
         opts['n_e'] = 50
         opts['n_cp'] = 3
         opts['blocking_factors'] = opts['n_e'] * [1]
         res = self.model_vdp.optimize(algorithm="CasadiRadau2", options=opts)
-        assert_results(res, N.nan, N.nan)
+        assert_results(res, 2.81692892672e1, 2.997111577228e-1)
         
         opts['n_e'] = 20
         opts['n_cp'] = 4
-        opts['blocking_factors'] = [2, 5, 2, 13]
-        opts['init_traj'] = ResultDymolaTextual("VDP_pack_VDP_Opt2_result.txt")
+        opts['blocking_factors'] = [1, 2, 1, 1, 2, 13]
         res = self.model_vdp.optimize(algorithm="CasadiRadau2", options=opts)
-        assert_results(res, N.nan, N.nan)
+        assert_results(res, 6.9393876378875e1, 4.1528861933309e-1)
     
     @testattr(casadi = True)
     def test_state_cont_var(self):

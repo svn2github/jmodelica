@@ -1220,8 +1220,8 @@ class Radau2Collocator(CasadiCollocator):
         if self.blocking_factors != None:
             element = 1
             for factor in self.blocking_factors:
-                new_index = index + n_var[var_type]
-                indices = xrange(index, new_index)
+                new_index = index + self.model.get_n_u()
+                indices = range(index, new_index)
                 for i in xrange(element, element + factor):
                     for k in xrange(1, self.n_cp + 1):
                         var_indices[i][k]['u'] = indices
@@ -1248,6 +1248,11 @@ class Radau2Collocator(CasadiCollocator):
             var_indices[1][0][var_type] = range(index, new_index)
             index = new_index
             var[1][0][var_type] = xx[var_indices[1][0][var_type]]
+            
+        # Index initial controls separately if blocking_factors != None
+        if self.blocking_factors != None:
+            var_indices[1][0]['u'] = var_indices[1][1]['u']
+            var[1][0]['u'] = xx[var_indices[1][0]['u']]
         
         assert(index == n_xx)
         
