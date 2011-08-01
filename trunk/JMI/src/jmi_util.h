@@ -165,4 +165,23 @@ int jmi_util_dae_derivative_checker(jmi_t *jmi,jmi_func_t *func, int sparsity, i
  */
 int jmi_func_cad_dF_get_independent_ind(jmi_t *jmi, jmi_func_t *func, int independent_vars, int *col_independent_ind);
 
+
+/**
+ * \brief Types of log messages.
+ */
+typedef enum {
+    logError,
+    logWarning,
+    logInfo
+} jmi_log_category_t;
+
+/**
+ * \brief Log function should be used for all output in the run-time. Forwards the call to FMI logger in case of FMU.
+ *  Use sprintf to form a message first.
+ *
+ * @param jmi       A jmi_t struct.
+ * @param category  Log category. By default logError will go to stderr and other messages to stdout.
+ * @param message   The message. Note that a trailing '\n' is always added to the message when printing.
+ */
+void jmi_log(jmi_t *jmi, jmi_log_category_t category, char* message);
 #endif

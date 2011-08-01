@@ -41,7 +41,8 @@ extern "C" {
 #endif
 
 /* Type definitions */
-typedef struct {
+/*typedef */
+struct fmi_t {
     fmiString fmi_instance_name;
     fmiString fmi_GUID;
     fmiCallbackFunctions fmi_functions;
@@ -49,7 +50,7 @@ typedef struct {
     fmiReal fmi_newton_tolerance;
     fmiReal fmi_epsilon;
     jmi_t* jmi;
-} fmi_t;
+};
 
 /**
  * \defgroup fmi_init Creation, initialization and destruction.

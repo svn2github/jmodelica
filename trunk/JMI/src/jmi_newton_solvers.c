@@ -19,6 +19,7 @@
 
 
 #include "jmi_newton_solvers.h"
+#include "jmi_util.h"
 #include "kinsol_jmod_impl.h"
 #include <kinsol/kinsol_impl.h>
 #include <time.h>
@@ -45,8 +46,10 @@ int kin_f(N_Vector yy, N_Vector ff, void *problem_data){
 	n = NV_LENGTH_S(yy);
 	for (i=0;i<n;i++) {
 	  /* Unrecoverable error*/
-	  if (Ith(ff,i)- Ith(ff,i) != 0) return -1;
-	  
+          if (Ith(yy,i)- Ith(yy,i) != 0) {
+              jmi_log(block->jmi, logWarning, "Not a number in arguments to model function in DAE");
+              return -1;
+          }
 	}
 
 	/*Evaluate the residual*/
@@ -56,7 +59,8 @@ int kin_f(N_Vector yy, N_Vector ff, void *problem_data){
 	n = NV_LENGTH_S(ff);
 	for (i=0;i<n;i++) {
 	  /* Recoverable error*/
-	  if (Ith(ff,i)- Ith(ff,i) != 0) return 1;
+          jmi_log(block->jmi, logWarning, "Not a number in output from model function in DAE");
+          if (Ith(ff,i)- Ith(ff,i) != 0) return 1;
 	}
 	return KIN_SUCCESS; /*Success*/
 	/*return 1;  //Recoverable error*/
@@ -64,30 +68,30 @@ int kin_f(N_Vector yy, N_Vector ff, void *problem_data){
 }
 
 void kin_err(int err_code, const char *module, const char *function, char *msg, void *eh_data){
-
-	if (err_code > 0){ /*Warning*/
-		printf("[KINSOL WARNING] ");
+        jmi_log_category_t category;
+        char buffer[4000];
+        jmi_block_residual_t *block = eh_data;
+        if (err_code > 0){ /*Warning*/
+            category = logWarning;
 	}else if (err_code < 0){ /*Error*/
-		printf("[KINSOL ERROR] ");
+            category = logError;
 	}
-	printf("%s",function);
-	printf(" ");
-	printf("%s\n",msg);
-	
+        sprintf(buffer, "[KINSOL] %s %s", function, msg);
+        jmi_log(block->jmi, category, buffer);
 }
 
 void kin_info(const char *module, const char *function, char *msg, void *eh_data){
-
-	printf("[KINSOL INFO] ");
-	printf("%s\n",msg);
-
+        char buffer[4000];
+        jmi_block_residual_t *block = eh_data;
+        sprintf(buffer, "[KINSOL] %s", msg);
+        jmi_log(block->jmi, logInfo, buffer);
 }
 
-
 void jmi_kinsol_error_handling(int flag){
-  /*if (flag != 0){
-		printf("Kinsol failed with flag %d \n", flag); 
-		}*/
+  /* TODO: proper error handling
+        if (flag != 0){
+        printf("Kinsol failed with flag %d \n", flag);
+        }*/
 }
 
 int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, void *user_data, N_Vector tmp1, N_Vector tmp2){
@@ -181,11 +185,11 @@ int jmi_kinsol_solve(jmi_block_residual_t * block){
 		jmi_kinsol_error_handling(flag);
 		
 		/*Error function*/
-		flag = KINSetErrHandlerFn(block->kin_mem, kin_err, NULL);
+                flag = KINSetErrHandlerFn(block->kin_mem, kin_err, block);
 		jmi_kinsol_error_handling(flag);
 		
 		/*Info function*/
-		flag = KINSetInfoHandlerFn(block->kin_mem, kin_info, NULL);
+                flag = KINSetInfoHandlerFn(block->kin_mem, kin_info, block);
 		jmi_kinsol_error_handling(flag);
 		
 		/*Solve the block*/

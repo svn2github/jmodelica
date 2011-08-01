@@ -24,6 +24,10 @@
 #include "fmiModelTypes.h"
 #include "jmi.h"
 
+#ifdef USE_FMI_ALLOC
+#include "fmi_alloc.h"
+#endif
+
 #define indexmask 0x0FFFFFFF
 #define typemask 0xF0000000
 
@@ -62,15 +66,32 @@ fmiComponent fmi_instantiate_model(fmiString instanceName, fmiString GUID, fmiCa
     /* Create jmi struct -> No need  since jmi_init allocates it
      jmi_t* jmi = (jmi_t *)functions.allocateMemory(1, sizeof(jmi_t)); */
     jmi_t* jmi = 0;
-    fmiInteger retval = jmi_new(&jmi);
+    fmiInteger retval;
 
-    if(retval != 0) {
-        /* creating jmi struct failed */
-        return NULL;
+    if(!functions.allocateMemory || !functions.freeMemory || !functions.logger) {
+         if(functions.logger) {
+             functions.logger(0, instanceName, fmiError, "ERROR", "Memory management functions allocateMemory/freeMemory are required.");
+         }
+         return 0;
     }
     
     component = (fmi_t *)functions.allocateMemory(1, sizeof(fmi_t));
-    
+    component -> fmi_functions = functions;
+
+#ifdef USE_FMI_ALLOC
+    /* Set the global user functions pointer so that memory allocation functions are intercepted */
+    fmiFunctions = &(component -> fmi_functions);
+#endif
+
+    retval = jmi_new(&jmi);
+    if(retval != 0) {
+        /* creating jmi struct failed */
+        functions.freeMemory(component);
+        return NULL;
+    }
+
+    jmi->fmi = component;
+
     inst_name_len = strlen(instanceName)+1;
     tmpname = (char*)(fmi_t *)functions.allocateMemory(inst_name_len, sizeof(char));
     strncpy(tmpname, instanceName, inst_name_len);

@@ -17,6 +17,7 @@
     <http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
 */
 
+#include "fmi.h"
 #include "jmi.h"
 
 int jmi_get_index_from_value_ref(int vref) {
@@ -634,3 +635,42 @@ int jmi_func_cad_dF_get_independent_ind(jmi_t *jmi, jmi_func_t *func, int indepe
 	}
 	return 0;
 }
+
+void jmi_log(jmi_t *jmi, jmi_log_category_t category, char* message) {
+    if(jmi->fmi) {
+        fmiStatus status;
+        fmiString fmiCategory;
+        fmi_t* fmi = jmi->fmi;
+        if(!fmi->fmi_logging_on) return;
+        switch (category) {
+        case logError:
+            status = fmiError;
+            fmiCategory = "ERROR";
+            break;
+        case logWarning:
+            status = fmiWarning;
+            fmiCategory = "WARNING";
+            break;
+        case logInfo:
+            status = fmiOK;
+            fmiCategory = "INFO";
+            break;
+        }
+        fmi->fmi_functions.logger(fmi, fmi->fmi_instance_name,
+                                  status, fmiCategory, message);
+    }
+    else {
+        switch (category) {
+        case logError:
+            fprintf(stderr, "ERROR: %s\n", message);
+            break;
+        case logWarning:
+            fprintf(stderr, "WARNING: %s\n", message);
+            break;
+        case logInfo:
+            fprintf(stdout, "%s\n", message);
+            break;
+        }
+    }
+}
+

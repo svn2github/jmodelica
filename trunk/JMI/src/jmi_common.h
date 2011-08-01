@@ -148,6 +148,7 @@
 
 /* Forward declaration of jmi structs */
 typedef struct jmi_t jmi_t;                               /**< \brief Forward declaration of struct. */
+typedef struct fmi_t fmi_t;                               /**< \brief Forward declaration of struct. */
 typedef struct jmi_dae_t jmi_dae_t;                       /**< \brief Forward declaration of struct. */
 typedef struct jmi_init_t jmi_init_t;                     /**< \brief Forward declaration of struct. */
 typedef struct jmi_opt_t jmi_opt_t;                       /**< \brief Forward declaration of struct. */
@@ -1148,7 +1149,8 @@ struct jmi_t{
 	jmi_opt_t* opt;                      /**< \brief A jmi_opt_t struct pointer. */
 	jmi_info_t* info;                    /**< \brief A jmi_info_t struct pointer. */
 	jmi_sim_t*  sim;                     /**< \brief A jmi_sim_t struct pointer. */
-	fmiCallbackFunctions user_func;      /**< \brief fmiCallbackFunctions, user provided. */
+        /* never used: fmiCallbackFunctions* user_func;*/     /**< \brief fmiCallbackFunctions, user provided. */
+        fmi_t*      fmi;                     /**< \brief A pointer to the FMI interface (NULL in JMI mode). */
 
 	int n_real_ci;                       /**< \brief Number of independent constants. */
 	int n_real_cd;                       /**< \brief Number of dependent constants. */
