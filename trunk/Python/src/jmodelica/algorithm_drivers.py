@@ -590,6 +590,12 @@ class AssimuloFMIAlgOptions(OptionBase):
             written. Setting this option to an empty string results in a default 
             file name that is based on the name of the model class.
             Default: Empty string
+
+        with_jacobian --
+            Set to True if an FMU Jacobian for the ODE is available or
+            False otherwise.
+            Default: False
+
                  
     The different solvers provided by the Assimulo simulation package provides
     different options. These options are given in dictionaries with names
@@ -624,6 +630,7 @@ class AssimuloFMIAlgOptions(OptionBase):
             'initialize':True,
             'write_scaled_result':False,
             'result_file_name':'',
+            'with_jacobian':False,
             'CVode_options':{'discr':'BDF','iter':'Newton'}
             }
         super(AssimuloFMIAlgOptions,self).__init__(_defaults)
@@ -705,10 +712,10 @@ class AssimuloFMIAlg(AlgorithmBase):
             self.model.initialize(relativeTolerance=self.solver_options['rtol'])
 
         if not self.input:
-            self.probl = FMIODE(self.model, result_file_name=self.result_file_name)
+            self.probl = FMIODE(self.model, result_file_name=self.result_file_name,with_jacobian=self.with_jacobian)
         else:
             self.probl = FMIODE(
-                self.model, input_traj, result_file_name=self.result_file_name)
+                self.model, input_traj, result_file_name=self.result_file_name,with_jacobian=self.with_jacobian)
         
         # instantiate solver and set options
         self.simulator = self.solver(self.probl, t0=self.start_time)
@@ -722,6 +729,8 @@ class AssimuloFMIAlg(AlgorithmBase):
         self.ncp = self.options['ncp']
 
         self.write_scaled_result = self.options['write_scaled_result']
+
+        self.with_jacobian = self.options['with_jacobian']
         
         # result file name
         if self.options['result_file_name'] == '':

@@ -774,7 +774,7 @@ class RadauCollocator(CasadiCollocator):
         self.time_points[1][0] = time[0]
         
         self.n_g_colloc = len(self.g)
-
+    
         # Add path constraints
         # for t,i,j in self.time_points:
         #    pass
