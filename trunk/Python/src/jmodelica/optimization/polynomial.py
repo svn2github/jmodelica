@@ -21,6 +21,7 @@ Module containing polynomial evaluations, weight calculations etc. .
 import numpy as N
 import numpy.linalg
 import scipy.special as SP
+import casadi
         
 class RadauPol(object):
     
@@ -69,7 +70,7 @@ class RadauPol(object):
         p = (r + 1) / 2
         
         # Add interpolation points for tau = 0 and tau = 1
-        p = N.hstack([0., (r + 1) / 2, 1.])
+        p = N.hstack([0., p, 1.])
         
         # Store interpolation points as data attribute
         self.p = p
@@ -86,7 +87,7 @@ class RadauPol(object):
     
     def _calc_der_vals(self):
         # Evaluate derivatives
-        der_vals = N.empty([self.n + 1, self.n + 1])
+        der_vals = casadi.DMatrix(self.n + 1, self.n + 1)
         for j in xrange(self.n + 1):
             for k in xrange(self.n + 1):
                 der_vals[j, k] = lagrange_derivative_eval(self.p, j, self.p[k])

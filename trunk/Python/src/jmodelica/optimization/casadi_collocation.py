@@ -1297,11 +1297,31 @@ class Radau2Collocator(CasadiCollocator):
         # Get a local reference to variables
         var = self.var
         
-        # Define DAE function evaluation method based on graph
+        # Broadcast self.pol.der_vals
+        der_vals = []
+        for k in xrange(self.n_cp + 1):
+            der_vals_k = [self.pol.der_vals[:, k].reshape([1, self.n_cp + 1])]
+            der_vals_k *= self.model.get_n_x()
+            der_vals += [casadi.vertcat(der_vals_k)]
+        
+        # Create function for collocation equations
+        x_i = casadi.symbolic("x_i", self.model.get_n_x(), self.n_cp + 1)
+        der_vals_k = casadi.symbolic("der_vals[k]",
+                                     self.model.get_n_x(), self.n_cp + 1)
+        dx_i_k = casadi.symbolic("dx_i_k", self.model.get_n_x())
+        h = casadi.SX("h")
+        coll_eq = casadi.SXFunction(
+                [x_i, der_vals_k, h, dx_i_k],
+                [casadi.sum(x_i * der_vals_k, 1) - h * dx_i_k])
+        coll_eq.init()
+        
+        # Define function evaluation methods based on graph
         if self.graph == 'MX' or self.graph == 'expanded_MX':
             dae_F_eval = self.model.get_dae_F().call
+            coll_eq_eval = coll_eq.call
         elif self.graph == 'SX':
             dae_F_eval = self.model.get_dae_F().eval
+            coll_eq_eval = coll_eq.eval
         else:
             raise ValueError('Unknown CasADi graph %s.' % graph)
             
@@ -1333,17 +1353,21 @@ class Radau2Collocator(CasadiCollocator):
         # Add residual for u_1_0 as constraint
         g = casadi.vertcat([g, var[1][0]['u'] - u_1_0])
         
-        # Create nested list of states
+        # Create list of state matrices
         x_list = [[]]
-        x_list += [[var[1][k]['x'] for k in xrange(self.n_cp + 1)]]
+        x_i = [var[1][k]['x'] for k in xrange(self.n_cp + 1)]
+        x_i = casadi.horzcat(x_i)
+        x_list += [x_i]
         if self.state_cont_var:
             for i in xrange(2, self.n_e + 1):
-                x_i = [[var[i][k]['x'] for k in xrange(self.n_cp + 1)]]
+                x_i = [var[i][k]['x'] for k in xrange(self.n_cp + 1)]
+                x_i = casadi.horzcat(x_i)
                 x_list += [x_i]
         else:
             for i in xrange(2, self.n_e + 1):
                 x_i = [var[i - 1][self.n_cp]['x']]
                 x_i += [var[i][k]['x'] for k in xrange(1, self.n_cp + 1)]
+                x_i = casadi.horzcat(x_i)
                 x_list += [x_i]
         
         # Collocation and DAE constraints for first element
@@ -1354,9 +1378,9 @@ class Radau2Collocator(CasadiCollocator):
             time += [t]
             
             # Collocation constraint
-            colloc_constr = (N.sum(x_list[1] * self.pol.der_vals[:, k]) - 
-                             self.h[1] * var[1][k]['dx'])
-            g = casadi.vertcat([g, colloc_constr])
+            [coll_constr] = coll_eq_eval([x_list[1], der_vals[k], 
+                                          self.h[1], var[1][k]['dx']])
+            g = casadi.vertcat([g, coll_constr])
             
             # DAE constraint
             z = self._get_z(1, k)
@@ -1374,9 +1398,9 @@ class Radau2Collocator(CasadiCollocator):
                 time += [t]
                 
                 # Collocation constraint
-                colloc_constr = (N.sum(x_list[i] * self.pol.der_vals[:, k]) - 
-                                 self.h[i] * var[i][k]['dx'])
-                g = casadi.vertcat([g, colloc_constr])
+                [coll_constr] = coll_eq_eval([x_list[i], der_vals[k], 
+                                              self.h[i], var[i][k]['dx']])
+                g = casadi.vertcat([g, coll_constr])
                 
                 # DAE constraint
                 z = self._get_z(i, k)
@@ -1545,7 +1569,7 @@ class Radau2Collocator(CasadiCollocator):
 
     # Inherit "set_initial_from_file" from RadauCollocator
     set_initial_from_file = RadauCollocator.__dict__["set_initial_from_file"]
-        
+    
 class PseudoSpectral(CasadiCollocator):
     """
     This class discretize and solves optimization problem of the general kind,
