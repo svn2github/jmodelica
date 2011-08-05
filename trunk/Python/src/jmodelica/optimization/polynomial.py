@@ -102,6 +102,60 @@ class RadauPol(object):
         Does not use the interpolation point at tau = 0.
         """
         return lagrange_eval(self.p[1:], i, tau)
+        
+class GaussPol(object):
+    
+    """
+    Handles Lagrange polynomials used for Gauss collocation.
+    
+    Data attributes::
+    
+        n --
+            Number of collocation points per element.
+            Type: int
+    
+        p --
+            Interpolation (collocation) points, including tau = 0.
+            Type: rank 1 ndarray
+            
+        w --
+            Quadrature weights.
+            Type: rank 1 ndarray
+            
+        der_vals --
+            Derivative values for each basis polynomial at the interpolation
+            points. der_vals[j, k] contains the derivative of basis polynomial
+            j evaluated at interpolation point k.
+            Type: rank 2 ndarray
+    """
+    
+    def _calc_p(self):
+        # Calculate the roots for the non-shifted Gauss-Legendre polynomial
+        r = legendre_Pn_roots(self.n)
+        
+        # Shift the roots
+        p = (r + 1) / 2
+        
+        # Add interpolation points for tau = 0
+        p = N.hstack([0., p])
+        
+        # Store interpolation points as data attribute
+        self.p = p
+        
+    def _calc_w(self):
+        # Calculate the weights for the non-shifted Gauss-Radau polynomial
+        w = gauss_quadrature_weights("LG", self.n)
+        
+        # Shift the weights
+        w /= 2
+        
+        # Store weights as data attribute
+        self.w = w
+    
+    # Inherit from RadauPol
+    __init__ = RadauPol.__dict__["__init__"]
+    _calc_der_vals = RadauPol.__dict__["_calc_der_vals"]
+    eval_basis = RadauPol.__dict__["eval_basis"]
 
 class RadauPol3(object):
 
