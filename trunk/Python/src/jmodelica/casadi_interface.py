@@ -461,7 +461,7 @@ class CasadiModel(object):
 
         # Create functions the DAE right hand side
         # Joel: Use this if making collocation using MX graphs
-        #self.createFunctions(True, False, True)
+        # self.ocp.createFunctions(True, False, True)
 
         # Make sure the variables appear in value reference order
         var_dict = dict((repr(v),v) for v in self.ocp.x_)

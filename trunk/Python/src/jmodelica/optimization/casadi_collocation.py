@@ -53,28 +53,15 @@ class CasadiCollocator(object):
         
         # Get constraints
         c_e = self.get_equality_constraint()
-        if c_e.numel() == 0:
-            c_e = []
         c_i = self.get_inequality_constraint()
-        if c_i.numel() == 0:
-            c_i = []
+        c = casadi.vertcat([c_e, c_i])
         
         # Create constraint function
-        c = casadi.vertcat([c_e, c_i])
-        if self.graph == 'MX' or self.graph == 'expanded_MX':
-            self.c_fcn = casadi.MXFunction([self.get_xx()], [c])
-        elif self.graph == 'SX':
-            self.c_fcn = casadi.SXFunction([self.get_xx()], [c])
-        else:
-            raise ValueError('Unknown CasADi graph %s.' % self.graph)
+        self.c_fcn = casadi.SXFunction([self.get_xx()], [c])
         self.c_fcn.setOption("name", "NLP constraint function")
         self.c_fcn.init()
         
-        # Expand constraint function
-        if self.graph == 'expanded_MX':
-            self.c_fcn.expand()
-        
-        # Create Solver
+        # Create solver
         if self.get_hessian() == None:
             self.solver = casadi.IpoptSolver(self.get_cost(), self.c_fcn)
         else:
@@ -121,12 +108,7 @@ class CasadiCollocator(object):
         """
         Get the inequality constraint g(x) <= 0.0
         """
-        if self.graph == 'MX' or self.graph == 'expanded_MX':
-            return casadi.MX(0, 0) # Change this to casadi.MX() once https://sourceforge.net/apps/trac/casadi/ticket/180 is finished
-        elif self.graph == 'SX':
-            return casadi.SXMatrix()
-        else:
-            raise ValueError('Unknown CasADi graph %s.' % self.graph)
+        return casadi.SXMatrix()
         
     def get_constraint_fcn(self):
         """
@@ -138,12 +120,7 @@ class CasadiCollocator(object):
         """
         Get the equality constraint h(x) = 0.0
         """
-        if self.graph == 'MX' or self.graph == 'expanded_MX':
-            return casadi.MX(0, 0) # Change this to casadi.MX() once https://sourceforge.net/apps/trac/casadi/ticket/180 is finished
-        elif self.graph == 'SX':
-            return casadi.SXMatrix()
-        else:
-            raise ValueError('Unknown CasADi graph %s.' % self.graph)
+        return casadi.SXMatrix()
         
     def set_ipopt_option(self, k, v):
         """
@@ -425,9 +402,9 @@ class CasadiCollocator(object):
         return (t_opt, dx_opt, x_opt, u_opt, w_opt, p_opt)
     
     def ipopt_solve(self):
-        # Initialize
-        self.solver.init();
-
+        # Initialize solver
+        self.solver.init()
+        
         # Initial condition
         self.solver.setInput(self.get_xx_init(),casadi.NLP_X_INIT)
         
@@ -600,7 +577,6 @@ class RadauCollocator(CasadiCollocator):
         self.parameter_estimation_data = options['parameter_estimation_data']
         self.n_e = options['n_e']
         self.n_cp = options['n_cp']
-        self.graph = options['graph']
         self.h = N.ones(self.n_e)/self.n_e;
 
         self.initial_dae_constraints = []
@@ -774,7 +750,7 @@ class RadauCollocator(CasadiCollocator):
         self.time_points[1][0] = time[0]
         
         self.n_g_colloc = len(self.g)
-    
+        
         # Add path constraints
         # for t,i,j in self.time_points:
         #    pass
@@ -1156,13 +1132,53 @@ class Radau2Collocator(CasadiCollocator):
         # Define polynomial for representation of solutions
         self.pol = RadauPol(self.n_cp)
         
-        # Create the NLP problem
+        self._create_NLP()
+        
+    def _create_NLP(self):
+        """
+        Wrapper for creating the NLP.
+        """
+        self._calc_jac_sparsity()        
         self._create_nlp_variables()
         self._create_constraints()
+        self._create_constraint_function()
         self._create_cost_function()
-        
-        super(Radau2Collocator, self).__init__(model)
-        
+        self._expand_MX()
+        self._calc_jac()
+        self._calc_Lagrangian_Hessian()
+        self._compute_bounds_and_init()
+        self._create_solver()
+    
+    def _calc_jac_sparsity(self):
+        if self.jac_via_SX:
+            # Change graph
+            old_graph = self.graph
+            self.graph = "SX"
+            
+            # Create constraints
+            self._create_nlp_variables()
+            self._create_constraints()
+            
+            # Get constraints
+            c_e = self.get_equality_constraint()
+            if c_e.numel() == 0:
+                c_e = []
+            c_i = self.get_inequality_constraint()
+            if c_i.numel() == 0:
+                c_i = []
+            
+            # Create constraint function
+            c = casadi.vertcat([c_e, c_i])
+            c_fcn = casadi.SXFunction([self.get_xx()], [c])
+            c_fcn.setOption("name", "NLP constraint function")
+            c_fcn.init()
+            
+            # Calculate sparsity
+            self.c_fcn_J_sparsity = casadi.CRSSparsity(c_fcn.jacSparsity()) # The CRSSparsity constructor call will no longer be necessary when https://sourceforge.net/apps/trac/casadi/ticket/179 has been fixed
+            
+            # Revert graph
+            self.graph = old_graph
+    
     def _create_nlp_variables(self):
         """
         Create the NLP variables and store them in a nested dictionary.
@@ -1417,6 +1433,32 @@ class Radau2Collocator(CasadiCollocator):
         self.g = g
         self.time = N.array(time)
         
+    def _create_constraint_function(self):
+        """
+        Create constraint function and calculate its Jacobian.
+        """
+        # Concatenate constraints
+        c_e = self.get_equality_constraint()
+        if c_e.numel() == 0:
+            c_e = []
+        c_i = self.get_inequality_constraint()
+        if c_i.numel() == 0:
+            c_i = []
+        c = casadi.vertcat([c_e, c_i])
+        
+        # Create constraint function
+        if self.graph == 'MX' or self.graph == 'expanded_MX':
+            c_fcn = casadi.MXFunction([self.get_xx()], [c])
+        elif self.graph == 'SX':
+            c_fcn = casadi.SXFunction([self.get_xx()], [c])
+        else:
+            raise ValueError('Unknown CasADi graph %s.' % self.graph)
+        c_fcn.setOption("name", "NLP constraint function")
+        c_fcn.init()
+            
+        # Save constraint function as data attribute
+        self.c_fcn = c_fcn
+        
     def _create_cost_function(self):
         """
         Create the cost function.
@@ -1526,26 +1568,46 @@ class Radau2Collocator(CasadiCollocator):
         cost_fcn.init()
         cost_fcn.setOption("name", "NLP objective function")
         
-        # Expand objective function
-        if self.graph == 'expanded_MX':
-            cost_fcn.expand()
+        # Save cost function as data attribute
+        self.cost_fcn = cost_fcn
         
-        # Calculate exact Hessian of NLP Lagrangian
-        # Currently only supported for SXFunctions by CasADi, see
-        # https://sourceforge.net/apps/trac/casadi/ticket/164
+    def _expand_MX(self):
+        """
+        Expand the MX graphs to SX graphs.
+        """
+        if self.graph == "expanded_MX":
+            # Replace NLP MX objects with SX objects from expansion
+            self.xx = casadi.symbolic("xx", self.n_xx)
+            self.c_fcn = self.c_fcn.expand([self.xx])
+            self.g = self.c_fcn.outputSX()
+            self.cost_fcn = self.cost_fcn.expand([self.xx])
+            self.cost = self.cost_fcn.outputSX()
+            
+    def _calc_jac(self):
+        """
+        Calculate Jacobian using sparsity information
+        """
+        if self.jac_via_SX:
+            # Set Jacobian sparsity
+            self.c_fcn.setJacSparsity(self.c_fcn_J_sparsity, 0, 0)
+            
+            # Calculate Jacobian
+            self.J = self.c_fcn.jacobian()
+            self.J.init()
         
-        # Note: Possible to make it work for expanded MX, but since the
-        # solution would later (hopefully soon) become obsolete, I won't bother
-        # with it for now.
-        if self.graph == "SX":
+    def _calc_Lagrangian_Hessian(self):
+        """
+        Calculate the exact Hessian of the NLP Lagrangian.
+        """
+        if self.exact_hessian:
             # Lagrange multipliers and objective function scaling
             lam = casadi.symbolic("lambda", self.g.numel())
             sigma = casadi.symbolic("sigma")
             
             # Lagrangian
-            lagrangian_exp = sigma * self.cost + casadi.inner_prod(lam, self.g)
+            lag_exp = sigma * self.cost + casadi.inner_prod(lam, self.g)
             lagrangian = casadi.SXFunction([self.xx, lam, [sigma]],
-                                           [lagrangian_exp])
+                                           [lag_exp])
             lagrangian.init()
         
             # Hessian of the Lagrangian
@@ -1553,10 +1615,24 @@ class Radau2Collocator(CasadiCollocator):
             self.H_fcn.setOption("name", "Exact Hessian of NLP Lagrangian")
             self.H_fcn.init()
         else:
-            self.H_fcn = None
-        
-        # Save cost function as data attribute
-        self.cost_fcn = cost_fcn
+            # Set Hessian of the Lagrangian to a null function
+            if self.graph == 'MX':
+                self.H_fcn = casadi.MXFunction()
+            elif self.graph == "SX" or self.graph == 'expanded_MX':
+                self.H_fcn = casadi.SXFunction()
+            else:
+                raise ValueError('Unknown CasADi graph %s.' % self.graph)
+    
+    def _create_solver(self):
+        if self.jac_via_SX:
+            self.solver = casadi.IpoptSolver(self.get_cost(), self.c_fcn,
+                                             self.get_hessian(), self.J)
+        else:
+            if self.get_hessian().isNull():
+                self.solver = casadi.IpoptSolver(self.get_cost(), self.c_fcn)
+            else:
+                self.solver = casadi.IpoptSolver(self.get_cost(), self.c_fcn,
+                                                 self.get_hessian())
         
     def get_equality_constraint(self):
         return self.g

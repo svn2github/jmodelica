@@ -1737,10 +1737,6 @@ class CasadiPseudoSpectral(AlgorithmBase):
         """
         self.n_e=self.options['n_e']
         self.n_cp=self.options['n_cp']
-        self.graph = self.options['graph']
-        if self.graph != 'SX':
-            raise NotImplementedError("CasadiPseudoSpectral currently " + \
-                    "only supports SX graphs.")
                     
         self.init_traj=self.options['init_traj']
         self.result_mode = self.options['result_mode']
@@ -1816,10 +1812,6 @@ class CasadiPseudoSpectralOptions(OptionBase):
         n_cp --
             Number of collocation points in each phase (element).
             Default: 20
-            
-        graph --
-            CasADi graph type. Currently the only supported graph is "SX".
-            Default: "SX"
         
         discr --
             Determines the discretization of the problem. Could be either
@@ -1912,7 +1904,6 @@ class CasadiPseudoSpectralOptions(OptionBase):
         _defaults= {
             'n_e':1, 
             'n_cp':20,
-            'graph':'SX',
             'discr': "LG",
             'free_phases':False,
             'link_options':[],
@@ -1950,10 +1941,6 @@ class CasadiRadauOptions(OptionBase):
         n_cp --
             Number of collocation points in each element.
             Default: 3
-            
-        graph --
-            CasADi graph type. Currently the only supported graph is "SX".
-            Default: "SX"
 
         init_traj --
             Variable trajectory data used for initialization of the optimization 
@@ -1990,7 +1977,6 @@ class CasadiRadauOptions(OptionBase):
         _defaults= {
             'n_e':50, 
             'n_cp':3,
-            'graph':'SX',
             'init_traj':None,
             'parameter_estimation_data':None,
             'IPOPT_options':{'max_iter':1000,
@@ -2074,11 +2060,6 @@ class CasadiRadau(AlgorithmBase):
         if self.n_cp != 3:
             raise NotImplementedError("CasadiRadau currently only " + \
                     "supports 3 collocation points.")
-        
-        self.graph = self.options['graph']
-        if self.graph != 'SX':
-            raise NotImplementedError("CasadiRadau currently only " + \
-                    "supports SX graphs.")
                     
         self.init_traj = self.options['init_traj']
         self.parameter_estimation_data = self.options['parameter_estimation_data']
@@ -2125,9 +2106,8 @@ class CasadiRadau(AlgorithmBase):
     @classmethod
     def get_default_options(cls):
         """ 
-        Get an instance of the options class for the 
-        CollocationLagrangePolynomialsAlg algorithm, prefilled with default 
-        values. (Class method.)
+        Get an instance of the options class for the CasadiRadau algorithm,
+        prefilled with default values. (Class method.)
         """
         return CasadiRadauOptions()
 
@@ -2168,7 +2148,7 @@ class CasadiRadau2(AlgorithmBase):
             # user has passed dict with options or empty dict = default
             self.options = CasadiRadau2Options(options)
         elif isinstance(options, CasadiRadau2Options):
-            # user has passed CasadiPseudoSpectralOptions instance
+            # user has passed CasadiRadau2Options instance
             self.options = options
         else:
             raise InvalidAlgorithmOptionException(options)
@@ -2193,6 +2173,16 @@ class CasadiRadau2(AlgorithmBase):
         Helper function that sets options for the CasadiRadau2 algorithm.
         """
         self.__dict__.update(self.options)
+        
+        # Handle option dependencies
+        if self.jac_via_SX:
+            if self.graph != "MX":
+                raise NotImplementedError("jac_via_SX is only supported for " +
+                                          "MX graphs.")
+        if self.exact_hessian:
+            if self.graph == "MX":
+                raise NotImplementedError("exact_hessian is not supported " +
+                                          "for MX graphs.")
         
         # solver options
         self.solver_options = self.options['IPOPT_options']
@@ -2236,13 +2226,13 @@ class CasadiRadau2(AlgorithmBase):
     @classmethod
     def get_default_options(cls):
         """ 
-        Get an instance of the options class for the 
-        CollocationLagrangePolynomialsAlg algorithm, prefilled with default 
-        values. (Class method.)
+        Get an instance of the options class for the CasadiRadau2 algorithm,
+        prefilled with default values. (Class method.)
         """
         return CasadiRadau2Options()
     
 class CasadiRadau2Options(OptionBase):
+    
     """
     Options for optimizing JMU models using a collocation algorithm. 
 
@@ -2250,17 +2240,20 @@ class CasadiRadau2Options(OptionBase):
     
         n_e --
             Number of finite elements.
+            
             Type: int
             Default: 50
             
         n_cp --
             Number of collocation points in each element.
+            
             Type: int
             Default: 3
             
         graph --
             CasADi graph type. Possible values are "SX", "MX" and
             "expanded_MX".
+            
             Type: str
             Default: "SX"
             
@@ -2272,7 +2265,8 @@ class CasadiRadau2Options(OptionBase):
             in the list must be the same as the number of elements. If
             blocking_facotrs == None, then Lagrange polynomials are instead
             used to represent the control.
-            Type: None or list of int
+            
+            Type: list of ints
             Default: None
             
         state_cont_var --
@@ -2282,14 +2276,45 @@ class CasadiRadau2Options(OptionBase):
             If False: Let the same variables represent both the values of the
             states at the start of each element and the end of the previous
             element.
+            
             Type: bool
             Default: True
 
         init_traj --
             Variable trajectory data used for initialization of the
-            optimization problem. The data is represented by an object of the
-            type jmodelica.io.DymolaResultTextual.
+            optimization problem.
+            
+            Type: jmodelica.io.DymolaResultTextual
             Default: None
+            
+        exact_hessian --
+            If True, the exact Hessian of the Lagrangian function is used.
+            
+            Exact Hessians is currently only implemented for SXFunctions in
+            CasADi, see https://sourceforge.net/apps/trac/casadi/ticket/164.
+            This option is thus only supported for SX and expanded_MX graphs
+            currently.
+            
+            Type: bool
+            Default: True
+            
+        jac_via_SX --
+            This option is only supported (and only useful) for MX graphs.
+            
+            If True, the sparsity for the Jacobian of the constraint function
+            is obtained by first creating the constraint function using SX
+            graphs and then calculating its Jacobian sparsity, which is then
+            used when calculating the Jacobian for the MX graph.
+            
+            This is useful because CasADi currently does not support
+            calculating the Jacobian sparsity without first calculating the
+            Jacobian itself for MXFunctions, which can be very inefficient.
+            
+            Once https://sourceforge.net/apps/trac/casadi/ticket/200 has been
+            fixed, this option will become obsolete.
+            
+            Type: bool
+            Default: False
 
     Options are set by using the syntax for dictionaries::
 
@@ -2304,17 +2329,22 @@ class CasadiRadau2Options(OptionBase):
 
         max_iter --
            Maximum number of iterations.
+           
+           Type: int
            Default: 3000
                       
         derivative_test --
            Check the correctness of the NLP derivatives. Valid values are 
            'none', 'first-order', 'second-order', 'only-second-order'.
+           
+           Type: str
            Default: 'none'
 
     IPOPT options are set using the syntax for dictionaries::
 
         >>> opts['IPOPT_options']['max_iter'] = 200
     """
+    
     def __init__(self, *args, **kw):
         _defaults= {
                 'n_e': 50, 
@@ -2324,14 +2354,13 @@ class CasadiRadau2Options(OptionBase):
                 'state_cont_var': True,
                 'init_traj': None,
                 'parameter_estimation_data': None,
+                'exact_hessian': True,
+                'jac_via_SX': False,
                 'IPOPT_options':{
-                        'max_iter': 1000,
+                        'max_iter': 3000,
                         'derivative_test': 'none'}}
         
         super(CasadiRadau2Options, self).__init__(_defaults)
-        # for those key-value-sets where the value is a dict, don't 
-        # overwrite the whole dict but instead update the default dict 
-        # with the new values
         self._update_keep_dict_defaults(*args, **kw)
 
 class CasadiRadau2Result(JMResultBase):
