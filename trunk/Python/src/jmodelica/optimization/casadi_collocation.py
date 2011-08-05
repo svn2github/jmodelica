@@ -1138,46 +1138,14 @@ class Radau2Collocator(CasadiCollocator):
         """
         Wrapper for creating the NLP.
         """
-        self._calc_jac_sparsity()        
         self._create_nlp_variables()
         self._create_constraints()
         self._create_constraint_function()
         self._create_cost_function()
         self._expand_MX()
-        self._calc_jac()
         self._calc_Lagrangian_Hessian()
         self._compute_bounds_and_init()
         self._create_solver()
-    
-    def _calc_jac_sparsity(self):
-        if self.jac_via_SX:
-            # Change graph
-            old_graph = self.graph
-            self.graph = "SX"
-            
-            # Create constraints
-            self._create_nlp_variables()
-            self._create_constraints()
-            
-            # Get constraints
-            c_e = self.get_equality_constraint()
-            if c_e.numel() == 0:
-                c_e = []
-            c_i = self.get_inequality_constraint()
-            if c_i.numel() == 0:
-                c_i = []
-            
-            # Create constraint function
-            c = casadi.vertcat([c_e, c_i])
-            c_fcn = casadi.SXFunction([self.get_xx()], [c])
-            c_fcn.setOption("name", "NLP constraint function")
-            c_fcn.init()
-            
-            # Calculate sparsity
-            self.c_fcn_J_sparsity = casadi.CRSSparsity(c_fcn.jacSparsity()) # The CRSSparsity constructor call will no longer be necessary when https://sourceforge.net/apps/trac/casadi/ticket/179 has been fixed
-            
-            # Revert graph
-            self.graph = old_graph
     
     def _create_nlp_variables(self):
         """
@@ -1582,18 +1550,6 @@ class Radau2Collocator(CasadiCollocator):
             self.g = self.c_fcn.outputSX()
             self.cost_fcn = self.cost_fcn.expand([self.xx])
             self.cost = self.cost_fcn.outputSX()
-            
-    def _calc_jac(self):
-        """
-        Calculate Jacobian using sparsity information
-        """
-        if self.jac_via_SX:
-            # Set Jacobian sparsity
-            self.c_fcn.setJacSparsity(self.c_fcn_J_sparsity, 0, 0)
-            
-            # Calculate Jacobian
-            self.J = self.c_fcn.jacobian()
-            self.J.init()
         
     def _calc_Lagrangian_Hessian(self):
         """
@@ -1624,14 +1580,10 @@ class Radau2Collocator(CasadiCollocator):
                 raise ValueError('Unknown CasADi graph %s.' % self.graph)
     
     def _create_solver(self):
-        if self.jac_via_SX:
-            self.solver = casadi.IpoptSolver(self.get_cost(), self.c_fcn,
-                                             self.get_hessian(), self.J)
+        if self.get_hessian().isNull():
+            self.solver = casadi.IpoptSolver(self.get_cost(), self.c_fcn)
         else:
-            if self.get_hessian().isNull():
-                self.solver = casadi.IpoptSolver(self.get_cost(), self.c_fcn)
-            else:
-                self.solver = casadi.IpoptSolver(self.get_cost(), self.c_fcn,
+            self.solver = casadi.IpoptSolver(self.get_cost(), self.c_fcn,
                                                  self.get_hessian())
         
     def get_equality_constraint(self):
@@ -1794,7 +1746,6 @@ class PseudoSpectral(CasadiCollocator):
         
         self.model = model
         self.options = options
-        self.graph = options['graph']
         self.md  = model.get_model_description()
         self.ocp = model.get_casadi_ocp()
         

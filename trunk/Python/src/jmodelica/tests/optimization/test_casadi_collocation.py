@@ -208,7 +208,6 @@ class TestRadau2:
         
         # MX
         opts['graph'] = "MX"
-        opts['jac_via_SX'] = True
         opts['exact_hessian'] = False
         res = self.model_vdp.optimize(algorithm="CasadiRadau2", options=opts)
         assert_results(res, cost_SX, u_norm_SX, 5, 6)
@@ -251,35 +250,6 @@ class TestRadau2:
         opts['exact_hessian'] = False
         res = self.model_vdp.optimize(algorithm="CasadiRadau2", options=opts)
         assert_results(res, cost_SX_with, u_norm_SX_with, 5, 6)
-        
-    @testattr(casadi = True)
-    def test_jac_via_SX(self):
-        """
-        Test optimizing the VDP using MX graphs with and without Jacobian
-        sparsity pre-calculated from SX graphs.
-        """
-        # Get initial guess from SX optimization to speed up test
-        res = self.model_vdp.optimize(algorithm="CasadiRadau2")
-        
-        # With jac_via_SX
-        opts = self.model_vdp.optimize_options(algorithm="CasadiRadau2")
-        opts['n_e'] = 20
-        opts['n_cp'] = 4
-        opts['init_traj'] = ResultDymolaTextual("VDP_pack_VDP_Opt2_result.txt")
-        opts['graph'] = "MX"
-        opts['exact_hessian'] = False
-        opts['jac_via_SX'] = True
-        res = self.model_vdp.optimize(algorithm="CasadiRadau2", options=opts)
-        
-        cost_with = res["cost"][-1]
-        u = res["u"]
-        u_norm_with = N.linalg.norm(u) / N.sqrt(len(u))
-        assert_results(res, 2.3384921684583301e1, 2.8227471021520e-1)
-        
-        # Without jac_via_SX
-        opts['jac_via_SX'] = False
-        res = self.model_vdp.optimize(algorithm="CasadiRadau2", options=opts)
-        assert_results(res, cost_with, u_norm_with, 6, 7)
 
 class TestPseudoSpectral:
     

@@ -2175,10 +2175,6 @@ class CasadiRadau2(AlgorithmBase):
         self.__dict__.update(self.options)
         
         # Handle option dependencies
-        if self.jac_via_SX:
-            if self.graph != "MX":
-                raise NotImplementedError("jac_via_SX is only supported for " +
-                                          "MX graphs.")
         if self.exact_hessian:
             if self.graph == "MX":
                 raise NotImplementedError("exact_hessian is not supported " +
@@ -2297,24 +2293,6 @@ class CasadiRadau2Options(OptionBase):
             
             Type: bool
             Default: True
-            
-        jac_via_SX --
-            This option is only supported (and only useful) for MX graphs.
-            
-            If True, the sparsity for the Jacobian of the constraint function
-            is obtained by first creating the constraint function using SX
-            graphs and then calculating its Jacobian sparsity, which is then
-            used when calculating the Jacobian for the MX graph.
-            
-            This is useful because CasADi currently does not support
-            calculating the Jacobian sparsity without first calculating the
-            Jacobian itself for MXFunctions, which can be very inefficient.
-            
-            Once https://sourceforge.net/apps/trac/casadi/ticket/200 has been
-            fixed, this option will become obsolete.
-            
-            Type: bool
-            Default: False
 
     Options are set by using the syntax for dictionaries::
 
@@ -2355,7 +2333,6 @@ class CasadiRadau2Options(OptionBase):
                 'init_traj': None,
                 'parameter_estimation_data': None,
                 'exact_hessian': True,
-                'jac_via_SX': False,
                 'IPOPT_options':{
                         'max_iter': 3000,
                         'derivative_test': 'none'}}
