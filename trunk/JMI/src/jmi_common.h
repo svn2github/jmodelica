@@ -232,6 +232,13 @@ typedef jmi_ad_tape_t *jmi_ad_tape_p;
 #error "The directive JMI_AD_NONE or JMI_AD_CPPAD must be set"
 #endif
 
+/* If we are using a C++ compiler now, but aren't using CppAD, then we need extern "C" around functions. */
+#ifdef __cplusplus
+#if JMI_AD == JMI_AD_NONE
+#define JMI_AD_NONE_AND_CPP
+#endif
+#endif
+
 #define LOG_EXP_AND(op1,op2) ((op1)*(op2))           /**< \brief Macro for logical expression and <br> */
 #define LOG_EXP_NOT(op)      (JMI_TRUE-(op))         /**< \brief Macro for logical expression not <br> */
 
@@ -250,6 +257,11 @@ typedef jmi_ad_tape_t *jmi_ad_tape_p;
 /* Default Kinsol tolerance when solving BLT blocks */
 /* RCONST from SUNDIALS and defines a compatible type, usally double precision */
 #define JMI_DEFAULT_KINSOL_TOL RCONST(1.0e-8)
+
+
+#ifdef JMI_AD_NONE_AND_CPP
+extern "C" {
+#endif
 
 /**
  * Function to wrap division and report errors.
@@ -1434,6 +1446,7 @@ int jmi_variable_type_spec(jmi_t *jmi, int independent_vars,
 
 /* @} */
 
-
-
+#ifdef JMI_AD_NONE_AND_CPP
+}
+#endif
 #endif

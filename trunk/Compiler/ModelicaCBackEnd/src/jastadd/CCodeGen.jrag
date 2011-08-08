@@ -1211,33 +1211,22 @@ aspect CCodeGen {
 		str.print("  return 0;\n}\n\n");
 	}
 	
-	public abstract void AbstractEquationBlock.genBlock_C(int i, boolean inInitial, String indent, PrintStream str);
-	
-	public void EquationBlock.genBlock_C(int i, boolean inInitial, String indent, PrintStream str) {	
-		if (inInitial) {
-			str.print("  jmi_kinsol_solve(jmi->dae_init_block_residuals["+i+"]);\n");
-		} else {
-			str.print("  jmi_kinsol_solve(jmi->dae_block_residuals["+i+"]);\n");
-		}	
-	}
-
-	public void TornEquationBlock.genBlock_C(int i, boolean inInitial, String indent, PrintStream str) {	
-		if (inInitial) {
-			str.print("  jmi_kinsol_solve(jmi->dae_init_block_residuals["+i+"]);\n");
-		} else {
-			str.print("  jmi_kinsol_solve(jmi->dae_block_residuals["+i+"]);\n");
-		}	
+	public void AbstractEquationBlock.genBlock_C(int i, boolean inInitial, String indent, PrintStream str) {
+		String var = inInitial ? "dae_init_block_residuals" : "dae_block_residuals";
+		str.format("%sjmi_kinsol_solve(jmi->%s[%d]);\n", indent, var, i);
 	}
 
 	public void SolvedScalarBlock.genBlock_C(int i, boolean inInitial, String indent, PrintStream str) {	
-			equations().get(0).genSolvedBlock_C(activeVariables().get(0),indent,str);
+		equations().get(0).genSolvedBlock_C(activeVariables().get(0),indent,str);
 	}
 
 	public void FAbstractEquation.genSolvedBlock_C(FVariable v, String indent, PrintStream str) {}
 	
 	public void FEquation.genSolvedBlock_C(FVariable v, String indent, PrintStream str) {
-		str.print(indent + v.name_C() + " = ");
-		solution(v.name()).prettyPrint_C(str,indent);
+		FExp sol = solution(v.name());
+		sol.genTempVars_C(printer_C, str, indent);
+		str.format("%s%s = ", indent, v.name_C());
+		sol.prettyPrint_C(str, indent);
 		str.print(";\n");		
 	}
 	
@@ -1248,9 +1237,8 @@ aspect CCodeGen {
 		  }
 		*/
 		for (FExp g : guards()) {		
-			str.print("_guards(");
-			str.print(g.guardExpInEquationsIndex());
-			str.print(") = ");
+			g.genTempVars_C(printer_C, str, indent);
+			str.format("%s_guards(%d) = ", indent, g.guardExpInEquationsIndex());
 			g.prettyPrint_C(str,"");
 			str.print(";\n");
 		}

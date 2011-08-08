@@ -34,6 +34,11 @@
 #include <sundials/sundials_types.h>
 #include <sundials/sundials_math.h>
 
+
+#ifdef JMI_AD_NONE_AND_CPP
+extern "C" {
+#endif
+
 extern void dgesv_(int* N, int* NRHS, double* A, int* LDA, int* IPIV,
                 double* B, int* LDB, int* INFO );
 
@@ -82,4 +87,7 @@ int jmi_simple_newton_solve(jmi_block_residual_t *block);
 int jmi_simple_newton_jac(jmi_block_residual_t *block);
 
 
+#ifdef JMI_AD_NONE_AND_CPP
+}
+#endif
 #endif
