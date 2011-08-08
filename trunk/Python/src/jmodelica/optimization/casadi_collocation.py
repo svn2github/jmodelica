@@ -17,15 +17,17 @@
 """
 Module containing the Casadi interface Python wrappers.
 """
+import logging
 import codecs
 from operator import itemgetter
 import pylab as P
 
 try:
     import casadi
-except:
-    pass
-
+except ImportError:
+    logging.warning(
+        'Could not find CasADi package, aborting.')
+    
 from jmodelica.optimization.polynomial import *
 from jmodelica import xmlparser
 from jmodelica.io import VariableNotFoundError

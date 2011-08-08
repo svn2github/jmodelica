@@ -17,11 +17,15 @@
 """ 
 Module containing polynomial evaluations, weight calculations etc. .
 """
-
+import logging
 import numpy as N
 import numpy.linalg
 import scipy.special as SP
-import casadi
+try:
+    import casadi
+except ImportError:
+    logging.warning(
+        'Could not find CasADi package, aborting.')
         
 class RadauPol(object):
     
