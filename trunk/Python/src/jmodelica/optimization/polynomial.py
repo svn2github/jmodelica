@@ -37,9 +37,14 @@ class RadauPol(object):
         n --
             Number of collocation points per element.
             Type: int
+            
+        beg_interp --
+            Whether or not an interpolation point is placed at tau = 0 for the
+            state profiles.
+            Type: bool
     
         p --
-            Interpolation (collocation) points, including tau = 0.
+            Interpolation points.
             Type: rank 1 ndarray
             
         w --
@@ -53,15 +58,21 @@ class RadauPol(object):
             Type: rank 2 ndarray
     """
     
-    def __init__(self, n):
+    def __init__(self, n, beg_interp):
         """
         Parameters::
         
             n --
-            Number of collocation points per element.
-            Type: int
+                Number of collocation points per element.
+                Type: int
+            
+            beg_interp --
+                Whether or not an interpolation point is placed at tau = 0 for
+                the state profiles.
+                Type: bool
         """
         self.n = n
+        self.beg_interp = beg_interp
         self._calc_p()
         self._calc_w()
         self._calc_der_vals()
@@ -73,8 +84,14 @@ class RadauPol(object):
         # Shift the roots
         p = (r + 1) / 2
         
-        # Add interpolation points for tau = 0 and tau = 1
-        p = N.hstack([0., p, 1.])
+        # Add interpolation point for tau = 0
+        if self.beg_interp:
+            p = N.hstack([0., p])
+        else:
+            p = N.hstack([N.nan, p])
+        
+        # Add interpolation point for tau = 1
+        p = N.hstack([p, 1.])
         
         # Store interpolation points as data attribute
         self.p = p
@@ -90,11 +107,22 @@ class RadauPol(object):
         self.w = w
     
     def _calc_der_vals(self):
-        # Evaluate derivatives
+        # Derivatives of all basis polynomials at all collocation points
         der_vals = casadi.DMatrix(self.n + 1, self.n + 1)
+        
         for j in xrange(self.n + 1):
-            for k in xrange(self.n + 1):
-                der_vals[j, k] = lagrange_derivative_eval(self.p, j, self.p[k])
+            der_vals[j, 0] = N.nan # Value not used                        
+        
+        if not self.beg_interp:
+            for k in xrange(1, self.n + 1):
+                der_vals[0, k] = N.nan # Value not used   
+        
+        for j in xrange(not self.beg_interp, self.n + 1):
+            for k in xrange(1, self.n + 1):
+                der_vals[j, k] = \
+                        lagrange_derivative_eval(self.p[not self.beg_interp:],
+                                                 j - (not self.beg_interp),
+                                                 self.p[k])
         
         # Store derivative values as data attribute
         self.der_vals = der_vals
@@ -103,9 +131,9 @@ class RadauPol(object):
         """
         Evaluate Lagrange basis polynomial.
         
-        Does not use the interpolation point at tau = 0.
+        Does not have an interpolation point at tau = 0.
         """
-        return lagrange_eval(self.p[1:], i, tau)
+        return lagrange_eval(self.p[1:], i - 1, tau)
         
 class GaussPol(object):
     

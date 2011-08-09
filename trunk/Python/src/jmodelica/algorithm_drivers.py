@@ -23,6 +23,7 @@ respectively.
 
 #from abc import ABCMeta, abstractmethod
 import logging
+import time
 import numpy as N
 
 import jmodelica
@@ -2141,6 +2142,7 @@ class CasadiRadau2(AlgorithmBase):
                   dict will thus give all options with default values.
                 - A CasadiRadau2Options object.
         """
+        self.t0 = time.clock()
         self.model = model
         
         # handle options argument
@@ -2166,7 +2168,7 @@ class CasadiRadau2(AlgorithmBase):
         self._set_solver_options()
 
         if self.init_traj != None:
-            self.nlp.set_initial_from_file(self.init_traj) 
+            self.nlp.set_initial_from_file(self.init_traj)
         
     def _set_options(self):
         """ 
@@ -2177,8 +2179,8 @@ class CasadiRadau2(AlgorithmBase):
         # Handle option dependencies
         if self.exact_hessian:
             if self.graph == "MX":
-                raise NotImplementedError("exact_hessian is not supported " +
-                                          "for MX graphs.")
+                print("Warning: exact_hessian is not recommended in " +
+                      "combination with MX graphs.")
         
         # solver options
         self.solver_options = self.options['IPOPT_options']
@@ -2194,12 +2196,25 @@ class CasadiRadau2(AlgorithmBase):
         """ 
         Solve the optimization problem using ipopt solver. 
         """
-        self.nlp.ipopt_solve()
+        times = {}
+        times['sol'] = self.nlp.ipopt_solve()
+        
+        # Calculate times
+        times['tot'] = time.clock() - self.t0
+        times['init'] = times['tot'] - times['sol']
+        
+        # Print times
+        print("\nTotal time: %.3f seconds" % times['tot'])
+        print("Initialization time: %.3f seconds" % times['init'])
+        print("Solution time: %.3f seconds" % times['sol'])
+        
+        # Store times as data attribute
+        self.times = times
         
     def get_result(self):
         """ 
         Write result to file, load result data and create a 
-        CollocationLagrangePolynomialsResult object.
+        CasadiRadau2Result object.
         
         Returns::
         
@@ -2217,7 +2232,7 @@ class CasadiRadau2(AlgorithmBase):
         
         # create and return result object
         return CasadiRadau2Result(self.model, resultfile, self.nlp, res,
-                                  self.options)
+                                  self.options, self.times)
         
     @classmethod
     def get_default_options(cls):
@@ -2265,6 +2280,15 @@ class CasadiRadau2Options(OptionBase):
             Type: list of ints
             Default: None
             
+        beg_interp --
+            Whether or not to place an interpolation point at the beginning of
+            the element for the polynomials representing the states.
+            
+            Disabling this option can give quite unpleasant numeric properties.
+            
+            Type: bool
+            Default: True
+            
         state_cont_var --
             If True: Create extra variables for the states at the start of each
             element and then constrain them to be equal to the corresponding 
@@ -2286,13 +2310,29 @@ class CasadiRadau2Options(OptionBase):
         exact_hessian --
             If True, the exact Hessian of the Lagrangian function is used.
             
-            Exact Hessians is currently only implemented for SXFunctions in
-            CasADi, see https://sourceforge.net/apps/trac/casadi/ticket/164.
-            This option is thus only supported for SX and expanded_MX graphs
-            currently.
+            Exact Hessians is currently not fully supported by CasADi for MX
+            graphs, see https://sourceforge.net/apps/trac/casadi/ticket/164.
+            It works, but it's inefficient and will lead to very slow
+            initialization times.
             
             Type: bool
             Default: True
+            
+        numeric_jacobian --
+            Whether to use the numeric_jacobian option for the constraints.
+            
+            Setting numeric_jacobian to True should decrease initialization
+            time but increase solution time.
+            
+            If None, the CasADi default will be used. The CasADi default is
+            currently True for MX graphs and False for SX and expanded_MX
+            graphs, but this is subject to change.
+            
+            Setting numeric_jacobian to False for MX graphs is currently not
+            fully supported by CasADi and thus not recommended.
+            
+            Type: bool or None
+            Default: None
 
     Options are set by using the syntax for dictionaries::
 
@@ -2329,10 +2369,12 @@ class CasadiRadau2Options(OptionBase):
                 'n_cp': 3,
                 'graph': 'SX',
                 'blocking_factors': None,
+                'beg_interp': True,
                 'state_cont_var': True,
                 'init_traj': None,
                 'parameter_estimation_data': None,
                 'exact_hessian': True,
+                'numeric_jacobian': None,
                 'IPOPT_options':{
                         'max_iter': 3000,
                         'derivative_test': 'none'}}
@@ -2341,4 +2383,9 @@ class CasadiRadau2Options(OptionBase):
         self._update_keep_dict_defaults(*args, **kw)
 
 class CasadiRadau2Result(JMResultBase):
-    pass
+    
+    def __init__(self, model=None, result_file_name=None, solver=None, 
+                 result_data=None, options=None, times=None):
+        super(CasadiRadau2Result, self).__init__(model, result_file_name,
+                                                 solver, result_data, options)
+        self.times = times

@@ -119,17 +119,19 @@ class TestRadau2:
     def test_blocking_factors(self):
         """Test optimizing the VDP using blocking factors."""
         opts = self.model_vdp.optimize_options(algorithm="CasadiRadau2")
-        opts['n_e'] = 50
+        opts['n_e'] = 60
         opts['n_cp'] = 3
         opts['blocking_factors'] = opts['n_e'] * [1]
         res = self.model_vdp.optimize(algorithm="CasadiRadau2", options=opts)
-        assert_results(res, 2.81692892672e1, 2.997111577228e-1)
+        assert_results(res, 2.440785869906e1, 2.997111577228e-1,
+                       cost_places=1, norm_places=1)
         
         opts['n_e'] = 20
         opts['n_cp'] = 4
         opts['blocking_factors'] = [1, 2, 1, 1, 2, 13]
         res = self.model_vdp.optimize(algorithm="CasadiRadau2", options=opts)
-        assert_results(res, 6.9393876378875e1, 4.1528861933309e-1)
+        assert_results(res, 6.9557353378639e1, 4.1528861933309e-1,
+                       cost_places=1, norm_places=1)
     
     @testattr(casadi = True)
     def test_state_cont_var(self):
@@ -184,6 +186,10 @@ class TestRadau2:
         """
         Test optimizing the VDP with all three graph types.
         
+        The exact Hessian is currently not used for the MX graph test. Change
+        this when https://sourceforge.net/apps/trac/casadi/ticket/164 has been
+        fixed.
+        
         Once https://trac.modelon.se/P420-JModelica-CasadiCollocation/ticket/15
         has been resolved, change this test to use the CSTR instead, in order
         to vary the test cases.
@@ -216,40 +222,108 @@ class TestRadau2:
     def test_exact_hessian(self):
         """
         Test optimizing the VDP with and without exact Hessian for all graphs.
-        
-        Since exact Hessian is not supported by MX graphs, this only tests SX
-        and expanded_MX. This should be changed when it's also supported for
-        MX.
         """
-        # SX with exact Hessian
+        # Solve problem to get initialization trajectory and reference values
         opts = self.model_vdp.optimize_options(algorithm="CasadiRadau2")
         opts['n_e'] = 20
         opts['n_cp'] = 4
+        res = self.model_vdp.optimize(algorithm="CasadiRadau2", options=opts)
+        
+        assert_results(res, 2.3384921684583301e1, 2.8227471021520e-1)
+        cost_ref = res["cost"][-1]
+        u = res["u"]
+        u_norm_ref = N.linalg.norm(u) / N.sqrt(len(u))
+        opts['init_traj'] = ResultDymolaTextual("VDP_pack_VDP_Opt2_result.txt")
+        
+        # SX with exact Hessian
         opts['graph'] = "SX"
         opts['exact_hessian'] = True
         res = self.model_vdp.optimize(algorithm="CasadiRadau2", options=opts)
-        
-        cost_SX_with = res["cost"][-1]
-        u = res["u"]
-        u_norm_SX_with = N.linalg.norm(u) / N.sqrt(len(u))
-        assert_results(res, 2.3384921684583301e1, 2.8227471021520e-1)
+        sol_with = res.times['sol']
+        assert_results(res, cost_ref, u_norm_ref)
         
         # SX without exact Hessian
-        opts['init_traj'] = ResultDymolaTextual("VDP_pack_VDP_Opt2_result.txt")
         opts['exact_hessian'] = False
         res = self.model_vdp.optimize(algorithm="CasadiRadau2", options=opts)
-        assert_results(res, cost_SX_with, u_norm_SX_with)
+        sol_without = res.times['sol']
+        nose.tools.assert_true(sol_with < 0.5 * sol_without)
+        assert_results(res, cost_ref, u_norm_ref)
         
         # expanded_MX with exact Hessian
         opts['graph'] = "expanded_MX"
         opts['exact_hessian'] = True
         res = self.model_vdp.optimize(algorithm="CasadiRadau2", options=opts)
-        assert_results(res, cost_SX_with, u_norm_SX_with, 6, 7)
+        sol_with = res.times['sol']
+        assert_results(res, cost_ref, u_norm_ref, 6, 7)
         
         # expanded_MX without exact Hessian
         opts['exact_hessian'] = False
         res = self.model_vdp.optimize(algorithm="CasadiRadau2", options=opts)
-        assert_results(res, cost_SX_with, u_norm_SX_with, 5, 6)
+        sol_without = res.times['sol']
+        nose.tools.assert_true(sol_with < 0.5 * sol_without)
+        assert_results(res, cost_ref, u_norm_ref, 5, 6)
+        
+        # MX with exact Hessian
+        opts['graph'] = "MX"
+        opts['exact_hessian'] = True
+        res = self.model_vdp.optimize(algorithm="CasadiRadau2", options=opts)
+        sol_with = res.times['sol']
+        assert_results(res, cost_ref, u_norm_ref, 6, 7)
+        
+        # MX without exact Hessian
+        opts['exact_hessian'] = False
+        res = self.model_vdp.optimize(algorithm="CasadiRadau2", options=opts)
+        sol_without = res.times['sol']
+        nose.tools.assert_true(sol_with < 0.5 * sol_without)
+        assert_results(res, cost_ref, u_norm_ref, 5, 6)
+        
+    @testattr(casadi = True)
+    def test_numeric_jacobian(self):
+        """
+        Test the VDP with and without numeric_jacobian for all graphs.
+        
+        This test currently only tests SX and expanded_MX graphs, because
+        numeric_jacobian is currently not fully supported by CasADi.
+        """
+        # Solve problem to get initialization trajectory and reference values
+        opts = self.model_vdp.optimize_options(algorithm="CasadiRadau2")
+        opts['n_e'] = 20
+        opts['n_cp'] = 4
+        res = self.model_vdp.optimize(algorithm="CasadiRadau2", options=opts)
+        
+        assert_results(res, 2.3384921684583301e1, 2.8227471021520e-1)
+        cost_ref = res["cost"][-1]
+        u = res["u"]
+        u_norm_ref = N.linalg.norm(u) / N.sqrt(len(u))
+        opts['init_traj'] = ResultDymolaTextual("VDP_pack_VDP_Opt2_result.txt")
+        
+        # SX with numeric Jacobian
+        opts['graph'] = "SX"
+        opts['numeric_jacobian'] = True
+        res = self.model_vdp.optimize(algorithm="CasadiRadau2", options=opts)
+        sol_with = res.times['sol']
+        assert_results(res, cost_ref, u_norm_ref)
+        
+        # SX without numeric Jacobian
+        opts['numeric_jacobian'] = False
+        res = self.model_vdp.optimize(algorithm="CasadiRadau2", options=opts)
+        sol_without = res.times['sol']
+        nose.tools.assert_true(sol_without < 0.7 * sol_with)
+        assert_results(res, cost_ref, u_norm_ref)
+        
+        # expanded_MX with numeric Jacobian
+        opts['graph'] = "expanded_MX"
+        opts['numeric_jacobian'] = True
+        res = self.model_vdp.optimize(algorithm="CasadiRadau2", options=opts)
+        sol_with = res.times['sol']
+        assert_results(res, cost_ref, u_norm_ref, 6, 7)
+        
+        # expanded_MX without numeric Jacobian
+        opts['numeric_jacobian'] = False
+        res = self.model_vdp.optimize(algorithm="CasadiRadau2", options=opts)
+        sol_without = res.times['sol']
+        nose.tools.assert_true(sol_without < 0.7 * sol_with)
+        assert_results(res, cost_ref, u_norm_ref, 5, 6)
 
 class TestPseudoSpectral:
     

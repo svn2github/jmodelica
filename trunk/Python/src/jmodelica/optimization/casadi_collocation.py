@@ -21,6 +21,7 @@ import logging
 import codecs
 from operator import itemgetter
 import pylab as P
+import time
 
 try:
     import casadi
@@ -404,6 +405,15 @@ class CasadiCollocator(object):
         return (t_opt, dx_opt, x_opt, u_opt, w_opt, p_opt)
     
     def ipopt_solve(self):
+        """
+        Solves the NLP using IPOPT.
+        
+        Returns::
+        
+            sol_time --
+                Duration (seconds) of call to IPOPT.
+                Type: float
+        """
         # Initialize solver
         self.solver.init()
         
@@ -440,10 +450,13 @@ class CasadiCollocator(object):
         print "Cost functional: ", self.get_cost()
         """
         # Solve the problem
+        t0 = time.clock()
         self.solver.solve()
         
         # Get the result
         self.nlp_opt = N.array(self.solver.output(casadi.NLP_X_OPT))
+        sol_time = time.clock() - t0
+        return sol_time
     
     def _compute_bounds_and_init(self):
         # Create lower and upper bounds
@@ -1132,7 +1145,7 @@ class Radau2Collocator(CasadiCollocator):
             self.h[i] = (self.ocp.tf - self.ocp.t0) / self.n_e
         
         # Define polynomial for representation of solutions
-        self.pol = RadauPol(self.n_cp)
+        self.pol = RadauPol(self.n_cp, self.beg_interp)
         
         self._create_NLP()
         
@@ -1141,6 +1154,7 @@ class Radau2Collocator(CasadiCollocator):
         Wrapper for creating the NLP.
         """
         self._create_nlp_variables()
+        self._rename_variables()
         self._create_constraints()
         self._create_constraint_function()
         self._create_cost_function()
@@ -1149,7 +1163,7 @@ class Radau2Collocator(CasadiCollocator):
         self._compute_bounds_and_init()
         self._create_solver()
     
-    def _create_nlp_variables(self):
+    def _create_nlp_variables(self, rename=False):
         """
         Create the NLP variables and store them in a nested dictionary.
         """
@@ -1177,6 +1191,10 @@ class Radau2Collocator(CasadiCollocator):
             xx = casadi.symbolic("xx", n_xx)
         else:
             raise ValueError("Unknown CasADi graph %s." % self.graph)
+        
+        # Get variables with correct names
+        if rename:
+            xx = self.xx
         
         # Create objects for variable indexing
         var = {}
@@ -1247,6 +1265,58 @@ class Radau2Collocator(CasadiCollocator):
         self.n_xx = n_xx
         self.var = var
         self.var_indices = var_indices
+        
+    def _rename_variables(self):
+        """
+        Renames the NLP variables.
+        
+        This only works for SX graphs. It's also done in a very inefficient
+        manner and should only be used for debugging purposes. The NLP
+        variables are essentially created twice; first with incorrect names and
+        then recreated with correct names.
+        
+        The switch for enabling variable renaming exists internally.
+        """
+        rename = False # Internal switch for variable renaming
+        if rename:
+            print("Warning: Variable renaming is currently activated.")
+            assert self.graph == "SX", \
+                   "Variable renaming is only allowed for SX graphs."
+            xx = casadi.SXMatrix(self.n_xx, 1, 0)
+            var_indices = self.var_indices
+            
+            for i in range(1, self.n_e+1):
+                for k in var_indices[i].keys():
+                    if 'dx' in var_indices[i][k].keys():
+                        dx = []
+                        for j in range(self.model.get_n_x()):
+                            dx.append(casadi.SX(str(self.model.get_dx()[j]) +
+                                                '_' + str(i) + '_' + str(k)))
+                        xx[var_indices[i][k]['dx']] = dx
+                    
+                    if 'x' in var_indices[i][k].keys():
+                        x = []
+                        for j in range(self.model.get_n_x()):
+                            x.append(casadi.SX(str(self.model.get_x()[j]) +
+                                               '_' +  str(i) + '_' + str(k)))
+                        xx[var_indices[i][k]['x']] = x
+                    
+                    if 'u' in var_indices[i][k].keys():
+                        u = []
+                        for j in range(self.model.get_n_u()):
+                            u.append(casadi.SX(str(self.model.get_u()[j]) +
+                                               '_' +  str(i) + '_' + str(k)))
+                        xx[var_indices[i][k]['u']] = u
+                    
+                    if 'w' in var_indices[i][k].keys():                         
+                        w = []
+                        for j in range(self.model.get_n_w()):
+                            w.append(casadi.SX(str(self.model.get_w()[j]) +
+                                               '_' +  str(i) + '_' + str(k)))
+                        xx[var_indices[i][k]['w']]
+            
+            self.xx = xx
+            self._create_nlp_variables(True)
     
     def _get_z(self, i, k):
         """
@@ -1280,20 +1350,24 @@ class Radau2Collocator(CasadiCollocator):
         """
         Create the constraints and time points.
         """
-        # Get a local reference to variables
+        # Get a local reference to var and beg_interp
         var = self.var
+        beg_interp = self.beg_interp
         
         # Broadcast self.pol.der_vals
-        der_vals = []
-        for k in xrange(self.n_cp + 1):
-            der_vals_k = [self.pol.der_vals[:, k].reshape([1, self.n_cp + 1])]
+        der_vals = [[]]
+        for k in xrange(1, self.n_cp + 1):
+            der_vals_k = [self.pol.der_vals[not self.beg_interp:, k].reshape(
+                    [1, self.n_cp + beg_interp])]
             der_vals_k *= self.model.get_n_x()
             der_vals += [casadi.vertcat(der_vals_k)]
         
         # Create function for collocation equations
-        x_i = casadi.symbolic("x_i", self.model.get_n_x(), self.n_cp + 1)
+        x_i = casadi.symbolic("x_i", self.model.get_n_x(),
+                              self.n_cp + beg_interp)
         der_vals_k = casadi.symbolic("der_vals[k]",
-                                     self.model.get_n_x(), self.n_cp + 1)
+                                     self.model.get_n_x(),
+                                     self.n_cp + beg_interp)
         dx_i_k = casadi.symbolic("dx_i_k", self.model.get_n_x())
         h = casadi.SX("h")
         coll_eq = casadi.SXFunction(
@@ -1331,28 +1405,26 @@ class Radau2Collocator(CasadiCollocator):
             raise ValueError('Unknown CasADi graph %s.' % graph)
         g = casadi.vertcat([g, dae_F_eval([z])[0]])
         
-        # Evaluate u_1_0 based on polynomial u^1
-        u_1_0 = 0
-        for k in xrange(1, self.n_cp + 1):
-            u_1_0 += var[1][k]['u'] * self.pol.eval_basis(k - 1, 0)
-            
-        # Add residual for u_1_0 as constraint
-        g = casadi.vertcat([g, var[1][0]['u'] - u_1_0])
-        
         # Create list of state matrices
         x_list = [[]]
-        x_i = [var[1][k]['x'] for k in xrange(self.n_cp + 1)]
+        x_i = [var[1][k]['x'] for k in xrange(not beg_interp, self.n_cp + 1)]
         x_i = casadi.horzcat(x_i)
         x_list += [x_i]
-        if self.state_cont_var:
-            for i in xrange(2, self.n_e + 1):
-                x_i = [var[i][k]['x'] for k in xrange(self.n_cp + 1)]
-                x_i = casadi.horzcat(x_i)
-                x_list += [x_i]
+        if beg_interp:
+            if self.state_cont_var:
+                for i in xrange(2, self.n_e + 1):
+                    x_i = [var[i][k]['x'] for k in xrange(self.n_cp + 1)]
+                    x_i = casadi.horzcat(x_i)
+                    x_list += [x_i]
+            else:
+                for i in xrange(2, self.n_e + 1):
+                    x_i = [var[i - 1][self.n_cp]['x']]
+                    x_i += [var[i][k]['x'] for k in xrange(1, self.n_cp + 1)]
+                    x_i = casadi.horzcat(x_i)
+                    x_list += [x_i]
         else:
             for i in xrange(2, self.n_e + 1):
-                x_i = [var[i - 1][self.n_cp]['x']]
-                x_i += [var[i][k]['x'] for k in xrange(1, self.n_cp + 1)]
+                x_i = [var[i][k]['x'] for k in xrange(1, self.n_cp + 1)]
                 x_i = casadi.horzcat(x_i)
                 x_list += [x_i]
         
@@ -1393,11 +1465,40 @@ class Radau2Collocator(CasadiCollocator):
                 [dae_constr] = dae_F_eval([z])
                 g = casadi.vertcat([g, dae_constr])
                 
-        # Continuity constraints
+        # State continuity variables constraints
         if self.state_cont_var:
             for i in xrange(1, self.n_e):
                 cont_constr = var[i][self.n_cp]['x'] - var[i + 1][0]['x']
                 g = casadi.vertcat([g, cont_constr])
+        
+        # Continuity constraints
+        if not beg_interp:
+            # Evaluate x_1_0 based on polynomial x^1
+            x_1_0 = 0
+            for k in xrange(1, self.n_cp + 1):
+                x_1_0 += var[1][k]['x'] * self.pol.eval_basis(k, 0)
+            
+            # Add residual for x_1_0 as constraint
+            g = casadi.vertcat([g, var[1][0]['x'] - x_1_0])
+            
+            for i in xrange(2, self.n_e + 1):
+                # Evaluate x_i_0 based on polynomial x^i
+                x_i_0 = 0
+                for k in xrange(1, self.n_cp + 1):
+                    x_i_0 += var[i][k]['x'] * self.pol.eval_basis(k, 0)
+                
+                # Add residual for x_i_0 as constraint
+                g = casadi.vertcat([g, var[i - (not self.state_cont_var)][
+                        (not self.state_cont_var) * self.n_cp
+                        ]['x'] - x_i_0])
+                    
+        # Evaluate u_1_0 based on polynomial u^1
+        u_1_0 = 0
+        for k in xrange(1, self.n_cp + 1):
+            u_1_0 += var[1][k]['u'] * self.pol.eval_basis(k, 0)
+            
+        # Add residual for u_1_0 as constraint
+        g = casadi.vertcat([g, var[1][0]['u'] - u_1_0])
         
         # Store constraints and time as data attributes
         self.g = g
@@ -1424,6 +1525,8 @@ class Radau2Collocator(CasadiCollocator):
         else:
             raise ValueError('Unknown CasADi graph %s.' % self.graph)
         c_fcn.setOption("name", "NLP constraint function")
+        if self.numeric_jacobian != None:
+            c_fcn.setOption("numeric_jacobian", self.numeric_jacobian)
         c_fcn.init()
             
         # Save constraint function as data attribute
@@ -1535,8 +1638,8 @@ class Radau2Collocator(CasadiCollocator):
             cost_fcn = casadi.SXFunction([self.xx], [self.cost])
         else:
             raise ValueError("Unknown CasADi graph %s." % graph)
-        cost_fcn.init()
         cost_fcn.setOption("name", "NLP objective function")
+        cost_fcn.init()
         
         # Save cost function as data attribute
         self.cost_fcn = cost_fcn
@@ -1548,9 +1651,19 @@ class Radau2Collocator(CasadiCollocator):
         if self.graph == "expanded_MX":
             # Replace NLP MX objects with SX objects from expansion
             self.xx = casadi.symbolic("xx", self.n_xx)
+            
+            # Recreate constraints
             self.c_fcn = self.c_fcn.expand([self.xx])
+            self.c_fcn.setOption("name", "NLP constraint function")
+            if self.numeric_jacobian != None:
+                self.c_fcn.setOption("numeric_jacobian", self.numeric_jacobian)
+            self.c_fcn.init()
             self.g = self.c_fcn.outputSX()
+            
+            # Recreate cost
             self.cost_fcn = self.cost_fcn.expand([self.xx])
+            self.cost_fcn.setOption("name", "NLP objective function")
+            self.cost_fcn.init()
             self.cost = self.cost_fcn.outputSX()
         
     def _calc_Lagrangian_Hessian(self):
@@ -1559,13 +1672,25 @@ class Radau2Collocator(CasadiCollocator):
         """
         if self.exact_hessian:
             # Lagrange multipliers and objective function scaling
-            lam = casadi.symbolic("lambda", self.g.numel())
-            sigma = casadi.symbolic("sigma")
+            if self.graph == 'MX':
+                lam = casadi.MX("lambda", self.g.numel())
+                sigma = casadi.MX("sigma")
+            elif self.graph == "SX" or self.graph == 'expanded_MX':
+                lam = casadi.symbolic("lambda", self.g.numel())
+                sigma = casadi.symbolic("sigma")
+            else:
+                raise ValueError('Unknown CasADi graph %s.' % self.graph)
             
             # Lagrangian
             lag_exp = sigma * self.cost + casadi.inner_prod(lam, self.g)
-            lagrangian = casadi.SXFunction([self.xx, lam, [sigma]],
-                                           [lag_exp])
+            if self.graph == 'MX':
+                lagrangian = casadi.MXFunction([self.xx, lam, sigma],
+                                               [lag_exp])
+            elif self.graph == "SX" or self.graph == 'expanded_MX':
+                lagrangian = casadi.SXFunction([self.xx, lam, [sigma]],
+                                               [lag_exp])
+            else:
+                raise ValueError('Unknown CasADi graph %s.' % self.graph)
             lagrangian.init()
         
             # Hessian of the Lagrangian
