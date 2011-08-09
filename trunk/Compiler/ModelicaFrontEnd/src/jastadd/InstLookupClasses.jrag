@@ -503,7 +503,7 @@ aspect InstLookupClasses {
 	eq InstClassAccess.myInstClassDecl()  {
 		HashSet set = lookupInstClass(name());
 		if (set.size() > 0)
-			return (InstClassDecl)set.iterator().next();
+			return (InstClassDecl) set.iterator().next();
 		else
 			return unknownInstClassDecl();
 	}
@@ -515,7 +515,20 @@ aspect InstLookupClasses {
 	//eq InstShortClassDecl.myInstClass()  = getClassName().myInstClassDecl();
 	eq InstClassDecl.myInstClass()            = this;
 	eq InstExtends.myInstClass()              = getClassName().myInstClassDecl();
-	eq UnknownInstComponentDecl.myInstClass() = unknownInstClassDecl();	
+	eq UnknownInstComponentDecl.myInstClass() = unknownInstClassDecl();
+	
+	syn InstClassDecl InstNode.lookupInstClassDotted(String name) {
+		String[] parts = name.split("\\.");
+		InstNode icd = this;
+		for (String part : parts) {
+			HashSet set = icd.lookupInstClass(part);
+			if (set.size() > 0)
+				icd = (InstNode) set.iterator().next();
+			else
+				return unknownInstClassDecl();
+		}
+		return (InstClassDecl) icd;
+	}
 
 }
 

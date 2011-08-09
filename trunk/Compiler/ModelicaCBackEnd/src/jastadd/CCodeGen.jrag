@@ -780,7 +780,11 @@ aspect CCodeGen {
 	}
 
 	public void FNoEventExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
-		p.print(getFExp(),str,indent);
+		p.print(getFExp(), str, indent);
+	}
+
+	public void FSmoothExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
+		p.print(getFExp(), str, indent);
 	}
 
 	public void FInitialExp.prettyPrint_C(Printer p, PrintStream str, String indent) {

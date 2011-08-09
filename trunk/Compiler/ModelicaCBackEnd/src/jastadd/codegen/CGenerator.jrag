@@ -699,6 +699,85 @@ public class CGenerator extends GenericGenerator {
 				rec.prettyPrint_C(genPrinter, "");
 		}
 	}
+	
+	/**
+	 * Generates wrappers for Modelica functions for exporting in a shared library.
+	 */
+	class DAETag_C_export_functions extends DAETag {
+		
+		public DAETag_C_export_functions(AbstractGenerator myGenerator, FClass fclass) {
+			super("C_export_functions","C: C functions wrapping internal representation of Modelica functions",
+			  myGenerator,fclass);
+		}
+
+		public void generate(PrintStream out) {
+			for (FFunctionDecl func : fclass.getFFunctionDecls())
+				if (func.hasExportWrapper_C())
+					func.exportWrapper_C(out, "");
+		}
+	}
+	
+	/**
+	 * Generates export wrappers for groups of Modelica functions with the same signature.
+	 * 
+	 * Allows less functions to be imported from resulting shared library. 
+	 * Requires $C_export_functions$, and must be after it.
+	 */
+	class DAETag_C_export_wrappers extends DAETag {
+		
+		public DAETag_C_export_wrappers(AbstractGenerator myGenerator, FClass fclass) {
+			super("C_export_wrappers","C: C functions wrapping groups of export function with same signature",
+			  myGenerator,fclass);
+		}
+
+		public void generate(PrintStream out) {
+			int i = 0;
+			String ind = ASTNode.printer_C.indent("");
+			for (ArrayList<FFunctionDecl> grp : fclass.exportWrapperGroups()) {
+				FFunctionDecl first = grp.get(0);
+				String type = first.exportWrapperType_C();
+				String name = "select_" + (++i);
+				
+				out.format("char* %s_names[] = { ", name);
+				String fmt = "\"%s\"";
+				for (FFunctionDecl f : grp) {
+					out.format(fmt, f.getFQName().nameUnderscore());
+					fmt = ", \"%s\"";
+				}
+				out.print(" };\n");
+				
+				out.format("int %s_lengths[] = { ", name);
+				fmt = "%d";
+				for (FFunctionDecl f : grp) {
+					out.format(fmt, f.getFQName().nameUnderscore().length());
+					fmt = ", %d";
+				}
+				out.print(" };\n");
+				
+				out.format("%s (*%s_funcs[])(", type, name);
+				first.exportWrapperArgumentTypeDecl_C(out);
+				out.print(") = { ");
+				fmt = "*%s";
+				for (FFunctionDecl f : grp) {
+					out.format(fmt, f.funcNameExportWrapper());
+					fmt = ", *%s";
+				}
+				out.print(" };\n");
+				
+				out.format("DllExport %s __stdcall %s(char* name, ", type, name);
+				first.exportWrapperArgumentDecl_C(out);
+				out.print(") {\n");
+				out.format("%sint i, j;\n", ind);
+				out.format("%sfor (i = 0, j = 0; name[i] != 0; i++) \n", ind);
+				out.format("%s%swhile (j < %d && i <= %s_lengths[j] && name[i] > %s_names[j][i]) j++;\n", ind, ind, grp.size(), name, name);
+				out.format("%sif (j >= %d || strcmp(%s_names[j], name)) return 0;\n", ind, grp.size(), name);
+				out.format("%sreturn %s_funcs[j](", ind, name);
+				first.exportWrapperArgumentCall_C(out);
+				out.print(");\n");
+				out.print("}\n\n");
+			}
+		}
+	}
 
 	/**
 	 * Generates MODEL_IDENTIFIER.

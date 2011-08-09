@@ -240,9 +240,13 @@ aspect PredefinedTypes {
             String builtInFunc = 
 "function initial end initial;\n"
 +"function terminal end terminal;\n"
-+"function smooth end smooth;\n"
++"function smooth\n"
++"  input Integer p;\n"
++"  input Real expr;\n"   // Type not used
++"  output Real y;\n"     // Type not used
++"end smooth;\n"
 +"function noEvent\n"
-+"  input Real x;\n"      // Type not used
++"  input Real expr;\n"   // Type not used
 +"  output Real y;\n"     // Type not used
 +"end noEvent;\n"
 +"function sample\n"

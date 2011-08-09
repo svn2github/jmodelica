@@ -565,6 +565,7 @@ aspect FlatTypeCheck {
   eq FEnumIntegerExp.getChild().argumentDefinedTypeValid()       = false;
   eq FVectUnaryBuiltIn.getChild().argumentDefinedTypeValid()     = false;
   eq FPreExp.getChild().argumentDefinedTypeValid()               = false;
+  eq FSmoothExp.getChild(int i).argumentDefinedTypeValid()       = i != 0;
 
   /**
    * \brief Check if the type supplied is valid for this argument.
@@ -580,5 +581,6 @@ aspect FlatTypeCheck {
   eq FAbsExp.getChild().argumentTypeValid(FType type)               = type.isNumeric();
   eq FMinMaxExp.getOriginalArg(int i).argumentTypeValid(FType type) = 
 	  hasY() != getOriginalArg(i).getFExp().isArray() && type.isPrimitive();
+  eq FSmoothExp.getChild().argumentTypeValid(FType type)            = type.onlyContainsReal();
   
 }

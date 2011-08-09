@@ -31,6 +31,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 
 import org.jmodelica.util.ModelicaLogger;
 
@@ -516,13 +517,53 @@ aspect Names {
   inh String InstExternal.packageName();
   inh String InstBaseClassDecl.packageName();
   eq InstBaseClassDecl.getChild().packageName() = isPackage() ? qualifiedName() : packageName();
-  eq InstRoot.getChild().packageName() = null;
-  eq FlatRoot.getChild().packageName() = null;
+  eq Root.getChild().packageName() = null;
   
-  inh String InstExternal.packagePath(String name);
+  inh String ASTNode.packagePath(String name);
+  eq Root.getChild().packagePath(String name) = null;
   eq InstNode.getChild().packagePath(String name) {
-	  HashSet res = lookupInstClass(name);
-	  return res.isEmpty() ? null : ((InstClassDecl) res.iterator().next()).dirName();
+	  InstClassDecl icd = lookupInstClassDotted(name);
+	  return (icd == null) ? null : icd.dirName();
+  }
+  eq FullClassDecl.getChild().packagePath(String name) {
+	  ClassDecl cd = simpleLookupClassDotted(name);
+	  return (cd == null) ? null : cd.dirName();
+  }
+  
+  inh String ASTNode.topPackagePath();
+  eq Root.getChild().topPackagePath() = null;
+  eq InstClassDecl.getChild().topPackagePath() {
+	  String path = topPackagePath();
+	  return (path == null) ? dirName() : path;
+  }
+  eq FullClassDecl.getChild().topPackagePath() {
+	  String path = topPackagePath();
+	  return (path == null) ? dirName() : path;
+  }
+
+  /**
+   * \brief Converts an URI to a file-system path.
+   * 
+   * Only modelica:// and file:// URIs are supported.
+   * 
+   * @param str  the string to interpret as an URI
+   */
+  public String ASTNode.uri2path(String str) {
+      try {
+          URI uri = new URI(str);
+    	  String scheme = uri.getScheme();
+          if (scheme == null) {
+              String pack = topPackagePath();
+              return pack != null ? pack + "/" + uri.getPath() : null;
+          } else if (scheme.equals("file")) {
+              return uri.getPath();
+          } else if (scheme.equals("modelica")) {
+              String pack = packagePath(uri.getHost());
+              return pack != null ? pack + uri.getPath() : null;
+          }
+      } catch (URISyntaxException e) {
+      }
+      return null;
   }
 
   
@@ -1346,6 +1387,43 @@ aspect FlatFunctionUtils {
       * \brief Check if this function returns a non-primitive when used as an expression.
       */
      syn boolean FFunctionDecl.isComposite() = hasOutputs() ? expOutput().isComposite() : false;
+     
+     /**
+      * Returns a string (tersely) describing the signature of the function.
+      * 
+      * Intended to make it easier to compare the signatures of functions.
+      * The string consists of one character for each input/output, followed by the number 
+      * of dimensions. The inputs are first, followed by a colon, and then the oututs.
+      * The characters used are R - Real, I - Integer, B - Boolean and S - String. 
+      * Records are represented by the record name within parenthesis, followed by the number
+      * of dimensions. Enumerations are treated the same way, but with brackets instead of 
+      * parenthesis.
+      * 
+      * Example:
+      * Inputs: Real, Integer[2], Real[:,4], outputs: Real, Real gives "r0i1r2:r0r0".
+      */
+     syn lazy String FFunctionDecl.signatureString() {
+    	 StringBuilder buf = new StringBuilder();
+    	 for (FFunctionVariable v : myInputs())
+    		 buf.append(v.type().signatureString());
+    	 buf.append(':');
+    	 for (FFunctionVariable v : myOutputs())
+    		 buf.append(v.type().signatureString());
+    	 return buf.toString();
+     }
+     
+     /**
+      * Returns a string (tersely) describing this type.
+      * 
+      * @see FFunctionDecl#signatureString()
+      */
+     syn String FType.signatureString() = "-";
+     eq FRealType.signatureString()     = String.format("r%d", ndims());
+     eq FIntegerType.signatureString()  = String.format("i%d", ndims());
+     eq FBooleanType.signatureString()  = String.format("b%d", ndims());
+     eq FStringType.signatureString()   = String.format("s%d", ndims());
+     eq FEnumType.signatureString()     = String.format("[%s]%d", getName(), ndims());
+     eq FRecordType.signatureString()   = String.format("(%s)%d", getName(), ndims());
      
      /**
       * \brief Check is this node is in a function.

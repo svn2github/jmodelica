@@ -1037,6 +1037,13 @@ abstract FVectUnaryBuiltIn : FUnaryBuiltIn;
 FNoEventExp : FVectUnaryBuiltIn;
 
 /**
+ * \brief smooth built-in function.
+ * 
+ * Handled like noEvent(), but with a warning. To be implemented properly later.
+ */
+FSmoothExp : FBuiltInFunctionCall ::= Order:FExp FExp;
+
+/**
  * Pre built-in function.
  */
 FPreExp : FUnaryBuiltIn;

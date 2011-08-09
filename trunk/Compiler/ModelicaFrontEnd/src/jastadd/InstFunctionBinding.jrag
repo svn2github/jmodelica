@@ -244,6 +244,7 @@ aspect InstFunctionBinding {
 				map.put("log",          new BuiltInCreator(true,  new FLogExp(),         1));
 				map.put("log10",        new BuiltInCreator(true,  new FLog10Exp(),       1));
 				map.put("noEvent",      new BuiltInCreator(false, new FNoEventExp(),     1));
+				map.put("smooth",       new BuiltInCreator(false, new FSmoothExp(),      2));
 				map.put("pre",          new BuiltInCreator(false, new FPreExp(),         1));
 				map.put("sample",       new BuiltInCreator(false, new FSampleExp(),      2));
 				map.put("initial",      new BuiltInCreator(false, new FInitialExp(),     0));

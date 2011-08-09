@@ -455,22 +455,30 @@ aspect Derivatives {
 
 	public FExp FTanhExp.diff(String name) {
 		return dynamicFExp(new FDivExp(getFExp().diff(name),
-		                               new FPowExp(new FCoshExp((FExp)getFExp().fullCopy()), new FIntegerLitExp("2"))));
+				new FPowExp(new FCoshExp((FExp)getFExp().fullCopy()), new FIntegerLitExp("2"))));
 	}
 
 	public FExp FLogExp.diff(String name) {
 		return dynamicFExp(new FDivExp(getFExp().diff(name),
-		                               (FExp)getFExp().fullCopy()));
+				(FExp)getFExp().fullCopy()));
 	}
 
 	public FExp FLog10Exp.diff(String name) {
 		return dynamicFExp(new FDivExp(getFExp().diff(name),
-		                               new FMulExp((FExp)getFExp().fullCopy(),new FLogExp(new FIntegerLitExp("10")))));
+				new FMulExp((FExp)getFExp().fullCopy(),new FLogExp(new FIntegerLitExp("10")))));
 	}
 
 	public FExp FSqrtExp.diff(String name) {
 		return dynamicFExp(new FDivExp(getFExp().diff(name),
-		                               new FMulExp(new FIntegerLitExp("2"),new FSqrtExp((FExp)getFExp().fullCopy()))));
+				new FMulExp(new FIntegerLitExp("2"),new FSqrtExp((FExp)getFExp().fullCopy()))));
+	}
+
+	public FExp FSmoothExp.diff(String name) {
+		int order = getOrder().ceval().intValue();
+		if (order > 0)
+			return new FSmoothExp(new FIntegerLitExp(order - 1), getFExp().diff(name));
+		else
+			throw new ExpressionDifferentiationException(this);
 	}
 
 	public FExp FIfExp.diff(String name) {

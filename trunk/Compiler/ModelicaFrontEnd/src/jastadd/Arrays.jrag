@@ -240,6 +240,8 @@ aspect Arrays {
 	eq FIfExp.ndims()     = getThenExp().ndims();
 	eq FElseIfExp.ndims() = getThenExp().ndims();
 	
+	eq FSmoothExp.ndims() = getFExp().ndims();
+	
 	eq FVectUnaryBuiltIn.ndims() = getFExp().ndims();
 	
 	/**
@@ -717,6 +719,8 @@ aspect Arrays {
 	
 	eq FSizeExp.size()  = hasDim() ? Size.SCALAR : new Size(getFExp().ndims());
 	eq FNdimsExp.size() = Size.SCALAR;
+	
+	eq FSmoothExp.size() = getFExp().size();
 	
 	eq FUnaryBuiltIn.size()     = getFExp().size();
 	eq FVectUnaryBuiltIn.size() = getFExp().size().contractRight(ndims());
@@ -1299,6 +1303,17 @@ aspect Arrays {
 		Indices ind = arr.indices();
 		for (Index i : ind)
 			arr.set(i, old.get(ind.translate(i)));
+		return arr;
+	}
+	
+	eq FSmoothExp.getArray() {
+		if (!isArray())
+			return super.getArray();
+		
+		Array arr = new Array(indices());
+		Array inner = getFExp().getArray();
+		for (Index i : arr.indices())
+			arr.set(i, new FSmoothExp((FExp) getOrder().fullCopy(), inner.get(i)));
 		return arr;
 	}
 	

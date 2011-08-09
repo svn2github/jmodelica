@@ -146,6 +146,15 @@ aspect AnnotationAPI {
 		}
 		
 		/**
+		 * Returns the value for a node that represents a string value, interpreted as 
+		 * a path of an URI (with protocol file or modelica). A simple path is also 
+		 * supported, and is interpreted relative to the top containing package.
+		 */
+		public String path() {
+			return ast().uri2path(string());
+		}
+		
+		/**
 		 * \brief Returns the value for a node that represents a list of strings.
 		 */
 		public ArrayList<String> stringList() {
@@ -195,6 +204,11 @@ aspect AnnotationAPI {
 		public boolean bool() {
 			return false;
 		}
+		
+		/**
+		 * Returns the ast node that this annotation node is connected to.
+		 */
+		protected abstract ASTNode ast();
 		
 		/**
 		 * Iterates over the annotation nodes representing the nodes in the list.
@@ -249,6 +263,15 @@ aspect AnnotationAPI {
 			public boolean exists() {
 				return false;
 			}
+			
+			public String path() {
+				return null;
+			}
+
+			protected ASTNode ast() {
+				return null;
+			}
+			
 		}
 		
 		/**
@@ -278,7 +301,11 @@ aspect AnnotationAPI {
 						return arg.annotationNode().forPath(path, i+1);
 				return NO_ANNOTATION;
 			}
-			
+
+			protected ASTNode ast() {
+				return mod;
+			}
+
 		}
 		
 		/**
@@ -309,6 +336,10 @@ aspect AnnotationAPI {
 					if (arg.matches(path[i])) 
 						return arg.annotationNode().forPath(path, i+1);
 				return NO_ANNOTATION;
+			}
+			
+			protected ASTNode ast() {
+				return call;
 			}
 			
 		}
@@ -347,6 +378,10 @@ aspect AnnotationAPI {
 
 			public boolean bool() {
 				return exp().avalueBool();
+			}
+			
+			protected ASTNode ast() {
+				return exp();
 			}
 
 		}

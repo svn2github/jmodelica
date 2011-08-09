@@ -1170,6 +1170,7 @@ aspect ConstantEvaluation {
   }
   
   eq FNoEventExp.cevalCalc() = getFExp().ceval();
+  eq FSmoothExp.cevalCalc()  = getFExp().ceval();
   
   eq FPreExp.cevalCalc()     = CValue.UNKNOWN;
   eq FSampleExp.cevalCalc()  = CValue.UNKNOWN;
@@ -1475,8 +1476,8 @@ aspect ConstantEvaluation {
   syn CValue AbstractFVariable.ceval();
   eq UnknownFVariable.ceval()    = CValue.UNKNOWN;
   eq FDerivativeVariable.ceval() = CValue.UNKNOWN;
-  eq FEnumLiteral.ceval() = CValue.UNKNOWN;
-  eq FFunctionVariable.ceval()   = evaluationValue;
+  eq FEnumLiteral.ceval()        = CValue.UNKNOWN;
+  eq FFunctionVariable.ceval()   = evaluationValue();
   eq FVariable.ceval() {
 	  if (!isConstant() && !isParameter()) {
 		  return CValue.UNKNOWN;

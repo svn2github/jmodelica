@@ -45,7 +45,7 @@ aspect SimpleClassLookup {
 	
 	
 	inh ClassDecl Access.simpleLookupClass(String name);
-	inh ClassDecl FullClassDecl.simpleLookupClass(String name);
+	inh ClassDecl ClassDecl.simpleLookupClass(String name);
 	eq Dot.getRight().simpleLookupClass(String name)           = 
 		getLeft().findClassDecl().simpleLookupClassMemberScope(name);
 	eq GlobalAccess.getAccess().simpleLookupClass(String name)      = simpleLookupClassGlobalScope(name);
@@ -53,6 +53,17 @@ aspect SimpleClassLookup {
 	eq FullClassDecl.getSuper().simpleLookupClass(String name)      = simpleLookupClassLocalScope(name);
 	eq FullClassDecl.getChild().simpleLookupClass(String name)      = simpleLookupClassDefaultScope(name);
 	eq Program.getChild().simpleLookupClass(String name)            = simpleLookupClassDefaultScope(name);
+	
+	syn ClassDecl FullClassDecl.simpleLookupClassDotted(String name) {
+		String[] parts = name.split("\\.");
+		ClassDecl cd = this;
+		for (String part : parts) {
+			cd = cd.simpleLookupClass(part);
+			if (cd == null)
+				return null;
+		}
+		return cd;
+	}
 	
 	inh ClassDecl Access.simpleLookupClassGlobalScope(String name);
 	inh ClassDecl ImportClause.simpleLookupClassGlobalScope(String name);

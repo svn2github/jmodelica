@@ -102,6 +102,10 @@ aspect ComplianceCheck {
 				"() function-like operator is not supported, and is currently ignored");
 	}
 	
+	public void FSmoothExp.complianceCheck() {
+		warning("The smooth() function-like operator is not fully supported, unnecessary events may be generated");
+	}
+	
 	public void FDotAddExp.complianceCheck() {
 		super.complianceCheck();
 		if (type().isString())

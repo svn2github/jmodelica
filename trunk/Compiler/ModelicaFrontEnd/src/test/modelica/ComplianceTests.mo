@@ -263,7 +263,7 @@ model UnsupportedBuiltins3_ComplErr
          name="UnsupportedBuiltins3_ComplErr",
          description="Compliance error for unsupported builtins",
          errorMessage="
-10 errors found:
+9 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 280, column 3:
   The semiLinear() function-like operator is not supported
@@ -273,9 +273,6 @@ Compliance error at line 281, column 3:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 282, column 3:
   The terminal() function-like operator is not supported
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 283, column 3:
-  The smooth() function-like operator is not supported
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 284, column 3:
   The sample() function-like operator is not supported
@@ -301,7 +298,6 @@ Compliance error at line 289, column 3:
   semiLinear();
   initial();
   terminal();
-  smooth(1);
   sample(1,1);
   pre(x);
   edge();

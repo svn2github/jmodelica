@@ -5102,4 +5102,20 @@ void func_CCodeGenTests_externalArrayFortran6_f_def(jmi_array_t* a_a, jmi_array_
 		
 end externalArrayFortran6;
 
+
+model Smooth1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="Smooth1",
+         description="",
+         template="$C_DAE_equation_residuals$",
+         generatedCode="
+    (*res)[0] = _time - ( 2 ) - (_y_0);
+    (*res)[1] = (COND_EXP_EQ(_sw(0),JMI_TRUE,AD_WRAP_LITERAL(0),(1.0 * (_y_0) * (_y_0) * (_y_0)))) - (_x_1);
+")})));
+
+  Real y = time - 2;
+  Real x = smooth(2, if y < 0 then 0 else y ^ 3);
+end Smooth1;
+
 end CCodeGenTests;

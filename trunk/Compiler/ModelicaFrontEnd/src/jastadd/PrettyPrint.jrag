@@ -16,6 +16,7 @@
 
 import java.io.PrintStream;
 import java.io.ByteArrayOutputStream;
+import java.util.Collection;
 
 
 	// superclass to all classes that perform the dispatch
@@ -32,6 +33,11 @@ import java.io.ByteArrayOutputStream;
 		}
 
 		public void print(ASTNode node, PrintStream str, String indent) { 
+  		}
+
+		public void print(Collection<? extends ASTNode> nodes, PrintStream str, String indent) {
+			for (ASTNode node : nodes)
+				print(node, str, indent);
   		}
   		
   		public String op(FBinExp e) { return e.op(); }
@@ -1502,6 +1508,7 @@ aspect FlattPrettyPrint {
 	eq FNdimsExp.builtInName()       = "ndims";
 	eq FSizeExp.builtInName()        = "size";
 	eq FNoEventExp.builtInName()     = "noEvent";
+	eq FSmoothExp.builtInName()      = "smooth";
 	eq FPreExp.builtInName()         = "pre";
 	eq FSampleExp.builtInName()      = "sample";
 	eq FInitialExp.builtInName()     = "initial";

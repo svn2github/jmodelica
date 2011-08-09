@@ -328,6 +328,8 @@ aspect FlatTypeAnalysis {
 	
 	eq FVectUnaryBuiltIn.type() = scalarType().sizedType(size());
 	
+	eq FSmoothExp.type() = getFExp().type();
+	
 	/**
 	 * The scalar type of the expression.
 	 * 
@@ -823,6 +825,30 @@ aspect BuiltInFlatTypes {
 	syn boolean FType.isNumericArray()    = isNumeric() && isArray();
 	syn boolean FType.isPrimitiveScalar() = isPrimitive() && isScalar();
 	syn boolean FType.isPrimitiveArray()  = isPrimitive() && isArray();
+	
+	// For type comparisons ending with "or records of such types"
+	public abstract class FType {
+		protected static interface TypeChecker {
+			public boolean check(FType t);
+		}
+		
+		private static final TypeChecker IS_REAL = new TypeChecker() {
+			public boolean check(FType t) { return t.isReal(); }
+		};
+	}
+	
+	protected boolean FType.recursiveTypeCheck(TypeChecker ch) {
+		return ch.check(this);
+	}
+	
+	protected boolean FRecordType.recursiveTypeCheck(TypeChecker ch) {
+		for (FRecordComponentType c : getComponents())
+			if (!ch.check(c.getFType()))
+				return false;
+		return true;
+	}
+	
+	syn boolean FType.onlyContainsReal() = recursiveTypeCheck(IS_REAL);
 	
 	syn boolean FType.hasAdd()        = false;
 	eq FPrimitiveNumericType.hasAdd() = true;
