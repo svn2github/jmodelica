@@ -674,6 +674,33 @@ aspect FlatAPI {
 	syn lazy ArrayList<FVariable> FClass.stringInputs() =
       intersection(inputs(), strings());
 
+    syn int FClass.numOutputs() = outputs().size();
+	coll ArrayList<FVariable> FClass.outputs() 
+	  [new ArrayList<FVariable>()] with add root FlatRoot;
+	FVariable contributes
+ 		this when isOutput() && shouldContribute()
+	to FClass.outputs() for myFClass();
+
+	syn int FClass.numRealOutputs() = realOutputs().size();
+	syn lazy ArrayList<FVariable> FClass.realOutputs() =
+      intersection(outputs(), reals());
+	
+	syn int FClass.numIntegerOutputs() = integerOutputs().size();
+	syn lazy ArrayList<FVariable> FClass.integerOutputs() =
+      intersection(outputs(), integers());
+	
+	syn int FClass.numEnumOutputs() = enumOutputs().size();
+	syn lazy ArrayList<FVariable> FClass.enumOutputs() =
+      intersection(outputs(), enums());
+
+	syn int FClass.numBooleanOutputs() = booleanOutputs().size();
+	syn lazy ArrayList<FVariable> FClass.booleanOutputs() =
+      intersection(outputs(), booleans());
+
+	syn int FClass.numStringOutputs() = stringOutputs().size();
+	syn lazy ArrayList<FVariable> FClass.stringOutputs() =
+      intersection(outputs(), strings());
+
     syn lazy int FClass.numScalarEquations() {
     	int res = 0;
     	for (FAbstractEquation e : equations())

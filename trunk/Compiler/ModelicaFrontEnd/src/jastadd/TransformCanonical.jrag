@@ -123,6 +123,16 @@ aspect TransformCanonical {
 		
 	public class BLT extends ArrayList<AbstractEquationBlock> {
 	
+		private FClass fclass;
+		
+		public BLT(FClass fclass) {
+			this.fclass = fclass;	
+		}
+	
+		public FClass getFClass() {
+			return fclass;	
+		}
+	
 		public ArrayList<Integer> unsolvedBlockSizes() {
 			ArrayList<Integer> blockSizes = new ArrayList<Integer>();
 			for (AbstractEquationBlock b : this) {
@@ -131,6 +141,12 @@ aspect TransformCanonical {
 				}		
 			}
 			return blockSizes;
+		}
+
+		public void reset() {
+			for (AbstractEquationBlock eb : this) {
+				eb.reset();
+			}	
 		}
 
 		public String toString() {
@@ -148,11 +164,12 @@ aspect TransformCanonical {
 	public class StructuredBLT extends BLT {
 		private ArrayList<AbstractEquationBlock> topEquationBlocks = new ArrayList<AbstractEquationBlock>();
 		
-		public StructuredBLT() {
-		
+		public StructuredBLT(FClass fclass) {
+			super(fclass);	
 		}
 		
-		public StructuredBLT(BLT blt) {
+		public StructuredBLT(FClass fclass, BLT blt) {
+			super(fclass);
 			for (AbstractEquationBlock eb : blt) {
 				this.add(eb);
 				eb.setDAEPredecessors();
@@ -163,64 +180,94 @@ aspect TransformCanonical {
 		}
 		
 		public String toString() {
+			reset();
 			StringBuffer str = new StringBuffer();
-			str.append("************* Structured BLT*********\n");			
-			for (AbstractEquationBlock eb : this) {
-				str.append("**** Block ****\n");
-				str.append(eb.toString());
-				str.append("**** Depends on ****\n");
-				for (FVariable fv : eb.dependsOn()) {
-					str.append(fv.prettyPrint("") + "\n");
-				} 
-				str.append("**** Predecessors ****\n");
-				for (AbstractEquationBlock ebb : eb.getPredecessors()) {
-					str.append(ebb.toString());
-					str.append("---------\n");
-				}
-				str.append("**** Successors ****\n");
-				for (AbstractEquationBlock ebb : eb.getSuccessors()) {
-					str.append(ebb.toString());
-					str.append("---------\n");
-				}
-				str.append("**** Block ends ****\n");
+			str.append("************* Structured BLT*********\n");
+			str.append("***********************************\n");	
+			str.append("************* ODE section *********\n");	
+			str.append("***********************************\n");	
+			// Loop over all derivatives
+			for (FVariable fv : getFClass().derivativeVariables()) {
+				// Get the block where the variable is solved for	
+				AbstractEquationBlock eb = fv.myDAEEquationBlock();
+				if (!eb.isVisited()) {
+					eb.setVisited(true);
+					for (AbstractEquationBlock ebb : eb.getAllPredecessors()){
+						if (!ebb.isVisited()) {	
+							ebb.setVisited(true);
+							str.append(ebb.toString());
+							str.append("******\n");
+						}
+					}
+					str.append(eb.toString());
+					str.append("******\n");
+				}	
 			}
-			str.append("************* Structured BLT ends *********\n");				
+			
+			// Loop over all real outputs
+			str.append("***********************************\n");	
+			str.append("************ Real outputs *********\n");	
+			str.append("***********************************\n");	
+			for (FVariable fv : getFClass().realOutputs()) {
+				// Get the block where the variable is solved for	
+				AbstractEquationBlock eb = fv.myDAEEquationBlock();
+				if (!eb.isVisited()) {
+					eb.setVisited(true);
+					for (AbstractEquationBlock ebb : eb.getAllPredecessors()){
+						if (!ebb.isVisited()) {	
+							ebb.setVisited(true);
+							str.append(ebb.toString());
+							str.append("******\n");
+						}
+					}
+					str.append(eb.toString());
+					str.append("******\n");
+				}	
+			}
+
+			str.append("***********************************\n");	
+			str.append("****Integer and boolean outputs ***\n");	
+			str.append("***********************************\n");	
+			for (FVariable fv : getFClass().outputs()) {
+				// Get the block where the variable is solved for	
+				AbstractEquationBlock eb = fv.myDAEEquationBlock();
+				if (!eb.isVisited()) {
+					eb.setVisited(true);
+					for (AbstractEquationBlock ebb : eb.getAllPredecessors()){
+						if (!ebb.isVisited()) {	
+							ebb.setVisited(true);
+							str.append(ebb.toString());
+							str.append("******\n");
+						}
+					}
+					str.append(eb.toString());
+					str.append("******\n");
+				}	
+			}
+
+			// Loop over all others
+			str.append("***********************************\n");	
+			str.append("**** Other variables ***\n");	
+			str.append("***********************************\n");	
+			for (FVariable fv : getFClass().variables()) {
+				// Get the block where the variable is solved for	
+				AbstractEquationBlock eb = fv.myDAEEquationBlock();
+				if (eb!=null && !eb.isVisited()) {
+					eb.setVisited(true);
+					for (AbstractEquationBlock ebb : eb.getAllPredecessors()){
+						if (!ebb.isVisited()) {	
+							ebb.setVisited(true);
+							str.append(ebb.toString());
+							str.append("******\n");
+						}
+					}
+					str.append(eb.toString());
+					str.append("******\n");
+				}	
+			}
+			
 			return str.toString();
 		}
-	}
-
-	public class ODEBLT extends BLT {
-		ArrayList<ArrayList<AbstractEquationBlock>> odeBLT = 
-			new ArrayList<ArrayList<AbstractEquationBlock>>();
-		ArrayList<ArrayList<AbstractEquationBlock>> outputBLT = 
-			new ArrayList<ArrayList<AbstractEquationBlock>>();	
-
-		public String toString() {
-			StringBuffer str = new StringBuffer();
-			str.append("========== ODE BLT ============\n");
-	     		str.append("*******************************\n");	
-				for (ArrayList<AbstractEquationBlock> l : odeBLT) {
-					str.append("-------------------------------\n");
-					for (AbstractEquationBlock eb : l) {
-						str.append(eb.toString());
-						str.append("-------------------------------\n");
-					}
-					str.append("*******************************\n");	
-			    } 
-			str.append("========= OUTPUT BLT ==========\n");
-	     		str.append("*******************************\n");	
-				for (ArrayList<AbstractEquationBlock> l : outputBLT) {
-					str.append("-------------------------------\n");
-					for (AbstractEquationBlock eb : l) {
-						str.append(eb.toString());
-						str.append("-------------------------------\n");
-					}
-					str.append("*******************************\n");	
-			    } 						
-			str.append("===============================\n");
-			return str.toString();
-		}
-
 	}
 
 	/**
@@ -231,7 +278,8 @@ aspect TransformCanonical {
 		private LinkedHashSet<AbstractEquationBlock> predecessors = new LinkedHashSet<AbstractEquationBlock>();
 		private LinkedHashSet<AbstractEquationBlock> successors = new LinkedHashSet<AbstractEquationBlock>();
 		private LinkedHashSet<FVariable> dependsOnVariables = null; 
-	
+	    private boolean visited = false;
+	    
 		private boolean predecessorsSet = false;
 	
 		public abstract ArrayList<FAbstractEquation> equations();
@@ -291,6 +339,15 @@ aspect TransformCanonical {
 			}
 			return diffedEq;
 		}
+
+		public ArrayList<AbstractEquationBlock> getAllPredecessors() {
+			ArrayList<AbstractEquationBlock> allPredecessors = new ArrayList<AbstractEquationBlock>(); 
+			for (AbstractEquationBlock eb : getPredecessors()) {
+				allPredecessors.addAll(eb.getAllPredecessors());
+				allPredecessors.addAll(getPredecessors());
+			}
+			return allPredecessors;
+		}	
 		
 		public LinkedHashSet<AbstractEquationBlock> getPredecessors() {
 			return predecessors;
@@ -303,6 +360,40 @@ aspect TransformCanonical {
 		public boolean isPredecessorsSet() {
 			return predecessorsSet;
 		}
+	
+		public boolean isVisited() {
+			return visited;
+		}
+		
+		public void setVisited(boolean visited) {
+			this.visited = visited;	
+		}
+		
+		public void reset() {
+			visited  = false;	
+		}
+		
+		public String toStringVerbose() {	
+			StringBuffer str = new StringBuffer();
+			str.append("**** Block ****\n");
+			str.append(toString());
+			str.append("**** Depends on ****\n");
+			for (FVariable fv : dependsOn()) {
+				str.append(fv.prettyPrint("") + "\n");
+			} 
+			str.append("**** Predecessors ****\n");
+			for (AbstractEquationBlock eb : getPredecessors()) {
+				str.append(eb.toString());
+				str.append("---------\n");
+			}
+			str.append("**** Successors ****\n");
+			for (AbstractEquationBlock eb : getSuccessors()) {
+				str.append(eb.toString());
+				str.append("---------\n");
+			}
+		    str.append("**** Block ends ****\n");				
+			return str.toString();
+		}		
 		
 		public abstract String toString();
 	
@@ -356,7 +447,7 @@ aspect TransformCanonical {
 			}
 			return false;
 		}				
-						
+					  						
 		public String toString() {
 			StringBuffer str = new StringBuffer();
 			str.append("Non-solved block of " + activeVariables().size() + " variables:\n");
@@ -677,9 +768,9 @@ aspect TransformCanonical {
 		
 		daeMatching = new ArrayList<MatchingPair>();
 		daeInitMatching = new ArrayList<MatchingPair>();		
-	    daeBLT = new BLT();
-	    daeStructuredBLT = new StructuredBLT();
-	   	daeInitBLT = new BLT();		
+	    daeBLT = new BLT(this);
+	    daeStructuredBLT = new StructuredBLT(this);
+	   	daeInitBLT = new BLT(this);		
 		daeUnmatchedEquations = new ArrayList<FAbstractEquation>();		
 		daeUnmatchedVariables = new ArrayList<FVariable>();			
 		daeInitUnmatchedEquations = new ArrayList<FAbstractEquation>();		
@@ -687,7 +778,7 @@ aspect TransformCanonical {
 		daeFVariableEquationBlockMap = new HashMap<FVariable,AbstractEquationBlock>();	
 		daeInitFVariableEquationBlockMap = new HashMap<FVariable,AbstractEquationBlock>();	
 			
-		BiPGraph g = new BiPGraph(name(),"");
+		BiPGraph g = new BiPGraph(this,name(),"");
 		
 		Eq eqn = null;
 		Var v = null;		
@@ -826,7 +917,7 @@ aspect TransformCanonical {
 				
 				BiPGraph oldG = g;	
 
-				g = new BiPGraph(name(),"");
+				g = new BiPGraph(this,name(),"");
 				g.addVariables(this, BiPGraph.DERIVATIVE_VARIABLES | BiPGraph.ALGEBRAIC_VARIABLES);
 				g.addEquations(equations(), BiPGraph.DERIVATIVE_VARIABLES | BiPGraph.ALGEBRAIC_VARIABLES,"eq_",1);
 		
@@ -862,14 +953,14 @@ aspect TransformCanonical {
 				daeBLT = computeTearings(g);
 				
 			}else{
-				daeBLT = g.computeODEBLT();
+				daeBLT = g.computeBLT();
 				for (AbstractEquationBlock eb : daeBLT) {
 					for (FVariable fv : eb.activeVariables()) {
 						daeFVariableEquationBlockMap.put(fv,eb);
 					}
 				}	
 				
-				daeStructuredBLT = new StructuredBLT(daeBLT);
+				daeStructuredBLT = new StructuredBLT(this,daeBLT);
 				log.info(daeStructuredBLT.toString());
 				
 			}
@@ -1055,11 +1146,11 @@ aspect TransformCanonical {
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	public BLT FClass.computeTearings(BiPGraph graph) {
 			LinkedList<Stack<Eq>> blt = graph.computeRawBLT();
-			BLT tearBLT = new BLT();
+			BLT tearBLT = new BLT(this);
 			for(Stack<Eq> block : blt){ // Iterate over all (global) BLT-blocks
 				if (block.size()>1){
 					TornEquationBlock eb = new TornEquationBlock();
-					BiPGraph g = new BiPGraph("","");
+					BiPGraph g = new BiPGraph(this,"","");
 					ArrayList<Eq> SUME = new ArrayList<Eq>();
 
 					// ---------------------- Graph Info -----------------------------------
@@ -1159,7 +1250,7 @@ aspect TransformCanonical {
 								}
 							} else {
 										// Build Inner Graph and add info about tearing variables
-								BiPGraph gInner = new BiPGraph("","");
+								BiPGraph gInner = new BiPGraph(this,"","");
 										// Obtain info about block-graph
 								for(Eq e : bInner){
 									Var gInnerVar = gInner.addVariable(e.getSolvableMatching().getName(),"",e.getSolvableMatching().getVariable());
@@ -1321,7 +1412,7 @@ aspect TransformCanonical {
 	}
 	
 	public TornEquationBlock FClass.Tear(Stack<Eq> Block, TornEquationBlock eb){
-		BiPGraph g = new BiPGraph("","");
+		BiPGraph g = new BiPGraph(this,"","");
 		for(Eq e : Block){
 			Var gVar = g.addVariable(e.getSolvableMatching().getName(),"",e.getSolvableMatching().getVariable());
 			Eq gEq = g.addEquation(e.getName(),"",e.getEquation());

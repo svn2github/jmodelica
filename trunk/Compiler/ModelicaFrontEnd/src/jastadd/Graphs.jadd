@@ -38,14 +38,21 @@ public class BiPGraph {
 	private String name;
 	private String description;
 	
+	private FClass fclass;
+	
 	protected ArrayList<Eq> equations = new ArrayList<Eq>();
 	protected LinkedHashMap<String,Var> variableMap = new LinkedHashMap<String,Var>();
 	protected LinkedHashMap<String,Eq> equationMap = new LinkedHashMap<String,Eq>();
 	protected LinkedHashMap<FAbstractEquation,ArrayList<Eq>> equationIndexMap = new LinkedHashMap<FAbstractEquation,ArrayList<Eq>>();
 	
-	public BiPGraph(String name, String description) {
+	public BiPGraph(FClass fclass, String name, String description) {
+		this.fclass = fclass;
 		this.name = name;
 		this.description = description;
+	}
+
+	public FClass getFClass() {
+		return fclass;	
 	}
 
 	public Eq getEquation(String name) {
@@ -776,7 +783,7 @@ public class BiPGraph {
 									
 			// Step 4: Select independent columns: simple matching will do for 
 			// now
-			BiPGraph gd = new BiPGraph("","");
+			BiPGraph gd = new BiPGraph(getFClass(),"","");
 					
 			// Add variables to the graph
 			for (FVariable fv : z) {
@@ -954,7 +961,7 @@ public class BiPGraph {
         	}
         }
 				
-        BLT blt = new BLT();
+        BLT blt = new BLT(getFClass());
         
         Var v = null;
 		for (Stack<Eq> bl : components) {
@@ -972,75 +979,6 @@ public class BiPGraph {
 				blt.add(b);
 			}
 		}
-		return blt;
-	}
-
-    /* This version of Tarjan's algorithm computes, separetely the ODE blocks
-     * and the output blocks.
-     */
-	public ODEBLT computeODEBLT() {
-		
-		index = 0;
-        S = new Stack<Eq>();
-        tarjanReset();
-
-        ODEBLT blt = new ODEBLT();
- 
-        Var v = null;
-               
- 		// Order the equations so that the ones matched to derivatives comes
- 		// first
- 		ArrayList<Eq> orderedEq = new ArrayList<Eq>();              
- 		
- 		for (Eq e : getEquations()) {
-        	if (e.getMatching().getVariable().isDerivativeVariable()) {
-        		orderedEq.add(e);
-        	}
-        }
-
- 		for (Eq e : getEquations()) {
-        	if (!e.getMatching().getVariable().isDerivativeVariable()) {
-        		orderedEq.add(e);
-        	}
-        }
-               
-        for (Eq e : orderedEq) {
-        	if (!e.isVisited()) {
-        	    components = new LinkedList<Stack<Eq>>();
-        		tarjan(e);
-        		ArrayList<AbstractEquationBlock> odeBlocks = new ArrayList<AbstractEquationBlock>();
-        		ArrayList<AbstractEquationBlock> outputBlocks = new ArrayList<AbstractEquationBlock>();	
-				for (Stack<Eq> bl : components) {
-					EquationBlock b = new EquationBlock();
-					// TODO: handle the case of multiple scalar equations in
-					// one block
-					for (Eq bl_eqn : bl) {
-						v = bl_eqn.getMatching();
-						MatchingPair mp = new MatchingPair(bl_eqn.getEquation(),v.getVariable());
-						b.addMatchingPair(mp);
-					}
-					AbstractEquationBlock ab = null;
-					if (b.isSolvable()) {
-						ab = b.createSolvedEquationBlock();
-					} else {
-						ab = b;
-					}
-					blt.add(ab);
-					if (e.getMatching().getVariable().isDerivativeVariable()) {
-						odeBlocks.add(ab);
-					} else {
-						outputBlocks.add(ab);
-					}
-				}
-				if (odeBlocks.size()>0) {
-					blt.odeBLT.add(odeBlocks);
-				}
-				if (outputBlocks.size()>0) {
-					blt.outputBLT.add(outputBlocks);	
-				}
-        	}
-        }
- 
 		return blt;
 	}
 	

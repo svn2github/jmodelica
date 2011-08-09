@@ -3882,6 +3882,7 @@ end TransformCanonicalTests.DuplicateVariables1;
 
 end DuplicateVariables1;
 
+
   model SolveEqTest1
 	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.FClassMethodTestCase(name="SolveEqTest1",
@@ -3889,36 +3890,25 @@ end DuplicateVariables1;
 	equation_sorting = true,         
         description="Test solution of equations", methodResult=
         "
-========== ODE BLT ============
-*******************************
-========= OUTPUT BLT ==========
-*******************************
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
-x
+  x
 Solution:
-1
--------------------------------
-*******************************
+  1
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
-y
+  y
 Solution:
-x + 3
--------------------------------
-*******************************
+  x + 3
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
-z
+  z
 Solution:
-x - ( y )
+  x - ( y )
 -------------------------------
-*******************************
-===============================
-
 ")})));
 
     Real x, y, z;
@@ -3935,35 +3925,25 @@ x - ( y )
 	equation_sorting = true,         
         description="Test solution of equations", methodResult=
         "
-========== ODE BLT ============
-*******************************
-========= OUTPUT BLT ==========
-*******************************
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
-x
+  x
 Solution:
-1
--------------------------------
-*******************************
+  1
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
-y
+  y
 Solution:
-( x + 3 ) / ( - ( 1 ) )
--------------------------------
-*******************************
+  ( x + 3 ) / (  - ( 1 ) )
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
-z
+  z
 Solution:
-( x - ( y ) ) / ( - ( 1 ) )
+  ( x - ( y ) ) / (  - ( 1 ) )
 -------------------------------
-*******************************
-===============================
 ")})));
 
     Real x, y, z;
@@ -3980,35 +3960,25 @@ Solution:
 	equation_sorting = true,         
         description="Test solution of equations", methodResult=
         "
-========== ODE BLT ============
-*******************************
-========= OUTPUT BLT ==========
-*******************************
+        -------------------------------
+Solved block of 1 variables:
+Computed variable:
+  x
+Solution:
+  1
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
-x
+  y
 Solution:
-1
--------------------------------
-*******************************
+  ( x + 3 ) / ( 2 )
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
-y
+  z
 Solution:
-( x + 3 ) / ( 2 )
+  ( x - ( y ) ) / ( x )
 -------------------------------
-*******************************
--------------------------------
-Solved block of 1 variables:
-Computed variable:
-z
-Solution:
-( x - ( y ) ) / ( x )
--------------------------------
-*******************************
-===============================
 ")})));
 
     Real x, y, z;
@@ -4025,35 +3995,25 @@ Solution:
 	equation_sorting = true,         
         description="Test solution of equations", methodResult=
         "
-========== ODE BLT ============
-*******************************
-========= OUTPUT BLT ==========
-*******************************
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
-x
+  x
 Solution:
-1
--------------------------------
-*******************************
+  1
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
-y
+  y
 Solution:
-( x + 3 ) / ( ( 1 ) / ( 2 ) )
--------------------------------
-*******************************
+  ( x + 3 ) / ( ( 1 ) / ( 2 ) )
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
-z
+  z
 Solution:
-( x - ( y ) ) / ( ( 1 ) / ( x ) )
+  ( x - ( y ) ) / ( ( 1 ) / ( x ) )
 -------------------------------
-*******************************
-===============================
 ")})));
 
     Real x, y, z;
@@ -4070,35 +4030,25 @@ Solution:
 	equation_sorting = true,         
         description="Test solution of equations", methodResult=
 "
-========== ODE BLT ============
-*******************************
-========= OUTPUT BLT ==========
-*******************************
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
-x
+  x
 Solution:
-1
--------------------------------
-*******************************
+  1
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
-y
+  y
 Solution:
-( x + 3 ) / ( 1 - ( 3 ) )
--------------------------------
-*******************************
+  ( x + 3 ) / ( 1 - ( 3 ) )
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
-z
+  z
 Solution:
-( x - ( y ) ) / ( 1 - ( x + 3 ) )
+  ( x - ( y ) ) / ( 1 - ( x + 3 ) )
 -------------------------------
-*******************************
-===============================
 ")})));
 
     Real x, y, z;
@@ -4115,35 +4065,26 @@ Solution:
 	equation_sorting = true,         
         description="Test solution of equations", methodResult=
         "
-========== ODE BLT ============
-*******************************
-========= OUTPUT BLT ==========
-*******************************
--------------------------------
+        -------------------------------
 Solved block of 1 variables:
 Computed variable:
-x
+  x
 Solution:
-1
--------------------------------
-*******************************
+  1
 -------------------------------
 Non-solved block of 1 variables:
 Unknown variables:
-y
+  y
 Equations:
-( 2 ) / ( y ) = x + 3
--------------------------------
-*******************************
+  ( 2 ) / ( y ) = x + 3
 -------------------------------
 Non-solved block of 1 variables:
 Unknown variables:
-z
+  z
 Equations:
-( x ) / ( z ) = x - ( y )
+  ( x ) / ( z ) = x - ( y )
 -------------------------------
-*******************************
-===============================
+        
 ")})));
 
 
@@ -4161,36 +4102,26 @@ Equations:
 	equation_sorting = true,         
         description="Test solution of equations", methodResult=
         "
-========== ODE BLT ============
-*******************************
-========= OUTPUT BLT ==========
-*******************************
+        -------------------------------
+Solved block of 1 variables:
+Computed variable:
+  x
+Solution:
+  1
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
-x
+  y
 Solution:
-1
--------------------------------
-*******************************
+  ( x + 3 ) / (  - ( 1 ) + 1 - ( 4 ) )
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
-y
+  z
 Solution:
-( x + 3 ) / ( - ( 1 ) + 1 - ( 4 ) )
+  ( x - ( y ) ) / (  - ( 1 ) + 1 + 5 )
 -------------------------------
-*******************************
--------------------------------
-Solved block of 1 variables:
-Computed variable:
-z
-Solution:
-( x - ( y ) ) / ( - ( 1 ) + 1 + 5 )
--------------------------------
-*******************************
-===============================
-")})));
+        ")})));
 
 
     Real x, y, z;
