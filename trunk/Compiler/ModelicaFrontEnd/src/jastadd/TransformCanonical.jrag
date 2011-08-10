@@ -211,7 +211,8 @@ aspect TransformCanonical {
 			for (FVariable fv : getFClass().realOutputs()) {
 				// Get the block where the variable is solved for	
 				AbstractEquationBlock eb = fv.myDAEEquationBlock();
-				if (!eb.isVisited()) {
+				//States and inputs can be outputs in which case they don't have equation blocks associated with them
+				if (eb!=null && !eb.isVisited()) { 
 					eb.setVisited(true);
 					for (AbstractEquationBlock ebb : eb.getAllPredecessors()){
 						if (!ebb.isVisited()) {	
