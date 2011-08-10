@@ -202,12 +202,12 @@ public class CADGenerator extends CGenerator {
 		public void generate(PrintStream genPrinter) {
 			if (fclass.root().options.getBooleanOption("generate_ode_jacobian")) {
 				//genPrinter.print(INDENT + "model_ode_guards(jmi);\n");						
-				genPrinter.print("  int i;\n");
+				/*genPrinter.print("  int i;\n");
 				genPrinter.print("  int j;\n");
 				genPrinter.print("  int INFO;\n");
 				genPrinter.print("  int n_x;\n");
 				genPrinter.print("  int nrhs = 1;\n");
-				genPrinter.print("  jmi_block_residual_t *current_block;\n");
+				genPrinter.print("  jmi_block_residual_t *current_block;\n");*/
 				genPrinter.print("  jmi_real_t** dz = jmi->dz;\n");
 				genPrinter.print("  jmi_real_t** dv = jmi->dv;\n");
 				genPrinter.print("  memcpy((*dz), (*dv), (jmi->n_v)*sizeof(jmi_real_t));\n");
@@ -234,13 +234,13 @@ public class CADGenerator extends CGenerator {
 
 		public void generate(PrintStream genPrinter) {
 			if (fclass.root().options.getBooleanOption("generate_ode_jacobian")) {
-				genPrinter.print(INDENT + "model_ode_guards(jmi);\n");
-				genPrinter.print("  int i;\n");
+				//genPrinter.print(INDENT + "model_ode_guards(jmi);\n");
+				/*genPrinter.print("  int i;\n");
 				genPrinter.print("  int j;\n");
 				genPrinter.print("  int INFO;\n");
 				genPrinter.print("  int n_x;\n");
 				genPrinter.print("  int nrhs = 1;\n");
-				genPrinter.print("  jmi_block_residual_t *current_block;\n");
+				genPrinter.print("  jmi_block_residual_t *current_block;\n");*/
 				genPrinter.print("  jmi_real_t** dz = jmi->dz;\n");
 				genPrinter.print("  jmi_real_t** dv = jmi->dv;\n");
 				genPrinter.print("  memcpy((*dz), (*dv), (jmi->n_v)*sizeof(jmi_real_t));\n");			

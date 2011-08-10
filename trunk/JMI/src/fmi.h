@@ -214,6 +214,8 @@ fmiStatus fmi_event_update(fmiComponent c, fmiBoolean intermediateResults, fmiEv
 
 /* @{ */
 
+fmiStatus fmi_get_jacobian_fd(fmiComponent c, int independents, int dependents, fmiReal jac[], size_t njac);
+
 /**
  * \brief Evaluate Jacobian(s) of the ODE.
  *

@@ -813,8 +813,8 @@ aspect CADCodeGen {
 	
 	public void EquationBlock.genBlock_CAD(int i, boolean inInitial, String indent, PrintStream str) {	
 		if (inInitial) {
-			
-			str.print(indent + "current_block = jmi->dae_init_block_residuals[" + i + "];\n");
+			str.print(indent + "jmi_ode_unsolved_block_dir_der(jmi, jmi->dae_init_block_residuals[" + i +"]);\n");
+			/*str.print(indent + "current_block = jmi->dae_init_block_residuals[" + i + "];\n");
 			str.print(indent + "n_x = current_block->n;\n");
 			str.print(indent + "current_block->dF(jmi, current_block->x, current_block->dx,current_block->res, current_block->dv, JMI_BLOCK_EVALUATE_INACTIVE);\n");
 			str.print(indent + "  for(i = 0; i < n_x; i++){\n");
@@ -827,9 +827,10 @@ aspect CADCodeGen {
 			str.print(indent + "}\n");
 			str.print(indent + "INFO = 0;\n");
 			str.print(indent + "dgesv_( &n_x, &nrhs, current_block->jac, &n_x, current_block->ipiv, current_block->dv, &n_x, &INFO );\n");
-			str.print(indent + "current_block->dF(jmi, current_block->x, current_block->dx, current_block->res, current_block->dv, JMI_BLOCK_WRITE_BACK);\n");
+			str.print(indent + "current_block->dF(jmi, current_block->x, current_block->dx, current_block->res, current_block->dv, JMI_BLOCK_WRITE_BACK);\n");*/
 		} else {
-			str.print(indent + "current_block = jmi->dae_block_residuals[" + i + "];\n");
+			str.print(indent + "jmi_ode_unsolved_block_dir_der(jmi, jmi->dae_block_residuals[" + i +"]);\n");
+			/*str.print(indent + "current_block = jmi->dae_block_residuals[" + i + "];\n");
 			str.print(indent + "n_x = current_block->n;\n");
 			str.print(indent + "current_block->dF(jmi, current_block->x, current_block->dx,current_block->res, current_block->dv, JMI_BLOCK_EVALUATE_INACTIVE);\n");
 			str.print(indent + "  for(i = 0; i < n_x; i++){\n");
@@ -842,7 +843,7 @@ aspect CADCodeGen {
 			str.print(indent + "}\n");
 			str.print(indent + "INFO = 0;\n");
 			str.print(indent + "dgesv_( &n_x, &nrhs, current_block->jac, &n_x, current_block->ipiv, current_block->dv, &n_x, &INFO );\n");
-			str.print(indent + "current_block->dF(jmi, current_block->x, current_block->dx, current_block->res, current_block->dv, JMI_BLOCK_WRITE_BACK);\n");
+			str.print(indent + "current_block->dF(jmi, current_block->x, current_block->dx, current_block->res, current_block->dv, JMI_BLOCK_WRITE_BACK);\n");*/
 		}	
 	}
 	

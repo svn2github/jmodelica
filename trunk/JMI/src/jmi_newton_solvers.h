@@ -82,6 +82,8 @@ int kin_df(int N, N_Vector u, N_Vector fu, DlsMat J, void *user_data, N_Vector t
  */
 void kin_err(int err_code, const char *module, const char *function, char *msg, void *eh_data);
 
+int jmi_ode_unsolved_block_dir_der(jmi_t *jmi, jmi_block_residual_t *current_block);
+
 int jmi_simple_newton_solve(jmi_block_residual_t *block);
 
 int jmi_simple_newton_jac(jmi_block_residual_t *block);

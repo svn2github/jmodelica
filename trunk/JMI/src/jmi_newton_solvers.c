@@ -246,6 +246,28 @@ int jmi_kinsol_solve(jmi_block_residual_t * block){
 	return 0;
 }
 
+int jmi_ode_unsolved_block_dir_der(jmi_t *jmi, jmi_block_residual_t *current_block){
+	int i;
+	int j;
+	int INFO;
+	int n_x;
+	int nrhs;
+	nrhs = 1;
+	INFO = 0;
+  	n_x = current_block->n;
+  	current_block->dF(jmi, current_block->x, current_block->dx,current_block->res, current_block->dv, JMI_BLOCK_EVALUATE_INACTIVE);
+    for(i = 0; i < n_x; i++){
+    	current_block->dx[i] = 1;
+    	current_block->dF(current_block->jmi,current_block->x,current_block->dx,current_block->res,current_block->dres,JMI_BLOCK_EVALUATE);
+    	for(j = 0; j < n_x; j++){
+  			current_block->jac[i*n_x+j] = current_block->dres[j];
+    	}
+    	current_block->dx[i] = 0;
+  	}
+ 	dgesv_( &n_x, &nrhs, current_block->jac, &n_x, current_block->ipiv, current_block->dv, &n_x, &INFO );
+  	current_block->dF(jmi, current_block->x, current_block->dx, current_block->res, current_block->dv, JMI_BLOCK_WRITE_BACK);
+}
+
 int jmi_simple_newton_solve(jmi_block_residual_t *block) {
 
 	int i, j, INCX, nbr_iter;
