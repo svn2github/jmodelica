@@ -2177,13 +2177,17 @@ class CasadiRadau2(AlgorithmBase):
         self.__dict__.update(self.options)
         
         # Handle option dependencies
-        if self.exact_hessian:
+        if self.exact_Hessian:
             if self.graph == "MX":
-                print("Warning: exact_hessian is not recommended in " +
+                print("Warning: exact_Hessian is not recommended in " +
                       "combination with MX graphs.")
+        else:
+            if len(self.CasADi_options_L.keys()) > 1:
+                raise ValueError("CasADi_options_L is only used " +
+                                 "if exact_Hessian is True.")
         
         # solver options
-        self.solver_options = self.options['IPOPT_options']
+        self.solver_options = self.IPOPT_options
         
     def _set_solver_options(self):
         """ 
@@ -2317,29 +2321,28 @@ class CasadiRadau2Options(OptionBase):
             
             Type: bool
             Default: True
-            
-        numeric_jacobian --
-            Whether to use the numeric_jacobian option for the constraints.
-            
-            Setting numeric_jacobian to True should decrease initialization
-            time but increase solution time.
-            
-            If None, the CasADi default will be used. The CasADi default is
-            currently True for MX graphs and False for SX and expanded_MX
-            graphs, but this is subject to change.
-            
-            Setting numeric_jacobian to False for MX graphs is currently not
-            fully supported by CasADi and thus not recommended.
-            
-            Type: bool or None
-            Default: None
-
+    
     Options are set by using the syntax for dictionaries::
 
         >>> opts = my_model.optimize_options()
         >>> opts['n_e'] = 100
         
-    In addition, IPOPT options can be provided in the option IPOPT_options. For 
+    In addition, CasADi options can be provided in the options
+    CasADi_options_F, CasADi_options_G and CasADi_options_L for the NLP
+    objective, constraint and Lagrangian functions respectively. For a complete
+    list of CasADi options, please consult the CasADi documentation.
+    
+    See
+    http://casadi.sourceforge.net/api/html/d2/d58/classCasADi_1_1SXFunction.html
+    for SX and expanded_MX graphs and
+    http://casadi.sourceforge.net/api/html/dc/d0b/classCasADi_1_1MXFunction.html
+    for MX graphs.
+    
+    CasADi options are set using the syntax for dictionaries::
+
+        >>> opts['CasADi_options_G']['numeric_jacobian'] = True
+    
+    IPOPT options can be provided in the option IPOPT_options. For 
     a complete list of IPOPT options, please consult the IPOPT documentation 
     available at http://www.coin-or.org/Ipopt/documentation/).
 
@@ -2373,8 +2376,10 @@ class CasadiRadau2Options(OptionBase):
                 'state_cont_var': True,
                 'init_traj': None,
                 'parameter_estimation_data': None,
-                'exact_hessian': True,
-                'numeric_jacobian': None,
+                'exact_Hessian': True,
+                'CasADi_options_F': {"name": "NLP objective function"},
+                'CasADi_options_G': {"name": "NLP constraint function"},
+                'CasADi_options_L': {"name": "NLP Lagrangian function"},
                 'IPOPT_options':{
                         'max_iter': 3000,
                         'derivative_test': 'none'}}

@@ -1153,7 +1153,7 @@ class Radau2Collocator(CasadiCollocator):
         """
         Wrapper for creating the NLP.
         """
-        self._create_nlp_variables()
+        self._create_NLP_variables()
         self._rename_variables()
         self._create_constraints()
         self._create_constraint_function()
@@ -1163,7 +1163,7 @@ class Radau2Collocator(CasadiCollocator):
         self._compute_bounds_and_init()
         self._create_solver()
     
-    def _create_nlp_variables(self, rename=False):
+    def _create_NLP_variables(self, rename=False):
         """
         Create the NLP variables and store them in a nested dictionary.
         """
@@ -1524,9 +1524,10 @@ class Radau2Collocator(CasadiCollocator):
             c_fcn = casadi.SXFunction([self.get_xx()], [c])
         else:
             raise ValueError('Unknown CasADi graph %s.' % self.graph)
-        c_fcn.setOption("name", "NLP constraint function")
-        if self.numeric_jacobian != None:
-            c_fcn.setOption("numeric_jacobian", self.numeric_jacobian)
+            
+        # Set user provided options and initialize
+        for (k, v) in self.CasADi_options_G.iteritems():
+            c_fcn.setOption(k, v)
         c_fcn.init()
             
         # Save constraint function as data attribute
@@ -1576,7 +1577,7 @@ class Radau2Collocator(CasadiCollocator):
                         t = self.time_points[i][k]
                         z = self._get_z(i, k)
                         self.cost_lagrange += (self.h[i] * L_eval([z])[0] * 
-                                               self.pol.w[k - 1])
+                                               self.pol.w[k])
             
             # Sum up the two cost terms
             self.cost = self.cost_mayer + self.cost_lagrange
@@ -1627,7 +1628,7 @@ class Radau2Collocator(CasadiCollocator):
                     err = N.array(err)
                     Q = self.parameter_estimation_data.Q
                     cost_term = N.dot(N.dot(err, Q), err)
-                    self.cost += self.h[i] * cost_term * self.pol.w[k - 1]
+                    self.cost += self.h[i] * cost_term * self.pol.w[k]
 
         # Define NLP objective function based on graph
         if self.graph == "MX":
@@ -1638,7 +1639,10 @@ class Radau2Collocator(CasadiCollocator):
             cost_fcn = casadi.SXFunction([self.xx], [self.cost])
         else:
             raise ValueError("Unknown CasADi graph %s." % graph)
-        cost_fcn.setOption("name", "NLP objective function")
+        
+        # Set user provided options and initialize
+        for (k, v) in self.CasADi_options_F.iteritems():
+            cost_fcn.setOption(k, v)
         cost_fcn.init()
         
         # Save cost function as data attribute
@@ -1654,23 +1658,27 @@ class Radau2Collocator(CasadiCollocator):
             
             # Recreate constraints
             self.c_fcn = self.c_fcn.expand([self.xx])
-            self.c_fcn.setOption("name", "NLP constraint function")
-            if self.numeric_jacobian != None:
-                self.c_fcn.setOption("numeric_jacobian", self.numeric_jacobian)
-            self.c_fcn.init()
             self.g = self.c_fcn.outputSX()
+            
+            # Reset user provided options and initialize
+            for (k, v) in self.CasADi_options_G.iteritems():
+                self.c_fcn.setOption(k, v)
+            self.c_fcn.init()
             
             # Recreate cost
             self.cost_fcn = self.cost_fcn.expand([self.xx])
-            self.cost_fcn.setOption("name", "NLP objective function")
-            self.cost_fcn.init()
             self.cost = self.cost_fcn.outputSX()
+            
+            # Reset user provided options and initialize
+            for (k, v) in self.CasADi_options_F.iteritems():
+                self.cost_fcn.setOption(k, v)
+            self.cost_fcn.init()
         
     def _calc_Lagrangian_Hessian(self):
         """
         Calculate the exact Hessian of the NLP Lagrangian.
         """
-        if self.exact_hessian:
+        if self.exact_Hessian:
             # Lagrange multipliers and objective function scaling
             if self.graph == 'MX':
                 lam = casadi.MX("lambda", self.g.numel())
@@ -1684,19 +1692,19 @@ class Radau2Collocator(CasadiCollocator):
             # Lagrangian
             lag_exp = sigma * self.cost + casadi.inner_prod(lam, self.g)
             if self.graph == 'MX':
-                lagrangian = casadi.MXFunction([self.xx, lam, sigma],
-                                               [lag_exp])
+                L = casadi.MXFunction([self.xx, lam, sigma], [lag_exp])
             elif self.graph == "SX" or self.graph == 'expanded_MX':
-                lagrangian = casadi.SXFunction([self.xx, lam, [sigma]],
-                                               [lag_exp])
+                L = casadi.SXFunction([self.xx, lam, [sigma]], [lag_exp])
             else:
                 raise ValueError('Unknown CasADi graph %s.' % self.graph)
-            lagrangian.init()
+                
+            # Set user provided options and initialize
+            for (k, v) in self.CasADi_options_L.iteritems():
+                L.setOption(k, v)
+            L.init()
         
-            # Hessian of the Lagrangian
-            self.H_fcn = lagrangian.hessian()
-            self.H_fcn.setOption("name", "Exact Hessian of NLP Lagrangian")
-            self.H_fcn.init()
+            # Calculate Hessian
+            self.H_fcn = L.hessian()
         else:
             # Set Hessian of the Lagrangian to a null function
             if self.graph == 'MX':

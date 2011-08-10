@@ -101,7 +101,7 @@ class RadauPol(object):
         w = gauss_quadrature_weights("LGR", self.n)
         
         # Shift the weights
-        w /= 2
+        w = N.hstack([N.nan, w / 2])
         
         # Store weights as data attribute
         self.w = w
