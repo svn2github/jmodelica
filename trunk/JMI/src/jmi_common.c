@@ -107,11 +107,11 @@ int jmi_func_new(jmi_func_t** jmi_func, jmi_residual_func_t F, int n_eq_F, jmi_j
 }
 
 int jmi_func_delete(jmi_func_t *func) {
+	int i;
+	int flag;
 	if (func->ad!=NULL) {
 		return -1;
 	}
-	int i;
-	int flag;
 	free(func->sym_dF_row);
 	free(func->sym_dF_col);
 	free(func->cad_dF_row);
