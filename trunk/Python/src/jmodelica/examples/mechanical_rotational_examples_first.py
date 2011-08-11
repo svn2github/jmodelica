@@ -35,8 +35,14 @@ def run_demo(with_plots=True):
     # Load model
     model = FMUModel(fmu_name)
 
+    # Get options
+    opts = model.simulate_options()
+
+    # Set absolute tolerance
+    opts['CVode_options']['atol'] = 1e-6
+
     # Load result file
-    res = model.simulate(final_time=3.)
+    res = model.simulate(final_time=3., options=opts)
 
     w1 = res['inertia1.w']
     w2 = res['inertia2.w']
@@ -44,7 +50,7 @@ def run_demo(with_plots=True):
     tau = res['torque.tau']
     t = res['time']
 
-    assert N.abs(w3[-1] - (-0.27563922835493898)) < 1e-3, \
+    assert N.abs(w3[-1] - (-0.27404370774029602)) < 1e-3, \
            "Wrong value in simulation result."  
 
     if with_plots:
