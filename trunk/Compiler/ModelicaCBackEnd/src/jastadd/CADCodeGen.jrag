@@ -769,18 +769,15 @@ aspect CADCodeGen {
 		str.print("  jmi_real_t** dv;\n");
 		str.print("  if(evaluation_mode== JMI_BLOCK_EVALUATE){\n");
 		str.print("      dv = jmi->dz_seed;\n");
-		str.print("  } else if(evaluation_mode== JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode== JMI_BLOCK_WRITE_BACK){\n");
-		str.print("      dv = jmi->dz;\n");
-		str.print("  } else{\n");
-		str.print("  return -1;\n}\n");
-		str.print("  if (evaluation_mode==JMI_BLOCK_INITIALIZE) {\n");
+		// Loop over all active variables and write the values in x to the z vector
 		int var_counter = 0;
-		// Loop over all active variables and write their value to x	
 		for (FVariable fv : activeVariables()) {
-			str.print("    x["+var_counter+"] = " + fv.name_C() + ";\n");
+			//str.print("    " + fv.name_C() + " = x["+var_counter+"];\n");
+			str.print("    (*dv)[ jmi_get_index_from_value_ref(" + fv.valueReference() + ")-jmi->offs_real_dx] = dx[" + var_counter + "];\n");
 			var_counter++;
 		}
-		str.print("  } else if (evaluation_mode==JMI_BLOCK_EVALUATE || evaluation_mode==JMI_BLOCK_EVALUATE_INACTIVE) {\n");
+		str.print("  } else if(evaluation_mode== JMI_BLOCK_EVALUATE_WITH_STATE){\n");
+		str.print("      dv = jmi->dz_seed;\n");
 		// Loop over all active variables and write the values in x to the z vector
 		var_counter = 0;
 		for (FVariable fv : activeVariables()) {
@@ -788,6 +785,19 @@ aspect CADCodeGen {
 			str.print("    (*dv)[ jmi_get_index_from_value_ref(" + fv.valueReference() + ")-jmi->offs_real_dx] = dx[" + var_counter + "];\n");
 			var_counter++;
 		}
+		
+		str.print("  } else if(evaluation_mode== JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode== JMI_BLOCK_WRITE_BACK){\n");
+		str.print("      dv = jmi->dv;\n");
+		str.print("  } else{\n");
+		str.print("  return -1;\n}\n");
+		str.print("  if (evaluation_mode==JMI_BLOCK_INITIALIZE) {\n");
+		var_counter = 0;
+		// Loop over all active variables and write their value to x	
+		for (FVariable fv : activeVariables()) {
+			str.print("    x["+var_counter+"] = " + fv.name_C() + ";\n");
+			var_counter++;
+		}
+		str.print("  } else if (evaluation_mode==JMI_BLOCK_EVALUATE || evaluation_mode==JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode==JMI_BLOCK_EVALUATE_WITH_STATE) {\n");
 		// Write AD-code
 		int equation_counter = 0;
 		for (FAbstractEquation e : equations()) {

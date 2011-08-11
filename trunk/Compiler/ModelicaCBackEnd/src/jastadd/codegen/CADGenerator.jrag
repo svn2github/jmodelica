@@ -208,9 +208,9 @@ public class CADGenerator extends CGenerator {
 				genPrinter.print("  int n_x;\n");
 				genPrinter.print("  int nrhs = 1;\n");
 				genPrinter.print("  jmi_block_residual_t *current_block;\n");*/
-				genPrinter.print("  jmi_real_t** dz = jmi->dz;\n");
+				genPrinter.print("  jmi_real_t** dz = jmi->dv;\n");
 				genPrinter.print("  jmi_real_t** dv = jmi->dv;\n");
-				genPrinter.print("  memcpy((*dz), (*dv), (jmi->n_v)*sizeof(jmi_real_t));\n");
+				//genPrinter.print("  memcpy((*dz), (*dv), (jmi->n_v)*sizeof(jmi_real_t));\n");
 				int block_counter = 0;
 				for (AbstractEquationBlock block : fclass.getDAEBLT()) {					
 					block.genBlock_CAD(block_counter,false,"  ",genPrinter);                                        
@@ -241,9 +241,9 @@ public class CADGenerator extends CGenerator {
 				genPrinter.print("  int n_x;\n");
 				genPrinter.print("  int nrhs = 1;\n");
 				genPrinter.print("  jmi_block_residual_t *current_block;\n");*/
-				genPrinter.print("  jmi_real_t** dz = jmi->dz;\n");
+				genPrinter.print("  jmi_real_t** dz = jmi->dv;\n");
 				genPrinter.print("  jmi_real_t** dv = jmi->dv;\n");
-				genPrinter.print("  memcpy((*dz), (*dv), (jmi->n_v)*sizeof(jmi_real_t));\n");			
+				//genPrinter.print("  memcpy((*dz), (*dv), (jmi->n_v)*sizeof(jmi_real_t));\n");			
 				int block_counter = 0;
 				for (AbstractEquationBlock block : fclass.getDAEInitBLT()) {
 					block.genBlock_CAD(block_counter,true,"  ",genPrinter);                                        

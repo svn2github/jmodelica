@@ -538,9 +538,9 @@ fmiStatus fmi_get_jacobian_fd(fmiComponent c, int independents, int dependents, 
  			}
  		}
  		(*(jmi->z))[offs+i] += h;
+ 		
  		for(j = 0; j < nzvr;j++){
  			jac[i*nzvr+j] = (z1[j] - z2[j])/(2*h);
- 			/*printf("\nz[i]: %f, i: %d j: %d z1: %f z2: %f jac: %f", (*(jmi->z))[offs+i], i, j, z1[i], z2[i], jac[i*nzvr+j]);*/
  		}
  		
  	}
@@ -550,6 +550,7 @@ fmiStatus fmi_get_jacobian_fd(fmiComponent c, int independents, int dependents, 
 fmiStatus fmi_get_jacobian(fmiComponent c, int independents, int dependents, fmiReal jac[], size_t njac) {
 	int i = 0;
 	int j = 0;
+	int k = 0;
 	int passed = 0;
 	int failed = 0;
 	int offs;
@@ -565,14 +566,14 @@ fmiStatus fmi_get_jacobian(fmiComponent c, int independents, int dependents, fmi
 	size_t nzvr = 0;
 	jmi_t* jmi = ((fmi_t *)c)->jmi;
 	dv = jmi->dv;
-	dz = jmi->dz;
+	dz = jmi->dv;
 	
-	offs = jmi->offs_real_x;
+	offs = jmi->n_real_dx;
 	
 	if(independents&FMI_STATES){
 		nvvr += jmi->n_real_x;
  	}else{
- 		offs = jmi->offs_real_u;
+ 		offs += jmi->n_real_x;
  	}
 	if(independents&FMI_INPUTS){
 		nvvr += jmi->n_real_u;
@@ -583,49 +584,61 @@ fmiStatus fmi_get_jacobian(fmiComponent c, int independents, int dependents, fmi
 	if(dependents&FMI_OUTPUTS){
 		nzvr += jmi->n_real_w;
  	}
-	/*
-	jac2 = (fmiReal*)calloc(njac, sizeof(fmiReal));
-	*/
+
+	/*jac2 = (fmiReal*)calloc(njac, sizeof(fmiReal));*/
+	
 	for(i = 0; i < nvvr; i++){
 		(*dv)[i+offs] = 1;
 		jmi->dae->ode_derivatives_dir_der(jmi);
 		if(dependents&FMI_DERIVATIVES){
 			for(j = 0; j<jmi->n_real_dx;j++){
-				jac[i*nzvr+j] = (*dz)[j+jmi->offs_real_dx];	
+				jac[i*nzvr+j] = (*dz)[j];
 			}
 		}
 		if(dependents&FMI_OUTPUTS){
 			for(j = 0; j<jmi->n_real_w;j++){
-				jac[(i+1)*nzvr+j-jmi->n_real_w] = (*dz)[j+jmi->offs_real_w];	
+				jac[(i+1)*nzvr+j-jmi->n_real_w] = (*dz)[j+jmi->offs_real_w-jmi->offs_real_dx];	
 			}
-		}		
+		}
+		for(j = 0; j<jmi->n_real_dx;j++){
+				(*dz)[j] = 0;
+		}
+		for(j = 0; j<jmi->n_real_w;j++){
+			(*dz)[j+jmi->offs_real_w-jmi->offs_real_dx] = 0;
+		}
+		
 		(*dv)[i+offs] = 0;
 	}
+	
 	/*
 	fmi_get_jacobian_fd(c, independents, dependents, jac2, njac);
 	
-	for(i = 0; i < njac; i++){
-		if(jac[i] != 0 && jac2[i] != 0){
-			rel_tol = 1.0 - jac2[i]/jac[i];
-			if((rel_tol < tol) && (rel_tol > -tol)){
-				passed++;
+	for(j = 0; j < nvvr; j++){
+		for(k = 0; k < nzvr; k++){
+			i = j*nzvr + k;
+			if(jac[i] != 0 && jac2[i] != 0){
+				rel_tol = 1.0 - jac2[i]/jac[i];
+				if((rel_tol < tol) && (rel_tol > -tol)){
+					passed++;
+				} else{
+					failed++;
+					printf("\ni: %d,j: %d, cad: %f, fd: %f, rel_tol: %f",k, j, jac[i], jac2[i], rel_tol);
+				}
 			} else{
-				failed++;
-				printf("\ncad: %f, fd: %f, rel_tol: %f", jac[i], jac2[i], rel_tol);
-			}
-		} else{
-			abs_tol = jac[i]-jac2[i];
-			if((abs_tol < tol) && (abs_tol > -tol)){
-				passed++;
-			} else{
-				failed++;
-				printf("\ni: %d, cad: %f, fd: %f, abs_tol: %f",i,  jac[i], jac2[i], abs_tol);
+				abs_tol = jac[i]-jac2[i];
+				if((abs_tol < tol) && (abs_tol > -tol)){
+					passed++;
+				} else{
+					failed++;
+					printf("\ni: %d, j: %d, cad: %f, fd: %f, abs_tol: %f",k, j, jac[i], jac2[i], abs_tol);
+				}
 			}
 		}
 	}
 	printf("\nPASSED: %d\tFAILED: %d\n\n", passed, failed);
 
-	free(jac2);*/
+	free(jac2);
+	*/
 	return fmiOK;
 }
 
