@@ -1133,20 +1133,19 @@ class Radau2Collocator(CasadiCollocator):
         # Get the options
         self.__dict__.update(options)
         
-        # Check the validity of blocking_factors
-        if (self.blocking_factors != None and 
-            N.sum(self.blocking_factors) != self.n_e):
-            raise ValueError("The sum of all elements in blocking factors " +
-                             "must be the same as the number of elements.")
-        
-        # Define element lengths
-        self.h = {}
-        for i in xrange(1, self.n_e + 1):
-            self.h[i] = (self.ocp.tf - self.ocp.t0) / self.n_e
+        # Redefine element lengths
+        self.horizon = self.ocp.tf - self.ocp.t0
+        h = [N.nan] # Element 0
+        if self.h == None:
+            h += self.n_e * [1. / self.n_e]
+        else:
+            h += self.h
+        self.h = h
         
         # Define polynomial for representation of solutions
-        self.pol = RadauPol(self.n_cp, self.beg_interp)
+        self.pol = RadauPol(self.n_cp)
         
+        # Get to work
         self._create_NLP()
         
     def _create_NLP(self):
@@ -1172,7 +1171,6 @@ class Radau2Collocator(CasadiCollocator):
                  'w': self.model.get_n_w()}
         get_var = {'dx': self.model.get_dx, 'x': self.model.get_x,
                    'u': self.model.get_u, 'w': self.model.get_w}
-                   
         if self.blocking_factors == None:
             n_var['u'] = self.model.get_n_u()
         
@@ -1183,7 +1181,7 @@ class Radau2Collocator(CasadiCollocator):
             n_xx += len(self.blocking_factors) * self.model.get_n_u()
         if self.state_cont_var:
             n_xx += (self.n_e - 1) * n_var['x']
-            
+        
         # Create NLP variables
         if self.graph == "MX" or self.graph == 'expanded_MX':
             xx = casadi.MX("xx", n_xx)
@@ -1277,8 +1275,8 @@ class Radau2Collocator(CasadiCollocator):
         
         The switch for enabling variable renaming exists internally.
         """
-        rename = False # Internal switch for variable renaming
-        if rename:
+        rename_switch = False # Internal switch for variable renaming
+        if rename_switch:
             print("Warning: Variable renaming is currently activated.")
             assert self.graph == "SX", \
                    "Variable renaming is only allowed for SX graphs."
@@ -1308,15 +1306,15 @@ class Radau2Collocator(CasadiCollocator):
                                                '_' +  str(i) + '_' + str(k)))
                         xx[var_indices[i][k]['u']] = u
                     
-                    if 'w' in var_indices[i][k].keys():                         
+                    if 'w' in var_indices[i][k].keys():
                         w = []
                         for j in range(self.model.get_n_w()):
                             w.append(casadi.SX(str(self.model.get_w()[j]) +
                                                '_' +  str(i) + '_' + str(k)))
-                        xx[var_indices[i][k]['w']]
+                        xx[var_indices[i][k]['w']] = w
             
             self.xx = xx
-            self._create_nlp_variables(True)
+            self._create_NLP_variables(True)
     
     def _get_z(self, i, k):
         """
@@ -1350,24 +1348,20 @@ class Radau2Collocator(CasadiCollocator):
         """
         Create the constraints and time points.
         """
-        # Get a local reference to var and beg_interp
+        # Get a local reference to var
         var = self.var
-        beg_interp = self.beg_interp
         
         # Broadcast self.pol.der_vals
         der_vals = [[]]
         for k in xrange(1, self.n_cp + 1):
-            der_vals_k = [self.pol.der_vals[not self.beg_interp:, k].reshape(
-                    [1, self.n_cp + beg_interp])]
+            der_vals_k = [self.pol.der_vals[:, k].reshape([1, self.n_cp + 1])]
             der_vals_k *= self.model.get_n_x()
             der_vals += [casadi.vertcat(der_vals_k)]
         
         # Create function for collocation equations
-        x_i = casadi.symbolic("x_i", self.model.get_n_x(),
-                              self.n_cp + beg_interp)
-        der_vals_k = casadi.symbolic("der_vals[k]",
-                                     self.model.get_n_x(),
-                                     self.n_cp + beg_interp)
+        x_i = casadi.symbolic("x_i", self.model.get_n_x(), self.n_cp + 1)
+        der_vals_k = casadi.symbolic("der_vals[k]", self.model.get_n_x(),
+                                     self.n_cp + 1)
         dx_i_k = casadi.symbolic("dx_i_k", self.model.get_n_x())
         h = casadi.SX("h")
         coll_eq = casadi.SXFunction(
@@ -1405,39 +1399,43 @@ class Radau2Collocator(CasadiCollocator):
             raise ValueError('Unknown CasADi graph %s.' % graph)
         g = casadi.vertcat([g, dae_F_eval([z])[0]])
         
+        # Evaluate u_1_0 based on polynomial u^1
+        u_1_0 = 0
+        for k in xrange(1, self.n_cp + 1):
+            u_1_0 += var[1][k]['u'] * self.pol.eval_basis(k, 0)
+            
+        # Add residual for u_1_0 as constraint
+        g = casadi.vertcat([g, var[1][0]['u'] - u_1_0])
+        
         # Create list of state matrices
         x_list = [[]]
-        x_i = [var[1][k]['x'] for k in xrange(not beg_interp, self.n_cp + 1)]
+        x_i = [var[1][k]['x'] for k in xrange(self.n_cp + 1)]
         x_i = casadi.horzcat(x_i)
         x_list += [x_i]
-        if beg_interp:
-            if self.state_cont_var:
-                for i in xrange(2, self.n_e + 1):
-                    x_i = [var[i][k]['x'] for k in xrange(self.n_cp + 1)]
-                    x_i = casadi.horzcat(x_i)
-                    x_list += [x_i]
-            else:
-                for i in xrange(2, self.n_e + 1):
-                    x_i = [var[i - 1][self.n_cp]['x']]
-                    x_i += [var[i][k]['x'] for k in xrange(1, self.n_cp + 1)]
-                    x_i = casadi.horzcat(x_i)
-                    x_list += [x_i]
+        if self.state_cont_var:
+            for i in xrange(2, self.n_e + 1):
+                x_i = [var[i][k]['x'] for k in xrange(self.n_cp + 1)]
+                x_i = casadi.horzcat(x_i)
+                x_list += [x_i]
         else:
             for i in xrange(2, self.n_e + 1):
-                x_i = [var[i][k]['x'] for k in xrange(1, self.n_cp + 1)]
+                x_i = [var[i - 1][self.n_cp]['x']]
+                x_i += [var[i][k]['x'] for k in xrange(1, self.n_cp + 1)]
                 x_i = casadi.horzcat(x_i)
                 x_list += [x_i]
         
         # Collocation and DAE constraints for first element
         for k in xrange(1, self.n_cp + 1):
             # Calculate and store time point
-            t = self.time_points[1][0] + self.h[1] * self.pol.p[k]
+            t = (self.time_points[1][0] +
+                 self.horizon * self.h[1] * self.pol.p[k])
             self.time_points[1][k] = t
             time += [t]
             
             # Collocation constraint
             [coll_constr] = coll_eq_eval([x_list[1], der_vals[k], 
-                                          self.h[1], var[1][k]['dx']])
+                                          self.horizon * self.h[1],
+                                          var[1][k]['dx']])
             g = casadi.vertcat([g, coll_constr])
             
             # DAE constraint
@@ -1451,13 +1449,14 @@ class Radau2Collocator(CasadiCollocator):
             for k in xrange(1, self.n_cp + 1):
                 # Calculate and store time point
                 t = (self.time_points[i - 1][self.n_cp] + 
-                     self.h[i] * self.pol.p[k])
+                     self.horizon * self.h[i] * self.pol.p[k])
                 self.time_points[i][k] = t
                 time += [t]
                 
                 # Collocation constraint
                 [coll_constr] = coll_eq_eval([x_list[i], der_vals[k], 
-                                              self.h[i], var[i][k]['dx']])
+                                              self.horizon * self.h[i],
+                                              var[i][k]['dx']])
                 g = casadi.vertcat([g, coll_constr])
                 
                 # DAE constraint
@@ -1465,40 +1464,11 @@ class Radau2Collocator(CasadiCollocator):
                 [dae_constr] = dae_F_eval([z])
                 g = casadi.vertcat([g, dae_constr])
                 
-        # State continuity variables constraints
+        # Continuity constraints
         if self.state_cont_var:
             for i in xrange(1, self.n_e):
                 cont_constr = var[i][self.n_cp]['x'] - var[i + 1][0]['x']
                 g = casadi.vertcat([g, cont_constr])
-        
-        # Continuity constraints
-        if not beg_interp:
-            # Evaluate x_1_0 based on polynomial x^1
-            x_1_0 = 0
-            for k in xrange(1, self.n_cp + 1):
-                x_1_0 += var[1][k]['x'] * self.pol.eval_basis(k, 0)
-            
-            # Add residual for x_1_0 as constraint
-            g = casadi.vertcat([g, var[1][0]['x'] - x_1_0])
-            
-            for i in xrange(2, self.n_e + 1):
-                # Evaluate x_i_0 based on polynomial x^i
-                x_i_0 = 0
-                for k in xrange(1, self.n_cp + 1):
-                    x_i_0 += var[i][k]['x'] * self.pol.eval_basis(k, 0)
-                
-                # Add residual for x_i_0 as constraint
-                g = casadi.vertcat([g, var[i - (not self.state_cont_var)][
-                        (not self.state_cont_var) * self.n_cp
-                        ]['x'] - x_i_0])
-                    
-        # Evaluate u_1_0 based on polynomial u^1
-        u_1_0 = 0
-        for k in xrange(1, self.n_cp + 1):
-            u_1_0 += var[1][k]['u'] * self.pol.eval_basis(k, 0)
-            
-        # Add residual for u_1_0 as constraint
-        g = casadi.vertcat([g, var[1][0]['u'] - u_1_0])
         
         # Store constraints and time as data attributes
         self.g = g
@@ -1576,8 +1546,8 @@ class Radau2Collocator(CasadiCollocator):
                     for k in xrange(1, self.n_cp + 1):
                         t = self.time_points[i][k]
                         z = self._get_z(i, k)
-                        self.cost_lagrange += (self.h[i] * L_eval([z])[0] * 
-                                               self.pol.w[k])
+                        self.cost_lagrange += (self.horizon * self.h[i] *
+                                               L_eval([z])[0] * self.pol.w[k])
             
             # Sum up the two cost terms
             self.cost = self.cost_mayer + self.cost_lagrange
@@ -1628,7 +1598,8 @@ class Radau2Collocator(CasadiCollocator):
                     err = N.array(err)
                     Q = self.parameter_estimation_data.Q
                     cost_term = N.dot(N.dot(err, Q), err)
-                    self.cost += self.h[i] * cost_term * self.pol.w[k]
+                    self.cost += (self.horizon * self.h[i] *
+                                  cost_term * self.pol.w[k])
 
         # Define NLP objective function based on graph
         if self.graph == "MX":

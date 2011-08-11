@@ -2172,11 +2172,11 @@ class CasadiRadau2(AlgorithmBase):
         
     def _set_options(self):
         """ 
-        Helper function that sets options for the CasadiRadau2 algorithm.
+        Set algorithm options and assert their validity.
         """
         self.__dict__.update(self.options)
         
-        # Handle option dependencies
+        # Check validity of exact_Hessian
         if self.exact_Hessian:
             if self.graph == "MX":
                 print("Warning: exact_Hessian is not recommended in " +
@@ -2185,6 +2185,21 @@ class CasadiRadau2(AlgorithmBase):
             if len(self.CasADi_options_L.keys()) > 1:
                 raise ValueError("CasADi_options_L is only used " +
                                  "if exact_Hessian is True.")
+                                 
+        # Check validity of element lengths
+        if self.h != None:
+            if len(self.h) != self.n_e:
+                raise ValueError("The number of specified element lengths " +
+                                 "must be equal to the number of elements.")
+            if not N.allclose(N.sum(self.h), 1):
+                raise ValueError("The sum of all elements lengths must be" +
+                                 "(almost) equal to 1.")
+                                 
+        # Check validity of blocking_factors
+        if (self.blocking_factors != None and 
+            N.sum(self.blocking_factors) != self.n_e):
+            raise ValueError("The sum of all elements in blocking factors " +
+                             "must be the same as the number of elements.")
         
         # solver options
         self.solver_options = self.IPOPT_options
@@ -2259,6 +2274,14 @@ class CasadiRadau2Options(OptionBase):
             Type: int
             Default: 50
             
+        h --
+            Element lengths. Normalized in the sense that the sum of all
+            lengths must be equal to 1. If None, the element lengths are
+            uniformly distributed.
+            
+            Type: list of floats
+            Default: None
+            
         n_cp --
             Number of collocation points in each element.
             
@@ -2283,16 +2306,7 @@ class CasadiRadau2Options(OptionBase):
             
             Type: list of ints
             Default: None
-            
-        beg_interp --
-            Whether or not to place an interpolation point at the beginning of
-            the element for the polynomials representing the states.
-            
-            Disabling this option can give quite unpleasant numeric properties.
-            
-            Type: bool
-            Default: True
-            
+        
         state_cont_var --
             If True: Create extra variables for the states at the start of each
             element and then constrain them to be equal to the corresponding 
@@ -2368,11 +2382,11 @@ class CasadiRadau2Options(OptionBase):
     
     def __init__(self, *args, **kw):
         _defaults= {
-                'n_e': 50, 
+                'n_e': 50,
+                'h': None,
                 'n_cp': 3,
                 'graph': 'SX',
                 'blocking_factors': None,
-                'beg_interp': True,
                 'state_cont_var': True,
                 'init_traj': None,
                 'parameter_estimation_data': None,
