@@ -69,8 +69,9 @@ import org.jmodelica.optimica.parser.OptimicaParser.Terminals;
     return res;
   }
 
-  public int yyline() { return yyline; }
-  public int yychar() { return yychar; }
+  protected int matchLine()   { return yyline; }
+  protected int matchOffset() { return yychar; }
+  protected int matchLength() { return yylength(); }
 
 %}
 

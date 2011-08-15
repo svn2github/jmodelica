@@ -22,26 +22,26 @@ public abstract class AbstractModelicaScanner extends beaver.Scanner {
 	}
 
 	protected void addLineBreaks(String text) {
-		int line = yyline();
+		int line = matchLine();
 		for (int i = 0; i < text.length(); i += 1) {
 			switch (text.charAt(i)) {
 			case '\r':
 				if (i < text.length() - 1 && text.charAt(i + 1) == '\n')
 					++i;
 			case '\n':
-				lineBreakMap.put(++line, yychar() + i + 1);
+				lineBreakMap.put(++line, matchOffset() + i + 1);
 			}
 		}
 	}
 
 	protected void addLineBreak() {
-		lineBreakMap.put(yyline() + 1, yychar() + yylength());
+		lineBreakMap.put(matchLine() + 1, matchOffset() + matchLength());
 	}
 
-	public abstract int yylength();
+	protected abstract int matchLength();
 
-	public abstract int yyline();
+	protected abstract int matchLine();
 
-	public abstract int yychar();
+	protected abstract int matchOffset();
 
 }
