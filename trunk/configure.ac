@@ -323,11 +323,6 @@ AC_CONFIG_FILES([
  ThirdParty/Blas/Makefile
  ThirdParty/Lapack/Makefile
  JMI/src/Makefile
- JMI/examples/Vdp/Makefile
- JMI/examples/Vdp_cppad/Makefile
- JMI/examples/FurutaPendulum/Makefile
- JMI/examples/CSTR/Makefile
- JMI/examples/CSTR2/Makefile
  docbook/UsersGuide/Makefile
  Python/jm_ipython.sh
  Python/jm_python.sh

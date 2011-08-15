@@ -192,20 +192,6 @@ test: install
 
 clean-local: clean-frontends clean-assimulo
 
-# jmi-examples: install
-# 	cd JMI/examples/Vdp; $(MAKE) all
-# 	cd JMI/examples/Vdp_cppad; $(MAKE) all
-# 	cd JMI/examples/FurutaPendulum; $(MAKE) all
-# 	cd JMI/examples/CSTR; $(MAKE) all
-# 	cd JMI/examples/CSTR2; $(MAKE) all
-
-# clean-jmi-examples: 
-# 	cd JMI/examples/Vdp; $(MAKE) clean
-# 	cd JMI/examples/Vdp_cppad; $(MAKE) clean
-# 	cd JMI/examples/FurutaPendulum; $(MAKE) clean
-# 	cd JMI/examples/CSTR; $(MAKE) clean
-# 	cd JMI/examples/CSTR2; $(MAKE) clean
-
 clean-assimulo:
 if WITH_SUNDIALS
 	cd $(abs_top_srcdir)/Assimulo; \
@@ -215,14 +201,6 @@ endif
 
 clean-frontends:
 if HAVE_ANT
-#	cd $(abs_top_srcdir)/Compiler/ModelicaFrontEnd; \
-#	$(ANT_OPTS) $(ANT) clean
-#	cd $(abs_top_srcdir)/Compiler/OptimicaFrontEnd; \
-#	$(ANT_OPTS) $(ANT) clean
-#	cd $(abs_top_srcdir)/Compiler/ModelicaCBackend; \
-#	$(ANT_OPTS) $(ANT) clean
-#	cd $(abs_top_srcdir)/Compiler/ModelicaXMLBackend; \
-#	$(ANT_OPTS) $(ANT) clean
 	cd $(abs_top_srcdir)/Compiler/ModelicaCompiler; \
 	$(ANT_OPTS) $(ANT) clean
 	cd $(abs_top_srcdir)/Compiler/OptimicaCompiler; \
@@ -231,8 +209,6 @@ endif
 
 docs:
 	cd $(abs_top_srcdir); doxygen doc/JMI/jmi_doxydoc.conf
-#	cd $(abs_top_srcdir); doxygen doc/ModelicaFrontEnd/modelica_frontend_doxydoc.conf
-#	cd $(abs_top_srcdir); doxygen doc/OptimicaFrontEnd/optimica_frontend_doxydoc.conf
 	cd $(abs_top_srcdir); doxygen doc/ModelicaCompiler/modelica_compiler_doxydoc.conf
 	cd $(abs_top_srcdir); doxygen doc/OptimicaCompiler/optimica_compiler_doxydoc.conf
 	make -C $(abs_top_srcdir)/doc/PyJMI html

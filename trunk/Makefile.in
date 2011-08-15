@@ -50,13 +50,7 @@ host_triplet = @host@
 subdir = .
 DIST_COMMON = $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config.h.in \
-	$(srcdir)/jm_tests.in \
-	$(top_srcdir)/JMI/examples/CSTR/Makefile.in \
-	$(top_srcdir)/JMI/examples/CSTR2/Makefile.in \
-	$(top_srcdir)/JMI/examples/FurutaPendulum/Makefile.in \
-	$(top_srcdir)/JMI/examples/Vdp/Makefile.in \
-	$(top_srcdir)/JMI/examples/Vdp_cppad/Makefile.in \
-	$(top_srcdir)/Python/jm_ipython.sh.in \
+	$(srcdir)/jm_tests.in $(top_srcdir)/Python/jm_ipython.sh.in \
 	$(top_srcdir)/Python/jm_python.sh.in $(top_srcdir)/configure \
 	$(top_srcdir)/docbook/UsersGuide/Makefile.in INSTALL \
 	config.guess config.sub depcomp install-sh ltmain.sh missing
@@ -68,11 +62,7 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno config.status.lineno
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = config.h
-CONFIG_CLEAN_FILES = JMI/examples/Vdp/Makefile \
-	JMI/examples/Vdp_cppad/Makefile \
-	JMI/examples/FurutaPendulum/Makefile \
-	JMI/examples/CSTR/Makefile JMI/examples/CSTR2/Makefile \
-	docbook/UsersGuide/Makefile Python/jm_ipython.sh \
+CONFIG_CLEAN_FILES = docbook/UsersGuide/Makefile Python/jm_ipython.sh \
 	Python/jm_python.sh jm_tests
 CONFIG_CLEAN_VPATH_FILES =
 SOURCES =
@@ -329,16 +319,6 @@ $(srcdir)/config.h.in:  $(am__configure_deps)
 
 distclean-hdr:
 	-rm -f config.h stamp-h1
-JMI/examples/Vdp/Makefile: $(top_builddir)/config.status $(top_srcdir)/JMI/examples/Vdp/Makefile.in
-	cd $(top_builddir) && $(SHELL) ./config.status $@
-JMI/examples/Vdp_cppad/Makefile: $(top_builddir)/config.status $(top_srcdir)/JMI/examples/Vdp_cppad/Makefile.in
-	cd $(top_builddir) && $(SHELL) ./config.status $@
-JMI/examples/FurutaPendulum/Makefile: $(top_builddir)/config.status $(top_srcdir)/JMI/examples/FurutaPendulum/Makefile.in
-	cd $(top_builddir) && $(SHELL) ./config.status $@
-JMI/examples/CSTR/Makefile: $(top_builddir)/config.status $(top_srcdir)/JMI/examples/CSTR/Makefile.in
-	cd $(top_builddir) && $(SHELL) ./config.status $@
-JMI/examples/CSTR2/Makefile: $(top_builddir)/config.status $(top_srcdir)/JMI/examples/CSTR2/Makefile.in
-	cd $(top_builddir) && $(SHELL) ./config.status $@
 docbook/UsersGuide/Makefile: $(top_builddir)/config.status $(top_srcdir)/docbook/UsersGuide/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 Python/jm_ipython.sh: $(top_builddir)/config.status $(top_srcdir)/Python/jm_ipython.sh.in
@@ -936,34 +916,12 @@ test: install
 
 clean-local: clean-frontends clean-assimulo
 
-# jmi-examples: install
-# 	cd JMI/examples/Vdp; $(MAKE) all
-# 	cd JMI/examples/Vdp_cppad; $(MAKE) all
-# 	cd JMI/examples/FurutaPendulum; $(MAKE) all
-# 	cd JMI/examples/CSTR; $(MAKE) all
-# 	cd JMI/examples/CSTR2; $(MAKE) all
-
-# clean-jmi-examples: 
-# 	cd JMI/examples/Vdp; $(MAKE) clean
-# 	cd JMI/examples/Vdp_cppad; $(MAKE) clean
-# 	cd JMI/examples/FurutaPendulum; $(MAKE) clean
-# 	cd JMI/examples/CSTR; $(MAKE) clean
-# 	cd JMI/examples/CSTR2; $(MAKE) clean
-
 clean-assimulo:
 @WITH_SUNDIALS_TRUE@	cd $(abs_top_srcdir)/Assimulo; \
 @WITH_SUNDIALS_TRUE@	python setup_source.py clean --all --sundials-home=$(SUNDIALS_HOME) 
 @WITH_SUNDIALS_TRUE@	rm -rf $(assimulo_install_dir)
 
 clean-frontends:
-#	cd $(abs_top_srcdir)/Compiler/ModelicaFrontEnd; \
-#	$(ANT_OPTS) $(ANT) clean
-#	cd $(abs_top_srcdir)/Compiler/OptimicaFrontEnd; \
-#	$(ANT_OPTS) $(ANT) clean
-#	cd $(abs_top_srcdir)/Compiler/ModelicaCBackend; \
-#	$(ANT_OPTS) $(ANT) clean
-#	cd $(abs_top_srcdir)/Compiler/ModelicaXMLBackend; \
-#	$(ANT_OPTS) $(ANT) clean
 @HAVE_ANT_TRUE@	cd $(abs_top_srcdir)/Compiler/ModelicaCompiler; \
 @HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT) clean
 @HAVE_ANT_TRUE@	cd $(abs_top_srcdir)/Compiler/OptimicaCompiler; \
@@ -971,8 +929,6 @@ clean-frontends:
 
 docs:
 	cd $(abs_top_srcdir); doxygen doc/JMI/jmi_doxydoc.conf
-#	cd $(abs_top_srcdir); doxygen doc/ModelicaFrontEnd/modelica_frontend_doxydoc.conf
-#	cd $(abs_top_srcdir); doxygen doc/OptimicaFrontEnd/optimica_frontend_doxydoc.conf
 	cd $(abs_top_srcdir); doxygen doc/ModelicaCompiler/modelica_compiler_doxydoc.conf
 	cd $(abs_top_srcdir); doxygen doc/OptimicaCompiler/optimica_compiler_doxydoc.conf
 	make -C $(abs_top_srcdir)/doc/PyJMI html
