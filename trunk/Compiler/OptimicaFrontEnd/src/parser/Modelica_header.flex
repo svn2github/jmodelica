@@ -15,7 +15,4 @@
 */
 package org.jmodelica.optimica.parser;
 
-import java.util.Map;
-import java.util.HashMap;
-import beaver.Scanner;
 import org.jmodelica.optimica.parser.ModelicaParser.Terminals;

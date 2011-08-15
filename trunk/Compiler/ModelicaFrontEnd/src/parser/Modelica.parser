@@ -145,14 +145,6 @@
 	    lineBreakMap = map;
 	}
 
-	public String removeWhitespace(String str) {
-		String str_res = str;
-    	str_res = str_res.replaceAll("\\r", "");
-    	str_res = str_res.replaceAll("\\n", "");
-    	str_res = str_res.replaceAll(" ", "");
-		return str_res;
-	}
-
 :};
  
 SourceRoot source_root
@@ -203,8 +195,7 @@ BaseClassDecl base_class_decl
     string_comment? 
     composition 
     END_ID.end   {:   
-        String end_s = end.substring(3,end.length());
-        end_s = removeWhitespace(end_s);
+        String end_s = end.substring(3,end.length()).trim();
         return new PN_FullClassDecl(
             new UnknownVisibilityType(),
             encapsulated,
@@ -253,8 +244,7 @@ BaseClassDecl base_class_decl
     string_comment? 
     composition 
     END_ID.end {:
-        String end_s = end.substring(3,end.length());
-	    end_s = removeWhitespace(end_s);
+        String end_s = end.substring(3,end.length()).trim();
         return new PN_ExtendClassDecl(
             new UnknownVisibilityType(),
             encapsulated,

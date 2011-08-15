@@ -15,6 +15,8 @@
 */
 
 
+import org.jmodelica.util.AbstractModelicaScanner;
+import beaver.Scanner;
 
 
 %%
@@ -22,7 +24,7 @@
 %public
 %final
 %class ModelicaScanner
-%extends Scanner
+%extends AbstractModelicaScanner
 %unicode
 %function nextToken
 %type Symbol
@@ -90,10 +92,6 @@
     }
     
   }
-  
-  private HashMap<Integer, Integer> lineBreakMap;
-  
-  StringBuilder string = new StringBuilder(128);
 
   private Symbol newSymbol(short id) {
     //System.out.println(id);
@@ -105,34 +103,13 @@
   }
   
   public void reset(java.io.Reader reader) {
-    lineBreakMap = new HashMap<Integer, Integer>();
-    lineBreakMap.put(0, 0);
     yyreset(reader);
   }
-  
-  private void addLineBreaks(String text) {
-  	int line = yyline;  	
-  	for (int i = 0; i < text.length(); i += 1) {
-  		switch (text.charAt(i)) {
-  			case '\r': 
-  				if (i < text.length() - 1 && text.charAt(i+1) == '\n') 
-  					++i;
-  			case '\n': 
-  				lineBreakMap.put(++line, yychar + i + 1);
-		} 
-  	} 
-  }  
-  
-  public Map<Integer, Integer> getLineBreakMap() {
-	  return lineBreakMap;
-  }
+
+  public int yyline() { return yyline; }
+  public int yychar() { return yychar; }
   
 %}
-
-%init{
-  lineBreakMap = new HashMap<Integer, Integer>();
-  lineBreakMap.put(0, 0);
-%init}
 
 
 ID = {NONDIGIT} ({DIGIT}|{NONDIGIT})* | {Q_IDENT}
@@ -302,7 +279,7 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   
   {Comment}                { addLineBreaks(yytext()); }
   {NonBreakingWhiteSpace}  { }
-  {LineTerminator} 		   { lineBreakMap.put(yyline+1, yychar + yylength()); }
+  {LineTerminator} 		   { addLineBreak(); }
 }
 
 //.|\n                { throw new RuntimeException("Illegal character \""+yytext()+ "\" at line "+yyline+", column "+yycolumn); }

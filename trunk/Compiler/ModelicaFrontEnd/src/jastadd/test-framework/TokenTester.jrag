@@ -18,7 +18,7 @@
  * 
  */
 
-import org.jmodelica.modelica.parser.FlatModelicaScanner;
+import org.jmodelica.util.AbstractFlatModelicaScanner;
 import java.io.StringReader;
 import java.io.FileReader;
 import java.io.Reader;
@@ -34,8 +34,10 @@ public class TokenTester {
 		boolean testSuccess = true;
 		boolean done = false;
 
-		FlatModelicaScanner fms1 = new FlatModelicaScanner(new StringReader(s1));
-		FlatModelicaScanner fms2 = new FlatModelicaScanner(new StringReader(s2));
+		AbstractFlatModelicaScanner fms1 = 
+			ParserHandler.createModelicaFlatScanner(new StringReader(s1));
+		AbstractFlatModelicaScanner fms2 = 
+			ParserHandler.createModelicaFlatScanner(new StringReader(s2));
 
 		try {
 			while (!done && testSuccess) {

@@ -16,97 +16,87 @@
 
 aspect OptimicaRootAccess {
 	
-	refine RootAccess eq SourceRoot.language() {
-		return "Optimica";
-	}
+	refine RootAccess eq SourceRoot.language() = "Optimica";
 	
-	refine RootAccess FClass ParserHandler.newFClass() {
+	refine RootAccess public FClass ParserHandler.newFClass() {
 		return new FOptClass();
 	}
+    
+	refine RootAccess public static beaver.Parser ParserHandler.createModelicaParser(AbstractModelicaScanner scanner) {
+    	org.jmodelica.optimica.parser.ModelicaParser parser = 
+    		new org.jmodelica.optimica.parser.ModelicaParser();
+        parser.setLineBreakMap(scanner.getLineBreakMap());
+		return parser;
+    }
+    
+	refine RootAccess public static AbstractModelicaScanner ParserHandler.createModelicaScanner(Reader in) {
+    	return new org.jmodelica.optimica.parser.ModelicaScanner(in);
+    }
+    
+	refine RootAccess public static AbstractFlatModelicaScanner ParserHandler.createModelicaFlatScanner(Reader in) {
+    	return new org.jmodelica.optimica.parser.FlatModelicaScanner(in);
+    }
+    
+	refine RootAccess public static short ParserHandler.expModelicaGoal() {
+    	return org.jmodelica.optimica.parser.ModelicaParser.AltGoals.exp;
+    }
 
-	refine RootAccess SourceRoot ParserHandler.parseFile(String fileName) 
-	   throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException{
+    public static beaver.Parser ParserHandler.createOptimicaParser(AbstractModelicaScanner scanner) {
+    	org.jmodelica.optimica.parser.OptimicaParser parser = 
+    		new org.jmodelica.optimica.parser.OptimicaParser();
+        parser.setLineBreakMap(scanner.getLineBreakMap());
+		return parser;
+    }
+    
+    public static AbstractModelicaScanner ParserHandler.createOptimicaScanner(Reader in) {
+    	return new org.jmodelica.optimica.parser.OptimicaScanner(in);
+    }
+    
+	public static short ParserHandler.expOptimicaGoal() {
+    	return org.jmodelica.optimica.parser.OptimicaParser.AltGoals.exp;
+    }
+	
+	refine RootAccess public SourceRoot ParserHandler.parseFile(String fileName) 
+	   throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException {
 		return parseOptimicaFile(fileName);
 	}
 
-	refine RootAccess SourceRoot ParserHandler.parseString(String str, String fileName)  
-	   throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException{
-		return parseOptimicaString(str,fileName);
+	refine RootAccess public SourceRoot ParserHandler.parseString(String str, String fileName)  
+	   throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException {
+		return parseOptimicaString(str, fileName);
 	}
 	
-	refine RootAccess Exp ParserHandler.parseExpString(String str) 
-	   throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException{
+	refine RootAccess public Exp ParserHandler.parseExpString(String str) 
+	   throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException {
 		return parseOptimicaExpString(str);
-	}
-	
-	refine RootAccess SourceRoot ParserHandler.parseModelicaFile(String fileName) 
-	   throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException{
-		SourceRoot sr = null;
-		Reader reader = fileReader(fileName);
-		org.jmodelica.optimica.parser.ModelicaScanner scanner = 
-			new org.jmodelica.optimica.parser.ModelicaScanner(new BufferedReader(reader));
-		org.jmodelica.optimica.parser.ModelicaParser parser = new org.jmodelica.optimica.parser.ModelicaParser();
-		parser.setLineBreakMap(scanner.getLineBreakMap());
-		sr = (SourceRoot)parser.parse(scanner);
-		sr.setFileName(fileName);
-		return sr;
-	}
-	
-	refine RootAccess SourceRoot ParserHandler.parseModelicaString(String str, String fileName) 
-	   throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException{
-		SourceRoot sr = null;
-		org.jmodelica.optimica.parser.ModelicaScanner scanner = 
-			new org.jmodelica.optimica.parser.ModelicaScanner(new StringReader(str));
-		org.jmodelica.optimica.parser.ModelicaParser parser = 
-			new org.jmodelica.optimica.parser.ModelicaParser();
-		parser.setLineBreakMap(scanner.getLineBreakMap());
-		sr = (SourceRoot)parser.parse(scanner);
-		sr.setFileName(fileName);
-		return sr;
-	}
-	
-	refine RootAccess Exp ParserHandler.parseModelicaExpString(String str)
-	   throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException{
-		Exp exp = null;
-		org.jmodelica.optimica.parser.ModelicaScanner scanner = 
-			new org.jmodelica.optimica.parser.ModelicaScanner(new StringReader(str));
-		org.jmodelica.optimica.parser.ModelicaParser parser = 
-			new org.jmodelica.optimica.parser.ModelicaParser();
-		exp = (Exp)parser.parse(scanner,org.jmodelica.optimica.parser.ModelicaParser.AltGoals.exp);
-		//log.debug("ModelicaParser.parseExpString: "+str);
-		//exp.dumpTreeBasic("");
-		return exp;
 	}
 
 	public SourceRoot ParserHandler.parseOptimicaFile(String fileName) 
-	   throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException{
-		SourceRoot sr = null;
-		Reader reader = new FileReader(fileName);
-		OptimicaScanner scanner = new OptimicaScanner(new BufferedReader(reader));
-		OptimicaParser parser = new OptimicaParser();
-		parser.setLineBreakMap(scanner.getLineBreakMap());
-		sr = (SourceRoot)parser.parse(scanner);
+	   throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException {
+		BufferedReader reader = new BufferedReader(new FileReader(fileName));
+		AbstractModelicaScanner scanner = createOptimicaScanner(reader);
+		beaver.Parser parser = createOptimicaParser(scanner);
+		SourceRoot sr = (SourceRoot) parser.parse(scanner);
 		sr.setFileName(fileName);
 		return sr;
 	}
 
 	public SourceRoot ParserHandler.parseOptimicaString(String str, String fileName)  
-	   throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException{
+	   throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException {
 		SourceRoot sr = null;
-		OptimicaScanner scanner = new OptimicaScanner(new StringReader(str));
-		OptimicaParser parser = new OptimicaParser();
-		parser.setLineBreakMap(scanner.getLineBreakMap());
-		sr = (SourceRoot)parser.parse(scanner);
+		AbstractModelicaScanner scanner = createOptimicaScanner(new StringReader(str));
+		beaver.Parser parser = createOptimicaParser(scanner);
+		sr = (SourceRoot) parser.parse(scanner);
 		sr.setFileName(fileName);
 		return sr;
 	}
 	
 	public Exp ParserHandler.parseOptimicaExpString(String str) 
-	   throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException{
+	   throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException {
 		Exp exp = null;
-		OptimicaScanner scanner = new OptimicaScanner(new StringReader(str));
-		OptimicaParser parser = new OptimicaParser();
-		exp = (Exp)parser.parse(scanner,OptimicaParser.AltGoals.exp);
+		AbstractModelicaScanner scanner = createOptimicaScanner(new StringReader(str));
+		beaver.Parser parser = createOptimicaParser(scanner);
+		exp = (Exp) parser.parse(scanner, expOptimicaGoal());
 		//log.debug("OptimicaParser.parseExpString: "+str);
 		//exp.dumpTreeBasic("");		
 		return exp;

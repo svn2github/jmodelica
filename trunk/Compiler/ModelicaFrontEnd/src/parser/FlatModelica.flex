@@ -14,12 +14,14 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import org.jmodelica.util.AbstractFlatModelicaScanner;
 
 %%
 
 %public
 %final
 %class FlatModelicaScanner
+%extends AbstractFlatModelicaScanner
 %unicode
 %function nextToken
 %type String

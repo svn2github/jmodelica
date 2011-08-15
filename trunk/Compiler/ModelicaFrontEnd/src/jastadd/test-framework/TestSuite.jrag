@@ -51,12 +51,13 @@ public class TestSuite {
 	}
 	
 	public void dumpJunit(String testFile, String dir) {
-		StringBuilder str = new StringBuilder();
-		str.append("package org.jmodelica.test.junitgenerated;\n\n");
-		str.append("import org.junit.*;\n");
-		
 		SourceRoot sr = new SourceRoot();
-		str.append("import org.jmodelica." + sr.language().toLowerCase() + ".compiler.*;\n\n");
+		String lang = sr.language().toLowerCase();
+		
+		StringBuilder str = new StringBuilder();
+		str.append("package org.jmodelica.test." + lang + ".junitgenerated;\n\n");
+		str.append("import org.junit.*;\n");
+		str.append("import org.jmodelica." + lang + ".compiler.*;\n\n");
 
 		str.append("public class " + name + " {\n\n");
 		str.append("  static TestSuite ts;\n\n");

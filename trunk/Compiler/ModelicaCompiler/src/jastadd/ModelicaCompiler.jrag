@@ -976,11 +976,6 @@ public class ModelicaCompiler {
 	 */
 	private SourceRoot parseModel(String name) 
 	  throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException{
-//		ModelicaParser parser = new ModelicaParser();
-//		ModelicaParser.CollectingReport report = new ModelicaParser.CollectingReport();
-//		parser.setReport(report);
-//		Reader reader = new FileReader(name);
-//		ModelicaScanner scanner = new ModelicaScanner(new BufferedReader(reader));
 	/*
 		if (report.hasErrors()) {
 			CompilerException ce = new CompilerException();
@@ -994,7 +989,6 @@ public class ModelicaCompiler {
 		log.info("Parsing " + name + "...");
 		SourceRoot sr;
 		try {
-//			sr = (SourceRoot) parser.parse(scanner);
 			sr = ph.parseFile(name);
 			if (errorHandler != null)
 				sr.setErrorHandler(errorHandler);

@@ -1005,7 +1005,7 @@ public class BiPGraph {
 		index++;
 		for (Var v : e.getVariables()) {
 			Eq ee = v.getMatching();
-			if (ee!=null && e!=ee) {
+			if (ee != null && e != ee) {
 				if (!ee.isVisited()) {
 					tarjan(ee);
 					e.setTarjanLowLink(Math.min(

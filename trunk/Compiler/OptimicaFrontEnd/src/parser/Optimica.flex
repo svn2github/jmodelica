@@ -17,10 +17,9 @@
 
 package org.jmodelica.optimica.parser;
 
-import java.util.Map;
-import java.util.HashMap; 
-import beaver.Symbol;
+import org.jmodelica.util.AbstractModelicaScanner;
 import beaver.Scanner;
+import beaver.Symbol;
 import org.jmodelica.optimica.parser.OptimicaParser.Terminals;
 
 %%
@@ -28,7 +27,7 @@ import org.jmodelica.optimica.parser.OptimicaParser.Terminals;
 %public
 %final
 %class OptimicaScanner
-%extends Scanner
+%extends AbstractModelicaScanner
 %unicode
 %function nextTokenAll
 %type Symbol
@@ -41,10 +40,6 @@ import org.jmodelica.optimica.parser.OptimicaParser.Terminals;
 %char
 
 %{
-  private HashMap<Integer, Integer> lineBreakMap;
-
-  StringBuilder string = new StringBuilder(128);
-
   private Symbol newSymbol(short id) {
     return new Symbol(id, yyline + 1, yycolumn + 1, yylength(), yytext());
   }
@@ -59,26 +54,7 @@ import org.jmodelica.optimica.parser.OptimicaParser.Terminals;
 //  }
   
   public void reset(java.io.Reader reader) {
-    lineBreakMap = new HashMap<Integer, Integer>();
-    lineBreakMap.put(0, 0);
     yyreset(reader);
-  }
-  
-  private void addLineBreaks(String text) {
-  	int line = yyline;  	
-  	for (int i = 0; i < text.length(); i += 1) {
-  		switch (text.charAt(i)) {
-  			case '\r': 
-  				if (i < text.length() - 1 && text.charAt(i+1) == '\n') 
-  					++i;
-  			case '\n': 
-  				lineBreakMap.put(++line, yychar + i + 1);
-		} 
-  	} 
-  }
-  
-  public Map<Integer, Integer> getLineBreakMap() {
-	  return lineBreakMap;
   }
   
   public static final short COMMENT = -1;
@@ -93,12 +69,10 @@ import org.jmodelica.optimica.parser.OptimicaParser.Terminals;
     return res;
   }
 
-%}
+  public int yyline() { return yyline; }
+  public int yychar() { return yychar; }
 
-%init{
-  lineBreakMap = new HashMap<Integer, Integer>();
-  lineBreakMap.put(0, 0);
-%init}
+%}
 
 ID = {NONDIGIT} ({DIGIT}|{NONDIGIT})* | {Q_IDENT}
 NONDIGIT = [a-zA-Z_]
@@ -265,7 +239,7 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   
   {Comment}                { addLineBreaks(yytext()); }
   {NonBreakingWhiteSpace}  { }
-  {LineTerminator} 		   { lineBreakMap.put(yyline+1, yychar + yylength()); }
+  {LineTerminator} 		   { addLineBreak(); }
 
 }
 

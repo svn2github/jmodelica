@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
-import org.jmodelica.modelica.parser.*;
 import org.jmodelica.util.OptionRegistry;
 
 aspect Library {

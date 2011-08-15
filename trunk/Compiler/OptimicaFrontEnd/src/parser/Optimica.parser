@@ -22,8 +22,7 @@ BaseClassDecl base_class_decl =
   class_modification?
   string_comment? 
   composition 
-  END_ID.end   {: String end_s = end.substring(3,end.length());
-	              end_s = removeWhitespace(end_s);
+  END_ID.end   {: String end_s = end.substring(3,end.length()).trim();
                   return new PN_OptClassDecl(new UnknownVisibilityType(),
                                              encapsulated,
                                              partial,

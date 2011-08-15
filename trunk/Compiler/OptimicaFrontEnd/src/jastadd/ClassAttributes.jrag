@@ -36,7 +36,6 @@ aspect ClassAttributes {
   
    		try {
    		
-   			//ModelicaScanner scanner = new ModelicaScanner(builtInDefReader);
    			ParserHandler ph = new ParserHandler();
    			SourceRoot sr = ph.parseString(builtInDef,"");
  			Program p = sr.getProgram();
