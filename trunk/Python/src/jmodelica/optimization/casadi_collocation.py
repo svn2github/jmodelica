@@ -1560,44 +1560,50 @@ class Radau2Collocator(CasadiCollocator):
             # Create base cost function
             self.cost = 0
             
+            # Variable reference maps
+            x_vr = self.model.get_x_vr_map()
+            x_vr['var_name'] = 'x'
+            w_vr = self.model.get_w_vr_map()
+            w_vr['var_name'] = 'w'
+            u_vr = self.model.get_u_vr_map()
+            u_vr['var_name'] = 'u'
+            
+            # Map of maps
+            maps_map = {}
+            for v_map in [x_vr, w_vr, u_vr]:
+                for key in v_map.keys():
+                    maps_map[key] = v_map
+            
+            # Create nested dictionary for storage of errors and calculate
+            # reference values
+            err = {}
+            y_ref = {}
+            for i in range(1, self.n_e + 1):
+                err[i] = {}
+                y_ref[i] = {}
+                for k in range(1, self.n_cp + 1):
+                    err[i][k] = []
+                    y_ref[i][k] = data.eval(self.time_points[i][k])[0, :]
+            
+            # Calculate errors
+            measured_variables = \
+                    self.parameter_estimation_data.measured_variables
+            for j in xrange(len(measured_variables)):
+                val_ref = self.model.xmldoc.get_value_reference(
+                        measured_variables[j])
+                for i in range(1, self.n_e + 1):
+                    for k in range(1, self.n_cp + 1):
+                        v_map = maps_map[val_ref]
+                        val = self.var[i][k][v_map['var_name']][v_map[val_ref]]
+                        ref_val = y_ref[i][k][j]
+                        err[i][k].append(val - ref_val)
+            
             # Calculate cost contribution from each collocation point
+            Q = self.parameter_estimation_data.Q
             for i in range(1, self.n_e + 1):
                 for k in range(1, self.n_cp + 1):
-                    # Variable reference values
-                    y_ref = data.eval(self.time_points[i][k])[0, :]
-                    
-                    # List of errors for each measure variable
-                    err = []
-                    
-                    # Variable reference maps
-                    x_vr = self.model.get_x_vr_map()
-                    w_vr = self.model.get_w_vr_map()
-                    u_vr = self.model.get_u_vr_map()
-                    
-                    # Calculate errors for each measure variable
-                    # This loop is ugly! And inefficient! See https://trac.modelon.se/P420-JModelica-CasadiCollocation/ticket/13
-                    measured_variables = \
-                            self.parameter_estimation_data.measured_variables
-                    for j in xrange(len(measured_variables)):
-                        v = str(measured_variables[j])
-                        val_ref = self.model.xmldoc.get_value_reference(v)
-                        if val_ref in x_vr.keys():
-                            err.append(self.var[i][k]['x'][x_vr[val_ref]] - 
-                                       y_ref[j])
-                        elif val_ref in w_vr.keys():
-                            err.append(self.var[i][k]['w'][w_vr[val_ref]] - 
-                                       y_ref[j])
-                        elif val_ref in u_vr.keys():
-                            err.append(self.var[i][k]['u'][u_vr[val_ref]] - 
-                                       y_ref[j])
-                        else:
-                            raise ValueError("Unknown value reference %s." %
-                                             val_ref)
-                    
-                    # Calculate cost given errors
-                    err = N.array(err)
-                    Q = self.parameter_estimation_data.Q
-                    cost_term = N.dot(N.dot(err, Q), err)
+                    err_i_k = N.array(err[i][k])
+                    cost_term = N.dot(N.dot(err_i_k, Q), err_i_k)
                     self.cost += (self.horizon * self.h[i] *
                                   cost_term * self.pol.w[k])
 
