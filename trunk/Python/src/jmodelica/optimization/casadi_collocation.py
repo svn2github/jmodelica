@@ -14,13 +14,14 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 """
 Module containing the Casadi interface Python wrappers.
 """
+
 import logging
 import codecs
 from operator import itemgetter
-import pylab as P
 import time
 
 try:
@@ -28,6 +29,7 @@ try:
 except ImportError:
     logging.warning(
         'Could not find CasADi package, aborting.')
+import numpy as N
     
 from jmodelica.optimization.polynomial import *
 from jmodelica import xmlparser
@@ -1166,7 +1168,7 @@ class Radau2Collocator(CasadiCollocator):
         """
         Create the NLP variables and store them in a nested dictionary.
         """
-        # Get model info
+        # Set model info
         n_var = {'dx': self.model.get_n_x(), 'x': self.model.get_n_x(),
                  'w': self.model.get_n_w()}
         get_var = {'dx': self.model.get_dx, 'x': self.model.get_x,
@@ -1402,7 +1404,7 @@ class Radau2Collocator(CasadiCollocator):
         # Evaluate u_1_0 based on polynomial u^1
         u_1_0 = 0
         for k in xrange(1, self.n_cp + 1):
-            u_1_0 += var[1][k]['u'] * self.pol.eval_basis(k, 0)
+            u_1_0 += var[1][k]['u'] * self.pol.eval_basis(k, 0, False)
             
         # Add residual for u_1_0 as constraint
         g = casadi.vertcat([g, var[1][0]['u'] - u_1_0])
@@ -1700,13 +1702,77 @@ class Radau2Collocator(CasadiCollocator):
         
     def get_equality_constraint(self):
         return self.g
-
+    
     def get_cost(self):
         return self.cost_fcn
-
+    
     def get_hessian(self):
         return self.H_fcn
-
+    
+    def get_result(self):
+        # Create array with discrete times
+        if self.result_mode == "collocation_points":
+            t_opt = self.get_time().reshape([-1, 1])
+        elif self.result_mode == "element_interpolation":
+            t_opt = []
+            t_start = 0
+            for i in xrange(1, self.n_e + 1):
+                t_end = t_start + self.h[i] * self.horizon
+                t_i = N.linspace(t_start, t_end, self.n_eval_points)
+                t_opt = N.hstack([t_opt, t_i])
+                t_start = t_opt[-1]
+            t_opt = t_opt.reshape([-1, 1])
+        else:
+            raise ValueError("Unknown result mode %s." % self.result_mode)
+        
+        # Set model info
+        n_var = {'dx': self.model.get_n_x(), 'x': self.model.get_n_x(),
+                 'u': self.model.get_n_u(), 'w': self.model.get_n_w()}
+        cont = {'dx': False, 'x': True, 'u': False, 'w': False}
+        var_types = ['dx', 'x', 'u', 'w']
+        var_opt = {}
+        
+        # Create arrays for storage of variable trajectories
+        for var_type in var_types:
+            var_opt[var_type] = N.empty([len(t_opt), n_var[var_type]])
+        var_opt['p_opt'] = N.empty(self.model.get_n_p())
+        
+        # Get optimal parameter values
+        var_opt['p_opt'][:] = \
+                self.nlp_opt[self.get_var_indices()['p_opt']].reshape(-1)
+        
+        # Get solution trajectories
+        if self.result_mode == "collocation_points":
+            t_index = 0
+            var_indices = self.get_var_indices()
+            for i in xrange(1, self.n_e + 1):
+                for k in self.get_time_points()[i]:
+                    for var_type in var_types:
+                        xx_i_k = self.nlp_opt[var_indices[i][k][var_type]]
+                        var_opt[var_type][t_index, :] = xx_i_k.reshape(-1)
+                    t_index += 1
+        elif self.result_mode == "element_interpolation":
+            t_index = 0
+            var_indices = self.get_var_indices()
+            tau_arr = N.linspace(0, 1, self.n_eval_points)
+            for i in xrange(1, self.n_e + 1):
+                for tau in tau_arr:
+                    for var_type in var_types:
+                        # Evaluate xx_i_tau based on polynomial xx^i
+                        xx_i_tau = 0
+                        for k in xrange(not cont[var_type], self.n_cp + 1):
+                            xx_i_k = self.nlp_opt[var_indices[i][k][var_type]]
+                            xx_i_tau += xx_i_k * self.pol.eval_basis(
+                                    k, tau, cont[var_type])
+                        var_opt[var_type][t_index, :] = xx_i_tau.reshape(-1)
+                    t_index += 1
+        else:
+            raise ValueError("Unknown result mode %s." % self.result_mode)
+        
+        # Return results
+        return (t_opt, var_opt['dx'], var_opt['x'], var_opt['u'], var_opt['w'],
+                var_opt['p_opt'])
+    
     # Inherit "set_initial_from_file" from RadauCollocator
     set_initial_from_file = RadauCollocator.__dict__["set_initial_from_file"]
     

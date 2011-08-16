@@ -101,13 +101,30 @@ class RadauPol(object):
         # Store derivative values as data attribute
         self.der_vals = der_vals
         
-    def eval_basis(self, i, tau):
+    def eval_basis(self, i, tau, beg_interp):
         """
         Evaluate Lagrange basis polynomial.
         
-        Does not have an interpolation point at tau = 0.
+        Parameters::
+        
+            i --
+                Polynomial index, corresponds to collocation point i, indexed
+                from 0.
+                
+                Type: int
+                
+            tau --
+                Normalized time point to evaluate polynomial at.
+                
+                Type: float
+                
+            beg_interp --
+                Whether or not to include an interpolation point at tau = 0.
+                
+                Type: bool
         """
-        return lagrange_eval(self.p[1:], i - 1, tau)
+        nbi = not beg_interp
+        return lagrange_eval(self.p[nbi:], i - nbi, tau)
         
 class GaussPol(object):
     

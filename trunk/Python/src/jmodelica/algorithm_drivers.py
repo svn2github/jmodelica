@@ -2113,10 +2113,12 @@ class CasadiRadau(AlgorithmBase):
         return CasadiRadauOptions()
 
 class CasadiRadau2(AlgorithmBase):
+    
     """
     The algorithm is based on orthogonal collocation and relies on the solver 
     IPOPT for solving a non-linear programming problem.
     """
+    
     def __init__(self, model, options):
         """
         Create a CasadiRadau2 algorithm.
@@ -2176,6 +2178,15 @@ class CasadiRadau2(AlgorithmBase):
         """
         self.__dict__.update(self.options)
         
+        # Check validity of element lengths
+        if self.h != None:
+            if len(self.h) != self.n_e:
+                raise ValueError("The number of specified element lengths " +
+                                 "must be equal to the number of elements.")
+            if not N.allclose(N.sum(self.h), 1):
+                raise ValueError("The sum of all elements lengths must be" +
+                                 "(almost) equal to 1.")
+        
         # Check validity of exact_Hessian
         if self.exact_Hessian:
             if self.graph == "MX":
@@ -2186,15 +2197,13 @@ class CasadiRadau2(AlgorithmBase):
                 raise ValueError("CasADi_options_L is only used " +
                                  "if exact_Hessian is True.")
                                  
-        # Check validity of element lengths
-        if self.h != None:
-            if len(self.h) != self.n_e:
-                raise ValueError("The number of specified element lengths " +
-                                 "must be equal to the number of elements.")
-            if not N.allclose(N.sum(self.h), 1):
-                raise ValueError("The sum of all elements lengths must be" +
-                                 "(almost) equal to 1.")
-                                 
+        # Check validity of result_mode and n_eval_points
+        if self.result_mode == "collocation_points":
+            if self.n_eval_points != 20:
+                raise ValueError("n_eval_points is only used if algorithm " + \
+                                 "option result_mode is set to " + \
+                                 '"element_interpolation".')
+        
         # Check validity of blocking_factors
         if (self.blocking_factors != None and 
             N.sum(self.blocking_factors) != self.n_e):
@@ -2295,6 +2304,30 @@ class CasadiRadau2Options(OptionBase):
             Type: str
             Default: "SX"
             
+        result_mode --
+            Specifies the output format of the optimization result.
+            
+            "collocation_points" gives the the optimization result at the
+            collocation points.
+            
+            "element_interpolation" computes the values of the variable
+            trajectories by evaluating the collocation interpolation
+            polynomials. The algorithm option n_evaluation_points is used to
+            specify the evaluation points within each finite element.
+            
+            Type: str
+            Default: "collocation points"
+            
+        n_eval_points --
+            The number of evaluation points used in each element when the
+            algorithm option result_mode is set to "element_interpolation". One
+            evaluation point is placed at each element end-point (hence the
+            option value must be at least 2) and the rest are distributed
+            uniformly.
+            
+            Type: int
+            Default: 20
+        
         blocking_factors --
             The list of blocking factors, where each element corresponds to the
             number of elements for which the control profile should be
@@ -2381,11 +2414,13 @@ class CasadiRadau2Options(OptionBase):
     """
     
     def __init__(self, *args, **kw):
-        _defaults= {
+        _defaults = {
                 'n_e': 50,
                 'h': None,
                 'n_cp': 3,
                 'graph': 'SX',
+                'result_mode': "collocation_points",
+                'n_eval_points': 20,
                 'blocking_factors': None,
                 'state_cont_var': True,
                 'init_traj': None,

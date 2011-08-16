@@ -65,6 +65,47 @@ package VDP_pack
     der(x2) = p1*x1;
     der(cost) = exp(p3) * (x1^2 + x2^2 + u^2);
   end VDP_Opt2;
+  
+  optimization VDP_Opt_Bounds_Lagrange (
+        objectiveIntegrand = exp(p2) * (x1^2 + x2^2 + u^2),
+        startTime = 0, finalTime = 20)
+
+    parameter Real p1 = 1;             // Parameter 1
+    parameter Real p2 = 2;             // Parameter 2
+
+    // The states
+    Real x1(start=0,fixed=true);
+    Real x2(start=1,fixed=true);
+    
+    // The control signal
+    input Real u(max=0.75);
+  
+  equation
+    der(x1) = (1 - x2^2) * x1 - x2 + u;
+    der(x2) = p1 * x1;
+  end VDP_Opt_Bounds_Lagrange;
+  
+  optimization VDP_Opt_Bounds_Mayer (objective = cost(finalTime),
+                                     startTime = 0,
+                                     finalTime = 20)
+
+    parameter Real p1 = 1;             // Parameter 1
+    parameter Real p2 = 2;             // Parameter 2
+
+    // The states
+    Real x1(start=0,fixed=true);
+    Real x2(start=1,fixed=true);
+
+    // The control signal
+    input Real u(max=0.75);
+
+    Real cost(start=0,fixed=true,min=0);
+
+  equation
+    der(x1) = (1 - x2^2) * x1 - x2 + u;
+    der(x2) = p1 * x1;
+    der(cost) = exp(p2) * (x1^2 + x2^2 + u^2);
+  end VDP_Opt_Bounds_Mayer;
 
   optimization VDP_Opt_Min_Time (objective = tf,
                          startTime = 0,
