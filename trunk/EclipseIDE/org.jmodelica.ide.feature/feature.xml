@@ -2,7 +2,7 @@
 <feature
       id="org.jmodelica.ide"
       label="JModelica IDE"
-      version="0.3.7"
+      version="1.0.10"
       provider-name="JModelica.org">
 
    <description url="http://www.example.com/description">
