@@ -70,7 +70,7 @@ def write_data(simulator,write_scaled_result=False, result_file_name=''):
         y = N.array(simulator.y)
         yd = N.array(simulator.yd)
         if simulator._problem.input:
-            u_name = [k[1] for k in model.get_u_variable_names()]
+            u_name = [k[1] for k in sorted(model.get_u_variable_names())]
             #u = N.zeros((len(t), len(u_name)))
             u = N.ones((len(t), len(u_name)))*model.real_u
             u_mat = simulator._problem.input[1].eval(t)
@@ -101,7 +101,7 @@ def write_data(simulator,write_scaled_result=False, result_file_name=''):
         t = N.array(simulator.t)
         y = N.array(simulator.y)
         if simulator._problem.input:
-            u_name = [k[1] for k in model.get_u_variable_names()]
+            u_name = [k[1] for k in sorted(model.get_u_variable_names())]
             #u = N.zeros((len(t), len(u_name)))
             u = N.ones((len(t), len(u_name)))*model.real_u
             u_mat = simulator._problem.input[1].eval(t)
@@ -133,7 +133,7 @@ def write_data(simulator,write_scaled_result=False, result_file_name=''):
         y = N.array(simulator.y)
         yd = N.array(simulator.yd)
         if simulator._problem.input:
-            u_name = [k[1] for k in model.get_u_variable_names()]
+            u_name = [k[1] for k in sorted(model.get_u_variable_names())]
             #u = N.zeros((len(t), len(u_name)))
             u = N.ones((len(t), len(u_name)))*model.real_u
             u_mat = simulator._problem.input[1].eval(t)
