@@ -549,10 +549,6 @@ aspect TransformCanonical {
 
 		public boolean printStarted = false;
 		public String toString() {
-			if (!printStarted && activeVariables().size()==1 && activeVariables().get(0).name().equals("inertia2.flange_b.tau")) {
-				printStarted = true;
-				return toStringVerbose();	
-			}
 			
 			StringBuffer str = new StringBuffer();
 			str.append("Solved block of " + activeVariables().size() + " variables:\n"); 
