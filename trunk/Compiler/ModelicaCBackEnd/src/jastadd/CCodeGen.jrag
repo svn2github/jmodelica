@@ -1577,6 +1577,40 @@ aspect CCodeGen {
 		}
 		str.print(";\n");
 	}
+	
+	public void BLT.genOdeDerivativeBlocks(PrintStream str) {
+		int block_counter = 0;
+		for (AbstractEquationBlock block : this) {
+			block.genBlock_C(block_counter,false,"  ",str); 
+            if (!block.isSolvable()) {
+				block_counter++;
+            }
+		}
+	}
+
+	public void StructuredBLT.genOdeDerivativeBlocks(PrintStream str) {
+		int block_counter = 0;			
+		reset();
+		str.append("/************* ODE section *********/\n");	
+		// Loop over all derivatives
+		for (AbstractEquationBlock eb : getOdeBlocks()) {
+			eb.genBlock_C(block_counter,false,"  ",str);
+			block_counter += eb.isSolvable()? 0: 1; 			
+		}
+		str.append("/************ Real outputs *********/\n");	
+		for (AbstractEquationBlock eb : getRealOutputBlocks()) {
+			eb.genBlock_C(block_counter,false,"  ",str);
+			block_counter += eb.isSolvable()? 0: 1; 			
+		}
+		str.append("/****Integer and boolean outputs ***/\n");	
+		for (AbstractEquationBlock eb : getIntegerBooleanOutputBlocks()) {
+			eb.genBlock_C(block_counter,false,"  ",str);
+			block_counter += eb.isSolvable()? 0: 1; 			
+		}
+		str.append("/**** Other variables ***/\n");	
+		for (AbstractEquationBlock eb : getOtherBlocks()) {
+			eb.genBlock_C(block_counter,false,"  ",str);
+			block_counter += eb.isSolvable()? 0: 1; 			
+		}
+	}
 }
-
-

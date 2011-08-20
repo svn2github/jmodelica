@@ -163,6 +163,10 @@ aspect TransformCanonical {
 	
 	public class StructuredBLT extends BLT {
 		private ArrayList<AbstractEquationBlock> topEquationBlocks = new ArrayList<AbstractEquationBlock>();
+		private ArrayList<AbstractEquationBlock> odeBlocks = new ArrayList<AbstractEquationBlock>();
+		private ArrayList<AbstractEquationBlock> realOutputBlocks = new ArrayList<AbstractEquationBlock>();
+		private ArrayList<AbstractEquationBlock> integerBooleanOutputBlocks = new ArrayList<AbstractEquationBlock>();
+		private ArrayList<AbstractEquationBlock> otherBlocks = new ArrayList<AbstractEquationBlock>();
 		
 		public StructuredBLT(FClass fclass) {
 			super(fclass);	
@@ -177,15 +181,8 @@ aspect TransformCanonical {
 					topEquationBlocks.add(eb);
 				}
 			}
-		}
-		
-		public String toString() {
+
 			reset();
-			StringBuffer str = new StringBuffer();
-			str.append("************* Structured BLT*********\n");
-			str.append("***********************************\n");	
-			str.append("************* ODE section *********\n");	
-			str.append("***********************************\n");	
 			// Loop over all derivatives
 			for (FVariable fv : getFClass().derivativeVariables()) {
 				// Get the block where the variable is solved for	
@@ -195,19 +192,14 @@ aspect TransformCanonical {
 					for (AbstractEquationBlock ebb : eb.getAllPredecessors()){
 						if (!ebb.isVisited()) {	
 							ebb.setVisited(true);
-							str.append(ebb.toString());
-							str.append("******\n");
+							odeBlocks.add(ebb);
 						}
 					}
-					str.append(eb.toString());
-					str.append("******\n");
-				}	
+					odeBlocks.add(eb);
+				}
 			}
 			
 			// Loop over all real outputs
-			str.append("***********************************\n");	
-			str.append("************ Real outputs *********\n");	
-			str.append("***********************************\n");	
 			for (FVariable fv : getFClass().realOutputs()) {
 				// Get the block where the variable is solved for	
 				AbstractEquationBlock eb = fv.myDAEEquationBlock();
@@ -217,18 +209,14 @@ aspect TransformCanonical {
 					for (AbstractEquationBlock ebb : eb.getAllPredecessors()){
 						if (!ebb.isVisited()) {	
 							ebb.setVisited(true);
-							str.append(ebb.toString());
-							str.append("******\n");
+							realOutputBlocks.add(ebb);
 						}
 					}
-					str.append(eb.toString());
-					str.append("******\n");
+					realOutputBlocks.add(eb);
 				}	
 			}
 
-			str.append("***********************************\n");	
-			str.append("****Integer and boolean outputs ***\n");	
-			str.append("***********************************\n");	
+			// Loop over integer and boolean outputs
 			for (FVariable fv : getFClass().outputs()) {
 				// Get the block where the variable is solved for	
 				AbstractEquationBlock eb = fv.myDAEEquationBlock();
@@ -237,19 +225,14 @@ aspect TransformCanonical {
 					for (AbstractEquationBlock ebb : eb.getAllPredecessors()){
 						if (!ebb.isVisited()) {	
 							ebb.setVisited(true);
-							str.append(ebb.toString());
-							str.append("******\n");
+							integerBooleanOutputBlocks.add(ebb);
 						}
 					}
-					str.append(eb.toString());
-					str.append("******\n");
+					integerBooleanOutputBlocks.add(eb);
 				}	
 			}
 
 			// Loop over all others
-			str.append("***********************************\n");	
-			str.append("**** Other variables ***\n");	
-			str.append("***********************************\n");	
 			for (FVariable fv : getFClass().variables()) {
 				// Get the block where the variable is solved for	
 				AbstractEquationBlock eb = fv.myDAEEquationBlock();
@@ -258,15 +241,65 @@ aspect TransformCanonical {
 					for (AbstractEquationBlock ebb : eb.getAllPredecessors()){
 						if (!ebb.isVisited()) {	
 							ebb.setVisited(true);
-							str.append(ebb.toString());
-							str.append("******\n");
+							otherBlocks.add(ebb);
 						}
 					}
-					str.append(eb.toString());
-					str.append("******\n");
+					otherBlocks.add(eb);
 				}	
 			}
-			
+
+		}
+
+	    public ArrayList<AbstractEquationBlock> getOdeBlocks() {
+			return odeBlocks;
+		}
+
+	    public ArrayList<AbstractEquationBlock> getRealOutputBlocks() {
+			return realOutputBlocks;
+		}
+
+	    public ArrayList<AbstractEquationBlock> getIntegerBooleanOutputBlocks() {
+			return integerBooleanOutputBlocks;
+		}
+
+	    public ArrayList<AbstractEquationBlock> getOtherBlocks() {
+			return otherBlocks;
+		}
+
+		public String toString() {
+			reset();
+			StringBuffer str = new StringBuffer();
+			str.append("************* Structured BLT*********\n");
+			str.append("***********************************\n");	
+			str.append("************* ODE section *********\n");	
+			str.append("***********************************\n");	
+			// Loop over all derivatives
+			for (AbstractEquationBlock eb : getOdeBlocks()) {
+				str.append(eb.toString());
+				str.append("******\n");
+			}
+			str.append("***********************************\n");	
+			str.append("************ Real outputs *********\n");	
+			str.append("***********************************\n");	
+			for (AbstractEquationBlock eb : getRealOutputBlocks()) {
+				str.append(eb.toString());
+				str.append("******\n");
+			}
+			str.append("***********************************\n");	
+			str.append("****Integer and boolean outputs ***\n");	
+			str.append("***********************************\n");	
+			for (AbstractEquationBlock eb : getIntegerBooleanOutputBlocks()) {
+				str.append(eb.toString());
+				str.append("******\n");
+			}
+			str.append("***********************************\n");	
+			str.append("**** Other variables ***\n");	
+			str.append("***********************************\n");	
+			for (AbstractEquationBlock eb : getOtherBlocks()) {
+				str.append(eb.toString());
+				str.append("******\n");
+			}
+
 			return str.toString();
 		}
 	}
@@ -310,8 +343,12 @@ aspect TransformCanonical {
 		public void setDAEPredecessors() {
 			if (!predecessorsSet) {
 				for (FVariable fv : inactiveVariables()) {
-					predecessors.add(fv.myDAEEquationBlock());
-					fv.myDAEEquationBlock().getSuccessors().add(this);
+					if (!predecessors.contains(fv.myDAEEquationBlock())) {
+						predecessors.add(fv.myDAEEquationBlock());
+					}
+					if (!fv.myDAEEquationBlock().getSuccessors().contains(this)) {
+						fv.myDAEEquationBlock().getSuccessors().add(this);
+					}
 					fv.myDAEEquationBlock().setDAEPredecessors();
 				}
 				predecessorsSet = true;
@@ -344,8 +381,14 @@ aspect TransformCanonical {
 		public ArrayList<AbstractEquationBlock> getAllPredecessors() {
 			ArrayList<AbstractEquationBlock> allPredecessors = new ArrayList<AbstractEquationBlock>(); 
 			for (AbstractEquationBlock eb : getPredecessors()) {
-				allPredecessors.addAll(eb.getAllPredecessors());
-				allPredecessors.addAll(getPredecessors());
+				for (AbstractEquationBlock ebb : eb.getAllPredecessors()) {
+					if (!allPredecessors.contains(ebb)) {
+						allPredecessors.add(ebb);
+					}
+				}
+				if (!allPredecessors.contains(eb)) {
+					allPredecessors.add(eb);
+				}
 			}
 			return allPredecessors;
 		}	
@@ -384,6 +427,11 @@ aspect TransformCanonical {
 			} 
 			str.append("**** Predecessors ****\n");
 			for (AbstractEquationBlock eb : getPredecessors()) {
+				str.append(eb.toString());
+				str.append("---------\n");
+			}
+			str.append("**** All Predecessors ****\n");
+			for (AbstractEquationBlock eb : getAllPredecessors()) {
 				str.append(eb.toString());
 				str.append("---------\n");
 			}
@@ -456,6 +504,10 @@ aspect TransformCanonical {
 			for (FVariable fv : activeVariables()) {
 				str.append("  " + fv.name() + "\n");
 			}
+/*			str.append("Inactive variables:\n");
+			for (FVariable fv : inactiveVariables()) {
+				str.append("  " + fv.name() + "\n");
+			}*/
 			str.append("Equations:\n");
 			for (FAbstractEquation feq : equations()) {
 				str.append("  " + feq.prettyPrint("") + "\n");			
@@ -495,13 +547,23 @@ aspect TransformCanonical {
 			return true;
 		}
 
+		public boolean printStarted = false;
 		public String toString() {
+			if (!printStarted && activeVariables().size()==1 && activeVariables().get(0).name().equals("inertia2.flange_b.tau")) {
+				printStarted = true;
+				return toStringVerbose();	
+			}
+			
 			StringBuffer str = new StringBuffer();
 			str.append("Solved block of " + activeVariables().size() + " variables:\n"); 
 			str.append("Computed variable:\n");
 			for (FVariable fv : activeVariables()) {
 				str.append("  " + fv.name() + "\n");
 			}
+/*			str.append("Inactive variables:\n");
+			for (FVariable fv : inactiveVariables()) {
+				str.append("  " + fv.name() + "\n");
+			}*/
 			str.append("Solution:\n");
 			str.append("  " + solution().prettyPrint("") + "\n");
 			return str.toString();
