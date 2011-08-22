@@ -192,6 +192,12 @@ aspect XMLCodeGen {
 		p.print(getFIdUse(), str, p.indent(indent));
 	}
 	
+	public void FDerExp.prettyPrint_XML(Printer p, PrintStream str, String indent) {	
+		open_XML(str, indent);
+		p.print(getFIdUse(), str, p.indent(indent));
+		close_XML(str, indent);
+	}
+	
 	
 	public void FIdUse.prettyPrint_XML(Printer p, PrintStream str, String indent) {
 		open_XML(str, indent);

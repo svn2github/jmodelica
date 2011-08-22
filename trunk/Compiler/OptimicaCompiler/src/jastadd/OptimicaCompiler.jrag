@@ -152,6 +152,15 @@ public class OptimicaCompiler extends ModelicaCompiler {
 			return new CADGenerator(new PrettyPrinter(), '$', fc);
 		}
 	}
+	
+	/**
+	 * Set the Optimica c template file path attribute.
+	 * 
+	 * @param template The new c template file path.
+	 */
+	public void setOptimicaCTemplate(String template) {
+		optimicaCTemplatefile = template;
+	}
 
 	/**
 	 * \brief get the C template. 
@@ -162,9 +171,9 @@ public class OptimicaCompiler extends ModelicaCompiler {
 	 */
 	protected String getCTemplatefile(FClass fc) {
 		if (fc instanceof FOptClass) {
-			return this.optimicaCTemplatefile;
+			return optimicaCTemplatefile;
 		} else {
-			return this.cTemplatefile;
+			return cTemplatefile;
 		}
 	}
 
@@ -174,7 +183,7 @@ public class OptimicaCompiler extends ModelicaCompiler {
 		super.setArguments(compilerName, args, programarguments);
 		int arg = programarguments.size();
 		if (args.length >= arg+6) 
-			this.optimicaCTemplatefile = args[arg+5];
+			optimicaCTemplatefile = args[arg+5];
 	}
 	
 	public static void main(String args[]) {		

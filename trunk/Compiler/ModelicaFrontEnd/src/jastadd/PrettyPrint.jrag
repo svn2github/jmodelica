@@ -325,6 +325,12 @@ aspect PrettyPrint {
 		str.print(indent + "end " + getName().getID());
 	} 
 
+	// For debugging
+	public void LibNode.prettyPrint(Printer p, PrintStream str, String indent) {
+		str.format("%s%structured library '%s' at '%s'\n", indent, 
+				(getStructured() ? "S" : "Uns"), getName(), getFileName());
+	}
+
 	public void ComponentDecl.prettyPrint(Printer p, PrintStream str, String indent) {
 		str.print(indent);//+getVisibilityType().toString()+" ";
 		

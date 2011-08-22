@@ -42,15 +42,15 @@ public class OptionRegistry {
 	
 		private enum DefOpt {
 			DIVIDE_BY_PARS_IN_TEARING  ("divide_by_vars_in_tearing", false, 
-			"If this option is set to true (default is false), a less restrictive strategy is used for solving equations " +
-			"in the tearing algorithm. Specifically, division by parameters and variables is permitted, by default no" +
-			"such divisions are made during tearing."),
+					"If this option is set to true (default is false), a less restrictive strategy is used for solving equations " +
+					"in the tearing algorithm. Specifically, division by parameters and variables is permitted, by default no" +
+					"such divisions are made during tearing."),
 			ENABLE_TEARING   ("enable_tearing", false, 
 					"If this option is set to true (default is false), tearing of equation systems is enabled."),
 			ADVANCED_TEARING   ("advanced_tearing", false, 
-							"If this option is set to true (default is false), an more advanced tearing algorithm" +
-							"is used. This algorithm may give smaller torn systems, but may also take longer time" +
-							"to execute. This option only has an effect if the option ENABLE_TEARING is set to true."),
+					"If this option is set to true (default is false), an more advanced tearing algorithm" +
+					"is used. This algorithm may give smaller torn systems, but may also take longer time" +
+					"to execute. This option only has an effect if the option ENABLE_TEARING is set to true."),
 			CONV_FREE_DEP_PAR_TO_ALGS   ("convert_free_dependent_parameters_to_algebraics", true, 
 					"If this option is set to true (default is true), free dependent parameters are" +
 					"converted to algebraic variables."),

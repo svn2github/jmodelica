@@ -695,9 +695,10 @@ optimization DepParTest4 (objective=1,startTime=0,finalTime=1)
 
   	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.FClassMethodTestCase(name="DepParTest4",
-      convert_free_dependent_variables_to_algebraics = false,
-      methodName="freeParametersDiagnostics",
-        description="Test that free dependent parameters are handled correctly.", methodResult=
+        convert_free_dependent_parameters_to_algebraics = false,
+        methodName="freeParametersDiagnostics",
+        description="Test that free dependent parameters are handled correctly.", 
+        methodResult=
         "
 Free independent parameters:
 p2

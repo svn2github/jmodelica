@@ -242,9 +242,10 @@ end OptimicaTests.ClassAttrTest8;
 
       annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.FClassMethodTestCase(name="FreeDependentParametersTest1",
-      methodName="freeParametersDiagnostics",
-      convert_free_dependent_variables_to_algebraics = false,
-        description="Test that free dependent parameters are computed correctly.", methodResult=
+        methodName="freeParametersDiagnostics",
+        convert_free_dependent_parameters_to_algebraics = false,
+        description="Test that free dependent parameters are computed correctly.", 
+        methodResult=
         "  
 Free independent parameters:
 p1
@@ -266,9 +267,10 @@ p3
 
   	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.FClassMethodTestCase(name="FreeDependentParametersTest2",
-      methodName="freeParametersDiagnostics",
-      convert_free_dependent_variables_to_algebraics = false,
-        description="Test that free dependent parameters are computed correctly.", methodResult=
+        methodName="freeParametersDiagnostics",
+        convert_free_dependent_parameters_to_algebraics = false,
+        description="Test that free dependent parameters are computed correctly.", 
+        methodResult=
         "  
 Free independent parameters:
 p1
@@ -293,9 +295,10 @@ p3
 
   	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.FClassMethodTestCase(name="FreeDependentParametersTest3",
-      methodName="freeParametersDiagnostics",
-      convert_free_dependent_variables_to_algebraics = false,
-        description="Test that free dependent parameters are computed correctly.", methodResult=
+        methodName="freeParametersDiagnostics",
+        convert_free_dependent_parameters_to_algebraics = false,
+        description="Test that free dependent parameters are computed correctly.", 
+        methodResult=
         "  
 Free independent parameters:
 p1
@@ -318,9 +321,10 @@ p3
 
   	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.FClassMethodTestCase(name="FreeDependentParametersTest4",
-      methodName="freeParametersDiagnostics",
-      convert_free_dependent_variables_to_algebraics = false,
-        description="Test that free dependent parameters are computed correctly.", methodResult=
+        methodName="freeParametersDiagnostics",
+        convert_free_dependent_parameters_to_algebraics = false,
+        description="Test that free dependent parameters are computed correctly.", 
+        methodResult=
         "  
 Free independent parameters:
 p1
@@ -344,7 +348,7 @@ p3
   	     annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.FClassMethodTestCase(name="FreeDependentParametersTest5",
         methodName="variableDiagnostics",
-      convert_free_dependent_variables_to_algebraics = false,
+        convert_free_dependent_parameters_to_algebraics = false,
         description="Test linearity of free dependent parameters.", 
 		methodResult="  
 Independent constants: 
