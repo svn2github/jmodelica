@@ -42,9 +42,11 @@ abstract public class TestCase {
 	private boolean checkAll = false;
 	
 	private OptionRegistry options;
+	private Exception exception;
 
 	public TestCase() {
 		options = createOptionsRegistry();
+		exception = null;
 	}
 	
 	/**
@@ -81,28 +83,44 @@ abstract public class TestCase {
 	 * \brief Set a string option to be used during compilation.
 	 */
 	public void setStringOption(String key, String value) {
-		options.setStringOption(key, value);
+		try {
+			options.setStringOption(key, value);
+		} catch (UnknownOptionException e) {
+			exception = e;
+		}
 	}
 	
 	/**
 	 * \brief Set a boolean option to be used during compilation.
 	 */
 	public void setBooleanOption(String key, boolean value) {
-		options.setBooleanOption(key, value);
+		try {
+			options.setBooleanOption(key, value);
+		} catch (UnknownOptionException e) {
+			exception = e;
+		}
 	}
 	
 	/**
 	 * \brief Set an integer option to be used during compilation.
 	 */
 	public void setIntegerOption(String key, int value) {
-		options.setIntegerOption(key, value);
+		try {
+			options.setIntegerOption(key, value);
+		} catch (UnknownOptionException e) {
+			exception = e;
+		}
 	}
 	
 	/**
 	 * \brief Set a real option to be used during compilation.
 	 */
 	public void setRealOption(String key, double value) {
-		options.setRealOption(key, value);
+		try {
+			options.setRealOption(key, value);
+		} catch (UnknownOptionException e) {
+			exception = e;
+		}
 	}
 		
 	public void dumpJunit(StringBuilder str, int index) {
@@ -254,6 +272,9 @@ abstract public class TestCase {
 	
 	public void performTest() throws ParserException, beaver.Parser.Exception, 
 				IOException, ModelicaClassNotFoundException {
+		if (exception != null)
+			fail(exception);
+		
 		// Parse
 		ParserHandler ph = new ParserHandler();
 		SourceRoot sr = null;
