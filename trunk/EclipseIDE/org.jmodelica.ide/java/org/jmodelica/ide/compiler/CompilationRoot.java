@@ -62,15 +62,13 @@ public class CompilationRoot {
 	}
 
 	/**
-	 * Returns the StoredDefinition for the first compilation. Really supposed
-	 * to be used when you want to only compile a single file.
+	 * Returns the StoredDefinition for the first compilation. 
+	 * Use when you want to only compile a single file.
 	 * 
 	 * @return StoredDefinition from the first compilation, or null if no
 	 *         successful compilation has been performed.
 	 */
 	public StoredDefinition getStoredDefinition() {
-		assert list.getNumChild() > 0;
-
 		forceRewrites();
 		return list.getNumChild() > 0 ? list.getChild(0) : null;
 	}

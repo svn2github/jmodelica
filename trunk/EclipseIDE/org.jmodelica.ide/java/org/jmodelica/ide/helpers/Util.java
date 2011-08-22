@@ -33,15 +33,21 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchPartReference;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.ide.IDE;
+import org.eclipse.ui.part.ISetSelectionTarget;
 import org.jastadd.plugin.compiler.ast.IError;
 import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.editor.Editor;
@@ -118,7 +124,10 @@ public class Util {
 		} catch (CoreException e) {
 		}
 	}
-	
+
+	private static final String[] ATTRIBUTES_WITH_OFFSET = new String[] { IMarker.MESSAGE, IMarker.SEVERITY, IMarker.LINE_NUMBER, IMarker.CHAR_START, IMarker.CHAR_END };
+	private static final String[] ATTRIBUTES_NO_OFFSET = new String[] { IMarker.MESSAGE, IMarker.SEVERITY, IMarker.LINE_NUMBER };
+
 	public static void addErrorMarker(IResource resource, IError error) {
 		try {
 			String type = IDEConstants.ERROR_MARKER_SYNTACTIC_ID;
@@ -132,20 +141,23 @@ public class Util {
 			    return;
 			
 			String message = error.getMessage();
-			int severity = error.getSeverity();
-			int line = error.getLine();
-			int startOffset = error.getStartOffset();
-			int endOffset = error.getEndOffset();
-
-			marker.setAttribute(IMarker.MESSAGE, message);
-			marker.setAttribute(IMarker.SEVERITY, severity);
+			Integer severity = error.getSeverity();
+			Integer line = error.getLine();
+			Integer startOffset = error.getStartOffset();
+			Integer endOffset = error.getEndOffset();
 			if (line < 0)
 				line = 1;
-			marker.setAttribute(IMarker.LINE_NUMBER, line);
+
+			Object[] vals;
+			String[] keys;
 			if (startOffset >= 0 && endOffset > startOffset) {
-				marker.setAttribute(IMarker.CHAR_START, startOffset);
-				marker.setAttribute(IMarker.CHAR_END, endOffset);
+				keys = ATTRIBUTES_WITH_OFFSET;
+				vals = new Object[] { message, severity, line, startOffset, endOffset };
+			} else {
+				keys = ATTRIBUTES_NO_OFFSET;
+				vals = new Object[] { message, severity, line };
 			}
+			marker.setAttributes(keys, vals);
 		} catch (CoreException e) {
 			e.printStackTrace();
 		}
@@ -258,5 +270,87 @@ public class Util {
             : new Dot("", res, createDotAccess(parts, i + 1));
         
     }
+
+	/**
+	 * Attempts to select and reveal the specified resource in all parts within
+	 * the supplied workbench window's active page.
+	 * <p>
+	 * Checks all parts in the active page to see if they implement
+	 * <code>ISetSelectionTarget</code>, either directly or as an adapter. If
+	 * so, tells the part to select and reveal the specified resource.
+	 * </p>
+	 * 
+	 * @param resource
+	 *            the resource to be selected and revealed
+	 * @param window
+	 *            the workbench window to select and reveal the resource
+	 * 
+	 * @see ISetSelectionTarget
+	 */
+	@SuppressWarnings("unchecked")
+	public static void selectAndReveal(IResource resource,
+			IWorkbenchWindow window) {
+		// validate the input
+		if (window == null || resource == null) {
+			return;
+		}
+		IWorkbenchPage page = window.getActivePage();
+		if (page == null) {
+			return;
+		}
+	
+		// get all the view and editor parts
+		List parts = new ArrayList();
+		IWorkbenchPartReference refs[] = page.getViewReferences();
+		for (int i = 0; i < refs.length; i++) {
+			IWorkbenchPart part = refs[i].getPart(false);
+			if (part != null) {
+				parts.add(part);
+			}
+		}
+		refs = page.getEditorReferences();
+		for (int i = 0; i < refs.length; i++) {
+			if (refs[i].getPart(false) != null) {
+				parts.add(refs[i].getPart(false));
+			}
+		}
+	
+		final ISelection selection = new StructuredSelection(resource);
+		Iterator itr = parts.iterator();
+		while (itr.hasNext()) {
+			IWorkbenchPart part = (IWorkbenchPart) itr.next();
+	
+			// get the part's ISetSelectionTarget implementation
+			ISetSelectionTarget target = null;
+			if (part instanceof ISetSelectionTarget) {
+				target = (ISetSelectionTarget) part;
+			} else {
+				target = (ISetSelectionTarget) part
+						.getAdapter(ISetSelectionTarget.class);
+			}
+	
+			if (target != null) {
+				// select and reveal resource
+				final ISetSelectionTarget finalTarget = target;
+				window.getShell().getDisplay().asyncExec(new Runnable() {
+					public void run() {
+						finalTarget.selectReveal(selection);
+					}
+				});
+			}
+		}
+	}
+
+	public static boolean isModelicaFile(IFile file) {
+		return IDEConstants.MODELICA_FILE_EXT.equals(file.getFileExtension());
+	}
+
+	public static boolean isModelicaProject(IProject project) {
+		try {
+			return project != null && project.hasNature(IDEConstants.NATURE_ID);
+		} catch (CoreException e) {
+			return false;
+		}
+	}
 
 }

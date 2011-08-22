@@ -16,7 +16,11 @@
 package org.jmodelica.ide.outline;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -51,10 +55,14 @@ public class ExplorerContentProvider implements ITreeContentProvider, IResourceC
 	private ASTRegistry registry;
 	private ModelicaEclipseCompiler cmp;
 	private StructuredViewer viewer;
+	private Map<IFile,IASTNode> localCompiles;
+	private Set<IASTNode> outdatedLocalCompiles;
 
 	public ExplorerContentProvider() {
 		registry = org.jastadd.plugin.Activator.getASTRegistry();
 		cmp = new ModelicaEclipseCompiler();
+		localCompiles = new HashMap<IFile, IASTNode>();
+		outdatedLocalCompiles = new HashSet<IASTNode>();
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(this, IResourceChangeEvent.POST_CHANGE);
 	}
 
@@ -100,8 +108,16 @@ public class ExplorerContentProvider implements ITreeContentProvider, IResourceC
 		String path = file.getRawLocation().toOSString();
 		IASTNode ast = registry.lookupAST(path, project);
 		// TODO: Need to save in registry even if we have to build ourselves
-		if (ast == null) 
-			ast = cmp.compileFile(file);
+		if (ast == null) {
+			ast = localCompiles.get(file);
+			if (ast == null || outdatedLocalCompiles.contains(ast)) {
+				outdatedLocalCompiles.remove(ast);
+				new CompileJob(file).schedule();
+			}
+		} else {
+			outdatedLocalCompiles.remove(localCompiles.get(file));
+			localCompiles.remove(file);
+		}
 		return ast;
 	}
 	
@@ -160,19 +176,45 @@ public class ExplorerContentProvider implements ITreeContentProvider, IResourceC
 		case IResource.FILE:
 			final IFile file = (IFile) source;
 			if (file.getFileExtension().equals(IDEConstants.MODELICA_FILE_EXT)) {
-				UIJob job = new UIJob("Update Source tree in Project Explorer") {
-					public IStatus runInUIThread(IProgressMonitor monitor) {
-						if (viewer != null && !viewer.getControl().isDisposed())
-							viewer.refresh(file);
-						return Status.OK_STATUS;						
-					}
-				};
-				job.setSystem(true);
-				job.setPriority(Job.SHORT);
-				job.schedule();
+				outdatedLocalCompiles.add(localCompiles.get(file));
+				new UpdateJob(file).schedule();
 			}
 			return false;
 		}
 		return false;
 	}
+
+	private final class CompileJob extends Job {
+		private IFile file;
+
+		private CompileJob(IFile file) {
+			super("Local compilation of " + file);
+			setSystem(true);
+			setPriority(Job.DECORATE);
+			this.file = file;
+		}
+
+		protected IStatus run(IProgressMonitor monitor) {
+			localCompiles.put(file, cmp.compileFile(file));
+			return Status.OK_STATUS;
+		}
+	}
+
+	private final class UpdateJob extends UIJob {
+		private final IFile file;
+
+		private UpdateJob(IFile file) {
+			super("Update Source tree in Project Explorer");
+			this.file = file;
+			setSystem(true);
+			setPriority(Job.SHORT);
+		}
+
+		public IStatus runInUIThread(IProgressMonitor monitor) {
+			if (viewer != null && !viewer.getControl().isDisposed())
+				viewer.refresh(file);
+			return Status.OK_STATUS;						
+		}
+	}
+
 }

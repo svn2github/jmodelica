@@ -39,6 +39,7 @@ import org.jastadd.plugin.registry.ASTRegistry;
 import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.helpers.DocumentReader;
 import org.jmodelica.ide.helpers.Maybe;
+import org.jmodelica.ide.helpers.Util;
 import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.LibNode;
 import org.jmodelica.modelica.compiler.SourceRoot;
@@ -56,7 +57,7 @@ public class ModelicaEclipseCompiler extends AbstractCompiler {
 		try {
 			IResource[] resources = parent.members();
 			for (IResource resource : resources) {
-				if (monitor.isCanceled())
+				if (monitor.isCanceled()) // TODO: probably shouldn't return a half-finished compilation result here
 					break;
 
 				switch (resource.getType()) {
@@ -72,7 +73,7 @@ public class ModelicaEclipseCompiler extends AbstractCompiler {
 
 				case IResource.FILE:
 					IFile file = (IFile) resource;
-					if (IDEConstants.isModelicaFile(file)) {
+					if (Util.isModelicaFile(file)) {
 						compilationRoot.parseFile(file);
 						monitor.worked(1);
 					}

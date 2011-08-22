@@ -12,7 +12,6 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IURIEditorInput;
-import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.folding.IFilePosition;
 import org.jmodelica.ide.helpers.EclipseUtil;
 import org.jmodelica.ide.helpers.Util;
@@ -80,16 +79,9 @@ public class EditorFile {
 	 * Returns true if file is in a project with a Modelica nature
 	 */
 	public boolean inModelicaProject() {
-		if (file != null) {
-			try {
-				IProject project = file.getProject();
-				return project != null && project.hasNature(IDEConstants.NATURE_ID);
-			} catch (CoreException e) {
-			}
-		}
-		return false;
+		return (file != null) && Util.isModelicaProject(file.getProject());
 	}
-	
+
 	/**
 	 * Returns path of all files in root of the project this file belongs to.
 	 * 

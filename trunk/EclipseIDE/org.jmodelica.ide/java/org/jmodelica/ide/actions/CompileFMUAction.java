@@ -152,12 +152,12 @@ public class CompileFMUAction extends CurrentClassAction implements IJobChangeLi
 	protected static class CompileJob extends Job implements CompilationHooks {
 
 		private static final int WORK_PARSE       = 1;
-		private static final int WORK_INSTANTIATE = 5;
-		private static final int WORK_FLATTEN     = 1;
-		private static final int WORK_TRANSFORM   = 1;
-		private static final int WORK_FLAT_CHECK  = 1;
-		private static final int WORK_GENERATE    = 1;
-		private static final int WORK_COMPILE_C   = 2;
+		private static final int WORK_INSTANTIATE = 12;
+		private static final int WORK_FLATTEN     = 4;
+		private static final int WORK_TRANSFORM   = 3;
+		private static final int WORK_FLAT_CHECK  = 2;
+		private static final int WORK_GENERATE    = 3;
+		private static final int WORK_COMPILE_C   = 5;
 		private static final int WORK_PACK        = 1;
 		
 		private static final int WORK_TOTAL = 
@@ -208,6 +208,10 @@ public class CompileFMUAction extends CurrentClassAction implements IJobChangeLi
 					if (e.getMessage().contains("\n\n")) 
 						sev = IStatus.WARNING;
 					msg.append(e.getMessage());
+				} else {
+					msg.append("\n(Exeption thrown: ");
+					msg.append(e);
+					msg.append(")");
 				}
 				status = new Status(sev, IDEConstants.PLUGIN_ID, msg.toString(), e); 
 			} finally {

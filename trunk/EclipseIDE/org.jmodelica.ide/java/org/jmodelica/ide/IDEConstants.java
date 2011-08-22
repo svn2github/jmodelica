@@ -17,7 +17,6 @@ package org.jmodelica.ide;
 
 import java.io.File;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.swt.graphics.RGB;
@@ -119,10 +118,5 @@ public class IDEConstants {
 	
 	public static final String COMPILER_OPTIONS_FILE = "compiler_options.xml";
 	public static final String MODELICAPATH = "MODELICAPATH";
-	
-	
-	public static boolean isModelicaFile(IFile file) {
-		return MODELICA_FILE_EXT.equals(file.getFileExtension());
-	}
 	
 }
