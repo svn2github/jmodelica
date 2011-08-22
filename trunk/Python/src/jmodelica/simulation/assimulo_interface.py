@@ -1217,8 +1217,8 @@ class JMIDAESens(Implicit_Problem):
         self._dx_nbr = len(self._model.real_dx) #Number of derivatives
         self._p_nbr = len(self._parameter_names) #Number of parameters
         self._write_header = True
-        self._input_names = [k[1] for k in model.get_u_variable_names()]
-        
+        self._input_names = [k[1] for k in sorted(model.get_u_variable_names())]
+
         #Used for logging
         self._logLevel = logging.CRITICAL
         self._log = createLogger(model, self._logLevel)

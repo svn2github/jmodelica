@@ -721,6 +721,12 @@ class Test_JMI_DAE:
         nose.tools.assert_almost_equal(res["u_h3"][-1], 3.00000, 3)
         nose.tools.assert_almost_equal(res["u_c4"][-1], 4.000000, 3)
         nose.tools.assert_almost_equal(res["u_p5"][-1], 5.000000, 3)
+        
+        nose.tools.assert_almost_equal(res["T.u1"][-1], 1.000000000, 3)
+        nose.tools.assert_almost_equal(res["T.u_e2"][-1], 2.00000, 3)
+        nose.tools.assert_almost_equal(res["T.u_h3"][-1], 3.00000, 3)
+        nose.tools.assert_almost_equal(res["T.u_c4"][-1], 4.000000, 3)
+        nose.tools.assert_almost_equal(res["T.u_p5"][-1], 5.000000, 3)
 
     @testattr(assimulo = True)
     def test_double_input(self):
@@ -1365,6 +1371,47 @@ class Test_JMI_DAE_Sens:
         
         nose.tools.assert_almost_equal(dx1da2.x[0], 0.000000, 4)
         nose.tools.assert_almost_equal(dx1da2.x[-1], 0.00000, 4)
+
+    @testattr(assimulo = True)
+    def test_order_input(self):
+        """
+        This tests that the inputs are sorted in an correct value reference order
+        when being written to file.
+        """
+        fpath = os.path.join(get_files_path(), 'Modelica', 'OrderInputs.mop')
+        cpath = 'OptimInputs'
+        
+        unames = ['u1', 'u_e2', 'u_h3', 'u_c4', 'u_p5']
+        n = len(unames)
+
+        uvalues = [1.,2.,3.,4.,5.]
+
+        data = N.array([[0.,1.,2.,3.,4.,5.],
+                 [1.,1.,2.,3.,4.,5.],
+                 [2.,1.,2.,3.,4.,5.]])
+        inputtuple = (unames,data)
+        jmu_name = compile_jmu(cpath,fpath)
+        
+        model = JMUModel(jmu_name)
+        
+        opts = model.simulate_options()
+        
+        opts["IDA_options"]["sensitivity"] = True
+        opts["IDA_options"]["write_cont"] = True
+        
+        res = model.simulate(0,2,input=inputtuple, options=opts)
+        
+        nose.tools.assert_almost_equal(res["u1"][-1], 1.000000000, 3)
+        nose.tools.assert_almost_equal(res["u_e2"][-1], 2.00000, 3)
+        nose.tools.assert_almost_equal(res["u_h3"][-1], 3.00000, 3)
+        nose.tools.assert_almost_equal(res["u_c4"][-1], 4.000000, 3)
+        nose.tools.assert_almost_equal(res["u_p5"][-1], 5.000000, 3)
+        
+        nose.tools.assert_almost_equal(res["T.u1"][-1], 1.000000000, 3)
+        nose.tools.assert_almost_equal(res["T.u_e2"][-1], 2.00000, 3)
+        nose.tools.assert_almost_equal(res["T.u_h3"][-1], 3.00000, 3)
+        nose.tools.assert_almost_equal(res["T.u_c4"][-1], 4.000000, 3)
+        nose.tools.assert_almost_equal(res["T.u_p5"][-1], 5.000000, 3)
 
     @testattr(assimulo = True)
     def test_input_simulation_high_level_switched_input(self):
