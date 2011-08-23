@@ -37,13 +37,14 @@ except NameError, ImportError:
 
 path_to_mos = os.path.join(get_files_path(), 'Modelica')
 
-def assert_results(res, cost_ref, u_norm_ref, cost_places=4, norm_places = 5):
+def assert_results(res, cost_ref, u_norm_ref,
+                   cost_rtol=1e-3, u_norm_rtol=1e-4):
     """Helper function for asserting optimization results."""
     cost = float(res.solver.solver.output(casadi.NLP_COST))
     u = res["u"]
     u_norm = N.linalg.norm(u) / N.sqrt(len(u))
-    nose.tools.assert_almost_equal(cost, cost_ref, cost_places)
-    nose.tools.assert_almost_equal(u_norm, u_norm_ref, norm_places)
+    N.testing.assert_allclose(cost, cost_ref, cost_rtol)
+    N.testing.assert_allclose(u_norm, u_norm_ref, u_norm_rtol)
 
 class TestRadau:
     
@@ -155,7 +156,7 @@ class TestRadau2:
         
         # Lagrange
         res = self.model_CSTR_Lagrange.optimize("CasadiRadau2", opts)
-        assert_results(res, cost_ref, u_norm_ref, cost_places=0, norm_places=0)
+        assert_results(res, cost_ref, u_norm_ref)
     
     @testattr(casadi = True)
     def test_element_lengths(self):
@@ -184,7 +185,7 @@ class TestRadau2:
         # Element interpolation
         opts['result_mode'] = "element_interpolation"
         res = self.model_VDP_Lagrange.optimize(self.algorithm, opts)
-        assert_results(res, cost_ref, u_norm_ref, norm_places=2)
+        assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=3e-2)
     
     @testattr(casadi = True)
     def test_result_mode(self):
@@ -210,7 +211,7 @@ class TestRadau2:
         opts['result_mode'] = "element_interpolation"
         opts['n_eval_points'] = 15
         res = self.model_VDP_Lagrange.optimize(self.algorithm, opts)
-        assert_results(res, cost_ref, u_norm_ref, 4, 3)
+        assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=5e-3)
     
     @testattr(casadi = True)
     def test_blocking_factors(self):
@@ -220,14 +221,14 @@ class TestRadau2:
         opts['blocking_factors'] = opts['n_e'] * [1]
         res = self.model_VDP_Mayer.optimize(self.algorithm, opts)
         assert_results(res, 2.8169280267e1, 2.997111577228e-1,
-                       cost_places=1, norm_places=1)
+                       cost_rtol=1.5e-1, u_norm_rtol=5e-2)
         
         opts['n_e'] = 20
         opts['n_cp'] = 4
         opts['blocking_factors'] = [1, 2, 1, 1, 2, 13]
         res = self.model_VDP_Mayer.optimize(self.algorithm, opts)
         assert_results(res, 6.939387678875e1, 4.1528861933309e-1,
-                       cost_places=1, norm_places=1)
+                       cost_rtol=1.5e-1, u_norm_rtol=5e-2)
     
     @testattr(casadi = True)
     def test_state_cont_var(self):
@@ -314,28 +315,28 @@ class TestRadau2:
         opts['exact_Hessian'] = True
         res = self.model_VDP_Lagrange.optimize(self.algorithm, opts)
         sol_with = res.times['sol']
-        assert_results(res, cost_ref, u_norm_ref, 6, 7)
+        assert_results(res, cost_ref, u_norm_ref)
         
         # expanded_MX without exact Hessian
         opts['exact_Hessian'] = False
         res = self.model_VDP_Lagrange.optimize(self.algorithm, opts)
         sol_without = res.times['sol']
         nose.tools.assert_true(sol_with < 0.5 * sol_without)
-        assert_results(res, cost_ref, u_norm_ref, 5, 6)
+        assert_results(res, cost_ref, u_norm_ref)
         
         # MX with exact Hessian
         opts['graph'] = "MX"
         opts['exact_Hessian'] = True
         res = self.model_VDP_Lagrange.optimize(self.algorithm, opts)
         sol_with = res.times['sol']
-        assert_results(res, cost_ref, u_norm_ref, 6, 7)
+        assert_results(res, cost_ref, u_norm_ref)
         
         # MX without exact Hessian
         opts['exact_Hessian'] = False
         res = self.model_VDP_Lagrange.optimize(self.algorithm, opts)
         sol_without = res.times['sol']
         nose.tools.assert_true(sol_with < 0.85 * sol_without)
-        assert_results(res, cost_ref, u_norm_ref, 5, 6)
+        assert_results(res, cost_ref, u_norm_ref)
         
     @testattr(casadi = True)
     def test_CasADi_option(self):
@@ -357,8 +358,8 @@ class TestRadau2:
         opts['CasADi_options_G']['numeric_jacobian'] = False
         res = self.model_VDP_Mayer.optimize(self.algorithm, opts)
         sol_without = res.times['sol']
-        nose.tools.assert_true(sol_without < 0.7 * sol_with)
-        assert_results(res, cost_ref, u_norm_ref, cost_places=2, norm_places=3)
+        nose.tools.assert_true(sol_without < 0.95 * sol_with)
+        assert_results(res, cost_ref, u_norm_ref)
 
 class TestPseudoSpectral:
     
