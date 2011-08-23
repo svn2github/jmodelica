@@ -220,7 +220,7 @@ aspect TransformCanonical {
 			for (FVariable fv : getFClass().outputs()) {
 				// Get the block where the variable is solved for	
 				AbstractEquationBlock eb = fv.myDAEEquationBlock();
-				if (!eb.isVisited()) {
+				if (eb!=null && !eb.isVisited()) {
 					eb.setVisited(true);
 					for (AbstractEquationBlock ebb : eb.getAllPredecessors()){
 						if (!ebb.isVisited()) {	
