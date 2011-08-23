@@ -1135,14 +1135,14 @@ class Radau2Collocator(CasadiCollocator):
         # Get the options
         self.__dict__.update(options)
         
-        # Redefine element lengths
+        # Define element lengths
         self.horizon = self.ocp.tf - self.ocp.t0
-        h = [N.nan] # Element 0
-        if self.h == None:
-            h += self.n_e * [1. / self.n_e]
-        else:
-            h += self.h
-        self.h = h
+        if self.hs != "free":
+            self.h = [N.nan] # Element 0
+            if self.hs == None:
+                self.h += self.n_e * [1. / self.n_e]
+            else:
+                self.h += self.hs
         
         # Define polynomial for representation of solutions
         self.pol = RadauPol(self.n_cp)
@@ -1161,7 +1161,7 @@ class Radau2Collocator(CasadiCollocator):
         self._create_cost_function()
         self._expand_MX()
         self._calc_Lagrangian_Hessian()
-        self._compute_bounds_and_init()
+        self._compute_bounds_and_init_full()
         self._create_solver()
     
     def _create_NLP_variables(self, rename=False):
@@ -1183,6 +1183,8 @@ class Radau2Collocator(CasadiCollocator):
             n_xx += len(self.blocking_factors) * self.model.get_n_u()
         if self.state_cont_var:
             n_xx += (self.n_e - 1) * n_var['x']
+        if self.hs == "free":
+            n_xx += self.n_e
         
         # Create NLP variables
         if self.graph == "MX" or self.graph == 'expanded_MX':
@@ -1257,6 +1259,13 @@ class Radau2Collocator(CasadiCollocator):
         if self.blocking_factors != None:
             var_indices[1][0]['u'] = var_indices[1][1]['u']
             var[1][0]['u'] = xx[var_indices[1][0]['u']]
+            
+        # Index element lengths
+        if self.hs == "free":
+            new_index = index + self.n_e
+            var_indices['h'] = [N.nan] + range(index, new_index)
+            index = new_index
+            self.h = casadi.vertcat([N.nan, xx[var_indices['h'][1:]]])
         
         assert(index == n_xx)
         
@@ -1286,6 +1295,8 @@ class Radau2Collocator(CasadiCollocator):
             var_indices = self.var_indices
             
             for i in range(1, self.n_e+1):
+                if self.hs == "free":
+                    xx[var_indices['h'][i]] = casadi.SX("h_" + str(i))
                 for k in var_indices[i].keys():
                     if 'dx' in var_indices[i][k].keys():
                         dx = []
@@ -1471,6 +1482,11 @@ class Radau2Collocator(CasadiCollocator):
             for i in xrange(1, self.n_e):
                 cont_constr = var[i][self.n_cp]['x'] - var[i + 1][0]['x']
                 g = casadi.vertcat([g, cont_constr])
+                
+        # Element length constraints
+        if self.hs == "free":
+            h_constr = casadi.sum(self.h[1:]) - 1
+            g = casadi.vertcat([g, h_constr])
         
         # Store constraints and time as data attributes
         self.g = g
@@ -1692,6 +1708,21 @@ class Radau2Collocator(CasadiCollocator):
                 self.H_fcn = casadi.SXFunction()
             else:
                 raise ValueError('Unknown CasADi graph %s.' % self.graph)
+                
+    def _compute_bounds_and_init_full(self):
+        """
+        Compute bounds and intial guesses for NLP variables.
+        """
+        self._compute_bounds_and_init() # Inherited method
+        
+        # Compute bounds and initial guesses for element lengths
+        if self.hs == "free":
+            h_0 = 1. / self.n_e
+            var_indices = self.get_var_indices()
+            for i in xrange(1, self.n_e + 1):
+                self.xx_lb[var_indices['h'][i]] = self.h_bounds[0] * h_0
+                self.xx_ub[var_indices['h'][i]] = self.h_bounds[1] * h_0
+                self.xx_init[var_indices['h'][i]] = self.h_bounds[1] * h_0
     
     def _create_solver(self):
         if self.get_hessian().isNull():
@@ -1710,27 +1741,44 @@ class Radau2Collocator(CasadiCollocator):
         return self.H_fcn
     
     def get_result(self):
-        # Create array with discrete times
-        if self.result_mode == "collocation_points":
-            t_opt = self.get_time().reshape([-1, 1])
-        elif self.result_mode == "element_interpolation":
-            t_opt = []
-            t_start = 0
-            for i in xrange(1, self.n_e + 1):
-                t_end = t_start + self.h[i] * self.horizon
-                t_i = N.linspace(t_start, t_end, self.n_eval_points)
-                t_opt = N.hstack([t_opt, t_i])
-                t_start = t_opt[-1]
-            t_opt = t_opt.reshape([-1, 1])
-        else:
-            raise ValueError("Unknown result mode %s." % self.result_mode)
-        
         # Set model info
         n_var = {'dx': self.model.get_n_x(), 'x': self.model.get_n_x(),
                  'u': self.model.get_n_u(), 'w': self.model.get_n_w()}
         cont = {'dx': False, 'x': True, 'u': False, 'w': False}
         var_types = ['dx', 'x', 'u', 'w']
         var_opt = {}
+        var_indices = self.get_var_indices()
+        
+        # Create array with discrete times
+        if self.result_mode == "collocation_points":
+            if self.hs == "free":
+                h_opt = self.horizon * self.nlp_opt[var_indices['h'][1:]]
+                t_start = 0.
+                t_opt = [t_start]
+                for h in h_opt:
+                    for k in xrange(1, self.n_cp + 1):
+                        t_opt.append(t_start + 
+                                     self.pol.p[k] * h)
+                    t_start += h
+                t_opt = N.array(t_opt).reshape([-1, 1])
+            else:
+                t_opt = self.get_time().reshape([-1, 1])
+        elif self.result_mode == "element_interpolation":
+            if self.hs == "free":
+                h_opt = N.vstack([N.nan, self.horizon * 
+                                         self.nlp_opt[var_indices['h'][1:]]])
+            else:
+                h_opt = self.horizon * N.array(self.h)
+            t_opt = []
+            t_start = 0.
+            for i in xrange(1, self.n_e + 1):
+                t_end = t_start + h_opt[i]
+                t_i = N.linspace(t_start, t_end, self.n_eval_points)
+                t_opt = N.hstack([t_opt, t_i])
+                t_start = t_opt[-1]
+            t_opt = t_opt.reshape([-1, 1])
+        else:
+            raise ValueError("Unknown result mode %s." % self.result_mode)
         
         # Create arrays for storage of variable trajectories
         for var_type in var_types:
@@ -1742,9 +1790,8 @@ class Radau2Collocator(CasadiCollocator):
                 self.nlp_opt[self.get_var_indices()['p_opt']].reshape(-1)
         
         # Get solution trajectories
+        t_index = 0
         if self.result_mode == "collocation_points":
-            t_index = 0
-            var_indices = self.get_var_indices()
             for i in xrange(1, self.n_e + 1):
                 for k in self.get_time_points()[i]:
                     for var_type in var_types:
@@ -1752,8 +1799,6 @@ class Radau2Collocator(CasadiCollocator):
                         var_opt[var_type][t_index, :] = xx_i_k.reshape(-1)
                     t_index += 1
         elif self.result_mode == "element_interpolation":
-            t_index = 0
-            var_indices = self.get_var_indices()
             tau_arr = N.linspace(0, 1, self.n_eval_points)
             for i in xrange(1, self.n_e + 1):
                 for tau in tau_arr:

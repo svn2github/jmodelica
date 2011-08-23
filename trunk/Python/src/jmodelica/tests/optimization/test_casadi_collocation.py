@@ -162,11 +162,31 @@ class TestRadau2:
         """Test non-uniformly distributed elements."""
         opts = self.model_VDP_Mayer.optimize_options("CasadiRadau2")
         opts['n_e'] = 23
-        opts['h'] = (4 * [0.01] + 2 * [0.05] + 10 * [0.02] + 5 * [0.02] + 
+        opts['hs'] = (4 * [0.01] + 2 * [0.05] + 10 * [0.02] + 5 * [0.02] + 
                      2 * [0.28])
         res = self.model_VDP_Mayer.optimize(self.algorithm, opts)
         assert_results(res, 2.34597852302e1, 3.707273887662e-1)
+    
+    @testattr(casadi = True)
+    def test_free_element_lengths(self):
+        """Test optimized element lengths with both result modes."""
+        # References values
+        cost_ref = 2.343240065531e1
+        u_norm_ref = 2.630846391607e-1
         
+        # Collocation points
+        opts = self.model_VDP_Lagrange.optimize_options("CasadiRadau2")
+        opts['hs'] = "free"
+        opts['result_mode'] = "collocation_points"
+        res = self.model_VDP_Lagrange.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        
+        # Element interpolation
+        opts['result_mode'] = "element_interpolation"
+        res = self.model_VDP_Lagrange.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref, norm_places=2)
+    
+    @testattr(casadi = True)
     def test_result_mode(self):
         """
         Test the two different result modes.

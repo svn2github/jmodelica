@@ -2177,15 +2177,20 @@ class CasadiRadau2(AlgorithmBase):
         Set algorithm options and assert their validity.
         """
         self.__dict__.update(self.options)
+        defaults = self.get_default_options()
         
         # Check validity of element lengths
-        if self.h != None:
-            if len(self.h) != self.n_e:
+        if isinstance(self.hs, list):
+            if len(self.hs) != self.n_e:
                 raise ValueError("The number of specified element lengths " +
                                  "must be equal to the number of elements.")
-            if not N.allclose(N.sum(self.h), 1):
+            if not N.allclose(N.sum(self.hs), 1):
                 raise ValueError("The sum of all elements lengths must be" +
                                  "(almost) equal to 1.")
+        if self.h_bounds != defaults['h_bounds']:
+            if self.hs != "free":
+                raise ValueError("h_bounds is only used if algorithm " + \
+                                 'option hs is set to "free".')
         
         # Check validity of exact_Hessian
         if self.exact_Hessian:
@@ -2193,13 +2198,13 @@ class CasadiRadau2(AlgorithmBase):
                 print("Warning: exact_Hessian is not recommended in " +
                       "combination with MX graphs.")
         else:
-            if len(self.CasADi_options_L.keys()) > 1:
+            if self.CasADi_options_L != defaults['CasADi_options_L']:
                 raise ValueError("CasADi_options_L is only used " +
-                                 "if exact_Hessian is True.")
+                                 "if algorithm option exact_Hessian is True.")
                                  
         # Check validity of result_mode and n_eval_points
         if self.result_mode == "collocation_points":
-            if self.n_eval_points != 20:
+            if self.n_eval_points != defaults['n_eval_points']:
                 raise ValueError("n_eval_points is only used if algorithm " + \
                                  "option result_mode is set to " + \
                                  '"element_interpolation".')
@@ -2283,13 +2288,34 @@ class CasadiRadau2Options(OptionBase):
             Type: int
             Default: 50
             
-        h --
-            Element lengths. Normalized in the sense that the sum of all
-            lengths must be equal to 1. If None, the element lengths are
-            uniformly distributed.
+        hs --
+            Element lengths.
             
-            Type: list of floats
+            Possible values: None, list of floats and "free"
+            
+            None: The element lengths are uniformly distributed.
+            
+            list of floats: Component i of the list specifies the length of
+            element i. The lengths must be normalized in the sense that the sum
+            of all lengths must be equal to 1.
+            
+            "free": The element lengths become optimization variables.
+            
+            Type: None, list of floats or string
             Default: None
+            
+        h_bounds --
+            Element length bounds. Only used if algorithm option hs is set to
+            "free". The bounds are given as a tuple (l, u), where the bounds
+            are used in the following way:
+            
+            .. math::
+                l / n_e \leq h_i \leq u / n_e, \quad \forall i \in [1, n_e],
+                
+            where h_i is the normalized length of element i.
+            
+            Type: tuple
+            Default: (0.7, 1.3)
             
         n_cp --
             Number of collocation points in each element.
@@ -2307,16 +2333,18 @@ class CasadiRadau2Options(OptionBase):
         result_mode --
             Specifies the output format of the optimization result.
             
-            "collocation_points" gives the the optimization result at the
+            Possible values: "collocation_points" and "element_interpolation"
+            
+            "collocation_points": The optimization result is given at the
             collocation points.
             
-            "element_interpolation" computes the values of the variable
-            trajectories by evaluating the collocation interpolation
+            "element_interpolation": The values of the variable trajectories
+            are calculated by evaluating the collocation interpolation
             polynomials. The algorithm option n_evaluation_points is used to
             specify the evaluation points within each finite element.
             
             Type: str
-            Default: "collocation points"
+            Default: "collocation_points"
             
         n_eval_points --
             The number of evaluation points used in each element when the
@@ -2333,18 +2361,20 @@ class CasadiRadau2Options(OptionBase):
             number of elements for which the control profile should be
             constant. For example, if blocking_factor == [2, 1, 5], then
             u_0 = u_1 and u_3 = u_4 = u_5 = u_6 = u_7. The sum of all elements
-            in the list must be the same as the number of elements. If
-            blocking_facotrs == None, then Lagrange polynomials are instead
+            in the list must be the same as the number of elements.
+            
+            If blocking_facotrs == None, then Lagrange polynomials are instead
             used to represent the control.
             
-            Type: list of ints
+            Type: None or list of ints
             Default: None
         
         state_cont_var --
-            If True: Create extra variables for the states at the start of each
+            True: Create extra variables for the states at the start of each
             element and then constrain them to be equal to the corresponding 
             variable at the end of the previous element for continuity.
-            If False: Let the same variables represent both the values of the
+            
+            False: Let the same variables represent both the values of the
             states at the start of each element and the end of the previous
             element.
             
@@ -2416,7 +2446,8 @@ class CasadiRadau2Options(OptionBase):
     def __init__(self, *args, **kw):
         _defaults = {
                 'n_e': 50,
-                'h': None,
+                'hs': None,
+                'h_bounds': (0.7, 1.3),
                 'n_cp': 3,
                 'graph': 'SX',
                 'result_mode': "collocation_points",
