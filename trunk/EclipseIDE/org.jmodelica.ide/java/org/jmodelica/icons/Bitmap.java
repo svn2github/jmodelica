@@ -1,5 +1,10 @@
 package org.jmodelica.icons;
 
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
 public class Bitmap extends GraphicItem {
 
 	private Extent extent;
@@ -39,18 +44,26 @@ public class Bitmap extends GraphicItem {
 	 * @param path
 	 */
 	public void setFileName(String fileName) {
-		// File URI scheme:
-		if (fileName.toLowerCase().startsWith("file:///")) {
-			this.fileName = fileName.substring(7);
-		
-		// TODO: Modelica URI scheme:
-		} else if (fileName.toLowerCase().startsWith("modelica://")) {  
-			
-		}
+		this.fileName = fileName;
 	}
 
 	public String getFileName() {
 		return fileName;
+	}
+	
+	public boolean isFromFile() {
+		return fileName != null;
+	}
+	
+	public InputStream getInputStream() throws IOException {
+		if (fileName != null) {
+			return new FileInputStream(fileName);
+		} else if (imageSource != null) {
+			byte decodedBytes[] = 
+				new sun.misc.BASE64Decoder().decodeBuffer(imageSource);
+			return new ByteArrayInputStream(decodedBytes);  
+		}
+		return null;
 	}
 	
 	public String toString() {

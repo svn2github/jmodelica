@@ -1,6 +1,8 @@
 package org.jmodelica.icons;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import org.jmodelica.icons.Color;
 import org.jmodelica.icons.Types.Arrow;
@@ -12,7 +14,7 @@ import org.jmodelica.icons.drawing.IconConstants;
 public class Line extends GraphicItem {
 	
 	
-	private ArrayList<Point> points;
+	private List<Point> points;
 	private Color color;
 	private Types.LinePattern linePattern;
 	private double thickness;
@@ -28,37 +30,29 @@ public class Line extends GraphicItem {
 	public static final Types.Arrow[] DEFAULT_ARROW = {Types.Arrow.NONE, Types.Arrow.NONE};
 	public static final double DEFAULT_ARROW_SIZE = 3.0;
 	public static final Types.Smooth DEFAULT_SMOOTH = Types.Smooth.NONE;
-	public static final Polygon[] DEFAULT_ARROW_POLYGONS = new Polygon[0];
 
 	public Line() {
-		super();
-		color = DEFAULT_COLOR;
-		linePattern = DEFAULT_LINE_PATTERN;
-		thickness = DEFAULT_THICKNESS;
-		arrowSize = DEFAULT_ARROW_SIZE;
-		arrow = DEFAULT_ARROW;
-		smooth = DEFAULT_SMOOTH;
-		points = new ArrayList<Point>();
-		arrowPolygons = new Polygon[0];
-		
+		this(Collections.<Point>emptyList());
 	}	
-	public Line(ArrayList<Point> points) {
+	
+	public Line(List<Point> points) {
 		super();
-		this.points = points;
 		color = DEFAULT_COLOR;
 		linePattern = DEFAULT_LINE_PATTERN;
 		thickness = DEFAULT_THICKNESS;
 		arrowSize = DEFAULT_ARROW_SIZE;
 		arrow = DEFAULT_ARROW;
 		smooth = DEFAULT_SMOOTH;
-		arrowPolygons = new Polygon[0];		
+		this.points = points;
+		arrowPolygons = null;
 	}
 	
-	public void setPoints(ArrayList<Point> point) {
+	public void setPoints(List<Point> point) {
 		this.points = point;
+		arrowPolygons = null;
 	}
 		
-	public ArrayList<Point> getPoints() {
+	public List<Point> getPoints() {
 		return points;
 	}
 
@@ -86,29 +80,20 @@ public class Line extends GraphicItem {
 	}
 
 	private void fixArrowPolygon() {
+		if (points.size() >= 2) {
 		arrowPolygons = new Polygon[2];
-		
-		if (arrow[0] != Arrow.NONE) {
-		
-			Point p1 = points.get(1);
-			Point p2 = points.get(0);
-			arrowPolygons[0] = createArrowPolygon(p1, p2);
-			if (arrow[0] == Arrow.FILLED) {
-				arrowPolygons[0].setFillPattern(FillPattern.SOLID);
+			for (int i = 0; i < 2; i++) {
+				if (arrow[0] == Arrow.NONE) {
+					arrowPolygons[i] = null;
+				} else {
+					int tip = i * (points.size() - 1);
+					Point p1 = points.get(tip + 1 - (2 * i));
+					Point p2 = points.get(tip);
+					arrowPolygons[i] = createArrowPolygon(p1, p2);
+					if (arrow[i] == Arrow.FILLED) 
+						arrowPolygons[i].setFillPattern(FillPattern.SOLID);
+				}
 			}
-		} else {
-			arrowPolygons[0] = null;
-		}
-		if (arrow[1] != Arrow.NONE) {
-		
-			Point p1 = points.get(points.size()-2);
-			Point p2 = points.get(points.size()-1);
-			arrowPolygons[1] = createArrowPolygon(p1, p2);
-			if (arrow[1] == Arrow.FILLED) {
-				arrowPolygons[1].setFillPattern(FillPattern.SOLID);
-			}
-		} else {
-			arrowPolygons[1] = null;
 		}
 	}
 	
@@ -156,14 +141,14 @@ public class Line extends GraphicItem {
 	}
 	
 	public Polygon[] getArrowPolygons() {
+		if (arrowPolygons == null)
+			fixArrowPolygon();
 		return arrowPolygons;
 	}
 	
 	public void setArrow(Types.Arrow[] arrow) {
 		this.arrow = arrow;
-		if (arrow[0] != Arrow.NONE || arrow[1] != Arrow.NONE) {
-			fixArrowPolygon();
-		}
+		arrowPolygons = null;
 	}
 
 	public Types.Arrow[] getArrow() {

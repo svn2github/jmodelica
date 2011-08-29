@@ -30,7 +30,7 @@ import java.lang.IllegalArgumentException;
 
 aspect AnnotationParsing {
 	
-	public class AnnotationNode {
+	public abstract class AnnotationNode {
 		
 		/**
 		* Creates the icon layer represented by this AnnotationNode. 
@@ -149,15 +149,15 @@ aspect AnnotationParsing {
 				try {
 					if (c.name().equals("preserveAspectRatio")) {
 						co.setPreserveAspectRatio(c.bool());
-					}else if (c.name().equals("extent")) {
+					} else if (c.name().equals("extent")) {
 						co.setExtent(c.createExtent());
-					}else if (c.name().equals("grid")) {
+					} else if (c.name().equals("grid")) {
 						co.setGrid(c.createGrid());	
 					} else if (c.name().equals("initialScale")) {
 						//co.setInitialScale(c.real());
 					}
 				} catch (FailedConstructionException e) {
-				}catch(IllegalArgumentException ie) {
+				} catch(IllegalArgumentException ie) {
 				}
 			}
 			return co;
@@ -213,7 +213,7 @@ aspect AnnotationParsing {
 		* 	default values for the attributes if the attributes are not set.
 		* @return the created FilledShape
 		*/
-		private FilledShape createFilledShape(FilledShape filledShape) {
+		private void initializeFilledShape(FilledShape filledShape) {
 			for (AnnotationNode a : this) {
 				try {
 					if (a.name().equals("lineColor")) {
@@ -235,41 +235,41 @@ aspect AnnotationParsing {
 					
 				}
 			}
-			return (FilledShape)createGraphicItem(filledShape);
+			initializeGraphicItem(filledShape);
 		}
 		
 		/**
 		* Create a GraphicItem object that is represented by this AnnotationNode.
 		* @param graphicItem
-		* @return the created Graphic item
 		*/
-		private GraphicItem createGraphicItem(GraphicItem graphicItem) {
+		private void initializeGraphicItem(GraphicItem graphicItem) {
 			for (AnnotationNode a : this) {
 				if (a.name().equals("visible")) {
 					graphicItem.setVisible(a.bool());
 				} else if (a.name().equals("origin")) {
 					try {
 						graphicItem.setOrigin(a.createOrigin());
-					}catch (FailedConstructionException e) {}
+					} catch (FailedConstructionException e) {}
 				} else if (a.name().equals("rotation")) {
 					graphicItem.setRotation(a.createRotation());
 				}
 			}
-			return graphicItem;
 		}
+		
 		/**
 		* Create a FilledShape that is represented by this AnnotationNode. 
 		* @param FilledRectShape
 		* @return the created FilledShape
 		* @throws NotEnoughParametersException if the extent parameter was not given.
 		*/
-		private FilledShape createFilledRectShape(FilledRectShape filledRectShape) 
+		private void initializeFilledRectShape(FilledRectShape filledRectShape) 
 				throws FailedConstructionException, NotEnoughParametersException {
 			
 			for (AnnotationNode a : this) {
 				if (a.name().equals("extent")) {
 					filledRectShape.setExtent(a.createExtent());
-					return createFilledShape(filledRectShape);
+					initializeFilledShape(filledRectShape);
+					return;
 				}
 			}
 			throw new NotEnoughParametersException("FilledRectShape");
@@ -283,7 +283,7 @@ aspect AnnotationParsing {
 		private Ellipse createEllipse()
 				throws FailedConstructionException, NotEnoughParametersException {
 			Ellipse ellipse = new Ellipse();
-			ellipse = (Ellipse)createFilledRectShape(ellipse);
+			initializeFilledRectShape(ellipse);
 			for (AnnotationNode a : this) {
 				if (a.name().equals("startAngle")) {
 					ellipse.setStartAngle(a.createStartAngle());
@@ -302,7 +302,7 @@ aspect AnnotationParsing {
 		private Bitmap createBitmap() 
 		throws FailedConstructionException, NotEnoughParametersException {
 			Bitmap bitmap = new Bitmap();
-			bitmap = (Bitmap)createGraphicItem(bitmap);
+			initializeGraphicItem(bitmap);
 			boolean extentSet = false;
 			boolean fileNameSet = false;
 			boolean imageSourceSet = false;
@@ -311,7 +311,7 @@ aspect AnnotationParsing {
 					bitmap.setExtent(a.createExtent());
 					extentSet = true;
 				} else if (a.name().equals("fileName")) {
-					bitmap.setFileName(a.string());
+					bitmap.setFileName(a.path());
 					fileNameSet = true;
 				} else if (a.name().equals("imageSource")) {
 					bitmap.setImageSource(a.string());
@@ -333,35 +333,27 @@ aspect AnnotationParsing {
 		private Line createLine() 
 				throws FailedConstructionException, NotEnoughParametersException {
 			Line line = new Line();
-			line = (Line)createGraphicItem(line);
+			initializeGraphicItem(line);
 			boolean pointsSet = false;
 			for (AnnotationNode a : this) {
 				if (a.name().equals("points")) {
 					line.setPoints(a.createPoints());
 					pointsSet = true;
-				} else if (a.name().equals("color")) {
+				} else { 
 					try {
-						line.setColor(a.createColor());
-					} catch(FailedConstructionException e) {}
-				} else if (a.name().equals("thickness")) {
-					try {
-						line.setThickness(a.createThickness());
-					} catch(FailedConstructionException e) {}
-				} else if (a.name().equals("pattern")) {
-					try {
-						line.setLinePattern(a.createLinePattern());
-					} catch(FailedConstructionException e) {}
-				} else if (a.name().equals("smooth")) {
-					try {
-						line.setSmooth(a.createSmooth());
-					} catch(FailedConstructionException e) {}
-				} else if (a.name().equals("arrow")) {
-					try {
-						line.setArrow(a.createArrow());
-					} catch(FailedConstructionException e) {}
-				} else if (a.name().equals("arrowSize")) {
-					try {
-						line.setArrowSize(a.createArrowSize());
+						if (a.name().equals("color")) {
+							line.setColor(a.createColor());
+						} else if (a.name().equals("thickness")) {
+							line.setThickness(a.createThickness());
+						} else if (a.name().equals("pattern")) {
+							line.setLinePattern(a.createLinePattern());
+						} else if (a.name().equals("smooth")) {
+							line.setSmooth(a.createSmooth());
+						} else if (a.name().equals("arrow")) {
+							line.setArrow(a.createArrow());
+						} else if (a.name().equals("arrowSize")) {
+							line.setArrowSize(a.createArrowSize());
+						}
 					} catch(FailedConstructionException e) {}
 				}
 			}
@@ -384,11 +376,8 @@ aspect AnnotationParsing {
 				}
 			}
 			double[] vector = realVector();
-			if (vector == null) {
+			if (vector == null || vector.length != 2) 
 				throw new FailedConstructionException("Point");
-			} else if (vector.length != 2) {
-				throw new FailedConstructionException("Point");
-			}
 			return new Point(vector[0], vector[1]);
 		}
 	
@@ -554,7 +543,7 @@ aspect AnnotationParsing {
 		private Rectangle createRectangle()
 				throws FailedConstructionException, NotEnoughParametersException {
 			Rectangle rect = new Rectangle();
-			rect = (Rectangle)createFilledRectShape(rect);
+			initializeFilledRectShape(rect);
 			for (AnnotationNode a : this) {
 				try {
 					if (a.name().equals("borderPattern")) {
@@ -562,8 +551,8 @@ aspect AnnotationParsing {
 					} else if (a.name().equals("radius")) {
 						rect.setRadius(a.createRadius());
 					}
-				}catch(FailedConstructionException e) {
-				}catch(IllegalArgumentException ia) {
+				} catch(FailedConstructionException e) {
+				} catch(IllegalArgumentException ia) {
 				}
 			}
 			return rect;
@@ -581,7 +570,7 @@ aspect AnnotationParsing {
 		private Text createText()
 				throws FailedConstructionException, NotEnoughParametersException {
 			Text text = new Text();
-			text = (Text)createFilledRectShape(text);
+			initializeFilledRectShape(text);
 			boolean textStringSet = false;
 			for (AnnotationNode a : this) {
 				try {
@@ -623,7 +612,7 @@ aspect AnnotationParsing {
 				}
 			}
 			Polygon polygon = new Polygon();
-			polygon = (Polygon)createFilledShape(polygon);
+			initializeFilledShape(polygon);
 			boolean pointsSet = false;
 			for (AnnotationNode a : this) {
 				if (a.name().equals("points")) {

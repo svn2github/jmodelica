@@ -5,13 +5,14 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.GradientPaint;
 import java.awt.Graphics2D;
+import java.awt.MultipleGradientPaint.CycleMethod;
 import java.awt.Paint;
 import java.awt.RadialGradientPaint;
 import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.TexturePaint;
-import java.awt.MultipleGradientPaint.CycleMethod;
+import java.awt.Transparency;
 import java.awt.font.TextAttribute;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
@@ -22,16 +23,14 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.DirectColorModel;
-import java.awt.image.WritableRaster;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ByteArrayInputStream;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Stack;
-
 
 import javax.imageio.ImageIO;
 
@@ -59,12 +58,27 @@ import org.jmodelica.icons.Types.FillPattern;
 import org.jmodelica.icons.Types.LinePattern;
 import org.jmodelica.icons.Types.TextAlignment;
 import org.jmodelica.icons.exceptions.CreateShapeFailedException;
-import org.jmodelica.icons.exceptions.FailedConstructionException;
 
 
 public class AWTIconDrawer implements GraphicsInterface {
 	
 	private static final int BORDER_PATTERN_WIDTH = 2;
+	private static final int[][][] BORDER_PATTERN_UPLEFT = new int[][][] { 
+			{ 
+				{ 1, 1, 0, 0, 1, 1, 1 }, { 0, 0, 1, 1, 0, 0, 0 },
+				{ 1, 1, 0, -BORDER_PATTERN_WIDTH, 1 + BORDER_PATTERN_WIDTH, 1 + BORDER_PATTERN_WIDTH, 1 } 
+			}, {
+				{ 0, 1, 1, 1, 1, 0, 0 }, { 1, 0, 0, 0, 0, 1, 1 },
+				{ 0, 1, 1, 1 + BORDER_PATTERN_WIDTH, 1 + BORDER_PATTERN_WIDTH, -BORDER_PATTERN_WIDTH, 0 } 
+			} };
+	private static final int[][][] BORDER_PATTERN_DOWNRIGHT = new int[][][] { 
+			{ 
+				{ 1, 0, 0, 0, 0, 1, 1 }, { 0, 1, 1, 1, 1, 0, 0 },  
+				{ 1, 0, 0, -BORDER_PATTERN_WIDTH, -BORDER_PATTERN_WIDTH, 1 + BORDER_PATTERN_WIDTH, 1 } 
+			}, {
+				{ 0, 0, 1, 1, 0, 0, 0 },{ 1, 1, 0, 0, 1, 1, 1 }, 
+				{ 0, 0, 1, 1 + BORDER_PATTERN_WIDTH, -BORDER_PATTERN_WIDTH, -BORDER_PATTERN_WIDTH, 0 } 
+			} };
 	
 	public static final double MINIMUM_FONT_SIZE = 9.0;
 	
@@ -93,39 +107,41 @@ public class AWTIconDrawer implements GraphicsInterface {
 	}
 	
 	public AWTIconDrawer(Icon icon) {
-		savedTransformations = new Stack<AffineTransform>();
-		outline = true;
-		createBufferedImage(icon);
+		this(icon, true);
 	}
+	
 	public AWTIconDrawer(Icon icon, boolean outline) {
 		savedTransformations = new Stack<AffineTransform>();
 		this.outline = outline;
 		createBufferedImage(icon);
 	}
+	
 	public void createBufferedImage(Icon icon) {
-		
 		double imageWidth,imageHeight,iconWidth,iconHeight;
 		
 		iconExtent = icon.getExtent();
-		if(iconExtent == Extent.NO_EXTENT) {			
+		if (iconExtent == Extent.NO_EXTENT) {			
 			return;
 		} else {
-    		iconExtent = icon.getBounds(iconExtent);
+    		iconExtent = icon.getBounds(iconExtent).fix();
     		iconWidth = iconExtent.getWidth();
     		iconHeight = iconExtent.getHeight();
 		}
-		if(outline) {
+		if (outline) {
 	    		imageWidth=IconConstants.OUTLINE_IMAGE_SIZE-1;
 	    		imageHeight=IconConstants.OUTLINE_IMAGE_SIZE-1;	
-		}else {
+		} else {
 			return;
 		}
 		double scaleWidth = (imageWidth-1)/iconWidth;
 		double scaleHeight = (imageHeight-1)/iconHeight;
+
+		double transX = -iconExtent.getP1().getX() * scaleWidth + 0.5;
+		double transY = iconExtent.getP2().getY() * scaleHeight + 0.5;
 		
 		image = new BufferedImage(
-				(int)imageWidth, 
-				(int)imageHeight, 
+				(int) imageWidth, 
+				(int) imageHeight, 
 				BufferedImage.TYPE_INT_ARGB
 		);
 		
@@ -133,14 +149,9 @@ public class AWTIconDrawer implements GraphicsInterface {
 		g = image.createGraphics();
 		g.setBackground(new java.awt.Color(255,255,255,0));
 		g.clearRect(0, 0, image.getWidth(), image.getHeight());
-        
-        AffineTransform transform = new AffineTransform(); 
-        
-        transform.translate(
-        		(imageWidth/2),
-        		(imageHeight/2)
-        );
 
+        AffineTransform transform = new AffineTransform(); 
+		transform.translate(transX, transY);
 		transform.scale(scaleWidth, scaleHeight);
 		g.transform(transform); 
 		   
@@ -255,32 +266,76 @@ public class AWTIconDrawer implements GraphicsInterface {
 //			System.out.println("Failed to draw bitmap primitive: " + e.getMessage());
 		}
 	}
-		
-	private void doDrawBitmap(Bitmap b) 
-			throws MalformedURLException, IOException {
+	
+    /**
+     * Convenience method that returns a scaled instance of the
+     * provided {@code BufferedImage}.
+     *
+     * @param img the original image to be scaled
+     * @param targetWidth the desired width of the scaled instance,
+     *    in pixels
+     * @param targetHeight the desired height of the scaled instance,
+     *    in pixels
+     * @return a scaled version of the original {@code BufferedImage}
+     */
+    public BufferedImage getScaledInstance(BufferedImage img,
+                                           int targetWidth,
+                                           int targetHeight)
+    {
+        int type = (img.getTransparency() == Transparency.OPAQUE) ?
+            BufferedImage.TYPE_INT_RGB : BufferedImage.TYPE_INT_ARGB;
+        BufferedImage ret = img;
+        int w = img.getWidth();
+        int h = img.getHeight();
+        
+        do {
+            if (w > targetWidth) {
+                w /= 2;
+                if (w < targetWidth) 
+                    w = targetWidth;
+            }
+            if (h > targetHeight) {
+                h /= 2;
+                if (h < targetHeight) 
+                    h = targetHeight;
+            }
+
+            BufferedImage tmp = new BufferedImage(w, h, type);
+            Graphics2D g2 = tmp.createGraphics();
+            g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, 
+            		RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+            g2.drawImage(ret, 0, 0, w, h, null);
+            g2.dispose();
+
+            ret = tmp;
+        } while (w != targetWidth || h != targetHeight);
+
+        return ret;
+    }
+
+	
+	private void doDrawBitmap(Bitmap b) throws IOException {
+		// TODO: cache bitmap?
 		BufferedImage bitmapImage = null;
-		if (b.getFileName() != null) {
-			bitmapImage = ImageIO.read(new File(b.getFileName()));
-		} else if (b.getImageSource() != null) {
-			byte decodedBytes[] = 
-				new sun.misc.BASE64Decoder().decodeBuffer(b.getImageSource());
-			InputStream in = new ByteArrayInputStream(decodedBytes);  
+		InputStream in = b.getInputStream();
+		if (in != null) 
 			bitmapImage = ImageIO.read(in);
-		} 
 		if (bitmapImage != null) {
 			Extent extent = b.getExtent().fix();
-			g.drawImage(
-					bitmapImage, 
-					(int)extent.getP1().getX(), 
-					(int)extent.getP1().getY(), 
-					(int)extent.getP2().getX(), 
-					(int)extent.getP2().getY(),
-					0,
-					0,
-					bitmapImage.getWidth(),
-					bitmapImage.getHeight(),
-					null
-			);
+			int iw = bitmapImage.getWidth();
+			int ih = bitmapImage.getHeight();
+			double x1 = extent.getP1().getX();
+			double y1 = -extent.getP2().getY();
+			double x2 = extent.getP2().getX();
+			double y2 = -extent.getP1().getY();
+			double[] size = new double[] { x1, y1, x2, y2 };
+			g.getTransform().transform(size, 0, size, 0, 2);
+			int tw = (int) (Math.round(size[2] - size[0])) + 1;
+			int th = (int) (Math.round(size[3] - size[1])) + 1;
+			if (iw > 2 * tw || ih > 2 * th)
+				bitmapImage = getScaledInstance(bitmapImage, tw, th);
+			g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+			g.drawImage(bitmapImage, (int) x1, (int) y1, (int) x2, (int) y2, 0, 0, tw, th, null);
 		}
 	}
 	
@@ -416,64 +471,32 @@ public class AWTIconDrawer implements GraphicsInterface {
 	}
 	
 	private void drawBorderPattern(Rectangle r) {
+		// TODO: this uses integer coordinates in image space
+		//       needs to be reworked to use double coordinates in local space
+		// TODO: add engraved border pattern
 		Types.BorderPattern borderPattern = r.getBorderPattern();
 		Extent outerExtent = r.getExtent().fix();
 		if (outerExtent.getWidth() > 2*BORDER_PATTERN_WIDTH+1 && outerExtent.getHeight() > 2*BORDER_PATTERN_WIDTH+1 ) {
 			
 			Point2D untransformedOuterP1 = new Point2D.Double(
 					outerExtent.getP1().getX(), 
-					outerExtent.getP1().getY()
+					-outerExtent.getP2().getY()
 			);
 			Point2D untransformedOuterP2 = new Point2D.Double(
 					outerExtent.getP2().getX(), 
-					outerExtent.getP2().getY()
+					-outerExtent.getP1().getY()
 			);
 			Point2D outerP1 = new Point2D.Double();
 			Point2D outerP2 = new Point2D.Double();
 			g.getTransform().transform(untransformedOuterP1, outerP1);
 			g.getTransform().transform(untransformedOuterP2, outerP2);
-			java.awt.Polygon upLeft = new java.awt.Polygon(
-					new int[]{
-							(int)outerP1.getX()+1, 
-							(int)outerP1.getX()+1, 
-							(int)outerP2.getX(), 
-							(int)outerP2.getX()-BORDER_PATTERN_WIDTH, 
-							(int)outerP1.getX()+1+BORDER_PATTERN_WIDTH, 
-							(int)outerP1.getX()+1+BORDER_PATTERN_WIDTH, 
-							(int)outerP1.getX()+1
-					}, 
-					new int[]{
-							(int)outerP2.getY(), 
-							(int)outerP1.getY()+1, 
-							(int)outerP1.getY()+1, 
-							(int)outerP1.getY()+1+BORDER_PATTERN_WIDTH, 
-							(int)outerP1.getY()+1+BORDER_PATTERN_WIDTH, 
-							(int)outerP2.getY()-BORDER_PATTERN_WIDTH, 
-							(int)outerP2.getY()
-					}, 
-					7
-			);
-			java.awt.Polygon downRight = new java.awt.Polygon(
-					new int[]{
-							(int)outerP1.getX()+1, 
-							(int)outerP2.getX(), 
-							(int)outerP2.getX(), 
-							(int)outerP2.getX()-BORDER_PATTERN_WIDTH, 
-							(int)outerP2.getX()-BORDER_PATTERN_WIDTH, 
-							(int)outerP1.getX()+1+BORDER_PATTERN_WIDTH, 
-							(int)outerP1.getX()+1
-					}, 
-					new int[]{
-							(int)outerP2.getY(), 
-							(int)outerP2.getY(), 
-							(int)outerP1.getY()+1, 
-							(int)outerP1.getY()+1+BORDER_PATTERN_WIDTH, 
-							(int)outerP2.getY()-BORDER_PATTERN_WIDTH, 
-							(int)outerP2.getY()-BORDER_PATTERN_WIDTH, 
-							(int)outerP2.getY()
-					}, 
-					7
-			);
+			int x1 = (int) outerP1.getX();
+			int x2 = (int) outerP2.getX();
+			int y1 = (int) outerP1.getY();
+			int y2 = (int) outerP2.getY();
+			int[][] coords = new int[][]  { { x1, x2, 1 }, { y1, y2, 1 } };
+			java.awt.Polygon upLeft = makeBorderPolygon(BORDER_PATTERN_UPLEFT, coords);
+			java.awt.Polygon downRight = makeBorderPolygon(BORDER_PATTERN_DOWNRIGHT, coords);
 			java.awt.Color upLeftColor = null;
 			java.awt.Color downRightColor = null;
 			java.awt.Color brighterColor = translateColor(r.getFillColor().brighter());
@@ -494,44 +517,53 @@ public class AWTIconDrawer implements GraphicsInterface {
 			g.setTransform(oldTransform);
 		}
 	}
+
+	public java.awt.Polygon makeBorderPolygon(int[][][] pattern, int[][] coords) {
+		int[] x = new int[pattern[0][0].length];
+		int[] y = new int[pattern[0][0].length];
+		for (int i = 0; i < pattern[0].length; i++) {
+			for (int j = 0; j < pattern[0][0].length; j++) {
+				x[j] += pattern[0][i][j] * coords[0][i];
+				y[j] += pattern[1][i][j] * coords[1][i];
+			}
+		}
+		return new java.awt.Polygon(x, y, x.length);
+	}
 	
-	private void drawBezier(Line l) 
-	{	
-		ArrayList<Point> linePoints = l.getPoints();
-		for(Point lp : linePoints)
-		{
+	private void drawBezier(Line l) {
+		List<Point> linePoints = l.getPoints();
+		if (linePoints.size() < 2)
+			return;
+		
+		ArrayList<Point> bezierPoints = new ArrayList<Point>();
+		Point last = null;
+		for (Point lp : linePoints) {
 			/* invert y to compensate java */
 			lp.setY(-(lp.getY()));
+			if (last != null) {
+				bezierPoints.add(transform(last));
+				double x = (last.getX() + lp.getX()) / 2;
+				double y = (last.getY() + lp.getY()) / 2;
+				bezierPoints.add(transform(new Point(x, y)));
+			}
+			last = lp;
 		}
-		ArrayList<Point> bezierPoints = new ArrayList<Point>();
-		for(int i = 0; i < linePoints.size()-1; i++)
-		{
-			double x = (linePoints.get(i).getX() + linePoints.get(i+1).getX()) / 2;
-			double y = (linePoints.get(i).getY() + linePoints.get(i+1).getY()) / 2;
-			bezierPoints.add(new Point(x, y));
-		}
+		bezierPoints.add(transform(last));
+		
 		GeneralPath gp = new GeneralPath();
-		gp.moveTo(
-				transform(linePoints.get(0)).getX(), 
-				transform(linePoints.get(0)).getY()
-		);
-		gp.lineTo(
-				transform(bezierPoints.get(0)).getX(), 
-				transform(bezierPoints.get(0)).getY()
-		);
-		for(int i = 1; i < bezierPoints.size(); i++)
-		{
-			gp.quadTo(
-					transform(linePoints.get(i)).getX(), 
-					transform(linePoints.get(i)).getY(), 
-					transform(bezierPoints.get(i)).getX(), 
-					transform(bezierPoints.get(i)).getY()
-			);
+		Iterator<Point> i = bezierPoints.iterator();
+		Point p = i.next();
+		gp.moveTo(p.getX(), p.getY());
+		p = i.next();
+		gp.lineTo(p.getX(), p.getY());
+		while (i.hasNext()) {
+			p = i.next();
+			if (i.hasNext()) {
+				Point p2 = i.next();
+				gp.quadTo(p.getX(), p.getY(), p2.getX(), p2.getY());
+			}
 		}
-		gp.lineTo(
-				transform(linePoints.get(linePoints.size()-1)).getX(), 
-				transform(linePoints.get(linePoints.size()-1)).getY()
-		);
+		gp.lineTo(p.getX(), p.getY());
 		
 		setColor(l.getColor());
 		
@@ -658,7 +690,7 @@ public class AWTIconDrawer implements GraphicsInterface {
 			paint = new RadialGradientPaint(
 					new Rectangle2D.Double(
 							x, 
-							y, 
+							-y, 
 							2*width, 
 							2*height
 					),
@@ -724,13 +756,6 @@ public class AWTIconDrawer implements GraphicsInterface {
 			graphics.drawLine(textureSize/2, 0, textureSize/2, textureSize);
 		}
 		
-		try {
-			ImageIO.write(img, "PNG", new File("c:/tmp/texturepaint.png"));
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
 		return new TexturePaint(
 				img, 
 				new java.awt.Rectangle(
@@ -757,17 +782,16 @@ public class AWTIconDrawer implements GraphicsInterface {
 	                palette);
 	   
 	        
-	        for (int y = 0; y < imagedata.height; y++) {
-	        	int x = 0;
+	        int x = 0, y = 0;
+	        for (y = 0; y < imagedata.height; y++) 
 	        	imagedata.setAlpha(x, y, 0);
-
-	        }
-        	for (int x = 0; x < imagedata.width; x++) {
-        		int y = imagedata.height-1;
+	        
+	        y = imagedata.height-1;
+        	for (x = 0; x < imagedata.width; x++) 
         		imagedata.setAlpha(x, y, 0);
-        	}
-	        for (int y = 0; y < image.getHeight(); y++) {
-	            for (int x = 0; x < image.getWidth(); x++) {
+        	
+	        for (y = 0; y < image.getHeight(); y++) {
+	            for (x = 0; x < image.getWidth(); x++) {
 	            	int rgb = image.getRGB(x, y);
 	            	int pixel = palette.getPixel(new RGB((rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, rgb & 0xFF));
 	            	imagedata.setPixel(x+1, y, pixel);

@@ -33,6 +33,7 @@ public class Extent {
 				ext.getP1().getY()+getHeight()/2
 		);
 	}
+	
 	/**
 	 * Returns an extent representing the same area as this extent but with points
 	 * p1 and p2 such that p1 <= p2.
@@ -61,6 +62,7 @@ public class Extent {
 
 		return new Extent(new Point(minx, miny), new Point(maxx, maxy));
 	}
+	
 	/**
 	 * Returns a copy of this Extent that contains the provided extent,
 	 * expanding it symmetric if necessary.
@@ -124,18 +126,23 @@ public class Extent {
 	public Extent clone() {
 		return new Extent(p1.clone(), p2.clone());
 	}
+	
 	public void setP2(Point p2) {
 		this.p2 = p2;
 	}
+	
 	public Point getP2() {
 		return p2;
 	}
+	
 	public void setP1(Point p1) {
 		this.p1 = p1;
 	}
+	
 	public Point getP1() {
 		return p1;
 	}
+	
 	public String toString() {
 		return "P1 = " + getP1() + ", P2 = " + getP2() + ", width = " + getWidth() + ", height = " + getHeight();
 	}
