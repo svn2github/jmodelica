@@ -1990,7 +1990,53 @@ class ModelDescription:
                     nominal_attributes.append(sv.get_fundamental_type().get_nominal())
         return zip(tuple(vrefs), tuple(nominal_attributes))
 
-
+    def get_p_opt_nominal(self, include_alias=True, ignore_cache=False):
+        """ 
+        Get the nominal attributes for all optimized parameters
+        (variability:parameter, free: true).
+        
+        Parameters::
+        
+            include_alias --
+                If True, also include variables which are alias variables in
+                the result. If False, only non-alias variables will be included
+                in the result.
+                Default: True
+            ignore_cache -- 
+                If False look for the value in the cache first, if True skip 
+                cache and derive value from data structure.
+                Default: False
+        
+        Returns::
+        
+            A list of tuples containing value reference and value of nominal 
+            attribute respectively.
+        """
+        if not ignore_cache:
+            return self.function_cache.get(self, 'get_p_opt_nominal',
+                                           include_alias)
+        
+        vrefs = []
+        nominal_attributes = []
+        scalarvariables = self.get_model_variables()
+        
+        if include_alias:
+            for sv in scalarvariables:
+                ftype = sv.get_fundamental_type()
+                if (sv.get_variability() == PARAMETER and 
+                    ftype.get_free() == True):
+                    vrefs.append(sv.get_value_reference())
+                    nominal_attributes.append(ftype.get_nominal())
+            return zip(tuple(vrefs), tuple(nominal_attributes))
+            
+        for sv in scalarvariables:
+            ftype = sv.get_fundamental_type()
+            if (sv.get_alias() == NO_ALIAS and 
+                sv.get_variability() == PARAMETER and 
+                ftype.get_free() == True):
+                vrefs.append(sv.get_value_reference())
+                nominal_attributes.append(ftype.get_nominal())
+        return zip(tuple(vrefs), tuple(nominal_attributes))
 
 #############################
     def get_p_opt_initial_guess(self, include_alias=True, ignore_cache=False):

@@ -23,6 +23,7 @@ import logging
 import codecs
 from operator import itemgetter
 import time
+import copy
 
 try:
     import casadi
@@ -139,7 +140,7 @@ class CasadiCollocator(object):
         self.solver.setOption(k,v)
     
     def export_result_dymola(self, file_name='', format='txt', 
-        write_scaled_result = False):
+                             write_scaled_result=False):
         """
         Export an optimization or simulation result to file in Dymolas result file 
         format. The parameter values are read from the z vector of the model object 
@@ -159,11 +160,11 @@ class CasadiCollocator(object):
                 binary Matlab format.
                 Default: 'txt'
             
-            scaled --
+            write_scaled_result --
                 Set this parameter to True to write the result to file without
-                taking scaling into account. If the value of scaled is False, then 
-                the variable scaling factors of the model are used to reproduced the 
-                unscaled variable values.
+                taking scaling into account. If the value of write_sacled_result
+                is False, then the variable scaling factors of the model are
+                used to reproduced the unscaled variable values.
                 Default: False
 
         Limitations::
@@ -171,7 +172,6 @@ class CasadiCollocator(object):
             Currently only textual format is supported.
         """
         (t,dx_opt,x_opt,u_opt,w_opt,p_opt) = self.get_result()
-        #data = N.hstack((N.transpose(N.array([t])),dx_opt,x_opt,u_opt,w_opt))
         data = N.hstack((t,dx_opt,x_opt,u_opt,w_opt))
         
         if (format=='txt'):
@@ -339,22 +339,30 @@ class CasadiCollocator(object):
                     
             f.write('\n')
 
-            sc = N.hstack((N.array([1.0]),self.model.get_dx_sf(),self.model.get_x_sf(),self.model.get_u_sf(),self.model.get_w_sf()))            
-            rescale = self.model.enable_scaling
-
+            sc = N.hstack((N.array([1.0]),self.model.get_dx_sf(),self.model.get_x_sf(),self.model.get_u_sf(),self.model.get_w_sf()))
+            try:
+                rescale = (self.model.enable_scaling and 
+                           not self.write_scaled_results)
+            except AttributeError:
+                rescale = self.model.enable_scaling
+            
+            # Get objects for parameter rescaling
+            p_opt_names = [str(p) for p in self.model.get_p()]
+            p_sf = self.model.get_p_sf()
+            p_vr_map = self.model.get_p_vr_map()
+            
             # Write data
             # Write data set 1
             f.write('float data_1(%d,%d)\n' % (2, n_parameters + 1))
             f.write("%.14E" % data[0,0])
             str_text = ''
             for i in params:
-                if rescale:
-                    #str_text += " %.14E" % (z[ref]*sc[ref])
-                    str_text += " %.14E" % (start_values[i[0]])
-                    #raise NotImplementedError
+                if rescale and i[1] in p_opt_names:
+                    str_text += " %.14E" % (start_values[i[0]] * 
+                                            p_sf[p_vr_map[i[0]]])
                 else:
                     str_text += " %.14E" % (start_values[i[0]])#(0.0)#(z[ref])
-                    
+            
             f.write(str_text)
             f.write('\n')
             f.write("%.14E" % data[-1,0])
@@ -367,16 +375,16 @@ class CasadiCollocator(object):
             n_points = len(data[:,0])
             f.write('float data_2(%d,%d)\n' % (n_points, n_vars))
             for i in range(n_points):
-                str = ''
+                str_text = ''
                 for ref in range(n_vars):
                     if ref==0: # Don't scale time
-                        str = str + (" %.14E" % data[i,ref])
+                        str_text = str_text + (" %.14E" % data[i,ref])
                     else:
                         if rescale:
-                            str = str + (" %.14E" % (data[i,ref]*sc[ref]))
+                            str_text = str_text + (" %.14E" % (data[i,ref]*sc[ref]))
                         else:
-                            str = str + (" %.14E" % data[i,ref])
-                f.write(str+'\n')
+                            str_text = str_text + (" %.14E" % data[i,ref])
+                f.write(str_text+'\n')
 
             f.write('\n')
 
@@ -502,13 +510,13 @@ class CasadiCollocator(object):
 
         for vr, val in _p_opt_min:
             if val != None:
-                p_opt_min[self.model.get_p_vr_map()[vr]] = val
+                p_opt_min[self.model.get_p_vr_map()[vr]] = val/self.model.get_p_sf()[self.model.get_p_vr_map()[vr]]
         for vr, val in _p_opt_max:
             if val != None:
-                p_opt_max[self.model.get_p_vr_map()[vr]] = val
+                p_opt_max[self.model.get_p_vr_map()[vr]] = val/self.model.get_p_sf()[self.model.get_p_vr_map()[vr]]
         for vr, val in _p_opt_start:
             if val != None:
-                p_opt_start[self.model.get_p_vr_map()[vr]] = val
+                p_opt_start[self.model.get_p_vr_map()[vr]] = val/self.model.get_p_sf()[self.model.get_p_vr_map()[vr]]
 
         for vr, val in _dx_min:
             if val != None:
@@ -1579,11 +1587,11 @@ class Radau2Collocator(CasadiCollocator):
             self.cost = 0
             
             # Variable reference maps
-            x_vr = self.model.get_x_vr_map()
+            x_vr = copy.deepcopy(self.model.get_x_vr_map())
             x_vr['var_name'] = 'x'
-            w_vr = self.model.get_w_vr_map()
+            w_vr = copy.deepcopy(self.model.get_w_vr_map())
             w_vr['var_name'] = 'w'
-            u_vr = self.model.get_u_vr_map()
+            u_vr = copy.deepcopy(self.model.get_u_vr_map())
             u_vr['var_name'] = 'u'
             
             # Map of maps

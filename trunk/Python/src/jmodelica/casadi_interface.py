@@ -593,6 +593,7 @@ class CasadiModel(object):
             x_nominal = self.xmldoc.get_x_nominal(include_alias = False)
             u_nominal = self.xmldoc.get_u_nominal(include_alias = False)
             w_nominal = self.xmldoc.get_w_nominal(include_alias = False)
+            p_nominal = self.xmldoc.get_p_opt_nominal(include_alias = False)
 
             for vr, val in x_nominal:
                 if val != None:
@@ -606,6 +607,10 @@ class CasadiModel(object):
             for vr, val in w_nominal:
                 if val != None:
                     self.w_sf[self.w_vr_map[vr]] = N.abs(val)
+                    
+            for vr, val in p_nominal:
+                if val != None:
+                    self.p_sf[self.p_vr_map[vr]] = N.abs(val)        
 
 
 
