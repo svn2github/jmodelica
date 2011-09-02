@@ -30,9 +30,10 @@ public class InstanceErrorHandler implements IErrorHandler {
 	private Set<InstanceProblem> countedWarnings = new HashSet<InstanceProblem>();
 	private boolean lostErrors;
 	
-	private static final int MAX_ERRORS_SHOWN = 20;
+	private static final int MAX_ERRORS_SHOWN = 50;
 	private static final String[] MSG_FORMATS = new String[] {
-		"No errors found.", "%d warning%s found.", "%d error%s found.", "%d error%s and %d warning%s found."
+		"No errors found.", "%d warning%s found:\n", 
+		"%d error%s found:\n", "%d error%s and %d warning%s found:\n"
 	};
 	private static final int MSG_FORMAT_ERR = 2;
 	private static final int MSG_FORMAT_WARN = 1;
@@ -85,6 +86,10 @@ public class InstanceErrorHandler implements IErrorHandler {
 		return getNumErrors() > 0;
 	}
 
+	public boolean hasProblems() {
+		return (getNumErrors() + getNumWarnings()) > 0;
+	}
+
 	public void resetCounter() {
 		countedErrors.clear();
 		countedWarnings.clear();
@@ -103,30 +108,32 @@ public class InstanceErrorHandler implements IErrorHandler {
 		return res;
 	}
 
+	public Collection<InstanceProblem> getProblemsByType() {
+		Collection<InstanceProblem> res = new ArrayList<InstanceProblem>(found.size());
+		res.addAll(countedErrors);
+		res.addAll(countedWarnings);
+		return res;
+	}
+
 	public String resultMessage() {
-		String msg;
-		if (hasLostErrors()) {
-			Collection<InstanceProblem> err = getLostErrors();
-			StringBuilder buf = new StringBuilder("Errors found in files outside workspace:\n");
-			if (err.size() > MAX_ERRORS_SHOWN)
-				buf.append(String.format("(First %d of %d errors shown.)\n",
-						MAX_ERRORS_SHOWN, err.size()));
-			int i = 0;
-			for (InstanceProblem e : err) {
-				if (i++ < MAX_ERRORS_SHOWN) {
-					buf.append('\n');
-					buf.append(e);
-				}
+		Collection<InstanceProblem> err = getProblemsByType();
+		int numE = getNumErrors();
+		int numW = getNumWarnings();
+		String f = MSG_FORMATS[(numE > 0 ? MSG_FORMAT_ERR : 0) + (numW > 0 ? MSG_FORMAT_WARN : 0)];
+		if (numE == 0)
+			numE = numW;
+		String msg = String.format(f, numE, (numE > 1 ? "s" : ""), numW, (numW > 1 ? "s" : ""));
+		StringBuilder buf = new StringBuilder(msg);
+		if (err.size() > MAX_ERRORS_SHOWN)
+			buf.append(String.format("(First %d of %d problems shown.)\n",
+					MAX_ERRORS_SHOWN, err.size()));
+		int i = 0;
+		for (InstanceProblem e : err) {
+			if (i++ < MAX_ERRORS_SHOWN) {
+				buf.append('\n');
+				buf.append(e);
 			}
-			msg = buf.toString();
-		} else {
-			int numE = getNumErrors();
-			int numW = getNumWarnings();
-			String f = MSG_FORMATS[(numE > 0 ? MSG_FORMAT_ERR : 0) + (numW > 0 ? MSG_FORMAT_WARN : 0)];
-			if (numE == 0)
-				numE = numW;
-			msg = String.format(f, numE, (numE > 1 ? "s" : ""), numW, (numW > 1 ? "s" : ""));
 		}
-		return msg;
+		return buf.toString();
 	}
 }

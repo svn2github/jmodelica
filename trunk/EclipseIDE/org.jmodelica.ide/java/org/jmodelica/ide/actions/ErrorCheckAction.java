@@ -89,7 +89,7 @@ public class ErrorCheckAction extends CurrentClassAction implements IJobChangeLi
 		String message = event.getResult().getMessage();
 		int severity = event.getResult().getSeverity();
 		int kind = (severity == IStatus.OK) ? MessageDialog.INFORMATION : MessageDialog.ERROR;
-		boolean expanded = severity == IStatus.WARNING;
+		boolean expanded = message.contains("\n\n");
 		new ShowMessageJob(title, message, kind, expanded).schedule();
 	}
 

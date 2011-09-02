@@ -12,8 +12,9 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.jmodelica.ant.ExtractPluginVersion.VERSION_FILE;
+
 public class PatchFeature {
-	public static final String VERSION_FILE = ExtractPluginVersion.VERSION_FILE;
 	public static final String PROPERTY_FILE = "feature.properties";
 	private String feature;
 	private String dataDir;

@@ -9,8 +9,9 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.jmodelica.ant.ExtractPluginVersion.VERSION_FILE;
+
 public class PatchSite {
-	public static final String VERSION_FILE = ExtractPluginVersion.VERSION_FILE;
 	private String dataDir;
 	private String path;
 
