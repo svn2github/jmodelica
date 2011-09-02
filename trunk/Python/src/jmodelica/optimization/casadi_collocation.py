@@ -2776,8 +2776,8 @@ class PseudoSpectral(CasadiCollocator):
         
         xx_init = self.get_xx_init()
 
-        x_init = N.zeros((len(t), self.model.get_n_x()))
-        u_init = N.zeros((len(t)-len(DISCR)+len(COLLO), self.model.get_n_u()))
+        x_init = N.zeros((len(t_opt), self.model.get_n_x()))
+        u_init = N.zeros((len(t_opt)-len(DISCR)+len(COLLO), self.model.get_n_u()))
         
         for i in range(self.model.get_n_x()):
             x_init[:,i] = N.interp(t_opt, var_data[:,0], var_data[:,i+1]).transpose()
