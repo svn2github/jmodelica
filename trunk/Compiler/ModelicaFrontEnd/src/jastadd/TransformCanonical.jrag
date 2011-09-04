@@ -163,6 +163,7 @@ aspect TransformCanonical {
 	
 	public class StructuredBLT extends BLT {
 		private ArrayList<AbstractEquationBlock> topEquationBlocks = new ArrayList<AbstractEquationBlock>();
+		private ArrayList<AbstractEquationBlock> allBlocks = new ArrayList<AbstractEquationBlock>();
 		private ArrayList<AbstractEquationBlock> odeBlocks = new ArrayList<AbstractEquationBlock>();
 		private ArrayList<AbstractEquationBlock> realOutputBlocks = new ArrayList<AbstractEquationBlock>();
 		private ArrayList<AbstractEquationBlock> integerBooleanOutputBlocks = new ArrayList<AbstractEquationBlock>();
@@ -247,7 +248,16 @@ aspect TransformCanonical {
 					otherBlocks.add(eb);
 				}	
 			}
+			
+			allBlocks.addAll(odeBlocks);
+			allBlocks.addAll(realOutputBlocks);
+			allBlocks.addAll(integerBooleanOutputBlocks);
+			allBlocks.addAll(otherBlocks);
 
+		}
+
+	    public ArrayList<AbstractEquationBlock> getAllBlocks() {
+			return allBlocks;
 		}
 
 	    public ArrayList<AbstractEquationBlock> getOdeBlocks() {
@@ -267,7 +277,48 @@ aspect TransformCanonical {
 		}
 
 		public String toString() {
-			reset();
+			
+			HashSet<FVariable> solvedVars = new HashSet<FVariable>();
+			
+			int n_blocks = 0;
+			/*
+			for (AbstractEquationBlock eb : getOdeBlocks()) {
+				n_blocks++;
+				for (FVariable fv : eb.activeVariables()) {
+					System.out.println("'" + fv.name() + "',");
+				}
+				for (FVariable fv : eb.inactiveVariables()) {
+					if (!solvedVars.contains(fv)) {
+						System.out.println("ERRROR:");
+						System.out.println("Variable:");
+						System.out.println(fv);
+						System.out.println("needed by block:");
+						System.out.println(eb.toStringVerbose());
+						System.out.println("have not been solved");
+					}							
+				}
+				solvedVars.addAll(eb.activeVariables());
+			}
+			
+			for (AbstractEquationBlock eb : getOtherBlocks()) {
+				n_blocks++;
+				for (FVariable fv : eb.inactiveVariables()) {
+					if (!solvedVars.contains(fv)) {
+						System.out.println("ERRROR:");
+						System.out.println("Variable:");
+						System.out.println(fv);
+						System.out.println("needed by block:");
+						System.out.println(eb.toStringVerbose());
+						System.out.println("have not been solved");
+					}							
+				}
+				solvedVars.addAll(eb.activeVariables());
+			}
+			
+			System.out.println("Number of blocks in generated code: " + n_blocks +  
+			" Total number of blocks: " + size());
+			*/
+
 			StringBuffer str = new StringBuffer();
 			str.append("************* Structured BLT*********\n");
 			str.append("***********************************\n");	
@@ -425,7 +476,11 @@ aspect TransformCanonical {
 			for (FVariable fv : dependsOn()) {
 				str.append(fv.prettyPrint("") + "\n");
 			} 
-			str.append("**** Predecessors ****\n");
+			str.append("**** Inactive variables ****\n");
+			for (FVariable fv : inactiveVariables()) {
+				str.append(fv.prettyPrint("") + "\n");
+			} 
+/*			str.append("**** Predecessors ****\n");
 			for (AbstractEquationBlock eb : getPredecessors()) {
 				str.append(eb.toString());
 				str.append("---------\n");
@@ -439,7 +494,7 @@ aspect TransformCanonical {
 			for (AbstractEquationBlock eb : getSuccessors()) {
 				str.append(eb.toString());
 				str.append("---------\n");
-			}
+			}*/
 		    str.append("**** Block ends ****\n");				
 			return str.toString();
 		}		

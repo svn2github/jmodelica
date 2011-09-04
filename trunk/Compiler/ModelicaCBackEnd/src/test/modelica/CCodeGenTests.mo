@@ -4127,6 +4127,70 @@ equation
   5 = x + 3*y;  
 end BlockTest1;
 
+
+model BlockTest2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="BlockTest2",
+         description="Test of code generation of when clauses.",
+         generate_ode=true,
+         equation_sorting=true,
+         template="$C_dae_blocks_residual_functions$
+                   $C_ode_derivatives$ 
+                   $C_dae_add_blocks_residual_functions$",
+         generatedCode=" 
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {
+  jmi_real_t** res = &residual;
+  if (init==JMI_BLOCK_INITIALIZE) {
+    x[0] = _z2_2_4;
+    x[1] = _z2_1_3;
+  } else if (init==JMI_BLOCK_EVALUATE) {
+    _z2_2_4 = x[0];
+    _z2_1_3 = x[1];
+  (*res)[0] = 5 - (( 3 ) * ( _z2_1_3 ) + ( 4 ) * ( _z2_2_4 ));
+  (*res)[1] = 4 - (( 1 ) * ( _z2_1_3 ) + ( 2 ) * ( _z2_2_4 ));
+  }
+  return 0;
+}
+
+static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init) {
+  jmi_real_t** res = &residual;
+  if (init==JMI_BLOCK_INITIALIZE) {
+    x[0] = _z1_2;
+  } else if (init==JMI_BLOCK_EVALUATE) {
+    _z1_2 = x[0];
+  (*res)[0] = _z1_2 + 2 - (( sin(_z1_2) ) * ( 3 ));
+  }
+  return 0;
+}
+
+  /************* ODE section *********/
+  jmi_kinsol_solve(jmi->dae_block_residuals[0]);
+  _der_x2_5 =  - ( _x2_1 ) + _z2_1_3 + _z2_2_4;
+  jmi_kinsol_solve(jmi->dae_block_residuals[1]);
+  _der_x1_6 =  - ( _x1_0 ) + _z1_2;
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+
+   jmi_dae_add_equation_block(*jmi,dae_block_0, NULL,2,0 );
+ jmi_dae_add_equation_block(*jmi,dae_block_1, NULL,1,1 );
+
+")})));
+
+Real x1,x2,z1,z2[2];
+
+equation
+
+sin(z1)*3 = z1 + 2;
+{{1,2},{3,4}}*z2 = {4,5};
+
+der(x2) = -x2 + z2[1] + z2[2];
+der(x1) = -x1 + z1;
+
+end BlockTest2;
+
+
 model StartValues1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.CCodeGenTestCase(

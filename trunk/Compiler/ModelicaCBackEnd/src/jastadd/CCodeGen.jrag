@@ -1590,7 +1590,6 @@ aspect CCodeGen {
 
 	public void StructuredBLT.genOdeDerivativeBlocks(PrintStream str) {
 		int block_counter = 0;			
-		reset();
 		str.append("/************* ODE section *********/\n");	
 		// Loop over all derivatives
 		for (AbstractEquationBlock eb : getOdeBlocks()) {
