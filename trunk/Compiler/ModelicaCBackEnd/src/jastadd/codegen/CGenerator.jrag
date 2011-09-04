@@ -774,6 +774,31 @@ public class CGenerator extends GenericGenerator {
 		}
 	}
 
+	class DAETag_C_outputVrefs extends DAETag {
+		
+		public DAETag_C_outputVrefs(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("C_DAE_output_vrefs","C: DAE output value references",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+
+			genPrinter.print("static const int Output_vrefs[" + 
+				fclass.numOutputs() + "] = {");
+
+			int ind = 0;
+			for (FVariable fv : fclass.outputs()) {
+				genPrinter.print(fv.valueReference());
+				if (ind < fclass.numOutputs()-1) {
+					genPrinter.print(",");
+				}	
+				ind++;
+			}		
+			genPrinter.print("};\n");
+		}	
+	}
+
 	/**
 	 * Generates MODEL_IDENTIFIER.
 	 */

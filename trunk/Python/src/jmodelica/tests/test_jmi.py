@@ -180,7 +180,7 @@ class TestModel_VDP:
     @testattr(stddist = True)   
     def test_get_sizes(self):
         """ Test jmi.JMUModel.get_sizes method."""
-        sizes = [0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 27] 
+        sizes = [0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 27] 
         ntools.assert_equal(self.vdp.get_sizes(),sizes)
     
     @testattr(stddist = True)    
@@ -730,6 +730,7 @@ class TestJMIModel_VDP:
         n_integer_u = ct.c_int()        
         n_boolean_d = ct.c_int()
         n_boolean_u = ct.c_int()                
+        n_outputs = ct.c_int()                    
         n_sw = ct.c_int()
         n_sw_init = ct.c_int()
         n_guards = ct.c_int()
@@ -740,7 +741,7 @@ class TestJMIModel_VDP:
                                     n_boolean_ci, n_boolean_cd, n_boolean_pi, n_boolean_pd,
                                     n_real_dx, n_real_x, n_real_u, n_real_w, n_tp,
                                     n_real_d,n_integer_d,n_integer_u,n_boolean_d,n_boolean_u,
-                                    n_sw, n_sw_init, n_guards, n_guards_init,n_z)
+                                    n_outputs,n_sw, n_sw_init, n_guards, n_guards_init,n_z)
 
     @testattr(stddist = True)
     def test_get_offsets(self):
@@ -1603,3 +1604,35 @@ class TestEmptyModelException(object):
        """
        nose.tools.assert_raises(JMIException,JMUModel,jmi.get_jmu_name(self._cpath))
 
+class TestOutputVrefs:
+    """Test that output value references are generate correctly.
+    """
+    @classmethod
+    def setUpClass(cls):
+        """
+        Sets up the test class.
+        """
+        fpath_ot = os.path.join(get_files_path(), 'Modelica', "OutputTest.mo")
+        cpath_ot = "OutputTest"
+        fname_ot = compile_jmu(cpath_ot, fpath_ot)
+
+    def setUp(self):
+        """
+        Sets up the test case.
+        """
+        self.ot = JMUModel("OutputTest.jmu")
+
+    @testattr(stddist = True)   
+    def test_get_sizes(self):
+        """ Test jmi.JMUModel.get_sizes method."""
+        sizes = [0,0,0,0,0,0,0,0,0,0,0,0,5,5,4,42,0,0,0,0,0,28,0,0,0,0,0,113]
+        ntools.assert_equal(self.ot.get_sizes(),sizes)
+
+    @testattr(stddist = True)   
+    def test_output_vrefs(self):
+        """ Test jmi.JMIModel.get_output_vrefs method."""
+        vrefs = [ 5,  6,  7,  8,  9, 14, 17, 20, 23, 26, 29, 30, 31, 32, 33, 34, 35,
+                 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46]
+        vrefs_test = N.zeros(28,dtype=N.int32)
+        self.ot.jmimodel.get_output_vrefs(vrefs_test)
+        ntools.assert_equal(vrefs_test.tolist(),vrefs)

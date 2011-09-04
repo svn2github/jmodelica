@@ -464,6 +464,7 @@ int jmi_delete(jmi_t* jmi);
  * @param n_integer_u (Output) number of integer inputs.
  * @param n_boolean_d (Output) number of boolean discrete variables.
  * @param n_boolean_u (Output) number of boolean inputs.
+ * @param n_outputs (Output) number of outputs.
  * @param n_sw (output) number of switching functions in the DAE \f$F\f$.
  * @param n_sw_init (output) number of switching functions in the initialization system \f$F_0\f$.
  * @param n_guards (output) number of guards in the DAE \f$F\f$.
@@ -477,7 +478,7 @@ int jmi_get_sizes(jmi_t* jmi, int* n_real_ci, int* n_real_cd, int* n_real_pi, in
 		int* n_boolean_ci, int* n_boolean_cd, int* n_boolean_pi, int* n_boolean_pd,
 		int* n_real_dx, int* n_real_x, int* n_real_u, int* n_real_w, int* n_tp,
 		int* n_real_d, int* n_integer_d, int* n_integer_u, int* n_boolean_d, int* n_boolean_u,
-		int* n_sw, int* n_sw_init, int* n_guards, int* n_guards_init, int* n_z);
+		int* n_outputs, int* n_sw, int* n_sw_init, int* n_guards, int* n_guards_init, int* n_z);
 
 /**
  * \brief Get the offsets for the variable types in the \f$z\f$ vector.
@@ -837,6 +838,17 @@ jmi_real_t* jmi_get_boolean_d(jmi_t* jmi);
  *
  */
 jmi_real_t* jmi_get_boolean_u(jmi_t* jmi);
+
+/**
+ * \brief Get the value references of the outputs.
+ *
+ * @param jmi A jmi_t struct.
+ * @param output_vrefs (Output) An array containing the value references
+ *                              of the outputs.
+ * @return Error code.
+ *
+ */
+int jmi_get_output_vrefs(jmi_t *jmi, int *output_vrefs);
 
 /**
  * \brief Get a pointer to the first switching function in the DAE \$fF\$f.

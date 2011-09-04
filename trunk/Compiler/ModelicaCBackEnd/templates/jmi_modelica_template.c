@@ -90,6 +90,9 @@ static const int Scaling_method = $C_DAE_scaling_method$;
 
 #define sf(i) (jmi->variable_scaling_factors[i])
 
+static const int N_outputs = $n_outputs$;
+$C_DAE_output_vrefs$
+
 $C_DAE_equation_sparsity$
 
 $C_variable_aliases$
@@ -276,7 +279,8 @@ int jmi_new(jmi_t** jmi) {
 	   N_string_ci, N_string_cd, N_string_pi, N_string_pd,
 	   N_real_dx,N_real_x, N_real_u, N_real_w,N_t_p,
 	   N_real_d,N_integer_d,N_integer_u,N_boolean_d,N_boolean_u,
-	   N_string_d,N_string_u,N_sw,N_sw_init,N_guards,N_guards_init,
+	   N_string_d,N_string_u,N_outputs,(int (*))Output_vrefs,
+	   N_sw,N_sw_init,N_guards,N_guards_init,
 	   N_dae_blocks,N_dae_init_blocks,
 	   Scaling_method);
 

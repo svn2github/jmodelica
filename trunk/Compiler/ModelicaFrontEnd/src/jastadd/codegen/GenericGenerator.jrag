@@ -464,6 +464,20 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
+	class DAETag_numOutputs extends DAETag {
+		
+		public DAETag_numOutputs(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_outputs","Number of output variables",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numOutputs());
+		}
+	
+	}
+
 	class DAETag_numDiscreteIntegerVariables extends DAETag {
 		
 		public DAETag_numDiscreteIntegerVariables(AbstractGenerator myGenerator, 

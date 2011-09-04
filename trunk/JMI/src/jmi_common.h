@@ -872,6 +872,8 @@ struct jmi_block_residual_t {
  * @param n_boolean_u Number of boolean inputs.
  * @param n_string_d Number of string discrete parameters.
  * @param n_string_u Number of string inputs.
+ * @param n_outputs Number of outputs.
+ * @param output_vrefs Value references of the outputs.
  * @param n_sw Number of switching functions in DAE \$fF\$f.
  * @param n_sw_init Number of switching functions in DAE initialization system \$fF_0\$f.
  * @param n_guards Number of guards in DAE \$fF\$f.
@@ -890,7 +892,9 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 		int n_tp,int n_real_d,
 		int n_integer_d, int n_integer_u,
 		int n_boolean_d, int n_boolean_u,
-		int n_string_d, int n_string_u, int n_sw, int n_sw_init,
+		int n_string_d, int n_string_u,
+		int n_outputs, int* output_vrefs,
+		int n_sw, int n_sw_init,
 		int n_guards, int n_guards_init,
 		int n_dae_blocks, int n_dae_init_blocks,
 		int scaling_method);
@@ -1200,6 +1204,10 @@ struct jmi_t{
 
 	int n_string_d;                      /**< \brief Number of string discrete variables. */
 	int n_string_u;                      /**< \brief Number of string inputs. */
+
+	int n_outputs;                       /** \brief Number of output variables. */
+
+	int *output_vrefs;                   /** \brief Value references of the output variables. */
 
 	int n_sw;                            /**< \brief Number of switching functions in the DAE \f$F\f$. */
 	int n_sw_init;                       /**< \brief Number of switching functions in the DAE initialization system\f$F_0\f$. */

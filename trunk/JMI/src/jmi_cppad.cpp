@@ -54,7 +54,9 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 		int n_tp,int n_real_d,
 		int n_integer_d, int n_integer_u,
 		int n_boolean_d, int n_boolean_u,
-		int n_string_d, int n_string_u, int n_sw, int n_sw_init,
+		int n_string_d, int n_string_u,
+		int n_outputs, int* output_vrefs,
+		int n_sw, int n_sw_init,
 		int n_guards, int n_guards_init,
 		int n_dae_blocks, int n_dae_init_blocks,
 		int scaling_method) {
@@ -105,6 +107,12 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 
 	jmi_->n_string_d = n_string_d;
 	jmi_->n_string_u = n_string_u;
+
+	jmi_->n_outputs = n_outputs;
+	jmi_->output_vrefs = (int*)calloc(n_outputs,sizeof(int));
+	for (int i=0;i<n_outputs;i++) {
+		jmi_->output_vrefs[i] = output_vrefs[i];
+	}
 
 	jmi_->n_sw = n_sw;
 	jmi_->n_sw_init = n_sw_init;
@@ -989,6 +997,7 @@ int jmi_delete(jmi_t* jmi){
 		jmi_delete_block_residual(jmi->dae_block_residuals[i]);
 	}
 
+	free(jmi->output_vrefs);
 	delete jmi->z;
 	free(*(jmi->z_val));
 	free(jmi->z_val);

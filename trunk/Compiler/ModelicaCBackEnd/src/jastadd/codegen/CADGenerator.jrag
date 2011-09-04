@@ -255,8 +255,6 @@ public class CADGenerator extends CGenerator {
 		}
 	}
 	
-	
-
 	class DAETag_C_equationSparsity extends DAETag {
 		
 		public DAETag_C_equationSparsity(AbstractGenerator myGenerator, 

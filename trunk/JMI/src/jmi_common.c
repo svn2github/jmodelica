@@ -776,7 +776,7 @@ int jmi_get_sizes(jmi_t* jmi, int* n_real_ci, int* n_real_cd, int* n_real_pi, in
 		int* n_boolean_ci, int* n_boolean_cd, int* n_boolean_pi, int* n_boolean_pd,
 		int* n_real_dx, int* n_real_x, int* n_real_u, int* n_real_w,int* n_tp,
 		int* n_real_d, int* n_integer_d, int* n_integer_u, int* n_boolean_d, int* n_boolean_u,
-		int* n_sw, int* n_sw_init, int* n_guards, int* n_guards_init, int* n_z) {
+		int* n_outputs, int* n_sw, int* n_sw_init, int* n_guards, int* n_guards_init, int* n_z) {
 
 	*n_real_ci = jmi->n_real_ci;
 	*n_real_cd = jmi->n_real_cd;
@@ -803,6 +803,8 @@ int jmi_get_sizes(jmi_t* jmi, int* n_real_ci, int* n_real_cd, int* n_real_pi, in
 	*n_integer_u = jmi->n_integer_u;
 	*n_boolean_d = jmi->n_boolean_d;
 	*n_boolean_u = jmi->n_boolean_u;
+
+	*n_outputs = jmi->n_outputs;
 
     *n_sw = jmi->n_sw;
     *n_sw_init = jmi->n_sw_init;
@@ -1499,6 +1501,14 @@ jmi_real_t* jmi_get_boolean_d(jmi_t* jmi) {
 
 jmi_real_t* jmi_get_boolean_u(jmi_t* jmi) {
 	return *(jmi->z_val) + jmi->offs_integer_u;
+}
+
+int jmi_get_output_vrefs(jmi_t *jmi, int *output_vrefs) {
+	int i;
+	for (i=0;i<jmi->n_outputs;i++) {
+		output_vrefs[i] = jmi->output_vrefs[i];
+	}
+	return 0;
 }
 
 jmi_real_t* jmi_get_sw(jmi_t* jmi) {

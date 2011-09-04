@@ -424,6 +424,7 @@ class JMUModel(BaseModel):
         self._n_integer_u = ct.c_int()
         self._n_boolean_d = ct.c_int()
         self._n_boolean_u = ct.c_int()
+        self._n_outputs = ct.c_int()
         self._n_sw = ct.c_int()
         self._n_sw_init = ct.c_int()
         self._n_guards = ct.c_int()
@@ -1362,12 +1363,13 @@ class JMUModel(BaseModel):
                                 self._n_integer_u,
                                 self._n_boolean_d,
                                 self._n_boolean_u,
+                                self._n_outputs,
                                 self._n_sw,
                                 self._n_sw_init,
                                 self._n_guards,
                                 self._n_guards_init,
                                 self._n_z)
-        
+
         l = [self._n_real_ci.value, self._n_real_cd.value, \
              self._n_real_pi.value, self._n_real_pd.value, \
              self._n_integer_ci.value, self._n_integer_cd.value, \
@@ -1379,6 +1381,7 @@ class JMUModel(BaseModel):
              self._n_real_d.value, \
              self._n_integer_d.value, self._n_integer_u.value,\
              self._n_boolean_d.value, self._n_boolean_u.value,\
+             self._n_outputs.value,
              self._n_tp.value, self._n_sw.value,
              self._n_sw_init.value, self._n_guards.value,
              self._n_guards_init.value,self._n_z.value]
@@ -2814,6 +2817,7 @@ class JMIModel(object):
         n_integer_u  = ct.c_int()
         n_boolean_d  = ct.c_int()
         n_boolean_u  = ct.c_int()
+        n_outputs = ct.c_int()
         n_sw = ct.c_int()
         n_sw_init = ct.c_int()
         n_guards = ct.c_int()
@@ -2842,6 +2846,7 @@ class JMIModel(object):
                                        byref(n_integer_u),
                                        byref(n_boolean_d),
                                        byref(n_boolean_u),
+                                       byref(n_outputs),
                                        byref(n_sw),
                                        byref(n_sw_init),
                                        byref(n_guards),
@@ -2935,6 +2940,7 @@ class JMIModel(object):
                                             ct.POINTER(ct.c_int),
                                             ct.POINTER(ct.c_int),
                                             ct.POINTER(ct.c_int),
+                                            ct.POINTER(ct.c_int),
                                             ct.POINTER(ct.c_int)]   
         self._dll.jmi_get_offsets.argtypes = [ct.c_void_p,
                                               ct.POINTER(ct.c_int),
@@ -3016,7 +3022,12 @@ class JMIModel(object):
         self._dll.jmi_get_integer_u.argtypes   = [ct.c_void_p]
         self._dll.jmi_get_boolean_d.argtypes   = [ct.c_void_p]
         self._dll.jmi_get_boolean_u.argtypes   = [ct.c_void_p]
-        
+        self._dll.jmi_get_output_vrefs.argtypes   = [ct.c_void_p,
+                                                      Nct.ndpointer(dtype=ct.c_int,
+                                                       ndim=1,
+                                                       shape=n_outputs.value,
+                                                       flags='C')]  
+                
         self._dll.jmi_get_sw.argtypes  = [ct.c_void_p]
         self._dll.jmi_get_sw_init.argtypes  = [ct.c_void_p]
 
@@ -3660,7 +3671,7 @@ class JMIModel(object):
         n_integer_ci, n_integer_cd, n_integer_pi, n_integer_pd, n_boolean_ci, 
         n_boolean_cd, n_boolean_pi, n_boolean_pd, n_real_dx, n_real_x, n_real_u, 
         n_real_w, n_tp, n_real_d, n_integer_d, n_integer_u, n_boolean_d, 
-        n_boolean_u,n_sw, n_sw_init, n_guards, n_guards_init, n_z):
+        n_boolean_u,n_outputs,n_sw, n_sw_init, n_guards, n_guards_init, n_z):
         """ 
         Get the sizes of the variable vectors.
         
@@ -3692,6 +3703,7 @@ class JMIModel(object):
                                          byref(n_integer_u),
                                          byref(n_boolean_d),
                                          byref(n_boolean_u),
+                                         byref(n_outputs),
                                          byref(n_sw),
                                          byref(n_sw_init),
                                          byref(n_guards),
@@ -4100,6 +4112,18 @@ class JMIModel(object):
             A reference to the boolean input variables vector.
         """
         return self._boolean_u
+
+    def get_output_vrefs(self, output_vrefs):
+        """ 
+        Get the value references of the outputs.
+        
+        Parameters::
+        
+            output_vrefs --         
+                A list of value references for the outputs (Output variable).
+        """
+        if self._dll.jmi_get_output_vrefs(self._jmi,output_vrefs) is not 0:
+            raise JMIException("Retrieving output value references failed.")
 
     def get_sw(self):
         """ 
