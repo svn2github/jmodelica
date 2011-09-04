@@ -70,7 +70,7 @@ equation
  r.fluidPort.p = r.p0;
  r.fluidPort.h_outflow = r.h0;
  r.fluidPort.m_flow = 0;
- h = (if r.fluidPort.m_flow > 0 then r.fluidPort.h_outflow else r.fluidPort.h_outflow);
+ h = noEvent((if r.fluidPort.m_flow > 0 then r.fluidPort.h_outflow else r.fluidPort.h_outflow));
 end StreamTests.StreamTest2;
 
 ")})));
@@ -192,8 +192,8 @@ equation
  r[2].fluidPort.h_outflow = r[2].h0;
  r[1].fluidPort.m_flow = 0;
  r[2].fluidPort.m_flow = 0;
- h[1] = (if r[1].fluidPort.m_flow > 0 then r[1].fluidPort.h_outflow else r[1].fluidPort.h_outflow);
- h[2] = (if r[2].fluidPort.m_flow > 0 then r[2].fluidPort.h_outflow else r[2].fluidPort.h_outflow);
+ h[1] = noEvent((if r[1].fluidPort.m_flow > 0 then r[1].fluidPort.h_outflow else r[1].fluidPort.h_outflow));
+ h[2] = noEvent((if r[2].fluidPort.m_flow > 0 then r[2].fluidPort.h_outflow else r[2].fluidPort.h_outflow));
 end StreamTests.StreamTest5;
 ")})));
 
@@ -216,8 +216,8 @@ fclass StreamTests.StreamTest6
  Real f[1];
  Real f[2];
 equation
- f[1] = (if d.a > 0 then d.b[1] else d.b[1]);
- f[2] = (if d.a > 0 then d.b[2] else d.b[2]);
+ f[1] = noEvent((if d.a > 0 then d.b[1] else d.b[1]));
+ f[2] = noEvent((if d.a > 0 then d.b[2] else d.b[2]));
  f[1] = 1;
  f[2] = 2;
  d.c = 0;
@@ -574,10 +574,10 @@ equation
  multiPortVolume.u = multiPortVolume.h - ( ( multiPortVolume.R ) * ( multiPortVolume.T ) );
  multiPortVolume.h = ( multiPortVolume.cp ) * ( multiPortVolume.T );
  multiPortVolume.p = ( ( multiPortVolume.rho ) * ( multiPortVolume.R ) ) * ( multiPortVolume.T );
- multiPortVolume.H_flow[1] = ( multiPortVolume.flowPort[1].m_flow ) * ( (if multiPortVolume.flowPort[1].m_flow > 0 then flowSource.flowPort.h_outflow else multiPortVolume.flowPort[1].h_outflow) );
+ multiPortVolume.H_flow[1] = ( multiPortVolume.flowPort[1].m_flow ) * ( noEvent((if multiPortVolume.flowPort[1].m_flow > 0 then flowSource.flowPort.h_outflow else multiPortVolume.flowPort[1].h_outflow)) );
  multiPortVolume.flowPort[1].p = multiPortVolume.p;
  multiPortVolume.flowPort[1].h_outflow = multiPortVolume.h;
- multiPortVolume.H_flow[2] = ( multiPortVolume.flowPort[2].m_flow ) * ( (if multiPortVolume.flowPort[2].m_flow > 0 then linearResistance.port_a.h_outflow else multiPortVolume.flowPort[2].h_outflow) );
+ multiPortVolume.H_flow[2] = ( multiPortVolume.flowPort[2].m_flow ) * ( noEvent((if multiPortVolume.flowPort[2].m_flow > 0 then linearResistance.port_a.h_outflow else multiPortVolume.flowPort[2].h_outflow)) );
  multiPortVolume.flowPort[2].p = multiPortVolume.p;
  multiPortVolume.flowPort[2].h_outflow = multiPortVolume.h;
  multiPortVolume.heatPort.T = multiPortVolume.T;

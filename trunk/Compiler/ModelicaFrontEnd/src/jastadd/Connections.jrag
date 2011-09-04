@@ -159,7 +159,7 @@ aspect Connections {
 				FIdUseExp else_exp = var_name.createFIdUseExp();
 				FGtExp guard = new FGtExp(flow_var_name.createFIdUseExp(),new FRealLitExp("0"));
 				FIfExp if_exp = new FIfExp(guard,then_exp,new List(),else_exp);
-				return if_exp;
+				return new FNoEventExp(if_exp);
 			}
 			throw new UnsupportedOperationException("Rewriting actualStream() for '" + var_name.name() + 
 					"': found " + cses.size() + " matching flow variables");
