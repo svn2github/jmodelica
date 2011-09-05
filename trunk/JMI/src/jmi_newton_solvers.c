@@ -59,8 +59,10 @@ int kin_f(N_Vector yy, N_Vector ff, void *problem_data){
 	n = NV_LENGTH_S(ff);
 	for (i=0;i<n;i++) {
 	  /* Recoverable error*/
-          jmi_log(block->jmi, logWarning, "Not a number in output from model function in DAE");
-          if (Ith(ff,i)- Ith(ff,i) != 0) return 1;
+          if (Ith(ff,i)- Ith(ff,i) != 0) {
+           jmi_log(block->jmi, logWarning, "Not a number in output from model function in DAE");
+           return 1;
+          }
 	}
 	return KIN_SUCCESS; /*Success*/
 	/*return 1;  //Recoverable error*/
@@ -159,7 +161,7 @@ int jmi_kinsol_solve(jmi_block_residual_t * block){
 		flag = KINSetUserData(block->kin_mem, block);
 		jmi_kinsol_error_handling(flag);
 		
-		if(block->dF != NULL){
+                if(block->dF != NULL){
 			flag = KINDlsSetDenseJacFn(block->kin_mem, kin_dF);
 			jmi_kinsol_error_handling(flag);
 		}
