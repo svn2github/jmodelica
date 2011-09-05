@@ -197,7 +197,18 @@
     }
     
     public void Algorithm.addToFullClassDecl(FullClassDecl fcd) {
-    	fcd.addAlgorithm(this);
+    	Algorithm algo = new Algorithm(getInitialOpt(), new List());
+    	for (Statement stmt : getStatements())
+    		stmt.addToFullClassDecl(fcd, algo);
+    	fcd.addAlgorithm(algo);
+    }
+    
+    public void Statement.addToFullClassDecl(FullClassDecl fcd, Algorithm algo) {
+    	algo.addStatement(this);
+    }
+    
+    public void AlgorithmAnnotation.addToFullClassDecl(FullClassDecl fcd, Algorithm algo) {
+    	fcd.addAnnotation(getAnnotation());
     }
     
     public void ExtendsClause.addToFullClassDecl(FullClassDecl fcd) {
