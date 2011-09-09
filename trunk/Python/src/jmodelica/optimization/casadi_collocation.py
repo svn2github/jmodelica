@@ -866,7 +866,7 @@ class RadauCollocator(CasadiCollocator):
             self.Lag = self.Lag + self.g[i]*self.lam[i]
             
         self.Lag_fcn = casadi.SXFunction([self.xx, self.lam, [self.sigma]],[[self.Lag]])
-
+        self.Lag_fcn.init()
         self.H_fcn = self.Lag_fcn.hessian(0,0)
         
     def get_equality_constraint(self):
@@ -2279,7 +2279,7 @@ class PseudoSpectral(CasadiCollocator):
             self.Lag = self.Lag + self.g[i]*self.lam[i+len(self.h)]
             
         self.Lag_fcn = casadi.SXFunction([self.xx, self.lam, [self.sigma]],[[self.Lag]])
-        
+        self.Lag_fcn.init()
         #self.H_fcn = None
         self.H_fcn = self.Lag_fcn.hessian(0,0)
     
