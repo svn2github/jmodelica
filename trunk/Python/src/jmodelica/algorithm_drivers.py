@@ -39,6 +39,7 @@ try:
     from jmodelica.simulation.assimulo_interface import JMIDAESens
     from jmodelica.simulation.assimulo_interface import write_data
     from jmodelica.core import TrajectoryLinearInterpolation
+    from jmodelica.core import TrajectoryUserFunction
     from assimulo.implicit_ode import *
     from assimulo.explicit_ode import *
     from assimulo import implicit_ode as impl_ode
@@ -702,7 +703,11 @@ class AssimuloFMIAlg(AlgorithmBase):
 
         input_traj = None
         if self.input:
-            input_traj=(self.input[0], 
+            if hasattr(self.input[1],"__call__"):
+                input_traj=(self.input[0],
+                        TrajectoryUserFunction(self.input[1]))
+            else:
+                input_traj=(self.input[0], 
                         TrajectoryLinearInterpolation(self.input[1][:,0], 
                                                       self.input[1][:,1:]))
             #Sets the inputs, if any
@@ -992,7 +997,11 @@ class AssimuloAlg(AlgorithmBase):
 
         input_traj = None
         if self.input:
-            input_traj=(self.input[0], 
+            if hasattr(self.input[1],"__call__"):
+                input_traj=(self.input[0],
+                        TrajectoryUserFunction(self.input[1]))
+            else:
+                input_traj=(self.input[0], 
                         TrajectoryLinearInterpolation(self.input[1][:,0], 
                                                       self.input[1][:,1:]))
             #Sets the inputs, if any
@@ -1006,22 +1015,16 @@ class AssimuloAlg(AlgorithmBase):
                     self.probl = JMIDAESens(model,result_file_name=self.result_file_name)
             else:
                 if not self.sensitivity:
-                    self.probl = JMIDAE(model,(self.input[0],
-                        TrajectoryLinearInterpolation(self.input[1][:,0], \
-                                                      self.input[1][:,1:])), \
+                    self.probl = JMIDAE(model,input_traj, \
                                                       self.result_file_name)
                 else:
-                    self.probl = JMIDAESens(model,(self.input[0],
-                        TrajectoryLinearInterpolation(self.input[1][:,0], \
-                                                      self.input[1][:,1:])), \
+                    self.probl = JMIDAESens(model,input_traj, \
                                                       self.result_file_name)
         else:
             if not self.input:
                 self.probl = JMIODE(model,result_file_name=self.result_file_name)
             else:
-                self.probl = JMIODE(model,(self.input[0],
-                    TrajectoryLinearInterpolation(self.input[1][:,0], \
-                                                  self.input[1][:,1:])), \
+                self.probl = JMIODE(model,input_traj, \
                                                   self.result_file_name)
         # instantiate solver and set options
         self.simulator = self.solver(self.probl, t0=self.start_time)

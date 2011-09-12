@@ -497,3 +497,42 @@ class TrajectoryLinearInterpolation(Trajectory):
         for i in range(N.size(y,1)):
             y[:,i] = N.interp(x,self.abscissa,self.ordinate[:,i])
         return y
+        
+class TrajectoryUserFunction(Trajectory):
+    
+    def __init__(self, func):
+        """
+        Constructor for creating a user defined trajectory function.
+        
+        Parameters::
+        
+            func -- 
+                A function which calculates the ordinate values.
+        """
+        
+        self.traj = func
+        
+    def eval(self, x):
+        """
+        Evaluate the trajectory at a specifed abscissa.
+
+        Parameters::
+        
+            x -- 
+                One dimensional numpy array, or scalar number, containing a 
+                abscissa value.
+
+        Returns::
+        
+            Two dimensional n x m matrix containing the ordinate values 
+            corresponding to the argument x.
+        """
+        try:
+            y = N.array(N.matrix(self.traj(float(x))))
+        except TypeError:
+            y = N.array(N.matrix(self.traj(x)).transpose())
+                                       #In order to guarantee that the
+                                       #return values are on the correct
+                                       #form. May need to be evaluated
+                                       #for speed improvements.
+        return y

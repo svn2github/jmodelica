@@ -74,12 +74,12 @@ def write_data(simulator,write_scaled_result=False, result_file_name=''):
             #u = N.zeros((len(t), len(u_name)))
             u = N.ones((len(t), len(u_name)))*model.real_u
             u_mat = simulator._problem.input[1].eval(t)
-            
+
             if not isinstance(simulator._problem.input[0],list):
                 u_input_name = [simulator._problem.input[0]]
             else:
                 u_input_name = simulator._problem.input[0]
-            
+
             for i,n in enumerate(u_input_name):
                 u[:,u_name.index(n)] = u_mat[:,i]/problem._input_nominal[i]
         else:

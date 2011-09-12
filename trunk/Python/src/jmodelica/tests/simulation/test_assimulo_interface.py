@@ -784,6 +784,58 @@ class Test_JMI_DAE:
         nose.tools.assert_almost_equal(r1[-1], -0.839071529, 3)
         nose.tools.assert_almost_equal(r2[-1], -0.544021110, 3)
 
+    @testattr(assimulo = True)
+    def test_double_input_with_function(self):
+        """
+        This tests double input with function.
+        """
+        fpath = os.path.join(get_files_path(), 'Modelica', 'DoubleInput.mo')
+        cpath = 'DoubleInput'
+
+        # compile VDP
+        fname = compile_jmu(cpath, fpath, 
+                    compiler_options={'state_start_values_fixed':True})
+
+        # Load the dynamic library and XML data
+        dInput = JMUModel(fname)
+
+        def func(t):
+            return N.array([N.cos(t),N.sin(t)])
+        
+        res = dInput.simulate(final_time=10, input=(['u1','u2'],func))
+        
+        r1=res['u1']
+        r2=res['u2']
+        t1=res['time']
+        
+        #P.plot(t1,r1,t1,r2)
+        #P.show()
+        nose.tools.assert_almost_equal(r1[0], 1.000000000, 3)
+        nose.tools.assert_almost_equal(r2[0], 0.000000000, 3)
+        nose.tools.assert_almost_equal(r1[-1], -0.839071529, 3)
+        nose.tools.assert_almost_equal(r2[-1], -0.544021110, 3)
+        
+        #TEST REVERSE ORDER OF INPUT
+        
+        # Load the dynamic library and XML data
+        dInput = JMUModel(fname)
+
+        def func(t):
+            return [N.sin(t),N.cos(t)]
+        
+        res = dInput.simulate(final_time=10, input=(['u2','u1'],func))
+        
+        r1=res['u1']
+        r2=res['u2']
+        t1=res['time']
+        
+        #P.plot(t1,r1,t1,r2)
+        #P.show()
+        nose.tools.assert_almost_equal(r1[0], 1.000000000, 3)
+        nose.tools.assert_almost_equal(r2[0], 0.000000000, 3)
+        nose.tools.assert_almost_equal(r1[-1], -0.839071529, 3)
+        nose.tools.assert_almost_equal(r2[-1], -0.544021110, 3)
+
 class Test_FMI_ODE:
     """
     This class tests jmodelica.simulation.assimulo.FMIODE and together
