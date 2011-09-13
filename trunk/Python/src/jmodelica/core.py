@@ -254,7 +254,7 @@ class BaseModel(object):
         algdrive = getattr(algdrive, 'algorithm_drivers')
         algorithm = getattr(algdrive, algorithm)
         return algorithm.get_default_options()
-    
+  
 def unzip_unit(archive, path='.', random_name=True):
     """
     Unzip the FMU/JMU.
@@ -296,17 +296,15 @@ def unzip_unit(archive, path='.', random_name=True):
     #Extracting the XML
     for file in archive.filelist:
         if 'modelDescription.xml' in file.filename:
+
+            # Extracting the modelDescription.xml file
+            xml_filename = archive.extract(file,tmp_location)
             
-            data = archive.read(file) #Reading the file
+            # Rename to temporary file name
+            tempxmlname = tempfile.mktemp(suffix='.xml',
+                dir=tmp_location)
+            os.rename(xml_filename, tempxmlname)          
             
-            # Creating temp file
-            fhandle, tempxmlname = tempfile.mkstemp(suffix='.xml', 
-                dir=tmp_location) 
-            os.close(fhandle)
-            # Writing to the temp file
-            fout = open(tempxmlname, 'w') 
-            fout.write(data)
-            fout.close()
             break
     else:
         raise IOError('Could not find modelDescription.xml in the FMU.')
@@ -316,16 +314,14 @@ def unzip_unit(archive, path='.', random_name=True):
     for file in archive.filelist:
         if file.filename.endswith('values.xml'):
             
-            data = archive.read(file) #Reading the file
+            # Extracting the model values xml file
+            xml_filename = archive.extract(file,tmp_location)
             
-            # Creating temp file
-            fhandle, tempxmlvaluesname = tempfile.mkstemp(suffix='.xml', 
-                dir=tmp_location) 
-            os.close(fhandle)
-            # Writing to the temp file
-            fout = open(tempxmlvaluesname, 'w') 
-            fout.write(data)
-            fout.close()
+            # Rename to temporary file name
+            tempxmlvaluesname = tempfile.mktemp(suffix='.xml', 
+                dir=tmp_location)
+            os.rename(xml_filename, tempxmlvaluesname)
+            
             is_jmu = True
             break
     # --
@@ -347,9 +343,10 @@ def unzip_unit(archive, path='.', random_name=True):
         modelname = dllname[:-len(suffix)]
         
         extract_dll = True
-        if random_name: 
-            fhandle, tempdllname = tempfile.mkstemp(suffix=suffix, dir=tmp_location)
-            os.close(fhandle)
+        if random_name:
+            # Create temporary file name
+            tempdllname = tempfile.mktemp(suffix=suffix, 
+                dir=tmp_location)
         else:
             tempdllname = os.path.join(tmp_location, dllname)
             if os.path.isfile(tempdllname):
@@ -358,11 +355,11 @@ def unzip_unit(archive, path='.', random_name=True):
         
         # Unzip
         if extract_dll:
-            data = archive.read(found_files[0]) #Reading the first found dll
-        
-            fout = open(tempdllname, 'w+b')
-            fout.write(data)
-            fout.close()
+            # Extracting the binary file
+            bin_filename = archive.extract(found_files[0],tmp_location)
+            
+             # Rename to temporary file name
+            os.rename(bin_filename, tempdllname)
         
         if is_jmu:
             return [tempdllname.split(os.sep)[-1], \
