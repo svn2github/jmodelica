@@ -1381,7 +1381,7 @@ sim_model.set('T_init',T_0_A)
 sim_model.set('Tc',u[0])
 
 res = sim_model.simulate(start_time=0.,final_time=150.,
-    input_trajectory=u_traj)
+    input=('Tc',u_traj))
 </programlisting>
 
       <para>Finally, we load the simulated data and plot it to compare with
