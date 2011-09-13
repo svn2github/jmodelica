@@ -555,7 +555,10 @@ aspect Names {
   /**
    * \brief Converts an URI to a file-system path.
    * 
-   * Only modelica:// and file:// URIs are supported.
+   * Only modelica:// and file:// URIs are supported. 
+   * If the string is a simple path, then it is interpreted as relative to the 
+   * top level package this node is in, or if that path does not exist, relative 
+   * to the parent directory the file this node is in.
    * 
    * @param str  the string to interpret as an URI
    */
@@ -565,12 +568,19 @@ aspect Names {
     	  String scheme = uri.getScheme();
           if (scheme == null) {
               String pack = topPackagePath();
-              return pack != null ? pack + "/" + uri.getPath() : null;
+              if (pack != null) {
+            	  File f = new File(pack, uri.getPath());
+            	  if (f.exists())
+            		  return f.getAbsolutePath();
+              }
+              File dir = new File(fileName()).getParentFile();
+              return new File(dir, uri.getPath()).getAbsolutePath();
           } else if (scheme.equals("file")) {
               return uri.getPath();
           } else if (scheme.equals("modelica")) {
               String pack = packagePath(uri.getHost());
-              return pack != null ? pack + uri.getPath() : null;
+              if (pack != null) 
+            	  return new File(pack, uri.getPath()).getAbsolutePath();
           }
       } catch (URISyntaxException e) {
       }

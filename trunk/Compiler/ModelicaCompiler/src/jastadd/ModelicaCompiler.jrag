@@ -36,6 +36,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -142,7 +143,7 @@ public class ModelicaCompiler {
 	
 	protected static LinkedList<CompilationHooks> globalHooksList = new LinkedList<CompilationHooks>();
 	protected LinkedList<CompilationHooks> hooksList = new LinkedList<CompilationHooks>(globalHooksList);
-	protected static CCompilerDelegator cCompiler = new GCCcompilerDelegator();
+	protected static CCompilerDelegator cCompiler = new GccCompilerDelegator();
 	protected IErrorHandler errorHandler = null;
 	
 	protected static String jmodelicaHome = System.getenv("JMODELICA_HOME");
@@ -817,6 +818,26 @@ public class ModelicaCompiler {
 		
 		// remove files
 		deleteOutDir();
+	}
+	
+	protected void parseFiles(String[] files) {
+		for (String file : files) {
+			try {
+				parseModel(file);
+				log.info(file + " parsed OK.");
+			} catch (ParserException e) {
+				StringBuilder str = new StringBuilder();
+				str.append("In file: " + file + "\n");
+				str.append(e.getProblem());
+				log.error(str.toString());
+			} catch (FileNotFoundException e) {
+				log.error("Could not find file: " + e.getMessage());
+			} catch (IOException e) {
+				log.error("Error opening file: " + e.getMessage());
+			} catch (Exception e) {
+				log.error("Parser thew an exception on file " + file + ":\n" + e);
+			}
+		}
 	}
 
 	private static final int ZIP_BUFFER_SIZE = 2048;
@@ -1553,8 +1574,12 @@ public class ModelicaCompiler {
 		modelicapath = programarguments.get("modelicapath");
 		
 		arg = programarguments.size();
-		if (args.length < arg+2) {
+		if (args.length < arg+2 && !programarguments.containsKey("parse")) {
 			log.error(compilerName + " expects a file name and a class name as command line arguments.");
+			System.exit(1);
+		}
+		if (programarguments.containsKey("parse") && args.length != arg+1) {
+			log.error(compilerName + " -parse expects a list of filenames.");
 			System.exit(1);
 		}
 		
@@ -1592,11 +1617,13 @@ public class ModelicaCompiler {
 		// Get files and class
 		int arg = programarguments.size();
 		String[] name = splitFiles(args[arg]);
-		String cl = args[arg+1];
+		String cl = (args.length > arg+1) ? args[arg+1] : null;
 		
 		// Compile model
 		try {
-			if (programarguments.containsKey("fmume"))
+			if (programarguments.containsKey("parse"))
+				parseFiles(name);
+			else if (programarguments.containsKey("fmume"))
 				compileFMUME(cl, name);
 			else if (programarguments.containsKey("fmucs"))
 				compileFMUCS(cl, name);
@@ -1942,93 +1969,161 @@ public class CompilationAbortedException extends RuntimeException {
 public interface CCompilerDelegator {
 	
 	public void compileCCode(String fileName, String target, File workDir, 
-			HashSet<String> ext_libs, HashSet<String> ext_lib_dirs, HashSet<String> ext_incl_dirs);
+			Set<String> ext_libs, Set<String> ext_lib_dirs, Set<String> ext_incl_dirs);
 	
 }
 
-public class GCCcompilerDelegator implements CCompilerDelegator {
-	
-	public GCCcompilerDelegator() {
-	}
+/**
+ * Compiles DLL(s) from generated C code using make.
+ */
+public class GccCompilerDelegator implements CCompilerDelegator {
 
+    public GccCompilerDelegator() {}
+
+	/**
+	 * Get the target platforms to compile for.
+	 */
+	protected String[] getTargetPlatforms() {
+		return new String[] { ModelicaCompiler.getPlatform() };
+	}
 	
+	/**
+	 * Get the path to the Makefile for the specified target platform.
+	 */
+	protected String getMakefile(String jmodelicaHome, String platform) {
+		return new File(jmodelicaHome, "Makefiles/MakeFile").getPath();
+	}
+	
+	/**
+	 * Get the make command to use for the specified build platform.
+	 */
+	protected String getMake(String platform) {
+		if (ModelicaCompiler.getPlatform().startsWith("win")) 
+			return new File(System.getenv("MINGW_HOME"), "bin/mingw32-make").getPath();
+		else
+			return "make";
+	}
+	
+	/**
+	 * Add make variables to set that is valid for all target platforms.
+	 */
+	protected void addFixedMakeVars(Map<String,String> vars, String fileName, String jmodelicaHome, 
+			Set<String> ext_libs, Set<String> ext_incl_dirs) {
+		vars.put("FILE_NAME", fileName);
+		vars.put("JMODELICA_HOME", jmodelicaHome);
+		vars.put("CPPAD_HOME", System.getenv("CPPAD_HOME"));
+		vars.put("IPOPT_HOME", System.getenv("IPOPT_HOME"));
+		vars.put("SUNDIALS_HOME", System.getenv("SUNDIALS_HOME"));
+		vars.put("EXT_LIBS", varFromList(ext_libs));
+		vars.put("EXT_INC_DIRS", varFromList(ext_incl_dirs));
+	}
+	
+	/**
+	 * Add make variables specific to the build platform.
+	 */
+	protected void addBuildPlatformMakeVars(Map<String,String> vars, String platform) {
+		if (platform.startsWith("win")) {
+			File mingw_bin = new File(System.getenv("MINGW_HOME"), "bin");
+			vars.put("CXX", new File(mingw_bin, "g++").getPath());
+			vars.put("AR", new File(mingw_bin, "ar").getPath());
+		}
+	}
+	
+	/**
+	 * Add make variables specific to the target platform.
+	 */
+	protected void addTargetPlatformMakeVars(Map<String,String> vars, Set<String> ext_lib_dirs, String platform) {
+		vars.put("PLATFORM", platform);
+		vars.put("EXT_LIB_DIRS", varFromList(ext_lib_dirs, new PlatformDirOperation(platform)));
+	}
+	
+	/**
+	 * Compile DLL(s) from generated C code.
+	 */
 	public void compileCCode(String fileName, String target, File workDir, 
-			HashSet<String> ext_libs, HashSet<String> ext_lib_dirs, HashSet<String> ext_incl_dirs) {
-		String filesep = File.separator;
+			Set<String> ext_libs, Set<String> ext_lib_dirs, Set<String> ext_incl_dirs) {
 		String jmodelicaHome = ModelicaCompiler.getJModelicaHome();
-		String makefile = jmodelicaHome + filesep + "Makefiles" + filesep + "MakeFile";
-		String platformDir = ModelicaCompiler.getPlatform();
+		String buildPlatform = ModelicaCompiler.getPlatform();
+		String make = getMake(buildPlatform);
 		
-		// make arguments
-		String file_name = "FILE_NAME=" + fileName;
-		String jmodelica_home = "JMODELICA_HOME=" + jmodelicaHome;
-		String cppad_home = "CPPAD_HOME=" + System.getenv("CPPAD_HOME");
-		String ipopt_home = "IPOPT_HOME=" + System.getenv("IPOPT_HOME");
-		String sundials_home = "SUNDIALS_HOME=" + System.getenv("SUNDIALS_HOME");
-		String platform = "PLATFORM=" + platformDir;
+		Map<String, String> vars = new HashMap<String, String>();
+		addFixedMakeVars(vars, fileName, jmodelicaHome, ext_libs, ext_incl_dirs);
+		addBuildPlatformMakeVars(vars, buildPlatform);
 		
-		// external library directories
-		StringBuilder extLibDirs_sb = new StringBuilder();
-		for (String libDir : ext_lib_dirs) {
-			File f = new File(libDir, platformDir);
-			if (f.isDirectory()) {
-				extLibDirs_sb.append(f.getPath());
-			} else {
-				extLibDirs_sb.append(libDir);
-			}
-			extLibDirs_sb.append(" ");
-		}
-		String extLibDirs = null;
-		if (ext_lib_dirs.size()!=0) {
-			extLibDirs = "EXT_LIB_DIRS=\"" + extLibDirs_sb.toString().trim() + "\"";
-		}
-
-		// external libraries
-		StringBuilder extLibs_sb = new StringBuilder();
-		for (String lib:ext_libs) {
-			extLibs_sb.append(lib+" ");
-		}
-
-		String extLibs = null;
-		if (ext_libs.size()!=0) {		
-			extLibs = "EXT_LIBS=\"" + extLibs_sb.toString().trim() + "\"";
-		}
-
-		// external include directories
-		StringBuilder extInclDirs_sb = new StringBuilder();
-		for (String libDir:ext_incl_dirs) {
-			extInclDirs_sb.append(libDir + " ");
-		}
-		String extInclDirs = null;
-		if (ext_incl_dirs.size()!=0) {
-			extInclDirs = "EXT_INC_DIRS=\"" + extInclDirs_sb.toString().trim() + "\"";
-		}
-		
-		// Generate make call
-		String make = "make";
-		String compiler = null;
-		String ar = null;
-		if (platformDir.startsWith("win")) {
-			String mingw_bin = System.getenv("MINGW_HOME") + filesep + "bin";
-			make = mingw_bin + filesep + "mingw32-make";
-			compiler = "CXX=" + mingw_bin + filesep + "g++";
-			ar = "AR=" + mingw_bin + filesep + "ar";
-		}
+		for (String platform : getTargetPlatforms()) {
+			Map<String, String> pVars = new HashMap<String, String>(vars);
+			addTargetPlatformMakeVars(pVars, ext_lib_dirs, platform);
 			
-		String[] cmd = new String[] {
-			make, "-f", makefile, compiler, ar, target, file_name, platform, jmodelica_home, 
-			cppad_home, ipopt_home, sundials_home, extLibDirs, extLibs, extInclDirs 
-		};
-		ArrayList<String> cmdList = new ArrayList<String>(cmd.length);
-		for (String c : cmd)
-			if (c != null)
-				cmdList.add(c);
-		cmd = cmdList.toArray(new String[cmdList.size()]);
-	
-		// execute make
-		if (ModelicaCompiler.loggedProcess(cmd, null, workDir) != 0)
-			throw new CcodeCompilationException("Compilation of generated C code failed.");
+			String[] args = new String[] { make, "-f", getMakefile(jmodelicaHome, platform), target };
+			ArrayList<String> vArgs = new ArrayList<String>(pVars.size());
+			for (Map.Entry<String,String> var : pVars.entrySet())
+				if (var.getValue() != null)
+					vArgs.add(var.getKey() + '=' + var.getValue());
+			String[] cmd = new String[args.length + vArgs.size()];
+			System.arraycopy(args, 0, cmd, 0, args.length);
+			int i = args.length;
+			for (String arg : vArgs)
+				cmd[i++] = arg;
+			
+System.out.println(Arrays.toString(cmd));
+			if (ModelicaCompiler.loggedProcess(cmd, null, workDir) != 0)
+				throw new CcodeCompilationException("Compilation of generated C code failed.");
+		}
 	}
+	
+	/**
+	 * Format a list of values into a form understood by make (i.e. space-separated).
+	 */
+	protected String varFromList(Collection<String> list) {
+		return varFromList(list, StringOperation.NULL_OP);
+	}
+	
+	/**
+	 * Format a list of values into a form understood by make (i.e. space-separated).
+	 * 
+	 * Applies op to each value before adding it to the result.
+	 */
+	protected String varFromList(Collection<String> list, StringOperation op) {
+		StringBuilder buf = new StringBuilder();
+		//buf.append('"'); // TODO: Do we really need the quotes?
+		String prefix = "";
+		for (String str : list) {
+			str = op.op(str);
+			if (str != null) {
+				buf.append(prefix);
+				buf.append(str);
+				prefix = " ";
+			}
+		}
+		//buf.append('"');
+		return (buf.length() == 0) ? null : buf.toString();
+	}
+	
+	protected interface StringOperation {
+		
+		public static final StringOperation NULL_OP = new StringOperation() {
+			public String op(String str) { return str; }
+		};
+		
+		public String op(String str);
+		
+	}
+	
+	protected class PlatformDirOperation implements StringOperation {
+		
+		private String platform;
+		
+		public PlatformDirOperation(String platform) {
+			this.platform = platform;
+		}
+		
+		public String op(String path) {
+			File f = new File(path, platform);
+			return f.isDirectory() ? f.getPath() : path;
+		}
+		
+	}
+	
 }
 
 }

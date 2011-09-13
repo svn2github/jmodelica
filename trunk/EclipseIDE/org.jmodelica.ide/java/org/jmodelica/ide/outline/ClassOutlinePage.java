@@ -38,6 +38,9 @@ import org.jmodelica.modelica.compiler.BaseClassDecl;
 
 public class ClassOutlinePage extends OutlinePage implements IDoubleClickListener, IASTRegistryListener {
 
+	private static final ClassOutlineContentProvider CLASS_OUTLINE_CONTENT = new ClassOutlineContentProvider();
+	private static final OutlineAwareLabelProvider OUTLINE_AWARE_LABEL = new OutlineAwareLabelProvider(JASTADD_LABEL);
+	
 	private ASTRegistry registry;
 	private ClassOutlineContentProvider content;
 	private IProject project;
@@ -70,11 +73,11 @@ public class ClassOutlinePage extends OutlinePage implements IDoubleClickListene
 
 	@Override
 	protected ClassOutlineContentProvider createContentProvider() {
-		return new ClassOutlineContentProvider();
+		return CLASS_OUTLINE_CONTENT;
 	}
 
 	protected IBaseLabelProvider getLabelProvider() {
-		return new OutlineAwareLabelProvider(JASTADD_LABEL);
+		return OUTLINE_AWARE_LABEL;
 	}
 
 	public void projectASTChanged(IProject project) {

@@ -209,6 +209,14 @@
 		</concat>
 		<jflex file="${parser_output}/FlatModelica_all.flex" outdir="${parser_output}" nobak="yes" />
 
+		<!-- clean up intermediate files -->
+		<delete deleteonexit="true">
+			<fileset dir="${parser_output}">
+				<include name="*.parser" />
+				<include name="*.beaver" />
+				<include name="*.flex" />
+			</fileset>
+		</delete>
 	</target>
 
 	<!-- TARGET clean -->

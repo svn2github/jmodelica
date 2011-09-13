@@ -195,7 +195,7 @@ public class CompileFMUAction extends CurrentClassAction implements IJobChangeLi
 			try {
 				mc.addCompilationHooks(this);
 				mc.setTempFileDir(getTempDir());
-				mc.compileFMU(className, paths, "model_noad", dir);
+				mc.compileFMUME(className, paths, dir);
 			} catch (CompilationAbortedException e) {
 				status = Status.CANCEL_STATUS;
 			} catch (Exception e) {

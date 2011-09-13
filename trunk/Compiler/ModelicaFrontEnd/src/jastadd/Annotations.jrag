@@ -148,7 +148,8 @@ aspect AnnotationAPI {
 		/**
 		 * Returns the value for a node that represents a string value, interpreted as 
 		 * a path of an URI (with protocol file or modelica). A simple path is also 
-		 * supported, and is interpreted relative to the top containing package.
+		 * supported, and is interpreted relative to the top containing package, or if 
+		 * that does not exist, relative to the directory containing the current file.
 		 */
 		public String path() {
 			return ast().uri2path(string());
