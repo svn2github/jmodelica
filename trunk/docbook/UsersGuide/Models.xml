@@ -810,7 +810,7 @@ myModel = FMUModel('myFMU.fmu')
       <title>Setting and getting variables</title>
 
       <para>The model variables can be accessed with via the
-      <literal>jmi.JMUModel</literal> or <literal>fmi.FMIModel</literal>
+      <literal>jmi.JMUModel</literal> or <literal>fmi.FMUModel</literal>
       interface. It is possible to set and get one specific variable at a time
       or a whole list of variables.</para>
 

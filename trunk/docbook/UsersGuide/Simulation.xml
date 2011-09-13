@@ -50,9 +50,7 @@
 </programlisting>
 
     <para>Create a new file in your working directory called
-    <literal>VDP.mo</literal> and save the model. Note that this model is
-    described as an ODE and can thus be simulated using ODE solvers from
-    Assimulo.</para>
+    <literal>VDP.mo</literal> and save the model.</para>
 
     <para>Next, create a Python script file and write or (copy paste) the
     commands for compiling and loading a model:</para>
