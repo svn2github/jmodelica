@@ -611,11 +611,11 @@ class AssimuloFMIAlgOptions(OptionBase):
             The relative tolerance. The relative tolerance are retrieved from
             the 'default experiment' section in the XML-file and if not
             found are set to 1.0e-4
-            Default: 1.0e-4
+            Default: "Default" (1.0e-4)
             
         atol    --
             The absolute tolerance.
-            Default: rtol*0.01*(nominal values of the continuous states)
+            Default: "Default" (rtol*0.01*(nominal values of the continuous states))
         
         discr   --
             The discretization method. Can be either 'BDF' or 'Adams'
@@ -633,7 +633,8 @@ class AssimuloFMIAlgOptions(OptionBase):
             'write_scaled_result':False,
             'result_file_name':'',
             'with_jacobian':False,
-            'CVode_options':{'discr':'BDF','iter':'Newton'}
+            'CVode_options':{'discr':'BDF','iter':'Newton',
+                             'atol':"Default",'rtol':"Default",}
             }
         super(AssimuloFMIAlgOptions,self).__init__(_defaults)
         # for those key-value-sets where the value is a dict, don't 
@@ -758,16 +759,12 @@ class AssimuloFMIAlg(AlgorithmBase):
         #Check relative tolerance
         #If the tolerances are not set specifically, they are set 
         #according to the 'DefaultExperiment' from the XML file.
-        try:
-            self.solver_options['rtol']
-        except KeyError:
+        if self.solver_options["rtol"] == "Default":
             rtol, atol = self.model.get_tolerances()
             self.solver_options['rtol'] = rtol
                 
         #Check absolute tolerance
-        try:
-            self.solver_options['atol']
-        except KeyError:
+        if self.solver_options["atol"] == "Default":
             rtol, atol = self.model.get_tolerances()
             fnbr, gnbr = self.model.get_ode_sizes()
             if fnbr == 0:
