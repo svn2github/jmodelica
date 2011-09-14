@@ -2192,6 +2192,16 @@ class CasadiRadau2(AlgorithmBase):
                 raise ValueError("h_bounds is only used if algorithm " + \
                                  'option hs is set to "free".')
         
+        # Check validity of free_element_lengths_data
+        if self.free_element_lengths_data == None:
+            if self.hs == "free":
+                raise ValueError("free_element_lengths_data must be given " + \
+                                 'if self.hs == "free".')
+        if self.free_element_lengths_data != None:
+            if self.hs != "free":
+                raise ValueError("free_element_lengths_data can only be " + \
+                                 'given if self.hs == "free".')
+        
         # Check validity of exact_Hessian
         if self.exact_Hessian:
             if self.graph == "MX":
@@ -2287,7 +2297,7 @@ class CasadiRadau2Options(OptionBase):
             
             Type: int
             Default: 50
-            
+        
         hs --
             Element lengths.
             
@@ -2299,37 +2309,35 @@ class CasadiRadau2Options(OptionBase):
             element i. The lengths must be normalized in the sense that the sum
             of all lengths must be equal to 1.
             
-            "free": The element lengths become optimization variables.
+            "free": The element lengths become optimization variables and are
+            optimized according to the algorithm option
+            free_element_length_data.
+            WARNING: This option is very experimental and will not always give
+            desirable results.
             
             Type: None, list of floats or string
             Default: None
             
-        h_bounds --
-            Element length bounds. Only used if algorithm option hs is set to
-            "free". The bounds are given as a tuple (l, u), where the bounds
-            are used in the following way:
+        free_element_lengths_data --
+            Data used for optimizing the element lengths if they are free.
+            Should be None if and only if hs != "free".
             
-            .. math::
-                l / n_e \leq h_i \leq u / n_e, \quad \forall i \in [1, n_e],
-                
-            where h_i is the normalized length of element i.
-            
-            Type: tuple
-            Default: (0.7, 1.3)
-            
+            Type: None or jmodelica.optimization.free_element_length_data
+            Default: None
+        
         n_cp --
             Number of collocation points in each element.
             
             Type: int
             Default: 3
-            
+        
         graph --
             CasADi graph type. Possible values are "SX", "MX" and
             "expanded_MX".
             
             Type: str
             Default: "SX"
-            
+        
         write_scaled_results --
             Return the scaled optimization result if set to True, otherwise
             return the unscaled optimization result. This option is 
@@ -2338,7 +2346,7 @@ class CasadiRadau2Options(OptionBase):
             
             Type: bool
             Default: False
-            
+        
         result_mode --
             Specifies the output format of the optimization result.
             
@@ -2354,7 +2362,7 @@ class CasadiRadau2Options(OptionBase):
             
             Type: str
             Default: "collocation_points"
-            
+        
         n_eval_points --
             The number of evaluation points used in each element when the
             algorithm option result_mode is set to "element_interpolation". One
@@ -2389,14 +2397,21 @@ class CasadiRadau2Options(OptionBase):
             
             Type: bool
             Default: True
-
+        
         init_traj --
             Variable trajectory data used for initialization of the
             optimization problem.
             
-            Type: jmodelica.io.DymolaResultTextual
+            Type: None or jmodelica.io.DymolaResultTextual
             Default: None
+        
+        parameter_estimation_data --
+            Parameter estimation data used for solving parameter estimation
+            problems.
             
+            Type: None or jmodelica.optimization.parameter_estimation_data
+            Default: None
+        
         exact_hessian --
             If True, the exact Hessian of the Lagrangian function is used.
             
@@ -2456,6 +2471,7 @@ class CasadiRadau2Options(OptionBase):
         _defaults = {
                 'n_e': 50,
                 'hs': None,
+                'free_element_lengths_data': None,
                 'h_bounds': (0.7, 1.3),
                 'n_cp': 3,
                 'graph': 'SX',

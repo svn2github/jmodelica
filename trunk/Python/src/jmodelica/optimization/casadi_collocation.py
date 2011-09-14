@@ -584,11 +584,65 @@ class CasadiCollocator(object):
         return (nlp_lb,nlp_ub,nlp_init)
 
 class ParameterEstimationData:
+    
+    """This needs to be documented!"""
 
     def __init__(self,Q,measured_variables,data):
         self.Q = Q
         self.measured_variables = measured_variables
         self.data = data
+        
+class FreeElementLengthData:
+    
+    """
+    Data used to control the element lengths when they are free.
+    
+    The objective function f is adjusted to penalize large element lengths for
+    elements with high state derivatives in the following way:
+    
+    .. math::
+        
+        f += c \cdot \sum_{i = 1}^{n_e} \left(h_i^p \cdot \int_{t_i}^{t_{i+1}}
+        \dot{x}^T(t) \cdot Q \cdot \dot{x}(t)\,dt
+    """
+    
+    def __init__(self, c, Q, bounds=(0.7, 1.3), a=1.):
+        """
+        Parameters::
+            
+            c --
+                The coefficient for the newly introduced cost term.
+                
+                Type: float
+            
+            Q --
+                The coefficient matrix for weighting the various state
+                derivatives.
+                
+                Type: ndarray with shape (n_x, n_x)
+                
+            bounds --
+                Element length bounds. The bounds are given as a tuple (l, u),
+                where the bounds are used in the following way:
+                
+                .. math::
+                    l / n_e \leq h_i \leq u / n_e, \quad\forall i \in [1, n_e],
+                    
+                where h_i is the normalized length of element i.
+                
+                Type: tuple
+                Default: (0.7, 1.3)
+            
+            a --
+                The exponent of the element length.
+                
+                Type: float
+                Default: 1.
+        """
+        self.bounds = bounds
+        self.c = c
+        self.Q = Q
+        self.a = a
 
 class RadauCollocator(CasadiCollocator):
 
@@ -1373,6 +1427,7 @@ class Radau2Collocator(CasadiCollocator):
         var = self.var
         
         # Broadcast self.pol.der_vals
+        # Note that der_vals is quite different from self.pol.der_vals
         der_vals = [[]]
         for k in xrange(1, self.n_cp + 1):
             der_vals_k = [self.pol.der_vals[:, k].reshape([1, self.n_cp + 1])]
@@ -1627,11 +1682,25 @@ class Radau2Collocator(CasadiCollocator):
             # Calculate cost contribution from each collocation point
             Q = self.parameter_estimation_data.Q
             for i in range(1, self.n_e + 1):
+                h_i = self.horizon * self.h[i]
                 for k in range(1, self.n_cp + 1):
                     err_i_k = N.array(err[i][k])
-                    cost_term = N.dot(N.dot(err_i_k, Q), err_i_k)
-                    self.cost += (self.horizon * self.h[i] *
-                                  cost_term * self.pol.w[k])
+                    integrand = N.dot(N.dot(err_i_k, Q), err_i_k)
+                    self.cost += (h_i * integrand * self.pol.w[k])
+        
+        # Add cost term for free element lengths
+        if self.hs == "free":
+            Q = self.free_element_lengths_data.Q
+            c = self.free_element_lengths_data.c
+            a = self.free_element_lengths_data.a
+            length_cost = 0
+            for i in range(1, self.n_e + 1):
+                h_i = self.horizon * self.h[i]
+                for k in range(1, self.n_cp + 1):
+                    integrand = N.dot(N.dot(self.var[i][k]['dx'].T, Q),
+                                      self.var[i][k]['dx'])
+                    length_cost += (h_i ** (1 + a) * integrand * self.pol.w[k])
+            self.cost += c * length_cost
 
         # Define NLP objective function based on graph
         if self.graph == "MX":
@@ -1726,11 +1795,12 @@ class Radau2Collocator(CasadiCollocator):
         # Compute bounds and initial guesses for element lengths
         if self.hs == "free":
             h_0 = 1. / self.n_e
+            h_bounds = self.free_element_lengths_data.bounds
             var_indices = self.get_var_indices()
             for i in xrange(1, self.n_e + 1):
-                self.xx_lb[var_indices['h'][i]] = self.h_bounds[0] * h_0
-                self.xx_ub[var_indices['h'][i]] = self.h_bounds[1] * h_0
-                self.xx_init[var_indices['h'][i]] = self.h_bounds[1] * h_0
+                self.xx_lb[var_indices['h'][i]] = h_bounds[0] * h_0
+                self.xx_ub[var_indices['h'][i]] = h_bounds[1] * h_0
+                self.xx_init[var_indices['h'][i]] = h_bounds[1] * h_0
     
     def _create_solver(self):
         if self.get_hessian().isNull():

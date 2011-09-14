@@ -172,19 +172,29 @@ class TestRadau2:
     def test_free_element_lengths(self):
         """Test optimized element lengths with both result modes."""
         # References values
-        cost_ref = 2.343240065531e1
-        u_norm_ref = 2.630846391607e-1
+        cost_ref = 2.441156492357014e1
+        u_norm_ref = 2.0730293748022388e-1
+        
+        # Free element lengths data
+        c = 1e-2
+        Q = N.eye(3)
+        bounds = (0.5, 2.5)
+        free_ele_data = FreeElementLengthData(c, Q, bounds)
+        
+        # Set options shared by both result modes
+        opts = self.model_VDP_Mayer.optimize_options("CasadiRadau2")
+        opts['n_e'] = 20
+        opts['hs'] = "free"
+        opts['free_element_lengths_data'] = free_ele_data
         
         # Collocation points
-        opts = self.model_VDP_Lagrange.optimize_options("CasadiRadau2")
-        opts['hs'] = "free"
         opts['result_mode'] = "collocation_points"
-        res = self.model_VDP_Lagrange.optimize(self.algorithm, opts)
+        res = self.model_VDP_Mayer.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
         
         # Element interpolation
         opts['result_mode'] = "element_interpolation"
-        res = self.model_VDP_Lagrange.optimize(self.algorithm, opts)
+        res = self.model_VDP_Mayer.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=3e-2)
     
     @testattr(casadi = True)
