@@ -15,7 +15,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
-Module containing base classes.
+Module containing base classes and functionality.
 """
 
 import zipfile
@@ -398,6 +398,20 @@ def get_unit_name(class_name, unit_type='JMU'):
         
 def get_temp_location():
     return tmp_location
+
+def list_to_string(item_list):
+    """
+    Helper function that takes a list of items, which are typed to str and 
+    returned as a string with the list items separated by platform dependent 
+    path separator. For example: 
+        (platform = win)
+        item_list = [1, 2, 3]
+        return value: '1;2;3'
+    """
+    ret_str = ''
+    for l in item_list:
+        ret_str =ret_str+str(l)+os.pathsep
+    return ret_str
 
 class Trajectory:
     """

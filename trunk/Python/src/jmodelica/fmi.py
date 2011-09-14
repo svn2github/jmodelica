@@ -31,7 +31,7 @@ from lxml import etree
 
 import jmodelica.jmi
 from jmodelica import xmlparser
-from jmodelica.core import BaseModel, unzip_unit, get_unit_name, get_temp_location
+from jmodelica.core import BaseModel, unzip_unit, get_unit_name, get_temp_location, list_to_string
 from jmodelica.compiler import ModelicaCompiler, OptimicaCompiler
 
 def compile_fmu(class_name, file_name=[], compiler='modelica', 
@@ -133,7 +133,7 @@ def compile_fmu(class_name, file_name=[], compiler='modelica',
         elif isinstance(value, float):
             comp.set_real_options(key,value)
         elif isinstance(value, list):
-            comp.set_string_option(key, _list_to_string(value))
+            comp.set_string_option(key, list_to_string(value))
         else:
             raise JMIException("Unknown compiler option type for key: %s. \
             Should be of the following types: boolean, string, integer, \

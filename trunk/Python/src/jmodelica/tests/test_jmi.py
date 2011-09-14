@@ -1512,6 +1512,17 @@ class Test_JMU_methods:
         jmu_name = compile_jmu(cpath_ODE, fpath_ODE, compile_to=new_dir)
         
         assert os.path.exists(jmu_name)
+
+    @testattr(stddist = True)
+    def test_set_compiler_options(self):
+        """ Test compiling with compiler options."""
+        libdir = os.path.join(get_files_path(), 'MODELICAPATH_test', 'LibLoc1',
+            'LibA')
+        co = {"index_reduction":True, "equation_sorting":True,
+            "extra_lib_dirs":[libdir]}
+        compile_jmu('RLC_Circuit',
+            os.path.join(get_files_path(), 'Modelica','RLC_Circuit.mo'),
+            compiler_options = co)
         
     @testattr(assimulo = True)
     def test_get_default_options(self):

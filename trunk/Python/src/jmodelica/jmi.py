@@ -37,7 +37,7 @@ import atexit
 from lxml import etree
 
 from jmodelica import xmlparser
-from jmodelica.core import BaseModel, unzip_unit, get_unit_name, get_temp_location
+from jmodelica.core import BaseModel, unzip_unit, get_unit_name, get_temp_location, list_to_string
 from jmodelica.compiler import ModelicaCompiler
 from jmodelica.compiler import OptimicaCompiler
 import jmodelica.io
@@ -6263,7 +6263,7 @@ def compile_jmu(class_name, file_name=[], compiler='auto', target='ipopt',
         elif isinstance(value, float):
             comp.set_real_options(key,value)
         elif isinstance(value, list):
-            comp.set_string_option(key, _list_to_string(value))
+            comp.set_string_option(key, list_to_string(value))
         else:
             raise JMIException("Unknown compiler option type for key: %s. \
             Should be of the following types: boolean, string, integer, \
@@ -6284,18 +6284,4 @@ def compile_jmu(class_name, file_name=[], compiler='auto', target='ipopt',
     comp.compile_JMU(class_name, file_name, target, compile_to)
     
     return os.path.join(compile_to, get_jmu_name(class_name))
-
-def _list_to_string(item_list):
-    """
-    Helper function that takes a list of items, which are typed to str and 
-    returned as a string with the list items separated by platform dependent 
-    path separator. For example: 
-        (platform = win)
-        item_list = [1, 2, 3]
-        return value: '1;2;3'
-    """
-    ret_str = ''
-    for l in item_list:
-        ret_str =ret_str+str(l)+os.pathsep
-    return ret_str
         

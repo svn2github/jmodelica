@@ -374,14 +374,25 @@ class Test_FMI_Compile:
         
         self._model  = FMUModel(fmuname)
 
+    @testattr(fmi = True)
     def test_get_version(self):
         """ Test the version property."""
         nose.tools.assert_equal(self._model.version, "1.0")
         
+    @testattr(fmi = True)
     def test_get_model_types_platform(self):
         """ Test the model types platform property. """
         nose.tools.assert_equal(self._model.model_types_platform, "standard32")
-    
+
+    @testattr(fmi = True)
+    def test_set_compiler_options(self):
+        """ Test compiling with compiler options."""
+        libdir = O.path.join(get_files_path(), 'MODELICAPATH_test', 'LibLoc1',
+            'LibA')
+        co = {"index_reduction":True, "equation_sorting":True,
+            "extra_lib_dirs":[libdir]}
+        compile_fmu('RLC_Circuit', os.path.join(path_to_mofiles,'RLC_Circuit.mo'),
+            compiler_options = co)
 
 class TestDiscreteVariableRefs(object):
     """
