@@ -2338,7 +2338,7 @@ class CasadiRadau2Options(OptionBase):
             Type: str
             Default: "SX"
         
-        write_scaled_results --
+        write_scaled_result --
             Return the scaled optimization result if set to True, otherwise
             return the unscaled optimization result. This option is 
             only applicable when the CasadiModel has been compiled with
@@ -2475,7 +2475,7 @@ class CasadiRadau2Options(OptionBase):
                 'h_bounds': (0.7, 1.3),
                 'n_cp': 3,
                 'graph': 'SX',
-                'write_scaled_results': False,
+                'write_scaled_result': False,
                 'result_mode': "collocation_points",
                 'n_eval_points': 20,
                 'blocking_factors': None,

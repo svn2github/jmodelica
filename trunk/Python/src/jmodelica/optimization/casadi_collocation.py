@@ -342,7 +342,7 @@ class CasadiCollocator(object):
             sc = N.hstack((N.array([1.0]),self.model.get_dx_sf(),self.model.get_x_sf(),self.model.get_u_sf(),self.model.get_w_sf()))
             try:
                 rescale = (self.model.enable_scaling and 
-                           not self.write_scaled_results)
+                           not self.write_scaled_result)
             except AttributeError:
                 rescale = self.model.enable_scaling
             
