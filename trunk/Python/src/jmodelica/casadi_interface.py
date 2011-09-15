@@ -96,7 +96,8 @@ class CasadiModel(object):
         
             algorithm --
                 The algorithm for which the options class should be returned. 
-                Possible values are: 'CasadiRadau', 'CasadiPseudoSpectral'
+                Possible values are: 'CasadiRadau', 'CasadiRadau2',
+                'CasadiPseudoSpectral'
                 Default: 'CasadiRadau'
                 
         Returns::
@@ -125,6 +126,9 @@ class CasadiModel(object):
                 - 'CasadiRadau'. This algorithm is based 
                   on direct collocation on finite elements and the algorithm 
                   IPOPT is used to obtain a numerical solution to the problem.
+                - 'CasadiRadau2'. This algorithm is a new version of
+                  CasadiRadau with more features. It is currently under heavy
+                  development and is thus less stable than its predecessor.
                 - 'CasadiPseudoSpectral'
                 Default: 'CasadiRadau'
                 
@@ -133,14 +137,15 @@ class CasadiModel(object):
                 documentation can be retrieved from an options object:
                 
                     >>> myModel = CasadiModel(...)
-                    >>> opts = myModel.optimize_options()
+                    >>> opts = myModel.optimize_options(algorithm)
                     >>> opts?
 
                 Valid values are: 
-                - A dict that overrides some or all of the default values
-                  provided by CasadiRadauOptions. An empty
-                  dict will thus give all options with default values.
-                - A CasadiRadauOptions object.
+                - A dict that overrides some or all of the algorithm's default
+                  values. An empty dict will thus give all options with default
+                  values.
+                - An Options object for the corresponding algorithm, e.g.
+                  CasadiRadauOptions for CasadiRadau.
                 Default: Empty dict
             
         Returns::
