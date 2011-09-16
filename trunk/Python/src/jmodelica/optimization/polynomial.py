@@ -95,7 +95,7 @@ class RadauPol(object):
         for j in xrange(self.n + 1):
             der_vals[j, 0] = N.nan # Value not used
             for k in xrange(1, self.n + 1):
-                der_vals[j, k] = lagrange_derivative_eval(self.p[:], j,
+                der_vals[j, k] = lagrange_derivative_eval(self.p, j,
                                                           self.p[k])
         
         # Store derivative values as data attribute
@@ -108,7 +108,7 @@ class RadauPol(object):
         Parameters::
         
             i --
-                Polynomial index, corresponds to collocation point i, indexed
+                Polynomial index, corresponds to interpolation point i, indexed
                 from 0.
                 
                 Type: int
@@ -125,7 +125,33 @@ class RadauPol(object):
         """
         nbi = not beg_interp
         return lagrange_eval(self.p[nbi:], i - nbi, tau)
+    
+    def eval_basis_der(self, i, tau, beg_interp=True):
+        """
+        Evaluate derivative of Lagrange basis polynomial.
         
+        Parameters::
+        
+            i --
+                Polynomial index, corresponds to interpolation point i, indexed
+                from 0.
+                
+                Type: int
+                
+            tau --
+                Normalized time point to evaluate polynomial at.
+                
+                Type: float
+                
+            beg_interp --
+                Whether to include an interpolation point at tau = 0.
+                
+                Type: bool
+                Default: True
+        """
+        nbi = not beg_interp
+        return lagrange_derivative_eval(self.p[nbi:], i - nbi, tau)
+    
 class GaussPol(object):
     
     """

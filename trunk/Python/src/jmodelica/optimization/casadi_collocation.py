@@ -24,6 +24,7 @@ import codecs
 from operator import itemgetter
 import time
 import copy
+from IPython.Debugger import Tracer; dh = Tracer()
 
 try:
     import casadi
@@ -1880,7 +1881,8 @@ class Radau2Collocator(CasadiCollocator):
             tau_arr = N.linspace(0, 1, self.n_eval_points)
             for i in xrange(1, self.n_e + 1):
                 for tau in tau_arr:
-                    for var_type in var_types:
+                    # Non-derivatives
+                    for var_type in var_types[1:]:
                         # Evaluate xx_i_tau based on polynomial xx^i
                         xx_i_tau = 0
                         for k in xrange(not cont[var_type], self.n_cp + 1):
@@ -1888,6 +1890,15 @@ class Radau2Collocator(CasadiCollocator):
                             xx_i_tau += xx_i_k * self.pol.eval_basis(
                                     k, tau, cont[var_type])
                         var_opt[var_type][t_index, :] = xx_i_tau.reshape(-1)
+                    
+                    # Derivatives
+                    dx_i_tau = 0
+                    for k in xrange(0, self.n_cp + 1):
+                        x_i_k = self.nlp_opt[var_indices[i][k]['x']]
+                        dx_i_tau += (1. / h_opt[i] * x_i_k * 
+                                     self.pol.eval_basis_der(k, tau))
+                    var_opt['dx'][t_index, :] = dx_i_tau.reshape(-1)
+                    
                     t_index += 1
         else:
             raise ValueError("Unknown result mode %s." % self.result_mode)
