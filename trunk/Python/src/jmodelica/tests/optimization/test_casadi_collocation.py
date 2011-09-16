@@ -208,17 +208,26 @@ class TestRadau2:
         # References values
         cost_ref = 1.8576873858261e3
         u_norm_ref = 3.0556730059e2
-
-        # Unscaled result
-        opts = self.model_CSTR_scaled_Lagrange.optimize_options(self.algorithm)
+        
+        # Unscaled model
+        opts = self.model_CSTR_Lagrange.optimize_options(self.algorithm)
         opts['write_scaled_result'] = False
         res = self.model_CSTR_Lagrange.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
 
-        # Scaled result
+        # Scaled model & unscaled result
+        opts['write_scaled_result'] = False
+        res = self.model_CSTR_scaled_Lagrange.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        c_unscaled = res['cstr.c']
+
+        # Scaled model & scaled result
         opts['write_scaled_result'] = True
         res = self.model_CSTR_scaled_Lagrange.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
+        c_scaled = res['cstr.c']
+        N.testing.assert_allclose(c_unscaled, 1000. * c_scaled,
+                                  rtol=0, atol=1e-5)
     
     @testattr(casadi = True)
     def test_result_mode(self):
