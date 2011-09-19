@@ -44,7 +44,7 @@ public class EndOfBlockAdder extends EndStatementAdder {
 			if (!context.matches(classRegex))
 				return;
 
-			super.addEndIfNotPresent(endStatementString(context), doc, c.offset);
+			super.addEndIfNotPresent(endStatementString(context), doc, c);
 
 		} catch (BadLocationException e) {
 			e.printStackTrace();

@@ -28,7 +28,7 @@ public void customizeDocumentCommand(IDocument doc, DocumentCommand c) {
     if (!(insertingNewline && afterCommentStart)) 
         return;
     
-    super.addEndIfNotPresent("*/", doc, c.offset);
+    super.addEndIfNotPresent("*/", doc, c);
 
 }
 
