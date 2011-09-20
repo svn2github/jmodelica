@@ -107,7 +107,7 @@ aspect TransformCanonical {
 
 		if (root().options.getBooleanOption("automatic_add_initial_equations")) {
 			// Equations are added as part of this this method
-			computeMatchingsAndBLT();
+			computeMatchingsAndBLT();			
 		}
 	    
 	   	root().flushAllRecursive();	
@@ -1016,6 +1016,13 @@ aspect TransformCanonical {
 				// flushAllRecursiveClearFinal must be used here in order to
 				// trigger rewrites of FDerExp -> FDummyDerExp
 				root().flushAllRecursiveClearFinal();
+
+				if (root().options.getBooleanOption("eliminate_alias_variables")) {
+					genAlias();
+					eliminateAliasVariables();
+				}
+
+ 				root().flushAllRecursive();
 
 				//System.out.println(prettyPrint(""));
 
@@ -2936,9 +2943,28 @@ aspect TransformCanonical {
 		}
 	}
 	
+	public boolean FVariable.canBeAliasEliminated(FVariable that) {
+	
+		// The only case where it is allowed to eliminate an 
+		// alias equation containing a derivative is when the
+		// other access is to an algebraic: der(x) = w
+	
+		if ((this.isDerivativeVariable() /*&& !that.isAlgebraicVariable()*/) ||
+		    (that.isDerivativeVariable() /*&& that.isDerivativeVariable()*/)) {
+		    //System.out.println(">>>>>>>> " + this.name() + " " + that.name());
+		 	return false;   	
+		}
+	
+		return true;
+		 
+	}
+	
 	public AliasPair FAbstractEquation.aliasVariables() {
 		return null;
 	}
+	
+	public boolean FAbstractEquation.aliasClassified = false;
+	public boolean FAbstractEquation.classifiedAsAlias = false;
 	
 	/**
 	 * \brief Detection of alias variables in equations
@@ -3092,9 +3118,12 @@ aspect TransformCanonical {
 			}
 		}	
 			
-			
+		aliasClassified = true;
 		if ((fv1!=null) && 
-				(fv2!=null)) {
+				(fv2!=null) &&
+				fv1.canBeAliasEliminated(fv2)) {
+			classifiedAsAlias = true;
+			//System.out.println("**** " + fv1.name() + " " +fv2.name());
 			return new AliasPair(fv1,fv2,negated);
 		} else {
 			return null;
@@ -3103,27 +3132,36 @@ aspect TransformCanonical {
 	}
 	
 	syn lazy boolean FAbstractEquation.isAliasEquation() = false;
-	eq FEquation.isAliasEquation() = aliasVariables()!=null;
+	// If an equation has been classified, the result needs to be cached 
+	// in order to avoid reclassification after alias rewrites.
+	eq FEquation.isAliasEquation() = aliasClassified? classifiedAsAlias: aliasVariables()!=null;
 	
 	/**
 	 * \brief Generate alias information and remove alias equations.
 	 */
 	public void FClass.genAlias() {
-		aliasManager = new AliasManager();
-		
+		if (aliasManager==null) {
+			aliasManager = new AliasManager();
+		}
+		//System.out.println("****************************************");
 		for (FAbstractEquation equation : 
 			getFEquationBlock(0).getFAbstractEquations()) {
 			// Iterate over all equations
 			// If the equation is an alias equation, then register
 			// the alias variables in the alias manager.
-//			System.out.println(equation.prettyPrint(" -- "));
+			//System.out.println(equation.prettyPrint(" -- "));
+			// Check all alias equations, also those that that have bee
+			// checked before.
+			equation.aliasClassified = false; 
 			if (equation.isAliasEquation()) {
+				//System.out.println(equation.prettyPrint(" ----- "));
 				AliasPair aliasPair = equation.aliasVariables();
 				aliasManager.addAliasVariables(aliasPair.fv1,
 						aliasPair.fv2, aliasPair.negated);
-//				System.out.println(aliasManager.printAliasSets());
+				//System.out.println(aliasManager.printAliasSets());
 			}			
 		}	
+		//System.out.println("****************************************");
 		//flush();
 		root().flushAllRecursive(); // TODO: is this really needed? the tree isn't changed
 	}
@@ -3148,11 +3186,16 @@ aspect TransformCanonical {
 		//log.debug("FClass.eliminateAliasVariables(): l1 " + nonAliasVars + " l2 " + aliasVars);
 		
 		// Go through all variables and insert in correct list
-		for (FVariable fv : getFVariables()) {
-			if (fv.isAlias()) 
+		int i = 1;
+		for (FVariable fv : getAliasVariables()) {
 				aliasVars.add(fv);
-			else 
+		}
+		for (FVariable fv : getFVariables()) {
+			if (fv.isAlias()) {
+				aliasVars.add(fv);
+			} else { 
 				nonAliasVars.add(fv);
+			}
 		}
 		
 		// Remove alias equations.
@@ -3195,7 +3238,7 @@ aspect TransformCanonical {
 	rewrite FIdUseExp {
 		when (rewriteAlias && !myFV().isUnknown() && myFV().isAlias()) to FExp {
 			FVariable fv = (FVariable) myFV();
-			FExp new_exp = fv.alias().getFQName().createFIdUseExp();
+			FExp new_exp = fv.alias().createFIdExp();
 			if (fv.isNegated()) 
 				new_exp = new FNegExp(new_exp);
 			return new_exp;
@@ -3216,6 +3259,44 @@ aspect TransformCanonical {
 			FQName new_name = (FQName)((FVariable)getFIdUse().myFV()).alias().getFQName().fullCopy();
 			FExp new_exp = new FDerExp(new FIdUse(new_name));
 			if (getFIdUse().myFV().isNegated()) 
+				new_exp = new FNegExp(new_exp);
+			return new_exp;
+		}
+	}
+
+	/**
+	 * \brief FDummyDerExps referring to alias variables need to be changed to 
+	 * FDummyDerExps referring to their alias targets. 
+	 * 
+	 * This is done by rewrites which are activated once FClass.aliasVariablesEliminated
+	 * is true. Notice that in order for the rewrite to be enable, the is$final
+	 * field of FIdUseExp needs to be set to false: this is done by the recursive
+	 * method ASTNode.flushAllRecursiveClearFinal. 
+	 */
+	rewrite FDummyDerExp {
+		when (rewriteAlias && !myFV().isUnknown() && myFV().isAlias()) to FExp {
+			FVariable fv = (FVariable) myFV();
+			FExp new_exp = fv.alias().createFIdExp();
+			if (myFV().isNegated()) 
+				new_exp = new FNegExp(new_exp);
+			return new_exp;
+		}
+	}
+
+	/**
+	 * \brief FHDummyDerExps referring to alias variables need to be changed to 
+	 * FHDummyDerExps referring to their alias targets. 
+	 * 
+	 * This is done by rewrites which are activated once FClass.aliasVariablesEliminated
+	 * is true. Notice that in order for the rewrite to be enable, the is$final
+	 * field of FIdUseExp needs to be set to false: this is done by the recursive
+	 * method ASTNode.flushAllRecursiveClearFinal. 
+	 */
+	rewrite FHDummyDerExp {
+		when (rewriteAlias && !myFV().isUnknown() && myFV().isAlias()) to FExp {
+			FVariable fv = (FVariable) myFV();
+			FExp new_exp = fv.alias().createFIdExp();
+			if (myFV().isNegated()) 
 				new_exp = new FNegExp(new_exp);
 			return new_exp;
 		}

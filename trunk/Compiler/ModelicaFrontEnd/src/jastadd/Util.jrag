@@ -938,6 +938,8 @@ aspect FlatNames {
     syn String FIdUseExp.name() = getFIdUse().name();
     eq FDerExp.name() = derName();
     eq FDummyDerExp.name() = derName();
+    eq FHDerExp.name() = hDerName(getOrder());
+    eq FHDummyDerExp.name() = hDerName(getOrder());
     eq FPreExp.name() = preName();
     syn String FInstAccessExp.name() = getInstAccessNoTransform().name();
     syn String FIdUseInstAccess.name() = getInstAccessNoTransform().name();
@@ -960,33 +962,16 @@ aspect FlatNames {
     syn String FEnumDecl.name() = getName().name();
     
     syn String FEnumLiteral.name() = getName().name();
-    
-//  syn lazy String FQName.derName() = "der(" + name() + ")";
-    
-    eq FHDerExp.name() {
-    	String[] str = derName().split("\\)");
-    	return str[0] + "," + getOrder() + ")";
-    }
-
-    eq FHDummyDerExp.name() {
-    	String[] str = derName().split("\\)");
-    	return str[0] + "," + getOrder() + ")";
-    }
-
-    eq FHDerivativeVariable.name() {
-    	String[] str = getFQNameNoTransform().derName().split("\\)");
-    	return str[0] + "," + getOrder() + ")";
-    }
-
-    eq FHDummyDerivativeVariable.name() {
-    	String[] str = getFQNameNoTransform().derName().split("\\)");
-    	return str[0] + "," + getOrder() + ")";
-    }
-    
+      
     eq FDerivativeVariable.name()  = getFQNameNoTransform().derName();
+    eq FHDerivativeVariable.name()  = getFQNameNoTransform().hDerName(getOrder());
     eq FDummyDerivativeVariable.name()  =getFQNameNoTransform().derName();
+    eq FHDummyDerivativeVariable.name()  =getFQNameNoTransform().hDerName(getOrder());
+
     syn String FIdUse.derName()    = getFQNameNoTransform().derName();
     syn String FIdUseExp.derName() = getFIdUseNoTransform().derName();
+    syn String FIdUse.hDerName(int derOrder)    = getFQNameNoTransform().hDerName(derOrder);
+    syn String FIdUseExp.hDerName(int derOrder) = getFIdUseNoTransform().hDerName(derOrder);
 
     syn lazy String FQName.derName() {
         StringBuilder str = new StringBuilder();
@@ -1007,6 +992,11 @@ aspect FlatNames {
         str.append(")");
         return str.toString();
     }
+
+	syn lazy String FQName.hDerName(int derOrder) {
+	   	String[] str = derName().split("\\)");
+    	return str[0] + "," + derOrder + ")";	
+	}
 
     eq FPreRealVariable.name()  = getFQNameNoTransform().preName();
     eq FPreIntegerVariable.name()  = getFQNameNoTransform().preName();	
@@ -1187,6 +1177,54 @@ aspect FlatNames {
         	res.addFQNamePart(newPart);
         }
         return res;
+    }
+
+	public FExp FVariable.createFIdExp() {
+		 return getFQName().createFIdUseExp();
+	}
+
+	public FExp FDerivativeVariable.createFIdExp() {
+		 return getFQName().createFDerExp();
+	}
+
+	public FExp FHDerivativeVariable.createFIdExp() {
+		 return getFQName().createFHDerExp(getOrder());
+	}
+
+	public FExp FDummyDerivativeVariable.createFIdExp() {
+		 return getFQName().createFDummyDerExp();
+	}
+
+	public FExp FHDummyDerivativeVariable.createFIdExp() {
+		 return getFQName().createFHDummyDerExp(getOrder());
+	}
+
+    /**
+     * \brief Create an FDerExp using a copy of this name.
+     */
+    public FDerExp FQName.createFDerExp() {
+        return new FDerExp(createFIdUse()); 
+    }
+
+    /**
+     * \brief Create an FHDerExp using a copy of this name.
+     */
+    public FHDerExp FQName.createFHDerExp(int order) {
+        return new FHDerExp(createFIdUse(), order); 
+    }
+
+    /**
+     * \brief Create an FDummyDerExp using a copy of this name.
+     */
+    public FDummyDerExp FQName.createFDummyDerExp() {
+        return new FDummyDerExp(createFIdUse()); 
+    }
+
+    /**
+     * \brief Create an FHDummyDerExp using a copy of this name.
+     */
+    public FHDummyDerExp FQName.createFHDummyDerExp(int order) {
+        return new FHDummyDerExp(createFIdUse(), order); 
     }
     
     /**

@@ -551,6 +551,11 @@ aspect AliasVariables {
 	syn int FVariable.aliasHeuristicScore() {
 		int score = 1000;
 		
+		// 0. Derivatives
+		if (isDerivativeVariable())
+			return score;
+		score--;
+		
 		// 1. Input
 		if (isInput())
 			return score;

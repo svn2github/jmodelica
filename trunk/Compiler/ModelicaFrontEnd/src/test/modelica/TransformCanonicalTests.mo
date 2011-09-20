@@ -3059,30 +3059,26 @@ end WhenVariability1;
          description="Test of index reduction",
          flatModel="
 fclass TransformCanonicalTests.IndexReduction1_PlanarPendulum
- parameter Real L = 1 \"Pendulum length\" /* 1 */;
- parameter Real g = 9.81 \"Acceleration due to gravity\" /* 9.81 */;
- Real x \"Cartesian x coordinate\";
- Real y \"Cartesian x coordinate\";
- Real vx \"Velocity in x coordinate\";
- Real vy \"Velocity in y coordinate\";
- Real lambda \"Lagrange multiplier\";
- Real der_x;
- Real der_vx;
- Real der_2_x;
- Real der_2_y;
+parameter Real L = 1 \"Pendulum length\" /* 1 */;
+parameter Real g = 9.81 \"Acceleration due to gravity\" /* 9.81 */;
+Real x \"Cartesian x coordinate\";
+Real y \"Cartesian x coordinate\";
+Real vy \"Velocity in y coordinate\";
+Real lambda \"Lagrange multiplier\";
+Real der_x;
+Real der_2_x;
+Real der_2_y;
 initial equation 
- y = 0.0;
- vy = 0.0;
+y = 0.0;
+vy = 0.0;
 equation
- der_x = vx;
- der(y) = vy;
- der_vx = ( lambda ) * ( x );
- der(vy) = ( lambda ) * ( y ) - ( g );
- x ^ 2 + y ^ 2 = L;
- ( ( 2 ) * ( x ) ) * ( der_x ) + ( ( 2 ) * ( y ) ) * ( der(y) ) = 0;
- ( ( 2 ) * ( x ) ) * ( der_2_x ) + ( ( 2 ) * ( der_x ) + ( 0 ) * ( x ) ) * ( der_x ) + ( ( 2 ) * ( y ) ) * ( der_2_y ) + ( ( 2 ) * ( der(y) ) + ( 0 ) * ( y ) ) * ( der(y) ) = 0;
- der_2_x = der_vx;
- der_2_y = der(vy);
+der(y) = vy;
+der_2_x = ( lambda ) * ( x );
+der(vy) = ( lambda ) * ( y ) - ( g );
+x ^ 2 + y ^ 2 = L;
+( ( 2 ) * ( x ) ) * ( der_x ) + ( ( 2 ) * ( y ) ) * ( der(y) ) = 0;
+( ( 2 ) * ( x ) ) * ( der_2_x ) + ( ( 2 ) * ( der_x ) + ( 0 ) * ( x ) ) * ( der_x ) + ( ( 2 ) * ( y ) ) * ( der_2_y ) + ( ( 2 ) * ( der(y) ) + ( 0 ) * ( y ) ) * ( der(y) ) = 0;
+der_2_y = der(vy);
 end TransformCanonicalTests.IndexReduction1_PlanarPendulum;
 ")})));
 
@@ -3159,16 +3155,10 @@ parameter Real sine.phase(final quantity = \"Angle\",final unit = \"rad\",displa
 parameter Real sine.offset = 0 \"Offset of output signal\" /* 0 */;
 parameter Real sine.startTime(final quantity = \"Time\",final unit = \"s\") = 0 \"Output = offset for time < startTime\" /* 0 */;
 constant Real sine.pi = 3.141592653589793;
-Real der_inertia1_phi;
-Real der_inertia1_w;
-Real der_inertia2_phi;
-Real der_inertia2_w;
 Real der_idealGear_phi_a;
 Real der_idealGear_phi_b;
 Real der_2_idealGear_phi_a;
-Real der_2_inertia1_phi;
 Real der_2_idealGear_phi_b;
-Real der_2_inertia2_phi;
 Real der_2_damper_phi_rel;
 initial equation 
 inertia2.phi = 0;
@@ -3183,15 +3173,11 @@ damper.d = damping;
 sine.amplitude = amplitude;
 sine.freqHz = freqHz;
 equation
-inertia1.w = der_inertia1_phi;
-inertia1.a = der_inertia1_w;
 ( inertia1.J ) * ( inertia1.a ) = - ( torque.flange.tau ) - ( idealGear.flange_a.tau );
 idealGear.phi_a = inertia1.phi - ( fixed.phi0 );
 idealGear.phi_b = inertia2.phi - ( fixed.phi0 );
 idealGear.phi_a = ( idealGear.ratio ) * ( idealGear.phi_b );
 0 = ( idealGear.ratio ) * ( idealGear.flange_a.tau ) + idealGear.flange_b.tau;
-inertia2.w = der_inertia2_phi;
-inertia2.a = der_inertia2_w;
 ( inertia2.J ) * ( inertia2.a ) = - ( idealGear.flange_b.tau ) + inertia2.flange_b.tau;
 spring.flange_b.tau = ( spring.c ) * ( spring.phi_rel - ( spring.phi_rel0 ) );
 spring.phi_rel = inertia3.phi - ( inertia2.phi );
@@ -3208,15 +3194,13 @@ damper.flange_b.tau + fixed.flange.tau + idealGear.support.tau - ( torque.flange
 inertia3.flange_b.tau = 0;
 idealGear.support.tau = - ( idealGear.flange_a.tau ) - ( idealGear.flange_b.tau );
 der_idealGear_phi_a = ( idealGear.ratio ) * ( der_idealGear_phi_b ) + ( 0 ) * ( idealGear.phi_b );
-der_idealGear_phi_a = der_inertia1_phi - ( 0 );
-der_idealGear_phi_b = der_inertia2_phi - ( 0 );
+der_idealGear_phi_a = inertia1.w - ( 0 );
+der_idealGear_phi_b = inertia2.w - ( 0 );
 der_2_idealGear_phi_a = ( idealGear.ratio ) * ( der_2_idealGear_phi_b ) + ( 0 ) * ( der_idealGear_phi_b ) + ( 0 ) * ( der_idealGear_phi_b ) + ( 0 ) * ( idealGear.phi_b );
-der_2_idealGear_phi_a = der_2_inertia1_phi - ( 0 );
-der_inertia1_w = der_2_inertia1_phi;
-der_2_idealGear_phi_b = der_2_inertia2_phi - ( 0 );
-der_inertia2_w = der_2_inertia2_phi;
-damper.der(phi_rel) = 0 - ( der_inertia2_phi );
-der_2_damper_phi_rel = 0 - ( der_2_inertia2_phi );
+der_2_idealGear_phi_a = inertia1.a - ( 0 );
+der_2_idealGear_phi_b = inertia2.a - ( 0 );
+damper.der(phi_rel) = 0 - ( inertia2.w );
+der_2_damper_phi_rel = 0 - ( inertia2.a );
 damper.der(w_rel) = der_2_damper_phi_rel;
 
 type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");

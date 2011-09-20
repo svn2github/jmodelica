@@ -534,14 +534,36 @@ aspect Derivatives {
 	}
 	
 }
-/*
+
  aspect ExpressionSimplification {
- 
+
+/* 
  	rewrite FMulExp {
 		when (getLeft().variability().lessOrEqual(fConstant()) && getLeft().ceval().realValue()==0.) to FExp {
 				return getRight();
 			}
 	}
+*/
+/* 
+ 	rewrite FSubExp {
+		when (getLeft().variability().lessOrEqual(fConstant()) && getLeft().ceval().realValue()==0.) to FExp {
+				return new FNegExp(getRight());
+			}
+		when (getRight().variability().lessOrEqual(fConstant()) && getRight().ceval().realValue()==0.) to FExp {
+				return getLeft();
+			}
+	}
+
+ 	rewrite FAddExp {
+		when (getLeft().variability().lessOrEqual(fConstant()) && getLeft().ceval().realValue()==0.) to FExp {
+				return getRight();
+			}
+		when (getRight().variability().lessOrEqual(fConstant()) && getRight().ceval().realValue()==0.) to FExp {
+				return getLeft();
+			}
+	}
+*/
+
+
  
  }
- */
