@@ -24,8 +24,14 @@ import codecs
 from operator import itemgetter
 import time
 import copy
-from IPython.Debugger import Tracer; dh = Tracer()
-
+try:
+    from IPython.Debugger import Tracer; dh = Tracer()
+except ImportError:
+    try:
+        from IPython.core.debugger import Tracer; dh = Tracer()
+    except:
+        logging.warning('Could not find IPython debugger module')
+    
 try:
     import casadi
 except ImportError:
