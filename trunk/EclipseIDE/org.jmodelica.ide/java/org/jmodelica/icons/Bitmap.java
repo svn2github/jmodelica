@@ -5,6 +5,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import javax.xml.bind.DatatypeConverter;
+
 public class Bitmap extends GraphicItem {
 
 	private Extent extent;
@@ -59,9 +61,8 @@ public class Bitmap extends GraphicItem {
 		if (fileName != null) {
 			return new FileInputStream(fileName);
 		} else if (imageSource != null) {
-			byte decodedBytes[] = 
-				new sun.misc.BASE64Decoder().decodeBuffer(imageSource);
-			return new ByteArrayInputStream(decodedBytes);  
+			byte[] bytes = DatatypeConverter.parseBase64Binary(imageSource);
+			return new ByteArrayInputStream(bytes);
 		}
 		return null;
 	}

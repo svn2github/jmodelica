@@ -15,18 +15,25 @@
 */
 package org.jmodelica.ide.outline;
 
+import java.io.File;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.IURIEditorInput;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.part.IPage;
+import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
+import org.jastadd.plugin.compiler.ast.IASTNode;
 import org.jmodelica.ide.editor.Editor;
 import org.jmodelica.ide.editor.ICurrentClassListener;
 import org.jmodelica.ide.helpers.EclipseUtil;
@@ -131,6 +138,34 @@ public class ClassOutlineView extends OutlineView {
 
 	protected IContentOutlinePage getOutlinePage(Editor part) {
 		return null;
+	}
+
+	protected IASTNode rootASTOfInput(IEditorInput input) {
+		// Get the file connected to the input.
+		IFile file = null;
+		String path = null;
+		// TODO: This should probably be a util func.
+		if (input instanceof IFileEditorInput) {
+			file = ((IFileEditorInput) input).getFile();
+			path = file.getLocation().toOSString();
+		} else if (input instanceof IURIEditorInput) {
+			path = new File(((IURIEditorInput) input).getURI().getPath()).getAbsolutePath();
+			file = EclipseUtil.getFileForPath(path).value();
+		}
+		IProject proj = (file == null) ? null : file.getProject();
+		IASTNode root = null;
+		if (proj != null) {
+			// TODO: This might not be the current page, in that case we will need to show the page before selecting node.
+			root = mapProjToPage.get(proj).getRoot();
+		} else {
+			IPage page = getCurrentPage();
+			if (page instanceof OutlinePage)
+				root = ((OutlinePage) page).getRoot();
+		}
+		if (root != null && path != null)
+			return root.lookupChildAST(path);
+		else
+			return root;
 	}
 
 }

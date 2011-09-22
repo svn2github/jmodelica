@@ -27,6 +27,7 @@ aspect Outline {
 	eq ImportClause.showInContentOutline() = false;
 	eq InstClassDecl.showInContentOutline() = true;
 	eq InstComponentDecl.showInContentOutline() = true;
+	eq SourceRoot.showInContentOutline() = true;
 	
 	// TODO: show components and extends in the content outline and the project explorer?
 	

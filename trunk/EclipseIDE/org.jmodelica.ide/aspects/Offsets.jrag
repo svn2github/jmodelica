@@ -60,5 +60,42 @@ aspect Offset {
 	syn int ASTNode.getEndLineOffset()   = createLineOffset(getValidEnd(), 1);
 	
 	syn int ASTNode.offset()             = getBeginOffset();
-	syn int ASTNode.length()             = getEndOffset() - getBeginOffset() + 1;	
+	syn int ASTNode.length()             = getEndOffset() - getBeginOffset() + 1;
+	
+
+	syn boolean ASTNode.contains(int offset, int length) {
+		int begin = getBeginOffset();
+		int end = getEndOffset();
+		// Assume no end info means until end of file
+		return end < 0 || (begin <= offset && end >= offset + length);
+	}
+	
+	syn ClassDecl ASTNode.containingClassDecl(int offset, int length) {
+		if (!contains(offset, length))
+			return null;
+		for (ASTNode child : this) {
+			ClassDecl res = child.containingClassDecl(offset, length);
+			if (res != null)
+				return res;
+		}
+		return containingClassDeclForThis();
+	}
+	
+	syn ClassDecl ASTNode.containingClassDeclForThis() = null;
+	eq BaseClassDecl.containingClassDeclForThis()      = this;
+
+	
+	syn ClassDecl ASTNode.firstClassDecl() {
+		for (ASTNode child : this) {
+			ClassDecl res = child.firstClassDecl();
+			if (res != null)
+				return res;
+		}
+		return null;
+	}
+	eq BaseClassDecl.firstClassDecl()    = this;
+	eq SourceRoot.firstClassDecl()       = getProgram().firstClassDecl();
+	eq Program.firstClassDecl()          = getUnstructuredEntitys().firstClassDecl();
+	eq StoredDefinition.firstClassDecl() = getElements().firstClassDecl();
+	
 }

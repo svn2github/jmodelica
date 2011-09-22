@@ -9,8 +9,6 @@ import org.jmodelica.icons.Types.Arrow;
 import org.jmodelica.icons.Types.FillPattern;
 import org.jmodelica.icons.drawing.IconConstants;
 
-/* TODO fixa så att punkter hamnar rätt i kordinatsystemet */
-
 public class Line extends GraphicItem {
 	
 	

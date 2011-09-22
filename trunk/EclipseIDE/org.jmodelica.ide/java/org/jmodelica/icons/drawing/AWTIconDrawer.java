@@ -98,9 +98,10 @@ public class AWTIconDrawer implements GraphicsInterface {
 	
 	private Graphics2D g;
 	private Stack<AffineTransform> savedTransformations;
+	private AffineTransform nullTransform;
 	
-	private Extent iconExtent;	
-	
+	private Extent iconExtent;
+		
 	public AWTIconDrawer() {
 		savedTransformations = new Stack<AffineTransform>();
 		outline = true;
@@ -149,6 +150,7 @@ public class AWTIconDrawer implements GraphicsInterface {
 		g = image.createGraphics();
 		g.setBackground(new java.awt.Color(255,255,255,0));
 		g.clearRect(0, 0, image.getWidth(), image.getHeight());
+		nullTransform = g.getTransform();
 
         AffineTransform transform = new AffineTransform(); 
 		transform.translate(transX, transY);
@@ -332,10 +334,13 @@ public class AWTIconDrawer implements GraphicsInterface {
 			g.getTransform().transform(size, 0, size, 0, 2);
 			int tw = (int) (Math.round(size[2] - size[0])) + 1;
 			int th = (int) (Math.round(size[3] - size[1])) + 1;
-			if (iw > 2 * tw || ih > 2 * th)
+			if (iw > 2 * tw || ih > 2 * th) {
 				bitmapImage = getScaledInstance(bitmapImage, tw, th);
+				iw = tw;
+				ih = th;
+			}
 			g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-			g.drawImage(bitmapImage, (int) x1, (int) y1, (int) x2, (int) y2, 0, 0, tw, th, null);
+			g.drawImage(bitmapImage, (int) x1, (int) y1, (int) x2, (int) y2, 0, 0, iw, ih, null);
 		}
 	}
 	
@@ -368,7 +373,7 @@ public class AWTIconDrawer implements GraphicsInterface {
 			// Set up the Graphics object and draw the transformed line.
 			setColor(l.getColor());
 			AffineTransform oldTransform = g.getTransform();
-			g.setTransform(new AffineTransform());
+			g.setTransform(nullTransform);
 			g.setRenderingHint(
 					RenderingHints.KEY_STROKE_CONTROL, 
 					RenderingHints.VALUE_STROKE_PURE
@@ -441,7 +446,7 @@ public class AWTIconDrawer implements GraphicsInterface {
 				}
 			}
 			AffineTransform oldTransform = g.getTransform();
-			g.setTransform(new AffineTransform());
+			g.setTransform(nullTransform);
 			g.fill(xformedShape);
 			g.setTransform(oldTransform);
 			g.setPaint(oldPaint);
@@ -456,7 +461,7 @@ public class AWTIconDrawer implements GraphicsInterface {
 			g.setStroke(newStroke);
 			setColor(s.getLineColor());
 			AffineTransform oldTransform = g.getTransform();
-			g.setTransform(new AffineTransform());
+			g.setTransform(nullTransform);
 			g.draw(xformedShape);
 			g.setTransform(oldTransform);
 		}
@@ -509,7 +514,7 @@ public class AWTIconDrawer implements GraphicsInterface {
 				downRightColor = brighterColor;
 			}
 			AffineTransform oldTransform = g.getTransform();
-			g.setTransform(new AffineTransform());
+			g.setTransform(nullTransform);
 			g.setColor(upLeftColor);
 			g.fill(upLeft);
 			g.setColor(downRightColor);
@@ -568,7 +573,7 @@ public class AWTIconDrawer implements GraphicsInterface {
 		setColor(l.getColor());
 		
 		AffineTransform oldTransform = g.getTransform();
-		g.setTransform(new AffineTransform());
+		g.setTransform(nullTransform);
 		g.draw(gp);
 		g.setTransform(oldTransform);
 		

@@ -72,7 +72,7 @@ public abstract class AbstractBaseContentOutlinePage extends ContentOutlinePage 
 	public void selectionChanged(SelectionChangedEvent event) {
 		super.selectionChanged(event);
 		ISelection selection= event.getSelection();
-		if (selection.isEmpty())
+		if (selection.isEmpty() && fTextEditor != null)
 			fTextEditor.resetHighlightRange();
 		else {
 			IStructuredSelection structSelect = (IStructuredSelection)selection; 

@@ -15,22 +15,39 @@
 */
 package org.jmodelica.ide.outline;
 
+import java.util.List;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.IURIEditorInput;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.part.IPage;
 import org.eclipse.ui.part.IPageBookViewPage;
 import org.eclipse.ui.part.IPageSite;
+import org.eclipse.ui.part.IShowInTarget;
 import org.eclipse.ui.part.MessagePage;
 import org.eclipse.ui.part.PageBook;
 import org.eclipse.ui.part.PageBookView;
+import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
+import org.jastadd.plugin.compiler.ast.IASTNode;
+import org.jastadd.plugin.registry.ASTRegistry;
 import org.jmodelica.ide.editor.Editor;
+import org.jmodelica.ide.helpers.EclipseUtil;
+import org.jmodelica.modelica.compiler.ASTNode;
 
-public abstract class OutlineView extends PageBookView implements ISelectionProvider, ISelectionChangedListener {
+public abstract class OutlineView extends PageBookView 
+implements ISelectionProvider, ISelectionChangedListener, IShowInTarget {
 
     private String defaultText = "An outline is not available."; 
 
@@ -126,5 +143,81 @@ public abstract class OutlineView extends PageBookView implements ISelectionProv
 		}
         super.showPageRec(pageRec);
     }
+
+	public boolean show(ShowInContext context) {
+		ISelection selection = context.getSelection();
+		if (selection instanceof ITreeSelection) {
+			// Pretty theoretic at this point, we don't support "show in" from any tree view
+			ITreeSelection treeSel = (ITreeSelection) selection;
+			if (treeSel.size() == 1) {
+				Object elem = treeSel.getFirstElement();
+				if (elem instanceof IASTNode)
+					return selectNode((IASTNode) elem);
+				else if (elem instanceof IFile)
+					return selectNode(lookupASTForFile((IFile) elem));
+			} else {
+				// TODO: Does this work? probably not - but can't test yet
+				IPage page = getCurrentPage();
+				if (page instanceof OutlinePage) 
+					((OutlinePage) page).select(selection);
+			}
+		} else if (context.getInput() instanceof IEditorInput) {
+			IEditorInput input = (IEditorInput) context.getInput();
+			IASTNode root = rootASTOfInput(input);
+			if (root != null) {
+				// TODO: Add needed methods to an interface instead
+				ASTNode root2 = (ASTNode) root;
+				if (selection instanceof ITextSelection) {
+					ITextSelection textSel = (ITextSelection) selection;
+					int offset = textSel.getOffset();
+					int length = textSel.getLength();
+					return selectNode(root2.containingClassDecl(offset, length));
+				} else {
+					return selectNode(root2.firstClassDecl());
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Get the root of the AST that this view uses for the given file.
+	 */
+	protected IASTNode rootASTOfInput(IEditorInput input) {
+		IEditorPart editor = getSite().getPage().findEditor(input);
+		PageRec pageRec = getPageRec(editor);
+		if (pageRec != null && pageRec.page instanceof OutlinePage) 
+			return ((OutlinePage) pageRec.page).getRoot();
+		else
+			return null;
+	}
+
+	/**
+	 * Look up the AST for a specific file in the AST registry.
+	 * @param file  the file to look up in the registry
+	 * @return
+	 */
+	private IASTNode lookupASTForFile(IFile file) {
+		IProject project = file.getProject();
+		String path = file.getRawLocation().toOSString();
+		return org.jastadd.plugin.Activator.getASTRegistry().lookupAST(path, project);
+	}
+
+	/**
+	 * Select and reveal the given node if it is in (the current page of) this view.
+	 * @param node  the node to select
+	 * @return <code>true</code> if selection was successful
+	 */
+	private boolean selectNode(IASTNode node) {
+		IPage page = getCurrentPage();
+		if (page instanceof OutlinePage) {
+			OutlinePage page2 = (OutlinePage) page;
+			if (page2.contains(node)) {
+				page2.select((ASTNode) node);
+				return true;
+			}
+		} 
+		return false;
+	}
 
 }

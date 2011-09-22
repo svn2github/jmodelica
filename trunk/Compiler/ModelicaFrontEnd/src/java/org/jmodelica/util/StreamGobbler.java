@@ -20,7 +20,7 @@ public class StreamGobbler extends Thread {
     public void run() {
         try {
         	try {
-				byte[] b = new byte[512];
+				byte[] b = new byte[64];
 				int n;
 				while ((n = is.read(b)) > 0)
 					os.write(b, 0, n);

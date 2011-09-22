@@ -28,9 +28,31 @@ aspect CompileInIDE {
 	eq StoredDefinition.lookupKey() = fileName();
 
 	/*
+	 * We can refine child AST lookup since we know the possible places they can be
+	 * and some things about the keys.
+	 */
+	eq Program.lookupChildAST(String key) {
+		for (StoredDefinition sd : getUnstructuredEntitys()) {
+			if (key.equals(sd.fileName()))
+				return sd;
+		}
+		for (LibNode ln : getLibNodes()) {
+			IASTNode childMatch = ln.lookupChildAST(key);
+			if (childMatch != null) 
+				return childMatch;
+		}
+		return null;
+	}
+	eq LibNode.lookupChildAST(String key)      = 
+		key.startsWith(getFileName()) ?	getStoredDefinition().lookupChildAST(key) : null;
+	eq ClassDecl.lookupChildAST(String key)    = null;
+	eq LibClassDecl.lookupChildAST(String key) = getLibNodes().lookupChildAST(key);
+	
+	
+	/*
 	 * IJastAddNode requires this for some reason.
 	 */
-	public String ASTNode.getFileName() { return null; }
+	public String ASTNode.getFileName() { return fileName(); }
 	
 	/*
 	 * A link between an AST node and an IFile is useful in e.g. error collection

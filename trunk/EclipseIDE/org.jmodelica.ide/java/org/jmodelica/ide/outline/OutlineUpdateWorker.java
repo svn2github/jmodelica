@@ -1,19 +1,28 @@
 package org.jmodelica.ide.outline;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.StructuredViewer;
+import org.eclipse.jface.viewers.TreePath;
+import org.eclipse.jface.viewers.TreeSelection;
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.ui.progress.UIJob;
 import org.jmodelica.modelica.compiler.ASTNode;
 
 public class OutlineUpdateWorker {
 
 	private static OutlineUpdateJob job = new OutlineUpdateJob();
+	private static Map<ASTNode, Set<ChildrenUpdatedListener>> childrenUpdatedListenerMap = 
+		new HashMap<ASTNode, Set<ChildrenUpdatedListener>>();
 	
 	/**
 	 * Queues updating of the icon for an AST node.
@@ -50,6 +59,52 @@ public class OutlineUpdateWorker {
 	public static void addChildren(StructuredViewer viewer, ASTNode node) {
 		if (!node.cachedOutlineChildrenIsCurrent())
 			job.addTask(new ChildrenTask(viewer, node));
+	}
+
+	/**
+	 * Add a listener to be notified when the list of outline children 
+	 * for the specified node is updated. Since this normally only happens 
+	 * once for each node, the listener is removed before it is notified.
+	 *  
+	 * @param node      the node to add the listener for
+	 * @param listener  the listener to add
+	 */
+	public static void addChildrenUpdatedListener(ASTNode node, ChildrenUpdatedListener listener) {
+		Set<ChildrenUpdatedListener> listeners = childrenUpdatedListenerMap.get(node);
+		if (listeners == null) {
+			listeners = new HashSet<ChildrenUpdatedListener>();
+			childrenUpdatedListenerMap.put(node, listeners);
+		}
+		listeners.add(listener);
+	}
+
+	/**
+	 * Remove a listener that was to be notified when the list of outline 
+	 * children for the specified node is updated. If the listener isn't 
+	 * registered for the given node, nothing happens.
+	 *  
+	 * @param node      the node to remove the listener for
+	 * @param listener  the listener to remove
+	 */
+	public static void removeChildrenUpdatedListener(ASTNode node, ChildrenUpdatedListener listener) {
+		Set<ChildrenUpdatedListener> listeners = childrenUpdatedListenerMap.get(node);
+		if (listeners != null) {
+			listeners.remove(listener);
+			if (listeners.isEmpty())
+				childrenUpdatedListenerMap.remove(listeners);
+		}
+	}
+
+	/**
+	 * Expand tree in <code>page</code> down to the node given by <code>path</code>. 
+	 * If any nodes along the path aren't loaded yet, expansion will pause until they are.
+	 * 
+	 * @param page    the page that contains the path
+	 * @param viewer  the viewer that shows the node
+	 * @param path    the path from the root (the tree root, not the AST root) to the node to select 
+	 */
+	public static void expandAndSelect(OutlinePage page, TreeViewer viewer, TreePath path) {
+		new ExpandAndSelectWorker(page, viewer, path).work();
 	}
 
 	private static class OutlineUpdateJob extends Job {
@@ -130,7 +185,13 @@ public class OutlineUpdateWorker {
 		}
 
 		public IStatus runInUIThread(IProgressMonitor monitor) {
-			task.viewer.refresh(task.node);
+			ASTNode node = task.node;
+			task.viewer.refresh(node);
+			Set<ChildrenUpdatedListener> listeners = childrenUpdatedListenerMap.get(node);
+			if (listeners != null)
+				for (ChildrenUpdatedListener listener : listeners)
+					listener.childrenUpdated(node);
+			childrenUpdatedListenerMap.remove(node);
 			return Status.OK_STATUS;
 		}
 
@@ -183,6 +244,52 @@ public class OutlineUpdateWorker {
 			new ChildrenUpdateJob(this).schedule();
 		}
 		
+	}
+	
+	private interface ChildrenUpdatedListener {
+		
+		public void childrenUpdated(ASTNode node);
+		
+	}
+
+	private static class ExpandAndSelectWorker implements ChildrenUpdatedListener {
+
+		private OutlinePage page;
+		private TreePath path;
+		private TreeViewer viewer;
+		private int i;
+
+		public ExpandAndSelectWorker(OutlinePage page, TreeViewer viewer, TreePath path) {
+			this.page = page;
+			this.path = path;
+			this.viewer = viewer;
+			i = 1;
+		}
+
+		public void work() {
+			if (i < path.getSegmentCount()) {
+				if (viewer.testFindItem(path.getSegment(i)) == null) {
+					Object parent = path.getSegment(i - 1);
+					i++;
+					if (parent instanceof ASTNode) {
+						ASTNode parentNode = (ASTNode) parent;
+						addChildrenUpdatedListener(parentNode, this);
+						addChildren(viewer, parentNode);
+					}
+				} else {
+					i++;
+					work();
+				}
+			} else {
+				page.select(new TreeSelection(path));
+			}
+		}
+
+		public void childrenUpdated(ASTNode node) {
+			viewer.expandToLevel(node, 1);
+			work();
+		}
+
 	}
 	
 }

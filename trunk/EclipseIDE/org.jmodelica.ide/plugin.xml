@@ -411,4 +411,15 @@
          </command>
       </menuContribution>
    </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="org.jmodelica.ide.perspective">
+         <showInPart
+               id="org.eclipse.ui.navigator.ProjectExplorer"></showInPart>
+         <showInPart
+               id="org.jmodelica.ide.view.outline.class">
+         </showInPart>
+      </perspectiveExtension>
+   </extension>
 </plugin>

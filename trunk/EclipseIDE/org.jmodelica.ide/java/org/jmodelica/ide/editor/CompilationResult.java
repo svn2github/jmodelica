@@ -15,9 +15,9 @@ import org.jmodelica.modelica.compiler.BaseClassDecl;
  */
 public abstract class CompilationResult {
 
-protected ASTNode<?> root;
+protected ASTNode root;
 
-public ASTNode<?> root() {
+public ASTNode root() {
     return root;
 }
 
@@ -45,7 +45,7 @@ public abstract void update(IProject projChanged);
  * @return true iff. compilation had errors 
  */
 public boolean failed() {
-    return root() == null || root().isError();
+    return root == null || root.isError();
 }
 
 /**
@@ -60,19 +60,6 @@ public abstract void dispose(Editor editor);
  * @param file input file
  */
 public abstract void recompileLocal(IDocument doc, IFile file);
-
-/**
- * Returns class declaration containing selection <code> sel </code>.
- * @param sel selection
- * @return class declaration containing selection
- */
-public BaseClassDecl classContaining(ITextSelection sel) {
-    
-    if (root() == null)
-        return null;
-    return root().containingClass(sel.getOffset(), sel.getLength());
-    
-}
 
 
 }

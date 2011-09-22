@@ -203,20 +203,46 @@ public abstract class OutlinePage extends AbstractBaseContentOutlinePage impleme
 	protected abstract void rootChanged(TreeViewer viewer);
 
 	public void select(ASTNode<?> node) {
-		TreeSelection sel = (node != null) ? 
-				new TreeSelection(pathFromNode(node)) : 
-				new TreeSelection();
-		select(sel);
+		if (node == null) {
+			select(new TreeSelection());
+		} else {
+			TreePath path = pathFromNode(node);
+			TreeViewer viewer = getTreeViewer();
+			if (viewer != null && viewer.testFindItem(node) == null)
+				OutlineUpdateWorker.expandAndSelect(this, getTreeViewer(), path);
+			else
+				select(new TreeSelection(path));
+		}
 	}
 
-	private void select(ISelection sel) {
+	protected void select(ISelection sel) {
 		selecting = true;
 		TreeViewer viewer = getTreeViewer();
 		if (viewer != null) 
 			viewer.setSelection(sel, true);
 		selecting = false;
 	}
+	
+	/**
+	 * Check if the given node is in the tree of this page.
+	 */
+	public boolean contains(Object node) {
+		ITreeContentProvider provider = getContentProvider();
+		while (node != null && node != fRoot) 
+			node = provider.getParent(node);
+		return node == fRoot;
+	}
+	
+	/**
+	 * Get the root of the AST shown in this page.
+	 */
+	protected IASTNode getRoot() {
+		return fRoot;
+	}
 
+	/**
+	 * Return the path from the root of the tree to the given node.
+	 */
 	private TreePath pathFromNode(Object node) {
 		ArrayList<Object> list = new ArrayList<Object>();
 		ITreeContentProvider provider = getContentProvider();
@@ -224,10 +250,11 @@ public abstract class OutlinePage extends AbstractBaseContentOutlinePage impleme
 			list.add(node);
 			node = provider.getParent(node);
 		}
-		int n = list.size();
+		int n = list.size() + 1;
 		Object[] res = new Object[n];
-		for (int i = 0; i < n; i++)
+		for (int i = 1; i < n; i++)
 			res[i] = list.get(n - i - 1);
+		res[0] = fRoot;
 		return new TreePath(res);
 	}
 

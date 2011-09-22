@@ -4,7 +4,6 @@ Bundle-Name: JastAdd Core Plug-in
 Bundle-SymbolicName: org.jastadd.plugin;singleton:=true
 Bundle-Version: 1.0.8
 Bundle-Activator: org.jastadd.plugin.Activator
-Bundle-Localization: plugin
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.core.resources,
@@ -30,3 +29,4 @@ Export-Package: org.jastadd.plugin,
  org.jastadd.plugin.ui.view,
  org.jastadd.plugin.util
 Bundle-Vendor: jastadd.org
+Bundle-RequiredExecutionEnvironment: J2SE-1.5

@@ -50,7 +50,7 @@
 	<property name="tests_dir" value="tests" />
 	<property name="ant_task_dir" value="ant" />
 	<property name="bin_dir" value="bin" />
-	<property name="output_dir" value="site" />
+	<property name="output_dir" location="site" />
 
 	<property name="compiler_dir" value="${jmodelica_root}/Compiler" />
 	<property name="modelica_frontend_dir" value="${compiler_dir}/ModelicaFrontEnd/src" />
@@ -191,19 +191,13 @@
 				</path>
 			</pathconvert>
 			<java jar="${launcher}" fork="true" timeout="10800000" taskname="p2" failonerror="false" maxmemory="256m">
-				<classpath>
-					<fileset dir="${eclipse_path}/plugins">
-						<include name="org.eclipse.equinox.launcher_*.jar" />
-						<include name="org.eclipse.equinox.p2.metadata.generator_*.jar" />
-					</fileset>
-					<pathelement location="${eclipse_path}/plugins" />
-				</classpath>
-				<arg line=" org.eclipse.equinox.launcher.Main" />
-				<arg line=" -application org.eclipse.equinox.p2.metadata.generator.EclipseGenerator" />
-				<arg line=" -updateSite @{dir}/ -site file:@{dir}/site.xml" />
+				<arg line=" -application org.eclipse.equinox.p2.publisher.UpdateSitePublisher" />
+				<arg line=" -metadataRepository file:@{dir}" />
+				<arg line=" -artifactRepository file:@{dir}" />
+				<arg line=" -source @{dir}/ -configs ANY" />
 				<arg line=" -metadataRepositoryName &quot;@{name} plugins&quot;" />
 				<arg line=" -artifactRepositoryName &quot;@{name} artifacts&quot;" />
-				<arg line=" -inplace -noDefaultIUs -compress" />
+				<arg line=" -publishArtifacts -compress" />
 			</java>
 		</sequential>
 	</macrodef>
@@ -327,7 +321,7 @@
 		<jflex file="${parser_output}/FlatModelica_all.flex" outdir="${parser_output}" nobak="yes" />
 
 		<!-- clean up intermediate files -->
-		<delete>
+		<delete deleteonexit="true">
 			<fileset dir="${parser_output}">
 				<include name="*.parser" />
 				<include name="*.beaver" />
