@@ -1990,8 +1990,8 @@ public class GccCompilerDelegator implements CCompilerDelegator {
 	/**
 	 * Get the path to the Makefile for the specified target platform.
 	 */
-	protected String getMakefile(String jmodelicaHome, String platform) {
-		return new File(jmodelicaHome, "Makefiles/MakeFile").getPath();
+	protected File getMakefile(String jmodelicaHome, String platform) {
+		return new File(jmodelicaHome, "Makefiles/MakeFile");
 	}
 	
 	/**
@@ -2054,7 +2054,10 @@ public class GccCompilerDelegator implements CCompilerDelegator {
 			Map<String, String> pVars = new HashMap<String, String>(vars);
 			addTargetPlatformMakeVars(pVars, ext_lib_dirs, platform);
 			
-			String[] args = new String[] { make, "-f", getMakefile(jmodelicaHome, platform), target };
+			File makefile = getMakefile(jmodelicaHome, platform);
+			if (!makefile.exists())
+				throw new CcodeCompilationException("Makefile '" + makefile + "' does not exist.");
+			String[] args = new String[] { make, "-f", makefile.getPath(), target };
 			ArrayList<String> vArgs = new ArrayList<String>(pVars.size());
 			for (Map.Entry<String,String> var : pVars.entrySet())
 				if (var.getValue() != null)
@@ -2065,7 +2068,6 @@ public class GccCompilerDelegator implements CCompilerDelegator {
 			for (String arg : vArgs)
 				cmd[i++] = arg;
 			
-System.out.println(Arrays.toString(cmd));
 			if (ModelicaCompiler.loggedProcess(cmd, null, workDir) != 0)
 				throw new CcodeCompilationException("Compilation of generated C code failed.");
 		}
