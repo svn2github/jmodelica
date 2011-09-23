@@ -101,17 +101,20 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, void *user_data, N_Vector t
 	int i;
 	int j;
 	for(i = 0; i < N; i++){ 
- 	    block->x[i] = Ith(u,i); 
-	} 
+ 	    block->x[i] = Ith(u,i);
+	}
+	/*printf("x[0]: %f\n Jac: ", block->x[0]);*/
 	for(i = 0; i < N; i++){
 		block->dx[i] = 1;
 		block->dF(block->jmi,block->x,block->dx,block->res,block->dres,JMI_BLOCK_EVALUATE_WITH_STATE);
 		for(j = 0; j < N; j++){
 			(J->data)[i*N+j] = block->dres[j];
+			/*printf(" %f, ", block->dres[j]);*/
 		}
 		J->cols[i] = &(J->data)[i*N];
 		block->dx[i] = 0;
 	}
+	/*printf("\n");*/
 	return 0;
 }
 
@@ -161,7 +164,7 @@ int jmi_kinsol_solve(jmi_block_residual_t * block){
 		flag = KINSetUserData(block->kin_mem, block);
 		jmi_kinsol_error_handling(flag);
 		
-                if(block->dF != NULL){
+        if(block->dF != NULL){
 			flag = KINDlsSetDenseJacFn(block->kin_mem, kin_dF);
 			jmi_kinsol_error_handling(flag);
 		}
@@ -257,6 +260,9 @@ int jmi_ode_unsolved_block_dir_der(jmi_t *jmi, jmi_block_residual_t *current_blo
 	nrhs = 1;
 	INFO = 0;
   	n_x = current_block->n;
+  	
+  	current_block->dF(jmi, current_block->x, current_block->dx,current_block->res, current_block->dv, JMI_BLOCK_INITIALIZE);
+  	
   	current_block->dF(jmi, current_block->x, current_block->dx,current_block->res, current_block->dv, JMI_BLOCK_EVALUATE_INACTIVE);
     for(i = 0; i < n_x; i++){
     	current_block->dx[i] = 1;
@@ -266,7 +272,8 @@ int jmi_ode_unsolved_block_dir_der(jmi_t *jmi, jmi_block_residual_t *current_blo
     	}
     	current_block->dx[i] = 0;
   	}
- 	dgesv_( &n_x, &nrhs, current_block->jac, &n_x, current_block->ipiv, current_block->dv, &n_x, &INFO );
+  	
+ 	dgesv_( &n_x, &nrhs, current_block->jac, &n_x, current_block->ipiv, current_block->dv, &n_x, &INFO );	
   	current_block->dF(jmi, current_block->x, current_block->dx, current_block->res, current_block->dv, JMI_BLOCK_WRITE_BACK);
 }
 

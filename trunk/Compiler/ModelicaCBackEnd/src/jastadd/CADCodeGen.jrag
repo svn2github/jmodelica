@@ -824,8 +824,10 @@ aspect CADCodeGen {
 	
 	public void EquationBlock.genBlock_CAD(int i, boolean inInitial, String indent, PrintStream str) {	
 		if (inInitial) {
+			str.print(indent + "jmi_kinsol_solve(jmi->dae_init_block_residuals[" + i +"]);\n");
 			str.print(indent + "jmi_ode_unsolved_block_dir_der(jmi, jmi->dae_init_block_residuals[" + i +"]);\n");
 		} else {
+			str.print(indent + "jmi_kinsol_solve(jmi->dae_block_residuals[" + i +"]);\n");
 			str.print(indent + "jmi_ode_unsolved_block_dir_der(jmi, jmi->dae_block_residuals[" + i +"]);\n");
 		}	
 	}
@@ -909,6 +911,41 @@ aspect CADCodeGen {
 		
 		str.print("  return 0;\n}\n\n");
 		
+	}
+	
+	public void BLT.genOdeDerivativeBlocks_CAD(PrintStream str) {
+		int block_counter = 0;
+		for (AbstractEquationBlock block : this) {
+			block.genBlock_CAD(block_counter,false,"  ",str); 
+            if (!block.isSolvable()) {
+				block_counter++;
+            }
+		}
+	}
+
+	public void StructuredBLT.genOdeDerivativeBlocks_CAD(PrintStream str) {
+		int block_counter = 0;
+		str.append("/************* ODE section *********/\n");	
+		// Loop over all derivatives
+		for (AbstractEquationBlock eb : getOdeBlocks()) {
+			eb.genBlock_CAD(block_counter,false,"  ",str);
+			block_counter += eb.isSolvable()? 0: 1; 			
+		}
+		str.append("/************ Real outputs *********/\n");	
+		for (AbstractEquationBlock eb : getRealOutputBlocks()) {
+			eb.genBlock_CAD(block_counter,false,"  ",str);
+			block_counter += eb.isSolvable()? 0: 1; 			
+		}
+		str.append("/****Integer and boolean outputs ***/\n");	
+		for (AbstractEquationBlock eb : getIntegerBooleanOutputBlocks()) {
+			eb.genBlock_CAD(block_counter,false,"  ",str);
+			block_counter += eb.isSolvable()? 0: 1; 			
+		}
+		str.append("/**** Other variables ***/\n");	
+		for (AbstractEquationBlock eb : getOtherBlocks()) {
+			eb.genBlock_CAD(block_counter,false,"  ",str);
+			block_counter += eb.isSolvable()? 0: 1; 			
+		}
 	}
 	
 	//Methods to handle function calls starts here

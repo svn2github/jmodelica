@@ -104,7 +104,7 @@ public class CADGenerator extends CGenerator {
 		public void generate(PrintStream genPrinter) {
 			if (fclass.root().options.getBooleanOption("generate_ode_jacobian")) {
 				int block_counter = 0;
-				for (AbstractEquationBlock block : fclass.getDAEBLT()) {
+				for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks()) {
 				 	block.genBlockResidualFunction_CAD(block_counter,false,"  ",genPrinter); 
 				  	if (!block.isSolvable()) {
 				  		block_counter++;
@@ -152,7 +152,7 @@ public class CADGenerator extends CGenerator {
 			if (fclass.root().options.getBooleanOption("generate_ode_jacobian")) {
 			
 				int block_counter = 0;
-				for (AbstractEquationBlock block : fclass.getDAEBLT()) {
+				for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks()) {
 				    if (!block.isSolvable()) {
 						genPrinter.print(" jmi_dae_add_equation_block(*jmi,dae_block_" + 
 							block_counter + "," + "dae_block_dir_der_" + block_counter + ","+ block.activeVariables().size() + "," + 
@@ -201,23 +201,9 @@ public class CADGenerator extends CGenerator {
 
 		public void generate(PrintStream genPrinter) {
 			if (fclass.root().options.getBooleanOption("generate_ode_jacobian")) {
-				//genPrinter.print(INDENT + "model_ode_guards(jmi);\n");						
-				/*genPrinter.print("  int i;\n");
-				genPrinter.print("  int j;\n");
-				genPrinter.print("  int INFO;\n");
-				genPrinter.print("  int n_x;\n");
-				genPrinter.print("  int nrhs = 1;\n");
-				genPrinter.print("  jmi_block_residual_t *current_block;\n");*/
 				genPrinter.print("  jmi_real_t** dz = jmi->dv;\n");
 				genPrinter.print("  jmi_real_t** dv = jmi->dv;\n");
-				//genPrinter.print("  memcpy((*dz), (*dv), (jmi->n_v)*sizeof(jmi_real_t));\n");
-				int block_counter = 0;
-				for (AbstractEquationBlock block : fclass.getDAEBLT()) {					
-					block.genBlock_CAD(block_counter,false,"  ",genPrinter);                                        
-                    if (!block.isSolvable()) {
-						block_counter++;
-                    }
-				}
+				fclass.getDAEStructuredBLT().genOdeDerivativeBlocks_CAD(genPrinter);
 			}
 		}
 	}
@@ -235,12 +221,6 @@ public class CADGenerator extends CGenerator {
 		public void generate(PrintStream genPrinter) {
 			if (fclass.root().options.getBooleanOption("generate_ode_jacobian")) {
 				//genPrinter.print(INDENT + "model_ode_guards(jmi);\n");
-				/*genPrinter.print("  int i;\n");
-				genPrinter.print("  int j;\n");
-				genPrinter.print("  int INFO;\n");
-				genPrinter.print("  int n_x;\n");
-				genPrinter.print("  int nrhs = 1;\n");
-				genPrinter.print("  jmi_block_residual_t *current_block;\n");*/
 				genPrinter.print("  jmi_real_t** dz = jmi->dv;\n");
 				genPrinter.print("  jmi_real_t** dv = jmi->dv;\n");
 				//genPrinter.print("  memcpy((*dz), (*dv), (jmi->n_v)*sizeof(jmi_real_t));\n");			
