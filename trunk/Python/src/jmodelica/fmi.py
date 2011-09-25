@@ -639,7 +639,6 @@ class FMUModel(BaseModel):
                                                           Nct.ndpointer(), C.c_size_t,
                                                           Nct.ndpointer(), Nct.ndpointer()]
         except:
-            print "Hepp"
             pass
             
         #self._fmiExtractDebugInfo = self._dll.__getattr__(

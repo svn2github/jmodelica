@@ -157,7 +157,7 @@ def run_demo(with_plots=True):
 		# Evaluate the objective function
 		y_meas = N.vstack((y1_meas,y2_meas))
 		y_sim = N.vstack((x1_sim,x2_sim))
-		obj = qe.quad_err(t_meas,y_meas,t_sim,y_sim)
+		obj = dfo.quad_err(t_meas,y_meas,t_sim,y_sim)
 		
 		return obj
 
@@ -255,7 +255,7 @@ def run_demo(with_plots=True):
 		# Evaluate the objective function
 		y_meas = [y1_meas,y2_meas,y3_meas,y4_meas]
 		y_sim = [x1_sim,x2_sim,x3_sim,x4_sim]
-		obj = qe.quad_err(t_meas,y_meas,t_sim,y_sim)
+		obj = dfo.quad_err(t_meas,y_meas,t_sim,y_sim)
 		
 		return obj
 

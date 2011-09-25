@@ -107,8 +107,8 @@ def run_demo(with_plots=True):
 	
 	# Solve the problem using the Nelder-Mead method
 	# Scale x0, lb and ub to get order of magnitude 1
-	x_opt,f_opt,nbr_iters,nbr_fevals,solve_time = dfo.fmin('furuta_dfo_cost.py',xstart=x0*1e3,
-														  lb=lb*1e3,ub=ub*1e3,alg=1,nbr_cores=4,
+	x_opt,f_opt,nbr_iters,nbr_fevals,solve_time = dfo.fmin(curr_dir + '/furuta_dfo_cost.py',xstart=x0*1e3,
+														  lb=lb*1e3,ub=ub*1e3,alg=1,nbr_cores=1,
 														  x_tol=1e-3,f_tol=1e-2)
 	# alg = 1: Nelder-Mead method
 	# alg = 2: Sequential barrier method using Nelder-Mead

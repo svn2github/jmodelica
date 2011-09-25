@@ -23,8 +23,10 @@ import numpy as N
 from jmodelica.fmi import FMUModel
 from jmodelica.optimization import dfo
 
+curr_dir = os.path.dirname(os.path.abspath(__file__));
+
 # Load measurement data from file
-data = loadmat('../examples/files/FurutaData.mat',appendmat=False)
+data = loadmat(curr_dir + '/../examples/files/FurutaData.mat',appendmat=False)
 
 # Extract data series
 t_meas = data['time'][:,0]
@@ -39,7 +41,7 @@ def furuta_dfo_cost(x):
 	armFrictionCoefficient = x[0]/1e3
 	pendulumFrictionCoefficient = x[1]/1e3
 	
-	model = FMUModel('../../examples/files/FMUs/Furuta.fmu')
+	model = FMUModel(curr_dir + '/../examples/files/FMUs/Furuta.fmu')
 
 	# Set new parameter values into the model 
 	model.set('armFriction',armFrictionCoefficient)
