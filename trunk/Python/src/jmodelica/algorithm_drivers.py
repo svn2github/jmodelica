@@ -2263,6 +2263,10 @@ class CasadiRadau2(AlgorithmBase):
         
             The CasadiRadau2Result object.
         """
+        #~ # Experimental
+        #~ # ------------
+        #~ return self.nlp.export_result_dymola()
+        #~ # ------------
         self.nlp.export_result_dymola()
             
         # result file name
@@ -2273,9 +2277,12 @@ class CasadiRadau2(AlgorithmBase):
         # load result file
         res = ResultDymolaTextual(resultfile)
         
+        # Get optimized element lengths
+        h_opt = self.nlp.get_h_opt()
+        
         # create and return result object
         return CasadiRadau2Result(self.model, resultfile, self.nlp, res,
-                                  self.options, self.times)
+                                  self.options, self.times, h_opt)
         
     @classmethod
     def get_default_options(cls):
@@ -2495,8 +2502,36 @@ class CasadiRadau2Options(OptionBase):
 
 class CasadiRadau2Result(JMResultBase):
     
+    """
+    A JMResultBase object with the additional attributes times and h_opt.
+    
+    Attributes::
+    
+        times --
+            A dictionary with the keys 'sol', 'init' and 'tot'.
+            
+            times['sol'] is the (clock) time spent solving the NLP (total IPOPT
+            time).
+            
+            times['init'] is the time spent creating the NLP.
+            
+            times['tot'] is the sum of times['sol'] and times['init'].
+            
+            Type: dict
+        
+        h_opt --
+            An array with the optimized element lengths.
+            
+            The element lengths are only optimized (and stored in a class
+            instance) if the algorithm option "hs" == free. Otherwise this
+            attribute is None.
+            
+            Type: ndarray of floats or None
+    """
+    
     def __init__(self, model=None, result_file_name=None, solver=None, 
-                 result_data=None, options=None, times=None):
+                 result_data=None, options=None, times=None, h_opt=None):
         super(CasadiRadau2Result, self).__init__(model, result_file_name,
                                                  solver, result_data, options)
         self.times = times
+        self.h_opt = h_opt

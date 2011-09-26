@@ -178,6 +178,10 @@ class CasadiCollocator(object):
     
             Currently only textual format is supported.
         """
+        #~ # Experimental
+        #~ # ------------
+        #~ return self.get_result()
+        #~ # ------------
         (t,dx_opt,x_opt,u_opt,w_opt,p_opt) = self.get_result()
         data = N.hstack((t,dx_opt,x_opt,u_opt,w_opt))
         
@@ -1826,6 +1830,15 @@ class Radau2Collocator(CasadiCollocator):
         return self.H_fcn
     
     def get_result(self):
+        #~ # Experimental
+        #~ # ------------
+        #~ x = self.xx
+        #~ x_opt = self.nlp_opt
+        #~ g = self.c_fcn
+        #~ jac = g.jac()
+        #~ return (x, x_opt, g, jac)
+        #~ # ------------
+        
         # Set model info
         n_var = {'dx': self.model.get_n_x(), 'x': self.model.get_n_x(),
                  'u': self.model.get_n_u(), 'w': self.model.get_n_w()}
@@ -1846,6 +1859,8 @@ class Radau2Collocator(CasadiCollocator):
                                      self.pol.p[k] * h)
                     t_start += h
                 t_opt = N.array(t_opt).reshape([-1, 1])
+                
+                self.h_opt = h_opt
             else:
                 t_opt = self.get_time().reshape([-1, 1])
         elif self.result_mode == "element_interpolation":
@@ -1854,6 +1869,8 @@ class Radau2Collocator(CasadiCollocator):
                                          self.nlp_opt[var_indices['h'][1:]]])
             else:
                 h_opt = self.horizon * N.array(self.h)
+            self.h_opt = h_opt
+            
             t_opt = []
             t_start = 0.
             for i in xrange(1, self.n_e + 1):
@@ -1912,10 +1929,16 @@ class Radau2Collocator(CasadiCollocator):
         # Return results
         return (t_opt, var_opt['dx'], var_opt['x'], var_opt['u'], var_opt['w'],
                 var_opt['p_opt'])
+                
+    def get_h_opt(self):
+        if self.hs == "free":
+            return self.h_opt
+        else:
+            return None
     
     # Inherit "set_initial_from_file" from RadauCollocator
     set_initial_from_file = RadauCollocator.__dict__["set_initial_from_file"]
-    
+
 class PseudoSpectral(CasadiCollocator):
     """
     This class discretize and solves optimization problem of the general kind,

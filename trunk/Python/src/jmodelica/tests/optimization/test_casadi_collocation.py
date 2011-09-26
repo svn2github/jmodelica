@@ -173,13 +173,13 @@ class TestRadau2:
     def test_free_element_lengths(self):
         """Test optimized element lengths with both result modes."""
         # References values
-        cost_ref = 2.441156492357014e1
-        u_norm_ref = 2.0730293748022388e-1
+        cost_ref = 6.8400278249466e1
+        u_norm_ref = 3.97912036671e-1
         
         # Free element lengths data
-        c = 1e-2
+        c = 0.5
         Q = N.eye(3)
-        bounds = (0.5, 2.5)
+        bounds = (0.5, 2.0)
         free_ele_data = FreeElementLengthData(c, Q, bounds)
         
         # Set options shared by both result modes
@@ -192,6 +192,9 @@ class TestRadau2:
         opts['result_mode'] = "collocation_points"
         res = self.model_VDP_Mayer.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
+        indices = range(0, 3) + range(opts['n_e'] - 3, opts['n_e'])
+        values = N.array([0.5, 0.5, 0.5, 2.0, 2.0, 2.0]).reshape([-1, 1])
+        N.testing.assert_allclose(res.h_opt[indices], values, 5e-3)
         
         # Element interpolation
         opts['result_mode'] = "element_interpolation"
