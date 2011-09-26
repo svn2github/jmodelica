@@ -965,19 +965,32 @@ public class BiPGraph {
         
         Var v = null;
 		for (Stack<Eq> bl : components) {
-			EquationBlock b = new EquationBlock();
-			// TODO: handle the case of multiple scalar equations in
-			// one block
-			for (Eq bl_eqn : bl) {
-				v = bl_eqn.getMatching();
-				MatchingPair mp = new MatchingPair(bl_eqn.getEquation(),v.getVariable());
-				b.addMatchingPair(mp);
-			}
-			if (b.isSolvable()) {
-				blt.add(b.createSolvedEquationBlock());
+			
+			if (bl.size()==1 && bl.get(0).getEquation().isSolved(bl.get(0).getMatching().getVariable().name())) {
+				v = bl.get(0).getMatching();
+				MatchingPair mp = new MatchingPair(bl.get(0).getEquation(),v.getVariable());
+				blt.add(new SolvedScalarBlock(mp));
 			} else {
+				EquationBlock b = null;
+				boolean isMixed = false;
+				for (Eq bl_eqn : bl) {
+					if (!bl_eqn.getEquation().isReal()) {
+						isMixed = true;
+						break;
+					}
+				}
+				if (isMixed) {
+					b = new MixedEquationBlock();
+				} else {
+					b = new EquationBlock();	
+				}
+				for (Eq bl_eqn : bl) {
+					v = bl_eqn.getMatching();
+					MatchingPair mp = new MatchingPair(bl_eqn.getEquation(),v.getVariable());
+					b.addMatchingPair(mp);
+				}
 				blt.add(b);
-			}
+			}			
 		}
 		return blt;
 	}

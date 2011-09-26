@@ -995,23 +995,23 @@ int jmi_sim_init(jmi_t* jmi, fmiReal relative_tolerance){
 	return 0;
 }
 
-int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int index) {
+int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int index) {
 	jmi_block_residual_t* b;
 	int flag;
-	flag = jmi_new_block_residual(&b,jmi,F,dF,n,index);
+	flag = jmi_new_block_residual(&b,jmi,F,dF,n,n_nr,index);
 	jmi->dae_block_residuals[index] = b;
 	return 0;
 }
 
-int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int index) {
+int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int index) {
 	jmi_block_residual_t* b;
 	int flag;
-	flag = jmi_new_block_residual(&b,jmi,F,dF,n,index);
+	flag = jmi_new_block_residual(&b,jmi,F,dF,n,n_nr,index);
 	jmi->dae_init_block_residuals[index] = b;
 	return 0;
 }
 
-int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n,int index){
+int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int index){
 	jmi_block_residual_t* b = (jmi_block_residual_t*)calloc(1,sizeof(jmi_block_residual_t));
 	*block = b;
 	
@@ -1019,8 +1019,12 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_r
 	b->F = F;
 	b->dF = dF;
 	b->n = n;
+	b->n_nr = n_nr;
 	b->index = index ;
 	b->x = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
+	if (n_nr>0) {
+		b->x_nr = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
+	}
 	b->dx = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
 	b->dv = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
 	b->res = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
@@ -1042,6 +1046,9 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_r
 
 int jmi_delete_block_residual(jmi_block_residual_t* b){
 	free(b->x);
+	if (b->n_nr>0) {
+		free(b->x_nr);
+	}
 	free(b->dx);
 	free(b->dv);
 	free(b->res);

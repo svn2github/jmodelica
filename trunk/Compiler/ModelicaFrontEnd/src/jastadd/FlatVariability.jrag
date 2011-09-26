@@ -89,6 +89,20 @@ aspect FlatVariability {
 	protected static final int Discrete.VARIABILITY_LEVEL   = 20;
 	protected static final int Continuous.VARIABILITY_LEVEL = 30;
 	
+	syn boolean FAbstractEquation.isConstant() = false;
+	syn boolean FAbstractEquation.isParameter() = false;
+	syn boolean FAbstractEquation.isDiscrete() = false;
+	syn boolean FAbstractEquation.isContinuous() = false;
+	
+	eq FEquation.isConstant() = 
+		getLeft().variability().combine(getRight().variability()).constantVariability();
+	eq FEquation.isParameter() = 
+		getLeft().variability().combine(getRight().variability()).parameterVariability();
+	eq FEquation.isDiscrete() = 
+		getLeft().variability().combine(getRight().variability()).discreteVariability();
+	eq FEquation.isContinuous() = 
+		getLeft().variability().combine(getRight().variability()).continuousVariability();
+	
 	syn boolean AbstractFVariable.isConstant()   = false;
     syn boolean AbstractFVariable.isParameter()  = false;
     syn boolean AbstractFVariable.isDiscrete()   = false;

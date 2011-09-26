@@ -794,7 +794,7 @@ aspect FlatAPI {
 	FRelExp contributes
     // Only include relational in the equation section which are 
     // not inside a noEvent operator
- 		this when inEquationSection() && !inNoEventExp() && originalFRelExp==null
+ 		this when inEquationSection() && !inNoEventExp() && originalFRelExp==null && isRealComparison()
 	to FClass.relExpInEquations() for myFClass();	
 		
 	public int FRelExp.relExpInEquationsIndex() {
@@ -835,7 +835,7 @@ aspect FlatAPI {
 	FRelExp contributes
 	    // Only include relational in the initial equation section which are 
 	    // not inside a noEvent operator
- 		this when inInitialEquationSection() && !inNoEventExp() && originalFRelExp==null
+ 		this when inInitialEquationSection() && !inNoEventExp() && originalFRelExp==null && isRealComparison()
 	    to FClass.relExpInInitialEquations() for myFClass();	
 
 	public int FRelExp.relExpInInitialEquationsIndex() {

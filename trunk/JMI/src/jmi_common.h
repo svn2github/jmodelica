@@ -800,8 +800,10 @@ struct jmi_block_residual_t {
 	jmi_t *jmi;                    /**< \brief A pointer to the corresponding jmi_t struct */
 	jmi_block_residual_func_t F;   /**< \brief A function pointer to the block residual function */
 	jmi_block_dir_der_func_t dF;   /**< \brief A function pointer to the block AD-function */
-	int n;                         /**< \brief The number of unknowns in the equation system */
-	jmi_real_t* x;                 /**< \brief Work vector for the iteration variables */
+	int n;                         /**< \brief The number of real unknowns in the equation system */
+	int n_nr;                         /**< \brief The number of non-real unknowns in the equation system */
+	jmi_real_t* x;                 /**< \brief Work vector for the real iteration variables */
+	jmi_real_t* x_nr;                 /**< \brief Work vector for the non-real iteration variables */
 	jmi_real_t* dx;				/**< \brief Work vector for the seed vector */
 	jmi_real_t* dv;					/**< \brief Work vector for (dF/dv)*dv */
         int index ;
@@ -943,7 +945,18 @@ int jmi_dae_init(jmi_t* jmi, jmi_residual_func_t F, int n_eq_F,
         jmi_generic_func_t ode_guards_init,
         jmi_next_time_event_func_t ode_next_time_event);
 
-int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int index);
+/**
+ * \brief Register a block residual function in a jmi_t struct.
+ *
+ * @param jmi A jmi_t struct.
+ * @param F A jmi_block_residual_func_t function
+ * @param dF A jmi_block_dir_der_func_t function
+ * @param n Integer size of the block of real variables
+ * @param n_nr Integer size of the block of non-real variables
+ * @param index Integer ID nbr of the block
+ * @return Error code.
+ */
+int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int index);
 
 /**
  * \brief Allocates a jmi_block_residual struct.
@@ -952,11 +965,12 @@ int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_bloc
  * @param jmi A jmi_t struct.
  * @param F A jmi_block_residual_func_t function
  * @param dF A jmi_block_dir_der_func_t function 
- * @param n Integer size of the block
+ * @param n Integer size of the block of real variables
+ * @param n_nr Integer size of the block of non-real variables
  * @param index Integer ID nbr of the block
  * @return Error code.
  */
-int jmi_new_block_residual(jmi_block_residual_t** b,jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n,int index);
+int jmi_new_block_residual(jmi_block_residual_t** b,jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int index);
 
 
 /**
@@ -967,7 +981,18 @@ int jmi_new_block_residual(jmi_block_residual_t** b,jmi_t* jmi, jmi_block_residu
  */
 int jmi_delete_block_residual(jmi_block_residual_t* b);
 
-int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int index);
+/**
+ * \brief Register an initialization block residual function in a jmi_t struct.
+ *
+ * @param jmi A jmi_t struct.
+ * @param F A jmi_block_residual_func_t function
+ * @param dF A jmi_block_dir_der_func_t function
+ * @param n Integer size of the block of real variables
+ * @param n_nr Integer size of the block of non-real variables
+ * @param index Integer ID nbr of the block
+ * @return Error code.
+ */
+int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int index);
 
 /**
  * \brief Allocates memory for the contents of a jmi_color_info struct

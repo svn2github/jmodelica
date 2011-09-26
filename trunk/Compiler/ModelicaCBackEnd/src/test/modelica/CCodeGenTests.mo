@@ -3653,6 +3653,7 @@ _guards(2) = _sw(2);
 _guards(3) = LOG_EXP_OR(LOG_EXP_OR(LOG_EXP_AND(_sw(3), _sw(4)), LOG_EXP_AND(_sw(5), _sw(6))), LOG_EXP_AND(_sw(7), _sw(8)));
 _guards(4) = LOG_EXP_OR(LOG_EXP_OR(LOG_EXP_AND(_sw(3), _sw(4)), LOG_EXP_AND(_sw(5), _sw(6))), LOG_EXP_AND(_sw(7), _sw(8)));
 
+model_ode_guards(jmi);
 /************* ODE section *********/
 _guards(3) = LOG_EXP_OR(LOG_EXP_OR(LOG_EXP_AND(_sw(3), _sw(4)), LOG_EXP_AND(_sw(5), _sw(6))), LOG_EXP_AND(_sw(7), _sw(8)));
 if(COND_EXP_EQ(LOG_EXP_AND(_guards(3),LOG_EXP_NOT(_pre_guards(3))),JMI_TRUE,JMI_TRUE,JMI_FALSE)) {
@@ -3825,6 +3826,7 @@ nextTimeEvent = nextTimeEventTmp;
 }
 *nextTime = nextTimeEvent;
 
+model_ode_guards(jmi);
 /************* ODE section *********/
 _der_dummy_3 = 0;
 /************ Real outputs *********/
@@ -3888,11 +3890,11 @@ pre_x_c_3 = x[0];
 _x_c_3 = x[1];
 (*res)[0] = pre_x_c_3 - (_x_c_3);
 (*res)[1] = ( _a_c_8 ) * ( pre_x_c_3 ) + ( _b_c_9 ) * ( _u_c_4 ) - (_x_c_3);
-}
+} 
 return 0;
 }
 
-
+model_ode_guards(jmi);
 /************* ODE section *********/
 _sampleTrigger_0 = jmi_sample(jmi,0,_h_11);
 _guards(0) = _atInitial;
@@ -3976,11 +3978,11 @@ pre_x_c_3 = x[0];
 _x_c_3 = x[1];
 (*res)[0] = pre_x_c_3 - (_x_c_3);
 (*res)[1] = pre_x_c_3 - (_x_c_3);
-}
+} 
 return 0;
 }
 
-
+model_ode_guards(jmi);
 /************* ODE section *********/
 _atInit_12 = LOG_EXP_AND(JMI_TRUE, _atInitial);
 _sampleTrigger_0 = jmi_sample(jmi,0,_h_11);
@@ -4108,7 +4110,7 @@ _x_0 = x[1];
 return 0;
 }
 
-
+model_ode_guards(jmi);
 /************* ODE section *********/
 /************ Real outputs *********/
 /****Integer and boolean outputs ***/
@@ -4163,7 +4165,7 @@ static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init
   }
   return 0;
 }
-
+model_ode_guards(jmi);
   /************* ODE section *********/
   jmi_kinsol_solve(jmi->dae_block_residuals[0]);
   _der_x2_5 =  - ( _x2_1 ) + _z2_1_3 + _z2_2_4;
@@ -4173,8 +4175,8 @@ static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int init
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
 
-   jmi_dae_add_equation_block(*jmi,dae_block_0, NULL,2,0 );
- jmi_dae_add_equation_block(*jmi,dae_block_1, NULL,1,1 );
+jmi_dae_add_equation_block(*jmi,dae_block_0, NULL,2,0,0 );
+jmi_dae_add_equation_block(*jmi,dae_block_1, NULL,1,0,1 );
 
 ")})));
 

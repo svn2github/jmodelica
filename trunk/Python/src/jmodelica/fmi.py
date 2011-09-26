@@ -564,8 +564,10 @@ class FMUModel(BaseModel):
         self._fmiGetInteger = self._dll.__getattr__(
             self._modelname+'_fmiGetInteger')
         self._fmiGetInteger.restype = self._fmiStatus
-        self._fmiGetInteger.argtypes = [self._fmiComponent, Nct.ndpointer(), 
-            C.c_size_t, Nct.ndpointer()]
+        self._fmiGetInteger.argtypes = [self._fmiComponent, Nct.ndpointer(),
+            C.c_size_t, Nct.ndpointer(dtype=C.c_int,
+                                            ndim=1,
+                                            flags='C')]
         self._fmiGetBoolean = self._dll.__getattr__(
             self._modelname+'_fmiGetBoolean')
         self._fmiGetBoolean.restype = self._fmiStatus
@@ -1127,7 +1129,8 @@ class FMUModel(BaseModel):
         """
         valueref = N.array(valueref, dtype=N.uint32)
         nref = len(valueref)
-        values = N.array([0]*nref)
+#        values = N.array([0]*nref)
+        values = N.zeros(nref,dtype=N.int32)
         
         status = self._fmiGetInteger(self._model, valueref, nref, values)
         

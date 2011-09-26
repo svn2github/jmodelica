@@ -154,6 +154,19 @@ aspect FlatTypeAnalysis {
 		return tot;
 	}
 	
+	syn lazy FType FAbstractEquation.type() = fUnknownType();
+	eq FEquation.type() = getRight().type().numericPromotion(getLeft().type());
+	
+	syn boolean FAbstractEquation.isReal() = type().isReal();
+	syn boolean FAbstractEquation.isInteger() = type().isInteger();
+	syn boolean FAbstractEquation.isBoolean() = type().isBoolean();
+	syn boolean FAbstractEquation.isString() = type().isString();
+		
+	syn boolean FRelExp.isRealComparison() = getRight().type().numericPromotion(getLeft().type()).isReal();
+	syn boolean FRelExp.isIntegerComparison() = getRight().type().numericPromotion(getLeft().type()).isInteger();
+	syn boolean FRelExp.isBooleanComparison() = getRight().type().numericPromotion(getLeft().type()).isBoolean();
+	syn boolean FRelExp.isStringComparison() = getRight().type().numericPromotion(getLeft().type()).isString();
+		
 	syn lazy FType FExp.type() = fUnknownType();
 	
 	eq FUnaryExp.type()   = getFExp().type();

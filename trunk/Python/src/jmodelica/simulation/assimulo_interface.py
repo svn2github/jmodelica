@@ -423,7 +423,7 @@ class FMIODE(Explicit_Problem):
             #Retrieve solutions (if needed)
             #if eInfo.iterationConverged == False:
             #    pass
-        
+
         #Check if the event affected the state values and if so sets them
         if eInfo.stateValuesChanged:
             solver.y_cur = self._model.continuous_states

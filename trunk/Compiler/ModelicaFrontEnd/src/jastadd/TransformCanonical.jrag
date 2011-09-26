@@ -419,6 +419,15 @@ aspect TransformCanonical {
 		
 		public abstract boolean isSolvable();
 		
+		public boolean isMixed() {
+			for (FAbstractEquation e : equations()) {
+				if (e.isDiscrete()) {
+					return true;
+				}	
+			}	
+			return false;
+		}
+		
 		public ArrayList<FAbstractEquation> differentiatedEquations() {
 			ArrayList<FAbstractEquation> diffedEq = new ArrayList<FAbstractEquation>();
 			for (FAbstractEquation e : equations()) {
@@ -508,7 +517,7 @@ aspect TransformCanonical {
 	 * solved or non-solved equations.
 	 */
 	public class EquationBlock extends AbstractEquationBlock {
-		private ArrayList<MatchingPair> matchingPairs = new ArrayList<MatchingPair>();
+		protected ArrayList<MatchingPair> matchingPairs = new ArrayList<MatchingPair>();
 				
 		public void addMatchingPair(MatchingPair m) {
 			matchingPairs.add(m);
@@ -542,7 +551,7 @@ aspect TransformCanonical {
 				return null;
 			}
 		}
-												
+
 		public boolean containsDerivative() {
 			for (FVariable fv : activeVariables()) {
 				if (fv.isDerivativeVariable()) {
@@ -570,6 +579,84 @@ aspect TransformCanonical {
 			return str.toString();
 		}
 	
+	}
+
+	/**
+	 * MixedEquationBlock is a general block that may contain one or more
+	 * solved or non-solved equations and which contains both continous
+	 * and discrete equations.
+	 */
+	public class MixedEquationBlock extends EquationBlock {
+		
+		public ArrayList<FVariable> activeContinuousVariables() {
+			ArrayList<FVariable> s = new ArrayList<FVariable>();
+			for (MatchingPair mp : matchingPairs) {
+				//if (mp.getFVariable().isContinuous()) {
+				if (mp.getFVariable().isReal()) {
+					s.add(mp.getFVariable());
+				}
+			}
+			return s;
+		}		
+
+		public ArrayList<FVariable> activeDiscreteVariables() {
+			ArrayList<FVariable> s = new ArrayList<FVariable>();
+			for (MatchingPair mp : matchingPairs) {
+				//if (mp.getFVariable().isDiscrete()) {
+				if (!mp.getFVariable().isReal()) {
+					s.add(mp.getFVariable());
+				}
+			}
+			return s;
+		}		
+
+		public ArrayList<FAbstractEquation> continuousEquations() {
+			ArrayList<FAbstractEquation> s = new ArrayList<FAbstractEquation>();
+			for (MatchingPair mp : matchingPairs) {
+				//if (mp.getEquation().isContinuous()) {
+				if (mp.getEquation().isReal()) {
+					s.add(mp.getEquation());
+				}
+			}
+			return s;
+		}
+
+		public ArrayList<FAbstractEquation> discreteEquations() {
+			ArrayList<FAbstractEquation> s = new ArrayList<FAbstractEquation>();
+			for (MatchingPair mp : matchingPairs) {
+				//if (mp.getEquation().isDiscrete()) {
+				if (!mp.getEquation().isReal()) {
+					s.add(mp.getEquation());
+				}
+			}
+			return s;
+		}
+									  						
+		public String toString() {
+			StringBuffer str = new StringBuffer();
+			str.append("Mixed non-solved block of " + activeVariables().size() + " variables:\n");
+			str.append("Unknown continuous variables:\n");
+			for (FVariable fv : activeContinuousVariables()) {
+				str.append("  " + fv.name() + "\n");
+			}
+			str.append("Unknown discrete variables:\n");
+			for (FVariable fv : activeDiscreteVariables()) {
+				str.append("  " + fv.name() + "\n");
+			}
+/*			str.append("Inactive variables:\n");
+			for (FVariable fv : inactiveVariables()) {
+				str.append("  " + fv.name() + "\n");
+			}*/
+			str.append("Continuous equations:\n");
+			for (FAbstractEquation feq : continuousEquations()) {
+				str.append("  " + feq.prettyPrint("") + "\n");			
+			}
+			str.append("Discrete equations:\n");
+			for (FAbstractEquation feq : discreteEquations()) {
+				str.append("  " + feq.prettyPrint("") + "\n");			
+			}
+			return str.toString();
+		}
 	}
 
 	/**
