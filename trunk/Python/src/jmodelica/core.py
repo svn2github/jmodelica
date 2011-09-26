@@ -23,6 +23,8 @@ import tempfile
 import platform as PL
 import os
 import sys
+import shutil
+
 import numpy as N
 
 # location for temporary JModelica files
@@ -292,18 +294,20 @@ def unzip_unit(archive, path='.', random_name=True):
     # create JModelica directory for temporary files (if not already created)
     if not os.path.exists(tmp_location):
         os.mkdir(tmp_location)
+        
+    # create temporary directory
+    tmp_dir = tempfile.mkdtemp(prefix='jm_tmp', dir=tmp_location)
     
     #Extracting the XML
     for file in archive.filelist:
         if 'modelDescription.xml' in file.filename:
 
             # Extracting the modelDescription.xml file
-            xml_filename = archive.extract(file,tmp_location)
+            xml_filename = archive.extract(file, tmp_dir)
             
             # Rename to temporary file name
-            tempxmlname = tempfile.mktemp(suffix='.xml',
-                dir=tmp_location)
-            os.rename(xml_filename, tempxmlname)          
+            tempxmlname = tempfile.mktemp(suffix='.xml', dir=tmp_location)
+            os.rename(xml_filename, tempxmlname)
             
             break
     else:
@@ -315,11 +319,10 @@ def unzip_unit(archive, path='.', random_name=True):
         if file.filename.endswith('values.xml'):
             
             # Extracting the model values xml file
-            xml_filename = archive.extract(file,tmp_location)
+            xml_filename = archive.extract(file,tmp_dir)
             
             # Rename to temporary file name
-            tempxmlvaluesname = tempfile.mktemp(suffix='.xml', 
-                dir=tmp_location)
+            tempxmlvaluesname = tempfile.mktemp(suffix='.xml', dir=tmp_location)
             os.rename(xml_filename, tempxmlvaluesname)
             
             is_jmu = True
@@ -345,8 +348,7 @@ def unzip_unit(archive, path='.', random_name=True):
         extract_dll = True
         if random_name:
             # Create temporary file name
-            tempdllname = tempfile.mktemp(suffix=suffix, 
-                dir=tmp_location)
+            tempdllname = tempfile.mktemp(suffix=suffix, dir=tmp_location)
         else:
             tempdllname = os.path.join(tmp_location, dllname)
             if os.path.isfile(tempdllname):
@@ -356,10 +358,13 @@ def unzip_unit(archive, path='.', random_name=True):
         # Unzip
         if extract_dll:
             # Extracting the binary file
-            bin_filename = archive.extract(found_files[0],tmp_location)
+            bin_filename = archive.extract(found_files[0],tmp_dir)
             
              # Rename to temporary file name
-            os.rename(bin_filename, tempdllname)
+            os.rename(bin_filename, tempdllname)      
+        
+        # Delete tmp_dir
+        shutil.rmtree(tmp_dir)
         
         if is_jmu:
             return [tempdllname.split(os.sep)[-1], \
@@ -393,6 +398,8 @@ def get_unit_name(class_name, unit_type='JMU'):
         return class_name.replace('.','_')+'.jmu' 
     elif unit_type == 'FMU':
         return class_name.replace('.','_')+'.fmu' 
+    elif unit_type == 'FMUX':
+        return class_name.replace('.','_')+'.fmux'
     else:
         raise Exception("The unit type %s is unknown" %unit_type)
         
