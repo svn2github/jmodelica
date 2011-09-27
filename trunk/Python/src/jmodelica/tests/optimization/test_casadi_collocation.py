@@ -102,6 +102,10 @@ class TestRadau2:
         class_path = "VDP_pack.VDP_Opt_Bounds_Mayer"
         compile_casadi(class_path, file_path)
         
+        file_path = os.path.join(get_files_path(), 'Modelica', 'VDP.mop')
+        class_path = "VDP_pack.VDP_Opt_Constraints_Mayer"
+        compile_casadi(class_path, file_path)
+        
         file_path = os.path.join(get_files_path(), 'Modelica', 'CSTR.mop')
         class_path = "CSTR.CSTR_Opt_Bounds_Lagrange"
         compile_casadi(class_path, file_path)
@@ -112,11 +116,15 @@ class TestRadau2:
     
     def setUp(self):
         """Load the test models."""
-        JMU_VDP_Lagrange = 'VDP_pack_VDP_Opt_Bounds_Lagrange.jmu'
-        self.model_VDP_Lagrange = CasadiModel(JMU_VDP_Lagrange)
+        JMU_VDP_bounds_Lagrange = 'VDP_pack_VDP_Opt_Bounds_Lagrange.jmu'
+        self.model_VDP_bounds_Lagrange = CasadiModel(JMU_VDP_bounds_Lagrange)
         
-        JMU_VDP_Mayer = 'VDP_pack_VDP_Opt_Bounds_Mayer.jmu'
-        self.model_VDP_Mayer = CasadiModel(JMU_VDP_Mayer)
+        JMU_VDP_bounds_Mayer = 'VDP_pack_VDP_Opt_Bounds_Mayer.jmu'
+        self.model_VDP_bounds_Mayer = CasadiModel(JMU_VDP_bounds_Mayer)
+        
+        JMU_VDP_constraints_Mayer = 'VDP_pack_VDP_Opt_Constraints_Mayer.jmu'
+        self.model_VDP_constraints_Mayer = CasadiModel(
+                JMU_VDP_constraints_Mayer)
         
         JMU_CSTR_Lagrange = "CSTR_CSTR_Opt_Bounds_Lagrange.jmu"
         self.model_CSTR_Lagrange = CasadiModel(JMU_CSTR_Lagrange)
@@ -131,47 +139,62 @@ class TestRadau2:
     @testattr(casadi = True)
     def test_init_traj(self):
         """Test optimizing based on an existing optimization reult."""
-        opts = self.model_VDP_Mayer.optimize_options(self.algorithm)
+        model = self.model_VDP_bounds_Mayer
+        opts = model.optimize_options(self.algorithm)
         opts['n_e'] = 40
         opts['n_cp'] = 2
-        res = self.model_VDP_Mayer.optimize(self.algorithm, opts)
+        res = model.optimize(self.algorithm, opts)
         assert_results(res, 2.36076704795e1, 2.8099726741e-1)
         
         opts['n_e'] = 75
         opts['n_cp'] = 4
         opts['init_traj'] = ResultDymolaTextual("VDP_pack_VDP_Opt2_result.txt")
-        res = self.model_VDP_Mayer.optimize(self.algorithm, opts)
+        res = model.optimize(self.algorithm, opts)
         assert_results(res, 2.346018464586e1, 2.84860645767e-1)
         
     @testattr(casadi = True)
     def test_CSTR_Mayer_and_Lagrange(self):
         """Test the CSTR with both Mayer and Lagrange costs."""
+        Mayer_model = self.model_CSTR_Mayer
+        Lagrange_model = self.model_CSTR_Lagrange
+        
         # References values
         cost_ref = 1.8576873858261e3
         u_norm_ref = 3.0556730059e2
         
         # Mayer
-        opts = self.model_CSTR_Mayer.optimize_options(self.algorithm)
-        res = self.model_CSTR_Mayer.optimize(self.algorithm, opts)
+        opts = Mayer_model.optimize_options(self.algorithm)
+        res = Mayer_model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
         
         # Lagrange
-        res = self.model_CSTR_Lagrange.optimize(self.algorithm, opts)
+        res = Lagrange_model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
+        
+    @testattr(casadi = True)
+    def test_path_constraints(self):
+        """Test a simple path constraint."""
+        model = self.model_VDP_constraints_Mayer
+        res = model.optimize(self.algorithm)
+        assert_results(res, 2.4339339699047e1, 2.931305684671e-1)
+        
     
     @testattr(casadi = True)
     def test_element_lengths(self):
         """Test non-uniformly distributed elements."""
-        opts = self.model_VDP_Mayer.optimize_options(self.algorithm)
+        model = self.model_VDP_bounds_Mayer
+        opts = model.optimize_options(self.algorithm)
         opts['n_e'] = 23
         opts['hs'] = (4 * [0.01] + 2 * [0.05] + 10 * [0.02] + 5 * [0.02] + 
                      2 * [0.28])
-        res = self.model_VDP_Mayer.optimize(self.algorithm, opts)
+        res = model.optimize(self.algorithm, opts)
         assert_results(res, 2.34597852302e1, 3.707273887662e-1)
     
     @testattr(casadi = True)
     def test_free_element_lengths(self):
         """Test optimized element lengths with both result modes."""
+        model = self.model_VDP_bounds_Mayer
+        
         # References values
         cost_ref = 6.8400278249466e1
         u_norm_ref = 3.97912036671e-1
@@ -183,14 +206,14 @@ class TestRadau2:
         free_ele_data = FreeElementLengthData(c, Q, bounds)
         
         # Set options shared by both result modes
-        opts = self.model_VDP_Mayer.optimize_options(self.algorithm)
+        opts = model.optimize_options(self.algorithm)
         opts['n_e'] = 20
         opts['hs'] = "free"
         opts['free_element_lengths_data'] = free_ele_data
         
         # Collocation points
         opts['result_mode'] = "collocation_points"
-        res = self.model_VDP_Mayer.optimize(self.algorithm, opts)
+        res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
         indices = range(0, 3) + range(opts['n_e'] - 3, opts['n_e'])
         values = N.array([0.5, 0.5, 0.5, 2.0, 2.0, 2.0]).reshape([-1, 1])
@@ -198,7 +221,7 @@ class TestRadau2:
         
         # Element interpolation
         opts['result_mode'] = "element_interpolation"
-        res = self.model_VDP_Mayer.optimize(self.algorithm, opts)
+        res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=3e-2)
         
     @testattr(casadi = True)
@@ -208,25 +231,28 @@ class TestRadau2:
 
         This test also tests writing both the unscaled and scaled result.
         """
+        unscaled_model = self.model_CSTR_Lagrange
+        scaled_model = self.model_CSTR_scaled_Lagrange
+        
         # References values
         cost_ref = 1.8576873858261e3
         u_norm_ref = 3.0556730059e2
         
         # Unscaled model
-        opts = self.model_CSTR_Lagrange.optimize_options(self.algorithm)
+        opts = unscaled_model.optimize_options(self.algorithm)
         opts['write_scaled_result'] = False
-        res = self.model_CSTR_Lagrange.optimize(self.algorithm, opts)
+        res = unscaled_model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
 
         # Scaled model & unscaled result
         opts['write_scaled_result'] = False
-        res = self.model_CSTR_scaled_Lagrange.optimize(self.algorithm, opts)
+        res = scaled_model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
         c_unscaled = res['cstr.c']
 
         # Scaled model & scaled result
         opts['write_scaled_result'] = True
-        res = self.model_CSTR_scaled_Lagrange.optimize(self.algorithm, opts)
+        res = scaled_model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
         c_scaled = res['cstr.c']
         N.testing.assert_allclose(c_unscaled, 1000. * c_scaled,
@@ -240,38 +266,42 @@ class TestRadau2:
         The difference between the trajectories of the two result modes should
         be very small if n_e * n_cp is sufficiently large. This is tested.
         """
+        model = self.model_VDP_bounds_Lagrange
+        
         # References values
         cost_ref = 2.345988962015e1
         u_norm_ref = 2.84538707322e-1
         
         # Collocation points
-        opts = self.model_VDP_Lagrange.optimize_options(self.algorithm)
+        opts = model.optimize_options(self.algorithm)
         opts['n_e'] = 100
         opts['n_cp'] = 5
         opts['result_mode'] = "collocation_points"
-        res = self.model_VDP_Lagrange.optimize(self.algorithm, opts)
+        res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
         
         # Element interpolation
         opts['result_mode'] = "element_interpolation"
         opts['n_eval_points'] = 15
-        res = self.model_VDP_Lagrange.optimize(self.algorithm, opts)
+        res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=5e-3)
     
     @testattr(casadi = True)
     def test_blocking_factors(self):
         """Test blocking factors."""
-        opts = self.model_VDP_Mayer.optimize_options(self.algorithm)
+        model = self.model_VDP_bounds_Mayer
+        
+        opts = model.optimize_options(self.algorithm)
         opts['n_cp'] = 3
         opts['blocking_factors'] = opts['n_e'] * [1]
-        res = self.model_VDP_Mayer.optimize(self.algorithm, opts)
+        res = model.optimize(self.algorithm, opts)
         assert_results(res, 2.8169280267e1, 2.997111577228e-1,
                        cost_rtol=1.5e-1, u_norm_rtol=5e-2)
         
         opts['n_e'] = 20
         opts['n_cp'] = 4
         opts['blocking_factors'] = [1, 2, 1, 1, 2, 13]
-        res = self.model_VDP_Mayer.optimize(self.algorithm, opts)
+        res = model.optimize(self.algorithm, opts)
         assert_results(res, 6.939387678875e1, 4.1528861933309e-1,
                        cost_rtol=1.5e-1, u_norm_rtol=5e-2)
     
@@ -280,20 +310,22 @@ class TestRadau2:
         """
         Test that results are consistent regardless of state_cont_var.
         """
+        model = self.model_VDP_bounds_Mayer
+        
         # References values
         cost_ref = 2.3469088662e1
         u_norm_ref = 2.8723846121e-1
         
         # With state continuity variables
-        opts = self.model_VDP_Mayer.optimize_options(self.algorithm)
+        opts = model.optimize_options(self.algorithm)
         opts["state_cont_var"] = True
-        res = self.model_VDP_Mayer.optimize(self.algorithm, opts)
+        res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
         
         # Without state continuity variables
         opts["state_cont_var"] = False
         opts['init_traj'] = ResultDymolaTextual("VDP_pack_VDP_Opt2_result.txt")
-        res = self.model_VDP_Mayer.optimize(self.algorithm, opts)
+        res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
     
     @testattr(casadi = True)
@@ -301,26 +333,27 @@ class TestRadau2:
         """
         Test varying n_e and n_cp.
         """
-        opts = self.model_VDP_Mayer.optimize_options(self.algorithm)
+        model = self.model_VDP_bounds_Mayer
+        opts = model.optimize_options(self.algorithm)
         
         # n_cp = 1
         opts['n_e'] = 100
         opts['n_cp'] = 1
-        res = self.model_VDP_Mayer.optimize(self.algorithm, opts)
+        res = model.optimize(self.algorithm, opts)
         assert_results(res, 1.906718422888e1, 2.56751074502e-1)
         
         # n_cp = 3
         opts['n_e'] = 50
         opts['n_cp'] = 3
         opts['init_traj'] = ResultDymolaTextual("VDP_pack_VDP_Opt2_result.txt")
-        res = self.model_VDP_Mayer.optimize(self.algorithm, opts)
+        res = model.optimize(self.algorithm, opts)
         assert_results(res, 2.3469088662e1, 2.8723846121e-1)
         
         # n_cp = 8
         opts['n_e'] = 20
         opts['n_cp'] = 8
         opts['init_traj'] = ResultDymolaTextual("VDP_pack_VDP_Opt2_result.txt")
-        res = self.model_VDP_Mayer.optimize(self.algorithm, opts)
+        res = model.optimize(self.algorithm, opts)
         assert_results(res, 2.3469088662e1, 2.803233e-1)
         
     @testattr(casadi = True)
@@ -328,15 +361,17 @@ class TestRadau2:
         """
         Test that results are consistent regardless of graph and exact_Hessian.
         """
+        model = self.model_VDP_bounds_Lagrange
+        
         # References values
         cost_ref = 2.3384921684583301e1
         u_norm_ref = 2.8227471021520e-1
         
         # Solve problem to get initialization trajectory
-        opts = self.model_VDP_Lagrange.optimize_options(self.algorithm)
+        opts = model.optimize_options(self.algorithm)
         opts['n_e'] = 20
         opts['n_cp'] = 4
-        res = self.model_VDP_Lagrange.optimize(self.algorithm, opts)
+        res = model.optimize(self.algorithm, opts)
         
         assert_results(res, cost_ref, u_norm_ref)
         opts['init_traj'] = ResultDymolaTextual("VDP_pack_VDP_Opt2_result.txt")
@@ -344,13 +379,13 @@ class TestRadau2:
         # SX with exact Hessian
         opts['graph'] = "SX"
         opts['exact_Hessian'] = True
-        res = self.model_VDP_Lagrange.optimize(self.algorithm, opts)
+        res = model.optimize(self.algorithm, opts)
         sol_with = res.times['sol']
         assert_results(res, cost_ref, u_norm_ref)
         
         # SX without exact Hessian
         opts['exact_Hessian'] = False
-        res = self.model_VDP_Lagrange.optimize(self.algorithm, opts)
+        res = model.optimize(self.algorithm, opts)
         sol_without = res.times['sol']
         nose.tools.assert_true(sol_with < 0.5 * sol_without)
         assert_results(res, cost_ref, u_norm_ref)
@@ -358,13 +393,13 @@ class TestRadau2:
         # expanded_MX with exact Hessian
         opts['graph'] = "expanded_MX"
         opts['exact_Hessian'] = True
-        res = self.model_VDP_Lagrange.optimize(self.algorithm, opts)
+        res = model.optimize(self.algorithm, opts)
         sol_with = res.times['sol']
         assert_results(res, cost_ref, u_norm_ref)
         
         # expanded_MX without exact Hessian
         opts['exact_Hessian'] = False
-        res = self.model_VDP_Lagrange.optimize(self.algorithm, opts)
+        res = model.optimize(self.algorithm, opts)
         sol_without = res.times['sol']
         nose.tools.assert_true(sol_with < 0.5 * sol_without)
         assert_results(res, cost_ref, u_norm_ref)
@@ -372,13 +407,13 @@ class TestRadau2:
         # MX with exact Hessian
         opts['graph'] = "MX"
         opts['exact_Hessian'] = True
-        res = self.model_VDP_Lagrange.optimize(self.algorithm, opts)
+        res = model.optimize(self.algorithm, opts)
         sol_with = res.times['sol']
         assert_results(res, cost_ref, u_norm_ref)
         
         # MX without exact Hessian
         opts['exact_Hessian'] = False
-        res = self.model_VDP_Lagrange.optimize(self.algorithm, opts)
+        res = model.optimize(self.algorithm, opts)
         sol_without = res.times['sol']
         nose.tools.assert_true(sol_with < 0.9 * sol_without)
         assert_results(res, cost_ref, u_norm_ref)
@@ -388,20 +423,22 @@ class TestRadau2:
         """
         Test the CasADi option numeric_jacobian.
         """
+        model = self.model_VDP_bounds_Mayer
+        
         # References values
         cost_ref = 2.34690886624e1
         u_norm_ref = 2.8723845558898e-1
         
         # numeric_jacobian = True
-        opts = self.model_VDP_Mayer.optimize_options(self.algorithm)
+        opts = model.optimize_options(self.algorithm)
         opts['CasADi_options_G']['numeric_jacobian'] = True
-        res = self.model_VDP_Mayer.optimize(self.algorithm, opts)
+        res = model.optimize(self.algorithm, opts)
         sol_with = res.times['sol']
         assert_results(res, cost_ref, u_norm_ref)
         
         # numeric_jacobian = False
         opts['CasADi_options_G']['numeric_jacobian'] = False
-        res = self.model_VDP_Mayer.optimize(self.algorithm, opts)
+        res = model.optimize(self.algorithm, opts)
         sol_without = res.times['sol']
         nose.tools.assert_true(sol_without < 0.95 * sol_with)
         assert_results(res, cost_ref, u_norm_ref)

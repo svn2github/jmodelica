@@ -1445,7 +1445,7 @@ class Radau2Collocator(CasadiCollocator):
             der_vals_k *= self.model.get_n_x()
             der_vals += [casadi.vertcat(der_vals_k)]
         
-        # Create function for collocation equations
+        # Create collocation equation functions
         x_i = casadi.symbolic("x_i", self.model.get_n_x(), self.n_cp + 1)
         der_vals_k = casadi.symbolic("der_vals[k]", self.model.get_n_x(),
                                      self.n_cp + 1)
@@ -1456,13 +1456,48 @@ class Radau2Collocator(CasadiCollocator):
                 [casadi.sum(x_i * der_vals_k, 1) - h * dx_i_k])
         coll_eq.init()
         
+        # Create path constraint functions
+        g_e = []
+        g_i = []
+        path_fcn = self.ocp.path_fcn_
+        lb = self.ocp.path_min_
+        ub = self.ocp.path_max_
+        for i in range(len(path_fcn)):
+            if lb[i] == ub[i]:
+                g_e += [path_fcn[i] - ub[i]]
+            else:
+                if lb[i] != -N.inf:
+                    g_i += [-path_fcn[i] + lb[i]]
+                if ub[i] != N.inf:
+                    g_i += [path_fcn[i] - ub[i]]
+        z = casadi.vertcat([self.model.p,
+                            self.model.dx,
+                            self.model.x,
+                            self.model.u,
+                            self.model.w,
+                            self.model.t])
+        g_e_fcn = casadi.SXFunction([z], [g_e])
+        g_e_fcn.init()
+        g_i_fcn = casadi.SXFunction([z], [g_i])
+        g_i_fcn.init()
+        
         # Define function evaluation methods based on graph
         if self.graph == 'MX' or self.graph == 'expanded_MX':
+            init_F0_eval = self.model.get_init_F0().call
             dae_F_eval = self.model.get_dae_F().call
             coll_eq_eval = coll_eq.call
+            g_e_eval = g_e_fcn.call
+            g_i_eval = g_i_fcn.call
+            c_e = casadi.MX() 
+            c_i = casadi.MX()
         elif self.graph == 'SX':
+            init_F0_eval = self.model.get_init_F0().eval
             dae_F_eval = self.model.get_dae_F().eval
             coll_eq_eval = coll_eq.eval
+            g_e_eval = g_e_fcn.eval
+            g_i_eval = g_i_fcn.eval
+            c_e = casadi.SXMatrix()
+            c_i = casadi.SXMatrix()
         else:
             raise ValueError('Unknown CasADi graph %s.' % graph)
             
@@ -1476,15 +1511,10 @@ class Radau2Collocator(CasadiCollocator):
         self.time_points[1][0] = t
         time += [t]
         
-        # Boundary conditions
+        # Initial conditions
         z = self._get_z(1, 0)
-        if self.graph == 'MX' or self.graph == 'expanded_MX':
-            [g] = self.model.get_init_F0().call([z])
-        elif self.graph == 'SX':
-            [g] = self.model.get_init_F0().eval([z])
-        else:
-            raise ValueError('Unknown CasADi graph %s.' % graph)
-        g = casadi.vertcat([g, dae_F_eval([z])[0]])
+        c_e = casadi.vertcat([c_e, init_F0_eval([z])[0]])
+        c_e = casadi.vertcat([c_e, dae_F_eval([z])[0]])
         
         # Evaluate u_1_0 based on polynomial u^1
         u_1_0 = 0
@@ -1492,7 +1522,7 @@ class Radau2Collocator(CasadiCollocator):
             u_1_0 += var[1][k]['u'] * self.pol.eval_basis(k, 0, False)
             
         # Add residual for u_1_0 as constraint
-        g = casadi.vertcat([g, var[1][0]['u'] - u_1_0])
+        c_e = casadi.vertcat([c_e, var[1][0]['u'] - u_1_0])
         
         # Create list of state matrices
         x_list = [[]]
@@ -1523,12 +1553,12 @@ class Radau2Collocator(CasadiCollocator):
             [coll_constr] = coll_eq_eval([x_list[1], der_vals[k], 
                                           self.horizon * self.h[1],
                                           var[1][k]['dx']])
-            g = casadi.vertcat([g, coll_constr])
+            c_e = casadi.vertcat([c_e, coll_constr])
             
             # DAE constraint
             z = self._get_z(1, k)
             [dae_constr] = dae_F_eval([z])
-            g = casadi.vertcat([g, dae_constr])
+            c_e = casadi.vertcat([c_e, dae_constr])
         
         # Collocation and DAE constraints for succeeding elements
         for i in xrange(2, self.n_e + 1):
@@ -1544,26 +1574,45 @@ class Radau2Collocator(CasadiCollocator):
                 [coll_constr] = coll_eq_eval([x_list[i], der_vals[k], 
                                               self.horizon * self.h[i],
                                               var[i][k]['dx']])
-                g = casadi.vertcat([g, coll_constr])
+                c_e = casadi.vertcat([c_e, coll_constr])
                 
                 # DAE constraint
                 z = self._get_z(i, k)
                 [dae_constr] = dae_F_eval([z])
-                g = casadi.vertcat([g, dae_constr])
+                c_e = casadi.vertcat([c_e, dae_constr])
                 
         # Continuity constraints
         if self.state_cont_var:
             for i in xrange(1, self.n_e):
                 cont_constr = var[i][self.n_cp]['x'] - var[i + 1][0]['x']
-                g = casadi.vertcat([g, cont_constr])
+                c_e = casadi.vertcat([c_e, cont_constr])
                 
         # Element length constraints
         if self.hs == "free":
             h_constr = casadi.sum(self.h[1:]) - 1
-            g = casadi.vertcat([g, h_constr])
+            c_e = casadi.vertcat([c_e, h_constr])
+        
+        # Path constraints
+        for i in xrange(1, self.n_e + 1):
+            for k in self.time_points[i]:
+                z = self._get_z(i, k)
+                [g_e_constr] = g_e_eval([z])
+                [g_i_constr] = g_i_eval([z])
+                c_e = casadi.vertcat([c_e, g_e_constr])
+                c_i = casadi.vertcat([c_i, g_i_constr])
         
         # Store constraints and time as data attributes
-        self.g = g
+        # This code can be simplified once
+        # https://sourceforge.net/apps/trac/casadi/ticket/180
+        # has been fixed.
+        self.c_e = c_e
+        if self.graph == 'MX' or self.graph == 'expanded_MX':
+            if c_i.isNull():
+                self.c_i = casadi.MX(0, 0)
+            else:
+                self.c_i = c_i
+        else:
+            self.c_i = c_i
         self.time = N.array(time)
         
     def _create_constraint_function(self):
@@ -1741,7 +1790,9 @@ class Radau2Collocator(CasadiCollocator):
             
             # Recreate constraints
             self.c_fcn = self.c_fcn.expand([self.xx])
-            self.g = self.c_fcn.outputSX()
+            n_c_e = self.c_e.numel()
+            self.c_e = self.c_fcn.outputSX()[:n_c_e]
+            self.c_i = self.c_fcn.outputSX()[n_c_e:]
             
             # Reset user provided options and initialize
             for (k, v) in self.CasADi_options_G.iteritems():
@@ -1764,16 +1815,16 @@ class Radau2Collocator(CasadiCollocator):
         if self.exact_Hessian:
             # Lagrange multipliers and objective function scaling
             if self.graph == 'MX':
-                lam = casadi.MX("lambda", self.g.numel())
+                lam = casadi.MX("lambda", self.c_e.numel())
                 sigma = casadi.MX("sigma")
             elif self.graph == "SX" or self.graph == 'expanded_MX':
-                lam = casadi.symbolic("lambda", self.g.numel())
+                lam = casadi.symbolic("lambda", self.c_e.numel())
                 sigma = casadi.symbolic("sigma")
             else:
                 raise ValueError('Unknown CasADi graph %s.' % self.graph)
             
             # Lagrangian
-            lag_exp = sigma * self.cost + casadi.inner_prod(lam, self.g)
+            lag_exp = sigma * self.cost + casadi.inner_prod(lam, self.c_e)
             if self.graph == 'MX':
                 L = casadi.MXFunction([self.xx, lam, sigma], [lag_exp])
             elif self.graph == "SX" or self.graph == 'expanded_MX':
@@ -1821,7 +1872,10 @@ class Radau2Collocator(CasadiCollocator):
                                                  self.get_hessian())
         
     def get_equality_constraint(self):
-        return self.g
+        return self.c_e
+    
+    def get_inequality_constraint(self):
+        return self.c_i
     
     def get_cost(self):
         return self.cost_fcn
@@ -1834,9 +1888,9 @@ class Radau2Collocator(CasadiCollocator):
         #~ # ------------
         #~ x = self.xx
         #~ x_opt = self.nlp_opt
-        #~ g = self.c_fcn
-        #~ jac = g.jac()
-        #~ return (x, x_opt, g, jac)
+        #~ c_e = self.c_fcn
+        #~ jac = c_e.jac()
+        #~ return (x, x_opt, c_e, jac)
         #~ # ------------
         
         # Set model info
