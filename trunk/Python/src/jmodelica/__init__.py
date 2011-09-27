@@ -20,7 +20,7 @@ The JModelica.org Python package <http:/www.jmodelica.org/>
 
 __all__ = ['jmi', 'xmlparser', 'compiler','optimization','examples', 'tests', 
     'io','initialization','simulation','core', 'linearization', 
-    'algorithm_drivers', 'fmi']
+    'algorithm_drivers', 'fmi','plotting']
 
 __version__=''
 
