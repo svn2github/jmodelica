@@ -199,6 +199,13 @@ class ResultBase(object):
     """)
 
 class JMResultBase(ResultBase):
+    
+    def keys(self):
+        """
+        Returns the variable names in the result file.
+        """
+        return self.result_data.name
+    
     def __getitem__(self, key):
         val = self.result_data.get_variable_data(key)
 
@@ -634,7 +641,8 @@ class AssimuloFMIAlgOptions(OptionBase):
             'result_file_name':'',
             'with_jacobian':False,
             'CVode_options':{'discr':'BDF','iter':'Newton',
-                             'atol':"Default",'rtol':"Default",}
+                             'atol':"Default",'rtol':"Default",},
+            'Radau5_options':{'atol':"Default",'rtol':"Default"}
             }
         super(AssimuloFMIAlgOptions,self).__init__(_defaults)
         # for those key-value-sets where the value is a dict, don't 
