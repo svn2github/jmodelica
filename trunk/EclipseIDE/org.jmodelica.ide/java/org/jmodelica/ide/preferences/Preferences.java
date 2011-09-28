@@ -11,7 +11,6 @@ import java.util.zip.ZipInputStream;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.core.runtime.preferences.DefaultScope;
@@ -22,9 +21,7 @@ import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.text.TextAttribute;
 import org.eclipse.jface.text.rules.Token;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Device;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
 import org.jmodelica.ide.Activator;
@@ -41,8 +38,7 @@ public class Preferences extends AbstractPreferenceInitializer {
 	}
 	
 	public static String get(String key) {
-		IPreferencesService service = Platform.getPreferencesService();
-		return service.getString(IDEConstants.PLUGIN_ID, key, null, null);
+		return get(null, key);
 	}
 	
 	public static Token getColorToken(String key) {
@@ -54,7 +50,7 @@ public class Preferences extends AbstractPreferenceInitializer {
 	}
 
 	public static void set(String key, String value) {
-		new InstanceScope().getNode(IDEConstants.PLUGIN_ID).put(key, value);
+		set(null, key, value);
 	}
 
 	public static void setColor(String key, Color value) {
@@ -62,53 +58,54 @@ public class Preferences extends AbstractPreferenceInitializer {
 	}
 
 	public static void update(String key, String value) {
-		if (value != null && !value.equals(""))
-			set(key, value);
-		else
-			clear(key);
+		update(null, key, value);
 	}
 
 	public static void clear(String key) {
-		new InstanceScope().getNode(IDEConstants.PLUGIN_ID).remove(key);
+		clear(null, key);
 	}
 	
 	public static String get(IProject proj, String key) {
 		IPreferencesService service = Platform.getPreferencesService();
-		IScopeContext[] contexts = new IScopeContext[] { new ProjectScope(proj) };
+		IScopeContext[] contexts = (proj == null) ? null : new IScopeContext[] { new ProjectScope(proj) };
 		return service.getString(IDEConstants.PLUGIN_ID, key, null, contexts);
 	}
 	
 	public static void set(IProject proj, String key, String value) {
-		new ProjectScope(proj).getNode(IDEConstants.PLUGIN_ID).put(key, value);
+		getNode(proj).put(key, value);
 	}
 
 	public static void update(IProject proj, String key, String value) {
 		if (value != null && !value.isEmpty())
-			set(key, value);
+			set(proj, key, value);
 		else
-			clear(key);
+			clear(proj, key);
 	}
 
 	public static void clear(IProject proj, String key) {
-		new ProjectScope(proj).getNode(IDEConstants.PLUGIN_ID).remove(key);
+		getNode(proj).remove(key);
 	}
 	
 	public static void addListener(IPreferenceChangeListener listener) {
-		new InstanceScope().getNode(IDEConstants.PLUGIN_ID).addPreferenceChangeListener(listener);
+		addListener(null, listener);
 	}
 	
 	public static void addListener(IProject proj, IPreferenceChangeListener listener) {
-		new ProjectScope(proj).getNode(IDEConstants.PLUGIN_ID).addPreferenceChangeListener(listener);
+		getNode(proj).addPreferenceChangeListener(listener);
 	}
 	
 	public static void removeListener(IPreferenceChangeListener listener) {
-		new InstanceScope().getNode(IDEConstants.PLUGIN_ID).removePreferenceChangeListener(listener);
+		removeListener(null, listener);
 	}
 	
 	public static void removeListener(IProject proj, IPreferenceChangeListener listener) {
-		new ProjectScope(proj).getNode(IDEConstants.PLUGIN_ID).removePreferenceChangeListener(listener);
+		getNode(proj).removePreferenceChangeListener(listener);
 	}
 
+	private static IEclipsePreferences getNode(IProject proj) {
+		return ((proj == null) ? new InstanceScope() : new ProjectScope(proj)).getNode(IDEConstants.PLUGIN_ID);
+	}
+	
 	@Override
 	public void initializeDefaultPreferences() {
 		// Read default values from environment vars
