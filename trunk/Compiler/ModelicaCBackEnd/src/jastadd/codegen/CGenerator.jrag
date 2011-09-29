@@ -786,18 +786,22 @@ public class CGenerator extends GenericGenerator {
 	
 		public void generate(PrintStream genPrinter) {
 
-			genPrinter.print("static const int Output_vrefs[" + 
-				fclass.numOutputs() + "] = {");
+			if (fclass.numOutputs()>0) {
+				genPrinter.print("static const int Output_vrefs[" + 
+					fclass.numOutputs() + "] = {");		
 
-			int ind = 0;
-			for (FVariable fv : fclass.outputs()) {
-				genPrinter.print(fv.valueReference());
-				if (ind < fclass.numOutputs()-1) {
-					genPrinter.print(",");
-				}	
-				ind++;
-			}		
-			genPrinter.print("};\n");
+				int ind = 0;
+				for (FVariable fv : fclass.outputs()) {
+					genPrinter.print(fv.valueReference());
+					if (ind < fclass.numOutputs()-1) {
+						genPrinter.print(",");
+					}	
+					ind++;
+				}		
+				genPrinter.print("};\n");
+			} else {
+				genPrinter.print("static const int Output_vrefs[1] = {-1};");
+			} 
 		}	
 	}
 
