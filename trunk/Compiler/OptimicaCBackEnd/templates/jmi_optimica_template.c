@@ -147,9 +147,6 @@ $C_function_headers$
 
 $C_functions$
 
-$C_export_functions$
-$C_export_wrappers$
-
 static int model_ode_guards(jmi_t* jmi) {
   $C_ode_guards$
   return 0;
