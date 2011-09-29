@@ -108,7 +108,12 @@ public class OptionRegistry {
 					"When this option is set to true (default is false), then compliance errors are treated " + 
 					"as warnings instead. This can lead to the compiler or solver crashing. Use with caution!"),
 			GEN_HTML_DIAG ("generate_html_diagnostics", false, 
-					"When this option is set to true (default is false) model diagnostics is generated in HTML format ");
+					"When this option is set to true (default is false) model diagnostics is generated in HTML format "), 
+			EXPORT_FUNCS ("export_functions", false, 
+					"Export used functions to generated C code in a manner that is compatible with the external C " +
+					"interface in the Modelica Language Specification"),
+			EXPORT_FUNCS_VBA ("export_functions_vba", false, 
+					"Create wrappers for exported functions that are compatible with VBA. Requires export_functions");
 						
 			public String key;
 			public String desc;

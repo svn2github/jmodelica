@@ -21,6 +21,8 @@ model Scalar2To1
      JModelica.UnitTesting.CCodeGenTestCase(
          name="Scalar2To1",
          description="",
+		 export_functions=true,
+		 export_functions_vba=true,
          template="
 $C_export_functions$
 $C_export_wrappers$
@@ -33,15 +35,15 @@ DllExport double func_ExportFunctions_Scalar2To1_f_export(double x_v, int y_v) {
 }
 
 
-char* select_1_names[] = { \"ExportFunctions_Scalar2To1_f\" };
-int select_1_lengths[] = { 28 };
-double (*select_1_funcs[])(double, int) = { *func_ExportFunctions_Scalar2To1_f_export };
-DllExport double __stdcall select_1(char* name, double x_v, int y_v) {
+char* select_vba_1_names[] = { \"ExportFunctions_Scalar2To1_f\" };
+int select_vba_1_lengths[] = { 28 };
+double (*select_vba_1_funcs[])(double, int) = { *func_ExportFunctions_Scalar2To1_f_export };
+DllExport double __stdcall select_vba_1(char* name, double x_v, int y_v) {
     int i, j;
     for (i = 0, j = 0; name[i] != 0; i++) 
-        while (j < 1 && i <= select_1_lengths[j] && name[i] > select_1_names[j][i]) j++;
-    if (j >= 1 || strcmp(select_1_names[j], name)) return 0;
-    return select_1_funcs[j](x_v, y_v);
+        while (j < 1 && i <= select_vba_1_lengths[j] && name[i] > select_vba_1_names[j][i]) j++;
+    if (j >= 1 || strcmp(select_vba_1_names[j], name)) return 0;
+    return select_vba_1_funcs[j](x_v, y_v);
 }
 
 ")})));
@@ -57,14 +59,72 @@ DllExport double __stdcall select_1(char* name, double x_v, int y_v) {
 algorithm
   f(1.0, 2);
 end Scalar2To1;
+	
+model Options1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="Options1",
+         description="Check that the options activate/deactivate the export functions properly.",
+		 export_functions=false,
+		 export_functions_vba=false,
+         template="
+$C_export_functions$
+$C_export_wrappers$
+",
+         generatedCode="")})));
 
+  function f
+    input Real x;
+    input Integer y;
+    output Real z;
+  algorithm
+    z := x + y;
+  end f;
+  
+algorithm
+  f(1.0, 2);
+end Options1;
+	
+model Options2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="Options2",
+         description="Check that the options activate/deactivate the export functions properly.",
+		 export_functions=true,
+		 export_functions_vba=false,
+         template="
+$C_export_functions$
+$C_export_wrappers$
+",
+         generatedCode="
+DllExport double func_ExportFunctions_Options2_f_export(double x_v, int y_v) {
+    double z_v;
+    func_ExportFunctions_Options2_f_def(x_v, y_v, &z_v);
+    return z_v;
+}
+")})));
+
+  function f
+    input Real x;
+    input Integer y;
+    output Real z;
+  algorithm
+    z := x + y;
+  end f;
+  
+algorithm
+  f(1.0, 2);
+end Options2;
+	
 
 model ScalarGrouping1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.CCodeGenTestCase(
          name="ScalarGrouping1",
          description="",
-         template="
+		 export_functions=true,
+		 export_functions_vba=true,
+		 template="
 $C_export_functions$
 $C_export_wrappers$
 ",
@@ -94,26 +154,26 @@ DllExport double func_ExportFunctions_ScalarGrouping1_fb2_export(double x_v, dou
 }
 
 
-char* select_1_names[] = { \"ExportFunctions_ScalarGrouping1_fa1\", \"ExportFunctions_ScalarGrouping1_fa2\" };
-int select_1_lengths[] = { 35, 35 };
-double (*select_1_funcs[])(double) = { *func_ExportFunctions_ScalarGrouping1_fa1_export, *func_ExportFunctions_ScalarGrouping1_fa2_export };
-DllExport double __stdcall select_1(char* name, double x_v) {
+char* select_vba_1_names[] = { \"ExportFunctions_ScalarGrouping1_fa1\", \"ExportFunctions_ScalarGrouping1_fa2\" };
+int select_vba_1_lengths[] = { 35, 35 };
+double (*select_vba_1_funcs[])(double) = { *func_ExportFunctions_ScalarGrouping1_fa1_export, *func_ExportFunctions_ScalarGrouping1_fa2_export };
+DllExport double __stdcall select_vba_1(char* name, double x_v) {
     int i, j;
     for (i = 0, j = 0; name[i] != 0; i++) 
-        while (j < 2 && i <= select_1_lengths[j] && name[i] > select_1_names[j][i]) j++;
-    if (j >= 2 || strcmp(select_1_names[j], name)) return 0;
-    return select_1_funcs[j](x_v);
+        while (j < 2 && i <= select_vba_1_lengths[j] && name[i] > select_vba_1_names[j][i]) j++;
+    if (j >= 2 || strcmp(select_vba_1_names[j], name)) return 0;
+    return select_vba_1_funcs[j](x_v);
 }
 
-char* select_2_names[] = { \"ExportFunctions_ScalarGrouping1_fb1\", \"ExportFunctions_ScalarGrouping1_fb2\" };
-int select_2_lengths[] = { 35, 35 };
-double (*select_2_funcs[])(double, double) = { *func_ExportFunctions_ScalarGrouping1_fb1_export, *func_ExportFunctions_ScalarGrouping1_fb2_export };
-DllExport double __stdcall select_2(char* name, double x1_v, double x2_v) {
+char* select_vba_2_names[] = { \"ExportFunctions_ScalarGrouping1_fb1\", \"ExportFunctions_ScalarGrouping1_fb2\" };
+int select_vba_2_lengths[] = { 35, 35 };
+double (*select_vba_2_funcs[])(double, double) = { *func_ExportFunctions_ScalarGrouping1_fb1_export, *func_ExportFunctions_ScalarGrouping1_fb2_export };
+DllExport double __stdcall select_vba_2(char* name, double x1_v, double x2_v) {
     int i, j;
     for (i = 0, j = 0; name[i] != 0; i++) 
-        while (j < 2 && i <= select_2_lengths[j] && name[i] > select_2_names[j][i]) j++;
-    if (j >= 2 || strcmp(select_2_names[j], name)) return 0;
-    return select_2_funcs[j](x1_v, x2_v);
+        while (j < 2 && i <= select_vba_2_lengths[j] && name[i] > select_vba_2_names[j][i]) j++;
+    if (j >= 2 || strcmp(select_vba_2_names[j], name)) return 0;
+    return select_vba_2_funcs[j](x1_v, x2_v);
 }
 
 ")})));
@@ -157,7 +217,9 @@ model ArrayInputs1
      JModelica.UnitTesting.CCodeGenTestCase(
          name="ArrayInputs1",
          description="",
-         template="
+		 export_functions=true,
+		 export_functions_vba=true,
+		 template="
 $C_export_functions$
 $C_export_wrappers$
 ",
@@ -189,15 +251,15 @@ DllExport double func_ExportFunctions_ArrayInputs1_f1_export(double* x_ap, int x
 }
 
 
-char* select_1_names[] = { \"ExportFunctions_ArrayInputs1_f1\", \"ExportFunctions_ArrayInputs1_f2\" };
-int select_1_lengths[] = { 31, 31 };
-double (*select_1_funcs[])(double*, int) = { *func_ExportFunctions_ArrayInputs1_f1_export, *func_ExportFunctions_ArrayInputs1_f2_export };
-DllExport double __stdcall select_1(char* name, double* x_ap, int x_a0) {
+char* select_vba_1_names[] = { \"ExportFunctions_ArrayInputs1_f1\", \"ExportFunctions_ArrayInputs1_f2\" };
+int select_vba_1_lengths[] = { 31, 31 };
+double (*select_vba_1_funcs[])(double*, int) = { *func_ExportFunctions_ArrayInputs1_f1_export, *func_ExportFunctions_ArrayInputs1_f2_export };
+DllExport double __stdcall select_vba_1(char* name, double* x_ap, int x_a0) {
     int i, j;
     for (i = 0, j = 0; name[i] != 0; i++) 
-        while (j < 2 && i <= select_1_lengths[j] && name[i] > select_1_names[j][i]) j++;
-    if (j >= 2 || strcmp(select_1_names[j], name)) return 0;
-    return select_1_funcs[j](x_ap, x_a0);
+        while (j < 2 && i <= select_vba_1_lengths[j] && name[i] > select_vba_1_names[j][i]) j++;
+    if (j >= 2 || strcmp(select_vba_1_names[j], name)) return 0;
+    return select_vba_1_funcs[j](x_ap, x_a0);
 }
 
 ")})));
@@ -225,7 +287,9 @@ model ArrayInputs2
      JModelica.UnitTesting.CCodeGenTestCase(
          name="ArrayInputs2",
          description="",
-         template="
+		 export_functions=true,
+		 export_functions_vba=true,
+		 template="
 $C_export_functions$
 $C_export_wrappers$
 ",
@@ -259,15 +323,15 @@ DllExport double func_ExportFunctions_ArrayInputs2_f1_export(double* x_ap, int x
 }
 
 
-char* select_1_names[] = { \"ExportFunctions_ArrayInputs2_f1\", \"ExportFunctions_ArrayInputs2_f2\" };
-int select_1_lengths[] = { 31, 31 };
-double (*select_1_funcs[])(double*, int, int) = { *func_ExportFunctions_ArrayInputs2_f1_export, *func_ExportFunctions_ArrayInputs2_f2_export };
-DllExport double __stdcall select_1(char* name, double* x_ap, int x_a0, int x_a1) {
+char* select_vba_1_names[] = { \"ExportFunctions_ArrayInputs2_f1\", \"ExportFunctions_ArrayInputs2_f2\" };
+int select_vba_1_lengths[] = { 31, 31 };
+double (*select_vba_1_funcs[])(double*, int, int) = { *func_ExportFunctions_ArrayInputs2_f1_export, *func_ExportFunctions_ArrayInputs2_f2_export };
+DllExport double __stdcall select_vba_1(char* name, double* x_ap, int x_a0, int x_a1) {
     int i, j;
     for (i = 0, j = 0; name[i] != 0; i++) 
-        while (j < 2 && i <= select_1_lengths[j] && name[i] > select_1_names[j][i]) j++;
-    if (j >= 2 || strcmp(select_1_names[j], name)) return 0;
-    return select_1_funcs[j](x_ap, x_a0, x_a1);
+        while (j < 2 && i <= select_vba_1_lengths[j] && name[i] > select_vba_1_names[j][i]) j++;
+    if (j >= 2 || strcmp(select_vba_1_names[j], name)) return 0;
+    return select_vba_1_funcs[j](x_ap, x_a0, x_a1);
 }
 
 ")})));
@@ -295,7 +359,9 @@ model OnlyUnsupported
      JModelica.UnitTesting.CCodeGenTestCase(
          name="OnlyUnsupported",
          description="Test that unsupported functions aren't included when exporting functions",
-         template="
+		 export_functions=true,
+		 export_functions_vba=true,
+		 template="
 $C_export_functions$
 $C_export_wrappers$
 ",

@@ -153,6 +153,9 @@ $C_dae_init_blocks_residual_functions$
 
 $C_functions$
 
+$C_export_functions$
+$C_export_wrappers$
+
 static int model_ode_guards(jmi_t* jmi) {
   $C_ode_guards$
   return 0;

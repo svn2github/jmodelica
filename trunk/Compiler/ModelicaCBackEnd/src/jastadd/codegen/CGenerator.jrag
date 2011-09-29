@@ -703,9 +703,10 @@ public class CGenerator extends GenericGenerator {
 		}
 
 		public void generate(PrintStream out) {
-			for (FFunctionDecl func : fclass.getFFunctionDecls())
-				if (func.hasExportWrapper_C())
-					func.exportWrapper_C(out, "");
+			if (fclass.root().options.getBooleanOption("export_functions"))
+				for (FFunctionDecl func : fclass.getFFunctionDecls())
+					if (func.hasExportWrapper_C())
+						func.exportWrapper_C(out, "");
 		}
 	}
 	
@@ -723,50 +724,54 @@ public class CGenerator extends GenericGenerator {
 		}
 
 		public void generate(PrintStream out) {
-			int i = 0;
-			String ind = ASTNode.printer_C.indent("");
-			for (ArrayList<FFunctionDecl> grp : fclass.exportWrapperGroups()) {
-				FFunctionDecl first = grp.get(0);
-				String type = first.exportWrapperType_C();
-				String name = "select_" + (++i);
-				
-				out.format("char* %s_names[] = { ", name);
-				String fmt = "\"%s\"";
-				for (FFunctionDecl f : grp) {
-					out.format(fmt, f.getFQName().nameUnderscore());
-					fmt = ", \"%s\"";
+			if (fclass.root().options.getBooleanOption("export_functions_vba")) {
+				// TODO: refactor out parts not specific to VBA to make it 
+				//       easier to support other platforms with special needs
+				int i = 0;
+				String ind = ASTNode.printer_C.indent("");
+				for (ArrayList<FFunctionDecl> grp : fclass.exportWrapperGroups()) {
+					FFunctionDecl first = grp.get(0);
+					String type = first.exportWrapperType_C();
+					String name = "select_vba_" + (++i);
+					
+					out.format("char* %s_names[] = { ", name);
+					String fmt = "\"%s\"";
+					for (FFunctionDecl f : grp) {
+						out.format(fmt, f.getFQName().nameUnderscore());
+						fmt = ", \"%s\"";
+					}
+					out.print(" };\n");
+					
+					out.format("int %s_lengths[] = { ", name);
+					fmt = "%d";
+					for (FFunctionDecl f : grp) {
+						out.format(fmt, f.getFQName().nameUnderscore().length());
+						fmt = ", %d";
+					}
+					out.print(" };\n");
+					
+					out.format("%s (*%s_funcs[])(", type, name);
+					first.exportWrapperArgumentTypeDecl_C(out);
+					out.print(") = { ");
+					fmt = "*%s";
+					for (FFunctionDecl f : grp) {
+						out.format(fmt, f.funcNameExportWrapper());
+						fmt = ", *%s";
+					}
+					out.print(" };\n");
+					
+					out.format("DllExport %s __stdcall %s(char* name, ", type, name);
+					first.exportWrapperArgumentDecl_C(out);
+					out.print(") {\n");
+					out.format("%sint i, j;\n", ind);
+					out.format("%sfor (i = 0, j = 0; name[i] != 0; i++) \n", ind);
+					out.format("%s%swhile (j < %d && i <= %s_lengths[j] && name[i] > %s_names[j][i]) j++;\n", ind, ind, grp.size(), name, name);
+					out.format("%sif (j >= %d || strcmp(%s_names[j], name)) return 0;\n", ind, grp.size(), name);
+					out.format("%sreturn %s_funcs[j](", ind, name);
+					first.exportWrapperArgumentCall_C(out);
+					out.print(");\n");
+					out.print("}\n\n");
 				}
-				out.print(" };\n");
-				
-				out.format("int %s_lengths[] = { ", name);
-				fmt = "%d";
-				for (FFunctionDecl f : grp) {
-					out.format(fmt, f.getFQName().nameUnderscore().length());
-					fmt = ", %d";
-				}
-				out.print(" };\n");
-				
-				out.format("%s (*%s_funcs[])(", type, name);
-				first.exportWrapperArgumentTypeDecl_C(out);
-				out.print(") = { ");
-				fmt = "*%s";
-				for (FFunctionDecl f : grp) {
-					out.format(fmt, f.funcNameExportWrapper());
-					fmt = ", *%s";
-				}
-				out.print(" };\n");
-				
-				out.format("DllExport %s __stdcall %s(char* name, ", type, name);
-				first.exportWrapperArgumentDecl_C(out);
-				out.print(") {\n");
-				out.format("%sint i, j;\n", ind);
-				out.format("%sfor (i = 0, j = 0; name[i] != 0; i++) \n", ind);
-				out.format("%s%swhile (j < %d && i <= %s_lengths[j] && name[i] > %s_names[j][i]) j++;\n", ind, ind, grp.size(), name, name);
-				out.format("%sif (j >= %d || strcmp(%s_names[j], name)) return 0;\n", ind, grp.size(), name);
-				out.format("%sreturn %s_funcs[j](", ind, name);
-				first.exportWrapperArgumentCall_C(out);
-				out.print(");\n");
-				out.print("}\n\n");
 			}
 		}
 	}
