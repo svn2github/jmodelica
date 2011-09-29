@@ -46,6 +46,7 @@ ID_LABELS  = 15003
 ID_AXIS    = 15004
 ID_MOVE    = 15005
 ID_ZOOM    = 15006
+ID_RESIZE  = 15007
 
 class MainGUI(wx.Frame):
     sizeHeightDefault=900
@@ -153,8 +154,8 @@ class MainGUI(wx.Frame):
         
         # Edit
         self.editAdd  = editmenu.Append(wx.ID_ADD,"A&dd Plot","Add a plot window.")
-        self.editLabels = editmenu.Append(ID_LABELS, "Labels", "Edit the labels of the current plot.")
-        self.editAxis = editmenu.Append(ID_AXIS,"Axis", "Edit the axis of the current plot.")
+        self.editAxisLabels = editmenu.Append(ID_AXIS,"Axis / Labels", "Edit the axis and labels of the current plot.")
+        self.editResize = editmenu.Append(ID_RESIZE, "Resize", "Resize the current plot.")
         
         # View
         self.viewGrid  = viewmenu.Append(ID_GRID,"&Grid","Show/Hide Grid.",kind=wx.ITEM_CHECK)
@@ -177,8 +178,8 @@ class MainGUI(wx.Frame):
         self.Bind(wx.EVT_MENU, self.OnMenuSaveFig, self.menuSaveFig)
         self.Bind(wx.EVT_MENU, self.OnMenuExit,    self.menuExit)
         self.Bind(wx.EVT_MENU, self.OnMenuAdd,     self.editAdd)
-        self.Bind(wx.EVT_MENU, self.OnMenuLabels,  self.editLabels)
-        self.Bind(wx.EVT_MENU, self.OnMenuAxis,    self.editAxis)
+        self.Bind(wx.EVT_MENU, self.OnMenuAxisLabels,    self.editAxisLabels)
+        self.Bind(wx.EVT_MENU, self.OnMenuResize,  self.editResize)
         self.Bind(wx.EVT_MENU, self.OnMenuGrid,    self.viewGrid)
         self.Bind(wx.EVT_MENU, self.OnMenuMove,    self.viewMove)
         self.Bind(wx.EVT_MENU, self.OnMenuZoom,    self.viewZoom)
@@ -217,6 +218,11 @@ class MainGUI(wx.Frame):
                                         wx.OK | wx.ICON_INFORMATION)
         dlg.ShowModal()
         dlg.Destroy()
+        
+    def OnMenuResize(self, event):
+        
+        IDPlot = self.noteBook.GetSelection()
+        self.noteBook.GetPage(IDPlot).ReSize()
         
     def OnMenuOpen(self, event):
         #Open the file window
@@ -272,38 +278,19 @@ class MainGUI(wx.Frame):
         self.noteBook.AddPage(self.plotPanels[-1],"Plot "+str(self.PlotIndex+1))
         
         #Enable labels and axis options
-        self.editLabels.Enable(True)
-        self.editAxis.Enable(True)
+        self.editAxisLabels.Enable(True)
         
-    def OnMenuLabels(self, event):
-        IDPlot = self.noteBook.GetSelection()
-        plotWindow = self.noteBook.GetPage(IDPlot)
-        
-        #Create the labels dialog
-        dlg = DialogLabels(self,plotWindow)
-        
-        #Open the dialog and update options if OK
-        if dlg.ShowModal() == wx.ID_OK:
-            
-            title,xlabel,ylabel = dlg.GetLabelInfo()
-            
-            plotWindow.UpdateSettings(title=title,xlabel=xlabel,ylabel=ylabel)
-            plotWindow.DrawSettings()
-        
-        #Destroy the dialog
-        dlg.Destroy()
-        
-    def OnMenuAxis(self, event):
+    def OnMenuAxisLabels(self, event):
         IDPlot = self.noteBook.GetSelection()
         plotWindow = self.noteBook.GetPage(IDPlot)
         
         #Create the axis dialog
-        dlg = DialogAxis(self,self.noteBook.GetPage(IDPlot))
+        dlg = DialogAxisLabels(self,self.noteBook.GetPage(IDPlot))
         
         #Open the dialog and update options if OK
         if dlg.ShowModal() == wx.ID_OK:
             
-            xmax,xmin,ymax,ymin = dlg.GetAxisValues()
+            xmax,xmin,ymax,ymin,title,xlabel,ylabel,xscale,yscale = dlg.GetValues()
             
             try:
                 xmax=float(xmax)
@@ -322,7 +309,9 @@ class MainGUI(wx.Frame):
             except ValueError:
                 ymin=None
             
-            plotWindow.UpdateSettings(axes=[xmin,xmax,ymin,ymax])#(xmax=xmax,xmin=xmin,ymax=ymax,ymin=ymin)
+            plotWindow.UpdateSettings(axes=[xmin,xmax,ymin,ymax],
+                                    title=title,xlabel=xlabel,ylabel=ylabel,
+                                    xscale=xscale, yscale=yscale)
             plotWindow.DrawSettings()
         
         #Destroy the dialog
@@ -399,8 +388,7 @@ class MainGUI(wx.Frame):
         
         #Disable changing of labels and axis if there is no Plot
         if self.noteBook.GetPageCount() == 1:
-            self.editLabels.Enable(False)
-            self.editAxis.Enable(False)
+            self.editAxisLabels.Enable(False)
                             
     def OnTabChanging(self, event):
         IDPlot = self.noteBook.GetSelection()
@@ -596,121 +584,102 @@ class VariableTree(wxCustom.CustomTreeCtrl):
         return index
         
         
-class DialogLabels(wx.Dialog):
+class DialogAxisLabels(wx.Dialog):
     def __init__(self, parent, plotPage):
-        wx.Dialog.__init__(self, parent, -1, "Labels",size=(190,200))
-        
+        wx.Dialog.__init__(self, parent, -1, "Axis and Labels")
         
         settings = plotPage.GetSettings()
         
+        plotXAxisStatic = wx.StaticText(self, -1, "X-Axis")
+        plotYAxisStatic = wx.StaticText(self, -1, "Y-Axis")
+        plotXMaxStatic = wx.StaticText(self, -1, "Max",size =(50,-1))
+        plotXMinStatic = wx.StaticText(self, -1, "Min",size =(50,-1))
+        plotTitleStatic = wx.StaticText(self, -1, "Title")
+        plotXLabelStatic = wx.StaticText(self, -1, "Label")
+        plotXScaleStatic = wx.StaticText(self, -1, "Scale")
+        plotYMaxStatic = wx.StaticText(self, -1, "Max",size =(50,-1))
+        plotYMinStatic = wx.StaticText(self, -1, "Min",size =(50,-1))
+        plotYLabelStatic = wx.StaticText(self, -1, "Label")
+        plotYScaleStatic = wx.StaticText(self, -1, "Scale")
+        
+        font = plotXAxisStatic.GetFont()
+        font.SetWeight(wx.BOLD)
+        
+        plotXAxisStatic.SetFont(font)
+        plotYAxisStatic.SetFont(font)
+        
+        self.plotYAxisMin = wx.TextCtrl(self, -1, "" if settings["YAxisMin"]==None else str(settings["YAxisMin"]), style = wx.TE_LEFT , size =(150,-1))
+        self.plotYAxisMax = wx.TextCtrl(self, -1, "" if settings["YAxisMax"]==None else str(settings["YAxisMax"]), style = wx.TE_LEFT , size =(150,-1))
+        self.plotXAxisMin = wx.TextCtrl(self, -1, "" if settings["XAxisMin"]==None else str(settings["XAxisMin"]), style = wx.TE_LEFT , size =(150,-1))
+        self.plotXAxisMax = wx.TextCtrl(self, -1, "" if settings["XAxisMax"]==None else str(settings["XAxisMax"]), style = wx.TE_LEFT , size =(150,-1))
+        
+        self.plotTitle = wx.TextCtrl(self, -1, settings["Title"], style = wx.TE_LEFT , size =(150,-1))
+        self.plotXLabel = wx.TextCtrl(self, -1, settings["XLabel"], style = wx.TE_LEFT , size =(150,-1))
+        self.plotYLabel = wx.TextCtrl(self, -1, settings["YLabel"], style = wx.TE_LEFT , size =(150,-1))
+        self.plotXScale = wx.ComboBox(self, -1, size=(150, -1), choices=["Linear","Log"], style=wx.CB_READONLY)
+        self.plotYScale = wx.ComboBox(self, -1, size=(150, -1), choices=["Linear","Log"], style=wx.CB_READONLY)
+        self.plotXScale.SetSelection(0 if settings["XScale"]=="Linear" else 1)
+        self.plotYScale.SetSelection(0 if settings["YScale"]=="Linear" else 1)
+        
         mainSizer = wx.BoxSizer(wx.VERTICAL)
-        flexGrid = wx.FlexGridSizer(3, 2, 10, 10)
+        bagSizer = wx.GridBagSizer(10, 10)
+
+        bagSizer.Add(plotTitleStatic,(0,0))
+        bagSizer.Add(self.plotTitle, (0,1))
         
-        plotTitleStatic = wx.StaticText(self, -1, "Title :")
-        plotXLabelStatic = wx.StaticText(self, -1, "X-Label :")
-        plotYLabelStatic = wx.StaticText(self, -1, "Y-Label :")
+        bagSizer.Add(plotXAxisStatic,(1,0),(1,1))
+        bagSizer.Add(plotXMinStatic,(2,0))
+        bagSizer.Add(self.plotXAxisMin,(2,1))
+        bagSizer.Add(plotXMaxStatic,(3,0))
+        bagSizer.Add(self.plotXAxisMax,(3,1))
+        bagSizer.Add(plotXLabelStatic,(4,0))
+        bagSizer.Add(self.plotXLabel,(4,1))
+        bagSizer.Add(plotXScaleStatic,(5,0))
+        bagSizer.Add(self.plotXScale,(5,1))
         
-        self.plotTitle = wx.TextCtrl(self, -1, settings["Title"], style = wx.TE_LEFT , size =(100,-1))
-        self.plotXLabel = wx.TextCtrl(self, -1, settings["XLabel"], style = wx.TE_LEFT , size =(100,-1))
-        self.plotYLabel = wx.TextCtrl(self, -1, settings["YLabel"], style = wx.TE_LEFT , size =(100,-1))
+        bagSizer.Add(plotYAxisStatic,(6,0),(1,1))
+        bagSizer.Add(plotYMinStatic,(7,0))
+        bagSizer.Add(self.plotYAxisMin,(7,1))
+        bagSizer.Add(plotYMaxStatic,(8,0))
+        bagSizer.Add(self.plotYAxisMax,(8,1))
+        bagSizer.Add(plotYLabelStatic,(9,0))
+        bagSizer.Add(self.plotYLabel,(9,1))
+        bagSizer.Add(plotYScaleStatic,(10,0))
+        bagSizer.Add(self.plotYScale,(10,1))
         
-        #Add the checkboxes to the flexgrid
-        flexGrid.Add(plotTitleStatic)
-        flexGrid.Add(self.plotTitle)
-        flexGrid.Add(plotXLabelStatic)
-        flexGrid.Add(self.plotXLabel)
-        flexGrid.Add(plotYLabelStatic)
-        flexGrid.Add(self.plotYLabel)
-        
-        
-        flexGrid.AddGrowableCol(1, 1)
+        bagSizer.AddGrowableCol(1)
         
         #Create OK and Cancel buttons
         buttonSizer =  self.CreateButtonSizer(wx.CANCEL|wx.OK)
         
         #Add information to the sizers
-        mainSizer.Add(flexGrid,0,wx.ALL|wx.EXPAND,10)
+        mainSizer.Add(bagSizer,0,wx.ALL|wx.EXPAND,20)
         mainSizer.Add(buttonSizer,1,wx.ALL|wx.EXPAND,10)
+
+        #Set size
+        #self.SetSize(bagSizer.GetMinSizeTuple())
         
         #Set the main sizer to the panel
         self.SetSizer(mainSizer)
         
-    def GetLabelInfo(self):
-        """
-        Return the label values.
-        
-        Returns::
-        
-            title, xlabel, ylabel
-        """
-        
-        title = self.plotTitle.GetValue()
-        xlabel = self.plotXLabel.GetValue()
-        ylabel = self.plotYLabel.GetValue()
-        
-        return title, xlabel, ylabel
-        
-class DialogAxis(wx.Dialog):
-    def __init__(self, parent, plotPage):
-        wx.Dialog.__init__(self, parent, -1, "Axis",size=(190,200))
-        
-        settings = plotPage.GetSettings()
-        
-        plotXAxisStatic = wx.StaticText(self, -1, "X-Axis :")
-        plotYAxisStatic = wx.StaticText(self, -1, "Y-Axis :")
-        
-        plotMaxStatic = wx.StaticText(self, -1, "Max", style=wx.ALIGN_CENTER,size =(50,-1))
-        plotMinStatic = wx.StaticText(self, -1, "Min", style=wx.ALIGN_CENTER,size =(50,-1))
-        plotNoneStatic = wx.StaticText(self, -1, "")
-        
-        self.plotYAxisMin = wx.TextCtrl(self, -1, "" if settings["YAxisMin"]==None else str(settings["YAxisMin"]), style = wx.TE_RIGHT , size =(50,-1))
-        self.plotYAxisMax = wx.TextCtrl(self, -1, "" if settings["YAxisMax"]==None else str(settings["YAxisMax"]), style = wx.TE_RIGHT , size =(50,-1))
-        self.plotXAxisMin = wx.TextCtrl(self, -1, "" if settings["XAxisMin"]==None else str(settings["XAxisMin"]), style = wx.TE_RIGHT , size =(50,-1))
-        self.plotXAxisMax = wx.TextCtrl(self, -1, "" if settings["XAxisMax"]==None else str(settings["XAxisMax"]), style = wx.TE_RIGHT , size =(50,-1))
-        
-        
-        mainSizer = wx.BoxSizer(wx.VERTICAL)
-        flexGrid = wx.FlexGridSizer(3, 3, 10, 10)
-        
-        #Add the checkboxes to the flexgrid
-        flexGrid.Add(plotNoneStatic)
-        flexGrid.Add(plotMinStatic)
-        flexGrid.Add(plotMaxStatic)
-        flexGrid.Add(plotYAxisStatic)
-        flexGrid.Add(self.plotYAxisMin)
-        flexGrid.Add(self.plotYAxisMax)
-        flexGrid.Add(plotXAxisStatic)
-        flexGrid.Add(self.plotXAxisMin)
-        flexGrid.Add(self.plotXAxisMax)
-        
-        flexGrid.AddGrowableCol(2, 1)
-        
-        #Create OK and Cancel buttons
-        buttonSizer =  self.CreateButtonSizer(wx.CANCEL|wx.OK)
-        
-        #Add information to the sizers
-        mainSizer.Add(flexGrid,0,wx.ALL|wx.EXPAND,10)
-        mainSizer.Add(buttonSizer,1,wx.ALL|wx.EXPAND,10)
-        
-        #Set the main sizer to the panel
-        self.SetSizer(mainSizer)
-        
-    def GetAxisValues(self):
-        """
-        Return the axis values.
-        
-        Returns::
-        
-            xmax, xmin, ymax, ymin
-        """
+        mainSizer.Fit(self)
+    
+    def GetValues(self):
         
         xmax = self.plotXAxisMax.GetValue()
         xmin = self.plotXAxisMin.GetValue()
         ymax = self.plotYAxisMax.GetValue()
         ymin = self.plotYAxisMin.GetValue()
         
-        return xmax,xmin,ymax,ymin
-
+        title = self.plotTitle.GetValue()
+        xlabel = self.plotXLabel.GetValue()
+        ylabel = self.plotYLabel.GetValue()
+        
+        xscale = self.plotXScale.GetValue()
+        yscale = self.plotYScale.GetValue()
+        
+        return xmax,xmin,ymax,ymin,title, xlabel, ylabel, xscale, yscale
+        
 class FilterPanel(wx.Panel):
     def __init__(self, parent,tree, **kwargs):
         wx.Panel.__init__( self, parent, **kwargs )
@@ -780,6 +749,8 @@ class PlotPanel(wx.Panel):
         self.settings["XAxisMin"] = None
         self.settings["YAxisMax"] = None
         self.settings["YAxisMin"] = None
+        self.settings["XScale"] = "Linear"
+        self.settings["YScale"] = "Linear"
 
         self._resizeflag = False
 
@@ -896,7 +867,7 @@ class PlotPanel(wx.Panel):
         except AttributeError: 
             pass
         else: 
-            dc.DrawRectangle(*self._lastZoomRect)  #erase last
+            dc.DrawRectangle(*self._lastZoomRect)  #Erase last
         
         if drawNew:
             self._lastZoomRect = rectZoom
@@ -954,6 +925,9 @@ class PlotPanel(wx.Panel):
         """
         On right click, resize the plot.
         """
+        self.ReSize()
+        
+    def ReSize(self):
         self.UpdateSettings(axes=[None,None,None,None])
         self.DrawSettings()
 
@@ -1005,7 +979,11 @@ class PlotPanel(wx.Panel):
         self.subplot.set_title(self.settings["Title"])
         self.subplot.set_xlabel(self.settings["XLabel"])
         self.subplot.set_ylabel(self.settings["YLabel"])
-
+        
+        #Draw Scale settings
+        self.subplot.set_xscale(self.settings["XScale"])
+        self.subplot.set_yscale(self.settings["YScale"])
+        
         #Draw axis settings
         if self.settings["XAxisMin"] != None:
             #self.subplot.set_xlim(left=self.settings["XAxisMin"])
@@ -1035,7 +1013,8 @@ class PlotPanel(wx.Panel):
         self.canvas.draw()
         
     def UpdateSettings(self, grid=None, title=None, xlabel=None,
-                        ylabel=None, axes=None, move=None, zoom=None):
+                        ylabel=None, axes=None, move=None, zoom=None,
+                        xscale=None, yscale=None):
         """
         Updates the settings dict.
         """
@@ -1056,6 +1035,10 @@ class PlotPanel(wx.Panel):
             self.settings["Move"] = move
         if zoom != None:
             self.settings["Zoom"] = zoom
+        if xscale != None:
+            self.settings["XScale"] = xscale
+        if yscale != None:
+            self.settings["YScale"] = yscale
 
     def UpdateCursor(self):
         if self.settings["Move"]:
