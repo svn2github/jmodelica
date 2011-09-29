@@ -34,6 +34,17 @@ from jmodelica import xmlparser
 from jmodelica.core import BaseModel, unzip_unit, get_unit_name, get_temp_location, list_to_string
 from jmodelica.compiler import ModelicaCompiler, OptimicaCompiler
 
+"""Flags for evaluation of FMI Jacobians
+"""
+"""Evaluate Jacobian w.r.t. states."""
+FMI_STATES = 1
+"""Evaluate Jacobian w.r.t. inputs."""
+FMI_INPUTS = 2
+"""Evaluate Jacobian of derivatives."""
+FMI_DERIVATIVES = 1
+"""Evaluate Jacobian of outputs."""
+FMI_OUTPUTS = 2
+
 def compile_fmu(class_name, file_name=[], compiler='modelica', 
     target='model_noad', compiler_options={}, compile_to='.', 
     compiler_log_level='warning'):
