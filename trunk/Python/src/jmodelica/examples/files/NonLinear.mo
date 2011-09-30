@@ -699,7 +699,6 @@ package NonLinear
       annotation (Placement(transformation(extent={{-208,-58},{-188,-38}})));
     Modelica.Thermal.HeatTransfer.Sources.PrescribedHeatFlow
                                                         fixedHeatFlow(
-      Q_flow=1,
       alpha=0.5,
       T_ref=323.15)
       annotation (Placement(transformation(extent={{-100,-18},{-80,2}})));
