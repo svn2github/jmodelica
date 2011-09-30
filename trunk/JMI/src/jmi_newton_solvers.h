@@ -49,7 +49,7 @@ extern double dnrm2_(int* N, double* X, int* INCX);
  * 
  * @param flag An integer
  */
-void jmi_kinsol_error_handling(int flag);
+void jmi_kinsol_error_handling(jmi_t* jmi, int flag);
 
 /**
  * \brief A solve rutine for Kinsol.

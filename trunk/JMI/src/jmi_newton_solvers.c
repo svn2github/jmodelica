@@ -83,17 +83,66 @@ void kin_err(int err_code, const char *module, const char *function, char *msg, 
 }
 
 void kin_info(const char *module, const char *function, char *msg, void *eh_data){
-        char buffer[4000];
+        char buffer[400];
         jmi_block_residual_t *block = eh_data;
         sprintf(buffer, "[KINSOL] %s", msg);
         jmi_log(block->jmi, logInfo, buffer);
 }
 
-void jmi_kinsol_error_handling(int flag){
-  /* TODO: proper error handling
-        if (flag != 0){
-        printf("Kinsol failed with flag %d \n", flag);
-        }*/
+void jmi_kinsol_error_handling(jmi_t* jmi, int flag){
+        /* TODO: The error flags decoded below are for the KINsol function, but
+         * jmi_kinsol_error_handling is called also for other functions. This
+         * needs to be fixed. */
+		if (flag < 0){
+        	char buffer[400];
+            switch (flag) {
+            case -1:
+            	sprintf(buffer,"KINSOL returned with error flag: KIN_MEM_NULL");
+            	break;
+            case -2:
+            	sprintf(buffer,"KINSOL returned with error flag: KIN_ILL_INPUT");
+            	break;
+            case -3:
+            	sprintf(buffer,"KINSOL returned with error flag: KIN_NO_MALLOC");
+            	break;
+            case -4:
+            	sprintf(buffer,"KINSOL returned with error flag: KIN_MEM_FAIL");
+            	break;
+            case -5:
+            	sprintf(buffer,"KINSOL returned with error flag: KIN_LINESEARCH_NONCONV");
+            	break;
+            case -6:
+            	sprintf(buffer,"KINSOL returned with error flag: KIN_MAXITER_REACHED");
+            	break;
+            case -7:
+            	sprintf(buffer,"KINSOL returned with error flag: KIN_MXNEWT_5X_EXCEEDED");
+            	break;
+            case -8:
+            	sprintf(buffer,"KINSOL returned with error flag: KIN_LINESEARCH_BCFAIL");
+            	break;
+            case -9:
+            	sprintf(buffer,"KINSOL returned with error flag: KIN_LINSOLV_NO_RECOVERY");
+            	break;
+            case -10:
+            	sprintf(buffer,"KINSOL returned with error flag: KIN_LINIT_FAIL");
+            	break;
+            case -11:
+            	sprintf(buffer,"KINSOL returned with error flag: KIN_LSETUP_FAIL");
+            	break;
+            case -13:
+            	sprintf(buffer,"KINSOL returned with error flag: KIN_SYSFUNC_FAIL");
+            	break;
+            case -14:
+            	sprintf(buffer,"KINSOL returned with error flag: KIN_FIRST_SYSFUNC_ERR");
+            	break;
+            case -15:
+            	sprintf(buffer,"KINSOL returned with error flag: KIN_REPTD_SYSFUNC_ERR");
+            	break;
+            default:
+            	sprintf(buffer,"KINSOL returned with error flag: %d",flag);
+            }
+            jmi_log(jmi, logError, buffer);
+        }
 }
 
 int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, void *user_data, N_Vector tmp1, N_Vector tmp2){
@@ -147,7 +196,7 @@ int jmi_kinsol_solve(jmi_block_residual_t * block){
 
                 block->kin_mem = KINCreate();
 		flag = KINInit(block->kin_mem, kin_f, block->kin_y); /*Initialize Kinsol*/
-		jmi_kinsol_error_handling(flag);
+		jmi_kinsol_error_handling(block->jmi, flag);
 		
 		/*Attach linear solver*/
 		/*Dense Kinsol solver*/
@@ -157,49 +206,49 @@ int jmi_kinsol_solve(jmi_block_residual_t * block){
 		 
 		/*Dense Kinsol using regularization*/
 		flag = KINPinv(block->kin_mem, block->n);
-		jmi_kinsol_error_handling(flag);
+		jmi_kinsol_error_handling(block->jmi, flag);
 		/*End linear solver*/
 		
 		/*Set problem data to Kinsol*/
 		flag = KINSetUserData(block->kin_mem, block);
-		jmi_kinsol_error_handling(flag);
+		jmi_kinsol_error_handling(block->jmi, flag);
 		
         if(block->dF != NULL){
 			flag = KINDlsSetDenseJacFn(block->kin_mem, kin_dF);
-			jmi_kinsol_error_handling(flag);
+			jmi_kinsol_error_handling(block->jmi, flag);
 		}
 		
 		/*Stopping tolerance of F*/
 		flag = KINSetFuncNormTol(block->kin_mem, block->kin_ftol); 
-		jmi_kinsol_error_handling(flag);
+		jmi_kinsol_error_handling(block->jmi, flag);
 		
 		/*Stepsize tolerance*/
 		flag = KINSetScaledStepTol(block->kin_mem, 0.001*(block->kin_stol)); 
-		jmi_kinsol_error_handling(flag);
+		jmi_kinsol_error_handling(block->jmi, flag);
 		
 		/* Allow long steps */
 		flag = KINSetMaxNewtonStep(block->kin_mem, 1e30);
-		jmi_kinsol_error_handling(flag);
+		jmi_kinsol_error_handling(block->jmi, flag);
 		
 		/* Disable residual monitoring */
 		flag = KINSetNoResMon(block->kin_mem,1);
-		jmi_kinsol_error_handling(flag);
+		jmi_kinsol_error_handling(block->jmi, flag);
   
 		/*Verbosity*/
 		flag = KINSetPrintLevel(block->kin_mem, verbosity);
-		jmi_kinsol_error_handling(flag);
+		jmi_kinsol_error_handling(block->jmi, flag);
 		
 		/*Error function*/
                 flag = KINSetErrHandlerFn(block->kin_mem, kin_err, block);
-		jmi_kinsol_error_handling(flag);
+		jmi_kinsol_error_handling(block->jmi, flag);
 		
 		/*Info function*/
                 flag = KINSetInfoHandlerFn(block->kin_mem, kin_info, block);
-		jmi_kinsol_error_handling(flag);
+		jmi_kinsol_error_handling(block->jmi, flag);
 		
 		/*Solve the block*/
 		flag = KINSol(block->kin_mem, block->kin_y, KIN_LINESEARCH, block->kin_y_scale, block->kin_f_scale);
-		jmi_kinsol_error_handling(flag);
+		jmi_kinsol_error_handling(block->jmi, flag);
 		
 		block->init = 0; /*The block is initialized*/
 
@@ -211,7 +260,7 @@ int jmi_kinsol_solve(jmi_block_residual_t * block){
 	
 		if(block->dF != NULL){
 			flag = KINDlsSetDenseJacFn(block->kin_mem, kin_dF);
-			jmi_kinsol_error_handling(flag);
+			jmi_kinsol_error_handling(block->jmi, flag);
 		}
 		
 		/*block->F(block->jmi,NULL,NULL,JMI_BLOCK_EVALUATE_NON_REALS);*/
@@ -223,10 +272,10 @@ int jmi_kinsol_solve(jmi_block_residual_t * block){
 		   it seems as if the  Jacobian has to be reevaluated */
 		if (flag ==1) {
 		  flag = KINSetNoInitSetup(block->kin_mem, 0);
-		  jmi_kinsol_error_handling(flag);
+		  jmi_kinsol_error_handling(block->jmi, flag);
 		} else {
 		  flag = KINSetNoInitSetup(block->kin_mem, 1);
-		  jmi_kinsol_error_handling(flag);
+		  jmi_kinsol_error_handling(block->jmi, flag);
 		}
 
 	}
@@ -239,11 +288,11 @@ int jmi_kinsol_solve(jmi_block_residual_t * block){
 	/* Get debug information */
 	nniters = 0;
 	flag = KINGetNumNonlinSolvIters(block->kin_mem, &nniters);
-	jmi_kinsol_error_handling(flag);
+	jmi_kinsol_error_handling(block->jmi, flag);
 
 	njevals = 0;
 	flag = KINPinvGetNumJacEvals(block->kin_mem, &njevals);
-	jmi_kinsol_error_handling(flag);
+	jmi_kinsol_error_handling(block->jmi, flag);
 
 	/* Store debug information */
 	block->nb_calls++;
