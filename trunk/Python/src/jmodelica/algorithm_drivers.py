@@ -132,7 +132,7 @@ class ResultBase(object):
         self._options = options
     
     def _get_model(self):
-        if self._model != None:
+        if self._model is not None:
             return self._model
         raise Exception("model has not been set")
         
@@ -145,7 +145,7 @@ class ResultBase(object):
     """)
         
     def _get_result_file(self):
-        if self._result_file_name != None:
+        if self._result_file_name is not None:
             return self._result_file_name
         raise Exception("result file name has not been set")
     
@@ -158,7 +158,7 @@ class ResultBase(object):
     """)
         
     def _get_solver(self):
-        if self._solver != None:
+        if self._solver is not None:
             return self._solver
         raise Exception("solver has not been set")
 
@@ -171,7 +171,7 @@ class ResultBase(object):
     """)
         
     def _get_result_data(self):
-        if self._result_data != None:
+        if self._result_data is not None:
             return self._result_data
         raise Exception("result data has not been set")
         
@@ -185,7 +185,7 @@ class ResultBase(object):
     """)
     
     def _get_options(self):
-        if self._options != None:
+        if self._options is not None:
             return self._options
         raise Exception("options has not been set")
         
@@ -2177,7 +2177,7 @@ class CasadiRadau2(AlgorithmBase):
         # set solver options
         self._set_solver_options()
 
-        if self.init_traj != None:
+        if self.init_traj is not None:
             self.nlp.set_initial_from_file(self.init_traj)
         
     def _set_options(self):
@@ -2201,11 +2201,11 @@ class CasadiRadau2(AlgorithmBase):
                                  'option hs is set to "free".')
         
         # Check validity of free_element_lengths_data
-        if self.free_element_lengths_data == None:
+        if self.free_element_lengths_data is None:
             if self.hs == "free":
                 raise ValueError("free_element_lengths_data must be given " + \
                                  'if self.hs == "free".')
-        if self.free_element_lengths_data != None:
+        if self.free_element_lengths_data is not None:
             if self.hs != "free":
                 raise ValueError("free_element_lengths_data can only be " + \
                                  'given if self.hs == "free".')
@@ -2228,7 +2228,7 @@ class CasadiRadau2(AlgorithmBase):
                                  '"element_interpolation".')
         
         # Check validity of blocking_factors
-        if (self.blocking_factors != None and 
+        if (self.blocking_factors is not None and 
             N.sum(self.blocking_factors) != self.n_e):
             raise ValueError("The sum of all elements in blocking factors " +
                              "must be the same as the number of elements.")
@@ -2395,23 +2395,36 @@ class CasadiRadau2Options(OptionBase):
             u_0 = u_1 and u_3 = u_4 = u_5 = u_6 = u_7. The sum of all elements
             in the list must be the same as the number of elements.
             
-            If blocking_facotrs == None, then Lagrange polynomials are instead
+            If blocking_facotrs is None, then Lagrange polynomials are instead
             used to represent the control.
             
             Type: None or list of ints
             Default: None
         
-        state_cont_var --
-            True: Create extra variables for the states at the start of each
-            element and then constrain them to be equal to the corresponding 
-            variable at the end of the previous element for continuity.
+        eliminate_der_var --
+            True: The variables representing the derivatives are eliminated
+            via the collocation equations and are thus not a part of the NLP.
             
-            False: Let the same variables represent both the values of the
+            False: The variables representing the derivatives are kept as NLP
+            variables and the collocation equations enter as constraints.
+            
+            Currently does not work in combination with either Mayer type cost
+            functions or DAE initial equations containing state derivatives.
+            
+            Type: bool
+            Default: False
+        
+        eliminate_cont_var --
+            True: Let the same variables represent both the values of the
             states at the start of each element and the end of the previous
             element.
             
+            False: Create extra variables for the states at the start of each
+            element and then constrain them to be equal to the corresponding 
+            variable at the end of the previous element for continuity.
+            
             Type: bool
-            Default: True
+            Default: False
         
         init_traj --
             Variable trajectory data used for initialization of the
@@ -2494,7 +2507,8 @@ class CasadiRadau2Options(OptionBase):
                 'result_mode': "collocation_points",
                 'n_eval_points': 20,
                 'blocking_factors': None,
-                'state_cont_var': True,
+                'eliminate_der_var': False,
+                'eliminate_cont_var': False,
                 'init_traj': None,
                 'parameter_estimation_data': None,
                 'exact_Hessian': True,
@@ -2502,7 +2516,7 @@ class CasadiRadau2Options(OptionBase):
                 'CasADi_options_G': {"name": "NLP constraint function"},
                 'CasADi_options_L': {"name": "NLP Lagrangian function"},
                 'IPOPT_options':{
-                        'max_iter': 3000,
+                        'max_iter': 2000,
                         'derivative_test': 'none'}}
         
         super(CasadiRadau2Options, self).__init__(_defaults)

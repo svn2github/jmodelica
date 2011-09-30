@@ -93,8 +93,7 @@ class RadauPol(object):
         # Derivatives of all basis polynomials at all collocation points
         der_vals = casadi.DMatrix(self.n + 1, self.n + 1)
         for j in xrange(self.n + 1):
-            der_vals[j, 0] = N.nan # Value not used
-            for k in xrange(1, self.n + 1):
+            for k in xrange(self.n + 1):
                 der_vals[j, k] = lagrange_derivative_eval(self.p, j,
                                                           self.p[k])
         

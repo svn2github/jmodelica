@@ -25,12 +25,16 @@ from operator import itemgetter
 import time
 import copy
 try:
-    from IPython.Debugger import Tracer; dh = Tracer()
-except ImportError:
     try:
-        from IPython.core.debugger import Tracer; dh = Tracer()
-    except:
-        logging.warning('Could not find IPython debugger module')
+        from IPython.Debugger import Tracer; dh = Tracer()
+    except ImportError:
+        try:
+            from IPython.core.debugger import Tracer; dh = Tracer()
+        except:
+            logging.warning('Could not find IPython debugger module')
+except AttributeError:
+    # Circumvents trouble when running the tests through MSYS
+    pass
     
 try:
     import casadi
@@ -75,7 +79,7 @@ class CasadiCollocator(object):
         self.c_fcn.init()
         
         # Create solver
-        if self.get_hessian() == None:
+        if self.get_hessian() is None:
             self.solver = casadi.IpoptSolver(self.get_cost(), self.c_fcn)
         else:
             self.solver = casadi.IpoptSolver(self.get_cost(), self.c_fcn,
@@ -1179,9 +1183,14 @@ class RadauCollocator(CasadiCollocator):
                                    var_data[:, 1 + 2*self.model.get_n_x() + self.model.get_n_u() + i]);
 
         cnt = 0
+        try:
+            eliminate_der_var = self.eliminate_der_var
+        except AttributeError:
+            eliminate_der_var = False
+        
         for i in xrange(1, self.n_e + 1):
             for k in self.get_time_points()[i]:
-                if (self.model.get_n_x()>0):
+                if (self.model.get_n_x()>0 and not eliminate_der_var):
                     self.get_xx_init()[self.var_indices[i][k]['dx']] = dx_init[cnt,:]
                 if (self.model.get_n_x()>0):
                     self.get_xx_init()[self.var_indices[i][k]['x']] = x_init[cnt,:]
@@ -1212,7 +1221,7 @@ class Radau2Collocator(CasadiCollocator):
         self.horizon = self.ocp.tf - self.ocp.t0
         if self.hs != "free":
             self.h = [N.nan] # Element 0
-            if self.hs == None:
+            if self.hs is None:
                 self.h += self.n_e * [1. / self.n_e]
             else:
                 self.h += self.hs
@@ -1227,6 +1236,7 @@ class Radau2Collocator(CasadiCollocator):
         """
         Wrapper for creating the NLP.
         """
+        self._define_collocation()
         self._create_NLP_variables()
         self._rename_variables()
         self._create_constraints()
@@ -1234,27 +1244,48 @@ class Radau2Collocator(CasadiCollocator):
         self._create_cost_function()
         self._expand_MX()
         self._calc_Lagrangian_Hessian()
-        self._compute_bounds_and_init_full()
+        self._compute_bounds_and_init()
         self._create_solver()
+    
+    def _define_collocation(self):
+        """
+        Define collocation variables.
+        
+        The variables are used for either creating the collocation constraints
+        or eliminating the derivative variables.
+        """
+        collocation = {}
+        x_i = casadi.symbolic("x_i", self.model.get_n_x(), self.n_cp + 1)
+        der_vals_k = casadi.symbolic("der_vals[k]", self.model.get_n_x(),
+                                     self.n_cp + 1)
+        h_i = casadi.SX("h_i")
+        collocation['coll_der'] = casadi.sum(x_i * der_vals_k, 1) / h_i
+        
+        collocation['x_i'] = x_i
+        collocation['der_vals_k'] = der_vals_k
+        collocation['h_i'] = h_i
+        self._collocation = collocation
     
     def _create_NLP_variables(self, rename=False):
         """
         Create the NLP variables and store them in a nested dictionary.
         """
         # Set model info
-        n_var = {'dx': self.model.get_n_x(), 'x': self.model.get_n_x(),
-                 'w': self.model.get_n_w()}
-        get_var = {'dx': self.model.get_dx, 'x': self.model.get_x,
-                   'u': self.model.get_u, 'w': self.model.get_w}
-        if self.blocking_factors == None:
+        n_var = {'x': self.model.get_n_x(), 'w': self.model.get_n_w()}
+        get_var = {'x': self.model.get_x, 'u': self.model.get_u,
+                   'w': self.model.get_w}
+        if self.blocking_factors is None:
             n_var['u'] = self.model.get_n_u()
+        if not self.eliminate_der_var:
+            get_var['dx'] = self.model.get_dx
+            n_var['dx'] = self.model.get_n_x()
         
         # Count NLP variables
         n_xx = self.model.get_n_p()
         n_xx += (1 + self.n_e * self.n_cp) * N.sum(n_var.values())
-        if self.blocking_factors != None:
+        if self.blocking_factors is not None:
             n_xx += len(self.blocking_factors) * self.model.get_n_u()
-        if self.state_cont_var:
+        if not self.eliminate_cont_var:
             n_xx += (self.n_e - 1) * n_var['x']
         if self.hs == "free":
             n_xx += self.n_e
@@ -1295,8 +1326,8 @@ class Radau2Collocator(CasadiCollocator):
                     index = new_index
                     var[i][k][var_type] = xx[var_indices[i][k][var_type]]
         
-        # Index controls separately if blocking_factors != None
-        if self.blocking_factors != None:
+        # Index controls separately if blocking_factors is not None
+        if self.blocking_factors is not None:
             element = 1
             for factor in self.blocking_factors:
                 new_index = index + self.model.get_n_u()
@@ -1309,7 +1340,7 @@ class Radau2Collocator(CasadiCollocator):
                 element += factor
         
         # Index state continuity variables
-        if self.state_cont_var:
+        if not self.eliminate_cont_var:
             for i in xrange(2, self.n_e + 1):
                 var[i][0] = {}
                 var_indices[i][0] = {}
@@ -1328,8 +1359,8 @@ class Radau2Collocator(CasadiCollocator):
             index = new_index
             var[1][0][var_type] = xx[var_indices[1][0][var_type]]
             
-        # Index initial controls separately if blocking_factors != None
-        if self.blocking_factors != None:
+        # Index initial controls separately if blocking_factors is not None
+        if self.blocking_factors is not None:
             var_indices[1][0]['u'] = var_indices[1][1]['u']
             var[1][0]['u'] = xx[var_indices[1][0]['u']]
             
@@ -1371,7 +1402,8 @@ class Radau2Collocator(CasadiCollocator):
                 if self.hs == "free":
                     xx[var_indices['h'][i]] = casadi.SX("h_" + str(i))
                 for k in var_indices[i].keys():
-                    if 'dx' in var_indices[i][k].keys():
+                    if (not self.eliminate_der_var and
+                        'dx' in var_indices[i][k].keys()):
                         dx = []
                         for j in range(self.model.get_n_x()):
                             dx.append(casadi.SX(str(self.model.get_dx()[j]) +
@@ -1406,20 +1438,25 @@ class Radau2Collocator(CasadiCollocator):
         """
         Return a vector with all the NLP variables at a collocation point.
         
+        Assumes the state derivatives are NLP variables.
+        
         Parameters::
         
             i --
                 Element index.
+                
                 Type: int
                  
             k --
                 Collocation point.
+                
                 Type: int
                 
         Returns::
         
             z --
                 NLP variable vector.
+                
                 Type: MX or SXMatrix
         """
         z = casadi.vertcat([self.var['p_opt'],
@@ -1429,7 +1466,39 @@ class Radau2Collocator(CasadiCollocator):
                             self.var[i][k]['w'],
                             self.time_points[i][k]])
         return z
+    
+    def _get_z_elim_der(self, i, k):
+        """
+        Return a vector with all the NLP variables at a collocation point.
         
+        Assumes the state derivatives are not NLP variables.
+        
+        Parameters::
+        
+            i --
+                Element index.
+                
+                Type: int
+                 
+            k --
+                Collocation point.
+                
+                Type: int
+                
+        Returns::
+        
+            z --
+                NLP variable vector.
+                
+                Type: MX or SXMatrix
+        """
+        z = casadi.vertcat([self.var['p_opt'],
+                            self.var[i][k]['x'],
+                            self.var[i][k]['u'],
+                            self.var[i][k]['w'],
+                            self.time_points[i][k]])
+        return z
+    
     def _create_constraints(self):
         """
         Create the constraints and time points.
@@ -1439,22 +1508,51 @@ class Radau2Collocator(CasadiCollocator):
         
         # Broadcast self.pol.der_vals
         # Note that der_vals is quite different from self.pol.der_vals
-        der_vals = [[]]
-        for k in xrange(1, self.n_cp + 1):
+        der_vals = []
+        self.der_vals = der_vals
+        for k in xrange(self.n_cp + 1):
             der_vals_k = [self.pol.der_vals[:, k].reshape([1, self.n_cp + 1])]
             der_vals_k *= self.model.get_n_x()
             der_vals += [casadi.vertcat(der_vals_k)]
         
-        # Create collocation equation functions
-        x_i = casadi.symbolic("x_i", self.model.get_n_x(), self.n_cp + 1)
-        der_vals_k = casadi.symbolic("der_vals[k]", self.model.get_n_x(),
-                                     self.n_cp + 1)
-        dx_i_k = casadi.symbolic("dx_i_k", self.model.get_n_x())
-        h = casadi.SX("h")
-        coll_eq = casadi.SXFunction(
-                [x_i, der_vals_k, h, dx_i_k],
-                [casadi.sum(x_i * der_vals_k, 1) - h * dx_i_k])
-        coll_eq.init()
+        # Create collocation and DAE functions
+        x_i = self._collocation['x_i']
+        der_vals_k = self._collocation['der_vals_k']
+        h_i = self._collocation['h_i']
+        if self.eliminate_der_var:
+            coll_der = self._collocation['coll_der']
+            init = casadi.substitute(self.ocp.initial_eq_, self.model.dx,
+                                     coll_der)
+            dae = casadi.substitute(self.ocp.implicit_fcn_, self.model.dx,
+                                    coll_der)
+            
+            # Check that the provided initial equation is supported
+            for dx in self.model.dx:
+                if repr(dx) in repr(self.ocp.initial_eq_):
+                    raise NotImplementedError(
+                            "eliminate_der_var is currently not supported " + \
+                            "in combination with DAE initial equations " + \
+                            "containing state derivatives.")
+            
+            sym_z = []
+            sym_z += list(self.model.p)
+            sym_z += list(self.model.x)
+            sym_z += list(self.model.u)
+            sym_z += list(self.model.w)
+            sym_z += [self.model.t]
+            
+            init_F0 = casadi.SXFunction([sym_z, x_i, der_vals_k, h_i], [init])
+            init_F0.init()
+            dae_F = casadi.SXFunction([sym_z, x_i, der_vals_k, h_i], [dae])
+            dae_F.init()
+        else:
+            dx_i_k = casadi.symbolic("dx_i_k", self.model.get_n_x())
+            coll_eq = casadi.SXFunction(
+                    [x_i, der_vals_k, h_i, dx_i_k],
+                    [casadi.sum(x_i * der_vals_k, 1) - h_i * dx_i_k])
+            coll_eq.init()
+            init_F0 = self.model.get_init_F0()
+            dae_F = self.model.get_dae_F()
         
         # Create path constraint functions
         g_e = []
@@ -1470,30 +1568,43 @@ class Radau2Collocator(CasadiCollocator):
                     g_i += [-path_fcn[i] + lb[i]]
                 if ub[i] != N.inf:
                     g_i += [path_fcn[i] - ub[i]]
-        z = casadi.vertcat([self.model.p,
-                            self.model.dx,
-                            self.model.x,
-                            self.model.u,
-                            self.model.w,
-                            self.model.t])
-        g_e_fcn = casadi.SXFunction([z], [g_e])
+        if self.eliminate_der_var:
+            z = casadi.vertcat([self.model.p,
+                                self.model.x,
+                                self.model.u,
+                                self.model.w,
+                                self.model.t])
+            g_e = casadi.substitute(g_e, self.model.dx, coll_der)
+            g_i = casadi.substitute(g_i, self.model.dx, coll_der)
+            g_e_fcn = casadi.SXFunction([z, x_i, der_vals_k, h_i], [g_e])
+            g_i_fcn = casadi.SXFunction([z, x_i, der_vals_k, h_i], [g_i])
+        else:
+            z = casadi.vertcat([self.model.p,
+                                self.model.dx,
+                                self.model.x,
+                                self.model.u,
+                                self.model.w,
+                                self.model.t])
+            g_e_fcn = casadi.SXFunction([z], [g_e])
+            g_i_fcn = casadi.SXFunction([z], [g_i])
         g_e_fcn.init()
-        g_i_fcn = casadi.SXFunction([z], [g_i])
         g_i_fcn.init()
         
         # Define function evaluation methods based on graph
         if self.graph == 'MX' or self.graph == 'expanded_MX':
-            init_F0_eval = self.model.get_init_F0().call
-            dae_F_eval = self.model.get_dae_F().call
-            coll_eq_eval = coll_eq.call
+            init_F0_eval = init_F0.call
+            dae_F_eval = dae_F.call
+            if not self.eliminate_der_var:
+                coll_eq_eval = coll_eq.call
             g_e_eval = g_e_fcn.call
             g_i_eval = g_i_fcn.call
             c_e = casadi.MX() 
             c_i = casadi.MX()
         elif self.graph == 'SX':
-            init_F0_eval = self.model.get_init_F0().eval
-            dae_F_eval = self.model.get_dae_F().eval
-            coll_eq_eval = coll_eq.eval
+            init_F0_eval = init_F0.eval
+            dae_F_eval = dae_F.eval
+            if not self.eliminate_der_var:
+                coll_eq_eval = coll_eq.eval
             g_e_eval = g_e_fcn.eval
             g_i_eval = g_i_fcn.eval
             c_e = casadi.SXMatrix()
@@ -1501,35 +1612,35 @@ class Radau2Collocator(CasadiCollocator):
         else:
             raise ValueError('Unknown CasADi graph %s.' % graph)
             
-        # Create dict and list for storage of time points
+        # Calculate time points
         self.time_points = {}
         time = []
-        
-        # Start time
-        self.time_points[1] = {}
+        i = 1
+        self.time_points[i] = {}
         t = self.ocp.t0
-        self.time_points[1][0] = t
+        self.time_points[i][0] = t
         time += [t]
-        
-        # Initial conditions
-        z = self._get_z(1, 0)
-        c_e = casadi.vertcat([c_e, init_F0_eval([z])[0]])
-        c_e = casadi.vertcat([c_e, dae_F_eval([z])[0]])
-        
-        # Evaluate u_1_0 based on polynomial u^1
-        u_1_0 = 0
+        ti = t # Time at start of element
         for k in xrange(1, self.n_cp + 1):
-            u_1_0 += var[1][k]['u'] * self.pol.eval_basis(k, 0, False)
-            
-        # Add residual for u_1_0 as constraint
-        c_e = casadi.vertcat([c_e, var[1][0]['u'] - u_1_0])
+            t = ti + self.horizon * self.h[i] * self.pol.p[k]
+            self.time_points[i][k] = t
+            time += [t]
+        for i in xrange(2, self.n_e + 1):
+            self.time_points[i] = {}
+            ti = (self.time_points[i - 1][self.n_cp] +
+                  (1. - self.pol.p[self.n_cp]) * self.horizon * self.h[i])
+            for k in xrange(1, self.n_cp + 1):
+                t = ti + self.horizon * self.h[i] * self.pol.p[k]
+                self.time_points[i][k] = t
+                time += [t]
         
         # Create list of state matrices
         x_list = [[]]
+        self.x_list = x_list
         x_i = [var[1][k]['x'] for k in xrange(self.n_cp + 1)]
         x_i = casadi.horzcat(x_i)
         x_list += [x_i]
-        if self.state_cont_var:
+        if not self.eliminate_cont_var:
             for i in xrange(2, self.n_e + 1):
                 x_i = [var[i][k]['x'] for k in xrange(self.n_cp + 1)]
                 x_i = casadi.horzcat(x_i)
@@ -1541,48 +1652,55 @@ class Radau2Collocator(CasadiCollocator):
                 x_i = casadi.horzcat(x_i)
                 x_list += [x_i]
         
-        # Collocation and DAE constraints for first element
-        for k in xrange(1, self.n_cp + 1):
-            # Calculate and store time point
-            t = (self.time_points[1][0] +
-                 self.horizon * self.h[1] * self.pol.p[k])
-            self.time_points[1][k] = t
-            time += [t]
-            
-            # Collocation constraint
-            [coll_constr] = coll_eq_eval([x_list[1], der_vals[k], 
-                                          self.horizon * self.h[1],
-                                          var[1][k]['dx']])
-            c_e = casadi.vertcat([c_e, coll_constr])
-            
-            # DAE constraint
-            z = self._get_z(1, k)
-            [dae_constr] = dae_F_eval([z])
-            c_e = casadi.vertcat([c_e, dae_constr])
+        # Initial conditions
+        i = 1
+        k = 0
+        if self.eliminate_der_var:
+            z = self._get_z_elim_der(i, k)
+            [initial_F0] = init_F0_eval([z, x_list[i], der_vals[k],
+                                         self.horizon * self.h[i]])
+            #~ [initial_F] = dae_F_eval([z, x_list[i], der_vals[k],
+                                      #~ self.horizon * self.h[i]])
+            initial_F = []
+        else:
+            z = self._get_z(i, k)
+            [initial_F0] = init_F0_eval([z])
+            [initial_F] = dae_F_eval([z])
+        c_e = casadi.vertcat([c_e, initial_F0])
+        c_e = casadi.vertcat([c_e, initial_F])
         
-        # Collocation and DAE constraints for succeeding elements
-        for i in xrange(2, self.n_e + 1):
-            self.time_points[i] = {}
-            for k in xrange(1, self.n_cp + 1):
-                # Calculate and store time point
-                t = (self.time_points[i - 1][self.n_cp] + 
-                     self.horizon * self.h[i] * self.pol.p[k])
-                self.time_points[i][k] = t
-                time += [t]
-                
-                # Collocation constraint
-                [coll_constr] = coll_eq_eval([x_list[i], der_vals[k], 
-                                              self.horizon * self.h[i],
-                                              var[i][k]['dx']])
-                c_e = casadi.vertcat([c_e, coll_constr])
-                
-                # DAE constraint
-                z = self._get_z(i, k)
-                [dae_constr] = dae_F_eval([z])
-                c_e = casadi.vertcat([c_e, dae_constr])
+        # Evaluate u_1_0 based on polynomial u^1
+        u_1_0 = 0
+        for k in xrange(1, self.n_cp + 1):
+            u_1_0 += var[1][k]['u'] * self.pol.eval_basis(k, 0, False)
+            
+        # Add residual for u_1_0 as constraint
+        c_e = casadi.vertcat([c_e, var[1][0]['u'] - u_1_0])
+        
+        # Collocation and DAE constraints
+        if self.eliminate_der_var:
+            for i in xrange(1, self.n_e + 1):
+                for k in xrange(1, self.n_cp + 1):
+                    z = self._get_z_elim_der(i, k)
+                    [dae_constr] = dae_F_eval([z, x_list[i], der_vals[k],
+                                               self.horizon * self.h[i]])
+                    c_e = casadi.vertcat([c_e, dae_constr])
+        else:
+            for i in xrange(1, self.n_e + 1):
+                for k in xrange(1, self.n_cp + 1):
+                    # Collocation constraint
+                    [coll_constr] = coll_eq_eval([x_list[i], der_vals[k], 
+                                                  self.horizon * self.h[i],
+                                                  var[i][k]['dx']])
+                    c_e = casadi.vertcat([c_e, coll_constr])
+                    
+                    # DAE constraint
+                    z = self._get_z(i, k)
+                    [dae_constr] = dae_F_eval([z])
+                    c_e = casadi.vertcat([c_e, dae_constr])
                 
         # Continuity constraints
-        if self.state_cont_var:
+        if not self.eliminate_cont_var:
             for i in xrange(1, self.n_e):
                 cont_constr = var[i][self.n_cp]['x'] - var[i + 1][0]['x']
                 c_e = casadi.vertcat([c_e, cont_constr])
@@ -1593,13 +1711,24 @@ class Radau2Collocator(CasadiCollocator):
             c_e = casadi.vertcat([c_e, h_constr])
         
         # Path constraints
-        for i in xrange(1, self.n_e + 1):
-            for k in self.time_points[i]:
-                z = self._get_z(i, k)
-                [g_e_constr] = g_e_eval([z])
-                [g_i_constr] = g_i_eval([z])
-                c_e = casadi.vertcat([c_e, g_e_constr])
-                c_i = casadi.vertcat([c_i, g_i_constr])
+        if self.eliminate_der_var:
+            for i in xrange(1, self.n_e + 1):
+                for k in self.time_points[i]:
+                    z = self._get_z_elim_der(i, k)
+                    [g_e_constr] = g_e_eval([z, x_list[i], der_vals[k],
+                                             self.horizon * self.h[i]])
+                    [g_i_constr] = g_i_eval([z, x_list[i], der_vals[k],
+                                             self.horizon * self.h[i]])
+                    c_e = casadi.vertcat([c_e, g_e_constr])
+                    c_i = casadi.vertcat([c_i, g_i_constr])
+        else:
+            for i in xrange(1, self.n_e + 1):
+                for k in self.time_points[i]:
+                    z = self._get_z(i, k)
+                    [g_e_constr] = g_e_eval([z])
+                    [g_i_constr] = g_i_eval([z])
+                    c_e = casadi.vertcat([c_e, g_e_constr])
+                    c_i = casadi.vertcat([c_i, g_i_constr])
         
         # Store constraints and time as data attributes
         # This code can be simplified once
@@ -1651,44 +1780,117 @@ class Radau2Collocator(CasadiCollocator):
         If parameter estimation data is available, the cost function will be
         based on that. Otherwise the cost function will be a Bolza functional.
         """
+        # Retrieve collocation variables
+        if self.eliminate_der_var:
+            x_i = self._collocation['x_i']
+            der_vals_k = self._collocation['der_vals_k']
+            h_i = self._collocation['h_i']
+            coll_der = self._collocation['coll_der']
+        
         # Create base cost functions
         self.cost_mayer = 0
         self.cost_lagrange = 0
         
-        if self.parameter_estimation_data == None:
-            # Get cost functions
-            J = self.model.get_opt_J()
-            L = self.model.get_opt_L()
-            
-            # Mayer cost
-            if J != None:
-                z = self._get_z(self.n_e, self.n_cp)
+        if self.parameter_estimation_data is None:
+            if self.eliminate_der_var:
+                J = self.ocp.mterm
+                L = self.ocp.lterm
+                sym_z = []
+                sym_z += list(self.model.p)
+                sym_z += list(self.model.x)
+                sym_z += list(self.model.u)
+                sym_z += list(self.model.w)
+                sym_z += [self.model.t]
                 
-                # Use appropriate function evaluation based on graph
-                if self.graph == "MX" or self.graph == 'expanded_MX':
-                    [self.cost_mayer] = J.call([z])
-                elif self.graph == "SX":
-                    [self.cost_mayer] = J.eval([z])
-                else:
-                    raise ValueError("Unknown CasADi graph %s." % self.graph)
-            
-            # Lagrange cost
-            if L != None:
-                # Define function evaluation method based on graph
-                if self.graph == "MX" or self.graph == 'expanded_MX':
-                    L_eval = L.call
-                elif self.graph == "SX":
-                    L_eval = L.eval
-                else:
-                    raise ValueError("Unknown CasADi graph %s." % self.graph)
+                # Mayer cost
+                if len(self.ocp.mterm) > 0:
+                    raise NotImplementedError("Mayer type cost function " + \
+                                              "is currently not supported " + \
+                                              "in combination with " + \
+                                              "eliminate_der_var.")
+                    J = casadi.substitute(J[0], self.model.dx, coll_der)
+                    J_fcn = casadi.SXFunction([sym_z, x_i, der_vals_k, h_i],
+                                              [J])
+                    J_fcn.init()
+                    
+                    # Evaluated J_fcn depending on graph
+                    i = self.n_e
+                    k = self.n_cp
+                    z = self._get_z_elim_der(i, k)
+                    if self.graph == "MX" or self.graph == 'expanded_MX':
+                        [self.cost_mayer] = J_fcn.call(
+                                [z, x_list[i], der_vals[k],
+                                 self.horizon * self.h[i]])
+                    elif self.graph == "SX":
+                        [self.cost_mayer] = J_fcn.eval(
+                                [z, self.x_list[i], self.der_vals[k],
+                                 self.horizon * self.h[i]])
+                    else:
+                        raise ValueError("Unknown CasADi graph %s." %
+                                         self.graph)
                 
-                # Evaluate Lagrange cost function on each collocation point
-                for i in xrange(1, self.n_e + 1):
-                    for k in xrange(1, self.n_cp + 1):
-                        t = self.time_points[i][k]
-                        z = self._get_z(i, k)
-                        self.cost_lagrange += (self.horizon * self.h[i] *
-                                               L_eval([z])[0] * self.pol.w[k])
+                # Lagrange cost
+                if len(self.ocp.lterm) > 0:
+                    L = casadi.substitute(L[0], self.model.dx, coll_der)
+                    L_fcn = casadi.SXFunction([sym_z, x_i, der_vals_k, h_i],
+                                              [L])
+                    L_fcn.init()
+                    
+                    # Define function evaluation method based on graph
+                    if self.graph == "MX" or self.graph == 'expanded_MX':
+                        L_eval = L_fcn.call
+                    elif self.graph == "SX":
+                        L_eval = L_fcn.eval
+                    else:
+                        raise ValueError("Unknown CasADi graph %s." %
+                                         self.graph)
+                    
+                    # Evaluate Lagrange cost function on each collocation point
+                    for i in xrange(1, self.n_e + 1):
+                        for k in xrange(1, self.n_cp + 1):
+                            z = self._get_z_elim_der(i, k)
+                            self.cost_lagrange += \
+                                    (self.horizon * self.h[i] *
+                                     L_eval([z, self.x_list[i],
+                                             self.der_vals[k],
+                                             self.horizon * self.h[i]])[0] *
+                                     self.pol.w[k])
+            else:
+                # Get cost functions
+                J = self.model.get_opt_J()
+                L = self.model.get_opt_L()
+                
+                # Mayer cost
+                if J is not None:
+                    z = self._get_z(self.n_e, self.n_cp)
+                    
+                    # Use appropriate function evaluation based on graph
+                    if self.graph == "MX" or self.graph == 'expanded_MX':
+                        [self.cost_mayer] = J.call([z])
+                    elif self.graph == "SX":
+                        [self.cost_mayer] = J.eval([z])
+                    else:
+                        raise ValueError("Unknown CasADi graph %s." %
+                                         self.graph)
+                
+                # Lagrange cost
+                if L is not None:
+                    # Define function evaluation method based on graph
+                    if self.graph == "MX" or self.graph == 'expanded_MX':
+                        L_eval = L.call
+                    elif self.graph == "SX":
+                        L_eval = L.eval
+                    else:
+                        raise ValueError("Unknown CasADi graph %s." %
+                                         self.graph)
+                    
+                    # Evaluate Lagrange cost function on each collocation point
+                    for i in xrange(1, self.n_e + 1):
+                        for k in xrange(1, self.n_cp + 1):
+                            z = self._get_z(i, k)
+                            self.cost_lagrange += (self.horizon * self.h[i] *
+                                                   L_eval([z])[0] *
+                                                   self.pol.w[k])
             
             # Sum up the two cost terms
             self.cost = self.cost_mayer + self.cost_lagrange
@@ -1848,11 +2050,141 @@ class Radau2Collocator(CasadiCollocator):
             else:
                 raise ValueError('Unknown CasADi graph %s.' % self.graph)
                 
-    def _compute_bounds_and_init_full(self):
+    def _compute_bounds_and_init(self):
         """
         Compute bounds and intial guesses for NLP variables.
         """
-        self._compute_bounds_and_init() # Inherited method
+        # Create lower and upper bounds
+        nlp_lb = self.LOWER * N.ones(self.get_n_xx())
+        nlp_ub = self.UPPER * N.ones(self.get_n_xx())
+        nlp_init = N.zeros(self.get_n_xx())
+        
+        # Retrieve model data
+        vr_map_p = self.model.get_p_vr_map()
+        vr_map_x = self.model.get_x_vr_map()
+        vr_map_u = self.model.get_u_vr_map()
+        vr_map_w = self.model.get_w_vr_map()
+        sf_p = self.model.get_p_sf()
+        sf_x = self.model.get_x_sf()
+        sf_u = self.model.get_u_sf()
+        sf_w = self.model.get_w_sf()
+        var_indices = self.get_var_indices()
+        md = self.get_model_description()
+        
+        # Get model bounds and initial guesses
+        _p_opt_max = md.get_p_opt_max(include_alias=False)
+        _x_max = md.get_x_max(include_alias=False)
+        _u_max = md.get_u_max(include_alias=False)
+        _w_max = md.get_w_max(include_alias=False)
+        _p_opt_min = md.get_p_opt_min(include_alias=False)
+        _x_min = md.get_x_min(include_alias=False)
+        _u_min = md.get_u_min(include_alias=False)
+        _w_min = md.get_w_min(include_alias=False)
+        _p_opt_init = md.get_p_opt_initial_guess(include_alias=False)
+        _x_init = md.get_x_initial_guess(include_alias=False)
+        _u_init = md.get_u_initial_guess(include_alias=False)
+        _w_init = md.get_w_initial_guess(include_alias=False)
+        
+        # Set preliminary bounds and initial guesses
+        p_opt_max = self.UPPER * N.ones(len(_p_opt_max))
+        x_max = self.UPPER * N.ones(len(_x_max))
+        u_max = self.UPPER * N.ones(len(_u_max))
+        w_max = self.UPPER * N.ones(len(_w_max))
+        p_opt_min = self.LOWER * N.ones(len(_p_opt_min))
+        x_min = self.LOWER * N.ones(len(_x_min))
+        u_min = self.LOWER * N.ones(len(_u_min))
+        w_min = self.LOWER * N.ones(len(_w_min))
+        p_opt_init = self.UPPER * N.ones(len(_p_opt_init))
+        x_init = self.LOWER * N.ones(len(_x_init))
+        u_init = self.LOWER * N.ones(len(_u_init))
+        w_init = self.LOWER * N.ones(len(_w_init))
+        
+        # Set scaled bounds and initial guesses for parameters
+        for (vr, val) in _p_opt_min:
+            if val is not None:
+                p_opt_min[vr_map_p[vr]] = val / sf_p[vr_map_p[vr]]
+        for (vr, val) in _p_opt_max:
+            if val is not None:
+                p_opt_max[vr_map_p[vr]] = val / sf_p[vr_map_p[vr]]
+        for (vr, val) in _p_opt_init:
+            if val is not None:
+                p_opt_init[vr_map_p[vr]] = val / sf_p[vr_map_p[vr]]
+        
+        # Set scaled bounds and initial guesses for states
+        for (vr, val) in _x_min:
+            if val is not None:
+                x_min[vr_map_x[vr]] = val / sf_x[vr_map_x[vr]]
+        for (vr, val) in _x_max:
+            if val is not None:
+                x_max[vr_map_x[vr]] = val / sf_x[vr_map_x[vr]]
+        for (vr, val) in _x_init:
+            if val is not None:
+                x_init[vr_map_x[vr]] = val / sf_x[vr_map_x[vr]]
+        
+        # Set scaled bounds and initial guesses for controls
+        for (vr, val) in _u_min:
+            if val is not None:
+                u_min[vr_map_u[vr]] = val / sf_u[vr_map_u[vr]]
+        for (vr, val) in _u_max:
+            if val is not None:
+                u_max[vr_map_u[vr]] = val / sf_u[vr_map_u[vr]]
+        for (vr, val) in _u_init:
+            if val is not None:
+                u_init[vr_map_u[vr]] = val / sf_u[vr_map_u[vr]]
+        
+        # Set scaled bounds and initial guesses for algebraic variables
+        for (vr, val) in _w_min:
+            if val is not None:
+                w_min[vr_map_w[vr]] = val / sf_w[vr_map_w[vr]]
+        for (vr, val) in _w_max:
+            if val is not None:
+                w_max[vr_map_w[vr]] = val / sf_w[vr_map_w[vr]]
+        for (vr, val) in _w_init:
+            if val is not None:
+                w_init[vr_map_w[vr]] = val / sf_w[vr_map_w[vr]]
+        
+        # Compose bounds and initial guesses
+        nlp_lb[var_indices['p_opt']] = p_opt_min
+        nlp_ub[var_indices['p_opt']] = p_opt_max
+        nlp_init[var_indices['p_opt']] = p_opt_init
+        for i in xrange(1, self.n_e + 1):
+            for k in self.get_time_points()[i]:
+                nlp_lb[var_indices[i][k]['x']] = x_min
+                nlp_ub[var_indices[i][k]['x']] = x_max
+                nlp_init[var_indices[i][k]['x']] = x_init
+                nlp_lb[var_indices[i][k]['u']] = u_min
+                nlp_ub[var_indices[i][k]['u']] = u_max
+                nlp_init[var_indices[i][k]['u']] = u_init
+                nlp_lb[var_indices[i][k]['w']] = w_min
+                nlp_ub[var_indices[i][k]['w']] = w_max
+                nlp_init[var_indices[i][k]['w']] = w_init
+        
+        # Handle derivatives independently
+        if not self.eliminate_der_var:
+            vr_map_dx = self.model.get_dx_vr_map()
+            sf_dx = self.model.get_dx_sf()
+            _dx_max = md.get_dx_max(include_alias=False)
+            _dx_min = md.get_dx_min(include_alias=False)
+            _dx_init = md.get_dx_initial_guess(include_alias=False)
+            dx_max = self.UPPER * N.ones(len(_dx_max))
+            dx_min = self.LOWER * N.ones(len(_dx_min))
+            dx_init = self.LOWER * N.ones(len(_dx_init))
+            
+            for (vr, val) in _dx_min:
+                if val is not None:
+                    dx_min[vr_map_dx[vr]] = val / sf_dx[vr_map_dx[vr]]
+            for (vr, val) in _dx_max:
+                if val is not None:
+                    dx_max[vr_map_dx[vr]] = val / sf_dx[vr_map_dx[vr]]
+            for (vr, val) in _dx_init:
+                if val is not None:
+                    dx_init[vr_map_dx[vr]] = val / sf_dx[vr_map_dx[vr]]
+            
+            for i in xrange(1, self.n_e + 1):
+                for k in self.get_time_points()[i]:
+                    nlp_lb[var_indices[i][k]['dx']] = dx_min
+                    nlp_ub[var_indices[i][k]['dx']] = dx_max
+                    nlp_init[var_indices[i][k]['dx']] = dx_init
         
         # Compute bounds and initial guesses for element lengths
         if self.hs == "free":
@@ -1860,16 +2192,22 @@ class Radau2Collocator(CasadiCollocator):
             h_bounds = self.free_element_lengths_data.bounds
             var_indices = self.get_var_indices()
             for i in xrange(1, self.n_e + 1):
-                self.xx_lb[var_indices['h'][i]] = h_bounds[0] * h_0
-                self.xx_ub[var_indices['h'][i]] = h_bounds[1] * h_0
-                self.xx_init[var_indices['h'][i]] = h_bounds[1] * h_0
+                nlp_lb[var_indices['h'][i]] = h_bounds[0] * h_0
+                nlp_ub[var_indices['h'][i]] = h_bounds[1] * h_0
+                nlp_init[var_indices['h'][i]] = h_bounds[1] * h_0
+        
+        self.xx_lb = nlp_lb
+        self.xx_ub = nlp_ub
+        self.xx_init = nlp_init
+
+        return (nlp_lb, nlp_ub, nlp_init)
     
     def _create_solver(self):
         if self.get_hessian().isNull():
             self.solver = casadi.IpoptSolver(self.get_cost(), self.c_fcn)
         else:
             self.solver = casadi.IpoptSolver(self.get_cost(), self.c_fcn,
-                                                 self.get_hessian())
+                                             self.get_hessian())
         
     def get_equality_constraint(self):
         return self.c_e
@@ -1897,14 +2235,23 @@ class Radau2Collocator(CasadiCollocator):
         n_var = {'dx': self.model.get_n_x(), 'x': self.model.get_n_x(),
                  'u': self.model.get_n_u(), 'w': self.model.get_n_w()}
         cont = {'dx': False, 'x': True, 'u': False, 'w': False}
-        var_types = ['dx', 'x', 'u', 'w']
+        var_types = ['x', 'u', 'w']
+        if not self.eliminate_der_var:
+            var_types = ['dx'] + var_types
         var_opt = {}
         var_indices = self.get_var_indices()
+        
+        # Get element lengths
+        if self.hs == "free":
+            h_opt = N.vstack([N.nan, self.horizon * 
+                                     self.nlp_opt[var_indices['h'][1:]]])
+        else:
+            h_opt = self.horizon * N.array(self.h)
+        self.h_opt = h_opt
         
         # Create array with discrete times
         if self.result_mode == "collocation_points":
             if self.hs == "free":
-                h_opt = self.horizon * self.nlp_opt[var_indices['h'][1:]]
                 t_start = 0.
                 t_opt = [t_start]
                 for h in h_opt:
@@ -1913,18 +2260,9 @@ class Radau2Collocator(CasadiCollocator):
                                      self.pol.p[k] * h)
                     t_start += h
                 t_opt = N.array(t_opt).reshape([-1, 1])
-                
-                self.h_opt = h_opt
             else:
                 t_opt = self.get_time().reshape([-1, 1])
         elif self.result_mode == "element_interpolation":
-            if self.hs == "free":
-                h_opt = N.vstack([N.nan, self.horizon * 
-                                         self.nlp_opt[var_indices['h'][1:]]])
-            else:
-                h_opt = self.horizon * N.array(self.h)
-            self.h_opt = h_opt
-            
             t_opt = []
             t_start = 0.
             for i in xrange(1, self.n_e + 1):
@@ -1939,6 +2277,8 @@ class Radau2Collocator(CasadiCollocator):
         # Create arrays for storage of variable trajectories
         for var_type in var_types:
             var_opt[var_type] = N.empty([len(t_opt), n_var[var_type]])
+        if self.eliminate_der_var:
+            var_opt['dx'] = N.empty([len(t_opt), n_var['x']])
         var_opt['p_opt'] = N.empty(self.model.get_n_p())
         
         # Get optimal parameter values
@@ -1947,19 +2287,48 @@ class Radau2Collocator(CasadiCollocator):
         
         # Get solution trajectories
         t_index = 0
+        time_points = self.get_time_points()
         if self.result_mode == "collocation_points":
             for i in xrange(1, self.n_e + 1):
-                for k in self.get_time_points()[i]:
+                for k in time_points[i]:
                     for var_type in var_types:
                         xx_i_k = self.nlp_opt[var_indices[i][k][var_type]]
                         var_opt[var_type][t_index, :] = xx_i_k.reshape(-1)
                     t_index += 1
+            if self.eliminate_der_var:
+                t_index = 0
+                ecv = self.eliminate_cont_var
+                i = 1
+                for k in xrange(0, self.n_cp + 1):
+                    dx_i_k = 0
+                    for l in xrange(0, self.n_cp + 1):
+                        x_i_l = self.nlp_opt[var_indices[i][l]['x']]
+                        dx_i_k += (1. / h_opt[i] * x_i_l * 
+                                   self.pol.eval_basis_der(l,
+                                                           self.pol.p[k]))
+                    var_opt['dx'][t_index, :] = dx_i_k.reshape(-1)
+                    t_index += 1
+                for i in xrange(2, self.n_e + 1):
+                    for k in xrange(1, self.n_cp + 1):
+                        l = 0
+                        x_i_l = self.nlp_opt[
+                                var_indices[i - ecv][ecv * self.n_cp]['x']]
+                        dx_i_k = (1. / h_opt[i] * x_i_l * 
+                                  self.pol.eval_basis_der(l,
+                                                          self.pol.p[k]))
+                        for l in xrange(1, self.n_cp + 1):
+                            x_i_l = self.nlp_opt[var_indices[i][l]['x']]
+                            dx_i_k += (1. / h_opt[i] * x_i_l * 
+                                       self.pol.eval_basis_der(
+                                               l, self.pol.p[k]))
+                        var_opt['dx'][t_index, :] = dx_i_k.reshape(-1)
+                        t_index += 1
         elif self.result_mode == "element_interpolation":
             tau_arr = N.linspace(0, 1, self.n_eval_points)
             for i in xrange(1, self.n_e + 1):
                 for tau in tau_arr:
                     # Non-derivatives
-                    for var_type in var_types[1:]:
+                    for var_type in var_types[not self.eliminate_der_var:]:
                         # Evaluate xx_i_tau based on polynomial xx^i
                         xx_i_tau = 0
                         for k in xrange(not cont[var_type], self.n_cp + 1):

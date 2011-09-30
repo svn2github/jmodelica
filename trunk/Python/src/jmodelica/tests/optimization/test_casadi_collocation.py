@@ -35,6 +35,18 @@ except NameError, ImportError:
     pass
     #logging.warning('Could not load Casadi collocation. Check jmodelica.check_packages()')
 
+try:
+    try:
+        from IPython.Debugger import Tracer; dh = Tracer()
+    except ImportError:
+        try:
+            from IPython.core.debugger import Tracer; dh = Tracer()
+        except:
+            logging.warning('Could not find IPython debugger module')
+except AttributeError:
+    # Circumvents trouble when running the tests through MSYS
+    pass
+
 path_to_mos = os.path.join(get_files_path(), 'Modelica')
 
 def assert_results(res, cost_ref, u_norm_ref,
@@ -197,7 +209,7 @@ class TestRadau2:
         
         # References values
         cost_ref = 6.8400278249466e1
-        u_norm_ref = 3.97912036671e-1
+        u_norm_ref = 3.8847404443117917e-1
         
         # Free element lengths data
         c = 0.5
@@ -215,7 +227,7 @@ class TestRadau2:
         opts['result_mode'] = "collocation_points"
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
-        indices = range(0, 3) + range(opts['n_e'] - 3, opts['n_e'])
+        indices = range(1, 4) + range(opts['n_e'] - 3, opts['n_e'])
         values = N.array([0.5, 0.5, 0.5, 2.0, 2.0, 2.0]).reshape([-1, 1])
         N.testing.assert_allclose(res.h_opt[indices], values, 5e-3)
         
@@ -229,7 +241,8 @@ class TestRadau2:
         """
         Test optimizing the CSTR with scaling.
 
-        This test also tests writing both the unscaled and scaled result.
+        This test also tests writing both the unscaled and scaled result as
+        well as eliminating derivative variables.
         """
         unscaled_model = self.model_CSTR_Lagrange
         scaled_model = self.model_CSTR_scaled_Lagrange
@@ -238,20 +251,23 @@ class TestRadau2:
         cost_ref = 1.8576873858261e3
         u_norm_ref = 3.0556730059e2
         
-        # Unscaled model
+        # Unscaled model, with derivatives
         opts = unscaled_model.optimize_options(self.algorithm)
         opts['write_scaled_result'] = False
+        opts['eliminate_der_var'] = False
         res = unscaled_model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
 
-        # Scaled model & unscaled result
+        # Scaled model & unscaled result, eliminated derivatives
         opts['write_scaled_result'] = False
+        opts['eliminate_der_var'] = True
         res = scaled_model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
         c_unscaled = res['cstr.c']
 
-        # Scaled model & scaled result
+        # Scaled model & scaled result, eliminated derivatives
         opts['write_scaled_result'] = True
+        opts['eliminate_der_var'] = True
         res = scaled_model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
         c_scaled = res['cstr.c']
@@ -264,7 +280,8 @@ class TestRadau2:
         Test the two different result modes.
         
         The difference between the trajectories of the two result modes should
-        be very small if n_e * n_cp is sufficiently large. This is tested.
+        be very small if n_e * n_cp is sufficiently large. Eliminating
+        derivative variables is also tested for element interpolation.
         """
         model = self.model_VDP_bounds_Lagrange
         
@@ -282,6 +299,7 @@ class TestRadau2:
         
         # Element interpolation
         opts['result_mode'] = "element_interpolation"
+        opts['eliminate_der_var'] = True
         opts['n_eval_points'] = 15
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=5e-3)
@@ -306,9 +324,40 @@ class TestRadau2:
                        cost_rtol=1.5e-1, u_norm_rtol=5e-2)
     
     @testattr(casadi = True)
-    def test_state_cont_var(self):
+    def test_eliminate_der_var(self):
         """
-        Test that results are consistent regardless of state_cont_var.
+        Test that results are consistent regardless of eliminate_der_var.
+        """
+        model_Mayer = self.model_VDP_bounds_Mayer
+        model_Lagrange = self.model_VDP_bounds_Lagrange
+        
+        # References values
+        cost_ref = 2.3469088662e1
+        u_norm_ref = 2.8723846121e-1
+        
+        # Keep derivative variables
+        opts = model_Lagrange.optimize_options(self.algorithm)
+        opts["eliminate_der_var"] = False
+        res = model_Lagrange.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        
+        # Mayer, eliminate derivative variables
+        # Currently does not work due to lack of support for Mayer
+        #~ opts["eliminate_der_var"] = True
+        #~ opts['init_traj'] = ResultDymolaTextual("VDP_pack_VDP_Opt2_result.txt")
+        #~ res = model_Mayer.optimize(self.algorithm, opts)
+        #~ assert_results(res, cost_ref, u_norm_ref)
+        
+        # Lagrange, eliminate derivative variables
+        opts["eliminate_der_var"] = True
+        opts['init_traj'] = ResultDymolaTextual("VDP_pack_VDP_Opt2_result.txt")
+        res = model_Lagrange.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+    
+    @testattr(casadi = True)
+    def test_eliminate_cont_var(self):
+        """
+        Test that results are consistent regardless of eliminate_cont_var.
         """
         model = self.model_VDP_bounds_Mayer
         
@@ -316,14 +365,14 @@ class TestRadau2:
         cost_ref = 2.3469088662e1
         u_norm_ref = 2.8723846121e-1
         
-        # With state continuity variables
+        # Keep continuity variables
         opts = model.optimize_options(self.algorithm)
-        opts["state_cont_var"] = True
+        opts["eliminate_cont_var"] = False
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
         
-        # Without state continuity variables
-        opts["state_cont_var"] = False
+        # Eliminate continuity variables
+        opts["eliminate_cont_var"] = True
         opts['init_traj'] = ResultDymolaTextual("VDP_pack_VDP_Opt2_result.txt")
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
@@ -360,6 +409,11 @@ class TestRadau2:
     def test_graphs_and_exact_Hessian(self):
         """
         Test that results are consistent regardless of graph and exact_Hessian.
+        
+        The test also checks the elimination of derivative and continuity
+        variables.
+        
+        NOTE: DOES NOT CHECK CONTINUITY VARIABLES
         """
         model = self.model_VDP_bounds_Lagrange
         
@@ -372,47 +426,58 @@ class TestRadau2:
         opts['n_e'] = 20
         opts['n_cp'] = 4
         res = model.optimize(self.algorithm, opts)
-        
         assert_results(res, cost_ref, u_norm_ref)
         opts['init_traj'] = ResultDymolaTextual("VDP_pack_VDP_Opt2_result.txt")
         
-        # SX with exact Hessian
+        # SX with exact Hessian and eliminated variables
         opts['graph'] = "SX"
         opts['exact_Hessian'] = True
+        opts['eliminate_der_var'] = True
+        #~ opts['eliminate_cont_var'] = True
         res = model.optimize(self.algorithm, opts)
         sol_with = res.times['sol']
         assert_results(res, cost_ref, u_norm_ref)
         
-        # SX without exact Hessian
+        # SX without exact Hessian and eliminated variables
         opts['exact_Hessian'] = False
+        opts['eliminate_der_var'] = False
+        #~ opts['eliminate_cont_var'] = False
         res = model.optimize(self.algorithm, opts)
         sol_without = res.times['sol']
         nose.tools.assert_true(sol_with < 0.5 * sol_without)
         assert_results(res, cost_ref, u_norm_ref)
         
-        # expanded_MX with exact Hessian
+        # expanded_MX with exact Hessian and eliminated variables
         opts['graph'] = "expanded_MX"
         opts['exact_Hessian'] = True
+        opts['eliminate_der_var'] = True
+        #~ opts['eliminate_cont_var'] = True
         res = model.optimize(self.algorithm, opts)
         sol_with = res.times['sol']
         assert_results(res, cost_ref, u_norm_ref)
         
-        # expanded_MX without exact Hessian
+        # expanded_MX without exact Hessian and eliminated variables
         opts['exact_Hessian'] = False
+        opts['eliminate_der_var'] = False
+        #~ opts['eliminate_cont_var'] = False
         res = model.optimize(self.algorithm, opts)
         sol_without = res.times['sol']
         nose.tools.assert_true(sol_with < 0.5 * sol_without)
         assert_results(res, cost_ref, u_norm_ref)
         
-        # MX with exact Hessian
+        # MX with exact Hessian and eliminated variables
         opts['graph'] = "MX"
         opts['exact_Hessian'] = True
+        opts['eliminate_der_var'] = True
+        #~ opts['eliminate_cont_var'] = True
         res = model.optimize(self.algorithm, opts)
         sol_with = res.times['sol']
         assert_results(res, cost_ref, u_norm_ref)
         
-        # MX without exact Hessian
+        # MX without exact Hessian and eliminated variables
         opts['exact_Hessian'] = False
+        opts['eliminate_der_var'] = False
+        #~ opts['eliminate_cont_var'] = False
         res = model.optimize(self.algorithm, opts)
         sol_without = res.times['sol']
         nose.tools.assert_true(sol_with < 0.9 * sol_without)

@@ -21,6 +21,18 @@ import os.path
 import numpy as N
 
 try:
+    try:
+        from IPython.Debugger import Tracer; dh = Tracer()
+    except ImportError:
+        try:
+            from IPython.core.debugger import Tracer; dh = Tracer()
+        except:
+            logging.warning('Could not find IPython debugger module')
+except AttributeError:
+    # Circumvents trouble when running the tests through MSYS
+    pass
+
+try:
     import casadi
 except:
     pass
