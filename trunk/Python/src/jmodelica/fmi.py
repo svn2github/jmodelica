@@ -194,7 +194,7 @@ class FMUModel(BaseModel):
     A JMI Model loaded from a DLL.
     """
     
-    def __init__(self, fmu, path='.', reload_dll=True):
+    def __init__(self, fmu, path='.', reload_dll=True, enable_logging=False):
         """
         Constructor.
         """
@@ -235,8 +235,12 @@ class FMUModel(BaseModel):
         #Load XML file
         self._load_xml()
         
+        #Internal values
+        self._log = []
+        self._enable_logging = enable_logging
+        
         #Instantiate
-        self.instantiate_model()
+        self.instantiate_model(logging=enable_logging)
         
         #Default values
         self.__t = None
@@ -244,7 +248,6 @@ class FMUModel(BaseModel):
         #Internal values
         self._file_open = False
         self._npoints = 0
-        self._log = []
 
         #Create a JMIModel if a JModelica generated FMU is loaded
         # This is convenient for debugging purposes
@@ -1333,6 +1336,8 @@ class FMUModel(BaseModel):
                 
         Calls the low-level FMI function: fmiSetDebuggLogging
         """
+        self._enable_logging = flag
+        
         if flag:
             status = self._fmiSetDebugLogging(self._model, self._fmiTrue)
         else:
@@ -1434,9 +1439,13 @@ class FMUModel(BaseModel):
             self._model, tolcontrolledC, tol, C.byref(self._eventInfo))
         
         if status == 1:
-            logging.warning(
-                'Initialize returned with a warning.' \
-                'Check the log for information.')
+            if self._enable_logging:
+                logging.warning(
+                    'Initialize returned with a warning.' \
+                    ' Check the log for information (FMUModel.get_log).')
+            else:
+                logging.warning('Initialize returned with a warning.' \
+                    ' Enable logging for more information, (FMUModel(..., enable_logging=True)).')
         
         if status > 1:
             raise FMUException('Failed to Initialize the model.')
@@ -1460,11 +1469,12 @@ class FMUModel(BaseModel):
         """
         instance = self._fmiString(name)
         guid = self._fmiString(self._GUID)
-        if logging:
-            logging = self._fmiBoolean(self._fmiTrue)
-        else:
-            logging = self._fmiBoolean(self._fmiFalse)
         
+        if logging:
+            logging_fmi = self._fmiTrue#self._fmiBoolean(self._fmiTrue)
+        else:
+            logging_fmi = self._fmiFalse#self._fmiBoolean(self._fmiFalse)
+
         functions = self._fmiCallbackFunctions()#(self._fmiCallbackLogger(self.fmiCallbackLogger),self._fmiCallbackAllocateMemory(self.fmiCallbackAllocateMemory), self._fmiCallbackFreeMemory(self.fmiCallbackFreeMemory))
         
         
@@ -1480,7 +1490,11 @@ class FMUModel(BaseModel):
         self._modFunctions = self._modFunctions.contents
         
         self._model = self._fmiInstantiateModel(
-            instance,guid,self._modFunctions,logging)
+            instance,guid,self._modFunctions,logging_fmi)
+        
+        #Just to be safe, some problems with Dymola (2012) FMUs not reacting
+        #to logging when set to the instantiate method.    
+        self.set_debug_logging(logging)
         
     def fmiCallbackLogger(self,c, instanceName, status, category, message):
         """
@@ -1519,8 +1533,9 @@ class FMUModel(BaseModel):
         if self._compiled_with_debug_fct:
             self._fmiExtractDebugInfo(self._model)
         else:
-            print "FMU not compiled with JModelica.org compliant debug functions"
-            print "Debug info from non-linear solver currently not accessible."
+            pass
+            #print "FMU not compiled with JModelica.org compliant debug functions"
+            #print "Debug info from non-linear solver currently not accessible."
         
         
         return self._log 
