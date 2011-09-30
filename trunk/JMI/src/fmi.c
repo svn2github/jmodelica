@@ -448,14 +448,15 @@ fmiStatus fmi_get_derivatives(fmiComponent c, fmiReal derivatives[] , size_t nx)
 }
 
 fmiStatus fmi_get_event_indicators(fmiComponent c, fmiReal eventIndicators[], size_t ni) {
+	jmi_real_t *switches;
+	fmiValueReference i;
 	fmiInteger retval = jmi_ode_derivatives(((fmi_t *)c)->jmi);
 	if(retval != 0) {
 		(((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the derivatives failed.");
 		return fmiError;
 	}
 	retval = jmi_dae_R(((fmi_t *)c)->jmi,eventIndicators);
-    jmi_real_t *switches = jmi_get_sw(((fmi_t *)c)->jmi);
-    fmiValueReference i;
+	switches = jmi_get_sw(((fmi_t *)c)->jmi);
     
 	if(retval != 0) {
 		(((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the event indicators failed.");
