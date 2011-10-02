@@ -106,6 +106,7 @@ class TestBlockingFactors(OptimizationTest):
 
     @testattr(ipopt = True)
     def setUp(self):
+        self.load_expected_data('BlockingTest_result.txt')
         n_e = 50
         hs = N.ones(n_e)*1./n_e
         n_cp = 3
@@ -114,39 +115,9 @@ class TestBlockingFactors(OptimizationTest):
                                        'hs':hs,
                                        'n_cp':n_cp,
                                        'blocking_factors':blocking_factors,
-                                       'IPOPT_options':{'max_iter': 500}})
+                                       'IPOPT_options':{'max_iter': 500},
+                                       'init_traj':self.expected})
         self.run()
-        self.load_expected_data('BlockingTest_result.txt')
-
-    @testattr(ipopt = True)
-    def test_cost_end(self):
-        self.assert_end_value('cost', 8.1819533e-01)
-
-    @testattr(ipopt = True)
-    def test_trajectories(self):
-        self.assert_all_trajectories(
-            ['x[1]', 'x[2]', 'w1', 'w2', 'w3', 'w4'])
-
-class TestBlockingFactors(OptimizationTest):
-
-    @classmethod
-    def setUpClass(cls):
-        OptimizationTest.setup_class_base(
-            'BlockingTest.mop', 'BlockingTest')
-
-    @testattr(ipopt = True)
-    def setUp(self):
-        n_e = 50
-        hs = N.ones(n_e)*1./n_e
-        n_cp = 3
-        blocking_factors = N.array([5,10,5,3])
-        self.setup_base(opt_options = {'n_e':n_e,
-                                       'hs':hs,
-                                       'n_cp':n_cp,
-                                       'blocking_factors':blocking_factors,
-                                       'IPOPT_options':{'max_iter': 500}})
-        self.run()
-        self.load_expected_data('BlockingTest_result.txt')
 
     @testattr(ipopt = True)
     def test_cost_end(self):

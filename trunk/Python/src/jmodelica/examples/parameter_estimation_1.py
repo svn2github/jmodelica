@@ -105,7 +105,9 @@ def run_demo(with_plots=True):
         plt.show()
     
     # optimize
-    res = model.optimize(options={'IPOPT_options':{"max_iter":500}})
+    opts = model.optimize_options()
+    opts['n_e'] = 10
+    res = model.optimize(options=opts)
     
     # Extract variable profiles
     x1 = res['sys.x1']
@@ -114,9 +116,9 @@ def run_demo(with_plots=True):
     z = res['sys.z']
     t = res['time']
     
-    assert N.abs(w - 1.051198) < 1e-4, \
+    assert N.abs(w - 1.053339) < 1e-3, \
             "Wrong value of parameter w in parameter_estimation_1.py"  
-    assert N.abs(z - 0.448710 ) < 1e-4, \
+    assert N.abs(z - 0.449854 ) < 1e-3, \
             "Wrong value of parameter z in parameter_estimation_1.py"  
     
     if with_plots:

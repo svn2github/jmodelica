@@ -142,12 +142,14 @@ def run_demo(with_plots=True):
         qt_par_est.set("y1_meas["+`i+1`+"]",y1_meas[i])
         qt_par_est.set("y2_meas["+`i+1`+"]",y2_meas[i])
 
-    n_e = 100 # Numer of element in collocation algorithm
+    n_e = 30 # Numer of element in collocation algorithm
 
     # Get an options object for the optimization algorithm
     opt_opts = qt_par_est.optimize_options()
     # Set the number of collocation points
     opt_opts['n_e'] = n_e
+
+    opt_opts['init_traj'] = res.result_data
     
     # Solve parameter optimization problem
     res = qt_par_est.optimize(options=opt_opts)
@@ -160,8 +162,8 @@ def run_demo(with_plots=True):
     print('a1: ' + str(a1_opt*1e4) + 'cm^2')
     print('a2: ' + str(a2_opt*1e4) + 'cm^2')
 
-    assert N.abs(a1_opt*1.e6 - 2.658636) < 1e-3, "Wrong value of parameter a1"  
-    assert N.abs(a2_opt*1.e6 - 2.715543) < 1e-3, "Wrong value of parameter a2"  
+    assert N.abs(a1_opt*1.e6 - 2.6574) < 1e-3, "Wrong value of parameter a1"  
+    assert N.abs(a2_opt*1.e6 - 2.7130) < 1e-3, "Wrong value of parameter a2"  
 
     # Load state profiles
     x1_opt = res["qt.x1"]
@@ -217,10 +219,10 @@ def run_demo(with_plots=True):
     print('a3:' + str(a3_opt2*1e4) + 'cm^2')
     print('a4:' + str(a4_opt2*1e4) + 'cm^2')
 
-    assert N.abs(a1_opt2*1.e6 - 2.659686) < 1e-3, "Wrong value of parameter a1"  
-    assert N.abs(a2_opt2*1.e6 - 2.706181) < 1e-3, "Wrong value of parameter a2"  
-    assert N.abs(a3_opt2*1.e6 - 3.007429) < 1e-3, "Wrong value of parameter a3"  
-    assert N.abs(a4_opt2*1.e6 - 2.933729) < 1e-3, "Wrong value of parameter a4"  
+    assert N.abs(a1_opt2*1.e6 - 2.6579) < 1e-3, "Wrong value of parameter a1"  
+    assert N.abs(a2_opt2*1.e6 - 2.7038) < 1e-3, "Wrong value of parameter a2"  
+    assert N.abs(a3_opt2*1.e6 - 3.0031) < 1e-3, "Wrong value of parameter a3"  
+    assert N.abs(a4_opt2*1.e6 - 2.9342) < 1e-3, "Wrong value of parameter a4"  
 
     # Extract state and input profiles
     x1_opt2 = res_opt2["qt.x1"]
