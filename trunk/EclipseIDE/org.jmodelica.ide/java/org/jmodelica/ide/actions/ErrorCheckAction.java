@@ -119,29 +119,31 @@ public class ErrorCheckAction extends CurrentClassAction implements IJobChangeLi
 		}
 
 		protected IStatus run(IProgressMonitor monitor) {
-			SourceRoot root = (SourceRoot) currentClass.root();
-			InstProgramRoot ipr = root.getProgram().getInstProgramRoot();
-			InstanceErrorHandler errorHandler = getErrorHandler(root);
-			String name = currentClass.qualifiedName();
-			InstClassDecl icd = ipr.simpleLookupInstClassDecl(name);
-			icd.resetCollectErrors();
-			icd.collectErrors();
-			if (!errorHandler.hasErrors()) {
-				ModelicaCompiler mc = new ModelicaCompiler(icd.root().options);
-				FClass fc = mc.createFlatTree(icd, icd.fileName());
-				icd.flattenInstClassDecl(fc);
-				fc.setLocation(icd.getSelectionNode());
-				fc.setDefinition(icd.getDefinition());
-				fc.transformCanonical();
-				fc.collectErrors();
+			synchronized (currentClass.state()) {
+				SourceRoot root = (SourceRoot) currentClass.root();
+				InstProgramRoot ipr = root.getProgram().getInstProgramRoot();
+				InstanceErrorHandler errorHandler = getErrorHandler(root);
+				String name = currentClass.qualifiedName();
+				InstClassDecl icd = ipr.simpleLookupInstClassDecl(name);
+				icd.resetCollectErrors();
+				icd.collectErrors();
+				if (!errorHandler.hasErrors()) {
+					ModelicaCompiler mc = new ModelicaCompiler(icd.root().options);
+					FClass fc = mc.createFlatTree(icd, icd.fileName());
+					icd.flattenInstClassDecl(fc);
+					fc.setLocation(icd.getSelectionNode());
+					fc.setDefinition(icd.getDefinition());
+					fc.transformCanonical();
+					fc.collectErrors();
+				}
+				// We use the severity to tell what kind of message is passed
+				int status = IStatus.OK;      // No errors
+				if (errorHandler.hasErrors()) 
+					status = IStatus.INFO;    // Only errors that we created markers for
+				if (errorHandler.hasLostErrors()) 
+					status = IStatus.WARNING; // Some errors that no markers were created for
+				return new Status(status, IDEConstants.PLUGIN_ID, errorHandler.resultMessage());
 			}
-			// We use the severity to tell what kind of message is passed
-			int status = IStatus.OK;      // No errors
-			if (errorHandler.hasErrors()) 
-				status = IStatus.INFO;    // Only errors that we created markers for
-			if (errorHandler.hasLostErrors()) 
-				status = IStatus.WARNING; // Some errors that no markers were created for
-			return new Status(status, IDEConstants.PLUGIN_ID, errorHandler.resultMessage());
 		}
 
 		private InstanceErrorHandler getErrorHandler(SourceRoot root) {
