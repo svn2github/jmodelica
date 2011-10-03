@@ -17,9 +17,6 @@ DEFAULT_TESTS="optimica python"
 # Default arguments - always parse these arguments before command line
 DEFAULT_ARGS=""
 
-# You may need to change this - only needed on some systems
-PYTHON_HOME=/opt/python/python2.5/
-
 # Variables set by configure script
 JMODELICA_HOME="@prefix@"
 JMODELICA_SRC="@abs_top_srcdir@"
@@ -33,7 +30,11 @@ fi
 
 # Variables that are relative to others
 CPPAD_HOME="${JMODELICA_HOME}/ThirdParty/CppAD/"
-PYTHONPATH="${PYTHON_HOME}:${JMODELICA_HOME}/Python/"
+if [[ "${PYTHONPATH}" == "" ]]; then
+  PYTHONPATH="${JMODELICA_HOME}/Python/"
+else
+  PYTHONPATH="${PYTHONPATH}:${JMODELICA_HOME}/Python/"
+fi
 
 # ====== End variables to set ======
 
