@@ -93,7 +93,6 @@ public class AWTIconDrawer implements GraphicsInterface {
 	private static final int DEFAULT_FONT_STYLE = Font.PLAIN;
 	private static final int DEFAULT_FONT_SIZE = 12;
 	
-	private boolean outline;
 	private BufferedImage image;
 	
 	private Graphics2D g;
@@ -101,19 +100,21 @@ public class AWTIconDrawer implements GraphicsInterface {
 	private AffineTransform nullTransform;
 	
 	private Extent iconExtent;
+	private int targetWidth;
+	private int targetHeight;
 		
 	public AWTIconDrawer() {
 		savedTransformations = new Stack<AffineTransform>();
-		outline = true;
 	}
 	
 	public AWTIconDrawer(Icon icon) {
-		this(icon, true);
+		this(icon, IconConstants.OUTLINE_IMAGE_SIZE-1, IconConstants.OUTLINE_IMAGE_SIZE-1);
 	}
 	
-	public AWTIconDrawer(Icon icon, boolean outline) {
+	public AWTIconDrawer(Icon icon, int w, int h) {
 		savedTransformations = new Stack<AffineTransform>();
-		this.outline = outline;
+		targetWidth = w;
+		targetHeight = h;
 		createBufferedImage(icon);
 	}
 	
@@ -128,12 +129,8 @@ public class AWTIconDrawer implements GraphicsInterface {
     		iconWidth = iconExtent.getWidth();
     		iconHeight = iconExtent.getHeight();
 		}
-		if (outline) {
-	    		imageWidth=IconConstants.OUTLINE_IMAGE_SIZE-1;
-	    		imageHeight=IconConstants.OUTLINE_IMAGE_SIZE-1;	
-		} else {
-			return;
-		}
+		imageWidth = targetWidth;
+		imageHeight = targetHeight;	
 		double scaleWidth = (imageWidth-1)/iconWidth;
 		double scaleHeight = (imageHeight-1)/iconHeight;
 
@@ -543,13 +540,11 @@ public class AWTIconDrawer implements GraphicsInterface {
 		ArrayList<Point> bezierPoints = new ArrayList<Point>();
 		Point last = null;
 		for (Point lp : linePoints) {
-			/* invert y to compensate java */
+			/* invert y to convert to screen coords */
 			lp.setY(-(lp.getY()));
 			if (last != null) {
 				bezierPoints.add(transform(last));
-				double x = (last.getX() + lp.getX()) / 2;
-				double y = (last.getY() + lp.getY()) / 2;
-				bezierPoints.add(transform(new Point(x, y)));
+				bezierPoints.add(transform(Point.midPoint(last, lp)));
 			}
 			last = lp;
 		}
@@ -771,6 +766,11 @@ public class AWTIconDrawer implements GraphicsInterface {
 				)
 		);
 	}
+	
+	public BufferedImage getAWTImage() {
+		return image;
+	}
+	
 	public Image getImage() {
 		ImageData imagedata = null;
 		if(image == null){
@@ -869,12 +869,25 @@ public class AWTIconDrawer implements GraphicsInterface {
 	private Shape createShape(Polygon p) throws CreateShapeFailedException {
 		ArrayList<Point> points = p.getPoints();
 		Path2D.Double path = new Path2D.Double();
-		path.moveTo(points.get(0).getX(), -points.get(0).getY());
-		for (int i = 1; i < points.size(); i++) {
-			Point point = points.get(i);
-			path.lineTo(point.getX(), -point.getY());
+		boolean bezier = p.getSmooth() == Types.Smooth.BEZIER;
+		
+		if (bezier && false) { // Disabled since it gives weird results
+			Point ctrl = points.get(0);
+			Point point = Point.midPoint(points.get(points.size() - 2), ctrl);
+			path.moveTo(point.getX(), -point.getY());
+			for (int i = 1; i < points.size() - 1; i++) {
+				ctrl = points.get(i);
+				point = Point.midPoint(ctrl, points.get(i + 1));
+				path.quadTo(ctrl.getX(), -ctrl.getY(), point.getX(), -point.getY());
+			}
+		} else {
+			Point first = points.get(0);
+			path.moveTo(first.getX(), -first.getY());
+			for (int i = 1; i < points.size(); i++) {
+				Point point = points.get(i);
+				path.lineTo(point.getX(), -point.getY());
+			}
 		}
-		path.lineTo(points.get(0).getX(), -points.get(0).getY());
 		return path;
 	}
 	

@@ -32,7 +32,19 @@ public class Point
 		return new Point(x, y);
 	}
 
+	public static Point midPoint(Point a, Point b) {
+		return new Point((a.x + b.x) / 2, (b.y + b.y) / 2);
+	}
+
+	public boolean equals(Object obj) {
+		if (!(obj instanceof Point))
+			return false;
+		Point p = (Point) obj;
+		return x == p.x && y == p.y;
+	}
+	
 	public String toString() {
 		return "{" + x + "},{" + y + "}";
 	}
+	
 }

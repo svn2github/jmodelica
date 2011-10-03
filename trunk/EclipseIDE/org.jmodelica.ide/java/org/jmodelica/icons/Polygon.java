@@ -19,11 +19,14 @@ public class Polygon extends FilledShape {
 	}
 	public Polygon(ArrayList<Point> points) {
 		super();
-		this.points = points;
+		setPoints(points);
 	}
 
 	public void setPoints(ArrayList<Point> points) {
 		this.points = points;
+		int n = points.size();
+		if (!points.get(0).equals(points.get(n - 1))) 
+			points.add(points.get(0));
 	}
 
 	public ArrayList<Point> getPoints() {

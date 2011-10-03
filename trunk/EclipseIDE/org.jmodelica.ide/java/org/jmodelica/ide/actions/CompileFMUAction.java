@@ -5,6 +5,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import javax.imageio.ImageIO;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -35,8 +37,10 @@ import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.editor.Editor;
 import org.jmodelica.ide.error.InstanceErrorHandler;
 import org.jmodelica.ide.helpers.ShowMessageJob;
+import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.AbstractGenerator;
 import org.jmodelica.modelica.compiler.BaseClassDecl;
+import org.jmodelica.modelica.compiler.ClassDecl;
 import org.jmodelica.modelica.compiler.CompilationAbortedException;
 import org.jmodelica.modelica.compiler.CompilationHooks;
 import org.jmodelica.modelica.compiler.CompilerException;
@@ -171,6 +175,7 @@ public class CompileFMUAction extends CurrentClassAction implements IJobChangeLi
 		private OptionRegistry opt;
 		private MessageConsole messageConsole;
 		private IProject proj;
+		private ClassDecl targetClass;
 
 		public CompileJob(String className, String[] paths, String dir, IProject proj, OptionRegistry opt) {
 			super("Compiling " + className + " to FMU");
@@ -195,7 +200,10 @@ public class CompileFMUAction extends CurrentClassAction implements IJobChangeLi
 			try {
 				mc.addCompilationHooks(this);
 				mc.setTempFileDir(getTempDir());
-				mc.compileFMUME(className, paths, dir);
+				// Need to synchronize because ASTNode.state is static
+				synchronized (new ASTNode().state()) {
+					mc.compileFMUME(className, paths, dir);
+				}
 			} catch (CompilationAbortedException e) {
 				status = Status.CANCEL_STATUS;
 			} catch (Exception e) {
@@ -260,6 +268,7 @@ public class CompileFMUAction extends CurrentClassAction implements IJobChangeLi
 		public void filesParsed(SourceRoot sr) {
 			mon.worked(WORK_PARSE);
 			mon.subTask("Instantiating...");
+			targetClass = sr.getProgram().simpleLookupClassDotted(className);
 		}
 
 		@Override
@@ -288,7 +297,15 @@ public class CompileFMUAction extends CurrentClassAction implements IJobChangeLi
 		}
 
 		@Override
-		public void codeGenerated() {
+		public void codeGenerated(File dir) {
+			// TODO: move this to ModelicaCompiler when icons are moved there
+			if (targetClass != null && targetClass.hasIcon()) {
+				File file = new File(dir, "model.png");
+				try {
+					ImageIO.write(targetClass.createIconImage(), "png", file);
+				} catch (IOException e) {
+				}
+			}
 			mon.worked(WORK_GENERATE);
 			mon.subTask("Compiling generated code...");
 		}
@@ -300,7 +317,7 @@ public class CompileFMUAction extends CurrentClassAction implements IJobChangeLi
 		}
 
 		@Override
-		public void fmuPacked(String path) {
+		public void fmuPacked(File path) {
 			mon.worked(WORK_PACK);
 		}
 		

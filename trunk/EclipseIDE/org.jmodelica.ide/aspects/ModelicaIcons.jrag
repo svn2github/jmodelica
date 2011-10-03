@@ -4,6 +4,7 @@ import org.jmodelica.icons.exceptions.FailedConstructionException;
 import org.jmodelica.icons.drawing.IconConstants.Context;
 import org.jmodelica.ide.ui.ImageLoader;
 import org.jmodelica.icons.drawing.AWTIconDrawer;
+import java.awt.image.BufferedImage;
 
 aspect ModelicaIcons
 {
@@ -115,6 +116,18 @@ aspect ModelicaIcons
 		else
 			return new AWTIconDrawer(icon).getImage();
 	}
+	
+	public BufferedImage BaseNode.render(Icon icon, int w, int h) {
+		return new AWTIconDrawer(icon, w, h).getAWTImage();
+	}
+	
+	public static final int BaseNode.iconImageSize = 400;
+	
+	public BufferedImage BaseNode.createIconImage() {
+		return render(icon(), iconImageSize, iconImageSize);
+	}
+	
+	syn boolean BaseNode.hasIcon() = !icon().isEmpty();
 	
 	syn Image BaseNode.defaultIcon() = null;
 	eq ClassDecl.defaultIcon() = ImageLoader.getFrequentImage(ImageLoader.GENERIC_CLASS_IMAGE);
