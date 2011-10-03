@@ -22,6 +22,7 @@ matplotlib.use('WXAgg')
 
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg
 from matplotlib.figure import Figure
+from matplotlib import rcParams
 
 #GUI modules
 try:
@@ -34,6 +35,7 @@ except ImportError:
 #JModelica related imports
 try:
     from jmodelica.io import ResultDymolaTextual
+    from jmodelica.io import ResultDymolaBinary
 except ImportError:
     print "JModelica not found."
 
@@ -47,6 +49,7 @@ ID_AXIS    = 15004
 ID_MOVE    = 15005
 ID_ZOOM    = 15006
 ID_RESIZE  = 15007
+ID_LINES   = 15008
 
 class MainGUI(wx.Frame):
     sizeHeightDefault=900
@@ -154,14 +157,18 @@ class MainGUI(wx.Frame):
         
         # Edit
         self.editAdd  = editmenu.Append(wx.ID_ADD,"A&dd Plot","Add a plot window.")
+        editmenu.AppendSeparator()
         self.editAxisLabels = editmenu.Append(ID_AXIS,"Axis / Labels", "Edit the axis and labels of the current plot.")
-        self.editResize = editmenu.Append(ID_RESIZE, "Resize", "Resize the current plot.")
+        self.editLinesLegends = editmenu.Append(ID_LINES, "Lines / Legends", "Edit the lines and the legend of the current plot.")
         
         # View
         self.viewGrid  = viewmenu.Append(ID_GRID,"&Grid","Show/Hide Grid.",kind=wx.ITEM_CHECK)
         viewmenu.AppendSeparator() #Append a seperator
         self.viewMove = viewmenu.Append(ID_MOVE,"Move","Use the mouse to move the plot.",kind=wx.ITEM_RADIO)
         self.viewZoom = viewmenu.Append(ID_ZOOM,"Zoom","Use the mouse for zooming.",kind=wx.ITEM_RADIO)
+        viewmenu.AppendSeparator()
+        self.viewResize = viewmenu.Append(ID_RESIZE, "Resize", "Resize the current plot.")
+        
         
         # Help
         self.helpLicense = helpmenu.Append(ID_LICENSE, "License","Show the license.")
@@ -179,7 +186,8 @@ class MainGUI(wx.Frame):
         self.Bind(wx.EVT_MENU, self.OnMenuExit,    self.menuExit)
         self.Bind(wx.EVT_MENU, self.OnMenuAdd,     self.editAdd)
         self.Bind(wx.EVT_MENU, self.OnMenuAxisLabels,    self.editAxisLabels)
-        self.Bind(wx.EVT_MENU, self.OnMenuResize,  self.editResize)
+        self.Bind(wx.EVT_MENU, self.OnMenuLinesLegends,  self.editLinesLegends)
+        self.Bind(wx.EVT_MENU, self.OnMenuResize,  self.viewResize)
         self.Bind(wx.EVT_MENU, self.OnMenuGrid,    self.viewGrid)
         self.Bind(wx.EVT_MENU, self.OnMenuMove,    self.viewMove)
         self.Bind(wx.EVT_MENU, self.OnMenuZoom,    self.viewZoom)
@@ -193,6 +201,9 @@ class MainGUI(wx.Frame):
                                             (wx.ACCEL_CTRL, ord("S"), self.menuSaveFig.GetId()),
                                             (wx.ACCEL_CTRL, ord("X"), self.menuExit.GetId())])
         self.SetAcceleratorTable(hotKeysTable)
+        
+        #Disable Lines and Legends
+        self.editLinesLegends.Enable(False)
     
     def OnMenuMove(self, event):
         self.move = True
@@ -226,7 +237,7 @@ class MainGUI(wx.Frame):
         
     def OnMenuOpen(self, event):
         #Open the file window
-        dlg = wx.FileDialog(self, "Open result file(s)",wildcard="Text files (.txt)|*.txt| All files (*.*)|*.*",
+        dlg = wx.FileDialog(self, "Open result file(s)",wildcard="Text files (.txt)|*.txt|MATLAB files (.mat)|*.mat|All files (*.*)|*.*",
                             style=wx.FD_MULTIPLE)
         
         #If OK load the results
@@ -234,7 +245,21 @@ class MainGUI(wx.Frame):
             for n in dlg.GetFilenames():
                 self.SetStatusText("Loading "+n+"...") #Change the statusbar
                 
-                self.ResultFiles.append((n,ResultDymolaTextual(O.path.join(dlg.GetDirectory(),n))))
+                #Find out if the result is a textual or binary file
+                if n.lower().endswith(".txt"): #Textual file
+                    self.ResultFiles.append((n,ResultDymolaTextual(O.path.join(dlg.GetDirectory(),n))))
+                elif n.lower().endswith(".mat"): #Binary file
+                    try:
+                        self.ResultFiles.append((n,ResultDymolaBinary(O.path.join(dlg.GetDirectory(),n))))
+                    except TypeError:
+                        self.SetStatusText("Could not load "+n+".") #Change the statusbar
+                        break
+                else:
+                    self.SetStatusText("Could not load "+n+".") #Change the statusbar
+                    break
+                
+                self.SetStatusText("Populating tree for " +n+"...")
+                
                 self.tree.AddTreeNode(self.ResultFiles[-1][1], self.ResultFiles[-1][0], 
                                             self.filterPanel.checkBoxTimeVarying.GetValue(),
                                             self.filterPanel.checkBoxParametersConstants.GetValue())
@@ -279,7 +304,27 @@ class MainGUI(wx.Frame):
         
         #Enable labels and axis options
         self.editAxisLabels.Enable(True)
+    
+    def OnMenuLinesLegends(self, event):
+        IDPlot = self.noteBook.GetSelection()
+        plotWindow = self.noteBook.GetPage(IDPlot)
         
+        #Create the axis dialog
+        dlg = DialogLinesLegends(self,self.noteBook.GetPage(IDPlot))
+        
+        #Open the dialog and update options if OK
+        if dlg.ShowModal() == wx.ID_OK:
+            dlg.ApplyChanges() #Apply Changes
+            
+            legend = dlg.GetValues()
+
+            plotWindow.UpdateSettings(legendposition=legend)
+            plotWindow.Draw()
+            
+        #Destroy the dialog
+        dlg.Destroy()
+        
+    
     def OnMenuAxisLabels(self, event):
         IDPlot = self.noteBook.GetSelection()
         plotWindow = self.noteBook.GetPage(IDPlot)
@@ -332,21 +377,30 @@ class MainGUI(wx.Frame):
         ID = self.tree.FindIndexParent(item)
         IDPlot = self.noteBook.GetSelection()
 
-        #Store plot variables or "unstore" in the self.PlotVariables
-        
+        #Store plot variables or "unstore"
         if self.tree.IsItemChecked(item): #Draw
 
             data = self.tree.GetPyData(item)
-            self.PlotVariables[IDPlot].append([ID,data["traj"],item,data["name"]])
+            
+            #Add to Plot panel
+            self.noteBook.GetPage(IDPlot).AddPlotVariable(ID,item,data)
             
         else: #Undraw
-            for i,var in enumerate(self.PlotVariables[IDPlot]):
-                if var[2]==item:
-                    self.PlotVariables[IDPlot].pop(i)
+        
+            #Remove from panel
+            self.noteBook.GetPage(IDPlot).DeletePlotVariable(item)
             
-        self.noteBook.GetPage(IDPlot).Draw(self.PlotVariables[IDPlot])
-
+        self.noteBook.GetPage(IDPlot).Draw()
+        
         self.SetStatusText("")
+        
+        lines = self.noteBook.GetPage(IDPlot).GetLines()
+        if len(lines) != 0:
+            #Enable Lines and Legends
+            self.editLinesLegends.Enable(True)
+        else:
+            #Disable Lines and Legends
+            self.editLinesLegends.Enable(False)
         
     def OnKeyPress(self, event):
         keycode = event.GetKeyCode() #Get the key pressed
@@ -363,20 +417,10 @@ class MainGUI(wx.Frame):
                 self.ResultFiles.pop(ID) #Delete the result object from the list
                 self.tree.DeleteParent(self.tree.GetSelection())
                 
-                #Delete the results connected to the ResultFile
-                for i in range(len(self.PlotVariables)):
-                    j = 0
-                    while j < len(self.PlotVariables[i]):
-                        if self.PlotVariables[i][j][0] == ID:
-                            self.PlotVariables[i].pop(j)
-                        else:
-                            j = j+1
-
-                        if j==len(self.PlotVariables[i]):
-                            break
                 #Redraw
                 for i in range(self.noteBook.GetPageCount()):
-                    self.noteBook.GetPage(i).Draw(self.PlotVariables[i])
+                    self.noteBook.GetPage(i).DeletePlotVariable(ID=ID)
+                    self.noteBook.GetPage(i).Draw()
 
             self.SetStatusText("")
     
@@ -395,16 +439,32 @@ class MainGUI(wx.Frame):
         
         #Uncheck the items related to the previous plot
         if IDPlot != -1:
-            for i,var in enumerate(self.PlotVariables[IDPlot]):
-                self.tree.CheckItem2(var[2],checked=False,torefresh=True)
+            for i,var in enumerate(self.noteBook.GetPage(IDPlot).GetPlotVariables()):
+                self.tree.CheckItem2(var[1],checked=False,torefresh=True)
+            
+            lines = self.noteBook.GetPage(IDPlot).GetLines()
+            if len(lines) != 0:
+                #Enable Lines and Legends
+                self.editLinesLegends.Enable(True)
+            else:
+                #Disable Lines and Legends
+                self.editLinesLegends.Enable(False)
     
     def OnTabChanged(self,event):
         IDPlot = self.noteBook.GetSelection()
         
         #Check the items related to the previous plot
         if IDPlot != -1:
-            for i,var in enumerate(self.PlotVariables[IDPlot]):
-                self.tree.CheckItem2(var[2],checked=True,torefresh=True)
+            for i,var in enumerate(self.noteBook.GetPage(IDPlot).GetPlotVariables()):
+                self.tree.CheckItem2(var[1],checked=True,torefresh=True)
+            
+            lines = self.noteBook.GetPage(IDPlot).GetLines()
+            if len(lines) != 0:
+                #Enable Lines and Legends
+                self.editLinesLegends.Enable(True)
+            else:
+                #Disable Lines and Legends
+                self.editLinesLegends.Enable(False)
 
     def OnMenuLicense(self, event):
         
@@ -479,7 +539,9 @@ class VariableTree(wxCustom.CustomTreeCtrl):
         self.SortChildren(child)
         
         #Hide nodes if options are choosen
-        self.HideNodes(timeVarying,parametersConstants)
+        if timeVarying == False or parametersConstants == False:
+            self.HideNodes(timeVarying,parametersConstants)
+        
     
     def FindLoneChildDown(self, child):
         """
@@ -582,7 +644,170 @@ class VariableTree(wxCustom.CustomTreeCtrl):
             index += 1
             
         return index
+
+class DialogLinesLegends(wx.Dialog):
+    def __init__(self, parent, plotPage):
+        wx.Dialog.__init__(self, parent, -1, "Lines and Legends")
         
+        #Get the variables
+        self.variables = plotPage.GetPlotVariables()
+        #Get the settings
+        settings = plotPage.GetSettings()
+        #Get the lines
+        lines = plotPage.GetLines()
+        #First line
+        line1 = lines[0]
+        
+        names = [i[2]["name"] for i in self.variables]
+        lineStyles = ["-","--","-.",":"]
+        colors = ["Auto","Blue","Green","Red","Cyan","Magneta","Yellow","Black","White"]
+        lineStylesNames = ["Solid","Dashed","Dash Dot","Dotted"]
+        markerStyles = ["None",'D','s','_','^','d','h','+','*',',','o','.','p','H','v','x','>','<']
+        markerStylesNames = ["None","Diamond","Square","Horizontal Line","Triangle Up","Thin Diamond","Hexagon 1","Plus","Star","Pixel","Circle",
+                            "Point","Pentagon","Hexagon 2", "Triangle Down", "X", "Triangle Right", "Triangle Left"]
+  
+        legendPositions = ['Hide','Best','Upper Right','Upper Left','Lower Left','Lower Right','Right','Center Left','Center Right','Lower Center','Upper Center','Center']
+        
+        self.lineStyles = lineStyles
+        self.markerStyles = markerStyles
+        self.colors = colors
+        
+        #Create the legend dict from where to look up positions
+        self.LegendDict = dict((item,i) for i,item in enumerate(legendPositions[1:]))
+        self.LegendDict["Hide"] = -1
+        
+        #Create the line style dict
+        self.LineStyleDict = dict((item,i) for i,item in enumerate(lineStyles))
+        
+        #Create the marker dict
+        self.MarkerStyleDict = dict((item,i) for i,item in enumerate(markerStyles))
+        
+        #Create the color dict
+        self.ColorsDict = dict((item,i) for i,item in enumerate(colors))
+        
+        mainSizer = wx.BoxSizer(wx.VERTICAL)
+        bagSizer = wx.GridBagSizer(10, 10)
+        
+        plotLabelStatic  = wx.StaticText(self, -1, "Label")
+        plotStyleStatic  = wx.StaticText(self, -1, "Style")
+        plotMarkerStyleStatic  = wx.StaticText(self, -1, "Style")
+        plotLineStatic   = wx.StaticText(self, -1, "Line")
+        plotMarkerStatic = wx.StaticText(self, -1, "Marker")
+        plotLegendStatic = wx.StaticText(self, -1, "Legend")
+        plotPositionStatic = wx.StaticText(self, -1, "Position")
+        plotWidthStatic = wx.StaticText(self, -1, "Width")
+        plotColorStatic = wx.StaticText(self, -1, "Color")
+        
+        sizeWidth = 170
+        
+        #Set the first line as default
+        self.plotLines = wx.ComboBox(self, -1, size=(220, -1), choices=names, style=wx.CB_READONLY)
+        self.plotLines.SetSelection(0)
+        
+        #Set the first line as default
+        self.plotLineStyle = wx.ComboBox(self, -1, size=(sizeWidth, -1), choices=lineStylesNames, style=wx.CB_READONLY)
+        self.plotMarkerStyle = wx.ComboBox(self, -1, size=(sizeWidth, -1), choices=markerStylesNames, style=wx.CB_READONLY)
+        
+        #Set the first label as default
+        self.plotLineName = wx.TextCtrl(self, -1, "", style = wx.TE_LEFT , size =(sizeWidth,-1))
+        self.plotWidth = wx.TextCtrl(self, -1, "", style = wx.TE_LEFT, size=(sizeWidth,-1))
+        self.plotColor = wx.ComboBox(self, -1, choices=colors, size=(sizeWidth,-1),style=wx.CB_READONLY)
+        
+        #Define the legend
+        self.plotLegend = wx.ComboBox(self, -1, size=(sizeWidth, -1), choices=legendPositions, style=wx.CB_READONLY)
+        self.plotLegend.SetSelection(plotPage.GetLegendLocation()+1)
+        
+        #Get the FONT
+        font = plotLineStatic.GetFont()
+        font.SetWeight(wx.BOLD)
+        
+        #Set the bold font to the sections
+        plotLineStatic.SetFont(font)
+        plotMarkerStatic.SetFont(font)
+        plotLegendStatic.SetFont(font)
+        
+        bagSizer.Add(self.plotLines,(0,0),(1,2))
+        bagSizer.Add(plotLabelStatic,(1,0))
+        bagSizer.Add(self.plotLineName,(1,1))
+        bagSizer.Add(plotLineStatic,(2,0),(1,1))
+        bagSizer.Add(plotStyleStatic,(3,0))
+        bagSizer.Add(self.plotLineStyle,(3,1))
+        bagSizer.Add(plotWidthStatic,(4,0))
+        bagSizer.Add(self.plotWidth,(4,1))
+        bagSizer.Add(plotColorStatic,(5,0))
+        bagSizer.Add(self.plotColor,(5,1))
+        
+        bagSizer.Add(plotMarkerStatic,(6,0),(1,1))
+        bagSizer.Add(plotMarkerStyleStatic,(7,0))
+        bagSizer.Add(self.plotMarkerStyle,(7,1))
+        
+        
+        bagSizer.Add(plotLegendStatic,(8,0),(1,1))
+        bagSizer.Add(plotPositionStatic,(9,0))
+        bagSizer.Add(self.plotLegend,(9,1))
+        
+        #Create OK,Cancel and Apply buttons
+        self.buttonOK = wx.Button(self, wx.ID_OK)
+        self.buttonCancel = wx.Button(self, wx.ID_CANCEL)
+        self.buttonApply = wx.Button(self, wx.ID_APPLY)
+        
+        buttonSizer = wx.StdDialogButtonSizer()
+        buttonSizer.AddButton(self.buttonOK)
+        buttonSizer.AddButton(self.buttonCancel)
+        buttonSizer.AddButton(self.buttonApply)
+        buttonSizer.Realize()
+        
+        #Add information to the sizers
+        mainSizer.Add(bagSizer,0,wx.ALL|wx.EXPAND,20)
+        mainSizer.Add(buttonSizer,1,wx.ALL|wx.EXPAND,10)
+ 
+        #Set the main sizer to the panel
+        self.SetSizer(mainSizer)
+
+        #Set size        
+        mainSizer.Fit(self)
+        
+        #Set the first line as default
+        self.ChangeLine(self.variables[0])
+        
+        #Bind events
+        self.Bind(wx.EVT_COMBOBOX, self.OnLineChange)
+        self.buttonApply.Bind(wx.EVT_BUTTON, self.OnApply)
+    
+    def OnApply(self, event):
+        self.ApplyChanges()
+    
+    def OnLineChange(self, event):
+        
+        if self.plotLines.FindFocus() == self.plotLines:
+            ID = self.plotLines.GetSelection()
+            self.ChangeLine(self.variables[ID])
+    
+    def ApplyChanges(self):
+        
+        ID = self.plotLines.GetSelection()
+        
+        self.variables[ID][3].name = self.plotLineName.GetValue()
+        self.variables[ID][3].style = self.lineStyles[self.plotLineStyle.GetSelection()]
+        self.variables[ID][3].width = float(self.plotWidth.GetValue())
+        self.variables[ID][3].color = None if self.plotColor.GetSelection()==0 else self.colors[self.plotColor.GetSelection()].lower()
+        self.variables[ID][3].marker = self.markerStyles[self.plotMarkerStyle.GetSelection()]
+    
+    def ChangeLine(self, var):
+        
+        self.plotLineStyle.SetSelection(self.LineStyleDict[var[3].style])
+        self.plotMarkerStyle.SetSelection(self.MarkerStyleDict[var[3].marker])
+        self.plotLineName.SetValue(var[3].name)
+        self.plotWidth.SetValue(str(var[3].width))
+        
+        if var[3].color == None:
+            self.plotColor.SetSelection(0)
+        else:
+            self.plotColor.SetSelection(self.ColorsDict[var[3].color[0].upper()+var[3].color[1:]])
+        
+    def GetValues(self):
+        return self.LegendDict[self.plotLegend.GetValue()]
+    
         
 class DialogAxisLabels(wx.Dialog):
     def __init__(self, parent, plotPage):
@@ -601,6 +826,7 @@ class DialogAxisLabels(wx.Dialog):
         plotYMinStatic = wx.StaticText(self, -1, "Min",size =(50,-1))
         plotYLabelStatic = wx.StaticText(self, -1, "Label")
         plotYScaleStatic = wx.StaticText(self, -1, "Scale")
+        
         
         font = plotXAxisStatic.GetFont()
         font.SetWeight(wx.BOLD)
@@ -647,6 +873,8 @@ class DialogAxisLabels(wx.Dialog):
         bagSizer.Add(plotYScaleStatic,(10,0))
         bagSizer.Add(self.plotYScale,(10,1))
         
+        
+        
         bagSizer.AddGrowableCol(1)
         
         #Create OK and Cancel buttons
@@ -655,13 +883,11 @@ class DialogAxisLabels(wx.Dialog):
         #Add information to the sizers
         mainSizer.Add(bagSizer,0,wx.ALL|wx.EXPAND,20)
         mainSizer.Add(buttonSizer,1,wx.ALL|wx.EXPAND,10)
-
-        #Set size
-        #self.SetSize(bagSizer.GetMinSizeTuple())
-        
+ 
         #Set the main sizer to the panel
         self.SetSizer(mainSizer)
-        
+
+        #Set size        
         mainSizer.Fit(self)
     
     def GetValues(self):
@@ -727,6 +953,14 @@ class FilterPanel(wx.Panel):
     def OnTimeVarying(self, event):
         self.tree.HideNodes(hideTimeVarying=self.checkBoxTimeVarying.GetValue())
 
+class Lines_Settings:
+    def __init__(self, name=None):
+        self.width = rcParams["lines.linewidth"]
+        self.style = rcParams["lines.linestyle"]
+        self.marker = rcParams["lines.marker"]
+        self.color = None
+        self.name = name
+
 class PlotPanel(wx.Panel):
     def __init__(self, parent, grid=False,move=True,zoom=False, **kwargs):
         wx.Panel.__init__( self, parent, **kwargs )
@@ -751,6 +985,9 @@ class PlotPanel(wx.Panel):
         self.settings["YAxisMin"] = None
         self.settings["XScale"] = "Linear"
         self.settings["YScale"] = "Linear"
+        self.settings["LegendPosition"] = 0 #"Best" position
+        
+        self.plotVariables = []
 
         self._resizeflag = False
 
@@ -773,6 +1010,34 @@ class PlotPanel(wx.Panel):
         
         self._mouseLeftPressed = False
         self._mouseMoved = False
+    
+    def AddPlotVariable(self, ID, item, data):
+        lineSettings = Lines_Settings(data["name"])
+        self.plotVariables.append([ID,item,data,lineSettings])
+        
+    def GetPlotVariables(self):
+        return self.plotVariables
+        
+    def DeletePlotVariable(self, item=None, ID=None):
+        
+        if item != None:
+            for i,var in enumerate(self.plotVariables):
+                if var[1]==item:
+                    self.plotVariables.pop(i)
+                    break
+                    
+        if ID != None:
+            j = 0
+            while j < len(self.plotVariables):
+                if self.plotVariables[j][0] == ID:
+                    self.plotVariables.pop(j)
+                else:
+                    if ID < self.plotVariables[j][0]:
+                        self.plotVariables[j][0] = self.plotVariables[j][0]-1 
+                    j = j+1
+                    
+                if j==len(self.plotVariables):
+                    break
     
     def OnPass(self, event):
         pass
@@ -946,17 +1211,29 @@ class PlotPanel(wx.Panel):
         self.figure.set_size_inches(float(pixels[0])/self.figure.get_dpi(),
                                     float(pixels[1])/self.figure.get_dpi())
                                      
-    def Draw(self, variables=[]):
+    #def Draw(self, variables=[]):
+    def Draw(self):
         self.subplot.clear()
         self.subplot.hold(True)
 
-        for i in variables:
-            self.subplot.plot(i[1].t, i[1].x,label=i[3])
-        
-        if len(variables) != 0:
-            self.subplot.legend()
-        
+        for i in self.plotVariables:
+            if i[3].color is None:
+                self.subplot.plot(i[2]["traj"].t, i[2]["traj"].x,label=i[3].name,linewidth=i[3].width,marker=i[3].marker,linestyle=i[3].style)
+            else:
+                self.subplot.plot(i[2]["traj"].t, i[2]["traj"].x,label=i[3].name,linewidth=i[3].width,marker=i[3].marker,linestyle=i[3].style, color=i[3].color)
+                
         self.DrawSettings()
+        
+    def GetLines(self):
+        return self.subplot.get_lines()
+        
+    def GetLegendLocation(self):
+        res = self.subplot.get_legend()
+        
+        if res is None:
+            return -1
+        else:
+            return res._loc
 
     def Save(self, filename):
         """
@@ -983,6 +1260,9 @@ class PlotPanel(wx.Panel):
         #Draw Scale settings
         self.subplot.set_xscale(self.settings["XScale"])
         self.subplot.set_yscale(self.settings["YScale"])
+        
+        if len(self.plotVariables) != 0 and self.settings["LegendPosition"] != -1:
+            self.subplot.legend(loc=self.settings["LegendPosition"])
         
         #Draw axis settings
         if self.settings["XAxisMin"] != None:
@@ -1014,7 +1294,7 @@ class PlotPanel(wx.Panel):
         
     def UpdateSettings(self, grid=None, title=None, xlabel=None,
                         ylabel=None, axes=None, move=None, zoom=None,
-                        xscale=None, yscale=None):
+                        xscale=None, yscale=None, legendposition=None):
         """
         Updates the settings dict.
         """
@@ -1039,6 +1319,8 @@ class PlotPanel(wx.Panel):
             self.settings["XScale"] = xscale
         if yscale != None:
             self.settings["YScale"] = yscale
+        if legendposition != None:
+            self.settings["LegendPosition"] = legendposition
 
     def UpdateCursor(self):
         if self.settings["Move"]:
