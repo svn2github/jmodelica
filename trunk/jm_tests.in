@@ -85,7 +85,7 @@ function python_tests() {
   fi 
   PATTERN=----------------------------------------------------------------------
   if [[ "${TAGS_SET}" != "1" ]]; then
-    TAGS="-a stddist -a fmi"
+    TAGS="-a stddist -a fmi -a casadi"
     if [[ "${IPOPT_HOME}" != "" ]]; then
       TAGS="${TAGS} -a ipopt"
       if [[ "${SUNDIALS_HOME}" != "" ]]; then
