@@ -376,31 +376,36 @@ class MainGUI(wx.Frame):
         
         ID = self.tree.FindIndexParent(item)
         IDPlot = self.noteBook.GetSelection()
-
-        #Store plot variables or "unstore"
-        if self.tree.IsItemChecked(item): #Draw
-
-            data = self.tree.GetPyData(item)
-            
-            #Add to Plot panel
-            self.noteBook.GetPage(IDPlot).AddPlotVariable(ID,item,data)
-            
-        else: #Undraw
         
-            #Remove from panel
-            self.noteBook.GetPage(IDPlot).DeletePlotVariable(item)
+        if IDPlot != -1: #If there exist a plot window
+        
+            #Store plot variables or "unstore"
+            if self.tree.IsItemChecked(item): #Draw
+
+                data = self.tree.GetPyData(item)
+                
+                #Add to Plot panel
+                self.noteBook.GetPage(IDPlot).AddPlotVariable(ID,item,data)
+                
+            else: #Undraw
             
-        self.noteBook.GetPage(IDPlot).Draw()
+                #Remove from panel
+                self.noteBook.GetPage(IDPlot).DeletePlotVariable(item)
+                
+            self.noteBook.GetPage(IDPlot).Draw()
+            
+            lines = self.noteBook.GetPage(IDPlot).GetLines()
+            if len(lines) != 0:
+                #Enable Lines and Legends
+                self.editLinesLegends.Enable(True)
+            else:
+                #Disable Lines and Legends
+                self.editLinesLegends.Enable(False)
+        
+        else: #Dont allow an item to be checked if there exist no plot window
+            self.tree.CheckItem2(item,checked=False,torefresh=True)
         
         self.SetStatusText("")
-        
-        lines = self.noteBook.GetPage(IDPlot).GetLines()
-        if len(lines) != 0:
-            #Enable Lines and Legends
-            self.editLinesLegends.Enable(True)
-        else:
-            #Disable Lines and Legends
-            self.editLinesLegends.Enable(False)
         
     def OnKeyPress(self, event):
         keycode = event.GetKeyCode() #Get the key pressed
@@ -433,6 +438,7 @@ class MainGUI(wx.Frame):
         #Disable changing of labels and axis if there is no Plot
         if self.noteBook.GetPageCount() == 1:
             self.editAxisLabels.Enable(False)
+            self.editLinesLegends.Enable(False)
                             
     def OnTabChanging(self, event):
         IDPlot = self.noteBook.GetSelection()
