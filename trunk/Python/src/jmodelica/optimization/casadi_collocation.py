@@ -1756,6 +1756,7 @@ class Radau2Collocator(CasadiCollocator):
         if c_i.numel() == 0:
             c_i = []
         c = casadi.vertcat([c_e, c_i])
+        self.c = c
         
         # Create constraint function
         if self.graph == 'MX' or self.graph == 'expanded_MX':
@@ -1995,6 +1996,7 @@ class Radau2Collocator(CasadiCollocator):
             n_c_e = self.c_e.numel()
             self.c_e = self.c_fcn.outputSX()[:n_c_e]
             self.c_i = self.c_fcn.outputSX()[n_c_e:]
+            self.c = casadi.vertcat([self.c_e, self.c_i])
             
             # Reset user provided options and initialize
             for (k, v) in self.CasADi_options_G.iteritems():
@@ -2017,16 +2019,16 @@ class Radau2Collocator(CasadiCollocator):
         if self.exact_Hessian:
             # Lagrange multipliers and objective function scaling
             if self.graph == 'MX':
-                lam = casadi.MX("lambda", self.c_e.numel())
+                lam = casadi.MX("lambda", self.c.numel())
                 sigma = casadi.MX("sigma")
             elif self.graph == "SX" or self.graph == 'expanded_MX':
-                lam = casadi.symbolic("lambda", self.c_e.numel())
+                lam = casadi.symbolic("lambda", self.c.numel())
                 sigma = casadi.symbolic("sigma")
             else:
                 raise ValueError('Unknown CasADi graph %s.' % self.graph)
             
             # Lagrangian
-            lag_exp = sigma * self.cost + casadi.inner_prod(lam, self.c_e)
+            lag_exp = sigma * self.cost + casadi.inner_prod(lam, self.c)
             if self.graph == 'MX':
                 L = casadi.MXFunction([self.xx, lam, sigma], [lag_exp])
             elif self.graph == "SX" or self.graph == 'expanded_MX':
