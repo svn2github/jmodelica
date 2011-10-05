@@ -9,6 +9,84 @@
   <title>Release notes</title>
 
   <section>
+    <title>Release notes for JModelica.org version 1.6</title>
+
+    <section>
+      <title>Highlights</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>A new derivative free parameter optimization algorithm for
+          FMUs</para>
+        </listitem>
+
+        <listitem>
+          <para>A new pseudo spectral optimization algorithm</para>
+        </listitem>
+
+        <listitem>
+          <para>Support for index reduction</para>
+        </listitem>
+
+        <listitem>
+          <para>A new graphical user interface for plotting of simulation and
+          optimization results</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Compilers</title>
+
+      <para></para>
+    </section>
+
+    <section>
+      <title>Python interface</title>
+
+      <para></para>
+    </section>
+
+    <section>
+      <title>Optimization</title>
+
+      <para></para>
+    </section>
+
+    <section>
+      <title>Contributors</title>
+
+      <para>Christian Andersson</para>
+
+      <para>Tove Bergdahl</para>
+
+      <para>Sofia Gedda</para>
+
+      <para>Magnus Gäfvert</para>
+
+      <para>Fredrik Magnusson</para>
+
+      <para>Jesper Mattsson</para>
+
+      <para>Johan Ylikiiskilä</para>
+
+      <para>Johan Åkesson</para>
+
+      <section>
+        <title>Previous contributors</title>
+
+        <para>Philip Nilsson</para>
+
+        <para>Roberto Parrotto</para>
+
+        <para>Jens Rantil</para>
+
+        <para>Philip Reuterswärd</para>
+      </section>
+    </section>
+  </section>
+
+  <section>
     <title>Release notes for JModelica.org version 1.5</title>
 
     <section>
@@ -544,41 +622,13 @@ yres = res['y']
           to encode Lagrange cost functions of the type</para>
 
           <informalequation>
-            <m:math display="block">
-              <m:mrow>
-                <m:munderover>
-                  <m:mo>∫</m:mo>
-
-                  <m:msub>
-                    <m:mi>t</m:mi>
-
-                    <m:mi>0</m:mi>
-                  </m:msub>
-
-                  <m:msub>
-                    <m:mi>t</m:mi>
-
-                    <m:mi>f</m:mi>
-                  </m:msub>
-                </m:munderover>
-
-                <m:mrow>
-                  <m:mrow>
-                    <m:mi>L</m:mi>
-
-                    <m:mo>⁡</m:mo>
-
-                    <m:mfenced>
-                      <m:mi>.</m:mi>
-                    </m:mfenced>
-                  </m:mrow>
-
-                  <m:mspace depth="0.5ex" height="0.5ex" width="1ex" />
-
-                  <m:mtext>dt</m:mtext>
-                </m:mrow>
-              </m:mrow>
-            </m:math>
+            <m:math display="block"><m:mrow> <m:munderover> <m:mo>∫</m:mo>
+            <m:msub> <m:mi>t</m:mi> <m:mi>0</m:mi> </m:msub> <m:msub>
+            <m:mi>t</m:mi> <m:mi>f</m:mi> </m:msub> </m:munderover> <m:mrow>
+            <m:mrow> <m:mi>L</m:mi> <m:mo>⁡</m:mo> <m:mfenced> <m:mi>.</m:mi>
+            </m:mfenced> </m:mrow> <m:mspace depth="0.5ex" height="0.5ex"
+            width="1ex"></m:mspace> <m:mtext>dt</m:mtext> </m:mrow>
+            </m:mrow></m:math>
           </informalequation>
 
           <para>the Optimica class attribute
