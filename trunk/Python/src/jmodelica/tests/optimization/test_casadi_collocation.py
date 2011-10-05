@@ -153,17 +153,21 @@ class TestRadau2:
         """Test optimizing based on an existing optimization reult."""
         model = self.model_VDP_bounds_Mayer
         
+        # References values
+        cost_ref = 3.19495079586595e0
+        u_norm_ref = 2.80997269112246e-1
+        
         opts = model.optimize_options(self.algorithm)
         opts['n_e'] = 40
         opts['n_cp'] = 2
         res = model.optimize(self.algorithm, opts)
-        assert_results(res, 2.8626448086446e0, 2.86716530287e-1)
+        assert_results(res, cost_ref, u_norm_ref)
         
         opts['n_e'] = 75
         opts['n_cp'] = 4
         opts['init_traj'] = ResultDymolaTextual("VDP_pack_VDP_Opt2_result.txt")
         res = model.optimize(self.algorithm, opts)
-        assert_results(res, 2.8731453441917e0, 2.79651683022e-1)
+        assert_results(res, cost_ref, u_norm_ref, 5e-2, 5e-2)
         
     @testattr(casadi = True)
     def test_CSTR_Mayer_and_Lagrange(self):
@@ -213,7 +217,7 @@ class TestRadau2:
         opts['hs'] = (4 * [0.01] + 2 * [0.05] + 10 * [0.02] + 5 * [0.02] + 
                      2 * [0.28])
         res = model.optimize(self.algorithm, opts)
-        assert_results(res, 2.8725837143130e0, 3.23454473152e-1)
+        assert_results(res, 3.174936706809e0, 3.707273799325e-1)
     
     @testattr(casadi = True)
     def test_free_element_lengths(self):
@@ -221,8 +225,8 @@ class TestRadau2:
         model = self.model_VDP_bounds_Mayer
         
         # References values
-        cost_ref = 3.927658955199e0
-        u_norm_ref = 3.800349369066e-1
+        cost_ref = 4.226631156609e0
+        u_norm_ref = 3.89087345490e-1
         
         # Free element lengths data
         c = 0.5
@@ -299,8 +303,8 @@ class TestRadau2:
         model = self.model_VDP_bounds_Lagrange
         
         # References values
-        cost_ref = 2.8731453597567e0
-        u_norm_ref = 2.794322054089e-1
+        cost_ref = 3.17495094634053e0
+        u_norm_ref = 2.84538299160e-1
         
         # Collocation points
         opts = model.optimize_options(self.algorithm)
@@ -327,15 +331,15 @@ class TestRadau2:
         opts['n_cp'] = 3
         opts['blocking_factors'] = opts['n_e'] * [1]
         res = model.optimize(self.algorithm, opts)
-        assert_results(res, 2.9414928549335e0, 2.830653018537e-1,
-                       cost_rtol=1.5e-1, u_norm_rtol=5e-2)
+        assert_results(res, 4.6794608506686e0, 3.23598449250e-1,
+                       cost_rtol=8e-2, u_norm_rtol=3e-2)
         
         opts['n_e'] = 20
         opts['n_cp'] = 4
         opts['blocking_factors'] = [1, 2, 1, 1, 2, 13]
         res = model.optimize(self.algorithm, opts)
-        assert_results(res, 8.3561931655395, 4.57767608709e-1,
-                       cost_rtol=1.5e-1, u_norm_rtol=5e-2)
+        assert_results(res, 9.508434744576, 4.173168764353e-1,
+                       cost_rtol=8e-2, u_norm_rtol=3e-2)
     
     @testattr(casadi = True)
     def test_eliminate_der_var(self):
@@ -346,8 +350,8 @@ class TestRadau2:
         model_Lagrange = self.model_VDP_bounds_Lagrange
         
         # References values
-        cost_ref = 2.8730955269669685e0
-        u_norm_ref = 2.80098775976e-1
+        cost_ref = 3.17619580332244e0
+        u_norm_ref = 2.8723837585e-1
         
         # Keep derivative variables
         opts = model_Lagrange.optimize_options(self.algorithm)
@@ -376,8 +380,8 @@ class TestRadau2:
         model = self.model_VDP_bounds_Mayer
         
         # References values
-        cost_ref = 2.8730955269669685e0
-        u_norm_ref = 2.80098775976e-1
+        cost_ref = 3.17619580332244e0
+        u_norm_ref = 2.8723837585e-1
         
         # Keep continuity variables
         opts = model.optimize_options(self.algorithm)
@@ -403,20 +407,20 @@ class TestRadau2:
         opts['n_e'] = 100
         opts['n_cp'] = 1
         res = model.optimize(self.algorithm, opts)
-        assert_results(res, 2.471555915589e0, 2.578857243e-1)
+        assert_results(res, 2.58046279958e0, 2.567510746260e-1)
         
         # n_cp = 3
         opts['n_e'] = 50
         opts['n_cp'] = 3
         res = model.optimize(self.algorithm, opts)
-        assert_results(res, 2.8730955269669e0, 2.800987759761e-1)
+        assert_results(res, 3.1761957722665e0, 2.87238440058e-1)
         
         # n_cp = 8
         opts['n_e'] = 20
         opts['n_cp'] = 8
         opts['init_traj'] = ResultDymolaTextual("VDP_pack_VDP_Opt2_result.txt")
         res = model.optimize(self.algorithm, opts)
-        assert_results(res, 2.8731453593189755e0, 2.823304724e-1)
+        assert_results(res, 3.17620203643878e0, 2.803233013e-1)
         
     @testattr(casadi = True)
     def test_graphs_and_exact_Hessian(self):
@@ -429,8 +433,8 @@ class TestRadau2:
         model = self.model_VDP_bounds_Lagrange
         
         # References values
-        cost_ref = 2.87290424868901e0
-        u_norm_ref = 2.800987759761e-1
+        cost_ref = 3.17619580332244e0
+        u_norm_ref = 2.8723837585e-1
         
         # Solve problem to get initialization trajectory
         opts = model.optimize_options(self.algorithm)
@@ -480,7 +484,6 @@ class TestRadau2:
         opts['eliminate_der_var'] = True
         opts['eliminate_cont_var'] = True
         res = model.optimize(self.algorithm, opts)
-        sol_with = res.times['sol']
         assert_results(res, cost_ref, u_norm_ref)
         
         # MX without exact Hessian and eliminated variables
@@ -488,8 +491,6 @@ class TestRadau2:
         opts['eliminate_der_var'] = False
         opts['eliminate_cont_var'] = False
         res = model.optimize(self.algorithm, opts)
-        sol_without = res.times['sol']
-        nose.tools.assert_true(sol_with < 0.9 * sol_without)
         assert_results(res, cost_ref, u_norm_ref)
         
     @testattr(casadi = True)
@@ -500,8 +501,8 @@ class TestRadau2:
         model = self.model_VDP_bounds_Mayer
         
         # References values
-        cost_ref = 2.87290424868901e0
-        u_norm_ref = 2.800987759761e-1
+        cost_ref = 3.17619580332244e0
+        u_norm_ref = 2.8723837585e-1
         
         # numeric_jacobian = True
         opts = model.optimize_options(self.algorithm)

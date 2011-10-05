@@ -73,7 +73,7 @@ package VDP_pack
     Real x1(start=0, fixed=true) "First state";
     Real x2(start=1, fixed=true) "Second state";
     
-    input Real u "Control signal";
+    input Real u(max=0.75) "Control signal";
   
   equation
     der(x1) = (1 - x2^2) * x1 - x2 + u;
@@ -104,7 +104,7 @@ package VDP_pack
     Real x1(start=0, fixed=true) "First state";
     Real x2(start=1, fixed=true) "Second state";
     
-    input Real u "Control signal";
+    input Real u(max=0.75) "Control signal";
     
     Real cost(start=0, fixed=true) "Cost state";
 

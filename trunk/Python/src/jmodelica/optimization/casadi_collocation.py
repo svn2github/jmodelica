@@ -1340,7 +1340,14 @@ class Radau2Collocator(CasadiCollocator):
                 element += factor
         
         # Index state continuity variables
-        if not self.eliminate_cont_var:
+        if self.eliminate_cont_var:
+            for i in xrange(2, self.n_e + 1):
+                var[i][0] = {}
+                var_indices[i][0] = {}
+                
+                var[i][0]['x'] = var[i - 1][self.n_cp]['x']
+                var_indices[i][0]['x'] = var_indices[i - 1][self.n_cp]['x']
+        else:
             for i in xrange(2, self.n_e + 1):
                 var[i][0] = {}
                 var_indices[i][0] = {}
@@ -1637,20 +1644,10 @@ class Radau2Collocator(CasadiCollocator):
         # Create list of state matrices
         x_list = [[]]
         self.x_list = x_list
-        x_i = [var[1][k]['x'] for k in xrange(self.n_cp + 1)]
-        x_i = casadi.horzcat(x_i)
-        x_list += [x_i]
-        if not self.eliminate_cont_var:
-            for i in xrange(2, self.n_e + 1):
-                x_i = [var[i][k]['x'] for k in xrange(self.n_cp + 1)]
-                x_i = casadi.horzcat(x_i)
-                x_list += [x_i]
-        else:
-            for i in xrange(2, self.n_e + 1):
-                x_i = [var[i - 1][self.n_cp]['x']]
-                x_i += [var[i][k]['x'] for k in xrange(1, self.n_cp + 1)]
-                x_i = casadi.horzcat(x_i)
-                x_list += [x_i]
+        for i in xrange(1, self.n_e + 1):
+            x_i = [var[i][k]['x'] for k in xrange(self.n_cp + 1)]
+            x_i = casadi.horzcat(x_i)
+            x_list += [x_i]
         
         # Initial conditions
         i = 1
@@ -2299,26 +2296,10 @@ class Radau2Collocator(CasadiCollocator):
                     t_index += 1
             if self.eliminate_der_var:
                 t_index = 0
-                ecv = self.eliminate_cont_var
-                i = 1
-                for k in xrange(0, self.n_cp + 1):
-                    dx_i_k = 0
-                    for l in xrange(0, self.n_cp + 1):
-                        x_i_l = self.nlp_opt[var_indices[i][l]['x']]
-                        dx_i_k += (1. / h_opt[i] * x_i_l * 
-                                   self.pol.eval_basis_der(l,
-                                                           self.pol.p[k]))
-                    var_opt['dx'][t_index, :] = dx_i_k.reshape(-1)
-                    t_index += 1
-                for i in xrange(2, self.n_e + 1):
-                    for k in xrange(1, self.n_cp + 1):
-                        l = 0
-                        x_i_l = self.nlp_opt[
-                                var_indices[i - ecv][ecv * self.n_cp]['x']]
-                        dx_i_k = (1. / h_opt[i] * x_i_l * 
-                                  self.pol.eval_basis_der(l,
-                                                          self.pol.p[k]))
-                        for l in xrange(1, self.n_cp + 1):
+                for i in xrange(1, self.n_e + 1):
+                    for k in time_points[i]:
+                        dx_i_k = 0
+                        for l in xrange(self.n_cp + 1):
                             x_i_l = self.nlp_opt[var_indices[i][l]['x']]
                             dx_i_k += (1. / h_opt[i] * x_i_l * 
                                        self.pol.eval_basis_der(
