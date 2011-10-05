@@ -44,7 +44,8 @@
     <section>
       <title>Python interface</title>
 
-      <para></para>
+      <para>The Python simulation interface have been improved with support
+      for input functions as an addition to input data matrices.</para>
     </section>
 
     <section>

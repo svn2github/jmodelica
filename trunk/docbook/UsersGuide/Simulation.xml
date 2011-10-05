@@ -171,57 +171,79 @@ plt.show()
 
       <para>The start and final time attributes are simply the time where the
       solver should start the integration and stop the integration. The input
-      however is a bit more complex. The input defines the input trajectories
-      to the model and should be a 2-tuple consisting of the name(s) of the
-      input variables and the second argument should be a data matrix with the
-      time vector as the first column and the second column should correspond
-      to the first name in the first argument and so forth.</para>
+      however is a bit more complex and is described in more detail in the
+      following section. The algorithm attribute is where the different
+      simulation package can be specified, however currently only a connection
+      to Assimulo is supported and connected through the algorithm
+      <literal>AssimuloAlg</literal> for <literal>JMUModel</literal> and
+      <literal>AssimuloFMIAlg</literal> for
+      <literal>FMUModel</literal>.</para>
 
-      <para>For example, consider that we have a model with an input variable
-      <literal>u1 </literal>and that the model should be driven by a sinus
-      wave as input. Also we are interested in the interval 0 to 10.</para>
+      <section>
+        <title>Input</title>
 
-      <programlisting language="python">t = N.linspace(0.,10.,100) #Create one hundred evenly spaced points
+        <para>The input defines the input trajectories to the model and should
+        be a 2-tuple consisting of the name(s) of the input variables and the
+        second argument should be either a data matrix or a function. If the
+        argument is a data matrix it should contain a time vector as the first
+        column and the second column should correspond to the first name in
+        the first argument and so forth. If instead the second argument is a
+        function it should be defined to take the time as input and return the
+        number of inputs in the order defined by the first argument.</para>
+
+        <para>For example, consider that we have a model with an input
+        variable <literal>u1 </literal>and that the model should be driven by
+        a sinus wave as input. Also we are interested in the interval 0 to
+        10.</para>
+
+        <programlisting language="python">t = N.linspace(0.,10.,100) #Create one hundred evenly spaced points
 u = N.sin(t) #Create the input vector
 u_traj = N.transpose(N.hstack((t,u))) #Create the data matrix and transpose 
                                       #it to the correct form
 </programlisting>
 
-      <para>The above code have created the data matrix that we are interested
-      in giving to the model as input, we just need to connect the data to a
-      specific input variable, <literal>u1</literal>:</para>
+        <para>The above code have created the data matrix that we are
+        interested in giving to the model as input, we just need to connect
+        the data to a specific input variable, <literal>u1</literal>:</para>
 
-      <programlisting language="python">input_model = ('u1', u_traj)
+        <programlisting language="python">input_object = ('u1', u_traj)
 </programlisting>
 
-      <para>Now we are ready to simulate using the input and simulate 10
-      seconds.</para>
+        <para>Now we are ready to simulate using the input and simulate 10
+        seconds.</para>
 
-      <programlisting language="python">res = model.simulate(final_time=10, input=input_model)
+        <programlisting language="python">res = model.simulate(final_time=10, input=input_object)
 </programlisting>
 
-      <para>If we on the other hand would have two input variables, u1 and u2
-      the script would instead look like:</para>
+        <para>If we on the other hand would have two input variables, u1 and
+        u2 the script would instead look like:</para>
 
-      <programlisting language="python">t = N.linspace(0.,10.,100) #Create one hundred evenly spaced points
+        <programlisting language="python">t = N.linspace(0.,10.,100) #Create one hundred evenly spaced points
 u1 = N.sin(t) #Create the first input vector
 u2 = N.cos(t) #Create the second input vector
 u_traj = N.transpose(N.hstack((t,u1,u2))) #Create the data matrix and 
                                           #transpose it to the correct form
 
-input_model = (['u1','u2'], u_traj)
+input_object = (['u1','u2'], u_traj)
 
-res = model.simulate(final_time=10, input=input_model)
+res = model.simulate(final_time=10, input=input_object)
 </programlisting>
 
-      <para>Note that the variables are now a List of variables.</para>
+        <para>Note that the variables are now a List of variables.</para>
 
-      <para>The algorithm attribute is where the different simulation package
-      can be specified, however currently only a connection to Assimulo is
-      supported and connected through the algorithm
-      <literal>AssimuloAlg</literal> for <literal>JMUModel</literal> and
-      <literal>AssimuloFMIAlg</literal> for
-      <literal>FMUModel</literal>.</para>
+        <para>If we were to do the same example using input functions instead,
+        the code would like for the single input case:</para>
+
+        <programlisting>input_object = ('u1', N.sin)</programlisting>
+
+        <para>and for the double input case:</para>
+
+        <programlisting>def input_function(t):
+    return N.array([N.sin(t),N.cos(t)])
+
+input_object = (['u1','u2'],input_function)
+</programlisting>
+      </section>
 
       <section>
         <title>Options for JMUModel</title>
