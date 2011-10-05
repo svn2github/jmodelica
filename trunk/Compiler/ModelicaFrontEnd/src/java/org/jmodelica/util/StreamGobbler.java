@@ -20,10 +20,16 @@ public class StreamGobbler extends Thread {
     public void run() {
         try {
         	try {
-				byte[] b = new byte[64];
+        		// Write to output as soon as data is available.
+				byte[] b = new byte[128];
 				int n;
-				while ((n = is.read(b)) > 0)
+				while ((n = is.read(b, 0, 1)) > 0) {
+					int m = is.available();
+					if (m > b.length - 1)
+						m = b.length - 1;
+					n += is.read(b, 1, m);
 					os.write(b, 0, n);
+				}
 				os.flush();
 	        } finally {
 	        	is.close();

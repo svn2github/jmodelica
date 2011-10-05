@@ -54,7 +54,7 @@ aspect SimpleClassLookup {
 	eq FullClassDecl.getChild().simpleLookupClass(String name)      = simpleLookupClassDefaultScope(name);
 	eq Program.getChild().simpleLookupClass(String name)            = simpleLookupClassDefaultScope(name);
 	
-	syn ClassDecl FullClassDecl.simpleLookupClassDotted(String name) {
+	syn ClassDecl ClassDecl.simpleLookupClassDotted(String name) {
 		String[] parts = name.split("\\.");
 		ClassDecl cd = this;
 		for (String part : parts) {
@@ -63,6 +63,12 @@ aspect SimpleClassLookup {
 				return null;
 		}
 		return cd;
+	}
+	
+	syn ClassDecl Program.simpleLookupClassDotted(String name) {
+		String[] parts = name.split("\\.", 2);
+		ClassDecl base = simpleLookupClassDefaultScope(parts[0]);
+		return (base == null || parts.length == 1) ? base : base.simpleLookupClassDotted(parts[1]);
 	}
 	
 	inh ClassDecl Access.simpleLookupClassGlobalScope(String name);

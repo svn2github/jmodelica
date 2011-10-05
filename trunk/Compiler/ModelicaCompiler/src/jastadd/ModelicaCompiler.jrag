@@ -381,9 +381,9 @@ public class ModelicaCompiler {
 	/**
 	 * Calls the hook to be called after output code is generated.
 	 */
-	protected void hookCodeGenerated() {
+	protected void hookCodeGenerated(File dir) {
 		for (CompilationHooks hooks : hooksList)
-			hooks.codeGenerated();
+			hooks.codeGenerated(dir);
 	}
 	
 	/**
@@ -397,7 +397,7 @@ public class ModelicaCompiler {
 	/**
 	 * Calls the hook to be called after the FMU is packed.
 	 */
-	protected void hookFmuPacked(String path) {
+	protected void hookFmuPacked(File path) {
 		for (CompilationHooks hooks : hooksList)
 			hooks.fmuPacked(path);
 	}
@@ -808,7 +808,7 @@ public class ModelicaCompiler {
 			out.setMethod(ZipOutputStream.DEFLATED);
 			zipDir(outDir, out);
 			out.close();
-			hookFmuPacked(unitFile.getAbsolutePath());
+			hookFmuPacked(unitFile.getAbsoluteFile());
 		} catch(CompilationAbortedException e) {
 			deleteOutDir();
 			throw e;
@@ -1357,7 +1357,7 @@ public class ModelicaCompiler {
 		output = new File(sourceDir, name + ".c").getPath();
 		cgenerator.generate(getCTemplatefile(fc), output);
 
-		hookCodeGenerated();
+		hookCodeGenerated(outDir);
 		log.debug("... code generated.");
 	}
 	
@@ -1926,7 +1926,7 @@ public interface CompilationHooks {
 	/**
 	 * Called after output code is generated.
 	 */
-	public void codeGenerated();
+	public void codeGenerated(File dir);
 	
 	/**
 	 * Called after the generated C code is compiled.
@@ -1936,7 +1936,7 @@ public interface CompilationHooks {
 	/**
 	 * Called after the FMU is packed.
 	 */
-	public void fmuPacked(String path);
+	public void fmuPacked(File path);
 }
 
 public class JModelicaHomeNotFoundException extends Exception {
