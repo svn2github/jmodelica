@@ -24,7 +24,8 @@ import ctypes as ct
 import matplotlib.pyplot as plt
 
 # Import the JModelica.org Python packages
-from jmodelica.casadi_interface import compile_casadi, CasadiModel
+from jmodelica.fmi import compile_fmux
+from jmodelica.casadi_interface import CasadiModel
 from jmodelica.jmi import compile_jmu, JMUModel
 from jmodelica.optimization.casadi_collocation import RadauCollocator, ParameterEstimationData
 
@@ -38,7 +39,7 @@ def run_demo(with_plots=True, algorithm="CasadiRadau"):
     curr_dir = os.path.dirname(os.path.abspath(__file__));
 
     # Compile the Optimica model to an XML file
-    model_name = compile_casadi("ParEst.ParEstCasADi",
+    model_name = compile_fmux("ParEst.ParEstCasADi",
         curr_dir+"/files/ParameterEstimation_1.mop")
     
     # Load the model

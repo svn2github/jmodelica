@@ -74,7 +74,7 @@ import org.jmodelica.util.OptionRegistry;
  */
 public class OptimicaCompiler extends ModelicaCompiler {
 	
-	private String optimicaCTemplatefile;
+	private String optimicaCTemplatefile = null;
 	
 	public OptimicaCompiler(OptionRegistry options, String xmlTpl, 
 			String xmlValuesTpl, String cTemplatefile, 
@@ -85,16 +85,34 @@ public class OptimicaCompiler extends ModelicaCompiler {
 	
 	public OptimicaCompiler(OptionRegistry options) {
 		super(options);
-		defaultTemplate();
 	}
 	
 	protected OptimicaCompiler() {
 		super();
-		defaultTemplate();
 	}
 	
 	private void defaultTemplate() {
-		this.optimicaCTemplatefile = new File(getTemplatesDir(), "jmi_optimica_template.c").getPath();
+		optimicaCTemplatefile = (optimicaCTemplatefile == null) ? new File(getTemplatesDir(), "jmi_optimica_template.c").getPath() : optimicaCTemplatefile;
+	}
+	
+	public void defaultTemplatePathsJMU() {
+		super.defaultTemplatePathsJMU();
+		defaultTemplate();
+	}
+	
+	public void defaultTemplatePathsFMUME() {
+		super.defaultTemplatePathsFMUME();
+		defaultTemplate();
+	}
+	
+	public void defaultTemplatePathsFMUCS() {
+		super.defaultTemplatePathsFMUCS();
+		defaultTemplate();
+	}
+	
+	public void defaultTemplatePathsFMUX() {
+		super.defaultTemplatePathsFMUX();
+		optimicaCTemplatefile = null;
 	}
 	
 	/**

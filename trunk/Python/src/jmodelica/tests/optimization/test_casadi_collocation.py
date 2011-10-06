@@ -29,8 +29,9 @@ from jmodelica.io import ResultDymolaTextual
 from jmodelica.examples import *
 
 try:
+    from jmodelica.fmi import compile_fmux
     from jmodelica.optimization.casadi_collocation import *
-    from jmodelica.casadi_interface import compile_casadi, CasadiModel
+    from jmodelica.casadi_interface import CasadiModel
 except NameError, ImportError:
     pass
     #logging.warning('Could not load Casadi collocation. Check jmodelica.check_packages()')
@@ -69,12 +70,12 @@ class TestRadau:
         """Compile the test models."""
         file_path = os.path.join(get_files_path(), 'Modelica', 'VDP.mop')
         class_path = "VDP_pack.VDP_Opt2"
-        compile_casadi(class_path, file_path)
+        compile_fmux(class_path, file_path)
         
     def setUp(self):
         """Load the test models."""
-        JMU_VDP = 'VDP_pack_VDP_Opt2.jmu'
-        self.model_VDP = CasadiModel(JMU_VDP)
+        FMUX_VDP = 'VDP_pack_VDP_Opt2.fmux'
+        self.model_VDP = CasadiModel(FMUX_VDP)
     
     @testattr(casadi = True)
     def test_VDP(self):
@@ -108,43 +109,43 @@ class TestRadau2:
         """Compile the test models."""
         file_path = os.path.join(get_files_path(), 'Modelica', 'VDP.mop')
         class_path = "VDP_pack.VDP_Opt_Bounds_Lagrange"
-        compile_casadi(class_path, file_path)
+        compile_fmux(class_path, file_path)
         
         file_path = os.path.join(get_files_path(), 'Modelica', 'VDP.mop')
         class_path = "VDP_pack.VDP_Opt_Bounds_Mayer"
-        compile_casadi(class_path, file_path)
+        compile_fmux(class_path, file_path)
         
         file_path = os.path.join(get_files_path(), 'Modelica', 'VDP.mop')
         class_path = "VDP_pack.VDP_Opt_Constraints_Mayer"
-        compile_casadi(class_path, file_path)
+        compile_fmux(class_path, file_path)
         
         file_path = os.path.join(get_files_path(), 'Modelica', 'CSTR.mop')
         class_path = "CSTR.CSTR_Opt_Bounds_Lagrange"
-        compile_casadi(class_path, file_path)
+        compile_fmux(class_path, file_path)
         
         file_path = os.path.join(get_files_path(), 'Modelica', 'CSTR.mop')
         class_path = "CSTR.CSTR_Opt_Bounds_Mayer"
-        compile_casadi(class_path, file_path)
+        compile_fmux(class_path, file_path)
     
     def setUp(self):
         """Load the test models."""
-        JMU_VDP_bounds_Lagrange = 'VDP_pack_VDP_Opt_Bounds_Lagrange.jmu'
-        self.model_VDP_bounds_Lagrange = CasadiModel(JMU_VDP_bounds_Lagrange)
+        FMUX_VDP_bounds_Lagrange = 'VDP_pack_VDP_Opt_Bounds_Lagrange.fmux'
+        self.model_VDP_bounds_Lagrange = CasadiModel(FMUX_VDP_bounds_Lagrange)
         
-        JMU_VDP_bounds_Mayer = 'VDP_pack_VDP_Opt_Bounds_Mayer.jmu'
-        self.model_VDP_bounds_Mayer = CasadiModel(JMU_VDP_bounds_Mayer)
+        FMUX_VDP_bounds_Mayer = 'VDP_pack_VDP_Opt_Bounds_Mayer.fmux'
+        self.model_VDP_bounds_Mayer = CasadiModel(FMUX_VDP_bounds_Mayer)
         
-        JMU_VDP_constraints_Mayer = 'VDP_pack_VDP_Opt_Constraints_Mayer.jmu'
+        FMUX_VDP_constraints_Mayer = 'VDP_pack_VDP_Opt_Constraints_Mayer.fmux'
         self.model_VDP_constraints_Mayer = CasadiModel(
-                JMU_VDP_constraints_Mayer)
+                FMUX_VDP_constraints_Mayer)
         
-        JMU_CSTR_Lagrange = "CSTR_CSTR_Opt_Bounds_Lagrange.jmu"
-        self.model_CSTR_Lagrange = CasadiModel(JMU_CSTR_Lagrange)
-        self.model_CSTR_scaled_Lagrange = CasadiModel(JMU_CSTR_Lagrange,
+        FMUX_CSTR_Lagrange = "CSTR_CSTR_Opt_Bounds_Lagrange.fmux"
+        self.model_CSTR_Lagrange = CasadiModel(FMUX_CSTR_Lagrange)
+        self.model_CSTR_scaled_Lagrange = CasadiModel(FMUX_CSTR_Lagrange,
                                                       enable_scaling=True)
         
-        JMU_CSTR_Mayer = "CSTR_CSTR_Opt_Bounds_Mayer.jmu"
-        self.model_CSTR_Mayer = CasadiModel(JMU_CSTR_Mayer)
+        FMUX_CSTR_Mayer = "CSTR_CSTR_Opt_Bounds_Mayer.fmux"
+        self.model_CSTR_Mayer = CasadiModel(FMUX_CSTR_Mayer)
         
         self.algorithm = "CasadiRadau2"
     
@@ -529,19 +530,19 @@ class TestPseudoSpectral:
         """Compile the test models."""
         file_path = os.path.join(get_files_path(), 'Modelica', 'VDP.mop')
         class_path = "VDP_pack.VDP_Opt2"
-        compile_casadi(class_path, file_path)
+        compile_fmux(class_path, file_path)
         
         file_path = os.path.join(get_files_path(), 'Modelica', 'TwoState.mop')
         class_path = "TwoState"
-        compile_casadi(class_path, file_path)
+        compile_fmux(class_path, file_path)
     
     def setUp(self):
         """Load the test models."""
-        JMU_VDP = 'VDP_pack_VDP_Opt2.jmu'
-        self.model_VDP = CasadiModel(JMU_VDP)
+        FMUX_VDP = 'VDP_pack_VDP_Opt2.fmux'
+        self.model_VDP = CasadiModel(FMUX_VDP)
         
-        JMU_two_state = 'TwoState.jmu'
-        self.model_two_state = CasadiModel(JMU_two_state)
+        FMUX_two_state = 'TwoState.fmux'
+        self.model_two_state = CasadiModel(FMUX_two_state)
     
     @testattr(casadi = True)
     def test_two_state(self):
@@ -646,7 +647,7 @@ class TestPseudoSpectral:
         """
         UNCOMMENT WHEN FREE TIME HAVE BEEN FIXED!!!
         
-        jn = compile_casadi("DoubleIntegrator", os.path.join(path_to_mos,"DoubleIntegrator.mop"))
+        jn = compile_fmux("DoubleIntegrator", os.path.join(path_to_mos,"DoubleIntegrator.mop"))
         VDP = CasadiModel(jn)
         
         opts = VDP.optimize_options("CasadiPseudoSpectral")

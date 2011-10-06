@@ -31,8 +31,8 @@ from lxml import etree
 
 import jmodelica.jmi
 from jmodelica import xmlparser
-from jmodelica.core import BaseModel, unzip_unit, get_unit_name, get_temp_location, list_to_string
-from jmodelica.compiler import ModelicaCompiler, OptimicaCompiler
+from jmodelica.core import BaseModel, unzip_unit, get_unit_name, get_temp_location
+from jmodelica.compiler import _get_compiler
 
 """Flags for evaluation of FMI Jacobians
 """
@@ -115,57 +115,95 @@ def compile_fmu(class_name, file_name=[], compiler='modelica',
     if isinstance(file_name, basestring):
         file_name = [file_name]
         
-    # if compiler is 'auto' - detect file suffix
-    if compiler == 'auto':
-        comp = ModelicaCompiler()
-        for f in file_name:
-            basename, ext = os.path.splitext(f)
-            if ext == '.mop':
-                comp = OptimicaCompiler()
-                break
-    else:
-        if compiler.lower() == 'modelica':
-            comp = ModelicaCompiler()
-        elif compiler.lower() == 'optimica':
-            comp = OptimicaCompiler()
-        else:
-            logging.warning("Invalid compiler argument: "+str(compiler) + 
-                ". Using OptimicaCompiler instead.")
-            comp = OptimicaCompiler()
-            
-    # set compiler options
-    for key, value in compiler_options.iteritems():
-        if isinstance(value, bool):
-            comp.set_boolean_option(key, value)
-        elif isinstance(value, basestring):
-            comp.set_string_option(key,value)
-        elif isinstance(value, int):
-            comp.set_integer_option(key,value)
-        elif isinstance(value, float):
-            comp.set_real_options(key,value)
-        elif isinstance(value, list):
-            comp.set_string_option(key, list_to_string(value))
-        else:
-            raise JMIException("Unknown compiler option type for key: %s. \
-            Should be of the following types: boolean, string, integer, \
-            float or list" %key)
+    # get a compiler based on 'compiler' argument or files listed in file_name
+    comp = _get_compiler(files=file_name, selected_compiler=compiler)
     
-    # set compiler log level
-    if compiler_log_level.lower().startswith('w'):
-        comp.set_log_level(ModelicaCompiler.LOG_WARNING)
-    elif compiler_log_level.lower().startswith('e'):
-        comp.set_log_level(ModelicaCompiler.LOG_ERROR)
-    elif compiler_log_level.lower().startswith('i'):
-        comp.set_log_level(ModelicaCompiler.LOG_INFO)
-    else:
-        logging.warning("Invalid compiler_log_level: "+str(compiler_log_level) + 
-        " using level 'warning' instead.")
+    # set compiler options
+    comp.set_options(compiler_options)
+    
+    # set log level
+    comp.set_compiler_log_level(compiler_log_level)
     
     # compile FMU in java
     comp.compile_FMU(class_name, file_name, target, compile_to)
     
-    return os.path.join(compile_to, get_fmu_name(class_name))
+    return os.path.join(compile_to, get_fmu_name(class_name))       
+
+
+def compile_fmux(class_name, file_name=[], compiler='auto', 
+                 compiler_options={}, compile_to='.', 
+                 compiler_log_level='warning'):
+    """ 
+    Compile a Modelica model to an FMUX.
     
+    A model class name must be passed, all other arguments have default values. 
+    The different scenarios are:
+    
+    * Only class_name is passed: 
+        - Class is assumed to be in MODELICAPATH.
+    
+    * class_name and file_name is passed:
+        - file_name can be a single file as a string or a list of file_names 
+          (strings).
+    
+    Library directories can be added to MODELICAPATH by listing them in a 
+    special compiler option 'extra_lib_dirs', for example:
+    
+        compiler_options = 
+            {'extra_lib_dirs':['c:\MyLibs\MyLib1','c:\MyLibs\MyLib2']}
+        
+    Other options for the compiler should also be listed in the compiler_options 
+    dict.
+    
+    
+    Parameters::
+    
+        class_name -- 
+            The name of the model class.
+            
+        file_name -- 
+            Model file (string) or files (list of strings), can be both .mo or 
+            .mop files.
+            Default: Empty list.
+            
+        compiler -- 
+            The compiler used to compile the model.
+            Default: 'auto'
+            
+        compiler_options --
+            Options for the compiler.
+            Default: Empty dict.
+            
+        compile_to --
+            Specify location of the compiled FMU. Directory will be created if 
+            it does not exist.
+            Default: Current directory.
+
+        compiler_log_level --
+            Set the log level for the compiler. Valid options are 'warning'/'w', 
+            'error'/'e' or 'info'/'i'.
+            Default: 'warning'
+            
+    Returns::
+    
+        Name of the FMUX which has been created.
+    """
+    if isinstance(file_name, basestring):
+        file_name = [file_name]
+        
+    # get a compiler based on 'compiler' argument or files listed in file_name
+    comp = _get_compiler(files=file_name, selected_compiler=compiler)
+    
+    # set compiler options
+    comp.set_options(compiler_options)
+    
+    # set log level
+    comp.set_compiler_log_level(compiler_log_level)
+    
+    # compile FMU in java
+    comp.compile_FMUX(class_name, file_name, compile_to)
+    
+    return os.path.join(compile_to, get_fmux_name(class_name))
     
 def get_fmu_name(class_name):
     """
@@ -181,6 +219,44 @@ def get_fmu_name(class_name):
         The FMU name (replaced dots with underscores).
     """
     return get_unit_name(class_name, unit_type='FMU')
+
+def get_fmux_name(class_name):
+    """
+    Computes the FMUX name from a class name.
+    
+    Parameters::
+        
+        class_name -- 
+            The name of the model.
+        
+    Returns::
+    
+        The FMUX name (replaced dots with underscores).
+    """
+    return get_unit_name(class_name, unit_type='FMUX')
+
+
+def unzip_fmu(archive, path='.',  random_name=True):
+    fmu_files = unzip_unit(archive, path, random_name)
+    
+    # check if all files have been found during unzip
+    if fmu_files['model_desc'] == None:
+        raise IOError('model description XML file not found in FMU file '+str(archive))
+    
+    if fmu_files['binary'] == None:
+        raise IOError('binary file not found in FMU file '+str(archive))
+    
+    return fmu_files
+
+
+def unzip_fmux(archive, path='.'):
+    fmux_files = unzip_unit(archive, path)
+    
+    # check if all files have been found during unzip
+    if fmux_files['model_desc'] == None:
+        raise IOError('model description XML file not found in FMUX file '+str(archive))
+    
+    return fmux_files
 
 class FMUException(Exception):
     """
@@ -216,10 +292,9 @@ class FMUModel(BaseModel):
 
             
         #Create temp binary
-        self._tempnames = unzip_unit(archive=fmu, path=path, random_name=reload_dll)
-        self._tempdll = self._tempnames[0]
-        self._tempxml = self._tempnames[1]
-        self._modelname = self._tempnames[2]
+        self._tempnames = unzip_fmu(archive=fmu, path=path, random_name=reload_dll)
+        self._tempdll = self._tempnames['binary']
+        self._tempxml = self._tempnames['model_desc']
         self._tempdir = get_temp_location()
         
         #Retrieve and load the binary
@@ -229,10 +304,16 @@ class FMUModel(BaseModel):
         #Load calloc and free
         self._load_c()
         
+        # Parse XML
+        self._md = xmlparser.ModelDescription(self._tempdir+os.sep+self._tempxml)
+         
+        #Set model name
+        self._modelname = self.get_name().replace('.','_')
+
         #Set FMIModel Typedefs
         self._set_fmimodel_typedefs()
         
-        #Load XML file
+        #Load data from XML file
         self._load_xml()
         
         #Internal values
@@ -304,8 +385,6 @@ class FMUModel(BaseModel):
         """
         Loads the XML information.
         """
-        self._md = xmlparser.ModelDescription(
-            self._tempdir+os.sep+self._tempxml) 
         self._nContinuousStates = self._md.get_number_of_continuous_states()
         self._nEventIndicators = self._md.get_number_of_event_indicators()
         self._GUID = self._md.get_guid()
@@ -1783,7 +1862,7 @@ class FMUModel(BaseModel):
         """ 
         Return the name of the model. 
         """
-        return self._modelname
+        return self._md.get_model_identifier()
     
     def __del__(self):
         """

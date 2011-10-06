@@ -23,7 +23,8 @@ import numpy as N
 import matplotlib.pyplot as plt
 
 # Import the JModelica.org Python packages
-from jmodelica.casadi_interface import compile_casadi, CasadiModel
+from jmodelica.fmi import compile_fmux
+from jmodelica.casadi_interface import CasadiModel
 
 def run_demo(with_plots=True):
     """
@@ -31,7 +32,7 @@ def run_demo(with_plots=True):
     """
     # Compile and load model
     curr_dir = os.path.dirname(os.path.abspath(__file__));
-    jn = compile_casadi("CSTR.CSTR_Opt2", curr_dir+"/files/CSTR.mop")
+    jn = compile_fmux("CSTR.CSTR_Opt2", curr_dir+"/files/CSTR.mop")
     model = CasadiModel(jn)
     
     # Set algorithm options

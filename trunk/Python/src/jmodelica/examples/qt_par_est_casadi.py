@@ -26,8 +26,10 @@ from jmodelica.jmi import JMUModel
 
 from jmodelica.core import TrajectoryLinearInterpolation
 
+from jmodelica.fmi import compile_fmux
+
 from jmodelica.optimization.casadi_collocation import RadauCollocator, ParameterEstimationData
-from jmodelica.casadi_interface import compile_casadi, CasadiModel
+from jmodelica.casadi_interface import CasadiModel
 
 def run_demo(with_plots=True):
     """
@@ -130,7 +132,7 @@ def run_demo(with_plots=True):
         plt.plot(t_sim,u2_sim,'r')
 
     # Compile the Optimica model to an XML file
-    model_name = compile_casadi("QuadTankPack.QuadTank_ParEstCasADi",
+    model_name = compile_fmux("QuadTankPack.QuadTank_ParEstCasADi",
         curr_dir+"/files/QuadTankPack.mop")
     
     # Load the model

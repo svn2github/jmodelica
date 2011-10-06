@@ -256,19 +256,27 @@ class BaseModel(object):
         algdrive = getattr(algdrive, 'algorithm_drivers')
         algorithm = getattr(algdrive, algorithm)
         return algorithm.get_default_options()
-  
+
 def unzip_unit(archive, path='.', random_name=True):
     """
-    Unzip the FMU/JMU.
+    Unzip a unit file.
+    
+    Looks for a model description XML file, model values XML file and a binary 
+    file and returns the result in a dict with the key words: 'model_desc', 
+    'model_values' and 'binary' resp. Any file not found will result in 'None' 
+    at that position.
     """
-
+    # return arg
+    ret_val = {'model_desc':None, 'model_values':None, 'binary':None}
+    
     try:
         archive = zipfile.ZipFile(os.path.join(path,archive))
     except IOError:
-        raise IOError('Could not locate the FMU/JMU.')
+        raise IOError('Could not locate the file: ' + str(archive))
     
-    dir = ['binaries','sources']
+    unit_dirs = ['binaries','sources']
     
+    # Detect platform and file suffix
     if sys.platform == 'win32':
         platform = 'win'
         suffix = '.dll'
@@ -283,14 +291,7 @@ def unzip_unit(archive, path='.', random_name=True):
         platform += '32'
     else:
         platform += '64'
-    
-    #if platform == 'win32' or platform == 'win64':
-    #    suffix = '.dll'
-    #elif platform == 'linux32' or platform == 'linux64':
-    #    suffix = '.so'
-    #else: 
-    #    suffix = '.dylib'
-    
+        
     # create JModelica directory for temporary files (if not already created)
     if not os.path.exists(tmp_location):
         os.mkdir(tmp_location)
@@ -309,12 +310,11 @@ def unzip_unit(archive, path='.', random_name=True):
             tempxmlname = tempfile.mktemp(suffix='.xml', dir=tmp_location)
             os.rename(xml_filename, tempxmlname)
             
+            # Add to return arg
+            ret_val['model_desc'] = tempxmlname.split(os.sep)[-1]
             break
-    else:
-        raise IOError('Could not find modelDescription.xml in the FMU.')
         
-    #Extracting the XML values (if any)
-    is_jmu = False
+    #Extracting the XML values
     for file in archive.filelist:
         if file.filename.endswith('values.xml'):
             
@@ -325,9 +325,9 @@ def unzip_unit(archive, path='.', random_name=True):
             tempxmlvaluesname = tempfile.mktemp(suffix='.xml', dir=tmp_location)
             os.rename(xml_filename, tempxmlvaluesname)
             
-            is_jmu = True
+            # Add to return arg
+            ret_val['model_values'] = tempxmlvaluesname.split(os.sep)[-1]
             break
-    # --
     
     #Extrating the binary
     
@@ -335,15 +335,14 @@ def unzip_unit(archive, path='.', random_name=True):
 
     # Looping over the archive to find correct binary
     for file in archive.filelist: 
-        if dir[0] in file.filename and platform in file.filename and \
+        if unit_dirs[0] in file.filename and platform in file.filename and \
             file.filename.endswith(suffix): 
             # Binary directory found
             found_files.append(file)
     
     if found_files:
         # Find where dll should be
-        dllname = found_files[0].filename.split('/')[-1]
-        modelname = dllname[:-len(suffix)]
+        dllname = found_files[0].filename.split('/')[-1] 
         
         extract_dll = True
         if random_name:
@@ -359,23 +358,17 @@ def unzip_unit(archive, path='.', random_name=True):
         if extract_dll:
             # Extracting the binary file
             bin_filename = archive.extract(found_files[0],tmp_dir)
-            
              # Rename to temporary file name
-            os.rename(bin_filename, tempdllname)      
+            os.rename(bin_filename, tempdllname)
         
-        # Delete tmp_dir
-        shutil.rmtree(tmp_dir)
+            
+        # Add to return arg
+        ret_val['binary'] = tempdllname.split(os.sep)[-1]
+            
+    # Delete tmp_dir
+    shutil.rmtree(tmp_dir)
         
-        if is_jmu:
-            return [tempdllname.split(os.sep)[-1], \
-                tempxmlname.split(os.sep)[-1], \
-                modelname, tempxmlvaluesname.split(os.sep)[-1]]
-        else:
-            return [tempdllname.split(os.sep)[-1], \
-                tempxmlname.split(os.sep)[-1], modelname]
-
-    else:
-        raise IOError('Could not find binaries for your platform.')
+    return ret_val
         
 def get_unit_name(class_name, unit_type='JMU'):
     """

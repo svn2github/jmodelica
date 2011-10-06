@@ -33,6 +33,7 @@ import jpype
 
 import jmodelica as jm
 from jmodelica import xmlparser
+from jmodelica.core import list_to_string
 
 #start JVM
 # note that startJVM() fails after shutdownJVM(), hence, only one start
@@ -54,7 +55,28 @@ OptionRegistry = org.jmodelica.util.OptionRegistry
 UnknownOptionException = jpype.JClass(
     'org.jmodelica.util.OptionRegistry$UnknownOptionException')
 
-class ModelicaCompiler():
+def _get_compiler(files, selected_compiler='auto'):
+    # if selected_compiler is 'auto' - detect file suffix
+    if selected_compiler == 'auto':
+        comp = ModelicaCompiler()
+        for f in files:
+            basename, ext = os.path.splitext(f)
+            if ext == '.mop':
+                comp = OptimicaCompiler()
+                break
+    else:
+        if selected_compiler.lower() == 'modelica':
+            comp = ModelicaCompiler()
+        elif selected_compiler.lower() == 'optimica':
+            comp = OptimicaCompiler()
+        else:
+            logging.warning("Invalid compiler argument: "+str(compiler) + 
+                ". Using OptimicaCompiler instead.")
+            comp = OptimicaCompiler()
+            
+    return comp
+            
+class ModelicaCompiler(object):
     """ 
     User class for accessing the Java ModelicaCompiler class. 
     """
@@ -66,24 +88,12 @@ class ModelicaCompiler():
     LOG_INFO = ModelicaCompiler.INFO
     
     jm_home = jm.environ['JMODELICA_HOME']
-    
-    fmi_tpl = os.path.join(jm_home, 
-        'CodeGenTemplates', 'fmi_model_description.tpl') 
-    fmi_ext_tpl = os.path.join(jm_home, 'CodeGenTemplates', 
-        'fmi_extended_model_description.tpl')
-    jmodelica_tpl = os.path.join(jm_home, 'CodeGenTemplates', 
-        'jmodelica_model_description.tpl')
-    model_values_tpl = os.path.join(jm_home, 'CodeGenTemplates', 
-        'jmodelica_model_values.tpl')
-    jmi_c_tpl_path = os.path.join(jm_home, 'CodeGenTemplates', 
-        'jmi_modelica_template.c')    
-    fmi_me_c_tpl_path = os.path.join(jm_home, 'CodeGenTemplates', 
-        'fmi_me_modelica_template.c')    
-    fmi_cs_c_tpl_path = os.path.join(jm_home, 'CodeGenTemplates', 
-        'fmi_cs_modelica_template.c')    
+
     options_file_path = os.path.join(jm_home, 'Options','options.xml')
 
-    def __init__(self):
+
+    def __init__(self, xml_template = None, xml_values_template = None, 
+                 c_template = None):
         """ 
         Create a Modelica compiler. The compiler can be used to compile pure 
         Modelica models. A compiler instance can be used multiple times.
@@ -94,23 +104,11 @@ class ModelicaCompiler():
             self._handle_exception(ex)
             
         options.addStringOption('MODELICAPATH',jm.environ['MODELICAPATH'])
-        fmi = options.getBooleanOption('generate_fmi_me_xml')
-        equ = options.getBooleanOption('generate_xml_equations')
-        if fmi and not equ:
-            self._compiler = self.ModelicaCompiler(options, 
-                                                   self.fmi_tpl,
-                                                   self.model_values_tpl,
-                                                   self.jmi_c_tpl_path)
-        elif fmi and equ:
-            self._compiler = self.ModelicaCompiler(options, 
-                                                   self.fmi_ext_tpl,
-                                                   self.model_values_tpl,
-                                                   self.jmi_c_tpl_path)
-        else:
-            self._compiler = self.ModelicaCompiler(options, 
-                                                   self.jmodelica_tpl,
-                                                   self.model_values_tpl,
-                                                   self.jmi_c_tpl_path)
+        
+        self._compiler = self.ModelicaCompiler(options, 
+                                               xml_template,
+                                               xml_values_template,
+                                               c_template)
             
     @classmethod
     def set_log_level(self,level):
@@ -139,6 +137,38 @@ class ModelicaCompiler():
             The current level of log messages.
         """
         return self.ModelicaCompiler.getLogLevel(self.ModelicaCompiler.log)
+    
+    
+    def set_options(self, compiler_options):
+        # set compiler options
+        for key, value in compiler_options.iteritems():
+            if isinstance(value, bool):
+                self.set_boolean_option(key, value)
+            elif isinstance(value, basestring):
+                self.set_string_option(key,value)
+            elif isinstance(value, int):
+                self.set_integer_option(key,value)
+            elif isinstance(value, float):
+                self.set_real_option(key,value)
+            elif isinstance(value, list):
+                self.set_string_option(key, list_to_string(value))
+            else:
+                raise JMIException("Unknown compiler option type for key: %s. \
+                Should be of the following types: boolean, string, integer, \
+                float or list" %key)
+
+    def set_compiler_log_level(self, compiler_log_level):
+        # set compiler log level
+        if compiler_log_level.lower().startswith('w'):
+            self.set_log_level(ModelicaCompiler.LOG_WARNING)
+        elif compiler_log_level.lower().startswith('e'):
+            self.set_log_level(ModelicaCompiler.LOG_ERROR)
+        elif compiler_log_level.lower().startswith('i'):
+            self.set_log_level(ModelicaCompiler.LOG_INFO)
+        else:
+            logging.warning("Invalid compiler_log_level: "+str(compiler_log_level) + 
+            " using level 'warning' instead.")
+
         
     def get_modelicapath(self):
         """ 
@@ -195,18 +225,6 @@ class ModelicaCompiler():
         """
         try:
             self._compiler.setBooleanOption(key, value)
-            
-            if key.strip() == 'generate_fmi_me_xml' or \
-                key.strip() == 'generate_xml_equations':
-                fmi = self.get_boolean_option('generate_fmi_me_xml')
-                equ = self.get_boolean_option('generate_xml_equations')
-                if fmi and not equ:
-                    self.set_XML_tpl(self.fmi_tpl)
-                elif fmi and equ:
-                    self.set_XML_tpl(self.fmi_ext_tpl)
-                else:
-                    self.set_XML_tpl(self.jmodelica_tpl)
-                    
         except jpype.JavaException, ex:
             self._handle_exception(ex)
         
@@ -451,6 +469,29 @@ class ModelicaCompiler():
         except jpype.JavaException, ex:
             self._handle_exception(ex)
 
+    def compile_FMUX(self, class_name, file_name, compile_to):
+        """
+        Compiles a model (parsing, instantiating, flattening and XML code 
+        generation) and creates an FMUX on the file system.
+        
+        Parameters::
+        
+            class_name --
+                Name of model class in the model file to compile.
+            
+            file_name --
+                Path to file or list of paths to files in which the model is 
+                contained.
+                
+            compile_to --
+                Specify location of the compiled FMUX. Directory will be created 
+                if it does not exist.
+        """
+        try:
+            self._compiler.compileFMUX(class_name, file_name, compile_to)
+        except jpype.JavaException, ex:
+            self._handle_exception(ex)
+
     def parse_model(self,model_file_name):   
         """ 
         Parse a model.
@@ -672,10 +713,9 @@ class OptimicaCompiler(ModelicaCompiler):
     OptimicaCompiler = org.jmodelica.optimica.compiler.OptimicaCompiler
 
     jm_home = jm.environ['JMODELICA_HOME']
-    optimica_c_tpl_path = os.path.join(
-        jm_home, 'CodeGenTemplates', 'jmi_optimica_template.c')
 
-    def __init__(self):
+    def __init__(self, xml_template = None, xml_values_template = None, 
+                 c_template = None, optimica_c_template = None):
         """ 
         Create an Optimica compiler. The compiler can be used to compile both 
         Modelica and Optimica models. A compiler instance can be used multiple 
@@ -688,19 +728,12 @@ class OptimicaCompiler(ModelicaCompiler):
             
         options.addStringOption('MODELICAPATH',jm.environ['MODELICAPATH'])
         
-        fmi = options.getBooleanOption('generate_fmi_me_xml')
-        if fmi:
-            self._compiler = self.OptimicaCompiler(options, 
-                                                   self.fmi_ext_tpl,
-                                                   self.model_values_tpl,
-                                                   self.jmi_c_tpl_path,
-                                                   self.optimica_c_tpl_path)
-        else:
-            self._compiler = self.OptimicaCompiler(options, 
-                                                   self.jmodelica_tpl,
-                                                   self.model_values_tpl,
-                                                   self.jmi_c_tpl_path,
-                                                   self.optimica_c_tpl_path)
+        self._compiler = self.OptimicaCompiler(options,
+                                               xml_template,
+                                               xml_values_template,
+                                               c_template,
+                                               optimica_c_template)
+
     @classmethod
     def set_log_level(self,level):
         """ 
@@ -748,14 +781,6 @@ class OptimicaCompiler(ModelicaCompiler):
         """
         try:
             self._compiler.setBooleanOption(key, value)
-            
-            if key.strip() == 'generate_fmi_me_xml':
-                fmi = self.get_boolean_option('generate_fmi_me_xml')
-                if fmi:
-                    self.set_XML_tpl(self.fmi_ext_tpl)
-                else:
-                    self.set_XML_tpl(self.jmodelica_tpl)            
-                          
         except jpype.JavaException, ex:
             self._handle_exception(ex)
               

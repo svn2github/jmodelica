@@ -37,9 +37,8 @@ import atexit
 from lxml import etree
 
 from jmodelica import xmlparser
-from jmodelica.core import BaseModel, unzip_unit, get_unit_name, get_temp_location, list_to_string
-from jmodelica.compiler import ModelicaCompiler
-from jmodelica.compiler import OptimicaCompiler
+from jmodelica.core import BaseModel, unzip_unit, get_unit_name, get_temp_location
+from jmodelica.compiler import _get_compiler
 import jmodelica.io
 from jmodelica.core import TrajectoryLinearInterpolation
 
@@ -393,11 +392,10 @@ class JMUModel(BaseModel):
         """
         # extract files from JMU
         path, jmu_name = os.path.split(jmu_name)
-        jmu_files = unzip_unit(jmu_name, path, random_name=reload_dll)
-        lib_name = jmu_files[0]
-        self._xml_name = jmu_files[1]
-        self._model_name = jmu_files[2]
-        self._xml_values_name = jmu_files[3]
+        jmu_files = unzip_jmu(jmu_name, path, random_name=reload_dll)
+        lib_name = jmu_files['binary']
+        self._xml_name = jmu_files['model_desc']
+        self._xml_values_name = jmu_files['model_values']
         
         self.jmimodel = JMIModel(lib_name)
 
@@ -2336,7 +2334,7 @@ class JMUModel(BaseModel):
         
             The name of the model.
         """
-        return self._model_name
+        return self._get_XMLDoc().get_model_name().replace('.','_')
 
     def _get(self, name):
         """
@@ -6234,54 +6232,35 @@ def compile_jmu(class_name, file_name=[], compiler='auto', target='ipopt',
     if isinstance(file_name, basestring):
         file_name = [file_name]
         
-    # if compiler is 'auto' - detect file suffix
-    if compiler == 'auto':
-        comp = ModelicaCompiler()
-        for f in file_name:
-            basename, ext = os.path.splitext(f)
-            if ext == '.mop':
-                comp = OptimicaCompiler()
-                break
-    else:
-        if compiler.lower() == 'modelica':
-            comp = ModelicaCompiler()
-        elif compiler.lower() == 'optimica':
-            comp = OptimicaCompiler()
-        else:
-            logging.warning("Invalid compiler argument: "+str(compiler) + 
-                ". Using OptimicaCompiler instead.")
-            comp = OptimicaCompiler()
-        
+    # get a compiler based on 'compiler' argument or files listed in file_name
+    comp = _get_compiler(files=file_name, selected_compiler=compiler)
+    
     # set compiler options
-    for key, value in compiler_options.iteritems():
-        if isinstance(value, bool):
-            comp.set_boolean_option(key, value)
-        elif isinstance(value, basestring):
-            comp.set_string_option(key,value)
-        elif isinstance(value, int):
-            comp.set_integer_option(key,value)
-        elif isinstance(value, float):
-            comp.set_real_options(key,value)
-        elif isinstance(value, list):
-            comp.set_string_option(key, list_to_string(value))
-        else:
-            raise JMIException("Unknown compiler option type for key: %s. \
-            Should be of the following types: boolean, string, integer, \
-            float or list" %key)
-            
-    # set compiler log level
-    if compiler_log_level.lower().startswith('w'):
-        comp.set_log_level(ModelicaCompiler.LOG_WARNING)
-    elif compiler_log_level.lower().startswith('e'):
-        comp.set_log_level(ModelicaCompiler.LOG_ERROR)
-    elif compiler_log_level.lower().startswith('i'):
-        comp.set_log_level(ModelicaCompiler.LOG_INFO)
-    else:
-        logging.warning("Invalid compiler_log_level: "+str(compiler_log_level) + 
-        " using level 'warning' instead.")
+    comp.set_options(compiler_options)
+    
+    # set log level
+    comp.set_compiler_log_level(compiler_log_level)
             
     # compile jmu in Java
     comp.compile_JMU(class_name, file_name, target, compile_to)
     
     return os.path.join(compile_to, get_jmu_name(class_name))
+
+
+def unzip_jmu(archive, path='.', random_name=True):
+    jmu_files = unzip_unit(archive, path, random_name)
+    
+    # check if all files have been found during unzip
+    if jmu_files['model_desc'] == None:
+        raise IOError('model description XML file not found in JMU file '+str(archive))
+    
+    if jmu_files['model_values'] == None:
+        raise IOError('model values XML file not found in JMU file '+str(archive))
+    
+    if jmu_files['binary'] == None:
+        raise IOError('binary file not found in JMU file '+str(archive))
+    
+    return jmu_files
+    
+    
         

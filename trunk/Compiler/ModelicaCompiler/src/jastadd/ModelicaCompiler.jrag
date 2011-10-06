@@ -134,9 +134,9 @@ public class ModelicaCompiler {
 	}
 	public static final String DEFAULT_LEVEL = ERROR;
 	
-	protected String xmlTpl;
-	protected String xmlValuesTpl;
-	protected String cTemplatefile;
+	protected String xmlTpl = null;
+	protected String xmlValuesTpl = null;
+	protected String cTemplatefile = null;
 	
 	private OptionRegistry options = null;
 	private DiagnosticsGenerator diagGenerator = null;
@@ -154,8 +154,7 @@ public class ModelicaCompiler {
 	protected File resourceDir = null;
 	
 	public ModelicaCompiler(OptionRegistry options, String xmlTpl, String xmlValuesTpl, String cTemplatefile) {
-		staticBlocks();
-		this.options = options;
+		this(options);
 		this.xmlTpl = xmlTpl;
 		this.xmlValuesTpl = xmlValuesTpl;
 		this.cTemplatefile = cTemplatefile;
@@ -168,7 +167,6 @@ public class ModelicaCompiler {
 	
 	protected ModelicaCompiler() {
 		staticBlocks();
-		defaultTemplatePathsJMU();
 	}
 
 	public void defaultOptionsFMUME() {
@@ -189,38 +187,41 @@ public class ModelicaCompiler {
 		setBooleanOption("generate_xml_equations", false);
 	}
 	
+	public void defaultOptionsFMUX() {
+    	setBooleanOption("generate_xml_equations", true);
+    	setBooleanOption("normalize_minimum_time_problems", false);
+	}
+	
 	public void defaultTemplatePathsJMU() {
-		defaultTemplatePaths("jmodelica");
+		File dir = getTemplatesDir();
+		xmlTpl = (xmlTpl == null) ? new File(dir, "jmodelica_model_description.tpl").getPath(): xmlTpl;
+		xmlValuesTpl = (xmlValuesTpl == null) ? new File(dir, "jmodelica_model_values.tpl").getPath() : xmlValuesTpl;
+		cTemplatefile = (cTemplatefile == null) ? new File(dir, "jmi_modelica_template.c").getPath(): cTemplatefile;
 	}
 	
 	public void defaultTemplatePathsFMUME() {
-		defaultTemplatePaths("fmi_me");
+		File dir = getTemplatesDir();
+		xmlTpl  = (xmlTpl == null) ?  new File(dir, "fmi_model_description.tpl").getPath() : xmlTpl;
+		xmlValuesTpl = (xmlValuesTpl == null) ? new File(dir, "jmodelica_model_values.tpl").getPath() : xmlValuesTpl;
+		cTemplatefile = (cTemplatefile == null) ? new File(dir, "fmi_me_modelica_template.c").getPath() : cTemplatefile;
 	}
 
 	public void defaultTemplatePathsFMUCS() {
-		defaultTemplatePaths("fmi_cs");
+		File dir = getTemplatesDir();
+		xmlTpl = (xmlTpl == null) ? new File(dir, "fmi_model_description.tpl").getPath() : xmlTpl;
+		xmlValuesTpl = (xmlValuesTpl == null) ? new File(dir, "jmodelica_model_values.tpl").getPath() : xmlValuesTpl;
+		cTemplatefile = (cTemplatefile == null) ? new File(dir, "fmi_cs_modelica_template.c").getPath() : cTemplatefile;
 	}
 	
-	protected void defaultTemplatePaths(String prefix) {
-		// give templates default values based on $JMODELICA_HOME
+	public void defaultTemplatePathsFMUX() {
 		File dir = getTemplatesDir();
-		if (prefix.equals("jmodelica")) {
-			this.xmlTpl = new File(dir, prefix + "_model_description.tpl").getPath();
-			this.xmlValuesTpl = new File(dir, "jmodelica_model_values.tpl").getPath();
-			this.cTemplatefile = new File(dir, "jmi_modelica_template.c").getPath();
-		} else if (prefix.equals("fmi_me")) {
-			this.xmlTpl = new File(dir, "fmi_model_description.tpl").getPath();
-			this.xmlValuesTpl = new File(dir, "jmodelica_model_values.tpl").getPath();
-			this.cTemplatefile = new File(dir, "fmi_me_modelica_template.c").getPath();
-		} else if (prefix.equals("fmi_cs")) {
-			this.xmlTpl = new File(dir, "fmi_model_description.tpl").getPath();
-			this.xmlValuesTpl = new File(dir, "jmodelica_model_values.tpl").getPath();
-			this.cTemplatefile = new File(dir, "fmi_cs_modelica_template.c").getPath();
-		}  
+		xmlTpl = (xmlTpl == null) ? new File(dir, "jmodelica_model_description.tpl").getPath() : xmlTpl;
+		xmlValuesTpl = null;
+		cTemplatefile = null;
 	}
 
 	/**
-	 * Sets the direcory new temporary files are created in. 
+	 * Sets the directory new temporary files are created in. 
 	 * The default value is <code>null</code>, and is interpreted as the current working directory.
 	 */
 	public void setTempFileDir(File temp) {
@@ -662,6 +663,7 @@ public class ModelicaCompiler {
 	 */
 	public void compileJMU(String className, String fileName[], String target, String compileTo) 
 		throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, beaver.Parser.Exception {
+		defaultTemplatePathsJMU();
 		compileUnit(className, fileName, target, compileTo, "JMU");
 	}
 
@@ -758,11 +760,36 @@ public class ModelicaCompiler {
 		// set back all options
 		options.copyAllOptions(tempOptions);
 	}
+	
+	/**
+	 * \brief Compiles a model and creates an FMUX.
+	 * 
+	 * Compiles a model (parsing, instantiating, flattening and XML code 
+	 * generation) and packs the result in a FMUX.
+	 * 
+	 * @param className Name of model class in the model file to compile.
+	 * @param fileName Array of model file paths.
+	 * @param compileTo Specify location of the compiled FMUX. Directory will be created if it does not exist.
+	 */
+	public void compileFMUX(String className, String fileName[], String compileTo) 
+		throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, beaver.Parser.Exception {
+		// Always set certain options when compiling an FMUX
+		// First save these options in temp options registry to reset when compiling has finished
+		OptionRegistry tempOptions = new OptionRegistry(options);
+		
+		// use fmi XML file template and set the correct options so that XML file will be FMI compliant
+		defaultOptionsFMUX();
+		defaultTemplatePathsFMUX();	
+		compileUnit(className, fileName, null, compileTo, "FMUX");		
+		
+		// set back all options
+		options.copyAllOptions(tempOptions);
+	}
 
 	/**
-	 * \brief Compiles a JMU or FMU (helper function for compileJMU and compileFMU).
+	 * \brief Compiles a JMU, FMU or FMUX (helper function for compileJMU, compileFMU and compileFMUX).
 	 * 
-	 * @param unitType "JMU", "FMUME" or "FMUCS".
+	 * @param unitType "JMU", "FMUME", "FMUCS" or "FMUX".
 	 */
 	private void compileUnit(String className, String fileName[], String target, String compileTo, String unitType) 
 		throws ModelicaClassNotFoundException, CompilerException, FileNotFoundException, IOException, beaver.Parser.Exception {
@@ -770,13 +797,15 @@ public class ModelicaCompiler {
 		if (outDir == null)
 			setRandomOutDir();
 		
-		// compile mo-file + generate code
+		// compile mo-file + generate code for all templates that are not null
 		FClass fc = compileModel(fileName, className);
 		
-		// compile c code
+		// compile c code if c template is not null
 		hookCheckAbort();
-		String cFileName = FClass.convertClassNameToUnderscore(className);
-		getCCompiler().compileCCode(cFileName, target, outDir, fc.externalLibraries(), fc.externalLibraryDirectories(), fc.externalIncludeDirectories());
+		if (target != null) {
+			String cFileName = FClass.convertClassNameToUnderscore(className);
+			getCCompiler().compileCCode(cFileName, target, outDir, fc.externalLibraries(), fc.externalLibraryDirectories(), fc.externalIncludeDirectories());
+		}
 		hookCodeCompiled();
 		
 		// package JMU
@@ -899,8 +928,8 @@ public class ModelicaCompiler {
 	 * Should be updated when new unit types are added.
 	 */
 	protected String getUnitSuffix(String unitType) {
-		// JMU -> jmu, FMUME -> fmu, FMUCS -> fmu
-		return unitType.substring(0, 3).toLowerCase();
+		// JMU -> jmu, FMUME -> fmu, FMUCS -> fmu, FMUX -> fmux
+		return unitType.equals("FMUX") ? unitType.toLowerCase() : unitType.substring(0, 3).toLowerCase();
 	}
 
 	/**
@@ -955,9 +984,9 @@ public class ModelicaCompiler {
 			fc = flattenModel(icl);
 //			dumpMemoryUseFile(fc, "flat");
 
-			// Generate code?
-			if (this.getXmlTpl(fc) != null && this.getXmlValuesTpl(fc) !=null && this.getCTemplatefile(fc) != null) 
-				generateCode(fc);
+			// Generate code 
+			generateCode(fc);
+			
 		} finally {
 			logCompilationInfo();
 			// The node count requires changeing ASTNode.java by hand - see dumpNodeCountFile()
@@ -1334,29 +1363,32 @@ public class ModelicaCompiler {
 	 *             If either of the three template files can not be found.
 	 */
 	public void generateCode(FClass fc) throws FileNotFoundException {
-		hookCheckAbort();
 		log.info("Generating code...");
 		String name = fc.nameUnderscore();
 		
-		XMLGenerator xmlgenerator = createXMLGenerator(fc);
-		hookCodeGeneratorCreated(xmlgenerator);
+		String output = null;
+		if (getXmlTpl(fc) != null) {
+			hookCheckAbort();
+			XMLGenerator xmlgenerator = createXMLGenerator(fc);
+			hookCodeGeneratorCreated(xmlgenerator);
+			output = new File(outDir, "modelDescription.xml").getPath();
+			xmlgenerator.generate(getXmlTpl(fc), output);
+		}
+		if (getXmlValuesTpl(fc) != null) {
+			hookCheckAbort();
+			XMLValueGenerator valuegenerator = createXMLValueGenerator(fc);
+			hookCodeGeneratorCreated(valuegenerator);
+			output = new File(resourceDir, name + "_values.xml").getPath();
+			valuegenerator.generate(getXmlValuesTpl(fc), output);
+		}
+		if (getCTemplatefile(fc) != null) {
+			hookCheckAbort();
+			CGenerator cgenerator = createCGenerator(fc);
+			hookCodeGeneratorCreated(cgenerator);
+			output = new File(sourceDir, name + ".c").getPath();
+			cgenerator.generate(getCTemplatefile(fc), output);
+		}
 		
-		XMLValueGenerator valuegenerator = createXMLValueGenerator(fc);
-		hookCodeGeneratorCreated(valuegenerator);
-		
-		CGenerator cgenerator = createCGenerator(fc);
-		hookCodeGeneratorCreated(cgenerator);
-		
-		hookCheckAbort();
-		String output = new File(outDir, "modelDescription.xml").getPath();
-		xmlgenerator.generate(getXmlTpl(fc), output);
-		
-		output = new File(resourceDir, name + "_values.xml").getPath();
-		valuegenerator.generate(getXmlValuesTpl(fc), output);
-		
-		output = new File(sourceDir, name + ".c").getPath();
-		cgenerator.generate(getCTemplatefile(fc), output);
-
 		hookCodeGenerated(outDir);
 		log.debug("... code generated.");
 	}

@@ -37,8 +37,8 @@ try:
 except:
     pass
 
-from jmodelica.jmi import compile_jmu
-from jmodelica.core import unzip_unit, get_unit_name, get_temp_location
+from jmodelica.fmi import compile_fmux, unzip_fmux
+from jmodelica.core import get_temp_location
 from jmodelica import xmlparser
 
 def convert_casadi_der_name(name):
@@ -49,27 +49,12 @@ def convert_casadi_der_name(name):
         n = n + qnames[i] + '.'
     return n + 'der(' + qnames[len(qnames)-1] + ')' 
 
-def compile_casadi(class_name, file_name=[], compiler='auto', target='ipopt', 
-    compiler_options={}, compile_to='.', compiler_log_level='warning'):
-    """
-    Helper function for creating a CasADi compliant model. Extends the compiler
-    options with 'generate_xml_equations':True which is an requirement for
-    CasADi.
-    """
-    compiler_options['generate_xml_equations']=True
-    compiler_options['normalize_minimum_time_problems']=False
-    
-    return compile_jmu(class_name, file_name, compiler, target, compiler_options,
-                       compile_to, compiler_log_level)
-
 class CasadiModel(object):
     def __init__(self, name, path='.', enable_scaling = False):
         
         #Create temp binary
-        self._tempnames = unzip_unit(archive=name, path=".")
-        self._tempdll = self._tempnames[0]
-        self._tempxml = self._tempnames[1]
-        self._modelname = self._tempnames[2]
+        self._tempnames = unzip_fmux(archive=name, path=".")
+        self._tempxml = self._tempnames['model_desc']
         self._tempdir = get_temp_location()
         
         #Load model description
@@ -85,7 +70,7 @@ class CasadiModel(object):
         """
         Returns the model name.
         """
-        return self._modelname
+        return self.xmldoc.get_model_name().replace('.','_')
     
     def _default_options(self, algorithm):
         """ 
