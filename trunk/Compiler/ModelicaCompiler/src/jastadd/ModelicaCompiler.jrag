@@ -2100,8 +2100,12 @@ public class GccCompilerDelegator implements CCompilerDelegator {
 			for (String arg : vArgs)
 				cmd[i++] = arg;
 			
-			if (ModelicaCompiler.loggedProcess(cmd, null, workDir) != 0)
-				throw new CcodeCompilationException("Compilation of generated C code failed.");
+			if (ModelicaCompiler.loggedProcess(cmd, null, workDir) != 0) {
+				File sourceDir = new File(workDir, "sources");
+				File cfile = new File(sourceDir, fileName+".c");
+				throw new CcodeCompilationException("Compilation of generated C code failed.\n" +
+						"C file location: "+cfile.getAbsolutePath());
+			}
 		}
 	}
 	

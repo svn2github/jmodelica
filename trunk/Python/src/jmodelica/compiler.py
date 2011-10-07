@@ -664,44 +664,52 @@ class ModelicaCompiler(object):
         
         if ex.javaClass() is jpype.java.io.FileNotFoundException:
             raise IOError(
-                'Message: '+ex.message().encode('utf-8')+\
-                    '\n Stacktrace: '+ex.stacktrace().encode('utf-8'))
+                '\nMessage: '+ex.message().encode('utf-8')+\
+                '\nStacktrace: '+ex.stacktrace().encode('utf-8'))
         
         if ex.javaClass() is jpype.java.io.IOException:
             raise IOError(
-                'Message: '+ex.message().encode('utf-8')+\
-                    '\n Stacktrace: '+ex.stacktrace().encode('utf-8'))
+                '\nMessage: '+ex.message().encode('utf-8')+\
+                '\nStacktrace: '+ex.stacktrace().encode('utf-8'))
         
         if ex.javaClass() is jpype.javax.xml.xpath.XPathExpressionException:
             raise XPathExpressionError(
-                'Message: '+ex.message().encode('utf-8')+\
-                    '\n Stacktrace: '+ex.stacktrace().encode('utf-8'))
+                '\nMessage: '+ex.message().encode('utf-8')+\
+                '\nStacktrace: '+ex.stacktrace().encode('utf-8'))
         
         if ex.javaClass() is jpype.javax.xml.parsers.ParserConfigurationException:
             raise ParserConfigurationError(
-                'Message: '+ex.message().encode('utf-8')+\
-                    '\n Stacktrace: '+ex.stacktrace().encode('utf-8'))
+                '\nMessage: '+ex.message().encode('utf-8')+\
+                '\nStacktrace: '+ex.stacktrace().encode('utf-8'))
         
         if ex.javaClass() is org.xml.sax.SAXException or \
             ex.javaClass() is org.xml.sax.SAXNotRecognizedException or \
             ex.javaClass() is org.xml.sax.SAXNotSupportedException or \
             ex.javaClass() is org.xml.sax.SAXParseException:
             raise SAXError(
-                'Message: '+ex.message().encode('utf-8')+\
-                    '\n Stacktrace: '+ex.stacktrace().encode('utf-8'))
+                '\nMessage: '+ex.message().encode('utf-8')+\
+                '\nStacktrace: '+ex.stacktrace().encode('utf-8'))
     
         if ex.javaClass() is UnknownOptionException:
             raise UnknownOptionError(
-                ex.message().encode('utf-8')+'\n Stacktrace: '+\
+                ex.message().encode('utf-8')+'\nStacktrace: '+\
                     ex.stacktrace().encode('utf-8'))
         
         if ex.javaClass() is jpype.java.lang.Exception:
             raise Exception(
-                'Message: '+ex.message().encode('utf-8')+\
-                    '\n Stacktrace: '+ex.stacktrace().encode('utf-8'))
+                '\nMessage: '+ex.message().encode('utf-8')+\
+                '\nStacktrace: '+ex.stacktrace().encode('utf-8'))
         
         if ex.javaClass() is jpype.java.lang.NullPointerException:
             raise JError(ex.stacktrace().encode('utf-8'))
+        
+        if ex.javaClass() is \
+            org.jmodelica.modelica.compiler.CcodeCompilationException or \
+            ex.javaClass() is \
+            org.jmodelica.optimica.compiler.CcodeCompilationException:
+            raise CcodeCompilationError(
+                '\nMessage: '+ex.message().encode('utf-8')+\
+                '\nStacktrace: '+ex.stacktrace().encode('utf-8'))
         
         raise JError(ex.stacktrace().encode('utf-8'))
 
