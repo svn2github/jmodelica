@@ -2420,14 +2420,22 @@ res = model.optimize(algorithm="CasadiPseudoSpectral", options=opts)
   <section>
     <title>Derivative-Free Model Calibration of FMUs</title>
 
-    <para>This tutorial demonstrates how to solve a model calibration problem
-    using an algorithm that can be applied to Functional Mock-up Units. The
-    model to be calibrated is the Furuta pendulum shown in Figure A.1. The
-    Furuta pendulum consists of an arm rotating in the horizontal plane and a
-    pendulum which is free to rotate in the vertical plane. The construction
-    has two degrees of freedom, the angle of the arm, φ, and the angle of the
-    pendulum, θ. The Modelica model for the system can be found in the file
-    Furuta.mo and the FMU is located in Furuta.fmu. Download the FMU file to
+    <para><figure>
+        <title>The Furuta pendulum.</title>
+
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="images/furuta-image.png"
+                       xml:id="opt-fig-furuta"></imagedata>
+          </imageobject>
+        </mediaobject>
+      </figure>This tutorial demonstrates how to solve a model calibration
+    problem using an algorithm that can be applied to Functional Mock-up
+    Units. The model to be calibrated is the Furuta pendulum shown in Figure
+    <xref linkend="opt-fig-furuta" />. The Furuta pendulum consists of an arm
+    rotating in the horizontal plane and a pendulum which is free to rotate in
+    the vertical plane. The construction has two degrees of freedom, the angle
+    of the arm, φ, and the angle of the pendulum, θ. Download the FMU file to
     your working directory. Measurement data for φ and θ is available in the
     file FurutaData.mat. Download this file to your working directory as well.
     These measurements will be used for the calibration. Open a text file,
@@ -2468,9 +2476,23 @@ plt.grid ()
 plt.show ()
 </programlisting>
 
-    <para>This code should generate a figure equal to Figure A.2 showing the
-    measurements of θ and φ. To investigate the accuracy of the nominal
-    parameter values in the model, we shall now simulate the model:</para>
+    <para>This code should generate a figure equal to Figure <xref
+    linkend="opt-fig-furuta-meas" /> showing the measurements of θ and φ.
+    </para>
+
+    <figure>
+      <title>Measurements of θ and φ for the Furuta pendulum.</title>
+
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="images/furuta_meas.svg"
+                     xml:id="opt-fig-furuta-meas"></imagedata>
+        </imageobject>
+      </mediaobject>
+    </figure>
+
+    <para>To investigate the accuracy of the nominal parameter values in the
+    model, we shall now simulate the model:</para>
 
     <programlisting># Load model
 model = FMUModel("Furuta.fmu")
@@ -2496,10 +2518,24 @@ lt.legend(loc=1)
 plt.show ()
 </programlisting>
 
-    <para>Figure A.3 shows the simulation result together with the
-    measurements. As can be seen, the simulation result does not quite agree
-    with the measurements. We shall now attempt to calibrate the model by
-    estimating the two following model parameters:</para>
+    <para>Figure <xref linkend="opt-fig-furuta-meas-nomsim" /> shows the
+    simulation result together with the measurements. </para>
+
+    <figure>
+      <title>Measurements and model simulation result for θ and φ when using
+      nominal parameter values in the Furuta pendulum model.</title>
+
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="images/furuta_meas_nomsim.svg"
+                     xml:id="opt-fig-furuta-meas-nomsim"></imagedata>
+        </imageobject>
+      </mediaobject>
+    </figure>
+
+    <para>As can be seen, the simulation result does not quite agree with the
+    measurements. We shall now attempt to calibrate the model by estimating
+    the two following model parameters:</para>
 
     <itemizedlist>
       <listitem>
@@ -2516,11 +2552,161 @@ plt.show ()
     optimization algorithm. The objective function, i.e. the function to be
     minimized, is defined as:</para>
 
-    <para>where ti, i = 1,2,...,M, are the measurement time points and x =
-    carm,cpendT is the parameter vector. φmeas and θmeas are the measurements
-    of φ and θ, respectively, and φsim and θsim are the corresponding
-    simulation results. Now, add code defining a starting point for the
-    algorithm (use the nominal parameter values) as well as lower and upper
-    bounds for the parameters:</para>
+    <para><inlinemediaobject>
+        <imageobject>
+          <imagedata fileref="images/furuta-cost.png" scale="50"></imagedata>
+        </imageobject>
+      </inlinemediaobject></para>
+
+    <para>where t_i, i = 1,2,...,M, are the measurement time points and x =
+    [c_arm,c_pend]^T is the parameter vector. φ^meas and θ^meas are the
+    measurements of φ and θ, respectively, and φ^sim and θ^sim are the
+    corresponding simulation results. Now, add code defining a starting point
+    for the algorithm (use the nominal parameter values) as well as lower and
+    upper bounds for the parameters:<programlisting language="python"># Choose starting point
+x0 = N.array([0.012,0.002])*1e3
+# Choose lower and upper bounds (optional)
+lb = N.zeros (2)
+ub = (x0 + 1e-2)*1e3
+</programlisting>Note that the values are scaled with a factor 10^3. This is
+    done to get a more appropriate variable size for the algorithm to work
+    with. After the optimization is done, the obtained result is scaled back
+    again. In this calibration problem, we shall use multiprocessing, i.e.,
+    parallel execution of multiple processes. All objective function
+    evaluations in the optimization algorithm will be performed in separate
+    processes in order to save memory and time. To be able to do this we need
+    to define the objective function in a separate Python file and provide the
+    optimization algorithm with the file name. Open a new text file, name it
+    furuta_cost.py and enter the following imports:</para>
+
+    <programlisting language="python">from jmodelica.fmi import FMUModel
+from jmodelica.optimization import dfo
+from scipy.io.matlab.mio import loadmat
+import numpy as N
+</programlisting>
+
+    <para>Then, enter code for opening the data file and extracting the
+    measurement time series:</para>
+
+    <programlisting language="python"># Load measurement data from file
+data = loadmat('FurutaData.mat',appendmat=False)
+# Extract data series
+t_meas = data['time'][:,0]
+phi_meas = data['phi'][:,0]
+theta_meas = data['theta'][:,0]
+</programlisting>
+
+    <para>Next, define the objective function, it is important that the
+    objective function has the same name as the file it is defined in (except
+    for .py):</para>
+
+    <programlisting language="python"># Define the objective function
+def furuta_cost(x):
+# Scale down the inputs x since they are scaled up
+# versions of the parameters (x = 1e3*[param1,param2])
+armFrictionCoefficient = x[0]/1e3
+pendulumFrictionCoefficient = x[1]/1e3
+# Load model
+model = FMUModel('../Furuta.fmu')
+# Set new parameter values into the model
+model.set('armFriction',armFrictionCoefficient)
+model.set('pendulumFriction',pendulumFrictionCoefficient)
+# Simulate model response with new parameter values
+res = model.simulate(start_time=0.,final_time=40)
+# Load simulation result
+phi_sim = res['armJoint.phi']
+theta_sim = res['pendulumJoint.phi']
+t_sim = res['time']
+# Evaluate the objective function
+y_meas	=	N.vstack((phi_meas ,theta_meas))
+y_sim = N.vstack((phi_sim,theta_sim))
+obj = dfo.quad_err(t_meas,y_meas,t_sim,y_sim)
+return obj
+</programlisting>
+
+    <para>This function will later be evaluated in temporary sub-directories
+    to your working directory which is why the string '../' is added to the
+    FMU name, it means that the FMU is located in the parent directory. The
+    Python function dfo.quad_err evaluates the objective function (A.1). Now
+    we can finally perform the actual calibration. Solve the optimization
+    problem by calling the Python function dfo.fmin in the file named
+    furuta_par_est.py:</para>
+
+    <programlisting language="python"># Solve the problem using the Nelder-Mead simplex algorithm
+x_opt,f_opt,nbr_iters,nbr_fevals,solve_time = dfo.fmin("furuta_cost.py",
+xstart=x0,lb=lb,ub=ub,alg=1,nbr_cores=4,x_tol=1e-3,f_tol=1e-2)
+</programlisting>
+
+    <para>The input argument alg specifies which algorithm to be used, alg=1
+    means that the Nelder-Mead simplex algo- rithm is used. The number of
+    processor cores (nbr_cores) on the computer used must also be provided
+    when multiprocessing is applied. Now print the optimal parameter values
+    and the optimal function value:</para>
+
+    <programlisting language="python"># Optimal point (don't forget to scale down)
+[armFrictionCoefficient_opt ,pendulumFrictionCoefficient_opt] = x_opt/1e3
+# Print optimal parameter values and optimal function value
+print 'Optimal parameter values:'
+print 'arm friction coeff = ' + str(armFrictionCoefficient_opt)
+print 'pendulum friction coeff = ' + str(pendulumFrictionCoefficient_opt)
+print 'Optimal function value: ' + str(f_opt)
+</programlisting>
+
+    <para>This should give something like the following printout:</para>
+
+    <programlisting>Optimal parameter values:
+arm friction coeff = 0.00997223923413
+pendulum friction coeff = 0.000994473020199
+Optimal function value: 1.09943830585
+</programlisting>
+
+    <para>Then, we shall set the optimized parameter values into the model and
+    simulate it:</para>
+
+    <programlisting language="python"># Load model
+model = FMUModel("Furuta.fmu")
+# Set optimal parameter values into the model
+model.set('armFriction',armFrictionCoefficient_opt)
+model.set('pendulumFriction',pendulumFrictionCoefficient_opt)
+# Simulate model response with optimal parameter values
+res = model.simulate(start_time=0.,final_time=40)
+# Load simulation result
+phi_opt = res['armJoint.phi']
+theta_opt = res['pendulumJoint.phi']
+t_opt = res['time']
+</programlisting>
+
+    <para>And finally, we plot the simulation result:</para>
+
+    <programlisting language="python"># Plot simulation result
+plt.figure (1)
+plt.subplot(2,1,1)
+plt.plot(t_opt,theta_opt,'-.',linewidth=3,
+label='Simulation optimal parameters')
+plt.legend(loc=1)
+plt.subplot(2,1,2)
+plt.plot(t_opt,phi_opt,'-.',linewidth=3,
+label='Simulation optimal parameters')
+plt.legend(loc=1)
+plt.show ()
+</programlisting>
+
+    <para>This should generate the Figure <xref
+    linkend="opt-fig-furuta-opt" />. As can be seen, the agreement between the
+    measurements and the simulation result has improved considerably. The
+    model has been successfully calibrated.</para>
+
+    <figure>
+      <title>Measurements and model simulation results for θ and φ with
+      nominal and optimal parameters in the model of the Furuta
+      pendulum.</title>
+
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="images/furuta_optsim_dashed.svg"
+                     xml:id="opt-fig-furuta-opt"></imagedata>
+        </imageobject>
+      </mediaobject>
+    </figure>
   </section>
 </chapter>
