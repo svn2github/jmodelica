@@ -1785,10 +1785,9 @@ class Radau2Collocator(CasadiCollocator):
             h_i = self._collocation['h_i']
             coll_der = self._collocation['coll_der']
         
-        # Create base cost functions
+        # Create cost functions
         self.cost_mayer = 0
         self.cost_lagrange = 0
-        
         if self.parameter_estimation_data is None:
             if self.eliminate_der_var:
                 J = self.ocp.mterm
@@ -1904,10 +1903,13 @@ class Radau2Collocator(CasadiCollocator):
             # Variable reference maps
             x_vr = copy.deepcopy(self.model.get_x_vr_map())
             x_vr['var_name'] = 'x'
+            x_vr['sf'] = self.model.get_x_sf()
             w_vr = copy.deepcopy(self.model.get_w_vr_map())
             w_vr['var_name'] = 'w'
+            w_vr['sf'] = self.model.get_w_sf()
             u_vr = copy.deepcopy(self.model.get_u_vr_map())
             u_vr['var_name'] = 'u'
+            u_vr['sf'] = self.model.get_u_sf()
             
             # Map of maps
             maps_map = {}
@@ -1935,9 +1937,11 @@ class Radau2Collocator(CasadiCollocator):
                 for i in range(1, self.n_e + 1):
                     for k in range(1, self.n_cp + 1):
                         v_map = maps_map[val_ref]
-                        val = self.var[i][k][v_map['var_name']][v_map[val_ref]]
+                        l = v_map[val_ref]
+                        val = self.var[i][k][v_map['var_name']][l]
+                        sf = v_map['sf'][l]
                         ref_val = y_ref[i][k][j]
-                        err[i][k].append(val - ref_val)
+                        err[i][k].append(sf * val - ref_val)
             
             # Calculate cost contribution from each collocation point
             Q = self.parameter_estimation_data.Q

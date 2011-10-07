@@ -101,7 +101,8 @@ class TestRadau2:
     """
     Tests jmodelica.optimization.casadi_collocation.Radau2Collocator.
     
-    The models used for testing are based on the VDP oscillator and CSTR.
+    The models used for testing are based on the VDP oscillator, CSTR and a
+    custom second order system.
     """
     
     @classmethod
@@ -126,6 +127,11 @@ class TestRadau2:
         file_path = os.path.join(get_files_path(), 'Modelica', 'CSTR.mop')
         class_path = "CSTR.CSTR_Opt_Bounds_Mayer"
         compile_fmux(class_path, file_path)
+        
+        file_path = os.path.join(get_files_path(), 'Modelica',
+                                 'ParameterEstimation_1.mop')
+        class_path = "ParEst.ParEstCasADi"
+        compile_fmux(class_path, file_path)
     
     def setUp(self):
         """Load the test models."""
@@ -147,6 +153,10 @@ class TestRadau2:
         FMUX_CSTR_Mayer = "CSTR_CSTR_Opt_Bounds_Mayer.fmux"
         self.model_CSTR_Mayer = CasadiModel(FMUX_CSTR_Mayer)
         
+        FMUX_second_order = "ParEst_ParEstCasADi.fmux"
+        self.model_second_order = CasadiModel(FMUX_second_order)
+        self.model_second_order_scaled = CasadiModel(FMUX_second_order,
+                                                     enable_scaling=True)
         self.algorithm = "CasadiRadau2"
     
     @testattr(casadi = True)
@@ -188,7 +198,47 @@ class TestRadau2:
         # Lagrange
         res = Lagrange_model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
+    
+    @testattr(casadi = True)
+    def test_parameter_estimation(self):
+        """Test a parameter estimation example with and without scaling."""
+        model_unscaled = self.model_second_order
+        model_scaled = self.model_second_order_scaled
         
+        # Reference values
+        w_ref = 1.048589
+        z_ref = 0.470934
+        
+        # Measurements
+        y_meas = N.array([0.01463904, 0.35424225, 0.94776816, 1.20116167,
+                          1.17283905, 1.03631145, 1.0549561, 0.94827652,
+                          1.0317119, 1.04010453, 1.08012155])
+        t_meas = N.linspace(0., 10., num=len(y_meas))
+        
+        # Parameter estimation data
+        Q = N.array([[1.]])
+        measured_variables=['sys.y']
+        data = N.hstack([N.transpose(N.array([t_meas])),
+                         N.transpose(N.array([y_meas]))])
+        par_est_data = ParameterEstimationData(Q, measured_variables, data)
+        
+        # Optimize without scaling
+        opts = model_unscaled.optimize_options(self.algorithm)
+        opts['parameter_estimation_data'] = par_est_data
+        res = model_unscaled.optimize(self.algorithm, opts)
+        
+        w_unscaled = res['sys.w']
+        z_unscaled = res['sys.z']
+        N.testing.assert_allclose(w_unscaled, w_ref, 1e-2)
+        N.testing.assert_allclose(z_unscaled, z_ref, 1e-2)
+        
+        # Optimize with scaling
+        res = model_scaled.optimize(self.algorithm, opts)
+        w_scaled = res['sys.w']
+        z_scaled = res['sys.z']
+        N.testing.assert_allclose(w_scaled, w_ref, 1e-2)
+        N.testing.assert_allclose(z_scaled, z_ref, 1e-2)
+    
     @testattr(casadi = True)
     def test_path_constraints(self):
         """Test a simple path constraint with and without exact Hessian."""
