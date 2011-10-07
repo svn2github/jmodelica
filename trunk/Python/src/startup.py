@@ -3,11 +3,12 @@
 
 This script sets items in the 'jmodelica.environ' dictionary. The
 values are set from system environment variables if defined, otherwise
-to default values. Values can be overriden by a user startup script
-(optional):
+to default values. 
 
-  $HOME/jmodelica.org/startup.py (unix)
-  $HOMEPATH/jmodelica.org/startup.py (win32)
+Values can be overriden by a user startup script (optional):
+
+  $HOME/.jmodelica.org/user_startup.py (unix)
+  $USERPROFILE/.jmodelica.org/user_startup.py (win32)
 
 Required keys:
   'JMODELICA_HOME' : Path to JModelica.org installation directory
@@ -53,9 +54,6 @@ _defaults = [('IPOPT_HOME','',True),
              ('JVM_PATH',jpype.getDefaultJVMPath(),True),
              ('JVM_ARGS','-Xmx512m',False)]
 
-# Set MODELICAPATH
-#os.environ['MODELICAPATH'] = os.path.join(_jm_home,'ThirdParty','MSL')
-
 if sys.platform == 'win32':
     _defaults.append(('MINGW_HOME',os.path.join(_jm_home,'mingw'),True))
 
@@ -70,27 +68,15 @@ if sys.platform == 'win32':
     # add mingw to path (win32)
     os.environ['PATH'] = os.path.join(environ['MINGW_HOME'],'bin') + \
                          ';' + os.environ['PATH']
-#else:
-#    # MINGW_HOME only on win32
-#    del environ['MINGW_HOME']
-
-
-# set matplotlib backend
-# one of GTK GTKAgg GTKCairo FltkAgg QtAgg TkAgg
-# WX WXAgg Agg Cairo GD GDK Paint PS PDF SVG Template
-# Qt4Agg
-#matplotlib.rcParams['backend'] = 'TkAgg'
-#matplotlib.rcParams['interactive'] = True
 
 # read user startup script
 if sys.platform == 'win32':
     _p = os.environ['USERPROFILE']
-#    _p = os.environ['HOMEPATH']
 else:
     _p = os.environ['HOME']
     
 try:
-    execfile(os.path.join(_p,'jmodelica.org','startup.py'))
+    execfile(os.path.join(_p,'.jmodelica.org','user_startup.py'))
 except IOError:
     None
 
