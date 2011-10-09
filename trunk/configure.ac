@@ -24,7 +24,7 @@ AC_CONFIG_HEADER([config.h])
 
 # Checks for programs.
 AC_PROG_CXX
-AC_PROG_F77
+AC_PROG_F77([gfortran])
 
 # Acquire information about the platform
 AC_CANONICAL_BUILD
@@ -77,6 +77,10 @@ AC_PREFIX_DEFAULT(["/usr/local/jmodelica"])
 #AS_IF([test "x$JMODELICA_HOME" = x],
 # 	AC_PREFIX_DEFAULT([`pwd`]),
 #        AC_PREFIX_DEFAULT(["$JMODELICA_HOME"]))
+
+AS_IF([test "x$F77" != x],
+      [AC_MSG_RESULT([gfortran seems to be working])],
+      [AC_MSG_FAILURE([gfortran does not seem to be present or does not work properly])]) 
 
 # Checks for libraries.
 AC_ARG_WITH([ipopt],
