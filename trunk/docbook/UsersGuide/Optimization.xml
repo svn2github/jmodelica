@@ -405,7 +405,7 @@ x1 = res['x1']
                 the sum of the entries is larger than the number of element)
                 or by increasing the last entry of the vector. For example, if
                 the number of elements is 4, the normalized blocking factor
-                vector in the example is [2,2]. If the number of elements is
+                vector in the example is [2,1,1]. If the number of elements is
                 10, then the normalized vector is [2,1,7].</entry>
               </row>
 
