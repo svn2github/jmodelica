@@ -176,12 +176,35 @@ public class DiagnosticsGenerator {
 				}
 				ind = 0;
 				out.print("<h2>BLT for DAE system </h2>\n");	
-				for (AbstractEquationBlock eb : fc.getDAEBLT()) {
+				out.print("<h3> ODE blocks </h3>\n");	
+				// Loop over all derivatives
+				for (AbstractEquationBlock eb : fc.getDAEStructuredBLT().getOdeBlocks()) {
 					out.print("<pre>\n");
 					out.print("--- Block " + ind++ + "---\n");
 					out.print(eb.toString()+"\n");
-					out.print("</pre>\n");
+					out.print("</pre>\n");					
 				}
+				out.print("<h3> Real output blocks </h3>\n");	
+				for (AbstractEquationBlock eb : fc.getDAEStructuredBLT().getRealOutputBlocks()) {
+					out.print("<pre>\n");
+					out.print("--- Block " + ind++ + "---\n");
+					out.print(eb.toString()+"\n");
+					out.print("</pre>\n");					
+				}
+				out.print("<h3> Integer and boolean output blocks </h3>\n");	
+				for (AbstractEquationBlock eb : fc.getDAEStructuredBLT().getIntegerBooleanOutputBlocks()) {
+					out.print("<pre>\n");
+					out.print("--- Block " + ind++ + "---\n");
+					out.print(eb.toString()+"\n");
+					out.print("</pre>\n");	
+				}
+				out.print("<h3> Other output blocks </h3>\n");					
+				for (AbstractEquationBlock eb : fc.getDAEStructuredBLT().getOtherBlocks()) {
+					out.print("<pre>\n");
+					out.print("--- Block " + ind++ + "---\n");
+					out.print(eb.toString()+"\n");
+					out.print("</pre>\n");					
+				}		
 			}
 			out.print("</pre>\n");	
 			out.print(html_tail);
