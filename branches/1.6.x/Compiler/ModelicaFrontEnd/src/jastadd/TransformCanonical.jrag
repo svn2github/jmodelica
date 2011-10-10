@@ -1,0 +1,3948 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+//import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Queue;
+import java.util.Set;
+import java.util.Stack;
+import java.util.HashSet;
+import java.util.Collections;
+import java.util.Iterator;
+
+
+/* This causes conflicts
+import org.jmodelica.graphs.EquationSystem;
+import org.jmodelica.graphs.Equation;
+import org.jmodelica.graphs.Variable;
+*/
+
+/**
+ * \brief Contains transformations on the flattened model which converts
+ * it into a canonical form.
+ */
+aspect TransformCanonical {
+
+	/**
+	 * \brief Transform the raw flattened model into a structured form.
+	 * 
+	 * Currently, the following operations are performed:
+	 *  <ul>
+	 *    <li> Binding equations for variables are converted into regular
+	 *         equations by calling genBindingEquations().
+	 *    <li> For each non-function algorithm:
+	 *         <ul>
+	 *           <li> A function is generated with the algorithm as body, 
+	 *                any assigned variables as outputs and any used 
+	 *                variables as inputs.
+	 *           <li> The original algorithm is replaced with a call to 
+	 *                the generated function.
+	 *         </ul>
+	 *    <li> The model is scalarized, i.e., all array declarations and
+	 *         equations are replaced by scalar declarations and equations
+	 *    <li> Alias variables are eliminated from the model.
+	 *    <li> Derivative variables are generated and inserted in the
+	 *         list of FVariables by calling addFDerivativeVariables().
+	 *    <li> Generate initial equations based on start attribute.
+	 *    <li> Sort dependent parameters.
+	 *  </ul>
+	 */
+	 
+	 /**
+	  *  transformCanonicalBase contains all transformation that should be
+	  *  done by both the Modelica and the Optimica compilers.
+	  */
+	public void FClass.transformCanonicalBase() {
+		genBindingEquations();
+		genAlgorithmFunctions();
+		scalarize();
+		
+		// This must be done after scalarization
+		enableStreamsRewrite();
+		root().flushAllRecursive();
+		
+		if (root().options.getBooleanOption("eliminate_alias_variables")) {
+			genAlias();
+			eliminateAliasVariables();
+		}
+		enableWhenEquationRewrite();
+		root().flushAllRecursive();
+//		log.debug(prettyPrint(""));
+		addFDerivativeVariables();
+		addFPreVariables();
+		genInitialEquations();
+		sortDependentParameters();
+
+	/*
+		for (FAbstractEquation eqn : equations()) {
+			FEquation e = (FEquation)eqn;
+			System.out.println(e.getLeft().diff("time",1));		
+		}
+*/
+/*
+		if (root().options.getBooleanOption("index_reduction")) {
+			indexReduction();
+			blt();
+		}
+	*/
+	}
+
+	public void FClass.transformCanonical() {
+
+		transformCanonicalBase();
+
+		if (root().options.getBooleanOption("automatic_add_initial_equations")) {
+			// Equations are added as part of this this method
+			computeMatchingsAndBLT();			
+		}
+	    
+	   	root().flushAllRecursive();	
+	    
+	    if (root().options.getBooleanOption("enable_tearing")) {
+			// Equations are added as part of this this method
+			//computeTearings();
+		}
+	    
+	    root().flushAllRecursive();
+		
+	}
+		
+	public class BLT extends ArrayList<AbstractEquationBlock> {
+	
+		private FClass fclass;
+		
+		public BLT(FClass fclass) {
+			this.fclass = fclass;	
+		}
+	
+		public FClass getFClass() {
+			return fclass;	
+		}
+	
+		public ArrayList<Integer> unsolvedBlockSizes() {
+			ArrayList<Integer> blockSizes = new ArrayList<Integer>();
+			for (AbstractEquationBlock b : this) {
+				if (!b.isSolvable()) {
+					blockSizes.add(new Integer(b.activeVariables().size()));
+				}		
+			}
+			return blockSizes;
+		}
+
+		public void reset() {
+			for (AbstractEquationBlock eb : this) {
+				eb.reset();
+			}	
+		}
+
+		public String toString() {
+			StringBuffer str = new StringBuffer();
+			str.append("-------------------------------\n");
+			for (AbstractEquationBlock eb : this) {
+				str.append(eb.toString());
+				str.append("-------------------------------\n");
+			}
+			return str.toString();
+		}
+		
+	}
+	
+	public class StructuredBLT extends BLT {
+		private ArrayList<AbstractEquationBlock> topEquationBlocks = new ArrayList<AbstractEquationBlock>();
+		private ArrayList<AbstractEquationBlock> allBlocks = new ArrayList<AbstractEquationBlock>();
+		private ArrayList<AbstractEquationBlock> odeBlocks = new ArrayList<AbstractEquationBlock>();
+		private ArrayList<AbstractEquationBlock> realOutputBlocks = new ArrayList<AbstractEquationBlock>();
+		private ArrayList<AbstractEquationBlock> integerBooleanOutputBlocks = new ArrayList<AbstractEquationBlock>();
+		private ArrayList<AbstractEquationBlock> otherBlocks = new ArrayList<AbstractEquationBlock>();
+		
+		public StructuredBLT(FClass fclass) {
+			super(fclass);	
+		}
+		
+		public StructuredBLT(FClass fclass, BLT blt) {
+			super(fclass);
+			for (AbstractEquationBlock eb : blt) {
+				this.add(eb);
+				eb.setDAEPredecessors();
+				if (eb.getPredecessors().size() == 0) {
+					topEquationBlocks.add(eb);
+				}
+			}
+
+			reset();
+			// Loop over all derivatives
+			for (FVariable fv : getFClass().derivativeVariables()) {
+				// Get the block where the variable is solved for	
+				AbstractEquationBlock eb = fv.myDAEEquationBlock();
+				if (!eb.isVisited()) {
+					eb.setVisited(true);
+					for (AbstractEquationBlock ebb : eb.getAllPredecessors()){
+						if (!ebb.isVisited()) {	
+							ebb.setVisited(true);
+							odeBlocks.add(ebb);
+						}
+					}
+					odeBlocks.add(eb);
+				}
+			}
+			
+			// Loop over all real outputs
+			for (FVariable fv : getFClass().realOutputs()) {
+				// Get the block where the variable is solved for	
+				AbstractEquationBlock eb = fv.myDAEEquationBlock();
+				//States and inputs can be outputs in which case they don't have equation blocks associated with them
+				if (eb!=null && !eb.isVisited()) { 
+					eb.setVisited(true);
+					for (AbstractEquationBlock ebb : eb.getAllPredecessors()){
+						if (!ebb.isVisited()) {	
+							ebb.setVisited(true);
+							realOutputBlocks.add(ebb);
+						}
+					}
+					realOutputBlocks.add(eb);
+				}	
+			}
+
+			// Loop over integer and boolean outputs
+			for (FVariable fv : getFClass().outputs()) {
+				// Get the block where the variable is solved for	
+				AbstractEquationBlock eb = fv.myDAEEquationBlock();
+				if (eb!=null && !eb.isVisited()) {
+					eb.setVisited(true);
+					for (AbstractEquationBlock ebb : eb.getAllPredecessors()){
+						if (!ebb.isVisited()) {	
+							ebb.setVisited(true);
+							integerBooleanOutputBlocks.add(ebb);
+						}
+					}
+					integerBooleanOutputBlocks.add(eb);
+				}	
+			}
+
+			// Loop over all others
+			for (FVariable fv : getFClass().variables()) {
+				// Get the block where the variable is solved for	
+				AbstractEquationBlock eb = fv.myDAEEquationBlock();
+				if (eb!=null && !eb.isVisited()) {
+					eb.setVisited(true);
+					for (AbstractEquationBlock ebb : eb.getAllPredecessors()){
+						if (!ebb.isVisited()) {	
+							ebb.setVisited(true);
+							otherBlocks.add(ebb);
+						}
+					}
+					otherBlocks.add(eb);
+				}	
+			}
+			
+			allBlocks.addAll(odeBlocks);
+			allBlocks.addAll(realOutputBlocks);
+			allBlocks.addAll(integerBooleanOutputBlocks);
+			allBlocks.addAll(otherBlocks);
+
+		}
+
+	    public ArrayList<AbstractEquationBlock> getAllBlocks() {
+			return allBlocks;
+		}
+
+	    public ArrayList<AbstractEquationBlock> getOdeBlocks() {
+			return odeBlocks;
+		}
+
+	    public ArrayList<AbstractEquationBlock> getRealOutputBlocks() {
+			return realOutputBlocks;
+		}
+
+	    public ArrayList<AbstractEquationBlock> getIntegerBooleanOutputBlocks() {
+			return integerBooleanOutputBlocks;
+		}
+
+	    public ArrayList<AbstractEquationBlock> getOtherBlocks() {
+			return otherBlocks;
+		}
+
+		public String toString() {
+			
+			HashSet<FVariable> solvedVars = new HashSet<FVariable>();
+			
+			int n_blocks = 0;
+			/*
+			for (AbstractEquationBlock eb : getOdeBlocks()) {
+				n_blocks++;
+				for (FVariable fv : eb.activeVariables()) {
+					System.out.println("'" + fv.name() + "',");
+				}
+				for (FVariable fv : eb.inactiveVariables()) {
+					if (!solvedVars.contains(fv)) {
+						System.out.println("ERRROR:");
+						System.out.println("Variable:");
+						System.out.println(fv);
+						System.out.println("needed by block:");
+						System.out.println(eb.toStringVerbose());
+						System.out.println("have not been solved");
+					}							
+				}
+				solvedVars.addAll(eb.activeVariables());
+			}
+			
+			for (AbstractEquationBlock eb : getOtherBlocks()) {
+				n_blocks++;
+				for (FVariable fv : eb.inactiveVariables()) {
+					if (!solvedVars.contains(fv)) {
+						System.out.println("ERRROR:");
+						System.out.println("Variable:");
+						System.out.println(fv);
+						System.out.println("needed by block:");
+						System.out.println(eb.toStringVerbose());
+						System.out.println("have not been solved");
+					}							
+				}
+				solvedVars.addAll(eb.activeVariables());
+			}
+			
+			System.out.println("Number of blocks in generated code: " + n_blocks +  
+			" Total number of blocks: " + size());
+			*/
+
+			StringBuffer str = new StringBuffer();
+			str.append("************* Structured BLT*********\n");
+			str.append("***********************************\n");	
+			str.append("************* ODE section *********\n");	
+			str.append("***********************************\n");	
+			// Loop over all derivatives
+			for (AbstractEquationBlock eb : getOdeBlocks()) {
+				str.append(eb.toString());
+				str.append("******\n");
+			}
+			str.append("***********************************\n");	
+			str.append("************ Real outputs *********\n");	
+			str.append("***********************************\n");	
+			for (AbstractEquationBlock eb : getRealOutputBlocks()) {
+				str.append(eb.toString());
+				str.append("******\n");
+			}
+			str.append("***********************************\n");	
+			str.append("****Integer and boolean outputs ***\n");	
+			str.append("***********************************\n");	
+			for (AbstractEquationBlock eb : getIntegerBooleanOutputBlocks()) {
+				str.append(eb.toString());
+				str.append("******\n");
+			}
+			str.append("***********************************\n");	
+			str.append("**** Other variables ***\n");	
+			str.append("***********************************\n");	
+			for (AbstractEquationBlock eb : getOtherBlocks()) {
+				str.append(eb.toString());
+				str.append("******\n");
+			}
+
+			return str.toString();
+		}
+	}
+
+	/**
+	 * Abstract class for equation blocks resulting from the BLT transformation
+	 */
+	public abstract class AbstractEquationBlock {
+	
+		private LinkedHashSet<AbstractEquationBlock> predecessors = new LinkedHashSet<AbstractEquationBlock>();
+		private LinkedHashSet<AbstractEquationBlock> successors = new LinkedHashSet<AbstractEquationBlock>();
+		private LinkedHashSet<FVariable> dependsOnVariables = null; 
+	    private boolean visited = false;
+	    
+		private boolean predecessorsSet = false;
+	
+		public abstract ArrayList<FAbstractEquation> equations();
+		
+		public abstract ArrayList<FVariable> activeVariables();
+		
+		public ArrayList<FVariable> inactiveVariables() {
+			ArrayList<FVariable> s = new ArrayList<FVariable>();
+			for (FAbstractEquation e : equations()) {
+				s.addAll(e.algebraicVariables());
+				s.addAll(e.derivativeVariables());	
+			}
+			s.removeAll(activeVariables());
+			return s;	
+		}		
+
+		public ArrayList<FVariable> independentVariables() {
+			ArrayList<FVariable> s = new ArrayList<FVariable>();
+			for (FAbstractEquation e : equations()) {
+				s.addAll(e.inputs());
+				s.addAll(e.differentiatedVariables());	
+				s.addAll(e.discretePreVariables());	
+			}
+			return s;
+		}		
+		
+		public void setDAEPredecessors() {
+			if (!predecessorsSet) {
+				for (FVariable fv : inactiveVariables()) {
+					if (!predecessors.contains(fv.myDAEEquationBlock())) {
+						predecessors.add(fv.myDAEEquationBlock());
+					}
+					if (!fv.myDAEEquationBlock().getSuccessors().contains(this)) {
+						fv.myDAEEquationBlock().getSuccessors().add(this);
+					}
+					fv.myDAEEquationBlock().setDAEPredecessors();
+				}
+				predecessorsSet = true;
+			}		
+		}
+		
+		public LinkedHashSet<FVariable> dependsOn() {
+			if (this.dependsOnVariables==null) {
+				dependsOnVariables = new LinkedHashSet<FVariable>();
+				dependsOnVariables.addAll(independentVariables());
+				for (AbstractEquationBlock eb : getPredecessors()) {
+					dependsOnVariables.addAll(eb.dependsOn());
+				}
+			}
+			return dependsOnVariables;
+		}
+		
+		public abstract boolean isSolvable();
+		
+		public boolean isMixed() {
+			for (FAbstractEquation e : equations()) {
+				if (e.isDiscrete()) {
+					return true;
+				}	
+			}	
+			return false;
+		}
+		
+		public ArrayList<FAbstractEquation> differentiatedEquations() {
+			ArrayList<FAbstractEquation> diffedEq = new ArrayList<FAbstractEquation>();
+			for (FAbstractEquation e : equations()) {
+				if (e.getMeIntegrated()!=null) {
+					diffedEq.add(e);
+				}
+			}
+			return diffedEq;
+		}
+
+		public ArrayList<AbstractEquationBlock> getAllPredecessors() {
+			ArrayList<AbstractEquationBlock> allPredecessors = new ArrayList<AbstractEquationBlock>(); 
+			for (AbstractEquationBlock eb : getPredecessors()) {
+				for (AbstractEquationBlock ebb : eb.getAllPredecessors()) {
+					if (!allPredecessors.contains(ebb)) {
+						allPredecessors.add(ebb);
+					}
+				}
+				if (!allPredecessors.contains(eb)) {
+					allPredecessors.add(eb);
+				}
+			}
+			return allPredecessors;
+		}	
+		
+		public LinkedHashSet<AbstractEquationBlock> getPredecessors() {
+			return predecessors;
+		}	
+
+		public LinkedHashSet<AbstractEquationBlock> getSuccessors() {
+			return successors;
+		}	
+		
+		public boolean isPredecessorsSet() {
+			return predecessorsSet;
+		}
+	
+		public boolean isVisited() {
+			return visited;
+		}
+		
+		public void setVisited(boolean visited) {
+			this.visited = visited;	
+		}
+		
+		public void reset() {
+			visited  = false;	
+		}
+		
+		public String toStringVerbose() {	
+			StringBuffer str = new StringBuffer();
+			str.append("**** Block ****\n");
+			str.append(toString());
+			str.append("**** Depends on ****\n");
+			for (FVariable fv : dependsOn()) {
+				str.append(fv.prettyPrint("") + "\n");
+			} 
+			str.append("**** Inactive variables ****\n");
+			for (FVariable fv : inactiveVariables()) {
+				str.append(fv.prettyPrint("") + "\n");
+			} 
+/*			str.append("**** Predecessors ****\n");
+			for (AbstractEquationBlock eb : getPredecessors()) {
+				str.append(eb.toString());
+				str.append("---------\n");
+			}
+			str.append("**** All Predecessors ****\n");
+			for (AbstractEquationBlock eb : getAllPredecessors()) {
+				str.append(eb.toString());
+				str.append("---------\n");
+			}
+			str.append("**** Successors ****\n");
+			for (AbstractEquationBlock eb : getSuccessors()) {
+				str.append(eb.toString());
+				str.append("---------\n");
+			}*/
+		    str.append("**** Block ends ****\n");				
+			return str.toString();
+		}		
+		
+		public abstract String toString();
+	
+	}
+
+	/**
+	 * EquationBlock is a general block that may contain one or more
+	 * solved or non-solved equations.
+	 */
+	public class EquationBlock extends AbstractEquationBlock {
+		protected ArrayList<MatchingPair> matchingPairs = new ArrayList<MatchingPair>();
+				
+		public void addMatchingPair(MatchingPair m) {
+			matchingPairs.add(m);
+		}	
+		
+		public ArrayList<FVariable> activeVariables() {
+			ArrayList<FVariable> s = new ArrayList<FVariable>();
+			for (MatchingPair mp : matchingPairs) {
+				s.add(mp.getFVariable());
+			}
+			return s;
+		}		
+
+		public ArrayList<FAbstractEquation> equations() {
+			ArrayList<FAbstractEquation> s = new ArrayList<FAbstractEquation>();
+			for (MatchingPair mp : matchingPairs) {
+				s.add(mp.getEquation());
+			}
+			return s;
+		}
+		
+		public boolean isSolvable() {
+		    // TODO: extend to handle solvable non scalar blocks, e.g., linear blocks
+			return equations().size()==1 && equations().get(0).isSolved(activeVariables().get(0).name());
+		}
+		
+		public AbstractEquationBlock createSolvedEquationBlock() {
+			if (isSolvable()) {
+				return new SolvedScalarBlock(matchingPairs.get(0));
+			} else {
+				return null;
+			}
+		}
+
+		public boolean containsDerivative() {
+			for (FVariable fv : activeVariables()) {
+				if (fv.isDerivativeVariable()) {
+					return true;
+				}
+			}
+			return false;
+		}				
+					  						
+		public String toString() {
+			StringBuffer str = new StringBuffer();
+			str.append("Non-solved block of " + activeVariables().size() + " variables:\n");
+			str.append("Unknown variables:\n");
+			for (FVariable fv : activeVariables()) {
+				str.append("  " + fv.name() + "\n");
+			}
+/*			str.append("Inactive variables:\n");
+			for (FVariable fv : inactiveVariables()) {
+				str.append("  " + fv.name() + "\n");
+			}*/
+			str.append("Equations:\n");
+			for (FAbstractEquation feq : equations()) {
+				str.append("  " + feq.prettyPrint("") + "\n");			
+			}
+			return str.toString();
+		}
+	
+	}
+
+	/**
+	 * MixedEquationBlock is a general block that may contain one or more
+	 * solved or non-solved equations and which contains both continous
+	 * and discrete equations.
+	 */
+	public class MixedEquationBlock extends EquationBlock {
+		
+		public ArrayList<FVariable> activeContinuousVariables() {
+			ArrayList<FVariable> s = new ArrayList<FVariable>();
+			for (MatchingPair mp : matchingPairs) {
+				//if (mp.getFVariable().isContinuous()) {
+				if (mp.getFVariable().isReal()) {
+					s.add(mp.getFVariable());
+				}
+			}
+			return s;
+		}		
+
+		public ArrayList<FVariable> activeDiscreteVariables() {
+			ArrayList<FVariable> s = new ArrayList<FVariable>();
+			for (MatchingPair mp : matchingPairs) {
+				//if (mp.getFVariable().isDiscrete()) {
+				if (!mp.getFVariable().isReal()) {
+					s.add(mp.getFVariable());
+				}
+			}
+			return s;
+		}		
+
+		public ArrayList<FAbstractEquation> continuousEquations() {
+			ArrayList<FAbstractEquation> s = new ArrayList<FAbstractEquation>();
+			for (MatchingPair mp : matchingPairs) {
+				//if (mp.getEquation().isContinuous()) {
+				if (mp.getEquation().isReal()) {
+					s.add(mp.getEquation());
+				}
+			}
+			return s;
+		}
+
+		public ArrayList<FAbstractEquation> discreteEquations() {
+			ArrayList<FAbstractEquation> s = new ArrayList<FAbstractEquation>();
+			for (MatchingPair mp : matchingPairs) {
+				//if (mp.getEquation().isDiscrete()) {
+				if (!mp.getEquation().isReal()) {
+					s.add(mp.getEquation());
+				}
+			}
+			return s;
+		}
+									  						
+		public String toString() {
+			StringBuffer str = new StringBuffer();
+			str.append("Mixed non-solved block of " + activeVariables().size() + " variables:\n");
+			str.append("Unknown continuous variables:\n");
+			for (FVariable fv : activeContinuousVariables()) {
+				str.append("  " + fv.name() + "\n");
+			}
+			str.append("Unknown discrete variables:\n");
+			for (FVariable fv : activeDiscreteVariables()) {
+				str.append("  " + fv.name() + "\n");
+			}
+/*			str.append("Inactive variables:\n");
+			for (FVariable fv : inactiveVariables()) {
+				str.append("  " + fv.name() + "\n");
+			}*/
+			str.append("Continuous equations:\n");
+			for (FAbstractEquation feq : continuousEquations()) {
+				str.append("  " + feq.prettyPrint("") + "\n");			
+			}
+			str.append("Discrete equations:\n");
+			for (FAbstractEquation feq : discreteEquations()) {
+				str.append("  " + feq.prettyPrint("") + "\n");			
+			}
+			return str.toString();
+		}
+	}
+
+	/**
+	 * SolvedScalarBlock represents a scalar solved equation.
+	 */
+	public class SolvedScalarBlock extends AbstractEquationBlock {
+		private MatchingPair mp;
+		
+		SolvedScalarBlock(MatchingPair mp) {
+			this.mp = mp;
+		}
+		
+		public ArrayList<FAbstractEquation> equations() {
+			ArrayList<FAbstractEquation> s = new ArrayList<FAbstractEquation>();
+			s.add(mp.getEquation());
+			return s;
+		}
+		
+		public ArrayList<FVariable> activeVariables() {
+			ArrayList<FVariable> s = new ArrayList<FVariable>();
+			s.add(mp.getFVariable());
+			return s;
+		}
+		
+		public FExp solution() {
+			return mp.getEquation().solution(mp.getFVariable().name());
+		}
+
+		public boolean isSolvable() {
+			return true;
+		}
+
+		public boolean printStarted = false;
+		public String toString() {
+			
+			StringBuffer str = new StringBuffer();
+			str.append("Solved block of " + activeVariables().size() + " variables:\n"); 
+			str.append("Computed variable:\n");
+			for (FVariable fv : activeVariables()) {
+				str.append("  " + fv.name() + "\n");
+			}
+/*			str.append("Inactive variables:\n");
+			for (FVariable fv : inactiveVariables()) {
+				str.append("  " + fv.name() + "\n");
+			}*/
+			str.append("Solution:\n");
+			str.append("  " + solution().prettyPrint("") + "\n");
+			return str.toString();
+		}
+				
+	}
+
+	/**
+	 * TornEquationBlock represents an equation block resulting from tearing.
+	 */
+	public class TornEquationBlock extends AbstractEquationBlock {
+		private ArrayList<MatchingPair> unsolvedPairs = new ArrayList<MatchingPair>();
+		private ArrayList<MatchingPair> solvedPairs = new ArrayList<MatchingPair>();
+		
+		public TornEquationBlock() {
+		}
+		
+		public void addSolvedMatchingPair(MatchingPair m) {
+			solvedPairs.add(m);
+		}	
+
+		public void addUnsolvedMatchingPair(MatchingPair m) {
+			unsolvedPairs.add(m);
+		}	
+
+		public ArrayList<FAbstractEquation> unsolvedEquations() {
+			ArrayList<FAbstractEquation> s = new ArrayList<FAbstractEquation>();
+			for (MatchingPair mp : unsolvedPairs) {
+				s.add(mp.getEquation());
+			}
+			return s;
+		}
+
+		public ArrayList<FAbstractEquation> solvedEquations() {
+			ArrayList<FAbstractEquation> s = new ArrayList<FAbstractEquation>();
+			for (MatchingPair mp : solvedPairs) {
+				s.add(mp.getEquation());
+			}
+			return s;
+		}
+
+		public ArrayList<FAbstractEquation> equations() {
+			ArrayList<FAbstractEquation> s = new ArrayList<FAbstractEquation>();
+			s.addAll(solvedEquations());
+			s.addAll(unsolvedEquations());
+			return s;
+		}
+
+		public ArrayList<MatchingPair> getSolvedPairs() {
+			return solvedPairs;
+		}
+
+		public ArrayList<MatchingPair> getUnsolvedPairs() {
+			return unsolvedPairs;
+		}
+		
+		public ArrayList<FVariable> activeVariables() {
+			ArrayList<FVariable> s = new ArrayList<FVariable>();
+			for (MatchingPair mp : unsolvedPairs) {
+				s.add(mp.getFVariable());
+			}
+			return s;
+		}
+		
+		public ArrayList<FVariable> variables() {
+			ArrayList<FVariable> s = new ArrayList<FVariable>();
+			for (MatchingPair mp : unsolvedPairs) {
+				s.add(mp.getFVariable());
+			}
+			for (MatchingPair mp : solvedPairs) {
+				s.add(mp.getFVariable());
+			}
+			return s;
+		}
+						
+		public boolean isSolvable() {
+			return false;
+		}			
+		
+		public boolean containsDerivative() {
+			for (FVariable fv : activeVariables()) {
+				if (fv.isDerivativeVariable()) {
+					return true;
+				}
+			}
+
+			return false;
+		}	
+		
+		public String toString() {
+			StringBuffer str = new StringBuffer();
+			str.append("Torn block of " + activeVariables().size() + " tearing variables");
+			str.append(" and " + solvedEquations().size() + " solved variables.\n");
+			str.append("Tearing variables:\n");
+			for (FVariable fv : activeVariables()) {
+				str.append("  " + fv.name() + "\n");
+			}
+			str.append("Solved equations:\n");
+			for(MatchingPair mp: getSolvedPairs()){
+				str.append("  " + mp.getFVariable().name() + " = ");
+				str.append(mp.getEquation().solution(mp.getFVariable().name(),true) + "\n");
+			}	
+			str.append("Residual equations:\n");
+			for (FAbstractEquation feq : unsolvedEquations()) {
+				str.append("  " + feq.prettyPrint("") + "\n");			
+			}
+			return str.toString();
+	
+		}
+	
+	}
+
+    public class MatchingPair {
+    	private FAbstractEquation eqn;
+    	private FVariable fv;
+    	public MatchingPair(FAbstractEquation eqn, FVariable fv) {
+    		this.eqn = eqn;
+    		this.fv = fv;
+    	}
+    
+    	public FAbstractEquation getEquation() {
+			return eqn;    	
+    	}
+    	
+    	public FVariable getFVariable() {
+    		return fv;
+    	}
+    }
+
+	syn lazy LinkedHashSet<FVariable> FVariable.dependsOn() {
+		if (myDAEEquationBlock() != null) {
+			return myDAEEquationBlock().dependsOn();
+		} else {
+			return new LinkedHashSet<FVariable>();
+		}
+	}
+
+	syn lazy AbstractEquationBlock FVariable.myDAEEquationBlock() = 
+		myFClass().getDAEFVariableEquationBlockMap().get(this);
+
+	private HashMap<FVariable,AbstractEquationBlock> FClass.daeFVariableEquationBlockMap = null;
+	syn HashMap<FVariable,AbstractEquationBlock> FClass.getDAEFVariableEquationBlockMap() {
+		if (daeFVariableEquationBlockMap == null) 
+			computeMatchingsAndBLT();
+		return daeFVariableEquationBlockMap;
+	}
+
+	syn lazy AbstractEquationBlock FVariable.myDAEInitEquationBlock() = 
+		myFClass().getDAEInitFVariableEquationBlockMap().get(this);
+	
+	private HashMap<FVariable,AbstractEquationBlock> FClass.daeInitFVariableEquationBlockMap = null;	
+	syn HashMap<FVariable,AbstractEquationBlock> FClass.getDAEInitFVariableEquationBlockMap() {
+		if (daeInitFVariableEquationBlockMap == null) 
+			computeMatchingsAndBLT();
+		return daeInitFVariableEquationBlockMap;
+	}
+
+	private ArrayList<MatchingPair> FClass.daeMatching = null;
+	syn ArrayList<MatchingPair> FClass.getDAEMatching() {
+		if (daeMatching == null) 
+			computeMatchingsAndBLT();
+		return daeMatching;
+	}
+	
+	private ArrayList<MatchingPair> FClass.daeInitMatching = null;
+	syn ArrayList<MatchingPair> FClass.getDAEInitMatching() { 
+		if (daeInitMatching == null) 
+			computeMatchingsAndBLT();
+		return daeInitMatching;
+	}	
+
+	private ArrayList<FAbstractEquation> FClass.daeUnmatchedEquations = null;
+	syn ArrayList<FAbstractEquation> FClass.getDAEUnmatchedEquations() { 
+		if (daeUnmatchedEquations == null) 
+			computeMatchingsAndBLT();
+		return daeUnmatchedEquations;
+	}	
+
+	private ArrayList<FVariable> FClass.daeUnmatchedVariables = null;
+	syn ArrayList<FVariable> FClass.getDAEUnmatchedVariables() { 
+		if (daeUnmatchedVariables == null) 
+			computeMatchingsAndBLT();
+		return daeUnmatchedVariables;
+	}	
+
+	private ArrayList<FAbstractEquation> FClass.daeInitUnmatchedEquations = null;
+	syn ArrayList<FAbstractEquation> FClass.getDAEInitUnmatchedEquations() { 
+		if (daeInitUnmatchedEquations == null) 
+			computeMatchingsAndBLT();
+		return daeInitUnmatchedEquations;
+	}	
+
+	private ArrayList<FVariable> FClass.daeInitUnmatchedVariables = null;
+	syn ArrayList<FVariable> FClass.getDAEInitUnmatchedVariables() { 
+		if (daeUnmatchedVariables == null) 
+			computeMatchingsAndBLT();
+		return daeInitUnmatchedVariables;
+	}	
+
+	private BLT FClass.daeBLT = null;
+	syn BLT FClass.getDAEBLT() {
+		if (daeBLT == null) 
+			computeMatchingsAndBLT();
+		return daeBLT;
+	}
+
+	private StructuredBLT FClass.daeStructuredBLT = null;
+	syn StructuredBLT FClass.getDAEStructuredBLT() {
+		if (daeStructuredBLT == null) 
+			computeMatchingsAndBLT();
+		return daeStructuredBLT;
+	}
+	
+	private BLT FClass.daeInitBLT = null;	
+	syn BLT FClass.getDAEInitBLT() {
+		if (daeInitBLT == null) 
+			computeMatchingsAndBLT();
+		return daeInitBLT;
+	}	
+	
+	public ArrayList<String> FClass.indexReductionErrors = new ArrayList<String>();
+	
+	/**
+	 * The symbolic equation sorting and canonicalization proceeds in the
+	 * following steps:
+	 * 
+	 * - The DAE system consisting of the DAE equations with algebraics and
+	 *   derivatives treated as unknowns is matched to obtain a pairing
+	 *   between equations and variables. Discrete and continuous algebraic
+	 *   variables are treated equally in this respect.
+	 *
+	 * - If a perfect matching is found, i.e., if there are no unmatched
+	 *   equations or variables, the BLT algoritm is applied to compute
+	 *   a sequence of stron components, corresponding to systems of equations.
+	 * 
+	 * - Having computed a matching and transformed the DAE into BLT form, 
+	 *   the DAE initialization system is analyzed:
+	 *    - The differentiated variables are added to the set of unknown 
+	 *      variables of the system.
+	 *    - The pre variables are added to the set of unknown variables of the
+	 *      system.
+	 *    - The initial equations are added to the set of equations of the 
+	 *      system. This includes equations resulting from start values with
+	 *      a corresonding fixed attribute set to true.
+	 *    - When clauses are analyzed: if a when clause is explicitly enabled by
+	 *      the initial() operator (whatever this means...), the when clause 
+	 *      is excluded, otherwhise the equation pre(x) = x is added, where x 
+	 *      is the variable that is solved for in the when clause.
+	 *      
+	 * - The matching algoritm is applied to the updated graph. Notice that it
+	 *   is important that the result of the DAE matching is used as a starting
+	 *   point: using this approach, derivatives and algebraics will remain
+	 *   matched if possible and additional equations are added, if needed,
+	 *   for differentiated variables. If there are 
+	 *   unmatched equations, the transformation sequence terminates. If there
+	 *   are unmatched variables, then additional initial equations are added 
+	 *   in order to obtained a balanced system. For continuous variables, 
+	 *   equations such as x = x.start are added, whereas for discrete variables
+	 *   equations such as pre(x) = x.start are added.
+	 *
+	 *  - Finally, the BLT algorithm is applied to the resulting perfect
+	 *    matchibng for the DAE initialization system.
+     */	
+	public void FClass.computeMatchingsAndBLT() {
+		
+		daeMatching = new ArrayList<MatchingPair>();
+		daeInitMatching = new ArrayList<MatchingPair>();		
+	    daeBLT = new BLT(this);
+	    daeStructuredBLT = new StructuredBLT(this);
+	   	daeInitBLT = new BLT(this);		
+		daeUnmatchedEquations = new ArrayList<FAbstractEquation>();		
+		daeUnmatchedVariables = new ArrayList<FVariable>();			
+		daeInitUnmatchedEquations = new ArrayList<FAbstractEquation>();		
+		daeInitUnmatchedVariables = new ArrayList<FVariable>();			
+		daeFVariableEquationBlockMap = new HashMap<FVariable,AbstractEquationBlock>();	
+		daeInitFVariableEquationBlockMap = new HashMap<FVariable,AbstractEquationBlock>();	
+			
+		BiPGraph g = new BiPGraph(this,name(),"");
+		
+		Eq eqn = null;
+		Var v = null;		
+		
+		int k = 1;
+		
+		g.addVariables(this, BiPGraph.DERIVATIVE_VARIABLES | BiPGraph.ALGEBRAIC_VARIABLES);
+		g.addEquations(equations(), BiPGraph.DERIVATIVE_VARIABLES | BiPGraph.ALGEBRAIC_VARIABLES,"eq_",1);
+		
+		log.info(g.toString());
+		g.maximumMatching(true);	
+		log.info("DAE system ");
+		log.info(g.printMatching());
+			
+		daeMatching = g.getMatching();
+			
+		for (Var var : g.getUnmatchedVariables()) {
+			daeUnmatchedVariables.add(var.getVariable());
+		}
+
+		for (Eq ee : g.getUnmatchedEquations()) {
+			daeUnmatchedEquations.add(ee.getEquation());
+		}
+	
+		// TODO: If no complete matching found, then try index reduction
+		if (g.getUnmatchedVariables().size()>0 || g.getUnmatchedEquations().size()>0) {
+			if (root().options.getBooleanOption("index_reduction")) {
+				//System.out.println(prettyPrint(""));
+				
+				IndexReductionResult result = null;
+				try {
+					result = g.reduceIndex(false);
+				} catch (EquationDifferentiationException e) {
+					indexReductionErrors.add(e.getMessage());
+					return; 
+				}
+				
+				if (result != null) {
+				// Add the new equations
+				// Replace selected dummy derivatives with algebraics
+				// Enable rewrite of identifiers? (not necessary?)
+				for (FAbstractEquation fe : result.getEquations()) {
+					addFEquation((FAbstractEquation)fe.fullCopy());
+				}
+				
+				List<FVariable> l = new List<FVariable>();
+				
+				for (FVariable fv : getFVariables()) {
+					if (result.getDummyDerivatives().contains(fv)) {
+						if (fv instanceof FHDerivativeVariable) {
+							FHDummyDerivativeVariable fdv = new FHDummyDerivativeVariable((FVisibilityType)fv.getFVisibilityType().fullCopy(),
+								(FTypePrefixVariability)fv.getFTypePrefixVariability().fullCopy(),
+								new Opt(),
+								new List(),
+								new Opt(),
+								new Opt(),
+								fv.getFQName().fullCopy(),
+								((FHDerivativeVariable)fv).getOrder());
+							l.add(fdv);
+						} else if (fv instanceof FDerivativeVariable) {
+							FDummyDerivativeVariable fdv = new FDummyDerivativeVariable((FVisibilityType)fv.getFVisibilityType().fullCopy(),
+								(FTypePrefixVariability)fv.getFTypePrefixVariability().fullCopy(),
+								new Opt(),
+								new List(),
+								new Opt(),
+								new Opt(),
+								fv.getFQName().fullCopy());
+							l.add(fdv);					
+						} else {
+							l.add(fv);
+						}
+					} else if (fv instanceof FHDerivativeVariable) {
+					    // Convert higher order derivative variables into
+					    // first order derivatives
+					    FHDerivativeVariable fhdv = (FHDerivativeVariable)fv;
+						for (int i=0;i<fhdv.getOrder()-1;i++) {
+							StringBuffer str = new StringBuffer();
+							StringBuffer str2 = new StringBuffer();
+							for (int j=0;j<i+1;j++) {
+								str.append("_der");
+								if (j<i) {
+									str2.append("_der");
+								}
+							}
+							str.append("_");
+							if (i>0) {
+								str2.append("_");
+							}
+							FQName fqn = fhdv.getFQName();
+							FQName fqn2 = (FQName)fv.getFQName().fullCopy();
+							str.append(fqn.getFQNamePart(fqn.getNumFQNamePart()-1).name());
+							fqn.setFQNamePart(new FQNamePart(str.toString(),fqn.getFQNamePart(fqn.getNumFQNamePart()-1).getFArraySubscriptsOpt()),fqn.getNumFQNamePart()-1);
+							l.add(new FRealVariable((FVisibilityType)fv.getFVisibilityType().fullCopy(),
+								(FTypePrefixVariability)fv.getFTypePrefixVariability().fullCopy(),
+								new Opt(),
+								new List(),
+								new Opt(),
+								new Opt(),
+							fqn));
+							l.add(new FDerivativeVariable((FVisibilityType)fv.getFVisibilityType().fullCopy(),
+								(FTypePrefixVariability)fv.getFTypePrefixVariability().fullCopy(),
+								new Opt(),
+								new List(),
+								new Opt(),
+								new Opt(),
+								(FQName)fqn.fullCopy()));
+							str2.append(fqn2.getFQNamePart(fqn2.getNumFQNamePart()-1).name());
+							fqn2.setFQNamePart(new FQNamePart(str2.toString(),fqn2.getFQNamePart(fqn2.getNumFQNamePart()-1).getFArraySubscriptsOpt()),fqn2.getNumFQNamePart()-1);
+							// Add equations for the new variables
+							addFEquation(new FEquation(new FIdUseExp(new FIdUse((FQName)fqn.fullCopy())),new FDerExp(new FIdUse(fqn2))));
+						}		
+					} else {
+						l.add(fv);
+					}
+				}	
+
+				setFVariableList(l);		
+
+				enableFHDerRewrite();
+
+				// flushAllRecursiveClearFinal must be used here in order to
+				// trigger rewrites of FDerExp -> FDummyDerExp
+				root().flushAllRecursiveClearFinal();
+
+				if (root().options.getBooleanOption("eliminate_alias_variables")) {
+					genAlias();
+					eliminateAliasVariables();
+				}
+
+ 				root().flushAllRecursive();
+
+				//System.out.println(prettyPrint(""));
+
+				//dumpTree("");
+
+				log.info("States:");
+				for (FVariable fv : differentiatedRealVariables()) {
+					log.info(fv.prettyPrint("  "));
+				}
+				} else {
+					return;
+				}
+				
+				BiPGraph oldG = g;	
+
+				g = new BiPGraph(this,name(),"");
+				g.addVariables(this, BiPGraph.DERIVATIVE_VARIABLES | BiPGraph.ALGEBRAIC_VARIABLES);
+				g.addEquations(equations(), BiPGraph.DERIVATIVE_VARIABLES | BiPGraph.ALGEBRAIC_VARIABLES,"eq_",1);
+		
+				log.info(g.toString());
+				g.maximumMatching(true);	
+				log.info("DAE system ");
+				log.info(g.printMatching());
+			
+				daeMatching = g.getMatching();
+			
+				daeUnmatchedVariables.clear();
+				for (Var var : g.getUnmatchedVariables()) {
+					daeUnmatchedVariables.add(var.getVariable());
+				}
+
+				daeUnmatchedEquations.clear();
+				for (Eq ee : g.getUnmatchedEquations()) {
+					daeUnmatchedEquations.add(ee.getEquation());
+				}
+				
+				if (g.getUnmatchedVariables().size()>0 || g.getUnmatchedEquations().size()>0) {
+					return;
+				}
+			} else {
+				return;
+			}
+		}
+	
+		// Perform BLT
+		if (root().options.getBooleanOption("equation_sorting") && g.getUnmatchedVariables().size()==0 && g.getUnmatchedEquations().size()==0) {	
+			
+			if (root().options.getBooleanOption("enable_tearing")){
+				daeBLT = computeTearings(g);
+				
+			}else{
+				daeBLT = g.computeBLT();
+				for (AbstractEquationBlock eb : daeBLT) {
+					for (FVariable fv : eb.activeVariables()) {
+						daeFVariableEquationBlockMap.put(fv,eb);
+					}
+				}	
+				
+				daeStructuredBLT = new StructuredBLT(this,daeBLT);
+				log.info(daeStructuredBLT.toString());
+				
+			}
+			log.info(daeBLT.toString());
+		
+		}
+						
+		// Find matching for the initialization system	
+
+		g.addVariables(this, BiPGraph.DIFFERENTIATED_VARIABLES | BiPGraph.DISCRETE_PRE_VARIABLES);
+		g.addEquations(equations(), BiPGraph.DIFFERENTIATED_VARIABLES | BiPGraph.DISCRETE_PRE_VARIABLES, "eq_",1);
+
+
+	    // Replace when equations	
+		ArrayList<FAbstractEquation> equationsToReplace = 
+			new ArrayList<FAbstractEquation>();
+		for (FAbstractEquation e : equations()) {
+			if (e.replacedAtInitialization()) {
+				equationsToReplace.add(e);
+			}
+		}		
+		
+		// Loop over all equations to replace
+		for (FAbstractEquation equationToReplace : equationsToReplace) {
+			//System.out.println(" **>>> " + equationToReplace.prettyPrint(""));
+			
+			// How many equations are there in this when clause?
+			List<FAbstractEquation> newEquations = equationToReplace.getInitialEquationList();
+
+			// Get all the scalar (graph) equations corresponding to 
+			// the AST equation
+			ArrayList<Eq> eq_list = g.getEquations(equationToReplace);
+			
+			// The number of simple and scalar (graph) equations should
+			// be the same
+			
+			// Loop over the graph equations and the simple lefts
+			// and do the replacements			
+			int i = 0;
+			for (FAbstractEquation e : newEquations) {
+				Eq ee = eq_list.get(i);
+				//FAbstractEquation e = newEquations.get(i);
+				i++;
+				eqn = g.replaceEquation(ee.getName(),e.prettyPrint(""),e);
+			
+				//System.out.println(" ** " + e.prettyPrint(""));
+				for (FVariable y : e.algebraicVariables()) { 
+					//System.out.println("  Algebraic: " + y.name()); 	 	 
+					v = g.getVariable(y.name());     
+					g.addEdge(eqn,v); 
+				} 
+					
+				for (FVariable x : e.differentiatedVariables()) { 
+					//System.out.println("  State: " + x.name()); 	 
+					v = g.getVariable(x.name());     
+					g.addEdge(eqn,v); 
+				} 
+				 	
+				for (FDerivativeVariable dx : e.derivativeVariables()) { 
+					//System.out.println("  Diffed state: " + dx.name()); 
+					v = g.getVariable(dx.name());     
+					g.addEdge(eqn,v); 
+				} 
+
+				for (FVariable pv : e.discretePreVariables()) { 
+					//System.out.println("   pre variable: " + pv.name()); 
+					v = g.getVariable(pv.name());     
+					g.addEdge(eqn,v); 
+				} 
+			}			
+		}		
+	
+		log.info(g.toString());
+		
+
+		g.addEquations(initialEquations(), BiPGraph.DERIVATIVE_VARIABLES | 
+		                                   BiPGraph.ALGEBRAIC_VARIABLES | 
+		                                   BiPGraph.DIFFERENTIATED_VARIABLES | 
+		                                   BiPGraph.DISCRETE_PRE_VARIABLES, "eq_",
+		                                   g.getEquations().size() + 1);
+
+		log.info(g.toString());
+		g.maximumMatching(false);	
+		log.info("DAE initial ");
+		log.info(g.printMatching());
+
+		if (g.getUnmatchedEquations().size()>0) {
+		   	return;
+		}
+
+		// Add initial equations if needed
+		if (root().options.getBooleanOption("automatic_add_initial_equations")) {
+			List<FAbstractEquation> l = new List<FAbstractEquation>();
+			for (FAbstractEquation e : initialEquations()) {
+				l.add(e);
+			}
+
+			for (Var var : g.getUnmatchedVariables()) {	
+			    FVariable fv = var.getVariable();
+			    FEquation fe = null;
+			    if (fv.isReal() && fv.isContinuous()) {
+					fe = new FEquation(new FIdUseExp(
+						new FIdUse(fv.getFQName().fullCopy())),
+						fv.startAttributeSet()? fv.startAttributeExp(): new FRealLitExp("0.0"));
+				} else if (fv.isReal() && fv.isDiscrete()) {
+					fe = new FEquation(new FPreExp(new FIdUseExp(
+						new FIdUse(fv.getFQName().fullCopy()))),
+						fv.startAttributeSet()? fv.startAttributeExp(): new FRealLitExp("0.0"));
+				}else if (fv.isInteger()) {
+					fe = new FEquation(new FPreExp(new FIdUseExp(
+						new FIdUse(fv.getFQName().fullCopy()))),
+						fv.startAttributeSet()? fv.startAttributeExp(): new FRealLitExp("0"));
+				}
+			    if (fv.isBoolean()) {
+					fe = new FEquation(new FPreExp(new FIdUseExp(
+						new FIdUse(fv.getFQName().fullCopy()))),
+						fv.startAttributeSet()? fv.startAttributeExp(): new FBooleanLitExpFalse());
+				}
+				if (fv.isString()) {
+					fe = new FEquation(new FPreExp(new FIdUseExp(
+						new FIdUse(fv.getFQName().fullCopy()))),
+						fv.startAttributeSet()? fv.startAttributeExp(): new FStringLitExp(""));
+				}
+			    if (fv.isEnum()) {
+					fe = new FEquation(new FPreExp(new FIdUseExp(
+						new FIdUse(fv.getFQName().fullCopy()))),
+						fv.startAttributeSet()? fv.startAttributeExp(): new FBooleanLitExpFalse());
+				}
+				l.add(fe);
+				
+				eqn = g.addEquation("eq_"+(g.getEquations().size() + 1),fe.prettyPrint(""),fe);
+				v = g.getVariable(var.getName());     
+				g.addEdge(eqn,v); 
+				k++;
+				//j++;
+			}
+	
+			setFInitialEquationList(l);	
+	        root().flushAllRecursive();
+
+			g.maximumMatching(false);	
+			log.info("DAE initial after addition of initial equations");
+			log.info(g.toString());
+			log.info(g.printMatching());
+
+		}
+
+		for (Var var : g.getUnmatchedVariables()) {
+			daeInitUnmatchedVariables.add(var.getVariable());
+		}
+
+		for (Eq ee : g.getUnmatchedEquations()) {
+			daeInitUnmatchedEquations.add(ee.getEquation());
+		}
+
+		daeInitMatching = g.getMatching();
+
+		// TODO: If no complete matching found, then try index reduction
+		if (g.getUnmatchedVariables().size()>0 || g.getUnmatchedEquations().size()>0) {
+			return;
+		}
+				
+		if (root().options.getBooleanOption("equation_sorting") && 
+			g.getUnmatchedVariables().size()==0 && 
+			g.getUnmatchedEquations().size()==0) {
+		
+			g.tarjanReset();
+			if (root().options.getBooleanOption("enable_tearing")){
+				daeInitBLT = computeTearings(g);
+			}else{
+				daeInitBLT = g.computeBLT();
+				for (AbstractEquationBlock eb : daeInitBLT) {
+					for (FVariable fv : eb.activeVariables()) {
+						daeInitFVariableEquationBlockMap.put(fv,eb);
+					}
+				}		
+			}
+			log.info(daeInitBLT.toString());
+
+			
+		}
+	}	
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	public BLT FClass.computeTearings(BiPGraph graph) {
+			LinkedList<Stack<Eq>> blt = graph.computeRawBLT();
+			BLT tearBLT = new BLT(this);
+			for(Stack<Eq> block : blt){ // Iterate over all (global) BLT-blocks
+				if (block.size()>1){
+					TornEquationBlock eb = new TornEquationBlock();
+					BiPGraph g = new BiPGraph(this,"","");
+					ArrayList<Eq> SUME = new ArrayList<Eq>();
+
+					// ---------------------- Graph Info -----------------------------------
+					for(Eq e : block){
+						Var gVar = g.addVariable(e.getMatching().getName(),"",e.getMatching().getVariable());
+						Eq gEq = g.addEquation(e.getName(),"",e.getEquation());
+						if(gEq.getEquation().isSolved(gVar.getName(),true)){ // Use old matching where possible
+							gEq.setSolvableMatching(gVar);
+							gVar.setSolvableMatching(gEq);
+						}else{
+							SUME.add(gEq);
+						}
+					}
+					// Add edges between the active variables and equations
+					for(Eq e : block){
+						Eq gEq = g.getEquation(e.getName());
+						for(Var v : e.getVariables()){
+							Var gVar = g.getVariable(v.getName());
+							if(gVar!=null){
+								gEq.addVariable(gVar);
+								gVar.occurrence();
+								if(gEq.getEquation().isSolved(gVar.getName(),true)){
+									gEq.addSolvableVariable(gVar);
+									gVar.solvableOccurrence();
+								}
+							}
+						}
+					}
+					// Obtain Maximum Solvable Matching in two steps (greedy and augmenting paths)
+					SUME = g.greedySM(SUME);
+					Iterator<Eq> itr = SUME.iterator();
+					while (itr.hasNext()) {
+						Eq e = itr.next();
+						if(g.SAP(e)){
+							itr.remove();
+						}else{
+							e.isRes(true);
+						}
+						g.lightReset();
+					}
+					System.out.println(SUME.size());
+					// Now we have a Maximum Solvable Matching
+					
+					if(SUME.size()==0){ // If: there exist a Pefect Solvable Matching
+										//     proceed with recursive tearing of block
+						eb = Tear(g,eb);
+					} else { 
+										// Else: Start out by trying to insert residuals that contain
+										// 		 few variables. 
+						ArrayList<FAbstractEquation> residuals = new ArrayList<FAbstractEquation>();
+						for(Eq e: SUME) {
+							int nVars = e.getVariables().size();
+							int nSVars = e.getSolvableVariables().size();
+							Eq newRes = null;
+							for(Var v: e.getSolvableVariables()){
+								Eq tmp = v.getSolvableMatching();
+								int tmpNVars = tmp.getVariables().size();
+								int tmpNSVars = tmp.getSolvableVariables().size();
+								if(tmpNVars > nVars	|| (tmpNVars == nVars && tmpNSVars > nSVars) ){
+									newRes = tmp;
+									nVars = tmpNVars;
+									nSVars = tmpNSVars;
+								}
+							}
+							if(newRes!=null){
+								Var tmpVar = newRes.getSolvableMatching();
+								newRes.setSolvableMatching(null);
+								newRes.isRes(true);
+								e.setSolvableMatching(tmpVar);
+								tmpVar.setSolvableMatching(e);
+								e.isRes(false);
+								residuals.add(newRes.getEquation());
+							}else{
+								residuals.add(e.getEquation());
+							}
+						}
+						
+										// Compute inner BLT and see if tearings can be changed 
+						ArrayList<Var> SUMV = g.getSUMV();			
+						LinkedList<Stack<Eq>> innerBlocks = g.computeTearBlocks(); 
+						ArrayList<FVariable> tearings = new ArrayList<FVariable>();
+						
+						for(Stack<Eq> bInner : innerBlocks){
+							if(bInner.size()==1){
+										// If: the block is scalar, it will be a solvedMatchingPair
+								Eq e = bInner.get(0);
+								Var v = e.getSolvableMatching();
+								MatchingPair mp = new MatchingPair(e.getEquation(),v.getVariable());
+								eb.addSolvedMatchingPair(mp);
+										// If the equation contains a Var in SUMV, that Var cannot be
+										// reinserted and must be used as a tearing variable.
+								for(Var vv : e.getVariables()){
+									if(SUMV.contains(vv)){
+										SUMV.remove(vv);
+										tearings.add(vv.getVariable());
+									}
+								}
+							} else {
+										// Build Inner Graph and add info about tearing variables
+								BiPGraph gInner = new BiPGraph(this,"","");
+										// Obtain info about block-graph
+								for(Eq e : bInner){
+									Var gInnerVar = gInner.addVariable(e.getSolvableMatching().getName(),"",e.getSolvableMatching().getVariable());
+									Eq gInnerEq = gInner.addEquation(e.getName(),"",e.getEquation());
+									gInnerEq.setSolvableMatching(gInnerVar);
+									gInnerVar.setSolvableMatching(gInnerEq);
+								}
+										// Build block-graph and look for interchangeable variables in SUMV
+								ArrayList<Eq> eqs = new ArrayList<Eq>();
+								boolean graphHasTear = false;
+								for(Eq e : bInner){
+									Eq gInnerEq = gInner.getEquation(e.getName());
+									for(Var v : e.getVariables()){
+										Var gInnerVar = gInner.getVariable(v.getName());
+										if(gInnerVar!=null){
+											gInnerEq.addVariable(gInnerVar);
+											gInnerVar.occurrence();
+											if(gInnerEq.getEquation().isSolved(gInnerVar.getName(),true)){
+												gInnerEq.addSolvableVariable(gInnerVar);
+												gInnerVar.solvableOccurrence();
+												if(gInnerVar.isTear() && !eqs.contains(gInnerEq)){
+													eqs.add(gInnerEq);
+												}
+											}
+										}else if(SUMV.contains(v)){
+											Var newGInnerVar = gInner.addVariable(v.getName(),"",v.getVariable());
+											newGInnerVar.isTear(true);
+											newGInnerVar.occurrence();
+											gInnerEq.addVariable(newGInnerVar);
+											SUMV.remove(v);
+											tearings.add(v.getVariable());
+											graphHasTear = true;
+											if(e.getEquation().isSolved(v.getName(),true)){
+												gInnerEq.addSolvableVariable(newGInnerVar);
+												newGInnerVar.solvableOccurrence();
+												if(!eqs.contains(gInnerEq)){
+													eqs.add(gInnerEq);
+												}
+											}
+										}
+									}
+								}
+										// Go through equations that might get a new matching
+								boolean isChanged = false;
+								for(Eq e: eqs){
+									int occ = e.getSolvableMatching().getNbrV();
+									int solvOcc = e.getSolvableMatching().getNbrSV();
+									for(Var v: e.getSolvableVariables()){
+										if(v.isTear()){
+											int vOcc = v.getNbrV();
+											int vSolvOcc = v.getNbrSV();
+										// Reinsert tearing if it is "better" than the matching	
+											if(vOcc < occ || (vOcc == occ && vSolvOcc > solvOcc)){
+												Var tmp = e.getSolvableMatching();
+												tmp.isTear(true);
+												tmp.setSolvableMatching(null);
+												tearings.remove(v.getVariable());
+												tearings.add(tmp.getVariable());
+												v.isTear(false);
+												e.setSolvableMatching(v);
+												v.setSolvableMatching(e);
+												occ=vOcc;
+												solvOcc = vSolvOcc;
+												isChanged = true;
+											}
+										}
+									}
+								}
+								
+								if(graphHasTear){
+									if(isChanged){
+										LinkedList<Stack<Eq>> newBlocks = gInner.computeTearBlocks();
+										for(Stack<Eq> bInnerInner : newBlocks){
+											if(bInnerInner.size()==1){
+												Eq e = bInnerInner.get(0);
+												Var v = e.getSolvableMatching();
+												MatchingPair mp = new MatchingPair(e.getEquation(),v.getVariable());
+												eb.addSolvedMatchingPair(mp);
+											} else {
+												eb = Tear(bInnerInner,eb);
+											}
+										}
+									} else {
+										eb = Tear(bInner,eb);
+									}
+							
+								} else {
+										// Reuse the already constructed graph
+									eb = Tear(gInner,eb);
+								}
+							}
+						}
+						for(Var v: SUMV){
+							//SUMV ought to be empty, but there might exist variables that hasn't 
+							// been altered before. 
+							tearings.add(v.getVariable());
+						}
+						for(int i=0; i<tearings.size(); i++){
+							MatchingPair mp = new MatchingPair(residuals.get(i),tearings.get(i));
+							eb.addUnsolvedMatchingPair(mp);
+						}
+					}
+					
+					tearBLT.add(eb);
+				} else {
+					Eq eqv = block.get(0);
+					Var var = eqv.getMatching();
+					MatchingPair mp = new MatchingPair(eqv.getEquation(),var.getVariable());
+					if(eqv.getEquation().isSolved(var.getName())){
+						SolvedScalarBlock eb = new SolvedScalarBlock(mp);
+						tearBLT.add(eb);
+					} else {
+						EquationBlock eb = new EquationBlock();
+						eb.addMatchingPair(mp);
+						tearBLT.add(eb);
+					}
+				}
+			}
+			return tearBLT;
+	}	
+
+	
+	public TornEquationBlock FClass.Tear(BiPGraph g, TornEquationBlock eb){
+		int maxOcc = 0;
+		int minSolvOcc = 0;
+		Var tear = null;
+		for(Eq e: g.getEquations()){
+			Var tmp = e.getSolvableMatching();
+			int occ = tmp.getNbrV();
+			int sOcc = tmp.getNbrSV();
+			if(occ>maxOcc){
+				tear=tmp;
+				maxOcc=occ;
+				minSolvOcc = sOcc;
+			} else if (occ==maxOcc && sOcc < minSolvOcc){
+				tear=tmp;
+				minSolvOcc = sOcc;
+			}
+		}
+		Eq res = tear.getSolvableMatching();
+		tear.isTear(true);
+		res.isRes(true);
+		//v.isVisited(true);	
+		//g.collectResidual(res,e.getVariables().size()-1,e.getSolvableVariables().size());
+		MatchingPair tp = new MatchingPair(res.getEquation(),tear.getVariable());
+		eb.addUnsolvedMatchingPair(tp);
+		LinkedList<Stack<Eq>> blt = g.computeTearBlocks();
+		for(Stack<Eq> block : blt){
+			if(block.size()==1){
+				Eq e = block.get(0);
+				Var v = e.getSolvableMatching();
+				MatchingPair mp = new MatchingPair(e.getEquation(),v.getVariable());
+				eb.addSolvedMatchingPair(mp);
+			} else {
+				eb = Tear(block,eb);
+			}
+		}
+		return eb;
+	}
+	
+	public TornEquationBlock FClass.Tear(Stack<Eq> Block, TornEquationBlock eb){
+		BiPGraph g = new BiPGraph(this,"","");
+		for(Eq e : Block){
+			Var gVar = g.addVariable(e.getSolvableMatching().getName(),"",e.getSolvableMatching().getVariable());
+			Eq gEq = g.addEquation(e.getName(),"",e.getEquation());
+			// At this stage the pair is a SolvableMatchingPair
+			gEq.setSolvableMatching(gVar);
+			gVar.setSolvableMatching(gEq);
+		}
+		// Add edges between the active variables and equations
+		for(Eq e : Block){
+			Eq gEq = g.getEquation(e.getName());
+			for(Var v : e.getVariables()){
+				Var gVar = g.getVariable(v.getName());
+				if(gVar!=null){
+					gEq.addVariable(gVar);
+					gVar.occurrence();
+					if(gEq.getEquation().isSolved(gVar.getName(),true)){
+						gEq.addSolvableVariable(gVar);
+						gVar.solvableOccurrence();
+					}
+				}
+			}
+		}
+		return Tear(g,eb);
+	}
+	/*
+	public class VarTP{
+		private Var outsideVar;
+		private Var insideVar;
+		
+		public VarTP(Var outside, Var inside){
+			this.outsideVar = outside;
+			this.insideVar = inside;
+		}
+		
+		public boolean tryChange(){
+			return (outsideVar.getNbrV() <= insideVar.getNbrV());
+		}
+	}
+	*/
+	/*public BLT FClass.computeTearingsOld(BiPGraph graph) {
+	LinkedList<Stack<Eq>> blt = graph.computeRawBLT();
+	BLT tearBLT = new BLT();
+	for(Stack<Eq> block : blt){
+		Eq tmp = block.pop();
+		if (!block.isEmpty()){
+			TornEquationBlock eb = new TornEquationBlock();
+			int size=1;
+			for(Eq e: block){
+				size++;
+			}
+			//Calls function Tear
+			block.push(tmp);
+			ArrayList<MatchingPair> tearingPairs = new ArrayList<MatchingPair>();
+			initTear(block);
+			//rebuild graph to get sequential order of solved equations
+			// which after the removal of tearingPairs should be an Index-0 graph
+			// (this will be rewritten when the global structure for the blt is decided) 
+			BiPGraph solvedGraph = new BiPGraph("","");
+			for(Eq e : block){
+				boolean isRes=false;
+				boolean isTear=false;
+				for(MatchingPair tp: tearingPairs){
+					if(tp.getEquation().equals(e.getEquation())){
+						isRes=true;
+					}
+					if(tp.getFVariable().equals(e.getMatching().getVariable())){
+						isTear=true;
+					}
+				}
+				if(!isRes){
+					Eq gEq = solvedGraph.addEquation(e.getName(),"",e.getEquation());
+				}
+				if(!isTear){
+					Var gVar = solvedGraph.addVariable(e.getMatching().getName(),"",e.getMatching().getVariable());
+				}
+			}
+			for(Eq e : block){
+				Eq gEq = solvedGraph.getEquation(e.getName());
+				if(gEq!=null){
+					for(Var v : e.getVariables()){
+						Var gVar = solvedGraph.getVariable(v.getName());
+						if(gVar!=null){
+							gEq.addVariable(gVar);
+						}
+					}	
+				}
+			}
+			//Only one Perfect Matching should exist, (since Index-0)
+			solvedGraph.maximumMatching(true);
+			LinkedList<Stack<Eq>> components = solvedGraph.computeRawBLT();
+			for (Stack<Eq> bl : components) {
+				ArrayList<Eq> ar = new ArrayList<Eq>(bl);
+				if (ar.size()>1) {
+					System.out.println("\n No sequential order was obtained after tearing!");
+				}else{
+					Var v = ar.get(0).getMatching();
+					MatchingPair mp = new MatchingPair(ar.get(0).getEquation(),v.getVariable());
+					eb.addSolvedMatchingPair(mp);
+				}
+			}
+			int i=1;
+			for(MatchingPair tp: tearingPairs){
+				eb.addUnsolvedMatchingPair(tp);
+				i++;	
+			}
+			tearBLT.add(eb);
+			
+		} else {
+			MatchingPair mp = new MatchingPair(tmp.getEquation(),tmp.getMatching().getVariable());
+			if(tmp.getEquation().isSolved(tmp.getMatching().getName())){
+				SolvedScalarBlock eb = new SolvedScalarBlock(mp);
+				tearBLT.add(eb);
+			} else {
+				EquationBlock eb = new EquationBlock();
+				eb.addMatchingPair(mp);
+				tearBLT.add(eb);
+			}
+		}
+	}
+	return tearBLT;
+}	
+*/
+	
+	
+	/*
+	public ArrayList<MatchingPair> FClass.TearNew(Stack<Eq> Block){
+		System.out.println("------------- New recursion in tearing ------------------");
+		ArrayList<MatchingPair> tp = new ArrayList<MatchingPair>();
+		BiPGraph g = new BiPGraph("","");
+		BiPGraph sg = new BiPGraph("","");
+		ArrayList<Eq> SUME = new ArrayList<Eq>();
+		ArrayList<Var> SUMV = new ArrayList<Var>();
+		ArrayList<Eq> USE = new ArrayList<Eq>();
+		ArrayList<Var> USV = new ArrayList<Var>();
+		int blockSize = 0;
+		int nbrEdges = 0;
+		Var theTear = null;
+		Eq theRes = null;
+		boolean canBeSolved=false;
+		
+		// ---------------------- Obtain Graph Info ----------------------------------------
+		for(Eq e : Block){
+			Var gVar = g.addVariable(e.getMatching().getName(),"",e.getMatching().getVariable());
+			Eq gEq = g.addEquation(e.getName(),"",e.getEquation());
+			if(gEq.getEquation().isSolved(gVar.getName(),true)){
+				//Only match where Solvability exist
+				gEq.setSolvableMatching(gVar);
+				gVar.setSolvableMatching(gEq);
+				gEq.setMatching(gVar);
+				gVar.setMatching(gEq);
+			}else{
+				SUME.add(gEq);
+				gEq.setMatching(gVar);
+				gVar.setMatching(gEq);
+			}
+			blockSize++;
+		}
+		System.out.println("Block size: " + blockSize);
+		// ------------------------ Build Graph -------------------------------------------- 
+		for(Eq e : Block){
+			canBeSolved=false;
+			Eq gEq = g.getEquation(e.getName());
+			for(Var v : e.getVariables()){
+				Var gVar = g.getVariable(v.getName());
+				if(gVar!=null){
+					gVar.occurrence();
+					gEq.addVariable(gVar);
+					if(gEq.getEquation().isSolved(gVar.getName(),true)){
+						gEq.addSolvableVariable(gVar);
+						canBeSolved=true;
+					}
+				}
+			}
+			if(!canBeSolved){
+				USE.add(gEq);
+			}
+		}
+		
+		// OUTPUT
+		//o   |
+		//  o |
+		//---------   
+		//    |x
+		//    | x
+		int SUMESize = SUME.size();
+		System.out.println("SUME size at start: " + SUMESize);
+		System.out.print(g.printMatching());
+		System.out.print(g.printSolvableMatching());
+		Eq APEq = null;
+		int is = 0;
+		for(int i=0; i < SUMESize; i++){
+			boolean hasUnused=false;
+			Iterator<Eq> itr = SUME.iterator();
+			while(itr.hasNext()){
+				APEq = itr.next();
+				if(APEq.isUsed()){
+					itr.remove();
+				}else{
+					hasUnused=true;
+					break;
+				}
+			}
+			if(hasUnused==false){
+				break;
+			}
+			System.out.println("\n Looking for AP starting in eqn:   " +APEq.getName());
+			if(g.initAP(APEq)){
+				SUME = g.getSUME();
+				System.out.println("Matched  equation(s)!");
+				System.out.println("Nbr of UnsolvableMatched :" + SUME.size());
+				//System.out.print(g.printSolvableMatching());
+				//System.out.print(g.printMatching());
+			}else{
+				SUME.remove(APEq);
+			}
+			is=is+1;
+		}
+		System.out.println("\nTotal number of initAps: " + is);
+		System.out.println("Unmatched from start: "+ SUMESize);
+		System.out.print(g.printSolvableMatching());
+		System.out.print(g.printMatching());
+		for(Eq e: g.getEquations()){
+			if(e.getSolvableMatching()!=null){
+				if(e.getSolvableMatching()!=e.getMatching()){
+					System.out.println("Different Matchings :(");
+				}
+			}
+		}
+		
+		//------------------------ Greedy Solvable Matching for SUME ------------------------------
+		//SUME = g.greedySM(SUME);
+		// OUTPUT
+		//o     |
+		//  o   |
+		//    o |
+		//-----------   
+		//      |UM
+		//      |
+		//System.out.println("SUME size after Greedy: " + SUME.size());
+		
+		// --------------------- Try to Solvable Match with SAP ------------------------------------
+		Iterator<Eq> itr = SUME.iterator();
+		while(itr.hasNext()){
+			g.lightReset();
+			if(g.SAP(itr.next(), new ArrayList<Eq>(), new ArrayList<Var>())){
+				itr.remove();
+			}
+		}
+		
+		// OUTPUT
+		//o       |
+		//  o     |
+		//    o   |
+		//      o |
+		//-------------   
+		//        |UM   <-- small graph
+		//        |
+		//System.out.println("SUME size after SAPs: " + SUME.size());
+		
+		// --------------------- Look for Unsolvable variables ----------------------------------
+		SUMV = g.getSUMV();
+		for(Var v: SUMV){
+			canBeSolved = false;
+			for(Eq e: g.getEquations()){
+				ArrayList<Var> SV = e.getSolvableVariables();
+				if(SV.contains(v)){
+					canBeSolved = true;
+					break;
+				}
+			}
+			if(!canBeSolved){
+				USV.add(v);
+			}
+		}
+		System.out.println("Nbr of USV: " + USV.size());
+		System.out.println("Nbr of USE: " + USE.size());
+		
+		
+		
+		// ----------------- Build Small Graph from SUME and SUMV ----------------------------
+		
+		BiPGraph SG = new BiPGraph("","");
+		for(int i=0; i<SUME.size(); i++){
+			Var SGVar = SG.addVariable(SUMV.get(i).getName(),"",SUMV.get(i).getVariable());
+			Eq SGEq = SG.addEquation(SUME.get(i).getName(),"",SUME.get(i).getEquation());
+		}
+		for(Eq e: SUME){
+			Eq SGEq = SG.getEquation(e.getName());
+			for(Var v : e.getVariables()){
+				Var gVar = SG.getVariable(v.getName());
+				if(gVar!=null){
+					SGEq.addVariable(gVar);
+				}
+			}
+		}
+		
+		// OUTPUT
+		//  UM |
+		//     |
+		// ----
+		//------------------ Construct Maximum Matching for SG ---------------------------------
+		//
+		
+		ArrayList<Eq> UME = null;
+		if(SUME.size()>0){
+			SG.maximumMatching(true);
+			UME = SG.getUnmatchedEquations();	
+		}
+		for(Eq eqSG: SG.getEquations()){
+			if(eqSG.getMatching()!=null){
+				Eq eqG = g.getEquation(eqSG.getName());
+				Var matchG = g.getVariable(eqSG.getMatching().getName());
+				eqG.setMatching(matchG);
+				matchG.setMatching(eqG);
+			}
+		}
+		System.out.println("Unmatched Equations: " + UME.size());
+		
+		// OUTPUT
+		//o       | |
+		//  o     | |
+		//    o   | |
+		//      o | |
+		//-------------- }  
+		//        |x|    }  <- small graph
+		//-------------- }
+		//        | |UM  }
+		
+		
+		
+		
+		 ---------------------- Start Choosing tearing (5 cases) ----------------------------------
+		 CASE 1: The system has BOTH an unsolvable EQ and an unsolvable VAR
+		 CASE 2: The system has an unsolvable VAR
+		 CASE 3: The system has an unsolvable EQ
+		 CASE 4: The system has solvableUnmatchables
+		 CASE 5: The system has a Solvable Perfect Matching
+		 ---------------------------------------------------------------------------------------------
+		
+		
+		
+		
+		// CASE 1: -------------  the system has both an unsolvable EQ and VAR  ---------------
+		
+		if(USV.size()>0 && USE.size()>0){
+			System.out.println("\n Enters CASE 1...");
+			for(Eq e: UME){
+				g.lightReset();
+				g.augmentPath(g.getEquation(e.getName()), new ArrayList<Eq>(), new ArrayList<Var>());
+			}
+			int MaxE = 0;
+			int MaxV = 0;
+			for(Var v: USV){
+				int nbrV = v.getNbrV();
+				if(nbrV >MaxV){
+					MaxV=nbrV;
+					theTear=v;
+				}
+			}
+			for(Eq e: USE){
+				int nbrE = e.getVariables().size();
+				if(e.getVariables().contains(theTear)){
+					nbrE--;
+				}
+				if(nbrE >= MaxE){
+					MaxE=nbrE;
+					theRes=e;
+				}
+			}
+			if(theTear.getName().equals(theRes.getMatching().getName())){
+				g.removeTearingPair(theRes,theTear,false);
+			}else{
+				g.removeTearingPair(theRes,theTear,true);
+				g.lightReset();
+				g.augmentPath(theTear.getMatching(), new ArrayList<Eq>(), new ArrayList<Var>());
+			}
+		 
+		// CASE 2: ------------ the system has a VAR that cannot be solved at all ----------
+		}else if(USV.size()>0){
+			theTear = USV.get(0);
+			boolean validPair=false;
+			ArrayList<Eq> resList = new ArrayList<Eq>();				
+			int maxVars = 0;	
+			w:while(!validPair){
+				resList.clear();
+				for(Eq e : g.getEquations()){
+					if(!e.wasUsed()){
+						int nbrVars = e.getVariables().size(); 
+						if(e.getVariables().contains(theTear)){
+							nbrVars--;
+						}
+						if(nbrVars > maxVars){
+							resList.clear();
+							resList.add(e);
+							maxVars = nbrVars;
+						}else if(nbrVars==maxVars){
+							resList.add(e);
+						}
+					}
+				}
+				for(Eq e: resList){
+					theRes = e;
+					theRes.isUsed();
+						// ++++ The Residual is in SUME
+					if(SUME.contains(theRes)){
+						if(theTear.getName().equals(theRes.getMatching().getName())){
+							g.removeTearingPair(theRes,theTear,false);
+							validPair=true;
+						}else{
+							Eq SGRes = SG.getEquation(theRes.getName());
+							Var SGTear = SG.getVariable(theTear.getName());
+							ArrayList<Eq> altSGEqs = SG.removeTearingPair(SGRes,SGTear,true);
+							SG.lightReset();
+							if(SG.augmentPath(SGTear.getMatching(), new ArrayList<Eq>(), new ArrayList<Var>())){
+								g.removeTearingPair(theRes,theTear,true);
+								break w;
+							}else{
+								SG.reinsertTearingPair(SGRes,SGTear,altSGEqs,false);
+							}
+						}
+						// ++++ The Residual is NOT in SUME
+					}else{ 
+						ArrayList<Eq> altEqs = g.removeTearingPair(theRes,theTear,true);
+						for(Eq eqTryMatch: SUME){
+							boolean SGMatch = false;
+							// Check if there is a PM in the small graf, if eqTryMatch is unmatched
+							if(theTear.getName().equals(eqTryMatch.getMatching().getName())){
+								SGMatch=true;
+								g.lightReset();
+								validPair = g.SAP(eqTryMatch, new ArrayList<Eq>(), new ArrayList<Var>());
+								if(validPair){
+									
+								}
+								
+								
+							}else{
+								Eq SGEqTryMatch = SG.getEquation(eqTryMatch.getName());
+								Var SGTear = SG.getVariable(theTear.getName());
+								ArrayList<Eq> altSGEqs = SG.removeTearingPair(SGEqTryMatch,SGTear,true);
+								SG.lightReset();
+								SGMatch =SG.hasAP(SGTear.getMatching(), new ArrayList<Eq>(), new ArrayList<Var>());
+								if(!SGMatch){
+									SG.reinsertTearingPair(SGEqTryMatch,SGTear,altSGEqs,false);
+								}
+							}
+							if(SGMatch){
+								g.lightReset();
+								validPair = g.SAP(eqTryMatch, new ArrayList<Eq>(), new ArrayList<Var>());
+								if(validPair){
+									SG.lightReset();
+									SG.augmentPath(SGTear.getMatching(), new ArrayList<Eq>(), new ArrayList<Var>());
+									for(Eq eqSG: SG.getEquations()){
+										Eq eqG = g.getEquation(eqSG.getName());
+										Var matchG = g.getVariable(eqSG.getMatching().getName());
+										eqG.setMatching(matchG);
+										matchG.setMatching(eqG);
+									}
+									break w;
+								}
+							SG.reinsertTearingPair(SGEqTryMatch,SGTear,altSGEqs,false);
+							}
+						}
+						g.reinsertTearingPair(theRes,theTear,altEqs,false);
+					}
+				}
+			}	
+		// CASE 3: -------------- the system has an EQ that cannot be solved at all ----------
+		}else if(USE.size()>0){
+			
+			theRes = USE.get(0);
+			boolean validPair=false;
+			ArrayList<Var> tearList = new ArrayList<Var>();
+			int maxOcc = 0;
+			w:while(!validPair){
+				tearList.clear();
+				for(Var v : g.getMatchedVariables()){
+					if(!v.wasUsed()){
+						int nbrOcc = v.getOccurrences(); 
+						if(theRes.getVariables().contains(v)){
+							nbrOcc--;
+						}
+						if(nbrOcc > maxOcc){
+							tearList.clear();
+							tearList.add(v);
+							maxOcc = nbrOcc;
+						}else if(nbrOcc==maxOcc){
+							tearList.add(v);
+						}
+					}
+				}
+				for(Var v: tearList){
+					theTear = v;
+					theTear.isUsed();
+					if(SUMV.contains(theTear)){
+						if(theTear.getName().equals(theRes.getMatching().getName())){
+							g.removeTearingPair(theRes,theTear,false);
+							validPair=true;
+						}else{
+							Eq SGRes = SG.getEquation(theRes.getName());
+							Var SGTear = SG.getVariable(theTear.getName());
+							ArrayList<Eq> altSGEqs = SG.removeTearingPair(SGRes,SGTear,true);
+							SG.lightReset();
+							if(SG.augmentPath(SGTear.getMatching(), new ArrayList<Eq>(), new ArrayList<Var>())){
+								g.removeTearingPair(theRes,theTear,true);
+								for(Eq eqSG: SG.getEquations()){
+									Eq eqG = g.getEquation(eqSG.getName());
+									Var matchG = g.getVariable(eqSG.getMatching().getName());
+									eqG.setMatching(matchG);
+									matchG.setMatching(eqG);
+								}
+								break w;
+							}else{
+								SG.reinsertTearingPair(SGRes,SGTear,altSGEqs,false);
+							}
+						}
+					}else{ // The Tearing variable is NOT in SUMV
+						   // Still have to figure out how to solve it in this case,
+						// Might be necessary to introduce EquationLists in Var-class.... 
+						
+					}
+				}
+			}
+		// CASE 4:--------- The system has solvableUnmatchables  ------------------------------------
+		}else if(SUME.size>0){
+			
+		    // One of the SubCases has the same problem as in CASE3, w8 until that one
+			// is solved. 	
+			
+		// CASE 5:------------- The system has a Solvable Perfect Matching ---------------------------		
+		}else{
+			ArrayList<Var> tearList = new ArrayList<Var>();
+			ArrayList<Eq> resList = new ArrayList<Eq>();
+			ArrayList<TestPair> TPList = new ArrayList<TestPair>();
+			boolean isStart = true;
+			int MAXOCC=0;
+			int MAXVARS=0;
+			int maxOcc=0;
+			int maxVars=0;
+			int scndMaxOcc=0;
+			int scndMaxVars=0;
+			int cnt=0;
+			int switchCnt=0;
+			boolean validPair=false;
+			
+			w:while(!validPair){
+				if((!isStart) && (maxOcc + scndMaxVars > maxVars + scndMaxOcc)){
+					// This part is Not done...
+					if(cnt==2){
+						MAXOCC=scndMaxOcc;
+					}
+					for(Eq res : resList){
+						res.isUsed();
+					}
+					resList.clear();
+				}else if(!isStart){
+					tearList.clear();
+				}	
+				
+					
+				
+				for(Var v : g.getMatchedVariables()){
+					if(!v.wasUsed()){
+						int nbrOcc = v.getOccurrences(); 
+						if(nbrOcc > maxOcc){
+							tearList.clear();
+							tearList.add(e);
+							scndMaxOcc = maxOcc;
+							maxOcc = nbrOcc;
+						}else if(nbrOcc==maxOcc){
+							tearList.add(v);
+						}
+					}
+				}
+				
+				for(Eq e : g.getEquations()){
+					if(!e.wasUsed()){
+						int nbrVars = e.getVariables().size(); 
+						if(nbrVars > maxVars){
+							resList.clear();
+							resList.add(e);
+							scndMaxVars = maxVars;
+							maxVars = nbrVars;
+						}else if(nbrVars==maxVars){
+							resList.add(e);
+						}
+					}
+				}
+				
+				if(isStart){
+					MAXOCC=maxOcc;
+					MAXVARS=maxVars;
+				}
+				for(Var v: tearList){
+					theTear = v;
+					for(Eq theRes: resList){
+						if(theRes.getVariables().contains(theTear)){
+							TPList.add(new TestPair(theRes,theTear));
+						}else{
+							if(theTear.getName().equals(theRes.getMatching().getName())){
+								g.removeTearingPair(theRes,theTear,false);
+								validPair=true;
+							}else{
+								ArrayList<Eq> altEqs = g.removeTearingPair(theRes,theTear,true);
+								g.lightReset();
+								validPair = SAP(theTear.getMatching(), new ArrayList<Eq>(), new ArrayList<Var>());
+							}
+							if(validPair){
+								break w;
+							}
+						}
+					}
+					
+				}
+				for(TestPair TP:TPList){
+					theRes = TP.getRes();
+					theTear = TP.getTear();
+					if(theTear.getName().equals(theRes.getMatching().getName())){
+						g.removeTearingPair(theRes,theTear,false);
+						validPair=true;
+					}else{
+						ArrayList<Eq> altEqs = g.removeTearingPair(theRes,theTear,true);
+						g.lightReset();
+						validPair = SAP(theTear.getMatching(), new ArrayList<Eq>(), new ArrayList<Var>());
+					}
+					if(validPair){
+						break w;
+					}
+					g.reinsertTearingPair(theRes,theTear,false);
+				}
+				isStart=false;
+				TPList.clear();
+			}	
+		}
+		
+		System.out.println("10");
+		tp.add(new MatchingPair(theRes.getEquation(),theTear.getVariable()));
+		LinkedList<Stack<Eq>> innerBlt = g.computeRawBLT();	
+		for(Stack<Eq> subBlock : innerBlt){
+			Eq tmp = subBlock.pop();
+			if (!subBlock.isEmpty()){
+				subBlock.push(tmp);
+				System.out.println("BigBlock");
+				tp.addAll(TearNew(subBlock));
+			}else if(!tmp.getEquation().isSolved(tmp.getMatching().getName(),true)){
+				tp.add(new MatchingPair(tmp.getEquation(),tmp.getMatching().getVariable()));
+				System.out.println("UnsolvableScalarBlock");
+			}
+		}
+		
+		return tp;	
+	}
+	*/
+	
+	
+	/*
+	// =============================  The old algorithm    ==================================
+	public ArrayList<MatchingPair> FClass.Tear(Stack<Eq> Block){
+		ArrayList<MatchingPair> tp = new ArrayList<MatchingPair>();
+		BiPGraph g = new BiPGraph("","");
+		Stack<Eq> solvableUnmatched = new Stack<Eq>();
+		boolean forceChoice=false;
+		// ---------------------- Graph setup -----------------------------------
+		for(Eq e : Block){
+			Var gVar = g.addVariable(e.getMatching().getName(),"",e.getMatching().getVariable());
+			Eq gEq = g.addEquation(e.getName(),"",e.getEquation());
+			//System.out.println(varAdd.getName());
+			//System.out.println(eqAdd.getName());
+			gEq.setMatching(gVar);
+			gVar.setMatching(gEq);
+			if(gEq.getEquation().isSolved(gVar.getName(),true)){
+				gEq.setSolvableMatching(gVar);
+				gVar.setSolvableMatching(gEq);
+			}else{
+				solvableUnmatched.push(gEq);
+			}
+		}
+		// Add edges between the active variables and equations
+		for(Eq e : Block){
+			boolean hasSolvable = false;
+			Eq gEq = g.getEquation(e.getName());
+			for(Var v : e.getVariables()){
+				Var gVar = g.getVariable(v.getName());
+				if(gVar!=null){
+					gVar.occurrence();
+					gEq.addVariable(gVar);
+					if(gEq.getEquation().isSolved(gVar.getName(),true)){
+						gEq.addSolvableVariable(gVar);
+						hasSolvable = true;
+					}
+				}
+			}
+		}
+		// --------------------- end of graph set up ------------------------
+		if(solvableUnmatched.size()>0){
+			for(Eq e: solvableUnmatched){
+				g.lightReset();
+				if(!g.SAP(e, new ArrayList<Eq>(), new ArrayList<Var>())){
+					forceChoice = true;
+					g.removeTearingPair(e, e.getMatching(), false);
+					tp.add(new MatchingPair(e.getEquation(), e.getMatching().getVariable()));
+				}
+			}
+		}
+		if(forceChoice){
+			LinkedList<Stack<Eq>> tornBlt = g.computeRawBLT();
+			for(Stack<Eq> tornBlock : tornBlt){
+				Eq tmp = tornBlock.pop();
+				if (!tornBlock.isEmpty()){
+					tornBlock.push(tmp);
+					tp.addAll(Tear(tornBlock));
+				}	
+			}
+			System.out.println(tp.size()+ "Tearing chosen at first iteration!");
+			return tp;
+		// Below from here all equations and variables left have solvableMatchings	
+		} else {
+			// Choose as residual eqation the equation that contains most variables. 
+			ArrayList<Eq> resList = new ArrayList<Eq>();
+			//int maxVars = 0;
+			for(Eq e : g.getEquations()){
+				//Comment most of this part to test ALL equations instead of only those with max variables
+			//	int nbrVars = e.getVariables().size(); 
+			//	if(nbrVars > maxVars){
+			//		resList.clear();
+			//		resList.add(e);
+			//		maxVars = nbrVars;
+			//	}else if(nbrVars==maxVars){
+					resList.add(e);
+			//	}
+			}
+			int maxTorn = 0;
+			Var theTear=null;
+			Eq theRes=null;
+			for(Eq res: resList){
+				//Comment most of this part to test ALL variables instead of only those with max occurrence
+				ArrayList<Var> tearList = new ArrayList<Var>();
+				//int maxOcc=0;
+				for(Var v : res.getVariables()){ 
+				//	int occ = v.getNbrV();
+				//	if(occ > maxOcc){
+				//		tearList.clear();
+						tearList.add(v);
+				//		maxOcc = occ;
+				//	}else if(occ==maxOcc){
+				//		tearList.add(v);
+				//	}
+				}
+				for(Var tear: tearList){	
+					boolean hasPath;
+					boolean wasMatched = false;
+					ArrayList<Eq> alteredEquations;
+					if(tear.getName().equals(res.getSolvableMatching().getName())){
+						alteredEquations = g.removeTearingPair(res, tear, false);
+						hasPath = true;
+						wasMatched = true;
+					}else{
+						alteredEquations = g.removeTearingPair(res, tear, true);
+						g.lightReset();
+						hasPath = g.SAP(tear.getMatching(), new ArrayList<Eq>(), new ArrayList<Var>());
+					}
+					if(!hasPath){  	
+						g.reinsertTearingPair(res, tear, alteredEquations, false);
+					}else{							
+						LinkedList<Stack<Eq>> testBlt = g.computeRawBLT();
+						int causalized = 0; 
+						for(Stack<Eq> block : testBlt){
+							Eq tmp = block.pop();
+							if(block.isEmpty()){
+								causalized++; 		
+							}
+							block.push(tmp);
+						}
+						if(causalized >= maxTorn){
+							maxTorn = causalized;
+							theRes = res;
+							theTear = tear; 
+						}
+						if(wasMatched){
+							g.reinsertTearingPair(res, tear, alteredEquations, false);
+						}else{
+							g.reinsertTearingPair(res, tear, alteredEquations, true);
+						}
+					}
+				}
+			}
+			if(theTear==null || theRes==null){
+				//System.out.println("Couldnt find any tearing pairs!");
+				// Shouldnt be possible... 
+			}
+			tp.add(new MatchingPair(theRes.getEquation(), theTear.getVariable()));
+			if(theTear.getName().equals(theRes.getSolvableMatching().getName())){
+				g.removeTearingPair(theRes, theTear, false);
+			}else{
+				g.removeTearingPair(theRes, theTear, true);
+				g.lightReset();
+				boolean hp = g.SAP(theTear.getMatching(), new ArrayList<Eq>(), new ArrayList<Var>());
+				if(!hp){
+				}
+			}
+			LinkedList<Stack<Eq>> tornBlt = g.computeRawBLT();
+			for(Stack<Eq> subBlock : tornBlt){
+				Eq tmp = subBlock.pop();
+				if (!subBlock.isEmpty()){
+					subBlock.push(tmp);
+					tp.addAll(Tear(subBlock));
+				}else if(!tmp.getEquation().isSolved(tmp.getMatching().getName(),true)){
+					tp.add(new MatchingPair(tmp.getEquation(),tmp.getMatching().getVariable()));
+				}
+			}
+
+			return tp;	
+		}
+	}
+	*/
+	
+
+		
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////			
+	
+	syn lazy ArrayList<String> FClass.structuralErrors() {
+		ArrayList<String> structuralErrors = new ArrayList<String>();
+		if (root().options.getBooleanOption("enable_structural_diagnosis")) {
+		boolean unbalanced = false;
+		StringBuffer err_str = new StringBuffer();
+		if (getDAEUnmatchedVariables().size() > 0 ) {
+			err_str.append("The system is structurally singuar. The following varible(s) could not be matched to any equation:\n");
+			for (FVariable fv : getDAEUnmatchedVariables()) {
+				err_str.append("   " + fv.name());
+				err_str.append("\n");
+			}
+			unbalanced = true;
+		}
+		if (getDAEUnmatchedEquations().size() > 0 ) {
+			if (!unbalanced) {
+				err_str.append("The system is structurally singuar. The following equation(s) could not be matched to any variable:\n");
+			} else {
+				err_str.append("\n  The follwowing equation(s) could not be matched to any variable:\n");
+			}
+			for (FAbstractEquation ee : getDAEUnmatchedEquations()) {
+				err_str.append("   " + ee.prettyPrint(""));
+				err_str.append("\n");
+			}
+			unbalanced = true;
+		}
+		
+		if (unbalanced) {
+			structuralErrors.add(err_str.toString());
+		}
+		}
+		return structuralErrors;
+	}
+
+	
+	/**
+	 * \brief Convert variable binding equations into regular equations.
+	 */
+	public void FClass.genBindingEquations() {
+		FQName empty = new FQName();
+		for (FVariable fv : getFVariables()) 
+			if (!fv.isConstant()) 
+				fv.genBindingEquations(this, empty);
+//		flush();
+		flushAllRecursive();
+	}
+	
+	public FExp FVariable.selectBindingFExp(FAttribute attr) {
+		if (attr != null && attr.hasValue())
+			return attr.getValue();
+		else if (hasBindingExp())
+			return getBindingExp();
+		else
+			return null;
+	}
+	
+	public FQName FVariable.createNameForBindingEquation(FQName prefix, FAttribute attr) {
+		FQName name = prefix.copyAndAppend(getFQName());
+		FArraySubscripts fas = null;
+		if (isArray()) {
+			if (attr != null)
+				attr = attr.findAttribute(FAttribute.SIZE);
+			Size size = (attr != null && attr.hasValue()) ? new MutableSize(attr.getValue()) : size();
+			fas = size.rangeFArraySubscripts();
+		}
+		name.setLastFArraySubscripts(fas);
+		return name;
+	}
+	
+	public void FVariable.genBindingEquations(FClass fc, FQName prefix) {
+		genBindingEquations(fc, prefix, null, false);
+	}
+	
+	public void FVariable.genBindingEquations(FClass fc, FQName prefix, FAttribute attr, boolean param) {
+		FExp bexp = selectBindingFExp(attr);
+		boolean isAttr = attr != null && attr.hasValue();
+		param = param || isParameter();
+		if (bexp != null && !(param && bexp.isIndependentParameterExp())) {
+			if (!inRecord())
+				setBindingExpOpt(new Opt());
+			genBindingEquationsFromExp(fc, prefix, attr, bexp, param);
+			if (isAttr)
+				attr.setValueOpt(new Opt());
+		}
+	}
+	
+	public void FRecordVariable.genBindingEquations(FClass fc, FQName prefix, FAttribute attr, boolean param) {
+		/* TODO: Perhaps this is the wrong approach? Could we instead convert binding expressions 
+		 *       for records into attributes on the variable, and sort it out into binding expressions 
+		 *       during scalarization?
+		 */
+		FExp bexp = selectBindingFExp(attr);
+		if (bexp != null) {
+			super.genBindingEquations(fc, prefix, attr, param);
+		} else {
+			List<FAttribute> attrs = selectFAttributeList(attr);
+			FQName name = createNameForBindingEquation(prefix, attr);
+			for (FVariable comp : myFRecordDecl().getFVariables()) {
+				FAttribute cAttr = findMatching(attrs, comp.name());
+				comp.genBindingEquations(fc, name, cAttr, param || isParameter());
+			}
+		}
+	}
+	
+	protected void FVariable.genBindingEquationsFromExp(FClass fc, FQName prefix, 
+			FAttribute attr, FExp bexp, boolean param) {
+		FQName name = createNameForBindingEquation(prefix, attr);
+		param = param || isParameter();
+		FEquation feq = new FEquation(new FIdUseExp(name), bexp.reflattenBindingExp(prefix, this));
+		if (param)
+			fc.addFParameterEquation(feq);
+		else
+			fc.addFEquation(feq);	
+	}
+	
+	protected void FRecordVariable.genBindingEquationsFromExp(FClass fc, FQName prefix, 
+			FAttribute attr, FExp bexp, boolean param) {
+		/* If we get here, then we won't be able to leave expressions for independent parameters 
+		 * as binding expressions on the FVariable - we'll have to clean that up later. Since it 
+		 * has to be done after records are broken into separate variables, we'll do it during 
+		 * parameter equation sorting.
+		 */
+		if (bexp.canExtractRecordComponents()) {
+			List<FAttribute> attrs = selectFAttributeList(attr);
+			FQName name = createNameForBindingEquation(prefix, attr);
+			for (FVariable comp : myFRecordDecl().getFVariables()) {
+				FAttribute cAttr = findMatching(attrs, comp.name());
+				FExp cExp = bexp.dynamicFExp(bexp.extractRecordFExp(comp.name()));
+				comp.genBindingEquationsFromExp(fc, name, cAttr, cExp, param || isParameter());
+			}
+		} else {
+			super.genBindingEquationsFromExp(fc, prefix, attr, bexp, param);
+		}
+	}
+	
+	public FExp FExp.reflattenBindingExp(FQName prefix, FVariable var) {
+		FExp res = dynamicFExp((FExp) fullCopy());
+		FRecordDecl decl = var.containingRecordDecl();
+		if (decl != null)
+			res.prefixInternalUses(prefix, decl);
+		return res;
+	}
+	
+	public void FExp.prefixInternalUses(FQName prefix, FRecordDecl decl) {
+		for (FExp e : childFExps())
+			e.prefixInternalUses(prefix, decl);
+	}
+	
+	public void FIdUseExp.prefixInternalUses(FQName prefix, FRecordDecl decl) {
+		FQName fqn = getFIdUse().getFQName();
+		for (FQNamePart p : fqn.getFQNameParts())
+			if (p.hasFArraySubscripts())
+				for (FSubscript s : p.getFArraySubscripts().getFSubscripts())
+					s.prefixInternalUses(prefix, decl);
+		if (decl == lookupFV(fqn.copyPrefix()).containingRecordDecl()) 
+			getFIdUse().setFQName(prefix.copyAndAppend(fqn));
+	}
+	
+	public void FSubscript.prefixInternalUses(FQName prefix, FRecordDecl decl) {}
+	
+	public void FExpSubscript.prefixInternalUses(FQName prefix, FRecordDecl decl) {
+		getFExp().prefixInternalUses(prefix, decl);
+	}
+	
+	protected List<FAttribute> FRecordVariable.selectFAttributeList(FAttribute attr) {
+		if (attr != null && attr.getFAttributes().getNumChild() > 0)
+			return attr.getFAttributes();
+		else
+			return getFAttributes();
+	}
+	
+	syn boolean FExp.canExtractRecordComponents()      = false;
+	eq FIdUseExp.canExtractRecordComponents()          = true;
+	eq FRecordConstructor.canExtractRecordComponents() = true;
+	eq FArray.canExtractRecordComponents()             = true;
+	eq FAbstractCat.canExtractRecordComponents()       = true;
+	
+	/**
+	 * \brief Create an FExp that represents a specific component of this record expression.
+	 * 
+	 * @param suffix    the suffix to add to a use of the record to access the specific component
+	 */
+	public FExp FExp.extractRecordFExp(String suffix) {
+		throw new UnsupportedOperationException("Can't extract record component of " + getClass().getSimpleName());
+	}
+	
+	public FExp FIdUseExp.extractRecordFExp(String suffix) {
+		FQName name = getFIdUse().getFQName().copyAndAppend(suffix);
+		return new FIdUseExp(name);
+	}
+	
+	public FExp FRecordConstructor.extractRecordFExp(String suffix) {
+		return (FExp) getArg(getRecord().myFRecordDecl().indexOf(suffix)).fullCopy();
+	}
+	
+	public FExp FArray.extractRecordFExp(String suffix) {
+		FArray res = createEmptyNode();
+		for (FExp e : getFExps())
+			res.addFExp(e.extractRecordFExp(suffix));
+		return res;
+	}
+	
+	public FExp FAbstractCat.extractRecordFExp(String suffix) {
+		FInfArgsFunctionCall res = createEmptyNode();
+		for (FExp e : getFExps())
+			res.addFExp(e.extractRecordFExp(suffix));
+		return res;
+	}
+	
+	public FExp FCatExp.extractRecordFExp(String suffix) {
+		FCatExp res = (FCatExp) super.extractRecordFExp(suffix);
+		res.setDim((FExp) getDim().fullCopy());
+		return res;
+	}
+	
+	public FExp FNoEventExp.extractRecordFExp(String suffix) {
+		return createNode(getFExp().extractRecordFExp(suffix));
+	}
+	
+	/**
+	 * \brief Generate equations from an attribute of a record variable.
+	 */
+	public void FAttribute.genBindingEquations(FClass fc, FRecordDecl rec, FQName prefix, boolean depPar) {
+		FVariable comp = (FVariable) rec.findComponent(getName().getFQName());
+		if (!comp.isUnknown() && !comp.isConstant()) {
+			FQName fqn = prefix.copyAndAppend(getName().getFQName());
+			
+			if (hasValue()) {
+				boolean indPar = !depPar && comp.isParameter() && getValue().isIndependentParameterExp();
+				// TODO: handle 'each'
+				if (!indPar) {
+					FEquation feq = new FEquation(new FIdUseExp(fqn), getValue());
+					if (depPar || comp.isParameter())
+						fc.addFParameterEquation(feq);
+					else
+						fc.addFEquation(feq);
+					setValueOpt(new Opt());
+				}
+			}
+			
+			if (comp.isRecord()) {
+				FRecordDecl next = comp.myFRecordDecl();
+				for (FAttribute a : getFAttributes())
+					a.genBindingEquations(fc, next, fqn, depPar);
+			}
+		}
+	}
+	
+	/**
+	 * \brief Generate functions from algorithms.
+	 */
+	public void FClass.genAlgorithmFunctions() {
+		for (FAlgorithmBlock alg : myAlgorithms()) {
+			// Create function declaration
+			List<FFunctionVariable> vars = new List<FFunctionVariable>();
+			FQName funcName = new FQName(alg.generateFunctionName());
+			
+			// - Find inputs
+			ArrayList<FVariable> inVars = new ArrayList<FVariable>();
+			ArrayList<FFunctionVariable> bothInVars = new ArrayList<FFunctionVariable>();
+			for (FIdUse use : alg.usedFIdUses()) {
+				AbstractFVariable fv = use.myFV();
+				if (!fv.isUnknown() && !inVars.contains(fv) && !fv.isForIndex()) {
+					inVars.add((FVariable) fv);
+					bothInVars.add(null);
+				}
+			}
+			
+			// - Create outputs, add to vars and locate those that are inputs as well
+			ArrayList<FVariable> outVars = new ArrayList<FVariable>();
+			for (FIdUse use : alg.assignedFIdUses()) {
+				if (!use.myFV().isUnknown() && !outVars.contains(use.myFV())) {
+					FVariable fv = (FVariable) use.myFV();
+					FFunctionVariable ffv = fv.createFFunctionOutput();
+					vars.add(ffv);
+					outVars.add(fv);
+					int i = inVars.indexOf(fv);
+					if (i >= 0) 
+						bothInVars.set(i, ffv);
+				}
+			}
+			
+			// - Create inputs, add to vars and update inputs and outputs that are the same
+			ArrayList<FVariable> allVars = new ArrayList<FVariable>();
+			allVars.addAll(inVars);
+			allVars.addAll(outVars);
+			
+			for (int i = 0; i < inVars.size(); i++) {
+				FVariable fv = inVars.get(i);
+				FFunctionVariable ffv = fv.createFFunctionInput();
+				vars.add(ffv);
+				if (bothInVars.get(i) != null) {
+					
+					// Generate a new (unique) name for variable
+					boolean nameExists = true;
+					String name = null;
+					for (int j = 0; nameExists; j++) {
+						name = fv.name() + "_" + j;
+						nameExists = false;
+						for (FVariable fv2 : allVars)
+							if (fv2.name().equals(name))
+								nameExists = true;
+					}
+					
+					// Rename input
+					FQName fqn = new FQName(name);
+					ffv.setFQName(fqn);
+					
+					// Create and add binding expression for output
+					bothInVars.get(i).setBindingExp(fqn.createFIdUseExp());
+				}
+			}
+			
+			// Create function call equation and replace algorithm
+			List<FExp> args = new List<FExp>();
+			for (int i = 0; i < inVars.size(); i++) 
+				args.add(inVars.get(i).createAlgorithmArgument(bothInVars.get(i) != null));
+			Size[] sizes = new Size[outVars.size()];
+			for (int i = 0; i < outVars.size(); i++)
+				sizes[i] = outVars.get(i).size();
+			FFunctionCall call = new FFunctionCall(funcName.createFIdUse(), args, sizes);
+			List<FFunctionCallLeft> lefts = new List<FFunctionCallLeft>();
+			for (FVariable fv : outVars)
+				lefts.add(fv.getFQName().createFFunctionCallLeft());
+			replaceEquation(alg, new FFunctionCallEquation(lefts, call));
+			
+			// Add return statement, create function declaration and add it to FClass 
+			alg.addFStatement(new FReturnStmt());
+			addFFunctionDecl(new FFunctionDecl(funcName, vars, alg));
+		}
+	}
+	
+	/**
+	 * \brief Replace one equation with another.
+	 */
+	public void FClass.replaceEquation(FAbstractEquation oldEq, FAbstractEquation newEq) {
+		for (FEquationBlock b : getFEquationBlocks())
+			if (b.getFAbstractEquations().replaceChild(oldEq, newEq))
+				return;
+	}
+	
+	/**
+	 * \brief Create an FFunctionCallLeft using a copy of this name.
+	 */
+	public FFunctionCallLeft FQName.createFFunctionCallLeft() {
+		FQName fqn = fullCopy();
+		fqn.setLastFArraySubscripts(null);
+		return new FFunctionCallLeft(new Opt(new FIdUseExp(fqn)));
+	}
+
+	/**
+	 * \brief Create an expression to serve as argument to a generated algorithm function.
+	 * 
+	 * @param init  <code>true</code> if the argument is to initialize an assigned variable
+	 */
+	public FExp FVariable.createAlgorithmArgument(boolean init) {
+		if (init) {
+			if (isDiscrete())
+				return null; // TODO: Return pre() value.
+			if (isContinuous())
+				return startAttributeExp();
+		}
+		return getFQName().createFIdUseExp();
+	}
+	
+	/**
+	 * \brief Create an input representing this variable in a generated algorithm function.
+	 */
+	public FFunctionVariable FVariable.createFFunctionOutput() {
+		return createFFunctionVariable(new FOutput());
+	}
+
+	/**
+	 * \brief Create an output representing this variable in a generated algorithm function.
+	 */
+	public FFunctionVariable FVariable.createFFunctionInput() {
+		return createFFunctionVariable(new FInput());
+	}
+
+	/**
+	 * \brief Create an function variable representing this variable in a generated algorithm function.
+	 */
+	public FFunctionVariable FVariable.createFFunctionVariable(FTypePrefixInputOutput io) {
+		FType type = (FType) type().fullCopy();
+		return new FFunctionVariable(new Opt(io), type, new Opt(), getFQName().fullCopy());
+	}
+
+	/**
+	 * \brief Add derivative variables to the list of FVariables, one for each
+	 * differentiate variable.
+	 */
+	public void FClass.addFDerivativeVariables() {
+		ArrayList<FDerivativeVariable> l = new ArrayList<FDerivativeVariable>();
+		for (FVariable fv : differentiatedRealVariables()) {
+		    FDerivativeVariable fdv = new FDerivativeVariable((FVisibilityType)fv.getFVisibilityType().fullCopy(),
+					(FTypePrefixVariability)fv.getFTypePrefixVariability().fullCopy(),
+					new Opt(),
+					new List(),
+					new Opt(),
+					new Opt(),
+					fv.getFQName().fullCopy());
+			fdv.setMeIntegrated(fv);
+			fv.setMeDifferentiated(fdv);
+			l.add(fdv);
+		}
+		for (FVariable fv : l) {
+			addFVariable(fv);
+		}
+//		flush();
+				root().flushAllRecursive();
+	}
+
+	public FVariable FClass.addFDerivativeVariable(FVariable fv) {
+		FVariable ffv = fv.createFDerivativeVariable();
+		addFVariable(ffv);
+		root().flushAllRecursive();
+		return ffv;
+	}
+
+	public FVariable FVariable.createFDerivativeVariable() {
+		return null;
+	}
+
+	public FVariable FRealVariable.createFDerivativeVariable() {
+		return new FDerivativeVariable((FVisibilityType)getFVisibilityType().fullCopy(),
+					(FTypePrefixVariability)getFTypePrefixVariability().fullCopy(),
+					new Opt(),
+					new List(),
+					new Opt(),
+					new Opt(),
+					getFQName().fullCopy());
+	}
+
+	public FVariable FDerivativeVariable.createFDerivativeVariable() {
+		return new FHDerivativeVariable((FVisibilityType)getFVisibilityType().fullCopy(),
+					(FTypePrefixVariability)getFTypePrefixVariability().fullCopy(),
+					new Opt(),
+					new List(),
+					new Opt(),
+					new Opt(),
+					getFQName().fullCopy(),2);
+	}
+
+	public FVariable FHDerivativeVariable.createFDerivativeVariable() {
+		return new FHDerivativeVariable((FVisibilityType)getFVisibilityType().fullCopy(),
+					(FTypePrefixVariability)getFTypePrefixVariability().fullCopy(),
+					new Opt(),
+					new List(),
+					new Opt(),
+					new Opt(),
+					getFQName().fullCopy(),getOrder()+1);
+	}
+
+	/**
+	 * \brief Add pre variables to the list of FVariables, one for each
+	 * discrete variable.
+	 */
+	public void FClass.addFPreVariables() {
+		ArrayList<FVariable> l = new ArrayList<FVariable>();
+		for (FVariable fv : discreteRealVariables()) {
+			l.add(new FPreRealVariable((FVisibilityType)fv.getFVisibilityType().fullCopy(),
+					(FTypePrefixVariability)fv.getFTypePrefixVariability().fullCopy(),
+					new Opt(),
+					(List)fv.getFAttributeList().fullCopy(),
+					new Opt(),
+					new Opt(),
+					fv.getFQName().fullCopy()));
+		}
+		for (FVariable fv : discreteIntegerVariables()) {
+			l.add(new FPreIntegerVariable((FVisibilityType)fv.getFVisibilityType().fullCopy(),
+					(FTypePrefixVariability)fv.getFTypePrefixVariability().fullCopy(),
+					new Opt(),
+					(List)fv.getFAttributeList().fullCopy(),
+					new Opt(),
+					new Opt(),
+					fv.getFQName().fullCopy()));
+		}
+		for (FVariable fv : discreteBooleanVariables()) {
+			l.add(new FPreBooleanVariable((FVisibilityType)fv.getFVisibilityType().fullCopy(),
+					(FTypePrefixVariability)fv.getFTypePrefixVariability().fullCopy(),
+					new Opt(),
+					(List)fv.getFAttributeList().fullCopy(),
+					new Opt(),
+					new Opt(),
+					fv.getFQName().fullCopy()));
+		}
+		for (FVariable fv : discreteStringVariables()) {
+			l.add(new FPreStringVariable((FVisibilityType)fv.getFVisibilityType().fullCopy(),
+					(FTypePrefixVariability)fv.getFTypePrefixVariability().fullCopy(),
+					new Opt(),
+					(List)fv.getFAttributeList().fullCopy(),
+					new Opt(),
+					new Opt(),
+					fv.getFQName().fullCopy()));
+		}
+		
+		for (FEnumVariable fv : discreteEnumVariables()) {
+			l.add(new FPreEnumVariable((FVisibilityType)fv.getFVisibilityType().fullCopy(),
+					(FTypePrefixVariability)fv.getFTypePrefixVariability().fullCopy(),
+					new Opt(),
+					(List)fv.getFAttributeList().fullCopy(),
+					new Opt(),
+					new Opt(),
+					fv.getFQName().fullCopy(),fv.getEnum().fullCopy()));
+		}
+
+
+		for (FVariable fv : l) {
+			addFVariable(fv);
+		}
+//		flush();
+		root().flushAllRecursive();
+	}
+
+	/**
+	 * \brief Generate initial equations from variables with fixed start
+	 * attributes.
+	 * 
+	 * Intitial equations corresponding to explicitly set start attributes of 
+	 * differentiated variables are also generated, without taking the fixed
+	 * attribute into account.
+	 */
+	public void FClass.genInitialEquations() {
+		// TODO: Isn't there always a value for fv.startAttributeExp() now?
+		for (FRealVariable fv : differentiatedRealVariables()) {
+			if (fv.fixedAttribute() ||
+					(root().options.getBooleanOption("state_start_values_fixed") 
+							&& fv.startAttributeSet())) {
+				addFInitialEquation(new FEquation(new FIdUseExp(
+						new FIdUse(fv.getFQName().fullCopy())),
+						fv.startAttributeSet()? fv.startAttributeExp(): new FRealLitExp("0.0")));
+			}	
+		}
+		for (FRealVariable fv : algebraicRealVariables()) {
+			if (fv.fixedAttribute()) {
+				addFInitialEquation(new FEquation(new FIdUseExp(
+						new FIdUse(fv.getFQName().fullCopy())),
+						fv.startAttributeSet()? fv.startAttributeExp(): new FRealLitExp("0.0")));
+			}	
+		}
+//		log.debug(prettyPrint(""));
+		for (FRealVariable fv : discreteRealVariables()) {
+			if (fv.fixedAttribute()) {
+				addFInitialEquation(new FEquation(new FPreExp(new FIdUseExp(
+						new FIdUse(fv.getFQName().fullCopy()))),
+						fv.startAttributeSet()? fv.startAttributeExp(): new FIntegerLitExp("0")));
+			}	
+		}
+		for (FIntegerVariable fv : discreteIntegerVariables()) {
+			if (fv.fixedAttribute()) {
+				addFInitialEquation(new FEquation(new FPreExp(new FIdUseExp(
+						new FIdUse(fv.getFQName().fullCopy()))),
+						fv.startAttributeSet()? fv.startAttributeExp(): new FIntegerLitExp("0")));
+			}	
+		}
+		for (FBooleanVariable fv : discreteBooleanVariables()) {
+			if (fv.fixedAttribute()) {
+				addFInitialEquation(new FEquation(new FPreExp(new FIdUseExp(
+						new FIdUse(fv.getFQName().fullCopy()))),
+						fv.startAttributeSet()? fv.startAttributeExp(): new FBooleanLitExpFalse()));
+			}	
+		}		
+		for (FEnumVariable fv : discreteEnumVariables()) {
+			if (fv.fixedAttribute()) {
+				addFInitialEquation(new FEquation(new FPreExp(new FIdUseExp(
+						new FIdUse(fv.getFQName().fullCopy()))),
+						fv.startAttributeSet()? fv.startAttributeExp(): new FBooleanLitExpFalse()));
+			}	
+		}		
+
+		//flush();
+				root().flushAllRecursive();
+	}
+	
+	ArrayList<String> FClass.aliasErrors = new ArrayList<String>();
+	
+	
+	/**
+	 * \brief A helper class containing information about an alias pair.
+	 */
+	public class AliasPair {
+		public FVariable fv1;
+		public FVariable fv2;
+		public boolean negated;
+		public AliasPair(FVariable fv1, FVariable fv2, boolean negated) {
+			this.fv1 = fv1;
+			this.fv2 = fv2;
+			this.negated = negated;
+		}
+	}
+	
+	public boolean FVariable.canBeAliasEliminated(FVariable that) {
+	
+		// The only case where it is allowed to eliminate an 
+		// alias equation containing a derivative is when the
+		// other access is to an algebraic: der(x) = w
+	
+		if ((this.isDerivativeVariable() /*&& !that.isAlgebraicVariable()*/) ||
+		    (that.isDerivativeVariable() /*&& that.isDerivativeVariable()*/)) {
+		    //System.out.println(">>>>>>>> " + this.name() + " " + that.name());
+		 	return false;   	
+		}
+	
+		return true;
+		 
+	}
+	
+	public AliasPair FAbstractEquation.aliasVariables() {
+		return null;
+	}
+	
+	public boolean FAbstractEquation.aliasClassified = false;
+	public boolean FAbstractEquation.classifiedAsAlias = false;
+	
+	/**
+	 * \brief Detection of alias variables in equations
+	 * 
+	 * Equations of the type 'x=y', 'x=-y', '-x=y' and '-x=-y' are detected
+	 * as alias equations and an AliasPair object is returned.
+	 */
+	public AliasPair FEquation.aliasVariables() {
+
+		AbstractFVariable afv1 = null;
+		AbstractFVariable afv2 = null;
+		
+		FVariable fv1 = null;
+		FVariable fv2 = null;
+		boolean negated = false;	
+		
+		if (getLeft() instanceof FIdUseExp && // x = y
+					getRight() instanceof FIdUseExp) {
+			afv1 = ((FIdUseExp)getLeft()).myFV();
+			afv2 = ((FIdUseExp)getRight()).myFV();
+			if (!afv1.isUnknown() && !afv2.isUnknown()) {
+				fv1 = (FVariable)afv1;
+				fv2 = (FVariable)afv2;
+				negated = false;
+			}
+		} else if (getLeft() instanceof FNegExp && // -x = y
+				((FNegExp)getLeft()).getFExp() instanceof FIdUseExp &&
+				getRight() instanceof FIdUseExp) {
+			afv1 = ((FIdUseExp)((FNegExp)getLeft()).getFExp()).myFV();
+			afv2 = ((FIdUseExp)getRight()).myFV();
+			if (!afv1.isUnknown() && !afv2.isUnknown()) {
+				fv1 = (FVariable)afv1;
+				fv2 = (FVariable)afv2;
+				negated = true;
+			}
+		} else if (getLeft() instanceof FIdUseExp && // x = -y
+					getRight() instanceof FNegExp &&
+				((FNegExp)getRight()).getFExp() instanceof FIdUseExp) {
+			afv1 = ((FIdUseExp)getLeft()).myFV();
+			afv2 = ((FIdUseExp)((FNegExp)getRight()).getFExp()).myFV();	
+			if (!afv1.isUnknown() && !afv2.isUnknown()) {
+				fv1 = (FVariable)afv1;
+				fv2 = (FVariable)afv2;
+				negated = true;
+			}
+		} else if (getLeft() instanceof FNegExp && // -x = -y
+				((FNegExp)getLeft()).getFExp() instanceof FIdUseExp &&
+				getRight() instanceof FNegExp &&
+				((FNegExp)getRight()).getFExp() instanceof FIdUseExp
+				) {
+			afv1 = ((FIdUseExp)((FNegExp)getLeft()).getFExp()).myFV();
+			afv2 = ((FIdUseExp)((FNegExp)getRight()).getFExp()).myFV();	
+			if (!afv1.isUnknown() && !afv2.isUnknown()) {
+				fv1 = (FVariable)afv1;
+				fv2 = (FVariable)afv2;
+				negated = false;
+			}
+		} else if (getLeft() instanceof FLitExp && getLeft().ceval().realValue() == 0 && // 0 = x + y
+				getRight() instanceof FDotAddExp &&
+				((FDotAddExp)getRight()).getLeft() instanceof FIdUseExp &&
+				((FDotAddExp)getRight()).getRight() instanceof FIdUseExp) {
+			afv1 = ((FIdUseExp)((FDotAddExp)getRight()).getLeft()).myFV();
+			afv2 = ((FIdUseExp)((FDotAddExp)getRight()).getRight()).myFV();
+			if (!afv1.isUnknown() && !afv2.isUnknown()) {
+				fv1 = (FVariable)afv1;
+				fv2 = (FVariable)afv2;
+				negated = true;
+			}
+		} else if ((getLeft() instanceof FDotAddExp &&  //  x + y = 0
+				((FDotAddExp)getLeft()).getLeft() instanceof FIdUseExp &&
+				((FDotAddExp)getLeft()).getRight() instanceof FIdUseExp) &&
+				(getRight() instanceof FLitExp && getRight().ceval().realValue() == 0)) {
+			afv1 = ((FIdUseExp)((FDotAddExp)getLeft()).getLeft()).myFV();
+			afv2 = ((FIdUseExp)((FDotAddExp)getLeft()).getRight()).myFV();
+			if (!afv1.isUnknown() && !afv2.isUnknown()) {
+				fv1 = (FVariable)afv1;
+				fv2 = (FVariable)afv2;
+				negated = true;
+			}
+			// The following might be redundant when using standard libraries... 
+		} else if ((getLeft() instanceof FDotSubExp &&  //  x - y = 0
+				((FDotSubExp)getLeft()).getLeft() instanceof FIdUseExp &&
+				((FDotSubExp)getLeft()).getRight() instanceof FIdUseExp) &&
+				(getRight() instanceof FLitExp && getRight().ceval().realValue() == 0)) {
+			afv1 = ((FIdUseExp)((FDotSubExp)getLeft()).getLeft()).myFV();
+			afv2 = ((FIdUseExp)((FDotSubExp)getLeft()).getRight()).myFV();
+			if (!afv1.isUnknown() && !afv2.isUnknown()) {
+				fv1 = (FVariable)afv1;
+				fv2 = (FVariable)afv2;
+				negated = false;
+			}
+		} else if ((getLeft() instanceof FDotAddExp &&  //  -x + y = 0
+				((FDotAddExp)getLeft()).getLeft() instanceof FNegExp &&
+				((FNegExp)((FDotAddExp)getLeft()).getLeft()).getFExp() instanceof FIdUseExp &&
+				((FDotAddExp)getLeft()).getRight() instanceof FIdUseExp) &&
+				(getRight() instanceof FLitExp && getRight().ceval().realValue() == 0)) {
+			afv1 = ((FIdUseExp)((FNegExp)((FDotAddExp)getLeft()).getLeft()).getFExp()).myFV();
+			afv2 = ((FIdUseExp)((FDotAddExp)getLeft()).getRight()).myFV();
+			if (!afv1.isUnknown() && !afv2.isUnknown()) {
+				fv1 = (FVariable)afv1;
+				fv2 = (FVariable)afv2;
+				negated = false;
+			}
+		}else if ((getLeft() instanceof FDotSubExp &&  //  -x - y = 0
+				((FDotSubExp)getLeft()).getLeft() instanceof FNegExp &&
+				((FNegExp)((FDotSubExp)getLeft()).getLeft()).getFExp() instanceof FIdUseExp &&
+				((FDotSubExp)getLeft()).getRight() instanceof FIdUseExp) &&
+				(getRight() instanceof FLitExp && getRight().ceval().realValue() == 0)) {
+			afv1 = ((FIdUseExp)((FNegExp)((FDotSubExp)getLeft()).getLeft()).getFExp()).myFV();
+			afv2 = ((FIdUseExp)((FDotSubExp)getLeft()).getRight()).myFV();
+			if (!afv1.isUnknown() && !afv2.isUnknown()) {
+				fv1 = (FVariable)afv1;
+				fv2 = (FVariable)afv2;
+				negated = true;
+			}
+			
+		} else if ((getRight() instanceof FDotSubExp &&  //  0= x - y
+				((FDotSubExp)getRight()).getLeft() instanceof FIdUseExp &&
+				((FDotSubExp)getRight()).getRight() instanceof FIdUseExp) &&
+				(getLeft() instanceof FLitExp && getLeft().ceval().realValue() == 0)) {
+			afv1 = ((FIdUseExp)((FDotSubExp)getRight()).getLeft()).myFV();
+			afv2 = ((FIdUseExp)((FDotSubExp)getRight()).getRight()).myFV();
+			if (!afv1.isUnknown() && !afv2.isUnknown()) {
+				fv1 = (FVariable)afv1;
+				fv2 = (FVariable)afv2;
+				negated = false;
+			}	
+		} else if ((getRight() instanceof FDotAddExp &&  //  0 = -x + y
+				((FDotAddExp)getRight()).getLeft() instanceof FNegExp &&
+				((FNegExp)((FDotAddExp)getRight()).getLeft()).getFExp() instanceof FIdUseExp &&
+				((FDotAddExp)getRight()).getRight() instanceof FIdUseExp) &&
+				(getLeft() instanceof FLitExp && getLeft().ceval().realValue() == 0)) {
+			afv1 = ((FIdUseExp)((FNegExp)((FDotAddExp)getRight()).getLeft()).getFExp()).myFV();
+			afv2 = ((FIdUseExp)((FDotAddExp)getRight()).getRight()).myFV();
+			if (!afv1.isUnknown() && !afv2.isUnknown()) {
+				fv1 = (FVariable)afv1;
+				fv2 = (FVariable)afv2;
+				negated = false;
+			}
+		}else if ((getRight() instanceof FDotSubExp &&  //  0= -x - y
+				((FDotSubExp)getRight()).getLeft() instanceof FNegExp &&
+				((FNegExp)((FDotSubExp)getRight()).getLeft()).getFExp() instanceof FIdUseExp &&
+				((FDotSubExp)getRight()).getRight() instanceof FIdUseExp) &&
+				(getLeft() instanceof FLitExp && getLeft().ceval().realValue() == 0)) {
+			afv1 = ((FIdUseExp)((FNegExp)((FDotSubExp)getRight()).getLeft()).getFExp()).myFV();
+			afv2 = ((FIdUseExp)((FDotSubExp)getRight()).getRight()).myFV();
+			if (!afv1.isUnknown() && !afv2.isUnknown()) {
+				fv1 = (FVariable)afv1;
+				fv2 = (FVariable)afv2;
+				negated = true;
+			}
+		}	
+			
+		aliasClassified = true;
+		if ((fv1!=null) && 
+				(fv2!=null) &&
+				fv1.canBeAliasEliminated(fv2)) {
+			classifiedAsAlias = true;
+			//System.out.println("**** " + fv1.name() + " " +fv2.name());
+			return new AliasPair(fv1,fv2,negated);
+		} else {
+			return null;
+		}
+		
+	}
+	
+	syn lazy boolean FAbstractEquation.isAliasEquation() = false;
+	// If an equation has been classified, the result needs to be cached 
+	// in order to avoid reclassification after alias rewrites.
+	eq FEquation.isAliasEquation() = aliasClassified? classifiedAsAlias: aliasVariables()!=null;
+	
+	/**
+	 * \brief Generate alias information and remove alias equations.
+	 */
+	public void FClass.genAlias() {
+		if (aliasManager==null) {
+			aliasManager = new AliasManager();
+		}
+		//System.out.println("****************************************");
+		for (FAbstractEquation equation : 
+			getFEquationBlock(0).getFAbstractEquations()) {
+			// Iterate over all equations
+			// If the equation is an alias equation, then register
+			// the alias variables in the alias manager.
+			//System.out.println(equation.prettyPrint(" -- "));
+			// Check all alias equations, also those that that have bee
+			// checked before.
+			equation.aliasClassified = false; 
+			if (equation.isAliasEquation()) {
+				//System.out.println(equation.prettyPrint(" ----- "));
+				AliasPair aliasPair = equation.aliasVariables();
+				aliasManager.addAliasVariables(aliasPair.fv1,
+						aliasPair.fv2, aliasPair.negated);
+				//System.out.println(aliasManager.printAliasSets());
+			}			
+		}	
+		//System.out.println("****************************************");
+		//flush();
+		root().flushAllRecursive(); // TODO: is this really needed? the tree isn't changed
+	}
+
+	/**
+	 * \brief Flag indicating if alias variables have been eliminated from the
+	 * model.
+	 */
+	public boolean FClass.aliasVariablesEliminated = false;
+	
+	/**
+	 * \brief Eliminate alias variables from the flat model.
+	 * 
+	 * The non-alias variables are kept in the list FClass.FVariableList but the
+	 * alias variables are moved to FClass.AliasVariablesList.
+	 */
+	public void FClass.eliminateAliasVariables() {
+		ArrayList<FVariable> nonAliasVars = new ArrayList<FVariable>();
+		ArrayList<FVariable> aliasVars    = new ArrayList<FVariable>();
+		ArrayList<FAbstractEquation> eqns = new ArrayList<FAbstractEquation>();
+		
+		//log.debug("FClass.eliminateAliasVariables(): l1 " + nonAliasVars + " l2 " + aliasVars);
+		
+		// Go through all variables and insert in correct list
+		int i = 1;
+		for (FVariable fv : getAliasVariables()) {
+				aliasVars.add(fv);
+		}
+		for (FVariable fv : getFVariables()) {
+			if (fv.isAlias()) {
+				aliasVars.add(fv);
+			} else { 
+				nonAliasVars.add(fv);
+			}
+		}
+		
+		// Remove alias equations.
+		for (FAbstractEquation equation : getFEquationBlock(0).getFAbstractEquations()) 
+			if (!equation.isAliasEquation()) 
+				eqns.add(equation);
+
+		setFVariableList(new List(nonAliasVars));
+		setAliasVariableList(new List(aliasVars));
+		getFEquationBlock(0).setFAbstractEquationList(new List(eqns));
+		
+		aliasVariablesEliminated = true;
+		enableAliasRewrite();
+		
+		flush();
+	}
+	
+	public void ASTNode.enableAliasRewrite() {
+		for (ASTNode n : this)
+			n.enableAliasRewrite();
+	}
+	
+	public void FIdUseExp.enableAliasRewrite() {
+		super.enableAliasRewrite();
+		rewriteAlias = true;
+		is$Final = false;
+	}
+	
+	boolean FIdUseExp.rewriteAlias = false;
+	
+	/**
+	 * \brief FIdUses referring to alias variables need to be changed to 
+	 * FIdUses referring to their alias targets. 
+	 * 
+	 * This is done by rewrites which are activated once FClass.aliasVariablesEliminated
+	 * is true. Notice that in order for the rewrite to be enable, the is$final
+	 * field of FIdUseExp needs to be set to false: this is done by the recursive
+	 * method ASTNode.flushAllRecursiveClearFinal. 
+	 */
+	rewrite FIdUseExp {
+		when (rewriteAlias && !myFV().isUnknown() && myFV().isAlias()) to FExp {
+			FVariable fv = (FVariable) myFV();
+			FExp new_exp = fv.alias().createFIdExp();
+			if (fv.isNegated()) 
+				new_exp = new FNegExp(new_exp);
+			return new_exp;
+		}
+	}
+	
+	/**
+	 * \brief FDerExps referring to alias variables need to be changed to 
+	 * FDerExps referring to their alias targets. 
+	 * 
+	 * This is done by rewrites which are activated once FClass.aliasVariablesEliminated
+	 * is true. Notice that in order for the rewrite to be enable, the is$final
+	 * field of FIdUseExp needs to be set to false: this is done by the recursive
+	 * method ASTNode.flushAllRecursiveClearFinal. 
+	 */
+	rewrite FDerExp {
+		when (rewriteAlias && !getFIdUse().myFV().isUnknown() && getFIdUse().myFV().isAlias()) to FExp {
+			FQName new_name = (FQName)((FVariable)getFIdUse().myFV()).alias().getFQName().fullCopy();
+			FExp new_exp = new FDerExp(new FIdUse(new_name));
+			if (getFIdUse().myFV().isNegated()) 
+				new_exp = new FNegExp(new_exp);
+			return new_exp;
+		}
+	}
+
+	/**
+	 * \brief FDummyDerExps referring to alias variables need to be changed to 
+	 * FDummyDerExps referring to their alias targets. 
+	 * 
+	 * This is done by rewrites which are activated once FClass.aliasVariablesEliminated
+	 * is true. Notice that in order for the rewrite to be enable, the is$final
+	 * field of FIdUseExp needs to be set to false: this is done by the recursive
+	 * method ASTNode.flushAllRecursiveClearFinal. 
+	 */
+	rewrite FDummyDerExp {
+		when (rewriteAlias && !myFV().isUnknown() && myFV().isAlias()) to FExp {
+			FVariable fv = (FVariable) myFV();
+			FExp new_exp = fv.alias().createFIdExp();
+			if (myFV().isNegated()) 
+				new_exp = new FNegExp(new_exp);
+			return new_exp;
+		}
+	}
+
+	/**
+	 * \brief FHDummyDerExps referring to alias variables need to be changed to 
+	 * FHDummyDerExps referring to their alias targets. 
+	 * 
+	 * This is done by rewrites which are activated once FClass.aliasVariablesEliminated
+	 * is true. Notice that in order for the rewrite to be enable, the is$final
+	 * field of FIdUseExp needs to be set to false: this is done by the recursive
+	 * method ASTNode.flushAllRecursiveClearFinal. 
+	 */
+	rewrite FHDummyDerExp {
+		when (rewriteAlias && !myFV().isUnknown() && myFV().isAlias()) to FExp {
+			FVariable fv = (FVariable) myFV();
+			FExp new_exp = fv.alias().createFIdExp();
+			if (myFV().isNegated()) 
+				new_exp = new FNegExp(new_exp);
+			return new_exp;
+		}
+	}
+
+	/*
+	 * Rewrite derivatives of parameters to zeros.
+	 */
+	rewrite FDerExp {
+		when (!getFIdUse().myFV().isUnknown() &&
+				((FVariable)getFIdUse().myFV()).variability().lessOrEqual(fParameter())) to FExp {
+			return new FRealLitExp("0.0");
+		}
+	}
+
+}
+
+aspect MapWhenClauses{
+
+	public void ASTNode.enableWhenEquationRewrite() {
+		for (ASTNode n : this)
+			n.enableWhenEquationRewrite();
+	}
+	
+	public void FWhenEquation.enableWhenEquationRewrite() {
+		super.enableWhenEquationRewrite();
+		rewriteWhenEquation = true;
+		is$Final = false;
+	}
+	
+	boolean FWhenEquation.rewriteWhenEquation = false;
+
+	public abstract FIfWhenElseEquation FIfWhenElseEquation.createIfWhenElseEquation(List eqns, 
+	                         FExp guard, Opt elseClause);
+	
+	public FIfWhenElseEquation FWhenEquation.createIfWhenElseEquation(List eqns, 
+	                         FExp guard, Opt elseClause) {
+		return new FWhenEquation((FEquationType)getType().fullCopy(),eqns,guard,elseClause);
+	}
+
+	public FIfWhenElseEquation FIfEquation.createIfWhenElseEquation(List eqns, 
+	                         FExp guard, Opt elseClause) {
+		return new FIfEquation((FEquationType)getType().fullCopy(),eqns,guard,elseClause);
+	}
+
+	public FIfWhenElseEquation FElseEquation.createIfWhenElseEquation(List eqns, 
+	                         FExp guard, Opt elseClause) {
+		return new FElseEquation((FEquationType)getType().fullCopy(),eqns);
+	}
+
+
+	public FIfWhenElseEquation FIfWhenElseEquation.createSimpleIfWhenElseEquation(String varName, boolean copyGuard) {
+		return null; //Not handled yet
+	}
+
+	public FIfWhenElseEquation FIfWhenEquation.createSimpleIfWhenElseEquation(String varName, boolean copyGuard) {
+	
+		// Copy guard
+		FExp guard = null;
+		if (copyGuard) {
+			guard = (FExp)getTest().fullCopy();
+			guard.setParent(this);
+			guard.traverseSymbolic(getTest());
+		} else {
+			guard = getTest();
+		}
+		
+		// Find the right equation
+		FAbstractEquation eqn = null;
+		for (FAbstractEquation e : getFAbstractEquations()) {
+		 	if (e.isSimple()) {
+		 		for (FIdUseExp n : e.simpleLefts()) {
+					if (n.name().equals(varName)) {
+						eqn = e;
+						break;
+					}
+		 		}
+		 	}
+		}
+		
+		if (eqn==null) {
+			return null;
+		}
+		
+		List eqns = new List().add(eqn);
+		
+		Opt o = null;
+		// If there is an else when, split it
+		if (hasElse()) {
+			o = new Opt(getElse().createSimpleIfWhenElseEquation(varName,copyGuard));
+		} else {
+		    o = new Opt();
+		}
+		return createIfWhenElseEquation(eqns,guard,o);
+	}
+
+	public List FWhenEquation.splitWhenEquation() {
+		List l = new List();
+		int i = 0;
+		for (FAbstractEquation e : getFAbstractEquations()) {
+		 	if (e.isSimple()) {
+		 		for (FIdUseExp n : e.simpleLefts()) {
+		 			l.add(createSimpleIfWhenElseEquation(n.name(),i!=0));
+		 		}
+		 	}
+		 	i++;
+		}	
+		return l;
+	}
+
+	rewrite FWhenEquation in FEquationBlock.getFAbstractEquation() {
+		when (rewriteWhenEquation && getNumFAbstractEquation()>1) to List {
+			return splitWhenEquation();
+		}
+	}
+	
+	syn lazy boolean FAbstractEquation.isSimple() = false;
+	eq FEquation.isSimple() = (getLeft() instanceof FIdUseExp);
+	
+	syn lazy ArrayList<FIdUseExp> FAbstractEquation.simpleLefts() = new ArrayList<FIdUseExp>();
+	
+	eq FEquation.simpleLefts() {
+		ArrayList<FIdUseExp> l = new ArrayList<FIdUseExp>();
+		if (isSimple()) {
+			l.add((FIdUseExp)getLeft());
+		} 
+		return l;
+	}
+	
+	// TODO: generalize to handle function calls with multiple outputs
+	
+}
+
+aspect ParameterSorting {
+
+	/**
+	 * \brief Indicate if there exist cyclic parameter dependencies.
+	 */
+	public boolean FClass.cyclicParameters = false;
+	
+	/**
+	 * \brief Index of equation during equation sorting.
+	 */
+	public int FAbstractEquation.sortingIndex = -1;
+	
+	public class FAbstractEquation {
+		public static class SortingIndexComparator implements Comparator<FAbstractEquation> {
+			public int compare(FAbstractEquation o1, FAbstractEquation o2) {
+				return o1.sortingIndex - o2.sortingIndex;
+			}
+		}
+	}
+	
+	public class FVariable {
+		public static class SortingIndexComparator implements Comparator<FVariable> {
+			public int compare(FVariable o1, FVariable o2) {
+				return o1.parameterEquation().sortingIndex - o2.parameterEquation().sortingIndex;
+			}
+		}
+	}
+	
+	/**
+	 * \brief Creates a TreeSet that can hold FAbstractEquations, sorted by their sortingIndex.
+	 */
+	public static TreeSet<FAbstractEquation> FAbstractEquation.sortingSet() {
+		return new TreeSet<FAbstractEquation>(new SortingIndexComparator());
+	}
+	
+	/** 
+	 * \brief Sorts a list of FVariables according to the sortingIndex of their equation.
+	 */
+	public static void FVariable.sortParameters(java.util.List<FVariable> vars) {
+		Collections.sort(vars, new SortingIndexComparator());
+	}
+	
+	/**
+	 * \brief Sort dependent parameter equations.
+	 * 
+	 * This is a simple implementation of Kahn's topological sorting algorithm.
+	 * This implementation will most likely be replaced by other graph 
+	 * algorithms later on.
+	 */
+	public void FClass.sortDependentParameters() {
+		// Get the list of parameter equations and set up preliminary data.
+		ArrayList<FAbstractEquation> eqns = getFParameterEquations().toArrayList();
+		int n_eqns = eqns.size();
+		List<FVariable> vars = getFVariables();
+		int n_vars = getNumFVariable();
+		for (int i = 0; i < n_eqns; i++)
+			eqns.get(i).sortingIndex = i;
+		for (FVariable fv : vars)
+			fv.parameterEquation();  // Calculate these before changing anything
+		
+		// If there is nothing to do, return.
+		if (n_eqns == 0)
+			return;
+		
+		// Set up data structures for the adjacency graph.
+		ArrayList<HashSet<FAbstractEquation>> toNodes = new ArrayList<HashSet<FAbstractEquation>>(n_eqns);
+		ArrayList<HashSet<FAbstractEquation>> fromNodes = new ArrayList<HashSet<FAbstractEquation>>(n_eqns);
+		for (int i = 0; i < n_eqns; i++) {
+			toNodes.add(new HashSet<FAbstractEquation>());
+			fromNodes.add(new HashSet<FAbstractEquation>());
+		}
+		
+		// For each equation
+		for (FAbstractEquation eqn : eqns) {
+			// Retrieve all variables referenced in right hand side
+			Set<FVariable> deps = eqn.referencedFVariablesInRHS();
+			// Build the actual adjacency graph.
+			for (FVariable fv : deps) {
+				FAbstractEquation depEqn = fv.parameterEquation();
+				if (depEqn != null && depEqn.sortingIndex >= 0) {
+					toNodes.get(depEqn.sortingIndex).add(eqn);		
+					fromNodes.get(eqn.sortingIndex).add(depEqn);
+				}
+			}
+		}	
+				
+		// Sort using algorithm described at
+		// http://en.wikipedia.org/wiki/Topological_sorting
+		List<FAbstractEquation> L = new List<FAbstractEquation>();
+		Queue<FAbstractEquation> S = 
+			new java.util.concurrent.ArrayBlockingQueue<FAbstractEquation>(n_eqns);
+		
+		// Add all nodes without incoming edges to S
+		for (int i = 0; i < n_eqns; i++) 
+			if (fromNodes.get(i).isEmpty()) 
+				S.add(eqns.get(i));
+		
+		// Repeat while S is not empty
+		int si = 0;
+		int n_indep = 0;
+		while (S.size() > 0) {
+			// Remove a node n from S
+			FAbstractEquation n = S.remove();
+			// Take care of n
+			if (n.isIndependentParameterEquation()) {
+				/* This equation should be the binding expression of an independent parameter.
+				 * There are several ways this could happen, e.g. using iteration expressions.
+				 * These could be removed from list before sorting, but this way is simpler. */ 
+				n.revertToBindingExp();
+				n_indep++;
+			} else {
+				// Insert n into L
+				L.add(n);
+			}
+			// For each node m with an edge e from n to m (in original order)
+			Set<FAbstractEquation> nodes = FAbstractEquation.sortingSet();
+			nodes.addAll(toNodes.get(n.sortingIndex));
+			for (FAbstractEquation m : nodes) {
+				// Remove edge e from fromNodes
+				fromNodes.get(m.sortingIndex).remove(n);
+				// If m has no incoming edges add m to S
+				if (fromNodes.get(m.sortingIndex).isEmpty()) 
+					S.add(m);
+			}
+			// Remove e from toNodes
+			toNodes.get(n.sortingIndex).clear();
+			// Done with n - update sortingIndex
+			n.sortingIndex = si++;
+		}
+		
+		// Not possible to find an ordering without cycles?
+		if (L.getNumChild() != eqns.size() - n_indep) {
+			cyclicParameters = true;
+			return;
+		}
+		
+		// Replace old parameter equation list
+		setFParameterEquationList(L);
+		
+		// Rearrange parameters in same order as parameter equations
+		ArrayList<FVariable> depParams = new ArrayList<FVariable>(n_eqns);
+		ArrayList<Integer> depParamIndices = new ArrayList<Integer>(n_eqns);
+		for (int i = 0; i < n_vars; i++) {
+			FVariable fv = vars.getChild(i);
+			if (fv.hasParameterEquation()) {
+				depParams.add(fv);
+				depParamIndices.add(new Integer(i));
+			}
+		}
+		FVariable.sortParameters(depParams);
+		for (int i = 0; i < depParams.size(); i++)
+			vars.setChild(depParams.get(i), depParamIndices.get(i).intValue());
+
+		// Flush AST since the structure has changed.
+		flush();
+		
+		// Remove any binding expressions of variables with parameter equations
+		for (FAbstractEquation eqn : L)
+			eqn.removeBindingExpOfAssignedVars();
+	}
+	
+	/**
+	 * Remove binding expression of variables assigned in this equation.
+	 */
+	public void FAbstractEquation.removeBindingExpOfAssignedVars() {}
+
+	public void FEquation.removeBindingExpOfAssignedVars() {
+		getLeft().removeBindingExpOfReferencedVars();
+	}
+	
+	public void FFunctionCallEquation.removeBindingExpOfAssignedVars() {
+		for (FFunctionCallLeft left : getLefts())
+			if (left.hasFExp())
+				left.getFExp().removeBindingExpOfReferencedVars();
+	}
+	
+	/**
+	 * Remove binding expression of variables referenced in this expression.
+	 */
+	public void FExp.removeBindingExpOfReferencedVars() {
+		for (FExp e : childFExps())
+			e.removeBindingExpOfReferencedVars();
+	}
+	
+	public void FIdUseExp.removeBindingExpOfReferencedVars() {
+		getFIdUse().myFV().removeBindingExp();
+	}
+	
+	/**
+	 * Remove binding expression of this variable.
+	 */
+	public void AbstractFVariable.removeBindingExp() {}
+	
+	public void FVariable.removeBindingExp() {
+		if (hasBindingExp())
+			setBindingExpOpt(new Opt());
+	}
+	
+	/**
+	 * Test if this should be the binding expression of an independent parameter instead.
+	 */
+	syn boolean FAbstractEquation.isIndependentParameterEquation() = false;
+	eq FEquation.isIndependentParameterEquation() = 
+		getLeft().isFlatParameterUse() && getRight().isIndependentParameterExp();
+	
+	/**
+	 * Test if this is a use of a parameter (in the flat tree).
+	 */
+	syn boolean FExp.isFlatParameterUse()   = false;
+	eq FIdUseExp.isFlatParameterUse()       = getFIdUse().isFlatParameterUse();
+	syn boolean FIdUse.isFlatParameterUse() = myFV().isParameter();
+	
+	/**
+	 * Convert this parameter equation to a binding expression.
+	 */
+	public void FAbstractEquation.revertToBindingExp() {}
+	public void FEquation.revertToBindingExp() {
+		FVariable fv = (FVariable) ((FIdUseExp) getLeft()).getFIdUse().myFV();
+		fv.setBindingExp(getRight());
+	}
+
+}
+
+aspect DummyDerivatives {
+
+	rewrite FDerExp {
+		when (myFV().isDummyDer()) to FDummyDerExp {
+			return new FDummyDerExp(getFIdUse());
+		}
+	}
+
+	rewrite FHDerExp {
+		when (myFV().isDummyDer()) to FHDummyDerExp {
+			return new FHDummyDerExp(getFIdUse(),getOrder());
+		}
+	}
+	
+	syn boolean AbstractFVariable.isDummyDer() {
+		return false;
+	}
+	
+	eq FDummyDerivativeVariable.isDummyDer() {
+		return true;
+	}
+	
+	eq FHDummyDerivativeVariable.isDummyDer() {
+		return true;	
+	}
+
+	public void ASTNode.enableFHDerRewrite() {
+		for (ASTNode n : this)
+			n.enableFHDerRewrite();
+	}
+	
+	public void FHDerExp.enableFHDerRewrite() {
+		rewriteFHDer = true;
+		is$Final = false;
+	}
+	
+	boolean FHDerExp.rewriteFHDer = false;
+
+	public void FHDerivativeVariable.enableFHDerRewrite() {
+		rewriteFHDer = true;
+		is$Final = false;
+	}
+	
+	boolean FHDerivativeVariable.rewriteFHDer = false;
+
+	rewrite FHDerExp {
+		when (rewriteFHDer) to FDerExp {
+			StringBuffer str = new StringBuffer();
+			for (int i=0;i<getOrder()-1;i++) {
+				str.append("_der");
+			}
+			str.append("_");
+			FQName fqn = getFIdUse().getFQName();
+			str.append(fqn.getFQNamePart(fqn.getNumFQNamePart()-1).name());
+			fqn.setFQNamePart(new FQNamePart(str.toString(),fqn.getFQNamePart(fqn.getNumFQNamePart()-1).getFArraySubscriptsOpt()),fqn.getNumFQNamePart()-1);
+			return new FDerExp(new FIdUse(fqn));
+		} 
+	}
+
+}
+
+aspect TransformCanonicalErrorCheck {
+	
+	/**
+	 * The number of DAE equations corresponds to the equivalent scalar number
+	 * of equations.
+	 */
+	syn int FClass.numDAEEquations() = numScalarEquations();
+	
+	/**
+	 * The number of equations in the DAE initialization system originating 
+	 * from the DAE should be the same as the equivalent scalar number of
+	 * equations. The equations may differ, however, due to inactive when
+	 * clauses.
+	 */
+	syn int FClass.numDAEEquationsAtInitialization() 
+		= numScalarEquationsAtInitialization();
+	
+	/**
+	 * The number of unknown variables in the DAE corresponds to the number
+	 * of real algebraic variables plus the number of derivative variables
+	 * plus the number of discrete variables.
+	 */
+	syn int FClass.numDAEVariables() = 
+		numAlgebraicRealVariables() + 
+		numDifferentiatedRealVariables() + numDiscreteVariables();
+	
+	/**
+	 * The number of equations in the DAE initialization system is the 
+	 * number of scalar DAE equations plus the number of scalar initial
+	 * equations.
+	 */	
+	syn int FClass.numDAEInitEquations() = numDAEEquationsAtInitialization() + 
+		numInitialEquations();
+	
+	/**
+	 * The number of unknowns in the DAE initialization system is the 
+	 * number of unknowns in the DAE system plus the number of differentiated
+	 * variables plus the number of (pre) discrete variables.
+	 */
+	syn int FClass.numDAEInitVariables() = numDAEVariables() + 
+		numDifferentiatedRealVariables() + numDiscretePreVariables();
+	
+	public void FClass.checkFClassDimensions() {
+		// Check dimensions of DAE
+		int n_eq_F = numDAEEquations();
+		int n_vars_F = numDAEVariables();
+		if (n_eq_F != n_vars_F) 
+			error("The DAE system has " + n_eq_F + " equations and " + n_vars_F + " free variables.");
+		
+		// Check dimensions of DAE initialization system
+		int n_eq_F0 = numDAEInitEquations();
+		int n_vars_F0 = numDAEInitVariables();
+		if (n_eq_F0 > n_vars_F0) 
+			error("The DAE initialization system has " + n_eq_F0 + " equations and " + n_vars_F0 + " free variables.");
+		
+	}
+	
+	public void FClass.collectErrors() {
+		if (cyclicParameters) {
+			error("The model "+ name() +" contains cyclic parameter dependencies.");
+		}
+		if (getAliasManager().aliasError()) {
+			error(getAliasManager().getAliasErrorMessage());
+		}
+		for (String str : aliasErrors) {
+			error(str);
+		}
+		for (String str : indexReductionErrors) {
+			error(str);
+		}
+		checkDuplicateVariables();
+		checkFClassDimensions();
+		for (String str : structuralErrors()) {
+			error(str);
+		}		
+		checkUnsupportedStreamConnections();
+	}
+}
+
+aspect FlushFClass {
+	/**
+	 * \brief Flush all caches, including collection attributes.
+	 */
+	public void ASTNode.flushAll() {
+		flushCache();
+		flushCollectionCache();
+	}
+
+	/**
+	 * \brief Flush all caches, including collection attributes, and also
+	 * flush all children. In addition, the is$final attribute is set to false
+	 * for FIdUseExps and FDerExps in order to enable rewrites of such nodes
+	 * after elimination of alias variables.
+	 */
+	public void ASTNode.flushAllRecursiveClearFinal() {
+		flushAll();
+		//is$Final = false;
+		for (int i=0;i<getNumChild();i++) {
+			getChild(i).flushAllRecursiveClearFinal();
+		}
+	}
+	
+	public void FIdUseExp.flushAllRecursiveClearFinal() {
+		flushAll();
+		is$Final = false;
+		for (int i=0;i<getNumChild();i++) {
+			getChild(i).flushAllRecursiveClearFinal();
+		}
+	}
+	
+	public void FDerExp.flushAllRecursiveClearFinal() {
+		flushAll();
+		is$Final = false;
+		for (int i=0;i<getNumChild();i++) {
+			getChild(i).flushAllRecursiveClearFinal();
+		}
+	}
+
+	/**
+	 * \brief Flush all caches, including collection attributes, and also
+	 * flush all children. 
+	 */
+	public void ASTNode.flushAllRecursive() {
+		flushAll();
+		for (int i=0;i<getNumChild();i++) {
+			getChild(i).flushAllRecursive();
+		}
+	}
+	
+	/**
+	 * \brief Flush model AST and enable rewrites of FIdUseExps and FDerExps
+	 * after alias elimination.
+	 */
+	public void FClass.flush() {
+		flushAllRecursiveClearFinal();
+		//is$Final = true;
+	}
+	
+}
+
+aspect Tearing{
+	
+	
+}
+
