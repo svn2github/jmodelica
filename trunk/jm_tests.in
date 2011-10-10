@@ -97,7 +97,6 @@ function python_tests() {
     TEST_DIR=$(mktemp -dq /tmp/jm_tests.XXXXXX)
   fi 
   PATTERN=----------------------------------------------------------------------
-  echo TAGS=$TAGS
   print_name Python
   case ${OUTPUT} in
     v)
