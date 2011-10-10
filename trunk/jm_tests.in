@@ -59,6 +59,19 @@ test_set_m="modelica"
 test_set_o="optimica"
 test_set_p="python"
 
+# Standard set of tags
+TAGS="-a stddist -a fmi"
+if [[ "${IPOPT_HOME}" != "" ]]; then
+  TAGS="${TAGS} -a ipopt"
+  if [[ "${SUNDIALS_HOME}" != "" ]]; then
+    TAGS="${TAGS} -a assimulo"
+    if [[ "$(uname -o)" == "Msys" ]]; then
+      TAGS="${TAGS} -a windows"
+    fi
+  fi
+fi
+
+
 # Functions for running specific tests
 function modelica_tests() {
   junit_test Modelica
@@ -84,18 +97,7 @@ function python_tests() {
     TEST_DIR=$(mktemp -dq /tmp/jm_tests.XXXXXX)
   fi 
   PATTERN=----------------------------------------------------------------------
-  if [[ "${TAGS_SET}" != "1" ]]; then
-    TAGS="-a stddist -a fmi -a casadi"
-    if [[ "${IPOPT_HOME}" != "" ]]; then
-      TAGS="${TAGS} -a ipopt"
-      if [[ "${SUNDIALS_HOME}" != "" ]]; then
-        TAGS="${TAGS} -a assimulo"
-        if [[ "$(uname -o)" == "Msys" ]]; then
-          TAGS="${TAGS} -a windows"
-        fi
-      fi
-    fi
-  fi
+  echo TAGS=$TAGS
   print_name Python
   case ${OUTPUT} in
     v)
@@ -238,7 +240,6 @@ done
 export JAVA_HOME JMODELICA_HOME IPOPT_HOME CPPAD_HOME PYTHONPATH LD_LIBRARY_PATH ANT_OPTS SUNDIALS_HOME
 TIME=$(date +%s)
 
-TAGS=
 TESTS=
 ARG_TYPE=flag
 for a in ${DEFAULT_ARGS} $*; do
@@ -254,8 +255,8 @@ for a in ${DEFAULT_ARGS} $*; do
       TAGS="${TAGS} -a ${a}"
       ;;
     file)
-      if [[ -f ${a} ]]; then
-        FILE="${a:a}"
+      if [[ -f "${a}" ]]; then
+        FILE="${a}"
       else
         FILE="${TESTS_DIR}/${a}"
       fi
@@ -295,11 +296,14 @@ for a in ${DEFAULT_ARGS} $*; do
           ARG_TYPE=file
           ;;
         t)
-          TAGS_SET=1
+          TAGS=""
+          ARG_TYPE=tag
+          ;;
+        g)
           ARG_TYPE=tag
           ;;
         h)
-          echo "usage: tests [-ajmopvnqcCh] [-t [tag1 ...]] [-f file1 ...]"
+          echo "usage: tests [-ajmopvnqcCh] { [-(t|g) [tag1 ...]] } [-f file1 ...]"
           echo "The -ajmop options each control a set of tests, and select all tests in set "
           echo "for running, or, if all in set are already selected, deselects them. "
           echo "Thus, \"tests -am\" runs all tests except modelica. If no tests are chosen, "
@@ -317,7 +321,9 @@ for a in ${DEFAULT_ARGS} $*; do
           echo "  -i  Do not re-build before python tests"
           echo "  -k  Keep generated files from python tests"
           echo "  -t  When running python tests, only run tests marked with one of the "
-          echo "      listed tags. If given without tags, all tests are run"
+          echo "      listed tags. If given without tags, all tests are run. If -t is "
+          echo "      given several times, only the last one will be used"
+          echo "  -g  When running python tests, add the listed tags to the tags to use"
           echo "  -f  When running python tests, only run tests from the listed files. "
           echo "      Paths relative to the tests directory are accepted, as well as "
           echo "      absolute or relative to current directory"
