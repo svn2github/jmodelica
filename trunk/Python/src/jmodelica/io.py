@@ -306,12 +306,8 @@ class ResultDymolaTextual:
         result  = [];
      
         # Read Aclass section
-        l = fid.readline()
-        tmp = l.partition('(')
-        while tmp[0]!='char Aclass':
-            l = fid.readline()
-            tmp = l. partition('(')
-        nLines = tmp[2].partition(',')
+        nLines = self._find_phrase(fid, 'char Aclass')
+
         nLines = int(nLines[0])
         Aclass = []
         for i in range(0,nLines):
@@ -319,25 +315,17 @@ class ResultDymolaTextual:
         self.Aclass = Aclass
 
         # Read name section
-        l = fid.readline()
-        tmp = l.partition('(')
-        while tmp[0]!='char name':
-            l = fid.readline()
-            tmp = l. partition('(')
-        nLines = tmp[2].partition(',')
+        nLines = self._find_phrase(fid, 'char name')
+
         nLines = int(nLines[0])
         name = []
         for i in range(0,nLines):
             name.append(fid.readline().strip().replace(" ",""))
         self.name = name
      
-        # Read description section   
-        l = fid.readline()
-        tmp = l.partition('(')
-        while tmp[0]!='char description':
-            l = fid.readline()
-            tmp = l. partition('(')
-        nLines = tmp[2].partition(',')
+        # Read description section  
+        nLines = self._find_phrase(fid, 'char description') 
+
         nLines = int(nLines[0])
         description = []
         for i in range(0,nLines):
@@ -345,12 +333,8 @@ class ResultDymolaTextual:
         self.description = description
 
         # Read dataInfo section
-        l = fid.readline()
-        tmp = l.partition('(')
-        while tmp[0]!='int dataInfo':
-            l = fid.readline()
-            tmp = l. partition('(')
-        nLines = tmp[2].partition(',')
+        nLines = self._find_phrase(fid, 'int dataInfo')
+
         nCols = nLines[2].partition(')')
         nLines = int(nLines[0])
         nCols = int(nCols[0])
@@ -370,9 +354,11 @@ class ResultDymolaTextual:
         for i in range(0,nData): 
             l = fid.readline()
             tmp = l.partition(' ')
-            while tmp[0]!='float' and tmp[0]!='double':
+            while tmp[0]!='float' and tmp[0]!='double' and l!='':
                 l = fid.readline()
                 tmp = l. partition(' ')
+            if l=='':
+                raise JIOError('The result does not seem to be of a supported format.')
             tmp = tmp[2].partition('(')
             nLines = tmp[2].partition(',')
             nCols = nLines[2].partition(')')
@@ -390,6 +376,16 @@ class ResultDymolaTextual:
                     data.append(map(robust_float,info[0:nCols]))
                 del(info)
             self.data.append(N.array(data))
+            
+    def _find_phrase(self,fid, phrase):
+        l = fid.readline()
+        tmp = l.partition('(')
+        while tmp[0]!=phrase and l!='':
+            l = fid.readline()
+            tmp = l. partition('(')
+        if l=='':
+            raise JIOError("The result does not seem to be of a supported format.")
+        return tmp[2].partition(',')
 
     def get_variable_index(self,name): 
         """

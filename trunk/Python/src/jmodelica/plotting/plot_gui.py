@@ -36,6 +36,7 @@ except ImportError:
 try:
     from jmodelica.io import ResultDymolaTextual
     from jmodelica.io import ResultDymolaBinary
+    from jmodelica.io import JIOError
 except ImportError:
     print "JModelica not found."
 
@@ -247,7 +248,11 @@ class MainGUI(wx.Frame):
                 
                 #Find out if the result is a textual or binary file
                 if n.lower().endswith(".txt"): #Textual file
-                    self.ResultFiles.append((n,ResultDymolaTextual(O.path.join(dlg.GetDirectory(),n))))
+                    try:
+                        self.ResultFiles.append((n,ResultDymolaTextual(O.path.join(dlg.GetDirectory(),n))))
+                    except JIOError:
+                        self.SetStatusText("Could not load "+n+".") #Change the statusbar
+                        break
                 elif n.lower().endswith(".mat"): #Binary file
                     try:
                         self.ResultFiles.append((n,ResultDymolaBinary(O.path.join(dlg.GetDirectory(),n))))
@@ -666,7 +671,7 @@ class DialogLinesLegends(wx.Dialog):
         
         names = [i[2]["name"] for i in self.variables]
         lineStyles = ["-","--","-.",":"]
-        colors = ["Auto","Blue","Green","Red","Cyan","Magneta","Yellow","Black","White"]
+        colors = ["Auto","Blue","Green","Red","Cyan","Magenta","Yellow","Black","White"]
         lineStylesNames = ["Solid","Dashed","Dash Dot","Dotted"]
         markerStyles = ["None",'D','s','_','^','d','h','+','*',',','o','.','p','H','v','x','>','<']
         markerStylesNames = ["None","Diamond","Square","Horizontal Line","Triangle Up","Thin Diamond","Hexagon 1","Plus","Star","Pixel","Circle",
