@@ -133,7 +133,8 @@ LIBS_NOCPPAD = -L${JMI_LIB_DIR} -lgfortran -ljmi -lfmi -lmodelica_utilities $(JM
 LIBS_FMUME = -L${JMI_LIB_DIR} -lgfortran -ljmi -lfmi -lmodelica_utilities $(JMI_LIB_DIR)/liblapack.a $(JMI_LIB_DIR)/libblas.a  $(SUNDIALS_HOME)/lib/libsundials_kinsol.a $(SUNDIALS_HOME)/lib/libsundials_nvecserial.a 
 LIBS_FMUCS = -L${JMI_LIB_DIR} -lgfortran -ljmi -lfmi_cs -lmodelica_utilities -lgfortran $(JMI_LIB_DIR)/liblapack.a $(JMI_LIB_DIR)/libblas.a  $(SUNDIALS_HOME)/lib/libsundials_kinsol.a $(SUNDIALS_HOME)/lib/libsundials_nvecserial.a
 LIBS_IPOPT = -L$(JMI_LIB_DIR) -ljmi_cppad -ljmi_algorithm_cppad -ljmi_solver_cppad -lfmi\
--L$(IPOPT_HOME)/lib -lipopt -llapack -lblas -lm -lgfortran -L$(SUNDIALS_HOME)/lib -lsundials_kinsol -lsundials_nvecserial
+-L$(IPOPT_HOME)/lib/coin/ -L$(IPOPT_HOME)/lib/coin/ThirdParty/ -lipopt -lcoinhsl -llapack -lblas -lm -lgfortran -L$(SUNDIALS_HOME)/lib -lsundials_kinsol -lsundials_nvecserial
+#-L$(IPOPT_HOME)/lib/ -lipopt -llapack -lblas -lm -lgfortran -L$(SUNDIALS_HOME)/lib -lsundials_kinsol -lsundials_nvecserial
 
 # Include paths for compilation
 INCL_CPPAD = -I$(JMI_INC_DIR) -I$(CPPAD_INC_DIR) -I$(SUNDIALS_INC_DIR)

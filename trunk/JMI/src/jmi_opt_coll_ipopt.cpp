@@ -104,7 +104,7 @@ int jmi_opt_coll_ipopt_get_statistics(jmi_opt_coll_ipopt_t* jmi_opt_coll_ipopt,
 		*return_status = jmi_opt_coll_ipopt->return_status;
 		*nbr_iter = jmi_opt_coll_ipopt->ipopt_app->Statistics()->IterationCount();
 		*objective = jmi_opt_coll_ipopt->ipopt_app->Statistics()->FinalObjective();
-		*total_exec_time = jmi_opt_coll_ipopt->ipopt_app->Statistics()->TotalCPUTime();
+		*total_exec_time = jmi_opt_coll_ipopt->ipopt_app->Statistics()->TotalCpuTime();
 		return 0;
 	} else {
 		return -1;
