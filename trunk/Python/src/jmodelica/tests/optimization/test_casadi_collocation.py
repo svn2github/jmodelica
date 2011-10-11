@@ -120,6 +120,10 @@ class TestRadau2:
         class_path = "VDP_pack.VDP_Opt_Constraints_Mayer"
         compile_fmux(class_path, file_path)
         
+        file_path = os.path.join(get_files_path(), 'Modelica', 'VDP.mop')
+        class_path = "VDP_pack.VDP_Opt_Initial_Equations"
+        compile_fmux(class_path, file_path)
+        
         file_path = os.path.join(get_files_path(), 'Modelica', 'CSTR.mop')
         class_path = "CSTR.CSTR_Opt_Bounds_Lagrange"
         compile_fmux(class_path, file_path)
@@ -145,6 +149,10 @@ class TestRadau2:
         self.model_VDP_constraints_Mayer = CasadiModel(
                 FMUX_VDP_constraints_Mayer)
         
+        FMUX_VDP_initial_equations = 'VDP_pack_VDP_Opt_Initial_Equations.fmux'
+        self.model_VDP_initial_equations = CasadiModel(
+                FMUX_VDP_initial_equations)
+        
         FMUX_CSTR_Lagrange = "CSTR_CSTR_Opt_Bounds_Lagrange.fmux"
         self.model_CSTR_Lagrange = CasadiModel(FMUX_CSTR_Lagrange)
         self.model_CSTR_scaled_Lagrange = CasadiModel(FMUX_CSTR_Lagrange,
@@ -162,7 +170,7 @@ class TestRadau2:
     @testattr(casadi = True)
     def test_init_traj(self):
         """Test optimizing based on an existing optimization reult."""
-        model = self.model_VDP_bounds_Mayer
+        model = self.model_VDP_bounds_Lagrange
         
         # References values
         cost_ref = 3.19495079586595e0
@@ -176,7 +184,10 @@ class TestRadau2:
         
         opts['n_e'] = 75
         opts['n_cp'] = 4
-        opts['init_traj'] = ResultDymolaTextual("VDP_pack_VDP_Opt2_result.txt")
+        opts['eliminate_der_var'] = True
+        opts['eliminate_cont_var'] = True
+        opts['init_traj'] = ResultDymolaTextual(
+                "VDP_pack_VDP_Opt_bounds_Lagrange_result.txt")
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref, 5e-2, 5e-2)
         
@@ -256,6 +267,26 @@ class TestRadau2:
         
         # With exact Hessian
         opts['exact_Hessian'] = True
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+    
+    @testattr(casadi = True)
+    def test_initial_equations(self):
+        """Test initial equations with and without eliminated derivatives."""
+        model = self.model_VDP_initial_equations
+        
+        # References values
+        cost_ref = 4.7533158101416788e0
+        u_norm_ref = 5.18716394291585e-1
+        
+        # Without derivative elimination
+        opts = model.optimize_options(self.algorithm)
+        opts['eliminate_der_var'] = False
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        
+        # With derivative elimination
+        opts['eliminate_der_var'] = True
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
     
@@ -413,13 +444,15 @@ class TestRadau2:
         # Mayer, eliminate derivative variables
         # Currently does not work due to lack of support for Mayer
         #~ opts["eliminate_der_var"] = True
-        #~ opts['init_traj'] = ResultDymolaTextual("VDP_pack_VDP_Opt2_result.txt")
+        #~ opts['init_traj'] = ResultDymolaTextual(
+                #~ "VDP_pack_VDP_Opt_bounds_Lagrange_result.txt")
         #~ res = model_Mayer.optimize(self.algorithm, opts)
         #~ assert_results(res, cost_ref, u_norm_ref)
         
         # Lagrange, eliminate derivative variables
         opts["eliminate_der_var"] = True
-        opts['init_traj'] = ResultDymolaTextual("VDP_pack_VDP_Opt2_result.txt")
+        opts['init_traj'] = ResultDymolaTextual(
+                "VDP_pack_VDP_Opt_bounds_Lagrange_result.txt")
         res = model_Lagrange.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
     
@@ -442,7 +475,8 @@ class TestRadau2:
         
         # Eliminate continuity variables
         opts["eliminate_cont_var"] = True
-        opts['init_traj'] = ResultDymolaTextual("VDP_pack_VDP_Opt2_result.txt")
+        opts['init_traj'] = ResultDymolaTextual(
+                "VDP_pack_VDP_Opt_bounds_Mayer_result.txt")
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
     
@@ -469,7 +503,8 @@ class TestRadau2:
         # n_cp = 8
         opts['n_e'] = 20
         opts['n_cp'] = 8
-        opts['init_traj'] = ResultDymolaTextual("VDP_pack_VDP_Opt2_result.txt")
+        opts['init_traj'] = ResultDymolaTextual(
+                "VDP_pack_VDP_Opt_bounds_Mayer_result.txt")
         res = model.optimize(self.algorithm, opts)
         assert_results(res, 3.17620203643878e0, 2.803233013e-1)
         
@@ -491,7 +526,8 @@ class TestRadau2:
         opts = model.optimize_options(self.algorithm)
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
-        opts['init_traj'] = ResultDymolaTextual("VDP_pack_VDP_Opt2_result.txt")
+        opts['init_traj'] = ResultDymolaTextual(
+                "VDP_pack_VDP_Opt_bounds_Lagrange_result.txt")
         
         # SX with exact Hessian and eliminated variables
         opts['graph'] = "SX"

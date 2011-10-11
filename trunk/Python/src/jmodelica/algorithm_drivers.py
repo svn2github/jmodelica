@@ -2403,13 +2403,15 @@ class CasadiRadau2Options(OptionBase):
         
         eliminate_der_var --
             True: The variables representing the derivatives are eliminated
-            via the collocation equations and are thus not a part of the NLP.
+            via the collocation equations and are thus not a part of the NLP,
+            with the exception of \dot{x}_{1, 0}, which is not eliminated since
+            the collocation equations are not enforced at t_0.
             
             False: The variables representing the derivatives are kept as NLP
             variables and the collocation equations enter as constraints.
             
-            Currently does not work in combination with either Mayer type cost
-            functions or DAE initial equations containing state derivatives.
+            Currently does not work in combination with Mayer type cost
+            functions.
             
             Type: bool
             Default: False

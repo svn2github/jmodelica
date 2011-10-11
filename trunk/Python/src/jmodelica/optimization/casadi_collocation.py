@@ -1188,6 +1188,9 @@ class RadauCollocator(CasadiCollocator):
         except AttributeError:
             eliminate_der_var = False
         
+        if eliminate_der_var:
+            self.get_xx_init()[self.var_indices[1][0]['dx']] = dx_init[cnt,:]
+        
         for i in xrange(1, self.n_e + 1):
             for k in self.get_time_points()[i]:
                 if (self.model.get_n_x()>0 and not eliminate_der_var):
@@ -1283,6 +1286,8 @@ class Radau2Collocator(CasadiCollocator):
         # Count NLP variables
         n_xx = self.model.get_n_p()
         n_xx += (1 + self.n_e * self.n_cp) * N.sum(n_var.values())
+        if self.eliminate_der_var:
+            n_xx += n_var['x'] # dx_1_0
         if self.blocking_factors is not None:
             n_xx += len(self.blocking_factors) * self.model.get_n_u()
         if not self.eliminate_cont_var:
@@ -1357,9 +1362,16 @@ class Radau2Collocator(CasadiCollocator):
                 index = new_index
                 var[i][0]['x'] = xx[var_indices[i][0]['x']]
         
-        # Index the variables for the initial values
+        # Index the variables for the derivative initial values
         var[1][0] = {}
         var_indices[1][0] = {}
+        if self.eliminate_der_var:
+            new_index = index + n_var['x']
+            var_indices[1][0]['dx'] = range(index, new_index)
+            index = new_index
+            var[1][0]['dx'] = xx[var_indices[1][0]['dx']]
+        
+        # Index the variables for the remaining initial values
         for var_type in n_var.keys():
             new_index = index + n_var[var_type]
             var_indices[1][0][var_type] = range(index, new_index)
@@ -1437,6 +1449,13 @@ class Radau2Collocator(CasadiCollocator):
                             w.append(casadi.SX(str(self.model.get_w()[j]) +
                                                '_' +  str(i) + '_' + str(k)))
                         xx[var_indices[i][k]['w']] = w
+            
+            # Derivative initial values
+            if self.eliminate_der_var:
+                dx = []
+                for j in range(self.model.get_n_x()):
+                    dx.append(casadi.SX(str(self.model.get_dx()[j]) + '_1_0'))
+                xx[var_indices[1][0]['dx']] = dx
             
             self.xx = xx
             self._create_NLP_variables(True)
@@ -1533,14 +1552,6 @@ class Radau2Collocator(CasadiCollocator):
             dae = casadi.substitute(self.ocp.implicit_fcn_, self.model.dx,
                                     coll_der)
             
-            # Check that the provided initial equation is supported
-            for dx in self.model.dx:
-                if repr(dx) in repr(self.ocp.initial_eq_):
-                    raise NotImplementedError(
-                            "eliminate_der_var is currently not supported " + \
-                            "in combination with DAE initial equations " + \
-                            "containing state derivatives.")
-            
             sym_z = []
             sym_z += list(self.model.p)
             sym_z += list(self.model.x)
@@ -1548,8 +1559,7 @@ class Radau2Collocator(CasadiCollocator):
             sym_z += list(self.model.w)
             sym_z += [self.model.t]
             
-            init_F0 = casadi.SXFunction([sym_z, x_i, der_vals_k, h_i], [init])
-            init_F0.init()
+            dae_F_t0 = self.model.get_dae_F()
             dae_F = casadi.SXFunction([sym_z, x_i, der_vals_k, h_i], [dae])
             dae_F.init()
         else:
@@ -1558,8 +1568,8 @@ class Radau2Collocator(CasadiCollocator):
                     [x_i, der_vals_k, h_i, dx_i_k],
                     [casadi.sum(x_i * der_vals_k, 1) - h_i * dx_i_k])
             coll_eq.init()
-            init_F0 = self.model.get_init_F0()
             dae_F = self.model.get_dae_F()
+        init_F0 = self.model.get_init_F0()
         
         # Create path constraint functions
         g_e = []
@@ -1601,7 +1611,9 @@ class Radau2Collocator(CasadiCollocator):
         if self.graph == 'MX' or self.graph == 'expanded_MX':
             init_F0_eval = init_F0.call
             dae_F_eval = dae_F.call
-            if not self.eliminate_der_var:
+            if self.eliminate_der_var:
+                dae_F_t0_eval = dae_F_t0.call
+            else:
                 coll_eq_eval = coll_eq.call
             g_e_eval = g_e_fcn.call
             g_i_eval = g_i_fcn.call
@@ -1610,7 +1622,9 @@ class Radau2Collocator(CasadiCollocator):
         elif self.graph == 'SX':
             init_F0_eval = init_F0.eval
             dae_F_eval = dae_F.eval
-            if not self.eliminate_der_var:
+            if self.eliminate_der_var:
+                dae_F_t0_eval = dae_F_t0.eval
+            else:
                 coll_eq_eval = coll_eq.eval
             g_e_eval = g_e_fcn.eval
             g_i_eval = g_i_fcn.eval
@@ -1653,12 +1667,9 @@ class Radau2Collocator(CasadiCollocator):
         i = 1
         k = 0
         if self.eliminate_der_var:
-            z = self._get_z_elim_der(i, k)
-            [initial_F0] = init_F0_eval([z, x_list[i], der_vals[k],
-                                         self.horizon * self.h[i]])
-            #~ [initial_F] = dae_F_eval([z, x_list[i], der_vals[k],
-                                      #~ self.horizon * self.h[i]])
-            initial_F = []
+            z = self._get_z(i, k)
+            [initial_F0] = init_F0_eval([z])
+            [initial_F] = dae_F_t0_eval([z])
         else:
             z = self._get_z(i, k)
             [initial_F0] = init_F0_eval([z])
@@ -2299,9 +2310,17 @@ class Radau2Collocator(CasadiCollocator):
                         var_opt[var_type][t_index, :] = xx_i_k.reshape(-1)
                     t_index += 1
             if self.eliminate_der_var:
+                # dx_1_0
                 t_index = 0
+                i = 1
+                k = 0
+                dx_i_k = self.nlp_opt[var_indices[i][k]['dx']]
+                var_opt['dx'][t_index, :] = dx_i_k.reshape(-1)
+                t_index += 1
+                
+                # Collocation point derivatives
                 for i in xrange(1, self.n_e + 1):
-                    for k in time_points[i]:
+                    for k in xrange(1, self.n_cp + 1):
                         dx_i_k = 0
                         for l in xrange(self.n_cp + 1):
                             x_i_l = self.nlp_opt[var_indices[i][l]['x']]
