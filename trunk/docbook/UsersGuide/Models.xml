@@ -389,10 +389,10 @@ jmu_name = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_s
 
                   <entry><literal>true</literal></entry>
 
-                  <entry>When this option is set to <literal>true</literal>
-                  the minimum time optimal control problems encoded in
-                  Optimica are converted to fixed interval problems by scaling
-                  of the derivative variables. (Boolean option.)</entry>
+                  <entry>If this option is <literal>true</literal>, then the
+                  minimum time optimal control problems encoded in Optimica
+                  are converted to fixed interval problems by scaling of the
+                  derivative variables. (Boolean option.)</entry>
                 </row>
 
                 <row>
@@ -410,9 +410,9 @@ jmu_name = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_s
 
                   <entry><literal>false</literal></entry>
 
-                  <entry>If this option is set to <literal>false</literal> one
-                  or more compiler warnings will not stop compilation of the
-                  model. (Boolean option.)</entry>
+                  <entry>If this option is <literal>true</literal>, then any
+                  compiler warnings will stop compilation of the model.
+                  (Boolean option.)</entry>
                 </row>
 
                 <row>
@@ -420,11 +420,11 @@ jmu_name = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_s
 
                   <entry><literal>true</literal></entry>
 
-                  <entry>When this option is set to <literal>true</literal>,
-                  then additional initial equations are added to the model
-                  based on a the result of a matching algorithm. Initial
-                  equations are added for states that are not matched to an
-                  equation. (Boolean option.)</entry>
+                  <entry>If this option is <literal>true</literal>, then
+                  additional initial equations are added to the model based on
+                  a the result of a matching algorithm. Initial equations are
+                  added for states that are not matched to an equation.
+                  (Boolean option.)</entry>
                 </row>
 
                 <row>
@@ -432,8 +432,8 @@ jmu_name = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_s
 
                   <entry><literal>false</literal></entry>
 
-                  <entry>If this option is <literal>true</literal> the model
-                  description part of the XML variables file will be FMI
+                  <entry>If this option is <literal>true</literal>, then the
+                  model description part of the XML variables file will be FMI
                   compliant. To generate an XML which will validate with FMI
                   schema the option <literal>generate_xml_equations</literal>
                   must also be set to <literal>false</literal>. (Boolean
@@ -445,8 +445,8 @@ jmu_name = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_s
 
                   <entry><literal>true</literal></entry>
 
-                  <entry>If this option is set to <literal>true</literal>,
-                  then alias variables are eliminated from the model. (Boolean
+                  <entry>If this option is <literal>true</literal>, then alias
+                  variables are eliminated from the model. (Boolean
                   option.)</entry>
                 </row>
 
@@ -476,12 +476,12 @@ jmu_name = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_s
 
                   <entry><literal>false</literal></entry>
 
-                  <entry>This option enables the user to specify if initial
-                  equations should be generated automatically for
-                  differentiated variables even though the fixed attribute is
-                  equal to <literal>fixed</literal>. Setting this option to
-                  <literal>true</literal> is, however, often practical in
-                  optimization problems. (Boolean option.)</entry>
+                  <entry>If this option is <literal>true</literal>, then
+                  initial equations are always generated automatically for
+                  differentiated variables, even with the fixed attribute set
+                  to <literal>fixed</literal>. Setting this option to
+                  <literal>true</literal> is often practical in optimization
+                  problems. (Boolean option.)</entry>
                 </row>
 
                 <row>
@@ -489,8 +489,8 @@ jmu_name = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_s
 
                   <entry><literal>false</literal></entry>
 
-                  <entry>If this option is <literal>true</literal>, equations
-                  are sorted using the BLT algorithm. (Boolean
+                  <entry>If this option is <literal>true</literal>, then
+                  equations are sorted using the BLT algorithm. (Boolean
                   option.)</entry>
                 </row>
 
@@ -499,7 +499,7 @@ jmu_name = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_s
 
                   <entry><literal>false</literal></entry>
 
-                  <entry>If this option is <literal>true</literal>, index
+                  <entry>If this option is <literal>true</literal>, then index
                   reduction is performed. (Boolean option.)</entry>
                 </row>
 
@@ -508,9 +508,9 @@ jmu_name = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_s
 
                   <entry><literal>true</literal></entry>
 
-                  <entry>Enable this option to invoke the structural error
-                  diagnosis based on the matching algorithm. (Boolean
-                  option.)</entry>
+                  <entry>If this option is <literal>true</literal>, then
+                  structural error diagnosis is performed based on the
+                  matching algorithm. (Boolean option.)</entry>
                 </row>
 
                 <row>
@@ -518,9 +518,10 @@ jmu_name = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_s
 
                   <entry><literal>false</literal></entry>
 
-                  <entry>When this option is set to <literal>true</literal>
-                  (default is <literal>false</literal>), then compliance
-                  errors are treated as warnings instead. This can lead to the
+                  <entry>If this option is <literal>true</literal>, then
+                  compliance errors are treated as warnings instead. This is
+                  intended to allow use of language features, for witch
+                  support is still in development. This can lead to the
                   compiler or solver crashing. Use with caution! (Boolean
                   option.)</entry>
                 </row>
@@ -530,9 +531,10 @@ jmu_name = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_s
 
                   <entry><literal>false</literal></entry>
 
-                  <entry>When this option is set to true (default is false)
-                  model diagnostics is generated in HTML format. (Boolean
-                  option)</entry>
+                  <entry>If this option is <literal>true</literal>, then model
+                  diagnostics in HTML format are generated. This includes the
+                  flattened model, connection sets, alias sets and BLT form.
+                  (Boolean option.)</entry>
                 </row>
 
                 <row>
@@ -540,9 +542,8 @@ jmu_name = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_s
 
                   <entry><literal>false</literal></entry>
 
-                  <entry>If this option is set to true (default is false),
-                  code for solving ODEs are generated. (Boolean
-                  option)</entry>
+                  <entry>If this option is <literal>true</literal>, then code
+                  for solving ODEs is generated. (Boolean option.)</entry>
                 </row>
 
                 <row>
@@ -550,9 +551,9 @@ jmu_name = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_s
 
                   <entry><literal>true</literal></entry>
 
-                  <entry>If this option is set to true (default is true), free
+                  <entry>If this option is <literal>true</literal>, then free
                   dependent parameters are converted to algebraic variables.
-                  (Boolean option)</entry>
+                  (Boolean option.)</entry>
                 </row>
 
                 <row>
@@ -560,8 +561,8 @@ jmu_name = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_s
 
                   <entry><literal>true</literal></entry>
 
-                  <entry>If this option is set to true (default is true), code
-                  for solving DAEs are generated. (Boolean option)</entry>
+                  <entry>If this option is <literal>true</literal>, then code
+                  for solving DAEs is generated. (Boolean option.)</entry>
                 </row>
 
                 <row>
@@ -569,9 +570,31 @@ jmu_name = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_s
 
                   <entry><literal>false</literal></entry>
 
-                  <entry>If this option is set to true (default is false),
-                  code for computing DAE Jacobians are generated. (Boolean
-                  option)</entry>
+                  <entry>If this option is <literal>true</literal>, then code
+                  for computing DAE Jacobians is generated. (Boolean
+                  option.)</entry>
+                </row>
+
+                <row>
+                  <entry><literal>export_functions</literal></entry>
+
+                  <entry><literal>false</literal></entry>
+
+                  <entry>If this option is <literal>true</literal>, then used
+                  Modelica functions are exported to generated C code in a
+                  manner that is compatible with the external C interface (see
+                  Modelica Language Specification). (Boolean option.)</entry>
+                </row>
+
+                <row>
+                  <entry><literal>export_functions_vba</literal></entry>
+
+                  <entry><literal>false</literal></entry>
+
+                  <entry>If this option is <literal>true</literal>, then
+                  VBA-compatible wrappers for exported functions are created.
+                  Requires <literal>export_functions = true</literal>.
+                  (Boolean option.)</entry>
                 </row>
 
                 <row>
@@ -958,13 +981,13 @@ rlc_circuit.write_parameters_to_XML('test_values.xml')
       order to facilitate localization of errors. There are two mechanisms for
       generating such diagnostics: dumping of debug information to the system
       output or generation of HTML code that can be viewed with a standard web
-      browser. </para>
+      browser.</para>
 
       <para>By setting the argument <literal>compiler_log_level</literal> to
       <literal>'i'</literal>, diagnostics is printed to the standard output,
       normally the terminal window from which the compiler is invoked. The
       resulting diagnostics provides detailed information from each of the
-      transformation steps in the symbolic manipulation algorithms. </para>
+      transformation steps in the symbolic manipulation algorithms.</para>
 
       <para>By setting the compiler option
       <literal>generate_html_diagnostics</literal> to true, a number of HTML
@@ -976,7 +999,7 @@ rlc_circuit.write_parameters_to_XML('test_values.xml')
       contains only the most important information, but it also provides a
       better overview. Opening the file
       <literal>Model_Name_diagnostics/index.html</literal> in a web browser,
-      results in a page similar to the one shown below. </para>
+      results in a page similar to the one shown below.</para>
 
       <programlisting>Modelica.Mechanics.Rotational.Examples.First
 
