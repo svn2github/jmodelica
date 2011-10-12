@@ -5,6 +5,18 @@
 # Type "tests -h" for usage.
 # Requres Unix-like system with bash, grep, dc, mktemp, uname and sed.
 
+merge_path() {
+  if [ "$1" = "" ]; then
+    if [ "$3" = "" ]; then
+      echo $2
+    else
+      echo $3@SEP@$2
+    fi
+  else
+    echo $1@SEP@$2
+  fi
+}
+
 # ====== Variables to set ======
 
 # Memory allocation for the ant process
@@ -28,27 +40,20 @@ if [[ "${JAVA_HOME}" == "" ]]; then
   JAVA_HOME="@_JAVA_HOME_@"
 fi
 
-# Variables that are relative to others
-CPPAD_HOME="${JMODELICA_HOME}/ThirdParty/CppAD/"
-if [[ "${PYTHONPATH}" == "" ]]; then
-  PYTHONPATH="${JMODELICA_HOME}/Python/"
-else
-  PYTHONPATH="${PYTHONPATH}:${JMODELICA_HOME}/Python/"
-fi
-
 # ====== End variables to set ======
 
+CPPAD_HOME="${JMODELICA_HOME}/ThirdParty/CppAD/"
+PYTHONPATH="$(merge_path "${PYTHONPATH}" "${JMODELICA_HOME}/Python/")"
+
 # Update library path
+if [[ "${SUNDIALS_HOME}" != "" ]]; then
+  LIB_PATH="${SUNDIALS_HOME}/lib"
+fi
 if [[ "${IPOPT_HOME}" != "" ]]; then
-  LIB_PATH="${IPOPT_HOME}/lib"
-  if [[ "${SUNDIALS_HOME}" != "" ]]; then
-    LIB_PATH="${LIB_PATH}:${SUNDIALS_HOME}/lib"
-  fi
-  if [[ "${LD_LIBRARY_PATH}" == "" ]]; then
-    LD_LIBRARY_PATH="/lib:${LIB_PATH}"
-  else
-    LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${LIB_PATH}"
-  fi
+  LIB_PATH="$(merge_path "${LIB_PATH}" "${IPOPT_HOME}/lib")"
+fi
+if [[ "${LIB_PATH}" != "" ]]; then
+  LD_LIBRARY_PATH="$(merge_path "${LD_LIBRARY_PATH}" "${LIB_PATH}" /lib)"
 fi
 
 # Test sets
