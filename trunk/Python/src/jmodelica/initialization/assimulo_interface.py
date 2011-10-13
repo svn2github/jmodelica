@@ -449,20 +449,33 @@ class JMUAlgebraic(ProblemAlgebraic):
         """
         Method printing info on variable at position i
         """
-        dx_min = self._model._xmldoc.get_dx_min()
-        dx_max = self._model._xmldoc.get_dx_max()
-        dx_names = self._model.get_dx_variable_names()
         
-        x_min = self._model._xmldoc.get_x_min()
-        x_max = self._model._xmldoc.get_x_max()
-        x_names = self._model.get_x_variable_names()
+        dx_min = self._model._xmldoc.get_dx_min(include_alias=False)
+        dx_max = self._model._xmldoc.get_dx_max(include_alias=False)
+        dx_names = self._model.get_dx_variable_names(include_alias=False)
         
-        w_min = self._model._xmldoc.get_w_min()
-        w_max = self._model._xmldoc.get_w_max()
-        w_names = self._model.get_w_variable_names()
+        x_min = self._model._xmldoc.get_x_min(include_alias=False)
+        x_max = self._model._xmldoc.get_x_max(include_alias=False)
+        x_names = self._model.get_x_variable_names(include_alias=False)
         
-        if i < self._dx_size:
-            print "der(state): ",dx_names[i][1]
+        w_min = self._model._xmldoc.get_w_min(include_alias=False)
+        w_max = self._model._xmldoc.get_w_max(include_alias=False)
+        w_names = self._model.get_w_variable_names(include_alias=False)
+        
+        dx_min.sort()
+        dx_max.sort()
+        dx_names.sort()
+        
+        x_min.sort()
+        x_max.sort()
+        x_names.sort()
+        
+        w_min.sort()
+        w_max.sort()
+        w_names.sort()
+
+        if i < self._dx_size:			
+            print "der(state): ",dx_names[i][1]," = ", self._model.real_dx[i]
             if dx_min[i][1] != None:
                 print "with min: ", dx_min[i][1]
             if dx_max[i][1] != None:
@@ -474,7 +487,7 @@ class JMUAlgebraic(ProblemAlgebraic):
             else:
                 print "not constrained initially"
         elif i < self._mark:
-            print "state: ",x_names[i-self._dx_size][1]
+            print "state: ",x_names[i-self._dx_size][1]," = ", self._model.real_x[i - self._dx_size]
             if x_min[i-self._dx_size][1] != None:
                 print "with min: ", x_min[i-self._dx_size][1]
             if x_max[i-self._dx_size][1] != None:
@@ -486,7 +499,7 @@ class JMUAlgebraic(ProblemAlgebraic):
             else:
                 print "not constrained initially"
         else:
-            print "algebraic: ",w_names[i-self._mark][1]
+            print "algebraic variaable: ",w_names[i-self._mark][1]," = ", self._model.real_w[i-self._mark]
             if w_min[i-self._mark][1] != None:
                 print "with min: ", w_min[i-self._mark][1]
             if w_max[i-self._mark][1] != None:
