@@ -1,0 +1,12 @@
+#!/bin/sh
+
+if test "${JAVA_HOME}" = ""; then
+  export JAVA_HOME=@_JAVA_HOME_@
+fi
+JMODELICA_HOME=@prefix@ \
+IPOPT_HOME=@IPOPT_HOME@ \
+CPPAD_HOME=@CPPAD_HOME@ \
+SUNDIALS_HOME=@SUNDIALS_HOME@ \
+PYTHONPATH=:@prefix@/Python/:@CASADI_HOME@ \
+LD_LIBRARY_PATH=:@IPOPT_HOME@/lib/coin/:@IPOPT_HOME@/lib/coin/ThirdParty/:@SUNDIALS_HOME@/lib \
+ipython $@
