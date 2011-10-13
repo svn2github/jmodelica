@@ -65,7 +65,7 @@ aspect CADCodeGen {
 		inFunction() ? getFIdUse().toString_var_CAD(printer_C) : this.prettyPrint_C("");
 	
 	syn String FIdUseExp.adDerName() =
-		inFunction() ? getFIdUse().toString_der_CAD(printer_C) : variability().lessOrEqual(fParameter()) ? "AD_WRAP_LITERAL(0)" :  getSeedName() + "[jmi_get_index_from_value_ref(" + this.myFV().valueReference() + ")-jmi->offs_real_dx]";
+		inFunction() ? getFIdUse().toString_der_CAD(printer_C) : (variability().lessOrEqual(fParameter()) || !getFIdUse().myFV().isReal()) ? "AD_WRAP_LITERAL(0)" :  getSeedName() + "[jmi_get_index_from_value_ref(" + this.myFV().valueReference() + ")-jmi->offs_real_dx]";
 		
 	//functions.. modified and added
 	public void FIdUseExp.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
@@ -840,9 +840,13 @@ aspect CADCodeGen {
 	public void FAbstractEquation.genSolvedBlock_CAD(FVariable v, String indent, PrintStream str) {}
 
 	public void FEquation.genSolvedBlock_CAD(FVariable v, String indent, PrintStream str) {
-		solution(v.name()).prettyPrint_CAD(str,indent);
-		str.print(indent + v.name_C() + " = " + solution(v.name()).adVarName() + ";\n");
-		str.print(indent + "(*dz)[jmi_get_index_from_value_ref(" + v.valueReference() + ")-jmi->offs_real_dx] =" +  solution(v.name()).adDerName() + ";\n");
+		if(v.isReal()){
+			solution(v.name()).prettyPrint_CAD(str,indent);
+			str.print(indent + v.name_C() + " = " + solution(v.name()).adVarName() + ";\n");
+			str.print(indent + "(*dz)[jmi_get_index_from_value_ref(" + v.valueReference() + ")-jmi->offs_real_dx] =" +  solution(v.name()).adDerName() + ";\n");
+		}else{
+			this.genSolvedBlock_C(v, indent, str);
+		}
 	}
 	
 	public void TornEquationBlock.genBlockResidualFunction_CAD(int block_counter, boolean inInit, String indent, PrintStream str) {
