@@ -870,7 +870,6 @@ class RadauCollocator(CasadiCollocator):
                 z = []
                 t = self.ocp.tf
                 z += self.vars['p_opt']
-                z += self.vars[n_e][n_cp]['dx']
                 z += self.vars[n_e][n_cp]['x']
                 z += self.vars[n_e][n_cp]['u']
                 z += self.vars[n_e][n_cp]['w']
@@ -1796,12 +1795,27 @@ class Radau2Collocator(CasadiCollocator):
             h_i = self._collocation['h_i']
             coll_der = self._collocation['coll_der']
         
-        # Create cost functions
-        self.cost_mayer = 0
-        self.cost_lagrange = 0
+        # Calculate cost
         if self.parameter_estimation_data is None:
+            self.cost_mayer = 0
+            self.cost_lagrange = 0
+            
+            # Mayer cost
+            J = self.model.get_opt_J()
+            if J is not None:
+                z = self._get_z_elim_der(self.n_e, self.n_cp)
+                
+                # Use appropriate function evaluation based on graph
+                if self.graph == "MX" or self.graph == 'expanded_MX':
+                    [self.cost_mayer] = J.call([z])
+                elif self.graph == "SX":
+                    [self.cost_mayer] = J.eval([z])
+                else:
+                    raise ValueError("Unknown CasADi graph %s." %
+                                     self.graph)
+            
+            # Lagrange cost
             if self.eliminate_der_var:
-                J = self.ocp.mterm
                 L = self.ocp.lterm
                 sym_z = []
                 sym_z += list(self.model.p)
@@ -1810,34 +1824,6 @@ class Radau2Collocator(CasadiCollocator):
                 sym_z += list(self.model.w)
                 sym_z += [self.model.t]
                 
-                # Mayer cost
-                if len(self.ocp.mterm) > 0:
-                    raise NotImplementedError("Mayer type cost function " + \
-                                              "is currently not supported " + \
-                                              "in combination with " + \
-                                              "eliminate_der_var.")
-                    J = casadi.substitute(J[0], self.model.dx, coll_der)
-                    J_fcn = casadi.SXFunction([sym_z, x_i, der_vals_k, h_i],
-                                              [J])
-                    J_fcn.init()
-                    
-                    # Evaluated J_fcn depending on graph
-                    i = self.n_e
-                    k = self.n_cp
-                    z = self._get_z_elim_der(i, k)
-                    if self.graph == "MX" or self.graph == 'expanded_MX':
-                        [self.cost_mayer] = J_fcn.call(
-                                [z, x_list[i], der_vals[k],
-                                 self.horizon * self.h[i]])
-                    elif self.graph == "SX":
-                        [self.cost_mayer] = J_fcn.eval(
-                                [z, self.x_list[i], self.der_vals[k],
-                                 self.horizon * self.h[i]])
-                    else:
-                        raise ValueError("Unknown CasADi graph %s." %
-                                         self.graph)
-                
-                # Lagrange cost
                 if len(self.ocp.lterm) > 0:
                     L = casadi.substitute(L[0], self.model.dx, coll_der)
                     L_fcn = casadi.SXFunction([sym_z, x_i, der_vals_k, h_i],
@@ -1864,24 +1850,7 @@ class Radau2Collocator(CasadiCollocator):
                                              self.horizon * self.h[i]])[0] *
                                      self.pol.w[k])
             else:
-                # Get cost functions
-                J = self.model.get_opt_J()
                 L = self.model.get_opt_L()
-                
-                # Mayer cost
-                if J is not None:
-                    z = self._get_z(self.n_e, self.n_cp)
-                    
-                    # Use appropriate function evaluation based on graph
-                    if self.graph == "MX" or self.graph == 'expanded_MX':
-                        [self.cost_mayer] = J.call([z])
-                    elif self.graph == "SX":
-                        [self.cost_mayer] = J.eval([z])
-                    else:
-                        raise ValueError("Unknown CasADi graph %s." %
-                                         self.graph)
-                
-                # Lagrange cost
                 if L is not None:
                     # Define function evaluation method based on graph
                     if self.graph == "MX" or self.graph == 'expanded_MX':

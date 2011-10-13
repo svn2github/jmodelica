@@ -442,17 +442,13 @@ class TestRadau2:
         assert_results(res, cost_ref, u_norm_ref)
         
         # Mayer, eliminate derivative variables
-        # Currently does not work due to lack of support for Mayer
-        #~ opts["eliminate_der_var"] = True
-        #~ opts['init_traj'] = ResultDymolaTextual(
-                #~ "VDP_pack_VDP_Opt_bounds_Lagrange_result.txt")
-        #~ res = model_Mayer.optimize(self.algorithm, opts)
-        #~ assert_results(res, cost_ref, u_norm_ref)
-        
-        # Lagrange, eliminate derivative variables
         opts["eliminate_der_var"] = True
         opts['init_traj'] = ResultDymolaTextual(
                 "VDP_pack_VDP_Opt_bounds_Lagrange_result.txt")
+        res = model_Mayer.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        
+        # Lagrange, eliminate derivative variables
         res = model_Lagrange.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
     
