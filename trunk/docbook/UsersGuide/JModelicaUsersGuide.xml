@@ -46,6 +46,8 @@
 
   <xi:include href="Optimization.xml" xpointer="element(/1)" />
 
+  <xi:include href="GraphicalUserInterface.xml" xpointer="element(/1)" />
+
   <xi:include href="Optimica.xml" xpointer="element(/1)" />
 
   <xi:include href="AdvancedTopics.xml" xpointer="element(/1)" />
