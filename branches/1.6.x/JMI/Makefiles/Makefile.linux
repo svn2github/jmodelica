@@ -138,13 +138,13 @@ LIB_COMMON   = $(LIB_LAPACK) $(LIB_SUNDIALS)
 LIB_JMIC     = -L$(JMI_LIB_DIR) -ljmi -lmodelica_utilities
 LIB_JMIAD    = -L$(JMI_LIB_DIR) -ljmi_cppad
 LIB_EXTRA_AD = -ljmi_algorithm_cppad -ljmi_solver_cppad
-LIB_IPOPT    = -L$(IPOPT_HOME)/lib -lipopt -lm -lpthread
+LIB_IPOPT    = `PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig pkg-config --libs ipopt`
 # For different targets
 LIBS_CPPAD   = $(LIB_JMIAD) -lfmi    $(LIB_SUNDIALS)
 LIBS_NOCPPAD = $(LIB_JMIC)  -lfmi    $(LIB_COMMON)
 LIBS_FMUME   = $(LIB_JMIC)  -lfmi    $(LIB_COMMON)
 LIBS_FMUCS   = $(LIB_JMIC)  -lfmi_cs $(LIB_COMMON)
-LIBS_IPOPT   = $(LIB_JMIAD) -lfmi    $(LIB_EXTRA_AD) $(LIB_IPOPT) $(LIB_COMMON)
+LIBS_IPOPT   = $(LIB_JMIAD) -lfmi    $(LIB_EXTRA_AD) $(LIB_IPOPT) $(LIB_SUNDIALS)
 
 # Include paths for compilation
 INCL_CPPAD = -I$(JMI_INC_DIR) -I$(CPPAD_INC_DIR) -I$(SUNDIALS_INC_DIR)

@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <chapter version="5.0" xmlns="http://docbook.org/ns/docbook"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:xs="http://www.w3.org/2001/XMLSchema"
          xmlns:xlink="http://www.w3.org/1999/xlink"
          xmlns:xi="http://www.w3.org/2001/XInclude"
          xmlns:svg="http://www.w3.org/2000/svg"
@@ -13,8 +15,8 @@
 
     <para>JModelica.org can be installed on Linux, Mac OS X, and Windows (XP,
     Vista, 7) with 32-bit or 64-bit architectures. Most development work is
-    carried out on 32-bit Mac OS X , 32 and 64-bit Linux and 32-bit Windows
-    XP, so these platforms tend to be best tested.</para>
+    carried out on 32-bit Mac OS X , 32 and 64-bit Linux and 32 and 64-bit
+    Windows 7, so these platforms tend to be best tested.</para>
   </section>
 
   <section xml:id="inst_sec_prerequisites">
@@ -32,8 +34,9 @@
 
           <procedure>
             <step>
-              <para>Get a JRE installer suitable for your platform <link
-              xlink:href="http://www.java.com/en/download/index.jsp">here</link>.</para>
+              <para>Get a <link
+              xlink:href="http://www.java.com/en/download/index.jsp">JRE</link>
+              installer suitable for your platform.</para>
             </step>
 
             <step>
@@ -47,7 +50,7 @@
       <title>Python</title>
 
       <para><link xlink:href="http://www.python.org/download/releases/">Python
-      2.6</link> with the following additional packages are required:</para>
+      2.7</link> with the following additional packages are required:</para>
 
       <table>
         <title>Python prerequisites</title>
@@ -74,7 +77,7 @@
               <entry><link
               xlink:href="http://sourceforge.net/projects/numpy/files/">NumPy</link></entry>
 
-              <entry>1.3.0</entry>
+              <entry>1.6.1</entry>
 
               <entry>The fundamental package needed for scientific computing
               with Python.</entry>
@@ -84,7 +87,7 @@
               <entry><link
               xlink:href="http://sourceforge.net/projects/scipy/files/">SciPy</link></entry>
 
-              <entry>0.7.1</entry>
+              <entry>0.9.0</entry>
 
               <entry>A library of algorithms and mathematical tools for
               Python.</entry>
@@ -94,7 +97,7 @@
               <entry><link
               xlink:href="http://sourceforge.net/projects/matplotlib/files/">matplotlib</link></entry>
 
-              <entry>0.99.1.1</entry>
+              <entry>1.0.1</entry>
 
               <entry>A plotting library for Python, with a MATLAB like
               interface.</entry>
@@ -102,27 +105,49 @@
 
             <row>
               <entry><link
-              xlink:href="http://ipython.scipy.org/moin/Download">IPython</link></entry>
+              xlink:href="http://ipython.org/download.html">IPython</link></entry>
 
-              <entry>0.10</entry>
+              <entry>0.11</entry>
 
               <entry>An interactive shell for Python with additional shell
               syntax, code highlighting, tab completion, string completion,
               and rich history.</entry>
             </row>
-
-            <row>
-              <entry><link
-              xlink:href="https://launchpad.net/pyreadline/+download">PyReadline</link></entry>
-
-              <entry>1.5</entry>
-
-              <entry>Note: Windows only. A readline for Windows required by
-              IPython.</entry>
-            </row>
           </tbody>
         </tgroup>
       </table>
+
+      <para>Please note that IPython has extra dependencies on Windows and Mac
+      OS X :</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>Windows:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para><link
+              xlink:href="https://launchpad.net/pyreadline/+download">Pyreadline</link></para>
+            </listitem>
+
+            <listitem>
+              <para><link
+              xlink:href="http://pypi.python.org/pypi/setuptools">setuptools</link></para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+
+        <listitem>
+          <para>Mac OS X:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para><link
+              xlink:href="http://pypi.python.org/pypi/readline">readline</link></para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </itemizedlist>
 
       <para>The recommended version of a package is not always the same as the
       latest version available. It is the package version that JModelica.org
@@ -146,6 +171,64 @@
       installer sets up a pre-configured complete environment with convenient
       start menu shortcuts.</para>
 
+      <section xml:id="inst_subsec_bundles">
+        <title>Bundled tools, libraries and Python packages</title>
+
+        <para>The following tools, libraries and Python packages are bundled
+        with the binary distribution of JModelica.org.</para>
+
+        <itemizedlist>
+          <listitem>
+            <para><link xlink:href="http://www.mingw.org">MingGW</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            xlink:href="https://projects.coin-or.org/Ipopt">Ipopt</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            xlink:href="http://jpype.sourceforge.net">JPype</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            xlink:href="http://codespeak.net/lxml">lxml</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            xlink:href="http://readthedocs.org/docs/nose/en/latest/">nose</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            xlink:href="http://www.wxpython.org">wxPython</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            xlink:href="https://computation.llnl.gov/casc/sundials/main.html">SUNDIALS</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            xlink:href="http://www.cython.org/">Cython</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            xlink:href="http://crd.lbl.gov/~xiaoye/SuperLU/">SuperLU</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            xlink:href="http://sourceforge.net/apps/trac/casadi/">Casadi</link></para>
+          </listitem>
+        </itemizedlist>
+      </section>
+
       <section>
         <title>Installing JModelica.org with Windows installer</title>
 
@@ -161,11 +244,30 @@
           </step>
 
           <step>
-            <para>Run the installer and follow the wizard. Choose to install
-            the additional Python packages when prompted, unless they are
-            already installed on your computer.</para>
+            <para>Run the installer and follow the wizard.</para>
+
+            <itemizedlist>
+              <listitem>
+                <para>In the <emphasis>Choose Components</emphasis> window,
+                select which of the bundled Python packages that should be
+                installed. Make sure that any package not already installed on
+                your computer is checked.</para>
+              </listitem>
+            </itemizedlist>
           </step>
         </procedure>
+
+        <figure>
+          <title>Selecting Python packages in the <emphasis>Choose
+          components</emphasis> window.</title>
+
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" fileref="images/Setup_components.png"
+                         scalefit="1" width="50%"></imagedata>
+            </imageobject>
+          </mediaobject>
+        </figure>
       </section>
     </section>
 
@@ -212,8 +314,8 @@
 
         <procedure>
           <step>
-            <para>Get a JDK <link
-            xlink:href="http://java.sun.com/javase/downloads/">here</link>.</para>
+            <para>Get a <link
+            xlink:href="http://java.sun.com/javase/downloads/">JDK</link>.</para>
           </step>
 
           <step>
@@ -231,34 +333,16 @@
       JModelica.org SDK installation.</para>
 
       <section>
-        <title>Bundled tools</title>
+        <title>Bundled tools, libraries and Python packages</title>
 
-        <para>The following tools are bundled in the JModelica.org SDK.</para>
+        <para>All tools, libraries and Python packages included in the binary
+        distribution, see <xref linkend="inst_subsec_bundles" />, are also
+        included in the SDK. The SDK also includes a few extra tools:</para>
 
         <itemizedlist>
           <listitem>
             <para><link xlink:href="http://www.mingw.org">MinGW,
             MSYS</link></para>
-          </listitem>
-
-          <listitem>
-            <para><link
-            xlink:href="https://projects.coin-or.org/Ipopt">Ipopt</link></para>
-          </listitem>
-
-          <listitem>
-            <para><link
-            xlink:href="http://jpype.sourceforge.net">JPype</link></para>
-          </listitem>
-
-          <listitem>
-            <para><link
-            xlink:href="http://codespeak.net/lxml">lxml</link></para>
-          </listitem>
-
-          <listitem>
-            <para><link
-            xlink:href="http://somethingaboutorange.com/mrl/projects/nose/1.0.0/">nose</link></para>
           </listitem>
 
           <listitem>
@@ -270,26 +354,6 @@
             <para><link xlink:href="http://ant.apache.org">Apache
             Ant</link></para>
           </listitem>
-
-          <listitem>
-            <para><link
-            xlink:href="https://computation.llnl.gov/casc/sundials/main.html">SUNDIALS</link></para>
-          </listitem>
-
-          <listitem>
-            <para><link
-            xlink:href="http://www.cython.org/">Cython</link></para>
-          </listitem>
-
-          <listitem>
-            <para><link
-            xlink:href="http://www.docbook.org/">DocBook</link></para>
-          </listitem>
-
-          <listitem>
-            <para><link
-            xlink:href="http://crd.lbl.gov/~xiaoye/SuperLU/">SuperLU</link></para>
-          </listitem>
         </itemizedlist>
       </section>
 
@@ -298,9 +362,10 @@
 
         <para><orderedlist>
             <listitem>
-              <para>Download the JModelica.org SDK <link
-              xlink:href="http://www.jmodelica.org/sdk">here</link> and save
-              the executable file somewhere on your computer.</para>
+              <para>Download the <link
+              xlink:href="http://www.jmodelica.org/sdk">JModelica.org
+              SDK</link> and save the executable file somewhere on your
+              computer.</para>
             </listitem>
 
             <listitem>
@@ -322,16 +387,14 @@
                     <para>Configure the sources for build and installation
                     (this will create the subdirectories
                     <filename>build</filename> and
-                    <filename>install</filename>) with:<programlisting>cd /JModelica.org-SDK
-./configure.sh</programlisting></para>
+                    <filename>install</filename>) with:<programlisting>./configure.sh</programlisting></para>
                   </listitem>
 
                   <listitem>
                     <para>Compile the sources with <literal>make</literal>
                     from the <filename>build</filename>
                     folder:<programlisting>cd build
-make
-make install</programlisting></para>
+make &amp;&amp; make install</programlisting></para>
                   </listitem>
                 </orderedlist></para>
             </listitem>

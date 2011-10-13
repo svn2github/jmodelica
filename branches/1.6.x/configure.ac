@@ -36,30 +36,34 @@ AC_CANONICAL_HOST
 # dll:s.
 AC_SUBST(SHAREDEXT)
 AC_SUBST(SHARED_LDFLAGS)
+AC_SUBST(SEP)
+SEP=':'
 case $build in
   *-cygwin*)
 	echo "Cygwin detected"   
  	SHAREDEXT=".dll";
-    	SHARED_LDFLAGS=" -shared ";
-    	AC_LIBTOOL_WIN32_DLL
-    	AC_DEFINE([WIN32],[1],[Building on a win32 system (detected Cygwin).])
+	SHARED_LDFLAGS=" -shared ";
+	SEP=';'
+	AC_LIBTOOL_WIN32_DLL
+	AC_DEFINE([WIN32],[1],[Building on a win32 system (detected Cygwin).])
     ;;
   *-mingw*)
 	echo "MinGW detected"   
-    	SHAREDEXT=".dll";
-    	SHARED_LDFLAGS=" -shared ";
-    	AC_LIBTOOL_WIN32_DLL
-    	AC_DEFINE([WIN32],[1],[Building on a win32 system (detected MinGW).])    
+	SHAREDEXT=".dll";
+	SHARED_LDFLAGS=" -shared ";
+	SEP=';'
+	AC_LIBTOOL_WIN32_DLL
+	AC_DEFINE([WIN32],[1],[Building on a win32 system (detected MinGW).])    
     ;;
   *-apple*)
 	echo "Mac OS X detected"   
-    	SHAREDEXT=".dylib";
-    	SHARED_LDFLAGS=" -dynamiclib ";
+	SHAREDEXT=".dylib";
+	SHARED_LDFLAGS=" -dynamiclib ";
     ;;
   *)
 	echo "Linux detected"   
-    	APP_LIBS="-lipopt -llapack -lblas -lm -lgfortranbegin -lgfortran"
-    	SHAREDEXT=".so";
+	APP_LIBS="-lipopt -llapack -lblas -lm -lgfortranbegin -lgfortran"
+	SHAREDEXT=".so";
    	SHARED_LDFLAGS=" -shared ";
 	# The fPIC flag is used to make the code independent of position in the
 	# memory. This is needed on Linux x86_64 platforms.

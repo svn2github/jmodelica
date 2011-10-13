@@ -559,8 +559,7 @@ class CasadiModel(object):
         if len(self.ocp.mterm)>0:
 
             self.ocp_mterm_inputs = []
-            #self.ocp_mterm_inputs += list(self.p)
-            self.ocp_mterm_inputs += list(self.dx)
+            self.ocp_mterm_inputs += list(self.p)
             self.ocp_mterm_inputs += [x.atTime(self.ocp.tf,True) for x in self.ocp.x_]
             self.ocp_mterm_inputs += [x.atTime(self.ocp.tf,True) for x in self.ocp.u_]
             self.ocp_mterm_inputs += [x.atTime(self.ocp.tf,True) for x in self.ocp.z_]
