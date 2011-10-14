@@ -34,6 +34,9 @@ from jmodelica import xmlparser
 from jmodelica.core import BaseModel, unzip_unit, get_unit_name, get_temp_location
 from jmodelica.compiler import _get_compiler
 
+int = N.int32
+N.int = N.int32
+
 """Flags for evaluation of FMI Jacobians
 """
 """Evaluate Jacobian w.r.t. states."""
@@ -422,12 +425,12 @@ class FMUModel(BaseModel):
         int_start_values = []
         int_keys = []
         int_names = []
-        for int in ints:
-            start = int.get_fundamental_type().get_start()
+        for i in ints:
+            start = i.get_fundamental_type().get_start()
             if start != None:
-                int_start_values.append(int.get_fundamental_type().get_start())
-                int_keys.append(int.get_value_reference())
-                int_names.append(int.get_name())
+                int_start_values.append(i.get_fundamental_type().get_start())
+                int_keys.append(i.get_value_reference())
+                int_names.append(i.get_name())
 
         self._XMLStartIntegerValues = N.array(int_start_values,dtype=N.int32)
         self._XMLStartIntegerKeys   = N.array(int_keys,dtype=N.uint32)
@@ -437,13 +440,13 @@ class FMUModel(BaseModel):
         bool_start_values = []
         bool_keys = []
         bool_names = []
-        for bool in bools:
-            start = bool.get_fundamental_type().get_start()
+        for b in bools:
+            start = b.get_fundamental_type().get_start()
             if start != None:
                 bool_start_values.append(
-                    bool.get_fundamental_type().get_start())
-                bool_keys.append(bool.get_value_reference())
-                bool_names.append(bool.get_name())
+                    b.get_fundamental_type().get_start())
+                bool_keys.append(b.get_value_reference())
+                bool_names.append(b.get_name())
 
         self._XMLStartBooleanValues = N.array(bool_start_values)
         self._XMLStartBooleanKeys   = N.array(bool_keys,dtype=N.uint32)
@@ -453,12 +456,12 @@ class FMUModel(BaseModel):
         str_start_values = []
         str_keys = []
         str_names = []
-        for str in strs:
-            start = str.get_fundamental_type().get_start()
+        for s in strs:
+            start = s.get_fundamental_type().get_start()
             if start != '':
-                str_start_values.append(str.get_fundamental_type().get_start())
-                str_keys.append(str.get_value_reference())
-                str_names.append(str.get_name())
+                str_start_values.append(s.get_fundamental_type().get_start())
+                str_keys.append(s.get_value_reference())
+                str_names.append(s.get_name())
 
         self._XMLStartStringValues = N.array(str_start_values)
         self._XMLStartStringKeys   = N.array(str_keys,dtype=N.uint32)
@@ -505,19 +508,19 @@ class FMUModel(BaseModel):
         
         disc_name_i = []
         disc_valueref_i = []
-        for int in ints:
-            if int.get_variability() == xmlparser.DISCRETE and \
-                int.get_alias() == xmlparser.NO_ALIAS:
-                    disc_name_i.append(int.get_name())
-                    disc_valueref_i.append(int.get_value_reference())
+        for i in ints:
+            if i.get_variability() == xmlparser.DISCRETE and \
+                i.get_alias() == xmlparser.NO_ALIAS:
+                    disc_name_i.append(i.get_name())
+                    disc_valueref_i.append(i.get_value_reference())
                     
         disc_name_b = []
         disc_valueref_b =[]
-        for bool in bools:
-            if bool.get_variability() == xmlparser.DISCRETE and \
-                bool.get_alias() == xmlparser.NO_ALIAS:
-                    disc_name_b.append(bool.get_name())
-                    disc_valueref_b.append(bool.get_value_reference())
+        for b in bools:
+            if b.get_variability() == xmlparser.DISCRETE and \
+                b.get_alias() == xmlparser.NO_ALIAS:
+                    disc_name_b.append(b.get_name())
+                    disc_valueref_b.append(b.get_value_reference())
 
         self._save_cont_valueref = [
             N.array(cont_valueref+disc_valueref_r,dtype=N.uint), 
@@ -1222,8 +1225,7 @@ class FMUModel(BaseModel):
         """
         valueref = N.array(valueref, dtype=N.uint32)
         nref = len(valueref)
-#        values = N.array([0]*nref)
-        values = N.zeros(nref,dtype=N.int32)
+        values = N.array([0]*nref, dtype=int)
         
         status = self._fmiGetInteger(self._model, valueref, nref, values)
         
@@ -1252,7 +1254,7 @@ class FMUModel(BaseModel):
         """
         valueref = N.array(valueref, dtype=N.uint32)
         nref = valueref.size
-        values = N.array(values)
+        values = N.array(values, dtype=int)
         
         if valueref.size != values.size:
             raise FMUException(
@@ -1286,22 +1288,16 @@ class FMUModel(BaseModel):
         """
         valueref = N.array(valueref, dtype=N.uint32)
         nref = len(valueref)
-        values = N.array(['0']*nref)
+        values = N.array(['0']*nref, dtype=N.char.character)
         
         status = self._fmiGetBoolean(self._model, valueref, nref, values)
         
         if status != 0:
             raise FMUException('Failed to get the Boolean values.')
-        
+
         bol = []
-        for i in values:
-            if i == self._fmiTrue:
-                bol.append(True)
-            else:
-                bol.append(False)
-        
-        #if nref==1:
-        #    bol = bol[0]
+        # char to bol
+        bol = map(lambda x: x == self._fmiTrue, values)
         
         return bol
         
@@ -1325,13 +1321,16 @@ class FMUModel(BaseModel):
         """
         valueref = N.array(valueref, dtype=N.uint32)
         nref = valueref.size
-        values = N.array(values)
         
-        if valueref.size != values.size:
+        # bool to char
+        char_values = map(lambda x: self._fmiTrue if x else self._fmiFalse, values)
+        char_values = N.array(char_values, dtype=N.char.character)
+        
+        if valueref.size != char_values.size:
             raise FMUException(
                 'The length of valueref and values are inconsistent.')
         
-        status = self._fmiSetBoolean(self._model,valueref, nref, values)
+        status = self._fmiSetBoolean(self._model,valueref, nref, char_values)
         
         if status != 0:
             raise FMUException('Failed to set the Boolean values.')
