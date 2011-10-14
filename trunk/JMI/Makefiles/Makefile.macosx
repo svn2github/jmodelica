@@ -126,15 +126,23 @@ SUNDIALS_INC_DIR = $(SUNDIALS_HOME)/include
 
 # Directory with jmi_cppad.a
 JMI_LIB_DIR = ${JMODELICA_HOME}/lib
+SUNDIALS_LIB_DIR = $(SUNDIALS_HOME)/lib
 
 # Libraries necessary to link with jmi
-LIBS_CPPAD = -L$(JMI_LIB_DIR) -ljmi_cppad -lfmi -L$(SUNDIALS_HOME)/lib -lsundials_kinsol -lsundials_nvecserial
-LIBS_NOCPPAD = -L${JMI_LIB_DIR} -lgfortran -ljmi -lfmi -lmodelica_utilities $(JMI_LIB_DIR)/liblapack.a $(JMI_LIB_DIR)/libblas.a  $(SUNDIALS_HOME)/lib/libsundials_kinsol.a $(SUNDIALS_HOME)/lib/libsundials_nvecserial.a
-LIBS_FMUME = -L${JMI_LIB_DIR} -lgfortran -ljmi -lfmi -lmodelica_utilities $(JMI_LIB_DIR)/liblapack.a $(JMI_LIB_DIR)/libblas.a  $(SUNDIALS_HOME)/lib/libsundials_kinsol.a $(SUNDIALS_HOME)/lib/libsundials_nvecserial.a 
-LIBS_FMUCS = -L${JMI_LIB_DIR} -lgfortran -ljmi -lfmi_cs -lmodelica_utilities -lgfortran $(JMI_LIB_DIR)/liblapack.a $(JMI_LIB_DIR)/libblas.a  $(SUNDIALS_HOME)/lib/libsundials_kinsol.a $(SUNDIALS_HOME)/lib/libsundials_nvecserial.a
-LIBS_IPOPT = -L$(JMI_LIB_DIR) -ljmi_cppad -ljmi_algorithm_cppad -ljmi_solver_cppad -lfmi\
--L$(IPOPT_HOME)/lib/coin/ -L$(IPOPT_HOME)/lib/coin/ThirdParty/ -lipopt -lcoinhsl -llapack -lblas -lm -lgfortran -L$(SUNDIALS_HOME)/lib -lsundials_kinsol -lsundials_nvecserial
-#-L$(IPOPT_HOME)/lib/ -lipopt -llapack -lblas -lm -lgfortran -L$(SUNDIALS_HOME)/lib -lsundials_kinsol -lsundials_nvecserial
+# Reused parts
+LIB_SUNDIALS = -L$(SUNDIALS_LIB_DIR) $(SUNDIALS_HOME)/lib/libsundials_kinsol.a $(SUNDIALS_HOME)/lib/libsundials_nvecserial.a
+LIB_LAPACK   = -lmodelica_utilities $(JMI_LIB_DIR)/liblapack.a $(JMI_LIB_DIR)/libblas.a -lgfortran
+LIB_COMMON   = $(LIB_LAPACK) $(LIB_SUNDIALS)
+LIB_JMIC     = -L$(JMI_LIB_DIR) -ljmi -lmodelica_utilities
+LIB_JMIAD    = -L$(JMI_LIB_DIR) -ljmi_cppad
+LIB_EXTRA_AD = -ljmi_algorithm_cppad -ljmi_solver_cppad
+LIB_IPOPT    = `PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig pkg-config --libs ipopt`
+# For different targets
+LIBS_CPPAD   = $(LIB_JMIAD) -lfmi    $(LIB_SUNDIALS)
+LIBS_NOCPPAD = $(LIB_JMIC)  -lfmi    $(LIB_COMMON)
+LIBS_FMUME   = $(LIB_JMIC)  -lfmi    $(LIB_COMMON)
+LIBS_FMUCS   = $(LIB_JMIC)  -lfmi_cs $(LIB_COMMON)
+LIBS_IPOPT   = $(LIB_JMIAD) -lfmi    $(LIB_EXTRA_AD) $(LIB_IPOPT) $(LIB_SUNDIALS)
 
 # Include paths for compilation
 INCL_CPPAD = -I$(JMI_INC_DIR) -I$(CPPAD_INC_DIR) -I$(SUNDIALS_INC_DIR)
