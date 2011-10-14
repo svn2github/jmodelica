@@ -39,7 +39,8 @@
 
           <listitem>
             <para><emphasis role="bold">pylab</emphasis> - IPython shell which
-            also loads the package pylab.</para>
+            also loads the numeric computation environment <link
+            xlink:href="http://www.scipy.org/PyLab">PyLab</link>.</para>
           </listitem>
         </itemizedlist></para>
     </section>
@@ -47,8 +48,9 @@
     <section>
       <title>Linux or Mac OS</title>
 
-      <para>To start the IPython shell with the package pylab on Linux or Mac
-      OS X, open a terminal and enter the command:</para>
+      <para>To start the IPython shell with <link
+      xlink:href="PyLab">PyLab</link> on Linux or Mac OS X, open a terminal
+      and enter the command:</para>
 
       <programlisting language="python">&gt; $JMODELICA_HOME/Python/jm_ipython.sh -pylab
 </programlisting>
@@ -65,8 +67,8 @@
     located in the subdirectory <filename>files</filename>. The following code
     demonstrates how to run such an example. First a Python session must be
     started, see <xref linkend="gs_sec_starting_a_python_session" /> above.
-    The example scripts are preferably run in a IPython shell with pylab mode.
-    <programlisting># import the VDP example
+    The example scripts are preferably run in the pylab python
+    shell.<programlisting># import the VDP example
 from jmodelica.examples import vdp
 
 # run the example
@@ -96,26 +98,102 @@ Performing JModelica package check
 ==================================
 
 Platform...................... win32
-
-Python version:............... 2.6.5
-
-JModelica version:............ r2074
-
+Python version:............... 2.7.2
+JModelica version:............ 1.6b1
 
 Dependencies:
 
 Package                        Version
 -------                        -------
-numpy......................... 1.3.0                          Ok
-scipy......................... 0.7.1                          Ok
-matplotlib.................... 0.99.1                         Ok
-jpype......................... --                             Ok
-lxml.......................... 2.2.8                          Ok
-nose.......................... 0.11.3                         Ok
-assimulo...................... --                             Ok
-pyreadline.................... 1.5                            Ok
+numpy......................... 1.6.1                          Ok
+scipy......................... 0.9.0                          Ok
+matplotlib.................... 1.0.1                          Ok
+jpype......................... n/a                            Ok
+lxml.......................... 2.3.0                          Ok
+nose.......................... 1.1.2                          Ok
+assimulo...................... n/a                            Ok
+wxPython...................... 2.8.12.1                       Ok
+cython........................ n/a                            Ok
+casadi........................ n/a                            Ok
+pyreadline.................... 1.7                            Ok
+setuptools.................... 0.6c11                         Ok
 
 </programlisting></para>
+  </section>
+
+  <section>
+    <title>Redefining the JModelica.org environment</title>
+
+    <para>When importing <literal>jmodelica</literal> in Python the script
+    <filename>startup.py</filename> is run which sets the environment used by
+    JModelica.org for the current Python session. For example, the environment
+    variable <literal>JMODELICA_HOME</literal> points at the JModelica.org
+    installation directory and <literal>IPOPT_HOME</literal> points at the
+    Ipopt installation directory. One or more of these environment variables
+    set in <filename>startup.py</filename> can be overridden by a user defined
+    script: <filename>user_startup.py</filename>. </para>
+
+    <para>The script <filename>startup.py</filename> looks for
+    <filename>user_startup.py</filename> in the folder</para>
+
+    <itemizedlist>
+      <listitem>
+        <para><filename>$USERPROFILE/.jmodelica.org/</filename>
+        (Windows)</para>
+      </listitem>
+
+      <listitem>
+        <para><filename>$HOME/.jmodelica.org/</filename> (unix)</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>If the script <filename>user_startup.py</filename> is not found, the
+    default environment variables will be used.</para>
+
+    <section>
+      <title>Example redefining IPOPT_HOME</title>
+
+      <para>The following step-by-step procedure will redefine the
+      JModelica.org environment variable <literal>IPOPT_HOME</literal>:</para>
+
+      <orderedlist>
+        <listitem>
+          <para>Create a text file and name it
+          <filename>user_startup.py</filename>.</para>
+        </listitem>
+
+        <listitem>
+          <para>Place the file in
+          <filename>$USERPROFILE/.jmodelica.org/</filename> (Windows) or
+          <filename>$HOME/.jmodelica.org/</filename> (unix). To find out what
+          <literal>$USERPROFILE</literal> or <literal>$HOME</literal> points
+          to, open a Python shell and type:</para>
+
+          <programlisting>import os
+os.environ['USERPROFILE']   // windows
+os.environ['HOME']          // unix</programlisting>
+        </listitem>
+
+        <listitem>
+          <para>Open the file and type</para>
+
+          <programlisting>environ['IPOPT_HOME']='&lt;new path to Ipopt home&gt;'</programlisting>
+        </listitem>
+
+        <listitem>
+          <para>Save and close.</para>
+        </listitem>
+
+        <listitem>
+          <para>Check your changes by opening a Python shell, import
+          <literal>jmodelica</literal> and check the
+          <literal>IPOPT_HOME</literal> environment variable:</para>
+
+          <programlisting>import jmodelica
+jmodelica.environ['IPOPT_HOME']</programlisting>
+        </listitem>
+      </orderedlist>
+    </section>
   </section>
 
   <section>
