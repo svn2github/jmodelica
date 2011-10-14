@@ -4138,7 +4138,7 @@ case $build in
 	echo "Cygwin detected"
  	SHAREDEXT=".dll";
 	SHARED_LDFLAGS=" -shared ";
-	SEP=';'
+	SEP='\;'
 	enable_win32_dll=yes
 
 case $host in
@@ -4450,7 +4450,7 @@ $as_echo "#define WIN32 1" >>confdefs.h
 	echo "MinGW detected"
 	SHAREDEXT=".dll";
 	SHARED_LDFLAGS=" -shared ";
-	SEP=';'
+	SEP='\;'
 	enable_win32_dll=yes
 
 case $host in
