@@ -646,80 +646,117 @@ class FMUModel(BaseModel):
             self._modelname+'_fmiSetContinuousStates')
         self._fmiSetContinuousStates.restype = self._fmiStatus
         self._fmiSetContinuousStates.argtypes = [self._fmiComponent, 
-            Nct.ndpointer() ,C.c_size_t]
+            Nct.ndpointer(dtype=C.c_double,
+                           ndim=1,
+                           flags='C') ,C.c_size_t]
         self._fmiGetContinuousStates = self._dll.__getattr__(
             self._modelname+'_fmiGetContinuousStates')
         self._fmiGetContinuousStates.restype = self._fmiStatus
         self._fmiGetContinuousStates.argtypes = [self._fmiComponent, 
-            Nct.ndpointer() ,C.c_size_t]
+            Nct.ndpointer(dtype=C.c_double,
+                           ndim=1,
+                           flags='C') ,C.c_size_t]
         
         self._fmiGetReal = self._dll.__getattr__(self._modelname+'_fmiGetReal')
         self._fmiGetReal.restype = self._fmiStatus
-        self._fmiGetReal.argtypes = [self._fmiComponent, Nct.ndpointer(),
-            C.c_size_t, Nct.ndpointer()]
+        self._fmiGetReal.argtypes = [self._fmiComponent, Nct.ndpointer(dtype=C.c_uint32,
+                           ndim=1,
+                           flags='C'),
+            C.c_size_t, Nct.ndpointer(dtype=C.c_double,
+                           ndim=1,
+                           flags='C')]
         self._fmiGetInteger = self._dll.__getattr__(
             self._modelname+'_fmiGetInteger')
         self._fmiGetInteger.restype = self._fmiStatus
-        self._fmiGetInteger.argtypes = [self._fmiComponent, Nct.ndpointer(),
-            C.c_size_t, Nct.ndpointer(dtype=C.c_int,
+        self._fmiGetInteger.argtypes = [self._fmiComponent, Nct.ndpointer(dtype=C.c_uint32,
+                           ndim=1,
+                           flags='C'),
+            C.c_size_t, Nct.ndpointer(dtype=C.c_int32,
                                             ndim=1,
                                             flags='C')]
         self._fmiGetBoolean = self._dll.__getattr__(
             self._modelname+'_fmiGetBoolean')
         self._fmiGetBoolean.restype = self._fmiStatus
-        self._fmiGetBoolean.argtypes = [self._fmiComponent, Nct.ndpointer(), 
-            C.c_size_t, Nct.ndpointer()]
+        self._fmiGetBoolean.argtypes = [self._fmiComponent, Nct.ndpointer(dtype=C.c_uint32,
+                           ndim=1,
+                           flags='C'), 
+            C.c_size_t, Nct.ndpointer(dtype=C.c_char,
+                           ndim=1,
+                           flags='C')]
         self._fmiGetString = self._dll.__getattr__(
             self._modelname+'_fmiGetString')
         self._fmiGetString.restype = self._fmiStatus
-        #self._fmiGetString.argtypes = [self._fmiComponent, Nct.ndpointer(),C.c_size_t, Nct.ndpointer()]
-        self._fmiGetString.argtypes = [self._fmiComponent, Nct.ndpointer(), 
+        self._fmiGetString.argtypes = [self._fmiComponent, Nct.ndpointer(dtype=C.c_uint32,
+                           ndim=1,
+                           flags='C'), 
             C.c_size_t, self._PfmiString]
 
         
         self._fmiSetReal = self._dll.__getattr__(self._modelname+'_fmiSetReal')
         self._fmiSetReal.restype = self._fmiStatus
-        self._fmiSetReal.argtypes = [self._fmiComponent, Nct.ndpointer(), 
-            C.c_size_t,Nct.ndpointer()]
+        self._fmiSetReal.argtypes = [self._fmiComponent, Nct.ndpointer(dtype=C.c_uint32,
+                           ndim=1,
+                           flags='C'), 
+            C.c_size_t,Nct.ndpointer(dtype=C.c_double,
+                           ndim=1,
+                           flags='C')]
         self._fmiSetInteger = self._dll.__getattr__(
             self._modelname+'_fmiSetInteger')
         self._fmiSetInteger.restype = self._fmiStatus
-        self._fmiSetInteger.argtypes = [self._fmiComponent, Nct.ndpointer(), 
-            C.c_size_t,Nct.ndpointer()]
+        self._fmiSetInteger.argtypes = [self._fmiComponent, Nct.ndpointer(dtype=C.c_uint32,
+                           ndim=1,
+                           flags='C'), 
+            C.c_size_t,Nct.ndpointer(dtype=C.c_int32,
+                           ndim=1,
+                           flags='C')]
         self._fmiSetBoolean = self._dll.__getattr__(
             self._modelname+'_fmiSetBoolean')
         self._fmiSetBoolean.restype = self._fmiStatus
-        self._fmiSetBoolean.argtypes = [self._fmiComponent, Nct.ndpointer(), 
-            C.c_size_t,Nct.ndpointer()]
+        self._fmiSetBoolean.argtypes = [self._fmiComponent, Nct.ndpointer(dtype=C.c_uint32,
+                           ndim=1,
+                           flags='C'), 
+            C.c_size_t,Nct.ndpointer(dtype=C.c_char,
+                           ndim=1,
+                           flags='C')]
         self._fmiSetString = self._dll.__getattr__(
             self._modelname+'_fmiSetString')
         self._fmiSetString.restype = self._fmiStatus
-        self._fmiSetString.argtypes = [self._fmiComponent, Nct.ndpointer(), 
+        self._fmiSetString.argtypes = [self._fmiComponent, Nct.ndpointer(dtype=C.c_uint32,
+                           ndim=1,
+                           flags='C'), 
             C.c_size_t,self._PfmiString]
         
         self._fmiGetDerivatives = self._dll.__getattr__(
             self._modelname+'_fmiGetDerivatives')
         self._fmiGetDerivatives.restype = self._fmiStatus
-        self._fmiGetDerivatives.argtypes = [self._fmiComponent, Nct.ndpointer(),
+        self._fmiGetDerivatives.argtypes = [self._fmiComponent, Nct.ndpointer(dtype=C.c_double,
+                           ndim=1,
+                           flags='C'),
             C.c_size_t]
         
         self._fmiGetEventIndicators = self._dll.__getattr__(
             self._modelname+'_fmiGetEventIndicators')
         self._fmiGetEventIndicators.restype = self._fmiStatus
         self._fmiGetEventIndicators.argtypes = [self._fmiComponent, 
-            Nct.ndpointer(), C.c_size_t]
+            Nct.ndpointer(dtype=C.c_double,
+                           ndim=1,
+                           flags='C'), C.c_size_t]
         
         self._fmiGetNominalContinuousStates = self._dll.__getattr__(
             self._modelname+'_fmiGetNominalContinuousStates')
         self._fmiGetNominalContinuousStates.restype = self._fmiStatus
         self._fmiGetNominalContinuousStates.argtypes = [self._fmiComponent, 
-            Nct.ndpointer(), C.c_size_t]
+            Nct.ndpointer(dtype=C.c_double,
+                           ndim=1,
+                           flags='C'), C.c_size_t]
         
         self._fmiGetStateValueReferences = self._dll.__getattr__(
             self._modelname+'_fmiGetStateValueReferences')
         self._fmiGetStateValueReferences.restype = self._fmiStatus
         self._fmiGetStateValueReferences.argtypes = [self._fmiComponent, 
-            Nct.ndpointer(), C.c_size_t]
+            Nct.ndpointer(dtype=C.c_uint32,
+                           ndim=1,
+                           flags='C'), C.c_size_t]
 
         # Experimental Jacobian interface
         try:
@@ -769,7 +806,7 @@ class FMUModel(BaseModel):
     """)
     
     def _get_continuous_states(self):
-        values = N.array([0.0]*self._nContinuousStates, dtype=N.double)
+        values = N.array([0.0]*self._nContinuousStates, dtype=N.double,ndmin=1)
         status = self._fmiGetContinuousStates(
             self._model, values, self._nContinuousStates)
         
@@ -779,7 +816,8 @@ class FMUModel(BaseModel):
         return values
         
     def _set_continuous_states(self, values):
-        values = N.array(values)
+        values = N.array(values,dtype=N.double,ndmin=1).flatten()
+        
         if values.size != self._nContinuousStates:
             raise FMUException(
                 'Failed to set the new continuous states. ' \
@@ -800,7 +838,8 @@ class FMUModel(BaseModel):
     """)
     
     def _get_nominal_continuous_states(self):
-        values = N.array([0.0]*self._nContinuousStates,dtype=N.double)
+        values = N.array([0.0]*self._nContinuousStates,dtype=N.double,ndmin=1)
+
         status = self._fmiGetNominalContinuousStates(
             self._model, values, self._nContinuousStates)
         
@@ -830,7 +869,8 @@ class FMUModel(BaseModel):
                 
         Calls the low-level FMI function: fmiGetDerivatives
         """
-        values = N.array([0.0]*self._nContinuousStates,dtype=N.double)
+        values = N.array([0.0]*self._nContinuousStates,dtype=N.double,ndmin=1)
+
         status = self._fmiGetDerivatives(
             self._model, values, self._nContinuousStates)
         
@@ -854,7 +894,7 @@ class FMUModel(BaseModel):
                 
         Calls the low-level FMI function: fmiGetEventIndicators
         """
-        values = N.array([0.0]*self._nEventIndicators,dtype=N.double)
+        values = N.array([0.0]*self._nEventIndicators,dtype=N.double,ndmin=1)
         status = self._fmiGetEventIndicators(
             self._model, values, self._nEventIndicators)
         
@@ -1002,7 +1042,7 @@ class FMUModel(BaseModel):
             
         Calls the low-level FMI function: fmiGetStateValueReferences
         """
-        values = N.array([0]*self._nContinuousStates,dtype=N.uint32)
+        values = N.array([0]*self._nContinuousStates,dtype=N.uint32,ndmin=1)
         status = self._fmiGetStateValueReferences(
             self._model, values, self._nContinuousStates)
         
@@ -1161,9 +1201,10 @@ class FMUModel(BaseModel):
                 
         Calls the low-level FMI function: fmiGetReal/fmiSetReal
         """
-        valueref = N.array(valueref, dtype=N.uint32)
+        valueref = N.array(valueref, dtype=N.uint32,ndmin=1).flatten()
+
         nref = len(valueref)
-        values = N.array([0.0]*nref)
+        values = N.array([0.0]*nref,dtype=N.float, ndmin=1)
         
         status = self._fmiGetReal(self._model, valueref, nref, values)
         
@@ -1190,9 +1231,10 @@ class FMUModel(BaseModel):
         
         Calls the low-level FMI function: fmiGetReal/fmiSetReal
         """
-        valueref = N.array(valueref, dtype=N.uint32)
+        valueref = N.array(valueref, dtype=N.uint32,ndmin=1).flatten()
+
         nref = valueref.size
-        values = N.array(values)
+        values = N.array(values, dtype=N.float, ndmin=1).flatten()
 
         if valueref.size != values.size:
             raise FMUException(
@@ -1223,9 +1265,10 @@ class FMUModel(BaseModel):
                 
         Calls the low-level FMI function: fmiGetInteger/fmiSetInteger
         """
-        valueref = N.array(valueref, dtype=N.uint32)
+        valueref = N.array(valueref, dtype=N.uint32,ndmin=1).flatten()
+
         nref = len(valueref)
-        values = N.array([0]*nref, dtype=int)
+        values = N.array([0]*nref, dtype=int,ndmin=1)
         
         status = self._fmiGetInteger(self._model, valueref, nref, values)
         
@@ -1252,9 +1295,10 @@ class FMUModel(BaseModel):
         
         Calls the low-level FMI function: fmiGetInteger/fmiSetInteger
         """
-        valueref = N.array(valueref, dtype=N.uint32)
+        valueref = N.array(valueref, dtype=N.uint32,ndmin=1).flatten()
+
         nref = valueref.size
-        values = N.array(values, dtype=int)
+        values = N.array(values, dtype=int,ndmin=1).flatten()
         
         if valueref.size != values.size:
             raise FMUException(
@@ -1286,18 +1330,21 @@ class FMUModel(BaseModel):
                 
         Calls the low-level FMI function: fmiGetBoolean/fmiSetBoolean
         """
-        valueref = N.array(valueref, dtype=N.uint32)
+        valueref = N.array(valueref, dtype=N.uint32,ndmin=1).flatten()
+
         nref = len(valueref)
-        values = N.array(['0']*nref, dtype=N.char.character)
+        values = N.array(['0']*nref, dtype=N.char.character,ndmin=1)
         
         status = self._fmiGetBoolean(self._model, valueref, nref, values)
         
         if status != 0:
             raise FMUException('Failed to get the Boolean values.')
 
-        bol = []
+        #bol = []
         # char to bol
-        bol = map(lambda x: x == self._fmiTrue, values)
+        #bol = map(lambda x: x == self._fmiTrue, values)
+        
+        bol = N.array([x==self._fmiTrue for x in values])
         
         return bol
         
@@ -1319,12 +1366,12 @@ class FMUModel(BaseModel):
         
         Calls the low-level FMI function: fmiGetBoolean/fmiSetBoolean
         """
-        valueref = N.array(valueref, dtype=N.uint32)
+        valueref = N.array(valueref, dtype=N.uint32,ndmin=1).flatten()
         nref = valueref.size
         
         # bool to char
         char_values = map(lambda x: self._fmiTrue if x else self._fmiFalse, values)
-        char_values = N.array(char_values, dtype=N.char.character)
+        char_values = N.array(char_values, dtype=N.char.character,ndmin=1).flatten()
         
         if valueref.size != char_values.size:
             raise FMUException(
@@ -1355,7 +1402,8 @@ class FMUModel(BaseModel):
                 
         Calls the low-level FMI function: fmiGetString/fmiSetString
         """
-        valueref = N.array(valueref, dtype=N.uint32)
+        valueref = N.array(valueref, dtype=N.uint32,ndmin=1).flatten()
+
         nref = len(valueref)
         values = N.ndarray([])
         
@@ -1364,7 +1412,7 @@ class FMUModel(BaseModel):
         status = self._fmiGetString(self._model, valueref, nref, temp)
 
         if status != 0:
-            raise FMUException('Failed to set the String values.')
+            raise FMUException('Failed to get the String values.')
         
         return N.array(temp)[:]
     
@@ -1386,9 +1434,10 @@ class FMUModel(BaseModel):
         
         Calls the low-level FMI function: fmiGetString/fmiSetString
         """
-        valueref = N.array(valueref, dtype=N.uint32)
+        valueref = N.array(valueref, dtype=N.uint32,ndmin=1).flatten()
+
         nref = valueref.size
-        values = N.array(values)
+        values = N.array(values).flatten()
         
         temp = (self._fmiString*nref)()
         for i in range(nref):

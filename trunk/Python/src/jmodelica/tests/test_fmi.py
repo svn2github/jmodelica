@@ -83,7 +83,7 @@ class Test_FMI:
         """
         Sets up the test class.
         """
-        pass
+        depPar1 = compile_fmu("DepParTests.DepPar1",os.path.join(path_to_mofiles,"DepParTests.mo"))
         
     def setUp(self):
         """
@@ -93,6 +93,8 @@ class Test_FMI:
         self._dq = FMUModel('dq.fmu',path_to_fmus)
         self._bounce.initialize()
         self._dq.initialize()
+        self.dep = FMUModel("DepParTests_DepPar1.fmu")
+        self.dep.initialize()
     
     @testattr(fmi = True)
     def test_init(self):
@@ -114,8 +116,21 @@ class Test_FMI:
         """
         This tests the functionality of setting/getting fmiBoolean.
         """
-        #Cannot be tested with the current models.
-        pass 
+        
+        val = self.dep.get(["b1","b2"])
+        
+        assert val[0]
+        assert not val[1]
+        
+        assert self.dep.get("b1")
+        assert not self.dep.get("b2")
+        
+        self.dep.set("b1", False)
+        assert not self.dep.get("b1")
+        
+        self.dep.set(["b1","b2"],[True,True])
+        assert self.dep.get("b1")
+        assert self.dep.get("b2")
 
     @testattr(fmi = True)
     def test_real(self):
@@ -132,13 +147,32 @@ class Test_FMI:
         nose.tools.assert_almost_equal(const[0],-9.81000000)
         nose.tools.assert_almost_equal(const[1],0.70000000)
     
+        self.dep.set("r[1]",1)
+        nose.tools.assert_almost_equal(self.dep.get("r[1]"),1.00000)
+    
     @testattr(fmi = True)
     def test_integer(self):
         """
         This tests the functionality of setting/getting fmiInteger.
         """
-        #Cannot be tested with the current models.
-        pass 
+
+        val = self.dep.get(["N1","N2"])
+        
+        assert val[0] == 1
+        assert val[1] == 1
+        
+        assert self.dep.get("N1") == 1
+        assert self.dep.get("N2") == 1
+        
+        self.dep.set("N1", 2)
+        assert self.dep.get("N1") == 2
+        
+        self.dep.set(["N1","N2"],[3,2])
+        assert self.dep.get("N1") == 3
+        assert self.dep.get("N2") == 2
+        
+        self.dep.set("N1", 4.0)
+        assert self.dep.get("N1")==4
         
     @testattr(fmi = True)    
     def test_string(self):
