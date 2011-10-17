@@ -49,7 +49,7 @@ FMI_DERIVATIVES = 1
 FMI_OUTPUTS = 2
 
 def compile_fmu(class_name, file_name=[], compiler='modelica', 
-    target='model_noad', compiler_options={}, compile_to='.', 
+    target='model_fmume', compiler_options={}, compile_to='.', 
     compiler_log_level='warning'):
     """ 
     Compile a Modelica model to an FMU.
@@ -73,9 +73,9 @@ def compile_fmu(class_name, file_name=[], compiler='modelica',
     Other options for the compiler should also be listed in the compiler_options 
     dict.
     
-    The compiler target is 'model_noad' by default which means that libraries 
-    for AD and optimization/initialization algortihms will not be available. This 
-    is currently the only target that is possible to use.
+    The compiler target is 'model_fmume' by default which means that the shared 
+    file contains the FMI for Model Exchange API. This is currently the only 
+    target that is possible to use.
     
     Parameters::
     
@@ -94,8 +94,7 @@ def compile_fmu(class_name, file_name=[], compiler='modelica',
             
         target --
             Compiler target.
-            Note: Needs to be 'model_noad' at the moment.
-            Default: 'model_noad'
+            Default: 'model_fmume'
             
         compiler_options --
             Options for the compiler.
@@ -240,6 +239,26 @@ def get_fmux_name(class_name):
 
 
 def unzip_fmu(archive, path='.',  random_name=True):
+    """
+    Unzip an FMU.
+    
+    Looks for a model description XML file and a binary file and returns the 
+    result in a dict with the key words: 'model_desc' and 'binary' resp. Any 
+    file not found will result in an exception being raised.
+    
+    Parameters::
+        
+        archive --
+            The archive file name.
+            
+        path --
+            The path to the archive file.
+            Default: Current directory.
+            
+    Raises::
+    
+        IOError if any file is missing in the FMU.
+    """
     fmu_files = unzip_unit(archive, path, random_name)
     
     # check if all files have been found during unzip
@@ -253,6 +272,26 @@ def unzip_fmu(archive, path='.',  random_name=True):
 
 
 def unzip_fmux(archive, path='.'):
+    """
+    Unzip an FMUX.
+    
+    Looks for a model description XML file and returns the result in a dict with 
+    the key words: 'model_desc'. If the file is not found an exception will be 
+    raised.
+    
+    Parameters::
+        
+        archive --
+            The archive file name.
+            
+        path --
+            The path to the archive file.
+            Default: Current directory.
+            
+    Raises::
+    
+        IOError the model description XML file is missing in the FMU.
+    """
     fmux_files = unzip_unit(archive, path)
     
     # check if all files have been found during unzip
