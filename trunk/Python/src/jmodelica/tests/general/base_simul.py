@@ -250,7 +250,8 @@ class SimulationTest(_BaseSimOptTest):
         _BaseSimOptTest.setup_class_base(mo_file, class_name, options, format)
 
     def setup_base(self, rel_tol = 1.0e-4, abs_tol = 1.0e-6, 
-        start_time=0.0, final_time=10.0, time_step=0.01, input=()):
+        start_time=0.0, final_time=10.0, time_step=0.01, input=(),
+                   write_scaled_result=False):
         """ 
         Set up a new test case. Creates and configures the simulation.
         Call this with proper args from setUp(). 
@@ -265,6 +266,7 @@ class SimulationTest(_BaseSimOptTest):
         self.time_step = time_step
         self.ncp = int((final_time-start_time)/time_step)
         self.input = input
+        self.write_scaled_result = write_scaled_result
         
     def _run_and_write_data(self):
         """
@@ -275,6 +277,7 @@ class SimulationTest(_BaseSimOptTest):
                                 final_time=self.final_time,
                                 input = self.input,
                                 options={'ncp':self.ncp,
+                                         'write_scaled_result':self.write_scaled_result,
                                         'IDA_options':{'atol':self.abs_tol,'rtol':self.rel_tol}})
         elif self.format=='fmu':
             self.model.simulate(start_time=self.start_time,
