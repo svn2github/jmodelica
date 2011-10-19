@@ -3010,7 +3010,7 @@ print "a4: " + str(sens_res['a4']) + ", standard deviation: " + str(sigma_a4)
   </section>
 
   <section>
-    <title>Optimization using IPOPT and CasADi</title>
+    <title>Optimization using Pseduo-Spectral methods.</title>
 
     <para>New collocation algorithms have been implemented using the automatic
     differentiation tool CasADi connected to IPOPT. The collocation algorithms
@@ -3023,17 +3023,18 @@ print "a4: " + str(sens_res['a4']) + ", standard deviation: " + str(sigma_a4)
     the class <literal>PseudoSpectral</literal>.</para>
 
     <para>The implementation resides in the module
-    <literal>casadi_interface</literal> and contains a model class,
-    <literal>CasadiModel</literal> together with a compile method,
-    <literal>compile_casadi</literal>. Usage of the methods is consistent with
-    the work flow for optimization of <literal>JMUModels</literal>. Shown
-    below is a Python code example describing how to invoke the optimization
-    method.</para>
+    <literal>casadi_interface</literal> and contains a model class
+    <literal>CasadiModel</literal>. A compiler method for creating models
+    compliant with <literal>CasadiModel</literal> resides in
+    <literal>jmodelica.fmi</literal>, <literal>compile_fmux</literal>.. Usage
+    of the methods is consistent with the work flow for optimization of
+    <literal>JMUModels</literal>. Shown below is a Python code example
+    describing how to invoke the optimization method.</para>
 
-    <programlisting>from jmodelica.casadi_interface import compile_casadi
+    <programlisting language="python">from jmodelica.fmi import compile_fmux
 from jmodelica.casadi_interface import CasadiModel
 
-casadi_name = compile_casadi("MyModel", "MyModels.mop")
+casadi_name = compile_fmux("MyModel", "MyModels.mop")
 model = CasadiModel(casadi_name)
 
 res = model.optimize(algorithm="CasadiPseudoSpectral")
@@ -3066,14 +3067,14 @@ res = model.optimize(algorithm="CasadiPseudoSpectral")
       a <literal>CasadiModel</literal> instance. It is also shown how to use
       the interactive help.</para>
 
-      <programlisting>opts = model.optimize_options(algorithm="CasadiPseudoSpectral")
+      <programlisting language="python">opts = model.optimize_options(algorithm="CasadiPseudoSpectral")
 
 opts? #View the help text</programlisting>
 
       <para>To provide the options to the optimize call, use the options
       attribute.</para>
 
-      <programlisting>res = model.optimize(algorithm="CasadiPseudoSpectral", options=opts)</programlisting>
+      <programlisting language="python">res = model.optimize(algorithm="CasadiPseudoSpectral", options=opts)</programlisting>
 
       <para>In Table <xref linkend="opt-tab-pseudo" /> the options for the
       PseudoSpectral methods are shown.<table xml:id="opt-tab-pseudo">
@@ -3279,10 +3280,10 @@ opts["free_phases"] = True #The phase boundary is allowed to be changed.
         we change the number of collocation points from the default 20 to 40
         via the options dictionary.</para>
 
-        <programlisting>from jmodelica.casadi_interface import compile_casadi
+        <programlisting language="python">from jmodelica.fmi import compile_fmux
 from jmodelica.casadi_interface import CasadiModel
 
-casadi_name = compile_casadi("VDP_Opt", "VDP.mop")
+casadi_name = compile_fmux("VDP_Opt", "VDP.mop")
 model = CasadiModel(casadi_name)
 
 #Get the options dictionary
@@ -3304,6 +3305,240 @@ res = model.optimize(algorithm="CasadiPseudoSpectral", options=opts)
           <mediaobject>
             <imageobject>
               <imagedata fileref="images/vdp_casadi.svg" scale="70"></imagedata>
+            </imageobject>
+          </mediaobject>
+        </figure>
+      </section>
+
+      <section>
+        <title>Hohmann Transfer</title>
+
+        <para>This example will show how to use the pseudo-spectral method for
+        solving a problem of altitude change of a satellite orbiting earth.
+        The problem have a well known solution called a Hohmann Transfer from
+        the German scientist Walter Hohmann. The solution consists of two
+        rocket burns, one for leaving the current orbit and one when the final
+        orbit have been reached, both perpendicular to the radial component in
+        a rotation coordinating system. The magnitude of the rocket burns can
+        also be calculated theoretically.</para>
+
+        <para>We will solve this problem using the gauss pseudo-spectral
+        method with two phases. The phases will be connected in such a way
+        that the velocities are allowed to be discontinuous, see <xref
+        linkend="opt-fig-disc" /> . The magnitude of the discontinuity will
+        correspond to the first rocket burn. The second rocket burn are
+        connected as constraints at the final time.</para>
+
+        <para>We start by setting up our model of a planar two-body system
+        where the bodies are the earth and the satellite. We also scale the
+        problem with the orbital time and the radius of the earth.</para>
+
+        <programlisting>model Orbital
+  //"State variables"
+  Real x(fixed=true,start=x0);
+  Real y(fixed=true,start=y0);
+  Real vx(fixed=true,start=vx0);
+  Real vy(fixed=true,start=vy0);
+  
+  //"Initial values"
+  parameter Real x0=rStart;
+  parameter Real y0=0;
+  parameter Real vx0=0;
+  parameter Real vy0=vStart;
+  
+  //"Constants"
+  constant Real G=6.67384e-11 "Gravitational Constant";
+  constant Real M=5.9742e24 "Earth Mass";
+  constant Real R=6.371e6 "Earth Radii";
+  
+  //"Parameters"
+  parameter Real my=G*M/R^3*T^2;
+  parameter Real T=5400; //Orbital time of rStart
+
+  parameter Real rFinal = rStart*2 "Radii of final orbit";
+  parameter Real rStart = (R+300e3)/R "Radii of start orbit";
+  parameter Real vStart = 7730/R*T "Velocity of start orbit";
+  
+equation //Equation of motion of a planar two-body problem
+  der(x)=vx;
+  der(y)=vy;
+  der(vx)=-x*my/(x^2+y^2)^(3/2);
+  der(vy)=-y*my/(x^2+y^2)^(3/2);
+end Orbital;</programlisting>
+
+        <para>Our starting orbit is 300 km above the earths surface and our
+        target orbit is 6971 km.</para>
+
+        <para>Next, we set up our optimization problem.</para>
+
+        <programlisting>optimization HohmannTransfer(objective=(dx1^2+dy1^2)^0.5+(dx2^2+dy2^2)^0.5, startTime=0, finalTime(free=true,min=0.5,max=10,initialGuess=0.8))
+  extends Orbital;
+
+  //"Rocket burns"
+  parameter Real dx1(free=true,min=-2,max=2,start=0.05);
+  parameter Real dy1(free=true,min=-2,max=2,start=0.05);
+  parameter Real dx2(free=true,min=-2,max=2,start=0.05);
+  parameter Real dy2(free=true,min=-2,max=2,start=0.05);
+  
+  //"Time for firing the first rockets"
+  parameter Real t1(free=true,min=0.001,max=0.01, start=0.005);
+
+constraint
+  (x(finalTime)^2+y(finalTime)^2)^0.5=rFinal; //"Final position constraint"
+  (vx(finalTime)+dx2)^2+(vy(finalTime)+dy2)^2=my/rFinal; //"Final velocity"
+  x(finalTime)*(vx(finalTime)+dx2)+y(finalTime)*(vy(finalTime)+dy2)=0; //"Final Radial velocity component"
+end HohmannTransfer;</programlisting>
+
+        <para>As can be seen from the above the code, our objective is to
+        minimize the rocket burns (d1 and d2) with the final time unknown. The
+        constraints are set on the final position (circular) and on the final
+        velocities so that we are actually staying in the target orbit. There
+        is also a parameter t1 set to be free which will be connected to the
+        problem via Python and will be used to specify the time of the first
+        rocket burn. From the problem, one can also see that dx1 and dy1 are
+        not included in the problem, except for the objective. They will be
+        connected via Python and determine the velocity changes between phase
+        1 and phase 2. Note that in the following scripts the models have been
+        stored as <literal>Hohmann.mop</literal> .</para>
+
+        <para>We start our script by importing the necessary modules and
+        methods for compiling the two different models and also for loading
+        the compiled models into JModelica.orgs framework.</para>
+
+        <programlisting>import numpy as N
+import matplotlib.pyplot as plt
+
+from jmodelica.jmi import compile_jmu
+from jmodelica.jmi import JMUModel
+
+from jmodelica.fmi import compile_fmux
+from jmodelica.casadi_interface import CasadiModel
+
+jmu_name  = compile_jmu("Orbital","Hohmann.mop")
+fmux_name = compile_fmux("HohmannTransfer", "Hohmann.mop")
+</programlisting>
+
+        <para>Next, the optimization model needs to be loaded and options
+        specified.</para>
+
+        <programlisting language="python">#Optimization
+model = CasadiModel(fmux_name)
+    
+opts = model.optimize_options(algorithm="CasadiPseudoSpectral")
+
+opts["n_cp"] = 40 #Number of collocation points
+opts["n_e"] = 2   #Number of phases
+opts["free_phases"] = True #The phase boundary is allowed to be changed in time
+opts["phase_options"] = ["t1"] #The phase boundary is connected to variable t1
+opts["link_options"] = [(1,"vy","dy1"),(1,"vx","dx1")] #Allow for discontinuities between phase 1 and 2 for vy and vx.
+                                                       #The discontinuities are connected by dy1 and dx1</programlisting>
+
+        <para>In the above code we have loaded our optimization model
+        <literal>fmux_name</literal> into a class,
+        <literal>CasadiModel</literal>. Our options dictionary is retrieved by
+        calling the optimization options method with our method of choice as
+        input, <literal>CasadiPseudoSpectral</literal>. We then specify the
+        number of collocation points in each phase and also the number of
+        phases. The next options are a bit more interesting. The option
+        <literal>free_phases</literal> specifies that the boundary between
+        phase 1 and phase 2 are allowed to be changed by the optimizer and the
+        <literal>phase_options</literal> specifies that the boundary should be
+        connected to the parameter <literal>t1</literal> in the model where we
+        also have specified constraints on the parameter. Finally we connect
+        the first rocket burn (dx1 and dy1) to the corresponding variables, dx
+        and dy, allowing them to be changed on the phase boundary.</para>
+
+        <para>Now we are ready to optimize our problem.</para>
+
+        <programlisting>#Optimize
+res_opt = model.optimize(algorithm="CasadiPseudoSpectral",options=opts)
+    
+#Get results
+dx1,dy1,dx2,dy2 = res_opt["dx1"],      res_opt["dy1"],    res_opt["dx2"],res_opt["dy2"]
+r1,r2,my        = res_opt["rStart"],   res_opt["rFinal"], res_opt["my"]
+tf,t1           = res_opt["time"][-1], res_opt["t1"]</programlisting>
+
+        <para>The above code performs the optimization and also retrieves the
+        values used to verify the solution.</para>
+
+        <para>To verify the solution we perform simulations using the
+        resulting rocket burns and even simulate further in time to verify
+        that we are staying in the targeted orbit.</para>
+
+        <programlisting>#Verify solution by simulation
+model = JMUModel(jmu_name)
+    
+#Simulation of Phase 1
+res = model.simulate(final_time=t1,options={'ncp':100,'solver':"CVode"})
+
+x_phase_1,y_phase_1 = res["x"], res["y"]
+    
+#Simulation of Phase 2
+model.set("vx",dx1+res["vx"][-1])
+model.set("vy",dy1+res["vy"][-1])
+
+res = model.simulate(start_time=t1,final_time=tf,options={'ncp':100,'solver':"CVode"})
+
+x_phase_2,y_phase_2 = res["x"], res["y"]
+
+#Simulation of Phase 3 (verify that we are still in orbit)
+model.set("vx",dx2+res["vx"][-1])
+model.set("vy",dy2+res["vy"][-1])
+
+res = model.simulate(start_time=tf,final_time=tf*2,options={'ncp':100,'solver':"CVode"})
+
+x_phase_3,y_phase_3 = res["x"], res["y"]</programlisting>
+
+        <para>In the above simulation code we used the model compiled in the
+        beginning of the script ,<literal>"Orbital"</literal> and then
+        performed three simulations. One for the first phase, one for the
+        second phase and finally an extra simulation for verification. In
+        between the simulations we added the calculated rocket burns to the
+        velocities and also retrieved the result.</para>
+
+        <para>Next, we set up the figure where we plot the the initial and
+        target orbit together with the earth and the satellite trajectory. We
+        also plot the rocket burns.</para>
+
+        <programlisting>#Plot Earth
+r = 1.0
+xE = r*N.cos(N.linspace(0,2*N.pi,200))
+yE = r*N.sin(N.linspace(0,2*N.pi,200))
+plt.plot(xE,yE,label="Earth")
+
+#Plot Orbits
+r = res["rStart"]
+xS = r*N.cos(N.linspace(0,2*N.pi,200))
+yS = r*N.sin(N.linspace(0,2*N.pi,200))
+plt.plot(xS,yS,label="Low Orbit")
+
+r = res["rFinal"]
+xSE = r*N.cos(N.linspace(0,2*N.pi,200))
+ySE = r*N.sin(N.linspace(0,2*N.pi,200))
+plt.plot(xSE,ySE,label="High Orbit")
+        
+#Plot Satellite trajectory
+x_sim=N.hstack((N.hstack((x_phase_1,x_phase_2)),x_phase_3))
+y_sim=N.hstack((N.hstack((y_phase_1,y_phase_2)),y_phase_3))
+
+plt.plot(x_sim,y_sim,"-",label="Satellite")
+        
+#Plot Rocket Burns
+plt.arrow(x_phase_1[-1],y_phase_1[-1],0.5*dx1,0.5*dy1, width=0.01,label="dv1")
+plt.arrow(x_phase_2[-1],y_phase_2[-1],0.5*dx2,0.5*dy2, width=0.01,label="dv2")
+        
+plt.legend()
+plt.show()</programlisting>
+
+        <para>In <xref linkend="fig-opt-satellite-final" /> the result is
+        visualized. The arrows represents the rocket burns.</para>
+
+        <figure xml:id="fig-opt-satellite-final">
+          <title>Hohmann Transfer</title>
+
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref="images/satellite_final.png"></imagedata>
             </imageobject>
           </mediaobject>
         </figure>
