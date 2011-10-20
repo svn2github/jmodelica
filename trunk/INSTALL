@@ -6,11 +6,12 @@ In order to compile JModelica.org you will need a unix-like
 environment. Depending on you operating system, different procedures 
 are required.
 
- - For Linux, make sure that the gcc compiler suite, Subversion and
-   Apache Ant are installed.
- - The requirements for Mac OS X are the same as for Linux. The 
-   gcc compiler suite is available in the XCode distribution 
-   provided by Apple.
+ - For Linux and Mac, make sure that the following tools are installed: 
+   - The gcc compiler suite
+   - Subversion
+   - Apache Ant
+   - Cmake
+   - Java development kit
  - For Windows, it is recommended to use the JModelica.org-SDK
    installer which contains all the tools necessary to build the
    platform.
@@ -28,7 +29,7 @@ installer.
 
 2. Get Ipopt 
 
-Download Ipopt from https://projects.coin-or.org/Ipopt. Unzip the
+Download Ipopt (version 3.9 or later) from https://projects.coin-or.org/Ipopt. Unzip the
 tar-ball and put in a directory that does not hold any spaces nor ~
 character in its path. Build the package according to its INSTALL
 file. Make sure to run
@@ -40,7 +41,7 @@ JModelica.org-SDK installer for Windows.
 
 3. Get Sundials 
 
-Download Sundials from
+Download Sundials (version 2.4.0) from
 https://computation.llnl.gov/casc/sundials/main.html. Unzip the
 tar-ball and put in a directory that does not hold any spaces nor ~
 character in its path. Build the package according to its
@@ -63,7 +64,8 @@ however, that if they are not given, only parts of the software will
 be built and the functionality of the platform will be limited. You
 may want to give additional arguments to configure. Type configure
 --help for information. By default, the installation directory
-(--prefix) is set to /usr/local/jmodelica.
+(--prefix) is set to /usr/local/jmodelica - use the --prefix argument
+to change the default location.
 
 5. Build and install
 
@@ -106,11 +108,12 @@ In order to run the JModelica.org compilers from Python, the packages
  - Nose (http://code.google.com/p/python-nose/) (Only needed to run
    the test suits.)
 
-need to be installed. The JModelica.org has been tested on Python 2.5
-and Python 2.6. Notice that the JModelica.org-SDK and JModelica.org
-installers for Windows will install JPype, lxml, Cython and Nose
-automatically. Linux and Mac OS X users need to install these packages
-manually.
+need to be installed. The JModelica.org has been tested on Python 2.6
+and Python 2.7. Notice that the JModelica.org-SDK and JModelica.org
+(both require a 32-bit Python 2.7 installation) installers for Windows 
+will install JPype, lxml, Cython and Nose automatically. 
+Linux and Mac OS X users need to install these packages
+manually or through a package manager such as apt-get or mac ports.
 
 JModelica.org supports the following environment variables:
 
