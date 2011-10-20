@@ -3076,7 +3076,7 @@ opts? #View the help text</programlisting>
 
       <programlisting language="python">res = model.optimize(algorithm="CasadiPseudoSpectral", options=opts)</programlisting>
 
-      <para>In Table <xref linkend="opt-tab-pseudo" /> the options for the
+      <para>In <xref linkend="opt-tab-pseudo" /> the options for the
       PseudoSpectral methods are shown.<table xml:id="opt-tab-pseudo">
           <title>Options for the Pseudospectral optimization
           algorithms.</title>
@@ -3199,8 +3199,9 @@ opts? #View the help text</programlisting>
           </tgroup>
         </table></para>
 
-      <para>Options that need a little more attention are the free_phases,
-      link_options and phase_options. These options allows a user to setup a
+      <para>Options that need a little more attention are the
+      <literal>free_phase</literal>s, <literal>link_options</literal> and
+      <literal>phase_options</literal>. These options allows a user to setup a
       problem involving discontinuities. As an example, say that in a model a
       state is allowed to be changed discontinuous at an arbitrary time point,
       <literal>tp</literal>, with the parameter <literal>dv</literal>. See
@@ -3221,7 +3222,7 @@ opts? #View the help text</programlisting>
       phase one plus the discontinuity should be equal to our state in phase
       two.</para>
 
-      <programlisting>opts = model.optimize_options(algorithm="CasadiPseudoSpectral")
+      <programlisting language="python">opts = model.optimize_options(algorithm="CasadiPseudoSpectral")
 
 opts["n_e"]=2 #Two elements
 opts["link_options"] = [(1,"v","dv")] #The parameter dv should be connected
@@ -3253,7 +3254,7 @@ opts["free_phases"] = True #The phase boundary is allowed to be changed.
         Below, the <literal>Optimica</literal> for the example is
         shown.</para>
 
-        <programlisting>optimization VDP_Opt (objectiveIntegrand = (x1^2 + x2^2 + u^2),
+        <programlisting language="optimica">optimization VDP_Opt (objectiveIntegrand = (x1^2 + x2^2 + u^2),
                          startTime = 0,
                          finalTime = 20)
 
@@ -3333,7 +3334,7 @@ res = model.optimize(algorithm="CasadiPseudoSpectral", options=opts)
         where the bodies are the earth and the satellite. We also scale the
         problem with the orbital time and the radius of the earth.</para>
 
-        <programlisting>model Orbital
+        <programlisting language="modelica">model Orbital
   //"State variables"
   Real x(fixed=true,start=x0);
   Real y(fixed=true,start=y0);
@@ -3371,7 +3372,7 @@ end Orbital;</programlisting>
 
         <para>Next, we set up our optimization problem.</para>
 
-        <programlisting>optimization HohmannTransfer(objective=(dx1^2+dy1^2)^0.5+(dx2^2+dy2^2)^0.5, startTime=0, finalTime(free=true,min=0.5,max=10,initialGuess=0.8))
+        <programlisting language="optimica">optimization HohmannTransfer(objective=(dx1^2+dy1^2)^0.5+(dx2^2+dy2^2)^0.5, startTime=0, finalTime(free=true,min=0.5,max=10,initialGuess=0.8))
   extends Orbital;
 
   //"Rocket burns"
@@ -3405,7 +3406,7 @@ end HohmannTransfer;</programlisting>
         methods for compiling the two different models and also for loading
         the compiled models into JModelica.orgs framework.</para>
 
-        <programlisting>import numpy as N
+        <programlisting language="python">import numpy as N
 import matplotlib.pyplot as plt
 
 from jmodelica.jmi import compile_jmu
@@ -3450,7 +3451,7 @@ opts["link_options"] = [(1,"vy","dy1"),(1,"vx","dx1")] #Allow for discontinuitie
 
         <para>Now we are ready to optimize our problem.</para>
 
-        <programlisting>#Optimize
+        <programlisting language="python">#Optimize
 res_opt = model.optimize(algorithm="CasadiPseudoSpectral",options=opts)
     
 #Get results
@@ -3465,7 +3466,7 @@ tf,t1           = res_opt["time"][-1], res_opt["t1"]</programlisting>
         resulting rocket burns and even simulate further in time to verify
         that we are staying in the targeted orbit.</para>
 
-        <programlisting>#Verify solution by simulation
+        <programlisting language="python">#Verify solution by simulation
 model = JMUModel(jmu_name)
     
 #Simulation of Phase 1
@@ -3500,7 +3501,7 @@ x_phase_3,y_phase_3 = res["x"], res["y"]</programlisting>
         target orbit together with the earth and the satellite trajectory. We
         also plot the rocket burns.</para>
 
-        <programlisting>#Plot Earth
+        <programlisting language="python">#Plot Earth
 r = 1.0
 xE = r*N.cos(N.linspace(0,2*N.pi,200))
 yE = r*N.sin(N.linspace(0,2*N.pi,200))

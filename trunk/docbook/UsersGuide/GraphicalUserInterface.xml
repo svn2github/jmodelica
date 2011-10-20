@@ -239,7 +239,7 @@ plot_gui.startGUI()
       of the lines have also been modified in width and in line style. A grid
       is also shown.</para>
 
-      <figure>
+      <figure xml:id="fig_gui_example">
         <title>Multiple figure example.</title>
 
         <mediaobject>
