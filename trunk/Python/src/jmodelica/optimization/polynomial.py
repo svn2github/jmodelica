@@ -18,6 +18,7 @@
 Module containing polynomial evaluations, weight calculations etc. .
 """
 import logging
+import abc
 import numpy as N
 import numpy.linalg
 import scipy.special as SP
@@ -26,32 +27,14 @@ try:
 except ImportError:
     logging.warning(
         'Could not find CasADi package, aborting.')
-        
-class RadauPol(object):
+
+class LocalPol(object):
     
     """
-    Handles Lagrange polynomials used for Radau collocation.
-    
-    Data attributes::
-    
-        n --
-            Number of collocation points per element.
-            Type: int
-    
-        p --
-            Interpolation points.
-            Type: rank 1 ndarray
-            
-        w --
-            Quadrature weights.
-            Type: rank 1 ndarray
-            
-        der_vals --
-            Derivative values for each basis polynomial at the interpolation
-            points. der_vals[j, k] contains the derivative of basis polynomial
-            j evaluated at interpolation point k.
-            Type: rank 2 ndarray
+    Abstract base class for Lagrange polynomials used for local collocation.
     """
+    
+    __metaclass__ = abc.ABCMeta
     
     def __init__(self, n):
         """
@@ -65,29 +48,14 @@ class RadauPol(object):
         self._calc_p()
         self._calc_w()
         self._calc_der_vals()
-        
+    
+    @abc.abstractmethod
     def _calc_p(self):
-        # Calculate the roots for the non-shifted Gauss-Radau polynomial
-        r = jacobi_a1_b0_roots(self.n - 1)
-        
-        # Shift the roots
-        p = (r + 1) / 2
-        
-        # Add interpolation point for tau = 0 and tau = 1
-        p = N.hstack([0., p, 1.])
-        
-        # Store interpolation points as data attribute
-        self.p = p
-        
+        pass
+    
+    @abc.abstractmethod
     def _calc_w(self):
-        # Calculate the weights for the non-shifted Gauss-Radau polynomial
-        w = gauss_quadrature_weights("LGR", self.n)
-        
-        # Shift the weights
-        w = N.hstack([N.nan, w / 2])
-        
-        # Store weights as data attribute
-        self.w = w
+        pass
     
     def _calc_der_vals(self):
         # Derivatives of all basis polynomials at all collocation points
@@ -150,8 +118,57 @@ class RadauPol(object):
         """
         nbi = not beg_interp
         return lagrange_derivative_eval(self.p[nbi:], i - nbi, tau)
+        
+class RadauPol(LocalPol):
     
-class GaussPol(object):
+    """
+    Handles Lagrange polynomials used for Radau collocation.
+    
+    Data attributes::
+    
+        n --
+            Number of collocation points per element.
+            Type: int
+    
+        p --
+            Interpolation points.
+            Type: rank 1 ndarray
+            
+        w --
+            Quadrature weights.
+            Type: rank 1 ndarray
+            
+        der_vals --
+            Derivative values for each basis polynomial at the interpolation
+            points. der_vals[j, k] contains the derivative of basis polynomial
+            j evaluated at interpolation point k.
+            Type: rank 2 ndarray
+    """
+        
+    def _calc_p(self):
+        # Calculate the roots for the non-shifted Gauss-Radau polynomial
+        r = jacobi_a1_b0_roots(self.n - 1)
+        
+        # Shift the roots
+        p = (r + 1) / 2
+        
+        # Add interpolation point for tau = 0 and tau = 1
+        p = N.hstack([0., p, 1.])
+        
+        # Store interpolation points as data attribute
+        self.p = p
+        
+    def _calc_w(self):
+        # Calculate the weights for the non-shifted Gauss-Radau polynomial
+        w = gauss_quadrature_weights("LGR", self.n)
+        
+        # Shift the weights
+        w = N.hstack([N.nan, w / 2])
+        
+        # Store weights as data attribute
+        self.w = w
+
+class GaussPol(LocalPol):
     
     """
     Handles Lagrange polynomials used for Gauss collocation.
@@ -195,15 +212,10 @@ class GaussPol(object):
         w = gauss_quadrature_weights("LG", self.n)
         
         # Shift the weights
-        w /= 2
+        w = N.hstack([N.nan, w / 2])
         
         # Store weights as data attribute
         self.w = w
-    
-    # Inherit from RadauPol
-    __init__ = RadauPol.__dict__["__init__"]
-    _calc_der_vals = RadauPol.__dict__["_calc_der_vals"]
-    eval_basis = RadauPol.__dict__["eval_basis"]
 
 class RadauPol3(object):
 

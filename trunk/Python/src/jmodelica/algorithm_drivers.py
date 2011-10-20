@@ -2210,11 +2210,18 @@ class CasadiRadau2(AlgorithmBase):
                 raise ValueError("free_element_lengths_data can only be " + \
                                  'given if self.hs == "free".')
         
+        # Check validity of discr
+        if self.discr == "LGL":
+            raise NotImplementedError("Lobatto collocation is currently " + \
+                                      "not supported.")
+        elif self.discr != "LG" and self.discr != "LGR":
+            raise ValueError("Unknown discretization scheme %s." % self.discr)
+        
         # Check validity of exact_Hessian
         if self.exact_Hessian:
             if self.graph == "MX":
-                print("Warning: exact_Hessian is not recommended in " +
-                      "combination with MX graphs.")
+                print("Warning: exact_Hessian is currently not recommended " +
+                      "in combination with MX graphs.")
         else:
             if self.CasADi_options_L != defaults['CasADi_options_L']:
                 raise ValueError("CasADi_options_L is only used " +
@@ -2271,24 +2278,16 @@ class CasadiRadau2(AlgorithmBase):
         
             The CasadiRadau2Result object.
         """
-        #~ # Experimental
-        #~ # ------------
-        #~ return self.nlp.export_result_dymola()
-        #~ # ------------
         self.nlp.export_result_dymola()
-            
-        # result file name
-        # resultfile = self.result_args['file_name']
-        # if not resultfile:
-        resultfile = self.model.get_name() + '_result.txt'
         
-        # load result file
+        # Load result file
+        resultfile = self.model.get_name() + '_result.txt'
         res = ResultDymolaTextual(resultfile)
         
         # Get optimized element lengths
         h_opt = self.nlp.get_h_opt()
         
-        # create and return result object
+        # Create and return result object
         return CasadiRadau2Result(self.model, resultfile, self.nlp, res,
                                   self.options, self.times, h_opt)
         
@@ -2345,6 +2344,21 @@ class CasadiRadau2Options(OptionBase):
             
             Type: int
             Default: 3
+        
+        discr --
+            Determines the collocation scheme used to discretize the problem.
+            
+            Possible values: "LG", "LGR" and "LGL"
+            
+            "LG": Gauss collocation (Legendre-Gauss)
+            
+            "LGR": Radau collocation (Legendre-Gauss-Radau)
+            
+            "LGL: Lobatto collocation (Legendre-Gauss-Lobatto)
+            NOTE: LOBATTO CURRENTLY NOT SUPPORTED
+            
+            Type: str
+            Default: "LGR"
         
         graph --
             CasADi graph type. Possible values are "SX", "MX" and
@@ -2421,9 +2435,16 @@ class CasadiRadau2Options(OptionBase):
             states at the start of each element and the end of the previous
             element.
             
-            False: Create extra variables for the states at the start of each
-            element and then constrain them to be equal to the corresponding 
-            variable at the end of the previous element for continuity.
+            False:
+            For Radau collocation, the extra variables x_{i, 0},
+            representing the states at the start of each element, are created
+            and then constrained to be equal to the corresponding variable at
+            the end of the previous element for continuity.
+            
+            For Gauss collocation, the extra variables x_{i, n_cp + 1},
+            representing the states at the end of each element, are created
+            and then constrained to be equal to the corresponding variable at
+            the start of the succeeding element for continuity.
             
             Type: bool
             Default: False
@@ -2504,6 +2525,7 @@ class CasadiRadau2Options(OptionBase):
                 'free_element_lengths_data': None,
                 'h_bounds': (0.7, 1.3),
                 'n_cp': 3,
+                'discr': "LGR",
                 'graph': 'SX',
                 'write_scaled_result': False,
                 'result_mode': "collocation_points",
