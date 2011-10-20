@@ -2217,6 +2217,15 @@ class CasadiRadau2(AlgorithmBase):
         elif self.discr != "LG" and self.discr != "LGR":
             raise ValueError("Unknown discretization scheme %s." % self.discr)
         
+        # Check validity of quadrature_constraint
+        if self.discr != "LG" and not self.quadrature_constraint:
+            raise ValueError("quadrature_constraint is only compatible " + \
+                             "with Gauss collocation.")
+        if (self.discr == "LG" and self.eliminate_der_var and
+            self.quadrature_constraint):
+            raise ValueError("quadrature_constraint is not compatible " + \
+                             "with eliminate_der_var.")
+        
         # Check validity of exact_Hessian
         if self.exact_Hessian:
             if self.graph == "MX":
@@ -2449,6 +2458,21 @@ class CasadiRadau2Options(OptionBase):
             Type: bool
             Default: False
         
+        quadrature_constraint --
+            Whether to use quadrature continuity constraints. This option is
+            only compatible with Gauss collocation. It is also incompatible
+            with eliminate_der_var.
+            
+            True: Quadrature is used to get the values of the states at the mesh
+            points.
+            
+            False: The Lagrange basis polynomials for the state collocation
+            polynomials are evaluated to get the values of the states at the
+            mesh points.
+            
+            Type: bool
+            Default: True
+        
         init_traj --
             Variable trajectory data used for initialization of the
             optimization problem.
@@ -2533,6 +2557,7 @@ class CasadiRadau2Options(OptionBase):
                 'blocking_factors': None,
                 'eliminate_der_var': False,
                 'eliminate_cont_var': False,
+                'quadrature_constraint': True,
                 'init_traj': None,
                 'parameter_estimation_data': None,
                 'exact_Hessian': True,

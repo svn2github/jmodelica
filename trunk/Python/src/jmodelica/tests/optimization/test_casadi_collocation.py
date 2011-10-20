@@ -501,6 +501,30 @@ class TestRadau2:
         assert_results(res, cost_ref, u_norm_ref_gauss)
     
     @testattr(casadi = True)
+    def test_quadrature_constraint(self):
+        """
+        Test that optimization results of the CSTR is consistent regardless of
+        quadrature_constraint for Gauss collocation.
+        """
+        model = self.model_CSTR_Mayer
+        
+        # References values
+        cost_ref = 1.8576873858261e3
+        u_norm_ref = 3.0526018951367553e2
+        
+        # Quadrature constraint
+        opts = model.optimize_options(self.algorithm)
+        opts['discr'] = "LG"
+        opts['quadrature_constraint'] = True
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        
+        # Evaluation constraint
+        opts['quadrature_constraint'] = False
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+    
+    @testattr(casadi = True)
     def test_n_cp(self):
         """
         Test varying n_e and n_cp.

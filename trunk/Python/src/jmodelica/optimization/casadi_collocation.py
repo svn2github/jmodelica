@@ -1735,15 +1735,29 @@ class Radau2Collocator(CasadiCollocator):
                 
         # Continuity constraints for x_{i, n_cp + 1}
         if self.discr == "LG":
-            for i in xrange(1, self.n_e):
-                # Evaluate x_{i, n_cp + 1} based on polynomial x_i
-                x_i_np1 = 0
-                for k in xrange(self.n_cp + 1):
-                    x_i_np1 += var[i][k]['x'] * self.pol.eval_basis(k, 1, True)
-                
-                # Add residual for x_i_np1 as constraint
-                c_e = casadi.vertcat([c_e,
-                                      var[i][self.n_cp + 1]['x'] - x_i_np1])
+            if self.quadrature_constraint:
+                for i in xrange(1, self.n_e):
+                    # Evaluate x_{i, n_cp + 1} based on quadrature
+                    x_i_np1 = 0
+                    for k in xrange(1, self.n_cp + 1):
+                        x_i_np1 += self.pol.w[k] * var[i][k]['dx']
+                    x_i_np1 = (var[i][0]['x'] + 
+                               self.horizon * self.h[i] * x_i_np1)
+                    
+                    # Add residual for x_i_np1 as constraint
+                    c_e = casadi.vertcat(
+                            [c_e, var[i][self.n_cp + 1]['x'] - x_i_np1])
+            else:
+                for i in xrange(1, self.n_e):
+                    # Evaluate x_{i, n_cp + 1} based on polynomial x_i
+                    x_i_np1 = 0
+                    for k in xrange(self.n_cp + 1):
+                        x_i_np1 += var[i][k]['x'] * self.pol.eval_basis(k, 1,
+                                                                        True)
+                    
+                    # Add residual for x_i_np1 as constraint
+                    c_e = casadi.vertcat(
+                            [c_e, var[i][self.n_cp + 1]['x'] - x_i_np1])
         
         # Continuity constraints for x_{i, 0}
         if not self.eliminate_cont_var:
