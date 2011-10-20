@@ -48,19 +48,22 @@
 
         <para>High-index systems, commonly occurring in mechanical systems,
         are supported in JModelica.org 1.6. The implementation relies on
-        Pantelides' algorithm and the dummy derivative selection algorithm.
-        </para>
+        Pantelides' algorithm and the dummy derivative selection
+        algorithm.</para>
       </section>
     </section>
 
     <section>
-      <title>Python </title>
+      <title>Python</title>
 
       <section>
         <title>Graphical user interface for visualization of simulation and
         optimization results</title>
 
-        <para>A new graphical interface for </para>
+        <para>A new graphical interface for displaying simulation and / or
+        optimization results have been implemented. The interface also
+        supports results generated from Dymola, both binary and
+        textual.</para>
       </section>
 
       <section>
