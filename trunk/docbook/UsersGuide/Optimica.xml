@@ -268,7 +268,7 @@
   velocity <emphasis>v(t)</emphasis> and the input <emphasis>u(t)</emphasis>.
   A Modelica model for the double integrator system is given by:</para>
 
-  <programlisting>model DoubleIntegrator
+  <programlisting language="modelica">model DoubleIntegrator
   Real x(start=0);
   Real v(start=0);
   input Real u;
@@ -344,7 +344,7 @@ end DoubleIntegrator;
     <para>As a starting-point for the formulation of the optimization problem
     consider the <literal>optimization</literal> class:</para>
 
-    <programlisting>optimization DIMinTime
+    <programlisting language="optimica">optimization DIMinTime
   DoubleIntegrator di;
   input Real u = di.u;
 end DIMinTime;
@@ -391,7 +391,7 @@ end DIMinTime;
     <literal>true</literal>. Also, the <literal>initialGuess</literal>
     attribute is set to 0.0.</para>
 
-    <programlisting>optimization DIMinTime
+    <programlisting language="optimica">optimization DIMinTime
   DoubleIntegrator di(u(free=true,
                         initialGuess=0.0));
   input Real u = di.u;
@@ -462,7 +462,7 @@ end DIMinTime;
     proposed syntax for class attributes is shown in the following
     <literal>optimization</literal> class:</para>
 
-    <programlisting>optimization DIMinTime (
+    <programlisting language="optimica">optimization DIMinTime (
         objective=finalTime,
         startTime=0,
         finalTime(free=true,initialGuess=1))
@@ -505,7 +505,7 @@ end DIMinTime;
     specified for the <literal>finalTime</literal> class attribute. The
     resulting optimization formulation may now be written:</para>
 
-    <programlisting>optimization DIMinTime (
+    <programlisting language="optimica">optimization DIMinTime (
     objective=finalTime,
     startTime=0,
     finalTime(free=true,initialGuess=1))

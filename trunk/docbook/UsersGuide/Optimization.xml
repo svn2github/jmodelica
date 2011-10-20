@@ -135,7 +135,7 @@ plt.show()
     linkend="fig-vdp-opt" />.</para>
 
     <figure floatstyle="top" xml:id="fig-vdp-opt">
-      <title></title>
+      <title>Optimal profiles for the VDP oscillator</title>
 
       <mediaobject>
         <imageobject>
@@ -868,7 +868,7 @@ init_model = JMUModel(jmu_name)
       models. Before proceeding, have a look at the interactive help for one
       of the functions you used:</para>
 
-      <programlisting language="python">In [8]: help(compile_jmu)
+      <programlisting language="python">help(compile_jmu)
 </programlisting>
     </section>
 
@@ -1319,7 +1319,7 @@ plt.show()
       account when plotting. Your should now the plot shown in <xref
       linkend="opt-fig-cstr-opt1" />.</para>
 
-      <figure>
+      <figure xml:id="opt-fig-cstr-opt1">
         <title>Optimal profiles for the CSTR problem.</title>
 
         <mediaobject>
@@ -2409,7 +2409,7 @@ plt.show()
     states are given by the state measurement at the start of the experiment.
     This assumption can be expressed in the model:</para>
 
-    <programlisting language="python">model Sim_QuadTank
+    <programlisting language="modelica">model Sim_QuadTank
   QuadTank qt;
   input Real u1 = qt.u1;
   input Real u2 = qt.u2;
@@ -3305,7 +3305,8 @@ res = model.optimize(algorithm="CasadiPseudoSpectral", options=opts)
 
           <mediaobject>
             <imageobject>
-              <imagedata fileref="images/vdp_casadi.svg" scale="70"></imagedata>
+              <imagedata fileref="images/vdp_casadi.svg" scalefit="1"
+                         width="60%"></imagedata>
             </imageobject>
           </mediaobject>
         </figure>
@@ -3539,7 +3540,8 @@ plt.show()</programlisting>
 
           <mediaobject>
             <imageobject>
-              <imagedata fileref="images/satellite_final.png"></imagedata>
+              <imagedata fileref="images/satellite_final.png" scalefit="1"
+                         width="60%"></imagedata>
             </imageobject>
           </mediaobject>
         </figure>
