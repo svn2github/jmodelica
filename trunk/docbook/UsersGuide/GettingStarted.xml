@@ -63,20 +63,23 @@
     <para>There are several Python scripts in the
     <filename>examples</filename> folder under the Python package in the
     JModelica.org installation which run examples demonstrating compilation,
-    loading and simulating or optimizing of models. The models themselves are
+    loading and simulation or optimization of models. The model files are
     located in the subdirectory <filename>files</filename>. The following code
     demonstrates how to run such an example. First a Python session must be
     started, see <xref linkend="gs_sec_starting_a_python_session" /> above.
-    The example scripts are preferably run in the pylab python
-    shell.<programlisting># import the VDP example
-from jmodelica.examples import vdp
+    The example scripts are preferably run in the pylab python shell.</para>
 
-# run the example
-vdp.run_demo()</programlisting></para>
+    <para>The following code will run the RLC example and plot some
+    results.</para>
 
-    <para>This code will run the example and plot some results. Open
-    <filename>vdp.py</filename> in an editor and look at the Python code to
-    see what happens when the script is run.</para>
+    <para><programlisting language="python"># Import the RLC example
+from jmodelica.examples import RLC
+
+# Run the RLC example and plot results
+RLC.run_demo()</programlisting></para>
+
+    <para> Open <filename>RLC.py</filename> in an editor and look at the
+    Python code to see what happens when the script is run.</para>
   </section>
 
   <section>
@@ -88,10 +91,10 @@ vdp.run_demo()</programlisting></para>
     packages that are found on your computer. Missing or having the wrong
     version of a package can be a source of errors. Therefore it can be useful
     to run <literal>jmodelica.check_packages()</literal> after installation or
-    when trouble-shooting.<programlisting># import the function from jmodelica
+    when trouble-shooting.<programlisting language="python"># Import the function from jmodelica
 from jmodelica import check_packages
 
-# run check_packages
+# Run check_packages
 check_packages()
 
 Performing JModelica package check
@@ -131,7 +134,7 @@ setuptools.................... 0.6c11                         Ok
     installation directory and <literal>IPOPT_HOME</literal> points at the
     Ipopt installation directory. One or more of these environment variables
     set in <filename>startup.py</filename> can be overridden by a user defined
-    script: <filename>user_startup.py</filename>. </para>
+    script: <filename>user_startup.py</filename>.</para>
 
     <para>The script <filename>startup.py</filename> looks for
     <filename>user_startup.py</filename> in the folder</para>
@@ -169,7 +172,7 @@ setuptools.................... 0.6c11                         Ok
           <literal>$USERPROFILE</literal> or <literal>$HOME</literal> points
           to, open a Python shell and type:</para>
 
-          <programlisting>import os
+          <programlisting language="python">import os
 os.environ['USERPROFILE']   // windows
 os.environ['HOME']          // unix</programlisting>
         </listitem>
@@ -189,7 +192,7 @@ os.environ['HOME']          // unix</programlisting>
           <literal>jmodelica</literal> and check the
           <literal>IPOPT_HOME</literal> environment variable:</para>
 
-          <programlisting>import jmodelica
+          <programlisting language="python">import jmodelica
 jmodelica.environ['IPOPT_HOME']</programlisting>
         </listitem>
       </orderedlist>

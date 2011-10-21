@@ -97,7 +97,6 @@ In order to run the JModelica.org compilers from Python, the packages
  - Matplotlib 1.0.1 (http://matplotlib.sourceforge.net/)
  - wxPython 2.8 <http://www.wxpython.org/>
  - IPython 0.11 <http://ipython.org/>
-   - Mac OS X dependency: readline 6.2.1 <http://pypi.python.org/pypi/readline>
  - Nose 1.1.2 <http://readthedocs.org/docs/nose/en/latest/> (Only needed to run
    the test suits.)
 

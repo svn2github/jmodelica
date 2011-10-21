@@ -177,7 +177,7 @@ def compile_fmux(class_name, file_name=[], compiler='auto',
             Default: Empty dict.
             
         compile_to --
-            Specify location of the compiled FMU. Directory will be created if 
+            Specify location of the compiled FMUX. Directory will be created if 
             it does not exist.
             Default: Current directory.
 

@@ -3009,7 +3009,7 @@ print "a4: " + str(sens_res['a4']) + ", standard deviation: " + str(sigma_a4)
     this purpose.</para>
   </section>
 
-  <section>
+  <section xml:id="opt_sec_pseudo-spectral">
     <title>Optimization using Pseduo-Spectral methods.</title>
 
     <para>New collocation algorithms have been implemented using the automatic
