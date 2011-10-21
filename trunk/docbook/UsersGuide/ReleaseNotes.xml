@@ -97,7 +97,13 @@
         <title>Compilation of XML models</title>
 
         <para>A new convenience function for compilation of Modelica and
-        Optimica models into XMK, including equations, has been added.</para>
+        Optimica models into XML, including equations, has been added.</para>
+      </section>
+
+      <section>
+        <title>Python version upgrade</title>
+
+        <para>The Python package has been updated to Python 2.7.</para>
       </section>
     </section>
 
