@@ -263,7 +263,12 @@ int jmi_kinsol_solve(jmi_block_residual_t * block){
 			jmi_kinsol_error_handling(block->jmi, flag);
 		}
 		
-		/*block->F(block->jmi,NULL,NULL,JMI_BLOCK_EVALUATE_NON_REALS);*/
+		block->F(block->jmi,NULL,NULL,JMI_BLOCK_EVALUATE_NON_REALS);
+
+		/* Call Kinsol solver routine */
+		flag = KINSol(block->kin_mem, block->kin_y, KIN_LINESEARCH, block->kin_y_scale, block->kin_f_scale);
+
+		block->F(block->jmi,NULL,NULL,JMI_BLOCK_EVALUATE_NON_REALS);
 
 		/* Call Kinsol solver routine */
 		flag = KINSol(block->kin_mem, block->kin_y, KIN_LINESEARCH, block->kin_y_scale, block->kin_f_scale);
