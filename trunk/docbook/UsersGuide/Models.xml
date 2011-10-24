@@ -23,7 +23,7 @@
     parameters.</para>
 
     <section>
-      <title>The different models in JModelica.org</title>
+      <title>The different model objects in JModelica.org</title>
 
       <para>There are three different kinds of model objects that can be
       created with JModelica.org: <literal>JMUModel</literal>,
@@ -40,11 +40,11 @@
       <para>JMUs are created by compiling Modelica or Optimica models with
       JModelica.org. The JMU can then be loaded in a
       <literal>JMUModel</literal> object and used for simulation and
-      optimization (if Optimica) purposes.</para>
+      optimization purposes.</para>
 
       <para>FMUs are created by compiling Modelica models with JModelica.org
-      (or any other tool supporting FMU export). (Optimica models can thus not
-      be compiled into FMUs.) The FMU can then be loaded in an
+      (or any other tool supporting FMU export). Optimica models can not be
+      compiled into FMUs. The FMU can then be loaded in an
       <literal>FMUModel</literal> object and used for simulation
       purposes.</para>
 
@@ -56,7 +56,8 @@
       and thereby use the automatic differentiation tool CasADi for
       optimization purposes. Read more about CasADi and how a
       <literal>CasadiModel</literal> object can be used for optimization in
-      <xref linkend="opt_sec_pseudo-spectral" />.</para>
+      <xref linkend="opt_sec_pseudo-spectral" /> in <xref
+      linkend="ch_optimization" />.</para>
     </section>
   </section>
 
@@ -66,17 +67,17 @@
     <para>Compiling a model is done in a few steps; importing a compiler
     function from JModelica.org, specifying a model class and file location
     and performing the actual compilation. This will be demonstrated in <xref
-    linkend="models_sec_simple_jmu_compilation" /> for the JMU and in <xref
-    linkend="models_sec_simple_fmu_compilation" /> for the FMU.</para>
+    linkend="models_sec_simple_jmu_compilation" /> for the JMU, in <xref
+    linkend="models_sec_simple_fmu_compilation" /> for the FMU and in <xref
+    linkend="models_sec_simple_fmux_compilation" /> for the FMUX.</para>
 
-    <para>For more advanced usage there are compiler options and parameters to
-    the compiler functions which can be modified. This will be explained in
-    <xref linkend="models_sec_compiler_settings" />.</para>
+    <para>For more advanced usage of the compiler functions, there are
+    compiler options and parameters which can be modified. These will be
+    explained in <xref linkend="models_sec_compiler_settings" />.</para>
 
-    <para>The section, <xref
-    linkend="models_sec_compilation_in_more_detail" />, will go through some
-    parts of the compilation process and how to perform these steps one by
-    one.</para>
+    <para><xref linkend="models_sec_compilation_in_more_detail" />, will go
+    through some parts of the compilation process and how to perform these
+    steps one by one.</para>
 
     <section xml:id="models_sec_simple_jmu_compilation">
       <title>Simple JMU compilation example</title>
@@ -113,8 +114,8 @@ compile_jmu(model_name, mo_file)
 
       <para>Once compilation has completed successfully a JMU file will have
       been created on the file system. The JMU file is essentially a
-      compressed file containing files created during compilation that are
-      needed when instantiating a model object. Return argument for
+      compressed file archive containing files created during compilation that
+      are needed when instantiating a model object. Return argument for
       <literal>compile_jmu</literal> is the full file path of the JMU that has
       just been created, this will be useful later when we want to create
       model objects. More about the JMU file and loading models can be found
@@ -170,7 +171,7 @@ compile_fmu(model_name, mo_file)
       <xref linkend="models_sec_loading_models" />.</para>
     </section>
 
-    <section>
+    <section xml:id="models_sec_simple_fmux_compilation">
       <title>Simple FMUX compilation example</title>
 
       <para>Compiling an FMUX follows the same principle as compiling a JMU
@@ -217,7 +218,9 @@ compile_fmux(model_name, mo_file)
       below.</para>
 
       <para>The parameter <literal>target</literal>, is further explained in
-      <xref linkend="models_sec_compiler_targets" />.</para>
+      <xref linkend="models_sec_compiler_targets_jmu" />, <xref
+      linkend="models_sec_compiler_targets_fmu" /> and <xref
+      linkend="models_sec_compiler_targets_fmux" />.</para>
 
       <section xml:id="models_sec_compile_jmu_parameters">
         <title>compile_jmu parameters</title>
@@ -465,10 +468,9 @@ compile_fmux(class_name, file_name=[], compiler='auto', compiler_options={}, com
         when a compiler is created, that is when
         <literal>compile_jmu</literal>, <literal>compile_fmu</literal> or
         <literal>compile_fmux</literal> is run. Options for a compiler
-        instance can be modified by editing the XML file before compiling or
-        interactively when compiling using the parameter
-        <literal>compiler_options</literal>. The interactive way is shown in
-        an example compiling an Optimica model below.</para>
+        instance can be modified interactively when compiling using the
+        parameter <literal>compiler_options</literal>. This is shown in an
+        example compiling an Optimica model below.</para>
 
         <programlisting language="python"># Compile with the compiler option 'enable_variable_scaling' set to True
 
@@ -476,7 +478,7 @@ compile_fmux(class_name, file_name=[], compiler='auto', compiler_options={}, com
 model_name = 'myPackage.myModel'
 mo_file = 'myPackage.mop'
 
-jmu_name = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_scaling":True})
+compile_jmu(model_name, mo_file, compiler_options={"enable_variable_scaling":True})
 </programlisting>
 
         <para>There are four type categories: string, real, integer and
@@ -774,7 +776,7 @@ jmu_name = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_s
           </table></para>
       </section>
 
-      <section xml:id="models_sec_compiler_targets">
+      <section xml:id="models_sec_compiler_targets_jmu">
         <title>Compiler targets for <literal>compile_jmu</literal></title>
 
         <para>There are four compiler targets available for
@@ -813,7 +815,7 @@ jmu_name = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_s
         with the AD interface at the moment.</para>
       </section>
 
-      <section>
+      <section xml:id="models_sec_compiler_targets_fmu">
         <title>Compiler targets for <literal>compile_fmu</literal></title>
 
         <para>Currently, the only possible target available for
@@ -822,7 +824,7 @@ jmu_name = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_s
         Exchange API.</para>
       </section>
 
-      <section>
+      <section xml:id="models_sec_compiler_targets_fmux">
         <title>Compiler targets for <literal>compile_fmux</literal></title>
 
         <para>Compiler targets are not relevant for
@@ -913,8 +915,9 @@ mc.generate_code(flat_rep)
     for JMU model instances.) These are explained in <xref
     linkend="ch_simulation" /> and <xref linkend="ch_optimization" />. For
     more information on how to use the CasadiModel for optimization purposes,
-    see <xref linkend="opt_sec_pseudo-spectral" />. The more basic methods for
-    variable and parameter manipulation are explained in <xref
+    see <xref linkend="opt_sec_pseudo-spectral" /> in <xref
+    linkend="ch_optimization" />. The more basic methods for variable and
+    parameter manipulation are explained in <xref
     linkend="models_sec_variable_and_parameter_manipulation" />.</para>
 
     <section xml:id="models_sec_the_jmu_file">
