@@ -1,0 +1,45 @@
+import java.util.Collections;
+import java.util.Iterator;
+
+aspect ErrorClasses {
+	
+	syn boolean ASTNode.isError() = false;
+
+	eq BadDefinition.isError() = true;
+	eq BadClassDecl.isError() = true;
+	eq BadElement.isError() = true;
+	eq BadArgument.isError() = true;
+	eq BadStatement.isError() = true;
+	
+	public InstModification BadArgument.newInstModification() {
+		return null;
+	}
+	
+	public FStatement BadStatement.instantiateStatement() {
+		return null;
+	}
+	
+	
+	// Make iterator empty to prevent traversials from throwing null pointer exceptions.
+	
+	public Iterator<ASTNode> BadDefinition.iterator() {
+		return Collections.<ASTNode>emptyList().iterator();
+	}
+	
+	public Iterator<ASTNode> BadClassDecl.iterator() {
+		return Collections.<ASTNode>emptyList().iterator();
+	}
+	
+	public Iterator<ASTNode> BadElement.iterator() {
+		return Collections.<ASTNode>emptyList().iterator();
+	}
+	
+	public Iterator<ASTNode> BadArgument.iterator() {
+		return Collections.<ASTNode>emptyList().iterator();
+	}
+	
+	public Iterator<ASTNode> BadStatement.iterator() {
+		return Collections.<ASTNode>emptyList().iterator();
+	}
+	
+}
