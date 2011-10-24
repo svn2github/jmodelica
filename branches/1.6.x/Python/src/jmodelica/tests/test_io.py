@@ -152,6 +152,25 @@ class TestIO:
         
         nose.tools.assert_raises(VariableNotTimeVarying, res.get_column, 'sine.freqHz')
 
+    @testattr(assimulo = True)
+    def test_time_shift(self):
+        """
+        Test the time shift feature
+        """
+        model_file = os.path.join(get_files_path(), 'Modelica', 'RLC_Circuit.mo')
+        compile_jmu('RLC_Circuit', model_file)
+        model = JMUModel('RLC_Circuit.jmu')
+        res = model.simulate()
+
+        time_shifted_fix = res['time'] + 11.
+
+        res.result_data.shift_time(11.)
+
+        time_shifted = res['time']
+
+        assert max(N.abs(time_shifted_fix-time_shifted))<1e-6, \
+               "Error in shifted time vector."        
+
 class test_ResultWriterDymola:
     """Tests the class ResultWriterDymola."""
     

@@ -31,4 +31,4 @@ __all__ = [
     'vdp_casadi', 'vdp_casadi_ps', 'vdp_casadi_radau2', 'cstr_casadi',
     'cstr_casadi_radau2', 'qt_par_est_dfo', 'leadtransport',
     'multiple_nl_systems','furuta_dfo','simulation_with_input_function',
-    'fmu_with_input_function']
+    'fmu_with_input_function', 'hohmann_transfer']

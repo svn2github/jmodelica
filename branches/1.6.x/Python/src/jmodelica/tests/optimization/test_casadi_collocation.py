@@ -192,23 +192,30 @@ class TestRadau2:
         assert_results(res, cost_ref, u_norm_ref, 5e-2, 5e-2)
         
     @testattr(casadi = True)
-    def test_CSTR_Mayer_and_Lagrange(self):
-        """Test the CSTR with both Mayer and Lagrange costs."""
+    def test_CSTR(self):
+        """
+        Test optimizing the CSTR.
+        
+        Tests both a Mayer cost with Gauss collocation and a Lagrange cost with
+        Radau collocation.
+        """
         Mayer_model = self.model_CSTR_Mayer
         Lagrange_model = self.model_CSTR_Lagrange
         
         # References values
         cost_ref = 1.8576873858261e3
-        u_norm_ref = 3.0556730059e2
+        u_norm_ref = 3.0526018951367553e2
         
         # Mayer
         opts = Mayer_model.optimize_options(self.algorithm)
+        opts['discr'] = "LG"
         res = Mayer_model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
         
         # Lagrange
+        opts['discr'] = "LGR"
         res = Lagrange_model.optimize(self.algorithm, opts)
-        assert_results(res, cost_ref, u_norm_ref)
+        assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=5e-3)
     
     @testattr(casadi = True)
     def test_parameter_estimation(self):
@@ -456,23 +463,64 @@ class TestRadau2:
     def test_eliminate_cont_var(self):
         """
         Test that results are consistent regardless of eliminate_cont_var.
+        
+        This is tested for both Gauss and Radau collocation.
         """
         model = self.model_VDP_bounds_Mayer
         
         # References values
         cost_ref = 3.17619580332244e0
-        u_norm_ref = 2.8723837585e-1
+        u_norm_ref_radau = 2.8723837585e-1
+        u_norm_ref_gauss = 2.8618348702292551e-1
         
-        # Keep continuity variables
+        # Keep continuity variables, Radau
         opts = model.optimize_options(self.algorithm)
+        opts['discr'] = "LGR"
         opts["eliminate_cont_var"] = False
         res = model.optimize(self.algorithm, opts)
-        assert_results(res, cost_ref, u_norm_ref)
+        assert_results(res, cost_ref, u_norm_ref_radau)
         
-        # Eliminate continuity variables
+        # Eliminate continuity variables, Radau
         opts["eliminate_cont_var"] = True
         opts['init_traj'] = ResultDymolaTextual(
                 "VDP_pack_VDP_Opt_bounds_Mayer_result.txt")
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref_radau)
+        
+        # Keep continuity variables, Gauss
+        opts['discr'] = "LG"
+        opts["eliminate_cont_var"] = False
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref_gauss)
+        
+        # Eliminate continuity variables, Gauss
+        opts["eliminate_cont_var"] = True
+        opts['init_traj'] = ResultDymolaTextual(
+                "VDP_pack_VDP_Opt_bounds_Mayer_result.txt")
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref_gauss)
+    
+    @testattr(casadi = True)
+    def test_quadrature_constraint(self):
+        """
+        Test that optimization results of the CSTR is consistent regardless of
+        quadrature_constraint for Gauss collocation.
+        """
+        model = self.model_CSTR_Mayer
+        
+        # References values
+        cost_ref = 1.8576873858261e3
+        u_norm_ref = 3.0526018951367553e2
+        
+        # Quadrature constraint
+        opts = model.optimize_options(self.algorithm)
+        opts['discr'] = "LG"
+        opts['quadrature_constraint'] = True
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        
+        # Evaluation constraint
+        opts['quadrature_constraint'] = False
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
     

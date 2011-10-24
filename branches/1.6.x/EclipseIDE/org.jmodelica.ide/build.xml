@@ -19,7 +19,7 @@
 	<property name="ide.project" value="org.jmodelica.ide" />
 	<!-- Project name for the project checked out from 
 	     https://svn.jmodelica.org/trunk/EclipseIDE/org.jmodelica.folding -->
-	<property name="folding.project" value="org.jmodelica.folding" />
+<!--	<property name="folding.project" value="org.jmodelica.folding" /> -->
 	<!-- Project name for the project checked out from 
 	     https://svn.jastadd.org/projects/trunk/JastAddExtensions/org.jastadd.plugin -->
 	<property name="jastadd.project" value="org.jastadd.plugin" />
@@ -28,7 +28,7 @@
 	<property name="ide.feature.project" value="org.jmodelica.ide.feature" />
 	<!-- Project name for the project checked out from 
 	     https://svn.jmodelica.org/trunk/EclipseIDE/org.jmodelica.folding.feature -->
-	<property name="folding.feature.project" value="org.jmodelica.folding.feature" />
+<!-- 	<property name="folding.feature.project" value="org.jmodelica.folding.feature" /> -->
 	<!-- Project name for the project checked out from 
 	     https://svn.jmodelica.org/trunk/EclipseIDE/org.jastadd.plugin.feature -->
 	<property name="jastadd.feature.project" value="org.jastadd.plugin.feature" />
@@ -63,7 +63,7 @@
 	<property name="site_dir" value="../site" />
 
 	<property name="core_java_dir" value="${core_dir}/src" />
-	<property name="folding_java_dir" value="../${folding.project}/src" />
+<!--	<property name="folding_java_dir" value="../${folding.project}/src" /> -->
 
 
 	<property name="package" value="org.jmodelica" />
@@ -355,7 +355,7 @@
 			<src path="${ant_task_dir}" />
 			<src path="${tests_dir}" />
 			<src path="${core_java_dir}" />
-			<src path="${folding_java_dir}" />
+<!--			<src path="${folding_java_dir}" /> -->
 			<include name="**/*.java" />
 		</javac>
 	</target>
@@ -370,11 +370,11 @@
 		</copy>
 
 		<!-- collect class files for org.jmodelica.folding -->
-		<copy todir="${bin_dir}/bundles/${folding.project}">
+<!--		<copy todir="${bin_dir}/bundles/${folding.project}">
 			<fileset dir="${bin_dir}/classes">
 				<include name="org/jmodelica/folding/**/*" />
 			</fileset>
-		</copy>
+		</copy> -->
 
 		<!-- collect class files for org.jmodelica.ide -->
 		<copy todir="${bin_dir}/bundles/${ide.project}">
@@ -391,13 +391,13 @@
 		<delete file="${bin_dir}/plugin.versions" quiet="true" />
 		<emptyDir dir="${bin_dir}/plugins" />
 		<jm_buildPlugin projectName="${ide.project}" revpath="${jmodelica_root}" />
-		<jm_buildPlugin projectName="${folding.project}" />
+<!--		<jm_buildPlugin projectName="${folding.project}" /> -->
 		<jm_buildPlugin projectName="${jastadd.project}" path="${core_dir}" />
 
 		<!-- build jars for features -->
 		<emptyDir dir="${bin_dir}/features" />
 		<jm_buildFeature projectName="${ide.feature.project}" />
-		<jm_buildFeature projectName="${folding.feature.project}" />
+<!--		<jm_buildFeature projectName="${folding.feature.project}" /> -->
 		<jm_buildFeature projectName="${jastadd.feature.project}" />
 
 		<!-- build update site -->

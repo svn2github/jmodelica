@@ -6248,6 +6248,27 @@ def compile_jmu(class_name, file_name=[], compiler='auto', target='ipopt',
 
 
 def unzip_jmu(archive, path='.', random_name=True):
+    """
+    Unzip a JMU.
+    
+    Looks for a model description XML file, model values XML file and a binary 
+    file and returns the result in a dict with the key words: 'model_desc', 
+    'model_values' and 'binary' resp. Any file not found will result in an 
+    exception being raised.
+    
+    Parameters::
+        
+        archive --
+            The archive file name.
+            
+        path --
+            The path to the archive file.
+            Default: Current directory.
+            
+    Raises::
+    
+        IOError if any file is missing in the JMU.
+    """
     jmu_files = unzip_unit(archive, path, random_name)
     
     # check if all files have been found during unzip

@@ -128,6 +128,25 @@ class TestBlockingFactors(OptimizationTest):
         self.assert_all_trajectories(
             ['x[1]', 'x[2]', 'w1', 'w2', 'w3', 'w4'])
 
+class TestWriteScaledResult(OptimizationTest):
+
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+                'ScaledResult.mop', 'ScaledResult.Scaled2',
+                    options={"enable_variable_scaling":True})
+
+    @testattr(assimulo = True)
+    def setUp(self):
+        self.setup_base(opt_options={'write_scaled_result':True})
+        self.run()
+        self.load_expected_data('ScaledResult_Scaled2_result.txt')
+
+    @testattr(assimulo = True)
+    def test_trajectories(self):
+        self.assert_all_trajectories(['x', 'y', 'u', 'der(x)'])
+
+
 class TestTerminalConstraintNominal(OptimizationTest):
 
     @classmethod

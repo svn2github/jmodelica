@@ -265,6 +265,15 @@ def unzip_unit(archive, path='.', random_name=True):
     file and returns the result in a dict with the key words: 'model_desc', 
     'model_values' and 'binary' resp. Any file not found will result in 'None' 
     at that position.
+    
+    Parameters::
+    
+        archive --
+            The archive file name.
+            
+        path --
+            The path to the archive file.
+            Default: Current directory.
     """
     # return arg
     ret_val = {'model_desc':None, 'model_values':None, 'binary':None}

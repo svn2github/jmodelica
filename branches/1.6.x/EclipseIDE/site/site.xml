@@ -6,9 +6,9 @@
    <feature url="features/org.jastadd.plugin_1.0.8.r1618.jar" id="org.jastadd.plugin" version="1.0.8.r1618">
       <category name="org.jmodelica.ide.category"/>
    </feature>
-   <feature url="features/org.jmodelica.folding_0.1.3.r1618.jar" id="org.jmodelica.folding" version="0.1.3.r1618">
+<!--   <feature url="features/org.jmodelica.folding_0.1.3.r1618.jar" id="org.jmodelica.folding" version="0.1.3.r1618">
       <category name="org.jmodelica.ide.category"/>
-   </feature>
+   </feature> -->
    <feature url="features/org.jmodelica.ide_0.3.5.r1618.jar" id="org.jmodelica.ide" version="0.3.5.r1618">
       <category name="org.jmodelica.ide.category"/>
    </feature>

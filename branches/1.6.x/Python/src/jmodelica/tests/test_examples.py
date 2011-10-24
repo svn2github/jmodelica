@@ -194,3 +194,8 @@ def test_parameter_estimation_1_casadi_radau2():
 def test_vdp_casadi_ps():
     """Run the VDP CasADi example using CasadiPseudoSpectral."""
     vdp_casadi_ps.run_demo(False)
+
+@testattr(casadi = True)
+def test_hohmann_transfer():
+    """Run the Hohmann Transfer example using CsadiPseudoSpectral."""
+    hohmann_transfer.run_demo(False)

@@ -1,8 +1,8 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: JModelica IDE
+Bundle-Name: JModelica.org IDE
 Bundle-SymbolicName: org.jmodelica.ide;singleton:=true
-Bundle-Version: 0.3.7
+Bundle-Version: 0.4.0
 Bundle-Activator: org.jmodelica.ide.Activator
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6

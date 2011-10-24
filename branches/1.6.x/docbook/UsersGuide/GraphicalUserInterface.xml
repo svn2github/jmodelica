@@ -9,7 +9,7 @@
          xmlns:m="http://www.w3.org/1998/Math/MathML"
          xmlns:html="http://www.w3.org/1999/xhtml"
          xmlns:db="http://docbook.org/ns/docbook">
-  <title>Graphical User Interface</title>
+  <title>Graphical User Interface for Visualization of Results</title>
 
   <section>
     <title>Plot GUI</title>
@@ -20,13 +20,12 @@
     textual formats).</para>
 
     <para>The GUI is located in the module
-    <literal>jmodelica.plotting.plot_gui</literal> and can be started for
-    windows users by using the shortcut located in the start-menu under
+    <literal>jmodelica.plotting.plot_gui</literal> and can be started by
+    Windows users by selecting the shortcut located in the start-menu under
     JModelica.org. The GUI can also be started by typing the following
     commands in a Python shell:</para>
 
-    <programlisting>from jmodelica.plotting import plot_gui
-
+    <programlisting language="python">from jmodelica.plotting import plot_gui
 plot_gui.startGUI()
 </programlisting>
 
@@ -37,7 +36,7 @@ plot_gui.startGUI()
 
       <mediaobject>
         <imageobject>
-          <imagedata fileref="images/overview.png" scale="100"></imagedata>
+          <imagedata fileref="images/overview.png" scalefit="1" width="60%"></imagedata>
         </imageobject>
       </mediaobject>
     </figure>
@@ -50,23 +49,23 @@ plot_gui.startGUI()
       located to the right and can contain multiple figures in various
       configurations. The left is dedicated to show the loaded result file(s)
       and its(theirs) variables together with options for filtering
-      time-varying variables and parameters / constants.</para>
+      time-varying variables and parameters/constants.</para>
 
       <para>Loading a result file is done using the <literal>File</literal>
-      menu and <literal>open</literal> which opens a file dialog where either
-      textual (.txt) results or binary (.mat) results can be chosen. The
-      result are loaded into a tree structure which enables a user to easily
-      browse between components in a model, see <xref
+      menu selection <literal>Open</literal> which opens a file dialog where
+      either textual (.txt) results or binary (.mat) results can be chosen.
+      The result is then loaded into a tree structure which enables a user to
+      easily browse between components in a model, see <xref
       linkend="fig_gui_first" /> . Multiple results can be loaded either
       simultaneously or separately by using the <literal>File</literal> menu
-      again.</para>
+      option <literal>Open</literal> repeatedly.</para>
 
       <figure xml:id="fig_gui_first">
-        <title>A first look.</title>
+        <title>A result file has been loaded.</title>
 
         <mediaobject>
           <imageobject>
-            <imagedata fileref="images/FirstLook.png"></imagedata>
+            <imagedata fileref="images/FirstLook.png" scalefit="1" width="60%"></imagedata>
           </imageobject>
         </mediaobject>
       </figure>
@@ -77,16 +76,17 @@ plot_gui.startGUI()
       principle.</para>
 
       <figure xml:id="fig_gui_traj">
-        <title>A first trajectory.</title>
+        <title>Plotting a trajectory.</title>
 
         <mediaobject>
           <imageobject>
-            <imagedata fileref="images/FirstTrajectory.png"></imagedata>
+            <imagedata fileref="images/FirstTrajectory.png" scalefit="1"
+                       width="60%"></imagedata>
           </imageobject>
         </mediaobject>
       </figure>
 
-      <para>A result can also be removed from the tree view by highlighting an
+      <para>A result can also be removed from the tree view by selecting an
       item in the tree and by pressing the delete key.</para>
     </section>
 
@@ -104,12 +104,13 @@ plot_gui.startGUI()
 
         <mediaobject>
           <imageobject>
-            <imagedata fileref="images/FigureOptions.png"></imagedata>
+            <imagedata fileref="images/FigureOptions.png" scalefit="1"
+                       width="60%"></imagedata>
           </imageobject>
         </mediaobject>
       </figure>
 
-      <para>Under <literal>Axis / Labels</literal>, options such as defining
+      <para>Under <literal>Axis/Labels</literal>, options such as defining
       titles and labels in both X and Y direction can be found together with
       axis options.</para>
 
@@ -118,12 +119,13 @@ plot_gui.startGUI()
 
         <mediaobject>
           <imageobject>
-            <imagedata fileref="images/FigureAxis.png"></imagedata>
+            <imagedata fileref="images/FigureAxis.png" scalefit="1"
+                       width="60%"></imagedata>
           </imageobject>
         </mediaobject>
       </figure>
 
-      <para>Under <literal>Lines / Legends</literal>, options for specifying
+      <para>Under <literal>Lines/Legends</literal>, options for specifying
       specific line labels and line styles can be found, see <xref
       linkend="fig_gui_lines" />. The top drop-down list contains all
       variables related to the highlighted figure and the following input
@@ -137,7 +139,8 @@ plot_gui.startGUI()
 
         <mediaobject>
           <imageobject>
-            <imagedata fileref="images/FigureLines.png"></imagedata>
+            <imagedata fileref="images/FigureLines.png" scalefit="1"
+                       width="60%"></imagedata>
           </imageobject>
         </mediaobject>
       </figure>
@@ -148,43 +151,46 @@ plot_gui.startGUI()
       added.</para>
 
       <figure xml:id="fig_gui_additional">
-        <title>Additional Figure.</title>
+        <title>An additional plot has been added.</title>
 
         <mediaobject>
           <imageobject>
-            <imagedata fileref="images/FigurePlot.png"></imagedata>
+            <imagedata fileref="images/FigurePlot.png" scalefit="1"
+                       width="60%"></imagedata>
           </imageobject>
         </mediaobject>
       </figure>
 
-      <para>The figures can be positioned to ones liking by choosing a figure
-      tab and moving it to an appropriate side. In <xref
+      <para>The figures can be positioned by choosing a figure tab and moving
+      it to one of the borders of the GUI. In <xref
       linkend="fig_gui_moving" /> "Plot 1" have been dragged to the left side
-      of the figure and a highlighted area have emerged which shows where
-      "Plot 1" will be positioned if we are to drop it there. In <xref
-      linkend="fig_gui_moved" /> the result is shown.</para>
+      of the figure and a highlighted area has emerged which shows where "Plot
+      1" will be positioned. In <xref linkend="fig_gui_moved" /> the result is
+      shown.</para>
 
       <figure xml:id="fig_gui_moving">
         <title>Moving Plot Figure.</title>
 
         <mediaobject>
           <imageobject>
-            <imagedata fileref="images/FigureMoving.png"></imagedata>
+            <imagedata fileref="images/FigureMoving.png" scalefit="1"
+                       width="60%"></imagedata>
           </imageobject>
         </mediaobject>
       </figure>
 
       <figure xml:id="fig_gui_moved">
-        <title>Moved Plot Figure.</title>
+        <title>GUI after moving the plot window.</title>
 
         <mediaobject>
           <imageobject>
-            <imagedata fileref="images/FigureMoved.png"></imagedata>
+            <imagedata fileref="images/FigureMoved.png" scalefit="1"
+                       width="60%"></imagedata>
           </imageobject>
         </mediaobject>
       </figure>
 
-      <para>If we are to add more figures an increasingly complex figure
+      <para>If we are to add more figures, an increasingly complex figure
       layout can be created as is shown in <xref linkend="fig_gui_complex" />
       where figures also have been dragged to other figure headers.</para>
 
@@ -193,7 +199,8 @@ plot_gui.startGUI()
 
         <mediaobject>
           <imageobject>
-            <imagedata fileref="images/FigureComplex.png"></imagedata>
+            <imagedata fileref="images/FigureComplex.png" scalefit="1"
+                       width="60%"></imagedata>
           </imageobject>
         </mediaobject>
       </figure>
@@ -203,16 +210,17 @@ plot_gui.startGUI()
       <title>View Options</title>
 
       <para>Options for interacting with a figure and changing the display can
-      be found under the View menu. The options are to show / hide a grid,
+      be found under the View menu. The options are to show/hide a grid,
       either to use the mouse to move the plot or to use the mouse for zooming
-      and finally to resize the plot to fit the checked variables.</para>
+      and finally to resize the plot to fit the selected variables.</para>
 
       <figure>
         <title>Figure View Options.</title>
 
         <mediaobject>
           <imageobject>
-            <imagedata fileref="images/FigureView.png"></imagedata>
+            <imagedata fileref="images/FigureView.png" scalefit="1"
+                       width="60%"></imagedata>
           </imageobject>
         </mediaobject>
       </figure>
@@ -220,23 +228,24 @@ plot_gui.startGUI()
       <para>Moving a figure with the <literal>move</literal> option is
       performed by simply pressing the left mouse button and while still
       holding down the button, dragging the plot to the area of interest. A
-      <literal>zoom</literal> is performed in a similar fashion.</para>
+      zoom operation is performed in a similar fashion.</para>
     </section>
 
     <section>
       <title>Example</title>
 
-      <para>In <xref linkend="fig_gui_example" /> an example is shown how the
+      <para>In <xref linkend="fig_gui_example" /> an example showing how the
       GUI can be used to plot four different plots with different labels. Some
       of the lines have also been modified in width and in line style. A grid
       is also shown.</para>
 
-      <figure>
+      <figure xml:id="fig_gui_example">
         <title>Multiple figure example.</title>
 
         <mediaobject>
           <imageobject>
-            <imagedata fileref="images/MultipleExample.png"></imagedata>
+            <imagedata fileref="images/MultipleExample.png" scalefit="1"
+                       width="60%"></imagedata>
           </imageobject>
         </mediaobject>
       </figure>

@@ -28,13 +28,13 @@
     <section>
       <title>Java</title>
 
-      <para>It is required to have a Java Runtime Environment (JRE) version 6
-      installed on your computer.<task>
+      <para>It is required to have a 32 bit Java Runtime Environment (JRE)
+      version 6 installed on your computer.<task>
           <title>Install a JRE</title>
 
           <procedure>
             <step>
-              <para>Get a <link
+              <para>Get a 32 bit <link
               xlink:href="http://www.java.com/en/download/index.jsp">JRE</link>
               installer suitable for your platform.</para>
             </step>
@@ -49,8 +49,9 @@
     <section xml:id="inst_sec_prereq_python">
       <title>Python</title>
 
-      <para><link xlink:href="http://www.python.org/download/releases/">Python
-      2.7</link> with the following additional packages are required:</para>
+      <para>A 32 bit <link
+      xlink:href="http://www.python.org/download/releases/">Python 2.7</link>
+      with the following additional packages are required:</para>
 
       <table>
         <title>Python prerequisites</title>
@@ -117,37 +118,51 @@
         </tgroup>
       </table>
 
-      <para>Please note that IPython has extra dependencies on Windows and Mac
-      OS X :</para>
+      <para>Please note that IPython has extra dependencies on Windows
+      :</para>
 
-      <itemizedlist>
-        <listitem>
-          <para>Windows:</para>
+      <table>
+        <title>IPython dependencies on Windows</title>
 
-          <itemizedlist>
-            <listitem>
-              <para><link
-              xlink:href="https://launchpad.net/pyreadline/+download">Pyreadline</link></para>
-            </listitem>
+        <tgroup cols="3">
+          <colspec align="left" colname="col–para" colwidth="2*" />
 
-            <listitem>
-              <para><link
-              xlink:href="http://pypi.python.org/pypi/setuptools">setuptools</link></para>
-            </listitem>
-          </itemizedlist>
-        </listitem>
+          <colspec align="left" colname="col–def" colwidth="2*" />
 
-        <listitem>
-          <para>Mac OS X:</para>
+          <colspec align="left" colname="col–descr" colwidth="3*" />
 
-          <itemizedlist>
-            <listitem>
-              <para><link
-              xlink:href="http://pypi.python.org/pypi/readline">readline</link></para>
-            </listitem>
-          </itemizedlist>
-        </listitem>
-      </itemizedlist>
+          <thead>
+            <row>
+              <entry align="center">Package</entry>
+
+              <entry align="center">Recommended version</entry>
+
+              <entry align="center">Description</entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry><link
+              xlink:href="http://pypi.python.org/pypi/pyreadline">Pyreadline</link></entry>
+
+              <entry>1.7</entry>
+
+              <entry>A Python implmementation of GNU readline.</entry>
+            </row>
+
+            <row>
+              <entry><link
+              xlink:href="http://pypi.python.org/pypi/setuptools">setuptools</link></entry>
+
+              <entry>0.6c11</entry>
+
+              <entry>A package for downloading, building, installing,
+              upgrading, and uninstalling Python packages.</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
 
       <para>The recommended version of a package is not always the same as the
       latest version available. It is the package version that JModelica.org
@@ -306,15 +321,15 @@
 
       <para>The Python prerequisites for installing the JModelica.org SDK are
       the same as listed in <xref linkend="inst_sec_prereq_python" />. For
-      Java however it is required to have a JDK installed, not only a JRE as
-      for the binary installation.</para>
+      Java however it is required to have a 32 bit JDK installed, not only a
+      32 bit JRE as for the binary installation.</para>
 
       <task>
         <title>Install a JDK</title>
 
         <procedure>
           <step>
-            <para>Get a <link
+            <para>Get a 32bit <link
             xlink:href="http://java.sun.com/javase/downloads/">JDK</link>.</para>
           </step>
 
@@ -404,10 +419,10 @@ make &amp;&amp; make install</programlisting></para>
               JModelica.org start menu and running an example. Starting the
               Python session from this start menu will set all the environment
               variables required to run the JModelica.org Python
-              interface.<programlisting># import the vdp example
+              interface.<programlisting language="python"># Import the vdp example
 from jmodelica.examples import vdp
 
-# run the vdp
+# Run the vdp example and plot results
 vdp.run_demo()</programlisting></para>
             </listitem>
           </orderedlist></para>

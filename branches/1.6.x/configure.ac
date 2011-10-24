@@ -43,7 +43,7 @@ case $build in
 	echo "Cygwin detected"   
  	SHAREDEXT=".dll";
 	SHARED_LDFLAGS=" -shared ";
-	SEP=';'
+	SEP='\;'
 	AC_LIBTOOL_WIN32_DLL
 	AC_DEFINE([WIN32],[1],[Building on a win32 system (detected Cygwin).])
     ;;
@@ -51,7 +51,7 @@ case $build in
 	echo "MinGW detected"   
 	SHAREDEXT=".dll";
 	SHARED_LDFLAGS=" -shared ";
-	SEP=';'
+	SEP='\;'
 	AC_LIBTOOL_WIN32_DLL
 	AC_DEFINE([WIN32],[1],[Building on a win32 system (detected MinGW).])    
     ;;

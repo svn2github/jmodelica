@@ -234,11 +234,11 @@ res = model.simulate(final_time=10, input=input_object)
         <para>If we were to do the same example using input functions instead,
         the code would like for the single input case:</para>
 
-        <programlisting>input_object = ('u1', N.sin)</programlisting>
+        <programlisting language="python">input_object = ('u1', N.sin)</programlisting>
 
         <para>and for the double input case:</para>
 
-        <programlisting>def input_function(t):
+        <programlisting language="python">def input_function(t):
     return N.array([N.sin(t),N.cos(t)])
 
 input_object = (['u1','u2'],input_function)
@@ -251,7 +251,7 @@ input_object = (['u1','u2'],input_function)
         <para>The options attribute are where options to the specified
         algorithm are stored and are preferably used together with:</para>
 
-        <programlisting>opts = JMUModel.simulate_options()
+        <programlisting language="python">opts = JMUModel.simulate_options()
 </programlisting>
 
         <para>which returns the default options for the default algorithm.
@@ -1119,9 +1119,9 @@ plt.show()
       differentiated, and dummy derivatives are selected. In order to
       demonstrate this feature, we consider the model
       Modelica.Mechanics.Rotational.Examples.First from the Modelica Standard
-      library, see Figure <xref linkend="rotational_first_diagram" />. The
-      model is of high index since there are two rotating inertias connected
-      with a rigid gear.</para>
+      library, see <xref linkend="rotational_first_diagram" />. The model is
+      of high index since there are two rotating inertias connected with a
+      rigid gear.</para>
 
       <figure xml:id="rotational_first_diagram">
         <title>Modelica.Mechanics.Rotational.First connection diagram</title>
@@ -1312,7 +1312,7 @@ P.show()
       Sundials suite (https://computation.llnl.gov/casc/sundials/main.html)
       and the model is shown in the code below.</para>
 
-      <programlisting>optimization Robertson
+      <programlisting language="optimica">optimization Robertson
     parameter Real p1(free=true)=0.040;
     parameter Real p2(free=true)=1.0e4;
     parameter Real p3(free=true)=3.0e7;
@@ -1357,7 +1357,7 @@ model = JMUModel(jmu_name)
       option to activate the sensitivity calculations and also the absolute
       tolerances:</para>
 
-      <programlisting># Get and set the options
+      <programlisting language="python"># Get and set the options
 opts = model.simulate_options() #Get the options
 opts['IDA_options']['atol'] = [1.0e-8, 1.0e-14, 1.0e-6] #Change the tolerance
 opts['IDA_options']['sensitivity'] = True #Activate the sensitivity calculations
@@ -1366,14 +1366,14 @@ opts['ncp'] = 400 #Change the number of communication points
 
       <para>Now lets simulate the model:</para>
 
-      <programlisting>res = model.simulate(final_time=4, options=opts)
+      <programlisting language="python">res = model.simulate(final_time=4, options=opts)
 </programlisting>
 
       <para>The sensitivity results are stored as <literal>d{variable
       name}/d{parameter name}</literal> in the result object. We are
       interested in the following sensitivities:</para>
 
-      <programlisting>dy1dp1 = res['dy1/dp1']
+      <programlisting language="python">dy1dp1 = res['dy1/dp1']
 dy2dp1 = res['dy2/dp1']
 dy3dp1 = res['dy3/dp1']
 time = res['time']
@@ -1382,7 +1382,7 @@ time = res['time']
       <para>To plot the trajectories using <literal>matplotlib</literal>, use
       the following commands:</para>
 
-      <programlisting>plt.plot(time, dy1dp1, time, dy2dp1, time, dy3dp1)
+      <programlisting language="python">plt.plot(time, dy1dp1, time, dy2dp1, time, dy3dp1)
 plt.legend(('dy1/dp1', 'dy2/dp1', 'dy3/dp1'))
 plt.show()
 </programlisting>

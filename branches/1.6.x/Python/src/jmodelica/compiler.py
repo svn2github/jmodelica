@@ -97,6 +97,23 @@ class ModelicaCompiler(object):
         """ 
         Create a Modelica compiler. The compiler can be used to compile pure 
         Modelica models. A compiler instance can be used multiple times.
+        
+        Parameters::
+        
+            xml_template --
+                Path to the model description XML template file. If None then 
+                the default template will be used.
+                Default: None
+                
+            xml_values_template --
+                Path to the model values XML template file. If None then the 
+                default template will be used.
+                Default: None
+                
+            c_template --
+                Path to the C template file. If None then the default template 
+                will be used.
+                Default: None
         """
         try:
             options = OptionRegistry(self.options_file_path)
@@ -140,6 +157,20 @@ class ModelicaCompiler(object):
     
     
     def set_options(self, compiler_options):
+        """
+        Set compiler options. See available options in the file options.xml.
+        
+        Parameters::
+        
+            compiler_options --
+                A dict of options where the key specifies which option to modify 
+                and the value the new value for the option.
+        
+        Raises::
+        
+            JMIException if the value of the option is not one of the allowed 
+            types (float, boolean, string, integer or list).
+        """
         # set compiler options
         for key, value in compiler_options.iteritems():
             if isinstance(value, bool):
@@ -199,6 +230,10 @@ class ModelicaCompiler(object):
         
             key --
                 Get the boolean option for this key.
+        
+        Raises::
+        
+            UnknownOptionError if the option does not exist.
         """
         try:
             option = self._compiler.getBooleanOption(key)
@@ -221,7 +256,7 @@ class ModelicaCompiler(object):
                 
         Raises::
         
-            UnknownOptionError if the options does not exist.
+            UnknownOptionError if the option does not exist.
         """
         try:
             self._compiler.setBooleanOption(key, value)
@@ -236,6 +271,10 @@ class ModelicaCompiler(object):
         
             key --
                 Get the integer option for this key.
+        
+        Raises::
+        
+            UnknownOptionError if the option does not exist.
         """
         try:
             option = self._compiler.getIntegerOption(key)
@@ -273,6 +312,10 @@ class ModelicaCompiler(object):
         
             key --
                 Get the real option for this key.
+        
+        Raises::
+        
+            UnknownOptionError if the option does not exist.
         """
         try:
             option = self._compiler.getRealOption(key)
@@ -310,6 +353,10 @@ class ModelicaCompiler(object):
         
             key --
                 Get the string option for this key.
+                
+        Raises::
+        
+            UnknownOptionError if the option does not exist.
         """
         try:
             option = self._compiler.getStringOption(key)
@@ -357,8 +404,7 @@ class ModelicaCompiler(object):
         Parameters::
         
             template --
-                The new XML model description template.
-        
+                The new XML model description template.       
         """
         self._compiler.setXMLTpl(template)
 
@@ -379,8 +425,7 @@ class ModelicaCompiler(object):
         Parameters::
         
             template --
-                The new XML model values template.
-        
+                The new XML model values template.       
         """
         self._compiler.setXMLValuesTpl(template)
         
@@ -411,8 +456,9 @@ class ModelicaCompiler(object):
         Compiles a model (parsing, instantiating, flattening, code generation 
         and binary file generation) and creates a JMU on the file system. Set 
         target to specify the contents of the object file used to build the 
-        binary. The options are "model", "model_noad", "algorithms" and "ipopt". 
-        See makefile in install folder for details on the different targets.
+        binary. The different targets are "model", "model_noad", "algorithms" 
+        and "ipopt". See makefile in install folder for details on the different 
+        targets.
         
         Parameters::
         
@@ -441,10 +487,10 @@ class ModelicaCompiler(object):
         Compiles a model (parsing, instantiating, flattening, code generation 
         and binary file generation) and creates an FMU on the file system. Set 
         target to specify the contents of the object file used to build the 
-        binary. The options are "model", "model_noad", "algorithms" and "ipopt". 
+        binary. The different targets are "model_fmume" and "model_fmucs". 
         See makefile in install folder for details on the different targets.
         
-        Note: target must currently be set to 'model_noad'.
+        Note: target must currently be set to 'model_fmume'.
         
         Parameters::
         
@@ -456,9 +502,9 @@ class ModelicaCompiler(object):
                 contained.
                 
             target --
-                The build target. Valid options are 'model', 'model_noad', 
-                'algorithms' and 'ipopt'.
-                Note: Must currently be set to 'model_noad'.
+                The build target. Valid options are 'model_fmume' and 
+                'model_fmucs'.
+                Note: Must currently be set to 'model_fmume'.
                 
             compile_to --
                 Specify location of the compiled FMU. Directory will be created 
@@ -728,6 +774,28 @@ class OptimicaCompiler(ModelicaCompiler):
         Create an Optimica compiler. The compiler can be used to compile both 
         Modelica and Optimica models. A compiler instance can be used multiple 
         times.
+        
+        Parameters::
+        
+            xml_template --
+                Path to the model description XML template file. If None then 
+                the default template will be used.
+                Default: None
+                
+            xml_values_template --
+                Path to the model values XML template file. If None then the 
+                default template will be used.
+                Default: None
+                
+            c_template --
+                Path to the C template file. If None then the default template 
+                will be used.
+                Default: None
+                
+            optimica_c_template --
+                Path to the Optimica C template file. If None then the default 
+                template will be used.
+                Default: None
         """
         try:
             options = OptionRegistry(self.options_file_path)

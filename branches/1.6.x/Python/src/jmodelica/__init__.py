@@ -114,19 +114,20 @@ def check_packages():
     sys.stdout.write("\n")
     
     packages=["numpy", "scipy", "matplotlib", "jpype", "lxml", "nose", 
-        "assimulo"]
+        "assimulo","wxPython", "cython", "casadi"]
     assimulo_path=os.path.join(jmodelica.environ['JMODELICA_HOME'],'Python',
         'assimulo')
     
     if platform == "win32":
         packages.append("pyreadline")
+        packages.append("setuptools")
     
     error_packages=[]
     warning_packages=[]
     fp = None
     for package in packages:
         try:
-            vers="--"
+            vers="n/a"
             if package=='assimulo':
                 fp, path, desc = imp.find_module('problem', [assimulo_path])
                 mod = imp.load_module('problem', fp, path, desc)
@@ -146,7 +147,7 @@ def check_packages():
                 pass
             sys.stdout.write("%s %s %s" %(package.ljust(le,'.'), vers.ljust(le), "Ok".ljust(le)))
         except ImportError, e:
-            if package == "nose" or package == "assimulo":
+            if package == "nose" or package == "assimulo" or package == "casadi" or package == "wxPython":
                 sys.stdout.write("%s %s %s" % (package.ljust(le,'.'), vers.ljust(le), "Package missing - Warning issued, see details below".ljust(le)))
                 warning_packages.append(package)
             else:
@@ -198,6 +199,14 @@ def check_packages():
                 sys.stdout.write("** The package nose could not be found. \n   \
 This package is needed in the jmodelica.tests package. \
 You will not be able to run any tests.")
+            elif w == 'casadi':
+                sys.stdout.write("** The package casadi could not be found.\n \
+This package is needed to be able to use:\n\n \
+- The casadi_interface module.\n \
+- Some of the examples in the jmodelica.examples package")
+            elif w == 'wxPython':
+                sys.stdout.write("** The package wxPython could not be found.\n \
+This package is needed to be able to use the plot-GUI.")
 		
             sys.stdout.write("\n\n")
 

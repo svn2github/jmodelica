@@ -48,19 +48,41 @@
 
         <para>High-index systems, commonly occurring in mechanical systems,
         are supported in JModelica.org 1.6. The implementation relies on
-        Pantelides' algorithm and the dummy derivative selection algorithm.
-        </para>
+        Pantelides' algorithm and the dummy derivative selection
+        algorithm.</para>
+      </section>
+
+      <section>
+        <title>Modelica compliance</title>
+
+        <para>The following improvements to the Modelica compliance of the
+        editors has been made:</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>Partial support for the <code>smooth()</code> operator (not
+            used in event handling, otherwise supported).</para>
+          </listitem>
+
+          <listitem>
+            <para>Support for global name lookup (i.e. names starting with a
+            dot are looked up from the top scope).</para>
+          </listitem>
+        </itemizedlist>
       </section>
     </section>
 
     <section>
-      <title>Python </title>
+      <title>Python</title>
 
       <section>
         <title>Graphical user interface for visualization of simulation and
         optimization results</title>
 
-        <para>A new graphical interface for </para>
+        <para>A new graphical interface for displaying simulation and / or
+        optimization results have been implemented. The interface also
+        supports results generated from Dymola, both binary and
+        textual.</para>
       </section>
 
       <section>
@@ -75,7 +97,13 @@
         <title>Compilation of XML models</title>
 
         <para>A new convenience function for compilation of Modelica and
-        Optimica models into XMK, including equations, has been added.</para>
+        Optimica models into XML, including equations, has been added.</para>
+      </section>
+
+      <section>
+        <title>Python version upgrade</title>
+
+        <para>The Python package has been updated to Python 2.7.</para>
       </section>
     </section>
 
@@ -110,9 +138,17 @@
     </section>
 
     <section>
-      <title>Eclipse Modelica plug-in</title>
+      <title>Eclipse Modelica plugin</title>
 
-      <para></para>
+      <para>The JModelica.org Eclipse plugin has improved to the point where
+      we are ready to do a release. Version 0.4.0 is now available from the
+      JModelica.org website.</para>
+
+      <para>Changes from the versions that has been available from the SVN
+      repository are mainly stability and performance improvements. To this
+      end, some features have been disabled (auto-complete and format
+      file/region). There are also a few new features, most notably support
+      for rendering of class icons.</para>
     </section>
 
     <section>
@@ -130,11 +166,11 @@
 
       <para>Fredrik Magnusson</para>
 
+      <para>Jesper Mattsson</para>
+
       <para>Patrik Meijer</para>
 
       <para>Lennart Moraeus</para>
-
-      <para>Jesper Mattsson</para>
 
       <para>Kristina Olsson</para>
 

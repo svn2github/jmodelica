@@ -182,10 +182,6 @@ class CasadiCollocator(object):
     
             Currently only textual format is supported.
         """
-        #~ # Experimental
-        #~ # ------------
-        #~ return self.get_result()
-        #~ # ------------
         (t,dx_opt,x_opt,u_opt,w_opt,p_opt) = self.get_result()
         data = N.hstack((t,dx_opt,x_opt,u_opt,w_opt))
         
@@ -1209,7 +1205,7 @@ class RadauCollocator(CasadiCollocator):
 
 class Radau2Collocator(CasadiCollocator):
     
-    """Solves an optimal control problem using Radau direct collocation."""
+    """Solves an optimal control problem using local collocation."""
     
     def __init__(self, model, options):
         # Store the model
@@ -1229,7 +1225,12 @@ class Radau2Collocator(CasadiCollocator):
                 self.h += self.hs
         
         # Define polynomial for representation of solutions
-        self.pol = RadauPol(self.n_cp)
+        if self.discr == "LG":
+            self.pol = GaussPol(self.n_cp)
+        elif self.discr == "LGR":
+            self.pol = RadauPol(self.n_cp)
+        else:
+            raise ValueError("Unknown discretization scheme %s." % self.discr)
         
         # Get to work
         self._create_NLP()
@@ -1291,6 +1292,8 @@ class Radau2Collocator(CasadiCollocator):
             n_xx += len(self.blocking_factors) * self.model.get_n_u()
         if not self.eliminate_cont_var:
             n_xx += (self.n_e - 1) * n_var['x']
+        if self.discr == "LG":
+            n_xx += (self.n_e - 1) * n_var['x']
         if self.hs == "free":
             n_xx += self.n_e
         
@@ -1344,22 +1347,46 @@ class Radau2Collocator(CasadiCollocator):
                 element += factor
         
         # Index state continuity variables
-        if self.eliminate_cont_var:
+        if self.discr == "LGR":
             for i in xrange(2, self.n_e + 1):
-                var[i][0] = {}
                 var_indices[i][0] = {}
-                
-                var[i][0]['x'] = var[i - 1][self.n_cp]['x']
-                var_indices[i][0]['x'] = var_indices[i - 1][self.n_cp]['x']
-        else:
-            for i in xrange(2, self.n_e + 1):
                 var[i][0] = {}
-                var_indices[i][0] = {}
                 
+                if self.eliminate_cont_var:
+                    var_indices[i][0]['x'] = var_indices[i - 1][self.n_cp]['x']
+                    var[i][0]['x'] = var[i - 1][self.n_cp]['x']
+                else:
+                    new_index = index + n_var['x']
+                    var_indices[i][0]['x'] = range(index, new_index)
+                    index = new_index
+                    var[i][0]['x'] = xx[var_indices[i][0]['x']]
+        elif self.discr == "LG":
+            for i in xrange(1, self.n_e):
+                var_indices[i][self.n_cp + 1] = {}
+                var[i][self.n_cp + 1] = {}
+                var_indices[i + 1][0] = {}
+                var[i + 1][0] = {}
+                
+                # Index x_{i, n_cp + 1}
                 new_index = index + n_var['x']
-                var_indices[i][0]['x'] = range(index, new_index)
+                var_indices[i][self.n_cp + 1]['x'] = range(index, new_index)
                 index = new_index
-                var[i][0]['x'] = xx[var_indices[i][0]['x']]
+                var[i][self.n_cp + 1]['x'] = \
+                        xx[var_indices[i][self.n_cp + 1]['x']]
+                
+                # Index x_{i + 1, 0}
+                if self.eliminate_cont_var:
+                    var_indices[i + 1][0]['x'] = \
+                            var_indices[i][self.n_cp + 1]['x']
+                    var[i + 1][0]['x'] = var[i][self.n_cp + 1]['x']
+                else:
+                    new_index = index + n_var['x']
+                    var_indices[i + 1][0]['x'] = range(index, new_index)
+                    index = new_index
+                    var[i + 1][0]['x'] = xx[var_indices[i + 1][0]['x']]
+        else:
+            raise ValueError("Unknown discretization scheme %s." %
+                             self.discr)
         
         # Index the variables for the derivative initial values
         var[1][0] = {}
@@ -1676,7 +1703,7 @@ class Radau2Collocator(CasadiCollocator):
         c_e = casadi.vertcat([c_e, initial_F0])
         c_e = casadi.vertcat([c_e, initial_F])
         
-        # Evaluate u_1_0 based on polynomial u^1
+        # Evaluate u_1_0 based on polynomial u_1
         u_1_0 = 0
         for k in xrange(1, self.n_cp + 1):
             u_1_0 += var[1][k]['u'] * self.pol.eval_basis(k, 0, False)
@@ -1706,10 +1733,38 @@ class Radau2Collocator(CasadiCollocator):
                     [dae_constr] = dae_F_eval([z])
                     c_e = casadi.vertcat([c_e, dae_constr])
                 
-        # Continuity constraints
+        # Continuity constraints for x_{i, n_cp + 1}
+        if self.discr == "LG":
+            if self.quadrature_constraint:
+                for i in xrange(1, self.n_e):
+                    # Evaluate x_{i, n_cp + 1} based on quadrature
+                    x_i_np1 = 0
+                    for k in xrange(1, self.n_cp + 1):
+                        x_i_np1 += self.pol.w[k] * var[i][k]['dx']
+                    x_i_np1 = (var[i][0]['x'] + 
+                               self.horizon * self.h[i] * x_i_np1)
+                    
+                    # Add residual for x_i_np1 as constraint
+                    c_e = casadi.vertcat(
+                            [c_e, var[i][self.n_cp + 1]['x'] - x_i_np1])
+            else:
+                for i in xrange(1, self.n_e):
+                    # Evaluate x_{i, n_cp + 1} based on polynomial x_i
+                    x_i_np1 = 0
+                    for k in xrange(self.n_cp + 1):
+                        x_i_np1 += var[i][k]['x'] * self.pol.eval_basis(k, 1,
+                                                                        True)
+                    
+                    # Add residual for x_i_np1 as constraint
+                    c_e = casadi.vertcat(
+                            [c_e, var[i][self.n_cp + 1]['x'] - x_i_np1])
+        
+        # Continuity constraints for x_{i, 0}
         if not self.eliminate_cont_var:
+            gauss = int(self.discr == "LG")
             for i in xrange(1, self.n_e):
-                cont_constr = var[i][self.n_cp]['x'] - var[i + 1][0]['x']
+                cont_constr = (var[i][self.n_cp + gauss]['x'] - 
+                               var[i + 1][0]['x'])
                 c_e = casadi.vertcat([c_e, cont_constr])
                 
         # Element length constraints
@@ -2205,15 +2260,6 @@ class Radau2Collocator(CasadiCollocator):
         return self.H_fcn
     
     def get_result(self):
-        #~ # Experimental
-        #~ # ------------
-        #~ x = self.xx
-        #~ x_opt = self.nlp_opt
-        #~ c_e = self.c_fcn
-        #~ jac = c_e.jac()
-        #~ return (x, x_opt, c_e, jac)
-        #~ # ------------
-        
         # Set model info
         n_var = {'dx': self.model.get_n_x(), 'x': self.model.get_n_x(),
                  'u': self.model.get_n_u(), 'w': self.model.get_n_w()}

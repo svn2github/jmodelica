@@ -23,27 +23,41 @@
     parameters.</para>
 
     <section>
-      <title>The JMUModel and FMUModel</title>
+      <title>The different model objects in JModelica.org</title>
 
-      <para>There are two different kinds of model objects that can be created
-      with JModelica.org, the <literal>JMUModel</literal> and the
-      <literal>FMUModel</literal>. The <literal>JMUModel</literal> is created
-      by loading a <emphasis>JMU</emphasis>, which is a compressed file with a
+      <para>There are three different kinds of model objects that can be
+      created with JModelica.org: <literal>JMUModel</literal>,
+      <literal>FMUModel</literal> and <literal>CasadiModel</literal>. The
+      <literal>JMUModel</literal> is created by loading a
+      <emphasis>JMU</emphasis>, which is a compressed file with a
       JModelica.org specific structure. The <literal>FMUModel</literal> is
       created by loading an <emphasis>FMU</emphasis> (Functional Mock-up
       Unit), which is a compressed file following the FMI (Functional Mock-up
-      Interface) standard.</para>
+      Interface) standard. The <literal>CasadiModel</literal> is created by
+      loading an <emphasis>FMUX</emphasis> which is a compressed file
+      containing the XML file needed to work with CasADI.</para>
 
       <para>JMUs are created by compiling Modelica or Optimica models with
       JModelica.org. The JMU can then be loaded in a
       <literal>JMUModel</literal> object and used for simulation and
-      optimization (if Optimica) purposes.</para>
+      optimization purposes.</para>
 
       <para>FMUs are created by compiling Modelica models with JModelica.org
-      (or any other tool supporting FMU export). (Optimica models can thus not
-      be compiled into FMUs.) The FMU can then be loaded in an
+      (or any other tool supporting FMU export). Optimica models can not be
+      compiled into FMUs. The FMU can then be loaded in an
       <literal>FMUModel</literal> object and used for simulation
       purposes.</para>
+
+      <para>FMUXes are created by compiling Modelica or Optimica models with
+      JModelica.org. The FMUX main content is an XML file which follows the
+      FMI standard with some additional JModelica.org specific elements and an
+      equation section in which all equations used in the model are
+      represented. The FMUX can be loaded in a <literal>CasadiModel</literal>
+      and thereby use the automatic differentiation tool CasADi for
+      optimization purposes. Read more about CasADi and how a
+      <literal>CasadiModel</literal> object can be used for optimization in
+      <xref linkend="opt_sec_pseudo-spectral" /> in <xref
+      linkend="ch_optimization" />.</para>
     </section>
   </section>
 
@@ -53,15 +67,17 @@
     <para>Compiling a model is done in a few steps; importing a compiler
     function from JModelica.org, specifying a model class and file location
     and performing the actual compilation. This will be demonstrated in <xref
-    linkend="models_sec_simple_jmu_compilation" /> for the JMU and in <xref
-    linkend="models_sec_simple_fmu_compilation" /> for the FMU.</para>
+    linkend="models_sec_simple_jmu_compilation" /> for the JMU, in <xref
+    linkend="models_sec_simple_fmu_compilation" /> for the FMU and in <xref
+    linkend="models_sec_simple_fmux_compilation" /> for the FMUX.</para>
 
-    <para>For more advanced usage there are compiler options and parameters to
-    the compiler functions which can be modified. This will be explained in
-    <xref linkend="models_sec_compiler_settings" />. The last section, <xref
-    linkend="models_sec_compilation_in_more_detail" />, will go through some
-    parts of the compilation process and how to perform these steps one by
-    one.</para>
+    <para>For more advanced usage of the compiler functions, there are
+    compiler options and parameters which can be modified. These will be
+    explained in <xref linkend="models_sec_compiler_settings" />.</para>
+
+    <para><xref linkend="models_sec_compilation_in_more_detail" />, will go
+    through some parts of the compilation process and how to perform these
+    steps one by one.</para>
 
     <section xml:id="models_sec_simple_jmu_compilation">
       <title>Simple JMU compilation example</title>
@@ -84,22 +100,22 @@
         </procedure></para>
 
       <para>This is demonstrated in the following code example.<programlisting
-      language="python"># import the compiler function
+      language="python"># Import the compiler function
 from jmodelica.jmi import compile_jmu
 
-# specify Modelica model and model file
+# Specify Modelica model and model file
 model_name = 'myPackage.myModel'
 mo_file = 'myPackage.mo'
 
-# compile the model, return argument is the file name of the JMU
+# Compile the model, return argument is the file name of the JMU
 compile_jmu(model_name, mo_file)
 &gt;&gt; '.\\myPackage_myModel.jmu'
 </programlisting></para>
 
       <para>Once compilation has completed successfully a JMU file will have
       been created on the file system. The JMU file is essentially a
-      compressed file containing files created during compilation that are
-      needed when instantiating a model object. Return argument for
+      compressed file archive containing files created during compilation that
+      are needed when instantiating a model object. Return argument for
       <literal>compile_jmu</literal> is the full file path of the JMU that has
       just been created, this will be useful later when we want to create
       model objects. More about the JMU file and loading models can be found
@@ -135,14 +151,14 @@ compile_jmu(model_name, mo_file)
 
       <para>The only difference is really the requirement on the model, it
       must be a pure Modelica model. The following code example demonstrates
-      how to compile an FMU.<programlisting language="python"># import the compiler function
+      how to compile an FMU.<programlisting language="python"># Import the compiler function
 from jmodelica.fmi import compile_fmu
 
-# specify Modelica model and model file
+# Specify Modelica model and model file
 model_name = 'myPackage.myModel'
 mo_file = 'myPackage.mo'
 
-# compile the model, return argument is the file name of the FMU
+# Compile the model, return argument is the file name of the FMU
 compile_fmu(model_name, mo_file)
 &gt;&gt; '.\\myPackage_myModel.fmu'
 </programlisting></para>
@@ -155,24 +171,62 @@ compile_fmu(model_name, mo_file)
       <xref linkend="models_sec_loading_models" />.</para>
     </section>
 
+    <section xml:id="models_sec_simple_fmux_compilation">
+      <title>Simple FMUX compilation example</title>
+
+      <para>Compiling an FMUX follows the same principle as compiling a JMU
+      and an FMU.</para>
+
+      <procedure>
+        <step>
+          <para>Import the JModelica.org compiler function
+          <literal>compile_fmux</literal> from
+          <literal>jmodelica.fmi</literal>.</para>
+        </step>
+
+        <step>
+          <para>Specify the model and model file.</para>
+        </step>
+
+        <step>
+          <para>Perform the compilation.</para>
+        </step>
+      </procedure>
+
+      <para>The Python code example below will perform these steps.</para>
+
+      <programlisting language="python"># Import the compiler function
+from jmodelica.fmi import compile_fmux
+
+# Specify Modelica model and model file
+model_name = 'myPackage.myModel'
+mo_file = 'myPackage.mo'
+
+# Compile the model, return argument is the file name of the FMUX
+compile_fmux(model_name, mo_file)
+&gt;&gt; '.\\myPackage_myModel.fmux'
+</programlisting>
+    </section>
+
     <section xml:id="models_sec_compiler_settings">
       <title>Compiler settings</title>
 
-      <para>The <literal>compile_jmu</literal> or
-      <literal>compile_fmu</literal> parameters can be listed with the
+      <para>The compiler function parameters can be listed with the
       interactive help in Python. The parameters are explained in the
       corresponding Python <emphasis>docstring</emphasis> which is visualized
       with the interactive help. This is demonstrated in the code examples
       below.</para>
 
       <para>The parameter <literal>target</literal>, is further explained in
-      <xref linkend="models_sec_compiler_targets" />.</para>
+      <xref linkend="models_sec_compiler_targets_jmu" />, <xref
+      linkend="models_sec_compiler_targets_fmu" /> and <xref
+      linkend="models_sec_compiler_targets_fmux" />.</para>
 
       <section xml:id="models_sec_compile_jmu_parameters">
         <title>compile_jmu parameters</title>
 
         <para>The <literal>compile_jmu</literal> parameters can be listed with
-        the interactive help.<programlisting># display the docstring for compile_jmu with the Python command 'help'
+        the interactive help.<programlisting language="python"># Display the docstring for compile_jmu with the Python command 'help'
 from jmodelica.jmi import compile_jmu
 help(compile_jmu)
 Help on function compile_jmu in module jmodelica.jmi:
@@ -251,7 +305,6 @@ compile_jmu(class_name, file_name=[], compiler='auto', target='ipopt', compiler_
             'error'/'e' or 'info'/'i'.
             Default: 'warning'
 
-
     Returns::
 
         Name of the JMU which has been created.
@@ -265,75 +318,143 @@ compile_jmu(class_name, file_name=[], compiler='auto', target='ipopt', compiler_
         <para>The <literal>compile_fmu</literal> parameters can be listed with
         the interactive help.</para>
 
-        <programlisting># display the docstring for compile_fmu with the Python command 'help'
+        <programlisting language="python"># Display the docstring for compile_fmu with the Python command 'help'
 from jmodelica.fmi import compile_fmu
 help(compile_fmu)
 Help on function compile_fmu in module jmodelica.fmi:
 
-compile_fmu(class_name, file_name=[], compiler='modelica', target='model_noad', 
+compile_fmu(class_name, file_name=[], compiler='modelica', target='model_fmume', 
             compiler_options={}, compile_to='.', compiler_log_level='warning')
     Compile a Modelica model to an FMU.
-    
-    A model class name must be passed, all other arguments have default values. 
+
+    A model class name must be passed, all other arguments have default values.
     The different scenarios are:
-    
-    * Only class_name is passed: 
+
+    * Only class_name is passed:
         - Class is assumed to be in MODELICAPATH.
-    
+
     * class_name and file_name is passed:
-        - file_name can be a single file as a string or a list of file_names 
+        - file_name can be a single file as a string or a list of file_names
           (strings).
-    
-    Library directories can be added to MODELICAPATH by listing them in a 
+
+    Library directories can be added to MODELICAPATH by listing them in a
     special compiler option 'extra_lib_dirs', for example:
-    
-        compiler_options = 
+
+        compiler_options =
             {'extra_lib_dirs':['c:\MyLibs\MyLib1','c:\MyLibs\MyLib2']}
-        
-    Other options for the compiler should also be listed in the compiler_options 
+
+    Other options for the compiler should also be listed in the compiler_options
     dict.
-    
-    The compiler target is 'model_noad' by default which means that libraries 
-    for AD and optimization/initialization algortihms will not be available. This 
-    is currently the only target that is possible to use.
-    
+
+    The compiler target is 'model_fmume' by default which means that the shared
+    file contains the FMI for Model Exchange API. This is currently the only
+    target that is possible to use.
+
     Parameters::
-    
-        class_name -- 
+
+        class_name --
             The name of the model class.
-            
-        file_name -- 
-            Model file (string) or files (list of strings), can be both .mo or 
+
+        file_name --
+            Model file (string) or files (list of strings), can be both .mo or
             .mop files.
             Default: Empty list.
-            
-        compiler -- 
-            The compiler used to compile the model. The only possible compiler 
+
+        compiler --
+            The compiler used to compile the model. The only possible compiler
             that can be used currently is ModelicaCompiler.
             Default: 'modelica'
-            
+
         target --
             Compiler target.
-            Note: Needs to be 'model_noad' at the moment.
-            Default: 'model_noad'
-            
+            Default: 'model_fmume'
+
         compiler_options --
             Options for the compiler.
             Default: Empty dict.
-            
+
         compile_to --
-            Specify location of the compiled FMU. Directory will be created if 
+            Specify location of the compiled FMU. Directory will be created if
             it does not exist.
             Default: Current directory.
 
         compiler_log_level --
-            Set the log level for the compiler. Valid options are 'warning'/'w', 
+            Set the log level for the compiler. Valid options are 'warning'/'w',
             'error'/'e' or 'info'/'i'.
             Default: 'warning'
-            
+
     Returns::
-    
+
         Name of the FMU which has been created.
+</programlisting>
+      </section>
+
+      <section>
+        <title>compile_fmux parameters</title>
+
+        <para>The <literal>compile_fmux</literal> parameters can be listed
+        with the interactive help.</para>
+
+        <programlisting language="python"># Display the docstring for compile_fmux with the Python command 'help'
+from jmodelica.fmi import compile_fmux
+help(compile_fmux)
+Help on function compile_fmux in module jmodelica.fmi:
+
+compile_fmux(class_name, file_name=[], compiler='auto', compiler_options={}, compile_to='.', 
+             compiler_log_level='warning')
+    Compile a Modelica model to an FMUX.
+
+    A model class name must be passed, all other arguments have default values.
+    The different scenarios are:
+
+    * Only class_name is passed:
+        - Class is assumed to be in MODELICAPATH.
+
+    * class_name and file_name is passed:
+        - file_name can be a single file as a string or a list of file_names
+          (strings).
+
+    Library directories can be added to MODELICAPATH by listing them in a
+    special compiler option 'extra_lib_dirs', for example:
+
+        compiler_options =
+            {'extra_lib_dirs':['c:\MyLibs\MyLib1','c:\MyLibs\MyLib2']}
+
+    Other options for the compiler should also be listed in the compiler_options
+    dict.
+
+
+    Parameters::
+
+        class_name --
+            The name of the model class.
+
+        file_name --
+            Model file (string) or files (list of strings), can be both .mo or
+            .mop files.
+            Default: Empty list.
+
+        compiler --
+            The compiler used to compile the model.
+            Default: 'auto'
+
+        compiler_options --
+            Options for the compiler.
+            Default: Empty dict.
+
+        compile_to --
+            Specify location of the compiled FMUX. Directory will be created if
+            it does not exist.
+            Default: Current directory.
+
+        compiler_log_level --
+            Set the log level for the compiler. Valid options are 'warning'/'w',
+            'error'/'e' or 'info'/'i'.
+            Default: 'warning'
+
+    Returns::
+
+        Name of the FMUX which has been created.
 </programlisting>
       </section>
 
@@ -345,19 +466,19 @@ compile_fmu(class_name, file_name=[], compiler='modelica', target='model_noad',
         JModelica.org installation folder under the folder
         <filename>Options</filename>. The options are loaded from the file
         when a compiler is created, that is when
-        <literal>compile_jmu</literal> or <literal>compile_fmu</literal> is
-        run. Options for a compiler instance can be modified by editing the
-        XML file before compiling or interactively when compiling using the
-        parameter <literal>compiler_options</literal>. The interactive way is
-        shown in an example compiling an Optimica model below.</para>
+        <literal>compile_jmu</literal>, <literal>compile_fmu</literal> or
+        <literal>compile_fmux</literal> is run. Options for a compiler
+        instance can be modified interactively when compiling using the
+        parameter <literal>compiler_options</literal>. This is shown in an
+        example compiling an Optimica model below.</para>
 
-        <programlisting># compile with setting the compiler option 'enable_variable_scaling'
+        <programlisting language="python"># Compile with the compiler option 'enable_variable_scaling' set to True
 
-# specify Optimica model and model file
+# Specify Optimica model and model file
 model_name = 'myPackage.myModel'
 mo_file = 'myPackage.mop'
 
-jmu_name = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_scaling":True}) 
+compile_jmu(model_name, mo_file, compiler_options={"enable_variable_scaling":True})
 </programlisting>
 
         <para>There are four type categories: string, real, integer and
@@ -369,7 +490,7 @@ jmu_name = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_s
             <tgroup cols="3">
               <colspec align="left" colname="col–para" colwidth="2.75*" />
 
-              <colspec align="left" colname="col–def" colwidth="1.25*" />
+              <colspec align="left" colname="col–def" colwidth="1*" />
 
               <colspec align="left" colname="col–descr" colwidth="3.25*" />
 
@@ -389,10 +510,10 @@ jmu_name = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_s
 
                   <entry><literal>true</literal></entry>
 
-                  <entry>If this option is <literal>true</literal>, then the
-                  minimum time optimal control problems encoded in Optimica
-                  are converted to fixed interval problems by scaling of the
-                  derivative variables. (Boolean option.)</entry>
+                  <entry>When this option is set to <literal>true</literal>
+                  then minimum time optimal control problems encoded in
+                  Optimica are converted to fixed interval problems by scaling
+                  of the derivative variables. (Boolean option.)</entry>
                 </row>
 
                 <row>
@@ -410,9 +531,9 @@ jmu_name = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_s
 
                   <entry><literal>false</literal></entry>
 
-                  <entry>If this option is <literal>true</literal>, then any
-                  compiler warnings will stop compilation of the model.
-                  (Boolean option.)</entry>
+                  <entry>If this option is set to <literal>false</literal> one
+                  or more compiler warnings will not stop compilation of the
+                  model. (Boolean option.)</entry>
                 </row>
 
                 <row>
@@ -420,23 +541,20 @@ jmu_name = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_s
 
                   <entry><literal>true</literal></entry>
 
-                  <entry>If this option is <literal>true</literal>, then
-                  additional initial equations are added to the model based on
-                  a the result of a matching algorithm. Initial equations are
-                  added for states that are not matched to an equation.
-                  (Boolean option.)</entry>
+                  <entry>When this option is set to <literal>true</literal>,
+                  then additional initial equations are added to the model
+                  based on a the result of a matching algorithm. Initial
+                  equations are added for states that are not matched to an
+                  equation. (Boolean option.)</entry>
                 </row>
 
                 <row>
-                  <entry><literal>generate_fmi_xml</literal></entry>
+                  <entry><literal>generate_ode_jacobian</literal></entry>
 
                   <entry><literal>false</literal></entry>
 
-                  <entry>If this option is <literal>true</literal>, then the
-                  model description part of the XML variables file will be FMI
-                  compliant. To generate an XML which will validate with FMI
-                  schema the option <literal>generate_xml_equations</literal>
-                  must also be set to <literal>false</literal>. (Boolean
+                  <entry>If this option is set to <literal>true</literal>,
+                  code for computing ODE Jacobians are generated. (Boolean
                   option.)</entry>
                 </row>
 
@@ -453,7 +571,7 @@ jmu_name = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_s
                 <row>
                   <entry><literal>extra_lib_dirs</literal></entry>
 
-                  <entry><literal>""</literal> (Empty string)</entry>
+                  <entry><literal>""</literal></entry>
 
                   <entry>The value of this option is appended to the value of
                   the <literal>MODELICAPATH</literal> environment variable for
@@ -476,12 +594,12 @@ jmu_name = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_s
 
                   <entry><literal>false</literal></entry>
 
-                  <entry>If this option is <literal>true</literal>, then
-                  initial equations are always generated automatically for
-                  differentiated variables, even with the fixed attribute set
-                  to <literal>fixed</literal>. Setting this option to
-                  <literal>true</literal> is often practical in optimization
-                  problems. (Boolean option.)</entry>
+                  <entry>This option enables the user to specify if initial
+                  equations should be generated automatically for
+                  differentiated variables even though the fixed attribute is
+                  equal to fixed. Setting this option to
+                  <literal>true</literal> is, however, often practical in
+                  optimization problems. (Boolean option.)</entry>
                 </row>
 
                 <row>
@@ -489,17 +607,17 @@ jmu_name = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_s
 
                   <entry><literal>false</literal></entry>
 
-                  <entry>If this option is <literal>true</literal>, then
-                  equations are sorted using the BLT algorithm. (Boolean
+                  <entry>If this option is <literal>true</literal>, equations
+                  are sorted using the BLT algorithm. (Boolean
                   option.)</entry>
                 </row>
 
                 <row>
                   <entry><literal>index_reduction</literal></entry>
 
-                  <entry><literal>false</literal></entry>
+                  <entry><literal>true</literal></entry>
 
-                  <entry>If this option is <literal>true</literal>, then index
+                  <entry>If this option is <literal>true</literal>, index
                   reduction is performed. (Boolean option.)</entry>
                 </row>
 
@@ -508,9 +626,9 @@ jmu_name = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_s
 
                   <entry><literal>true</literal></entry>
 
-                  <entry>If this option is <literal>true</literal>, then
-                  structural error diagnosis is performed based on the
-                  matching algorithm. (Boolean option.)</entry>
+                  <entry>Enable this option to invoke the structural error
+                  diagnosis based on the matching algorithm. (Boolean
+                  option.)</entry>
                 </row>
 
                 <row>
@@ -518,12 +636,10 @@ jmu_name = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_s
 
                   <entry><literal>false</literal></entry>
 
-                  <entry>If this option is <literal>true</literal>, then
-                  compliance errors are treated as warnings instead. This is
-                  intended to allow use of language features, for witch
-                  support is still in development. This can lead to the
-                  compiler or solver crashing. Use with caution! (Boolean
-                  option.)</entry>
+                  <entry>When this option is set to <literal>true</literal>,
+                  then compliance errors are treated as warnings instead. This
+                  can lead to the compiler or solver crashing. Use with
+                  caution! (Boolean option.)</entry>
                 </row>
 
                 <row>
@@ -531,10 +647,10 @@ jmu_name = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_s
 
                   <entry><literal>false</literal></entry>
 
-                  <entry>If this option is <literal>true</literal>, then model
-                  diagnostics in HTML format are generated. This includes the
-                  flattened model, connection sets, alias sets and BLT form.
-                  (Boolean option.)</entry>
+                  <entry>When this option is set to <literal>true</literal>
+                  model diagnostics is generated in HTML format. This includes
+                  the flattened model, connection sets, alias sets and BLT
+                  form. (Boolean option.)</entry>
                 </row>
 
                 <row>
@@ -542,16 +658,18 @@ jmu_name = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_s
 
                   <entry><literal>false</literal></entry>
 
-                  <entry>If this option is <literal>true</literal>, then code
-                  for solving ODEs is generated. (Boolean option.)</entry>
+                  <entry>If this option is set to <literal>true</literal>,
+                  code for solving ODEs is generated. (Boolean
+                  option.)</entry>
                 </row>
 
                 <row>
-                  <entry><literal>convert_free_dependent_parameters_to_algebraics</literal></entry>
+                  <entry><literal>convert_free_dependent_
+                  parameters_to_algebraics</literal></entry>
 
                   <entry><literal>true</literal></entry>
 
-                  <entry>If this option is <literal>true</literal>, then free
+                  <entry>If this option is <literal>true</literal>, free
                   dependent parameters are converted to algebraic variables.
                   (Boolean option.)</entry>
                 </row>
@@ -561,8 +679,8 @@ jmu_name = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_s
 
                   <entry><literal>true</literal></entry>
 
-                  <entry>If this option is <literal>true</literal>, then code
-                  for solving DAEs is generated. (Boolean option.)</entry>
+                  <entry>If this option is <literal>true</literal>, code for
+                  solving DAEs is generated. (Boolean option.)</entry>
                 </row>
 
                 <row>
@@ -570,8 +688,8 @@ jmu_name = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_s
 
                   <entry><literal>false</literal></entry>
 
-                  <entry>If this option is <literal>true</literal>, then code
-                  for computing DAE Jacobians is generated. (Boolean
+                  <entry>If this option is <literal>true</literal>, code for
+                  computing DAE Jacobians is generated. (Boolean
                   option.)</entry>
                 </row>
 
@@ -580,10 +698,10 @@ jmu_name = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_s
 
                   <entry><literal>false</literal></entry>
 
-                  <entry>If this option is <literal>true</literal>, then used
-                  Modelica functions are exported to generated C code in a
-                  manner that is compatible with the external C interface (see
-                  Modelica Language Specification). (Boolean option.)</entry>
+                  <entry>Export used Modelica functions to generated C code in
+                  a manner that is compatible with the external C interface in
+                  the Modelica Language Specification. (Boolean
+                  option.)</entry>
                 </row>
 
                 <row>
@@ -598,23 +716,71 @@ jmu_name = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_s
                 </row>
 
                 <row>
-                  <entry><literal>generate_html_diagnstics</literal></entry>
+                  <entry><literal>generate_fmi_cs_xml</literal></entry>
 
                   <entry><literal>false</literal></entry>
 
-                  <entry>When this option is set to true model diagnostics is
-                  generated in HTML format. This includes the flattened model,
-                  connection sets, alias sets and BLT form.</entry>
+                  <entry>If this option is <literal>true</literal> the model
+                  description part of the XML variables file will be FMI for
+                  co simulation compliant. To generate an XML which will
+                  validate with FMI schema the option generate_xml_equations
+                  must also be false.</entry>
+                </row>
+
+                <row>
+                  <entry><literal>advanced_tearing</literal></entry>
+
+                  <entry><literal>false</literal></entry>
+
+                  <entry>If this option is set to <literal>true</literal>, a
+                  more advanced tearing algorithm is used. This algorithm may
+                  give smaller torn systems, but may also take longer time to
+                  execute. This option only has an effect if the option
+                  <literal>enable_tearing</literal> is set to true.</entry>
+                </row>
+
+                <row>
+                  <entry><literal>divide_by_vars_in_tearing</literal></entry>
+
+                  <entry><literal>false</literal></entry>
+
+                  <entry>If this option is set to <literal>true</literal>, a
+                  less restrictive strategy is used for solving equations in
+                  the tearing algorithm. Specifically, division by parameters
+                  and variables is permitted, by default no such divisions are
+                  made during tearing.</entry>
+                </row>
+
+                <row>
+                  <entry><literal>enable_tearing</literal></entry>
+
+                  <entry><literal>false</literal></entry>
+
+                  <entry>If this option is set to <literal>true</literal>,
+                  tearing of equation systems is enabled.</entry>
+                </row>
+
+                <row>
+                  <entry><literal>generate_fmi_me_xml</literal></entry>
+
+                  <entry><literal>false</literal></entry>
+
+                  <entry>If this option is <literal>true</literal> the model
+                  description part of the XML variables file will be FMI for
+                  model exchange compliant. To generate an XML which will
+                  validate with FMI schema the option generate_xml_equations
+                  must also be false.</entry>
                 </row>
               </tbody>
             </tgroup>
           </table></para>
       </section>
 
-      <section xml:id="models_sec_compiler_targets">
-        <title>Compiler targets</title>
+      <section xml:id="models_sec_compiler_targets_jmu">
+        <title>Compiler targets for <literal>compile_jmu</literal></title>
 
-        <para>There are four compiler targets available:<itemizedlist>
+        <para>There are four compiler targets available for
+        <literal>compile_jmu</literal>:<itemizedlist>
             <listitem>
               <para><literal>ipopt</literal>: Compiled model will include JMI
               interface, AD and linking to Ipopt libraries. There is support
@@ -638,31 +804,44 @@ jmu_name = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_s
             </listitem>
           </itemizedlist></para>
 
-        <para>For <literal>compile_jmu</literal>, the
-        <literal>compile_model</literal> parameter <literal>target</literal>
-        is '<literal>ipopt</literal>' by default which will work for most
-        cases. However, if JModelica.org has been built without Ipopt
-        libraries the <literal>target</literal> parameter would have to be
-        changed to any other suitable target that does not include the Ipopt
+        <para>The compiler target is '<literal>ipopt</literal>' by default
+        which will work for most cases. However, if JModelica.org has been
+        built without Ipopt libraries the target would have to be changed to
+        any other suitable target that does not include the Ipopt
         libraries.</para>
 
-        <para>For <literal>compile_fmu</literal>, the only possible target is
-        '<literal>model_noad</literal>'.</para>
+        <para>The target <literal>model_noad</literal> must be used if the
+        model contains external equations since external equations do not work
+        with the AD interface at the moment.</para>
+      </section>
 
-        <para>The target <literal>model_noad</literal> must also be used if
-        the model contains external equations since external equations do not
-        work with the AD interface at the moment.</para>
+      <section xml:id="models_sec_compiler_targets_fmu">
+        <title>Compiler targets for <literal>compile_fmu</literal></title>
+
+        <para>Currently, the only possible target available for
+        <literal>compile_fmu</literal> is '<literal>model_fmume</literal>'.
+        With this target the compiled model will include the FMI for Model
+        Exchange API.</para>
+      </section>
+
+      <section xml:id="models_sec_compiler_targets_fmux">
+        <title>Compiler targets for <literal>compile_fmux</literal></title>
+
+        <para>Compiler targets are not relevant for
+        <literal>compile_fmux</literal> since no binary file is
+        compiled.</para>
       </section>
     </section>
 
     <section xml:id="models_sec_compilation_in_more_detail">
       <title>Compilation in more detail</title>
 
-      <para>Compiling with <literal>compile_jmu</literal> or
-      <literal>compile_fmu</literal> bundles quite a few steps required for
-      the compilation from model file to JMU or FMU. Some of these steps will
-      be described briefly here, for a more detailed review on the compilation
-      steps see <xref linkend="intro_sec_architecture" /> in <xref
+      <para>Compiling with <literal>compile_jmu</literal>,
+      <literal>compile_fmu</literal> or <literal>compile_fmux</literal>
+      bundles quite a few steps required for the compilation from model file
+      to JMU, FMU or FMUX. Some of these steps will be described briefly here,
+      for a more detailed review on the compilation steps see <xref
+      linkend="intro_sec_architecture" /> in <xref
       linkend="ch_intro" />.</para>
 
       <section>
@@ -670,8 +849,12 @@ jmu_name = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_s
 
         <para>A compiler, can be either a Modelica or Optimica compiler, is
         created by importing the Python classes from the compiler module. The
-        compiler constructors do not take any arguments. This example code
-        will create a Modelica compiler.<programlisting language="python"># import the class ModelicaCompiler from the compiler module
+        compiler constructors only has optional arguments. These are the paths
+        to the template XML and C files which in most cases can be left to the
+        default values. (Note that in the <literal>compile_fmux</literal> case
+        the only template needed is to the Model description XML template file
+        since no C code is produced.) This example code will create a Modelica
+        compiler.<programlisting language="python"># import the class ModelicaCompiler from the compiler module
 from jmodelica.compiler import ModelicaCompiler
 
 # create a compiler instance
@@ -703,7 +886,8 @@ flat_rep = mc.flatten_model(model_instance)
         <para>The next step is the code generation which produces C code
         containing the model equations and a couple of XML files containing
         model meta data such as variable names and types and parameter values.
-        <programlisting language="python"># Generate code
+        Note that in the <literal>compile_fmux</literal> case, only XML code
+        is generated in this step.<programlisting language="python"># Generate code
 mc.generate_code(flat_rep)
 </programlisting></para>
       </section>
@@ -713,19 +897,25 @@ mc.generate_code(flat_rep)
   <section xml:id="models_sec_loading_models">
     <title>Loading models</title>
 
-    <para>Compiled models, JMUs and FMUs, are loaded in the JModelica.org
-    Python interface with the <literal>JMUModel</literal> class from the
-    <literal>jmodelica.jmi</literal> module and the
+    <para>Compiled models, JMUs, FMUs and FMUXes, are loaded in the
+    JModelica.org Python interface with the <literal>JMUModel</literal> class
+    from the <literal>jmodelica.jmi</literal> module, the
     <literal>FMUModel</literal> class from the
-    <literal>jmodelica.fmi</literal> module respectively. This will be
-    demonstrated in <xref linkend="models_sec_loading_a_jmu" /> and <xref
-    linkend="models_sec_loading_an_fmu" />.</para>
+    <literal>jmodelica.fmi</literal> module and the
+    <literal>CasadiModel</literal> class from the
+    <literal>jmodelica.casadi_interface</literal> module respectively. This
+    will be demonstrated in <xref linkend="models_sec_loading_a_jmu" />, <xref
+    linkend="models_sec_loading_an_fmu" /> and <xref
+    linkend="models_sec_loading_an_fmux" />.</para>
 
     <para>The model classes contain many methods with which models can be
     manipulated after instantiation. Amongst the most important methods are
-    the <literal>initialize</literal>, <literal>simulate</literal> and
-    <literal>optimize</literal> (only relevant for JMU model instances)
-    methods. These are explained in <xref linkend="ch_simulation" /> and <xref
+    <literal>initialize</literal>, <literal>simulate</literal> and
+    <literal>optimize</literal>. (<literal>optimize</literal> is only relevant
+    for JMU model instances.) These are explained in <xref
+    linkend="ch_simulation" /> and <xref linkend="ch_optimization" />. For
+    more information on how to use the CasadiModel for optimization purposes,
+    see <xref linkend="opt_sec_pseudo-spectral" /> in <xref
     linkend="ch_optimization" />. The more basic methods for variable and
     parameter manipulation are explained in <xref
     linkend="models_sec_variable_and_parameter_manipulation" />.</para>
@@ -756,6 +946,18 @@ mc.generate_code(flat_rep)
       linkend="ch_fmi" />.</para>
     </section>
 
+    <section>
+      <title>The FMUX</title>
+
+      <para>The FMUX is a compressed file which only contains an XML file and
+      a couple of resource files created during the flattening of the model.
+      The XML file follows the FMI standard with some JModelica.org specific
+      extra elements and a section of equations. The equations part contains
+      all equations used in the model. The FMUX is created when compiling a
+      Modelica or Optimica model with
+      <literal>jmodelica.fmi.compile_fmux</literal>.</para>
+    </section>
+
     <section xml:id="models_sec_loading_a_jmu">
       <title>Loading a JMU</title>
 
@@ -763,7 +965,7 @@ mc.generate_code(flat_rep)
       <literal>JMUModel</literal> in the <literal>jmodelica.jmi</literal>
       module. The following simple example demonstrates how to do this in a
       Python shell or script.<programlisting language="python"
-      xml:space="preserve"># import JMUModel from jmodelica.jmi
+      xml:space="preserve"># Import JMUModel from jmodelica.jmi
 from jmodelica.jmi import JMUModel
 myModel = JMUModel('myPackage_myModel.jmu')
 </programlisting></para>
@@ -773,11 +975,11 @@ myModel = JMUModel('myPackage_myModel.jmu')
       loading it is therefore practical to use the return argument from
       <literal>compile_jmu</literal>, which is the path to the JMU created.
       The following example demonstrates this.<programlisting
-      language="python"># import compile_jmu and JMUModel
+      language="python"># Import compile_jmu and JMUModel
 from jmodelica.jmi import compile_jmu
 from jmodelica.jmi import JMUModel
 
-# compile and load model
+# Compile and load model
 jmu_name = compile_jmu('myPackage.myModel','myPackage.mo')
 myModel = JMUModel(jmu_name)
 </programlisting></para>
@@ -789,7 +991,7 @@ myModel = JMUModel(jmu_name)
       <para>The FMU file can be loaded in JModelica.org with the class
       <literal>FMUModel</literal> in the <literal>jmodelica.fmi</literal>
       module. The following short example demonstrates how to do this in a
-      Python shell or script.<programlisting># import FMUModel from jmodelica.fmi
+      Python shell or script.<programlisting language="python"># Import FMUModel from jmodelica.fmi
 from jmodelica.fmi import FMUModel
 myModel = FMUModel('myFMU.fmu')
 </programlisting></para>
@@ -797,20 +999,32 @@ myModel = FMUModel('myFMU.fmu')
       <para>The <literal>FMUModel</literal> instance can then be used to set
       parameters and used for simulations.</para>
     </section>
+
+    <section xml:id="models_sec_loading_an_fmux">
+      <title>Loading an FMUX</title>
+
+      <para>The FMUX file can be loaded in JModelica.org with the class
+      <literal>CasadiModel</literal> in the
+      <literal>jmodelica.casadi_interface</literal> module. The following
+      short example demonstrates how to do this in a Python shell or
+      script.<programlisting language="python"># Import CasadiModel from jmodelica.casadi_interface
+from jmodelica.casadi_interface import CasadiModel
+myModel = CasadiModel('myFMUX.fmux')
+</programlisting></para>
+    </section>
   </section>
 
   <section xml:id="models_sec_variable_and_parameter_manipulation">
     <title>Variable and parameter manipulation</title>
 
     <para>Model variables and parameters can be manipulated with methods in
-    <literal>JMUModel</literal> or <literal>FMUModel</literal> once the model
-    has been loaded. Some short examples in <xref
-    linkend="models_sec_setting_and_getting_variables" /> will demonstrate
-    this. Model variable meta data and parameter values are saved in XML files
-    which are generated during compilation, these are briefly explained in
-    <xref linkend="models_sec_model_variable_XML_files" />. The XML file
-    containing the parameters can be used to save different sets of parameters
-    for one model, see <xref
+    the model classes once the model has been loaded. Some short examples in
+    <xref linkend="models_sec_setting_and_getting_variables" /> will
+    demonstrate this. Model variable meta data and parameter values are saved
+    in XML files which are generated during compilation, these are briefly
+    explained in <xref linkend="models_sec_model_variable_XML_files" />. The
+    XML file containing the parameters can be used to save different sets of
+    parameters for one model, see <xref
     linkend="models_sec_loading_and_saving_parameters" />.</para>
 
     <section xml:id="models_sec_model_variable_XML_files">
@@ -834,33 +1048,33 @@ myModel = FMUModel('myFMU.fmu')
       <filename>modelDescription.xml</filename> and the parameter values in
       <filename>&lt;model_class_name&gt;_values.xml</filename>. Note that the
       parameter values file is JModelica.org specific and is not a part of the
-      FMI standard. The name of the parameter is used to map a parameter value
-      in the XML values file to a parameter specification in the XML variables
-      file.</para>
+      FMI standard and it is not part of the FMUX either. The name of the
+      parameter is used to map a parameter value in the XML values file to a
+      parameter specification in the XML variables file.</para>
     </section>
 
     <section xml:id="models_sec_setting_and_getting_variables">
       <title>Setting and getting variables</title>
 
-      <para>The model variables can be accessed with via the
-      <literal>jmi.JMUModel</literal> or <literal>fmi.FMUModel</literal>
-      interface. It is possible to set and get one specific variable at a time
-      or a whole list of variables.</para>
+      <para>The model variables can be accessed with via the model class
+      interfaces. It is possible to set and get one specific variable at a
+      time or a whole list of variables.</para>
 
       <para>The following code example demonstrates how to get and set a
       specific variable using an example JMU model from the
-      <literal>jmodelica.examples</literal> package.<programlisting># compile and load the model
+      <literal>jmodelica.examples</literal> package.<programlisting
+      language="python"># Compile and load the model
 from jmodelica.jmi import compile_jmu
 from jmodelica.jmi import JMUModel
 jmu_name = compile_jmu('RLC_Circuit','RLC_Circuit.mo')
 rlc_circuit = JMUModel(jmu_name)
 
-# get the value of the variable 'resistor.R'
+# Get the value of the variable 'resistor.R'
 resistor_r = rlc_circuit.get('resistor.R')
 resistor_r
 &gt;&gt; 1.0
 
-# give 'resistor.R' a new value
+# Give 'resistor.R' a new value
 resistor_r = 2.0
 rlc_circuit.set('resistor.R', resistor_r)
 rlc_circuit.get('resistor.R')
@@ -869,13 +1083,13 @@ rlc_circuit.get('resistor.R')
 
       <para>The following example demonstrates how to get and set a list of
       variables using the same example model as above. The model is assumed to
-      already be compiled and loaded.<programlisting># create a list of variables and values
+      already be compiled and loaded.<programlisting language="python"># Create a list of variables and values
 vars = ['resistor.R', 'resistor.v', 'capacitor.C', 'capacitor.v']
 values = rlc_circuit.get(vars)
 values
 &gt;&gt; [2.0, 0.0, 1.0, 0.0]
 
-# change some of the values
+# Change some of the values
 values[0] = 3.0
 values[3] = 1.0
 rlc_circuit.set(vars, values)
@@ -902,23 +1116,23 @@ rlc_circuit.get(vars)
         The model is taken from the <literal>jmodelica.examples</literal>
         package and is assumed to be compiled and loaded.</para>
 
-        <programlisting language="python"># look at parameters 'resistor.R' and 'sine.offset'
+        <programlisting language="python"># Look at parameters 'resistor.R' and 'sine.offset'
 rlc_circuit.get('resistor.R)
 &gt;&gt; 1.0
 rlc_circuit.get('sine.offset')
 &gt;&gt; 0.0
 
-# change them
+# Change them
 rlc_circuit.set('resistor.R', 2.0)
 rlc_circuit.set('sine.offset', 0.5)
 
-# look at them again
+# Look at them again
 rlc_circuit.get('resistor.R)
 &gt;&gt; 2.0
 rlc_circuit.get('sine.offset')
 &gt;&gt; 0.5
 
-# reset them by loading the original XML values file
+# Reset them by loading the original XML values file
 rlc_circuit.load_parameters_from_XML()
 
 # 'resistor.R' and 'sine.offset' have now been reset
@@ -947,13 +1161,13 @@ rlc_circuit.load_parameters_from_XML('new_values.xml')
         made to the model parameters, the values have to be written to the XML
         values file.</para>
 
-        <programlisting language="python"># set a parameter
+        <programlisting language="python"># Set a parameter
 rlc_circuit.set('inductor.L', 1.5)
 
 # Save parameters to the XML values file
 rlc_circuit.write_parameters_to_XML()
 
-# load the XML values file once again and see that the changed parameter was saved in 
+# Load the XML values file once again and see that the changed parameter was saved in 
 # the XML file
 rlc_circuit.load_parameters_from_XML()
 rlc_circuit.get('inductor.L')
@@ -973,35 +1187,36 @@ rlc_circuit.write_parameters_to_XML('test_values.xml')
 </programlisting>
       </section>
     </section>
+  </section>
 
-    <section>
-      <title>Debugging</title>
+  <section>
+    <title>Debugging models</title>
 
-      <para>The JModelica.org compilers can generate debugging information in
-      order to facilitate localization of errors. There are two mechanisms for
-      generating such diagnostics: dumping of debug information to the system
-      output or generation of HTML code that can be viewed with a standard web
-      browser.</para>
+    <para>The JModelica.org compilers can generate debugging information in
+    order to facilitate localization of errors. There are two mechanisms for
+    generating such diagnostics: dumping of debug information to the system
+    output or generation of HTML code that can be viewed with a standard web
+    browser.</para>
 
-      <para>By setting the argument <literal>compiler_log_level</literal> to
-      <literal>'i'</literal>, diagnostics is printed to the standard output,
-      normally the terminal window from which the compiler is invoked. The
-      resulting diagnostics provides detailed information from each of the
-      transformation steps in the symbolic manipulation algorithms.</para>
+    <para>By setting the argument <literal>compiler_log_level</literal> to
+    <literal>'i'</literal>, diagnostics is printed to the standard output,
+    normally the terminal window from which the compiler is invoked. The
+    resulting diagnostics provides detailed information from each of the
+    transformation steps in the symbolic manipulation algorithms.</para>
 
-      <para>By setting the compiler option
-      <literal>generate_html_diagnostics</literal> to true, a number of HTML
-      pages containing similar diagnostics is generated. The HTML files are
-      generated in the directory <literal>Model_Name_diagnostics</literal>,
-      where <literal>Model_Name</literal> is the name of the compiled model.
-      As compared to the diagnostics generated by the
-      <literal>compiler_log_level</literal> argument, the HTML diagnostics
-      contains only the most important information, but it also provides a
-      better overview. Opening the file
-      <literal>Model_Name_diagnostics/index.html</literal> in a web browser,
-      results in a page similar to the one shown below.</para>
+    <para>By setting the compiler option
+    <literal>generate_html_diagnostics</literal> to true, a number of HTML
+    pages containing similar diagnostics is generated. The HTML files are
+    generated in the directory <literal>Model_Name_diagnostics</literal>,
+    where <literal>Model_Name</literal> is the name of the compiled model. As
+    compared to the diagnostics generated by the
+    <literal>compiler_log_level</literal> argument, the HTML diagnostics
+    contains only the most important information, but it also provides a
+    better overview. Opening the file
+    <literal>Model_Name_diagnostics/index.html</literal> in a web browser,
+    results in a page similar to the one shown below.</para>
 
-      <programlisting>Modelica.Mechanics.Rotational.Examples.First
+    <programlisting>Modelica.Mechanics.Rotational.Examples.First
 
 Number of independent constants:              1
   Number of Real independent constants:       1
@@ -1075,21 +1290,23 @@ Number of unsolved equation blocks in DAE initialization system: 1: {7}
 Number of unsolved equation blocks in DAE system: 1: {7}
 </programlisting>
 
-      <para>Note that some of the entries, including <literal>Flattened
-      model</literal>, <literal>Transformed model</literal>,
-      <literal>Connection sets</literal>, <literal>Alias sets</literal> and
-      <literal>BLT diagnostics</literal> are links to sub pages containing
-      additional information. For example, the BLT diagnostics page contains
-      information about individual systems of equations:</para>
+    <para>Note that some of the entries, including <literal>Flattened
+    model</literal>, <literal>Transformed model</literal>, <literal>Connection
+    sets</literal>, <literal>Alias sets</literal> and <literal>BLT
+    diagnostics</literal> are links to sub pages containing additional
+    information. For example, the BLT diagnostics page contains information
+    about individual systems of equations:</para>
 
-      <programlisting>...
+    <programlisting>...
 
 --- Block 12---
 Solved block of 1 variables:
 Computed variable:
   torque.flange.tau
 Solution:
-  ( sine.offset + (if time &lt; sine.startTime then 0 else ( sine.amplitude ) * ( sin(( ( ( 2 ) * ( 3.141592653589793 ) ) * ( sine.freqHz ) ) * ( time - ( sine.startTime ) ) + sine.phase) )) ) / (  - ( 1 ) )
+  ( sine.offset + (if time &lt; sine.startTime then 0 else ( sine.amplitude ) * 
+  ( sin(( ( ( 2 ) * ( 3.141592653589793 ) ) * ( sine.freqHz ) ) * 
+  ( time - ( sine.startTime ) ) + sine.phase) )) ) / (  - ( 1 ) )
 
 --- Block 13---
 Non-solved block of 7 variables:
@@ -1103,7 +1320,9 @@ Unknown variables:
   inertia1.a
 Equations:
   der_2_idealGear_phi_a = inertia1.a - ( 0 )
-  der_2_idealGear_phi_a = ( idealGear.ratio ) * ( der_2_idealGear_phi_b ) + ( 0 ) * ( der_idealGear_phi_b ) + ( 0 ) * ( der_idealGear_phi_b ) + ( 0 ) * ( idealGear.phi_b )
+  der_2_idealGear_phi_a = ( idealGear.ratio ) * ( der_2_idealGear_phi_b ) + ( 0 ) * 
+                          ( der_idealGear_phi_b ) + ( 0 ) * ( der_idealGear_phi_b ) + 
+                          ( 0 ) * ( idealGear.phi_b )
   der_2_idealGear_phi_b = inertia2.der(_der_phi) - ( 0 )
   inertia2.a = inertia2.der(_der_phi)
   ( inertia2.J ) * ( inertia2.a ) =  - ( idealGear.flange_b.tau ) + inertia2.flange_b.tau
@@ -1112,6 +1331,5 @@ Equations:
 
 ...
 </programlisting>
-    </section>
   </section>
 </chapter>
