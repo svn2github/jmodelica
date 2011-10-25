@@ -50,7 +50,8 @@ def convert_casadi_der_name(name):
     return n + 'der(' + qnames[len(qnames)-1] + ')' 
 
 class CasadiModel(object):
-    def __init__(self, name, path='.', enable_scaling = False):
+    def __init__(self, name, path='.', enable_scaling=False,
+                 scale_equations=False):
         
         #Create temp binary
         self._tempnames = unzip_fmux(archive=name, path=".")
@@ -61,7 +62,8 @@ class CasadiModel(object):
         self.xmldoc = xmlparser.ModelDescription(os.path.join(self._tempdir,self._tempxml))
         
         #Load CasADi interface
-        self._load_xml_to_casadi(os.path.join(self._tempdir,self._tempxml), enable_scaling)
+        self._load_xml_to_casadi(os.path.join(self._tempdir,self._tempxml),
+                                 enable_scaling, scale_equations)
     
     def get_model_description(self):
         return self.xmldoc
@@ -440,7 +442,8 @@ class CasadiModel(object):
     def get_ode_F0(self):
         return self.ode_F0
         
-    def _load_xml_to_casadi(self, xml, enable_scaling=False):
+    def _load_xml_to_casadi(self, xml, enable_scaling=False,
+                            scale_equations=False):
         # Store scaling option
         self.enable_scaling = enable_scaling
         
@@ -458,7 +461,7 @@ class CasadiModel(object):
         self.ocp.eliminateDependent()
 
         # Scale the equations
-        if enable_scaling:
+        if enable_scaling and scale_equations:
             self.ocp.scaleEquations()
 
         # Create functions the DAE right hand side

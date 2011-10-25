@@ -155,8 +155,10 @@ class TestRadau2:
         
         FMUX_CSTR_Lagrange = "CSTR_CSTR_Opt_Bounds_Lagrange.fmux"
         self.model_CSTR_Lagrange = CasadiModel(FMUX_CSTR_Lagrange)
-        self.model_CSTR_scaled_Lagrange = CasadiModel(FMUX_CSTR_Lagrange,
-                                                      enable_scaling=True)
+        self.model_CSTR_scaled_Lagrange = CasadiModel(
+                FMUX_CSTR_Lagrange, enable_scaling=True, scale_equations=False)
+        self.model_CSTR_scaled_equations_Lagrange = CasadiModel(
+                FMUX_CSTR_Lagrange, enable_scaling=True, scale_equations=True)
         
         FMUX_CSTR_Mayer = "CSTR_CSTR_Opt_Bounds_Mayer.fmux"
         self.model_CSTR_Mayer = CasadiModel(FMUX_CSTR_Mayer)
@@ -345,13 +347,14 @@ class TestRadau2:
     @testattr(casadi = True)
     def test_scaling(self):
         """
-        Test optimizing the CSTR with scaling.
+        Test optimizing the CSTR with scaled variables and equations.
 
         This test also tests writing both the unscaled and scaled result as
         well as eliminating derivative variables.
         """
         unscaled_model = self.model_CSTR_Lagrange
         scaled_model = self.model_CSTR_scaled_Lagrange
+        scaled_equations_model = self.model_CSTR_scaled_equations_Lagrange
         
         # References values
         cost_ref = 1.8576873858261e3
@@ -364,14 +367,16 @@ class TestRadau2:
         res = unscaled_model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
 
-        # Scaled model & unscaled result, eliminated derivatives
+        # Scaled model, unscaled result, unscaled equations
+        # Eliminated derivatives
         opts['write_scaled_result'] = False
         opts['eliminate_der_var'] = True
         res = scaled_model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
         c_unscaled = res['cstr.c']
 
-        # Scaled model & scaled result, eliminated derivatives
+        # Scaled model, scaled result, unscaled equations
+        # Eliminated derivatives
         opts['write_scaled_result'] = True
         opts['eliminate_der_var'] = True
         res = scaled_model.optimize(self.algorithm, opts)
@@ -379,6 +384,13 @@ class TestRadau2:
         c_scaled = res['cstr.c']
         N.testing.assert_allclose(c_unscaled, 1000. * c_scaled,
                                   rtol=0, atol=1e-5)
+        
+        # Scaled model, unscaled result, scaled equations, with derivatives
+        opts['write_scaled_result'] = False
+        opts['eliminate_der_var'] = False
+        res = scaled_equations_model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        c_unscaled = res['cstr.c']
     
     @testattr(casadi = True)
     def test_result_mode(self):

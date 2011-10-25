@@ -2460,11 +2460,11 @@ class CasadiRadau2Options(OptionBase):
         
         quadrature_constraint --
             Whether to use quadrature continuity constraints. This option is
-            only compatible with Gauss collocation. It is also incompatible
-            with eliminate_der_var.
+            only applicable when using Gauss collocation. It is incompatible
+            with eliminate_der_var set to True.
             
-            True: Quadrature is used to get the values of the states at the mesh
-            points.
+            True: Quadrature is used to get the values of the states at the
+            mesh points.
             
             False: The Lagrange basis polynomials for the state collocation
             polynomials are evaluated to get the values of the states at the

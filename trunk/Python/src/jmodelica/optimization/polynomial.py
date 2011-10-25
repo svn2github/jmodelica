@@ -58,7 +58,7 @@ class LocalPol(object):
         pass
     
     def _calc_der_vals(self):
-        # Derivatives of all basis polynomials at all collocation points
+        # Derivatives of all basis polynomials at all interpolation points
         der_vals = casadi.DMatrix(self.n + 1, self.n + 1)
         for j in xrange(self.n + 1):
             for k in xrange(self.n + 1):
@@ -67,58 +67,15 @@ class LocalPol(object):
         
         # Store derivative values as data attribute
         self.der_vals = der_vals
-        
-    def eval_basis(self, i, tau, beg_interp):
-        """
-        Evaluate Lagrange basis polynomial.
-        
-        Parameters::
-        
-            i --
-                Polynomial index, corresponds to interpolation point i, indexed
-                from 0.
-                
-                Type: int
-                
-            tau --
-                Normalized time point to evaluate polynomial at.
-                
-                Type: float
-                
-            beg_interp --
-                Whether or not to include an interpolation point at tau = 0.
-                
-                Type: bool
-        """
-        nbi = not beg_interp
-        return lagrange_eval(self.p[nbi:], i - nbi, tau)
     
-    def eval_basis_der(self, i, tau, beg_interp=True):
-        """
-        Evaluate derivative of Lagrange basis polynomial.
-        
-        Parameters::
-        
-            i --
-                Polynomial index, corresponds to interpolation point i, indexed
-                from 0.
-                
-                Type: int
-                
-            tau --
-                Normalized time point to evaluate polynomial at.
-                
-                Type: float
-                
-            beg_interp --
-                Whether to include an interpolation point at tau = 0.
-                
-                Type: bool
-                Default: True
-        """
-        nbi = not beg_interp
-        return lagrange_derivative_eval(self.p[nbi:], i - nbi, tau)
-        
+    @abc.abstractmethod
+    def eval_basis(self, i, tau, beg_interp):
+        pass
+    
+    @abc.abstractmethod
+    def eval_basis_der(self, i, tau):
+        pass
+
 class RadauPol(LocalPol):
     
     """
@@ -131,7 +88,7 @@ class RadauPol(LocalPol):
             Type: int
     
         p --
-            Interpolation points.
+            Interpolation points, including \tau_0 = 0.
             Type: rank 1 ndarray
             
         w --
@@ -167,6 +124,49 @@ class RadauPol(LocalPol):
         
         # Store weights as data attribute
         self.w = w
+    
+    def eval_basis(self, i, tau, beg_interp):
+        """
+        Evaluate Lagrange basis polynomial.
+        
+        Parameters::
+        
+            i --
+                Polynomial index, corresponds to interpolation point i.
+                
+                Type: int
+                
+            tau --
+                Normalized time point to evaluate polynomial at.
+                
+                Type: float
+                
+            beg_interp --
+                Whether or not to include an interpolation point at tau = 0.
+                
+                Type: bool
+        """
+        nbi = not beg_interp
+        return lagrange_eval(self.p[nbi:], i - nbi, tau)
+    
+    def eval_basis_der(self, i, tau):
+        """
+        Evaluate derivative of Lagrange basis polynomial. Assumes an
+        interpolation point at \tau = 0.
+        
+        Parameters::
+        
+            i --
+                Polynomial index, corresponds to interpolation point i.
+                
+                Type: int
+                
+            tau --
+                Normalized time point to evaluate polynomial at.
+                
+                Type: float
+        """
+        return lagrange_derivative_eval(self.p, i, tau)
 
 class GaussPol(LocalPol):
     
@@ -180,7 +180,7 @@ class GaussPol(LocalPol):
             Type: int
     
         p --
-            Interpolation (collocation) points, including tau = 0.
+            Interpolation points, including \tau_0 = 0.
             Type: rank 1 ndarray
             
         w --
@@ -206,7 +206,7 @@ class GaussPol(LocalPol):
         
         # Store interpolation points as data attribute
         self.p = p
-        
+    
     def _calc_w(self):
         # Calculate the weights for the non-shifted Gauss-Radau polynomial
         w = gauss_quadrature_weights("LG", self.n)
@@ -216,6 +216,95 @@ class GaussPol(LocalPol):
         
         # Store weights as data attribute
         self.w = w
+    
+    # Inherit evaluation methods from RadauPol
+    eval_basis = RadauPol.__dict__["eval_basis"]
+    eval_basis_der = RadauPol.__dict__["eval_basis_der"]
+
+class LobattoPol(LocalPol):
+    
+    """
+    Handles Lagrange polynomials used for Lobatto collocation.
+    
+    Data attributes::
+    
+        n --
+            Number of collocation points per element.
+            Type: int
+    
+        p --
+            Interpolation (and collocation) points.
+            Type: rank 1 ndarray
+            
+        w --
+            Quadrature weights.
+            Type: rank 1 ndarray
+            
+        der_vals --
+            Derivative values for each basis polynomial at the interpolation
+            points. der_vals[j, k] contains the derivative of basis polynomial
+            j evaluated at interpolation point k.
+            Type: rank 2 ndarray
+    """
+    
+    def _calc_p(self):
+        # Calculate the roots for the non-shifted Gauss-Legendre polynomial
+        r = legendre_dPn_roots(self.n - 1)
+        
+        # Shift the roots
+        p = (r + 1) / 2
+        
+        # Add interpolation points for tau = 0 and tau = 1
+        p = N.hstack([N.nan, 0., p, 1.])
+        
+        # Store interpolation points as data attribute
+        self.p = p
+        
+    def _calc_w(self):
+        # Calculate the weights for the non-shifted Gauss-Legendre polynomial
+        w = gauss_quadrature_weights("LGL", self.n)
+        
+        # Shift the weights
+        w = N.hstack([N.nan, w / 2])
+        
+        # Store weights as data attribute
+        self.w = w
+    
+    def eval_basis(self, i, tau):
+        """
+        Evaluate Lagrange basis polynomial.
+        
+        Parameters::
+        
+            i --
+                Polynomial index, corresponds to interpolation point i.
+                
+                Type: int
+                
+            tau --
+                Normalized time point to evaluate polynomial at.
+                
+                Type: float
+        """
+        return lagrange_eval(self.p[1:], i - 1, tau)
+    
+    def eval_basis_der(self, i, tau):
+        """
+        Evaluate derivative of Lagrange basis polynomial.
+        
+        Parameters::
+        
+            i --
+                Polynomial index, corresponds to interpolation point i.
+                
+                Type: int
+                
+            tau --
+                Normalized time point to evaluate polynomial at.
+                
+                Type: float
+        """
+        return lagrange_derivative_eval(self.p[1:], i - 1, tau)
 
 class RadauPol3(object):
 
@@ -591,6 +680,8 @@ def legendre_dPn_roots(K):
         A reference can be found at, 
         http://mathworld.wolfram.com/JacobiPolynomial.html (eq:11, 12)
     """
+    if K < 2:
+        return N.array([])
     K = K-1
     supdiag = [N.sqrt(i*(i+2.0)/((2.0*i+1.0)*(2.0*i+3.0))) for i in range(1,K)]
     
