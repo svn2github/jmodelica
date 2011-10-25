@@ -3325,7 +3325,7 @@ aspect TransformCanonical {
 	rewrite FIdUseExp {
 		when (rewriteAlias && !myFV().isUnknown() && myFV().isAlias()) to FExp {
 			FVariable fv = (FVariable) myFV();
-			FExp new_exp = fv.alias().createFIdExp();
+			FExp new_exp = fv.alias().createUseExp();
 			if (fv.isNegated()) 
 				new_exp = new FNegExp(new_exp);
 			return new_exp;
@@ -3363,7 +3363,7 @@ aspect TransformCanonical {
 	rewrite FDummyDerExp {
 		when (rewriteAlias && !myFV().isUnknown() && myFV().isAlias()) to FExp {
 			FVariable fv = (FVariable) myFV();
-			FExp new_exp = fv.alias().createFIdExp();
+			FExp new_exp = fv.alias().createUseExp();
 			if (myFV().isNegated()) 
 				new_exp = new FNegExp(new_exp);
 			return new_exp;
@@ -3382,7 +3382,7 @@ aspect TransformCanonical {
 	rewrite FHDummyDerExp {
 		when (rewriteAlias && !myFV().isUnknown() && myFV().isAlias()) to FExp {
 			FVariable fv = (FVariable) myFV();
-			FExp new_exp = fv.alias().createFIdExp();
+			FExp new_exp = fv.alias().createUseExp();
 			if (myFV().isNegated()) 
 				new_exp = new FNegExp(new_exp);
 			return new_exp;

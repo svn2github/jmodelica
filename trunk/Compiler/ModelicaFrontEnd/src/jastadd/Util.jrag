@@ -1178,25 +1178,54 @@ aspect FlatNames {
         }
         return res;
     }
-
-	public FExp FVariable.createFIdExp() {
+    
+    /**
+     * \brief Interface for variable declarations in flat and instance trees.
+     */
+    public interface CommonVariableDecl {
+    	public FExp createUseExp();
+    }
+    
+    /**
+     * Create an access to this variable.
+     */
+	public FExp FVariable.createUseExp() {
 		 return getFQName().createFIdUseExp();
 	}
 
-	public FExp FDerivativeVariable.createFIdExp() {
+	public FExp FDerivativeVariable.createUseExp() {
 		 return getFQName().createFDerExp();
 	}
 
-	public FExp FHDerivativeVariable.createFIdExp() {
+	public FExp FHDerivativeVariable.createUseExp() {
 		 return getFQName().createFHDerExp(getOrder());
 	}
 
-	public FExp FDummyDerivativeVariable.createFIdExp() {
+	public FExp FDummyDerivativeVariable.createUseExp() {
 		 return getFQName().createFDummyDerExp();
 	}
 
-	public FExp FHDummyDerivativeVariable.createFIdExp() {
+	public FExp FHDummyDerivativeVariable.createUseExp() {
 		 return getFQName().createFHDummyDerExp(getOrder());
+	}
+    
+	public FExp FFunctionVariable.createUseExp() {
+		 return getFQName().createFIdUseExp();
+	}
+    
+	public FExp FEnumLiteral.createUseExp() {
+		 return new FEnumLitExp(myFEnumDecl().name(), name(), null);
+	}
+    
+	public FExp UnknownFVariable.createUseExp() {
+		 return null;
+	}
+
+    /**
+     * Create an access to this variable, from a scope where it can be accessed unqualified.
+     */
+	public FIdUseExp InstComponentDecl.createUseExp() {
+		 return new FIdUseExp(new FIdUseInstAccess(new InstComponentAccess(name(), new Opt())));
 	}
 
     /**
@@ -1263,14 +1292,14 @@ aspect FlatNames {
     }
     
     syn String FType.name();
-    eq FRealType.name()    = "Real";
-    eq FIntegerType.name() = "Integer";
-    eq FBooleanType.name() = "Boolean";
-    eq FStringType.name()  = "String";
-    eq FEnumType.name()  = getName();
-    eq FEnumLiteralType.name()  = getName();
-    eq FRecordType.name()  = getName();
-    eq FUnknownType.name() = "(unknown type)";
+    eq FRealType.name()        = "Real";
+    eq FIntegerType.name()     = "Integer";
+    eq FBooleanType.name()     = "Boolean";
+    eq FStringType.name()      = "String";
+    eq FEnumType.name()        = getName();
+    eq FEnumLiteralType.name() = getName();
+    eq FRecordType.name()      = getName();
+    eq FUnknownType.name()     = "(unknown type)";
     
     syn boolean FAbstractFunctionCall.isIgnored() = false;
     eq FIgnoredBuiltIn.isIgnored() = true;

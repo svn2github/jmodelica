@@ -374,7 +374,7 @@ optimization TimedArrayTest3 (objective=y(finalTime),startTime=0,finalTime=2)
 1 errors found:
 Error: in file 'Compiler/OptimicaFrontEnd/src/test/modelica/OptimicaTransformCanonicalTests.mo':
 Semantic error at line 347, column 7:
-  Type error in expression
+  Type error in expression: x(\"0\")
 ")})));
 
  Real x[2] = {1,2};
@@ -393,7 +393,7 @@ optimization TimedArrayTest4 (objective=y(finalTime),startTime=0,finalTime=2)
 1 errors found:
 Error: in file 'Compiler/OptimicaFrontEnd/src/test/modelica/OptimicaTransformCanonicalTests.mo':
 Semantic error at line 366, column 7:
-  Type error in expression
+  Type error in expression: x(y)
 ")})));
 
  Real x[2] = {1,2};

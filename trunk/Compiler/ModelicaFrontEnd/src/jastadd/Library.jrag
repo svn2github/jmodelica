@@ -82,9 +82,9 @@ aspect Library {
 	   				return entity;
 	   			}
 			} catch (ParserException e) {
-				e.getProblem().setFileName(getFileName());
+				e.getProblem().setFileName(packageFile.getPath());
 				log.error(e.getProblem().toString());
-				return createErrorStoredDefinition();		        
+				return createErrorStoredDefinition();
 			} catch (Exception e) {
 				String msg = "Error when parsing file: '" + packageFile + "':\n" + 
 						"   " + e.getClass().getName() + "\n";
@@ -92,7 +92,7 @@ aspect Library {
 					msg = msg + "   " + e.getMessage();
 				log.error(msg);
 				log.stackTrace(e);
-				return createErrorStoredDefinition();		        
+				return createErrorStoredDefinition();
 			} 		
 			
 		} else {
@@ -108,7 +108,7 @@ aspect Library {
 			} catch (ParserException e) {
 				e.getProblem().setFileName(getFileName());
 				log.error(e.getProblem().toString()+"\n");
-				return createErrorStoredDefinition();		        
+				return createErrorStoredDefinition();
 			} catch (Exception e) {
 				String msg = "Error when parsing file: '" + getFileName() + "':\n" + 
 						"   " + e.getClass().getName() + "\n";
@@ -116,7 +116,7 @@ aspect Library {
 					msg = msg + "   " + e.getMessage();
 				log.error(msg);
 				log.stackTrace(e);
-				return createErrorStoredDefinition();		        
+				return createErrorStoredDefinition();
 			} 
 		}
 		return null;

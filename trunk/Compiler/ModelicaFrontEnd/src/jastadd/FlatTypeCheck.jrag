@@ -131,8 +131,7 @@ aspect FlatTypeCheck {
   // TODO: Add specialized typeError() methods that gives better error messages
   
   public void FExp.typeError() {
-	  // TODO: add expression to end of error message to make it clearer
-	  error("Type error in expression");	  
+	  error("Type error in expression: " + this);	  
   }
 
   public void FInstAccessExp.typeError() {
@@ -434,7 +433,7 @@ aspect FlatTypeCheck {
   public void InstFunctionCall.typeCheck() {
 	  if (!isFunctionCallClause() && !getName().myInstClassDecl().isRecord() && !hasOutputs())
 		  error("Function " + getName().name() + "() has no outputs, but is used in expression");
-	  else if (!isFunctionCallClause() && size().isUnknown())
+	  else if (!isFunctionCallClause() && !inFunction() && size().isUnknown())
 		  error("Could not evaluate array size of output " + expOutput().name());
 	  if (myOutputs().size() < myLefts().size())
 		  error("Too many components assigned from function call: " + getName().name() + 

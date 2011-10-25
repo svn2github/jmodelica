@@ -1137,36 +1137,21 @@ public class ModelicaCompiler {
 	}
 	
 	protected void handleCompilerProblems(Collection<Problem> problems) throws CompilerException{
-		ArrayList<Problem> warnings = new ArrayList<Problem>();
-		ArrayList<Problem> errors = new ArrayList<Problem>();
-		for (Problem p : problems) {
-			if (p.severity() == Problem.Severity.ERROR) 
-				errors.add(p);
-			else
-				warnings.add(p);
-		}
-		
 		if (this.options.getBooleanOption("generate_html_diagnostics") &&
 		    getDiagnosticsGenerator()!=null) {
 			getDiagnosticsGenerator().writeProblems(problems);
 		}
 		
-		if (errors.size() > 0 || (warnings.size() > 0 && options.getBooleanOption("halt_on_warning"))) {
+		CompilerException ce = new CompilerException(problems);
+		if (ce.shouldStop(options.getBooleanOption("halt_on_warning"))) {
 			// there are errors -> add errors and possible warnings and throw exception or
 			// there are only warnings but compiler option sais throw exception			
-			
-			CompilerException ce = new CompilerException();
-			for (Problem e : errors) 
-				ce.addProblem(e);
-			for (Problem w: warnings) 
-				ce.addProblem(w);
 			throw ce;
 		} else {
 			// there are only warnings and halt_on_warning = false so just send them to logger
 			log.warning("------- Compiler Warnings -------");
-			for (Problem p:warnings) 
-				log.warning(p.toString());
-			log.warning("--------------------------------");
+			log.warning(ce.getMessage());
+			log.warning("---------------------------------");
 		}
 	}
 	
@@ -1544,7 +1529,7 @@ public class ModelicaCompiler {
 		return arg.trim().startsWith("-");
 	}
 	
-	private void setOptions(Hashtable<String, String> programarguments, String modelicapath) {
+	private void setOptions(Hashtable<String, String> programarguments) {
 		String filesep = File.separator;
 		String optionsfile = null;
 		//look for options.xml in $JMODELICA_HOME/Options/ and program arguments
@@ -1563,6 +1548,7 @@ public class ModelicaCompiler {
 		}
 		
 		//add modelicapath to optionregistry
+		String modelicapath = programarguments.get("modelicapath");
 		if (modelicapath == null) {
 			//modelicapath was not set in program arguments -> check envir variable or via JMODELICA_HOME
 			if (System.getenv("MODELICAPATH") != null) { 
@@ -1584,8 +1570,8 @@ public class ModelicaCompiler {
 			log.error(compilerName + " expects the command line arguments: \n" +
 					"[<options>] [-fmume|-fmucs|-jmu] <file name> <class name> [<templates>]\n" +
 					" where options could be: \n" +
-					"  -log=<d or i or w or e> \n" +
-					"  -modelicapath=<path to modelica library> \n" +
+					"  -log=<i or w or e> \n" +
+					"  -modelicapath=<path to modelica libraries> \n" +
 					"  -optfile=<path to XML options file> \n" + 
 					" and templates, if given, should be (in order): \n" + 
 					"  xml model description template \n" +
@@ -1601,9 +1587,6 @@ public class ModelicaCompiler {
 		//log option
 		String level = programarguments.get("log");
 		setLogLevel(log, (level != null) ? level : ModelicaCompiler.ERROR);
-
-		//modelicapath option
-		modelicapath = programarguments.get("modelicapath");
 		
 		arg = programarguments.size();
 		if (args.length < arg+2 && !programarguments.containsKey("parse")) {
@@ -1623,7 +1606,7 @@ public class ModelicaCompiler {
 		}
 		
 		// set options
-		this.setOptions(programarguments, modelicapath);
+		this.setOptions(programarguments);
 	}
 	
 	public static void main(String[] args) {
@@ -1665,11 +1648,7 @@ public class ModelicaCompiler {
 			log.error("Could not find the class "+ cl);
 			System.exit(1);
 		} catch (CompilerException ce) {
-			StringBuilder str = new StringBuilder();
-			str.append(ce.getProblems().size() + " errors found:\n");
-			for (Problem p : ce.getProblems()) 
-				str.append(p.toString()+"\n");
-			log.error(str.toString());
+			log.error(ce.getMessage());
 			System.exit(1);
 		} catch (FileNotFoundException e) {
 			log.error("Could not find file: " + e.getMessage());

@@ -481,7 +481,7 @@ aspect InstFunctionBinding {
 		    	n = builtInTranslator.create(name, temp);
 		    if (n == null) {
 				if (target.isRecord() && argsOK) {
-					FIdUse rec = new FIdUseInstAccess(new FQName(), getName());
+					FIdUse rec = new FIdUseInstAccess(getName());
 					n = new FRecordConstructor(rec, new List());
 				} else {
 			    	InstFunctionCall ifc = new InstFunctionCall(getName(), new List());

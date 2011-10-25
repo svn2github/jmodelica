@@ -68,6 +68,7 @@ aspect Scalarization {
 		for (FFunctionDecl f : getFFunctionDecls()) 
 			funcs.add(f.scalarize());
 		setFFunctionDeclList(funcs);
+		funcs.clearScalarized();  // Functions need scalarized = false in FQNames
 		
 		// Replace subscript expressions with literals (enable rewrite)
 		eb.getFAbstractEquations().makeSubscriptsLiteral();
@@ -477,6 +478,26 @@ aspect Scalarization {
 		}
 		
 		/**
+		 * Creates nestled for loops using the top layer of names.
+		 *  
+		 * Adds the outermost for loop to a list of statements.
+		 * 
+		 * @param stmts  list to add the created for statements to
+		 * @param sizes  array of expressions describing the size of each dimension
+		 * @return  the list of statements of the innermost loop
+		 */
+		public List<FStatement> createForLoops(List<FStatement> stmts, FExp[] sizes) {
+			List<FStatement> cur = stmts;
+			for (int i = 0; i < topLayer().length; i++) {
+				FForIndex ffi = new FForIndex(topLayer()[i], sizes[i]);
+				FForStmt fs = new FForStmt(ffi, new List());
+				cur.add(fs);
+				cur = fs.getForStmts();
+			}
+			return cur;
+		}
+		
+		/**
 		 * \brief Creates nestled for loops over a single variable, using the top layer of names.
 		 *  
 		 * Adds the outermost for loop to a list of statements.
@@ -486,14 +507,28 @@ aspect Scalarization {
 		 * @return  the list of statements of the innermost loop
 		 */
 		public List<FStatement> createForLoops(List<FStatement> stmts, FQName var) {
-			List<FStatement> cur = stmts;
-			for (int i = 0; i < topLayer().length; i++) {
-				FForIndex ffi = new FForIndex(topLayer()[i], new FSizeExp(var, i));
-				FForStmt fs = new FForStmt(ffi, new List());
-				cur.add(fs);
-				cur = fs.getForStmts();
-			}
-			return cur;
+			int n = topLayer().length;
+			FExp[] sizes = new FExp[n];
+			for (int i = 0; i < n; i++)
+				sizes[i] = new FSizeExp(var, i);
+			return createForLoops(stmts, sizes);
+		}
+		
+		/**
+		 * \brief Creates nestled for loops over an expression, using the top layer of names.
+		 *  
+		 * Adds the outermost for loop to a list of statements.
+		 * 
+		 * @param stmts  list to add the created for statements to
+		 * @param exp    expression to loop over
+		 * @return  the list of statements of the innermost loop
+		 */
+		public List<FStatement> createForLoops(List<FStatement> stmts, FExp exp) {
+			int n = topLayer().length;
+			FExp[] sizes = new FExp[n];
+			for (int i = 0; i < n; i++)
+				sizes[i] = exp.size().createFExp(i);
+			return createForLoops(stmts, sizes);
 		}
 		
 		/**
@@ -505,6 +540,7 @@ aspect Scalarization {
 				fas.addFSubscript(new FExpSubscript(new FIdUseExp(name)));
 			return fas;
 		}
+		
 	}
 
 	/**
@@ -532,18 +568,44 @@ aspect Scalarization {
 	protected ForNames FExp.indexNames = null;
 	
 	/**
-	 * \brief Add translations of all uses of array variables to the index map. 
-	 *        The translations should add array subscripts that are uses of the given names.
+	 * Add translations of all uses of array variables to the index map. 
+	 * The translations should add array subscripts that are uses of the given names.
 	 * 
-	 * Any expression node that needs it's own for loop(s) should override this method, 
-	 * save <code>names</code> and create it's for loop in createArrayTemporaries(). 
-	 * In this case, don't continue traversal here, do that in createArrayTemporaries()
-	 * instead (when we have updated names).
+  	 * Any expression node that needs it's own for loop(s) should override this method, 
+  	 * save <code>names</code> and create it's for loop in createArrayTemporaries(). 
+  	 * In this case, don't continue traversal here, do that in createArrayTemporaries()
+  	 * instead (when we have updated names).
 	 */
 	public void ASTNode.addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names) {
 		for (ASTNode n : this)
 			n.addArrayUsesToIndexMap(indexMap, names);
 	}
+	
+	/**
+	 * Add translations of all uses of array variables to the index map. 
+	 * The translations should add array subscripts that are uses of the given names.
+	 * 
+	 * Any expression node that needs it's own for loop(s) should override scalarizesToLoop()
+     * to return true in those cases. That causes this method to save <code>names</code> and 
+     * stop traversal here. The node should also override createArrayTemporaries(), update 
+     * <code>names</code>, call this function on its children and create it's for loop there. 
+	 */
+	public void FExp.addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names) {
+		if (scalarizesToLoop())
+			indexNames = names;
+		else
+			super.addArrayUsesToIndexMap(indexMap, names);
+	}
+	
+	/**
+	 * Should addArrayUsesToIndexMap() stop recursion and save <code>names</code> at this point?
+	 * 
+	 * @see ASTNode#addArrayUsesToIndexMap(Map<String,FExp>,ForNames)
+	 */
+	syn boolean FExp.scalarizesToLoop() = false;
+	eq FMulExp.scalarizesToLoop()       = isArray() && !isElementWise();
+	eq FRangeExp.scalarizesToLoop()     = true;
+	eq FSumExp.scalarizesToLoop()       = getFExp().size().isUnknown();
 	
 	public void FIdUseExp.addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names) {
 		if (isArray()) {
@@ -557,6 +619,13 @@ aspect Scalarization {
 		FIdUse use = new FIdUse(tempVarName());
 		use.getFQName().setLastFArraySubscripts(names.createFArraySubscripts());
 		indexMap.put(tempVarName(), new FIdUseExp(use));
+	}
+	
+	public void FIterExp.addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names) {
+		int n = getNumForIndex();
+		for (int i = 0; i < n; i++)
+			indexMap.put(getForIndex(i).name(), new FIdUseExp(names.get(i)));
+		super.addArrayUsesToIndexMap(indexMap, names);
 	}
 	
 	public void FArray.createArrayTemporaries(List clauses, List vars, 
@@ -574,15 +643,39 @@ aspect Scalarization {
 		}
 	}
 	
-	public void FRangeExp.addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names) {
-		indexNames = names;
-	}
-	
-	public void FMulExp.addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names) {
-		if (isArray() && !isElementWise())
-			indexNames = names;
-		else
-			super.addArrayUsesToIndexMap(indexMap, names);
+	public void FSumExp.createArrayTemporaries(List clauses, List vars, 
+			Map<String,FExp> indexMap, boolean addVar) {
+		if (scalarizesToLoop()) {
+			if (indexNames == null)
+				indexNames = new ForNames();
+			useTempVar = true;
+			
+			// Create temp
+			FType type = (FType) type().scalarType().unboundCopy();
+			if (addVar) 
+				vars.add(new FFunctionVariable(type, tempVarName()));
+			clauses.add(new FAssignStmt(new FIdUse(tempVarName()), type.zeroLiteral()));
+			
+			// Set up names and create for loop(s)
+			FExp exp = getFExp();
+			indexNames.addLayer(exp.ndims());
+			indexNames.fillLayer(this);
+			// TODO: handle sum returning array, e.g. "sum( { i, i*i } for i in 1:3 )"
+			List<FStatement> fsl = indexNames.createForLoops(clauses, exp);
+			
+			// Scalarize exp
+			Map<String,FExp> myIndexMap = new HashMap<String,FExp>(indexMap);
+			exp.addArrayUsesToIndexMap(myIndexMap, indexNames);
+			exp.createArrayTemporaries(fsl, vars, myIndexMap, addVar);
+			FExp scalar = exp.scalarize(myIndexMap);
+			indexNames.removeLayer();
+			
+			// Add statement updating temp var to loop
+			FExp add = new FAddExp(new FIdUseExp(tempVarName()), scalar);
+			fsl.add(new FAssignStmt(new FIdUse(tempVarName()), add));
+		} else {
+			super.createArrayTemporaries(clauses, vars, indexMap, addVar);
+		}
 	}
 	
 	public void FMulExp.createArrayTemporaries(List clauses, List vars, 
@@ -842,10 +935,6 @@ aspect Scalarization {
 			var.scalarize(vars, stmts, emptyIndexMap);
 		for (FStatement stmt : getFAlgorithmBlock().getFStatements())
 			stmt.scalarize(vars, stmts, emptyIndexMap);
-		
-		// During scalarization, FQNames got their scalarized flag set, we need to clear it
-		vars.clearScalarized();
-		stmts.clearScalarized();
 		
 		FQName name = (FQName) getFQName().fullCopy();
 		return new FFunctionDecl(name, vars, new FAlgorithmBlock(stmts));
@@ -1428,7 +1517,7 @@ aspect Scalarization {
 			return indexMap.containsKey(tempVarName()) ? 
 					(FExp) indexMap.get(tempVarName()).fullCopy() : 
 					new FIdUseExp(tempVarName());
-    	if (type().isRecord() && wantsRecordCon())
+		else if (type().isRecord() && wantsRecordCon())
     		return buildRecordConstructor(indexMap);
  		else if (isArray() && !keepAsArray()) 
 			return getArray().buildScalarized(indexMap, this);
@@ -1581,7 +1670,14 @@ aspect Scalarization {
 	}
 	
 	public FExp FSumExp.scalarizeExp(Map<String,FExp> indexMap) {
-		return getFExp().reduceToScalarized(new FAddExp(), indexMap);
+		if (getFExp().size().numElements() == 0)
+			return type().zeroLiteral();
+		else
+			return getFExp().reduceToScalarized(new FAddExp(), indexMap);
+	}
+	
+	public FExp FIterExp.scalarizeExp(Map<String,FExp> indexMap) {
+		return getFExp().scalarize(indexMap);
 	}
 	
 	/**

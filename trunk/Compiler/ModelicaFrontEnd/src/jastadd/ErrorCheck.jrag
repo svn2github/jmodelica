@@ -108,34 +108,67 @@ import java.util.ArrayList;
    * Exception containing a list of compiler errors/warnings. 
    */
   public class CompilerException extends ModelicaException {
-	  private Collection<Problem> problems;
+	  private Collection<Problem> errors;
+	  private Collection<Problem> warnings;
 	  
 	  /**
 	   * Default constructor.
 	   */
 	  public CompilerException() {
-		  problems = new ArrayList<Problem>();
+		  errors = new ArrayList<Problem>();
+		  warnings = new ArrayList<Problem>();
 	  }
 	  
 	  /**
 	   * Construct from a list of problems.
 	   */
 	  public CompilerException(Collection<Problem> problems) {
-		  this.problems = problems;
+		  this();
+		  for (Problem p : problems) 
+			  addProblem(p);
 	  }
 	  
 	  /**
 	   * Add a new problem.
 	   */
 	  public void addProblem(Problem p) {
-		  problems.add(p);
+		  if (p.severity() == Problem.Severity.ERROR) 
+			  errors.add(p);
+		  else
+			  warnings.add(p);
 	  }
 	  
 	  /**
 	   * Get the list of problems.
 	   */
 	  public Collection<Problem> getProblems() {
+		  Collection<Problem> problems = new ArrayList<Problem>();
+		  problems.addAll(errors);
+		  problems.addAll(warnings);
 		  return problems;
+	  }
+	  
+	  /**
+	   * Get the list of errors.
+	   */
+	  public Collection<Problem> getErrors() {
+		  return errors;
+	  }
+	  
+	  /**
+	   * Get the list of warnings.
+	   */
+	  public Collection<Problem> getWarnings() {
+		  return warnings;
+	  }
+	  
+	  /**
+	   * Should these problems cause compilation to stop?
+	   * 
+	   * @param warnings  value to return if there are warnings but not errors 
+	   */
+	  public boolean shouldStop(boolean warnings) {
+		  return !errors.isEmpty() || (warnings && !this.warnings.isEmpty());
 	  }
 
 	  /**
@@ -143,9 +176,20 @@ import java.util.ArrayList;
 	   */
 	  public String getMessage() {
 		  StringBuilder str = new StringBuilder();
-		  str.append(problems.size());
-		  str.append(" problems found:\n\n");
-		  for (Problem p : problems) {
+		  if (!errors.isEmpty()) {
+			  str.append(errors.size());
+			  str.append(" errors ");
+			  str.append(warnings.isEmpty() ? "found:\n\n" : "and ");
+		  }
+		  if (!warnings.isEmpty()) {
+			  str.append(warnings.size());
+			  str.append(" warnings found:\n\n");
+		  }
+		  for (Problem p : errors) {
+			  str.append(p);
+			  str.append("\n\n");
+		  }
+		  for (Problem p : warnings) {
 			  str.append(p);
 			  str.append("\n\n");
 		  }
@@ -800,16 +844,25 @@ aspect InstanceErrorCheck {
 	 * \brief Check if class has exactly one algorithm section or external function declaration.
 	 */
 	public boolean InstClassDecl.isCompleteFunction() {
-		return (numFAlgorithmBlock() == 1) != hasInstExternal();
+		return (numFAlgorithmBlock() == 1) != (numInstExternal() == 1);
 	}
 	
 	syn boolean InstClassDecl.hasInstExternal() = false;
+	
+	syn int InstClassDecl.numInstExternal() {
+		int n = hasInstExternal() ? 1 : 0;
+		for (InstExtends ie : getInstExtendss())
+			n += ie.myInstClass().numInstExternal();
+		return n;
+	}
 	
 	syn int InstClassDecl.numFAlgorithmBlock() {
 		int n = 0;
 		for (FAbstractEquation e : getFAbstractEquations())
 			if (e instanceof FAlgorithmBlock)
 				n++;
+		for (InstExtends ie : getInstExtendss())
+			n += ie.myInstClass().numFAlgorithmBlock();
 		return n;
 	}
 	

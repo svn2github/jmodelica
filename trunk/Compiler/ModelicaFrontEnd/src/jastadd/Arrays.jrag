@@ -922,6 +922,19 @@ aspect Arrays {
 	public Opt Opt.createSizeFExp(Map<ASTNode, FExp> varMap) {
 		return getNumChild() == 0 ? new Opt() : new Opt(getChild(0).createSizeFExp(varMap));
 	}
+	
+	/**
+	 * Create a copy of this expression suitable for when it is used to describe a size.
+	 * 
+	 * Default implementation simply returns a copy.
+	 */
+	public FExp FExp.createSizeFExp() {
+		return (FExp) unboundCopy();
+	}
+	
+	public FExp FUnknownSizeExp.createSizeFExp() {
+		return new FSizeExp(getVariable().createUseExp(), getDim());
+	}
 		
 	/**
 	 * \brief check if an expression is an array expression.
@@ -1444,7 +1457,7 @@ aspect Arrays {
 	 */
 	public FIdUseInstAccess FIdUseInstAccess.specify(Index i, boolean scalarize) {
 		InstAccess ia = getInstAccess().specify(i);
-		return new FIdUseInstAccess(new FQName(), ia);
+		return new FIdUseInstAccess(ia);
 	}
 	
 	/**
@@ -2359,7 +2372,7 @@ aspect ArrayHelpers {
 		 */
 		public void set(int d, FExp e) {
 			int s = UNKNOWN;
-			if (e.isValidExp()) {
+			if (okExp(e)) {
 				try {
 					s = e.ceval().intValue();
 				} catch (ConstantEvaluationException uoe) {
@@ -2529,8 +2542,8 @@ aspect ArrayHelpers {
 		 * the resulting expression is not expanded like createSizeFExp().
 		 */
 		public FExp createFExp(int d) {
-			return (okExp(exps[d])) ? 
-					(FExp) exps[d].unboundCopy() : 
+			return (exps[d] != null) ? 
+					exps[d].createSizeFExp() : 
 					super.createFExp(d);
 		}
 		

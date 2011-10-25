@@ -103,18 +103,17 @@ aspect Flattening {
 	// Flatten function if not already done
 	public void InstClassDecl.flattenFunction(FClass fc) {}
 	
-	// TODO: Shouldn't this be InstBaseClassDecl instead?
-	public void InstFullClassDecl.flattenFunction(FClass fc) {
+	public void InstBaseClassDecl.flattenFunction(FClass fc) {
 		getInstRestriction().flattenFunction(fc, this);
 	}
 	
-	public void InstRestriction.flattenFunction(FClass fc, InstFullClassDecl icd) {}
+	public void InstRestriction.flattenFunction(FClass fc, InstBaseClassDecl icd) {}
 	
-	public void InstFunction.flattenFunction(FClass fc, InstFullClassDecl icd) {
+	public void InstFunction.flattenFunction(FClass fc, InstBaseClassDecl icd) {
 		icd.flattenThisFunction(fc);
 	}
 	
-	public void InstFullClassDecl.flattenThisFunction(FClass fc) {
+	public void InstBaseClassDecl.flattenThisFunction(FClass fc) {
 		if (fc.lookupFunc(qualifiedName()) == null) {	
 	   		FFunctionDecl ffd = new FFunctionDecl();
 	   		ffd.setFQName(new FQName(qualifiedName()));
@@ -126,14 +125,12 @@ aspect Flattening {
 	   				icd.flattenInFunction(ffd, fc, false);
 			
 	   		FAlgorithmBlock fab = findFunctionAlgorithm();
-	   		if (fab == null)
-	   			fab = new FAlgorithmBlock(new List());
-	   		else
-	   			fab = fab.flattenEqn(new FQName(), fc);
-			ffd.setFAlgorithmBlock(fab);
-			if (hasInstExternal())
-				fab.addFStatement(getInstExternal().flatten(this, new FQName()));
+	   		fab = (fab == null) ? new FAlgorithmBlock(new List()) : fab.flattenEqn(new FQName(), fc);
+			InstExternal ie = findFunctionExternal();
+			if (ie != null)
+				fab.addFStatement(ie.flatten(this, new FQName()));
 			fab.ensureReturn();
+			ffd.setFAlgorithmBlock(fab);
 			
 			for (InstAssignable cons : localFunctionConstantList())
 				cons.flattenInFunction(ffd, fc, true);
@@ -159,26 +156,36 @@ aspect Flattening {
 		return null;
 	}
 	
+	syn InstExternal InstClassDecl.findFunctionExternal() {
+		for (InstExtends ie : getInstExtendss()) {
+			InstExternal tmp = ie.myInstClass().findFunctionExternal();
+			if (tmp != null) 
+				return tmp;
+		}
+		return null;
+	}
+	eq InstFullClassDecl.findFunctionExternal() = 
+		hasInstExternal() ? getInstExternal() : super.findFunctionExternal();
+	
 	// Flatten record if not already done
 	public void InstClassDecl.flattenRecord(FClass fc) {}
 	
-	// TODO: Shouldn't this be InstBaseClassDecl instead?
-	public void InstFullClassDecl.flattenRecord(FClass fc) {
-		getInstRestriction().flattenRecord(fc);
+	public void InstBaseClassDecl.flattenRecord(FClass fc) {
+		getInstRestriction().flattenRecord(fc, this);
 	}
 	
-	public void InstRestriction.flattenRecord(FClass fc) {}
+	public void InstRestriction.flattenRecord(FClass fc, InstBaseClassDecl icd) {}
 	
 	private FClass InstMRecord.flatRecordAddedTo = null;
 	
-	public void InstMRecord.flattenRecord(FClass fc) {
+	public void InstMRecord.flattenRecord(FClass fc, InstBaseClassDecl icd) {
 		if (flatRecordAddedTo != fc) {
 			flatRecordAddedTo = fc;
-			((InstFullClassDecl) getParent()).flattenThisRecord(fc);
+			icd.flattenThisRecord(fc);
 		}
 	}
 	
-	public void InstFullClassDecl.flattenThisRecord(FClass fc) {
+	public void InstBaseClassDecl.flattenThisRecord(FClass fc) {
 		if (fc.lookupFRec(qualifiedName()) == null) {
 			FRecordDecl frd = new FRecordDecl();
 	   		frd.setFQName(new FQName(qualifiedName()));
@@ -1411,8 +1418,8 @@ aspect InstantiatedExpressions {
 	    else
 	    	o = new Opt();
 		FConnectClause c = new FConnectClause(equationType(), o, 
-				new FIdUseInstAccess(new FQName(), getConnector1().newInstAccess()),
-				new FIdUseInstAccess(new FQName(), getConnector2().newInstAccess()));
+				new FIdUseInstAccess(getConnector1().newInstAccess()),
+				new FIdUseInstAccess(getConnector2().newInstAccess()));
 		c.setLocation(this);
 		return c;
 	}
@@ -1456,7 +1463,7 @@ aspect InstantiatedExpressions {
 	
 	public 	FFunctionCallLeft FunctionCallLeft.instantiate() {
 		Opt id = hasAccess() ? 
-				new Opt(new FIdUseExp(new FIdUseInstAccess(new FQName(), getAccess().newInstAccess()))) : 
+				new Opt(new FIdUseExp(new FIdUseInstAccess(getAccess().newInstAccess()))) : 
 				new Opt();
 		return new FFunctionCallLeft(id);
 	}
@@ -1520,7 +1527,7 @@ aspect InstantiatedExpressions {
 	}
 	
 	protected InstAssignStmt AssignStmt.instantiateStatement() {
-		FIdUseInstAccess left = new FIdUseInstAccess(new FQName(), getLeft().newInstAccess());
+		FIdUseInstAccess left = new FIdUseInstAccess(getLeft().newInstAccess());
 		return new InstAssignStmt(left, getRight().instantiate());
 	}
 	

@@ -200,6 +200,15 @@ aspect Constructors {
 	}
 	
 	/**
+	 * Constructs an FIdUseInstAccess with an empty FQName.
+	 * 
+	 * Note: the FQName of an FIdUseInstAccess should always be empty.
+	 */
+	public FIdUseInstAccess.FIdUseInstAccess(InstAccess ia) {
+		this(new FQName(), ia);
+	}
+	
+	/**
 	 * \brief Constructs an InstDot with an empty ID.
 	 */
 	public InstDot.InstDot(InstAccess left, InstAccess right) {

@@ -630,6 +630,14 @@ aspect ConstantEvaluation {
         }
         
         /**
+         * Returns <code>false</code> until {@link #addCell(CValue)} has been called 
+         * once for each cell.
+         */
+        public boolean isFilled() {
+        	return add >= values.length;
+        }
+        
+        /**
          * \brief Get the value of a specific cell of an array constant value.
          */
         public CValue getCell(Index i) {
@@ -942,7 +950,28 @@ aspect ConstantEvaluation {
 	    }
     	
     }
+    
+	
+ 	/**
+ 	 * \brief Create a CValue with the zero value for this type, if applicable.
+ 	 */
+ 	public CValue FType.zeroCValue() {
+ 		if (isArray() && !zeroCValueScalar().isUnknown()) {
+	 		CValueArray res = new CValueArray(size());
+	 		while (!res.isFilled())
+	 			res.addCell(zeroCValueScalar());
+	 		return res; 
+ 		} else {
+ 			return zeroCValueScalar();
+ 		}
+ 	}
 
+ 	public CValue FType.zeroCValueScalar()        { return CValue.UNSUPPORTED; }
+ 	public CValue FRealType.zeroCValueScalar()    { return new CValueReal(0.0); }
+ 	public CValue FIntegerType.zeroCValueScalar() { return new CValueInteger(0); }
+ 	public CValue FStringType.zeroCValueScalar()  { return new CValueString(""); }
+ 	public CValue FBooleanType.zeroCValueScalar() { return new CValueBoolean(false); }
+ 	
     
     /** 
      * \build Creates an FExp with literals from this Array.
@@ -1160,10 +1189,8 @@ aspect ConstantEvaluation {
   }
   
   eq FSumExp.cevalCalc() {
-	  if (isArray())
-		  return CValue.UNKNOWN;
 	  Iterator<FExp> it = getFExp().getArray().iteratorFExp();
-	  CValue sum = it.next().ceval();
+	  CValue sum = type().zeroCValue();
 	  while (it.hasNext())
 		  sum = type().add(sum, it.next().ceval());
 	  return sum;

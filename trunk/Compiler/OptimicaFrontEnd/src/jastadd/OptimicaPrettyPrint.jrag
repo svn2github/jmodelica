@@ -118,6 +118,13 @@ aspect OptimicaPrettyPrint {
 		str.print(")");
 	}
 
+	public void InstTimedVariable.prettyPrint(Printer p, PrintStream str, String indent) {
+		str.print(getName().name());
+		str.print("(");
+		p.print(getArg(), str, indent);
+		str.print(")");
+	}
+
 }
 
 aspect FlatOptimicaPrettyPrint {

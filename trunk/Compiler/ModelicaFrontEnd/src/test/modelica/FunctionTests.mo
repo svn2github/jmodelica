@@ -1260,7 +1260,7 @@ model FunctionType17
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
 Semantic error at line 1094, column 8:
-  Type error in expression
+  Type error in expression: x + y
 ")})));
 
  function f
@@ -4696,6 +4696,137 @@ end FunctionTests.UnknownArray24;
 
 	Real x[3,2] = f({{5,6},{7,8},{9,0}});
 end UnknownArray24;
+
+
+model UnknownArray25
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="UnknownArray25",
+         description="Taking sum of array of unknown size",
+         flatModel="
+fclass FunctionTests.UnknownArray25
+ Real x;
+equation
+ x = FunctionTests.UnknownArray25.f({1,2});
+
+ function FunctionTests.UnknownArray25.f
+  input Real[:] y;
+  output Real x;
+  Real temp_1;
+ algorithm
+  temp_1 := 0.0;
+  for i1 in 1:size(y, 1) loop
+   temp_1 := temp_1 + y[i1];
+  end for;
+  x := temp_1;
+  return;
+ end FunctionTests.UnknownArray25.f;
+end FunctionTests.UnknownArray25;
+")})));
+
+    function f
+        input Real[:] y;
+        output Real x;
+    algorithm
+        x := sum(y);
+    end f;
+    
+    Real x = f({1,2});
+end UnknownArray25;
+
+
+model UnknownArray26
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="UnknownArray26",
+         description="Taking sum of iterator expression over array of unknown size",
+         flatModel="
+fclass FunctionTests.UnknownArray26
+ Real x;
+equation
+ x = FunctionTests.UnknownArray26.f({1,2});
+
+ function FunctionTests.UnknownArray26.f
+  input Real[:] y;
+  output Real x;
+  Real temp_1;
+ algorithm
+  temp_1 := 0.0;
+  for i1 in 1:size(y, 1) loop
+   temp_1 := temp_1 + ( y[i1] ) * ( y[i1] );
+  end for;
+  x := temp_1;
+  return;
+ end FunctionTests.UnknownArray26.f;
+end FunctionTests.UnknownArray26;
+")})));
+
+    function f
+        input Real[:] y;
+        output Real x;
+    algorithm
+        x := sum(y[i]*y[i] for i in 1:size(y,1));
+    end f;
+    
+    Real x = f({1,2});
+end UnknownArray26;
+
+
+model UnknownArray27
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="UnknownArray27",
+         description="Nestled sums over iterator expressions over arrays of unknown size",
+         flatModel="
+fclass FunctionTests.UnknownArray27
+ Real x;
+equation
+ x = FunctionTests.UnknownArray27.f({1,2}, {{1,2},{3,4}});
+
+ function FunctionTests.UnknownArray27.f
+  input Real[:] y;
+  input Real[size(y, 1), size(y, 1)] z;
+  output Real x;
+  Real temp_1;
+  Real temp_2;
+ algorithm
+  temp_1 := 0.0;
+  for i1 in 1:size(y, 1) loop
+   temp_2 := 0.0;
+   for i2 in 1:size(y, 1) loop
+    temp_2 := temp_2 + ( y[i2] ) * ( z[i1,i2] );
+   end for;
+   temp_1 := temp_1 + ( ( y[i1] ) * ( y[i1] ) ) / ( temp_2 );
+  end for;
+  x := temp_1;
+  return;
+ end FunctionTests.UnknownArray27.f;
+end FunctionTests.UnknownArray27;
+")})));
+
+    function f
+        input Real[:] y;
+        input Real[size(y,1), size(y,1)] z;
+        output Real x;
+    algorithm
+        x := sum(y[i]*y[i]/(sum(y[j]*z[i,j] for j in 1:size(y,1))) for i in 1:size(y,1));
+    end f;
+    
+    Real x = f({1,2}, {{1,2},{3,4}});
+end UnknownArray27;
+
+
+// TODO: this gives wrong result
+model UnknownArray28
+    function f
+        input Real[:] y;
+        output Real x;
+    algorithm
+        x := sum(sum(j for j in 1:size({k for k in 1:i},1)) for i in 1:size(y,1));
+    end f;
+    
+    Real x = f({1,2});
+end UnknownArray28;
 
 
 // TODO: need more complex cases

@@ -18,6 +18,8 @@ within ;
 package ArrayBuiltins
 	
 	
+
+package Size
 	
 model SizeExp1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
@@ -25,11 +27,11 @@ model SizeExp1
 		 name="SizeExp1",
 		 description="Size operator: first dim",
 		 flatModel="
-fclass ArrayBuiltins.SizeExp1
+fclass ArrayBuiltins.Size.SizeExp1
  Real x;
 equation
  x = 2;
-end ArrayBuiltins.SizeExp1;
+end ArrayBuiltins.Size.SizeExp1;
 ")})));
 
  Real x = size(ones(2), 1);
@@ -42,11 +44,11 @@ model SizeExp2
 		 name="SizeExp2",
 		 description="Size operator: second dim",
 		 flatModel="
-fclass ArrayBuiltins.SizeExp2
+fclass ArrayBuiltins.Size.SizeExp2
  Real x;
 equation
  x = 3;
-end ArrayBuiltins.SizeExp2;
+end ArrayBuiltins.Size.SizeExp2;
 ")})));
 
  Real x = size(ones(2, 3), 2);
@@ -59,11 +61,11 @@ model SizeExp3
 		 name="SizeExp3",
 		 description="Size operator: without dim",
 		 flatModel="
-fclass ArrayBuiltins.SizeExp3
+fclass ArrayBuiltins.Size.SizeExp3
  Real x[1];
 equation
  x[1] = 2;
-end ArrayBuiltins.SizeExp3;
+end ArrayBuiltins.Size.SizeExp3;
 ")})));
 
  Real x[1] = size(ones(2));
@@ -76,13 +78,13 @@ model SizeExp4
 		 name="SizeExp4",
 		 description="Size operator: without dim",
 		 flatModel="
-fclass ArrayBuiltins.SizeExp4
+fclass ArrayBuiltins.Size.SizeExp4
  Real x[1];
  Real x[2];
 equation
  x[1] = 2;
  x[2] = 3;
-end ArrayBuiltins.SizeExp4;
+end ArrayBuiltins.Size.SizeExp4;
 ")})));
 
  Real x[2] = size(ones(2, 3));
@@ -95,12 +97,12 @@ model SizeExp5
 		 name="SizeExp5",
 		 description="Size operator: using parameter",
 		 flatModel="
-fclass ArrayBuiltins.SizeExp5
+fclass ArrayBuiltins.Size.SizeExp5
  parameter Integer p = 1 /* 1 */;
  Real x;
 equation
  x = 2;
-end ArrayBuiltins.SizeExp5;
+end ArrayBuiltins.Size.SizeExp5;
 ")})));
 
  parameter Integer p = 1;
@@ -117,7 +119,7 @@ model SizeExp6
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
 Semantic error at line 793, column 11:
-  Type error in expression
+  Type error in expression: size(ones(2, 3), d)
 ")})));
 
  Integer d = 1;
@@ -133,10 +135,10 @@ model SizeExp7
 		 errorMessage="
 2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
-Semantic error at line 809, column 11:
-  Type error in expression
+Semantic error at line 145, column 11:
+  Type error in expression: size(ones(2, 3), {1,2})
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
-Semantic error at line 809, column 28:
+Semantic error at line 145, column 28:
   Calling function size(): types of positional argument 2 and input d are not compatible
 ")})));
 
@@ -153,7 +155,7 @@ model SizeExp8
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
 Semantic error at line 828, column 11:
-  Type error in expression
+  Type error in expression: size(ones(2, 3), 1.0)
 ")})));
 
  Real x = size(ones(2, 3), 1.0);
@@ -169,7 +171,7 @@ model SizeExp9
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
 Semantic error at line 844, column 11:
-  Type error in expression
+  Type error in expression: size(ones(2, 3), 0)
 ")})));
 
  Real x = size(ones(2, 3), 0);
@@ -185,27 +187,31 @@ model SizeExp10
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
 Semantic error at line 860, column 11:
-  Type error in expression
+  Type error in expression: size(ones(2, 3), 3)
 ")})));
 
  Real x = size(ones(2, 3), 3);
 end SizeExp10;
 
+end Size;
 
 
+
+package Fill
+	
 model FillExp1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
 	 JModelica.UnitTesting.TransformCanonicalTestCase(
 		 name="FillExp1",
 		 description="Fill operator: one dim",
 		 flatModel="
-fclass ArrayBuiltins.FillExp1
+fclass ArrayBuiltins.Fill.FillExp1
  Real x[1];
  Real x[2];
 equation
  x[1] = 1 + 2;
  x[2] = 1 + 2;
-end ArrayBuiltins.FillExp1;
+end ArrayBuiltins.Fill.FillExp1;
 ")})));
 
  Real x[2] = fill(1 + 2, 2);
@@ -218,7 +224,7 @@ model FillExp2
 		 name="FillExp2",
 		 description="Fill operator: three dims",
 		 flatModel="
-fclass ArrayBuiltins.FillExp2
+fclass ArrayBuiltins.Fill.FillExp2
  Real x[1,1,1];
  Real x[1,1,2];
  Real x[1,1,3];
@@ -268,7 +274,7 @@ equation
  x[2,3,2] = 1 + 2;
  x[2,3,3] = 1 + 2;
  x[2,3,4] = 1 + 2;
-end ArrayBuiltins.FillExp2;
+end ArrayBuiltins.Fill.FillExp2;
 ")})));
 
  Real x[2,3,4] = fill(1 + 2, 2, 3, 4);
@@ -368,7 +374,7 @@ model FillExp8
 		 name="FillExp8",
 		 description="Fill operator: filling with array",
 		 flatModel="
-fclass ArrayBuiltins.FillExp8
+fclass ArrayBuiltins.Fill.FillExp8
  Real x[1,1];
  Real x[1,2];
  Real x[2,1];
@@ -382,26 +388,30 @@ equation
  x[2,2] = 2;
  x[3,1] = 1;
  x[3,2] = 2;
-end ArrayBuiltins.FillExp8;
+end ArrayBuiltins.Fill.FillExp8;
 ")})));
 
  Real x[3,2] = fill({1,2}, 3);
 end FillExp8;
  
+end Fill;
 
 
+
+package Min
+	
 model MinExp1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
 	 JModelica.UnitTesting.TransformCanonicalTestCase(
 		 name="MinExp1",
 		 description="Min operator: 2 scalar args",
 		 flatModel="
-fclass ArrayBuiltins.MinExp1
+fclass ArrayBuiltins.Min.MinExp1
  constant Real x = min(1 + 2, 3 + 4);
  Real y;
 equation
  y = 3.0;
-end ArrayBuiltins.MinExp1;
+end ArrayBuiltins.Min.MinExp1;
 ")})));
 
  constant Real x = min(1+2, 3+4);
@@ -415,12 +425,12 @@ model MinExp2
 		 name="MinExp2",
 		 description="Min operator: 1 array arg",
 		 flatModel="
-fclass ArrayBuiltins.MinExp2
+fclass ArrayBuiltins.Min.MinExp2
  constant Real x = min(min(min(1, 2), 3), 4);
  Real y;
 equation
  y = 1.0;
-end ArrayBuiltins.MinExp2;
+end ArrayBuiltins.Min.MinExp2;
 ")})));
 
  constant Real x = min({{1,2},{3,4}});
@@ -435,14 +445,14 @@ model MinExp3
 		 description="Min operator: strings",
 
 		 flatModel="
-fclass ArrayBuiltins.MinExp3
+fclass ArrayBuiltins.Min.MinExp3
  constant String x = min(\"foo\", \"bar\");
  discrete String y;
 initial equation 
  pre(y) = \"\";
 equation
  y = \"bar\";
-end ArrayBuiltins.MinExp3;
+end ArrayBuiltins.Min.MinExp3;
 ")})));
 
  constant String x = min("foo", "bar");
@@ -456,14 +466,14 @@ model MinExp4
 		 name="MinExp4",
 		 description="Min operator: booleans",
 		 flatModel="
-fclass ArrayBuiltins.MinExp4
+fclass ArrayBuiltins.Min.MinExp4
  constant Boolean x = min(true, false);
  discrete Boolean y;
 initial equation 
  pre(y) = false;
 equation
  y = false;
-end ArrayBuiltins.MinExp4;
+end ArrayBuiltins.Min.MinExp4;
 ")})));
 
  constant Boolean x = min(true, false);
@@ -480,7 +490,7 @@ model MinExp5
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
 Semantic error at line 958, column 11:
-  Type error in expression
+  Type error in expression: min(true, 0)
 ")})));
 
  Real x = min(true, 0);
@@ -528,12 +538,12 @@ model MinExp8
 		 name="MinExp8",
 		 description="Reduction-expression with min(): constant expression",
 		 flatModel="
-fclass ArrayBuiltins.MinExp8
+fclass ArrayBuiltins.Min.MinExp8
  constant Real x = min(min(min(min(min(min(min(min(min(min(min(1.0, 1.0), 1.0), 1.0), 1.0), 1.0), 1.0), 1.0), 1.0), 1.0), 1.0), 1.0);
  Real y;
 equation
  y = 1.0;
-end ArrayBuiltins.MinExp8;
+end ArrayBuiltins.Min.MinExp8;
 ")})));
 
  constant Real x = min(1.0 for i in 1:4, j in {2,3,5});
@@ -547,11 +557,11 @@ model MinExp9
 		 name="MinExp9",
 		 description="Reduction-expression with min(): basic test",
 		 flatModel="
-fclass ArrayBuiltins.MinExp9
+fclass ArrayBuiltins.Min.MinExp9
  Real x;
 equation
  x = min(min(min(min(min(min(min(min(( 1 ) * ( 2 ), ( 1 ) * ( 3 )), ( 1 ) * ( 5 )), ( 2 ) * ( 2 )), ( 2 ) * ( 3 )), ( 2 ) * ( 5 )), ( 3 ) * ( 2 )), ( 3 ) * ( 3 )), ( 3 ) * ( 5 ));
-end ArrayBuiltins.MinExp9;
+end ArrayBuiltins.Min.MinExp9;
 ")})));
 
  Real x = min(i * j for i in 1:3, j in {2,3,5});
@@ -563,16 +573,13 @@ model MinExp10
 	 JModelica.UnitTesting.ErrorTestCase(
 		 name="MinExp10",
 		 description="Reduction-expression with min(): non-vector index expressions",
-		 errorMessage="
-3 errors found:
+         errorMessage="
+2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
-Semantic error at line 1472, column 11:
-  Type error in expression
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
-Semantic error at line 1472, column 25:
+Semantic error at line 589, column 25:
   The expression of for index i must be a vector expression: {{1,2},{3,4}} has 2 dimension(s)
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
-Semantic error at line 1472, column 45:
+Semantic error at line 589, column 45:
   The expression of for index j must be a vector expression: 2 has 0 dimension(s)
 ")})));
 
@@ -611,20 +618,24 @@ Semantic error at line 1193, column 7:
  Real x = min(false for i in 1:4, j in 2:5);
 end MinExp12;
 
+end Min;
 
 
+
+package Max
+	
 model MaxExp1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
 	 JModelica.UnitTesting.TransformCanonicalTestCase(
 		 name="MaxExp1",
 		 description="Max operator: 2 scalar args",
 		 flatModel="
-fclass ArrayBuiltins.MaxExp1
+fclass ArrayBuiltins.Max.MaxExp1
  constant Real x = max(1 + 2, 3 + 4);
  Real y;
 equation
  y = 7.0;
-end ArrayBuiltins.MaxExp1;
+end ArrayBuiltins.Max.MaxExp1;
 ")})));
 
  constant Real x = max(1+2, 3+4);
@@ -638,12 +649,12 @@ model MaxExp2
 		 name="MaxExp2",
 		 description="Max operator: 1 array arg",
 		 flatModel="
-fclass ArrayBuiltins.MaxExp2
+fclass ArrayBuiltins.Max.MaxExp2
  constant Real x = max(max(max(1, 2), 3), 4);
  Real y;
 equation
  y = 4.0;
-end ArrayBuiltins.MaxExp2;
+end ArrayBuiltins.Max.MaxExp2;
 ")})));
 
  constant Real x = max({{1,2},{3,4}});
@@ -657,14 +668,14 @@ model MaxExp3
 		 name="MaxExp3",
 		 description="Max operator: strings",
 		 flatModel="
-fclass ArrayBuiltins.MaxExp3
+fclass ArrayBuiltins.Max.MaxExp3
  constant String x = max(\"foo\", \"bar\");
  discrete String y;
 initial equation 
  pre(y) = \"\";
 equation
  y = \"foo\";
-end ArrayBuiltins.MaxExp3;
+end ArrayBuiltins.Max.MaxExp3;
 ")})));
 
  constant String x = max("foo", "bar");
@@ -678,14 +689,14 @@ model MaxExp4
 		 name="MaxExp4",
 		 description="Max operator: booleans",
 		 flatModel="
-fclass ArrayBuiltins.MaxExp4
+fclass ArrayBuiltins.Max.MaxExp4
  constant Boolean x = max(true, false);
  discrete Boolean y;
 initial equation 
  pre(y) = false;
 equation
  y = true;
-end ArrayBuiltins.MaxExp4;
+end ArrayBuiltins.Max.MaxExp4;
 ")})));
 
  constant Boolean x = max(true, false);
@@ -702,7 +713,7 @@ model MaxExp5
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
 Semantic error at line 958, column 11:
-  Type error in expression
+  Type error in expression: max(true, 0)
 ")})));
 
  Real x = max(true, 0);
@@ -750,11 +761,11 @@ model MaxExp8
 		 name="MaxExp8",
 		 description="Reduction-expression with max(): constant expression",
 		 flatModel="
-fclass ArrayBuiltins.MaxExp8
+fclass ArrayBuiltins.Max.MaxExp8
  Real x;
 equation
  x = max(max(max(max(max(max(max(max(max(max(max(1.0, 1.0), 1.0), 1.0), 1.0), 1.0), 1.0), 1.0), 1.0), 1.0), 1.0), 1.0);
-end ArrayBuiltins.MaxExp8;
+end ArrayBuiltins.Max.MaxExp8;
 ")})));
 
  Real x = max(1.0 for i in 1:4, j in {2,3,5});
@@ -767,12 +778,12 @@ model MaxExp9
 		 name="MaxExp9",
 		 description="Reduction-expression with max(): basic test",
 		 flatModel="
-fclass ArrayBuiltins.MaxExp9
+fclass ArrayBuiltins.Max.MaxExp9
  constant Real x = max(max(max(max(max(max(max(max(max(max(max(( 1 ) * ( 2 ), ( 1 ) * ( 3 )), ( 1 ) * ( 5 )), ( 2 ) * ( 2 )), ( 2 ) * ( 3 )), ( 2 ) * ( 5 )), ( 3 ) * ( 2 )), ( 3 ) * ( 3 )), ( 3 ) * ( 5 )), ( 4 ) * ( 2 )), ( 4 ) * ( 3 )), ( 4 ) * ( 5 ));
  Real y;
 equation
  y = 20.0;
-end ArrayBuiltins.MaxExp9;
+end ArrayBuiltins.Max.MaxExp9;
 ")})));
 
  constant Real x = max(i * j for i in 1:4, j in {2,3,5});
@@ -786,15 +797,12 @@ model MaxExp10
 		 name="MaxExp10",
 		 description="Reduction-expression with max(): non-vector index expressions",
 		 errorMessage="
-3 errors found:
+2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
-Semantic error at line 1690, column 11:
-  Type error in expression
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
-Semantic error at line 1690, column 25:
+Semantic error at line 812, column 25:
   The expression of for index i must be a vector expression: {{1,2},{3,4}} has 2 dimension(s)
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
-Semantic error at line 1690, column 45:
+Semantic error at line 812, column 45:
   The expression of for index j must be a vector expression: 2 has 0 dimension(s)
 ")})));
 
@@ -822,20 +830,24 @@ Semantic error at line 1462, column 7:
  Real x = max(false for i in 1:4, j in 2:5);
 end MaxExp12;
 
+end Max;
 
 
+
+package Sum
+	
 model SumExp1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
 	 JModelica.UnitTesting.TransformCanonicalTestCase(
 		 name="SumExp1",
 		 description="sum() expressions: basic test",
 		 flatModel="
-fclass ArrayBuiltins.SumExp1
+fclass ArrayBuiltins.Sum.SumExp1
  constant Real x = 1 + 2 + 3 + 4;
  Real y;
 equation
  y = 10.0;
-end ArrayBuiltins.SumExp1;
+end ArrayBuiltins.Sum.SumExp1;
 ")})));
 
  constant Real x = sum({1,2,3,4});
@@ -849,12 +861,12 @@ model SumExp2
 		 name="SumExp2",
 		 description="sum() expressions: reduction-expression",
 		 flatModel="
-fclass ArrayBuiltins.SumExp2
+fclass ArrayBuiltins.Sum.SumExp2
  constant Real x = ( 1 ) * ( 1 ) + ( 1 ) * ( 2 ) + ( 1 ) * ( 3 ) + ( 2 ) * ( 1 ) + ( 2 ) * ( 2 ) + ( 2 ) * ( 3 ) + ( 3 ) * ( 1 ) + ( 3 ) * ( 2 ) + ( 3 ) * ( 3 );
  Real y;
 equation
  y = 36.0;
-end ArrayBuiltins.SumExp2;
+end ArrayBuiltins.Sum.SumExp2;
 ")})));
 
  constant Real x = sum(i * j for i in 1:3, j in 1:3);
@@ -868,7 +880,7 @@ model SumExp3
 		 name="SumExp3",
 		 description="sum() expressions: reduction-expression over array",
 		 flatModel="
-fclass ArrayBuiltins.SumExp3
+fclass ArrayBuiltins.Sum.SumExp3
  constant Real x[1] = 1 + 1 + 1 + 2 + 2 + 2 + 3 + 3 + 3;
  constant Real x[2] = 2 + 3 + 4 + 2 + 3 + 4 + 2 + 3 + 4;
  Real y[1];
@@ -876,7 +888,7 @@ fclass ArrayBuiltins.SumExp3
 equation
  y[1] = 18.0;
  y[2] = 27.0;
-end ArrayBuiltins.SumExp3;
+end ArrayBuiltins.Sum.SumExp3;
 ")})));
 
  constant Real x[2] = sum({i, j} for i in 1:3, j in 2:4);
@@ -890,12 +902,12 @@ model SumExp4
 		 name="SumExp4",
 		 description="sum() expressions: over array constructor with iterators",
 		 flatModel="
-fclass ArrayBuiltins.SumExp4
+fclass ArrayBuiltins.Sum.SumExp4
  constant Real x = 1 + 2 + 1 + 3 + 1 + 4 + 2 + 2 + 2 + 3 + 2 + 4 + 3 + 2 + 3 + 3 + 3 + 4;
  Real y;
 equation
  y = 45.0;
-end ArrayBuiltins.SumExp4;
+end ArrayBuiltins.Sum.SumExp4;
 ")})));
 
  constant Real x = sum( { {i, j} for i in 1:3, j in 2:4 } );
@@ -943,14 +955,33 @@ equation
 end SumExp7;
 
 
+model SumExp8
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="SumExp8",
+         description="sum() expressions: empty array",
+         flatModel="
+fclass ArrayBuiltins.Sum.SumExp8
+ parameter Real x = 0 /* 0 */;
+end ArrayBuiltins.Sum.SumExp8;
+")})));
 
+	parameter Real x = sum(fill(2, 0));
+end SumExp8;
+
+end Sum;
+
+
+
+package Transpose
+	
 model Transpose1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
 	 JModelica.UnitTesting.TransformCanonicalTestCase(
 		 name="Transpose1",
 		 description="Scalarization of transpose operator: Integer[2,2]",
 		 flatModel="
-fclass ArrayBuiltins.Transpose1
+fclass ArrayBuiltins.Transpose.Transpose1
  Real x[1,1];
  Real x[1,2];
  Real x[2,1];
@@ -960,7 +991,7 @@ equation
  x[1,2] = 3;
  x[2,1] = 2;
  x[2,2] = 4;
-end ArrayBuiltins.Transpose1;
+end ArrayBuiltins.Transpose.Transpose1;
 ")})));
 
  Real x[2,2] = transpose({{1,2},{3,4}});
@@ -973,7 +1004,7 @@ model Transpose2
 		 name="Transpose2",
 		 description="Scalarization of transpose operator: Integer[3,2]",
 		 flatModel="
-fclass ArrayBuiltins.Transpose2
+fclass ArrayBuiltins.Transpose.Transpose2
  Real x[1,1];
  Real x[1,2];
  Real x[1,3];
@@ -987,7 +1018,7 @@ equation
  x[2,1] = 2;
  x[2,2] = 4;
  x[2,3] = 6;
-end ArrayBuiltins.Transpose2;
+end ArrayBuiltins.Transpose.Transpose2;
 ")})));
 
  Real x[2,3] = transpose({{1,2},{3,4},{5,6}});
@@ -1000,13 +1031,13 @@ model Transpose3
 		 name="Transpose3",
 		 description="Scalarization of transpose operator: Integer[1,2]",
 		 flatModel="
-fclass ArrayBuiltins.Transpose3
+fclass ArrayBuiltins.Transpose.Transpose3
  Real x[1,1];
  Real x[2,1];
 equation
  x[1,1] = 1;
  x[2,1] = 2;
-end ArrayBuiltins.Transpose3;
+end ArrayBuiltins.Transpose.Transpose3;
 ")})));
 
  Real x[2,1] = transpose({{1,2}});
@@ -1019,7 +1050,7 @@ model Transpose4
 		 name="Transpose4",
 		 description="Scalarization of transpose operator: Integer[2,2,2]",
 		 flatModel="
-fclass ArrayBuiltins.Transpose4
+fclass ArrayBuiltins.Transpose.Transpose4
  discrete Integer x[1,1,1];
  discrete Integer x[1,1,2];
  discrete Integer x[1,2,1];
@@ -1046,7 +1077,7 @@ equation
  x[2,1,2] = 4;
  x[2,2,1] = 7;
  x[2,2,2] = 8;
-end ArrayBuiltins.Transpose4;
+end ArrayBuiltins.Transpose.Transpose4;
 ")})));
 
  Integer x[2,2,2] = transpose({{{1,2},{3,4}},{{5,6},{7,8}}});
@@ -1103,15 +1134,19 @@ Semantic error at line 4892, column 10:
  Integer x[2,1] = transpose({{1.0,2}});
 end Transpose7;
 
+end Transpose;
 
 
+
+package Cross
+	
 model Cross1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
 	 JModelica.UnitTesting.TransformCanonicalTestCase(
 		 name="Cross1",
 		 description="cross() operator: Real result",
 		 flatModel="
-fclass ArrayBuiltins.Cross1
+fclass ArrayBuiltins.Cross.Cross1
  Real x[1];
  Real x[2];
  Real x[3];
@@ -1119,7 +1154,7 @@ equation
  x[1] = ( 2 ) * ( 6 ) - ( ( 3 ) * ( 5 ) );
  x[2] = ( 3 ) * ( 4 ) - ( ( 1.0 ) * ( 6 ) );
  x[3] = ( 1.0 ) * ( 5 ) - ( ( 2 ) * ( 4 ) );
-end ArrayBuiltins.Cross1;
+end ArrayBuiltins.Cross.Cross1;
 ")})));
 
  Real x[3] = cross({1.0,2,3}, {4,5,6});
@@ -1132,9 +1167,9 @@ model Cross2
 		 name="Cross2",
 		 description="cross() operator: Integer result",
 		 flatModel="
-fclass ArrayBuiltins.Cross2
+fclass ArrayBuiltins.Cross.Cross2
  discrete Integer x[3] = cross({1,2,3}, {4,5,6});
-end ArrayBuiltins.Cross2;
+end ArrayBuiltins.Cross.Cross2;
 ")})));
 
  Integer x[3] = cross({1,2,3}, {4,5,6});
@@ -1232,15 +1267,19 @@ Semantic error at line 6475, column 52:
  Integer x[3,3] = cross({{1,2,3},{1,2,3},{1,2,3}}, {{4,5,6},{4,5,6},{4,5,6}});
 end Cross7; 
 
+end Cross;
 
 
+
+package Cat
+	
 model ArrayCat1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
 	 JModelica.UnitTesting.TransformCanonicalTestCase(
 		 name="ArrayCat1",
 		 description="cat() operator: basic test",
 		 flatModel="
-fclass ArrayBuiltins.ArrayCat1
+fclass ArrayBuiltins.Cat.ArrayCat1
  Real x[1,1];
  Real x[1,2];
  Real x[2,1];
@@ -1262,7 +1301,7 @@ equation
  x[4,2] = 8;
  x[5,1] = 9;
  x[5,2] = 0;
-end ArrayBuiltins.ArrayCat1;
+end ArrayBuiltins.Cat.ArrayCat1;
 ")})));
 
  Real x[5,2] = cat(1, {{1,2},{3,4}}, {{5,6}}, {{7,8},{9,0}});
@@ -1275,7 +1314,7 @@ model ArrayCat2
 		 name="ArrayCat2",
 		 description="cat() operator: basic test",
 		 flatModel="
-fclass ArrayBuiltins.ArrayCat2
+fclass ArrayBuiltins.Cat.ArrayCat2
  Real x[1,1];
  Real x[1,2];
  Real x[1,3];
@@ -1297,7 +1336,7 @@ equation
  x[2,3] = 8;
  x[2,4] = 9;
  x[2,5] = 0;
-end ArrayBuiltins.ArrayCat2;
+end ArrayBuiltins.Cat.ArrayCat2;
 ")})));
 
  Real x[2,5] = cat(2, {{1.0,2.0},{6,7}}, {{3},{8}}, {{4,5},{9,0}});
@@ -1310,9 +1349,9 @@ model ArrayCat3
 		 name="ArrayCat3",
 		 description="cat() operator: using strings",
 		 flatModel="
-fclass ArrayBuiltins.ArrayCat3
+fclass ArrayBuiltins.Cat.ArrayCat3
  discrete String x[2,5] = cat(2, {{\"1\",\"2\"},{\"6\",\"7\"}}, {{\"3\"},{\"8\"}}, {{\"4\",\"5\"},{\"9\",\"0\"}});
-end ArrayBuiltins.ArrayCat3;
+end ArrayBuiltins.Cat.ArrayCat3;
 ")})));
 
  String x[2,5] = cat(2, {{"1","2"},{"6","7"}}, {{"3"},{"8"}}, {{"4","5"},{"9","0"}});
@@ -1406,10 +1445,10 @@ model ArrayCat8
 		 name="ArrayCat8",
 		 description="cat() operator: parameter dim",
 		 flatModel="
-fclass ArrayBuiltins.ArrayCat8
+fclass ArrayBuiltins.Cat.ArrayCat8
  parameter Integer d = 1 /* 1 */;
  discrete Integer x[4] = cat(d, {1,2}, {4,5});
-end ArrayBuiltins.ArrayCat8;
+end ArrayBuiltins.Cat.ArrayCat8;
 ")})));
 
  parameter Integer d = 1;
@@ -1456,7 +1495,7 @@ model ArrayShortCat1
 		 name="ArrayShortCat1",
 		 description="Shorthand array concatenation operator: basic test",
 		 flatModel="
-fclass ArrayBuiltins.ArrayShortCat1
+fclass ArrayBuiltins.Cat.ArrayShortCat1
  Real x[1,1];
  Real x[1,2];
  Real x[1,3];
@@ -1470,7 +1509,7 @@ equation
  x[2,1] = 4;
  x[2,2] = 5;
  x[2,3] = 6;
-end ArrayBuiltins.ArrayShortCat1;
+end ArrayBuiltins.Cat.ArrayShortCat1;
 ")})));
 
  Real x[2,3] = [1,2,3; 4,5,6];
@@ -1482,7 +1521,7 @@ model ArrayShortCat2
 		 name="ArrayShortCat2",
 		 description="Shorthand array concatenation operator: different sizes",
 		 flatModel="
-fclass ArrayBuiltins.ArrayShortCat2
+fclass ArrayBuiltins.Cat.ArrayShortCat2
  Real x[1,1];
  Real x[1,2];
  Real x[1,3];
@@ -1502,7 +1541,7 @@ equation
  x[2,3] = 6;
  x[3,2] = 8;
  x[3,3] = 9;
-end ArrayBuiltins.ArrayShortCat2;
+end ArrayBuiltins.Cat.ArrayShortCat2;
 ")})));
 
  Real x[3,3] = [a, b; c, d];
@@ -1519,7 +1558,7 @@ model ArrayShortCat3
 		 name="ArrayShortCat3",
 		 description="Shorthand array concatenation operator: more than 2 dimensions",
 		 flatModel="
-fclass ArrayBuiltins.ArrayShortCat3
+fclass ArrayBuiltins.Cat.ArrayShortCat3
  Real x[1,1,1,1];
  Real x[1,1,2,1];
  Real x[1,2,1,1];
@@ -1537,7 +1576,7 @@ equation
  x[2,1,2,1] = 6;
  x[2,2,1,1] = 7;
  x[2,2,2,1] = 8;
-end ArrayBuiltins.ArrayShortCat3;
+end ArrayBuiltins.Cat.ArrayShortCat3;
 ")})));
 
  Real x[2,2,2,1] = [{{{{1},{2}}}}, {{{3,4}}}; {{{5,6}}}, {{{7,8}}}];
@@ -1575,15 +1614,19 @@ Semantic error at line 6878, column 17:
  Real x[3,2] = [{1,2,3}, {4,5}];
 end ArrayShortCat5;
 
+end Cat;
 
 
+
+package End
+	
 model ArrayEnd1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
 	 JModelica.UnitTesting.TransformCanonicalTestCase(
 		 name="ArrayEnd1",
 		 description="end operator: basic test",
 		 flatModel="
-fclass ArrayBuiltins.ArrayEnd1
+fclass ArrayBuiltins.End.ArrayEnd1
  Real x[1];
  Real x[2];
  Real x[3];
@@ -1597,7 +1640,7 @@ equation
  x[4] = 4;
  y[1] = ( x[2] ) * ( 2 );
  y[2] = ( x[3] ) * ( 2 );
-end ArrayBuiltins.ArrayEnd1;
+end ArrayBuiltins.End.ArrayEnd1;
 ")})));
 
  Real x[4] = {1,2,3,4};
@@ -1629,7 +1672,7 @@ model ArrayEnd3
 		 description="End operator: nestled array subscripts",
 		 eliminate_alias_variables=false,
 		 flatModel="
-fclass ArrayBuiltins.ArrayEnd3
+fclass ArrayBuiltins.End.ArrayEnd3
  constant Integer x1[1] = 1;
  constant Integer x1[2] = 2;
  constant Integer x1[3] = 3;
@@ -1649,7 +1692,7 @@ equation
  x2[5] = 9;
  y[1] = x2[3];
  y[2] = x2[2];
-end ArrayBuiltins.ArrayEnd3;
+end ArrayBuiltins.End.ArrayEnd3;
 ")})));
 
  constant Integer x1[4] = {1,2,3,4};
@@ -1657,6 +1700,7 @@ end ArrayBuiltins.ArrayEnd3;
  Real y[2] = x2[end.-x1[2:end-1]];
 end ArrayEnd3;
 
+end End;
 
 
 model Linspace1
@@ -1739,7 +1783,7 @@ model Linspace4
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
 Semantic error at line 7052, column 14:
-  Type error in expression
+  Type error in expression: linspace(a, b, c)
 ")})));
 
  Real a = 1;
@@ -1890,7 +1934,7 @@ model Identity3
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
 Semantic error at line 7224, column 27:
-  Type error in expression
+  Type error in expression: identity(n)
 ")})));
 
   Integer n = 3;
@@ -1939,7 +1983,7 @@ model ScalarSize2
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
 Semantic error at line 7272, column 15:
-  Type error in expression
+  Type error in expression: {1} + Modelica.Constants.pi
 ")})));
 
   Real x[1] = {1} + Modelica.Constants.pi;

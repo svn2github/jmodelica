@@ -1041,7 +1041,7 @@ Semantic error at line 712, column 18:
   Could not evaluate binding expression for parameter 'p3': 'p1 + p2'
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
 Semantic error at line 712, column 21:
-  Type error in expression
+  Type error in expression: p1 + p2
 ")})));
 
   parameter Boolean p1=true;

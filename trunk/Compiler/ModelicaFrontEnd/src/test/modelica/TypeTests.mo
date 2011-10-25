@@ -59,7 +59,7 @@ Semantic error at line 35, column 4:
 1 error(s) found...
 In file 'src/test/modelica/TypeTests.mo':
 Semantic error at line 51, column 16:
-  Type error in expression
+  Type error in expression: x + y
 ")})));
 	
 	  Real x = 1;
@@ -76,7 +76,7 @@ Semantic error at line 51, column 16:
 1 error(s) found...
 In file 'src/test/modelica/TypeTests.mo':
 Semantic error at line 66, column 4:
-  Type error in expression
+  Type error in expression: x + y
 ")})));
 	
 	  Real x = 1;
@@ -94,7 +94,7 @@ Semantic error at line 66, column 4:
 1 error(s) found...
 In file 'src/test/modelica/TypeTests.mo':
 Semantic error at line 66, column 4:
-  Type error in expression
+  Type error in expression: x + y
 ")})));
 	
 	  Real x = 1;
@@ -238,22 +238,22 @@ model TypeRel5
 6 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
 Semantic error at line 222, column 15:
-  Type error in expression
+  Type error in expression: {1.0} == {2.0}
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
 Semantic error at line 223, column 15:
-  Type error in expression
+  Type error in expression: {1.0} <> {2.0}
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
 Semantic error at line 224, column 15:
-  Type error in expression
+  Type error in expression: {1.0} > {2.0}
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
 Semantic error at line 225, column 15:
-  Type error in expression
+  Type error in expression: {1.0} >= {2.0}
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
 Semantic error at line 226, column 15:
-  Type error in expression
+  Type error in expression: {1.0} < {2.0}
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
 Semantic error at line 227, column 15:
-  Type error in expression
+  Type error in expression: {1.0} <= {2.0}
 ")})));
 
  Boolean eq = {1.0} == {2.0};
@@ -274,22 +274,22 @@ model TypeRel6
 6 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
 Semantic error at line 258, column 15:
-  Type error in expression
+  Type error in expression: 1.0 == \"2.0\"
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
 Semantic error at line 259, column 15:
-  Type error in expression
+  Type error in expression: 1.0 <> \"2.0\"
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
 Semantic error at line 260, column 15:
-  Type error in expression
+  Type error in expression: 1.0 > \"2.0\"
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
 Semantic error at line 261, column 15:
-  Type error in expression
+  Type error in expression: 1.0 >= \"2.0\"
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
 Semantic error at line 262, column 15:
-  Type error in expression
+  Type error in expression: 1.0 < \"2.0\"
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
 Semantic error at line 263, column 15:
-  Type error in expression
+  Type error in expression: 1.0 <= \"2.0\"
 ")})));
 
  Boolean eq = 1.0 == "2.0";
@@ -698,7 +698,7 @@ model RealEq1
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
 Semantic error at line 672, column 14:
-  Type error in expression
+  Type error in expression: 1.0 == 2
 ")})));
 
  Boolean a = 1.0 == 2;
@@ -714,7 +714,7 @@ model RealEq2
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
 Semantic error at line 688, column 14:
-  Type error in expression
+  Type error in expression: 1.0 <> 2
 ")})));
 
  Boolean a = 1.0 <> 2;
