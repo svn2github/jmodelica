@@ -303,7 +303,8 @@ aspect Flattening {
 		for (int i = 0; i < exps.length; i++) {
 			if (exps[i] != null) {
 				res.exps[i] = exps[i].flatten(prefix);
-				res.exps[i].updateFUnknownSizeExps(fv);
+				if (fv != null)
+					res.exps[i].updateFUnknownSizeExps(fv);
 			}
 		}
 		return res;
@@ -1348,9 +1349,9 @@ aspect FlatExpressions {
 		Size[] sizes = new Size[myOutputs().size()];
 		if (isFunctionCallClause()) 
 			for (int i = 0; i < myLefts().size(); i++)
-				sizes[i] = myLefts().get(i).hasFExp() ? sizeOfOutput(i) : null;
+				sizes[i] = myLefts().get(i).hasFExp() ? sizeOfOutput(i).flatten(prefix, null) : null;
 		else
-			sizes[0] = size();
+			sizes[0] = size().flatten(prefix, null);
 		return new FFunctionCall(name, args, sizes);	
 	}
 
