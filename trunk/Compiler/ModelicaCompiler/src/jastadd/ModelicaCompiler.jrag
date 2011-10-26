@@ -1076,16 +1076,21 @@ public class ModelicaCompiler {
 	 *             If there was an error reading the model file. (Beaver exception.)
 	 */
 	public SourceRoot parseModel(String names[]) 
-	  throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException{
+	  throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException {
 		hookCheckAbort();
 		noteUsedMemory();
 		
 		SourceRoot sr = new SourceRoot(new Program());
 		sr.options.copyAllOptions(this.options);
 		for (String name : names) {
-			SourceRoot sr_tmp = parseModel(name);
-			for(StoredDefinition sd : sr_tmp.getProgram().getUnstructuredEntitys()) 
-				sr.getProgram().addUnstructuredEntity(sd);
+			if (new File(name).isDirectory()) {
+				if (!sr.getProgram().getLibraryList().addLibrary(name))
+					log.error(String.format("The directory '%s' is not a Modelica library.", name));
+			} else {
+				SourceRoot sr_tmp = parseModel(name);
+				for(StoredDefinition sd : sr_tmp.getProgram().getUnstructuredEntitys()) 
+					sr.getProgram().addUnstructuredEntity(sd);
+			}
 		}
 		
 		hookFilesParsed(sr);

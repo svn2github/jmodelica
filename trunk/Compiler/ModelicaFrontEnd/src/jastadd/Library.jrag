@@ -243,39 +243,92 @@ aspect Library {
 			return res;
 		}
 		
-		
-		public void addAll(String[] paths, boolean directories) {
-			for (String path : paths)
-				add(path, directories);
+		/**
+		 * Add <code>path</code> to list of libraries.
+		 * 
+		 * @return <code>true</code> if a library was added 
+		 */
+		public boolean addLibrary(String path) {
+			return add(path, false);
 		}
 		
-		public void add(String path, boolean directory) {
+		/**
+		 * Add each library found in the directory <code>path</code> to list of libraries.
+		 * 
+		 * @return <code>true</code> if any libraries were added 
+		 */
+		public boolean addLibraryDirectory(String path) {
+			return add(path, true);
+		}
+		
+		/**
+		 * Add each of <code>paths</code> to list of libraries.
+		 * 
+		 * @return <code>true</code> if a library was added 
+		 */
+		public boolean addLibraries(String[] paths) {
+			return addAll(paths, false);
+		}
+		
+		/**
+		 * Add each library found in each of the directories in <code>paths</code> 
+		 * to list of libraries.
+		 * 
+		 * @return <code>true</code> if any libraries were added 
+		 */
+		public boolean addLibraryDirectories(String[] paths) {
+			return addAll(paths, true);
+		}
+		
+		protected boolean addAll(String[] paths, boolean directories) {
+			boolean res = false;
+			for (String path : paths)
+				if (add(path, directories))
+					res = true;
+			return res;
+		}
+		
+		/**
+		 * Add a path to list of libraries.
+		 * 
+		 * @param path       the library or directory containing libraries to add
+		 * @param directory  if <code>true</code>, add all libraried found in the directory 
+		 *                   <code>path</code>, else add <code>path</code>
+		 * @return <code>true</code> if any libraries were added 
+		 */
+		protected boolean add(String path, boolean directory) {
 			File base = new File(path);
 			if (directory) {
+				boolean res = false;
 				try {
 					File[] files = base.listFiles();
 					if (files != null)
 						for (File file : files)
-							add(file);
+							if (add(file))
+								res = true;
 				} catch (SecurityException e) {
 					// TODO: should probably do something constructive here, log an error or something
 				}
+				return res;
 			} else {
-				add(base);
+				return add(base);
 			}
 		}
 		
-		protected void add(File path) {
+		protected boolean add(File path) {
 			try {
-				add(LibraryDef.create(path));
+				return add(LibraryDef.create(path));
 			} catch (SecurityException e) {
 				// TODO: should probably do something constructive here, log an error or something
+				return false;
 			}
 		}
 		
-		protected void add(LibraryDef def) {
-			if (def != null)
+		protected boolean add(LibraryDef def) {
+			boolean res = def != null;
+			if (res)
 				set.add(def);
+			return res;
 		}
 		
 		public static class LibraryDef implements Comparable<LibraryDef> {
