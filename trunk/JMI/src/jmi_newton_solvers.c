@@ -262,17 +262,24 @@ int jmi_kinsol_solve(jmi_block_residual_t * block){
 			flag = KINDlsSetDenseJacFn(block->kin_mem, kin_dF);
 			jmi_kinsol_error_handling(block->jmi, flag);
 		}
-		
-		block->F(block->jmi,NULL,NULL,JMI_BLOCK_EVALUATE_NON_REALS);
 
-		/* Call Kinsol solver routine */
+		/*
+		 * A proper local even iteration should problably be done here.
+		 *
+		 */
+
+		if (block->jmi->atEvent) {
+			block->F(block->jmi,NULL,NULL,JMI_BLOCK_EVALUATE_NON_REALS);
+		}
+
 		flag = KINSol(block->kin_mem, block->kin_y, KIN_LINESEARCH, block->kin_y_scale, block->kin_f_scale);
 
-		block->F(block->jmi,NULL,NULL,JMI_BLOCK_EVALUATE_NON_REALS);
+		if (block->jmi->atEvent) {
+			block->F(block->jmi,NULL,NULL,JMI_BLOCK_EVALUATE_NON_REALS);
+			flag = KINSol(block->kin_mem, block->kin_y, KIN_LINESEARCH, block->kin_y_scale, block->kin_f_scale);
+		}
 
-		/* Call Kinsol solver routine */
-		flag = KINSol(block->kin_mem, block->kin_y, KIN_LINESEARCH, block->kin_y_scale, block->kin_f_scale);
-		
+
 		/* In the case when the initial guess is a solution (flag ==1) 
 		   it seems as if the  Jacobian has to be reevaluated */
 		if (flag ==1) {

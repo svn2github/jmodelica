@@ -1235,9 +1235,13 @@ aspect FlattPrettyPrint {
 	}
 	
 	public void FBoolBinExp.prettyPrint(Printer p,PrintStream str, String indent) {
+		//str.print("(");
 		p.print(getLeft(),str,indent);
+		//str.print(")");
 		str.print(op());
+		//str.print("(");
 		p.print(getRight(),str,indent);
+		//str.print(")");
 	}
 	
 	syn String FBinExp.op();
@@ -1313,7 +1317,9 @@ aspect FlattPrettyPrint {
 	
 	public void FNotExp.prettyPrint(Printer p, PrintStream str, String indent) {
 		str.print("not ");
+		//str.print("(");
 		p.print(getFExp(),str,indent);
+		//str.print(")");	
 	}
 	
 	public void FIfExp.prettyPrint(Printer p, PrintStream str, String indent) {

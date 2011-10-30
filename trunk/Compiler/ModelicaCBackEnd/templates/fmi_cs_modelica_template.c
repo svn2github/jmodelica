@@ -141,7 +141,7 @@ $C_variable_aliases$
 #define _pre_guards(i) ((*(jmi->z))[jmi->offs_pre_guards + i])
 #define _pre_guards_init(i) ((*(jmi->z))[jmi->offs_pre_guards_init + i])
 
-#define _atInitial (jmi->atEvent)
+#define _atInitial (jmi->atInitial)
 
 $C_records$
 

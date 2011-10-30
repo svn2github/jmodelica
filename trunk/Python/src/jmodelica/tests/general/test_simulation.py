@@ -377,3 +377,67 @@ class TestIndexReduction3FMU(SimulationTest):
     @testattr(assimulo = True)
     def test_trajectories(self):
         self.assert_all_trajectories(['capacitor.i'], same_span=True, rel_tol=1e-4, abs_tol=1e-4)
+
+class TestCoupledClutches(SimulationTest):
+    
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            'Empty.mo',
+            'Modelica.Mechanics.Rotational.Examples.CoupledClutches',
+            format='fmu')
+
+    @testattr(assimulo = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=1.6,time_step=0.01,rel_tol=1e-6)
+        self.run()
+        self.load_expected_data(
+            'Modelica_Mechanics_Rotational_Examples_CoupledClutches_result.txt')
+
+    @testattr(assimulo = True)
+    def test_trajectories(self):
+        self.assert_all_trajectories(['J1.w','J2.w','J3.w','J4.w',
+                                      'clutch1.sa','clutch2.sa','clutch3.sa'],
+                                      rel_tol=1e-4, abs_tol=1e-4)
+
+class TestDiode(SimulationTest):
+    
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            'Diode.mo',
+            'Diode',
+            format='fmu')
+
+    @testattr(assimulo = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=10,time_step=0.05,rel_tol=1e-6)
+        self.run()
+        self.load_expected_data(
+            'Diode_result.txt')
+
+    @testattr(assimulo = True)
+    def test_trajectories(self):
+        self.assert_all_trajectories(['s','i0','i2'],rel_tol=1e-4, abs_tol=1e-4)
+
+
+class TestFriction(SimulationTest):
+    
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            'Friction.mo',
+            'Friction',
+            format='fmu')
+
+    @testattr(assimulo = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=10,time_step=0.05,rel_tol=1e-6)
+        self.run()
+        self.load_expected_data(
+            'Friction_result.txt')
+
+    @testattr(assimulo = True)
+    def test_trajectories(self):
+        self.assert_all_trajectories(['v','a','f','sa'],rel_tol=1e-4, abs_tol=1e-4)
+

@@ -230,7 +230,7 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
     fmiInteger initComplete = 0;    /* If the initialization are complete */
     jmi_real_t nextTimeEvent;       /* Next time event instant */
     fmiReal safety_factor_events = 0.0001;
-    fmiReal safety_factor_newton = 0.01;
+    fmiReal safety_factor_newton = 0.001;
     
     jmi_real_t* switchesR;   /* Switches */
     jmi_real_t* switchesR0;  /* Initial Switches */
@@ -284,8 +284,16 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
     /* Write values to the pre vector*/
     jmi_copy_pre_values(((fmi_t*)c)->jmi);
 
+    /* Call the initialization algorithm */
+    retval = jmi_ode_initialize(((fmi_t *)c)->jmi);
+
+    if(retval != 0) { /* Error check */
+        (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Initialization failed.");
+        return fmiError;
+    }
+
     while (initComplete == 0){                            /* Loop during event iteration */
-    
+
         if (nR0 > 0){                                     /* Specify the switches if any */
             jmi_real_t* b_mode =  ((fmi_t*)c) -> fmi_functions.allocateMemory(nR0, sizeof(jmi_real_t));
             retval = jmi_init_R0(((fmi_t *)c)->jmi, b_mode);
@@ -315,17 +323,17 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
             }
             ((fmi_t*)c) -> fmi_functions.freeMemory(b_mode);
         }/* End specify switches */
-
-        /* Call the initialization algorithm */
-        retval = jmi_ode_initialize(((fmi_t *)c)->jmi);
-
-        if(retval != 0) { /* Error check */
-            (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Initialization failed.");
-            return fmiError;
-        }
         
         if (nR0 > 0){ /* Event functions, check if there is an iteration. */
             jmi_real_t* b_mode =  ((fmi_t*)c) -> fmi_functions.allocateMemory(nR0, sizeof(jmi_real_t));
+            /* Call the initialization algorithm */
+             retval = jmi_ode_initialize(((fmi_t *)c)->jmi);
+
+             if(retval != 0) { /* Error check */
+                 (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Initialization failed.");
+                 return fmiError;
+             }
+
             retval = jmi_init_R0(((fmi_t *)c)->jmi, b_mode);
             
             if(retval != 0) { /* Error check */
@@ -811,228 +819,172 @@ jmi_t* fmi_get_jmi_t(fmiComponent c) {
 	return ((fmi_t*)c)->jmi;
 }
 
-fmiStatus fmi_event_update(fmiComponent c, fmiBoolean intermediateResults, fmiEventInfo* eventInfo) {
-    /* Handle an event */
-    fmiInteger retval;
-    fmiInteger nF; /* Number of F-equations */
-    fmiInteger nR; /* Number of R-equations */
-    fmiInteger nGuards; /* Number of guard expressions */
-    jmi_real_t* b_mode;
-    jmi_real_t* a_mode;
-    jmi_real_t* pre_iter_guards;
-    jmi_real_t* guards;
-    jmi_real_t nextTimeEvent;       /* Next time event instant */
-    jmi_real_t *switches; /* Switches */
-    jmi_real_t* t_temp;
-    jmi_t* jmi;
-    jmi = ((fmi_t*)c)->jmi;
+fmiStatus fmi_event_iteration(fmiComponent c, fmiBoolean duringInitialization,
+		                      fmiBoolean intermediateResults, fmiEventInfo* eventInfo) {
 
+	fmiInteger nGuards;
+	fmiInteger nF;
+	fmiInteger nR;
+	fmiInteger retval;
+	fmiInteger i;
+    jmi_real_t nextTimeEvent;
+	fmi_t* fmi = ((fmi_t *)c);
+	jmi_t* jmi = fmi->jmi;
+	jmi_real_t* z = jmi_get_z(jmi);
+    jmi_real_t* event_indicators;
+    jmi_real_t* switches;
+
+	/* Allocate memory */
     nGuards = jmi->n_guards;
-    retval = jmi_dae_get_sizes((((fmi_t *)c) ->jmi), &nF, &nR); /* Get the size of R and F, (interested in R) */
+    jmi_dae_get_sizes(jmi, &nF, &nR);
+    event_indicators = fmi->fmi_functions.allocateMemory(nR, sizeof(jmi_real_t));
+    switches = jmi_get_sw(jmi); /* Get the switches */
 
-    guards = (*(jmi->z_val)) + jmi->offs_guards; /* Get the guards */
-    
-    /* Value of the event indicators prior to the initialization */
-    b_mode =  ((fmi_t*)c) -> fmi_functions.allocateMemory(nR, sizeof(jmi_real_t));
-    /* Value of the event indicators after the initialization */
-    a_mode =  ((fmi_t*)c) -> fmi_functions.allocateMemory(nR, sizeof(jmi_real_t));
-
-    /* Value of the guards at the previous event iteration */
-    pre_iter_guards =  ((fmi_t*)c) -> fmi_functions.allocateMemory(nGuards, sizeof(jmi_real_t));
-    
-    /* Update eventInfo */
+    /* Reset eventInfo */
     eventInfo->upcomingTimeEvent = fmiFalse;            /* No support for time events */
     eventInfo->nextEventTime = 0.0;                     /* Not used */
     eventInfo->stateValueReferencesChanged = fmiFalse;  /* No support for dynamic state selection */
     eventInfo->terminateSimulation = fmiFalse;          /* Don't terminate the simulation */
     eventInfo->iterationConverged = fmiFalse;           /* The iteration have not converged */
 
-    /* We are at an event */
-    ((fmi_t *)c)->jmi->atEvent = JMI_TRUE;
+    retval = jmi_ode_derivatives(jmi);
 
-    if (intermediateResults){ /* Return after each event iteration loop */
-        fmiInteger j, i;
-        jmi_real_t* switches;
-        
-        retval = jmi_dae_R(((fmi_t *)c)->jmi,b_mode); /* The event indicators before the initialisation */
-        
+    if(retval != 0) {
+        fmi->fmi_functions.logger(c, fmi->fmi_instance_name, fmiError, "ERROR", "Initialize during event iteration failed.");
+        return fmiError;
+    }
+
+	/* Copy all pre values */
+	jmi_copy_pre_values(jmi);
+
+    /* We are at an event -> set atEvent to true. */
+    jmi->atEvent = JMI_TRUE;
+
+    /* Iterate */
+    while ((eventInfo->iterationConverged)==fmiFalse){
+
+    	/* Set switches according to the event indicators*/
+        retval = jmi_dae_R(jmi,event_indicators);
+
         /* Turn the switches */
-        switches = jmi_get_sw(((fmi_t *)c)->jmi); /* Get the switches */
-        for (j=0; j < nR; j=j+1){
-            if (switches[j] == 1.0){
-                /*if (b_mode[j] <= -1*((fmi_t *)c)->fmi_epsilon){ */
-                if (b_mode[j] <= 0.0){
-                    switches[j] = 0.0;
+        for (i=0; i < nR; i=i+1){
+            if (switches[i] == 1.0){
+                if (event_indicators[i] <= 0.0){
+                    switches[i] = 0.0;
                 }
             }else{
-                /*if (b_mode[j] >= ((fmi_t *)c)->fmi_epsilon){ */
-                if (b_mode[j] > 0.0){
-                    switches[j] = 1.0;
+                if (event_indicators[i] > 0.0){
+                    switches[i] = 1.0;
                 }
             }
         }
-        
-        /* Turn the switches */
-        switches = jmi_get_sw(((fmi_t *)c)->jmi); /* Get the switches */
-            
-        retval = jmi_ode_derivatives(((fmi_t *)c)->jmi); /* Initialise */
-        
+
+    	/* Evaluate the ODE again */
+        retval = jmi_ode_derivatives(jmi);
+
         if(retval != 0) {
-            (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Initialize during event iteration failed.");
+            (fmi->fmi_functions).logger(c, fmi->fmi_instance_name, fmiError, "ERROR", "Evaluation of model equations during event iteration failed.");
             return fmiError;
         }
-            
-        retval = jmi_dae_R(((fmi_t *)c)->jmi,a_mode); /* Get the event indicators after the initialisation */
-            
-        /* Error check */
-        if(retval != 0) {
-            (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the event indicators failed.");
-            return fmiError;
-        }
-        
-        /* Compare the values of the event indicators before and after the event */
+
+    	/* Compare new values with values
+    	 * with the pre values. If there is an element that differs, set
+    	 * eventInfo->iterationConverged to false
+    	 */
         eventInfo->iterationConverged = fmiTrue; /* Assume the iteration converged */
-        switches = jmi_get_sw(((fmi_t *)c)->jmi); /* Get the switches */
-        
+
+        /* Start with continuous variables - they could change due to
+         * the reinit operator. */
+
+        /*
+    	for (i=jmi->offs_real_dx;i<jmi->offs_t;i++) {
+    		if (jmi->z[i - jmi->offs_real_dx + jmi->offs_pre_real_dx] != jmi->z[i]) {
+    			eventInfo->iterationConverged = fmiFalse;
+    		}
+    	}
+         */
+
+    	for (i=jmi->offs_real_d;i<jmi->offs_pre_real_dx;i=i+1) {
+    		if (z[i - jmi->offs_real_d + jmi->offs_pre_real_d] != z[i]) {
+    			eventInfo->iterationConverged = fmiFalse;
+    		}
+    	}
+
+    	/* Evaluate the event indicators again */
+        retval = jmi_dae_R(jmi,event_indicators);
+
+    	/* Check the switches against the event indicators
+    	 * separately to account for the epsilon.
+    	 */
         for (i=0; i < nR; i=i+1){
-            if (switches[i] == 1.0){ /* Case when the switch are True */
-                if (a_mode[i] <= -1*((fmi_t *)c)->fmi_epsilon){
-                    eventInfo->iterationConverged = fmiFalse; /* Event iteration (not converged) */
+            if (switches[i] == 1.0){
+                if (event_indicators[i] <= -1*fmi->fmi_epsilon){
+                    eventInfo->iterationConverged = fmiFalse;
                 }
-            }else{ /* Case when the switch are False */
-                if (a_mode[i] >= ((fmi_t *)c)->fmi_epsilon){
-                    eventInfo->iterationConverged = fmiFalse; /* Event iteration (not converged) */
+            }else{
+                if (event_indicators[i] >= fmi->fmi_epsilon){
+                	eventInfo->iterationConverged = fmiFalse;
                 }
             }
         }
-        
-    }else{ /* Return once the iteration have converged */
-        while ((eventInfo->iterationConverged)==fmiFalse){
-            fmiInteger j;
-            fmiInteger i;
 
-            /* Save the guards before the iteration */
-            for (i=0;i<nGuards;i++) {
-            	pre_iter_guards[i] = guards[i];
-            }
+    	/* Copy new values to pre values */
+    	jmi_copy_pre_values(jmi);
 
-            retval = jmi_dae_R(((fmi_t *)c)->jmi,b_mode); /* The event indicators before the initialisation */
-            
-            /* Error check */
-            if(retval != 0) {
-                (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the event indicators failed.");
-                return fmiError;
-            }
-            
-            /* Turn the switches */
-            switches = jmi_get_sw(((fmi_t *)c)->jmi); /* Get the switches */
-            /*
-            t_temp = jmi_get_t(((fmi_t *)c)->jmi);
-            printf("Time %12.12f , c_event %12.20f switch %f \n", *t_temp, b_mode[0], switches[0]);
-            if (b_mode[0] <= 0.0){
-                printf("Event %1.20f \n",*t_temp);
-            }
-            */
-            for (j=0; j < nR; j=j+1){
-                if (switches[j] == 1.0){
-                    /*if (b_mode[j] <= -1*((fmi_t *)c)->fmi_epsilon){*/
-                    if (b_mode[j] <= 0.0){
-                        switches[j] = 0.0;
-                    }
-                }else{
-                    /*if (b_mode[j] >= ((fmi_t *)c)->fmi_epsilon){*/
-                    if (b_mode[j] > 0.0){
-                        switches[j] = 1.0;
-                    }
-                }
-            }
-            
-            retval = jmi_ode_derivatives(((fmi_t *)c)->jmi); /* Initialise */
+    	if (intermediateResults){
+    		break;
+    	}
 
-            if(retval != 0) {
-                (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Initialize during event iteration failed.");
-                return fmiError;
-            }
-            
-            retval = jmi_dae_R(((fmi_t *)c)->jmi,a_mode); /* Get the event indicators after the initialisation */
-            
-            /* Error check */
-            if(retval != 0) {
-                (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the event indicators failed.");
-                return fmiError;
-            }
-            
-            /* Compare the values of the event indicators before and after the event */
-            eventInfo->iterationConverged = fmiTrue; /* Assume the iteration converged */
-            switches = jmi_get_sw(((fmi_t *)c)->jmi); /* Get the switches */
-            
-            for (i=0; i < nR; i=i+1){
-                if (switches[i] == 1.0){ /* Case when the switch are True */
-                    if (a_mode[i] <= -1*((fmi_t *)c)->fmi_epsilon){
-                        eventInfo->iterationConverged = fmiFalse; /* Event iteration (not converged) */
-                    }
-                }else{ /* Case when the switch are False */
-                    if (a_mode[i] >= ((fmi_t *)c)->fmi_epsilon){
-                    	eventInfo->iterationConverged = fmiFalse; /* Event iteration (not converged) */
-                    }
-                }
-            }
-            
-            /*printf("ATime %12.12f , c_event %12.20f switch %f \n", *t_temp, a_mode[0], switches[0]); */
-
-            /* Compare the values of the guards before and after the event */
-
-            for (i=0; i < nGuards; i=i+1){
-            	if (pre_iter_guards[i]!=guards[i]) {
-            		eventInfo->iterationConverged = fmiFalse; /* Event iteration (not converged) */
-            		break;
-            	}
-            }
-        }
-    }
-    
-    ((fmi_t*)c) -> fmi_functions.freeMemory(a_mode); /* Free memory */
-    ((fmi_t*)c) -> fmi_functions.freeMemory(b_mode); /* Free memory */
-    ((fmi_t*)c) -> fmi_functions.freeMemory(pre_iter_guards); /* Free memory */
-
-    /* Compute the next time event */
-    retval = jmi_ode_next_time_event(((fmi_t *)c)->jmi,&nextTimeEvent);
-
-    if(retval != 0) { /* Error check */
-    	(((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Computation of next time event failed.");
-        return fmiError;
     }
 
-    if (!(nextTimeEvent==JMI_INF)) {
-        /* If there is an upcoming time event, then set the event information
-           accordingly. */
-    	eventInfo->upcomingTimeEvent = fmiTrue;
-        eventInfo->nextEventTime = nextTimeEvent;
-        /*printf("fmi_event_upate: nextTimeEvent: %f\n",nextTimeEvent); */
-    } else {
-    	eventInfo->upcomingTimeEvent = fmiFalse;
+    /* Only do the final steps if the event iteration is done. */
+    if (eventInfo->iterationConverged == fmiTrue) {
+
+    	/* Compute the next time event */
+    	retval = jmi_ode_next_time_event(jmi,&nextTimeEvent);
+
+    	if(retval != 0) { /* Error check */
+    		(fmi -> fmi_functions).logger(c, fmi->fmi_instance_name, fmiError, "ERROR", "Computation of next time event failed.");
+    		return fmiError;
+    	}
+
+    	/* If there is an upcoming time event, then set the event information
+    	 * accordingly.
+    	 */
+    	if (!(nextTimeEvent==JMI_INF)) {
+    		eventInfo->upcomingTimeEvent = fmiTrue;
+    		eventInfo->nextEventTime = nextTimeEvent;
+    		/*printf("fmi_event_upate: nextTimeEvent: %f\n",nextTimeEvent); */
+    	} else {
+    		eventInfo->upcomingTimeEvent = fmiFalse;
+    	}
+
+    	/* Reset atEvent flag */
+    	jmi->atEvent = JMI_FALSE;
+
+    	/* Evaluate the guards with the event flat set to false in order to
+    	 * reset guards depending on samplers before copying pre values.
+    	 * If this is not done, then the corresponding pre values for these guards
+    	 * will be true, and no event will be triggered at the next sample.
+    	 */
+    	retval = jmi_ode_guards(jmi);
+
+    	if(retval != 0) { /* Error check */
+    		(fmi->fmi_functions).logger(c,fmi->fmi_instance_name, fmiError, "ERROR", "Computation of guard expressions failed.");
+    		return fmiError;
+    	}
+
     }
 
-    /* Reset atEvent flag */
-    ((fmi_t *)c)->jmi->atEvent = JMI_FALSE;
-
-    /* Evaluate the guards with the event flat set to false in order to 
-     * reset guards depending on samplers before copying pre values.
-     * If this is not done, then the corresponding pre values for these guards
-     * will be true, and no event will be triggered at the next sample. 
-     */
-    retval = jmi_ode_guards(((fmi_t *)c)->jmi);
-
-    if(retval != 0) { /* Error check */
-    	(((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Computation of guard expressions failed.");
-        return fmiError;
-    }
-
-    if ((eventInfo->iterationConverged)==fmiTrue) {
-        jmi_copy_pre_values(((fmi_t*)c)->jmi);
-    }
+    fmi->fmi_functions.freeMemory(event_indicators);
 
     return fmiOK;
+
+}
+
+fmiStatus fmi_event_update(fmiComponent c, fmiBoolean intermediateResults, fmiEventInfo* eventInfo) {
+
+	return fmi_event_iteration(c, JMI_FALSE, intermediateResults, eventInfo);
 }
 
 fmiStatus fmi_get_continuous_states(fmiComponent c, fmiReal states[], size_t nx) {
