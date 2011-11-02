@@ -481,6 +481,165 @@ fmiStatus fmi_get_event_indicators(fmiComponent c, fmiReal eventIndicators[], si
     return fmiOK;
 }
 
+fmiStatus fmi_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixElement)(void* data, fmiInteger row, fmiInteger col, fmiReal value), void* A, void* B, void* C, void* D){	
+
+/* fmi_get_jacobian is not an FMI function. Still use fmiStatus as return arguments?. Is there an error handling policy? Standard messages? Which function should return errors?*/
+	
+	fmiStatus fmiFlag;
+	fmiReal* jac;
+	jmi_t* jmi = ((fmi_t *)c)->jmi;
+	fmi_t* fmi = (fmi_t *)c;
+	int nA;
+	int nB;
+	int nC;
+	int nD;
+	int nx;
+	int nu;
+	int ny;
+	int nmax;
+	int k;
+	int p;
+
+	int n_outputs;
+	int* output_vrefs;
+
+	char msg[100]; /* Holder for the logger function's messages */
+
+	/* Get number of outputs that are variability = "continuous", ny */
+	n_outputs = ny = jmi->n_outputs;
+	if (!(output_vrefs = (int*)fmi -> fmi_functions.allocateMemory(n_outputs, sizeof(int)))) {
+		fmi -> fmi_functions.logger(c, fmi->fmi_instance_name, fmiError, "ERROR", "Out of memory.");
+		return fmiError;
+	}
+		
+	jmi_get_output_vrefs(jmi, output_vrefs);
+
+	for(k = 0; k < n_outputs; k++)
+		if (get_type_from_value_ref(output_vrefs[k])!= 0)
+			ny--;	
+	fmi -> fmi_functions.freeMemory(output_vrefs);
+	
+	nx = jmi->n_real_x;
+	nu = jmi->n_real_u;
+	
+	nA = nx*nx;
+	nB = nx*nu;
+	nC = ny*nx;
+	nD = ny*nu;
+
+	if (fmi -> fmi_logging_on) {
+		sprintf(msg,"size of A  = %d %d",nx,nx);
+		fmi -> fmi_functions.logger(c, fmi->fmi_instance_name, fmiOK, "OK", msg);
+		sprintf(msg,"size of B  = %d %d",nx,nu);
+		fmi -> fmi_functions.logger(c, fmi->fmi_instance_name, fmiOK, "OK", msg);
+		sprintf(msg,"size of C  = %d %d",ny,nx);
+		fmi -> fmi_functions.logger(c, fmi->fmi_instance_name, fmiOK, "OK", msg);
+		sprintf(msg,"size of D  = %d %d",ny,nu);
+		fmi -> fmi_functions.logger(c, fmi->fmi_instance_name, fmiOK, "OK", msg);
+	}
+
+
+#ifndef MAX
+#define MAX(a,b) ((a) < (b) ? (b) : (a))
+#else
+#define MAX printf(GIVEMEACOMPILERERROR)
+#endif
+	nmax = MAX(MAX(MAX(nA,nB),nC),nD);
+
+	/* Allocate memory for the biggest matrix, use this for all matrices. */
+	if (!(jac = fmi -> fmi_functions.allocateMemory(sizeof(fmiReal),nmax))) {
+		fmi -> fmi_functions.logger(c, fmi->fmi_instance_name, fmiError, "ERROR", "Out of memory.");
+		return fmiError;
+	}
+
+
+	/* Get the internal A matrix */
+	fmiFlag = fmi_get_jacobian(c, FMI_STATES, FMI_DERIVATIVES, jac, nA); 
+	if (fmiFlag > fmiWarning) {
+		fmi -> fmi_functions.logger(c, fmi->fmi_instance_name, fmiFlag, "ERROR", "Evaluating the A matrix failed.");
+		fmi -> fmi_functions.freeMemory(jac);
+		return fmiFlag;
+	}
+	/* Update external A matrix */
+	for (k=0;k<nx;k++) {
+		for (p=0;p<nx;p++) {
+			fmiFlag = setMatrixElement(A,k+1,p+1,jac[k*nx + p]);
+			if (fmiFlag > fmiWarning) {
+				fmi -> fmi_functions.logger(c, fmi->fmi_instance_name, fmiFlag, "ERROR", "setMatrixElement failed to update matrix A");
+				fmi -> fmi_functions.freeMemory(jac);
+				return fmiFlag;
+			}
+		}
+	}
+
+
+
+	/* Get the internal B matrix */
+	fmiFlag = fmi_get_jacobian(c, FMI_INPUTS, FMI_DERIVATIVES, jac, nB); 
+	if (fmiFlag > fmiWarning) {
+		fmi -> fmi_functions.logger(c, fmi->fmi_instance_name, fmiFlag, "ERROR", "Evaluating the B matrix failed.");
+		fmi -> fmi_functions.freeMemory(jac);
+		return fmiFlag;
+	}
+	/* Update external B matrix */
+	for (k=0;k<nx;k++) {
+		for (p=0;p<nu;p++) {
+			fmiFlag = setMatrixElement(B,k+1,p+1,jac[k*nu + p]);
+			if (fmiFlag > fmiWarning) {
+				fmi -> fmi_functions.logger(c, fmi->fmi_instance_name, fmiFlag, "ERROR", "setMatrixElement failed to update matrix B");
+				fmi -> fmi_functions.freeMemory(jac);
+				return fmiFlag;
+			}
+		}
+	}
+
+
+
+	/* Get the internal C matrix */
+	fmiFlag = fmi_get_jacobian(c, FMI_STATES, FMI_OUTPUTS, jac, nC); 
+	if (fmiFlag > fmiWarning) {
+		fmi -> fmi_functions.logger(c, fmi->fmi_instance_name, fmiFlag, "ERROR", "Evaluating the C matrix failed.");
+		fmi -> fmi_functions.freeMemory(jac);
+		return fmiFlag;
+	}
+	/* Update external C matrix */
+	for (k=0;k<ny;k++) {
+		for (p=0;p<nx;p++) {
+			fmiFlag = setMatrixElement(C,k+1,p+1,jac[k*nx + p]);
+			if (fmiFlag > fmiWarning) {
+				fmi -> fmi_functions.logger(c, fmi->fmi_instance_name, fmiFlag, "ERROR", "setMatrixElement failed to update matrix C");
+				fmi -> fmi_functions.freeMemory(jac);
+				return fmiFlag;
+			}
+		}
+	}
+
+
+
+	/* Get the internal D matrix */
+	fmiFlag = fmi_get_jacobian(c, FMI_INPUTS, FMI_OUTPUTS, jac, nD); 
+	if (fmiFlag > fmiWarning) {
+		fmi -> fmi_functions.logger(c, fmi->fmi_instance_name, fmiFlag, "ERROR", "Evaluating the D matrix failed.");
+		fmi -> fmi_functions.freeMemory(jac);
+		return fmiFlag;
+	}
+	/* Update external D matrix */
+	for (k=0;k<ny;k++) {
+		for (p=0;p<nu;p++) {
+			fmiFlag = setMatrixElement(D,k+1,p+1,jac[k*nu + p]);
+			if (fmiFlag > fmiWarning) {
+				fmi -> fmi_functions.logger(c, fmi->fmi_instance_name, fmiFlag, "ERROR", "setMatrixElement failed to update matrix D");
+				fmi -> fmi_functions.freeMemory(jac);
+				return fmiFlag;
+			}
+		}
+	}
+
+
+	fmi -> fmi_functions.freeMemory(jac);
+	return fmiOK;
+}
+
 fmiStatus fmi_get_jacobian_fd(fmiComponent c, int independents, int dependents, fmiReal jac[], size_t njac){
 	int i;
 	int j;

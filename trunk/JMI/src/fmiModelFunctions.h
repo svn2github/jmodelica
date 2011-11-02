@@ -127,6 +127,7 @@
 
 #define fmiGetJacobian        		  fmiFullName(_fmiGetJacobian)
 #define fmiGetDirectionalDerivative   fmiFullName(_fmiGetDirectionalDerivative)
+#define fmiGetPartialDerivatives	  fmiFullName(_fmiGetPartialDerivatives)
 
 /* Version number */
 #define fmiVersion "1.0"
@@ -219,5 +220,7 @@
    DllExport fmiStatus fmiGetJacobian(fmiComponent c, int independents, int dependents, fmiReal jac[], size_t njac);
 
    DllExport fmiStatus fmiGetDirectionalDerivative(fmiComponent c, const fmiValueReference z_vref[], size_t nzvr, const fmiValueReference v_vref[], size_t nvvr, fmiReal dz[], const fmiReal dv[]);
+
+   DllExport fmiStatus fmiGetPartialDerivatives(fmiComponent c, fmiStatus (*setMatrixElement)(void* data, fmiInteger row, fmiInteger col, fmiReal value), void* A, void* B, void* C, void* D);
 
 #endif /* fmiModelFunctions_h */

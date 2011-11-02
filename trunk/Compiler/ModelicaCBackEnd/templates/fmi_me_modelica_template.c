@@ -467,6 +467,11 @@ DllExport fmiStatus fmiGetDirectionalDerivative(fmiComponent c, const fmiValueRe
 
 }
 
+DllExport fmiStatus fmiGetPartialDerivatives(fmiComponent c, fmiStatus (*setMatrixElement)(void* data, fmiInteger row, fmiInteger col, fmiReal value), void* A, void* B, void* C, void* D) {
+	return fmi_get_partial_derivatives(c, setMatrixElement, A, B, C, D);
+}
+
+
 #ifdef __cplusplus
 }
 #endif

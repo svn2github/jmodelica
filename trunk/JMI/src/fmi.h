@@ -217,6 +217,21 @@ fmiStatus fmi_event_update(fmiComponent c, fmiBoolean intermediateResults, fmiEv
 fmiStatus fmi_get_jacobian_fd(fmiComponent c, int independents, int dependents, fmiReal jac[], size_t njac);
 
 /**
+ * \brief Evaluate matrices A, B, C, D
+ *
+ * This function evaluates the A, B, C, D Jacobian matrices in the
+ * linearized ODE:
+ *
+ * dx = A*x + B*u
+ * y = C*x + D*u
+ *
+ * The input arguments are pointers to the matrices that are allocated by the simulation environment. 
+ * A function pointer is also provied by the environemnt which updates the matrices. Values that are 
+ * not explicitly set by this function are assumed to be zero. 
+ */
+fmiStatus fmi_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixElement)(void* data, fmiInteger row, fmiInteger col, fmiReal value), void* A, void* B, void* C, void* D);
+
+/**
  * \brief Evaluate Jacobian(s) of the ODE.
  *
  * This function evaluates one or several of the A, B, C, D Jacobian matrices in the
