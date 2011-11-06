@@ -496,9 +496,10 @@ fmiStatus fmi_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixEleme
 	int nx;
 	int nu;
 	int ny;
-	int nmax;
-	int k;
-	int p;
+	int jac_size;
+	int i;
+	int row;
+	int col;
 
 	int n_outputs;
 	int* output_vrefs;
@@ -514,8 +515,9 @@ fmiStatus fmi_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixEleme
 		
 	jmi_get_output_vrefs(jmi, output_vrefs);
 
-	for(k = 0; k < n_outputs; k++)
-		if (get_type_from_value_ref(output_vrefs[k])!= 0)
+	/* This analysis needs to be extended to account for discrete reals*/
+	for(i = 0; i < n_outputs; i++)
+		if (get_type_from_value_ref(output_vrefs[i])!= 0)
 			ny--;	
 	fmi -> fmi_functions.freeMemory(output_vrefs);
 	
@@ -538,20 +540,18 @@ fmiStatus fmi_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixEleme
 		fmi -> fmi_functions.logger(c, fmi->fmi_instance_name, fmiOK, "OK", msg);
 	}
 
-
-#ifndef MAX
-#define MAX(a,b) ((a) < (b) ? (b) : (a))
-#else
-#define MAX printf(GIVEMEACOMPILERERROR)
-#endif
-	nmax = MAX(MAX(MAX(nA,nB),nC),nD);
+	/* Allocate a big chunk of memory that is enough to compute all Jacobians */
+	jac_size = nA + nB + nC + nD;
 
 	/* Allocate memory for the biggest matrix, use this for all matrices. */
-	if (!(jac = fmi -> fmi_functions.allocateMemory(sizeof(fmiReal),nmax))) {
+	if (!(jac = fmi -> fmi_functions.allocateMemory(sizeof(fmiReal),jac_size))) {
 		fmi -> fmi_functions.logger(c, fmi->fmi_instance_name, fmiError, "ERROR", "Out of memory.");
 		return fmiError;
 	}
 
+	/* Individual calls to evaluation of A, B, C, D matrices can be made
+	 * more efficiently by evaluating several Jacobian at the same time.
+	 */
 
 	/* Get the internal A matrix */
 	fmiFlag = fmi_get_jacobian(c, FMI_STATES, FMI_DERIVATIVES, jac, nA); 
@@ -560,10 +560,11 @@ fmiStatus fmi_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixEleme
 		fmi -> fmi_functions.freeMemory(jac);
 		return fmiFlag;
 	}
+
 	/* Update external A matrix */
-	for (k=0;k<nx;k++) {
-		for (p=0;p<nx;p++) {
-			fmiFlag = setMatrixElement(A,k+1,p+1,jac[k*nx + p]);
+	for (row=0;row<nx;row++) {
+		for (col=0;col<nx;col++) {
+			fmiFlag = setMatrixElement(A,row+1,col+1,jac[row + col*nx]);
 			if (fmiFlag > fmiWarning) {
 				fmi -> fmi_functions.logger(c, fmi->fmi_instance_name, fmiFlag, "ERROR", "setMatrixElement failed to update matrix A");
 				fmi -> fmi_functions.freeMemory(jac);
@@ -571,8 +572,6 @@ fmiStatus fmi_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixEleme
 			}
 		}
 	}
-
-
 
 	/* Get the internal B matrix */
 	fmiFlag = fmi_get_jacobian(c, FMI_INPUTS, FMI_DERIVATIVES, jac, nB); 
@@ -582,9 +581,9 @@ fmiStatus fmi_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixEleme
 		return fmiFlag;
 	}
 	/* Update external B matrix */
-	for (k=0;k<nx;k++) {
-		for (p=0;p<nu;p++) {
-			fmiFlag = setMatrixElement(B,k+1,p+1,jac[k*nu + p]);
+	for (row=0;row<nx;row++) {
+		for (col=0;col<nu;col++) {
+			fmiFlag = setMatrixElement(B,row+1,col+1,jac[row + col*nx]);
 			if (fmiFlag > fmiWarning) {
 				fmi -> fmi_functions.logger(c, fmi->fmi_instance_name, fmiFlag, "ERROR", "setMatrixElement failed to update matrix B");
 				fmi -> fmi_functions.freeMemory(jac);
@@ -592,8 +591,6 @@ fmiStatus fmi_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixEleme
 			}
 		}
 	}
-
-
 
 	/* Get the internal C matrix */
 	fmiFlag = fmi_get_jacobian(c, FMI_STATES, FMI_OUTPUTS, jac, nC); 
@@ -603,9 +600,9 @@ fmiStatus fmi_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixEleme
 		return fmiFlag;
 	}
 	/* Update external C matrix */
-	for (k=0;k<ny;k++) {
-		for (p=0;p<nx;p++) {
-			fmiFlag = setMatrixElement(C,k+1,p+1,jac[k*nx + p]);
+	for (row=0;row<ny;row++) {
+		for (col=0;col<nx;col++) {
+			fmiFlag = setMatrixElement(C,row + 1, col + 1, jac[row+col*ny]);
 			if (fmiFlag > fmiWarning) {
 				fmi -> fmi_functions.logger(c, fmi->fmi_instance_name, fmiFlag, "ERROR", "setMatrixElement failed to update matrix C");
 				fmi -> fmi_functions.freeMemory(jac);
@@ -624,9 +621,9 @@ fmiStatus fmi_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixEleme
 		return fmiFlag;
 	}
 	/* Update external D matrix */
-	for (k=0;k<ny;k++) {
-		for (p=0;p<nu;p++) {
-			fmiFlag = setMatrixElement(D,k+1,p+1,jac[k*nu + p]);
+	for (row=0;row<ny;row++) {
+		for (col=0;col<nu;col++) {
+			fmiFlag = setMatrixElement(D,row + 1, col + 1,jac[row + col*ny]);
 			if (fmiFlag > fmiWarning) {
 				fmi -> fmi_functions.logger(c, fmi->fmi_instance_name, fmiFlag, "ERROR", "setMatrixElement failed to update matrix D");
 				fmi -> fmi_functions.freeMemory(jac);
@@ -634,7 +631,6 @@ fmiStatus fmi_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixEleme
 			}
 		}
 	}
-
 
 	fmi -> fmi_functions.freeMemory(jac);
 	return fmiOK;

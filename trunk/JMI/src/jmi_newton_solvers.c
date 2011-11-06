@@ -163,6 +163,24 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, void *user_data, N_Vector t
 		J->cols[i] = &(J->data)[i*N];
 		block->dx[i] = 0;
 	}
+	/*
+	printf("Q=N.array([");
+	for(i = 0; i < N; i++){
+		printf("[");
+		for(j = 0; j < N; j++){
+			printf("%12.12e",(J->data)[i+j*N]);
+			if (j<N-1) {
+				printf(", ");
+			}
+		}
+		printf("]");
+		if (i<N-1) {
+			printf(",\n");
+		}
+	}
+	printf("])\n");
+	printf("print N.linalg.cond(Q)\n");
+*/
 	/*printf("\n");*/
 	return 0;
 }

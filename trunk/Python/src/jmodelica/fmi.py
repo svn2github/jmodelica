@@ -309,7 +309,7 @@ class FMUException(Exception):
 
 class FMUModel(BaseModel):
     """
-    A JMI Model loaded from a DLL.
+    An FMI Model loaded from a DLL.
     """
     
     def __init__(self, fmu, path='.', reload_dll=True, enable_logging=False):
@@ -796,24 +796,6 @@ class FMUModel(BaseModel):
             Nct.ndpointer(dtype=C.c_uint32,
                            ndim=1,
                            flags='C'), C.c_size_t]
-
-        # Experimental Jacobian interface
-        try:
-            self._fmiGetJacobian = self._dll.__getattr__(
-                self._modelname+'_fmiGetJacobian')
-            self._fmiGetJacobian.restype = self._fmiStatus
-            self._fmiGetJacobian.argtypes = [self._fmiComponent, self._fmiInteger,
-                                             self._fmiInteger, Nct.ndpointer(),
-                                             C.c_size_t]
-            self._fmiGetDirectionalDerivative = self._dll.__getattr__(
-                self._modelname+'_fmiGetDirectionalDerivative')
-            self._fmiGetDirectionalDerivative.restype = self._fmiStatus
-            self._fmiGetDirectionalDerivative.argtypes = [self._fmiComponent,
-                                                          Nct.ndpointer(), C.c_size_t,
-                                                          Nct.ndpointer(), C.c_size_t,
-                                                          Nct.ndpointer(), Nct.ndpointer()]
-        except:
-            pass
             
         #self._fmiExtractDebugInfo = self._dll.__getattr__(
         #self._modelname+'_fmiExtractDebugInfo')      
@@ -1090,81 +1072,6 @@ class FMUModel(BaseModel):
                 'Failed to get the continuous state reference values.')
             
         return values
-
-
-    def get_jacobian(self, independents, dependents, jac):
-        """
-        Evaluate Jacobian(s) of the ODE.
-
-        This function evaluates one or several of the A, B, C, D Jacobian matrices in the
-        linearized ODE:
-        
-          dx = A*x + B*u
-          y = C*x + D*u
-        
-        where dx are the derivatives, u are the inputs, y are the top level outputs and
-        x are the states. The arguments 'independents' and 'dependents' are used to
-        specify which Jacobian(s) to compute: independents=FMI_STATES and
-        dependents=FMI_DERIVATIVES gives the A matrix, and
-        independents=FMI_STATES|FMI_INPUTS and dependents=FMI_DERIVATIVES|FMI_OUTPUTS
-        gives the A, B, C and D matrices in block matrix form:
-        
-          A  |  B
-          -------
-          C  |  D
-
-        Parameters::
-
-            independents --
-                Should be FMI_STATES and/or FMI_INPUTS.
-
-            dependents --
-                Should be be FMI_DERIVATIVES and/or FMI_OUTPUTS.
-
-            jac --
-                A vector representing a matrix on column major format.
-
-        Example::
-        
-            jac = model.get_jacobian(jmodelica.fmi.FMI_STATES,
-                                     jmodelica.fmi.FMI_DERIVATIVES, jac)
-                
-        Calls the low-level FMI function: fmiGetJacobian
-        """
-        status = self._fmiGetJacobian(
-            self._model, independents, dependents, jac, len(jac))
-        
-        if status != 0:
-            raise FMUException('Failed to evaluate the Jacobian.')
-
-    def get_directional_derivative(self, z_vref, v_vref, dz, dv):
-        """
-        Evaluate directional derivative of the ODE.
-
-        Paramters::
-
-            z_vref --
-                Value references of the directional derivative result vector dz.
-                These are defined by a subset of the derivative and output variable
-                value references.
-
-            v_ref --
-                Value reference of the input seed vector dv. These are defined by a
-                subset of the state and input variable value references.
-
-            dz --
-                Output argument containing the directional derivative vector.
-
-            dv -- Input argument containing the input seed vector.
-                
-        Calls the low-level FMI function: fmiGetDirectionalDerivative
-        """
-        status = self._fmiGetDirectionalDerivative(
-            self._model, z_vref, len(z_vref), v_vref, len(v_vref), dz, dv)
-        
-        if status != 0:
-            raise FMUException('Failed to evaluate the directional derivative.')
-
     
     def _get_version(self):
         """
@@ -1977,3 +1884,361 @@ class FMUModel(BaseModel):
             os.remove(self._tempdir+os.sep+self._tempdll)
         except:
             print 'Failed to remove temporary dll ('+ self._tempdll+').'
+
+class FMUModel2(FMUModel):
+    """
+    An FMI 2.0 Model loaded from a DLL.
+    
+    This class is still very experimental and is used for prototyping
+    """
+
+    def _set_fmimodel_typedefs(self):
+        """
+        Connects the FMU to Python by retrieving the C-function by use of ctypes. 
+        """
+        
+        FMUModel._set_fmimodel_typedefs(self)
+                
+        try:
+            self._fmiGetJacobian = self._dll.__getattr__(self._modelname+'_fmiGetJacobian')
+            self._fmiGetJacobian.restype = self._fmiStatus
+            self._fmiGetJacobian.argtypes = [self._fmiComponent, self._fmiInteger,
+                                             self._fmiInteger, Nct.ndpointer(),
+                                             C.c_size_t]
+
+            self._fmiGetDirectionalDerivative = self._dll.__getattr__(self._modelname+'_fmiGetDirectionalDerivative')
+            self._fmiGetDirectionalDerivative.restype = self._fmiStatus
+            self._fmiGetDirectionalDerivative.argtypes = [self._fmiComponent,
+                                                          Nct.ndpointer(), C.c_size_t,
+                                                          Nct.ndpointer(), C.c_size_t,
+                                                          Nct.ndpointer(), Nct.ndpointer()]
+
+        except:
+            pass
+ 
+        # A struct that hods a raw double vector and the size
+        # of the matrix. Row major format is used by default.
+        class fmiJacobianStruct(C.Structure):
+            _fields_ = [('data', C.POINTER(self._fmiReal)),
+                        ('nRow', self._fmiInteger),
+                        ('nCol', self._fmiInteger)]
+
+        self._fmiJacobianStruct = fmiJacobianStruct
+ 
+        self._fmiSetMatrixElementType = C.CFUNCTYPE(C.c_int32, C.POINTER(self._fmiJacobianStruct), self._fmiInteger,
+                                                        self._fmiInteger, self._fmiReal)        
+
+        self._fmiGetPartialDerivatives = self._dll.__getattr__(
+        self._modelname+'_fmiGetPartialDerivatives')
+        self._fmiGetPartialDerivatives.restype = self._fmiStatus
+        self._fmiGetPartialDerivatives.argtypes = [self._fmiComponent,
+                                                   self._fmiSetMatrixElementType,
+                                                   C.c_void_p,
+                                                   C.c_void_p,
+                                                   C.c_void_p,
+                                                   C.c_void_p]
+        
+    def fmiSetMatrixElement(self, matrix, row, col, value):
+        """
+        Element setter function that is passed into the FMU.
+        
+        Parameters::
+        
+            matrix --
+                Pointer to a the user defined data structure containing the matrix.
+            
+            row --
+                Row index.
+                
+            col --
+                Cloumn index.
+                
+            value --
+                Value of the matrix entry.
+        """
+
+        #Access struct contents via contents
+        nRow = matrix.contents.nRow
+        nCol = matrix.contents.nCol
+        #Access double* data
+        data = matrix.contents.data
+
+        
+        #print "Nrow, Ncol, row, col, ind, value", nRow, nCol, row, col, (row-1)*nRow + (col-1), value
+                
+        #for i in range(nRow):
+        #    for j in range(nCol):
+        #        print "<<< " + repr(data[(i)*nCol+(j)])
+
+        # Set the data
+        data[(row-1)*nCol + (col-1)] = value
+
+        return 0
+
+    def get_partial_derivatives(self):
+        """
+        Evaluate the Jacobian matrices A, B, C, D of the ODE.
+        
+        This function evaluates one or several of the A, B, C, D 
+        Jacobian matrices in the linearized ODE:
+        
+          dx = A*x + B*u
+          y = C*x + D*u
+        
+        where dx are the derivatives, u are the continuous inputs, 
+        y are the continuous top level outputs and x are the states.
+        
+        Returns::
+           
+            A, B, C, D --
+                The Jacobian matrices.
+        
+        """
+        
+        # Retrieve sizes
+        nx = self._md.get_number_of_continuous_states()
+        ncu = self._md.get_number_of_continuous_inputs()
+        ncy = self._md.get_number_of_continuous_outputs()
+        
+        # Create Numpy arrays and then extract the data vectors
+        # and insert these into the structs
+        Ajac = N.zeros((nx,nx))
+        Am = self._fmiJacobianStruct()
+        Am.data = C.cast(Ajac.ctypes.data, C.POINTER(C.c_double))
+        Am.nRow = nx
+        Am.nCol = nx
+
+        Bjac = N.zeros((nx,ncu))
+        Bm = self._fmiJacobianStruct()
+        Bm.data = C.cast(Bjac.ctypes.data, C.POINTER(C.c_double))
+        Bm.nRow = nx
+        Bm.nCol = ncu
+
+        Cjac = N.zeros((ncy,nx))
+        Cm = self._fmiJacobianStruct()
+        Cm.data = C.cast(Cjac.ctypes.data, C.POINTER(C.c_double))
+        Cm.nRow = ncy
+        Cm.nCol = nx
+
+        Djac = N.zeros((ncy,ncu))
+        Dm = self._fmiJacobianStruct()
+        Dm.data = C.cast(Djac.ctypes.data, C.POINTER(C.c_double))
+        Dm.nRow = ncy
+        Dm.nCol = ncu
+        
+        # Evaluate the Jacobians
+        status = self._fmiGetPartialDerivatives(self._model, self._fmiSetMatrixElementType(self.fmiSetMatrixElement), 
+                                       C.byref(Am),C.byref(Bm),C.byref(Cm),C.byref(Dm))
+      
+        if status != 0:
+            raise FMUException('Failed to evaluate the Jacobian.')
+
+        return (Ajac,Bjac,Cjac,Djac)
+
+    def get_jacobian(self, independents, dependents, jac):
+        """
+        Evaluate Jacobian(s) of the ODE 
+        (ONLY FOR JMODELICA.ORG FMUS.)
+
+        This function evaluates one or several of the A, B, C, D Jacobian matrices in the
+        linearized ODE:
+        
+          dx = A*x + B*u
+          y = C*x + D*u
+        
+        where dx are the derivatives, u are the inputs, y are the top level outputs and
+        x are the states. The arguments 'independents' and 'dependents' are used to
+        specify which Jacobian(s) to compute: independents=FMI_STATES and
+        dependents=FMI_DERIVATIVES gives the A matrix, and
+        independents=FMI_STATES|FMI_INPUTS and dependents=FMI_DERIVATIVES|FMI_OUTPUTS
+        gives the A, B, C and D matrices in block matrix form:
+        
+          A  |  B
+          -------
+          C  |  D
+
+        Parameters::
+
+            independents --
+                Should be FMI_STATES and/or FMI_INPUTS.
+
+            dependents --
+                Should be be FMI_DERIVATIVES and/or FMI_OUTPUTS.
+
+            jac --
+                A vector representing a matrix on column major format.
+
+        Example::
+        
+            jac = model.get_jacobian(jmodelica.fmi.FMI_STATES,
+                                     jmodelica.fmi.FMI_DERIVATIVES, jac)
+                
+        Calls the low-level FMI function: fmiGetJacobian
+        """
+        status = self._fmiGetJacobian(
+            self._model, independents, dependents, jac, len(jac))
+        
+        if status != 0:
+            raise FMUException('Failed to evaluate the Jacobian.')
+
+    def get_directional_derivative(self, z_vref, v_vref, dz, dv):
+        """
+        Evaluate directional derivative of the ODE. 
+        (ONLY FOR JMODELICA.ORG FMUS)
+
+        Paramters::
+
+            z_vref --
+                Value references of the directional derivative result vector dz.
+                These are defined by a subset of the derivative and output variable
+                value references.
+
+            v_ref --
+                Value reference of the input seed vector dv. These are defined by a
+                subset of the state and input variable value references.
+
+            dz --
+                Output argument containing the directional derivative vector.
+
+            dv -- Input argument containing the input seed vector.
+                
+        Calls the low-level FMI function: fmiGetDirectionalDerivative
+        """
+        status = self._fmiGetDirectionalDerivative(
+            self._model, z_vref, len(z_vref), v_vref, len(v_vref), dz, dv)
+        
+        if status != 0:
+            raise FMUException('Failed to evaluate the directional derivative.')
+
+    def check_jacobians(self, delta_abs=1e-2, delta_rel=1e-6, tol=1e-3):
+        """
+        Check if the Jacobians are correct by means of finite differences.
+        
+        The increment used in the finite difference is computed according to
+        
+        delta_i = (z_i + delta_abs)*delta_rel
+        
+        where z_i is a state or input for which the finite difference is
+        computed. 
+        
+        An error in a Jacobian entry is reported if the relative error is
+        larger than tol.
+        
+        Parameters::
+        
+            delta_abs --
+                Absolute delta used in computation of finite difference increment.
+                
+            delta_rel --
+                Relative delta used in computation of finite difference increment.
+                
+            tol --
+                Tolerance for detecting Jacobian errors. 
+                
+        """
+        A,B,C,D = self.get_partial_derivatives()
+        nx = self._md.get_number_of_continuous_states()
+        ncu = self._md.get_number_of_continuous_inputs()
+        ncy = self._md.get_number_of_continuous_outputs()
+
+        Afd = N.zeros((nx,nx))
+        Bfd = N.zeros((nx,ncu))
+        Cfd = N.zeros((ncy,nx))
+        Dfd = N.zeros((ncy,ncu))
+
+        x = self.continuous_states
+    
+        yc_vrefs = self._md.get_continous_outputs_value_references()
+        uc_vrefs = self._md.get_continous_inputs_value_references()    
+    
+        for i in range(nx):
+            if x[i] < 0:
+                delta = (x[i] - delta_abs)*delta_rel
+            else:
+                delta = (x[i] + delta_abs)*delta_rel
+
+            #print delta
+            x[i] = x[i] + delta
+            self.continuous_states = x
+            fpA = self.get_derivatives()
+            fpC = self.get_real(yc_vrefs)
+
+            x[i] = x[i] - 2*delta
+            self.continuous_states = x
+            fnA = self.get_derivatives()
+            fnC = self.get_real(yc_vrefs)
+
+            Afd[:,i] = (fpA-fnA)/2./delta
+            Cfd[:,i] = (fpC-fnC)/2./delta
+
+            x[i] = x[i] + delta
+            self.continuous_states = x
+
+        u = self.get_real(uc_vrefs)
+    
+        for i in range(ncu):
+            if u[i] < 0:
+                delta = (u[i] - delta_abs)*delta_rel
+            else:
+                delta = (u[i] + delta_abs)*delta_rel
+
+            u[i] = u[i] + delta
+            self.set_real(uc_vrefs,u)
+            fpB = self.get_derivatives()
+            fpD = self.get_real(yc_vrefs)
+
+            u[i] = u[i] - 2*delta
+            self.set_real(uc_vrefs,u)
+            fnB = self.get_derivatives()
+            fnD = self.get_real(yc_vrefs)
+
+            Bfd[:,i] = (fpB-fnB)/2./delta
+            Dfd[:,i] = (fpD-fnD)/2./delta
+
+            u[i] = u[i] + delta
+            self.set_real(uc_vrefs,u)
+            
+
+        n_err = 0
+        print "Errors in Jaobians:"
+        for i in range(nx):
+            for j in range(nx):
+                if N.abs((A[i,j]-Afd[i,j])/(N.abs(Afd[i,j]) + 1)) > tol:                    
+                    print "A[" + repr(i).rjust(3) + "," + repr(j).rjust(3) + \
+                    "] - jac: " +"{0: e}".format(A[i,j]) + \
+                    " - fd: " + "{0: e}".format(Afd[i,j]) + \
+                    " - err: " + "{0: e}".format(A[i,j]-Afd[i,j])  
+                    n_err = n_err + 1
+                    
+
+        for i in range(nx):
+            for j in range(ncu):
+                if N.abs((B[i,j]-Bfd[i,j])/(N.abs(Bfd[i,j]) + 1)) > tol:
+                    print "B[" + repr(i).rjust(3) + "," + repr(j).rjust(3) + \
+                    "] - jac: " +"{0: e}".format(B[i,j]) + \
+                    " - fd: " + "{0: e}".format(Bfd[i,j]) + \
+                    " - err: " + "{0: e}".format(B[i,j]-Bfd[i,j])  
+                    n_err = n_err + 1
+
+        for i in range(ncy):
+            for j in range(nx):
+                if N.abs((C[i,j]-Cfd[i,j])/(N.abs(Cfd[i,j]) + 1)) > tol:
+                    print "C[" + repr(i).rjust(3) + "," + repr(j).rjust(3) + \
+                    "] - jac: " +"{0: e}".format(C[i,j]) + \
+                    " - fd: " + "{0: e}".format(Cfd[i,j]) + \
+                    " - err: " + "{0: e}".format(C[i,j]-Cfd[i,j])  
+                    n_err = n_err + 1
+
+        for i in range(ncy):
+            for j in range(ncu):
+                if N.abs((D[i,j]-Dfd[i,j])/(N.abs(Dfd[i,j]) + 1)) > tol:
+                    print "D[" + repr(i).rjust(3) + "," + repr(j).rjust(3) + \
+                    "] - jac: " +"{0: e}".format(D[i,j]) + \
+                    " - fd: " + "{0: e}".format(Dfd[i,j]) + \
+                    " - err: " + "{0: e}".format(D[i,j]-Dfd[i,j])  
+                    n_err = n_err + 1
+
+        print "Found " + repr(n_err) + " errors"
+
+        return Afd,Bfd,Cfd,Dfd
+    

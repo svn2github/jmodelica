@@ -257,6 +257,22 @@ class ModelDescription:
         # create tuple
         self._vrefs = tuple(self._vrefs)
         self._vrefs_noAlias = tuple(self._vrefs_noAlias)
+        
+        self._nu = 0
+        self._ny = 0
+        self._ncu = 0
+        self._ncy = 0
+
+        for v in self.get_model_variables():
+            if v.get_causality()==INPUT:
+                self._nu = self._nu + 1
+                if v.get_variability()==CONTINUOUS:
+                    self._ncu = self._ncu + 1
+            if v.get_causality()==OUTPUT:
+                self._ny = self._ny + 1
+                if v.get_variability()==CONTINUOUS:
+                    self._ncy = self._ncy + 1
+
 
     def _parse_element_tree(self, root):
         """ 
@@ -528,6 +544,76 @@ class ModelDescription:
         if self._attributes['numberOfEventIndicators'] == '':
             return None
         return uint(self._attributes['numberOfEventIndicators'])
+                    
+    def get_number_of_inputs(self):
+        """
+        Get the number of inputs.
+        
+        Returns::
+        
+            The number of inputs.
+        """
+        return self._nu
+    
+    def get_number_of_continuous_inputs(self):
+        """
+        Get the number of continuous inputs.
+        
+        Returns::
+        
+            The number of continuous inputs.
+        """
+        return self._ncu
+    
+    def get_number_of_outputs(self):
+        """
+        Get the number of outputs.
+        
+        Returns::
+        
+            The number of outputs.
+        """
+        return self._ny
+    
+    def get_number_of_continuous_outputs(self):
+        """
+        Get the number of continuous outputs.
+        
+        Returns::
+        
+            The number of continuous outputs.
+        """
+        return self._ncy
+            
+    def get_continous_outputs_value_references(self):
+        """
+        Get the value references of the of continuous outputs.
+        
+        Returns::
+        
+            A list of value references.
+        """
+        yc_vrefs=[]
+        for v in self.get_model_variables():
+            if v.get_causality()==OUTPUT:
+                if v.get_variability()==CONTINUOUS:
+                    yc_vrefs.append(v.get_value_reference())
+        return sorted(yc_vrefs)
+
+    def get_continous_inputs_value_references(self):
+        """
+        Get the value references of the of continuous inputs.
+        
+        Returns::
+        
+            A list of value references.
+        """
+        uc_vrefs=[]
+        for v in self.get_model_variables():
+            if v.get_causality()==INPUT:
+                if v.get_variability()==CONTINUOUS:
+                    uc_vrefs.append(v.get_value_reference())
+        return sorted(uc_vrefs)
         
     def get_unit_definitions(self):
         """ 
@@ -568,7 +654,7 @@ class ModelDescription:
             A list of vendor annotations (type: Tool)
         """
         return self._vendor_annotations
-        
+            
     def get_model_variables(self):
         """ 
         Get all variables in model. 
