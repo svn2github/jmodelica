@@ -342,9 +342,20 @@ int jmi_ode_unsolved_block_dir_der(jmi_t *jmi, jmi_block_residual_t *current_blo
 	INFO = 0;
   	n_x = current_block->n;
   	
+	/* We now assume that the block is solved, so first we retrieve the
+           solution of the equation system - put it into current_block->x 
+	*/
   	current_block->dF(jmi, current_block->x, current_block->dx,current_block->res, current_block->dv, JMI_BLOCK_INITIALIZE);
   	
+	/* Evaluate the right hand side of the linear system we would like to solve. This is
+           done by evaluating the AD function with a seed vector dv (corresponding to
+           inputs and states - which are known) and the entries of dz (corresponding
+           to states and derivatives) that have already been solved. The seeding
+           vector is set internally in the block function. The output argument is 
+           current_block->dv, where the right hand side is stored. */
   	current_block->dF(jmi, current_block->x, current_block->dx,current_block->res, current_block->dv, JMI_BLOCK_EVALUATE_INACTIVE);
+
+        /* Now we evaluate the system matrix of the linear system. */
     for(i = 0; i < n_x; i++){
     	current_block->dx[i] = 1;
     	current_block->dF(current_block->jmi,current_block->x,current_block->dx,current_block->res,current_block->dres,JMI_BLOCK_EVALUATE);
@@ -354,7 +365,9 @@ int jmi_ode_unsolved_block_dir_der(jmi_t *jmi, jmi_block_residual_t *current_blo
     	current_block->dx[i] = 0;
   	}
   	
+        /* Solve linear equation system to get dz_i for the block */
  	dgesv_( &n_x, &nrhs, current_block->jac, &n_x, current_block->ipiv, current_block->dv, &n_x, &INFO );	
+        /* Write back results into the global dz vector. */
   	current_block->dF(jmi, current_block->x, current_block->dx, current_block->res, current_block->dv, JMI_BLOCK_WRITE_BACK);
 }
 
