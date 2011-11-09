@@ -5469,4 +5469,283 @@ end AttributeTemp1;
 
 
 
+model InputAsArraySize1
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="InputAsArraySize1",
+         description="Input as array size of output in function: basic test",
+         flatModel="
+fclass FunctionTests.InputAsArraySize1
+ Real x[1];
+ Real x[2];
+ Real x[3];
+equation
+ ({x[1],x[2],x[3]}) = FunctionTests.InputAsArraySize1.f(3);
+
+ function FunctionTests.InputAsArraySize1.f
+  input Integer n;
+  output Real[n] x;
+ algorithm
+  for i1 in 1:size(x, 1) loop
+   x[i1] := i1;
+  end for;
+  return;
+ end FunctionTests.InputAsArraySize1.f;
+end FunctionTests.InputAsArraySize1;
+")})));
+
+	function f
+		input Integer n;
+		output Real x[n];
+	algorithm
+		x := 1:size(x,1);
+	end f;
+	
+	Real x[3] = f(3);
+end InputAsArraySize1;
+
+
+model InputAsArraySize2
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="InputAsArraySize2",
+         description="Input as array size of output in function: basic test",
+         flatModel="
+fclass FunctionTests.InputAsArraySize2
+ parameter Integer n = 3 /* 3 */;
+ Real x[1];
+ Real x[2];
+ Real x[3];
+equation
+ ({x[1],x[2],x[3]}) = FunctionTests.InputAsArraySize2.f(n);
+
+ function FunctionTests.InputAsArraySize2.f
+  input Integer n;
+  output Real[n] x;
+ algorithm
+  for i1 in 1:size(x, 1) loop
+   x[i1] := i1;
+  end for;
+  return;
+ end FunctionTests.InputAsArraySize2.f;
+end FunctionTests.InputAsArraySize2;
+")})));
+
+	function f
+		input Integer n;
+		output Real x[n];
+	algorithm
+		x := 1:size(x,1);
+	end f;
+	
+	parameter Integer n = 3;
+	Real x[3] = f(n);
+end InputAsArraySize2;
+
+
+model InputAsArraySize3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="InputAsArraySize3",
+         description="Input as array size of output in function: basic test",
+         flatModel="
+fclass FunctionTests.InputAsArraySize3
+ parameter Integer n = 3 /* 3 */;
+ Real x[1];
+ Real x[2];
+ Real x[3];
+equation
+ ({x[1],x[2],x[3]}) = FunctionTests.InputAsArraySize3.f(n);
+
+ function FunctionTests.InputAsArraySize3.f
+  input Integer n;
+  output Real[n] x;
+ algorithm
+  for i1 in 1:size(x, 1) loop
+   x[i1] := i1;
+  end for;
+  return;
+ end FunctionTests.InputAsArraySize3.f;
+end FunctionTests.InputAsArraySize3;
+")})));
+
+	function f
+		input Integer n;
+		output Real x[n];
+	algorithm
+		x := 1:size(x,1);
+	end f;
+	
+	parameter Integer n = 3;
+	Real x[n] = f(n);
+end InputAsArraySize3;
+
+
+model InputAsArraySize4
+	function f
+		input Integer n;
+		output Real x[n];
+	algorithm
+		x := 1:size(x,1);
+	end f;
+	
+	Real x[3] = f(size(x,1));
+end InputAsArraySize4;
+
+
+model InputAsArraySize5
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="InputAsArraySize5",
+         description="Input as array size of output in function: variable passed",
+         errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
+Semantic error at line 5605, column 7:
+  Array size mismatch in declaration of x, size of declaration is [3] and size of binding expression is [n]
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
+Semantic error at line 5605, column 14:
+  Could not evaluate array size of output x
+")})));
+
+	function f
+		input Integer n;
+		output Real x[n];
+	algorithm
+		x := 1:size(x,1);
+	end f;
+	
+	Integer n = 3;
+	Real x[3] = f(n);
+end InputAsArraySize5;
+
+
+model InputAsArraySize6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.ErrorTestCase(
+         name="InputAsArraySize6",
+         description="Input as array size of output in function: wrong value passed",
+         errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
+Semantic error at line 5631, column 7:
+  Array size mismatch in declaration of x, size of declaration is [3] and size of binding expression is [4]
+")})));
+
+	function f
+		input Integer n;
+		output Real x[n];
+	algorithm
+		x := 1:size(x,1);
+	end f;
+	
+	Real x[3] = f(4);
+end InputAsArraySize6;
+
+
+model InputAsArraySize7
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="InputAsArraySize7",
+         description="Input as array size of other input in function: basic test",
+         flatModel="
+fclass FunctionTests.InputAsArraySize7
+ Real x;
+equation
+ x = FunctionTests.InputAsArraySize7.f(3, {1,2,3});
+
+ function FunctionTests.InputAsArraySize7.f
+  input Integer n;
+  input Real[n] y;
+  output Real x;
+  Real temp_1;
+ algorithm
+  temp_1 := 0.0;
+  for i1 in 1:n loop
+   temp_1 := temp_1 + y[i1];
+  end for;
+  x := temp_1;
+  return;
+ end FunctionTests.InputAsArraySize7.f;
+end FunctionTests.InputAsArraySize7;
+")})));
+
+	function f
+		input Integer n;
+		input Real y[n];
+		output Real x;
+	algorithm
+		x := sum(y[1:n]);
+	end f;
+	
+	Real x = f(3, {1, 2, 3});
+end InputAsArraySize7;
+
+
+model InputAsArraySize8
+	function f
+		input Integer n;
+		input Real y[n];
+		output Real x;
+	algorithm
+		x := sum(y[1:n]);
+	end f;
+	
+	Real x = f(4, {1, 2, 3});
+end InputAsArraySize8;
+
+
+model InputAsArraySize9
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="InputAsArraySize9",
+         description="Input as array size of other input in function: basic test",
+         flatModel="
+fclass FunctionTests.InputAsArraySize9
+ Real x;
+equation
+ x = FunctionTests.InputAsArraySize9.f(3, {1,2,3});
+
+ function FunctionTests.InputAsArraySize9.f
+  input Integer n;
+  input Real[n] y;
+  output Real x;
+  Real temp_1;
+ algorithm
+  temp_1 := 0.0;
+  for i1 in 1:n loop
+   temp_1 := temp_1 + y[i1];
+  end for;
+  x := temp_1;
+  return;
+ end FunctionTests.InputAsArraySize9.f;
+end FunctionTests.InputAsArraySize9;
+")})));
+
+	function f
+		input Integer n;
+		input Real y[n];
+		output Real x;
+	algorithm
+		x := sum(y);
+	end f;
+	
+	Real x = f(3, {1, 2, 3});
+end InputAsArraySize9;
+
+
+model InputAsArraySize10
+	function f
+		input Integer n;
+		input Real y[n];
+		output Real x;
+	algorithm
+		x := sum(y);
+	end f;
+	
+	Real x = f(4, {1, 2, 3});
+end InputAsArraySize10;
+// TODO: Fler som ovan
+
+
 end FunctionTests;
