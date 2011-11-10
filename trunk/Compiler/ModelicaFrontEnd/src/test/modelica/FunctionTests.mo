@@ -5582,6 +5582,30 @@ end InputAsArraySize3;
 
 
 model InputAsArraySize4
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="InputAsArraySize4",
+         description="Input as array size of output in function: test using size()",
+         flatModel="
+fclass FunctionTests.InputAsArraySize4
+ Real x[1];
+ Real x[2];
+ Real x[3];
+equation
+ ({x[1],x[2],x[3]}) = FunctionTests.InputAsArraySize4.f(3);
+
+ function FunctionTests.InputAsArraySize4.f
+  input Integer n;
+  output Real[n] x;
+ algorithm
+  for i1 in 1:size(x, 1) loop
+   x[i1] := i1;
+  end for;
+  return;
+ end FunctionTests.InputAsArraySize4.f;
+end FunctionTests.InputAsArraySize4;
+")})));
+
 	function f
 		input Integer n;
 		output Real x[n];

@@ -2492,6 +2492,30 @@ aspect CircularExpressions {
 
 	syn lazy boolean FForIndex.isCircular() circular [true] = hasFExp() && getFExp().isCircular();
 
+	eq FSizeExp.isCircular() { 
+		Size s = getFExp().size();
+		return hasDim() ? s.isCircular(dimension()) : s.isCircular();
+	}
+	
+	public boolean Size.isCircular() {
+		for (int d = 0; d < size.length; d++)
+			if (isCircular(d))
+				return true;
+		return false;
+	}
+	
+	public boolean Size.isCircular(int d) {
+		return false;
+	}
+	
+	public boolean MutableSize.isCircular(int d) {
+		try {
+			return size[d] == UNKNOWN && exps[d] != null && exps[d].isCircular();
+		} catch (ArrayIndexOutOfBoundsException e) {
+			return false;
+		}
+	}
+
 	eq FIterExp.isCircular() {
 		if (getFExp().isCircular()) 
 			return true;
