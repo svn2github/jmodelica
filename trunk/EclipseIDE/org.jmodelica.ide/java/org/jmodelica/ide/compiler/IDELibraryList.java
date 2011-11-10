@@ -53,10 +53,10 @@ public class IDELibraryList extends DefaultLibraryList {
 		}
 	}
 
-	protected void add(LibraryDef def) {
-		super.add(def);
+	protected boolean add(LibraryDef def) {
 		if (def != null && loadAll)
 			loadedSet.add(def);
+		return super.add(def);
 	}
 
 }

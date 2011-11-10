@@ -175,7 +175,8 @@ public class ExplorerContentProvider implements ITreeContentProvider, IResourceC
 			return true;
 		case IResource.FILE:
 			final IFile file = (IFile) source;
-			if (file.getFileExtension().equals(IDEConstants.MODELICA_FILE_EXT)) {
+			String ext = file.getFileExtension();
+			if (ext != null && ext.equals(IDEConstants.MODELICA_FILE_EXT)) {
 				outdatedLocalCompiles.add(localCompiles.get(file));
 				new UpdateJob(file).schedule();
 			}

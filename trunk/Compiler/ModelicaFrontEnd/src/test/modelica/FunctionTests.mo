@@ -412,6 +412,87 @@ end FunctionTests.FunctionFlatten8;
 end FunctionFlatten8;
 
 
+model FunctionFlatten9
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="FunctionFlatten9",
+         description="Require copying of same constant array twice",
+         flatModel="
+fclass FunctionTests.FunctionFlatten9
+ constant Real a[1] = 1;
+ constant Real a[2] = 2;
+ constant Real a[3] = 3;
+ Real z[1];
+ Real z[2];
+equation
+ ({z[1],z[2]}) = FunctionTests.FunctionFlatten9.f({3,4});
+
+ function FunctionTests.FunctionFlatten9.f
+  input Real[2] x;
+  output Real[2] y;
+  Real[3] a;
+ algorithm
+  a[1] := 1;
+  a[2] := 2;
+  a[3] := 3;
+  y[1] := x[1] + a[1] + a[1];
+  y[2] := x[2] + a[2] + a[2];
+  return;
+ end FunctionTests.FunctionFlatten9.f;
+end FunctionTests.FunctionFlatten9;
+")})));
+
+    constant Real[3] a = {1,2,3};
+    
+    function f
+        input Real[2] x;
+        output Real[2] y;
+    algorithm
+        y := x + a[1:2] + a[1:2];
+    end f;
+    
+    Real[2] z = f({3,4});
+end FunctionFlatten9;
+
+
+model FunctionFlatten10
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="FunctionFlatten10",
+         description="Multi-level extending of functions",
+         flatModel="
+fclass FunctionTests.FunctionFlatten10
+ Real z = FunctionTests.FunctionFlatten10.f3(1);
+
+ function FunctionTests.FunctionFlatten10.f3
+  input Real x;
+  output Real y;
+ algorithm
+  y := x;
+  return;
+ end FunctionTests.FunctionFlatten10.f3;
+end FunctionTests.FunctionFlatten10;
+")})));
+
+    function f1
+        input Real x;
+        output Real y;
+    end f1;
+    
+    function f2
+        extends f1;
+    end f2;
+    
+    function f3
+        extends f2;
+    algorithm
+        y := x;
+    end f3;
+    
+    Real z = f3(1);
+end FunctionFlatten10;
+
+
 
 /* ====================== Function calls ====================== */
 
@@ -4827,6 +4908,69 @@ model UnknownArray28
     
     Real x = f({1,2});
 end UnknownArray28;
+
+
+model UnknownArray29
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="UnknownArray29",
+         description="Calling function from function with slice argument",
+         flatModel="
+fclass FunctionTests.UnknownArray29
+ constant Real a[1] = 1;
+ constant Real a[2] = 2;
+ constant Real a[3] = 3;
+ Real x;
+equation
+ x = FunctionTests.UnknownArray29.f1();
+
+ function FunctionTests.UnknownArray29.f1
+  output Real y1;
+  Real[3] a;
+  Real[2] temp_1;
+ algorithm
+  a[1] := 1;
+  a[2] := 2;
+  a[3] := 3;
+  temp_1[1] := a[1];
+  temp_1[2] := a[2];
+  y1 := FunctionTests.UnknownArray29.f2(temp_1);
+  return;
+ end FunctionTests.UnknownArray29.f1;
+
+ function FunctionTests.UnknownArray29.f2
+  input Real[:] x2;
+  Real temp_1;
+  output Real y2;
+ algorithm
+  temp_1 := 0.0;
+  for i1 in 1:size(x2, 1) loop
+   temp_1 := temp_1 + x2[i1];
+  end for;
+  y2 := temp_1;
+  return;
+ end FunctionTests.UnknownArray29.f2;
+end FunctionTests.UnknownArray29;
+")})));
+
+    final constant Real a[:] = {1, 2, 3};
+    
+    function f1
+        output Real y1;
+    protected
+    algorithm
+      y1 := f2(a[1:2]);
+    end f1;
+    
+    function f2
+        input Real x2[:];
+        output Real y2 = sum(x2);
+    algorithm
+    end f2;
+    
+    Real x = f1();
+end UnknownArray29;
+
 
 
 // TODO: need more complex cases

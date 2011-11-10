@@ -28,6 +28,7 @@ import org.jmodelica.ide.Activator;
 import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.scanners.HilightScanner;
 import org.jmodelica.modelica.compiler.ModelicaCompiler;
+import org.osgi.service.prefs.BackingStoreException;
 
 public class Preferences extends AbstractPreferenceInitializer {
 
@@ -72,7 +73,12 @@ public class Preferences extends AbstractPreferenceInitializer {
 	}
 	
 	public static void set(IProject proj, String key, String value) {
-		getNode(proj).put(key, value);
+		IEclipsePreferences node = getNode(proj);
+		node.put(key, value);
+		try {
+			node.flush();
+		} catch (BackingStoreException e) {
+		}
 	}
 
 	public static void update(IProject proj, String key, String value) {

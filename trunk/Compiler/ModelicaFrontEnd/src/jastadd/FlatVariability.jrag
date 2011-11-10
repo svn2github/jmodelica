@@ -326,8 +326,6 @@ aspect FlatVariability {
 	
 	eq FLinspace.expVariability() = getStartExp().variability().combine(getStopExp().variability());
 	
-	eq FSubscriptedExp.expVariability()  = combineFExpListVariability(getArray().iterable());
-	
 	eq FIdentity.expVariability()   = fConstant();
 	eq FOnes.expVariability()       = fConstant();
 	eq FZeros.expVariability()      = fConstant();

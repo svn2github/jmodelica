@@ -26,8 +26,16 @@ aspect ExportFunctions {
 	/**
 	 * Check if function should generate an export wrapper. 
 	 */
-	syn boolean FFunctionDecl.hasExportWrapper_C() = 
-		myOutputs().size() == 1 && myOutputs().get(0).type().isNumericScalar();
+	syn boolean FFunctionDecl.hasExportWrapper_C() {
+		if (myOutputs().size() != 1)
+			return false;
+		if (!myOutputs().get(0).type().isNumericScalar())
+			return false;
+		for (FFunctionVariable ffv : myInputs())
+			if (ffv.type().isRecord())
+				return false;
+		return true;
+	}
 	
 	/**
 	 * The return type of the export wrapper of this function.

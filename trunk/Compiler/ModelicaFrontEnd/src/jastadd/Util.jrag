@@ -914,23 +914,71 @@ aspect FlatNames {
      * @param n  the number of parts to include. If <code>n <= 0</code>, then 
      *           all but the last <code>-n</code> parts are included.
      */
-    syn String FQName.prefixName(int n) {
+    public String FQName.prefixName(int n) {
+    	return prefixName(n, false, false);
+    }
+
+    /**
+     * \brief Get a string representation of a prefix of this name.
+     * 
+     * @param n     the number of parts to include. If <code>n <= 0</code>, then 
+     *              all but the last <code>-n</code> parts are included.
+     * @param der   if <code>true</code>, generate a derivative name (e.g. "a.der(b)")
+     * @param eval  if <code>true</code>, then evaluate all expressions first
+     */
+    public String FQName.prefixName(int n, boolean der, boolean eval) {
     	int tot = getNumFQNamePart();
     	if (n <= 0)
     		n = tot + n;
         StringBuilder str = new StringBuilder();
         for (int i = 0; i < n; i++) {
             FQNamePart part = getFQNamePart(i);
+            boolean last = i == n - 1; 
+            if (last && der)
+            	str.append("der(");
             str.append(part.getName());
-            if ((i < n-1 || isScalarized()) && part.hasFArraySubscripts()) 
-            	str.append(part.getFArraySubscripts());
-            if (i < n-1) 
+            if ((!last || der || isScalarized()) && part.hasFArraySubscripts()) {
+            	FArraySubscripts fas = part.getFArraySubscripts();
+            	if (eval)
+            		fas = fas.createEvaluated();
+            	str.append(fas);
+            }
+            if (!last) 
                 str.append(".");
         }
+        if (der)
+        	str.append(")");
         return str.toString();
     }
+    
+    public FArraySubscripts FArraySubscripts.createEvaluated() {
+    	FArraySubscripts res = new FArraySubscripts(new List());
+        for (FSubscript fs : getFSubscripts())
+        	res.addFSubscript(fs.createEvaluated());
+        return res;
+    }
+    
+    public FSubscript FSubscript.createEvaluated() {
+    	return (FSubscript) fullCopy();
+    }
+    
+    public FSubscript FExpSubscript.createEvaluated() {
+    	return new FExpSubscript(getFExp().ceval().buildLiteral());
+    }
 
-    syn lazy String FQName.name() = prefixName(0);
+    syn lazy String FQName.name()            = prefixName(0);
+    syn lazy String FQName.resolvedName()    = prefixName(0, false, true);
+    syn lazy String FQName.derName()         = prefixName(0, true, false);
+    syn lazy String FQName.resolvedDerName() = prefixName(0, true, false);
+
+	syn lazy String FQName.hDerName(int derOrder) {
+	   	StringBuilder str = new StringBuilder(derName());
+	   	int len = str.length();
+	   	str.replace(len - 1, len, ",");
+	   	str.append(derOrder);
+	   	str.append(")");
+    	return str.toString();
+	}
     
     syn String FQNamePart.name() = getName();
 
@@ -972,31 +1020,6 @@ aspect FlatNames {
     syn String FIdUseExp.derName() = getFIdUseNoTransform().derName();
     syn String FIdUse.hDerName(int derOrder)    = getFQNameNoTransform().hDerName(derOrder);
     syn String FIdUseExp.hDerName(int derOrder) = getFIdUseNoTransform().hDerName(derOrder);
-
-    syn lazy String FQName.derName() {
-        StringBuilder str = new StringBuilder();
-        for (int i=0;i<getNumFQNamePart();i++) {
-            if (i==getNumFQNamePart()-1) {
-                str.append("der(");
-            }
-            str.append(getFQNamePart(i).getName());
-            //if (i<getNumFQNamePart()-1 || isScalarized()) {
-                if (getFQNamePart(i).hasFArraySubscripts()) {
-                    str.append(getFQNamePart(i).getFArraySubscripts().prettyPrint(""));
-                }
-                if (i<getNumFQNamePart()-1) {
-                    str.append(".");
-                }
-            //}
-        }
-        str.append(")");
-        return str.toString();
-    }
-
-	syn lazy String FQName.hDerName(int derOrder) {
-	   	String[] str = derName().split("\\)");
-    	return str[0] + "," + derOrder + ")";	
-	}
 
     eq FPreRealVariable.name()  = getFQNameNoTransform().preName();
     eq FPreIntegerVariable.name()  = getFQNameNoTransform().preName();	

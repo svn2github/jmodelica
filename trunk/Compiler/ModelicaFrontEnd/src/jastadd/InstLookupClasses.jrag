@@ -112,8 +112,8 @@ aspect InstLookupClasses {
 	inh HashSet InstNode.surroundingSuperLookupInstClass(String name);
 	eq SourceRoot.getChild().surroundingSuperLookupInstClass(String name) = emptyHashSet();
 	eq FlatRoot.getChild().surroundingSuperLookupInstClass(String name)   = emptyHashSet();
-	eq InstClassDecl.getInstExtends().surroundingSuperLookupInstClass(String name) = 
-		doSurroundingSuperLookupInstClass(name);
+	eq InstClassDecl.getInstExtends(int i).surroundingSuperLookupInstClass(String name) = 
+		lookupInstClassInSuperClassExcept(name, i);
 	eq InstClassDecl.getChild().surroundingSuperLookupInstClass(String name) = 
 		lookupInstClassInSuperClass(name);
 	eq InstComponentDecl.getChild().surroundingSuperLookupInstClass(String name) = 
@@ -127,10 +127,19 @@ aspect InstLookupClasses {
 	/**
 	 * \brief Does lookup in all superclasses.
 	 */
-	syn lazy HashSet InstNode.lookupInstClassInSuperClass(String name) {
+	syn HashSet InstNode.lookupInstClassInSuperClass(String name) = 
+		lookupInstClassInSuperClassExcept(name, -1);
+	
+	/**
+	 * \brief Does lookup in all superclasses exept the one with the specified index.
+	 */
+	syn lazy HashSet InstNode.lookupInstClassInSuperClassExcept(String name, int except) {
 		HashSet set = new HashSet(4);
-		for (InstExtends ie : getInstExtendss()) 
-			set.addAll(ie.memberInstClass(name));
+		List<InstExtends> exts = getInstExtendss();
+		int n = exts.getNumChild();
+		for (int i = 0; i < n; i++)
+			if (i != except)
+				set.addAll(exts.getChild(i).memberInstClass(name));
 		return set.isEmpty() ? emptyHashSet() : set;
 	}
 	

@@ -55,7 +55,7 @@ aspect FlatNameBinding {
 	
 	public static AbstractFVariable ASTNode.lookupFVFromMap(
 			HashMap<String, ? extends AbstractFVariable> map, FQName fqn, boolean der) {
-		AbstractFVariable variable = map.get(der ? fqn.derName() : fqn.name());
+		AbstractFVariable variable = map.get(der ? fqn.resolvedDerName() : fqn.resolvedName());
 		if (variable == null) {
 			int i = fqn.getNumFQNamePart();
 			do {

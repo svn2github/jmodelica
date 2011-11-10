@@ -93,7 +93,7 @@ public class EditorFile {
 				ArrayList<String> paths = new ArrayList<String>();
 				for (IResource res : file.getProject().members())
 					if (res.getType() == IResource.FILE && res.getName().endsWith(".mo"))
-						paths.add(res.getRawLocation().toOSString());
+						paths.add(res.getLocation().toOSString());
 				return paths.toArray(new String[paths.size()]);
 			} catch (CoreException e) {
 			}

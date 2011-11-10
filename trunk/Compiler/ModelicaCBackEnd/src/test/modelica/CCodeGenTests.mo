@@ -2192,6 +2192,91 @@ void func_CCodeGenTests_CUnknownArray2_f_def(jmi_array_t* x_a, jmi_array_t* y_a)
 end CUnknownArray2;
 
 
+// This tests for a bug that wasn't exposed until C code generation
+model CUnknownArray3
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.CCodeGenTestCase(
+         name="CUnknownArray3",
+         description="Passing array return value of unknown size directly to other function",
+         template="$C_functions$",
+         generatedCode="
+void func_CCodeGenTests_CUnknownArray3_f1_def(jmi_array_t* x1_a, jmi_ad_var_t* y1_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t y1_v;
+    JMI_ARRAY_DYNAMIC(temp_1_a, jmi_array_size(x1_a, 0), jmi_array_size(x1_a, 0))
+    func_CCodeGenTests_CUnknownArray3_f2_def(x1_a, temp_1_a);
+    y1_v = func_CCodeGenTests_CUnknownArray3_f3_exp(temp_1_a);
+    if (y1_o != NULL) *y1_o = y1_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_CUnknownArray3_f1_exp(jmi_array_t* x1_a) {
+    jmi_ad_var_t y1_v;
+    func_CCodeGenTests_CUnknownArray3_f1_def(x1_a, &y1_v);
+    return y1_v;
+}
+
+void func_CCodeGenTests_CUnknownArray3_f3_def(jmi_array_t* x3_a, jmi_ad_var_t* y3_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t y3_v;
+    jmi_ad_var_t temp_1_v;
+    temp_1_v = 0.0;
+    for (jmi_ad_var_t i1_i = 1; i1_i <= jmi_array_size(x3_a, 0); i1_i += 1) {
+        temp_1_v = temp_1_v + jmi_array_val_1(x3_a, i1_i);
+    }
+    y3_v = temp_1_v;
+    if (y3_o != NULL) *y3_o = y3_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_CUnknownArray3_f3_exp(jmi_array_t* x3_a) {
+    jmi_ad_var_t y3_v;
+    func_CCodeGenTests_CUnknownArray3_f3_def(x3_a, &y3_v);
+    return y3_v;
+}
+
+void func_CCodeGenTests_CUnknownArray3_f2_def(jmi_array_t* x2_a, jmi_array_t* y2_a) {
+    JMI_DYNAMIC_INIT()
+    if (y2_a == NULL) {
+        JMI_ARRAY_DYNAMIC(y2_an, jmi_array_size(x2_a, 0), jmi_array_size(x2_a, 0))
+        y2_a = y2_an;
+    }
+    for (jmi_ad_var_t i1_i = 1; i1_i <= jmi_array_size(y2_a, 0); i1_i += 1) {
+        jmi_array_ref_1(y2_a, i1_i) = jmi_array_val_1(x2_a, i1_i);
+    }
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+")})));
+
+    function f1
+        input Real[:] x1;
+        output Real y1;
+    algorithm
+        y1 := f3(f2(x1));
+    end f1;
+    
+    function f2
+        input Real[:] x2;
+        output Real[size(x2,1)] y2;
+    algorithm
+        y2 := x2;
+    end f2;
+    
+    function f3
+        input Real[:] x3;
+        output Real y3;
+    algorithm
+        y3 := sum(x3);
+    end f3;
+    
+    Real x = f1({1,2});
+end CUnknownArray3;
+
+
 
 model CRecordDecl1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
@@ -5342,91 +5427,6 @@ model Smooth1
   Real y = time - 2;
   Real x = smooth(2, if y < 0 then 0 else y ^ 3);
 end Smooth1;
-
-
-// This tests for a bug that wasn't exposed until C code generation
-model UnknownArrayC1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.CCodeGenTestCase(
-         name="UnknownArrayC1",
-         description="Function containing a function call returning unknown array size, that is used as argument of another function",
-         template="$C_functions$",
-         generatedCode="
-void func_CCodeGenTests_UnknownArrayC1_f1_def(jmi_array_t* x1_a, jmi_ad_var_t* y1_o) {
-    JMI_DYNAMIC_INIT()
-    jmi_ad_var_t y1_v;
-    JMI_ARRAY_DYNAMIC(temp_1_a, jmi_array_size(x1_a, 0), jmi_array_size(x1_a, 0))
-    func_CCodeGenTests_UnknownArrayC1_f2_def(x1_a, temp_1_a);
-    y1_v = func_CCodeGenTests_UnknownArrayC1_f3_exp(temp_1_a);
-    if (y1_o != NULL) *y1_o = y1_v;
-    JMI_DYNAMIC_FREE()
-    return;
-}
-
-jmi_ad_var_t func_CCodeGenTests_UnknownArrayC1_f1_exp(jmi_array_t* x1_a) {
-    jmi_ad_var_t y1_v;
-    func_CCodeGenTests_UnknownArrayC1_f1_def(x1_a, &y1_v);
-    return y1_v;
-}
-
-void func_CCodeGenTests_UnknownArrayC1_f3_def(jmi_array_t* x3_a, jmi_ad_var_t* y3_o) {
-    JMI_DYNAMIC_INIT()
-    jmi_ad_var_t y3_v;
-    jmi_ad_var_t temp_1_v;
-    temp_1_v = 0.0;
-    for (jmi_ad_var_t i1_i = 1; i1_i <= jmi_array_size(x3_a, 0); i1_i += 1) {
-        temp_1_v = temp_1_v + jmi_array_val_1(x3_a, i1_i);
-    }
-    y3_v = temp_1_v;
-    if (y3_o != NULL) *y3_o = y3_v;
-    JMI_DYNAMIC_FREE()
-    return;
-}
-
-jmi_ad_var_t func_CCodeGenTests_UnknownArrayC1_f3_exp(jmi_array_t* x3_a) {
-    jmi_ad_var_t y3_v;
-    func_CCodeGenTests_UnknownArrayC1_f3_def(x3_a, &y3_v);
-    return y3_v;
-}
-
-void func_CCodeGenTests_UnknownArrayC1_f2_def(jmi_array_t* x2_a, jmi_array_t* y2_a) {
-    JMI_DYNAMIC_INIT()
-    if (y2_a == NULL) {
-        JMI_ARRAY_DYNAMIC(y2_an, jmi_array_size(x2_a, 0), jmi_array_size(x2_a, 0))
-        y2_a = y2_an;
-    }
-    for (jmi_ad_var_t i1_i = 1; i1_i <= jmi_array_size(y2_a, 0); i1_i += 1) {
-        jmi_array_ref_1(y2_a, i1_i) = jmi_array_val_1(x2_a, i1_i);
-    }
-    JMI_DYNAMIC_FREE()
-    return;
-}
-
-")})));
-
-    function f1
-        input Real[:] x1;
-        output Real y1;
-    algorithm
-        y1 := f3(f2(x1));
-    end f1;
-    
-    function f2
-        input Real[:] x2;
-        output Real[size(x2,1)] y2;
-    algorithm
-        y2 := x2;
-    end f2;
-    
-    function f3
-        input Real[:] x3;
-        output Real y3;
-    algorithm
-        y3 := sum(x3);
-    end f3;
-    
-    Real x = f1({1,2});
-end UnknownArrayC1;
 
 
 end CCodeGenTests;

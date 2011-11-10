@@ -16,6 +16,8 @@
 
 import java.util.Map;
 import java.util.Collections;
+import java.util.Set;
+import java.util.HashSet;
 
 aspect Flattening {
     
@@ -117,12 +119,8 @@ aspect Flattening {
 		if (fc.lookupFunc(qualifiedName()) == null) {	
 	   		FFunctionDecl ffd = new FFunctionDecl();
 	   		ffd.setFQName(new FQName(qualifiedName()));
-	
-	   		for (InstComponentDecl icd : getInstComponentDecls())
-				icd.flattenInFunction(ffd, fc, false);
-	   		for (InstExtends ie : getInstExtendss())
-	   	   		for (InstComponentDecl icd : ie.getInstComponentDecls())
-	   				icd.flattenInFunction(ffd, fc, false);
+	   		
+	   		flattenComponentsInFunction(ffd, fc);
 			
 	   		FAlgorithmBlock fab = findFunctionAlgorithm();
 	   		fab = (fab == null) ? new FAlgorithmBlock(new List()) : fab.flattenEqn(new FQName(), fc);
@@ -139,6 +137,13 @@ aspect Flattening {
 			
 			flattenUsedFuncsAndEnums(fc);
 		}
+	}
+	
+	public void InstNode.flattenComponentsInFunction(FFunctionDecl ffd, FClass fc) {
+   		for (InstComponentDecl icd : getInstComponentDecls())
+			icd.flattenInFunction(ffd, fc, false);
+   		for (InstExtends ie : getInstExtendss())
+   	   		ie.flattenComponentsInFunction(ffd, fc);
 	}
 	
 	syn FAlgorithmBlock InstNode.findFunctionAlgorithm() {
@@ -283,31 +288,80 @@ aspect Flattening {
 		return ffv;
 	}
 	
-	public void FType.flattenSize(FQName prefix, FFunctionVariable fv) {
-		setSize(getSize().flatten(prefix, fv));
+	// TODO: perhaps we should duplicate the instance tree algorithm for calculating the size 
+	//       of function calls in the flat tree instead of all this (all down to "TODO: end of remove")
+	public void FType.flattenSize(FQName prefix, ASTNode context) {
+		setSize(getSize().flatten(prefix, context));
 	}
 	
-	public void FRecordType.flattenSize(FQName prefix, FFunctionVariable fv) {
-		super.flattenSize(prefix, fv);
+	public void FRecordType.flattenSize(FQName prefix, ASTNode context) {
+		super.flattenSize(prefix, context);
 		for (FRecordComponentType comp : getComponents())
 			comp.getFType().flattenSize(prefix, null);
 	}
 	
-	public Size Size.flatten(FQName prefix, FFunctionVariable fv) {
+	public Size Size.flatten(FQName prefix, ASTNode context) {
 		return this;
 	}
 	
-	public MutableSize MutableSize.flatten(FQName prefix, FFunctionVariable fv) {
+	public MutableSize MutableSize.flatten(FQName prefix, ASTNode context) {
 		MutableSize res = new MutableSize(size.length);
 		System.arraycopy(size, 0, res.size, 0, size.length);
 		for (int i = 0; i < exps.length; i++) {
 			if (exps[i] != null) {
 				res.exps[i] = exps[i].flatten(prefix);
-				if (fv != null)
-					res.exps[i].updateFUnknownSizeExps(fv);
+				if (context != null)
+					res.exps[i] = context.affixExpression(res.exps[i]);
 			}
 		}
 		return res;
+	}
+	
+	/**
+	 * Affix the given expression to the tree.
+	 * 
+	 * Where supported, adds it to dynamicFExp(), otherwise throws UnsupportedOperationException.
+	 * 
+	 * @return the expression, possibly rewritten
+	 */
+	public FExp ASTNode.affixExpression(FExp exp) {
+		throw new UnsupportedOperationException("Method affixExpression(FExp) not supported by class " + getClass().getSimpleName());
+	}
+	
+	public FExp FExp.affixExpression(FExp exp) {
+		return dynamicFExp(exp);
+	}
+	
+	public FExp FFunctionCall.affixExpression(FExp exp) {
+		// can't use dynamicExp(), since this node might not be in tree (InstFunctionCall.flatten())
+		// TODO: if InstFunctionCall.flatten() is changed so that the size is flattened in a 
+		//       rewrite on FFunctionCall instead, then dynamicExp() can be used here
+		exp.parent = this;
+		return exp;
+	}
+	
+	/**
+	 * Affix the given expression to the tree, and point FUnknownSizeExps to this var.
+	 * 
+	 * This implementation uses a hack to add node to tree.
+	 * 
+	 * @return the expression, possibly rewritten
+	 */
+	public FExp AbstractFVariable.affixExpression(FExp exp) {
+		// TODO: need better way of including exp in tree
+		exp.parent = this;
+		exp.updateFUnknownSizeExps(this);
+		return exp;
+	}
+	
+	/**
+	 * \brief Change the variable of any FUnknownSizeExp to the given variable.
+	 */
+	public void FExp.updateFUnknownSizeExps(AbstractFVariable var) {
+	}
+	
+	public void FUnknownSizeExp.updateFUnknownSizeExps(AbstractFVariable var) {
+		setVariable(var);
 	}
 	
 	/**
@@ -327,28 +381,14 @@ aspect Flattening {
 	public void Size.updateFUnknownSizeExps(AbstractFVariable var) {}
 	
 	public void MutableSize.updateFUnknownSizeExps(AbstractFVariable var) {
-		for (int i = 0; i < exps.length; i++) {
-			if (exps[i] != null) {
-				exps[i] = (FExp) exps[i].fullCopy();
-				exps[i].updateFUnknownSizeExps(var);
-			}
-		}
+		for (int i = 0; i < exps.length; i++) 
+			if (exps[i] != null) 
+				exps[i] = var.affixExpression((FExp) exps[i].fullCopy());
 	}
 	
-	/**
-	 * \brief Change the variable of any FUnknownSizeExp to the given variable.
-	 */
-	public void FExp.updateFUnknownSizeExps(AbstractFVariable var) {
-		// TODO: need better way of including exp in tree
-		parent = var;
-	}
+	// TODO: end of remove (see TODO above)
 	
-	public void FUnknownSizeExp.updateFUnknownSizeExps(AbstractFVariable var) {
-		setVariable(var);
-		// TODO: need better way of including exp in tree
-		parent = var;
-	}
-
+	
 	// Generic method for flattening	
 	public void ASTNode.flatten(FClass fc) {
 		for (int i=0;i<getNumChild();i++) {
@@ -1081,7 +1121,7 @@ aspect FlatExpressions {
 	/**
 	 * \brief Get the list of constants that need to be added to the surrounding function.
 	 */
-	inh ArrayList<InstAssignable> FInstAccessExp.functionConstantList();
+	inh Set<InstAssignable> FInstAccessExp.functionConstantList();
 	eq InstClassDecl.getChild().functionConstantList() = localFunctionConstantList();
 	eq Root.getChild().functionConstantList() = null;
 	
@@ -1090,8 +1130,8 @@ aspect FlatExpressions {
 	 * 
 	 * The list will be populated when expressions in the function are flattened.
 	 */
-	syn lazy ArrayList<InstAssignable> InstClassDecl.localFunctionConstantList() = 
-		new ArrayList<InstAssignable>();
+	syn lazy Set<InstAssignable> InstClassDecl.localFunctionConstantList() = 
+		new HashSet<InstAssignable>();
 	
 	syn boolean InstAccess.hasUnknownIndices() = 
 		hasFArraySubscripts() && getFArraySubscripts().hasUnknownIndices(); 
@@ -1347,12 +1387,13 @@ aspect FlatExpressions {
 			args.add(e.flatten(prefix));
 		FIdUse name = new FIdUse(new FQName(getName().myInstClassDecl().qualifiedName()));
 		Size[] sizes = new Size[myOutputs().size()];
+		FFunctionCall res = new FFunctionCall(name, args, sizes);
 		if (isFunctionCallClause()) 
 			for (int i = 0; i < myLefts().size(); i++)
-				sizes[i] = myLefts().get(i).hasFExp() ? sizeOfOutput(i).flatten(prefix, null) : null;
+				sizes[i] = myLefts().get(i).hasFExp() ? sizeOfOutput(i).flatten(prefix, res) : null;
 		else
-			sizes[0] = size().flatten(prefix, null);
-		return new FFunctionCall(name, args, sizes);	
+			sizes[0] = size().flatten(prefix, res);
+		return res;	
 	}
 
 	public FExp InstFunctionArgument.flatten(FQName prefix) {

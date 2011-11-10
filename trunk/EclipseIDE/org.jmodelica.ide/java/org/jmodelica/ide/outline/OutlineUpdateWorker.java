@@ -219,11 +219,17 @@ public class OutlineUpdateWorker {
 
 		public void run() {
 			if (!node.contentOutlineImageCalculated()) {
-				synchronized (node.state()) { 
-					// Depends on ASTNode.state being static (if it isn't, use an object that is unique to the tree) 
-					node.updateCachedIcon();
+				try {
+					synchronized (node.state()) { 
+						// Depends on ASTNode.state being static (if it isn't, use an object that is unique to the tree)
+						node.updateCachedIcon();
+					}
+					new IconUpdateJob(this).schedule();
+				} catch (Throwable t) {
+					// Don't let anything be thrown past here
+					t.printStackTrace();
+					return;
 				}
-				new IconUpdateJob(this).schedule();
 			}
 		}
 
@@ -237,11 +243,17 @@ public class OutlineUpdateWorker {
 		}
 
 		public void run() {
-			synchronized (node.state()) {
-				// Depends on ASTNode.state being static (if it isn't, use an object that is unique to the tree) 
-				node.updateOutlineCachedChildren();
+			try {
+				synchronized (node.state()) {
+					// Depends on ASTNode.state being static (if it isn't, use an object that is unique to the tree) 
+					node.updateOutlineCachedChildren();
+				}
+				new ChildrenUpdateJob(this).schedule();
+			} catch (Throwable t) {
+				// Don't let anything be thrown past here
+				t.printStackTrace();
+				return;
 			}
-			new ChildrenUpdateJob(this).schedule();
 		}
 		
 	}

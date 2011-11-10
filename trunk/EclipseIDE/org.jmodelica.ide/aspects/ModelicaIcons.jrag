@@ -163,7 +163,8 @@ aspect ModelicaIcons
 			try {
 				myCachedIcon.icon = renderIcon(icon());
 			} catch (Exception e) {
-				// Can't really do anything constructive here
+				// Make sure *something* is shown
+				myCachedIcon.icon = defaultIcon();
 				e.printStackTrace();
 			}
 			myCachedIcon.iscurrent = true;

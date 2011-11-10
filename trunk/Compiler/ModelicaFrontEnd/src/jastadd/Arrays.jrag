@@ -1311,6 +1311,8 @@ aspect Arrays {
 	eq FIterExp.getArray() = copyArray();
 	
 	eq FSubscriptedExp.getArray() {
+		if (!isArray()) 
+			return new ScalarAsArray(this);
 		Array arr = new Array(indices());
 		Array old = getFExp().getArray();
 		Indices ind = arr.indices();
@@ -2881,7 +2883,7 @@ aspect ArrayHelpers {
 		 * This makes indices().iterator() meaningful.
 		 */
 		public ScalarAsArray(FExp exp, Indices ind) {
-			this(new List().add(exp.unboundCopy()));
+			this(new List().add(exp.fullCopy()));
 			indices = ind;
 			length = 1;
 		}

@@ -1134,6 +1134,46 @@ Semantic error at line 4892, column 10:
  Integer x[2,1] = transpose({{1.0,2}});
 end Transpose7;
 
+
+model Transpose8
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="Transpose8",
+         description="Scalarization of transpose operator: access to variable",
+         flatModel="
+fclass ArrayBuiltins.Transpose.Transpose8
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real x[3,1];
+ Real x[3,2];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[1,3];
+ Real y[2,1];
+ Real y[2,2];
+ Real y[2,3];
+equation
+ x[1,1] = 1;
+ x[1,2] = 2;
+ x[2,1] = 3;
+ x[2,2] = 4;
+ x[3,1] = 5;
+ x[3,2] = 6;
+ y[1,1] = x[1,1] .+ 1;
+ y[1,2] = x[2,1] .+ 1;
+ y[1,3] = x[3,1] .+ 1;
+ y[2,1] = x[1,2] .+ 1;
+ y[2,2] = x[2,2] .+ 1;
+ y[2,3] = x[3,2] .+ 1;
+end ArrayBuiltins.Transpose.Transpose8;
+")})));
+
+    Real[3,2] x = {{1,2},{3,4},{5,6}};
+    Real[2,3] y = transpose(x) .+ 1;
+end Transpose8;
+
 end Transpose;
 
 
@@ -1807,6 +1847,38 @@ Semantic error at line 7057, column 10:
 
  Integer x[4] = linspace(1, 3, 3);
 end Linspace5;
+
+
+model Linspace6
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.TransformCanonicalTestCase(
+         name="Linspace6",
+         description="",
+         flatModel="
+fclass ArrayBuiltins.Linspace6
+ parameter Real b = 1.5 /* 1.5 */;
+ parameter Real c = 3 /* 3 */;
+ parameter Integer d = 3 /* 3 */;
+ parameter Real a[1].x;
+ parameter Real a[2].x;
+ parameter Real a[3].x;
+parameter equation
+ a[1].x = b + ( 0 ) * ( ( c - ( b ) ) / ( 2 ) );
+ a[2].x = b + ( 1 ) * ( ( c - ( b ) ) / ( 2 ) );
+ a[3].x = b + ( 2 ) * ( ( c - ( b ) ) / ( 2 ) );
+end ArrayBuiltins.Linspace6;
+")})));
+
+	model A
+		parameter Real x;
+	end A;
+	
+    parameter Real b = 1.5;
+    parameter Real c = 3;
+    parameter Integer d = 3;
+	
+	A a[d](x = linspace(b, c, d));
+end Linspace6;
 
 
 

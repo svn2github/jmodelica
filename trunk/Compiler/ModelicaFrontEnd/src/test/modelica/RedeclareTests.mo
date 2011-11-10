@@ -4096,4 +4096,36 @@ end RedeclareEach2;
 
 
 
+// When looking up the class H.D extends (E.D) from the redeclaration in A, 
+// InstReplacingFullClassDecl.doSurroundingSuperLookupInstClass returns B, but should 
+// lookup from H.D instead
+model ShortRedeclare1
+    package A
+        replaceable function B
+            output Real c = 2;
+        end B;
+    end A;
+    
+    package C = A(redeclare function B = F.D);
+    package F = H;
+    
+    package H
+        extends E;
+          redeclare function extends D
+        algorithm
+            c := b;
+        end D;
+    end H;
+    
+    package E
+        replaceable function D
+            input Real b = 1;
+            output Real c;
+        end D;
+    end E;
+    
+    Real x = C.B();
+end ShortRedeclare1;
+
+
 end RedeclareTests;

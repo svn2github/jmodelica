@@ -630,16 +630,20 @@ aspect Scalarization {
 	
 	public void FArray.createArrayTemporaries(List clauses, List vars, 
 			Map<String,FExp> indexMap, boolean addVar) {
-		if (useTempVar) {
-			if (addVar) 
-				vars.add(new FFunctionArray((FType) type().unboundCopy(), tempVarName()));
-			Array arr = getArray();
-			for (Index i : indices()) {
-				FQName name = new FQName(tempVarName());
-				name.setLastFArraySubscripts(i.createFArraySubscripts());
-				name.scalarized = true;
-				clauses.add(new FAssignStmt(new FIdUse(name), arr.get(i)));
-			}
+		if (useTempVar) 
+			defaultFunctionArrayTemporaries(clauses, vars, indexMap, addVar);
+	}
+	
+	public void FExp.defaultFunctionArrayTemporaries(List clauses, List vars, 
+			Map<String,FExp> indexMap, boolean addVar) {
+		if (addVar) 
+			vars.add(new FFunctionArray((FType) type().unboundCopy(), tempVarName()));
+		Array arr = getArray();
+		for (Index i : indices()) {
+			FQName name = new FQName(tempVarName());
+			name.setLastFArraySubscripts(i.createFArraySubscripts());
+			name.scalarized = true;
+			clauses.add(new FAssignStmt(new FIdUse(name), arr.get(i).scalarize(indexMap)));
 		}
 	}
 	
@@ -733,7 +737,15 @@ aspect Scalarization {
 			super.createArrayTemporaries(clauses, vars, indexMap, addVar);
 		}
 	}
-	
+
+	public void FIdUseExp.createArrayTemporaries(List clauses, List vars, 
+			Map<String,FExp> indexMap, boolean addVar) {
+		if (isSlice() && isArray() && keepAsArray()) {
+			useTempVar = true;
+			defaultFunctionArrayTemporaries(clauses, vars, indexMap, addVar);
+		}
+	}
+
 	/**
 	 * \brief Create a new FIdUse of this variable with uses of <code>names</code> as array subscripts.
 	 */
