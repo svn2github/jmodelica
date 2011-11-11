@@ -38,13 +38,13 @@ aspect FlatNameBinding {
 	public AbstractFVariable FClass.lookupFV(FQName fqn, boolean der) {
 		boolean scalar = fqn.scalarized;
 		fqn.scalarized = scalarized;
-		AbstractFVariable variable = lookupFVFromMap(fullyQualifiedVariablesMap(), fqn, der);
+		AbstractFVariable variable = lookupFVFromMap(fullyQualifiedVariablesMap(), fqn, der, true);
 		fqn.scalarized = scalar;
 		return (variable == null) ? unknownFVariable() : variable;
 	}
 
 	eq FFunctionDecl.getChild(int index).lookupFV(FQName fqn) {
-		AbstractFVariable variable = lookupFVFromMap(fullyQualifiedVariablesMap(), fqn, false);
+		AbstractFVariable variable = lookupFVFromMap(fullyQualifiedVariablesMap(), fqn, false, false);
 		return (variable == null) ? unknownFVariable() : variable;
 	}
 
@@ -54,15 +54,18 @@ aspect FlatNameBinding {
 	}
 	
 	public static AbstractFVariable ASTNode.lookupFVFromMap(
-			HashMap<String, ? extends AbstractFVariable> map, FQName fqn, boolean der) {
-		AbstractFVariable variable = map.get(der ? fqn.resolvedDerName() : fqn.resolvedName());
+			HashMap<String, ? extends AbstractFVariable> map, FQName fqn, boolean der, boolean resolve) {
+		String name = fqn.prefixName(0, der, resolve);
+		AbstractFVariable variable = map.get(name);
 		if (variable == null) {
 			int i = fqn.getNumFQNamePart();
 			do {
 				i--;
-				String part = fqn.prefixName(i);
+				// Only last part should have "der()", and it isn't included here
+				String part = fqn.prefixName(i, false, resolve);
 				AbstractFVariable tmp = map.get(part);
 				if (tmp != null) 
+					// TODO: shouldn't we support der here?
 					variable = tmp.lookupFVInRecord(fqn, i);
 			} while (variable == null && i > 1);
 		}

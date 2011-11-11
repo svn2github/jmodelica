@@ -740,7 +740,7 @@ aspect Scalarization {
 
 	public void FIdUseExp.createArrayTemporaries(List clauses, List vars, 
 			Map<String,FExp> indexMap, boolean addVar) {
-		if (isSlice() && isArray() && keepAsArray()) {
+		if (isSlice() && isArray() && canAcceptArray()) {
 			useTempVar = true;
 			defaultFunctionArrayTemporaries(clauses, vars, indexMap, addVar);
 		}

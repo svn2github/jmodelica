@@ -969,7 +969,7 @@ aspect FlatNames {
     syn lazy String FQName.name()            = prefixName(0);
     syn lazy String FQName.resolvedName()    = prefixName(0, false, true);
     syn lazy String FQName.derName()         = prefixName(0, true, false);
-    syn lazy String FQName.resolvedDerName() = prefixName(0, true, false);
+    syn lazy String FQName.resolvedDerName() = prefixName(0, true, true);
 
 	syn lazy String FQName.hDerName(int derOrder) {
 	   	StringBuilder str = new StringBuilder(derName());

@@ -748,7 +748,7 @@ aspect Arrays {
 	
 	syn Size InstFunctionCall.sizeOfOutput(int i) {
 		Size s = myOutputs().get(i).size();
-		if (!s.isUnknown())
+		if (!s.isUnknown() || isCircular())
 			return s;
 		
 		HashMap<ASTNode, FExp> varMap = new HashMap<ASTNode, FExp>();

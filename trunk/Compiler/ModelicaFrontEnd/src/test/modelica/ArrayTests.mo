@@ -6426,8 +6426,8 @@ Semantic error at line 1529, column 14:
 	algorithm
 	end f;
 	
-	Real[:] a = f(b);
-	Real[:] b = f(a);
+	Real[:] c = f(d);
+	Real[:] d = f(c);
 end CircularFunctionArg1;
 
 
@@ -6529,29 +6529,6 @@ end ArrayTests.Other.ArrayConst4;
 	parameter Integer i = 1;
 	Real x = testConst[i];
 end ArrayConst4;
-
-
-
-model ArraySize1
- annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-     JModelica.UnitTesting.ErrorTestCase(
-         name="ArraySize1",
-         description="Using input as array size",
-         errorMessage="
-1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 6351, column 15:
-  Array size must be constant or parameter: N
-")})));
-
-	function f
-		input Integer N;
-		output Real[N] o = 1:N;
-	algorithm
-	end f;
-	
-	Real x[3] = f(3);
-end ArraySize1;
 
 
 model ArraySize2

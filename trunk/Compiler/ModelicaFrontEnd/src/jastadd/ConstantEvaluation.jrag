@@ -2492,9 +2492,20 @@ aspect CircularExpressions {
 
 	syn lazy boolean FForIndex.isCircular() circular [true] = hasFExp() && getFExp().isCircular();
 
+	/* Need this because automatic circularity detection doesn't work 
+	 * when circular attribute is calls a non-circular attribute that 
+	 * in turn calls the circular attribute again. 
+	 */
+	private boolean FSizeExp.inIsCircular = false;
+	
 	eq FSizeExp.isCircular() { 
+		if (inIsCircular)
+			return true;
+		inIsCircular = true;
 		Size s = getFExp().size();
-		return hasDim() ? s.isCircular(dimension()) : s.isCircular();
+		boolean res = hasDim() ? s.isCircular(dimension()) : s.isCircular();
+		inIsCircular = false;
+		return res;
 	}
 	
 	public boolean Size.isCircular() {
