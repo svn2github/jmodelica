@@ -1120,6 +1120,33 @@ model FunctionEval20
 end FunctionEval20;
 
 
+model FunctionEval21
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.XMLCodeGenTestCase(
+         name="FunctionEval21",
+         description="Evaluation of function containing assert()",
+         template="$XML_variables$",
+         generatedCode="
+
+		<ScalarVariable name=\"a\" valueReference=\"0\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"1.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>independentParameter</VariableCategory>
+		</ScalarVariable>")})));
+
+	function f
+		input Real x;
+		output Real y;
+	algorithm
+		assert(true, "Test");
+		y := x;
+	end f;
+	
+	parameter Real a = f(1);
+end FunctionEval21;
+
+
+
 model ScalarizedLookup1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.XMLCodeGenTestCase(

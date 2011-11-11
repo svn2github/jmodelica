@@ -1620,11 +1620,13 @@ aspect ConstantEvaluation {
   public class AbstractFVariable implements CommonVariableDecl {}
   public class InstComponentDecl implements CommonVariableDecl {}
   
-  syn ArrayList<? extends CommonVariableDecl> FAbstractFunctionCall.myFuncInputs() = null;
+  syn ArrayList<? extends CommonVariableDecl> FAbstractFunctionCall.myFuncInputs() = 
+	  new ArrayList<CommonVariableDecl>(0);
   eq FFunctionCall.myFuncInputs()    = myInputs();
   eq InstFunctionCall.myFuncInputs() = myInputs();
   
-  syn ArrayList<? extends CommonVariableDecl> FAbstractFunctionCall.myFuncOutputs() = null;
+  syn ArrayList<? extends CommonVariableDecl> FAbstractFunctionCall.myFuncOutputs() = 
+	  new ArrayList<CommonVariableDecl>(0);
   eq FFunctionCall.myFuncOutputs()    = myOutputs();
   eq InstFunctionCall.myFuncOutputs() = myOutputs();
   
