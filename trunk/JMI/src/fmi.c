@@ -660,9 +660,6 @@ fmiStatus fmi_get_jacobian_fd(fmiComponent c, int independents, int dependents, 
 	output_vrefs = (int*)calloc(n_outputs, sizeof(int));
 	output_vrefs2 = (int*)calloc(n_outputs, sizeof(int));
 	
-	
-	
-	
 	jmi_get_output_vrefs(jmi, output_vrefs);
 	j = 0;
 	for(i = 0; i < n_outputs; i++){
@@ -673,8 +670,6 @@ fmiStatus fmi_get_jacobian_fd(fmiComponent c, int independents, int dependents, 
 			n_outputs2--;
 		}
 	}
-	
-	
 	
 	offs = jmi->offs_real_x;
 	if(independents&FMI_STATES){
@@ -740,6 +735,10 @@ fmiStatus fmi_get_jacobian_fd(fmiComponent c, int independents, int dependents, 
  		}
  		
  	}
+ 	
+ 	free(output_vrefs);
+ 	free(output_vrefs2);
+ 	
  	return fmiOK;
 }
 
@@ -778,9 +777,11 @@ fmiStatus fmi_get_jacobian(fmiComponent c, int independents, int dependents, fmi
 	dv = jmi->dv;
 	dz = jmi->dv;
 	
-	/*jac2 = (fmiReal*)calloc(njac, sizeof(fmiReal));*/
+	/*
+	jac2 = (fmiReal*)calloc(njac, sizeof(fmiReal));
+	*/
 	output_vrefs = (int*)calloc(n_outputs, sizeof(int));
-	output_vrefs2 = (int*)calloc(n_outputs, sizeof(int));
+	output_vrefs2 = (int*)calloc(n_outputs, sizeof(int)); 
 	
 	jmi_get_output_vrefs(jmi, output_vrefs);
 	j = 0;
@@ -793,10 +794,7 @@ fmiStatus fmi_get_jacobian(fmiComponent c, int independents, int dependents, fmi
 		}
 	}
 	
-	
-	
 	offs = jmi->n_real_dx;
-	
 	
 	if(independents&FMI_STATES){
 		nvvr += jmi->n_real_x;
@@ -815,7 +813,11 @@ fmiStatus fmi_get_jacobian(fmiComponent c, int independents, int dependents, fmi
  	}
  	
  	for(i = 0; i<jmi->n_real_dx+jmi->n_real_x+jmi->n_real_u+jmi->n_real_w;i++){
-		(*dz)[j] = 0;
+		(*dz)[i] = 0;
+	}
+	
+	for(i = 0; i < jmi->n_real_u; i++){
+		(*(jmi->z))[i+jmi->offs_real_u] = (*(jmi->z_val))[i+jmi->offs_real_u];
 	}
 	
 	for(i = 0; i < nvvr; i++){
@@ -829,11 +831,11 @@ fmiStatus fmi_get_jacobian(fmiComponent c, int independents, int dependents, fmi
 		if(dependents&FMI_OUTPUTS){
 			for(j = 0; j<n_outputs2;j++){
 				index = get_index_from_value_ref(output_vrefs2[j]);
-				if(index < offs+nvvr && index >= offs){
-					  if(index == i+offs){
-					  	jac[i*nzvr+j+output_off] = 1;
+				if(index < jmi->n_real_x + jmi->n_real_u){
+					  if(index == i + offs){
+					  	jac[i*nzvr+output_off+j] = 1;
 					  } else{
-					  	jac[i*nzvr+j+output_off] = 0;
+					  	jac[i*nzvr+output_off+j] = 0;
 					  }
 				} else{
 					jac[i*nzvr+j+output_off] = (*dz)[index-jmi->offs_real_dx];	
@@ -841,7 +843,7 @@ fmiStatus fmi_get_jacobian(fmiComponent c, int independents, int dependents, fmi
 			}
 		}
 		for(j = 0; j<jmi->n_real_dx+jmi->n_real_x+jmi->n_real_u+jmi->n_real_w;j++){
-				(*dz)[j] = 0;
+			(*dz)[j] = 0;
 		}
 	}
 	/*
@@ -870,10 +872,12 @@ fmiStatus fmi_get_jacobian(fmiComponent c, int independents, int dependents, fmi
 		}
 	}
 	printf("\nPASSED: %d\tFAILED: %d\n\n", passed, failed);
-	
-	
+
 	free(jac2);
 	*/
+	free(output_vrefs);
+	free(output_vrefs2);
+	
 	return fmiOK;
 }
 
