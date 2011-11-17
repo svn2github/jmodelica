@@ -520,12 +520,14 @@ aspect InstLookupClasses {
 	syn InstClassDecl InstNode.lookupInstClassDotted(String name) {
 		String[] parts = name.split("\\.");
 		InstNode icd = this;
+		boolean first = true;
 		for (String part : parts) {
-			HashSet set = icd.lookupInstClass(part);
+			HashSet set = first ? icd.lookupInstClass(part) : icd.memberInstClass(part);
 			if (set.size() > 0)
 				icd = (InstNode) set.iterator().next();
 			else
 				return unknownInstClassDecl();
+			first = false;
 		}
 		return (InstClassDecl) icd;
 	}
