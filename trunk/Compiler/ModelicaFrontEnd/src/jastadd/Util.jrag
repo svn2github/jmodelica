@@ -412,6 +412,13 @@ aspect FileNames {
     
     syn String ASTNode.dirName() = 
     	fileName().replaceFirst("^[^\\\\/]*$", ".").replaceFirst("[\\\\/][^\\\\/]*$", "");
+//    syn String ASTNode.dirName() {
+//    	String res = fileName();
+//    	if (res == null)
+//    		return res;
+//    	res = res.replaceFirst("^[^\\\\/]*$", ".");
+//    	return res.replaceFirst("[\\\\/][^\\\\/]*$", "");
+//    }
     
     inh String ASTNode.retrieveFileName();
     eq BaseNode.getChild().retrieveFileName() = fileName();
@@ -1537,6 +1544,11 @@ aspect FlatFunctionUtils {
      eq FRecordType.signatureString()   = String.format("(%s)%d", getName(), ndims());
      
      /**
+      * Set to a class to make all children behave as if this was declared in that function.
+      */
+     private InstClassDecl InstAssignable.temporarilyInFunction = null;
+     
+     /**
       * \brief Check is this node is in a function.
       */
      inh boolean FQName.inFunction();
@@ -1551,6 +1563,7 @@ aspect FlatFunctionUtils {
      inh boolean FFunctionCallLeft.inFunction();
      eq InstBaseClassDecl.getChild().inFunction() = isFunction();
      eq FFunctionDecl.getChild().inFunction()     = true;
+     eq InstAssignable.getChild().inFunction()    = (temporarilyInFunction != null) || inFunction();
      eq Root.getChild().inFunction()              = false;
      
      /**

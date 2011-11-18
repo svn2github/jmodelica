@@ -67,9 +67,11 @@ public class CGenerator extends GenericGenerator {
 	
 		public void generate(PrintStream genPrinter) {
 			if (fclass.root().options.getBooleanOption("generate_dae")) {
+				for (FAbstractEquation e : fclass.equations()) 
+					e.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
 				int i=0;
 				for (FAbstractEquation e : fclass.equations()) {
-					e.genResidual_C(i,INDENT,genPrinter);				
+					e.genResidual_C(i, INDENT, genPrinter);				
 					i += e.numScalarEquations();
 				}
 			}
@@ -86,6 +88,8 @@ public class CGenerator extends GenericGenerator {
 		}
 	
 		public void generate(PrintStream genPrinter) {
+			for (FRelExp e : fclass.relExpInEquations()) 
+				e.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
 			int i=0;
 			for (FRelExp e : fclass.relExpInEquations()) {
 				e.genResidual_C(i,INDENT,genPrinter);				
@@ -105,6 +109,10 @@ public class CGenerator extends GenericGenerator {
 	
 		public void generate(PrintStream genPrinter) {
 			if (fclass.root().options.getBooleanOption("generate_dae")) {
+				for (FAbstractEquation e : fclass.equations()) 
+					e.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
+				for (FAbstractEquation e : fclass.initialEquations()) 
+					e.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
 				int i=0;
 				for (FAbstractEquation e : fclass.equations()) {
 					e.genResidual_C(i,INDENT,genPrinter);				
@@ -127,6 +135,10 @@ public class CGenerator extends GenericGenerator {
 		}
 	
 		public void generate(PrintStream genPrinter) {
+			for (FRelExp e : fclass.relExpInEquations()) 
+				e.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
+			for (FRelExp e : fclass.relExpInInitialEquations()) 
+				e.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
 			int i=0;
 			for (FRelExp e : fclass.relExpInEquations()) {
 				e.genResidual_C(i,INDENT,genPrinter);				
@@ -188,6 +200,8 @@ public class CGenerator extends GenericGenerator {
 		}
 	
 		public void generate(PrintStream genPrinter) {
+			for (FAbstractEquation e : fclass.getFParameterEquations()) 
+				e.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
 			for (FAbstractEquation e : fclass.getFParameterEquations()) 
 				e.genAssignment_C(INDENT, genPrinter);
 		}
@@ -440,6 +454,8 @@ public class CGenerator extends GenericGenerator {
 
 		public void generate(PrintStream genPrinter) {
 			if (fclass.root().options.getBooleanOption("generate_ode")) {
+				for (FExp e : fclass.guardExpInEquations()) 
+					e.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
 				int i=0;
 				for (FExp e : fclass.guardExpInEquations()) {
 				    genPrinter.print("  _guards(" + i + ") = ");
@@ -463,6 +479,8 @@ public class CGenerator extends GenericGenerator {
 
 		public void generate(PrintStream genPrinter) {
 			if (fclass.root().options.getBooleanOption("generate_ode")) {
+				for (FExp e : fclass.guardExpInInitialEquations()) 
+					e.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
 				int i=0;
 				for (FExp e : fclass.guardExpInInitialEquations()) {
 				    genPrinter.print("  _guards_init(" + i + ") = ");
@@ -486,6 +504,8 @@ public class CGenerator extends GenericGenerator {
 
 		public void generate(PrintStream genPrinter) {
 			if (fclass.root().options.getBooleanOption("generate_ode")) {
+				for (FSampleExp e : fclass.samplers()) 
+					e.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
 				genPrinter.print("  jmi_real_t nextTimeEvent;\n");
 				genPrinter.print("  jmi_real_t nextTimeEventTmp;\n");				
 				genPrinter.print("  jmi_real_t nSamp;\n");	
@@ -600,6 +620,7 @@ public class CGenerator extends GenericGenerator {
 
 		public void generate(PrintStream genPrinter) {
 			if (fclass.root().options.getBooleanOption("generate_ode")) {
+				fclass.getDAEStructuredBLT().genVarDecls_C(genPrinter, INDENT);
 				genPrinter.print(INDENT + "model_ode_guards(jmi);\n");						
 				fclass.getDAEStructuredBLT().genOdeDerivativeBlocks(genPrinter);
 			}

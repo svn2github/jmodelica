@@ -767,7 +767,8 @@ aspect CADCodeGen {
 		str.print("  jmi_real_t** res = &residual;\n");
 		str.print("  jmi_real_t** dF = &dRes;\n");
 		str.print("  jmi_real_t** dv;\n");
-		str.print("  if(evaluation_mode== JMI_BLOCK_EVALUATE){\n");
+		genVarDecls_CAD(str, indent); // TODO: wrong indent (but so has rest of func...)
+		str.print("  if (evaluation_mode == JMI_BLOCK_EVALUATE){\n");
 		str.print("      dv = jmi->dz_seed;\n");
 		// Loop over all active variables and write the values in x to the z vector
 		int var_counter = 0;
@@ -776,7 +777,7 @@ aspect CADCodeGen {
 			str.print("    (*dv)[ jmi_get_index_from_value_ref(" + fv.valueReference() + ")-jmi->offs_real_dx] = dx[" + var_counter + "];\n");
 			var_counter++;
 		}
-		str.print("  } else if(evaluation_mode== JMI_BLOCK_EVALUATE_WITH_STATE){\n");
+		str.print("  } else if (evaluation_mode == JMI_BLOCK_EVALUATE_WITH_STATE){\n");
 		str.print("      dv = jmi->dz_seed;\n");
 		// Loop over all active variables and write the values in x to the z vector
 		var_counter = 0;
@@ -786,7 +787,7 @@ aspect CADCodeGen {
 			var_counter++;
 		}
 		
-		str.print("  } else if(evaluation_mode== JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode== JMI_BLOCK_WRITE_BACK){\n");
+		str.print("  } else if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_WRITE_BACK){\n");
 		str.print("      dv = jmi->dv;\n");
 		str.print("  } else{\n");
 		str.print("  return -1;\n}\n");
@@ -808,7 +809,7 @@ aspect CADCodeGen {
 		for (FVariable fv : activeVariables()) {
 			str.print("    (*dv)[jmi_get_index_from_value_ref(" + fv.valueReference() + ")-jmi->offs_real_dx] = 0;\n");
 		}
-		str.print("   }else if(evaluation_mode==JMI_BLOCK_WRITE_BACK){\n");
+		str.print("   }else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {\n");
 		var_counter = 0;
 		for (FVariable fv : activeVariables()) {
 			str.print("    (*dv)[jmi_get_index_from_value_ref(" + fv.valueReference() + ")-jmi->offs_real_dx] = -(*dF)[" + var_counter + "];\n");
@@ -854,7 +855,8 @@ aspect CADCodeGen {
 		str.print("  jmi_real_t** res = &residual;\n");
 		str.print("  jmi_real_t** dF = &dRes;\n");
 		str.print("  jmi_real_t** dv;\n");
-		str.print("  if(evaluation_mode== JMI_BLOCK_EVALUATE){\n");
+		genVarDecls_CAD(str, indent); // TODO: wrong indent (but so has rest of func...)
+		str.print("  if (evaluation_mode == JMI_BLOCK_EVALUATE){\n");
 		str.print("      dv = jmi->dz_seed;\n");
 		// Loop over all active variables and write the values in x to the z vector
 		int var_counter = 0;
@@ -863,7 +865,7 @@ aspect CADCodeGen {
 			str.print("    (*dv)[ jmi_get_index_from_value_ref(" + fv.valueReference() + ")-jmi->offs_real_dx] = dx[" + var_counter + "];\n");
 			var_counter++;
 		}
-		str.print("  } else if(evaluation_mode== JMI_BLOCK_EVALUATE_WITH_STATE){\n");
+		str.print("  } else if (evaluation_mode == JMI_BLOCK_EVALUATE_WITH_STATE){\n");
 		str.print("      dv = jmi->dz_seed;\n");
 		// Loop over all active variables and write the values in x to the z vector
 		var_counter = 0;
@@ -873,7 +875,7 @@ aspect CADCodeGen {
 			var_counter++;
 		}
 		
-		str.print("  } else if(evaluation_mode== JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode== JMI_BLOCK_WRITE_BACK){\n");
+		str.print("  } else if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_WRITE_BACK){\n");
 		str.print("      dv = jmi->dv;\n");
 		str.print("  } else{\n");
 		str.print("  return -1;\n}\n");
@@ -917,6 +919,23 @@ aspect CADCodeGen {
 		
 	}
 	
+	public ArrayList<ASTNode> AbstractEquationBlock.blockResidualNodes_CAD() {
+		ArrayList<ASTNode> res = new ArrayList<ASTNode>(activeVariables());
+		res.addAll(equations());
+		return res;
+	}
+	
+	public ArrayList<ASTNode> TornEquationBlock.blockResidualNodes_CAD() {
+		ArrayList<ASTNode> res = new ArrayList<ASTNode>(variables());
+		res.addAll(equations());
+		return res;
+	}
+	
+	protected void AbstractEquationBlock.genVarDecls_CAD(PrintStream str, String indent) {
+		for (ASTNode n : blockResidualNodes_CAD())
+			n.genVarDecls_CAD(ASTNode.printer_CAD, str, indent);
+	}
+	
 	public void BLT.genOdeDerivativeBlocks_CAD(PrintStream str) {
 		int block_counter = 0;
 		for (AbstractEquationBlock block : this) {
@@ -925,6 +944,11 @@ aspect CADCodeGen {
 				block_counter++;
             }
 		}
+	}
+	
+	public void StructuredBLT.genVarDecls_CAD(PrintStream str, String indent) {
+		for (AbstractEquationBlock eb : getAllBlocks())
+			eb.genVarDecls_CAD(str, indent);
 	}
 
 	public void StructuredBLT.genOdeDerivativeBlocks_CAD(PrintStream str) {
@@ -979,12 +1003,8 @@ aspect CADCodeGen {
 	
 	public void FFunctionCall.genTempVars_CAD(Printer p, PrintStream str, String indent) {
 		getArgs().genTempVars_CAD(p, str, indent);
-		for (FExp arg : getArgs()){ 
-			if (!arg.keepAsArray()){ 
-				arg.genTempInput_var_CAD(p, str, indent);
-				arg.genTempInput_der_CAD(p,str,indent);
-			}
-		}
+		for (FExp arg : getArgs()) 
+			arg.genTempInputs_CAD(p, str, indent);
 	}
 	
 	
@@ -997,21 +1017,62 @@ aspect CADCodeGen {
 	}
 	
 	public void FFunctionCallLeft.genTempVars_CAD(Printer p, PrintStream str, String indent) {
-		if (hasFExp()){
-			getFExp().genTempOutput_var_CAD(p, str, indent);
-			getFExp().genTempOutput_der_CAD(p, str, indent);
+		if (hasFExp())
+			getFExp().genTempOutputs_CAD(p, str, indent);
+	}
+
+	public void FExp.genTempOutputs_CAD(Printer p, PrintStream str, String indent) {}
+	
+	public void FArray.genTempOutputs_CAD(Printer p, PrintStream str, String indent) {
+		type().printInit_C(p, str, indent, tempName_var_CAD(), this);
+		type().printInit_C(p, str, indent, tempName_der_CAD(), this);
+	}
+	
+	
+	public void ASTNode.genVarDecls_CAD(Printer p, PrintStream str, String indent) {
+		for (ASTNode node : this)
+			node.genVarDecls_CAD(p, str, indent);
+	}
+	
+	public void FFunctionCallLeft.genVarDecls_CAD(Printer p, PrintStream str, String indent) {
+		super.genVarDecls_CAD(p, str, indent);
+		if (hasFExp())
+			getFExp().genTempOutputDecls_CAD(p, str, indent);
+	}
+	
+	public void FExp.genVarDecls_CAD(Printer p, PrintStream str, String indent) {
+		if (isArray() && !size().isUnknown())
+			getArray().genVarDecls_CAD(p, str, indent);
+		else
+			super.genVarDecls_CAD(p, str, indent);
+	}
+	
+	public void FFunctionCall.genVarDecls_CAD(Printer p, PrintStream str, String indent) {
+		super.genVarDecls_CAD(p, str, indent);
+		for (FExp arg : getArgs()) 
+			arg.genTempInputDecls_CAD(p, str, indent);
+	}
+	
+	public void FFunctionVariable.genVarDecls_CAD(Printer p, PrintStream str, String indent) {
+		if (!isInput()) {
+			String suffix = (isOutput() && isComposite()) ? C_SUFFIX_NULL : "";
+			printDeclOrInit_C(p, str, indent, name_var_CAD() + suffix, true);
+			printDeclOrInit_C(p, str, indent, name_der_CAD() + suffix, true);
 		}
 	}
-	
-	public void FExp.genTempOutput_var_CAD(Printer p, PrintStream str, String indent) {}
 
-	public void FExp.genTempOutput_der_CAD(Printer p, PrintStream str, String indent) {}
+	public void FExp.genTempOutputDecls_CAD(Printer p, PrintStream str, String indent) {}
 	
-	public void FArray.genTempOutput_var_CAD(Printer p, PrintStream str, String indent) {
+	public void FArray.genTempOutputDecls_CAD(Printer p, PrintStream str, String indent) {
 		type().printDecl_C(p, str, indent, tempName_var_CAD(), this);
-	}
-	public void FArray.genTempOutput_der_CAD(Printer p, PrintStream str, String indent) {
 		type().printDecl_C(p, str, indent, tempName_der_CAD(), this);
+	}
+	
+	public void FExp.genTempInputDecls_CAD(Printer p, PrintStream str, String indent) {
+		if (isComposite() && !keepAsArray()) {
+			type().printDecl_C(p, str, indent, tempName_var_CAD(), this);
+			type().printDecl_C(p, str, indent, tempName_der_CAD(), this);
+		}
 	}
 	
 	syn lazy String FExp.tempName_var_CAD() {
@@ -1038,18 +1099,13 @@ aspect CADCodeGen {
 	
 	syn lazy int FExp.nextTempNbr_der_CAD() = myFClass().nextTempNbr_der_CAD();
 	
-	public void FExp.genTempInput_var_CAD(Printer p, PrintStream str, String indent) {
-		if (isComposite()) {
+	public void FExp.genTempInputs_CAD(Printer p, PrintStream str, String indent) {
+		if (isComposite() && !keepAsArray()) {
 			String name = tempName_var_CAD();
-			type().printDecl_C(p, str, indent, name, this);
+			type().printInit_C(p, str, indent, name, this);
 			type().genTempInputAssigns_var_CAD(p, str, indent, name, this);
-		}
-	}
-	
-	public void FExp.genTempInput_der_CAD(Printer p, PrintStream str, String indent) {
-		if (isComposite()) {
-			String name = tempName_der_CAD();
-			type().printDecl_C(p, str, indent, name, this);
+			name = tempName_der_CAD();
+			type().printInit_C(p, str, indent, name, this);
 			type().genTempInputAssigns_der_CAD(p, str, indent, name, this);
 		}
 	}
@@ -1110,6 +1166,7 @@ aspect CADCodeGen {
 		}
 	}
 	
+	// TODO: Declare in genVarDecls_C instead
 	public void FFunctionCallLeft.genTempVar_var_CAD(String indent, PrintStream str) {
 		if (hasFExp() && !getFExp().isComposite()) {
 			str.print(indent);
@@ -1134,6 +1191,7 @@ aspect CADCodeGen {
 		}
 	}
 	
+	// TODO: Declare in genVarDecls_C instead
 	public void FFunctionCallLeft.genTempVar_der_CAD(String indent, PrintStream str) {
 		if (hasFExp() && !getFExp().isComposite()) {
 			str.print(indent);
@@ -1373,6 +1431,7 @@ aspect CADCodeGen {
 			getFExp().printForIndex_CAD(p, str, indent, getFVariable().name_C());
 	}
 	
+	// TODO: Declare in genVarDecls_CAD instead
 	public void FForIndex.printForArrayDecl_CAD(Printer p, PrintStream str, String indent) {
 		if (needsForArray()) {
 			str.print(indent);
@@ -1384,6 +1443,7 @@ aspect CADCodeGen {
 		}
 	}
 	
+	// TODO: Declare in genVarDecls_CAD instead
 	public void FForIndex.printForArrayNext_CAD(Printer p, PrintStream str, String indent) {
 		if (needsForArray()) {
 			String name = getFVariable().name_C();
@@ -1467,8 +1527,9 @@ aspect CADCodeGen {
 		prettyPrintHead_CAD(p, str, indent, "void", "der_AD", true);
 		str.print(" {\n");
 		str.print(next + "JMI_DYNAMIC_INIT()\n");
+		genVarDecls_CAD(p, str, p.indent(indent));
 		for (FFunctionVariable ffv : myNonInputs())
-			ffv.printNullNonInputReplacement_CAD(p, str, indent);
+			p.print(ffv, str, indent);
 		for (FFunctionVariable ffv : myOutputs())
 			ffv.printNullOutputReplacement_CAD(p, str, next);
     	p.print(getFAlgorithmBlock(), str, next);
@@ -1480,24 +1541,10 @@ aspect CADCodeGen {
     	str.print("}\n\n");
 	}
 	
-	//Null handeling
-	
-	public void  FFunctionVariable.printNullNonInputReplacement_CAD(Printer p, PrintStream str, String indent) {
-		str.print("jmi_ad_var_t ");
-		str.print(name_var_CAD());
-		str.print(";\n");
-		
-		str.print("jmi_ad_var_t ");
-		str.print(name_der_CAD());
-		str.print(";\n");
-	}
-	
-	public void FFunctionArray.printNullNonInputReplacement_CAD(Printer p, PrintStream str, String indent) {
-		if(!isOutput()){
-			String name_var = name_var_CAD();
-			String name_der = name_der_CAD();
-			printDecl_C(p, str, indent,name_var);
-			printDecl_C(p,str,indent,name_der);
+	public void FFunctionArray.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
+		if (!isOutput()) {
+			printDeclOrInit_C(p, str, indent, name_var_CAD(), false);
+			printDeclOrInit_C(p, str, indent, name_der_CAD(), false);
 		}
 	}
 	
@@ -1507,14 +1554,14 @@ aspect CADCodeGen {
 			String name_var_r = name_var_CAD + C_SUFFIX_NULL;
 			String next = p.indent(indent);
 			str.print(indent + "if (" + name_var_CAD + " == NULL) {\n");
-			printDecl_C(p, str, next, name_var_r);
+			printDeclOrInit_C(p, str, next, name_var_r, false);
 			str.print(next + name_var_CAD + " = " + name_var_r + ";\n");
 			str.print(indent + "}\n");
 			
 			String name_der_CAD = name_der_CAD();
 			String name_der_r = name_der_CAD + C_SUFFIX_NULL;
 			str.print(indent + "if (" + name_der_CAD + " == NULL) {\n");
-			printDecl_C(p, str, next, name_der_r);
+			printDeclOrInit_C(p, str, next, name_der_r, false);
 			str.print(next + name_der_CAD + " = " + name_der_r + ";\n");
 			str.print(indent + "}\n");
 		}

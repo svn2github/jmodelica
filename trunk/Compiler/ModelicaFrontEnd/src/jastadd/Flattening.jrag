@@ -130,18 +130,32 @@ aspect Flattening {
 			fab.ensureReturn();
 			ffd.setFAlgorithmBlock(fab);
 			
-			for (InstAssignable cons : localFunctionConstantList())
-				cons.flattenInFunction(ffd, fc, true);
-	
+			addLocalFunctionConstants(ffd, fc);
 			fc.addFFunctionDecl(ffd);
-			
 			flattenUsedFuncsAndEnums(fc);
+		}
+	}
+	
+	private void InstBaseClassDecl.addLocalFunctionConstants(FFunctionDecl ffd, FClass fc) {
+		Set<InstAssignable> added = new HashSet<InstAssignable>();
+		Set<InstAssignable> all = localFunctionConstantList();
+		int n = 0;
+		while (n < all.size()) {
+			n = all.size();
+			// We need a copy of all since it can be modified during iteration
+			for (InstAssignable cons : all.toArray(new InstAssignable[n])) {
+				if (!added.contains(cons)) {
+					cons.flattenInFunction(ffd, fc, true, this);
+					cons.myBindingInstExp().flattenUsedFuncsAndEnums(fc);
+					added.add(cons);
+				}
+			}
 		}
 	}
 	
 	public void InstNode.flattenComponentsInFunction(FFunctionDecl ffd, FClass fc) {
    		for (InstComponentDecl icd : getInstComponentDecls())
-			icd.flattenInFunction(ffd, fc, false);
+			icd.flattenInFunction(ffd, fc, false, null);
    		for (InstExtends ie : getInstExtendss())
    	   		ie.flattenComponentsInFunction(ffd, fc);
 	}
@@ -256,11 +270,15 @@ aspect Flattening {
 			addFStatement(new FReturnStmt());
 	}
 	
-	public void InstComponentDecl.flattenInFunction(FFunctionDecl ffd, FClass fc, boolean useConstant) {}
+	public void InstComponentDecl.flattenInFunction(
+			FFunctionDecl ffd, FClass fc, boolean useConstant, InstClassDecl func) {}
 	
-	public void InstAssignable.flattenInFunction(FFunctionDecl ffd, FClass fc, boolean useConstant) {
+	public void InstAssignable.flattenInFunction(
+			FFunctionDecl ffd, FClass fc, boolean useConstant, InstClassDecl func) {
 		boolean isConstant = getComponentDecl().isConstant();
 		if (useConstant || !isConstant) {
+			InstClassDecl old = temporarilyInFunction;
+			temporarilyInFunction = func;
 			FExp e = flattenBindingFExp();
 			Opt eo = (e == null) ? new Opt() : new Opt(e);
 			FQName fqn = new FQName(getFQName());
@@ -273,6 +291,7 @@ aspect Flattening {
 			// TODO: Mark var as constant if isConstant is true?
 			ffd.addFFunctionVariable(ffv);
 			myInstClass().flattenRecord(fc);
+			temporarilyInFunction = old;
 		}
 	}
 
@@ -1086,16 +1105,13 @@ aspect FlatExpressions {
 		InstAccess ia = getInstAccess();
 		if (ia.myInstComponentDecl() instanceof InstAssignable) {
 			InstAssignable var = (InstAssignable) ia.myInstComponentDecl();
+			boolean addConstToFunc = false;
 			if (var.isConstant()) {
 				try {
 					// Check if we have non-constant array subscripts
 					if (ia.hasUnknownIndices()) {
 						if (inFunction()) {
-							// Add the constant array to the function and keep the access
-							functionConstantList().add(var);
-							FQName fqn = new FQName(var.getFQName());
-							fqn.setLastFArraySubscripts(ia.getFArraySubscripts().flatten(prefix));
-							return new FIdUseExp(fqn);
+							addConstToFunc = true;
 						} else {
 							// Inline entire array wrapped in an FSubscriptedExp, and resolve index later
 							FExp exp = var.getBindingFExp().getArray().buildLiteral(var.isReal());
@@ -1110,8 +1126,20 @@ aspect FlatExpressions {
 						return cval.buildLiteral();
 					}
 				} catch (ConstantEvaluationException e) {
-					// In this case, simply don't inline value
+					// In this case, simply don't inline value if we aren't in a function
 					// TODO: Really? isn't this an error?
+					if (inFunction())
+						addConstToFunc = true;
+				}
+				if (addConstToFunc) {
+					// Add the constant array to the function and keep the access
+					functionConstantList().add(var);
+					FQName fqn = new FQName(var.getFQName());
+					FArraySubscripts fas = null;
+					if (ia.hasFArraySubscripts()) 
+						fas = ia.getFArraySubscripts().flatten(prefix);
+					fqn.setLastFArraySubscripts(fas);
+					return new FIdUseExp(fqn);
 				}
 			}
 		} 
@@ -1122,8 +1150,13 @@ aspect FlatExpressions {
 	 * \brief Get the list of constants that need to be added to the surrounding function.
 	 */
 	inh Set<InstAssignable> FInstAccessExp.functionConstantList();
-	eq InstClassDecl.getChild().functionConstantList() = localFunctionConstantList();
-	eq Root.getChild().functionConstantList() = null;
+	inh Set<InstAssignable> InstAssignable.functionConstantList();
+	eq InstClassDecl.getChild().functionConstantList()  = localFunctionConstantList();
+	eq InstAssignable.getChild().functionConstantList() = 
+		(temporarilyInFunction != null) ? 
+				temporarilyInFunction.localFunctionConstantList() : 
+				functionConstantList();
+	eq Root.getChild().functionConstantList()           = null;
 	
 	/**
 	 * \brief The list of constants that need to be added to this function.

@@ -780,6 +780,47 @@ end FunctionTests.FunctionBinding15;
 end FunctionBinding15;
 
 
+model FunctionBinding16
+    function f
+        input Real a = 1;
+        input Real b = a;
+        output Real c = a + b;
+    algorithm
+    end f;
+    
+    Real x = f();
+    Real y = f(x);
+    Real z = f(x,y);
+end FunctionBinding16;
+
+
+model FunctionBinding17
+    function f1
+        output Real a1;
+    algorithm
+        a1 := f2;
+    end f1;
+    
+    function f2
+        output Real a2 = 1;
+    algorithm
+    end f2;
+    
+    Real x = f1();
+end FunctionBinding17;
+
+
+model FunctionBinding18
+    function f
+        output Real a = 1;
+    algorithm
+    end f;
+   
+    Real x = f;
+end FunctionBinding18;
+
+
+
 model BadFunctionCall1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
       JModelica.UnitTesting.ErrorTestCase(name="BadFunctionCall1",

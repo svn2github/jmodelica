@@ -29,6 +29,8 @@ import java.util.LinkedHashSet;
 import java.io.*;
 import java.lang.reflect.Constructor;
 
+import org.jmodelica.util.NotNullPrintStream;
+
 /**
  * Abstract base class for code generation classes. 
  * 
@@ -186,7 +188,7 @@ public abstract class AbstractGenerator {
 	  throws FileNotFoundException {
 		try {
 			BufferedReader template = new BufferedReader(new FileReader(new File(templateFile)));
-			PrintStream output = new PrintStream(new File(outputFile), "UTF-8");
+			PrintStream output = new NotNullPrintStream(new File(outputFile), "UTF-8");
 			generate(template, output);
 			template.close();
 			output.close();

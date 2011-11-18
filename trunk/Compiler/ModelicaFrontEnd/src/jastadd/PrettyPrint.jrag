@@ -18,6 +18,8 @@ import java.io.PrintStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Collection;
 
+import org.jmodelica.util.NotNullPrintStream;
+
 
 	// superclass to all classes that perform the dispatch
 	class Printer {
@@ -81,7 +83,7 @@ aspect PrettyPrint {
 
 	public String ASTNode.prettyPrint(String indent) {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		PrintStream str = new PrintStream(os);
+		PrintStream str = new NotNullPrintStream(os);
 		prettyPrint(str, indent);
 		return os.toString();
 	}

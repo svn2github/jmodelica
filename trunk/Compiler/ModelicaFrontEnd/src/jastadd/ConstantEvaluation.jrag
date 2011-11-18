@@ -1087,6 +1087,7 @@ aspect ConstantEvaluation {
   eq InstFunctionCall.cevalArray(Index i) = cevalCalc();
   eq FInstAccessExp.cevalArray(Index i)   = isSlice() ? super.cevalArray(i) : cevalCalc();
   eq FIdUseExp.cevalArray(Index i)        = isSlice() ? super.cevalArray(i) : cevalCalc();
+  eq FIfExp.cevalArray(Index i)           = cevalSelectExp().cevalArray(i);
   
   /**
    * \brief Delegate attribute for ceval().
@@ -1129,13 +1130,15 @@ aspect ConstantEvaluation {
   eq FLtExp.cevalCalc()  = cevalType().lt(getLeft().ceval(), getRight().ceval());
   eq FLeqExp.cevalCalc() = cevalType().leq(getLeft().ceval(), getRight().ceval());
   
-  eq FIfExp.cevalCalc() {
+  eq FIfExp.cevalCalc() = cevalSelectExp().ceval();
+  
+  syn FExp FIfExp.cevalSelectExp() {
 	  if (getIfExp().ceval().booleanValue())
-		  return getThenExp().ceval();
+		  return getThenExp();
 	  for (FElseIfExp eie : getFElseIfExps())
 		  if (eie.getIfExp().ceval().booleanValue())
-			  return eie.getThenExp().ceval();
-	  return getElseExp().ceval();
+			  return eie.getThenExp();
+	  return getElseExp();
   }
   
   eq FRecordConstructor.cevalCalc() {

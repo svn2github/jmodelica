@@ -23,7 +23,7 @@ void jmi_transpose_matrix(jmi_array_t* arr, jmi_ad_var_t* src, jmi_ad_var_t* des
 	int i, j, tmp1, tmp2, k, n, dim;
 
 	n = arr->num_elems;
-	dim = sizeof(arr->size);
+	dim = arr->num_ndims;
 
 	for (i = 0; i < arr->n; i++) {
 		j = 0;

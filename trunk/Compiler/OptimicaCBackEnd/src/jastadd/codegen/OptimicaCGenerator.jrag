@@ -29,8 +29,6 @@ import java.io.*;
  */
 public class OptimicaCGenerator extends CADGenerator {
 
-	protected static final String INDENT = "    ";
-	
 	class OptTag_C_numFreeDependentParameters extends OptTag {
 		
 		public OptTag_C_numFreeDependentParameters(AbstractGenerator myGenerator, 
@@ -178,6 +176,8 @@ public class OptimicaCGenerator extends CADGenerator {
 		}
 	
 		public void generate(PrintStream genPrinter) {
+			for (FAbstractEquation e : foptclass.freeDependentParameterEquations()) 
+				e.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
 			int i=0;
 			for (FAbstractEquation e : foptclass.freeDependentParameterEquations()) {
 				e.genResidual_C(i, INDENT, genPrinter);				
@@ -195,9 +195,11 @@ public class OptimicaCGenerator extends CADGenerator {
 		}
 	
 		public void generate(PrintStream genPrinter) {
-			if (foptclass.objectiveExp()!=null) {
+			FExp obj = foptclass.objectiveExp();
+			if (obj != null) {
+				obj.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
 				genPrinter.print(INDENT + "(*res)[0] = ");
-				foptclass.objectiveExp().prettyPrint_C(genPrinter,"");
+				obj.prettyPrint_C(genPrinter,"");
 				genPrinter.print(";\n");
 			}
 		}
@@ -212,9 +214,11 @@ public class OptimicaCGenerator extends CADGenerator {
 		}
 	
 		public void generate(PrintStream genPrinter) {
-			if (foptclass.objectiveIntegrandExp()!=null) {
-				genPrinter.print("   (*res)[0] = ");
-				foptclass.objectiveIntegrandExp().prettyPrint_C(genPrinter,"");
+			FExp obj = foptclass.objectiveIntegrandExp();
+			if (obj != null) {
+				obj.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
+				genPrinter.print(INDENT + "(*res)[0] = ");
+				obj.prettyPrint_C(genPrinter,"");
 				genPrinter.print(";\n");
 			}
 		}
@@ -230,6 +234,8 @@ public class OptimicaCGenerator extends CADGenerator {
 		}
 	
 		public void generate(PrintStream genPrinter) {
+			for (FConstraint c : foptclass.pathEqConstraints()) 
+				c.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
 			int i=0;
 			for (FConstraintEq c : foptclass.pathEqConstraints()) {
 				c.genResidual_C(i, INDENT, genPrinter);				
@@ -247,6 +253,10 @@ public class OptimicaCGenerator extends CADGenerator {
 		}
 	
 		public void generate(PrintStream genPrinter) {
+			for (FConstraint c : foptclass.pathLeqConstraints()) 
+				c.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
+			for (FConstraint c : foptclass.pathGeqConstraints()) 
+				c.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
 			int i=0;
 			for (FConstraintLeq c : foptclass.pathLeqConstraints()) {
 				c.genResidual_C(i, INDENT, genPrinter);				
@@ -268,6 +278,8 @@ public class OptimicaCGenerator extends CADGenerator {
 		}
 	
 		public void generate(PrintStream genPrinter) {
+			for (FConstraint c : foptclass.pointEqConstraints()) 
+				c.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
 			int i=0;
 			for (FConstraintEq c : foptclass.pointEqConstraints()) {
 				c.genResidual_C(i, INDENT, genPrinter);				
@@ -285,6 +297,10 @@ public class OptimicaCGenerator extends CADGenerator {
 		}
 	
 		public void generate(PrintStream genPrinter) {
+			for (FConstraint c : foptclass.pointLeqConstraints()) 
+				c.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
+			for (FConstraint c : foptclass.pointGeqConstraints()) 
+				c.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
 			int i=0;
 			for (FConstraintLeq c : foptclass.pointLeqConstraints()) {
 				c.genResidual_C(i, INDENT, genPrinter);				
