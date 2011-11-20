@@ -298,7 +298,7 @@ class ModelDescription:
         
         # fill optimization
         self._fill_optimization(root)
-      
+              
     def _fill_attributes(self, root):
         """ 
         Set the Model Description attributes. 
@@ -5432,6 +5432,297 @@ class EnumParameter(Parameter):
         """
         self._attributes.update({'value':int(value)})
         self._element.set('value',str(value))
+        
+#===================== FMI 2.0 ========================================
+
+class ModelDescription2 (ModelDescription):
+    """
+    A class for storing the ModelDescription information in FMI 2.0.
+    """
+    
+    def _parse_element_tree(self, root):
+        """
+        Override the default _parse_element_tree function to handle
+        FMI 2.0 specific elements.
+        """
+        ModelDescription._parse_element_tree(self, root)
+    
+        # Build the ModelStructure data structures
+        self._fill_model_structure(root)
+        
+    def _fill_model_structure(self, root):
+        """ 
+        Create the model structure data structure and fill with 
+        data from the XML file.
+        """
+        self._model_structure_inputs = []
+        self._model_structure_inputs_dict = {}
+
+        self._model_structure_derivatives = []
+        self._model_structure_derivatives_dict = {}
+
+        self._model_structure_outputs = []
+        self._model_structure_outputs_dict = {}
+        
+        try:
+            e_modelstructure = root.find('ModelStructure')
+        except:
+            return
+        
+        inputs = e_modelstructure[0]
+        derivatives = e_modelstructure[1]
+        outputs = e_modelstructure[2]
+        
+        for e_input in inputs.getchildren():
+            inp = MSInput(e_input)
+            self._model_structure_inputs.append(inp)
+            self._model_structure_inputs_dict[inp.get_name()] = inp
+
+        for e_derivative in derivatives.getchildren():
+            deriv = MSDerivative(e_derivative)
+            self._model_structure_derivatives.append(deriv)
+            self._model_structure_derivatives_dict[deriv.get_name()] = deriv
+
+        for e_output in outputs.getchildren():
+            outp = MSOutput(e_output)
+            self._model_structure_outputs.append(outp)
+            self._model_structure_outputs_dict[outp.get_name()] = outp
+            
+            
+    def get_number_of_inputs(self):
+        """
+        Get the number of inputs.
+        
+        Returns::
+        
+            The number of inputs.
+        """
+        return len(self._model_structure_inputs)
+    
+    def get_number_of_continuous_inputs(self):
+        """
+        Get the number of continuous inputs.
+        
+        Returns::
+        
+            The number of continuous inputs.
+        """
+        return len(self.get_continous_inputs_value_references())
+    
+    def get_number_of_outputs(self):
+        """
+        Get the number of outputs.
+        
+        Returns::
+        
+            The number of outputs.
+        """
+        return len(self._model_structure_inputs)
+    
+    def get_number_of_continuous_outputs(self):
+        """
+        Get the number of continuous outputs.
+        
+        Returns::
+        
+            The number of continuous outputs.
+        """
+        return len(self.get_continous_outputs_value_references())
+            
+    def get_continous_outputs_value_references(self):
+        """
+        Get the value references of the of continuous outputs.
+        
+        Returns::
+        
+            A list of value references.
+        """    
+        yc_vrefs=[]        
+        for vv in self._model_structure_outputs:
+            v = self._model_variables_dict[vv.get_name()]
+            if v.get_variability()==CONTINUOUS:
+                yc_vrefs.append(v.get_value_reference())
+        return yc_vrefs
+
+    def get_continous_inputs_value_references(self):
+        """
+        Get the value references of the of continuous inputs.
+        
+        Returns::
+        
+            A list of value references.
+        """
+        uc_vrefs=[]        
+        for vv in self._model_structure_inputs:
+            v = self._model_variables_dict[vv.get_name()]
+            if v.get_variability()==CONTINUOUS:
+                uc_vrefs.append(v.get_value_reference())
+        return uc_vrefs
+
+    def get_state_dependency(self, variable):
+        """
+        Get the state dependencies of a particular derivative or
+        output variable.
+        
+        Returns::
+        
+            A list of state indices (0-indexing).
+        """
+        try:
+            v = self._model_structure_derivatives_dict[variable]
+            return v.get_state_dependency()
+        except:
+            try:
+                v = self._model_structure_outputs_dict[variable]
+                return v.get_state_dependency()
+            except:
+                raise Exception("No state dependency information is available for variable " + variable)
+
+    def get_input_dependency(self, variable):
+        """
+        Get the input dependencies of a particular derivative or
+        output variable.
+        
+        Returns::
+        
+            A list of input indices (0-indexing).
+        """
+
+        try:
+            v = self._model_structure_derivatives_dict[variable]
+            return v.get_input_dependency()
+        except:
+            try:
+                v = self._model_structure_outputs_dict[variable]
+                return v.get_input_dependency()
+            except:
+                raise Exception("No input dependency information is available for variable " + variable)
+
+
+class MSVariable:
+    """
+    Base class describing a variable in the ModelStructure section.
+    """
+    def __init__(self,element):
+        """
+        Constructor that takes an XML element as input.
+        """
+        self._name = element.attrib['name']
+
+    def get_name(self):
+        """
+        Get the name of the variable.
+        
+        Returns::
+        
+            The name of the variable.
+        """
+        return self._name
+
+class MSInput(MSVariable):
+    """
+    Class describing an input variable in the ModelStructure section.
+    """
+
+    pass
+    
+class MSDerivative(MSVariable):
+    """
+    Class describing a derivative variable in the ModelStructure section.
+    """
+    
+    def __init__(self,element):
+        """
+        Constructor taking an XML element as argument.
+        """
+        MSVariable.__init__(self, element)
+        try:
+            self._state_dependency = element.attrib['stateDependency'].split()  
+            for i in range(len(self._state_dependency)):
+                self._state_dependency[i] = int(self._state_dependency[i]) - 1
+        except:
+            self._state_dependency = []
+        try:
+            self._input_dependency = element.attrib['inputDependency'].split()      
+            for i in range(len(self._input_dependency)):
+                self._input_dependency[i] = int(self._input_dependency[i]) - 1            
+        except:
+            self._input_dependency = []      
+        
+    def get_state(self):
+        """
+        Get the name of the state corresponding to the derivative.
+        
+        Returns::
+        
+            The name of the state.
+        """
+        return self._state
+
+    def get_state_dependency(self):
+        """
+        Get the state dependency. The variable depends directly on
+        the states corresponding to the returned list of indices.
+        
+        Returns::
+        
+            A list of state indices.
+        """
+        return self._state_dependency
+
+    def get_input_dependency(self):
+        """
+        Get the input dependency. The variable depends directly on
+        the states corresponding to the returned list of indices.
+        
+        Returns::
+        
+            A list of input indices.
+        """
+        return self._input_dependency
+
+class MSOutput(MSVariable):
+    """
+    Class describing a derivative variable in the ModelStructure section.
+    """
+        
+    def __init__(self,element):
+        MSVariable.__init__(self, element)
+        try:
+            self._state_dependency = element.attrib['stateDependency'].split()  
+            for i in range(len(self._state_dependency)):
+                self._state_dependency[i] = int(self._state_dependency[i]) - 1
+        except:
+            self._state_dependency = []
+        try:
+            self._input_dependency = element.attrib['inputDependency'].split()      
+            for i in range(len(self._input_dependency)):
+                self._input_dependency[i] = int(self._input_dependency[i]) - 1            
+        except:
+            self._input_dependency = []      
+
+    def get_state_dependency(self):
+        """
+        Get the state dependency. The variable depends directly on
+        the states corresponding to the returned list of indices.
+        
+        Returns::
+        
+            A list of state indices.
+        """
+
+        return self._state_dependency
+
+    def get_input_dependency(self):
+        """
+        Get the input dependency. The variable depends directly on
+        the states corresponding to the returned list of indices.
+        
+        Returns::
+        
+            A list of input indices.
+        """
+        return self._input_dependency
         
 #=======================================================================
 

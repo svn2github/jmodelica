@@ -83,14 +83,18 @@ public class OptionRegistry {
 					"If this option is true (default is true), index reduction is performed."),
 			EQU_SORT    ("equation_sorting",          false, 
 					"If this option is true (default is false), equations are sorted using the BLT algorithm."),
-			XML_FMI_ME     ("generate_fmi_me_xml",          false, 
+			XML_FMI_ME ("generate_fmi_me_xml",          false, 
 					"If this option is true the model description part of the XML variables file " + 
 					"will be FMI for model exchange compliant. Default is false. To generate an XML which will " + 
 					"validate with FMI schema the option generate_xml_equations must also be false."),
-			XML_FMI_CS     ("generate_fmi_cs_xml",          false, 
-					"If this option is true the model description part of the XML variables file " + 
-					"will be FMI for co simulation compliant. Default is false. To generate an XML which will " + 
-					"validate with FMI schema the option generate_xml_equations must also be false."),
+			XML_FMI_CS ("generate_fmi_cs_xml",          false, 
+						"If this option is true the model description part of the XML variables file " + 
+						"will be FMI for co simulation compliant. Default is false. To generate an XML which will " + 
+						"validate with FMI schema the option generate_xml_equations must also be false."),
+			FMI_VER ("fmi_version",          1.0, 
+						"If this option is true the model description part of the XML variables file " + 
+						"will be FMI for co simulation compliant. Default is false. To generate an XML which will " + 
+						"validate with FMI schema the option generate_xml_equations must also be false."),
 			VAR_SCALE   ("enable_variable_scaling",   false, 
 					"If this option is true (default is false), then the \"nominal\" attribute will " + 
 					"be used to scale variables in the model."),

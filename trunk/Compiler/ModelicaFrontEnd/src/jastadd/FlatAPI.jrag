@@ -654,6 +654,9 @@ aspect FlatAPI {
  		this when isInput() && shouldContribute()
 	to FClass.inputs() for myFClass();
 
+	syn int FVariable.inputIndex() =
+		myFClass().inputs().indexOf(this);
+
 	syn int FClass.numRealInputs() = realInputs().size();
 	syn lazy ArrayList<FVariable> FClass.realInputs() =
       intersection(inputs(), reals());

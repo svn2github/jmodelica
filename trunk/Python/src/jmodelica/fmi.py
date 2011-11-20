@@ -34,6 +34,8 @@ from jmodelica import xmlparser
 from jmodelica.core import BaseModel, unzip_unit, get_unit_name, get_temp_location
 from jmodelica.compiler import _get_compiler
 
+import matplotlib.pyplot as plt
+
 int = N.int32
 N.int = N.int32
 
@@ -347,7 +349,7 @@ class FMUModel(BaseModel):
         self._load_c()
         
         # Parse XML
-        self._md = xmlparser.ModelDescription(self._tempdir+os.sep+self._tempxml)
+        self._parse_xml(self._tempdir+os.sep+self._tempxml)
          
         #Set model name
         self._modelname = self.get_name().replace('.','_')
@@ -423,6 +425,9 @@ class FMUModel(BaseModel):
         self._fmiHelperLogger = cFMILogger.pythonCallbacks
         
         
+    def _parse_xml(self, fname):
+            self._md = xmlparser.ModelDescription(self._tempdir+os.sep+self._tempxml)
+    
     def _load_xml(self):
         """
         Loads the XML information.
@@ -1892,6 +1897,9 @@ class FMUModel2(FMUModel):
     This class is still very experimental and is used for prototyping
     """
 
+    def _parse_xml(self, fname):
+            self._md = xmlparser.ModelDescription2(self._tempdir+os.sep+self._tempxml)
+
     def _set_fmimodel_typedefs(self):
         """
         Connects the FMU to Python by retrieving the C-function by use of ctypes. 
@@ -2035,6 +2043,73 @@ class FMUModel2(FMUModel):
 
         return (Ajac,Bjac,Cjac,Djac)
 
+    def get_partial_derivatives_incidence(self):
+        """
+        Get the sparsity patterns of the Jacobian matrices. The patterns
+        are returned in matrices where each row contains the row and column
+        indices (0-indexing) of the non-zero elements. One matrix is returned
+        for each of the Jacobians A, B, C, D.
+        
+        Returns::
+        
+            A tuple with four matrices containing the sparsity patterns
+            for A, B, C, and D respectively.
+        """
+        A_irow = []
+        A_icol = []
+        B_irow = []
+        B_icol = []
+        C_irow = []
+        C_icol = []
+        D_irow = []
+        D_icol = []
+        
+        irow = 0
+        for v in self._md._model_structure_derivatives:
+            for icol in v.get_state_dependency():
+                A_irow.append(irow)
+                A_icol.append(icol)
+            irow = irow + 1
+           
+        A_st = N.zeros((len(A_icol),2),dtype=int)
+        A_st[:,0] = A_irow
+        A_st[:,1] = A_icol
+        
+        irow = 0
+        for v in self._md._model_structure_derivatives:
+            for icol in v.get_input_dependency():
+                B_irow.append(irow)
+                B_icol.append(icol)
+            irow = irow + 1
+           
+        B_st = N.zeros((len(B_icol),2),dtype=int)
+        B_st[:,0] = B_irow
+        B_st[:,1] = B_icol
+
+        irow = 0
+        for v in self._md._model_structure_outputs:
+            for icol in v.get_state_dependency():
+                C_irow.append(irow)
+                C_icol.append(icol)
+            irow = irow + 1
+           
+        C_st = N.zeros((len(C_icol),2),dtype=int)
+        C_st[:,0] = C_irow
+        C_st[:,1] = C_icol
+
+        irow = 0
+        for v in self._md._model_structure_outputs:
+            for icol in v.get_input_dependency():
+                D_irow.append(irow)
+                D_icol.append(icol)
+            irow = irow + 1
+           
+        D_st = N.zeros((len(D_icol),2),dtype=int)
+        D_st[:,0] = D_irow
+        D_st[:,1] = D_icol
+
+        return (A_st,B_st,C_st,D_st)
+
     def get_jacobian(self, independents, dependents, jac):
         """
         Evaluate Jacobian(s) of the ODE 
@@ -2110,7 +2185,8 @@ class FMUModel2(FMUModel):
         if status != 0:
             raise FMUException('Failed to evaluate the directional derivative.')
 
-    def check_jacobians(self, delta_abs=1e-2, delta_rel=1e-6, tol=1e-3):
+    def check_jacobians(self, delta_abs=1e-2, delta_rel=1e-6, tol=1e-3, 
+                        plot_sparsity_check=False):
         """
         Check if the Jacobians are correct by means of finite differences.
         
@@ -2135,8 +2211,17 @@ class FMUModel2(FMUModel):
             tol --
                 Tolerance for detecting Jacobian errors. 
                 
+            plot_sparsity_check --
+                Generate plots for the sparsity patterns of the A, B, C, and D
+                matrices. A black 'x' indicates that this entry is present in 
+                the variable dependency information in the XML file. A red '+'
+                indicates that the corresponding entry is non-zero i the evaluated
+                Jacobian.
+                
         """
         A,B,C,D = self.get_partial_derivatives()
+        A_st,B_st,C_st,D_st = self.get_partial_derivatives_incidence()
+        
         nx = self._md.get_number_of_continuous_states()
         ncu = self._md.get_number_of_continuous_inputs()
         ncy = self._md.get_number_of_continuous_outputs()
@@ -2207,7 +2292,7 @@ class FMUModel2(FMUModel):
                     print "A[" + repr(i).rjust(3) + "," + repr(j).rjust(3) + \
                     "] - jac: " +"{0: e}".format(A[i,j]) + \
                     " - fd: " + "{0: e}".format(Afd[i,j]) + \
-                    " - err: " + "{0: e}".format(A[i,j]-Afd[i,j])  
+                    " - err: " + "{0: e}".format(A[i,j]-Afd[i,j])
                     n_err = n_err + 1
                     
 
@@ -2240,5 +2325,65 @@ class FMUModel2(FMUModel):
 
         print "Found " + repr(n_err) + " errors"
 
+        if plot_sparsity_check:
+            
+            h = plt.figure(1)
+            plt.clf()
+            h.gca().set_ylim((nx+1,0))
+            plt.plot(A_st[:,1]+1,A_st[:,0]+1,'kx')
+            plt.hold(True)
+
+            for i in range(nx):
+                for j in range(nx):
+                    if (N.abs(A[i,j])>1e-8):
+                        plt.plot(j+1,i+1,'r+')
+            plt.axis([0, nx+1, nx+1, 0])
+            
+            plt.show()
+
+            h = plt.figure(2)
+            plt.clf()
+            h.gca().set_ylim((nx+1,0))
+            plt.plot(B_st[:,1]+1,B_st[:,0]+1,'kx')
+            plt.hold(True)
+
+            for i in range(nx):
+                for j in range(ncu):
+                    if (N.abs(B[i,j])>1e-8):
+                        plt.plot(j+1,i+1,'r+')
+            plt.axis([0, ncu+1, nx+1, 0])
+            
+            plt.show()
+
+            h = plt.figure(3)
+            plt.clf()
+            h.gca().set_ylim((ncy+1,0))
+            plt.plot(C_st[:,1]+1,C_st[:,0]+1,'kx')
+            plt.hold(True)
+
+            for i in range(ncy):
+                for j in range(nx):
+                    if (N.abs(C[i,j])>1e-8):
+                        plt.plot(j+1,i+1,'r+')
+            plt.axis([0, nx+1, ncy+1, 0])
+            
+            plt.show()
+
+            h = plt.figure(4)
+            plt.clf()
+            h.gca().set_ylim((ncy+1,0))            
+            plt.plot(D_st[:,1]+1,D_st[:,0]+1,'kx')
+            plt.hold(True)
+
+            for i in range(ncy):
+                for j in range(ncu):
+                    if (N.abs(D[i,j])>1e-8):
+                        plt.plot(j+1,i+1,'r+')
+            plt.axis([0, ncu+1, ncy+1, 0])
+            
+            plt.show()
+
+ 
+            
         return Afd,Bfd,Cfd,Dfd
     

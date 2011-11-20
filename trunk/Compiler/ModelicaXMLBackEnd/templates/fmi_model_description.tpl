@@ -21,4 +21,5 @@
 	$XML_vendorAnnotations$	
 	<ModelVariables>$XML_variables$
 	</ModelVariables>
+	$XML_modelStructure$
 </fmiModelDescription>
