@@ -1340,6 +1340,26 @@ public class ModelicaCompiler {
 	}
 	
 	/**
+	 * Generate an output file.
+	 * 
+	 * @param fc    the FClass to generate code for
+	 * @param tmpl  the path to the template
+	 * @param gen   the code generator to use 
+	 * @param dir   the directory to put the output file in
+	 * @param name  the name of the output file
+	 */
+	private void generateFile(FClass fc, String tmpl, AbstractGenerator gen, File dir, String name) 
+			throws FileNotFoundException {
+		if (tmpl != null) {
+			hookCheckAbort();
+			hookCodeGeneratorCreated(gen);
+			String output = new File(dir, name).getPath();
+			gen.generate(tmpl, output);
+			log.debug("Generated file '" + output + "'.");
+		}
+	}
+	
+	/**
 	 * 
 	 * Generates XML and c code for a flattened model represented as an instance
 	 * of FClass using template files. The XML variables, XML values and c files
@@ -1356,28 +1376,12 @@ public class ModelicaCompiler {
 		log.info("Generating code...");
 		String name = fc.nameUnderscore();
 		
-		String output = null;
-		if (getXmlTpl(fc) != null) {
-			hookCheckAbort();
-			XMLGenerator xmlgenerator = createXMLGenerator(fc);
-			hookCodeGeneratorCreated(xmlgenerator);
-			output = new File(outDir, "modelDescription.xml").getPath();
-			xmlgenerator.generate(getXmlTpl(fc), output);
-		}
-		if (getXmlValuesTpl(fc) != null) {
-			hookCheckAbort();
-			XMLValueGenerator valuegenerator = createXMLValueGenerator(fc);
-			hookCodeGeneratorCreated(valuegenerator);
-			output = new File(resourceDir, name + "_values.xml").getPath();
-			valuegenerator.generate(getXmlValuesTpl(fc), output);
-		}
-		if (getCTemplatefile(fc) != null) {
-			hookCheckAbort();
-			CGenerator cgenerator = createCGenerator(fc);
-			hookCodeGeneratorCreated(cgenerator);
-			output = new File(sourceDir, name + ".c").getPath();
-			cgenerator.generate(getCTemplatefile(fc), output);
-		}
+		generateFile(fc, getXmlTpl(fc),        createXMLGenerator(fc), 
+				outDir,      "modelDescription.xml");
+		generateFile(fc, getXmlValuesTpl(fc),  createXMLValueGenerator(fc), 
+				resourceDir, name + "_values.xml");
+		generateFile(fc, getCTemplatefile(fc), createCGenerator(fc), 
+				sourceDir,   name + ".c");
 		
 		hookCodeGenerated(outDir);
 		log.debug("... code generated.");
@@ -1494,13 +1498,22 @@ public class ModelicaCompiler {
 	public static String getLogLevel(String logger) {
 		return getLogLevel(ModelicaLoggers.getLogger(logger));
 	}
+
+	private static String[] convertEnv(Map<String, String> envMap) {
+		String[] res = new String[envMap.size()];
+		int i = 0;
+		for (String key : envMap.keySet())
+			res[i++] = key + '=' + envMap.get(key);
+		return res;
+	}
 	
 	/**
 	 * Executes the given command as a separate process, writing any output to the logger.
 	 */
-	public static int loggedProcess(String[] cmd, String[] env, File workDir) {
+	public static int loggedProcess(String[] cmd, Map<String,String> env, File workDir) {
 		try {
-			Process proc = Runtime.getRuntime().exec(cmd, env, workDir);
+			String[] e = (env != null) ? convertEnv(env) : null;
+			Process proc = Runtime.getRuntime().exec(cmd, e, workDir);
 			
 			// Eat any output
             new StreamGobbler(proc.getErrorStream(), log.warningStream()).start();            
@@ -1982,17 +1995,30 @@ public class CompilationAbortedException extends RuntimeException {
 	}
 }
 
-public interface CCompilerDelegator {
+public abstract class CCompilerDelegator {
 	
-	public void compileCCode(String fileName, String target, File workDir, 
+	private Map<String, String> env = System.getenv();
+	
+	abstract public void compileCCode(String fileName, String target, File workDir, 
 			Set<String> ext_libs, Set<String> ext_lib_dirs, Set<String> ext_incl_dirs);
+	
+	/**
+	 * Set the environment to pass to any external processes.
+	 */
+	public void setEnv(Map<String, String> env) {
+		this.env = env;
+	}
+	
+	public Map<String, String> getEnv() {
+		return env;
+	}
 	
 }
 
 /**
  * Compiles DLL(s) from generated C code using make.
  */
-public class GccCompilerDelegator implements CCompilerDelegator {
+public class GccCompilerDelegator extends CCompilerDelegator {
 
     public GccCompilerDelegator() {}
 
@@ -2015,7 +2041,7 @@ public class GccCompilerDelegator implements CCompilerDelegator {
 	 */
 	protected String getMake(String platform) {
 		if (ModelicaCompiler.getPlatform().startsWith("win")) 
-			return new File(System.getenv("MINGW_HOME"), "bin/mingw32-make").getPath();
+			return new File(getEnv().get("MINGW_HOME"), "bin/mingw32-make").getPath();
 		else
 			return "make";
 	}
@@ -2027,9 +2053,9 @@ public class GccCompilerDelegator implements CCompilerDelegator {
 			Set<String> ext_libs, Set<String> ext_incl_dirs) {
 		vars.put("FILE_NAME", fileName);
 		vars.put("JMODELICA_HOME", jmodelicaHome);
-		vars.put("CPPAD_HOME", System.getenv("CPPAD_HOME"));
-		vars.put("IPOPT_HOME", System.getenv("IPOPT_HOME"));
-		vars.put("SUNDIALS_HOME", System.getenv("SUNDIALS_HOME"));
+		vars.put("CPPAD_HOME", getEnv().get("CPPAD_HOME"));
+		vars.put("IPOPT_HOME", getEnv().get("IPOPT_HOME"));
+		vars.put("SUNDIALS_HOME", getEnv().get("SUNDIALS_HOME"));
 		vars.put("EXT_LIBS", varFromList(ext_libs));
 		vars.put("EXT_INC_DIRS", varFromList(ext_incl_dirs));
 	}
@@ -2039,7 +2065,7 @@ public class GccCompilerDelegator implements CCompilerDelegator {
 	 */
 	protected void addBuildPlatformMakeVars(Map<String,String> vars, String platform) {
 		if (platform.startsWith("win")) {
-			File mingw_bin = new File(System.getenv("MINGW_HOME"), "bin");
+			File mingw_bin = new File(getEnv().get("MINGW_HOME"), "bin");
 			vars.put("CXX", new File(mingw_bin, "g++").getPath());
 			vars.put("AR", new File(mingw_bin, "ar").getPath());
 		}
@@ -2084,7 +2110,7 @@ public class GccCompilerDelegator implements CCompilerDelegator {
 			for (String arg : vArgs)
 				cmd[i++] = arg;
 			
-			if (ModelicaCompiler.loggedProcess(cmd, null, workDir) != 0) {
+			if (ModelicaCompiler.loggedProcess(cmd, getEnv(), workDir) != 0) {
 				File sourceDir = new File(workDir, "sources");
 				File cfile = new File(sourceDir, fileName+".c");
 				throw new CcodeCompilationException("Compilation of generated C code failed.\n" +
