@@ -936,6 +936,10 @@ aspect CADCodeGen {
 			n.genVarDecls_CAD(ASTNode.printer_CAD, str, indent);
 	}
 	
+	protected void SolvedScalarBlock.genVarDecls_CAD(PrintStream str, String indent) {
+		solution().genVarDecls_CAD(ASTNode.printer_CAD, str, indent);
+	}
+	
 	public void BLT.genOdeDerivativeBlocks_CAD(PrintStream str) {
 		int block_counter = 0;
 		for (AbstractEquationBlock block : this) {
@@ -946,7 +950,7 @@ aspect CADCodeGen {
 		}
 	}
 	
-	public void StructuredBLT.genVarDecls_CAD(PrintStream str, String indent) {
+	public void BLT.genVarDecls_CAD(PrintStream str, String indent) {
 		for (AbstractEquationBlock eb : getAllBlocks())
 			eb.genVarDecls_CAD(str, indent);
 	}

@@ -1330,6 +1330,10 @@ aspect CCodeGen {
 			n.genVarDecls_C(ASTNode.printer_C, str, indent);
 	}
 	
+	protected void SolvedScalarBlock.genVarDecls_C(PrintStream str, String indent) {
+		solution().genVarDecls_C(ASTNode.printer_C, str, indent);
+	}
+	
 	public ArrayList<ASTNode> AbstractEquationBlock.blockResidualNodes_C() {
 		ArrayList<ASTNode> res = new ArrayList<ASTNode>(blockResidualVariables_C());
 		res.addAll(blockResidualEquations_C());
@@ -1787,7 +1791,11 @@ aspect CCodeGen {
 		}
 	}
 	
-	public void StructuredBLT.genVarDecls_C(PrintStream str, String indent) {
+	public ArrayList<AbstractEquationBlock> BLT.getAllBlocks() {
+		return this;
+	}
+	
+	public void BLT.genVarDecls_C(PrintStream str, String indent) {
 		for (AbstractEquationBlock eb : getAllBlocks())
 			eb.genVarDecls_C(str, indent);
 	}
