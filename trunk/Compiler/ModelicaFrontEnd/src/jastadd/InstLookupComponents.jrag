@@ -252,6 +252,9 @@ aspect InstLookupComponents {
 	eq InstDot.myInstComponentDecl()                            = getRight().myInstComponentDecl();
 	eq InstGlobalAccess.myInstComponentDecl()                   = getInstAccess().myInstComponentDecl();
 	
+	syn InstComponentDecl InstAccess.topInstComponentDecl() = myInstComponentDecl();
+	eq InstDot.topInstComponentDecl()                       = getLeft().myInstComponentDecl();
+	
 }
 
 aspect LookupInstComponentsInModifications {

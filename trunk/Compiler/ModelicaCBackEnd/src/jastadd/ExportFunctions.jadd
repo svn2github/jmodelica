@@ -181,6 +181,7 @@ aspect ExportFunctions {
 		String name = name_C();
 		str.format("%s%s_obj.var = %sp;\n", ind, name, name);
 		str.format("%s%s_obj.size = %s_size;\n", ind, name, name);
+		str.format("%s%s_obj.num_dims = %d;\n", ind, name, ndims());
 		str.format("%s%s_obj.num_elems = 1", ind, name);
 		for (int i = 0; i < ndims(); i++)
 			str.format(" * %s%d", name, i);

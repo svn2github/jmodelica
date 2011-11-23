@@ -825,10 +825,14 @@ aspect InstanceErrorCheck {
 		}
 	}
 	
+	inh boolean FArraySubscripts.myAccessExists();
+	eq Root.getChild().myAccessExists()       = false;
+	eq InstAccess.getChild().myAccessExists() = !myInstComponentDecl().isUnknown();
+	
 	public void FArraySubscripts.collectErrors() {
 		// Should this check be in the access instead?
 		int ndims = mySize().ndims();
-		if (getNumFSubscript() > ndims && !isInstComponentSize()) {
+		if (getNumFSubscript() > ndims && !isInstComponentSize() && myAccessExists()) {
 			// TODO: shouldn't this check for to few as well? (no [] or all dimensions given)
 			error("Too many array subscripts for access: " + getNumFSubscript() + 
 					" subscripts given, component has " + mySize().ndims() + " dimensions");

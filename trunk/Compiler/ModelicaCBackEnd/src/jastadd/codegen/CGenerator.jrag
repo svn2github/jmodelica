@@ -782,7 +782,8 @@ public class CGenerator extends GenericGenerator {
 					}
 					out.print(" };\n");
 					
-					out.format("DllExport %s __stdcall %s(char* name, ", type, name);
+					String sep = first.myInputs().isEmpty() ? "" : ", "; 
+					out.format("DllExport %s __stdcall %s(char* name%s", type, name, sep);
 					first.exportWrapperArgumentDecl_C(out);
 					out.print(") {\n");
 					out.format("%sint i, j;\n", ind);

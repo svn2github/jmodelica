@@ -1527,6 +1527,51 @@ end NameTests.ConstantLookup31.NameTests.ConstantLookup31.ConstantLookup31_m;
 end ConstantLookup31;
 
 
+model ConstantLookup32
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ConstantLookup32",
+         description="Package constants in functions for complex accesses",
+         flatModel="
+fclass NameTests.ConstantLookup32
+ parameter Integer j = 1 /* 1 */;
+ Real y = NameTests.ConstantLookup32.f(j);
+
+ function NameTests.ConstantLookup32.f
+  input Integer i;
+  output Real x;
+  NameTests.ConstantLookup32.A[2] d := {NameTests.ConstantLookup32.A(3),NameTests.ConstantLookup32.A(4)};
+ algorithm
+  x := d[i].b;
+  return;
+ end NameTests.ConstantLookup32.f;
+
+ record NameTests.ConstantLookup32.A
+  Real b;
+ end NameTests.ConstantLookup32.A;
+end NameTests.ConstantLookup32;
+")})));
+
+    record A
+        Real b;
+    end A;
+    
+    package C
+        constant A[2] d = { A(3), A(4) };
+    end C;
+    
+    function f
+        input Integer i;
+        output Real x;
+    algorithm
+        x := C.d[i].b;
+    end f;
+    
+    parameter Integer j = 1;
+    Real y = f(j);
+end ConstantLookup32;
+
+
 
 class ExtendsTest1
      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
@@ -2122,6 +2167,21 @@ end NameTests.ShortClassDeclTest8;
  Modelica.Blocks.Interfaces.RealInput u2;
 
 end ShortClassDeclTest8;
+
+
+model ShortClassDeclTest9
+    package B = A1;
+    
+    package A2
+        function f
+            output Real x = 1;
+        algorithm
+        end f;
+    end A2;
+    
+    Real y = B.f();
+end ShortClassDeclTest9;
+
 
 
 model DerTest1
