@@ -231,6 +231,7 @@ DllExport double func_ExportFunctions_ArrayInputs1_f2_export(double* y_ap, int y
     jmi_array_t* y_a = &y_a_obj;
     y_a_obj.var = y_ap;
     y_a_obj.size = y_a_size;
+    y_a_obj.num_dims = 1;
     y_a_obj.num_elems = 1 * y_a0;
     y_a_size[0] = y_a0;
     func_ExportFunctions_ArrayInputs1_f2_def(y_a, &w_v);
@@ -244,6 +245,7 @@ DllExport double func_ExportFunctions_ArrayInputs1_f1_export(double* x_ap, int x
     jmi_array_t* x_a = &x_a_obj;
     x_a_obj.var = x_ap;
     x_a_obj.size = x_a_size;
+	x_a_obj.num_dims = 1;
     x_a_obj.num_elems = 1 * x_a0;
     x_a_size[0] = x_a0;
     func_ExportFunctions_ArrayInputs1_f1_def(x_a, &z_v);
@@ -301,6 +303,7 @@ DllExport double func_ExportFunctions_ArrayInputs2_f2_export(double* y_ap, int y
     jmi_array_t* y_a = &y_a_obj;
     y_a_obj.var = y_ap;
     y_a_obj.size = y_a_size;
+	y_a_obj.num_dims = 2;
     y_a_obj.num_elems = 1 * y_a0 * y_a1;
     y_a_size[0] = y_a0;
     y_a_size[1] = y_a1;
@@ -315,6 +318,7 @@ DllExport double func_ExportFunctions_ArrayInputs2_f1_export(double* x_ap, int x
     jmi_array_t* x_a = &x_a_obj;
     x_a_obj.var = x_ap;
     x_a_obj.size = x_a_size;
+	x_a_obj.num_dims = 2;
     x_a_obj.num_elems = 1 * x_a0 * x_a1;
     x_a_size[0] = x_a0;
     x_a_size[1] = x_a1;
