@@ -114,10 +114,10 @@ public class OptionRegistry {
 			GEN_HTML_DIAG ("generate_html_diagnostics", false, 
 					"When this option is set to true (default is false) model diagnostics is generated in HTML format. " +
 			        "This includes the flattened model, connection sets, alias sets and BLT form."), 
-			EXPORT_FUNCS ("export_functions", false, 
+			EXPORT_FUNCS ("export_functions", true, 
 					"Export used Modelica functions to generated C code in a manner that is compatible with the " +
 					"external C interface in the Modelica Language Specification (default is false)"),
-			EXPORT_FUNCS_VBA ("export_functions_vba", false, 
+			EXPORT_FUNCS_VBA ("export_functions_vba", true, 
 					"Create VBA-compatible wrappers for exported functions (default is false). Requires export_functions");
 						
 			public String key;

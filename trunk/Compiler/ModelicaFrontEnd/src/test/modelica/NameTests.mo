@@ -1572,6 +1572,64 @@ end NameTests.ConstantLookup32;
 end ConstantLookup32;
 
 
+model ConstantLookup33
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.FlatteningTestCase(
+         name="ConstantLookup33",
+         description="",
+         flatModel="
+fclass NameTests.ConstantLookup33
+ parameter Integer j = 1 /* 1 */;
+ Real y = NameTests.ConstantLookup33.f(j);
+
+ function NameTests.ConstantLookup33.f
+  input Integer i;
+  output Real x;
+  NameTests.ConstantLookup33.D.A[2] d := {NameTests.ConstantLookup33.C.E.A(3),NameTests.ConstantLookup33.C.E.A(4)};
+ algorithm
+  x := d[i].b;
+  return;
+ end NameTests.ConstantLookup33.f;
+
+ record NameTests.ConstantLookup33.C.E.A
+  Real b;
+ end NameTests.ConstantLookup33.C.E.A;
+
+ record NameTests.ConstantLookup33.D.A
+  Real b;
+ end NameTests.ConstantLookup33.D.A;
+end NameTests.ConstantLookup33;
+")})));
+
+	package D
+	    record A
+	        Real b;
+	    end A;
+	end D;
+	
+	package F
+		constant D.A[2] d;
+	end F;
+    
+    package C 
+		package E = D;
+		constant E.A g = E.A(3);
+		constant E.A h = E.A(4);
+        extends F(d = { g, h });
+    end C;
+    
+    function f
+        input Integer i;
+        output Real x;
+    algorithm
+        x := C.d[i].b;
+    end f;
+    
+    parameter Integer j = 1;
+    Real y = f(j);
+end ConstantLookup33;
+
+
 
 class ExtendsTest1
      annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={

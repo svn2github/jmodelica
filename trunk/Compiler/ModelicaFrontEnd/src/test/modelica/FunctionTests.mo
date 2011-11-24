@@ -3643,6 +3643,14 @@ fclass FunctionTests.ArrayOutputScalarization11
 equation
  x = FunctionTests.ArrayOutputScalarization11.f2();
 
+ function FunctionTests.ArrayOutputScalarization11.f1
+  output Real[2] x;
+ algorithm
+  x[1] := 1;
+  x[2] := 2;
+  return;
+ end FunctionTests.ArrayOutputScalarization11.f1;
+
  function FunctionTests.ArrayOutputScalarization11.f2
   output Real x;
   Real[2] temp_1;
@@ -3654,14 +3662,6 @@ equation
   x := y[1];
   return;
  end FunctionTests.ArrayOutputScalarization11.f2;
-
- function FunctionTests.ArrayOutputScalarization11.f1
-  output Real[2] x;
- algorithm
-  x[1] := 1;
-  x[2] := 2;
-  return;
- end FunctionTests.ArrayOutputScalarization11.f1;
 end FunctionTests.ArrayOutputScalarization11;
 ")})));
 
@@ -3692,6 +3692,14 @@ fclass FunctionTests.ArrayOutputScalarization12
 equation
  x = FunctionTests.ArrayOutputScalarization12.f2();
 
+ function FunctionTests.ArrayOutputScalarization12.f1
+  output Real[2] x;
+ algorithm
+  x[1] := 1;
+  x[2] := 2;
+  return;
+ end FunctionTests.ArrayOutputScalarization12.f1;
+
  function FunctionTests.ArrayOutputScalarization12.f2
   output Real x;
   Real[2] temp_1;
@@ -3703,14 +3711,6 @@ equation
   x := y[1];
   return;
  end FunctionTests.ArrayOutputScalarization12.f2;
-
- function FunctionTests.ArrayOutputScalarization12.f1
-  output Real[2] x;
- algorithm
-  x[1] := 1;
-  x[2] := 2;
-  return;
- end FunctionTests.ArrayOutputScalarization12.f1;
 end FunctionTests.ArrayOutputScalarization12;
 ")})));
 
@@ -3741,6 +3741,14 @@ fclass FunctionTests.ArrayOutputScalarization13
 equation
  x = FunctionTests.ArrayOutputScalarization13.f2();
 
+ function FunctionTests.ArrayOutputScalarization13.f1
+  output Real[2] x;
+ algorithm
+  x[1] := 1;
+  x[2] := 2;
+  return;
+ end FunctionTests.ArrayOutputScalarization13.f1;
+
  function FunctionTests.ArrayOutputScalarization13.f2
   output Real x;
   Real[2] temp_1;
@@ -3751,14 +3759,6 @@ equation
   x := y;
   return;
  end FunctionTests.ArrayOutputScalarization13.f2;
-
- function FunctionTests.ArrayOutputScalarization13.f1
-  output Real[2] x;
- algorithm
-  x[1] := 1;
-  x[2] := 2;
-  return;
- end FunctionTests.ArrayOutputScalarization13.f1;
 end FunctionTests.ArrayOutputScalarization13;
 ")})));
 

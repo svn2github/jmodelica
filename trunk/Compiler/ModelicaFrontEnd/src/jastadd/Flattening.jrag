@@ -66,8 +66,8 @@ aspect Flattening {
      * \brief Find functions, record and enumeration declarations that need to be flattened.
      */
 	public void ASTNode.flattenUsedFuncsAndEnums(FClass fc) {
-		for (int i = 0; i < getNumChild(); i++) 
-			getChild(i).flattenUsedFuncsAndEnums(fc);
+		for (ASTNode n : this) 
+			n.flattenUsedFuncsAndEnums(fc);
 	}
     
     public void InstNode.flattenUsedFuncsAndEnums(FClass fc) {
@@ -89,6 +89,22 @@ aspect Flattening {
 	public void FRecordConstructor.flattenUsedFuncsAndEnums(FClass fc) {
 		getRecord().flattenMyRecord(fc);
 		getArgs().flattenUsedFuncsAndEnums(fc);
+	}
+	
+	public void InstRecord.flattenUsedFuncsAndEnums(FClass fc) {
+		super.flattenUsedFuncsAndEnums(fc);
+		getClassName().myInstClassDecl().flattenRecord(fc);
+	}
+	
+	public void FInstAccessExp.flattenUsedFuncsAndEnums(FClass fc) {
+		super.flattenUsedFuncsAndEnums(fc);
+		InstAccess ia = getInstAccess();
+		if (ia.isAssignable()) {
+			InstAssignable var = (InstAssignable) ia.myInstComponentDecl();
+			// If this access will be inlined
+			if (var.isConstant() && !ia.hasUnknownIndices()) 
+				var.flattenUsedFuncsAndEnums(fc);
+		}
 	}
 	
 	public void InstClassAccess.flattenUsedFuncsAndEnums(FClass fc) {
@@ -280,6 +296,8 @@ aspect Flattening {
 			InstClassDecl old = temporarilyInFunction;
 			temporarilyInFunction = func;
 			FExp e = flattenBindingFExp();
+			if (hasInstValueMod())
+				getBindingFExp().flattenUsedFuncsAndEnums(fc);
 			Opt eo = (e == null) ? new Opt() : new Opt(e);
 			FQName fqn = new FQName(getFQName());
 			fqn.setLastFArraySubscripts(null);
