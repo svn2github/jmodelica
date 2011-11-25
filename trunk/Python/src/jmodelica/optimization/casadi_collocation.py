@@ -24,17 +24,7 @@ import codecs
 from operator import itemgetter
 import time
 import copy
-try:
-    try:
-        from IPython.Debugger import Tracer; dh = Tracer()
-    except ImportError:
-        try:
-            from IPython.core.debugger import Tracer; dh = Tracer()
-        except:
-            logging.warning('Could not find IPython debugger module')
-except AttributeError:
-    # Circumvents trouble when running the tests through MSYS
-    pass
+import types
     
 try:
     import casadi
@@ -46,7 +36,7 @@ import numpy as N
 from jmodelica.optimization.polynomial import *
 from jmodelica import xmlparser
 from jmodelica.io import VariableNotFoundError
-from jmodelica.core import TrajectoryLinearInterpolation
+from jmodelica.core import TrajectoryLinearInterpolation, TrajectoryUserFunction
 
 class CasadiCollocatorException(Exception):
     """
@@ -596,25 +586,113 @@ class CasadiCollocator(object):
 
 class ParameterEstimationData:
     
-    """This needs to be documented!"""
+    """
+    Data used to define the cost function for parameter estimation problems.
+    
+    Parameters::
+    
+        Q --
+            Weighting matrix.
+            
+            Type: rank 2 ndarray
+        
+        measured_variables --
+            List of the names of the measured variables.
+            
+            Type: list of strings
+        
+        data --
+            Object containing the measurement data.
+            
+            If data is a function, it should take a time point as its argument
+            and return an array where element j contains the measured value
+            of measured_variables[j] at the given time point.
+            
+            If data is a matrix,
+            data[i][0] should contain measurement point i and
+            data[i][j] should contain the measured value of
+            measured_variables[j] at measurement point i.
+            
+            Type: function or rank 2 ndarray
+        
+        discrete --
+            Whether to perform discrete or continuous parameter estimation.
+            
+            NOTE: Discrete parameter estimation is not yet supported!
+            
+            Continuous parameter estimation uses the cost function
+            
+            .. math::
+            
+                f = \int_{t_0}^{t_f} (y(t) - y_m(t)) \cdot Q \cdot
+                (y(t) - y_m(t))\,\mathrm{d}t,
+            
+            where y is a function created by gluing together the collocation
+            polynomials for the measured variables at all the mesh points and
+            y_m is a function providing the measured values given time. If the
+            parameter data is a matrix, the data is linearly interpolated to
+            create the y_m function. If data is a function, then this function
+            defines y_m.
+            
+            Discrete parameter estimation uses the cost function
+            
+            .. math::
+            
+                f = \sum_{i = 1}^{n_m} (y(t_i) - y_m(t_i)) \cdot
+                Q \cdot y(t_i) - y_m(t_i),
+            
+            where y is the optimized values of the measured variables and
+            y_m is the measured values of the measured variables. This option
+            requires the parameter data to be a matrix. It is also required
+            that each measurement point coincides with either a collocation
+            point or a mesh point.
+            
+            Type: bool
+            Default: False
+        
+        eps --
+            In the case of discrete parameter estimation, the measurement point
+            t is considered to coincide with the collocation or mesh point v
+            if and only if |t - v| / (t_f - t_0) < eps.
+            
+            Type: float
+            Default: 1e-5
+    """
 
-    def __init__(self,Q,measured_variables,data):
+    def __init__(self, Q, measured_variables, data, discrete=False, eps=1e-5):
         self.Q = Q
         self.measured_variables = measured_variables
-        self.data = data
-        
-class FreeElementLengthData:
+        self.discrete = discrete
+        if isinstance(data, types.FunctionType):
+            if discrete:
+                raise ValueError("Parameter data must be a matrix if " +
+                                 "parameter discrete is True.")
+            else:
+                self.data = TrajectoryUserFunction(data)
+        else:
+            if discrete:
+                self.data = data
+                raise NotImplementedError("Discrete parameter estimation is " +
+                                          "not yet supported!")
+            else:
+                self.data = TrajectoryLinearInterpolation(data[:, 0],
+                                                          data[:, 1:])
+        self.eps = eps
+
+class FreeElementLengthsData:
     
     """
     Data used to control the element lengths when they are free.
     
     The objective function f is adjusted to penalize large element lengths for
-    elements with high state derivatives in the following way:
+    elements with high state derivatives, resulting in the modified objective
+    function \hat{f} defined as follows:
     
     .. math::
         
-        f += c \cdot \sum_{i = 1}^{n_e} \left(h_i^p \cdot \int_{t_i}^{t_{i+1}}
-        \dot{x}^T(t) \cdot Q \cdot \dot{x}(t)\,dt
+        \hat{f} = f + c \cdot \sum_{i = 1}^{n_e} \left(h_i^p \cdot 
+        \int_{t_i}^{t_{i+1}} \dot{x}^T(t) \cdot Q \cdot
+        \dot{x}(t)\,\mathrm{d}t\right).
     """
     
     def __init__(self, c, Q, bounds=(0.7, 1.3), a=1.):
@@ -720,6 +798,7 @@ class RadauCollocator(CasadiCollocator):
                     self.vars[i][k]['dx'] = []
                     self.vars[i][k]['u'] = []
                     self.vars[i][k]['w'] = []
+        
         # Group variables indices in the global
         # variable vector
         self.var_indices = {}
@@ -890,8 +969,7 @@ class RadauCollocator(CasadiCollocator):
 
         else:
 
-            data = TrajectoryLinearInterpolation(self.parameter_estimation_data.data[:,0], 
-                                                 self.parameter_estimation_data.data[:,1:])
+            data = self.parameter_estimation_data.data
             self.cost = 0
             for i in range(1,n_e+1):
                 for k in range(1,n_cp+1):
@@ -1928,64 +2006,66 @@ class Radau2Collocator(CasadiCollocator):
             self.cost = self.cost_mayer + self.cost_lagrange
         else:
             # Interpolate the parameter estimation data
-            data = TrajectoryLinearInterpolation(
-                    self.parameter_estimation_data.data[:, 0], 
-                    self.parameter_estimation_data.data[:, 1:])
-                    
-            # Create base cost function
-            self.cost = 0
+            data = self.parameter_estimation_data.data
             
-            # Variable reference maps
-            x_vr = copy.deepcopy(self.model.get_x_vr_map())
-            x_vr['var_name'] = 'x'
-            x_vr['sf'] = self.model.get_x_sf()
-            w_vr = copy.deepcopy(self.model.get_w_vr_map())
-            w_vr['var_name'] = 'w'
-            w_vr['sf'] = self.model.get_w_sf()
-            u_vr = copy.deepcopy(self.model.get_u_vr_map())
-            u_vr['var_name'] = 'u'
-            u_vr['sf'] = self.model.get_u_sf()
-            
-            # Map of maps
-            maps_map = {}
-            for v_map in [x_vr, w_vr, u_vr]:
-                for key in v_map.keys():
-                    maps_map[key] = v_map
-            
-            # Create nested dictionary for storage of errors and calculate
-            # reference values
-            err = {}
-            y_ref = {}
-            for i in range(1, self.n_e + 1):
-                err[i] = {}
-                y_ref[i] = {}
-                for k in range(1, self.n_cp + 1):
-                    err[i][k] = []
-                    y_ref[i][k] = data.eval(self.time_points[i][k])[0, :]
-            
-            # Calculate errors
-            measured_variables = \
-                    self.parameter_estimation_data.measured_variables
-            for j in xrange(len(measured_variables)):
-                val_ref = self.model.xmldoc.get_value_reference(
-                        measured_variables[j])
+            if self.parameter_estimation_data.discrete:
+                raise NotImplementedError("Discrete parameter estimation is " +
+                                          "not yet supported.")
+            else:
+                # Create base cost function
+                self.cost = 0
+                
+                # Variable reference maps
+                x_vr = copy.deepcopy(self.model.get_x_vr_map())
+                x_vr['var_name'] = 'x'
+                x_vr['sf'] = self.model.get_x_sf()
+                w_vr = copy.deepcopy(self.model.get_w_vr_map())
+                w_vr['var_name'] = 'w'
+                w_vr['sf'] = self.model.get_w_sf()
+                u_vr = copy.deepcopy(self.model.get_u_vr_map())
+                u_vr['var_name'] = 'u'
+                u_vr['sf'] = self.model.get_u_sf()
+                
+                # Map of maps
+                maps_map = {}
+                for v_map in [x_vr, w_vr, u_vr]:
+                    for key in v_map.keys():
+                        maps_map[key] = v_map
+                
+                # Create nested dictionary for storage of errors and calculate
+                # reference values
+                err = {}
+                y_ref = {}
                 for i in range(1, self.n_e + 1):
+                    err[i] = {}
+                    y_ref[i] = {}
                     for k in range(1, self.n_cp + 1):
-                        v_map = maps_map[val_ref]
-                        l = v_map[val_ref]
-                        val = self.var[i][k][v_map['var_name']][l]
-                        sf = v_map['sf'][l]
-                        ref_val = y_ref[i][k][j]
-                        err[i][k].append(sf * val - ref_val)
-            
-            # Calculate cost contribution from each collocation point
-            Q = self.parameter_estimation_data.Q
-            for i in range(1, self.n_e + 1):
-                h_i = self.horizon * self.h[i]
-                for k in range(1, self.n_cp + 1):
-                    err_i_k = N.array(err[i][k])
-                    integrand = N.dot(N.dot(err_i_k, Q), err_i_k)
-                    self.cost += (h_i * integrand * self.pol.w[k])
+                        err[i][k] = []
+                        y_ref[i][k] = data.eval(self.time_points[i][k])[0, :]
+                
+                # Calculate errors
+                measured_variables = \
+                        self.parameter_estimation_data.measured_variables
+                for j in xrange(len(measured_variables)):
+                    val_ref = self.model.xmldoc.get_value_reference(
+                            measured_variables[j])
+                    for i in range(1, self.n_e + 1):
+                        for k in range(1, self.n_cp + 1):
+                            v_map = maps_map[val_ref]
+                            l = v_map[val_ref]
+                            val = self.var[i][k][v_map['var_name']][l]
+                            sf = v_map['sf'][l]
+                            ref_val = y_ref[i][k][j]
+                            err[i][k].append(sf * val - ref_val)
+                
+                # Calculate cost contribution from each collocation point
+                Q = self.parameter_estimation_data.Q
+                for i in range(1, self.n_e + 1):
+                    h_i = self.horizon * self.h[i]
+                    for k in range(1, self.n_cp + 1):
+                        err_i_k = N.array(err[i][k])
+                        integrand = N.dot(N.dot(err_i_k, Q), err_i_k)
+                        self.cost += (h_i * integrand * self.pol.w[k])
         
         # Add cost term for free element lengths
         if self.hs == "free":

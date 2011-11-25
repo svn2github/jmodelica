@@ -2340,7 +2340,7 @@ class CasadiRadau2Options(OptionBase):
             
             Type: None, list of floats or string
             Default: None
-            
+        
         free_element_lengths_data --
             Data used for optimizing the element lengths if they are free.
             Should be None if and only if hs != "free".
@@ -2394,9 +2394,9 @@ class CasadiRadau2Options(OptionBase):
             collocation points.
             
             "element_interpolation": The values of the variable trajectories
-            are calculated by evaluating the collocation interpolation
-            polynomials. The algorithm option n_evaluation_points is used to
-            specify the evaluation points within each finite element.
+            are calculated by evaluating the collocation polynomials. The
+            algorithm option n_evaluation_points is used to specify the
+            evaluation points within each finite element.
             
             Type: str
             Default: "collocation_points"
@@ -2413,16 +2413,31 @@ class CasadiRadau2Options(OptionBase):
         
         blocking_factors --
             The list of blocking factors, where each element corresponds to the
-            number of elements for which the control profile should be
+            number of elements for which all the control profiles should be
             constant. For example, if blocking_factor == [2, 1, 5], then
             u_0 = u_1 and u_3 = u_4 = u_5 = u_6 = u_7. The sum of all elements
             in the list must be the same as the number of elements.
             
-            If blocking_facotrs is None, then Lagrange polynomials are instead
-            used to represent the control.
+            If blocking_factors is None, then the usual collocation polynomials
+            are instead used to represent the controls.
             
             Type: None or list of ints
             Default: None
+        
+        quadrature_constraint --
+            Whether to use quadrature continuity constraints. This option is
+            only applicable when using Gauss collocation. It is incompatible
+            with eliminate_der_var set to True.
+            
+            True: Quadrature is used to get the values of the states at the
+            mesh points.
+            
+            False: The Lagrange basis polynomials for the state collocation
+            polynomials are evaluated to get the values of the states at the
+            mesh points.
+            
+            Type: bool
+            Default: True
         
         eliminate_der_var --
             True: The variables representing the derivatives are eliminated
@@ -2432,9 +2447,6 @@ class CasadiRadau2Options(OptionBase):
             
             False: The variables representing the derivatives are kept as NLP
             variables and the collocation equations enter as constraints.
-            
-            Currently does not work in combination with Mayer type cost
-            functions.
             
             Type: bool
             Default: False
@@ -2458,21 +2470,6 @@ class CasadiRadau2Options(OptionBase):
             Type: bool
             Default: False
         
-        quadrature_constraint --
-            Whether to use quadrature continuity constraints. This option is
-            only applicable when using Gauss collocation. It is incompatible
-            with eliminate_der_var set to True.
-            
-            True: Quadrature is used to get the values of the states at the
-            mesh points.
-            
-            False: The Lagrange basis polynomials for the state collocation
-            polynomials are evaluated to get the values of the states at the
-            mesh points.
-            
-            Type: bool
-            Default: True
-        
         init_traj --
             Variable trajectory data used for initialization of the
             optimization problem.
@@ -2488,12 +2485,12 @@ class CasadiRadau2Options(OptionBase):
             Default: None
         
         exact_hessian --
-            If True, the exact Hessian of the Lagrangian function is used.
+            True: The Hessian of the Lagrangian function is obtained via CasADi
+            and supplied to Ipopt.
             
-            Exact Hessians is currently not fully supported by CasADi for MX
-            graphs, see https://sourceforge.net/apps/trac/casadi/ticket/164.
-            It works, but it's inefficient and will lead to very slow
-            initialization times.
+            False: Ipopt uses a Quasi-Newton method.
+            
+            WARNING: exact_hessian is very slow in combination with MX graphs.
             
             Type: bool
             Default: True
@@ -2504,7 +2501,7 @@ class CasadiRadau2Options(OptionBase):
         >>> opts['n_e'] = 100
         
     In addition, CasADi options can be provided in the options
-    CasADi_options_F, CasADi_options_G and CasADi_options_L for the NLP
+    casadi_options_f, casadi_options_g and casadi_options_l for the NLP
     objective, constraint and Lagrangian functions respectively. For a complete
     list of CasADi options, please consult the CasADi documentation.
     
@@ -2520,7 +2517,7 @@ class CasadiRadau2Options(OptionBase):
     
     IPOPT options can be provided in the option IPOPT_options. For 
     a complete list of IPOPT options, please consult the IPOPT documentation 
-    available at http://www.coin-or.org/Ipopt/documentation/).
+    available at http://www.coin-or.org/Ipopt/documentation/.
 
     Some commonly used IPOPT options are provided by default::
 
@@ -2528,7 +2525,7 @@ class CasadiRadau2Options(OptionBase):
            Maximum number of iterations.
            
            Type: int
-           Default: 3000
+           Default: 2000
                       
         derivative_test --
            Check the correctness of the NLP derivatives. Valid values are 
@@ -2555,9 +2552,9 @@ class CasadiRadau2Options(OptionBase):
                 'result_mode': "collocation_points",
                 'n_eval_points': 20,
                 'blocking_factors': None,
+                'quadrature_constraint': True,
                 'eliminate_der_var': False,
                 'eliminate_cont_var': False,
-                'quadrature_constraint': True,
                 'init_traj': None,
                 'parameter_estimation_data': None,
                 'exact_Hessian': True,

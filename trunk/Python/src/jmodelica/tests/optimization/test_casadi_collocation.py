@@ -36,18 +36,6 @@ except NameError, ImportError:
     pass
     #logging.warning('Could not load Casadi collocation. Check jmodelica.check_packages()')
 
-try:
-    try:
-        from IPython.Debugger import Tracer; dh = Tracer()
-    except ImportError:
-        try:
-            from IPython.core.debugger import Tracer; dh = Tracer()
-        except:
-            logging.warning('Could not find IPython debugger module')
-except AttributeError:
-    # Circumvents trouble when running the tests through MSYS
-    pass
-
 path_to_mos = os.path.join(get_files_path(), 'Modelica')
 
 def assert_results(res, cost_ref, u_norm_ref,
@@ -221,7 +209,12 @@ class TestRadau2:
     
     @testattr(casadi = True)
     def test_parameter_estimation(self):
-        """Test a parameter estimation example with and without scaling."""
+        """
+        Test a parameter estimation example with and without scaling.
+        
+        WARNING: This test is very slow when using the linear solver MUMPS for
+        Ipopt.
+        """
         model_unscaled = self.model_second_order
         model_scaled = self.model_second_order_scaled
         
@@ -323,7 +316,7 @@ class TestRadau2:
         c = 0.5
         Q = N.eye(3)
         bounds = (0.5, 2.0)
-        free_ele_data = FreeElementLengthData(c, Q, bounds)
+        free_ele_data = FreeElementLengthsData(c, Q, bounds)
         
         # Set options shared by both result modes
         opts = model.optimize_options(self.algorithm)
@@ -651,14 +644,11 @@ class TestRadau2:
         opts = model.optimize_options(self.algorithm)
         opts['CasADi_options_G']['numeric_jacobian'] = True
         res = model.optimize(self.algorithm, opts)
-        sol_with = res.times['sol']
         assert_results(res, cost_ref, u_norm_ref)
         
         # numeric_jacobian = False
         opts['CasADi_options_G']['numeric_jacobian'] = False
         res = model.optimize(self.algorithm, opts)
-        sol_without = res.times['sol']
-        nose.tools.assert_true(sol_without < 0.95 * sol_with)
         assert_results(res, cost_ref, u_norm_ref)
 
 class TestPseudoSpectral:
