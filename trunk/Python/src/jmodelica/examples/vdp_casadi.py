@@ -1,7 +1,7 @@
 #!/usr/bin/env python 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2010 Modelon AB
+# Copyright (C) 2011 Modelon AB
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,43 +28,42 @@ from jmodelica.casadi_interface import CasadiModel
 
 def run_demo(with_plots=True):
     """
-    Demonstrate how to solve a dynamic optimization problem based on a Van der 
-    Pol oscillator system.
+    Demonstrate how to optimize a Van der Pol oscillator using CasadiRadau2.
     """
+    # Compile and load model
     curr_dir = os.path.dirname(os.path.abspath(__file__));
-
-    jn = compile_fmux("VDP_pack.VDP_Opt2", curr_dir+"/files/VDP.mop")
-
+    jn = compile_fmux("VDP_pack.VDP_Opt2", curr_dir + "/files/VDP.mop")
     model = CasadiModel(jn)
-
-    opts = model.optimize_options()
-    #opts['IPOPT_options']['derivative_test'] = 'second-order'
-    opts['n_e'] = 50
-
-    res = model.optimize(options=opts)
+    
+    # Set algorithm options
+    opts = model.optimize_options(algorithm="LocalDAECollocationAlg")
+    opts['graph'] = "SX"
+    
+    # Optimize
+    res = model.optimize(algorithm="LocalDAECollocationAlg", options=opts)
     
     # Extract variable profiles
-    x1   = res['x1']
-    x2   = res['x2']
-    u    = res['u']
+    x1 = res['x1']
+    x2 = res['x2']
+    u = res['u']
     time = res['time']
     
+    # Plot
     if with_plots:
-        # Plot
         plt.figure(1)
         plt.clf()
-        plt.subplot(311)
-        plt.plot(time,x1)
+        plt.subplot(3, 1, 1)
+        plt.plot(time, x1)
         plt.grid()
         plt.ylabel('x1')
         
-        plt.subplot(312)
-        plt.plot(time,x2)
+        plt.subplot(3, 1, 2)
+        plt.plot(time, x2)
         plt.grid()
         plt.ylabel('x2')
         
-        plt.subplot(313)
-        plt.plot(time,u)
+        plt.subplot(3, 1, 3)
+        plt.plot(time, u)
         plt.grid()
         plt.ylabel('u')
         plt.xlabel('time')
@@ -72,4 +71,3 @@ def run_demo(with_plots=True):
 
 if __name__ == "__main__":
     run_demo()
-

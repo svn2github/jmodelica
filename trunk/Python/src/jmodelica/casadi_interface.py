@@ -14,9 +14,11 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 """
-Module containing the Casadi interface Python wrappers.
+Module containing the CasADi interface Python wrappers.
 """
+
 import os.path
 import numpy as N
 
@@ -73,7 +75,7 @@ class CasadiModel(object):
         algorithm = getattr(algdrive, algorithm)
         return algorithm.get_default_options()
     
-    def optimize_options(self, algorithm='CasadiRadau'):
+    def optimize_options(self, algorithm='LocalDAECollocationAlg'):
         """
         Returns an instance of the optimize options class containing options 
         default values. If called without argument then the options class for 
@@ -83,9 +85,9 @@ class CasadiModel(object):
         
             algorithm --
                 The algorithm for which the options class should be returned. 
-                Possible values are: 'CasadiRadau', 'CasadiRadau2',
+                Possible values are: 'LocalDAECollocationAlg' and
                 'CasadiPseudoSpectral'
-                Default: 'CasadiRadau'
+                Default: 'LocalDAECollocationAlg'
                 
         Returns::
         
@@ -94,7 +96,7 @@ class CasadiModel(object):
         return self._default_options(algorithm)    
     
     def optimize(self, 
-                 algorithm='CasadiRadau', 
+                 algorithm='LocalDAECollocationAlg', 
                  options={}):
         """
         Solve an optimization problem.
@@ -110,14 +112,11 @@ class CasadiModel(object):
                 custom algorithms and to use them with this function.
 
                 The following algorithms are available:
-                - 'CasadiRadau'. This algorithm is based 
-                  on direct collocation on finite elements and the algorithm 
-                  IPOPT is used to obtain a numerical solution to the problem.
-                - 'CasadiRadau2'. This algorithm is a new version of
-                  CasadiRadau with more features. It is currently under heavy
-                  development and is thus less stable than its predecessor.
+                - 'LocalDAECollocationAlg'. This algorithm is based on direct
+                  collocation on finite elements and the algorithm IPOPT is
+                  used to obtain a numerical solution to the problem.
                 - 'CasadiPseudoSpectral'
-                Default: 'CasadiRadau'
+                Default: 'LocalDAECollocationAlg'
                 
             options -- 
                 The options that should be used in the algorithm. The options
@@ -132,7 +131,7 @@ class CasadiModel(object):
                   values. An empty dict will thus give all options with default
                   values.
                 - An Options object for the corresponding algorithm, e.g.
-                  CasadiRadauOptions for CasadiRadau.
+                  LocalDAECollocationAlgOptions for LocalDAECollocationAlg.
                 Default: Empty dict
             
         Returns::

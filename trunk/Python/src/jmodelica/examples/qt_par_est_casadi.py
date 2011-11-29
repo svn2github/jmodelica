@@ -28,7 +28,7 @@ from jmodelica.core import TrajectoryLinearInterpolation
 
 from jmodelica.fmi import compile_fmux
 
-from jmodelica.optimization.casadi_collocation import RadauCollocator, ParameterEstimationData
+from jmodelica.optimization.casadi_collocation import ParameterEstimationData
 from jmodelica.casadi_interface import CasadiModel
 
 def run_demo(with_plots=True):
@@ -170,9 +170,8 @@ def run_demo(with_plots=True):
     #opts['IPOPT_options']['derivative_test'] = 'second-order'
     #opts['IPOPT_options']['max_iter'] = 0
 
-    res = model_casadi.optimize(options = opts)
-
-    collocator = RadauCollocator(model_casadi, options = opts)
+    res = model_casadi.optimize(algorithm="LocalDAECollocationAlg",
+                                options=opts)
 
     # Load state profiles
     x1_opt = res["qt.x1"]

@@ -28,8 +28,7 @@ __all__ = [
     'lagrange_cost', 'fmi_bouncing_ball_native', 'fmi_bouncing_ball', 
     'robertson', 'qt_par_est','qt_par_est_casadi', 'extfunctions', 'fmu_with_input','crystallizer',
     'distillation_fmu','extFunctions_arrays','extFunctions_matrix',
-    'vdp_casadi', 'vdp_casadi_ps', 'vdp_casadi_radau2', 'cstr_casadi',
-    'cstr_casadi_radau2', 'qt_par_est_dfo', 'leadtransport',
+    'vdp_casadi', 'vdp_casadi_ps', 'cstr_casadi', 'qt_par_est_dfo', 'leadtransport',
     'multiple_nl_systems','furuta_dfo','simulation_with_input_function',
     'fmu_with_input_function', 'hohmann_transfer',
     'mechanical_rotational_examples_coupled_clutches']

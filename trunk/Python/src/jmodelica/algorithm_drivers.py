@@ -1693,7 +1693,7 @@ class CasadiPseudoSpectral(AlgorithmBase):
         Parameters::
               
             model -- 
-                jmodelica.jmi.CasadiModel model object
+                jmodelica.casadi_interface.CasadiModel model object
 
             options -- 
                 The options that should be used by the algorithm. For 
@@ -1809,6 +1809,7 @@ class CasadiPseudoSpectral(AlgorithmBase):
         return CasadiPseudoSpectralOptions()
 
 class CasadiPseudoSpectralOptions(OptionBase):
+    
     """
     Options for optimizing JMU models using a collocation algorithm. 
 
@@ -1909,6 +1910,7 @@ class CasadiPseudoSpectralOptions(OptionBase):
         >>> opts['IPOPT_options']['max_iter'] = 200
 
     """
+    
     def __init__(self, *args, **kw):
         _defaults= {
             'n_e':1, 
@@ -1934,223 +1936,38 @@ class CasadiPseudoSpectralOptions(OptionBase):
 
 class CasadiPseudoSpectralResult(JMResultBase):
     pass
-class CasadiRadauResult(JMResultBase):
-    pass
 
-class CasadiRadauOptions(OptionBase):
-    """
-    Options for optimizing JMU models using a collocation algorithm. 
-
-    Collocation algorithm options::
-    
-        n_e --
-            Number of phases of the finite element mesh.
-            Default: 50
-            
-        n_cp --
-            Number of collocation points in each element.
-            Default: 3
-
-        init_traj --
-            Variable trajectory data used for initialization of the optimization 
-            problem. The data is represented by an object of the type 
-            jmodelica.io.DymolaResultTextual.
-            Default: None
-
-    Options are set by using the syntax for dictionaries::
-
-        >>> opts = my_model.optimize_options()
-        >>> opts['n_e'] = 100
-        
-    In addition, IPOPT options can be provided in the option IPOPT_options. For 
-    a complete list of IPOPT options, please consult the IPOPT documentation 
-    available at http://www.coin-or.org/Ipopt/documentation/).
-
-    Some commonly used IPOPT options are provided by default::
-
-        max_iter --
-           Maximum number of iterations.
-           Default: 3000
-                      
-        derivative_test --
-           Check the correctness of the NLP derivatives. Valid values are 
-           'none', 'first-order', 'second-order', 'only-second-order'.
-           Default: 'none'
-
-    IPOPT options are set using the syntax for dictionaries::
-
-        >>> opts['IPOPT_options']['max_iter'] = 200
-
-    """
-    def __init__(self, *args, **kw):
-        _defaults= {
-            'n_e':50, 
-            'n_cp':3,
-            'init_traj':None,
-            'parameter_estimation_data':None,
-            'IPOPT_options':{'max_iter':1000,
-                             'derivative_test':'none'}
-            }
-        super(CasadiRadauOptions,self).__init__(_defaults)
-        # for those key-value-sets where the value is a dict, don't 
-        # overwrite the whole dict but instead update the default dict 
-        # with the new values
-        self._update_keep_dict_defaults(*args, **kw)
-
-
-class CasadiRadau(AlgorithmBase):
-    """
-    The algorithm is based on orthogonal collocation and relies on the solver 
-    IPOPT for solving a non-linear programming problem. 
-    """
-    
-    def __init__(self, 
-                 model, 
-                 options):
-        """
-        Create a CasadiRadau algorithm.
-        
-        Parameters::
-              
-            model -- 
-                jmodelica.jmi.casadiModel model object
-
-            options -- 
-                The options that should be used by the algorithm. For 
-                details on the options, see:
-                
-                * model.optimize_options('CasadiRadauOptions')
-                
-                or look at the docstring with help:
-                
-                * help(jmodelica.algorithm_drivers.CasadiRadauOptions)
-                
-                Valid values are: 
-                - A dict that overrides some or all of the default values
-                  provided by CasadiRadauOptions. An empty
-                  dict will thus give all options with default values.
-                - A CasadiRadauOptions object.
-        """
-        self.model = model
-        
-        # handle options argument
-        if isinstance(options, dict) and not \
-            isinstance(options, CasadiRadauOptions):
-            # user has passed dict with options or empty dict = default
-            self.options = CasadiRadauOptions(options)
-        elif isinstance(options, CasadiRadauOptions):
-            # user has passed CasadiPseudoSpectralOptions instance
-            self.options = options
-        else:
-            raise InvalidAlgorithmOptionException(options)
-
-        # set options
-        self._set_options()
-            
-        if not casadi_present:
-            raise Exception(
-                'Could not find CasADi. Check jmodelica.check_packages()')
-        
-        self.nlp = RadauCollocator(model, self.options)
-            
-        # set solver options
-        self._set_solver_options()
-
-        if self.init_traj!=None:
-            self.nlp.set_initial_from_file(self.init_traj) 
-        
-    def _set_options(self):
-        """ 
-        Helper function that sets options for the CasadiRadau 
-        algorithm.
-        """
-        self.n_e = self.options['n_e']
-        self.n_cp = self.options['n_cp']
-        if self.n_cp != 3:
-            raise NotImplementedError("CasadiRadau currently only " + \
-                    "supports 3 collocation points.")
-                    
-        self.init_traj = self.options['init_traj']
-        self.parameter_estimation_data = self.options['parameter_estimation_data']
-        
-        # solver options
-        self.solver_options = self.options['IPOPT_options']
-        
-    def _set_solver_options(self):
-        """ 
-        Helper function that sets options for the solver.
-        """
-        for k, v in self.solver_options.iteritems():
-            self.nlp.set_ipopt_option(k, v)
-            
-    def solve(self):
-        """ 
-        Solve the optimization problem using ipopt solver. 
-        """
-        self.nlp.ipopt_solve()
-        
-    def get_result(self):
-        """ 
-        Write result to file, load result data and create an 
-        CollocationLagrangePolynomialsResult object.
-        
-        Returns::
-        
-            The CasadiRadauResult object.
-        """
-        self.nlp.export_result_dymola()
-            
-        # result file name
-        #resultfile = self.result_args['file_name']
-        #if not resultfile:
-        resultfile=self.model.get_name()+'_result.txt'
-        
-        # load result file
-        res = ResultDymolaTextual(resultfile)
-        
-        # create and return result object
-        return CasadiRadauResult(self.model, 
-            resultfile, self.nlp, res, self.options)
-        
-    @classmethod
-    def get_default_options(cls):
-        """ 
-        Get an instance of the options class for the CasadiRadau algorithm,
-        prefilled with default values. (Class method.)
-        """
-        return CasadiRadauOptions()
-
-class CasadiRadau2(AlgorithmBase):
+class LocalDAECollocationAlg(AlgorithmBase):
     
     """
     The algorithm is based on orthogonal collocation and relies on the solver 
-    IPOPT for solving a non-linear programming problem.
+    IPOPT for solving the arising non-linear programming problem.
     """
     
     def __init__(self, model, options):
         """
-        Create a CasadiRadau2 algorithm.
+        Create a LocalDAECollocationAlg algorithm.
         
         Parameters::
               
             model -- 
-                jmodelica.jmi.casadiModel model object
+                jmodelica.casadi_interface.CasadiModel model object
 
             options -- 
                 The options that should be used by the algorithm. For 
                 details on the options, see:
                 
-                * model.optimize_options('CasadiRadau2Options')
+                * model.optimize_options('LocalDAECollocationAlgOptions')
                 
                 or look at the docstring with help:
                 
-                * help(jmodelica.algorithm_drivers.CasadiRadau2Options)
+                * help(jmodelica.algorithm_drivers.LocalDAECollocationAlgOptions)
                 
                 Valid values are: 
                 - A dict that overrides some or all of the default values
-                  provided by CasadiRadauOptions. An empty
+                  provided by LocalDAECollocationAlgOptions. An empty
                   dict will thus give all options with default values.
-                - A CasadiRadau2Options object.
+                - A LocalDAECollocationAlgOptions object.
         """
         self.t0 = time.clock()
         self.model = model
@@ -2158,9 +1975,9 @@ class CasadiRadau2(AlgorithmBase):
         # handle options argument
         if isinstance(options, dict):
             # user has passed dict with options or empty dict = default
-            self.options = CasadiRadau2Options(options)
-        elif isinstance(options, CasadiRadau2Options):
-            # user has passed CasadiRadau2Options instance
+            self.options = LocalDAECollocationAlgOptions(options)
+        elif isinstance(options, LocalDAECollocationAlgOptions):
+            # user has passed LocalDAECollocationAlgOptions instance
             self.options = options
         else:
             raise InvalidAlgorithmOptionException(options)
@@ -2172,7 +1989,7 @@ class CasadiRadau2(AlgorithmBase):
             raise Exception(
                     'Could not find CasADi. Check jmodelica.check_packages()')
         
-        self.nlp = Radau2Collocator(model, self.options)
+        self.nlp = LocalDAECollocator(model, self.options)
             
         # set solver options
         self._set_solver_options()
@@ -2281,11 +2098,11 @@ class CasadiRadau2(AlgorithmBase):
     def get_result(self):
         """ 
         Write result to file, load result data and create a 
-        CasadiRadau2Result object.
+        LocalDAECollocationAlgResult object.
         
         Returns::
         
-            The CasadiRadau2Result object.
+            The LocalDAECollocationAlgResult object.
         """
         self.nlp.export_result_dymola()
         
@@ -2297,18 +2114,18 @@ class CasadiRadau2(AlgorithmBase):
         h_opt = self.nlp.get_h_opt()
         
         # Create and return result object
-        return CasadiRadau2Result(self.model, resultfile, self.nlp, res,
+        return LocalDAECollocationAlgResult(self.model, resultfile, self.nlp, res,
                                   self.options, self.times, h_opt)
         
     @classmethod
     def get_default_options(cls):
         """ 
-        Get an instance of the options class for the CasadiRadau2 algorithm,
+        Get an instance of the options class for the LocalDAECollocationAlg algorithm,
         prefilled with default values. (Class method.)
         """
-        return CasadiRadau2Options()
+        return LocalDAECollocationAlgOptions()
     
-class CasadiRadau2Options(OptionBase):
+class LocalDAECollocationAlgOptions(OptionBase):
     
     """
     Options for optimizing JMU models using a collocation algorithm. 
@@ -2565,10 +2382,10 @@ class CasadiRadau2Options(OptionBase):
                         'max_iter': 2000,
                         'derivative_test': 'none'}}
         
-        super(CasadiRadau2Options, self).__init__(_defaults)
+        super(LocalDAECollocationAlgOptions, self).__init__(_defaults)
         self._update_keep_dict_defaults(*args, **kw)
 
-class CasadiRadau2Result(JMResultBase):
+class LocalDAECollocationAlgResult(JMResultBase):
     
     """
     A JMResultBase object with the additional attributes times and h_opt.
@@ -2599,7 +2416,7 @@ class CasadiRadau2Result(JMResultBase):
     
     def __init__(self, model=None, result_file_name=None, solver=None, 
                  result_data=None, options=None, times=None, h_opt=None):
-        super(CasadiRadau2Result, self).__init__(model, result_file_name,
+        super(LocalDAECollocationAlgResult, self).__init__(model, result_file_name,
                                                  solver, result_data, options)
         self.times = times
         self.h_opt = h_opt

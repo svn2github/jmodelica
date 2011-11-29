@@ -34,7 +34,7 @@ try:
     from jmodelica.casadi_interface import CasadiModel
 except NameError, ImportError:
     pass
-    #logging.warning('Could not load Casadi collocation. Check jmodelica.check_packages()')
+    #logging.warning('Could not load casadi_collocation. Check jmodelica.check_packages()')
 
 path_to_mos = os.path.join(get_files_path(), 'Modelica')
 
@@ -47,47 +47,10 @@ def assert_results(res, cost_ref, u_norm_ref,
     N.testing.assert_allclose(cost, cost_ref, cost_rtol)
     N.testing.assert_allclose(u_norm, u_norm_ref, u_norm_rtol)
 
-class TestRadau:
+class TestLocalDAECollocator:
     
     """
-    Tests jmodelica.optimization.casadi_collocation.RadauCollocator.
-    """
-    
-    @classmethod
-    def setUpClass(cls):
-        """Compile the test models."""
-        file_path = os.path.join(get_files_path(), 'Modelica', 'VDP.mop')
-        class_path = "VDP_pack.VDP_Opt2"
-        compile_fmux(class_path, file_path)
-        
-    def setUp(self):
-        """Load the test models."""
-        FMUX_VDP = 'VDP_pack_VDP_Opt2.fmux'
-        self.model_VDP = CasadiModel(FMUX_VDP)
-    
-    @testattr(casadi = True)
-    def test_VDP(self):
-        """Test optimizing the VDP using default options."""
-        opts = self.model_VDP.optimize_options(algorithm="CasadiRadau")
-        res = self.model_VDP.optimize(algorithm="CasadiRadau", options=opts)
-        assert_results(res, 2.3469089e1, 2.872384555575e-1)
-        
-    @testattr(casadi = True)
-    def test_init_traj(self):
-        """Test optimizing the VDP based on an existing optimization reult."""
-        opts = self.model_VDP.optimize_options(algorithm="CasadiRadau")
-        opts['n_e'] = 30
-        opts['n_cp'] = 3
-        res = self.model_VDP.optimize(algorithm="CasadiRadau", options=opts)
-        
-        opts['n_e'] = 100
-        opts['init_traj'] = ResultDymolaTextual("VDP_pack_VDP_Opt2_result.txt")
-        res = self.model_VDP.optimize(algorithm="CasadiRadau", options=opts)
-
-class TestRadau2:
-    
-    """
-    Tests jmodelica.optimization.casadi_collocation.Radau2Collocator.
+    Tests jmodelica.optimization.casadi_collocation.LocalDAECollocator.
     
     The models used for testing are based on the VDP oscillator, CSTR and a
     custom second order system.
@@ -127,40 +90,40 @@ class TestRadau2:
     
     def setUp(self):
         """Load the test models."""
-        FMUX_VDP_bounds_Lagrange = 'VDP_pack_VDP_Opt_Bounds_Lagrange.fmux'
-        self.model_VDP_bounds_Lagrange = CasadiModel(FMUX_VDP_bounds_Lagrange)
+        fmux_vdp_bounds_lagrange = 'VDP_pack_VDP_Opt_Bounds_Lagrange.fmux'
+        self.model_vdp_bounds_lagrange = CasadiModel(fmux_vdp_bounds_lagrange)
         
-        FMUX_VDP_bounds_Mayer = 'VDP_pack_VDP_Opt_Bounds_Mayer.fmux'
-        self.model_VDP_bounds_Mayer = CasadiModel(FMUX_VDP_bounds_Mayer)
+        fmux_vdp_bounds_mayer = 'VDP_pack_VDP_Opt_Bounds_Mayer.fmux'
+        self.model_vdp_bounds_mayer = CasadiModel(fmux_vdp_bounds_mayer)
         
-        FMUX_VDP_constraints_Mayer = 'VDP_pack_VDP_Opt_Constraints_Mayer.fmux'
-        self.model_VDP_constraints_Mayer = CasadiModel(
-                FMUX_VDP_constraints_Mayer)
+        fmux_vdp_constraints_mayer = 'VDP_pack_VDP_Opt_Constraints_Mayer.fmux'
+        self.model_vdp_constraints_mayer = CasadiModel(
+                fmux_vdp_constraints_mayer)
         
-        FMUX_VDP_initial_equations = 'VDP_pack_VDP_Opt_Initial_Equations.fmux'
-        self.model_VDP_initial_equations = CasadiModel(
-                FMUX_VDP_initial_equations)
+        fmux_vdp_initial_equations = 'VDP_pack_VDP_Opt_Initial_Equations.fmux'
+        self.model_vdp_initial_equations = CasadiModel(
+                fmux_vdp_initial_equations)
         
-        FMUX_CSTR_Lagrange = "CSTR_CSTR_Opt_Bounds_Lagrange.fmux"
-        self.model_CSTR_Lagrange = CasadiModel(FMUX_CSTR_Lagrange)
-        self.model_CSTR_scaled_Lagrange = CasadiModel(
-                FMUX_CSTR_Lagrange, enable_scaling=True, scale_equations=False)
-        self.model_CSTR_scaled_equations_Lagrange = CasadiModel(
-                FMUX_CSTR_Lagrange, enable_scaling=True, scale_equations=True)
+        fmux_cstr_lagrange = "CSTR_CSTR_Opt_Bounds_Lagrange.fmux"
+        self.model_cstr_lagrange = CasadiModel(fmux_cstr_lagrange)
+        self.model_cstr_scaled_lagrange = CasadiModel(
+                fmux_cstr_lagrange, enable_scaling=True, scale_equations=False)
+        self.model_cstr_scaled_equations_lagrange = CasadiModel(
+                fmux_cstr_lagrange, enable_scaling=True, scale_equations=True)
         
-        FMUX_CSTR_Mayer = "CSTR_CSTR_Opt_Bounds_Mayer.fmux"
-        self.model_CSTR_Mayer = CasadiModel(FMUX_CSTR_Mayer)
+        fmux_cstr_mayer = "CSTR_CSTR_Opt_Bounds_Mayer.fmux"
+        self.model_cstr_mayer = CasadiModel(fmux_cstr_mayer)
         
-        FMUX_second_order = "ParEst_ParEstCasADi.fmux"
-        self.model_second_order = CasadiModel(FMUX_second_order)
-        self.model_second_order_scaled = CasadiModel(FMUX_second_order,
+        fmux_second_order = "ParEst_ParEstCasADi.fmux"
+        self.model_second_order = CasadiModel(fmux_second_order)
+        self.model_second_order_scaled = CasadiModel(fmux_second_order,
                                                      enable_scaling=True)
-        self.algorithm = "CasadiRadau2"
+        self.algorithm = "LocalDAECollocationAlg"
     
     @testattr(casadi = True)
     def test_init_traj(self):
         """Test optimizing based on an existing optimization reult."""
-        model = self.model_VDP_bounds_Lagrange
+        model = self.model_vdp_bounds_lagrange
         
         # References values
         cost_ref = 3.19495079586595e0
@@ -182,29 +145,29 @@ class TestRadau2:
         assert_results(res, cost_ref, u_norm_ref, 5e-2, 5e-2)
         
     @testattr(casadi = True)
-    def test_CSTR(self):
+    def test_cstr(self):
         """
         Test optimizing the CSTR.
         
         Tests both a Mayer cost with Gauss collocation and a Lagrange cost with
         Radau collocation.
         """
-        Mayer_model = self.model_CSTR_Mayer
-        Lagrange_model = self.model_CSTR_Lagrange
+        mayer_model = self.model_cstr_mayer
+        lagrange_model = self.model_cstr_lagrange
         
         # References values
         cost_ref = 1.8576873858261e3
         u_norm_ref = 3.0526018951367553e2
         
         # Mayer
-        opts = Mayer_model.optimize_options(self.algorithm)
+        opts = mayer_model.optimize_options(self.algorithm)
         opts['discr'] = "LG"
-        res = Mayer_model.optimize(self.algorithm, opts)
+        res = mayer_model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
         
         # Lagrange
         opts['discr'] = "LGR"
-        res = Lagrange_model.optimize(self.algorithm, opts)
+        res = lagrange_model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=5e-3)
     
     @testattr(casadi = True)
@@ -255,7 +218,7 @@ class TestRadau2:
     @testattr(casadi = True)
     def test_path_constraints(self):
         """Test a simple path constraint with and without exact Hessian."""
-        model = self.model_VDP_constraints_Mayer
+        model = self.model_vdp_constraints_mayer
         
         # References values
         cost_ref = 5.273481330869811e0
@@ -275,7 +238,7 @@ class TestRadau2:
     @testattr(casadi = True)
     def test_initial_equations(self):
         """Test initial equations with and without eliminated derivatives."""
-        model = self.model_VDP_initial_equations
+        model = self.model_vdp_initial_equations
         
         # References values
         cost_ref = 4.7533158101416788e0
@@ -295,7 +258,7 @@ class TestRadau2:
     @testattr(casadi = True)
     def test_element_lengths(self):
         """Test non-uniformly distributed elements."""
-        model = self.model_VDP_bounds_Mayer
+        model = self.model_vdp_bounds_mayer
         opts = model.optimize_options(self.algorithm)
         opts['n_e'] = 23
         opts['hs'] = (4 * [0.01] + 2 * [0.05] + 10 * [0.02] + 5 * [0.02] + 
@@ -306,7 +269,7 @@ class TestRadau2:
     @testattr(casadi = True)
     def test_free_element_lengths(self):
         """Test optimized element lengths with both result modes."""
-        model = self.model_VDP_bounds_Mayer
+        model = self.model_vdp_bounds_mayer
         
         # References values
         cost_ref = 4.226631156609e0
@@ -345,9 +308,9 @@ class TestRadau2:
         This test also tests writing both the unscaled and scaled result as
         well as eliminating derivative variables.
         """
-        unscaled_model = self.model_CSTR_Lagrange
-        scaled_model = self.model_CSTR_scaled_Lagrange
-        scaled_equations_model = self.model_CSTR_scaled_equations_Lagrange
+        unscaled_model = self.model_cstr_lagrange
+        scaled_model = self.model_cstr_scaled_lagrange
+        scaled_equations_model = self.model_cstr_scaled_equations_lagrange
         
         # References values
         cost_ref = 1.8576873858261e3
@@ -394,7 +357,7 @@ class TestRadau2:
         be very small if n_e * n_cp is sufficiently large. Eliminating
         derivative variables is also tested for element interpolation.
         """
-        model = self.model_VDP_bounds_Lagrange
+        model = self.model_vdp_bounds_lagrange
         
         # References values
         cost_ref = 3.17495094634053e0
@@ -418,7 +381,7 @@ class TestRadau2:
     @testattr(casadi = True)
     def test_blocking_factors(self):
         """Test blocking factors."""
-        model = self.model_VDP_bounds_Lagrange
+        model = self.model_vdp_bounds_lagrange
         
         opts = model.optimize_options(self.algorithm)
         opts['n_e'] = 40
@@ -440,28 +403,28 @@ class TestRadau2:
         """
         Test that results are consistent regardless of eliminate_der_var.
         """
-        model_Mayer = self.model_VDP_bounds_Mayer
-        model_Lagrange = self.model_VDP_bounds_Lagrange
+        model_mayer = self.model_vdp_bounds_mayer
+        model_lagrange = self.model_vdp_bounds_lagrange
         
         # References values
         cost_ref = 3.17619580332244e0
         u_norm_ref = 2.8723837585e-1
         
         # Keep derivative variables
-        opts = model_Lagrange.optimize_options(self.algorithm)
+        opts = model_lagrange.optimize_options(self.algorithm)
         opts["eliminate_der_var"] = False
-        res = model_Lagrange.optimize(self.algorithm, opts)
+        res = model_lagrange.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
         
         # Mayer, eliminate derivative variables
         opts["eliminate_der_var"] = True
         opts['init_traj'] = ResultDymolaTextual(
                 "VDP_pack_VDP_Opt_bounds_Lagrange_result.txt")
-        res = model_Mayer.optimize(self.algorithm, opts)
+        res = model_mayer.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
         
-        # Lagrange, eliminate derivative variables
-        res = model_Lagrange.optimize(self.algorithm, opts)
+        # Kagrange, eliminate derivative variables
+        res = model_lagrange.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
     
     @testattr(casadi = True)
@@ -471,7 +434,7 @@ class TestRadau2:
         
         This is tested for both Gauss and Radau collocation.
         """
-        model = self.model_VDP_bounds_Mayer
+        model = self.model_vdp_bounds_mayer
         
         # References values
         cost_ref = 3.17619580332244e0
@@ -511,7 +474,7 @@ class TestRadau2:
         Test that optimization results of the CSTR is consistent regardless of
         quadrature_constraint for Gauss collocation.
         """
-        model = self.model_CSTR_Mayer
+        model = self.model_cstr_mayer
         
         # References values
         cost_ref = 1.8576873858261e3
@@ -534,7 +497,7 @@ class TestRadau2:
         """
         Test varying n_e and n_cp.
         """
-        model = self.model_VDP_bounds_Mayer
+        model = self.model_vdp_bounds_mayer
         opts = model.optimize_options(self.algorithm)
         
         # n_cp = 1
@@ -565,7 +528,7 @@ class TestRadau2:
         The test also checks the elimination of derivative and continuity
         variables.
         """
-        model = self.model_VDP_bounds_Lagrange
+        model = self.model_vdp_bounds_lagrange
         
         # References values
         cost_ref = 3.17619580332244e0
@@ -634,7 +597,7 @@ class TestRadau2:
         """
         Test the CasADi option numeric_jacobian.
         """
-        model = self.model_VDP_bounds_Mayer
+        model = self.model_vdp_bounds_mayer
         
         # References values
         cost_ref = 3.17619580332244e0
@@ -670,11 +633,11 @@ class TestPseudoSpectral:
     
     def setUp(self):
         """Load the test models."""
-        FMUX_VDP = 'VDP_pack_VDP_Opt2.fmux'
-        self.model_VDP = CasadiModel(FMUX_VDP)
+        fmux_vdp = 'VDP_pack_VDP_Opt2.fmux'
+        self.model_vdp = CasadiModel(fmux_vdp)
         
-        FMUX_two_state = 'TwoState.fmux'
-        self.model_two_state = CasadiModel(FMUX_two_state)
+        fmux_two_state = 'TwoState.fmux'
+        self.model_two_state = CasadiModel(fmux_two_state)
     
     @testattr(casadi = True)
     def test_two_state(self):
@@ -780,15 +743,15 @@ class TestPseudoSpectral:
         UNCOMMENT WHEN FREE TIME HAVE BEEN FIXED!!!
         
         jn = compile_fmux("DoubleIntegrator", os.path.join(path_to_mos,"DoubleIntegrator.mop"))
-        VDP = CasadiModel(jn)
+        vdp = CasadiModel(jn)
         
-        opts = VDP.optimize_options("CasadiPseudoSpectral")
+        opts = vdp.optimize_options("CasadiPseudoSpectral")
         opts['n_e'] = 8
         opts['n_cp'] = 5
                 
         #Test LG points
         opts['discr'] = "LG"
-        res = VDP.optimize(algorithm="CasadiPseudoSpectral", options=opts)
+        res = vdp.optimize(algorithm="CasadiPseudoSpectral", options=opts)
         y1 = res["x1"]
         y2 = res["x2"]
         u = res["u"]
@@ -799,7 +762,7 @@ class TestPseudoSpectral:
         
         #Test LGR points
         opts['discr'] = "LGR"
-        res = VDP.optimize(algorithm="CasadiPseudoSpectral", options=opts)
+        res = vdp.optimize(algorithm="CasadiPseudoSpectral", options=opts)
         y1 = res["x1"]
         y2 = res["x2"]
         u = res["u"]
@@ -809,7 +772,7 @@ class TestPseudoSpectral:
         nose.tools.assert_almost_equal(u[-1], 1.000000000, places=5)
         #Test LGL points
         opts['discr'] = "LGL"
-        res = VDP.optimize(algorithm="CasadiPseudoSpectral", options=opts)
+        res = vdp.optimize(algorithm="CasadiPseudoSpectral", options=opts)
         y1 = res["x1"]
         y2 = res["x2"]
         u = res["u"]
@@ -821,29 +784,29 @@ class TestPseudoSpectral:
         """
         
     @testattr(casadi = True)
-    def test_VDP(self):
+    def test_vdp(self):
         """Tests the different discretization options on a modified VDP."""
-        opts = self.model_VDP.optimize_options("CasadiPseudoSpectral")
+        opts = self.model_vdp.optimize_options("CasadiPseudoSpectral")
         opts['n_e'] = 1
         opts['n_cp'] = 60
         
         #Test LG points
         opts['discr'] = "LG"
-        res = self.model_VDP.optimize(algorithm="CasadiPseudoSpectral",
+        res = self.model_vdp.optimize(algorithm="CasadiPseudoSpectral",
                                       options=opts)
         cost = res["cost"]
         nose.tools.assert_almost_equal(cost[-1], 2.3463724e1, places=1)
         
         #Test LGR points
         opts['discr'] = "LGR"
-        res = self.model_VDP.optimize(algorithm="CasadiPseudoSpectral",
+        res = self.model_vdp.optimize(algorithm="CasadiPseudoSpectral",
                                       options=opts)
         cost = res["cost"]
         nose.tools.assert_almost_equal(cost[-1], 2.3463724e1, places=1)
         
         #Test LGL points
         opts['discr'] = "LGL"
-        res = self.model_VDP.optimize(algorithm="CasadiPseudoSpectral",
+        res = self.model_vdp.optimize(algorithm="CasadiPseudoSpectral",
                                       options=opts)
         cost = res["cost"]
         nose.tools.assert_almost_equal(cost[-1], 2.3463724e1, places=1)
@@ -853,19 +816,19 @@ class TestPseudoSpectral:
         
         #Test LG points
         opts['discr'] = "LG"
-        res = VDP.optimize(algorithm="CasadiPseudoSpectral", options=opts)
+        res = vdp.optimize(algorithm="CasadiPseudoSpectral", options=opts)
         cost = res["cost"]
         nose.tools.assert_almost_equal(cost[-1], 2.3463724e1, places=1)
         
         #Test LGR points
         opts['discr'] = "LGR"
-        res = VDP.optimize(algorithm="CasadiPseudoSpectral", options=opts)
+        res = vdp.optimize(algorithm="CasadiPseudoSpectral", options=opts)
         cost = res["cost"]
         nose.tools.assert_almost_equal(cost[-1], 2.3463724e1, places=1)
         
         #Test LGL points
         opts['discr'] = "LGL"
-        res = VDP.optimize(algorithm="CasadiPseudoSpectral", options=opts)
+        res = vdp.optimize(algorithm="CasadiPseudoSpectral", options=opts)
         cost = res["cost"]
         nose.tools.assert_almost_equal(cost[-1], 2.3463724e1, places=1)
         """

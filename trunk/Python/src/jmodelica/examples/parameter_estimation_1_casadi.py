@@ -27,11 +27,11 @@ import matplotlib.pyplot as plt
 from jmodelica.fmi import compile_fmux
 from jmodelica.casadi_interface import CasadiModel
 from jmodelica.jmi import compile_jmu, JMUModel
-from jmodelica.optimization.casadi_collocation import RadauCollocator, ParameterEstimationData
+from jmodelica.optimization.casadi_collocation import ParameterEstimationData
 
 import scipy.integrate as integr
 
-def run_demo(with_plots=True, algorithm="CasadiRadau"):
+def run_demo(with_plots=True):
     """
     Demonstrate how to solve a simple parameter estimation problem.
     """
@@ -40,17 +40,17 @@ def run_demo(with_plots=True, algorithm="CasadiRadau"):
 
     # Compile the Optimica model to an XML file
     model_name = compile_fmux("ParEst.ParEstCasADi",
-        curr_dir+"/files/ParameterEstimation_1.mop")
+        curr_dir + "/files/ParameterEstimation_1.mop")
     
     # Load the model
-    model_casadi=CasadiModel(model_name)
+    model_casadi = CasadiModel(model_name)
 
     # Compile the Optimica model to a JMU
     jmu_name = compile_jmu("ParEst.ParEst",
-        curr_dir+"/files/ParameterEstimation_1.mop")
+        curr_dir + "/files/ParameterEstimation_1.mop")
     
     # Load the dynamic library
-    model=JMUModel(jmu_name)
+    model = JMUModel(jmu_name)
     
     # Retreive parameter and variable vectors
     pi = model.real_pi
@@ -65,21 +65,21 @@ def run_demo(with_plots=True, algorithm="CasadiRadau"):
     # ODE right hand side
     # This can be done since DAE residuals 1 and 2
     # are written on simple "ODE" form: f(x,u)-\dot x = 0
-    def F(xx,t):
+    def F(xx, t):
         dx[0] = 0. # Set derivatives to zero
         dx[1] = 0.
         x[0] = xx[0] # Set states
         x[1] = xx[1]
         res = N.zeros(3); # Create residual vector
         model.jmimodel.dae_F(res) # Evaluate DAE residual
-        return N.array([res[1],res[2]])
+        return N.array([res[1], res[2]])
     
     # Simulate model to get measurement data
     N_points = 100 # Number of points in simulation
     t0 = 0
     tf = 15
     t_sim = N.linspace(t0,tf,num=N_points)
-    xx0=N.array([0.,0.])
+    xx0 = N.array([0.,0.])
     xx = integr.odeint(F,xx0,t_sim)
         
     # Extract measurements
@@ -115,16 +115,16 @@ def run_demo(with_plots=True, algorithm="CasadiRadau"):
 
     par_est_data = ParameterEstimationData(Q,measured_variables,data)
 
-    opts = model_casadi.optimize_options(algorithm=algorithm)
+    opts = model_casadi.optimize_options(algorithm="LocalDAECollocationAlg")
 
-    opts['n_e'] = 15
+    opts['n_e'] = 16
     opts['n_cp'] = 3
 
     opts['parameter_estimation_data'] = par_est_data
     #opts['IPOPT_options']['derivative_test'] = 'second-order'
     #opts['IPOPT_options']['max_iter'] = 0
 
-    res_casadi = model_casadi.optimize(algorithm=algorithm, options=opts)
+    res_casadi = model_casadi.optimize(algorithm="LocalDAECollocationAlg", options=opts)
 
     # Extract variable profiles
     x1 = res_casadi['sys.x1']
