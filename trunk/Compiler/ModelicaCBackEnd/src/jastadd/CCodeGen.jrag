@@ -1353,7 +1353,7 @@ aspect CCodeGen {
 	}
 	
 	public ArrayList<FVariable> AbstractEquationBlock.blockResidualVariables_C() {
-		return activeVariables();
+		return iterationVariables();
 	}
 	
 	public ArrayList<FVariable> MixedEquationBlock.blockResidualVariables_C() {
@@ -1405,7 +1405,7 @@ aspect CCodeGen {
 	public void EquationBlock.genBlockAddCall_C(int block_counter, boolean inInit, String indent, PrintStream str) {
 		str.print(indent + "jmi_dae_" + (inInit? "init_": "") + 
 		"add_equation_block(*jmi,dae_" + (inInit? "init_": "") + "block_" + 
-		block_counter + ", NULL," + activeVariables().size() + ",0," + 
+		block_counter + ", NULL," + iterationVariables().size() + ",0," + 
 		block_counter + " );\n");
 	} 
 

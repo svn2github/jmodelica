@@ -370,6 +370,10 @@ aspect TransformCanonical {
 		public abstract ArrayList<FAbstractEquation> equations();
 		
 		public abstract ArrayList<FVariable> activeVariables();
+
+		public ArrayList<FVariable> iterationVariables() {
+			return activeVariables();
+		}
 		
 		public ArrayList<FVariable> inactiveVariables() {
 			ArrayList<FVariable> s = new ArrayList<FVariable>();
@@ -759,6 +763,10 @@ aspect TransformCanonical {
 		}
 		
 		public ArrayList<FVariable> activeVariables() {
+			return null;
+		}	
+		
+		public ArrayList<FVariable> iterationVariables() {
 			ArrayList<FVariable> s = new ArrayList<FVariable>();
 			for (MatchingPair mp : unsolvedPairs) {
 				s.add(mp.getFVariable());
