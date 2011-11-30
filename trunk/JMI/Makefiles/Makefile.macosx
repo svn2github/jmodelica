@@ -81,7 +81,6 @@ SUNDIALS_HOME =
 
 # Additional library directories
 EXT_LIB_DIRS =
-EXTERNAL_DIRS = $(EXT_LIB_DIRS:%=-L%)
 
 # Additional libraries
 EXT_LIBS = 
@@ -89,7 +88,6 @@ EXTERNAL_LIBS = $(EXT_LIBS:%=-l%)
 
 # Additional include directories
 EXT_INC_DIRS =
-EXTERNAL_INCLUDES = $(EXT_INC_DIRS:%=-I%)
 
 # Build with algorithms (requires IPOPT)
 BUILD_WITH_ALGORITHMS = false
@@ -146,7 +144,7 @@ LIBS_IPOPT   = $(LIB_JMIAD) -lfmi    $(LIB_EXTRA_AD) $(LIB_IPOPT) $(LIB_SUNDIALS
 
 # Include paths for compilation
 INCL_CPPAD = -I$(JMI_INC_DIR) -I$(CPPAD_INC_DIR) -I$(SUNDIALS_INC_DIR)
-INCL_NOCPPAD = -I$(JMI_INC_DIR) $(EXTERNAL_INCLUDES) -I$(SUNDIALS_INC_DIR)
+INCL_NOCPPAD = -I$(JMI_INC_DIR) $(EXT_INC_DIRS) -I$(SUNDIALS_INC_DIR)
 
 # set variable to correct makefile (for recursive call in model_noad)
 MAKEFILE = $(lastword $(MAKEFILE_LIST))
@@ -159,7 +157,7 @@ model: $(OBJS)
 else
 model: $(OBJS)
 	mkdir -p $(BINARY_DIR)
-	$(CC) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) $(LIBS_NOCPPAD) $(EXTERNAL_DIRS) $(EXTERNAL_LIBS)
+	$(CC) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) $(LIBS_NOCPPAD) $(EXT_INC_DIRS) $(EXTERNAL_LIBS)
 	$(RM) $(OBJS)
 endif
 
@@ -171,7 +169,7 @@ model_fmume:
 
 model_fmume_: $(OBJS)
 	mkdir -p $(BINARY_DIR)
-	$(CC) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) $(LIBS_FMUME) $(EXTERNAL_DIRS) $(EXTERNAL_LIBS)
+	$(CC) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) $(LIBS_FMUME) $(EXT_INC_DIRS) $(EXTERNAL_LIBS)
 	$(RM) $(OBJS)
 
 model_fmucs:
@@ -179,7 +177,7 @@ model_fmucs:
 
 model_fmucs_: $(OBJS)
 	mkdir -p $(BINARY_DIR)
-	$(CC) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) $(LIBS_FMICS) $(EXTERNAL_DIRS) $(EXTERNAL_LIBS)
+	$(CC) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) $(LIBS_FMICS) $(EXT_INC_DIRS) $(EXTERNAL_LIBS)
 	$(RM) $(OBJS)
 
 algorithms: $(OBJS)

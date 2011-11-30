@@ -2163,7 +2163,7 @@ aspect FlatExternalFunctionAPI {
 			if (uri.getScheme().equals("file")) {
 				return uri.getPath();
 			} else if (uri.getScheme().equals("modelica")) {
-				String pack = packagePath(uri.getHost());
+				String pack = new File(packagePath(uri.getAuthority())).getAbsolutePath();
 				return pack != null ? pack + uri.getPath() : null;
 			}
 		} catch (URISyntaxException e) {

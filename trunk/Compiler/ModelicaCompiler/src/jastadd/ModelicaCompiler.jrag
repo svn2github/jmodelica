@@ -2046,6 +2046,8 @@ public class GccCompilerDelegator extends CCompilerDelegator {
 			return "make";
 	}
 	
+	protected static final QuoteOperation INC_OP = new QuoteOperation("-I");
+	
 	/**
 	 * Add make variables to set that is valid for all target platforms.
 	 */
@@ -2057,7 +2059,7 @@ public class GccCompilerDelegator extends CCompilerDelegator {
 		vars.put("IPOPT_HOME", getEnv().get("IPOPT_HOME"));
 		vars.put("SUNDIALS_HOME", getEnv().get("SUNDIALS_HOME"));
 		vars.put("EXT_LIBS", varFromList(ext_libs));
-		vars.put("EXT_INC_DIRS", varFromList(ext_incl_dirs));
+		vars.put("EXT_INC_DIRS", varFromList(ext_incl_dirs, INC_OP));
 	}
 	
 	/**
@@ -2076,7 +2078,10 @@ public class GccCompilerDelegator extends CCompilerDelegator {
 	 */
 	protected void addTargetPlatformMakeVars(Map<String,String> vars, Set<String> ext_lib_dirs, String platform) {
 		vars.put("PLATFORM", platform);
-		vars.put("EXT_LIB_DIRS", varFromList(ext_lib_dirs, new PlatformDirOperation(platform)));
+		StringOperation libOp = new ChainedOperations(
+				new PlatformDirOperation(platform),
+				new QuoteOperation("-L"));
+		vars.put("EXT_LIB_DIRS", varFromList(ext_lib_dirs, libOp));
 	}
 	
 	/**
@@ -2133,7 +2138,6 @@ public class GccCompilerDelegator extends CCompilerDelegator {
 	 */
 	protected String varFromList(Collection<String> list, StringOperation op) {
 		StringBuilder buf = new StringBuilder();
-		//buf.append('"'); // TODO: Do we really need the quotes?
 		String prefix = "";
 		for (String str : list) {
 			str = op.op(str);
@@ -2143,11 +2147,10 @@ public class GccCompilerDelegator extends CCompilerDelegator {
 				prefix = " ";
 			}
 		}
-		//buf.append('"');
 		return (buf.length() == 0) ? null : buf.toString();
 	}
 	
-	protected interface StringOperation {
+	protected static interface StringOperation {
 		
 		public static final StringOperation NULL_OP = new StringOperation() {
 			public String op(String str) { return str; }
@@ -2157,7 +2160,41 @@ public class GccCompilerDelegator extends CCompilerDelegator {
 		
 	}
 	
-	protected class PlatformDirOperation implements StringOperation {
+	protected static class ChainedOperations implements StringOperation {
+		
+		private StringOperation[] ops;
+		
+		public ChainedOperations(StringOperation... ops) {
+			this.ops = ops;
+		}
+		
+		public String op(String path) {
+			for (StringOperation op : ops)
+				path = op.op(path);
+			return path;
+		}
+		
+	}
+	
+	protected static class QuoteOperation implements StringOperation {
+		
+		private String prefix;
+		
+		public QuoteOperation() {
+			this("");
+		}
+		
+		public QuoteOperation(String prefix) {
+			this.prefix = prefix;
+		}
+		
+		public String op(String path) {
+			return String.format("%s\\\"%s\\\"", prefix, path);
+		}
+		
+	}
+	
+	protected static class PlatformDirOperation implements StringOperation {
 		
 		private String platform;
 		
