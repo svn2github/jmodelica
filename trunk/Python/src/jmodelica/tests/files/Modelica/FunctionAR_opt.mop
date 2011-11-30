@@ -16,9 +16,9 @@ package FunctionAR
     Real w;
   algorithm
     z := x;
-    w := x * z;
+    w := x*z;
     for i in 1:size(x,1) loop
-      y[i] := - x[i] * w * i;
+      y[i] := - x[i]*w*i;
     end for;
   end F;
   
@@ -42,7 +42,7 @@ package FunctionAR
     input R_FR1 r;
     output Real y;
   algorithm
-    y := x * (r.a + r.b * r.b);
+    y := x*(r.a + r.b *r.b);
   end F_FR1;
 
 end FunctionAR;
