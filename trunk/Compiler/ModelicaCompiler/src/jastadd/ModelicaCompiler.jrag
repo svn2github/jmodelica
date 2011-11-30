@@ -202,14 +202,14 @@ public class ModelicaCompiler {
 	public void defaultTemplatePathsFMUME() {
 		File dir = getTemplatesDir();
 		xmlTpl  = (xmlTpl == null) ?  new File(dir, "fmi_model_description.tpl").getPath() : xmlTpl;
-		xmlValuesTpl = (xmlValuesTpl == null) ? new File(dir, "jmodelica_model_values.tpl").getPath() : xmlValuesTpl;
+		xmlValuesTpl = null;
 		cTemplatefile = (cTemplatefile == null) ? new File(dir, "fmi_me_modelica_template.c").getPath() : cTemplatefile;
 	}
 
 	public void defaultTemplatePathsFMUCS() {
 		File dir = getTemplatesDir();
 		xmlTpl = (xmlTpl == null) ? new File(dir, "fmi_model_description.tpl").getPath() : xmlTpl;
-		xmlValuesTpl = (xmlValuesTpl == null) ? new File(dir, "jmodelica_model_values.tpl").getPath() : xmlValuesTpl;
+		xmlValuesTpl = null;
 		cTemplatefile = (cTemplatefile == null) ? new File(dir, "fmi_cs_modelica_template.c").getPath() : cTemplatefile;
 	}
 	
@@ -1211,7 +1211,7 @@ public class ModelicaCompiler {
 		hookCheckAbort();
 		noteUsedMemory();
 		
-		File flatFile = new File(resourceDir, icl.qualifiedName() + ".mof");
+		File flatFile = new File(sourceDir, icl.qualifiedName() + ".mof");
 		FClass fc = createFlatTree(icl, flatFile.getPath());
 		
 		log.info("Flattening model...");
@@ -1242,7 +1242,7 @@ public class ModelicaCompiler {
 		hookCheckAbort();
 				
 		log.debug("Creating transformed .mof file...");
-		out = new PrintStream(new File(resourceDir, icl.qualifiedName() + "_transformed.mof"));
+		out = new PrintStream(new File(sourceDir, icl.qualifiedName() + "_transformed.mof"));
 	   	fc.prettyPrint_MC(out, "");
 	   	out.close();
 	   	log.debug("... transformed .mof file created.");
