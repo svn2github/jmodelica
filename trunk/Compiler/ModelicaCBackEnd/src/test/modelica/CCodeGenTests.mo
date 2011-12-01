@@ -550,9 +550,9 @@ model CCodeGenMinMax
     (*res)[2] = 3 - (_x_2_1_2);
     (*res)[3] = 4 - (_x_2_2_3);
     (*res)[4] = jmi_min(jmi_min(jmi_min(_x_1_1_0, _x_1_2_1), _x_2_1_2), _x_2_2_3) - (_y1_4);
-    (*res)[5] = jmi_min(1, 2) - (_y2_5);
+    (*res)[5] = jmi_min(AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(2)) - (_y2_5);
     (*res)[6] = jmi_max(jmi_max(jmi_max(_x_1_1_0, _x_1_2_1), _x_2_1_2), _x_2_2_3) - (_y3_6);
-    (*res)[7] = jmi_max(1, 2) - (_y4_7);
+    (*res)[7] = jmi_max(AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(2)) - (_y4_7);
 ")})));
 
  Real x[2,2] = {{1,2},{3,4}};
@@ -696,7 +696,7 @@ jmi_ad_var_t func_CCodeGenTests_TestFunction2_exp(jmi_ad_var_t i1_v, jmi_ad_var_
 
     jmi_ad_var_t tmp_var_0;
     jmi_ad_var_t tmp_var_1;
-    func_CCodeGenTests_TestFunction2_def(1, 2, &tmp_var_0, &tmp_var_1);
+    func_CCodeGenTests_TestFunction2_def(AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(2), &tmp_var_0, &tmp_var_1);
     (*res)[0] = tmp_var_0 - (_x_0);
     (*res)[1] = tmp_var_1 - (_y_1);
 ")})));
@@ -741,8 +741,8 @@ jmi_ad_var_t func_CCodeGenTests_TestFunction2_exp(jmi_ad_var_t i1_v, jmi_ad_var_
 }
 
 
-    (*res)[0] = func_CCodeGenTests_TestFunction2_exp(1, 0) - (_x_0);
-    (*res)[1] = func_CCodeGenTests_TestFunction2_exp(2, 3) - (_y_1);
+    (*res)[0] = func_CCodeGenTests_TestFunction2_exp(AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(0)) - (_x_0);
+    (*res)[1] = func_CCodeGenTests_TestFunction2_exp(AD_WRAP_LITERAL(2), AD_WRAP_LITERAL(3)) - (_y_1);
 ")})));
 
  Real x;
@@ -802,8 +802,8 @@ jmi_ad_var_t func_CCodeGenTests_TestFunction1_exp(jmi_ad_var_t i1_v) {
 }
 
 
-    (*res)[0] = func_CCodeGenTests_TestFunction1_exp(( _y_1 ) * ( 2 )) - (_x_0);
-    (*res)[1] = func_CCodeGenTests_TestFunction2_exp(2, 3) - (_y_1);
+    (*res)[0] = func_CCodeGenTests_TestFunction1_exp(( _y_1 ) * ( AD_WRAP_LITERAL(2) )) - (_x_0);
+    (*res)[1] = func_CCodeGenTests_TestFunction2_exp(AD_WRAP_LITERAL(2), AD_WRAP_LITERAL(3)) - (_y_1);
 ")})));
 
  Real x;
@@ -850,7 +850,7 @@ jmi_ad_var_t func_CCodeGenTests_TestFunction3_exp(jmi_ad_var_t i1_v, jmi_ad_var_
 
     jmi_ad_var_t tmp_var_0;
     jmi_ad_var_t tmp_var_1;
-    func_CCodeGenTests_TestFunction3_def(1, 2, 3, &tmp_var_0, &tmp_var_1, NULL);
+    func_CCodeGenTests_TestFunction3_def(AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(2), AD_WRAP_LITERAL(3), &tmp_var_0, &tmp_var_1, NULL);
     (*res)[0] = tmp_var_0 - (_x_0);
     (*res)[1] = tmp_var_1 - (_y_1);
 ")})));
@@ -899,7 +899,7 @@ jmi_ad_var_t func_CCodeGenTests_TestFunction3_exp(jmi_ad_var_t i1_v, jmi_ad_var_
 
     jmi_ad_var_t tmp_var_0;
     jmi_ad_var_t tmp_var_1;
-    func_CCodeGenTests_TestFunction3_def(1, 2, 3, &tmp_var_0, NULL, &tmp_var_1);
+    func_CCodeGenTests_TestFunction3_def(AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(2), AD_WRAP_LITERAL(3), &tmp_var_0, NULL, &tmp_var_1);
     (*res)[0] = tmp_var_0 - (_x_0);
     (*res)[1] = tmp_var_1 - (_z_1);
 ")})));
@@ -944,7 +944,7 @@ jmi_ad_var_t func_CCodeGenTests_TestFunction2_exp(jmi_ad_var_t i1_v, jmi_ad_var_
 }
 
 
-    func_CCodeGenTests_TestFunction2_def(1, 2, NULL, NULL);
+    func_CCodeGenTests_TestFunction2_def(AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(2), NULL, NULL);
 ")})));
 
 equation
@@ -998,7 +998,7 @@ jmi_ad_var_t func_CCodeGenTests_TestFunction1_exp(jmi_ad_var_t i1_v) {
 }
 
 
-    (*res)[0] = func_CCodeGenTests_TestFunctionCallingFunction_exp(1) - (_x_0);
+    (*res)[0] = func_CCodeGenTests_TestFunctionCallingFunction_exp(AD_WRAP_LITERAL(1)) - (_x_0);
 ")})));
 
  Real x = TestFunctionCallingFunction(1);
@@ -1103,7 +1103,7 @@ void func_CCodeGenTests_TestFunctionNoOut_def(jmi_ad_var_t i1_v) {
 }
 
 
-    func_CCodeGenTests_TestFunctionNoOut_def(1);
+    func_CCodeGenTests_TestFunctionNoOut_def(AD_WRAP_LITERAL(1));
 ")})));
 
 equation
@@ -1290,9 +1290,9 @@ jmi_ad_var_t func_CCodeGenTests_CArrayInput1_f_exp(jmi_array_t* inp_a) {
 
     JMI_ARRAY_STATIC(tmp_1, 3, 1)
     JMI_ARRAY_STATIC_INIT_1(tmp_1, 3)
-    jmi_array_ref_1(tmp_1, 1) = 1;
-    jmi_array_ref_1(tmp_1, 2) = 2;
-    jmi_array_ref_1(tmp_1, 3) = 3;
+    jmi_array_ref_1(tmp_1, 1) = AD_WRAP_LITERAL(1);
+    jmi_array_ref_1(tmp_1, 2) = AD_WRAP_LITERAL(2);
+    jmi_array_ref_1(tmp_1, 3) = AD_WRAP_LITERAL(3);
     (*res)[0] = func_CCodeGenTests_CArrayInput1_f_exp(tmp_1) - (_x_0);
 ")})));
 
@@ -1338,9 +1338,9 @@ jmi_ad_var_t func_CCodeGenTests_CArrayInput2_f_exp(jmi_array_t* inp_a) {
 
     JMI_ARRAY_STATIC(tmp_1, 3, 1)
     JMI_ARRAY_STATIC_INIT_1(tmp_1, 3)
-    jmi_array_ref_1(tmp_1, 1) = 1 + 3;
-    jmi_array_ref_1(tmp_1, 2) = 2 + 5;
-    jmi_array_ref_1(tmp_1, 3) = 3 + 7;
+    jmi_array_ref_1(tmp_1, 1) = AD_WRAP_LITERAL(1) + AD_WRAP_LITERAL(3);
+    jmi_array_ref_1(tmp_1, 2) = AD_WRAP_LITERAL(2) + AD_WRAP_LITERAL(5);
+    jmi_array_ref_1(tmp_1, 3) = AD_WRAP_LITERAL(3) + AD_WRAP_LITERAL(7);
     (*res)[0] = 2 + ( 5 ) * ( func_CCodeGenTests_CArrayInput2_f_exp(tmp_1) ) - (_x_0);
 ")})));
 
@@ -1389,17 +1389,17 @@ jmi_ad_var_t func_CCodeGenTests_CArrayInput3_f_exp(jmi_array_t* inp_a) {
     JMI_ARRAY_STATIC(tmp_3, 3, 1)
     JMI_ARRAY_STATIC(tmp_4, 3, 1)
     JMI_ARRAY_STATIC_INIT_1(tmp_1, 3)
-    jmi_array_ref_1(tmp_1, 1) = 1;
-    jmi_array_ref_1(tmp_1, 2) = 2;
-    jmi_array_ref_1(tmp_1, 3) = 3;
+    jmi_array_ref_1(tmp_1, 1) = AD_WRAP_LITERAL(1);
+    jmi_array_ref_1(tmp_1, 2) = AD_WRAP_LITERAL(2);
+    jmi_array_ref_1(tmp_1, 3) = AD_WRAP_LITERAL(3);
     JMI_ARRAY_STATIC_INIT_1(tmp_2, 3)
-    jmi_array_ref_1(tmp_2, 1) = 4;
-    jmi_array_ref_1(tmp_2, 2) = 5;
-    jmi_array_ref_1(tmp_2, 3) = 6;
+    jmi_array_ref_1(tmp_2, 1) = AD_WRAP_LITERAL(4);
+    jmi_array_ref_1(tmp_2, 2) = AD_WRAP_LITERAL(5);
+    jmi_array_ref_1(tmp_2, 3) = AD_WRAP_LITERAL(6);
     JMI_ARRAY_STATIC_INIT_1(tmp_3, 3)
-    jmi_array_ref_1(tmp_3, 1) = 7;
-    jmi_array_ref_1(tmp_3, 2) = 8;
-    jmi_array_ref_1(tmp_3, 3) = 9;
+    jmi_array_ref_1(tmp_3, 1) = AD_WRAP_LITERAL(7);
+    jmi_array_ref_1(tmp_3, 2) = AD_WRAP_LITERAL(8);
+    jmi_array_ref_1(tmp_3, 3) = AD_WRAP_LITERAL(9);
     JMI_ARRAY_STATIC_INIT_1(tmp_4, 3)
     jmi_array_ref_1(tmp_4, 1) = func_CCodeGenTests_CArrayInput3_f_exp(tmp_1);
     jmi_array_ref_1(tmp_4, 2) = func_CCodeGenTests_CArrayInput3_f_exp(tmp_2);
@@ -1438,9 +1438,9 @@ void func_CCodeGenTests_CArrayInput4_f1_def(jmi_ad_var_t* out_o) {
     JMI_ARRAY_STATIC(tmp_1, 3, 1)
     out_v = 1.0;
     JMI_ARRAY_STATIC_INIT_1(tmp_1, 3)
-    jmi_array_ref_1(tmp_1, 1) = 1;
-    jmi_array_ref_1(tmp_1, 2) = 2;
-    jmi_array_ref_1(tmp_1, 3) = 3;
+    jmi_array_ref_1(tmp_1, 1) = AD_WRAP_LITERAL(1);
+    jmi_array_ref_1(tmp_1, 2) = AD_WRAP_LITERAL(2);
+    jmi_array_ref_1(tmp_1, 3) = AD_WRAP_LITERAL(3);
     out_v = func_CCodeGenTests_CArrayInput4_f2_exp(tmp_1);
     if (out_o != NULL) *out_o = out_v;
     JMI_DYNAMIC_FREE()
@@ -1508,9 +1508,9 @@ void func_CCodeGenTests_CArrayInput5_f1_def(jmi_ad_var_t* out_o) {
     JMI_ARRAY_STATIC(tmp_1, 3, 1)
     out_v = 1.0;
     JMI_ARRAY_STATIC_INIT_1(tmp_1, 3)
-    jmi_array_ref_1(tmp_1, 1) = 1;
-    jmi_array_ref_1(tmp_1, 2) = 2;
-    jmi_array_ref_1(tmp_1, 3) = 3;
+    jmi_array_ref_1(tmp_1, 1) = AD_WRAP_LITERAL(1);
+    jmi_array_ref_1(tmp_1, 2) = AD_WRAP_LITERAL(2);
+    jmi_array_ref_1(tmp_1, 3) = AD_WRAP_LITERAL(3);
     func_CCodeGenTests_CArrayInput5_f2_def(tmp_1, &out_v, &t_v);
     if (out_o != NULL) *out_o = out_v;
     JMI_DYNAMIC_FREE()
@@ -1586,25 +1586,25 @@ void func_CCodeGenTests_CArrayInput6_f1_def(jmi_ad_var_t* out_o) {
     JMI_ARRAY_STATIC(tmp_5, 2, 1)
     out_v = 1.0;
     JMI_ARRAY_STATIC_INIT_1(tmp_1, 2)
-    jmi_array_ref_1(tmp_1, 1) = 1;
-    jmi_array_ref_1(tmp_1, 2) = 2;
+    jmi_array_ref_1(tmp_1, 1) = AD_WRAP_LITERAL(1);
+    jmi_array_ref_1(tmp_1, 2) = AD_WRAP_LITERAL(2);
     JMI_ARRAY_STATIC_INIT_1(tmp_3, 2)
-    jmi_array_ref_1(tmp_3, 1) = 3;
-    jmi_array_ref_1(tmp_3, 2) = 4;
+    jmi_array_ref_1(tmp_3, 1) = AD_WRAP_LITERAL(3);
+    jmi_array_ref_1(tmp_3, 2) = AD_WRAP_LITERAL(4);
     if (COND_EXP_LT(func_CCodeGenTests_CArrayInput6_f2_exp(tmp_1),4,JMI_TRUE,JMI_FALSE)) {
         JMI_ARRAY_STATIC_INIT_1(tmp_2, 2)
-        jmi_array_ref_1(tmp_2, 1) = 5;
-        jmi_array_ref_1(tmp_2, 2) = 6;
+        jmi_array_ref_1(tmp_2, 1) = AD_WRAP_LITERAL(5);
+        jmi_array_ref_1(tmp_2, 2) = AD_WRAP_LITERAL(6);
         out_v = func_CCodeGenTests_CArrayInput6_f2_exp(tmp_2);
     } else if (COND_EXP_GT(func_CCodeGenTests_CArrayInput6_f2_exp(tmp_3),5,JMI_TRUE,JMI_FALSE)) {
         JMI_ARRAY_STATIC_INIT_1(tmp_4, 2)
-        jmi_array_ref_1(tmp_4, 1) = 7;
-        jmi_array_ref_1(tmp_4, 2) = 8;
+        jmi_array_ref_1(tmp_4, 1) = AD_WRAP_LITERAL(7);
+        jmi_array_ref_1(tmp_4, 2) = AD_WRAP_LITERAL(8);
         out_v = func_CCodeGenTests_CArrayInput6_f2_exp(tmp_4);
     } else {
         JMI_ARRAY_STATIC_INIT_1(tmp_5, 2)
-        jmi_array_ref_1(tmp_5, 1) = 9;
-        jmi_array_ref_1(tmp_5, 2) = 10;
+        jmi_array_ref_1(tmp_5, 1) = AD_WRAP_LITERAL(9);
+        jmi_array_ref_1(tmp_5, 2) = AD_WRAP_LITERAL(10);
         out_v = func_CCodeGenTests_CArrayInput6_f2_exp(tmp_5);
     }
     if (out_o != NULL) *out_o = out_v;
@@ -1679,14 +1679,14 @@ void func_CCodeGenTests_CArrayInput7_f1_def(jmi_ad_var_t* out_o) {
     JMI_ARRAY_STATIC(tmp_2, 3, 1)
     out_v = 1.0;
     JMI_ARRAY_STATIC_INIT_1(tmp_1, 3)
-    jmi_array_ref_1(tmp_1, 1) = 1;
-    jmi_array_ref_1(tmp_1, 2) = 2;
-    jmi_array_ref_1(tmp_1, 3) = 3;
+    jmi_array_ref_1(tmp_1, 1) = AD_WRAP_LITERAL(1);
+    jmi_array_ref_1(tmp_1, 2) = AD_WRAP_LITERAL(2);
+    jmi_array_ref_1(tmp_1, 3) = AD_WRAP_LITERAL(3);
     while (COND_EXP_LT(func_CCodeGenTests_CArrayInput7_f2_exp(tmp_1),2,JMI_TRUE,JMI_FALSE)) {
         JMI_ARRAY_STATIC_INIT_1(tmp_2, 3)
-        jmi_array_ref_1(tmp_2, 1) = 4;
-        jmi_array_ref_1(tmp_2, 2) = 5;
-        jmi_array_ref_1(tmp_2, 3) = 6;
+        jmi_array_ref_1(tmp_2, 1) = AD_WRAP_LITERAL(4);
+        jmi_array_ref_1(tmp_2, 2) = AD_WRAP_LITERAL(5);
+        jmi_array_ref_1(tmp_2, 3) = AD_WRAP_LITERAL(6);
         out_v = func_CCodeGenTests_CArrayInput7_f2_exp(tmp_2);
 }
     if (out_o != NULL) *out_o = out_v;
@@ -1758,20 +1758,20 @@ void func_CCodeGenTests_CArrayInput8_f1_def(jmi_ad_var_t* out_o) {
     JMI_ARRAY_STATIC(tmp_3, 3, 1)
     out_v = 1.0;
     JMI_ARRAY_STATIC_INIT_1(tmp_1, 3)
-    jmi_array_ref_1(tmp_1, 1) = 1;
-    jmi_array_ref_1(tmp_1, 2) = 2;
-    jmi_array_ref_1(tmp_1, 3) = 3;
+    jmi_array_ref_1(tmp_1, 1) = AD_WRAP_LITERAL(1);
+    jmi_array_ref_1(tmp_1, 2) = AD_WRAP_LITERAL(2);
+    jmi_array_ref_1(tmp_1, 3) = AD_WRAP_LITERAL(3);
     JMI_ARRAY_STATIC_INIT_1(tmp_2, 3)
-    jmi_array_ref_1(tmp_2, 1) = 4;
-    jmi_array_ref_1(tmp_2, 2) = 5;
-    jmi_array_ref_1(tmp_2, 3) = 6;
+    jmi_array_ref_1(tmp_2, 1) = AD_WRAP_LITERAL(4);
+    jmi_array_ref_1(tmp_2, 2) = AD_WRAP_LITERAL(5);
+    jmi_array_ref_1(tmp_2, 3) = AD_WRAP_LITERAL(6);
     jmi_ad_var_t i_ia[] = { func_CCodeGenTests_CArrayInput8_f2_exp(tmp_1), func_CCodeGenTests_CArrayInput8_f2_exp(tmp_2) };
     for (int i_ii = 0; i_ii < 2; i_ii++) {
         jmi_ad_var_t i_i = i_ia[i_ii];
         JMI_ARRAY_STATIC_INIT_1(tmp_3, 3)
-        jmi_array_ref_1(tmp_3, 1) = 7;
-        jmi_array_ref_1(tmp_3, 2) = 8;
-        jmi_array_ref_1(tmp_3, 3) = 9;
+        jmi_array_ref_1(tmp_3, 1) = AD_WRAP_LITERAL(7);
+        jmi_array_ref_1(tmp_3, 2) = AD_WRAP_LITERAL(8);
+        jmi_array_ref_1(tmp_3, 3) = AD_WRAP_LITERAL(9);
         out_v = func_CCodeGenTests_CArrayInput8_f2_exp(tmp_3);
     }
     if (out_o != NULL) *out_o = out_v;
@@ -2102,8 +2102,8 @@ void func_CCodeGenTests_CArrayOutputs5_f2_def(jmi_array_t* i_a, jmi_array_t* o1_
 
     JMI_ARRAY_STATIC(tmp_1, 2, 1)
     JMI_ARRAY_STATIC_INIT_1(tmp_1, 2)
-    jmi_array_ref_1(tmp_1, 1) = 1;
-    jmi_array_ref_1(tmp_1, 2) = 2;
+    jmi_array_ref_1(tmp_1, 1) = AD_WRAP_LITERAL(1);
+    jmi_array_ref_1(tmp_1, 2) = AD_WRAP_LITERAL(2);
     (*res)[0] = func_CCodeGenTests_CArrayOutputs5_f1_exp(tmp_1) - (_x_0);
 ")})));
 
@@ -2906,8 +2906,8 @@ jmi_ad_var_t func_CCodeGenTests_CRecordDecl13_f_exp(A_0_r* x_v) {
 
 
     JMI_RECORD_STATIC(A_0_r, tmp_1)
-    tmp_1->a = 1;
-    tmp_1->b = 2;
+    tmp_1->a = AD_WRAP_LITERAL(1);
+    tmp_1->b = AD_WRAP_LITERAL(2);
     (*res)[0] = func_CCodeGenTests_CRecordDecl13_f_exp(tmp_1) - (_x_0);
 ")})));
 
@@ -2960,8 +2960,8 @@ jmi_ad_var_t func_CCodeGenTests_CRecordDecl14_f_exp(A_1_r* x_v) {
     JMI_RECORD_STATIC(A_1_r, tmp_1)
     JMI_RECORD_STATIC(B_0_r, tmp_2)
     tmp_1->b = tmp_2;
-    tmp_1->a = 1;
-    tmp_1->b->c = 2;
+    tmp_1->a = AD_WRAP_LITERAL(1);
+    tmp_1->b->c = AD_WRAP_LITERAL(2);
     (*res)[0] = func_CCodeGenTests_CRecordDecl14_f_exp(tmp_1) - (_x_0);
 ")})));
 
@@ -3019,8 +3019,8 @@ jmi_ad_var_t func_CCodeGenTests_CRecordDecl15_f_exp(A_0_r* x_v) {
     JMI_ARRAY_STATIC(tmp_2, 2, 1)
     JMI_ARRAY_STATIC_INIT_1(tmp_2, 2)
     tmp_1->a = tmp_2;
-    jmi_array_ref_1(tmp_1->a, 1) = 1;
-    jmi_array_ref_1(tmp_1->a, 2) = 2;
+    jmi_array_ref_1(tmp_1->a, 1) = AD_WRAP_LITERAL(1);
+    jmi_array_ref_1(tmp_1->a, 2) = AD_WRAP_LITERAL(2);
     (*res)[0] = func_CCodeGenTests_CRecordDecl15_f_exp(tmp_1) - (_x_0);
 ")})));
 
@@ -3883,22 +3883,22 @@ model WhenTest2
          template="$C_ode_guards$
                    $C_ode_time_events$" ,
          generatedCode="
-    _guards(0) = jmi_sample(jmi,0,_h_6);
-  _guards(1) = jmi_sample(jmi,0,_h_6);
+    _guards(0) = jmi_sample(jmi,AD_WRAP_LITERAL(0),_h_6);
+  _guards(1) = jmi_sample(jmi,AD_WRAP_LITERAL(0),_h_6);
  
   jmi_real_t nextTimeEvent;
   jmi_real_t nextTimeEventTmp;
   jmi_real_t nSamp;
   nextTimeEvent = JMI_INF;
   nextTimeEventTmp = JMI_INF;
-  if (SURELY_LT_ZERO(_t - 0)) {
-    nextTimeEventTmp = 0;
-  }  else if (ALMOST_ZERO(jmi_dremainder(_t - 0,_h_6))) {
-    nSamp = jmi_dround((_t-0)/(_h_6));
-    nextTimeEventTmp = (nSamp + 1.0)*_h_6 + 0;
-  }  else if (SURELY_GT_ZERO(jmi_dremainder(_t - 0,_h_6))) {
-    nSamp = floor((_t-0)/(_h_6));
-    nextTimeEventTmp = (nSamp + 1.0)*_h_6 + 0;
+  if (SURELY_LT_ZERO(_t - AD_WRAP_LITERAL(0))) {
+    nextTimeEventTmp = AD_WRAP_LITERAL(0);
+  }  else if (ALMOST_ZERO(jmi_dremainder(_t - AD_WRAP_LITERAL(0),_h_6))) {
+    nSamp = jmi_dround((_t-AD_WRAP_LITERAL(0))/(_h_6));
+    nextTimeEventTmp = (nSamp + 1.0)*_h_6 + AD_WRAP_LITERAL(0);
+  }  else if (SURELY_GT_ZERO(jmi_dremainder(_t - AD_WRAP_LITERAL(0),_h_6))) {
+    nSamp = floor((_t-AD_WRAP_LITERAL(0))/(_h_6));
+    nextTimeEventTmp = (nSamp + 1.0)*_h_6 + AD_WRAP_LITERAL(0);
   }
    if (nextTimeEventTmp<nextTimeEvent) {
     nextTimeEvent = nextTimeEventTmp;
@@ -3941,27 +3941,27 @@ jmi_real_t nextTimeEventTmp;
 jmi_real_t nSamp;
 nextTimeEvent = JMI_INF;
 nextTimeEventTmp = JMI_INF;
-if (SURELY_LT_ZERO(_t - 0)) {
-nextTimeEventTmp = 0;
-} else if (ALMOST_ZERO(jmi_dremainder(_t - 0,jmi_divide(1,3,\"Divide by zero: ( 1 ) / ( 3 )\")))) {
-nSamp = jmi_dround((_t-0)/(jmi_divide(1,3,\"Divide by zero: ( 1 ) / ( 3 )\")));
-nextTimeEventTmp = (nSamp + 1.0)*jmi_divide(1,3,\"Divide by zero: ( 1 ) / ( 3 )\") + 0;
-} else if (SURELY_GT_ZERO(jmi_dremainder(_t - 0,jmi_divide(1,3,\"Divide by zero: ( 1 ) / ( 3 )\")))) {
-nSamp = floor((_t-0)/(jmi_divide(1,3,\"Divide by zero: ( 1 ) / ( 3 )\")));
-nextTimeEventTmp = (nSamp + 1.0)*jmi_divide(1,3,\"Divide by zero: ( 1 ) / ( 3 )\") + 0;
+if (SURELY_LT_ZERO(_t - AD_WRAP_LITERAL(0))) {
+nextTimeEventTmp = AD_WRAP_LITERAL(0);
+} else if (ALMOST_ZERO(jmi_dremainder(_t - AD_WRAP_LITERAL(0),jmi_divide(AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"Divide by zero: ( 1 ) / ( 3 )\")))) {
+nSamp = jmi_dround((_t-AD_WRAP_LITERAL(0))/(jmi_divide(AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"Divide by zero: ( 1 ) / ( 3 )\")));
+nextTimeEventTmp = (nSamp + 1.0)*jmi_divide(AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"Divide by zero: ( 1 ) / ( 3 )\") + AD_WRAP_LITERAL(0);
+} else if (SURELY_GT_ZERO(jmi_dremainder(_t - AD_WRAP_LITERAL(0),jmi_divide(AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"Divide by zero: ( 1 ) / ( 3 )\")))) {
+nSamp = floor((_t-AD_WRAP_LITERAL(0))/(jmi_divide(AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"Divide by zero: ( 1 ) / ( 3 )\")));
+nextTimeEventTmp = (nSamp + 1.0)*jmi_divide(AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"Divide by zero: ( 1 ) / ( 3 )\") + AD_WRAP_LITERAL(0);
 }
 if (nextTimeEventTmp<nextTimeEvent) {
 nextTimeEvent = nextTimeEventTmp;
 }
 nextTimeEventTmp = JMI_INF;
-if (SURELY_LT_ZERO(_t - 0)) {
-nextTimeEventTmp = 0;
-} else if (ALMOST_ZERO(jmi_dremainder(_t - 0,jmi_divide(2,3,\"Divide by zero: ( 2 ) / ( 3 )\")))) {
-nSamp = jmi_dround((_t-0)/(jmi_divide(2,3,\"Divide by zero: ( 2 ) / ( 3 )\")));
-nextTimeEventTmp = (nSamp + 1.0)*jmi_divide(2,3,\"Divide by zero: ( 2 ) / ( 3 )\") + 0;
-} else if (SURELY_GT_ZERO(jmi_dremainder(_t - 0,jmi_divide(2,3,\"Divide by zero: ( 2 ) / ( 3 )\")))) {
-nSamp = floor((_t-0)/(jmi_divide(2,3,\"Divide by zero: ( 2 ) / ( 3 )\")));
-nextTimeEventTmp = (nSamp + 1.0)*jmi_divide(2,3,\"Divide by zero: ( 2 ) / ( 3 )\") + 0;
+if (SURELY_LT_ZERO(_t - AD_WRAP_LITERAL(0))) {
+nextTimeEventTmp = AD_WRAP_LITERAL(0);
+} else if (ALMOST_ZERO(jmi_dremainder(_t - AD_WRAP_LITERAL(0),jmi_divide(AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"Divide by zero: ( 2 ) / ( 3 )\")))) {
+nSamp = jmi_dround((_t-AD_WRAP_LITERAL(0))/(jmi_divide(AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"Divide by zero: ( 2 ) / ( 3 )\")));
+nextTimeEventTmp = (nSamp + 1.0)*jmi_divide(AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"Divide by zero: ( 2 ) / ( 3 )\") + AD_WRAP_LITERAL(0);
+} else if (SURELY_GT_ZERO(jmi_dremainder(_t - AD_WRAP_LITERAL(0),jmi_divide(AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"Divide by zero: ( 2 ) / ( 3 )\")))) {
+nSamp = floor((_t-AD_WRAP_LITERAL(0))/(jmi_divide(AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"Divide by zero: ( 2 ) / ( 3 )\")));
+nextTimeEventTmp = (nSamp + 1.0)*jmi_divide(AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"Divide by zero: ( 2 ) / ( 3 )\") + AD_WRAP_LITERAL(0);
 }
 if (nextTimeEventTmp<nextTimeEvent) {
 nextTimeEvent = nextTimeEventTmp;
@@ -3974,13 +3974,13 @@ _der_dummy_3 = 0;
 /************ Real outputs *********/
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
-_guards(0) = jmi_sample(jmi,0,jmi_divide(1,3,\"Divide by zero: ( 1 ) / ( 3 )\"));
+_guards(0) = jmi_sample(jmi,AD_WRAP_LITERAL(0),jmi_divide(AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"Divide by zero: ( 1 ) / ( 3 )\"));
 if(COND_EXP_EQ(LOG_EXP_AND(_guards(0),LOG_EXP_NOT(_pre_guards(0))),JMI_TRUE,JMI_TRUE,JMI_FALSE)) {
 _x_0 = pre_x_0 + 1;
 } else {
 _x_0 = pre_x_0;
 }
-_guards(1) = jmi_sample(jmi,0,jmi_divide(2,3,\"Divide by zero: ( 2 ) / ( 3 )\"));
+_guards(1) = jmi_sample(jmi,AD_WRAP_LITERAL(0),jmi_divide(AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"Divide by zero: ( 2 ) / ( 3 )\"));
 if(COND_EXP_EQ(LOG_EXP_AND(_guards(1),LOG_EXP_NOT(_pre_guards(1))),JMI_TRUE,JMI_TRUE,JMI_FALSE)) {
 _y_1 = pre_y_1 + 1;
 } else {
@@ -4038,7 +4038,7 @@ return 0;
 
 model_ode_guards(jmi);
 /************* ODE section *********/
-_sampleTrigger_0 = jmi_sample(jmi,0,_h_11);
+_sampleTrigger_0 = jmi_sample(jmi,AD_WRAP_LITERAL(0),_h_11);
 _guards(0) = _atInitial;
 _guards(1) = _sampleTrigger_0;
 if(LOG_EXP_OR(COND_EXP_EQ(LOG_EXP_AND(_guards(0),LOG_EXP_NOT(_pre_guards(0))),JMI_TRUE,JMI_TRUE,JMI_FALSE),
@@ -4067,7 +4067,7 @@ _u_c_4 = ( _c_p_7 ) * ( _x_p_1 );
 jmi_kinsol_solve(jmi->dae_init_block_residuals[0]);
 _u_p_2 = ( _c_c_10 ) * ( _x_c_3 );
 _der_x_p_12 = ( _a_p_5 ) * ( _x_p_1 ) + ( _b_p_6 ) * ( _u_p_2 );
-_sampleTrigger_0 = jmi_sample(jmi,0,_h_11);
+_sampleTrigger_0 = jmi_sample(jmi,AD_WRAP_LITERAL(0),_h_11);
 pre_sampleTrigger_0 = JMI_FALSE;
 pre_u_c_4 = 0.0;
 
@@ -4127,7 +4127,7 @@ return 0;
 model_ode_guards(jmi);
 /************* ODE section *********/
 _atInit_12 = LOG_EXP_AND(JMI_TRUE, _atInitial);
-_sampleTrigger_0 = jmi_sample(jmi,0,_h_11);
+_sampleTrigger_0 = jmi_sample(jmi,AD_WRAP_LITERAL(0),_h_11);
 _guards(0) = _atInit_12;
 _guards(1) = _sampleTrigger_0;
 if(LOG_EXP_OR(COND_EXP_EQ(LOG_EXP_AND(_guards(0),LOG_EXP_NOT(_pre_guards(0))),JMI_TRUE,JMI_TRUE,JMI_FALSE),
@@ -4155,7 +4155,7 @@ jmi_kinsol_solve(jmi->dae_init_block_residuals[0]);
 _u_p_2 = ( _c_c_10 ) * ( _x_c_3 );
 _x_p_1 = 1;
 _der_x_p_13 = ( _a_p_5 ) * ( _x_p_1 ) + ( _b_p_6 ) * ( _u_p_2 );
-_sampleTrigger_0 = jmi_sample(jmi,0,_h_11);
+_sampleTrigger_0 = jmi_sample(jmi,AD_WRAP_LITERAL(0),_h_11);
 pre_u_c_4 = 0.0;
 _u_c_4 = pre_u_c_4;
 _atInit_12 = LOG_EXP_AND(JMI_TRUE, _atInitial);

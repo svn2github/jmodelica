@@ -440,15 +440,17 @@ aspect CCodeGen {
 	
 	syn String FType.type_C() = isArray() ? arrayType_C() : scalarType_C();
 	
-	syn String FType.argType_C() = type_C();
-	syn String FPrimitiveType.argType_C() = "jmi_ad_var_t";
-	syn String FIntegerType.argType_C() = "jmi_int_t";
+	syn String FType.argType_C()  = type_C();
+	eq FPrimitiveType.argType_C() = "jmi_ad_var_t";
+	eq FIntegerType.argType_C()   = "jmi_int_t";
 	
 	syn String FType.scalarType_C() = "jmi_ad_var_t";
 	eq FRecordType.scalarType_C()   = name_C() + "*";
+	eq FStringType.scalarType_C()   = "char*"; // Tentative support.
 	
 	syn String FType.arrayType_C() = "jmi_array_t*";
 	eq FRecordType.arrayType_C()   = nameArray_C() + "*";
+	eq FStringType.arrayType_C()   = null; // Make sure this throws an exception
 
 	syn String FFunctionVariable.typeReturn_C() = isRecord() ? type_C() : (type_C() + "*");
 	eq FFunctionArray.typeReturn_C()            = type_C();
@@ -982,20 +984,29 @@ aspect CCodeGen {
 	}
 			 	
 	public void FRealLitExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
-		if (inIfCondition()) 
+		boolean wrap = inIfCondition();
+		if (wrap) 
 			str.print("AD_WRAP_LITERAL(");
 		str.print(getUNSIGNED_NUMBER());
-		if (inIfCondition()) 
+		if (wrap) 
 			str.print(")");
 	}
 
 	public void FIntegerLitExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
-		if (inIfCondition()) 
+		boolean wrap = inIfCondition() || inFunctionArg();
+		if (wrap) 
 			str.print("AD_WRAP_LITERAL(");
 		str.print(getUNSIGNED_INTEGER());
-		if (inIfCondition()) 
+		if (wrap) 
 			str.print(")");
 	}
+	
+	inh boolean FIntegerLitExp.inFunctionArg();
+	eq FAbstractFunctionCall.getChild().inFunctionArg() = true;
+	eq FArraySubscripts.getChild().inFunctionArg()      = false;
+	eq AbstractFVariable.getChild().inFunctionArg()     = false;
+	eq FAbstractEquation.getChild().inFunctionArg()     = false;
+	eq Root.getChild().inFunctionArg()                  = false;
 	
 	public void FBooleanLitExpTrue.prettyPrint_C(Printer p, PrintStream str, String indent) {
 		str.print("JMI_TRUE");
