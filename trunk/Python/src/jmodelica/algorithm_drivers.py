@@ -1951,17 +1951,19 @@ class LocalDAECollocationAlg(AlgorithmBase):
         Parameters::
               
             model -- 
-                jmodelica.casadi_interface.CasadiModel model object
+                Model object
+                
+                Type: jmodelica.casadi_interface.CasadiModel
 
             options -- 
                 The options that should be used by the algorithm. For 
                 details on the options, see:
                 
-                * model.optimize_options('LocalDAECollocationAlgOptions')
+                model.optimize_options('LocalDAECollocationAlgOptions')
                 
                 or look at the docstring with help:
                 
-                * help(jmodelica.algorithm_drivers.LocalDAECollocationAlgOptions)
+                help(jmodelica.algorithm_drivers.LocalDAECollocationAlgOptions)
                 
                 Valid values are: 
                 - A dict that overrides some or all of the default values
@@ -2043,14 +2045,14 @@ class LocalDAECollocationAlg(AlgorithmBase):
             raise ValueError("quadrature_constraint is not compatible " + \
                              "with eliminate_der_var.")
         
-        # Check validity of exact_Hessian
-        if self.exact_Hessian:
+        # Check validity of exact_hessian
+        if self.exact_hessian:
             if self.graph == "MX":
-                print("Warning: exact_Hessian is currently not recommended " +
+                print("Warning: exact_hessian is currently not recommended " +
                       "in combination with MX graphs.")
         else:
-            if self.CasADi_options_L != defaults['CasADi_options_L']:
-                raise ValueError("CasADi_options_L is only used " +
+            if self.casadi_options_l != defaults['casadi_options_l']:
+                raise ValueError("casadi_options_l is only used " +
                                  "if algorithm option exact_Hessian is True.")
                                  
         # Check validity of result_mode and n_eval_points
@@ -2114,14 +2116,15 @@ class LocalDAECollocationAlg(AlgorithmBase):
         h_opt = self.nlp.get_h_opt()
         
         # Create and return result object
-        return LocalDAECollocationAlgResult(self.model, resultfile, self.nlp, res,
-                                  self.options, self.times, h_opt)
+        return LocalDAECollocationAlgResult(self.model, resultfile, self.nlp,
+                                            res, self.options, self.times,
+                                            h_opt)
         
     @classmethod
     def get_default_options(cls):
         """ 
-        Get an instance of the options class for the LocalDAECollocationAlg algorithm,
-        prefilled with default values. (Class method.)
+        Get an instance of the options class for the LocalDAECollocationAlg
+        algorithm, prefilled with default values. (Class method.)
         """
         return LocalDAECollocationAlgOptions()
     
@@ -2151,7 +2154,7 @@ class LocalDAECollocationAlgOptions(OptionBase):
             
             "free": The element lengths become optimization variables and are
             optimized according to the algorithm option
-            free_element_length_data.
+            free_element_lengths_data.
             WARNING: This option is very experimental and will not always give
             desirable results.
             
@@ -2162,7 +2165,8 @@ class LocalDAECollocationAlgOptions(OptionBase):
             Data used for optimizing the element lengths if they are free.
             Should be None if and only if hs != "free".
             
-            Type: None or jmodelica.optimization.free_element_length_data
+            Type: None or
+            jmodelica.optimization.casadi_collocation.FreeElementLengthsData
             Default: None
         
         n_cp --
@@ -2174,14 +2178,11 @@ class LocalDAECollocationAlgOptions(OptionBase):
         discr --
             Determines the collocation scheme used to discretize the problem.
             
-            Possible values: "LG", "LGR" and "LGL"
+            Possible values: "LG" and "LGR"
             
             "LG": Gauss collocation (Legendre-Gauss)
             
             "LGR": Radau collocation (Legendre-Gauss-Radau)
-            
-            "LGL: Lobatto collocation (Legendre-Gauss-Lobatto)
-            NOTE: LOBATTO CURRENTLY NOT SUPPORTED
             
             Type: str
             Default: "LGR"
@@ -2196,8 +2197,8 @@ class LocalDAECollocationAlgOptions(OptionBase):
         write_scaled_result --
             Return the scaled optimization result if set to True, otherwise
             return the unscaled optimization result. This option is 
-            only applicable when the CasadiModel has been compiled with
-            enable_scaling=True. This option is only intended for debugging.
+            only applicable when the CasadiModel has been instantiated with
+            scale_variables=True. This option is only intended for debugging.
             
             Type: bool
             Default: False
@@ -2231,7 +2232,7 @@ class LocalDAECollocationAlgOptions(OptionBase):
         blocking_factors --
             The list of blocking factors, where each element corresponds to the
             number of elements for which all the control profiles should be
-            constant. For example, if blocking_factor == [2, 1, 5], then
+            constant. For example, if blocking_factors == [2, 1, 5], then
             u_0 = u_1 and u_3 = u_4 = u_5 = u_6 = u_7. The sum of all elements
             in the list must be the same as the number of elements.
             
@@ -2330,7 +2331,7 @@ class LocalDAECollocationAlgOptions(OptionBase):
     
     CasADi options are set using the syntax for dictionaries::
 
-        >>> opts['CasADi_options_G']['numeric_jacobian'] = True
+        >>> opts['casadi_options_g']['numeric_jacobian'] = True
     
     IPOPT options can be provided in the option IPOPT_options. For 
     a complete list of IPOPT options, please consult the IPOPT documentation 
@@ -2374,10 +2375,10 @@ class LocalDAECollocationAlgOptions(OptionBase):
                 'eliminate_cont_var': False,
                 'init_traj': None,
                 'parameter_estimation_data': None,
-                'exact_Hessian': True,
-                'CasADi_options_F': {"name": "NLP objective function"},
-                'CasADi_options_G': {"name": "NLP constraint function"},
-                'CasADi_options_L': {"name": "NLP Lagrangian function"},
+                'exact_hessian': True,
+                'casadi_options_f': {"name": "NLP objective function"},
+                'casadi_options_g': {"name": "NLP constraint function"},
+                'casadi_options_l': {"name": "NLP Lagrangian function"},
                 'IPOPT_options':{
                         'max_iter': 2000,
                         'derivative_test': 'none'}}
@@ -2416,7 +2417,7 @@ class LocalDAECollocationAlgResult(JMResultBase):
     
     def __init__(self, model=None, result_file_name=None, solver=None, 
                  result_data=None, options=None, times=None, h_opt=None):
-        super(LocalDAECollocationAlgResult, self).__init__(model, result_file_name,
-                                                 solver, result_data, options)
+        super(LocalDAECollocationAlgResult, self).__init__(
+                model, result_file_name, solver, result_data, options)
         self.times = times
         self.h_opt = h_opt

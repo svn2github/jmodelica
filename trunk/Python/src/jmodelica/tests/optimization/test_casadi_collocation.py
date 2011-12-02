@@ -91,33 +91,40 @@ class TestLocalDAECollocator:
     def setUp(self):
         """Load the test models."""
         fmux_vdp_bounds_lagrange = 'VDP_pack_VDP_Opt_Bounds_Lagrange.fmux'
-        self.model_vdp_bounds_lagrange = CasadiModel(fmux_vdp_bounds_lagrange)
+        self.model_vdp_bounds_lagrange = CasadiModel(fmux_vdp_bounds_lagrange,
+                                                     verbose=False)
         
         fmux_vdp_bounds_mayer = 'VDP_pack_VDP_Opt_Bounds_Mayer.fmux'
-        self.model_vdp_bounds_mayer = CasadiModel(fmux_vdp_bounds_mayer)
+        self.model_vdp_bounds_mayer = CasadiModel(fmux_vdp_bounds_mayer,
+                                                  verbose=False)
         
         fmux_vdp_constraints_mayer = 'VDP_pack_VDP_Opt_Constraints_Mayer.fmux'
         self.model_vdp_constraints_mayer = CasadiModel(
-                fmux_vdp_constraints_mayer)
+                fmux_vdp_constraints_mayer, verbose=False)
         
         fmux_vdp_initial_equations = 'VDP_pack_VDP_Opt_Initial_Equations.fmux'
         self.model_vdp_initial_equations = CasadiModel(
-                fmux_vdp_initial_equations)
+                fmux_vdp_initial_equations, verbose=False)
         
         fmux_cstr_lagrange = "CSTR_CSTR_Opt_Bounds_Lagrange.fmux"
-        self.model_cstr_lagrange = CasadiModel(fmux_cstr_lagrange)
+        self.model_cstr_lagrange = CasadiModel(fmux_cstr_lagrange,
+                                               verbose=False)
         self.model_cstr_scaled_lagrange = CasadiModel(
-                fmux_cstr_lagrange, enable_scaling=True, scale_equations=False)
+                fmux_cstr_lagrange, scale_variables=True,
+                scale_equations=False, verbose=False)
         self.model_cstr_scaled_equations_lagrange = CasadiModel(
-                fmux_cstr_lagrange, enable_scaling=True, scale_equations=True)
+                fmux_cstr_lagrange, scale_variables=True, scale_equations=True,
+                verbose=False)
         
         fmux_cstr_mayer = "CSTR_CSTR_Opt_Bounds_Mayer.fmux"
-        self.model_cstr_mayer = CasadiModel(fmux_cstr_mayer)
+        self.model_cstr_mayer = CasadiModel(fmux_cstr_mayer, verbose=False)
         
         fmux_second_order = "ParEst_ParEstCasADi.fmux"
         self.model_second_order = CasadiModel(fmux_second_order)
         self.model_second_order_scaled = CasadiModel(fmux_second_order,
-                                                     enable_scaling=True)
+                                                     scale_variables=True,
+                                                     verbose=False)
+        
         self.algorithm = "LocalDAECollocationAlg"
     
     @testattr(casadi = True)
@@ -226,12 +233,12 @@ class TestLocalDAECollocator:
         
         # Without exact Hessian
         opts = model.optimize_options(self.algorithm)
-        opts['exact_Hessian'] = False
+        opts['exact_hessian'] = False
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
         
         # With exact Hessian
-        opts['exact_Hessian'] = True
+        opts['exact_hessian'] = True
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
     
@@ -521,9 +528,9 @@ class TestLocalDAECollocator:
         assert_results(res, 3.17620203643878e0, 2.803233013e-1)
         
     @testattr(casadi = True)
-    def test_graphs_and_exact_Hessian(self):
+    def test_graphs_and_exact_hessian(self):
         """
-        Test that results are consistent regardless of graph and exact_Hessian.
+        Test that results are consistent regardless of graph and exact_hessian.
         
         The test also checks the elimination of derivative and continuity
         variables.
@@ -543,7 +550,7 @@ class TestLocalDAECollocator:
         
         # SX with exact Hessian and eliminated variables
         opts['graph'] = "SX"
-        opts['exact_Hessian'] = True
+        opts['exact_hessian'] = True
         opts['eliminate_der_var'] = True
         opts['eliminate_cont_var'] = True
         res = model.optimize(self.algorithm, opts)
@@ -551,7 +558,7 @@ class TestLocalDAECollocator:
         assert_results(res, cost_ref, u_norm_ref)
         
         # SX without exact Hessian and eliminated variables
-        opts['exact_Hessian'] = False
+        opts['exact_hessian'] = False
         opts['eliminate_der_var'] = False
         opts['eliminate_cont_var'] = False
         res = model.optimize(self.algorithm, opts)
@@ -561,7 +568,7 @@ class TestLocalDAECollocator:
         
         # expanded_MX with exact Hessian and eliminated variables
         opts['graph'] = "expanded_MX"
-        opts['exact_Hessian'] = True
+        opts['exact_hessian'] = True
         opts['eliminate_der_var'] = True
         opts['eliminate_cont_var'] = True
         res = model.optimize(self.algorithm, opts)
@@ -569,7 +576,7 @@ class TestLocalDAECollocator:
         assert_results(res, cost_ref, u_norm_ref)
         
         # expanded_MX without exact Hessian and eliminated variables
-        opts['exact_Hessian'] = False
+        opts['exact_hessian'] = False
         opts['eliminate_der_var'] = False
         opts['eliminate_cont_var'] = False
         res = model.optimize(self.algorithm, opts)
@@ -579,21 +586,21 @@ class TestLocalDAECollocator:
         
         # MX with exact Hessian and eliminated variables
         opts['graph'] = "MX"
-        opts['exact_Hessian'] = True
+        opts['exact_hessian'] = True
         opts['eliminate_der_var'] = True
         opts['eliminate_cont_var'] = True
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
         
         # MX without exact Hessian and eliminated variables
-        opts['exact_Hessian'] = False
+        opts['exact_hessian'] = False
         opts['eliminate_der_var'] = False
         opts['eliminate_cont_var'] = False
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
         
     @testattr(casadi = True)
-    def test_CasADi_option(self):
+    def test_casadi_option(self):
         """
         Test the CasADi option numeric_jacobian.
         """
@@ -605,12 +612,12 @@ class TestLocalDAECollocator:
         
         # numeric_jacobian = True
         opts = model.optimize_options(self.algorithm)
-        opts['CasADi_options_G']['numeric_jacobian'] = True
+        opts['casadi_options_g']['numeric_jacobian'] = True
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
         
         # numeric_jacobian = False
-        opts['CasADi_options_G']['numeric_jacobian'] = False
+        opts['casadi_options_g']['numeric_jacobian'] = False
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
 
@@ -634,10 +641,10 @@ class TestPseudoSpectral:
     def setUp(self):
         """Load the test models."""
         fmux_vdp = 'VDP_pack_VDP_Opt2.fmux'
-        self.model_vdp = CasadiModel(fmux_vdp)
+        self.model_vdp = CasadiModel(fmux_vdp, verbose=False)
         
         fmux_two_state = 'TwoState.fmux'
-        self.model_two_state = CasadiModel(fmux_two_state)
+        self.model_two_state = CasadiModel(fmux_two_state, verbose=False)
     
     @testattr(casadi = True)
     def test_two_state(self):
