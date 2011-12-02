@@ -109,13 +109,6 @@ class TestModel_VDP:
         u = self.vdp_scaled.get("u", scaled=True)
         nose.tools.assert_almost_equal(u, 10.00000, 4)
     """
-    @testattr(stddist = True)
-    def test_same_dll(self):
-        """ Test that we can load the model multiple times with reload_dll = False. """
-        i = 0
-        while i < 50:
-            i = i + 1
-            model = JMUModel("VDP_pack_VDP_Opt.jmu", reload_dll=False)
         
     @testattr(stddist = True)
     def test_has_cppad_derivatives(self):

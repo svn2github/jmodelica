@@ -27,6 +27,7 @@ from jmodelica.tests import testattr
 from jmodelica.tests import get_files_path
 from jmodelica.fmi import *
 import jmodelica.algorithm_drivers as ad
+from jmodelica.core import get_platform_dir
 
 path_to_fmus = O.path.join(get_files_path(), 'FMUs')
 path_to_mofiles = O.path.join(get_files_path(), 'Modelica')
@@ -36,41 +37,19 @@ def test_unzip():
     """
     This tests the functionality of the method unzip_FMU.
     """
-    platform = sys.platform
-    
     #FMU
     fmu = 'bouncingBall.fmu'
     
     #Unzip FMU
     tempnames = unzip_fmu(archive=fmu, path=path_to_fmus)
-    tempdll = tempnames['binary']
-    tempxml = tempnames['model_desc']
+    binarydir = tempnames['binaries_dir']
+    xmlfile = tempnames['model_desc']
     
-    if platform == 'win32':
-        assert tempdll.endswith('.dll')
-    elif platform == 'darwin':
-        assert tempdll.endswith('.dylib')
-    else:
-        assert tempdll.endswith('.so')
-    assert tempxml.endswith('.xml')
+    platform = get_platform_dir()
+    assert binarydir.endswith(platform)
+    assert xmlfile.endswith('.xml')
     
     nose.tools.assert_raises(IOError,unzip_fmu,'Coupled')
-    
-    #FMU
-    fmu = 'dq.fmu'
-    
-    #Unzip FMU
-    tempnames = unzip_fmu(archive=fmu, path=path_to_fmus)
-    tempdll = tempnames['binary']
-    tempxml = tempnames['model_desc']
-    
-    if platform == 'win32':
-        assert tempdll.endswith('.dll')
-    elif platform == 'darwin':
-        assert tempdll.endswith('.dylib')
-    else:
-        assert tempdll.endswith('.so')
-    assert tempxml.endswith('.xml')
     
 
 class Test_FMI:

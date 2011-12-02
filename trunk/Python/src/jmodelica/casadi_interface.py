@@ -44,16 +44,14 @@ class CasadiModel(object):
                  scale_equations=False):
         
         #Create temp binary
-        self._tempnames = unzip_fmux(archive=name, path=".")
-        self._tempxml = self._tempnames['model_desc']
-        self._tempdir = get_temp_location()
+        self._fmuxnames = unzip_fmux(archive=name, path=path)
+        self._tempxml = self._fmuxnames['model_desc']
         
         #Load model description
-        self.xmldoc = xmlparser.ModelDescription(os.path.join(self._tempdir,self._tempxml))
+        self.xmldoc = xmlparser.ModelDescription(self._tempxml)
         
         #Load CasADi interface
-        self._load_xml_to_casadi(os.path.join(self._tempdir,self._tempxml),
-                                 enable_scaling, scale_equations)
+        self._load_xml_to_casadi(self._tempxml, enable_scaling, scale_equations)
     
     def get_model_description(self):
         return self.xmldoc

@@ -30,6 +30,7 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.lang.InterruptedException;
 import java.lang.StringBuilder;
+import java.nio.channels.FileChannel;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -121,6 +122,13 @@ public class ModelicaCompiler {
 	public static final String ERROR = "e";
 	public static final String INHERITED = "inh";
 	protected static final HashMap<String, Level> levels = new HashMap<String, Level>();
+	
+	protected static final String WIN_32 = "win32";
+	protected static final String WIN_64 = "win64";
+	protected static final String DAR_32 = "darwin32";
+	protected static final String DAR_64 = "darwin64";
+	protected static final String LIN_32 = "linux32";
+	protected static final String LIN_64 = "linux64";
 	
 	// This should be two static blocks, but jastadd ignores those, so this is a workaround
 	private static void staticBlocks() {
@@ -800,11 +808,13 @@ public class ModelicaCompiler {
 		// compile mo-file + generate code for all templates that are not null
 		FClass fc = compileModel(fileName, className);
 		
-		// compile c code if c template is not null
+		// compile c code if target is not null
 		hookCheckAbort();
 		if (target != null) {
 			String cFileName = FClass.convertClassNameToUnderscore(className);
-			getCCompiler().compileCCode(cFileName, target, outDir, fc.externalLibraries(), fc.externalLibraryDirectories(), fc.externalIncludeDirectories());
+			CCompilerDelegator ccompiler = getCCompiler();
+			ccompiler.compileCCode(cFileName, target, outDir, fc.externalLibraries(), fc.externalLibraryDirectories(), fc.externalIncludeDirectories());
+			ccompiler.copySharedLibs(outDir, fc.externalLibraries(), fc.externalLibraryDirectories());
 		}
 		hookCodeCompiled();
 		
@@ -1742,6 +1752,7 @@ public class ModelicaCompiler {
 		
 		return platform;
 	}
+
 	
 	/**
 	 * Class which can be used to fetch static loggers with different purposes.
@@ -2002,6 +2013,36 @@ public abstract class CCompilerDelegator {
 	abstract public void compileCCode(String fileName, String target, File workDir, 
 			Set<String> ext_libs, Set<String> ext_lib_dirs, Set<String> ext_incl_dirs);
 	
+	abstract protected String[] getTargetPlatforms();
+	
+	/**
+	 * Copy shared libs to binaries[\<platform>] folder.
+	 */
+	public void copySharedLibs(File outDir, Set<String> ext_libs, 
+			Set<String> ext_lib_dirs) {
+		for (String platform : getTargetPlatforms()) {
+			StringOperation po = new PlatformDirOperation(platform);
+			StringOperation sh = new SharedLibOperation(platform);
+			for (String dir : ext_lib_dirs) {
+				String dirpath = po.op(dir);
+				for (String lib : ext_libs) {
+					String libname = sh.op(lib);
+					File shlib = new File(dirpath, libname);
+					if (shlib.exists()) {
+						String destfile = "binaries" + File.separator + platform + File.separator + libname; 
+						File destdir = new File(outDir, destfile);
+						try {
+							copyFile(shlib, destdir);
+						} catch (IOException e) {
+							// TODO: this should result in an error message about failing copy shared libs
+							e.printStackTrace();
+						}
+					}
+				}
+			}
+		}
+	}
+	
 	/**
 	 * Set the environment to pass to any external processes.
 	 */
@@ -2011,6 +2052,134 @@ public abstract class CCompilerDelegator {
 	
 	public Map<String, String> getEnv() {
 		return env;
+	}
+	
+	/**
+	 * Format a list of values into space-separated.
+	 */
+	protected String varFromList(Collection<String> list) {
+		return varFromList(list, StringOperation.NULL_OP);
+	}
+	
+	/**
+	 * Format a list of values into a form understood by make (i.e. space-separated).
+	 * 
+	 * Applies op to each value before adding it to the result.
+	 */
+	protected String varFromList(Collection<String> list, StringOperation op) {
+		StringBuilder buf = new StringBuilder();
+		String prefix = "";
+		for (String str : list) {
+			str = op.op(str);
+			if (str != null) {
+				buf.append(prefix);
+				buf.append(str);
+				prefix = " ";
+			}
+		}
+		return (buf.length() == 0) ? null : buf.toString();
+	}
+	
+	protected static interface StringOperation {
+		
+		public static final StringOperation NULL_OP = new StringOperation() {
+			public String op(String str) { return str; }
+		};
+		
+		public String op(String str);
+		
+	}
+	
+	protected static class ChainedOperations implements StringOperation {
+		
+		private StringOperation[] ops;
+		
+		public ChainedOperations(StringOperation... ops) {
+			this.ops = ops;
+		}
+		
+		public String op(String path) {
+			for (StringOperation op : ops)
+				path = op.op(path);
+			return path;
+		}
+		
+	}
+	
+	protected static class QuoteOperation implements StringOperation {
+		
+		private String prefix;
+		
+		public QuoteOperation() {
+			this("");
+		}
+		
+		public QuoteOperation(String prefix) {
+			this.prefix = prefix;
+		}
+		
+		public String op(String path) {
+			return String.format("%s\\\"%s\\\"", prefix, path);
+		}
+		
+	}
+	
+	protected static class PlatformDirOperation implements StringOperation {
+		
+		private String platform;
+		
+		public PlatformDirOperation(String platform) {
+			this.platform = platform;
+		}
+		
+		public String op(String path) {
+			File f = new File(path, platform);
+			return f.isDirectory() ? f.getPath() : path;
+		}
+		
+	}
+	
+	protected static class SharedLibOperation implements StringOperation {
+		
+		private String platform;
+		
+		public SharedLibOperation(String platform) {
+			this.platform = platform;
+		}
+		
+		public String op(String library) {
+			if (platform.startsWith("win")) 
+				return library += ".dll";
+			else
+				return library += ".so";
+		}
+
+	}
+	
+	
+	protected static void copyFile(File sourceFile, File destFile) throws IOException {
+		
+		if(!destFile.exists()) {
+			destFile.createNewFile();
+		}
+
+		FileChannel source = null;
+		FileChannel destination = null;
+		try {
+			source = new FileInputStream(sourceFile).getChannel();
+			destination = new FileOutputStream(destFile).getChannel();
+			long count =0;
+			long size = source.size();                
+			while( (count += destination.transferFrom(source, 0, size-count)) < size);
+		}
+		
+		finally {
+			if(source != null) 
+				source.close();
+			
+			if(destination != null)
+				destination.close();
+		}
 	}
 	
 }
@@ -2123,92 +2292,7 @@ public class GccCompilerDelegator extends CCompilerDelegator {
 			}
 		}
 	}
-	
-	/**
-	 * Format a list of values into a form understood by make (i.e. space-separated).
-	 */
-	protected String varFromList(Collection<String> list) {
-		return varFromList(list, StringOperation.NULL_OP);
-	}
-	
-	/**
-	 * Format a list of values into a form understood by make (i.e. space-separated).
-	 * 
-	 * Applies op to each value before adding it to the result.
-	 */
-	protected String varFromList(Collection<String> list, StringOperation op) {
-		StringBuilder buf = new StringBuilder();
-		String prefix = "";
-		for (String str : list) {
-			str = op.op(str);
-			if (str != null) {
-				buf.append(prefix);
-				buf.append(str);
-				prefix = " ";
-			}
-		}
-		return (buf.length() == 0) ? null : buf.toString();
-	}
-	
-	protected static interface StringOperation {
 		
-		public static final StringOperation NULL_OP = new StringOperation() {
-			public String op(String str) { return str; }
-		};
-		
-		public String op(String str);
-		
-	}
-	
-	protected static class ChainedOperations implements StringOperation {
-		
-		private StringOperation[] ops;
-		
-		public ChainedOperations(StringOperation... ops) {
-			this.ops = ops;
-		}
-		
-		public String op(String path) {
-			for (StringOperation op : ops)
-				path = op.op(path);
-			return path;
-		}
-		
-	}
-	
-	protected static class QuoteOperation implements StringOperation {
-		
-		private String prefix;
-		
-		public QuoteOperation() {
-			this("");
-		}
-		
-		public QuoteOperation(String prefix) {
-			this.prefix = prefix;
-		}
-		
-		public String op(String path) {
-			return String.format("%s\\\"%s\\\"", prefix, path);
-		}
-		
-	}
-	
-	protected static class PlatformDirOperation implements StringOperation {
-		
-		private String platform;
-		
-		public PlatformDirOperation(String platform) {
-			this.platform = platform;
-		}
-		
-		public String op(String path) {
-			File f = new File(path, platform);
-			return f.isDirectory() ? f.getPath() : path;
-		}
-		
-	}
-	
 }
 
 }

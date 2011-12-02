@@ -31,7 +31,7 @@ from lxml import etree
 
 import jmodelica.jmi
 from jmodelica import xmlparser
-from jmodelica.core import BaseModel, unzip_unit, get_unit_name, get_temp_location
+from jmodelica.core import BaseModel, unzip_unit, get_unit_name, get_platform_suffix, get_files_in_archive, rename_to_tmp
 from jmodelica.compiler import _get_compiler
 
 import matplotlib.pyplot as plt
@@ -240,13 +240,55 @@ def get_fmux_name(class_name):
     return get_unit_name(class_name, unit_type='FMUX')
 
 
+#def unzip_fmu(archive, path='.',  random_name=True):
+#    """
+#    Unzip an FMU.
+#    
+#    Looks for a model description XML file and a binary file and returns the 
+#    result in a dict with the key words: 'model_desc' and 'binary' resp. Any 
+#    file not found will result in an exception being raised.
+#    
+#    Parameters::
+#        
+#        archive --
+#            The archive file name.
+#            
+#        path --
+#            The path to the archive file.
+#            Default: Current directory.
+#            
+#    Raises::
+#    
+#        IOError if any file is missing in the FMU.
+#    """
+#    fmu_files = unzip_unit(archive, path, random_name)
+#    
+#    # check if all files have been found during unzip
+#    if fmu_files['model_desc'] == None:
+#        raise IOError('model description XML file not found in FMU file '+str(archive))
+#    
+#    if fmu_files['binary'] == None:
+#        raise IOError('binary file not found in FMU file '+str(archive))
+#    
+#    return fmu_files
+
 def unzip_fmu(archive, path='.',  random_name=True):
     """
     Unzip an FMU.
     
-    Looks for a model description XML file and a binary file and returns the 
-    result in a dict with the key words: 'model_desc' and 'binary' resp. Any 
-    file not found will result in an exception being raised.
+    Looks for a model description XML file and a binaries directory and returns 
+    the result in a dict with the key:value pairs:
+            - root : Root of archive (same as path)
+            - model_desc : XML description of model (required)
+            - image : Image file of model icon (optional)
+            - documentation_dir : Directory containing the model documentation (optional)
+            - sources_dir : Directory containing source files (optional)
+            - binaries_dir : Directory containing the binaries (required)
+            - resources_dir : Directory containing resources needed by the model (optional)
+    
+    
+     If the model_desc and/or binaries_dir are not found, an exception will be 
+     raised.
     
     Parameters::
         
@@ -261,14 +303,15 @@ def unzip_fmu(archive, path='.',  random_name=True):
     
         IOError if any file is missing in the FMU.
     """
-    fmu_files = unzip_unit(archive, path, random_name)
+    tmp_dir = unzip_unit(archive, path, random_name)
+    fmu_files = get_files_in_archive(tmp_dir)
     
-    # check if all files have been found during unzip
+    # check if all obligatory files (but the binary) have been found during unzip
     if fmu_files['model_desc'] == None:
-        raise IOError('model description XML file not found in FMU file '+str(archive))
+        raise IOError('ModelDescription.xml not found in FMU archive: '+str(archive))
     
-    if fmu_files['binary'] == None:
-        raise IOError('binary file not found in FMU file '+str(archive))
+    if fmu_files['binaries_dir'] == None:
+        raise IOError('binaries folder not found in FMU archive: '+str(archive))
     
     return fmu_files
 
@@ -294,11 +337,12 @@ def unzip_fmux(archive, path='.'):
     
         IOError the model description XML file is missing in the FMU.
     """
-    fmux_files = unzip_unit(archive, path)
+    tmpdir = unzip_unit(archive, path)
+    fmux_files = get_files_in_archive(tmpdir)
     
     # check if all files have been found during unzip
     if fmux_files['model_desc'] == None:
-        raise IOError('model description XML file not found in FMUX file '+str(archive))
+        raise IOError('ModelDescription.xml not found in FMUX archive: '+str(archive))
     
     return fmux_files
 
@@ -323,36 +367,26 @@ class FMUModel(BaseModel):
         ext = os.path.splitext(fmu)[1]
         if ext != ".fmu":
             raise FMUException("FMUModel must be instantiated with an FMU (.fmu) file.")
-                
-        #Detect Platform
-        platform = ''
         
-        if sys.platform == 'win32':
-            suffix = '.dll'
-        elif sys.platform == 'darwin':
-            suffix = '.dylib'
-        else:
-            suffix = '.so'
-
-            
-        #Create temp binary
-        self._tempnames = unzip_fmu(archive=fmu, path=path, random_name=reload_dll)
-        self._tempdll = self._tempnames['binary']
-        self._tempxml = self._tempnames['model_desc']
-        self._tempdir = get_temp_location()
+        # unzip unit and get files in archive
+        self._fmufiles = unzip_fmu(archive=fmu, path=path, random_name=reload_dll)
+        self._tempxml = self._fmufiles['model_desc']
+        
+        # Parse XML and set model name (needed when creating temp bin file name)
+        self._parse_xml(self._tempxml)
+        self._modelname = self.get_name().replace('.','_')
+        
+        # find model binary in binaries folder and rename to something unique
+        suffix = get_platform_suffix()
+        self._tempdll = self._fmufiles['binary'] = rename_to_tmp(self._modelname + suffix, self._fmufiles['binaries_dir'])
         
         #Retrieve and load the binary
-        self._dll = jmodelica.jmi.load_DLL(
-            self._tempdll[:-len(suffix)],self._tempdir)
+        dllname = self._tempdll.split(os.sep)[-1]
+        dllname = dllname[:-len(suffix)]
+        self._dll = jmodelica.jmi.load_DLL(dllname,self._fmufiles['binaries_dir'])
         
         #Load calloc and free
         self._load_c()
-        
-        # Parse XML
-        self._parse_xml(self._tempdir+os.sep+self._tempxml)
-         
-        #Set model name
-        self._modelname = self.get_name().replace('.','_')
 
         #Set FMIModel Typedefs
         self._set_fmimodel_typedefs()
@@ -426,7 +460,7 @@ class FMUModel(BaseModel):
         
         
     def _parse_xml(self, fname):
-            self._md = xmlparser.ModelDescription(self._tempdir+os.sep+self._tempxml)
+            self._md = xmlparser.ModelDescription(fname)
     
     def _load_xml(self):
         """
@@ -1883,10 +1917,10 @@ class FMUModel(BaseModel):
             self._fmiFreeModelInstance(self._model)
            
         #Remove the temporary xml
-        os.remove(self._tempdir+os.sep+self._tempxml)
+        os.remove(self._tempxml)
         #Remove the temporary binary
         try:
-            os.remove(self._tempdir+os.sep+self._tempdll)
+            os.remove(self._tempdll)
         except:
             print 'Failed to remove temporary dll ('+ self._tempdll+').'
 
@@ -1898,7 +1932,7 @@ class FMUModel2(FMUModel):
     """
 
     def _parse_xml(self, fname):
-            self._md = xmlparser.ModelDescription2(self._tempdir+os.sep+self._tempxml)
+            self._md = xmlparser.ModelDescription2(fname)
 
     def _set_fmimodel_typedefs(self):
         """

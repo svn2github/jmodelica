@@ -37,7 +37,7 @@ import atexit
 from lxml import etree
 
 from jmodelica import xmlparser
-from jmodelica.core import BaseModel, unzip_unit, get_unit_name, get_temp_location
+from jmodelica.core import BaseModel, unzip_unit, get_unit_name, get_platform_suffix, get_files_in_archive, rename_to_tmp
 from jmodelica.compiler import _get_compiler
 import jmodelica.io
 from jmodelica.core import TrajectoryLinearInterpolation
@@ -390,14 +390,28 @@ class JMUModel(BaseModel):
             jmu_name --
                 Whole name of JMU file, including path.
         """
-        # extract files from JMU
-        path, jmu_name = os.path.split(jmu_name)
-        jmu_files = unzip_jmu(jmu_name, path, random_name=reload_dll)
-        lib_name = jmu_files['binary']
-        self._xml_name = jmu_files['model_desc']
-        self._xml_values_name = jmu_files['model_values']
+        # Check that the file referenced by jmu_name has the correct file-ending
+        ext = os.path.splitext(jmu_name)[1]
+        if ext != ".jmu":
+            raise FMUException("JMUModel must be instantiated with an JMU (.jmu) file.")
         
-        self.jmimodel = JMIModel(lib_name)
+        # unzip unit and get files in archive
+        path, jmu_name = os.path.split(jmu_name)
+        self._jmufiles = unzip_jmu(archive=jmu_name, path=path, random_name=reload_dll)
+        self._xml_name = self._jmufiles['model_desc']
+        
+        # Parse XML and set model name (needed when creating temp bin file name)
+        self._parse_xml_md(self._xml_name)
+        self._modelname = self.get_name()
+        
+        # extract XML values file from JMU and parse
+        self._xml_values_name = os.path.join(self._jmufiles['resources_dir'], self._modelname+'_values.xml')
+        self._parse_xml_values(self._xml_values_name)
+        
+        #Retrieve, rename and load the binary
+        suffix = get_platform_suffix()
+        lib_name = self._jmufiles['binary'] = rename_to_tmp(self._modelname + suffix, self._jmufiles['binaries_dir'])
+        self.jmimodel = JMIModel(lib_name, self._jmufiles['binaries_dir'])
 
         # sizes of all arrays
         self._n_real_ci = ct.c_int()
@@ -536,8 +550,18 @@ class JMUModel(BaseModel):
                 dtype=ct.c_int,
                 ndim=1,
                 shape=self._n_p_opt,
-                flags='C')]  
-                
+                flags='C')]
+        
+    def _parse_xml_md(self, fname):
+        # xml file has been unzipped from JMU and is located in the 
+        # tempdir specified by core.get_temp_location()
+        self._set_XMLDoc(xmlparser.ModelDescription(fname))
+        
+    def _parse_xml_values(self, fname):
+        # xml file has been unzipped from JMU and is located in the 
+        # tempdir specified by core.get_temp_location()
+        self._set_XMLValuesDoc(xmlparser.IndependentParameters(fname))
+               
     def _setDefaultValuesFromMetadata(self, libname=None, path=None):
         """ 
         Load metadata saved in XML files.
@@ -545,17 +569,10 @@ class JMUModel(BaseModel):
         Meta data can be things like time points, initial states, initial cost 
         etc.
         """
-        # xml file has been unzipped from JMU and is located in the 
-        # tempdir specified by core.get_temp_location()
-        self._set_XMLDoc(xmlparser.ModelDescription(os.path.join(
-            get_temp_location(),self._xml_name)))
-        
         self._set_scaling_factors()
         self._set_start_attributes()
 
         # set independent parameter values
-        self._set_XMLValuesDoc(xmlparser.IndependentParameters(os.path.join(
-            get_temp_location(),self._xml_values_name)))
         self._set_iparam_values()
 
         # set optimizataion interval, time points and optimization 
@@ -2447,12 +2464,11 @@ class JMUModel(BaseModel):
         """
         if filename:
             if os.path.exists(filename):
-                self._set_XMLValuesDoc(xmlparser.IndependentParameters(filename))
+                self._parse_xml_values(filename)
             else:
                 raise IOError("The file: "+filename+" could not be found.")
         else:
-            self._set_XMLValuesDoc(xmlparser.IndependentParameters(
-                os.path.join(get_temp_location(),self._xml_values_name)))
+            self._parse_xml_values(self._xml_values_name)
             
         self._set_iparam_values(self._get_XMLValuesDoc())
         
@@ -2476,8 +2492,7 @@ class JMUModel(BaseModel):
         
         # create temp XMLValuesDoc from the xml values file for writing 
         # the new parameters to
-        temp_doc = xmlparser.IndependentParameters(os.path.join(get_temp_location(),
-            self._xml_values_name))
+        temp_doc = xmlparser.IndependentParameters(self._xml_values_name)
         
         # get all parameters
         parameters = temp_doc.get_all_parameters()
@@ -2506,8 +2521,7 @@ class JMUModel(BaseModel):
                 os.mkdir(dir)
             temp_doc.write_to_file(filename)
         else:
-            temp_doc.write_to_file(os.path.join(get_temp_location(), 
-                self._xml_values_name))
+            temp_doc.write_to_file(self._xml_values_name)
             
     def get_aliases_for_variable(self, variable):
         """ 
@@ -2676,24 +2690,17 @@ class JMIModel(object):
         """ 
         Create a jmi.JMIModel object from a binary file.
         """
-
+        suffix = get_platform_suffix()
         if is_jmu:
-            self._dll = load_DLL(libname, get_temp_location())
+            dllname = libname.split(os.sep)[-1]
+            dllname = dllname[:-len(suffix)]
+            self._dll = load_DLL(dllname, path)
             self._tempfname = libname
         else:
-            # detect platform specific shared library file extension
-            suffix = ''
-            if sys.platform == 'win32':
-                suffix = '.dll'
-            elif sys.platform == 'darwin':
-                suffix = '.dylib'
-            else:
-                suffix = '.so'
-    
-            # create temp dll
+           # create temp dll
             fhandle,self._tempfname = tempfile.mkstemp(suffix=suffix, 
                 dir=get_temp_location())
-            shutil.copyfile(path+os.sep+libname+suffix,self._tempfname)
+            shutil.copyfile(os.path.join(path,libname+suffix),self._tempfname)
             os.close(fhandle)
             fname = self._tempfname.split(os.sep)
             fname = fname[len(fname)-1]
@@ -6251,10 +6258,19 @@ def unzip_jmu(archive, path='.', random_name=True):
     """
     Unzip a JMU.
     
-    Looks for a model description XML file, model values XML file and a binary 
-    file and returns the result in a dict with the key words: 'model_desc', 
-    'model_values' and 'binary' resp. Any file not found will result in an 
-    exception being raised.
+    Looks for a model description XML file, a binaries directory and a resources 
+    directory and returns the result in a dict with the key:value pairs:
+            - root : Root of archive (same as path)
+            - model_desc : XML description of model (required)
+            - image : Image file of model icon (optional)
+            - documentation_dir : Directory containing the model documentation (optional)
+            - sources_dir : Directory containing source files (optional)
+            - binaries_dir : Directory containing the binaries (required)
+            - resources_dir : Directory containing resources needed by the model (optional)
+    
+    
+     If the model_desc and/or binaries_dir and/or resources_dir are not found, 
+     an exception will be raised.
     
     Parameters::
         
@@ -6267,21 +6283,20 @@ def unzip_jmu(archive, path='.', random_name=True):
             
     Raises::
     
-        IOError if any file is missing in the JMU.
+        IOError if any file is missing in the FMU.
     """
-    jmu_files = unzip_unit(archive, path, random_name)
+    tmpdir = unzip_unit(archive, path)
+    jmu_files = get_files_in_archive(tmpdir)
     
-    # check if all files have been found during unzip
+    # check if all obligatory (but the binary and model values) files have been found during unzip
     if jmu_files['model_desc'] == None:
-        raise IOError('model description XML file not found in JMU file '+str(archive))
+        raise IOError('ModelDescription.xml not found in JMU archive: '+str(archive))
     
-    if jmu_files['model_values'] == None:
-        raise IOError('model values XML file not found in JMU file '+str(archive))
+    if jmu_files['resources_dir'] == None:
+        raise IOError('resource directory not found in JMU archive: '+str(archive))
     
-    if jmu_files['binary'] == None:
-        raise IOError('binary file not found in JMU file '+str(archive))
+    if jmu_files['binaries_dir'] == None:
+        raise IOError('binaries directory not found in JMU archive: '+str(archive))
     
     return jmu_files
     
-    
-        

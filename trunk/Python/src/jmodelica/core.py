@@ -257,14 +257,153 @@ class BaseModel(object):
         algorithm = getattr(algdrive, algorithm)
         return algorithm.get_default_options()
 
+
+def get_platform_suffix(type = "dynamic_lib"):
+    """
+    Get the platform dependent suffix based on the file type.
+    
+    Parameters::
+    
+        type --
+            The file type. Currently only dynamic_lib is possible.
+            Default: 'dynamic_lib'
+            
+    Returns::
+    
+        The platform specific file suffix depending on type or empty string if 
+        no possible match was found.
+    """
+    #Detect file suffix depending on type
+    platform = '' 
+    if sys.platform == 'win32':
+        if type == 'dynamic_lib':
+            return '.dll'
+    elif sys.platform == 'darwin':
+        if type == 'dynamic_lib':
+            return '.dylib'
+    else:
+        if type == 'dynamic_lib':
+            return '.so'
+    return ''
+
+def get_platform_dir():
+    """
+    Get the platform specific name of binaries directory.
+    
+    Returns::
+    
+        The name of the binaries directory. Possible values are:
+            - win32
+            - win64
+            - darwin32
+            - darwin64
+            - linux32
+            - linux64
+    """
+    #Detect platform
+    if sys.platform == 'win32':
+        platform = 'win'
+    elif sys.platform == 'darwin':
+        platform = 'darwin'
+    else:
+        platform = 'linux'
+    
+    if PL.architecture()[0].startswith('32'):
+        platform += '32'
+    else:
+        platform += '64'
+        
+    return platform
+
+def rename_to_tmp(filename, path ='.', filetype = 'dynamic_lib'):
+    """
+    Take a file and give it a random temporary name.
+    
+    Parameters::
+    
+        filename --
+            Name of file to rename.
+            
+        path --
+            Path to the file to rename. This is also where the renamed file will 
+            end up.
+            Default: Current directory.
+            
+        filetype --
+            Type of file to rename, used so that platform specific suffixes can 
+            be taken into consideration. Currently only dynamic libary is possible.
+            Default: 'dynamic_lib'
+    """
+    tempfilename = tempfile.mktemp(suffix=get_platform_suffix(filetype), dir=path)
+    shutil.move(os.path.join(path, filename), tempfilename)
+    return tempfilename
+
+def get_files_in_archive(path):
+    """
+    Get paths to all unit files and directories in archive.
+    
+    Parameters::
+    
+        path --
+            The path to the archive directory.
+            
+    Returns::
+        
+        Dict with path to the file or directory as value or None if not found. 
+        Keys are used to access the unit specific files or directories, possible 
+        values are:
+            - root : Root of archive (same as path)
+            - model_desc : XML description of model (required)
+            - image : Image file of model icon (optional)
+            - documentation_dir : Directory containing the model documentation (optional)
+            - sources_dir : Directory containing source files (optional)
+            - binaries_dir : Directory containing the binaries (required)
+            - resources_dir : Directory containing resources needed by the model (optional)
+    """
+    
+    files =  {'root':path, 'model_desc':None, 'image': None, 
+              'documentation_dir': None, 'sources_dir':None, 
+              'binaries_dir': None, 'resources_dir':None}
+    
+    # model description XML file
+    filepath = os.path.join(path, 'modelDescription.xml')
+    if os.path.exists(filepath):
+        files['model_desc'] = filepath
+        
+    # model image file
+    filepath = os.path.join(path, 'model.png')
+    if os.path.exists(filepath):
+        files['image'] = filepath
+    
+    # documentation directory
+    filepath = os.path.join(path, 'documentation')
+    if os.path.exists(filepath):
+        files['documentation_dir'] = filepath
+        
+    # source directory
+    filepath = os.path.join(path, 'sources')
+    if os.path.exists(filepath):
+        files['sources_dir'] = filepath
+        
+    # binaries directory
+    filepath = os.path.join(path, 'binaries', get_platform_dir())
+    if os.path.exists(filepath):
+        files['binaries_dir'] = filepath
+    
+    # resource directory
+    filepath = os.path.join(path, 'resources')
+    if os.path.exists(filepath):
+        files['resources_dir'] = filepath
+        
+    return files
+            
+
 def unzip_unit(archive, path='.', random_name=True):
     """
     Unzip a unit file.
     
-    Looks for a model description XML file, model values XML file and a binary 
-    file and returns the result in a dict with the key words: 'model_desc', 
-    'model_values' and 'binary' resp. Any file not found will result in 'None' 
-    at that position.
+    Extracts all files in archive in temporary location as returned by 
+    get_temp_location().
     
     Parameters::
     
@@ -274,110 +413,32 @@ def unzip_unit(archive, path='.', random_name=True):
         path --
             The path to the archive file.
             Default: Current directory.
+            
+    Returns::
+    
+        Path to the root of the extracted archive.
     """
     # return arg
-    ret_val = {'model_desc':None, 'model_values':None, 'binary':None}
+    #ret_val = {'model_desc':None, 'model_values':None, 'binary':None}
     
+    # unzip whole archive
     try:
         archive = zipfile.ZipFile(os.path.join(path,archive))
     except IOError:
         raise IOError('Could not locate the file: ' + str(archive))
     
-    unit_dirs = ['binaries','sources']
-    
-    # Detect platform and file suffix
-    if sys.platform == 'win32':
-        platform = 'win'
-        suffix = '.dll'
-    elif sys.platform == 'darwin':
-        platform = 'darwin'
-        suffix = '.dylib'
-    else:
-        platform = 'linux'
-        suffix = '.so'
-    
-    if PL.architecture()[0].startswith('32'):
-        platform += '32'
-    else:
-        platform += '64'
-        
     # create JModelica directory for temporary files (if not already created)
     if not os.path.exists(tmp_location):
         os.mkdir(tmp_location)
-        
+
     # create temporary directory
-    tmp_dir = tempfile.mkdtemp(prefix='jm_tmp', dir=tmp_location)
+    tmpdir = tempfile.mkdtemp(prefix='jm_tmp', dir=tmp_location)
     
-    #Extracting the XML
-    for file in archive.filelist:
-        if 'modelDescription.xml' in file.filename:
+    # extract all into temp_dir
+    archive.extractall(path=tmpdir)
+    
+    return tmpdir
 
-            # Extracting the modelDescription.xml file
-            xml_filename = archive.extract(file, tmp_dir)
-            
-            # Rename to temporary file name
-            tempxmlname = tempfile.mktemp(suffix='.xml', dir=tmp_location)
-            os.rename(xml_filename, tempxmlname)
-            
-            # Add to return arg
-            ret_val['model_desc'] = tempxmlname.split(os.sep)[-1]
-            break
-        
-    #Extracting the XML values
-    for file in archive.filelist:
-        if file.filename.endswith('values.xml'):
-            
-            # Extracting the model values xml file
-            xml_filename = archive.extract(file,tmp_dir)
-            
-            # Rename to temporary file name
-            tempxmlvaluesname = tempfile.mktemp(suffix='.xml', dir=tmp_location)
-            os.rename(xml_filename, tempxmlvaluesname)
-            
-            # Add to return arg
-            ret_val['model_values'] = tempxmlvaluesname.split(os.sep)[-1]
-            break
-    
-    #Extrating the binary
-    
-    found_files = [] #Found files
-
-    # Looping over the archive to find correct binary
-    for file in archive.filelist: 
-        if unit_dirs[0] in file.filename and platform in file.filename and \
-            file.filename.endswith(suffix): 
-            # Binary directory found
-            found_files.append(file)
-    
-    if found_files:
-        # Find where dll should be
-        dllname = found_files[0].filename.split('/')[-1] 
-        
-        extract_dll = True
-        if random_name:
-            # Create temporary file name
-            tempdllname = tempfile.mktemp(suffix=suffix, dir=tmp_location)
-        else:
-            tempdllname = os.path.join(tmp_location, dllname)
-            if os.path.isfile(tempdllname):
-                extract_dll = False
-                print 'Re-using already extracted binary at ' + tempdllname
-        
-        # Unzip
-        if extract_dll:
-            # Extracting the binary file
-            bin_filename = archive.extract(found_files[0],tmp_dir)
-             # Rename to temporary file name
-            os.rename(bin_filename, tempdllname)
-        
-            
-        # Add to return arg
-        ret_val['binary'] = tempdllname.split(os.sep)[-1]
-            
-    # Delete tmp_dir
-    shutil.rmtree(tmp_dir)
-        
-    return ret_val
         
 def get_unit_name(class_name, unit_type='JMU'):
     """
@@ -406,6 +467,13 @@ def get_unit_name(class_name, unit_type='JMU'):
         raise Exception("The unit type %s is unknown" %unit_type)
         
 def get_temp_location():
+    """
+    Get the directory where the temporary files are placed.
+    
+    Returns::
+    
+        The location of temporary files.
+    """
     return tmp_location
 
 def list_to_string(item_list):
