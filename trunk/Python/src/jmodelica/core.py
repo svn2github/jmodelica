@@ -398,7 +398,7 @@ def get_files_in_archive(path):
     return files
             
 
-def unzip_unit(archive, path='.', random_name=True):
+def unzip_unit(archive, path='.'):
     """
     Unzip a unit file.
     

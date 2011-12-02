@@ -394,7 +394,7 @@ class JMUModel(BaseModel):
     High-level interface to a JMIModel. 
     """
     
-    def __init__(self, jmu_name, reload_dll=True):
+    def __init__(self, jmu_name):
         """ 
         Create a jmi.JMUModel. 
         
@@ -414,7 +414,7 @@ class JMUModel(BaseModel):
         
         # unzip unit and get files in archive
         path, jmu_name = os.path.split(jmu_name)
-        self._jmufiles = unzip_jmu(archive=jmu_name, path=path, random_name=reload_dll)
+        self._jmufiles = unzip_jmu(archive=jmu_name, path=path)
         self._xml_name = self._jmufiles['model_desc']
         
         # Parse XML and set model name (needed when creating temp bin file name)
@@ -6271,7 +6271,7 @@ def compile_jmu(class_name, file_name=[], compiler='auto', target='ipopt',
     return os.path.join(compile_to, get_jmu_name(class_name))
 
 
-def unzip_jmu(archive, path='.', random_name=True):
+def unzip_jmu(archive, path='.'):
     """
     Unzip a JMU.
     

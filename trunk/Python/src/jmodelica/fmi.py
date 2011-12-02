@@ -240,39 +240,7 @@ def get_fmux_name(class_name):
     return get_unit_name(class_name, unit_type='FMUX')
 
 
-#def unzip_fmu(archive, path='.',  random_name=True):
-#    """
-#    Unzip an FMU.
-#    
-#    Looks for a model description XML file and a binary file and returns the 
-#    result in a dict with the key words: 'model_desc' and 'binary' resp. Any 
-#    file not found will result in an exception being raised.
-#    
-#    Parameters::
-#        
-#        archive --
-#            The archive file name.
-#            
-#        path --
-#            The path to the archive file.
-#            Default: Current directory.
-#            
-#    Raises::
-#    
-#        IOError if any file is missing in the FMU.
-#    """
-#    fmu_files = unzip_unit(archive, path, random_name)
-#    
-#    # check if all files have been found during unzip
-#    if fmu_files['model_desc'] == None:
-#        raise IOError('model description XML file not found in FMU file '+str(archive))
-#    
-#    if fmu_files['binary'] == None:
-#        raise IOError('binary file not found in FMU file '+str(archive))
-#    
-#    return fmu_files
-
-def unzip_fmu(archive, path='.',  random_name=True):
+def unzip_fmu(archive, path='.'):
     """
     Unzip an FMU.
     
@@ -303,7 +271,7 @@ def unzip_fmu(archive, path='.',  random_name=True):
     
         IOError if any file is missing in the FMU.
     """
-    tmp_dir = unzip_unit(archive, path, random_name)
+    tmp_dir = unzip_unit(archive, path)
     fmu_files = get_files_in_archive(tmp_dir)
     
     # check if all obligatory files (but the binary) have been found during unzip
@@ -358,7 +326,7 @@ class FMUModel(BaseModel):
     An FMI Model loaded from a DLL.
     """
     
-    def __init__(self, fmu, path='.', reload_dll=True, enable_logging=False):
+    def __init__(self, fmu, path='.', enable_logging=False):
         """
         Constructor.
         """
@@ -369,7 +337,7 @@ class FMUModel(BaseModel):
             raise FMUException("FMUModel must be instantiated with an FMU (.fmu) file.")
         
         # unzip unit and get files in archive
-        self._fmufiles = unzip_fmu(archive=fmu, path=path, random_name=reload_dll)
+        self._fmufiles = unzip_fmu(archive=fmu, path=path)
         self._tempxml = self._fmufiles['model_desc']
         
         # Parse XML and set model name (needed when creating temp bin file name)

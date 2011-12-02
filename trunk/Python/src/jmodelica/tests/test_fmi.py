@@ -83,14 +83,6 @@ class Test_FMI:
         pass
         
     @testattr(fmi = True)
-    def test_same_dll(self):
-        """ Test that we can load the model multiple times with reload_dll = False. """
-        i = 0
-        while i < 50:
-            i = i + 1
-            model = FMUModel('bouncingBall.fmu', path_to_fmus, reload_dll=False)
-        
-    @testattr(fmi = True)
     def test_boolean(self):
         """
         This tests the functionality of setting/getting fmiBoolean.
