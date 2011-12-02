@@ -2119,9 +2119,12 @@ public abstract class CCompilerDelegator {
 		}
 		
 		public String op(String path) {
-			return String.format("%s\\\"%s\\\"", prefix, path);
-		}
-		
+			if (ModelicaCompiler.getPlatform().startsWith("win")) {
+				return String.format("%s\\\"%s\\\"", prefix, path);
+			} else {
+				return String.format("%s\"%s\"", prefix, path);
+			}		
+		}	
 	}
 	
 	protected static class PlatformDirOperation implements StringOperation {
