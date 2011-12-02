@@ -67,8 +67,8 @@ aspect TransformCanonical {
 	  *  done by both the Modelica and the Optimica compilers.
 	  */
 	public void FClass.transformCanonicalBase() {
-		genBindingEquations();
 		genAlgorithmFunctions();
+		genBindingEquations();
 		scalarize();
 		
 		// This must be done after scalarization
@@ -370,6 +370,10 @@ aspect TransformCanonical {
 		public abstract ArrayList<FAbstractEquation> equations();
 		
 		public abstract ArrayList<FVariable> activeVariables();
+
+		public ArrayList<FVariable> iterationVariables() {
+			return activeVariables();
+		}
 		
 		public ArrayList<FVariable> inactiveVariables() {
 			ArrayList<FVariable> s = new ArrayList<FVariable>();
@@ -759,6 +763,10 @@ aspect TransformCanonical {
 		}
 		
 		public ArrayList<FVariable> activeVariables() {
+			return null;
+		}	
+		
+		public ArrayList<FVariable> iterationVariables() {
 			ArrayList<FVariable> s = new ArrayList<FVariable>();
 			for (MatchingPair mp : unsolvedPairs) {
 				s.add(mp.getFVariable());
@@ -2482,8 +2490,27 @@ aspect TransformCanonical {
 		for (FVariable fv : getFVariables()) 
 			if (!fv.isConstant()) 
 				fv.genBindingEquations(this, empty);
+		for (FFunctionDecl ffd : getFFunctionDecls())
+			ffd.genBindingAssignments();
 //		flush();
 		flushAllRecursive();
+	}
+	
+	public void FFunctionDecl.genBindingAssignments() {
+		// TODO: To support Modelica 3.3, we need to sort the assignments
+		List<FStatement> stmts = new List<FStatement>();
+		for (FFunctionVariable ffv : getFFunctionVariables())
+			ffv.genBindingAssignments(stmts);
+		for (FStatement stmt : getFAlgorithmBlock().getFStatements())
+			stmts.add(stmt);
+		getFAlgorithmBlock().setFStatementList(stmts);
+	}
+	
+	public void FFunctionVariable.genBindingAssignments(List<FStatement> stmts) {
+		if (!isInput() && hasBindingExp()) {
+			stmts.add(new FAssignStmt(getFQName().createFIdUse(), getBindingExp()));
+			setBindingExpOpt(new Opt());
+		}
 	}
 	
 	public FExp FVariable.selectBindingFExp(FAttribute attr) {

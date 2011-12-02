@@ -255,35 +255,33 @@ class TestNominal(OptimizationTest):
             "NominalTests_NominalOptTest2_result.txt")
         self.assert_all_trajectories(['x', 'der(x)', 'u'])
 
-
-class TestFunction1(OptimizationTest):
-
-    @classmethod
-    def setUpClass(cls):
-        OptimizationTest.setup_class_base(
-            'FunctionAR_opt.mop', 'FunctionAR.UnknownArray1')
-
-    @testattr(ipopt = True)
-    def setUp(self):
-        n_e = 50
-        hs = N.ones(n_e)*1./n_e
-        n_cp = 3
-        self.setup_base(rel_tol=1.0e-2, 
-                        abs_tol=1.0e-2,
-                        opt_options = {'n_e':n_e,
-                                       'hs':hs,
-                                       'n_cp':n_cp,
-                                       'IPOPT_options':{'max_iter': 500}})
-        self.run()
-        self.load_expected_data('UnknownArray.txt')
-
-    @testattr(ipopt = True)
-    def test_trajectories(self):
-        vars = ['x[%d]' % i for i in range(1, 4)]
-        self.assert_all_trajectories(vars, same_span=True)
+#class TestFunction1(OptimizationTest):
+#
+#    @classmethod
+#    def setUpClass(cls):
+#        OptimizationTest.setup_class_base(
+#            'FunctionAR_opt.mop', 'FunctionAR.UnknownArray1')
+#
+#    @testattr(ipopt = True)
+#    def setUp(self):
+#        n_e = 50
+#        hs = N.ones(n_e)*1./n_e
+#        n_cp = 3
+#        self.setup_base(rel_tol=1.0e-2, 
+#                        abs_tol=1.0e-2,
+#                        opt_options = {'n_e':n_e,
+#                                       'hs':hs,
+#                                       'n_cp':n_cp,
+#                                       'IPOPT_options':{'max_iter': 500}})
+#        self.run()
+#        self.load_expected_data('UnknownArray.txt')
+#
+#    @testattr(ipopt = True)
+#    def test_trajectories(self):
+#        vars = ['x[%d]' % i for i in range(1, 4)]
+#        self.assert_all_trajectories(vars, same_span=True)
  
-
-class TestFunction1(OptimizationTest):
+class TestFunction2(OptimizationTest):
 
     @classmethod
     def setUpClass(cls):
@@ -292,7 +290,7 @@ class TestFunction1(OptimizationTest):
 
     @testattr(ipopt = True)
     def setUp(self):
-        n_e = 50
+        n_e = 20
         hs = N.ones(n_e)*1./n_e
         n_cp = 3
         self.setup_base(rel_tol=1.0e-2, 

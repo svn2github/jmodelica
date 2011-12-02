@@ -323,8 +323,8 @@ aspect Scalarization {
 		FFunctionVariable var = (FFunctionVariable) fullCopy();
 		var.getType().updateFUnknownSizeExps(var);
 		var.setBindingExpOpt(new Opt());
-		if (hasBindingExp() && !isInput())
-			scalarizeBindingExp(vars, stmts, indexMap);
+//		if (hasBindingExp() && !isInput())
+//			scalarizeBindingExp(vars, stmts, indexMap);
 		vars.add(var);
 	}
 	
@@ -613,8 +613,19 @@ aspect Scalarization {
 			indexMap.put(name(), new FIdUseExp(use));
 		}
 	}
+		
+	public void FFunctionCall.addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names) {
+		if (isComposite() && functionCallIsExp())
+			useTempVarAndAddUseToIndexMap(indexMap, names);
+		else
+			super.addArrayUsesToIndexMap(indexMap, names);
+	}
 	
 	public void FArray.addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names) {
+		useTempVarAndAddUseToIndexMap(indexMap, names);
+	}
+	
+	public void FExp.useTempVarAndAddUseToIndexMap(Map<String,FExp> indexMap, ForNames names) {
 		useTempVar = true;
 		FIdUse use = new FIdUse(tempVarName());
 		use.getFQName().setLastFArraySubscripts(names.createFArraySubscripts());

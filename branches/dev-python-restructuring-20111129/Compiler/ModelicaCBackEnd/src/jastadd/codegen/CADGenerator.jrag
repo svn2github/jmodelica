@@ -157,7 +157,7 @@ public class CADGenerator extends CGenerator {
 				for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks()) {
 				    if (!block.isSolvable()) {
 						genPrinter.print(" jmi_dae_add_equation_block(*jmi,dae_block_" + 
-							block_counter + "," + "dae_block_dir_der_" + block_counter + ","+ block.activeVariables().size() + ",0," + 
+							block_counter + "," + "dae_block_dir_der_" + block_counter + ","+ block.iterationVariables().size() + ",0," + 
 							block_counter + " );\n");
 						block_counter++;
 					}
@@ -182,7 +182,7 @@ public class CADGenerator extends CGenerator {
 				for (AbstractEquationBlock block : fclass.getDAEInitBLT()) {
 				    if (!block.isSolvable()) {
 						genPrinter.print(" jmi_dae_init_add_equation_block(*jmi,dae_init_block_" + 
-							block_counter + "," + "dae_init_block_dir_der_" + block_counter + "," + block.activeVariables().size() + ",0," + 
+							block_counter + "," + "dae_init_block_dir_der_" + block_counter + "," + block.iterationVariables().size() + ",0," + 
 							block_counter + ");\n");
 						block_counter++;
 					}

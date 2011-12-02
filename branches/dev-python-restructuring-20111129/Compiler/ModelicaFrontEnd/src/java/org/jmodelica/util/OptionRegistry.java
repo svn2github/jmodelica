@@ -118,7 +118,9 @@ public class OptionRegistry {
 					"Export used Modelica functions to generated C code in a manner that is compatible with the " +
 					"external C interface in the Modelica Language Specification (default is false)"),
 			EXPORT_FUNCS_VBA ("export_functions_vba", false, 
-					"Create VBA-compatible wrappers for exported functions (default is false). Requires export_functions");
+					"Create VBA-compatible wrappers for exported functions (default is false). Requires export_functions"), 
+			INLINE_FUNCS ("inline_functions", false, 
+					"Perform function inlining on model after flattening (default is false)");
 						
 			public String key;
 			public String desc;
