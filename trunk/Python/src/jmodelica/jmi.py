@@ -278,8 +278,6 @@ def get_platform_libpath():
     #Detect libray path depending on platform
     if sys.platform == 'win32':
         return 'PATH'
-    elif sys.platform == 'darwin':
-        return 'DYLD_LIBRARY_PATH'
     else:
         return 'LD_LIBRARY_PATH'
 
@@ -316,7 +314,12 @@ def load_DLL(libname, path):
     # is dependent on other dlls. In that case they should be located in 'path'. 
     libpath = get_platform_libpath()
     oldpath = os.getenv(libpath)
-    newpath = path + ";" + oldpath
+    if oldpath == None:
+        oldpath = ''
+    if sys.platform == 'win32':
+        newpath = path + ";" + oldpath
+    else:
+        newpath = path + ":" + oldpath
     os.putenv(libpath, newpath)
     # Don't catch this exception since it hides the actual source
     # of the error.
