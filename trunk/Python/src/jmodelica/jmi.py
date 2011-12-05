@@ -313,7 +313,12 @@ def load_DLL(libname, path):
     # Temporarily add the value of 'path' to system library path in case the dll 
     # is dependent on other dlls. In that case they should be located in 'path'. 
     libpath = get_platform_libpath()
-    oldpath = os.environ[libpath]
+    
+    if os.environ.has_key(libpath):
+        oldpath = os.environ[libpath]
+    else:
+        oldpath = None
+    
     if oldpath is not None:
         newpath = path + os.pathsep + oldpath
     else:
