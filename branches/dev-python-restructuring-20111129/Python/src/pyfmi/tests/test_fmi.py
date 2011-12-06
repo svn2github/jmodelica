@@ -23,11 +23,11 @@ import nose
 import os as O
 import numpy as N
 import sys as S
-from jmodelica.tests import testattr
-from jmodelica.tests import get_files_path
-from jmodelica.fmi import *
-import jmodelica.algorithm_drivers as ad
-from jmodelica.core import get_platform_dir
+from pyfmi.tests import testattr
+from pyfmi.tests import get_files_path
+from pyfmi.fmi import *
+import pyfmi.fmi_algorithm_drivers as ad
+from pyfmi.common.core import get_platform_dir
 
 path_to_fmus = O.path.join(get_files_path(), 'FMUs')
 path_to_mofiles = O.path.join(get_files_path(), 'Modelica')

@@ -27,19 +27,17 @@ import matplotlib.pyplot as plt
 import nose.tools as ntools
 import logging
 
-from jmodelica.tests import testattr
-from jmodelica.tests import get_files_path
+from pyjmi.tests import testattr
+from pyjmi.tests import get_files_path
 
-import jmodelica.xmlparser as xp
-import jmodelica.io
-import jmodelica.jmi as jmi
-from jmodelica.jmi import compile_jmu
-from jmodelica.jmi import JMUModel
-from jmodelica.jmi import JMIException
-import jmodelica.algorithm_drivers as ad
+import pyjmi.jmi as jmi
+from pyjmi.jmi import compile_jmu
+from pyjmi.jmi import JMUModel
+from pyjmi.jmi import JMIException
+import pyjmi.jmi_algorithm_drivers as ad
 
 try:
-    from jmodelica.simulation.assimulo_interface import JMIODE
+    from pyjmi.simulation.assimulo_interface import JMIODE
     #, JMIDAE, FMIODE, JMIModel_Exception
     #from jmodelica.simulation.assimulo_interface import write_data
     #from jmodelica.simulation.assimulo_interface import TrajectoryLinearInterpolation

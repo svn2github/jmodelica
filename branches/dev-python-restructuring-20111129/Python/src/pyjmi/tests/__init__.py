@@ -23,7 +23,6 @@ This __init__.py file holds functions used to load
 import os
 import sys
 import os, os.path
-import jmodelica.jmi as pyjmi
 
 __all__ = ['test_jmi', 'test_linearization', 'initialization', 'optimization']
 

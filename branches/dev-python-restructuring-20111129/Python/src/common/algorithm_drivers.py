@@ -26,8 +26,7 @@ import logging
 import time
 import numpy as N
 
-import common
-from common.xmlparser import XMLException
+from xmlparser import XMLException
 
 default_int = int
 int = N.int32

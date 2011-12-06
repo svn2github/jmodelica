@@ -23,9 +23,8 @@ This __init__.py file holds functions used to load
 import os
 import sys
 import os, os.path
-import jmodelica.jmi as pyjmi
 
-__all__ = ['test_fmi']
+__all__ = ['test_fmi', 'simulation']
 
 #create working directory for tests
 if sys.platform == 'win32':
@@ -63,5 +62,5 @@ def get_files_path():
     assert jmhome is not None, "You have to specify" \
                                " JMODELICA_HOME environment" \
                                " variable."
-    return os.path.join(jmhome, 'Python', 'jmodelica', 'tests', 'files')
+    return os.path.join(jmhome, 'Python', 'pyfmi', 'tests', 'files')
 

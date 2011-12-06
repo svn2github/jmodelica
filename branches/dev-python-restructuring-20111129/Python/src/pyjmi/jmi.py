@@ -36,11 +36,12 @@ import _ctypes
 import atexit
 from lxml import etree
 
-from jmodelica import xmlparser
-from jmodelica.core import BaseModel, unzip_unit, get_unit_name, get_platform_suffix, get_files_in_archive, rename_to_tmp
+import pyjmi
+from common import xmlparser
+from common.core import BaseModel, unzip_unit, get_unit_name, get_platform_suffix, get_files_in_archive, rename_to_tmp
 from jmodelica.compiler import _get_compiler
-import jmodelica.io
-from jmodelica.core import TrajectoryLinearInterpolation
+import common.io
+from common.core import TrajectoryLinearInterpolation
 
 int = N.int32
 N.int = N.int32

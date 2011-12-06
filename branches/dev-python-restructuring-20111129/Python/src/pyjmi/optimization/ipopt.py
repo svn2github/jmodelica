@@ -25,9 +25,10 @@ from ctypes import byref
 import numpy as N
 import numpy.ctypeslib as Nct
 
-from jmodelica import jmi 
-from jmodelica import io
-from jmodelica.io import VariableNotFoundError
+import pyjmi
+from pyjmi import jmi 
+from pyjmi.common import io
+from pyjmi.common.io import VariableNotFoundError
 
 int = N.int32
 N.int = N.int32

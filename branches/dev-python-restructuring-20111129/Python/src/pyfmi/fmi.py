@@ -27,14 +27,12 @@ import ctypes as C
 import numpy as N
 from ctypes.util import find_library
 import numpy.ctypeslib as Nct
-from lxml import etree
-
-import jmodelica.jmi
-from jmodelica import xmlparser
-from jmodelica.core import BaseModel, unzip_unit, get_unit_name, get_platform_suffix, get_files_in_archive, rename_to_tmp
-from jmodelica.compiler import _get_compiler
-
 import matplotlib.pyplot as plt
+
+import pyfmi
+from common import xmlparser
+from common.core import BaseModel, unzip_unit, get_unit_name, get_platform_suffix, get_files_in_archive, rename_to_tmp, load_DLL
+from jmodelica.compiler import _get_compiler
 
 int = N.int32
 N.int = N.int32
@@ -351,7 +349,7 @@ class FMUModel(BaseModel):
         #Retrieve and load the binary
         dllname = self._tempdll.split(os.sep)[-1]
         dllname = dllname[:-len(suffix)]
-        self._dll = jmodelica.jmi.load_DLL(dllname,self._fmufiles['binaries_dir'])
+        self._dll = load_DLL(dllname,self._fmufiles['binaries_dir'])
         
         #Load calloc and free
         self._load_c()
@@ -413,7 +411,7 @@ class FMUModel(BaseModel):
         self._free.argtypes = [C.c_void_p]
         
         #Get the path to the helper C function, logger
-        p = os.path.join(jmodelica.environ['JMODELICA_HOME'],'Python','util')
+        p = os.path.join(pyfmi.environ['JMODELICA_HOME'],'Python','pyfmi','util')
         
         #Load the helper function
         if sys.platform == 'win32':
