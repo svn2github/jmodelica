@@ -32,8 +32,8 @@ import string
 import jpype
 
 import jmodelica as jm
-from jmodelica import xmlparser
-from jmodelica.core import list_to_string
+from jmodelica.common import xmlparser
+from jmodelica.common.core import list_to_string
 
 #start JVM
 # note that startJVM() fails after shutdownJVM(), hence, only one start

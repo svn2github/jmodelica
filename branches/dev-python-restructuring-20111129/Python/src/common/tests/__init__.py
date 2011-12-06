@@ -24,7 +24,7 @@ import os
 import sys
 import os, os.path
 
-__all__ = ['test_compiler']
+__all__ = ['test_io', 'test_xmlparser']
 
 #create working directory for tests
 if sys.platform == 'win32':
@@ -62,5 +62,5 @@ def get_files_path():
     assert jmhome is not None, "You have to specify" \
                                " JMODELICA_HOME environment" \
                                " variable."
-    return os.path.join(jmhome, 'Python', 'jmodelica', 'tests', 'files')
+    return os.path.join(jmhome, 'Python', 'jmodelica', 'common', 'tests', 'files')
 

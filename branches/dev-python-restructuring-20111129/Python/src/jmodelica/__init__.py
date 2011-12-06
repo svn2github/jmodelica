@@ -18,9 +18,7 @@
 The JModelica.org Python package <http:/www.jmodelica.org/>
 """
 
-__all__ = ['jmi', 'xmlparser', 'compiler','optimization','examples', 'tests', 
-    'io','initialization','simulation','core', 'linearization', 
-    'algorithm_drivers', 'fmi','plotting']
+__all__ = ['compiler', 'examples', 'tests', 'common']
 
 __version__=''
 
@@ -38,7 +36,7 @@ except KeyError, IOError:
 # set version
 f= None
 try:
-    _fpath=os.path.join(os.environ['JMODELICA_HOME'],'version.txt')    
+    _fpath=os.path.join(os.environ['JMODELICA_HOME'],'version.txt')
     f = open(_fpath)
     __version__=f.readline().strip()
 except IOError:
