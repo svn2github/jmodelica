@@ -1145,6 +1145,53 @@ model FunctionEval21
 	parameter Real a = f(1);
 end FunctionEval21;
 
+    
+model FunctionEval22
+ annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
+     JModelica.UnitTesting.XMLCodeGenTestCase(
+         name="FunctionEval22",
+         description="Test function call statement using more than one output",
+         template="$XML_variables$",
+         generatedCode="
+
+		<ScalarVariable name=\"y\" valueReference=\"0\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"5.0\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>independentParameter</VariableCategory>
+		</ScalarVariable>
+		<ScalarVariable name=\"z\" valueReference=\"1\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" />
+			<isLinear>true</isLinear>
+			<VariableCategory>algebraic</VariableCategory>
+		</ScalarVariable>")})));
+
+	function f1
+		input Real x1;
+		input Real x2;
+		output Real y;
+	protected
+		Real z1;
+		Real z2;
+	algorithm
+		(z1, z2) := f2(x1, x2);
+		y := z1 + z2;
+    end f1;
+	
+    function f2
+        input Real x1;
+		input Real x2;
+		output Real y1;
+		output Real y2;
+	algorithm
+		y1 := x1 * x2;
+		y2 := x1 + x2;
+    end f2;
+	
+    parameter Real y = f1(1,2);
+    Real z;
+equation
+	z = y * 3;
+end FunctionEval22;
 
 
 model ScalarizedLookup1

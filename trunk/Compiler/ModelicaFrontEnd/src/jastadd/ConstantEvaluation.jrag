@@ -1674,6 +1674,7 @@ aspect ConstantEvaluation {
 	  for (CommonVariableDecl var : myFuncOutputs()) {
 		  CValue val = values.get(var);
 		  res[i] = (val == null) ? CValue.UNKNOWN : val;
+		  i++;
 	  }
 	  return res;
   }
