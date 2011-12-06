@@ -762,7 +762,14 @@ aspect TransformCanonical {
 		}
 		
 		public ArrayList<FVariable> activeVariables() {
-			return null;
+			ArrayList<FVariable> s = new ArrayList<FVariable>();
+			for(MatchingPair mp: solvedPairs){
+				s.add(mp.getFVariable());
+			}
+			for (MatchingPair mp : unsolvedPairs) {
+				s.add(mp.getFVariable());
+			}
+			return s;
 		}	
 		
 		public ArrayList<FVariable> iterationVariables() {
@@ -800,10 +807,10 @@ aspect TransformCanonical {
 		
 		public String toString() {
 			StringBuffer str = new StringBuffer();
-			str.append("Torn block of " + activeVariables().size() + " tearing variables");
+			str.append("Torn block of " + iterationVariables().size() + " tearing variables");
 			str.append(" and " + solvedEquations().size() + " solved variables.\n");
 			str.append("Tearing variables:\n");
-			for (FVariable fv : activeVariables()) {
+			for (FVariable fv : iterationVariables()) {
 				str.append("  " + fv.name() + "\n");
 			}
 			str.append("Solved equations:\n");
@@ -1169,16 +1176,15 @@ aspect TransformCanonical {
 				
 			}else{
 				daeBLT = g.computeBLT();
-				for (AbstractEquationBlock eb : daeBLT) {
-					for (FVariable fv : eb.activeVariables()) {
-						daeFVariableEquationBlockMap.put(fv,eb);
-					}
-				}	
-				
-				daeStructuredBLT = new StructuredBLT(this,daeBLT);
-				log.info(daeStructuredBLT.toString());
-				
 			}
+			for (AbstractEquationBlock eb : daeBLT) {
+				for (FVariable fv : eb.activeVariables()) {
+					daeFVariableEquationBlockMap.put(fv,eb);
+				}
+			}	
+			daeStructuredBLT = new StructuredBLT(this,daeBLT);
+			log.info(daeStructuredBLT.toString());
+			
 			log.info(daeBLT.toString());
 		
 		}
@@ -1347,12 +1353,12 @@ aspect TransformCanonical {
 				daeInitBLT = computeTearings(g);
 			}else{
 				daeInitBLT = g.computeBLT();
-				for (AbstractEquationBlock eb : daeInitBLT) {
-					for (FVariable fv : eb.activeVariables()) {
-						daeInitFVariableEquationBlockMap.put(fv,eb);
-					}
-				}		
 			}
+			for (AbstractEquationBlock eb : daeInitBLT) {
+				for (FVariable fv : eb.activeVariables()) {
+					daeInitFVariableEquationBlockMap.put(fv,eb);
+				}
+			}	
 			log.info(daeInitBLT.toString());
 
 			

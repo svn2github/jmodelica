@@ -1066,7 +1066,7 @@ public class BiPGraph {
 		for (Var v : e.getVariables()) {
 			if(!v.isTear()){
 				Eq ee = v.getSolvableMatching();
-				if (!(e==ee)) {
+				if (ee!=null && !(e==ee)) {
 					if (!ee.isVisited()) {
 						tarjanTear(ee);
 						e.setTarjanLowLink(Math.min(
