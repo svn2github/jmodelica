@@ -14,6 +14,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import java.util.Map;
 import java.util.HashMap;
 
 aspect FlatNameBinding {
@@ -43,8 +44,12 @@ aspect FlatNameBinding {
 		return (variable == null) ? unknownFVariable() : variable;
 	}
 
+	private Map<String,FVariable> FFunctionDecl.tempLookupMap = null;
+	
 	eq FFunctionDecl.getChild(int index).lookupFV(FQName fqn) {
-		AbstractFVariable variable = lookupFVFromMap(fullyQualifiedVariablesMap(), fqn, false, false);
+		Map<String,? extends AbstractFVariable> varMap = 
+			(tempLookupMap != null) ? tempLookupMap : fullyQualifiedVariablesMap();
+		AbstractFVariable variable = lookupFVFromMap(varMap, fqn, false, false);
 		return (variable == null) ? unknownFVariable() : variable;
 	}
 
@@ -54,7 +59,7 @@ aspect FlatNameBinding {
 	}
 	
 	public static AbstractFVariable ASTNode.lookupFVFromMap(
-			HashMap<String, ? extends AbstractFVariable> map, FQName fqn, boolean der, boolean resolve) {
+			Map<String, ? extends AbstractFVariable> map, FQName fqn, boolean der, boolean resolve) {
 		String name = fqn.prefixName(0, der, resolve);
 		AbstractFVariable variable = map.get(name);
 		if (variable == null) {
@@ -137,9 +142,13 @@ aspect FlatNameBinding {
 		(FDerivativeVariable)lookupFDV(getFIdUseExp().derName());	
 	*/
 	
-	syn lazy HashMap<String,FVariable> FClass.fullyQualifiedVariablesMap() {
+	public void FClass.clearFlatNameBinding() {
+	    fullyQualifiedVariablesMap_computed = false;
+	}
+	
+	syn lazy Map<String,FVariable> FClass.fullyQualifiedVariablesMap() {
 		//log.debug("FClass.fullyQualifiedVariablesMap()");
-		HashMap<String,FVariable> map = new HashMap<String,FVariable>();
+		Map<String,FVariable> map = new HashMap<String,FVariable>();
 		for (FVariable v : getFVariables()) 
 			map.put(v.name(), v);
 		for (FVariable v : getAliasVariables()) 
@@ -147,8 +156,8 @@ aspect FlatNameBinding {
 		return map;
 	}
 	
-	syn lazy HashMap<String, FFunctionVariable> FFunctionDecl.fullyQualifiedVariablesMap() {
-		HashMap<String, FFunctionVariable> map = new HashMap<String, FFunctionVariable>();
+	syn lazy Map<String, FFunctionVariable> FFunctionDecl.fullyQualifiedVariablesMap() {
+		Map<String, FFunctionVariable> map = new HashMap<String, FFunctionVariable>();
 		for (FFunctionVariable v : getFFunctionVariables()) 
 			map.put(v.name(), v);
 		return map;
@@ -184,36 +193,36 @@ aspect ParameterEquations {
 	eq FFunctionDecl.getChild().parameterEquation()       = null;
 	eq FRecordDecl.getChild().parameterEquation()         = null;
 	
-	syn lazy HashMap<AbstractFVariable,FAbstractEquation> FClass.parameterEquationsMap() {
-		HashMap<AbstractFVariable,FAbstractEquation> map = new HashMap<AbstractFVariable,FAbstractEquation>();
+	syn lazy Map<AbstractFVariable,FAbstractEquation> FClass.parameterEquationsMap() {
+		Map<AbstractFVariable,FAbstractEquation> map = new HashMap<AbstractFVariable,FAbstractEquation>();
 		for (FAbstractEquation equ : getFParameterEquations())
 			equ.addToParameterEquationsMap(map);
 		return map;
 	}
 	
 	public void FAbstractEquation.addToParameterEquationsMap(
-			HashMap<AbstractFVariable,FAbstractEquation> map) {}
+			Map<AbstractFVariable,FAbstractEquation> map) {}
 	
 	public void FEquation.addToParameterEquationsMap(
-			HashMap<AbstractFVariable,FAbstractEquation> map) {
+			Map<AbstractFVariable,FAbstractEquation> map) {
 		getLeft().addToParameterEquationsMap(map, this);
 	}
 	
 	public void FFunctionCallEquation.addToParameterEquationsMap(
-			HashMap<AbstractFVariable,FAbstractEquation> map) {
+			Map<AbstractFVariable,FAbstractEquation> map) {
 		for (FFunctionCallLeft left : getLefts())
 			if (left.hasFExp())
 				left.getFExp().addToParameterEquationsMap(map, this);
 	}
 	
 	public void FExp.addToParameterEquationsMap(
-			HashMap<AbstractFVariable,FAbstractEquation> map, FAbstractEquation equ) {
+			Map<AbstractFVariable,FAbstractEquation> map, FAbstractEquation equ) {
 		for (FExp e : childFExps())
 			e.addToParameterEquationsMap(map, equ);
 	}
 	
 	public void FIdUseExp.addToParameterEquationsMap(
-			HashMap<AbstractFVariable,FAbstractEquation> map, FAbstractEquation equ) {
+			Map<AbstractFVariable,FAbstractEquation> map, FAbstractEquation equ) {
 		AbstractFVariable fv = getFIdUse().myFV();
 		if (!fv.isUnknown())
 			map.put(fv, equ);
@@ -391,7 +400,7 @@ aspect FlatPreBinding {
 	}
 
 	public static AbstractFVariable ASTNode.lookupPreFVFromMap(
-		HashMap<String, ? extends AbstractFVariable> map, FQName fqn) {
+		Map<String, ? extends AbstractFVariable> map, FQName fqn) {
 		AbstractFVariable variable = map.get(fqn.preName());
 		//System.out.println(map.toString());
 		return variable;
@@ -425,7 +434,7 @@ aspect FlatHDerBinding {
 	}
 
 	public static AbstractFVariable ASTNode.lookupHDerFVFromMap(
-		HashMap<String, ? extends AbstractFVariable> map, FQName fqn, int order) {
+		Map<String, ? extends AbstractFVariable> map, FQName fqn, int order) {
 		String[] str = fqn.derName().split("\\)");
 		AbstractFVariable variable = map.get(str[0] + "," + order + ")");
 		//System.out.println(map.toString());

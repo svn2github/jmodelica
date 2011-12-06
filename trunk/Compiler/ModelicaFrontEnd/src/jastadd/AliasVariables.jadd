@@ -40,13 +40,12 @@ aspect AliasVariables {
 	 * null.
 	 */
 	syn lazy AliasVariable FVariable.aliasVariable() {
-		LinkedHashSet<AliasVariable> aliasSet = myFClass().getAliasManager().
-		  getAliasSet(this);
-		if (aliasSet==null) {
+		AliasManager aliasManager = myFClass().getAliasManager();
+		LinkedHashSet<AliasVariable> aliasSet = aliasManager.getAliasSet(this);
+		if (aliasSet == null) {
 			return null;
 		}
-		AliasVariable av = myFClass().getAliasManager().
-			getIterationVariable(aliasSet);
+		AliasVariable av = aliasManager.getIterationVariable(aliasSet);
 		return av.getFVariable()==this? null : av;
 	}
 	
@@ -61,7 +60,7 @@ aspect AliasVariables {
 	syn FVariable AbstractFVariable.alias() = null;
 	
 	eq FVariable.alias() {
-		if (aliasVariable()==null) {
+		if (aliasVariable() == null) {
 			return null;
 		} else {
 			return aliasVariable().getFVariable();			
@@ -76,15 +75,14 @@ aspect AliasVariables {
 	syn boolean AbstractFVariable.isNegated() = false;
 	
 	eq FVariable.isNegated(){
-		AliasVariable av = myFClass().getAliasManager().getAliasVariable(this);
-		LinkedHashSet<AliasVariable> aliasSet =
-			myFClass().getAliasManager().getAliasSet(av);
-		if (av==null) {
+		AliasManager aliasManager = myFClass().getAliasManager();
+		AliasVariable av = aliasManager.getAliasVariable(this);
+		LinkedHashSet<AliasVariable> aliasSet = aliasManager.getAliasSet(av);
+		if (av == null) {
 			return false;
 		} else {
-			//return av.isNegated();
-			return !((av.isNegated() & myFClass().getAliasManager().getIterationVariable(aliasSet).isNegated()) |
-			(!av.isNegated() & !myFClass().getAliasManager().getIterationVariable(aliasSet).isNegated()));
+			AliasVariable iav = aliasManager.getIterationVariable(aliasSet);
+			return (av.isNegated() != iav.isNegated());
 		}
 	}
 		
@@ -550,6 +548,10 @@ aspect AliasVariables {
 	 */
 	syn int FVariable.aliasHeuristicScore() {
 		int score = 1000;
+		
+		// Temporary variables added during transformations should get lower priority
+		if (isTemporary())
+			score -= 100;
 		
 		// 0. Derivatives
 		if (isDerivativeVariable())

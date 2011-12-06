@@ -420,7 +420,7 @@ aspect Flattening {
 	public void MutableSize.updateFUnknownSizeExps(AbstractFVariable var) {
 		for (int i = 0; i < exps.length; i++) 
 			if (exps[i] != null) 
-				exps[i] = var.affixExpression((FExp) exps[i].fullCopy());
+				exps[i] = var.affixExpression(exps[i].fullCopy());
 	}
 	
 	// TODO: end of remove (see TODO above)
@@ -610,7 +610,7 @@ aspect Flattening {
 		fv.setFVisibilityType(getComponentDecl().isPublic() ? 
 				new FPublicVisibilityType() : new FProtectedVisibilityType());
 		
-		fv.setFTypePrefixVariability((FTypePrefixVariability) variability().fullCopy());
+		fv.setFTypePrefixVariability(variability().fullCopy());
  		
 		// Only set prefix for top level inputs and outputs
 		// TODO: Make sure that prefixes specified in short class declarations are propagated
@@ -655,7 +655,7 @@ aspect Flattening {
 				(!declaredSize().isUnknown() && type().typeCompatible(fe.type()));  // Assume each if types match
 			if (!hasEach && im.myInstNode() != this)
 				fe = splitBindingFExp(fe, im.myInstNode());
-			return (FExp) fe.unboundCopy();
+			return fe.unboundCopy();
 		}
 		return null;
 	}
@@ -696,7 +696,7 @@ aspect Flattening {
 	 * 
 	 * Will not create new nodes unless necessary.
 	 */
-	syn FExp FExp.splitArrayExp(int index)     = new FSubscriptedExp((FExp) unboundCopy(), index);
+	syn FExp FExp.splitArrayExp(int index)     = new FSubscriptedExp(unboundCopy(), index);
 	eq FArray.splitArrayExp(int index)         = getFExp(index - 1);
 	eq FIdUseExp.splitArrayExp(int index)      = createNode(getFIdUse().splitArrayAccess(index));
 	eq FInstAccessExp.splitArrayExp(int index) = new FInstAccessExp(getInstAccess().splitArrayAccess(index));

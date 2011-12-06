@@ -340,7 +340,6 @@ aspect Arrays {
 	 * @return  an FArraySubscripts that spans the entire FV this access points to.
 	 */
 	syn FArraySubscripts FIdUse.getExpandedSubscripts() {
-		FArraySubscripts res = new FArraySubscripts();
 		Size s = myFV().size();
 		if (s.isUnknown() && myFV().inRecord()) {
 			// Find enclosing record
@@ -367,9 +366,7 @@ aspect Arrays {
 					s = new MutableSize(attr.getValue());
 			}
 		}
-		for (int i = 0; i < s.ndims(); i++)
-			res.addFSubscript(s.createExpandedFSubscript(i));
-		return res;
+		return s.createExpandedFArraySubscripts();
 	}
 	
 	/**
@@ -398,10 +395,7 @@ aspect Arrays {
 	 * If this is a scalar component, an empty FArraySubscripts is returned.
 	 */
 	public FArraySubscripts InstComponentDecl.expandedSubscripts() {
-		FArraySubscripts res = new FArraySubscripts();
-		for (int i = 0; i < ndims(); i++)
-			res.addFSubscript(size().createExpandedFSubscript(i));
-		return res;
+		return size().createExpandedFArraySubscripts();
 	}
 	
 	/**
@@ -504,7 +498,11 @@ aspect Arrays {
 	public abstract void FSubscript.addDeclarationSize(MutableSize s);
 	
 	public void FExpSubscript.addDeclarationSize(MutableSize s) {
-		s.append(getFExp());
+		FExp e = getFExp();
+		if (e.ndims() == 0)
+			s.append(e);
+		else
+			s.append(e.size(), 0);
 	}
 	
 	public void FColonSubscript.addDeclarationSize(MutableSize s) {
@@ -612,7 +610,7 @@ aspect Arrays {
  		} else {
  			start = start.makeRangeSizeExp();
  			stop = stop.makeRangeSizeExp();
- 	 		FExp step = hasStep ? (FExp) getFExp(1).fullCopy() : null;
+ 	 		FExp step = hasStep ? getFExp(1).fullCopy() : null;
  			FExp exp = new FSubExp(stop, start);
  			if (hasStep)
  				exp = new FDivExp(exp, step);
@@ -628,7 +626,7 @@ aspect Arrays {
  	 *        array size of a range expression.
  	 */
  	public FExp FExp.makeRangeSizeExp() {
- 		return type().wrapRangeSizeExp((FExp) fullCopy());
+ 		return type().wrapRangeSizeExp(fullCopy());
  	}
  	
  	/**
@@ -855,7 +853,7 @@ aspect Arrays {
 	 *                Also contains uses that have been replaced, to detect circularities.
 	 */
 	public FExp FExp.createSizeFExp(Map<ASTNode, FExp> varMap) {
-		FExp exp = (FExp) copy();
+		FExp exp = copy();
 		for (int i = 0; i < getNumChild(); i++) 
 			exp.setChild(getChild(i).createSizeFExp(varMap), i);
 		return exp;
@@ -929,7 +927,7 @@ aspect Arrays {
 	 * Default implementation simply returns a copy.
 	 */
 	public FExp FExp.createSizeFExp() {
-		return (FExp) unboundCopy();
+		return unboundCopy();
 	}
 	
 	public FExp FUnknownSizeExp.createSizeFExp() {
@@ -999,12 +997,12 @@ aspect Arrays {
 	
 	protected void Array.fillSubset(Array arr, Index i, Map<String,FExp> indexMap) {
 		for (Index i2 : indices()) {
-			FExp e = (FExp) get(i2).fullCopy();
+			FExp e = get(i2).fullCopy();
 			arr.set(i.expand(i2), (FExp) replaceIndices(e, indexMap));
 		}
 	}
 	protected void ScalarAsArray.fillSubset(Array arr, Index i, Map<String,FExp> indexMap) {
-		FExp e = (FExp) get(Index.NULL).fullCopy();
+		FExp e = get(Index.NULL).fullCopy();
 		arr.set(i, (FExp) replaceIndices(e, indexMap));
 	}
 	
@@ -1150,7 +1148,7 @@ aspect Arrays {
 			Array right = getRight().getArray();
 			Array res   = new Array(indices());
 			for (Index i : res.indices())
-				res.set(i, createNode((FExp) left.get(i).fullCopy(), (FExp) right.get(i).fullCopy()));
+				res.set(i, createNode(left.get(i).fullCopy(), right.get(i).fullCopy()));
 			return res;
 		} else {
 			return new ScalarAsArray(this);
@@ -1162,7 +1160,7 @@ aspect Arrays {
 			Array src = getFExp().getArray();
 			Array res = new Array(indices());
 			for (Index i : res.indices())
-				res.set(i, createNode((FExp) src.get(i).fullCopy()));
+				res.set(i, createNode(src.get(i).fullCopy()));
 			return res;
 		} else {
 			return new ScalarAsArray(this);
@@ -1190,9 +1188,9 @@ aspect Arrays {
 	protected static FExp FExp.vectorMultiplication(Iterator<FExp> left, Iterator<FExp> right, FType type) {
 		if (!left.hasNext())
 			return type.zeroLiteral();
-		FExp cur = new FMulExp((FExp) left.next().fullCopy(), (FExp) right.next().fullCopy());
+		FExp cur = new FMulExp( left.next().fullCopy(), right.next().fullCopy());
 		while (left.hasNext()) 
-			cur = new FAddExp(cur, new FMulExp((FExp) left.next().fullCopy(), (FExp) right.next().fullCopy()));
+			cur = new FAddExp(cur, new FMulExp( left.next().fullCopy(), right.next().fullCopy()));
 		return cur;
 	}
 	
@@ -1243,8 +1241,8 @@ aspect Arrays {
 		for (Index i : res.indices()) {
 			j.set(0, i.first() % 3 + 1);
 			k.set(0, j.first() % 3 + 1);
-			FExp m1 = new FMulExp((FExp) x.get(j).fullCopy(), (FExp) y.get(k).fullCopy());
-			FExp m2 = new FMulExp((FExp) x.get(k).fullCopy(), (FExp) y.get(j).fullCopy());
+			FExp m1 = new FMulExp(x.get(j).fullCopy(), y.get(k).fullCopy());
+			FExp m2 = new FMulExp(x.get(k).fullCopy(), y.get(j).fullCopy());
 			res.set(i, new FSubExp(m1, m2));
 		}
 		return res;
@@ -1302,7 +1300,7 @@ aspect Arrays {
 	}
 	
 	public FExp FIterExp.extract(Index i) {
-		FExp exp = (FExp) getFExp().getArray().get(i).fullCopy();
+		FExp exp = getFExp().getArray().get(i).fullCopy();
 		List fil = (List) getForIndexList().fullCopy();
 		return new FIterExp(exp, fil);
 	}
@@ -1328,7 +1326,7 @@ aspect Arrays {
 		Array arr = new Array(indices());
 		Array inner = getFExp().getArray();
 		for (Index i : arr.indices())
-			arr.set(i, new FSmoothExp((FExp) getOrder().fullCopy(), inner.get(i)));
+			arr.set(i, new FSmoothExp(getOrder().fullCopy(), inner.get(i)));
 		return arr;
 	}
 	
@@ -1360,9 +1358,9 @@ aspect Arrays {
 	 */
 	public void FExp.fillArray(Array arr, Index i, int level) {
 		if (isArray())
-			arr.set(i, (FExp) getArray().get(i.subIndex(level)).fullCopy());
+			arr.set(i, getArray().get(i.subIndex(level)).fullCopy());
 		else
-			arr.set(i, (FExp) fullCopy());
+			arr.set(i, fullCopy());
 	}
 	
 	/**
@@ -1398,7 +1396,7 @@ aspect Arrays {
 		Array elseArr = getElseExp().getArray();
 		Array arr = new Array(indices());
 		for (Index i : arr.indices()) {
-			FExp ifExp = (FExp) getIfExp().fullCopy();
+			FExp ifExp = getIfExp().fullCopy();
 			FIfExp exp = new FIfExp(ifExp, thenArr.get(i), new List(), elseArr.get(i));
 			for (FElseIfExp eie : getFElseIfExps())
 				exp.addFElseIfExp((FElseIfExp) eie.getArray().get(i));
@@ -1413,7 +1411,7 @@ aspect Arrays {
 		
 		Array arr = new Array(indices());
 		for (Index i : arr.indices()) 
-			arr.set(i, new FElseIfExp((FExp) getIfExp().fullCopy(), getThenExp().getArray().get(i)));
+			arr.set(i, new FElseIfExp(getIfExp().fullCopy(), getThenExp().getArray().get(i)));
 		return arr;
 	}
 	
@@ -1608,12 +1606,12 @@ aspect Arrays {
 	
 	eq FLinspace.getArray() {
 		int n = size().get(0);
-		FExp len = new FSubExp((FExp) getStopExp().fullCopy(), (FExp) getStartExp().fullCopy());
+		FExp len = new FSubExp(getStopExp().fullCopy(), getStartExp().fullCopy());
 		FExp step = new FDivExp(len, new FIntegerLitExp(n - 1));
 		Array array = new Array(indices());
 		for (Index i : array.indices()) {
-			FExp part = new FMulExp(new FIntegerLitExp(i.first() - 1), (FExp) step.unboundCopy());
-			array.set(i, new FAddExp((FExp) getStartExp().fullCopy(), part));
+			FExp part = new FMulExp(new FIntegerLitExp(i.first() - 1), step.unboundCopy());
+			array.set(i, new FAddExp(getStartExp().fullCopy(), part));
 		}
 		return array;
 	}
@@ -1982,7 +1980,7 @@ aspect ArrayHelpers {
 		 * \brief Create a copy of this size.
 		 */
 		protected Size clone() {
-			return new Size(size.clone());
+			return (size.length == 0) ? SCALAR : new Size(size.clone());
 		}
 		
 		/**
@@ -2217,9 +2215,21 @@ aspect ArrayHelpers {
 		}
 		
 		/**
+		 * \brief Create an FArraySubscripts that spans this size.
+		 * 
+		 * Dimension that nothing is known about get an FColonSubscript.
+		 */
+		public FArraySubscripts createExpandedFArraySubscripts() {
+			FArraySubscripts res = new FArraySubscripts();
+			for (int i = 0; i < ndims(); i++)
+				res.addFSubscript(createExpandedFSubscript(i));
+			return res;
+		}
+		
+		/**
 		 * \brief Create an FSubscript that spans the length of dimension <code>d</code>.
 		 * 
-		 * If nothing is known of the length of the dimension, an FColonSubscripts is created.
+		 * If nothing is known of the length of the dimension, an FColonSubscript is created.
 		 */
 		public FSubscript createExpandedFSubscript(int d) {
 			if (hasValue(d)) {
@@ -2405,7 +2415,7 @@ aspect ArrayHelpers {
 			} else if (size[d] != UNKNOWN) {
 				size[d] += s;
 			} else if (okExp(exps[d])) {
-				exps[d] = new FAddExp((FExp) exps[d].unboundCopy(), new FIntegerLitExp(s));
+				exps[d] = new FAddExp(exps[d].unboundCopy(), new FIntegerLitExp(s));
 			}
 		}
 		
@@ -2416,7 +2426,7 @@ aspect ArrayHelpers {
 			try {
 				add(d, e.ceval().intValue());
 			} catch (ConstantEvaluationException uoe) {
-				exps[d] = new FAddExp(createFExp(d), (FExp) e.unboundCopy());
+				exps[d] = new FAddExp(createFExp(d), e.unboundCopy());
 				size[d] = UNKNOWN;
 			}
 		}
@@ -2469,7 +2479,7 @@ aspect ArrayHelpers {
 		protected void copyFrom(int d1, FExp exp, int d2) {
 			set(d1, exp.size(), d2);
 			if (!hasValue(d1)) {
-				FExp copyExp = (FExp) exp.fullCopy();
+				FExp copyExp = exp.fullCopy();
 				Opt dimExp = new Opt(new FIntegerLitExp(d2 + 1));
 				FSizeExp sizeExp  = new FSizeExp(copyExp, dimExp);
 				exps[d1] = exp.dynamicFExp(sizeExp);
@@ -2558,7 +2568,7 @@ aspect ArrayHelpers {
 			for (int i = 0; i < size.length; i++) {
 				// TODO: this will fail if hasValue(i) == false
 				if (size[i] == UNKNOWN) {
-					FExp e = (FExp) exps[i].unboundCopy();
+					FExp e = exps[i].unboundCopy();
 					res = (res == null) ? e : new FMulExp(res, e);
 				} else {
 					known *= size[i];
@@ -2593,7 +2603,7 @@ aspect ArrayHelpers {
 		 */
 		protected FSubscript rangeFSubscript(int i) {
 			return !okExp(exps[i]) ? super.rangeFSubscript(i) : 
-				new FExpSubscript(new FRangeExp(new FIntegerLitExp(1), (FExp) exps[i].fullCopy()));
+				new FExpSubscript(new FRangeExp(new FIntegerLitExp(1), exps[i].fullCopy()));
 		}
 		
 		/**
@@ -2722,7 +2732,7 @@ aspect ArrayHelpers {
 		 * \brief Sets the element referenced by <code>i</code> in this Array to <code>exp</code>.
 		 */
 		public void set(Index i, FExp exp) {
-			setFExp((FExp) exp.unboundCopy(), i.internal(indices));
+			setFExp(exp.unboundCopy(), i.internal(indices));
 		}
 		
 		/**
@@ -2744,10 +2754,10 @@ aspect ArrayHelpers {
 			if (exp.isArray()) {
 				int n = exp.size().numElements();
 				for (int i = 0; i < length; i++)
-					setFExp((FExp) exp.getArray().getFExp(i % n).fullCopy(), i);
+					setFExp(exp.getArray().getFExp(i % n).fullCopy(), i);
 			} else {
 				for (int i = 0; i < length; i++)
-					setFExp((FExp) exp.fullCopy(), i);
+					setFExp(exp.fullCopy(), i);
 			}
 			return this;
 		}
@@ -2785,7 +2795,7 @@ aspect ArrayHelpers {
 	    			arr.addFExp(buildFArray(it, builder, dim + 1));
 	    	} else {
 	    		for (int i = 0; i < n; i++) 
-	    			arr.addFExp((FExp) builder.build(it.next()).unboundCopy());
+	    			arr.addFExp(builder.build(it.next()).unboundCopy());
 	    	}
 	    	return arr;
 	    }
@@ -2899,7 +2909,7 @@ aspect ArrayHelpers {
 	     * @see #buildScalarized(java.util.HashMap<String,FExp>)
 	     */
 	    protected FExp buildFArray(Iterator<FExp> it, ElementBuilder builder, int dim) {
-	    	return (FExp) builder.build(it.next()).unboundCopy();
+	    	return builder.build(it.next()).unboundCopy();
 	    }
 	    
 		/**
@@ -2913,7 +2923,7 @@ aspect ArrayHelpers {
 		 * \brief Sets the single element wrapped by this Array to <code>exp</code>.
 		 */
 		public void set(Index i, FExp exp) {
-			setFExp((FExp) exp.unboundCopy(), 0);
+			setFExp(exp.unboundCopy(), 0);
 		}
 		
 	}

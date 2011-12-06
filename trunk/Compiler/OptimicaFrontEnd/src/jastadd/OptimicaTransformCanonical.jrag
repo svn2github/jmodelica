@@ -42,7 +42,7 @@ aspect OptimicaTransformCanonical {
 		fv_startTime = new FRealVariable(new FPublicVisibilityType(), 
 				fParameter(), new Opt(), 
 				startTime_attr!=null? (List<FAttribute>)startTime_attr.getFAttributeList().fullCopy(): new List(), 
-						(startTime_attr!=null && startTime_attr.hasValue())? new Opt((FExp)startTime_attr.getValue().fullCopy()): 
+						(startTime_attr!=null && startTime_attr.hasValue())? new Opt(startTime_attr.getValue().fullCopy()): 
 							new Opt(new FRealLitExp("0.0")), 
 							new Opt(), new FQName("startTime"));
 		addFVariable(fv_startTime);
@@ -60,7 +60,7 @@ aspect OptimicaTransformCanonical {
 		fv_finalTime = new FRealVariable(new FPublicVisibilityType(), 
 				fParameter(), new Opt(), 
 				finalTime_attr!=null? (List<FAttribute>)finalTime_attr.getFAttributeList().fullCopy(): new List(), 
-				(finalTime_attr!=null && finalTime_attr.hasValue())? new Opt((FExp)finalTime_attr.getValue().fullCopy()):
+				(finalTime_attr!=null && finalTime_attr.hasValue())? new Opt(finalTime_attr.getValue().fullCopy()):
 					new Opt(new FRealLitExp("1.0")), new Opt(), new FQName("finalTime"));
 				addFVariable(fv_finalTime);
 
@@ -96,7 +96,7 @@ aspect OptimicaTransformCanonical {
 						}					
 						// Set initialGuess to 0.0
 						if (a.getName().name().equals("initialGuess")) {
-							initialGuess_exp = (FExp)a.getValue().fullCopy();
+							initialGuess_exp = a.getValue().fullCopy();
 							a.setValue(new FRealLitExp("0.0"));
 							a.setAttributeSet(false);
 						}
@@ -130,7 +130,7 @@ aspect OptimicaTransformCanonical {
 							a.setAttributeSet(false);
 						}					
 						if (a.getName().name().equals("initialGuess")) {
-							initialGuess_exp = (FExp)a.getValue().fullCopy();
+							initialGuess_exp = a.getValue().fullCopy();
 							a.setValue(new FRealLitExp("1.0"));
 							a.setAttributeSet(false);
 						}	

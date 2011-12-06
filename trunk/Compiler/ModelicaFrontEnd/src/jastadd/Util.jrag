@@ -585,7 +585,7 @@ aspect Names {
           } else if (scheme.equals("file")) {
               return uri.getPath();
           } else if (scheme.equals("modelica")) {
-              String pack = packagePath(uri.getHost());
+              String pack = packagePath(uri.getAuthority());
               if (pack != null) 
             	  return new File(pack, uri.getPath()).getAbsolutePath();
           }
@@ -1260,6 +1260,8 @@ aspect FlatNames {
 
     /**
      * \brief Create an FDerExp using a copy of this name.
+     * 
+     * It is assumed that this name is from a variable declaration.
      */
     public FDerExp FQName.createFDerExp() {
         return new FDerExp(createFIdUse()); 
@@ -1267,6 +1269,8 @@ aspect FlatNames {
 
     /**
      * \brief Create an FHDerExp using a copy of this name.
+     * 
+     * It is assumed that this name is from a variable declaration.
      */
     public FHDerExp FQName.createFHDerExp(int order) {
         return new FHDerExp(createFIdUse(), order); 
@@ -1274,6 +1278,8 @@ aspect FlatNames {
 
     /**
      * \brief Create an FDummyDerExp using a copy of this name.
+     * 
+     * It is assumed that this name is from a variable declaration.
      */
     public FDummyDerExp FQName.createFDummyDerExp() {
         return new FDummyDerExp(createFIdUse()); 
@@ -1281,6 +1287,8 @@ aspect FlatNames {
 
     /**
      * \brief Create an FHDummyDerExp using a copy of this name.
+     * 
+     * It is assumed that this name is from a variable declaration.
      */
     public FHDummyDerExp FQName.createFHDummyDerExp(int order) {
         return new FHDummyDerExp(createFIdUse(), order); 
@@ -1288,6 +1296,8 @@ aspect FlatNames {
     
     /**
      * \brief Create an FIdUseExp using a copy of this name.
+     * 
+     * It is assumed that this name is from a variable declaration.
      */
     public FIdUseExp FQName.createFIdUseExp() {
         return new FIdUseExp(createFIdUse()); 
@@ -1295,9 +1305,14 @@ aspect FlatNames {
     
     /**
      * \brief Create an FIdUse using a copy of this name.
+     * 
+     * It is assumed that this name is from a variable declaration.
      */
     public FIdUse FQName.createFIdUse() {
-        return new FIdUse(fullCopy()); 
+    	FQName name = fullCopy();
+    	if (!isScalarized() && ndims() > 0)
+    		name.setLastFArraySubscripts(size().createExpandedFArraySubscripts());
+        return new FIdUse(name); 
     }
     
     /**
@@ -1656,16 +1671,19 @@ aspect FlatFunctionUtils {
      inh lazy String FExp.tempVarName();
      eq InstNode.getChild().tempVarName()      = null;
      eq FFunctionCall.getArray().tempVarName() = tempVarName();
-     eq FClass.getChild().tempVarName() {
-         HashMap<String,FVariable> vars = fullyQualifiedVariablesMap();
+     eq FClass.getChild().tempVarName()        = nextTempVarName();
+     eq FFunctionDecl.getChild().tempVarName() = nextTempVarName();
+     
+     public String FClass.nextTempVarName() {
+         Map<String,FVariable> vars = fullyQualifiedVariablesMap();
          String name;
          do {
              name = "temp_" + nextTempVarIndex++;
          } while (vars.get(name) != null);
          return name;
      }
-     eq FFunctionDecl.getChild().tempVarName() {
-         HashMap<String,FFunctionVariable> vars = fullyQualifiedVariablesMap();
+     public String FFunctionDecl.nextTempVarName() {
+         Map<String,FFunctionVariable> vars = fullyQualifiedVariablesMap();
          String name;
          do {
              name = "temp_" + nextTempVarIndex++;
@@ -1686,19 +1704,23 @@ aspect Visibility {
     syn boolean ComponentDecl.isProtected() = getVisibilityType().isProtected();
 
     syn boolean VisibilityType.isPublic() = false;
-    eq PublicVisibilityType.isPublic() = true;
+    eq PublicVisibilityType.isPublic()    = true;
 
     syn boolean VisibilityType.isProtected() = false;
     eq ProtectedVisibilityType.isProtected() = true;
 
     syn boolean FVisibilityType.isPublic() = false;
-    eq FPublicVisibilityType.isPublic() = true;
+    eq FPublicVisibilityType.isPublic()    = true;
 
     syn boolean FVisibilityType.isProtected() = false;
     eq FProtectedVisibilityType.isProtected() = true;
 
-    syn boolean FVariable.isPublic() = getFVisibilityType().isPublic();
+    syn boolean FVisibilityType.isTemporary() = false;
+    eq FTemporaryVisibilityType.isTemporary() = true;
+
+    syn boolean FVariable.isPublic()    = getFVisibilityType().isPublic();
     syn boolean FVariable.isProtected() = getFVisibilityType().isProtected();
+    syn boolean FVariable.isTemporary() = getFVisibilityType().isTemporary();
     
 }
 
@@ -2014,7 +2036,7 @@ aspect Strings {
 	syn String StringLitExp.unEscape() {
 		StringBuffer buf = new StringBuffer();
 		Matcher m = ESCAPE_PATTERN.matcher(getSTRING());
-		HashMap<String,String> repl = escapeReplacements();
+		Map<String,String> repl = escapeReplacements();
 		while (m.find())
 			m.appendReplacement(buf, repl.get(m.group(1)));
 		m.appendTail(buf);
@@ -2023,7 +2045,7 @@ aspect Strings {
 	
 	protected static Pattern ASTNode.ESCAPE_PATTERN = Pattern.compile("\\\\(.)");
 	
-	protected static HashMap<String,String> ASTNode.escapeReplacements() {
+	protected static Map<String,String> ASTNode.escapeReplacements() {
 		if (ESCAPE_REPLACEMENTS == null) {
 			ESCAPE_REPLACEMENTS = new HashMap<String,String>();
 			ESCAPE_REPLACEMENTS.put("'", "'");
@@ -2041,7 +2063,7 @@ aspect Strings {
 		return ESCAPE_REPLACEMENTS;
 	}
 
-	private static HashMap<String,String> ASTNode.ESCAPE_REPLACEMENTS = null;
+	private static Map<String,String> ASTNode.ESCAPE_REPLACEMENTS = null;
 
 }
 
@@ -2056,6 +2078,21 @@ aspect StringComments {
 }
 
 aspect GeneralHelpers {
+	
+	abstract public FExp FExp.fullCopy();
+	abstract public FTypePrefixVariability FTypePrefixVariability.fullCopy();
+	
+	abstract public FExp FExp.copy();
+	
+	public FExp FExp.unboundCopy() { return (FExp) super.unboundCopy(); }
+	
+	inh boolean ASTNode.isFirst();
+	eq List.getChild(int i).isFirst()    = i == 0;
+	eq ASTNode.getChild(int i).isFirst() = true;
+	
+	inh boolean ASTNode.isLast();
+	eq List.getChild(int i).isLast()     = i == getNumChild() - 1;
+	eq ASTNode.getChild(int i).isLast()  = true;
 	
 	/**
 	 * \brief Generic iterator over constant array.

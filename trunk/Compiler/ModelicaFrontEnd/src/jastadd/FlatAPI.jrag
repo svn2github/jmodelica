@@ -918,6 +918,7 @@ aspect FlatAPI {
 	inh FClass FExp.myFClass();
 	inh FClass FIdUse.myFClass();
 	inh FClass FQName.myFClass();
+	inh FClass FFunctionDecl.myFClass();
 	inh FClass FAlgorithmBlock.myFClass();
 	inh FClass FAbstractEquation.myFClass();	
 	inh lazy FClass FExternalStmt.myFClass();

@@ -1169,8 +1169,8 @@ aspect InstaceConstrainingClauses {
 	
 	syn lazy FExp InstValueModification.getFExp() = 
 		getValueModification().getExp().instantiate();
-	eq InstRecordModification.getFExp() = (FExp) getValue().unboundCopy();
-	eq InstArrayModification.getFExp()  = (FExp) getCell().unboundCopy();
+	eq InstRecordModification.getFExp() = getValue().unboundCopy();
+	eq InstArrayModification.getFExp()  = getCell().unboundCopy();
 	
 	public List InstNode.buildFAbstractEquationList() { 
 	    List l = new List();

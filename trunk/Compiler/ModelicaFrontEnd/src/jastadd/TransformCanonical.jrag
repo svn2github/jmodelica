@@ -18,9 +18,11 @@
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Queue;
-import java.util.Set;
 import java.util.Stack;
+import java.util.Set;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.Collections;
 import java.util.Iterator;
 
@@ -69,12 +71,9 @@ aspect TransformCanonical {
 	public void FClass.transformCanonicalBase() {
 		genAlgorithmFunctions();
 		genBindingEquations();
+		if (root().options.getBooleanOption("inline_functions"))
+			inlineFunctions();
 		scalarize();
-		
-		// This must be done after scalarization
-		enableStreamsRewrite();
-		root().flushAllRecursive();
-		
 		if (root().options.getBooleanOption("eliminate_alias_variables")) {
 			genAlias();
 			eliminateAliasVariables();
@@ -1039,7 +1038,7 @@ aspect TransformCanonical {
 					if (result.getDummyDerivatives().contains(fv)) {
 						if (fv instanceof FHDerivativeVariable) {
 							FHDummyDerivativeVariable fdv = new FHDummyDerivativeVariable((FVisibilityType)fv.getFVisibilityType().fullCopy(),
-								(FTypePrefixVariability)fv.getFTypePrefixVariability().fullCopy(),
+								fv.getFTypePrefixVariability().fullCopy(),
 								new Opt(),
 								new List(),
 								new Opt(),
@@ -1049,7 +1048,7 @@ aspect TransformCanonical {
 							l.add(fdv);
 						} else if (fv instanceof FDerivativeVariable) {
 							FDummyDerivativeVariable fdv = new FDummyDerivativeVariable((FVisibilityType)fv.getFVisibilityType().fullCopy(),
-								(FTypePrefixVariability)fv.getFTypePrefixVariability().fullCopy(),
+								fv.getFTypePrefixVariability().fullCopy(),
 								new Opt(),
 								new List(),
 								new Opt(),
@@ -1081,14 +1080,14 @@ aspect TransformCanonical {
 							str.append(fqn.getFQNamePart(fqn.getNumFQNamePart()-1).name());
 							fqn.setFQNamePart(new FQNamePart(str.toString(),fqn.getFQNamePart(fqn.getNumFQNamePart()-1).getFArraySubscriptsOpt()),fqn.getNumFQNamePart()-1);
 							l.add(new FRealVariable((FVisibilityType)fv.getFVisibilityType().fullCopy(),
-								(FTypePrefixVariability)fv.getFTypePrefixVariability().fullCopy(),
+								fv.getFTypePrefixVariability().fullCopy(),
 								new Opt(),
 								new List(),
 								new Opt(),
 								new Opt(),
 							fqn));
 							l.add(new FDerivativeVariable((FVisibilityType)fv.getFVisibilityType().fullCopy(),
-								(FTypePrefixVariability)fv.getFTypePrefixVariability().fullCopy(),
+								fv.getFTypePrefixVariability().fullCopy(),
 								new Opt(),
 								new List(),
 								new Opt(),
@@ -2602,7 +2601,7 @@ aspect TransformCanonical {
 	}
 	
 	public FExp FExp.reflattenBindingExp(FQName prefix, FVariable var) {
-		FExp res = dynamicFExp((FExp) fullCopy());
+		FExp res = dynamicFExp(fullCopy());
 		FRecordDecl decl = var.containingRecordDecl();
 		if (decl != null)
 			res.prefixInternalUses(prefix, decl);
@@ -2658,7 +2657,7 @@ aspect TransformCanonical {
 	}
 	
 	public FExp FRecordConstructor.extractRecordFExp(String suffix) {
-		return (FExp) getArg(getRecord().myFRecordDecl().indexOf(suffix)).fullCopy();
+		return getArg(getRecord().myFRecordDecl().indexOf(suffix)).fullCopy();
 	}
 	
 	public FExp FArray.extractRecordFExp(String suffix) {
@@ -2677,7 +2676,7 @@ aspect TransformCanonical {
 	
 	public FExp FCatExp.extractRecordFExp(String suffix) {
 		FCatExp res = (FCatExp) super.extractRecordFExp(suffix);
-		res.setDim((FExp) getDim().fullCopy());
+		res.setDim(getDim().fullCopy());
 		return res;
 	}
 	
@@ -2861,7 +2860,7 @@ aspect TransformCanonical {
 		ArrayList<FDerivativeVariable> l = new ArrayList<FDerivativeVariable>();
 		for (FVariable fv : differentiatedRealVariables()) {
 		    FDerivativeVariable fdv = new FDerivativeVariable((FVisibilityType)fv.getFVisibilityType().fullCopy(),
-					(FTypePrefixVariability)fv.getFTypePrefixVariability().fullCopy(),
+					fv.getFTypePrefixVariability().fullCopy(),
 					new Opt(),
 					new List(),
 					new Opt(),
@@ -2891,7 +2890,7 @@ aspect TransformCanonical {
 
 	public FVariable FRealVariable.createFDerivativeVariable() {
 		return new FDerivativeVariable((FVisibilityType)getFVisibilityType().fullCopy(),
-					(FTypePrefixVariability)getFTypePrefixVariability().fullCopy(),
+					getFTypePrefixVariability().fullCopy(),
 					new Opt(),
 					new List(),
 					new Opt(),
@@ -2901,7 +2900,7 @@ aspect TransformCanonical {
 
 	public FVariable FDerivativeVariable.createFDerivativeVariable() {
 		return new FHDerivativeVariable((FVisibilityType)getFVisibilityType().fullCopy(),
-					(FTypePrefixVariability)getFTypePrefixVariability().fullCopy(),
+					getFTypePrefixVariability().fullCopy(),
 					new Opt(),
 					new List(),
 					new Opt(),
@@ -2911,7 +2910,7 @@ aspect TransformCanonical {
 
 	public FVariable FHDerivativeVariable.createFDerivativeVariable() {
 		return new FHDerivativeVariable((FVisibilityType)getFVisibilityType().fullCopy(),
-					(FTypePrefixVariability)getFTypePrefixVariability().fullCopy(),
+					getFTypePrefixVariability().fullCopy(),
 					new Opt(),
 					new List(),
 					new Opt(),
@@ -2927,7 +2926,7 @@ aspect TransformCanonical {
 		ArrayList<FVariable> l = new ArrayList<FVariable>();
 		for (FVariable fv : discreteRealVariables()) {
 			l.add(new FPreRealVariable((FVisibilityType)fv.getFVisibilityType().fullCopy(),
-					(FTypePrefixVariability)fv.getFTypePrefixVariability().fullCopy(),
+					fv.getFTypePrefixVariability().fullCopy(),
 					new Opt(),
 					(List)fv.getFAttributeList().fullCopy(),
 					new Opt(),
@@ -2936,7 +2935,7 @@ aspect TransformCanonical {
 		}
 		for (FVariable fv : discreteIntegerVariables()) {
 			l.add(new FPreIntegerVariable((FVisibilityType)fv.getFVisibilityType().fullCopy(),
-					(FTypePrefixVariability)fv.getFTypePrefixVariability().fullCopy(),
+					fv.getFTypePrefixVariability().fullCopy(),
 					new Opt(),
 					(List)fv.getFAttributeList().fullCopy(),
 					new Opt(),
@@ -2945,7 +2944,7 @@ aspect TransformCanonical {
 		}
 		for (FVariable fv : discreteBooleanVariables()) {
 			l.add(new FPreBooleanVariable((FVisibilityType)fv.getFVisibilityType().fullCopy(),
-					(FTypePrefixVariability)fv.getFTypePrefixVariability().fullCopy(),
+					fv.getFTypePrefixVariability().fullCopy(),
 					new Opt(),
 					(List)fv.getFAttributeList().fullCopy(),
 					new Opt(),
@@ -2954,7 +2953,7 @@ aspect TransformCanonical {
 		}
 		for (FVariable fv : discreteStringVariables()) {
 			l.add(new FPreStringVariable((FVisibilityType)fv.getFVisibilityType().fullCopy(),
-					(FTypePrefixVariability)fv.getFTypePrefixVariability().fullCopy(),
+					fv.getFTypePrefixVariability().fullCopy(),
 					new Opt(),
 					(List)fv.getFAttributeList().fullCopy(),
 					new Opt(),
@@ -2964,7 +2963,7 @@ aspect TransformCanonical {
 		
 		for (FEnumVariable fv : discreteEnumVariables()) {
 			l.add(new FPreEnumVariable((FVisibilityType)fv.getFVisibilityType().fullCopy(),
-					(FTypePrefixVariability)fv.getFTypePrefixVariability().fullCopy(),
+					fv.getFTypePrefixVariability().fullCopy(),
 					new Opt(),
 					(List)fv.getFAttributeList().fullCopy(),
 					new Opt(),
@@ -3471,7 +3470,7 @@ aspect MapWhenClauses{
 		// Copy guard
 		FExp guard = null;
 		if (copyGuard) {
-			guard = (FExp)getTest().fullCopy();
+			guard = getTest().fullCopy();
 			guard.setParent(this);
 			guard.traverseSymbolic(getTest());
 		} else {
@@ -3968,8 +3967,345 @@ aspect FlushFClass {
 	
 }
 
-aspect Tearing{
+
+
+aspect Tearing {
 	
 	
 }
 
+
+
+aspect FunctionInlining {
+	
+	/**
+	 * Inline all function calls that we can.
+	 */
+	public void FClass.inlineFunctions() {
+		new FunctionInliner(this).inline();
+	}
+	
+	/**
+	 * Helper class for inlining.
+	 * 
+	 * Keeps track of all required data and the current state of the inlining process.
+	 */
+	public class FunctionInliner {
+		
+		private FClass fc;
+		private List<FVariable> vars;
+		private List<FAbstractEquation> normalEqns;
+		private List<FAbstractEquation> paramEqns;
+		
+		private Map<String,FVariable> replMap;
+		private Map<String,FVariable> lookupMap;
+		
+		/**
+		 * Create a ne FunctionInliner to use with <code>fc</code>.
+		 */
+		public FunctionInliner(FClass fc) {
+			this.fc = fc;
+			vars = fc.getFVariables();
+			normalEqns = fc.getFEquationBlock(0).getFAbstractEquations();
+			paramEqns = fc.getFParameterEquations();
+		}
+		
+		/**
+		 * Inline all function calls that we can.
+		 */
+		public void inline() {
+			inline(normalEqns);
+			inline(paramEqns);
+		}
+		
+		/**
+		 * Inline all function calls that we can from a specific list of equations.
+		 */
+		public void inline(List<FAbstractEquation> eqns) {
+			for (FAbstractEquation eqn : eqns) {
+				while (eqn.hasInlinableFunctions()) {
+					// Note that this will add new equations to eqns, so we depend on
+					// List.iterator() to handle that correctly.
+					eqn.inlineFunctions(this);
+					fc.clearFlatNameBinding();
+				}
+			}
+		}
+		
+		/**
+		 * Inline a single statement.
+		 */
+		public void inline(FStatement stmt) {
+			stmt.inline(this, replMap);
+		}
+		
+		/**
+		 * Prepare for inlining a new function call.
+		 * 
+		 * @return  the map to use for lookups in the function during inlining.
+		 */
+		public Map<String,FVariable> startFunction() {
+			replMap = new HashMap<String,FVariable>();
+			lookupMap = new HashMap<String,FVariable>();
+			return lookupMap;
+		}
+
+		/**
+		 * Get the variable that represents a specific output of the function 
+		 * call currently being inlined.
+		 * 
+		 * @param name  the name of the output
+		 */
+		public FVariable getOutputVar(String name) {
+			return replMap.get(name);
+		}
+
+		/**
+		 * Add a variable and (if not constant) an equation for an assignment.
+		 * 
+		 * @param oldName  the name of the variable that was assigned in the function
+		 * @param value    the right-hand side of the equation 
+		 */
+		public FVariable addVarAndEqn(String oldName, FExp value) {
+			FTypePrefixVariability variability = value.variability().fullCopy();
+			FVisibilityType visibility = new FTemporaryVisibilityType();
+			FQName name = new FQName(fc.nextTempVarName());
+			if (value.isArray())
+				name.setLastFArraySubscripts(value.size().flattenFArraySubscripts(new FQName()));
+			FVariable var = value.type().createFVariable(visibility, name, variability);
+			vars.add(var);
+			
+			if (variability.constantVariability()) {
+				var.setBindingExp(value.ceval().buildLiteral());
+			} else {
+				FEquation eqn = new FEquation(new FNormalEquation(), var.createUseExp(), value);
+				if (variability.parameterVariability())
+					paramEqns.add(eqn);
+				else
+					normalEqns.add(eqn);
+			}
+			
+			replMap.put(oldName, var);
+			lookupMap.put(var.name(), var);
+			return var;
+		}
+		
+	}
+	
+	
+	/**
+	 * Check if an equation contains any calls to functions that we can inline.
+	 */
+	syn boolean FAbstractEquation.hasInlinableFunctions() = false;
+	eq FFunctionCallEquation.hasInlinableFunctions()      = false; // TODO: handle function call eqns
+	eq FEquation.hasInlinableFunctions()                  =
+		getLeft().hasInlinableFunctions() || getRight().hasInlinableFunctions();
+	
+	/**
+	 * Check if an expression contains any calls to functions that we can inline.
+	 */
+	syn boolean FExp.hasInlinableFunctions() {
+		for (FExp exp : childFExps())
+			if (exp.hasInlinableFunctions())
+				return true;
+		return false;
+	}
+	// TODO: function calls in indices, etc
+	eq FFunctionCall.hasInlinableFunctions() =
+		isInlinableFunctionCall() || super.hasInlinableFunctions();
+	
+	/**
+	 * Check if an expression is a call to a function that we can inline.
+	 */
+	syn boolean FExp.isInlinableFunctionCall() = false;
+	eq FFunctionCall.isInlinableFunctionCall() = myFFunctionDecl().isInlinable();
+	
+
+	/**
+	 * Inline all calls to functions that we can inline.
+	 */
+	public void FAbstractEquation.inlineFunctions(FunctionInliner fi) {}
+	
+	public void FEquation.inlineFunctions(FunctionInliner fi) {
+		getLeft().inlineFunctions(fi);
+		getRight().inlineFunctions(fi);
+	}
+	
+	public void FFunctionCallEquation.inlineFunctions(FunctionInliner fi) {
+		// TODO: handle function call eqns
+	}
+	
+	/**
+	 * Inline all calls to functions that we can inline.
+	 */
+	public void FExp.inlineFunctions(FunctionInliner fi) {
+		for (FExp exp : childFExps())
+			exp.inlineFunctions(fi);
+	}
+	
+	public void FFunctionCall.inlineFunctions(FunctionInliner fi) {
+		if (isInlinableFunctionCall()) {
+			FVariable var = myFFunctionDecl().inline(fi, getArgs())[0];
+			replaceMe(var.isConstant() ? var.ceval().buildLiteral() : var.createUseExp());
+		} else {
+			super.inlineFunctions(fi);
+		}
+	}
+	
+	/**
+	 * Replace a child of this node.
+	 * 
+	 * @param child  the child to replace
+	 * @param repl   the node to replace it with
+	 * @throws IllegalArgumentException  if <code>child</code> is not a child of this node
+	 */
+	private void ASTNode.replaceChild(ASTNode child, ASTNode repl) {
+		if (getChild(child.childIndex) != child)
+			throw new IllegalArgumentException("Trying to replace a child that is not found in the given position.");
+		setChild(repl, child.childIndex);
+	}
+	
+	/**
+	 * Replace this node in the tree.
+	 * 
+	 * @param repl  the node to replace it with
+	 */
+	protected void ASTNode.replaceMe(ASTNode repl) {
+		ASTNode p = getParent();
+		if (p != null)
+			p.replaceChild(this, repl);
+	}
+	
+	
+	/**
+	 * Check if we can inline this function.
+	 */
+	syn boolean FFunctionDecl.isInlinable() {
+		for (FStatement stmt : getFAlgorithmBlock().getFStatements())
+			if (!stmt.isInlinable())
+				return false;
+		return true;
+	}
+	
+	/**
+	 * Check if we can inline this statement.
+	 */
+	syn boolean FStatement.isInlinable() = false;
+	eq FAssignStmt.isInlinable()         = true;
+	eq FReturnStmt.isInlinable()         = isLast();
+	// TODO: handle more types of stmts
+	
+	
+	/**
+	 * Flags that this function is being inlined.
+	 */
+	private boolean FFunctionDecl.duringInlining = false;
+	
+	/**
+	 * Inline a call to this function.
+	 * 
+	 * @param fi    the function inlining helper to use
+	 * @param args  the argument list for the function call
+	 */
+	public FVariable[] FFunctionDecl.inline(FunctionInliner fi, List<FExp> args) {
+		duringInlining = true;
+		tempLookupMap = fi.startFunction();
+		
+		ArrayList<FFunctionVariable> inp = myInputs();
+		for (int i = 0; i < inp.size(); i++) 
+			fi.addVarAndEqn(inp.get(i).name(), args.getChild(i));
+		
+		for (FStatement stmt : getFAlgorithmBlock().getFStatements()) 
+			fi.inline(stmt);
+		
+		ArrayList<FFunctionVariable> outp = myOutputs();
+		FVariable[] res = new FVariable[outp.size()];
+		for (int i = 0; i < res.length; i++) 
+			res[i] = fi.getOutputVar(outp.get(i).name());
+		
+		tempLookupMap = null;
+		duringInlining = false;
+		return res;
+	}
+	
+	/**
+	 * Inline this statement.
+	 * 
+	 * @param fi      the function inlining helper to use
+	 * @param varMap  the variables to use instead of the variables in the function
+	 */
+	public void FStatement.inline(FunctionInliner fi, Map<String,FVariable> varMap) {}
+	
+	public void FAssignStmt.inline(FunctionInliner fi, Map<String,FVariable> varMap) {
+		FExp exp = getRight().fullCopy();
+		exp = getRight().dynamicFExp(exp);
+		exp = exp.replaceReferences(varMap);
+		FVariable var = fi.addVarAndEqn(getLeft().name(), exp);
+	}
+	
+	// TODO: handle more types of stmts
+	
+	
+	/**
+	 * Replace all variable references according to the map.
+	 */
+	public ASTNode ASTNode.replaceReferences(Map<String,FVariable> varMap) {
+		for (ASTNode n : this)
+			n.replaceReferences(varMap);
+		return this;
+	}
+	
+	public FExp FExp.replaceReferences(Map<String,FVariable> varMap) {
+		super.replaceReferences(varMap);
+		return this;
+	}
+	
+	public FExp FIdUseExp.replaceReferences(Map<String,FVariable> varMap) {
+		// TODO: handle records
+		// TODO: handle array indices
+		FVariable var = varMap.get(getFIdUse().name());
+		FExp exp = this;
+		if (var != null) {
+			if (var.isConstant()) {
+				try {
+					exp = var.ceval().buildLiteral();
+				} catch (ConstantEvaluationException e) {}
+			}
+			if (exp == this) 
+				exp = var.createUseExp();
+			replaceMe(exp);
+		}
+		return exp;
+	}
+	
+	public FExp FFunctionCall.replaceReferences(Map<String,FVariable> varMap) {
+		super.replaceReferences(varMap);
+		Size[] old = getSizes();
+		Size[] sizes = new Size[old.length];
+		for (int i = 0; i < old.length; i++)
+			sizes[i] = old[i].copyAndReplaceReferences(varMap, this);
+		setSizes(sizes);
+		return this;
+	}
+	
+	/**
+	 * Make a copy of this size with all variable references replaced according to the map.
+	 */
+	public Size Size.copyAndReplaceReferences(Map<String,FVariable> varMap, FExp context) {
+		return clone();
+	}
+	
+	public MutableSize MutableSize.copyAndReplaceReferences(Map<String,FVariable> varMap, FExp context) {
+		MutableSize res = clone();
+		for (int i = 0; i < exps.length; i++)
+			res.exps[i] = context.dynamicFExp(exps[i].fullCopy()).replaceReferences(varMap);
+		return res;
+	}
+	
+	/*
+	 * We must be able to tell the difference between discrete and continous expressions 
+	 * during function inlining. Normally all expressions in functions are considered discrete.
+	 */
+	refine FlatVariability eq FFunctionDecl.getChild().inDiscreteLocation() = !duringInlining;
+	
+}

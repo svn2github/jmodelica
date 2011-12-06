@@ -184,7 +184,7 @@ typedef void jmi_ad_tape_t;                            /**< \brief If JMI_AD_NON
                                                        /**< \brief If JMI_AD_CPPAD: an AD tape. */
 typedef jmi_ad_tape_t *jmi_ad_tape_p;                  /**< \brief If JMI_AD_NONE: a pointer to void (not used).<br> */
 
-#define AD_WRAP_LITERAL(x) x /**< \brief Macro for inserting an AD object based on a literal. Has no effect when compiling without CppAD  <br> */
+#define AD_WRAP_LITERAL(x) ((jmi_ad_var_t) (x)) /**< \brief Macro for inserting an AD object based on a literal. Has no effect when compiling without CppAD  <br> */
 
 #define COND_EXP_EQ(op1,op2,th,el) ((op1==op2)? (th): (el)) /**< \brief Macro for conditional expression == <br> */
 #define COND_EXP_LE(op1,op2,th,el) ((op1<=op2)? (th): (el)) /**< \brief Macro for conditional expression <= <br> */

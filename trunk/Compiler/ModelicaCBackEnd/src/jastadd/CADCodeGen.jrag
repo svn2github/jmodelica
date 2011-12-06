@@ -313,36 +313,36 @@ aspect CADCodeGen {
 	}
 	
 	public void FAtan2Exp.prettyPrint_CAD(Printer p, PrintStream str, String indent) {		
-			p.print((FExp)getChild(0),str,indent);
-			p.print((FExp)getChild(1),str,indent);
+			p.print(getFExp(),str,indent);
+			p.print(getY(),str,indent);
 			str.print("jmi_ad_var_t ");
 			str.print(this.adVarName());
 			str.print(" = atan2(");
-			str.print(((FExp)getChild(0)).adVarName());
+			str.print(getFExp().adVarName());
 			str.print(",");
-			str.print(((FExp)getChild(1)).adVarName());
+			str.print(getY().adVarName());
 			str.print(");\n");
 			
 			str.print("jmi_ad_var_t ");
 			str.print(this.adDerName());
 			str.print(" = (");
 			
-			str.print(((FExp)getChild(0)).adDerName());
+			str.print(getFExp().adDerName());
 			str.print(" * ");
-			str.print(((FExp)getChild(1)).adVarName());
+			str.print(getY().adVarName());
 			str.print(" - ");
-			str.print(((FExp)getChild(0)).adVarName());
+			str.print(getFExp().adVarName());
 			str.print(" * ");
-			str.print(((FExp)getChild(1)).adDerName());
+			str.print(getY().adDerName());
 			str.print(" ) / ( ");
-			str.print(((FExp)getChild(1)).adVarName());
+			str.print(getY().adVarName());
 			str.print("*");
-			str.print(((FExp)getChild(1)).adVarName());
+			str.print(getY().adVarName());
 			
 			str.print(" + ");
-			str.print(((FExp)getChild(0)).adVarName());
+			str.print(getFExp().adVarName());
 			str.print("*");
-			str.print(((FExp)getChild(0)).adVarName());
+			str.print(getFExp().adVarName());
 			
 			str.print(");\n");
 			

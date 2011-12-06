@@ -71,12 +71,15 @@ aspect Scalarization {
 		funcs.clearScalarized();  // Functions need scalarized = false in FQNames
 		
 		// Replace subscript expressions with literals (enable rewrite)
+		clearFlatNameBinding();
 		eb.getFAbstractEquations().makeSubscriptsLiteral();
 		getFInitialEquations().makeSubscriptsLiteral();
 		getFParameterEquations().makeSubscriptsLiteral();
 		
 		scalarized = true;
 
+		// This must be done after scalarization
+		enableStreamsRewrite();
 		flush();		
 	}
 	
@@ -143,7 +146,7 @@ aspect Scalarization {
 		// Create new variable and copy fields that should be same
 		FVariable fv = createEmptyNode();
 		fv.setFVisibilityType((FVisibilityType) getFVisibilityType().fullCopy());
-		fv.setFTypePrefixVariability((FTypePrefixVariability) getFTypePrefixVariability().fullCopy());
+		fv.setFTypePrefixVariability(getFTypePrefixVariability().fullCopy());
 		if (hasFTypePrefixInputOutput())
 			fv.setFTypePrefixInputOutput((FTypePrefixInputOutput) getFTypePrefixInputOutput().fullCopy());
 		if (hasFStringComment())
@@ -718,7 +721,7 @@ aspect Scalarization {
 			// Create loop
 			Size rSize = getRight().size();
 			FExp sizeExp = rSize.hasValue(0) ? rSize.createFExp(0) : 
-				new FSizeExp((FExp) getRight().fullCopy(), 0);
+				new FSizeExp(getRight().fullCopy(), 0);
 			FForStmt fs = new FForStmt(new FForIndex(i, sizeExp), new List());
 			clauses.add(fs);
 			List<FStatement> fsl = fs.getForStmts();
@@ -804,7 +807,7 @@ aspect Scalarization {
 	public void FType.scalarizeRecordAssignment(
 			List<FFunctionVariable> vars, List<FStatement> stmts, 
 			Map<String,FExp> indexMap, FQName left, FExp right) {
-		stmts.add(new FAssignStmt(new FIdUse(left.fullCopy()), (FExp) right.fullCopy()));
+		stmts.add(new FAssignStmt(new FIdUse(left.fullCopy()), right.fullCopy()));
 	}
 	
 	/**
@@ -1452,31 +1455,42 @@ aspect Scalarization {
 	 * \brief Creates a new variable with the given visibility and name.
 	 * 
 	 * All optional children in the new variable are empty.
+	 * If param is true, then variability is parameter, otherwise continous.
+	 */
+	public FVariable FType.createFVariable(FVisibilityType fvt, FQName name, boolean param) {
+		return createFVariable(fvt, name, param ? new FParameter() : new FContinuous());
+	}
+	
+	/**
+	 * \brief Creates a new variable with the given visibility, name and visibility.
+	 * 
+	 * All optional children in the new variable are empty.
 	 * 
 	 * Default implementation returns <code>null</code>.
 	 */
-	public FVariable FType.createFVariable(FVisibilityType fvt, FQName name, boolean param) {
+	public FVariable FType.createFVariable(FVisibilityType fvt, FQName name, 
+			FTypePrefixVariability variability) {
 		return null;
 	}
 		
-	public FVariable FRealType.createFVariable(FVisibilityType fvt, FQName name, boolean param) {
-		return new FRealVariable(fvt, param ? new FParameter() : new FContinuous(), 
-				new Opt(), new List(), new Opt(), new Opt(), name);
+	public FVariable FRealType.createFVariable(FVisibilityType fvt, FQName name, 
+			FTypePrefixVariability variability) {
+		return new FRealVariable(fvt, variability, new Opt(), new List(), new Opt(), new Opt(), name);
 	}	
 	
-	public FVariable FIntegerType.createFVariable(FVisibilityType fvt, FQName name, boolean param) {
-		return new FIntegerVariable(fvt, param ? new FParameter() : new FDiscrete(), 
-				new Opt(), new List(), new Opt(), new Opt(), name);
+	public FVariable FIntegerType.createFVariable(FVisibilityType fvt, FQName name, 
+			FTypePrefixVariability variability) {
+		return new FIntegerVariable(fvt, variability, new Opt(), new List(), new Opt(), new Opt(), name);
 	}	
 	
-	public FVariable FBooleanType.createFVariable(FVisibilityType fvt, FQName name, boolean param) {
-		return new FBooleanVariable(fvt, param ? new FParameter() : new FDiscrete(), 
-				new Opt(), new List(), new Opt(), new Opt(), name);
+	public FVariable FBooleanType.createFVariable(FVisibilityType fvt, FQName name, 
+			FTypePrefixVariability variability) {
+		return new FBooleanVariable(fvt, variability, new Opt(), new List(), new Opt(), new Opt(), name);
 	}	
 	
-	public FVariable FStringType.createFVariable(FVisibilityType fvt, FQName name, boolean param) {
-		return new FStringVariable(fvt, param ? new FParameter() : new FDiscrete(), 
-				new Opt(), new List(), new Opt(), new Opt(), name);
+	public FVariable FStringType.createFVariable(FVisibilityType fvt, FQName name, 
+			FTypePrefixVariability variability) {
+		return new FStringVariable(fvt, variability, new Opt(), new List(), new Opt(), new Opt(), name);
 	}	
 	
 	/**
@@ -1538,7 +1552,7 @@ aspect Scalarization {
 	public FExp FExp.scalarize(Map<String,FExp> indexMap) {
 		if (useTempVar) 
 			return indexMap.containsKey(tempVarName()) ? 
-					(FExp) indexMap.get(tempVarName()).fullCopy() : 
+					indexMap.get(tempVarName()).fullCopy() : 
 					new FIdUseExp(tempVarName());
 		else if (type().isRecord() && wantsRecordCon())
     		return buildRecordConstructor(indexMap);
@@ -1580,7 +1594,7 @@ aspect Scalarization {
 	 * \brief Scalarize expressions.
 	 */
 	public FExp FExp.scalarizeExp(Map<String,FExp> indexMap) {
-		return (FExp) fullCopy();
+		return fullCopy();
 	}
 
 	public FSubscript FSubscript.scalarize(Map<String,FExp> indexMap) {
@@ -1618,7 +1632,7 @@ aspect Scalarization {
 
     public FExp FIdUseExp.scalarizeExp(Map<String,FExp> indexMap) {
     	if (indexMap.containsKey(name())) 
-    		return (FExp) indexMap.get(name()).fullCopy();
+    		return indexMap.get(name()).fullCopy();
     	return new FIdUseExp(getFIdUse().scalarize(indexMap));
     }
     
@@ -1655,8 +1669,8 @@ aspect Scalarization {
 		if (!startIsOne || hasStep) {
 			res = new FSubExp(res, new FIntegerLitExp(1));
 			if (hasStep)
-				res = new FMulExp(res, (FExp) getFExp(1).fullCopy());
-			res = new FAddExp((FExp) getFExp(0).fullCopy(), res);
+				res = new FMulExp(res, getFExp(1).fullCopy());
+			res = new FAddExp(getFExp(0).fullCopy(), res);
 		}
 		return res;
 	}
@@ -1666,7 +1680,7 @@ aspect Scalarization {
 		// Only the form with dim can be in the tree at this point
 		FExp exp = getFExp();
 		if (exp instanceof FIdUseExp && exp.size().isUnknown())
-			return (FExp) fullCopy();
+			return fullCopy();
 		else
 			return dynamicFExp(getFExp().size().createFExp(dimension())).scalarize(indexMap);
 	}

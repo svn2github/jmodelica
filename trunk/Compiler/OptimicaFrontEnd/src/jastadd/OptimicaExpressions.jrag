@@ -185,7 +185,7 @@ aspect OptimicaArrays {
 		Array array = new Array(indices());
 		for (Index i : array.indices()) {
 			InstAccess name = getName().specify(i);
-			FExp arg = (FExp) getArg().fullCopy();
+			FExp arg = getArg().fullCopy();
 			array.set(i, new InstTimedVariable(name, arg));
 		}
 		return array;
@@ -197,7 +197,7 @@ aspect OptimicaArrays {
 		Array array = new Array(indices());
 		for (Index i : array.indices()) {
 			FIdUse name = getName().specify(i, true);
-			FExp arg = (FExp) getArg().fullCopy();
+			FExp arg = getArg().fullCopy();
 			array.set(i, new FTimedVariable(name, arg));
 		}
 		return array;
