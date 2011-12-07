@@ -73,7 +73,7 @@ constraint
 end CSTR_Opt;
 
 optimization CSTR_Opt2(objectiveIntegrand=1e-4*(q_c*(c_ref-cstr.c)^2 + q_T*(T_ref-cstr.T)^2 + 
-                  q_Tc*(Tc_ref-cstr.Tc)^2)/*, objective=(cost(finalTime))*/,
+                  q_Tc*(Tc_ref-cstr.Tc)^2),
                       startTime=0.0,
                       finalTime=150)
  
@@ -81,7 +81,6 @@ optimization CSTR_Opt2(objectiveIntegrand=1e-4*(q_c*(c_ref-cstr.c)^2 + q_T*(T_re
   CSTR cstr(c(initialGuess=300),T(initialGuess=300, max=350),Tc(initialGuess=350),
             c_init=956.271065,T_init=250.051971);
 
-  //Real cost(start=0,fixed=true,initialGuess=500);
   parameter Real c_ref = 338.775766;
   parameter Real T_ref = 280.099198;
   parameter Real Tc_ref = 280;
@@ -89,9 +88,6 @@ optimization CSTR_Opt2(objectiveIntegrand=1e-4*(q_c*(c_ref-cstr.c)^2 + q_T*(T_re
   parameter Real q_T = 1;
   parameter Real q_Tc = 1;
   Real q = 2*u;
-equation
- // der(cost) = 1e-4*(q_c*(c_ref-cstr.c)^2 + q_T*(T_ref-cstr.T)^2 + 
- //                 q_Tc*(Tc_ref-cstr.Tc)^2);
 end CSTR_Opt2;
 
 
